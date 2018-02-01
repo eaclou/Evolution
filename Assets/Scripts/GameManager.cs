@@ -19,11 +19,19 @@ public class GameManager : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		
-	}
+        simulationManager.UpdateDebugUI();
+
+    }
 
     private void FixedUpdate() {
         simulationManager.TickSimulation();
+        if(simulationManager.trainingRequirementsMet) {
+            if(simulationManager.isTraining) {
+                for (int i = 0; i < 64; i++) {
+                    simulationManager.TickTrainingMode();
+                }
+            }                      
+        }
     }
 
 

@@ -19,6 +19,52 @@ public class Agent : MonoBehaviour {
         rigidBody2D = GetComponent<Rigidbody2D>();
     }
 
+    private int GetNumInputs() {
+        return 15;  // make more robust later!
+    }
+    private int GetNumOutputs() {
+        return 2;  // make more robust later!
+    }
+    public DataSample RecordData() {
+        DataSample sample = new DataSample(GetNumInputs(), GetNumOutputs());
+
+        sample.inputDataArray[0] = 1f;
+        sample.inputDataArray[1] = testModule.ownPosX[0];
+        sample.inputDataArray[2] = testModule.ownPosY[0];
+        sample.inputDataArray[3] = testModule.ownVelX[0];
+        sample.inputDataArray[4] = testModule.ownVelY[0];
+        sample.inputDataArray[5] = testModule.enemyPosX[0];
+        sample.inputDataArray[6] = testModule.enemyPosY[0];
+        sample.inputDataArray[7] = testModule.enemyVelX[0];
+        sample.inputDataArray[8] = testModule.enemyVelY[0];        
+        sample.inputDataArray[9] = testModule.enemyDirX[0];
+        sample.inputDataArray[10] = testModule.enemyDirY[0];
+        sample.inputDataArray[11] = testModule.distLeft[0];
+        sample.inputDataArray[12] = testModule.distRight[0];
+        sample.inputDataArray[13] = testModule.distUp[0];
+        sample.inputDataArray[14] = testModule.distDown[0];
+
+        // @$!@$#!#% REVISIT THIS!! REDUNDANT CODE!!!!!!!!!!!!!!!!!!!!!!!!!!  movement script on Agent also does this....
+        float outputHorizontal = 0f;
+        if (Input.GetKey("left") || Input.GetKey("a")) {
+            outputHorizontal += -1f;
+        }
+        if (Input.GetKey("right") || Input.GetKey("d")) {
+            outputHorizontal += 1f;
+        }
+        float outputVertical = 0f;
+        if (Input.GetKey("down") || Input.GetKey("s")) {
+            outputVertical += -1f;
+        }
+        if (Input.GetKey("up") || Input.GetKey("w")) {
+            outputVertical += 1f;
+        }
+        sample.outputDataArray[0] = outputHorizontal;
+        sample.outputDataArray[1] = outputVertical;
+
+        return sample;
+    }
+
     public void MapNeuronToModule(NID nid, Neuron neuron) {
         testModule.MapNeuron(nid, neuron);
         // Hidden nodes!
@@ -27,6 +73,10 @@ public class Agent : MonoBehaviour {
             neuron.neuronType = NeuronGenome.NeuronType.Hid;
             neuron.previousValue = 0f;
         }
+    }
+
+    public void ReplaceBrain(AgentGenome genome) {
+        brain = new Brain(genome.brainGenome, this);
     }
 
     public void TickBrain() {
