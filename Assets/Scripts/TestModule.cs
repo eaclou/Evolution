@@ -10,15 +10,44 @@ public class TestModule {
     public int inno;
     //public bool isVisible;
 
+        // INPUTS
+    // Bias
+    // Food Sensor  xPos, yPos, xDir, yDir, typeR, typeG, typeB (type includes amplitude?)
+    // Friend Sensor   xPos, yPos, xVel, yVel, xDir, yDir
+    // Hazard Sensor   xPos, yPos, xVel, yVel, xDir, yDir
+    // Self Sensor   ownVelX, ownVelY, Temperature, Pressure
+    // Contact Sensor   isContact, contactForce
+    // Health    physicalHealth(damage), stamina(energy),  foodR, foodG, foodB
+    // 8 cardinal Raycast rangefinders
+    // Communication module (4 inputs based on nearest broadcasting object (friend or foe)) -- might only work for organic unsupervised learning, otherwise it's noise
+    
+        //OUTPUTS:
+    // throttleX, throttleY
+    // Communication Module (4 channels)
+    // Dash?
+
     //public bool destroyed = false;
     //public float maxHealth;
     //public float prevHealth;
     //public float health;
     public float[] bias;
-    public float[] ownPosX;
-    public float[] ownPosY;
-    public float[] ownVelX;
-    public float[] ownVelY;
+    //public float[] ownPosX;
+    //public float[] ownPosY;
+    public float[] foodPosX;
+    public float[] foodPosY;
+    public float[] foodDirX;
+    public float[] foodDirY;
+    public float[] foodTypeR;
+    public float[] foodTypeG;
+    public float[] foodTypeB;
+
+    public float[] friendPosX;
+    public float[] friendPosY;
+    public float[] friendVelX;
+    public float[] friendVelY;
+    public float[] friendDirX;
+    public float[] friendDirY;
+
     public float[] enemyPosX;
     public float[] enemyPosY;
     public float[] enemyVelX;
@@ -26,20 +55,49 @@ public class TestModule {
     public float[] enemyDirX;
     public float[] enemyDirY;
 
-    public float[] distLeft;
+    public float[] ownVelX;
+    public float[] ownVelY;
+    public float[] temperature;
+    public float[] pressure;
+    public float[] isContact;
+    public float[] contactForceX;
+    public float[] contactForceY;
+    public float[] hitPoints;
+    public float[] stamina;
+    public float[] foodAmountR;
+    public float[] foodAmountG;
+    public float[] foodAmountB;
+
+    public float[] distUp; // start up and go clockwise!
+    public float[] distTopRight;
     public float[] distRight;
-    public float[] distUp;
-    public float[] distDown;
+    public float[] distBottomRight;
+    public float[] distDown;    
+    public float[] distBottomLeft;
+    public float[] distLeft;
+    public float[] distTopLeft;
+
+    public float[] inComm0;
+    public float[] inComm1;
+    public float[] inComm2;
+    public float[] inComm3;  // 44 In?
 
     public float[] throttleX;
     public float[] throttleY;
+    public float[] dash;
+    public float[] outComm0;
+    public float[] outComm1;
+    public float[] outComm2;
+    public float[] outComm3;  // 7 Out?
 
-    public float maxSpeed = 0.5f;
-    public float accel = 0.05f;
-    public float radius = 1f;
+    //public float maxSpeed = 0.5f;
+    //public float accel = 0.05f;
+    //public float radius = 1f;
 
     //public Transform enemyTransform;
     public Rigidbody2D ownRigidBody2D;
+    public Transform nearestFoodTransform;
+    public TestModule friendTestModule;
     public TestModule enemyTestModule;
 
     //public HealthModuleComponent component;
@@ -55,13 +113,73 @@ public class TestModule {
 
     public void Initialize(TestModuleGenome genome, Agent agent, StartPositionGenome startPos) {
         ownRigidBody2D = agent.GetComponent<Rigidbody2D>();
+        bias = new float[1];   //0
+        foodPosX = new float[1];  //1
+        foodPosY = new float[1]; // 2
+        foodDirX = new float[1];  // 3
+        foodDirY = new float[1];  // 4
+        foodTypeR = new float[1]; // 5
+        foodTypeG = new float[1]; // 6
+        foodTypeB = new float[1]; // 7
+
+        friendPosX = new float[1]; // 8
+        friendPosY = new float[1]; // 9
+        friendVelX = new float[1]; // 10
+        friendVelY = new float[1]; // 11
+        friendDirX = new float[1]; // 12
+        friendDirY = new float[1]; // 13
+
+        enemyPosX = new float[1]; // 14
+        enemyPosY = new float[1]; // 15
+        enemyVelX = new float[1]; // 16
+        enemyVelY = new float[1]; // 17
+        enemyDirX = new float[1]; // 18
+        enemyDirY = new float[1]; // 19
+
+        ownVelX = new float[1]; // 20
+        ownVelY = new float[1]; // 21
+        temperature = new float[1]; // 22
+        pressure = new float[1]; // 23
+        isContact = new float[1]; // 24
+        contactForceX = new float[1]; // 25
+        contactForceY = new float[1]; // 26
+        hitPoints = new float[1]; // 27
+        stamina = new float[1]; // 28
+        foodAmountR = new float[1]; // 29
+        foodAmountG = new float[1]; // 30
+        foodAmountB = new float[1]; // 31
+
+        distUp = new float[1]; // 32 // start up and go clockwise!
+        distTopRight = new float[1]; // 33
+        distRight = new float[1]; // 34
+        distBottomRight = new float[1]; // 35
+        distDown = new float[1]; // 36
+        distBottomLeft = new float[1]; // 37
+        distLeft = new float[1]; // 38
+        distTopLeft = new float[1]; // 39
+
+        inComm0 = new float[1]; // 40
+        inComm1 = new float[1]; // 41
+        inComm2 = new float[1]; // 42
+        inComm3 = new float[1]; // 43 
+        // 44 Total Inputs
+
+        throttleX = new float[1]; // 0
+        throttleY = new float[1]; // 1
+        dash = new float[1]; // 2
+        outComm0 = new float[1]; // 3
+        outComm1 = new float[1]; // 4
+        outComm2 = new float[1]; // 5
+        outComm3 = new float[1]; // 6 
+        // 7 Total Outputs
+
         //destroyed = false;
-        bias = new float[1];
+        /*bias = new float[1];
         bias[0] = 1f;
 
-        ownPosX = new float[1];
+        //ownPosX = new float[1];
         //ownPosX[0] = startPos.agentStartPosition.x;
-        ownPosY = new float[1];
+        //ownPosY = new float[1];
         //ownPosY[0] = startPos.agentStartPosition.y;
         ownVelX = new float[1];
         ownVelY = new float[1];
@@ -80,10 +198,7 @@ public class TestModule {
 
         throttleX = new float[1];
         throttleY = new float[1];
-
-        maxSpeed = genome.maxSpeed;
-        accel = genome.accel;
-        radius = genome.radius;
+        */
 
         //maxHealth = genome.maxHealth;
         //health = maxHealth;
@@ -101,75 +216,273 @@ public class TestModule {
     }
 
     public void MapNeuron(NID nid, Neuron neuron) {
+        /*
+        bias = new float[1];   //0
+        foodPosX = new float[1];  //1
+        foodPosY = new float[1]; // 2
+        foodDirX = new float[1];  // 3
+        foodDirY = new float[1];  // 4
+        foodTypeR = new float[1]; // 5
+        foodTypeG = new float[1]; // 6
+        foodTypeB = new float[1]; // 7
+
+        friendPosX = new float[1]; // 8
+        friendPosY = new float[1]; // 9
+        friendVelX = new float[1]; // 10
+        friendVelY = new float[1]; // 11
+        friendDirX = new float[1]; // 12
+        friendDirY = new float[1]; // 13
+
+        enemyPosX = new float[1]; // 14
+        enemyPosY = new float[1]; // 15
+        enemyVelX = new float[1]; // 16
+        enemyVelY = new float[1]; // 17
+        enemyDirX = new float[1]; // 18
+        enemyDirY = new float[1]; // 19
+
+        ownVelX = new float[1]; // 20
+        ownVelY = new float[1]; // 21
+        temperature = new float[1]; // 22
+        pressure = new float[1]; // 23
+        isContact = new float[1]; // 24
+        contactForceX = new float[1]; // 25
+        contactForceY = new float[1]; // 26
+        hitPoints = new float[1]; // 27
+        stamina = new float[1]; // 28
+        foodAmountR = new float[1]; // 29
+        foodAmountG = new float[1]; // 30
+        foodAmountB = new float[1]; // 31
+
+        distUp = new float[1]; // 32 // start up and go clockwise!
+        distTopRight = new float[1]; // 33
+        distRight = new float[1]; // 34
+        distBottomRight = new float[1]; // 35
+        distDown = new float[1]; // 36
+        distBottomLeft = new float[1]; // 37
+        distLeft = new float[1]; // 38
+        distTopLeft = new float[1]; // 39
+
+        inComm0 = new float[1]; // 40
+        inComm1 = new float[1]; // 41
+        inComm2 = new float[1]; // 42
+        inComm3 = new float[1]; // 43 
+        // 44 Total Inputs
+
+        throttleX = new float[1]; // 0
+        throttleY = new float[1]; // 1
+        dash = new float[1]; // 2
+        outComm0 = new float[1]; // 3
+        outComm1 = new float[1]; // 4
+        outComm2 = new float[1]; // 5
+        outComm3 = new float[1]; // 6 
+        */
         if (inno == nid.moduleID) {
             if (nid.neuronID == 0) {
                 neuron.currentValue = bias;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
             if (nid.neuronID == 1) {
-                neuron.currentValue = ownPosX;
+                neuron.currentValue = foodPosX;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
             if (nid.neuronID == 2) {
-                neuron.currentValue = ownPosY;
+                neuron.currentValue = foodPosY;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
             if (nid.neuronID == 3) {
-                neuron.currentValue = ownVelX;
+                neuron.currentValue = foodDirX;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
             if (nid.neuronID == 4) {
-                neuron.currentValue = ownVelY;
+                neuron.currentValue = foodDirY;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
             if (nid.neuronID == 5) {
-                neuron.currentValue = enemyPosX;
+                neuron.currentValue = foodTypeR;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
             if (nid.neuronID == 6) {
-                neuron.currentValue = enemyPosY;
+                neuron.currentValue = foodTypeG;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
             if (nid.neuronID == 7) {
-                neuron.currentValue = enemyVelX;
+                neuron.currentValue = foodTypeB;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
             if (nid.neuronID == 8) {
-                neuron.currentValue = enemyVelY;
+                neuron.currentValue = friendPosX;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
             if (nid.neuronID == 9) {
-                neuron.currentValue = enemyDirX;
+                neuron.currentValue = friendPosY;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
             if (nid.neuronID == 10) {
-                neuron.currentValue = enemyDirY;
+                neuron.currentValue = friendVelX;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
-
             if (nid.neuronID == 11) {
-                neuron.currentValue = distLeft;
+                neuron.currentValue = friendVelY;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
             if (nid.neuronID == 12) {
-                neuron.currentValue = distRight;
+                neuron.currentValue = friendDirX;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
             if (nid.neuronID == 13) {
-                neuron.currentValue = distUp;
+                neuron.currentValue = friendDirY;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
             if (nid.neuronID == 14) {
+                neuron.currentValue = enemyPosX;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 15) {
+                neuron.currentValue = enemyPosY;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 16) {
+                neuron.currentValue = enemyVelX;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 17) {
+                neuron.currentValue = enemyVelY;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 18) {
+                neuron.currentValue = enemyDirX;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 19) {
+                neuron.currentValue = enemyDirY;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 20) {
+                neuron.currentValue = ownVelX;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 21) {
+                neuron.currentValue = ownVelY;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 22) {
+                neuron.currentValue = temperature;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 23) {
+                neuron.currentValue = pressure;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 24) {
+                neuron.currentValue = isContact;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 25) {
+                neuron.currentValue = contactForceX;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 26) {
+                neuron.currentValue = contactForceY;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 27) {
+                neuron.currentValue = hitPoints;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 28) {
+                neuron.currentValue = stamina;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 29) {
+                neuron.currentValue = foodAmountR;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 30) {
+                neuron.currentValue = foodAmountG;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 31) {
+                neuron.currentValue = foodAmountB;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 32) {
+                neuron.currentValue = distUp;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 33) {
+                neuron.currentValue = distTopRight;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 34) {
+                neuron.currentValue = distRight;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 35) {
+                neuron.currentValue = distBottomRight;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 36) {
                 neuron.currentValue = distDown;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
+            if (nid.neuronID == 37) {
+                neuron.currentValue = distBottomLeft;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 38) {
+                neuron.currentValue = distLeft;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 39) {
+                neuron.currentValue = distTopLeft;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 40) {
+                neuron.currentValue = inComm0;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 41) {
+                neuron.currentValue = inComm1;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 42) {
+                neuron.currentValue = inComm2;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 43) {
+                neuron.currentValue = inComm3;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
 
-            if (nid.neuronID == 15) {
+
+
+
+            if (nid.neuronID == 100) {
                 neuron.currentValue = throttleX;
                 neuron.neuronType = NeuronGenome.NeuronType.Out;
             }
-            if (nid.neuronID == 16) {
+            if (nid.neuronID == 101) {
                 neuron.currentValue = throttleY;
+                neuron.neuronType = NeuronGenome.NeuronType.Out;
+            }
+            if (nid.neuronID == 102) {
+                neuron.currentValue = dash;
+                neuron.neuronType = NeuronGenome.NeuronType.Out;
+            }
+            if (nid.neuronID == 103) {
+                neuron.currentValue = outComm0;
+                neuron.neuronType = NeuronGenome.NeuronType.Out;
+            }
+            if (nid.neuronID == 104) {
+                neuron.currentValue = outComm1;
+                neuron.neuronType = NeuronGenome.NeuronType.Out;
+            }
+            if (nid.neuronID == 105) {
+                neuron.currentValue = outComm2;
+                neuron.neuronType = NeuronGenome.NeuronType.Out;
+            }
+            if (nid.neuronID == 106) {
+                neuron.currentValue = outComm3;
                 neuron.neuronType = NeuronGenome.NeuronType.Out;
             }
         }
@@ -177,28 +490,149 @@ public class TestModule {
 
     public void Tick() {        
 
-        float xPos = ownRigidBody2D.transform.localPosition.x;
-        float yPos = ownRigidBody2D.transform.localPosition.y;
-        Vector2 enemyPos = new Vector2(enemyTestModule.ownRigidBody2D.transform.localPosition.x, enemyTestModule.ownRigidBody2D.transform.localPosition.y);
-        Vector2 enemyDir = new Vector2(enemyPos.x - xPos, enemyPos.y - yPos).normalized;
+        //float xPos = ownRigidBody2D.transform.localPosition.x;
+        //float yPos = ownRigidBody2D.transform.localPosition.y;
+        Vector2 ownPos = new Vector2(ownRigidBody2D.transform.localPosition.x, ownRigidBody2D.transform.localPosition.y);
         Vector2 ownVel = new Vector2(ownRigidBody2D.velocity.x, ownRigidBody2D.velocity.y);
-        Vector2 enemyVel = new Vector2(enemyTestModule.ownRigidBody2D.velocity.x, enemyTestModule.ownRigidBody2D.velocity.y);
-        
-        ownPosX[0] = xPos / 40f;
-        ownPosY[0] = yPos / 40f;
-        ownVelX[0] = ownVel.x / 15f;
-        ownVelY[0] = ownVel.y / 15f;
 
-        enemyPosX[0] = (enemyTestModule.ownRigidBody2D.transform.localPosition.x - xPos) / 20f;
-        enemyPosY[0] = (enemyTestModule.ownRigidBody2D.transform.localPosition.y - yPos) / 20f;        
+        Vector2 foodPos = Vector2.zero;
+        Vector2 foodDir = Vector2.zero;
+        float typeR = 0f;
+        float typeG = 0f;
+        float typeB = 0f;
+        if(nearestFoodTransform != null) {
+            foodPos = new Vector2(nearestFoodTransform.localPosition.x, nearestFoodTransform.localPosition.y);
+            foodDir = new Vector2(foodPos.x - ownPos.x, foodPos.y - ownPos.y).normalized;
+            typeR = 0f;  // make a FoodModule Class to hold as reference which will contain Type info
+            typeG = 0f;
+            typeB = 0f;
+        }
+
+        Vector2 friendPos = Vector2.zero;
+        Vector2 friendDir = Vector2.zero;
+        Vector2 friendVel = Vector2.zero;
+        if(friendTestModule != null) {
+            friendPos = new Vector2(friendTestModule.ownRigidBody2D.transform.localPosition.x, friendTestModule.ownRigidBody2D.transform.localPosition.y);
+            friendDir = new Vector2(friendPos.x - ownPos.x, friendPos.y - ownPos.y).normalized;
+            friendVel = new Vector2(friendTestModule.ownRigidBody2D.velocity.x, friendTestModule.ownRigidBody2D.velocity.y);
+        }
+
+        Vector2 enemyPos = Vector2.zero;
+        Vector2 enemyDir = Vector2.zero;
+        Vector2 enemyVel = Vector2.zero;
+        if (enemyTestModule != null) {
+            enemyPos = new Vector2(enemyTestModule.ownRigidBody2D.transform.localPosition.x, enemyTestModule.ownRigidBody2D.transform.localPosition.y);
+            enemyDir = new Vector2(enemyPos.x - ownPos.x, enemyPos.y - ownPos.y).normalized;
+            enemyVel = new Vector2(enemyTestModule.ownRigidBody2D.velocity.x, enemyTestModule.ownRigidBody2D.velocity.y);
+        }
+
+        foodPosX[0] = foodPos.x / 20f;
+        foodPosY[0] = foodPos.y / 20f;
+        foodDirX[0] = foodDir.x;
+        foodDirY[0] = foodDir.y;
+        foodTypeR[0] = typeR;
+        foodTypeG[0] = typeG;
+        foodTypeB[0] = typeB;
+
+        friendPosX[0] = 0f; // (friendPos.x - ownPos.x) / 20f;
+        friendPosY[0] = 0f; // (friendPos.y - ownPos.y) / 20f;
+        friendVelX[0] = 0f; // (friendVel.x - ownVel.x) / 15f;
+        friendVelY[0] = 0f; // (friendVel.y - ownVel.y) / 15f;
+        friendDirX[0] = friendDir.x;
+        friendDirY[0] = friendDir.y;
+
+        enemyPosX[0] = (enemyPos.x - ownPos.x) / 20f;
+        enemyPosY[0] = (enemyPos.y - ownPos.y) / 20f;        
         enemyVelX[0] = (enemyVel.x - ownVel.x) / 15f;
         enemyVelY[0] = (enemyVel.y - ownVel.y) / 15f;
         enemyDirX[0] = enemyDir.x;
         enemyDirY[0] = enemyDir.y;
 
-        distLeft[0] = Mathf.Abs(-40f - xPos) / 40f;
-        distRight[0] = Mathf.Abs(40f - xPos) / 40f;
-        distUp[0] = Mathf.Abs(40f - yPos) / 40f;
-        distDown[0] = Mathf.Abs(-40f - yPos) / 40f;        
+        ownVelX[0] = ownVel.x / 15f;
+        ownVelY[0] = ownVel.y / 15f;
+
+        temperature[0] = 0f;
+        pressure[0] = 0f;
+        isContact[0] = 0f;
+        contactForceX[0] = 0f;
+        contactForceY[0] = 0f;
+        hitPoints[0] = 1f;
+        stamina[0] = 1f;
+        foodAmountR[0] = 0f;
+        foodAmountG[0] = 0f;
+        foodAmountB[0] = 0f;
+
+        // TOP
+        float raycastMaxLength = 15f;
+        RaycastHit2D hitTop = Physics2D.Raycast(ownPos, Vector2.up, raycastMaxLength);  // UP
+        float distance = raycastMaxLength;
+        if (hitTop.collider != null && hitTop.collider.tag == "HazardCollider") {
+            distance = (hitTop.point - ownPos).magnitude;            
+        }
+        distUp[0] = (raycastMaxLength - distance) / raycastMaxLength;  // Mathf.Abs(40f - yPos) / 40f;        
+        // TOP RIGHT
+        RaycastHit2D hitTopRight = Physics2D.Raycast(ownPos, new Vector2(1f,1f), raycastMaxLength);  //  + / +
+        distance = raycastMaxLength;
+        if (hitTopRight.collider != null && hitTopRight.collider.tag == "HazardCollider") {
+            distance = (hitTopRight.point - ownPos).magnitude;
+        }
+        distTopRight[0] = (raycastMaxLength - distance) / raycastMaxLength;
+        // RIGHT
+        RaycastHit2D hitRight = Physics2D.Raycast(ownPos, new Vector2(1f, 0f), raycastMaxLength);  //  + / +
+        distance = raycastMaxLength;
+        if (hitRight.collider != null && hitRight.collider.tag == "HazardCollider") {
+            distance = (hitRight.point - ownPos).magnitude;
+        }
+        distRight[0] = (raycastMaxLength - distance) / raycastMaxLength;
+        // BOTTOM RIGHT
+        RaycastHit2D hitBottomRight = Physics2D.Raycast(ownPos, new Vector2(1f, -1f), raycastMaxLength);  //  + / +
+        distance = raycastMaxLength;
+        if (hitBottomRight.collider != null && hitBottomRight.collider.tag == "HazardCollider") {
+            distance = (hitBottomRight.point - ownPos).magnitude;
+        }
+        distBottomRight[0] = (raycastMaxLength - distance) / raycastMaxLength;
+        // BOTTOM
+        RaycastHit2D hitBottom = Physics2D.Raycast(ownPos, new Vector2(0f, -1f), raycastMaxLength);  //  + / +
+        distance = raycastMaxLength;
+        if (hitBottom.collider != null && hitBottom.collider.tag == "HazardCollider") {
+            distance = (hitBottom.point - ownPos).magnitude;
+            //Debug.Log("HIT BOTTOM! " + ((raycastMaxLength - distance) / raycastMaxLength).ToString());
+        }
+        distDown[0] = (raycastMaxLength - distance) / raycastMaxLength;
+        // BOTTOM LEFT
+        RaycastHit2D hitBottomLeft = Physics2D.Raycast(ownPos, new Vector2(-1f, -1f), raycastMaxLength);  //  + / +
+        distance = raycastMaxLength;
+        if (hitBottomLeft.collider != null && hitBottomLeft.collider.tag == "HazardCollider") {
+            distance = (hitBottomLeft.point - ownPos).magnitude;
+        }
+        distBottomLeft[0] = (raycastMaxLength - distance) / raycastMaxLength;
+        // LEFT
+        RaycastHit2D hitLeft = Physics2D.Raycast(ownPos, new Vector2(-1f, 0f), raycastMaxLength);  //  + / +
+        distance = raycastMaxLength;
+        if (hitLeft.collider != null && hitLeft.collider.tag == "HazardCollider") {
+            distance = (hitLeft.point - ownPos).magnitude;
+        }
+        distLeft[0] = (raycastMaxLength - distance) / raycastMaxLength;
+        // TOP LEFT
+        RaycastHit2D hitTopLeft = Physics2D.Raycast(ownPos, new Vector2(-1f, 1f), raycastMaxLength);  //  + / +
+        distance = raycastMaxLength;
+        if (hitTopLeft.collider != null && hitTopLeft.collider.tag == "HazardCollider") {
+            distance = (hitTopLeft.point - ownPos).magnitude;
+        }
+        distTopLeft[0] = (raycastMaxLength - distance) / raycastMaxLength;
+
+        inComm0[0] = 0f;
+        inComm1[0] = 0f;
+        inComm2[0] = 0f;
+        inComm3[0] = 0f;
+
+        // TEST
+        //hit = Physics2D.Raycast(new Vector2(35f, 0f), new Vector2(1f, 0f), raycastMaxLength);  //  + / +
+        //distance = raycastMaxLength;
+        //if (hit.collider != null && hit.collider.tag == "HazardCollider") {
+            //distance = (hit.point - new Vector2(35f, 0f)).magnitude;
+            //Debug.Log("HIT TEST! " + ((raycastMaxLength - distance) / raycastMaxLength).ToString());
+        //}
+        //distTopLeft[0] = (raycastMaxLength - distance) / raycastMaxLength;
     }
 }

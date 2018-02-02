@@ -27,7 +27,7 @@ public class GameManager : MonoBehaviour {
         simulationManager.TickSimulation();
         if(simulationManager.trainingRequirementsMet) {
             if(simulationManager.isTraining) {
-                for (int i = 0; i < 64; i++) {
+                for (int i = 0; i < 32; i++) {
                     simulationManager.TickTrainingMode();
                 }
             }                      

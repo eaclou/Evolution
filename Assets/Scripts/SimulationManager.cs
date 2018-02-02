@@ -50,99 +50,7 @@ public class SimulationManager : MonoBehaviour {
 
     // need to be able to update Agent's Brain on the fly?  --- but needs to access the Module to set up inputs/outputs???
     // Ability to run a Brain Headless (without instantiating an Agent?)
-    private void CreateFakeData() {
-        dataSamplesList = new List<DataSample>();
-
-        DataSample sample1 = new DataSample(15, 2);
-        sample1.inputDataArray[0] = 1f;
-        sample1.inputDataArray[1] = 0f;
-        sample1.inputDataArray[2] = 0f;
-        sample1.inputDataArray[3] = 0f;
-        sample1.inputDataArray[4] = 0f;
-        sample1.inputDataArray[5] = 0.1f;
-        sample1.inputDataArray[6] = 0.1f;
-        sample1.inputDataArray[7] = 0f;
-        sample1.inputDataArray[8] = 0f;
-        sample1.inputDataArray[9] = 0.77f;
-        sample1.inputDataArray[10] = 0.77f;
-        sample1.inputDataArray[11] = 0.5f;
-        sample1.inputDataArray[12] = 0.5f;
-        sample1.inputDataArray[13] = 0.5f;
-        sample1.inputDataArray[14] = 0.5f;
-
-        sample1.outputDataArray[0] = 1f;
-        sample1.outputDataArray[1] = 1f;
-
-        dataSamplesList.Add(sample1);  // Add to master List
-
-        DataSample sample2 = new DataSample(15, 2);
-        sample1.inputDataArray[0] = 1f;
-        sample1.inputDataArray[1] = 0f;
-        sample1.inputDataArray[2] = 0f;
-        sample1.inputDataArray[3] = 0f;
-        sample1.inputDataArray[4] = 0f;
-        sample1.inputDataArray[5] = 0.1f;
-        sample1.inputDataArray[6] = -0.1f;
-        sample1.inputDataArray[7] = 0f;
-        sample1.inputDataArray[8] = 0f;
-        sample1.inputDataArray[9] = 0.77f;
-        sample1.inputDataArray[10] = -0.77f;
-        sample1.inputDataArray[11] = 0.5f;
-        sample1.inputDataArray[12] = 0.5f;
-        sample1.inputDataArray[13] = 0.5f;
-        sample1.inputDataArray[14] = 0.5f;
-
-        sample2.outputDataArray[0] = 1f;
-        sample2.outputDataArray[1] = -1f;
-
-        dataSamplesList.Add(sample2);  // Add to master List
-
-        DataSample sample3 = new DataSample(15, 2);
-        sample1.inputDataArray[0] = 1f;
-        sample1.inputDataArray[1] = 0f;
-        sample1.inputDataArray[2] = 0f;
-        sample1.inputDataArray[3] = 0f;
-        sample1.inputDataArray[4] = 0f;
-        sample1.inputDataArray[5] = -0.1f;
-        sample1.inputDataArray[6] = 0.1f;
-        sample1.inputDataArray[7] = 0f;
-        sample1.inputDataArray[8] = 0f;
-        sample1.inputDataArray[9] = -0.77f;
-        sample1.inputDataArray[10] = 0.77f;
-        sample1.inputDataArray[11] = 0.5f;
-        sample1.inputDataArray[12] = 0.5f;
-        sample1.inputDataArray[13] = 0.5f;
-        sample1.inputDataArray[14] = 0.5f;
-
-        sample3.outputDataArray[0] = -1f;
-        sample3.outputDataArray[1] = 1f;
-
-        dataSamplesList.Add(sample3);  // Add to master List
-
-        DataSample sample4 = new DataSample(15, 2);
-        sample1.inputDataArray[0] = 1f;
-        sample1.inputDataArray[1] = 0f;
-        sample1.inputDataArray[2] = 0f;
-        sample1.inputDataArray[3] = 0f;
-        sample1.inputDataArray[4] = 0f;
-        sample1.inputDataArray[5] = -0.1f;
-        sample1.inputDataArray[6] = -0.1f;
-        sample1.inputDataArray[7] = 0f;
-        sample1.inputDataArray[8] = 0f;
-        sample1.inputDataArray[9] = -0.77f;
-        sample1.inputDataArray[10] = -0.77f;
-        sample1.inputDataArray[11] = 0.5f;
-        sample1.inputDataArray[12] = 0.5f;
-        sample1.inputDataArray[13] = 0.5f;
-        sample1.inputDataArray[14] = 0.5f;
-
-        sample4.outputDataArray[0] = -1f;
-        sample4.outputDataArray[1] = -1f;
-
-        dataSamplesList.Add(sample4);  // Add to master List
-
-        //for(int i = 0; i <)
-    }
+    
     public void InitializeGridCells() {
         mapGridCellArray = new MapGridCell[agentGridCellResolution][];
         for(int i = 0; i < agentGridCellResolution; i++) {
@@ -289,21 +197,52 @@ public class SimulationManager : MonoBehaviour {
         }
     }
     private void CopyDataSampleToModule(DataSample sample, TestModule module) {
+                
         module.bias[0] = sample.inputDataArray[0];
-        module.ownPosX[0] = sample.inputDataArray[1];
-        module.ownPosY[0] = sample.inputDataArray[2];
-        module.ownVelX[0] = sample.inputDataArray[3];
-        module.ownVelY[0] = sample.inputDataArray[4];
-        module.enemyPosX[0] = sample.inputDataArray[5];
-        module.enemyPosY[0] = sample.inputDataArray[6];
-        module.enemyVelX[0] = sample.inputDataArray[7];
-        module.enemyVelY[0] = sample.inputDataArray[8];
-        module.enemyDirX[0] = sample.inputDataArray[9];
-        module.enemyDirY[0] = sample.inputDataArray[10];
-        module.distLeft[0] = sample.inputDataArray[11];
-        module.distRight[0] = sample.inputDataArray[12];
-        module.distUp[0] = sample.inputDataArray[13];
-        module.distDown[0] = sample.inputDataArray[14];
+        module.foodPosX[0] = sample.inputDataArray[1];
+        module.foodPosY[0] = sample.inputDataArray[2];
+        module.foodDirX[0] = sample.inputDataArray[3];
+        module.foodDirY[0] = sample.inputDataArray[4];
+        module.foodTypeR[0] = sample.inputDataArray[5];
+        module.foodTypeG[0] = sample.inputDataArray[6];
+        module.foodTypeB[0] = sample.inputDataArray[7];
+        module.friendPosX[0] = sample.inputDataArray[8];
+        module.friendPosY[0] = sample.inputDataArray[9];
+        module.friendVelX[0] = sample.inputDataArray[10];
+        module.friendVelY[0] = sample.inputDataArray[11];
+        module.friendDirX[0] = sample.inputDataArray[12];
+        module.friendDirY[0] = sample.inputDataArray[13];
+        module.enemyPosX[0] = sample.inputDataArray[14];
+        module.enemyPosY[0] = sample.inputDataArray[15];
+        module.enemyVelX[0] = sample.inputDataArray[16];
+        module.enemyVelY[0] = sample.inputDataArray[17];
+        module.enemyDirX[0] = sample.inputDataArray[18];
+        module.enemyDirY[0] = sample.inputDataArray[19];
+        module.ownVelX[0] = sample.inputDataArray[20];
+        module.ownVelY[0] = sample.inputDataArray[21];
+
+        module.temperature[0] = sample.inputDataArray[22];
+        module.pressure[0] = sample.inputDataArray[23];
+        module.isContact[0] = sample.inputDataArray[24];
+        module.contactForceX[0] = sample.inputDataArray[25];
+        module.contactForceY[0] = sample.inputDataArray[26];
+        module.hitPoints[0] = sample.inputDataArray[27];
+        module.stamina[0] = sample.inputDataArray[28];
+        module.foodAmountR[0] = sample.inputDataArray[29];
+        module.foodAmountG[0] = sample.inputDataArray[30];
+        module.foodAmountB[0] = sample.inputDataArray[31];
+        module.distUp[0] = sample.inputDataArray[32];
+        module.distTopRight[0] = sample.inputDataArray[33];
+        module.distRight[0] = sample.inputDataArray[34];
+        module.distBottomRight[0] = sample.inputDataArray[35];
+        module.distDown[0] = sample.inputDataArray[36];
+        module.distBottomLeft[0] = sample.inputDataArray[37];
+        module.distLeft[0] = sample.inputDataArray[38];
+        module.distTopLeft[0] = sample.inputDataArray[39];
+        module.inComm0[0] = sample.inputDataArray[40];
+        module.inComm1[0] = sample.inputDataArray[41];
+        module.inComm2[0] = sample.inputDataArray[42];
+        module.inComm3[0] = sample.inputDataArray[43];        
     }
 
     private float CompareDataSampleToBrainOutput(DataSample sample, TestModule module) {

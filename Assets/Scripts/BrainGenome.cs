@@ -55,7 +55,7 @@ public class BrainGenome {
             }
         }
         // Create Hidden nodes TEMP!!!!
-        for (int i = 0; i < numInputs; i++) {
+        for (int i = 0; i < 8; i++) {
             NeuronGenome neuron = new NeuronGenome(NeuronGenome.NeuronType.Hid, -1, i);
             hiddenNeuronList.Add(neuron);
         }
