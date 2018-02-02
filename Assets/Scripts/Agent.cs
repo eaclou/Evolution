@@ -28,7 +28,7 @@ public class Agent : MonoBehaviour {
     public DataSample RecordData() {
         DataSample sample = new DataSample(GetNumInputs(), GetNumOutputs());
 
-        sample.inputDataArray[0] = 1f;
+        sample.inputDataArray[0] = 1f; // bias
         sample.inputDataArray[1] = testModule.ownPosX[0];
         sample.inputDataArray[2] = testModule.ownPosY[0];
         sample.inputDataArray[3] = testModule.ownVelX[0];

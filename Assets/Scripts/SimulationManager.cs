@@ -25,7 +25,7 @@ public class SimulationManager : MonoBehaviour {
     public List<DataSample> currentDataBatch;
     private int maxSavedDataSamples = 256;  // dataSamples above this number replace existing samples randomly
     private int dataBatchSize = 96;
-    private int minDataSamplesForTraining = 8;  // won't start training brains until DataList has at least this many samples
+    private int minDataSamplesForTraining = 4;  // won't start training brains until DataList has at least this many samples
     private int periodicSamplingRate = 64;  // saves a sample of player's data every (this #) frames
     public MutationSettings mutationSettings;
     public float[] rawFitnessScoresArray;
@@ -42,8 +42,145 @@ public class SimulationManager : MonoBehaviour {
     private Agent dummyAgent;
     private StartPositionGenome dummyStartGenome;
 
+    public float rawFitnessScoreBlankAgent = 0f;
+    public float lastGenBlankAgentFitness = 0f;
+
+    private int agentGridCellResolution = 4;  // How much to subdivide the map in order to detect nearest-neighbors more efficiently --> to not be O(n^2)
+    public MapGridCell[][] mapGridCellArray;
+
     // need to be able to update Agent's Brain on the fly?  --- but needs to access the Module to set up inputs/outputs???
     // Ability to run a Brain Headless (without instantiating an Agent?)
+    private void CreateFakeData() {
+        dataSamplesList = new List<DataSample>();
+
+        DataSample sample1 = new DataSample(15, 2);
+        sample1.inputDataArray[0] = 1f;
+        sample1.inputDataArray[1] = 0f;
+        sample1.inputDataArray[2] = 0f;
+        sample1.inputDataArray[3] = 0f;
+        sample1.inputDataArray[4] = 0f;
+        sample1.inputDataArray[5] = 0.1f;
+        sample1.inputDataArray[6] = 0.1f;
+        sample1.inputDataArray[7] = 0f;
+        sample1.inputDataArray[8] = 0f;
+        sample1.inputDataArray[9] = 0.77f;
+        sample1.inputDataArray[10] = 0.77f;
+        sample1.inputDataArray[11] = 0.5f;
+        sample1.inputDataArray[12] = 0.5f;
+        sample1.inputDataArray[13] = 0.5f;
+        sample1.inputDataArray[14] = 0.5f;
+
+        sample1.outputDataArray[0] = 1f;
+        sample1.outputDataArray[1] = 1f;
+
+        dataSamplesList.Add(sample1);  // Add to master List
+
+        DataSample sample2 = new DataSample(15, 2);
+        sample1.inputDataArray[0] = 1f;
+        sample1.inputDataArray[1] = 0f;
+        sample1.inputDataArray[2] = 0f;
+        sample1.inputDataArray[3] = 0f;
+        sample1.inputDataArray[4] = 0f;
+        sample1.inputDataArray[5] = 0.1f;
+        sample1.inputDataArray[6] = -0.1f;
+        sample1.inputDataArray[7] = 0f;
+        sample1.inputDataArray[8] = 0f;
+        sample1.inputDataArray[9] = 0.77f;
+        sample1.inputDataArray[10] = -0.77f;
+        sample1.inputDataArray[11] = 0.5f;
+        sample1.inputDataArray[12] = 0.5f;
+        sample1.inputDataArray[13] = 0.5f;
+        sample1.inputDataArray[14] = 0.5f;
+
+        sample2.outputDataArray[0] = 1f;
+        sample2.outputDataArray[1] = -1f;
+
+        dataSamplesList.Add(sample2);  // Add to master List
+
+        DataSample sample3 = new DataSample(15, 2);
+        sample1.inputDataArray[0] = 1f;
+        sample1.inputDataArray[1] = 0f;
+        sample1.inputDataArray[2] = 0f;
+        sample1.inputDataArray[3] = 0f;
+        sample1.inputDataArray[4] = 0f;
+        sample1.inputDataArray[5] = -0.1f;
+        sample1.inputDataArray[6] = 0.1f;
+        sample1.inputDataArray[7] = 0f;
+        sample1.inputDataArray[8] = 0f;
+        sample1.inputDataArray[9] = -0.77f;
+        sample1.inputDataArray[10] = 0.77f;
+        sample1.inputDataArray[11] = 0.5f;
+        sample1.inputDataArray[12] = 0.5f;
+        sample1.inputDataArray[13] = 0.5f;
+        sample1.inputDataArray[14] = 0.5f;
+
+        sample3.outputDataArray[0] = -1f;
+        sample3.outputDataArray[1] = 1f;
+
+        dataSamplesList.Add(sample3);  // Add to master List
+
+        DataSample sample4 = new DataSample(15, 2);
+        sample1.inputDataArray[0] = 1f;
+        sample1.inputDataArray[1] = 0f;
+        sample1.inputDataArray[2] = 0f;
+        sample1.inputDataArray[3] = 0f;
+        sample1.inputDataArray[4] = 0f;
+        sample1.inputDataArray[5] = -0.1f;
+        sample1.inputDataArray[6] = -0.1f;
+        sample1.inputDataArray[7] = 0f;
+        sample1.inputDataArray[8] = 0f;
+        sample1.inputDataArray[9] = -0.77f;
+        sample1.inputDataArray[10] = -0.77f;
+        sample1.inputDataArray[11] = 0.5f;
+        sample1.inputDataArray[12] = 0.5f;
+        sample1.inputDataArray[13] = 0.5f;
+        sample1.inputDataArray[14] = 0.5f;
+
+        sample4.outputDataArray[0] = -1f;
+        sample4.outputDataArray[1] = -1f;
+
+        dataSamplesList.Add(sample4);  // Add to master List
+
+        //for(int i = 0; i <)
+    }
+    public void InitializeGridCells() {
+        mapGridCellArray = new MapGridCell[agentGridCellResolution][];
+        for(int i = 0; i < agentGridCellResolution; i++) {
+            mapGridCellArray[i] = new MapGridCell[agentGridCellResolution];
+        }
+
+        float mapSize = 80f;
+        float cellSize = mapSize / agentGridCellResolution;
+
+        for (int x = 0; x < agentGridCellResolution; x++) {
+            for(int y = 0; y < agentGridCellResolution; y++) {
+                Vector2 cellTopLeft = new Vector2(cellSize * x, cellSize * y);
+                Vector2 cellBottomRight = new Vector2(cellSize * (x + 1), cellSize * (y + 1));
+                mapGridCellArray[x][y] = new MapGridCell(cellTopLeft, cellBottomRight);
+            }
+        }
+    }
+    public void PopulateGridCells() {
+        // Inefficient!!!
+        for (int x = 0; x < agentGridCellResolution; x++) {
+            for (int y = 0; y < agentGridCellResolution; y++) {                
+                mapGridCellArray[x][y].agentIndicesList.Clear();
+            }
+        }
+
+        float mapSize = 80f;
+        float cellSize = mapSize / agentGridCellResolution;
+
+        for (int a = 0; a < agentsArray.Length; a++) {
+            float xPos = agentsArray[a].transform.localPosition.x;
+            float yPos = agentsArray[a].transform.localPosition.y;
+            int xCoord = Mathf.FloorToInt((xPos + mapSize / 2f) / mapSize * (float)agentGridCellResolution);
+            int yCoord = Mathf.FloorToInt((yPos + mapSize / 2f) / mapSize * (float)agentGridCellResolution);
+
+            //Debug.Log("PopulateGrid(" + a.ToString() + ") [" + xCoord.ToString() + "," + yCoord.ToString() + "]");
+            mapGridCellArray[xCoord][yCoord].agentIndicesList.Add(a);
+        }
+    }
     public void ToggleRecording() {
         recording = !recording;
     }
@@ -65,7 +202,9 @@ public class SimulationManager : MonoBehaviour {
         if(trainingRequirementsMet) {
             debugTxt = "Training: ACTIVE   numSamples: " + dataSamplesList.Count.ToString() + "\n";
             debugTxt += "Gen: " + curGen.ToString() + ", Agent: " + curTestingAgent.ToString() + ", Sample: " + curTestingSample.ToString() + "\n";
-            debugTxt += "Fitness Best: " + bestFitnessScore.ToString() + " ( Avg: " + avgFitnessLastGen.ToString() + " )";
+            debugTxt += "Fitness Best: " + bestFitnessScore.ToString() + " ( Avg: " + avgFitnessLastGen.ToString() + " ) Blank: " + lastGenBlankAgentFitness.ToString() + "\n";
+            debugTxt += "Agent[0] # Neurons: " + agentsArray[0].brain.neuronList.Count.ToString() + ", # Axons: " + agentsArray[0].brain.axonList.Count.ToString() + "\n";
+
         }
         textDebugTrainingInfo.text = debugTxt;
 
@@ -96,12 +235,14 @@ public class SimulationManager : MonoBehaviour {
         }
     }
     public void InitializeTrainingApparatus() {
-        mutationSettings = new MutationSettings(0.01f, 0.25f, 0.0f, 0.00f);
+        mutationSettings = new MutationSettings(0.04f, 0.75f, 0.025f, 0.002f);
         GameObject dummyAgentGO = new GameObject("DummyAgent");
         dummyAgent = dummyAgentGO.AddComponent<Agent>();
         dummyStartGenome = new StartPositionGenome(Vector3.zero, Quaternion.identity);
 
         dataSamplesList = new List<DataSample>();
+
+        //CreateFakeData();
 
         ResetTrainingForNewGen();
     }
@@ -123,6 +264,7 @@ public class SimulationManager : MonoBehaviour {
             }            
         }
         // Make this respect maxDataSamples size and act accordingly
+        //sample.Print();
     }
     private void SetUpTrainingDataBatch() {
         if(currentDataBatch == null) {
@@ -135,8 +277,14 @@ public class SimulationManager : MonoBehaviour {
 
         // Populate dataBatch:
         for(int i = 0; i < numSamplesInBatch; i++) {
-            int randIndex = UnityEngine.Random.Range(0, dataSamplesList.Count - 1);
-            DataSample sample = dataSamplesList[randIndex].GetCopy();
+            // OLD: RANDOM SAMPLING:
+            //int randIndex = UnityEngine.Random.Range(0, dataSamplesList.Count - 1);
+            //DataSample sample = dataSamplesList[randIndex].GetCopy();
+            //currentDataBatch.Add(sample);
+
+        // TEST: Same As dataPool:
+            //int randIndex = UnityEngine.Random.Range(0, dataSamplesList.Count - 1);
+            DataSample sample = dataSamplesList[i].GetCopy();
             currentDataBatch.Add(sample);
         }
     }
@@ -161,8 +309,8 @@ public class SimulationManager : MonoBehaviour {
     private float CompareDataSampleToBrainOutput(DataSample sample, TestModule module) {
         float throttleX = Mathf.Round(module.throttleX[0] * 3f / 2f);// + module.throttleX[0];
         float throttleY = Mathf.Round(module.throttleY[0] * 3f / 2f);// + module.throttleY[0];
-        float deltaX = sample.outputDataArray[0] - throttleX + (sample.outputDataArray[0] - module.throttleX[0]) * 0.5f;  // Change this later?
-        float deltaY = sample.outputDataArray[1] - throttleY + (sample.outputDataArray[1] - module.throttleY[0]) * 0.5f;
+        float deltaX = sample.outputDataArray[0] - throttleX + (sample.outputDataArray[0] - module.throttleX[0]) * 0.25f;  // Change this later?
+        float deltaY = sample.outputDataArray[1] - throttleY + (sample.outputDataArray[1] - module.throttleY[0]) * 0.25f;
         float distSquared = deltaX * deltaX + deltaY * deltaY;
         return distSquared;
     }
@@ -170,7 +318,7 @@ public class SimulationManager : MonoBehaviour {
         for (int i = 0; i < genomePoolArray.Length; i++) {   // Create initial Population
             AgentGenome agentGenome = new AgentGenome(i);
             agentGenome.InitializeBodyGenomeFromTemplate(bodyGenomeTemplate);
-            agentGenome.InitializeRandomBrainFromCurrentBody(0.01f);
+            agentGenome.InitializeRandomBrainFromCurrentBody(0.0f);
             genomePoolArray[i] = agentGenome;
         }
     }
@@ -225,9 +373,9 @@ public class SimulationManager : MonoBehaviour {
         }
 
         //Hookup Agent Modules to their proper Objects/Transforms/Info
-        playerAgent.testModule.enemyTestModule = agentsArray[0].testModule;
+        //playerAgent.testModule.enemyTestModule = agentsArray[0].testModule;
         for (int p = 0; p < agentsArray.Length; p++) {
-            agentsArray[p].testModule.enemyTestModule = playerAgent.testModule;
+            //agentsArray[p].testModule.enemyTestModule = playerAgent.testModule;
             //for (int e = 0; e < currentAgentsArray.Length; e++) {
             //if (e != p) {  // not vs self:
                     //currentAgentsArray[p].testModule.ownRigidBody2D = currentAgentsArray[p].GetComponent<Rigidbody2D>();
@@ -238,10 +386,73 @@ public class SimulationManager : MonoBehaviour {
             //}
         }
 
+        InitializeGridCells();
+        HookUpModules();
         InitializeTrainingApparatus();
     }
 
+    private void HookUpModules() {
+        PopulateGridCells();
+
+        // Find NearestNeighbors:
+        float mapSize = 80f;
+        float cellSize = mapSize / agentGridCellResolution;
+        Vector2 playerPos = new Vector2(playerAgent.transform.localPosition.x, playerAgent.transform.localPosition.y);
+
+        for (int a = 0; a < agentsArray.Length; a++) {
+            // Find which gridCell this Agent is in:    
+            Vector2 agentPos = new Vector2(agentsArray[a].transform.localPosition.x, agentsArray[a].transform.localPosition.y);
+            int xCoord = Mathf.FloorToInt((agentPos.x + mapSize / 2f) / mapSize * (float)agentGridCellResolution);
+            int yCoord = Mathf.FloorToInt((agentPos.y + mapSize / 2f) / mapSize * (float)agentGridCellResolution);
+
+            int closestNeighborIndex = a;  // default to self
+            float nearestSquaredDistance = float.PositiveInfinity;
+            // Only checking its own grid cell!!! Will need to expand to adjacent cells as well!
+            for(int i = 0; i < mapGridCellArray[xCoord][yCoord].agentIndicesList.Count; i++) {
+                Vector2 neighborPos = new Vector2(agentsArray[mapGridCellArray[xCoord][yCoord].agentIndicesList[i]].transform.localPosition.x, agentsArray[mapGridCellArray[xCoord][yCoord].agentIndicesList[i]].transform.localPosition.y);
+                float squaredDist = (neighborPos - agentPos).sqrMagnitude;
+
+                if(squaredDist <= nearestSquaredDistance) { // if now the closest so far, update index and dist:
+                    if(a != mapGridCellArray[xCoord][yCoord].agentIndicesList[i]) {  // make sure it doesn't consider itself:
+                        closestNeighborIndex = mapGridCellArray[xCoord][yCoord].agentIndicesList[i];
+                        nearestSquaredDistance = squaredDist;
+                    }                    
+                }
+            }            
+
+            //Debug.Log("closestNeighborIndex: " + closestNeighborIndex.ToString());
+            agentsArray[a].testModule.enemyTestModule = agentsArray[closestNeighborIndex].testModule;
+
+            // Compare to Player also:
+            
+            float squaredPlayerDist = (playerPos - agentPos).sqrMagnitude;
+            if (squaredPlayerDist <= nearestSquaredDistance) {
+                agentsArray[a].testModule.enemyTestModule = playerAgent.testModule;
+            }
+        }
+
+        // Update PlayerAgent's module:
+        // Find which gridCell this Agent is in:
+        int xIndex = Mathf.FloorToInt((playerPos.x + mapSize / 2f) / mapSize * (float)agentGridCellResolution);
+        int yIndex = Mathf.FloorToInt((playerPos.y + mapSize / 2f) / mapSize * (float)agentGridCellResolution);
+
+        int closestIndex = 0;  // default to 0?
+        float nearestDist = float.PositiveInfinity;
+        // Only checking its own grid cell!!! Will need to expand to adjacent cells as well!
+        for (int i = 0; i < mapGridCellArray[xIndex][yIndex].agentIndicesList.Count; i++) {
+            Vector2 neighborPos = new Vector2(agentsArray[mapGridCellArray[xIndex][yIndex].agentIndicesList[i]].transform.localPosition.x, agentsArray[mapGridCellArray[xIndex][yIndex].agentIndicesList[i]].transform.localPosition.y);
+            float squaredDist = (neighborPos - playerPos).sqrMagnitude;
+            if (squaredDist <= nearestDist) { // if now the closest so far, update index and dist:if (a != mapGridCellArray[xCoord][yCoord].agentIndicesList[i]) {  // make sure it doesn't consider itself:
+                closestIndex = mapGridCellArray[xIndex][yIndex].agentIndicesList[i];
+                nearestDist = squaredDist;                
+            }
+        }
+        //Debug.Log("closestNeighborIndex: " + closestNeighborIndex.ToString());
+        playerAgent.testModule.enemyTestModule = agentsArray[closestIndex].testModule;
+
+    }
     public void TickSimulation() {
+        HookUpModules(); // Sets nearest-neighbors etc.
         playerAgent.Tick();
         for (int i = 0; i < agentsArray.Length; i++) {
             agentsArray[i].Tick();
@@ -268,9 +479,9 @@ public class SimulationManager : MonoBehaviour {
         if (curHorizontalInput != lastHorizontalInput || curVerticalInput != lastVerticalInput) {
             recordData = true; // RecordPlayerData();
         }
-        if(timeStepCounter % periodicSamplingRate == 0) {
-            recordData = true;
-        }
+        //if(timeStepCounter % periodicSamplingRate == 0) {
+        //    recordData = true;
+        //}
         if(recording == false) {
             recordData = false;
         }
@@ -289,11 +500,17 @@ public class SimulationManager : MonoBehaviour {
             if (curTestingSample < currentDataBatch.Count) {
                 CopyDataSampleToModule(currentDataBatch[curTestingSample], dummyAgent.testModule);  // load training data into module (and by extension, brain)
                 // Run Brain ( few ticks? )
-                for (int t = 0; t < 2; t++) {
+                for (int t = 0; t < 3; t++) {
                     dummyAgent.TickBrain();
                 }
                 //Debug.Log(CompareDataSampleToBrainOutput(dataSamplesList[curTestingSample], dummyAgent.testModule).ToString());
                 rawFitnessScoresArray[curTestingAgent] += CompareDataSampleToBrainOutput(currentDataBatch[curTestingSample], dummyAgent.testModule);
+
+                // Hacky way to check if blank brains are scoring too well:
+                if(curTestingAgent == 0) {  // do Blank brain parallel to agent[0]
+                    rawFitnessScoreBlankAgent += CompareDataSampleToBrainOutput(currentDataBatch[curTestingSample], playerAgent.testModule);
+                }
+
                 curTestingSample++;
             }
             else {
@@ -335,6 +552,8 @@ public class SimulationManager : MonoBehaviour {
         }
         Debug.Log(fitTxt);
         avgFitnessLastGen = totalFitness / (float)populationSize;
+        lastGenBlankAgentFitness = rawFitnessScoreBlankAgent;
+        bestFitnessScore = minScore;
 
         // Process Fitness (bigger is better so lottery works)
         float scoreRange = maxScore - minScore;
@@ -402,8 +621,8 @@ public class SimulationManager : MonoBehaviour {
         // Reset
         ResetTrainingForNewGen();
 
-        //trainingSettingsManager.mutationChance *= 0.996f;
-        //trainingSettingsManager.mutationStepSize *= 0.998f;
+        //mutationSettings.mutationChance *= 0.995f;
+        //mutationSettings.mutationStepSize *= 0.995f;
 
         UpdateAgentBrains();
 
@@ -413,7 +632,7 @@ public class SimulationManager : MonoBehaviour {
     private void UpdateAgentBrains() {
         // UPDATE BRAINS TEST!!!!!
         for (int a = 0; a < agentsArray.Length; a++) {
-            agentsArray[a].ReplaceBrain(genomePoolArray[a]);
+            agentsArray[a].ReplaceBrain(genomePoolArray[a % 4]);
         }
     }
 
@@ -441,6 +660,7 @@ public class SimulationManager : MonoBehaviour {
 
     private void ResetTrainingForNewGen() {
         rawFitnessScoresArray = new float[populationSize];
+        rawFitnessScoreBlankAgent = 0f;
 
         curTestingAgent = 0;
         curTestingSample = 0;

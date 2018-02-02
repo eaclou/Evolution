@@ -60,9 +60,9 @@ public class TestModule {
         bias[0] = 1f;
 
         ownPosX = new float[1];
-        ownPosX[0] = startPos.agentStartPosition.x;
+        //ownPosX[0] = startPos.agentStartPosition.x;
         ownPosY = new float[1];
-        ownPosY[0] = startPos.agentStartPosition.y;
+        //ownPosY[0] = startPos.agentStartPosition.y;
         ownVelX = new float[1];
         ownVelY = new float[1];
 
@@ -175,30 +175,30 @@ public class TestModule {
         }
     }
 
-    public void Tick() {
-        //Vector2 enemyPos = 
-        //Debug.Log("TestModuleTick!");
+    public void Tick() {        
+
+        float xPos = ownRigidBody2D.transform.localPosition.x;
+        float yPos = ownRigidBody2D.transform.localPosition.y;
+        Vector2 enemyPos = new Vector2(enemyTestModule.ownRigidBody2D.transform.localPosition.x, enemyTestModule.ownRigidBody2D.transform.localPosition.y);
+        Vector2 enemyDir = new Vector2(enemyPos.x - xPos, enemyPos.y - yPos).normalized;
+        Vector2 ownVel = new Vector2(ownRigidBody2D.velocity.x, ownRigidBody2D.velocity.y);
+        Vector2 enemyVel = new Vector2(enemyTestModule.ownRigidBody2D.velocity.x, enemyTestModule.ownRigidBody2D.velocity.y);
         
-        Vector2 enemyDir = new Vector2(enemyTestModule.ownRigidBody2D.transform.localPosition.x - ownPosX[0], enemyTestModule.ownRigidBody2D.transform.localPosition.y - ownPosY[0]).normalized;
+        ownPosX[0] = xPos / 40f;
+        ownPosY[0] = yPos / 40f;
+        ownVelX[0] = ownVel.x / 15f;
+        ownVelY[0] = ownVel.y / 15f;
+
+        enemyPosX[0] = (enemyTestModule.ownRigidBody2D.transform.localPosition.x - xPos) / 20f;
+        enemyPosY[0] = (enemyTestModule.ownRigidBody2D.transform.localPosition.y - yPos) / 20f;        
+        enemyVelX[0] = (enemyVel.x - ownVel.x) / 15f;
+        enemyVelY[0] = (enemyVel.y - ownVel.y) / 15f;
         enemyDirX[0] = enemyDir.x;
         enemyDirY[0] = enemyDir.y;
 
-        // Zeroed out temporarily for simplicity:
-        enemyVelX[0] = (enemyTestModule.ownVelX[0] - ownVelX[0]) / 15f;
-        enemyVelY[0] = (enemyTestModule.ownVelY[0] - ownVelY[0]) / 15f;
-
-        ownVelX[0] = ownRigidBody2D.velocity.x / 15f; //Mathf.Clamp(ownVelX[0] + throttleX[0] * accel, -maxSpeed, maxSpeed);
-        ownVelY[0] = ownRigidBody2D.velocity.y / 15f; //Mathf.Clamp(ownVelY[0] + throttleY[0] * accel, -maxSpeed, maxSpeed);
-
-        ownPosX[0] = ownRigidBody2D.transform.localPosition.x;
-        ownPosY[0] = ownRigidBody2D.transform.localPosition.y;
-
-        enemyPosX[0] = (enemyTestModule.ownRigidBody2D.transform.localPosition.x - ownPosX[0]) / 20f;
-        enemyPosY[0] = (enemyTestModule.ownRigidBody2D.transform.localPosition.y - ownPosY[0]) / 20f;
-        
-        distLeft[0] = Mathf.Abs(-40f - ownPosX[0]) / 40f;
-        distRight[0] = Mathf.Abs(40f - ownPosX[0]) / 40f;
-        distUp[0] = Mathf.Abs(40f - ownPosY[0]) / 40f;
-        distDown[0] = Mathf.Abs(-40f - ownPosY[0]) / 40f;        
+        distLeft[0] = Mathf.Abs(-40f - xPos) / 40f;
+        distRight[0] = Mathf.Abs(40f - xPos) / 40f;
+        distUp[0] = Mathf.Abs(40f - yPos) / 40f;
+        distDown[0] = Mathf.Abs(-40f - yPos) / 40f;        
     }
 }

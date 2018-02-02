@@ -22,4 +22,16 @@ public class DataSample {
         }
         return copy;
     }
+
+    public void Print() {
+        string txt = "Inputs: ";
+        for(int i = 0; i < inputDataArray.Length; i++) {
+            txt += inputDataArray[i].ToString() + ", ";
+        }
+        txt += "\nOutputs: ";
+        for (int i = 0; i < outputDataArray.Length; i++) {
+            txt += outputDataArray[i].ToString() + ", ";
+        }
+        Debug.Log(txt);
+    }
 }
