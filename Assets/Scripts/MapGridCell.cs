@@ -6,13 +6,16 @@ public class MapGridCell {
 
     public Vector2 topLeft;
     public Vector2 bottomRight;
-    public List<int> agentIndicesList;
+    public List<int> foodIndicesList;
+    public List<int> friendIndicesList;
+    public List<int> enemyIndicesList;
 
     public MapGridCell(Vector2 topLeft, Vector2 bottomRight) {
         this.topLeft = topLeft;
         this.bottomRight = bottomRight;
-        agentIndicesList = new List<int>();
+        foodIndicesList = new List<int>();
+        friendIndicesList = new List<int>();
+        enemyIndicesList = new List<int>();
     }
-
     
 }

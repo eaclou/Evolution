@@ -54,7 +54,7 @@ public class BrainGenome {
                 numInputs++;
             }
         }
-        // Create Hidden nodes TEMP!!!!
+         //Create Hidden nodes TEMP!!!!
         for (int i = 0; i < 8; i++) {
             NeuronGenome neuron = new NeuronGenome(NeuronGenome.NeuronType.Hid, -1, i);
             hiddenNeuronList.Add(neuron);
@@ -75,12 +75,14 @@ public class BrainGenome {
                 outputNeuronList.Add(bodyNeuronList[i]);
             }
         }
-        // Initialize fully connected with all weights Random
+        // Initialize partially connected with all weights Random
         for (int i = 0; i < outputNeuronList.Count; i++) {
             for (int j = 0; j < inputNeuronList.Count; j++) {
-                float randomWeight = Gaussian.GetRandomGaussian() * initialWeightMultiplier;
-                LinkGenome linkGenome = new LinkGenome(inputNeuronList[j].nid.moduleID, inputNeuronList[j].nid.neuronID, outputNeuronList[i].nid.moduleID, outputNeuronList[i].nid.neuronID, randomWeight, true);
-                linkList.Add(linkGenome);
+                if(UnityEngine.Random.Range(0f, 1f) < 1.05f) {  // 100% chance of link
+                    float randomWeight = Gaussian.GetRandomGaussian() * initialWeightMultiplier;
+                    LinkGenome linkGenome = new LinkGenome(inputNeuronList[j].nid.moduleID, inputNeuronList[j].nid.neuronID, outputNeuronList[i].nid.moduleID, outputNeuronList[i].nid.neuronID, randomWeight, true);
+                    linkList.Add(linkGenome);
+                }                
             }
         }
         for (int i = 0; i < outputNeuronList.Count; i++) {
@@ -124,7 +126,7 @@ public class BrainGenome {
                 float randomWeight = Gaussian.GetRandomGaussian();
                 newLinkGenome.weight = newLinkGenome.weight + Mathf.Lerp(0f, randomWeight, settings.mutationStepSize);
             }
-            newLinkGenome.weight *= 0.95f;
+            //newLinkGenome.weight *= 0.95f;
             linkList.Add(newLinkGenome);
         }
 

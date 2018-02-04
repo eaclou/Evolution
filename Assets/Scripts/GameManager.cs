@@ -24,6 +24,8 @@ public class GameManager : MonoBehaviour {
     }
 
     private void FixedUpdate() {
+        float sTime = Time.realtimeSinceStartup;
+
         simulationManager.TickSimulation();
         if(simulationManager.trainingRequirementsMet) {
             if(simulationManager.isTraining) {
@@ -32,6 +34,10 @@ public class GameManager : MonoBehaviour {
                 }
             }                      
         }
+
+        //if(Time.realtimeSinceStartup - sTime > 0.05f) {
+        //Debug.Log("FixedUpdate SLOW! " + (Time.realtimeSinceStartup - sTime).ToString());
+        //}
     }
 
 

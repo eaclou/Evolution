@@ -174,8 +174,17 @@ public class Agent : MonoBehaviour {
         brain = new Brain(genome.brainGenome, this);
     }
 
+    public void ResetBrainState() {
+        brain.ResetBrainState();
+    }
+
     public void TickBrain() {
+        float startTime = Time.realtimeSinceStartup;
         brain.BrainMasterFunction();
+        float endTime = Time.realtimeSinceStartup;
+        if(endTime - startTime > 0.1f) {
+            Debug.Log("TickBrain " + (endTime - startTime).ToString() + "s");
+        }
     }
     public void TickModules() {
         testModule.Tick();

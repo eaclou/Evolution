@@ -96,7 +96,7 @@ public class TestModule {
 
     //public Transform enemyTransform;
     public Rigidbody2D ownRigidBody2D;
-    public Transform nearestFoodTransform;
+    public FoodModule nearestFoodModule;
     public TestModule friendTestModule;
     public TestModule enemyTestModule;
 
@@ -500,12 +500,12 @@ public class TestModule {
         float typeR = 0f;
         float typeG = 0f;
         float typeB = 0f;
-        if(nearestFoodTransform != null) {
-            foodPos = new Vector2(nearestFoodTransform.localPosition.x, nearestFoodTransform.localPosition.y);
-            foodDir = new Vector2(foodPos.x - ownPos.x, foodPos.y - ownPos.y).normalized;
-            typeR = 0f;  // make a FoodModule Class to hold as reference which will contain Type info
-            typeG = 0f;
-            typeB = 0f;
+        if(nearestFoodModule != null) {
+            foodPos = new Vector2(nearestFoodModule.transform.localPosition.x - ownPos.x, nearestFoodModule.transform.localPosition.y - ownPos.y);
+            foodDir = foodPos.normalized;
+            typeR = nearestFoodModule.amountR;  // make a FoodModule Class to hold as reference which will contain Type info
+            typeG = nearestFoodModule.amountG;
+            typeB = nearestFoodModule.amountB;
         }
 
         Vector2 friendPos = Vector2.zero;

@@ -64,6 +64,14 @@ public class Brain {
         //PrintBrain();
     }
 
+    public void ResetBrainState() {
+        for(int i = 0; i < neuronList.Count; i++) {
+            //neuronList[i].currentValue[] = null;
+            neuronList[i].currentValue[0] = 0f;
+            neuronList[i].previousValue = 0f;
+        }
+    }
+
     public void BrainMasterFunction() {
         // ticks state of brain forward 1 timestep
 

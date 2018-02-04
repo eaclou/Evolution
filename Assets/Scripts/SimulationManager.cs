@@ -20,6 +20,9 @@ public class SimulationManager : MonoBehaviour {
     public BodyGenome bodyGenomeTemplate;
     public AgentGenome[] genomePoolArray;
 
+    public FoodModule[] foodArray;
+    private int numFood = 8;
+
     public bool recording = false;
     public List<DataSample> dataSamplesList;  // master pool
     public List<DataSample> currentDataBatch;
@@ -41,6 +44,7 @@ public class SimulationManager : MonoBehaviour {
     public int curTestingSample = 0;
     private Agent dummyAgent;
     private StartPositionGenome dummyStartGenome;
+    private bool firstTimeTraining = true;
 
     public float rawFitnessScoreBlankAgent = 0f;
     public float lastGenBlankAgentFitness = 0f;
@@ -72,13 +76,25 @@ public class SimulationManager : MonoBehaviour {
         // Inefficient!!!
         for (int x = 0; x < agentGridCellResolution; x++) {
             for (int y = 0; y < agentGridCellResolution; y++) {                
-                mapGridCellArray[x][y].agentIndicesList.Clear();
+                mapGridCellArray[x][y].friendIndicesList.Clear();
+                mapGridCellArray[x][y].foodIndicesList.Clear();
+                mapGridCellArray[x][y].foodIndicesList.Clear();
             }
         }
 
         float mapSize = 80f;
         float cellSize = mapSize / agentGridCellResolution;
 
+        // FOOD!!! :::::::
+        for (int f = 0; f < foodArray.Length; f++) {
+            float xPos = foodArray[f].transform.localPosition.x;
+            float yPos = foodArray[f].transform.localPosition.y;
+            int xCoord = Mathf.FloorToInt((xPos + mapSize / 2f) / mapSize * (float)agentGridCellResolution);
+            int yCoord = Mathf.FloorToInt((yPos + mapSize / 2f) / mapSize * (float)agentGridCellResolution);            
+            mapGridCellArray[xCoord][yCoord].foodIndicesList.Add(f);
+        }
+
+        // FRIENDS::::::
         for (int a = 0; a < agentsArray.Length; a++) {
             float xPos = agentsArray[a].transform.localPosition.x;
             float yPos = agentsArray[a].transform.localPosition.y;
@@ -86,13 +102,17 @@ public class SimulationManager : MonoBehaviour {
             int yCoord = Mathf.FloorToInt((yPos + mapSize / 2f) / mapSize * (float)agentGridCellResolution);
 
             //Debug.Log("PopulateGrid(" + a.ToString() + ") [" + xCoord.ToString() + "," + yCoord.ToString() + "]");
-            mapGridCellArray[xCoord][yCoord].agentIndicesList.Add(a);
+            mapGridCellArray[xCoord][yCoord].friendIndicesList.Add(a);
         }
     }
     public void ToggleRecording() {
         recording = !recording;
     }
     public void ToggleTraining() {
+        if(firstTimeTraining) {
+            ResetTrainingForNewGen();
+            firstTimeTraining = false;
+        }
         isTraining = !isTraining;
     }
     public void ResetGenomes() {
@@ -104,6 +124,12 @@ public class SimulationManager : MonoBehaviour {
     public void ClearTrainingData() {
         trainingRequirementsMet = false;
         dataSamplesList.Clear();
+    }
+    public void SaveTrainingData() {
+
+    }
+    public void LoadTrainingData() {
+
     }
     public void UpdateDebugUI() {
         string debugTxt = "Training: False";
@@ -143,7 +169,7 @@ public class SimulationManager : MonoBehaviour {
         }
     }
     public void InitializeTrainingApparatus() {
-        mutationSettings = new MutationSettings(0.04f, 0.75f, 0.025f, 0.002f);
+        mutationSettings = new MutationSettings(0.05f, 1f, 0.025f, 0.002f);
         GameObject dummyAgentGO = new GameObject("DummyAgent");
         dummyAgent = dummyAgentGO.AddComponent<Agent>();
         dummyStartGenome = new StartPositionGenome(Vector3.zero, Quaternion.identity);
@@ -257,7 +283,7 @@ public class SimulationManager : MonoBehaviour {
         for (int i = 0; i < genomePoolArray.Length; i++) {   // Create initial Population
             AgentGenome agentGenome = new AgentGenome(i);
             agentGenome.InitializeBodyGenomeFromTemplate(bodyGenomeTemplate);
-            agentGenome.InitializeRandomBrainFromCurrentBody(0.0f);
+            agentGenome.InitializeRandomBrainFromCurrentBody(0.25f);
             genomePoolArray[i] = agentGenome;
         }
     }
@@ -325,11 +351,32 @@ public class SimulationManager : MonoBehaviour {
             //}
         }
 
+        // FOOODDDD!!!!
+        foodArray = new FoodModule[numFood];
+        SpawnFood();
+
         InitializeGridCells();
         HookUpModules();
         InitializeTrainingApparatus();
     }
 
+    private void SpawnFood() {
+        Debug.Log("SpawnFood!");
+        for (int i = 0; i < foodArray.Length; i++) {
+            GameObject foodGO = Instantiate(Resources.Load("FoodPrefab")) as GameObject;
+            foodGO.name = "Food" + i.ToString();
+            FoodModule newFood = foodGO.AddComponent<FoodModule>();
+            //int numColumns = Mathf.RoundToInt(Mathf.Sqrt(populationSize));
+            //int row = Mathf.FloorToInt(i / numColumns);
+            //int col = i % numColumns;
+            //StartPositionGenome agentStartPosGenome = new StartPositionGenome(new Vector3(1.25f * (col - numColumns / 2), -2.0f - (1.25f * row), 0f), Quaternion.identity);
+
+            Vector3 startPos = new Vector3(UnityEngine.Random.Range(-40f, 40f), UnityEngine.Random.Range(-40f, 40f), 0f);
+            foodGO.transform.localPosition = startPos;
+            foodArray[i] = newFood; // Add to stored list of current Agents
+            //newAgent.InitializeAgentFromGenome(genomePoolArray[i], agentStartPosGenome);
+        }
+    }
     private void HookUpModules() {
         PopulateGridCells();
 
@@ -338,35 +385,51 @@ public class SimulationManager : MonoBehaviour {
         float cellSize = mapSize / agentGridCellResolution;
         Vector2 playerPos = new Vector2(playerAgent.transform.localPosition.x, playerAgent.transform.localPosition.y);
 
+        
         for (int a = 0; a < agentsArray.Length; a++) {
             // Find which gridCell this Agent is in:    
             Vector2 agentPos = new Vector2(agentsArray[a].transform.localPosition.x, agentsArray[a].transform.localPosition.y);
             int xCoord = Mathf.FloorToInt((agentPos.x + mapSize / 2f) / mapSize * (float)agentGridCellResolution);
             int yCoord = Mathf.FloorToInt((agentPos.y + mapSize / 2f) / mapSize * (float)agentGridCellResolution);
 
-            int closestNeighborIndex = a;  // default to self
-            float nearestSquaredDistance = float.PositiveInfinity;
+            int closestFriendIndex = a;  // default to self
+            float nearestFriendSquaredDistance = float.PositiveInfinity;
+            int closestFoodIndex = 0; // default to 0???
+            float nearestFoodSquaredDistance = float.PositiveInfinity;
             // Only checking its own grid cell!!! Will need to expand to adjacent cells as well!
-            for(int i = 0; i < mapGridCellArray[xCoord][yCoord].agentIndicesList.Count; i++) {
-                Vector2 neighborPos = new Vector2(agentsArray[mapGridCellArray[xCoord][yCoord].agentIndicesList[i]].transform.localPosition.x, agentsArray[mapGridCellArray[xCoord][yCoord].agentIndicesList[i]].transform.localPosition.y);
-                float squaredDist = (neighborPos - agentPos).sqrMagnitude;
-
-                if(squaredDist <= nearestSquaredDistance) { // if now the closest so far, update index and dist:
-                    if(a != mapGridCellArray[xCoord][yCoord].agentIndicesList[i]) {  // make sure it doesn't consider itself:
-                        closestNeighborIndex = mapGridCellArray[xCoord][yCoord].agentIndicesList[i];
-                        nearestSquaredDistance = squaredDist;
+            for(int i = 0; i < mapGridCellArray[xCoord][yCoord].friendIndicesList.Count; i++) {
+                // FRIEND:
+                Vector2 neighborPos = new Vector2(agentsArray[mapGridCellArray[xCoord][yCoord].friendIndicesList[i]].transform.localPosition.x, agentsArray[mapGridCellArray[xCoord][yCoord].friendIndicesList[i]].transform.localPosition.y);
+                float squaredDistFriend = (neighborPos - agentPos).sqrMagnitude;
+                               
+                if (squaredDistFriend <= nearestFriendSquaredDistance) { // if now the closest so far, update index and dist:
+                    if(a != mapGridCellArray[xCoord][yCoord].friendIndicesList[i]) {  // make sure it doesn't consider itself:
+                        closestFriendIndex = mapGridCellArray[xCoord][yCoord].friendIndicesList[i];
+                        nearestFriendSquaredDistance = squaredDistFriend;
                     }                    
                 }
-            }            
+            }
+            
+            for (int i = 0; i < mapGridCellArray[xCoord][yCoord].foodIndicesList.Count; i++) {
+                // FOOD:
+                Vector2 foodPos = new Vector2(foodArray[mapGridCellArray[xCoord][yCoord].foodIndicesList[i]].transform.localPosition.x, foodArray[mapGridCellArray[xCoord][yCoord].foodIndicesList[i]].transform.localPosition.y);
+                float squaredDistFood = (foodPos - agentPos).sqrMagnitude;
+                if (squaredDistFood <= nearestFoodSquaredDistance) { // if now the closest so far, update index and dist:
+                    if (a != mapGridCellArray[xCoord][yCoord].foodIndicesList[i]) {  // make sure it doesn't consider itself:
+                        closestFoodIndex = mapGridCellArray[xCoord][yCoord].foodIndicesList[i];
+                        nearestFoodSquaredDistance = squaredDistFood;
+                    }
+                }
+            }
 
-            //Debug.Log("closestNeighborIndex: " + closestNeighborIndex.ToString());
-            agentsArray[a].testModule.enemyTestModule = agentsArray[closestNeighborIndex].testModule;
+                //Debug.Log("closestNeighborIndex: " + closestNeighborIndex.ToString());
+            agentsArray[a].testModule.friendTestModule = agentsArray[closestFriendIndex].testModule;
+            agentsArray[a].testModule.nearestFoodModule = foodArray[closestFoodIndex];
 
             // Compare to Player also:
-            
-            float squaredPlayerDist = (playerPos - agentPos).sqrMagnitude;
-            if (squaredPlayerDist <= nearestSquaredDistance) {
-                agentsArray[a].testModule.enemyTestModule = playerAgent.testModule;
+            float squaredPlayerDistFriend = (playerPos - agentPos).sqrMagnitude;
+            if (squaredPlayerDistFriend <= nearestFriendSquaredDistance) {
+                agentsArray[a].testModule.friendTestModule = playerAgent.testModule;
             }
         }
 
@@ -375,26 +438,50 @@ public class SimulationManager : MonoBehaviour {
         int xIndex = Mathf.FloorToInt((playerPos.x + mapSize / 2f) / mapSize * (float)agentGridCellResolution);
         int yIndex = Mathf.FloorToInt((playerPos.y + mapSize / 2f) / mapSize * (float)agentGridCellResolution);
 
-        int closestIndex = 0;  // default to 0?
-        float nearestDist = float.PositiveInfinity;
+        int closestIndexFriend = 0;  // default to 0?
+        float nearestDistFriend = float.PositiveInfinity;
+        int closestIndexFood = 0;  // default to 0?
+        float nearestDistFood = float.PositiveInfinity;
         // Only checking its own grid cell!!! Will need to expand to adjacent cells as well!
-        for (int i = 0; i < mapGridCellArray[xIndex][yIndex].agentIndicesList.Count; i++) {
-            Vector2 neighborPos = new Vector2(agentsArray[mapGridCellArray[xIndex][yIndex].agentIndicesList[i]].transform.localPosition.x, agentsArray[mapGridCellArray[xIndex][yIndex].agentIndicesList[i]].transform.localPosition.y);
-            float squaredDist = (neighborPos - playerPos).sqrMagnitude;
-            if (squaredDist <= nearestDist) { // if now the closest so far, update index and dist:if (a != mapGridCellArray[xCoord][yCoord].agentIndicesList[i]) {  // make sure it doesn't consider itself:
-                closestIndex = mapGridCellArray[xIndex][yIndex].agentIndicesList[i];
-                nearestDist = squaredDist;                
+        for (int i = 0; i < mapGridCellArray[xIndex][yIndex].friendIndicesList.Count; i++) {
+            // FRIENDS::::
+            Vector2 neighborPosFriend = new Vector2(agentsArray[mapGridCellArray[xIndex][yIndex].friendIndicesList[i]].transform.localPosition.x, agentsArray[mapGridCellArray[xIndex][yIndex].friendIndicesList[i]].transform.localPosition.y);
+            float squaredDistFriend = (neighborPosFriend - playerPos).sqrMagnitude;
+            if (squaredDistFriend <= nearestDistFriend) { // if now the closest so far, update index and dist:if (a != mapGridCellArray[xCoord][yCoord].agentIndicesList[i]) {  // make sure it doesn't consider itself:
+                closestIndexFriend = mapGridCellArray[xIndex][yIndex].friendIndicesList[i];
+                nearestDistFriend = squaredDistFriend;                
             }
         }
-        //Debug.Log("closestNeighborIndex: " + closestNeighborIndex.ToString());
-        playerAgent.testModule.enemyTestModule = agentsArray[closestIndex].testModule;
+        for (int i = 0; i < mapGridCellArray[xIndex][yIndex].foodIndicesList.Count; i++) {
+            // FOOD::::
+            Vector2 neighborPosFood = new Vector2(foodArray[mapGridCellArray[xIndex][yIndex].foodIndicesList[i]].transform.localPosition.x, foodArray[mapGridCellArray[xIndex][yIndex].foodIndicesList[i]].transform.localPosition.y);
+            float squaredDistFood = (neighborPosFood - playerPos).sqrMagnitude;
+            if (squaredDistFood <= nearestDistFriend) { // if now the closest so far, update index and dist:if (a != mapGridCellArray[xCoord][yCoord].agentIndicesList[i]) {  // make sure it doesn't consider itself:
+                closestIndexFood = mapGridCellArray[xIndex][yIndex].foodIndicesList[i];
+                nearestDistFood = squaredDistFood;
+            }
+        }
+            //Debug.Log("closestNeighborIndex: " + closestNeighborIndex.ToString());
+        playerAgent.testModule.friendTestModule = agentsArray[closestIndexFriend].testModule;
+        playerAgent.testModule.nearestFoodModule = foodArray[closestIndexFood];
 
     }
     public void TickSimulation() {
+        float startTime = Time.realtimeSinceStartup;
         HookUpModules(); // Sets nearest-neighbors etc.
+        float endTime = Time.realtimeSinceStartup;
+        if (endTime - startTime > 0.1f) {
+            Debug.Log("HookUpModules " + (endTime - startTime).ToString() + "s");
+        }
+
+        float stime = Time.realtimeSinceStartup;
         playerAgent.Tick();
         for (int i = 0; i < agentsArray.Length; i++) {
             agentsArray[i].Tick();
+        }
+        float etime = Time.realtimeSinceStartup;
+        if (etime - stime > 0.1f) {
+            Debug.Log("AgentTick() " + (etime - stime).ToString() + "s");
         }
 
         //Vector3 camPos = new Vector3(playerAgent.transform.position.x, playerAgent.transform.position.y, -10f);
@@ -437,6 +524,8 @@ public class SimulationManager : MonoBehaviour {
         // Can do one genome & 1 dataSample per frame
         if (curTestingAgent < genomePoolArray.Length) {
             if (curTestingSample < currentDataBatch.Count) {
+                // Reset Brain State!!!
+                //dummyAgent.ResetBrainState();
                 CopyDataSampleToModule(currentDataBatch[curTestingSample], dummyAgent.testModule);  // load training data into module (and by extension, brain)
                 // Run Brain ( few ticks? )
                 for (int t = 0; t < 3; t++) {
@@ -457,7 +546,7 @@ public class SimulationManager : MonoBehaviour {
 
                 curTestingAgent++;
                 if (curTestingAgent < genomePoolArray.Length) { // this can clearly be done better
-                    dummyAgent.InitializeAgentFromGenome(genomePoolArray[curTestingAgent], dummyStartGenome);
+                    dummyAgent.InitializeAgentFromGenome(genomePoolArray[curTestingAgent], dummyStartGenome);                    
                 }
             }
         }
@@ -479,7 +568,7 @@ public class SimulationManager : MonoBehaviour {
 
     }
     private void NextGeneration() {
-        string fitTxt = "Fitness Scores:\n";
+        string fitTxt = "Gen " + curGen.ToString() + " Fitness Scores:\n";
         float totalFitness = 0f;
         float minScore = float.PositiveInfinity;
         float maxScore = float.NegativeInfinity;
@@ -489,8 +578,10 @@ public class SimulationManager : MonoBehaviour {
             minScore = Mathf.Min(minScore, rawFitnessScoresArray[f]);
             maxScore = Mathf.Max(maxScore, rawFitnessScoresArray[f]);
         }
-        Debug.Log(fitTxt);
+        
         avgFitnessLastGen = totalFitness / (float)populationSize;
+        fitTxt += "\nAvgFitnessLastGen: " + avgFitnessLastGen.ToString() + ", blank: " + lastGenBlankAgentFitness.ToString();
+        Debug.Log(fitTxt);
         lastGenBlankAgentFitness = rawFitnessScoreBlankAgent;
         bestFitnessScore = minScore;
 
@@ -564,6 +655,7 @@ public class SimulationManager : MonoBehaviour {
         //mutationSettings.mutationStepSize *= 0.995f;
 
         UpdateAgentBrains();
+        //HookUpModules();
 
         curGen++;
     }
@@ -571,7 +663,7 @@ public class SimulationManager : MonoBehaviour {
     private void UpdateAgentBrains() {
         // UPDATE BRAINS TEST!!!!!
         for (int a = 0; a < agentsArray.Length; a++) {
-            agentsArray[a].ReplaceBrain(genomePoolArray[a % 4]);
+            agentsArray[a].ReplaceBrain(genomePoolArray[a % 32]);
         }
     }
 
@@ -592,7 +684,7 @@ public class SimulationManager : MonoBehaviour {
                 //Debug.Log("Selected: " + selectedIndex.ToString() + "! (" + i.ToString() + ") fit= " + currentValue.ToString() + "--" + (currentValue + (1f - rankedFitnessList[i])).ToString() + " / " + totalFitness.ToString() + ", lotto# " + lotteryValue.ToString() + ", fit= " + (1f - rankedFitnessList[i]).ToString());
             }
             currentValue += rankedFitnessList[i]; // add this agent's fitness to current value for next check            
-        }
+        }        
 
         return selectedIndex;
     }
