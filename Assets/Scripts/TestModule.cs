@@ -204,6 +204,11 @@ public class TestModule {
         //health = maxHealth;
         //prevHealth = health;
 
+        bias[0] = 1f;
+        foodAmountR[0] = 0f;
+        foodAmountG[0] = 0f;
+        foodAmountB[0] = 0f;
+
         parentID = genome.parentID;
         inno = genome.inno;
         //isVisible = agent.isVisible;
@@ -512,8 +517,8 @@ public class TestModule {
         Vector2 friendDir = Vector2.zero;
         Vector2 friendVel = Vector2.zero;
         if(friendTestModule != null) {
-            friendPos = new Vector2(friendTestModule.ownRigidBody2D.transform.localPosition.x, friendTestModule.ownRigidBody2D.transform.localPosition.y);
-            friendDir = new Vector2(friendPos.x - ownPos.x, friendPos.y - ownPos.y).normalized;
+            friendPos = new Vector2(friendTestModule.ownRigidBody2D.transform.localPosition.x - ownPos.x, friendTestModule.ownRigidBody2D.transform.localPosition.y - ownPos.y);
+            friendDir = friendPos.normalized;
             friendVel = new Vector2(friendTestModule.ownRigidBody2D.velocity.x, friendTestModule.ownRigidBody2D.velocity.y);
         }
 
@@ -521,8 +526,8 @@ public class TestModule {
         Vector2 enemyDir = Vector2.zero;
         Vector2 enemyVel = Vector2.zero;
         if (enemyTestModule != null) {
-            enemyPos = new Vector2(enemyTestModule.ownRigidBody2D.transform.localPosition.x, enemyTestModule.ownRigidBody2D.transform.localPosition.y);
-            enemyDir = new Vector2(enemyPos.x - ownPos.x, enemyPos.y - ownPos.y).normalized;
+            enemyPos = new Vector2(enemyTestModule.ownRigidBody2D.transform.localPosition.x - ownPos.x, enemyTestModule.ownRigidBody2D.transform.localPosition.y - ownPos.y);
+            enemyDir = enemyPos.normalized;
             enemyVel = new Vector2(enemyTestModule.ownRigidBody2D.velocity.x, enemyTestModule.ownRigidBody2D.velocity.y);
         }
 
@@ -534,15 +539,15 @@ public class TestModule {
         foodTypeG[0] = typeG;
         foodTypeB[0] = typeB;
 
-        friendPosX[0] = 0f; // (friendPos.x - ownPos.x) / 20f;
-        friendPosY[0] = 0f; // (friendPos.y - ownPos.y) / 20f;
-        friendVelX[0] = 0f; // (friendVel.x - ownVel.x) / 15f;
-        friendVelY[0] = 0f; // (friendVel.y - ownVel.y) / 15f;
+        friendPosX[0] = friendPos.x / 20f;
+        friendPosY[0] = friendPos.y / 20f;
+        friendVelX[0] = (friendVel.x - ownVel.x) / 15f;
+        friendVelY[0] = (friendVel.y - ownVel.y) / 15f;
         friendDirX[0] = friendDir.x;
         friendDirY[0] = friendDir.y;
 
-        enemyPosX[0] = (enemyPos.x - ownPos.x) / 20f;
-        enemyPosY[0] = (enemyPos.y - ownPos.y) / 20f;        
+        enemyPosX[0] = enemyPos.x / 20f;
+        enemyPosY[0] = enemyPos.y / 20f;        
         enemyVelX[0] = (enemyVel.x - ownVel.x) / 15f;
         enemyVelY[0] = (enemyVel.y - ownVel.y) / 15f;
         enemyDirX[0] = enemyDir.x;
@@ -558,9 +563,7 @@ public class TestModule {
         contactForceY[0] = 0f;
         hitPoints[0] = 1f;
         stamina[0] = 1f;
-        foodAmountR[0] = 0f;
-        foodAmountG[0] = 0f;
-        foodAmountB[0] = 0f;
+        
 
         // TOP
         float raycastMaxLength = 15f;

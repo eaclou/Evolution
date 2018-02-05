@@ -177,7 +177,7 @@ public class Agent : MonoBehaviour {
     public void ResetBrainState() {
         brain.ResetBrainState();
     }
-
+    
     public void TickBrain() {
         float startTime = Time.realtimeSinceStartup;
         brain.BrainMasterFunction();

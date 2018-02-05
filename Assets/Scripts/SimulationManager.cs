@@ -21,15 +21,15 @@ public class SimulationManager : MonoBehaviour {
     public AgentGenome[] genomePoolArray;
 
     public FoodModule[] foodArray;
-    private int numFood = 8;
+    private int numFood = 32;
 
     public bool recording = false;
     public List<DataSample> dataSamplesList;  // master pool
     public List<DataSample> currentDataBatch;
     private int maxSavedDataSamples = 256;  // dataSamples above this number replace existing samples randomly
-    private int dataBatchSize = 96;
+    private int dataBatchSize = 48;
     private int minDataSamplesForTraining = 4;  // won't start training brains until DataList has at least this many samples
-    private int periodicSamplingRate = 64;  // saves a sample of player's data every (this #) frames
+    private int periodicSamplingRate = 32;  // saves a sample of player's data every (this #) frames
     public MutationSettings mutationSettings;
     public float[] rawFitnessScoresArray;
     public bool trainingRequirementsMet = false;  // minimum reqs met
@@ -49,7 +49,7 @@ public class SimulationManager : MonoBehaviour {
     public float rawFitnessScoreBlankAgent = 0f;
     public float lastGenBlankAgentFitness = 0f;
 
-    private int agentGridCellResolution = 4;  // How much to subdivide the map in order to detect nearest-neighbors more efficiently --> to not be O(n^2)
+    private int agentGridCellResolution = 1;  // How much to subdivide the map in order to detect nearest-neighbors more efficiently --> to not be O(n^2)
     public MapGridCell[][] mapGridCellArray;
 
     // need to be able to update Agent's Brain on the fly?  --- but needs to access the Module to set up inputs/outputs???
@@ -72,7 +72,13 @@ public class SimulationManager : MonoBehaviour {
             }
         }
     }
+    public void ReviveFood(int index) {
+        foodArray[index].Respawn();
+        Vector3 startPos = new Vector3(UnityEngine.Random.Range(-36f, 36f), UnityEngine.Random.Range(-36f, 36f), 0f);
+        foodArray[index].transform.localPosition = startPos;
+    }
     public void PopulateGridCells() {
+        
         // Inefficient!!!
         for (int x = 0; x < agentGridCellResolution; x++) {
             for (int y = 0; y < agentGridCellResolution; y++) {                
@@ -90,7 +96,7 @@ public class SimulationManager : MonoBehaviour {
             float xPos = foodArray[f].transform.localPosition.x;
             float yPos = foodArray[f].transform.localPosition.y;
             int xCoord = Mathf.FloorToInt((xPos + mapSize / 2f) / mapSize * (float)agentGridCellResolution);
-            int yCoord = Mathf.FloorToInt((yPos + mapSize / 2f) / mapSize * (float)agentGridCellResolution);            
+            int yCoord = Mathf.FloorToInt((yPos + mapSize / 2f) / mapSize * (float)agentGridCellResolution);           
             mapGridCellArray[xCoord][yCoord].foodIndicesList.Add(f);
         }
 
@@ -103,6 +109,14 @@ public class SimulationManager : MonoBehaviour {
 
             //Debug.Log("PopulateGrid(" + a.ToString() + ") [" + xCoord.ToString() + "," + yCoord.ToString() + "]");
             mapGridCellArray[xCoord][yCoord].friendIndicesList.Add(a);
+        }
+
+        // CHECK FOR DEAD FOOD!!! :::::::
+        for (int f = 0; f < foodArray.Length; f++) {
+            if (foodArray[f].isDepleted) {
+                //Debug.Log("Food " + f.ToString() + " is Depleted!");sddd
+                ReviveFood(f);
+            }
         }
     }
     public void ToggleRecording() {
@@ -366,14 +380,16 @@ public class SimulationManager : MonoBehaviour {
             GameObject foodGO = Instantiate(Resources.Load("FoodPrefab")) as GameObject;
             foodGO.name = "Food" + i.ToString();
             FoodModule newFood = foodGO.AddComponent<FoodModule>();
+            foodArray[i] = newFood; // Add to stored list of current Agents
+            ReviveFood(i);
             //int numColumns = Mathf.RoundToInt(Mathf.Sqrt(populationSize));
             //int row = Mathf.FloorToInt(i / numColumns);
             //int col = i % numColumns;
             //StartPositionGenome agentStartPosGenome = new StartPositionGenome(new Vector3(1.25f * (col - numColumns / 2), -2.0f - (1.25f * row), 0f), Quaternion.identity);
 
-            Vector3 startPos = new Vector3(UnityEngine.Random.Range(-40f, 40f), UnityEngine.Random.Range(-40f, 40f), 0f);
-            foodGO.transform.localPosition = startPos;
-            foodArray[i] = newFood; // Add to stored list of current Agents
+            //Vector3 startPos = new Vector3(UnityEngine.Random.Range(-40f, 40f), UnityEngine.Random.Range(-40f, 40f), 0f);
+            //foodGO.transform.localPosition = startPos;
+            
             //newAgent.InitializeAgentFromGenome(genomePoolArray[i], agentStartPosGenome);
         }
     }
