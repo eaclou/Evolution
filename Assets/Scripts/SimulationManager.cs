@@ -12,6 +12,10 @@ public class SimulationManager : MonoBehaviour {
     public Button buttonClearTrainingData;
 
     public Camera mainCam;
+    private int numAgents = 48;
+    private int supervisedGenomePoolSize = 64;  // Brain evaluated tested on DataSamples only
+    private int persistentGenomePoolSize = 48;  // spawned as Agents that live until they are killed naturally, tested on Fitness Function
+    private int transientGenomePoolSize = 48;  // spawned as Agents (in the background layer) that are short-lived and tested on Fitness Function + DataSamples
     private int populationSize = 64;
     public Material playerMat;
     public Agent playerAgent;
@@ -22,6 +26,8 @@ public class SimulationManager : MonoBehaviour {
 
     public FoodModule[] foodArray;
     private int numFood = 32;
+    public PredatorModule[] predatorArray;
+    private int numPredators = 8;
 
     public bool recording = false;
     public List<DataSample> dataSamplesList;  // master pool
@@ -32,7 +38,7 @@ public class SimulationManager : MonoBehaviour {
     private int periodicSamplingRate = 32;  // saves a sample of player's data every (this #) frames
     public MutationSettings mutationSettings;
     public float[] rawFitnessScoresArray;
-    public bool trainingRequirementsMet = false;  // minimum reqs met
+    public bool trainingRequirementsMet = true;  // minimum reqs met
     public bool isTraining = false;  // player control
     private float lastHorizontalInput = 0f;
     private float lastVerticalInput = 0f;
@@ -84,7 +90,7 @@ public class SimulationManager : MonoBehaviour {
             for (int y = 0; y < agentGridCellResolution; y++) {                
                 mapGridCellArray[x][y].friendIndicesList.Clear();
                 mapGridCellArray[x][y].foodIndicesList.Clear();
-                mapGridCellArray[x][y].foodIndicesList.Clear();
+                mapGridCellArray[x][y].predatorIndicesList.Clear();
             }
         }
 
@@ -109,6 +115,15 @@ public class SimulationManager : MonoBehaviour {
 
             //Debug.Log("PopulateGrid(" + a.ToString() + ") [" + xCoord.ToString() + "," + yCoord.ToString() + "]");
             mapGridCellArray[xCoord][yCoord].friendIndicesList.Add(a);
+        }
+
+        // PREDATORS !!! :::::::
+        for (int p = 0; p < predatorArray.Length; p++) {
+            float xPos = predatorArray[p].transform.localPosition.x;
+            float yPos = predatorArray[p].transform.localPosition.y;
+            int xCoord = Mathf.FloorToInt((xPos + mapSize / 2f) / mapSize * (float)agentGridCellResolution);
+            int yCoord = Mathf.FloorToInt((yPos + mapSize / 2f) / mapSize * (float)agentGridCellResolution);
+            mapGridCellArray[xCoord][yCoord].predatorIndicesList.Add(p);
         }
 
         // CHECK FOR DEAD FOOD!!! :::::::
@@ -183,12 +198,12 @@ public class SimulationManager : MonoBehaviour {
         }
     }
     public void InitializeTrainingApparatus() {
-        mutationSettings = new MutationSettings(0.05f, 1f, 0.025f, 0.002f);
+        mutationSettings = new MutationSettings(0.0075f, 0.75f, 0.1f, 0.001f);
         GameObject dummyAgentGO = new GameObject("DummyAgent");
         dummyAgent = dummyAgentGO.AddComponent<Agent>();
         dummyStartGenome = new StartPositionGenome(Vector3.zero, Quaternion.identity);
 
-        dataSamplesList = new List<DataSample>();
+        dataSamplesList = FakeDataGenerator.GenerateDataAvoidWalls();// new List<DataSample>();
 
         //CreateFakeData();
 
@@ -226,14 +241,13 @@ public class SimulationManager : MonoBehaviour {
         // Populate dataBatch:
         for(int i = 0; i < numSamplesInBatch; i++) {
             // OLD: RANDOM SAMPLING:
-            //int randIndex = UnityEngine.Random.Range(0, dataSamplesList.Count - 1);
-            //DataSample sample = dataSamplesList[randIndex].GetCopy();
-            //currentDataBatch.Add(sample);
+            int randIndex = UnityEngine.Random.Range(0, dataSamplesList.Count - 1);
+            DataSample sample = dataSamplesList[randIndex].GetCopy();
+            currentDataBatch.Add(sample);
 
         // TEST: Same As dataPool:
-            //int randIndex = UnityEngine.Random.Range(0, dataSamplesList.Count - 1);
-            DataSample sample = dataSamplesList[i].GetCopy();
-            currentDataBatch.Add(sample);
+            //DataSample sample = dataSamplesList[i].GetCopy();
+            //currentDataBatch.Add(sample);
         }
     }
     private void CopyDataSampleToModule(DataSample sample, TestModule module) {
@@ -330,6 +344,7 @@ public class SimulationManager : MonoBehaviour {
         //agentGO.GetComponent<CircleCollider2D>().enabled = false;
         playerAgent = playerAgentGO.AddComponent<Agent>();
         playerAgent.humanControlled = true;
+        playerAgent.humanControlLerp = 1f;
         playerAgent.speed *= 10f;
         //agentScript.isVisible = visible;
         StartPositionGenome playerStartPosGenome = new StartPositionGenome(Vector3.zero, Quaternion.identity);
@@ -342,6 +357,8 @@ public class SimulationManager : MonoBehaviour {
         for (int i = 0; i < agentsArray.Length; i++) {
             GameObject agentGO = Instantiate(Resources.Load(assetURL)) as GameObject;
             agentGO.name = "Agent" + i.ToString();
+            float randScale = UnityEngine.Random.Range(0.8f, 1.25f);
+            agentGO.transform.localScale = new Vector3(randScale, randScale, randScale);
             Agent newAgent = agentGO.AddComponent<Agent>();
             int numColumns = Mathf.RoundToInt(Mathf.Sqrt(populationSize));
             int row = Mathf.FloorToInt(i / numColumns);
@@ -368,18 +385,33 @@ public class SimulationManager : MonoBehaviour {
         // FOOODDDD!!!!
         foodArray = new FoodModule[numFood];
         SpawnFood();
+        predatorArray = new PredatorModule[numPredators];
+        SpawnPredators();
 
         InitializeGridCells();
         HookUpModules();
         InitializeTrainingApparatus();
     }
 
+    private void SpawnPredators() {
+        Debug.Log("SpawnPredators!");
+        for (int i = 0; i < predatorArray.Length; i++) {
+            GameObject predatorGO = Instantiate(Resources.Load("PredatorPrefab")) as GameObject;
+            predatorGO.name = "Predator" + i.ToString();
+            PredatorModule newPredator = predatorGO.GetComponent<PredatorModule>();
+            predatorArray[i] = newPredator; // Add to stored list of current Agents
+            //ReviveFood(i);
+            //foodArray[index].Respawn();
+            Vector3 startPos = new Vector3(UnityEngine.Random.Range(-36f, 36f), UnityEngine.Random.Range(-36f, 36f), 0f);
+            predatorArray[i].transform.localPosition = startPos;
+        }
+    }
     private void SpawnFood() {
         Debug.Log("SpawnFood!");
         for (int i = 0; i < foodArray.Length; i++) {
             GameObject foodGO = Instantiate(Resources.Load("FoodPrefab")) as GameObject;
             foodGO.name = "Food" + i.ToString();
-            FoodModule newFood = foodGO.AddComponent<FoodModule>();
+            FoodModule newFood = foodGO.GetComponent<FoodModule>();
             foodArray[i] = newFood; // Add to stored list of current Agents
             ReviveFood(i);
             //int numColumns = Mathf.RoundToInt(Mathf.Sqrt(populationSize));
@@ -412,8 +444,10 @@ public class SimulationManager : MonoBehaviour {
             float nearestFriendSquaredDistance = float.PositiveInfinity;
             int closestFoodIndex = 0; // default to 0???
             float nearestFoodSquaredDistance = float.PositiveInfinity;
+            int closestPredIndex = 0; // default to 0???
+            float nearestPredSquaredDistance = float.PositiveInfinity;
             // Only checking its own grid cell!!! Will need to expand to adjacent cells as well!
-            for(int i = 0; i < mapGridCellArray[xCoord][yCoord].friendIndicesList.Count; i++) {
+            for (int i = 0; i < mapGridCellArray[xCoord][yCoord].friendIndicesList.Count; i++) {
                 // FRIEND:
                 Vector2 neighborPos = new Vector2(agentsArray[mapGridCellArray[xCoord][yCoord].friendIndicesList[i]].transform.localPosition.x, agentsArray[mapGridCellArray[xCoord][yCoord].friendIndicesList[i]].transform.localPosition.y);
                 float squaredDistFriend = (neighborPos - agentPos).sqrMagnitude;
@@ -438,12 +472,29 @@ public class SimulationManager : MonoBehaviour {
                 }
             }
 
-                //Debug.Log("closestNeighborIndex: " + closestNeighborIndex.ToString());
+            for (int i = 0; i < mapGridCellArray[xCoord][yCoord].predatorIndicesList.Count; i++) {
+                // PREDATORS:::::::
+                Vector2 predatorPos = new Vector2(predatorArray[mapGridCellArray[xCoord][yCoord].predatorIndicesList[i]].transform.localPosition.x, predatorArray[mapGridCellArray[xCoord][yCoord].predatorIndicesList[i]].transform.localPosition.y);
+                float squaredDistPred = (predatorPos - agentPos).sqrMagnitude;
+                if (squaredDistPred <= nearestPredSquaredDistance) { // if now the closest so far, update index and dist:
+                    if (a != mapGridCellArray[xCoord][yCoord].predatorIndicesList[i]) {  // make sure it doesn't consider itself:
+                        closestPredIndex = mapGridCellArray[xCoord][yCoord].predatorIndicesList[i];
+                        nearestPredSquaredDistance = squaredDistPred;
+                    }
+                }
+            }
+
+            //Debug.Log("closestNeighborIndex: " + closestNeighborIndex.ToString());
             agentsArray[a].testModule.friendTestModule = agentsArray[closestFriendIndex].testModule;
             agentsArray[a].testModule.nearestFoodModule = foodArray[closestFoodIndex];
+            agentsArray[a].testModule.nearestPredatorModule = predatorArray[closestPredIndex];
 
             // Compare to Player also:
             float squaredPlayerDistFriend = (playerPos - agentPos).sqrMagnitude;
+            // HumanControlLerp:
+            float maxControlSqrDist = 400f;
+            float lerpVal = (maxControlSqrDist - Mathf.Clamp(squaredPlayerDistFriend, 0f, maxControlSqrDist)) / maxControlSqrDist;
+            agentsArray[a].humanControlLerp = lerpVal * 0.6f;
             if (squaredPlayerDistFriend <= nearestFriendSquaredDistance) {
                 agentsArray[a].testModule.friendTestModule = playerAgent.testModule;
             }
@@ -458,6 +509,8 @@ public class SimulationManager : MonoBehaviour {
         float nearestDistFriend = float.PositiveInfinity;
         int closestIndexFood = 0;  // default to 0?
         float nearestDistFood = float.PositiveInfinity;
+        int closestIndexPred = 0;  // default to 0?
+        float nearestDistPred = float.PositiveInfinity;
         // Only checking its own grid cell!!! Will need to expand to adjacent cells as well!
         for (int i = 0; i < mapGridCellArray[xIndex][yIndex].friendIndicesList.Count; i++) {
             // FRIENDS::::
@@ -472,14 +525,24 @@ public class SimulationManager : MonoBehaviour {
             // FOOD::::
             Vector2 neighborPosFood = new Vector2(foodArray[mapGridCellArray[xIndex][yIndex].foodIndicesList[i]].transform.localPosition.x, foodArray[mapGridCellArray[xIndex][yIndex].foodIndicesList[i]].transform.localPosition.y);
             float squaredDistFood = (neighborPosFood - playerPos).sqrMagnitude;
-            if (squaredDistFood <= nearestDistFriend) { // if now the closest so far, update index and dist:if (a != mapGridCellArray[xCoord][yCoord].agentIndicesList[i]) {  // make sure it doesn't consider itself:
+            if (squaredDistFood <= nearestDistFood) { // if now the closest so far, update index and dist:if (a != mapGridCellArray[xCoord][yCoord].agentIndicesList[i]) {  // make sure it doesn't consider itself:
                 closestIndexFood = mapGridCellArray[xIndex][yIndex].foodIndicesList[i];
                 nearestDistFood = squaredDistFood;
             }
         }
-            //Debug.Log("closestNeighborIndex: " + closestNeighborIndex.ToString());
+        for (int i = 0; i < mapGridCellArray[xIndex][yIndex].predatorIndicesList.Count; i++) {
+            // PREDATORS::::
+            Vector2 neighborPosPred = new Vector2(predatorArray[mapGridCellArray[xIndex][yIndex].predatorIndicesList[i]].transform.localPosition.x, predatorArray[mapGridCellArray[xIndex][yIndex].predatorIndicesList[i]].transform.localPosition.y);
+            float squaredDistPred = (neighborPosPred - playerPos).sqrMagnitude;
+            if (squaredDistPred <= nearestDistPred) { // if now the closest so far, update index and dist:if (a != mapGridCellArray[xCoord][yCoord].agentIndicesList[i]) {  // make sure it doesn't consider itself:
+                closestIndexPred = mapGridCellArray[xIndex][yIndex].predatorIndicesList[i];
+                nearestDistPred = squaredDistPred;
+            }
+        }
+        //Debug.Log("closestNeighborIndex: " + closestNeighborIndex.ToString());
         playerAgent.testModule.friendTestModule = agentsArray[closestIndexFriend].testModule;
         playerAgent.testModule.nearestFoodModule = foodArray[closestIndexFood];
+        playerAgent.testModule.nearestPredatorModule = predatorArray[closestIndexPred];
 
     }
     public void TickSimulation() {
@@ -500,8 +563,8 @@ public class SimulationManager : MonoBehaviour {
             Debug.Log("AgentTick() " + (etime - stime).ToString() + "s");
         }
 
-        //Vector3 camPos = new Vector3(playerAgent.transform.position.x, playerAgent.transform.position.y, -10f);
-        //mainCam.transform.position = Vector3.Lerp(mainCam.transform.position, camPos, 0.045f);
+        Vector3 camPos = new Vector3(playerAgent.transform.position.x, playerAgent.transform.position.y, -10f);
+        mainCam.transform.position = Vector3.Lerp(mainCam.transform.position, camPos, 0.045f);
 
         bool recordData = false;
         float curHorizontalInput = 0f;

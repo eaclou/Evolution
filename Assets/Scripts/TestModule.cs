@@ -98,7 +98,7 @@ public class TestModule {
     public Rigidbody2D ownRigidBody2D;
     public FoodModule nearestFoodModule;
     public TestModule friendTestModule;
-    public TestModule enemyTestModule;
+    public PredatorModule nearestPredatorModule;
 
     //public HealthModuleComponent component;
 
@@ -208,6 +208,8 @@ public class TestModule {
         foodAmountR[0] = 0f;
         foodAmountG[0] = 0f;
         foodAmountB[0] = 0f;
+        hitPoints[0] = 1f;
+        stamina[0] = 1f;
 
         parentID = genome.parentID;
         inno = genome.inno;
@@ -525,10 +527,10 @@ public class TestModule {
         Vector2 enemyPos = Vector2.zero;
         Vector2 enemyDir = Vector2.zero;
         Vector2 enemyVel = Vector2.zero;
-        if (enemyTestModule != null) {
-            enemyPos = new Vector2(enemyTestModule.ownRigidBody2D.transform.localPosition.x - ownPos.x, enemyTestModule.ownRigidBody2D.transform.localPosition.y - ownPos.y);
+        if (nearestPredatorModule != null) {
+            enemyPos = new Vector2(nearestPredatorModule.rigidBody.transform.localPosition.x - ownPos.x, nearestPredatorModule.rigidBody.transform.localPosition.y - ownPos.y);
             enemyDir = enemyPos.normalized;
-            enemyVel = new Vector2(enemyTestModule.ownRigidBody2D.velocity.x, enemyTestModule.ownRigidBody2D.velocity.y);
+            enemyVel = new Vector2(nearestPredatorModule.rigidBody.velocity.x, nearestPredatorModule.rigidBody.velocity.y);
         }
 
         foodPosX[0] = foodPos.x / 20f;
@@ -561,41 +563,48 @@ public class TestModule {
         isContact[0] = 0f;
         contactForceX[0] = 0f;
         contactForceY[0] = 0f;
-        hitPoints[0] = 1f;
-        stamina[0] = 1f;
-        
+        hitPoints[0] = Mathf.Max(hitPoints[0], 0f);
+        //stamina[0] = 1f;
+
+        foodAmountR[0] = Mathf.Clamp(foodAmountR[0] - 0.01f, 0f, 1f);
+        foodAmountG[0] = Mathf.Clamp(foodAmountG[0] - 0.01f, 0f, 1f);
+        foodAmountB[0] = Mathf.Clamp(foodAmountB[0] - 0.01f, 0f, 1f);
+
+        int rayLayer = LayerMask.GetMask("EnvironmentCollision");
+        //Debug.Log(LayerMask.GetMask("EnvironmentCollision"));
+        //Debug.Log(mask.ToString());
 
         // TOP
-        float raycastMaxLength = 15f;
-        RaycastHit2D hitTop = Physics2D.Raycast(ownPos, Vector2.up, raycastMaxLength);  // UP
+        float raycastMaxLength = 20f;
+        RaycastHit2D hitTop = Physics2D.Raycast(ownPos, Vector2.up, raycastMaxLength, rayLayer);  // UP
         float distance = raycastMaxLength;
         if (hitTop.collider != null && hitTop.collider.tag == "HazardCollider") {
             distance = (hitTop.point - ownPos).magnitude;            
         }
         distUp[0] = (raycastMaxLength - distance) / raycastMaxLength;  // Mathf.Abs(40f - yPos) / 40f;        
         // TOP RIGHT
-        RaycastHit2D hitTopRight = Physics2D.Raycast(ownPos, new Vector2(1f,1f), raycastMaxLength);  //  + / +
+        RaycastHit2D hitTopRight = Physics2D.Raycast(ownPos, new Vector2(1f,1f), raycastMaxLength, rayLayer);  //  + / +
         distance = raycastMaxLength;
         if (hitTopRight.collider != null && hitTopRight.collider.tag == "HazardCollider") {
             distance = (hitTopRight.point - ownPos).magnitude;
         }
         distTopRight[0] = (raycastMaxLength - distance) / raycastMaxLength;
         // RIGHT
-        RaycastHit2D hitRight = Physics2D.Raycast(ownPos, new Vector2(1f, 0f), raycastMaxLength);  //  + / +
+        RaycastHit2D hitRight = Physics2D.Raycast(ownPos, new Vector2(1f, 0f), raycastMaxLength, rayLayer);  //  + / +
         distance = raycastMaxLength;
         if (hitRight.collider != null && hitRight.collider.tag == "HazardCollider") {
             distance = (hitRight.point - ownPos).magnitude;
         }
         distRight[0] = (raycastMaxLength - distance) / raycastMaxLength;
         // BOTTOM RIGHT
-        RaycastHit2D hitBottomRight = Physics2D.Raycast(ownPos, new Vector2(1f, -1f), raycastMaxLength);  //  + / +
+        RaycastHit2D hitBottomRight = Physics2D.Raycast(ownPos, new Vector2(1f, -1f), raycastMaxLength, rayLayer);  //  + / +
         distance = raycastMaxLength;
         if (hitBottomRight.collider != null && hitBottomRight.collider.tag == "HazardCollider") {
             distance = (hitBottomRight.point - ownPos).magnitude;
         }
         distBottomRight[0] = (raycastMaxLength - distance) / raycastMaxLength;
         // BOTTOM
-        RaycastHit2D hitBottom = Physics2D.Raycast(ownPos, new Vector2(0f, -1f), raycastMaxLength);  //  + / +
+        RaycastHit2D hitBottom = Physics2D.Raycast(ownPos, new Vector2(0f, -1f), raycastMaxLength, rayLayer);  //  + / +
         distance = raycastMaxLength;
         if (hitBottom.collider != null && hitBottom.collider.tag == "HazardCollider") {
             distance = (hitBottom.point - ownPos).magnitude;
@@ -603,21 +612,21 @@ public class TestModule {
         }
         distDown[0] = (raycastMaxLength - distance) / raycastMaxLength;
         // BOTTOM LEFT
-        RaycastHit2D hitBottomLeft = Physics2D.Raycast(ownPos, new Vector2(-1f, -1f), raycastMaxLength);  //  + / +
+        RaycastHit2D hitBottomLeft = Physics2D.Raycast(ownPos, new Vector2(-1f, -1f), raycastMaxLength, rayLayer);  //  + / +
         distance = raycastMaxLength;
         if (hitBottomLeft.collider != null && hitBottomLeft.collider.tag == "HazardCollider") {
             distance = (hitBottomLeft.point - ownPos).magnitude;
         }
         distBottomLeft[0] = (raycastMaxLength - distance) / raycastMaxLength;
         // LEFT
-        RaycastHit2D hitLeft = Physics2D.Raycast(ownPos, new Vector2(-1f, 0f), raycastMaxLength);  //  + / +
+        RaycastHit2D hitLeft = Physics2D.Raycast(ownPos, new Vector2(-1f, 0f), raycastMaxLength, rayLayer);  //  + / +
         distance = raycastMaxLength;
         if (hitLeft.collider != null && hitLeft.collider.tag == "HazardCollider") {
             distance = (hitLeft.point - ownPos).magnitude;
         }
         distLeft[0] = (raycastMaxLength - distance) / raycastMaxLength;
         // TOP LEFT
-        RaycastHit2D hitTopLeft = Physics2D.Raycast(ownPos, new Vector2(-1f, 1f), raycastMaxLength);  //  + / +
+        RaycastHit2D hitTopLeft = Physics2D.Raycast(ownPos, new Vector2(-1f, 1f), raycastMaxLength, rayLayer);  //  + / +
         distance = raycastMaxLength;
         if (hitTopLeft.collider != null && hitTopLeft.collider.tag == "HazardCollider") {
             distance = (hitTopLeft.point - ownPos).magnitude;

@@ -13,6 +13,8 @@ public class Agent : MonoBehaviour {
     //public float verticalMovementInput = 0f;
     public float speed = 150f;
     public bool humanControlled = false;
+    public float humanControlLerp = 0f;
+    public bool isDead = false;
 
     // Use this for initialization
     void Start() {
@@ -173,7 +175,9 @@ public class Agent : MonoBehaviour {
     public void ReplaceBrain(AgentGenome genome) {
         brain = new Brain(genome.brainGenome, this);
     }
+    public void ResetAgent() {  // for when an agent dies, this resets attributes, moves to new spawnPos, switches Brain etc.aw
 
+    }
     public void ResetBrainState() {
         brain.ResetBrainState();
     }
@@ -203,7 +207,7 @@ public class Agent : MonoBehaviour {
         float horizontalMovementInput = 0f;
         float verticalMovementInput = 0f;
 
-        if (humanControlled) {
+        /*if (humanControlled) {
             horizontalMovementInput = 0f;
             if (Input.GetKey("left") || Input.GetKey("a")) {
                 horizontalMovementInput -= 1f;
@@ -222,11 +226,33 @@ public class Agent : MonoBehaviour {
         else {
             horizontalMovementInput = Mathf.Round(testModule.throttleX[0] * 3f / 2f);
             verticalMovementInput = Mathf.Round(testModule.throttleY[0] * 3f / 2f);
+        }*/
+
+        float horHuman = 0f;
+        float verHuman = 0f;
+        if (Input.GetKey("left") || Input.GetKey("a")) {
+            horHuman -= 1f;
+        }
+        if (Input.GetKey("right") || Input.GetKey("d")) {
+            horHuman += 1f;
+        }
+        verticalMovementInput = 0f;
+        if (Input.GetKey("up") || Input.GetKey("w")) {
+            verHuman += 1f;
+        }
+        if (Input.GetKey("down") || Input.GetKey("s")) {
+            verHuman -= 1f;
         }
 
+        float horAI = Mathf.Round(testModule.throttleX[0] * 3f / 2f);
+        float verAI = Mathf.Round(testModule.throttleY[0] * 3f / 2f);
+
+        horizontalMovementInput = Mathf.Lerp(horAI, horHuman, humanControlLerp);
+        verticalMovementInput = Mathf.Lerp(verAI, verHuman, humanControlLerp);
+
         // MOVEMENT HERE:
-        this.GetComponent<Rigidbody2D>().AddForce(new Vector2(speed * horizontalMovementInput * Time.deltaTime, 0f), ForceMode2D.Impulse);
-        this.GetComponent<Rigidbody2D>().AddForce(new Vector2(0f, speed * verticalMovementInput * Time.deltaTime), ForceMode2D.Impulse);
+        this.GetComponent<Rigidbody2D>().AddForce(new Vector2(speed * horizontalMovementInput * Time.deltaTime, speed * verticalMovementInput * Time.deltaTime), ForceMode2D.Impulse);
+        //this.GetComponent<Rigidbody2D>().AddForce(new Vector2(0f, speed * verticalMovementInput * Time.deltaTime), ForceMode2D.Impulse);
     }
     
     public void InitializeModules(AgentGenome genome, Agent agent, StartPositionGenome startPos) {

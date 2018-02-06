@@ -12,7 +12,7 @@ public class FoodModule : MonoBehaviour {
 
     private int colliderCount = 0;
 
-    private float feedingRate = 0.05f;
+    private float feedingRate = 0.02f;
 
     public bool isDepleted = false;
 
