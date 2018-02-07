@@ -8,9 +8,15 @@ public class PredatorModule : MonoBehaviour {
     private float speed = 150f;
 
     private float damage = 0.1f;
+    private int counter = 0;
 
-	// Use this for initialization
-	void Awake () {
+    private float randX;
+    private float randY;
+
+    private int framesPerDirChange = 8;
+
+    // Use this for initialization
+    void Awake () {
         rigidBody = GetComponent<Rigidbody2D>();
 
     }
@@ -21,9 +27,11 @@ public class PredatorModule : MonoBehaviour {
 	}
 
     private void FixedUpdate() {
-        float randX = UnityEngine.Random.Range(-1f, 1f);
-        float randY = UnityEngine.Random.Range(-1f, 1f);
-
+        counter = (counter + 1) % framesPerDirChange;
+        if(counter == 0) {
+            randX = UnityEngine.Random.Range(-1f, 1f);
+            randY = UnityEngine.Random.Range(-1f, 1f);
+        }
         // MOVEMENT HERE:
         this.GetComponent<Rigidbody2D>().AddForce(new Vector2(speed * randX * Time.deltaTime, speed * randY * Time.deltaTime), ForceMode2D.Impulse);
     }

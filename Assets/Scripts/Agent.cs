@@ -16,6 +16,9 @@ public class Agent : MonoBehaviour {
     public float humanControlLerp = 0f;
     public bool isDead = false;
 
+    public Material material;
+    public Texture2D texture;
+
     // Use this for initialization
     void Start() {
         rigidBody2D = GetComponent<Rigidbody2D>();
@@ -199,8 +202,39 @@ public class Agent : MonoBehaviour {
     public void Tick() {
         // Any external inputs updated by simManager just before this
         TickModules(); // update inputs for Brain
+
+        // Check for Death:
+        float minFood = Mathf.Min(Mathf.Min(testModule.foodAmountR[0], testModule.foodAmountG[0]), testModule.foodAmountB[0]);
+        if (minFood <= 0f) {
+            // DEAD FROM STARVATION!!!!
+            isDead = true;
+            //Debug.Log("Agent Starved to DEATH!!!");
+        }
+
         TickBrain(); // Tick Brain
-        TickActions(); // Execute Actions                
+        TickActions(); // Execute Actions
+
+
+        // DebugDisplay
+        if(texture != null) {
+            //Debug.Log(texture.ToString());
+            texture.SetPixel(0, 0, new Color(testModule.hitPoints[0], testModule.hitPoints[0], testModule.hitPoints[0]));
+            texture.SetPixel(1, 0, new Color(testModule.foodAmountR[0], testModule.foodAmountR[0], testModule.foodAmountR[0]));
+            texture.SetPixel(2, 0, new Color(testModule.foodAmountG[0], testModule.foodAmountG[0], testModule.foodAmountG[0]));
+            texture.SetPixel(3, 0, new Color(testModule.foodAmountB[0], testModule.foodAmountB[0], testModule.foodAmountB[0]));
+
+            float comm0 = testModule.outComm0[0] * 0.5f + 0.5f;
+            float comm1 = testModule.outComm1[0] * 0.5f + 0.5f;
+            float comm2 = testModule.outComm2[0] * 0.5f + 0.5f;
+            float comm3 = testModule.outComm3[0] * 0.5f + 0.5f;
+            texture.SetPixel(0, 1, new Color(comm0, comm0, comm0));
+            texture.SetPixel(1, 1, new Color(comm1, comm1, comm1));
+            texture.SetPixel(2, 1, new Color(comm2, comm2, comm2));
+            texture.SetPixel(3, 1, new Color(comm3, comm3, comm3));
+
+            texture.Apply();
+        }
+        
     }
 
     public void TickActions() {
@@ -261,6 +295,7 @@ public class Agent : MonoBehaviour {
     }
 
     public void InitializeAgentFromGenome(AgentGenome genome, StartPositionGenome startPos) {
+        isDead = false;
         this.transform.localPosition = startPos.agentStartPosition;
         InitializeModules(genome, this, startPos);      // Modules need to be created first so that Brain can map its neurons to existing modules  
         brain = new Brain(genome.brainGenome, this);

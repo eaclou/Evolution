@@ -12,14 +12,20 @@ public class SimulationManager : MonoBehaviour {
     public Button buttonClearTrainingData;
 
     public Camera mainCam;
-    private int numAgents = 48;
+    private int numAgents = 64;
     private int supervisedGenomePoolSize = 64;  // Brain evaluated tested on DataSamples only
     private int persistentGenomePoolSize = 48;  // spawned as Agents that live until they are killed naturally, tested on Fitness Function
     private int transientGenomePoolSize = 48;  // spawned as Agents (in the background layer) that are short-lived and tested on Fitness Function + DataSamples
     private int populationSize = 64;
     public Material playerMat;
+    public Material agentMatTemplate;
+    public Material foodMatTemplate;
     public Agent playerAgent;
     public Agent[] agentsArray;
+    public Material[] agentMaterialsArray;
+    public Material[] foodMaterialsArray;
+    public Texture2D[] agentDebugTexturesArray;
+    public Texture2D[] foodDebugTexturesArray;
 
     public BodyGenome bodyGenomeTemplate;
     public AgentGenome[] genomePoolArray;
@@ -32,7 +38,7 @@ public class SimulationManager : MonoBehaviour {
     public bool recording = false;
     public List<DataSample> dataSamplesList;  // master pool
     public List<DataSample> currentDataBatch;
-    private int maxSavedDataSamples = 256;  // dataSamples above this number replace existing samples randomly
+    private int maxSavedDataSamples = 1024;  // dataSamples above this number replace existing samples randomly
     private int dataBatchSize = 48;
     private int minDataSamplesForTraining = 4;  // won't start training brains until DataList has at least this many samples
     private int periodicSamplingRate = 32;  // saves a sample of player's data every (this #) frames
@@ -133,6 +139,17 @@ public class SimulationManager : MonoBehaviour {
                 ReviveFood(f);
             }
         }
+
+        // CHECK FOR DEAD AGENTS!!!  // Better place for this????
+        for(int a = 0; a < agentsArray.Length; a++) {
+            if(agentsArray[a].isDead) {
+                // Respawn Agent randomly and replace Brain (Later on handle persistent pool learning -- for now, just controls when Brain updates )
+                Vector3 startPos = new Vector3(UnityEngine.Random.Range(-30f, 30f), UnityEngine.Random.Range(-30f, 30f), 0f);
+                StartPositionGenome startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
+                //playerAgent.InitializeAgentFromGenome(playerGenome, playerStartPosGenome);
+                agentsArray[a].InitializeAgentFromGenome(genomePoolArray[a], startPosGenome);
+            }
+        }
     }
     public void ToggleRecording() {
         recording = !recording;
@@ -148,7 +165,7 @@ public class SimulationManager : MonoBehaviour {
         InitializePopulationGenomes();
         curGen = 0;
         ResetTrainingForNewGen();
-        UpdateAgentBrains();
+        //UpdateAgentBrains();
     }
     public void ClearTrainingData() {
         trainingRequirementsMet = false;
@@ -198,16 +215,50 @@ public class SimulationManager : MonoBehaviour {
         }
     }
     public void InitializeTrainingApparatus() {
-        mutationSettings = new MutationSettings(0.0075f, 0.75f, 0.1f, 0.001f);
+        mutationSettings = new MutationSettings(0.02f, 0.45f, 0.1f, 0.001f);
         GameObject dummyAgentGO = new GameObject("DummyAgent");
         dummyAgent = dummyAgentGO.AddComponent<Agent>();
         dummyStartGenome = new StartPositionGenome(Vector3.zero, Quaternion.identity);
 
-        dataSamplesList = FakeDataGenerator.GenerateDataAvoidWalls();// new List<DataSample>();
-
+        GenerateDataRepelWalls();
         //CreateFakeData();
 
         ResetTrainingForNewGen();
+    }
+    public void GenerateDataRepelWalls() {
+        Debug.Log("GenerateDataRepelWalls()");
+        dataSamplesList = FakeDataGenerator.GenerateDataRepelWalls(64);// new List<DataSample>();
+        trainingRequirementsMet = true;
+    }
+    public void GenerateDataRepelPreds() {
+        Debug.Log("GenerateDataRepelPreds()");
+        dataSamplesList = FakeDataGenerator.GenerateDataRepelPreds(64);// new List<DataSample>();
+        trainingRequirementsMet = true;
+    }
+    public void GenerateDataRepelFriends() {
+        Debug.Log("GenerateDataRepelFriends()");
+        dataSamplesList = FakeDataGenerator.GenerateDataRepelFriends(64);// new List<DataSample>();
+        trainingRequirementsMet = true;
+    }
+    public void GenerateDataAttractFriends() {
+        Debug.Log("GenerateDataAttractFriends()");
+        dataSamplesList = FakeDataGenerator.GenerateDataAttractFriends(64);// new List<DataSample>();
+        trainingRequirementsMet = true;
+    }
+    public void GenerateDataAttractFood() {
+        Debug.Log("GenerateDataAttractFood()");
+        dataSamplesList = FakeDataGenerator.GenerateDataAttractFood(64);// new List<DataSample>();
+        trainingRequirementsMet = true;
+    }
+    public void GenerateDataAttractPreds() {
+        Debug.Log("GenerateDataAttractPreds()");
+        dataSamplesList = FakeDataGenerator.GenerateDataAttractPreds(64);// new List<DataSample>();
+        trainingRequirementsMet = true;
+    }
+    public void GenerateDataStandardMix() {
+        Debug.Log("GenerateDataStandardMix()");
+        dataSamplesList = FakeDataGenerator.GenerateDataStandardMix(64);// new List<DataSample>();
+        trainingRequirementsMet = true;
     }
     private void RecordPlayerData() {        
         DataSample sample = playerAgent.RecordData();// new DataSample();
@@ -319,6 +370,11 @@ public class SimulationManager : MonoBehaviour {
 
         // Create Environment (Or have it pre-built)
 
+        agentMaterialsArray = new Material[numAgents];
+        agentDebugTexturesArray = new Texture2D[numAgents];
+        foodMaterialsArray = new Material[numFood];
+        foodDebugTexturesArray = new Texture2D[numFood];
+
         // Create initial population of Genomes:
         // Re-Factor:
         bodyGenomeTemplate = new BodyGenome();
@@ -366,22 +422,20 @@ public class SimulationManager : MonoBehaviour {
             StartPositionGenome agentStartPosGenome = new StartPositionGenome(new Vector3(1.25f * (col - numColumns / 2), -2.0f - (1.25f * row), 0f), Quaternion.identity);
             agentsArray[i] = newAgent; // Add to stored list of current Agents
             newAgent.InitializeAgentFromGenome(genomePoolArray[i], agentStartPosGenome);
-        }
 
-        //Hookup Agent Modules to their proper Objects/Transforms/Info
-        //playerAgent.testModule.enemyTestModule = agentsArray[0].testModule;
-        for (int p = 0; p < agentsArray.Length; p++) {
-            //agentsArray[p].testModule.enemyTestModule = playerAgent.testModule;
-            //for (int e = 0; e < currentAgentsArray.Length; e++) {
-            //if (e != p) {  // not vs self:
-                    //currentAgentsArray[p].testModule.ownRigidBody2D = currentAgentsArray[p].GetComponent<Rigidbody2D>();
-                    //currentAgentsArray[p].testModule.enemyTestModule = currentAgentsArray[e].testModule;
-                    //currentAgentsArray[p].testModule.enemyPosX[0] = currentAgentsArray[e].testModule.posX[0] - currentAgentsArray[p].testModule.posX[0];
-                    //currentAgentsArray[p].testModule.enemyPosY[0] = currentAgentsArray[e].testModule.posY[0] - currentAgentsArray[p].testModule.posY[0];
-                //}
-            //}
-        }
+            Material mat = new Material(agentMatTemplate);
+            agentMaterialsArray[i] = mat;
+            agentGO.GetComponent<MeshRenderer>().material = mat;
+            newAgent.material = mat;
 
+            Texture2D tex = new Texture2D(4, 2);  // Health, foodAmountRGB, 4 outCommChannels
+            tex.filterMode = FilterMode.Point;
+            agentDebugTexturesArray[i] = tex;
+            newAgent.texture = tex;
+
+            newAgent.material.SetTexture("_MainTex", tex);
+        }
+        
         // FOOODDDD!!!!
         foodArray = new FoodModule[numFood];
         SpawnFood();
@@ -414,15 +468,17 @@ public class SimulationManager : MonoBehaviour {
             FoodModule newFood = foodGO.GetComponent<FoodModule>();
             foodArray[i] = newFood; // Add to stored list of current Agents
             ReviveFood(i);
-            //int numColumns = Mathf.RoundToInt(Mathf.Sqrt(populationSize));
-            //int row = Mathf.FloorToInt(i / numColumns);
-            //int col = i % numColumns;
-            //StartPositionGenome agentStartPosGenome = new StartPositionGenome(new Vector3(1.25f * (col - numColumns / 2), -2.0f - (1.25f * row), 0f), Quaternion.identity);
 
-            //Vector3 startPos = new Vector3(UnityEngine.Random.Range(-40f, 40f), UnityEngine.Random.Range(-40f, 40f), 0f);
-            //foodGO.transform.localPosition = startPos;
-            
-            //newAgent.InitializeAgentFromGenome(genomePoolArray[i], agentStartPosGenome);
+            Material mat = new Material(foodMatTemplate);
+            foodMaterialsArray[i] = mat;
+            foodGO.GetComponent<MeshRenderer>().material = mat;
+            newFood.material = mat;
+
+            Texture2D tex = new Texture2D(3, 1);  // foodAmountRGB
+            foodDebugTexturesArray[i] = tex;
+            newFood.texture = tex;
+
+            newFood.material.SetTexture("_MainTex", tex);
         }
     }
     private void HookUpModules() {
@@ -494,7 +550,7 @@ public class SimulationManager : MonoBehaviour {
             // HumanControlLerp:
             float maxControlSqrDist = 400f;
             float lerpVal = (maxControlSqrDist - Mathf.Clamp(squaredPlayerDistFriend, 0f, maxControlSqrDist)) / maxControlSqrDist;
-            agentsArray[a].humanControlLerp = lerpVal * 0.6f;
+            agentsArray[a].humanControlLerp = 0f; // lerpVal * 0.6f;
             if (squaredPlayerDistFriend <= nearestFriendSquaredDistance) {
                 agentsArray[a].testModule.friendTestModule = playerAgent.testModule;
             }
@@ -733,7 +789,7 @@ public class SimulationManager : MonoBehaviour {
         //mutationSettings.mutationChance *= 0.995f;
         //mutationSettings.mutationStepSize *= 0.995f;
 
-        UpdateAgentBrains();
+        //UpdateAgentBrains();
         //HookUpModules();
 
         curGen++;

@@ -93,6 +93,7 @@ public class TestModule {
     //public float maxSpeed = 0.5f;
     //public float accel = 0.05f;
     //public float radius = 1f;
+    public float foodConsumptionRate = 0.001f;
 
     //public Transform enemyTransform;
     public Rigidbody2D ownRigidBody2D;
@@ -205,9 +206,9 @@ public class TestModule {
         //prevHealth = health;
 
         bias[0] = 1f;
-        foodAmountR[0] = 0f;
-        foodAmountG[0] = 0f;
-        foodAmountB[0] = 0f;
+        foodAmountR[0] = 1f;
+        foodAmountG[0] = 1f;
+        foodAmountB[0] = 1f;
         hitPoints[0] = 1f;
         stamina[0] = 1f;
 
@@ -566,10 +567,10 @@ public class TestModule {
         hitPoints[0] = Mathf.Max(hitPoints[0], 0f);
         //stamina[0] = 1f;
 
-        foodAmountR[0] = Mathf.Clamp(foodAmountR[0] - 0.01f, 0f, 1f);
-        foodAmountG[0] = Mathf.Clamp(foodAmountG[0] - 0.01f, 0f, 1f);
-        foodAmountB[0] = Mathf.Clamp(foodAmountB[0] - 0.01f, 0f, 1f);
-
+        foodAmountR[0] = Mathf.Max(foodAmountR[0] - foodConsumptionRate, 0f);
+        foodAmountG[0] = Mathf.Max(foodAmountG[0] - foodConsumptionRate, 0f);
+        foodAmountB[0] = Mathf.Max(foodAmountB[0] - foodConsumptionRate, 0f);
+        
         int rayLayer = LayerMask.GetMask("EnvironmentCollision");
         //Debug.Log(LayerMask.GetMask("EnvironmentCollision"));
         //Debug.Log(mask.ToString());
@@ -633,10 +634,10 @@ public class TestModule {
         }
         distTopLeft[0] = (raycastMaxLength - distance) / raycastMaxLength;
 
-        inComm0[0] = 0f;
-        inComm1[0] = 0f;
-        inComm2[0] = 0f;
-        inComm3[0] = 0f;
+        inComm0[0] = friendTestModule.outComm0[0];
+        inComm1[0] = friendTestModule.outComm1[0];
+        inComm2[0] = friendTestModule.outComm2[0];
+        inComm3[0] = friendTestModule.outComm3[0];
 
         // TEST
         //hit = Physics2D.Raycast(new Vector2(35f, 0f), new Vector2(1f, 0f), raycastMaxLength);  //  + / +

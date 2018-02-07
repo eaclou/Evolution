@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class FoodModule : MonoBehaviour {
 
+    public Material material;
+    public Texture2D texture;
+
     public int index;
 
     public float amountR;
@@ -12,9 +15,15 @@ public class FoodModule : MonoBehaviour {
 
     private int colliderCount = 0;
 
-    private float feedingRate = 0.02f;
+    private float feedingRate = 0.005f;
 
     public bool isDepleted = false;
+
+    private float minScale = 0.5f;
+    private float maxScale = 4.5f;
+
+    private float minMass = 0.1f;
+    private float maxMass = 25f;
 
     // Use this for initialization
     void Start() {
@@ -34,6 +43,15 @@ public class FoodModule : MonoBehaviour {
     }
 
     private void FixedUpdate() {
+        float avgAmount = (amountR + amountG + amountB) / 3.0f;
+        float lerpAmount = Mathf.Sqrt(avgAmount);
+
+        float scale = Mathf.Lerp(minScale, maxScale, lerpAmount);
+        float mass = Mathf.Lerp(minMass, maxMass, lerpAmount);
+
+        transform.localScale = new Vector3(scale, scale, scale);
+        GetComponent<Rigidbody2D>().mass = mass;
+
         isDepleted = CheckIfDepleted();
     }
 
@@ -48,23 +66,26 @@ public class FoodModule : MonoBehaviour {
         Agent collidingAgent = coll.collider.gameObject.GetComponent<Agent>();
         if (collidingAgent != null) {
 
-            float flow = feedingRate / colliderCount;
+            float flow = feedingRate; // / colliderCount;
             if(colliderCount == 0) {
                 Debug.LogError("DIVIDE BY ZERO!!!");
             }
 
-            collidingAgent.testModule.foodAmountR[0] += Mathf.Max(0f, amountR - flow);  // make sure Agent doesn't receive food from empty dispenser
-            amountR -= flow;
+            float flowR = Mathf.Min(amountR, flow);
+            collidingAgent.testModule.foodAmountR[0] += flowR;  // make sure Agent doesn't receive food from empty dispenser
+            amountR -= flowR;
             if (amountR < 0f)
                 amountR = 0f;
 
-            collidingAgent.testModule.foodAmountG[0] += Mathf.Max(0f, amountG - flow);  // make sure Agent doesn't receive food from empty dispenser
-            amountG -= flow;
+            float flowG = Mathf.Min(amountG, flow);
+            collidingAgent.testModule.foodAmountG[0] += flowG;  // make sure Agent doesn't receive food from empty dispenser
+            amountG -= flowG;
             if (amountG < 0f)
                 amountG = 0f;
 
-            collidingAgent.testModule.foodAmountB[0] += Mathf.Max(0f, amountB - flow);  // make sure Agent doesn't receive food from empty dispenser
-            amountB -= flow;
+            float flowB = Mathf.Min(amountB, flow);
+            collidingAgent.testModule.foodAmountB[0] += flowB;  // make sure Agent doesn't receive food from empty dispenser
+            amountB -= flowB;
             if (amountB < 0f)
                 amountB = 0f;
 
