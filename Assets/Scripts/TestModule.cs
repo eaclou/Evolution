@@ -93,7 +93,7 @@ public class TestModule {
     //public float maxSpeed = 0.5f;
     //public float accel = 0.05f;
     //public float radius = 1f;
-    public float foodConsumptionRate = 0.001f;
+    public float foodConsumptionRate = 0.0025f;
 
     //public Transform enemyTransform;
     public Rigidbody2D ownRigidBody2D;

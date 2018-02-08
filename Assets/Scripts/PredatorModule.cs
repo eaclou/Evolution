@@ -5,20 +5,26 @@ using UnityEngine;
 public class PredatorModule : MonoBehaviour {
 
     public Rigidbody2D rigidBody;
-    private float speed = 150f;
+    private float speed = 75f;
 
-    private float damage = 0.1f;
+    private float damage = 0.15f;
     private int counter = 0;
 
     private float randX;
     private float randY;
 
-    private int framesPerDirChange = 8;
+    private float minScale = 3f;
+    private float maxScale = 5f;
+
+    private int framesPerDirChange = 32;
 
     // Use this for initialization
     void Awake () {
         rigidBody = GetComponent<Rigidbody2D>();
 
+        float size = UnityEngine.Random.Range(minScale, maxScale);
+        Vector3 scale = new Vector3(size, size, size);
+        transform.localScale = scale;
     }
 	
 	// Update is called once per frame

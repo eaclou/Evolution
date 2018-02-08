@@ -5,7 +5,7 @@ using UnityEngine;
 public class FoodModule : MonoBehaviour {
 
     public Material material;
-    public Texture2D texture;
+    //public Texture2D texture;
 
     public int index;
 
@@ -15,7 +15,7 @@ public class FoodModule : MonoBehaviour {
 
     private int colliderCount = 0;
 
-    private float feedingRate = 0.005f;
+    private float feedingRate = 0.01f;
 
     public bool isDepleted = false;
 
@@ -53,6 +53,11 @@ public class FoodModule : MonoBehaviour {
         GetComponent<Rigidbody2D>().mass = mass;
 
         isDepleted = CheckIfDepleted();
+
+        material.SetFloat("_FoodAmountR", amountR);
+        material.SetFloat("_FoodAmountG", amountG);
+        material.SetFloat("_FoodAmountB", amountB);
+        material.SetFloat("_Scale", scale);
     }
 
     private void OnCollisionEnter2D(Collision2D coll) {
@@ -72,19 +77,19 @@ public class FoodModule : MonoBehaviour {
             }
 
             float flowR = Mathf.Min(amountR, flow);
-            collidingAgent.testModule.foodAmountR[0] += flowR;  // make sure Agent doesn't receive food from empty dispenser
+            collidingAgent.testModule.foodAmountR[0] += flowR * 2f;  // make sure Agent doesn't receive food from empty dispenser
             amountR -= flowR;
             if (amountR < 0f)
                 amountR = 0f;
 
             float flowG = Mathf.Min(amountG, flow);
-            collidingAgent.testModule.foodAmountG[0] += flowG;  // make sure Agent doesn't receive food from empty dispenser
+            collidingAgent.testModule.foodAmountG[0] += flowG * 2f;  // make sure Agent doesn't receive food from empty dispenser
             amountG -= flowG;
             if (amountG < 0f)
                 amountG = 0f;
 
             float flowB = Mathf.Min(amountB, flow);
-            collidingAgent.testModule.foodAmountB[0] += flowB;  // make sure Agent doesn't receive food from empty dispenser
+            collidingAgent.testModule.foodAmountB[0] += flowB * 2f;  // make sure Agent doesn't receive food from empty dispenser
             amountB -= flowB;
             if (amountB < 0f)
                 amountB = 0f;

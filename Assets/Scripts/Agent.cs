@@ -19,6 +19,8 @@ public class Agent : MonoBehaviour {
     public Material material;
     public Texture2D texture;
 
+    public int ageCounter = 0;
+
     // Use this for initialization
     void Start() {
         rigidBody2D = GetComponent<Rigidbody2D>();
@@ -234,7 +236,8 @@ public class Agent : MonoBehaviour {
 
             texture.Apply();
         }
-        
+
+        ageCounter++;
     }
 
     public void TickActions() {
@@ -296,6 +299,7 @@ public class Agent : MonoBehaviour {
 
     public void InitializeAgentFromGenome(AgentGenome genome, StartPositionGenome startPos) {
         isDead = false;
+        ageCounter = 0;
         this.transform.localPosition = startPos.agentStartPosition;
         InitializeModules(genome, this, startPos);      // Modules need to be created first so that Brain can map its neurons to existing modules  
         brain = new Brain(genome.brainGenome, this);

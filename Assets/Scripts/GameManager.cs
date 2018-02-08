@@ -27,8 +27,8 @@ public class GameManager : MonoBehaviour {
         float sTime = Time.realtimeSinceStartup;
 
         simulationManager.TickSimulation();
-        if(simulationManager.trainingRequirementsMet) {
-            if(simulationManager.isTraining) {
+        if(simulationManager.trainingRequirementsMetSupervised) {
+            if(simulationManager.isTrainingSupervised) {
                 for (int i = 0; i < 32; i++) {
                     simulationManager.TickTrainingMode();
                 }

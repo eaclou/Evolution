@@ -7,16 +7,17 @@ public class SimulationManager : MonoBehaviour {
 
     public Text textDebugTrainingInfo;
     public Button buttonToggleRecording;
-    public Button buttonToggleTraining;
+    public Button buttonToggleTrainingSupervised;
     public Button buttonResetGenomes;
     public Button buttonClearTrainingData;
+    public Button buttonToggleTrainingPersistent;
 
     public Camera mainCam;
     private int numAgents = 64;
     private int supervisedGenomePoolSize = 64;  // Brain evaluated tested on DataSamples only
-    private int persistentGenomePoolSize = 48;  // spawned as Agents that live until they are killed naturally, tested on Fitness Function
+    private int persistentGenomePoolSize = 64;  // spawned as Agents that live until they are killed naturally, tested on Fitness Function
     private int transientGenomePoolSize = 48;  // spawned as Agents (in the background layer) that are short-lived and tested on Fitness Function + DataSamples
-    private int populationSize = 64;
+    //private int populationSize = 64;
     public Material playerMat;
     public Material agentMatTemplate;
     public Material foodMatTemplate;
@@ -25,15 +26,16 @@ public class SimulationManager : MonoBehaviour {
     public Material[] agentMaterialsArray;
     public Material[] foodMaterialsArray;
     public Texture2D[] agentDebugTexturesArray;
-    public Texture2D[] foodDebugTexturesArray;
+    //public Texture2D[] foodDebugTexturesArray;
 
     public BodyGenome bodyGenomeTemplate;
-    public AgentGenome[] genomePoolArray;
+    public AgentGenome[] supervisedGenomePoolArray;
+    public AgentGenome[] persistentGenomePoolArray;
 
     public FoodModule[] foodArray;
-    private int numFood = 32;
+    private int numFood = 36;
     public PredatorModule[] predatorArray;
-    private int numPredators = 8;
+    private int numPredators = 12;
 
     public bool recording = false;
     public List<DataSample> dataSamplesList;  // master pool
@@ -42,25 +44,33 @@ public class SimulationManager : MonoBehaviour {
     private int dataBatchSize = 48;
     private int minDataSamplesForTraining = 4;  // won't start training brains until DataList has at least this many samples
     private int periodicSamplingRate = 32;  // saves a sample of player's data every (this #) frames
-    public MutationSettings mutationSettings;
-    public float[] rawFitnessScoresArray;
-    public bool trainingRequirementsMet = true;  // minimum reqs met
-    public bool isTraining = false;  // player control
+    public MutationSettings mutationSettingsSupervised;
+    public MutationSettings mutationSettingsPersistent;
+    public float[] rawFitnessScoresArraySupervised;
+    public float[] rawFitnessScoresArrayPersistent;
+    public bool trainingRequirementsMetSupervised = true;  // minimum reqs met
+    public bool isTrainingSupervised = false;
+    public bool isTrainingPersistent = false;
     private float lastHorizontalInput = 0f;
     private float lastVerticalInput = 0f;
     private int timeStepCounter = 1;
     public int curGen;
-    public float avgFitnessLastGen = 0f;
-    public float bestFitnessScore = 0f;
-    public int curTestingAgent = 0;
+    public float avgFitnessLastGenSupervised = 0f;
+    public float bestFitnessScoreSupervised = 0f;
+    public float avgFitnessLastGenPersistent = 0f;
+    public float bestFitnessScorePersistent = 0f;
+    public int curTestingGenomeSupervised = 0;
     public int curTestingSample = 0;
-    private Agent dummyAgent;
+    private Agent dummyAgent; // used for supervised training (brain evaluation)
     private StartPositionGenome dummyStartGenome;
-    private bool firstTimeTraining = true;
+    private bool firstTimeTrainingSupervised = true;
+    private bool firstTimeTrainingPersistent = true;
+    public int numPersistentAgentsBorn = 0;
+    public int currentOldestAgent = 0;
 
-    public float rawFitnessScoreBlankAgent = 0f;
-    public float lastGenBlankAgentFitness = 0f;
-
+    public float rawFitnessScoreBlankAgentSupervised = 0f;
+    public float lastGenBlankAgentFitnessSupervised = 0f;
+    
     private int agentGridCellResolution = 1;  // How much to subdivide the map in order to detect nearest-neighbors more efficiently --> to not be O(n^2)
     public MapGridCell[][] mapGridCellArray;
 
@@ -143,32 +153,115 @@ public class SimulationManager : MonoBehaviour {
         // CHECK FOR DEAD AGENTS!!!  // Better place for this????
         for(int a = 0; a < agentsArray.Length; a++) {
             if(agentsArray[a].isDead) {
-                // Respawn Agent randomly and replace Brain (Later on handle persistent pool learning -- for now, just controls when Brain updates )
-                Vector3 startPos = new Vector3(UnityEngine.Random.Range(-30f, 30f), UnityEngine.Random.Range(-30f, 30f), 0f);
-                StartPositionGenome startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
-                //playerAgent.InitializeAgentFromGenome(playerGenome, playerStartPosGenome);
-                agentsArray[a].InitializeAgentFromGenome(genomePoolArray[a], startPosGenome);
+                ProcessDeadAgent(a);
             }
         }
+    }
+    public void ProcessDeadAgent(int agentIndex) {
+        
+        // Respawn Agent randomly and replace Brain (Later on handle persistent pool learning -- for now, just controls when Brain updates )
+        Vector3 startPos = new Vector3(UnityEngine.Random.Range(-30f, 30f), UnityEngine.Random.Range(-30f, 30f), 0f);
+        StartPositionGenome startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
+        //playerAgent.InitializeAgentFromGenome(playerGenome, playerStartPosGenome);
+
+        if(isTrainingPersistent) {
+            // Handle Reproduction of persistent Agents Here
+
+            // Measure fitness of all current agents (their genomes, actually)
+            for(int i = 0; i < numAgents; i++) {
+                rawFitnessScoresArrayPersistent[i] = (float)agentsArray[i].ageCounter;
+            }
+            //float totalScore = 0f;
+            //for(int i = 0; i < rawFitnessScoresArrayPersistent.Length; i++) {
+            //    totalScore += rawFitnessScoresArrayPersistent[i];
+            //}
+
+            // Sort Fitness Scores
+            int[] rankedIndicesList = new int[rawFitnessScoresArrayPersistent.Length];
+            float[] rankedFitnessList = new float[rawFitnessScoresArrayPersistent.Length];
+
+            // populate arrays:
+            for (int i = 0; i < rawFitnessScoresArrayPersistent.Length; i++) {
+                rankedIndicesList[i] = i;
+                rankedFitnessList[i] = rawFitnessScoresArrayPersistent[i];
+            }
+            for (int i = 0; i < rawFitnessScoresArrayPersistent.Length - 1; i++) {
+                for (int j = 0; j < rawFitnessScoresArrayPersistent.Length - 1; j++) {
+                    float swapFitA = rankedFitnessList[j];
+                    float swapFitB = rankedFitnessList[j + 1];
+                    int swapIdA = rankedIndicesList[j];
+                    int swapIdB = rankedIndicesList[j + 1];
+
+                    if (swapFitA < swapFitB) {  // bigger is better now after inversion
+                        rankedFitnessList[j] = swapFitB;
+                        rankedFitnessList[j + 1] = swapFitA;
+                        rankedIndicesList[j] = swapIdB;
+                        rankedIndicesList[j + 1] = swapIdA;
+                    }
+                }
+            }
+            //string txt = "PersistentAges:\n";
+            //for (int i = 0; i < rankedFitnessList.Length; i++) {
+            //    txt += i.ToString() + ": " + rankedFitnessList[i].ToString() + "\n";
+            //}
+            //Debug.Log(txt);
+
+            // Randomly select a good one based on fitness Lottery (oldest = best)
+            if (rankedIndicesList[0] == agentIndex) {  // if Top Agent, just respawn identical copy:
+                //BrainGenome parentGenome = supervisedGenomePoolArray[rankedIndicesList[x]].brainGenome;  // keep top performer as-is
+                //newGenBrainGenomeList.Add(parentGenome);
+                // Essentially do nothing and it should just respawn this Agent???
+            }
+            else {
+                BrainGenome newBrainGenome = new BrainGenome();
+                int parentIndex = GetAgentIndexByLottery(rankedFitnessList, rankedIndicesList);
+                BrainGenome parentGenome = persistentGenomePoolArray[parentIndex].brainGenome;
+                // Create duplicate Genome
+                newBrainGenome.SetToMutatedCopyOfParentGenome(parentGenome, mutationSettingsPersistent);
+                
+                persistentGenomePoolArray[agentIndex].brainGenome = newBrainGenome; // update genome to new one
+
+                numPersistentAgentsBorn++;
+                //currentOldestAgent = agentsArray[rankedIndicesList[0]].ageCounter;
+                //Debug.Log("Agent[" + agentIndex.ToString() + "] replaced by child from Agent: " + parentIndex.ToString());
+            }            
+            
+            // Reset
+            // Spawn that genome in dead Agent's body and revive it!
+            agentsArray[agentIndex].InitializeAgentFromGenome(persistentGenomePoolArray[agentIndex], startPosGenome);
+        }
+        else {
+            // Needs safeguards for fewer agents than genomes:
+            agentsArray[agentIndex].InitializeAgentFromGenome(supervisedGenomePoolArray[agentIndex], startPosGenome);
+        }
+        //currentOldestAgent = agentsArray[rankedIndicesList[0]].ageCounter;
     }
     public void ToggleRecording() {
         recording = !recording;
     }
-    public void ToggleTraining() {
-        if(firstTimeTraining) {
-            ResetTrainingForNewGen();
-            firstTimeTraining = false;
+    public void ToggleTrainingSupervised() {
+        if(firstTimeTrainingSupervised) {
+            ResetTrainingForNewGenSupervised();
+            firstTimeTrainingSupervised = false;
         }
-        isTraining = !isTraining;
+        isTrainingSupervised = !isTrainingSupervised;
+    }
+    public void ToggleTrainingPersistent() {
+        if (firstTimeTrainingPersistent) {
+            //ResetTrainingForNewGen();
+            rawFitnessScoresArrayPersistent = new float[persistentGenomePoolSize];
+            firstTimeTrainingPersistent = false;
+        }
+        isTrainingPersistent = !isTrainingPersistent;
     }
     public void ResetGenomes() {
         InitializePopulationGenomes();
         curGen = 0;
-        ResetTrainingForNewGen();
+        ResetTrainingForNewGenSupervised();
         //UpdateAgentBrains();
     }
     public void ClearTrainingData() {
-        trainingRequirementsMet = false;
+        trainingRequirementsMetSupervised = false;
         dataSamplesList.Clear();
     }
     public void SaveTrainingData() {
@@ -179,12 +272,12 @@ public class SimulationManager : MonoBehaviour {
     }
     public void UpdateDebugUI() {
         string debugTxt = "Training: False";
-        if(trainingRequirementsMet) {
+        if(trainingRequirementsMetSupervised) {
             debugTxt = "Training: ACTIVE   numSamples: " + dataSamplesList.Count.ToString() + "\n";
-            debugTxt += "Gen: " + curGen.ToString() + ", Agent: " + curTestingAgent.ToString() + ", Sample: " + curTestingSample.ToString() + "\n";
-            debugTxt += "Fitness Best: " + bestFitnessScore.ToString() + " ( Avg: " + avgFitnessLastGen.ToString() + " ) Blank: " + lastGenBlankAgentFitness.ToString() + "\n";
+            debugTxt += "Gen: " + curGen.ToString() + ", Agent: " + curTestingGenomeSupervised.ToString() + ", Sample: " + curTestingSample.ToString() + "\n";
+            debugTxt += "Fitness Best: " + bestFitnessScoreSupervised.ToString() + " ( Avg: " + avgFitnessLastGenSupervised.ToString() + " ) Blank: " + lastGenBlankAgentFitnessSupervised.ToString() + "\n";
             debugTxt += "Agent[0] # Neurons: " + agentsArray[0].brain.neuronList.Count.ToString() + ", # Axons: " + agentsArray[0].brain.axonList.Count.ToString() + "\n";
-
+            debugTxt += "CurOldestAge: " + currentOldestAgent.ToString() + ", numChildrenBorn: " + numPersistentAgentsBorn.ToString() + ", ~Gen: " + ((float)numPersistentAgentsBorn / (float)numAgents).ToString();
         }
         textDebugTrainingInfo.text = debugTxt;
 
@@ -207,15 +300,24 @@ public class SimulationManager : MonoBehaviour {
             buttonToggleRecording.GetComponentInChildren<Text>().text = "OFF";
         }
 
-        if(isTraining) {
-            buttonToggleTraining.GetComponentInChildren<Text>().text = "Training: ON";
+        if(isTrainingSupervised) {
+            buttonToggleTrainingSupervised.GetComponentInChildren<Text>().text = "Supervised\nTraining: ON";
         }
         else {
-            buttonToggleTraining.GetComponentInChildren<Text>().text = "Training: OFF";
+            buttonToggleTrainingSupervised.GetComponentInChildren<Text>().text = "Supervised\nTraining: OFF";
+        }
+
+        if (isTrainingPersistent) {
+            buttonToggleTrainingPersistent.GetComponentInChildren<Text>().text = "Persistent\nTraining: ON";
+        }
+        else {
+            buttonToggleTrainingPersistent.GetComponentInChildren<Text>().text = "Persistent\nTraining: OFF";
         }
     }
     public void InitializeTrainingApparatus() {
-        mutationSettings = new MutationSettings(0.02f, 0.45f, 0.1f, 0.001f);
+        mutationSettingsSupervised = new MutationSettings(0.02f, 0.45f, 0.1f, 0.001f);
+        mutationSettingsPersistent = new MutationSettings(0.02f, 0.45f, 0.1f, 0.001f);
+
         GameObject dummyAgentGO = new GameObject("DummyAgent");
         dummyAgent = dummyAgentGO.AddComponent<Agent>();
         dummyStartGenome = new StartPositionGenome(Vector3.zero, Quaternion.identity);
@@ -223,42 +325,42 @@ public class SimulationManager : MonoBehaviour {
         GenerateDataRepelWalls();
         //CreateFakeData();
 
-        ResetTrainingForNewGen();
+        ResetTrainingForNewGenSupervised();
     }
     public void GenerateDataRepelWalls() {
         Debug.Log("GenerateDataRepelWalls()");
         dataSamplesList = FakeDataGenerator.GenerateDataRepelWalls(64);// new List<DataSample>();
-        trainingRequirementsMet = true;
+        trainingRequirementsMetSupervised = true;
     }
     public void GenerateDataRepelPreds() {
         Debug.Log("GenerateDataRepelPreds()");
         dataSamplesList = FakeDataGenerator.GenerateDataRepelPreds(64);// new List<DataSample>();
-        trainingRequirementsMet = true;
+        trainingRequirementsMetSupervised = true;
     }
     public void GenerateDataRepelFriends() {
         Debug.Log("GenerateDataRepelFriends()");
         dataSamplesList = FakeDataGenerator.GenerateDataRepelFriends(64);// new List<DataSample>();
-        trainingRequirementsMet = true;
+        trainingRequirementsMetSupervised = true;
     }
     public void GenerateDataAttractFriends() {
         Debug.Log("GenerateDataAttractFriends()");
         dataSamplesList = FakeDataGenerator.GenerateDataAttractFriends(64);// new List<DataSample>();
-        trainingRequirementsMet = true;
+        trainingRequirementsMetSupervised = true;
     }
     public void GenerateDataAttractFood() {
         Debug.Log("GenerateDataAttractFood()");
         dataSamplesList = FakeDataGenerator.GenerateDataAttractFood(64);// new List<DataSample>();
-        trainingRequirementsMet = true;
+        trainingRequirementsMetSupervised = true;
     }
     public void GenerateDataAttractPreds() {
         Debug.Log("GenerateDataAttractPreds()");
         dataSamplesList = FakeDataGenerator.GenerateDataAttractPreds(64);// new List<DataSample>();
-        trainingRequirementsMet = true;
+        trainingRequirementsMetSupervised = true;
     }
     public void GenerateDataStandardMix() {
         Debug.Log("GenerateDataStandardMix()");
         dataSamplesList = FakeDataGenerator.GenerateDataStandardMix(64);// new List<DataSample>();
-        trainingRequirementsMet = true;
+        trainingRequirementsMetSupervised = true;
     }
     private void RecordPlayerData() {        
         DataSample sample = playerAgent.RecordData();// new DataSample();
@@ -272,9 +374,9 @@ public class SimulationManager : MonoBehaviour {
         }        
 
         if(dataSamplesList.Count >= minDataSamplesForTraining) {
-            if(!trainingRequirementsMet) {
+            if(!trainingRequirementsMetSupervised) {
                 SetUpTrainingDataBatch();
-                trainingRequirementsMet = true;
+                trainingRequirementsMetSupervised = true;
             }            
         }
         // Make this respect maxDataSamples size and act accordingly
@@ -359,11 +461,19 @@ public class SimulationManager : MonoBehaviour {
         return distSquared;
     }
     private void InitializePopulationGenomes() {
-        for (int i = 0; i < genomePoolArray.Length; i++) {   // Create initial Population
+        float initialConnectionWeights = 0.25f;
+        for (int i = 0; i < supervisedGenomePoolArray.Length; i++) {   // Create initial Population Supervised Learners
             AgentGenome agentGenome = new AgentGenome(i);
             agentGenome.InitializeBodyGenomeFromTemplate(bodyGenomeTemplate);
-            agentGenome.InitializeRandomBrainFromCurrentBody(0.25f);
-            genomePoolArray[i] = agentGenome;
+            agentGenome.InitializeRandomBrainFromCurrentBody(initialConnectionWeights);
+            supervisedGenomePoolArray[i] = agentGenome;
+        }
+
+        for (int i = 0; i < persistentGenomePoolArray.Length; i++) {   // Create initial Population Supervised Learners
+            AgentGenome agentGenome = new AgentGenome(i);
+            agentGenome.InitializeBodyGenomeFromTemplate(bodyGenomeTemplate);
+            agentGenome.InitializeRandomBrainFromCurrentBody(initialConnectionWeights);
+            persistentGenomePoolArray[i] = agentGenome;
         }
     }
     public void InitializeNewSimulation() {
@@ -373,20 +483,22 @@ public class SimulationManager : MonoBehaviour {
         agentMaterialsArray = new Material[numAgents];
         agentDebugTexturesArray = new Texture2D[numAgents];
         foodMaterialsArray = new Material[numFood];
-        foodDebugTexturesArray = new Texture2D[numFood];
+        //foodDebugTexturesArray = new Texture2D[numFood];
 
         // Create initial population of Genomes:
         // Re-Factor:
         bodyGenomeTemplate = new BodyGenome();
         bodyGenomeTemplate.InitializeGenomeAsDefault();
-        genomePoolArray = new AgentGenome[populationSize];
+        // Genome Pools:
+        supervisedGenomePoolArray = new AgentGenome[supervisedGenomePoolSize];
+        persistentGenomePoolArray = new AgentGenome[persistentGenomePoolSize];
+        InitializePopulationGenomes();
+
         // Player's dummy Genome (required to initialize Agent Class):
         AgentGenome playerGenome = new AgentGenome(-1);
         playerGenome.InitializeBodyGenomeFromTemplate(bodyGenomeTemplate);
-        playerGenome.InitializeRandomBrainFromCurrentBody(0.0f);
-
-        InitializePopulationGenomes();
-
+        playerGenome.InitializeRandomBrainFromCurrentBody(0.0f);  // player's dummy genome zeroed
+        
         // Instantiate Player Agent
         string assetURL = "AgentPrefab";
         GameObject playerAgentGO = Instantiate(Resources.Load(assetURL)) as GameObject;
@@ -394,34 +506,28 @@ public class SimulationManager : MonoBehaviour {
         playerAgentGO.GetComponent<MeshRenderer>().material = playerMat;
         playerAgentGO.GetComponent<Rigidbody2D>().mass = 10f;
         playerAgentGO.transform.localScale = new Vector3(1.5f, 1.5f, 0.33f);
-        //How to handle initial Placement?
-        //agentGO.transform.localPosition = currentEvalTicket.environmentGenome.agentStartPositionsList[i].agentStartPosition;
-        //.transform.localRotation = currentEvalTicket.environmentGenome.agentStartPositionsList[i].agentStartRotation;
-        //agentGO.GetComponent<CircleCollider2D>().enabled = false;
         playerAgent = playerAgentGO.AddComponent<Agent>();
         playerAgent.humanControlled = true;
         playerAgent.humanControlLerp = 1f;
         playerAgent.speed *= 10f;
-        //agentScript.isVisible = visible;
         StartPositionGenome playerStartPosGenome = new StartPositionGenome(Vector3.zero, Quaternion.identity);
         playerAgent.InitializeAgentFromGenome(playerGenome, playerStartPosGenome);
-        //currentAgentsArray[i] = agentScript;
-
+        
 
         // Instantiate AI Agents
-        agentsArray = new Agent[populationSize];
+        agentsArray = new Agent[numAgents];
         for (int i = 0; i < agentsArray.Length; i++) {
             GameObject agentGO = Instantiate(Resources.Load(assetURL)) as GameObject;
             agentGO.name = "Agent" + i.ToString();
             float randScale = UnityEngine.Random.Range(0.8f, 1.25f);
             agentGO.transform.localScale = new Vector3(randScale, randScale, randScale);
             Agent newAgent = agentGO.AddComponent<Agent>();
-            int numColumns = Mathf.RoundToInt(Mathf.Sqrt(populationSize));
+            int numColumns = Mathf.RoundToInt(Mathf.Sqrt(numAgents));
             int row = Mathf.FloorToInt(i / numColumns);
             int col = i % numColumns;
             StartPositionGenome agentStartPosGenome = new StartPositionGenome(new Vector3(1.25f * (col - numColumns / 2), -2.0f - (1.25f * row), 0f), Quaternion.identity);
             agentsArray[i] = newAgent; // Add to stored list of current Agents
-            newAgent.InitializeAgentFromGenome(genomePoolArray[i], agentStartPosGenome);
+            newAgent.InitializeAgentFromGenome(supervisedGenomePoolArray[i], agentStartPosGenome);
 
             Material mat = new Material(agentMatTemplate);
             agentMaterialsArray[i] = mat;
@@ -474,11 +580,11 @@ public class SimulationManager : MonoBehaviour {
             foodGO.GetComponent<MeshRenderer>().material = mat;
             newFood.material = mat;
 
-            Texture2D tex = new Texture2D(3, 1);  // foodAmountRGB
-            foodDebugTexturesArray[i] = tex;
-            newFood.texture = tex;
+            //Texture2D tex = new Texture2D(3, 1);  // foodAmountRGB
+            //foodDebugTexturesArray[i] = tex;
+            //newFood.texture = tex; // just sets floats parameters now
 
-            newFood.material.SetTexture("_MainTex", tex);
+            //newFood.material.SetTexture("_MainTex", tex);
         }
     }
     private void HookUpModules() {
@@ -602,22 +708,13 @@ public class SimulationManager : MonoBehaviour {
 
     }
     public void TickSimulation() {
-        float startTime = Time.realtimeSinceStartup;
-        HookUpModules(); // Sets nearest-neighbors etc.
-        float endTime = Time.realtimeSinceStartup;
-        if (endTime - startTime > 0.1f) {
-            Debug.Log("HookUpModules " + (endTime - startTime).ToString() + "s");
-        }
-
-        float stime = Time.realtimeSinceStartup;
+        
+        HookUpModules(); // Sets nearest-neighbors etc.        
+        
         playerAgent.Tick();
         for (int i = 0; i < agentsArray.Length; i++) {
             agentsArray[i].Tick();
-        }
-        float etime = Time.realtimeSinceStartup;
-        if (etime - stime > 0.1f) {
-            Debug.Log("AgentTick() " + (etime - stime).ToString() + "s");
-        }
+        }       
 
         Vector3 camPos = new Vector3(playerAgent.transform.position.x, playerAgent.transform.position.y, -10f);
         mainCam.transform.position = Vector3.Lerp(mainCam.transform.position, camPos, 0.045f);
@@ -657,7 +754,7 @@ public class SimulationManager : MonoBehaviour {
 
     public void TickTrainingMode() {
         // Can do one genome & 1 dataSample per frame
-        if (curTestingAgent < genomePoolArray.Length) {
+        if (curTestingGenomeSupervised < supervisedGenomePoolArray.Length) {
             if (curTestingSample < currentDataBatch.Count) {
                 // Reset Brain State!!!
                 //dummyAgent.ResetBrainState();
@@ -667,11 +764,11 @@ public class SimulationManager : MonoBehaviour {
                     dummyAgent.TickBrain();
                 }
                 //Debug.Log(CompareDataSampleToBrainOutput(dataSamplesList[curTestingSample], dummyAgent.testModule).ToString());
-                rawFitnessScoresArray[curTestingAgent] += CompareDataSampleToBrainOutput(currentDataBatch[curTestingSample], dummyAgent.testModule);
+                rawFitnessScoresArraySupervised[curTestingGenomeSupervised] += CompareDataSampleToBrainOutput(currentDataBatch[curTestingSample], dummyAgent.testModule);
 
                 // Hacky way to check if blank brains are scoring too well:
-                if(curTestingAgent == 0) {  // do Blank brain parallel to agent[0]
-                    rawFitnessScoreBlankAgent += CompareDataSampleToBrainOutput(currentDataBatch[curTestingSample], playerAgent.testModule);
+                if(curTestingGenomeSupervised == 0) {  // do Blank brain parallel to agent[0]
+                    rawFitnessScoreBlankAgentSupervised += CompareDataSampleToBrainOutput(currentDataBatch[curTestingSample], playerAgent.testModule);
                 }
 
                 curTestingSample++;
@@ -679,67 +776,57 @@ public class SimulationManager : MonoBehaviour {
             else {
                 curTestingSample = 0;
 
-                curTestingAgent++;
-                if (curTestingAgent < genomePoolArray.Length) { // this can clearly be done better
-                    dummyAgent.InitializeAgentFromGenome(genomePoolArray[curTestingAgent], dummyStartGenome);                    
+                curTestingGenomeSupervised++;
+                if (curTestingGenomeSupervised < supervisedGenomePoolArray.Length) { // this can clearly be done better
+                    dummyAgent.InitializeAgentFromGenome(supervisedGenomePoolArray[curTestingGenomeSupervised], dummyStartGenome);                    
                 }
             }
         }
         else {
             // New Generation!!!
-            //
-            NextGeneration();
-
+            NextGenerationSupervised();
         }
-
-        // Loop through all Genomes in pop
-        // Build Brain from genome
-        // Test Brain vs all dataSamples
-        // keep track of fitness score
-        // Sort by fitness
-        // Crossover
-        // Set new population
 
 
     }
-    private void NextGeneration() {
+    private void NextGenerationSupervised() {
         string fitTxt = "Gen " + curGen.ToString() + " Fitness Scores:\n";
         float totalFitness = 0f;
         float minScore = float.PositiveInfinity;
         float maxScore = float.NegativeInfinity;
-        for (int f = 0; f < populationSize; f++) {
-            fitTxt += f.ToString() + ": " + rawFitnessScoresArray[f].ToString() + "\n";
-            totalFitness += rawFitnessScoresArray[f];
-            minScore = Mathf.Min(minScore, rawFitnessScoresArray[f]);
-            maxScore = Mathf.Max(maxScore, rawFitnessScoresArray[f]);
+        for (int f = 0; f < supervisedGenomePoolSize; f++) {
+            fitTxt += f.ToString() + ": " + rawFitnessScoresArraySupervised[f].ToString() + "\n";
+            totalFitness += rawFitnessScoresArraySupervised[f];
+            minScore = Mathf.Min(minScore, rawFitnessScoresArraySupervised[f]);
+            maxScore = Mathf.Max(maxScore, rawFitnessScoresArraySupervised[f]);
         }
         
-        avgFitnessLastGen = totalFitness / (float)populationSize;
-        fitTxt += "\nAvgFitnessLastGen: " + avgFitnessLastGen.ToString() + ", blank: " + lastGenBlankAgentFitness.ToString();
+        avgFitnessLastGenSupervised = totalFitness / (float)supervisedGenomePoolSize;
+        fitTxt += "\nAvgFitnessLastGen: " + avgFitnessLastGenSupervised.ToString() + ", blank: " + lastGenBlankAgentFitnessSupervised.ToString();
         Debug.Log(fitTxt);
-        lastGenBlankAgentFitness = rawFitnessScoreBlankAgent;
-        bestFitnessScore = minScore;
+        lastGenBlankAgentFitnessSupervised = rawFitnessScoreBlankAgentSupervised;
+        bestFitnessScoreSupervised = minScore;
 
         // Process Fitness (bigger is better so lottery works)
         float scoreRange = maxScore - minScore;
         if (scoreRange == 0f) {
             scoreRange = 1f;  // avoid divide by zero
         }
-        for (int f = 0; f < populationSize; f++) {
-            rawFitnessScoresArray[f] = 1f - ((rawFitnessScoresArray[f] - minScore) / scoreRange); // normalize and invert scores for fitness lottery
+        for (int f = 0; f < supervisedGenomePoolSize; f++) {
+            rawFitnessScoresArraySupervised[f] = 1f - ((rawFitnessScoresArraySupervised[f] - minScore) / scoreRange); // normalize and invert scores for fitness lottery
         }
 
         // Sort Fitness Scores
-        int[] rankedIndicesList = new int[rawFitnessScoresArray.Length];
-        float[] rankedFitnessList = new float[rawFitnessScoresArray.Length];
+        int[] rankedIndicesList = new int[rawFitnessScoresArraySupervised.Length];
+        float[] rankedFitnessList = new float[rawFitnessScoresArraySupervised.Length];
 
         // populate arrays:
-        for (int i = 0; i < rawFitnessScoresArray.Length; i++) {
+        for (int i = 0; i < rawFitnessScoresArraySupervised.Length; i++) {
             rankedIndicesList[i] = i;
-            rankedFitnessList[i] = rawFitnessScoresArray[i];
+            rankedFitnessList[i] = rawFitnessScoresArraySupervised[i];
         }
-        for (int i = 0; i < rawFitnessScoresArray.Length - 1; i++) {
-            for (int j = 0; j < rawFitnessScoresArray.Length - 1; j++) {
+        for (int i = 0; i < rawFitnessScoresArraySupervised.Length - 1; i++) {
+            for (int j = 0; j < rawFitnessScoresArraySupervised.Length - 1; j++) {
                 float swapFitA = rankedFitnessList[j];
                 float swapFitB = rankedFitnessList[j + 1];
                 int swapIdA = rankedIndicesList[j];
@@ -753,52 +840,46 @@ public class SimulationManager : MonoBehaviour {
                 }
             }
         }
-        string fitnessRankText = "";
-        for (int i = 0; i < rawFitnessScoresArray.Length; i++) {
-            fitnessRankText += "[" + rankedIndicesList[i].ToString() + "]: " + rankedFitnessList[i].ToString() + "\n";
-        }
+        //string fitnessRankText = "";
+        //for (int i = 0; i < rawFitnessScoresArraySupervised.Length; i++) {
+        //    fitnessRankText += "[" + rankedIndicesList[i].ToString() + "]: " + rankedFitnessList[i].ToString() + "\n";
+        //}
 
         // CROSSOVER CROSSOVER CROSSOVER CROSSOVER CROSSOVER CROSSOVER CROSSOVER CROSSOVER CROSSOVER CROSSOVER CROSSOVER CROSSOVER CROSSOVER CROSSOVER CROSSOVER CROSSOVER 
         List<BrainGenome> newGenBrainGenomeList = new List<BrainGenome>(); // new population!        
-
-        //FitnessManager fitnessManager = teamsConfig.playersList[playerIndex].fitnessManager;
-        //TrainingSettingsManager trainingSettingsManager = teamsConfig.playersList[playerIndex].trainingSettingsManager;
-
+        
         // Keep top-half peformers + mutations:
-        for (int x = 0; x < genomePoolArray.Length; x++) {
+        for (int x = 0; x < supervisedGenomePoolArray.Length; x++) {
             if (x == 0) {
-                BrainGenome parentGenome = genomePoolArray[rankedIndicesList[x]].brainGenome;  // keep top performer as-is
+                BrainGenome parentGenome = supervisedGenomePoolArray[rankedIndicesList[x]].brainGenome;  // keep top performer as-is
                 newGenBrainGenomeList.Add(parentGenome);
             }
             else {
                 BrainGenome newBrainGenome = new BrainGenome();
                 int parentIndex = GetAgentIndexByLottery(rankedFitnessList, rankedIndicesList);
-                BrainGenome parentGenome = genomePoolArray[parentIndex].brainGenome;
-                newBrainGenome.SetToMutatedCopyOfParentGenome(parentGenome, mutationSettings);
+                BrainGenome parentGenome = supervisedGenomePoolArray[parentIndex].brainGenome;
+                newBrainGenome.SetToMutatedCopyOfParentGenome(parentGenome, mutationSettingsSupervised);
                 newGenBrainGenomeList.Add(newBrainGenome);
             }
         }
 
-        for (int i = 0; i < genomePoolArray.Length; i++) {
-            genomePoolArray[i].brainGenome = newGenBrainGenomeList[i];
+        for (int i = 0; i < supervisedGenomePoolArray.Length; i++) {
+            supervisedGenomePoolArray[i].brainGenome = newGenBrainGenomeList[i];
         }
 
         // Reset
-        ResetTrainingForNewGen();
+        ResetTrainingForNewGenSupervised();
 
         //mutationSettings.mutationChance *= 0.995f;
         //mutationSettings.mutationStepSize *= 0.995f;
-
-        //UpdateAgentBrains();
-        //HookUpModules();
-
+        
         curGen++;
     }
 
     private void UpdateAgentBrains() {
         // UPDATE BRAINS TEST!!!!!
         for (int a = 0; a < agentsArray.Length; a++) {
-            agentsArray[a].ReplaceBrain(genomePoolArray[a % 32]);
+            agentsArray[a].ReplaceBrain(supervisedGenomePoolArray[a % 32]);
         }
     }
 
@@ -824,14 +905,14 @@ public class SimulationManager : MonoBehaviour {
         return selectedIndex;
     }
 
-    private void ResetTrainingForNewGen() {
-        rawFitnessScoresArray = new float[populationSize];
-        rawFitnessScoreBlankAgent = 0f;
+    private void ResetTrainingForNewGenSupervised() {
+        rawFitnessScoresArraySupervised = new float[supervisedGenomePoolSize];
+        rawFitnessScoreBlankAgentSupervised = 0f;
 
-        curTestingAgent = 0;
+        curTestingGenomeSupervised = 0;
         curTestingSample = 0;
 
-        dummyAgent.InitializeAgentFromGenome(genomePoolArray[0], dummyStartGenome);
+        dummyAgent.InitializeAgentFromGenome(supervisedGenomePoolArray[0], dummyStartGenome);
         SetUpTrainingDataBatch();
     }
 }

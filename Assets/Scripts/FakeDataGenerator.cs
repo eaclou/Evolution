@@ -254,15 +254,15 @@ public static class FakeDataGenerator {
         List<DataSample> mainDataList = new List<DataSample>();
 
         List<DataSample> repelPredsDataList = FakeDataGenerator.GenerateDataRepelPreds(Mathf.RoundToInt((float)numRandomSets * 1.0f));
-        List<DataSample> repelWallsDataList = FakeDataGenerator.GenerateDataRepelWalls(numRandomSets);
-        List<DataSample> repelFriendsDataList = FakeDataGenerator.GenerateDataRepelFriends(numRandomSets);
-        List<DataSample> attractFoodDataList = FakeDataGenerator.GenerateDataAttractFood(numRandomSets);
+        List<DataSample> repelWallsDataList = FakeDataGenerator.GenerateDataRepelWalls(Mathf.RoundToInt((float)numRandomSets * 0.25f));
+        List<DataSample> repelFriendsDataList = FakeDataGenerator.GenerateDataRepelFriends(Mathf.RoundToInt((float)numRandomSets * 0.75f));
+        List<DataSample> attractFoodDataList = FakeDataGenerator.GenerateDataAttractFood(Mathf.RoundToInt((float)numRandomSets * 2f));
 
         for(int i = 0; i < repelPredsDataList.Count; i++) {
-            //mainDataList.Add(repelPredsDataList[i]);
+            mainDataList.Add(repelPredsDataList[i]);
         }
         for (int i = 0; i < repelWallsDataList.Count; i++) {
-            //mainDataList.Add(repelWallsDataList[i]);
+            mainDataList.Add(repelWallsDataList[i]);
         }
         for (int i = 0; i < repelFriendsDataList.Count; i++) {
             mainDataList.Add(repelFriendsDataList[i]);
