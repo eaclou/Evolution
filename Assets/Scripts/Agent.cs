@@ -188,12 +188,12 @@ public class Agent : MonoBehaviour {
     }
     
     public void TickBrain() {
-        float startTime = Time.realtimeSinceStartup;
+        //float startTime = Time.realtimeSinceStartup;
         brain.BrainMasterFunction();
-        float endTime = Time.realtimeSinceStartup;
-        if(endTime - startTime > 0.1f) {
-            Debug.Log("TickBrain " + (endTime - startTime).ToString() + "s");
-        }
+        //float endTime = Time.realtimeSinceStartup;
+        //if(endTime - startTime > 0.1f) {
+        //    Debug.Log("TickBrain " + (endTime - startTime).ToString() + "s");
+        //}
     }
     public void TickModules() {
         testModule.Tick();

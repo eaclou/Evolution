@@ -5,18 +5,18 @@ using UnityEngine;
 public class PredatorModule : MonoBehaviour {
 
     public Rigidbody2D rigidBody;
-    private float speed = 75f;
+    private float speed = 1000f;
 
-    private float damage = 0.15f;
+    private float damage = 0.25f;
     private int counter = 0;
 
     private float randX;
     private float randY;
 
-    private float minScale = 3f;
-    private float maxScale = 5f;
+    private float minScale = 4f;
+    private float maxScale = 5.5f;
 
-    private int framesPerDirChange = 32;
+    private int framesPerDirChange = 64;
 
     // Use this for initialization
     void Awake () {

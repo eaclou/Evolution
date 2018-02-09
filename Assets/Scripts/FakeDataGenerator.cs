@@ -250,25 +250,64 @@ public static class FakeDataGenerator {
         }
         return dataList;
     }
+    public static List<DataSample> GenerateDataCopyFriends(int numRandomSets) {
+        // Try to match movement of nearest-neighbor!
+        List<DataSample> dataList = new List<DataSample>();
+        //int numRandomSets = 64;
+        for (int i = 0; i < numRandomSets; i++) {
+            for (int x = -1; x < 2; x++) {
+                for (int y = -1; y < 2; y++) {
+                    if (x != 0 & y != 0) {
+                        DataSample sample = GetRandomSampleInputs();
+
+                        //Vector2 friendPos = new Vector2((float)x, (float)y);
+                        //Vector2 friendDir = friendPos.normalized;
+
+                        Vector2 friendVel = new Vector2((float)x, (float)y);
+
+                        //sample.inputDataArray[8] = friendPos.x;  // friendPos
+                        //sample.inputDataArray[9] = friendPos.y;  // friendPos
+                        sample.inputDataArray[10] = friendVel.x;  // friendVelX
+                        sample.inputDataArray[11] = friendVel.y;  // friendVelY
+                        //sample.inputDataArray[12] = friendDir.x;  // friendDir
+                        //sample.inputDataArray[13] = friendDir.y;  // friendDir
+
+                        sample.outputDataArray[0] = sample.inputDataArray[10];  // Same as Friend Movement!
+                        sample.outputDataArray[1] = sample.inputDataArray[11];  // Same as Friend Movement!
+
+                        dataList.Add(sample);
+
+                        //sample.Print();
+                    }
+                }
+            }
+        }
+        return dataList;
+    }
     public static List<DataSample> GenerateDataStandardMix(int numRandomSets) {
         List<DataSample> mainDataList = new List<DataSample>();
 
-        List<DataSample> repelPredsDataList = FakeDataGenerator.GenerateDataRepelPreds(Mathf.RoundToInt((float)numRandomSets * 1.0f));
-        List<DataSample> repelWallsDataList = FakeDataGenerator.GenerateDataRepelWalls(Mathf.RoundToInt((float)numRandomSets * 0.25f));
-        List<DataSample> repelFriendsDataList = FakeDataGenerator.GenerateDataRepelFriends(Mathf.RoundToInt((float)numRandomSets * 0.75f));
-        List<DataSample> attractFoodDataList = FakeDataGenerator.GenerateDataAttractFood(Mathf.RoundToInt((float)numRandomSets * 2f));
+        List<DataSample> repelPredsDataList = FakeDataGenerator.GenerateDataRepelPreds(Mathf.RoundToInt((float)numRandomSets * 0.25f));
+        List<DataSample> repelWallsDataList = FakeDataGenerator.GenerateDataRepelWalls(Mathf.RoundToInt((float)numRandomSets * 1f));
+        List<DataSample> repelFriendsDataList = FakeDataGenerator.GenerateDataRepelFriends(Mathf.RoundToInt((float)numRandomSets * 0.25f));
+        List<DataSample> attractFoodDataList = FakeDataGenerator.GenerateDataAttractFood(Mathf.RoundToInt((float)numRandomSets * 0.25f));
 
-        for(int i = 0; i < repelPredsDataList.Count; i++) {
+        List<DataSample> copyFriendsDataList = FakeDataGenerator.GenerateDataCopyFriends(Mathf.RoundToInt((float)numRandomSets * 1.35f));
+
+        for (int i = 0; i < repelPredsDataList.Count; i++) {
             mainDataList.Add(repelPredsDataList[i]);
         }
         for (int i = 0; i < repelWallsDataList.Count; i++) {
             mainDataList.Add(repelWallsDataList[i]);
         }
         for (int i = 0; i < repelFriendsDataList.Count; i++) {
-            mainDataList.Add(repelFriendsDataList[i]);
+            //mainDataList.Add(repelFriendsDataList[i]);
         }
         for (int i = 0; i < attractFoodDataList.Count; i++) {
             mainDataList.Add(attractFoodDataList[i]);
+        }
+        for (int i = 0; i < copyFriendsDataList.Count; i++) {
+            mainDataList.Add(copyFriendsDataList[i]);
         }
 
         return mainDataList;

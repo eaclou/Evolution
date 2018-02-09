@@ -42,7 +42,7 @@
 			v2f vert (appdata v)
 			{
 				v2f o;
-				o.vertex = UnityObjectToClipPos(v.vertex);
+				o.vertex = UnityObjectToClipPos(v.vertex + float4(0,0,-0.1,0));
 				o.uv = TRANSFORM_TEX(v.uv, _MainTex);
 				//UNITY_TRANSFER_FOG(o,o.vertex);
 				return o;
@@ -54,7 +54,7 @@
 				//fixed4 texSample = tex2D(_MainTex, i.uv);
 
 				float4 bgColor = float4(0.2, 2, 0.5, 1.0);
-				float4 damageColor = float4(0.5, 0, 0,1);
+				float4 damageColor = float4(0.5, 0.5, 0.4,1);
 				float damageRadius = 0.8;
 				
 				
@@ -85,41 +85,48 @@
 				//outCol.rgb = lerp(damageColor, bgColor, healthValue);
 
 				float outCommRadius = 0.3;
-				float3 negColor = float3(1, 0.75, 0.25) * 1.25;
-				float3 posColor = float3(0.25, 0.75, 1) * 1.25;
+				float3 negColor = float3(1, 0.6, 0.0) * 1.05;
+				float3 posColor = float3(0.25, 0.6, 1) * 1.25;
 
 				float healthValue = saturate(min(foodEnergy, hitPoints));
 				if(healthValue < 0.30) {
 					outCol.rgb = lerp(damageColor, bgColor, 0);
-					outCommRadius *= healthValue * 3;
-					negColor *= 0.5;
-					posColor *= 0.5;
+					//outCommRadius *= healthValue * 3;
+					//negColor *= 0.5;
+					//posColor *= 0.5;
 				}
 				outCol.rgb = lerp(outCol.rgb, float3(0.8, 0.75, 0.9), 0.45);
 							
-				float2 outCommOrigin0 = float2(0.5, 0.5);
+				float2 outCommOrigin0 = float2(0.25, 0.25);
 				float outCommDist0 = length(coords - outCommOrigin0);
 				if(outCommDist0 < outCommRadius) {
-					float4 sampleCol = tex2D(_MainTex, float2(0.125, 0.667));
-					outCol.rgb = lerp(negColor, posColor, sampleCol.r) * abs(sampleCol.r * 2.0 - 1.0);
+					float4 sampleCol = tex2D(_MainTex, float2(0.125, 0.667));  // 0-1
+					float val = floor(sampleCol.r * 3) - 1; // ??? -1,0,1 ???
+					outCol.rgb = lerp(negColor, posColor, val * 0.5 + 0.5) * abs(val);
 				}
-				float2 outCommOrigin1 = float2(0.5, -0.5);
+				float2 outCommOrigin1 = float2(0.25, -0.25);
 				float outCommDist1 = length(coords - outCommOrigin1);
 				if(outCommDist1 < outCommRadius) {
 					float4 sampleCol = tex2D(_MainTex, float2(0.375, 0.667));
-					outCol.rgb = lerp(negColor, posColor, sampleCol.r) * abs(sampleCol.r * 2.0 - 1.0);
+					float val = floor(sampleCol.r * 3) - 1; // ??? -1,0,1 ???
+					outCol.rgb = lerp(negColor, posColor, val * 0.5 + 0.5) * abs(val);
+					//outCol.rgb = lerp(negColor, posColor, sampleCol.r) * abs(sampleCol.r * 2.0 - 1.0);
 				}
-				float2 outCommOrigin2 = float2(-0.5, 0.5);
+				float2 outCommOrigin2 = float2(-0.25, 0.25);
 				float outCommDist2 = length(coords - outCommOrigin2);
 				if(outCommDist2 < outCommRadius) {
 					float4 sampleCol = tex2D(_MainTex, float2(0.625, 0.667));
-					outCol.rgb = lerp(negColor, posColor, sampleCol.r) * abs(sampleCol.r * 2.0 - 1.0);
+					float val = floor(sampleCol.r * 3) - 1; // ??? -1,0,1 ???
+					outCol.rgb = lerp(negColor, posColor, val * 0.5 + 0.5) * abs(val);
+					//outCol.rgb = lerp(negColor, posColor, sampleCol.r) * abs(sampleCol.r * 2.0 - 1.0);
 				}
-				float2 outCommOrigin3 = float2(-0.5, -0.5);
+				float2 outCommOrigin3 = float2(-0.25, -0.25);
 				float outCommDist3 = length(coords - outCommOrigin3);
 				if(outCommDist3 < outCommRadius) {
 					float4 sampleCol = tex2D(_MainTex, float2(0.875, 0.667));
-					outCol.rgb = lerp(negColor, posColor, sampleCol.r) * abs(sampleCol.r * 2.0 - 1.0);
+					float val = floor(sampleCol.r * 3) - 1; // ??? -1,0,1 ???
+					outCol.rgb = lerp(negColor, posColor, val * 0.5 + 0.5) * abs(val);
+					//outCol.rgb = lerp(negColor, posColor, sampleCol.r) * abs(sampleCol.r * 2.0 - 1.0);
 				}
 
 				float cellSize = 4;

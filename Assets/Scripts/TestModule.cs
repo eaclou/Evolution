@@ -634,17 +634,18 @@ public class TestModule {
         }
         distTopLeft[0] = (raycastMaxLength - distance) / raycastMaxLength;
 
-        inComm0[0] = friendTestModule.outComm0[0];
-        inComm1[0] = friendTestModule.outComm1[0];
-        inComm2[0] = friendTestModule.outComm2[0];
-        inComm3[0] = friendTestModule.outComm3[0];
+        //
+        inComm0[0] = Mathf.Round(friendTestModule.outComm0[0] * 3f / 2f);
+        inComm1[0] = Mathf.Round(friendTestModule.outComm1[0] * 3f / 2f);
+        inComm2[0] = Mathf.Round(friendTestModule.outComm2[0] * 3f / 2f);
+        inComm3[0] = Mathf.Round(friendTestModule.outComm3[0] * 3f / 2f);
 
         // TEST
         //hit = Physics2D.Raycast(new Vector2(35f, 0f), new Vector2(1f, 0f), raycastMaxLength);  //  + / +
         //distance = raycastMaxLength;
         //if (hit.collider != null && hit.collider.tag == "HazardCollider") {
-            //distance = (hit.point - new Vector2(35f, 0f)).magnitude;
-            //Debug.Log("HIT TEST! " + ((raycastMaxLength - distance) / raycastMaxLength).ToString());
+        //distance = (hit.point - new Vector2(35f, 0f)).magnitude;
+        //Debug.Log("HIT TEST! " + ((raycastMaxLength - distance) / raycastMaxLength).ToString());
         //}
         //distTopLeft[0] = (raycastMaxLength - distance) / raycastMaxLength;
     }
