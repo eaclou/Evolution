@@ -121,11 +121,19 @@ public class BrainGenome {
         linkList = new List<LinkGenome>();
         for (int i = 0; i < parentGenome.linkList.Count; i++) {
             LinkGenome newLinkGenome = new LinkGenome(parentGenome.linkList[i].fromModuleID, parentGenome.linkList[i].fromNeuronID, parentGenome.linkList[i].toModuleID, parentGenome.linkList[i].toNeuronID, parentGenome.linkList[i].weight, true);
-            float randChance = UnityEngine.Random.Range(0f, 1f);
-            if (randChance < settings.mutationChance) {
+
+            float randZeroChance = UnityEngine.Random.Range(0f, 1f);
+            if (randZeroChance < settings.zeroWeightChance) {
+                newLinkGenome.weight = 0f;
+            }
+
+            float randMutationChance = UnityEngine.Random.Range(0f, 1f);
+            if (randMutationChance < settings.mutationChance) {
                 float randomWeight = Gaussian.GetRandomGaussian();
                 newLinkGenome.weight = newLinkGenome.weight + Mathf.Lerp(0f, randomWeight, settings.mutationStepSize);
             }
+
+            newLinkGenome.weight *= settings.weightDecayAmount;
             //newLinkGenome.weight *= 0.95f;
             linkList.Add(newLinkGenome);
         }

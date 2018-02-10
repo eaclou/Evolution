@@ -7,7 +7,7 @@ public class PredatorModule : MonoBehaviour {
     public Rigidbody2D rigidBody;
     private float speed = 1000f;
 
-    private float damage = 0.25f;
+    private float damage = 0.14f;
     private int counter = 0;
 
     private float randX;
@@ -15,6 +15,7 @@ public class PredatorModule : MonoBehaviour {
 
     private float minScale = 4f;
     private float maxScale = 5.5f;
+    public float curScale = 4f;
 
     private int framesPerDirChange = 64;
 
@@ -22,8 +23,8 @@ public class PredatorModule : MonoBehaviour {
     void Awake () {
         rigidBody = GetComponent<Rigidbody2D>();
 
-        float size = UnityEngine.Random.Range(minScale, maxScale);
-        Vector3 scale = new Vector3(size, size, size);
+        float curScale = UnityEngine.Random.Range(minScale, maxScale);
+        Vector3 scale = new Vector3(curScale, curScale, curScale);
         transform.localScale = scale;
     }
 	

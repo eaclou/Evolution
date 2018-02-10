@@ -7,6 +7,7 @@
 		_FoodAmountG ("_FoodAmountG", Float) = 1.0
 		_FoodAmountB ("_FoodAmountB", Float) = 1.0
 		_Scale ("_Scale", Float) = 1.0
+		_IsBeingEaten ("_IsBeingEaten", Float) = 0.0
 	}
 	SubShader
 	{
@@ -43,6 +44,7 @@
 			fixed _FoodAmountG;
 			fixed _FoodAmountB;
 			fixed _Scale;
+			fixed _IsBeingEaten;
 
 			float rand(float2 co){
 				return frac(sin(dot(co.xy ,float2(12.9898,78.233))) * 43758.5453);
@@ -105,7 +107,10 @@
 				//outColor.a = alpha;
 				float alphaCutoffValue = 0.1;
 				clip(outColor.a - alphaCutoffValue);
-				return outColor * 0.45;
+				float dimmer = 0.45 + _IsBeingEaten * 0.075;
+				outColor.rgb *= dimmer;
+
+				return outColor;
 			}
 			ENDCG
 		}

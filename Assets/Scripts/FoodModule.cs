@@ -15,15 +15,18 @@ public class FoodModule : MonoBehaviour {
 
     private int colliderCount = 0;
 
-    private float feedingRate = 0.01f;
+    private float feedingRate = 0.025f;
 
     public bool isDepleted = false;
 
     private float minScale = 0.5f;
+    public float curScale = 1f;
     private float maxScale = 4.5f;
 
     private float minMass = 0.1f;
     private float maxMass = 25f;
+
+    private float isBeingEaten = 0f;
 
     // Use this for initialization
     void Start() {
@@ -46,18 +49,28 @@ public class FoodModule : MonoBehaviour {
         float avgAmount = (amountR + amountG + amountB) / 3.0f;
         float lerpAmount = Mathf.Sqrt(avgAmount);
 
-        float scale = Mathf.Lerp(minScale, maxScale, lerpAmount);
+        curScale = Mathf.Lerp(minScale, maxScale, lerpAmount);
         float mass = Mathf.Lerp(minMass, maxMass, lerpAmount);
 
-        transform.localScale = new Vector3(scale, scale, scale);
+        transform.localScale = new Vector3(curScale, curScale, curScale);
         GetComponent<Rigidbody2D>().mass = mass;
 
         isDepleted = CheckIfDepleted();
 
+        /*if(colliderCount > 0) {
+            isBeingEaten = 1.0f;
+        }
+        else {
+            isBeingEaten = 0f;
+        }*/
+
         material.SetFloat("_FoodAmountR", amountR);
         material.SetFloat("_FoodAmountG", amountG);
         material.SetFloat("_FoodAmountB", amountB);
-        material.SetFloat("_Scale", scale);
+        material.SetFloat("_Scale", curScale);
+        material.SetFloat("_IsBeingEaten", isBeingEaten);
+
+        isBeingEaten = 0.0f;
     }
 
     private void OnCollisionEnter2D(Collision2D coll) {
@@ -70,6 +83,8 @@ public class FoodModule : MonoBehaviour {
 
         Agent collidingAgent = coll.collider.gameObject.GetComponent<Agent>();
         if (collidingAgent != null) {
+
+            isBeingEaten = 1.0f;
 
             float flow = feedingRate; // / colliderCount;
             if(colliderCount == 0) {

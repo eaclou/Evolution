@@ -12,7 +12,9 @@ public class SimulationManager : MonoBehaviour {
     public Button buttonClearTrainingData;
     public Button buttonToggleTrainingPersistent;
 
-    public Camera mainCam;
+    public UIManager uiManager;
+    //public Camera mainCam;
+    public CameraManager cameraManager;
     private int numAgents = 64;
     private int supervisedGenomePoolSize = 64;  // Brain evaluated tested on DataSamples only
     private int persistentGenomePoolSize = 64;  // spawned as Agents that live until they are killed naturally, tested on Fitness Function
@@ -49,8 +51,9 @@ public class SimulationManager : MonoBehaviour {
     private int dataBatchSize = 48;
     private int minDataSamplesForTraining = 4;  // won't start training brains until DataList has at least this many samples
     private int periodicSamplingRate = 32;  // saves a sample of player's data every (this #) frames
-    public MutationSettings mutationSettingsSupervised;
-    public MutationSettings mutationSettingsPersistent;
+    public SettingsManager settingsManager;
+    //public MutationSettings mutationSettingsSupervised;
+    //public MutationSettings mutationSettingsPersistent;
     public float[] rawFitnessScoresArraySupervised;
     public float[] rawFitnessScoresArrayPersistent;
     public bool trainingRequirementsMetSupervised = true;  // minimum reqs met
@@ -89,7 +92,150 @@ public class SimulationManager : MonoBehaviour {
 
     // need to be able to update Agent's Brain on the fly?  --- but needs to access the Module to set up inputs/outputs???
     // Ability to run a Brain Headless (without instantiating an Agent?)
-    
+
+    public void InitializeTrainingApparatus() {
+        settingsManager.Initialize();
+        //mutationSettingsSupervised = new MutationSettings(0.015f, 0.6f, 0.005f, 1f, 0.1f, 0.001f);
+        //mutationSettingsPersistent = new MutationSettings(0.01f, 0.5f, 0.00001f, 0.9999f, 0.01f, 0.001f);
+
+        GameObject dummyAgentGO = new GameObject("DummyAgent");
+        dummyAgent = dummyAgentGO.AddComponent<Agent>();
+        dummyStartGenome = new StartPositionGenome(Vector3.zero, Quaternion.identity);
+
+        GenerateDataRepelWalls();
+        //CreateFakeData();
+
+        ResetTrainingForNewGenSupervised();
+    }
+    public void InitializeNewSimulation() {
+        ToggleTrainingPersistent();
+        // Create Environment (Or have it pre-built)
+
+        agentMaterialsArray = new Material[numAgents];
+        agentDebugTexturesArray = new Texture2D[numAgents];
+        foodMaterialsArray = new Material[numFood];
+        //foodDebugTexturesArray = new Texture2D[numFood];
+        // Create initial population of Genomes:
+        // Re-Factor:
+        bodyGenomeTemplate = new BodyGenome();
+        bodyGenomeTemplate.InitializeGenomeAsDefault();
+
+        InitializePopulationGenomes();
+
+        // Player's dummy Genome (required to initialize Agent Class):
+        AgentGenome playerGenome = new AgentGenome(-1);
+        playerGenome.InitializeBodyGenomeFromTemplate(bodyGenomeTemplate);
+        playerGenome.InitializeRandomBrainFromCurrentBody(0.25f);  // player's dummy genome zeroed
+
+        // Instantiate Player Agent
+        string assetURL = "AgentPrefab";
+        GameObject playerAgentGO = Instantiate(Resources.Load(assetURL)) as GameObject;
+        playerAgentGO.name = "PlayerAgent";
+        playerAgentGO.GetComponent<MeshRenderer>().material = playerMat;
+        playerAgentGO.GetComponent<Rigidbody2D>().mass = 1f;
+        playerAgentGO.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
+        playerAgent = playerAgentGO.AddComponent<Agent>();
+        //playerAgent.humanControlled = true;
+        //playerAgent.humanControlLerp = 1f;
+        playerAgent.speed *= 1f;
+        StartPositionGenome playerStartPosGenome = new StartPositionGenome(Vector3.zero, Quaternion.identity);
+        playerAgent.InitializeAgentFromGenome(playerGenome, playerStartPosGenome);
+        Material pMat = new Material(agentMatTemplate);
+        playerAgentGO.GetComponent<MeshRenderer>().material = pMat;
+        playerAgent.material = pMat;
+        Texture2D playerTex = new Texture2D(4, 2);  // Health, foodAmountRGB, 4 outCommChannels
+        playerTex.filterMode = FilterMode.Point;
+        playerAgent.texture = playerTex;
+        playerAgent.material.SetTexture("_MainTex", playerTex);
+        //playerAgent.material.SetFloat("_IsPlayer", 1.0f);
+
+        uiManager.healthDisplayTex = playerTex;
+        uiManager.SetDisplayTextures();
+
+        // Instantiate AI Agents
+        agentsArray = new Agent[numAgents];
+        for (int i = 0; i < agentsArray.Length; i++) {
+            GameObject agentGO = Instantiate(Resources.Load(assetURL)) as GameObject;
+            agentGO.name = "Agent" + i.ToString();
+            float randScale = UnityEngine.Random.Range(1f, 1f);
+            agentGO.transform.localScale = new Vector3(randScale, randScale, randScale);
+            Agent newAgent = agentGO.AddComponent<Agent>();
+            int numColumns = Mathf.RoundToInt(Mathf.Sqrt(numAgents));
+            int row = Mathf.FloorToInt(i / numColumns);
+            int col = i % numColumns;
+            Vector3 startPos = new Vector3(UnityEngine.Random.Range(-30f, 30f), UnityEngine.Random.Range(-30f, 30f), 0f);
+            StartPositionGenome agentStartPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
+            //StartPositionGenome agentStartPosGenome = new StartPositionGenome(new Vector3(1.25f * (col - numColumns / 2), -2.0f - (1.25f * row), 0f), Quaternion.identity);
+            agentsArray[i] = newAgent; // Add to stored list of current Agents
+            newAgent.InitializeAgentFromGenome(supervisedGenomePoolArray[i], agentStartPosGenome);
+
+            Material mat = new Material(agentMatTemplate);
+            agentMaterialsArray[i] = mat;
+            agentGO.GetComponent<MeshRenderer>().material = mat;
+            newAgent.material = mat;
+
+            Texture2D tex = new Texture2D(4, 2);  // Health, foodAmountRGB, 4 outCommChannels
+            tex.filterMode = FilterMode.Point;
+            agentDebugTexturesArray[i] = tex;
+            newAgent.texture = tex;
+
+            newAgent.material.SetTexture("_MainTex", tex);
+        }
+
+        // FOOODDDD!!!!
+        foodArray = new FoodModule[numFood];
+        SpawnFood();
+        predatorArray = new PredatorModule[numPredators];
+        SpawnPredators();
+
+        InitializeGridCells();
+        HookUpModules();
+        InitializeTrainingApparatus();
+    }
+    private void InitializePopulationGenomes() {
+
+        // Genome Pools:
+        supervisedGenomePoolArray = new AgentGenome[supervisedGenomePoolSize];
+        prevGenSupervisedGenomePoolArray = new AgentGenome[supervisedGenomePoolSize];
+        prevGenSupervisedRankedIndicesList = new int[supervisedGenomePoolSize];
+        prevGenSupervisedRankedFitnessList = new float[supervisedGenomePoolSize];
+
+        // !@$#!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+        // ========= DONT FORGET TO UNDO THIS!!! ============
+        persistentGenomePoolArray = supervisedGenomePoolArray; // shared pool!
+        //old (correct): persistentGenomePoolArray = new AgentGenome[persistentGenomePoolSize];
+        //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+        // !@$#!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+        float initialConnectionWeights = 0.35f;
+        for (int i = 0; i < supervisedGenomePoolArray.Length; i++) {   // Create initial Population Supervised Learners
+            AgentGenome agentGenome = new AgentGenome(i);
+            agentGenome.InitializeBodyGenomeFromTemplate(bodyGenomeTemplate);
+            agentGenome.InitializeRandomBrainFromCurrentBody(initialConnectionWeights);
+            supervisedGenomePoolArray[i] = agentGenome;
+            prevGenSupervisedGenomePoolArray[i] = agentGenome;
+            prevGenSupervisedRankedIndicesList[i] = i;
+            prevGenSupervisedRankedFitnessList[i] = 1f;
+        }
+
+        for (int i = 0; i < persistentGenomePoolArray.Length; i++) {   // Create initial Population Supervised Learners
+            AgentGenome agentGenome = new AgentGenome(i);
+            agentGenome.InitializeBodyGenomeFromTemplate(bodyGenomeTemplate);
+            agentGenome.InitializeRandomBrainFromCurrentBody(initialConnectionWeights);
+            persistentGenomePoolArray[i] = agentGenome;
+        }
+
+        // Sort Fitness Scores Persistent:
+        rankedIndicesListPersistent = new int[persistentGenomePoolSize];
+        rankedFitnessListPersistent = new float[persistentGenomePoolSize];
+
+        for (int i = 0; i < persistentGenomePoolSize; i++) {
+            rankedIndicesListPersistent[i] = i;
+            rankedFitnessListPersistent[i] = 1f;
+        }
+    }
     public void InitializeGridCells() {
         mapGridCellArray = new MapGridCell[agentGridCellResolution][];
         for(int i = 0; i < agentGridCellResolution; i++) {
@@ -123,7 +269,7 @@ public class SimulationManager : MonoBehaviour {
             }
         }
 
-        float mapSize = 80f;
+        float mapSize = 160f;
         float cellSize = mapSize / agentGridCellResolution;
 
         // FOOD!!! :::::::
@@ -251,7 +397,7 @@ public class SimulationManager : MonoBehaviour {
                 }
                 
                 // Create duplicate Genome
-                newBrainGenome.SetToMutatedCopyOfParentGenome(parentGenome, mutationSettingsPersistent);
+                newBrainGenome.SetToMutatedCopyOfParentGenome(parentGenome, settingsManager.mutationSettingsPersistent);
                 
                 persistentGenomePoolArray[agentIndex].brainGenome = newBrainGenome; // update genome to new one
 
@@ -288,355 +434,6 @@ public class SimulationManager : MonoBehaviour {
         playerAgent.InitializeAgentFromGenome(persistentGenomePoolArray[rankedIndicesListPersistent[0]], startPosGenome);
         //playerAgent.ReplaceBrain(persistentGenomePoolArray[rankedIndicesListPersistent[0]]);
     }
-    public void ToggleRecording() {
-        recording = !recording;
-    }
-    public void ToggleTrainingSupervised() {
-        if(firstTimeTrainingSupervised) {
-            ResetTrainingForNewGenSupervised();
-            firstTimeTrainingSupervised = false;
-        }
-        isTrainingSupervised = !isTrainingSupervised;
-    }
-    public void ToggleTrainingPersistent() {
-        if (firstTimeTrainingPersistent) {
-            //ResetTrainingForNewGen();
-            rawFitnessScoresArrayPersistent = new float[persistentGenomePoolSize];
-            firstTimeTrainingPersistent = false;
-        }
-        isTrainingPersistent = !isTrainingPersistent;
-    }
-    public void ResetGenomes() {
-        InitializePopulationGenomes();
-        curGen = 0;
-        ResetTrainingForNewGenSupervised();
-        //UpdateAgentBrains();
-    }
-    public void ClearTrainingData() {
-        trainingRequirementsMetSupervised = false;
-        dataSamplesList.Clear();
-    }
-    public void SaveTrainingData() {
-
-    }
-    public void LoadTrainingData() {
-
-    }
-    public void UpdateDebugUI() {
-        string debugTxt = "Training: False";
-        if(trainingRequirementsMetSupervised) {
-            debugTxt = "Training: ACTIVE   numSamples: " + dataSamplesList.Count.ToString() + "\n";
-            debugTxt += "Gen: " + curGen.ToString() + ", Agent: " + curTestingGenomeSupervised.ToString() + ", Sample: " + curTestingSample.ToString() + "\n";
-            debugTxt += "Fitness Best: " + bestFitnessScoreSupervised.ToString() + " ( Avg: " + avgFitnessLastGenSupervised.ToString() + " ) Blank: " + lastGenBlankAgentFitnessSupervised.ToString() + "\n";
-            debugTxt += "Agent[0] # Neurons: " + agentsArray[0].brain.neuronList.Count.ToString() + ", # Axons: " + agentsArray[0].brain.axonList.Count.ToString() + "\n";
-            debugTxt += "CurOldestAge: " + currentOldestAgent.ToString() + ", numChildrenBorn: " + numPersistentAgentsBorn.ToString() + ", ~Gen: " + ((float)numPersistentAgentsBorn / (float)numAgents).ToString();
-            debugTxt += "\nBotRecordAge: " + recordBotAge.ToString() + ", PlayerRecordAge: " + recordPlayerAge.ToString();
-        }
-        textDebugTrainingInfo.text = debugTxt;
-
-        if(recording) {
-            ColorBlock colorBlock = buttonToggleRecording.colors;
-            colorBlock.normalColor = Color.red;
-            colorBlock.highlightedColor = Color.red;
-            buttonToggleRecording.colors = colorBlock;
-
-            buttonToggleRecording.GetComponentInChildren<Text>().color = Color.white;
-            buttonToggleRecording.GetComponentInChildren<Text>().text = "RECORDING";
-        }
-        else {
-            ColorBlock colorBlock = buttonToggleRecording.colors;
-            colorBlock.normalColor = Color.white;
-            colorBlock.highlightedColor = Color.white;
-            buttonToggleRecording.colors = colorBlock;
-
-            buttonToggleRecording.GetComponentInChildren<Text>().color = Color.black;
-            buttonToggleRecording.GetComponentInChildren<Text>().text = "OFF";
-        }
-
-        if(isTrainingSupervised) {
-            buttonToggleTrainingSupervised.GetComponentInChildren<Text>().text = "Supervised\nTraining: ON";
-        }
-        else {
-            buttonToggleTrainingSupervised.GetComponentInChildren<Text>().text = "Supervised\nTraining: OFF";
-        }
-
-        if (isTrainingPersistent) {
-            buttonToggleTrainingPersistent.GetComponentInChildren<Text>().text = "Persistent\nTraining: ON";
-        }
-        else {
-            buttonToggleTrainingPersistent.GetComponentInChildren<Text>().text = "Persistent\nTraining: OFF";
-        }
-    }
-    public void InitializeTrainingApparatus() {
-        mutationSettingsSupervised = new MutationSettings(0.015f, 0.6f, 0.1f, 0.001f);
-        mutationSettingsPersistent = new MutationSettings(0.015f, 0.6f, 0.1f, 0.001f);
-
-        GameObject dummyAgentGO = new GameObject("DummyAgent");
-        dummyAgent = dummyAgentGO.AddComponent<Agent>();
-        dummyStartGenome = new StartPositionGenome(Vector3.zero, Quaternion.identity);
-
-        GenerateDataRepelWalls();
-        //CreateFakeData();
-
-        ResetTrainingForNewGenSupervised();
-    }
-    public void GenerateDataRepelWalls() {
-        Debug.Log("GenerateDataRepelWalls()");
-        dataSamplesList = FakeDataGenerator.GenerateDataRepelWalls(64);// new List<DataSample>();
-        trainingRequirementsMetSupervised = true;
-    }
-    public void GenerateDataRepelPreds() {
-        Debug.Log("GenerateDataRepelPreds()");
-        dataSamplesList = FakeDataGenerator.GenerateDataRepelPreds(64);// new List<DataSample>();
-        trainingRequirementsMetSupervised = true;
-    }
-    public void GenerateDataRepelFriends() {
-        Debug.Log("GenerateDataRepelFriends()");
-        dataSamplesList = FakeDataGenerator.GenerateDataRepelFriends(64);// new List<DataSample>();
-        trainingRequirementsMetSupervised = true;
-    }
-    public void GenerateDataAttractFriends() {
-        Debug.Log("GenerateDataAttractFriends()");
-        dataSamplesList = FakeDataGenerator.GenerateDataAttractFriends(64);// new List<DataSample>();
-        trainingRequirementsMetSupervised = true;
-    }
-    public void GenerateDataAttractFood() {
-        Debug.Log("GenerateDataAttractFood()");
-        dataSamplesList = FakeDataGenerator.GenerateDataAttractFood(64);// new List<DataSample>();
-        trainingRequirementsMetSupervised = true;
-    }
-    public void GenerateDataAttractPreds() {
-        Debug.Log("GenerateDataAttractPreds()");
-        dataSamplesList = FakeDataGenerator.GenerateDataAttractPreds(64);// new List<DataSample>();
-        trainingRequirementsMetSupervised = true;
-    }
-    public void GenerateDataStandardMix() {
-        Debug.Log("GenerateDataStandardMix()");
-        dataSamplesList = FakeDataGenerator.GenerateDataStandardMix(64);// new List<DataSample>();
-        trainingRequirementsMetSupervised = true;
-    }
-    private void RecordPlayerData() {        
-        DataSample sample = playerAgent.RecordData();// new DataSample();
-        if(dataSamplesList.Count < maxSavedDataSamples) {
-            dataSamplesList.Add(sample);  // Add to master List
-        }
-        else {
-            int randIndex = UnityEngine.Random.Range(0, dataSamplesList.Count - 1);
-            dataSamplesList.RemoveAt(randIndex);
-            dataSamplesList.Add(sample);  // Add to master List
-        }        
-
-        if(dataSamplesList.Count >= minDataSamplesForTraining) {
-            if(!trainingRequirementsMetSupervised) {
-                SetUpTrainingDataBatch();
-                trainingRequirementsMetSupervised = true;
-            }            
-        }
-        // Make this respect maxDataSamples size and act accordingly
-        //sample.Print();
-    }
-    private void SetUpTrainingDataBatch() {
-        if(currentDataBatch == null) {
-            currentDataBatch = new List<DataSample>();
-        }
-        else {
-            currentDataBatch.Clear();
-        }
-        int numSamplesInBatch = (int)Mathf.Min(dataSamplesList.Count, dataBatchSize);
-
-        // Populate dataBatch:
-        for(int i = 0; i < numSamplesInBatch; i++) {
-            // OLD: RANDOM SAMPLING:
-            int randIndex = UnityEngine.Random.Range(0, dataSamplesList.Count - 1);
-            DataSample sample = dataSamplesList[randIndex].GetCopy();
-            currentDataBatch.Add(sample);
-
-        // TEST: Same As dataPool:
-            //DataSample sample = dataSamplesList[i].GetCopy();
-            //currentDataBatch.Add(sample);
-        }
-    }
-    private void CopyDataSampleToModule(DataSample sample, TestModule module) {
-                
-        module.bias[0] = sample.inputDataArray[0];
-        module.foodPosX[0] = sample.inputDataArray[1];
-        module.foodPosY[0] = sample.inputDataArray[2];
-        module.foodDirX[0] = sample.inputDataArray[3];
-        module.foodDirY[0] = sample.inputDataArray[4];
-        module.foodTypeR[0] = sample.inputDataArray[5];
-        module.foodTypeG[0] = sample.inputDataArray[6];
-        module.foodTypeB[0] = sample.inputDataArray[7];
-        module.friendPosX[0] = sample.inputDataArray[8];
-        module.friendPosY[0] = sample.inputDataArray[9];
-        module.friendVelX[0] = sample.inputDataArray[10];
-        module.friendVelY[0] = sample.inputDataArray[11];
-        module.friendDirX[0] = sample.inputDataArray[12];
-        module.friendDirY[0] = sample.inputDataArray[13];
-        module.enemyPosX[0] = sample.inputDataArray[14];
-        module.enemyPosY[0] = sample.inputDataArray[15];
-        module.enemyVelX[0] = sample.inputDataArray[16];
-        module.enemyVelY[0] = sample.inputDataArray[17];
-        module.enemyDirX[0] = sample.inputDataArray[18];
-        module.enemyDirY[0] = sample.inputDataArray[19];
-        module.ownVelX[0] = sample.inputDataArray[20];
-        module.ownVelY[0] = sample.inputDataArray[21];
-
-        module.temperature[0] = sample.inputDataArray[22];
-        module.pressure[0] = sample.inputDataArray[23];
-        module.isContact[0] = sample.inputDataArray[24];
-        module.contactForceX[0] = sample.inputDataArray[25];
-        module.contactForceY[0] = sample.inputDataArray[26];
-        module.hitPoints[0] = sample.inputDataArray[27];
-        module.stamina[0] = sample.inputDataArray[28];
-        module.foodAmountR[0] = sample.inputDataArray[29];
-        module.foodAmountG[0] = sample.inputDataArray[30];
-        module.foodAmountB[0] = sample.inputDataArray[31];
-        module.distUp[0] = sample.inputDataArray[32];
-        module.distTopRight[0] = sample.inputDataArray[33];
-        module.distRight[0] = sample.inputDataArray[34];
-        module.distBottomRight[0] = sample.inputDataArray[35];
-        module.distDown[0] = sample.inputDataArray[36];
-        module.distBottomLeft[0] = sample.inputDataArray[37];
-        module.distLeft[0] = sample.inputDataArray[38];
-        module.distTopLeft[0] = sample.inputDataArray[39];
-        module.inComm0[0] = sample.inputDataArray[40];
-        module.inComm1[0] = sample.inputDataArray[41];
-        module.inComm2[0] = sample.inputDataArray[42];
-        module.inComm3[0] = sample.inputDataArray[43];        
-    }
-
-    private float CompareDataSampleToBrainOutput(DataSample sample, TestModule module) {
-        float throttleX = Mathf.Round(module.throttleX[0] * 3f / 2f);// + module.throttleX[0];
-        float throttleY = Mathf.Round(module.throttleY[0] * 3f / 2f);// + module.throttleY[0];
-        float deltaX = sample.outputDataArray[0] - throttleX + (sample.outputDataArray[0] - module.throttleX[0]) * 0.25f;  // Change this later?
-        float deltaY = sample.outputDataArray[1] - throttleY + (sample.outputDataArray[1] - module.throttleY[0]) * 0.25f;
-        float distSquared = deltaX * deltaX + deltaY * deltaY;
-        return distSquared;
-    }
-    private void InitializePopulationGenomes() {
-        
-        // Genome Pools:
-        supervisedGenomePoolArray = new AgentGenome[supervisedGenomePoolSize];
-        prevGenSupervisedGenomePoolArray = new AgentGenome[supervisedGenomePoolSize];
-        prevGenSupervisedRankedIndicesList = new int[supervisedGenomePoolSize];
-        prevGenSupervisedRankedFitnessList = new float[supervisedGenomePoolSize];
-
-        // !@$#!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-        // ========= DONT FORGET TO UNDO THIS!!! ============
-        persistentGenomePoolArray = supervisedGenomePoolArray; // shared pool!
-        //old (correct): persistentGenomePoolArray = new AgentGenome[persistentGenomePoolSize];
-        //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-        // !@$#!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-
-        float initialConnectionWeights = 0.25f;
-        for (int i = 0; i < supervisedGenomePoolArray.Length; i++) {   // Create initial Population Supervised Learners
-            AgentGenome agentGenome = new AgentGenome(i);
-            agentGenome.InitializeBodyGenomeFromTemplate(bodyGenomeTemplate);
-            agentGenome.InitializeRandomBrainFromCurrentBody(initialConnectionWeights);
-            supervisedGenomePoolArray[i] = agentGenome;
-            prevGenSupervisedGenomePoolArray[i] = agentGenome;
-            prevGenSupervisedRankedIndicesList[i] = i;
-            prevGenSupervisedRankedFitnessList[i] = 1f;
-        }
-
-        for (int i = 0; i < persistentGenomePoolArray.Length; i++) {   // Create initial Population Supervised Learners
-            AgentGenome agentGenome = new AgentGenome(i);
-            agentGenome.InitializeBodyGenomeFromTemplate(bodyGenomeTemplate);
-            agentGenome.InitializeRandomBrainFromCurrentBody(initialConnectionWeights);
-            persistentGenomePoolArray[i] = agentGenome;
-        }
-
-        // Sort Fitness Scores Persistent:
-        rankedIndicesListPersistent = new int[persistentGenomePoolSize];
-        rankedFitnessListPersistent = new float[persistentGenomePoolSize];
-
-        for(int i = 0; i < persistentGenomePoolSize; i++) {
-            rankedIndicesListPersistent[i] = i;
-            rankedFitnessListPersistent[i] = 1f;
-        }
-    }
-    public void InitializeNewSimulation() {
-
-        // Create Environment (Or have it pre-built)
-
-        agentMaterialsArray = new Material[numAgents];
-        agentDebugTexturesArray = new Texture2D[numAgents];
-        foodMaterialsArray = new Material[numFood];
-        //foodDebugTexturesArray = new Texture2D[numFood];
-        // Create initial population of Genomes:
-        // Re-Factor:
-        bodyGenomeTemplate = new BodyGenome();
-        bodyGenomeTemplate.InitializeGenomeAsDefault();
-
-        InitializePopulationGenomes();
-
-        // Player's dummy Genome (required to initialize Agent Class):
-        AgentGenome playerGenome = new AgentGenome(-1);
-        playerGenome.InitializeBodyGenomeFromTemplate(bodyGenomeTemplate);
-        playerGenome.InitializeRandomBrainFromCurrentBody(0.0f);  // player's dummy genome zeroed
-        
-        // Instantiate Player Agent
-        string assetURL = "AgentPrefab";
-        GameObject playerAgentGO = Instantiate(Resources.Load(assetURL)) as GameObject;
-        playerAgentGO.name = "PlayerAgent";
-        playerAgentGO.GetComponent<MeshRenderer>().material = playerMat;
-        playerAgentGO.GetComponent<Rigidbody2D>().mass = 10f;
-        playerAgentGO.transform.localScale = new Vector3(1.5f, 1.5f, 1.5f);
-        playerAgent = playerAgentGO.AddComponent<Agent>();
-        //playerAgent.humanControlled = true;
-        //playerAgent.humanControlLerp = 1f;
-        playerAgent.speed *= 10f;
-        StartPositionGenome playerStartPosGenome = new StartPositionGenome(Vector3.zero, Quaternion.identity);
-        playerAgent.InitializeAgentFromGenome(playerGenome, playerStartPosGenome);
-        Material pMat = new Material(agentMatTemplate);
-        playerAgentGO.GetComponent<MeshRenderer>().material = pMat;
-        playerAgent.material = pMat;
-        Texture2D playerTex = new Texture2D(4, 2);  // Health, foodAmountRGB, 4 outCommChannels
-        playerTex.filterMode = FilterMode.Point;
-        playerAgent.texture = playerTex;
-        playerAgent.material.SetTexture("_MainTex", playerTex);
-
-
-        // Instantiate AI Agents
-        agentsArray = new Agent[numAgents];
-        for (int i = 0; i < agentsArray.Length; i++) {
-            GameObject agentGO = Instantiate(Resources.Load(assetURL)) as GameObject;
-            agentGO.name = "Agent" + i.ToString();
-            float randScale = UnityEngine.Random.Range(0.8f, 1.25f);
-            agentGO.transform.localScale = new Vector3(randScale, randScale, randScale);
-            Agent newAgent = agentGO.AddComponent<Agent>();
-            int numColumns = Mathf.RoundToInt(Mathf.Sqrt(numAgents));
-            int row = Mathf.FloorToInt(i / numColumns);
-            int col = i % numColumns;
-            StartPositionGenome agentStartPosGenome = new StartPositionGenome(new Vector3(1.25f * (col - numColumns / 2), -2.0f - (1.25f * row), 0f), Quaternion.identity);
-            agentsArray[i] = newAgent; // Add to stored list of current Agents
-            newAgent.InitializeAgentFromGenome(supervisedGenomePoolArray[i], agentStartPosGenome);
-
-            Material mat = new Material(agentMatTemplate);
-            agentMaterialsArray[i] = mat;
-            agentGO.GetComponent<MeshRenderer>().material = mat;
-            newAgent.material = mat;
-
-            Texture2D tex = new Texture2D(4, 2);  // Health, foodAmountRGB, 4 outCommChannels
-            tex.filterMode = FilterMode.Point;
-            agentDebugTexturesArray[i] = tex;
-            newAgent.texture = tex;
-
-            newAgent.material.SetTexture("_MainTex", tex);
-        }
-        
-        // FOOODDDD!!!!
-        foodArray = new FoodModule[numFood];
-        SpawnFood();
-        predatorArray = new PredatorModule[numPredators];
-        SpawnPredators();
-
-        InitializeGridCells();
-        HookUpModules();
-        InitializeTrainingApparatus();
-    }
 
     private void SpawnPredators() {
         Debug.Log("SpawnPredators!");
@@ -672,11 +469,12 @@ public class SimulationManager : MonoBehaviour {
             //newFood.material.SetTexture("_MainTex", tex);
         }
     }
+
     private void HookUpModules() {
         PopulateGridCells();
 
         // Find NearestNeighbors:
-        float mapSize = 80f;
+        float mapSize = 160f;
         float cellSize = mapSize / agentGridCellResolution;
         Vector2 playerPos = new Vector2(playerAgent.transform.localPosition.x, playerAgent.transform.localPosition.y);
 
@@ -690,9 +488,9 @@ public class SimulationManager : MonoBehaviour {
             int closestFriendIndex = a;  // default to self
             float nearestFriendSquaredDistance = float.PositiveInfinity;
             int closestFoodIndex = 0; // default to 0???
-            float nearestFoodSquaredDistance = float.PositiveInfinity;
+            float nearestFoodDistance = float.PositiveInfinity;
             int closestPredIndex = 0; // default to 0???
-            float nearestPredSquaredDistance = float.PositiveInfinity;
+            float nearestPredDistance = float.PositiveInfinity;
             // Only checking its own grid cell!!! Will need to expand to adjacent cells as well!
             for (int i = 0; i < mapGridCellArray[xCoord][yCoord].friendIndicesList.Count; i++) {
                 // FRIEND:
@@ -710,11 +508,11 @@ public class SimulationManager : MonoBehaviour {
             for (int i = 0; i < mapGridCellArray[xCoord][yCoord].foodIndicesList.Count; i++) {
                 // FOOD:
                 Vector2 foodPos = new Vector2(foodArray[mapGridCellArray[xCoord][yCoord].foodIndicesList[i]].transform.localPosition.x, foodArray[mapGridCellArray[xCoord][yCoord].foodIndicesList[i]].transform.localPosition.y);
-                float squaredDistFood = (foodPos - agentPos).sqrMagnitude;
-                if (squaredDistFood <= nearestFoodSquaredDistance) { // if now the closest so far, update index and dist:
+                float distFood = (foodPos - agentPos).magnitude - (foodArray[mapGridCellArray[xCoord][yCoord].foodIndicesList[i]].curScale + 1f) * 0.5f;  // subtract food & agent radii
+                if (distFood <= nearestFoodDistance) { // if now the closest so far, update index and dist:
                     if (a != mapGridCellArray[xCoord][yCoord].foodIndicesList[i]) {  // make sure it doesn't consider itself:
                         closestFoodIndex = mapGridCellArray[xCoord][yCoord].foodIndicesList[i];
-                        nearestFoodSquaredDistance = squaredDistFood;
+                        nearestFoodDistance = distFood;
                     }
                 }
             }
@@ -722,11 +520,11 @@ public class SimulationManager : MonoBehaviour {
             for (int i = 0; i < mapGridCellArray[xCoord][yCoord].predatorIndicesList.Count; i++) {
                 // PREDATORS:::::::
                 Vector2 predatorPos = new Vector2(predatorArray[mapGridCellArray[xCoord][yCoord].predatorIndicesList[i]].transform.localPosition.x, predatorArray[mapGridCellArray[xCoord][yCoord].predatorIndicesList[i]].transform.localPosition.y);
-                float squaredDistPred = (predatorPos - agentPos).sqrMagnitude;
-                if (squaredDistPred <= nearestPredSquaredDistance) { // if now the closest so far, update index and dist:
+                float distPred = (predatorPos - agentPos).magnitude - (predatorArray[mapGridCellArray[xCoord][yCoord].predatorIndicesList[i]].curScale + 1f) * 0.5f;  // subtract pred & agent radii;
+                if (distPred <= nearestPredDistance) { // if now the closest so far, update index and dist:
                     if (a != mapGridCellArray[xCoord][yCoord].predatorIndicesList[i]) {  // make sure it doesn't consider itself:
                         closestPredIndex = mapGridCellArray[xCoord][yCoord].predatorIndicesList[i];
-                        nearestPredSquaredDistance = squaredDistPred;
+                        nearestPredDistance = distPred;
                     }
                 }
             }
@@ -771,7 +569,7 @@ public class SimulationManager : MonoBehaviour {
         for (int i = 0; i < mapGridCellArray[xIndex][yIndex].foodIndicesList.Count; i++) {
             // FOOD::::
             Vector2 neighborPosFood = new Vector2(foodArray[mapGridCellArray[xIndex][yIndex].foodIndicesList[i]].transform.localPosition.x, foodArray[mapGridCellArray[xIndex][yIndex].foodIndicesList[i]].transform.localPosition.y);
-            float squaredDistFood = (neighborPosFood - playerPos).sqrMagnitude;
+            float squaredDistFood = (neighborPosFood - playerPos).magnitude - (foodArray[mapGridCellArray[xIndex][yIndex].foodIndicesList[i]].curScale + 1f) * 0.5f;  // subtract food & agent radii;
             if (squaredDistFood <= nearestDistFood) { // if now the closest so far, update index and dist:if (a != mapGridCellArray[xCoord][yCoord].agentIndicesList[i]) {  // make sure it doesn't consider itself:
                 closestIndexFood = mapGridCellArray[xIndex][yIndex].foodIndicesList[i];
                 nearestDistFood = squaredDistFood;
@@ -780,7 +578,7 @@ public class SimulationManager : MonoBehaviour {
         for (int i = 0; i < mapGridCellArray[xIndex][yIndex].predatorIndicesList.Count; i++) {
             // PREDATORS::::
             Vector2 neighborPosPred = new Vector2(predatorArray[mapGridCellArray[xIndex][yIndex].predatorIndicesList[i]].transform.localPosition.x, predatorArray[mapGridCellArray[xIndex][yIndex].predatorIndicesList[i]].transform.localPosition.y);
-            float squaredDistPred = (neighborPosPred - playerPos).sqrMagnitude;
+            float squaredDistPred = (neighborPosPred - playerPos).magnitude - (predatorArray[mapGridCellArray[xIndex][yIndex].predatorIndicesList[i]].curScale + 1f) * 0.5f;  // subtract pred & agent radii;
             if (squaredDistPred <= nearestDistPred) { // if now the closest so far, update index and dist:if (a != mapGridCellArray[xCoord][yCoord].agentIndicesList[i]) {  // make sure it doesn't consider itself:
                 closestIndexPred = mapGridCellArray[xIndex][yIndex].predatorIndicesList[i];
                 nearestDistPred = squaredDistPred;
@@ -799,14 +597,14 @@ public class SimulationManager : MonoBehaviour {
         if (playerAgent.ageCounter > recordPlayerAge) {
             recordPlayerAge = playerAgent.ageCounter;
         }
+        uiManager.UpdateScoreText(playerAgent.ageCounter);
 
         playerAgent.Tick();
         for (int i = 0; i < agentsArray.Length; i++) {
             agentsArray[i].Tick();
-        }       
+        }
 
-        Vector3 camPos = new Vector3(playerAgent.transform.position.x, playerAgent.transform.position.y, -10f);
-        mainCam.transform.position = Vector3.Lerp(mainCam.transform.position, camPos, 0.08f);
+        cameraManager.targetTransform = playerAgent.transform;
 
         bool recordData = false;
         float curHorizontalInput = 0f;
@@ -846,17 +644,18 @@ public class SimulationManager : MonoBehaviour {
         else {
             idleFramesCounter = 0;
             playerAgent.humanControlLerp = 1f;
+            playerAgent.material.SetFloat("_IsPlayer", 1.0f);
         }
         if(idleFramesCounter >= idleFramesToBotControl) {
             // Transition eventually!
             playerAgent.humanControlLerp = 0f;
+            playerAgent.material.SetFloat("_IsPlayer", 0.0f);
         }
         //public int idleFramesToBotControl = 100;
         //private int idleFramesCounter = 0;
         //public int botToHumanControlTransitionFrameCount = 8;
         //public int humanToBotControlTransitionFrameCount = 30;
     }
-
     public void TickTrainingMode() {
         // Can do one genome & 1 dataSample per frame
         if (curTestingGenomeSupervised < supervisedGenomePoolArray.Length) {
@@ -894,6 +693,7 @@ public class SimulationManager : MonoBehaviour {
 
 
     }
+
     private void NextGenerationSupervised() {
         string fitTxt = "Gen " + curGen.ToString() + " Fitness Scores:\n";
         float totalFitness = 0f;
@@ -980,7 +780,7 @@ public class SimulationManager : MonoBehaviour {
                         parentGenome = persistentGenomePoolArray[parentIndexPersistent].brainGenome;
                     }
                 }
-                newBrainGenome.SetToMutatedCopyOfParentGenome(parentGenome, mutationSettingsSupervised);
+                newBrainGenome.SetToMutatedCopyOfParentGenome(parentGenome, settingsManager.mutationSettingsSupervised);
                 newGenBrainGenomeList.Add(newBrainGenome);
             }
         }
@@ -1036,5 +836,219 @@ public class SimulationManager : MonoBehaviour {
 
         dummyAgent.InitializeAgentFromGenome(supervisedGenomePoolArray[0], dummyStartGenome);
         SetUpTrainingDataBatch();
+    }
+
+    public void ToggleRecording() {
+        recording = !recording;
+    }
+    public void ToggleTrainingSupervised() {
+        if (firstTimeTrainingSupervised) {
+            ResetTrainingForNewGenSupervised();
+            firstTimeTrainingSupervised = false;
+        }
+        isTrainingSupervised = !isTrainingSupervised;
+    }
+    public void ToggleTrainingPersistent() {
+        if (firstTimeTrainingPersistent) {
+            //ResetTrainingForNewGen();
+            rawFitnessScoresArrayPersistent = new float[persistentGenomePoolSize];
+            firstTimeTrainingPersistent = false;
+        }
+        isTrainingPersistent = !isTrainingPersistent;
+    }
+    public void ResetGenomes() {
+        InitializePopulationGenomes();
+        curGen = 0;
+        ResetTrainingForNewGenSupervised();
+        //UpdateAgentBrains();
+    }
+    public void ClearTrainingData() {
+        trainingRequirementsMetSupervised = false;
+        dataSamplesList.Clear();
+    }
+    public void SaveTrainingData() {
+
+    }
+    public void LoadTrainingData() {
+
+    }
+    public void UpdateDebugUI() {
+        string debugTxt = "Training: False";
+        if (trainingRequirementsMetSupervised) {
+            debugTxt = "Training: ACTIVE   numSamples: " + dataSamplesList.Count.ToString() + "\n";
+            debugTxt += "Gen: " + curGen.ToString() + ", Agent: " + curTestingGenomeSupervised.ToString() + ", Sample: " + curTestingSample.ToString() + "\n";
+            debugTxt += "Fitness Best: " + bestFitnessScoreSupervised.ToString() + " ( Avg: " + avgFitnessLastGenSupervised.ToString() + " ) Blank: " + lastGenBlankAgentFitnessSupervised.ToString() + "\n";
+            debugTxt += "Agent[0] # Neurons: " + agentsArray[0].brain.neuronList.Count.ToString() + ", # Axons: " + agentsArray[0].brain.axonList.Count.ToString() + "\n";
+            debugTxt += "CurOldestAge: " + currentOldestAgent.ToString() + ", numChildrenBorn: " + numPersistentAgentsBorn.ToString() + ", ~Gen: " + ((float)numPersistentAgentsBorn / (float)numAgents).ToString();
+            debugTxt += "\nBotRecordAge: " + recordBotAge.ToString() + ", PlayerRecordAge: " + recordPlayerAge.ToString();
+        }
+        textDebugTrainingInfo.text = debugTxt;
+
+        if (recording) {
+            ColorBlock colorBlock = buttonToggleRecording.colors;
+            colorBlock.normalColor = Color.red;
+            colorBlock.highlightedColor = Color.red;
+            buttonToggleRecording.colors = colorBlock;
+
+            buttonToggleRecording.GetComponentInChildren<Text>().color = Color.white;
+            buttonToggleRecording.GetComponentInChildren<Text>().text = "RECORDING";
+        }
+        else {
+            ColorBlock colorBlock = buttonToggleRecording.colors;
+            colorBlock.normalColor = Color.white;
+            colorBlock.highlightedColor = Color.white;
+            buttonToggleRecording.colors = colorBlock;
+
+            buttonToggleRecording.GetComponentInChildren<Text>().color = Color.black;
+            buttonToggleRecording.GetComponentInChildren<Text>().text = "OFF";
+        }
+
+        if (isTrainingSupervised) {
+            buttonToggleTrainingSupervised.GetComponentInChildren<Text>().text = "Supervised\nTraining: ON";
+        }
+        else {
+            buttonToggleTrainingSupervised.GetComponentInChildren<Text>().text = "Supervised\nTraining: OFF";
+        }
+
+        if (isTrainingPersistent) {
+            buttonToggleTrainingPersistent.GetComponentInChildren<Text>().text = "Persistent\nTraining: ON";
+        }
+        else {
+            buttonToggleTrainingPersistent.GetComponentInChildren<Text>().text = "Persistent\nTraining: OFF";
+        }
+    }
+
+    public void GenerateDataRepelWalls() {
+        Debug.Log("GenerateDataRepelWalls()");
+        dataSamplesList = FakeDataGenerator.GenerateDataRepelWalls(64);// new List<DataSample>();
+        trainingRequirementsMetSupervised = true;
+    }
+    public void GenerateDataRepelPreds() {
+        Debug.Log("GenerateDataRepelPreds()");
+        dataSamplesList = FakeDataGenerator.GenerateDataRepelPreds(64);// new List<DataSample>();
+        trainingRequirementsMetSupervised = true;
+    }
+    public void GenerateDataRepelFriends() {
+        Debug.Log("GenerateDataRepelFriends()");
+        dataSamplesList = FakeDataGenerator.GenerateDataRepelFriends(64);// new List<DataSample>();
+        trainingRequirementsMetSupervised = true;
+    }
+    public void GenerateDataAttractFriends() {
+        Debug.Log("GenerateDataAttractFriends()");
+        dataSamplesList = FakeDataGenerator.GenerateDataAttractFriends(64);// new List<DataSample>();
+        trainingRequirementsMetSupervised = true;
+    }
+    public void GenerateDataAttractFood() {
+        Debug.Log("GenerateDataAttractFood()");
+        dataSamplesList = FakeDataGenerator.GenerateDataAttractFood(64);// new List<DataSample>();
+        trainingRequirementsMetSupervised = true;
+    }
+    public void GenerateDataAttractPreds() {
+        Debug.Log("GenerateDataAttractPreds()");
+        dataSamplesList = FakeDataGenerator.GenerateDataAttractPreds(64);// new List<DataSample>();
+        trainingRequirementsMetSupervised = true;
+    }
+    public void GenerateDataStandardMix() {
+        Debug.Log("GenerateDataStandardMix()");
+        dataSamplesList = FakeDataGenerator.GenerateDataStandardMix(64);// new List<DataSample>();
+        trainingRequirementsMetSupervised = true;
+    }
+
+    private void RecordPlayerData() {
+        DataSample sample = playerAgent.RecordData();// new DataSample();
+        if (dataSamplesList.Count < maxSavedDataSamples) {
+            dataSamplesList.Add(sample);  // Add to master List
+        }
+        else {
+            int randIndex = UnityEngine.Random.Range(0, dataSamplesList.Count - 1);
+            dataSamplesList.RemoveAt(randIndex);
+            dataSamplesList.Add(sample);  // Add to master List
+        }
+
+        if (dataSamplesList.Count >= minDataSamplesForTraining) {
+            if (!trainingRequirementsMetSupervised) {
+                SetUpTrainingDataBatch();
+                trainingRequirementsMetSupervised = true;
+            }
+        }
+        // Make this respect maxDataSamples size and act accordingly
+        //sample.Print();
+    }
+    private void SetUpTrainingDataBatch() {
+        if (currentDataBatch == null) {
+            currentDataBatch = new List<DataSample>();
+        }
+        else {
+            currentDataBatch.Clear();
+        }
+        int numSamplesInBatch = (int)Mathf.Min(dataSamplesList.Count, dataBatchSize);
+
+        // Populate dataBatch:
+        for (int i = 0; i < numSamplesInBatch; i++) {
+            // OLD: RANDOM SAMPLING:
+            int randIndex = UnityEngine.Random.Range(0, dataSamplesList.Count - 1);
+            DataSample sample = dataSamplesList[randIndex].GetCopy();
+            currentDataBatch.Add(sample);
+
+            // TEST: Same As dataPool:
+            //DataSample sample = dataSamplesList[i].GetCopy();
+            //currentDataBatch.Add(sample);
+        }
+    }
+    private void CopyDataSampleToModule(DataSample sample, TestModule module) {
+
+        module.bias[0] = sample.inputDataArray[0];
+        module.foodPosX[0] = sample.inputDataArray[1];
+        module.foodPosY[0] = sample.inputDataArray[2];
+        module.foodDirX[0] = sample.inputDataArray[3];
+        module.foodDirY[0] = sample.inputDataArray[4];
+        module.foodTypeR[0] = sample.inputDataArray[5];
+        module.foodTypeG[0] = sample.inputDataArray[6];
+        module.foodTypeB[0] = sample.inputDataArray[7];
+        module.friendPosX[0] = sample.inputDataArray[8];
+        module.friendPosY[0] = sample.inputDataArray[9];
+        module.friendVelX[0] = sample.inputDataArray[10];
+        module.friendVelY[0] = sample.inputDataArray[11];
+        module.friendDirX[0] = sample.inputDataArray[12];
+        module.friendDirY[0] = sample.inputDataArray[13];
+        module.enemyPosX[0] = sample.inputDataArray[14];
+        module.enemyPosY[0] = sample.inputDataArray[15];
+        module.enemyVelX[0] = sample.inputDataArray[16];
+        module.enemyVelY[0] = sample.inputDataArray[17];
+        module.enemyDirX[0] = sample.inputDataArray[18];
+        module.enemyDirY[0] = sample.inputDataArray[19];
+        module.ownVelX[0] = sample.inputDataArray[20];
+        module.ownVelY[0] = sample.inputDataArray[21];
+
+        module.temperature[0] = sample.inputDataArray[22];
+        module.pressure[0] = sample.inputDataArray[23];
+        module.isContact[0] = sample.inputDataArray[24];
+        module.contactForceX[0] = sample.inputDataArray[25];
+        module.contactForceY[0] = sample.inputDataArray[26];
+        module.hitPoints[0] = sample.inputDataArray[27];
+        module.stamina[0] = sample.inputDataArray[28];
+        module.foodAmountR[0] = sample.inputDataArray[29];
+        module.foodAmountG[0] = sample.inputDataArray[30];
+        module.foodAmountB[0] = sample.inputDataArray[31];
+        module.distUp[0] = sample.inputDataArray[32];
+        module.distTopRight[0] = sample.inputDataArray[33];
+        module.distRight[0] = sample.inputDataArray[34];
+        module.distBottomRight[0] = sample.inputDataArray[35];
+        module.distDown[0] = sample.inputDataArray[36];
+        module.distBottomLeft[0] = sample.inputDataArray[37];
+        module.distLeft[0] = sample.inputDataArray[38];
+        module.distTopLeft[0] = sample.inputDataArray[39];
+        module.inComm0[0] = sample.inputDataArray[40];
+        module.inComm1[0] = sample.inputDataArray[41];
+        module.inComm2[0] = sample.inputDataArray[42];
+        module.inComm3[0] = sample.inputDataArray[43];
+    }
+    private float CompareDataSampleToBrainOutput(DataSample sample, TestModule module) {
+        float throttleX = Mathf.Round(module.throttleX[0] * 3f / 2f);// + module.throttleX[0];
+        float throttleY = Mathf.Round(module.throttleY[0] * 3f / 2f);// + module.throttleY[0];
+        float deltaX = sample.outputDataArray[0] - throttleX + (sample.outputDataArray[0] - module.throttleX[0]) * 0.25f;  // Change this later?
+        float deltaY = sample.outputDataArray[1] - throttleY + (sample.outputDataArray[1] - module.throttleY[0]) * 0.25f;
+        float distSquared = deltaX * deltaX + deltaY * deltaY;
+        return distSquared;
     }
 }

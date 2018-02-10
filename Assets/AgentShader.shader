@@ -3,6 +3,7 @@
 	Properties
 	{
 		_MainTex ("Texture", 2D) = "white" {}
+		_IsPlayer ("_IsPlayer", Float) = 0.0
 	}
 	SubShader
 	{
@@ -34,6 +35,7 @@
 
 			sampler2D _MainTex;
 			float4 _MainTex_ST;
+			uniform float _IsPlayer;
 
 			float rand(float2 co){
 				return frac(sin(dot(co.xy ,float2(12.9898,78.233))) * 43758.5453);
@@ -53,49 +55,38 @@
 				// sample the texture
 				//fixed4 texSample = tex2D(_MainTex, i.uv);
 
-				float4 bgColor = float4(0.2, 2, 0.5, 1.0);
-				float4 damageColor = float4(0.5, 0.5, 0.4,1);
+				float4 bgColor = float4(0.2, 0.85, 0.75, 1.0);				
+				float4 damageColor = float4(0.6, 0.4, 0.3,1);
 				float damageRadius = 0.8;
+				float outCommRadius = 0.23;
+				float3 negColor = float3(1, 0.6, 0.0) * 1.05;
+				float3 posColor = float3(0.25, 0.6, 1) * 1.25;
+				if(_IsPlayer > 0.5) {
+					bgColor = float4(0.9, 1.25, 0.2, 1.0);
+					damageColor = float4(0.8, 0.3, 0.2,1);
+					outCommRadius *= 0.75;
+				}
 				
 				
 				float2 coords = float2((i.uv - 0.5) * 2.0);
 				float circle = ceil(1.0 - saturate(length(coords)));
 				float distToOrigin = length(coords);
 
-				float4 outCol = float4(bgColor.rgb, circle);
-
-				
+				float4 outCol = float4(bgColor.rgb, circle);				
 
 				float foodRadius = 0.8;
-
 				float foodEnergy = (tex2D(_MainTex, float2(0.375, 0.333)).r + tex2D(_MainTex, float2(0.625, 0.333)).r + tex2D(_MainTex, float2(0.875, 0.333)).r) / 3.0;
-				
-				//float2 foodOrigin = float2(0, 0);
-				//float foodDist = length(coords - foodOrigin);
-				//if(foodDist < foodRadius) {
-				//	outCol.rgb = lerp(damageColor, bgColor, foodEnergy);
-				//}
+								
 				float hitPoints = tex2D(_MainTex, float2(0.125, 0.333)).r;
-				//if(distToOrigin >= damageRadius) {
-					//float4 sampleCol = tex2D(_MainTex, float2(0.125, 0.333));
-					//outCol.rgb = lerp(damageColor, bgColor, sampleCol.r);
-				//}
-
 				
-				//outCol.rgb = lerp(damageColor, bgColor, healthValue);
-
-				float outCommRadius = 0.3;
-				float3 negColor = float3(1, 0.6, 0.0) * 1.05;
-				float3 posColor = float3(0.25, 0.6, 1) * 1.25;
-
 				float healthValue = saturate(min(foodEnergy, hitPoints));
-				if(healthValue < 0.30) {
-					outCol.rgb = lerp(damageColor, bgColor, 0);
+				if(healthValue < 0.50) {
+					outCol.rgb = lerp(damageColor, bgColor, healthValue * 2);
 					//outCommRadius *= healthValue * 3;
 					//negColor *= 0.5;
 					//posColor *= 0.5;
 				}
-				outCol.rgb = lerp(outCol.rgb, float3(0.8, 0.75, 0.9), 0.45);
+				//outCol.rgb = lerp(outCol.rgb, float3(0.8, 0.75, 0.9), 0.45);
 							
 				float2 outCommOrigin0 = float2(0.25, 0.25);
 				float outCommDist0 = length(coords - outCommOrigin0);
@@ -133,9 +124,12 @@
 				coords = floor(coords * cellSize) / cellSize;
 
 				float randVal = lerp(0, rand(coords), (distToOrigin));//rand(coords) - (saturate((1.0 - distToCenter))) * 0.25;
-				if(randVal > hitPoints && hitPoints < 0.30) {
-					outCol.a = 0;
+				if(randVal > hitPoints * 1.5) {
+					outCol.a = min(outCol.a, hitPoints * 0.5);					
 				}
+				if(hitPoints < 0.60) {
+						outCol.rgb = lerp(damageColor, outCol.rgb, hitPoints * 1.5);
+					}
 
 				// inside CGPROGRAM in the fragment Shader:
 				float alphaCutoffValue = 0.1;

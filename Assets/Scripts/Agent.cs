@@ -206,8 +206,9 @@ public class Agent : MonoBehaviour {
         TickModules(); // update inputs for Brain
 
         // Check for Death:
-        float minFood = Mathf.Min(Mathf.Min(testModule.foodAmountR[0], testModule.foodAmountG[0]), testModule.foodAmountB[0]);
-        if (minFood <= 0f) {
+        //float minFood = Mathf.Min(Mathf.Min(testModule.foodAmountR[0], testModule.foodAmountG[0]), testModule.foodAmountB[0]);
+        float maxFood = Mathf.Max(Mathf.Max(testModule.foodAmountR[0], testModule.foodAmountG[0]), testModule.foodAmountB[0]);
+        if (maxFood <= 0f) {
             // DEAD FROM STARVATION!!!!
             isDead = true;
             //Debug.Log("Agent Starved to DEATH!!!");
