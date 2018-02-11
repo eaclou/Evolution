@@ -20,6 +20,7 @@ public class UIManager : MonoBehaviour {
     public Text textScore;
 
     public GameObject panelDebug;
+    public Material fitnessDisplayMat;
     public Button buttonPause;
     public Button buttonPlaySlow;
     public Button buttonPlayNormal;
@@ -35,11 +36,16 @@ public class UIManager : MonoBehaviour {
     public Button buttonToggleDebug;
     public bool isActiveDebug = false;
 
+    public Texture2D fitnessDisplayTexture;
+
     
 	// Use this for initialization
 	void Start () {
         panelHUD.SetActive(isActiveHUD);
         panelDebug.SetActive(isActiveDebug);
+        fitnessDisplayTexture = new Texture2D(1, 1, TextureFormat.RGBAFloat, true);
+        fitnessDisplayTexture.wrapMode = TextureWrapMode.Clamp;
+        fitnessDisplayMat.SetTexture("_MainTex", fitnessDisplayTexture);
     }
 	
 	// Update is called once per frame

@@ -90,6 +90,16 @@ public class SimulationManager : MonoBehaviour {
     public int botToHumanControlTransitionFrameCount = 8;
     public int humanToBotControlTransitionFrameCount = 30;
 
+    public float rollingAverageAgentScore = 0f;
+    public List<float> persistentScoresList;
+    public float persistentAvgRecordScore = 1f;
+    public int curPersistentApproxGen = 1;
+
+    // GRID SEARCH!!!
+    public GridSearchManager gridSearchManager;
+    public bool isGridSearching = false;
+    
+    
     // need to be able to update Agent's Brain on the fly?  --- but needs to access the Module to set up inputs/outputs???
     // Ability to run a Brain Headless (without instantiating an Agent?)
 
@@ -110,6 +120,8 @@ public class SimulationManager : MonoBehaviour {
     public void InitializeNewSimulation() {
         ToggleTrainingPersistent();
         // Create Environment (Or have it pre-built)
+
+        persistentScoresList = new List<float>();
 
         agentMaterialsArray = new Material[numAgents];
         agentDebugTexturesArray = new Texture2D[numAgents];
@@ -191,6 +203,9 @@ public class SimulationManager : MonoBehaviour {
         InitializeGridCells();
         HookUpModules();
         InitializeTrainingApparatus();
+
+        // DON"T LEAVE THIS!!!
+        RunAutomatedGridSearch();
     }
     private void InitializePopulationGenomes() {
 
@@ -324,7 +339,31 @@ public class SimulationManager : MonoBehaviour {
         if(agentsArray[agentIndex].ageCounter > recordBotAge) {
             recordBotAge = agentsArray[agentIndex].ageCounter;
         }
-        
+
+        rollingAverageAgentScore = Mathf.Lerp(rollingAverageAgentScore, (float)agentsArray[agentIndex].ageCounter, 1f / 512f);
+        float approxGen = (float)numPersistentAgentsBorn / (float)persistentGenomePoolSize;
+        if(approxGen > curPersistentApproxGen) {
+            persistentScoresList.Add(rollingAverageAgentScore);
+            if(rollingAverageAgentScore > persistentAvgRecordScore) {
+                persistentAvgRecordScore = rollingAverageAgentScore;
+            }
+            Debug.Log("persistentScoresList " + curPersistentApproxGen.ToString() + ": " + rollingAverageAgentScore.ToString());
+            // fitnessTex:
+            uiManager.fitnessDisplayTexture.Resize(persistentScoresList.Count, 1);
+            for(int t = 0; t < persistentScoresList.Count; t++) {
+                uiManager.fitnessDisplayTexture.SetPixel(t, 1, new Color(persistentScoresList[t], persistentScoresList[t], persistentScoresList[t]));
+            }
+            uiManager.fitnessDisplayTexture.Apply();
+            uiManager.fitnessDisplayMat.SetFloat("_BestScore", persistentAvgRecordScore);
+            
+            curPersistentApproxGen++;
+            
+            // Grid Search:
+            if (isGridSearching) {
+                UpdateGridSearch(curPersistentApproxGen, rollingAverageAgentScore);
+            }
+        }
+
         // Respawn Agent randomly and replace Brain (Later on handle persistent pool learning -- for now, just controls when Brain updates )
         Vector3 startPos = new Vector3(UnityEngine.Random.Range(-30f, 30f), UnityEngine.Random.Range(-30f, 30f), 0f);
         StartPositionGenome startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
@@ -881,6 +920,7 @@ public class SimulationManager : MonoBehaviour {
             debugTxt += "Agent[0] # Neurons: " + agentsArray[0].brain.neuronList.Count.ToString() + ", # Axons: " + agentsArray[0].brain.axonList.Count.ToString() + "\n";
             debugTxt += "CurOldestAge: " + currentOldestAgent.ToString() + ", numChildrenBorn: " + numPersistentAgentsBorn.ToString() + ", ~Gen: " + ((float)numPersistentAgentsBorn / (float)numAgents).ToString();
             debugTxt += "\nBotRecordAge: " + recordBotAge.ToString() + ", PlayerRecordAge: " + recordPlayerAge.ToString();
+            debugTxt += "\nAverageAgentScore: " + rollingAverageAgentScore.ToString();
         }
         textDebugTrainingInfo.text = debugTxt;
 
@@ -1050,5 +1090,32 @@ public class SimulationManager : MonoBehaviour {
         float deltaY = sample.outputDataArray[1] - throttleY + (sample.outputDataArray[1] - module.throttleY[0]) * 0.25f;
         float distSquared = deltaX * deltaX + deltaY * deltaY;
         return distSquared;
+    }
+
+    public void RunAutomatedGridSearch() {
+        // Runs a bunch of simulations with different settings and saves the results for later analysis
+        gridSearchManager = new GridSearchManager();
+        gridSearchManager.InitializeGridSearch();
+        isGridSearching = true;
+        isTrainingPersistent = true;
+
+
+    }
+
+    public void UpdateGridSearch(int curGen, float score) {
+        //Debug.Log("UpdateGridSearch(int curGen, float score)");
+        // run every "Generation"
+        //gridSearchManager.UpdateGridSearch();
+        if(curGen >= gridSearchManager.duration) {
+            // Next Run!
+            gridSearchManager.StartNewRun();
+        }
+        else {
+            // Save data
+            gridSearchManager.DataEntry(curGen, score);
+        }
+        if(gridSearchManager.isComplete) {
+            isGridSearching = false;
+        }
     }
 }
