@@ -26,9 +26,15 @@ public class GameManager : MonoBehaviour {
     private void FixedUpdate() {
         float sTime = Time.realtimeSinceStartup;
 
-        simulationManager.TickSimulation();
+        if(simulationManager.isTrainingSupervised && simulationManager.isGridSearching) {
+
+        }
+        else {
+            simulationManager.TickSimulation();
+        }
+        
         if(simulationManager.trainingRequirementsMetSupervised) {
-            if(simulationManager.isTrainingSupervised) {
+            if(simulationManager.isTrainingSupervised) {                
                 for (int i = 0; i < 32; i++) {
                     simulationManager.TickTrainingMode();
                 }

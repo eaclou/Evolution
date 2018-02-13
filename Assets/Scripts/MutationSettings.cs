@@ -4,6 +4,7 @@ using UnityEngine;
 
 [System.Serializable]
 public class MutationSettings {
+    public float initialConnectionChance;
 
     public float mutationChance;
     public float mutationStepSize;
@@ -13,7 +14,8 @@ public class MutationSettings {
     public float newLinkChance;
     public float newHiddenNodeChance;
 
-    public MutationSettings(float mutationChance, float mutationStepSize, float zeroWeightChance, float weightDecayAmount, float newLinkChance, float newHiddenNodeChance) {
+    public MutationSettings(float initialConnectionChance, float mutationChance, float mutationStepSize, float zeroWeightChance, float weightDecayAmount, float newLinkChance, float newHiddenNodeChance) {
+        this.initialConnectionChance = initialConnectionChance;
         this.mutationChance = mutationChance;
         this.mutationStepSize = mutationStepSize;
         this.zeroWeightChance = zeroWeightChance;
