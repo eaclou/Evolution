@@ -3,20 +3,20 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 
-public class GridSearchManager {
-
-    private ComputeShader graphImageComputeShader;
-    public MutationSettings settings;
-    public bool biggerIsBetter;
+[CreateAssetMenu(fileName = "GridSearchManager", menuName = "GridSearchManager", order = 1)]
+public class GridSearchManager : ScriptableObject {
+    
+    private MutationSettings settings;
+    private bool biggerIsBetter;
 
     //public int resolution = 2;  // how to split each dimension    
-    public int numGens = 32;  // number of generations for each Run
-    public int numRunsPerSetting = 1;
+    public int numGens;  // number of generations for each Run
+    public int numRunsPerSetting;
 
-    public int resolutionA = 4;  // how to split each dimension
-    public int resolutionB = 3;  // how to split each dimension
-    public int resolutionC = 3;  // how to split each dimension
-    public int resolutionD = 1;  // how to split each dimension
+    public int resolutionA;  // how to split each dimension
+    public int resolutionB;  // how to split each dimension
+    public int resolutionC;  // how to split each dimension
+    public int resolutionD;  // how to split each dimension
 
     // Start out hardcoded to 4 dimensions, expand functionality later:
     public int coordA = 0;  // mutationChance
@@ -25,14 +25,14 @@ public class GridSearchManager {
     public int coordD = 0;  // weight decay
     public int curIter = 0;
 
-    public float minA = 0.005f;
-    public float maxA = 0.1f;
-    public float minB = 0.25f;
-    public float maxB = 1f;
-    public float minC = 0.0f;
-    public float maxC = 1.0f;
-    public float minD = 1f;
-    public float maxD = 1f;
+    public float minA;
+    public float maxA;
+    public float minB;
+    public float maxB;
+    public float minC;
+    public float maxC;
+    public float minD;
+    public float maxD;
 
     public GridSearchResults storedResults;
 
@@ -42,10 +42,39 @@ public class GridSearchManager {
         
     }
 
-    public void InitializeGridSearch(ComputeShader graphImageComputeShader, MutationSettings settings, bool biggerIsBetter) {
+    public int GetNumGens() {
+        return numGens;
+    }
+
+    public void InitializeGridSearch(MutationSettings settings, bool biggerIsBetter) {
         this.biggerIsBetter = biggerIsBetter;
-        this.graphImageComputeShader = graphImageComputeShader;
         this.settings = settings;
+
+        isComplete = false;
+
+        numGens = 420;  // number of generations for each Run
+        numRunsPerSetting = 8;
+
+        resolutionA = 1;  // how to split each dimension
+        resolutionB = 1;  // how to split each dimension
+        resolutionC = 2;  // how to split each dimension
+        resolutionD = 1;  // how to split each dimension
+
+        // Start out hardcoded to 4 dimensions, expand functionality later:
+        coordA = 0;  // mutationChance
+        coordB = 0;  // stepSize
+        coordC = 0;  // initialConnectionChance
+        coordD = 0;  // weight decay
+        curIter = 0;
+
+        minA = 0.015f;
+        maxA = 0.015f;
+        minB = 0.5f;
+        maxB = 0.5f;
+        minC = 0.0f;
+        maxC = 0.5f;
+        minD = 1f;
+        maxD = 1f;
 
         storedResults = new GridSearchResults();
         coordA = 0;
@@ -55,6 +84,13 @@ public class GridSearchManager {
         curIter = 0;
 
         CreateDataContainer();        
+    }
+
+    public void ResumeGridSearch() {
+        // reset latest run?
+        storedResults.dataList[storedResults.dataList.Count - 1].highestScore = 0f;
+        storedResults.dataList[storedResults.dataList.Count - 1].lowestScore = float.PositiveInfinity;
+        storedResults.dataList[storedResults.dataList.Count - 1].scoresList = new List<float>();
     }
 
     private void CreateDataContainer() {
@@ -98,8 +134,8 @@ public class GridSearchManager {
 
 
         // Process Data:::::
-        float[] maxScoreEachGenArray = new float[storedResults.dataList[0].scoresList.Count];
-        float[] minScoreEachGenArray = new float[storedResults.dataList[0].scoresList.Count];
+        float[] maxScoreEachGenArray = new float[numGens];
+        float[] minScoreEachGenArray = new float[numGens];
         storedResults.highestScoreAchieved = 0f;
         storedResults.lowestScoreAchieved = float.PositiveInfinity;
         for (int g = 0; g < maxScoreEachGenArray.Length; g++) {
@@ -129,8 +165,23 @@ public class GridSearchManager {
             }
             //}            
         }
-
-
+        // Calculate Standard Deviation & Mean:
+        float totalScore = 0f;
+        float[] stdScores = new float[storedResults.dataList.Count];
+        for(int s = 0; s < storedResults.dataList.Count; s++) {
+            totalScore += storedResults.dataList[s].scoresList[numGens - 1]; // just using end result?
+        }
+        float mean = totalScore / (float)storedResults.dataList.Count;
+        for (int s = 0; s < storedResults.dataList.Count; s++) {
+            stdScores[s] = storedResults.dataList[s].scoresList[numGens - 1] - mean;  // subtract mean and save values of each run in array
+            stdScores[s] = stdScores[s] * stdScores[s]; // Square the result
+        }
+        float sumOfSquares = 0f;
+        for (int s = 0; s < storedResults.dataList.Count; s++) {
+            sumOfSquares += stdScores[s];
+        }
+        float div = sumOfSquares / (storedResults.dataList.Count - 1);
+        float standardDeviation = Mathf.Sqrt(div);
 
         // SAVE JSON::::
         string saveNameJson = "GS_" + "RawScores";
@@ -148,7 +199,7 @@ public class GridSearchManager {
         if(!biggerIsBetter) {
             bestScore = storedResults.lowestScoreAchieved;
         }
-        string resultsString = "Grid Search Results! best individual score: " + bestScore.ToString() + "\n";
+        string resultsString = "Grid Search Results! highest: " + storedResults.highestScoreAchieved.ToString() + ", lowest: " + storedResults.lowestScoreAchieved.ToString() + ", std: " + standardDeviation.ToString() + "\n";
         for(int i = 0; i < storedResults.readoutList.Count; i++) {
             resultsString += storedResults.readoutList[i] + "\n";
         }
@@ -173,7 +224,7 @@ public class GridSearchManager {
                     Color color = Color.black;
                     //float val = 0f; // = 1f;
                     float yPos = (float)y / (float)pixels;
-                    int xIndex = Mathf.RoundToInt(((float)x / (float)pixels) * (float)(storedResults.dataList[i].scoresList.Count - 1));
+                    int xIndex = Mathf.RoundToInt(((float)x / (float)pixels) * (float)(numGens - 1));
                     float rawScore = storedResults.dataList[i].scoresList[xIndex];
                     float score01 = rawScore / storedResults.dataList[i].highestScore;
 
@@ -201,10 +252,23 @@ public class GridSearchManager {
             string imageFilename = directory + "/" + "Graph" + i.ToString() + ".jpg";
             System.IO.File.WriteAllBytes(imageFilename, tex.EncodeToJPG());            
         }
+
+
+        // SAVE GENEPOOLS!!!
+        for (int i = 0; i < storedResults.genePoolList.Count; i++) {
+            string saveNamePool = "GenePool_" + i.ToString();
+            string poolString = JsonUtility.ToJson(storedResults.genePoolList[i]);
+            string pathPool = directory + "/" + saveNamePool + ".json";
+            Debug.Log(pathPool);
+            if (File.Exists(pathPool)) {
+                File.Delete(pathPool);
+            }
+            System.IO.File.WriteAllText(pathPool, poolString);
+        }
     }
 
     public void StartNewRun() {
-        
+                
         curIter++;
         if(curIter >= numRunsPerSetting) {
             curIter = 0;

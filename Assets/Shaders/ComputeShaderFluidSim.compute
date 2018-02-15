@@ -1,0 +1,243 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel RefreshColor
+#pragma kernel InitializeVelocity
+#pragma kernel Advection
+#pragma kernel ViscousDiffusion
+#pragma kernel ExternalForce
+#pragma kernel VelocityDivergence
+#pragma kernel InitializePressure
+#pragma kernel PressureJacobi
+#pragma kernel SubtractGradient
+#pragma kernel BoundaryConditions
+
+Texture2D<float4> SourceColorTex;
+Texture2D<float4> VelocityRead;
+RWTexture2D<float4> VelocityWrite;
+Texture2D<float4> PressureRead;
+RWTexture2D<float4> PressureWrite;
+Texture2D<float4> DensityRead;
+RWTexture2D<float4> DensityWrite;
+Texture2D<float4> DivergenceRead;
+RWTexture2D<float4> DivergenceWrite;
+
+SamplerState _LinearClamp;
+SamplerState _LinearRepeat;
+SamplerState _PointClamp;
+SamplerState _PointRepeat;
+
+uniform float _TextureResolution;
+uniform float _DeltaTime;
+uniform float _InvGridScale;
+
+uniform float _ForcePosX;
+uniform float _ForcePosY;
+uniform float _ForceDirX;
+uniform float _ForceDirY;
+uniform float _ForceOn;
+uniform float _ForceMagnitude;
+uniform float _ForceSize;
+
+uniform float _Viscosity;
+uniform float _Damping;
+
+uniform float _ColorRefreshAmount;
+
+uniform float _Time;
+
+[numthreads(16,16,1)]
+void RefreshColor (uint3 id : SV_DispatchThreadID)
+{	
+	float xCoord = ((float)id.x + 0.5)  / _TextureResolution;
+	float yCoord = ((float)id.y + 0.5)  / _TextureResolution;
+	float2 uvOrigin = float2(xCoord, yCoord);
+	float4 sourceColor = SourceColorTex.SampleLevel(_LinearRepeat, uvOrigin, 0);
+	float4 currentColor = DensityRead[id.xy];
+	DensityWrite[id.xy] = lerp(currentColor, sourceColor, _ColorRefreshAmount);
+}
+
+[numthreads(16,16,1)]
+void InitializeVelocity (uint3 id : SV_DispatchThreadID)
+{
+	float xCoord = ((float)id.x + 0.5)  / _TextureResolution;
+	float yCoord = ((float)id.y + 0.5)  / _TextureResolution;
+	float2 uvOrigin = float2(xCoord, yCoord);
+
+	VelocityWrite[id.xy] = float4(sin(20 * uvOrigin.y) * uvOrigin.x,sin(13.79 * uvOrigin.x) * uvOrigin.y,0,0) * 0.05; // 
+}
+
+[numthreads(16,16,1)]
+void Advection (uint3 id : SV_DispatchThreadID)
+{
+	float xCoord = ((float)id.x + 0.5)  / _TextureResolution;
+	float yCoord = ((float)id.y + 0.5)  / _TextureResolution;
+	float2 uvOrigin = float2(xCoord, yCoord);
+
+	float2 uvSample = uvOrigin - _DeltaTime * _InvGridScale * VelocityRead.SampleLevel(_LinearRepeat, uvOrigin, 0).xy;
+	//uvSample = uvOrigin;
+
+	float4 newDensity = DensityRead.SampleLevel(_LinearRepeat, uvSample, 0);
+	float4 newVelocity = VelocityRead.SampleLevel(_LinearRepeat, uvSample, 0);
+		
+	DensityWrite[id.xy] = newDensity;
+	VelocityWrite[id.xy] = newVelocity; // + float4(uvSample, 0, 0);
+}
+
+[numthreads(16,16,1)]
+void ViscousDiffusion (uint3 id : SV_DispatchThreadID)
+{
+	float xCoord = ((float)id.x + 0.5)  / _TextureResolution;
+	float yCoord = ((float)id.y + 0.5)  / _TextureResolution;
+	float2 uvOrigin = float2(xCoord, yCoord);
+	float ps = 1.0 / _TextureResolution;
+
+	half viscosity = _Viscosity;
+
+	half alpha = (_InvGridScale * _InvGridScale) / (viscosity * _DeltaTime);
+	half beta = 4.0 + alpha;
+
+	half4 leftVal = VelocityRead.SampleLevel(_LinearRepeat, uvOrigin + half2(-ps, 0), 0);
+	half4 rightVal = VelocityRead.SampleLevel(_LinearRepeat, uvOrigin + half2(ps, 0), 0);
+	half4 topVal = VelocityRead.SampleLevel(_LinearRepeat, uvOrigin + half2(0, ps), 0);
+	half4 bottomVal = VelocityRead.SampleLevel(_LinearRepeat, uvOrigin + half2(0, -ps), 0);
+	half4 centerVal = VelocityRead.SampleLevel(_LinearRepeat, uvOrigin, 0);
+
+	float4 newVal = (leftVal + rightVal + topVal + bottomVal + centerVal * alpha) / beta;
+
+	VelocityWrite[id.xy] = newVal;
+}
+
+[numthreads(16,16,1)]
+void ExternalForce (uint3 id : SV_DispatchThreadID)
+{
+	float xCoord = ((float)id.x + 0.5)  / _TextureResolution;
+	float yCoord = ((float)id.y + 0.5)  / _TextureResolution;
+	float2 uvOrigin = float2(xCoord, yCoord);
+	float ps = 1.0 / _TextureResolution;
+
+	float4 currentVelocity = VelocityRead.SampleLevel(_LinearRepeat, uvOrigin, 0);
+
+	float2 clickPos = float2(_ForcePosX, _ForcePosY);
+	float2 clickDir = float2(_ForceDirX, _ForceDirY);
+	//float forceMagnitude = _;
+
+	float dist = length(uvOrigin - clickPos);
+
+	//float falloff = 1.0 / dist;
+	//float2 velocityAdd = float2(0, 0);
+	//if(dist < 0.02) {
+	//	velocityAdd = float2(sin(_Time * 0.1) * 0.03, cos(_Time * 0.1) * 0.03);
+	//}
+
+	float2 velocityAdd = _ForceOn * clickDir * _ForceMagnitude * _DeltaTime * exp(-_ForceSize * ((_ForcePosX - uvOrigin.x) * (_ForcePosX - uvOrigin.x) + (_ForcePosY - uvOrigin.y) * (_ForcePosY - uvOrigin.y)) / dist);
+
+	float damping = saturate(_Damping);
+	VelocityWrite[id.xy] = (currentVelocity + float4(velocityAdd, 0, 0)) * (1.0 - damping);
+}
+
+[numthreads(16,16,1)]
+void VelocityDivergence (uint3 id : SV_DispatchThreadID)
+{
+	float xCoord = ((float)id.x + 0.5)  / _TextureResolution;
+	float yCoord = ((float)id.y + 0.5)  / _TextureResolution;
+	float2 uvOrigin = float2(xCoord, yCoord);
+	float ps = 1.0 / _TextureResolution;
+
+	float4 leftVal = VelocityRead.SampleLevel(_LinearRepeat, uvOrigin + half2(-ps, 0), 0);  // should I use direct index access for these?
+	float4 rightVal = VelocityRead.SampleLevel(_LinearRepeat, uvOrigin + half2(ps, 0), 0);
+	float4 topVal = VelocityRead.SampleLevel(_LinearRepeat, uvOrigin + half2(0, ps), 0);
+	float4 bottomVal = VelocityRead.SampleLevel(_LinearRepeat, uvOrigin + half2(0, -ps), 0);
+
+	float divergence = _InvGridScale * 0.5 * ((rightVal.x - leftVal.x) + (topVal.y - bottomVal.y));
+
+	DivergenceWrite[id.xy] = float4(divergence, divergence, divergence, 1);
+}
+
+[numthreads(16,16,1)]
+void InitializePressure (uint3 id : SV_DispatchThreadID)
+{
+	PressureWrite[id.xy] = float4(0,0,0,0);
+}
+
+[numthreads(16,16,1)]
+void PressureJacobi (uint3 id : SV_DispatchThreadID)
+{
+	float xCoord = ((float)id.x + 0.5)  / _TextureResolution;
+	float yCoord = ((float)id.y + 0.5)  / _TextureResolution;
+	float2 uvOrigin = float2(xCoord, yCoord);
+	float ps = 1.0 / _TextureResolution;
+	
+	half alpha = -(_InvGridScale * _InvGridScale);
+	half beta = 4.0;
+
+	half4 leftVal = PressureRead.SampleLevel(_LinearRepeat, uvOrigin + half2(-ps, 0), 0);
+	half4 rightVal = PressureRead.SampleLevel(_LinearRepeat, uvOrigin + half2(ps, 0), 0);
+	half4 topVal = PressureRead.SampleLevel(_LinearRepeat, uvOrigin + half2(0, ps), 0);
+	half4 bottomVal = PressureRead.SampleLevel(_LinearRepeat, uvOrigin + half2(0, -ps), 0);
+	half4 centerVal = DivergenceRead.SampleLevel(_LinearRepeat, uvOrigin, 0);
+
+	float4 newVal = (leftVal + rightVal + topVal + bottomVal + centerVal * alpha) / beta;
+
+	PressureWrite[id.xy] = newVal;
+}
+
+[numthreads(16,16,1)]
+void SubtractGradient (uint3 id : SV_DispatchThreadID)
+{
+	float xCoord = ((float)id.x + 0.5)  / _TextureResolution;
+	float yCoord = ((float)id.y + 0.5)  / _TextureResolution;
+	float2 uvOrigin = float2(xCoord, yCoord);
+	float ps = 1.0 / _TextureResolution;
+	
+	float leftVal = PressureRead.SampleLevel(_LinearRepeat, uvOrigin + half2(-ps, 0), 0).x;
+	float rightVal = PressureRead.SampleLevel(_LinearRepeat, uvOrigin + half2(ps, 0), 0).x;
+	float topVal = PressureRead.SampleLevel(_LinearRepeat, uvOrigin + half2(0, ps), 0).x;
+	float bottomVal = PressureRead.SampleLevel(_LinearRepeat, uvOrigin + half2(0, -ps), 0).x;
+	
+	float4 newVal = VelocityRead.SampleLevel(_LinearRepeat, uvOrigin, 0);
+	newVal.xy -= 0.5 * _InvGridScale * half2(rightVal - leftVal, topVal - bottomVal);
+
+	VelocityWrite[id.xy] = newVal;
+}
+
+[numthreads(16,16,1)]
+void BoundaryConditions (uint3 id : SV_DispatchThreadID)
+{
+	
+	if(id.x == 0) {
+		// Velocity of neighbor:
+		float4 vel = VelocityRead[uint2(1, id.y)];
+		VelocityWrite[id.xy] = float4(-vel.x, -vel.y,0,0);
+
+		// Pressure of neighbor:
+		float4 pressure = PressureRead[uint2(1, id.y)];
+		PressureWrite[id.xy] = float4(pressure.x, pressure.y,0,0);
+	}
+	if(id.x >= (uint)(_TextureResolution - 1)) {
+		// Velocity of neighbor:
+		float4 vel = VelocityRead[uint2(id.x - 1, id.y)];
+		VelocityWrite[id.xy] = float4(-vel.x, -vel.y,0,0);
+
+		// Pressure of neighbor:
+		float4 pressure = PressureRead[uint2(id.x - 1, id.y)];
+		PressureWrite[id.xy] = float4(pressure.x, pressure.y,0,0);
+	}
+	if(id.y == 0) {
+		// Velocity of neighbor:
+		float4 vel = VelocityRead[uint2(id.x, 1)];
+		VelocityWrite[id.xy] = float4(-vel.x, -vel.y,0,0);
+
+		// Pressure of neighbor:
+		float4 pressure = PressureRead[uint2(id.x, 1)];
+		PressureWrite[id.xy] = float4(pressure.x, pressure.y,0,0);
+	}
+	if(id.y >= (uint)(_TextureResolution - 1)) {
+		// Velocity of neighbor:
+		float4 vel = VelocityRead[uint2(id.x, id.y - 1)];
+		VelocityWrite[id.xy] = float4(-vel.x, -vel.y,0,0);
+
+		// Pressure of neighbor:
+		float4 pressure = PressureRead[uint2(id.x, id.y - 1)];
+		PressureWrite[id.xy] = float4(pressure.x, pressure.y,0,0);
+	}
+	
+}

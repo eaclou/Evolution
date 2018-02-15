@@ -11,10 +11,12 @@ public class GridSearchResults {
     public List<float> trainingRunsScoreList;
     public List<GridSearchRunData> dataList;
 
+    public List<GenePool> genePoolList;
+
     public GridSearchResults() {
         readoutList = new List<string>();
         trainingRunsScoreList = new List<float>();
         dataList = new List<GridSearchRunData>();
-        
+        genePoolList = new List<GenePool>();
     }
 }

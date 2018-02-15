@@ -6,9 +6,7 @@ using System.IO;
 
 
 public class SimulationManager : MonoBehaviour {
-
-    public ComputeShader graphImageComputeShader;
-
+    
     public Text textDebugTrainingInfo;
     public Button buttonToggleRecording;
     public Button buttonToggleTrainingSupervised;
@@ -995,7 +993,8 @@ public class SimulationManager : MonoBehaviour {
     }
     public void LoadTrainingData() {
         Debug.Log("LOAD Population!");
-        string filePath = Application.dataPath + "/testSave.json";
+        //"E:\Unity Projects\GitHub\Evolution\Assets\GridSearchSaves\2018_2_13_12_35\GS_RawScores.json"
+        string filePath = Application.dataPath + "/GridSearchSaves/2018_2_13_12_35/GS_RawScores.json";
         // Read the json from the file into a string
         string dataAsJson = File.ReadAllText(filePath);
         // Pass the json to JsonUtility, and tell it to create a GameData object from it
@@ -1185,12 +1184,19 @@ public class SimulationManager : MonoBehaviour {
 
     public void RunAutomatedGridSearch() {
         // Runs a bunch of simulations with different settings and saves the results for later analysis
-        gridSearchManager = new GridSearchManager();
-        if(isTrainingPersistent) {
-            gridSearchManager.InitializeGridSearch(graphImageComputeShader, settingsManager.mutationSettingsPersistent, true);
+        //gridSearchManager = new GridSearchManager();
+        bool newSearch = true;
+
+        if(newSearch) {
+            if (isTrainingPersistent) {
+                gridSearchManager.InitializeGridSearch(settingsManager.mutationSettingsPersistent, true);
+            }
+            if (isTrainingSupervised) {
+                gridSearchManager.InitializeGridSearch(settingsManager.mutationSettingsSupervised, false);
+            }            
         }
-        if (isTrainingSupervised) {
-            gridSearchManager.InitializeGridSearch(graphImageComputeShader, settingsManager.mutationSettingsSupervised, false);
+        else {
+            gridSearchManager.ResumeGridSearch();
         }
         isGridSearching = true;
         //isTrainingPersistent = true;
@@ -1209,16 +1215,17 @@ public class SimulationManager : MonoBehaviour {
     }
 
     public void UpdateGridSearch(int curGen, float score) {
-        //Debug.Log("UpdateGridSearch(int curGen, float score)");
+        //Debug.Log("UpdateGridSearch(" + curGen.ToString() + ", float score)");
         // run every "Generation"
         //gridSearchManager.UpdateGridSearch();
 
         // Save data regardless?:::
         gridSearchManager.DataEntry(curGen, score);
 
-        if (curGen >= gridSearchManager.numGens) {
+        if (curGen >= gridSearchManager.GetNumGens()) {
             // Save this Gen?
-
+            GenePool pool = new GenePool(persistentGenomePoolArray);
+            gridSearchManager.storedResults.genePoolList.Add(pool);
             // Next Run!
             gridSearchManager.StartNewRun();
             ResetGenomes();
@@ -1231,6 +1238,7 @@ public class SimulationManager : MonoBehaviour {
             //gridSearchManager.DataEntry(curGen, score);
         }
         if(gridSearchManager.isComplete) {
+            //Debug.Log("UpdateGridSearch(gridSearchManager.isComplete)");
             isGridSearching = false;
         }
     }
