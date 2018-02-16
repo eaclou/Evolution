@@ -93,14 +93,14 @@
 				if(outCommDist0 < outCommRadius) {
 					float4 sampleCol = tex2D(_MainTex, float2(0.125, 0.667));  // 0-1
 					float val = floor(sampleCol.r * 3) - 1; // ??? -1,0,1 ???
-					outCol.rgb = lerp(negColor, posColor, val * 0.5 + 0.5) * abs(val);
+					//outCol.rgb = lerp(negColor, posColor, val * 0.5 + 0.5) * abs(val);
 				}
 				float2 outCommOrigin1 = float2(0.25, -0.25);
 				float outCommDist1 = length(coords - outCommOrigin1);
 				if(outCommDist1 < outCommRadius) {
 					float4 sampleCol = tex2D(_MainTex, float2(0.375, 0.667));
 					float val = floor(sampleCol.r * 3) - 1; // ??? -1,0,1 ???
-					outCol.rgb = lerp(negColor, posColor, val * 0.5 + 0.5) * abs(val);
+					//outCol.rgb = lerp(negColor, posColor, val * 0.5 + 0.5) * abs(val);
 					//outCol.rgb = lerp(negColor, posColor, sampleCol.r) * abs(sampleCol.r * 2.0 - 1.0);
 				}
 				float2 outCommOrigin2 = float2(-0.25, 0.25);
@@ -108,7 +108,7 @@
 				if(outCommDist2 < outCommRadius) {
 					float4 sampleCol = tex2D(_MainTex, float2(0.625, 0.667));
 					float val = floor(sampleCol.r * 3) - 1; // ??? -1,0,1 ???
-					outCol.rgb = lerp(negColor, posColor, val * 0.5 + 0.5) * abs(val);
+					//outCol.rgb = lerp(negColor, posColor, val * 0.5 + 0.5) * abs(val);
 					//outCol.rgb = lerp(negColor, posColor, sampleCol.r) * abs(sampleCol.r * 2.0 - 1.0);
 				}
 				float2 outCommOrigin3 = float2(-0.25, -0.25);
@@ -116,7 +116,7 @@
 				if(outCommDist3 < outCommRadius) {
 					float4 sampleCol = tex2D(_MainTex, float2(0.875, 0.667));
 					float val = floor(sampleCol.r * 3) - 1; // ??? -1,0,1 ???
-					outCol.rgb = lerp(negColor, posColor, val * 0.5 + 0.5) * abs(val);
+					//outCol.rgb = lerp(negColor, posColor, val * 0.5 + 0.5) * abs(val);
 					//outCol.rgb = lerp(negColor, posColor, sampleCol.r) * abs(sampleCol.r * 2.0 - 1.0);
 				}
 
@@ -125,12 +125,13 @@
 
 				float randVal = lerp(0, rand(coords), (distToOrigin));//rand(coords) - (saturate((1.0 - distToCenter))) * 0.25;
 				if(randVal > hitPoints * 1.5) {
-					outCol.a = min(outCol.a, hitPoints * 0.5);					
+					//outCol.a = min(outCol.a, hitPoints * 0.5);					
 				}
 				if(hitPoints < 0.60) {
 						outCol.rgb = lerp(damageColor, outCol.rgb, hitPoints * 1.5);
 					}
-
+				
+				outCol.rgb = float3(outCol.r, outCol.r, outCol.r) * 0.05;
 				// inside CGPROGRAM in the fragment Shader:
 				float alphaCutoffValue = 0.1;
 				clip(outCol.a - alphaCutoffValue);

@@ -15,6 +15,7 @@ public class SimulationManager : MonoBehaviour {
     public Button buttonToggleTrainingPersistent;
 
     public UIManager uiManager;
+    public EnvironmentFluidManager environmentFluidManager;
     //public Camera mainCam;
     public CameraManager cameraManager;
     private int numAgents = 64;
@@ -121,6 +122,7 @@ public class SimulationManager : MonoBehaviour {
     public void InitializeNewSimulation() {
         //ToggleTrainingPersistent();        
         // Create Environment (Or have it pre-built)
+        
 
         settingsManager.Initialize();
 
@@ -199,6 +201,10 @@ public class SimulationManager : MonoBehaviour {
 
             newAgent.material.SetTexture("_MainTex", tex);
         }
+        // Send agent info to FluidBG:
+        environmentFluidManager.agentsArray = agentsArray;
+        environmentFluidManager.playerAgent = playerAgent;
+        
 
         // SPAWN AGENTS:
         RespawnAgents();
@@ -208,6 +214,8 @@ public class SimulationManager : MonoBehaviour {
         SpawnFood();
         predatorArray = new PredatorModule[numPredators];
         SpawnPredators();
+
+        environmentFluidManager.predatorsArray = predatorArray;
 
         InitializeGridCells();
         HookUpModules();
@@ -220,7 +228,7 @@ public class SimulationManager : MonoBehaviour {
         // TEMPORARY!!!! TEMPORARY!!!! TEMPORARY!!!! TEMPORARY!!!! TEMPORARY!!!! TEMPORARY!!!!
         // TEMPORARY!!!! TEMPORARY!!!! TEMPORARY!!!! TEMPORARY!!!! TEMPORARY!!!! TEMPORARY!!!!
         // DON"T LEAVE THIS!!!
-        RunAutomatedGridSearch();
+        //RunAutomatedGridSearch();
     }
     private void RespawnAgents() {  // doesn't create the Agent classes, just resets their data
         for(int i = 0; i < persistentGenomePoolSize; i++) {

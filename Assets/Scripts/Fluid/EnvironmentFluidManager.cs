@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FluidManager : MonoBehaviour {
+public class EnvironmentFluidManager : MonoBehaviour {
 
     public ComputeShader computeShaderFluidSim;
     public Texture2D initialDensityTex;
+    public Texture2D initialObstaclesTex;
 
     public int resolution = 64;
     public float deltaTime = 1f;
@@ -25,6 +26,7 @@ public class FluidManager : MonoBehaviour {
     private RenderTexture densityB;
 
     private RenderTexture divergence;
+    private RenderTexture obstacles;
 
     private Material displayMat;
 
@@ -33,6 +35,13 @@ public class FluidManager : MonoBehaviour {
     private float prevMousePosX;
     private float prevMousePosY;
 
+    public Agent[] agentsArray;
+    public Agent playerAgent;
+    public PredatorModule[] predatorsArray;
+    public FoodModule[] foodArray;
+
+    private int numForcePoints = 77;
+    public ForcePoint[] forcePointsArray;
     public ComputeBuffer forcePointsCBuffer;
     public struct ForcePoint {
         public float posX;
@@ -40,6 +49,14 @@ public class FluidManager : MonoBehaviour {
         public float velX;
         public float velY;
         public float size;
+    }
+    private int numColorPoints = 77;
+    public ColorPoint[] colorPointsArray;
+    public ComputeBuffer colorPointsCBuffer;
+    public struct ColorPoint {
+        public float posX;
+        public float posY;
+        public Vector3 color;
     }
 
     public DisplayTexture displayTex = DisplayTexture.densityA;
@@ -50,41 +67,87 @@ public class FluidManager : MonoBehaviour {
         pressureB,
         densityA,
         densityB,
-        divergence
+        divergence,
+        obstacles
     }
     
 
 	// Use this for initialization
 	void Start () {
         CreateTextures();
-        CreateForcePoints();
+        
         displayMat = GetComponent<MeshRenderer>().material; //.SetTexture("_MainTex", velocityA);
         Graphics.Blit(initialDensityTex, densityA);
-        //InitializeVelocity();
+        Graphics.Blit(initialObstaclesTex, obstacles);
+
+        InitializeVelocity();
         //Advection();
         //Graphics.Blit(velocityB, velocityA); // TEMP! slow...
 
         //BoundaryConditions();
-
+        forcePointsCBuffer = new ComputeBuffer(numForcePoints, sizeof(float) * 5);
+        forcePointsArray = new ForcePoint[numForcePoints];
         //Tick();
+        CreateForcePoints();
         
     }
 
     private void CreateForcePoints() {
-        int numForcePoints = 64;
+        if(agentsArray == null || playerAgent == null || predatorsArray == null) {
+            return;
+        }
+        
+        //Debug.Log("agentsArray[i].testModule.ownRigidBody2D.velocity: " + agentsArray[0].testModule.ownRigidBody2D.velocity.ToString());
+        for(int i = 0; i < agentsArray.Length; i++) {
+            ForcePoint agentPoint = new ForcePoint();
+            //if(i == 0)
+            //    
+            // convert world coords to UVs:
+            Vector3 agentPos = agentsArray[i].testModule.ownRigidBody2D.transform.position;
+            float u = (agentPos.x + 70f) / 140f;
+            float v = (agentPos.y + 70f) / 140f;
+            agentPoint.posX = u; // UnityEngine.Random.Range(0f, 1f);
+            agentPoint.posY = v;
+            agentPoint.velX = agentsArray[i].testModule.ownRigidBody2D.velocity.x * 0.01f;
+            agentPoint.velY = agentsArray[i].testModule.ownRigidBody2D.velocity.y * 0.01f;
+            agentPoint.size = 450f;
 
-        ForcePoint[] forcePointsArray = new ForcePoint[numForcePoints];
-        for(int i = 0; i < numForcePoints; i++) {
-            ForcePoint point = new ForcePoint();
-            point.posX = UnityEngine.Random.Range(0f, 1f);
-            point.posY = UnityEngine.Random.Range(0f, 1f);
-            point.velX = UnityEngine.Random.Range(-1f, 1f);
-            point.velY = UnityEngine.Random.Range(-1f, 1f);
-            point.size = UnityEngine.Random.Range(256f, 600f);
-            forcePointsArray[i] = point;
+            //point.posX = UnityEngine.Random.Range(0f, 1f);
+            //point.posY = UnityEngine.Random.Range(0f, 1f);
+            //point.velX = UnityEngine.Random.Range(-1f, 1f);
+            //point.velY = UnityEngine.Random.Range(-1f, 1f);
+            //point.size = UnityEngine.Random.Range(256f, 600f);
+            forcePointsArray[i] = agentPoint;
+
+            //Debug.Log("point[" + i.ToString() + ", pos: (" + point.posX.ToString() + ", " + point.posY.ToString() + ") vel: (" + point.velX.ToString() + ", " + point.velY.ToString() + ") size: " + point.size.ToString());
         }
 
-        forcePointsCBuffer = new ComputeBuffer(numForcePoints, sizeof(float) * 5);
+        // Player:
+        ForcePoint point = new ForcePoint();
+        Vector3 playerPos = playerAgent.testModule.ownRigidBody2D.transform.position;
+        float pu = (playerPos.x + 70f) / 140f;
+        float pv = (playerPos.y + 70f) / 140f;
+        point.posX = pu; 
+        point.posY = pv;
+        point.velX = playerAgent.testModule.ownRigidBody2D.velocity.x * 0.01f;
+        point.velY = playerAgent.testModule.ownRigidBody2D.velocity.y * 0.01f;
+        point.size = 400f;        
+        forcePointsArray[agentsArray.Length] = point;
+
+        // Predators:
+        for (int i = 0; i < predatorsArray.Length; i++) {
+            ForcePoint predatorPoint = new ForcePoint();
+            Vector3 predatorPos = predatorsArray[i].rigidBody.transform.position;
+            float predU = (predatorPos.x + 70f) / 140f;
+            float predV = (predatorPos.y + 70f) / 140f;
+            predatorPoint.posX = predU; // UnityEngine.Random.Range(0f, 1f);
+            predatorPoint.posY = predV;
+            predatorPoint.velX = predatorsArray[i].rigidBody.velocity.x * 0.01f;
+            predatorPoint.velY = predatorsArray[i].rigidBody.velocity.y * 0.01f;
+            predatorPoint.size = 160f;
+            forcePointsArray[agentsArray.Length + 1 + i] = predatorPoint;
+            //Debug.Log("predatorPoint[" + i.ToString() + ", pos: (" + predatorPoint.posX.ToString() + ", " + predatorPoint.posY.ToString() + ") vel: (" + predatorPoint.velX.ToString() + ", " + predatorPoint.velY.ToString() + ") size: " + predatorPoint.size.ToString());
+        }
 
         forcePointsCBuffer.SetData(forcePointsArray);
     }
@@ -126,12 +189,17 @@ public class FluidManager : MonoBehaviour {
         divergence.wrapMode = TextureWrapMode.Repeat;
         divergence.enableRandomWrite = true;
         divergence.Create();
+
+        obstacles = new RenderTexture(resolution, resolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+        obstacles.wrapMode = TextureWrapMode.Repeat;
+        obstacles.enableRandomWrite = true;
+        obstacles.Create();
     }
 	
 	// Update is called once per frame
 	void FixedUpdate () {
         SetDisplayTexture();
-        
+        CreateForcePoints();
         if (tick) {   // So I can step through the program slowly at first
             //tick = false;
             Tick();
@@ -159,6 +227,9 @@ public class FluidManager : MonoBehaviour {
                 break;
             case DisplayTexture.pressureB:
                 displayMat.SetTexture("_MainTex", pressureB);
+                break;
+            case DisplayTexture.obstacles:
+                displayMat.SetTexture("_MainTex", obstacles);
                 break;
             case DisplayTexture.velocityA:
                 displayMat.SetTexture("_MainTex", velocityA);
@@ -201,15 +272,20 @@ public class FluidManager : MonoBehaviour {
 
         // EXTERNAL FORCE:::::
         //ExternalForce();
+        //CreateForcePoints();
         VelocityInjectionPoints();
-        Graphics.Blit(velocityB, velocityA); // TEMP! slow...
 
+        //Graphics.Blit(velocityB, velocityA); // TEMP! slow...
+        // EnforceBoundariesVelocity:
+        //InitializeVelocity();
+        EnforceBoundariesVelocity(velocityB, velocityA);  // REplaces BLIT for now!!!
+        
         // DIVERGENCE:::::
-        VelocityDivergence();
+        VelocityDivergence();  // calculate velocity divergence
 
         // PRESSURE JACOBI:::::
         //InitializePressure();  // zeroes out initial pressure guess
-        int numPressureJacobiIter = 48;
+        int numPressureJacobiIter = 60;
         for (int i = 0; i < numPressureJacobiIter; i++) {
             if (i % 2 == 0) {
                 PressureJacobi(pressureA, pressureB);
@@ -227,7 +303,7 @@ public class FluidManager : MonoBehaviour {
         //BoundaryConditions();  // Have to interweave this into each Texture "Slab Operation"
     }
 
-    private void RefreshColor() {
+    private void RefreshColor() { 
         int kernelRefreshColor = computeShaderFluidSim.FindKernel("RefreshColor");
 
         computeShaderFluidSim.SetFloat("_TextureResolution", (float)resolution);
@@ -276,6 +352,7 @@ public class FluidManager : MonoBehaviour {
     }
 
     private void VelocityInjectionPoints() {
+        
         int kernelVelocityInjectionPoints = computeShaderFluidSim.FindKernel("VelocityInjectionPoints");
         computeShaderFluidSim.SetFloat("_TextureResolution", (float)resolution);
         computeShaderFluidSim.SetFloat("_DeltaTime", deltaTime);
@@ -283,7 +360,23 @@ public class FluidManager : MonoBehaviour {
         computeShaderFluidSim.SetBuffer(kernelVelocityInjectionPoints, "ForcePointsCBuffer", forcePointsCBuffer);
         computeShaderFluidSim.SetTexture(kernelVelocityInjectionPoints, "VelocityRead", velocityA);
         computeShaderFluidSim.SetTexture(kernelVelocityInjectionPoints, "VelocityWrite", velocityB);
+        
         computeShaderFluidSim.Dispatch(kernelVelocityInjectionPoints, resolution / 16, resolution / 16, 1);
+    }
+    private void VelocityInjectionTexture() {
+        
+    }
+    private void DensityInjectionPoints() {
+        
+        int kernelDensityInjectionPoints = computeShaderFluidSim.FindKernel("DensityInjectionPoints");
+        computeShaderFluidSim.SetFloat("_TextureResolution", (float)resolution);
+        computeShaderFluidSim.SetFloat("_DeltaTime", deltaTime);
+        computeShaderFluidSim.SetFloat("_InvGridScale", invGridScale);
+        computeShaderFluidSim.SetBuffer(kernelDensityInjectionPoints, "ColorPointsCBuffer", colorPointsCBuffer);
+        computeShaderFluidSim.SetTexture(kernelDensityInjectionPoints, "DensityRead", densityA);
+        computeShaderFluidSim.SetTexture(kernelDensityInjectionPoints, "DensityWrite", densityB);
+
+        computeShaderFluidSim.Dispatch(kernelDensityInjectionPoints, resolution / 16, resolution / 16, 1);
     }
     private void ExternalForce() {
         int kernelExternalForce = computeShaderFluidSim.FindKernel("ExternalForce");
@@ -313,6 +406,18 @@ public class FluidManager : MonoBehaviour {
         computeShaderFluidSim.Dispatch(kernelExternalForce, resolution / 16, resolution / 16, 1);
     }
 
+    private void EnforceBoundariesVelocity(RenderTexture readTex, RenderTexture writeTex) {
+        int kernelEnforceBoundariesVelocity = computeShaderFluidSim.FindKernel("EnforceBoundariesVelocity");
+
+        computeShaderFluidSim.SetFloat("_TextureResolution", (float)resolution);
+        computeShaderFluidSim.SetFloat("_DeltaTime", deltaTime);
+        computeShaderFluidSim.SetFloat("_InvGridScale", invGridScale);
+        computeShaderFluidSim.SetTexture(kernelEnforceBoundariesVelocity, "ObstaclesRead", obstacles);
+        computeShaderFluidSim.SetTexture(kernelEnforceBoundariesVelocity, "VelocityRead", readTex);
+        computeShaderFluidSim.SetTexture(kernelEnforceBoundariesVelocity, "VelocityWrite", writeTex);
+        computeShaderFluidSim.Dispatch(kernelEnforceBoundariesVelocity, resolution / 16, resolution / 16, 1);
+    }
+
     private void VelocityDivergence() {
         int kernelViscosityDivergence = computeShaderFluidSim.FindKernel("VelocityDivergence");
 
@@ -340,6 +445,7 @@ public class FluidManager : MonoBehaviour {
         computeShaderFluidSim.SetFloat("_TextureResolution", (float)resolution);
         computeShaderFluidSim.SetFloat("_DeltaTime", deltaTime);
         computeShaderFluidSim.SetFloat("_InvGridScale", invGridScale);
+        computeShaderFluidSim.SetTexture(kernelPressureJacobi, "ObstaclesRead", obstacles);
         computeShaderFluidSim.SetTexture(kernelPressureJacobi, "DivergenceRead", divergence);
         computeShaderFluidSim.SetTexture(kernelPressureJacobi, "PressureRead", readRT);
         computeShaderFluidSim.SetTexture(kernelPressureJacobi, "PressureWrite", writeRT);

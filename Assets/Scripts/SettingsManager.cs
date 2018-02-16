@@ -18,7 +18,7 @@ public class SettingsManager : MonoBehaviour {
 	}
 
     public void Initialize() {
-        mutationSettingsSupervised = new MutationSettings(0f, 0.015f, 0.6f, 0.005f, 1f, 0.1f, 0.001f);
-        mutationSettingsPersistent = new MutationSettings(0f, 0.01f, 0.5f, 0.0f, 1f, 0.0f, 0.0f);
+        mutationSettingsSupervised = new MutationSettings(0.5f, 0.015f, 0.6f, 0.005f, 1f, 0.1f, 0.001f);
+        mutationSettingsPersistent = new MutationSettings(0.5f, 0.01f, 0.5f, 0.0f, 1f, 0.0f, 0.0f);
     }
 }

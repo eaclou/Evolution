@@ -72,7 +72,7 @@
 					float3 healthColor = lerp(float3(0.75,0.2,0.1), float3(0.25,1,0.36), foodAvgPercentage);
 					displayColor.rgb = lerp(foodRColor * foodRPercentage + foodGColor * foodGPercentage + foodBColor * foodBPercentage, healthColor, 0.5);
 				}
-				displayColor.rgb *= 0.6;
+				//displayColor.rgb *= 0.1;
 				return displayColor;
 			}
 			ENDCG

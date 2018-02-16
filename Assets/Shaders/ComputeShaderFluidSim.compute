@@ -4,13 +4,26 @@
 #pragma kernel Advection
 #pragma kernel ViscousDiffusion
 #pragma kernel ExternalForce
+#pragma kernel EnforceBoundariesVelocity
+#pragma kernel VelocityInjectionPoints
+#pragma kernel VelocityInjectionTexture
 #pragma kernel VelocityDivergence
 #pragma kernel InitializePressure
 #pragma kernel PressureJacobi
 #pragma kernel SubtractGradient
-#pragma kernel BoundaryConditions
+
+
+struct ForcePoint {
+    float posX;
+    float posY;        
+    float velX;
+    float velY;
+    float size;
+};
 
 Texture2D<float4> SourceColorTex;
+Texture2D<float4> InputVelocityTex;
+StructuredBuffer<ForcePoint> ForcePointsCBuffer;
 Texture2D<float4> VelocityRead;
 RWTexture2D<float4> VelocityWrite;
 Texture2D<float4> PressureRead;
@@ -19,6 +32,7 @@ Texture2D<float4> DensityRead;
 RWTexture2D<float4> DensityWrite;
 Texture2D<float4> DivergenceRead;
 RWTexture2D<float4> DivergenceWrite;
+Texture2D<float4> ObstaclesRead;
 
 SamplerState _LinearClamp;
 SamplerState _LinearRepeat;
@@ -62,7 +76,7 @@ void InitializeVelocity (uint3 id : SV_DispatchThreadID)
 	float yCoord = ((float)id.y + 0.5)  / _TextureResolution;
 	float2 uvOrigin = float2(xCoord, yCoord);
 
-	VelocityWrite[id.xy] = float4(sin(20 * uvOrigin.y) * uvOrigin.x,sin(13.79 * uvOrigin.x) * uvOrigin.y,0,0) * 0.05; // 
+	VelocityWrite[id.xy] = float4(sin(20 * uvOrigin.y) * uvOrigin.x,sin(13.79 * uvOrigin.x) * uvOrigin.y,0,0) * 0.1; // 
 }
 
 [numthreads(16,16,1)]
@@ -107,6 +121,44 @@ void ViscousDiffusion (uint3 id : SV_DispatchThreadID)
 }
 
 [numthreads(16,16,1)]
+void VelocityInjectionPoints (uint3 id : SV_DispatchThreadID)
+{	
+	uint elements;
+	uint stride;
+	ForcePointsCBuffer.GetDimensions(elements, stride);
+
+	float xCoord = ((float)id.x + 0.5) / _TextureResolution;
+	float yCoord = ((float)id.y + 0.5) / _TextureResolution;
+	float2 pixelCoords = float2(xCoord, yCoord);
+	
+	float4 currentVelocity = VelocityRead[id.xy];
+	
+	float2 newForce = currentVelocity.xy; //float2(0,0);
+
+	//float influenceAmount = 0;
+	for(uint i = 0; i < elements; i++) {
+		
+		ForcePoint fp;
+		fp = ForcePointsCBuffer[i];	
+
+		float2 forceCoords = float2(fp.posX, fp.posY);
+		float2 forceVal = float2(fp.velX, fp.velY);		
+		float dist = length(pixelCoords - forceCoords);
+		float influenceAmount = exp(-fp.size * ((forceCoords.x - pixelCoords.x) * (forceCoords.x - pixelCoords.x) + (forceCoords.y - pixelCoords.y) * (forceCoords.y - pixelCoords.y)) / dist);
+		//newForce += forceVal * _DeltaTime * ;
+		newForce = lerp(newForce, forceVal, influenceAmount);
+	}
+	float damping = saturate(_Damping);
+
+	VelocityWrite[id.xy] = float4(newForce, 0, 0) * (1.0 - damping);  //(currentVelocity + float4(newForce, 0, 0)) * (1.0 - damping);  //lerp(currentVelocity, float4(newForce, 0, 0) * 20, 1);
+}
+[numthreads(16,16,1)]
+void VelocityInjectionTexture (uint3 id : SV_DispatchThreadID)
+{	
+	
+}
+
+[numthreads(16,16,1)]
 void ExternalForce (uint3 id : SV_DispatchThreadID)
 {
 	float xCoord = ((float)id.x + 0.5)  / _TextureResolution;
@@ -132,6 +184,43 @@ void ExternalForce (uint3 id : SV_DispatchThreadID)
 
 	float damping = saturate(_Damping);
 	VelocityWrite[id.xy] = (currentVelocity + float4(velocityAdd, 0, 0)) * (1.0 - damping);
+}
+
+[numthreads(16,16,1)]
+void EnforceBoundariesVelocity (uint3 id : SV_DispatchThreadID)
+{	
+	half4 centerVal = ObstaclesRead[id.xy];
+	float obstacleMask = round(centerVal.x);
+
+	if(obstacleMask > 0.5) {
+		
+	
+		float xCoord = ((float)id.x + 0.5)  / _TextureResolution;
+		float yCoord = ((float)id.y + 0.5)  / _TextureResolution;
+		float2 uvOrigin = float2(xCoord, yCoord);
+		float ps = 1.0 / _TextureResolution;
+	
+		half4 leftVal = ObstaclesRead.SampleLevel(_LinearRepeat, uvOrigin + half2(-ps, 0), 0);
+		half4 rightVal = ObstaclesRead.SampleLevel(_LinearRepeat, uvOrigin + half2(ps, 0), 0);
+		half4 topVal = ObstaclesRead.SampleLevel(_LinearRepeat, uvOrigin + half2(0, ps), 0);
+		half4 bottomVal = ObstaclesRead.SampleLevel(_LinearRepeat, uvOrigin + half2(0, -ps), 0);
+	
+	
+		float dX = (rightVal.x - centerVal.x + centerVal.x - leftVal.x) * 0.5;
+		float dY = (topVal.y - centerVal.y + centerVal.y - bottomVal.y) * 0.5;
+		float2 normalDir = normalize(float2(dX, dY));
+
+		float2 neighborCoords = uvOrigin + normalDir * ps;
+		float4 neighborVelocity = VelocityRead.SampleLevel(_LinearRepeat, neighborCoords, 0);
+		float neighborMask = ObstaclesRead.SampleLevel(_LinearRepeat, neighborCoords, 0);
+
+		float innerObstacleMask = obstacleMask * round(neighborMask);  // 1 if inner, 0 if border
+		VelocityWrite[id.xy] = lerp(float4(-neighborVelocity.xy,0,0), float4(neighborVelocity.xy,0,0), innerObstacleMask);	
+	}
+	else {
+		float4 currentVelocityVal = VelocityRead[id.xy];
+		VelocityWrite[id.xy] = currentVelocityVal;
+	}
 }
 
 [numthreads(16,16,1)]
@@ -177,7 +266,21 @@ void PressureJacobi (uint3 id : SV_DispatchThreadID)
 
 	float4 newVal = (leftVal + rightVal + topVal + bottomVal + centerVal * alpha) / beta;
 
-	PressureWrite[id.xy] = newVal;
+	half4 leftObstacles = ObstaclesRead.SampleLevel(_LinearRepeat, uvOrigin + half2(-ps * 2, 0), 1);
+	half4 rightObstacles = ObstaclesRead.SampleLevel(_LinearRepeat, uvOrigin + half2(ps * 2, 0), 1);
+	half4 topObstacles = ObstaclesRead.SampleLevel(_LinearRepeat, uvOrigin + half2(0, ps * 2), 1);
+	half4 bottomObstacles = ObstaclesRead.SampleLevel(_LinearRepeat, uvOrigin + half2(0, -ps * 2), 1);
+	half4 centerObstacles = ObstaclesRead[id.xy];
+	float obstacleMask = centerObstacles.x;
+	
+	float dX = (rightObstacles.x - centerObstacles.x + centerObstacles.x - leftObstacles.x) * 0.5;
+	float dY = (topObstacles.y - centerObstacles.y + centerObstacles.y - bottomObstacles.y) * 0.5;
+	float2 normalDir = normalize(float2(dX, dY));
+
+	float2 neighborCoords = uvOrigin + normalDir * ps;
+	float4 neighborPressure = PressureRead.SampleLevel(_LinearRepeat, neighborCoords, 0);
+
+	PressureWrite[id.xy] = lerp(newVal, neighborPressure, round(obstacleMask));
 }
 
 [numthreads(16,16,1)]
@@ -199,45 +302,4 @@ void SubtractGradient (uint3 id : SV_DispatchThreadID)
 	VelocityWrite[id.xy] = newVal;
 }
 
-[numthreads(16,16,1)]
-void BoundaryConditions (uint3 id : SV_DispatchThreadID)
-{
-	
-	if(id.x == 0) {
-		// Velocity of neighbor:
-		float4 vel = VelocityRead[uint2(1, id.y)];
-		VelocityWrite[id.xy] = float4(-vel.x, -vel.y,0,0);
 
-		// Pressure of neighbor:
-		float4 pressure = PressureRead[uint2(1, id.y)];
-		PressureWrite[id.xy] = float4(pressure.x, pressure.y,0,0);
-	}
-	if(id.x >= (uint)(_TextureResolution - 1)) {
-		// Velocity of neighbor:
-		float4 vel = VelocityRead[uint2(id.x - 1, id.y)];
-		VelocityWrite[id.xy] = float4(-vel.x, -vel.y,0,0);
-
-		// Pressure of neighbor:
-		float4 pressure = PressureRead[uint2(id.x - 1, id.y)];
-		PressureWrite[id.xy] = float4(pressure.x, pressure.y,0,0);
-	}
-	if(id.y == 0) {
-		// Velocity of neighbor:
-		float4 vel = VelocityRead[uint2(id.x, 1)];
-		VelocityWrite[id.xy] = float4(-vel.x, -vel.y,0,0);
-
-		// Pressure of neighbor:
-		float4 pressure = PressureRead[uint2(id.x, 1)];
-		PressureWrite[id.xy] = float4(pressure.x, pressure.y,0,0);
-	}
-	if(id.y >= (uint)(_TextureResolution - 1)) {
-		// Velocity of neighbor:
-		float4 vel = VelocityRead[uint2(id.x, id.y - 1)];
-		VelocityWrite[id.xy] = float4(-vel.x, -vel.y,0,0);
-
-		// Pressure of neighbor:
-		float4 pressure = PressureRead[uint2(id.x, id.y - 1)];
-		PressureWrite[id.xy] = float4(pressure.x, pressure.y,0,0);
-	}
-	
-}

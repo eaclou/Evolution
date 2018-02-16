@@ -77,8 +77,8 @@
 				radius = radius * (maxDist - minDist) + minDist;
 				float alpha = saturate(radius - distToOrigin);
 
-				float3 startHue = float3(0.35, 0.0, 0.0);
-				float3 endHue = float3(1.2, 0.7, 0.0);
+				float3 startHue = float3(0.0, 0.0, 0.0);; //float3(0.35, 0.0, 0.0);
+				float3 endHue = float3(0.0, 0.0, 0.0); //float3(1.2, 0.7, 0.0);
 
 				outColor.rgb = lerp(startHue, endHue, distToOrigin * distToOrigin * distToOrigin);
 
