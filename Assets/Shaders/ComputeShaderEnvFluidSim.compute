@@ -3,13 +3,10 @@
 #pragma kernel InitializeVelocity
 #pragma kernel Advection
 #pragma kernel ViscousDiffusion
-#pragma kernel ExternalForce
 #pragma kernel VelocityInjectionPoints
-#pragma kernel VelocityInjectionTexture
 #pragma kernel VelocityDivergence
 #pragma kernel PressureJacobi
 #pragma kernel SubtractGradient
-
 
 struct ForcePoint {
     float posX;
@@ -85,21 +82,24 @@ void Advection (uint3 id : SV_DispatchThreadID)
 	float yCoord = ((float)id.y + 0.5)  / _TextureResolution;
 	float2 uvOrigin = float2(xCoord, yCoord);
 
-	float isSolid = ObstaclesRead[id.xy].r;
+	float isSolid = ObstaclesRead[id.xy].b;	
+	float2 uvSample = uvOrigin - _DeltaTime * _InvGridScale * VelocityRead.SampleLevel(_LinearRepeat, uvOrigin, 0).xy;
+	float4 newDensity = DensityRead.SampleLevel(_LinearRepeat, uvSample, 0);
+
 	if(isSolid > 0.5) {
-		//DensityWrite[id.xy] = float4(0,0,0,0);
+		DensityWrite[id.xy] = newDensity;
 		VelocityWrite[id.xy] = float4(0,0,0,0);
 
 		return;
 	}
 
-	float2 uvSample = uvOrigin - _DeltaTime * _InvGridScale * VelocityRead.SampleLevel(_LinearRepeat, uvOrigin, 0).xy;
 	
-	float4 newDensity = DensityRead.SampleLevel(_LinearRepeat, uvSample, 0);
+	
+	
 	float4 newVelocity = VelocityRead.SampleLevel(_LinearRepeat, uvSample, 0);
 		
 	DensityWrite[id.xy] = newDensity;
-	VelocityWrite[id.xy] = newVelocity; // + float4(uvSample, 0, 0);
+	VelocityWrite[id.xy] = newVelocity * (1.0 - saturate(_Damping)); // + float4(uvSample, 0, 0);
 }
 
 [numthreads(16,16,1)]
@@ -129,7 +129,7 @@ void ViscousDiffusion (uint3 id : SV_DispatchThreadID)
 [numthreads(16,16,1)]
 void VelocityInjectionPoints (uint3 id : SV_DispatchThreadID)
 {	
-	float isSolid = ObstaclesRead[id.xy].r;
+	float isSolid = ObstaclesRead[id.xy].b;
 	if(isSolid > 0.5) {
 		VelocityWrite[id.xy] = float4(0,0,0,0);
 		return;
@@ -161,41 +161,8 @@ void VelocityInjectionPoints (uint3 id : SV_DispatchThreadID)
 		newForce = lerp(newForce, forceVal, influenceAmount);
 	}
 	float damping = saturate(_Damping);
-	float2 constantVel = float2(0.005, 0.03) * 0;
+	float2 constantVel = float2(0.005, 0.03) * 0.0;
 	VelocityWrite[id.xy] = float4(newForce + constantVel, 0, 0) * (1.0 - damping);  //(currentVelocity + float4(newForce, 0, 0)) * (1.0 - damping);  //lerp(currentVelocity, float4(newForce, 0, 0) * 20, 1);
-}
-[numthreads(16,16,1)]
-void VelocityInjectionTexture (uint3 id : SV_DispatchThreadID)
-{	
-	
-}
-
-[numthreads(16,16,1)]
-void ExternalForce (uint3 id : SV_DispatchThreadID)
-{
-	float xCoord = ((float)id.x + 0.5)  / _TextureResolution;
-	float yCoord = ((float)id.y + 0.5)  / _TextureResolution;
-	float2 uvOrigin = float2(xCoord, yCoord);
-	float ps = 1.0 / _TextureResolution;
-
-	float4 currentVelocity = VelocityRead.SampleLevel(_LinearRepeat, uvOrigin, 0);
-
-	float2 clickPos = float2(_ForcePosX, _ForcePosY);
-	float2 clickDir = float2(_ForceDirX, _ForceDirY);
-	//float forceMagnitude = _;
-
-	float dist = length(uvOrigin - clickPos);
-
-	//float falloff = 1.0 / dist;
-	//float2 velocityAdd = float2(0, 0);
-	//if(dist < 0.02) {
-	//	velocityAdd = float2(sin(_Time * 0.1) * 0.03, cos(_Time * 0.1) * 0.03);
-	//}
-
-	float2 velocityAdd = _ForceOn * clickDir * _ForceMagnitude * _DeltaTime * exp(-_ForceSize * ((_ForcePosX - uvOrigin.x) * (_ForcePosX - uvOrigin.x) + (_ForcePosY - uvOrigin.y) * (_ForcePosY - uvOrigin.y)) / dist);
-
-	float damping = saturate(_Damping);
-	VelocityWrite[id.xy] = (currentVelocity + float4(velocityAdd, 0, 0)) * (1.0 - damping);
 }
 
 [numthreads(16,16,1)]
@@ -211,20 +178,16 @@ void VelocityDivergence (uint3 id : SV_DispatchThreadID)
 	float4 topVal = VelocityRead.SampleLevel(_LinearRepeat, uvOrigin + half2(0, ps), 0);
 	float4 bottomVal = VelocityRead.SampleLevel(_LinearRepeat, uvOrigin + half2(0, -ps), 0);
 
-	// See Below %%% v v v %%% IF I ADD DYNAMIC OBSTACLES:::  But if I assume they are static then neighbor vel will always be 0 which it should be anyway after Advection etc. ???
-	// ..... Come back to this later.....
-	// Find neighboring obstacles:
-    // vec3 oN = texelFetchOffset(Obstacles, T, 0, ivec2(0, 1)).xyz;
-    // vec3 oS = texelFetchOffset(Obstacles, T, 0, ivec2(0, -1)).xyz;
-    // vec3 oE = texelFetchOffset(Obstacles, T, 0, ivec2(1, 0)).xyz;
-    // vec3 oW = texelFetchOffset(Obstacles, T, 0, ivec2(-1, 0)).xyz;
-    // Use obstacle velocities for solid cells:
-    // if (oN.x > 0) vN = oN.yz;
-    // if (oS.x > 0) vS = oS.yz;
-    // if (oE.x > 0) vE = oE.yz;
-    // if (oW.x > 0) vW = oW.yz;
-	//////////////////////////////////////////////////
+	half4 leftObstacle = ObstaclesRead.SampleLevel(_LinearRepeat, uvOrigin + half2(-ps, 0), 0);
+	half4 rightObstacle = ObstaclesRead.SampleLevel(_LinearRepeat, uvOrigin + half2(ps, 0), 0);
+	half4 topObstacle = ObstaclesRead.SampleLevel(_LinearRepeat, uvOrigin + half2(0, ps), 0);
+	half4 bottomObstacle = ObstaclesRead.SampleLevel(_LinearRepeat, uvOrigin + half2(0, -ps), 0);
 
+	if(leftObstacle.b > 0.5) leftVal.xy = leftObstacle.xy;
+	if(rightObstacle.b > 0.5) rightVal.xy = rightObstacle.xy;
+	if(topObstacle.b > 0.5) topVal.xy = topObstacle.xy;
+	if(bottomObstacle.b > 0.5) bottomVal.xy = bottomObstacle.xy;
+	
 	float divergence = _InvGridScale * 0.5 * ((rightVal.x - leftVal.x) + (topVal.y - bottomVal.y));
 
 	DivergenceWrite[id.xy] = float4(divergence, divergence, divergence, 1);
@@ -254,10 +217,10 @@ void PressureJacobi (uint3 id : SV_DispatchThreadID)
 	half4 topPressure = PressureRead.SampleLevel(_LinearRepeat, uvOrigin + half2(0, ps), 0);
 	half4 bottomPressure = PressureRead.SampleLevel(_LinearRepeat, uvOrigin + half2(0, -ps), 0);
 
-	if(leftObstacle.x > 0.5) leftPressure = centerPressure;
-	if(rightObstacle.x > 0.5) rightPressure = centerPressure;
-	if(topObstacle.x > 0.5) topPressure = centerPressure;
-	if(bottomObstacle.x > 0.5) bottomPressure = centerPressure;
+	if(leftObstacle.b > 0.5) leftPressure = centerPressure;
+	if(rightObstacle.b > 0.5) rightPressure = centerPressure;
+	if(topObstacle.b > 0.5) topPressure = centerPressure;
+	if(bottomObstacle.b > 0.5) bottomPressure = centerPressure;
 
 	half4 divergence = DivergenceRead.SampleLevel(_LinearRepeat, uvOrigin, 0);
 	float4 newPressure = (leftPressure + rightPressure + topPressure + bottomPressure + divergence * alpha) / beta;
@@ -267,9 +230,9 @@ void PressureJacobi (uint3 id : SV_DispatchThreadID)
 [numthreads(16,16,1)]
 void SubtractGradient (uint3 id : SV_DispatchThreadID)
 {
-	float isSolid = ObstaclesRead[id.xy].r;
-	if (isSolid > 0.5) {
-        VelocityWrite[id.xy] = float4(0,0,0,0);  // <-- If I add moving obstacles, revisit this!!
+	float4 centerObstacle = ObstaclesRead[id.xy];
+	if (centerObstacle.b > 0.5) {
+        VelocityWrite[id.xy] = float4(centerObstacle.xy,0,0);
         return;
     }
 
@@ -289,15 +252,19 @@ void SubtractGradient (uint3 id : SV_DispatchThreadID)
 	half4 topObstacle = ObstaclesRead.SampleLevel(_LinearRepeat, uvOrigin + half2(0, ps), 0);
 	half4 bottomObstacle = ObstaclesRead.SampleLevel(_LinearRepeat, uvOrigin + half2(0, -ps), 0);
 	
-	if(leftObstacle.x > 0.5) leftPressure = centerPressure;
-	if(rightObstacle.x > 0.5) rightPressure = centerPressure;
-	if(topObstacle.x > 0.5) topPressure = centerPressure;
-	if(bottomObstacle.x > 0.5) bottomPressure = centerPressure;
+	// Copied from internet example... still need to understand this better::::
+	float2 obstV = float2(0,0);
+	float2 vMask = float2(1,1);
+
+	if(leftObstacle.b > 0.5) { leftPressure = centerPressure; obstV.x = leftObstacle.x; vMask.x = 0; }
+	if(rightObstacle.b > 0.5) { rightPressure = centerPressure; obstV.x = rightObstacle.x; vMask.x = 0; }
+	if(topObstacle.b > 0.5) { topPressure = centerPressure; obstV.y = topObstacle.y; vMask.y = 0; }
+	if(bottomObstacle.b > 0.5) { bottomPressure = centerPressure; obstV.y = bottomObstacle.y; vMask.y = 0; }
 	
 	float4 newVelocity = VelocityRead.SampleLevel(_LinearRepeat, uvOrigin, 0);
-	newVelocity.xy -= 0.5 * _InvGridScale * half2(rightPressure - leftPressure, topPressure - bottomPressure);
-
-	VelocityWrite[id.xy] = newVelocity;
+	float2 grad = 0.5 * _InvGridScale * half2(rightPressure - leftPressure, topPressure - bottomPressure);
+	newVelocity.xy -= grad;
+	VelocityWrite[id.xy] = float4(newVelocity.xy * vMask + obstV, 0, 0);
 }
 
 

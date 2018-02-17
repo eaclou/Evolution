@@ -4,6 +4,8 @@
 	{
 		_MainTex ("Texture", 2D) = "white" {}
 		_IsPlayer ("_IsPlayer", Float) = 0.0
+		_VelX ("_VelX", Float) = 0.0
+		_VelY ("_VelY", Float) = 0.0
 	}
 	SubShader
 	{
@@ -36,6 +38,8 @@
 			sampler2D _MainTex;
 			float4 _MainTex_ST;
 			uniform float _IsPlayer;
+			uniform float _VelX;
+			uniform float _VelY;
 
 			float rand(float2 co){
 				return frac(sin(dot(co.xy ,float2(12.9898,78.233))) * 43758.5453);
@@ -131,7 +135,8 @@
 						outCol.rgb = lerp(damageColor, outCol.rgb, hitPoints * 1.5);
 					}
 				
-				outCol.rgb = float3(outCol.r, outCol.r, outCol.r) * 0.05;
+				outCol.rgb = float3(_VelX, _VelY, 1);
+				//outCol.rgb = float3(0, 0, 1);
 				// inside CGPROGRAM in the fragment Shader:
 				float alphaCutoffValue = 0.1;
 				clip(outCol.a - alphaCutoffValue);

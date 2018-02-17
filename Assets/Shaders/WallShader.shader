@@ -57,7 +57,7 @@
 				float circle = ceil(1.0 - saturate(length(coords)));
 				float distToOrigin = length(coords);
 
-				float4 outColor = float4(0.0, 0.0, 0.0, circle);
+				float4 outColor = float4(0.0, 0.0, 1.0, circle);
 				//outColor.rgb += (rand(coords) - 0.5) * 0.25;
 
 				// inside CGPROGRAM in the fragment Shader:

@@ -79,9 +79,9 @@ public class FoodModule : MonoBehaviour {
         //Debug.Log("Food Collision! OnCollisionEnter colliderCount: " + colliderCount.ToString());
     }
     private void OnCollisionStay2D(Collision2D coll) {
-        
 
-        Agent collidingAgent = coll.collider.gameObject.GetComponent<Agent>();
+
+        Agent collidingAgent = coll.collider.gameObject.GetComponentInParent<Agent>();
         if (collidingAgent != null) {
 
             isBeingEaten = 1.0f;

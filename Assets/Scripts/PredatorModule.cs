@@ -55,7 +55,7 @@ public class PredatorModule : MonoBehaviour {
     private void OnCollisionStay2D(Collision2D coll) {
         //Debug.Log("OnCollisionStay2D! " + coll.collider.gameObject.name);
 
-        Agent collidingAgent = coll.collider.gameObject.GetComponent<Agent>();
+        Agent collidingAgent = coll.collider.gameObject.GetComponentInParent<Agent>();
         if (collidingAgent != null) {
             AttackAgent(collidingAgent);
         }

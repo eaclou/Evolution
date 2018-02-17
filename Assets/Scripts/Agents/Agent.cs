@@ -21,9 +21,12 @@ public class Agent : MonoBehaviour {
 
     public int ageCounter = 0;
 
+    private Vector3 prevPos;
+
     // Use this for initialization
     void Start() {
         rigidBody2D = GetComponent<Rigidbody2D>();
+        prevPos = transform.localPosition;
     }
 
     private int GetNumInputs() {
@@ -239,6 +242,15 @@ public class Agent : MonoBehaviour {
         }
 
         ageCounter++;
+
+        Vector3 curPos = transform.localPosition;
+
+        if(rigidBody2D != null) {
+            float velScale = 0.14f; ; // Time.fixedDeltaTime * 0.17f; // approx guess for now
+            material.SetFloat("_VelX", (curPos.x - prevPos.x) * velScale);
+            material.SetFloat("_VelY", (curPos.y - prevPos.y) * velScale);
+        }
+        prevPos = curPos;
     }
 
     public void TickActions() {
@@ -304,5 +316,6 @@ public class Agent : MonoBehaviour {
         this.transform.localPosition = startPos.agentStartPosition;
         InitializeModules(genome, this, startPos);      // Modules need to be created first so that Brain can map its neurons to existing modules  
         brain = new Brain(genome.brainGenome, this);
+        prevPos = transform.localPosition;
     }
 }

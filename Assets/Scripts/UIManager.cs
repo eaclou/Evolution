@@ -46,6 +46,8 @@ public class UIManager : MonoBehaviour {
         fitnessDisplayTexture = new Texture2D(1, 1, TextureFormat.RGBAFloat, true);
         fitnessDisplayTexture.wrapMode = TextureWrapMode.Clamp;
         fitnessDisplayMat.SetTexture("_MainTex", fitnessDisplayTexture);
+
+        ClickButtonModeC();
     }
 	
 	// Update is called once per frame

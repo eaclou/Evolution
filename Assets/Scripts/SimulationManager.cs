@@ -149,7 +149,7 @@ public class SimulationManager : MonoBehaviour {
         string assetURL = "AgentPrefab";
         GameObject playerAgentGO = Instantiate(Resources.Load(assetURL)) as GameObject;
         playerAgentGO.name = "PlayerAgent";
-        playerAgentGO.GetComponent<MeshRenderer>().material = playerMat;
+        //playerAgentGO.GetComponentInChildren<MeshRenderer>().material = playerMat;
         playerAgentGO.GetComponent<Rigidbody2D>().mass = 1f;
         playerAgentGO.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
         playerAgent = playerAgentGO.AddComponent<Agent>();
@@ -159,7 +159,7 @@ public class SimulationManager : MonoBehaviour {
         StartPositionGenome playerStartPosGenome = new StartPositionGenome(Vector3.zero, Quaternion.identity);
         playerAgent.InitializeAgentFromGenome(playerGenome, playerStartPosGenome);
         Material pMat = new Material(agentMatTemplate);
-        playerAgentGO.GetComponent<MeshRenderer>().material = pMat;
+        playerAgentGO.GetComponentInChildren<MeshRenderer>().material = pMat;
         playerAgent.material = pMat;
         Texture2D playerTex = new Texture2D(4, 2);  // Health, foodAmountRGB, 4 outCommChannels
         playerTex.filterMode = FilterMode.Point;
@@ -191,7 +191,7 @@ public class SimulationManager : MonoBehaviour {
 
             Material mat = new Material(agentMatTemplate);
             agentMaterialsArray[i] = mat;
-            agentGO.GetComponent<MeshRenderer>().material = mat;
+            agentGO.GetComponentInChildren<MeshRenderer>().material = mat;
             newAgent.material = mat;
 
             Texture2D tex = new Texture2D(4, 2);  // Health, foodAmountRGB, 4 outCommChannels
@@ -726,6 +726,8 @@ public class SimulationManager : MonoBehaviour {
         //private int idleFramesCounter = 0;
         //public int botToHumanControlTransitionFrameCount = 8;
         //public int humanToBotControlTransitionFrameCount = 30;
+
+        environmentFluidManager.Run();
     }
     public void TickTrainingMode() {
         // Can do one genome & 1 dataSample per frame
