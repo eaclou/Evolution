@@ -103,12 +103,12 @@
 				}
 				// apply fog
 				//UNITY_APPLY_FOG(i.fogCoord, col);
-				//outColor.rgb * 0.055;
-				//outColor.a = alpha;
+				outColor.rgb = float3(0,0.5,0);
+				//outColor.a = 0;
 				float alphaCutoffValue = 0.1;
 				clip(outColor.a - alphaCutoffValue);
-				float dimmer = 0.45 + _IsBeingEaten * 0.075;
-				outColor.rgb *= dimmer * 0.1;
+				//float dimmer = 0.45 + _IsBeingEaten * 0.075;
+				//outColor.rgb *= dimmer * 0.1;
 
 				return outColor;
 			}

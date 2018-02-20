@@ -9,8 +9,10 @@
 	}
 	SubShader
 	{
-		Tags { "Queue"="AlphaTest" "RenderType"="TransparentCutout" "IgnoreProjector"="True" }
+		Tags {"Queue" = "Transparent" "RenderType" = "Transparent"}
 		LOD 100
+		ZWrite Off
+        Blend SrcAlpha OneMinusSrcAlpha
 
 		Pass
 		{
@@ -59,72 +61,102 @@
 				// sample the texture
 				//fixed4 texSample = tex2D(_MainTex, i.uv);
 
-				float4 bgColor = float4(0.2, 0.85, 0.75, 1.0);				
+				/*float4 bgColor = float4(0.2, 0.85, 0.75, 1.0);				
 				float4 damageColor = float4(0.6, 0.4, 0.3,1);
 				float damageRadius = 0.8;
-				float outCommRadius = 0.23;
+				
 				float3 negColor = float3(1, 0.6, 0.0) * 1.05;
 				float3 posColor = float3(0.25, 0.6, 1) * 1.25;
 				if(_IsPlayer > 0.5) {
 					bgColor = float4(0.9, 1.25, 0.2, 1.0);
 					damageColor = float4(0.8, 0.3, 0.2,1);
 					outCommRadius *= 0.75;
+				}*/
+
+				const float PI = 3.141592;
+				float2 facingDirection = normalize(float2(_VelX, _VelY));
+				float facingAngle = atan(facingDirection.y / facingDirection.x);
+				if (facingDirection.x < 0 && facingDirection.y < 0) // quadrant Ⅲ
+					facingAngle = PI + facingAngle;
+				else if (facingDirection.x < 0) // quadrant Ⅱ
+					facingAngle = PI + facingAngle; // it actually substracts
+				else if (facingDirection.y < 0) // quadrant Ⅳ
+					facingAngle = 2 * PI + facingAngle; // it actually substracts
+				/*if(facingDirection.x == 0) {
+					facingAngle = PI * 0.5;
+					if(facingDirection.y < 0)
+						facingAngle = -facingAngle;
 				}
-				
+				if(facingDirection.y == 0) {
+					facingAngle = 0;
+					if(facingDirection.x < 0)
+						facingAngle = PI;
+				}*/
+				//facingAngle = PI * 0.5;
+
+				float3 eyeColor = float3(1,0.9,0.6);
+				float3 pupilColor = float3(0,0,0);
 				
 				float2 coords = float2((i.uv - 0.5) * 2.0);
-				float circle = ceil(1.0 - saturate(length(coords)));
+				float circle = (1.0 - saturate(length(coords))) * 15;
 				float distToOrigin = length(coords);
 
-				float4 outCol = float4(bgColor.rgb, circle);				
+				float4 outCol = float4(0.15, 0.5, 0.55, saturate(circle));				
 
-				float foodRadius = 0.8;
-				float foodEnergy = (tex2D(_MainTex, float2(0.375, 0.333)).r + tex2D(_MainTex, float2(0.625, 0.333)).r + tex2D(_MainTex, float2(0.875, 0.333)).r) / 3.0;
+				//float foodRadius = 0.8;
+				//float foodEnergy = (tex2D(_MainTex, float2(0.375, 0.333)).r + tex2D(_MainTex, float2(0.625, 0.333)).r + tex2D(_MainTex, float2(0.875, 0.333)).r) / 3.0;
 								
-				float hitPoints = tex2D(_MainTex, float2(0.125, 0.333)).r;
+				//float hitPoints = tex2D(_MainTex, float2(0.125, 0.333)).r;
 				
-				float healthValue = saturate(min(foodEnergy, hitPoints));
-				if(healthValue < 0.50) {
-					outCol.rgb = lerp(damageColor, bgColor, healthValue * 2);
+				//float healthValue = saturate(min(foodEnergy, hitPoints));
+				//if(healthValue < 0.50) {
+					//outCol.rgb = lerp(damageColor, bgColor, healthValue * 2);
 					//outCommRadius *= healthValue * 3;
 					//negColor *= 0.5;
 					//posColor *= 0.5;
-				}
+				//}
 				//outCol.rgb = lerp(outCol.rgb, float3(0.8, 0.75, 0.9), 0.45);
-							
-				float2 outCommOrigin0 = float2(0.25, 0.25);
-				float outCommDist0 = length(coords - outCommOrigin0);
-				if(outCommDist0 < outCommRadius) {
-					float4 sampleCol = tex2D(_MainTex, float2(0.125, 0.667));  // 0-1
-					float val = floor(sampleCol.r * 3) - 1; // ??? -1,0,1 ???
-					//outCol.rgb = lerp(negColor, posColor, val * 0.5 + 0.5) * abs(val);
+				float eyesOpen = saturate(length(float2(_VelX, _VelY)) * 20);
+				float eyeRadius = 0.4;			
+				float2 outCommOrigin0 = float2(0.6, 0.5);
+				float2 outComCoords0 = float2(outCommOrigin0.x * cos(facingAngle) - outCommOrigin0.y * sin(facingAngle),
+											  outCommOrigin0.y * cos(facingAngle) + outCommOrigin0.x * sin(facingAngle));
+				float outCommDist0 = length(coords - outComCoords0);
+				if(outCommDist0 < eyeRadius) {
+					outCol.rgb = lerp(outCol.rgb, eyeColor, eyesOpen);
+					outCol.a = 1;
 				}
-				float2 outCommOrigin1 = float2(0.25, -0.25);
-				float outCommDist1 = length(coords - outCommOrigin1);
-				if(outCommDist1 < outCommRadius) {
-					float4 sampleCol = tex2D(_MainTex, float2(0.375, 0.667));
-					float val = floor(sampleCol.r * 3) - 1; // ??? -1,0,1 ???
-					//outCol.rgb = lerp(negColor, posColor, val * 0.5 + 0.5) * abs(val);
-					//outCol.rgb = lerp(negColor, posColor, sampleCol.r) * abs(sampleCol.r * 2.0 - 1.0);
-				}
-				float2 outCommOrigin2 = float2(-0.25, 0.25);
-				float outCommDist2 = length(coords - outCommOrigin2);
-				if(outCommDist2 < outCommRadius) {
-					float4 sampleCol = tex2D(_MainTex, float2(0.625, 0.667));
-					float val = floor(sampleCol.r * 3) - 1; // ??? -1,0,1 ???
-					//outCol.rgb = lerp(negColor, posColor, val * 0.5 + 0.5) * abs(val);
-					//outCol.rgb = lerp(negColor, posColor, sampleCol.r) * abs(sampleCol.r * 2.0 - 1.0);
-				}
-				float2 outCommOrigin3 = float2(-0.25, -0.25);
-				float outCommDist3 = length(coords - outCommOrigin3);
-				if(outCommDist3 < outCommRadius) {
-					float4 sampleCol = tex2D(_MainTex, float2(0.875, 0.667));
-					float val = floor(sampleCol.r * 3) - 1; // ??? -1,0,1 ???
-					//outCol.rgb = lerp(negColor, posColor, val * 0.5 + 0.5) * abs(val);
-					//outCol.rgb = lerp(negColor, posColor, sampleCol.r) * abs(sampleCol.r * 2.0 - 1.0);
+				
+				float2 outCommOrigin1 = float2(0.6, -0.5);
+				float2 outComCoords1 = float2(outCommOrigin1.x * cos(facingAngle) - outCommOrigin1.y * sin(facingAngle),
+											  outCommOrigin1.y * cos(facingAngle) + outCommOrigin1.x * sin(facingAngle));
+				float outCommDist1 = length(coords - outComCoords1);
+				if(outCommDist1 < eyeRadius) {
+					outCol.rgb = lerp(outCol.rgb, eyeColor, eyesOpen);
+					outCol.a = 1;
 				}
 
-				float cellSize = 4;
+				float pupilRadius = 0.24;			
+				float2 outCommOrigin2 = float2(0.75, 0.55);
+				float2 outComCoords2 = float2(outCommOrigin2.x * cos(facingAngle) - outCommOrigin2.y * sin(facingAngle),
+											  outCommOrigin2.y * cos(facingAngle) + outCommOrigin2.x * sin(facingAngle));
+				float outCommDist2 = length(coords - outComCoords2);
+				if(outCommDist2 < pupilRadius) {
+					outCol.rgb = lerp(outCol.rgb, pupilColor, eyesOpen);
+					outCol.a = 1;
+				}
+				
+				float2 outCommOrigin3 = float2(0.75, -0.55);
+				float2 outComCoords3 = float2(outCommOrigin3.x * cos(facingAngle) - outCommOrigin3.y * sin(facingAngle),
+											  outCommOrigin3.y * cos(facingAngle) + outCommOrigin3.x * sin(facingAngle));
+				float outCommDist3 = length(coords - outComCoords3);
+				if(outCommDist3 < pupilRadius) {
+					outCol.rgb = lerp(outCol.rgb, pupilColor, eyesOpen);
+					outCol.a = 1;
+				}
+				
+
+				/*float cellSize = 4;
 				coords = floor(coords * cellSize) / cellSize;
 
 				float randVal = lerp(0, rand(coords), (distToOrigin));//rand(coords) - (saturate((1.0 - distToCenter))) * 0.25;
@@ -133,13 +165,14 @@
 				}
 				if(hitPoints < 0.60) {
 						outCol.rgb = lerp(damageColor, outCol.rgb, hitPoints * 1.5);
-					}
+					}*/
 				
-				outCol.rgb = float3(_VelX, _VelY, 1);
-				//outCol.rgb = float3(0, 0, 1);
+				
+				//outCol.a = circle;
+				outCol.rgb = float3(0, 2, 6);
 				// inside CGPROGRAM in the fragment Shader:
-				float alphaCutoffValue = 0.1;
-				clip(outCol.a - alphaCutoffValue);
+				//float alphaCutoffValue = 0.1;
+				//clip(outCol.a - alphaCutoffValue);
 				return outCol;
 			}
 			ENDCG

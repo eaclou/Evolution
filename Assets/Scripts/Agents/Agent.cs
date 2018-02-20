@@ -6,6 +6,9 @@ public class Agent : MonoBehaviour {
    
     public Brain brain;
 
+    public MeshRenderer meshRendererBeauty;
+    public MeshRenderer meshRendererFluidCollider;
+
     public TestModule testModule;
     private Rigidbody2D rigidBody2D;
     //public bool isVisible = false;
@@ -16,7 +19,7 @@ public class Agent : MonoBehaviour {
     public float humanControlLerp = 0f;
     public bool isDead = false;
 
-    public Material material;
+    //public Material material;
     public Texture2D texture;
 
     public int ageCounter = 0;
@@ -246,9 +249,12 @@ public class Agent : MonoBehaviour {
         Vector3 curPos = transform.localPosition;
 
         if(rigidBody2D != null) {
-            float velScale = 0.14f; ; // Time.fixedDeltaTime * 0.17f; // approx guess for now
-            material.SetFloat("_VelX", (curPos.x - prevPos.x) * velScale);
-            material.SetFloat("_VelY", (curPos.y - prevPos.y) * velScale);
+            float velScale = 0.17f; ; // Time.fixedDeltaTime * 0.17f; // approx guess for now
+            meshRendererFluidCollider.material.SetFloat("_VelX", (curPos.x - prevPos.x) * velScale);
+            meshRendererFluidCollider.material.SetFloat("_VelY", (curPos.y - prevPos.y) * velScale);
+
+            meshRendererBeauty.material.SetFloat("_VelX", (curPos.x - prevPos.x) * velScale);
+            meshRendererBeauty.material.SetFloat("_VelY", (curPos.y - prevPos.y) * velScale);
         }
         prevPos = curPos;
     }

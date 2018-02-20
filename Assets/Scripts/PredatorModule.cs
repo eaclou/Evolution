@@ -5,6 +5,9 @@ using UnityEngine;
 public class PredatorModule : MonoBehaviour {
 
     public Rigidbody2D rigidBody;
+    public MeshRenderer meshRendererBeauty;
+    public MeshRenderer meshRendererFluidCollider;
+
     private float speed = 1000f;
 
     private float damage = 0.14f;
@@ -18,6 +21,8 @@ public class PredatorModule : MonoBehaviour {
     public float curScale = 4f;
 
     private int framesPerDirChange = 64;
+
+    private Vector2 prevPos;
 
     // Use this for initialization
     void Awake () {
@@ -41,6 +46,12 @@ public class PredatorModule : MonoBehaviour {
         }
         // MOVEMENT HERE:
         this.GetComponent<Rigidbody2D>().AddForce(new Vector2(speed * randX * Time.deltaTime, speed * randY * Time.deltaTime), ForceMode2D.Impulse);
+
+        Vector3 curPos = transform.localPosition;
+        float velScale = 0.17f; ; // Time.fixedDeltaTime * 0.17f; // approx guess for now
+        meshRendererFluidCollider.material.SetFloat("_VelX", (curPos.x - prevPos.x) * velScale);
+        meshRendererFluidCollider.material.SetFloat("_VelY", (curPos.y - prevPos.y) * velScale);
+        prevPos = curPos;
     }
 
     private void AttackAgent(Agent agent) {

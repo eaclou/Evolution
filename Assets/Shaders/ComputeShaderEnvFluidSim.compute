@@ -129,9 +129,11 @@ void ViscousDiffusion (uint3 id : SV_DispatchThreadID)
 [numthreads(16,16,1)]
 void VelocityInjectionPoints (uint3 id : SV_DispatchThreadID)
 {	
+	float4 currentVelocity = VelocityRead[id.xy];
+
 	float isSolid = ObstaclesRead[id.xy].b;
 	if(isSolid > 0.5) {
-		VelocityWrite[id.xy] = float4(0,0,0,0);
+		VelocityWrite[id.xy] = currentVelocity;
 		return;
 	}
 	
@@ -142,8 +144,6 @@ void VelocityInjectionPoints (uint3 id : SV_DispatchThreadID)
 	float xCoord = ((float)id.x + 0.5) / _TextureResolution;
 	float yCoord = ((float)id.y + 0.5) / _TextureResolution;
 	float2 pixelCoords = float2(xCoord, yCoord);
-	
-	float4 currentVelocity = VelocityRead[id.xy];
 	
 	float2 newForce = currentVelocity.xy; //float2(0,0);
 

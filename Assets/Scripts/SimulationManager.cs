@@ -23,12 +23,13 @@ public class SimulationManager : MonoBehaviour {
     private int persistentGenomePoolSize = 64;  // spawned as Agents that live until they are killed naturally, tested on Fitness Function
     private int transientGenomePoolSize = 48;  // spawned as Agents (in the background layer) that are short-lived and tested on Fitness Function + DataSamples
     //private int populationSize = 64;
-    public Material playerMat;
-    public Material agentMatTemplate;
-    public Material foodMatTemplate;
+    //public Material playerMat;
+    public Material agentBeautyMatTemplate;
+    public Material fluidColliderMatTemplate;
+    //public Material foodFluidColliderMatTemplate;
     public Agent playerAgent;
     public Agent[] agentsArray;
-    public Material[] agentMaterialsArray;
+    public Material[] agentFluidColliderMaterialsArray;
     public Material[] foodMaterialsArray;
     public Texture2D[] agentDebugTexturesArray;
     //public Texture2D[] foodDebugTexturesArray;
@@ -129,7 +130,7 @@ public class SimulationManager : MonoBehaviour {
         persistentScoresList = new List<float>();
         supervisedScoresList = new List<float>();
 
-        agentMaterialsArray = new Material[numAgents];
+        agentFluidColliderMaterialsArray = new Material[numAgents];
         agentDebugTexturesArray = new Texture2D[numAgents];
         foodMaterialsArray = new Material[numFood];
         //foodDebugTexturesArray = new Texture2D[numFood];
@@ -152,19 +153,20 @@ public class SimulationManager : MonoBehaviour {
         //playerAgentGO.GetComponentInChildren<MeshRenderer>().material = playerMat;
         playerAgentGO.GetComponent<Rigidbody2D>().mass = 1f;
         playerAgentGO.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
-        playerAgent = playerAgentGO.AddComponent<Agent>();
+        playerAgent = playerAgentGO.GetComponent<Agent>();
         //playerAgent.humanControlled = true;
         //playerAgent.humanControlLerp = 1f;
         playerAgent.speed *= 1f;
         StartPositionGenome playerStartPosGenome = new StartPositionGenome(Vector3.zero, Quaternion.identity);
         playerAgent.InitializeAgentFromGenome(playerGenome, playerStartPosGenome);
-        Material pMat = new Material(agentMatTemplate);
-        playerAgentGO.GetComponentInChildren<MeshRenderer>().material = pMat;
-        playerAgent.material = pMat;
+        Material pMat = new Material(fluidColliderMatTemplate);
+        //playerAgentGO.GetComponentInChildren<MeshRenderer>().material = pMat;
+        playerAgent.meshRendererFluidCollider.material = pMat;
+        //playerAgent.material = pMat;
         Texture2D playerTex = new Texture2D(4, 2);  // Health, foodAmountRGB, 4 outCommChannels
         playerTex.filterMode = FilterMode.Point;
         playerAgent.texture = playerTex;
-        playerAgent.material.SetTexture("_MainTex", playerTex);
+        playerAgent.meshRendererBeauty.material.SetTexture("_MainTex", playerTex);
         //playerAgent.material.SetFloat("_IsPlayer", 1.0f);
 
         cameraManager.targetTransform = playerAgent.transform;
@@ -179,7 +181,7 @@ public class SimulationManager : MonoBehaviour {
             agentGO.name = "Agent" + i.ToString();
             float randScale = UnityEngine.Random.Range(1f, 1f);
             agentGO.transform.localScale = new Vector3(randScale, randScale, randScale);
-            Agent newAgent = agentGO.AddComponent<Agent>();
+            Agent newAgent = agentGO.GetComponent<Agent>();
             //int numColumns = Mathf.RoundToInt(Mathf.Sqrt(numAgents));
             //int row = Mathf.FloorToInt(i / numColumns);
             //int col = i % numColumns;
@@ -189,17 +191,17 @@ public class SimulationManager : MonoBehaviour {
             agentsArray[i] = newAgent; // Add to stored list of current Agents
             //newAgent.InitializeAgentFromGenome(supervisedGenomePoolArray[i], agentStartPosGenome);
 
-            Material mat = new Material(agentMatTemplate);
-            agentMaterialsArray[i] = mat;
-            agentGO.GetComponentInChildren<MeshRenderer>().material = mat;
-            newAgent.material = mat;
+            Material fluidColliderMat = new Material(fluidColliderMatTemplate);
+            agentFluidColliderMaterialsArray[i] = fluidColliderMat;
+            //agentGO.GetComponentInChildren<MeshRenderer>().material = mat;
+            newAgent.meshRendererFluidCollider.material = fluidColliderMat;
+            //newAgent.material = fluidColliderMat;
 
             Texture2D tex = new Texture2D(4, 2);  // Health, foodAmountRGB, 4 outCommChannels
             tex.filterMode = FilterMode.Point;
             agentDebugTexturesArray[i] = tex;
             newAgent.texture = tex;
-
-            newAgent.material.SetTexture("_MainTex", tex);
+            newAgent.meshRendererBeauty.material.SetTexture("_MainTex", tex);
         }
         // Send agent info to FluidBG:
         environmentFluidManager.agentsArray = agentsArray;
@@ -298,10 +300,10 @@ public class SimulationManager : MonoBehaviour {
             }
         }
     }
-    public void ReviveFood(int index) {
-        foodArray[index].Respawn();
+    public void ReviveFood(int index) {        
         Vector3 startPos = new Vector3(UnityEngine.Random.Range(-36f, 36f), UnityEngine.Random.Range(-36f, 36f), 0f);
         foodArray[index].transform.localPosition = startPos;
+        foodArray[index].Respawn();
     }
     public void RevivePredator(int index) {
         Vector3 startPos = new Vector3(UnityEngine.Random.Range(-36f, 36f), UnityEngine.Random.Range(-36f, 36f), 0f);
@@ -528,10 +530,10 @@ public class SimulationManager : MonoBehaviour {
             foodArray[i] = newFood; // Add to stored list of current Agents
             ReviveFood(i);
 
-            Material mat = new Material(foodMatTemplate);
+            Material mat = new Material(fluidColliderMatTemplate);
             foodMaterialsArray[i] = mat;
-            foodGO.GetComponent<MeshRenderer>().material = mat;
-            newFood.material = mat;
+            newFood.meshRendererFluidCollider.material = mat;
+            //newFood.material = mat; // redundant??
 
             //Texture2D tex = new Texture2D(3, 1);  // foodAmountRGB
             //foodDebugTexturesArray[i] = tex;
@@ -715,12 +717,12 @@ public class SimulationManager : MonoBehaviour {
         else {
             idleFramesCounter = 0;
             playerAgent.humanControlLerp = 1f;
-            playerAgent.material.SetFloat("_IsPlayer", 1.0f);
+            playerAgent.meshRendererBeauty.material.SetFloat("_IsPlayer", 1.0f);
         }
         if(idleFramesCounter >= idleFramesToBotControl) {
             // Transition eventually!
             playerAgent.humanControlLerp = 0f;
-            playerAgent.material.SetFloat("_IsPlayer", 0.0f);
+            playerAgent.meshRendererBeauty.material.SetFloat("_IsPlayer", 0.0f);
         }
         //public int idleFramesToBotControl = 100;
         //private int idleFramesCounter = 0;
@@ -996,7 +998,7 @@ public class SimulationManager : MonoBehaviour {
         Debug.Log(json);
         //Debug.Log(Application.dataPath);
         //string path = Application.dataPath + "/TrainingSaves/" + savename + ".json";
-        string path = Application.dataPath + "/testSave.json";
+        string path = Application.dataPath + "/TrainingSaves/testSave.json";
         //Debug.Log(Application.persistentDataPath);
         Debug.Log(path);
         System.IO.File.WriteAllText(path, json);
@@ -1004,7 +1006,7 @@ public class SimulationManager : MonoBehaviour {
     public void LoadTrainingData() {
         Debug.Log("LOAD Population!");
         //"E:\Unity Projects\GitHub\Evolution\Assets\GridSearchSaves\2018_2_13_12_35\GS_RawScores.json"
-        string filePath = Application.dataPath + "/GridSearchSaves/2018_2_13_12_35/GS_RawScores.json";
+        string filePath = Application.dataPath + "/TrainingSaves/testSave.json";
         // Read the json from the file into a string
         string dataAsJson = File.ReadAllText(filePath);
         // Pass the json to JsonUtility, and tell it to create a GameData object from it

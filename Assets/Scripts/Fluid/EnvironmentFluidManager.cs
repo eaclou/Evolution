@@ -8,6 +8,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
     public Texture2D initialDensityTex;
     //public Texture2D initialObstaclesTex;
     public Camera obstacleRenderCamera;
+    public Camera fluidColorRenderCamera;
 
     public int resolution = 64;
     public float deltaTime = 1f;
@@ -28,6 +29,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
 
     private RenderTexture divergence;
     private RenderTexture obstacles;
+    private RenderTexture sourceColor;
 
     private Material displayMat;
 
@@ -41,7 +43,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
     public PredatorModule[] predatorsArray;
     public FoodModule[] foodArray;
 
-    private int numForcePoints = 77;
+    private int numForcePoints = 32;
     public ForcePoint[] forcePointsArray;
     public ComputeBuffer forcePointsCBuffer;
     public struct ForcePoint {
@@ -93,17 +95,18 @@ public class EnvironmentFluidManager : MonoBehaviour {
     }
 
     private void CreateForcePoints() {
-        if(agentsArray == null || playerAgent == null || predatorsArray == null) {
-            return;
-        }
-        
+        //if(agentsArray == null || playerAgent == null || predatorsArray == null) {
+        //    return;
+        //}
+
         //Debug.Log("agentsArray[i].testModule.ownRigidBody2D.velocity: " + agentsArray[0].testModule.ownRigidBody2D.velocity.ToString());
-        for(int i = 0; i < agentsArray.Length; i++) {
+        int numForcePoints = 32;
+        for(int i = 0; i < numForcePoints; i++) {
             ForcePoint agentPoint = new ForcePoint();
             //if(i == 0)
             //    
             // convert world coords to UVs:
-            float rawVelX = agentsArray[i].testModule.ownRigidBody2D.velocity.x;
+            /*float rawVelX = agentsArray[i].testModule.ownRigidBody2D.velocity.x;
             float rawVelY = agentsArray[i].testModule.ownRigidBody2D.velocity.y;
             agentPoint.velX = rawVelX * 0.01f;
             agentPoint.velY = rawVelY * 0.01f;
@@ -112,19 +115,21 @@ public class EnvironmentFluidManager : MonoBehaviour {
             float v = (agentPos.y + rawVelX * Time.fixedDeltaTime * 2f + 70f) / 140f;
             agentPoint.posX = u; // UnityEngine.Random.Range(0f, 1f);
             agentPoint.posY = v;
-            agentPoint.size = 450f;
+            agentPoint.size = 450f;*/
 
-            //point.posX = UnityEngine.Random.Range(0f, 1f);
-            //point.posY = UnityEngine.Random.Range(0f, 1f);
-            //point.velX = UnityEngine.Random.Range(-1f, 1f);
-            //point.velY = UnityEngine.Random.Range(-1f, 1f);
-            //point.size = UnityEngine.Random.Range(256f, 600f);
+            float forceStrength = 0.15f;
+            agentPoint.posX = UnityEngine.Random.Range(0f, 1f);
+            agentPoint.posY = UnityEngine.Random.Range(0f, 1f);
+            agentPoint.velX = UnityEngine.Random.Range(-1f, 1f) * forceStrength;
+            agentPoint.velY = UnityEngine.Random.Range(-1f, 1f) * forceStrength;
+            agentPoint.size = UnityEngine.Random.Range(64f, 128f);
             forcePointsArray[i] = agentPoint;
 
             //Debug.Log("point[" + i.ToString() + ", pos: (" + point.posX.ToString() + ", " + point.posY.ToString() + ") vel: (" + point.velX.ToString() + ", " + point.velY.ToString() + ") size: " + point.size.ToString());
         }
 
         // Player:
+        /*
         ForcePoint point = new ForcePoint();
         Vector2 pVel = playerAgent.testModule.ownRigidBody2D.velocity;
         Vector3 playerPos = playerAgent.testModule.ownRigidBody2D.transform.position;
@@ -135,9 +140,10 @@ public class EnvironmentFluidManager : MonoBehaviour {
         point.velX = pVel.x * 0.01f;
         point.velY = pVel.y * 0.01f;
         point.size = 400f;        
-        forcePointsArray[agentsArray.Length] = point;
+        forcePointsArray[agentsArray.Length] = point;*/
 
         // Predators:
+        /*
         for (int i = 0; i < predatorsArray.Length; i++) {
             ForcePoint predatorPoint = new ForcePoint();
             Vector3 predatorPos = predatorsArray[i].rigidBody.transform.position;
@@ -150,7 +156,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
             predatorPoint.size = 160f;
             forcePointsArray[agentsArray.Length + 1 + i] = predatorPoint;
             //Debug.Log("predatorPoint[" + i.ToString() + ", pos: (" + predatorPoint.posX.ToString() + ", " + predatorPoint.posY.ToString() + ") vel: (" + predatorPoint.velX.ToString() + ", " + predatorPoint.velY.ToString() + ") size: " + predatorPoint.size.ToString());
-        }
+        }*/
 
         forcePointsCBuffer.SetData(forcePointsArray);
     }
@@ -197,6 +203,11 @@ public class EnvironmentFluidManager : MonoBehaviour {
         obstacles.wrapMode = TextureWrapMode.Repeat;
         obstacles.enableRandomWrite = true;
         obstacles.Create();
+
+        sourceColor = new RenderTexture(resolution, resolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+        sourceColor.wrapMode = TextureWrapMode.Repeat;
+        sourceColor.enableRandomWrite = true;
+        sourceColor.Create();
     }
 	
 	// Update is called once per frame
@@ -216,8 +227,9 @@ public class EnvironmentFluidManager : MonoBehaviour {
 
     public void Run() {
         obstacleRenderCamera.targetTexture = obstacles;
+        fluidColorRenderCamera.targetTexture = sourceColor;
         SetDisplayTexture();
-        CreateForcePoints();
+        //CreateForcePoints();
         if (tick) {   // So I can step through the program slowly at first
             //tick = false;
             Tick();
@@ -275,8 +287,8 @@ public class EnvironmentFluidManager : MonoBehaviour {
 
         // ADVECTION:::::
         Advection();
-        Graphics.Blit(velocityB, velocityA); // TEMP! slow...
-        //VelocityInjectionPoints(velocityB, velocityA);
+        //Graphics.Blit(velocityB, velocityA); // TEMP! slow...
+        VelocityInjectionPoints(velocityB, velocityA);
 
         // VISCOUS DIFFUSION:::::
         /*int numViscousDiffusionIter = 8;
@@ -316,7 +328,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
         computeShaderFluidSim.SetFloat("_TextureResolution", (float)resolution);
         computeShaderFluidSim.SetFloat("_DeltaTime", deltaTime);
         computeShaderFluidSim.SetFloat("_InvGridScale", invGridScale);
-        computeShaderFluidSim.SetTexture(kernelRefreshColor, "SourceColorTex", initialDensityTex);
+        computeShaderFluidSim.SetTexture(kernelRefreshColor, "SourceColorTex", sourceColor);
         computeShaderFluidSim.SetTexture(kernelRefreshColor, "DensityRead", densityB);
         computeShaderFluidSim.SetTexture(kernelRefreshColor, "DensityWrite", densityA);
         computeShaderFluidSim.Dispatch(kernelRefreshColor, resolution / 16, resolution / 16, 1);

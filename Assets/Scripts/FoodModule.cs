@@ -4,7 +4,9 @@ using UnityEngine;
 
 public class FoodModule : MonoBehaviour {
 
-    public Material material;
+    //public Material material;
+    public MeshRenderer meshRendererBeauty;
+    public MeshRenderer meshRendererFluidCollider;
     //public Texture2D texture;
 
     public int index;
@@ -28,6 +30,8 @@ public class FoodModule : MonoBehaviour {
 
     private float isBeingEaten = 0f;
 
+    private Vector2 prevPos;
+
     // Use this for initialization
     void Start() {
         Respawn();
@@ -43,6 +47,7 @@ public class FoodModule : MonoBehaviour {
         amountG = UnityEngine.Random.Range(0f, 1f);
         amountB = UnityEngine.Random.Range(0f, 1f);
         isDepleted = false;
+        prevPos = transform.localPosition;
     }
 
     private void FixedUpdate() {
@@ -64,11 +69,19 @@ public class FoodModule : MonoBehaviour {
             isBeingEaten = 0f;
         }*/
 
-        material.SetFloat("_FoodAmountR", amountR);
-        material.SetFloat("_FoodAmountG", amountG);
-        material.SetFloat("_FoodAmountB", amountB);
-        material.SetFloat("_Scale", curScale);
-        material.SetFloat("_IsBeingEaten", isBeingEaten);
+        meshRendererBeauty.material.SetFloat("_FoodAmountR", amountR);
+        meshRendererBeauty.material.SetFloat("_FoodAmountG", amountG);
+        meshRendererBeauty.material.SetFloat("_FoodAmountB", amountB);
+        meshRendererBeauty.material.SetFloat("_Scale", curScale);
+        meshRendererBeauty.material.SetFloat("_IsBeingEaten", isBeingEaten);
+
+        Vector3 curPos = transform.localPosition;
+        //if (rigidBody2D != null) {
+        float velScale = 0.17f; ; // Time.fixedDeltaTime * 0.17f; // approx guess for now
+        meshRendererFluidCollider.material.SetFloat("_VelX", (curPos.x - prevPos.x) * velScale);
+        meshRendererFluidCollider.material.SetFloat("_VelY", (curPos.y - prevPos.y) * velScale);
+        //}
+        prevPos = curPos;
 
         isBeingEaten = 0.0f;
     }

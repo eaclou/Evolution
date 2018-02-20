@@ -51,7 +51,7 @@ public class CameraManager : MonoBehaviour {
                 break;
         }
         camera.orthographicSize = Mathf.Lerp(camera.orthographicSize, targetZoomValue, 0.05f);
-        Vector3 camPos = new Vector3(targetCamPos.x, targetCamPos.y, -10f);
+        Vector3 camPos = new Vector3(targetCamPos.x, targetCamPos.y, -10.25f);
         transform.position = Vector3.Lerp(transform.position, camPos, lerpSpeed);
     }
 
