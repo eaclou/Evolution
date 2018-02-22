@@ -6,10 +6,23 @@ public class CameraManager : MonoBehaviour {
 
     public Camera camera;
 
-    public float targetZoomValue = 18f;
-    public float lerpSpeed = 0.25f;
+    public float targetZoomValueA = 8f;
+    public float targetZoomValueB = 18f;
+    public float targetZoomValueC = 46f;
+    private float targetZoomValue;
+
+    public float lerpSpeedA = 1f;
+    public float lerpSpeedB = 2f;
+    public float lerpSpeedC = 4f;
+    private float lerpSpeed;
+
+    public float camMaxSpeed = 1f;
+    public float camAccel = 0.05f;
+
     public Vector3 targetCamPos;
     public Transform targetTransform;
+
+    Vector2 prevCameraPosition, prevTargetPosition;
 
     private GameMode curMode;
     public enum GameMode {
@@ -32,27 +45,54 @@ public class CameraManager : MonoBehaviour {
             case GameMode.ModeA:
                 //
                 targetCamPos = targetTransform.position;
-                lerpSpeed = 0.12f;
+                lerpSpeed = lerpSpeedA;
                 break;
             case GameMode.ModeB:
                 //
                 targetCamPos = targetTransform.position;
-                lerpSpeed = 0.08f;
-                //targetZoomValue = 18f;
+                lerpSpeed = lerpSpeedB;
                 break;
             case GameMode.ModeC:
-                //targetZoomValue = 20f;
                 targetCamPos = Vector3.zero;
-                lerpSpeed = 0.04f;
+                lerpSpeed = lerpSpeedC;
                 //
                 break;
             default:
                 //
                 break;
         }
-        camera.orthographicSize = Mathf.Lerp(camera.orthographicSize, targetZoomValue, 0.05f);
-        Vector3 camPos = new Vector3(targetCamPos.x, targetCamPos.y, -10.25f);
-        transform.position = Vector3.Lerp(transform.position, camPos, lerpSpeed);
+        camera.orthographicSize = Mathf.Lerp(camera.orthographicSize, targetZoomValue, 0.5f * Time.deltaTime);
+        //Vector3 curPos = transform.position;
+        //Vector2 targetPos = new Vector2(targetCamPos.x, targetCamPos.y);
+        //Vector2 targetCamDir = new Vector2(targetCamPos.x, targetCamPos.y) - new Vector2(curPos.x, curPos.y);
+
+        // Fuck it for now.... stupid lerp jitter...
+        // Come back to this after sorting out Execution order and data flow in rest of program...
+        this.transform.position = new Vector3(targetCamPos.x, targetCamPos.y, -10f);
+
+        //Vector2 
+
+        //transform.position = Vector3.Lerp(transform.position, targetPos, Mathf.Clamp01(lerpSpeed * Time.deltaTime)).normalized * camMaxSpeed;
+
+
+        // move target //
+        //targetTransform.position += Vector3.right * Time.deltaTime * 200;
+
+        // move follower //
+        //Vector2 newCamPosition = SmoothApproach(prevCameraPosition, prevTargetPosition, targetPos, 10f);
+        //this.transform.position = new Vector3(newCamPosition.x, newCamPosition.y, -10f);
+        //prevCameraPosition = new Vector2(transform.position.x, transform.position.y);
+        //prevTargetPosition = targetPos;
+
+        // move camera along side the target //
+        //camTransform.position = new Vector3(targetTransform.position.x, targetTransform.position.y, targetTransform.position.z - 15);
+    }
+
+    private Vector2 SmoothApproach(Vector2 pastPosition, Vector2 pastTargetPosition, Vector2 targetPosition, float speed) {
+        float t = Time.deltaTime * speed;
+        Vector2 v = (targetPosition - pastTargetPosition) / t;
+        Vector2 f = pastPosition - pastTargetPosition + v;
+        return targetPosition - v + f * Mathf.Exp(-t);
     }
 
     public void ChangeGameMode(GameMode mode) {
@@ -61,14 +101,14 @@ public class CameraManager : MonoBehaviour {
         switch(curMode) {
             case GameMode.ModeA:
                 //
-                targetZoomValue = 6.5f;
+                targetZoomValue = targetZoomValueA;
                 break;
             case GameMode.ModeB:
                 //
-                targetZoomValue = 18f;
+                targetZoomValue = targetZoomValueB;
                 break;
             case GameMode.ModeC:
-                targetZoomValue = 45f;
+                targetZoomValue = targetZoomValueC;
                 //
                 break;
             default:

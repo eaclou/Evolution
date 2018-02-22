@@ -77,11 +77,11 @@
 				float cellSize = 12;
 				coords = floor(coords * cellSize) / cellSize;
 
-				float randVal = lerp(0, rand(coords), (distToCenter));//rand(coords) - (saturate((1.0 - distToCenter))) * 0.25;
+				float randVal = lerp(0, rand(coords), (distToCenter)) + 0.7;//rand(coords) - (saturate((1.0 - distToCenter))) * 0.25;
 				float randCol = floor(rand(coords.yx) * 3);
 				
 
-				float4 outColor = float4(0.0, 0.0, 0.0, 0.0);
+				float4 outColor = float4(0.0, 0.0, 0.0, 1.0);
 
 				if(randCol == 0) {
 					if(_FoodAmountR > randVal) {
@@ -103,8 +103,8 @@
 				}
 				// apply fog
 				//UNITY_APPLY_FOG(i.fogCoord, col);
-				outColor.rgb = float3(0,0.5,0);
-				//outColor.a = 0;
+				outColor.rgb = float3(0,0.5,0) * 3;
+				outColor.a *= 1;
 				float alphaCutoffValue = 0.1;
 				clip(outColor.a - alphaCutoffValue);
 				//float dimmer = 0.45 + _IsBeingEaten * 0.075;

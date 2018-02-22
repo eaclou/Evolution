@@ -7,6 +7,9 @@
 #pragma kernel VelocityDivergence
 #pragma kernel PressureJacobi
 #pragma kernel SubtractGradient
+#pragma kernel GetVelAtCoords
+#pragma kernel GetObjectVelocities
+#pragma kernel SimFloatyBits
 
 struct ForcePoint {
     float posX;
@@ -28,6 +31,11 @@ RWTexture2D<float4> DensityWrite;
 Texture2D<float4> DivergenceRead;
 RWTexture2D<float4> DivergenceWrite;
 Texture2D<float4> ObstaclesRead;
+
+StructuredBuffer<float3> ObjectPositionsCBuffer;
+RWStructuredBuffer<float2> VelocityValuesCBuffer;
+
+RWStructuredBuffer<float2> FloatyBitsCBuffer;
 
 SamplerState _LinearClamp;
 SamplerState _LinearRepeat;
@@ -52,6 +60,58 @@ uniform float _Damping;
 uniform float _ColorRefreshAmount;
 
 uniform float _Time;
+
+uniform float _SampleCoordX;
+uniform float _SampleCoordY;
+
+uniform float _VelocitySampleRadius;
+
+[numthreads(1,1,1)]
+void SimFloatyBits (uint3 id : SV_DispatchThreadID)
+{	
+	float2 uv = FloatyBitsCBuffer[id.x];
+	float2 vel = VelocityRead.SampleLevel(_LinearRepeat, uv, 0).xy;
+	float speedMult = 0.031;
+	
+	float2 nextPos = uv + vel * speedMult;
+
+	FloatyBitsCBuffer[id.x] = nextPos;
+}
+
+[numthreads(1,1,1)]
+void GetVelAtCoords (uint3 id : SV_DispatchThreadID)
+{	
+	float uvOffset = 0.005357;  // 0.75/140
+	float2 uv = float2(_SampleCoordX, _SampleCoordY);
+	float2 velLeft = VelocityRead.SampleLevel(_LinearRepeat, uv + float2(-uvOffset, 0), 0).xy;
+	float2 velRight = VelocityRead.SampleLevel(_LinearRepeat, uv + float2(uvOffset, 0), 0).xy;
+	float2 velUp = VelocityRead.SampleLevel(_LinearRepeat, uv + float2(0, uvOffset), 0).xy;
+	float2 velDown = VelocityRead.SampleLevel(_LinearRepeat, uv + float2(0, -uvOffset), 0).xy;
+
+	float2 vel = (velLeft + velRight + velUp + velDown) / 4;
+
+	VelocityValuesCBuffer[0] = vel;
+}
+
+[numthreads(1,1,1)]
+void GetObjectVelocities (uint3 id : SV_DispatchThreadID)
+{	
+	
+		
+	float3 data = ObjectPositionsCBuffer[id.x];
+	
+	float2 uv = data.xy;
+	float uvOffset = data.z;
+	
+	float2 velLeft = VelocityRead.SampleLevel(_LinearRepeat, uv + float2(-uvOffset, 0), 0).xy;
+	float2 velRight = VelocityRead.SampleLevel(_LinearRepeat, uv + float2(uvOffset, 0), 0).xy;
+	float2 velUp = VelocityRead.SampleLevel(_LinearRepeat, uv + float2(0, uvOffset), 0).xy;
+	float2 velDown = VelocityRead.SampleLevel(_LinearRepeat, uv + float2(0, -uvOffset), 0).xy;
+
+	float2 vel = (velLeft + velRight + velUp + velDown) / 4;
+
+	VelocityValuesCBuffer[id.x] = vel;
+}
 
 [numthreads(16,16,1)]
 void RefreshColor (uint3 id : SV_DispatchThreadID)

@@ -14,7 +14,7 @@ public class Agent : MonoBehaviour {
     //public bool isVisible = false;
     //public float horizontalMovementInput = 0f;
     //public float verticalMovementInput = 0f;
-    public float speed = 150f;
+    public float speed = 75f;
     public bool humanControlled = false;
     public float humanControlLerp = 0f;
     public bool isDead = false;

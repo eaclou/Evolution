@@ -104,8 +104,7 @@ public class SimulationManager : MonoBehaviour {
     // GRID SEARCH!!!
     public GridSearchManager gridSearchManager;
     public bool isGridSearching = false;
-    
-    
+        
     // need to be able to update Agent's Brain on the fly?  --- but needs to access the Module to set up inputs/outputs???
     // Ability to run a Brain Headless (without instantiating an Agent?)
 
@@ -169,6 +168,15 @@ public class SimulationManager : MonoBehaviour {
         playerAgent.meshRendererBeauty.material.SetTexture("_MainTex", playerTex);
         //playerAgent.material.SetFloat("_IsPlayer", 1.0f);
 
+        // $#!%@@@@@@@@@@@@ TEMP TEMP TEMP !%!#$%!#$%!@$%%!@$#%@$%@@@@@@@@@@@@@@@@@@@@@@@
+        //playerAgent.meshRendererFluidCollider.enabled = false;
+        //playerAgent.meshRendererBeauty.enabled = false;
+        playerAgent.humanControlLerp = 1f;
+        //playerAgent.meshRendererBeauty.material.SetFloat("_IsPlayer", 1.0f);
+        playerAgent.humanControlled = true;
+       // playerAgent.testModule.foodAmountB[0] = 10f;
+        // $#!%@@@@@@@@@@@@ TEMP TEMP TEMP !%!#$%!#$%!@$%%!@$#%@$%@@@@@@@@@@@@@@@@@@@@@@@
+
         cameraManager.targetTransform = playerAgent.transform;
 
         uiManager.healthDisplayTex = playerTex;
@@ -203,11 +211,7 @@ public class SimulationManager : MonoBehaviour {
             newAgent.texture = tex;
             newAgent.meshRendererBeauty.material.SetTexture("_MainTex", tex);
         }
-        // Send agent info to FluidBG:
-        environmentFluidManager.agentsArray = agentsArray;
-        environmentFluidManager.playerAgent = playerAgent;
         
-
         // SPAWN AGENTS:
         RespawnAgents();
 
@@ -217,6 +221,10 @@ public class SimulationManager : MonoBehaviour {
         predatorArray = new PredatorModule[numPredators];
         SpawnPredators();
 
+        // Send agent info to FluidBG:
+        environmentFluidManager.agentsArray = agentsArray;
+        environmentFluidManager.playerAgent = playerAgent;
+        environmentFluidManager.foodArray = foodArray;
         environmentFluidManager.predatorsArray = predatorArray;
 
         InitializeGridCells();
@@ -663,8 +671,49 @@ public class SimulationManager : MonoBehaviour {
         playerAgent.testModule.nearestPredatorModule = predatorArray[closestIndexPred];
 
     }
-    public void TickSimulation() {
+    /*public IEnumerator TestYieldFixedUpdate() {
+        Vector3 agentPos = playerAgent.testModule.ownRigidBody2D.position;
+        Debug.Log("Coroutine BEFORE! (pre-physics) AgentPos: (" + agentPos.x.ToString() + ", " + agentPos.y.ToString() + ") Time: " + Time.realtimeSinceStartup.ToString());
+
+        yield return new WaitForFixedUpdate();
+
+        Debug.Log("Coroutine AFTER! (Yield WaitForFixedUpdate, supposedly after physics) AgentPos: (" + agentPos.x.ToString() + ", " + agentPos.y.ToString() + ") Time: " + Time.realtimeSinceStartup.ToString());
+    }
+    public IEnumerator TestYieldEndOfFrame() {
+        Vector3 agentPos = playerAgent.testModule.ownRigidBody2D.position;        
+        yield return new WaitForEndOfFrame();
+        Debug.Log("TestYieldEndOfFrame()) AgentPos: (" + agentPos.x.ToString() + ", " + agentPos.y.ToString() + ") Time: " + Time.realtimeSinceStartup.ToString());
+    }
+    public void TestExecutionOrder() {
+        Vector3 agentPos = playerAgent.testModule.ownRigidBody2D.position;
+        Debug.Log("(During FixedUpdate - pre-physics) AgentPos: (" + agentPos.x.ToString() + ", " + agentPos.y.ToString() + ") Time: " + Time.realtimeSinceStartup.ToString());        
+    }*/
+    private void OnTriggerEnter2D(Collider2D collision) {
+        TriggerTestOrder();
+    }
+    private void OnTriggerStay2D(Collider2D collision) {
+        TriggerTestOrder();
+    }
+    private void TriggerTestOrder() {
         
+
+        //Vector3 agentPos = playerAgent.testModule.ownRigidBody2D.position;
+        //Debug.Log("OnTriggerStay2D AgentPos: (" + agentPos.x.ToString() + ", " + agentPos.y.ToString() + ") Time: " + Time.realtimeSinceStartup.ToString());
+    }
+    public void Update() {
+        cameraManager.targetTransform = playerAgent.transform;
+        //Vector3 agentPos = Vector3.zero;
+        //if (playerAgent != null) {
+        //    agentPos = playerAgent.testModule.ownRigidBody2D.position;
+        //}
+        //Debug.Log("Update() AgentPos: (" + agentPos.x.ToString() + ", " + agentPos.y.ToString() + ") Time: " + Time.realtimeSinceStartup.ToString());
+    }
+    public void TickSimulation() {
+        //StartCoroutine(TestYieldFixedUpdate());
+        //StartCoroutine(TestYieldEndOfFrame());
+        //TestExecutionOrder();
+        environmentFluidManager.Run();
+
         HookUpModules(); // Sets nearest-neighbors etc.        
 
         if (playerAgent.ageCounter > recordPlayerAge) {
@@ -677,7 +726,15 @@ public class SimulationManager : MonoBehaviour {
             agentsArray[i].Tick();
         }
 
-        cameraManager.targetTransform = playerAgent.transform;
+        // TEMP TEMP TEMP TEMP TEMP TEMP TEMP TEMP TEMP TEMP TEMP TEMP
+        Vector3 debugPos = playerAgent.testModule.ownRigidBody2D.position;
+        Vector2 playerUV = new Vector2((debugPos.x + 70f) / 140f, (debugPos.y + 70f) / 140f);
+        Vector2 fluidVel = environmentFluidManager.GetFluidVelocityAtPosition(playerUV);
+        playerAgent.testModule.ownRigidBody2D.AddForce(fluidVel * 42f, ForceMode2D.Impulse);
+        //playerAgent.testModule.foodAmountB[0] += 0.0025f;
+        // TEMP TEMP TEMP TEMP TEMP TEMP TEMP TEMP TEMP TEMP TEMP TEMP
+
+        //cameraManager.targetTransform = playerAgent.transform;
 
         bool recordData = false;
         float curHorizontalInput = 0f;
@@ -721,15 +778,16 @@ public class SimulationManager : MonoBehaviour {
         }
         if(idleFramesCounter >= idleFramesToBotControl) {
             // Transition eventually!
-            playerAgent.humanControlLerp = 0f;
-            playerAgent.meshRendererBeauty.material.SetFloat("_IsPlayer", 0.0f);
+            //playerAgent.humanControlLerp = 0f;
+            //playerAgent.meshRendererBeauty.material.SetFloat("_IsPlayer", 0.0f);
         }
         //public int idleFramesToBotControl = 100;
         //private int idleFramesCounter = 0;
         //public int botToHumanControlTransitionFrameCount = 8;
         //public int humanToBotControlTransitionFrameCount = 30;
+        //TestExecutionOrder();
 
-        environmentFluidManager.Run();
+        
     }
     public void TickTrainingMode() {
         // Can do one genome & 1 dataSample per frame

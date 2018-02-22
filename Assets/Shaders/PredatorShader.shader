@@ -81,8 +81,8 @@
 				float3 endHue = float3(0.25, 0.0, 0.0); //float3(1.2, 0.7, 0.0);
 
 				outColor.rgb = lerp(startHue, endHue, distToOrigin * distToOrigin * distToOrigin);
-				outColor.rgb = float3(0.5,0,0);
-				outColor.a = alpha;
+				outColor.rgb = float3(0.25,0,0);
+				outColor.a = alpha * 0.25;
 				float alphaCutoffValue = 0.1;
 				clip(outColor.a - alphaCutoffValue);
 				return outColor;

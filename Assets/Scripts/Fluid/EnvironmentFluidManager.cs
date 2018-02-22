@@ -4,11 +4,13 @@ using UnityEngine;
 
 public class EnvironmentFluidManager : MonoBehaviour {
 
+    public Camera mainCam;
     public ComputeShader computeShaderFluidSim;
     public Texture2D initialDensityTex;
     //public Texture2D initialObstaclesTex;
     public Camera obstacleRenderCamera;
     public Camera fluidColorRenderCamera;
+    public GameObject debugGO;
 
     public int resolution = 64;
     public float deltaTime = 1f;
@@ -43,7 +45,19 @@ public class EnvironmentFluidManager : MonoBehaviour {
     public PredatorModule[] predatorsArray;
     public FoodModule[] foodArray;
 
-    private int numForcePoints = 32;
+    public Vector2[] agentFluidVelocitiesArray;
+    public Vector3[] agentPositionsArray;  // z coord holds radius of object
+    public Vector2[] foodFluidVelocitiesArray;
+    public Vector3[] foodPositionsArray;
+    public Vector2[] predatorFluidVelocitiesArray;
+    public Vector3[] predatorPositionsArray;
+
+    private int numFloatyBits = 8196;
+    private ComputeBuffer floatyBitsCBuffer;
+    private ComputeBuffer quadVerticesCBuffer;
+    public Material floatyBitsDisplayMat;
+
+    private int numForcePoints = 8;
     public ForcePoint[] forcePointsArray;
     public ComputeBuffer forcePointsCBuffer;
     public struct ForcePoint {
@@ -61,7 +75,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
         public float posY;
         public Vector3 color;
     }
-
+    
     public DisplayTexture displayTex = DisplayTexture.densityA;
     public enum DisplayTexture {
         velocityA,
@@ -77,6 +91,14 @@ public class EnvironmentFluidManager : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+        obstacleRenderCamera.enabled = false;
+        fluidColorRenderCamera.enabled = false;
+        agentFluidVelocitiesArray = new Vector2[64];
+        agentPositionsArray = new Vector3[64];
+        foodFluidVelocitiesArray = new Vector2[36];
+        foodPositionsArray = new Vector3[36];
+        predatorFluidVelocitiesArray = new Vector2[12];
+        predatorPositionsArray = new Vector3[12];
         CreateTextures();
         
         displayMat = GetComponent<MeshRenderer>().material; //.SetTexture("_MainTex", velocityA);
@@ -91,7 +113,37 @@ public class EnvironmentFluidManager : MonoBehaviour {
         forcePointsArray = new ForcePoint[numForcePoints];
         
         CreateForcePoints();
-        
+
+
+        quadVerticesCBuffer = new ComputeBuffer(6, sizeof(float) * 3);
+        quadVerticesCBuffer.SetData(new[] {
+            new Vector3(-0.5f, 0.5f),
+            new Vector3(0.5f, 0.5f),
+            new Vector3(0.5f, -0.5f),
+            new Vector3(0.5f, -0.5f),
+            new Vector3(-0.5f, -0.5f),
+            new Vector3(-0.5f, 0.5f)
+        });
+        Vector2[] floatyBitsInitPos = new Vector2[numFloatyBits];
+        floatyBitsCBuffer = new ComputeBuffer(numFloatyBits, sizeof(float) * 2);
+        for(int i = 0; i < numFloatyBits; i++) {
+            floatyBitsInitPos[i] = new Vector2(UnityEngine.Random.Range(0.2f, 0.8f), UnityEngine.Random.Range(0.2f, 0.8f));
+        }
+        floatyBitsCBuffer.SetData(floatyBitsInitPos);
+        int kernelSimFloatyBits = computeShaderFluidSim.FindKernel("SimFloatyBits");
+        computeShaderFluidSim.SetBuffer(kernelSimFloatyBits, "FloatyBitsCBuffer", floatyBitsCBuffer);
+
+        floatyBitsDisplayMat.SetPass(0);
+        floatyBitsDisplayMat.SetBuffer("floatyBitsCBuffer", floatyBitsCBuffer);
+        floatyBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+    }
+
+    private void OnRenderObject() {
+        if(Camera.current == mainCam) {
+            floatyBitsDisplayMat.SetPass(0);
+            floatyBitsDisplayMat.SetBuffer("floatyBitsCBuffer", floatyBitsCBuffer);
+            Graphics.DrawProcedural(MeshTopology.Triangles, 6, floatyBitsCBuffer.count);
+        }        
     }
 
     private void CreateForcePoints() {
@@ -100,7 +152,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
         //}
 
         //Debug.Log("agentsArray[i].testModule.ownRigidBody2D.velocity: " + agentsArray[0].testModule.ownRigidBody2D.velocity.ToString());
-        int numForcePoints = 32;
+        //int numForcePoints = 16;
         for(int i = 0; i < numForcePoints; i++) {
             ForcePoint agentPoint = new ForcePoint();
             //if(i == 0)
@@ -117,7 +169,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
             agentPoint.posY = v;
             agentPoint.size = 450f;*/
 
-            float forceStrength = 0.15f;
+            float forceStrength = 0.2f;
             agentPoint.posX = UnityEngine.Random.Range(0f, 1f);
             agentPoint.posY = UnityEngine.Random.Range(0f, 1f);
             agentPoint.velX = UnityEngine.Random.Range(-1f, 1f) * forceStrength;
@@ -225,17 +277,131 @@ public class EnvironmentFluidManager : MonoBehaviour {
         prevMousePosY = Input.mousePosition.y;*/
     }
 
+    void Update() {
+        
+    }
+
+    public Vector2 GetFluidVelocityAtPosition(Vector2 uv) {
+        ComputeBuffer velocityValuesCBuffer = new ComputeBuffer(1, sizeof(float) * 2);
+
+        Vector2[] fluidVelocityValues = new Vector2[1];
+        //fluidVelocityValues [0] = Vector2.zero;
+        computeShaderFluidSim.SetFloat("_Time", Time.time);
+        computeShaderFluidSim.SetFloat("_ForceMagnitude", forceMagnitude);
+        computeShaderFluidSim.SetFloat("_Viscosity", viscosity);
+        computeShaderFluidSim.SetFloat("_Damping", damping);
+        computeShaderFluidSim.SetFloat("_ForceSize", invBrushSize);
+        computeShaderFluidSim.SetFloat("_ColorRefreshAmount", colorRefreshAmount);
+        
+        int kernelGetVelAtCoords = computeShaderFluidSim.FindKernel("GetVelAtCoords");
+        computeShaderFluidSim.SetFloat("_TextureResolution", (float)resolution);
+        computeShaderFluidSim.SetFloat("_DeltaTime", deltaTime);
+        computeShaderFluidSim.SetFloat("_InvGridScale", invGridScale);
+        computeShaderFluidSim.SetFloat("_SampleCoordX", uv.x);
+        computeShaderFluidSim.SetFloat("_SampleCoordY", uv.y);
+        computeShaderFluidSim.SetBuffer(kernelGetVelAtCoords, "VelocityValuesCBuffer", velocityValuesCBuffer);
+        computeShaderFluidSim.SetTexture(kernelGetVelAtCoords, "VelocityRead", velocityA);
+        computeShaderFluidSim.Dispatch(kernelGetVelAtCoords, 1, 1, 1);
+
+        velocityValuesCBuffer.GetData(fluidVelocityValues);
+
+        velocityValuesCBuffer.Release();
+        //Debug.Log("Fluid Velocity at: (" + uv.x.ToString() + ", " + uv.y.ToString() + "): [" + fluidVelocityValues[0].x.ToString() + ", " + fluidVelocityValues[0].y.ToString() + "]");
+        return fluidVelocityValues[0];
+    }
+
+    public Vector2[] GetFluidVelocityAtObjectPositions(Vector3[] positionsArray) {
+
+        ComputeBuffer objectPositionsCBuffer = new ComputeBuffer(positionsArray.Length, sizeof(float) * 3);
+        ComputeBuffer velocityValuesCBuffer = new ComputeBuffer(positionsArray.Length, sizeof(float) * 2);
+
+        Vector2[] objectVelocitiesArray = new Vector2[positionsArray.Length];
+
+        //for(int i = 0; i < 64; i++) {
+        //    Vector3 agentPos = agentsArray[i].testModule.ownRigidBody2D.position;
+        //    agentPositionsArray[i] = new Vector2((agentPos.x + 70f) / 140f, (agentPos.y + 70f) / 140f);
+        //}
+
+        objectPositionsCBuffer.SetData(positionsArray);
+        
+        //computeShaderFluidSim.SetFloat("_Time", Time.time);
+        //computeShaderFluidSim.SetFloat("_ForceMagnitude", forceMagnitude);
+        //computeShaderFluidSim.SetFloat("_Viscosity", viscosity);
+        //computeShaderFluidSim.SetFloat("_Damping", damping);
+        //computeShaderFluidSim.SetFloat("_ForceSize", invBrushSize);
+        //computeShaderFluidSim.SetFloat("_ColorRefreshAmount", colorRefreshAmount);
+
+        int kernelGetObjectVelocities = computeShaderFluidSim.FindKernel("GetObjectVelocities");
+        //computeShaderFluidSim.SetFloat("_TextureResolution", (float)resolution);
+        //computeShaderFluidSim.SetFloat("_DeltaTime", deltaTime);        
+        computeShaderFluidSim.SetBuffer(kernelGetObjectVelocities, "ObjectPositionsCBuffer", objectPositionsCBuffer);
+        computeShaderFluidSim.SetBuffer(kernelGetObjectVelocities, "VelocityValuesCBuffer", velocityValuesCBuffer);
+        computeShaderFluidSim.SetTexture(kernelGetObjectVelocities, "VelocityRead", velocityA);
+        computeShaderFluidSim.Dispatch(kernelGetObjectVelocities, positionsArray.Length, 1, 1);
+
+        velocityValuesCBuffer.GetData(objectVelocitiesArray);
+
+        velocityValuesCBuffer.Release();
+        objectPositionsCBuffer.Release();
+
+        return objectVelocitiesArray;
+        
+    }
+
+    public void SimFloatyBits() {
+        int kernelSimFloatyBits = computeShaderFluidSim.FindKernel("SimFloatyBits");
+
+        computeShaderFluidSim.SetFloat("_TextureResolution", (float)resolution);
+        computeShaderFluidSim.SetFloat("_DeltaTime", deltaTime);
+        computeShaderFluidSim.SetFloat("_InvGridScale", invGridScale);
+        computeShaderFluidSim.SetBuffer(kernelSimFloatyBits, "FloatyBitsCBuffer", floatyBitsCBuffer);
+        computeShaderFluidSim.SetTexture(kernelSimFloatyBits, "VelocityRead", velocityA);        
+        computeShaderFluidSim.Dispatch(kernelSimFloatyBits, floatyBitsCBuffer.count, 1, 1);
+    }
+
     public void Run() {
+        Vector3 debugPos = playerAgent.testModule.ownRigidBody2D.position;
+        debugGO.transform.position = debugPos;
         obstacleRenderCamera.targetTexture = obstacles;
         fluidColorRenderCamera.targetTexture = sourceColor;
+        obstacleRenderCamera.Render();
+        fluidColorRenderCamera.Render();
+
+        // Update AGENT positions & velocities:
+        for(int i = 0; i < agentPositionsArray.Length; i++) {
+            Vector3 agentPos = agentsArray[i].testModule.ownRigidBody2D.position;
+            // z coord holds radius of object   
+            agentPositionsArray[i] = new Vector3((agentPos.x + 70f) / 140f, (agentPos.y + 70f) / 140f, 0.005357f); //... 0.6/140 ...
+        }
+        agentFluidVelocitiesArray = GetFluidVelocityAtObjectPositions(agentPositionsArray);
+        // Update FOOD positions & velocities:
+        //Debug.Log("foodPositionsArray.Length " + foodPositionsArray.Length.ToString() + ", foodArray: " + foodArray.Length.ToString());
+        for (int i = 0; i < foodPositionsArray.Length; i++) {
+            Vector3 foodPos = foodArray[i].transform.position;
+            float sampleRadius = (foodArray[i].curScale + 0.1f) / 140f;
+            foodPositionsArray[i] = new Vector3((foodPos.x + 70f) / 140f, (foodPos.y + 70f) / 140f, sampleRadius); // z coord holds radius of object   
+        }
+        foodFluidVelocitiesArray = GetFluidVelocityAtObjectPositions(foodPositionsArray);
+        // Update PREDATOR positions & velocities:
+
+        for (int i = 0; i < 64; i++) {
+            agentsArray[i].testModule.ownRigidBody2D.AddForce(agentFluidVelocitiesArray[i] * 42f, ForceMode2D.Impulse);
+            //agentsArray[i].testModule.ownRigidBody2D.velocity = Vector2.Lerp(agentsArray[i].testModule.ownRigidBody2D.velocity, agentFluidVelocitiesArray[i] * 160f, 0.85f);
+        }
+        for (int i = 0; i < foodArray.Length; i++) {
+            foodArray[i].GetComponent<Rigidbody2D>().AddForce(foodFluidVelocitiesArray[i] * 10f * foodArray[i].GetComponent<Rigidbody2D>().mass, ForceMode2D.Impulse);
+        }
+
         SetDisplayTexture();
         //CreateForcePoints();
-        if (tick) {   // So I can step through the program slowly at first
-            //tick = false;
-            Tick();
-
-            //Debug.Log(new Vector2(Input.mousePosition.x - prevMousePosX, Input.mousePosition.y - prevMousePosY).ToString());
+        if (tick) {   // So I can step through the program slowly at first            
+            Tick();            
         }
+
+        
+
+        //Vector2 playerUV = new Vector2((debugPos.x + 70f) / 140f, (debugPos.y + 70f) / 140f);
+        //GetFluidVelocityAtPosition(playerUV);
 
         prevMousePosX = Input.mousePosition.x;
         prevMousePosY = Input.mousePosition.y;
@@ -319,7 +485,9 @@ public class EnvironmentFluidManager : MonoBehaviour {
 
         // SUBTRACT GRADIENT:::::
         SubtractGradient();
-        Graphics.Blit(velocityB, velocityA); // TEMP! slow...        
+        Graphics.Blit(velocityB, velocityA); // TEMP! slow...  
+
+        SimFloatyBits();
     }
 
     private void RefreshColor() { 
@@ -440,5 +608,12 @@ public class EnvironmentFluidManager : MonoBehaviour {
         if(forcePointsCBuffer != null) {
             forcePointsCBuffer.Release();
         }
+        if (floatyBitsCBuffer != null) {
+            floatyBitsCBuffer.Release();
+        }
+        if (quadVerticesCBuffer != null) {
+            quadVerticesCBuffer.Release();
+        }
+        
     }
 }

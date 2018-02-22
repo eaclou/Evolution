@@ -101,7 +101,7 @@
 				float circle = (1.0 - saturate(length(coords))) * 15;
 				float distToOrigin = length(coords);
 
-				float4 outCol = float4(0.15, 0.5, 0.55, saturate(circle));				
+				float4 outCol = float4(0.005, 0.025, 0.225, saturate(circle));				
 
 				//float foodRadius = 0.8;
 				//float foodEnergy = (tex2D(_MainTex, float2(0.375, 0.333)).r + tex2D(_MainTex, float2(0.625, 0.333)).r + tex2D(_MainTex, float2(0.875, 0.333)).r) / 3.0;
@@ -116,14 +116,14 @@
 					//posColor *= 0.5;
 				//}
 				//outCol.rgb = lerp(outCol.rgb, float3(0.8, 0.75, 0.9), 0.45);
-				float eyesOpen = saturate(length(float2(_VelX, _VelY)) * 20);
+				float eyesOpen = saturate((length(float2(_VelX, _VelY)) - 0.04) * 30);
 				float eyeRadius = 0.4;			
 				float2 outCommOrigin0 = float2(0.6, 0.5);
 				float2 outComCoords0 = float2(outCommOrigin0.x * cos(facingAngle) - outCommOrigin0.y * sin(facingAngle),
 											  outCommOrigin0.y * cos(facingAngle) + outCommOrigin0.x * sin(facingAngle));
 				float outCommDist0 = length(coords - outComCoords0);
 				if(outCommDist0 < eyeRadius) {
-					outCol.rgb = lerp(outCol.rgb, eyeColor, eyesOpen);
+					outCol.rgb = lerp(float3(1,1,1)*0.1, eyeColor, eyesOpen);
 					outCol.a = 1;
 				}
 				
@@ -132,7 +132,7 @@
 											  outCommOrigin1.y * cos(facingAngle) + outCommOrigin1.x * sin(facingAngle));
 				float outCommDist1 = length(coords - outComCoords1);
 				if(outCommDist1 < eyeRadius) {
-					outCol.rgb = lerp(outCol.rgb, eyeColor, eyesOpen);
+					outCol.rgb = lerp(float3(1,1,1)*0.1, eyeColor, eyesOpen);
 					outCol.a = 1;
 				}
 
@@ -169,7 +169,8 @@
 				
 				
 				//outCol.a = circle;
-				outCol.rgb = float3(0, 2, 6);
+				outCol.rgb = float3(6.5, 3, 0.5) * 0.5;
+				//outCol.a = outCol.a * 0.25;
 				// inside CGPROGRAM in the fragment Shader:
 				//float alphaCutoffValue = 0.1;
 				//clip(outCol.a - alphaCutoffValue);
