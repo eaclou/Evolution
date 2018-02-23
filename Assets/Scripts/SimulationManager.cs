@@ -174,7 +174,7 @@ public class SimulationManager : MonoBehaviour {
         playerAgent.humanControlLerp = 1f;
         //playerAgent.meshRendererBeauty.material.SetFloat("_IsPlayer", 1.0f);
         playerAgent.humanControlled = true;
-       // playerAgent.testModule.foodAmountB[0] = 10f;
+        playerAgent.testModule.foodAmountB[0] = 2.5f;
         // $#!%@@@@@@@@@@@@ TEMP TEMP TEMP !%!#$%!#$%!@$%%!@$#%@$%@@@@@@@@@@@@@@@@@@@@@@@
 
         cameraManager.targetTransform = playerAgent.transform;

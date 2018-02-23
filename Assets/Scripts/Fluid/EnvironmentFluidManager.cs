@@ -52,12 +52,12 @@ public class EnvironmentFluidManager : MonoBehaviour {
     public Vector2[] predatorFluidVelocitiesArray;
     public Vector3[] predatorPositionsArray;
 
-    private int numFloatyBits = 8196;
+    private int numFloatyBits = 1024 * 32;
     private ComputeBuffer floatyBitsCBuffer;
     private ComputeBuffer quadVerticesCBuffer;
     public Material floatyBitsDisplayMat;
 
-    private int numForcePoints = 8;
+    private int numForcePoints = 12;
     public ForcePoint[] forcePointsArray;
     public ComputeBuffer forcePointsCBuffer;
     public struct ForcePoint {
@@ -87,10 +87,36 @@ public class EnvironmentFluidManager : MonoBehaviour {
         divergence,
         obstacles
     }
-    
 
-	// Use this for initialization
-	void Start () {
+    public struct AgentSimData {
+        public Vector2 worldPos;
+        public Vector2 velocity;
+        public Vector2 heading;
+    }
+    public struct FoodSimData {
+        public Vector2 worldPos;
+        public Vector2 velocity;
+        public float scale;
+        public Vector3 foodAmount;
+    }
+    public struct PredatorSimData {
+        public Vector2 worldPos;
+        public Vector2 velocity;
+        public float scale;
+    }
+    public AgentSimData[] agentSimDataArray;
+    public FoodSimData[] foodSimDataArray;
+    public PredatorSimData[] predatorSimDataArray;
+    public ComputeBuffer agentSimDataCBuffer;
+    public ComputeBuffer foodSimDataCBuffer;
+    public ComputeBuffer predatorSimDataCBuffer;
+
+    public Material agentProceduralDisplayMat;
+    public Material foodProceduralDisplayMat;
+    public Material predatorProceduralDisplayMat;
+
+    // Use this for initialization
+    void Start () {
         obstacleRenderCamera.enabled = false;
         fluidColorRenderCamera.enabled = false;
         agentFluidVelocitiesArray = new Vector2[64];
@@ -99,6 +125,25 @@ public class EnvironmentFluidManager : MonoBehaviour {
         foodPositionsArray = new Vector3[36];
         predatorFluidVelocitiesArray = new Vector2[12];
         predatorPositionsArray = new Vector3[12];
+
+        agentSimDataArray = new AgentSimData[64];
+        for(int i = 0; i < agentSimDataArray.Length; i++) {
+            agentSimDataArray[i] = new AgentSimData();
+        }
+        agentSimDataCBuffer = new ComputeBuffer(agentSimDataArray.Length, sizeof(float) * 6);
+
+        foodSimDataArray = new FoodSimData[36];
+        for (int i = 0; i < foodSimDataArray.Length; i++) {
+            foodSimDataArray[i] = new FoodSimData();
+        }
+        foodSimDataCBuffer = new ComputeBuffer(foodSimDataArray.Length, sizeof(float) * 8);
+
+        predatorSimDataArray = new PredatorSimData[12];
+        for (int i = 0; i < predatorSimDataArray.Length; i++) {
+            predatorSimDataArray[i] = new PredatorSimData();
+        }
+        predatorSimDataCBuffer = new ComputeBuffer(predatorSimDataArray.Length, sizeof(float) * 5);
+
         CreateTextures();
         
         displayMat = GetComponent<MeshRenderer>().material; //.SetTexture("_MainTex", velocityA);
@@ -125,9 +170,9 @@ public class EnvironmentFluidManager : MonoBehaviour {
             new Vector3(-0.5f, 0.5f)
         });
         Vector2[] floatyBitsInitPos = new Vector2[numFloatyBits];
-        floatyBitsCBuffer = new ComputeBuffer(numFloatyBits, sizeof(float) * 2);
+        floatyBitsCBuffer = new ComputeBuffer(numFloatyBits, sizeof(float) * 4);
         for(int i = 0; i < numFloatyBits; i++) {
-            floatyBitsInitPos[i] = new Vector2(UnityEngine.Random.Range(0.2f, 0.8f), UnityEngine.Random.Range(0.2f, 0.8f));
+            floatyBitsInitPos[i] = new Vector4(UnityEngine.Random.Range(0.2f, 0.8f), UnityEngine.Random.Range(0.2f, 0.8f), 1f, 0f);
         }
         floatyBitsCBuffer.SetData(floatyBitsInitPos);
         int kernelSimFloatyBits = computeShaderFluidSim.FindKernel("SimFloatyBits");
@@ -136,6 +181,19 @@ public class EnvironmentFluidManager : MonoBehaviour {
         floatyBitsDisplayMat.SetPass(0);
         floatyBitsDisplayMat.SetBuffer("floatyBitsCBuffer", floatyBitsCBuffer);
         floatyBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+
+        agentProceduralDisplayMat.SetPass(0);
+        agentProceduralDisplayMat.SetBuffer("agentSimDataCBuffer", agentSimDataCBuffer);
+        agentProceduralDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+
+        foodProceduralDisplayMat.SetPass(0);
+        foodProceduralDisplayMat.SetBuffer("foodSimDataCBuffer", foodSimDataCBuffer);
+        foodProceduralDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+
+        predatorProceduralDisplayMat.SetPass(0);
+        predatorProceduralDisplayMat.SetBuffer("predatorSimDataCBuffer", predatorSimDataCBuffer);
+        predatorProceduralDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+
     }
 
     private void OnRenderObject() {
@@ -143,32 +201,26 @@ public class EnvironmentFluidManager : MonoBehaviour {
             floatyBitsDisplayMat.SetPass(0);
             floatyBitsDisplayMat.SetBuffer("floatyBitsCBuffer", floatyBitsCBuffer);
             Graphics.DrawProcedural(MeshTopology.Triangles, 6, floatyBitsCBuffer.count);
+
+            agentProceduralDisplayMat.SetPass(0);
+            agentProceduralDisplayMat.SetBuffer("agentSimDataCBuffer", agentSimDataCBuffer);
+            Graphics.DrawProcedural(MeshTopology.Triangles, 6, agentSimDataCBuffer.count);
+
+            foodProceduralDisplayMat.SetPass(0);
+            foodProceduralDisplayMat.SetBuffer("foodSimDataCBuffer", foodSimDataCBuffer);
+            Graphics.DrawProcedural(MeshTopology.Triangles, 6, foodSimDataCBuffer.count);
+
+            predatorProceduralDisplayMat.SetPass(0);
+            predatorProceduralDisplayMat.SetBuffer("predatorSimDataCBuffer", predatorSimDataCBuffer);
+            Graphics.DrawProcedural(MeshTopology.Triangles, 6, predatorSimDataCBuffer.count);
         }        
     }
 
     private void CreateForcePoints() {
-        //if(agentsArray == null || playerAgent == null || predatorsArray == null) {
-        //    return;
-        //}
-
-        //Debug.Log("agentsArray[i].testModule.ownRigidBody2D.velocity: " + agentsArray[0].testModule.ownRigidBody2D.velocity.ToString());
-        //int numForcePoints = 16;
+        
         for(int i = 0; i < numForcePoints; i++) {
             ForcePoint agentPoint = new ForcePoint();
-            //if(i == 0)
-            //    
-            // convert world coords to UVs:
-            /*float rawVelX = agentsArray[i].testModule.ownRigidBody2D.velocity.x;
-            float rawVelY = agentsArray[i].testModule.ownRigidBody2D.velocity.y;
-            agentPoint.velX = rawVelX * 0.01f;
-            agentPoint.velY = rawVelY * 0.01f;
-            Vector3 agentPos = agentsArray[i].testModule.ownRigidBody2D.transform.position;
-            float u = (agentPos.x + rawVelX * Time.fixedDeltaTime * 2f + 70f) / 140f;
-            float v = (agentPos.y + rawVelX * Time.fixedDeltaTime * 2f + 70f) / 140f;
-            agentPoint.posX = u; // UnityEngine.Random.Range(0f, 1f);
-            agentPoint.posY = v;
-            agentPoint.size = 450f;*/
-
+            
             float forceStrength = 0.2f;
             agentPoint.posX = UnityEngine.Random.Range(0f, 1f);
             agentPoint.posY = UnityEngine.Random.Range(0f, 1f);
@@ -176,40 +228,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
             agentPoint.velY = UnityEngine.Random.Range(-1f, 1f) * forceStrength;
             agentPoint.size = UnityEngine.Random.Range(64f, 128f);
             forcePointsArray[i] = agentPoint;
-
-            //Debug.Log("point[" + i.ToString() + ", pos: (" + point.posX.ToString() + ", " + point.posY.ToString() + ") vel: (" + point.velX.ToString() + ", " + point.velY.ToString() + ") size: " + point.size.ToString());
-        }
-
-        // Player:
-        /*
-        ForcePoint point = new ForcePoint();
-        Vector2 pVel = playerAgent.testModule.ownRigidBody2D.velocity;
-        Vector3 playerPos = playerAgent.testModule.ownRigidBody2D.transform.position;
-        float pu = (playerPos.x + pVel.x * Time.fixedDeltaTime * 2f + 70f) / 140f;
-        float pv = (playerPos.y + pVel.y * Time.fixedDeltaTime * 2f + 70f) / 140f;
-        point.posX = pu; 
-        point.posY = pv;
-        point.velX = pVel.x * 0.01f;
-        point.velY = pVel.y * 0.01f;
-        point.size = 400f;        
-        forcePointsArray[agentsArray.Length] = point;*/
-
-        // Predators:
-        /*
-        for (int i = 0; i < predatorsArray.Length; i++) {
-            ForcePoint predatorPoint = new ForcePoint();
-            Vector3 predatorPos = predatorsArray[i].rigidBody.transform.position;
-            float predU = (predatorPos.x + 70f) / 140f;
-            float predV = (predatorPos.y + 70f) / 140f;
-            predatorPoint.posX = predU; // UnityEngine.Random.Range(0f, 1f);
-            predatorPoint.posY = predV;
-            predatorPoint.velX = predatorsArray[i].rigidBody.velocity.x * 0.01f;
-            predatorPoint.velY = predatorsArray[i].rigidBody.velocity.y * 0.01f;
-            predatorPoint.size = 160f;
-            forcePointsArray[agentsArray.Length + 1 + i] = predatorPoint;
-            //Debug.Log("predatorPoint[" + i.ToString() + ", pos: (" + predatorPoint.posX.ToString() + ", " + predatorPoint.posY.ToString() + ") vel: (" + predatorPoint.velX.ToString() + ", " + predatorPoint.velY.ToString() + ") size: " + predatorPoint.size.ToString());
-        }*/
-
+        }        
         forcePointsCBuffer.SetData(forcePointsArray);
     }
 
@@ -356,7 +375,30 @@ public class EnvironmentFluidManager : MonoBehaviour {
         computeShaderFluidSim.SetFloat("_InvGridScale", invGridScale);
         computeShaderFluidSim.SetBuffer(kernelSimFloatyBits, "FloatyBitsCBuffer", floatyBitsCBuffer);
         computeShaderFluidSim.SetTexture(kernelSimFloatyBits, "VelocityRead", velocityA);        
-        computeShaderFluidSim.Dispatch(kernelSimFloatyBits, floatyBitsCBuffer.count, 1, 1);
+        computeShaderFluidSim.Dispatch(kernelSimFloatyBits, floatyBitsCBuffer.count / 1024, 1, 1);
+    }
+
+    public void SetSimDataArrays() {
+        
+        for(int i = 0; i < agentSimDataArray.Length; i++) {            
+            agentSimDataArray[i].worldPos = new Vector2(agentsArray[i].transform.position.x, agentsArray[i].transform.position.y);
+            agentSimDataArray[i].velocity = new Vector2(agentsArray[i].testModule.ownRigidBody2D.velocity.x, agentsArray[i].testModule.ownRigidBody2D.velocity.y);
+            agentSimDataArray[i].heading = new Vector2(0f, 1f); // Update later -- store inside Agent class?            
+        }
+        agentSimDataCBuffer.SetData(agentSimDataArray);
+        for (int i = 0; i < foodSimDataArray.Length; i++) {
+            foodSimDataArray[i].worldPos = new Vector2(foodArray[i].transform.position.x, foodArray[i].transform.position.y);
+            foodSimDataArray[i].velocity = new Vector2(foodArray[i].GetComponent<Rigidbody2D>().velocity.x, agentsArray[i].GetComponent<Rigidbody2D>().velocity.y);
+            foodSimDataArray[i].scale = foodArray[i].curScale;
+            foodSimDataArray[i].foodAmount = new Vector3(foodArray[i].amountR, foodArray[i].amountG, foodArray[i].amountB);
+        }
+        foodSimDataCBuffer.SetData(foodSimDataArray);
+        for (int i = 0; i < predatorSimDataArray.Length; i++) {
+            predatorSimDataArray[i].worldPos = new Vector2(predatorsArray[i].transform.position.x, predatorsArray[i].transform.position.y);
+            predatorSimDataArray[i].velocity = new Vector2(predatorsArray[i].rigidBody.velocity.x, predatorsArray[i].rigidBody.velocity.y);
+            predatorSimDataArray[i].scale = predatorsArray[i].curScale; 
+        }
+        predatorSimDataCBuffer.SetData(predatorSimDataArray);
     }
 
     public void Run() {
@@ -383,14 +425,25 @@ public class EnvironmentFluidManager : MonoBehaviour {
         }
         foodFluidVelocitiesArray = GetFluidVelocityAtObjectPositions(foodPositionsArray);
         // Update PREDATOR positions & velocities:
+        for (int i = 0; i < predatorPositionsArray.Length; i++) {
+            Vector3 predatorPos = predatorsArray[i].transform.position;
+            float sampleRadius = (predatorsArray[i].curScale + 0.1f) / 140f;
+            predatorPositionsArray[i] = new Vector3((predatorPos.x + 70f) / 140f, (predatorPos.y + 70f) / 140f, sampleRadius); // z coord holds radius of object   
+        }
+        predatorFluidVelocitiesArray = GetFluidVelocityAtObjectPositions(predatorPositionsArray);
 
-        for (int i = 0; i < 64; i++) {
+        for (int i = 0; i < agentsArray.Length; i++) {
             agentsArray[i].testModule.ownRigidBody2D.AddForce(agentFluidVelocitiesArray[i] * 42f, ForceMode2D.Impulse);
             //agentsArray[i].testModule.ownRigidBody2D.velocity = Vector2.Lerp(agentsArray[i].testModule.ownRigidBody2D.velocity, agentFluidVelocitiesArray[i] * 160f, 0.85f);
         }
         for (int i = 0; i < foodArray.Length; i++) {
-            foodArray[i].GetComponent<Rigidbody2D>().AddForce(foodFluidVelocitiesArray[i] * 10f * foodArray[i].GetComponent<Rigidbody2D>().mass, ForceMode2D.Impulse);
+            foodArray[i].GetComponent<Rigidbody2D>().AddForce(foodFluidVelocitiesArray[i] * 15f * foodArray[i].GetComponent<Rigidbody2D>().mass, ForceMode2D.Impulse);
         }
+        for (int i = 0; i < predatorsArray.Length; i++) {
+            predatorsArray[i].rigidBody.AddForce(predatorFluidVelocitiesArray[i] * 32f * predatorsArray[i].rigidBody.mass, ForceMode2D.Impulse);
+        }
+
+        SetSimDataArrays(); // Send data about gameState to GPU for display
 
         SetDisplayTexture();
         //CreateForcePoints();
@@ -614,6 +667,15 @@ public class EnvironmentFluidManager : MonoBehaviour {
         if (quadVerticesCBuffer != null) {
             quadVerticesCBuffer.Release();
         }
-        
+        if (agentSimDataCBuffer != null) {
+            agentSimDataCBuffer.Release();
+        }
+        if (foodSimDataCBuffer != null) {
+            foodSimDataCBuffer.Release();
+        }
+        if (predatorSimDataCBuffer != null) {
+            predatorSimDataCBuffer.Release();
+        }
+        //agentSimDataCBuffer
     }
 }

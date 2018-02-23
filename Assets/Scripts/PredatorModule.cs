@@ -8,7 +8,7 @@ public class PredatorModule : MonoBehaviour {
     public MeshRenderer meshRendererBeauty;
     public MeshRenderer meshRendererFluidCollider;
 
-    private float speed = 1000f;
+    private float speed = 500f;
 
     private float damage = 0.14f;
     private int counter = 0;

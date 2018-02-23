@@ -35,7 +35,7 @@ Texture2D<float4> ObstaclesRead;
 StructuredBuffer<float3> ObjectPositionsCBuffer;
 RWStructuredBuffer<float2> VelocityValuesCBuffer;
 
-RWStructuredBuffer<float2> FloatyBitsCBuffer;
+RWStructuredBuffer<float4> FloatyBitsCBuffer;
 
 SamplerState _LinearClamp;
 SamplerState _LinearRepeat;
@@ -66,16 +66,19 @@ uniform float _SampleCoordY;
 
 uniform float _VelocitySampleRadius;
 
-[numthreads(1,1,1)]
+[numthreads(1024,1,1)]
 void SimFloatyBits (uint3 id : SV_DispatchThreadID)
 {	
-	float2 uv = FloatyBitsCBuffer[id.x];
+	float4 floatyBitData = FloatyBitsCBuffer[id.x];
+	float2 uv = floatyBitData.xy;
 	float2 vel = VelocityRead.SampleLevel(_LinearRepeat, uv, 0).xy;
 	float speedMult = 0.031;
 	
 	float2 nextPos = uv + vel * speedMult;
 
-	FloatyBitsCBuffer[id.x] = nextPos;
+	float4 data = float4(nextPos, vel);
+	
+	FloatyBitsCBuffer[id.x] = data;
 }
 
 [numthreads(1,1,1)]
