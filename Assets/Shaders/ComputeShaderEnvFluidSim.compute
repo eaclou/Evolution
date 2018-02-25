@@ -19,6 +19,18 @@ struct ForcePoint {
     float size;
 };
 
+struct TrailDotData {
+    int parentIndex;
+    float2 coords01;
+    float age;
+};
+
+struct AgentSimData {
+    float2 worldPos;
+    float2 velocity;
+    float2 heading;
+};
+
 Texture2D<float4> SourceColorTex;
 Texture2D<float4> InputVelocityTex;
 StructuredBuffer<ForcePoint> ForcePointsCBuffer;
@@ -36,6 +48,8 @@ StructuredBuffer<float3> ObjectPositionsCBuffer;
 RWStructuredBuffer<float2> VelocityValuesCBuffer;
 
 RWStructuredBuffer<float4> FloatyBitsCBuffer;
+StructuredBuffer<AgentSimData> AgentSimDataCBuffer;
+RWStructuredBuffer<TrailDotData> TrailDotsCBuffer;
 
 SamplerState _LinearClamp;
 SamplerState _LinearRepeat;
@@ -72,7 +86,7 @@ void SimFloatyBits (uint3 id : SV_DispatchThreadID)
 	float4 floatyBitData = FloatyBitsCBuffer[id.x];
 	float2 uv = floatyBitData.xy;
 	float2 vel = VelocityRead.SampleLevel(_LinearRepeat, uv, 0).xy;
-	float speedMult = 0.031;
+	float speedMult = 0.028;
 	
 	float2 nextPos = uv + vel * speedMult;
 

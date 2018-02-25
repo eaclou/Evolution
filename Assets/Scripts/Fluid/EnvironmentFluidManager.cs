@@ -52,10 +52,20 @@ public class EnvironmentFluidManager : MonoBehaviour {
     public Vector2[] predatorFluidVelocitiesArray;
     public Vector3[] predatorPositionsArray;
 
-    private int numFloatyBits = 1024 * 32;
+    private int numFloatyBits = 1024 * 64;
     private ComputeBuffer floatyBitsCBuffer;
     private ComputeBuffer quadVerticesCBuffer;
     public Material floatyBitsDisplayMat;
+
+    private int numTrailDotsPerAgent = 8;
+    private ComputeBuffer trailDotsCBuffer;
+    public Material trailDotsDisplayMat;
+
+    public struct TrailDotData {
+        public int parentIndex;
+        public Vector2 coords01;
+        public float age;
+    }
 
     private int numForcePoints = 12;
     public ForcePoint[] forcePointsArray;
@@ -177,10 +187,16 @@ public class EnvironmentFluidManager : MonoBehaviour {
         floatyBitsCBuffer.SetData(floatyBitsInitPos);
         int kernelSimFloatyBits = computeShaderFluidSim.FindKernel("SimFloatyBits");
         computeShaderFluidSim.SetBuffer(kernelSimFloatyBits, "FloatyBitsCBuffer", floatyBitsCBuffer);
-
+        
         floatyBitsDisplayMat.SetPass(0);
         floatyBitsDisplayMat.SetBuffer("floatyBitsCBuffer", floatyBitsCBuffer);
         floatyBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+
+        trailDotsCBuffer = new ComputeBuffer(numTrailDotsPerAgent * agentSimDataCBuffer.count, sizeof(int) + sizeof(float) * 3);
+        trailDotsDisplayMat.SetPass(0);
+        trailDotsDisplayMat.SetBuffer("agentSimDataCBuffer", agentSimDataCBuffer);
+        trailDotsDisplayMat.SetBuffer("trailDotsCBuffer", trailDotsCBuffer);
+        trailDotsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
 
         agentProceduralDisplayMat.SetPass(0);
         agentProceduralDisplayMat.SetBuffer("agentSimDataCBuffer", agentSimDataCBuffer);
@@ -201,6 +217,12 @@ public class EnvironmentFluidManager : MonoBehaviour {
             floatyBitsDisplayMat.SetPass(0);
             floatyBitsDisplayMat.SetBuffer("floatyBitsCBuffer", floatyBitsCBuffer);
             Graphics.DrawProcedural(MeshTopology.Triangles, 6, floatyBitsCBuffer.count);
+
+            trailDotsDisplayMat.SetPass(0);
+            trailDotsDisplayMat.SetBuffer("agentSimDataCBuffer", agentSimDataCBuffer);
+            trailDotsDisplayMat.SetBuffer("trailDotsCBuffer", trailDotsCBuffer);
+            trailDotsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+            Graphics.DrawProcedural(MeshTopology.Triangles, 6, trailDotsCBuffer.count);
 
             agentProceduralDisplayMat.SetPass(0);
             agentProceduralDisplayMat.SetBuffer("agentSimDataCBuffer", agentSimDataCBuffer);
@@ -416,6 +438,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
             agentPositionsArray[i] = new Vector3((agentPos.x + 70f) / 140f, (agentPos.y + 70f) / 140f, 0.005357f); //... 0.6/140 ...
         }
         agentFluidVelocitiesArray = GetFluidVelocityAtObjectPositions(agentPositionsArray);
+
         // Update FOOD positions & velocities:
         //Debug.Log("foodPositionsArray.Length " + foodPositionsArray.Length.ToString() + ", foodArray: " + foodArray.Length.ToString());
         for (int i = 0; i < foodPositionsArray.Length; i++) {
@@ -541,6 +564,21 @@ public class EnvironmentFluidManager : MonoBehaviour {
         Graphics.Blit(velocityB, velocityA); // TEMP! slow...  
 
         SimFloatyBits();
+
+        SimTrailDots();
+    }
+
+    private void SimTrailDots() {
+        int kernelSimTrailDots = computeShaderFluidSim.FindKernel("SimTrailDots");
+
+        computeShaderFluidSim.SetFloat("_TextureResolution", (float)resolution);
+        computeShaderFluidSim.SetFloat("_DeltaTime", deltaTime);
+        computeShaderFluidSim.SetFloat("_InvGridScale", invGridScale);
+
+        computeShaderFluidSim.SetBuffer(kernelSimTrailDots, "AgentSimDataCBuffer", agentSimDataCBuffer);
+        computeShaderFluidSim.SetBuffer(kernelSimTrailDots, "TrailDotsCBuffer", trailDotsCBuffer);
+        computeShaderFluidSim.SetTexture(kernelSimTrailDots, "VelocityRead", velocityA);
+        computeShaderFluidSim.Dispatch(kernelSimTrailDots, trailDotsCBuffer.count / 8, 1, 1);
     }
 
     private void RefreshColor() { 
@@ -676,6 +714,9 @@ public class EnvironmentFluidManager : MonoBehaviour {
         if (predatorSimDataCBuffer != null) {
             predatorSimDataCBuffer.Release();
         }
-        //agentSimDataCBuffer
+        if (trailDotsCBuffer != null) {
+            trailDotsCBuffer.Release();
+        }
+        //trailDotsCBuffer
     }
 }
