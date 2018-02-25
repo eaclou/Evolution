@@ -10,6 +10,7 @@
 #pragma kernel GetVelAtCoords
 #pragma kernel GetObjectVelocities
 #pragma kernel SimFloatyBits
+#pragma kernel SimTrailDots
 
 struct ForcePoint {
     float posX;
@@ -23,6 +24,7 @@ struct TrailDotData {
     int parentIndex;
     float2 coords01;
     float age;
+	float initAlpha;
 };
 
 struct AgentSimData {
@@ -93,6 +95,36 @@ void SimFloatyBits (uint3 id : SV_DispatchThreadID)
 	float4 data = float4(nextPos, vel);
 	
 	FloatyBitsCBuffer[id.x] = data;
+}
+
+[numthreads(8,1,1)]
+void SimTrailDots (uint3 id : SV_DispatchThreadID)
+{	
+	TrailDotData trailDotData = TrailDotsCBuffer[id.x];
+	
+	int parentIndex = trailDotData.parentIndex;
+	float2 parentCoords = (AgentSimDataCBuffer[parentIndex].worldPos + 70) / 140;
+
+	float2 uv = trailDotData.coords01;
+	float2 vel = VelocityRead.SampleLevel(_LinearRepeat, uv, 0).xy;
+	float speedMult = 0.028;
+	
+	float2 nextPos = uv + vel * speedMult;
+
+	float age = trailDotData.age;
+	age += (1.0 / 16.0);
+
+	if(age >= 1.0) {
+		nextPos = parentCoords;
+		age -= 1.0;
+		float alpha = saturate(length(AgentSimDataCBuffer[parentIndex].velocity * 0.01));
+		trailDotData.initAlpha = alpha;
+	}
+	
+	trailDotData.age = age;
+	trailDotData.coords01 = nextPos;
+	
+	TrailDotsCBuffer[id.x] = trailDotData;
 }
 
 [numthreads(1,1,1)]

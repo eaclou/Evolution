@@ -31,9 +31,17 @@
 				int parentIndex;
 				float2 coords01;
 				float age;
+				float initAlpha;
 			};
 
-			StructuredBuffer<TrailDotsData> floatyBitsCBuffer;
+			struct AgentSimData {
+				float2 worldPos;
+				float2 velocity;
+				float2 heading;
+			};
+
+			StructuredBuffer<AgentSimData> agentSimDataCBuffer;
+			StructuredBuffer<TrailDotsData> trailDotsCBuffer;
 			StructuredBuffer<float3> quadVerticesCBuffer;
 
 			
@@ -54,8 +62,11 @@
 				v2f o;
 				
 				//o.color = floatingGlowyBitsCBuffer[inst].color;
-				TrailDotsData data = floatyBitsCBuffer[inst];
-				float3 worldPosition = float3(data.coords01 * 140 - 70, -0.1);
+				TrailDotsData data = trailDotsCBuffer[inst];
+
+				//int parentIndex = data.parentIndex;
+
+				float3 worldPosition = float3(data.coords01 * 140 - 70, -0.3);
 				float3 quadPoint = quadVerticesCBuffer[id];
 
 				float2 velocity = float2(0,1); //floatyBitData.zw;
@@ -68,9 +79,9 @@
 				float randomAspect = lerp(0.67, 1.33, random1);
 				//float randomScale = lerp(_Size.x, _Size.y, random2);
 				float randomValue = rand(float2(inst, randomAspect * 10));
-				float randomScale = lerp(0.25, 0.25, random2);
+				float randomScale = lerp(1, 1, random2);
 				//float2 scale = float2(randomAspect * randomScale, (1.0 / randomAspect) * randomScale * (length(velocity) * 50 + 1));
-				float2 scale = float2(1, 1) * randomScale;
+				float2 scale = float2(1, 1) * randomScale * (1.0 + data.age * 1.75);
 				quadPoint *= float3(scale, 1.0);
 
 				// ROTATION:
@@ -84,7 +95,7 @@
 											 quadPoint.z);
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(rotatedPoint, 0.0f));
-				o.color = float4(1,1,1,1); //float4(randomValue, randomValue, randomValue, 1 / (length(velocity) * 50 + 1.1));
+				o.color = float4(1,1,1,(1 - data.age) * data.initAlpha); //float4(randomValue, randomValue, randomValue, 1 / (length(velocity) * 50 + 1.1));
 				o.uv = quadVerticesCBuffer[id] + 0.5f;
 				
 				return o;
