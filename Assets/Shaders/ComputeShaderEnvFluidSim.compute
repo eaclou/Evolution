@@ -88,7 +88,7 @@ void SimFloatyBits (uint3 id : SV_DispatchThreadID)
 	float4 floatyBitData = FloatyBitsCBuffer[id.x];
 	float2 uv = floatyBitData.xy;
 	float2 vel = VelocityRead.SampleLevel(_LinearRepeat, uv, 0).xy;
-	float speedMult = 0.028;
+	float speedMult = 0.033;
 	
 	float2 nextPos = uv + vel * speedMult;
 
@@ -103,23 +103,32 @@ void SimTrailDots (uint3 id : SV_DispatchThreadID)
 	TrailDotData trailDotData = TrailDotsCBuffer[id.x];
 	
 	int parentIndex = trailDotData.parentIndex;
-	float2 parentCoords = (AgentSimDataCBuffer[parentIndex].worldPos + 70) / 140;
+	AgentSimData agentSimData = AgentSimDataCBuffer[parentIndex];
+
+	float2 parentCoords = (agentSimData.worldPos + 70) / 140;
 
 	float2 uv = trailDotData.coords01;
-	float2 vel = VelocityRead.SampleLevel(_LinearRepeat, uv, 0).xy;
-	float speedMult = 0.028;
-	
-	float2 nextPos = uv + vel * speedMult;
+	float2 fluidVel = VelocityRead.SampleLevel(_LinearRepeat, uv, 0).xy;
+	float speedMult = 0.033;
 
 	float age = trailDotData.age;
 	age += (1.0 / 16.0);
 
+	float fluidInfluenceLerp = saturate(saturate(age * 2.5) - 0.15);  // not influenced by fluidVel for certain duration after birth
+
+	float2 vel = lerp(-agentSimData.velocity * 0.001, fluidVel * speedMult, fluidInfluenceLerp);
+	
+	float2 nextPos = uv + vel;
+
 	if(age >= 1.0) {
-		nextPos = parentCoords;
+		float randAngle = id.x * 109.27;
+		float randRadius = 0; //fmod(id.x * 10.257, 8) / 8;
+		float2 rimOffset = float2(cos(randAngle) * randRadius * 0.4 / 140, sin(randAngle) * randRadius * 0.4 / 140);
+		nextPos = parentCoords + rimOffset + vel;
 		age -= 1.0;
-		float alpha = saturate(length(AgentSimDataCBuffer[parentIndex].velocity * 0.01));
+		float alpha = saturate(length(agentSimData.velocity * 0.25));
 		trailDotData.initAlpha = alpha;
-	}
+	}		
 	
 	trailDotData.age = age;
 	trailDotData.coords01 = nextPos;
@@ -263,7 +272,9 @@ void VelocityInjectionPoints (uint3 id : SV_DispatchThreadID)
 		fp = ForcePointsCBuffer[i];	
 
 		float2 forceCoords = float2(fp.posX, fp.posY);
-		float2 forceVal = float2(fp.velX, fp.velY);		
+		float animatedStrengthModifierX = sin((_Time + i * 10.0) * 0.2);
+		float animatedStrengthModifierY = cos((_Time - i * 20.1793) * 0.182451);
+		float2 forceVal = float2(fp.velX * animatedStrengthModifierX, fp.velY * animatedStrengthModifierY);		
 		float dist = length(pixelCoords - forceCoords);
 		float influenceAmount = exp(-fp.size * ((forceCoords.x - pixelCoords.x) * (forceCoords.x - pixelCoords.x) + (forceCoords.y - pixelCoords.y) * (forceCoords.y - pixelCoords.y)) / dist);
 		//newForce += forceVal * _DeltaTime * ;

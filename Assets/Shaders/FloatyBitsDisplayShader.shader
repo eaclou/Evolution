@@ -64,11 +64,11 @@
 
 				// Scaling!!!  _Size.zw is min/max aspect ratio, _Size.xy is min/max overall size				
 				//float randomAspect = lerp(_Size.z, _Size.w, random1);
-				float randomAspect = lerp(0.67, 1.33, random1);
+				float randomAspect = lerp(0.75, 1.33, random1);
 				//float randomScale = lerp(_Size.x, _Size.y, random2);
 				float randomValue = rand(float2(inst, randomAspect * 10));
-				float randomScale = lerp(0.033, 0.09, random2);
-				float2 scale = float2(randomAspect * randomScale, (1.0 / randomAspect) * randomScale * (length(velocity) * 50 + 1));
+				float randomScale = lerp(0.035, 0.085, random2);
+				float2 scale = float2(randomAspect * randomScale, (1.0 / randomAspect) * randomScale * (length(velocity) * 35 + 1));
 				//float2 scale = float2(1, 1) * randomScale;
 				quadPoint *= float3(scale, 1.0);
 
@@ -83,7 +83,7 @@
 											 quadPoint.z);
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(rotatedPoint, 0.0f));
-				o.color = float4(randomValue, randomValue, randomValue, 1 / (length(velocity) * 50 + 1.1));
+				o.color = float4(randomValue, randomValue, randomValue, 1 / (length(velocity) * 60 + 1.15));
 				o.uv = quadVerticesCBuffer[id] + 0.5f;
 				
 				return o;

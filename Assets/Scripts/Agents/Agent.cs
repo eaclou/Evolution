@@ -26,10 +26,15 @@ public class Agent : MonoBehaviour {
 
     private Vector3 prevPos;
 
+    public Vector2 throttle;
+    public Vector2 smoothedThrottle;
+    public Vector2 facingDirection;  // based on throttle history
+
     // Use this for initialization
     void Start() {
         rigidBody2D = GetComponent<Rigidbody2D>();
         prevPos = transform.localPosition;
+        facingDirection = new Vector2(0f, 1f);
     }
 
     private int GetNumInputs() {
@@ -305,10 +310,26 @@ public class Agent : MonoBehaviour {
 
         horizontalMovementInput = Mathf.Lerp(horAI, horHuman, humanControlLerp);
         verticalMovementInput = Mathf.Lerp(verAI, verHuman, humanControlLerp);
-
+        
         // MOVEMENT HERE:
         this.GetComponent<Rigidbody2D>().AddForce(new Vector2(speed * horizontalMovementInput * Time.deltaTime, speed * verticalMovementInput * Time.deltaTime), ForceMode2D.Impulse);
         //this.GetComponent<Rigidbody2D>().AddForce(new Vector2(0f, speed * verticalMovementInput * Time.deltaTime), ForceMode2D.Impulse);
+
+        // Facing Direction:
+        throttle = new Vector2(horizontalMovementInput, verticalMovementInput);
+        smoothedThrottle = Vector2.Lerp(smoothedThrottle, throttle, 0.2f);
+        Vector2 throttleForwardDir = throttle.normalized;
+        Vector2 currentRightDir = new Vector2(facingDirection.y, -facingDirection.x); // perpendicular to currentDir, to test for clockwise/counterclockwise
+        float dot = Vector2.Dot(currentRightDir, throttleForwardDir); // pos = clockwise, neg = counterclockwise
+        /*float extraPush = 0f;
+        if(dot > 0) {
+            extraPush = 1f;
+        }
+        else {
+            extraPush = -1f;
+        }*/
+        if(throttle.sqrMagnitude > 0.01f)
+            facingDirection = Vector2.Lerp(facingDirection + Vector2.one * 0.025f, throttleForwardDir, 0.25f).normalized;
     }
     
     public void InitializeModules(AgentGenome genome, Agent agent, StartPositionGenome startPos) {

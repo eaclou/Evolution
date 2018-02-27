@@ -64,6 +64,10 @@ public class UIManager : MonoBehaviour {
         hitPointsMat.SetTexture("_MainTex", healthDisplayTex);
     }
 
+    public void ClickButtonQuit() {
+        Application.Quit();
+    }
+
     public void ClickButtonPause() {
         Time.timeScale = 0f;
     }

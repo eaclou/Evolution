@@ -174,7 +174,7 @@ public class SimulationManager : MonoBehaviour {
         playerAgent.humanControlLerp = 1f;
         //playerAgent.meshRendererBeauty.material.SetFloat("_IsPlayer", 1.0f);
         playerAgent.humanControlled = true;
-        playerAgent.testModule.foodAmountB[0] = 2.5f;
+        playerAgent.testModule.foodAmountB[0] = 20f;
         // $#!%@@@@@@@@@@@@ TEMP TEMP TEMP !%!#$%!#$%!@$%%!@$#%@$%@@@@@@@@@@@@@@@@@@@@@@@
 
         cameraManager.targetTransform = playerAgent.transform;
@@ -516,6 +516,7 @@ public class SimulationManager : MonoBehaviour {
         StartPositionGenome startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
         playerAgent.InitializeAgentFromGenome(persistentGenomePoolArray[rankedIndicesListPersistent[0]], startPosGenome);
         //playerAgent.ReplaceBrain(persistentGenomePoolArray[rankedIndicesListPersistent[0]]);
+        playerAgent.testModule.foodAmountB[0] = 20f;
     }
 
     private void SpawnPredators() {

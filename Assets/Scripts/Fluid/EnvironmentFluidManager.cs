@@ -12,7 +12,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
     public Camera fluidColorRenderCamera;
     public GameObject debugGO;
 
-    public int resolution = 64;
+    public int resolution = 512;
     public float deltaTime = 1f;
     public float invGridScale = 1f;
 
@@ -52,7 +52,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
     public Vector2[] predatorFluidVelocitiesArray;
     public Vector3[] predatorPositionsArray;
 
-    private int numFloatyBits = 1024 * 64;
+    private int numFloatyBits = 1024 * 100;
     private ComputeBuffer floatyBitsCBuffer;
     private ComputeBuffer quadVerticesCBuffer;
     public Material floatyBitsDisplayMat;
@@ -68,7 +68,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
         public float initAlpha;
     }
 
-    private int numForcePoints = 12;
+    private int numForcePoints = 64;
     public ForcePoint[] forcePointsArray;
     public ComputeBuffer forcePointsCBuffer;
     public struct ForcePoint {
@@ -130,14 +130,14 @@ public class EnvironmentFluidManager : MonoBehaviour {
     void Start () {
         obstacleRenderCamera.enabled = false;
         fluidColorRenderCamera.enabled = false;
-        agentFluidVelocitiesArray = new Vector2[64];
-        agentPositionsArray = new Vector3[64];
+        agentFluidVelocitiesArray = new Vector2[65];
+        agentPositionsArray = new Vector3[65];
         foodFluidVelocitiesArray = new Vector2[36];
         foodPositionsArray = new Vector3[36];
         predatorFluidVelocitiesArray = new Vector2[12];
         predatorPositionsArray = new Vector3[12];
 
-        agentSimDataArray = new AgentSimData[64];
+        agentSimDataArray = new AgentSimData[65];
         for(int i = 0; i < agentSimDataArray.Length; i++) {
             agentSimDataArray[i] = new AgentSimData();
         }
@@ -163,6 +163,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
         //obstacleRenderCamera.activeTexture = obstacles;
         obstacleRenderCamera.targetTexture = obstacles;
         Graphics.Blit(initialDensityTex, densityA);
+        Graphics.Blit(initialDensityTex, sourceColor);
         InitializeVelocity();
         
         forcePointsCBuffer = new ComputeBuffer(numForcePoints, sizeof(float) * 5);
@@ -260,12 +261,12 @@ public class EnvironmentFluidManager : MonoBehaviour {
         for(int i = 0; i < numForcePoints; i++) {
             ForcePoint agentPoint = new ForcePoint();
             
-            float forceStrength = 0.2f;
+            float forceStrength = 0.075f;
             agentPoint.posX = UnityEngine.Random.Range(0f, 1f);
             agentPoint.posY = UnityEngine.Random.Range(0f, 1f);
             agentPoint.velX = UnityEngine.Random.Range(-1f, 1f) * forceStrength;
             agentPoint.velY = UnityEngine.Random.Range(-1f, 1f) * forceStrength;
-            agentPoint.size = UnityEngine.Random.Range(64f, 128f);
+            agentPoint.size = UnityEngine.Random.Range(60f, 300f);
             forcePointsArray[i] = agentPoint;
         }        
         forcePointsCBuffer.SetData(forcePointsArray);
@@ -323,7 +324,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
 	// Update is called once per frame
 	void FixedUpdate () {
         /*SetDisplayTexture();
-        CreateForcePoints();
+        CreateForcePoints(wd);
         if (tick) {   // So I can step through the program slowly at first
             //tick = false;
             Tick();
@@ -419,12 +420,16 @@ public class EnvironmentFluidManager : MonoBehaviour {
 
     public void SetSimDataArrays() {
         
-        for(int i = 0; i < agentSimDataArray.Length; i++) {            
+        for(int i = 0; i < agentSimDataArray.Length - 1; i++) {            
             agentSimDataArray[i].worldPos = new Vector2(agentsArray[i].transform.position.x, agentsArray[i].transform.position.y);
-            agentSimDataArray[i].velocity = new Vector2(agentsArray[i].testModule.ownRigidBody2D.velocity.x, agentsArray[i].testModule.ownRigidBody2D.velocity.y);
-            agentSimDataArray[i].heading = new Vector2(0f, 1f); // Update later -- store inside Agent class?            
-        }
+            agentSimDataArray[i].velocity = agentsArray[i].smoothedThrottle; // new Vector2(agentsArray[i].testModule.ownRigidBody2D.velocity.x, agentsArray[i].testModule.ownRigidBody2D.velocity.y);
+            agentSimDataArray[i].heading = agentsArray[i].facingDirection; // new Vector2(0f, 1f); // Update later -- store inside Agent class?            
+        } // Player:
+        agentSimDataArray[agentSimDataArray.Length - 1].worldPos = new Vector2(playerAgent.transform.position.x, playerAgent.transform.position.y);
+        agentSimDataArray[agentSimDataArray.Length - 1].velocity = playerAgent.smoothedThrottle; 
+        agentSimDataArray[agentSimDataArray.Length - 1].heading = playerAgent.facingDirection;
         agentSimDataCBuffer.SetData(agentSimDataArray);
+
         for (int i = 0; i < foodSimDataArray.Length; i++) {
             foodSimDataArray[i].worldPos = new Vector2(foodArray[i].transform.position.x, foodArray[i].transform.position.y);
             foodSimDataArray[i].velocity = new Vector2(foodArray[i].GetComponent<Rigidbody2D>().velocity.x, agentsArray[i].GetComponent<Rigidbody2D>().velocity.y);
@@ -449,11 +454,13 @@ public class EnvironmentFluidManager : MonoBehaviour {
         fluidColorRenderCamera.Render();
 
         // Update AGENT positions & velocities:
-        for(int i = 0; i < agentPositionsArray.Length; i++) {
+        for(int i = 0; i < agentPositionsArray.Length - 1; i++) {
             Vector3 agentPos = agentsArray[i].testModule.ownRigidBody2D.position;
             // z coord holds radius of object   
-            agentPositionsArray[i] = new Vector3((agentPos.x + 70f) / 140f, (agentPos.y + 70f) / 140f, 0.005357f); //... 0.6/140 ...
+            agentPositionsArray[i] = new Vector3((agentPos.x + 70f) / 140f, (agentPos.y + 70f) / 140f, 0.0035f); //... 0.5/140 ...
         }
+        Vector3 playerAgentPos = playerAgent.testModule.ownRigidBody2D.position;
+        agentPositionsArray[agentPositionsArray.Length - 1] = new Vector3((playerAgentPos.x + 70f) / 140f, (playerAgentPos.y + 70f) / 140f, 0.0035f);
         agentFluidVelocitiesArray = GetFluidVelocityAtObjectPositions(agentPositionsArray);
 
         // Update FOOD positions & velocities:
