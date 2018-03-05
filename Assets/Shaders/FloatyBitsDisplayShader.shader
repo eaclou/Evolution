@@ -2,7 +2,7 @@
 {
 	Properties
 	{
-		//_MainTex ("Main Texture", 2D) = "white" {}
+		_MainTex ("Main Texture", 2D) = "white" {}
 		//_Tint("Color", Color) = (1,1,1,1)
 		//_Size("Size", vector) = (1,1,1,1)
 	}
@@ -22,8 +22,8 @@
 			#pragma target 5.0
 			#include "UnityCG.cginc"
 
-			//sampler2D _MainTex;
-			//float4 _MainTex_ST;
+			sampler2D _MainTex;
+			float4 _MainTex_ST;
 			//float4 _Tint;
 			//float4 _Size;
 
@@ -66,9 +66,9 @@
 				//float randomAspect = lerp(_Size.z, _Size.w, random1);
 				float randomAspect = lerp(0.75, 1.33, random1);
 				//float randomScale = lerp(_Size.x, _Size.y, random2);
-				float randomValue = rand(float2(inst, randomAspect * 10));
-				float randomScale = lerp(0.035, 0.085, random2);
-				float2 scale = float2(randomAspect * randomScale, (1.0 / randomAspect) * randomScale * (length(velocity) * 35 + 1));
+				float randomValue = 1; //rand(float2(inst, randomAspect * 10));
+				float randomScale = lerp(0.024, 0.048, random2);
+				float2 scale = float2(randomAspect * randomScale, (1.0 / randomAspect) * randomScale * (length(velocity) * 60 + 1));
 				//float2 scale = float2(1, 1) * randomScale;
 				quadPoint *= float3(scale, 1.0);
 
@@ -83,7 +83,7 @@
 											 quadPoint.z);
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(rotatedPoint, 0.0f));
-				o.color = float4(randomValue, randomValue, randomValue, 1 / (length(velocity) * 60 + 1.15));
+				o.color = float4(randomValue, randomValue, randomValue, 1 / (length(velocity) * 50 + 1.15));
 				o.uv = quadVerticesCBuffer[id] + 0.5f;
 				
 				return o;
@@ -92,8 +92,9 @@
 			fixed4 frag(v2f i) : SV_Target
 			{
 				
-				//float4 texColor = tex2D(_MainTex, i.uv);  // Read Brush Texture
-				float4 finalColor = float4(i.color); //texColor * _Tint * float4(i.color, 1);
+				float4 texColor = tex2D(_MainTex, i.uv);  // Read Brush Texture
+				float4 finalColor = float4(i.color) * texColor; //texColor * _Tint * float4(i.color, 1);
+				//finalColor.a *= 0.5;
 				return finalColor;
 				
 			}

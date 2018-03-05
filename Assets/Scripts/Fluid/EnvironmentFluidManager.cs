@@ -57,7 +57,11 @@ public class EnvironmentFluidManager : MonoBehaviour {
     private ComputeBuffer quadVerticesCBuffer;
     public Material floatyBitsDisplayMat;
 
-    private int numTrailDotsPerAgent = 16;
+    private int numRipplesPerAgent = 8;
+    private ComputeBuffer ripplesCBuffer;
+    public Material ripplesDisplayMat;
+
+    private int numTrailDotsPerAgent = 512;
     private ComputeBuffer trailDotsCBuffer;
     public Material trailDotsDisplayMat;
 
@@ -193,24 +197,46 @@ public class EnvironmentFluidManager : MonoBehaviour {
         floatyBitsDisplayMat.SetPass(0);
         floatyBitsDisplayMat.SetBuffer("floatyBitsCBuffer", floatyBitsCBuffer);
         floatyBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        
+        // RIPPLES:
+        TrailDotData[] ripplesDataArray = new TrailDotData[numRipplesPerAgent * agentSimDataCBuffer.count];
+        for (int i = 0; i < agentSimDataCBuffer.count; i++) {
+            for(int t = 0; t < numRipplesPerAgent; t++) {
+                TrailDotData data = new TrailDotData();
+                data.parentIndex = i;
+                data.coords01 = new Vector2((agentSimDataArray[i].worldPos.x + 70f) / 140f, (agentSimDataArray[i].worldPos.y + 70f) / 140f);
+                data.age = (float)t / (float)numRipplesPerAgent;
+                data.initAlpha = 0f;
+                ripplesDataArray[i * numRipplesPerAgent + t] = data;
+            }
+        }
+        ripplesCBuffer = new ComputeBuffer(numRipplesPerAgent * agentSimDataCBuffer.count, sizeof(int) + sizeof(float) * 4);
+        int kernelSimRipples = computeShaderFluidSim.FindKernel("SimRipples");        
+        computeShaderFluidSim.SetBuffer(kernelSimRipples, "AgentSimDataCBuffer", agentSimDataCBuffer);
+        computeShaderFluidSim.SetBuffer(kernelSimRipples, "RipplesCBuffer", ripplesCBuffer);
+        ripplesCBuffer.SetData(ripplesDataArray);        
+        ripplesDisplayMat.SetPass(0);
+        ripplesDisplayMat.SetBuffer("agentSimDataCBuffer", agentSimDataCBuffer);
+        ripplesDisplayMat.SetBuffer("trailDotsCBuffer", ripplesCBuffer);
+        ripplesDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
 
+        // TRAIL DOTS:
         TrailDotData[] trailDotsDataArray = new TrailDotData[numTrailDotsPerAgent * agentSimDataCBuffer.count];
         for (int i = 0; i < agentSimDataCBuffer.count; i++) {
-            for(int t = 0; t < numTrailDotsPerAgent; t++) {
+            for (int t = 0; t < numTrailDotsPerAgent; t++) {
                 TrailDotData data = new TrailDotData();
                 data.parentIndex = i;
                 data.coords01 = new Vector2((agentSimDataArray[i].worldPos.x + 70f) / 140f, (agentSimDataArray[i].worldPos.y + 70f) / 140f);
                 data.age = (float)t / (float)numTrailDotsPerAgent;
-                data.initAlpha = 0f;
+                data.initAlpha = 1f;
                 trailDotsDataArray[i * numTrailDotsPerAgent + t] = data;
             }
-            
         }
         trailDotsCBuffer = new ComputeBuffer(numTrailDotsPerAgent * agentSimDataCBuffer.count, sizeof(int) + sizeof(float) * 4);
-        int kernelSimTrailDots = computeShaderFluidSim.FindKernel("SimTrailDots");        
+        int kernelSimTrailDots = computeShaderFluidSim.FindKernel("SimTrailDots");
         computeShaderFluidSim.SetBuffer(kernelSimTrailDots, "AgentSimDataCBuffer", agentSimDataCBuffer);
         computeShaderFluidSim.SetBuffer(kernelSimTrailDots, "TrailDotsCBuffer", trailDotsCBuffer);
-        trailDotsCBuffer.SetData(trailDotsDataArray);        
+        trailDotsCBuffer.SetData(trailDotsDataArray);
         trailDotsDisplayMat.SetPass(0);
         trailDotsDisplayMat.SetBuffer("agentSimDataCBuffer", agentSimDataCBuffer);
         trailDotsDisplayMat.SetBuffer("trailDotsCBuffer", trailDotsCBuffer);
@@ -236,6 +262,12 @@ public class EnvironmentFluidManager : MonoBehaviour {
             floatyBitsDisplayMat.SetBuffer("floatyBitsCBuffer", floatyBitsCBuffer);
             Graphics.DrawProcedural(MeshTopology.Triangles, 6, floatyBitsCBuffer.count);
 
+            ripplesDisplayMat.SetPass(0);
+            ripplesDisplayMat.SetBuffer("agentSimDataCBuffer", agentSimDataCBuffer);
+            ripplesDisplayMat.SetBuffer("trailDotsCBuffer", ripplesCBuffer);
+            ripplesDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+            Graphics.DrawProcedural(MeshTopology.Triangles, 6, ripplesCBuffer.count);
+                        
             trailDotsDisplayMat.SetPass(0);
             trailDotsDisplayMat.SetBuffer("agentSimDataCBuffer", agentSimDataCBuffer);
             trailDotsDisplayMat.SetBuffer("trailDotsCBuffer", trailDotsCBuffer);
@@ -589,15 +621,29 @@ public class EnvironmentFluidManager : MonoBehaviour {
 
         SimFloatyBits();
 
+        SimRipples();
         SimTrailDots();
     }
 
-    private void SimTrailDots() {
-        int kernelSimTrailDots = computeShaderFluidSim.FindKernel("SimTrailDots");
+    private void SimRipples() {
+        int kernelSimRipples = computeShaderFluidSim.FindKernel("SimRipples");
 
         //TrailDotData[] trailDotsDataArray = new TrailDotData[numTrailDotsPerAgent * agentSimDataCBuffer.count];
         //trailDotsCBuffer.GetData(trailDotsDataArray);
         //Debug.Log("Age0 " + trailDotsDataArray[0].age.ToString() + " Age1 " + trailDotsDataArray[1].age.ToString() + " Age2 " + trailDotsDataArray[2].age.ToString() + " Age3 " + trailDotsDataArray[3].age.ToString());
+        
+        computeShaderFluidSim.SetFloat("_TextureResolution", (float)resolution);
+        computeShaderFluidSim.SetFloat("_DeltaTime", deltaTime);
+        computeShaderFluidSim.SetFloat("_InvGridScale", invGridScale);
+
+        computeShaderFluidSim.SetBuffer(kernelSimRipples, "AgentSimDataCBuffer", agentSimDataCBuffer);
+        computeShaderFluidSim.SetBuffer(kernelSimRipples, "RipplesCBuffer", ripplesCBuffer);
+        computeShaderFluidSim.SetTexture(kernelSimRipples, "VelocityRead", velocityA);
+        computeShaderFluidSim.Dispatch(kernelSimRipples, ripplesCBuffer.count / 8, 1, 1);
+    }
+
+    private void SimTrailDots() {
+        int kernelSimTrailDots = computeShaderFluidSim.FindKernel("SimTrailDots");
         
         computeShaderFluidSim.SetFloat("_TextureResolution", (float)resolution);
         computeShaderFluidSim.SetFloat("_DeltaTime", deltaTime);
@@ -741,6 +787,9 @@ public class EnvironmentFluidManager : MonoBehaviour {
         }
         if (predatorSimDataCBuffer != null) {
             predatorSimDataCBuffer.Release();
+        }
+        if (ripplesCBuffer != null) {
+            ripplesCBuffer.Release();
         }
         if (trailDotsCBuffer != null) {
             trailDotsCBuffer.Release();

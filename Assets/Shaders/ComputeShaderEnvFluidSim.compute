@@ -10,6 +10,7 @@
 #pragma kernel GetVelAtCoords
 #pragma kernel GetObjectVelocities
 #pragma kernel SimFloatyBits
+#pragma kernel SimRipples
 #pragma kernel SimTrailDots
 
 struct ForcePoint {
@@ -51,6 +52,7 @@ RWStructuredBuffer<float2> VelocityValuesCBuffer;
 
 RWStructuredBuffer<float4> FloatyBitsCBuffer;
 StructuredBuffer<AgentSimData> AgentSimDataCBuffer;
+RWStructuredBuffer<TrailDotData> RipplesCBuffer;
 RWStructuredBuffer<TrailDotData> TrailDotsCBuffer;
 
 SamplerState _LinearClamp;
@@ -98,6 +100,42 @@ void SimFloatyBits (uint3 id : SV_DispatchThreadID)
 }
 
 [numthreads(8,1,1)]
+void SimRipples (uint3 id : SV_DispatchThreadID)
+{	
+	TrailDotData rippleData = RipplesCBuffer[id.x];
+	
+	int parentIndex = rippleData.parentIndex;
+	AgentSimData agentSimData = AgentSimDataCBuffer[parentIndex];
+
+	float2 parentCoords = (agentSimData.worldPos + 70) / 140;
+
+	float2 uv = rippleData.coords01;
+	float2 fluidVel = VelocityRead.SampleLevel(_LinearRepeat, uv, 0).xy;
+	float speedMult = 0.033;
+
+	float age = rippleData.age;
+	age += (1.0 / 16.0);
+
+	float fluidInfluenceLerp = 1;  // not influenced by fluidVel for certain duration after birth
+
+	float2 vel = lerp(-agentSimData.velocity * 0.001, fluidVel * speedMult, fluidInfluenceLerp);
+	
+	float2 nextPos = uv + vel;
+
+	if(age >= 1.0) {		
+		nextPos = parentCoords;
+		age -= 1.0;
+		float alpha = saturate(length(agentSimData.velocity * 0.25));
+		rippleData.initAlpha = alpha;
+	}		
+	
+	rippleData.age = age;
+	rippleData.coords01 = nextPos;
+	
+	RipplesCBuffer[id.x] = rippleData;
+}
+
+[numthreads(8,1,1)]
 void SimTrailDots (uint3 id : SV_DispatchThreadID)
 {	
 	TrailDotData trailDotData = TrailDotsCBuffer[id.x];
@@ -108,27 +146,46 @@ void SimTrailDots (uint3 id : SV_DispatchThreadID)
 	float2 parentCoords = (agentSimData.worldPos + 70) / 140;
 
 	float2 uv = trailDotData.coords01;
-	float2 fluidVel = VelocityRead.SampleLevel(_LinearRepeat, uv, 0).xy;
-	float speedMult = 0.033;
-
-	float age = trailDotData.age;
-	age += (1.0 / 16.0);
-
-	float fluidInfluenceLerp = saturate(saturate(age * 2.5) - 0.15);  // not influenced by fluidVel for certain duration after birth
-
-	float2 vel = lerp(-agentSimData.velocity * 0.001, fluidVel * speedMult, fluidInfluenceLerp);
 	
-	float2 nextPos = uv + vel;
+	float speedMult = 0.033;
+	float age = trailDotData.age;	
+	float frameDuration = (1.0 / 32.0);	
+	age += frameDuration;
+
+	float fluidInfluenceLerp = saturate(age * 4);
+
+	float2 fluidVel;
+	float2 vel;	
+	float2 nextPos;
+
+	float2 forwardDir = agentSimData.heading;
+	float2 rightDir = float2(forwardDir.y, -forwardDir.x);
+	//float randAngle = id.x * 109.27;
+	//float randRadius = 0; //fmod(id.x * 10.257, 8) / 8;
+	float2 localOffsets[4] = {float2(0,0.45 / 140), float2(0.45 / 140,0), float2(0,-0.45 / 140), float2(-0.45 / 140,0)};
+
+	int localIndex = id.x % 4;
+
+	float2 rimOffset = (forwardDir * localOffsets[localIndex].y) + rightDir * localOffsets[localIndex].x;
 
 	if(age >= 1.0) {
-		float randAngle = id.x * 109.27;
-		float randRadius = 0; //fmod(id.x * 10.257, 8) / 8;
-		float2 rimOffset = float2(cos(randAngle) * randRadius * 0.4 / 140, sin(randAngle) * randRadius * 0.4 / 140);
-		nextPos = parentCoords + rimOffset + vel;
+		// float2(cos(randAngle) * randRadiusds * 0.4 / 140, sin(randAngle) * randRadius * 0.4 / 140);
+		
 		age -= 1.0;
-		float alpha = saturate(length(agentSimData.velocity * 0.25));
-		trailDotData.initAlpha = alpha;
-	}		
+		float frameProportion = age / frameDuration;
+
+		fluidVel = VelocityRead.SampleLevel(_LinearRepeat, parentCoords + rimOffset, 0).xy;
+		vel = lerp(-agentSimData.velocity * 0.0, fluidVel * speedMult, fluidInfluenceLerp);
+
+		nextPos = parentCoords + rimOffset + vel * frameProportion;
+		trailDotData.initAlpha = 1;
+	}
+	else {
+		// Proceed Normally:
+		fluidVel = VelocityRead.SampleLevel(_LinearRepeat, uv, 0).xy;
+		vel = lerp(-agentSimData.velocity * 0.001, fluidVel * speedMult, fluidInfluenceLerp);
+		nextPos = uv + vel;
+	}
 	
 	trailDotData.age = age;
 	trailDotData.coords01 = nextPos;

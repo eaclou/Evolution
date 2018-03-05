@@ -10,7 +10,7 @@ public class PredatorModule : MonoBehaviour {
 
     private float speed = 500f;
 
-    private float damage = 0.14f;
+    private float damage = 0.29f;
     private int counter = 0;
 
     private float randX;
