@@ -11,9 +11,12 @@ public class Agent : MonoBehaviour {
 
     public TestModule testModule;
     private Rigidbody2D rigidBody2D;
-    //public bool isVisible = false;
-    //public float horizontalMovementInput = 0f;
-    //public float verticalMovementInput = 0f;
+
+    public Vector3 huePrimary;
+    public Vector3 hueSecondary;
+    public TheRenderKing.PointStrokeData bodyPointStroke;
+    public TheRenderKing.PointStrokeData[] decorationPointStrokesArray;
+    
     public float speed = 75f;
     public bool humanControlled = false;
     public float humanControlLerp = 0f;
@@ -35,6 +38,7 @@ public class Agent : MonoBehaviour {
         rigidBody2D = GetComponent<Rigidbody2D>();
         prevPos = transform.localPosition;
         facingDirection = new Vector2(0f, 1f);
+                
     }
 
     private int GetNumInputs() {

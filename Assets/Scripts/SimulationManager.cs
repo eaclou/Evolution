@@ -16,6 +16,7 @@ public class SimulationManager : MonoBehaviour {
 
     public UIManager uiManager;
     public EnvironmentFluidManager environmentFluidManager;
+    public TheRenderKing theRenderKing;
     //public Camera mainCam;
     public CameraManager cameraManager;
     private int numAgents = 64;
@@ -168,6 +169,23 @@ public class SimulationManager : MonoBehaviour {
         playerAgent.meshRendererBeauty.material.SetTexture("_MainTex", playerTex);
         //playerAgent.material.SetFloat("_IsPlayer", 1.0f);
 
+        //  APPEARANCE:::::
+        playerAgent.huePrimary = UnityEngine.Random.insideUnitSphere * 0.5f + new Vector3(0.5f, 0.5f, 0.5f);
+        playerAgent.hueSecondary = UnityEngine.Random.insideUnitSphere * 0.5f + new Vector3(0.5f, 0.5f, 0.5f);
+        playerAgent.bodyPointStroke = theRenderKing.GeneratePointStrokeData(numAgents, Vector2.one, Vector2.zero, new Vector2(0f, 1f), playerAgent.huePrimary, 0f);
+        playerAgent.decorationPointStrokesArray = new TheRenderKing.PointStrokeData[8];
+        float minSize = 0.15f;
+        float maxSize = 0.45f;
+        for (int j = 0; j < playerAgent.decorationPointStrokesArray.Length; j++) {
+            float lerpStrength = UnityEngine.Random.Range(0f, 1f);
+            playerAgent.decorationPointStrokesArray[j] = theRenderKing.GeneratePointStrokeData(numAgents,
+                                                                                            new Vector2(UnityEngine.Random.Range(minSize, maxSize), UnityEngine.Random.Range(minSize, maxSize)),
+                                                                                            UnityEngine.Random.insideUnitCircle * 0.35f,
+                                                                                            UnityEngine.Random.insideUnitCircle.normalized,
+                                                                                            Vector3.Lerp(playerAgent.huePrimary, playerAgent.hueSecondary, lerpStrength),
+                                                                                            lerpStrength);
+        }
+
         // $#!%@@@@@@@@@@@@ TEMP TEMP TEMP !%!#$%!#$%!@$%%!@$#%@$%@@@@@@@@@@@@@@@@@@@@@@@
         //playerAgent.meshRendererFluidCollider.enabled = false;
         //playerAgent.meshRendererBeauty.enabled = false;
@@ -210,6 +228,21 @@ public class SimulationManager : MonoBehaviour {
             agentDebugTexturesArray[i] = tex;
             newAgent.texture = tex;
             newAgent.meshRendererBeauty.material.SetTexture("_MainTex", tex);
+
+            //  APPEARANCE:::::
+            newAgent.huePrimary = UnityEngine.Random.insideUnitSphere * 0.5f + new Vector3(0.5f, 0.5f, 0.5f);
+            newAgent.hueSecondary = UnityEngine.Random.insideUnitSphere * 0.5f + new Vector3(0.5f, 0.5f, 0.5f);            
+            newAgent.bodyPointStroke = theRenderKing.GeneratePointStrokeData(i, Vector2.one, Vector2.zero, new Vector2(0f, 1f), newAgent.huePrimary, 0f);
+            newAgent.decorationPointStrokesArray = new TheRenderKing.PointStrokeData[8];            
+            for (int j = 0; j < newAgent.decorationPointStrokesArray.Length; j++) {
+                float lerpStrength = UnityEngine.Random.Range(0f, 1f);
+                newAgent.decorationPointStrokesArray[j] = theRenderKing.GeneratePointStrokeData(i, 
+                                                                                                new Vector2(UnityEngine.Random.Range(minSize, maxSize), UnityEngine.Random.Range(minSize, maxSize)),
+                                                                                                UnityEngine.Random.insideUnitCircle * 0.35f,
+                                                                                                UnityEngine.Random.insideUnitCircle.normalized, 
+                                                                                                Vector3.Lerp(newAgent.huePrimary, newAgent.hueSecondary, lerpStrength),
+                                                                                                lerpStrength);
+            }
         }
         
         // SPAWN AGENTS:
@@ -221,11 +254,15 @@ public class SimulationManager : MonoBehaviour {
         predatorArray = new PredatorModule[numPredators];
         SpawnPredators();
 
-        // Send agent info to FluidBG:
+        // Send agent info to FluidBG & RenderKing:
         environmentFluidManager.agentsArray = agentsArray;
         environmentFluidManager.playerAgent = playerAgent;
         environmentFluidManager.foodArray = foodArray;
         environmentFluidManager.predatorsArray = predatorArray;
+
+        theRenderKing.agentsArray = agentsArray;
+        theRenderKing.playerAgent = playerAgent;
+        theRenderKing.SetPointStrokesBuffer();
 
         InitializeGridCells();
         HookUpModules();
@@ -409,6 +446,7 @@ public class SimulationManager : MonoBehaviour {
         }
 
         // Respawn Agent randomly and replace Brain (Later on handle persistent pool learning -- for now, just controls when Brain updates )
+        
         Vector3 startPos = new Vector3(UnityEngine.Random.Range(-30f, 30f), UnityEngine.Random.Range(-30f, 30f), 0f);
         StartPositionGenome startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
         //playerAgent.InitializeAgentFromGenome(playerGenome, playerStartPosGenome);
@@ -478,7 +516,78 @@ public class SimulationManager : MonoBehaviour {
                         parentGenome = prevGenSupervisedGenomePoolArray[parentIndex].brainGenome;
                     }
                 }
+
+                //====================================================================================================================================
+                // Mutate Body Colors:
+                // Mutate Body Colors:
+                // Mutate Body Colors:
+                agentsArray[agentIndex].huePrimary = agentsArray[parentIndex].huePrimary;
+                agentsArray[agentIndex].hueSecondary = agentsArray[parentIndex].hueSecondary;
+
+                float randomMutate = UnityEngine.Random.Range(0f, 1f);
+                /*if(randomMutate < 0.1) {  // RED
+                    agentsArray[agentIndex].huePrimary.x = Mathf.Clamp01(agentsArray[agentIndex].huePrimary.x + Gaussian.GetRandomGaussian(0f, 0.075f));
+                }
+                randomMutate = UnityEngine.Random.Range(0f, 1f);
+                if (randomMutate < 0.1) {  // RED
+                    agentsArray[agentIndex].huePrimary.y = Mathf.Clamp01(agentsArray[agentIndex].huePrimary.y + Gaussian.GetRandomGaussian(0f, 0.075f));
+                }
+                randomMutate = UnityEngine.Random.Range(0f, 1f);
+                if (randomMutate < 0.1) {  // RED
+                    agentsArray[agentIndex].huePrimary.z = Mathf.Clamp01(agentsArray[agentIndex].huePrimary.z + Gaussian.GetRandomGaussian(0f, 0.075f));
+                }
+                randomMutate = UnityEngine.Random.Range(0f, 1f);
+                if (randomMutate < 0.1) {  // RED
+                    agentsArray[agentIndex].hueSecondary.x = Mathf.Clamp01(agentsArray[agentIndex].hueSecondary.x + Gaussian.GetRandomGaussian(0f, 0.075f));
+                }
+                randomMutate = UnityEngine.Random.Range(0f, 1f);
+                if (randomMutate < 0.1) {  // RED
+                    agentsArray[agentIndex].hueSecondary.y = Mathf.Clamp01(agentsArray[agentIndex].hueSecondary.y + Gaussian.GetRandomGaussian(0f, 0.075f));
+                }
+                randomMutate = UnityEngine.Random.Range(0f, 1f);
+                if (randomMutate < 0.1) {  // RED
+                    agentsArray[agentIndex].hueSecondary.z = Mathf.Clamp01(agentsArray[agentIndex].hueSecondary.z + Gaussian.GetRandomGaussian(0f, 0.075f));
+                }*/
+                agentsArray[agentIndex].bodyPointStroke.parentIndex = agentIndex; // agentsArray[parentIndex].decorationPointStrokesArray[b].parentIndex;
+                agentsArray[agentIndex].bodyPointStroke.strength = agentsArray[parentIndex].bodyPointStroke.strength;
+                agentsArray[agentIndex].bodyPointStroke.localScale = agentsArray[parentIndex].bodyPointStroke.localScale;
+                agentsArray[agentIndex].bodyPointStroke.localPos = agentsArray[parentIndex].bodyPointStroke.localPos;
+                agentsArray[agentIndex].bodyPointStroke.hue = agentsArray[parentIndex].bodyPointStroke.hue;
+
+                for (int b = 0; b < agentsArray[agentIndex].decorationPointStrokesArray.Length; b++) {
+
+                    agentsArray[agentIndex].decorationPointStrokesArray[b].parentIndex = agentIndex; // agentsArray[parentIndex].decorationPointStrokesArray[b].parentIndex;
+                    agentsArray[agentIndex].decorationPointStrokesArray[b].strength = agentsArray[parentIndex].decorationPointStrokesArray[b].strength;
+                    agentsArray[agentIndex].decorationPointStrokesArray[b].localScale = agentsArray[parentIndex].decorationPointStrokesArray[b].localScale;
+                    agentsArray[agentIndex].decorationPointStrokesArray[b].localPos = agentsArray[parentIndex].decorationPointStrokesArray[b].localPos;
+                    agentsArray[agentIndex].decorationPointStrokesArray[b].hue = agentsArray[parentIndex].decorationPointStrokesArray[b].hue;
+                    // mutate decoration stroke:
+                    randomMutate = UnityEngine.Random.Range(0f, 1f);
+                    if (randomMutate < 0.05) {  // RED
+                        agentsArray[agentIndex].decorationPointStrokesArray[b].strength = Mathf.Clamp01(agentsArray[agentIndex].decorationPointStrokesArray[b].strength + Gaussian.GetRandomGaussian(0f, 0.2f));
+                    }
+                    /*randomMutate = UnityEngine.Random.Range(0f, 1f);
+                    if (randomMutate < 0.05) {  // RED
+                        agentsArray[agentIndex].decorationPointStrokesArray[b].localScale = Gaussian.GetRandomGaussian(0f, 0.2f));
+                    }
+                    randomMutate = UnityEngine.Random.Range(0f, 1f);
+                    if (randomMutate < 0.05) {  // RED
+                        agentsArray[agentIndex].decorationPointStrokesArray[b].localPos = Gaussian.GetRandomGaussian(0f, 0.2f));
+                    }
+                    randomMutate = UnityEngine.Random.Range(0f, 1f);
+                    if (randomMutate < 0.05) {  // RED
+                        agentsArray[agentIndex].decorationPointStrokesArray[b].localDir = Gaussian.GetRandomGaussian(0f, 0.2f));
+                    }*/
+
+                    //agentsArray[agentIndex].decorationPointStrokesArray[b].hue = Vector3.Lerp(agentsArray[agentIndex].huePrimary, agentsArray[agentIndex].hueSecondary, agentsArray[agentIndex].decorationPointStrokesArray[b].strength);
+                }
+
                 
+                // Mutate Body Colors:
+                // Mutate Body Colors:
+                // Mutate Body Colors:
+                //====================================================================================================================================
+
                 // Create duplicate Genome
                 newBrainGenome.SetToMutatedCopyOfParentGenome(parentGenome, settingsManager.mutationSettingsPersistent);
                 
@@ -492,6 +601,8 @@ public class SimulationManager : MonoBehaviour {
             // Reset
             // Spawn that genome in dead Agent's body and revive it!
             agentsArray[agentIndex].InitializeAgentFromGenome(persistentGenomePoolArray[agentIndex], startPosGenome);
+
+            theRenderKing.SetPointStrokesBuffer();
         }
         else {
             // Needs safeguards for fewer agents than genomes:
@@ -714,6 +825,8 @@ public class SimulationManager : MonoBehaviour {
         //StartCoroutine(TestYieldEndOfFrame());
         //TestExecutionOrder();
         environmentFluidManager.Run();
+        //theRenderKing.SetPointStrokesBuffer(); // Do this more smartly in future
+        theRenderKing.Tick();
 
         HookUpModules(); // Sets nearest-neighbors etc.        
 

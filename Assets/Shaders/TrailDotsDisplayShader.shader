@@ -79,7 +79,7 @@
 				float randomAspect = lerp(0.75, 1.33, random1);
 				//float randomScale = lerp(_Size.x, _Size.y, random2);
 				float randomValue = rand(float2(inst, randomAspect * 10));
-				float randomScale = lerp(0.1, 0.12, random2);
+				float randomScale = lerp(0.18, 0.22, random2);
 				//float2 scale = float2(randomAspect * randomScale, (1.0 / randomAspect) * randomScale * (length(velocity) * 75 + 1));
 				float2 scale = randomScale * (1.0 + data.age * 0.25) * randomAspect;
 				quadPoint *= float3(scale, 1.0);

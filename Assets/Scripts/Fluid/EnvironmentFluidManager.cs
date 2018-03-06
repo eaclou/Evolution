@@ -61,7 +61,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
     private ComputeBuffer ripplesCBuffer;
     public Material ripplesDisplayMat;
 
-    private int numTrailDotsPerAgent = 512;
+    private int numTrailDotsPerAgent = 128;
     private ComputeBuffer trailDotsCBuffer;
     public Material trailDotsDisplayMat;
 
@@ -261,13 +261,13 @@ public class EnvironmentFluidManager : MonoBehaviour {
             floatyBitsDisplayMat.SetPass(0);
             floatyBitsDisplayMat.SetBuffer("floatyBitsCBuffer", floatyBitsCBuffer);
             Graphics.DrawProcedural(MeshTopology.Triangles, 6, floatyBitsCBuffer.count);
-
+            
             ripplesDisplayMat.SetPass(0);
             ripplesDisplayMat.SetBuffer("agentSimDataCBuffer", agentSimDataCBuffer);
             ripplesDisplayMat.SetBuffer("trailDotsCBuffer", ripplesCBuffer);
             ripplesDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
             Graphics.DrawProcedural(MeshTopology.Triangles, 6, ripplesCBuffer.count);
-                        
+            /*            
             trailDotsDisplayMat.SetPass(0);
             trailDotsDisplayMat.SetBuffer("agentSimDataCBuffer", agentSimDataCBuffer);
             trailDotsDisplayMat.SetBuffer("trailDotsCBuffer", trailDotsCBuffer);
@@ -277,7 +277,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
             agentProceduralDisplayMat.SetPass(0);
             agentProceduralDisplayMat.SetBuffer("agentSimDataCBuffer", agentSimDataCBuffer);
             Graphics.DrawProcedural(MeshTopology.Triangles, 6, agentSimDataCBuffer.count);
-
+            */
             foodProceduralDisplayMat.SetPass(0);
             foodProceduralDisplayMat.SetBuffer("foodSimDataCBuffer", foodSimDataCBuffer);
             Graphics.DrawProcedural(MeshTopology.Triangles, 6, foodSimDataCBuffer.count);
