@@ -107,6 +107,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
         public Vector2 worldPos;
         public Vector2 velocity;
         public Vector2 heading;
+        public Vector2 size;
     }
     public struct FoodSimData {
         public Vector2 worldPos;
@@ -145,7 +146,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
         for(int i = 0; i < agentSimDataArray.Length; i++) {
             agentSimDataArray[i] = new AgentSimData();
         }
-        agentSimDataCBuffer = new ComputeBuffer(agentSimDataArray.Length, sizeof(float) * 6);
+        agentSimDataCBuffer = new ComputeBuffer(agentSimDataArray.Length, sizeof(float) * 8);
 
         foodSimDataArray = new FoodSimData[36];
         for (int i = 0; i < foodSimDataArray.Length; i++) {

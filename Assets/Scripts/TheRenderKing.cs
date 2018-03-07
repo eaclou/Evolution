@@ -39,6 +39,7 @@ public class TheRenderKing : MonoBehaviour {
         public Vector2 worldPos;
         public Vector2 velocity;
         public Vector2 heading;
+        public Vector2 size;
     }
 
     public struct CurveStrokeData {
@@ -53,7 +54,7 @@ public class TheRenderKing : MonoBehaviour {
         for (int i = 0; i < agentSimDataArray.Length; i++) {
             agentSimDataArray[i] = new AgentSimData();
         }
-        agentSimDataCBuffer = new ComputeBuffer(agentSimDataArray.Length, sizeof(float) * 6);
+        agentSimDataCBuffer = new ComputeBuffer(agentSimDataArray.Length, sizeof(float) * 8);
 
         // Set up Quad Mesh billboard for brushStroke rendering
         quadVerticesCBuffer = new ComputeBuffer(6, sizeof(float) * 3);
@@ -145,6 +146,7 @@ public class TheRenderKing : MonoBehaviour {
             pointStrokeDataArray[baseIndex].localPos = agentsArray[i].bodyPointStroke.localPos;
             pointStrokeDataArray[baseIndex].localDir = agentsArray[i].bodyPointStroke.localDir;
             pointStrokeDataArray[baseIndex].hue = agentsArray[i].bodyPointStroke.hue;
+            pointStrokeDataArray[baseIndex].brushType = agentsArray[i].bodyPointStroke.brushType;
 
             for (int j = 0; j < 8; j++) {
                 int index = baseIndex + j + 1;
@@ -155,6 +157,7 @@ public class TheRenderKing : MonoBehaviour {
                 pointStrokeDataArray[index].localPos = agentsArray[i].decorationPointStrokesArray[j].localPos;
                 pointStrokeDataArray[index].localDir = agentsArray[i].decorationPointStrokesArray[j].localDir;
                 pointStrokeDataArray[index].hue = agentsArray[i].decorationPointStrokesArray[j].hue;
+                pointStrokeDataArray[index].brushType = agentsArray[i].decorationPointStrokesArray[j].brushType;
             }            
         }
         // Player:
@@ -166,6 +169,7 @@ public class TheRenderKing : MonoBehaviour {
         pointStrokeDataArray[playerBaseIndex].localPos = playerAgent.bodyPointStroke.localPos;
         pointStrokeDataArray[playerBaseIndex].localDir = playerAgent.bodyPointStroke.localDir;
         pointStrokeDataArray[playerBaseIndex].hue = playerAgent.bodyPointStroke.hue;
+        pointStrokeDataArray[playerBaseIndex].brushType = playerAgent.bodyPointStroke.brushType;
         for (int k = 0; k < 8; k++) {
             int playerIndex = playerBaseIndex + k + 1;
 
@@ -177,12 +181,13 @@ public class TheRenderKing : MonoBehaviour {
             pointStrokeDataArray[playerIndex].localPos = playerAgent.decorationPointStrokesArray[k].localPos;
             pointStrokeDataArray[playerIndex].localDir = playerAgent.decorationPointStrokesArray[k].localDir;
             pointStrokeDataArray[playerIndex].hue = playerAgent.decorationPointStrokesArray[k].hue;
+            pointStrokeDataArray[playerIndex].brushType = playerAgent.decorationPointStrokesArray[k].brushType;
         }
 
         agentPointStrokesCBuffer.SetData(pointStrokeDataArray);
     }
 
-    public PointStrokeData GeneratePointStrokeData(int index, Vector2 size, Vector2 pos, Vector2 dir, Vector3 hue, float str) {
+    public PointStrokeData GeneratePointStrokeData(int index, Vector2 size, Vector2 pos, Vector2 dir, Vector3 hue, float str, int brushType) {
         PointStrokeData pointStroke = new PointStrokeData();
         pointStroke.parentIndex = index;
         pointStroke.localScale = size;
@@ -190,6 +195,7 @@ public class TheRenderKing : MonoBehaviour {
         pointStroke.localDir = dir;
         pointStroke.hue = hue;
         pointStroke.strength = str; // temporarily used to lerp btw primary & secondary Agent Hues
+        pointStroke.brushType = brushType;
 
         return pointStroke;
     }
@@ -199,11 +205,13 @@ public class TheRenderKing : MonoBehaviour {
         for (int i = 0; i < agentSimDataArray.Length - 1; i++) {
             agentSimDataArray[i].worldPos = new Vector2(agentsArray[i].transform.position.x, agentsArray[i].transform.position.y);
             agentSimDataArray[i].velocity = agentsArray[i].smoothedThrottle; // new Vector2(agentsArray[i].testModule.ownRigidBody2D.velocity.x, agentsArray[i].testModule.ownRigidBody2D.velocity.y);
-            agentSimDataArray[i].heading = agentsArray[i].facingDirection; // new Vector2(0f, 1f); // Update later -- store inside Agent class?            
+            agentSimDataArray[i].heading = agentsArray[i].facingDirection; // new Vector2(0f, 1f); // Update later -- store inside Agent class? 
+            agentSimDataArray[i].size = agentsArray[i].size;
         } // Player:
         agentSimDataArray[agentSimDataArray.Length - 1].worldPos = new Vector2(playerAgent.transform.position.x, playerAgent.transform.position.y);
         agentSimDataArray[agentSimDataArray.Length - 1].velocity = playerAgent.smoothedThrottle;
         agentSimDataArray[agentSimDataArray.Length - 1].heading = playerAgent.facingDirection;
+        agentSimDataArray[agentSimDataArray.Length - 1].size = playerAgent.size;
         agentSimDataCBuffer.SetData(agentSimDataArray);        
     }
 

@@ -41,6 +41,7 @@
 				float2 worldPos;
 				float2 velocity;
 				float2 heading;
+				float2 size;
 			};
 
 
@@ -67,33 +68,43 @@
 				PointStrokeData pointStrokeData = pointStrokesCBuffer[inst];
 				AgentSimData agentSimData = agentSimDataCBuffer[pointStrokeData.parentIndex];
 
-				float3 worldPosition = float3(agentSimData.worldPos + pointStrokeData.localPos, -0.5);
+				float3 worldPosition = float3(agentSimData.worldPos, -0.5);
+				// Rotation of Billboard center around Agent's Center (no effect if localPos and localDir are zero/default)'
+				float2 forwardAgent = agentSimData.heading;
+				float2 rightAgent = float2(forwardAgent.y, -forwardAgent.x);
+				float2 positionOffset = float2(pointStrokeData.localPos.x * agentSimData.size.x * rightAgent + pointStrokeData.localPos.y * agentSimData.size.y * forwardAgent);
+				worldPosition.xy += positionOffset; // Place properly
+
 				float3 quadPoint = quadVerticesCBuffer[id];
-
-				//float2 velocity = floatyBitData.zw;
-
+				
 				float random1 = rand(float2(inst, inst));
 				float random2 = rand(float2(random1, random1));
-
 				float randomAspect = lerp(0.75, 1.33, random1);
 				float randomValue = 1; //rand(float2(inst, randomAspect * 10));
 				
-				float2 scale = pointStrokeData.localScale;
+				float2 scale = pointStrokeData.localScale * agentSimData.size;
 				quadPoint *= float3(scale, 1.0);
 
-				float2 forward0 = agentSimData.heading; //float2(0,1);
+				// Figure out final facing Vectors!!!
+				float2 forward0 = agentSimData.heading;
 				float2 right0 = float2(forward0.y, -forward0.x); // perpendicular to forward vector
-				float2 rotatedPoint0 = float2(pointStrokeData.localDir.x * right0 + pointStrokeData.localDir.y * forward0);
+				float2 rotatedPoint0 = float2(pointStrokeData.localDir.x * right0 + pointStrokeData.localDir.y * forward0);  // Rotate localRotation by AgentRotation
 
 				float2 forward1 = rotatedPoint0;
 				float2 right1 = float2(forward1.y, -forward1.x);
+				// With final facing Vectors, find rotation of QuadPoints:
 				float3 rotatedPoint1 = float3(quadPoint.x * right1 + quadPoint.y * forward1,
 											 quadPoint.z);
 				
 				//o.pos = mul(UNITY_MATRIX_VP, float4(rotatedPoint, 0.0f));
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(rotatedPoint1, 0.0f));
 				o.color = float4(pointStrokeData.hue,1);
-				o.uv = quadVerticesCBuffer[id] + 0.5f;
+				
+				float2 uvs = quadVerticesCBuffer[id] + 0.5f; // full texture
+				float randBrush = pointStrokeData.brushType; //floor(rand(float2(random2, inst)) * 3.99); // 0-3
+				uvs.x *= 0.25;  // 4 brushes on texture
+				uvs.x += 0.25 * randBrush;
+				o.uv = uvs;
 				
 				return o;
 			}

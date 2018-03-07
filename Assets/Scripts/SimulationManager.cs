@@ -152,7 +152,7 @@ public class SimulationManager : MonoBehaviour {
         playerAgentGO.name = "PlayerAgent";
         //playerAgentGO.GetComponentInChildren<MeshRenderer>().material = playerMat;
         playerAgentGO.GetComponent<Rigidbody2D>().mass = 1f;
-        playerAgentGO.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
+        //playerAgentGO.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
         playerAgent = playerAgentGO.GetComponent<Agent>();
         //playerAgent.humanControlled = true;
         //playerAgent.humanControlLerp = 1f;
@@ -172,18 +172,20 @@ public class SimulationManager : MonoBehaviour {
         //  APPEARANCE:::::
         playerAgent.huePrimary = UnityEngine.Random.insideUnitSphere * 0.5f + new Vector3(0.5f, 0.5f, 0.5f);
         playerAgent.hueSecondary = UnityEngine.Random.insideUnitSphere * 0.5f + new Vector3(0.5f, 0.5f, 0.5f);
-        playerAgent.bodyPointStroke = theRenderKing.GeneratePointStrokeData(numAgents, Vector2.one, Vector2.zero, new Vector2(0f, 1f), playerAgent.huePrimary, 0f);
+        playerAgent.bodyPointStroke = theRenderKing.GeneratePointStrokeData(numAgents, Vector2.one, Vector2.zero, new Vector2(0f, 1f), playerAgent.huePrimary, 0f, 0);
         playerAgent.decorationPointStrokesArray = new TheRenderKing.PointStrokeData[8];
         float minSize = 0.15f;
         float maxSize = 0.45f;
         for (int j = 0; j < playerAgent.decorationPointStrokesArray.Length; j++) {
             float lerpStrength = UnityEngine.Random.Range(0f, 1f);
+            int randBrush = UnityEngine.Random.Range(0, 4);
             playerAgent.decorationPointStrokesArray[j] = theRenderKing.GeneratePointStrokeData(numAgents,
                                                                                             new Vector2(UnityEngine.Random.Range(minSize, maxSize), UnityEngine.Random.Range(minSize, maxSize)),
                                                                                             UnityEngine.Random.insideUnitCircle * 0.35f,
                                                                                             UnityEngine.Random.insideUnitCircle.normalized,
                                                                                             Vector3.Lerp(playerAgent.huePrimary, playerAgent.hueSecondary, lerpStrength),
-                                                                                            lerpStrength);
+                                                                                            lerpStrength,
+                                                                                            randBrush);
         }
 
         // $#!%@@@@@@@@@@@@ TEMP TEMP TEMP !%!#$%!#$%!@$%%!@$#%@$%@@@@@@@@@@@@@@@@@@@@@@@
@@ -232,16 +234,18 @@ public class SimulationManager : MonoBehaviour {
             //  APPEARANCE:::::
             newAgent.huePrimary = UnityEngine.Random.insideUnitSphere * 0.5f + new Vector3(0.5f, 0.5f, 0.5f);
             newAgent.hueSecondary = UnityEngine.Random.insideUnitSphere * 0.5f + new Vector3(0.5f, 0.5f, 0.5f);            
-            newAgent.bodyPointStroke = theRenderKing.GeneratePointStrokeData(i, Vector2.one, Vector2.zero, new Vector2(0f, 1f), newAgent.huePrimary, 0f);
+            newAgent.bodyPointStroke = theRenderKing.GeneratePointStrokeData(i, Vector2.one, Vector2.zero, new Vector2(0f, 1f), newAgent.huePrimary, 0f, 0);
             newAgent.decorationPointStrokesArray = new TheRenderKing.PointStrokeData[8];            
             for (int j = 0; j < newAgent.decorationPointStrokesArray.Length; j++) {
                 float lerpStrength = UnityEngine.Random.Range(0f, 1f);
+                int randBrush = UnityEngine.Random.Range(0, 4);
                 newAgent.decorationPointStrokesArray[j] = theRenderKing.GeneratePointStrokeData(i, 
                                                                                                 new Vector2(UnityEngine.Random.Range(minSize, maxSize), UnityEngine.Random.Range(minSize, maxSize)),
                                                                                                 UnityEngine.Random.insideUnitCircle * 0.35f,
                                                                                                 UnityEngine.Random.insideUnitCircle.normalized, 
                                                                                                 Vector3.Lerp(newAgent.huePrimary, newAgent.hueSecondary, lerpStrength),
-                                                                                                lerpStrength);
+                                                                                                lerpStrength,
+                                                                                                randBrush);
             }
         }
         
@@ -524,35 +528,42 @@ public class SimulationManager : MonoBehaviour {
                 agentsArray[agentIndex].huePrimary = agentsArray[parentIndex].huePrimary;
                 agentsArray[agentIndex].hueSecondary = agentsArray[parentIndex].hueSecondary;
 
+                agentsArray[agentIndex].size = agentsArray[parentIndex].size;
                 float randomMutate = UnityEngine.Random.Range(0f, 1f);
-                /*if(randomMutate < 0.1) {  // RED
+                if (randomMutate < 0.08f) {  // SIZE
+                    agentsArray[agentIndex].size.x = Mathf.Clamp(agentsArray[agentIndex].size.x + Gaussian.GetRandomGaussian(0f, 0.1f), 0.5f, 2f);
+                    agentsArray[agentIndex].size.y = Mathf.Clamp(agentsArray[agentIndex].size.y + Gaussian.GetRandomGaussian(0f, 0.1f), 0.5f, 2f);
+                }
+                randomMutate = UnityEngine.Random.Range(0f, 1f);
+                if(randomMutate < 0.08f) {  // RED
                     agentsArray[agentIndex].huePrimary.x = Mathf.Clamp01(agentsArray[agentIndex].huePrimary.x + Gaussian.GetRandomGaussian(0f, 0.075f));
                 }
                 randomMutate = UnityEngine.Random.Range(0f, 1f);
-                if (randomMutate < 0.1) {  // RED
+                if (randomMutate < 0.08f) {  // GREEN
                     agentsArray[agentIndex].huePrimary.y = Mathf.Clamp01(agentsArray[agentIndex].huePrimary.y + Gaussian.GetRandomGaussian(0f, 0.075f));
                 }
                 randomMutate = UnityEngine.Random.Range(0f, 1f);
-                if (randomMutate < 0.1) {  // RED
+                if (randomMutate < 0.08f) {  // BLUE
                     agentsArray[agentIndex].huePrimary.z = Mathf.Clamp01(agentsArray[agentIndex].huePrimary.z + Gaussian.GetRandomGaussian(0f, 0.075f));
                 }
                 randomMutate = UnityEngine.Random.Range(0f, 1f);
-                if (randomMutate < 0.1) {  // RED
-                    agentsArray[agentIndex].hueSecondary.x = Mathf.Clamp01(agentsArray[agentIndex].hueSecondary.x + Gaussian.GetRandomGaussian(0f, 0.075f));
+                if (randomMutate < 0.08f) {  // RED
+                    agentsArray[agentIndex].hueSecondary.x = Mathf.Clamp01(agentsArray[agentIndex].hueSecondary.x + Gaussian.GetRandomGaussian(0f, 0.1f));
                 }
                 randomMutate = UnityEngine.Random.Range(0f, 1f);
-                if (randomMutate < 0.1) {  // RED
-                    agentsArray[agentIndex].hueSecondary.y = Mathf.Clamp01(agentsArray[agentIndex].hueSecondary.y + Gaussian.GetRandomGaussian(0f, 0.075f));
+                if (randomMutate < 0.08f) {  // GREEN
+                    agentsArray[agentIndex].hueSecondary.y = Mathf.Clamp01(agentsArray[agentIndex].hueSecondary.y + Gaussian.GetRandomGaussian(0f, 0.1f));
                 }
                 randomMutate = UnityEngine.Random.Range(0f, 1f);
-                if (randomMutate < 0.1) {  // RED
-                    agentsArray[agentIndex].hueSecondary.z = Mathf.Clamp01(agentsArray[agentIndex].hueSecondary.z + Gaussian.GetRandomGaussian(0f, 0.075f));
-                }*/
+                if (randomMutate < 0.08f) {  // BLUE
+                    agentsArray[agentIndex].hueSecondary.z = Mathf.Clamp01(agentsArray[agentIndex].hueSecondary.z + Gaussian.GetRandomGaussian(0f, 0.1f));
+                }
                 agentsArray[agentIndex].bodyPointStroke.parentIndex = agentIndex; // agentsArray[parentIndex].decorationPointStrokesArray[b].parentIndex;
                 agentsArray[agentIndex].bodyPointStroke.strength = agentsArray[parentIndex].bodyPointStroke.strength;
                 agentsArray[agentIndex].bodyPointStroke.localScale = agentsArray[parentIndex].bodyPointStroke.localScale;
                 agentsArray[agentIndex].bodyPointStroke.localPos = agentsArray[parentIndex].bodyPointStroke.localPos;
-                agentsArray[agentIndex].bodyPointStroke.hue = agentsArray[parentIndex].bodyPointStroke.hue;
+                agentsArray[agentIndex].bodyPointStroke.localDir = agentsArray[parentIndex].bodyPointStroke.localDir;
+                agentsArray[agentIndex].bodyPointStroke.hue = agentsArray[agentIndex].huePrimary;
 
                 for (int b = 0; b < agentsArray[agentIndex].decorationPointStrokesArray.Length; b++) {
 
@@ -560,26 +571,35 @@ public class SimulationManager : MonoBehaviour {
                     agentsArray[agentIndex].decorationPointStrokesArray[b].strength = agentsArray[parentIndex].decorationPointStrokesArray[b].strength;
                     agentsArray[agentIndex].decorationPointStrokesArray[b].localScale = agentsArray[parentIndex].decorationPointStrokesArray[b].localScale;
                     agentsArray[agentIndex].decorationPointStrokesArray[b].localPos = agentsArray[parentIndex].decorationPointStrokesArray[b].localPos;
+                    agentsArray[agentIndex].decorationPointStrokesArray[b].localDir = agentsArray[parentIndex].decorationPointStrokesArray[b].localDir;
                     agentsArray[agentIndex].decorationPointStrokesArray[b].hue = agentsArray[parentIndex].decorationPointStrokesArray[b].hue;
                     // mutate decoration stroke:
                     randomMutate = UnityEngine.Random.Range(0f, 1f);
-                    if (randomMutate < 0.05) {  // RED
-                        agentsArray[agentIndex].decorationPointStrokesArray[b].strength = Mathf.Clamp01(agentsArray[agentIndex].decorationPointStrokesArray[b].strength + Gaussian.GetRandomGaussian(0f, 0.2f));
-                    }
-                    /*randomMutate = UnityEngine.Random.Range(0f, 1f);
-                    if (randomMutate < 0.05) {  // RED
-                        agentsArray[agentIndex].decorationPointStrokesArray[b].localScale = Gaussian.GetRandomGaussian(0f, 0.2f));
+                    if (randomMutate < 0.1f) {  // 
+                        agentsArray[agentIndex].decorationPointStrokesArray[b].strength = Mathf.Clamp01(agentsArray[agentIndex].decorationPointStrokesArray[b].strength + Gaussian.GetRandomGaussian(0f, 0.25f));
                     }
                     randomMutate = UnityEngine.Random.Range(0f, 1f);
-                    if (randomMutate < 0.05) {  // RED
-                        agentsArray[agentIndex].decorationPointStrokesArray[b].localPos = Gaussian.GetRandomGaussian(0f, 0.2f));
+                    if (randomMutate < 0.1f) {  // Scale
+                        agentsArray[agentIndex].decorationPointStrokesArray[b].localScale.x = Mathf.Clamp(agentsArray[agentIndex].decorationPointStrokesArray[b].localScale.x + Gaussian.GetRandomGaussian(0f, 0.05f), 0.1f, 0.5f);
+                        agentsArray[agentIndex].decorationPointStrokesArray[b].localScale.y = Mathf.Clamp(agentsArray[agentIndex].decorationPointStrokesArray[b].localScale.y + Gaussian.GetRandomGaussian(0f, 0.05f), 0.1f, 0.5f);
                     }
                     randomMutate = UnityEngine.Random.Range(0f, 1f);
-                    if (randomMutate < 0.05) {  // RED
-                        agentsArray[agentIndex].decorationPointStrokesArray[b].localDir = Gaussian.GetRandomGaussian(0f, 0.2f));
-                    }*/
+                    if (randomMutate < 0.1f) {  // Position
+                        agentsArray[agentIndex].decorationPointStrokesArray[b].localPos.x = Mathf.Clamp(agentsArray[agentIndex].decorationPointStrokesArray[b].localPos.x + Gaussian.GetRandomGaussian(0f, 0.05f), -0.35f, 0.35f);
+                        agentsArray[agentIndex].decorationPointStrokesArray[b].localPos.y = Mathf.Clamp(agentsArray[agentIndex].decorationPointStrokesArray[b].localPos.y + Gaussian.GetRandomGaussian(0f, 0.05f), -0.35f, 0.35f);
+                    }
+                    randomMutate = UnityEngine.Random.Range(0f, 1f);
+                    if (randomMutate < 0.1f) {  // Direction
+                        agentsArray[agentIndex].decorationPointStrokesArray[b].localDir.x = agentsArray[agentIndex].decorationPointStrokesArray[b].localDir.x + Gaussian.GetRandomGaussian(0f, 0.1f);
+                        agentsArray[agentIndex].decorationPointStrokesArray[b].localDir.y = agentsArray[agentIndex].decorationPointStrokesArray[b].localDir.y + Gaussian.GetRandomGaussian(0f, 0.1f);
+                        agentsArray[agentIndex].decorationPointStrokesArray[b].localDir = agentsArray[agentIndex].decorationPointStrokesArray[b].localDir.normalized;
+                    }
+                    randomMutate = UnityEngine.Random.Range(0f, 1f);
+                    if (randomMutate < 0.1f) {  // Brush Type
+                        agentsArray[agentIndex].decorationPointStrokesArray[b].brushType = UnityEngine.Random.Range(0, 4);                        
+                    }
 
-                    //agentsArray[agentIndex].decorationPointStrokesArray[b].hue = Vector3.Lerp(agentsArray[agentIndex].huePrimary, agentsArray[agentIndex].hueSecondary, agentsArray[agentIndex].decorationPointStrokesArray[b].strength);
+                    agentsArray[agentIndex].decorationPointStrokesArray[b].hue = Vector3.Lerp(agentsArray[agentIndex].huePrimary, agentsArray[agentIndex].hueSecondary, agentsArray[agentIndex].decorationPointStrokesArray[b].strength);
                 }
 
                 

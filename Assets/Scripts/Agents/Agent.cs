@@ -16,6 +16,7 @@ public class Agent : MonoBehaviour {
     public Vector3 hueSecondary;
     public TheRenderKing.PointStrokeData bodyPointStroke;
     public TheRenderKing.PointStrokeData[] decorationPointStrokesArray;
+    public Vector2 size;
     
     public float speed = 75f;
     public bool humanControlled = false;
@@ -34,11 +35,14 @@ public class Agent : MonoBehaviour {
     public Vector2 facingDirection;  // based on throttle history
 
     // Use this for initialization
+    private void Awake() {
+        size = new Vector2(1f, 1f);
+    }
     void Start() {
         rigidBody2D = GetComponent<Rigidbody2D>();
         prevPos = transform.localPosition;
         facingDirection = new Vector2(0f, 1f);
-                
+             
     }
 
     private int GetNumInputs() {
@@ -345,6 +349,7 @@ public class Agent : MonoBehaviour {
         isDead = false;
         ageCounter = 0;
         this.transform.localPosition = startPos.agentStartPosition;
+        this.transform.localScale = new Vector3(size.x, size.y, 1f);
         InitializeModules(genome, this, startPos);      // Modules need to be created first so that Brain can map its neurons to existing modules  
         brain = new Brain(genome.brainGenome, this);
         prevPos = transform.localPosition;
