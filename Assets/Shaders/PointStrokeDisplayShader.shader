@@ -53,8 +53,9 @@
 			struct v2f
 			{
 				float4 pos : SV_POSITION;
-				float2 uv : TEXCOORD0;  // uv of the brushstroke quad itself, particle texture	
+				float4 uv : TEXCOORD0;  // uv of the brushstroke quad itself, particle texture	
 				float4 color : TEXCOORD1;
+				float motionBlurLerp : TEXCOORD2;
 			};
 
 			float rand(float2 co){   // OUTPUT is in [0,1] RANGE!!!
@@ -79,10 +80,13 @@
 				
 				float random1 = rand(float2(inst, inst));
 				float random2 = rand(float2(random1, random1));
-				float randomAspect = lerp(0.75, 1.33, random1);
-				float randomValue = 1; //rand(float2(inst, randomAspect * 10));
+				//float randomAspect = lerp(0.75, 1.33, random1);
+				//float randomValue = 1; //rand(float2(inst, randomAspect * 10));
+
+				float velMag = saturate(length(agentSimData.velocity)) * 0.5;
 				
 				float2 scale = pointStrokeData.localScale * agentSimData.size;
+				scale.y *= (velMag + 1);
 				quadPoint *= float3(scale, 1.0);
 
 				// Figure out final facing Vectors!!!
@@ -100,11 +104,27 @@
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(rotatedPoint1, 0.0f));
 				o.color = float4(pointStrokeData.hue,1);
 				
-				float2 uvs = quadVerticesCBuffer[id] + 0.5f; // full texture
+				float2 uv0 = quadVerticesCBuffer[id] + 0.5f; // full texture
+				float2 uv1 = uv0;
+				// Which Brush? (uv.X) :::::
 				float randBrush = pointStrokeData.brushType; //floor(rand(float2(random2, inst)) * 3.99); // 0-3
-				uvs.x *= 0.25;  // 4 brushes on texture
-				uvs.x += 0.25 * randBrush;
-				o.uv = uvs;
+				uv0.x *= 0.2;  // 5 brushes on texture
+				uv0.x += 0.2 * randBrush;
+				uv1.x *= 0.2;  // 5 brushes on texture
+				uv1.x += 0.2 * randBrush;
+
+				// Figure out how much to blur:
+				float blurMag = saturate(length(agentSimData.velocity)) * 2.99;				
+				float blurRow0 = floor(blurMag);  // 0-2
+				float blurRow1 = ceil(blurMag); // 1-3
+				float blurLerp = blurMag - blurRow0;
+				// calculate UV's to sample from correct rows:
+				uv0.y = uv0.y * 0.25 + 0.25 * blurRow0;
+				uv1.y = uv1.y * 0.25 + 0.25 * blurRow1;
+				// motion blur sampling:
+				o.motionBlurLerp = blurLerp;
+				
+				o.uv = float4(uv0, uv1);
 				
 				return o;
 			}
@@ -112,8 +132,12 @@
 			fixed4 frag(v2f i) : SV_Target
 			{
 				
-				float4 texColor = tex2D(_MainTex, i.uv);  // Read Brush Texture
-				float4 finalColor = float4(i.color) * texColor;
+				float4 texColor0 = tex2D(_MainTex, i.uv.xy);  // Read Brush Texture start Row
+				float4 texColor1 = tex2D(_MainTex, i.uv.zw);  // Read Brush Texture end Row
+				
+				float4 brushColor = lerp(texColor0, texColor1, i.motionBlurLerp);
+
+				float4 finalColor = float4(i.color) * brushColor;
 				
 				return finalColor;
 				

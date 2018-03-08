@@ -173,13 +173,28 @@ public class SimulationManager : MonoBehaviour {
         playerAgent.huePrimary = UnityEngine.Random.insideUnitSphere * 0.5f + new Vector3(0.5f, 0.5f, 0.5f);
         playerAgent.hueSecondary = UnityEngine.Random.insideUnitSphere * 0.5f + new Vector3(0.5f, 0.5f, 0.5f);
         playerAgent.bodyPointStroke = theRenderKing.GeneratePointStrokeData(numAgents, Vector2.one, Vector2.zero, new Vector2(0f, 1f), playerAgent.huePrimary, 0f, 0);
-        playerAgent.decorationPointStrokesArray = new TheRenderKing.PointStrokeData[8];
+        playerAgent.decorationPointStrokesArray = new TheRenderKing.PointStrokeData[10];
+        // EYES:
+        playerAgent.decorationPointStrokesArray[0] = theRenderKing.GeneratePointStrokeData(numAgents,
+                                                                                            new Vector2(0.36f, 0.36f),
+                                                                                            new Vector2(-0.25f, 0.45f),
+                                                                                            new Vector2(0f, 1f),
+                                                                                            Vector3.one,
+                                                                                            1,
+                                                                                            4);
+        playerAgent.decorationPointStrokesArray[1] = theRenderKing.GeneratePointStrokeData(numAgents,
+                                                                                            new Vector2(0.36f, 0.36f),
+                                                                                            new Vector2(0.25f, 0.45f),
+                                                                                            new Vector2(0f, 1f),
+                                                                                            Vector3.one,
+                                                                                            1,
+                                                                                            4);
         float minSize = 0.15f;
         float maxSize = 0.45f;
-        for (int j = 0; j < playerAgent.decorationPointStrokesArray.Length; j++) {
+        for (int j = 0; j < playerAgent.decorationPointStrokesArray.Length - 2; j++) {
             float lerpStrength = UnityEngine.Random.Range(0f, 1f);
             int randBrush = UnityEngine.Random.Range(0, 4);
-            playerAgent.decorationPointStrokesArray[j] = theRenderKing.GeneratePointStrokeData(numAgents,
+            playerAgent.decorationPointStrokesArray[j + 2] = theRenderKing.GeneratePointStrokeData(numAgents,
                                                                                             new Vector2(UnityEngine.Random.Range(minSize, maxSize), UnityEngine.Random.Range(minSize, maxSize)),
                                                                                             UnityEngine.Random.insideUnitCircle * 0.35f,
                                                                                             UnityEngine.Random.insideUnitCircle.normalized,
@@ -235,11 +250,26 @@ public class SimulationManager : MonoBehaviour {
             newAgent.huePrimary = UnityEngine.Random.insideUnitSphere * 0.5f + new Vector3(0.5f, 0.5f, 0.5f);
             newAgent.hueSecondary = UnityEngine.Random.insideUnitSphere * 0.5f + new Vector3(0.5f, 0.5f, 0.5f);            
             newAgent.bodyPointStroke = theRenderKing.GeneratePointStrokeData(i, Vector2.one, Vector2.zero, new Vector2(0f, 1f), newAgent.huePrimary, 0f, 0);
-            newAgent.decorationPointStrokesArray = new TheRenderKing.PointStrokeData[8];            
-            for (int j = 0; j < newAgent.decorationPointStrokesArray.Length; j++) {
+            newAgent.decorationPointStrokesArray = new TheRenderKing.PointStrokeData[10];
+            // EYES:
+            newAgent.decorationPointStrokesArray[0] = theRenderKing.GeneratePointStrokeData(i,
+                                                                                            new Vector2(0.36f, 0.36f),
+                                                                                            new Vector2(-0.25f, 0.45f),
+                                                                                            new Vector2(0f, 1f),
+                                                                                            Vector3.one,
+                                                                                            1,
+                                                                                            4);
+            newAgent.decorationPointStrokesArray[1] = theRenderKing.GeneratePointStrokeData(i,
+                                                                                            new Vector2(0.36f, 0.36f),
+                                                                                            new Vector2(0.25f, 0.45f),
+                                                                                            new Vector2(0f, 1f),
+                                                                                            Vector3.one,
+                                                                                            1,
+                                                                                            4);
+            for (int j = 0; j < newAgent.decorationPointStrokesArray.Length - 2; j++) {
                 float lerpStrength = UnityEngine.Random.Range(0f, 1f);
                 int randBrush = UnityEngine.Random.Range(0, 4);
-                newAgent.decorationPointStrokesArray[j] = theRenderKing.GeneratePointStrokeData(i, 
+                newAgent.decorationPointStrokesArray[j + 2] = theRenderKing.GeneratePointStrokeData(i, 
                                                                                                 new Vector2(UnityEngine.Random.Range(minSize, maxSize), UnityEngine.Random.Range(minSize, maxSize)),
                                                                                                 UnityEngine.Random.insideUnitCircle * 0.35f,
                                                                                                 UnityEngine.Random.insideUnitCircle.normalized, 
@@ -267,6 +297,8 @@ public class SimulationManager : MonoBehaviour {
         theRenderKing.agentsArray = agentsArray;
         theRenderKing.playerAgent = playerAgent;
         theRenderKing.SetPointStrokesBuffer();
+        theRenderKing.SetSimDataArrays();
+        theRenderKing.InitializeAllAgentCurveData();
 
         InitializeGridCells();
         HookUpModules();
@@ -536,15 +568,15 @@ public class SimulationManager : MonoBehaviour {
                 }
                 randomMutate = UnityEngine.Random.Range(0f, 1f);
                 if(randomMutate < 0.08f) {  // RED
-                    agentsArray[agentIndex].huePrimary.x = Mathf.Clamp01(agentsArray[agentIndex].huePrimary.x + Gaussian.GetRandomGaussian(0f, 0.075f));
+                    agentsArray[agentIndex].huePrimary.x = Mathf.Clamp01(agentsArray[agentIndex].huePrimary.x + Gaussian.GetRandomGaussian(0f, 0.1f));
                 }
                 randomMutate = UnityEngine.Random.Range(0f, 1f);
                 if (randomMutate < 0.08f) {  // GREEN
-                    agentsArray[agentIndex].huePrimary.y = Mathf.Clamp01(agentsArray[agentIndex].huePrimary.y + Gaussian.GetRandomGaussian(0f, 0.075f));
+                    agentsArray[agentIndex].huePrimary.y = Mathf.Clamp01(agentsArray[agentIndex].huePrimary.y + Gaussian.GetRandomGaussian(0f, 0.1f));
                 }
                 randomMutate = UnityEngine.Random.Range(0f, 1f);
                 if (randomMutate < 0.08f) {  // BLUE
-                    agentsArray[agentIndex].huePrimary.z = Mathf.Clamp01(agentsArray[agentIndex].huePrimary.z + Gaussian.GetRandomGaussian(0f, 0.075f));
+                    agentsArray[agentIndex].huePrimary.z = Mathf.Clamp01(agentsArray[agentIndex].huePrimary.z + Gaussian.GetRandomGaussian(0f, 0.1f));
                 }
                 randomMutate = UnityEngine.Random.Range(0f, 1f);
                 if (randomMutate < 0.08f) {  // RED
@@ -573,36 +605,38 @@ public class SimulationManager : MonoBehaviour {
                     agentsArray[agentIndex].decorationPointStrokesArray[b].localPos = agentsArray[parentIndex].decorationPointStrokesArray[b].localPos;
                     agentsArray[agentIndex].decorationPointStrokesArray[b].localDir = agentsArray[parentIndex].decorationPointStrokesArray[b].localDir;
                     agentsArray[agentIndex].decorationPointStrokesArray[b].hue = agentsArray[parentIndex].decorationPointStrokesArray[b].hue;
-                    // mutate decoration stroke:
-                    randomMutate = UnityEngine.Random.Range(0f, 1f);
-                    if (randomMutate < 0.1f) {  // 
-                        agentsArray[agentIndex].decorationPointStrokesArray[b].strength = Mathf.Clamp01(agentsArray[agentIndex].decorationPointStrokesArray[b].strength + Gaussian.GetRandomGaussian(0f, 0.25f));
-                    }
-                    randomMutate = UnityEngine.Random.Range(0f, 1f);
-                    if (randomMutate < 0.1f) {  // Scale
-                        agentsArray[agentIndex].decorationPointStrokesArray[b].localScale.x = Mathf.Clamp(agentsArray[agentIndex].decorationPointStrokesArray[b].localScale.x + Gaussian.GetRandomGaussian(0f, 0.05f), 0.1f, 0.5f);
-                        agentsArray[agentIndex].decorationPointStrokesArray[b].localScale.y = Mathf.Clamp(agentsArray[agentIndex].decorationPointStrokesArray[b].localScale.y + Gaussian.GetRandomGaussian(0f, 0.05f), 0.1f, 0.5f);
-                    }
-                    randomMutate = UnityEngine.Random.Range(0f, 1f);
-                    if (randomMutate < 0.1f) {  // Position
-                        agentsArray[agentIndex].decorationPointStrokesArray[b].localPos.x = Mathf.Clamp(agentsArray[agentIndex].decorationPointStrokesArray[b].localPos.x + Gaussian.GetRandomGaussian(0f, 0.05f), -0.35f, 0.35f);
-                        agentsArray[agentIndex].decorationPointStrokesArray[b].localPos.y = Mathf.Clamp(agentsArray[agentIndex].decorationPointStrokesArray[b].localPos.y + Gaussian.GetRandomGaussian(0f, 0.05f), -0.35f, 0.35f);
-                    }
-                    randomMutate = UnityEngine.Random.Range(0f, 1f);
-                    if (randomMutate < 0.1f) {  // Direction
-                        agentsArray[agentIndex].decorationPointStrokesArray[b].localDir.x = agentsArray[agentIndex].decorationPointStrokesArray[b].localDir.x + Gaussian.GetRandomGaussian(0f, 0.1f);
-                        agentsArray[agentIndex].decorationPointStrokesArray[b].localDir.y = agentsArray[agentIndex].decorationPointStrokesArray[b].localDir.y + Gaussian.GetRandomGaussian(0f, 0.1f);
-                        agentsArray[agentIndex].decorationPointStrokesArray[b].localDir = agentsArray[agentIndex].decorationPointStrokesArray[b].localDir.normalized;
-                    }
-                    randomMutate = UnityEngine.Random.Range(0f, 1f);
-                    if (randomMutate < 0.1f) {  // Brush Type
-                        agentsArray[agentIndex].decorationPointStrokesArray[b].brushType = UnityEngine.Random.Range(0, 4);                        
-                    }
 
-                    agentsArray[agentIndex].decorationPointStrokesArray[b].hue = Vector3.Lerp(agentsArray[agentIndex].huePrimary, agentsArray[agentIndex].hueSecondary, agentsArray[agentIndex].decorationPointStrokesArray[b].strength);
+                    // Don't mutate Eyes:
+                    if(b > 1) {
+                        // mutate decoration stroke:
+                        randomMutate = UnityEngine.Random.Range(0f, 1f);
+                        if (randomMutate < 0.1f) {  // 
+                            agentsArray[agentIndex].decorationPointStrokesArray[b].strength = Mathf.Clamp01(agentsArray[agentIndex].decorationPointStrokesArray[b].strength + Gaussian.GetRandomGaussian(0f, 0.25f));
+                        }
+                        randomMutate = UnityEngine.Random.Range(0f, 1f);
+                        if (randomMutate < 0.1f) {  // Scale
+                            agentsArray[agentIndex].decorationPointStrokesArray[b].localScale.x = Mathf.Clamp(agentsArray[agentIndex].decorationPointStrokesArray[b].localScale.x + Gaussian.GetRandomGaussian(0f, 0.05f), 0.1f, 0.5f);
+                            agentsArray[agentIndex].decorationPointStrokesArray[b].localScale.y = Mathf.Clamp(agentsArray[agentIndex].decorationPointStrokesArray[b].localScale.y + Gaussian.GetRandomGaussian(0f, 0.05f), 0.1f, 0.5f);
+                        }
+                        randomMutate = UnityEngine.Random.Range(0f, 1f);
+                        if (randomMutate < 0.1f) {  // Position
+                            agentsArray[agentIndex].decorationPointStrokesArray[b].localPos.x = Mathf.Clamp(agentsArray[agentIndex].decorationPointStrokesArray[b].localPos.x + Gaussian.GetRandomGaussian(0f, 0.05f), -0.35f, 0.35f);
+                            agentsArray[agentIndex].decorationPointStrokesArray[b].localPos.y = Mathf.Clamp(agentsArray[agentIndex].decorationPointStrokesArray[b].localPos.y + Gaussian.GetRandomGaussian(0f, 0.05f), -0.35f, 0.35f);
+                        }
+                        randomMutate = UnityEngine.Random.Range(0f, 1f);
+                        if (randomMutate < 0.1f) {  // Direction
+                            agentsArray[agentIndex].decorationPointStrokesArray[b].localDir.x = agentsArray[agentIndex].decorationPointStrokesArray[b].localDir.x + Gaussian.GetRandomGaussian(0f, 0.1f);
+                            agentsArray[agentIndex].decorationPointStrokesArray[b].localDir.y = agentsArray[agentIndex].decorationPointStrokesArray[b].localDir.y + Gaussian.GetRandomGaussian(0f, 0.1f);
+                            agentsArray[agentIndex].decorationPointStrokesArray[b].localDir = agentsArray[agentIndex].decorationPointStrokesArray[b].localDir.normalized;
+                        }
+                        randomMutate = UnityEngine.Random.Range(0f, 1f);
+                        if (randomMutate < 0.1f) {  // Brush Type
+                            agentsArray[agentIndex].decorationPointStrokesArray[b].brushType = UnityEngine.Random.Range(0, 4);
+                        }
+
+                        agentsArray[agentIndex].decorationPointStrokesArray[b].hue = Vector3.Lerp(agentsArray[agentIndex].huePrimary, agentsArray[agentIndex].hueSecondary, agentsArray[agentIndex].decorationPointStrokesArray[b].strength);
+                    }                    
                 }
-
-                
                 // Mutate Body Colors:
                 // Mutate Body Colors:
                 // Mutate Body Colors:
@@ -622,7 +656,9 @@ public class SimulationManager : MonoBehaviour {
             // Spawn that genome in dead Agent's body and revive it!
             agentsArray[agentIndex].InitializeAgentFromGenome(persistentGenomePoolArray[agentIndex], startPosGenome);
 
+            theRenderKing.SetSimDataArrays();
             theRenderKing.SetPointStrokesBuffer();
+            theRenderKing.InitializeAgentCurveData(agentIndex);
         }
         else {
             // Needs safeguards for fewer agents than genomes:
@@ -648,6 +684,9 @@ public class SimulationManager : MonoBehaviour {
         playerAgent.InitializeAgentFromGenome(persistentGenomePoolArray[rankedIndicesListPersistent[0]], startPosGenome);
         //playerAgent.ReplaceBrain(persistentGenomePoolArray[rankedIndicesListPersistent[0]]);
         playerAgent.testModule.foodAmountB[0] = 20f;
+
+        theRenderKing.SetSimDataArrays();
+        theRenderKing.InitializeAgentCurveData(agentsArray.Length);
     }
 
     private void SpawnPredators() {
