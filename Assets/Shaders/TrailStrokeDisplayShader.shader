@@ -55,7 +55,7 @@
 				uv.y = uv.y / 32.0 + localTrailPercentage;
 				
 				float2 scale = float2(0.1, 0.1);
-				scale.x += (1 - localTrailPercentage) * 0.45;
+				scale.x += (1 - localTrailPercentage) * 0.15;
 
 				if(localTrailIndex != 0) {
 					float2 parentPos = agentTrailStrokesReadCBuffer[inst - 1].worldPos;
