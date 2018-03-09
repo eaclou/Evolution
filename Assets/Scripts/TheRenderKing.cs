@@ -9,10 +9,13 @@ public class TheRenderKing : MonoBehaviour {
     public ComputeShader computeShaderBrushStrokes;
     public Material pointStrokeDisplayMat;
     public Material curveStrokeDisplayMat;
+    public Material trailStrokeDisplayMat;
 
     // Source Data:::
     public Agent[] agentsArray;
     public Agent playerAgent;
+
+    public RenderTexture velocityTex;
 
     // AGENT LAYERS:
     // Primer:      -- The backdrop for agent, provides minimum silhouette and bg color/shape
@@ -21,6 +24,7 @@ public class TheRenderKing : MonoBehaviour {
 
     PointStrokeData[] pointStrokeDataArray;
     CurveStrokeData[] curveStrokeDataArray;
+    TrailStrokeData[] trailStrokeDataArray;
 
     //public Vector3[] agentPositionsArray;
     public AgentSimData[] agentSimDataArray;
@@ -31,6 +35,12 @@ public class TheRenderKing : MonoBehaviour {
     private ComputeBuffer curveRibbonVerticesCBuffer;
     private ComputeBuffer agentCurveStrokes0CBuffer;
     private ComputeBuffer agentCurveStrokes1CBuffer;
+
+    private ComputeBuffer agentTrailStrokes0CBuffer;
+    private ComputeBuffer agentTrailStrokes1CBuffer;
+    private int numTrailPointsPerAgent = 32;
+
+    private int numCurveRibbonQuads = 6;
 
     public struct PointStrokeData {
         public int parentIndex;  // what agent/object is this attached to?
@@ -49,6 +59,10 @@ public class TheRenderKing : MonoBehaviour {
         public Vector2 p1;
         public Vector2 p2;
         public Vector2 p3;
+    }
+
+    public struct TrailStrokeData {
+        public Vector2 worldPos;
     }
 
     public struct AgentSimData {
@@ -89,9 +103,9 @@ public class TheRenderKing : MonoBehaviour {
             curveStrokeDataArray[i].parentIndex = i;
             curveStrokeDataArray[i].hue = Vector3.one;
             curveStrokeDataArray[i].p0 = new Vector2(0f, 0f);
-            curveStrokeDataArray[i].p1 = new Vector2(0.3333f, 0f);
-            curveStrokeDataArray[i].p2 = new Vector2(0.6667f, 0f);
-            curveStrokeDataArray[i].p3 = new Vector2(1f, 0f);
+            curveStrokeDataArray[i].p1 = new Vector2(0f, 0.3333f);
+            curveStrokeDataArray[i].p2 = new Vector2(0f, 0.6667f);
+            curveStrokeDataArray[i].p3 = new Vector2(0f, 1f);
         }
         agentCurveStrokes0CBuffer = new ComputeBuffer(curveStrokeDataArray.Length, sizeof(float) * 11 + sizeof(int));
         agentCurveStrokes0CBuffer.SetData(curveStrokeDataArray);
@@ -99,34 +113,48 @@ public class TheRenderKing : MonoBehaviour {
         agentCurveStrokes1CBuffer = new ComputeBuffer(curveStrokeDataArray.Length, sizeof(float) * 11 + sizeof(int));
 
         // Set up Curve Ribbon Mesh billboard for brushStroke rendering
-        curveRibbonVerticesCBuffer = new ComputeBuffer(18, sizeof(float) * 3);
-        curveRibbonVerticesCBuffer.SetData(new[] {
-            new Vector3(0f, 0.5f),
-            new Vector3(0.3333f, 0.5f),
-            new Vector3(0.3333f, -0.5f),
-            new Vector3(0.3333f, -0.5f),
-            new Vector3(0f, -0.5f),
-            new Vector3(0f, 0.5f),
-
-            new Vector3(0.3333f, 0.5f),
-            new Vector3(0.6667f, 0.5f),
-            new Vector3(0.6667f, -0.5f),
-            new Vector3(0.6667f, -0.5f),
-            new Vector3(0.3333f, -0.5f),
-            new Vector3(0.3333f, 0.5f),
-
-            new Vector3(0.6667f, 0.5f),
-            new Vector3(1f, 0.5f),
-            new Vector3(1f, -0.5f),
-            new Vector3(1f, -0.5f),
-            new Vector3(0.6667f, -0.5f),
-            new Vector3(0.6667f, 0.5f),
-        });
-
+        InitializeCurveRibbonMeshBuffer();
+        
         curveStrokeDisplayMat.SetPass(0);
         curveStrokeDisplayMat.SetBuffer("curveRibbonVerticesCBuffer", curveRibbonVerticesCBuffer);
         curveStrokeDisplayMat.SetBuffer("agentCurveStrokesReadCBuffer", agentCurveStrokes0CBuffer);
 
+        trailStrokeDataArray = new TrailStrokeData[65 * numTrailPointsPerAgent];
+        for (int i = 0; i < trailStrokeDataArray.Length; i++) {
+            int agentIndex = (int)Mathf.Floor((float)i / numTrailPointsPerAgent); //i % numTrailPointsPerAgent
+            float trailPos = (float)i % (float)numTrailPointsPerAgent;
+            trailStrokeDataArray[i] = new TrailStrokeData();
+            trailStrokeDataArray[i].worldPos = new Vector2(0f, trailPos * 1f);
+        }
+        agentTrailStrokes0CBuffer = new ComputeBuffer(trailStrokeDataArray.Length, sizeof(float) * 2);
+        agentTrailStrokes0CBuffer.SetData(trailStrokeDataArray);
+        agentTrailStrokes1CBuffer = new ComputeBuffer(trailStrokeDataArray.Length, sizeof(float) * 2);
+
+        trailStrokeDisplayMat.SetPass(0);
+        trailStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        trailStrokeDisplayMat.SetBuffer("agentTrailStrokesReadCBuffer", agentTrailStrokes0CBuffer);
+    }
+
+    private void InitializeCurveRibbonMeshBuffer() {
+        
+        float rowSize = 1f / (float)numCurveRibbonQuads;
+
+        curveRibbonVerticesCBuffer = new ComputeBuffer(6 * numCurveRibbonQuads, sizeof(float) * 3);
+        Vector3[] verticesArray = new Vector3[curveRibbonVerticesCBuffer.count];
+        for(int i = 0; i < numCurveRibbonQuads; i++) {
+            int baseIndex = i * 6;
+
+            float startCoord = (float)i;
+            float endCoord = (float)(i + 1);
+            verticesArray[baseIndex + 0] = new Vector3(0.5f, startCoord * rowSize);
+            verticesArray[baseIndex + 1] = new Vector3(0.5f, endCoord * rowSize);
+            verticesArray[baseIndex + 2] = new Vector3(-0.5f, endCoord * rowSize);
+            verticesArray[baseIndex + 3] = new Vector3(-0.5f, endCoord * rowSize);
+            verticesArray[baseIndex + 4] = new Vector3(-0.5f, startCoord * rowSize);
+            verticesArray[baseIndex + 5] = new Vector3(0.5f, startCoord * rowSize); 
+        }
+
+        curveRibbonVerticesCBuffer.SetData(verticesArray);
     }
 
     public void Tick() {
@@ -134,7 +162,10 @@ public class TheRenderKing : MonoBehaviour {
             SetSimDataArrays();
 
             // Update curveBrush data
-            IterateCurveBrushData();
+            SinglePassCurveBrushData();
+            //IterateCurveBrushData();
+
+            IterateTrailStrokesData();
         }
     }
 
@@ -185,20 +216,59 @@ public class TheRenderKing : MonoBehaviour {
         computeShaderBrushStrokes.Dispatch(kernelCSIterateCurveBrushData, agentCurveStrokes0CBuffer.count, 1, 1);
     }
 
+    private void SinglePassCurveBrushData() {
+        int kernelCSSinglePassCurveBrushData = computeShaderBrushStrokes.FindKernel("CSSinglePassCurveBrushData");
+        
+        computeShaderBrushStrokes.SetBuffer(kernelCSSinglePassCurveBrushData, "agentSimDataCBuffer", agentSimDataCBuffer);
+        computeShaderBrushStrokes.SetBuffer(kernelCSSinglePassCurveBrushData, "agentCurveStrokesWriteCBuffer", agentCurveStrokes0CBuffer);
+        computeShaderBrushStrokes.Dispatch(kernelCSSinglePassCurveBrushData, agentCurveStrokes0CBuffer.count, 1, 1);        
+    }
+
+    private void IterateTrailStrokesData() {
+        // Set position of trail Roots:
+        int kernelCSPinRootTrailStrokesData = computeShaderBrushStrokes.FindKernel("CSPinRootTrailStrokesData");        
+        computeShaderBrushStrokes.SetBuffer(kernelCSPinRootTrailStrokesData, "agentSimDataCBuffer", agentSimDataCBuffer);
+        computeShaderBrushStrokes.SetBuffer(kernelCSPinRootTrailStrokesData, "agentTrailStrokesWriteCBuffer", agentTrailStrokes0CBuffer);
+        computeShaderBrushStrokes.Dispatch(kernelCSPinRootTrailStrokesData, agentSimDataCBuffer.count, 1, 1);
+        computeShaderBrushStrokes.SetBuffer(kernelCSPinRootTrailStrokesData, "agentTrailStrokesWriteCBuffer", agentTrailStrokes1CBuffer);
+        computeShaderBrushStrokes.Dispatch(kernelCSPinRootTrailStrokesData, agentSimDataCBuffer.count, 1, 1);
+
+        if(velocityTex != null) {
+            // update all trailPoint positions:
+            int kernelCSIterateTrailStrokesData = computeShaderBrushStrokes.FindKernel("CSIterateTrailStrokesData");
+            // PING:::
+            computeShaderBrushStrokes.SetBuffer(kernelCSIterateTrailStrokesData, "agentSimDataCBuffer", agentSimDataCBuffer);
+            computeShaderBrushStrokes.SetBuffer(kernelCSIterateTrailStrokesData, "agentTrailStrokesReadCBuffer", agentTrailStrokes0CBuffer);
+            computeShaderBrushStrokes.SetBuffer(kernelCSIterateTrailStrokesData, "agentTrailStrokesWriteCBuffer", agentTrailStrokes1CBuffer);
+            computeShaderBrushStrokes.SetTexture(kernelCSIterateTrailStrokesData, "velocityRead", velocityTex);
+            computeShaderBrushStrokes.Dispatch(kernelCSIterateTrailStrokesData, agentTrailStrokes0CBuffer.count, 1, 1);
+            // PONG:::
+            computeShaderBrushStrokes.SetBuffer(kernelCSIterateTrailStrokesData, "agentSimDataCBuffer", agentSimDataCBuffer);
+            computeShaderBrushStrokes.SetBuffer(kernelCSIterateTrailStrokesData, "agentTrailStrokesReadCBuffer", agentTrailStrokes1CBuffer);
+            computeShaderBrushStrokes.SetBuffer(kernelCSIterateTrailStrokesData, "agentTrailStrokesWriteCBuffer", agentTrailStrokes0CBuffer);
+            computeShaderBrushStrokes.SetTexture(kernelCSIterateTrailStrokesData, "velocityRead", velocityTex);
+            computeShaderBrushStrokes.Dispatch(kernelCSIterateTrailStrokesData, agentTrailStrokes0CBuffer.count, 1, 1);
+        }
+    }
+
     private void OnRenderObject() {
         
         if (Camera.current == mainCam) {
+            trailStrokeDisplayMat.SetPass(0);
+            trailStrokeDisplayMat.SetBuffer("agentTrailStrokesReadCBuffer", agentTrailStrokes0CBuffer);
+            trailStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+            Graphics.DrawProcedural(MeshTopology.Triangles, 6, agentTrailStrokes0CBuffer.count);
+
+            curveStrokeDisplayMat.SetPass(0);
+            curveStrokeDisplayMat.SetBuffer("curveRibbonVerticesCBuffer", curveRibbonVerticesCBuffer);
+            curveStrokeDisplayMat.SetBuffer("agentCurveStrokes0CBuffer", agentCurveStrokes0CBuffer);
+            //Graphics.DrawProcedural(MeshTopology.Triangles, numCurveRibbonQuads * 6, agentCurveStrokes0CBuffer.count);
 
             pointStrokeDisplayMat.SetPass(0);
             pointStrokeDisplayMat.SetBuffer("agentSimDataCBuffer", agentSimDataCBuffer);
             pointStrokeDisplayMat.SetBuffer("pointStrokesCBuffer", agentPointStrokesCBuffer);
             pointStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
             Graphics.DrawProcedural(MeshTopology.Triangles, 6, agentPointStrokesCBuffer.count);
-
-            curveStrokeDisplayMat.SetPass(0);
-            curveStrokeDisplayMat.SetBuffer("curveRibbonVerticesCBuffer", curveRibbonVerticesCBuffer);
-            curveStrokeDisplayMat.SetBuffer("agentCurveStrokes0CBuffer", agentCurveStrokes0CBuffer);
-            Graphics.DrawProcedural(MeshTopology.Triangles, 18, agentCurveStrokes0CBuffer.count);
         }
     }
 
@@ -384,6 +454,12 @@ public class TheRenderKing : MonoBehaviour {
         }
         if (curveRibbonVerticesCBuffer != null) {
             curveRibbonVerticesCBuffer.Release();
+        }
+        if (agentTrailStrokes0CBuffer != null) {
+            agentTrailStrokes0CBuffer.Release();
+        }
+        if (agentTrailStrokes1CBuffer != null) {
+            agentTrailStrokes1CBuffer.Release();
         }
     }
 }

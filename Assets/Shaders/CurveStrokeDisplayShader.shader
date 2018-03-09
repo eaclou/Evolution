@@ -63,19 +63,20 @@
 				float3 worldPosition = float3(curveStrokeData.p0, -0.6);
 				float3 vertexPos = curveRibbonVerticesCBuffer[id];
 				float2 uv = curveRibbonVerticesCBuffer[id];
-				uv.y += 0.5;
+				uv.x += 0.5;
 
 				// Figure out worldPosition by constructing a bezierCurve between the 4 points
 				// and adjusting vertPosition based on curve output.
 				// curve t = vertex UV.x
 				// find tangent and bitangent of curve and use to project vertex UV.y
-				float t = uv.x;
+				float t = uv.y;
+				uv.y = 1.0 - uv.y;
 
 				float2 curvePos = GetPoint(curveStrokeData.p0, curveStrokeData.p1, curveStrokeData.p2, curveStrokeData.p3, t);
 				float2 curveTangent = normalize(GetFirstDerivative(curveStrokeData.p0, curveStrokeData.p1, curveStrokeData.p2, curveStrokeData.p3, t));
 				float2 curveBitangent = float2(curveTangent.y, -curveTangent.x);
 
-				float2 offset = curveBitangent * -curveRibbonVerticesCBuffer[id].y;
+				float2 offset = curveBitangent * -curveRibbonVerticesCBuffer[id].x;
 
 				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(vertexPos, 0.0f));
 				o.pos = UnityObjectToClipPos(float4(curvePos, 0, 1.0) + float4(offset, 0.0, 0.0));

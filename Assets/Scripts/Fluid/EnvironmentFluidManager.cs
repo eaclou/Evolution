@@ -22,7 +22,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
     public float invBrushSize = 128f;
     public float colorRefreshAmount = 0.01f;
 
-    private RenderTexture velocityA;
+    public RenderTexture velocityA;
     private RenderTexture velocityB;
     private RenderTexture pressureA;
     private RenderTexture pressureB;

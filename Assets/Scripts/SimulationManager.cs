@@ -293,7 +293,7 @@ public class SimulationManager : MonoBehaviour {
         environmentFluidManager.playerAgent = playerAgent;
         environmentFluidManager.foodArray = foodArray;
         environmentFluidManager.predatorsArray = predatorArray;
-
+        
         theRenderKing.agentsArray = agentsArray;
         theRenderKing.playerAgent = playerAgent;
         theRenderKing.SetPointStrokesBuffer();
@@ -885,6 +885,8 @@ public class SimulationManager : MonoBehaviour {
         //TestExecutionOrder();
         environmentFluidManager.Run();
         //theRenderKing.SetPointStrokesBuffer(); // Do this more smartly in future
+
+        theRenderKing.velocityTex = environmentFluidManager.velocityA;
         theRenderKing.Tick();
 
         HookUpModules(); // Sets nearest-neighbors etc.        

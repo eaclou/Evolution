@@ -1,6 +1,9 @@
 ﻿// Each #kernel tells which function to compile; you can have many kernels
 #pragma kernel CSInitializeCurveBrushData
 #pragma kernel CSIterateCurveBrushData
+#pragma kernel CSSinglePassCurveBrushData
+#pragma kernel CSPinRootTrailStrokesData
+#pragma kernel CSIterateTrailStrokesData
 
 struct AgentSimData {
 	float2 worldPos;
@@ -18,10 +21,20 @@ struct CurveStrokeData {
     float2 p3;
 };
 
+struct TrailStrokeData {
+    float2 worldPos;
+};
+
 StructuredBuffer<AgentSimData> agentSimDataCBuffer;
 StructuredBuffer<int> agentInitializeCBuffer;
 StructuredBuffer<CurveStrokeData> agentCurveStrokesReadCBuffer;
 RWStructuredBuffer<CurveStrokeData> agentCurveStrokesWriteCBuffer;
+StructuredBuffer<TrailStrokeData> agentTrailStrokesReadCBuffer;
+RWStructuredBuffer<TrailStrokeData> agentTrailStrokesWriteCBuffer;
+
+Texture2D<float4> velocityRead;
+
+SamplerState _LinearRepeat;
 
 [numthreads(1,1,1)]
 void CSInitializeCurveBrushData (uint3 id : SV_DispatchThreadID)
@@ -47,7 +60,7 @@ void CSInitializeCurveBrushData (uint3 id : SV_DispatchThreadID)
 void CSIterateCurveBrushData (uint3 id : SV_DispatchThreadID)
 {
 	CurveStrokeData oldCurveData = agentCurveStrokesReadCBuffer[id.x];
-	AgentSimData agentdata = agentSimDataCBuffer[oldCurveData.parentIndex];
+	AgentSimData agentData = agentSimDataCBuffer[oldCurveData.parentIndex];
 	
 	float lerpStrength = 0.7;
 	float lerpDecay = 0.6;
@@ -57,23 +70,85 @@ void CSIterateCurveBrushData (uint3 id : SV_DispatchThreadID)
 	newCurveData.parentIndex = oldCurveData.parentIndex;
 	newCurveData.hue = oldCurveData.hue;
 
-	newCurveData.p0 = agentdata.worldPos + (agentdata.heading * agentdata.size.y); // pin root to head tip
+	newCurveData.p0 = agentData.worldPos + (agentData.heading * agentData.size.y); // pin root to head tip
 
-	float2 targetPosP1 = newCurveData.p0 - agentdata.heading * restDistance;
+	float2 targetPosP1 = newCurveData.p0 - agentData.heading * restDistance;
 	newCurveData.p1 = lerp(oldCurveData.p1, targetPosP1, lerpStrength);
 
 	lerpStrength *= lerpDecay;
 
 	float2 vec2to1 = oldCurveData.p2 - oldCurveData.p1;
-	float2 targetPosP2 = oldCurveData.p1 - agentdata.heading * restDistance;
+	float2 targetPosP2 = oldCurveData.p1 - agentData.heading * restDistance;
 	newCurveData.p2 = lerp(oldCurveData.p2, targetPosP2, lerpStrength);
 
 	lerpStrength *= lerpDecay;
 
 	float2 vec3to2 = oldCurveData.p3 - oldCurveData.p2;
-	float2 targetPosP3 = oldCurveData.p2 - agentdata.heading * restDistance;
+	float2 targetPosP3 = oldCurveData.p2 - agentData.heading * restDistance;
 	newCurveData.p3 = lerp(oldCurveData.p3, targetPosP3, lerpStrength);
 
 
 	agentCurveStrokesWriteCBuffer[id.x] = newCurveData;
+}
+
+[numthreads(1,1,1)]
+void CSSinglePassCurveBrushData (uint3 id : SV_DispatchThreadID)
+{
+	CurveStrokeData curveData = agentCurveStrokesWriteCBuffer[id.x];
+	AgentSimData agentData = agentSimDataCBuffer[curveData.parentIndex];
+		
+	float restDistance = 2;
+
+	float2 p0 = agentData.worldPos;
+	
+	float2 p1 = curveData.p1;
+	float2 vec0to1 = p1 - p0; // after p0 has been moved, vector from old P1 to new P0	
+	p1 = p0 + normalize(vec0to1) * restDistance; 
+
+	float2 p2 = curveData.p2;
+	float2 vec1to2 = p2 - p1;
+	p2 = p1 + normalize(vec1to2) * restDistance; 
+
+	float2 p3 = curveData.p3;
+	float2 vec2to3 = p3 - p2;
+	p3 = p2 + normalize(vec2to3) * restDistance; 
+
+	agentCurveStrokesWriteCBuffer[id.x].p0 = p0;
+	agentCurveStrokesWriteCBuffer[id.x].p1 = p1;
+	agentCurveStrokesWriteCBuffer[id.x].p2 = p2;
+	agentCurveStrokesWriteCBuffer[id.x].p3 = p3;
+}
+
+[numthreads(1,1,1)]
+void CSPinRootTrailStrokesData (uint3 id : SV_DispatchThreadID)
+{
+	AgentSimData agentData = agentSimDataCBuffer[id.x];
+
+	int trailPointIndex = id.x * 32;
+
+	agentTrailStrokesWriteCBuffer[trailPointIndex].worldPos = agentData.worldPos;
+}
+
+[numthreads(1,1,1)]
+void CSIterateTrailStrokesData (uint3 id : SV_DispatchThreadID)
+{
+	uint trailPointIndex = id.x;
+	uint localTrailIndex = trailPointIndex % 32;
+
+	float restDistance = 0.125;
+
+	if(localTrailIndex != 0) {			
+		float2 parentPos = agentTrailStrokesReadCBuffer[trailPointIndex - 1].worldPos;
+		float2 currentPos = agentTrailStrokesReadCBuffer[trailPointIndex].worldPos;
+		
+		float2 uv = saturate((currentPos + 70) / 140);
+		float2 vel = velocityRead.SampleLevel(_LinearRepeat, uv, 0).xy;
+		float speedMult = 2.25;
+
+		currentPos += (vel * speedMult);
+
+		float2 vecParentToCurrent = currentPos - parentPos;
+
+		agentTrailStrokesWriteCBuffer[trailPointIndex].worldPos = parentPos + normalize(vecParentToCurrent) * restDistance;	
+	}
 }
