@@ -252,7 +252,7 @@ public class TheRenderKing : MonoBehaviour {
     }
 
     private void OnRenderObject() {
-        
+        /*
         if (Camera.current == mainCam) {
             trailStrokeDisplayMat.SetPass(0);
             trailStrokeDisplayMat.SetBuffer("agentTrailStrokesReadCBuffer", agentTrailStrokes0CBuffer);
@@ -269,7 +269,7 @@ public class TheRenderKing : MonoBehaviour {
             pointStrokeDisplayMat.SetBuffer("pointStrokesCBuffer", agentPointStrokesCBuffer);
             pointStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
             Graphics.DrawProcedural(MeshTopology.Triangles, 6, agentPointStrokesCBuffer.count);
-        }
+        }*/
     }
 
     public void SetPointStrokesBuffer() {

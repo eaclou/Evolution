@@ -10,7 +10,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
     //public Texture2D initialObstaclesTex;
     public Camera obstacleRenderCamera;
     public Camera fluidColorRenderCamera;
-    public GameObject debugGO;
+    //public GameObject debugGO;
 
     public int resolution = 512;
     public float deltaTime = 1f;
@@ -479,8 +479,8 @@ public class EnvironmentFluidManager : MonoBehaviour {
     }
 
     public void Run() {
-        Vector3 debugPos = playerAgent.testModule.ownRigidBody2D.position;
-        debugGO.transform.position = debugPos;
+        //Vector3 debugPos = playerAgent.testModule.ownRigidBody2D.position;
+        //debugGO.transform.position = debugPos;
         obstacleRenderCamera.targetTexture = obstacles;
         fluidColorRenderCamera.targetTexture = sourceColor;
         obstacleRenderCamera.Render();
