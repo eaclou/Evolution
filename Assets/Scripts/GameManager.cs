@@ -41,6 +41,7 @@ public class GameManager : MonoBehaviour {
         //simulationManager.UpdateDebugUI();
     }
 
+    // $$$$$$ THIS IS THE MAIN CODE THREAD HOOK!!! $$$$$$$$$
     private void FixedUpdate() {        
 
         // Depending on GameState, execute Frame:
@@ -51,15 +52,20 @@ public class GameManager : MonoBehaviour {
                 break;
             case GameState.Loading:
                 // Check on status of Simulation manager, wait for it to be fully loaded and ready to go:                
-                if(simulationManager.LoadingCompleteAllSystemsGo) {
-                    TransitionToGameState(GameState.Playing);
+                if(simulationManager._LoadingComplete) {
+                    if(simulationManager._SimulationWarmUpComplete) {                        
+                        TransitionToGameState(GameState.Playing);
+                    }
+                    else {
+                        simulationManager.TickLoading(); // continue Warming Up
+                    }
                 }
                 else {
-                    simulationManager.TickLoading(); // *** change this to one-time call rather than continual!
+                    simulationManager.TickLoading(); // *** change this to one-time call rather than continual???
                 }
                 break;
             case GameState.Playing:
-                //simulationManager.TickSimulation();
+                simulationManager.TickSimulation();
                 break;
             default:
                 Debug.LogError("No Enum Type Found! (" + currentGameState.ToString() + ")");
@@ -90,7 +96,7 @@ public class GameManager : MonoBehaviour {
     }
 
     private void TransitionToGameState(GameState nextState) {
-
+        Debug.Log("TransitionToGameState(" + nextState.ToString() + ")");
         switch (nextState) {
             case GameState.MainMenu:
                 // Can add more safety checks and additional logic later:

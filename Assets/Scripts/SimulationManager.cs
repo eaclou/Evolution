@@ -6,41 +6,97 @@ using System.IO;
 
 // The meat of the Game, controls the primary simulation/core logic gameplay Loop
 public class SimulationManager : MonoBehaviour {
-    
+
     public UIManager uiManager;
     public EnvironmentFluidManager environmentFluidManager;
-    public TheRenderKing theRenderKing;    
+    public TheRenderKing theRenderKing;
     public CameraManager cameraManager;
     public SettingsManager settingsManager;
+    public SimulationStateData simStateData;
 
     private bool isLoading = false;
-    private bool loadingCompleteAllSystemsGo;
-    public bool LoadingCompleteAllSystemsGo
+    private bool loadingComplete = false;
+    public bool _LoadingComplete
     {
         get
         {
-            return loadingCompleteAllSystemsGo;
+            return loadingComplete;
         }
         set
         {
 
         }
     }
-    
+    private bool simulationWarmUpComplete = false;
+    public bool _SimulationWarmUpComplete
+    {
+        get
+        {
+            return simulationWarmUpComplete;
+        }
+        set
+        {
+
+        }
+    }
+    private int numWarmUpTimeSteps = 30;
+    private int currentWarmUpTimeStep = 0;
+
     private float mapSize = 70f;  // This determines scale of environment, size of FluidSim plane!!! Important!
+    public float _MapSize
+    {
+        get
+        {
+            return mapSize;
+        }
+        set
+        {
+
+        }
+    }
     private int agentGridCellResolution = 1;  // How much to subdivide the map in order to detect nearest-neighbors more efficiently --> to not be O(n^2)
     public MapGridCell[][] mapGridCellArray;
 
     private int numAgents = 64;
-    private int agentGenomePoolSize = 64;  // spawned as Agents that live until they are killed naturally, tested on Fitness Function
+    public int _NumAgents {
+        get
+        {
+            return numAgents;
+        }
+        set
+        {
+
+        }
+    }
+    //private int agentGenomePoolSize = 64;  // spawned as Agents that live until they are killed naturally, tested on Fitness Function
     public Agent playerAgent; // Should just be a reference to whichever #Agent that the player is currently controlling
     public Agent[] agentsArray;
     public BodyGenome bodyGenomeTemplate; // .... refactor?
     public AgentGenome[] agentGenomePoolArray;
     public FoodModule[] foodArray;
     private int numFood = 36;
+    public int _NumFood {
+        get
+        {
+            return numFood;
+        }
+        set
+        {
+
+        }
+    }
     public PredatorModule[] predatorArray;
     private int numPredators = 12;
+    public int _NumPredators {
+        get
+        {
+            return numPredators;
+        }
+        set
+        {
+
+        }
+    }
    
     public float[] rawFitnessScoresArray;
     private int[] rankedIndicesList;
@@ -78,15 +134,32 @@ public class SimulationManager : MonoBehaviour {
     public void TickLoading() {
         // "Hey, I'm Loading Here!!!"
 
-        // Check if already loading:
-        if(isLoading) {
-            // loading coroutine already underway.. chill out and relax
+        // Has basic loading phase completed?
+        if(loadingComplete) {
+            // if so, warming up:
+                       
+            if(currentWarmUpTimeStep >= numWarmUpTimeSteps) {
+                Debug.Log("WarmUp Complete!!!");
+                simulationWarmUpComplete = true;
+            }
+            else {
+                //Debug.Log("WarmUp Step " + currentWarmUpTimeStep.ToString());
+                TickSimulation();
+
+                currentWarmUpTimeStep++;
+            }
         }
         else {
-            // Start Loading coroutine!!!!:
-            isLoading = true;
-            StartCoroutine(LoadingNewSimulation());
-        }        
+            // Check if already loading or if this is the first time startup:
+            if(isLoading) {
+                // loading coroutine already underway.. chill out and relax
+            }
+            else {
+                // Start Loading coroutine!!!!:
+                isLoading = true;
+                StartCoroutine(LoadingNewSimulation());
+            }  
+        }  
     }
 
     IEnumerator LoadingNewSimulation() {
@@ -103,16 +176,31 @@ public class SimulationManager : MonoBehaviour {
 
         yield return null;
 
-        // **** How to handle sharing simulation data between different Managers???
-        // Once Agents, Food, etc. are established, Initialize the Fluid:
-        LoadingInitializeFluidSim();
-
-        yield return null;
-
         // Wake up the Render King and prepare him for the day ahead, proudly ruling over Renderland.
         LoadingGentlyRouseTheRenderMonarchHisHighnessLordOfPixels();
 
         yield return null;
+
+        // **** How to handle sharing simulation data between different Managers???
+        // Once Agents, Food, etc. are established, Initialize the Fluid:
+        LoadingInitializeFluidSim();
+        
+        yield return null;
+
+        // Initialize Agents:
+        LoadingInstantiateAgents();  // Fills the AgentsArray, Instantiates Agent Objects (MonoBehaviors + GameObjects)
+        LoadingInitializeAgentsFromGenomes(); // This was "RespawnAgents()" --  Used to actually place the Agent in the game in a random spot and set the Agent's atributes ffrom its genome
+        // Initialize Food:
+        LoadingInstantiateFood();
+        LoadingInitializeFoodFromGenome();
+        // Initialize Predators:
+        LoadingInstantiatePredators();
+        LoadingInitializePredatorsFromGenome();
+
+        yield return null;
+                
+        LoadingHookUpFluidAndRenderKing();  // fluid needs refs to RK's obstacle/color cameras' RenderTextures!
+        // ***** ^^^^^ Might need to call this every frame???
 
         // Hook up Camera to data -- fill out CameraManager class
 
@@ -123,23 +211,11 @@ public class SimulationManager : MonoBehaviour {
 
         yield return null;
 
-        // Initialize Agents:
-        LoadingInstantiateAgents();  // Fills the AgentsArray, Instantiates Agent Objects (MonoBehaviors + GameObjects)
-        LoadingInitializeAgentsFromGenomes(); // This used to be "RespawnAgents()" --  Used to actually place the Agent in the game in a random spot and set the Agent's atributes ffrom its genome
-        // Initialize Food:
-        LoadingInstantiateFood();
-        LoadingInitializeFoodFromGenome();
-        // Initialize Predators:
-        LoadingInstantiatePredators();
-        LoadingInitializePredatorsFromGenome();
-
-        yield return null;
-
         LoadingInitializeGridCells();
         // Populates GridCells with their contents (agents/food/preds)
         LoadingFillGridCells();
         LoadingHookUpModules();
-        
+        //simStateData.PopulateSimDataArrays(this); // might be able to just call everytime in Tick()
 
         //elapsedTime = Time.realtimeSinceStartup - startTime;
         //if(elapsedTime > maxComputeTimePerFrame) {
@@ -149,9 +225,9 @@ public class SimulationManager : MonoBehaviour {
         //yield return new WaitForSeconds(5f); // TEMP!!!
 
         // Done - will be detected by GameManager next frame
-        loadingCompleteAllSystemsGo = true;
+        loadingComplete = true;
 
-        Debug.Log("LOADING COMPLETE");
+        Debug.Log("LOADING COMPLETE - Starting WarmUp!");
     }
 
     private void LoadingInitializeCoreSimulationState() {
@@ -164,9 +240,10 @@ public class SimulationManager : MonoBehaviour {
 
         LoadingInitializePopulationGenomes();
 
+        simStateData = new SimulationStateData(this);
     }
     private void LoadingInitializePopulationGenomes() {
-        agentGenomePoolArray = new AgentGenome[agentGenomePoolSize];
+        agentGenomePoolArray = new AgentGenome[numAgents];
 
         for (int i = 0; i < agentGenomePoolArray.Length; i++) {   // Create initial Population Supervised Learners
             AgentGenome agentGenome = new AgentGenome(i);
@@ -176,20 +253,20 @@ public class SimulationManager : MonoBehaviour {
         }
 
         // Sort Fitness Scores Persistent:
-        rankedIndicesList = new int[agentGenomePoolSize];
-        rankedFitnessList = new float[agentGenomePoolSize];
+        rankedIndicesList = new int[numAgents];
+        rankedFitnessList = new float[numAgents];
 
-        for (int i = 0; i < agentGenomePoolSize; i++) {
+        for (int i = 0; i < numAgents; i++) {
             rankedIndicesList[i] = i;
             rankedFitnessList[i] = 1f;
         }
     }
     private void LoadingInitializeFluidSim() {
-
-    }  // ***** ACTUALLY WRITE THIS!!
+        environmentFluidManager.InitializeFluidSystem();
+    }
     private void LoadingGentlyRouseTheRenderMonarchHisHighnessLordOfPixels() {
-
-    } // ***** ACTUALLY WRITE THIS!!
+        theRenderKing.InitializeRiseAndShine();
+    }
     private void LoadingInstantiateAgents() {
 
         string assetURL = "AgentPrefab";
@@ -241,10 +318,14 @@ public class SimulationManager : MonoBehaviour {
                                                                                                 randBrush);
             }*/
         }
+
+        // ************** TEMP!!! *******************
+        // Set playerAgent to agent[0]:
+        playerAgent = agentsArray[0];   // ***** RE-Factor!!!!! ****** when re-implementing player control! **
     }
     private void LoadingInitializeAgentsFromGenomes() {
         
-        for (int i = 0; i < agentGenomePoolSize; i++) {
+        for (int i = 0; i < numAgents; i++) {
             // Revisit how start positions are set up? Probably don't need to be part of the genome....
             Vector3 startPos = new Vector3(UnityEngine.Random.Range(-30f, 30f), UnityEngine.Random.Range(-30f, 30f), 0f);
             StartPositionGenome agentStartPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
@@ -283,6 +364,13 @@ public class SimulationManager : MonoBehaviour {
             RevivePredator(i);
         }
     }
+    private void LoadingHookUpFluidAndRenderKing() {
+
+        // **** NEED TO ADDRESS THIS!!!!!! ************************
+        theRenderKing.fluidObstaclesRenderCamera.targetTexture = environmentFluidManager._ObstaclesRT; // *** See if this works **
+        theRenderKing.fluidColorRenderCamera.targetTexture = environmentFluidManager._SourceColorRT;
+                
+    }
     private void LoadingInitializeGridCells() {
         mapGridCellArray = new MapGridCell[agentGridCellResolution][];
         for (int i = 0; i < agentGridCellResolution; i++) {
@@ -306,7 +394,7 @@ public class SimulationManager : MonoBehaviour {
         HookUpModules();
     }
     private void LoadingSetUpFitnessStorage() {
-        rawFitnessScoresArray = new float[agentGenomePoolSize];
+        rawFitnessScoresArray = new float[numAgents];
 
         fitnessScoresEachGenerationList = new List<float>(); // 
     }
@@ -316,24 +404,54 @@ public class SimulationManager : MonoBehaviour {
     #region Every Frame  //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& EVERY FRAME &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
     public void TickSimulation() {
-        
-        environmentFluidManager.Run(); // ** Clean this up, but generally OK
-        
-        // **** Figure out proper Execution Order / in which Class to Run RenderOps while being synced w/ results of physX sim!!!
-        //theRenderKing.velocityTex = environmentFluidManager.velocityA; // *** Better way to share DATA!!!
-        //theRenderKing.Tick();
 
-        HookUpModules(); // Sets nearest-neighbors etc.        
-
+        // Gather state data information -- current simulation state after previous frame's internal PhysX update:
+        //stateData Populate Arrays
+        simStateData.PopulateSimDataArrays(this);  // reads from GameObject Transforms & RigidBodies!!! ++ from FluidSimulationData!!!
+        // Render fluidSimulationCameras()  -- Will that work to actually render at the proper time???? we'll see..... *****
+        theRenderKing.RenderSimulationCameras(); // will pass current info to FluidSim before it Ticks()
+        // Reads from CameraRenders, GameObjects, and query GPU for fluidState
+        // eventually, if agents get fluid sensors, will want to download FluidSim data from GPU into simStateData!*        
         // ******** REVISIT CODE ORDERING!!!!  -- Should check for death Before or After agent Tick/PhysX ???
         CheckForDeadFood();
         CheckForDeadAgents();
+        CheckForRecordPlayerScore();        
+        // **** Figure out proper Execution Order / in which Class to Run RenderOps while being synced w/ results of physX sim!!!
+        //theRenderKing.velocityTex = environmentFluidManager.velocityA; // *** Better way to share DATA!!!
+        theRenderKing.Tick(simStateData); // updates all renderData, buffers, brushStrokes etc.
 
+        HookUpModules(); // Sets nearest-neighbors etc. feed current data into agent Brains
+        
+
+
+        // &&&&& STEP SIMULATION FORWARD:::: &&&&&&&&&&
+        // &&&&& STEP SIMULATION FORWARD:::: &&&&&&&&&&
+        // Load gameState into Agent Brain, process brain function, read out brainResults,
+        // Execute Agent Actions -- apply propulsive force to each Agent:
         for (int i = 0; i < agentsArray.Length; i++) {
             agentsArray[i].Tick();
         }
+        // Apply External Forces to dynamic objects: (internal PhysX Updates):
+        ApplyFluidForcesToDynamicObjects();        
+        
+        
+        
+        // Simulate timestep of fluid Sim - update density/velocity maps:
+        // Or should this be right at beginning of frame????? ***************** revisit...
+        environmentFluidManager.Tick(); // ** Clean this up, but generally OK
+    }
 
-        CheckForRecordPlayerScore();      
+    private void ApplyFluidForcesToDynamicObjects() {
+        // ********** REVISIT CONVERSION btw fluid/scene coords and Force Amounts !!!! *************
+        for (int i = 0; i < agentsArray.Length; i++) {
+            agentsArray[i].testModule.ownRigidBody2D.AddForce(simStateData.fluidVelocitiesAtAgentPositionsArray[i] * 42f, ForceMode2D.Impulse);
+        }
+        for (int i = 0; i < foodArray.Length; i++) { // *** cache rigidBody reference
+            foodArray[i].GetComponent<Rigidbody2D>().AddForce(simStateData.fluidVelocitiesAtFoodPositionsArray[i] * 15f * foodArray[i].GetComponent<Rigidbody2D>().mass, ForceMode2D.Impulse);
+        }
+        for (int i = 0; i < predatorArray.Length; i++) {
+            predatorArray[i].rigidBody.AddForce(simStateData.fluidVelocitiesAtPredatorPositionsArray[i] * 32f * predatorArray[i].rigidBody.mass, ForceMode2D.Impulse);
+        }
     }
 
     private void PopulateGridCells() {
@@ -447,7 +565,7 @@ public class SimulationManager : MonoBehaviour {
         // Check for Record Agent AGE!
         if (playerAgent.ageCounter > recordPlayerAge) {
             recordPlayerAge = playerAgent.ageCounter;
-        }  
+        }
     }
     private void CheckForDeadFood() { // *** revisit
         // CHECK FOR DEAD FOOD!!! :::::::
@@ -509,7 +627,7 @@ public class SimulationManager : MonoBehaviour {
     }
     private void ProcessAgentScores(int agentIndex) {
         rollingAverageAgentScore = Mathf.Lerp(rollingAverageAgentScore, (float)agentsArray[agentIndex].ageCounter, 1f / 512f);
-        float approxGen = (float)numAgentsBorn / (float)agentGenomePoolSize;
+        float approxGen = (float)numAgentsBorn / (float)numAgents;
         if (approxGen > curApproxGen) {
             fitnessScoresEachGenerationList.Add(rollingAverageAgentScore);
             if (rollingAverageAgentScore > agentAvgRecordScore) {
@@ -711,6 +829,18 @@ public class SimulationManager : MonoBehaviour {
 
     #endregion
     
+    private void OnDisable() {
+        if (simStateData.agentSimDataCBuffer != null) {
+            simStateData.agentSimDataCBuffer.Release();
+        }
+        if (simStateData.foodSimDataCBuffer != null) {
+            simStateData.foodSimDataCBuffer.Release();
+        }
+        if (simStateData.predatorSimDataCBuffer != null) {
+            simStateData.predatorSimDataCBuffer.Release();
+        }
+    }
+
     public void SaveTrainingData() {
         /*
         Debug.Log("SAVE Population!");

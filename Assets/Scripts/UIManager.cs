@@ -186,10 +186,12 @@ public class UIManager : MonoBehaviour {
     }
 
     public void ClickStartGame() {
+        Debug.Log("ClickStartGame()!");
         gameManager.StartNewGame();
     }
 
     public void ClickButtonQuit() {
+        Debug.Log("Quit!");
         Application.Quit();
     }
 
