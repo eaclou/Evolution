@@ -369,7 +369,9 @@ public class SimulationManager : MonoBehaviour {
         // **** NEED TO ADDRESS THIS!!!!!! ************************
         theRenderKing.fluidObstaclesRenderCamera.targetTexture = environmentFluidManager._ObstaclesRT; // *** See if this works **
         theRenderKing.fluidColorRenderCamera.targetTexture = environmentFluidManager._SourceColorRT;
-                
+
+        //temp:
+        theRenderKing.debugRT = environmentFluidManager._SourceColorRT;
     }
     private void LoadingInitializeGridCells() {
         mapGridCellArray = new MapGridCell[agentGridCellResolution][];
