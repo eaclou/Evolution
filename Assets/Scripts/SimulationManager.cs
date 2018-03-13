@@ -265,11 +265,11 @@ public class SimulationManager : MonoBehaviour {
         environmentFluidManager.InitializeFluidSystem();
     }
     private void LoadingGentlyRouseTheRenderMonarchHisHighnessLordOfPixels() {
-        theRenderKing.InitializeRiseAndShine();
+        theRenderKing.InitializeRiseAndShine(this);
     }
     private void LoadingInstantiateAgents() {
 
-        string assetURL = "AgentPrefab";
+        string assetURL = "Prefabs/AgentPrefab";
 
         // Instantiate AI Agents
         agentsArray = new Agent[numAgents];
@@ -338,7 +338,7 @@ public class SimulationManager : MonoBehaviour {
 
         Debug.Log("SpawnFood!");
         for (int i = 0; i < foodArray.Length; i++) {
-            GameObject foodGO = Instantiate(Resources.Load("FoodPrefab")) as GameObject;
+            GameObject foodGO = Instantiate(Resources.Load("Prefabs/FoodPrefab")) as GameObject;
             foodGO.name = "Food" + i.ToString();
             FoodModule newFood = foodGO.GetComponent<FoodModule>();
             foodArray[i] = newFood; // Add to stored list of current Food objects                     
@@ -353,7 +353,7 @@ public class SimulationManager : MonoBehaviour {
         predatorArray = new PredatorModule[numPredators];
         Debug.Log("SpawnPredators!");
         for (int i = 0; i < predatorArray.Length; i++) {
-            GameObject predatorGO = Instantiate(Resources.Load("PredatorPrefab")) as GameObject;
+            GameObject predatorGO = Instantiate(Resources.Load("Prefabs/PredatorPrefab")) as GameObject;
             predatorGO.name = "Predator" + i.ToString();
             PredatorModule newPredator = predatorGO.GetComponent<PredatorModule>();
             predatorArray[i] = newPredator; // Add to stored list of current Agents

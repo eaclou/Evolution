@@ -3,6 +3,7 @@
 	Properties
 	{
 		_MainTex ("Texture", 2D) = "white" {}
+		//_SourceTex ("Source Texture", 2D) = "black" {}
 	}
 	SubShader
 	{
@@ -21,9 +22,10 @@
 
 			struct v2f
 			{
-				float2 uv : TEXCOORD0;
 				float4 pos : SV_POSITION;
-				float4 color : TEXCOORD1;
+				float4 color : TEXCOORD0;
+				float2 uv : TEXCOORD1;
+				float2 centerUV : TEXCOORD2;
 			};
 
 			struct CurveStrokeData {
@@ -37,7 +39,7 @@
 			
 			sampler2D _MainTex;
 			float4 _MainTex_ST;
-
+			
 			StructuredBuffer<CurveStrokeData> agentCurveStrokesReadCBuffer;
 			StructuredBuffer<float3> curveRibbonVerticesCBuffer;
 
@@ -78,10 +80,17 @@
 
 				float2 offset = curveBitangent * -curveRibbonVerticesCBuffer[id].x;
 
+				// &&&& Screen-space UV of center of brushstroke:
+				// Magic to get proper UV's for sampling from GBuffers:
+				float4 pos = mul(UNITY_MATRIX_VP, float4(worldPosition, 1.0)); // *** Revisit to better understand!!!! ***
+				float4 centerUV = ComputeScreenPos(pos);
+				o.centerUV = centerUV.xy / centerUV.w;
+
 				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(vertexPos, 0.0f));
 				o.pos = UnityObjectToClipPos(float4(curvePos, 0, 1.0) + float4(offset, 0.0, 0.0));
 				o.color = float4(curveStrokeData.hue,1);				
 				o.uv = uv;
+				
 
 				return o;
 
@@ -94,6 +103,7 @@
 			{
 				// sample the texture
 				fixed4 col = tex2D(_MainTex, i.uv) * i.color;
+				
 				return col;
 			}
 			ENDCG

@@ -17,12 +17,56 @@ public class EnvironmentFluidManager : MonoBehaviour {
     public float colorRefreshGlobalMultiplier = 0.01f;
 
     private RenderTexture velocityA;
+    public RenderTexture _VelocityA
+    {
+        get
+        {
+            return velocityA;
+        }
+        set
+        {
+
+        }
+    }
     private RenderTexture velocityB;
     private RenderTexture pressureA;
+    public RenderTexture _PressureA
+    {
+        get
+        {
+            return pressureA;
+        }
+        set
+        {
+
+        }
+    }
     private RenderTexture pressureB;
     private RenderTexture densityA;
+    public RenderTexture _DensityA
+    {
+        get
+        {
+            return densityA;
+        }
+        set
+        {
+
+        }
+    }
     private RenderTexture densityB;
     private RenderTexture divergence;
+    public RenderTexture _Divergence
+    {
+        get
+        {
+            return divergence;
+        }
+        set
+        {
+
+        }
+    }
     private RenderTexture obstaclesRT;
     public RenderTexture _ObstaclesRT
     {

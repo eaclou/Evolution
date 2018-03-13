@@ -6,6 +6,8 @@ using UnityEngine.Rendering;
 public class TheRenderKing : MonoBehaviour {
 
     // SET IN INSPECTOR!!!::::
+    public EnvironmentFluidManager fluidManager;
+
     public Camera mainRenderCam;
     public Camera fluidObstaclesRenderCamera;
     public Camera fluidColorRenderCamera;
@@ -19,6 +21,10 @@ public class TheRenderKing : MonoBehaviour {
     public Material pointStrokeDisplayMat;
     public Material curveStrokeDisplayMat;
     public Material trailStrokeDisplayMat;
+    public Material frameBufferStrokeDisplayMat;
+
+    public Material fluidRenderMat;
+    private Mesh fluidRenderMesh;
 
     private bool isInitialized = false;
 
@@ -77,7 +83,13 @@ public class TheRenderKing : MonoBehaviour {
         public Vector2 worldPos;
     }
 
-    private int numFloatyBits = 1024 * 100;
+    public struct FrameBufferStrokeData {
+        public Vector3 worldPos;
+    }
+    private int numFrameBufferStrokesPerDimension = 128;
+    private ComputeBuffer frameBufferStrokesCBuffer;
+
+    /*private int numFloatyBits = 1024 * 100;
     private ComputeBuffer floatyBitsCBuffer;
     public Material floatyBitsDisplayMat;
 
@@ -99,6 +111,7 @@ public class TheRenderKing : MonoBehaviour {
     public Material agentProceduralDisplayMat;
     public Material foodProceduralDisplayMat;
     public Material predatorProceduralDisplayMat;
+    */
 
     /* $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  RENDER PIPELINE PSEUDOCODE!!!  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
     1) Standard main camera beauty pass finishes -- Renders Environment & Background objects -- store result in RT to be sampled later by brushstroke shaders
@@ -112,8 +125,8 @@ public class TheRenderKing : MonoBehaviour {
         fluidColorRenderCamera.enabled = false;
     }
     // Use this for initialization:
-    public void InitializeRiseAndShine() {
-        InitializeBuffers();
+    public void InitializeRiseAndShine(SimulationManager simManager) {
+        InitializeBuffers(simManager);
         InitializeMaterials();
         InitializeCommandBuffers();
 
@@ -121,7 +134,7 @@ public class TheRenderKing : MonoBehaviour {
     }
 
     // Actual mix of rendering passes will change!!! 
-    private void InitializeBuffers() {
+    private void InitializeBuffers(SimulationManager simManager) {
         // Set up Quad Mesh billboard for brushStroke rendering
         quadVerticesCBuffer = new ComputeBuffer(6, sizeof(float) * 3);
         quadVerticesCBuffer.SetData(new[] {
@@ -150,6 +163,30 @@ public class TheRenderKing : MonoBehaviour {
 
         // Set up Curve Ribbon Mesh billboard for brushStroke rendering
         InitializeCurveRibbonMeshBuffer();
+
+        InitializeFrameBufferStrokesBuffer();
+
+        fluidRenderMesh = new Mesh();
+        Vector3[] vertices = new Vector3[4];
+        vertices[0] = new Vector3(-simManager._MapSize, -simManager._MapSize, 0f);
+        vertices[1] = new Vector3(simManager._MapSize, -simManager._MapSize, 0f);
+        vertices[2] = new Vector3(-simManager._MapSize, simManager._MapSize, 0f);
+        vertices[3] = new Vector3(simManager._MapSize, simManager._MapSize, 0f);
+
+        Vector2[] uvs = new Vector2[4] {
+            new Vector2(0f, 0f),
+            new Vector2(1f, 0f),
+            new Vector2(0f, 1f),
+            new Vector2(1f, 1f)
+        };
+
+        int[] triangles = new int[6] {
+            0, 3, 1, 0, 2, 3
+        };
+
+        fluidRenderMesh.vertices = vertices;
+        fluidRenderMesh.uv = uvs;
+        fluidRenderMesh.triangles = triangles;
 
         /*
         trailStrokeDataArray = new TrailStrokeData[65 * numTrailPointsPerAgent];
@@ -218,7 +255,11 @@ public class TheRenderKing : MonoBehaviour {
         
         curveStrokeDisplayMat.SetPass(0);
         curveStrokeDisplayMat.SetBuffer("curveRibbonVerticesCBuffer", curveRibbonVerticesCBuffer);
-        curveStrokeDisplayMat.SetBuffer("agentCurveStrokesReadCBuffer", agentCurveStrokesCBuffer);                
+        curveStrokeDisplayMat.SetBuffer("agentCurveStrokesReadCBuffer", agentCurveStrokesCBuffer); 
+                
+        frameBufferStrokeDisplayMat.SetPass(0);
+        frameBufferStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        frameBufferStrokeDisplayMat.SetBuffer("frameBufferStrokesCBuffer", frameBufferStrokesCBuffer); 
 
         /*
         trailStrokeDisplayMat.SetPass(0);
@@ -273,6 +314,21 @@ public class TheRenderKing : MonoBehaviour {
 
         curveRibbonVerticesCBuffer.SetData(verticesArray);
     }
+    private void InitializeFrameBufferStrokesBuffer() {
+        frameBufferStrokesCBuffer = new ComputeBuffer(numFrameBufferStrokesPerDimension * numFrameBufferStrokesPerDimension, sizeof(float) * 3);
+        Vector3[] frameBufferStrokesArray = new Vector3[frameBufferStrokesCBuffer.count];
+        float frameBufferStrokesBounds = 200f;
+        for(int x = 0; x < numFrameBufferStrokesPerDimension; x++) {
+            for(int y = 0; y < numFrameBufferStrokesPerDimension; y++) {
+                int index = x * numFrameBufferStrokesPerDimension + y;
+                float xPos = (float)x / (float)(numFrameBufferStrokesPerDimension - 1) * frameBufferStrokesBounds - frameBufferStrokesBounds / 2f;
+                float yPos = (float)y / (float)(numFrameBufferStrokesPerDimension - 1) * frameBufferStrokesBounds - frameBufferStrokesBounds / 2f;
+                Vector3 pos = new Vector3(xPos + UnityEngine.Random.Range(-0.5f, 0.5f), yPos + UnityEngine.Random.Range(-0.5f, 0.5f), 0f);
+                frameBufferStrokesArray[index] = pos;
+            }
+        }
+        frameBufferStrokesCBuffer.SetData(frameBufferStrokesArray);
+    }
     private void InitializeCommandBuffers() {
 
         cmdBufferMainRender = new CommandBuffer();
@@ -313,32 +369,62 @@ public class TheRenderKing : MonoBehaviour {
     
 
     private void Render() {
-        curveStrokeDisplayMat.SetPass(0);
-        curveStrokeDisplayMat.SetBuffer("curveRibbonVerticesCBuffer", curveRibbonVerticesCBuffer);
-        curveStrokeDisplayMat.SetBuffer("agentCurveStrokes0CBuffer", agentCurveStrokesCBuffer);
-        Graphics.DrawProcedural(MeshTopology.Triangles, numCurveRibbonQuads * 6, agentCurveStrokesCBuffer.count);
+        //curveStrokeDisplayMat.SetPass(0);
+        //curveStrokeDisplayMat.SetBuffer("curveRibbonVerticesCBuffer", curveRibbonVerticesCBuffer);
+        //curveStrokeDisplayMat.SetBuffer("agentCurveStrokes0CBuffer", agentCurveStrokesCBuffer);
+        //Graphics.DrawProcedural(MeshTopology.Triangles, numCurveRibbonQuads * 6, agentCurveStrokesCBuffer.count);
         
     }
     private void TestRenderCommandBuffer() {
-        Debug.Log("TestRenderCommandBuffer()");
+        //Debug.Log("TestRenderCommandBuffer()");
+
+        // To DO:
+        // 1) Wall/Rocks standard shader LIT w/ fog
+        // 2) Background Brushstrokes
+        // 3) Fluid Shader 
+        // 4) Either distortion of Fluid to mimic brushstroke or Dedicated strokes that sample from fluid Color
+        // 5) Floaty bits in Fluid
+        // 6) Ripples/Wakes from movement in fluid
+        // 7) Agent Bodies
+        // 8) Agent Decorations
+        // 9) Agent Trails/Tentacles
+        // 10) Bushes/Trees (scaffolding for food)
+        // 11) Food objects
+        // 12) Predators
 
         cmdBufferMainRender.Clear();
 
         // Create RenderTargets:
-        //int renderedSceneID = Shader.PropertyToID("_RenderedSceneID");
-        //cmdBuffer.GetTemporaryRT(renderedSceneID, -1, -1, 0, FilterMode.Bilinear);  // save contents of Standard Rendering Pipeline
-        //cmdBuffer.Blit(BuiltinRenderTextureType.CameraTarget, renderedSceneID);  // save contents of Standard Rendering Pipeline
+        int renderedSceneID = Shader.PropertyToID("_RenderedSceneID");
+        cmdBufferMainRender.GetTemporaryRT(renderedSceneID, -1, -1, 0, FilterMode.Bilinear);  // save contents of Standard Rendering Pipeline
+        cmdBufferMainRender.Blit(BuiltinRenderTextureType.CameraTarget, renderedSceneID);  // save contents of Standard Rendering Pipeline
 
         RenderTargetIdentifier renderTarget = new RenderTargetIdentifier(BuiltinRenderTextureType.CameraTarget);
         cmdBufferMainRender.SetRenderTarget(renderTarget);  // Set render Target
+        cmdBufferMainRender.ClearRenderTarget(true, true, Color.black, 1.0f);  // clear -- needed???
+        
+        // BACKGROUND STROKES:::
+        frameBufferStrokeDisplayMat.SetPass(0);
+        frameBufferStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        frameBufferStrokeDisplayMat.SetBuffer("frameBufferStrokesCBuffer", frameBufferStrokesCBuffer);         
+        // Use this technique for Environment Brushstrokes:
+        cmdBufferMainRender.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
+        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, frameBufferStrokeDisplayMat, 0, MeshTopology.Triangles, 6, frameBufferStrokesCBuffer.count);
 
+        // FLUID TEST:
+        fluidRenderMat.SetPass(0);
+        fluidRenderMat.SetTexture("_DensityTex", fluidManager._DensityA);
+        fluidRenderMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
+        fluidRenderMat.SetTexture("_PressureTex", fluidManager._PressureA);
+        fluidRenderMat.SetTexture("_DivergenceTex", fluidManager._Divergence);
+        fluidRenderMat.SetTexture("_ObstaclesTex", fluidManager._ObstaclesRT);
+        cmdBufferMainRender.DrawMesh(fluidRenderMesh, Matrix4x4.identity, fluidRenderMat);
+
+        // TEMP AGENTS:
         curveStrokeDisplayMat.SetPass(0);
         curveStrokeDisplayMat.SetBuffer("curveRibbonVerticesCBuffer", curveRibbonVerticesCBuffer);
         curveStrokeDisplayMat.SetBuffer("agentCurveStrokes0CBuffer", agentCurveStrokesCBuffer);
-        
-        //cmdBuffer.SetGlobalTexture("_BrushColorReadTex", sceneRenderID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
-        
-        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, curveStrokeDisplayMat, 0, MeshTopology.Triangles, numCurveRibbonQuads * 6, agentCurveStrokesCBuffer.count);
+        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, curveStrokeDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, agentCurveStrokesCBuffer.count);
     }
     private void OnWillRenderObject() {  // requires MeshRenderer Component to be called
         //Debug.Log("OnWillRenderObject()");

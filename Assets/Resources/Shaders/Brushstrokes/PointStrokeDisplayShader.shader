@@ -44,12 +44,10 @@
 				float2 size;
 			};
 
-
 			StructuredBuffer<AgentSimData> agentSimDataCBuffer;
 			StructuredBuffer<PointStrokeData> pointStrokesCBuffer;
 			StructuredBuffer<float3> quadVerticesCBuffer;
 			
-
 			struct v2f
 			{
 				float4 pos : SV_POSITION;

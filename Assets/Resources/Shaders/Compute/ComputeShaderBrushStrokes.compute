@@ -97,7 +97,7 @@ void CSSinglePassCurveBrushData (uint3 id : SV_DispatchThreadID)
 	CurveStrokeData curveData = agentCurveStrokesWriteCBuffer[id.x];
 	AgentSimData agentData = agentSimDataCBuffer[curveData.parentIndex];
 		
-	float restDistance = 2;
+	float restDistance = 0.4;
 
 	float2 p0 = agentData.worldPos;
 	
