@@ -29,6 +29,17 @@ public class Agent : MonoBehaviour {
     public int ageCounter = 0;
 
     private Vector3 prevPos;
+    public Vector3 _PrevPos
+    {
+        get
+        {
+            return prevPos;
+        }
+        set
+        {
+
+        }
+    }
 
     public Vector2 throttle;
     public Vector2 smoothedThrottle;
@@ -260,7 +271,7 @@ public class Agent : MonoBehaviour {
         ageCounter++;
 
         Vector3 curPos = transform.localPosition;
-
+        /*
         if(rigidBody2D != null) {
             float velScale = 0.17f; ; // Time.fixedDeltaTime * 0.17f; // approx guess for now
             meshRendererFluidCollider.material.SetFloat("_VelX", (curPos.x - prevPos.x) * velScale);
@@ -268,7 +279,7 @@ public class Agent : MonoBehaviour {
 
             meshRendererBeauty.material.SetFloat("_VelX", (curPos.x - prevPos.x) * velScale);
             meshRendererBeauty.material.SetFloat("_VelY", (curPos.y - prevPos.y) * velScale);
-        }
+        }*/
         prevPos = curPos;
     }
 

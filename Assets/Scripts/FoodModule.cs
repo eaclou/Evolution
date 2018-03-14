@@ -31,6 +31,17 @@ public class FoodModule : MonoBehaviour {
     private float isBeingEaten = 0f;
 
     private Vector2 prevPos;
+    public Vector3 _PrevPos
+    {
+        get
+        {
+            return prevPos;
+        }
+        set
+        {
+
+        }
+    }
 
     // Use this for initialization
     void Start() {
@@ -76,13 +87,14 @@ public class FoodModule : MonoBehaviour {
         meshRendererBeauty.material.SetFloat("_IsBeingEaten", isBeingEaten);
 
         Vector3 curPos = transform.localPosition;
-        //if (rigidBody2D != null) {
+        
+        /*//if (rigidBody2D != null) {
         float velScale = 0.17f; ; // Time.fixedDeltaTime * 0.17f; // approx guess for now
         meshRendererFluidCollider.material.SetFloat("_VelX", (curPos.x - prevPos.x) * velScale);
         meshRendererFluidCollider.material.SetFloat("_VelY", (curPos.y - prevPos.y) * velScale);
-        //}
+        //}*/
         prevPos = curPos;
-
+        
         isBeingEaten = 0.0f;
     }
 

@@ -1,0 +1,78 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSGenerateMeshData
+#pragma kernel CSGenerateTriangleIndices
+
+struct TriangleIndexData {
+    int v1;
+    int v2;
+    int v3;
+};
+
+int resolutionX = 16;
+int resolutionZ = 16;
+
+float4 _QuadBounds;  // xy = min, zw = max
+float2 _HeightRange;
+
+Texture2D<float4> heightTexture;
+RWStructuredBuffer<float3> terrainVertexCBuffer;
+RWStructuredBuffer<float2> terrainUVCBuffer;
+RWStructuredBuffer<float3> terrainNormalCBuffer;
+RWStructuredBuffer<float4> terrainColorCBuffer;
+RWStructuredBuffer<TriangleIndexData> terrainTriangleCBuffer;
+
+SamplerState _LinearClamp;
+
+[numthreads(1,1,1)]
+void CSGenerateMeshData (uint3 id : SV_DispatchThreadID)
+{
+	int index = id.x * resolutionZ + id.z;
+
+	float xRange = _QuadBounds.y - _QuadBounds.x;
+	float zRange = _QuadBounds.w - _QuadBounds.z;
+	float xPart = (float)id.x / (float)(resolutionX - 1);
+	float zPart = (float)id.z / (float)(resolutionZ - 1);
+	float x = xPart * xRange + _QuadBounds.x;
+	float z = zPart * zRange + _QuadBounds.z;  // worldCoords
+
+	//float2 globalRange = float2(xRange, zRange);
+	float2 uv = float2(xPart,zPart);
+	
+	float4 textureSample =  heightTexture.SampleLevel(_LinearClamp, uv, 0);
+
+	float heightRange = _HeightRange.y - _HeightRange.x;
+	float height = (1.0 - textureSample.x) * heightRange + _HeightRange.x;
+	
+	terrainVertexCBuffer[index] = float3(x, z, height);
+	terrainUVCBuffer[index] = uv;
+	terrainNormalCBuffer[index] = float3(0,0,1);
+
+	//COLOR:	
+	terrainColorCBuffer[index] = float4(1, 1, 1, 1);	
+}
+
+[numthreads(1,1,1)]
+void CSGenerateTriangleIndices (uint3 id : SV_DispatchThreadID)
+{
+	TriangleIndexData triangleIndexData0;
+	TriangleIndexData triangleIndexData1;
+
+	int index0 = (id.x * (resolutionZ - 1) + id.z) * 2;
+	int index1 = index0 + 1;
+
+	int v00 = id.x * resolutionZ + id.z;
+	int v10 = (id.x + 1) * resolutionZ + id.z;
+	int v01 = id.x * resolutionZ + (id.z + 1);
+	int v11 = (id.x + 1) * resolutionZ + (id.z + 1);
+
+	triangleIndexData0.v1 = v00;
+	triangleIndexData0.v2 = v01;
+	triangleIndexData0.v3 = v11;
+
+	triangleIndexData1.v1 = v00;
+	triangleIndexData1.v2 = v11;
+	triangleIndexData1.v3 = v10;
+
+	terrainTriangleCBuffer[index0] = triangleIndexData0;
+	terrainTriangleCBuffer[index1] = triangleIndexData1;
+}

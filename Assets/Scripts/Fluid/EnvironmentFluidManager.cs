@@ -133,7 +133,8 @@ public class EnvironmentFluidManager : MonoBehaviour {
         //displayMat = GetComponent<MeshRenderer>().material;                
         
         Graphics.Blit(initialDensityTex, densityA);
-        //Graphics.Blit(initialDensityTex, sourceColor);
+        Graphics.Blit(initialDensityTex, densityB);
+        Graphics.Blit(initialDensityTex, sourceColorRT);
         //InitializeVelocity();
         
         forcePointsCBuffer = new ComputeBuffer(numForcePoints, sizeof(float) * 5);

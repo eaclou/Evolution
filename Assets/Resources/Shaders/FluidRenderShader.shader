@@ -62,12 +62,27 @@
 				fixed4 finalColor = float4(0,0,0,1);
 				finalColor.xyz = density.xyz;
 
+				float posterizeLevels = 64;
+
+				//finalColor.xyz = round(finalColor.xyz * posterizeLevels) / posterizeLevels;
+
+				float pressureAmplitude = length(pressure.xy);
+				//finalColor.xyz += (pressureAmplitude * 0.5);
+
+				float velocityAmplitude = length(velocity.xy);
+				//finalColor.xyz += velocityAmplitude * 6;
+
+				float divergenceAmplitude = abs(divergence.x) * 50;
+				//finalColor.xyz += divergenceAmplitude;
+
+				//finalColor.a -= 1.0 - saturate(velocityAmplitude * 36);
+
 				if(obstacles.b > 0.5) {
 					finalColor.a = 0;
 				}
 
-				float pressureAmplitude = length(pressure.xy);
-				finalColor.xyz += (pressureAmplitude * 0.5);
+				//finalColor = obstacles;
+				//finalColor.xy *= 20;
 
 				return finalColor;
 			}

@@ -23,6 +23,17 @@ public class PredatorModule : MonoBehaviour {
     private int framesPerDirChange = 64;
 
     private Vector2 prevPos;
+    public Vector3 _PrevPos
+    {
+        get
+        {
+            return prevPos;
+        }
+        set
+        {
+
+        }
+    }
 
     // Use this for initialization
     void Awake () {
@@ -48,9 +59,11 @@ public class PredatorModule : MonoBehaviour {
         this.GetComponent<Rigidbody2D>().AddForce(new Vector2(speed * randX * Time.deltaTime, speed * randY * Time.deltaTime), ForceMode2D.Impulse);
 
         Vector3 curPos = transform.localPosition;
+        /*
         float velScale = 0.17f; ; // Time.fixedDeltaTime * 0.17f; // approx guess for now
         meshRendererFluidCollider.material.SetFloat("_VelX", (curPos.x - prevPos.x) * velScale);
-        meshRendererFluidCollider.material.SetFloat("_VelY", (curPos.y - prevPos.y) * velScale);
+        meshRendererFluidCollider.material.SetFloat("_VelY", (curPos.y - prevPos.y) * velScale);*/
+
         prevPos = curPos;
     }
 

@@ -411,7 +411,7 @@ public class SimulationManager : MonoBehaviour {
         //stateData Populate Arrays
         simStateData.PopulateSimDataArrays(this);  // reads from GameObject Transforms & RigidBodies!!! ++ from FluidSimulationData!!!
         // Render fluidSimulationCameras()  -- Will that work to actually render at the proper time???? we'll see..... *****
-        theRenderKing.RenderSimulationCameras(); // will pass current info to FluidSim before it Ticks()
+        theRenderKing.RenderSimulationCameras(this); // will pass current info to FluidSim before it Ticks()
         // Reads from CameraRenders, GameObjects, and query GPU for fluidState
         // eventually, if agents get fluid sensors, will want to download FluidSim data from GPU into simStateData!*        
         // ******** REVISIT CODE ORDERING!!!!  -- Should check for death Before or After agent Tick/PhysX ???
@@ -511,7 +511,9 @@ public class SimulationManager : MonoBehaviour {
             // Find which gridCell this Agent is in:    
             Vector2 agentPos = new Vector2(agentsArray[a].transform.localPosition.x, agentsArray[a].transform.localPosition.y);
             int xCoord = Mathf.FloorToInt((agentPos.x + mapSize) / (mapSize * 2f) * (float)agentGridCellResolution);
+            xCoord = Mathf.Clamp(xCoord, 0, agentGridCellResolution);
             int yCoord = Mathf.FloorToInt((agentPos.y + mapSize) / (mapSize * 2f) * (float)agentGridCellResolution);
+            yCoord = Mathf.Clamp(yCoord, 0, agentGridCellResolution);
 
             int closestFriendIndex = a;  // default to self
             float nearestFriendSquaredDistance = float.PositiveInfinity;
