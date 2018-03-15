@@ -1,4 +1,4 @@
-﻿Shader "Unlit/ObstacleStrokeDisplayShader"
+﻿Shader "Unlit/BasicStrokeDisplayShader"
 {
 	Properties
 	{
@@ -27,13 +27,13 @@
 			//float4 _Tint;
 			//float4 _Size;
 
-			struct ObstacleStrokeData {				
+			struct BasicStrokeData {				
 				float2 worldPos;
 				float2 scale;
-				float2 velocity;
+				float4 color;
 			};
 			
-			StructuredBuffer<ObstacleStrokeData> obstacleStrokesCBuffer;
+			StructuredBuffer<BasicStrokeData> basicStrokesCBuffer;
 			StructuredBuffer<float3> quadVerticesCBuffer;
 			
 			struct v2f
@@ -47,7 +47,7 @@
 			{
 				v2f o;
 								
-				ObstacleStrokeData strokeData = obstacleStrokesCBuffer[inst];
+				BasicStrokeData strokeData = basicStrokesCBuffer[inst];
 
 				float3 worldPosition = float3(strokeData.worldPos, 0.0);
 				float3 quadPoint = quadVerticesCBuffer[id];
@@ -58,7 +58,7 @@
 				//o.pos = mul(UNITY_MATRIX_VP, float4(rotatedPoint, 0.0f));
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(quadPoint, 0.0f));
 				
-				o.color = float4(strokeData.velocity, 1, 1);
+				o.color = strokeData.color;
 				
 				float2 uv = quadVerticesCBuffer[id] + 0.5f;
 

@@ -38,22 +38,22 @@ public class CameraManager : MonoBehaviour {
     }
 	
 	// Update is called once per frame
-	void Update () {
+	void FixedUpdate () {
         //targetCamPos = new Vector3(playerAgent.transform.position.x, playerAgent.transform.position.y, -10f);
         //mainCam.transform.position = Vector3.Lerp(mainCam.transform.position, camPos, 0.08f);
         switch (curMode) {
             case GameMode.ModeA:
                 //
-                targetCamPos = targetTransform.position;
+                targetCamPos = Vector3.Lerp(targetCamPos, targetTransform.position, 0.1f);
                 lerpSpeed = lerpSpeedA;
                 break;
             case GameMode.ModeB:
                 //
-                targetCamPos = targetTransform.position;
+                targetCamPos = Vector3.Lerp(targetCamPos, targetTransform.position, 0.1f);
                 lerpSpeed = lerpSpeedB;
                 break;
             case GameMode.ModeC:
-                targetCamPos = Vector3.zero;
+                targetCamPos = Vector3.Lerp(targetCamPos, Vector3.zero, 0.1f);
                 lerpSpeed = lerpSpeedC;
                 //
                 break;
@@ -68,7 +68,7 @@ public class CameraManager : MonoBehaviour {
 
         // Fuck it for now.... stupid lerp jitter...
         // Come back to this after sorting out Execution order and data flow in rest of program...
-        this.transform.position = new Vector3(targetCamPos.x, targetCamPos.y, -10f);
+        this.transform.position = new Vector3(targetCamPos.x, targetCamPos.y, -50f);
 
         //Vector2 
 

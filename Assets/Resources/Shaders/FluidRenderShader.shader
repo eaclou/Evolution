@@ -7,6 +7,7 @@
 		_PressureTex ("_PressureTex", 2D) = "white" {}
 		_DivergenceTex ("_DivergenceTex", 2D) = "white" {}
 		_ObstaclesTex ("_ObstaclesTex", 2D) = "white" {}
+		_TerrainHeightTex ("_TerrainHeightTex", 2D) = "grey" {}
 	}
 	SubShader
 	{
@@ -41,6 +42,7 @@
 			sampler2D _PressureTex;
 			sampler2D _DivergenceTex;
 			sampler2D _ObstaclesTex;
+			sampler2D _TerrainHeightTex;
 			
 			v2f vert (appdata v)
 			{
@@ -75,15 +77,35 @@
 				float divergenceAmplitude = abs(divergence.x) * 50;
 				//finalColor.xyz += divergenceAmplitude;
 
-				//finalColor.a -= 1.0 - saturate(velocityAmplitude * 36);
+				float4 heightTex = tex2D(_TerrainHeightTex, i.uv * 0.5 + 0.25);
+				float altitude = heightTex.x * 2 - 1;  // [-1,1] range
+				//altitude *= -1; // *** invert needed for some reason!!! REVISIT THIS!!! ****
 
-				if(obstacles.b > 0.5) {
-					finalColor.a = 0;
+				finalColor.a -= (1.0 - saturate(velocityAmplitude * 12)) * 0.2;
+
+				float brightness = (finalColor.x + finalColor.y + finalColor.z) / 3.0;
+								
+				finalColor.a = saturate(-altitude);
+
+				float alphaMod = saturate((brightness - 0.5) * -12);
+				finalColor.a = saturate(finalColor.a - alphaMod * 1);
+
+				float shorelineBoost = 1.0 - saturate(-altitude);
+				float distToSeaLevel = abs(altitude);
+				float shoreLerp = 1.0 - distToSeaLevel * 10;
+				//finalColor.a = shorelineBoost;
+				if(altitude < 0 && altitude > -0.1) {
+					finalColor.a = lerp(finalColor.a, shorelineBoost * 0.5, shoreLerp);
 				}
+
+				finalColor.a *= 0.75;
 
 				//finalColor = obstacles;
 				//finalColor.xy *= 20;
-
+				//if(altitude < 0) {
+				//	return float4(1,1,1,1);
+				//}
+				
 				return finalColor;
 			}
 			ENDCG

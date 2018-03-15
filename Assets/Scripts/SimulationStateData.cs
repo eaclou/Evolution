@@ -82,6 +82,7 @@ public class SimulationStateData {
             agentSimDataArray[i].worldPos = new Vector2(agentPos.x, agentPos.y);  // in world(scene) coordinates
             agentSimDataArray[i].velocity = simManager.agentsArray[i].smoothedThrottle; 
             agentSimDataArray[i].heading = simManager.agentsArray[i].facingDirection;
+            agentSimDataArray[i].size = simManager.agentsArray[i].size;
             
             // Z & W coords represents agent's x/y Radii (in FluidCoords)
             // convert from scene coords (-mapSize --> +mapSize to fluid coords (0 --> 1):::

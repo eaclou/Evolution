@@ -30,6 +30,9 @@
 
 			struct FrameBufferStrokeData {
 				float3 worldPos;
+				float2 scale;
+				float2 heading;
+				int brushType;
 			};
 
 			StructuredBuffer<FrameBufferStrokeData> frameBufferStrokesCBuffer;
@@ -40,6 +43,7 @@
 				float4 pos : SV_POSITION;
 				float2 uv : TEXCOORD0;  // uv of the brushstroke quad itself, particle texture
 				float2 centerUV : TEXCOORD1;
+				float3 worldPos : TEXCOORD2;
 			};
 
 			float rand(float2 co){   // OUTPUT is in [0,1] RANGE!!!
@@ -54,6 +58,8 @@
 
 				float3 worldPosition = strokeData.worldPos;
 				float3 quadPoint = quadVerticesCBuffer[id];
+
+				o.worldPos = worldPosition;
 				
 				float random1 = rand(float2(inst, inst));
 				float random2 = rand(float2(random1, random1));
@@ -62,7 +68,7 @@
 
 				//float velMag = saturate(length(agentSimData.velocity)) * 0.5;
 				
-				float2 scale = float2(2,2) * randomAspect;
+				float2 scale = strokeData.scale * randomAspect;
 				quadPoint *= float3(scale, 1.0);
 
 				// &&&& Screen-space UV of center of brushstroke:
@@ -72,9 +78,9 @@
 				o.centerUV = centerUV.xy / centerUV.w;
 
 				// Figure out final facing Vectors!!!
-				//float2 forward0 = agentSimData.heading;
-				//float2 right0 = float2(forward0.y, -forward0.x); // perpendicular to forward vector
-				//float2 rotatedPoint0 = float2(pointStrokeData.localDir.x * right0 + pointStrokeData.localDir.y * forward0);  // Rotate localRotation by AgentRotation
+				float2 forward = strokeData.heading;
+				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
+				float2 rotatedPoint = float2(quadPoint.x * right + quadPoint.y * forward);  // Rotate localRotation by AgentRotation
 
 				//float2 forward1 = rotatedPoint0;
 				//float2 right1 = float2(forward1.y, -forward1.x);
@@ -83,7 +89,7 @@
 				//							 quadPoint.z);
 				
 				//o.pos = mul(UNITY_MATRIX_VP, float4(rotatedPoint, 0.0f));
-				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(quadPoint, 0.0f));
+				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)) + float4(rotatedPoint, 0, 0));
 				//o.color = float4(pointStrokeData.hue,1);
 				
 				//float2 uv0 = quadVerticesCBuffer[id] + 0.5f; // full texture
@@ -122,6 +128,9 @@
 				
 				float4 finalColor = frameBufferColor;
 				finalColor.a = brushColor.a;
+
+				float altitude = i.worldPos.z / 32; // [-1,1] range
+				finalColor.xyz = lerp(finalColor.xyz, float3(0,0.1,0.36), saturate(-altitude) * 0.92);
 				
 				return finalColor;
 				

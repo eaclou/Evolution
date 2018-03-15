@@ -190,6 +190,8 @@ public class SimulationManager : MonoBehaviour {
         // Initialize Agents:
         LoadingInstantiateAgents();  // Fills the AgentsArray, Instantiates Agent Objects (MonoBehaviors + GameObjects)
         LoadingInitializeAgentsFromGenomes(); // This was "RespawnAgents()" --  Used to actually place the Agent in the game in a random spot and set the Agent's atributes ffrom its genome
+        agentsArray[0].humanControlled = true;
+        agentsArray[0].humanControlLerp = 1f;
         // Initialize Food:
         LoadingInstantiateFood();
         LoadingInitializeFoodFromGenome();
@@ -203,10 +205,10 @@ public class SimulationManager : MonoBehaviour {
         // ***** ^^^^^ Might need to call this every frame???
 
         // Hook up Camera to data -- fill out CameraManager class
-
+        cameraManager.targetTransform = agentsArray[0].gameObject.transform;
         // ***** Hook up UI to proper data or find a way to handle that ****
         // possibly just top-down let cameraManager read simulation data
-
+        LoadingHookUpUIManager();
         // Separate class to hold all simulation State Data?
 
         yield return null;
@@ -373,6 +375,14 @@ public class SimulationManager : MonoBehaviour {
         //temp:
         theRenderKing.debugRT = environmentFluidManager._SourceColorRT;
     }
+    private void LoadingHookUpUIManager() {
+        Texture2D playerTex = new Texture2D(4, 2);  // Health, foodAmountRGB, 4 outCommChannels
+        playerTex.filterMode = FilterMode.Point;
+        playerAgent.texture = playerTex;
+
+        uiManager.healthDisplayTex = playerTex;
+        uiManager.SetDisplayTextures();
+    }
     private void LoadingInitializeGridCells() {
         mapGridCellArray = new MapGridCell[agentGridCellResolution][];
         for (int i = 0; i < agentGridCellResolution; i++) {
@@ -411,7 +421,7 @@ public class SimulationManager : MonoBehaviour {
         //stateData Populate Arrays
         simStateData.PopulateSimDataArrays(this);  // reads from GameObject Transforms & RigidBodies!!! ++ from FluidSimulationData!!!
         // Render fluidSimulationCameras()  -- Will that work to actually render at the proper time???? we'll see..... *****
-        theRenderKing.RenderSimulationCameras(this); // will pass current info to FluidSim before it Ticks()
+        theRenderKing.RenderSimulationCameras(); // will pass current info to FluidSim before it Ticks()
         // Reads from CameraRenders, GameObjects, and query GPU for fluidState
         // eventually, if agents get fluid sensors, will want to download FluidSim data from GPU into simStateData!*        
         // ******** REVISIT CODE ORDERING!!!!  -- Should check for death Before or After agent Tick/PhysX ???
@@ -420,7 +430,7 @@ public class SimulationManager : MonoBehaviour {
         CheckForRecordPlayerScore();        
         // **** Figure out proper Execution Order / in which Class to Run RenderOps while being synced w/ results of physX sim!!!
         //theRenderKing.velocityTex = environmentFluidManager.velocityA; // *** Better way to share DATA!!!
-        theRenderKing.Tick(simStateData); // updates all renderData, buffers, brushStrokes etc.
+        theRenderKing.Tick(); // updates all renderData, buffers, brushStrokes etc.
 
         HookUpModules(); // Sets nearest-neighbors etc. feed current data into agent Brains
         
@@ -614,15 +624,21 @@ public class SimulationManager : MonoBehaviour {
         predatorArray[index].transform.localPosition = startPos;
     } // *** confirm these are set up alright      
     public void ProcessDeadAgent(int agentIndex) {
-
-        CheckForRecordAgentScore(agentIndex);
-        ProcessAgentScores(agentIndex);
+        if(agentIndex != 0) { // if not player:
+            CheckForRecordAgentScore(agentIndex);
+            ProcessAgentScores(agentIndex);
         
-        // Updates rankedIndicesArray[] so agents are ordered by score:
-        ProcessAndRankAgentFitness();
+            // Updates rankedIndicesArray[] so agents are ordered by score:
+            ProcessAndRankAgentFitness();
 
-        // Reproduction!!!
-        CreateMutatedCopyOfAgent(agentIndex);        
+            // Reproduction!!!
+            CreateMutatedCopyOfAgent(agentIndex); 
+        }
+        else {
+            Vector3 startPos = new Vector3(UnityEngine.Random.Range(-30f, 30f), UnityEngine.Random.Range(-30f, 30f), 0f);
+            StartPositionGenome startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
+            agentsArray[agentIndex].InitializeAgentFromGenome(agentGenomePoolArray[agentIndex], startPosGenome); // Spawn that genome in dead Agent's body and revive it!
+        }      
     }
     private void CheckForRecordAgentScore(int agentIndex) {
         if (agentsArray[agentIndex].ageCounter > recordBotAge) {
@@ -631,14 +647,19 @@ public class SimulationManager : MonoBehaviour {
     }
     private void ProcessAgentScores(int agentIndex) {
         rollingAverageAgentScore = Mathf.Lerp(rollingAverageAgentScore, (float)agentsArray[agentIndex].ageCounter, 1f / 512f);
-        float approxGen = (float)numAgentsBorn / (float)numAgents;
+        float approxGen = (float)numAgentsBorn / (float)(numAgents - 1);
         if (approxGen > curApproxGen) {
             fitnessScoresEachGenerationList.Add(rollingAverageAgentScore);
             if (rollingAverageAgentScore > agentAvgRecordScore) {
                 agentAvgRecordScore = rollingAverageAgentScore;
             }
             curApproxGen++;
+
+            RefreshFitnessGraphTexture();
         }
+    }
+    private void RefreshFitnessGraphTexture() {
+        uiManager.RefreshFitnessTexture(fitnessScoresEachGenerationList);
     }
     private void ProcessAndRankAgentFitness() {
         // Measure fitness of all current agents (their genomes, actually)

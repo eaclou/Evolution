@@ -3,7 +3,7 @@ Shader "Unlit/FitnessDisplayShader"
 {
 	Properties
 	{
-		_MainTex ("Sprite Texture", 2D) = "black" {}
+		_MainTex ("_MainTex", 2D) = "black" {}
 		_BestScore ("_BestScore", Float) = 1.0		
 	}
 

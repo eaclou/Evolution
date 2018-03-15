@@ -7,6 +7,7 @@ public class TheRenderKing : MonoBehaviour {
 
     // SET IN INSPECTOR!!!::::
     public EnvironmentFluidManager fluidManager;
+    public SimulationManager simManager;
 
     public Camera mainRenderCam;
     public Camera fluidObstaclesRenderCamera;
@@ -38,13 +39,17 @@ public class TheRenderKing : MonoBehaviour {
     public Material curveStrokeDisplayMat;
     public Material trailStrokeDisplayMat;
     public Material frameBufferStrokeDisplayMat;
-    public Material obstacleStrokeDisplayMat;
+    public Material basicStrokeDisplayMat;
     public Material fluidBackgroundColorMat;
+    public Material floatyBitsDisplayMat;
+    public Material ripplesDisplayMat;
 
     public Material fluidRenderMat;
     private Mesh fluidRenderMesh;
 
     private bool isInitialized = false;
+
+    private const float velScale = 0.17f; // Conversion for rigidBody Vel --> fluid vel units ----  // approx guess for now
 
     // Source Data:::
     //public Agent[] agentsArray;
@@ -103,38 +108,46 @@ public class TheRenderKing : MonoBehaviour {
         public Vector2 worldPos;
     }
 
-    public struct ObstacleStrokeData {
+    public struct BasicStrokeData {
         public Vector2 worldPos;
         public Vector2 scale;
-        public Vector2 velocity;
+        public Vector4 color;
     }
-    private ObstacleStrokeData[] obstacleStrokeDataArray;
+    private BasicStrokeData[] obstacleStrokeDataArray;
     private ComputeBuffer obstacleStrokesCBuffer;
+
+    private BasicStrokeData[] colorInjectionStrokeDataArray;
+    private ComputeBuffer colorInjectionStrokesCBuffer;
 
     public struct FrameBufferStrokeData {
         public Vector3 worldPos;
+		public Vector2 scale;
+		public Vector2 heading;
+		public int brushType;
     }
-    private int numFrameBufferStrokesPerDimension = 128;
+    private int numFrameBufferStrokesPerDimension = 256;
     private ComputeBuffer frameBufferStrokesCBuffer;
 
-    /*private int numFloatyBits = 1024 * 100;
+    private int numFloatyBits = 1024 * 32;
     private ComputeBuffer floatyBitsCBuffer;
-    public Material floatyBitsDisplayMat;
-
+        
     private int numRipplesPerAgent = 8;
     private ComputeBuffer ripplesCBuffer;
-    public Material ripplesDisplayMat;
-
-    private int numTrailDotsPerAgent = 128;
-    private ComputeBuffer trailDotsCBuffer;
-    public Material trailDotsDisplayMat;
-
+    
     public struct TrailDotData {
         public int parentIndex;
         public Vector2 coords01;
         public float age;
         public float initAlpha;
     }
+    
+    /*
+
+    private int numTrailDotsPerAgent = 128;
+    private ComputeBuffer trailDotsCBuffer;
+    public Material trailDotsDisplayMat;
+
+    
 
     public Material agentProceduralDisplayMat;
     public Material foodProceduralDisplayMat;
@@ -154,17 +167,27 @@ public class TheRenderKing : MonoBehaviour {
     }
     // Use this for initialization:
     public void InitializeRiseAndShine(SimulationManager simManager) {
-        InitializeBuffers(simManager);
+        this.simManager = simManager;
+
+        InitializeBuffers();
         InitializeMaterials();
         InitializeCommandBuffers();
 
-        InitializeTerrain(simManager);
+        InitializeTerrain();
+
+        AlignFrameBufferStrokesToTerrain();
 
         isInitialized = true;  // we did it, guys!
     }
 
+    private void AlignFrameBufferStrokesToTerrain() {
+        int kernelCSAlignFrameBufferStrokes = computeShaderBrushStrokes.FindKernel("CSAlignFrameBufferStrokes");
+        computeShaderBrushStrokes.SetTexture(kernelCSAlignFrameBufferStrokes, "terrainHeightTex", terrainHeightMap);
+        computeShaderBrushStrokes.SetBuffer(kernelCSAlignFrameBufferStrokes, "terrainFrameBufferStrokesCBuffer", frameBufferStrokesCBuffer);
+        computeShaderBrushStrokes.Dispatch(kernelCSAlignFrameBufferStrokes, frameBufferStrokesCBuffer.count, 1, 1);
+    }
     // Actual mix of rendering passes will change!!! 
-    private void InitializeBuffers(SimulationManager simManager) {
+    private void InitializeBuffers() {
         // Set up Quad Mesh billboard for brushStroke rendering
         quadVerticesCBuffer = new ComputeBuffer(6, sizeof(float) * 3);
         quadVerticesCBuffer.SetData(new[] {
@@ -175,6 +198,9 @@ public class TheRenderKing : MonoBehaviour {
             new Vector3(-0.5f, -0.5f),
             new Vector3(-0.5f, 0.5f)
         });
+
+        // Set up Curve Ribbon Mesh billboard for brushStroke rendering
+        InitializeCurveRibbonMeshBuffer();
 
         // **** Just Curves to start!!!! ********
         curveStrokeDataArray = new CurveStrokeData[64]; // **** Temporarily just for Agents! ******
@@ -191,8 +217,7 @@ public class TheRenderKing : MonoBehaviour {
         agentCurveStrokesCBuffer.SetData(curveStrokeDataArray);
         //agentCurveStrokes1CBuffer = new ComputeBuffer(curveStrokeDataArray.Length, sizeof(float) * 11 + sizeof(int)); // not needed?
 
-        // Set up Curve Ribbon Mesh billboard for brushStroke rendering
-        InitializeCurveRibbonMeshBuffer();
+        
 
         InitializeFrameBufferStrokesBuffer();
 
@@ -219,8 +244,39 @@ public class TheRenderKing : MonoBehaviour {
         fluidRenderMesh.triangles = triangles;
 
 
-        obstacleStrokesCBuffer = new ComputeBuffer(simManager._NumAgents + simManager._NumFood + simManager._NumPredators, sizeof(float) * 6);
-        obstacleStrokeDataArray = new ObstacleStrokeData[obstacleStrokesCBuffer.count];
+        obstacleStrokesCBuffer = new ComputeBuffer(simManager._NumAgents + simManager._NumFood + simManager._NumPredators, sizeof(float) * 8);
+        obstacleStrokeDataArray = new BasicStrokeData[obstacleStrokesCBuffer.count];
+
+        colorInjectionStrokesCBuffer = new ComputeBuffer(simManager._NumAgents + simManager._NumFood + simManager._NumPredators, sizeof(float) * 8);
+        colorInjectionStrokeDataArray = new BasicStrokeData[colorInjectionStrokesCBuffer.count];
+
+        Vector2[] floatyBitsInitPos = new Vector2[numFloatyBits];
+        floatyBitsCBuffer = new ComputeBuffer(numFloatyBits, sizeof(float) * 4);
+        for(int i = 0; i < numFloatyBits; i++) {
+            floatyBitsInitPos[i] = new Vector4(UnityEngine.Random.Range(0.2f, 0.8f), UnityEngine.Random.Range(0.2f, 0.8f), 1f, 0f);
+        }
+        floatyBitsCBuffer.SetData(floatyBitsInitPos);
+        int kernelSimFloatyBits = fluidManager.computeShaderFluidSim.FindKernel("SimFloatyBits");
+        fluidManager.computeShaderFluidSim.SetBuffer(kernelSimFloatyBits, "FloatyBitsCBuffer", floatyBitsCBuffer);
+
+        // RIPPLES:
+        TrailDotData[] ripplesDataArray = new TrailDotData[numRipplesPerAgent * simManager.simStateData.agentSimDataCBuffer.count];
+        for (int i = 0; i < simManager.simStateData.agentSimDataCBuffer.count; i++) {
+            for(int t = 0; t < numRipplesPerAgent; t++) {
+                TrailDotData data = new TrailDotData();
+                data.parentIndex = i;
+                data.coords01 = new Vector2((simManager.simStateData.agentSimDataArray[i].worldPos.x + simManager._MapSize) / (simManager._MapSize * 2f), (simManager.simStateData.agentSimDataArray[i].worldPos.y + simManager._MapSize) / (simManager._MapSize * 2f));
+                data.age = (float)t / (float)numRipplesPerAgent;
+                data.initAlpha = 0f;
+                ripplesDataArray[i * numRipplesPerAgent + t] = data;
+            }
+        }
+        ripplesCBuffer = new ComputeBuffer(numRipplesPerAgent * simManager.simStateData.agentSimDataCBuffer.count, sizeof(int) + sizeof(float) * 4);
+        int kernelSimRipples = fluidManager.computeShaderFluidSim.FindKernel("SimRipples");        
+        fluidManager.computeShaderFluidSim.SetBuffer(kernelSimRipples, "AgentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
+        fluidManager.computeShaderFluidSim.SetBuffer(kernelSimRipples, "RipplesCBuffer", ripplesCBuffer);
+        ripplesCBuffer.SetData(ripplesDataArray); 
+
 
         /*
         trailStrokeDataArray = new TrailStrokeData[65 * numTrailPointsPerAgent];
@@ -235,32 +291,9 @@ public class TheRenderKing : MonoBehaviour {
         agentTrailStrokes1CBuffer = new ComputeBuffer(trailStrokeDataArray.Length, sizeof(float) * 2);
 
 
-        Vector2[] floatyBitsInitPos = new Vector2[numFloatyBits];
-        floatyBitsCBuffer = new ComputeBuffer(numFloatyBits, sizeof(float) * 4);
-        for(int i = 0; i < numFloatyBits; i++) {
-            floatyBitsInitPos[i] = new Vector4(UnityEngine.Random.Range(0.2f, 0.8f), UnityEngine.Random.Range(0.2f, 0.8f), 1f, 0f);
-        }
-        floatyBitsCBuffer.SetData(floatyBitsInitPos);
-        int kernelSimFloatyBits = computeShaderFluidSim.FindKernel("SimFloatyBits");
-        computeShaderFluidSim.SetBuffer(kernelSimFloatyBits, "FloatyBitsCBuffer", floatyBitsCBuffer);
+        
 
-        // RIPPLES:
-        TrailDotData[] ripplesDataArray = new TrailDotData[numRipplesPerAgent * agentSimDataCBuffer.count];
-        for (int i = 0; i < agentSimDataCBuffer.count; i++) {
-            for(int t = 0; t < numRipplesPerAgent; t++) {
-                TrailDotData data = new TrailDotData();
-                data.parentIndex = i;
-                data.coords01 = new Vector2((agentSimDataArray[i].worldPos.x + 70f) / 140f, (agentSimDataArray[i].worldPos.y + 70f) / 140f);
-                data.age = (float)t / (float)numRipplesPerAgent;
-                data.initAlpha = 0f;
-                ripplesDataArray[i * numRipplesPerAgent + t] = data;
-            }
-        }
-        ripplesCBuffer = new ComputeBuffer(numRipplesPerAgent * agentSimDataCBuffer.count, sizeof(int) + sizeof(float) * 4);
-        int kernelSimRipples = computeShaderFluidSim.FindKernel("SimRipples");        
-        computeShaderFluidSim.SetBuffer(kernelSimRipples, "AgentSimDataCBuffer", agentSimDataCBuffer);
-        computeShaderFluidSim.SetBuffer(kernelSimRipples, "RipplesCBuffer", ripplesCBuffer);
-        ripplesCBuffer.SetData(ripplesDataArray); 
+        
         
         // TRAIL DOTS:
         TrailDotData[] trailDotsDataArray = new TrailDotData[numTrailDotsPerAgent * agentSimDataCBuffer.count];
@@ -295,23 +328,26 @@ public class TheRenderKing : MonoBehaviour {
         frameBufferStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         frameBufferStrokeDisplayMat.SetBuffer("frameBufferStrokesCBuffer", frameBufferStrokesCBuffer);
 
-        obstacleStrokeDisplayMat.SetPass(0);
-        obstacleStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        obstacleStrokeDisplayMat.SetBuffer("obstacleStrokesCBuffer", obstacleStrokesCBuffer);
+        basicStrokeDisplayMat.SetPass(0);
+        basicStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        
+        floatyBitsDisplayMat.SetPass(0);
+        floatyBitsDisplayMat.SetBuffer("floatyBitsCBuffer", floatyBitsCBuffer);
+        floatyBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+
+        ripplesDisplayMat.SetPass(0);
+        //ripplesDisplayMat.SetBuffer("agentSimDataCBuffer", agentSimDataCBuffer);
+        ripplesDisplayMat.SetBuffer("trailDotsCBuffer", ripplesCBuffer);
+        ripplesDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
 
         /*
         trailStrokeDisplayMat.SetPass(0);
         trailStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         trailStrokeDisplayMat.SetBuffer("agentTrailStrokesReadCBuffer", agentTrailStrokes0CBuffer);
         
-        floatyBitsDisplayMat.SetPass(0);
-        floatyBitsDisplayMat.SetBuffer("floatyBitsCBuffer", floatyBitsCBuffer);
-        floatyBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);        
               
-        ripplesDisplayMat.SetPass(0);
-        ripplesDisplayMat.SetBuffer("agentSimDataCBuffer", agentSimDataCBuffer);
-        ripplesDisplayMat.SetBuffer("trailDotsCBuffer", ripplesCBuffer);
-        ripplesDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+              
+        
         
         trailDotsDisplayMat.SetPass(0);
         trailDotsDisplayMat.SetBuffer("agentSimDataCBuffer", agentSimDataCBuffer);
@@ -353,16 +389,20 @@ public class TheRenderKing : MonoBehaviour {
         curveRibbonVerticesCBuffer.SetData(verticesArray);
     }
     private void InitializeFrameBufferStrokesBuffer() {
-        frameBufferStrokesCBuffer = new ComputeBuffer(numFrameBufferStrokesPerDimension * numFrameBufferStrokesPerDimension, sizeof(float) * 3);
-        Vector3[] frameBufferStrokesArray = new Vector3[frameBufferStrokesCBuffer.count];
+        frameBufferStrokesCBuffer = new ComputeBuffer(numFrameBufferStrokesPerDimension * numFrameBufferStrokesPerDimension, sizeof(float) * 7 + sizeof(int));
+        FrameBufferStrokeData[] frameBufferStrokesArray = new FrameBufferStrokeData[frameBufferStrokesCBuffer.count];
         float frameBufferStrokesBounds = 280f;
         for(int x = 0; x < numFrameBufferStrokesPerDimension; x++) {
             for(int y = 0; y < numFrameBufferStrokesPerDimension; y++) {
                 int index = x * numFrameBufferStrokesPerDimension + y;
                 float xPos = (float)x / (float)(numFrameBufferStrokesPerDimension - 1) * frameBufferStrokesBounds - frameBufferStrokesBounds / 2f;
                 float yPos = (float)y / (float)(numFrameBufferStrokesPerDimension - 1) * frameBufferStrokesBounds - frameBufferStrokesBounds / 2f;
-                Vector3 pos = new Vector3(xPos + UnityEngine.Random.Range(-0.5f, 0.5f), yPos + UnityEngine.Random.Range(-0.5f, 0.5f), 0f);
-                frameBufferStrokesArray[index] = pos;
+                Vector2 offset = new Vector2(UnityEngine.Random.Range(-0.5f, 0.5f), UnityEngine.Random.Range(-0.5f, 0.5f));
+                Vector3 pos = new Vector3(xPos + offset.x, yPos + offset.y, 0f);
+                frameBufferStrokesArray[index].worldPos = pos;
+                frameBufferStrokesArray[index].scale = new Vector2(2.15f, 4.20f); // Y is forward, along stroke
+                frameBufferStrokesArray[index].heading = new Vector2(1f, 0f);
+                frameBufferStrokesArray[index].brushType = UnityEngine.Random.Range(0,4);
             }
         }
         frameBufferStrokesCBuffer.SetData(frameBufferStrokesArray);
@@ -383,7 +423,7 @@ public class TheRenderKing : MonoBehaviour {
         //()
     }
 
-    private void InitializeTerrain(SimulationManager simManager) {
+    private void InitializeTerrain() {
         Debug.Log("InitializeTerrain!");
 
         int meshResolution = 192;
@@ -487,9 +527,8 @@ public class TheRenderKing : MonoBehaviour {
         return terrainMesh;
     }
     
-    private void PopulateObstaclesBuffer(SimulationManager simManager) {
-        float velScale = 0.17f; ; // Time.fixedDeltaTime * 0.17f; // approx guess for now
-
+    private void PopulateObstaclesBuffer() {
+        
         int baseIndex = 0;
         // AGENTS:
         for(int i = 0; i < simManager.agentsArray.Length; i++) {
@@ -500,7 +539,7 @@ public class TheRenderKing : MonoBehaviour {
             float velX = (agentPos.x - simManager.agentsArray[i]._PrevPos.x) * velScale;
             float velY = (agentPos.y - simManager.agentsArray[i]._PrevPos.y) * velScale;
 
-            obstacleStrokeDataArray[baseIndex + i].velocity = new Vector2(velX, velY);
+            obstacleStrokeDataArray[baseIndex + i].color = new Vector4(velX, velY, 1f, 1f);
         }
         // FOOD:
         baseIndex = simManager.agentsArray.Length;
@@ -512,7 +551,7 @@ public class TheRenderKing : MonoBehaviour {
             float velX = (foodPos.x - simManager.foodArray[i]._PrevPos.x) * velScale;
             float velY = (foodPos.y - simManager.foodArray[i]._PrevPos.y) * velScale;
 
-            obstacleStrokeDataArray[baseIndex + i].velocity = new Vector2(velX, velY);
+            obstacleStrokeDataArray[baseIndex + i].color = new Vector4(velX, velY, 1f, 1f);
         }
         // PREDATORS:
         baseIndex = simManager.agentsArray.Length + simManager.foodArray.Length;
@@ -524,16 +563,57 @@ public class TheRenderKing : MonoBehaviour {
             float velX = (predatorPos.x - simManager.predatorArray[i]._PrevPos.x) * velScale;
             float velY = (predatorPos.y - simManager.predatorArray[i]._PrevPos.y) * velScale;
 
-            obstacleStrokeDataArray[baseIndex + i].velocity = new Vector2(velX, velY);
+            obstacleStrokeDataArray[baseIndex + i].color = new Vector4(velX, velY, 1f, 1f);
         }
 
         obstacleStrokesCBuffer.SetData(obstacleStrokeDataArray);
     }
-    public void RenderSimulationCameras(SimulationManager simManager) { // **** revisit
+    private void PopulateColorInjectionBuffer() {
+        
+        int baseIndex = 0;
+        // AGENTS:
+        for(int i = 0; i < simManager.agentsArray.Length; i++) {
+            Vector3 agentPos = simManager.agentsArray[i].transform.position;
+            colorInjectionStrokeDataArray[baseIndex + i].worldPos = new Vector2(agentPos.x, agentPos.y);
+            colorInjectionStrokeDataArray[baseIndex + i].scale = simManager.agentsArray[i].size * 1.1f; // ** revisit this later // should leave room for velSampling around Agent
+
+            float velX = (agentPos.x - simManager.agentsArray[i]._PrevPos.x) * velScale;
+            float velY = (agentPos.y - simManager.agentsArray[i]._PrevPos.y) * velScale;
+
+            colorInjectionStrokeDataArray[baseIndex + i].color = new Vector4(0.0f, 0.0f, 1f, 1f);
+        }
+        // FOOD:
+        baseIndex = simManager.agentsArray.Length;
+        for(int i = 0; i < simManager.foodArray.Length; i++) {
+            Vector3 foodPos = simManager.foodArray[i].transform.position;
+            colorInjectionStrokeDataArray[baseIndex + i].worldPos = new Vector2(foodPos.x, foodPos.y);
+            colorInjectionStrokeDataArray[baseIndex + i].scale = new Vector2(simManager.foodArray[i].curScale, simManager.foodArray[i].curScale) * 0.85f;
+
+            float velX = (foodPos.x - simManager.foodArray[i]._PrevPos.x) * velScale;
+            float velY = (foodPos.y - simManager.foodArray[i]._PrevPos.y) * velScale;
+
+            colorInjectionStrokeDataArray[baseIndex + i].color = new Vector4(0.25f, 1f, 0.25f, 1);
+        }
+        // PREDATORS:
+        baseIndex = simManager.agentsArray.Length + simManager.foodArray.Length;
+        for(int i = 0; i < simManager.predatorArray.Length; i++) {
+            Vector3 predatorPos = simManager.predatorArray[i].transform.position;
+            colorInjectionStrokeDataArray[baseIndex + i].worldPos = new Vector2(predatorPos.x, predatorPos.y);
+            colorInjectionStrokeDataArray[baseIndex + i].scale = new Vector2(simManager.predatorArray[i].curScale, simManager.predatorArray[i].curScale) * 0.85f;
+
+            float velX = (predatorPos.x - simManager.predatorArray[i]._PrevPos.x) * velScale;
+            float velY = (predatorPos.y - simManager.predatorArray[i]._PrevPos.y) * velScale;
+
+            colorInjectionStrokeDataArray[baseIndex + i].color = new Vector4(1f, 0.25f, 0f, 1);
+        }
+
+        colorInjectionStrokesCBuffer.SetData(colorInjectionStrokeDataArray);
+    }
+    public void RenderSimulationCameras() { // **** revisit
         debugRT = fluidManager._SourceColorRT;
 
         // SOLID OBJECTS OBSTACLES:::
-        PopulateObstaclesBuffer(simManager);  // update data for obstacles before rendering
+        PopulateObstaclesBuffer();  // update data for obstacles before rendering
 
         cmdBufferFluidObstacles.Clear(); // needed since camera clear flag is set to none
         cmdBufferFluidObstacles.SetRenderTarget(fluidManager._ObstaclesRT);
@@ -543,24 +623,30 @@ public class TheRenderKing : MonoBehaviour {
         // Draw Solid Land boundaries:
         cmdBufferFluidObstacles.DrawMesh(terrainMesh, Matrix4x4.identity, terrainObstaclesHeightMaskMat); // Masks out areas above the fluid "Sea Level"
         // Draw dynamic Obstacles:
-        obstacleStrokeDisplayMat.SetPass(0);
-        obstacleStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        obstacleStrokeDisplayMat.SetBuffer("obstacleStrokesCBuffer", obstacleStrokesCBuffer);
-        cmdBufferFluidObstacles.DrawProcedural(Matrix4x4.identity, obstacleStrokeDisplayMat, 0, MeshTopology.Triangles, 6, obstacleStrokesCBuffer.count);
+        basicStrokeDisplayMat.SetPass(0);
+        basicStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer); // *** Needed? or just set it once in beginning....
+        basicStrokeDisplayMat.SetBuffer("basicStrokesCBuffer", obstacleStrokesCBuffer);
+        cmdBufferFluidObstacles.DrawProcedural(Matrix4x4.identity, basicStrokeDisplayMat, 0, MeshTopology.Triangles, 6, obstacleStrokesCBuffer.count);
                 
         Graphics.ExecuteCommandBuffer(cmdBufferFluidObstacles);
         // Still not sure if this will work correctly... ****
-        fluidObstaclesRenderCamera.Render();
+        fluidObstaclesRenderCamera.Render(); // is this even needed? all drawcalls taken care of within commandBuffer?
 
 
         // COLOR INJECTION:::
+        PopulateColorInjectionBuffer(); // update data for colorInjection objects before rendering
+
         cmdBufferFluidColor.Clear(); // needed since camera clear flag is set to none
         cmdBufferFluidColor.SetRenderTarget(fluidManager._SourceColorRT);
         cmdBufferFluidColor.ClearRenderTarget(true, true, Color.black, 1.0f);  // clear -- needed???
         cmdBufferFluidColor.SetViewProjectionMatrices(fluidColorRenderCamera.worldToCameraMatrix, fluidColorRenderCamera.projectionMatrix);
-        cmdBufferFluidColor.Blit(fluidManager.initialDensityTex, fluidManager._SourceColorRT);
+        //cmdBufferFluidColor.Blit(fluidManager.initialDensityTex, fluidManager._SourceColorRT);
         cmdBufferFluidColor.DrawMesh(fluidRenderMesh, Matrix4x4.identity, fluidBackgroundColorMat); // Masks out areas above the fluid "Sea Level"
 
+        basicStrokeDisplayMat.SetPass(0);
+        basicStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        basicStrokeDisplayMat.SetBuffer("basicStrokesCBuffer", colorInjectionStrokesCBuffer);
+        cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, basicStrokeDisplayMat, 0, MeshTopology.Triangles, 6, colorInjectionStrokesCBuffer.count);
         // Render Agent/Food/Pred colors here!!!
         // just use their display renders?
 
@@ -570,33 +656,34 @@ public class TheRenderKing : MonoBehaviour {
         // Update this ^^ to use Graphics.ExecuteCommandBuffer()  ****
     }
 
-    public void Tick(SimulationStateData stateData) {  // should be called from SimManager at proper time!
+    public void Tick() {  // should be called from SimManager at proper time!
 
         // Read current stateData and update all Buffers, send data to GPU
         // Execute computeShaders to update any dynamic particles that are purely cosmetic
 
-        SinglePassCurveBrushData(stateData); // start with this one?
-         
+        SinglePassCurveBrushData(); // start with this one?
+        SimFloatyBits();
+        SimRipples();
     }
     
     // Using this one Primarily for starters!
-    private void SinglePassCurveBrushData(SimulationStateData stateData) {
+    private void SinglePassCurveBrushData() {
         int kernelCSSinglePassCurveBrushData = computeShaderBrushStrokes.FindKernel("CSSinglePassCurveBrushData");
         
-        computeShaderBrushStrokes.SetBuffer(kernelCSSinglePassCurveBrushData, "agentSimDataCBuffer", stateData.agentSimDataCBuffer);
+        computeShaderBrushStrokes.SetBuffer(kernelCSSinglePassCurveBrushData, "agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
         computeShaderBrushStrokes.SetBuffer(kernelCSSinglePassCurveBrushData, "agentCurveStrokesWriteCBuffer", agentCurveStrokesCBuffer);
         computeShaderBrushStrokes.Dispatch(kernelCSSinglePassCurveBrushData, agentCurveStrokesCBuffer.count, 1, 1);        
     }
     
 
-    private void Render() {
+    //private void Render() {
         //curveStrokeDisplayMat.SetPass(0);
         //curveStrokeDisplayMat.SetBuffer("curveRibbonVerticesCBuffer", curveRibbonVerticesCBuffer);
         //curveStrokeDisplayMat.SetBuffer("agentCurveStrokes0CBuffer", agentCurveStrokesCBuffer);
         //Graphics.DrawProcedural(MeshTopology.Triangles, numCurveRibbonQuads * 6, agentCurveStrokesCBuffer.count);
         
-    }
-    private void TestRenderCommandBuffer() {
+    //}
+    private void Render() {
         //Debug.Log("TestRenderCommandBuffer()");
 
         // To DO:
@@ -623,6 +710,7 @@ public class TheRenderKing : MonoBehaviour {
         RenderTargetIdentifier renderTarget = new RenderTargetIdentifier(BuiltinRenderTextureType.CameraTarget);
         cmdBufferMainRender.SetRenderTarget(renderTarget);  // Set render Target
         cmdBufferMainRender.ClearRenderTarget(true, true, Color.black, 1.0f);  // clear -- needed???
+        //cmdBufferMainRender.ClearRenderTarget(true, true, new Color(225f / 255f, 217f / 255f, 200f / 255f), 1.0f);  // clear -- needed???
         
         // BACKGROUND STROKES:::
         frameBufferStrokeDisplayMat.SetPass(0);
@@ -639,7 +727,21 @@ public class TheRenderKing : MonoBehaviour {
         fluidRenderMat.SetTexture("_PressureTex", fluidManager._PressureA);
         fluidRenderMat.SetTexture("_DivergenceTex", fluidManager._Divergence);
         fluidRenderMat.SetTexture("_ObstaclesTex", fluidManager._ObstaclesRT);
+        fluidRenderMat.SetTexture("_TerrainHeightTex", terrainHeightMap);
         cmdBufferMainRender.DrawMesh(fluidRenderMesh, Matrix4x4.identity, fluidRenderMat);
+
+        // FLOATY BITS!
+        floatyBitsDisplayMat.SetPass(0);
+        floatyBitsDisplayMat.SetBuffer("floatyBitsCBuffer", floatyBitsCBuffer);
+        floatyBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, floatyBitsDisplayMat, 0, MeshTopology.Triangles, 6, floatyBitsCBuffer.count);
+
+        // RIPPLES:
+        ripplesDisplayMat.SetPass(0);
+        ripplesDisplayMat.SetBuffer("agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
+        ripplesDisplayMat.SetBuffer("trailDotsCBuffer", ripplesCBuffer);
+        ripplesDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, ripplesDisplayMat, 0, MeshTopology.Triangles, 6, ripplesCBuffer.count);
 
         // TEMP AGENTS:
         curveStrokeDisplayMat.SetPass(0);
@@ -647,10 +749,34 @@ public class TheRenderKing : MonoBehaviour {
         curveStrokeDisplayMat.SetBuffer("agentCurveStrokes0CBuffer", agentCurveStrokesCBuffer);
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, curveStrokeDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, agentCurveStrokesCBuffer.count);
     }
+
+    public void SimFloatyBits() {
+        int kernelSimFloatyBits = fluidManager.computeShaderFluidSim.FindKernel("SimFloatyBits");
+
+        fluidManager.computeShaderFluidSim.SetFloat("_TextureResolution", (float)fluidManager.resolution);
+        fluidManager.computeShaderFluidSim.SetFloat("_DeltaTime", fluidManager.deltaTime);
+        fluidManager.computeShaderFluidSim.SetFloat("_InvGridScale", fluidManager.invGridScale);
+        fluidManager.computeShaderFluidSim.SetBuffer(kernelSimFloatyBits, "FloatyBitsCBuffer", floatyBitsCBuffer);
+        fluidManager.computeShaderFluidSim.SetTexture(kernelSimFloatyBits, "VelocityRead", fluidManager._VelocityA);        
+        fluidManager.computeShaderFluidSim.Dispatch(kernelSimFloatyBits, floatyBitsCBuffer.count / 1024, 1, 1);
+    }
+    private void SimRipples() {
+        int kernelSimRipples = fluidManager.computeShaderFluidSim.FindKernel("SimRipples");
+        
+        fluidManager.computeShaderFluidSim.SetFloat("_TextureResolution", (float)fluidManager.resolution);
+        fluidManager.computeShaderFluidSim.SetFloat("_DeltaTime", fluidManager.deltaTime);
+        fluidManager.computeShaderFluidSim.SetFloat("_InvGridScale", fluidManager.invGridScale);
+
+        fluidManager.computeShaderFluidSim.SetBuffer(kernelSimRipples, "AgentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
+        fluidManager.computeShaderFluidSim.SetBuffer(kernelSimRipples, "RipplesCBuffer", ripplesCBuffer);
+        fluidManager.computeShaderFluidSim.SetTexture(kernelSimRipples, "VelocityRead", fluidManager._VelocityA);
+        fluidManager.computeShaderFluidSim.Dispatch(kernelSimRipples, ripplesCBuffer.count / 8, 1, 1);
+    }
+
     private void OnWillRenderObject() {  // requires MeshRenderer Component to be called
         //Debug.Log("OnWillRenderObject()");
         if (isInitialized) {
-            TestRenderCommandBuffer();
+            Render();
         }
     }
     private void OnRenderObject() { // for direct rendering
@@ -796,33 +922,7 @@ public class TheRenderKing : MonoBehaviour {
     }*/
     
 
-    /*public void SimFloatyBits() {
-        int kernelSimFloatyBits = computeShaderFluidSim.FindKernel("SimFloatyBits");
-
-        computeShaderFluidSim.SetFloat("_TextureResolution", (float)resolution);
-        computeShaderFluidSim.SetFloat("_DeltaTime", deltaTime);
-        computeShaderFluidSim.SetFloat("_InvGridScale", invGridScale);
-        computeShaderFluidSim.SetBuffer(kernelSimFloatyBits, "FloatyBitsCBuffer", floatyBitsCBuffer);
-        computeShaderFluidSim.SetTexture(kernelSimFloatyBits, "VelocityRead", velocityA);        
-        computeShaderFluidSim.Dispatch(kernelSimFloatyBits, floatyBitsCBuffer.count / 1024, 1, 1);
-    }
-
-    private void SimRipples() {
-        int kernelSimRipples = computeShaderFluidSim.FindKernel("SimRipples");
-
-        //TrailDotData[] trailDotsDataArray = new TrailDotData[numTrailDotsPerAgent * agentSimDataCBuffer.count];
-        //trailDotsCBuffer.GetData(trailDotsDataArray);
-        //Debug.Log("Age0 " + trailDotsDataArray[0].age.ToString() + " Age1 " + trailDotsDataArray[1].age.ToString() + " Age2 " + trailDotsDataArray[2].age.ToString() + " Age3 " + trailDotsDataArray[3].age.ToString());
-        
-        computeShaderFluidSim.SetFloat("_TextureResolution", (float)resolution);
-        computeShaderFluidSim.SetFloat("_DeltaTime", deltaTime);
-        computeShaderFluidSim.SetFloat("_InvGridScale", invGridScale);
-
-        computeShaderFluidSim.SetBuffer(kernelSimRipples, "AgentSimDataCBuffer", agentSimDataCBuffer);
-        computeShaderFluidSim.SetBuffer(kernelSimRipples, "RipplesCBuffer", ripplesCBuffer);
-        computeShaderFluidSim.SetTexture(kernelSimRipples, "VelocityRead", velocityA);
-        computeShaderFluidSim.Dispatch(kernelSimRipples, ripplesCBuffer.count / 8, 1, 1);
-    }
+    /*
 
     private void SimTrailDots() {
         int kernelSimTrailDots = computeShaderFluidSim.FindKernel("SimTrailDots");
@@ -872,7 +972,16 @@ public class TheRenderKing : MonoBehaviour {
         }
         if (obstacleStrokesCBuffer != null) {
             obstacleStrokesCBuffer.Release();
-        }        
+        } 
+        if (colorInjectionStrokesCBuffer != null) {
+            colorInjectionStrokesCBuffer.Release();
+        }
+        if (floatyBitsCBuffer != null) {
+            floatyBitsCBuffer.Release();
+        } 
+        if (ripplesCBuffer != null) {
+            ripplesCBuffer.Release();
+        }
     }
 
 

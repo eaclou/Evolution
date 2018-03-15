@@ -122,27 +122,32 @@ public class UIManager : MonoBehaviour {
 
     }
     private void UpdateSimulationUI() {
-        //UpdateScoreText(int score);
-        //SetDisplayTextures();
+        UpdateScoreText(gameManager.simulationManager.playerAgent.ageCounter);
+
+        SetDisplayTextures();
+
+        UpdateDebugUI();
+        
     }
 
     public void UpdateDebugUI() {
 
         // DISABLED!!!! -- Need to establish good method for grabbing data from SimulationManager!
+        SimulationManager simManager = gameManager.simulationManager;
 
-        /*string debugTxt = "Training: False";
-        if (trainingRequirementsMetSupervised) {
-            debugTxt = "Training: ACTIVE   numSamples: " + dataSamplesList.Count.ToString() + "\n";
-            debugTxt += "Gen: " + curGen.ToString() + ", Agent: " + curTestingGenomeSupervised.ToString() + ", Sample: " + curTestingSample.ToString() + "\n";
-            debugTxt += "Fitness Best: " + bestFitnessScoreSupervised.ToString() + " ( Avg: " + avgFitnessLastGenSupervised.ToString() + " ) Blank: " + lastGenBlankAgentFitnessSupervised.ToString() + "\n";
-            debugTxt += "Agent[0] # Neurons: " + agentsArray[0].brain.neuronList.Count.ToString() + ", # Axons: " + agentsArray[0].brain.axonList.Count.ToString() + "\n";
-            debugTxt += "CurOldestAge: " + currentOldestAgent.ToString() + ", numChildrenBorn: " + numPersistentAgentsBorn.ToString() + ", ~Gen: " + ((float)numPersistentAgentsBorn / (float)numAgents).ToString();
-            debugTxt += "\nBotRecordAge: " + recordBotAge.ToString() + ", PlayerRecordAge: " + recordPlayerAge.ToString();
-            debugTxt += "\nAverageAgentScore: " + rollingAverageAgentScore.ToString();
-        }
+        string debugTxt = "Training: False";
+        
+        //debugTxt = "Training: ACTIVE   numSamples: " + dataSamplesList.Count.ToString() + "\n";
+        //debugTxt += "Gen: " + curGen.ToString() + ", Agent: " + curTestingGenomeSupervised.ToString() + ", Sample: " + curTestingSample.ToString() + "\n";
+        //debugTxt += "Fitness Best: " + bestFitnessScoreSupervised.ToString() + " ( Avg: " + avgFitnessLastGenSupervised.ToString() + " ) Blank: " + lastGenBlankAgentFitnessSupervised.ToString() + "\n";
+        debugTxt += "Agent[0] # Neurons: " + simManager.agentsArray[0].brain.neuronList.Count.ToString() + ", # Axons: " + simManager.agentsArray[0].brain.axonList.Count.ToString() + "\n";
+        debugTxt += "CurOldestAge: " + simManager.currentOldestAgent.ToString() + ", numChildrenBorn: " + simManager.numAgentsBorn.ToString() + ", ~Gen: " + ((float)simManager.numAgentsBorn / (float)simManager._NumAgents).ToString();
+        debugTxt += "\nBotRecordAge: " + simManager.recordBotAge.ToString() + ", PlayerRecordAge: " + simManager.recordPlayerAge.ToString();
+        debugTxt += "\nAverageAgentScore: " + simManager.rollingAverageAgentScore.ToString();
+        
         textDebugTrainingInfo.text = debugTxt;
 
-        if (recording) {
+        /*if (recording) {
             ColorBlock colorBlock = buttonToggleRecording.colors;
             colorBlock.normalColor = Color.red;
             colorBlock.highlightedColor = Color.red;
@@ -168,7 +173,7 @@ public class UIManager : MonoBehaviour {
             buttonToggleTrainingSupervised.GetComponentInChildren<Text>().text = "Supervised\nTraining: OFF";
         }
 
-        if (isTrainingPersistent) {
+        if (simManager.isTrainingPersistent) {
             buttonToggleTrainingPersistent.GetComponentInChildren<Text>().text = "Persistent\nTraining: ON";
         }
         else {
@@ -176,13 +181,32 @@ public class UIManager : MonoBehaviour {
         }*/
     }
 
-    public void UpdateScoreText(int score) {
-        //textScore.text = "Score: " + score.ToString();
+    public void RefreshFitnessTexture(List<float> generationScores) {
+        fitnessDisplayTexture.Resize(generationScores.Count, 1);
+
+        // Find Score Range:
+        float bestScore = 1f;
+        for (int i = 0; i < generationScores.Count; i++) {
+            bestScore = Mathf.Max(bestScore, generationScores[i]);
+        }
+        for(int i = 0; i < generationScores.Count; i++) {
+            fitnessDisplayTexture.SetPixel(i, 0, new Color(generationScores[i], 0f, 0f));
+        }
+        fitnessDisplayTexture.Apply();
+
+        fitnessDisplayMat.SetFloat("_BestScore", bestScore);
+        fitnessDisplayMat.SetTexture("_MainTex", fitnessDisplayTexture);
+        
     }
 
+    public void UpdateScoreText(int score) {
+        textScore.text = "Score: " + score.ToString();
+    }
+        
+
     public void SetDisplayTextures() {
-        //foodMat.SetTexture("_MainTex", healthDisplayTex);
-        //hitPointsMat.SetTexture("_MainTex", healthDisplayTex);
+        foodMat.SetTexture("_MainTex", healthDisplayTex);
+        hitPointsMat.SetTexture("_MainTex", healthDisplayTex);
     }
 
     public void ClickStartGame() {

@@ -4,6 +4,7 @@
 #pragma kernel CSSinglePassCurveBrushData
 #pragma kernel CSPinRootTrailStrokesData
 #pragma kernel CSIterateTrailStrokesData
+#pragma kernel CSAlignFrameBufferStrokes
 
 struct AgentSimData {
 	float2 worldPos;
@@ -25,12 +26,22 @@ struct TrailStrokeData {
     float2 worldPos;
 };
 
+struct FrameBufferStrokeData {
+	float3 worldPos;
+	float2 scale;
+	float2 heading;
+	int brushType;
+};
+
 StructuredBuffer<AgentSimData> agentSimDataCBuffer;
 StructuredBuffer<int> agentInitializeCBuffer;
 StructuredBuffer<CurveStrokeData> agentCurveStrokesReadCBuffer;
 RWStructuredBuffer<CurveStrokeData> agentCurveStrokesWriteCBuffer;
 StructuredBuffer<TrailStrokeData> agentTrailStrokesReadCBuffer;
 RWStructuredBuffer<TrailStrokeData> agentTrailStrokesWriteCBuffer;
+
+Texture2D<float4> terrainHeightTex;
+RWStructuredBuffer<FrameBufferStrokeData> terrainFrameBufferStrokesCBuffer;
 
 Texture2D<float4> velocityRead;
 
@@ -96,10 +107,10 @@ void CSSinglePassCurveBrushData (uint3 id : SV_DispatchThreadID)
 {
 	CurveStrokeData curveData = agentCurveStrokesWriteCBuffer[id.x];
 	AgentSimData agentData = agentSimDataCBuffer[curveData.parentIndex];
-		
+			
 	float restDistance = 0.4;
 
-	float2 p0 = agentData.worldPos;
+	float2 p0 = agentData.worldPos + agentData.heading * agentData.size.y * 0.0;
 	
 	float2 p1 = curveData.p1;
 	float2 vec0to1 = p1 - p0; // after p0 has been moved, vector from old P1 to new P0	
@@ -151,4 +162,37 @@ void CSIterateTrailStrokesData (uint3 id : SV_DispatchThreadID)
 
 		agentTrailStrokesWriteCBuffer[trailPointIndex].worldPos = parentPos + normalize(vecParentToCurrent) * restDistance;	
 	}
+}
+
+[numthreads(1,1,1)]
+void CSAlignFrameBufferStrokes (uint3 id : SV_DispatchThreadID)
+{
+	FrameBufferStrokeData data = terrainFrameBufferStrokesCBuffer[id.x];
+
+	// find uv for sampling terrainHeightMap
+
+	float2 uv = (data.worldPos.xy + 140) / 280;
+	float pixelOffset = 1.0 / 512;  // resolution
+
+	float altitudeCenter = terrainHeightTex.SampleLevel(_LinearRepeat, uv, 0).x;
+	float altitudeNorth = terrainHeightTex.SampleLevel(_LinearRepeat, uv + float2(0, pixelOffset), 1).x;
+	float altitudeEast = terrainHeightTex.SampleLevel(_LinearRepeat, uv + float2(pixelOffset, 0), 1).x;
+	float altitudeSouth = terrainHeightTex.SampleLevel(_LinearRepeat, uv + float2(0, -pixelOffset), 1).x;
+	float altitudeWest = terrainHeightTex.SampleLevel(_LinearRepeat, uv + float2(-pixelOffset, 0), 1).x;
+
+	float dX = altitudeEast - altitudeWest;
+	float dY = altitudeNorth - altitudeSouth;
+
+	float2 grad = float2(1,0);
+
+	if(dX != 0 && dY != 0) {
+		grad = normalize(float2(dX, dY));
+	}
+
+	if(altitudeCenter < 0.5) {  // if underwater, follow topographical lines rather than steepestGrade:
+		grad = float2(grad.y, -grad.x);
+	}
+
+	terrainFrameBufferStrokesCBuffer[id.x].heading = grad;
+	terrainFrameBufferStrokesCBuffer[id.x].worldPos.z = altitudeCenter * 64 - 32;
 }

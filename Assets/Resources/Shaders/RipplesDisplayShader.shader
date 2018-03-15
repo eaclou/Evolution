@@ -8,7 +8,7 @@
 	}
 	SubShader
 	{		
-		Tags{ "RenderType" = "Transparant" }
+		Tags{ "RenderType" = "Transparent" }
 		ZWrite Off
 		Cull Off
 		//Blend SrcAlpha One
