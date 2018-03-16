@@ -17,9 +17,13 @@ public class AgentGenome {
         brainGenome = new BrainGenome();
     }
 
-    public void InitializeBodyGenomeFromTemplate(BodyGenome bodyGenomeTemplate) {
-        bodyGenome.CopyBodyGenomeFromTemplate(bodyGenomeTemplate);
+    public void GenerateInitialRandomBodyGenome() {
+        bodyGenome.InitializeAsRandomGenome();
     }
+
+    /*public void InitializeBodyGenomeFromTemplate(BodyGenome bodyGenomeTemplate) {  // OLD
+        bodyGenome.CopyBodyGenomeFromTemplate(bodyGenomeTemplate);
+    }*/
 
     public void InitializeRandomBrainFromCurrentBody(float initialWeightsMultiplier) {
         brainGenome.InitializeRandomBrainGenome(bodyGenome, initialWeightsMultiplier);

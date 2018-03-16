@@ -13,28 +13,13 @@ public class TheRenderKing : MonoBehaviour {
     public Camera fluidObstaclesRenderCamera;
     public Camera fluidColorRenderCamera;
 
-    public GameObject terrainGO;
-    public Material terrainObstaclesHeightMaskMat;
-    public Texture2D terrainHeightMap;
-    private ComputeBuffer terrainVertexCBuffer;
-    private ComputeBuffer terrainUVCBuffer;
-    private ComputeBuffer terrainNormalCBuffer;
-    private ComputeBuffer terrainColorCBuffer;
-    private ComputeBuffer terrainTriangleCBuffer;      
-    public struct TriangleIndexData {
-        public int v1;
-        public int v2;
-        public int v3;
-    }
-    private Mesh terrainMesh;
-
     private CommandBuffer cmdBufferMainRender;
     private CommandBuffer cmdBufferFluidObstacles;
     private CommandBuffer cmdBufferFluidColor;
 
     public ComputeShader computeShaderBrushStrokes;
     public ComputeShader computeShaderTerrainGeneration;
-        
+
     public Material pointStrokeDisplayMat;
     public Material curveStrokeDisplayMat;
     public Material trailStrokeDisplayMat;
@@ -43,88 +28,45 @@ public class TheRenderKing : MonoBehaviour {
     public Material fluidBackgroundColorMat;
     public Material floatyBitsDisplayMat;
     public Material ripplesDisplayMat;
-
     public Material fluidRenderMat;
+
     private Mesh fluidRenderMesh;
 
     private bool isInitialized = false;
 
     private const float velScale = 0.17f; // Conversion for rigidBody Vel --> fluid vel units ----  // approx guess for now
 
-    // Source Data:::
-    //public Agent[] agentsArray;
-    //public Agent playerAgent;
-    //public RenderTexture velocityTex;
+    public GameObject terrainGO;
+    public Material terrainObstaclesHeightMaskMat;
+    public Texture2D terrainHeightMap;         
+    public struct TriangleIndexData {
+        public int v1;
+        public int v2;
+        public int v3;
+    }
+    private Mesh terrainMesh;
 
-    // AGENT LAYERS:
-    // Primer:      -- The backdrop for agent, provides minimum silhouette and bg color/shape
-    // Body:
-    // Decorations:
-
-    PointStrokeData[] pointStrokeDataArray;
+    private ComputeBuffer terrainVertexCBuffer;
+    private ComputeBuffer terrainUVCBuffer;
+    private ComputeBuffer terrainNormalCBuffer;
+    private ComputeBuffer terrainColorCBuffer;
+    private ComputeBuffer terrainTriangleCBuffer; 
+    
+    //PointStrokeData[] pointStrokeDataArray;
     CurveStrokeData[] curveStrokeDataArray;
-    TrailStrokeData[] trailStrokeDataArray;
-
-    //public Vector3[] agentPositionsArray;
-    //public AgentSimData[] agentSimDataArray;
+    //TrailStrokeData[] trailStrokeDataArray;
+    
     private ComputeBuffer quadVerticesCBuffer;  // quad mesh
-    private ComputeBuffer agentPointStrokesCBuffer;  
-    //private ComputeBuffer agentSimDataCBuffer;
+    private ComputeBuffer agentPointStrokesCBuffer;
 
     private int numCurveRibbonQuads = 6;
     private ComputeBuffer curveRibbonVerticesCBuffer;  // short ribbon mesh
     private ComputeBuffer agentCurveStrokesCBuffer;
-    //private ComputeBuffer agentCurveStrokes1CBuffer;
 
     private ComputeBuffer agentTrailStrokes0CBuffer;
     private ComputeBuffer agentTrailStrokes1CBuffer;
     private int numTrailPointsPerAgent = 32;
 
-    public Material debugMaterial;
-    public Mesh debugMesh;
-    public RenderTexture debugRT; // Used to see texture inside editor (inspector)
-        
-
-    public struct PointStrokeData {
-        public int parentIndex;  // what agent/object is this attached to?
-        public Vector2 localScale;
-        public Vector2 localPos;
-        public Vector2 localDir;
-        public Vector3 hue;   // RGB color tint
-        public float strength;  // abstraction for pressure of brushstroke + amount of paint 
-        public int brushType;  // what texture/mask/brush pattern to use
-    }
-
-    public struct CurveStrokeData {
-        public int parentIndex;
-        public Vector3 hue;
-        public Vector2 p0;
-        public Vector2 p1;
-        public Vector2 p2;
-        public Vector2 p3;
-    }
-
-    public struct TrailStrokeData {
-        public Vector2 worldPos;
-    }
-
-    public struct BasicStrokeData {
-        public Vector2 worldPos;
-        public Vector2 scale;
-        public Vector4 color;
-    }
-    private BasicStrokeData[] obstacleStrokeDataArray;
-    private ComputeBuffer obstacleStrokesCBuffer;
-
-    private BasicStrokeData[] colorInjectionStrokeDataArray;
-    private ComputeBuffer colorInjectionStrokesCBuffer;
-
-    public struct FrameBufferStrokeData {
-        public Vector3 worldPos;
-		public Vector2 scale;
-		public Vector2 heading;
-		public int brushType;
-    }
     private int numFrameBufferStrokesPerDimension = 256;
     private ComputeBuffer frameBufferStrokesCBuffer;
 
@@ -133,27 +75,56 @@ public class TheRenderKing : MonoBehaviour {
         
     private int numRipplesPerAgent = 8;
     private ComputeBuffer ripplesCBuffer;
-    
-    public struct TrailDotData {
+
+    private BasicStrokeData[] obstacleStrokeDataArray;
+    private ComputeBuffer obstacleStrokesCBuffer;
+
+    private BasicStrokeData[] colorInjectionStrokeDataArray;
+    private ComputeBuffer colorInjectionStrokesCBuffer;
+
+    public Material debugMaterial;
+    public Mesh debugMesh;
+    public RenderTexture debugRT; // Used to see texture inside editor (inspector)
+        
+
+    public struct PointStrokeData {
+        public int parentIndex;  // what agent/object is this attached to?
+        public Vector2 localPos;
+        public Vector2 localDir;
+        public Vector2 localScale;
+        public Vector3 hue;   // RGB color tint
+        public float strength;  // abstraction for pressure of brushstroke + amount of paint 
+        public int brushType;  // what texture/mask/brush pattern to use
+    }
+    public struct CurveStrokeData {
+        public int parentIndex;
+        public Vector3 hue;
+        public Vector2 p0;
+        public Vector2 p1;
+        public Vector2 p2;
+        public Vector2 p3;
+    }
+    public struct TrailStrokeData {
+        public Vector2 worldPos;
+    }
+    public struct TrailDotData {  // for Ripples (temp)
         public int parentIndex;
         public Vector2 coords01;
         public float age;
         public float initAlpha;
     }
+    public struct BasicStrokeData {  // fluidSim Render -- Obstacles + ColorInjection
+        public Vector2 worldPos;
+        public Vector2 scale;
+        public Vector4 color;
+    }
+    public struct FrameBufferStrokeData { // background terrain
+        public Vector3 worldPos;
+		public Vector2 scale;
+		public Vector2 heading;
+		public int brushType;
+    }
     
-    /*
-
-    private int numTrailDotsPerAgent = 128;
-    private ComputeBuffer trailDotsCBuffer;
-    public Material trailDotsDisplayMat;
-
-    
-
-    public Material agentProceduralDisplayMat;
-    public Material foodProceduralDisplayMat;
-    public Material predatorProceduralDisplayMat;
-    */
-
     /* $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  RENDER PIPELINE PSEUDOCODE!!!  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
     1) Standard main camera beauty pass finishes -- Renders Environment & Background objects -- store result in RT to be sampled later by brushstroke shaders
     2) Background pass Brushstrokes
@@ -202,21 +173,10 @@ public class TheRenderKing : MonoBehaviour {
         // Set up Curve Ribbon Mesh billboard for brushStroke rendering
         InitializeCurveRibbonMeshBuffer();
 
-        // **** Just Curves to start!!!! ********
-        curveStrokeDataArray = new CurveStrokeData[64]; // **** Temporarily just for Agents! ******
-        for (int i = 0; i < curveStrokeDataArray.Length; i++) {
-            curveStrokeDataArray[i] = new CurveStrokeData();
-            curveStrokeDataArray[i].parentIndex = i;
-            curveStrokeDataArray[i].hue = Vector3.one;
-            curveStrokeDataArray[i].p0 = new Vector2(0f, 0f);
-            curveStrokeDataArray[i].p1 = new Vector2(0f, 0.3333f);
-            curveStrokeDataArray[i].p2 = new Vector2(0f, 0.6667f);
-            curveStrokeDataArray[i].p3 = new Vector2(0f, 1f);
-        }
+        // **** Just Curves to start!!!! ********        
+        curveStrokeDataArray = new CurveStrokeData[simManager._NumAgents]; // **** Temporarily just for Agents! ******
         agentCurveStrokesCBuffer = new ComputeBuffer(curveStrokeDataArray.Length, sizeof(float) * 11 + sizeof(int));
-        agentCurveStrokesCBuffer.SetData(curveStrokeDataArray);
-        //agentCurveStrokes1CBuffer = new ComputeBuffer(curveStrokeDataArray.Length, sizeof(float) * 11 + sizeof(int)); // not needed?
-
+        InitializeAgentBodyStrokesBuffer();
         
 
         InitializeFrameBufferStrokesBuffer();
@@ -577,8 +537,8 @@ public class TheRenderKing : MonoBehaviour {
             colorInjectionStrokeDataArray[baseIndex + i].worldPos = new Vector2(agentPos.x, agentPos.y);
             colorInjectionStrokeDataArray[baseIndex + i].scale = simManager.agentsArray[i].size * 1.1f; // ** revisit this later // should leave room for velSampling around Agent
 
-            float velX = (agentPos.x - simManager.agentsArray[i]._PrevPos.x) * velScale;
-            float velY = (agentPos.y - simManager.agentsArray[i]._PrevPos.y) * velScale;
+            //float velX = (agentPos.x - simManager.agentsArray[i]._PrevPos.x) * velScale;
+            //float velY = (agentPos.y - simManager.agentsArray[i]._PrevPos.y) * velScale;
 
             colorInjectionStrokeDataArray[baseIndex + i].color = new Vector4(0.0f, 0.0f, 1f, 1f);
         }
@@ -589,8 +549,8 @@ public class TheRenderKing : MonoBehaviour {
             colorInjectionStrokeDataArray[baseIndex + i].worldPos = new Vector2(foodPos.x, foodPos.y);
             colorInjectionStrokeDataArray[baseIndex + i].scale = new Vector2(simManager.foodArray[i].curScale, simManager.foodArray[i].curScale) * 0.85f;
 
-            float velX = (foodPos.x - simManager.foodArray[i]._PrevPos.x) * velScale;
-            float velY = (foodPos.y - simManager.foodArray[i]._PrevPos.y) * velScale;
+            //float velX = (foodPos.x - simManager.foodArray[i]._PrevPos.x) * velScale;
+            //float velY = (foodPos.y - simManager.foodArray[i]._PrevPos.y) * velScale;
 
             colorInjectionStrokeDataArray[baseIndex + i].color = new Vector4(0.25f, 1f, 0.25f, 1);
         }
@@ -601,8 +561,8 @@ public class TheRenderKing : MonoBehaviour {
             colorInjectionStrokeDataArray[baseIndex + i].worldPos = new Vector2(predatorPos.x, predatorPos.y);
             colorInjectionStrokeDataArray[baseIndex + i].scale = new Vector2(simManager.predatorArray[i].curScale, simManager.predatorArray[i].curScale) * 0.85f;
 
-            float velX = (predatorPos.x - simManager.predatorArray[i]._PrevPos.x) * velScale;
-            float velY = (predatorPos.y - simManager.predatorArray[i]._PrevPos.y) * velScale;
+            //float velX = (predatorPos.x - simManager.predatorArray[i]._PrevPos.x) * velScale;
+            //float velY = (predatorPos.y - simManager.predatorArray[i]._PrevPos.y) * velScale;
 
             colorInjectionStrokeDataArray[baseIndex + i].color = new Vector4(1f, 0.25f, 0f, 1);
         }
@@ -673,6 +633,49 @@ public class TheRenderKing : MonoBehaviour {
         computeShaderBrushStrokes.SetBuffer(kernelCSSinglePassCurveBrushData, "agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
         computeShaderBrushStrokes.SetBuffer(kernelCSSinglePassCurveBrushData, "agentCurveStrokesWriteCBuffer", agentCurveStrokesCBuffer);
         computeShaderBrushStrokes.Dispatch(kernelCSSinglePassCurveBrushData, agentCurveStrokesCBuffer.count, 1, 1);        
+    }
+
+    public void InitializeAgentBodyStrokesBuffer() {
+        for (int i = 0; i < curveStrokeDataArray.Length; i++) {
+            curveStrokeDataArray[i] = new CurveStrokeData();
+            curveStrokeDataArray[i].parentIndex = i; // link to Agent
+            curveStrokeDataArray[i].hue = simManager.agentGenomePoolArray[i].bodyGenome.huePrimary;
+            curveStrokeDataArray[i].p0 = new Vector2(0f, 0f);
+            curveStrokeDataArray[i].p1 = new Vector2(0f, 0.3333f);
+            curveStrokeDataArray[i].p2 = new Vector2(0f, 0.6667f);
+            curveStrokeDataArray[i].p3 = new Vector2(0f, 1f);
+        }        
+        agentCurveStrokesCBuffer.SetData(curveStrokeDataArray);
+    }
+
+    public void UpdateAgentBodyStrokesBuffer(int agentIndex) {
+        // Doing it this way to avoid resetting ALL agents whenever ONE is respawned!
+
+        ComputeBuffer singleAgentCurveStrokeCBuffer = new ComputeBuffer(1, sizeof(float) * 11 + sizeof(int));
+        CurveStrokeData[] singleCurveStrokeArray = new CurveStrokeData[1];
+        
+        singleCurveStrokeArray[0] = new CurveStrokeData();
+        singleCurveStrokeArray[0].parentIndex = agentIndex; // link to Agent
+        singleCurveStrokeArray[0].hue = simManager.agentGenomePoolArray[agentIndex].bodyGenome.huePrimary;
+        singleCurveStrokeArray[0].p0 = new Vector2(0f, 0f);
+        singleCurveStrokeArray[0].p1 = new Vector2(0f, 0.3333f);
+        singleCurveStrokeArray[0].p2 = new Vector2(0f, 0.6667f);
+        singleCurveStrokeArray[0].p3 = new Vector2(0f, 1f);
+               
+        singleAgentCurveStrokeCBuffer.SetData(singleCurveStrokeArray);
+
+        int kernelCSUpdateCurveBrushDataAgentIndex = computeShaderBrushStrokes.FindKernel("CSUpdateCurveBrushDataAgentIndex");
+
+        computeShaderBrushStrokes.SetInt("_CurveStrokesUpdateAgentIndex", agentIndex); // ** can I just use parentIndex instead?
+        computeShaderBrushStrokes.SetBuffer(kernelCSUpdateCurveBrushDataAgentIndex, "agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
+        computeShaderBrushStrokes.SetBuffer(kernelCSUpdateCurveBrushDataAgentIndex, "agentCurveStrokesReadCBuffer", singleAgentCurveStrokeCBuffer);
+        computeShaderBrushStrokes.SetBuffer(kernelCSUpdateCurveBrushDataAgentIndex, "agentCurveStrokesWriteCBuffer", agentCurveStrokesCBuffer);
+        computeShaderBrushStrokes.Dispatch(kernelCSUpdateCurveBrushDataAgentIndex, 1, 1, 1);
+        
+        singleAgentCurveStrokeCBuffer.Release();
+        //curveStrokeDataArray[agentIndex];
+
+        
     }
     
 

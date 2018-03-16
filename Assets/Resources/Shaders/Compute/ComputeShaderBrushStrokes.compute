@@ -1,7 +1,10 @@
 ﻿// Each #kernel tells which function to compile; you can have many kernels
-#pragma kernel CSInitializeCurveBrushData
-#pragma kernel CSIterateCurveBrushData
+//#pragma kernel CSInitializeCurveBrushData
+//#pragma kernel CSIterateCurveBrushData
+
+
 #pragma kernel CSSinglePassCurveBrushData
+#pragma kernel CSUpdateCurveBrushDataAgentIndex
 #pragma kernel CSPinRootTrailStrokesData
 #pragma kernel CSIterateTrailStrokesData
 #pragma kernel CSAlignFrameBufferStrokes
@@ -35,8 +38,10 @@ struct FrameBufferStrokeData {
 
 StructuredBuffer<AgentSimData> agentSimDataCBuffer;
 StructuredBuffer<int> agentInitializeCBuffer;
-StructuredBuffer<CurveStrokeData> agentCurveStrokesReadCBuffer;
+StructuredBuffer<CurveStrokeData> agentCurveStrokesReadCBuffer; // use this for updating
 RWStructuredBuffer<CurveStrokeData> agentCurveStrokesWriteCBuffer;
+int _CurveStrokesUpdateAgentIndex;
+
 StructuredBuffer<TrailStrokeData> agentTrailStrokesReadCBuffer;
 RWStructuredBuffer<TrailStrokeData> agentTrailStrokesWriteCBuffer;
 
@@ -47,60 +52,6 @@ Texture2D<float4> velocityRead;
 
 SamplerState _LinearRepeat;
 
-[numthreads(1,1,1)]
-void CSInitializeCurveBrushData (uint3 id : SV_DispatchThreadID)
-{
-	int agentIndex = agentInitializeCBuffer[id.x];	
-	AgentSimData agentdata = agentSimDataCBuffer[agentIndex];
-	
-	float restDistance = 0.33;
-
-	agentCurveStrokesWriteCBuffer[agentIndex].p0 = agentdata.worldPos; // pin root
-
-	float2 targetPosP1 = agentdata.worldPos - agentdata.heading * restDistance;
-	agentCurveStrokesWriteCBuffer[agentIndex].p1 = targetPosP1;
-
-	float2 targetPosP2 = targetPosP1 - agentdata.heading * restDistance;
-	agentCurveStrokesWriteCBuffer[agentIndex].p2 = targetPosP2;
-
-	float2 targetPosP3 = targetPosP2 - agentdata.heading * restDistance;
-	agentCurveStrokesWriteCBuffer[agentIndex].p3 = targetPosP3;
-}
-
-[numthreads(1,1,1)]
-void CSIterateCurveBrushData (uint3 id : SV_DispatchThreadID)
-{
-	CurveStrokeData oldCurveData = agentCurveStrokesReadCBuffer[id.x];
-	AgentSimData agentData = agentSimDataCBuffer[oldCurveData.parentIndex];
-	
-	float lerpStrength = 0.7;
-	float lerpDecay = 0.6;
-	float restDistance = 0.33;
-
-	CurveStrokeData newCurveData;
-	newCurveData.parentIndex = oldCurveData.parentIndex;
-	newCurveData.hue = oldCurveData.hue;
-
-	newCurveData.p0 = agentData.worldPos + (agentData.heading * agentData.size.y); // pin root to head tip
-
-	float2 targetPosP1 = newCurveData.p0 - agentData.heading * restDistance;
-	newCurveData.p1 = lerp(oldCurveData.p1, targetPosP1, lerpStrength);
-
-	lerpStrength *= lerpDecay;
-
-	float2 vec2to1 = oldCurveData.p2 - oldCurveData.p1;
-	float2 targetPosP2 = oldCurveData.p1 - agentData.heading * restDistance;
-	newCurveData.p2 = lerp(oldCurveData.p2, targetPosP2, lerpStrength);
-
-	lerpStrength *= lerpDecay;
-
-	float2 vec3to2 = oldCurveData.p3 - oldCurveData.p2;
-	float2 targetPosP3 = oldCurveData.p2 - agentData.heading * restDistance;
-	newCurveData.p3 = lerp(oldCurveData.p3, targetPosP3, lerpStrength);
-
-
-	agentCurveStrokesWriteCBuffer[id.x] = newCurveData;
-}
 
 [numthreads(1,1,1)]
 void CSSinglePassCurveBrushData (uint3 id : SV_DispatchThreadID)
@@ -128,6 +79,41 @@ void CSSinglePassCurveBrushData (uint3 id : SV_DispatchThreadID)
 	agentCurveStrokesWriteCBuffer[id.x].p1 = p1;
 	agentCurveStrokesWriteCBuffer[id.x].p2 = p2;
 	agentCurveStrokesWriteCBuffer[id.x].p3 = p3;
+}
+
+[numthreads(1,1,1)]
+void CSUpdateCurveBrushDataAgentIndex (uint3 id : SV_DispatchThreadID)
+{
+	
+	CurveStrokeData curveData = agentCurveStrokesReadCBuffer[0];
+	
+	agentCurveStrokesWriteCBuffer[_CurveStrokesUpdateAgentIndex] = curveData;
+	
+	/*AgentSimData agentData = agentSimDataCBuffer[_CurveStrokesUpdateAgentIndex];
+			
+	float restDistance = 0.4;
+
+	float2 p0 = agentData.worldPos + agentData.heading * agentData.size.y * 0.0;
+	
+	float2 p1 = curveData.p1;
+	float2 vec0to1 = p1 - p0; // after p0 has been moved, vector from old P1 to new P0	
+	p1 = p0 + normalize(vec0to1) * restDistance; 
+
+	float2 p2 = curveData.p2;
+	float2 vec1to2 = p2 - p1;
+	p2 = p1 + normalize(vec1to2) * restDistance; 
+
+	float2 p3 = curveData.p3;
+	float2 vec2to3 = p3 - p2;
+	p3 = p2 + normalize(vec2to3) * restDistance; 
+
+	agentCurveStrokesWriteCBuffer[_CurveStrokesUpdateAgentIndex].p0 = p0;
+	agentCurveStrokesWriteCBuffer[_CurveStrokesUpdateAgentIndex].p1 = p1;
+	agentCurveStrokesWriteCBuffer[_CurveStrokesUpdateAgentIndex].p2 = p2;
+	agentCurveStrokesWriteCBuffer[_CurveStrokesUpdateAgentIndex].p3 = p3;
+
+	//agentCurveStrokesWriteCBuffer[_CurveStrokesUpdateAgentIndex].hue = curveData.hue;	
+	*/
 }
 
 [numthreads(1,1,1)]
@@ -196,3 +182,62 @@ void CSAlignFrameBufferStrokes (uint3 id : SV_DispatchThreadID)
 	terrainFrameBufferStrokesCBuffer[id.x].heading = grad;
 	terrainFrameBufferStrokesCBuffer[id.x].worldPos.z = altitudeCenter * 64 - 32;
 }
+
+
+
+// &&&&& OLD OLD OLD !!! &&&&&&&&&&&
+
+/*[numthreads(1,1,1)]
+void CSInitializeCurveBrushData (uint3 id : SV_DispatchThreadID)
+{
+	int agentIndex = agentInitializeCBuffer[id.x];	
+	AgentSimData agentdata = agentSimDataCBuffer[agentIndex];
+	
+	float restDistance = 0.33;
+
+	agentCurveStrokesWriteCBuffer[agentIndex].p0 = agentdata.worldPos; // pin root
+
+	float2 targetPosP1 = agentdata.worldPos - agentdata.heading * restDistance;
+	agentCurveStrokesWriteCBuffer[agentIndex].p1 = targetPosP1;
+
+	float2 targetPosP2 = targetPosP1 - agentdata.heading * restDistance;
+	agentCurveStrokesWriteCBuffer[agentIndex].p2 = targetPosP2;
+
+	float2 targetPosP3 = targetPosP2 - agentdata.heading * restDistance;
+	agentCurveStrokesWriteCBuffer[agentIndex].p3 = targetPosP3;
+}
+
+[numthreads(1,1,1)]
+void CSIterateCurveBrushData (uint3 id : SV_DispatchThreadID)
+{
+	CurveStrokeData oldCurveData = agentCurveStrokesReadCBuffer[id.x];
+	AgentSimData agentData = agentSimDataCBuffer[oldCurveData.parentIndex];
+	
+	float lerpStrength = 0.7;
+	float lerpDecay = 0.6;
+	float restDistance = 0.33;
+
+	CurveStrokeData newCurveData;
+	newCurveData.parentIndex = oldCurveData.parentIndex;
+	newCurveData.hue = oldCurveData.hue;
+
+	newCurveData.p0 = agentData.worldPos + (agentData.heading * agentData.size.y); // pin root to head tip
+
+	float2 targetPosP1 = newCurveData.p0 - agentData.heading * restDistance;
+	newCurveData.p1 = lerp(oldCurveData.p1, targetPosP1, lerpStrength);
+
+	lerpStrength *= lerpDecay;
+
+	float2 vec2to1 = oldCurveData.p2 - oldCurveData.p1;
+	float2 targetPosP2 = oldCurveData.p1 - agentData.heading * restDistance;
+	newCurveData.p2 = lerp(oldCurveData.p2, targetPosP2, lerpStrength);
+
+	lerpStrength *= lerpDecay;
+
+	float2 vec3to2 = oldCurveData.p3 - oldCurveData.p2;
+	float2 targetPosP3 = oldCurveData.p2 - agentData.heading * restDistance;
+	newCurveData.p3 = lerp(oldCurveData.p3, targetPosP3, lerpStrength);
+
+
+	agentCurveStrokesWriteCBuffer[id.x] = newCurveData;
+}*/

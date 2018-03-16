@@ -11,6 +11,8 @@ public class TestModuleGenome {
     public float accel;
     public float radius;
 
+    // This class "holds" the various input/output channels for use in the Agent's Brain
+
     public TestModuleGenome(int parentID, int inno) {
         this.parentID = parentID;
         this.inno = inno;

@@ -14,6 +14,9 @@ public class MutationSettings {
     public float newLinkChance;
     public float newHiddenNodeChance;
 
+    public float defaultBodyMutationChance;
+    public float defaultBodyMutationStepSize;
+
     public MutationSettings(float initialConnectionChance, float mutationChance, float mutationStepSize, float zeroWeightChance, float weightDecayAmount, float newLinkChance, float newHiddenNodeChance) {
         this.initialConnectionChance = initialConnectionChance;
         this.mutationChance = mutationChance;
@@ -22,5 +25,8 @@ public class MutationSettings {
         this.weightDecayAmount = weightDecayAmount;
         this.newLinkChance = newLinkChance;
         this.newHiddenNodeChance = newHiddenNodeChance;
+
+        defaultBodyMutationChance = 0.05f;
+        defaultBodyMutationStepSize = 0.1f;
     }
 }

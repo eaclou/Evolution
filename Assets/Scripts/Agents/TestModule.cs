@@ -212,6 +212,10 @@ public class TestModule {
         hitPoints[0] = 1f;
         stamina[0] = 1f;
 
+        //if(genome!= null) {
+        //    Debug.Log("!null -- genome.parentID" + genome.parentID.ToString());
+        //}
+        //Debug.Log("genome.parentID" + genome.parentID.ToString());
         parentID = genome.parentID;
         inno = genome.inno;
         //isVisible = agent.isVisible;

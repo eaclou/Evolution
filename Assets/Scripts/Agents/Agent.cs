@@ -11,19 +11,18 @@ public class Agent : MonoBehaviour {
 
     public TestModule testModule;
     private Rigidbody2D rigidBody2D;
-
-    public Vector3 huePrimary;
-    public Vector3 hueSecondary;
-    public TheRenderKing.PointStrokeData bodyPointStroke;
-    public TheRenderKing.PointStrokeData[] decorationPointStrokesArray;
+        
+    //public TheRenderKing.PointStrokeData bodyPointStroke;
+    //public TheRenderKing.PointStrokeData[] decorationPointStrokesArray;
     public Vector2 size;
+
+    //public int sourceGenomeIndex;
     
     public float speed = 75f;
     public bool humanControlled = false;
     public float humanControlLerp = 0f;
     public bool isDead = false;
-
-    //public Material material;
+        
     public Texture2D texture;
 
     public int ageCounter = 0;
@@ -47,7 +46,7 @@ public class Agent : MonoBehaviour {
 
     // Use this for initialization
     private void Awake() {
-        size = new Vector2(1f, 1f);
+        //size = new Vector2(1f, 1f); // Better way to handle this! ****
     }
     void Start() {
         rigidBody2D = GetComponent<Rigidbody2D>();
@@ -338,8 +337,8 @@ public class Agent : MonoBehaviour {
         throttle = new Vector2(horizontalMovementInput, verticalMovementInput);
         smoothedThrottle = Vector2.Lerp(smoothedThrottle, throttle, 0.2f);
         Vector2 throttleForwardDir = throttle.normalized;
-        Vector2 currentRightDir = new Vector2(facingDirection.y, -facingDirection.x); // perpendicular to currentDir, to test for clockwise/counterclockwise
-        float dot = Vector2.Dot(currentRightDir, throttleForwardDir); // pos = clockwise, neg = counterclockwise
+        //Vector2 currentRightDir = new Vector2(facingDirection.y, -facingDirection.x); // perpendicular to currentDir, to test for clockwise/counterclockwise
+        //float dot = Vector2.Dot(currentRightDir, throttleForwardDir); // pos = clockwise, neg = counterclockwise
         /*float extraPush = 0f;
         if(dot > 0) {
             extraPush = 1f;
@@ -357,6 +356,9 @@ public class Agent : MonoBehaviour {
     }
 
     public void InitializeAgentFromGenome(AgentGenome genome, StartPositionGenome startPos) {
+        //sourceGenomeIndex = genomeIndex;
+
+        this.size = genome.bodyGenome.size;
         isDead = false;
         ageCounter = 0;
         this.transform.localPosition = startPos.agentStartPosition;
