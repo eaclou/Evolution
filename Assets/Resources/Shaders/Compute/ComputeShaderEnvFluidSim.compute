@@ -32,6 +32,9 @@ struct AgentSimData {
     float2 worldPos;
     float2 velocity;
     float2 heading;
+	float2 size;
+	float maturity;
+	float decay;
 };
 
 Texture2D<float4> SourceColorTex;
@@ -125,7 +128,7 @@ void SimRipples (uint3 id : SV_DispatchThreadID)
 	if(age >= 1.0) {		
 		nextPos = parentCoords;
 		age -= 1.0;
-		float alpha = saturate(length(agentSimData.velocity * 0.25));
+		float alpha = saturate(length(agentSimData.velocity * 0.25) * agentSimData.maturity * (1 - agentSimData.decay));
 		rippleData.initAlpha = alpha;
 	}		
 	

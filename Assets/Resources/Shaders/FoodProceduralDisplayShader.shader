@@ -8,7 +8,7 @@
 	}
 	SubShader
 	{		
-		Tags{ "RenderType" = "Transparant" }
+		Tags{ "RenderType" = "Transparent" }
 		ZWrite Off
 		Cull Off
 		//Blend SrcAlpha One
@@ -36,8 +36,6 @@
 
 			StructuredBuffer<FoodSimData> foodSimDataCBuffer;
 			StructuredBuffer<float3> quadVerticesCBuffer;
-
-			
 
 			struct v2f
 			{

@@ -29,6 +29,8 @@ public class TheRenderKing : MonoBehaviour {
     public Material floatyBitsDisplayMat;
     public Material ripplesDisplayMat;
     public Material fluidRenderMat;
+    public Material foodProceduralDisplayMat;
+    public Material predatorProceduralDisplayMat;
 
     private Mesh fluidRenderMesh;
 
@@ -53,7 +55,7 @@ public class TheRenderKing : MonoBehaviour {
     private ComputeBuffer terrainTriangleCBuffer; 
     
     //PointStrokeData[] pointStrokeDataArray;
-    CurveStrokeData[] curveStrokeDataArray;
+    CurveStrokeData[] curveStrokeDataArray; // does this need to be global???
     //TrailStrokeData[] trailStrokeDataArray;
     
     private ComputeBuffer quadVerticesCBuffer;  // quad mesh
@@ -62,6 +64,8 @@ public class TheRenderKing : MonoBehaviour {
     private int numCurveRibbonQuads = 6;
     private ComputeBuffer curveRibbonVerticesCBuffer;  // short ribbon mesh
     private ComputeBuffer agentCurveStrokesCBuffer;
+
+    private ComputeBuffer agentEyesPointStrokesCBuffer;
 
     private ComputeBuffer agentTrailStrokes0CBuffer;
     private ComputeBuffer agentTrailStrokes1CBuffer;
@@ -103,7 +107,11 @@ public class TheRenderKing : MonoBehaviour {
         public Vector2 p1;
         public Vector2 p2;
         public Vector2 p3;
-    }
+        public float width;
+        public float restLength;
+        public float strength;
+        public int brushType;
+    }    
     public struct TrailStrokeData {
         public Vector2 worldPos;
     }
@@ -175,9 +183,8 @@ public class TheRenderKing : MonoBehaviour {
 
         // **** Just Curves to start!!!! ********        
         curveStrokeDataArray = new CurveStrokeData[simManager._NumAgents]; // **** Temporarily just for Agents! ******
-        agentCurveStrokesCBuffer = new ComputeBuffer(curveStrokeDataArray.Length, sizeof(float) * 11 + sizeof(int));
-        InitializeAgentBodyStrokesBuffer();
-        
+        agentCurveStrokesCBuffer = new ComputeBuffer(curveStrokeDataArray.Length, sizeof(float) * 14 + sizeof(int) * 2);
+        InitializeAgentBodyStrokesBuffer();        
 
         InitializeFrameBufferStrokesBuffer();
 
@@ -235,9 +242,11 @@ public class TheRenderKing : MonoBehaviour {
         int kernelSimRipples = fluidManager.computeShaderFluidSim.FindKernel("SimRipples");        
         fluidManager.computeShaderFluidSim.SetBuffer(kernelSimRipples, "AgentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
         fluidManager.computeShaderFluidSim.SetBuffer(kernelSimRipples, "RipplesCBuffer", ripplesCBuffer);
-        ripplesCBuffer.SetData(ripplesDataArray); 
+        ripplesCBuffer.SetData(ripplesDataArray);
 
-
+        agentEyesPointStrokesCBuffer = new ComputeBuffer(simManager._NumAgents * 4, sizeof(float) * 10 + sizeof(int) * 2); // pointStrokeData size
+        InitializeAgentEyeStrokesBuffer();
+        
         /*
         trailStrokeDataArray = new TrailStrokeData[65 * numTrailPointsPerAgent];
         for (int i = 0; i < trailStrokeDataArray.Length; i++) {
@@ -275,11 +284,11 @@ public class TheRenderKing : MonoBehaviour {
         */
     }
     private void InitializeMaterials() {
-        /*pointStrokeDisplayMat.SetPass(0);
-        pointStrokeDisplayMat.SetBuffer("agentSimDataCBuffer", agentSimDataCBuffer);
+        pointStrokeDisplayMat.SetPass(0); // Eyes
+        //pointStrokeDisplayMat.SetBuffer("agentSimDataCBuffer", agentSimDataCBuffer);
+        pointStrokeDisplayMat.SetBuffer("pointStrokesCBuffer", agentEyesPointStrokesCBuffer);
         pointStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        */
-        
+                
         curveStrokeDisplayMat.SetPass(0);
         curveStrokeDisplayMat.SetBuffer("curveRibbonVerticesCBuffer", curveRibbonVerticesCBuffer);
         curveStrokeDisplayMat.SetBuffer("agentCurveStrokesReadCBuffer", agentCurveStrokesCBuffer); 
@@ -635,15 +644,70 @@ public class TheRenderKing : MonoBehaviour {
         computeShaderBrushStrokes.Dispatch(kernelCSSinglePassCurveBrushData, agentCurveStrokesCBuffer.count, 1, 1);        
     }
 
+    public void InitializeAgentEyeStrokesBuffer() {
+        PointStrokeData[] agentEyesDataArray = new PointStrokeData[agentEyesPointStrokesCBuffer.count];        
+        for (int i = 0; i < simManager._NumAgents; i++) {
+            PointStrokeData dataLeftIris = new PointStrokeData();
+            dataLeftIris.parentIndex = i;
+            dataLeftIris.localPos = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.localPos;
+            dataLeftIris.localPos.x *= -1f; // LEFT SIDE!
+            dataLeftIris.localDir = new Vector2(0f, 1f);
+            dataLeftIris.localScale = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.localScale;
+            dataLeftIris.hue = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.irisHue;
+            dataLeftIris.strength = 1f;
+            dataLeftIris.brushType = 0; // ** Revisit
+
+            PointStrokeData dataRightIris = new PointStrokeData();
+            dataRightIris.parentIndex = i;
+            dataRightIris.localPos = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.localPos;
+            dataRightIris.localDir = new Vector2(0f, 1f);
+            dataRightIris.localScale = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.localScale;
+            dataRightIris.hue = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.irisHue;
+            dataRightIris.strength = 1f;
+            dataRightIris.brushType = 0; // ** Revisit
+
+            PointStrokeData dataLeftPupil = new PointStrokeData();
+            dataLeftPupil.parentIndex = i;
+            dataLeftPupil.localPos = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.localPos;
+            dataLeftPupil.localPos.x *= -1f; // LEFT SIDE!
+            dataLeftPupil.localDir = new Vector2(0f, 1f);
+            dataLeftPupil.localScale = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.localScale * simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.pupilRadius;
+            dataLeftPupil.hue = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.pupilHue;
+            dataLeftPupil.strength = 1f;
+            dataLeftPupil.brushType = 0; // ** Revisit
+
+            PointStrokeData dataRightPupil = new PointStrokeData();
+            dataRightPupil.parentIndex = i;
+            dataRightPupil.localPos = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.localPos;
+            dataRightPupil.localDir = new Vector2(0f, 1f);
+            dataRightPupil.localScale = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.localScale * simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.pupilRadius;
+            dataRightPupil.hue = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.pupilHue;
+            dataRightPupil.strength = 1f;
+            dataRightPupil.brushType = 0; // ** Revisit
+
+            agentEyesDataArray[i * 4 + 0] = dataLeftIris;
+            agentEyesDataArray[i * 4 + 1] = dataRightIris;
+            agentEyesDataArray[i * 4 + 2] = dataLeftPupil;
+            agentEyesDataArray[i * 4 + 3] = dataRightPupil;
+        }
+        agentEyesPointStrokesCBuffer.SetData(agentEyesDataArray);
+    }
     public void InitializeAgentBodyStrokesBuffer() {
         for (int i = 0; i < curveStrokeDataArray.Length; i++) {
             curveStrokeDataArray[i] = new CurveStrokeData();
             curveStrokeDataArray[i].parentIndex = i; // link to Agent
             curveStrokeDataArray[i].hue = simManager.agentGenomePoolArray[i].bodyGenome.huePrimary;
+
+            curveStrokeDataArray[i].restLength = simManager.agentGenomePoolArray[i].bodyGenome.size.y * 0.4f;
+
             curveStrokeDataArray[i].p0 = new Vector2(0f, 0f);
-            curveStrokeDataArray[i].p1 = new Vector2(0f, 0.3333f);
-            curveStrokeDataArray[i].p2 = new Vector2(0f, 0.6667f);
-            curveStrokeDataArray[i].p3 = new Vector2(0f, 1f);
+            curveStrokeDataArray[i].p1 = curveStrokeDataArray[i].p0 - new Vector2(0f, curveStrokeDataArray[i].restLength);
+            curveStrokeDataArray[i].p2 = curveStrokeDataArray[i].p0 - new Vector2(0f, curveStrokeDataArray[i].restLength * 2f);
+            curveStrokeDataArray[i].p3 = curveStrokeDataArray[i].p0 - new Vector2(0f, curveStrokeDataArray[i].restLength * 3f);
+            curveStrokeDataArray[i].width = simManager.agentGenomePoolArray[i].bodyGenome.size.x;
+            
+            curveStrokeDataArray[i].strength = 1f;
+            curveStrokeDataArray[i].brushType = 0;
         }        
         agentCurveStrokesCBuffer.SetData(curveStrokeDataArray);
     }
@@ -651,16 +715,23 @@ public class TheRenderKing : MonoBehaviour {
     public void UpdateAgentBodyStrokesBuffer(int agentIndex) {
         // Doing it this way to avoid resetting ALL agents whenever ONE is respawned!
 
-        ComputeBuffer singleAgentCurveStrokeCBuffer = new ComputeBuffer(1, sizeof(float) * 11 + sizeof(int));
+        ComputeBuffer singleAgentCurveStrokeCBuffer = new ComputeBuffer(1, sizeof(float) * 14 + sizeof(int) * 2);
         CurveStrokeData[] singleCurveStrokeArray = new CurveStrokeData[1];
         
         singleCurveStrokeArray[0] = new CurveStrokeData();
         singleCurveStrokeArray[0].parentIndex = agentIndex; // link to Agent
         singleCurveStrokeArray[0].hue = simManager.agentGenomePoolArray[agentIndex].bodyGenome.huePrimary;
-        singleCurveStrokeArray[0].p0 = new Vector2(0f, 0f);
-        singleCurveStrokeArray[0].p1 = new Vector2(0f, 0.3333f);
-        singleCurveStrokeArray[0].p2 = new Vector2(0f, 0.6667f);
-        singleCurveStrokeArray[0].p3 = new Vector2(0f, 1f);
+
+        singleCurveStrokeArray[0].restLength = simManager.agentGenomePoolArray[agentIndex].bodyGenome.size.y * 0.4f;
+
+        singleCurveStrokeArray[0].p0 = new Vector2(simManager.agentsArray[agentIndex]._PrevPos.x, simManager.agentsArray[agentIndex]._PrevPos.y);
+        singleCurveStrokeArray[0].p1 = singleCurveStrokeArray[0].p0 - new Vector2(0f, singleCurveStrokeArray[0].restLength);
+        singleCurveStrokeArray[0].p2 = singleCurveStrokeArray[0].p0 - new Vector2(0f, singleCurveStrokeArray[0].restLength * 2f);
+        singleCurveStrokeArray[0].p3 = singleCurveStrokeArray[0].p0 - new Vector2(0f, singleCurveStrokeArray[0].restLength * 3f);
+        singleCurveStrokeArray[0].width = simManager.agentGenomePoolArray[agentIndex].bodyGenome.size.x;
+        
+        singleCurveStrokeArray[0].strength = 1f;
+        singleCurveStrokeArray[0].brushType = 0;
                
         singleAgentCurveStrokeCBuffer.SetData(singleCurveStrokeArray);
 
@@ -673,19 +744,10 @@ public class TheRenderKing : MonoBehaviour {
         computeShaderBrushStrokes.Dispatch(kernelCSUpdateCurveBrushDataAgentIndex, 1, 1, 1);
         
         singleAgentCurveStrokeCBuffer.Release();
-        //curveStrokeDataArray[agentIndex];
 
-        
+        //Debug.Log("Update curve Strokes! [" + singleCurveStrokeArray[0].p0.ToString() + ", " + singleCurveStrokeArray[0].p1.ToString() + ", " + singleCurveStrokeArray[0].p2.ToString() + ", " + singleCurveStrokeArray[0].p3.ToString() + "]");
     }
-    
-
-    //private void Render() {
-        //curveStrokeDisplayMat.SetPass(0);
-        //curveStrokeDisplayMat.SetBuffer("curveRibbonVerticesCBuffer", curveRibbonVerticesCBuffer);
-        //curveStrokeDisplayMat.SetBuffer("agentCurveStrokes0CBuffer", agentCurveStrokesCBuffer);
-        //Graphics.DrawProcedural(MeshTopology.Triangles, numCurveRibbonQuads * 6, agentCurveStrokesCBuffer.count);
-        
-    //}
+  
     private void Render() {
         //Debug.Log("TestRenderCommandBuffer()");
 
@@ -748,9 +810,29 @@ public class TheRenderKing : MonoBehaviour {
 
         // TEMP AGENTS:
         curveStrokeDisplayMat.SetPass(0);
+        curveStrokeDisplayMat.SetBuffer("agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
         curveStrokeDisplayMat.SetBuffer("curveRibbonVerticesCBuffer", curveRibbonVerticesCBuffer);
-        curveStrokeDisplayMat.SetBuffer("agentCurveStrokes0CBuffer", agentCurveStrokesCBuffer);
+        curveStrokeDisplayMat.SetBuffer("agentCurveStrokesReadCBuffer", agentCurveStrokesCBuffer);
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, curveStrokeDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, agentCurveStrokesCBuffer.count);
+
+        // AGENT EYES:
+        pointStrokeDisplayMat.SetPass(0);
+        pointStrokeDisplayMat.SetBuffer("agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
+        pointStrokeDisplayMat.SetBuffer("pointStrokesCBuffer", agentEyesPointStrokesCBuffer);
+        pointStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, pointStrokeDisplayMat, 0, MeshTopology.Triangles, 6, agentEyesPointStrokesCBuffer.count);
+
+        foodProceduralDisplayMat.SetPass(0);
+        foodProceduralDisplayMat.SetBuffer("foodSimDataCBuffer", simManager.simStateData.foodSimDataCBuffer);
+        foodProceduralDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, foodProceduralDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.foodSimDataCBuffer.count);
+        //Graphics.DrawProcedural(MeshTopology.Triangles, 6, simManager.simStateData.foodSimDataCBuffer.count);
+
+        predatorProceduralDisplayMat.SetPass(0);
+        predatorProceduralDisplayMat.SetBuffer("predatorSimDataCBuffer", simManager.simStateData.predatorSimDataCBuffer);
+        predatorProceduralDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, predatorProceduralDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.predatorSimDataCBuffer.count);
+        //Graphics.DrawProcedural(MeshTopology.Triangles, 6, simManager.simStateData.predatorSimDataCBuffer.count);
     }
 
     public void SimFloatyBits() {
@@ -985,6 +1067,10 @@ public class TheRenderKing : MonoBehaviour {
         if (ripplesCBuffer != null) {
             ripplesCBuffer.Release();
         }
+        if (agentEyesPointStrokesCBuffer != null) {
+            agentEyesPointStrokesCBuffer.Release();
+        }
+        
     }
 
 

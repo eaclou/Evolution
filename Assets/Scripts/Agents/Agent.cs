@@ -3,6 +3,38 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Agent : MonoBehaviour {
+
+    public AgentLifeStage curLifeStage;
+    public enum AgentLifeStage {
+        Egg,
+        Mature,
+        Decaying,
+        Null
+    }
+    private int gestationDurationTimeSteps = 60;
+    public int _GestationDurationTimeSteps
+    {
+        get
+        {
+            return gestationDurationTimeSteps;
+        }
+        set
+        {
+
+        }
+    }
+    private int decayDurationTimeSteps = 60;
+    public int _DecayDurationTimeSteps
+    {
+        get
+        {
+            return decayDurationTimeSteps;
+        }
+        set
+        {
+
+        }
+    }
    
     public Brain brain;
 
@@ -21,11 +53,12 @@ public class Agent : MonoBehaviour {
     public float speed = 75f;
     public bool humanControlled = false;
     public float humanControlLerp = 0f;
-    public bool isDead = false;
+    public bool isNull = false;
         
     public Texture2D texture;
 
-    public int ageCounter = 0;
+    public int ageCounterMature = 0; // only counts when agent is an adult
+    public int lifeStageTransitionTimeStepCounter = 0; // keeps track of how long agent has been in its current lifeStage
 
     private Vector3 prevPos;
     public Vector3 _PrevPos
@@ -48,7 +81,7 @@ public class Agent : MonoBehaviour {
     private void Awake() {
         //size = new Vector2(1f, 1f); // Better way to handle this! ****
     }
-    void Start() {
+    void Start() { // *** MOVE THIS TO BETTER SPOT! ***
         rigidBody2D = GetComponent<Rigidbody2D>();
         prevPos = transform.localPosition;
         facingDirection = new Vector2(0f, 1f);
@@ -209,20 +242,15 @@ public class Agent : MonoBehaviour {
     public void ReplaceBrain(AgentGenome genome) {
         brain = new Brain(genome.brainGenome, this);
     }
-    public void ResetAgent() {  // for when an agent dies, this resets attributes, moves to new spawnPos, switches Brain etc.aw
+    /*public void ResetAgent() {  // for when an agent dies, this resets attributes, moves to new spawnPos, switches Brain etc.aw
 
-    }
+    }*/
     public void ResetBrainState() {
         brain.ResetBrainState();
     }
     
     public void TickBrain() {
-        //float startTime = Time.realtimeSinceStartup;
         brain.BrainMasterFunction();
-        //float endTime = Time.realtimeSinceStartup;
-        //if(endTime - startTime > 0.1f) {
-        //    Debug.Log("TickBrain " + (endTime - startTime).ToString() + "s");
-        //}
     }
     public void TickModules() {
         testModule.Tick();
@@ -230,23 +258,91 @@ public class Agent : MonoBehaviour {
         //enemyModule.Tick();
     }
 
-    public void Tick() {
-        // Any external inputs updated by simManager just before this
-        TickModules(); // update inputs for Brain
-
-        // Check for Death:
-        //float minFood = Mathf.Min(Mathf.Min(testModule.foodAmountR[0], testModule.foodAmountG[0]), testModule.foodAmountB[0]);
-        float maxFood = Mathf.Max(Mathf.Max(testModule.foodAmountR[0], testModule.foodAmountG[0]), testModule.foodAmountB[0]);
-        if (maxFood <= 0f) {
-            // DEAD FROM STARVATION!!!!
-            isDead = true;
-            //Debug.Log("Agent Starved to DEATH!!!");
+    private void CheckForLifeStageTransition() {
+        switch(curLifeStage) {
+            case AgentLifeStage.Egg:
+                //
+                if(lifeStageTransitionTimeStepCounter >= gestationDurationTimeSteps) {
+                    curLifeStage = AgentLifeStage.Mature;
+                    //Debug.Log("EGG HATCHED!");
+                    lifeStageTransitionTimeStepCounter = 0;
+                }
+                break;
+            case AgentLifeStage.Mature:
+                //
+                // Check for Death:
+                //float minFood = Mathf.Min(Mathf.Min(testModule.foodAmountR[0], testModule.foodAmountG[0]), testModule.foodAmountB[0]);
+                float maxFood = Mathf.Max(Mathf.Max(testModule.foodAmountR[0], testModule.foodAmountG[0]), testModule.foodAmountB[0]);
+                if (maxFood <= 0f) {
+                    curLifeStage = AgentLifeStage.Decaying;
+                    //isNull = true;
+                }
+                break;
+            case AgentLifeStage.Decaying:
+                //
+                if(lifeStageTransitionTimeStepCounter >= decayDurationTimeSteps) {
+                    curLifeStage = AgentLifeStage.Null;
+                    //Debug.Log("AGENT NO LONGER EXISTS!");
+                    lifeStageTransitionTimeStepCounter = 0;
+                    isNull = true;  // flagged for respawn
+                }
+                break;
+            case AgentLifeStage.Null:
+                //
+                Debug.Log("agent is null - probably shouldn't have gotten to this point...;");
+                break;
+            default:
+                Debug.LogError("NO SUCH ENUM ENTRY IMPLEMENTED, YOU FOOL!!! (" + curLifeStage.ToString() + ")");
+                break;
         }
 
+        if (testModule.hitPoints[0] <= 0f) {
+
+            curLifeStage = AgentLifeStage.Decaying;
+            //Debug.Log("Agent DEAD!");
+        }
+    }
+
+    public void Tick() {
+        // Any external inputs updated by simManager just before this
+
+        // Check for StateChange:
+        CheckForLifeStageTransition();
+        
+        switch(curLifeStage) {
+            case AgentLifeStage.Egg:
+                //
+                TickEgg();
+                break;
+            case AgentLifeStage.Mature:
+                //
+                TickMature();
+                break;
+            case AgentLifeStage.Decaying:
+                //
+                TickDecaying();
+                break;
+            case AgentLifeStage.Null:
+                //
+                //Debug.Log("agent is null - probably shouldn't have gotten to this point...;");
+                break;
+            default:
+                Debug.LogError("NO SUCH ENUM ENTRY IMPLEMENTED, YOU FOOL!!! (" + curLifeStage.ToString() + ")");
+                break;
+        }
+        
+        Vector3 curPos = transform.localPosition;        
+        prevPos = curPos;
+    }
+
+    private void TickEgg() {
+        lifeStageTransitionTimeStepCounter++;
+    }
+    private void TickMature() {
+        TickModules(); // update inputs for Brain        
         TickBrain(); // Tick Brain
         TickActions(); // Execute Actions
-
-
+        
         // DebugDisplay
         if(texture != null) {
             //Debug.Log(texture.ToString());
@@ -267,46 +363,16 @@ public class Agent : MonoBehaviour {
             texture.Apply();
         }
 
-        ageCounter++;
-
-        Vector3 curPos = transform.localPosition;
-        /*
-        if(rigidBody2D != null) {
-            float velScale = 0.17f; ; // Time.fixedDeltaTime * 0.17f; // approx guess for now
-            meshRendererFluidCollider.material.SetFloat("_VelX", (curPos.x - prevPos.x) * velScale);
-            meshRendererFluidCollider.material.SetFloat("_VelY", (curPos.y - prevPos.y) * velScale);
-
-            meshRendererBeauty.material.SetFloat("_VelX", (curPos.x - prevPos.x) * velScale);
-            meshRendererBeauty.material.SetFloat("_VelY", (curPos.y - prevPos.y) * velScale);
-        }*/
-        prevPos = curPos;
+        ageCounterMature++;
+    }
+    private void TickDecaying() {
+        lifeStageTransitionTimeStepCounter++;
     }
 
     public void TickActions() {
         float horizontalMovementInput = 0f;
         float verticalMovementInput = 0f;
-
-        /*if (humanControlled) {
-            horizontalMovementInput = 0f;
-            if (Input.GetKey("left") || Input.GetKey("a")) {
-                horizontalMovementInput -= 1f;
-            }
-            if (Input.GetKey("right") || Input.GetKey("d")) {
-                horizontalMovementInput += 1f;
-            }
-            verticalMovementInput = 0f;
-            if (Input.GetKey("up") || Input.GetKey("w")) {
-                verticalMovementInput += 1f;
-            }
-            if (Input.GetKey("down") || Input.GetKey("s")) {
-                verticalMovementInput -= 1f;
-            }
-        }
-        else {
-            horizontalMovementInput = Mathf.Round(testModule.throttleX[0] * 3f / 2f);
-            verticalMovementInput = Mathf.Round(testModule.throttleY[0] * 3f / 2f);
-        }*/
-
+        
         float horHuman = 0f;
         float verHuman = 0f;
         if (Input.GetKey("left") || Input.GetKey("a")) {
@@ -331,21 +397,17 @@ public class Agent : MonoBehaviour {
         
         // MOVEMENT HERE:
         this.GetComponent<Rigidbody2D>().AddForce(new Vector2(speed * horizontalMovementInput * Time.deltaTime, speed * verticalMovementInput * Time.deltaTime), ForceMode2D.Impulse);
-        //this.GetComponent<Rigidbody2D>().AddForce(new Vector2(0f, speed * verticalMovementInput * Time.deltaTime), ForceMode2D.Impulse);
-
+        
         // Facing Direction:
         throttle = new Vector2(horizontalMovementInput, verticalMovementInput);
         smoothedThrottle = Vector2.Lerp(smoothedThrottle, throttle, 0.2f);
         Vector2 throttleForwardDir = throttle.normalized;
-        //Vector2 currentRightDir = new Vector2(facingDirection.y, -facingDirection.x); // perpendicular to currentDir, to test for clockwise/counterclockwise
-        //float dot = Vector2.Dot(currentRightDir, throttleForwardDir); // pos = clockwise, neg = counterclockwise
-        /*float extraPush = 0f;
-        if(dot > 0) {
-            extraPush = 1f;
+
+        if(curLifeStage == AgentLifeStage.Decaying || curLifeStage == AgentLifeStage.Egg) {
+            throttle = Vector2.zero;
+            smoothedThrottle = Vector2.zero;
         }
-        else {
-            extraPush = -1f;
-        }*/
+        
         if(throttle.sqrMagnitude > 0.01f)
             facingDirection = Vector2.Lerp(facingDirection + Vector2.one * 0.025f, throttleForwardDir, 0.25f).normalized;
     }
@@ -358,13 +420,18 @@ public class Agent : MonoBehaviour {
     public void InitializeAgentFromGenome(AgentGenome genome, StartPositionGenome startPos) {
         //sourceGenomeIndex = genomeIndex;
 
+        curLifeStage = AgentLifeStage.Egg;
         this.size = genome.bodyGenome.size;
-        isDead = false;
-        ageCounter = 0;
+        isNull = false;
+        lifeStageTransitionTimeStepCounter = 0;
+        ageCounterMature = 0;
         this.transform.localPosition = startPos.agentStartPosition;
         this.transform.localScale = new Vector3(size.x, size.y, 1f);
         InitializeModules(genome, this, startPos);      // Modules need to be created first so that Brain can map its neurons to existing modules  
         brain = new Brain(genome.brainGenome, this);
+        facingDirection = new Vector2(0f, 1f);
+        throttle = Vector2.zero;
+        smoothedThrottle = Vector2.zero;
         prevPos = transform.localPosition;
     }
 }

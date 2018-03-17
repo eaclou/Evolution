@@ -26,7 +26,7 @@
 				float4 pos : SV_POSITION;
 				float4 color : TEXCOORD0;
 				float2 uv : TEXCOORD1;
-				float2 centerUV : TEXCOORD2;
+				//float2 centerUV : TEXCOORD2;
 			};
 
 			struct CurveStrokeData {
@@ -36,11 +36,25 @@
 				float2 p1;
 				float2 p2;
 				float2 p3;
+				float width;
+				float restLength;
+				float strength;
+				int brushType;
 			};
-			
+
+			struct AgentSimData {
+				float2 worldPos;
+				float2 velocity;
+				float2 heading;
+				float2 size;
+				float maturity;
+				float decay;
+			};
+
 			sampler2D _MainTex;
 			float4 _MainTex_ST;
 			
+			StructuredBuffer<AgentSimData> agentSimDataCBuffer;
 			StructuredBuffer<CurveStrokeData> agentCurveStrokesReadCBuffer;
 			StructuredBuffer<float3> curveRibbonVerticesCBuffer;
 
@@ -61,7 +75,7 @@
 			{
 				v2f o;
 				CurveStrokeData curveStrokeData = agentCurveStrokesReadCBuffer[inst];
-				//AgentSimData agentSimData = agentSimDataCBuffer[curveStrokeData.parentIndex];
+				AgentSimData agentSimData = agentSimDataCBuffer[curveStrokeData.parentIndex];
 
 				float3 worldPosition = float3(curveStrokeData.p0, -0.6);
 				float3 vertexPos = curveRibbonVerticesCBuffer[id];
@@ -79,23 +93,29 @@
 				float2 curveTangent = normalize(GetFirstDerivative(curveStrokeData.p0, curveStrokeData.p1, curveStrokeData.p2, curveStrokeData.p3, t));
 				float2 curveBitangent = float2(curveTangent.y, -curveTangent.x);
 
-				float2 offset = curveBitangent * -curveRibbonVerticesCBuffer[id].x;
+				float2 offset = curveBitangent * -curveRibbonVerticesCBuffer[id].x * curveStrokeData.width * agentSimData.maturity;
 
 				// &&&& Screen-space UV of center of brushstroke:
 				// Magic to get proper UV's for sampling from GBuffers:
-				float4 pos = mul(UNITY_MATRIX_VP, float4(worldPosition, 1.0)); // *** Revisit to better understand!!!! ***
-				float4 centerUV = ComputeScreenPos(pos);
-				o.centerUV = centerUV.xy / centerUV.w;
+				//float4 pos = mul(UNITY_MATRIX_VP, float4(worldPosition, 1.0)); // *** Revisit to better understand!!!! ***
+				//float4 centerUV = ComputeScreenPos(pos);
+				//o.centerUV = centerUV.xy / centerUV.w;
+
+				float alpha = 1;
+				//alpha = alpha * agentSimData.maturity;
+				alpha = alpha * (1.0 - agentSimData.decay);
+
+				float activeColorLerp = 1;
+				activeColorLerp = activeColorLerp * floor(agentSimData.maturity + 0.01);
+				activeColorLerp = activeColorLerp * floor((1.0 - agentSimData.decay) + 0.01);
 
 				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(vertexPos, 0.0f));
 				o.pos = UnityObjectToClipPos(float4(curvePos, 0, 1.0) + float4(offset, 0.0, 0.0));
-				o.color = float4(curveStrokeData.hue,1);				
-				o.uv = uv;
-				
+				o.color = lerp(float4(0.5, 0.5, 0.5, alpha), float4(curveStrokeData.hue,alpha), activeColorLerp);				
+				o.uv = uv;				
 
 				return o;
-
-
+				
 				//o.vertex = UnityObjectToClipPos(v.vertex);
 				//o.uv = TRANSFORM_TEX(v.uv, _MainTex);				
 			}

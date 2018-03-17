@@ -38,6 +38,9 @@
 				float2 worldPos;
 				float2 velocity;
 				float2 heading;
+				float2 size;
+				float maturity;
+				float decay;
 			};
 
 			StructuredBuffer<AgentSimData> agentSimDataCBuffer;

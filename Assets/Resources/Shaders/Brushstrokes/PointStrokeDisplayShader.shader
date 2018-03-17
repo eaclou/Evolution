@@ -8,7 +8,7 @@
 	}
 	SubShader
 	{		
-		Tags{ "RenderType" = "Transparant" }
+		Tags{ "RenderType" = "Transparent" }
 		ZWrite Off
 		Cull Off
 		//Blend SrcAlpha One
@@ -28,10 +28,10 @@
 			//float4 _Size;
 
 			struct PointStrokeData {
-				int parentIndex;  // what agent/object is this attached to?
-				float2 localScale;
+				int parentIndex;  // what agent/object is this attached to?				
 				float2 localPos;
 				float2 localDir;
+				float2 localScale;
 				float3 hue;   // RGB color tint
 				float strength;  // abstraction for pressure of brushstroke + amount of paint 
 				int brushType;  // what texture/mask/brush pattern to use
@@ -42,6 +42,8 @@
 				float2 velocity;
 				float2 heading;
 				float2 size;
+				float maturity;
+				float decay;
 			};
 
 			StructuredBuffer<AgentSimData> agentSimDataCBuffer;
@@ -67,11 +69,14 @@
 				PointStrokeData pointStrokeData = pointStrokesCBuffer[inst];
 				AgentSimData agentSimData = agentSimDataCBuffer[pointStrokeData.parentIndex];
 
+				//pointStrokeData.localDir = float2(0,1);
+				//pointStrokeData.localPos = float2(0.5, 0.8);
+
 				float3 worldPosition = float3(agentSimData.worldPos, -0.5);
 				// Rotation of Billboard center around Agent's Center (no effect if localPos and localDir are zero/default)'
 				float2 forwardAgent = agentSimData.heading;
 				float2 rightAgent = float2(forwardAgent.y, -forwardAgent.x);
-				float2 positionOffset = float2(pointStrokeData.localPos.x * agentSimData.size.x * rightAgent + pointStrokeData.localPos.y * agentSimData.size.y * forwardAgent);
+				float2 positionOffset = float2(pointStrokeData.localPos.x * agentSimData.size.x * rightAgent + pointStrokeData.localPos.y * agentSimData.size.y * forwardAgent) * 0.5;
 				worldPosition.xy += positionOffset; // Place properly
 
 				float3 quadPoint = quadVerticesCBuffer[id];
@@ -81,10 +86,10 @@
 				//float randomAspect = lerp(0.75, 1.33, random1);
 				//float randomValue = 1; //rand(float2(inst, randomAspect * 10));
 
-				float velMag = saturate(length(agentSimData.velocity)) * 0.5;
+				//float velMag = saturate(length(agentSimData.velocity)) * 0.5;
 				
-				float2 scale = pointStrokeData.localScale * agentSimData.size;
-				scale.y *= (velMag + 1);
+				float2 scale = pointStrokeData.localScale * agentSimData.size * agentSimData.maturity;
+				//scale.y *= (velMag + 1);
 				quadPoint *= float3(scale, 1.0);
 
 				// Figure out final facing Vectors!!!
@@ -97,15 +102,22 @@
 				// With final facing Vectors, find rotation of QuadPoints:
 				float3 rotatedPoint1 = float3(quadPoint.x * right1 + quadPoint.y * forward1,
 											 quadPoint.z);
+
+				float alpha = 1;
+				//alpha = alpha * agentSimData.maturity;
+				alpha = alpha * (1.0 - agentSimData.decay);
+				float activeColorLerp = 1;
+				activeColorLerp = activeColorLerp * floor(agentSimData.maturity + 0.01);
+				activeColorLerp = activeColorLerp * floor((1.0 - agentSimData.decay) + 0.01);
 				
 				//o.pos = mul(UNITY_MATRIX_VP, float4(rotatedPoint, 0.0f));
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(rotatedPoint1, 0.0f));
-				o.color = float4(pointStrokeData.hue,1);
+				o.color = lerp(float4(0.5, 0.5, 0.5, alpha), float4(pointStrokeData.hue,alpha), activeColorLerp);	
 				
 				float2 uv0 = quadVerticesCBuffer[id] + 0.5f; // full texture
 				float2 uv1 = uv0;
 				// Which Brush? (uv.X) :::::
-				float randBrush = pointStrokeData.brushType; //floor(rand(float2(random2, inst)) * 3.99); // 0-3
+				float randBrush = 0; //pointStrokeData.brushType; //floor(rand(float2(random2, inst)) * 3.99); // 0-3
 				uv0.x *= 0.2;  // 5 brushes on texture
 				uv0.x += 0.2 * randBrush;
 				uv1.x *= 0.2;  // 5 brushes on texture
@@ -120,7 +132,7 @@
 				uv0.y = uv0.y * 0.25 + 0.25 * blurRow0;
 				uv1.y = uv1.y * 0.25 + 0.25 * blurRow1;
 				// motion blur sampling:
-				o.motionBlurLerp = blurLerp;
+				o.motionBlurLerp = 0; //blurLerp;
 				
 				o.uv = float4(uv0, uv1);
 				

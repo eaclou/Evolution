@@ -36,9 +36,15 @@ public class CameraManager : MonoBehaviour {
         curMode = GameMode.ModeB;
 
     }
-	
-	// Update is called once per frame
-	void FixedUpdate () {
+
+    private void Update() {
+        //this.transform.position = SmoothApproach(Vector2 pastPosition, Vector2 pastTargetPosition, Vector2 targetPosition, float speed);
+        //this.transform.position = Vector3.Lerp(this.transform.position, new Vector3(targetCamPos.x, targetCamPos.y, -50f), 2f * Time.deltaTime);
+        //new Vector3(targetCamPos.x, targetCamPos.y, -50f);
+    }
+
+    // Update is called once per frame
+    void FixedUpdate () {
         //targetCamPos = new Vector3(playerAgent.transform.position.x, playerAgent.transform.position.y, -10f);
         //mainCam.transform.position = Vector3.Lerp(mainCam.transform.position, camPos, 0.08f);
         switch (curMode) {
@@ -61,6 +67,7 @@ public class CameraManager : MonoBehaviour {
                 //
                 break;
         }
+
         camera.orthographicSize = Mathf.Lerp(camera.orthographicSize, targetZoomValue, 0.5f * Time.deltaTime);
         //Vector3 curPos = transform.position;
         //Vector2 targetPos = new Vector2(targetCamPos.x, targetCamPos.y);
@@ -68,7 +75,7 @@ public class CameraManager : MonoBehaviour {
 
         // Fuck it for now.... stupid lerp jitter...
         // Come back to this after sorting out Execution order and data flow in rest of program...
-        this.transform.position = new Vector3(targetCamPos.x, targetCamPos.y, -50f);
+        this.transform.position = Vector3.Lerp(this.transform.position, new Vector3(targetCamPos.x, targetCamPos.y, -50f), 2.5f * Time.deltaTime);
 
         //Vector2 
 

@@ -14,6 +14,8 @@ struct AgentSimData {
 	float2 velocity;
 	float2 heading;
 	float2 size;
+	float maturity;
+	float decay;
 };
 
 struct CurveStrokeData {
@@ -23,6 +25,10 @@ struct CurveStrokeData {
     float2 p1;
     float2 p2;
     float2 p3;
+	float width;
+    float restLength;
+    float strength;
+    int brushType;
 };
 
 struct TrailStrokeData {
@@ -52,68 +58,80 @@ Texture2D<float4> velocityRead;
 
 SamplerState _LinearRepeat;
 
+CurveStrokeData UpdateCurveStroke(CurveStrokeData inData, AgentSimData agentData) {
+	CurveStrokeData curveData = inData;	
+
+	float restDistance = curveData.restLength * agentData.maturity;
+
+	float2 p0 = agentData.worldPos + agentData.heading * agentData.size.y * 0.0;
+	
+	float2 p1 = curveData.p1;
+	float2 vec0to1 = p1 - p0; // after p0 has been moved, vector from old P1 to new P0	
+	p1 = p0 + normalize(vec0to1) * restDistance;
+
+	float2 p2 = curveData.p2;
+	float2 vec1to2 = p2 - p1;
+	p2 = p1 + normalize(vec1to2) * restDistance;
+
+	float2 p3 = curveData.p3;
+	float2 vec2to3 = p3 - p2;
+	p3 = p2 + normalize(vec2to3) * restDistance;
+
+	curveData.p0 = p0;
+	curveData.p1 = p1;
+	curveData.p2 = p2;
+	curveData.p3 = p3;
+
+	return curveData;
+}
+
+CurveStrokeData UpdateCurveStrokeDirectional(CurveStrokeData inData, AgentSimData agentData) {
+	CurveStrokeData curveData = inData;	
+
+	float lerpStrength = 0.9;
+	float lerpDecay = 0.82;
+	float restDistance = curveData.restLength * agentData.maturity;
+	
+	float2 p0 = agentData.worldPos + (agentData.heading * agentData.size.y * 0.5); // pin root to head tip
+
+	float2 targetPosP1 = p0 - agentData.heading * restDistance;
+	float2 p1 = lerp(curveData.p1, targetPosP1, lerpStrength);
+
+	lerpStrength *= lerpDecay;
+
+	float2 vec2to1 = curveData.p2 - curveData.p1;
+	float2 targetPosP2 = curveData.p1 - agentData.heading * restDistance;
+	float2 p2 = lerp(curveData.p2, targetPosP2, lerpStrength);
+
+	lerpStrength *= lerpDecay;
+
+	float2 vec3to2 = curveData.p3 - curveData.p2;
+	float2 targetPosP3 = curveData.p2 - agentData.heading * restDistance;
+	float2 p3 = lerp(curveData.p3, targetPosP3, lerpStrength);
+
+	curveData.p0 = p0;
+	curveData.p1 = p1;
+	curveData.p2 = p2;
+	curveData.p3 = p3;
+
+	return curveData;
+}
 
 [numthreads(1,1,1)]
 void CSSinglePassCurveBrushData (uint3 id : SV_DispatchThreadID)
 {
 	CurveStrokeData curveData = agentCurveStrokesWriteCBuffer[id.x];
 	AgentSimData agentData = agentSimDataCBuffer[curveData.parentIndex];
-			
-	float restDistance = 0.4;
-
-	float2 p0 = agentData.worldPos + agentData.heading * agentData.size.y * 0.0;
 	
-	float2 p1 = curveData.p1;
-	float2 vec0to1 = p1 - p0; // after p0 has been moved, vector from old P1 to new P0	
-	p1 = p0 + normalize(vec0to1) * restDistance; 
-
-	float2 p2 = curveData.p2;
-	float2 vec1to2 = p2 - p1;
-	p2 = p1 + normalize(vec1to2) * restDistance; 
-
-	float2 p3 = curveData.p3;
-	float2 vec2to3 = p3 - p2;
-	p3 = p2 + normalize(vec2to3) * restDistance; 
-
-	agentCurveStrokesWriteCBuffer[id.x].p0 = p0;
-	agentCurveStrokesWriteCBuffer[id.x].p1 = p1;
-	agentCurveStrokesWriteCBuffer[id.x].p2 = p2;
-	agentCurveStrokesWriteCBuffer[id.x].p3 = p3;
+	agentCurveStrokesWriteCBuffer[id.x] = UpdateCurveStrokeDirectional(curveData, agentData);	
 }
 
 [numthreads(1,1,1)]
 void CSUpdateCurveBrushDataAgentIndex (uint3 id : SV_DispatchThreadID)
-{
-	
+{	
 	CurveStrokeData curveData = agentCurveStrokesReadCBuffer[0];
 	
-	agentCurveStrokesWriteCBuffer[_CurveStrokesUpdateAgentIndex] = curveData;
-	
-	/*AgentSimData agentData = agentSimDataCBuffer[_CurveStrokesUpdateAgentIndex];
-			
-	float restDistance = 0.4;
-
-	float2 p0 = agentData.worldPos + agentData.heading * agentData.size.y * 0.0;
-	
-	float2 p1 = curveData.p1;
-	float2 vec0to1 = p1 - p0; // after p0 has been moved, vector from old P1 to new P0	
-	p1 = p0 + normalize(vec0to1) * restDistance; 
-
-	float2 p2 = curveData.p2;
-	float2 vec1to2 = p2 - p1;
-	p2 = p1 + normalize(vec1to2) * restDistance; 
-
-	float2 p3 = curveData.p3;
-	float2 vec2to3 = p3 - p2;
-	p3 = p2 + normalize(vec2to3) * restDistance; 
-
-	agentCurveStrokesWriteCBuffer[_CurveStrokesUpdateAgentIndex].p0 = p0;
-	agentCurveStrokesWriteCBuffer[_CurveStrokesUpdateAgentIndex].p1 = p1;
-	agentCurveStrokesWriteCBuffer[_CurveStrokesUpdateAgentIndex].p2 = p2;
-	agentCurveStrokesWriteCBuffer[_CurveStrokesUpdateAgentIndex].p3 = p3;
-
-	//agentCurveStrokesWriteCBuffer[_CurveStrokesUpdateAgentIndex].hue = curveData.hue;	
-	*/
+	agentCurveStrokesWriteCBuffer[_CurveStrokesUpdateAgentIndex] = curveData;	
 }
 
 [numthreads(1,1,1)]
@@ -241,3 +259,25 @@ void CSIterateCurveBrushData (uint3 id : SV_DispatchThreadID)
 
 	agentCurveStrokesWriteCBuffer[id.x] = newCurveData;
 }*/
+
+/*float restDistance = 0.4;
+
+	float2 p0 = agentData.worldPos + agentData.heading * agentData.size.y * 0.0;
+	
+	float2 p1 = curveData.p1;
+	float2 vec0to1 = p1 - p0; // after p0 has been moved, vector from old P1 to new P0	
+	p1 = p0 + normalize(vec0to1) * restDistance; 
+
+	float2 p2 = curveData.p2;
+	float2 vec1to2 = p2 - p1;
+	p2 = p1 + normalize(vec1to2) * restDistance; 
+
+	float2 p3 = curveData.p3;
+	float2 vec2to3 = p3 - p2;
+	p3 = p2 + normalize(vec2to3) * restDistance; 
+
+	agentCurveStrokesWriteCBuffer[id.x].p0 = p0;
+	agentCurveStrokesWriteCBuffer[id.x].p1 = p1;
+	agentCurveStrokesWriteCBuffer[id.x].p2 = p2;
+	agentCurveStrokesWriteCBuffer[id.x].p3 = p3;
+	*/

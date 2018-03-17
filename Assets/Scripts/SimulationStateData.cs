@@ -11,6 +11,8 @@ public class SimulationStateData {
         public Vector2 velocity;
         public Vector2 heading;
         public Vector2 size;
+        public float maturity;  // 0-1 indicating growth
+        public float decay;  // 0-1 indicating decayStatus
     }
     public struct FoodSimData {
         public Vector2 worldPos;
@@ -53,7 +55,7 @@ public class SimulationStateData {
         for(int i = 0; i < agentSimDataArray.Length; i++) {
             agentSimDataArray[i] = new AgentSimData();
         }
-        agentSimDataCBuffer = new ComputeBuffer(agentSimDataArray.Length, sizeof(float) * 8);
+        agentSimDataCBuffer = new ComputeBuffer(agentSimDataArray.Length, sizeof(float) * 10);
 
         foodSimDataArray = new FoodSimData[simManager._NumFood];
         for (int i = 0; i < foodSimDataArray.Length; i++) {
@@ -83,6 +85,16 @@ public class SimulationStateData {
             agentSimDataArray[i].velocity = simManager.agentsArray[i].smoothedThrottle; 
             agentSimDataArray[i].heading = simManager.agentsArray[i].facingDirection;
             agentSimDataArray[i].size = simManager.agentsArray[i].size;
+            float maturity = 1f;
+            float decay = 0f;
+            if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Egg) {
+                maturity = (float)simManager.agentsArray[i].lifeStageTransitionTimeStepCounter / (float)simManager.agentsArray[i]._GestationDurationTimeSteps;
+            }
+            if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Decaying) {
+                decay = (float)simManager.agentsArray[i].lifeStageTransitionTimeStepCounter / (float)simManager.agentsArray[i]._DecayDurationTimeSteps;
+            }
+            agentSimDataArray[i].maturity = maturity;
+            agentSimDataArray[i].decay = decay;
             
             // Z & W coords represents agent's x/y Radii (in FluidCoords)
             // convert from scene coords (-mapSize --> +mapSize to fluid coords (0 --> 1):::

@@ -257,11 +257,11 @@ public class SimulationManager : MonoBehaviour {
         }
 
         // Sort Fitness Scores Persistent:
-        rankedIndicesList = new int[numAgents];
-        rankedFitnessList = new float[numAgents];
+        rankedIndicesList = new int[numAgents-1];
+        rankedFitnessList = new float[numAgents-1];
 
-        for (int i = 0; i < numAgents; i++) {
-            rankedIndicesList[i] = i;
+        for (int i = 0; i < rankedIndicesList.Length; i++) {
+            rankedIndicesList[i] = i+1;
             rankedFitnessList[i] = 1f;
         }
     }
@@ -421,6 +421,10 @@ public class SimulationManager : MonoBehaviour {
 
     public void TickSimulation() {
 
+        // ******** REVISIT CODE ORDERING!!!!  -- Should check for death Before or After agent Tick/PhysX ???
+        CheckForDeadFood();
+        CheckForDeadAgents();  // Result of this will affect: "simStateData.PopulateSimDataArrays(this)" !!!!!
+        CheckForRecordPlayerScore();  
         // Gather state data information -- current simulation state after previous frame's internal PhysX update:
         //stateData Populate Arrays
         simStateData.PopulateSimDataArrays(this);  // reads from GameObject Transforms & RigidBodies!!! ++ from FluidSimulationData!!!
@@ -428,18 +432,13 @@ public class SimulationManager : MonoBehaviour {
         theRenderKing.RenderSimulationCameras(); // will pass current info to FluidSim before it Ticks()
         // Reads from CameraRenders, GameObjects, and query GPU for fluidState
         // eventually, if agents get fluid sensors, will want to download FluidSim data from GPU into simStateData!*        
-        // ******** REVISIT CODE ORDERING!!!!  -- Should check for death Before or After agent Tick/PhysX ???
-        CheckForDeadFood();
-        CheckForDeadAgents();
-        CheckForRecordPlayerScore();        
+              
         // **** Figure out proper Execution Order / in which Class to Run RenderOps while being synced w/ results of physX sim!!!
         //theRenderKing.velocityTex = environmentFluidManager.velocityA; // *** Better way to share DATA!!!
         theRenderKing.Tick(); // updates all renderData, buffers, brushStrokes etc.
 
         HookUpModules(); // Sets nearest-neighbors etc. feed current data into agent Brains
         
-
-
         // &&&&& STEP SIMULATION FORWARD:::: &&&&&&&&&&
         // &&&&& STEP SIMULATION FORWARD:::: &&&&&&&&&&
         // Load gameState into Agent Brain, process brain function, read out brainResults,
@@ -449,9 +448,7 @@ public class SimulationManager : MonoBehaviour {
         }
         // Apply External Forces to dynamic objects: (internal PhysX Updates):
         ApplyFluidForcesToDynamicObjects();        
-        
-        
-        
+                
         // Simulate timestep of fluid Sim - update density/velocity maps:
         // Or should this be right at beginning of frame????? ***************** revisit...
         environmentFluidManager.Tick(); // ** Clean this up, but generally OK
@@ -589,8 +586,8 @@ public class SimulationManager : MonoBehaviour {
     }
     private void CheckForRecordPlayerScore() {
         // Check for Record Agent AGE!
-        if (playerAgent.ageCounter > recordPlayerAge) {
-            recordPlayerAge = playerAgent.ageCounter;
+        if (playerAgent.ageCounterMature > recordPlayerAge) {
+            recordPlayerAge = playerAgent.ageCounterMature;
         }
     }
     private void CheckForDeadFood() { // *** revisit
@@ -603,7 +600,7 @@ public class SimulationManager : MonoBehaviour {
     }
     private void CheckForDeadAgents() { 
         for (int a = 0; a < agentsArray.Length; a++) {
-            if (agentsArray[a].isDead) {
+            if (agentsArray[a].isNull) {
                 ProcessDeadAgent(a);
             }
         }
@@ -636,30 +633,26 @@ public class SimulationManager : MonoBehaviour {
         predatorArray[index].transform.localPosition = startPos;
     } // *** confirm these are set up alright      
     public void ProcessDeadAgent(int agentIndex) {
-        //if(agentIndex != 0) { // if not player:
-            CheckForRecordAgentScore(agentIndex);
-            ProcessAgentScores(agentIndex);
         
-            // Updates rankedIndicesArray[] so agents are ordered by score:
-            ProcessAndRankAgentFitness();
+        CheckForRecordAgentScore(agentIndex);
+        ProcessAgentScores(agentIndex);
+        
+        // Updates rankedIndicesArray[] so agents are ordered by score:
+        ProcessAndRankAgentFitness();
 
-            // Reproduction!!!
-            CreateMutatedCopyOfAgent(agentIndex); 
-        //}
-        //else {  // Is PLAYER!!! :::
-            //Vector3 startPos = new Vector3(UnityEngine.Random.Range(-30f, 30f), UnityEngine.Random.Range(-30f, 30f), 0f);
-            //StartPositionGenome startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
-            //agentsArray[agentIndex].InitializeAgentFromGenome(agentGenomePoolArray[rankedIndicesList[0]], GetRandomAgentSpawnPosition()); // Spawn that genome in dead Agent's body and revive it!
-        //}
+        // Reproduction!!!
+        CreateMutatedCopyOfAgent(agentIndex); 
+        
         theRenderKing.UpdateAgentBodyStrokesBuffer(agentIndex);
+        theRenderKing.InitializeAgentEyeStrokesBuffer();
     }
     private void CheckForRecordAgentScore(int agentIndex) {
-        if (agentsArray[agentIndex].ageCounter > recordBotAge) {
-            recordBotAge = agentsArray[agentIndex].ageCounter;
+        if (agentsArray[agentIndex].ageCounterMature > recordBotAge) {
+            recordBotAge = agentsArray[agentIndex].ageCounterMature;
         }
     }
     private void ProcessAgentScores(int agentIndex) {
-        rollingAverageAgentScore = Mathf.Lerp(rollingAverageAgentScore, (float)agentsArray[agentIndex].ageCounter, 1f / 512f);
+        rollingAverageAgentScore = Mathf.Lerp(rollingAverageAgentScore, (float)agentsArray[agentIndex].ageCounterMature, 1f / 512f);
         float approxGen = (float)numAgentsBorn / (float)(numAgents - 1);
         if (approxGen > curApproxGen) {
             fitnessScoresEachGenerationList.Add(rollingAverageAgentScore);
@@ -675,18 +668,18 @@ public class SimulationManager : MonoBehaviour {
         uiManager.RefreshFitnessTexture(fitnessScoresEachGenerationList);
     }
     private void ProcessAndRankAgentFitness() {
-        // Measure fitness of all current agents (their genomes, actually)
-            for (int i = 0; i < numAgents; i++) {
-                rawFitnessScoresArray[i] = (float)agentsArray[i].ageCounter;
+        // Measure fitness of all current agents (their genomes, actually)  NOT PLAYER!!!!
+            for (int i = 0; i < rawFitnessScoresArray.Length; i++) {
+                rawFitnessScoresArray[i] = (float)agentsArray[i].ageCounterMature;
             }
 
             // populate arrays:
-            for (int i = 0; i < rawFitnessScoresArray.Length; i++) {
-                rankedIndicesList[i] = i;
-                rankedFitnessList[i] = rawFitnessScoresArray[i];
+            for (int i = 0; i < rankedIndicesList.Length; i++) {
+                rankedIndicesList[i] = i+1;
+                rankedFitnessList[i] = rawFitnessScoresArray[i+1];
             } // Sort By Fitness
-            for (int i = 0; i < rawFitnessScoresArray.Length - 1; i++) {
-                for (int j = 0; j < rawFitnessScoresArray.Length - 1; j++) {
+            for (int i = 0; i < rankedIndicesList.Length - 1; i++) {
+                for (int j = 0; j < rankedIndicesList.Length - 1; j++) {
                     float swapFitA = rankedFitnessList[j];
                     float swapFitB = rankedFitnessList[j + 1];
                     int swapIdA = rankedIndicesList[j];
@@ -726,7 +719,7 @@ public class SimulationManager : MonoBehaviour {
             agentGenomePoolArray[agentIndex].brainGenome = newBrainGenome; // update genome to new one
 
             numAgentsBorn++;
-            currentOldestAgent = agentsArray[rankedIndicesList[0]].ageCounter;
+            currentOldestAgent = agentsArray[rankedIndicesList[0]].ageCounterMature;
         }        
         
         // **** !!! REvisit StartPos!!!

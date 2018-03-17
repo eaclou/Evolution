@@ -70,10 +70,11 @@ public class PredatorModule : MonoBehaviour {
     private void AttackAgent(Agent agent) {
         agent.testModule.hitPoints[0] -= damage;
         //Debug.Log("AttackAgent!");
-        if (agent.testModule.hitPoints[0] <= 0f) {
-            agent.isDead = true;
+        //if (agent.testModule.hitPoints[0] <= 0f) {
+
+            //agent.isNull = true;
             //Debug.Log("Agent DEAD!");
-        }
+        //}
     }
     
     private void OnCollisionStay2D(Collision2D coll) {
