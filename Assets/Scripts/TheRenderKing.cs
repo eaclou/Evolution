@@ -515,7 +515,7 @@ public class TheRenderKing : MonoBehaviour {
         for(int i = 0; i < simManager.foodArray.Length; i++) {
             Vector3 foodPos = simManager.foodArray[i].transform.position;
             obstacleStrokeDataArray[baseIndex + i].worldPos = new Vector2(foodPos.x, foodPos.y);
-            obstacleStrokeDataArray[baseIndex + i].scale = new Vector2(simManager.foodArray[i].curScale, simManager.foodArray[i].curScale) * 0.85f;
+            obstacleStrokeDataArray[baseIndex + i].scale = simManager.foodArray[i].curSize * 0.85f;
 
             float velX = (foodPos.x - simManager.foodArray[i]._PrevPos.x) * velScale;
             float velY = (foodPos.y - simManager.foodArray[i]._PrevPos.y) * velScale;
@@ -556,7 +556,7 @@ public class TheRenderKing : MonoBehaviour {
         for(int i = 0; i < simManager.foodArray.Length; i++) {
             Vector3 foodPos = simManager.foodArray[i].transform.position;
             colorInjectionStrokeDataArray[baseIndex + i].worldPos = new Vector2(foodPos.x, foodPos.y);
-            colorInjectionStrokeDataArray[baseIndex + i].scale = new Vector2(simManager.foodArray[i].curScale, simManager.foodArray[i].curScale) * 0.85f;
+            colorInjectionStrokeDataArray[baseIndex + i].scale = simManager.foodArray[i].curSize * 0.85f;
 
             //float velX = (foodPos.x - simManager.foodArray[i]._PrevPos.x) * velScale;
             //float velY = (foodPos.y - simManager.foodArray[i]._PrevPos.y) * velScale;

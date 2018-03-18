@@ -17,7 +17,8 @@ public class SimulationStateData {
     public struct FoodSimData {
         public Vector2 worldPos;
         public Vector2 velocity;
-        public float scale;
+        public Vector2 heading;
+        public Vector2 scale;
         public Vector3 foodAmount;
     }
     public struct PredatorSimData {
@@ -61,7 +62,7 @@ public class SimulationStateData {
         for (int i = 0; i < foodSimDataArray.Length; i++) {
             foodSimDataArray[i] = new FoodSimData();
         }
-        foodSimDataCBuffer = new ComputeBuffer(foodSimDataArray.Length, sizeof(float) * 8);
+        foodSimDataCBuffer = new ComputeBuffer(foodSimDataArray.Length, sizeof(float) * 11);
 
         predatorSimDataArray = new PredatorSimData[simManager._NumPredators];
         for (int i = 0; i < predatorSimDataArray.Length; i++) {
@@ -110,12 +111,14 @@ public class SimulationStateData {
             foodSimDataArray[i].worldPos = new Vector2(foodPos.x, foodPos.y);
             // *** Revisit to avoid using GetComponent, should use cached reference instead for speed:
             foodSimDataArray[i].velocity = new Vector2(simManager.foodArray[i].GetComponent<Rigidbody2D>().velocity.x, simManager.agentsArray[i].GetComponent<Rigidbody2D>().velocity.y);
-            foodSimDataArray[i].scale = simManager.foodArray[i].curScale;
+            foodSimDataArray[i].heading = simManager.foodArray[i].facingDirection;
+            foodSimDataArray[i].scale = simManager.foodArray[i].curSize;
             foodSimDataArray[i].foodAmount = new Vector3(simManager.foodArray[i].amountR, simManager.foodArray[i].amountG, simManager.foodArray[i].amountB);
 
             // Z & W coords represents agent's x/y Radii (in FluidCoords)
             // convert from scene coords (-mapSize --> +mapSize to fluid coords (0 --> 1):::
-            float sampleRadius = (simManager.foodArray[i].curScale + 0.1f) / (simManager._MapSize * 2f); // ****  ***** Revisit the 0.1f offset -- should be one pixel in fluidCoords?
+            // **** Revisit and get working properly in both X and Y dimensions independently *********
+            float sampleRadius = (simManager.foodArray[i].curSize.magnitude + 0.1f) / (simManager._MapSize * 2f); // ****  ***** Revisit the 0.1f offset -- should be one pixel in fluidCoords?
             foodFluidPositionsArray[i] = new Vector4((foodPos.x + simManager._MapSize) / (simManager._MapSize * 2f), 
                                                       (foodPos.y + simManager._MapSize) / (simManager._MapSize * 2f), 
                                                       sampleRadius, 

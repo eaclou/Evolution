@@ -24,6 +24,10 @@ public class CameraManager : MonoBehaviour {
 
     Vector2 prevCameraPosition, prevTargetPosition;
 
+    public float orbitRadius = 35f;
+    public float orbitSpeed = 1f;
+    public float curOrbitAngle = 0f;
+
     private GameMode curMode;
     public enum GameMode {
         ModeA,
@@ -38,16 +42,73 @@ public class CameraManager : MonoBehaviour {
     }
 
     private void Update() {
+        
+        //UpdateCameraTestBaseline();
+        UpdateCameraOld();
+
         //this.transform.position = SmoothApproach(Vector2 pastPosition, Vector2 pastTargetPosition, Vector2 targetPosition, float speed);
         //this.transform.position = Vector3.Lerp(this.transform.position, new Vector3(targetCamPos.x, targetCamPos.y, -50f), 2f * Time.deltaTime);
         //new Vector3(targetCamPos.x, targetCamPos.y, -50f);
     }
 
+    private void UpdateCameraOld() {
+        switch (curMode) {
+            case GameMode.ModeA:
+                //
+                targetCamPos = Vector3.Lerp(targetCamPos, targetTransform.position, 0.08f);
+                lerpSpeed = lerpSpeedA;
+                break;
+            case GameMode.ModeB:
+                //
+                targetCamPos = Vector3.Lerp(targetCamPos, targetTransform.position, 0.08f);
+                lerpSpeed = lerpSpeedB;
+                break;
+            case GameMode.ModeC:
+                targetCamPos = Vector3.Lerp(targetCamPos, Vector3.zero, 0.08f);
+                lerpSpeed = lerpSpeedC;
+                //
+                break;
+            default:
+                //
+                break;
+        }
+
+        camera.orthographicSize = Mathf.Lerp(camera.orthographicSize, targetZoomValue, 0.5f * Time.deltaTime);
+        //Vector3 curPos = transform.position;
+        //Vector2 targetPos = new Vector2(targetCamPos.x, targetCamPos.y);
+        //Vector2 targetCamDir = new Vector2(targetCamPos.x, targetCamPos.y) - new Vector2(curPos.x, curPos.y);
+
+        // Fuck it for now.... stupid lerp jitter...
+        // Come back to this after sorting out Execution order and data flow in rest of program...
+        this.transform.position = Vector3.Lerp(this.transform.position, new Vector3(targetCamPos.x, targetCamPos.y, -50f), lerpSpeed * Time.deltaTime);
+
+    }
+    private void UpdateCameraTestBaseline() {
+        //float orbitRadius = 35f;
+        //orbitSpeed
+        //curOrbitAngle
+
+        Vector3 currentCamPos = this.transform.position;
+
+        curOrbitAngle += orbitSpeed * Time.deltaTime;
+        float xDir = Mathf.Cos(curOrbitAngle);
+        float yDir = Mathf.Sin(curOrbitAngle);
+
+        //Vector3 newCameraPosition = new Vector3(xDir * orbitRadius, yDir * orbitRadius, -50f);
+        Vector3 newCameraPosition = new Vector3(xDir * orbitRadius, 0f, -50f);
+
+        this.transform.position = newCameraPosition;
+
+    }
     // Update is called once per frame
     void FixedUpdate () {
+
+        //UpdateCameraTestBaseline();
+        //UpdateCameraOld();
+
         //targetCamPos = new Vector3(playerAgent.transform.position.x, playerAgent.transform.position.y, -10f);
         //mainCam.transform.position = Vector3.Lerp(mainCam.transform.position, camPos, 0.08f);
-        switch (curMode) {
+        /*switch (curMode) {
             case GameMode.ModeA:
                 //
                 targetCamPos = Vector3.Lerp(targetCamPos, targetTransform.position, 0.1f);
@@ -78,7 +139,7 @@ public class CameraManager : MonoBehaviour {
         this.transform.position = Vector3.Lerp(this.transform.position, new Vector3(targetCamPos.x, targetCamPos.y, -50f), 2.5f * Time.deltaTime);
 
         //Vector2 
-
+        */
         //transform.position = Vector3.Lerp(transform.position, targetPos, Mathf.Clamp01(lerpSpeed * Time.deltaTime)).normalized * camMaxSpeed;
 
 

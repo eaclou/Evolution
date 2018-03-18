@@ -74,6 +74,7 @@ public class SimulationManager : MonoBehaviour {
     public Agent[] agentsArray;
     //public BodyGenome bodyGenomeTemplate; // .... refactor?
     public AgentGenome[] agentGenomePoolArray;
+    public FoodGenome[] foodGenomePoolArray;
     public FoodModule[] foodArray;
     private int numFood = 36;
     public int _NumFood {
@@ -264,6 +265,18 @@ public class SimulationManager : MonoBehaviour {
             rankedIndicesList[i] = i+1;
             rankedFitnessList[i] = 1f;
         }
+
+
+        // FOOD:
+        foodGenomePoolArray = new FoodGenome[numFood];
+
+        for(int i = 0; i < foodGenomePoolArray.Length; i++) {
+            FoodGenome foodGenome = new FoodGenome(i);
+
+            foodGenome.InitializeAsRandomGenome();
+
+            foodGenomePoolArray[i] = foodGenome;
+        }
     }
     private void LoadingInitializeFluidSim() {
         environmentFluidManager.InitializeFluidSystem();
@@ -280,69 +293,25 @@ public class SimulationManager : MonoBehaviour {
         for (int i = 0; i < agentsArray.Length; i++) {
             GameObject agentGO = Instantiate(Resources.Load(assetURL)) as GameObject;
             agentGO.name = "Agent" + i.ToString();
-            //float initScale = agentGenomePoolArray[i].bodyGenome.size UnityEngine.Random.Range(1f, 1f); // **** Replace this with data inside bodyGenome!!!
             agentGO.transform.localScale = new Vector3(agentGenomePoolArray[i].bodyGenome.size.x, agentGenomePoolArray[i].bodyGenome.size.y, 1f);
             Agent newAgent = agentGO.GetComponent<Agent>();  // Script placed on Prefab already            
-            agentsArray[i] = newAgent; // Add to stored list of current Agents
-            
-            // Set Material? ... Just pass data to The Render King and let him use his DrawProcedural ability to render in one pass
-            
-            // Find better way to pass data about Agent's brain/body state to His Majesty.
-            
-            // ****** :::::::: v v v MOVE INTO BODYGENOME DOMAIN!!!!!!
-            //  APPEARANCE:::::
-            /*newAgent.huePrimary = UnityEngine.Random.insideUnitSphere * 0.5f + new Vector3(0.5f, 0.5f, 0.5f);
-            newAgent.hueSecondary = UnityEngine.Random.insideUnitSphere * 0.5f + new Vector3(0.5f, 0.5f, 0.5f);
-            newAgent.bodyPointStroke = theRenderKing.GeneratePointStrokeData(i, Vector2.one, Vector2.zero, new Vector2(0f, 1f), newAgent.huePrimary, 0f, 0);
-            newAgent.decorationPointStrokesArray = new TheRenderKing.PointStrokeData[10];
-            // EYES:
-            newAgent.decorationPointStrokesArray[0] = theRenderKing.GeneratePointStrokeData(i,
-                                                                                            new Vector2(0.36f, 0.36f),
-                                                                                            new Vector2(-0.25f, 0.45f),
-                                                                                            new Vector2(0f, 1f),
-                                                                                            Vector3.one,
-                                                                                            1,
-                                                                                            4);
-            newAgent.decorationPointStrokesArray[1] = theRenderKing.GeneratePointStrokeData(i,
-                                                                                            new Vector2(0.36f, 0.36f),
-                                                                                            new Vector2(0.25f, 0.45f),
-                                                                                            new Vector2(0f, 1f),
-                                                                                            Vector3.one,
-                                                                                            1,
-                                                                                            4);
-            for (int j = 0; j < newAgent.decorationPointStrokesArray.Length - 2; j++) {
-                float lerpStrength = UnityEngine.Random.Range(0f, 1f);
-                int randBrush = UnityEngine.Random.Range(0, 4);
-                newAgent.decorationPointStrokesArray[j + 2] = theRenderKing.GeneratePointStrokeData(i,
-                                                                                                new Vector2(UnityEngine.Random.Range(minSize, maxSize), UnityEngine.Random.Range(minSize, maxSize)),
-                                                                                                UnityEngine.Random.insideUnitCircle * 0.35f,
-                                                                                                UnityEngine.Random.insideUnitCircle.normalized,
-                                                                                                Vector3.Lerp(newAgent.huePrimary, newAgent.hueSecondary, lerpStrength),
-                                                                                                lerpStrength,
-                                                                                                randBrush);
-            }*/
+            agentsArray[i] = newAgent; // Add to stored list of current Agents            
         }
 
         // ************** TEMP!!! *******************
         // Set playerAgent to agent[0]:
         playerAgent = agentsArray[0];   // ***** RE-Factor!!!!! ****** when re-implementing player control! **
     }
-    private void LoadingInitializeAgentsFromGenomes() {
-        
+    private void LoadingInitializeAgentsFromGenomes() {        
         for (int i = 0; i < numAgents; i++) {
-            // Revisit how start positions are set up? Probably don't need to be part of the genome....
-            //Vector3 startPos = new Vector3(UnityEngine.Random.Range(-30f, 30f), UnityEngine.Random.Range(-30f, 30f), 0f);
-            //StartPositionGenome agentStartPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
             agentsArray[i].InitializeAgentFromGenome(agentGenomePoolArray[i], GetRandomAgentSpawnPosition());
         }
-
-        //theRenderKing.InitializeAgentBodyStrokesBuffer(); // *** Might be needed??!?!?!
     }
     private void LoadingInstantiateFood() {
         // FOOODDDD!!!!
         foodArray = new FoodModule[numFood]; // create array
 
-        Debug.Log("SpawnFood!");
+        //Debug.Log("SpawnFood!");
         for (int i = 0; i < foodArray.Length; i++) {
             GameObject foodGO = Instantiate(Resources.Load("Prefabs/FoodPrefab")) as GameObject;
             foodGO.name = "Food" + i.ToString();
@@ -352,7 +321,8 @@ public class SimulationManager : MonoBehaviour {
     }
     private void LoadingInitializeFoodFromGenome() {
         for (int i = 0; i < foodArray.Length; i++) {
-            ReviveFood(i);
+            foodArray[i].InitializeFoodFromGenome(foodGenomePoolArray[i], GetRandomFoodSpawnPosition());
+            //ReviveFood(i);
         }
     }
     private void LoadingInstantiatePredators() {
@@ -446,6 +416,9 @@ public class SimulationManager : MonoBehaviour {
         for (int i = 0; i < agentsArray.Length; i++) {
             agentsArray[i].Tick();
         }
+        for (int i = 0; i < foodArray.Length; i++) {
+            foodArray[i].Tick();
+        }
         // Apply External Forces to dynamic objects: (internal PhysX Updates):
         ApplyFluidForcesToDynamicObjects();        
                 
@@ -483,12 +456,14 @@ public class SimulationManager : MonoBehaviour {
 
         // FOOD!!! :::::::
         for (int f = 0; f < foodArray.Length; f++) {
-            float xPos = foodArray[f].transform.localPosition.x;
-            float yPos = foodArray[f].transform.localPosition.y;
-            int xCoord = Mathf.FloorToInt((xPos + mapSize) / (mapSize * 2f) * (float)agentGridCellResolution);
-            int yCoord = Mathf.FloorToInt((yPos + mapSize) / (mapSize * 2f) * (float)agentGridCellResolution);
+            if(foodArray[f].curLifeStage == FoodModule.FoodLifeStage.Mature) {
+                float xPos = foodArray[f].transform.localPosition.x;
+                float yPos = foodArray[f].transform.localPosition.y;
+                int xCoord = Mathf.FloorToInt((xPos + mapSize) / (mapSize * 2f) * (float)agentGridCellResolution);
+                int yCoord = Mathf.FloorToInt((yPos + mapSize) / (mapSize * 2f) * (float)agentGridCellResolution);
 
-            mapGridCellArray[xCoord][yCoord].foodIndicesList.Add(f);
+                mapGridCellArray[xCoord][yCoord].foodIndicesList.Add(f);
+            }            
         }
 
         // FRIENDS::::::
@@ -558,7 +533,7 @@ public class SimulationManager : MonoBehaviour {
             for (int i = 0; i < mapGridCellArray[xCoord][yCoord].foodIndicesList.Count; i++) {
                 // FOOD:
                 Vector2 foodPos = new Vector2(foodArray[mapGridCellArray[xCoord][yCoord].foodIndicesList[i]].transform.localPosition.x, foodArray[mapGridCellArray[xCoord][yCoord].foodIndicesList[i]].transform.localPosition.y);
-                float distFood = (foodPos - agentPos).magnitude - (foodArray[mapGridCellArray[xCoord][yCoord].foodIndicesList[i]].curScale + 1f) * 0.5f;  // subtract food & agent radii
+                float distFood = (foodPos - agentPos).magnitude - (foodArray[mapGridCellArray[xCoord][yCoord].foodIndicesList[i]].curSize.magnitude + 1f) * 0.5f;  // subtract food & agent radii
                 if (distFood <= nearestFoodDistance) { // if now the closest so far, update index and dist:
                     if (a != mapGridCellArray[xCoord][yCoord].foodIndicesList[i]) {  // make sure it doesn't consider itself:
                         closestFoodIndex = mapGridCellArray[xCoord][yCoord].foodIndicesList[i];
@@ -594,7 +569,7 @@ public class SimulationManager : MonoBehaviour {
         // CHECK FOR DEAD FOOD!!! :::::::
         for (int f = 0; f < foodArray.Length; f++) {
             if (foodArray[f].isDepleted) {
-                ReviveFood(f);
+                ProcessDeadFood(f);
             }
         }
     }
@@ -623,11 +598,11 @@ public class SimulationManager : MonoBehaviour {
     #endregion
 
     #region Process Events // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& PROCESS EVENTS! &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-    public void ReviveFood(int index) {
+    /*public void ReviveFood(int index) {
         Vector3 startPos = new Vector3(UnityEngine.Random.Range(-36f, 36f), UnityEngine.Random.Range(-36f, 36f), 0f);
         foodArray[index].transform.localPosition = startPos;
         foodArray[index].Respawn();
-    } // *** confirm these are set up alright
+    }*/ // *** confirm these are set up alright
     public void RevivePredator(int index) {
         Vector3 startPos = new Vector3(UnityEngine.Random.Range(-36f, 36f), UnityEngine.Random.Range(-36f, 36f), 0f);
         predatorArray[index].transform.localPosition = startPos;
@@ -645,6 +620,20 @@ public class SimulationManager : MonoBehaviour {
         
         theRenderKing.UpdateAgentBodyStrokesBuffer(agentIndex);
         theRenderKing.InitializeAgentEyeStrokesBuffer();
+    }
+    public void ProcessDeadFood(int foodIndex) {
+        
+        //CheckForRecordAgentScore(foodIndex);
+        //ProcessAgentScores(foodIndex);
+        
+        // Updates rankedIndicesArray[] so agents are ordered by score:
+        //ProcessAndRankAgentFitness();
+
+        // Reproduction!!!
+        CreateMutatedCopyOfFood(foodIndex); 
+        
+        //theRenderKing.UpdateAgentBodyStrokesBuffer(foodIndex);
+        //theRenderKing.InitializeAgentEyeStrokesBuffer();
     }
     private void CheckForRecordAgentScore(int agentIndex) {
         if (agentsArray[agentIndex].ageCounterMature > recordBotAge) {
@@ -727,16 +716,85 @@ public class SimulationManager : MonoBehaviour {
         //StartPositionGenome startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
         agentsArray[agentIndex].InitializeAgentFromGenome(agentGenomePoolArray[agentIndex], GetRandomAgentSpawnPosition()); // Spawn that genome in dead Agent's body and revive it!
 
+
+        //if(agentIndex == 0) {
+            //if Player:
+
+            //cameraManager.targetCamPos = agentsArray[agentIndex].transform.position;
+            //cameraManager.targetCamPos.z = -50f;
+        //}
         //theRenderKing.SetSimDataArrays(); // find better way to sync data!! ****
         //theRenderKing.SetPointStrokesBuffer();
         //theRenderKing.InitializeAgentCurveData(agentIndex);
+    }
+    private void CreateMutatedCopyOfFood(int foodIndex) {
+        
+        int parentGenomeIndex = UnityEngine.Random.Range(0, numFood);
+
+        FoodGenome newFoodGenome = new FoodGenome(foodIndex);
+
+        newFoodGenome.SetToMutatedCopyOfParentGenome(foodGenomePoolArray[foodIndex], settingsManager.mutationSettingsPersistent);
+
+        foodGenomePoolArray[foodIndex] = newFoodGenome;
+
+        foodArray[foodIndex].InitializeFoodFromGenome(foodGenomePoolArray[foodIndex], GetRandomFoodSpawnPosition()); // Spawn that genome in dead Agent's body and revive it!
+       
+        // Randomly select a good one based on fitness Lottery (oldest = best)
+        /*if (rankedIndicesList[0] == foodIndex) {  // if Top Agent, just respawn identical copy:
+                               
+        }
+        else {
+            BodyGenome newBodyGenome = new BodyGenome();
+            BrainGenome newBrainGenome = new BrainGenome();
+            
+            int parentGenomeIndex = GetAgentIndexByLottery(rankedFitnessList, rankedIndicesList);
+
+            BodyGenome parentBodyGenome = agentGenomePoolArray[parentGenomeIndex].bodyGenome;
+            BrainGenome parentBrainGenome = agentGenomePoolArray[parentGenomeIndex].brainGenome;
+
+            // MUTATE BODY:
+            // Mutate body here
+            newBodyGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome, settingsManager.mutationSettingsPersistent);
+            // Create duplicate Genome
+            newBrainGenome.SetToMutatedCopyOfParentGenome(parentBrainGenome, settingsManager.mutationSettingsPersistent);
+
+            agentGenomePoolArray[foodIndex].bodyGenome = newBodyGenome; // update genome to new one
+            agentGenomePoolArray[foodIndex].brainGenome = newBrainGenome; // update genome to new one
+
+            numAgentsBorn++;
+            currentOldestAgent = agentsArray[rankedIndicesList[0]].ageCounterMature;
+        }*/
+
+        
     }
     private StartPositionGenome GetRandomAgentSpawnPosition() {
         Vector3 startPos = new Vector3(UnityEngine.Random.Range(-50f, 50f), UnityEngine.Random.Range(-50f, 50f), 0f);
         StartPositionGenome startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
         return startPosGenome;
     }
+    private StartPositionGenome GetRandomFoodSpawnPosition() {
+
+        Vector3 startPos;
+        StartPositionGenome startPosGenome;
+        // Ttry to find a suitable startPos:
+        int numParentSearches = 4;
+        //int parentIndex = -1;
+        for(int i = 0; i < numParentSearches; i++) {
+            int parentIndex = UnityEngine.Random.Range(0, numFood);
+            if(foodArray[parentIndex].curLifeStage == FoodModule.FoodLifeStage.Mature) {
+                startPos = new Vector3(foodArray[parentIndex].transform.position.x, foodArray[parentIndex].transform.position.x, 0f) + new Vector3(0f, 0f, 0f);
+                startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
+
+                return startPosGenome;
+            }            
+        }
+
+        startPos = new Vector3(UnityEngine.Random.Range(-50f, 50f), UnityEngine.Random.Range(-50f, 50f), 0f);
+        startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
+        return startPosGenome;
+    }
     public void ProcessDeadPlayer() {
+        
         
         /*if (playerAgent.ageCounter > recordPlayerAge) {
             recordPlayerAge = playerAgent.ageCounter;

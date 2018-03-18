@@ -10,7 +10,7 @@ public class PredatorModule : MonoBehaviour {
 
     private float speed = 500f;
 
-    private float damage = 0.29f;
+    private float damage = 0.51f;
     private int counter = 0;
 
     private float randX;
@@ -70,11 +70,14 @@ public class PredatorModule : MonoBehaviour {
     private void AttackAgent(Agent agent) {
         agent.testModule.hitPoints[0] -= damage;
         //Debug.Log("AttackAgent!");
-        //if (agent.testModule.hitPoints[0] <= 0f) {
+        if (agent.testModule.hitPoints[0] <= 0f) {
+            agent.curLifeStage = Agent.AgentLifeStage.Decaying;
+            agent.lifeStageTransitionTimeStepCounter = 0;
 
-            //agent.isNull = true;
+
+            //agent.isNull = true; // OLD
             //Debug.Log("Agent DEAD!");
-        //}
+        }
     }
     
     private void OnCollisionStay2D(Collision2D coll) {

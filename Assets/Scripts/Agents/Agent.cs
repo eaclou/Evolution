@@ -38,8 +38,8 @@ public class Agent : MonoBehaviour {
    
     public Brain brain;
 
-    public MeshRenderer meshRendererBeauty;
-    public MeshRenderer meshRendererFluidCollider;
+    //public MeshRenderer meshRendererBeauty;
+    //public MeshRenderer meshRendererFluidCollider;
 
     public TestModule testModule;
     private Rigidbody2D rigidBody2D;
@@ -296,11 +296,12 @@ public class Agent : MonoBehaviour {
                 break;
         }
 
-        if (testModule.hitPoints[0] <= 0f) {
+        //if (testModule.hitPoints[0] <= 0f) {
 
-            curLifeStage = AgentLifeStage.Decaying;
+            //curLifeStage = AgentLifeStage.Decaying;
+            //lifeStageTransitionTimeStepCounter = 0;
             //Debug.Log("Agent DEAD!");
-        }
+        //}
     }
 
     public void Tick() {
@@ -425,7 +426,7 @@ public class Agent : MonoBehaviour {
         isNull = false;
         lifeStageTransitionTimeStepCounter = 0;
         ageCounterMature = 0;
-        this.transform.localPosition = startPos.agentStartPosition;
+        this.transform.localPosition = startPos.startPosition;
         this.transform.localScale = new Vector3(size.x, size.y, 1f);
         InitializeModules(genome, this, startPos);      // Modules need to be created first so that Brain can map its neurons to existing modules  
         brain = new Brain(genome.brainGenome, this);

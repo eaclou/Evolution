@@ -4,16 +4,16 @@ using UnityEngine;
 
 [System.Serializable]
 public class StartPositionGenome {
-    public Vector3 agentStartPosition;
+    public Vector3 startPosition;
     public Quaternion agentStartRotation;
 
     public StartPositionGenome(StartPositionGenome templateGenome) {
-        agentStartPosition = new Vector3(templateGenome.agentStartPosition.x, templateGenome.agentStartPosition.y, templateGenome.agentStartPosition.z);
+        startPosition = new Vector3(templateGenome.startPosition.x, templateGenome.startPosition.y, templateGenome.startPosition.z);
         agentStartRotation = new Quaternion(templateGenome.agentStartRotation.x, templateGenome.agentStartRotation.y, templateGenome.agentStartRotation.z, templateGenome.agentStartRotation.w);
     }
 
     public StartPositionGenome(Vector3 pos, Quaternion rot) {
-        agentStartPosition = pos;
+        startPosition = pos;
         agentStartRotation = rot;
     }
 

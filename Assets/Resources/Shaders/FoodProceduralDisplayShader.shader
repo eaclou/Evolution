@@ -30,7 +30,8 @@
 			struct FoodSimData {
 				float2 worldPos;
 				float2 velocity;
-				float scale;
+				float2 heading;
+				float2 scale;				
 				float3 foodAmount;
 			};
 
@@ -73,14 +74,14 @@
 				quadPoint *= float3(scale, 1.0);
 
 				// ROTATION:
-				float rotationAngle = random1 * 10.0 * 3.141592;  // radians
-				float3 rotatedPoint = float3(quadPoint.x * cos(rotationAngle) - quadPoint.y * sin(rotationAngle),
-											 quadPoint.x * sin(rotationAngle) + quadPoint.y * cos(rotationAngle),
-											 quadPoint.z);
-				//float2 forward = normalize(velocity);
-				//float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
-				//float3 rotatedPoint = float3(quadPoint.x * right + quadPoint.y * forward,
+				///float rotationAngle = random1 * 10.0 * 3.141592;  // radians
+				//float3 rotatedPoint = float3(quadPoint.x * cos(rotationAngle) - quadPoint.y * sin(rotationAngle),
+				//							 quadPoint.x * sin(rotationAngle) + quadPoint.y * cos(rotationAngle),
 				//							 quadPoint.z);
+				float2 forward = normalize(rawData.heading);
+				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
+				float3 rotatedPoint = float3(quadPoint.x * right + quadPoint.y * forward,
+											 quadPoint.z);
 				//float3 rotatedPoint = quadPoint; // TEMP!!!
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(rotatedPoint, 0.0f));
