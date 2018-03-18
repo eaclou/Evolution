@@ -37,7 +37,7 @@ public class FoodModule : MonoBehaviour {
 
         }
     }
-    private int matureDurationTimeSteps = 1080;  // max oldAge
+    private int matureDurationTimeSteps = 6000;  // max oldAge
     public int _MatureDurationTimeSteps
     {
         get
@@ -70,6 +70,9 @@ public class FoodModule : MonoBehaviour {
 
     private float feedingRate = 0.005f;
 
+    public float growthStatus = 0f;  // 0-1 born --> mature
+    public float decayStatus = 0f;
+
     public bool isDepleted = false;
 
     public Vector2 fullSize;
@@ -80,7 +83,7 @@ public class FoodModule : MonoBehaviour {
     //private float maxScale = 4.5f;
 
     private float minMass = 0.25f;
-    private float maxMass = 25f;
+    private float maxMass = 5f;
 
     private float isBeingEaten = 0f;
     private float isBeingDamaged = 0f;
@@ -133,10 +136,13 @@ public class FoodModule : MonoBehaviour {
 
         lifeStageTransitionTimeStepCounter = 0;
         ageCounterMature = 0;
+        growthStatus = 0f;
+        decayStatus = 0f;
 
-        this.transform.localPosition = startPos.startPosition + new Vector3(0f, genome.fullSize.y * 0.5f, 0f);
+        this.transform.localPosition = startPos.startPosition + new Vector3(0f, 0.25f * 0.5f, 0f);
         this.transform.localScale = new Vector3(0.25f, 0.25f, 1f);
 
+        Rigidbody2D rigidBody = this.GetComponent<Rigidbody2D>();
         HingeJoint2D joint = this.GetComponent<HingeJoint2D>();
         if(parentFood != null) {
             //HingeJoint2D joint = this.GetComponent<HingeJoint2D>();
@@ -151,6 +157,8 @@ public class FoodModule : MonoBehaviour {
             parentModule = parentFood;
             //joint.isActiveAndEnabled = true;
             //Debug.Log("Init Food - parentPos: " + parentFood.transform.position.ToString() + ", startPos: " + startPos.startPosition.ToString());
+
+            //rigidBody.isKinematic = false;
         }
         else {
             
@@ -158,9 +166,11 @@ public class FoodModule : MonoBehaviour {
             
             joint.enabled = false;
             joint.connectedBody = null;
+
+            //rigidBody.isKinematic = true;
         }
 
-        Rigidbody2D rigidBody = this.GetComponent<Rigidbody2D>();
+        
         rigidBody.velocity = Vector2.zero;
         rigidBody.angularVelocity = 0f;
         //rigidBody.
@@ -294,21 +304,29 @@ public class FoodModule : MonoBehaviour {
     private void TickGrowing() {
         lifeStageTransitionTimeStepCounter++;
 
-        curSize = Vector2.Lerp(new Vector3(0.1f, 0.1f), fullSize, (float)lifeStageTransitionTimeStepCounter / (float)growDurationTimeSteps);
+        float growthPercentage = (float)lifeStageTransitionTimeStepCounter / (float)growDurationTimeSteps;
+        growthStatus = growthPercentage;
+
+        float mass = Mathf.Lerp(minMass, maxMass, growthPercentage);  // *** <<< REVISIT!!! ****
+        GetComponent<Rigidbody2D>().mass = mass;
+
+        curSize = Vector2.Lerp(new Vector3(0.1f, 0.1f), fullSize, growthPercentage);
         transform.localScale = new Vector3(curSize.x, curSize.y, 1f);
                 
 
         //Debug.Log("TickGrowing growDurationTimeSteps++");
     }
     private void TickMature() {
-        
+        growthStatus = 1f;
+
         float avgAmount = (amountR + amountG + amountB) / 3.0f;
         float lerpAmount = Mathf.Sqrt(avgAmount);
 
         curSize = Vector2.Lerp(new Vector3(0.1f, 0.1f), fullSize, 1f); // lerpAmount);  // *** <<< REVISIT!!! ****
         //float mass = Mathf.Lerp(minMass, maxMass, lerpAmount);  // *** <<< REVISIT!!! ****
-        transform.localScale = new Vector3(curSize.x, curSize.y, 1f);
         //GetComponent<Rigidbody2D>().mass = mass;
+        transform.localScale = new Vector3(curSize.x, curSize.y, 1f);
+        
 
         isDepleted = CheckIfDepleted();
 
@@ -321,7 +339,8 @@ public class FoodModule : MonoBehaviour {
 
     }
     private void TickDecaying() {
-
+        float decayPercentage = (float)lifeStageTransitionTimeStepCounter / (float)decayDurationTimeSteps;
+        decayStatus = decayPercentage;
         lifeStageTransitionTimeStepCounter++;
     }
     

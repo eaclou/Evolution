@@ -14,6 +14,7 @@ public class SimulationManager : MonoBehaviour {
     public CameraManager cameraManager;
     public SettingsManager settingsManager;
     public SimulationStateData simStateData;
+    public StartPositionsPresetLists startPositionsPresets;
 
     private bool isLoading = false;
     private bool loadingComplete = false;
@@ -752,8 +753,9 @@ public class SimulationManager : MonoBehaviour {
                 break;
             }            
         }
-        Vector3 parentForward = foodArray[parentIndex].transform.up;
-        startPos = new Vector3(foodArray[parentIndex].transform.position.x, foodArray[parentIndex].transform.position.x, 0f) + parentForward * (foodArray[parentIndex].curSize.y + 0.25f);
+        //Vector3 parentForward = foodArray[parentIndex].transform.up;
+        //startPos = new Vector3(foodArray[parentIndex].transform.position.x, foodArray[parentIndex].transform.position.y, 0f) + parentForward * (foodArray[parentIndex].curSize.y + 0.25f);
+        
         //startPosGenome = new StartPositionGenome()
         
         FoodGenome newFoodGenome = new FoodGenome(foodIndex);
@@ -766,13 +768,15 @@ public class SimulationManager : MonoBehaviour {
         if(foundParent) {
             parentFood = foodArray[parentIndex];
             //startPos = parentFood.transform.position;
-            parentForward = foodArray[parentIndex].transform.up;
+            Vector3 parentForward = foodArray[parentIndex].transform.up;
             startPos = new Vector3(foodArray[parentIndex].transform.position.x, foodArray[parentIndex].transform.position.y, 0f) + parentForward * (foodArray[parentIndex].curSize.y + 0.25f);
 
+            startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
             //Debug.Log("foundParent! parentPos: " + parentFood.transform.position.ToString() + ", startPos: " + startPos.ToString());
         }
-
-        startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
+        else {
+            startPosGenome = GetRandomFoodSpawnPosition();
+        }
 
         foodArray[foodIndex].InitializeFoodFromGenome(foodGenomePoolArray[foodIndex], startPosGenome, parentFood); // Spawn that genome in dead Agent's body and revive it!
        
@@ -826,7 +830,7 @@ public class SimulationManager : MonoBehaviour {
             }            
         }
 
-        startPos = new Vector3(UnityEngine.Random.Range(-10f, 10f), UnityEngine.Random.Range(-10f, 10f), 0f);
+        startPos = new Vector3(UnityEngine.Random.Range(-30f, 30f), UnityEngine.Random.Range(-30f, 30f), 0f);
         startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
         return startPosGenome;
     }

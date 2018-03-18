@@ -11,10 +11,20 @@ public class FoodGenome {
     public float foodProportionR = 1f;
     public float foodProportionG = 1f;
     public float foodProportionB = 1f;
-
-    public Vector3 fruitHue;
-    public Vector3 leafHue;
+        
     public Vector3 stemHue;
+    public Vector3 leafHue;
+    public Vector3 fruitHue;
+
+    public int stemBrushType;
+    public int leafBrushType;
+    public int fruitBrushType;
+
+    public float stemWidth;
+    public Vector2 leafScale;
+    public Vector2 fruitScale;
+
+    public Vector2 randomSeed; // ??
 
     // In Future Add:
     // Brush type

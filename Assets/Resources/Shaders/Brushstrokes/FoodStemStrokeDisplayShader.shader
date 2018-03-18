@@ -1,8 +1,8 @@
-﻿Shader "Unlit/FoodProceduralDisplayShader"
+﻿Shader "Brushstrokes/FoodStemStrokeDisplayShader"
 {
 	Properties
 	{
-		_MainTex ("Main Texture", 2D) = "white" {}
+		_MainTex ("Main Texture", 2D) = "white" {}  // stem texture sheet
 		//_Tint("Color", Color) = (1,1,1,1)
 		//_Size("Size", vector) = (1,1,1,1)
 	}
@@ -44,9 +44,19 @@
 				float3 fruitHue;
 			};
 
+			struct StemData {  // Only the main trunk for now!!! worry about other ones later!!! SIMPLIFY!!!
+				int foodIndex;
+				float2 localBaseCoords;  // main trunk is always (0, -1f) --> (0f, 1f), secondary stems need to start with x=0 (to be on main trunk)
+				float2 localTipCoords;  // scaled with main Food scale
+				float width; // thickness of branch
+				float childGrowth; // for future use:  // 0-1, 1 means fully mature childFood attached to this, 0 means empty end  
+				float attached;
+			};
+
+			StructuredBuffer<StemData> stemDataCBuffer;
 			StructuredBuffer<FoodSimData> foodSimDataCBuffer;
 			StructuredBuffer<float3> quadVerticesCBuffer;
-
+			
 			struct v2f
 			{
 				float4 pos : SV_POSITION;
@@ -61,8 +71,7 @@
 			v2f vert(uint id : SV_VertexID, uint inst : SV_InstanceID)
 			{
 				v2f o;
-				
-				//o.color = floatingGlowyBitsCBuffer[inst].color;
+								
 				FoodSimData rawData = foodSimDataCBuffer[inst];
 				float3 worldPosition = float3(rawData.worldPos, -0.25);  // -25 arbitrary to be visible above floaty bits & BG
 				float3 quadPoint = quadVerticesCBuffer[id];
@@ -82,21 +91,16 @@
 				float2 scale = float2(1, 1) * rawData.scale;
 				quadPoint *= float3(scale, 1.0);
 
-				// ROTATION:
-				///float rotationAngle = random1 * 10.0 * 3.141592;  // radians
-				//float3 rotatedPoint = float3(quadPoint.x * cos(rotationAngle) - quadPoint.y * sin(rotationAngle),
-				//							 quadPoint.x * sin(rotationAngle) + quadPoint.y * cos(rotationAngle),
-				//							 quadPoint.z);
+				// ROTATION:										 quadPoint.z);
 				float2 forward = normalize(rawData.heading);
 				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
 				float3 rotatedPoint = float3(quadPoint.x * right + quadPoint.y * forward,
 											 quadPoint.z);
-				//float3 rotatedPoint = quadPoint; // TEMP!!!
-
+				
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(rotatedPoint, 0.0f));
 				o.color = float4(rawData.leafHue, saturate(1.0 - rawData.decay));
 				o.uv = quadVerticesCBuffer[id] + 0.5f;
-				
+
 				return o;
 			}
 
