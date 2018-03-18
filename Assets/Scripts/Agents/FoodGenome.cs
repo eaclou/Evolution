@@ -42,7 +42,7 @@ public class FoodGenome {
     public void SetToMutatedCopyOfParentGenome(FoodGenome parentFoodGenome, MutationSettings settings) {
         // *** Result needs to be fully independent copy and share no references!!!
         
-        fullSize = UtilityMutationFunctions.GetMutatedVector2Additive(parentFoodGenome.fullSize, settings.defaultFoodMutationChance, settings.defaultFoodMutationStepSize, 1f, 4f);
+        fullSize = UtilityMutationFunctions.GetMutatedVector2Additive(parentFoodGenome.fullSize, settings.defaultFoodMutationChance, settings.defaultFoodMutationStepSize, 2.5f, 6f);
         // Set equal to parent at first, then check for possible mutation of that value:        
         fruitHue = UtilityMutationFunctions.GetMutatedVector3Additive(parentFoodGenome.fruitHue, settings.defaultFoodMutationChance, settings.defaultFoodMutationStepSize, 0f, 1f);
         leafHue = UtilityMutationFunctions.GetMutatedVector3Additive(parentFoodGenome.leafHue, settings.defaultFoodMutationChance, settings.defaultFoodMutationStepSize, 0f, 1f);

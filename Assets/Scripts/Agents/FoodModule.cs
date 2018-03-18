@@ -11,6 +11,10 @@ public class FoodModule : MonoBehaviour {
 
     public int index;
 
+    public FoodModule parentModule;
+    public FoodModule childModule;
+    public bool hasChildren = false;
+
     public CapsuleCollider2D collisionCollider;
     public CapsuleCollider2D collisionTrigger;
 
@@ -21,7 +25,7 @@ public class FoodModule : MonoBehaviour {
         Decaying,
         Null
     }
-    private int growDurationTimeSteps = 240;
+    private int growDurationTimeSteps = 60;
     public int _GrowDurationTimeSteps
     {
         get
@@ -33,7 +37,7 @@ public class FoodModule : MonoBehaviour {
 
         }
     }
-    private int matureDurationTimeSteps = 10000;  // max oldAge
+    private int matureDurationTimeSteps = 1080;  // max oldAge
     public int _MatureDurationTimeSteps
     {
         get
@@ -45,7 +49,7 @@ public class FoodModule : MonoBehaviour {
 
         }
     }
-    private int decayDurationTimeSteps = 240;
+    private int decayDurationTimeSteps = 60;
     public int _DecayDurationTimeSteps
     {
         get
@@ -118,7 +122,7 @@ public class FoodModule : MonoBehaviour {
         prevPos = transform.localPosition;
     }*/
 
-    public void InitializeFoodFromGenome(FoodGenome genome, StartPositionGenome startPos) {
+    public void InitializeFoodFromGenome(FoodGenome genome, StartPositionGenome startPos, FoodModule parentFood) {
         curLifeStage = FoodLifeStage.Growing;
 
         index = genome.index;
@@ -130,10 +134,48 @@ public class FoodModule : MonoBehaviour {
         lifeStageTransitionTimeStepCounter = 0;
         ageCounterMature = 0;
 
-        this.transform.localPosition = startPos.startPosition;
+        this.transform.localPosition = startPos.startPosition + new Vector3(0f, genome.fullSize.y * 0.5f, 0f);
         this.transform.localScale = new Vector3(0.25f, 0.25f, 1f);
 
+        HingeJoint2D joint = this.GetComponent<HingeJoint2D>();
+        if(parentFood != null) {
+            //HingeJoint2D joint = this.GetComponent<HingeJoint2D>();
+            joint.enabled = true;
+            joint.connectedBody = parentFood.GetComponent<Rigidbody2D>();
+            joint.autoConfigureConnectedAnchor = false;
+            joint.connectedAnchor = new Vector2(0f, 0.5f);
+            //joint.autoConfigureConnectedAnchor = true;
+
+            parentFood.hasChildren = true;
+            parentFood.childModule = this;
+            parentModule = parentFood;
+            //joint.isActiveAndEnabled = true;
+            //Debug.Log("Init Food - parentPos: " + parentFood.transform.position.ToString() + ", startPos: " + startPos.startPosition.ToString());
+        }
+        else {
+            
+            parentModule = null;
+            
+            joint.enabled = false;
+            joint.connectedBody = null;
+        }
+
+        Rigidbody2D rigidBody = this.GetComponent<Rigidbody2D>();
+        rigidBody.velocity = Vector2.zero;
+        rigidBody.angularVelocity = 0f;
+        //rigidBody.
+
+        if(childModule != null) {
+            childModule.parentModule = null;
+            childModule.GetComponent<HingeJoint2D>().enabled = false;
+            childModule.GetComponent<HingeJoint2D>().connectedBody = null;
+        }
+
+        hasChildren = false;
+        childModule = null;
         isDepleted = false;
+        healthStructural = 1f;
+        //hasChildren = false;
         prevPos = transform.localPosition;
 
         //curLifeStage = AgentLifeStage.Egg;
@@ -181,6 +223,12 @@ public class FoodModule : MonoBehaviour {
                 if (healthStructural <= 0f) {
                     curLifeStage = FoodLifeStage.Decaying;
                 }
+                if(ageCounterMature >= matureDurationTimeSteps) {
+                    curLifeStage = FoodLifeStage.Decaying;                    
+                }
+                if(transform.position.x > 50f || transform.position.x < -50f || transform.position.y > 50f || transform.position.y < -50f) {
+                    curLifeStage = FoodLifeStage.Decaying;   
+                }
                 break;
             case FoodLifeStage.Decaying:
                 //
@@ -189,6 +237,9 @@ public class FoodModule : MonoBehaviour {
                     //Debug.Log("FOOD NO LONGER EXISTS!");
                     lifeStageTransitionTimeStepCounter = 0;
                     isDepleted = true;  // flagged for respawn
+                    HingeJoint2D joint = this.GetComponent<HingeJoint2D>();
+                    joint.enabled = false;
+                    joint.connectedBody = null;
                 }
                 break;
             case FoodLifeStage.Null:
@@ -208,7 +259,7 @@ public class FoodModule : MonoBehaviour {
         //}
     }
     public void Tick() {
-        facingDirection = new Vector2(Mathf.Cos(transform.localRotation.z), Mathf.Sin(transform.localRotation.z));
+        facingDirection = new Vector2(Mathf.Cos(Mathf.Deg2Rad * transform.localEulerAngles.z + Mathf.PI * 0.5f), Mathf.Sin(Mathf.Deg2Rad * transform.localEulerAngles.z + Mathf.PI * 0.5f));
         // Check for StateChange:
         CheckForLifeStageTransition();
         
@@ -277,12 +328,17 @@ public class FoodModule : MonoBehaviour {
     private void ComputeCollisionDamage(Collider2D coll) {
         isBeingDamaged = 1.0f;
         healthStructural -= 0.002f;
+        Agent collidingAgent = coll.gameObject.GetComponentInParent<Agent>();
+        //collidingAgent.GetComponent<Rigidbody2D>().drag = 100f;
+        collidingAgent.isInsideFood = true;
     }
 
     private void OnTriggerEnter2D(Collider2D coll) {
         Agent collidingAgent = coll.gameObject.GetComponentInParent<Agent>();
         if (collidingAgent != null) {
             ComputeCollisionDamage(coll);
+            //collidingAgent.GetComponent<Rigidbody2D>().velocity *= 0.1f;
+            
         }
 
         colliderCount++;

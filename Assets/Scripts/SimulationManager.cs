@@ -321,7 +321,7 @@ public class SimulationManager : MonoBehaviour {
     }
     private void LoadingInitializeFoodFromGenome() {
         for (int i = 0; i < foodArray.Length; i++) {
-            foodArray[i].InitializeFoodFromGenome(foodGenomePoolArray[i], GetRandomFoodSpawnPosition());
+            foodArray[i].InitializeFoodFromGenome(foodGenomePoolArray[i], GetRandomFoodSpawnPosition(), null);
             //ReviveFood(i);
         }
     }
@@ -456,14 +456,14 @@ public class SimulationManager : MonoBehaviour {
 
         // FOOD!!! :::::::
         for (int f = 0; f < foodArray.Length; f++) {
-            if(foodArray[f].curLifeStage == FoodModule.FoodLifeStage.Mature) {
+            //if(foodArray[f].curLifeStage == FoodModule.FoodLifeStage.Mature) {
                 float xPos = foodArray[f].transform.localPosition.x;
                 float yPos = foodArray[f].transform.localPosition.y;
                 int xCoord = Mathf.FloorToInt((xPos + mapSize) / (mapSize * 2f) * (float)agentGridCellResolution);
                 int yCoord = Mathf.FloorToInt((yPos + mapSize) / (mapSize * 2f) * (float)agentGridCellResolution);
 
                 mapGridCellArray[xCoord][yCoord].foodIndicesList.Add(f);
-            }            
+            //}            
         }
 
         // FRIENDS::::::
@@ -503,7 +503,7 @@ public class SimulationManager : MonoBehaviour {
 
             int closestFriendIndex = a;  // default to self
             float nearestFriendSquaredDistance = float.PositiveInfinity;
-            int closestFoodIndex = 0; // default to 0???
+            int closestFoodIndex = -1; // default to -1??? ***
             float nearestFoodDistance = float.PositiveInfinity;
             int closestPredIndex = 0; // default to 0???
             float nearestPredDistance = float.PositiveInfinity;
@@ -532,14 +532,17 @@ public class SimulationManager : MonoBehaviour {
             
             for (int i = 0; i < mapGridCellArray[xCoord][yCoord].foodIndicesList.Count; i++) {
                 // FOOD:
-                Vector2 foodPos = new Vector2(foodArray[mapGridCellArray[xCoord][yCoord].foodIndicesList[i]].transform.localPosition.x, foodArray[mapGridCellArray[xCoord][yCoord].foodIndicesList[i]].transform.localPosition.y);
-                float distFood = (foodPos - agentPos).magnitude - (foodArray[mapGridCellArray[xCoord][yCoord].foodIndicesList[i]].curSize.magnitude + 1f) * 0.5f;  // subtract food & agent radii
-                if (distFood <= nearestFoodDistance) { // if now the closest so far, update index and dist:
-                    if (a != mapGridCellArray[xCoord][yCoord].foodIndicesList[i]) {  // make sure it doesn't consider itself:
-                        closestFoodIndex = mapGridCellArray[xCoord][yCoord].foodIndicesList[i];
-                        nearestFoodDistance = distFood;
+                if(foodArray[mapGridCellArray[xCoord][yCoord].foodIndicesList[i]].curLifeStage == FoodModule.FoodLifeStage.Mature) {
+                    //Debug.Log("Found valid Food!");
+                    Vector2 foodPos = new Vector2(foodArray[mapGridCellArray[xCoord][yCoord].foodIndicesList[i]].transform.localPosition.x, foodArray[mapGridCellArray[xCoord][yCoord].foodIndicesList[i]].transform.localPosition.y);
+                    float distFood = (foodPos - agentPos).magnitude - (foodArray[mapGridCellArray[xCoord][yCoord].foodIndicesList[i]].curSize.magnitude + 1f) * 0.5f;  // subtract food & agent radii
+                    if (distFood <= nearestFoodDistance) { // if now the closest so far, update index and dist:
+                        if (a != mapGridCellArray[xCoord][yCoord].foodIndicesList[i]) {  // make sure it doesn't consider itself:
+                            closestFoodIndex = mapGridCellArray[xCoord][yCoord].foodIndicesList[i];
+                            nearestFoodDistance = distFood;
+                        }
                     }
-                }
+                }                
             }
 
             for (int i = 0; i < mapGridCellArray[xCoord][yCoord].predatorIndicesList.Count; i++) {
@@ -555,7 +558,9 @@ public class SimulationManager : MonoBehaviour {
             }
             // Set proper references between AgentBrains and Environment/Game Objects:::
             agentsArray[a].testModule.friendTestModule = agentsArray[closestFriendIndex].testModule;
-            agentsArray[a].testModule.nearestFoodModule = foodArray[closestFoodIndex];
+            if(closestFoodIndex != -1) {
+                agentsArray[a].testModule.nearestFoodModule = foodArray[closestFoodIndex];
+            }            
             agentsArray[a].testModule.nearestPredatorModule = predatorArray[closestPredIndex];            
         }
     }
@@ -728,16 +733,48 @@ public class SimulationManager : MonoBehaviour {
         //theRenderKing.InitializeAgentCurveData(agentIndex);
     }
     private void CreateMutatedCopyOfFood(int foodIndex) {
-        
-        int parentGenomeIndex = UnityEngine.Random.Range(0, numFood);
 
+        Vector3 startPos; // = new Vector3(foodArray[parentIndex].transform.position.x, foodArray[parentIndex].transform.position.x, 0f) + new Vector3(0f, 0f, 0f);
+        StartPositionGenome startPosGenome; // = new StartPositionGenome(startPos, Quaternion.identity);
+
+        int parentIndex = UnityEngine.Random.Range(0, numFood);;
+        bool foundParent = false;
+        // Ttry to find a suitable startPos:
+        int numParentSearches = 16;
+        //int parentIndex = -1;
+        for(int i = 0; i < numParentSearches; i++) {
+            int randomIndex = UnityEngine.Random.Range(0, numFood);
+            if(foodArray[randomIndex].curLifeStage == FoodModule.FoodLifeStage.Mature && foodArray[randomIndex].hasChildren == false) {
+                
+                //return startPosGenome;
+                parentIndex = randomIndex;
+                foundParent = true;
+                break;
+            }            
+        }
+        Vector3 parentForward = foodArray[parentIndex].transform.up;
+        startPos = new Vector3(foodArray[parentIndex].transform.position.x, foodArray[parentIndex].transform.position.x, 0f) + parentForward * (foodArray[parentIndex].curSize.y + 0.25f);
+        //startPosGenome = new StartPositionGenome()
+        
         FoodGenome newFoodGenome = new FoodGenome(foodIndex);
 
-        newFoodGenome.SetToMutatedCopyOfParentGenome(foodGenomePoolArray[foodIndex], settingsManager.mutationSettingsPersistent);
+        newFoodGenome.SetToMutatedCopyOfParentGenome(foodGenomePoolArray[parentIndex], settingsManager.mutationSettingsPersistent);
 
         foodGenomePoolArray[foodIndex] = newFoodGenome;
 
-        foodArray[foodIndex].InitializeFoodFromGenome(foodGenomePoolArray[foodIndex], GetRandomFoodSpawnPosition()); // Spawn that genome in dead Agent's body and revive it!
+        FoodModule parentFood = null;
+        if(foundParent) {
+            parentFood = foodArray[parentIndex];
+            //startPos = parentFood.transform.position;
+            parentForward = foodArray[parentIndex].transform.up;
+            startPos = new Vector3(foodArray[parentIndex].transform.position.x, foodArray[parentIndex].transform.position.y, 0f) + parentForward * (foodArray[parentIndex].curSize.y + 0.25f);
+
+            //Debug.Log("foundParent! parentPos: " + parentFood.transform.position.ToString() + ", startPos: " + startPos.ToString());
+        }
+
+        startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
+
+        foodArray[foodIndex].InitializeFoodFromGenome(foodGenomePoolArray[foodIndex], startPosGenome, parentFood); // Spawn that genome in dead Agent's body and revive it!
        
         // Randomly select a good one based on fitness Lottery (oldest = best)
         /*if (rankedIndicesList[0] == foodIndex) {  // if Top Agent, just respawn identical copy:
@@ -789,7 +826,7 @@ public class SimulationManager : MonoBehaviour {
             }            
         }
 
-        startPos = new Vector3(UnityEngine.Random.Range(-50f, 50f), UnityEngine.Random.Range(-50f, 50f), 0f);
+        startPos = new Vector3(UnityEngine.Random.Range(-10f, 10f), UnityEngine.Random.Range(-10f, 10f), 0f);
         startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
         return startPosGenome;
     }

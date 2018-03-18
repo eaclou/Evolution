@@ -48,6 +48,8 @@ public class Agent : MonoBehaviour {
     //public TheRenderKing.PointStrokeData[] decorationPointStrokesArray;
     public Vector2 size;
 
+    public bool isInsideFood = false;
+
     //public int sourceGenomeIndex;
     
     public float speed = 75f;
@@ -331,6 +333,15 @@ public class Agent : MonoBehaviour {
                 Debug.LogError("NO SUCH ENUM ENTRY IMPLEMENTED, YOU FOOL!!! (" + curLifeStage.ToString() + ")");
                 break;
         }
+
+        if(isInsideFood) {
+            rigidBody2D.drag = 20f;
+            //Debug.Log("isInsideFood!");
+        }
+        else {
+            rigidBody2D.drag = 10f;
+        }
+        isInsideFood = false;
         
         Vector3 curPos = transform.localPosition;        
         prevPos = curPos;
