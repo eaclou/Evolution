@@ -41,12 +41,20 @@ public class FoodGenome {
 
     public void InitializeAsRandomGenome() {
 
-        fullSize = new Vector2(UnityEngine.Random.Range(1f, 3.33f), UnityEngine.Random.Range(1f, 6f));
+        fullSize = new Vector2(UnityEngine.Random.Range(1f, 2f), UnityEngine.Random.Range(1f, 6f));
         
         fruitHue = new Vector3(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f));
         leafHue = new Vector3(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f));
         stemHue = new Vector3(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f));
 
+        stemBrushType = UnityEngine.Random.Range(0, 8); // 8 texture types
+        leafBrushType = UnityEngine.Random.Range(0, 8);
+        fruitBrushType = UnityEngine.Random.Range(0, 8);
+
+        stemWidth = UnityEngine.Random.Range(0.4f, 0.99f);
+
+        leafScale = new Vector2(UnityEngine.Random.Range(0.25f, 0.6f), UnityEngine.Random.Range(0.25f, 0.6f));
+        fruitScale = new Vector2(UnityEngine.Random.Range(0.2f, 0.25f), UnityEngine.Random.Range(0.2f, 0.25f));
     }
 
     public void SetToMutatedCopyOfParentGenome(FoodGenome parentFoodGenome, MutationSettings settings) {
@@ -58,5 +66,13 @@ public class FoodGenome {
         leafHue = UtilityMutationFunctions.GetMutatedVector3Additive(parentFoodGenome.leafHue, settings.defaultFoodMutationChance, settings.defaultFoodMutationStepSize, 0f, 1f);
         stemHue = UtilityMutationFunctions.GetMutatedVector3Additive(parentFoodGenome.stemHue, settings.defaultFoodMutationChance, settings.defaultFoodMutationStepSize, 0f, 1f);
         
+        stemBrushType = UtilityMutationFunctions.GetMutatedIntAdditive(parentFoodGenome.stemBrushType, settings.defaultFoodMutationChance, 3, 0, 7);
+        leafBrushType = UtilityMutationFunctions.GetMutatedIntAdditive(parentFoodGenome.leafBrushType, settings.defaultFoodMutationChance, 3, 0, 7);
+        fruitBrushType = UtilityMutationFunctions.GetMutatedIntAdditive(parentFoodGenome.fruitBrushType, settings.defaultFoodMutationChance, 3, 0, 7);
+
+        stemWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentFoodGenome.stemWidth, settings.defaultFoodMutationChance, settings.defaultFoodMutationStepSize, 0.1f, 0.8f);
+
+        leafScale = UtilityMutationFunctions.GetMutatedVector2Additive(parentFoodGenome.leafScale, settings.defaultFoodMutationChance, settings.defaultFoodMutationStepSize, 0.25f, 0.6f);
+        fruitScale = UtilityMutationFunctions.GetMutatedVector2Additive(parentFoodGenome.fruitScale, settings.defaultFoodMutationChance, settings.defaultFoodMutationStepSize, 0.2f, 0.25f);
     }
 }

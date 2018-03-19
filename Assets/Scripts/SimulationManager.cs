@@ -179,17 +179,6 @@ public class SimulationManager : MonoBehaviour {
 
         yield return null;
 
-        // Wake up the Render King and prepare him for the day ahead, proudly ruling over Renderland.
-        LoadingGentlyRouseTheRenderMonarchHisHighnessLordOfPixels();
-
-        yield return null;
-
-        // **** How to handle sharing simulation data between different Managers???
-        // Once Agents, Food, etc. are established, Initialize the Fluid:
-        LoadingInitializeFluidSim();
-        
-        yield return null;
-
         // Initialize Agents:
         LoadingInstantiateAgents();  // Fills the AgentsArray, Instantiates Agent Objects (MonoBehaviors + GameObjects)
         LoadingInitializeAgentsFromGenomes(); // This was "RespawnAgents()" --  Used to actually place the Agent in the game in a random spot and set the Agent's atributes ffrom its genome
@@ -202,6 +191,17 @@ public class SimulationManager : MonoBehaviour {
         LoadingInstantiatePredators();
         LoadingInitializePredatorsFromGenome();
 
+        yield return null;
+
+        // Wake up the Render King and prepare him for the day ahead, proudly ruling over Renderland.
+        LoadingGentlyRouseTheRenderMonarchHisHighnessLordOfPixels();
+
+        yield return null;
+
+        // **** How to handle sharing simulation data between different Managers???
+        // Once Agents, Food, etc. are established, Initialize the Fluid:
+        LoadingInitializeFluidSim();
+        
         yield return null;
                 
         LoadingHookUpFluidAndRenderKing();  // fluid needs refs to RK's obstacle/color cameras' RenderTextures!
@@ -638,6 +638,7 @@ public class SimulationManager : MonoBehaviour {
         // Reproduction!!!
         CreateMutatedCopyOfFood(foodIndex); 
         
+        theRenderKing.UpdateDynamicFoodBuffers(foodIndex);
         //theRenderKing.UpdateAgentBodyStrokesBuffer(foodIndex);
         //theRenderKing.InitializeAgentEyeStrokesBuffer();
     }
@@ -979,6 +980,15 @@ public class SimulationManager : MonoBehaviour {
         }
         if (simStateData.predatorSimDataCBuffer != null) {
             simStateData.predatorSimDataCBuffer.Release();
+        }
+        if (simStateData.foodStemDataCBuffer != null) {
+            simStateData.foodStemDataCBuffer.Release();
+        }
+        if (simStateData.foodLeafDataCBuffer != null) {
+            simStateData.foodLeafDataCBuffer.Release();
+        }
+        if (simStateData.foodFruitDataCBuffer != null) {
+            simStateData.foodFruitDataCBuffer.Release();
         }
     }
 

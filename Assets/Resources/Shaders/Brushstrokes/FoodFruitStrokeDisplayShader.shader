@@ -1,4 +1,4 @@
-﻿Shader "Brushstrokes/FoodStemStrokeDisplayShader"
+﻿Shader "Brushstrokes/FoodFruitStrokeDisplayShader"
 {
 	Properties
 	{
@@ -44,16 +44,15 @@
 				float3 fruitHue;
 			};
 
-			struct StemData {  // Only the main trunk for now!!! worry about other ones later!!! SIMPLIFY!!!
+			struct FruitData {
 				int foodIndex;
-				float2 localBaseCoords;  // main trunk is always (0, -1f) --> (0f, 1f), secondary stems need to start with x=0 (to be on main trunk)
-				float2 localTipCoords;  // scaled with main Food scale
-				float width; // thickness of branch
-				float childGrowth; // for future use:  // 0-1, 1 means fully mature childFood attached to this, 0 means empty end  
-				float attached;
+				float2 worldPos;
+				float2 localCoords;
+				float2 localScale;
+				float attached;  // if attached, sticks to parent food, else, floats in water
 			};
 
-			StructuredBuffer<StemData> stemDataCBuffer;
+			StructuredBuffer<FruitData> fruitDataCBuffer;
 			StructuredBuffer<FoodSimData> foodSimDataCBuffer;
 			StructuredBuffer<float3> quadVerticesCBuffer;
 			
@@ -72,10 +71,20 @@
 			{
 				v2f o;
 							
-				StemData stemData = stemDataCBuffer[inst];
-				FoodSimData rawData = foodSimDataCBuffer[stemData.foodIndex];
+				FruitData fruitData = fruitDataCBuffer[inst];
+				FoodSimData rawData = foodSimDataCBuffer[fruitData.foodIndex];
 				
-				float3 worldPosition = float3(rawData.worldPos, -0.25);  // -25 arbitrary to be visible above floaty bits & BG
+				//float3 worldPosition = float3(rawData.worldPos, -0.5);  // -25 arbitrary to be visible above floaty bits & BG
+				//float3 offset = float3(fruitData.localCoords * rawData.scale * 0.5, 0);
+				//worldPosition += offset;
+
+				float3 worldPosition = float3(rawData.worldPos, -0.5);
+				// Rotation of Billboard center around Agent's Center (no effect if localPos and localDir are zero/default)'
+				float2 forwardAgent = rawData.heading;
+				float2 rightAgent = float2(forwardAgent.y, -forwardAgent.x);
+				float2 positionOffset = float2(fruitData.localCoords.x * rawData.scale.x * rightAgent + fruitData.localCoords.y * rawData.scale.y * forwardAgent) * 0.5;
+				worldPosition.xy += positionOffset; // Place properly
+				
 				float3 quadPoint = quadVerticesCBuffer[id];
 
 				float2 velocity = rawData.velocity;
@@ -91,22 +100,47 @@
 				//float randomScale = lerp(0.033, 0.09, random2);
 				//float2 scale = float2(randomAspect * randomScale, (1.0 / randomAspect) * randomScale * (length(velocity) * 50 + 1));
 				
-				float2 scale = float2(stemData.width, 1) * rawData.scale;
+				float2 scale = fruitData.localScale * length(rawData.scale) * rawData.growth;
 				quadPoint *= float3(scale, 1.0);
 
+				// Figure out final facing Vectors!!!
+				//float2 forward0 = rawData.heading;
+				//float2 right0 = float2(forward0.y, -forward0.x); // perpendicular to forward vector
+				//float2 rotatedPoint0 = float2(pointStrokeData.localDir.x * right0 + pointStrokeData.localDir.y * forward0);  // Rotate localRotation by AgentRotation
 				// ROTATION:										 quadPoint.z);
-				float2 forward = normalize(rawData.heading);
-				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
-				float3 rotatedPoint = float3(quadPoint.x * right + quadPoint.y * forward,
+				//float rotationAngle = random1 * 10.0 * 3.141592;  // radians
+				//float3 rotatedPoint = float3(quadPoint.x * cos(rotationAngle) - quadPoint.y * sin(rotationAngle),
+				//							 quadPoint.x * sin(rotationAngle) + quadPoint.y * cos(rotationAngle),
+				//							 quadPoint.z);
+
+
+				// Figure out final facing Vectors!!!
+				float rotationAngle = random1 * 10.0 * 3.141592;  // radians
+				float2 forward0 = rawData.heading;
+				float2 right0 = float2(forward0.y, -forward0.x); // perpendicular to forward vector
+				float2 rotatedPoint0 = float2(cos(rotationAngle) * right0 + sin(rotationAngle) * forward0);  // Rotate localRotation by AgentRotation
+				float2 forward1 = rotatedPoint0;
+				float2 right1 = float2(forward1.y, -forward1.x);
+				// With final facing Vectors, find rotation of QuadPoints:
+				float3 rotatedPoint1 = float3(quadPoint.x * right1 + quadPoint.y * forward1,
 											 quadPoint.z);
+				//float2 forward = normalize(rawData.heading);
+				//float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
+				//float3 rotatedPoint = float3(quadPoint.x * right + quadPoint.y * forward,
+				//							 quadPoint.z);
 				
-				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(rotatedPoint, 0.0f));
-				o.color = float4(rawData.stemHue, saturate(1.0 - rawData.decay));
+				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(rotatedPoint1, 0.0f));
+
+				float eaten = 1.0;
+				if(random2 > saturate(length(rawData.foodAmount))) {
+					eaten = 0.0;
+				}
+				o.color = float4(lerp(float3(0.5, 0.5, 0.5), rawData.fruitHue, rawData.growth), eaten * (1.0 - rawData.decay));
 
 				float2 uv0 = quadVerticesCBuffer[id] + 0.5f; // full texture
 				float2 uv1 = uv0;
 				// Which Brush? (uv.X) :::::
-				float randBrush = rawData.stemBrushType; //pointStrokeData.brushType; //floor(rand(float2(random2, inst)) * 3.99); // 0-3
+				float randBrush = rawData.fruitBrushType; //pointStrokeData.brushType; //floor(rand(float2(random2, inst)) * 3.99); // 0-3
 				const float tilePercentage = (1.0 / 8.0);
 				uv0.x *= tilePercentage;  // 8 brushes on texture
 				uv0.x += tilePercentage * randBrush;

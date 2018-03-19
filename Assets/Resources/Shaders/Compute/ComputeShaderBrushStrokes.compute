@@ -8,6 +8,9 @@
 #pragma kernel CSPinRootTrailStrokesData
 #pragma kernel CSIterateTrailStrokesData
 #pragma kernel CSAlignFrameBufferStrokes
+#pragma kernel CSUpdateDynamicStemBuffers
+#pragma kernel CSUpdateDynamicLeafBuffers
+#pragma kernel CSUpdateDynamicFruitBuffers
 
 struct AgentSimData {
 	float2 worldPos;
@@ -42,14 +45,44 @@ struct FrameBufferStrokeData {
 	int brushType;
 };
 
+struct StemData {  // Only the main trunk for now!!! worry about other ones later!!! SIMPLIFY!!!
+    int foodIndex;
+    float2 localBaseCoords;  // main trunk is always (0, -1f) --> (0f, 1f), secondary stems need to start with x=0 (to be on main trunk)
+    float2 localTipCoords;  // scaled with main Food scale
+    float width; // thickness of branch
+    float childGrowth; // for future use:  // 0-1, 1 means fully mature childFood attached to this, 0 means empty end  
+    float attached;
+};
+struct LeafData { // fixed number, but some aren't used (zero scale??)
+    int foodIndex;
+    float2 worldPos;
+    float2 localCoords;
+    float2 localScale;
+    float attached;  // if attached, sticks to parent food, else, floats in water
+};
+struct FruitData {
+    int foodIndex;
+    float2 worldPos;
+    float2 localCoords;
+    float2 localScale;
+    float attached;  // if attached, sticks to parent food, else, floats in water
+};
+
 StructuredBuffer<AgentSimData> agentSimDataCBuffer;
 StructuredBuffer<int> agentInitializeCBuffer;
 StructuredBuffer<CurveStrokeData> agentCurveStrokesReadCBuffer; // use this for updating
 RWStructuredBuffer<CurveStrokeData> agentCurveStrokesWriteCBuffer;
 int _CurveStrokesUpdateAgentIndex;
 
-StructuredBuffer<TrailStrokeData> agentTrailStrokesReadCBuffer;
-RWStructuredBuffer<TrailStrokeData> agentTrailStrokesWriteCBuffer;
+//StructuredBuffer<TrailStrokeData> agentTrailStrokesReadCBuffer;
+//RWStructuredBuffer<TrailStrokeData> agentTrailStrokesWriteCBuffer;
+
+StructuredBuffer<StemData> foodStemDataUpdateCBuffer;
+RWStructuredBuffer<StemData> foodStemDataWriteCBuffer;
+StructuredBuffer<LeafData> foodLeafDataUpdateCBuffer;
+RWStructuredBuffer<LeafData> foodLeafDataWriteCBuffer;
+StructuredBuffer<FruitData> foodFruitDataUpdateCBuffer;
+RWStructuredBuffer<FruitData> foodFruitDataWriteCBuffer;
 
 Texture2D<float4> terrainHeightTex;
 RWStructuredBuffer<FrameBufferStrokeData> terrainFrameBufferStrokesCBuffer;
@@ -117,6 +150,7 @@ CurveStrokeData UpdateCurveStrokeDirectional(CurveStrokeData inData, AgentSimDat
 	return curveData;
 }
 
+
 [numthreads(1,1,1)]
 void CSSinglePassCurveBrushData (uint3 id : SV_DispatchThreadID)
 {
@@ -135,19 +169,45 @@ void CSUpdateCurveBrushDataAgentIndex (uint3 id : SV_DispatchThreadID)
 }
 
 [numthreads(1,1,1)]
+void CSUpdateDynamicStemBuffers (uint3 id : SV_DispatchThreadID)
+{	
+	StemData stemData = foodStemDataUpdateCBuffer[0];
+	int foodIndex = foodStemDataUpdateCBuffer[0].foodIndex;	
+	foodStemDataWriteCBuffer[foodIndex] = stemData;	
+}
+[numthreads(1,1,1)]
+void CSUpdateDynamicLeafBuffers (uint3 id : SV_DispatchThreadID)
+{	
+	for(int i = 0; i < 16; i++) {
+		LeafData leafData = foodLeafDataUpdateCBuffer[i];
+		int foodIndex = leafData.foodIndex;	
+		foodLeafDataWriteCBuffer[foodIndex * 16 + i] = leafData;	
+	}
+}
+[numthreads(1,1,1)]
+void CSUpdateDynamicFruitBuffers (uint3 id : SV_DispatchThreadID)
+{	
+	for(int i = 0; i < 16; i++) {
+		FruitData fruitData = foodFruitDataUpdateCBuffer[i];
+		int foodIndex = fruitData.foodIndex;	
+		foodFruitDataWriteCBuffer[foodIndex * 16 + i] = fruitData;
+	}		
+}
+
+[numthreads(1,1,1)]
 void CSPinRootTrailStrokesData (uint3 id : SV_DispatchThreadID)
 {
-	AgentSimData agentData = agentSimDataCBuffer[id.x];
+	//AgentSimData agentData = agentSimDataCBuffer[id.x];
 
-	int trailPointIndex = id.x * 32;
+	//int trailPointIndex = id.x * 32;
 
-	agentTrailStrokesWriteCBuffer[trailPointIndex].worldPos = agentData.worldPos;
+	//agentTrailStrokesWriteCBuffer[trailPointIndex].worldPos = agentData.worldPos;
 }
 
 [numthreads(1,1,1)]
 void CSIterateTrailStrokesData (uint3 id : SV_DispatchThreadID)
 {
-	uint trailPointIndex = id.x;
+	/*uint trailPointIndex = id.x;
 	uint localTrailIndex = trailPointIndex % 32;
 
 	float restDistance = 0.125;
@@ -165,7 +225,7 @@ void CSIterateTrailStrokesData (uint3 id : SV_DispatchThreadID)
 		float2 vecParentToCurrent = currentPos - parentPos;
 
 		agentTrailStrokesWriteCBuffer[trailPointIndex].worldPos = parentPos + normalize(vecParentToCurrent) * restDistance;	
-	}
+	}*/
 }
 
 [numthreads(1,1,1)]

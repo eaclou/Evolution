@@ -25,7 +25,7 @@ public class FoodModule : MonoBehaviour {
         Decaying,
         Null
     }
-    private int growDurationTimeSteps = 60;
+    private int growDurationTimeSteps = 120;
     public int _GrowDurationTimeSteps
     {
         get
@@ -49,7 +49,7 @@ public class FoodModule : MonoBehaviour {
 
         }
     }
-    private int decayDurationTimeSteps = 60;
+    private int decayDurationTimeSteps = 120;
     public int _DecayDurationTimeSteps
     {
         get

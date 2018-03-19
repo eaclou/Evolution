@@ -68,6 +68,10 @@ public class SimulationStateData {
     public ComputeBuffer agentSimDataCBuffer;
     public ComputeBuffer foodSimDataCBuffer;
     public ComputeBuffer predatorSimDataCBuffer;
+
+    public ComputeBuffer foodStemDataCBuffer;
+    public ComputeBuffer foodLeafDataCBuffer;
+    public ComputeBuffer foodFruitDataCBuffer;
         
     public Vector2[] fluidVelocitiesAtAgentPositionsArray;  // Grabs info about how Fluid should affect Agents from GPU
     public Vector4[] agentFluidPositionsArray;  // zw coords holds xy radius of agent  // **** Revisit this?? Redundancy btw AgentSimData worldPos (but simData doesn't have agent Radius)
@@ -95,6 +99,14 @@ public class SimulationStateData {
             foodSimDataArray[i] = new FoodSimData();
         }
         foodSimDataCBuffer = new ComputeBuffer(foodSimDataArray.Length, sizeof(float) * 23 + sizeof(int) * 3); // got big
+
+        //StemData[] stemDataArray = new StemData[simManager._NumFood]; // one per food at first: // do this individually in a loop using the update kernel?
+        //for (int i = 0; i < stemDataArray.Length; i++) {
+        //    stemDataArray[i] = new StemData();
+        //}
+        foodStemDataCBuffer = new ComputeBuffer(simManager._NumFood, sizeof(float) * 7 + sizeof(int) * 1);
+        foodLeafDataCBuffer = new ComputeBuffer(simManager._NumFood * 16, sizeof(float) * 7 + sizeof(int) * 1);
+        foodFruitDataCBuffer = new ComputeBuffer(simManager._NumFood * 16, sizeof(float) * 7 + sizeof(int) * 1);
 
         predatorSimDataArray = new PredatorSimData[simManager._NumPredators];
         for (int i = 0; i < predatorSimDataArray.Length; i++) {
@@ -156,24 +168,7 @@ public class SimulationStateData {
             foodSimDataArray[i].stemHue = simManager.foodGenomePoolArray[i].stemHue;
             foodSimDataArray[i].leafHue = simManager.foodGenomePoolArray[i].leafHue;
             foodSimDataArray[i].fruitHue = simManager.foodGenomePoolArray[i].fruitHue;
-
-            /*
-            public Vector2 worldPos;
-            public Vector2 velocity;
-            public Vector2 heading;
-            public Vector2 scale;
-            public Vector3 foodAmount;
-            public float growth;
-            public float decay;
-            public float health;
-            public int stemBrushType;
-            public int leafBrushType;
-            public int fruitBrushType;
-            public Vector3 stemHue;
-            public Vector3 leafHue;
-            public Vector3 fruitHue;
-            */
-
+            
 
             // Z & W coords represents agent's x/y Radii (in FluidCoords)
             // convert from scene coords (-mapSize --> +mapSize to fluid coords (0 --> 1):::
@@ -185,7 +180,7 @@ public class SimulationStateData {
                                                       sampleRadius);
         }
         foodSimDataCBuffer.SetData(foodSimDataArray); // send data to GPU for Rendering
-
+        
         for (int i = 0; i < predatorSimDataArray.Length; i++) {
             Vector3 predatorPos = simManager.predatorArray[i].transform.position;
             predatorSimDataArray[i].worldPos = new Vector2(predatorPos.x, predatorPos.y);
