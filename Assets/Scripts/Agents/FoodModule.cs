@@ -25,7 +25,7 @@ public class FoodModule : MonoBehaviour {
         Decaying,
         Null
     }
-    private int growDurationTimeSteps = 120;
+    private int growDurationTimeSteps = 180;
     public int _GrowDurationTimeSteps
     {
         get
@@ -49,7 +49,7 @@ public class FoodModule : MonoBehaviour {
 
         }
     }
-    private int decayDurationTimeSteps = 120;
+    private int decayDurationTimeSteps = 180;
     public int _DecayDurationTimeSteps
     {
         get
@@ -341,6 +341,7 @@ public class FoodModule : MonoBehaviour {
     private void TickDecaying() {
         float decayPercentage = (float)lifeStageTransitionTimeStepCounter / (float)decayDurationTimeSteps;
         decayStatus = decayPercentage;
+        curSize = Vector2.Lerp(fullSize, new Vector3(0.1f, 0.1f), decayStatus);
         lifeStageTransitionTimeStepCounter++;
     }
     

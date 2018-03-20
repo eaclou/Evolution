@@ -31,7 +31,7 @@
 				float2 worldPos;
 				float2 velocity;
 				float2 heading;
-				float2 scale;
+				float2 fullSize;
 				float3 foodAmount;
 				float growth;
 				float decay;
@@ -79,7 +79,7 @@
 				// Rotation of Billboard center around Agent's Center (no effect if localPos and localDir are zero/default)'
 				float2 forwardAgent = rawData.heading;
 				float2 rightAgent = float2(forwardAgent.y, -forwardAgent.x);
-				float2 positionOffset = float2(leafData.localCoords.x * rawData.scale.x * rightAgent + leafData.localCoords.y * rawData.scale.y * forwardAgent) * 0.5;
+				float2 positionOffset = float2(leafData.localCoords.x * rightAgent * rawData.fullSize.x + leafData.localCoords.y * forwardAgent * rawData.fullSize.y) * 0.7 * saturate(rawData.growth * 1.5) * (1.0 - saturate(rawData.decay * 0.5));
 				worldPosition.xy += positionOffset; // Place properly
 
 				float3 quadPoint = quadVerticesCBuffer[id];
@@ -94,10 +94,11 @@
 				//float randomAspect = lerp(0.67, 1.33, random1);
 				//float randomScale = lerp(_Size.x, _Size.y, random2);
 				//float randomValue = rand(float2(inst, randomAspect * 10));
-				//float randomScale = lerp(0.033, 0.09, random2);
+				float randomScale = lerp(0.75, 1.35, random2);
 				//float2 scale = float2(randomAspect * randomScale, (1.0 / randomAspect) * randomScale * (length(velocity) * 50 + 1));
 				
-				float2 scale = rawData.scale * length(leafData.localScale) * rawData.growth;  // 
+				float2 scale = length(rawData.fullSize) * saturate((rawData.growth) * 2.2) * randomScale * leafData.localScale * (1.0 - rawData.decay);  // 
+				//scale = float2(0.2, 0.2);
 				quadPoint *= float3(scale, 1.0);
 
 				// Figure out final facing Vectors!!!
@@ -111,8 +112,8 @@
 				float3 rotatedPoint1 = float3(quadPoint.x * right1 + quadPoint.y * forward1,
 											 quadPoint.z);
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(rotatedPoint1, 0.0f));
-
-				o.color = float4(rawData.leafHue, 1);
+				float3 leafHue = lerp(rawData.leafHue, float3(0.15, 0.8, 0.28), 0.67);
+				o.color = lerp(float4(0.57, 0.56, 0.25, 0.2), float4(leafHue * (random1 * 0.4 + 0.8), 1), saturate((1.0 - rawData.decay * 2 + random1*0.5)));
 				o.status = float4(rawData.growth, rawData.decay, rawData.health, length(rawData.foodAmount));
 
 				float2 uv0 = quadVerticesCBuffer[id] + 0.5f; // full texture
@@ -133,8 +134,8 @@
 				//float blurLerp = blurMag - blurRow0;
 				// calculate UV's to sample from correct rows:
 
-				uv0.y = uv0.y * 0.25 + 0.25 * blurRow0;
-				uv1.y = uv1.y * 0.25 + 0.25 * blurRow1;
+				uv0.y = uv0.y * tilePercentage + tilePercentage * blurRow0;
+				uv1.y = uv1.y * tilePercentage + tilePercentage * blurRow1;
 				// motion blur sampling:
 				//o.motionBlurLerp = 0; //blurLerp;
 
@@ -151,7 +152,7 @@
 				float4 texColor1 = tex2D(_MainTex, i.uv.zw);  // Read Brush Texture end Row				
 				
 				float4 brushColor = lerp(texColor0, texColor1, 0.0);
-
+				
 				float alpha = brushColor.a;
 				if(alpha < i.status.y) {
 					alpha = 0;

@@ -31,7 +31,7 @@
 				float2 worldPos;
 				float2 velocity;
 				float2 heading;
-				float2 scale;
+				float2 fullSize;
 				float3 foodAmount;
 				float growth;
 				float decay;
@@ -91,7 +91,7 @@
 				//float randomScale = lerp(0.033, 0.09, random2);
 				//float2 scale = float2(randomAspect * randomScale, (1.0 / randomAspect) * randomScale * (length(velocity) * 50 + 1));
 				
-				float2 scale = float2(stemData.width, 1) * rawData.scale;
+				float2 scale = float2(stemData.width, 1) * rawData.fullSize * saturate(rawData.growth * 2) * (1.0 - rawData.decay);
 				quadPoint *= float3(scale, 1.0);
 
 				// ROTATION:										 quadPoint.z);
@@ -101,7 +101,7 @@
 											 quadPoint.z);
 				
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(rotatedPoint, 0.0f));
-				o.color = float4(rawData.stemHue, saturate(1.0 - rawData.decay));
+				o.color = float4(lerp(rawData.stemHue, float3(0.45,0.44,0.35)*1 + random2*0.25, 0.72), saturate(1.0 - rawData.decay));
 
 				float2 uv0 = quadVerticesCBuffer[id] + 0.5f; // full texture
 				float2 uv1 = uv0;

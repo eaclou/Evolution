@@ -53,8 +53,8 @@ public class FoodGenome {
 
         stemWidth = UnityEngine.Random.Range(0.4f, 0.99f);
 
-        leafScale = new Vector2(UnityEngine.Random.Range(0.25f, 0.6f), UnityEngine.Random.Range(0.25f, 0.6f));
-        fruitScale = new Vector2(UnityEngine.Random.Range(0.2f, 0.25f), UnityEngine.Random.Range(0.2f, 0.25f));
+        leafScale = new Vector2(UnityEngine.Random.Range(0.15f, 0.25f), UnityEngine.Random.Range(0.15f, 0.25f));
+        fruitScale = new Vector2(UnityEngine.Random.Range(0.1f, 0.15f), UnityEngine.Random.Range(0.1f, 0.15f));
     }
 
     public void SetToMutatedCopyOfParentGenome(FoodGenome parentFoodGenome, MutationSettings settings) {
@@ -72,7 +72,7 @@ public class FoodGenome {
 
         stemWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentFoodGenome.stemWidth, settings.defaultFoodMutationChance, settings.defaultFoodMutationStepSize, 0.1f, 0.8f);
 
-        leafScale = UtilityMutationFunctions.GetMutatedVector2Additive(parentFoodGenome.leafScale, settings.defaultFoodMutationChance, settings.defaultFoodMutationStepSize, 0.25f, 0.6f);
-        fruitScale = UtilityMutationFunctions.GetMutatedVector2Additive(parentFoodGenome.fruitScale, settings.defaultFoodMutationChance, settings.defaultFoodMutationStepSize, 0.2f, 0.25f);
+        leafScale = UtilityMutationFunctions.GetMutatedVector2Additive(parentFoodGenome.leafScale, settings.defaultFoodMutationChance, settings.defaultFoodMutationStepSize, 0.15f, 0.25f);
+        fruitScale = UtilityMutationFunctions.GetMutatedVector2Additive(parentFoodGenome.fruitScale, settings.defaultFoodMutationChance, settings.defaultFoodMutationStepSize, 0.1f, 0.15f);
     }
 }

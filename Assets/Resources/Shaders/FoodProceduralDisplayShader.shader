@@ -31,7 +31,7 @@
 				float2 worldPos;
 				float2 velocity;
 				float2 heading;
-				float2 scale;
+				float2 fullSize;
 				float3 foodAmount;
 				float growth;
 				float decay;
@@ -79,7 +79,7 @@
 				//float randomValue = rand(float2(inst, randomAspect * 10));
 				//float randomScale = lerp(0.033, 0.09, random2);
 				//float2 scale = float2(randomAspect * randomScale, (1.0 / randomAspect) * randomScale * (length(velocity) * 50 + 1));
-				float2 scale = float2(1, 1) * rawData.scale;
+				float2 scale = float2(1, 1) * rawData.fullSize;
 				quadPoint *= float3(scale, 1.0);
 
 				// ROTATION:

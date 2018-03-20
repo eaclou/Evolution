@@ -18,7 +18,7 @@ public class SimulationStateData {
         public Vector2 worldPos;
         public Vector2 velocity;
         public Vector2 heading;
-        public Vector2 scale;
+        public Vector2 fullSize;
         public Vector3 foodAmount;
         public float growth;
         public float decay;
@@ -156,7 +156,7 @@ public class SimulationStateData {
             // *** Revisit to avoid using GetComponent, should use cached reference instead for speed:
             foodSimDataArray[i].velocity = new Vector2(simManager.foodArray[i].GetComponent<Rigidbody2D>().velocity.x, simManager.agentsArray[i].GetComponent<Rigidbody2D>().velocity.y);
             foodSimDataArray[i].heading = simManager.foodArray[i].facingDirection;
-            foodSimDataArray[i].scale = simManager.foodArray[i].curSize;
+            foodSimDataArray[i].fullSize = simManager.foodArray[i].fullSize;
             foodSimDataArray[i].foodAmount = new Vector3(simManager.foodArray[i].amountR, simManager.foodArray[i].amountG, simManager.foodArray[i].amountB);
             foodSimDataArray[i].growth = simManager.foodArray[i].growthStatus;
             foodSimDataArray[i].decay = simManager.foodArray[i].decayStatus;
