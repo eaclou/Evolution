@@ -68,7 +68,7 @@ public class FoodModule : MonoBehaviour {
 
     private int colliderCount = 0;
 
-    private float feedingRate = 0.005f;
+    private float feedingRate = 0.01f;
 
     public float growthStatus = 0f;  // 0-1 born --> mature
     public float decayStatus = 0f;
@@ -85,7 +85,7 @@ public class FoodModule : MonoBehaviour {
     private float minMass = 0.25f;
     private float maxMass = 5f;
 
-    private float isBeingEaten = 0f;
+    public float isBeingEaten = 0f;
     private float isBeingDamaged = 0f;
     public float healthStructural = 1f;
 
@@ -130,9 +130,9 @@ public class FoodModule : MonoBehaviour {
 
         index = genome.index;
         this.fullSize = genome.fullSize;
-        amountR = UnityEngine.Random.Range(0f, 1f); // ** revisit eventually
-        amountG = UnityEngine.Random.Range(0f, 1f);
-        amountB = UnityEngine.Random.Range(0f, 1f);
+        amountR = 1f; // UnityEngine.Random.Range(0f, 1f); // ** revisit eventually
+        amountG = 1f; // UnityEngine.Random.Range(0f, 1f);
+        amountB = 1f; // UnityEngine.Random.Range(0f, 1f);
 
         lifeStageTransitionTimeStepCounter = 0;
         ageCounterMature = 0;
@@ -236,7 +236,7 @@ public class FoodModule : MonoBehaviour {
                 if(ageCounterMature >= matureDurationTimeSteps) {
                     curLifeStage = FoodLifeStage.Decaying;                    
                 }
-                if(transform.position.x > 50f || transform.position.x < -50f || transform.position.y > 50f || transform.position.y < -50f) {
+                if(transform.position.x > 70f || transform.position.x < -70f || transform.position.y > 70f || transform.position.y < -70f) {
                     curLifeStage = FoodLifeStage.Decaying;   
                 }
                 break;
@@ -322,7 +322,7 @@ public class FoodModule : MonoBehaviour {
         float avgAmount = (amountR + amountG + amountB) / 3.0f;
         float lerpAmount = Mathf.Sqrt(avgAmount);
 
-        curSize = Vector2.Lerp(new Vector3(0.1f, 0.1f), fullSize, 1f); // lerpAmount);  // *** <<< REVISIT!!! ****
+        curSize = Vector2.Lerp(new Vector3(0.1f, 0.1f), fullSize, Mathf.Clamp01(avgAmount + 0.4f)); // lerpAmount);  // *** <<< REVISIT!!! ****
         //float mass = Mathf.Lerp(minMass, maxMass, lerpAmount);  // *** <<< REVISIT!!! ****
         //GetComponent<Rigidbody2D>().mass = mass;
         transform.localScale = new Vector3(curSize.x, curSize.y, 1f);
@@ -341,22 +341,22 @@ public class FoodModule : MonoBehaviour {
     private void TickDecaying() {
         float decayPercentage = (float)lifeStageTransitionTimeStepCounter / (float)decayDurationTimeSteps;
         decayStatus = decayPercentage;
-        curSize = Vector2.Lerp(fullSize, new Vector3(0.1f, 0.1f), decayStatus);
+        curSize = Vector2.Lerp(fullSize * 0.0f, new Vector3(0.0f, 0.0f), decayStatus);
         lifeStageTransitionTimeStepCounter++;
     }
     
     private void ComputeCollisionDamage(Collider2D coll) {
         isBeingDamaged = 1.0f;
-        healthStructural -= 0.002f;
+        //healthStructural -= 0.002f;
         Agent collidingAgent = coll.gameObject.GetComponentInParent<Agent>();
         //collidingAgent.GetComponent<Rigidbody2D>().drag = 100f;
         collidingAgent.isInsideFood = true;
     }
 
-    private void OnTriggerEnter2D(Collider2D coll) {
+    private void OnCollisionEnter2D(Collision2D coll) {
         Agent collidingAgent = coll.gameObject.GetComponentInParent<Agent>();
         if (collidingAgent != null) {
-            ComputeCollisionDamage(coll);
+            ComputeCollisionDamage(coll.collider);
             //collidingAgent.GetComponent<Rigidbody2D>().velocity *= 0.1f;
             
         }
@@ -364,12 +364,12 @@ public class FoodModule : MonoBehaviour {
         colliderCount++;
         //Debug.Log("Food Collision! OnCollisionEnter colliderCount: " + colliderCount.ToString());
     }
-    private void OnTriggerStay2D(Collider2D coll) {
+    private void OnCollisionStay2D(Collision2D coll) {
         
         Agent collidingAgent = coll.gameObject.GetComponentInParent<Agent>();
         if (collidingAgent != null) {
 
-            ComputeCollisionDamage(coll);
+            ComputeCollisionDamage(coll.collider);
 
             isBeingEaten = 1.0f;
 
@@ -399,7 +399,7 @@ public class FoodModule : MonoBehaviour {
             //Debug.Log("OnCollisionSTAY colliderCount: " + colliderCount.ToString() + " collider: " + coll.collider.ToString() + ", amountR: " + amountR.ToString());
         }
     }
-    private void OnTriggerExit2D(Collider2D coll) {
+    private void OnCollisionExit2D(Collision2D coll) {
         colliderCount--;
     }
 

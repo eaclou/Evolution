@@ -334,13 +334,13 @@ public class Agent : MonoBehaviour {
                 break;
         }
 
-        if(isInsideFood) {
+        /*if(isInsideFood) {
             rigidBody2D.drag = 20f;
             //Debug.Log("isInsideFood!");
         }
         else {
             rigidBody2D.drag = 10f;
-        }
+        }*/
         isInsideFood = false;
         
         Vector3 curPos = transform.localPosition;        

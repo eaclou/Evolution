@@ -742,7 +742,7 @@ public class SimulationManager : MonoBehaviour {
         int parentIndex = UnityEngine.Random.Range(0, numFood);;
         bool foundParent = false;
         // Ttry to find a suitable startPos:
-        int numParentSearches = 16;
+        int numParentSearches = 1;
         //int parentIndex = -1;
         for(int i = 0; i < numParentSearches; i++) {
             int randomIndex = UnityEngine.Random.Range(0, numFood);
@@ -831,7 +831,7 @@ public class SimulationManager : MonoBehaviour {
             }            
         }
 
-        startPos = new Vector3(UnityEngine.Random.Range(-30f, 30f), UnityEngine.Random.Range(-30f, 30f), 0f);
+        startPos = new Vector3(UnityEngine.Random.Range(-30f, 30f), UnityEngine.Random.Range(-50f, 50f), 0f);
         startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
         return startPosGenome;
     }

@@ -106,7 +106,7 @@ public class SimulationStateData {
         //}
         foodStemDataCBuffer = new ComputeBuffer(simManager._NumFood, sizeof(float) * 7 + sizeof(int) * 1);
         foodLeafDataCBuffer = new ComputeBuffer(simManager._NumFood * 16, sizeof(float) * 7 + sizeof(int) * 1);
-        foodFruitDataCBuffer = new ComputeBuffer(simManager._NumFood * 16, sizeof(float) * 7 + sizeof(int) * 1);
+        foodFruitDataCBuffer = new ComputeBuffer(simManager._NumFood * 64, sizeof(float) * 7 + sizeof(int) * 1);
 
         predatorSimDataArray = new PredatorSimData[simManager._NumPredators];
         for (int i = 0; i < predatorSimDataArray.Length; i++) {

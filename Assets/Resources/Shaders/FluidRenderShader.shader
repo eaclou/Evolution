@@ -66,42 +66,51 @@
 
 				float posterizeLevels = 64;
 
+				float boost = 1;
+
 				//finalColor.xyz = round(finalColor.xyz * posterizeLevels) / posterizeLevels;
 
 				float pressureAmplitude = length(pressure.xy);
 				//finalColor.xyz += (pressureAmplitude * 0.5);
+				//boost += pressureAmplitude;
 
 				float velocityAmplitude = length(velocity.xy);
 				//finalColor.xyz += velocityAmplitude * 6;
+				boost += velocityAmplitude * 5;
 
 				float divergenceAmplitude = abs(divergence.x) * 50;
 				//finalColor.xyz += divergenceAmplitude;
+				//boost += divergenceAmplitude;
 
 				float4 heightTex = tex2D(_TerrainHeightTex, i.uv * 0.5 + 0.25);
 				float altitude = heightTex.x * 2 - 1;  // [-1,1] range
 				//altitude *= -1; // *** invert needed for some reason!!! REVISIT THIS!!! ****
 
-				finalColor.a -= (1.0 - saturate(velocityAmplitude * 12)) * 0.2;
+				//finalColor.a -= (1.0 - saturate(velocityAmplitude * 12)) * 0.2;
 
 				float brightness = (finalColor.x + finalColor.y + finalColor.z) / 3.0;
 								
-				finalColor.a = saturate(-altitude);
+				finalColor.a = saturate(-altitude * 17);
 
-				float alphaMod = saturate((brightness - 0.5) * -12);
-				finalColor.a = saturate(finalColor.a - alphaMod * 1);
+				float alphaMod = saturate((brightness - 0.5) * -16);
+				//finalColor.a = saturate(finalColor.a - alphaMod * 1);
 
 				float shorelineBoost = 1.0 - saturate(-altitude);
 				float distToSeaLevel = abs(altitude);
 				float shoreLerp = 1.0 - distToSeaLevel * 10;
 				//finalColor.a = shorelineBoost;
 				if(altitude < 0 && altitude > -0.1) {
-					finalColor.a = lerp(finalColor.a, shorelineBoost * 0.5, shoreLerp);
+					//finalColor.a = lerp(finalColor.a, shorelineBoost * 0.5, shoreLerp);
 				}
 
-				finalColor.a *= 0.75;
+				//finalColor.a *= 0.55;
 
 				//finalColor = obstacles;
-				//finalColor.xy *= 20;
+				//finalColor.x *= 0.65;
+				//finalColor.y *= 0.85;
+				//finalColor.z *= 1.2;
+
+				finalColor.rgb *= 1.2;
 				//if(altitude < 0) {
 				//	return float4(1,1,1,1);
 				//}

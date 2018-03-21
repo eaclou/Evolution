@@ -238,6 +238,7 @@ void RefreshColor (uint3 id : SV_DispatchThreadID)
 	float yCoord = ((float)id.y + 0.5)  / _TextureResolution;
 	float2 uvOrigin = float2(xCoord, yCoord);
 	float4 sourceColor = SourceColorTex.SampleLevel(_LinearRepeat, uvOrigin, 0);
+	sourceColor.a = saturate(sourceColor.a);
 	float4 currentColor = DensityRead[id.xy];
 	DensityWrite[id.xy] = lerp(currentColor, sourceColor, _ColorRefreshAmount);
 }

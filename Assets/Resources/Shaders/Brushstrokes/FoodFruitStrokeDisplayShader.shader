@@ -64,22 +64,48 @@
 				float4 uv : TEXCOORD0;  // uv of the brushstroke quad itself, particle texture	
 				float4 color : TEXCOORD1;
 				int foodIndex : TEXCOORD2;
-				float2 frameLerp : TEXCOORD3;
+				float frameLerp : TEXCOORD3;
 				float2 quadCoords : TEXCOORD4;
-				float4 uvDecay : TEXCOORD5;
 			};
 
-			float rand(float2 co){   // OUTPUT is in [0,1] RANGE!!!
+			float rand(float2 co) {   // OUTPUT is in [0,1] RANGE!!!
 				return frac(sin(dot(co.xy ,float2(12.9898,78.233))) * 43758.5453);
+			}
+			
+			float length_squared(float2 v, float2 w) {
+				float2 r = w - v;
+				float distSqr = (r.x * r.x + r.y * r.y);
+				return distSqr;
+			}
+
+			float minimum_distance(float2 v, float2 w, float2 p) {
+			  // Return minimum distance between line segment vw and point p
+			  const float l2 = length_squared(v, w);  // i.e. |w-v|^2 -  avoid a sqrt
+			  if (l2 == 0.0) {
+				return length(v - p);   // v == w case
+			  }
+			  // Consider the line extending the segment, parameterized as v + t (w - v).
+			  // We find projection of point p onto the line. 
+			  // It falls where t = [(p-v) . (w-v)] / |w-v|^2
+			  // We clamp t from [0,1] to handle points outside the segment vw.
+			  const float t = max(0, min(1, dot(p - v, w - v) / l2));
+			  const float2 projection = v + t * (w - v);  // Projection falls on the segment
+			  return distance(p, projection);
 			}
 
 			v2f vert(uint id : SV_VertexID, uint inst : SV_InstanceID)
 			{
 				v2f o;
+
+				float3 quadPoint = quadVerticesCBuffer[id];
 							
 				FruitData fruitData = fruitDataCBuffer[inst];
 				FoodSimData rawData = foodSimDataCBuffer[fruitData.foodIndex];
-								
+
+				float orderVal = fmod(inst, 64) / 64;
+
+				float distToCore = minimum_distance(float2(0,-0.5), float2(0,0.5), fruitData.localCoords);
+												
 				float random1 = rand(float2(inst, inst));
 				float random2 = rand(float2(random1, random1));
 				
@@ -87,43 +113,30 @@
 				//float3 offset = float3(fruitData.localCoords * rawData.scale * 0.5, 0);
 				//worldPosition += offset;
 
-				float growthLerp = saturate(rawData.growth * 3 - 2 + random2 * 1);
+				//float growthLerp = saturate(rawData.growth * 3 - 2 + random2 * 1);
 
-				float3 worldPosition = float3(rawData.worldPos, -random2);
+				float3 worldPosition = float3(fruitData.worldPos, orderVal);    //float3(rawData.worldPos, -random2);
 				// Rotation of Billboard center around Agent's Center (no effect if localPos and localDir are zero/default)'
 				float2 forwardAgent = rawData.heading;
 				float2 rightAgent = float2(forwardAgent.y, -forwardAgent.x);
-				float2 positionOffset = float2(fruitData.localCoords.x * rightAgent * rawData.fullSize.x + fruitData.localCoords.y * forwardAgent * rawData.fullSize.y) * 0.6 * saturate(rawData.growth * 1.46);
+				float2 positionOffset = float2(fruitData.localCoords.x * rightAgent * rawData.fullSize.x + fruitData.localCoords.y * forwardAgent * rawData.fullSize.y) * 0.6 * saturate(rawData.growth * 1.0);
 				//float2(fruitData.localCoords.x * rawData.scale.x * rightAgent + fruitData.localCoords.y * rawData.scale.y * forwardAgent) * 0.5;
-				worldPosition.xy += positionOffset; // Place properly
+				//worldPosition.xy += positionOffset; // Place properly
 				
-				float3 quadPoint = quadVerticesCBuffer[id];
-
-				float2 velocity = rawData.velocity;
-
 				
+
+				//float2 velocity = rawData.velocity;				
 
 				// Scaling!!!  _Size.zw is min/max aspect ratio, _Size.xy is min/max overall size				
 				//float randomAspect = lerp(_Size.z, _Size.w, random1);
 				//float randomAspect = lerp(0.67, 1.33, random1);
 				//float randomScale = lerp(_Size.x, _Size.y, random2);
 				//float randomValue = rand(float2(inst, randomAspect * 10));
-				float randomScale = lerp(0.75, 1.35, random2);
+				float randomScale = lerp(0.7, 0.9, random2);
 				//float2 scale = float2(randomAspect * randomScale, (1.0 / randomAspect) * randomScale * (length(velocity) * 50 + 1));
 				
-				float2 scale = fruitData.localScale * length(rawData.fullSize) * randomScale * saturate(rawData.growth * 2 - 0.3);
+				float2 scale = length(fruitData.localScale) * length(rawData.fullSize) * saturate(rawData.growth * 1.5f) * randomScale; // * (rawData.decay + 1.0);
 				quadPoint *= float3(scale, 1.0);
-
-				// Figure out final facing Vectors!!!
-				//float2 forward0 = rawData.heading;
-				//float2 right0 = float2(forward0.y, -forward0.x); // perpendicular to forward vector
-				//float2 rotatedPoint0 = float2(pointStrokeData.localDir.x * right0 + pointStrokeData.localDir.y * forward0);  // Rotate localRotation by AgentRotation
-				// ROTATION:										 quadPoint.z);
-				//float rotationAngle = random1 * 10.0 * 3.141592;  // radians
-				//float3 rotatedPoint = float3(quadPoint.x * cos(rotationAngle) - quadPoint.y * sin(rotationAngle),
-				//							 quadPoint.x * sin(rotationAngle) + quadPoint.y * cos(rotationAngle),
-				//							 quadPoint.z);
-
 
 				// Figure out final facing Vectors!!!
 				float rotationAngle = random1 * 10.0 * 3.141592;  // radians
@@ -135,29 +148,9 @@
 				// With final facing Vectors, find rotation of QuadPoints:
 				float3 rotatedPoint1 = float3(quadPoint.x * right1 + quadPoint.y * forward1,
 											 quadPoint.z);
-				//float2 forward = normalize(rawData.heading);
-				//float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
-				//float3 rotatedPoint = float3(quadPoint.x * right + quadPoint.y * forward,
-				//							 quadPoint.z);
 				
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(rotatedPoint1, 0.0f));
-
-				float eaten = 1.0;
-				if(random2 > saturate(length(rawData.foodAmount))) {
-					eaten = 0.0;
-				}
-				//float3 hue = rawData.fruitHue * ;
-				o.color.rgb = float3(random1, random2, length(rawData.foodAmount));
-
-				if(random1 > length(rawData.foodAmount)) {
-					o.color.a = 0;
-
-				}
-				else {
-					o.color.a = 1;
-				}
-				//o.color.a = (1.0 - rawData.decay);
-
+				
 				float2 uv0 = quadVerticesCBuffer[id] + 0.5f; // full texture
 				float2 uv1 = uv0;
 				// Which Brush? (uv.X) :::::
@@ -168,41 +161,31 @@
 				uv1.x *= tilePercentage;  // 5 brushes on texture
 				uv1.x += tilePercentage * randBrush;
 
-				float2 uvDecay0 = quadVerticesCBuffer[id] + 0.5f;
-				float2 uvDecay1 = uvDecay0;
-				uvDecay0.x *= tilePercentage;  // 8 brushes on texture
-				uvDecay0.x += tilePercentage * randBrush;
-				uvDecay1.x *= tilePercentage;  // 5 brushes on texture
-				uvDecay1.x += tilePercentage * randBrush;
-
 				// Figure out how much to blur:
-				
-				float frameLerp = saturate(growthLerp) * 7;
-				float decayLerp = (1 - saturate(length(rawData.foodAmount) - random2 * 0.8)) * 7;
+				float eatenLerp = saturate(((distToCore + 0.065) * 1.45 - rawData.foodAmount.r) * 9);
+								
+				float frameLerp = eatenLerp * 7; //saturate(growthLerp) * 3;
+				//frameLerp += (1 - saturate(rawData.foodAmount.r)) * 4;
+				//
+				//if(orderVal > saturate(length(rawData.foodAmount.r))) {
+				//	frameLerp = 7;
+				//}
 				// Can use this for random variations?
-				float growRow0 = floor(frameLerp);  // 0-6
-				float growRow1 = clamp(ceil(frameLerp), 1, 7); // 1-7
-
-				float decayRow0 = floor(decayLerp);  // 0-6
-				float decayRow1 = clamp(ceil(decayLerp), 1, 7); // 1-7
+				float row0 = floor(frameLerp);  // 0-6
+				float row1 = clamp(ceil(frameLerp), 1, 7); // 1-7
+				
+				//float decayRow0 = floor(decayLerp);  // 0-6
+				//float decayRow1 = clamp(ceil(decayLerp), 1, 3); // 1-7
 				//float blurLerp = blurMag - blurRow0;
 				// calculate UV's to sample from correct rows:
 
-				uv0.y = uv0.y * tilePercentage + tilePercentage * growRow0;
-				uv1.y = uv1.y * tilePercentage + tilePercentage * growRow1;
+				uv0.y = uv0.y * tilePercentage + tilePercentage * row0;
+				uv1.y = uv1.y * tilePercentage + tilePercentage * row1;
 
-				uvDecay0.y = uvDecay0.y * tilePercentage + tilePercentage * decayRow0;
-				uvDecay1.y = uvDecay1.y * tilePercentage + tilePercentage * decayRow1;
-				
-
-				// motion blur sampling:
-				o.frameLerp = float2(frameLerp - growRow0, decayLerp - decayRow0); //blurLerp;
-
+				o.color = float4(random1, random2, orderVal, 0);
+				o.frameLerp = frameLerp - row0;
 				o.uv = float4(uv0, uv1);
-				o.uvDecay = float4(uvDecay0, uvDecay1);				
-
 				o.foodIndex = fruitData.foodIndex;
-
 				o.quadCoords = quadVerticesCBuffer[id].xy;				
 
 				return o;
@@ -225,12 +208,13 @@
 				float3 highlightColor = float3(1,1,1);
 				float specular = dot(normal, normalize(float3(0,0,1)));
 				
-				float3 hue = lerp(rawData.leafHue * growBrushColor.g, float3(0.15, 0.8, 0.28), 0.67);
-				hue = lerp(hue, float3(1,1,1), growBrushColor.b); //); // temp flower color use stem color
-				hue = lerp(hue, rawData.fruitHue + zDir * 0.25, growBrushColor.r - i.color.y * 0.1);
-				finalGrowColor.rgb = hue * saturate(i.color.x * 0.4 + 0.6);
+				float3 hue = rawData.fruitHue;
+				//hue = lerp(hue, float3(1,1,1), growBrushColor.b); //); // temp flower color use stem color
+				hue = lerp(hue, float3(0.1,0.9,0.2), 0.7) + zDir * 0.45;
+				finalGrowColor.rgb = hue * lerp(saturate(i.color.z * 0.6 + 0.2), 1, 1.0 - rawData.foodAmount.r);
 				
-				finalGrowColor.a *= i.color.a;
+				finalGrowColor.a *= saturate(1.0 - rawData.decay * 1);
+				finalGrowColor.a *= 1;
 				
 				return finalGrowColor;
 			}

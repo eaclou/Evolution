@@ -160,6 +160,7 @@
 
 				float4 finalColor = float4(i.color) * brushColor;
 				finalColor.a = alpha;
+				finalColor.rgb *= 0.25;
 				return finalColor;
 			}
 		ENDCG

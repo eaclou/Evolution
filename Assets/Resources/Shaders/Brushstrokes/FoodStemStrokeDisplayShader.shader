@@ -141,7 +141,7 @@
 				float4 brushColor = lerp(texColor0, texColor1, 0.0);
 
 				float4 finalColor = float4(i.color) * brushColor;
-				
+				finalColor.rgb *= 0.25;
 				return finalColor;
 			}
 		ENDCG

@@ -68,7 +68,7 @@
 				float randomAspect = lerp(0.75, 1.33, random1);
 				//float randomScale = lerp(_Size.x, _Size.y, random2);
 				float randomValue = rand(float2(inst, randomAspect * 10));
-				float randomScale = lerp(0.35, 0.63, random2);
+				float randomScale = lerp(0.14, 0.22, random2);
 				float2 scale = float2(randomAspect * randomScale, (1.0 / randomAspect) * randomScale * (length(velocity) * 55 + 1));
 				//float2 scale = float2(1, 1) * randomScale;
 				quadPoint *= float3(scale, 1.0);
@@ -84,7 +84,7 @@
 											 quadPoint.z);
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(rotatedPoint, 0.0f));
-				o.color = float4(1,1,1,randomValue * 0.75 * velMag + 0.02); // float4(randomValue, randomValue, randomValue, 1 / (length(velocity) * 50 + 1.15));
+				o.color = float4(random1,random1,random1,randomValue * 2 * velMag + 0.15); // float4(randomValue, randomValue, randomValue, 1 / (length(velocity) * 50 + 1.15));
 				o.uv = quadVerticesCBuffer[id] + 0.5f;
 				
 				return o;

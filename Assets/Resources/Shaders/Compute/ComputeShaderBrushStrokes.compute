@@ -11,6 +11,7 @@
 #pragma kernel CSUpdateDynamicStemBuffers
 #pragma kernel CSUpdateDynamicLeafBuffers
 #pragma kernel CSUpdateDynamicFruitBuffers
+#pragma kernel CSSimulateFruit
 
 struct AgentSimData {
 	float2 worldPos;
@@ -45,6 +46,22 @@ struct FrameBufferStrokeData {
 	int brushType;
 };
 
+struct FoodSimData {
+	float2 worldPos;
+	float2 velocity;
+	float2 heading;
+	float2 fullSize;
+	float3 foodAmount;
+	float growth;
+	float decay;
+	float health;
+	int stemBrushType;
+	int leafBrushType;
+	int fruitBrushType;
+	float3 stemHue;
+	float3 leafHue;
+	float3 fruitHue;
+};
 struct StemData {  // Only the main trunk for now!!! worry about other ones later!!! SIMPLIFY!!!
     int foodIndex;
     float2 localBaseCoords;  // main trunk is always (0, -1f) --> (0f, 1f), secondary stems need to start with x=0 (to be on main trunk)
@@ -69,6 +86,7 @@ struct FruitData {
 };
 
 StructuredBuffer<AgentSimData> agentSimDataCBuffer;
+StructuredBuffer<FoodSimData> foodSimDataCBuffer;
 StructuredBuffer<int> agentInitializeCBuffer;
 StructuredBuffer<CurveStrokeData> agentCurveStrokesReadCBuffer; // use this for updating
 RWStructuredBuffer<CurveStrokeData> agentCurveStrokesWriteCBuffer;
@@ -90,6 +108,27 @@ RWStructuredBuffer<FrameBufferStrokeData> terrainFrameBufferStrokesCBuffer;
 Texture2D<float4> velocityRead;
 
 SamplerState _LinearRepeat;
+
+float length_squared(float2 v, float2 w) {
+	float2 r = w - v;
+	float distSqr = (r.x * r.x + r.y * r.y);
+	return distSqr;
+}
+
+float minimum_distance(float2 v, float2 w, float2 p) {
+	// Return minimum distance between line segment vw and point p
+	const float l2 = length_squared(v, w);  // i.e. |w-v|^2 -  avoid a sqrt
+	if (l2 == 0.0) {
+	return length(v - p);   // v == w case
+	}
+	// Consider the line extending the segment, parameterized as v + t (w - v).
+	// We find projection of point p onto the line. 
+	// It falls where t = [(p-v) . (w-v)] / |w-v|^2
+	// We clamp t from [0,1] to handle points outside the segment vw.
+	const float t = max(0, min(1, dot(p - v, w - v) / l2));
+	const float2 projection = v + t * (w - v);  // Projection falls on the segment
+	return distance(p, projection);
+}
 
 CurveStrokeData UpdateCurveStroke(CurveStrokeData inData, AgentSimData agentData) {
 	CurveStrokeData curveData = inData;	
@@ -187,10 +226,11 @@ void CSUpdateDynamicLeafBuffers (uint3 id : SV_DispatchThreadID)
 [numthreads(1,1,1)]
 void CSUpdateDynamicFruitBuffers (uint3 id : SV_DispatchThreadID)
 {	
-	for(int i = 0; i < 16; i++) {
+	for(int i = 0; i < 64; i++) {
 		FruitData fruitData = foodFruitDataUpdateCBuffer[i];
-		int foodIndex = fruitData.foodIndex;	
-		foodFruitDataWriteCBuffer[foodIndex * 16 + i] = fruitData;
+		int foodIndex = fruitData.foodIndex;
+
+		foodFruitDataWriteCBuffer[foodIndex * 64 + i] = fruitData;
 	}		
 }
 
@@ -259,6 +299,43 @@ void CSAlignFrameBufferStrokes (uint3 id : SV_DispatchThreadID)
 
 	terrainFrameBufferStrokesCBuffer[id.x].heading = grad;
 	terrainFrameBufferStrokesCBuffer[id.x].worldPos.z = altitudeCenter * 64 - 32;
+}
+
+[numthreads(64,1,1)]
+void CSSimulateFruit (uint3 id : SV_DispatchThreadID)
+{
+	FruitData fruitData = foodFruitDataWriteCBuffer[id.x];
+	FoodSimData foodData = foodSimDataCBuffer[fruitData.foodIndex];
+
+	float orderVal = fmod(id.x, 64) / 64;
+	float distToCore = minimum_distance(float2(0,-0.5), float2(0,0.5), fruitData.localCoords);
+	float eatenLerp = saturate(((distToCore + 0.065) * 1.0 - foodData.foodAmount.r) * 8);
+
+	float attached = 1; // = saturate(length(foodData.foodAmount));
+	//float eatenLerp = saturate(((length(fruitData.localCoords) + 0.025) * 1 - foodData.foodAmount.r) * 16);
+	if(eatenLerp > 0.5) {
+		attached = 0;
+	}
+	fruitData.attached = attached;
+
+	float2 curPos = fruitData.worldPos;
+	
+	float2 forwardFood = foodData.heading;
+	float2 rightFood = float2(forwardFood.y, -forwardFood.x);
+	float2 positionOffset = float2(fruitData.localCoords.x * rightFood * foodData.fullSize.x + fruitData.localCoords.y * forwardFood * foodData.fullSize.y) * 0.6 * saturate(foodData.growth * 1.46);
+
+	float2 targetPos = foodData.worldPos + positionOffset; // + transformed offset of fruit
+
+	float lerpSpeed = 0.1;
+	float2 newPos = lerp(curPos, targetPos, lerpSpeed * fruitData.attached);
+
+	float2 uv = (newPos + 70) / 140;
+	float2 fluidVel = velocityRead.SampleLevel(_LinearRepeat, uv, 0).xy;
+	float speedMult = 0.033 * 140;
+
+	newPos = newPos + fluidVel * speedMult;
+
+	foodFruitDataWriteCBuffer[id.x].worldPos = newPos;
 }
 
 

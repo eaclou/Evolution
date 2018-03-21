@@ -511,7 +511,7 @@ public class TheRenderKing : MonoBehaviour {
         for(int i = 0; i < simManager.agentsArray.Length; i++) {
             Vector3 agentPos = simManager.agentsArray[i].transform.position;
             obstacleStrokeDataArray[baseIndex + i].worldPos = new Vector2(agentPos.x, agentPos.y);
-            obstacleStrokeDataArray[baseIndex + i].scale = simManager.agentsArray[i].size * 0.85f; // ** revisit this later // should leave room for velSampling around Agent
+            obstacleStrokeDataArray[baseIndex + i].scale = simManager.agentsArray[i].size * 1f; // ** revisit this later // should leave room for velSampling around Agent
 
             float velX = (agentPos.x - simManager.agentsArray[i]._PrevPos.x) * velScale;
             float velY = (agentPos.y - simManager.agentsArray[i]._PrevPos.y) * velScale;
@@ -523,7 +523,7 @@ public class TheRenderKing : MonoBehaviour {
         for(int i = 0; i < simManager.foodArray.Length; i++) {
             Vector3 foodPos = simManager.foodArray[i].transform.position;
             obstacleStrokeDataArray[baseIndex + i].worldPos = new Vector2(foodPos.x, foodPos.y);
-            obstacleStrokeDataArray[baseIndex + i].scale = simManager.foodArray[i].curSize * 0.85f;
+            obstacleStrokeDataArray[baseIndex + i].scale = simManager.foodArray[i].curSize * 1f;
 
             float velX = (foodPos.x - simManager.foodArray[i]._PrevPos.x) * velScale;
             float velY = (foodPos.y - simManager.foodArray[i]._PrevPos.y) * velScale;
@@ -535,7 +535,7 @@ public class TheRenderKing : MonoBehaviour {
         for(int i = 0; i < simManager.predatorArray.Length; i++) {
             Vector3 predatorPos = simManager.predatorArray[i].transform.position;
             obstacleStrokeDataArray[baseIndex + i].worldPos = new Vector2(predatorPos.x, predatorPos.y);
-            obstacleStrokeDataArray[baseIndex + i].scale = new Vector2(simManager.predatorArray[i].curScale, simManager.predatorArray[i].curScale) * 0.85f;
+            obstacleStrokeDataArray[baseIndex + i].scale = new Vector2(simManager.predatorArray[i].curScale, simManager.predatorArray[i].curScale) * 1f;
 
             float velX = (predatorPos.x - simManager.predatorArray[i]._PrevPos.x) * velScale;
             float velY = (predatorPos.y - simManager.predatorArray[i]._PrevPos.y) * velScale;
@@ -552,24 +552,31 @@ public class TheRenderKing : MonoBehaviour {
         for(int i = 0; i < simManager.agentsArray.Length; i++) {
             Vector3 agentPos = simManager.agentsArray[i].transform.position;
             colorInjectionStrokeDataArray[baseIndex + i].worldPos = new Vector2(agentPos.x, agentPos.y);
-            colorInjectionStrokeDataArray[baseIndex + i].scale = simManager.agentsArray[i].size * 1.1f; // ** revisit this later // should leave room for velSampling around Agent
+            colorInjectionStrokeDataArray[baseIndex + i].scale = simManager.agentsArray[i].size * 1.0f;
 
             //float velX = (agentPos.x - simManager.agentsArray[i]._PrevPos.x) * velScale;
             //float velY = (agentPos.y - simManager.agentsArray[i]._PrevPos.y) * velScale;
-
-            colorInjectionStrokeDataArray[baseIndex + i].color = new Vector4(0.0f, 0.0f, 1f, 1f);
+            float alpha = 0f;
+            if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Mature) {
+                alpha = 5.5f;
+            }
+            colorInjectionStrokeDataArray[baseIndex + i].color = new Vector4(simManager.agentGenomePoolArray[i].bodyGenome.huePrimary.x, simManager.agentGenomePoolArray[i].bodyGenome.huePrimary.y, simManager.agentGenomePoolArray[i].bodyGenome.huePrimary.z, alpha);
         }
         // FOOD:
         baseIndex = simManager.agentsArray.Length;
         for(int i = 0; i < simManager.foodArray.Length; i++) {
             Vector3 foodPos = simManager.foodArray[i].transform.position;
             colorInjectionStrokeDataArray[baseIndex + i].worldPos = new Vector2(foodPos.x, foodPos.y);
-            colorInjectionStrokeDataArray[baseIndex + i].scale = simManager.foodArray[i].curSize * 0.85f;
+            colorInjectionStrokeDataArray[baseIndex + i].scale = simManager.foodArray[i].curSize * 1.0f;
 
             //float velX = (foodPos.x - simManager.foodArray[i]._PrevPos.x) * velScale;
             //float velY = (foodPos.y - simManager.foodArray[i]._PrevPos.y) * velScale;
+            float foodAlpha = 0.55f;
+            if(simManager.foodArray[i].isBeingEaten > 0.5) {
+                foodAlpha = 3.2f;
+            }
 
-            colorInjectionStrokeDataArray[baseIndex + i].color = new Vector4(0.25f, 1f, 0.25f, 1);
+            colorInjectionStrokeDataArray[baseIndex + i].color = new Vector4(Mathf.Lerp(simManager.foodGenomePoolArray[i].fruitHue.x, 0.1f, 0.7f), Mathf.Lerp(simManager.foodGenomePoolArray[i].fruitHue.y, 0.9f, 0.7f), Mathf.Lerp(simManager.foodGenomePoolArray[i].fruitHue.z, 0.2f, 0.7f), foodAlpha);
         }
         // PREDATORS:
         baseIndex = simManager.agentsArray.Length + simManager.foodArray.Length;
@@ -581,7 +588,7 @@ public class TheRenderKing : MonoBehaviour {
             //float velX = (predatorPos.x - simManager.predatorArray[i]._PrevPos.x) * velScale;
             //float velY = (predatorPos.y - simManager.predatorArray[i]._PrevPos.y) * velScale;
 
-            colorInjectionStrokeDataArray[baseIndex + i].color = new Vector4(1f, 0.25f, 0f, 1);
+            colorInjectionStrokeDataArray[baseIndex + i].color = new Vector4(1f, 0.25f, 0f, 1f);
         }
 
         colorInjectionStrokesCBuffer.SetData(colorInjectionStrokeDataArray);
@@ -641,6 +648,7 @@ public class TheRenderKing : MonoBehaviour {
         SinglePassCurveBrushData(); // start with this one?
         SimFloatyBits();
         SimRipples();
+        SimFruit();
     }
     
     // Using this one Primarily for starters!
@@ -810,16 +818,16 @@ public class TheRenderKing : MonoBehaviour {
         // DEBUG ***** RACE CONDITIONS -- NEVER FORGET!!! ********
         // DEBUG ***** RACE CONDITIONS -- NEVER FORGET!!! ********
 
-        // *** Hard-coded 16 Fruits per food object!!!! *** BEWARE!!!
-        ComputeBuffer foodFruitUpdateCBuffer = new ComputeBuffer(16, sizeof(float) * 7 + sizeof(int) * 1);
+        // *** Hard-coded 32 Fruits per food object!!!! *** BEWARE!!!
+        ComputeBuffer foodFruitUpdateCBuffer = new ComputeBuffer(64, sizeof(float) * 7 + sizeof(int) * 1);
 
-        SimulationStateData.FruitData[] foodFruitDataArray = new SimulationStateData.FruitData[16];
-        for(int i = 0; i < 16; i++) {
+        SimulationStateData.FruitData[] foodFruitDataArray = new SimulationStateData.FruitData[64];
+        for(int i = 0; i < 64; i++) {
             foodFruitDataArray[i] = new SimulationStateData.FruitData();
             foodFruitDataArray[i].foodIndex = foodIndex;
-            foodFruitDataArray[i].localCoords = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f));
+            foodFruitDataArray[i].localCoords = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)) * 0.5f + UnityEngine.Random.insideUnitCircle * 0.4f;
             foodFruitDataArray[i].localScale = simManager.foodGenomePoolArray[foodIndex].fruitScale;  
-            foodFruitDataArray[i].worldPos = new Vector3(0f, 0f, 0f);
+            foodFruitDataArray[i].worldPos = simManager.foodArray[foodIndex].transform.position;
             foodFruitDataArray[i].attached = 1f;
         }        
         foodFruitUpdateCBuffer.SetData(foodFruitDataArray);
@@ -894,6 +902,25 @@ public class TheRenderKing : MonoBehaviour {
         ripplesDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, ripplesDisplayMat, 0, MeshTopology.Triangles, 6, ripplesCBuffer.count);
 
+        /*foodStemDisplayMat.SetPass(0);
+        foodStemDisplayMat.SetBuffer("stemDataCBuffer", simManager.simStateData.foodStemDataCBuffer);
+        foodStemDisplayMat.SetBuffer("foodSimDataCBuffer", simManager.simStateData.foodSimDataCBuffer);
+        foodStemDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, foodStemDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.foodStemDataCBuffer.count);
+
+        foodLeafDisplayMat.SetPass(0);
+        foodLeafDisplayMat.SetBuffer("leafDataCBuffer", simManager.simStateData.foodLeafDataCBuffer);
+        foodLeafDisplayMat.SetBuffer("foodSimDataCBuffer", simManager.simStateData.foodSimDataCBuffer);
+        foodLeafDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, foodLeafDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.foodLeafDataCBuffer.count);
+        */
+        foodFruitDisplayMat.SetPass(0);
+        foodFruitDisplayMat.SetBuffer("fruitDataCBuffer", simManager.simStateData.foodFruitDataCBuffer);
+        foodFruitDisplayMat.SetBuffer("foodSimDataCBuffer", simManager.simStateData.foodSimDataCBuffer);
+        foodFruitDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, foodFruitDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.foodFruitDataCBuffer.count);
+
+        
         // TEMP AGENTS:
         curveStrokeDisplayMat.SetPass(0);
         curveStrokeDisplayMat.SetBuffer("agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
@@ -913,30 +940,14 @@ public class TheRenderKing : MonoBehaviour {
         foodProceduralDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         //cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, foodProceduralDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.foodSimDataCBuffer.count);
         //Graphics.DrawProcedural(MeshTopology.Triangles, 6, simManager.simStateData.foodSimDataCBuffer.count);
-
-        foodStemDisplayMat.SetPass(0);
-        foodStemDisplayMat.SetBuffer("stemDataCBuffer", simManager.simStateData.foodStemDataCBuffer);
-        foodStemDisplayMat.SetBuffer("foodSimDataCBuffer", simManager.simStateData.foodSimDataCBuffer);
-        foodStemDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, foodStemDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.foodStemDataCBuffer.count);
-
-        foodLeafDisplayMat.SetPass(0);
-        foodLeafDisplayMat.SetBuffer("leafDataCBuffer", simManager.simStateData.foodLeafDataCBuffer);
-        foodLeafDisplayMat.SetBuffer("foodSimDataCBuffer", simManager.simStateData.foodSimDataCBuffer);
-        foodLeafDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, foodLeafDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.foodLeafDataCBuffer.count);
-
+                
         // DEBUG *****
         //SimulationStateData.LeafData[] testDataArray = new SimulationStateData.LeafData[simManager.simStateData.foodLeafDataCBuffer.count];
         //simManager.simStateData.foodLeafDataCBuffer.GetData(testDataArray);
         //Debug.Log("testDataArray[0] " + testDataArray[0].foodIndex.ToString() + " testDataArray[15] " + testDataArray[15].foodIndex.ToString() + ", testDataArray[570]: " + testDataArray[570].foodIndex.ToString());
 
-        foodFruitDisplayMat.SetPass(0);
-        foodFruitDisplayMat.SetBuffer("fruitDataCBuffer", simManager.simStateData.foodFruitDataCBuffer);
-        foodFruitDisplayMat.SetBuffer("foodSimDataCBuffer", simManager.simStateData.foodSimDataCBuffer);
-        foodFruitDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, foodFruitDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.foodFruitDataCBuffer.count);
-
+        
+        
         predatorProceduralDisplayMat.SetPass(0);
         predatorProceduralDisplayMat.SetBuffer("predatorSimDataCBuffer", simManager.simStateData.predatorSimDataCBuffer);
         predatorProceduralDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -965,6 +976,14 @@ public class TheRenderKing : MonoBehaviour {
         fluidManager.computeShaderFluidSim.SetBuffer(kernelSimRipples, "RipplesCBuffer", ripplesCBuffer);
         fluidManager.computeShaderFluidSim.SetTexture(kernelSimRipples, "VelocityRead", fluidManager._VelocityA);
         fluidManager.computeShaderFluidSim.Dispatch(kernelSimRipples, ripplesCBuffer.count / 8, 1, 1);
+    }
+    private void SimFruit() {
+        int kernelCSSimulateFruit = computeShaderBrushStrokes.FindKernel("CSSimulateFruit");
+        
+        computeShaderBrushStrokes.SetTexture(kernelCSSimulateFruit, "velocityRead", fluidManager._VelocityA);
+        computeShaderBrushStrokes.SetBuffer(kernelCSSimulateFruit, "foodSimDataCBuffer", simManager.simStateData.foodSimDataCBuffer);
+        computeShaderBrushStrokes.SetBuffer(kernelCSSimulateFruit, "foodFruitDataWriteCBuffer", simManager.simStateData.foodFruitDataCBuffer);
+        computeShaderBrushStrokes.Dispatch(kernelCSSimulateFruit, simManager.simStateData.foodFruitDataCBuffer.count / 64, 1, 1);        
     }
 
     private void OnWillRenderObject() {  // requires MeshRenderer Component to be called
