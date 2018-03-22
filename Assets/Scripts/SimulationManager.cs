@@ -77,7 +77,7 @@ public class SimulationManager : MonoBehaviour {
     public AgentGenome[] agentGenomePoolArray;
     public FoodGenome[] foodGenomePoolArray;
     public FoodModule[] foodArray;
-    private int numFood = 36;
+    private int numFood = 64;
     public int _NumFood {
         get
         {
@@ -89,7 +89,7 @@ public class SimulationManager : MonoBehaviour {
         }
     }
     public PredatorModule[] predatorArray;
-    private int numPredators = 12;
+    private int numPredators = 32;
     public int _NumPredators {
         get
         {
@@ -334,6 +334,7 @@ public class SimulationManager : MonoBehaviour {
             predatorGO.name = "Predator" + i.ToString();
             PredatorModule newPredator = predatorGO.GetComponent<PredatorModule>();
             predatorArray[i] = newPredator; // Add to stored list of current Agents
+            
         }
     }
     private void LoadingInitializePredatorsFromGenome() {
@@ -434,7 +435,15 @@ public class SimulationManager : MonoBehaviour {
             agentsArray[i].testModule.ownRigidBody2D.AddForce(simStateData.fluidVelocitiesAtAgentPositionsArray[i] * 42f, ForceMode2D.Impulse);
         }
         for (int i = 0; i < foodArray.Length; i++) { // *** cache rigidBody reference
-            foodArray[i].GetComponent<Rigidbody2D>().AddForce(simStateData.fluidVelocitiesAtFoodPositionsArray[i] * 15f * foodArray[i].GetComponent<Rigidbody2D>().mass, ForceMode2D.Impulse);
+            float hackyScalingForceMultiplier = 1f;
+            if (foodArray[i].curLifeStage == FoodModule.FoodLifeStage.Growing) {
+                hackyScalingForceMultiplier = 3.3f;
+            }
+            foodArray[i].GetComponent<Rigidbody2D>().AddForce(simStateData.fluidVelocitiesAtFoodPositionsArray[i] * 12f * hackyScalingForceMultiplier * foodArray[i].GetComponent<Rigidbody2D>().mass, ForceMode2D.Impulse); //
+            //foodArray[i].GetComponent<Rigidbody2D>().AddForce(new Vector2(1f, 1f), ForceMode2D.Force); //
+            // Looks like AddForce has less of an effect on a GO/Rigidbody2D that is being scaled through a script... ??
+            // Feels like rigidbody is accumulating velocity which is then released all at once when the scaling stops??
+            // Hacking through it by increasign force on growing food:
         }
         for (int i = 0; i < predatorArray.Length; i++) {
             predatorArray[i].rigidBody.AddForce(simStateData.fluidVelocitiesAtPredatorPositionsArray[i] * 32f * predatorArray[i].rigidBody.mass, ForceMode2D.Impulse);
@@ -612,6 +621,8 @@ public class SimulationManager : MonoBehaviour {
     public void RevivePredator(int index) {
         Vector3 startPos = new Vector3(UnityEngine.Random.Range(-36f, 36f), UnityEngine.Random.Range(-36f, 36f), 0f);
         predatorArray[index].transform.localPosition = startPos;
+        predatorArray[index].InitializePredator();
+        
     } // *** confirm these are set up alright      
     public void ProcessDeadAgent(int agentIndex) {
         
@@ -624,6 +635,7 @@ public class SimulationManager : MonoBehaviour {
         // Reproduction!!!
         CreateMutatedCopyOfAgent(agentIndex); 
         
+        theRenderKing.UpdateAgentSmearStrokesBuffer(agentIndex);
         theRenderKing.UpdateAgentBodyStrokesBuffer(agentIndex);
         theRenderKing.InitializeAgentEyeStrokesBuffer();
     }
@@ -765,7 +777,7 @@ public class SimulationManager : MonoBehaviour {
 
         foodGenomePoolArray[foodIndex] = newFoodGenome;
 
-        FoodModule parentFood = null;
+        /*FoodModule parentFood = null;
         if(foundParent) {
             parentFood = foodArray[parentIndex];
             //startPos = parentFood.transform.position;
@@ -777,9 +789,9 @@ public class SimulationManager : MonoBehaviour {
         }
         else {
             startPosGenome = GetRandomFoodSpawnPosition();
-        }
+        }*/
 
-        foodArray[foodIndex].InitializeFoodFromGenome(foodGenomePoolArray[foodIndex], startPosGenome, parentFood); // Spawn that genome in dead Agent's body and revive it!
+        foodArray[foodIndex].InitializeFoodFromGenome(foodGenomePoolArray[foodIndex], GetRandomFoodSpawnPosition(), null); // Spawn that genome in dead Agent's body and revive it!
        
         // Randomly select a good one based on fitness Lottery (oldest = best)
         /*if (rankedIndicesList[0] == foodIndex) {  // if Top Agent, just respawn identical copy:
@@ -810,16 +822,44 @@ public class SimulationManager : MonoBehaviour {
         
     }
     private StartPositionGenome GetRandomAgentSpawnPosition() {
-        Vector3 startPos = new Vector3(UnityEngine.Random.Range(-50f, 50f), UnityEngine.Random.Range(-50f, 50f), 0f);
+        int numSpawnZones = startPositionsPresets.foodSpawnPositionsList.Count;
+
+        int randZone = UnityEngine.Random.Range(0, numSpawnZones);
+
+        float randRadius = 10f;
+
+        Vector2 randOffset = UnityEngine.Random.insideUnitCircle * randRadius;
+
+        Vector3 startPos = new Vector3(startPositionsPresets.foodSpawnPositionsList[randZone].transform.position.x + randOffset.x, 
+                               startPositionsPresets.foodSpawnPositionsList[randZone].transform.position.y + randOffset.y, 
+                               0f);
         StartPositionGenome startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
         return startPosGenome;
+
+        // OLD:
+        /*Vector3 startPos = new Vector3(UnityEngine.Random.Range(-50f, 50f), UnityEngine.Random.Range(-50f, 50f), 0f);
+        StartPositionGenome startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
+        return startPosGenome;*/
     }
     private StartPositionGenome GetRandomFoodSpawnPosition() {
 
         Vector3 startPos;
         StartPositionGenome startPosGenome;
+
+        int numSpawnZones = startPositionsPresets.foodSpawnPositionsList.Count;
+
+        int randZone = UnityEngine.Random.Range(0, numSpawnZones);
+
+        float randRadius = 10f;
+
+        Vector2 randOffset = UnityEngine.Random.insideUnitCircle * randRadius;
+
+        startPos = new Vector3(startPositionsPresets.foodSpawnPositionsList[randZone].transform.position.x + randOffset.x, 
+                               startPositionsPresets.foodSpawnPositionsList[randZone].transform.position.y + randOffset.y, 
+                               0f);
+        startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
         // Ttry to find a suitable startPos:
-        int numParentSearches = 4;
+        /*int numParentSearches = 4;
         //int parentIndex = -1;
         for(int i = 0; i < numParentSearches; i++) {
             int parentIndex = UnityEngine.Random.Range(0, numFood);
@@ -829,10 +869,10 @@ public class SimulationManager : MonoBehaviour {
 
                 return startPosGenome;
             }            
-        }
+        }*/
 
-        startPos = new Vector3(UnityEngine.Random.Range(-30f, 30f), UnityEngine.Random.Range(-50f, 50f), 0f);
-        startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
+        //startPos = new Vector3(UnityEngine.Random.Range(-30f, 30f), UnityEngine.Random.Range(-50f, 50f), 0f);
+        //startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
         return startPosGenome;
     }
     public void ProcessDeadPlayer() {

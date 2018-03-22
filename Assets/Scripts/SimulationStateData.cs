@@ -145,8 +145,8 @@ public class SimulationStateData {
             // convert from scene coords (-mapSize --> +mapSize to fluid coords (0 --> 1):::
             agentFluidPositionsArray[i] = new Vector4((agentPos.x + simManager._MapSize) / (simManager._MapSize * 2f), 
                                                       (agentPos.y + simManager._MapSize) / (simManager._MapSize * 2f), 
-                                                      simManager.agentsArray[i].size.x / (simManager._MapSize * 2f), 
-                                                      simManager.agentsArray[i].size.y / (simManager._MapSize * 2f)); //... 0.5/140 ...
+                                                      (simManager.agentsArray[i].size.x + 0.1f) / (simManager._MapSize * 2f), 
+                                                      (simManager.agentsArray[i].size.y + 0.1f) / (simManager._MapSize * 2f)); //... 0.5/140 ...
         }
         agentSimDataCBuffer.SetData(agentSimDataArray); // send data to GPU for Rendering
 
@@ -173,11 +173,11 @@ public class SimulationStateData {
             // Z & W coords represents agent's x/y Radii (in FluidCoords)
             // convert from scene coords (-mapSize --> +mapSize to fluid coords (0 --> 1):::
             // **** Revisit and get working properly in both X and Y dimensions independently *********
-            float sampleRadius = (simManager.foodArray[i].curSize.magnitude + 0.1f) / (simManager._MapSize * 2f); // ****  ***** Revisit the 0.1f offset -- should be one pixel in fluidCoords?
+            //float sampleRadius = (simManager.foodArray[i].curSize.magnitude + 0.1f) / (simManager._MapSize * 2f); // ****  ***** Revisit the 0.1f offset -- should be one pixel in fluidCoords?
             foodFluidPositionsArray[i] = new Vector4((foodPos.x + simManager._MapSize) / (simManager._MapSize * 2f), 
                                                       (foodPos.y + simManager._MapSize) / (simManager._MapSize * 2f), 
-                                                      sampleRadius, 
-                                                      sampleRadius);
+                                                      (simManager.foodArray[i].curSize.x + 0.1f) / (simManager._MapSize * 2f), 
+                                                      (simManager.foodArray[i].curSize.y + 0.1f) / (simManager._MapSize * 2f));
         }
         foodSimDataCBuffer.SetData(foodSimDataArray); // send data to GPU for Rendering
         
@@ -189,11 +189,11 @@ public class SimulationStateData {
 
             // Z & W coords represents agent's x/y Radii (in FluidCoords)
             // convert from scene coords (-mapSize --> +mapSize to fluid coords (0 --> 1):::
-            float sampleRadius = (simManager.predatorArray[i].curScale + 0.1f) / (simManager._MapSize * 2f); // ****  ***** Revisit the 0.1f offset -- should be one pixel in fluidCoords?
+            //float sampleRadius = (simManager.predatorArray[i].curScale + 0.1f) / (simManager._MapSize * 2f); // ****  ***** Revisit the 0.1f offset -- should be one pixel in fluidCoords?
             predatorFluidPositionsArray[i] = new Vector4((predatorPos.x + simManager._MapSize) / (simManager._MapSize * 2f), 
                                                       (predatorPos.y + simManager._MapSize) / (simManager._MapSize * 2f), 
-                                                      sampleRadius, 
-                                                      sampleRadius);
+                                                      (simManager.predatorArray[i].curScale + 0.1f) / (simManager._MapSize * 2f), 
+                                                      (simManager.predatorArray[i].curScale + 0.1f) / (simManager._MapSize * 2f));
         }
         predatorSimDataCBuffer.SetData(predatorSimDataArray);  // send data to GPU for Rendering
 

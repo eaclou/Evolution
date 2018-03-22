@@ -119,7 +119,7 @@ public class BodyGenome {
         huePrimary = UtilityMutationFunctions.GetMutatedVector3Additive(parentBodyGenome.huePrimary, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
         hueSecondary = UtilityMutationFunctions.GetMutatedVector3Additive(parentBodyGenome.hueSecondary, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
         // ***** v v v Revisit when implementing #BrushTypes!! **** REVISIT!!
-        bodyStrokeBrushType = UtilityMutationFunctions.GetMutatedIntAdditive(parentBodyGenome.bodyStrokeBrushType, settings.defaultBodyMutationChance, 4, 0, 0); // *****
+        bodyStrokeBrushType = UtilityMutationFunctions.GetMutatedIntAdditive(parentBodyGenome.bodyStrokeBrushType, settings.defaultBodyMutationChance, 7, 0, 7); // *****
 
         decorationGenomeList = new List<DecorationGenome>();
         for(int i = 0; i < parentBodyGenome.decorationGenomeList.Count; i++) {

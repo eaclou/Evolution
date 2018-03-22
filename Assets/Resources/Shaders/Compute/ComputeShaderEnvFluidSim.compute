@@ -50,7 +50,7 @@ Texture2D<float4> DivergenceRead;
 RWTexture2D<float4> DivergenceWrite;
 Texture2D<float4> ObstaclesRead;
 
-StructuredBuffer<float3> ObjectPositionsCBuffer;
+StructuredBuffer<float4> ObjectPositionsCBuffer;
 RWStructuredBuffer<float2> VelocityValuesCBuffer;
 
 RWStructuredBuffer<float4> FloatyBitsCBuffer;
@@ -216,15 +216,15 @@ void GetObjectVelocities (uint3 id : SV_DispatchThreadID)
 {	
 	
 		
-	float3 data = ObjectPositionsCBuffer[id.x];
+	float4 data = ObjectPositionsCBuffer[id.x];
 	
 	float2 uv = data.xy;
-	float uvOffset = data.z;
+	float2 uvOffset = data.zw;
 	
-	float2 velLeft = VelocityRead.SampleLevel(_LinearRepeat, uv + float2(-uvOffset, 0), 0).xy;
-	float2 velRight = VelocityRead.SampleLevel(_LinearRepeat, uv + float2(uvOffset, 0), 0).xy;
-	float2 velUp = VelocityRead.SampleLevel(_LinearRepeat, uv + float2(0, uvOffset), 0).xy;
-	float2 velDown = VelocityRead.SampleLevel(_LinearRepeat, uv + float2(0, -uvOffset), 0).xy;
+	float2 velLeft = VelocityRead.SampleLevel(_LinearRepeat, uv + float2(-uvOffset.x, 0), 0).xy;
+	float2 velRight = VelocityRead.SampleLevel(_LinearRepeat, uv + float2(uvOffset.x, 0), 0).xy;
+	float2 velUp = VelocityRead.SampleLevel(_LinearRepeat, uv + float2(0, uvOffset.y), 0).xy;
+	float2 velDown = VelocityRead.SampleLevel(_LinearRepeat, uv + float2(0, -uvOffset.y), 0).xy;
 
 	float2 vel = (velLeft + velRight + velUp + velDown) / 4;
 

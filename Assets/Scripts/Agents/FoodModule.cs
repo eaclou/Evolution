@@ -25,7 +25,7 @@ public class FoodModule : MonoBehaviour {
         Decaying,
         Null
     }
-    private int growDurationTimeSteps = 180;
+    private int growDurationTimeSteps = 150;
     public int _GrowDurationTimeSteps
     {
         get
@@ -49,7 +49,7 @@ public class FoodModule : MonoBehaviour {
 
         }
     }
-    private int decayDurationTimeSteps = 180;
+    private int decayDurationTimeSteps = 150;
     public int _DecayDurationTimeSteps
     {
         get
@@ -139,8 +139,8 @@ public class FoodModule : MonoBehaviour {
         growthStatus = 0f;
         decayStatus = 0f;
 
-        this.transform.localPosition = startPos.startPosition + new Vector3(0f, 0.25f * 0.5f, 0f);
-        this.transform.localScale = new Vector3(0.25f, 0.25f, 1f);
+        this.transform.localPosition = startPos.startPosition; // + new Vector3(0f, 0.25f * 0.5f, 0f);
+        this.transform.localScale = new Vector3(0.1f, 0.1f, 1f);
 
         Rigidbody2D rigidBody = this.GetComponent<Rigidbody2D>();
         HingeJoint2D joint = this.GetComponent<HingeJoint2D>();
@@ -211,6 +211,12 @@ public class FoodModule : MonoBehaviour {
                     curLifeStage = FoodLifeStage.Mature;
                     //Debug.Log("EGG HATCHED!");
                     lifeStageTransitionTimeStepCounter = 0;
+                    //this.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
+                    this.GetComponent<Rigidbody2D>().velocity *= 0.36f;
+                    //foodArray[i].GetComponent<Rigidbody2D>().AddForce(new Vector2(1f, 1f), ForceMode2D.Force); //
+                    // Looks like AddForce has less of an effect on a GO/Rigidbody2D that is being scaled through a script... ??
+                    // Feels like rigidbody is accumulating velocity which is then released all at once when the scaling stops??
+                    // Hacking through it by increasign force on growing food:
                 }
                 float maxFoodAvg = Mathf.Max(Mathf.Max(amountR, amountG), amountB);
                 if (maxFoodAvg <= 0f) {
@@ -310,7 +316,7 @@ public class FoodModule : MonoBehaviour {
         float mass = Mathf.Lerp(minMass, maxMass, growthPercentage);  // *** <<< REVISIT!!! ****
         GetComponent<Rigidbody2D>().mass = mass;
 
-        curSize = Vector2.Lerp(new Vector3(0.1f, 0.1f), fullSize, growthPercentage);
+        curSize = Vector2.Lerp(new Vector3(0.1f, 0.1f), fullSize, growthStatus);
         transform.localScale = new Vector3(curSize.x, curSize.y, 1f);
                 
 
@@ -341,7 +347,8 @@ public class FoodModule : MonoBehaviour {
     private void TickDecaying() {
         float decayPercentage = (float)lifeStageTransitionTimeStepCounter / (float)decayDurationTimeSteps;
         decayStatus = decayPercentage;
-        curSize = Vector2.Lerp(fullSize * 0.0f, new Vector3(0.0f, 0.0f), decayStatus);
+        curSize = Vector2.Lerp(fullSize * 0.4f, new Vector3(0.0f, 0.0f), Mathf.Clamp01(decayStatus * 6f));
+        transform.localScale = new Vector3(curSize.x, curSize.y, 1f);
         lifeStageTransitionTimeStepCounter++;
     }
     

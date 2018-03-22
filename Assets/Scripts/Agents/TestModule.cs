@@ -206,9 +206,9 @@ public class TestModule {
         //prevHealth = health;
 
         bias[0] = 1f;
-        foodAmountR[0] = 0.33f;
-        foodAmountG[0] = 0.33f;
-        foodAmountB[0] = 0.33f;
+        foodAmountR[0] = 0.5f;
+        foodAmountG[0] = 0.5f;
+        foodAmountB[0] = 0.5f;
         hitPoints[0] = 1f;
         stamina[0] = 1f;
 

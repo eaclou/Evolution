@@ -16,9 +16,9 @@ public class PredatorModule : MonoBehaviour {
     private float randX;
     private float randY;
 
-    private float minScale = 4f;
-    private float maxScale = 5.5f;
-    public float curScale = 4f;
+    private float minScale = 1.6f;
+    private float maxScale = 3.2f;
+    public float curScale = 2.4f;
 
     private int framesPerDirChange = 64;
 
@@ -36,18 +36,26 @@ public class PredatorModule : MonoBehaviour {
     }
 
     // Use this for initialization
-    void Awake () {
-        rigidBody = GetComponent<Rigidbody2D>();
+    void Start () {
+        //rigidBody = GetComponent<Rigidbody2D>();
 
-        float curScale = UnityEngine.Random.Range(minScale, maxScale);
-        Vector3 scale = new Vector3(curScale, curScale, curScale);
-        transform.localScale = scale;
+        //float curScale = UnityEngine.Random.Range(minScale, maxScale);
+        //Vector3 scale = new Vector3(curScale, curScale, curScale);
+        //transform.localScale = scale;
     }
 	
 	// Update is called once per frame
 	void Update () {
 		
 	}
+
+    public void InitializePredator() {
+        rigidBody = GetComponent<Rigidbody2D>();
+        curScale = UnityEngine.Random.Range(minScale, maxScale);        
+        Vector3 scale = new Vector3(curScale, curScale, curScale);
+        transform.localScale = scale;
+        //Debug.Log("curScale: " + curScale.ToString() + ", ts: " + transform.localScale.ToString());
+    }
 
     private void FixedUpdate() {
         counter = (counter + 1) % framesPerDirChange;
@@ -63,21 +71,22 @@ public class PredatorModule : MonoBehaviour {
         float velScale = 0.17f; ; // Time.fixedDeltaTime * 0.17f; // approx guess for now
         meshRendererFluidCollider.material.SetFloat("_VelX", (curPos.x - prevPos.x) * velScale);
         meshRendererFluidCollider.material.SetFloat("_VelY", (curPos.y - prevPos.y) * velScale);*/
-
+        //Debug.Log("curScale: " + curScale.ToString() + ", ts: " + transform.localScale.ToString());
         prevPos = curPos;
     }
 
     private void AttackAgent(Agent agent) {
         agent.testModule.hitPoints[0] -= damage;
         //Debug.Log("AttackAgent!");
-        if (agent.testModule.hitPoints[0] <= 0f) {
-            agent.curLifeStage = Agent.AgentLifeStage.Decaying;
-            agent.lifeStageTransitionTimeStepCounter = 0;
+        //if (agent.testModule.hitPoints[0] <= 0f) {
+
+            //agent.curLifeStage = Agent.AgentLifeStage.Decaying;
+            //agent.lifeStageTransitionTimeStepCounter = 0;
 
 
             //agent.isNull = true; // OLD
             //Debug.Log("Agent DEAD!");
-        }
+        //}
     }
     
     private void OnCollisionStay2D(Collision2D coll) {

@@ -279,6 +279,14 @@ public class Agent : MonoBehaviour {
                     curLifeStage = AgentLifeStage.Decaying;
                     //isNull = true;
                 }
+                if (testModule.hitPoints[0] <= 0f) {
+
+                    curLifeStage = Agent.AgentLifeStage.Decaying;
+                    lifeStageTransitionTimeStepCounter = 0;
+                    
+                    //agent.isNull = true; // OLD
+                    //Debug.Log("Agent DEAD!");
+                }
                 break;
             case AgentLifeStage.Decaying:
                 //

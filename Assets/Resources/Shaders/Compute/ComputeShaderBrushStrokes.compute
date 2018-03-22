@@ -5,6 +5,7 @@
 
 #pragma kernel CSSinglePassCurveBrushData
 #pragma kernel CSUpdateCurveBrushDataAgentIndex
+#pragma kernel CSUpdateBodyStrokeDataAgentIndex
 #pragma kernel CSPinRootTrailStrokesData
 #pragma kernel CSIterateTrailStrokesData
 #pragma kernel CSAlignFrameBufferStrokes
@@ -20,6 +21,16 @@ struct AgentSimData {
 	float2 size;
 	float maturity;
 	float decay;
+};
+
+struct BodyStrokeData {
+    int parentIndex;
+	float2 localPos;
+    float2 localDir;
+    float2 localScale;
+    float3 hue;    
+    float strength;
+    int brushType;
 };
 
 struct CurveStrokeData {
@@ -92,6 +103,9 @@ StructuredBuffer<CurveStrokeData> agentCurveStrokesReadCBuffer; // use this for 
 RWStructuredBuffer<CurveStrokeData> agentCurveStrokesWriteCBuffer;
 int _CurveStrokesUpdateAgentIndex;
 
+StructuredBuffer<BodyStrokeData> agentBodyStrokesReadCBuffer; // use this for updating
+RWStructuredBuffer<BodyStrokeData> agentBodyStrokesWriteCBuffer;
+
 //StructuredBuffer<TrailStrokeData> agentTrailStrokesReadCBuffer;
 //RWStructuredBuffer<TrailStrokeData> agentTrailStrokesWriteCBuffer;
 
@@ -133,7 +147,7 @@ float minimum_distance(float2 v, float2 w, float2 p) {
 CurveStrokeData UpdateCurveStroke(CurveStrokeData inData, AgentSimData agentData) {
 	CurveStrokeData curveData = inData;	
 
-	float restDistance = curveData.restLength * agentData.maturity;
+	float restDistance = curveData.restLength; // * agentData.maturity;
 
 	float2 p0 = agentData.worldPos + agentData.heading * agentData.size.y * 0.0;
 	
@@ -160,11 +174,11 @@ CurveStrokeData UpdateCurveStroke(CurveStrokeData inData, AgentSimData agentData
 CurveStrokeData UpdateCurveStrokeDirectional(CurveStrokeData inData, AgentSimData agentData) {
 	CurveStrokeData curveData = inData;	
 
-	float lerpStrength = 0.9;
-	float lerpDecay = 0.82;
-	float restDistance = curveData.restLength * agentData.maturity;
+	float lerpStrength = 0.75;
+	float lerpDecay = 0.47;
+	float restDistance = curveData.restLength * agentData.maturity * 1.0;
 	
-	float2 p0 = agentData.worldPos + (agentData.heading * agentData.size.y * 0.5); // pin root to head tip
+	float2 p0 = agentData.worldPos + (agentData.heading * agentData.size.y * 0.15); // pin root to head tip
 
 	float2 targetPosP1 = p0 - agentData.heading * restDistance;
 	float2 p1 = lerp(curveData.p1, targetPosP1, lerpStrength);
@@ -205,6 +219,14 @@ void CSUpdateCurveBrushDataAgentIndex (uint3 id : SV_DispatchThreadID)
 	CurveStrokeData curveData = agentCurveStrokesReadCBuffer[0];
 	
 	agentCurveStrokesWriteCBuffer[_CurveStrokesUpdateAgentIndex] = curveData;	
+}
+
+[numthreads(1,1,1)]
+void CSUpdateBodyStrokeDataAgentIndex (uint3 id : SV_DispatchThreadID)
+{	
+	BodyStrokeData bodyData = agentBodyStrokesReadCBuffer[0];
+	
+	agentBodyStrokesWriteCBuffer[bodyData.parentIndex] = bodyData;	
 }
 
 [numthreads(1,1,1)]

@@ -22,6 +22,7 @@
 			#pragma fragment frag
 			#pragma target 5.0
 			#include "UnityCG.cginc"
+			#include "Assets/Resources/Shaders/Inc/NoiseShared.cginc"
 
 			sampler2D _MainTex;
 			sampler2D _MatureToDecayTex;
@@ -119,7 +120,15 @@
 				// Rotation of Billboard center around Agent's Center (no effect if localPos and localDir are zero/default)'
 				float2 forwardAgent = rawData.heading;
 				float2 rightAgent = float2(forwardAgent.y, -forwardAgent.x);
-				float2 positionOffset = float2(fruitData.localCoords.x * rightAgent * rawData.fullSize.x + fruitData.localCoords.y * forwardAgent * rawData.fullSize.y) * 0.6 * saturate(rawData.growth * 1.0);
+				//float2 positionOffset = float2(fruitData.localCoords.x * rightAgent * rawData.fullSize.x + fruitData.localCoords.y * forwardAgent * rawData.fullSize.y) * 0.6 * saturate(rawData.growth * 1.0);
+				float clock = _Time.y;
+				
+				float freq = 11.45;
+				float amp = 0.075;
+				float3 noiseOffset = Value2D(worldPosition.x * 0.036 + clock * 0.16 + (float)inst, freq) * saturate(1 - rawData.decay * 8) * rawData.growth;
+				//float noiseOffsetY = Value2D(worldPosition.y * 0.1, freq).z;
+				worldPosition.xy += noiseOffset.yz * amp;
+				//worldPosition.y += noiseOffset.z * amp * (rawData.velocity);
 				//float2(fruitData.localCoords.x * rawData.scale.x * rightAgent + fruitData.localCoords.y * rawData.scale.y * forwardAgent) * 0.5;
 				//worldPosition.xy += positionOffset; // Place properly
 				
@@ -154,7 +163,7 @@
 				float2 uv0 = quadVerticesCBuffer[id] + 0.5f; // full texture
 				float2 uv1 = uv0;
 				// Which Brush? (uv.X) :::::
-				float randBrush = 0; //rawData.fruitBrushType; //pointStrokeData.brushType; //floor(rand(float2(random2, inst)) * 3.99); // 0-3
+				float randBrush = 1; //rawData.fruitBrushType; //pointStrokeData.brushType; //floor(rand(float2(random2, inst)) * 3.99); // 0-3
 				const float tilePercentage = (1.0 / 8.0);
 				uv0.x *= tilePercentage;  // 8 brushes on texture
 				uv0.x += tilePercentage * randBrush;
@@ -162,14 +171,15 @@
 				uv1.x += tilePercentage * randBrush;
 
 				// Figure out how much to blur:
-				float eatenLerp = saturate(((distToCore + 0.065) * 1.45 - rawData.foodAmount.r) * 9);
-								
+				float eatenLerp = saturate(((distToCore + 0.065) * 1.58 - rawData.foodAmount.r) * 9);
+				eatenLerp = max(eatenLerp, rawData.growth * 0.18);				
 				float frameLerp = eatenLerp * 7; //saturate(growthLerp) * 3;
 				//frameLerp += (1 - saturate(rawData.foodAmount.r)) * 4;
 				//
 				//if(orderVal > saturate(length(rawData.foodAmount.r))) {
 				//	frameLerp = 7;
 				//}
+				
 				// Can use this for random variations?
 				float row0 = floor(frameLerp);  // 0-6
 				float row1 = clamp(ceil(frameLerp), 1, 7); // 1-7
@@ -200,7 +210,7 @@
 				float4 growBrushColor = lerp(growTexColor0, growTexColor1, i.frameLerp.x);
 				float4 finalGrowColor = growBrushColor;
 
-				float distToOrigin = saturate(length(i.quadCoords.xy) * 1.4);
+				float distToOrigin = saturate(length(i.quadCoords.xy + float2(0.02, 0.03)) * 1.4);
 				float2 dir = normalize(i.quadCoords.xy);
 				float zDir = 1 - distToOrigin;
 				float3 normal = normalize(float3(dir, zDir));
@@ -210,10 +220,13 @@
 				
 				float3 hue = rawData.fruitHue;
 				//hue = lerp(hue, float3(1,1,1), growBrushColor.b); //); // temp flower color use stem color
-				hue = lerp(hue, float3(0.1,0.9,0.2), 0.7) + zDir * 0.45;
+				hue = lerp(hue, float3(0.1,0.9,0.2), 0.7);
+				hue = lerp(hue, rawData.fruitHue, growBrushColor.g) + zDir * 0.45; //); // temp flower color use stem color
 				finalGrowColor.rgb = hue * lerp(saturate(i.color.z * 0.6 + 0.2), 1, 1.0 - rawData.foodAmount.r);
+
 				
 				finalGrowColor.a *= saturate(1.0 - rawData.decay * 1);
+				finalGrowColor.a *= saturate(rawData.foodAmount.r * 0.6 + 0.4);
 				finalGrowColor.a *= 1;
 				
 				return finalGrowColor;
