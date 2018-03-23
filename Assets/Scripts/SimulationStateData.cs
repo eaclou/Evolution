@@ -11,8 +11,12 @@ public class SimulationStateData {
         public Vector2 velocity;
         public Vector2 heading;
         public Vector2 size;
+        public Vector3 primaryHue;  // can eventually pull these static variables out of here to avoid per-frame updates on non-dynamic attributes
+        public Vector3 secondaryHue;
         public float maturity;  // 0-1 indicating growth
         public float decay;  // 0-1 indicating decayStatus
+        public float eatingStatus;
+        public float foodAmount;
     }
     public struct FoodSimData {  
         public Vector2 worldPos;
@@ -92,7 +96,7 @@ public class SimulationStateData {
         for(int i = 0; i < agentSimDataArray.Length; i++) {
             agentSimDataArray[i] = new AgentSimData();
         }
-        agentSimDataCBuffer = new ComputeBuffer(agentSimDataArray.Length, sizeof(float) * 10);
+        agentSimDataCBuffer = new ComputeBuffer(agentSimDataArray.Length, sizeof(float) * 18);
 
         foodSimDataArray = new FoodSimData[simManager._NumFood];
         for (int i = 0; i < foodSimDataArray.Length; i++) {
@@ -127,9 +131,17 @@ public class SimulationStateData {
         for(int i = 0; i < agentSimDataArray.Length; i++) {  
             Vector3 agentPos = simManager.agentsArray[i].testModule.ownRigidBody2D.position;
             agentSimDataArray[i].worldPos = new Vector2(agentPos.x, agentPos.y);  // in world(scene) coordinates
-            agentSimDataArray[i].velocity = simManager.agentsArray[i].smoothedThrottle; 
+            //agentSimDataArray[i].velocity = simManager.agentsArray[i].smoothedThrottle;
+            if(simManager.agentsArray[i].smoothedThrottle.sqrMagnitude == 0f) {
+                //agentSimDataArray[i].velocity = simManager.agentsArray[i].facingDirection;
+            }
+            else {
+                agentSimDataArray[i].velocity = simManager.agentsArray[i].smoothedThrottle.normalized;
+            }
             agentSimDataArray[i].heading = simManager.agentsArray[i].facingDirection;
-            agentSimDataArray[i].size = simManager.agentsArray[i].size;
+            agentSimDataArray[i].size = simManager.agentsArray[i].fullSize;
+            agentSimDataArray[i].primaryHue = simManager.agentGenomePoolArray[i].bodyGenome.huePrimary;
+            agentSimDataArray[i].secondaryHue = simManager.agentGenomePoolArray[i].bodyGenome.hueSecondary;
             float maturity = 1f;
             float decay = 0f;
             if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Egg) {
@@ -139,14 +151,34 @@ public class SimulationStateData {
                 decay = (float)simManager.agentsArray[i].lifeStageTransitionTimeStepCounter / (float)simManager.agentsArray[i]._DecayDurationTimeSteps;
             }
             agentSimDataArray[i].maturity = maturity;
-            agentSimDataArray[i].decay = decay;
+            agentSimDataArray[i].decay = decay;            
+            if(simManager.agentsArray[i].isInsideFood) {
+                agentSimDataArray[i].eatingStatus = (agentSimDataArray[i].eatingStatus + 0.11f) % 1.0f;  // cycle around 0-1
+            }
+            else {
+                //if(agentSimDataArray[i].eatingStatus > 0.5f) {
+                //    agentSimDataArray[i].eatingStatus *= 1.1f;
+                //}
+                //else {
+                //    agentSimDataArray[i].eatingStatus *= 0.9f;
+                //}
+                agentSimDataArray[i].eatingStatus *= 0.7f;
+            }
+            // Experimental! move display data forward when chomping:
+            float eatingCycle = Mathf.Sin(agentSimDataArray[i].eatingStatus * Mathf.PI);
+            agentSimDataArray[i].worldPos += simManager.agentsArray[i].facingDirection * eatingCycle * 0.25f;
+            agentSimDataArray[i].heading = (simManager.agentsArray[i].facingDirection + UnityEngine.Random.insideUnitCircle * 0.4f * eatingCycle).normalized;
+            agentSimDataArray[i].size.y *= (eatingCycle * 0.2f + 1.0f);
+            agentSimDataArray[i].size.x *= (1.0f - eatingCycle * 0.2f);
+
+            agentSimDataArray[i].foodAmount = simManager.agentsArray[i].testModule.foodAmountR[0];
             
             // Z & W coords represents agent's x/y Radii (in FluidCoords)
             // convert from scene coords (-mapSize --> +mapSize to fluid coords (0 --> 1):::
             agentFluidPositionsArray[i] = new Vector4((agentPos.x + simManager._MapSize) / (simManager._MapSize * 2f), 
                                                       (agentPos.y + simManager._MapSize) / (simManager._MapSize * 2f), 
-                                                      (simManager.agentsArray[i].size.x + 0.1f) / (simManager._MapSize * 2f), 
-                                                      (simManager.agentsArray[i].size.y + 0.1f) / (simManager._MapSize * 2f)); //... 0.5/140 ...
+                                                      (simManager.agentsArray[i].fullSize.x + 0.1f) / (simManager._MapSize * 2f), 
+                                                      (simManager.agentsArray[i].fullSize.y + 0.1f) / (simManager._MapSize * 2f)); //... 0.5/140 ...
         }
         agentSimDataCBuffer.SetData(agentSimDataArray); // send data to GPU for Rendering
 

@@ -27,6 +27,14 @@ public static class UtilityMutationFunctions {
 
         return mutatedValue;
     }
+    public static Vector2 GetMutatedVector2Additive(Vector2 curValue, float mutationChance, float mutationStepSize, Vector2 minValue, Vector2 maxValue) {
+        Vector2 mutatedValue = curValue;
+
+        mutatedValue.x = GetMutatedFloatAdditive(mutatedValue.x, mutationChance, mutationStepSize, minValue.x, maxValue.x);
+        mutatedValue.y = GetMutatedFloatAdditive(mutatedValue.y, mutationChance, mutationStepSize, minValue.y, maxValue.y);
+
+        return mutatedValue;
+    }
 
     public static Vector3 GetMutatedVector3Additive(Vector3 curValue, float mutationChance, float mutationStepSize, float minValue, float maxValue) {
         Vector3 mutatedValue = curValue;

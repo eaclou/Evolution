@@ -1,11 +1,9 @@
 ﻿// Each #kernel tells which function to compile; you can have many kernels
-//#pragma kernel CSInitializeCurveBrushData
-//#pragma kernel CSIterateCurveBrushData
-
 
 #pragma kernel CSSinglePassCurveBrushData
 #pragma kernel CSUpdateCurveBrushDataAgentIndex
 #pragma kernel CSUpdateBodyStrokeDataAgentIndex
+#pragma kernel CSUpdateEyeStrokeDataAgentIndex
 #pragma kernel CSPinRootTrailStrokesData
 #pragma kernel CSIterateTrailStrokesData
 #pragma kernel CSAlignFrameBufferStrokes
@@ -19,18 +17,33 @@ struct AgentSimData {
 	float2 velocity;
 	float2 heading;
 	float2 size;
+	float3 primaryHue;  // can eventually pull these static variables out of here to avoid per-frame updates on non-dynamic attributes
+	float3 secondaryHue;
 	float maturity;
 	float decay;
+	float eatingStatus;
+	float foodAmount;
 };
 
 struct BodyStrokeData {
-    int parentIndex;
+	int parentIndex;  // what agent/object is this attached to?				
 	float2 localPos;
-    float2 localDir;
-    float2 localScale;
-    float3 hue;    
-    float strength;
-    int brushType;
+	float2 localDir;
+	float2 localScale;
+	float strength;  // abstraction for pressure of brushstroke + amount of paint 
+	int brushTypeX;  // what texture/mask/brush pattern to use
+	int brushTypeY;
+};
+
+struct AgentEyeStrokeData {
+	int parentIndex;  // what agent/object is this attached to?				
+	float2 localPos;
+	float2 localDir;
+	float2 localScale;
+	float3 irisHue;
+	float3 pupilHue;
+	float strength;  // abstraction for pressure of brushstroke + amount of paint 
+	int brushType;  // what texture/mask/brush pattern to use
 };
 
 struct CurveStrokeData {
@@ -105,6 +118,8 @@ int _CurveStrokesUpdateAgentIndex;
 
 StructuredBuffer<BodyStrokeData> agentBodyStrokesReadCBuffer; // use this for updating
 RWStructuredBuffer<BodyStrokeData> agentBodyStrokesWriteCBuffer;
+StructuredBuffer<AgentEyeStrokeData> agentEyeStrokesReadCBuffer; // use this for updating
+RWStructuredBuffer<AgentEyeStrokeData> agentEyeStrokesWriteCBuffer;
 
 //StructuredBuffer<TrailStrokeData> agentTrailStrokesReadCBuffer;
 //RWStructuredBuffer<TrailStrokeData> agentTrailStrokesWriteCBuffer;
@@ -227,6 +242,16 @@ void CSUpdateBodyStrokeDataAgentIndex (uint3 id : SV_DispatchThreadID)
 	BodyStrokeData bodyData = agentBodyStrokesReadCBuffer[0];
 	
 	agentBodyStrokesWriteCBuffer[bodyData.parentIndex] = bodyData;	
+}
+
+[numthreads(1,1,1)]
+void CSUpdateEyeStrokeDataAgentIndex (uint3 id : SV_DispatchThreadID)
+{	
+	AgentEyeStrokeData eyeDataLeft = agentEyeStrokesReadCBuffer[0];
+	AgentEyeStrokeData eyeDataRight = agentEyeStrokesReadCBuffer[1];
+	
+	agentEyeStrokesWriteCBuffer[eyeDataLeft.parentIndex * 2] = eyeDataLeft;	
+	agentEyeStrokesWriteCBuffer[eyeDataRight.parentIndex * 2 + 1] = eyeDataRight;	
 }
 
 [numthreads(1,1,1)]

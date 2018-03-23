@@ -39,8 +39,12 @@
 				float2 velocity;
 				float2 heading;
 				float2 size;
+				float3 primaryHue;  // can eventually pull these static variables out of here to avoid per-frame updates on non-dynamic attributes
+				float3 secondaryHue;
 				float maturity;
 				float decay;
+				float eatingStatus;
+				float foodAmount;
 			};
 
 			StructuredBuffer<AgentSimData> agentSimDataCBuffer;

@@ -61,6 +61,9 @@ public class FoodGenome {
         // *** Result needs to be fully independent copy and share no references!!!
         
         fullSize = UtilityMutationFunctions.GetMutatedVector2Additive(parentFoodGenome.fullSize, settings.defaultFoodMutationChance, settings.defaultFoodMutationStepSize, 2.5f, 6f);
+        if(fullSize.y < fullSize.x) {
+            fullSize.y = fullSize.x;
+        }
         // Set equal to parent at first, then check for possible mutation of that value:        
         fruitHue = UtilityMutationFunctions.GetMutatedVector3Additive(parentFoodGenome.fruitHue, settings.defaultFoodMutationChance, settings.defaultFoodMutationStepSize, 0f, 1f);
         leafHue = UtilityMutationFunctions.GetMutatedVector3Additive(parentFoodGenome.leafHue, settings.defaultFoodMutationChance, settings.defaultFoodMutationStepSize, 0f, 1f);

@@ -9,11 +9,12 @@ public class BodyGenome {
     public TestModuleGenome testModuleGenome;
 
     // BODY:
-    public Vector2 size;
+    public Vector2 sizeAndAspectRatio;
     public Vector3 huePrimary;
     public Vector3 hueSecondary;
     // Body Brushstroke information
-    public int bodyStrokeBrushType;  // derives rest of information from Agent size & hue?
+    public int bodyStrokeBrushTypeX;  // derives rest of information from Agent size & hue?
+    public int bodyStrokeBrushTypeY;
     // Body Decorations strokes information
     public List<DecorationGenome> decorationGenomeList;
     // Body Tentacles information
@@ -40,11 +41,12 @@ public class BodyGenome {
 
     public struct EyeGenome {
         public Vector2 localPos;
-        public Vector2 localScale;
+        public Vector2 localScale;  // avgSize, aspectRatio
         public Vector3 irisHue;
         public Vector3 pupilHue;
-        public float irisRadius;
-        public float pupilRadius;
+        public int eyeBrushType;
+        //public float irisRadius;
+        //public float pupilRadius;
     }
 
     //public List<HealthGenome> healthModuleList;
@@ -58,11 +60,13 @@ public class BodyGenome {
     public void InitializeAsRandomGenome() {
         testModuleGenome = new TestModuleGenome(0, 0);
 
-        size = new Vector2(1f, 1f);
+        sizeAndAspectRatio = new Vector2(1f, 1f);
 
         huePrimary = new Vector3(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f));
         hueSecondary = new Vector3(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f));
-        bodyStrokeBrushType = 0;
+        bodyStrokeBrushTypeX = UnityEngine.Random.Range(0, 8);
+        bodyStrokeBrushTypeY = UnityEngine.Random.Range(0, 8);
+
         decorationGenomeList = new List<DecorationGenome>();
         for(int i = 0; i < 4; i++) {
             DecorationGenome decorationGenome = new DecorationGenome();
@@ -71,7 +75,7 @@ public class BodyGenome {
             decorationGenome.localScale = new Vector2(UnityEngine.Random.Range(0.2f, 0.4f), UnityEngine.Random.Range(0.2f, 0.4f));
             decorationGenome.colorLerp = UnityEngine.Random.Range(0f, 1f);
             decorationGenome.strength = UnityEngine.Random.Range(0f, 1f);
-            decorationGenome.brushType = 0;
+            decorationGenome.brushType = UnityEngine.Random.Range(0, 8);
         }
         tentacleGenomeList = new List<TentacleGenome>();
         for(int i = 0; i < 0; i++) {
@@ -79,11 +83,12 @@ public class BodyGenome {
         }
         eyeGenome = new EyeGenome();
         eyeGenome.localPos = new Vector2(0.5f, 0.8f);
-        eyeGenome.localScale = new Vector2(0.4f, 0.4f);
+        eyeGenome.localScale = new Vector2(0.32f, 1f);
         eyeGenome.irisHue = new Vector3(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f));
         eyeGenome.pupilHue = Vector3.zero;
-        eyeGenome.irisRadius = 0.66f;
-        eyeGenome.pupilRadius = 0.33f;
+        eyeGenome.eyeBrushType = UnityEngine.Random.Range(0, 8);
+        //eyeGenome.irisRadius = 0.66f;
+        //eyeGenome.pupilRadius = 0.33f;
     }
 
     //public void InitializeGenomeAsDefault() {
@@ -115,11 +120,13 @@ public class BodyGenome {
         testModuleGenome = new TestModuleGenome(0, 0); // for now.. **** Revisit if updating Modules/Abilites!!!
         
         // Set equal to parent at first, then check for possible mutation of that value:
-        size = UtilityMutationFunctions.GetMutatedVector2Additive(parentBodyGenome.size, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.67f, 1.5f);
+        // SIZE IS: (x= size, y= aspectRatio)   aspect = x/y
+        sizeAndAspectRatio = UtilityMutationFunctions.GetMutatedVector2Additive(parentBodyGenome.sizeAndAspectRatio, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, new Vector2(0.8f, 0.6f), new Vector2(2.4f, 1f));
         huePrimary = UtilityMutationFunctions.GetMutatedVector3Additive(parentBodyGenome.huePrimary, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
         hueSecondary = UtilityMutationFunctions.GetMutatedVector3Additive(parentBodyGenome.hueSecondary, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
         // ***** v v v Revisit when implementing #BrushTypes!! **** REVISIT!!
-        bodyStrokeBrushType = UtilityMutationFunctions.GetMutatedIntAdditive(parentBodyGenome.bodyStrokeBrushType, settings.defaultBodyMutationChance, 7, 0, 7); // *****
+        bodyStrokeBrushTypeX = UtilityMutationFunctions.GetMutatedIntAdditive(parentBodyGenome.bodyStrokeBrushTypeX, settings.defaultBodyMutationChance, 2, 0, 7); // *****
+        bodyStrokeBrushTypeY = UtilityMutationFunctions.GetMutatedIntAdditive(parentBodyGenome.bodyStrokeBrushTypeY, settings.defaultBodyMutationChance, 2, 0, 7);
 
         decorationGenomeList = new List<DecorationGenome>();
         for(int i = 0; i < parentBodyGenome.decorationGenomeList.Count; i++) {
@@ -131,7 +138,7 @@ public class BodyGenome {
             newGenome.colorLerp = UtilityMutationFunctions.GetMutatedFloatAdditive(parentBodyGenome.decorationGenomeList[i].colorLerp, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
             newGenome.strength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentBodyGenome.decorationGenomeList[i].strength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
             // ***** v v v Revisit when implementing #BrushTypes!! **** REVISIT!!
-            bodyStrokeBrushType = UtilityMutationFunctions.GetMutatedIntAdditive(parentBodyGenome.decorationGenomeList[i].brushType, settings.defaultBodyMutationChance, 4, 0, 0); // *****
+            //bodyStrokeBrushTypeX = UtilityMutationFunctions.GetMutatedIntAdditive(parentBodyGenome.decorationGenomeList[i].brushType, settings.defaultBodyMutationChance, 4, 0, 0); // *****
 
             decorationGenomeList.Add(newGenome);
         }
@@ -150,12 +157,13 @@ public class BodyGenome {
 
         eyeGenome = new EyeGenome();
 
-        eyeGenome.localPos = UtilityMutationFunctions.GetMutatedVector2Additive(parentBodyGenome.eyeGenome.localPos, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, -1f, 1f);
-        eyeGenome.localScale = UtilityMutationFunctions.GetMutatedVector2Additive(parentBodyGenome.eyeGenome.localScale, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.25f, 0.75f);
+        eyeGenome.localPos = UtilityMutationFunctions.GetMutatedVector2Additive(parentBodyGenome.eyeGenome.localPos, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, new Vector2(0.2f, 0f), new Vector2(1f, 1f));
+        // EYES SCALE IS: (x= size, y= aspectRatio)
+        eyeGenome.localScale = UtilityMutationFunctions.GetMutatedVector2Additive(parentBodyGenome.eyeGenome.localScale, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, new Vector2(0.25f, 0.85f), new Vector2(0.4f, 1.2f));
         eyeGenome.irisHue = UtilityMutationFunctions.GetMutatedVector3Additive(parentBodyGenome.eyeGenome.irisHue, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
         eyeGenome.pupilHue = UtilityMutationFunctions.GetMutatedVector3Additive(parentBodyGenome.eyeGenome.pupilHue, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
-        eyeGenome.irisRadius = UtilityMutationFunctions.GetMutatedFloatAdditive(parentBodyGenome.eyeGenome.irisRadius, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.25f, 0.95f);
-        eyeGenome.pupilRadius = UtilityMutationFunctions.GetMutatedFloatAdditive(parentBodyGenome.eyeGenome.pupilRadius, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.25f, 0.95f);
+        eyeGenome.eyeBrushType = UtilityMutationFunctions.GetMutatedIntAdditive(parentBodyGenome.eyeGenome.eyeBrushType, settings.defaultBodyMutationChance, 7, 0, 7);
+        //eyeGenome.pupilRadius = UtilityMutationFunctions.GetMutatedFloatAdditive(parentBodyGenome.eyeGenome.pupilRadius, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.25f, 0.95f);
         
     }
 

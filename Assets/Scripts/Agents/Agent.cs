@@ -46,13 +46,16 @@ public class Agent : MonoBehaviour {
         
     //public TheRenderKing.PointStrokeData bodyPointStroke;
     //public TheRenderKing.PointStrokeData[] decorationPointStrokesArray;
-    public Vector2 size;
+    public Vector2 fullSize;
 
     public bool isInsideFood = false;
+    private float eatingLoopAnimFrame = 0f;
+
+    //public bool 
 
     //public int sourceGenomeIndex;
     
-    public float speed = 75f;
+    private float speed = 100f;
     public bool humanControlled = false;
     public float humanControlLerp = 0f;
     public bool isNull = false;
@@ -441,17 +444,17 @@ public class Agent : MonoBehaviour {
         //sourceGenomeIndex = genomeIndex;
 
         curLifeStage = AgentLifeStage.Egg;
-        this.size = genome.bodyGenome.size;
+        this.fullSize = new Vector2(genome.bodyGenome.sizeAndAspectRatio.x * genome.bodyGenome.sizeAndAspectRatio.y, genome.bodyGenome.sizeAndAspectRatio.x * (1.0f / genome.bodyGenome.sizeAndAspectRatio.y));
         isNull = false;
         lifeStageTransitionTimeStepCounter = 0;
         ageCounterMature = 0;
         this.transform.localPosition = startPos.startPosition;
-        this.transform.localScale = new Vector3(size.x, size.y, 1f);
+        this.transform.localScale = new Vector3(fullSize.x, fullSize.y, 1f);
         InitializeModules(genome, this, startPos);      // Modules need to be created first so that Brain can map its neurons to existing modules  
         brain = new Brain(genome.brainGenome, this);
         facingDirection = new Vector2(0f, 1f);
         throttle = Vector2.zero;
-        smoothedThrottle = Vector2.zero;
+        smoothedThrottle = new Vector2(0f, 0.01f);
         prevPos = transform.localPosition;
     }
 }

@@ -144,6 +144,11 @@ public class SimulationManager : MonoBehaviour {
             if(currentWarmUpTimeStep >= numWarmUpTimeSteps) {
                 Debug.Log("WarmUp Complete!!!");
                 simulationWarmUpComplete = true;
+
+                // Populate renderKingBuffers:
+                for(int i = 0; i < numAgents; i++) {
+                    theRenderKing.UpdateAgentBodyStrokesBuffer(i); // hacky fix but seems to work...
+                }
             }
             else {
                 //Debug.Log("WarmUp Step " + currentWarmUpTimeStep.ToString());
@@ -191,16 +196,20 @@ public class SimulationManager : MonoBehaviour {
         LoadingInstantiatePredators();
         LoadingInitializePredatorsFromGenome();
 
-        yield return null;
-
-        // Wake up the Render King and prepare him for the day ahead, proudly ruling over Renderland.
-        LoadingGentlyRouseTheRenderMonarchHisHighnessLordOfPixels();
 
         yield return null;
 
         // **** How to handle sharing simulation data between different Managers???
         // Once Agents, Food, etc. are established, Initialize the Fluid:
         LoadingInitializeFluidSim();
+
+
+        yield return null;
+
+        //simStateData.PopulateSimDataArrays(this); // testing if this works...
+        // Wake up the Render King and prepare him for the day ahead, proudly ruling over Renderland.
+        LoadingGentlyRouseTheRenderMonarchHisHighnessLordOfPixels();
+        
         
         yield return null;
                 
@@ -294,7 +303,7 @@ public class SimulationManager : MonoBehaviour {
         for (int i = 0; i < agentsArray.Length; i++) {
             GameObject agentGO = Instantiate(Resources.Load(assetURL)) as GameObject;
             agentGO.name = "Agent" + i.ToString();
-            agentGO.transform.localScale = new Vector3(agentGenomePoolArray[i].bodyGenome.size.x, agentGenomePoolArray[i].bodyGenome.size.y, 1f);
+            //agentGO.transform.localScale = new Vector3(agentGenomePoolArray[i].bodyGenome.sizeAndAspectRatio.x, agentGenomePoolArray[i].bodyGenome.sizeAndAspectRatio.y, 1f);
             Agent newAgent = agentGO.GetComponent<Agent>();  // Script placed on Prefab already            
             agentsArray[i] = newAgent; // Add to stored list of current Agents            
         }
@@ -637,7 +646,7 @@ public class SimulationManager : MonoBehaviour {
         
         theRenderKing.UpdateAgentSmearStrokesBuffer(agentIndex);
         theRenderKing.UpdateAgentBodyStrokesBuffer(agentIndex);
-        theRenderKing.InitializeAgentEyeStrokesBuffer();
+        theRenderKing.UpdateAgentEyeStrokesBuffer(agentIndex);
     }
     public void ProcessDeadFood(int foodIndex) {
         

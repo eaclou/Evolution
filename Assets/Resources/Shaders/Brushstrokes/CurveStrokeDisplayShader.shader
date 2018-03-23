@@ -47,8 +47,12 @@
 				float2 velocity;
 				float2 heading;
 				float2 size;
+				float3 primaryHue;  // can eventually pull these static variables out of here to avoid per-frame updates on non-dynamic attributes
+				float3 secondaryHue;
 				float maturity;
 				float decay;
+				float eatingStatus;
+				float foodAmount;
 			};
 
 			sampler2D _MainTex;
@@ -103,7 +107,7 @@
 
 				float alpha = 1;
 				//alpha = alpha * agentSimData.maturity;
-				alpha = alpha * (1.0 - agentSimData.decay);
+				alpha = alpha * saturate(1.0 - agentSimData.decay * 4);
 
 				float activeColorLerp = 1;
 				activeColorLerp = activeColorLerp * floor(agentSimData.maturity + 0.01);
@@ -124,7 +128,7 @@
 			{
 				// sample the texture
 				fixed4 col = tex2D(_MainTex, i.uv) * i.color;
-				
+				col.a *= 0.4;
 				return col;
 			}
 			ENDCG

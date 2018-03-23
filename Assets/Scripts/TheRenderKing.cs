@@ -20,7 +20,7 @@ public class TheRenderKing : MonoBehaviour {
     public ComputeShader computeShaderBrushStrokes;
     public ComputeShader computeShaderTerrainGeneration;
 
-    public Material pointStrokeDisplayMat;
+    public Material agentEyesDisplayMat;
     public Material curveStrokeDisplayMat;
     public Material trailStrokeDisplayMat;
     public Material frameBufferStrokeDisplayMat;
@@ -59,7 +59,7 @@ public class TheRenderKing : MonoBehaviour {
     private ComputeBuffer terrainTriangleCBuffer; 
     
     //PointStrokeData[] pointStrokeDataArray;
-    CurveStrokeData[] curveStrokeDataArray; // does this need to be global???
+    CurveStrokeData[] agentSmearStrokesDataArray; // does this need to be global???
     //TrailStrokeData[] trailStrokeDataArray;
     
     private ComputeBuffer quadVerticesCBuffer;  // quad mesh
@@ -69,7 +69,7 @@ public class TheRenderKing : MonoBehaviour {
     private ComputeBuffer curveRibbonVerticesCBuffer;  // short ribbon mesh
     private ComputeBuffer agentSmearStrokesCBuffer;
 
-    private ComputeBuffer agentEyesPointStrokesCBuffer;
+    private ComputeBuffer agentEyeStrokesCBuffer;
 
     private ComputeBuffer agentTrailStrokes0CBuffer;
     private ComputeBuffer agentTrailStrokes1CBuffer;
@@ -95,12 +95,13 @@ public class TheRenderKing : MonoBehaviour {
     public RenderTexture debugRT; // Used to see texture inside editor (inspector)
         
 
-    public struct PointStrokeData {
+    public struct AgentEyeStrokeData {
         public int parentIndex;  // what agent/object is this attached to?
         public Vector2 localPos;
-        public Vector2 localDir;
+        public Vector2 localDir; // rotation direction
         public Vector2 localScale;
-        public Vector3 hue;   // RGB color tint
+        public Vector3 irisHue;   // RGB color tint
+        public Vector3 pupilHue;   // RGB color tint
         public float strength;  // abstraction for pressure of brushstroke + amount of paint 
         public int brushType;  // what texture/mask/brush pattern to use
     }
@@ -109,9 +110,9 @@ public class TheRenderKing : MonoBehaviour {
         public Vector2 localPos;
         public Vector2 localDir;
         public Vector2 localScale;
-        public Vector3 hue;   // RGB color tint
         public float strength;  // abstraction for pressure of brushstroke + amount of paint 
-        public int brushType;  // what texture/mask/brush pattern to use
+        public int brushTypeX;  // what texture/mask/brush pattern to use
+        public int brushTypeY;  // what texture/mask/brush pattern to use
     }
     public struct CurveStrokeData {
         public int parentIndex;
@@ -184,8 +185,79 @@ public class TheRenderKing : MonoBehaviour {
         computeShaderBrushStrokes.Dispatch(kernelCSAlignFrameBufferStrokes, frameBufferStrokesCBuffer.count, 1, 1);
     }
     // Actual mix of rendering passes will change!!! 
-    private void InitializeBuffers() {
-        // Set up Quad Mesh billboard for brushStroke rendering
+    private void InitializeBuffers() {  // primary function -- calls sub-functions for initializing each buffer
+            
+        InitializeQuadMeshBuffer(); // Set up Quad Mesh billboard for brushStroke rendering            
+        InitializeCurveRibbonMeshBuffer(); // Set up Curve Ribbon Mesh billboard for brushStroke rendering
+        InitializeFluidRenderMesh(); 
+        
+        obstacleStrokesCBuffer = new ComputeBuffer(simManager._NumAgents + simManager._NumFood + simManager._NumPredators, sizeof(float) * 8);
+        obstacleStrokeDataArray = new BasicStrokeData[obstacleStrokesCBuffer.count];
+
+        colorInjectionStrokesCBuffer = new ComputeBuffer(simManager._NumAgents + simManager._NumFood + simManager._NumPredators, sizeof(float) * 8);
+        colorInjectionStrokeDataArray = new BasicStrokeData[colorInjectionStrokesCBuffer.count];
+
+        InitializeAgentBodyStrokesBuffer();         
+        InitializeAgentEyeStrokesBuffer();
+        InitializeAgentSmearStrokesBuffer();
+        InitializeFrameBufferStrokesBuffer();
+        InitializeFloatyBitsBuffer();
+        InitializeRipplesBuffer();
+
+        
+        /*
+        trailStrokeDataArray = new TrailStrokeData[65 * numTrailPointsPerAgent];
+        for (int i = 0; i < trailStrokeDataArray.Length; i++) {
+            int agentIndex = (int)Mathf.Floor((float)i / numTrailPointsPerAgent); //i % numTrailPointsPerAgent
+            float trailPos = (float)i % (float)numTrailPointsPerAgent;
+            trailStrokeDataArray[i] = new TrailStrokeData();
+            trailStrokeDataArray[i].worldPos = new Vector2(0f, trailPos * 1f);
+        }
+        agentTrailStrokes0CBuffer = new ComputeBuffer(trailStrokeDataArray.Length, sizeof(float) * 2);
+        agentTrailStrokes0CBuffer.SetData(trailStrokeDataArray);
+        agentTrailStrokes1CBuffer = new ComputeBuffer(trailStrokeDataArray.Length, sizeof(float) * 2);
+                
+        // TRAIL DOTS:
+        TrailDotData[] trailDotsDataArray = new TrailDotData[numTrailDotsPerAgent * agentSimDataCBuffer.count];
+        for (int i = 0; i < agentSimDataCBuffer.count; i++) {
+            for (int t = 0; t < numTrailDotsPerAgent; t++) {
+                TrailDotData data = new TrailDotData();
+                data.parentIndex = i;
+                data.coords01 = new Vector2((agentSimDataArray[i].worldPos.x + 70f) / 140f, (agentSimDataArray[i].worldPos.y + 70f) / 140f);
+                data.age = (float)t / (float)numTrailDotsPerAgent;
+                data.initAlpha = 1f;
+                trailDotsDataArray[i * numTrailDotsPerAgent + t] = data;
+            }
+        }
+        trailDotsCBuffer = new ComputeBuffer(numTrailDotsPerAgent * agentSimDataCBuffer.count, sizeof(int) + sizeof(float) * 4);
+        int kernelSimTrailDots = computeShaderFluidSim.FindKernel("SimTrailDots");
+        computeShaderFluidSim.SetBuffer(kernelSimTrailDots, "AgentSimDataCBuffer", agentSimDataCBuffer);
+        computeShaderFluidSim.SetBuffer(kernelSimTrailDots, "TrailDotsCBuffer", trailDotsCBuffer);
+        trailDotsCBuffer.SetData(trailDotsDataArray);
+        */
+    }
+    private void InitializeCurveRibbonMeshBuffer() {
+        
+        float rowSize = 1f / (float)numCurveRibbonQuads;
+
+        curveRibbonVerticesCBuffer = new ComputeBuffer(6 * numCurveRibbonQuads, sizeof(float) * 3);
+        Vector3[] verticesArray = new Vector3[curveRibbonVerticesCBuffer.count];
+        for(int i = 0; i < numCurveRibbonQuads; i++) {
+            int baseIndex = i * 6;
+
+            float startCoord = (float)i;
+            float endCoord = (float)(i + 1);
+            verticesArray[baseIndex + 0] = new Vector3(0.5f, startCoord * rowSize);
+            verticesArray[baseIndex + 1] = new Vector3(0.5f, endCoord * rowSize);
+            verticesArray[baseIndex + 2] = new Vector3(-0.5f, endCoord * rowSize);
+            verticesArray[baseIndex + 3] = new Vector3(-0.5f, endCoord * rowSize);
+            verticesArray[baseIndex + 4] = new Vector3(-0.5f, startCoord * rowSize);
+            verticesArray[baseIndex + 5] = new Vector3(0.5f, startCoord * rowSize); 
+        }
+
+        curveRibbonVerticesCBuffer.SetData(verticesArray);
+    }
+    private void InitializeQuadMeshBuffer() {
         quadVerticesCBuffer = new ComputeBuffer(6, sizeof(float) * 3);
         quadVerticesCBuffer.SetData(new[] {
             new Vector3(-0.5f, 0.5f),
@@ -195,20 +267,8 @@ public class TheRenderKing : MonoBehaviour {
             new Vector3(-0.5f, -0.5f),
             new Vector3(-0.5f, 0.5f)
         });
-
-        // Set up Curve Ribbon Mesh billboard for brushStroke rendering
-        InitializeCurveRibbonMeshBuffer();
-                
-        InitializeAgentBodyStrokesBuffer();
-
-        // **** Just Curves to start!!!! ********        
-        curveStrokeDataArray = new CurveStrokeData[simManager._NumAgents]; // **** Temporarily just for Agents! ******
-        agentSmearStrokesCBuffer = new ComputeBuffer(curveStrokeDataArray.Length, sizeof(float) * 14 + sizeof(int) * 2);
-
-        InitializeAgentSmearStrokesBuffer();        
-
-        InitializeFrameBufferStrokesBuffer();
-
+    }
+    private void InitializeFluidRenderMesh() {
         fluidRenderMesh = new Mesh();
         Vector3[] vertices = new Vector3[4];
         vertices[0] = new Vector3(-simManager._MapSize, -simManager._MapSize, 0f);
@@ -230,14 +290,8 @@ public class TheRenderKing : MonoBehaviour {
         fluidRenderMesh.vertices = vertices;
         fluidRenderMesh.uv = uvs;
         fluidRenderMesh.triangles = triangles;
-
-
-        obstacleStrokesCBuffer = new ComputeBuffer(simManager._NumAgents + simManager._NumFood + simManager._NumPredators, sizeof(float) * 8);
-        obstacleStrokeDataArray = new BasicStrokeData[obstacleStrokesCBuffer.count];
-
-        colorInjectionStrokesCBuffer = new ComputeBuffer(simManager._NumAgents + simManager._NumFood + simManager._NumPredators, sizeof(float) * 8);
-        colorInjectionStrokeDataArray = new BasicStrokeData[colorInjectionStrokesCBuffer.count];
-
+    }
+    private void InitializeFloatyBitsBuffer() {
         Vector2[] floatyBitsInitPos = new Vector2[numFloatyBits];
         floatyBitsCBuffer = new ComputeBuffer(numFloatyBits, sizeof(float) * 4);
         for(int i = 0; i < numFloatyBits; i++) {
@@ -247,6 +301,8 @@ public class TheRenderKing : MonoBehaviour {
         int kernelSimFloatyBits = fluidManager.computeShaderFluidSim.FindKernel("SimFloatyBits");
         fluidManager.computeShaderFluidSim.SetBuffer(kernelSimFloatyBits, "FloatyBitsCBuffer", floatyBitsCBuffer);
 
+    }
+    private void InitializeRipplesBuffer() {
         // RIPPLES:
         TrailDotData[] ripplesDataArray = new TrailDotData[numRipplesPerAgent * simManager.simStateData.agentSimDataCBuffer.count];
         for (int i = 0; i < simManager.simStateData.agentSimDataCBuffer.count; i++) {
@@ -264,51 +320,100 @@ public class TheRenderKing : MonoBehaviour {
         fluidManager.computeShaderFluidSim.SetBuffer(kernelSimRipples, "AgentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
         fluidManager.computeShaderFluidSim.SetBuffer(kernelSimRipples, "RipplesCBuffer", ripplesCBuffer);
         ripplesCBuffer.SetData(ripplesDataArray);
-
-        agentEyesPointStrokesCBuffer = new ComputeBuffer(simManager._NumAgents * 4, sizeof(float) * 10 + sizeof(int) * 2); // pointStrokeData size
-        InitializeAgentEyeStrokesBuffer();
-        
-        /*
-        trailStrokeDataArray = new TrailStrokeData[65 * numTrailPointsPerAgent];
-        for (int i = 0; i < trailStrokeDataArray.Length; i++) {
-            int agentIndex = (int)Mathf.Floor((float)i / numTrailPointsPerAgent); //i % numTrailPointsPerAgent
-            float trailPos = (float)i % (float)numTrailPointsPerAgent;
-            trailStrokeDataArray[i] = new TrailStrokeData();
-            trailStrokeDataArray[i].worldPos = new Vector2(0f, trailPos * 1f);
-        }
-        agentTrailStrokes0CBuffer = new ComputeBuffer(trailStrokeDataArray.Length, sizeof(float) * 2);
-        agentTrailStrokes0CBuffer.SetData(trailStrokeDataArray);
-        agentTrailStrokes1CBuffer = new ComputeBuffer(trailStrokeDataArray.Length, sizeof(float) * 2);
-
-
-        
-
-        
-        
-        // TRAIL DOTS:
-        TrailDotData[] trailDotsDataArray = new TrailDotData[numTrailDotsPerAgent * agentSimDataCBuffer.count];
-        for (int i = 0; i < agentSimDataCBuffer.count; i++) {
-            for (int t = 0; t < numTrailDotsPerAgent; t++) {
-                TrailDotData data = new TrailDotData();
-                data.parentIndex = i;
-                data.coords01 = new Vector2((agentSimDataArray[i].worldPos.x + 70f) / 140f, (agentSimDataArray[i].worldPos.y + 70f) / 140f);
-                data.age = (float)t / (float)numTrailDotsPerAgent;
-                data.initAlpha = 1f;
-                trailDotsDataArray[i * numTrailDotsPerAgent + t] = data;
+    }
+    private void InitializeFrameBufferStrokesBuffer() {
+        frameBufferStrokesCBuffer = new ComputeBuffer(numFrameBufferStrokesPerDimension * numFrameBufferStrokesPerDimension, sizeof(float) * 7 + sizeof(int));
+        FrameBufferStrokeData[] frameBufferStrokesArray = new FrameBufferStrokeData[frameBufferStrokesCBuffer.count];
+        float frameBufferStrokesBounds = 280f;
+        for(int x = 0; x < numFrameBufferStrokesPerDimension; x++) {
+            for(int y = 0; y < numFrameBufferStrokesPerDimension; y++) {
+                int index = x * numFrameBufferStrokesPerDimension + y;
+                float xPos = (float)x / (float)(numFrameBufferStrokesPerDimension - 1) * frameBufferStrokesBounds - frameBufferStrokesBounds / 2f;
+                float yPos = (float)y / (float)(numFrameBufferStrokesPerDimension - 1) * frameBufferStrokesBounds - frameBufferStrokesBounds / 2f;
+                Vector2 offset = new Vector2(UnityEngine.Random.Range(-0.5f, 0.5f), UnityEngine.Random.Range(-0.5f, 0.5f));
+                Vector3 pos = new Vector3(xPos + offset.x, yPos + offset.y, 0f);
+                frameBufferStrokesArray[index].worldPos = pos;
+                frameBufferStrokesArray[index].scale = new Vector2(2.15f, 4.20f); // Y is forward, along stroke
+                frameBufferStrokesArray[index].heading = new Vector2(1f, 0f);
+                frameBufferStrokesArray[index].brushType = UnityEngine.Random.Range(0,4);
             }
         }
-        trailDotsCBuffer = new ComputeBuffer(numTrailDotsPerAgent * agentSimDataCBuffer.count, sizeof(int) + sizeof(float) * 4);
-        int kernelSimTrailDots = computeShaderFluidSim.FindKernel("SimTrailDots");
-        computeShaderFluidSim.SetBuffer(kernelSimTrailDots, "AgentSimDataCBuffer", agentSimDataCBuffer);
-        computeShaderFluidSim.SetBuffer(kernelSimTrailDots, "TrailDotsCBuffer", trailDotsCBuffer);
-        trailDotsCBuffer.SetData(trailDotsDataArray);
-        */
+        frameBufferStrokesCBuffer.SetData(frameBufferStrokesArray);
     }
+    public void InitializeAgentEyeStrokesBuffer() {
+        agentEyeStrokesCBuffer = new ComputeBuffer(simManager._NumAgents * 2, sizeof(float) * 13 + sizeof(int) * 2); // pointStrokeData size
+        AgentEyeStrokeData[] agentEyesDataArray = new AgentEyeStrokeData[agentEyeStrokesCBuffer.count];        
+        for (int i = 0; i < simManager._NumAgents; i++) {
+            AgentEyeStrokeData dataLeftEye = new AgentEyeStrokeData();
+            dataLeftEye.parentIndex = i;
+            dataLeftEye.localPos = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.localPos;
+            dataLeftEye.localPos.x *= -1f; // LEFT SIDE!
+            dataLeftEye.localDir = new Vector2(0f, 1f);
+            dataLeftEye.localScale = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.localScale;
+            dataLeftEye.irisHue = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.irisHue;
+            dataLeftEye.pupilHue = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.pupilHue;
+            dataLeftEye.strength = 1f;
+            dataLeftEye.brushType = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.eyeBrushType;
+
+            AgentEyeStrokeData dataRightEye = new AgentEyeStrokeData();
+            dataRightEye.parentIndex = i;
+            dataRightEye.localPos = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.localPos;
+            dataRightEye.localDir = new Vector2(0f, 1f);
+            dataRightEye.localScale = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.localScale;
+            dataRightEye.irisHue = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.irisHue;
+            dataRightEye.pupilHue = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.pupilHue;
+            dataRightEye.strength = 1f;
+            dataRightEye.brushType = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.eyeBrushType;
+            
+            agentEyesDataArray[i * 2 + 0] = dataLeftEye;
+            agentEyesDataArray[i * 2 + 1] = dataRightEye;
+        }
+        agentEyeStrokesCBuffer.SetData(agentEyesDataArray);
+    }
+    public void InitializeAgentBodyStrokesBuffer() {
+        agentBodyStrokesCBuffer = new ComputeBuffer(simManager._NumAgents, sizeof(float) * 7 + sizeof(int) * 3);
+        AgentBodyStrokeData[] agentBodyStrokesArray = new AgentBodyStrokeData[agentBodyStrokesCBuffer.count];
+        for (int i = 0; i < agentBodyStrokesArray.Length; i++) {
+            AgentBodyStrokeData bodyStroke = new AgentBodyStrokeData();
+            bodyStroke.parentIndex = i;
+            bodyStroke.localPos = Vector2.zero;
+            bodyStroke.localDir = new Vector2(0f, 1f); // start up? shouldn't matter
+            bodyStroke.localScale = Vector2.one; // simManager.agentGenomePoolArray[i].bodyGenome.sizeAndAspectRatio;
+            bodyStroke.strength = 1f;
+            bodyStroke.brushTypeX = simManager.agentGenomePoolArray[i].bodyGenome.bodyStrokeBrushTypeX; // ** Revisit
+            bodyStroke.brushTypeY = simManager.agentGenomePoolArray[i].bodyGenome.bodyStrokeBrushTypeY;
+        }        
+        agentBodyStrokesCBuffer.SetData(agentBodyStrokesArray);
+    }
+    public void InitializeAgentSmearStrokesBuffer() {
+        // **** Just Curves to start!!!! ********        
+        agentSmearStrokesDataArray = new CurveStrokeData[simManager._NumAgents]; // **** Temporarily just for Agents! ******
+        agentSmearStrokesCBuffer = new ComputeBuffer(agentSmearStrokesDataArray.Length, sizeof(float) * 14 + sizeof(int) * 2);
+
+        for (int i = 0; i < agentSmearStrokesDataArray.Length; i++) {
+            agentSmearStrokesDataArray[i] = new CurveStrokeData();
+            agentSmearStrokesDataArray[i].parentIndex = i; // link to Agent
+            agentSmearStrokesDataArray[i].hue = simManager.agentGenomePoolArray[i].bodyGenome.huePrimary;
+
+            agentSmearStrokesDataArray[i].restLength = simManager.agentsArray[i].fullSize.y * 0.25f; // simManager.agentGenomePoolArray[i].bodyGenome.sizeAndAspectRatio.y * 0.25f;
+
+            agentSmearStrokesDataArray[i].p0 = new Vector2(0f, 0f);
+            agentSmearStrokesDataArray[i].p1 = agentSmearStrokesDataArray[i].p0 - new Vector2(0f, agentSmearStrokesDataArray[i].restLength);
+            agentSmearStrokesDataArray[i].p2 = agentSmearStrokesDataArray[i].p0 - new Vector2(0f, agentSmearStrokesDataArray[i].restLength * 2f);
+            agentSmearStrokesDataArray[i].p3 = agentSmearStrokesDataArray[i].p0 - new Vector2(0f, agentSmearStrokesDataArray[i].restLength * 3f);
+            agentSmearStrokesDataArray[i].width = simManager.agentsArray[i].fullSize.x; // simManager.agentGenomePoolArray[i].bodyGenome.sizeAndAspectRatio.x;
+            
+            agentSmearStrokesDataArray[i].strength = 1f;
+            agentSmearStrokesDataArray[i].brushType = 0;
+        }        
+        agentSmearStrokesCBuffer.SetData(agentSmearStrokesDataArray);
+    }
+
     private void InitializeMaterials() {
-        pointStrokeDisplayMat.SetPass(0); // Eyes
+        agentEyesDisplayMat.SetPass(0); // Eyes
         //pointStrokeDisplayMat.SetBuffer("agentSimDataCBuffer", agentSimDataCBuffer);
-        pointStrokeDisplayMat.SetBuffer("pointStrokesCBuffer", agentEyesPointStrokesCBuffer);
-        pointStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        agentEyesDisplayMat.SetBuffer("agentEyesStrokesCBuffer", agentEyeStrokesCBuffer);
+        agentEyesDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
                 
         curveStrokeDisplayMat.SetPass(0);
         curveStrokeDisplayMat.SetBuffer("curveRibbonVerticesCBuffer", curveRibbonVerticesCBuffer);
@@ -335,10 +440,6 @@ public class TheRenderKing : MonoBehaviour {
         trailStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         trailStrokeDisplayMat.SetBuffer("agentTrailStrokesReadCBuffer", agentTrailStrokes0CBuffer);
         
-              
-              
-        
-        
         trailDotsDisplayMat.SetPass(0);
         trailDotsDisplayMat.SetBuffer("agentSimDataCBuffer", agentSimDataCBuffer);
         trailDotsDisplayMat.SetBuffer("trailDotsCBuffer", trailDotsCBuffer);
@@ -357,46 +458,6 @@ public class TheRenderKing : MonoBehaviour {
         predatorProceduralDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         */
     }
-    private void InitializeCurveRibbonMeshBuffer() {
-        
-        float rowSize = 1f / (float)numCurveRibbonQuads;
-
-        curveRibbonVerticesCBuffer = new ComputeBuffer(6 * numCurveRibbonQuads, sizeof(float) * 3);
-        Vector3[] verticesArray = new Vector3[curveRibbonVerticesCBuffer.count];
-        for(int i = 0; i < numCurveRibbonQuads; i++) {
-            int baseIndex = i * 6;
-
-            float startCoord = (float)i;
-            float endCoord = (float)(i + 1);
-            verticesArray[baseIndex + 0] = new Vector3(0.5f, startCoord * rowSize);
-            verticesArray[baseIndex + 1] = new Vector3(0.5f, endCoord * rowSize);
-            verticesArray[baseIndex + 2] = new Vector3(-0.5f, endCoord * rowSize);
-            verticesArray[baseIndex + 3] = new Vector3(-0.5f, endCoord * rowSize);
-            verticesArray[baseIndex + 4] = new Vector3(-0.5f, startCoord * rowSize);
-            verticesArray[baseIndex + 5] = new Vector3(0.5f, startCoord * rowSize); 
-        }
-
-        curveRibbonVerticesCBuffer.SetData(verticesArray);
-    }
-    private void InitializeFrameBufferStrokesBuffer() {
-        frameBufferStrokesCBuffer = new ComputeBuffer(numFrameBufferStrokesPerDimension * numFrameBufferStrokesPerDimension, sizeof(float) * 7 + sizeof(int));
-        FrameBufferStrokeData[] frameBufferStrokesArray = new FrameBufferStrokeData[frameBufferStrokesCBuffer.count];
-        float frameBufferStrokesBounds = 280f;
-        for(int x = 0; x < numFrameBufferStrokesPerDimension; x++) {
-            for(int y = 0; y < numFrameBufferStrokesPerDimension; y++) {
-                int index = x * numFrameBufferStrokesPerDimension + y;
-                float xPos = (float)x / (float)(numFrameBufferStrokesPerDimension - 1) * frameBufferStrokesBounds - frameBufferStrokesBounds / 2f;
-                float yPos = (float)y / (float)(numFrameBufferStrokesPerDimension - 1) * frameBufferStrokesBounds - frameBufferStrokesBounds / 2f;
-                Vector2 offset = new Vector2(UnityEngine.Random.Range(-0.5f, 0.5f), UnityEngine.Random.Range(-0.5f, 0.5f));
-                Vector3 pos = new Vector3(xPos + offset.x, yPos + offset.y, 0f);
-                frameBufferStrokesArray[index].worldPos = pos;
-                frameBufferStrokesArray[index].scale = new Vector2(2.15f, 4.20f); // Y is forward, along stroke
-                frameBufferStrokesArray[index].heading = new Vector2(1f, 0f);
-                frameBufferStrokesArray[index].brushType = UnityEngine.Random.Range(0,4);
-            }
-        }
-        frameBufferStrokesCBuffer.SetData(frameBufferStrokesArray);
-    }
     private void InitializeCommandBuffers() {
 
         cmdBufferMainRender = new CommandBuffer();
@@ -412,7 +473,7 @@ public class TheRenderKing : MonoBehaviour {
         //fluidColorRenderCamera.AddCommandBuffer(CameraEvent.BeforeDepthNormalsTexture, cmdBufferFluidColor);
         //()
     }
-
+    
     private void InitializeTerrain() {
         Debug.Log("InitializeTerrain!");
 
@@ -524,7 +585,7 @@ public class TheRenderKing : MonoBehaviour {
         for(int i = 0; i < simManager.agentsArray.Length; i++) {
             Vector3 agentPos = simManager.agentsArray[i].transform.position;
             obstacleStrokeDataArray[baseIndex + i].worldPos = new Vector2(agentPos.x, agentPos.y);
-            obstacleStrokeDataArray[baseIndex + i].scale = simManager.agentsArray[i].size * 1f; // ** revisit this later // should leave room for velSampling around Agent
+            obstacleStrokeDataArray[baseIndex + i].scale = simManager.agentsArray[i].fullSize * 1f; // ** revisit this later // should leave room for velSampling around Agent
 
             float velX = (agentPos.x - simManager.agentsArray[i]._PrevPos.x) * velScale;
             float velY = (agentPos.y - simManager.agentsArray[i]._PrevPos.y) * velScale;
@@ -565,13 +626,16 @@ public class TheRenderKing : MonoBehaviour {
         for(int i = 0; i < simManager.agentsArray.Length; i++) {
             Vector3 agentPos = simManager.agentsArray[i].transform.position;
             colorInjectionStrokeDataArray[baseIndex + i].worldPos = new Vector2(agentPos.x, agentPos.y);
-            colorInjectionStrokeDataArray[baseIndex + i].scale = simManager.agentsArray[i].size * 1.0f;
+            colorInjectionStrokeDataArray[baseIndex + i].scale = simManager.agentsArray[i].fullSize * 1.0f;
 
             //float velX = (agentPos.x - simManager.agentsArray[i]._PrevPos.x) * velScale;
             //float velY = (agentPos.y - simManager.agentsArray[i]._PrevPos.y) * velScale;
             float alpha = 0f;
             if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Mature) {
                 alpha = 10f;
+            }
+            if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Decaying) {
+                alpha = 40f * (1f - (float)simManager.agentsArray[i].lifeStageTransitionTimeStepCounter / (float)simManager.agentsArray[i]._DecayDurationTimeSteps);
             }
             colorInjectionStrokeDataArray[baseIndex + i].color = new Vector4(simManager.agentGenomePoolArray[i].bodyGenome.huePrimary.x, simManager.agentGenomePoolArray[i].bodyGenome.huePrimary.y, simManager.agentGenomePoolArray[i].bodyGenome.huePrimary.z, alpha);
         }
@@ -606,150 +670,20 @@ public class TheRenderKing : MonoBehaviour {
 
         colorInjectionStrokesCBuffer.SetData(colorInjectionStrokeDataArray);
     }
-    public void RenderSimulationCameras() { // **** revisit
-        debugRT = fluidManager._SourceColorRT;
-
-        // SOLID OBJECTS OBSTACLES:::
-        PopulateObstaclesBuffer();  // update data for obstacles before rendering
-
-        cmdBufferFluidObstacles.Clear(); // needed since camera clear flag is set to none
-        cmdBufferFluidObstacles.SetRenderTarget(fluidManager._ObstaclesRT);
-        cmdBufferFluidObstacles.ClearRenderTarget(true, true, Color.black, 1.0f);  // clear -- needed???
-        cmdBufferFluidObstacles.SetViewProjectionMatrices(fluidObstaclesRenderCamera.worldToCameraMatrix, fluidObstaclesRenderCamera.projectionMatrix);
-
-        // Draw Solid Land boundaries:
-        cmdBufferFluidObstacles.DrawMesh(terrainMesh, Matrix4x4.identity, terrainObstaclesHeightMaskMat); // Masks out areas above the fluid "Sea Level"
-        // Draw dynamic Obstacles:
-        basicStrokeDisplayMat.SetPass(0);
-        basicStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer); // *** Needed? or just set it once in beginning....
-        basicStrokeDisplayMat.SetBuffer("basicStrokesCBuffer", obstacleStrokesCBuffer);
-        cmdBufferFluidObstacles.DrawProcedural(Matrix4x4.identity, basicStrokeDisplayMat, 0, MeshTopology.Triangles, 6, obstacleStrokesCBuffer.count);
-                
-        Graphics.ExecuteCommandBuffer(cmdBufferFluidObstacles);
-        // Still not sure if this will work correctly... ****
-        fluidObstaclesRenderCamera.Render(); // is this even needed? all drawcalls taken care of within commandBuffer?
-
-
-        // COLOR INJECTION:::
-        PopulateColorInjectionBuffer(); // update data for colorInjection objects before rendering
-
-        cmdBufferFluidColor.Clear(); // needed since camera clear flag is set to none
-        cmdBufferFluidColor.SetRenderTarget(fluidManager._SourceColorRT);
-        cmdBufferFluidColor.ClearRenderTarget(true, true, Color.black, 1.0f);  // clear -- needed???
-        cmdBufferFluidColor.SetViewProjectionMatrices(fluidColorRenderCamera.worldToCameraMatrix, fluidColorRenderCamera.projectionMatrix);
-        //cmdBufferFluidColor.Blit(fluidManager.initialDensityTex, fluidManager._SourceColorRT);
-        cmdBufferFluidColor.DrawMesh(fluidRenderMesh, Matrix4x4.identity, fluidBackgroundColorMat); // Masks out areas above the fluid "Sea Level"
-
-        basicStrokeDisplayMat.SetPass(0);
-        basicStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        basicStrokeDisplayMat.SetBuffer("basicStrokesCBuffer", colorInjectionStrokesCBuffer);
-        cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, basicStrokeDisplayMat, 0, MeshTopology.Triangles, 6, colorInjectionStrokesCBuffer.count);
-        // Render Agent/Food/Pred colors here!!!
-        // just use their display renders?
-
-        Graphics.ExecuteCommandBuffer(cmdBufferFluidColor);
-
-        fluidColorRenderCamera.Render();
-        // Update this ^^ to use Graphics.ExecuteCommandBuffer()  ****
-    }
-
-    public void Tick() {  // should be called from SimManager at proper time!
-
-        // Read current stateData and update all Buffers, send data to GPU
-        // Execute computeShaders to update any dynamic particles that are purely cosmetic
-
-        SinglePassCurveBrushData(); // start with this one?
-        SimFloatyBits();
-        SimRipples();
-        SimFruit();
-    }
     
-    // Using this one Primarily for starters!
-    private void SinglePassCurveBrushData() {
-        int kernelCSSinglePassCurveBrushData = computeShaderBrushStrokes.FindKernel("CSSinglePassCurveBrushData");
-        
-        computeShaderBrushStrokes.SetBuffer(kernelCSSinglePassCurveBrushData, "agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
-        computeShaderBrushStrokes.SetBuffer(kernelCSSinglePassCurveBrushData, "agentCurveStrokesWriteCBuffer", agentSmearStrokesCBuffer);
-        computeShaderBrushStrokes.Dispatch(kernelCSSinglePassCurveBrushData, agentSmearStrokesCBuffer.count, 1, 1);        
-    }
-
-    public void InitializeAgentEyeStrokesBuffer() {
-        PointStrokeData[] agentEyesDataArray = new PointStrokeData[agentEyesPointStrokesCBuffer.count];        
-        for (int i = 0; i < simManager._NumAgents; i++) {
-            PointStrokeData dataLeftIris = new PointStrokeData();
-            dataLeftIris.parentIndex = i;
-            dataLeftIris.localPos = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.localPos;
-            dataLeftIris.localPos.x *= -1f; // LEFT SIDE!
-            dataLeftIris.localDir = new Vector2(0f, 1f);
-            dataLeftIris.localScale = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.localScale;
-            dataLeftIris.hue = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.irisHue;
-            dataLeftIris.strength = 1f;
-            dataLeftIris.brushType = 0; // ** Revisit
-
-            PointStrokeData dataRightIris = new PointStrokeData();
-            dataRightIris.parentIndex = i;
-            dataRightIris.localPos = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.localPos;
-            dataRightIris.localDir = new Vector2(0f, 1f);
-            dataRightIris.localScale = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.localScale;
-            dataRightIris.hue = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.irisHue;
-            dataRightIris.strength = 1f;
-            dataRightIris.brushType = 0; // ** Revisit
-
-            PointStrokeData dataLeftPupil = new PointStrokeData();
-            dataLeftPupil.parentIndex = i;
-            dataLeftPupil.localPos = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.localPos;
-            dataLeftPupil.localPos.x *= -1f; // LEFT SIDE!
-            dataLeftPupil.localDir = new Vector2(0f, 1f);
-            dataLeftPupil.localScale = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.localScale * simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.pupilRadius;
-            dataLeftPupil.hue = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.pupilHue;
-            dataLeftPupil.strength = 1f;
-            dataLeftPupil.brushType = 0; // ** Revisit
-
-            PointStrokeData dataRightPupil = new PointStrokeData();
-            dataRightPupil.parentIndex = i;
-            dataRightPupil.localPos = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.localPos;
-            dataRightPupil.localDir = new Vector2(0f, 1f);
-            dataRightPupil.localScale = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.localScale * simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.pupilRadius;
-            dataRightPupil.hue = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.pupilHue;
-            dataRightPupil.strength = 1f;
-            dataRightPupil.brushType = 0; // ** Revisit
-
-            agentEyesDataArray[i * 4 + 0] = dataLeftIris;
-            agentEyesDataArray[i * 4 + 1] = dataRightIris;
-            agentEyesDataArray[i * 4 + 2] = dataLeftPupil;
-            agentEyesDataArray[i * 4 + 3] = dataRightPupil;
-        }
-        agentEyesPointStrokesCBuffer.SetData(agentEyesDataArray);
-    }
-
-    public void InitializeAgentBodyStrokesBuffer() {
-        agentBodyStrokesCBuffer = new ComputeBuffer(simManager._NumAgents, sizeof(float) * 10 + sizeof(int) * 2);
-        AgentBodyStrokeData[] agentBodyStrokesArray = new AgentBodyStrokeData[agentBodyStrokesCBuffer.count];
-        for (int i = 0; i < agentBodyStrokesArray.Length; i++) {
-            AgentBodyStrokeData bodyStroke = new AgentBodyStrokeData();
-            bodyStroke.parentIndex = i;
-            bodyStroke.localPos = Vector2.zero;
-            bodyStroke.localDir = new Vector2(0f, 1f); // start up? shouldn't matter
-            bodyStroke.localScale = simManager.agentGenomePoolArray[i].bodyGenome.size;
-            bodyStroke.hue = simManager.agentGenomePoolArray[i].bodyGenome.huePrimary;
-            bodyStroke.strength = 1f;
-            bodyStroke.brushType = simManager.agentGenomePoolArray[i].bodyGenome.bodyStrokeBrushType; // ** Revisit
-        }        
-        agentBodyStrokesCBuffer.SetData(agentBodyStrokesArray);
-    }
     public void UpdateAgentBodyStrokesBuffer(int agentIndex) {
         // Doing it this way to avoid resetting ALL agents whenever ONE is respawned!
-        ComputeBuffer singleAgentBodyStrokeCBuffer = new ComputeBuffer(1, sizeof(float) * 10 + sizeof(int) * 2);
+        ComputeBuffer singleAgentBodyStrokeCBuffer = new ComputeBuffer(1, sizeof(float) * 7 + sizeof(int) * 3);
         AgentBodyStrokeData[] singleBodyStrokeArray = new AgentBodyStrokeData[1];
         
         singleBodyStrokeArray[0] = new AgentBodyStrokeData();
         singleBodyStrokeArray[0].parentIndex = agentIndex; // link to Agent
         singleBodyStrokeArray[0].localPos = Vector2.zero;
         singleBodyStrokeArray[0].localDir = new Vector2(0f, 1f); // start up? shouldn't matter
-        singleBodyStrokeArray[0].localScale = simManager.agentGenomePoolArray[agentIndex].bodyGenome.size;
-        singleBodyStrokeArray[0].hue = simManager.agentGenomePoolArray[agentIndex].bodyGenome.huePrimary;
+        singleBodyStrokeArray[0].localScale = Vector2.one; // simManager.agentGenomePoolArray[agentIndex].bodyGenome.sizeAndAspectRatio;
         singleBodyStrokeArray[0].strength = 1f;
-        singleBodyStrokeArray[0].brushType = simManager.agentGenomePoolArray[agentIndex].bodyGenome.bodyStrokeBrushType;
+        singleBodyStrokeArray[0].brushTypeX = simManager.agentGenomePoolArray[agentIndex].bodyGenome.bodyStrokeBrushTypeX;
+        singleBodyStrokeArray[0].brushTypeY = simManager.agentGenomePoolArray[agentIndex].bodyGenome.bodyStrokeBrushTypeY;
         
         singleAgentBodyStrokeCBuffer.SetData(singleBodyStrokeArray);
 
@@ -760,26 +694,45 @@ public class TheRenderKing : MonoBehaviour {
         computeShaderBrushStrokes.Dispatch(kernelCSUpdateBodyStrokeDataAgentIndex, 1, 1, 1);
         
         singleAgentBodyStrokeCBuffer.Release();        
-    }
+    }    
+    public void UpdateAgentEyeStrokesBuffer(int agentIndex) {
+        // Doing it this way to avoid resetting ALL agents whenever ONE is respawned!
+        ComputeBuffer singleAgentEyeStrokeCBuffer = new ComputeBuffer(2, sizeof(float) * 13 + sizeof(int) * 2);
+        AgentEyeStrokeData[] singleAgentEyeStrokeArray = new AgentEyeStrokeData[singleAgentEyeStrokeCBuffer.count];        
+        
+        AgentEyeStrokeData dataLeftEye = new AgentEyeStrokeData();
+        dataLeftEye.parentIndex = agentIndex;
+        dataLeftEye.localPos = simManager.agentGenomePoolArray[agentIndex].bodyGenome.eyeGenome.localPos;
+        dataLeftEye.localPos.x *= -1f; // LEFT SIDE!
+        dataLeftEye.localDir = new Vector2(0f, 1f);
+        dataLeftEye.localScale = simManager.agentGenomePoolArray[agentIndex].bodyGenome.eyeGenome.localScale;
+        dataLeftEye.irisHue = simManager.agentGenomePoolArray[agentIndex].bodyGenome.eyeGenome.irisHue;
+        dataLeftEye.pupilHue = simManager.agentGenomePoolArray[agentIndex].bodyGenome.eyeGenome.pupilHue;
+        dataLeftEye.strength = 1f;
+        dataLeftEye.brushType = simManager.agentGenomePoolArray[agentIndex].bodyGenome.eyeGenome.eyeBrushType;
 
-    public void InitializeAgentSmearStrokesBuffer() {
-        for (int i = 0; i < curveStrokeDataArray.Length; i++) {
-            curveStrokeDataArray[i] = new CurveStrokeData();
-            curveStrokeDataArray[i].parentIndex = i; // link to Agent
-            curveStrokeDataArray[i].hue = simManager.agentGenomePoolArray[i].bodyGenome.huePrimary;
-
-            curveStrokeDataArray[i].restLength = simManager.agentGenomePoolArray[i].bodyGenome.size.y * 0.25f;
-
-            curveStrokeDataArray[i].p0 = new Vector2(0f, 0f);
-            curveStrokeDataArray[i].p1 = curveStrokeDataArray[i].p0 - new Vector2(0f, curveStrokeDataArray[i].restLength);
-            curveStrokeDataArray[i].p2 = curveStrokeDataArray[i].p0 - new Vector2(0f, curveStrokeDataArray[i].restLength * 2f);
-            curveStrokeDataArray[i].p3 = curveStrokeDataArray[i].p0 - new Vector2(0f, curveStrokeDataArray[i].restLength * 3f);
-            curveStrokeDataArray[i].width = simManager.agentGenomePoolArray[i].bodyGenome.size.x;
+        AgentEyeStrokeData dataRightEye = new AgentEyeStrokeData();
+        dataRightEye.parentIndex = agentIndex;
+        dataRightEye.localPos = simManager.agentGenomePoolArray[agentIndex].bodyGenome.eyeGenome.localPos;
+        dataRightEye.localDir = new Vector2(0f, 1f);
+        dataRightEye.localScale = simManager.agentGenomePoolArray[agentIndex].bodyGenome.eyeGenome.localScale;
+        dataRightEye.irisHue = simManager.agentGenomePoolArray[agentIndex].bodyGenome.eyeGenome.irisHue;
+        dataRightEye.pupilHue = simManager.agentGenomePoolArray[agentIndex].bodyGenome.eyeGenome.pupilHue;
+        dataRightEye.strength = 1f;
+        dataRightEye.brushType = simManager.agentGenomePoolArray[agentIndex].bodyGenome.eyeGenome.eyeBrushType;
             
-            curveStrokeDataArray[i].strength = 1f;
-            curveStrokeDataArray[i].brushType = 0;
-        }        
-        agentSmearStrokesCBuffer.SetData(curveStrokeDataArray);
+        singleAgentEyeStrokeArray[0] = dataLeftEye;
+        singleAgentEyeStrokeArray[1] = dataRightEye;
+        
+        singleAgentEyeStrokeCBuffer.SetData(singleAgentEyeStrokeArray);
+
+        int kernelCSUpdateEyeStrokeDataAgentIndex = computeShaderBrushStrokes.FindKernel("CSUpdateEyeStrokeDataAgentIndex");        
+        computeShaderBrushStrokes.SetBuffer(kernelCSUpdateEyeStrokeDataAgentIndex, "agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
+        computeShaderBrushStrokes.SetBuffer(kernelCSUpdateEyeStrokeDataAgentIndex, "agentEyeStrokesReadCBuffer", singleAgentEyeStrokeCBuffer);
+        computeShaderBrushStrokes.SetBuffer(kernelCSUpdateEyeStrokeDataAgentIndex, "agentEyeStrokesWriteCBuffer", agentEyeStrokesCBuffer);
+        computeShaderBrushStrokes.Dispatch(kernelCSUpdateEyeStrokeDataAgentIndex, 1, 1, 1);
+        
+        singleAgentEyeStrokeCBuffer.Release();     
     }
     public void UpdateAgentSmearStrokesBuffer(int agentIndex) {
         // Doing it this way to avoid resetting ALL agents whenever ONE is respawned!
@@ -791,13 +744,13 @@ public class TheRenderKing : MonoBehaviour {
         singleCurveStrokeArray[0].parentIndex = agentIndex; // link to Agent
         singleCurveStrokeArray[0].hue = simManager.agentGenomePoolArray[agentIndex].bodyGenome.huePrimary;
 
-        singleCurveStrokeArray[0].restLength = simManager.agentGenomePoolArray[agentIndex].bodyGenome.size.y * 0.25f;
+        singleCurveStrokeArray[0].restLength = simManager.agentsArray[agentIndex].fullSize.y * 0.25f;  // simManager.agentGenomePoolArray[agentIndex].bodyGenome.sizeAndAspectRatio.y * 0.25f;
 
         singleCurveStrokeArray[0].p0 = new Vector2(simManager.agentsArray[agentIndex]._PrevPos.x, simManager.agentsArray[agentIndex]._PrevPos.y);
         singleCurveStrokeArray[0].p1 = singleCurveStrokeArray[0].p0 - new Vector2(0f, singleCurveStrokeArray[0].restLength);
         singleCurveStrokeArray[0].p2 = singleCurveStrokeArray[0].p0 - new Vector2(0f, singleCurveStrokeArray[0].restLength * 2f);
         singleCurveStrokeArray[0].p3 = singleCurveStrokeArray[0].p0 - new Vector2(0f, singleCurveStrokeArray[0].restLength * 3f);
-        singleCurveStrokeArray[0].width = simManager.agentGenomePoolArray[agentIndex].bodyGenome.size.x;
+        singleCurveStrokeArray[0].width = simManager.agentsArray[agentIndex].fullSize.x; //simManager.agentGenomePoolArray[agentIndex].bodyGenome.sizeAndAspectRatio.x;
         
         singleCurveStrokeArray[0].strength = 1f;
         singleCurveStrokeArray[0].brushType = 0;
@@ -816,7 +769,6 @@ public class TheRenderKing : MonoBehaviour {
 
         //Debug.Log("Update curve Strokes! [" + singleCurveStrokeArray[0].p0.ToString() + ", " + singleCurveStrokeArray[0].p1.ToString() + ", " + singleCurveStrokeArray[0].p2.ToString() + ", " + singleCurveStrokeArray[0].p3.ToString() + "]");
     }
-
     public void UpdateDynamicFoodBuffers(int foodIndex) {
 
         ComputeBuffer singleStemCBuffer = new ComputeBuffer(1, sizeof(float) * 7 + sizeof(int) * 1);
@@ -894,7 +846,102 @@ public class TheRenderKing : MonoBehaviour {
 
 
     }
-  
+
+    private void SimAgentSmearStrokes() {
+        int kernelCSSinglePassCurveBrushData = computeShaderBrushStrokes.FindKernel("CSSinglePassCurveBrushData");
+        
+        computeShaderBrushStrokes.SetBuffer(kernelCSSinglePassCurveBrushData, "agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
+        computeShaderBrushStrokes.SetBuffer(kernelCSSinglePassCurveBrushData, "agentCurveStrokesWriteCBuffer", agentSmearStrokesCBuffer);
+        computeShaderBrushStrokes.Dispatch(kernelCSSinglePassCurveBrushData, agentSmearStrokesCBuffer.count, 1, 1);        
+    }    
+    public void SimFloatyBits() {
+        int kernelSimFloatyBits = fluidManager.computeShaderFluidSim.FindKernel("SimFloatyBits");
+
+        fluidManager.computeShaderFluidSim.SetFloat("_TextureResolution", (float)fluidManager.resolution);
+        fluidManager.computeShaderFluidSim.SetFloat("_DeltaTime", fluidManager.deltaTime);
+        fluidManager.computeShaderFluidSim.SetFloat("_InvGridScale", fluidManager.invGridScale);
+        fluidManager.computeShaderFluidSim.SetBuffer(kernelSimFloatyBits, "FloatyBitsCBuffer", floatyBitsCBuffer);
+        fluidManager.computeShaderFluidSim.SetTexture(kernelSimFloatyBits, "VelocityRead", fluidManager._VelocityA);        
+        fluidManager.computeShaderFluidSim.Dispatch(kernelSimFloatyBits, floatyBitsCBuffer.count / 1024, 1, 1);
+    }
+    private void SimRipples() {
+        int kernelSimRipples = fluidManager.computeShaderFluidSim.FindKernel("SimRipples");
+        
+        fluidManager.computeShaderFluidSim.SetFloat("_TextureResolution", (float)fluidManager.resolution);
+        fluidManager.computeShaderFluidSim.SetFloat("_DeltaTime", fluidManager.deltaTime);
+        fluidManager.computeShaderFluidSim.SetFloat("_InvGridScale", fluidManager.invGridScale);
+
+        fluidManager.computeShaderFluidSim.SetBuffer(kernelSimRipples, "AgentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
+        fluidManager.computeShaderFluidSim.SetBuffer(kernelSimRipples, "RipplesCBuffer", ripplesCBuffer);
+        fluidManager.computeShaderFluidSim.SetTexture(kernelSimRipples, "VelocityRead", fluidManager._VelocityA);
+        fluidManager.computeShaderFluidSim.Dispatch(kernelSimRipples, ripplesCBuffer.count / 8, 1, 1);
+    }
+    private void SimFruit() {
+        int kernelCSSimulateFruit = computeShaderBrushStrokes.FindKernel("CSSimulateFruit");
+        
+        computeShaderBrushStrokes.SetTexture(kernelCSSimulateFruit, "velocityRead", fluidManager._VelocityA);
+        computeShaderBrushStrokes.SetBuffer(kernelCSSimulateFruit, "foodSimDataCBuffer", simManager.simStateData.foodSimDataCBuffer);
+        computeShaderBrushStrokes.SetBuffer(kernelCSSimulateFruit, "foodFruitDataWriteCBuffer", simManager.simStateData.foodFruitDataCBuffer);
+        computeShaderBrushStrokes.Dispatch(kernelCSSimulateFruit, simManager.simStateData.foodFruitDataCBuffer.count / 64, 1, 1);        
+    }
+
+    public void Tick() {  // should be called from SimManager at proper time!
+
+        // Read current stateData and update all Buffers, send data to GPU
+        // Execute computeShaders to update any dynamic particles that are purely cosmetic
+
+        SimAgentSmearStrokes(); // start with this one?
+        SimFloatyBits();
+        SimRipples();
+        SimFruit();
+    }
+
+    public void RenderSimulationCameras() { // **** revisit
+        debugRT = fluidManager._SourceColorRT;
+
+        // SOLID OBJECTS OBSTACLES:::
+        PopulateObstaclesBuffer();  // update data for obstacles before rendering
+
+        cmdBufferFluidObstacles.Clear(); // needed since camera clear flag is set to none
+        cmdBufferFluidObstacles.SetRenderTarget(fluidManager._ObstaclesRT);
+        cmdBufferFluidObstacles.ClearRenderTarget(true, true, Color.black, 1.0f);  // clear -- needed???
+        cmdBufferFluidObstacles.SetViewProjectionMatrices(fluidObstaclesRenderCamera.worldToCameraMatrix, fluidObstaclesRenderCamera.projectionMatrix);
+
+        // Draw Solid Land boundaries:
+        cmdBufferFluidObstacles.DrawMesh(terrainMesh, Matrix4x4.identity, terrainObstaclesHeightMaskMat); // Masks out areas above the fluid "Sea Level"
+        // Draw dynamic Obstacles:
+        basicStrokeDisplayMat.SetPass(0);
+        basicStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer); // *** Needed? or just set it once in beginning....
+        basicStrokeDisplayMat.SetBuffer("basicStrokesCBuffer", obstacleStrokesCBuffer);
+        cmdBufferFluidObstacles.DrawProcedural(Matrix4x4.identity, basicStrokeDisplayMat, 0, MeshTopology.Triangles, 6, obstacleStrokesCBuffer.count);
+                
+        Graphics.ExecuteCommandBuffer(cmdBufferFluidObstacles);
+        // Still not sure if this will work correctly... ****
+        fluidObstaclesRenderCamera.Render(); // is this even needed? all drawcalls taken care of within commandBuffer?
+
+
+        // COLOR INJECTION:::
+        PopulateColorInjectionBuffer(); // update data for colorInjection objects before rendering
+
+        cmdBufferFluidColor.Clear(); // needed since camera clear flag is set to none
+        cmdBufferFluidColor.SetRenderTarget(fluidManager._SourceColorRT);
+        cmdBufferFluidColor.ClearRenderTarget(true, true, Color.black, 1.0f);  // clear -- needed???
+        cmdBufferFluidColor.SetViewProjectionMatrices(fluidColorRenderCamera.worldToCameraMatrix, fluidColorRenderCamera.projectionMatrix);
+        //cmdBufferFluidColor.Blit(fluidManager.initialDensityTex, fluidManager._SourceColorRT);
+        cmdBufferFluidColor.DrawMesh(fluidRenderMesh, Matrix4x4.identity, fluidBackgroundColorMat); // Masks out areas above the fluid "Sea Level"
+
+        basicStrokeDisplayMat.SetPass(0);
+        basicStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        basicStrokeDisplayMat.SetBuffer("basicStrokesCBuffer", colorInjectionStrokesCBuffer);
+        cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, basicStrokeDisplayMat, 0, MeshTopology.Triangles, 6, colorInjectionStrokesCBuffer.count);
+        // Render Agent/Food/Pred colors here!!!
+        // just use their display renders?
+
+        Graphics.ExecuteCommandBuffer(cmdBufferFluidColor);
+
+        fluidColorRenderCamera.Render();
+        // Update this ^^ to use Graphics.ExecuteCommandBuffer()  ****
+    }
     private void Render() {
         //Debug.Log("TestRenderCommandBuffer()");
 
@@ -987,15 +1034,19 @@ public class TheRenderKing : MonoBehaviour {
         agentBodyDisplayMat.SetBuffer("bodyStrokesCBuffer", agentBodyStrokesCBuffer);
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, agentBodyDisplayMat, 0, MeshTopology.Triangles, 6, agentBodyStrokesCBuffer.count);
         // AGENT EYES:
-        pointStrokeDisplayMat.SetPass(0);
-        pointStrokeDisplayMat.SetBuffer("agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
-        pointStrokeDisplayMat.SetBuffer("pointStrokesCBuffer", agentEyesPointStrokesCBuffer);
-        pointStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, pointStrokeDisplayMat, 0, MeshTopology.Triangles, 6, agentEyesPointStrokesCBuffer.count);
+        agentEyesDisplayMat.SetPass(0);
+        agentEyesDisplayMat.SetBuffer("agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
+        agentEyesDisplayMat.SetBuffer("agentEyesStrokesCBuffer", agentEyeStrokesCBuffer);
+        agentEyesDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, agentEyesDisplayMat, 0, MeshTopology.Triangles, 6, agentEyeStrokesCBuffer.count);
 
-        foodProceduralDisplayMat.SetPass(0);
-        foodProceduralDisplayMat.SetBuffer("foodSimDataCBuffer", simManager.simStateData.foodSimDataCBuffer);
-        foodProceduralDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        //AgentEyeStrokeData[] agentEyesDataArray = new AgentEyeStrokeData[agentEyeStrokesCBuffer.count];
+        //agentEyeStrokesCBuffer.GetData(agentEyesDataArray);
+        //Debug.Log(" " + agentEyesDataArray[10].parentIndex.ToString() + ", pos: " + agentEyesDataArray[0].localPos.ToString());
+
+        //foodProceduralDisplayMat.SetPass(0);
+        //foodProceduralDisplayMat.SetBuffer("foodSimDataCBuffer", simManager.simStateData.foodSimDataCBuffer);
+        //foodProceduralDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         //cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, foodProceduralDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.foodSimDataCBuffer.count);
         //Graphics.DrawProcedural(MeshTopology.Triangles, 6, simManager.simStateData.foodSimDataCBuffer.count);
                 
@@ -1012,37 +1063,6 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, predatorProceduralDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.predatorSimDataCBuffer.count);
         */
         //Graphics.DrawProcedural(MeshTopology.Triangles, 6, simManager.simStateData.predatorSimDataCBuffer.count);
-    }
-
-    public void SimFloatyBits() {
-        int kernelSimFloatyBits = fluidManager.computeShaderFluidSim.FindKernel("SimFloatyBits");
-
-        fluidManager.computeShaderFluidSim.SetFloat("_TextureResolution", (float)fluidManager.resolution);
-        fluidManager.computeShaderFluidSim.SetFloat("_DeltaTime", fluidManager.deltaTime);
-        fluidManager.computeShaderFluidSim.SetFloat("_InvGridScale", fluidManager.invGridScale);
-        fluidManager.computeShaderFluidSim.SetBuffer(kernelSimFloatyBits, "FloatyBitsCBuffer", floatyBitsCBuffer);
-        fluidManager.computeShaderFluidSim.SetTexture(kernelSimFloatyBits, "VelocityRead", fluidManager._VelocityA);        
-        fluidManager.computeShaderFluidSim.Dispatch(kernelSimFloatyBits, floatyBitsCBuffer.count / 1024, 1, 1);
-    }
-    private void SimRipples() {
-        int kernelSimRipples = fluidManager.computeShaderFluidSim.FindKernel("SimRipples");
-        
-        fluidManager.computeShaderFluidSim.SetFloat("_TextureResolution", (float)fluidManager.resolution);
-        fluidManager.computeShaderFluidSim.SetFloat("_DeltaTime", fluidManager.deltaTime);
-        fluidManager.computeShaderFluidSim.SetFloat("_InvGridScale", fluidManager.invGridScale);
-
-        fluidManager.computeShaderFluidSim.SetBuffer(kernelSimRipples, "AgentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
-        fluidManager.computeShaderFluidSim.SetBuffer(kernelSimRipples, "RipplesCBuffer", ripplesCBuffer);
-        fluidManager.computeShaderFluidSim.SetTexture(kernelSimRipples, "VelocityRead", fluidManager._VelocityA);
-        fluidManager.computeShaderFluidSim.Dispatch(kernelSimRipples, ripplesCBuffer.count / 8, 1, 1);
-    }
-    private void SimFruit() {
-        int kernelCSSimulateFruit = computeShaderBrushStrokes.FindKernel("CSSimulateFruit");
-        
-        computeShaderBrushStrokes.SetTexture(kernelCSSimulateFruit, "velocityRead", fluidManager._VelocityA);
-        computeShaderBrushStrokes.SetBuffer(kernelCSSimulateFruit, "foodSimDataCBuffer", simManager.simStateData.foodSimDataCBuffer);
-        computeShaderBrushStrokes.SetBuffer(kernelCSSimulateFruit, "foodFruitDataWriteCBuffer", simManager.simStateData.foodFruitDataCBuffer);
-        computeShaderBrushStrokes.Dispatch(kernelCSSimulateFruit, simManager.simStateData.foodFruitDataCBuffer.count / 64, 1, 1);        
     }
 
     private void OnWillRenderObject() {  // requires MeshRenderer Component to be called
@@ -1106,8 +1126,57 @@ public class TheRenderKing : MonoBehaviour {
             Graphics.DrawProcedural(MeshTopology.Triangles, 6, predatorSimDataCBuffer.count);
         }  */
     }
+    private void OnDisable() {
+        if(mainRenderCam != null) {
+            mainRenderCam.RemoveAllCommandBuffers();
+        }
+        if(fluidColorRenderCamera != null) {
+            fluidColorRenderCamera.RemoveAllCommandBuffers();
+        }
+        if(fluidObstaclesRenderCamera != null) {
+            fluidObstaclesRenderCamera.RemoveAllCommandBuffers();
+        }
+        
+        if (agentBodyStrokesCBuffer != null) {
+            agentBodyStrokesCBuffer.Release();
+        }
+        if (quadVerticesCBuffer != null) {
+            quadVerticesCBuffer.Release();
+        }
+        if (agentSmearStrokesCBuffer != null) {
+            agentSmearStrokesCBuffer.Release();
+        }
+        if (curveRibbonVerticesCBuffer != null) {
+            curveRibbonVerticesCBuffer.Release();
+        }
+        if (agentTrailStrokes0CBuffer != null) {
+            agentTrailStrokes0CBuffer.Release();
+        }
+        if (agentTrailStrokes1CBuffer != null) {
+            agentTrailStrokes1CBuffer.Release();
+        }
+        if (frameBufferStrokesCBuffer != null) {
+            frameBufferStrokesCBuffer.Release();
+        }
+        if (obstacleStrokesCBuffer != null) {
+            obstacleStrokesCBuffer.Release();
+        } 
+        if (colorInjectionStrokesCBuffer != null) {
+            colorInjectionStrokesCBuffer.Release();
+        }
+        if (floatyBitsCBuffer != null) {
+            floatyBitsCBuffer.Release();
+        } 
+        if (ripplesCBuffer != null) {
+            ripplesCBuffer.Release();
+        }
+        if (agentEyeStrokesCBuffer != null) {
+            agentEyeStrokesCBuffer.Release();
+        }
+        
+    }
 
-    public PointStrokeData GeneratePointStrokeData(int index, Vector2 size, Vector2 pos, Vector2 dir, Vector3 hue, float str, int brushType) {
+    /*public PointStrokeData GeneratePointStrokeData(int index, Vector2 size, Vector2 pos, Vector2 dir, Vector3 hue, float str, int brushType) {
         PointStrokeData pointStroke = new PointStrokeData();
         pointStroke.parentIndex = index;
         pointStroke.localScale = size;
@@ -1118,8 +1187,7 @@ public class TheRenderKing : MonoBehaviour {
         pointStroke.brushType = brushType;
 
         return pointStroke;
-    }
-
+    }*/
     /*private void IterateTrailStrokesData() {
     // Set position of trail Roots:
     int kernelCSPinRootTrailStrokesData = computeShaderBrushStrokes.FindKernel("CSPinRootTrailStrokesData");        
@@ -1145,8 +1213,7 @@ public class TheRenderKing : MonoBehaviour {
         computeShaderBrushStrokes.SetTexture(kernelCSIterateTrailStrokesData, "velocityRead", velocityTex);
         computeShaderBrushStrokes.Dispatch(kernelCSIterateTrailStrokesData, agentTrailStrokes0CBuffer.count, 1, 1);
     }
-    }*/    
-    
+    }*/
     /*public void InitializeAllAgentCurveData() {
         ComputeBuffer agentInitializeCBuffer = new ComputeBuffer(agentSimDataArray.Length, sizeof(int));
         int[] agentsToInitArray = new int[agentInitializeCBuffer.count];
@@ -1192,8 +1259,6 @@ public class TheRenderKing : MonoBehaviour {
         computeShaderBrushStrokes.SetBuffer(kernelCSIterateCurveBrushData, "agentCurveStrokesWriteCBuffer", agentCurveStrokes0CBuffer);
         computeShaderBrushStrokes.Dispatch(kernelCSIterateCurveBrushData, agentCurveStrokes0CBuffer.count, 1, 1);
     }*/
-    
-
     /*
 
     private void SimTrailDots() {
@@ -1209,59 +1274,6 @@ public class TheRenderKing : MonoBehaviour {
         computeShaderFluidSim.Dispatch(kernelSimTrailDots, trailDotsCBuffer.count / 8, 1, 1);
     }
     */
-
-    private void OnDisable() {
-        if(mainRenderCam != null) {
-            mainRenderCam.RemoveAllCommandBuffers();
-        }
-        if(fluidColorRenderCamera != null) {
-            fluidColorRenderCamera.RemoveAllCommandBuffers();
-        }
-        if(fluidObstaclesRenderCamera != null) {
-            fluidObstaclesRenderCamera.RemoveAllCommandBuffers();
-        }
-        
-        if (agentBodyStrokesCBuffer != null) {
-            agentBodyStrokesCBuffer.Release();
-        }
-        if (quadVerticesCBuffer != null) {
-            quadVerticesCBuffer.Release();
-        }
-        if (agentSmearStrokesCBuffer != null) {
-            agentSmearStrokesCBuffer.Release();
-        }
-        if (curveRibbonVerticesCBuffer != null) {
-            curveRibbonVerticesCBuffer.Release();
-        }
-        if (agentTrailStrokes0CBuffer != null) {
-            agentTrailStrokes0CBuffer.Release();
-        }
-        if (agentTrailStrokes1CBuffer != null) {
-            agentTrailStrokes1CBuffer.Release();
-        }
-        if (frameBufferStrokesCBuffer != null) {
-            frameBufferStrokesCBuffer.Release();
-        }
-        if (obstacleStrokesCBuffer != null) {
-            obstacleStrokesCBuffer.Release();
-        } 
-        if (colorInjectionStrokesCBuffer != null) {
-            colorInjectionStrokesCBuffer.Release();
-        }
-        if (floatyBitsCBuffer != null) {
-            floatyBitsCBuffer.Release();
-        } 
-        if (ripplesCBuffer != null) {
-            ripplesCBuffer.Release();
-        }
-        if (agentEyesPointStrokesCBuffer != null) {
-            agentEyesPointStrokesCBuffer.Release();
-        }
-        
-    }
-
-
-
     /*public void SetSimDataArrays() {
 
         for (int i = 0; i < agentSimDataArray.Length - 1; i++) {
