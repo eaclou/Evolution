@@ -55,10 +55,12 @@ public class Agent : MonoBehaviour {
 
     //public int sourceGenomeIndex;
     
-    private float speed = 100f;
+    private float speed = 120f;
     public bool humanControlled = false;
     public float humanControlLerp = 0f;
     public bool isNull = false;
+
+    public bool wasImpaled = false;
         
     public Texture2D texture;
 
@@ -286,7 +288,7 @@ public class Agent : MonoBehaviour {
 
                     curLifeStage = Agent.AgentLifeStage.Decaying;
                     lifeStageTransitionTimeStepCounter = 0;
-                    
+                    wasImpaled = true;
                     //agent.isNull = true; // OLD
                     //Debug.Log("Agent DEAD!");
                 }
@@ -356,9 +358,12 @@ public class Agent : MonoBehaviour {
         
         Vector3 curPos = transform.localPosition;        
         prevPos = curPos;
+
+        //transform.localScale = new Vector3(fullSize.x, fullSize.y, 1f);
+        transform.localRotation = Quaternion.FromToRotation(new Vector3(1f, 0f, 0f), new Vector3(facingDirection.x, facingDirection.y, 0f));
     }
 
-    private void TickEgg() {
+    private void TickEgg() {        
         lifeStageTransitionTimeStepCounter++;
     }
     private void TickMature() {
@@ -446,6 +451,7 @@ public class Agent : MonoBehaviour {
         curLifeStage = AgentLifeStage.Egg;
         this.fullSize = new Vector2(genome.bodyGenome.sizeAndAspectRatio.x * genome.bodyGenome.sizeAndAspectRatio.y, genome.bodyGenome.sizeAndAspectRatio.x * (1.0f / genome.bodyGenome.sizeAndAspectRatio.y));
         isNull = false;
+        wasImpaled = false;
         lifeStageTransitionTimeStepCounter = 0;
         ageCounterMature = 0;
         this.transform.localPosition = startPos.startPosition;

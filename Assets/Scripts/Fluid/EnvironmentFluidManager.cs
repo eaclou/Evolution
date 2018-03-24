@@ -14,7 +14,8 @@ public class EnvironmentFluidManager : MonoBehaviour {
     
     public float viscosity = 1f;
     public float damping = 0.01f;
-    public float colorRefreshGlobalMultiplier = 0.01f;
+    public float colorRefreshBackgroundMultiplier = 0.01f;
+    public float colorRefreshDynamicMultiplier = 0.01f;
 
     private RenderTexture velocityA;
     public RenderTexture _VelocityA
@@ -93,6 +94,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
     }
 
     private Material displayMat; // shader for display Mesh
+    public Material debugMat;
 
     //public bool tick = false;
     
@@ -140,6 +142,8 @@ public class EnvironmentFluidManager : MonoBehaviour {
         forcePointsCBuffer = new ComputeBuffer(numForcePoints, sizeof(float) * 5);
         forcePointsArray = new ForcePoint[numForcePoints];        
         CreateForcePoints();
+
+        debugMat.SetTexture("_MainTex", sourceColorRT);
     }    
     public void Tick() {
         //Debug.Log("Tick!");
@@ -148,7 +152,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
         computeShaderFluidSim.SetFloat("_Viscosity", viscosity);
         computeShaderFluidSim.SetFloat("_Damping", damping);
         //computeShaderFluidSim.SetFloat("_ForceSize", invBrushSize);
-        computeShaderFluidSim.SetFloat("_ColorRefreshAmount", colorRefreshGlobalMultiplier);
+        computeShaderFluidSim.SetFloat("_ColorRefreshAmount", colorRefreshBackgroundMultiplier);
 
         // Lerp towards sourceTexture color:
         RefreshColor();
@@ -200,7 +204,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
         for(int i = 0; i < numForcePoints; i++) {
             ForcePoint agentPoint = new ForcePoint();
             
-            float forceStrength = 0.075f;
+            float forceStrength = 0.08f * 0.1f;
             agentPoint.posX = UnityEngine.Random.Range(0f, 1f);
             agentPoint.posY = UnityEngine.Random.Range(0f, 1f);
             agentPoint.velX = UnityEngine.Random.Range(-1f, 1f) * forceStrength;
@@ -288,7 +292,12 @@ public class EnvironmentFluidManager : MonoBehaviour {
         computeShaderFluidSim.SetFloat("_TextureResolution", (float)resolution);
         computeShaderFluidSim.SetFloat("_DeltaTime", deltaTime);
         computeShaderFluidSim.SetFloat("_InvGridScale", invGridScale);
-        computeShaderFluidSim.SetTexture(kernelRefreshColor, "SourceColorTex", sourceColorRT);
+
+        computeShaderFluidSim.SetFloat("_ColorRefreshDynamicMultiplier", colorRefreshDynamicMultiplier);
+        computeShaderFluidSim.SetFloat("_ColorRefreshAmount", colorRefreshBackgroundMultiplier);
+        // break this out into Background texture and Dynamic Render pass (agents/food/preds/FX only) ??? ******
+        computeShaderFluidSim.SetTexture(kernelRefreshColor, "fluidBackgroundColorTex", initialDensityTex);
+        computeShaderFluidSim.SetTexture(kernelRefreshColor, "colorInjectionRenderTex", sourceColorRT);
         computeShaderFluidSim.SetTexture(kernelRefreshColor, "DensityRead", densityB);
         computeShaderFluidSim.SetTexture(kernelRefreshColor, "DensityWrite", densityA);
         computeShaderFluidSim.Dispatch(kernelRefreshColor, resolution / 16, resolution / 16, 1);

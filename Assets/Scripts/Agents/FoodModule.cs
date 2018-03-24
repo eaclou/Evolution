@@ -353,11 +353,19 @@ public class FoodModule : MonoBehaviour {
     }
     
     private void ComputeCollisionDamage(Collider2D coll) {
-        isBeingDamaged = 1.0f;
+        
         //healthStructural -= 0.002f;
         Agent collidingAgent = coll.gameObject.GetComponentInParent<Agent>();
         //collidingAgent.GetComponent<Rigidbody2D>().drag = 100f;
-        collidingAgent.isInsideFood = true;
+        Vector2 agentHeading = collidingAgent.facingDirection;
+        Vector2 agentToFoodDir = new Vector2(transform.position.x - collidingAgent.transform.position.x, transform.position.y - collidingAgent.transform.position.y).normalized;
+
+        float dotProd = Vector2.Dot(agentHeading, agentToFoodDir);
+
+        if(dotProd > 0f) {
+            isBeingDamaged = 1.0f;
+            collidingAgent.isInsideFood = true;
+        }        
     }
 
     private void OnCollisionEnter2D(Collision2D coll) {

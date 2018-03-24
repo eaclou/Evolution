@@ -9,6 +9,7 @@
 #pragma kernel SubtractGradient
 #pragma kernel GetVelAtCoords
 #pragma kernel GetObjectVelocities
+#pragma kernel SimPlayerGlowyBits
 #pragma kernel SimFloatyBits
 #pragma kernel SimRipples
 #pragma kernel SimTrailDots
@@ -28,6 +29,18 @@ struct TrailDotData {
 	float initAlpha;
 };
 
+struct PlayerGlowyBitData {
+	float2 coords;
+	float2 vel;
+	float age;
+};
+
+struct FloatyBitData {
+	float2 coords;
+	float2 vel;
+	float age;
+};
+
 struct AgentSimData {
 	float2 worldPos;
 	float2 velocity;
@@ -41,7 +54,8 @@ struct AgentSimData {
 	float foodAmount;
 };
 
-Texture2D<float4> SourceColorTex;
+Texture2D<float4> fluidBackgroundColorTex;
+Texture2D<float4> colorInjectionRenderTex;
 Texture2D<float4> InputVelocityTex;
 StructuredBuffer<ForcePoint> ForcePointsCBuffer;
 Texture2D<float4> VelocityRead;
@@ -57,7 +71,8 @@ Texture2D<float4> ObstaclesRead;
 StructuredBuffer<float4> ObjectPositionsCBuffer;
 RWStructuredBuffer<float2> VelocityValuesCBuffer;
 
-RWStructuredBuffer<float4> FloatyBitsCBuffer;
+RWStructuredBuffer<PlayerGlowyBitData> PlayerGlowyBitsCBuffer;
+RWStructuredBuffer<FloatyBitData> FloatyBitsCBuffer;
 StructuredBuffer<AgentSimData> AgentSimDataCBuffer;
 RWStructuredBuffer<TrailDotData> RipplesCBuffer;
 RWStructuredBuffer<TrailDotData> TrailDotsCBuffer;
@@ -83,6 +98,7 @@ uniform float _Viscosity;
 uniform float _Damping;
 
 uniform float _ColorRefreshAmount;
+uniform float _ColorRefreshDynamicMultiplier;
 
 uniform float _Time;
 
@@ -91,19 +107,71 @@ uniform float _SampleCoordY;
 
 uniform float _VelocitySampleRadius;
 
+uniform float4 _PlayerPos;
+
+float rand(float2 co){   // OUTPUT is in [0,1] RANGE!!!
+	return frac(sin(dot(co.xy ,float2(12.9898,78.233))) * 43758.5453);
+}
+
+[numthreads(1024,1,1)]
+void SimPlayerGlowyBits (uint3 id : SV_DispatchThreadID)
+{	
+	PlayerGlowyBitData data = PlayerGlowyBitsCBuffer[id.x];
+	float2 uv = data.coords;
+	float2 vel = VelocityRead.SampleLevel(_LinearRepeat, uv, 0).xy;
+	float speedMult = 0.033;
+
+	float maxAge = 256;
+	
+	float2 nextPos = uv + vel * speedMult;
+
+	data.vel = vel;
+	data.age = data.age + 3.0;
+	if(data.age > maxAge) {
+		// get random position near Player:
+		float2 randomOffset = float2(rand(float2(id.x, uv.x)), rand(float2(uv.y, id.x)));
+		//randomOffset = randomOffset * randomOffset * randomOffset * randomOffset;  // more concentrated at center?
+		randomOffset = (randomOffset * 2 - 1) * 0.2;
+
+		float2 spawnPos = (_PlayerPos.xy + randomOffset);
+
+		// reset ageCounter & position
+		data.coords = spawnPos;
+		data.age = 0;
+	}
+	else {
+		data.coords = nextPos;
+	}
+
+	
+	
+	PlayerGlowyBitsCBuffer[id.x] = data;
+}
+
 [numthreads(1024,1,1)]
 void SimFloatyBits (uint3 id : SV_DispatchThreadID)
 {	
-	float4 floatyBitData = FloatyBitsCBuffer[id.x];
-	float2 uv = floatyBitData.xy;
+	FloatyBitData floatyBitData = FloatyBitsCBuffer[id.x];
+	float2 uv = floatyBitData.coords;
 	float2 vel = VelocityRead.SampleLevel(_LinearRepeat, uv, 0).xy;
 	float speedMult = 0.033;
 	
 	float2 nextPos = uv + vel * speedMult;
 
-	float4 data = float4(nextPos, vel);
+	floatyBitData.vel = vel;
+
+	floatyBitData.age = floatyBitData.age + 0.01;  // 100 frame lifespan
+	if(floatyBitData.age > 1.0) {
+		
+		float2 spawnPos = float2(rand(float2(id.x, uv.x)), rand(float2(uv.y, id.x)));		
+		floatyBitData.coords = spawnPos;
+		floatyBitData.age = 0;
+	}
+	else {
+		floatyBitData.coords = nextPos;
+	}
 	
-	FloatyBitsCBuffer[id.x] = data;
+	FloatyBitsCBuffer[id.x] = floatyBitData;
 }
 
 [numthreads(8,1,1)]
@@ -241,10 +309,16 @@ void RefreshColor (uint3 id : SV_DispatchThreadID)
 	float xCoord = ((float)id.x + 0.5)  / _TextureResolution;
 	float yCoord = ((float)id.y + 0.5)  / _TextureResolution;
 	float2 uvOrigin = float2(xCoord, yCoord);
-	float4 sourceColor = SourceColorTex.SampleLevel(_LinearRepeat, uvOrigin, 0);
-	sourceColor.a = saturate(sourceColor.a);
+	
+	float4 sourceColorBackground = fluidBackgroundColorTex.SampleLevel(_LinearRepeat, uvOrigin, 0);
+	float4 sourceColorDynamic = colorInjectionRenderTex.SampleLevel(_LinearRepeat, uvOrigin, 0);
+	//sourceColor.a = saturate(sourceColor.a);
 	float4 currentColor = DensityRead[id.xy];
-	DensityWrite[id.xy] = lerp(currentColor, sourceColor, _ColorRefreshAmount);
+
+	float3 newColor = lerp(currentColor.rgb, sourceColorBackground.rgb, _ColorRefreshAmount);
+	newColor = lerp(newColor, sourceColorDynamic.rgb, _ColorRefreshDynamicMultiplier * sourceColorDynamic.a);
+	
+	DensityWrite[id.xy] = float4(newColor, 1); //lerp(currentColor, sourceColorDynamic, _ColorRefreshAmount);
 }
 
 [numthreads(16,16,1)]

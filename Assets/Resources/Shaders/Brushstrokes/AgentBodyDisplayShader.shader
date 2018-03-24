@@ -26,10 +26,7 @@
 			sampler2D _MainTex;
 			sampler2D _PatternTex;
 			sampler2D _BumpMap;
-			//float4 _MainTex_ST;
-			//float4 _Tint;
-			//float4 _Size;
-
+			
 			struct BodyStrokeData {
 				int parentIndex;  // what agent/object is this attached to?				
 				float2 localPos;
@@ -223,8 +220,8 @@
 				finalColor.a = brushColor.a * i.color.a;
 
 				finalColor.rgb = lerp(float3(0.5, 0.5, 0.5), finalColor.rgb, saturate(agentSimData.maturity * 4 - 3));
-				finalColor.rgb = lerp(float3(0.5, 0.5, 0.5), finalColor.rgb, saturate(agentSimData.foodAmount * 3.5));
-				finalColor.a = min(finalColor.a, lerp(0.33, finalColor.a, saturate(agentSimData.foodAmount * 3.5)));
+				finalColor.rgb = lerp(float3(0.5, 0.5, 0.5), finalColor.rgb, saturate(agentSimData.foodAmount * 4));
+				//finalColor.a = min(finalColor.a, lerp(0.33, finalColor.a, saturate(agentSimData.foodAmount * 3.5)));
 
 				float dotNml = dot(normalize(float3(-0.2,1,-0.75)), worldNormal);
 				finalColor.xyz += dotNml * 0.35 + 0.005;

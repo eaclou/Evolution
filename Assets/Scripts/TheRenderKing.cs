@@ -35,12 +35,15 @@ public class TheRenderKing : MonoBehaviour {
     public Material foodLeafDisplayMat;
     public Material foodFruitDisplayMat;
     public Material agentBodyDisplayMat;
+    public Material playerGlowyBitsDisplayMat;
+    public Material playerGlowMat; // soft glow to indicate it is the one player is controlling!
+    //public Material debugMat;
 
     private Mesh fluidRenderMesh;
 
     private bool isInitialized = false;
 
-    private const float velScale = 0.17f; // Conversion for rigidBody Vel --> fluid vel units ----  // approx guess for now
+    private const float velScale = 0.22f; // Conversion for rigidBody Vel --> fluid vel units ----  // approx guess for now
 
     public GameObject terrainGO;
     public Material terrainObstaclesHeightMaskMat;
@@ -78,7 +81,13 @@ public class TheRenderKing : MonoBehaviour {
     private int numFrameBufferStrokesPerDimension = 256;
     private ComputeBuffer frameBufferStrokesCBuffer;
 
-    private int numFloatyBits = 1024 * 32;
+    private BasicStrokeData[] playerGlowInitPos;
+    private ComputeBuffer playerGlowCBuffer;
+
+    private int numPlayerGlowyBits = 1024 * 16;
+    private ComputeBuffer playerGlowyBitsCBuffer;
+
+    private int numFloatyBits = 1024 * 16;
     private ComputeBuffer floatyBitsCBuffer;
         
     private int numRipplesPerAgent = 8;
@@ -93,7 +102,18 @@ public class TheRenderKing : MonoBehaviour {
     public Material debugMaterial;
     public Mesh debugMesh;
     public RenderTexture debugRT; // Used to see texture inside editor (inspector)
-        
+    
+    public struct PlayerGlowyBitData {
+		public Vector2 coords;
+		public Vector2 vel;
+		public float age;
+	}
+
+    public struct FloatyBitData {
+		public Vector2 coords;
+		public Vector2 vel;
+		public float age;
+	}
 
     public struct AgentEyeStrokeData {
         public int parentIndex;  // what agent/object is this attached to?
@@ -137,6 +157,7 @@ public class TheRenderKing : MonoBehaviour {
     }
     public struct BasicStrokeData {  // fluidSim Render -- Obstacles + ColorInjection
         public Vector2 worldPos;
+        public Vector2 localDir;
         public Vector2 scale;
         public Vector4 color;
     }
@@ -191,16 +212,18 @@ public class TheRenderKing : MonoBehaviour {
         InitializeCurveRibbonMeshBuffer(); // Set up Curve Ribbon Mesh billboard for brushStroke rendering
         InitializeFluidRenderMesh(); 
         
-        obstacleStrokesCBuffer = new ComputeBuffer(simManager._NumAgents + simManager._NumFood + simManager._NumPredators, sizeof(float) * 8);
+        obstacleStrokesCBuffer = new ComputeBuffer(simManager._NumAgents + simManager._NumFood + simManager._NumPredators, sizeof(float) * 10);
         obstacleStrokeDataArray = new BasicStrokeData[obstacleStrokesCBuffer.count];
 
-        colorInjectionStrokesCBuffer = new ComputeBuffer(simManager._NumAgents + simManager._NumFood + simManager._NumPredators, sizeof(float) * 8);
+        colorInjectionStrokesCBuffer = new ComputeBuffer(simManager._NumAgents + simManager._NumFood + simManager._NumPredators, sizeof(float) * 10);
         colorInjectionStrokeDataArray = new BasicStrokeData[colorInjectionStrokesCBuffer.count];
 
         InitializeAgentBodyStrokesBuffer();         
         InitializeAgentEyeStrokesBuffer();
         InitializeAgentSmearStrokesBuffer();
         InitializeFrameBufferStrokesBuffer();
+        InitializePlayerGlowBuffer();
+        InitializePlayerGlowyBitsBuffer();
         InitializeFloatyBitsBuffer();
         InitializeRipplesBuffer();
 
@@ -291,11 +314,50 @@ public class TheRenderKing : MonoBehaviour {
         fluidRenderMesh.uv = uvs;
         fluidRenderMesh.triangles = triangles;
     }
+
+    //playerGlowCBuffer
+    private void InitializePlayerGlowBuffer() {
+        playerGlowInitPos = new BasicStrokeData[1];
+        playerGlowCBuffer = new ComputeBuffer(1, sizeof(float) * 10);
+        Vector3 agentPos = simManager.agentsArray[0].transform.position;
+        playerGlowInitPos[0].worldPos = new Vector2(agentPos.x, agentPos.y);
+        playerGlowInitPos[0].localDir = simManager.agentsArray[0].facingDirection;
+        playerGlowInitPos[0].scale = new Vector2(simManager.agentsArray[0].transform.localScale.x, simManager.agentsArray[0].transform.localScale.y); // ** revisit this later // should leave room for velSampling around Agent
+        
+        playerGlowInitPos[0].color = new Vector4(simManager.agentGenomePoolArray[0].bodyGenome.huePrimary.x, 
+                                                 simManager.agentGenomePoolArray[0].bodyGenome.huePrimary.y,
+                                                 simManager.agentGenomePoolArray[0].bodyGenome.huePrimary.z, 1f);
+
+        playerGlowCBuffer.SetData(playerGlowInitPos);
+        //int kernelSimPlayerGlow = fluidManager.computeShaderFluidSim.FindKernel("SimPlayerGlowyBits");
+        //fluidManager.computeShaderFluidSim.SetBuffer(kernelSimPlayerGlowyBits, "PlayerGlowyBitsCBuffer", playerGlowyBitsCBuffer);
+
+    }
+    private void InitializePlayerGlowyBitsBuffer() {
+        PlayerGlowyBitData[] playerGlowyBitsInitPos = new PlayerGlowyBitData[numPlayerGlowyBits];
+        playerGlowyBitsCBuffer = new ComputeBuffer(numPlayerGlowyBits, sizeof(float) * 5);
+        for(int i = 0; i < numPlayerGlowyBits; i++) {
+            PlayerGlowyBitData data = new PlayerGlowyBitData();
+            data.coords = new Vector2(UnityEngine.Random.Range(0.2f, 0.8f), UnityEngine.Random.Range(0.2f, 0.8f)); // (UnityEngine.Random.Range(0.2f, 0.8f), UnityEngine.Random.Range(0.2f, 0.8f), 1f, 0f);
+            data.vel = new Vector2(1f, 0f);
+            data.age = (float)i / (float)numPlayerGlowyBits * 256f;
+            playerGlowyBitsInitPos[i] = data;
+        }
+        playerGlowyBitsCBuffer.SetData(playerGlowyBitsInitPos);
+        int kernelSimPlayerGlowyBits = fluidManager.computeShaderFluidSim.FindKernel("SimPlayerGlowyBits");
+        fluidManager.computeShaderFluidSim.SetBuffer(kernelSimPlayerGlowyBits, "PlayerGlowyBitsCBuffer", playerGlowyBitsCBuffer);
+
+    }
     private void InitializeFloatyBitsBuffer() {
-        Vector2[] floatyBitsInitPos = new Vector2[numFloatyBits];
-        floatyBitsCBuffer = new ComputeBuffer(numFloatyBits, sizeof(float) * 4);
+        FloatyBitData[] floatyBitsInitPos = new FloatyBitData[numFloatyBits];
+        floatyBitsCBuffer = new ComputeBuffer(numFloatyBits, sizeof(float) * 5);
         for(int i = 0; i < numFloatyBits; i++) {
-            floatyBitsInitPos[i] = new Vector4(UnityEngine.Random.Range(0.2f, 0.8f), UnityEngine.Random.Range(0.2f, 0.8f), 1f, 0f);
+            //floatyBitsInitPos[i] = new Vector4(UnityEngine.Random.Range(0.2f, 0.8f), UnityEngine.Random.Range(0.2f, 0.8f), 1f, 0f);
+            FloatyBitData data = new FloatyBitData();
+            data.coords = new Vector2(UnityEngine.Random.Range(0.2f, 0.8f), UnityEngine.Random.Range(0.2f, 0.8f)); // (UnityEngine.Random.Range(0.2f, 0.8f), UnityEngine.Random.Range(0.2f, 0.8f), 1f, 0f);
+            data.vel = new Vector2(1f, 0f);
+            data.age = (float)i / (float)numFloatyBits;
+            floatyBitsInitPos[i] = data;
         }
         floatyBitsCBuffer.SetData(floatyBitsInitPos);
         int kernelSimFloatyBits = fluidManager.computeShaderFluidSim.FindKernel("SimFloatyBits");
@@ -425,6 +487,10 @@ public class TheRenderKing : MonoBehaviour {
 
         basicStrokeDisplayMat.SetPass(0);
         basicStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+
+        playerGlowyBitsDisplayMat.SetPass(0);
+        playerGlowyBitsDisplayMat.SetBuffer("playerGlowyBitsCBuffer", playerGlowyBitsCBuffer);
+        playerGlowyBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         
         floatyBitsDisplayMat.SetPass(0);
         floatyBitsDisplayMat.SetBuffer("floatyBitsCBuffer", floatyBitsCBuffer);
@@ -585,7 +651,8 @@ public class TheRenderKing : MonoBehaviour {
         for(int i = 0; i < simManager.agentsArray.Length; i++) {
             Vector3 agentPos = simManager.agentsArray[i].transform.position;
             obstacleStrokeDataArray[baseIndex + i].worldPos = new Vector2(agentPos.x, agentPos.y);
-            obstacleStrokeDataArray[baseIndex + i].scale = simManager.agentsArray[i].fullSize * 1f; // ** revisit this later // should leave room for velSampling around Agent
+            obstacleStrokeDataArray[baseIndex + i].localDir = simManager.agentsArray[i].facingDirection;
+            obstacleStrokeDataArray[baseIndex + i].scale = new Vector2(simManager.agentsArray[i].transform.localScale.x, simManager.agentsArray[i].transform.localScale.y); // ** revisit this later // should leave room for velSampling around Agent
 
             float velX = (agentPos.x - simManager.agentsArray[i]._PrevPos.x) * velScale;
             float velY = (agentPos.y - simManager.agentsArray[i]._PrevPos.y) * velScale;
@@ -597,7 +664,8 @@ public class TheRenderKing : MonoBehaviour {
         for(int i = 0; i < simManager.foodArray.Length; i++) {
             Vector3 foodPos = simManager.foodArray[i].transform.position;
             obstacleStrokeDataArray[baseIndex + i].worldPos = new Vector2(foodPos.x, foodPos.y);
-            obstacleStrokeDataArray[baseIndex + i].scale = simManager.foodArray[i].curSize * 0.8f;
+            obstacleStrokeDataArray[baseIndex + i].localDir = simManager.foodArray[i].facingDirection;
+            obstacleStrokeDataArray[baseIndex + i].scale = simManager.foodArray[i].curSize * 0.95f;
 
             float velX = (foodPos.x - simManager.foodArray[i]._PrevPos.x) * velScale;
             float velY = (foodPos.y - simManager.foodArray[i]._PrevPos.y) * velScale;
@@ -609,7 +677,8 @@ public class TheRenderKing : MonoBehaviour {
         for(int i = 0; i < simManager.predatorArray.Length; i++) {
             Vector3 predatorPos = simManager.predatorArray[i].transform.position;
             obstacleStrokeDataArray[baseIndex + i].worldPos = new Vector2(predatorPos.x, predatorPos.y);
-            obstacleStrokeDataArray[baseIndex + i].scale = new Vector2(simManager.predatorArray[i].curScale, simManager.predatorArray[i].curScale) * 1f;
+            obstacleStrokeDataArray[baseIndex + i].localDir = new Vector2(Mathf.Cos(simManager.predatorArray[i].transform.rotation.z), Mathf.Sin(simManager.predatorArray[i].transform.rotation.z));
+            obstacleStrokeDataArray[baseIndex + i].scale = new Vector2(simManager.predatorArray[i].curScale, simManager.predatorArray[i].curScale) * 0.9f;
 
             float velX = (predatorPos.x - simManager.predatorArray[i]._PrevPos.x) * velScale;
             float velY = (predatorPos.y - simManager.predatorArray[i]._PrevPos.y) * velScale;
@@ -626,31 +695,38 @@ public class TheRenderKing : MonoBehaviour {
         for(int i = 0; i < simManager.agentsArray.Length; i++) {
             Vector3 agentPos = simManager.agentsArray[i].transform.position;
             colorInjectionStrokeDataArray[baseIndex + i].worldPos = new Vector2(agentPos.x, agentPos.y);
+            colorInjectionStrokeDataArray[baseIndex + i].localDir = simManager.agentsArray[i].facingDirection;
             colorInjectionStrokeDataArray[baseIndex + i].scale = simManager.agentsArray[i].fullSize * 1.0f;
-
-            //float velX = (agentPos.x - simManager.agentsArray[i]._PrevPos.x) * velScale;
-            //float velY = (agentPos.y - simManager.agentsArray[i]._PrevPos.y) * velScale;
-            float alpha = 0f;
+            
+            float agentAlpha = 0.024f;
             if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Mature) {
-                alpha = 10f;
+                agentAlpha = 0.2f;
             }
             if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Decaying) {
-                alpha = 40f * (1f - (float)simManager.agentsArray[i].lifeStageTransitionTimeStepCounter / (float)simManager.agentsArray[i]._DecayDurationTimeSteps);
+                agentAlpha = 1f * Mathf.Clamp01(1f - (float)simManager.agentsArray[i].lifeStageTransitionTimeStepCounter * 2f / (float)simManager.agentsArray[i]._DecayDurationTimeSteps);
             }
-            colorInjectionStrokeDataArray[baseIndex + i].color = new Vector4(simManager.agentGenomePoolArray[i].bodyGenome.huePrimary.x, simManager.agentGenomePoolArray[i].bodyGenome.huePrimary.y, simManager.agentGenomePoolArray[i].bodyGenome.huePrimary.z, alpha);
+            Color drawColor = new Color(simManager.agentGenomePoolArray[i].bodyGenome.huePrimary.x, simManager.agentGenomePoolArray[i].bodyGenome.huePrimary.y, simManager.agentGenomePoolArray[i].bodyGenome.huePrimary.z, agentAlpha);
+            if(simManager.agentsArray[i].wasImpaled) {
+                drawColor.r = 0.8f;
+                drawColor.g = 0.1f;
+                drawColor.b = 0f;
+                drawColor.a = 1f;
+                colorInjectionStrokeDataArray[baseIndex + i].scale *= 2f;
+            }
+            colorInjectionStrokeDataArray[baseIndex + i].color = drawColor;
+            
         }
         // FOOD:
         baseIndex = simManager.agentsArray.Length;
         for(int i = 0; i < simManager.foodArray.Length; i++) {
             Vector3 foodPos = simManager.foodArray[i].transform.position;
             colorInjectionStrokeDataArray[baseIndex + i].worldPos = new Vector2(foodPos.x, foodPos.y);
+            colorInjectionStrokeDataArray[baseIndex + i].localDir = simManager.foodArray[i].facingDirection;
             colorInjectionStrokeDataArray[baseIndex + i].scale = simManager.foodArray[i].curSize * 1.0f;
-
-            //float velX = (foodPos.x - simManager.foodArray[i]._PrevPos.x) * velScale;
-            //float velY = (foodPos.y - simManager.foodArray[i]._PrevPos.y) * velScale;
-            float foodAlpha = 2f;
+            
+            float foodAlpha = 0.025f;
             if(simManager.foodArray[i].isBeingEaten > 0.5) {
-                foodAlpha = 8f;
+                foodAlpha = 0.3f;
             }
 
             colorInjectionStrokeDataArray[baseIndex + i].color = new Vector4(Mathf.Lerp(simManager.foodGenomePoolArray[i].fruitHue.x, 0.1f, 0.7f), Mathf.Lerp(simManager.foodGenomePoolArray[i].fruitHue.y, 0.9f, 0.7f), Mathf.Lerp(simManager.foodGenomePoolArray[i].fruitHue.z, 0.2f, 0.7f), foodAlpha);
@@ -660,12 +736,10 @@ public class TheRenderKing : MonoBehaviour {
         for(int i = 0; i < simManager.predatorArray.Length; i++) {
             Vector3 predatorPos = simManager.predatorArray[i].transform.position;
             colorInjectionStrokeDataArray[baseIndex + i].worldPos = new Vector2(predatorPos.x, predatorPos.y);
-            colorInjectionStrokeDataArray[baseIndex + i].scale = new Vector2(simManager.predatorArray[i].curScale, simManager.predatorArray[i].curScale) * 0.85f;
-
-            //float velX = (predatorPos.x - simManager.predatorArray[i]._PrevPos.x) * velScale;
-            //float velY = (predatorPos.y - simManager.predatorArray[i]._PrevPos.y) * velScale;
-
-            colorInjectionStrokeDataArray[baseIndex + i].color = new Vector4(1f, 0.25f, 0f, 1f);
+            colorInjectionStrokeDataArray[baseIndex + i].localDir = new Vector2(Mathf.Cos(simManager.predatorArray[i].transform.rotation.z), Mathf.Sin(simManager.predatorArray[i].transform.rotation.z));
+            colorInjectionStrokeDataArray[baseIndex + i].scale = new Vector2(simManager.predatorArray[i].curScale, simManager.predatorArray[i].curScale) * 0.9f;
+            
+            colorInjectionStrokeDataArray[baseIndex + i].color = new Vector4(1f, 0.25f, 0f, 0.2f);
         }
 
         colorInjectionStrokesCBuffer.SetData(colorInjectionStrokeDataArray);
@@ -854,6 +928,37 @@ public class TheRenderKing : MonoBehaviour {
         computeShaderBrushStrokes.SetBuffer(kernelCSSinglePassCurveBrushData, "agentCurveStrokesWriteCBuffer", agentSmearStrokesCBuffer);
         computeShaderBrushStrokes.Dispatch(kernelCSSinglePassCurveBrushData, agentSmearStrokesCBuffer.count, 1, 1);        
     }    
+    private void SimPlayerGlow() {
+        //Vector3 agentPos = simManager.agentsArray[0].transform.position;
+        //playerGlowInitPos[0].worldPos = new Vector2(agentPos.x, agentPos.y);
+        //playerGlowInitPos[0].localDir = simManager.agentsArray[0].facingDirection;
+        playerGlowInitPos[0].scale = new Vector2(simManager.agentsArray[0].transform.localScale.x, simManager.agentsArray[0].transform.localScale.y); // ** revisit this later // should leave room for velSampling around Agent
+        
+        playerGlowInitPos[0].color = new Vector4(simManager.agentGenomePoolArray[0].bodyGenome.huePrimary.x, 
+                                                 simManager.agentGenomePoolArray[0].bodyGenome.huePrimary.y,
+                                                 simManager.agentGenomePoolArray[0].bodyGenome.huePrimary.z, 1f);
+
+        playerGlowCBuffer.SetData(playerGlowInitPos);
+    }
+    public void SimPlayerGlowyBits() {
+        playerGlowyBitsDisplayMat.SetVector("_PrimaryHue", new Vector4(simManager.agentGenomePoolArray[0].bodyGenome.huePrimary.x,
+                                                                       simManager.agentGenomePoolArray[0].bodyGenome.huePrimary.y,
+                                                                       simManager.agentGenomePoolArray[0].bodyGenome.huePrimary.z,
+                                                                       0f));
+        playerGlowyBitsDisplayMat.SetFloat("_PosX", (simManager.agentsArray[0].transform.position.x + 70f) / 140f);
+        playerGlowyBitsDisplayMat.SetFloat("_PosY", (simManager.agentsArray[0].transform.position.y + 70f) / 140f);
+
+
+        int kernelSimPlayerGlowyBits = fluidManager.computeShaderFluidSim.FindKernel("SimPlayerGlowyBits");
+
+        fluidManager.computeShaderFluidSim.SetFloat("_TextureResolution", (float)fluidManager.resolution);
+        fluidManager.computeShaderFluidSim.SetFloat("_DeltaTime", fluidManager.deltaTime);
+        fluidManager.computeShaderFluidSim.SetFloat("_InvGridScale", fluidManager.invGridScale);
+        fluidManager.computeShaderFluidSim.SetVector("_PlayerPos", new Vector4((simManager.agentsArray[0].transform.position.x + 70f) / 140f, (simManager.agentsArray[0].transform.position.y + 70f) / 140f, 0f, 0f));
+        fluidManager.computeShaderFluidSim.SetBuffer(kernelSimPlayerGlowyBits, "PlayerGlowyBitsCBuffer", playerGlowyBitsCBuffer);
+        fluidManager.computeShaderFluidSim.SetTexture(kernelSimPlayerGlowyBits, "VelocityRead", fluidManager._VelocityA);        
+        fluidManager.computeShaderFluidSim.Dispatch(kernelSimPlayerGlowyBits, playerGlowyBitsCBuffer.count / 1024, 1, 1);
+    }
     public void SimFloatyBits() {
         int kernelSimFloatyBits = fluidManager.computeShaderFluidSim.FindKernel("SimFloatyBits");
 
@@ -889,8 +994,9 @@ public class TheRenderKing : MonoBehaviour {
 
         // Read current stateData and update all Buffers, send data to GPU
         // Execute computeShaders to update any dynamic particles that are purely cosmetic
-
+        SimPlayerGlow();
         SimAgentSmearStrokes(); // start with this one?
+        SimPlayerGlowyBits();
         SimFloatyBits();
         SimRipples();
         SimFruit();
@@ -925,10 +1031,10 @@ public class TheRenderKing : MonoBehaviour {
 
         cmdBufferFluidColor.Clear(); // needed since camera clear flag is set to none
         cmdBufferFluidColor.SetRenderTarget(fluidManager._SourceColorRT);
-        cmdBufferFluidColor.ClearRenderTarget(true, true, Color.black, 1.0f);  // clear -- needed???
+        cmdBufferFluidColor.ClearRenderTarget(true, true, new Color(0f,0f,0f,0f), 1.0f);  // clear -- needed???
         cmdBufferFluidColor.SetViewProjectionMatrices(fluidColorRenderCamera.worldToCameraMatrix, fluidColorRenderCamera.projectionMatrix);
         //cmdBufferFluidColor.Blit(fluidManager.initialDensityTex, fluidManager._SourceColorRT);
-        cmdBufferFluidColor.DrawMesh(fluidRenderMesh, Matrix4x4.identity, fluidBackgroundColorMat); // Masks out areas above the fluid "Sea Level"
+        //cmdBufferFluidColor.DrawMesh(fluidRenderMesh, Matrix4x4.identity, fluidBackgroundColorMat); // Simple unlit Texture shader -- wysiwyg
 
         basicStrokeDisplayMat.SetPass(0);
         basicStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -991,6 +1097,7 @@ public class TheRenderKing : MonoBehaviour {
 
         // FLOATY BITS!
         floatyBitsDisplayMat.SetPass(0);
+        floatyBitsDisplayMat.SetTexture("_FluidColorTex", fluidManager._DensityA);
         floatyBitsDisplayMat.SetBuffer("floatyBitsCBuffer", floatyBitsCBuffer);
         floatyBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, floatyBitsDisplayMat, 0, MeshTopology.Triangles, 6, floatyBitsCBuffer.count);
@@ -1001,6 +1108,23 @@ public class TheRenderKing : MonoBehaviour {
         ripplesDisplayMat.SetBuffer("trailDotsCBuffer", ripplesCBuffer);
         ripplesDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, ripplesDisplayMat, 0, MeshTopology.Triangles, 6, ripplesCBuffer.count);
+
+        // PLAYER GLOW:::
+        playerGlowMat.SetPass(0);
+        playerGlowMat.SetBuffer("agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
+        playerGlowMat.SetBuffer("basicStrokesCBuffer", playerGlowCBuffer);
+        playerGlowMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, playerGlowMat, 0, MeshTopology.Triangles, 6, playerGlowCBuffer.count);
+
+
+        // PLAYER GLOWY BITS!
+        playerGlowyBitsDisplayMat.SetPass(0);
+        //playerGlowyBitsDisplayMat.SetFloat("_PosX", (simManager.agentsArray[0].transform.position.x + 70f) / 140f);
+        //playerGlowyBitsDisplayMat.SetFloat("_PosY", (simManager.agentsArray[0].transform.position.y + 70f) / 140f);
+        //playerGlowyBitsDisplayMat.SetVector("_PlayerPos", new Vector4((simManager.agentsArray[0].transform.position.x + 70f) / 140f, (simManager.agentsArray[0].transform.position.y + 70f) / 140f, 0f, 0f));
+        playerGlowyBitsDisplayMat.SetBuffer("playerGlowyBitsCBuffer", playerGlowyBitsCBuffer);
+        playerGlowyBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, playerGlowyBitsDisplayMat, 0, MeshTopology.Triangles, 6, playerGlowyBitsCBuffer.count);
 
         /*foodStemDisplayMat.SetPass(0);
         foodStemDisplayMat.SetBuffer("stemDataCBuffer", simManager.simStateData.foodStemDataCBuffer);
@@ -1057,11 +1181,11 @@ public class TheRenderKing : MonoBehaviour {
 
         
         
-        /*predatorProceduralDisplayMat.SetPass(0);
+        predatorProceduralDisplayMat.SetPass(0);
         predatorProceduralDisplayMat.SetBuffer("predatorSimDataCBuffer", simManager.simStateData.predatorSimDataCBuffer);
         predatorProceduralDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, predatorProceduralDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.predatorSimDataCBuffer.count);
-        */
+        
         //Graphics.DrawProcedural(MeshTopology.Triangles, 6, simManager.simStateData.predatorSimDataCBuffer.count);
     }
 
@@ -1164,6 +1288,12 @@ public class TheRenderKing : MonoBehaviour {
         if (colorInjectionStrokesCBuffer != null) {
             colorInjectionStrokesCBuffer.Release();
         }
+        if (playerGlowCBuffer != null) {
+            playerGlowCBuffer.Release();
+        }
+        if (playerGlowyBitsCBuffer != null) {
+            playerGlowyBitsCBuffer.Release();
+        } 
         if (floatyBitsCBuffer != null) {
             floatyBitsCBuffer.Release();
         } 

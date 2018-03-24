@@ -167,7 +167,7 @@ public class SimulationStateData {
             // Experimental! move display data forward when chomping:
             float eatingCycle = Mathf.Sin(agentSimDataArray[i].eatingStatus * Mathf.PI);
             agentSimDataArray[i].worldPos += simManager.agentsArray[i].facingDirection * eatingCycle * 0.25f;
-            agentSimDataArray[i].heading = (simManager.agentsArray[i].facingDirection + UnityEngine.Random.insideUnitCircle * 0.4f * eatingCycle).normalized;
+            agentSimDataArray[i].heading = (simManager.agentsArray[i].facingDirection + UnityEngine.Random.insideUnitCircle * 0.2f * eatingCycle).normalized;
             agentSimDataArray[i].size.y *= (eatingCycle * 0.2f + 1.0f);
             agentSimDataArray[i].size.x *= (1.0f - eatingCycle * 0.2f);
 
