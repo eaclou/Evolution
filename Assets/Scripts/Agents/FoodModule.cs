@@ -396,21 +396,30 @@ public class FoodModule : MonoBehaviour {
             float flowR = Mathf.Min(amountR, flow);
             collidingAgent.testModule.foodAmountR[0] += flowR * 2f;  // make sure Agent doesn't receive food from empty dispenser
             amountR -= flowR;
-            if (amountR < 0f)
+            if (amountR < 0f) {
                 amountR = 0f;
-
+            }                
+            if(collidingAgent.testModule.foodAmountR[0] > 1f) {
+                collidingAgent.testModule.foodAmountR[0] = 1f;
+            }
             float flowG = Mathf.Min(amountG, flow);
             collidingAgent.testModule.foodAmountG[0] += flowG * 2f;  // make sure Agent doesn't receive food from empty dispenser
             amountG -= flowG;
-            if (amountG < 0f)
+            if (amountG < 0f) {
                 amountG = 0f;
-
+            }                
+            if(collidingAgent.testModule.foodAmountG[0] > 1f) {
+                collidingAgent.testModule.foodAmountG[0] = 1f;
+            }
             float flowB = Mathf.Min(amountB, flow);
             collidingAgent.testModule.foodAmountB[0] += flowB * 2f;  // make sure Agent doesn't receive food from empty dispenser
             amountB -= flowB;
-            if (amountB < 0f)
+            if (amountB < 0f) {
                 amountB = 0f;
-
+            }                
+            if(collidingAgent.testModule.foodAmountB[0] > 1f) {
+                collidingAgent.testModule.foodAmountB[0] = 1f;
+            }
             //Debug.Log("OnCollisionSTAY colliderCount: " + colliderCount.ToString() + " collider: " + coll.collider.ToString() + ", amountR: " + amountR.ToString());
         }
     }

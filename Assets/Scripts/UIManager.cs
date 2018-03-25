@@ -20,6 +20,17 @@ public class UIManager : MonoBehaviour {
     public Material hitPointsMat;
     public Text textScore;
 
+    public GameObject panelDeathScreen;
+    public Text textRespawnCounter;
+    public Text textCauseOfDeath;
+    public Text textPlayerScore;
+
+    public GameObject panelObserverMode;
+    public Text textCurGen;
+    public Text textAvgLifespan;
+
+    public GameObject panelPaused;
+
     public GameObject panelDebug;
     public Material fitnessDisplayMat;
     public Button buttonPause;
@@ -44,11 +55,17 @@ public class UIManager : MonoBehaviour {
     public Button buttonToggleDebug;
     public bool isActiveDebug = false;
 
+    public bool isObserverMode = false;
+    public bool deathScreenOn = false;
+    public bool isPaused = false;
+
     public GameObject panelMainMenu;    
     public GameObject panelLoading;
     public GameObject panelPlaying;
 
     public Texture2D fitnessDisplayTexture;
+
+    public float timeOfLastPlayerDeath = 0f;
 
     
 	// Use this for initialization
@@ -67,12 +84,62 @@ public class UIManager : MonoBehaviour {
                 UpdateLoadingUI();
                 break;
             case GameManager.GameState.Playing:
+                // Check for Key PResses!
+                if(Input.GetKeyDown(KeyCode.Escape)) {
+                    Debug.Log("Pressed Escape Key!");
+                    //if(!deathScreenOn) {
+                    //    EnterObserverMode();                        
+                    //}     
+                    if(!isPaused) {
+
+                        EnterObserverMode();                        
+                    }  
+                }
+                if(Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKeyDown(KeyCode.Return)) {
+                    Debug.Log("Pressed ENTER Key!");
+
+                    if(!isPaused) {
+                        if(isObserverMode) {
+                            isObserverMode = false;
+                            ClickButtonModeB();
+                            // Respawn PLAYER!!! ****
+                            gameManager.simulationManager.RespawnPlayer();
+                            deathScreenOn = false;
+                        }
+                        if(deathScreenOn) {
+                            // Respawn PLAYER!!! ****
+                            gameManager.simulationManager.RespawnPlayer();
+                            deathScreenOn = false;
+                        }
+                        
+                    }                    
+                }
+                if(Input.GetKeyDown(KeyCode.Space)) {
+                    Debug.Log("Pressed Spacebar!");
+                    isPaused = !isPaused;
+
+                    if(isPaused) {
+                        ClickButtonPause();
+                    }
+                    else {
+                        ClickButtonPlayNormal();
+                    }
+                }
                 UpdateSimulationUI();
                 break;
             default:
                 Debug.LogError("No Enum Type Found! (" + gameManager.CurrentGameState.ToString() + ")");
                 break;
         }
+    }
+
+    public void EnterObserverMode() {
+        ClickButtonModeC();
+        isObserverMode = true;
+
+        deathScreenOn = false;
+
+        gameManager.simulationManager.EnterObserverMode();
     }
 
     public void TransitionToNewGameState(GameManager.GameState gameState) {
@@ -102,8 +169,8 @@ public class UIManager : MonoBehaviour {
         fitnessDisplayTexture = new Texture2D(1, 1, TextureFormat.RGBAFloat, true);
         fitnessDisplayTexture.wrapMode = TextureWrapMode.Clamp;
         fitnessDisplayMat.SetTexture("_MainTex", fitnessDisplayTexture);
-
-        ClickButtonModeC();
+        
+        ClickButtonModeB();
     }
     private void EnterLoadingUI() {
         panelMainMenu.SetActive(false);
@@ -127,7 +194,22 @@ public class UIManager : MonoBehaviour {
         SetDisplayTextures();
 
         UpdateDebugUI();
-        
+        UpdateHUDUI();
+        UpdateObserverModeUI();
+        UpdateDeathScreenUI();
+        UpdatePausedUI();
+    }
+
+    public void PlayerDied(bool starved) {
+        deathScreenOn = true;
+        timeOfLastPlayerDeath = Time.realtimeSinceStartup;
+
+        string causeOfDeath = "STARVED!";
+        if(!starved) {
+            causeOfDeath = "IMPALED!";
+        }
+        textCauseOfDeath.text = causeOfDeath;
+        textPlayerScore.text = "Lived For " + gameManager.simulationManager.lastPlayerScore.ToString() + " Years!";
     }
 
     public void UpdateDebugUI() {
@@ -179,6 +261,75 @@ public class UIManager : MonoBehaviour {
         else {
             buttonToggleTrainingPersistent.GetComponentInChildren<Text>().text = "Persistent\nTraining: OFF";
         }*/
+    }
+    public void UpdateHUDUI() {
+        if(isObserverMode) {
+            panelHUD.SetActive(false);
+        }
+        else {
+            panelHUD.SetActive(true);
+        }
+        if(deathScreenOn) {
+            // Do something to Energy Meter???
+            panelHUD.SetActive(false);
+        }
+        else {
+            
+        }
+    }
+    public void UpdatePausedUI() {
+        if(isPaused) {
+            panelPaused.SetActive(true);
+        }
+        else {
+            panelPaused.SetActive(false);
+        }
+    }
+    public void UpdateObserverModeUI() {
+        if(isObserverMode) {
+            panelObserverMode.SetActive(true);
+
+            textCurGen.text = "Generation: " + gameManager.simulationManager.curApproxGen.ToString("F0");
+            textAvgLifespan.text = "Average Lifespan: " + Mathf.RoundToInt(gameManager.simulationManager.rollingAverageAgentScore).ToString();
+
+            if(Input.GetKeyDown(KeyCode.UpArrow)) {
+                ClickButtonModeB();
+            }
+            if(Input.GetKeyDown(KeyCode.DownArrow)) {
+                ClickButtonModeC();
+            }
+        }
+        else {
+            panelObserverMode.SetActive(false);
+        }
+    }
+    public void UpdateDeathScreenUI() {
+        if(deathScreenOn) {
+            panelDeathScreen.SetActive(true);
+
+            float currentTime = Time.realtimeSinceStartup;
+
+            float elapsedDeathTime = currentTime - timeOfLastPlayerDeath;
+
+            float respawnTimer = 6f - elapsedDeathTime;
+            textRespawnCounter.text = "Respawn In " + Mathf.CeilToInt(respawnTimer).ToString() + " Seconds... Or Press 'Enter'";
+
+            if(elapsedDeathTime > 6f) {
+
+                if(isPaused) {
+
+                }
+                else {
+                    Debug.Log("5 seconds elapsed since player died");
+
+                    deathScreenOn = false;
+                    gameManager.simulationManager.RespawnPlayer();
+                }                
+            }
+        }
+        else {
+            panelDeathScreen.SetActive(false);
+        }
     }
 
     public void RefreshFitnessTexture(List<float> generationScores) {

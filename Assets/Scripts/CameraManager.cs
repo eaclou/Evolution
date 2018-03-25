@@ -37,7 +37,7 @@ public class CameraManager : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-        curMode = GameMode.ModeB;
+        ChangeGameMode(GameMode.ModeB);
 
     }
 
@@ -45,13 +45,15 @@ public class CameraManager : MonoBehaviour {
         
         //UpdateCameraTestBaseline();
         UpdateCameraOld();
-
+        //Debug.Log("mode: " + curMode.ToString());
         //this.transform.position = SmoothApproach(Vector2 pastPosition, Vector2 pastTargetPosition, Vector2 targetPosition, float speed);
         //this.transform.position = Vector3.Lerp(this.transform.position, new Vector3(targetCamPos.x, targetCamPos.y, -50f), 2f * Time.deltaTime);
         //new Vector3(targetCamPos.x, targetCamPos.y, -50f);
     }
 
     private void UpdateCameraOld() {
+        float orthoLerp = 0.9f;
+
         switch (curMode) {
             case GameMode.ModeA:
                 //
@@ -60,12 +62,16 @@ public class CameraManager : MonoBehaviour {
                 break;
             case GameMode.ModeB:
                 //
-                targetCamPos = Vector3.Lerp(targetCamPos, targetTransform.position, 0.08f);
-                lerpSpeed = lerpSpeedB;
+                if(targetTransform != null) {
+                    targetCamPos = Vector3.Lerp(targetCamPos, targetTransform.position, 0.08f);
+                    lerpSpeed = lerpSpeedB;
+                }
+                orthoLerp = 0.9f;
                 break;
             case GameMode.ModeC:
                 targetCamPos = Vector3.Lerp(targetCamPos, Vector3.zero, 0.08f);
                 lerpSpeed = lerpSpeedC;
+                orthoLerp = 0.6f;
                 //
                 break;
             default:
@@ -73,7 +79,7 @@ public class CameraManager : MonoBehaviour {
                 break;
         }
 
-        camera.orthographicSize = Mathf.Lerp(camera.orthographicSize, targetZoomValue, 0.5f * Time.deltaTime);
+        camera.orthographicSize = Mathf.Lerp(camera.orthographicSize, targetZoomValue, orthoLerp * Time.deltaTime);
         //Vector3 curPos = transform.position;
         //Vector2 targetPos = new Vector2(targetCamPos.x, targetCamPos.y);
         //Vector2 targetCamDir = new Vector2(targetCamPos.x, targetCamPos.y) - new Vector2(curPos.x, curPos.y);
@@ -83,7 +89,7 @@ public class CameraManager : MonoBehaviour {
         this.transform.position = Vector3.Lerp(this.transform.position, new Vector3(targetCamPos.x, targetCamPos.y, -50f), lerpSpeed * Time.deltaTime);
 
     }
-    private void UpdateCameraTestBaseline() {
+    /*private void UpdateCameraTestBaseline() {
         //float orbitRadius = 35f;
         //orbitSpeed
         //curOrbitAngle
@@ -99,7 +105,7 @@ public class CameraManager : MonoBehaviour {
 
         this.transform.position = newCameraPosition;
 
-    }
+    }*/
     // Update is called once per frame
     void FixedUpdate () {
 
@@ -154,6 +160,12 @@ public class CameraManager : MonoBehaviour {
 
         // move camera along side the target //
         //camTransform.position = new Vector3(targetTransform.position.x, targetTransform.position.y, targetTransform.position.z - 15);
+    }
+
+    public void StartPlayerRespawn() {
+        targetCamPos = targetTransform.position;
+        camera.orthographicSize = 5f;
+        this.transform.position = new Vector3(targetCamPos.x, targetCamPos.y, -50f);
     }
 
     private Vector2 SmoothApproach(Vector2 pastPosition, Vector2 pastTargetPosition, Vector2 targetPosition, float speed) {

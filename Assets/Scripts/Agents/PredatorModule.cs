@@ -8,9 +8,9 @@ public class PredatorModule : MonoBehaviour {
     public MeshRenderer meshRendererBeauty;
     public MeshRenderer meshRendererFluidCollider;
 
-    private float speed = 500f;
+    private float speed = 250f;
 
-    private float damage = 0.51f;
+    private float damage = 0.55f;
     private int counter = 0;
 
     private float randX;
@@ -54,6 +54,7 @@ public class PredatorModule : MonoBehaviour {
         curScale = UnityEngine.Random.Range(minScale, maxScale);        
         Vector3 scale = new Vector3(curScale, curScale, curScale);
         transform.localScale = scale;
+        counter = UnityEngine.Random.Range(0, framesPerDirChange);
         //Debug.Log("curScale: " + curScale.ToString() + ", ts: " + transform.localScale.ToString());
     }
 
@@ -67,28 +68,14 @@ public class PredatorModule : MonoBehaviour {
         this.GetComponent<Rigidbody2D>().AddForce(new Vector2(speed * randX * Time.deltaTime, speed * randY * Time.deltaTime), ForceMode2D.Impulse);
 
         Vector3 curPos = transform.localPosition;
-        /*
-        float velScale = 0.17f; ; // Time.fixedDeltaTime * 0.17f; // approx guess for now
-        meshRendererFluidCollider.material.SetFloat("_VelX", (curPos.x - prevPos.x) * velScale);
-        meshRendererFluidCollider.material.SetFloat("_VelY", (curPos.y - prevPos.y) * velScale);*/
-        //Debug.Log("curScale: " + curScale.ToString() + ", ts: " + transform.localScale.ToString());
         prevPos = curPos;
     }
 
     private void AttackAgent(Agent agent) {
-        agent.testModule.hitPoints[0] -= damage;
-        //Debug.Log("AttackAgent!");
-        //if (agent.testModule.hitPoints[0] <= 0f) {
-
-            //agent.curLifeStage = Agent.AgentLifeStage.Decaying;
-            //agent.lifeStageTransitionTimeStepCounter = 0;
-
-
-            //agent.isNull = true; // OLD
-            //Debug.Log("Agent DEAD!");
-        //}
+        agent.testModule.hitPoints[0] -= damage;        
     }
     
+    // *** Eventually look into explicitly ordering these Scripts Execution Order for OnCollision Monobehaviors (like Agents & Food) *****
     private void OnCollisionStay2D(Collision2D coll) {
         //Debug.Log("OnCollisionStay2D! " + coll.collider.gameObject.name);
 

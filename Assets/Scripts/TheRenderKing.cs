@@ -37,13 +37,14 @@ public class TheRenderKing : MonoBehaviour {
     public Material agentBodyDisplayMat;
     public Material playerGlowyBitsDisplayMat;
     public Material playerGlowMat; // soft glow to indicate it is the one player is controlling!
+    public Material fadeToBlackBlitMat;
     //public Material debugMat;
 
     private Mesh fluidRenderMesh;
 
     private bool isInitialized = false;
 
-    private const float velScale = 0.22f; // Conversion for rigidBody Vel --> fluid vel units ----  // approx guess for now
+    private const float velScale = 0.2f; // Conversion for rigidBody Vel --> fluid vel units ----  // approx guess for now
 
     public GameObject terrainGO;
     public Material terrainObstaclesHeightMaskMat;
@@ -102,6 +103,8 @@ public class TheRenderKing : MonoBehaviour {
     public Material debugMaterial;
     public Mesh debugMesh;
     public RenderTexture debugRT; // Used to see texture inside editor (inspector)
+
+    public float fullscreenFade = 1f;
     
     public struct PlayerGlowyBitData {
 		public Vector2 coords;
@@ -652,7 +655,7 @@ public class TheRenderKing : MonoBehaviour {
             Vector3 agentPos = simManager.agentsArray[i].transform.position;
             obstacleStrokeDataArray[baseIndex + i].worldPos = new Vector2(agentPos.x, agentPos.y);
             obstacleStrokeDataArray[baseIndex + i].localDir = simManager.agentsArray[i].facingDirection;
-            obstacleStrokeDataArray[baseIndex + i].scale = new Vector2(simManager.agentsArray[i].transform.localScale.x, simManager.agentsArray[i].transform.localScale.y); // ** revisit this later // should leave room for velSampling around Agent
+            obstacleStrokeDataArray[baseIndex + i].scale = new Vector2(simManager.agentsArray[i].transform.localScale.x, simManager.agentsArray[i].transform.localScale.y) * 1f; // ** revisit this later // should leave room for velSampling around Agent *** weird popping when * 0.9f
 
             float velX = (agentPos.x - simManager.agentsArray[i]._PrevPos.x) * velScale;
             float velY = (agentPos.y - simManager.agentsArray[i]._PrevPos.y) * velScale;
@@ -678,7 +681,7 @@ public class TheRenderKing : MonoBehaviour {
             Vector3 predatorPos = simManager.predatorArray[i].transform.position;
             obstacleStrokeDataArray[baseIndex + i].worldPos = new Vector2(predatorPos.x, predatorPos.y);
             obstacleStrokeDataArray[baseIndex + i].localDir = new Vector2(Mathf.Cos(simManager.predatorArray[i].transform.rotation.z), Mathf.Sin(simManager.predatorArray[i].transform.rotation.z));
-            obstacleStrokeDataArray[baseIndex + i].scale = new Vector2(simManager.predatorArray[i].curScale, simManager.predatorArray[i].curScale) * 0.9f;
+            obstacleStrokeDataArray[baseIndex + i].scale = new Vector2(simManager.predatorArray[i].curScale, simManager.predatorArray[i].curScale) * 0.95f;
 
             float velX = (predatorPos.x - simManager.predatorArray[i]._PrevPos.x) * velScale;
             float velY = (predatorPos.y - simManager.predatorArray[i]._PrevPos.y) * velScale;
@@ -991,7 +994,16 @@ public class TheRenderKing : MonoBehaviour {
     }
 
     public void Tick() {  // should be called from SimManager at proper time!
-
+        fullscreenFade = 1f;
+        if(simManager.agentsArray[0].curLifeStage == Agent.AgentLifeStage.Egg) {
+            fullscreenFade = fullscreenFade * (float)simManager.agentsArray[0].lifeStageTransitionTimeStepCounter / (float)simManager.agentsArray[0]._GestationDurationTimeSteps;
+        }
+        if(simManager.agentsArray[0].curLifeStage == Agent.AgentLifeStage.Decaying) {
+            fullscreenFade = fullscreenFade * (1f - (float)simManager.agentsArray[0].lifeStageTransitionTimeStepCounter / (float)simManager.agentsArray[0]._DecayDurationTimeSteps);
+        }
+        fadeToBlackBlitMat.SetPass(0);
+        fadeToBlackBlitMat.SetFloat("_FadeAmount", fullscreenFade);
+        //
         // Read current stateData and update all Buffers, send data to GPU
         // Execute computeShaders to update any dynamic particles that are purely cosmetic
         SimPlayerGlow();
@@ -1110,12 +1122,13 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, ripplesDisplayMat, 0, MeshTopology.Triangles, 6, ripplesCBuffer.count);
 
         // PLAYER GLOW:::
-        playerGlowMat.SetPass(0);
-        playerGlowMat.SetBuffer("agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
-        playerGlowMat.SetBuffer("basicStrokesCBuffer", playerGlowCBuffer);
-        playerGlowMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, playerGlowMat, 0, MeshTopology.Triangles, 6, playerGlowCBuffer.count);
-
+        if (!simManager.uiManager.isObserverMode) {
+            playerGlowMat.SetPass(0);
+            playerGlowMat.SetBuffer("agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
+            playerGlowMat.SetBuffer("basicStrokesCBuffer", playerGlowCBuffer);
+            playerGlowMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+            cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, playerGlowMat, 0, MeshTopology.Triangles, 6, playerGlowCBuffer.count);
+        }
 
         // PLAYER GLOWY BITS!
         playerGlowyBitsDisplayMat.SetPass(0);
@@ -1125,7 +1138,7 @@ public class TheRenderKing : MonoBehaviour {
         playerGlowyBitsDisplayMat.SetBuffer("playerGlowyBitsCBuffer", playerGlowyBitsCBuffer);
         playerGlowyBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, playerGlowyBitsDisplayMat, 0, MeshTopology.Triangles, 6, playerGlowyBitsCBuffer.count);
-
+        
         /*foodStemDisplayMat.SetPass(0);
         foodStemDisplayMat.SetBuffer("stemDataCBuffer", simManager.simStateData.foodStemDataCBuffer);
         foodStemDisplayMat.SetBuffer("foodSimDataCBuffer", simManager.simStateData.foodSimDataCBuffer);
@@ -1178,14 +1191,21 @@ public class TheRenderKing : MonoBehaviour {
         //SimulationStateData.LeafData[] testDataArray = new SimulationStateData.LeafData[simManager.simStateData.foodLeafDataCBuffer.count];
         //simManager.simStateData.foodLeafDataCBuffer.GetData(testDataArray);
         //Debug.Log("testDataArray[0] " + testDataArray[0].foodIndex.ToString() + " testDataArray[15] " + testDataArray[15].foodIndex.ToString() + ", testDataArray[570]: " + testDataArray[570].foodIndex.ToString());
-
-        
+               
         
         predatorProceduralDisplayMat.SetPass(0);
         predatorProceduralDisplayMat.SetBuffer("predatorSimDataCBuffer", simManager.simStateData.predatorSimDataCBuffer);
         predatorProceduralDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, predatorProceduralDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.predatorSimDataCBuffer.count);
-        
+
+        //cmdBufferMainRender.Blit()
+        /*int mainTexID = Shader.PropertyToID("_MainTex");        
+        fadeToBlackBlitMat.SetPass(0);
+        fadeToBlackBlitMat.SetFloat("_FadeAmount", fullscreenFade);
+        cmdBufferMainRender.GetTemporaryRT(mainTexID, -1, -1, 0, FilterMode.Bilinear);  // save contents of Standard Rendering Pipeline
+        cmdBufferMainRender.Blit(BuiltinRenderTextureType.CameraTarget, mainTexID);  // save contents of Standard Rendering Pipeline
+        cmdBufferMainRender.Blit(mainTexID, BuiltinRenderTextureType.CameraTarget, fadeToBlackBlitMat);
+        */
         //Graphics.DrawProcedural(MeshTopology.Triangles, 6, simManager.simStateData.predatorSimDataCBuffer.count);
     }
 

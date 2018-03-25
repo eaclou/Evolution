@@ -47,7 +47,7 @@
 				float4 foodBValue = tex2D(_MainTex, float2(0.875, 0.33));
 				
 				float foodTotal = foodRValue.x + foodGValue.x + foodBValue.x;
-				float foodAvgPercentage = foodTotal / 3.0;
+				float foodAvgPercentage = foodTotal / 2.9;
 
 				float foodRPercentage = (foodRValue.x / foodTotal); //saturate(foodRColor.x);
 				float foodGPercentage = (foodGValue.x / foodTotal);
@@ -59,20 +59,10 @@
 
 				fixed4 displayColor = float4(0,0,0,1); // BG black
 
-				/*if(i.uv.x < foodRPercentage && i.uv.y > 0.6667) {
-					displayColor.rgb = lerp(float3(0.25,0,0), float3(1,0,0), foodRPercentage);
-				}
-				if(i.uv.x < foodGPercentage && i.uv.y < 0.6667 && i.uv.y > 0.3333) {
-					displayColor.rgb = lerp(float3(0,0.25,0), float3(0,1,0), foodGPercentage);
-				}
-				if(i.uv.x < foodBPercentage && i.uv.y < 0.3333) {
-					displayColor.rgb = lerp(float3(0,0,0.25), float3(0,0,1), foodBPercentage);
-				}*/
 				if(i.uv.x < foodAvgPercentage) {
-					float3 healthColor = lerp(float3(0.75,0.2,0.1), float3(0.25,1,0.36), foodAvgPercentage);
+					float3 healthColor = lerp(float3(0.8,0.1,0.05), float3(0.25,1,0.36), foodAvgPercentage);
 					displayColor.rgb = lerp(foodRColor * foodRPercentage + foodGColor * foodGPercentage + foodBColor * foodBPercentage, healthColor, 0.5);
 				}
-				//displayColor.rgb *= 0.1;
 				return displayColor;
 			}
 			ENDCG

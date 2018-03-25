@@ -304,7 +304,12 @@ public class Agent : MonoBehaviour {
                 break;
             case AgentLifeStage.Null:
                 //
-                Debug.Log("agent is null - probably shouldn't have gotten to this point...;");
+                if(humanControlled) {
+                    // player agent stays null for extended period of time
+                }
+                else {
+                    Debug.Log("agent is null - probably shouldn't have gotten to this point...;");
+                }                
                 break;
             default:
                 Debug.LogError("NO SUCH ENUM ENTRY IMPLEMENTED, YOU FOOL!!! (" + curLifeStage.ToString() + ")");
@@ -361,6 +366,36 @@ public class Agent : MonoBehaviour {
 
         //transform.localScale = new Vector3(fullSize.x, fullSize.y, 1f);
         transform.localRotation = Quaternion.FromToRotation(new Vector3(1f, 0f, 0f), new Vector3(facingDirection.x, facingDirection.y, 0f));
+
+        // DebugDisplay
+        if(texture != null) {  // **** Will have to move this into general Tick() method and account for death types & lifeCycle transitions!
+            if(humanControlled) {
+                //Debug.Log(texture.ToString());
+                float displayFoodAmount = testModule.foodAmountR[0];
+                displayFoodAmount = testModule.foodAmountR[0];
+                if(curLifeStage == AgentLifeStage.Egg) {
+                    displayFoodAmount = (float)lifeStageTransitionTimeStepCounter / (float)gestationDurationTimeSteps;
+                }
+                if(curLifeStage == AgentLifeStage.Decaying || curLifeStage == AgentLifeStage.Null) {
+                    displayFoodAmount = 0f;
+                }
+                texture.SetPixel(0, 0, new Color(testModule.hitPoints[0], testModule.hitPoints[0], testModule.hitPoints[0]));
+                texture.SetPixel(1, 0, new Color(displayFoodAmount, displayFoodAmount, displayFoodAmount));
+                texture.SetPixel(2, 0, new Color(displayFoodAmount, displayFoodAmount, displayFoodAmount));
+                texture.SetPixel(3, 0, new Color(displayFoodAmount, displayFoodAmount, displayFoodAmount));
+
+                float comm0 = testModule.outComm0[0] * 0.5f + 0.5f;
+                float comm1 = testModule.outComm1[0] * 0.5f + 0.5f;
+                float comm2 = testModule.outComm2[0] * 0.5f + 0.5f;
+                float comm3 = testModule.outComm3[0] * 0.5f + 0.5f;
+                texture.SetPixel(0, 1, new Color(comm0, comm0, comm0));
+                texture.SetPixel(1, 1, new Color(comm1, comm1, comm1));
+                texture.SetPixel(2, 1, new Color(comm2, comm2, comm2));
+                texture.SetPixel(3, 1, new Color(comm3, comm3, comm3));
+
+                texture.Apply();
+            }            
+        }
     }
 
     private void TickEgg() {        
@@ -371,26 +406,6 @@ public class Agent : MonoBehaviour {
         TickBrain(); // Tick Brain
         TickActions(); // Execute Actions
         
-        // DebugDisplay
-        if(texture != null) {
-            //Debug.Log(texture.ToString());
-            texture.SetPixel(0, 0, new Color(testModule.hitPoints[0], testModule.hitPoints[0], testModule.hitPoints[0]));
-            texture.SetPixel(1, 0, new Color(testModule.foodAmountR[0], testModule.foodAmountR[0], testModule.foodAmountR[0]));
-            texture.SetPixel(2, 0, new Color(testModule.foodAmountG[0], testModule.foodAmountG[0], testModule.foodAmountG[0]));
-            texture.SetPixel(3, 0, new Color(testModule.foodAmountB[0], testModule.foodAmountB[0], testModule.foodAmountB[0]));
-
-            float comm0 = testModule.outComm0[0] * 0.5f + 0.5f;
-            float comm1 = testModule.outComm1[0] * 0.5f + 0.5f;
-            float comm2 = testModule.outComm2[0] * 0.5f + 0.5f;
-            float comm3 = testModule.outComm3[0] * 0.5f + 0.5f;
-            texture.SetPixel(0, 1, new Color(comm0, comm0, comm0));
-            texture.SetPixel(1, 1, new Color(comm1, comm1, comm1));
-            texture.SetPixel(2, 1, new Color(comm2, comm2, comm2));
-            texture.SetPixel(3, 1, new Color(comm3, comm3, comm3));
-
-            texture.Apply();
-        }
-
         ageCounterMature++;
     }
     private void TickDecaying() {

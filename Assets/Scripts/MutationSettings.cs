@@ -29,11 +29,11 @@ public class MutationSettings {
         this.newLinkChance = newLinkChance;
         this.newHiddenNodeChance = newHiddenNodeChance;
 
-        defaultBodyMutationChance = 0.15f;
-        defaultBodyMutationStepSize = 0.1f;
+        defaultBodyMutationChance = 0.04f;
+        defaultBodyMutationStepSize = 0.35f;
 
-        defaultFoodMutationChance = 0.15f;
-        defaultFoodMutationStepSize = 0.1f;
+        defaultFoodMutationChance = 0.16f;
+        defaultFoodMutationStepSize = 0.45f;
 
     }
 }

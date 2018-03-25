@@ -107,8 +107,10 @@ public class SimulationManager : MonoBehaviour {
     public int numAgentsBorn = 0;
     public int currentOldestAgent = 0;
     public int recordPlayerAge = 0;
+    public int lastPlayerScore = 0;
+    public bool playerIsDead = false;
     public int recordBotAge = 0;
-    public float rollingAverageAgentScore = 0f;
+    public float rollingAverageAgentScore = 100f;
     public List<float> fitnessScoresEachGenerationList;
     public float agentAvgRecordScore = 1f;
     public int curApproxGen = 1;
@@ -142,13 +144,15 @@ public class SimulationManager : MonoBehaviour {
             // if so, warming up:
                        
             if(currentWarmUpTimeStep >= numWarmUpTimeSteps) {
-                Debug.Log("WarmUp Complete!!!");
+                Debug.Log("WarmUp Complete!!! ");
                 simulationWarmUpComplete = true;
 
                 // Populate renderKingBuffers:
                 for(int i = 0; i < numAgents; i++) {
                     theRenderKing.UpdateAgentBodyStrokesBuffer(i); // hacky fix but seems to work...
                 }
+
+                RespawnPlayer();
             }
             else {
                 //Debug.Log("WarmUp Step " + currentWarmUpTimeStep.ToString());
@@ -186,9 +190,10 @@ public class SimulationManager : MonoBehaviour {
 
         // Initialize Agents:
         LoadingInstantiateAgents();  // Fills the AgentsArray, Instantiates Agent Objects (MonoBehaviors + GameObjects)
-        LoadingInitializeAgentsFromGenomes(); // This was "RespawnAgents()" --  Used to actually place the Agent in the game in a random spot and set the Agent's atributes ffrom its genome
         agentsArray[0].humanControlled = true;
         agentsArray[0].humanControlLerp = 1f;
+        LoadingInitializeAgentsFromGenomes(); // This was "RespawnAgents()" --  Used to actually place the Agent in the game in a random spot and set the Agent's atributes ffrom its genome
+        
         // Initialize Food:
         LoadingInstantiateFood();
         LoadingInitializeFoodFromGenome();
@@ -600,7 +605,17 @@ public class SimulationManager : MonoBehaviour {
     private void CheckForDeadAgents() { 
         for (int a = 0; a < agentsArray.Length; a++) {
             if (agentsArray[a].isNull) {
-                ProcessDeadAgent(a);
+                if(a == 0) { // if player
+                    if(playerIsDead) {
+                        // this was already called (or should have been)
+                    }
+                    else {
+                        ProcessDeadAgent(a);
+                    }
+                }
+                else {
+                    ProcessDeadAgent(a);
+                }                
             }
         }
     }  // *** revisit    
@@ -628,25 +643,41 @@ public class SimulationManager : MonoBehaviour {
         foodArray[index].Respawn();
     }*/ // *** confirm these are set up alright
     public void RevivePredator(int index) {
-        Vector3 startPos = new Vector3(UnityEngine.Random.Range(-36f, 36f), UnityEngine.Random.Range(-36f, 36f), 0f);
+        Vector3 startPos = GetRandomPredatorSpawnPosition(); // new Vector3(UnityEngine.Random.Range(-36f, 36f), UnityEngine.Random.Range(-36f, 36f), 0f);
         predatorArray[index].transform.localPosition = startPos;
         predatorArray[index].InitializePredator();
         
     } // *** confirm these are set up alright      
     public void ProcessDeadAgent(int agentIndex) {
-        
-        CheckForRecordAgentScore(agentIndex);
-        ProcessAgentScores(agentIndex);
-        
-        // Updates rankedIndicesArray[] so agents are ordered by score:
-        ProcessAndRankAgentFitness();
+        bool processAsAI = true;
 
-        // Reproduction!!!
-        CreateMutatedCopyOfAgent(agentIndex); 
+        if(agentIndex == 0) {
+            if(uiManager.isObserverMode) {
+
+            }
+            else {
+                processAsAI = false;
+            }
+        }
+        else {
+            
+        } 
         
-        theRenderKing.UpdateAgentSmearStrokesBuffer(agentIndex);
-        theRenderKing.UpdateAgentBodyStrokesBuffer(agentIndex);
-        theRenderKing.UpdateAgentEyeStrokesBuffer(agentIndex);
+        if(processAsAI) {
+            CheckForRecordAgentScore(agentIndex);
+            ProcessAgentScores(agentIndex);
+            // Updates rankedIndicesArray[] so agents are ordered by score:
+            ProcessAndRankAgentFitness();
+            // Reproduction!!!
+            CreateMutatedCopyOfAgent(agentIndex); 
+        
+            theRenderKing.UpdateAgentSmearStrokesBuffer(agentIndex);
+            theRenderKing.UpdateAgentBodyStrokesBuffer(agentIndex);
+            theRenderKing.UpdateAgentEyeStrokesBuffer(agentIndex);
+        }
+        else {
+            ProcessDeadPlayer();
+        }
     }
     public void ProcessDeadFood(int foodIndex) {
         
@@ -664,7 +695,7 @@ public class SimulationManager : MonoBehaviour {
         //theRenderKing.InitializeAgentEyeStrokesBuffer();
     }
     private void CheckForRecordAgentScore(int agentIndex) {
-        if (agentsArray[agentIndex].ageCounterMature > recordBotAge) {
+        if (agentsArray[agentIndex].ageCounterMature > recordBotAge && agentIndex != 0) {
             recordBotAge = agentsArray[agentIndex].ageCounterMature;
         }
     }
@@ -884,23 +915,64 @@ public class SimulationManager : MonoBehaviour {
         //startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
         return startPosGenome;
     }
+    private Vector3 GetRandomPredatorSpawnPosition() {
+
+        Vector3 startPos;
+        int numSpawnZones = startPositionsPresets.foodSpawnPositionsList.Count;
+        int randZone = UnityEngine.Random.Range(0, numSpawnZones);
+        float randRadius = 10f;
+
+        Vector2 randOffset = UnityEngine.Random.insideUnitCircle.normalized * randRadius;
+        startPos = new Vector3(startPositionsPresets.foodSpawnPositionsList[randZone].transform.position.x + randOffset.x, 
+                               startPositionsPresets.foodSpawnPositionsList[randZone].transform.position.y + randOffset.y, 
+                               0f);
+        return startPos;
+    }
     public void ProcessDeadPlayer() {
         
-        
-        /*if (playerAgent.ageCounter > recordPlayerAge) {
-            recordPlayerAge = playerAgent.ageCounter;
+        playerIsDead = true;  // so this function won't be called continuously
+        // Display Death screen, send player's Score, cause of death, etc.
+        lastPlayerScore = playerAgent.ageCounterMature;
+        if (playerAgent.ageCounterMature > recordPlayerAge) {
+            recordPlayerAge = playerAgent.ageCounterMature;
         }
-        // Respawn Agent randomly and replace Brain (Later on handle persistent pool learning -- for now, just controls when Brain updates )
-        Vector3 startPos = new Vector3(UnityEngine.Random.Range(-30f, 30f), UnityEngine.Random.Range(-30f, 30f), 0f);
-        StartPositionGenome startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
-        playerAgent.InitializeAgentFromGenome(agentGenomePoolArray[rankedIndicesList[0]], startPosGenome);
-        //playerAgent.ReplaceBrain(persistentGenomePoolArray[rankedIndicesListPersistent[0]]);
-        playerAgent.testModule.foodAmountB[0] = 20f;
+        // Wait certain amount of time OR press enter to immediately respawn.
+        // Countdown display showing time to auto-respawn
+        bool didStarve = true;
+        if(agentsArray[0].wasImpaled) {
+            didStarve = false;
+        }
+        Debug.Log("ProcessDeadPlayer! starved: " + didStarve.ToString());
+        uiManager.PlayerDied(didStarve);
+        // Fade To Black
+        
+    }
+    public void RespawnPlayer() {
+        Debug.Log("Manual New Player RESPAWN!");
+        // respawn the Agent // mutates, respawns, updates RenderKingBuffers
+        agentsArray[0].humanControlled = true;
+        agentsArray[0].humanControlLerp = 1f;
+        CreateMutatedCopyOfAgent(0);         
+        theRenderKing.UpdateAgentSmearStrokesBuffer(0);
+        theRenderKing.UpdateAgentBodyStrokesBuffer(0);
+        theRenderKing.UpdateAgentEyeStrokesBuffer(0);
+        
+        // Adjust Camera to position of agent
+        cameraManager.StartPlayerRespawn();
+        // Fade-in from black?
+        // Reset things that need to be reset i.e score counter?
 
-        theRenderKing.SetSimDataArrays();
-        theRenderKing.InitializeAgentCurveData(agentsArray.Length);
-        */
-    }  // **** NEEDS MODERNIZATION!
+        // Agent energy display should grow as agent grows through Egg stage
+                
+        playerIsDead = false;
+    }
+    public void EnterObserverMode() {
+        agentsArray[0].humanControlled = false;
+        agentsArray[0].humanControlLerp = 0f;
+
+        playerIsDead = false; // maybe rename this? bypasses Agent lifeCycleStage being Null for extended periods...
+    }
+    
     /*
     private void MutateBody {
         //====================================================================================================================================
