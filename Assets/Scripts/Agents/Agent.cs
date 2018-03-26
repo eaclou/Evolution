@@ -260,7 +260,7 @@ public class Agent : MonoBehaviour {
         brain.BrainMasterFunction();
     }
     public void TickModules() {
-        testModule.Tick();
+        testModule.Tick(humanControlled);
         //rangefinderModule.Tick();
         //enemyModule.Tick();
     }
@@ -324,6 +324,29 @@ public class Agent : MonoBehaviour {
         //}
     }
 
+    public void EatFood(float amount) {
+        if(humanControlled) {
+            testModule.foodAmountR[0] += amount * 0.720f;  // 0.33 is too little
+            testModule.foodAmountG[0] += amount * 0.720f;
+            testModule.foodAmountB[0] += amount * 0.720f;
+        }
+        else {
+            testModule.foodAmountR[0] += amount;
+            testModule.foodAmountG[0] += amount;
+            testModule.foodAmountB[0] += amount;
+        }
+
+        if(testModule.foodAmountR[0] > 1f) {
+            testModule.foodAmountR[0] = 1f;
+        }
+        if(testModule.foodAmountG[0] > 1f) {
+            testModule.foodAmountG[0] = 1f;
+        }
+        if(testModule.foodAmountB[0] > 1f) {
+            testModule.foodAmountB[0] = 1f;
+        }
+    }
+
     public void Tick() {
         // Any external inputs updated by simManager just before this
 
@@ -365,7 +388,9 @@ public class Agent : MonoBehaviour {
         prevPos = curPos;
 
         //transform.localScale = new Vector3(fullSize.x, fullSize.y, 1f);
-        transform.localRotation = Quaternion.FromToRotation(new Vector3(1f, 0f, 0f), new Vector3(facingDirection.x, facingDirection.y, 0f));
+
+        //transform.localRotation = Quaternion.FromToRotation(new Vector3(1f, 0f, 0f), new Vector3(facingDirection.x, facingDirection.y, 0f)); // ***** BREAKS BUILD **** w/ sim fluidRendrs!! ****
+        //rigidBody2D.MoveRotation(Quaternion.FromToRotation(new Vector3(1f, 0f, 0f), new Vector3(facingDirection.x, facingDirection.y, 0f)));
 
         // DebugDisplay
         if(texture != null) {  // **** Will have to move this into general Tick() method and account for death types & lifeCycle transitions!
@@ -470,7 +495,8 @@ public class Agent : MonoBehaviour {
         lifeStageTransitionTimeStepCounter = 0;
         ageCounterMature = 0;
         this.transform.localPosition = startPos.startPosition;
-        this.transform.localScale = new Vector3(fullSize.x, fullSize.y, 1f);
+        float semiMajorSize = fullSize.magnitude;
+        this.transform.localScale = new Vector3(semiMajorSize, semiMajorSize, 1f);
         InitializeModules(genome, this, startPos);      // Modules need to be created first so that Brain can map its neurons to existing modules  
         brain = new Brain(genome.brainGenome, this);
         facingDirection = new Vector2(0f, 1f);

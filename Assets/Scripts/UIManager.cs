@@ -13,6 +13,8 @@ public class UIManager : MonoBehaviour {
 
     public GameObject panelTint;
 
+    public Text textLoadingTooltips;
+
     public GameObject panelHUD;
     public Image imageFood;
     public Image imageHitPoints;
@@ -66,6 +68,8 @@ public class UIManager : MonoBehaviour {
     public Texture2D fitnessDisplayTexture;
 
     public float timeOfLastPlayerDeath = 0f;
+
+    public float loadingProgress = 0f;
 
     
 	// Use this for initialization
@@ -186,7 +190,18 @@ public class UIManager : MonoBehaviour {
         
     }
     private void UpdateLoadingUI() {
-
+        if (loadingProgress < 1f) {
+            textLoadingTooltips.text = "( Calculating Enjoyment Coefficients )";
+        }
+        if (loadingProgress < 0.75f) {
+            textLoadingTooltips.text = "( Warming Up Simulation Cubes )";
+        }
+        if (loadingProgress < 0.45f) {
+            textLoadingTooltips.text = "( Reticulating Splines )";
+        }
+        if (loadingProgress < 0.1f) {
+            textLoadingTooltips.text = "( Feeding Hamsters )";
+        }
     }
     private void UpdateSimulationUI() {
         UpdateScoreText(gameManager.simulationManager.playerAgent.ageCounterMature);
@@ -333,7 +348,7 @@ public class UIManager : MonoBehaviour {
     }
 
     public void RefreshFitnessTexture(List<float> generationScores) {
-        fitnessDisplayTexture.Resize(generationScores.Count, 1);
+        fitnessDisplayTexture.Resize(Mathf.Max(1, generationScores.Count), 1);
 
         // Find Score Range:
         float bestScore = 1f;
@@ -363,6 +378,11 @@ public class UIManager : MonoBehaviour {
     public void ClickStartGame() {
         Debug.Log("ClickStartGame()!");
         gameManager.StartNewGame();
+    }
+
+    public void ClickResetWorld() {
+        Debug.Log("Reset The World!");
+        gameManager.simulationManager.ResetWorld();
     }
 
     public void ClickButtonQuit() {

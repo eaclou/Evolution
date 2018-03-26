@@ -41,7 +41,7 @@ public class SimulationManager : MonoBehaviour {
 
         }
     }
-    private int numWarmUpTimeSteps = 30;
+    private int numWarmUpTimeSteps = 90;
     private int currentWarmUpTimeStep = 0;
 
     private float mapSize = 70f;  // This determines scale of environment, size of FluidSim plane!!! Important!
@@ -75,6 +75,9 @@ public class SimulationManager : MonoBehaviour {
     public Agent[] agentsArray;
     //public BodyGenome bodyGenomeTemplate; // .... refactor?
     public AgentGenome[] agentGenomePoolArray;
+    private AgentGenome[] savedGenomePoolArray1;
+    private AgentGenome[] savedGenomePoolArray2;
+    private AgentGenome[] savedGenomePoolArray3;
     public FoodGenome[] foodGenomePoolArray;
     public FoodModule[] foodArray;
     private int numFood = 64;
@@ -108,7 +111,7 @@ public class SimulationManager : MonoBehaviour {
     public int currentOldestAgent = 0;
     public int recordPlayerAge = 0;
     public int lastPlayerScore = 0;
-    public bool playerIsDead = false;
+    //public bool playerIsDead = false;
     public int recordBotAge = 0;
     public float rollingAverageAgentScore = 100f;
     public List<float> fitnessScoresEachGenerationList;
@@ -142,6 +145,7 @@ public class SimulationManager : MonoBehaviour {
         // Has basic loading phase completed?
         if(loadingComplete) {
             // if so, warming up:
+            uiManager.loadingProgress = (float)currentWarmUpTimeStep / (float)numWarmUpTimeSteps;
                        
             if(currentWarmUpTimeStep >= numWarmUpTimeSteps) {
                 Debug.Log("WarmUp Complete!!! ");
@@ -201,6 +205,11 @@ public class SimulationManager : MonoBehaviour {
         LoadingInstantiatePredators();
         LoadingInitializePredatorsFromGenome();
 
+
+        yield return null;
+
+        // Load pre-saved genomes:
+        LoadingLoadGenepoolFiles();
 
         yield return null;
 
@@ -400,8 +409,48 @@ public class SimulationManager : MonoBehaviour {
 
         fitnessScoresEachGenerationList = new List<float>(); // 
     }
+    private void LoadingLoadGenepoolFiles() {
+        
+        Debug.Log("LOAD LoadingLoadGenepoolFiles!");
+        string filePath1 = Path.Combine(Application.streamingAssetsPath, "savedGenePool310.json");
+        string dataAsJson1 = File.ReadAllText(filePath1);
+        GenePool loadedData1 = JsonUtility.FromJson<GenePool>(dataAsJson1);
+        savedGenomePoolArray1 = loadedData1.genomeArray;
+        
+        string filePath2 = Path.Combine(Application.streamingAssetsPath, "savedGenePool560.json");
+        string dataAsJson2 = File.ReadAllText(filePath2);
+        GenePool loadedData2 = JsonUtility.FromJson<GenePool>(dataAsJson2);
+        savedGenomePoolArray2 = loadedData2.genomeArray;
+
+        string filePath3 = Path.Combine(Application.streamingAssetsPath, "savedGenePool750.json");
+        string dataAsJson3 = File.ReadAllText(filePath3);
+        GenePool loadedData3 = JsonUtility.FromJson<GenePool>(dataAsJson3);
+        savedGenomePoolArray3 = loadedData3.genomeArray;
+        
+    }
 
     #endregion
+
+    public void ResetWorld() {
+        // Initialize Agents:
+        //LoadingInstantiateAgents();  // Fills the AgentsArray, Instantiates Agent Objects (MonoBehaviors + GameObjects)
+
+        LoadingInitializePopulationGenomes();
+        //agentsArray[0].humanControlled = true;
+        //agentsArray[0].humanControlLerp = 1f;
+        LoadingInitializeAgentsFromGenomes(); // This was "RespawnAgents()" --  Used to actually place the Agent in the game in a random spot and set the Agent's atributes ffrom its genome
+
+        fitnessScoresEachGenerationList.Clear();
+        numAgentsBorn = 0;
+        currentOldestAgent = 0;
+        recordPlayerAge = 0;
+        lastPlayerScore = 0;
+        recordBotAge = 0;
+        rollingAverageAgentScore = 100f;
+        curApproxGen = 1;
+
+        RefreshFitnessGraphTexture();
+    }
 
     #region Every Frame  //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& EVERY FRAME &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
@@ -446,21 +495,21 @@ public class SimulationManager : MonoBehaviour {
     private void ApplyFluidForcesToDynamicObjects() {
         // ********** REVISIT CONVERSION btw fluid/scene coords and Force Amounts !!!! *************
         for (int i = 0; i < agentsArray.Length; i++) {
-            agentsArray[i].testModule.ownRigidBody2D.AddForce(simStateData.fluidVelocitiesAtAgentPositionsArray[i] * 42f, ForceMode2D.Impulse);
+            agentsArray[i].testModule.ownRigidBody2D.AddForce(simStateData.fluidVelocitiesAtAgentPositionsArray[i] * 50f, ForceMode2D.Impulse);
         }
         for (int i = 0; i < foodArray.Length; i++) { // *** cache rigidBody reference
             float hackyScalingForceMultiplier = 1f;
             if (foodArray[i].curLifeStage == FoodModule.FoodLifeStage.Growing) {
                 hackyScalingForceMultiplier = 3.3f;
             }
-            foodArray[i].GetComponent<Rigidbody2D>().AddForce(simStateData.fluidVelocitiesAtFoodPositionsArray[i] * 12f * hackyScalingForceMultiplier * foodArray[i].GetComponent<Rigidbody2D>().mass, ForceMode2D.Impulse); //
+            foodArray[i].GetComponent<Rigidbody2D>().AddForce(simStateData.fluidVelocitiesAtFoodPositionsArray[i] * 16f * hackyScalingForceMultiplier * foodArray[i].GetComponent<Rigidbody2D>().mass, ForceMode2D.Impulse); //
             //foodArray[i].GetComponent<Rigidbody2D>().AddForce(new Vector2(1f, 1f), ForceMode2D.Force); //
             // Looks like AddForce has less of an effect on a GO/Rigidbody2D that is being scaled through a script... ??
             // Feels like rigidbody is accumulating velocity which is then released all at once when the scaling stops??
             // Hacking through it by increasign force on growing food:
         }
         for (int i = 0; i < predatorArray.Length; i++) {
-            predatorArray[i].rigidBody.AddForce(simStateData.fluidVelocitiesAtPredatorPositionsArray[i] * 32f * predatorArray[i].rigidBody.mass, ForceMode2D.Impulse);
+            predatorArray[i].rigidBody.AddForce(simStateData.fluidVelocitiesAtPredatorPositionsArray[i] * 38f * predatorArray[i].rigidBody.mass, ForceMode2D.Impulse);
         }
     }
 
@@ -606,12 +655,13 @@ public class SimulationManager : MonoBehaviour {
         for (int a = 0; a < agentsArray.Length; a++) {
             if (agentsArray[a].isNull) {
                 if(a == 0) { // if player
-                    if(playerIsDead) {
+                    ProcessDeadAgent(a);
+                    /*if(playerIsDead) {
                         // this was already called (or should have been)
                     }
                     else {
                         ProcessDeadAgent(a);
-                    }
+                    }*/
                 }
                 else {
                     ProcessDeadAgent(a);
@@ -649,7 +699,7 @@ public class SimulationManager : MonoBehaviour {
         
     } // *** confirm these are set up alright      
     public void ProcessDeadAgent(int agentIndex) {
-        bool processAsAI = true;
+        /*bool processAsAI = true;
 
         if(agentIndex == 0) {
             if(uiManager.isObserverMode) {
@@ -663,7 +713,7 @@ public class SimulationManager : MonoBehaviour {
             
         } 
         
-        if(processAsAI) {
+        if(processAsAI) {*/
             CheckForRecordAgentScore(agentIndex);
             ProcessAgentScores(agentIndex);
             // Updates rankedIndicesArray[] so agents are ordered by score:
@@ -674,10 +724,10 @@ public class SimulationManager : MonoBehaviour {
             theRenderKing.UpdateAgentSmearStrokesBuffer(agentIndex);
             theRenderKing.UpdateAgentBodyStrokesBuffer(agentIndex);
             theRenderKing.UpdateAgentEyeStrokesBuffer(agentIndex);
-        }
+        /*}
         else {
             ProcessDeadPlayer();
-        }
+        }*/
     }
     public void ProcessDeadFood(int foodIndex) {
         
@@ -710,7 +760,14 @@ public class SimulationManager : MonoBehaviour {
             curApproxGen++;
 
             RefreshFitnessGraphTexture();
+
+            UpdateSimulationClimate();
         }
+    }
+    private void UpdateSimulationClimate() {
+        // Change force of turbulence, damping, other fluidSim parameters,
+        // Inject pre-trained critters
+        environmentFluidManager.UpdateSimulationClimate((float)curApproxGen);
     }
     private void RefreshFitnessGraphTexture() {
         uiManager.RefreshFitnessTexture(fitnessScoresEachGenerationList);
@@ -753,9 +810,31 @@ public class SimulationManager : MonoBehaviour {
             BrainGenome newBrainGenome = new BrainGenome();
             
             int parentGenomeIndex = GetAgentIndexByLottery(rankedFitnessList, rankedIndicesList);
-
+            
             BodyGenome parentBodyGenome = agentGenomePoolArray[parentGenomeIndex].bodyGenome;
             BrainGenome parentBrainGenome = agentGenomePoolArray[parentGenomeIndex].brainGenome;
+
+            MutationSettings mutationSettings = settingsManager.mutationSettingsPersistent;
+
+            // Can randomly pull from saved Genepool database:
+            float randRoll = UnityEngine.Random.Range(0f, 1f);
+            if(randRoll < 0.005f) {
+                mutationSettings = settingsManager.mutationSettingsRandomBody;
+                randRoll = UnityEngine.Random.Range(0f, 1f);
+                if(randRoll < 0.55f) {                
+                    parentBodyGenome = savedGenomePoolArray1[parentGenomeIndex].bodyGenome;
+                    parentBrainGenome = savedGenomePoolArray1[parentGenomeIndex].brainGenome;
+                }
+                else if(randRoll < 0.9f) {                
+                    parentBodyGenome = savedGenomePoolArray2[parentGenomeIndex].bodyGenome;
+                    parentBrainGenome = savedGenomePoolArray2[parentGenomeIndex].brainGenome;
+                }
+                else {
+                    parentBodyGenome = savedGenomePoolArray3[parentGenomeIndex].bodyGenome;
+                    parentBrainGenome = savedGenomePoolArray3[parentGenomeIndex].brainGenome;
+                }
+                
+            }
 
             // MUTATE BODY:
             // Mutate body here
@@ -862,7 +941,7 @@ public class SimulationManager : MonoBehaviour {
         
     }
     private StartPositionGenome GetRandomAgentSpawnPosition() {
-        int numSpawnZones = startPositionsPresets.foodSpawnPositionsList.Count;
+        int numSpawnZones = startPositionsPresets.spawnZonesList.Count;
 
         int randZone = UnityEngine.Random.Range(0, numSpawnZones);
 
@@ -870,8 +949,8 @@ public class SimulationManager : MonoBehaviour {
 
         Vector2 randOffset = UnityEngine.Random.insideUnitCircle * randRadius;
 
-        Vector3 startPos = new Vector3(startPositionsPresets.foodSpawnPositionsList[randZone].transform.position.x + randOffset.x, 
-                               startPositionsPresets.foodSpawnPositionsList[randZone].transform.position.y + randOffset.y, 
+        Vector3 startPos = new Vector3(startPositionsPresets.spawnZonesList[randZone].transform.position.x + randOffset.x, 
+                               startPositionsPresets.spawnZonesList[randZone].transform.position.y + randOffset.y, 
                                0f);
         StartPositionGenome startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
         return startPosGenome;
@@ -886,16 +965,40 @@ public class SimulationManager : MonoBehaviour {
         Vector3 startPos;
         StartPositionGenome startPosGenome;
 
-        int numSpawnZones = startPositionsPresets.foodSpawnPositionsList.Count;
+        int numSpawnZones = startPositionsPresets.spawnZonesList.Count;
 
         int randZone = UnityEngine.Random.Range(0, numSpawnZones);
 
-        float randRadius = 10f;
+        for(int i = 0; i < 10; i++) {
+
+            randZone = UnityEngine.Random.Range(0, numSpawnZones);
+
+            if(startPositionsPresets.spawnZonesList[randZone].active) {
+                break;  // use this one
+            }
+            else {
+                if(startPositionsPresets.spawnZonesList[randZone].refactoryCounter > 300) {
+                    startPositionsPresets.spawnZonesList[randZone].refactoryCounter = 0;
+                    startPositionsPresets.spawnZonesList[randZone].active = true;
+                    break;
+                }
+                else {
+                    // do nothing, try again
+                }
+            }
+
+            if(i == 9) {
+                //made it to end of loop - food will never spawn again? or just plop it wherever, refactory be damned..
+                Debug.Log("No active spawnZones found!");
+            }
+        }
+        //Debug.Log("Rand Zone: " + randZone.ToString());
+        float randRadius = startPositionsPresets.spawnZonesList[randZone].radius;
 
         Vector2 randOffset = UnityEngine.Random.insideUnitCircle * randRadius;
 
-        startPos = new Vector3(startPositionsPresets.foodSpawnPositionsList[randZone].transform.position.x + randOffset.x, 
-                               startPositionsPresets.foodSpawnPositionsList[randZone].transform.position.y + randOffset.y, 
+        startPos = new Vector3(startPositionsPresets.spawnZonesList[randZone].transform.position.x + randOffset.x, 
+                               startPositionsPresets.spawnZonesList[randZone].transform.position.y + randOffset.y, 
                                0f);
         startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
         // Ttry to find a suitable startPos:
@@ -918,19 +1021,19 @@ public class SimulationManager : MonoBehaviour {
     private Vector3 GetRandomPredatorSpawnPosition() {
 
         Vector3 startPos;
-        int numSpawnZones = startPositionsPresets.foodSpawnPositionsList.Count;
+        int numSpawnZones = startPositionsPresets.spawnZonesList.Count;
         int randZone = UnityEngine.Random.Range(0, numSpawnZones);
         float randRadius = 10f;
 
         Vector2 randOffset = UnityEngine.Random.insideUnitCircle.normalized * randRadius;
-        startPos = new Vector3(startPositionsPresets.foodSpawnPositionsList[randZone].transform.position.x + randOffset.x, 
-                               startPositionsPresets.foodSpawnPositionsList[randZone].transform.position.y + randOffset.y, 
+        startPos = new Vector3(startPositionsPresets.spawnZonesList[randZone].transform.position.x + randOffset.x, 
+                               startPositionsPresets.spawnZonesList[randZone].transform.position.y + randOffset.y, 
                                0f);
         return startPos;
     }
     public void ProcessDeadPlayer() {
         
-        playerIsDead = true;  // so this function won't be called continuously
+        //playerIsDead = true;  // so this function won't be called continuously
         // Display Death screen, send player's Score, cause of death, etc.
         lastPlayerScore = playerAgent.ageCounterMature;
         if (playerAgent.ageCounterMature > recordPlayerAge) {
@@ -956,6 +1059,7 @@ public class SimulationManager : MonoBehaviour {
         theRenderKing.UpdateAgentSmearStrokesBuffer(0);
         theRenderKing.UpdateAgentBodyStrokesBuffer(0);
         theRenderKing.UpdateAgentEyeStrokesBuffer(0);
+        theRenderKing.SimPlayerGlow();
         
         // Adjust Camera to position of agent
         cameraManager.StartPlayerRespawn();
@@ -964,13 +1068,13 @@ public class SimulationManager : MonoBehaviour {
 
         // Agent energy display should grow as agent grows through Egg stage
                 
-        playerIsDead = false;
+        //playerIsDead = false;
     }
     public void EnterObserverMode() {
         agentsArray[0].humanControlled = false;
         agentsArray[0].humanControlLerp = 0f;
 
-        playerIsDead = false; // maybe rename this? bypasses Agent lifeCycleStage being Null for extended periods...
+        //playerIsDead = false; // maybe rename this? bypasses Agent lifeCycleStage being Null for extended periods...
     }
     
     /*
@@ -1114,30 +1218,32 @@ public class SimulationManager : MonoBehaviour {
     }
 
     public void SaveTrainingData() {
-        /*
+        
         Debug.Log("SAVE Population!");
-        GenePool pool = new GenePool(persistentGenomePoolArray);
+        GenePool pool = new GenePool(agentGenomePoolArray);
         string json = JsonUtility.ToJson(pool);
         Debug.Log(json);
         //Debug.Log(Application.dataPath);
         //string path = Application.dataPath + "/TrainingSaves/" + savename + ".json";
-        string path = Application.dataPath + "/TrainingSaves/testSave.json";
+        string filePath = Path.Combine(Application.streamingAssetsPath, "testSave.json");
+        //string path = Application.dataPath + "/Resources/SavedGenePools/testSave.json";
         //Debug.Log(Application.persistentDataPath);
-        Debug.Log(path);
-        System.IO.File.WriteAllText(path, json);
-        */
+        Debug.Log(filePath);
+        System.IO.File.WriteAllText(filePath, json);
+        
     }
     public void LoadTrainingData() {
-        /*
+        
         Debug.Log("LOAD Population!");
         //"E:\Unity Projects\GitHub\Evolution\Assets\GridSearchSaves\2018_2_13_12_35\GS_RawScores.json"
-        string filePath = Application.dataPath + "/TrainingSaves/testSave.json";
+        string filePath = Path.Combine(Application.streamingAssetsPath, "testSave.json");
+        //string filePath = Application.dataPath + "/Resources/SavedGenePools/testSave.json";
         // Read the json from the file into a string
         string dataAsJson = File.ReadAllText(filePath);
         // Pass the json to JsonUtility, and tell it to create a GameData object from it
         GenePool loadedData = JsonUtility.FromJson<GenePool>(dataAsJson);
-        persistentGenomePoolArray = loadedData.genomeArray;
-        */
+        agentGenomePoolArray = loadedData.genomeArray;
+        
     }
     
     #region OLD CODE: // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& OLD CODE! &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&

@@ -6,7 +6,8 @@ public class EnvironmentFluidManager : MonoBehaviour {
 
     //public Camera mainCam;
     public ComputeShader computeShaderFluidSim;
-    public Texture2D initialDensityTex;  
+    public Texture2D initialDensityTex;
+    public Texture2D firstTimeRelaxedColorTex;
 
     public int resolution = 512;
     public float deltaTime = 1f;
@@ -108,6 +109,8 @@ public class EnvironmentFluidManager : MonoBehaviour {
         public float velY;
         public float size;
     }
+
+    private float forceMultiplier;
     /*private int numColorPoints = 77;
     public ColorPoint[] colorPointsArray;
     public ComputeBuffer colorPointsCBuffer;
@@ -134,21 +137,21 @@ public class EnvironmentFluidManager : MonoBehaviour {
 
         //displayMat = GetComponent<MeshRenderer>().material;                
         
-        Graphics.Blit(initialDensityTex, densityA);
-        Graphics.Blit(initialDensityTex, densityB);
-        Graphics.Blit(initialDensityTex, sourceColorRT);
+        Graphics.Blit(firstTimeRelaxedColorTex, densityA);
+        Graphics.Blit(firstTimeRelaxedColorTex, densityB);
+        Graphics.Blit(firstTimeRelaxedColorTex, sourceColorRT);
         //InitializeVelocity();
         
         forcePointsCBuffer = new ComputeBuffer(numForcePoints, sizeof(float) * 5);
-        forcePointsArray = new ForcePoint[numForcePoints];        
-        CreateForcePoints();
+        forcePointsArray = new ForcePoint[numForcePoints];
+        CreateForcePoints(0.1f, 60f, 300f);
 
         debugMat.SetTexture("_MainTex", sourceColorRT);
     }    
     public void Tick() {
         //Debug.Log("Tick!");
         computeShaderFluidSim.SetFloat("_Time", Time.time);
-        //computeShaderFluidSim.SetFloat("_ForceMagnitude", forceMagnitude);
+        computeShaderFluidSim.SetFloat("_ForceMagnitude", forceMultiplier);
         computeShaderFluidSim.SetFloat("_Viscosity", viscosity);
         computeShaderFluidSim.SetFloat("_Damping", damping);
         //computeShaderFluidSim.SetFloat("_ForceSize", invBrushSize);
@@ -198,22 +201,78 @@ public class EnvironmentFluidManager : MonoBehaviour {
         //SimRipples();
         //SimTrailDots();
     }
+
+    public void UpdateSimulationClimate(float generation) {
+       
+        float cycleValue = generation % 21f;
+
+        if(cycleValue > 11f) {
+            Debug.Log("UpdateSimulationClimate Stormy!");
+            SetClimateStormy();
+        }
+        else if(cycleValue > 17f) {            
+            
+            Debug.Log("UpdateSimulationClimate Thick!");
+            SetClimateThick();
+        }
+        else {
+            Debug.Log("UpdateSimulationClimate Initial!");
+            SetClimateInitial();
+        }
+
+    }
+    private void SetClimateInitial() {
+
+        //CreateForcePoints(0.08f, 60f, 300f);
+        float lerpAmount = 0.3f;
+
+        viscosity = Mathf.Lerp(viscosity, 0.0002f, lerpAmount);
+        damping = Mathf.Lerp(damping, 0.002f, lerpAmount);
+        colorRefreshBackgroundMultiplier = Mathf.Lerp(colorRefreshBackgroundMultiplier, 0.0001f, lerpAmount);
+        colorRefreshDynamicMultiplier = Mathf.Lerp(colorRefreshDynamicMultiplier, 0.0075f, lerpAmount);
+
+        forceMultiplier = Mathf.Lerp(forceMultiplier, 1f, lerpAmount);
+    }
+    private void SetClimateStormy() {
+        //CreateForcePoints(2f, 60f, 300f);
+        float lerpAmount = 0.3f;
+
+        viscosity = Mathf.Lerp(viscosity, 0.0002f, lerpAmount);
+        damping = Mathf.Lerp(damping, 0.003f, lerpAmount);
+        colorRefreshBackgroundMultiplier = Mathf.Lerp(colorRefreshBackgroundMultiplier, 0.0009f, lerpAmount);
+        colorRefreshDynamicMultiplier = Mathf.Lerp(colorRefreshDynamicMultiplier, 0.01f, lerpAmount);
+
+        //forceMultiplier = Mathf.Lerp(forceMultiplier, 2.5f, lerpAmount);
+        forceMultiplier = Mathf.Lerp(forceMultiplier, 14f, lerpAmount);
+    }
+    private void SetClimateThick() {
+        float lerpAmount = 0.3f;
+
+        viscosity = Mathf.Lerp(viscosity, 0.02f, lerpAmount);
+        damping = Mathf.Lerp(damping, 0.06f, lerpAmount);
+        colorRefreshBackgroundMultiplier = Mathf.Lerp(colorRefreshBackgroundMultiplier, 0.00005f, lerpAmount);
+        colorRefreshDynamicMultiplier = Mathf.Lerp(colorRefreshDynamicMultiplier, 0.001f, lerpAmount);
+
+        //forceMultiplier = Mathf.Lerp(forceMultiplier, 2.5f, lerpAmount);
+        forceMultiplier = Mathf.Lerp(forceMultiplier, 4.5f, lerpAmount);
+    }
     
-    private void CreateForcePoints() {
+    private void CreateForcePoints(float magnitude, float minRadius, float maxRadius) {
         
         for(int i = 0; i < numForcePoints; i++) {
             ForcePoint agentPoint = new ForcePoint();
             
-            float forceStrength = 0.08f * 0.1f;
+            float forceStrength = magnitude * 0.1f;
             agentPoint.posX = UnityEngine.Random.Range(0f, 1f);
             agentPoint.posY = UnityEngine.Random.Range(0f, 1f);
             agentPoint.velX = UnityEngine.Random.Range(-1f, 1f) * forceStrength;
             agentPoint.velY = UnityEngine.Random.Range(-1f, 1f) * forceStrength;
-            agentPoint.size = UnityEngine.Random.Range(60f, 300f);
+            agentPoint.size = UnityEngine.Random.Range(minRadius, maxRadius);  // 60f, 300f originally
             forcePointsArray[i] = agentPoint;
         }        
         forcePointsCBuffer.SetData(forcePointsArray);
     }
+    
     private void CreateTextures() {
         Debug.Log("CreateTextures()!");
 

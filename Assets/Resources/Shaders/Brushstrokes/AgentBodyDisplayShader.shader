@@ -155,7 +155,7 @@
 				// PATTERNS UV:
 				float2 patternUV = baseUV;
 				float randPatternIDX = bodyStrokeData.brushTypeX;
-				float randPatternIDY = 0; //bodyStrokeData.brushTypeY;  ********** UPDATE!!! **************
+				float randPatternIDY = fmod(bodyStrokeData.brushTypeY, 3); // ********** UPDATE!!! **************
 				patternUV *= tilePercentage; // randVariation eventually
 				patternUV.x += tilePercentage * randPatternIDX;
 				patternUV.y += tilePercentage * randPatternIDY;

@@ -44,7 +44,7 @@ public class TheRenderKing : MonoBehaviour {
 
     private bool isInitialized = false;
 
-    private const float velScale = 0.2f; // Conversion for rigidBody Vel --> fluid vel units ----  // approx guess for now
+    private const float velScale = 0.17f; // Conversion for rigidBody Vel --> fluid vel units ----  // approx guess for now
 
     public GameObject terrainGO;
     public Material terrainObstaclesHeightMaskMat;
@@ -79,7 +79,7 @@ public class TheRenderKing : MonoBehaviour {
     private ComputeBuffer agentTrailStrokes1CBuffer;
     private int numTrailPointsPerAgent = 32;
 
-    private int numFrameBufferStrokesPerDimension = 256;
+    private int numFrameBufferStrokesPerDimension = 512;
     private ComputeBuffer frameBufferStrokesCBuffer;
 
     private BasicStrokeData[] playerGlowInitPos;
@@ -398,7 +398,7 @@ public class TheRenderKing : MonoBehaviour {
                 Vector2 offset = new Vector2(UnityEngine.Random.Range(-0.5f, 0.5f), UnityEngine.Random.Range(-0.5f, 0.5f));
                 Vector3 pos = new Vector3(xPos + offset.x, yPos + offset.y, 0f);
                 frameBufferStrokesArray[index].worldPos = pos;
-                frameBufferStrokesArray[index].scale = new Vector2(2.15f, 4.20f); // Y is forward, along stroke
+                frameBufferStrokesArray[index].scale = new Vector2(1.15f, 2.20f); // Y is forward, along stroke
                 frameBufferStrokesArray[index].heading = new Vector2(1f, 0f);
                 frameBufferStrokesArray[index].brushType = UnityEngine.Random.Range(0,4);
             }
@@ -655,7 +655,7 @@ public class TheRenderKing : MonoBehaviour {
             Vector3 agentPos = simManager.agentsArray[i].transform.position;
             obstacleStrokeDataArray[baseIndex + i].worldPos = new Vector2(agentPos.x, agentPos.y);
             obstacleStrokeDataArray[baseIndex + i].localDir = simManager.agentsArray[i].facingDirection;
-            obstacleStrokeDataArray[baseIndex + i].scale = new Vector2(simManager.agentsArray[i].transform.localScale.x, simManager.agentsArray[i].transform.localScale.y) * 1f; // ** revisit this later // should leave room for velSampling around Agent *** weird popping when * 0.9f
+            obstacleStrokeDataArray[baseIndex + i].scale = new Vector2(simManager.agentsArray[i].transform.localScale.x, simManager.agentsArray[i].transform.localScale.y) * 0.9f; // ** revisit this later // should leave room for velSampling around Agent *** weird popping when * 0.9f
 
             float velX = (agentPos.x - simManager.agentsArray[i]._PrevPos.x) * velScale;
             float velY = (agentPos.y - simManager.agentsArray[i]._PrevPos.y) * velScale;
@@ -809,7 +809,11 @@ public class TheRenderKing : MonoBehaviour {
         computeShaderBrushStrokes.SetBuffer(kernelCSUpdateEyeStrokeDataAgentIndex, "agentEyeStrokesWriteCBuffer", agentEyeStrokesCBuffer);
         computeShaderBrushStrokes.Dispatch(kernelCSUpdateEyeStrokeDataAgentIndex, 1, 1, 1);
         
-        singleAgentEyeStrokeCBuffer.Release();     
+        singleAgentEyeStrokeCBuffer.Release();  
+        
+        //AgentEyeStrokeData[] agentEyesDataArray = new AgentEyeStrokeData[agentEyeStrokesCBuffer.count];
+        //agentEyeStrokesCBuffer.GetData(agentEyesDataArray);
+        //Debug.Log(" " + agentEyesDataArray[agentIndex].parentIndex.ToString() + ", pos: " + agentEyesDataArray[agentIndex].localPos.ToString());
     }
     public void UpdateAgentSmearStrokesBuffer(int agentIndex) {
         // Doing it this way to avoid resetting ALL agents whenever ONE is respawned!
@@ -931,7 +935,7 @@ public class TheRenderKing : MonoBehaviour {
         computeShaderBrushStrokes.SetBuffer(kernelCSSinglePassCurveBrushData, "agentCurveStrokesWriteCBuffer", agentSmearStrokesCBuffer);
         computeShaderBrushStrokes.Dispatch(kernelCSSinglePassCurveBrushData, agentSmearStrokesCBuffer.count, 1, 1);        
     }    
-    private void SimPlayerGlow() {
+    public void SimPlayerGlow() {
         //Vector3 agentPos = simManager.agentsArray[0].transform.position;
         //playerGlowInitPos[0].worldPos = new Vector2(agentPos.x, agentPos.y);
         //playerGlowInitPos[0].localDir = simManager.agentsArray[0].facingDirection;
@@ -1088,16 +1092,8 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferMainRender.SetRenderTarget(renderTarget);  // Set render Target
         cmdBufferMainRender.ClearRenderTarget(true, true, Color.black, 1.0f);  // clear -- needed???
         //cmdBufferMainRender.ClearRenderTarget(true, true, new Color(225f / 255f, 217f / 255f, 200f / 255f), 1.0f);  // clear -- needed???
-        
-        // BACKGROUND STROKES:::
-        frameBufferStrokeDisplayMat.SetPass(0);
-        frameBufferStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        frameBufferStrokeDisplayMat.SetBuffer("frameBufferStrokesCBuffer", frameBufferStrokesCBuffer);         
-        // Use this technique for Environment Brushstrokes:
-        cmdBufferMainRender.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
-        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, frameBufferStrokeDisplayMat, 0, MeshTopology.Triangles, 6, frameBufferStrokesCBuffer.count);
-
-        // FLUID TEST:
+                
+        // FLUID ITSELF:
         fluidRenderMat.SetPass(0);
         fluidRenderMat.SetTexture("_DensityTex", fluidManager._DensityA);
         fluidRenderMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
@@ -1106,7 +1102,15 @@ public class TheRenderKing : MonoBehaviour {
         fluidRenderMat.SetTexture("_ObstaclesTex", fluidManager._ObstaclesRT);
         fluidRenderMat.SetTexture("_TerrainHeightTex", terrainHeightMap);
         cmdBufferMainRender.DrawMesh(fluidRenderMesh, Matrix4x4.identity, fluidRenderMat);
-
+        
+        // BACKGROUND STROKES:::
+        frameBufferStrokeDisplayMat.SetPass(0);
+        frameBufferStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        frameBufferStrokeDisplayMat.SetBuffer("frameBufferStrokesCBuffer", frameBufferStrokesCBuffer);         
+        // Use this technique for Environment Brushstrokes:
+        cmdBufferMainRender.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
+        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, frameBufferStrokeDisplayMat, 0, MeshTopology.Triangles, 6, frameBufferStrokesCBuffer.count);
+        
         // FLOATY BITS!
         floatyBitsDisplayMat.SetPass(0);
         floatyBitsDisplayMat.SetTexture("_FluidColorTex", fluidManager._DensityA);
@@ -1122,13 +1126,13 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, ripplesDisplayMat, 0, MeshTopology.Triangles, 6, ripplesCBuffer.count);
 
         // PLAYER GLOW:::
-        if (!simManager.uiManager.isObserverMode) {
-            playerGlowMat.SetPass(0);
-            playerGlowMat.SetBuffer("agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
-            playerGlowMat.SetBuffer("basicStrokesCBuffer", playerGlowCBuffer);
-            playerGlowMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-            cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, playerGlowMat, 0, MeshTopology.Triangles, 6, playerGlowCBuffer.count);
-        }
+        //if (!simManager.uiManager.isObserverMode) {
+        playerGlowMat.SetPass(0);
+        playerGlowMat.SetBuffer("agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
+        playerGlowMat.SetBuffer("basicStrokesCBuffer", playerGlowCBuffer);
+        playerGlowMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, playerGlowMat, 0, MeshTopology.Triangles, 6, playerGlowCBuffer.count);
+        //}
 
         // PLAYER GLOWY BITS!
         playerGlowyBitsDisplayMat.SetPass(0);
@@ -1139,25 +1143,13 @@ public class TheRenderKing : MonoBehaviour {
         playerGlowyBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, playerGlowyBitsDisplayMat, 0, MeshTopology.Triangles, 6, playerGlowyBitsCBuffer.count);
         
-        /*foodStemDisplayMat.SetPass(0);
-        foodStemDisplayMat.SetBuffer("stemDataCBuffer", simManager.simStateData.foodStemDataCBuffer);
-        foodStemDisplayMat.SetBuffer("foodSimDataCBuffer", simManager.simStateData.foodSimDataCBuffer);
-        foodStemDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, foodStemDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.foodStemDataCBuffer.count);
 
-        foodLeafDisplayMat.SetPass(0);
-        foodLeafDisplayMat.SetBuffer("leafDataCBuffer", simManager.simStateData.foodLeafDataCBuffer);
-        foodLeafDisplayMat.SetBuffer("foodSimDataCBuffer", simManager.simStateData.foodSimDataCBuffer);
-        foodLeafDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, foodLeafDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.foodLeafDataCBuffer.count);
-        */
         foodFruitDisplayMat.SetPass(0);
         foodFruitDisplayMat.SetBuffer("fruitDataCBuffer", simManager.simStateData.foodFruitDataCBuffer);
         foodFruitDisplayMat.SetBuffer("foodSimDataCBuffer", simManager.simStateData.foodSimDataCBuffer);
         foodFruitDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, foodFruitDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.foodFruitDataCBuffer.count);
-
-        
+                
         // TEMP AGENTS: // CHANGE THIS TO SMEARS!
         curveStrokeDisplayMat.SetPass(0);
         curveStrokeDisplayMat.SetBuffer("agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
@@ -1177,10 +1169,7 @@ public class TheRenderKing : MonoBehaviour {
         agentEyesDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, agentEyesDisplayMat, 0, MeshTopology.Triangles, 6, agentEyeStrokesCBuffer.count);
 
-        //AgentEyeStrokeData[] agentEyesDataArray = new AgentEyeStrokeData[agentEyeStrokesCBuffer.count];
-        //agentEyeStrokesCBuffer.GetData(agentEyesDataArray);
-        //Debug.Log(" " + agentEyesDataArray[10].parentIndex.ToString() + ", pos: " + agentEyesDataArray[0].localPos.ToString());
-
+        
         //foodProceduralDisplayMat.SetPass(0);
         //foodProceduralDisplayMat.SetBuffer("foodSimDataCBuffer", simManager.simStateData.foodSimDataCBuffer);
         //foodProceduralDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -1197,6 +1186,8 @@ public class TheRenderKing : MonoBehaviour {
         predatorProceduralDisplayMat.SetBuffer("predatorSimDataCBuffer", simManager.simStateData.predatorSimDataCBuffer);
         predatorProceduralDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, predatorProceduralDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.predatorSimDataCBuffer.count);
+        
+
 
         //cmdBufferMainRender.Blit()
         /*int mainTexID = Shader.PropertyToID("_MainTex");        

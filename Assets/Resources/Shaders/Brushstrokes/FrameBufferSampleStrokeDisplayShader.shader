@@ -3,6 +3,7 @@
 	Properties
 	{
 		_MainTex ("Main Texture", 2D) = "white" {}
+		//_FluidColorTex ("_FluidColorTex", 2D) = "black" {}
 		//_Tint("Color", Color) = (1,1,1,1)
 		//_Size("Size", vector) = (1,1,1,1)
 	}
@@ -22,7 +23,7 @@
 			#include "UnityCG.cginc"
 
 			sampler2D _MainTex;
-			float4 _MainTex_ST;
+			//sampler2D _FluidColorTex;
 			
 			sampler2D _RenderedSceneRT;  // Provided by CommandBuffer -- global tex??? seems confusing... ** revisit this
 			//float4 _Tint;
@@ -131,6 +132,7 @@
 
 				float altitude = i.worldPos.z / 32; // [-1,1] range
 				finalColor.xyz = lerp(finalColor.xyz, float3(0,0.1,0.36), saturate(-altitude) * 0.92);
+				finalColor.a = saturate((altitude + 0.08) * 7) * brushColor.a;
 				
 				return finalColor;
 				

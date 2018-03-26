@@ -16,9 +16,9 @@ public class BodyGenome {
     public int bodyStrokeBrushTypeX;  // derives rest of information from Agent size & hue?
     public int bodyStrokeBrushTypeY;
     // Body Decorations strokes information
-    public List<DecorationGenome> decorationGenomeList;
+    //public List<DecorationGenome> decorationGenomeList;
     // Body Tentacles information
-    public List<TentacleGenome> tentacleGenomeList;
+    //public List<TentacleGenome> tentacleGenomeList;
     // Eyes information
     public EyeGenome eyeGenome;
 
@@ -38,15 +38,13 @@ public class BodyGenome {
         public float startWidth;
         public float endWidth;
     }
-
+    [System.Serializable]
     public struct EyeGenome {
         public Vector2 localPos;
         public Vector2 localScale;  // avgSize, aspectRatio
         public Vector3 irisHue;
         public Vector3 pupilHue;
         public int eyeBrushType;
-        //public float irisRadius;
-        //public float pupilRadius;
     }
 
     //public List<HealthGenome> healthModuleList;
@@ -67,7 +65,7 @@ public class BodyGenome {
         bodyStrokeBrushTypeX = UnityEngine.Random.Range(0, 8);
         bodyStrokeBrushTypeY = UnityEngine.Random.Range(0, 8);
 
-        decorationGenomeList = new List<DecorationGenome>();
+        /*decorationGenomeList = new List<DecorationGenome>();
         for(int i = 0; i < 4; i++) {
             DecorationGenome decorationGenome = new DecorationGenome();
             decorationGenome.localPos = UnityEngine.Random.insideUnitCircle;
@@ -80,7 +78,8 @@ public class BodyGenome {
         tentacleGenomeList = new List<TentacleGenome>();
         for(int i = 0; i < 0; i++) {
             // LATER!!!
-        }
+        }*/
+
         eyeGenome = new EyeGenome();
         eyeGenome.localPos = new Vector2(0.5f, 0.8f);
         eyeGenome.localScale = new Vector2(0.32f, 1f);
@@ -89,6 +88,7 @@ public class BodyGenome {
         eyeGenome.eyeBrushType = UnityEngine.Random.Range(0, 8);
         //eyeGenome.irisRadius = 0.66f;
         //eyeGenome.pupilRadius = 0.33f;
+        
     }
 
     //public void InitializeGenomeAsDefault() {
@@ -128,7 +128,7 @@ public class BodyGenome {
         bodyStrokeBrushTypeX = UtilityMutationFunctions.GetMutatedIntAdditive(parentBodyGenome.bodyStrokeBrushTypeX, settings.defaultBodyMutationChance, 2, 0, 7); // *****
         bodyStrokeBrushTypeY = UtilityMutationFunctions.GetMutatedIntAdditive(parentBodyGenome.bodyStrokeBrushTypeY, settings.defaultBodyMutationChance, 2, 0, 7);
 
-        decorationGenomeList = new List<DecorationGenome>();
+        /*decorationGenomeList = new List<DecorationGenome>();
         for(int i = 0; i < parentBodyGenome.decorationGenomeList.Count; i++) {
             DecorationGenome newGenome = new DecorationGenome();
             //parentBodyGenome.decorationGenomeList[i]; // struct is value type so *hopefully* shouldn't be a problem w/ shared references....
@@ -153,7 +153,7 @@ public class BodyGenome {
             newGenome.endWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentBodyGenome.tentacleGenomeList[i].endWidth, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.1f, 0.5f);
             
             tentacleGenomeList.Add(newGenome);
-        }
+        }*/
 
         eyeGenome = new EyeGenome();
 

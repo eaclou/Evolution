@@ -104,7 +104,8 @@
 				float3 rotatedPoint1 = float3(quadPoint.x * right1 + quadPoint.y * forward1,
 											 quadPoint.z);
 				
-				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(rotatedPoint1, 0.0f));
+				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(0,0,-1, 1.0)) + float4(quadPoint* 10, 0.0));
+				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)) + float4(rotatedPoint1, 0.0));
 				o.color = float4(1, 1, 1, 1);	// change color of eyes if dead X's?'
 				
 				const float tilePercentage = (1.0 / 8.0);
@@ -140,6 +141,8 @@
 
 			fixed4 frag(v2f i) : SV_Target
 			{
+				//return float4(1,1,1,1);
+
 				AgentEyeStrokeData eyeData = agentEyesStrokesCBuffer[i.bufferIndices.y];
 				AgentSimData agentSimData = agentSimDataCBuffer[i.bufferIndices.x];
 				

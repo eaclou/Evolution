@@ -411,8 +411,8 @@ void VelocityInjectionPoints (uint3 id : SV_DispatchThreadID)
 		fp = ForcePointsCBuffer[i];	
 
 		float2 forceCoords = float2(fp.posX, fp.posY);
-		float animatedStrengthModifierX = sin((_Time + i * 10.0) * 0.2);
-		float animatedStrengthModifierY = cos((_Time - i * 20.1793) * 0.182451);
+		float animatedStrengthModifierX = sin((_Time + i * 10.0) * 0.2) * _ForceMagnitude;
+		float animatedStrengthModifierY = cos((_Time - i * 20.1793) * 0.182451) * _ForceMagnitude;
 		float2 forceVal = float2(fp.velX * animatedStrengthModifierX, fp.velY * animatedStrengthModifierY);		
 		float dist = length(pixelCoords - forceCoords);
 		float influenceAmount = exp(-fp.size * ((forceCoords.x - pixelCoords.x) * (forceCoords.x - pixelCoords.x) + (forceCoords.y - pixelCoords.y) * (forceCoords.y - pixelCoords.y)) / dist);

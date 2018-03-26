@@ -111,7 +111,7 @@ public class TestModule {
         parentID = genome.parentID;
         inno = genome.inno;*/
     }
-
+    
     public void Initialize(TestModuleGenome genome, Agent agent, StartPositionGenome startPos) {
         ownRigidBody2D = agent.GetComponent<Rigidbody2D>();
         bias = new float[1];   //0
@@ -505,7 +505,7 @@ public class TestModule {
         }
     }
 
-    public void Tick() {        
+    public void Tick(bool isPlayer) {        
 
         //float xPos = ownRigidBody2D.transform.localPosition.x;
         //float yPos = ownRigidBody2D.transform.localPosition.y;
@@ -576,9 +576,17 @@ public class TestModule {
         hitPoints[0] = Mathf.Max(hitPoints[0], 0f);
         //stamina[0] = 1f;
 
+        float foodDrain = foodConsumptionRate;
+
+        if(isPlayer) {
+            foodDrain = foodConsumptionRate * 0.92f;
+        }
+        
         foodAmountR[0] = Mathf.Max(foodAmountR[0] - foodConsumptionRate, 0f);
         foodAmountG[0] = Mathf.Max(foodAmountG[0] - foodConsumptionRate, 0f);
         foodAmountB[0] = Mathf.Max(foodAmountB[0] - foodConsumptionRate, 0f);
+        
+        
         
         int rayLayer = LayerMask.GetMask("EnvironmentCollision");
         //Debug.Log(LayerMask.GetMask("EnvironmentCollision"));

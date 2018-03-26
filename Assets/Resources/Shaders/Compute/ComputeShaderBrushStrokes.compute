@@ -340,7 +340,7 @@ void CSAlignFrameBufferStrokes (uint3 id : SV_DispatchThreadID)
 		grad = normalize(float2(dX, dY));
 	}
 
-	if(altitudeCenter < 0.5) {  // if underwater, follow topographical lines rather than steepestGrade:
+	if(altitudeCenter < 0.6) {  // if underwater, follow topographical lines rather than steepestGrade:
 		grad = float2(grad.y, -grad.x);
 	}
 

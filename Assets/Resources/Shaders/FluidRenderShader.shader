@@ -90,18 +90,18 @@
 
 				float brightness = (finalColor.x + finalColor.y + finalColor.z) / 3.0;
 								
-				finalColor.a = saturate(-altitude * 17);
+				finalColor.a = saturate(-(altitude - 0.075) * 17);
 
-				float alphaMod = saturate((brightness - 0.5) * -16);
+				//float alphaMod = saturate((brightness - 0.5) * -16);
 				//finalColor.a = saturate(finalColor.a - alphaMod * 1);
 
-				float shorelineBoost = 1.0 - saturate(-altitude);
-				float distToSeaLevel = abs(altitude);
-				float shoreLerp = 1.0 - distToSeaLevel * 10;
+				//float shorelineBoost = 1.0 - saturate(-altitude);
+				//float distToSeaLevel = abs(altitude);
+				//float shoreLerp = 1.0 - distToSeaLevel * 10;
 				//finalColor.a = shorelineBoost;
-				if(altitude < 0 && altitude > -0.1) {
+				//if(altitude < 0 && altitude > -0.1) {
 					//finalColor.a = lerp(finalColor.a, shorelineBoost * 0.5, shoreLerp);
-				}
+				//}
 
 				//finalColor.a *= 0.55;
 
