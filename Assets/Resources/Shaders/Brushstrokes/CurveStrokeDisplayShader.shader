@@ -105,7 +105,7 @@
 				//float4 centerUV = ComputeScreenPos(pos);
 				//o.centerUV = centerUV.xy / centerUV.w;
 
-				float alpha = 1;
+				float alpha = 0.75;
 				//alpha = alpha * agentSimData.maturity;
 				alpha = alpha * saturate(1.0 - agentSimData.decay * 4);
 

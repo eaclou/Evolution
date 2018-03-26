@@ -502,14 +502,14 @@ public class SimulationManager : MonoBehaviour {
             if (foodArray[i].curLifeStage == FoodModule.FoodLifeStage.Growing) {
                 hackyScalingForceMultiplier = 3.3f;
             }
-            foodArray[i].GetComponent<Rigidbody2D>().AddForce(simStateData.fluidVelocitiesAtFoodPositionsArray[i] * 16f * hackyScalingForceMultiplier * foodArray[i].GetComponent<Rigidbody2D>().mass, ForceMode2D.Impulse); //
+            foodArray[i].GetComponent<Rigidbody2D>().AddForce(simStateData.fluidVelocitiesAtFoodPositionsArray[i] * 28f * hackyScalingForceMultiplier * foodArray[i].GetComponent<Rigidbody2D>().mass, ForceMode2D.Impulse); //
             //foodArray[i].GetComponent<Rigidbody2D>().AddForce(new Vector2(1f, 1f), ForceMode2D.Force); //
             // Looks like AddForce has less of an effect on a GO/Rigidbody2D that is being scaled through a script... ??
             // Feels like rigidbody is accumulating velocity which is then released all at once when the scaling stops??
             // Hacking through it by increasign force on growing food:
         }
         for (int i = 0; i < predatorArray.Length; i++) {
-            predatorArray[i].rigidBody.AddForce(simStateData.fluidVelocitiesAtPredatorPositionsArray[i] * 38f * predatorArray[i].rigidBody.mass, ForceMode2D.Impulse);
+            predatorArray[i].rigidBody.AddForce(simStateData.fluidVelocitiesAtPredatorPositionsArray[i] * 40f * predatorArray[i].rigidBody.mass, ForceMode2D.Impulse);
         }
     }
 
@@ -818,14 +818,14 @@ public class SimulationManager : MonoBehaviour {
 
             // Can randomly pull from saved Genepool database:
             float randRoll = UnityEngine.Random.Range(0f, 1f);
-            if(randRoll < 0.005f) {
+            if(randRoll < 0.003f) {
                 mutationSettings = settingsManager.mutationSettingsRandomBody;
                 randRoll = UnityEngine.Random.Range(0f, 1f);
                 if(randRoll < 0.55f) {                
                     parentBodyGenome = savedGenomePoolArray1[parentGenomeIndex].bodyGenome;
                     parentBrainGenome = savedGenomePoolArray1[parentGenomeIndex].brainGenome;
                 }
-                else if(randRoll < 0.9f) {                
+                else if(randRoll < 0.85f) {                
                     parentBodyGenome = savedGenomePoolArray2[parentGenomeIndex].bodyGenome;
                     parentBrainGenome = savedGenomePoolArray2[parentGenomeIndex].brainGenome;
                 }

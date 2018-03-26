@@ -121,8 +121,8 @@ RWStructuredBuffer<BodyStrokeData> agentBodyStrokesWriteCBuffer;
 StructuredBuffer<AgentEyeStrokeData> agentEyeStrokesReadCBuffer; // use this for updating
 RWStructuredBuffer<AgentEyeStrokeData> agentEyeStrokesWriteCBuffer;
 
-//StructuredBuffer<TrailStrokeData> agentTrailStrokesReadCBuffer;
-//RWStructuredBuffer<TrailStrokeData> agentTrailStrokesWriteCBuffer;
+StructuredBuffer<TrailStrokeData> agentTrailStrokesReadCBuffer;
+RWStructuredBuffer<TrailStrokeData> agentTrailStrokesWriteCBuffer;
 
 StructuredBuffer<StemData> foodStemDataUpdateCBuffer;
 RWStructuredBuffer<StemData> foodStemDataWriteCBuffer;
@@ -284,20 +284,24 @@ void CSUpdateDynamicFruitBuffers (uint3 id : SV_DispatchThreadID)
 [numthreads(1,1,1)]
 void CSPinRootTrailStrokesData (uint3 id : SV_DispatchThreadID)
 {
-	//AgentSimData agentData = agentSimDataCBuffer[id.x];
+	AgentSimData agentData = agentSimDataCBuffer[id.x];
 
-	//int trailPointIndex = id.x * 32;
+	int trailPointIndex = id.x * 16;
 
-	//agentTrailStrokesWriteCBuffer[trailPointIndex].worldPos = agentData.worldPos;
+	agentTrailStrokesWriteCBuffer[trailPointIndex].worldPos = agentData.worldPos - agentData.heading * agentData.size.y * 0.4;
 }
 
 [numthreads(1,1,1)]
 void CSIterateTrailStrokesData (uint3 id : SV_DispatchThreadID)
 {
-	/*uint trailPointIndex = id.x;
-	uint localTrailIndex = trailPointIndex % 32;
+	uint trailPointIndex = id.x;
+	uint localTrailIndex = trailPointIndex % 16;
 
-	float restDistance = 0.125;
+	uint agentIndex = floor(id.x / 16);
+	AgentSimData agentData = agentSimDataCBuffer[agentIndex];
+	
+	float restDistance = 0.15 * agentData.size.y;
+	restDistance = restDistance * (1 + (agentData.primaryHue.b - 0.5) * 1);
 
 	if(localTrailIndex != 0) {			
 		float2 parentPos = agentTrailStrokesReadCBuffer[trailPointIndex - 1].worldPos;
@@ -305,14 +309,14 @@ void CSIterateTrailStrokesData (uint3 id : SV_DispatchThreadID)
 		
 		float2 uv = saturate((currentPos + 70) / 140);
 		float2 vel = velocityRead.SampleLevel(_LinearRepeat, uv, 0).xy;
-		float speedMult = 2.25;
+		float speedMult = 1;
 
 		currentPos += (vel * speedMult);
 
 		float2 vecParentToCurrent = currentPos - parentPos;
 
 		agentTrailStrokesWriteCBuffer[trailPointIndex].worldPos = parentPos + normalize(vecParentToCurrent) * restDistance;	
-	}*/
+	}
 }
 
 [numthreads(1,1,1)]

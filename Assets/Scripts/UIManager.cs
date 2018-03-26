@@ -71,6 +71,8 @@ public class UIManager : MonoBehaviour {
 
     public float loadingProgress = 0f;
 
+    private int obsZoomLevel = 0;  // 0 most zoomed out
+
     
 	// Use this for initialization
 	void Start () {
@@ -138,9 +140,11 @@ public class UIManager : MonoBehaviour {
     }
 
     public void EnterObserverMode() {
-        ClickButtonModeC();
-        isObserverMode = true;
+        obsZoomLevel = 0; // C, zoomed out max
 
+        ClickButtonModeC();
+
+        isObserverMode = true;
         deathScreenOn = false;
 
         gameManager.simulationManager.EnterObserverMode();
@@ -308,10 +312,30 @@ public class UIManager : MonoBehaviour {
             textAvgLifespan.text = "Average Lifespan: " + Mathf.RoundToInt(gameManager.simulationManager.rollingAverageAgentScore).ToString();
 
             if(Input.GetKeyDown(KeyCode.UpArrow)) {
-                ClickButtonModeB();
+                obsZoomLevel = obsZoomLevel + 1;
+                if(obsZoomLevel > 2) {
+                    obsZoomLevel = 2;
+                }
+
+                if(obsZoomLevel == 1) {
+                    ClickButtonModeA();
+                }
+                if(obsZoomLevel == 2) {
+                    ClickButtonModeB();
+                }                
             }
             if(Input.GetKeyDown(KeyCode.DownArrow)) {
-                ClickButtonModeC();
+                obsZoomLevel = obsZoomLevel - 1;
+                if(obsZoomLevel < 0) {
+                    obsZoomLevel = 0;
+                }
+
+                if(obsZoomLevel == 1) {
+                    ClickButtonModeA();
+                }
+                if(obsZoomLevel == 0) {
+                    ClickButtonModeC();
+                }
             }
         }
         else {

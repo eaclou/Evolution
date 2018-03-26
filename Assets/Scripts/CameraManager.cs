@@ -84,6 +84,15 @@ public class CameraManager : MonoBehaviour {
         //Vector2 targetPos = new Vector2(targetCamPos.x, targetCamPos.y);
         //Vector2 targetCamDir = new Vector2(targetCamPos.x, targetCamPos.y) - new Vector2(curPos.x, curPos.y);
 
+        // Max Camera Bounds!
+        //float paddingX = -3f;
+        //float paddingY = 2f;
+        float minPos = -70f + (camera.orthographicSize);
+        float maxPos = 70f - (camera.orthographicSize);
+
+        targetCamPos.x = Mathf.Min(Mathf.Max(targetCamPos.x, minPos), maxPos);
+        targetCamPos.y = Mathf.Min(Mathf.Max(targetCamPos.y, minPos), maxPos);
+
         // Fuck it for now.... stupid lerp jitter...
         // Come back to this after sorting out Execution order and data flow in rest of program...
         this.transform.position = Vector3.Lerp(this.transform.position, new Vector3(targetCamPos.x, targetCamPos.y, -50f), lerpSpeed * Time.deltaTime);

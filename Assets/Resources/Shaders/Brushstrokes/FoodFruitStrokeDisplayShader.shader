@@ -163,7 +163,7 @@
 				float2 uv0 = quadVerticesCBuffer[id] + 0.5f; // full texture
 				float2 uv1 = uv0;
 				// Which Brush? (uv.X) :::::
-				float randBrush = 1; //rawData.fruitBrushType; //pointStrokeData.brushType; //floor(rand(float2(random2, inst)) * 3.99); // 0-3
+				float randBrush = fmod((float)rawData.fruitBrushType, 2); //rawData.fruitBrushType; //pointStrokeData.brushType; //floor(rand(float2(random2, inst)) * 3.99); // 0-3
 				const float tilePercentage = (1.0 / 8.0);
 				uv0.x *= tilePercentage;  // 8 brushes on texture
 				uv0.x += tilePercentage * randBrush;

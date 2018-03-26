@@ -77,7 +77,7 @@ public class TheRenderKing : MonoBehaviour {
 
     private ComputeBuffer agentTrailStrokes0CBuffer;
     private ComputeBuffer agentTrailStrokes1CBuffer;
-    private int numTrailPointsPerAgent = 32;
+    private int numTrailPointsPerAgent = 16;
 
     private int numFrameBufferStrokesPerDimension = 512;
     private ComputeBuffer frameBufferStrokesCBuffer;
@@ -224,25 +224,14 @@ public class TheRenderKing : MonoBehaviour {
         InitializeAgentBodyStrokesBuffer();         
         InitializeAgentEyeStrokesBuffer();
         InitializeAgentSmearStrokesBuffer();
+        InitializeAgentTailStrokesBuffer();
         InitializeFrameBufferStrokesBuffer();
         InitializePlayerGlowBuffer();
         InitializePlayerGlowyBitsBuffer();
         InitializeFloatyBitsBuffer();
         InitializeRipplesBuffer();
-
         
-        /*
-        trailStrokeDataArray = new TrailStrokeData[65 * numTrailPointsPerAgent];
-        for (int i = 0; i < trailStrokeDataArray.Length; i++) {
-            int agentIndex = (int)Mathf.Floor((float)i / numTrailPointsPerAgent); //i % numTrailPointsPerAgent
-            float trailPos = (float)i % (float)numTrailPointsPerAgent;
-            trailStrokeDataArray[i] = new TrailStrokeData();
-            trailStrokeDataArray[i].worldPos = new Vector2(0f, trailPos * 1f);
-        }
-        agentTrailStrokes0CBuffer = new ComputeBuffer(trailStrokeDataArray.Length, sizeof(float) * 2);
-        agentTrailStrokes0CBuffer.SetData(trailStrokeDataArray);
-        agentTrailStrokes1CBuffer = new ComputeBuffer(trailStrokeDataArray.Length, sizeof(float) * 2);
-                
+        /*        
         // TRAIL DOTS:
         TrailDotData[] trailDotsDataArray = new TrailDotData[numTrailDotsPerAgent * agentSimDataCBuffer.count];
         for (int i = 0; i < agentSimDataCBuffer.count; i++) {
@@ -473,6 +462,18 @@ public class TheRenderKing : MonoBehaviour {
         }        
         agentSmearStrokesCBuffer.SetData(agentSmearStrokesDataArray);
     }
+    public void InitializeAgentTailStrokesBuffer() {
+        TrailStrokeData[] trailStrokeDataArray = new TrailStrokeData[simManager._NumAgents * numTrailPointsPerAgent];
+        for (int i = 0; i < trailStrokeDataArray.Length; i++) {
+            int agentIndex = (int)Mathf.Floor((float)i / numTrailPointsPerAgent);
+            float trailPos = (float)i % (float)numTrailPointsPerAgent;
+            trailStrokeDataArray[i] = new TrailStrokeData();
+            trailStrokeDataArray[i].worldPos = new Vector2(0f, trailPos * -1f);
+        }
+        agentTrailStrokes0CBuffer = new ComputeBuffer(trailStrokeDataArray.Length, sizeof(float) * 2);
+        agentTrailStrokes0CBuffer.SetData(trailStrokeDataArray);
+        agentTrailStrokes1CBuffer = new ComputeBuffer(trailStrokeDataArray.Length, sizeof(float) * 2);
+    }
 
     private void InitializeMaterials() {
         agentEyesDisplayMat.SetPass(0); // Eyes
@@ -503,12 +504,12 @@ public class TheRenderKing : MonoBehaviour {
         //ripplesDisplayMat.SetBuffer("agentSimDataCBuffer", agentSimDataCBuffer);
         ripplesDisplayMat.SetBuffer("trailDotsCBuffer", ripplesCBuffer);
         ripplesDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-
-        /*
+                
         trailStrokeDisplayMat.SetPass(0);
         trailStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         trailStrokeDisplayMat.SetBuffer("agentTrailStrokesReadCBuffer", agentTrailStrokes0CBuffer);
-        
+
+        /*
         trailDotsDisplayMat.SetPass(0);
         trailDotsDisplayMat.SetBuffer("agentSimDataCBuffer", agentSimDataCBuffer);
         trailDotsDisplayMat.SetBuffer("trailDotsCBuffer", trailDotsCBuffer);
@@ -703,18 +704,18 @@ public class TheRenderKing : MonoBehaviour {
             
             float agentAlpha = 0.024f;
             if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Mature) {
-                agentAlpha = 0.2f;
+                agentAlpha = 2.2f / simManager.agentsArray[i].fullSize.magnitude;
             }
             if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Decaying) {
-                agentAlpha = 1f * Mathf.Clamp01(1f - (float)simManager.agentsArray[i].lifeStageTransitionTimeStepCounter * 2f / (float)simManager.agentsArray[i]._DecayDurationTimeSteps);
+                agentAlpha = 3f * Mathf.Clamp01(1f - (float)simManager.agentsArray[i].lifeStageTransitionTimeStepCounter * 2f / (float)simManager.agentsArray[i]._DecayDurationTimeSteps);
             }
             Color drawColor = new Color(simManager.agentGenomePoolArray[i].bodyGenome.huePrimary.x, simManager.agentGenomePoolArray[i].bodyGenome.huePrimary.y, simManager.agentGenomePoolArray[i].bodyGenome.huePrimary.z, agentAlpha);
             if(simManager.agentsArray[i].wasImpaled) {
                 drawColor.r = 0.8f;
                 drawColor.g = 0.1f;
                 drawColor.b = 0f;
-                drawColor.a = 1f;
-                colorInjectionStrokeDataArray[baseIndex + i].scale *= 2f;
+                drawColor.a = 1.4f;
+                colorInjectionStrokeDataArray[baseIndex + i].scale *= 1.25f;
             }
             colorInjectionStrokeDataArray[baseIndex + i].color = drawColor;
             
@@ -727,9 +728,9 @@ public class TheRenderKing : MonoBehaviour {
             colorInjectionStrokeDataArray[baseIndex + i].localDir = simManager.foodArray[i].facingDirection;
             colorInjectionStrokeDataArray[baseIndex + i].scale = simManager.foodArray[i].curSize * 1.0f;
             
-            float foodAlpha = 0.025f;
+            float foodAlpha = 0.06f;
             if(simManager.foodArray[i].isBeingEaten > 0.5) {
-                foodAlpha = 0.3f;
+                foodAlpha = 1.2f;
             }
 
             colorInjectionStrokeDataArray[baseIndex + i].color = new Vector4(Mathf.Lerp(simManager.foodGenomePoolArray[i].fruitHue.x, 0.1f, 0.7f), Mathf.Lerp(simManager.foodGenomePoolArray[i].fruitHue.y, 0.9f, 0.7f), Mathf.Lerp(simManager.foodGenomePoolArray[i].fruitHue.z, 0.2f, 0.7f), foodAlpha);
@@ -849,6 +850,9 @@ public class TheRenderKing : MonoBehaviour {
         singleAgentSmearStrokeCBuffer.Release();
 
         //Debug.Log("Update curve Strokes! [" + singleCurveStrokeArray[0].p0.ToString() + ", " + singleCurveStrokeArray[0].p1.ToString() + ", " + singleCurveStrokeArray[0].p2.ToString() + ", " + singleCurveStrokeArray[0].p3.ToString() + "]");
+    }
+    public void UpdateAgentTailStrokesBuffer(int agentIndex) {
+
     }
     public void UpdateDynamicFoodBuffers(int foodIndex) {
 
@@ -996,6 +1000,45 @@ public class TheRenderKing : MonoBehaviour {
         computeShaderBrushStrokes.SetBuffer(kernelCSSimulateFruit, "foodFruitDataWriteCBuffer", simManager.simStateData.foodFruitDataCBuffer);
         computeShaderBrushStrokes.Dispatch(kernelCSSimulateFruit, simManager.simStateData.foodFruitDataCBuffer.count / 64, 1, 1);        
     }
+    private void IterateTrailStrokesData() {
+        // Set position of trail Roots:
+        int kernelCSPinRootTrailStrokesData = computeShaderBrushStrokes.FindKernel("CSPinRootTrailStrokesData");        
+        computeShaderBrushStrokes.SetBuffer(kernelCSPinRootTrailStrokesData, "agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
+        computeShaderBrushStrokes.SetBuffer(kernelCSPinRootTrailStrokesData, "agentTrailStrokesWriteCBuffer", agentTrailStrokes0CBuffer);
+        computeShaderBrushStrokes.Dispatch(kernelCSPinRootTrailStrokesData, simManager.simStateData.agentSimDataCBuffer.count, 1, 1);
+        computeShaderBrushStrokes.SetBuffer(kernelCSPinRootTrailStrokesData, "agentTrailStrokesWriteCBuffer", agentTrailStrokes1CBuffer);
+        computeShaderBrushStrokes.Dispatch(kernelCSPinRootTrailStrokesData, simManager.simStateData.agentSimDataCBuffer.count, 1, 1);
+
+        //if(velocityTex != null) {
+            // update all trailPoint positions:
+        int kernelCSIterateTrailStrokesData = computeShaderBrushStrokes.FindKernel("CSIterateTrailStrokesData");
+        // PING:::
+        computeShaderBrushStrokes.SetBuffer(kernelCSIterateTrailStrokesData, "agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
+        computeShaderBrushStrokes.SetBuffer(kernelCSIterateTrailStrokesData, "agentTrailStrokesReadCBuffer", agentTrailStrokes0CBuffer);
+        computeShaderBrushStrokes.SetBuffer(kernelCSIterateTrailStrokesData, "agentTrailStrokesWriteCBuffer", agentTrailStrokes1CBuffer);
+        computeShaderBrushStrokes.SetTexture(kernelCSIterateTrailStrokesData, "velocityRead", fluidManager._VelocityA);
+        computeShaderBrushStrokes.Dispatch(kernelCSIterateTrailStrokesData, agentTrailStrokes0CBuffer.count, 1, 1);
+        // PONG:::
+        computeShaderBrushStrokes.SetBuffer(kernelCSIterateTrailStrokesData, "agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
+        computeShaderBrushStrokes.SetBuffer(kernelCSIterateTrailStrokesData, "agentTrailStrokesReadCBuffer", agentTrailStrokes1CBuffer);
+        computeShaderBrushStrokes.SetBuffer(kernelCSIterateTrailStrokesData, "agentTrailStrokesWriteCBuffer", agentTrailStrokes0CBuffer);
+        computeShaderBrushStrokes.SetTexture(kernelCSIterateTrailStrokesData, "velocityRead", fluidManager._VelocityA);
+        computeShaderBrushStrokes.Dispatch(kernelCSIterateTrailStrokesData, agentTrailStrokes0CBuffer.count, 1, 1);
+
+        // PING:::
+        computeShaderBrushStrokes.SetBuffer(kernelCSIterateTrailStrokesData, "agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
+        computeShaderBrushStrokes.SetBuffer(kernelCSIterateTrailStrokesData, "agentTrailStrokesReadCBuffer", agentTrailStrokes0CBuffer);
+        computeShaderBrushStrokes.SetBuffer(kernelCSIterateTrailStrokesData, "agentTrailStrokesWriteCBuffer", agentTrailStrokes1CBuffer);
+        computeShaderBrushStrokes.SetTexture(kernelCSIterateTrailStrokesData, "velocityRead", fluidManager._VelocityA);
+        computeShaderBrushStrokes.Dispatch(kernelCSIterateTrailStrokesData, agentTrailStrokes0CBuffer.count, 1, 1);
+        // PONG:::
+        computeShaderBrushStrokes.SetBuffer(kernelCSIterateTrailStrokesData, "agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
+        computeShaderBrushStrokes.SetBuffer(kernelCSIterateTrailStrokesData, "agentTrailStrokesReadCBuffer", agentTrailStrokes1CBuffer);
+        computeShaderBrushStrokes.SetBuffer(kernelCSIterateTrailStrokesData, "agentTrailStrokesWriteCBuffer", agentTrailStrokes0CBuffer);
+        computeShaderBrushStrokes.SetTexture(kernelCSIterateTrailStrokesData, "velocityRead", fluidManager._VelocityA);
+        computeShaderBrushStrokes.Dispatch(kernelCSIterateTrailStrokesData, agentTrailStrokes0CBuffer.count, 1, 1);
+        //}
+    }
 
     public void Tick() {  // should be called from SimManager at proper time!
         fullscreenFade = 1f;
@@ -1012,6 +1055,7 @@ public class TheRenderKing : MonoBehaviour {
         // Execute computeShaders to update any dynamic particles that are purely cosmetic
         SimPlayerGlow();
         SimAgentSmearStrokes(); // start with this one?
+        IterateTrailStrokesData();
         SimPlayerGlowyBits();
         SimFloatyBits();
         SimRipples();
@@ -1143,6 +1187,12 @@ public class TheRenderKing : MonoBehaviour {
         playerGlowyBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, playerGlowyBitsDisplayMat, 0, MeshTopology.Triangles, 6, playerGlowyBitsCBuffer.count);
         
+        // AGENT TAILS WOO!
+        trailStrokeDisplayMat.SetPass(0);
+        trailStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        trailStrokeDisplayMat.SetBuffer("agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
+        trailStrokeDisplayMat.SetBuffer("agentTrailStrokesReadCBuffer", agentTrailStrokes0CBuffer);
+        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, trailStrokeDisplayMat, 0, MeshTopology.Triangles, 6, agentTrailStrokes0CBuffer.count);
 
         foodFruitDisplayMat.SetPass(0);
         foodFruitDisplayMat.SetBuffer("fruitDataCBuffer", simManager.simStateData.foodFruitDataCBuffer);
@@ -1329,32 +1379,7 @@ public class TheRenderKing : MonoBehaviour {
 
         return pointStroke;
     }*/
-    /*private void IterateTrailStrokesData() {
-    // Set position of trail Roots:
-    int kernelCSPinRootTrailStrokesData = computeShaderBrushStrokes.FindKernel("CSPinRootTrailStrokesData");        
-    computeShaderBrushStrokes.SetBuffer(kernelCSPinRootTrailStrokesData, "agentSimDataCBuffer", agentSimDataCBuffer);
-    computeShaderBrushStrokes.SetBuffer(kernelCSPinRootTrailStrokesData, "agentTrailStrokesWriteCBuffer", agentTrailStrokes0CBuffer);
-    computeShaderBrushStrokes.Dispatch(kernelCSPinRootTrailStrokesData, agentSimDataCBuffer.count, 1, 1);
-    computeShaderBrushStrokes.SetBuffer(kernelCSPinRootTrailStrokesData, "agentTrailStrokesWriteCBuffer", agentTrailStrokes1CBuffer);
-    computeShaderBrushStrokes.Dispatch(kernelCSPinRootTrailStrokesData, agentSimDataCBuffer.count, 1, 1);
-
-    if(velocityTex != null) {
-        // update all trailPoint positions:
-        int kernelCSIterateTrailStrokesData = computeShaderBrushStrokes.FindKernel("CSIterateTrailStrokesData");
-        // PING:::
-        computeShaderBrushStrokes.SetBuffer(kernelCSIterateTrailStrokesData, "agentSimDataCBuffer", agentSimDataCBuffer);
-        computeShaderBrushStrokes.SetBuffer(kernelCSIterateTrailStrokesData, "agentTrailStrokesReadCBuffer", agentTrailStrokes0CBuffer);
-        computeShaderBrushStrokes.SetBuffer(kernelCSIterateTrailStrokesData, "agentTrailStrokesWriteCBuffer", agentTrailStrokes1CBuffer);
-        computeShaderBrushStrokes.SetTexture(kernelCSIterateTrailStrokesData, "velocityRead", velocityTex);
-        computeShaderBrushStrokes.Dispatch(kernelCSIterateTrailStrokesData, agentTrailStrokes0CBuffer.count, 1, 1);
-        // PONG:::
-        computeShaderBrushStrokes.SetBuffer(kernelCSIterateTrailStrokesData, "agentSimDataCBuffer", agentSimDataCBuffer);
-        computeShaderBrushStrokes.SetBuffer(kernelCSIterateTrailStrokesData, "agentTrailStrokesReadCBuffer", agentTrailStrokes1CBuffer);
-        computeShaderBrushStrokes.SetBuffer(kernelCSIterateTrailStrokesData, "agentTrailStrokesWriteCBuffer", agentTrailStrokes0CBuffer);
-        computeShaderBrushStrokes.SetTexture(kernelCSIterateTrailStrokesData, "velocityRead", velocityTex);
-        computeShaderBrushStrokes.Dispatch(kernelCSIterateTrailStrokesData, agentTrailStrokes0CBuffer.count, 1, 1);
-    }
-    }*/
+    
     /*public void InitializeAllAgentCurveData() {
         ComputeBuffer agentInitializeCBuffer = new ComputeBuffer(agentSimDataArray.Length, sizeof(int));
         int[] agentsToInitArray = new int[agentInitializeCBuffer.count];

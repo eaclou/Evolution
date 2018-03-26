@@ -206,23 +206,18 @@ public class EnvironmentFluidManager : MonoBehaviour {
        
         float cycleValue = generation % 21f;
 
-        if(cycleValue > 11f) {
-            Debug.Log("UpdateSimulationClimate Stormy!");
-            SetClimateStormy();
-        }
-        else if(cycleValue > 17f) {            
-            
-            Debug.Log("UpdateSimulationClimate Thick!");
-            SetClimateThick();
-        }
-        else {
-            Debug.Log("UpdateSimulationClimate Initial!");
+        if(cycleValue <= 12) {
             SetClimateInitial();
         }
-
+        if(cycleValue > 12f && cycleValue <= 17) {            
+            SetClimateStormy();
+        }
+        if(cycleValue > 17f) {            
+            SetClimateThick();
+        }
     }
     private void SetClimateInitial() {
-
+        Debug.Log("UpdateSimulationClimate Initial!");
         //CreateForcePoints(0.08f, 60f, 300f);
         float lerpAmount = 0.3f;
 
@@ -234,18 +229,20 @@ public class EnvironmentFluidManager : MonoBehaviour {
         forceMultiplier = Mathf.Lerp(forceMultiplier, 1f, lerpAmount);
     }
     private void SetClimateStormy() {
+        Debug.Log("UpdateSimulationClimate Stormy!");
         //CreateForcePoints(2f, 60f, 300f);
         float lerpAmount = 0.3f;
 
         viscosity = Mathf.Lerp(viscosity, 0.0002f, lerpAmount);
         damping = Mathf.Lerp(damping, 0.003f, lerpAmount);
-        colorRefreshBackgroundMultiplier = Mathf.Lerp(colorRefreshBackgroundMultiplier, 0.0009f, lerpAmount);
+        colorRefreshBackgroundMultiplier = Mathf.Lerp(colorRefreshBackgroundMultiplier, 0.0025f, lerpAmount);
         colorRefreshDynamicMultiplier = Mathf.Lerp(colorRefreshDynamicMultiplier, 0.01f, lerpAmount);
 
         //forceMultiplier = Mathf.Lerp(forceMultiplier, 2.5f, lerpAmount);
         forceMultiplier = Mathf.Lerp(forceMultiplier, 14f, lerpAmount);
     }
     private void SetClimateThick() {
+        Debug.Log("UpdateSimulationClimate Thick!");
         float lerpAmount = 0.3f;
 
         viscosity = Mathf.Lerp(viscosity, 0.02f, lerpAmount);

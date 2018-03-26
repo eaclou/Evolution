@@ -464,7 +464,8 @@ public class Agent : MonoBehaviour {
         verticalMovementInput = Mathf.Lerp(verAI, verHuman, humanControlLerp);
         
         // MOVEMENT HERE:
-        this.GetComponent<Rigidbody2D>().AddForce(new Vector2(speed * horizontalMovementInput * Time.deltaTime, speed * verticalMovementInput * Time.deltaTime), ForceMode2D.Impulse);
+        this.GetComponent<Rigidbody2D>().AddForce(new Vector2(horizontalMovementInput, verticalMovementInput).normalized * speed * Time.deltaTime, ForceMode2D.Impulse);
+        //this.GetComponent<Rigidbody2D>().AddForce(new Vector2(speed * horizontalMovementInput * Time.deltaTime, speed * verticalMovementInput * Time.deltaTime), ForceMode2D.Impulse);
         
         // Facing Direction:
         throttle = new Vector2(horizontalMovementInput, verticalMovementInput);
