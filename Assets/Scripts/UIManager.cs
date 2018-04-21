@@ -311,7 +311,7 @@ public class UIManager : MonoBehaviour {
             textCurGen.text = "Generation: " + gameManager.simulationManager.curApproxGen.ToString("F0");
             textAvgLifespan.text = "Average Lifespan: " + Mathf.RoundToInt(gameManager.simulationManager.rollingAverageAgentScore).ToString();
 
-            if(Input.GetKeyDown(KeyCode.UpArrow)) {
+            if(Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W)) {
                 obsZoomLevel = obsZoomLevel + 1;
                 if(obsZoomLevel > 2) {
                     obsZoomLevel = 2;
@@ -324,7 +324,7 @@ public class UIManager : MonoBehaviour {
                     ClickButtonModeB();
                 }                
             }
-            if(Input.GetKeyDown(KeyCode.DownArrow)) {
+            if(Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.S)) {
                 obsZoomLevel = obsZoomLevel - 1;
                 if(obsZoomLevel < 0) {
                     obsZoomLevel = 0;

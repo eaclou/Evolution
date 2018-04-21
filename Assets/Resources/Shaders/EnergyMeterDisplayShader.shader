@@ -63,12 +63,12 @@
 				
 				newUV = newUV - 0.5;  // make center of each section 0
 
-				float xScale = 1.1;
+				float xScale = 0.6;
 				newUV.x *= xScale;
 				
 
 				float clock = _Time.y * 2.5;
-				float rotateAmp = 0.09;
+				float rotateAmp = 0.055;
 				newUV = float2(newUV.x + cos(clock + cellID) * rotateAmp, newUV.y + sin(clock + cellID) * rotateAmp);
 
 				// Danger Wobble:
@@ -76,7 +76,7 @@
 				float dangerClockSpeed = clock * dangerAmount * 1.05;
 				float freq = 0.8 * (1 + dangerAmount * 0.6);
 				float3 noiseOffset = Value2D(dangerClockSpeed + cellID * 10, freq);
-				float noiseAmp = 0.075 * dangerAmount;
+				float noiseAmp = 0.04 * dangerAmount;
 				newUV += noiseOffset * noiseAmp;
 
 				//newUV = float2(newUV.x + cos(clock + i.uv.x * 10) * wobbleAmp, newUV.y + sin(clock + i.uv.x * 10) * wobbleAmp);
@@ -84,8 +84,8 @@
 				float displayValue = 0;
 				float distToCenter = length(newUV);
 
-				float coreMask = 1.0 - smoothstep(0.16, 0.24, distToCenter);
-				float glowMask = 1.0 - smoothstep(0.16, 0.4, distToCenter) - coreMask;
+				float coreMask = 1.0 - smoothstep(0.12, 0.2, distToCenter);
+				float glowMask = 1.0 - smoothstep(0.12, 0.3, distToCenter) - coreMask;
 				displayValue = glowMask;
 				
 				float litMask = ceil((foodAvgPercentage * divisions - cellID) / divisions);

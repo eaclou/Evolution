@@ -55,7 +55,7 @@ public class Agent : MonoBehaviour {
 
     //public int sourceGenomeIndex;
     
-    private float speed = 120f;
+    private float speed = 100f;
     public bool humanControlled = false;
     public float humanControlLerp = 0f;
     public bool isNull = false;
@@ -83,6 +83,9 @@ public class Agent : MonoBehaviour {
     public Vector2 throttle;
     public Vector2 smoothedThrottle;
     public Vector2 facingDirection;  // based on throttle history
+
+    public float avgVel;
+    public float avgFluidVel;
 
     // Use this for initialization
     private void Awake() {
@@ -384,7 +387,8 @@ public class Agent : MonoBehaviour {
         }*/
         isInsideFood = false;
         
-        Vector3 curPos = transform.localPosition;        
+        Vector3 curPos = transform.localPosition;
+        avgVel = Mathf.Lerp(avgVel, (curPos - prevPos).magnitude, 0.25f);
         prevPos = curPos;
 
         //transform.localScale = new Vector3(fullSize.x, fullSize.y, 1f);

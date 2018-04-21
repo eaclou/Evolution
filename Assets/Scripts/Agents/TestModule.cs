@@ -579,7 +579,7 @@ public class TestModule {
         float foodDrain = foodConsumptionRate;
 
         if(isPlayer) {
-            foodDrain = foodConsumptionRate * 0.92f;
+            foodDrain = foodConsumptionRate * 0.75f;
         }
         
         foodAmountR[0] = Mathf.Max(foodAmountR[0] - foodConsumptionRate, 0f);

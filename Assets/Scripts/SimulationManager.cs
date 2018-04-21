@@ -59,7 +59,7 @@ public class SimulationManager : MonoBehaviour {
     private int agentGridCellResolution = 1;  // How much to subdivide the map in order to detect nearest-neighbors more efficiently --> to not be O(n^2)
     public MapGridCell[][] mapGridCellArray;
 
-    private int numAgents = 64;
+    private int numAgents = 48;
     public int _NumAgents {
         get
         {
@@ -80,7 +80,7 @@ public class SimulationManager : MonoBehaviour {
     private AgentGenome[] savedGenomePoolArray3;
     public FoodGenome[] foodGenomePoolArray;
     public FoodModule[] foodArray;
-    private int numFood = 64;
+    private int numFood = 48;
     public int _NumFood {
         get
         {
@@ -92,7 +92,7 @@ public class SimulationManager : MonoBehaviour {
         }
     }
     public PredatorModule[] predatorArray;
-    private int numPredators = 32;
+    private int numPredators = 24;
     public int _NumPredators {
         get
         {
@@ -485,7 +485,8 @@ public class SimulationManager : MonoBehaviour {
             foodArray[i].Tick();
         }
         // Apply External Forces to dynamic objects: (internal PhysX Updates):
-        ApplyFluidForcesToDynamicObjects();        
+        ApplyFluidForcesToDynamicObjects();     
+               
                 
         // Simulate timestep of fluid Sim - update density/velocity maps:
         // Or should this be right at beginning of frame????? ***************** revisit...
@@ -496,6 +497,8 @@ public class SimulationManager : MonoBehaviour {
         // ********** REVISIT CONVERSION btw fluid/scene coords and Force Amounts !!!! *************
         for (int i = 0; i < agentsArray.Length; i++) {
             agentsArray[i].testModule.ownRigidBody2D.AddForce(simStateData.fluidVelocitiesAtAgentPositionsArray[i] * 50f, ForceMode2D.Impulse);
+
+            agentsArray[i].avgFluidVel = Mathf.Lerp(agentsArray[i].avgFluidVel, simStateData.fluidVelocitiesAtAgentPositionsArray[i].magnitude, 0.25f);
         }
         for (int i = 0; i < foodArray.Length; i++) { // *** cache rigidBody reference
             float hackyScalingForceMultiplier = 1f;
@@ -817,24 +820,28 @@ public class SimulationManager : MonoBehaviour {
             MutationSettings mutationSettings = settingsManager.mutationSettingsPersistent;
 
             // Can randomly pull from saved Genepool database:
-            float randRoll = UnityEngine.Random.Range(0f, 1f);
-            if(randRoll < 0.003f) {
-                mutationSettings = settingsManager.mutationSettingsRandomBody;
-                randRoll = UnityEngine.Random.Range(0f, 1f);
-                if(randRoll < 0.55f) {                
-                    parentBodyGenome = savedGenomePoolArray1[parentGenomeIndex].bodyGenome;
-                    parentBrainGenome = savedGenomePoolArray1[parentGenomeIndex].brainGenome;
+            bool usePreTrained = true;
+
+            if(usePreTrained) {
+                float randRoll = UnityEngine.Random.Range(0f, 1f);
+                if(randRoll < 0.005f) {
+                    mutationSettings = settingsManager.mutationSettingsRandomBody;
+                    randRoll = UnityEngine.Random.Range(0f, 1f);
+                    if(randRoll < 0.55f) {                
+                        parentBodyGenome = savedGenomePoolArray1[parentGenomeIndex].bodyGenome;
+                        parentBrainGenome = savedGenomePoolArray1[parentGenomeIndex].brainGenome;
+                    }
+                    else if(randRoll < 0.85f) {                
+                        parentBodyGenome = savedGenomePoolArray2[parentGenomeIndex].bodyGenome;
+                        parentBrainGenome = savedGenomePoolArray2[parentGenomeIndex].brainGenome;
+                    }
+                    else {
+                        parentBodyGenome = savedGenomePoolArray3[parentGenomeIndex].bodyGenome;
+                        parentBrainGenome = savedGenomePoolArray3[parentGenomeIndex].brainGenome;
+                    }                
                 }
-                else if(randRoll < 0.85f) {                
-                    parentBodyGenome = savedGenomePoolArray2[parentGenomeIndex].bodyGenome;
-                    parentBrainGenome = savedGenomePoolArray2[parentGenomeIndex].brainGenome;
-                }
-                else {
-                    parentBodyGenome = savedGenomePoolArray3[parentGenomeIndex].bodyGenome;
-                    parentBrainGenome = savedGenomePoolArray3[parentGenomeIndex].brainGenome;
-                }
-                
             }
+            
 
             // MUTATE BODY:
             // Mutate body here
