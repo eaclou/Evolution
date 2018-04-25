@@ -65,7 +65,8 @@ public class PredatorModule : MonoBehaviour {
             randY = UnityEngine.Random.Range(-1f, 1f);
         }
         // MOVEMENT HERE:
-        this.GetComponent<Rigidbody2D>().AddForce(new Vector2(speed * randX * Time.deltaTime, speed * randY * Time.deltaTime), ForceMode2D.Impulse);
+        // ** DISABLED!!!
+        //this.GetComponent<Rigidbody2D>().AddForce(new Vector2(speed * randX * Time.deltaTime, speed * randY * Time.deltaTime), ForceMode2D.Impulse);
 
         Vector3 curPos = transform.localPosition;
         prevPos = curPos;

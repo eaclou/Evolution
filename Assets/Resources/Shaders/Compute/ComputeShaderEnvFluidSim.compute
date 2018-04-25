@@ -160,7 +160,7 @@ void SimFloatyBits (uint3 id : SV_DispatchThreadID)
 
 	floatyBitData.vel = vel;
 
-	floatyBitData.age = floatyBitData.age + 0.01;  // 100 frame lifespan
+	floatyBitData.age = floatyBitData.age + 0.001;  // 1000 frame lifespan
 	if(floatyBitData.age > 1.0) {
 		
 		float2 spawnPos = float2(rand(float2(id.x, uv.x)), rand(float2(uv.y, id.x)));		

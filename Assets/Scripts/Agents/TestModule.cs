@@ -93,7 +93,7 @@ public class TestModule {
     //public float maxSpeed = 0.5f;
     //public float accel = 0.05f;
     //public float radius = 1f;
-    public float foodConsumptionRate = 0.0025f;
+    public float foodConsumptionRate = 0.0025f * 0.5f; // *** *0.5 temporary!
 
     //public Transform enemyTransform;
     public Rigidbody2D ownRigidBody2D;
@@ -652,10 +652,12 @@ public class TestModule {
         distTopLeft[0] = (raycastMaxLength - distance) / raycastMaxLength;
 
         //
+        /*
         inComm0[0] = Mathf.Round(friendTestModule.outComm0[0] * 3f / 2f);
         inComm1[0] = Mathf.Round(friendTestModule.outComm1[0] * 3f / 2f);
         inComm2[0] = Mathf.Round(friendTestModule.outComm2[0] * 3f / 2f);
         inComm3[0] = Mathf.Round(friendTestModule.outComm3[0] * 3f / 2f);
+        */
 
         // TEST
         //hit = Physics2D.Raycast(new Vector2(35f, 0f), new Vector2(1f, 0f), raycastMaxLength);  //  + / +

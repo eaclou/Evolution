@@ -10,6 +10,7 @@ public class GameOptionsManager : MonoBehaviour {
     public Dropdown dropdownResolution;
     public Dropdown dropdownVSync;
     public Dropdown dropdownFluidSimQuality;
+    public Dropdown dropdownSimulationComplexity;
     public Slider sliderMasterVolume;
     public Slider sliderMusicVolume;
     public Slider sliderEffectsVolume;
@@ -49,6 +50,12 @@ public class GameOptionsManager : MonoBehaviour {
     }
 
     public void OnDropdownFluidSimQuality() {
+        gameOptions.fluidSimQuality = dropdownFluidSimQuality.value;
+
+        // Actually change resolution in FluidManager!!! ******************************
+    }
+
+    public void OnDropdownSimulationComplexity() {
         gameOptions.fluidSimQuality = dropdownFluidSimQuality.value;
 
         // Actually change resolution in FluidManager!!! ******************************

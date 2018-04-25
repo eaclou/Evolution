@@ -203,17 +203,18 @@ public class EnvironmentFluidManager : MonoBehaviour {
     }
 
     public void UpdateSimulationClimate(float generation) {
-       
+        //SetClimateStormy();
+
         float cycleValue = generation % 21f;
 
         if(cycleValue <= 12) {
             SetClimateInitial();
         }
         if(cycleValue > 12f && cycleValue <= 17) {            
-            SetClimateStormy();
+            //SetClimateStormy();
         }
         if(cycleValue > 17f) {            
-            SetClimateThick();
+            //SetClimateThick();
         }
     }
     private void SetClimateInitial() {

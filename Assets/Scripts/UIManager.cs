@@ -8,10 +8,13 @@ public class UIManager : MonoBehaviour {
     public GameManager gameManager;
     //public SimulationManager simManager;
     public CameraManager cameraManager;
+    public GameOptionsManager gameOptionsManager;
 
     public Texture2D healthDisplayTex;
 
     public GameObject panelTint;
+
+    public bool optionsMenuOn = false;
 
     public Text textLoadingTooltips;
 
@@ -49,6 +52,8 @@ public class UIManager : MonoBehaviour {
     public Button buttonResetGenomes;
     public Button buttonClearTrainingData;
     public Button buttonToggleTrainingPersistent;
+
+    public GameObject panelGameOptions;
 
     // TOP PANEL::::
     public GameObject panelTop;
@@ -168,15 +173,23 @@ public class UIManager : MonoBehaviour {
     }
     private void EnterMainMenuUI() {
         panelMainMenu.SetActive(true);
+        if (optionsMenuOn) {
+            panelGameOptions.SetActive(true);
+        }
+        else {
+            panelGameOptions.SetActive(false);
+        }
         panelLoading.SetActive(false);
         panelPlaying.SetActive(false);
 
         panelHUD.SetActive(isActiveHUD);
         panelDebug.SetActive(isActiveDebug);
 
-        fitnessDisplayTexture = new Texture2D(1, 1, TextureFormat.RGBAFloat, true);
-        fitnessDisplayTexture.wrapMode = TextureWrapMode.Clamp;
-        fitnessDisplayMat.SetTexture("_MainTex", fitnessDisplayTexture);
+        if(fitnessDisplayTexture == null) {
+            fitnessDisplayTexture = new Texture2D(1, 1, TextureFormat.RGBAFloat, true);
+            fitnessDisplayTexture.wrapMode = TextureWrapMode.Clamp;
+            fitnessDisplayMat.SetTexture("_MainTex", fitnessDisplayTexture);
+        }        
         
         ClickButtonModeB();
     }
@@ -184,14 +197,16 @@ public class UIManager : MonoBehaviour {
         panelMainMenu.SetActive(false);
         panelLoading.SetActive(true);
         panelPlaying.SetActive(false);
+        panelGameOptions.SetActive(false);
     }
     private void EnterPlayingUI() {
         panelMainMenu.SetActive(false);
         panelLoading.SetActive(false);
         panelPlaying.SetActive(true);
+        panelGameOptions.SetActive(false);
     }
     private void UpdateMainMenuUI() {
-        
+                
     }
     private void UpdateLoadingUI() {
         if (loadingProgress < 1f) {
@@ -399,6 +414,14 @@ public class UIManager : MonoBehaviour {
         hitPointsMat.SetTexture("_MainTex", healthDisplayTex);
     }
 
+    public void ClickOptionsMenu() {
+        optionsMenuOn = true;
+        EnterMainMenuUI();
+    }
+    public void ClickBackToMainMenu() {
+        optionsMenuOn = false;
+        EnterMainMenuUI();
+    }
     public void ClickStartGame() {
         Debug.Log("ClickStartGame()!");
         gameManager.StartNewGame();

@@ -59,7 +59,7 @@ public class SimulationManager : MonoBehaviour {
     private int agentGridCellResolution = 1;  // How much to subdivide the map in order to detect nearest-neighbors more efficiently --> to not be O(n^2)
     public MapGridCell[][] mapGridCellArray;
 
-    private int numAgents = 48;
+    private int numAgents = 64;
     public int _NumAgents {
         get
         {
@@ -92,7 +92,7 @@ public class SimulationManager : MonoBehaviour {
         }
     }
     public PredatorModule[] predatorArray;
-    private int numPredators = 24;
+    private int numPredators = 64;
     public int _NumPredators {
         get
         {
@@ -485,7 +485,8 @@ public class SimulationManager : MonoBehaviour {
             foodArray[i].Tick();
         }
         // Apply External Forces to dynamic objects: (internal PhysX Updates):
-        ApplyFluidForcesToDynamicObjects();     
+        // **** TEMPORARILY DISABLED!
+        //ApplyFluidForcesToDynamicObjects();     
                
                 
         // Simulate timestep of fluid Sim - update density/velocity maps:
@@ -820,7 +821,7 @@ public class SimulationManager : MonoBehaviour {
             MutationSettings mutationSettings = settingsManager.mutationSettingsPersistent;
 
             // Can randomly pull from saved Genepool database:
-            bool usePreTrained = true;
+            bool usePreTrained = false;
 
             if(usePreTrained) {
                 float randRoll = UnityEngine.Random.Range(0f, 1f);
