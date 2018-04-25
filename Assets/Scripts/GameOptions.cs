@@ -7,7 +7,8 @@ public class GameOptions {
 
     public bool isFullscreen;
     public int vSync;
-    public int fluidSimQuality;
+    public int fluidPhysicsQuality;
+    public int simulationComplexity;
     public int resolutionIndex;    
     public float masterVolume;
     public float musicVolume;

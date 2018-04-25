@@ -9,7 +9,7 @@ public class GameOptionsManager : MonoBehaviour {
     public Toggle toggleFullscreen;
     public Dropdown dropdownResolution;
     public Dropdown dropdownVSync;
-    public Dropdown dropdownFluidSimQuality;
+    public Dropdown dropdownFluidPhysicsQuality;
     public Dropdown dropdownSimulationComplexity;
     public Slider sliderMasterVolume;
     public Slider sliderMusicVolume;
@@ -24,16 +24,63 @@ public class GameOptionsManager : MonoBehaviour {
 
         // example of hardcoded Ui listener rather than through inspector:
         //toggleFullscreen.onValueChanged.AddListener(delegate { OnToggleFullscreen(); });
+
+        // Giving duplicates for some annoying reason, so manually set up resolutions list:
+        SetResolutionsDropdown();
+
+        // Set vSync dropdown to its current value: // **** Change all this when supporting Persistent Options!!!!! *****
+        gameOptions.vSync = QualitySettings.vSyncCount;
+        dropdownVSync.value = gameOptions.vSync;
+
+        // Set Defaults:  ** CHANGE LATER WHEN SUPPORTING PERSISTENT OPTIONS!! ***
+        gameOptions.fluidPhysicsQuality = 1; // medium 256x256
+        dropdownFluidPhysicsQuality.value = gameOptions.fluidPhysicsQuality;
+        gameOptions.simulationComplexity = 1; // medium 48 creatures, 16 hidden neurons
+        dropdownSimulationComplexity.value = gameOptions.simulationComplexity;
+    }
+
+    private void SetResolutionsDropdown() {
+        //resolutionsArray = GetSupportedResolutions();
+        Resolution[] rawResolutionsArray = Screen.resolutions;
+        List<Resolution> supportedResolutionsList = new List<Resolution>();         
         
-        resolutionsArray = Screen.resolutions;
+        // a bit awkward but it should work for finding dropdownMenu index of current resolution:
+        Dictionary<string, int> existingResolutionsDict = new Dictionary<string, int>();
         
+        for(int i = 0; i < rawResolutionsArray.Length; i++) {
+            int minResolutionWidth = 1024;
+            int minResolutionHeight = 768;
+
+            // Only consider resolutions larger than a minimum size:
+            if (rawResolutionsArray[i].width >= minResolutionWidth && rawResolutionsArray[i].height >= minResolutionHeight) {
+                if(existingResolutionsDict.ContainsKey(rawResolutionsArray[i].ToString())) {
+                    //already in, do nothing
+                }
+                else {
+                    // Add this to existing list:
+                    existingResolutionsDict.Add(rawResolutionsArray[i].ToString(), supportedResolutionsList.Count); 
+                    supportedResolutionsList.Add(rawResolutionsArray[i]);
+                }
+            }          
+        }        
+        resolutionsArray = supportedResolutionsList.ToArray();
+
+
+        dropdownResolution.options.Clear(); // clear existing options (set in Editor)        
         foreach(Resolution resolution in resolutionsArray) {
             dropdownResolution.options.Add(new Dropdown.OptionData(resolution.ToString()));
         }
-
+        // Start with current resolution selected?
+        Resolution currentRes = Screen.currentResolution;
+        int currentDropdownIndex = 0;
+        if(existingResolutionsDict.ContainsKey(currentRes.ToString())) {
+            currentDropdownIndex = existingResolutionsDict[currentRes.ToString()];
+        }
+        dropdownResolution.value = currentDropdownIndex;
+        
         dropdownResolution.RefreshShownValue();
     }
-
+    
     public void OnToggleFullscreen() {
         gameOptions.isFullscreen = toggleFullscreen.isOn;
         Screen.fullScreen = gameOptions.isFullscreen;
@@ -49,14 +96,14 @@ public class GameOptionsManager : MonoBehaviour {
         QualitySettings.vSyncCount = gameOptions.vSync;
     }
 
-    public void OnDropdownFluidSimQuality() {
-        gameOptions.fluidSimQuality = dropdownFluidSimQuality.value;
+    public void OnDropdownFluidPhysicsQuality() {
+        gameOptions.fluidPhysicsQuality = dropdownFluidPhysicsQuality.value;
 
         // Actually change resolution in FluidManager!!! ******************************
     }
 
     public void OnDropdownSimulationComplexity() {
-        gameOptions.fluidSimQuality = dropdownFluidSimQuality.value;
+        gameOptions.simulationComplexity = dropdownSimulationComplexity.value;
 
         // Actually change resolution in FluidManager!!! ******************************
     }

@@ -212,14 +212,14 @@ public class UIManager : MonoBehaviour {
         if (loadingProgress < 1f) {
             textLoadingTooltips.text = "( Calculating Enjoyment Coefficients )";
         }
-        if (loadingProgress < 0.75f) {
+        if (loadingProgress < 0.65f) {
             textLoadingTooltips.text = "( Warming Up Simulation Cubes )";
         }
-        if (loadingProgress < 0.45f) {
-            textLoadingTooltips.text = "( Reticulating Splines )";
+        if (loadingProgress < 0.4f) {
+            textLoadingTooltips.text = "( Feeding Hamsters )";
         }
         if (loadingProgress < 0.1f) {
-            textLoadingTooltips.text = "( Feeding Hamsters )";
+            textLoadingTooltips.text = "( Reticulating Splines )";
         }
     }
     private void UpdateSimulationUI() {

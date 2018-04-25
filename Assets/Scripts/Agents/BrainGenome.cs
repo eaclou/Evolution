@@ -30,10 +30,10 @@ public class BrainGenome {
         InitializeBodyNeurons(templateBody);
     }
 
-    public void InitializeRandomBrainGenome(BodyGenome bodyGenome, float initialWeightMultiplier) {
+    public void InitializeRandomBrainGenome(BodyGenome bodyGenome, float initialWeightMultiplier, int numInitHiddenNeurons) {
         InitializeNewBrainGenomeLists();
         InitializeBodyNeurons(bodyGenome);
-        InitializeAxons(initialWeightMultiplier);
+        InitializeAxons(initialWeightMultiplier, numInitHiddenNeurons);
     }
 
     public void InitializeBodyNeurons(BodyGenome bodyGenome) {
@@ -47,7 +47,7 @@ public class BrainGenome {
         }*/
     }
 
-    public void InitializeAxons(float initialWeightMultiplier) {
+    public void InitializeAxons(float initialWeightMultiplier, int numInitHiddenNeurons) {
         int numInputs = 0;
         for (int i = 0; i < bodyNeuronList.Count; i++) {
             if (bodyNeuronList[i].neuronType == NeuronGenome.NeuronType.In) {
@@ -55,7 +55,7 @@ public class BrainGenome {
             }
         }
          //Create Hidden nodes TEMP!!!!
-        for (int i = 0; i < 40; i++) {
+        for (int i = 0; i < numInitHiddenNeurons; i++) {
             NeuronGenome neuron = new NeuronGenome(NeuronGenome.NeuronType.Hid, -1, i);
             hiddenNeuronList.Add(neuron);
         }

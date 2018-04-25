@@ -25,8 +25,8 @@ public class AgentGenome {
         bodyGenome.CopyBodyGenomeFromTemplate(bodyGenomeTemplate);
     }*/
 
-    public void InitializeRandomBrainFromCurrentBody(float initialWeightsMultiplier) {
-        brainGenome.InitializeRandomBrainGenome(bodyGenome, initialWeightsMultiplier);
+    public void InitializeRandomBrainFromCurrentBody(float initialWeightsMultiplier, int numInitHiddenNeurons) {
+        brainGenome.InitializeRandomBrainGenome(bodyGenome, initialWeightsMultiplier, numInitHiddenNeurons);
     }
 
     public void PrintBrainGenome() {

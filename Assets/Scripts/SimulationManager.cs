@@ -67,7 +67,7 @@ public class SimulationManager : MonoBehaviour {
         }
         set
         {
-
+            numAgents = value;
         }
     }
     //private int agentGenomePoolSize = 64;  // spawned as Agents that live until they are killed naturally, tested on Fitness Function
@@ -88,7 +88,7 @@ public class SimulationManager : MonoBehaviour {
         }
         set
         {
-
+            numFood = value;
         }
     }
     public PredatorModule[] predatorArray;
@@ -100,7 +100,7 @@ public class SimulationManager : MonoBehaviour {
         }
         set
         {
-
+            numPredators = value;
         }
     }
    
@@ -117,6 +117,8 @@ public class SimulationManager : MonoBehaviour {
     public List<float> fitnessScoresEachGenerationList;
     public float agentAvgRecordScore = 1f;
     public int curApproxGen = 1;
+
+    public int numInitialHiddenNeurons = 16;
 
     //public bool isTrainingPersistent = false; // RENAME ONCE FUNCTIONAL
     //private float lastHorizontalInput = 0f;
@@ -277,7 +279,7 @@ public class SimulationManager : MonoBehaviour {
             AgentGenome agentGenome = new AgentGenome(i);
             agentGenome.GenerateInitialRandomBodyGenome();
             //agentGenome.InitializeBodyGenomeFromTemplate(bodyGenomeTemplate);  // OLD
-            agentGenome.InitializeRandomBrainFromCurrentBody(settingsManager.mutationSettingsPersistent.initialConnectionChance);
+            agentGenome.InitializeRandomBrainFromCurrentBody(settingsManager.mutationSettingsPersistent.initialConnectionChance, numInitialHiddenNeurons);
             agentGenomePoolArray[i] = agentGenome;
         }
 
@@ -812,8 +814,14 @@ public class SimulationManager : MonoBehaviour {
         else {
             BodyGenome newBodyGenome = new BodyGenome();
             BrainGenome newBrainGenome = new BrainGenome();
-            
-            int parentGenomeIndex = GetAgentIndexByLottery(rankedFitnessList, rankedIndicesList);
+
+            bool isEven = false; // HACKY TEST!!!!
+            if(agentIndex % 2 == 0) {
+                isEven = true;
+            }
+            int parentGenomeIndex = GetAgentIndexByLottery(rankedFitnessList, rankedIndicesList, isEven);
+
+            //Debug.Log("Agent[" + agentIndex.ToString() + "] (" + (agentIndex % 2).ToString() + ") parentIndex: " + parentGenomeIndex.ToString());
             
             BodyGenome parentBodyGenome = agentGenomePoolArray[parentGenomeIndex].bodyGenome;
             BrainGenome parentBrainGenome = agentGenomePoolArray[parentGenomeIndex].brainGenome;
@@ -1180,23 +1188,64 @@ public class SimulationManager : MonoBehaviour {
     #endregion
 
     #region Utility Functions // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& UTILITY FUNCTIONS! &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-    public int GetAgentIndexByLottery(float[] rankedFitnessList, int[] rankedIndicesList) {
+    public int GetAgentIndexByLottery(float[] rankedFitnessList, int[] rankedIndicesList, bool isEven) {
         int selectedIndex = 0;
-        // calculate total fitness of all agents
+        if(!isEven) {
+            selectedIndex = 1;
+        }
+        // calculate total fitness of all EVEN and ODD agents separately!
         float totalFitness = 0f;
         for (int i = 0; i < rankedFitnessList.Length; i++) {
-            totalFitness += rankedFitnessList[i];
+            // Experiemnt!! Split population into 2 separate Halves!!!
+            if(isEven) {
+                if(rankedIndicesList[i] % 2 == 0) {
+                    totalFitness += rankedFitnessList[i];
+                }
+                else {
+
+                }
+            }
+            else {
+                if(rankedIndicesList[i] % 2 == 0) {
+
+                }
+                else {
+                    totalFitness += rankedFitnessList[i];
+                }
+            }
+            //totalFitness += rankedFitnessList[i];
         }
         // generate random lottery value between 0f and totalFitness:
         float lotteryValue = UnityEngine.Random.Range(0f, totalFitness);
         float currentValue = 0f;
         for (int i = 0; i < rankedFitnessList.Length; i++) {
-            if (lotteryValue >= currentValue && lotteryValue < (currentValue + rankedFitnessList[i])) {
-                // Jackpot!
-                selectedIndex = rankedIndicesList[i];
-                //Debug.Log("Selected: " + selectedIndex.ToString() + "! (" + i.ToString() + ") fit= " + currentValue.ToString() + "--" + (currentValue + (1f - rankedFitnessList[i])).ToString() + " / " + totalFitness.ToString() + ", lotto# " + lotteryValue.ToString() + ", fit= " + (1f - rankedFitnessList[i]).ToString());
+            if(isEven) {
+                if(rankedIndicesList[i] % 2 == 0) {
+                    if (lotteryValue >= currentValue && lotteryValue < (currentValue + rankedFitnessList[i])) {
+                        // Jackpot!
+                        selectedIndex = rankedIndicesList[i];
+                        //Debug.Log("Selected: " + selectedIndex.ToString() + "! (" + i.ToString() + ") fit= " + currentValue.ToString() + "--" + (currentValue + (1f - rankedFitnessList[i])).ToString() + " / " + totalFitness.ToString() + ", lotto# " + lotteryValue.ToString() + ", fit= " + (1f - rankedFitnessList[i]).ToString());
+                    }
+                    currentValue += rankedFitnessList[i]; // add this agent's fitness to current value for next check       
+                }
+                else {
+
+                }
             }
-            currentValue += rankedFitnessList[i]; // add this agent's fitness to current value for next check            
+            else {
+                if(rankedIndicesList[i] % 2 == 0) {
+
+                }
+                else {  // ** ODD!!!
+                    if (lotteryValue >= currentValue && lotteryValue < (currentValue + rankedFitnessList[i])) {
+                        // Jackpot!
+                        selectedIndex = rankedIndicesList[i];
+                        //Debug.Log("Selected: " + selectedIndex.ToString() + "! (" + i.ToString() + ") fit= " + currentValue.ToString() + "--" + (currentValue + (1f - rankedFitnessList[i])).ToString() + " / " + totalFitness.ToString() + ", lotto# " + lotteryValue.ToString() + ", fit= " + (1f - rankedFitnessList[i]).ToString());
+                    }
+                    currentValue += rankedFitnessList[i]; // add this agent's fitness to current value for next check       
+                }
+            }
+                 
         }        
 
         return selectedIndex;
@@ -1205,24 +1254,26 @@ public class SimulationManager : MonoBehaviour {
     #endregion
     
     private void OnDisable() {
-        if (simStateData.agentSimDataCBuffer != null) {
-            simStateData.agentSimDataCBuffer.Release();
-        }
-        if (simStateData.foodSimDataCBuffer != null) {
-            simStateData.foodSimDataCBuffer.Release();
-        }
-        if (simStateData.predatorSimDataCBuffer != null) {
-            simStateData.predatorSimDataCBuffer.Release();
-        }
-        if (simStateData.foodStemDataCBuffer != null) {
-            simStateData.foodStemDataCBuffer.Release();
-        }
-        if (simStateData.foodLeafDataCBuffer != null) {
-            simStateData.foodLeafDataCBuffer.Release();
-        }
-        if (simStateData.foodFruitDataCBuffer != null) {
-            simStateData.foodFruitDataCBuffer.Release();
-        }
+        if(simStateData != null) {
+            if (simStateData.agentSimDataCBuffer != null) {
+                simStateData.agentSimDataCBuffer.Release();
+            }
+            if (simStateData.foodSimDataCBuffer != null) {
+                simStateData.foodSimDataCBuffer.Release();
+            }
+            if (simStateData.predatorSimDataCBuffer != null) {
+                simStateData.predatorSimDataCBuffer.Release();
+            }
+            if (simStateData.foodStemDataCBuffer != null) {
+                simStateData.foodStemDataCBuffer.Release();
+            }
+            if (simStateData.foodLeafDataCBuffer != null) {
+                simStateData.foodLeafDataCBuffer.Release();
+            }
+            if (simStateData.foodFruitDataCBuffer != null) {
+                simStateData.foodFruitDataCBuffer.Release();
+            }
+        }        
     }
 
     public void SaveTrainingData() {

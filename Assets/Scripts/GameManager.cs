@@ -32,8 +32,64 @@ public class GameManager : MonoBehaviour {
     }
 
     public void StartNewGame() {
+        // Apply Quality Settings from Game Options:
+        ApplyQualitySettings();        
+
         // SimulationManager needs to Load First:
         TransitionToGameState(GameState.Loading);        
+    }
+
+    private void ApplyQualitySettings() {
+        // SimulationComplexity:
+        switch(uiManager.gameOptionsManager.gameOptions.simulationComplexity) {
+            case 0:
+                // Low quality
+                simulationManager._NumAgents = 32;
+                simulationManager._NumFood = 32;
+                simulationManager._NumPredators = 32;
+                simulationManager.numInitialHiddenNeurons = 0;
+                break;
+            case 1:
+                // Medium
+                simulationManager._NumAgents = 48;
+                simulationManager._NumFood = 48;
+                simulationManager._NumPredators = 48;
+                simulationManager.numInitialHiddenNeurons = 16;
+                break;
+            case 2:
+                // High
+                simulationManager._NumAgents = 64;
+                simulationManager._NumFood = 64;
+                simulationManager._NumPredators = 64;
+                simulationManager.numInitialHiddenNeurons = 40;
+                break;
+            default:
+                Debug.LogError("NO SWITCH ENTRY FOUND!!! " + uiManager.gameOptionsManager.gameOptions.simulationComplexity.ToString());
+                break;
+        }
+
+        // Fluid Sim Resolution:
+        switch(uiManager.gameOptionsManager.gameOptions.fluidPhysicsQuality) {
+            case 0:
+                // Low quality
+                simulationManager.environmentFluidManager.resolution = 128;
+                break;
+            case 1:
+                // Medium
+                simulationManager.environmentFluidManager.resolution = 256;
+                break;
+            case 2:
+                // High
+                simulationManager.environmentFluidManager.resolution = 512;
+                break;
+            case 3:
+                // Max
+                simulationManager.environmentFluidManager.resolution = 768;
+                break;
+            default:
+                Debug.LogError("NO SWITCH ENTRY FOUND!!! " + uiManager.gameOptionsManager.gameOptions.fluidPhysicsQuality.ToString());
+                break;
+        }
     }
 	
 	// Update is called once per frame
