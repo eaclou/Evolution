@@ -14,6 +14,7 @@ public class SimulationManager : MonoBehaviour {
     public CameraManager cameraManager;
     public SettingsManager settingsManager;
     public SimulationStateData simStateData;
+    public AudioManager audioManager;
     public StartPositionsPresetLists startPositionsPresets;
 
     private bool isLoading = false;
@@ -142,16 +143,22 @@ public class SimulationManager : MonoBehaviour {
 
     #region loading   // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& LOADING LOADING LOADING &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
     public void TickLoading() {
-        // "Hey, I'm Loading Here!!!"
+        // "Hey, I'm Loadin' Here!!!"
+
+
+        
 
         // Has basic loading phase completed?
         if(loadingComplete) {
             // if so, warming up:
             uiManager.loadingProgress = (float)currentWarmUpTimeStep / (float)numWarmUpTimeSteps;
-                       
+        
             if(currentWarmUpTimeStep >= numWarmUpTimeSteps) {
                 Debug.Log("WarmUp Complete!!! ");
                 simulationWarmUpComplete = true;
+
+                //turn off menu music:
+                audioManager.TurnOffMenuAudioGroup();
 
                 // Populate renderKingBuffers:
                 for(int i = 0; i < numAgents; i++) {
@@ -164,8 +171,13 @@ public class SimulationManager : MonoBehaviour {
                 //Debug.Log("WarmUp Step " + currentWarmUpTimeStep.ToString());
                 TickSimulation();
 
+                // Fade out menu music:
+                audioManager.AdjustMenuVolume(1f - ((float)currentWarmUpTimeStep / (float)numWarmUpTimeSteps));
+
                 currentWarmUpTimeStep++;
             }
+
+            
         }
         else {
             // Check if already loading or if this is the first time startup:

@@ -7,6 +7,8 @@ public class AudioManager : MonoBehaviour {
 
     public AudioMixer masterAudioMixer;
 
+    public GameObject menuMusicGroupGO;
+
     private float Range01toDecibels(float value) {
         return 20f * Mathf.Log10(value);
     }
@@ -22,6 +24,16 @@ public class AudioManager : MonoBehaviour {
     }
     public void AdjustAmbientVolume(float value) {
         masterAudioMixer.SetFloat("ambientVol", Range01toDecibels(value));
+    }
+
+    public void AdjustMenuVolume(float value) {
+        masterAudioMixer.SetFloat("menuVol", Range01toDecibels(value));
+
+        //Debug.Log("menuAudioLevel DB: " + Range01toDecibels(value).ToString());
+    }
+
+    public void TurnOffMenuAudioGroup() {
+        menuMusicGroupGO.SetActive(false);
     }
 
 }
