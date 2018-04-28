@@ -79,3 +79,8 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+# Audio Files
+*.mp3
+*.aiff
+*.wav
