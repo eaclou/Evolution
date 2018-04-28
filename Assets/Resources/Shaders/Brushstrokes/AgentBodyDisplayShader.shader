@@ -196,10 +196,10 @@
 				float freq = 1.25;
 				float amp = 0.003;
 				float3 noiseOffset = Value2D(i.worldPos.xy * 1 * saturate(length(agentSimData.velocity) * 1), freq) * amp;
-				i.uv.xy += noiseOffset.yz;
-				i.uv.zw += noiseOffset.yz;
-				i.uvPattern += noiseOffset.yz;
-				i.quadUV += noiseOffset.yz * 8;
+				//i.uv.xy += noiseOffset.yz;
+				//i.uv.zw += noiseOffset.yz;
+				//i.uvPattern += noiseOffset.yz;
+				//i.quadUV += noiseOffset.yz * 8;
 				
 				half3 tnormal = UnpackNormal(tex2D(_BumpMap, i.quadUV)); // ***  *** Move this to 8x8 tiles to match Albedo map
                 // transform normal from tangent to world space

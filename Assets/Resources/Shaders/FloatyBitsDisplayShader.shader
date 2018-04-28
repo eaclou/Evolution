@@ -83,7 +83,7 @@
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(rotatedPoint, 0.0f));
 				float brightness = random1;
-				o.color = float4(brightness,brightness,brightness,alpha); // float4(randomValue, randomValue, randomValue, 1 / (length(velocity) * 50 + 1.15));
+				o.color = float4(brightness,brightness,brightness,alpha * 0.5); // float4(randomValue, randomValue, randomValue, 1 / (length(velocity) * 50 + 1.15));
 				o.uv = quadVerticesCBuffer[id] + 0.5f;
 				
 				return o;

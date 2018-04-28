@@ -28,6 +28,8 @@ public class CameraManager : MonoBehaviour {
     public float orbitSpeed = 1f;
     public float curOrbitAngle = 0f;
 
+    private int debugFrameCounter = 0;
+
     private GameMode curMode;
     public enum GameMode {
         ModeA,
@@ -38,13 +40,16 @@ public class CameraManager : MonoBehaviour {
     // Use this for initialization
     void Start () {
         ChangeGameMode(GameMode.ModeB);
-
+        //this.transform.position = new Vector3(0f, 0f, -50f);
     }
 
     private void Update() {
         
         //UpdateCameraTestBaseline();
+        
         UpdateCameraOld();
+            
+
         //Debug.Log("mode: " + curMode.ToString());
         //this.transform.position = SmoothApproach(Vector2 pastPosition, Vector2 pastTargetPosition, Vector2 targetPosition, float speed);
         //this.transform.position = Vector3.Lerp(this.transform.position, new Vector3(targetCamPos.x, targetCamPos.y, -50f), 2f * Time.deltaTime);
@@ -93,9 +98,21 @@ public class CameraManager : MonoBehaviour {
         targetCamPos.x = Mathf.Min(Mathf.Max(targetCamPos.x, minPos), maxPos);
         targetCamPos.y = Mathf.Min(Mathf.Max(targetCamPos.y, minPos), maxPos);
 
+        this.transform.position = Vector3.Lerp(this.transform.position, new Vector3(targetCamPos.x, targetCamPos.y, -50f), lerpSpeed * Time.deltaTime);
+
         // Fuck it for now.... stupid lerp jitter...
         // Come back to this after sorting out Execution order and data flow in rest of program...
-        this.transform.position = Vector3.Lerp(this.transform.position, new Vector3(targetCamPos.x, targetCamPos.y, -50f), lerpSpeed * Time.deltaTime);
+        /*if(debugFrameCounter > 200) {
+            this.transform.position = Vector3.Lerp(this.transform.position, new Vector3(targetCamPos.x, targetCamPos.y, -50f), lerpSpeed * Time.deltaTime);
+            debugFrameCounter = 0;
+        }        
+        debugFrameCounter++;*/
+
+        /*this.transform.position = new Vector3(this.transform.position.x + 10f * Time.deltaTime, this.transform.position.y, this.transform.position.z);
+        if(this.transform.position.x > 70f) {
+            this.transform.position = new Vector3(-70f, this.transform.position.y, -50f);
+        }*/
+        
 
     }
     /*private void UpdateCameraTestBaseline() {

@@ -68,7 +68,7 @@ public class FoodModule : MonoBehaviour {
 
     private int colliderCount = 0;
 
-    private float feedingRate = 0.01f;
+    private float feedingRate = 0.0065f;
 
     public float growthStatus = 0f;  // 0-1 born --> mature
     public float decayStatus = 0f;

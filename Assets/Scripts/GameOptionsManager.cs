@@ -6,6 +6,7 @@ using System.IO;
 
 public class GameOptionsManager : MonoBehaviour {
 
+    public AudioManager audioManager;
     public Toggle toggleFullscreen;
     public Dropdown dropdownResolution;
     public Dropdown dropdownVSync;
@@ -37,6 +38,23 @@ public class GameOptionsManager : MonoBehaviour {
         dropdownFluidPhysicsQuality.value = gameOptions.fluidPhysicsQuality;
         gameOptions.simulationComplexity = 1; // medium 48 creatures, 16 hidden neurons
         dropdownSimulationComplexity.value = gameOptions.simulationComplexity;
+                
+    }
+
+    private void Start() {
+        //Initialize Audio Levels to 3/4:
+
+        gameOptions.masterVolume = sliderMasterVolume.value;
+        OnSliderMasterVolume(gameOptions.masterVolume);
+
+        gameOptions.musicVolume = sliderMusicVolume.value;
+        OnSliderMusicVolume(gameOptions.musicVolume);
+
+        gameOptions.effectsVolume = sliderEffectsVolume.value;
+        OnSliderEffectsVolume(gameOptions.effectsVolume);
+
+        gameOptions.ambientVolume = sliderAmbientVolume.value;
+        OnSliderAmbientVolume(gameOptions.ambientVolume);
     }
 
     private void SetResolutionsDropdown() {
@@ -108,28 +126,27 @@ public class GameOptionsManager : MonoBehaviour {
         // Actually change resolution in FluidManager!!! ******************************
     }
 
-    public void OnSliderMasterVolume() {
+    public void OnSliderMasterVolume(float value) {
         gameOptions.masterVolume = sliderMasterVolume.value;
-
-        // *** Actually change Volume!!!! ***
+        audioManager.AdjustMasterVolume(value); // converts 0-1 to decibel range        
     }
 
-    public void OnSliderMusicVolume() {
+    public void OnSliderMusicVolume(float value) {
         gameOptions.masterVolume = sliderMusicVolume.value;
 
-        // *** Actually change Volume!!!! ***
+        audioManager.AdjustMusicVolume(value); // converts 0-1 to decibel range   
     }
 
-    public void OnSliderEffectsVolume() {
+    public void OnSliderEffectsVolume(float value) {
         gameOptions.masterVolume = sliderEffectsVolume.value;
 
-        // *** Actually change Volume!!!! ***
+        audioManager.AdjustEffectsVolume(value); // converts 0-1 to decibel range   
     }
 
-    public void OnSliderAmbientVolume() {
+    public void OnSliderAmbientVolume(float value) {
         gameOptions.masterVolume = sliderAmbientVolume.value;
 
-        // *** Actually change Volume!!!! ***
+        audioManager.AdjustAmbientVolume(value); // converts 0-1 to decibel range   
     }
 
     public void SaveOptions() {

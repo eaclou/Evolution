@@ -113,7 +113,7 @@ public class SimulationManager : MonoBehaviour {
     public int lastPlayerScore = 0;
     //public bool playerIsDead = false;
     public int recordBotAge = 0;
-    public float rollingAverageAgentScore = 100f;
+    public float rollingAverageAgentScore = 250f;
     public List<float> fitnessScoresEachGenerationList;
     public float agentAvgRecordScore = 1f;
     public int curApproxGen = 1;
@@ -419,12 +419,12 @@ public class SimulationManager : MonoBehaviour {
         GenePool loadedData1 = JsonUtility.FromJson<GenePool>(dataAsJson1);
         savedGenomePoolArray1 = loadedData1.genomeArray;
         
-        string filePath2 = Path.Combine(Application.streamingAssetsPath, "savedGenePool560.json");
+        string filePath2 = Path.Combine(Application.streamingAssetsPath, "testSave01.json");
         string dataAsJson2 = File.ReadAllText(filePath2);
         GenePool loadedData2 = JsonUtility.FromJson<GenePool>(dataAsJson2);
         savedGenomePoolArray2 = loadedData2.genomeArray;
 
-        string filePath3 = Path.Combine(Application.streamingAssetsPath, "savedGenePool750.json");
+        string filePath3 = Path.Combine(Application.streamingAssetsPath, "saveStillwater01.json");
         string dataAsJson3 = File.ReadAllText(filePath3);
         GenePool loadedData3 = JsonUtility.FromJson<GenePool>(dataAsJson3);
         savedGenomePoolArray3 = loadedData3.genomeArray;
@@ -448,7 +448,7 @@ public class SimulationManager : MonoBehaviour {
         recordPlayerAge = 0;
         lastPlayerScore = 0;
         recordBotAge = 0;
-        rollingAverageAgentScore = 100f;
+        rollingAverageAgentScore = 250f;
         curApproxGen = 1;
 
         RefreshFitnessGraphTexture();
@@ -488,7 +488,7 @@ public class SimulationManager : MonoBehaviour {
         }
         // Apply External Forces to dynamic objects: (internal PhysX Updates):
         // **** TEMPORARILY DISABLED!
-        //ApplyFluidForcesToDynamicObjects();     
+        ApplyFluidForcesToDynamicObjects();     
                
                 
         // Simulate timestep of fluid Sim - update density/velocity maps:
@@ -499,23 +499,23 @@ public class SimulationManager : MonoBehaviour {
     private void ApplyFluidForcesToDynamicObjects() {
         // ********** REVISIT CONVERSION btw fluid/scene coords and Force Amounts !!!! *************
         for (int i = 0; i < agentsArray.Length; i++) {
-            agentsArray[i].testModule.ownRigidBody2D.AddForce(simStateData.fluidVelocitiesAtAgentPositionsArray[i] * 50f, ForceMode2D.Impulse);
+            agentsArray[i].testModule.ownRigidBody2D.AddForce(simStateData.fluidVelocitiesAtAgentPositionsArray[i] * 40f, ForceMode2D.Impulse);
 
             agentsArray[i].avgFluidVel = Mathf.Lerp(agentsArray[i].avgFluidVel, simStateData.fluidVelocitiesAtAgentPositionsArray[i].magnitude, 0.25f);
         }
         for (int i = 0; i < foodArray.Length; i++) { // *** cache rigidBody reference
             float hackyScalingForceMultiplier = 1f;
             if (foodArray[i].curLifeStage == FoodModule.FoodLifeStage.Growing) {
-                hackyScalingForceMultiplier = 3.3f;
+                hackyScalingForceMultiplier = 2f;
             }
-            foodArray[i].GetComponent<Rigidbody2D>().AddForce(simStateData.fluidVelocitiesAtFoodPositionsArray[i] * 28f * hackyScalingForceMultiplier * foodArray[i].GetComponent<Rigidbody2D>().mass, ForceMode2D.Impulse); //
+            foodArray[i].GetComponent<Rigidbody2D>().AddForce(simStateData.fluidVelocitiesAtFoodPositionsArray[i] * 20f * hackyScalingForceMultiplier * foodArray[i].GetComponent<Rigidbody2D>().mass, ForceMode2D.Impulse); //
             //foodArray[i].GetComponent<Rigidbody2D>().AddForce(new Vector2(1f, 1f), ForceMode2D.Force); //
             // Looks like AddForce has less of an effect on a GO/Rigidbody2D that is being scaled through a script... ??
             // Feels like rigidbody is accumulating velocity which is then released all at once when the scaling stops??
             // Hacking through it by increasign force on growing food:
         }
         for (int i = 0; i < predatorArray.Length; i++) {
-            predatorArray[i].rigidBody.AddForce(simStateData.fluidVelocitiesAtPredatorPositionsArray[i] * 40f * predatorArray[i].rigidBody.mass, ForceMode2D.Impulse);
+            predatorArray[i].rigidBody.AddForce(simStateData.fluidVelocitiesAtPredatorPositionsArray[i] * 25f * predatorArray[i].rigidBody.mass, ForceMode2D.Impulse);
         }
     }
 
@@ -829,11 +829,11 @@ public class SimulationManager : MonoBehaviour {
             MutationSettings mutationSettings = settingsManager.mutationSettingsPersistent;
 
             // Can randomly pull from saved Genepool database:
-            bool usePreTrained = false;
+            bool usePreTrained = true;
 
             if(usePreTrained) {
                 float randRoll = UnityEngine.Random.Range(0f, 1f);
-                if(randRoll < 0.005f) {
+                if(randRoll < 0.006f) {
                     mutationSettings = settingsManager.mutationSettingsRandomBody;
                     randRoll = UnityEngine.Random.Range(0f, 1f);
                     if(randRoll < 0.55f) {                

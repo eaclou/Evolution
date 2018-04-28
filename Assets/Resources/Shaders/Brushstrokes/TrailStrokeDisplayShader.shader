@@ -102,7 +102,7 @@
 				
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(vertexPos, 0.0, 0.0f));
 				//o.pos = UnityObjectToClipPos(float4(worldPosition, 1.0) + float4(vertexPos, 0.0, 0.0));
-				float3 tailHue = lerp(agentData.primaryHue, agentData.secondaryHue, localTrailPercentage);
+				float3 tailHue = lerp(agentData.secondaryHue, agentData.primaryHue, localTrailPercentage);
 				tailHue = lerp(float3(0.5, 0.5, 0.5), tailHue, saturate(agentData.maturity * 4 - 3));
 				tailHue = lerp(float3(0.5, 0.5, 0.5), tailHue, saturate(agentData.foodAmount * 4));
 				o.color = float4(tailHue,alpha);			
