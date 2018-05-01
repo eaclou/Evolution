@@ -173,6 +173,8 @@ public class SimulationManager : MonoBehaviour {
 
                 // Fade out menu music:
                 audioManager.AdjustMenuVolume(1f - ((float)currentWarmUpTimeStep / (float)numWarmUpTimeSteps));
+                // Fade In gameplay audio:
+                audioManager.AdjustGameplayVolume((float)currentWarmUpTimeStep / (float)numWarmUpTimeSteps);
 
                 currentWarmUpTimeStep++;
             }
@@ -188,6 +190,9 @@ public class SimulationManager : MonoBehaviour {
                 // Start Loading coroutine!!!!:
                 isLoading = true;
                 StartCoroutine(LoadingNewSimulation());
+
+                // Turn on Gameplay Audio:
+                audioManager.TurnOnGameplayAudioGroup();
             }  
         }  
     }
@@ -500,8 +505,13 @@ public class SimulationManager : MonoBehaviour {
         }
         // Apply External Forces to dynamic objects: (internal PhysX Updates):
         // **** TEMPORARILY DISABLED!
-        ApplyFluidForcesToDynamicObjects();     
-               
+        ApplyFluidForcesToDynamicObjects();
+
+        // TEMP AUDIO EFFECTS!!!!
+        //float playerSpeed = (agentsArray[0].transform.position - agentsArray[0]._PrevPos).magnitude;
+        float volume = agentsArray[0].smoothedThrottle.magnitude * 0.22f;
+        audioManager.SetPlayerSwimLoopVolume(volume);
+        //agentsArray[0].avgVel       
                 
         // Simulate timestep of fluid Sim - update density/velocity maps:
         // Or should this be right at beginning of frame????? ***************** revisit...

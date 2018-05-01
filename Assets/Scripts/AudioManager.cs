@@ -8,13 +8,27 @@ public class AudioManager : MonoBehaviour {
     public AudioMixer masterAudioMixer;
 
     public GameObject menuMusicGroupGO;
+    public GameObject gameplayAudioGroupGO;
+
+    public AudioSource audioSourcePlayerSwimLoop;
+    public AudioSource audioSourcePlayerSwimStart;
 
     private float Range01toDecibels(float value) {
         return 20f * Mathf.Log10(value);
     }
+
+    public void SetPlayerSwimLoopVolume(float volume) {
+        audioSourcePlayerSwimLoop.volume = volume;
+    }
+    public void PlaySwimStart() {
+        audioSourcePlayerSwimStart.Play();
+    }
 	
     public void AdjustMasterVolume(float value) {
         masterAudioMixer.SetFloat("masterVol", Range01toDecibels(value));
+    }
+    public void AdjustGameplayVolume(float value) {
+        masterAudioMixer.SetFloat("gameplayVol", Range01toDecibels(value));
     }
     public void AdjustMusicVolume(float value) {
         masterAudioMixer.SetFloat("musicVol", Range01toDecibels(value));
@@ -32,8 +46,17 @@ public class AudioManager : MonoBehaviour {
         //Debug.Log("menuAudioLevel DB: " + Range01toDecibels(value).ToString());
     }
 
+    public void TurnOnMenuAudioGroup() {
+        menuMusicGroupGO.SetActive(true);
+    }
     public void TurnOffMenuAudioGroup() {
         menuMusicGroupGO.SetActive(false);
+    }
+    public void TurnOnGameplayAudioGroup() {
+        gameplayAudioGroupGO.SetActive(true);
+    }
+    public void TurnOffGameplayAudioGroup() {
+        gameplayAudioGroupGO.SetActive(false);
     }
 
 }

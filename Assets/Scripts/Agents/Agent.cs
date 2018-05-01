@@ -86,7 +86,7 @@ public class Agent : MonoBehaviour {
 
     public float avgVel;
     public float avgFluidVel;
-
+    
     // Use this for initialization
     private void Awake() {
         //size = new Vector2(1f, 1f); // Better way to handle this! ****
@@ -466,7 +466,7 @@ public class Agent : MonoBehaviour {
 
         horizontalMovementInput = Mathf.Lerp(horAI, horHuman, humanControlLerp);
         verticalMovementInput = Mathf.Lerp(verAI, verHuman, humanControlLerp);
-        
+
         // MOVEMENT HERE:
         this.GetComponent<Rigidbody2D>().AddForce(new Vector2(horizontalMovementInput, verticalMovementInput).normalized * speed * Time.deltaTime, ForceMode2D.Impulse);
         //this.GetComponent<Rigidbody2D>().AddForce(new Vector2(speed * horizontalMovementInput * Time.deltaTime, speed * verticalMovementInput * Time.deltaTime), ForceMode2D.Impulse);
