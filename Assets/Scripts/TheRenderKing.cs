@@ -38,6 +38,9 @@ public class TheRenderKing : MonoBehaviour {
     public Material playerGlowyBitsDisplayMat;
     public Material playerGlowMat; // soft glow to indicate it is the one player is controlling!
     public Material fadeToBlackBlitMat;
+    public Material waterSplinesMat;
+    public Material waterChainsMat;
+
     //public Material debugMat;
 
     private Mesh fluidRenderMesh;
@@ -85,14 +88,24 @@ public class TheRenderKing : MonoBehaviour {
     private BasicStrokeData[] playerGlowInitPos;
     private ComputeBuffer playerGlowCBuffer;
 
-    private int numPlayerGlowyBits = 1024 * 16;
+    private int numPlayerGlowyBits = 1024 * 12;
     private ComputeBuffer playerGlowyBitsCBuffer;
 
-    private int numFloatyBits = 1024 * 16;
+    private int numFloatyBits = 1024 * 12;
     private ComputeBuffer floatyBitsCBuffer;
         
     private int numRipplesPerAgent = 8;
     private ComputeBuffer ripplesCBuffer;
+
+    private int numWaterSplineMeshQuads = 6;
+    private ComputeBuffer waterSplineVerticesCBuffer;  // short ribbon mesh
+    private int numWaterSplines = 1024 * 8;
+    private ComputeBuffer waterSplinesCBuffer;
+
+    private int numWaterChains = 1024 * 8;
+    private int numPointsPerWaterChain = 16;
+    private ComputeBuffer waterChains0CBuffer;
+    private ComputeBuffer waterChains1CBuffer;
 
     private BasicStrokeData[] obstacleStrokeDataArray;
     private ComputeBuffer obstacleStrokesCBuffer;
@@ -148,7 +161,21 @@ public class TheRenderKing : MonoBehaviour {
         public float restLength;
         public float strength;
         public int brushType;
-    }    
+    }   
+    public struct WaterSplineData {   // 2 ints, 17 floats
+        public int index;        
+        public Vector2 p0;
+        public Vector2 p1;
+        public Vector2 p2;
+        public Vector2 p3;
+        public Vector4 widths;
+        public Vector3 hue;
+        //public float restLength;
+        public float strength;   // extra data to use however     
+		//public Vector2 vel; // was used before for strentching quad -- still needed?
+		public float age;  // to allow for fade-in and fade-out
+        public int brushType;  // brush texture mask
+    }
     public struct TrailStrokeData {
         public Vector2 worldPos;
     }
@@ -170,6 +197,8 @@ public class TheRenderKing : MonoBehaviour {
 		public Vector2 heading;
 		public int brushType;
     }
+
+    private int debugFrameCounter = 0;
     
     /* $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  RENDER PIPELINE PSEUDOCODE!!!  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
     1) Standard main camera beauty pass finishes -- Renders Environment & Background objects -- store result in RT to be sampled later by brushstroke shaders
@@ -196,7 +225,6 @@ public class TheRenderKing : MonoBehaviour {
 
         for(int i = 0; i < simManager._NumFood; i++) {
             UpdateDynamicFoodBuffers(i);
-            //Debug.Log("Upodate food buffer " + i.ToString());
         }
 
         isInitialized = true;  // we did it, guys!
@@ -213,6 +241,7 @@ public class TheRenderKing : MonoBehaviour {
             
         InitializeQuadMeshBuffer(); // Set up Quad Mesh billboard for brushStroke rendering            
         InitializeCurveRibbonMeshBuffer(); // Set up Curve Ribbon Mesh billboard for brushStroke rendering
+        InitializeWaterSplineMeshBuffer(); // same for water splines
         InitializeFluidRenderMesh(); 
         
         obstacleStrokesCBuffer = new ComputeBuffer(simManager._NumAgents + simManager._NumFood + simManager._NumPredators, sizeof(float) * 10);
@@ -230,6 +259,8 @@ public class TheRenderKing : MonoBehaviour {
         InitializePlayerGlowyBitsBuffer();
         InitializeFloatyBitsBuffer();
         InitializeRipplesBuffer();
+        InitializeWaterSplinesCBuffer();
+        InitializeWaterChainsCBuffer();
         
         /*        
         // TRAIL DOTS:
@@ -271,6 +302,27 @@ public class TheRenderKing : MonoBehaviour {
         }
 
         curveRibbonVerticesCBuffer.SetData(verticesArray);
+    }
+    private void InitializeWaterSplineMeshBuffer() {
+        
+        float rowSize = 1f / (float)numWaterSplineMeshQuads;
+
+        waterSplineVerticesCBuffer = new ComputeBuffer(6 * numWaterSplineMeshQuads, sizeof(float) * 3);
+        Vector3[] verticesArray = new Vector3[waterSplineVerticesCBuffer.count];
+        for(int i = 0; i < numWaterSplineMeshQuads; i++) {
+            int baseIndex = i * 6;
+
+            float startCoord = (float)i;
+            float endCoord = (float)(i + 1);
+            verticesArray[baseIndex + 0] = new Vector3(0.5f, startCoord * rowSize);
+            verticesArray[baseIndex + 1] = new Vector3(0.5f, endCoord * rowSize);
+            verticesArray[baseIndex + 2] = new Vector3(-0.5f, endCoord * rowSize);
+            verticesArray[baseIndex + 3] = new Vector3(-0.5f, endCoord * rowSize);
+            verticesArray[baseIndex + 4] = new Vector3(-0.5f, startCoord * rowSize);
+            verticesArray[baseIndex + 5] = new Vector3(0.5f, startCoord * rowSize); 
+        }
+
+        waterSplineVerticesCBuffer.SetData(verticesArray);
     }
     private void InitializeQuadMeshBuffer() {
         quadVerticesCBuffer = new ComputeBuffer(6, sizeof(float) * 3);
@@ -474,6 +526,39 @@ public class TheRenderKing : MonoBehaviour {
         agentTrailStrokes0CBuffer.SetData(trailStrokeDataArray);
         agentTrailStrokes1CBuffer = new ComputeBuffer(trailStrokeDataArray.Length, sizeof(float) * 2);
     }
+    public void InitializeWaterSplinesCBuffer() {
+        WaterSplineData[] waterSplinesDataArray = new WaterSplineData[numWaterSplines];
+        waterSplinesCBuffer = new ComputeBuffer(waterSplinesDataArray.Length, sizeof(float) * 17 + sizeof(int) * 2);
+
+        for(int i = 0; i < waterSplinesDataArray.Length; i++) {
+            waterSplinesDataArray[i] = new WaterSplineData();
+            waterSplinesDataArray[i].index = i;
+            
+            waterSplinesDataArray[i].p0 = new Vector2(UnityEngine.Random.Range(-60f, 60f), UnityEngine.Random.Range(-60f, 60f));
+            waterSplinesDataArray[i].p1 = waterSplinesDataArray[i].p0 + new Vector2(0f, -1f);
+            waterSplinesDataArray[i].p2 = waterSplinesDataArray[i].p0 + new Vector2(0f, -2f);
+            waterSplinesDataArray[i].p3 = waterSplinesDataArray[i].p0 + new Vector2(0f, -3f);
+            waterSplinesDataArray[i].widths = new Vector4(UnityEngine.Random.Range(0.75f, 1.25f), UnityEngine.Random.Range(0.75f, 1.25f), UnityEngine.Random.Range(0.75f, 1.25f), UnityEngine.Random.Range(0.75f, 1.25f));
+            waterSplinesDataArray[i].strength = 1f;  
+		    waterSplinesDataArray[i].age = UnityEngine.Random.Range(1f, 2f);
+            waterSplinesDataArray[i].brushType = 0; 
+        }
+
+        waterSplinesCBuffer.SetData(waterSplinesDataArray);
+    }
+    public void InitializeWaterChainsCBuffer() {
+        TrailStrokeData[] waterChainDataArray = new TrailStrokeData[numWaterChains * numPointsPerWaterChain];
+        for (int i = 0; i < waterChainDataArray.Length; i++) {
+            int agentIndex = (int)Mathf.Floor((float)i / numPointsPerWaterChain);
+            float trailPos = (float)i % (float)numPointsPerWaterChain;
+            Vector2 randPos = new Vector2(UnityEngine.Random.Range(-60f, 60f), UnityEngine.Random.Range(-60f, 60f));
+            waterChainDataArray[i] = new TrailStrokeData();
+            waterChainDataArray[i].worldPos = randPos + new Vector2(0f, trailPos * -1f);
+        }
+        waterChains0CBuffer = new ComputeBuffer(waterChainDataArray.Length, sizeof(float) * 2);
+        waterChains0CBuffer.SetData(waterChainDataArray);
+        waterChains1CBuffer = new ComputeBuffer(waterChainDataArray.Length, sizeof(float) * 2);
+    }
 
     private void InitializeMaterials() {
         agentEyesDisplayMat.SetPass(0); // Eyes
@@ -508,6 +593,14 @@ public class TheRenderKing : MonoBehaviour {
         trailStrokeDisplayMat.SetPass(0);
         trailStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         trailStrokeDisplayMat.SetBuffer("agentTrailStrokesReadCBuffer", agentTrailStrokes0CBuffer);
+
+        waterSplinesMat.SetPass(0);
+        waterSplinesMat.SetBuffer("verticesCBuffer", waterSplineVerticesCBuffer);
+        waterSplinesMat.SetBuffer("waterSplinesReadCBuffer", waterSplinesCBuffer);
+
+        waterChainsMat.SetPass(0);
+        waterChainsMat.SetBuffer("verticesCBuffer", quadVerticesCBuffer);
+        waterChainsMat.SetBuffer("waterChainsReadCBuffer", waterChains0CBuffer);
 
         /*
         trailDotsDisplayMat.SetPass(0);
@@ -850,7 +943,7 @@ public class TheRenderKing : MonoBehaviour {
         singleAgentSmearStrokeCBuffer.Release();
 
         //Debug.Log("Update curve Strokes! [" + singleCurveStrokeArray[0].p0.ToString() + ", " + singleCurveStrokeArray[0].p1.ToString() + ", " + singleCurveStrokeArray[0].p2.ToString() + ", " + singleCurveStrokeArray[0].p3.ToString() + "]");
-    }
+    }    
     public void UpdateAgentTailStrokesBuffer(int agentIndex) {
 
     }
@@ -1039,6 +1132,43 @@ public class TheRenderKing : MonoBehaviour {
         computeShaderBrushStrokes.Dispatch(kernelCSIterateTrailStrokesData, agentTrailStrokes0CBuffer.count, 1, 1);
         //}
     }
+    private void SimWaterSplines() {
+        int kernelSimWaterSplines = fluidManager.computeShaderFluidSim.FindKernel("SimWaterSplines");
+
+        fluidManager.computeShaderFluidSim.SetFloat("_TextureResolution", (float)fluidManager.resolution);
+        fluidManager.computeShaderFluidSim.SetFloat("_DeltaTime", fluidManager.deltaTime);
+        fluidManager.computeShaderFluidSim.SetFloat("_InvGridScale", fluidManager.invGridScale);
+        fluidManager.computeShaderFluidSim.SetBuffer(kernelSimWaterSplines, "WaterSplinesCBuffer", waterSplinesCBuffer);
+        fluidManager.computeShaderFluidSim.SetTexture(kernelSimWaterSplines, "VelocityRead", fluidManager._VelocityA);     
+        fluidManager.computeShaderFluidSim.SetTexture(kernelSimWaterSplines, "DensityRead", fluidManager._DensityA);  
+        fluidManager.computeShaderFluidSim.Dispatch(kernelSimWaterSplines, waterSplinesCBuffer.count / 1024, 1, 1);
+    }
+    private void SimWaterChains() {
+        // Set position of trail Roots:
+        int kernelCSPinWaterChainsData = fluidManager.computeShaderFluidSim.FindKernel("CSPinWaterChainsData");        
+        fluidManager.computeShaderFluidSim.SetBuffer(kernelCSPinWaterChainsData, "waterChainsReadCBuffer", waterChains0CBuffer);
+        fluidManager.computeShaderFluidSim.SetBuffer(kernelCSPinWaterChainsData, "waterChainsWriteCBuffer", waterChains1CBuffer);
+        fluidManager.computeShaderFluidSim.SetTexture(kernelCSPinWaterChainsData, "VelocityRead", fluidManager._VelocityA);
+        fluidManager.computeShaderFluidSim.Dispatch(kernelCSPinWaterChainsData, waterChains0CBuffer.count / numPointsPerWaterChain / 1024, 1, 1);
+        
+        if(debugFrameCounter % 1 == 0) {
+            // Shift positions:::
+            int kernelCSShiftWaterChainsData = fluidManager.computeShaderFluidSim.FindKernel("CSShiftWaterChainsData");
+            fluidManager.computeShaderFluidSim.SetBuffer(kernelCSShiftWaterChainsData, "waterChainsReadCBuffer", waterChains0CBuffer);
+            fluidManager.computeShaderFluidSim.SetBuffer(kernelCSShiftWaterChainsData, "waterChainsWriteCBuffer", waterChains1CBuffer);
+            fluidManager.computeShaderFluidSim.SetTexture(kernelCSShiftWaterChainsData, "VelocityRead", fluidManager._VelocityA);
+            fluidManager.computeShaderFluidSim.Dispatch(kernelCSShiftWaterChainsData, waterChains0CBuffer.count / 1024, 1, 1);
+        }      
+        
+        // Copy back to buffer1:::        
+        int kernelCSSwapWaterChainsData = fluidManager.computeShaderFluidSim.FindKernel("CSSwapWaterChainsData");
+        fluidManager.computeShaderFluidSim.SetBuffer(kernelCSSwapWaterChainsData, "waterChainsReadCBuffer", waterChains1CBuffer);
+        fluidManager.computeShaderFluidSim.SetBuffer(kernelCSSwapWaterChainsData, "waterChainsWriteCBuffer", waterChains0CBuffer);
+        fluidManager.computeShaderFluidSim.SetTexture(kernelCSSwapWaterChainsData, "VelocityRead", fluidManager._VelocityA);
+        fluidManager.computeShaderFluidSim.Dispatch(kernelCSSwapWaterChainsData, waterChains0CBuffer.count / 1024, 1, 1);
+
+        debugFrameCounter++;
+    }
 
     public void Tick() {  // should be called from SimManager at proper time!
         fullscreenFade = 1f;
@@ -1060,6 +1190,8 @@ public class TheRenderKing : MonoBehaviour {
         SimFloatyBits();
         SimRipples();
         SimFruit();
+        SimWaterSplines();
+        SimWaterChains();
     }
 
     public void RenderSimulationCameras() { // **** revisit
@@ -1154,7 +1286,21 @@ public class TheRenderKing : MonoBehaviour {
         // Use this technique for Environment Brushstrokes:
         cmdBufferMainRender.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, frameBufferStrokeDisplayMat, 0, MeshTopology.Triangles, 6, frameBufferStrokesCBuffer.count);
+
+        // WATER SPLINES:::
+        waterSplinesMat.SetPass(0);
+        waterSplinesMat.SetBuffer("verticesCBuffer", waterSplineVerticesCBuffer);
+        waterSplinesMat.SetBuffer("waterSplinesReadCBuffer", waterSplinesCBuffer);
+        waterSplinesMat.SetTexture("_FluidColorTex", fluidManager._DensityA);
+        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, waterSplinesMat, 0, MeshTopology.Triangles, 6 * numWaterSplineMeshQuads, waterSplinesCBuffer.count);
         
+        // WATER CHAINS:::
+        waterChainsMat.SetPass(0);
+        waterChainsMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        waterChainsMat.SetBuffer("waterChainsReadCBuffer", waterChains0CBuffer);
+        waterChainsMat.SetTexture("_FluidColorTex", fluidManager._DensityA);
+        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, waterChainsMat, 0, MeshTopology.Triangles, 6, waterChains0CBuffer.count);
+
         // FLOATY BITS!
         floatyBitsDisplayMat.SetPass(0);
         floatyBitsDisplayMat.SetTexture("_FluidColorTex", fluidManager._DensityA);
@@ -1162,6 +1308,8 @@ public class TheRenderKing : MonoBehaviour {
         floatyBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, floatyBitsDisplayMat, 0, MeshTopology.Triangles, 6, floatyBitsCBuffer.count);
 
+        /*
+        
         // RIPPLES:
         ripplesDisplayMat.SetPass(0);
         ripplesDisplayMat.SetBuffer("agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
@@ -1178,6 +1326,8 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, playerGlowMat, 0, MeshTopology.Triangles, 6, playerGlowCBuffer.count);
         //}
 
+        */
+
         // PLAYER GLOWY BITS!
         playerGlowyBitsDisplayMat.SetPass(0);
         //playerGlowyBitsDisplayMat.SetFloat("_PosX", (simManager.agentsArray[0].transform.position.x + 70f) / 140f);
@@ -1186,6 +1336,8 @@ public class TheRenderKing : MonoBehaviour {
         playerGlowyBitsDisplayMat.SetBuffer("playerGlowyBitsCBuffer", playerGlowyBitsCBuffer);
         playerGlowyBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, playerGlowyBitsDisplayMat, 0, MeshTopology.Triangles, 6, playerGlowyBitsCBuffer.count);
+        
+        /*
         
         // AGENT TAILS WOO!
         trailStrokeDisplayMat.SetPass(0);
@@ -1219,6 +1371,13 @@ public class TheRenderKing : MonoBehaviour {
         agentEyesDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, agentEyesDisplayMat, 0, MeshTopology.Triangles, 6, agentEyeStrokesCBuffer.count);
 
+        predatorProceduralDisplayMat.SetPass(0);
+        predatorProceduralDisplayMat.SetBuffer("predatorSimDataCBuffer", simManager.simStateData.predatorSimDataCBuffer);
+        predatorProceduralDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, predatorProceduralDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.predatorSimDataCBuffer.count);
+        
+        */
+        
         
         //foodProceduralDisplayMat.SetPass(0);
         //foodProceduralDisplayMat.SetBuffer("foodSimDataCBuffer", simManager.simStateData.foodSimDataCBuffer);
@@ -1232,12 +1391,7 @@ public class TheRenderKing : MonoBehaviour {
         //Debug.Log("testDataArray[0] " + testDataArray[0].foodIndex.ToString() + " testDataArray[15] " + testDataArray[15].foodIndex.ToString() + ", testDataArray[570]: " + testDataArray[570].foodIndex.ToString());
                
         
-        predatorProceduralDisplayMat.SetPass(0);
-        predatorProceduralDisplayMat.SetBuffer("predatorSimDataCBuffer", simManager.simStateData.predatorSimDataCBuffer);
-        predatorProceduralDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, predatorProceduralDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.predatorSimDataCBuffer.count);
         
-
 
         //cmdBufferMainRender.Blit()
         /*int mainTexID = Shader.PropertyToID("_MainTex");        
@@ -1364,7 +1518,18 @@ public class TheRenderKing : MonoBehaviour {
         if (agentEyeStrokesCBuffer != null) {
             agentEyeStrokesCBuffer.Release();
         }
-        
+        if (waterSplinesCBuffer != null) {
+            waterSplinesCBuffer.Release();
+        }
+        if (waterSplineVerticesCBuffer != null) {
+            waterSplineVerticesCBuffer.Release();
+        }
+        if (waterChains0CBuffer != null) {
+            waterChains0CBuffer.Release();
+        }
+        if (waterChains1CBuffer != null) {
+            waterChains1CBuffer.Release();
+        }
     }
 
     /*public PointStrokeData GeneratePointStrokeData(int index, Vector2 size, Vector2 pos, Vector2 dir, Vector3 hue, float str, int brushType) {

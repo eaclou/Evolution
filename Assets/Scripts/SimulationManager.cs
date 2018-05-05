@@ -509,7 +509,7 @@ public class SimulationManager : MonoBehaviour {
 
         // TEMP AUDIO EFFECTS!!!!
         //float playerSpeed = (agentsArray[0].transform.position - agentsArray[0]._PrevPos).magnitude;
-        float volume = agentsArray[0].smoothedThrottle.magnitude * 0.22f;
+        float volume = agentsArray[0].smoothedThrottle.magnitude * 0.24f;
         audioManager.SetPlayerSwimLoopVolume(volume);
         //agentsArray[0].avgVel       
                 
@@ -851,7 +851,7 @@ public class SimulationManager : MonoBehaviour {
             MutationSettings mutationSettings = settingsManager.mutationSettingsPersistent;
 
             // Can randomly pull from saved Genepool database:
-            bool usePreTrained = true;
+            bool usePreTrained = false;
 
             if(usePreTrained) {
                 float randRoll = UnityEngine.Random.Range(0f, 1f);

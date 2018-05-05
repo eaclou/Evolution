@@ -13,6 +13,10 @@
 #pragma kernel SimFloatyBits
 #pragma kernel SimRipples
 #pragma kernel SimTrailDots
+#pragma kernel SimWaterSplines
+#pragma kernel CSPinWaterChainsData
+#pragma kernel CSShiftWaterChainsData
+#pragma kernel CSSwapWaterChainsData
 
 struct ForcePoint {
     float posX;
@@ -39,6 +43,19 @@ struct FloatyBitData {
 	float2 coords;
 	float2 vel;
 	float age;
+};
+
+struct WaterSplineData {   // 2 ints, 17 floats
+    int index;    
+    float2 p0;
+    float2 p1;
+    float2 p2;
+    float2 p3;
+    float4 widths;
+	float3 hue;
+    float strength;   // extra data to use however
+	float age;  // to allow for fade-in and fade-out
+    int brushType;  // brush texture mask
 };
 
 struct AgentSimData {
@@ -72,10 +89,14 @@ StructuredBuffer<float4> ObjectPositionsCBuffer;
 RWStructuredBuffer<float2> VelocityValuesCBuffer;
 
 RWStructuredBuffer<PlayerGlowyBitData> PlayerGlowyBitsCBuffer;
+RWStructuredBuffer<WaterSplineData> WaterSplinesCBuffer;
 RWStructuredBuffer<FloatyBitData> FloatyBitsCBuffer;
 StructuredBuffer<AgentSimData> AgentSimDataCBuffer;
 RWStructuredBuffer<TrailDotData> RipplesCBuffer;
 RWStructuredBuffer<TrailDotData> TrailDotsCBuffer;
+
+RWStructuredBuffer<float2> waterChainsReadCBuffer;
+RWStructuredBuffer<float2> waterChainsWriteCBuffer;
 
 SamplerState _LinearClamp;
 SamplerState _LinearRepeat;
@@ -106,6 +127,8 @@ uniform float _SampleCoordX;
 uniform float _SampleCoordY;
 
 uniform float _VelocitySampleRadius;
+
+uniform const float _VelConversionConst = 0.033;
 
 uniform float4 _PlayerPos;
 
@@ -266,6 +289,80 @@ void SimTrailDots (uint3 id : SV_DispatchThreadID)
 	trailDotData.coords01 = nextPos;
 	
 	TrailDotsCBuffer[id.x] = trailDotData;
+}
+
+[numthreads(1024,1,1)]
+void SimWaterSplines (uint3 id : SV_DispatchThreadID)
+{	
+	WaterSplineData waterSplineData = WaterSplinesCBuffer[id.x];
+
+	// ***** Move Head Point0: //
+
+	float2 uv = (waterSplineData.p0 + 70) / 140;
+	float2 vel = VelocityRead.SampleLevel(_LinearRepeat, uv, 3).xy;
+	float speedMult = 0.033;
+	
+	float2 nextPos = uv + vel * speedMult;
+
+	//waterSplineData.vel = vel;
+
+	waterSplineData.age = waterSplineData.age + 0.001;  // 1000 frame lifespan
+	if(waterSplineData.age > 1.0) {
+		
+		float2 spawnPos = float2(rand(float2(id.x, uv.x)), rand(float2(uv.y, id.x)));		
+		waterSplineData.p0 = spawnPos * 140 - 70;
+		waterSplineData.p1 = waterSplineData.p0 - float2(0, -1);
+		waterSplineData.p2 = waterSplineData.p1 - float2(0, -1);
+		waterSplineData.p3 = waterSplineData.p2 - float2(0, -1);
+		waterSplineData.age -= 1;
+
+		float2 sampleUV = (waterSplineData.p0 + 70) / 140;
+		float3 fluidDensityColor = DensityRead.SampleLevel(_LinearRepeat, sampleUV, 0).xyz;
+		waterSplineData.hue = fluidDensityColor;
+	}
+	else {
+		waterSplineData.p0 = nextPos * 140 - 70;
+
+		float3 fluidDensityColor = DensityRead.SampleLevel(_LinearRepeat, uv, 0).xyz;
+		waterSplineData.hue = lerp(waterSplineData.hue, fluidDensityColor, 0.02);
+	}
+	
+	// ***** Move Tail points!!! ** //
+	/*
+	float2 vel1 = VelocityRead.SampleLevel(_LinearRepeat, (waterSplineData.p1 + 70) / 140, 3).xy;
+	float2 nextPos1 = (waterSplineData.p1 + 70) / 140 + vel1 * speedMult * 0.375;
+	waterSplineData.p1 = nextPos1 * 140 - 70;
+	float2 vel2 = VelocityRead.SampleLevel(_LinearRepeat, (waterSplineData.p2 + 70) / 140, 3).xy;
+	float2 nextPos2 = (waterSplineData.p2 + 70) / 140 + vel2 * speedMult * 0.275;
+	waterSplineData.p2 = nextPos2 * 140 - 70;
+	float2 vel3 = VelocityRead.SampleLevel(_LinearRepeat, (waterSplineData.p3 + 70) / 140, 3).xy;
+	float2 nextPos3 = (waterSplineData.p3 + 70) / 140 + vel3 * speedMult * 0.175;
+	waterSplineData.p3 = nextPos3 * 140 - 70;
+	*/
+
+	float restDistance = 2;
+	float lerpStrength = 0.5;
+
+	float2 p0 = waterSplineData.p0;
+	
+	float2 p1 = waterSplineData.p1;
+	float2 vec0to1 = p1 - p0; // after p0 has been moved, vector from old P1 to new P0	
+	p1 = lerp(p1, p0 + normalize(vec0to1) * restDistance, lerpStrength * 1);
+
+	float2 p2 = waterSplineData.p2;
+	float2 vec1to2 = p2 - p1;
+	p2 = lerp(p2, p1 + normalize(vec1to2) * restDistance, lerpStrength * 1);
+
+	float2 p3 = waterSplineData.p3;
+	float2 vec2to3 = p3 - p2;
+	p3 = lerp(p3, p2 + normalize(vec2to3) * restDistance, lerpStrength * 1);
+
+	waterSplineData.p0 = p0;
+	waterSplineData.p1 = p1;
+	waterSplineData.p2 = p2;
+	waterSplineData.p3 = p3;
+	
+	WaterSplinesCBuffer[id.x] = waterSplineData;
 }
 
 [numthreads(1,1,1)]
@@ -525,5 +622,63 @@ void SubtractGradient (uint3 id : SV_DispatchThreadID)
 	newVelocity.xy -= grad;
 	VelocityWrite[id.xy] = float4(newVelocity.xy * vMask + obstV, 0, 0);
 }
+
+[numthreads(1024,1,1)]
+void CSPinWaterChainsData (uint3 id : SV_DispatchThreadID)
+{	
+	int rootIndex = id.x * 16; // hardcoded 16 !!!!! ***********************
+	float2 waterChainData = waterChainsReadCBuffer[rootIndex];
+	
+	float2 uv = (waterChainData + 70) / 140;
+	
+	float speedMult = 0.033;
+	
+	// blah blah 
+
+	float2 fluidVel = VelocityRead.SampleLevel(_LinearRepeat, uv, 0).xy;
+	
+	float2 nextCoords = uv + fluidVel * speedMult;
+	
+	waterChainsWriteCBuffer[rootIndex] = nextCoords * 140 - 70;
+}
+
+[numthreads(1024,1,1)]
+void CSShiftWaterChainsData (uint3 id : SV_DispatchThreadID)
+{	
+	uint pointIndex = id.x;
+	uint localIndex = pointIndex % 16;  // **** HARDCODED!!!! ****
+
+	uint waterChainIndex = floor(id.x / 16);   // **** HARDCODED!!!! ****
+
+	float minDist = 0.1;
+
+	if(localIndex != 0) {  // don't move head point
+		float2 ownPos = waterChainsReadCBuffer[pointIndex]; // try to avoid divide by 0
+		float2 nextPos = waterChainsReadCBuffer[pointIndex - 1]; // get neighbor's position
+						
+		float2 vecToNext = nextPos - ownPos;
+		float distToNext = length(vecToNext);
+		
+		if(distToNext < minDist) {
+					
+		}
+		else { // normal non-overlapping
+			waterChainsWriteCBuffer[pointIndex] = lerp(ownPos, nextPos, 0.45);			
+		}
+
+		//newDist = max(minDist, distToNext);	
+		//waterChainsWriteCBuffer[pointIndex] = lerp(ownPos, nextPos - dirToNext * newDist, 0.05);
+
+		//waterChainsWriteCBuffer[pointIndex] = nextPos;
+	}
+}
+
+[numthreads(1024,1,1)]
+void CSSwapWaterChainsData (uint3 id : SV_DispatchThreadID)
+{	
+	waterChainsWriteCBuffer[id.x] = waterChainsReadCBuffer[id.x];
+}
+
+
 
 

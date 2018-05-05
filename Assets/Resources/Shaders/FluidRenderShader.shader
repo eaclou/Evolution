@@ -110,7 +110,7 @@
 				//finalColor.y *= 0.85;
 				//finalColor.z *= 1.2;
 
-				finalColor.rgb *= 1.12;
+				finalColor.rgb *= 1.1;
 				//if(altitude < 0) {
 				//	return float4(1,1,1,1);
 				//}

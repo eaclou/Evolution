@@ -53,6 +53,7 @@ public class UIManager : MonoBehaviour {
     public Button buttonClearTrainingData;
     public Button buttonToggleTrainingPersistent;
 
+    public GameObject panelTitleMenu;
     public GameObject panelGameOptions;
 
     // TOP PANEL::::
@@ -175,9 +176,11 @@ public class UIManager : MonoBehaviour {
         panelMainMenu.SetActive(true);
         if (optionsMenuOn) {
             panelGameOptions.SetActive(true);
+            panelTitleMenu.SetActive(false);
         }
         else {
             panelGameOptions.SetActive(false);
+            panelTitleMenu.SetActive(true);
         }
         panelLoading.SetActive(false);
         panelPlaying.SetActive(false);
