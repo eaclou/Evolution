@@ -18,6 +18,7 @@ public class TheRenderKing : MonoBehaviour {
     private CommandBuffer cmdBufferFluidColor;
 
     public ComputeShader computeShaderBrushStrokes;
+    public ComputeShader computeShaderUberChains;
     public ComputeShader computeShaderTerrainGeneration;
 
     public Material agentEyesDisplayMat;
@@ -40,7 +41,8 @@ public class TheRenderKing : MonoBehaviour {
     public Material fadeToBlackBlitMat;
     public Material waterSplinesMat;
     public Material waterChainsMat;
-
+    public Material uberFlowChainBrushMat1;
+    
     //public Material debugMat;
 
     private Mesh fluidRenderMesh;
@@ -91,7 +93,7 @@ public class TheRenderKing : MonoBehaviour {
     private int numPlayerGlowyBits = 1024 * 12;
     private ComputeBuffer playerGlowyBitsCBuffer;
 
-    private int numFloatyBits = 1024 * 12;
+    private int numFloatyBits = 1024 * 6;
     private ComputeBuffer floatyBitsCBuffer;
         
     private int numRipplesPerAgent = 8;
@@ -106,6 +108,8 @@ public class TheRenderKing : MonoBehaviour {
     private int numPointsPerWaterChain = 16;
     private ComputeBuffer waterChains0CBuffer;
     private ComputeBuffer waterChains1CBuffer;
+
+    private UberFlowChainBrush uberFlowChainBrush1;
 
     private BasicStrokeData[] obstacleStrokeDataArray;
     private ComputeBuffer obstacleStrokesCBuffer;
@@ -122,12 +126,14 @@ public class TheRenderKing : MonoBehaviour {
     public struct PlayerGlowyBitData {
 		public Vector2 coords;
 		public Vector2 vel;
+        public Vector2 heading;
 		public float age;
 	}
 
     public struct FloatyBitData {
 		public Vector2 coords;
 		public Vector2 vel;
+        public Vector2 heading;
 		public float age;
 	}
 
@@ -217,6 +223,7 @@ public class TheRenderKing : MonoBehaviour {
 
         InitializeBuffers();
         InitializeMaterials();
+        InitializeUberBrushes();
         InitializeCommandBuffers();
 
         InitializeTerrain();
@@ -359,6 +366,10 @@ public class TheRenderKing : MonoBehaviour {
         fluidRenderMesh.triangles = triangles;
     }
 
+    private void InitializeUberBrushes() {
+        uberFlowChainBrush1 = new UberFlowChainBrush();
+        uberFlowChainBrush1.Initialize(computeShaderUberChains, uberFlowChainBrushMat1);
+    }
     //playerGlowCBuffer
     private void InitializePlayerGlowBuffer() {
         playerGlowInitPos = new BasicStrokeData[1];
@@ -379,11 +390,12 @@ public class TheRenderKing : MonoBehaviour {
     }
     private void InitializePlayerGlowyBitsBuffer() {
         PlayerGlowyBitData[] playerGlowyBitsInitPos = new PlayerGlowyBitData[numPlayerGlowyBits];
-        playerGlowyBitsCBuffer = new ComputeBuffer(numPlayerGlowyBits, sizeof(float) * 5);
+        playerGlowyBitsCBuffer = new ComputeBuffer(numPlayerGlowyBits, sizeof(float) * 7);
         for(int i = 0; i < numPlayerGlowyBits; i++) {
             PlayerGlowyBitData data = new PlayerGlowyBitData();
             data.coords = new Vector2(UnityEngine.Random.Range(0.2f, 0.8f), UnityEngine.Random.Range(0.2f, 0.8f)); // (UnityEngine.Random.Range(0.2f, 0.8f), UnityEngine.Random.Range(0.2f, 0.8f), 1f, 0f);
             data.vel = new Vector2(1f, 0f);
+            data.heading = new Vector2(1f, 0f);
             data.age = (float)i / (float)numPlayerGlowyBits * 256f;
             playerGlowyBitsInitPos[i] = data;
         }
@@ -394,12 +406,13 @@ public class TheRenderKing : MonoBehaviour {
     }
     private void InitializeFloatyBitsBuffer() {
         FloatyBitData[] floatyBitsInitPos = new FloatyBitData[numFloatyBits];
-        floatyBitsCBuffer = new ComputeBuffer(numFloatyBits, sizeof(float) * 5);
+        floatyBitsCBuffer = new ComputeBuffer(numFloatyBits, sizeof(float) * 7);
         for(int i = 0; i < numFloatyBits; i++) {
             //floatyBitsInitPos[i] = new Vector4(UnityEngine.Random.Range(0.2f, 0.8f), UnityEngine.Random.Range(0.2f, 0.8f), 1f, 0f);
             FloatyBitData data = new FloatyBitData();
             data.coords = new Vector2(UnityEngine.Random.Range(0.2f, 0.8f), UnityEngine.Random.Range(0.2f, 0.8f)); // (UnityEngine.Random.Range(0.2f, 0.8f), UnityEngine.Random.Range(0.2f, 0.8f), 1f, 0f);
             data.vel = new Vector2(1f, 0f);
+            data.heading = new Vector2(1f, 0f);
             data.age = (float)i / (float)numFloatyBits;
             floatyBitsInitPos[i] = data;
         }
@@ -1192,6 +1205,8 @@ public class TheRenderKing : MonoBehaviour {
         SimFruit();
         SimWaterSplines();
         SimWaterChains();
+
+        uberFlowChainBrush1.Tick(fluidManager._VelocityA);
     }
 
     public void RenderSimulationCameras() { // **** revisit
@@ -1307,6 +1322,10 @@ public class TheRenderKing : MonoBehaviour {
         floatyBitsDisplayMat.SetBuffer("floatyBitsCBuffer", floatyBitsCBuffer);
         floatyBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, floatyBitsDisplayMat, 0, MeshTopology.Triangles, 6, floatyBitsCBuffer.count);
+
+        // Uber Chains !!!
+        uberFlowChainBrush1.RenderSetup(fluidManager._DensityA);
+        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, uberFlowChainBrush1.renderMat, 0, MeshTopology.Triangles, 6, uberFlowChainBrush1.chains0CBuffer.count);
 
         /*
         
@@ -1529,6 +1548,10 @@ public class TheRenderKing : MonoBehaviour {
         }
         if (waterChains1CBuffer != null) {
             waterChains1CBuffer.Release();
+        }
+
+        if(uberFlowChainBrush1 != null) {
+            uberFlowChainBrush1.CleanUp();
         }
     }
 

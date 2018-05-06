@@ -28,6 +28,7 @@
 			struct PlayerGlowyBitData {
 				float2 coords;
 				float2 vel;
+				float2 heading;
 				float age;
 			};
 
@@ -70,8 +71,8 @@
 				float randomAspect = lerp(0.75, 1.33, random1);
 				//float randomScale = lerp(_Size.x, _Size.y, random2);
 				float randomValue = rand(float2(inst, randomAspect * 10));
-				float randomScale = lerp(0.03, 0.07, random2) * 1.25;
-				float2 scale = float2(randomAspect * randomScale, (1.0 / randomAspect) * randomScale * (length(velocity) * 65 + 1));
+				float randomScale = lerp(0.044, 0.09, random2) * 1.75;
+				float2 scale = float2(randomAspect * randomScale, (1.0 / randomAspect) * randomScale * (length(velocity) * 95 + 1));
 				//float2 scale = float2(1, 1) * randomScale;
 				quadPoint *= float3(scale, 1.0);
 
@@ -80,7 +81,7 @@
 				//float3 rotatedPoint = float3(quadPoint.x * cos(rotationAngle) - quadPoint.y * sin(rotationAngle),
 				//							 quadPoint.x * sin(rotationAngle) + quadPoint.y * cos(rotationAngle),
 				//							 quadPoint.z);
-				float2 forward = normalize(velocity);
+				float2 forward = data.heading; // normalize(velocity);
 				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
 				float3 rotatedPoint = float3(quadPoint.x * right + quadPoint.y * forward,
 											 quadPoint.z);
@@ -95,8 +96,8 @@
 				if(distToPlayer < 0.005) {
 					glow = 0;
 				}
-				alpha = saturate(alpha * 0.3 * (1 + glow * 2));
-				float brightness = saturate(random1 + glow);
+				alpha = saturate(alpha * 0.275 * (1 + glow * 2));
+				float brightness = saturate(random1 + glow + 0.4);
 				float3 hue = lerp(float3(brightness, brightness, brightness), _PrimaryHue.rgb, glow);
 				
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(rotatedPoint, 0.0f));				
@@ -111,7 +112,7 @@
 				
 				float4 texColor = tex2D(_MainTex, i.uv);  // Read Brush Texture
 				float4 finalColor = float4(i.color) * texColor; //texColor * _Tint * float4(i.color, 1);
-				//finalColor.a *= 0.5;
+				finalColor.a *= 0.35;
 				return finalColor;
 				
 			}

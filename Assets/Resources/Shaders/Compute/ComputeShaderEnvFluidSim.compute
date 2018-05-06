@@ -36,12 +36,14 @@ struct TrailDotData {
 struct PlayerGlowyBitData {
 	float2 coords;
 	float2 vel;
+	float2 heading;
 	float age;
 };
 
 struct FloatyBitData {
 	float2 coords;
 	float2 vel;
+	float2 heading;
 	float age;
 };
 
@@ -149,6 +151,11 @@ void SimPlayerGlowyBits (uint3 id : SV_DispatchThreadID)
 	float2 nextPos = uv + vel * speedMult;
 
 	data.vel = vel;
+
+	// Set Heading!!
+	float velocityLerp = 85 * length(vel);
+	data.heading = normalize(lerp(data.heading, vel, saturate(velocityLerp)));
+
 	data.age = data.age + 3.0;
 	if(data.age > maxAge) {
 		// get random position near Player:
@@ -182,6 +189,10 @@ void SimFloatyBits (uint3 id : SV_DispatchThreadID)
 	float2 nextPos = uv + vel * speedMult;
 
 	floatyBitData.vel = vel;
+
+	// Set Heading!!
+	float velocityLerp = 85 * length(vel);
+	floatyBitData.heading = normalize(lerp(floatyBitData.heading, vel, saturate(velocityLerp)));
 
 	floatyBitData.age = floatyBitData.age + 0.001;  // 1000 frame lifespan
 	if(floatyBitData.age > 1.0) {

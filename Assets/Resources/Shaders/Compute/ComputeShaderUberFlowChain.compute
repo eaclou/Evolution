@@ -1,0 +1,61 @@
+﻿#pragma kernel CSPinChainsData
+#pragma kernel CSShiftChainsData
+#pragma kernel CSSwapChainsData
+
+Texture2D<float4> velocityRead;
+RWStructuredBuffer<float2> chainsReadCBuffer;
+RWStructuredBuffer<float2> chainsWriteCBuffer;
+
+SamplerState _LinearClamp;
+SamplerState _LinearRepeat;
+SamplerState _PointClamp;
+SamplerState _PointRepeat;
+
+[numthreads(1024,1,1)]
+void CSPinChainsData (uint3 id : SV_DispatchThreadID)
+{	
+	int rootIndex = id.x * 32; // hardcoded 32 !!!!! ***********************
+	float2 linkData = chainsReadCBuffer[rootIndex];
+	
+	float2 uv = (linkData + 70) / 140;
+	
+	float speedMult = 0.033;	
+
+	float2 fluidVel = velocityRead.SampleLevel(_LinearRepeat, uv, 0).xy;
+	
+	float2 nextCoords = uv + fluidVel * speedMult;
+	
+	chainsWriteCBuffer[rootIndex] = nextCoords * 140 - 70;  // *** hardcoded map scale!!!
+}
+
+[numthreads(1024,1,1)]
+void CSShiftChainsData (uint3 id : SV_DispatchThreadID)
+{	
+	uint pointIndex = id.x;
+	uint localIndex = pointIndex % 32;  // **** HARDCODED!!!! ****
+
+	uint chainIndex = floor(id.x / 32);   // **** HARDCODED!!!! ****
+
+	float minDist = 0.1;
+
+	if(localIndex != 0) {  // don't move head point
+		float2 ownPos = chainsReadCBuffer[pointIndex]; // try to avoid divide by 0
+		float2 nextPos = chainsReadCBuffer[pointIndex - 1]; // get neighbor's position
+						
+		float2 vecToNext = nextPos - ownPos;
+		float distToNext = length(vecToNext);
+		
+		if(distToNext < minDist) {
+					
+		}
+		else { // normal non-overlapping
+			chainsWriteCBuffer[pointIndex] = lerp(ownPos, nextPos, 0.45);			
+		}
+	}
+}
+
+[numthreads(1024,1,1)]
+void CSSwapChainsData (uint3 id : SV_DispatchThreadID)
+{	
+	chainsWriteCBuffer[id.x] = chainsReadCBuffer[id.x];
+}

@@ -39,6 +39,7 @@ public class GameOptionsManager : MonoBehaviour {
         gameOptions.simulationComplexity = 1; // medium 48 creatures, 16 hidden neurons
         dropdownSimulationComplexity.value = gameOptions.simulationComplexity;
                 
+                
     }
 
     private void Start() {
