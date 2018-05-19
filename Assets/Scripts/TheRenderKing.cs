@@ -90,7 +90,7 @@ public class TheRenderKing : MonoBehaviour {
     private BasicStrokeData[] playerGlowInitPos;
     private ComputeBuffer playerGlowCBuffer;
 
-    private int numPlayerGlowyBits = 1024 * 12;
+    private int numPlayerGlowyBits = 1024 * 10;
     private ComputeBuffer playerGlowyBitsCBuffer;
 
     private int numFloatyBits = 1024 * 6;
@@ -99,12 +99,12 @@ public class TheRenderKing : MonoBehaviour {
     private int numRipplesPerAgent = 8;
     private ComputeBuffer ripplesCBuffer;
 
-    private int numWaterSplineMeshQuads = 6;
+    private int numWaterSplineMeshQuads = 4;
     private ComputeBuffer waterSplineVerticesCBuffer;  // short ribbon mesh
-    private int numWaterSplines = 1024 * 8;
+    private int numWaterSplines = 1024 * 3;
     private ComputeBuffer waterSplinesCBuffer;
 
-    private int numWaterChains = 1024 * 8;
+    private int numWaterChains = 1024 * 3;
     private int numPointsPerWaterChain = 16;
     private ComputeBuffer waterChains0CBuffer;
     private ComputeBuffer waterChains1CBuffer;
@@ -1281,7 +1281,7 @@ public class TheRenderKing : MonoBehaviour {
 
         RenderTargetIdentifier renderTarget = new RenderTargetIdentifier(BuiltinRenderTextureType.CameraTarget);
         cmdBufferMainRender.SetRenderTarget(renderTarget);  // Set render Target
-        cmdBufferMainRender.ClearRenderTarget(true, true, Color.black, 1.0f);  // clear -- needed???
+        cmdBufferMainRender.ClearRenderTarget(true, true, Color.gray, 1.0f);  // clear -- needed???
         //cmdBufferMainRender.ClearRenderTarget(true, true, new Color(225f / 255f, 217f / 255f, 200f / 255f), 1.0f);  // clear -- needed???
                 
         // FLUID ITSELF:
@@ -1355,47 +1355,51 @@ public class TheRenderKing : MonoBehaviour {
         playerGlowyBitsDisplayMat.SetBuffer("playerGlowyBitsCBuffer", playerGlowyBitsCBuffer);
         playerGlowyBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, playerGlowyBitsDisplayMat, 0, MeshTopology.Triangles, 6, playerGlowyBitsCBuffer.count);
-        
-        /*
-        
-        // AGENT TAILS WOO!
-        trailStrokeDisplayMat.SetPass(0);
-        trailStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        trailStrokeDisplayMat.SetBuffer("agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
-        trailStrokeDisplayMat.SetBuffer("agentTrailStrokesReadCBuffer", agentTrailStrokes0CBuffer);
-        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, trailStrokeDisplayMat, 0, MeshTopology.Triangles, 6, agentTrailStrokes0CBuffer.count);
 
-        foodFruitDisplayMat.SetPass(0);
-        foodFruitDisplayMat.SetBuffer("fruitDataCBuffer", simManager.simStateData.foodFruitDataCBuffer);
-        foodFruitDisplayMat.SetBuffer("foodSimDataCBuffer", simManager.simStateData.foodSimDataCBuffer);
-        foodFruitDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, foodFruitDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.foodFruitDataCBuffer.count);
+        bool displayAgents = true;
+        if(displayAgents) {
+            
+        
+            // AGENT TAILS WOO!
+            trailStrokeDisplayMat.SetPass(0);
+            trailStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+            trailStrokeDisplayMat.SetBuffer("agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
+            trailStrokeDisplayMat.SetBuffer("agentTrailStrokesReadCBuffer", agentTrailStrokes0CBuffer);
+            cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, trailStrokeDisplayMat, 0, MeshTopology.Triangles, 6, agentTrailStrokes0CBuffer.count);
+
+            foodFruitDisplayMat.SetPass(0);
+            foodFruitDisplayMat.SetBuffer("fruitDataCBuffer", simManager.simStateData.foodFruitDataCBuffer);
+            foodFruitDisplayMat.SetBuffer("foodSimDataCBuffer", simManager.simStateData.foodSimDataCBuffer);
+            foodFruitDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+            cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, foodFruitDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.foodFruitDataCBuffer.count);
                 
-        // TEMP AGENTS: // CHANGE THIS TO SMEARS!
-        curveStrokeDisplayMat.SetPass(0);
-        curveStrokeDisplayMat.SetBuffer("agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
-        curveStrokeDisplayMat.SetBuffer("curveRibbonVerticesCBuffer", curveRibbonVerticesCBuffer);
-        curveStrokeDisplayMat.SetBuffer("agentCurveStrokesReadCBuffer", agentSmearStrokesCBuffer);
-        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, curveStrokeDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, agentSmearStrokesCBuffer.count);
-        // AGENT BODY:
-        agentBodyDisplayMat.SetPass(0);
-        agentBodyDisplayMat.SetBuffer("agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
-        agentBodyDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        agentBodyDisplayMat.SetBuffer("bodyStrokesCBuffer", agentBodyStrokesCBuffer);
-        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, agentBodyDisplayMat, 0, MeshTopology.Triangles, 6, agentBodyStrokesCBuffer.count);
-        // AGENT EYES:
-        agentEyesDisplayMat.SetPass(0);
-        agentEyesDisplayMat.SetBuffer("agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
-        agentEyesDisplayMat.SetBuffer("agentEyesStrokesCBuffer", agentEyeStrokesCBuffer);
-        agentEyesDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, agentEyesDisplayMat, 0, MeshTopology.Triangles, 6, agentEyeStrokesCBuffer.count);
+            // TEMP AGENTS: // CHANGE THIS TO SMEARS!
+            curveStrokeDisplayMat.SetPass(0);
+            curveStrokeDisplayMat.SetBuffer("agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
+            curveStrokeDisplayMat.SetBuffer("curveRibbonVerticesCBuffer", curveRibbonVerticesCBuffer);
+            curveStrokeDisplayMat.SetBuffer("agentCurveStrokesReadCBuffer", agentSmearStrokesCBuffer);
+            cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, curveStrokeDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, agentSmearStrokesCBuffer.count);
+            // AGENT BODY:
+            agentBodyDisplayMat.SetPass(0);
+            agentBodyDisplayMat.SetBuffer("agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
+            agentBodyDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+            agentBodyDisplayMat.SetBuffer("bodyStrokesCBuffer", agentBodyStrokesCBuffer);
+            cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, agentBodyDisplayMat, 0, MeshTopology.Triangles, 6, agentBodyStrokesCBuffer.count);
+            // AGENT EYES:
+            agentEyesDisplayMat.SetPass(0);
+            agentEyesDisplayMat.SetBuffer("agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
+            agentEyesDisplayMat.SetBuffer("agentEyesStrokesCBuffer", agentEyeStrokesCBuffer);
+            agentEyesDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+            cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, agentEyesDisplayMat, 0, MeshTopology.Triangles, 6, agentEyeStrokesCBuffer.count);
 
-        predatorProceduralDisplayMat.SetPass(0);
-        predatorProceduralDisplayMat.SetBuffer("predatorSimDataCBuffer", simManager.simStateData.predatorSimDataCBuffer);
-        predatorProceduralDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, predatorProceduralDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.predatorSimDataCBuffer.count);
+            predatorProceduralDisplayMat.SetPass(0);
+            predatorProceduralDisplayMat.SetBuffer("predatorSimDataCBuffer", simManager.simStateData.predatorSimDataCBuffer);
+            predatorProceduralDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+            cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, predatorProceduralDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.predatorSimDataCBuffer.count);
         
-        */
+        
+        }
+        
         
         
         //foodProceduralDisplayMat.SetPass(0);

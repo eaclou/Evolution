@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class UberFlowChainBrush {
 
-    private int numChains = 1024 * 2;
+    private int numChains = 1024 * 4;
     private int numLinksPerChain = 32;
     public ComputeBuffer chains0CBuffer;
     private ComputeBuffer chains1CBuffer;

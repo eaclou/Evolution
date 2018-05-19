@@ -99,7 +99,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
 
     //public bool tick = false;
     
-    private int numForcePoints = 64;
+    private int numForcePoints = 32;
     public ForcePoint[] forcePointsArray;
     public ComputeBuffer forcePointsCBuffer;
     public struct ForcePoint {
@@ -144,7 +144,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
         
         forcePointsCBuffer = new ComputeBuffer(numForcePoints, sizeof(float) * 5);
         forcePointsArray = new ForcePoint[numForcePoints];
-        CreateForcePoints(0.1f, 60f, 300f);
+        CreateForcePoints(0.1f, 50f, 250f);
 
         debugMat.SetTexture("_MainTex", sourceColorRT);
     }    
@@ -210,7 +210,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
         if(cycleValue <= 12) {
             SetClimateInitial();
         }
-        if(cycleValue > 1f && cycleValue <= 17) {            
+        if(cycleValue > 0f && cycleValue <= 17) {            
             SetClimateStormy();
         }
         if(cycleValue > 17f) {
