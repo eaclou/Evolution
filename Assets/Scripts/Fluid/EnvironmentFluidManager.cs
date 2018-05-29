@@ -210,7 +210,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
         if(cycleValue <= 12) {
             SetClimateInitial();
         }
-        if(cycleValue > 0f && cycleValue <= 17) {            
+        if(cycleValue > 12f && cycleValue <= 17) {            
             SetClimateStormy();
         }
         if(cycleValue > 17f) {
