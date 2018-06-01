@@ -73,7 +73,7 @@ public class PredatorModule : MonoBehaviour {
     }
 
     private void AttackAgent(Agent agent) {        
-        agent.testModule.hitPoints[0] -= damage;                      
+        agent.coreModule.hitPoints[0] -= damage;                      
     }
     
     // *** Eventually look into explicitly ordering these Scripts Execution Order for OnCollision Monobehaviors (like Agents & Food) *****

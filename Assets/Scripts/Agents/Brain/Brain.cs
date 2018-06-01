@@ -33,7 +33,7 @@ public class Brain {
             IDs.Add(genome.hiddenNeuronList[i].nid, i);
             neuronList.Add(neuron);
         }
-        //Debug.Log("RebuildBrain " + genome.bodyNeuronList.Count + ", " + neuronList.Count.ToString());
+        Debug.Log("RebuildBrain " + genome.bodyNeuronList.Count + ", " + neuronList.Count.ToString());
 
         // Create Axons:
         axonList = new List<Axon>();
@@ -79,6 +79,7 @@ public class Brain {
         // run through all links and save sum values in target neurons
         for (int i = 0; i < axonList.Count; i++) {
             // Find input neuron and multiply its value by the axon weight --- add that to output neuron total:
+            
             neuronList[axonList[i].toID].inputTotal += axonList[i].weight * neuronList[axonList[i].fromID].currentValue[0];
         }
         // Once all axons are calculated, process the neurons:

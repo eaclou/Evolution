@@ -129,7 +129,7 @@ public class SimulationStateData {
     public void PopulateSimDataArrays(SimulationManager simManager) {
         
         for(int i = 0; i < agentSimDataArray.Length; i++) {  
-            Vector3 agentPos = simManager.agentsArray[i].testModule.ownRigidBody2D.position;
+            Vector3 agentPos = simManager.agentsArray[i].rigidbodiesArray[0].position;
             agentSimDataArray[i].worldPos = new Vector2(agentPos.x, agentPos.y);  // in world(scene) coordinates
             //agentSimDataArray[i].velocity = simManager.agentsArray[i].smoothedThrottle;
             if(simManager.agentsArray[i].smoothedThrottle.sqrMagnitude == 0f) {
@@ -140,8 +140,8 @@ public class SimulationStateData {
             }
             agentSimDataArray[i].heading = simManager.agentsArray[i].facingDirection;
             agentSimDataArray[i].size = simManager.agentsArray[i].fullSize;
-            agentSimDataArray[i].primaryHue = simManager.agentGenomePoolArray[i].bodyGenome.huePrimary;
-            agentSimDataArray[i].secondaryHue = simManager.agentGenomePoolArray[i].bodyGenome.hueSecondary;
+            agentSimDataArray[i].primaryHue = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.huePrimary;
+            agentSimDataArray[i].secondaryHue = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.hueSecondary;
             float maturity = 1f;
             float decay = 0f;
             if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Egg) {
@@ -171,7 +171,7 @@ public class SimulationStateData {
             agentSimDataArray[i].size.y *= (eatingCycle * 0.2f + 1.0f);
             agentSimDataArray[i].size.x *= (1.0f - eatingCycle * 0.2f);
 
-            agentSimDataArray[i].foodAmount = simManager.agentsArray[i].testModule.foodAmountR[0];
+            agentSimDataArray[i].foodAmount = simManager.agentsArray[i].coreModule.foodAmountR[0];
             
             // Z & W coords represents agent's x/y Radii (in FluidCoords)
             // convert from scene coords (-mapSize --> +mapSize to fluid coords (0 --> 1):::
@@ -186,7 +186,7 @@ public class SimulationStateData {
             Vector3 foodPos = simManager.foodArray[i].transform.position;
             foodSimDataArray[i].worldPos = new Vector2(foodPos.x, foodPos.y);
             // *** Revisit to avoid using GetComponent, should use cached reference instead for speed:
-            foodSimDataArray[i].velocity = new Vector2(simManager.foodArray[i].GetComponent<Rigidbody2D>().velocity.x, simManager.agentsArray[i].GetComponent<Rigidbody2D>().velocity.y);
+            foodSimDataArray[i].velocity = new Vector2(simManager.foodArray[i].GetComponent<Rigidbody2D>().velocity.x, simManager.agentsArray[i].rigidbodiesArray[0].velocity.y);
             foodSimDataArray[i].heading = simManager.foodArray[i].facingDirection;
             foodSimDataArray[i].fullSize = simManager.foodArray[i].fullSize;
             foodSimDataArray[i].foodAmount = new Vector3(simManager.foodArray[i].amountR, simManager.foodArray[i].amountG, simManager.foodArray[i].amountB);

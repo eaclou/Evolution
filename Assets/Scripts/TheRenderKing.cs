@@ -379,9 +379,9 @@ public class TheRenderKing : MonoBehaviour {
         playerGlowInitPos[0].localDir = simManager.agentsArray[0].facingDirection;
         playerGlowInitPos[0].scale = new Vector2(simManager.agentsArray[0].transform.localScale.x, simManager.agentsArray[0].transform.localScale.y); // ** revisit this later // should leave room for velSampling around Agent
         
-        playerGlowInitPos[0].color = new Vector4(simManager.agentGenomePoolArray[0].bodyGenome.huePrimary.x, 
-                                                 simManager.agentGenomePoolArray[0].bodyGenome.huePrimary.y,
-                                                 simManager.agentGenomePoolArray[0].bodyGenome.huePrimary.z, 1f);
+        playerGlowInitPos[0].color = new Vector4(simManager.agentGenomePoolArray[0].bodyGenome.appearanceGenome.huePrimary.x, 
+                                                 simManager.agentGenomePoolArray[0].bodyGenome.appearanceGenome.huePrimary.y,
+                                                 simManager.agentGenomePoolArray[0].bodyGenome.appearanceGenome.huePrimary.z, 1f);
 
         playerGlowCBuffer.SetData(playerGlowInitPos);
         //int kernelSimPlayerGlow = fluidManager.computeShaderFluidSim.FindKernel("SimPlayerGlowyBits");
@@ -465,24 +465,24 @@ public class TheRenderKing : MonoBehaviour {
         for (int i = 0; i < simManager._NumAgents; i++) {
             AgentEyeStrokeData dataLeftEye = new AgentEyeStrokeData();
             dataLeftEye.parentIndex = i;
-            dataLeftEye.localPos = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.localPos;
+            dataLeftEye.localPos = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.localPos;
             dataLeftEye.localPos.x *= -1f; // LEFT SIDE!
             dataLeftEye.localDir = new Vector2(0f, 1f);
-            dataLeftEye.localScale = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.localScale;
-            dataLeftEye.irisHue = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.irisHue;
-            dataLeftEye.pupilHue = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.pupilHue;
+            dataLeftEye.localScale = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.localScale;
+            dataLeftEye.irisHue = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.irisHue;
+            dataLeftEye.pupilHue = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.pupilHue;
             dataLeftEye.strength = 1f;
-            dataLeftEye.brushType = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.eyeBrushType;
+            dataLeftEye.brushType = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.eyeBrushType;
 
             AgentEyeStrokeData dataRightEye = new AgentEyeStrokeData();
             dataRightEye.parentIndex = i;
-            dataRightEye.localPos = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.localPos;
+            dataRightEye.localPos = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.localPos;
             dataRightEye.localDir = new Vector2(0f, 1f);
-            dataRightEye.localScale = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.localScale;
-            dataRightEye.irisHue = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.irisHue;
-            dataRightEye.pupilHue = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.pupilHue;
+            dataRightEye.localScale = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.localScale;
+            dataRightEye.irisHue = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.irisHue;
+            dataRightEye.pupilHue = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.pupilHue;
             dataRightEye.strength = 1f;
-            dataRightEye.brushType = simManager.agentGenomePoolArray[i].bodyGenome.eyeGenome.eyeBrushType;
+            dataRightEye.brushType = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.eyeBrushType;
             
             agentEyesDataArray[i * 2 + 0] = dataLeftEye;
             agentEyesDataArray[i * 2 + 1] = dataRightEye;
@@ -499,8 +499,8 @@ public class TheRenderKing : MonoBehaviour {
             bodyStroke.localDir = new Vector2(0f, 1f); // start up? shouldn't matter
             bodyStroke.localScale = Vector2.one; // simManager.agentGenomePoolArray[i].bodyGenome.sizeAndAspectRatio;
             bodyStroke.strength = 1f;
-            bodyStroke.brushTypeX = simManager.agentGenomePoolArray[i].bodyGenome.bodyStrokeBrushTypeX; // ** Revisit
-            bodyStroke.brushTypeY = simManager.agentGenomePoolArray[i].bodyGenome.bodyStrokeBrushTypeY;
+            bodyStroke.brushTypeX = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.bodyStrokeBrushTypeX; // ** Revisit
+            bodyStroke.brushTypeY = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.bodyStrokeBrushTypeY;
         }        
         agentBodyStrokesCBuffer.SetData(agentBodyStrokesArray);
     }
@@ -512,7 +512,7 @@ public class TheRenderKing : MonoBehaviour {
         for (int i = 0; i < agentSmearStrokesDataArray.Length; i++) {
             agentSmearStrokesDataArray[i] = new CurveStrokeData();
             agentSmearStrokesDataArray[i].parentIndex = i; // link to Agent
-            agentSmearStrokesDataArray[i].hue = simManager.agentGenomePoolArray[i].bodyGenome.huePrimary;
+            agentSmearStrokesDataArray[i].hue = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.huePrimary;
 
             agentSmearStrokesDataArray[i].restLength = simManager.agentsArray[i].fullSize.y * 0.25f; // simManager.agentGenomePoolArray[i].bodyGenome.sizeAndAspectRatio.y * 0.25f;
 
@@ -815,7 +815,7 @@ public class TheRenderKing : MonoBehaviour {
             if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Decaying) {
                 agentAlpha = 3f * Mathf.Clamp01(1f - (float)simManager.agentsArray[i].lifeStageTransitionTimeStepCounter * 2f / (float)simManager.agentsArray[i]._DecayDurationTimeSteps);
             }
-            Color drawColor = new Color(simManager.agentGenomePoolArray[i].bodyGenome.huePrimary.x, simManager.agentGenomePoolArray[i].bodyGenome.huePrimary.y, simManager.agentGenomePoolArray[i].bodyGenome.huePrimary.z, agentAlpha);
+            Color drawColor = new Color(simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.huePrimary.x, simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.huePrimary.y, simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.huePrimary.z, agentAlpha);
             if(simManager.agentsArray[i].wasImpaled) {
                 drawColor.r = 0.8f;
                 drawColor.g = 0.1f;
@@ -866,8 +866,8 @@ public class TheRenderKing : MonoBehaviour {
         singleBodyStrokeArray[0].localDir = new Vector2(0f, 1f); // start up? shouldn't matter
         singleBodyStrokeArray[0].localScale = Vector2.one; // simManager.agentGenomePoolArray[agentIndex].bodyGenome.sizeAndAspectRatio;
         singleBodyStrokeArray[0].strength = 1f;
-        singleBodyStrokeArray[0].brushTypeX = simManager.agentGenomePoolArray[agentIndex].bodyGenome.bodyStrokeBrushTypeX;
-        singleBodyStrokeArray[0].brushTypeY = simManager.agentGenomePoolArray[agentIndex].bodyGenome.bodyStrokeBrushTypeY;
+        singleBodyStrokeArray[0].brushTypeX = simManager.agentGenomePoolArray[agentIndex].bodyGenome.appearanceGenome.bodyStrokeBrushTypeX;
+        singleBodyStrokeArray[0].brushTypeY = simManager.agentGenomePoolArray[agentIndex].bodyGenome.appearanceGenome.bodyStrokeBrushTypeY;
         
         singleAgentBodyStrokeCBuffer.SetData(singleBodyStrokeArray);
 
@@ -886,24 +886,24 @@ public class TheRenderKing : MonoBehaviour {
         
         AgentEyeStrokeData dataLeftEye = new AgentEyeStrokeData();
         dataLeftEye.parentIndex = agentIndex;
-        dataLeftEye.localPos = simManager.agentGenomePoolArray[agentIndex].bodyGenome.eyeGenome.localPos;
+        dataLeftEye.localPos = simManager.agentGenomePoolArray[agentIndex].bodyGenome.appearanceGenome.eyeGenome.localPos;
         dataLeftEye.localPos.x *= -1f; // LEFT SIDE!
         dataLeftEye.localDir = new Vector2(0f, 1f);
-        dataLeftEye.localScale = simManager.agentGenomePoolArray[agentIndex].bodyGenome.eyeGenome.localScale;
-        dataLeftEye.irisHue = simManager.agentGenomePoolArray[agentIndex].bodyGenome.eyeGenome.irisHue;
-        dataLeftEye.pupilHue = simManager.agentGenomePoolArray[agentIndex].bodyGenome.eyeGenome.pupilHue;
+        dataLeftEye.localScale = simManager.agentGenomePoolArray[agentIndex].bodyGenome.appearanceGenome.eyeGenome.localScale;
+        dataLeftEye.irisHue = simManager.agentGenomePoolArray[agentIndex].bodyGenome.appearanceGenome.eyeGenome.irisHue;
+        dataLeftEye.pupilHue = simManager.agentGenomePoolArray[agentIndex].bodyGenome.appearanceGenome.eyeGenome.pupilHue;
         dataLeftEye.strength = 1f;
-        dataLeftEye.brushType = simManager.agentGenomePoolArray[agentIndex].bodyGenome.eyeGenome.eyeBrushType;
+        dataLeftEye.brushType = simManager.agentGenomePoolArray[agentIndex].bodyGenome.appearanceGenome.eyeGenome.eyeBrushType;
 
         AgentEyeStrokeData dataRightEye = new AgentEyeStrokeData();
         dataRightEye.parentIndex = agentIndex;
-        dataRightEye.localPos = simManager.agentGenomePoolArray[agentIndex].bodyGenome.eyeGenome.localPos;
+        dataRightEye.localPos = simManager.agentGenomePoolArray[agentIndex].bodyGenome.appearanceGenome.eyeGenome.localPos;
         dataRightEye.localDir = new Vector2(0f, 1f);
-        dataRightEye.localScale = simManager.agentGenomePoolArray[agentIndex].bodyGenome.eyeGenome.localScale;
-        dataRightEye.irisHue = simManager.agentGenomePoolArray[agentIndex].bodyGenome.eyeGenome.irisHue;
-        dataRightEye.pupilHue = simManager.agentGenomePoolArray[agentIndex].bodyGenome.eyeGenome.pupilHue;
+        dataRightEye.localScale = simManager.agentGenomePoolArray[agentIndex].bodyGenome.appearanceGenome.eyeGenome.localScale;
+        dataRightEye.irisHue = simManager.agentGenomePoolArray[agentIndex].bodyGenome.appearanceGenome.eyeGenome.irisHue;
+        dataRightEye.pupilHue = simManager.agentGenomePoolArray[agentIndex].bodyGenome.appearanceGenome.eyeGenome.pupilHue;
         dataRightEye.strength = 1f;
-        dataRightEye.brushType = simManager.agentGenomePoolArray[agentIndex].bodyGenome.eyeGenome.eyeBrushType;
+        dataRightEye.brushType = simManager.agentGenomePoolArray[agentIndex].bodyGenome.appearanceGenome.eyeGenome.eyeBrushType;
             
         singleAgentEyeStrokeArray[0] = dataLeftEye;
         singleAgentEyeStrokeArray[1] = dataRightEye;
@@ -930,7 +930,7 @@ public class TheRenderKing : MonoBehaviour {
         
         singleCurveStrokeArray[0] = new CurveStrokeData();
         singleCurveStrokeArray[0].parentIndex = agentIndex; // link to Agent
-        singleCurveStrokeArray[0].hue = simManager.agentGenomePoolArray[agentIndex].bodyGenome.huePrimary;
+        singleCurveStrokeArray[0].hue = simManager.agentGenomePoolArray[agentIndex].bodyGenome.appearanceGenome.huePrimary;
 
         singleCurveStrokeArray[0].restLength = simManager.agentsArray[agentIndex].fullSize.y * 0.25f;  // simManager.agentGenomePoolArray[agentIndex].bodyGenome.sizeAndAspectRatio.y * 0.25f;
 
@@ -1051,16 +1051,16 @@ public class TheRenderKing : MonoBehaviour {
         //playerGlowInitPos[0].localDir = simManager.agentsArray[0].facingDirection;
         playerGlowInitPos[0].scale = new Vector2(simManager.agentsArray[0].transform.localScale.x, simManager.agentsArray[0].transform.localScale.y); // ** revisit this later // should leave room for velSampling around Agent
         
-        playerGlowInitPos[0].color = new Vector4(simManager.agentGenomePoolArray[0].bodyGenome.huePrimary.x, 
-                                                 simManager.agentGenomePoolArray[0].bodyGenome.huePrimary.y,
-                                                 simManager.agentGenomePoolArray[0].bodyGenome.huePrimary.z, 1f);
+        playerGlowInitPos[0].color = new Vector4(simManager.agentGenomePoolArray[0].bodyGenome.appearanceGenome.huePrimary.x, 
+                                                 simManager.agentGenomePoolArray[0].bodyGenome.appearanceGenome.huePrimary.y,
+                                                 simManager.agentGenomePoolArray[0].bodyGenome.appearanceGenome.huePrimary.z, 1f);
 
         playerGlowCBuffer.SetData(playerGlowInitPos);
     }
     public void SimPlayerGlowyBits() {
-        playerGlowyBitsDisplayMat.SetVector("_PrimaryHue", new Vector4(simManager.agentGenomePoolArray[0].bodyGenome.huePrimary.x,
-                                                                       simManager.agentGenomePoolArray[0].bodyGenome.huePrimary.y,
-                                                                       simManager.agentGenomePoolArray[0].bodyGenome.huePrimary.z,
+        playerGlowyBitsDisplayMat.SetVector("_PrimaryHue", new Vector4(simManager.agentGenomePoolArray[0].bodyGenome.appearanceGenome.huePrimary.x,
+                                                                       simManager.agentGenomePoolArray[0].bodyGenome.appearanceGenome.huePrimary.y,
+                                                                       simManager.agentGenomePoolArray[0].bodyGenome.appearanceGenome.huePrimary.z,
                                                                        0f));
         playerGlowyBitsDisplayMat.SetFloat("_PosX", (simManager.agentsArray[0].transform.position.x + 70f) / 140f);
         playerGlowyBitsDisplayMat.SetFloat("_PosY", (simManager.agentsArray[0].transform.position.y + 70f) / 140f);

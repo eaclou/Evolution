@@ -4,6 +4,17 @@ using UnityEngine;
 
 public class Agent : MonoBehaviour {
 
+    public float frequency = 4.5f;
+    public float amplitude = 0f;
+    public float offsetDelay = 1.3f;
+    public float headDrag = 8f;
+    public float bodyDrag = 8f;
+    public float headMass = 1f;
+    public float bodyMass = 1f;
+    public float speed = 500f;
+
+    public float animationCycle = 0f;
+
     public AgentLifeStage curLifeStage;
     public enum AgentLifeStage {
         Egg,
@@ -38,24 +49,26 @@ public class Agent : MonoBehaviour {
    
     public Brain brain;
 
-    //public MeshRenderer meshRendererBeauty;
-    //public MeshRenderer meshRendererFluidCollider;
+    public GameObject[] segmentsArray;
+    public Rigidbody2D[] rigidbodiesArray;
+    public HingeJoint2D[] hingeJointsArray;
+    public float[] jointAnglesArray;
 
-    public TestModule testModule;
-    private Rigidbody2D rigidBody2D;
+    //public TestModule testModule;
+    public CritterModuleCore coreModule;
+    public CritterModuleMovement movementModule;
+
+    //private Rigidbody2D rigidBody2D; // ** segments???
         
-    //public TheRenderKing.PointStrokeData bodyPointStroke;
-    //public TheRenderKing.PointStrokeData[] decorationPointStrokesArray;
     public Vector2 fullSize;
+
+    public float bodyLength;
+    public float bodyWidth;
+    public int numSegments;
 
     public bool isInsideFood = false;
     private float eatingLoopAnimFrame = 0f;
-
-    //public bool 
-
-    //public int sourceGenomeIndex;
-    
-    private float speed = 100f;
+        
     public bool humanControlled = false;
     public float humanControlLerp = 0f;
     public bool isNull = false;
@@ -92,18 +105,15 @@ public class Agent : MonoBehaviour {
         //size = new Vector2(1f, 1f); // Better way to handle this! ****
     }
     void Start() { // *** MOVE THIS TO BETTER SPOT! ***
-        rigidBody2D = GetComponent<Rigidbody2D>();
-        prevPos = transform.localPosition;
-        facingDirection = new Vector2(0f, 1f);
-             
+                    
     }
 
     private int GetNumInputs() {
         return 44;  // make more robust later!
-    }
+    } // *** UPGRADE!!!!
     private int GetNumOutputs() {
         return 7;  // make more robust later!
-    }
+    } // *** UPGRADE!!!!
     public DataSample RecordData() {
         DataSample sample = new DataSample(GetNumInputs(), GetNumOutputs());
         /*
@@ -167,6 +177,7 @@ public class Agent : MonoBehaviour {
         outComm3 = new float[1]; // 6 
         */
 
+        /*
         sample.inputDataArray[0] = 1f; // bias
         sample.inputDataArray[1] = testModule.foodPosX[0];
         sample.inputDataArray[2] = testModule.foodPosY[0];
@@ -236,11 +247,17 @@ public class Agent : MonoBehaviour {
         sample.outputDataArray[5] = 0f; //outComm2;
         sample.outputDataArray[6] = 0f; //outComm3;
 
+        */
+
         return sample;
     }
 
     public void MapNeuronToModule(NID nid, Neuron neuron) {
-        testModule.MapNeuron(nid, neuron);
+        //testModule.MapNeuron(nid, neuron); // OLD
+
+        coreModule.MapNeuron(nid, neuron);
+        movementModule.MapNeuron(nid, neuron);
+
         // Hidden nodes!
         if (nid.moduleID == -1) {
             neuron.currentValue = new float[1];
@@ -249,9 +266,9 @@ public class Agent : MonoBehaviour {
         }
     }
 
-    public void ReplaceBrain(AgentGenome genome) {
-        brain = new Brain(genome.brainGenome, this);
-    }
+    //public void ReplaceBrain(AgentGenome genome) {
+    //    brain = new Brain(genome.brainGenome, this);
+    //}
     /*public void ResetAgent() {  // for when an agent dies, this resets attributes, moves to new spawnPos, switches Brain etc.aw
 
     }*/
@@ -262,10 +279,37 @@ public class Agent : MonoBehaviour {
     public void TickBrain() {
         brain.BrainMasterFunction();
     }
-    public void TickModules() {
-        testModule.Tick(humanControlled);
+    public void TickModules() { // Updates internal state of body - i.e health, energy etc. -- updates input Neuron values!!!
+                                // Update Stocks & Flows ::: new health, energy, stamina
+                                // This should have happened during last frame's Internal PhysX Update
+
+        // HOWEVER, some updates only happen once per frame and can be handled here, like converting food into energy automatically
+
+        // Turns out that most of these updates are updating input neurons which tend to be sensors
+        // These values are sometimes raw attributes & sometimes processed data
+        // Should I break them up into individual sensor types -- like Ears, Collider Rangefind, etc.?
+        // Separate sensors for each target type or add multiple data types to rangefinder raycasts?
+        
+        //UpdateInternalResources();  // update energy, stamina, food -- or do this during TickActions?
+
+        Vector2 ownPos = new Vector2(rigidbodiesArray[0].transform.localPosition.x, rigidbodiesArray[0].transform.localPosition.y);
+        Vector2 ownVel = new Vector2(rigidbodiesArray[0].velocity.x, rigidbodiesArray[0].velocity.y);
+
+        coreModule.Tick(humanControlled, ownPos, ownVel);
+        movementModule.Tick(humanControlled, ownVel);
+        // Add more sensor Modules later:
+
+        //testModule.Tick(humanControlled); // old
+        
         //rangefinderModule.Tick();
         //enemyModule.Tick();
+    }
+
+    private void UpdateInternalResources() {
+        // Convert Food to Energy if there is some in stomach
+        // convert energy to stamina
+
+        // Each module can send back information about energy usage? Or store it as a value from last frame
     }
 
     private void CheckForLifeStageTransition() {
@@ -282,12 +326,12 @@ public class Agent : MonoBehaviour {
                 //
                 // Check for Death:
                 //float minFood = Mathf.Min(Mathf.Min(testModule.foodAmountR[0], testModule.foodAmountG[0]), testModule.foodAmountB[0]);
-                float maxFood = Mathf.Max(Mathf.Max(testModule.foodAmountR[0], testModule.foodAmountG[0]), testModule.foodAmountB[0]);
+                float maxFood = Mathf.Max(Mathf.Max(coreModule.foodAmountR[0], coreModule.foodAmountG[0]), coreModule.foodAmountB[0]);
                 if (maxFood <= 0f) {
                     curLifeStage = AgentLifeStage.Decaying;
                     //isNull = true;
                 }
-                if (testModule.hitPoints[0] <= 0f) {
+                if (coreModule.hitPoints[0] <= 0f) {
 
                     curLifeStage = Agent.AgentLifeStage.Decaying;
                     lifeStageTransitionTimeStepCounter = 0;
@@ -329,24 +373,24 @@ public class Agent : MonoBehaviour {
 
     public void EatFood(float amount) {
         if(humanControlled) {
-            testModule.foodAmountR[0] += amount * 0.720f;  // 0.33 is too little
-            testModule.foodAmountG[0] += amount * 0.720f;
-            testModule.foodAmountB[0] += amount * 0.720f;
+            coreModule.foodAmountR[0] += amount * 0.720f;  // 0.33 is too little
+            coreModule.foodAmountG[0] += amount * 0.720f;
+            coreModule.foodAmountB[0] += amount * 0.720f;
         }
         else {
-            testModule.foodAmountR[0] += amount;
-            testModule.foodAmountG[0] += amount;
-            testModule.foodAmountB[0] += amount;
+            coreModule.foodAmountR[0] += amount;
+            coreModule.foodAmountG[0] += amount;
+            coreModule.foodAmountB[0] += amount;
         }
 
-        if(testModule.foodAmountR[0] > 1f) {
-            testModule.foodAmountR[0] = 1f;
+        if(coreModule.foodAmountR[0] > 1f) {
+            coreModule.foodAmountR[0] = 1f;
         }
-        if(testModule.foodAmountG[0] > 1f) {
-            testModule.foodAmountG[0] = 1f;
+        if(coreModule.foodAmountG[0] > 1f) {
+            coreModule.foodAmountG[0] = 1f;
         }
-        if(testModule.foodAmountB[0] > 1f) {
-            testModule.foodAmountB[0] = 1f;
+        if(coreModule.foodAmountB[0] > 1f) {
+            coreModule.foodAmountB[0] = 1f;
         }
     }
 
@@ -400,23 +444,23 @@ public class Agent : MonoBehaviour {
         if(texture != null) {  // **** Will have to move this into general Tick() method and account for death types & lifeCycle transitions!
             if(humanControlled) {
                 //Debug.Log(texture.ToString());
-                float displayFoodAmount = testModule.foodAmountR[0];
-                displayFoodAmount = testModule.foodAmountR[0];
+                float displayFoodAmount = coreModule.foodAmountR[0];
+                displayFoodAmount = coreModule.foodAmountR[0];
                 if(curLifeStage == AgentLifeStage.Egg) {
                     displayFoodAmount = (float)lifeStageTransitionTimeStepCounter / (float)gestationDurationTimeSteps;
                 }
                 if(curLifeStage == AgentLifeStage.Decaying || curLifeStage == AgentLifeStage.Null) {
                     displayFoodAmount = 0f;
                 }
-                texture.SetPixel(0, 0, new Color(testModule.hitPoints[0], testModule.hitPoints[0], testModule.hitPoints[0]));
+                texture.SetPixel(0, 0, new Color(coreModule.hitPoints[0], coreModule.hitPoints[0], coreModule.hitPoints[0]));
                 texture.SetPixel(1, 0, new Color(displayFoodAmount, displayFoodAmount, displayFoodAmount));
                 texture.SetPixel(2, 0, new Color(displayFoodAmount, displayFoodAmount, displayFoodAmount));
                 texture.SetPixel(3, 0, new Color(displayFoodAmount, displayFoodAmount, displayFoodAmount));
 
-                float comm0 = testModule.outComm0[0] * 0.5f + 0.5f;
-                float comm1 = testModule.outComm1[0] * 0.5f + 0.5f;
-                float comm2 = testModule.outComm2[0] * 0.5f + 0.5f;
-                float comm3 = testModule.outComm3[0] * 0.5f + 0.5f;
+                float comm0 = coreModule.outComm0[0] * 0.5f + 0.5f;
+                float comm1 = coreModule.outComm1[0] * 0.5f + 0.5f;
+                float comm2 = coreModule.outComm2[0] * 0.5f + 0.5f;
+                float comm3 = coreModule.outComm3[0] * 0.5f + 0.5f;
                 texture.SetPixel(0, 1, new Color(comm0, comm0, comm0));
                 texture.SetPixel(1, 1, new Color(comm1, comm1, comm1));
                 texture.SetPixel(2, 1, new Color(comm2, comm2, comm2));
@@ -427,13 +471,16 @@ public class Agent : MonoBehaviour {
         }
     }
 
+    // *** Condense these into ONE
     private void TickEgg() {        
         lifeStageTransitionTimeStepCounter++;
     }
     private void TickMature() {
+        // Check for death & stuff? Or is this handled inside OnCollisionEnter() events?
+
         TickModules(); // update inputs for Brain        
         TickBrain(); // Tick Brain
-        TickActions(); // Execute Actions
+        TickActions(); // Execute Actions  -- Also Updates Resources!!! ***
         
         ageCounterMature++;
     }
@@ -461,14 +508,14 @@ public class Agent : MonoBehaviour {
             verHuman -= 1f;
         }
 
-        float horAI = Mathf.Round(testModule.throttleX[0] * 3f / 2f);
-        float verAI = Mathf.Round(testModule.throttleY[0] * 3f / 2f);
+        float horAI = Mathf.Round(movementModule.throttleX[0] * 3f / 2f);
+        float verAI = Mathf.Round(movementModule.throttleY[0] * 3f / 2f);
 
         horizontalMovementInput = Mathf.Lerp(horAI, horHuman, humanControlLerp);
         verticalMovementInput = Mathf.Lerp(verAI, verHuman, humanControlLerp);
 
         // MOVEMENT HERE:
-        this.GetComponent<Rigidbody2D>().AddForce(new Vector2(horizontalMovementInput, verticalMovementInput).normalized * speed * Time.deltaTime, ForceMode2D.Impulse);
+        //this.rigidbodiesArray[0].AddForce(new Vector2(horizontalMovementInput, verticalMovementInput).normalized * speed * Time.deltaTime, ForceMode2D.Impulse);
         //this.GetComponent<Rigidbody2D>().AddForce(new Vector2(speed * horizontalMovementInput * Time.deltaTime, speed * verticalMovementInput * Time.deltaTime), ForceMode2D.Impulse);
         
         // Facing Direction:
@@ -480,33 +527,222 @@ public class Agent : MonoBehaviour {
             throttle = Vector2.zero;
             smoothedThrottle = Vector2.zero;
         }
+
+        ApplyPhysicsForces(smoothedThrottle);
+
         
-        if(throttle.sqrMagnitude > 0.01f)
-            facingDirection = Vector2.Lerp(facingDirection + Vector2.one * 0.025f, throttleForwardDir, 0.25f).normalized;
+    }
+
+    private void ApplyPhysicsForces(Vector2 throttle) {
+        //MovementNaiveSin(throttle);
+        MovementBasicSteering(throttle);
+
+        //Debug.Log(jointAnglesArray[0].ToString());
+    }
+
+    private void MovementNaiveSin(Vector2 throttle) {  // Applies a Sin force to each segment based on its position in the spinal column while moving
+        // MOVEMENT HERE:
+        //this.rigidbodiesArray[0].AddForce(throttle.normalized * speed * Time.deltaTime, ForceMode2D.Impulse);
+        
+
+        if (throttle.sqrMagnitude > 0.01f) {
+            //facingDirection = Vector2.Lerp(facingDirection + Vector2.one * 0.025f, throttleForwardDir, 0.25f).normalized;
+            animationCycle += 0.01f;
+
+            animationCycle = animationCycle % 1.0f;
+
+            // JOINTS!!!
+            //float time = Time.realtimeSinceStartup;        
+
+            for(int i = 1; i < numSegments; i++) {
+
+                float delayValue = (float)(i - 1) / (float)(numSegments - 1) * offsetDelay;
+                float targetSpeed = Mathf.Sin((animationCycle + delayValue) * Mathf.PI * 2f * frequency) * amplitude;
+
+                hingeJointsArray[i - 1].useMotor = true;
+
+                JointMotor2D motor = hingeJointsArray[i-1].motor;            
+                motor.motorSpeed = targetSpeed;
+                motor.maxMotorTorque = 200f;
+
+                hingeJointsArray[i-1].motor = motor;
+            }
+        }
+        else {
+            for(int i = 1; i < numSegments; i++) {
+                
+                JointMotor2D motor = hingeJointsArray[i-1].motor;            
+                motor.motorSpeed = 0f;
+                motor.maxMotorTorque = 0f;
+                hingeJointsArray[i-1].motor = motor;
+            }
+        }
+    }
+    private void MovementBasicSteering(Vector2 throttle) {
+        
+        for(int j = 0; j < numSegments - 1; j++) {
+            jointAnglesArray[j] = hingeJointsArray[j].jointAngle;            
+        }
+        
+
+        if (throttle.sqrMagnitude > 0.01f) {
+            
+
+            Vector2 headForwardDir = new Vector2(this.rigidbodiesArray[0].transform.up.x, this.rigidbodiesArray[0].transform.up.y).normalized;
+            Vector2 headRightDir =  new Vector2(this.rigidbodiesArray[0].transform.right.x, this.rigidbodiesArray[0].transform.right.y).normalized;
+            Vector2 throttleDir = throttle.normalized;
+
+            float turnSign = Mathf.Clamp(Vector2.Dot(throttleDir, headRightDir) * -10000f, -1f, 1f);
+
+            //facingDirection = Vector2.Lerp(facingDirection + Vector2.one * 0.025f, headDir.normalized, 0.25f).normalized;
+             
+            this.rigidbodiesArray[0].AddForce(headForwardDir * speed * Time.deltaTime, ForceMode2D.Impulse);
+
+            animationCycle += 0.01f;
+            animationCycle = animationCycle % 1.0f;
+
+            // JOINTS!!!
+            //float time = Time.realtimeSinceStartup;        
+            
+            for(int i = 1; i < numSegments; i++) {
+
+                float delayValue = (float)(i - 1) / (float)(numSegments - 1) * offsetDelay;
+                float targetSpeed = Mathf.Sin((animationCycle + delayValue) * Mathf.PI * 2f * frequency) * amplitude;
+
+                hingeJointsArray[i - 1].useMotor = true;
+
+                JointMotor2D motor = hingeJointsArray[i-1].motor;            
+                motor.motorSpeed = 0f;
+                motor.maxMotorTorque = 1f;
+
+                hingeJointsArray[i-1].motor = motor;
+            }
+
+            JointMotor2D motor0 = hingeJointsArray[0].motor;            
+            motor0.motorSpeed = turnSign * 500f;
+            motor0.maxMotorTorque = 500f;
+            hingeJointsArray[0].motor = motor0;
+            
+        }
+        else {
+            for(int i = 1; i < numSegments; i++) {
+                
+                JointMotor2D motor = hingeJointsArray[i-1].motor;            
+                motor.motorSpeed = 0f;
+                motor.maxMotorTorque = 1f;
+                hingeJointsArray[i-1].motor = motor;
+            }
+        }
     }
     
     public void InitializeModules(AgentGenome genome, Agent agent, StartPositionGenome startPos) {
-        testModule = new TestModule();
-        testModule.Initialize(genome.bodyGenome.testModuleGenome, agent, startPos);        
+        //testModule = new TestModule();
+        //testModule.Initialize(genome.bodyGenome.testModuleGenome, agent, startPos);    
+
+        coreModule = new CritterModuleCore();
+        coreModule.Initialize(genome.bodyGenome.coreGenome, agent, startPos);
+
+        movementModule = new CritterModuleMovement();
+        movementModule.Initialize(genome.bodyGenome.movementGenome);
+    }
+
+    public void ReconstructAgentGameObjects(AgentGenome genome, StartPositionGenome startPos) {
+
+        // Delete existing children GameObjects:
+        foreach (Transform child in this.transform) {
+             GameObject.Destroy(child.gameObject);
+         }
+
+        bodyLength = genome.bodyGenome.coreGenome.length;
+        bodyWidth = genome.bodyGenome.coreGenome.width;
+        numSegments = genome.bodyGenome.coreGenome.numSegments;
+
+        float segmentRadius = bodyLength / (float)numSegments / 2f;
+
+        segmentsArray = new GameObject[numSegments];
+        rigidbodiesArray = new Rigidbody2D[numSegments];
+        hingeJointsArray = new HingeJoint2D[Mathf.RoundToInt(Mathf.Max(1, numSegments - 1))];
+        jointAnglesArray = new float[hingeJointsArray.Length];
+
+        for (int i = 0; i < numSegments; i++) {
+
+
+            //GameObject segmentGO = new GameObject("Segment" + i.ToString());
+            string assetURL = "Prefabs/SphereTest";
+            GameObject segmentGO = Instantiate(Resources.Load(assetURL)) as GameObject;
+            segmentGO.name = "Segment" + i.ToString();
+
+            segmentGO.transform.parent = this.gameObject.transform; // Parent under this Agent GO
+            // Move object to proper position/orientation: **
+            segmentGO.transform.localPosition = new Vector3(0f, -i * segmentRadius * 2f - segmentRadius, 0f) + startPos.startPosition;
+
+            segmentsArray[i] = segmentGO;
+            rigidbodiesArray[i] = segmentGO.AddComponent<Rigidbody2D>();
+            rigidbodiesArray[i].drag = bodyDrag;
+            
+            // Collision!
+            CircleCollider2D collider = segmentGO.AddComponent<CircleCollider2D>(); // change this to Capsule Later -- upgrade!!!!
+            collider.radius = segmentRadius;
+
+
+            // Set Rigidbody attributes to proper values: **
+                        
+            if(i == 0) {  // ROOT SEGMENT!
+                prevPos = segmentGO.transform.localPosition;
+                facingDirection = new Vector2(0f, 1f);
+
+                rigidbodiesArray[i].drag = headDrag; // only on root? // will need to suss out proper balance for this
+                rigidbodiesArray[i].mass = 1f;
+            }
+            else {
+                // Hinge Joint!
+                HingeJoint2D hingeJoint = segmentGO.AddComponent<HingeJoint2D>();
+                hingeJointsArray[i - 1] = hingeJoint;
+                
+                hingeJoint.connectedBody = rigidbodiesArray[i - 1];
+                hingeJoint.autoConfigureConnectedAnchor = false;
+                hingeJoint.anchor = new Vector2(0f, 0.5f) * segmentRadius * 2f;
+                hingeJoint.connectedAnchor = new Vector2(0f, -0.5f) * segmentRadius * 2f;
+                hingeJoint.useMotor = false;
+
+                JointMotor2D motor = hingeJoint.motor;
+                motor.maxMotorTorque = 0f;
+                hingeJoint.motor = motor;
+
+                hingeJoint.useLimits = true;
+                JointAngleLimits2D jointLimits = hingeJoint.limits;
+                jointLimits.min = -90f;
+                jointLimits.max = 90f;
+                hingeJoint.limits = jointLimits;
+                
+                rigidbodiesArray[i].mass = 1f;
+            }            
+        }
     }
 
     public void InitializeAgentFromGenome(AgentGenome genome, StartPositionGenome startPos) {
         //sourceGenomeIndex = genomeIndex;
 
+        // Upgrade this to proper Pooling!!!!
+        ReconstructAgentGameObjects(genome, startPos);
+
         curLifeStage = AgentLifeStage.Egg;
-        this.fullSize = new Vector2(genome.bodyGenome.sizeAndAspectRatio.x * genome.bodyGenome.sizeAndAspectRatio.y, genome.bodyGenome.sizeAndAspectRatio.x * (1.0f / genome.bodyGenome.sizeAndAspectRatio.y));
+        this.fullSize = new Vector2(genome.bodyGenome.coreGenome.width, genome.bodyGenome.coreGenome.length);
         isNull = false;
         wasImpaled = false;
         lifeStageTransitionTimeStepCounter = 0;
         ageCounterMature = 0;
-        this.transform.localPosition = startPos.startPosition;
-        float semiMajorSize = fullSize.magnitude;
-        this.transform.localScale = new Vector3(semiMajorSize, semiMajorSize, 1f);
+        //this.transform.localPosition = startPos.startPosition;
+        //float semiMajorSize = fullSize.magnitude;
+        //this.transform.localScale = new Vector3(semiMajorSize, semiMajorSize, 1f);
+
         InitializeModules(genome, this, startPos);      // Modules need to be created first so that Brain can map its neurons to existing modules  
+
         brain = new Brain(genome.brainGenome, this);
+
         facingDirection = new Vector2(0f, 1f);
         throttle = Vector2.zero;
         smoothedThrottle = new Vector2(0f, 0.01f);
-        prevPos = transform.localPosition;
+        //prevPos = transform.localPosition;
     }
 }

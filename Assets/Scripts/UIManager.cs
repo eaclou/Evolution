@@ -226,7 +226,7 @@ public class UIManager : MonoBehaviour {
         }
     }
     private void UpdateSimulationUI() {
-        UpdateScoreText(gameManager.simulationManager.playerAgent.ageCounterMature);
+        UpdateScoreText(gameManager.simulationManager.agentsArray[0].ageCounterMature);
 
         SetDisplayTextures();
 

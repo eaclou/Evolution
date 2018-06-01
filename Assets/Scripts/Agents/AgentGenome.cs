@@ -18,7 +18,8 @@ public class AgentGenome {
     }
 
     public void GenerateInitialRandomBodyGenome() {
-        bodyGenome.InitializeAsRandomGenome();
+        bodyGenome.FirstTimeInitializeCritterModuleGenomes();
+        bodyGenome.GenerateRandomBodyGenome();
     }
 
     /*public void InitializeBodyGenomeFromTemplate(BodyGenome bodyGenomeTemplate) {  // OLD

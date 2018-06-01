@@ -33,6 +33,8 @@ public class TestModule {
     public float[] bias;
     //public float[] ownPosX;
     //public float[] ownPosY;
+
+        // **** LOOK INTO::: close in its own class or store in bigger array rather than all individual length-one arrays? 
     public float[] foodPosX;
     public float[] foodPosY;
     public float[] foodDirX;
@@ -582,9 +584,9 @@ public class TestModule {
             foodDrain = foodConsumptionRate * 0.75f;
         }
         
-        foodAmountR[0] = Mathf.Max(foodAmountR[0] - foodConsumptionRate, 0f);
-        foodAmountG[0] = Mathf.Max(foodAmountG[0] - foodConsumptionRate, 0f);
-        foodAmountB[0] = Mathf.Max(foodAmountB[0] - foodConsumptionRate, 0f);
+        foodAmountR[0] = Mathf.Max(foodAmountR[0] - foodDrain, 0f);
+        foodAmountG[0] = Mathf.Max(foodAmountG[0] - foodDrain, 0f);
+        foodAmountB[0] = Mathf.Max(foodAmountB[0] - foodDrain, 0f);
         
         
         

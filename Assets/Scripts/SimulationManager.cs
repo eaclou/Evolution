@@ -72,7 +72,8 @@ public class SimulationManager : MonoBehaviour {
         }
     }
     //private int agentGenomePoolSize = 64;  // spawned as Agents that live until they are killed naturally, tested on Fitness Function
-    public Agent playerAgent; // Should just be a reference to whichever #Agent that the player is currently controlling
+    //public Agent playerAgent; // Should just be a reference to whichever #Agent that the player is currently controlling
+    // playerAgent is always agentsArray[0]
     public Agent[] agentsArray;
     //public BodyGenome bodyGenomeTemplate; // .... refactor?
     public AgentGenome[] agentGenomePoolArray;
@@ -165,7 +166,7 @@ public class SimulationManager : MonoBehaviour {
                     theRenderKing.UpdateAgentBodyStrokesBuffer(i); // hacky fix but seems to work...
                 }
 
-                RespawnPlayer();
+                RespawnPlayer(); // Needed???? *****
             }
             else {
                 //Debug.Log("WarmUp Step " + currentWarmUpTimeStep.ToString());
@@ -250,7 +251,7 @@ public class SimulationManager : MonoBehaviour {
         // ***** ^^^^^ Might need to call this every frame???
 
         // Hook up Camera to data -- fill out CameraManager class
-        cameraManager.targetTransform = agentsArray[0].gameObject.transform;
+        cameraManager.targetTransform = agentsArray[0].segmentsArray[0].transform;
         // ***** Hook up UI to proper data or find a way to handle that ****
         // possibly just top-down let cameraManager read simulation data
         LoadingHookUpUIManager();
@@ -329,6 +330,19 @@ public class SimulationManager : MonoBehaviour {
     }
     private void LoadingInstantiateAgents() {
 
+        // Re-Factor this to no longer use Prefab?
+
+        // Instantiate AI Agents
+        agentsArray = new Agent[numAgents];
+        for (int i = 0; i < agentsArray.Length; i++) {
+            GameObject agentGO = new GameObject("Agent" + i.ToString());
+            Agent newAgent = agentGO.AddComponent<Agent>();  // Script placed on Prefab already            
+            agentsArray[i] = newAgent; // Add to stored list of current Agents            
+        }
+
+
+        // OLD:
+        /*
         string assetURL = "Prefabs/AgentPrefab";
 
         // Instantiate AI Agents
@@ -344,6 +358,7 @@ public class SimulationManager : MonoBehaviour {
         // ************** TEMP!!! *******************
         // Set playerAgent to agent[0]:
         playerAgent = agentsArray[0];   // ***** RE-Factor!!!!! ****** when re-implementing player control! **
+        */
     }
     private void LoadingInitializeAgentsFromGenomes() {        
         for (int i = 0; i < numAgents; i++) {
@@ -396,7 +411,7 @@ public class SimulationManager : MonoBehaviour {
     private void LoadingHookUpUIManager() {
         Texture2D playerTex = new Texture2D(4, 2);  // Health, foodAmountRGB, 4 outCommChannels
         playerTex.filterMode = FilterMode.Point;
-        playerAgent.texture = playerTex;
+        agentsArray[0].texture = playerTex;
 
         uiManager.healthDisplayTex = playerTex;
         uiManager.SetDisplayTextures();
@@ -521,7 +536,7 @@ public class SimulationManager : MonoBehaviour {
     private void ApplyFluidForcesToDynamicObjects() {
         // ********** REVISIT CONVERSION btw fluid/scene coords and Force Amounts !!!! *************
         for (int i = 0; i < agentsArray.Length; i++) {
-            agentsArray[i].testModule.ownRigidBody2D.AddForce(simStateData.fluidVelocitiesAtAgentPositionsArray[i] * 40f, ForceMode2D.Impulse);
+            agentsArray[i].rigidbodiesArray[0].AddForce(simStateData.fluidVelocitiesAtAgentPositionsArray[i] * 40f, ForceMode2D.Impulse);
 
             agentsArray[i].avgFluidVel = Mathf.Lerp(agentsArray[i].avgFluidVel, simStateData.fluidVelocitiesAtAgentPositionsArray[i].magnitude, 0.25f);
         }
@@ -658,17 +673,18 @@ public class SimulationManager : MonoBehaviour {
                 }
             }
             // Set proper references between AgentBrains and Environment/Game Objects:::
-            agentsArray[a].testModule.friendTestModule = agentsArray[closestFriendIndex].testModule;
-            if(closestFoodIndex != -1) {
-                agentsArray[a].testModule.nearestFoodModule = foodArray[closestFoodIndex];
-            }            
-            agentsArray[a].testModule.nearestPredatorModule = predatorArray[closestPredIndex];            
+            // ***** DISABLED!!!! *** NEED TO RE_IMPLEMENT THIS LATER!!!! ********************************************
+            //agentsArray[a].testModule.friendTestModule = agentsArray[closestFriendIndex].testModule;
+            //if(closestFoodIndex != -1) {
+            //    agentsArray[a].testModule.nearestFoodModule = foodArray[closestFoodIndex];
+            //}            
+            //agentsArray[a].testModule.nearestPredatorModule = predatorArray[closestPredIndex];            
         }
     }
     private void CheckForRecordPlayerScore() {
         // Check for Record Agent AGE!
-        if (playerAgent.ageCounterMature > recordPlayerAge) {
-            recordPlayerAge = playerAgent.ageCounterMature;
+        if (agentsArray[0].ageCounterMature > recordPlayerAge) {
+            recordPlayerAge = agentsArray[0].ageCounterMature;
         }
     }
     private void CheckForDeadFood() { // *** revisit
@@ -1073,9 +1089,9 @@ public class SimulationManager : MonoBehaviour {
         
         //playerIsDead = true;  // so this function won't be called continuously
         // Display Death screen, send player's Score, cause of death, etc.
-        lastPlayerScore = playerAgent.ageCounterMature;
-        if (playerAgent.ageCounterMature > recordPlayerAge) {
-            recordPlayerAge = playerAgent.ageCounterMature;
+        lastPlayerScore = agentsArray[0].ageCounterMature;
+        if (agentsArray[0].ageCounterMature > recordPlayerAge) {
+            recordPlayerAge = agentsArray[0].ageCounterMature;
         }
         // Wait certain amount of time OR press enter to immediately respawn.
         // Countdown display showing time to auto-respawn
@@ -1100,6 +1116,7 @@ public class SimulationManager : MonoBehaviour {
         theRenderKing.SimPlayerGlow();
         
         // Adjust Camera to position of agent
+        cameraManager.targetTransform = agentsArray[0].segmentsArray[0].transform;
         cameraManager.StartPlayerRespawn();
         // Fade-in from black?
         // Reset things that need to be reset i.e score counter?

@@ -34,9 +34,9 @@ public class GameOptionsManager : MonoBehaviour {
         dropdownVSync.value = gameOptions.vSync;
 
         // Set Defaults:  ** CHANGE LATER WHEN SUPPORTING PERSISTENT OPTIONS!! ***
-        gameOptions.fluidPhysicsQuality = 1; // medium 256x256
+        gameOptions.fluidPhysicsQuality = 0;
         dropdownFluidPhysicsQuality.value = gameOptions.fluidPhysicsQuality;
-        gameOptions.simulationComplexity = 1; // medium 48 creatures, 16 hidden neurons
+        gameOptions.simulationComplexity = 0; 
         dropdownSimulationComplexity.value = gameOptions.simulationComplexity;
                 
                 
