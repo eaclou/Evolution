@@ -12,6 +12,13 @@ public class Agent : MonoBehaviour {
     public float headMass = 1f;
     public float bodyMass = 1f;
     public float speed = 500f;
+    public float jointSpeed = 100f;
+    public float jointMaxTorque = 250f;
+    public float swimAnimationCycleSpeed = 0.01f;
+    public float smoothedThrottleLerp = 0.1f;
+    public float restingJointTorque = 10f;
+    public float bendRatioHead = 0f;
+    public float bendRatioTailTip = 1f;
 
     public float animationCycle = 0f;
 
@@ -520,7 +527,7 @@ public class Agent : MonoBehaviour {
         
         // Facing Direction:
         throttle = new Vector2(horizontalMovementInput, verticalMovementInput);
-        smoothedThrottle = Vector2.Lerp(smoothedThrottle, throttle, 0.2f);
+        smoothedThrottle = Vector2.Lerp(smoothedThrottle, throttle, smoothedThrottleLerp);
         Vector2 throttleForwardDir = throttle.normalized;
 
         if(curLifeStage == AgentLifeStage.Decaying || curLifeStage == AgentLifeStage.Egg) {
@@ -535,8 +542,9 @@ public class Agent : MonoBehaviour {
 
     private void ApplyPhysicsForces(Vector2 throttle) {
         //MovementNaiveSin(throttle);
-        MovementBasicSteering(throttle);
-
+        //MovementBasicSteering(throttle);
+        //MovementSteeringSwim(throttle);
+        MovementForwardSlide(throttle);
         //Debug.Log(jointAnglesArray[0].ToString());
     }
 
@@ -634,6 +642,132 @@ public class Agent : MonoBehaviour {
             }
         }
     }
+    private void MovementSteeringSwim(Vector2 throttle) {
+        // Save current joint angles:
+        for(int j = 0; j < numSegments - 1; j++) {
+            jointAnglesArray[j] = hingeJointsArray[j].jointAngle;            
+        }
+
+        if (throttle.sqrMagnitude > 0.01f) {  // Throttle is NOT == ZERO
+            
+            Vector2 headForwardDir = new Vector2(this.rigidbodiesArray[0].transform.up.x, this.rigidbodiesArray[0].transform.up.y).normalized;
+            Vector2 headRightDir =  new Vector2(this.rigidbodiesArray[0].transform.right.x, this.rigidbodiesArray[0].transform.right.y).normalized;
+            Vector2 throttleDir = throttle.normalized;
+
+            float headTurnSign = Mathf.Clamp(Vector2.Dot(throttleDir, headRightDir) * -10000f, -1f, 1f);
+
+            this.rigidbodiesArray[0].AddForce(headForwardDir * speed * Time.deltaTime, ForceMode2D.Impulse);
+
+            animationCycle += swimAnimationCycleSpeed;
+            //animationCycle = animationCycle % 1.0f;
+
+
+
+            for(int i = 1; i < numSegments; i++) {
+
+                float phaseOffset = (float)(i - 1) / (float)(numSegments - 1) * offsetDelay;
+                //float targetSpeed = Mathf.Sin((animationCycle + phaseOffset) * Mathf.PI * 2f * frequency) * amplitude;
+
+                float targetAngle = Mathf.Sin((-animationCycle + phaseOffset) * Mathf.PI * 2f * frequency);
+
+                float targetWaveSpeed = targetAngle - (jointAnglesArray[i - 1] * Mathf.PI / 180f);
+                //Debug.Log("Joint[" + i.ToString() + "] DeltaAngle: " + targetWaveSpeed.ToString());
+
+                //float bendMultiplier = Mathf.Lerp(bendRatioHead, bendRatioTailTip, (float)(i - 1) / (float)(numSegments - 1));
+                float bendMultiplier = Mathf.Lerp(bendRatioHead, bendRatioTailTip, (float)(i - 1) / (float)(numSegments - 1));
+
+                float targetTurnSpeed = headTurnSign / (float)numSegments * 2f;
+
+                hingeJointsArray[i - 1].useMotor = true;
+
+                JointMotor2D motor = hingeJointsArray[i-1].motor;            
+                motor.motorSpeed = (targetWaveSpeed * bendMultiplier + targetTurnSpeed) * jointSpeed;
+                motor.maxMotorTorque = jointMaxTorque;
+
+                hingeJointsArray[i-1].motor = motor;
+            }
+
+            // Head Joint:
+            //JointMotor2D motor0 = hingeJointsArray[0].motor;            
+            //motor0.motorSpeed = headTurnSign * jointSpeed;
+            //motor0.maxMotorTorque = jointMaxTorque;
+            //hingeJointsArray[0].motor = motor0;
+
+            
+        }
+        else {
+            for(int i = 1; i < numSegments; i++) {
+                
+                JointMotor2D motor = hingeJointsArray[i-1].motor;            
+                motor.motorSpeed = 0f;
+                motor.maxMotorTorque = restingJointTorque;
+                hingeJointsArray[i-1].motor = motor;
+            }
+        }
+    }
+    private void MovementForwardSlide(Vector2 throttle) {
+        // Save current joint angles:
+        for(int j = 0; j < numSegments - 1; j++) {
+            jointAnglesArray[j] = hingeJointsArray[j].jointAngle;            
+        }
+
+        if (throttle.sqrMagnitude > 0.0001f) {  // Throttle is NOT == ZERO
+            
+            Vector2 headForwardDir = new Vector2(this.rigidbodiesArray[0].transform.up.x, this.rigidbodiesArray[0].transform.up.y).normalized;
+            Vector2 headRightDir =  new Vector2(this.rigidbodiesArray[0].transform.right.x, this.rigidbodiesArray[0].transform.right.y).normalized;
+            Vector2 throttleDir = throttle.normalized;
+
+            float headTurnSign = Mathf.Clamp(Vector2.Dot(throttleDir, headRightDir) * -10000f, -1f, 1f);
+
+            //this.rigidbodiesArray[0].AddForce(headForwardDir * speed * Time.deltaTime, ForceMode2D.Impulse);
+
+            animationCycle += swimAnimationCycleSpeed;
+            //animationCycle = animationCycle % 1.0f;
+            
+            for(int i = 1; i < numSegments; i++) {
+
+                float phaseOffset = (float)(i - 1) / (float)(numSegments - 1) * offsetDelay;
+                
+                float targetOscillateAngle = Mathf.Sin((-animationCycle + phaseOffset) * Mathf.PI * 2f * frequency);
+
+                float oscillateTorque = targetOscillateAngle - (jointAnglesArray[i - 1] * Mathf.PI / 180f);
+                
+                float bendMultiplier = Mathf.Lerp(bendRatioHead, bendRatioTailTip, (float)(i - 1) / (float)(numSegments - 1));
+                
+                float targetTurnAngle = -10f * Vector2.Dot(throttleDir, headRightDir) * Mathf.PI / 4f / ((float)numSegments - 1f);
+                float turningTorque = targetTurnAngle - (jointAnglesArray[i - 1] * Mathf.PI / 180f);
+
+                float uTurnMultiplier = -Vector2.Dot(throttleDir, headRightDir) * 0.5f + 0.5f;
+                float turningMultiplier = (Mathf.Abs(Vector2.Dot(throttleDir, headRightDir)) + 0.05f) * (1.0f + uTurnMultiplier);                
+                float oscillateMultiplier = (Vector2.Dot(throttleDir, headForwardDir) * 0.5f + 0.4f);
+
+                float finalTorque = oscillateTorque * oscillateMultiplier + turningTorque * turningMultiplier * bendMultiplier;
+
+                hingeJointsArray[i - 1].useMotor = true;
+
+                JointMotor2D motor = hingeJointsArray[i-1].motor;           
+                motor.motorSpeed = finalTorque * jointSpeed;
+                motor.maxMotorTorque = jointMaxTorque * throttle.magnitude;
+
+                hingeJointsArray[i-1].motor = motor;
+            }
+
+            // Forward Slide
+            for(int k = 0; k < numSegments; k++) {
+                Vector2 segmentForwardDir = new Vector2(this.rigidbodiesArray[k].transform.up.x, this.rigidbodiesArray[k].transform.up.y).normalized;
+                this.rigidbodiesArray[k].AddForce(segmentForwardDir * speed * Time.deltaTime, ForceMode2D.Impulse);
+            }
+        }
+        else {
+            for(int i = 1; i < numSegments; i++) {
+                
+                JointMotor2D motor = hingeJointsArray[i-1].motor;            
+                motor.motorSpeed = 0f;
+                motor.maxMotorTorque = restingJointTorque;
+                hingeJointsArray[i-1].motor = motor;
+            }
+        }
+    }
     
     public void InitializeModules(AgentGenome genome, Agent agent, StartPositionGenome startPos) {
         //testModule = new TestModule();
@@ -692,7 +826,7 @@ public class Agent : MonoBehaviour {
                 facingDirection = new Vector2(0f, 1f);
 
                 rigidbodiesArray[i].drag = headDrag; // only on root? // will need to suss out proper balance for this
-                rigidbodiesArray[i].mass = 1f;
+                rigidbodiesArray[i].mass = headMass;
             }
             else {
                 // Hinge Joint!
@@ -711,11 +845,11 @@ public class Agent : MonoBehaviour {
 
                 hingeJoint.useLimits = true;
                 JointAngleLimits2D jointLimits = hingeJoint.limits;
-                jointLimits.min = -90f;
-                jointLimits.max = 90f;
+                jointLimits.min = -45f;
+                jointLimits.max = 45f;
                 hingeJoint.limits = jointLimits;
                 
-                rigidbodiesArray[i].mass = 1f;
+                rigidbodiesArray[i].mass = bodyMass;
             }            
         }
     }

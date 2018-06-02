@@ -14,6 +14,13 @@ public class CritterMovementTestScript : MonoBehaviour {
     public float headMass = 1f;
     public float bodyMass = 1f;
     public float speed = 100f;
+    public float jointSpeed = 100f;
+    public float jointMaxTorque = 250f;
+    public float swimAnimationCycleSpeed = 0.01f;
+    public float smoothedThrottleLerp = 0.1f;
+    public float restingJointTorque = 10f;
+    public float bendRatioHead = 0f;
+    public float bendRatioTailTip = 1f;
 
     public int numSegments = 6;
     public float bodyLength = 6f;
@@ -77,7 +84,13 @@ public class CritterMovementTestScript : MonoBehaviour {
         testAgent.bodyDrag = bodyDrag;
         testAgent.headMass = headMass;
         testAgent.bodyMass = bodyMass;
-    
+        testAgent.jointSpeed = jointSpeed;
+        testAgent.jointMaxTorque = jointMaxTorque;
+        testAgent.swimAnimationCycleSpeed = swimAnimationCycleSpeed;
+        testAgent.smoothedThrottleLerp = smoothedThrottleLerp;
+        testAgent.restingJointTorque = restingJointTorque;
+        testAgent.bendRatioHead = bendRatioHead;
+        testAgent.bendRatioTailTip = bendRatioTailTip;
 
         // initialize Agent based on genome:
         StartPositionGenome startPosGenome = new StartPositionGenome(Vector3.zero, Quaternion.identity);
