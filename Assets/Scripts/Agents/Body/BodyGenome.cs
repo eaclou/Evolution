@@ -88,6 +88,7 @@ public class BodyGenome {
         // *** Result needs to be fully independent copy and share no references!!!
         appearanceGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome.appearanceGenome, settings);
         coreGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome.coreGenome, settings);
+        movementGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome.movementGenome, settings);
 
         /*
         //testModuleGenome = new TestModuleGenome(0, 0); // for now.. **** Revisit if updating Modules/Abilites!!!

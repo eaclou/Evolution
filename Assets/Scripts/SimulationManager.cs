@@ -42,7 +42,7 @@ public class SimulationManager : MonoBehaviour {
 
         }
     }
-    private int numWarmUpTimeSteps = 90;
+    private int numWarmUpTimeSteps = 10;
     private int currentWarmUpTimeStep = 0;
 
     private float mapSize = 70f;  // This determines scale of environment, size of FluidSim plane!!! Important!
@@ -520,7 +520,7 @@ public class SimulationManager : MonoBehaviour {
         }
         // Apply External Forces to dynamic objects: (internal PhysX Updates):
         // **** TEMPORARILY DISABLED!
-        ApplyFluidForcesToDynamicObjects();
+        //ApplyFluidForcesToDynamicObjects();
 
         // TEMP AUDIO EFFECTS!!!!
         //float playerSpeed = (agentsArray[0].transform.position - agentsArray[0]._PrevPos).magnitude;
@@ -675,10 +675,10 @@ public class SimulationManager : MonoBehaviour {
             // Set proper references between AgentBrains and Environment/Game Objects:::
             // ***** DISABLED!!!! *** NEED TO RE_IMPLEMENT THIS LATER!!!! ********************************************
             //agentsArray[a].testModule.friendTestModule = agentsArray[closestFriendIndex].testModule;
-            //if(closestFoodIndex != -1) {
-            //    agentsArray[a].testModule.nearestFoodModule = foodArray[closestFoodIndex];
-            //}            
-            //agentsArray[a].testModule.nearestPredatorModule = predatorArray[closestPredIndex];            
+            if(closestFoodIndex != -1) {
+                agentsArray[a].coreModule.nearestFoodModule = foodArray[closestFoodIndex];
+            }            
+            agentsArray[a].coreModule.nearestPredatorModule = predatorArray[closestPredIndex];            
         }
     }
     private void CheckForRecordPlayerScore() {
@@ -743,6 +743,7 @@ public class SimulationManager : MonoBehaviour {
         
     } // *** confirm these are set up alright      
     public void ProcessDeadAgent(int agentIndex) {
+                
         /*bool processAsAI = true;
 
         if(agentIndex == 0) {
@@ -772,6 +773,11 @@ public class SimulationManager : MonoBehaviour {
         else {
             ProcessDeadPlayer();
         }*/
+
+        if(agentIndex == 0) {
+            cameraManager.targetTransform = agentsArray[0].segmentsArray[0].transform;
+            cameraManager.StartPlayerRespawn();
+        }
     }
     public void ProcessDeadFood(int foodIndex) {
         

@@ -6,6 +6,9 @@ public class CritterModuleMovement {
 
     public int parentID;
     public int inno;
+
+    public float horsepower = 100f;
+    public float turnRate = 100f;
     
     public float[] ownVelX;
     public float[] ownVelY;
@@ -20,6 +23,9 @@ public class CritterModuleMovement {
     }
 
     public void Initialize(CritterModuleMovementGenome genome) {
+
+        horsepower = genome.horsepower;
+        turnRate = genome.turnRate;
         
         ownVelX = new float[1]; // 20
         ownVelY = new float[1]; // 21

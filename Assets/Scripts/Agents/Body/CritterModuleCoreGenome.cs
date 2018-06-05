@@ -2,14 +2,22 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
 public class CritterModuleCoreGenome {
 
     public int parentID;
     public int inno;
 
-    public float width;
-    public float length;
-    public int numSegments;
+    public float coreWidth;
+    public float coreLength;
+
+    public float relativeWidthHead = 1f;
+    public float relativeWidthBody = 1f;
+    public float relativeWidthTail = 1f;
+    public float headStart = 0.33f;
+    public float tailStart = 0.67f;
+
+    public int numSegments; // Number of GameObject / Rigidbodies
 
 	public CritterModuleCoreGenome(int parentID, int inno) {
         this.parentID = parentID;
@@ -21,9 +29,15 @@ public class CritterModuleCoreGenome {
         // Do stuff:
         Debug.Log("GenerateRandomGenome()");
 
-        numSegments = 6;
-        width = 1f;
-        length = 6f;
+        numSegments = UnityEngine.Random.Range(1, 6);
+        coreWidth = UnityEngine.Random.Range(0.5f, 2f);
+        coreLength = coreWidth * UnityEngine.Random.Range(1f, 3f);
+
+        relativeWidthHead = UnityEngine.Random.Range(0.5f, 1f);
+        relativeWidthBody = UnityEngine.Random.Range(0.5f, 1f);
+        relativeWidthTail = UnityEngine.Random.Range(0.5f, 1f);
+        headStart = UnityEngine.Random.Range(0.2f, 5f);
+        tailStart = UnityEngine.Random.Range(0.5f, 1f);
     }
 
     public void AppendModuleNeuronsToMasterList(ref List<NeuronGenome> neuronList) {
@@ -151,10 +165,16 @@ public class CritterModuleCoreGenome {
     public void SetToMutatedCopyOfParentGenome(CritterModuleCoreGenome parentGenome, MutationSettings settings) {
 
 
-        width = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.width, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 1f, 1f);
-        length = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.length, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 1f, 1f);
+        coreWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.coreWidth, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.5f, 2f);
+        coreLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.coreLength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, coreWidth * 1f, coreWidth * 3f);
 
         numSegments = parentGenome.numSegments;
+        
+        relativeWidthHead = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.relativeWidthHead, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.1f, 1f);
+        relativeWidthBody = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.relativeWidthBody, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.1f, 1f);
+        relativeWidthTail = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.relativeWidthTail, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.1f, 1f);
+        headStart = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.headStart, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.1f, 1f);
+        tailStart = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.tailStart, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.1f, 1f);
         
     }
 }

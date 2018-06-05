@@ -1196,17 +1196,17 @@ public class TheRenderKing : MonoBehaviour {
         //
         // Read current stateData and update all Buffers, send data to GPU
         // Execute computeShaders to update any dynamic particles that are purely cosmetic
-        SimPlayerGlow();
+        //SimPlayerGlow();
         SimAgentSmearStrokes(); // start with this one?
-        IterateTrailStrokesData();
-        SimPlayerGlowyBits();
-        SimFloatyBits();
-        SimRipples();
+        //IterateTrailStrokesData();
+        //SimPlayerGlowyBits();
+        //SimFloatyBits();
+        //SimRipples();
         SimFruit();
-        SimWaterSplines();
-        SimWaterChains();
+        //SimWaterSplines();
+        //SimWaterChains();
 
-        uberFlowChainBrush1.Tick(fluidManager._VelocityA);
+        //uberFlowChainBrush1.Tick(fluidManager._VelocityA);
     }
 
     public void RenderSimulationCameras() { // **** revisit
@@ -1225,7 +1225,7 @@ public class TheRenderKing : MonoBehaviour {
         // Draw dynamic Obstacles:
         basicStrokeDisplayMat.SetPass(0);
         basicStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer); // *** Needed? or just set it once in beginning....
-        basicStrokeDisplayMat.SetBuffer("basicStrokesCBuffer", obstacleStrokesCBuffer);
+        basicStrokeDisplayMat.SetBuffer("basicStrokesCBuffer", obstacleStrokesCBuffer);        
         cmdBufferFluidObstacles.DrawProcedural(Matrix4x4.identity, basicStrokeDisplayMat, 0, MeshTopology.Triangles, 6, obstacleStrokesCBuffer.count);
                 
         Graphics.ExecuteCommandBuffer(cmdBufferFluidObstacles);
@@ -1301,7 +1301,8 @@ public class TheRenderKing : MonoBehaviour {
         // Use this technique for Environment Brushstrokes:
         cmdBufferMainRender.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, frameBufferStrokeDisplayMat, 0, MeshTopology.Triangles, 6, frameBufferStrokesCBuffer.count);
-
+        
+        /*
         // WATER SPLINES:::
         waterSplinesMat.SetPass(0);
         waterSplinesMat.SetBuffer("verticesCBuffer", waterSplineVerticesCBuffer);
@@ -1326,6 +1327,7 @@ public class TheRenderKing : MonoBehaviour {
         // Uber Chains !!!
         uberFlowChainBrush1.RenderSetup(fluidManager._DensityA);
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, uberFlowChainBrush1.renderMat, 0, MeshTopology.Triangles, 6, uberFlowChainBrush1.chains0CBuffer.count);
+        */
 
         /*
         
@@ -1347,6 +1349,7 @@ public class TheRenderKing : MonoBehaviour {
 
         */
 
+        /*
         // PLAYER GLOWY BITS!
         playerGlowyBitsDisplayMat.SetPass(0);
         //playerGlowyBitsDisplayMat.SetFloat("_PosX", (simManager.agentsArray[0].transform.position.x + 70f) / 140f);
@@ -1355,17 +1358,19 @@ public class TheRenderKing : MonoBehaviour {
         playerGlowyBitsDisplayMat.SetBuffer("playerGlowyBitsCBuffer", playerGlowyBitsCBuffer);
         playerGlowyBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, playerGlowyBitsDisplayMat, 0, MeshTopology.Triangles, 6, playerGlowyBitsCBuffer.count);
+        */
 
-        bool displayAgents = true;
+        bool displayAgents = false;
         if(displayAgents) {
             
-        
+            /*
             // AGENT TAILS WOO!
             trailStrokeDisplayMat.SetPass(0);
             trailStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
             trailStrokeDisplayMat.SetBuffer("agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
             trailStrokeDisplayMat.SetBuffer("agentTrailStrokesReadCBuffer", agentTrailStrokes0CBuffer);
             cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, trailStrokeDisplayMat, 0, MeshTopology.Triangles, 6, agentTrailStrokes0CBuffer.count);
+            */
 
             foodFruitDisplayMat.SetPass(0);
             foodFruitDisplayMat.SetBuffer("fruitDataCBuffer", simManager.simStateData.foodFruitDataCBuffer);
@@ -1373,12 +1378,14 @@ public class TheRenderKing : MonoBehaviour {
             foodFruitDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
             cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, foodFruitDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.foodFruitDataCBuffer.count);
                 
+            /*
             // TEMP AGENTS: // CHANGE THIS TO SMEARS!
             curveStrokeDisplayMat.SetPass(0);
             curveStrokeDisplayMat.SetBuffer("agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
             curveStrokeDisplayMat.SetBuffer("curveRibbonVerticesCBuffer", curveRibbonVerticesCBuffer);
             curveStrokeDisplayMat.SetBuffer("agentCurveStrokesReadCBuffer", agentSmearStrokesCBuffer);
             cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, curveStrokeDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, agentSmearStrokesCBuffer.count);
+            */
             // AGENT BODY:
             agentBodyDisplayMat.SetPass(0);
             agentBodyDisplayMat.SetBuffer("agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);

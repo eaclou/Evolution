@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-
+[System.Serializable] // Temporary for debug purposes (view in inspector)
 public class CritterModuleCore {
 
     public int parentID;
@@ -12,6 +12,15 @@ public class CritterModuleCore {
     public float[] bias;
 
     public float foodConsumptionRate = 0.0025f * 0.5f; // *** *0.5 temporary!
+
+    public float coreWidth;
+    public float coreLength;
+    
+    public float energy = 1f;
+    //public float stamina = 1f;
+    public float healthHead = 1f;
+    public float healthBody = 1f;
+    public float healthExternal = 1f;
         
     // Nearest Edible Object:
     public float[] foodPosX;
@@ -66,6 +75,9 @@ public class CritterModuleCore {
     public float[] outComm1;
     public float[] outComm2;
     public float[] outComm3;  // 7 Out?
+
+    public FoodModule nearestFoodModule;
+    public PredatorModule nearestPredatorModule;
         
 
 	public CritterModuleCore() {
@@ -73,6 +85,11 @@ public class CritterModuleCore {
     }
 
     public void Initialize(CritterModuleCoreGenome genome, Agent agent, StartPositionGenome startPos) {
+
+        coreWidth = genome.coreWidth;
+        coreLength = genome.coreLength;
+
+        //numSegments = genome.numSegments;
 
         bias = new float[1];   //0
         foodPosX = new float[1];  //1
@@ -140,6 +157,11 @@ public class CritterModuleCore {
             foodAmountG[0] = 1f;
             foodAmountB[0] = 1f;
         }
+
+        energy = 1f;
+        healthHead = 1f;
+        healthBody = 1f;
+        healthExternal = 1f;
 
         bias[0] = 1f;
         
@@ -355,13 +377,13 @@ public class CritterModuleCore {
         float typeR = 0f;
         float typeG = 0f;
         float typeB = 0f;
-        /*if(nearestFoodModule != null) {
+        if(nearestFoodModule != null) {
             foodPos = new Vector2(nearestFoodModule.transform.localPosition.x - ownPos.x, nearestFoodModule.transform.localPosition.y - ownPos.y);
             foodDir = foodPos.normalized;
-            typeR = nearestFoodModule.amountR;  // make a FoodModule Class to hold as reference which will contain Type info
-            typeG = nearestFoodModule.amountG;
-            typeB = nearestFoodModule.amountB;
-        }*/
+            //typeR = nearestFoodModule.amountR;  // make a FoodModule Class to hold as reference which will contain Type info
+            //typeG = nearestFoodModule.amountG;
+            //typeB = nearestFoodModule.amountB;
+        }
 
         Vector2 friendPos = Vector2.zero;
         Vector2 friendDir = Vector2.zero;
@@ -375,11 +397,11 @@ public class CritterModuleCore {
         Vector2 enemyPos = Vector2.zero;
         Vector2 enemyDir = Vector2.zero;
         Vector2 enemyVel = Vector2.zero;
-        /*if (nearestPredatorModule != null) {
+        if (nearestPredatorModule != null) {
             enemyPos = new Vector2(nearestPredatorModule.rigidBody.transform.localPosition.x - ownPos.x, nearestPredatorModule.rigidBody.transform.localPosition.y - ownPos.y);
             enemyDir = enemyPos.normalized;
             enemyVel = new Vector2(nearestPredatorModule.rigidBody.velocity.x, nearestPredatorModule.rigidBody.velocity.y);
-        }*/
+        }
 
         foodPosX[0] = foodPos.x / 20f;
         foodPosY[0] = foodPos.y / 20f;
@@ -429,7 +451,7 @@ public class CritterModuleCore {
         //Debug.Log(mask.ToString());
 
         // TOP
-        float raycastMaxLength = 20f;
+        float raycastMaxLength = 10f;
         RaycastHit2D hitTop = Physics2D.Raycast(ownPos, Vector2.up, raycastMaxLength, rayLayer);  // UP
         float distance = raycastMaxLength;
         if (hitTop.collider != null && hitTop.collider.tag == "HazardCollider") {

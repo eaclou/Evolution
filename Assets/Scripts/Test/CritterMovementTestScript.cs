@@ -73,7 +73,7 @@ public class CritterMovementTestScript : MonoBehaviour {
         testAgent.humanControlled = true;
 
         testAgentGenome.bodyGenome.coreGenome.numSegments = numSegments;
-        testAgentGenome.bodyGenome.coreGenome.length = bodyLength;
+        testAgentGenome.bodyGenome.coreGenome.coreLength = bodyLength;
 
         testAgent.speed = speed;
 
