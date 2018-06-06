@@ -68,7 +68,7 @@ public class FoodModule : MonoBehaviour {
 
     private int colliderCount = 0;
 
-    private float feedingRate = 0.0065f;
+    private float feedingRate = 0.05f;
 
     public float growthStatus = 0f;  // 0-1 born --> mature
     public float decayStatus = 0f;
@@ -367,15 +367,13 @@ public class FoodModule : MonoBehaviour {
             collidingAgent.isInsideFood = true;
         }        
     }
-
+    /*
     private void OnCollisionEnter2D(Collision2D coll) {
         Agent collidingAgent = coll.gameObject.GetComponentInParent<Agent>();
         if (collidingAgent != null) {
             ComputeCollisionDamage(coll.collider);
-            //collidingAgent.GetComponent<Rigidbody2D>().velocity *= 0.1f;
-            
+            //collidingAgent.GetComponent<Rigidbody2D>().velocity *= 0.1f;            
         }
-
         colliderCount++;
         //Debug.Log("Food Collision! OnCollisionEnter colliderCount: " + colliderCount.ToString());
     }
@@ -397,7 +395,7 @@ public class FoodModule : MonoBehaviour {
             float flowR = Mathf.Min(amountR, flow);
             //collidingAgent.testModule.foodAmountR[0] += flowR * 2f;  // make sure Agent doesn't receive food from empty dispenser
 
-            collidingAgent.EatFood(flowR * 2f); // assumes all foodAmounts are equal !! *****
+            collidingAgent.EatFood(flowR * 1f); // assumes all foodAmounts are equal !! *****
     
             amountR -= flowR;
             if (amountR < 0f) {
@@ -430,6 +428,8 @@ public class FoodModule : MonoBehaviour {
     private void OnCollisionExit2D(Collision2D coll) {
         colliderCount--;
     }
+    */
+
 
     private bool CheckIfDepleted() {
         bool depleted = true;

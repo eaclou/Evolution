@@ -92,7 +92,8 @@ public class SimulationManager : MonoBehaviour {
         {
             numFood = value;
         }
-    }
+    }    
+    public FoodModule[] foodDeadAnimalArray;
     public PredatorModule[] predatorArray;
     private int numPredators = 64;
     public int _NumPredators {
@@ -362,12 +363,14 @@ public class SimulationManager : MonoBehaviour {
     }
     private void LoadingInitializeAgentsFromGenomes() {        
         for (int i = 0; i < numAgents; i++) {
-            agentsArray[i].InitializeAgentFromGenome(agentGenomePoolArray[i], GetRandomAgentSpawnPosition());
+            agentsArray[i].InitializeAgentFromGenome(i, agentGenomePoolArray[i], GetRandomAgentSpawnPosition());
         }
     }
     private void LoadingInstantiateFood() {
         // FOOODDDD!!!!
         foodArray = new FoodModule[numFood]; // create array
+        int numDeadAnimalFood = 32;
+        foodDeadAnimalArray = new FoodModule[numDeadAnimalFood];
 
         //Debug.Log("SpawnFood!");
         for (int i = 0; i < foodArray.Length; i++) {
@@ -375,6 +378,14 @@ public class SimulationManager : MonoBehaviour {
             foodGO.name = "Food" + i.ToString();
             FoodModule newFood = foodGO.GetComponent<FoodModule>();
             foodArray[i] = newFood; // Add to stored list of current Food objects                     
+        }
+
+        for(int j = 0; j < numDeadAnimalFood; j++) {
+            GameObject deadAnimalGO = Instantiate(Resources.Load("Prefabs/FoodPrefab")) as GameObject;
+            deadAnimalGO.name = "DeadAnimal" + j.ToString();
+            FoodModule newDeadAnimal = deadAnimalGO.GetComponent<FoodModule>();
+            newDeadAnimal.gameObject.SetActive(false);
+            foodDeadAnimalArray[j] = newDeadAnimal; // Add to stored list of current Food objects        
         }
     }
     private void LoadingInitializeFoodFromGenome() {
@@ -518,6 +529,11 @@ public class SimulationManager : MonoBehaviour {
         for (int i = 0; i < foodArray.Length; i++) {
             foodArray[i].Tick();
         }
+        for (int i = 0; i < foodDeadAnimalArray.Length; i++) {
+            if(foodDeadAnimalArray[i].gameObject.activeSelf) {
+                foodDeadAnimalArray[i].Tick();
+            }            
+        }
         // Apply External Forces to dynamic objects: (internal PhysX Updates):
         // **** TEMPORARILY DISABLED!
         //ApplyFluidForcesToDynamicObjects();
@@ -581,6 +597,14 @@ public class SimulationManager : MonoBehaviour {
                 mapGridCellArray[xCoord][yCoord].foodIndicesList.Add(f);
             //}            
         }
+        for(int a = 0; a < foodDeadAnimalArray.Length; a++) {  // DEAD ANIMALS!!!
+            float xPos = foodDeadAnimalArray[a].transform.localPosition.x;
+            float yPos = foodDeadAnimalArray[a].transform.localPosition.y;
+            int xCoord = Mathf.FloorToInt((xPos + mapSize) / (mapSize * 2f) * (float)agentGridCellResolution);
+            int yCoord = Mathf.FloorToInt((yPos + mapSize) / (mapSize * 2f) * (float)agentGridCellResolution);
+
+            mapGridCellArray[xCoord][yCoord].deadAnimalIndicesList.Add(a);
+        }
 
         // FRIENDS::::::
         for (int a = 0; a < agentsArray.Length; a++) {
@@ -611,7 +635,7 @@ public class SimulationManager : MonoBehaviour {
         // Find NearestNeighbors:
         for (int a = 0; a < agentsArray.Length; a++) {
             // Find which gridCell this Agent is in:    
-            Vector2 agentPos = new Vector2(agentsArray[a].transform.localPosition.x, agentsArray[a].transform.localPosition.y);
+            Vector2 agentPos = new Vector2(agentsArray[a].rigidbodiesArray[0].transform.localPosition.x, agentsArray[a].rigidbodiesArray[0].transform.localPosition.y);
             int xCoord = Mathf.FloorToInt((agentPos.x + mapSize) / (mapSize * 2f) * (float)agentGridCellResolution);
             xCoord = Mathf.Clamp(xCoord, 0, agentGridCellResolution - 1);
             int yCoord = Mathf.FloorToInt((agentPos.y + mapSize) / (mapSize * 2f) * (float)agentGridCellResolution);
@@ -619,10 +643,12 @@ public class SimulationManager : MonoBehaviour {
 
             int closestFriendIndex = a;  // default to self
             float nearestFriendSquaredDistance = float.PositiveInfinity;
-            int closestFoodIndex = -1; // default to -1??? ***
+            int closestFoodIndex = -1; // default to -1??? ***            
             float nearestFoodDistance = float.PositiveInfinity;
             int closestPredIndex = 0; // default to 0???
             float nearestPredDistance = float.PositiveInfinity;
+
+            bool closestFoodIsDeadAnimal = false;
 
             // **** Only checking its own grid cell!!! Will need to expand to adjacent cells as well!
             /*int index = -1;
@@ -648,18 +674,39 @@ public class SimulationManager : MonoBehaviour {
             
             for (int i = 0; i < mapGridCellArray[xCoord][yCoord].foodIndicesList.Count; i++) {
                 // FOOD:
-                if(foodArray[mapGridCellArray[xCoord][yCoord].foodIndicesList[i]].curLifeStage == FoodModule.FoodLifeStage.Mature) {
-                    //Debug.Log("Found valid Food!");
-                    Vector2 foodPos = new Vector2(foodArray[mapGridCellArray[xCoord][yCoord].foodIndicesList[i]].transform.localPosition.x, foodArray[mapGridCellArray[xCoord][yCoord].foodIndicesList[i]].transform.localPosition.y);
-                    float distFood = (foodPos - agentPos).magnitude - (foodArray[mapGridCellArray[xCoord][yCoord].foodIndicesList[i]].curSize.magnitude + 1f) * 0.5f;  // subtract food & agent radii
-                    if (distFood <= nearestFoodDistance) { // if now the closest so far, update index and dist:
-                        if (a != mapGridCellArray[xCoord][yCoord].foodIndicesList[i]) {  // make sure it doesn't consider itself:
-                            closestFoodIndex = mapGridCellArray[xCoord][yCoord].foodIndicesList[i];
-                            nearestFoodDistance = distFood;
+                if(foodArray[mapGridCellArray[xCoord][yCoord].foodIndicesList[i]].enabled) { // if enabled:
+                    if(foodArray[mapGridCellArray[xCoord][yCoord].foodIndicesList[i]].curLifeStage == FoodModule.FoodLifeStage.Mature) {
+                        //Debug.Log("Found valid Food!");
+                        Vector2 foodPos = new Vector2(foodArray[mapGridCellArray[xCoord][yCoord].foodIndicesList[i]].transform.localPosition.x, foodArray[mapGridCellArray[xCoord][yCoord].foodIndicesList[i]].transform.localPosition.y);
+                        float distFood = (foodPos - agentPos).magnitude - (foodArray[mapGridCellArray[xCoord][yCoord].foodIndicesList[i]].curSize.magnitude + 1f) * 0.5f;  // subtract food & agent radii
+                        if (distFood <= nearestFoodDistance) { // if now the closest so far, update index and dist:
+                            if (a != mapGridCellArray[xCoord][yCoord].foodIndicesList[i]) {  // make sure it doesn't consider itself:
+                                closestFoodIndex = mapGridCellArray[xCoord][yCoord].foodIndicesList[i];
+                                nearestFoodDistance = distFood;
+                            }
                         }
-                    }
-                }                
+                    } 
+                }                             
             }
+
+            for (int i = 0; i < mapGridCellArray[xCoord][yCoord].deadAnimalIndicesList.Count; i++) {
+                // DEAD ANIMALS!!!:
+                if(foodDeadAnimalArray[mapGridCellArray[xCoord][yCoord].deadAnimalIndicesList[i]].enabled) { // if enabled:
+                    if(foodDeadAnimalArray[mapGridCellArray[xCoord][yCoord].deadAnimalIndicesList[i]].curLifeStage == FoodModule.FoodLifeStage.Mature) {
+                        //Debug.Log("Found valid Food!");
+                        Vector2 foodPos = new Vector2(foodDeadAnimalArray[mapGridCellArray[xCoord][yCoord].deadAnimalIndicesList[i]].transform.localPosition.x, foodDeadAnimalArray[mapGridCellArray[xCoord][yCoord].deadAnimalIndicesList[i]].transform.localPosition.y);
+                        float distFood = (foodPos - agentPos).magnitude - (foodDeadAnimalArray[mapGridCellArray[xCoord][yCoord].deadAnimalIndicesList[i]].curSize.magnitude + 1f) * 0.5f;  // subtract food & agent radii
+                        if (distFood <= nearestFoodDistance) { // if now the closest so far, update index and dist:
+                            if (a != mapGridCellArray[xCoord][yCoord].deadAnimalIndicesList[i]) {  // make sure it doesn't consider itself:
+                                closestFoodIndex = mapGridCellArray[xCoord][yCoord].deadAnimalIndicesList[i];
+                                nearestFoodDistance = distFood;
+                                closestFoodIsDeadAnimal = true;
+                            }
+                        }
+                    } 
+                }                             
+            }
+            
 
             for (int i = 0; i < mapGridCellArray[xCoord][yCoord].predatorIndicesList.Count; i++) {
                 // PREDATORS:::::::
@@ -674,17 +721,22 @@ public class SimulationManager : MonoBehaviour {
             }
             // Set proper references between AgentBrains and Environment/Game Objects:::
             // ***** DISABLED!!!! *** NEED TO RE_IMPLEMENT THIS LATER!!!! ********************************************
-            //agentsArray[a].testModule.friendTestModule = agentsArray[closestFriendIndex].testModule;
+            agentsArray[a].coreModule.nearestFriendAgent = agentsArray[closestFriendIndex];
             if(closestFoodIndex != -1) {
-                agentsArray[a].coreModule.nearestFoodModule = foodArray[closestFoodIndex];
+                if(closestFoodIsDeadAnimal) {                    
+                    agentsArray[a].coreModule.nearestFoodModule = foodDeadAnimalArray[closestFoodIndex];
+                }
+                else {                    
+                    agentsArray[a].coreModule.nearestFoodModule = foodArray[closestFoodIndex];
+                }
             }            
             agentsArray[a].coreModule.nearestPredatorModule = predatorArray[closestPredIndex];            
         }
     }
     private void CheckForRecordPlayerScore() {
         // Check for Record Agent AGE!
-        if (agentsArray[0].ageCounterMature > recordPlayerAge) {
-            recordPlayerAge = agentsArray[0].ageCounterMature;
+        if (agentsArray[0].scoreCounter > recordPlayerAge) {
+            recordPlayerAge = agentsArray[0].scoreCounter;
         }
     }
     private void CheckForDeadFood() { // *** revisit
@@ -692,6 +744,12 @@ public class SimulationManager : MonoBehaviour {
         for (int f = 0; f < foodArray.Length; f++) {
             if (foodArray[f].isDepleted) {
                 ProcessDeadFood(f);
+            }
+        }
+
+        for (int a = 0; a < foodDeadAnimalArray.Length; a++) {
+            if (foodDeadAnimalArray[a].isDepleted) {
+                foodDeadAnimalArray[a].gameObject.SetActive(false);
             }
         }
     }
@@ -743,7 +801,24 @@ public class SimulationManager : MonoBehaviour {
         
     } // *** confirm these are set up alright      
     public void ProcessDeadAgent(int agentIndex) {
-                
+
+        // Convert to DeadAnimal Food:
+        int deadAnimalIndex = 0;
+        for(int i = 0; i < foodDeadAnimalArray.Length; i++) {
+            if(foodDeadAnimalArray[i].gameObject.activeSelf == false) {
+                deadAnimalIndex = i;
+                break;
+            }
+        }
+        // spawn corpseFood:
+        StartPositionGenome startPos = new StartPositionGenome(new Vector3(agentsArray[agentIndex].rigidbodiesArray[0].transform.position.x, 
+                                                                           agentsArray[agentIndex].rigidbodiesArray[0].transform.position.y, 
+                                                                           0f), 
+                                                                           Quaternion.identity);
+        foodDeadAnimalArray[deadAnimalIndex].InitializeFoodFromGenome(foodGenomePoolArray[0], startPos, null); // Spawn that genome in dead Agent's body and revive it!
+        
+        foodDeadAnimalArray[deadAnimalIndex].gameObject.SetActive(true);
+
         /*bool processAsAI = true;
 
         if(agentIndex == 0) {
@@ -759,16 +834,16 @@ public class SimulationManager : MonoBehaviour {
         } 
         
         if(processAsAI) {*/
-            CheckForRecordAgentScore(agentIndex);
-            ProcessAgentScores(agentIndex);
-            // Updates rankedIndicesArray[] so agents are ordered by score:
-            ProcessAndRankAgentFitness();
-            // Reproduction!!!
-            CreateMutatedCopyOfAgent(agentIndex); 
+        CheckForRecordAgentScore(agentIndex);
+        ProcessAgentScores(agentIndex);
+        // Updates rankedIndicesArray[] so agents are ordered by score:
+        ProcessAndRankAgentFitness();
+        // Reproduction!!!
+        CreateMutatedCopyOfAgent(agentIndex); 
         
-            theRenderKing.UpdateAgentSmearStrokesBuffer(agentIndex);
-            theRenderKing.UpdateAgentBodyStrokesBuffer(agentIndex);
-            theRenderKing.UpdateAgentEyeStrokesBuffer(agentIndex);
+        theRenderKing.UpdateAgentSmearStrokesBuffer(agentIndex);
+        theRenderKing.UpdateAgentBodyStrokesBuffer(agentIndex);
+        theRenderKing.UpdateAgentEyeStrokesBuffer(agentIndex);
         /*}
         else {
             ProcessDeadPlayer();
@@ -795,12 +870,12 @@ public class SimulationManager : MonoBehaviour {
         //theRenderKing.InitializeAgentEyeStrokesBuffer();
     }
     private void CheckForRecordAgentScore(int agentIndex) {
-        if (agentsArray[agentIndex].ageCounterMature > recordBotAge && agentIndex != 0) {
-            recordBotAge = agentsArray[agentIndex].ageCounterMature;
+        if (agentsArray[agentIndex].scoreCounter > recordBotAge && agentIndex != 0) {
+            recordBotAge = agentsArray[agentIndex].scoreCounter;
         }
     }
     private void ProcessAgentScores(int agentIndex) {
-        rollingAverageAgentScore = Mathf.Lerp(rollingAverageAgentScore, (float)agentsArray[agentIndex].ageCounterMature, 1f / 512f);
+        rollingAverageAgentScore = Mathf.Lerp(rollingAverageAgentScore, (float)agentsArray[agentIndex].scoreCounter, 1f / 512f);
         float approxGen = (float)numAgentsBorn / (float)(numAgents - 1);
         if (approxGen > curApproxGen) {
             fitnessScoresEachGenerationList.Add(rollingAverageAgentScore);
@@ -825,7 +900,7 @@ public class SimulationManager : MonoBehaviour {
     private void ProcessAndRankAgentFitness() {
         // Measure fitness of all current agents (their genomes, actually)  NOT PLAYER!!!!
             for (int i = 0; i < rawFitnessScoresArray.Length; i++) {
-                rawFitnessScoresArray[i] = (float)agentsArray[i].ageCounterMature;
+                rawFitnessScoresArray[i] = (float)agentsArray[i].scoreCounter;
             }
 
             // populate arrays:
@@ -863,7 +938,7 @@ public class SimulationManager : MonoBehaviour {
             if(agentIndex % 2 == 0) {
                 isEven = true;
             }
-            int parentGenomeIndex = GetAgentIndexByLottery(rankedFitnessList, rankedIndicesList, isEven);
+            int parentGenomeIndex = GetAgentIndexByLottery(rankedFitnessList, rankedIndicesList);
 
             //Debug.Log("Agent[" + agentIndex.ToString() + "] (" + (agentIndex % 2).ToString() + ") parentIndex: " + parentGenomeIndex.ToString());
             
@@ -906,13 +981,13 @@ public class SimulationManager : MonoBehaviour {
             agentGenomePoolArray[agentIndex].brainGenome = newBrainGenome; // update genome to new one
 
             numAgentsBorn++;
-            currentOldestAgent = agentsArray[rankedIndicesList[0]].ageCounterMature;
+            currentOldestAgent = agentsArray[rankedIndicesList[0]].scoreCounter;
         }        
         
         // **** !!! REvisit StartPos!!!
         //Vector3 startPos = new Vector3(UnityEngine.Random.Range(-30f, 30f), UnityEngine.Random.Range(-30f, 30f), 0f);
         //StartPositionGenome startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
-        agentsArray[agentIndex].InitializeAgentFromGenome(agentGenomePoolArray[agentIndex], GetRandomAgentSpawnPosition()); // Spawn that genome in dead Agent's body and revive it!
+        agentsArray[agentIndex].InitializeAgentFromGenome(agentIndex, agentGenomePoolArray[agentIndex], GetRandomAgentSpawnPosition()); // Spawn that genome in dead Agent's body and revive it!
 
 
         //if(agentIndex == 0) {
@@ -1095,9 +1170,9 @@ public class SimulationManager : MonoBehaviour {
         
         //playerIsDead = true;  // so this function won't be called continuously
         // Display Death screen, send player's Score, cause of death, etc.
-        lastPlayerScore = agentsArray[0].ageCounterMature;
-        if (agentsArray[0].ageCounterMature > recordPlayerAge) {
-            recordPlayerAge = agentsArray[0].ageCounterMature;
+        lastPlayerScore = agentsArray[0].scoreCounter;
+        if (agentsArray[0].scoreCounter > recordPlayerAge) {
+            recordPlayerAge = agentsArray[0].scoreCounter;
         }
         // Wait certain amount of time OR press enter to immediately respawn.
         // Countdown display showing time to auto-respawn
@@ -1233,66 +1308,25 @@ public class SimulationManager : MonoBehaviour {
     #endregion
 
     #region Utility Functions // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& UTILITY FUNCTIONS! &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-    public int GetAgentIndexByLottery(float[] rankedFitnessList, int[] rankedIndicesList, bool isEven) {
+    public int GetAgentIndexByLottery(float[] rankedFitnessList, int[] rankedIndicesList) {
         int selectedIndex = 0;
-        if(!isEven) {
-            selectedIndex = 1;
-        }
+        
         // calculate total fitness of all EVEN and ODD agents separately!
         float totalFitness = 0f;
-        for (int i = 0; i < rankedFitnessList.Length; i++) {
-            // Experiemnt!! Split population into 2 separate Halves!!!
-            if(isEven) {
-                if(rankedIndicesList[i] % 2 == 0) {
-                    totalFitness += rankedFitnessList[i];
-                }
-                else {
-
-                }
-            }
-            else {
-                if(rankedIndicesList[i] % 2 == 0) {
-
-                }
-                else {
-                    totalFitness += rankedFitnessList[i];
-                }
-            }
-            //totalFitness += rankedFitnessList[i];
+        for (int i = 0; i < rankedFitnessList.Length; i++) {            
+            totalFitness += rankedFitnessList[i];
         }
         // generate random lottery value between 0f and totalFitness:
         float lotteryValue = UnityEngine.Random.Range(0f, totalFitness);
         float currentValue = 0f;
         for (int i = 0; i < rankedFitnessList.Length; i++) {
-            if(isEven) {
-                if(rankedIndicesList[i] % 2 == 0) {
-                    if (lotteryValue >= currentValue && lotteryValue < (currentValue + rankedFitnessList[i])) {
-                        // Jackpot!
-                        selectedIndex = rankedIndicesList[i];
-                        //Debug.Log("Selected: " + selectedIndex.ToString() + "! (" + i.ToString() + ") fit= " + currentValue.ToString() + "--" + (currentValue + (1f - rankedFitnessList[i])).ToString() + " / " + totalFitness.ToString() + ", lotto# " + lotteryValue.ToString() + ", fit= " + (1f - rankedFitnessList[i]).ToString());
-                    }
-                    currentValue += rankedFitnessList[i]; // add this agent's fitness to current value for next check       
-                }
-                else {
-
-                }
+            if (lotteryValue >= currentValue && lotteryValue < (currentValue + rankedFitnessList[i])) {
+                // Jackpot!
+                selectedIndex = rankedIndicesList[i];
+                //Debug.Log("Selected: " + selectedIndex.ToString() + "! (" + i.ToString() + ") fit= " + currentValue.ToString() + "--" + (currentValue + (1f - rankedFitnessList[i])).ToString() + " / " + totalFitness.ToString() + ", lotto# " + lotteryValue.ToString() + ", fit= " + (1f - rankedFitnessList[i]).ToString());
             }
-            else {
-                if(rankedIndicesList[i] % 2 == 0) {
-
-                }
-                else {  // ** ODD!!!
-                    if (lotteryValue >= currentValue && lotteryValue < (currentValue + rankedFitnessList[i])) {
-                        // Jackpot!
-                        selectedIndex = rankedIndicesList[i];
-                        //Debug.Log("Selected: " + selectedIndex.ToString() + "! (" + i.ToString() + ") fit= " + currentValue.ToString() + "--" + (currentValue + (1f - rankedFitnessList[i])).ToString() + " / " + totalFitness.ToString() + ", lotto# " + lotteryValue.ToString() + ", fit= " + (1f - rankedFitnessList[i]).ToString());
-                    }
-                    currentValue += rankedFitnessList[i]; // add this agent's fitness to current value for next check       
-                }
-            }
-                 
-        }        
-
+            currentValue += rankedFitnessList[i]; // add this agent's fitness to current value for next check
+        }
         return selectedIndex;
     }
 

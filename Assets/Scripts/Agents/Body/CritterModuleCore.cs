@@ -78,7 +78,9 @@ public class CritterModuleCore {
 
     public FoodModule nearestFoodModule;
     public PredatorModule nearestPredatorModule;
-        
+    public Agent nearestFriendAgent;
+
+    public CritterMouthComponent mouthRef;
 
 	public CritterModuleCore() {
 
@@ -149,16 +151,16 @@ public class CritterModuleCore {
                 
         // ===============================================================================================================================
         
-        foodAmountR[0] = 0.5f;
-        foodAmountG[0] = 0.5f;
-        foodAmountB[0] = 0.5f;
+        foodAmountR[0] = 0.01f;
+        foodAmountG[0] = 0.01f;
+        foodAmountB[0] = 0.01f;
         if(agent.humanControlled) {  // if is Player:
             foodAmountR[0] = 1f;
             foodAmountG[0] = 1f;
             foodAmountB[0] = 1f;
         }
 
-        energy = 1f;
+        energy = 0.5f;
         healthHead = 1f;
         healthBody = 1f;
         healthExternal = 1f;
@@ -388,11 +390,11 @@ public class CritterModuleCore {
         Vector2 friendPos = Vector2.zero;
         Vector2 friendDir = Vector2.zero;
         Vector2 friendVel = Vector2.zero;
-        /*if(friendTestModule != null) {
-            friendPos = new Vector2(friendTestModule.ownRigidBody2D.transform.localPosition.x - ownPos.x, friendTestModule.ownRigidBody2D.transform.localPosition.y - ownPos.y);
+        if(nearestFriendAgent != null) {
+            friendPos = new Vector2(nearestFriendAgent.rigidbodiesArray[0].transform.localPosition.x - ownPos.x, nearestFriendAgent.rigidbodiesArray[0].transform.localPosition.y - ownPos.y);
             friendDir = friendPos.normalized;
-            friendVel = new Vector2(friendTestModule.ownRigidBody2D.velocity.x, friendTestModule.ownRigidBody2D.velocity.y);
-        }*/
+            friendVel = new Vector2(nearestFriendAgent.rigidbodiesArray[0].velocity.x, nearestFriendAgent.rigidbodiesArray[0].velocity.y);
+        }
 
         Vector2 enemyPos = Vector2.zero;
         Vector2 enemyDir = Vector2.zero;
@@ -410,7 +412,7 @@ public class CritterModuleCore {
         foodTypeR[0] = typeR;
         foodTypeG[0] = typeG;
         foodTypeB[0] = typeB;
-
+        
         friendPosX[0] = friendPos.x / 20f;
         friendPosY[0] = friendPos.y / 20f;
         friendVelX[0] = (friendVel.x - ownVel.x) / 15f;
@@ -436,6 +438,21 @@ public class CritterModuleCore {
         //hitPoints[0] = Mathf.Max(hitPoints[0], 0f);
         //stamina[0] = 1f;
 
+
+        // Update Mouth:::: 
+        
+        if(mouthRef.isBiting) {
+            
+            // Already biting
+            mouthRef.bitingFrameCounter++;
+
+            if(mouthRef.bitingFrameCounter >= mouthRef.biteCooldown) {
+                mouthRef.bitingFrameCounter = 0;
+                mouthRef.isBiting = false;
+            }
+        }
+        //mouthRef.foodInRange = false;
+        
         // *** Handled within Agent.TickActions()
        // float foodDrain = foodConsumptionRate;
         //if(isPlayer) {
@@ -449,7 +466,7 @@ public class CritterModuleCore {
         int rayLayer = LayerMask.GetMask("EnvironmentCollision");
         //Debug.Log(LayerMask.GetMask("EnvironmentCollision"));
         //Debug.Log(mask.ToString());
-
+        
         // TOP
         float raycastMaxLength = 10f;
         RaycastHit2D hitTop = Physics2D.Raycast(ownPos, Vector2.up, raycastMaxLength, rayLayer);  // UP
@@ -508,7 +525,7 @@ public class CritterModuleCore {
             distance = (hitTopLeft.point - ownPos).magnitude;
         }
         distTopLeft[0] = (raycastMaxLength - distance) / raycastMaxLength;
-
+        
         //
         /*
         inComm0[0] = Mathf.Round(friendTestModule.outComm0[0] * 3f / 2f);

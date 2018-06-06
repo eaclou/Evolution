@@ -56,21 +56,21 @@ public class GameManager : MonoBehaviour {
                 // Low quality
                 simulationManager._NumAgents = 32;
                 simulationManager._NumFood = 32;
-                simulationManager._NumPredators = 32;
+                simulationManager._NumPredators = 2;
                 simulationManager.numInitialHiddenNeurons = 0;
                 break;
             case 1:
                 // Medium
                 simulationManager._NumAgents = 48;
                 simulationManager._NumFood = 48;
-                simulationManager._NumPredators = 48;
+                simulationManager._NumPredators = 2;
                 simulationManager.numInitialHiddenNeurons = 16;
                 break;
             case 2:
                 // High
                 simulationManager._NumAgents = 64;
                 simulationManager._NumFood = 64;
-                simulationManager._NumPredators = 64;
+                simulationManager._NumPredators = 2;
                 simulationManager.numInitialHiddenNeurons = 40;
                 break;
             default:

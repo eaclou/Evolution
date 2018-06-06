@@ -94,6 +94,6 @@ public class CritterMovementTestScript : MonoBehaviour {
 
         // initialize Agent based on genome:
         StartPositionGenome startPosGenome = new StartPositionGenome(Vector3.zero, Quaternion.identity);
-        testAgent.InitializeAgentFromGenome(testAgentGenome, startPosGenome);  // This also rebuilds GameObjects
+        testAgent.InitializeAgentFromGenome(0, testAgentGenome, startPosGenome);  // This also rebuilds GameObjects
     }
 }

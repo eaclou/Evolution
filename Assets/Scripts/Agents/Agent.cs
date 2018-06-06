@@ -16,11 +16,13 @@ public class Agent : MonoBehaviour {
     public float jointMaxTorque = 250f;
     public float swimAnimationCycleSpeed = 0.01f;
     public float smoothedThrottleLerp = 0.25f;
-    public float restingJointTorque = 10f;
+    public float restingJointTorque = 50f;
     public float bendRatioHead = 0f;
     public float bendRatioTailTip = 1f;
 
     public float animationCycle = 0f;
+
+    public int index;
     
     public AgentLifeStage curLifeStage;
     public enum AgentLifeStage {
@@ -54,7 +56,7 @@ public class Agent : MonoBehaviour {
 
         }
     }
-    private int decayDurationTimeSteps = 60;
+    private int decayDurationTimeSteps = 2;
     public int _DecayDurationTimeSteps
     {
         get
@@ -70,7 +72,7 @@ public class Agent : MonoBehaviour {
     private int growthScalingSkipFrames = 12;
    
     public Brain brain;
-
+    public CritterSegment[] critterSegmentsArray;
     public GameObject[] segmentsArray;
     public GameObject[] tempRenderObjectsArray;
     public Rigidbody2D[] rigidbodiesArray;
@@ -103,6 +105,7 @@ public class Agent : MonoBehaviour {
 
     public int ageCounterMature = 0; // only counts when agent is an adult
     public int lifeStageTransitionTimeStepCounter = 0; // keeps track of how long agent has been in its current lifeStage
+    public int scoreCounter = 0;
 
     private Vector3 prevPos;
     public Vector3 _PrevPos
@@ -471,7 +474,7 @@ public class Agent : MonoBehaviour {
                 Debug.LogError("NO SUCH ENUM ENTRY IMPLEMENTED, YOU FOOL!!! (" + curLifeStage.ToString() + ")");
                 break;
         }
-
+        
         /*if(isInsideFood) {
             rigidBody2D.drag = 20f;
             //Debug.Log("isInsideFood!");
@@ -519,6 +522,7 @@ public class Agent : MonoBehaviour {
                 texture.Apply();
             }            
         }
+
     }
 
     // *** Condense these into ONE?
@@ -538,6 +542,7 @@ public class Agent : MonoBehaviour {
         TickBrain(); // Tick Brain
         TickActions(); // Execute Actions  -- Also Updates Resources!!! ***
         lifeStageTransitionTimeStepCounter++;
+        scoreCounter++;
     }
     private void TickMature() {
         // Check for death & stuff? Or is this handled inside OnCollisionEnter() events?
@@ -547,6 +552,7 @@ public class Agent : MonoBehaviour {
         TickActions(); // Execute Actions  -- Also Updates Resources!!! ***
         
         ageCounterMature++;
+        scoreCounter++;
     }
     private void TickDecaying() {
         lifeStageTransitionTimeStepCounter++;
@@ -564,6 +570,10 @@ public class Agent : MonoBehaviour {
                 segmentsArray[i].GetComponent<HingeJoint2D>().autoConfigureConnectedAnchor = false;
                 segmentsArray[i].GetComponent<HingeJoint2D>().anchor = new Vector2(0f, 0.5f) * segmentFullSizeArray[i].y * scale;
                 segmentsArray[i].GetComponent<HingeJoint2D>().connectedAnchor = new Vector2(0f, -0.5f) * segmentFullSizeArray[i].y * scale;
+            }
+            else {
+                segmentsArray[i].GetComponent<CircleCollider2D>().radius = segmentFullSizeArray[i].x * scale * 0.5f;
+                segmentsArray[i].GetComponent<CircleCollider2D>().offset = new Vector2(0f, segmentFullSizeArray[i].y * scale * 0.5f);
             }
 
             tempRenderObjectsArray[i].transform.localScale = new Vector3(segmentFullSizeArray[i].x * scale, segmentFullSizeArray[i].y * scale, 1f);
@@ -594,8 +604,8 @@ public class Agent : MonoBehaviour {
             verHuman -= 1f;
         }
 
-        float horAI = Mathf.Round(movementModule.throttleX[0] * 3f / 2f);
-        float verAI = Mathf.Round(movementModule.throttleY[0] * 3f / 2f);
+        float horAI = movementModule.throttleX[0]; // Mathf.Round(movementModule.throttleX[0] * 3f / 2f);
+        float verAI = movementModule.throttleY[0]; // Mathf.Round(movementModule.throttleY[0] * 3f / 2f);
 
         horizontalMovementInput = Mathf.Lerp(horAI, horHuman, humanControlLerp);
         verticalMovementInput = Mathf.Lerp(verAI, verHuman, humanControlLerp);
@@ -618,13 +628,16 @@ public class Agent : MonoBehaviour {
         // Digestion:
         float amountDigested = 0.02f;
         float digestionAmount = Mathf.Min(coreModule.foodAmountR[0], amountDigested);
-        float foodToEnergyConversion = 1f;
+        float foodToEnergyConversion = 1.0f;
         float createdEnergy = digestionAmount * foodToEnergyConversion;
         coreModule.foodAmountR[0] -= digestionAmount;
         if(coreModule.foodAmountR[0] < 0f) {
             coreModule.foodAmountR[0] = 0f;
         }
         coreModule.energy += createdEnergy;
+        if(coreModule.energy > 5f) {
+            coreModule.energy = 5f;
+        }
 
         float throttleMag = smoothedThrottle.magnitude;
         if(throttleMag > 0.01f) {
@@ -636,7 +649,7 @@ public class Agent : MonoBehaviour {
                 coreModule.stamina[0] = 0f;
             }
 
-            float energyCost = 0.001f + 0.001f * throttleMag;  // idle + movement calorie burn
+            float energyCost = 0.002f; // + 0.001f * throttleMag;  // idle + movement calorie burn
             coreModule.energy -= energyCost;
             if(coreModule.energy < 0f) {
                 coreModule.energy = 0f;
@@ -648,7 +661,7 @@ public class Agent : MonoBehaviour {
                 coreModule.stamina[0] = 1f;
             }
 
-            float energyCost = 0.001f; // idle calorie burn
+            float energyCost = 0.002f; // idle calorie burn
             coreModule.energy -= energyCost;
             if(coreModule.energy < 0f) {
                 coreModule.energy = 0f;
@@ -905,7 +918,7 @@ public class Agent : MonoBehaviour {
             Vector2 headRightDir =  new Vector2(this.rigidbodiesArray[0].transform.right.x, this.rigidbodiesArray[0].transform.right.y).normalized;
             Vector2 throttleDir = throttle.normalized;
 
-            float headTurn = Vector2.Dot(throttleDir, headRightDir) * -1f;
+            float headTurn = Vector2.Dot(throttleDir, headRightDir) * -1f * (-Vector2.Dot(throttleDir, headForwardDir) * 0.5f + 0.5f);
             float headTurnSign = Mathf.Clamp(Vector2.Dot(throttleDir, headRightDir) * -10000f, -1f, 1f);
 
             //this.rigidbodiesArray[0].AddForce(headForwardDir * speed * Time.deltaTime, ForceMode2D.Impulse);
@@ -993,6 +1006,7 @@ public class Agent : MonoBehaviour {
 
         float segmentLength = genome.bodyGenome.coreGenome.coreLength / (float)numSegments;
 
+        critterSegmentsArray = new CritterSegment[numSegments];
         segmentsArray = new GameObject[numSegments];
         tempRenderObjectsArray = new GameObject[numSegments];
         rigidbodiesArray = new Rigidbody2D[numSegments];
@@ -1033,7 +1047,12 @@ public class Agent : MonoBehaviour {
             GameObject segmentGO = new GameObject("Segment" + i.ToString());
             segmentGO.transform.parent = this.gameObject.transform;
             segmentGO.transform.localPosition = new Vector3(0f, -i * segmentLength - segmentLength / 2f, 0f) * 0.1f + startPos.startPosition;
+            segmentGO.tag = "LiveAnimal";
             segmentsArray[i] = segmentGO;
+            critterSegmentsArray[i] = segmentGO.AddComponent<CritterSegment>();
+            critterSegmentsArray[i].agentIndex = this.index;
+            critterSegmentsArray[i].agentRef = this;
+            critterSegmentsArray[i].segmentIndex = i;
             rigidbodiesArray[i] = segmentGO.AddComponent<Rigidbody2D>();
             rigidbodiesArray[i].drag = 12.5f; // bodyDrag;
             rigidbodiesArray[i].angularDrag = 12.5f;
@@ -1067,6 +1086,18 @@ public class Agent : MonoBehaviour {
 
                 rigidbodiesArray[i].drag = 12.5f; // headDrag; // only on root? // will need to suss out proper balance for this
                 rigidbodiesArray[i].mass = 1f; // headMass;
+
+                // Mouth Trigger:
+                CircleCollider2D mouthTrigger = segmentsArray[0].AddComponent<CircleCollider2D>();
+                mouthTrigger.isTrigger = true;
+                mouthTrigger.radius = avgSegmentWidth / 2f * 0.1f;
+                mouthTrigger.offset = new Vector2(0f, segmentLength / 2f * 0.1f);
+
+                //segmentsArray[0].AddComponent<CritterMouthComponent>().agentIndex = index;
+
+                coreModule.mouthRef = segmentsArray[0].AddComponent<CritterMouthComponent>();
+                coreModule.mouthRef.agentIndex = this.index;
+                coreModule.mouthRef.agentRef = this;
             }
             else {
                 // Hinge Joint!
@@ -1096,29 +1127,35 @@ public class Agent : MonoBehaviour {
             //float massProportion = 1f / (float)numSegments * avgSegmentWidth;
             //rigidbodiesArray[i].mass = massProportion * 10f;
         }
+        
 
         //ScaleBody(0f);
     }
 
-    public void InitializeAgentFromGenome(AgentGenome genome, StartPositionGenome startPos) {
+    public void InitializeAgentFromGenome(int agentIndex, AgentGenome genome, StartPositionGenome startPos) {
         //sourceGenomeIndex = genomeIndex;
 
+        index = agentIndex;
+
         numSegments = genome.bodyGenome.coreGenome.numSegments;
-
-        // Upgrade this to proper Pooling!!!!
-        ReconstructAgentGameObjects(genome, startPos);
-
+        
         curLifeStage = AgentLifeStage.Egg;
         this.fullSize = new Vector2(genome.bodyGenome.coreGenome.coreWidth, genome.bodyGenome.coreGenome.coreLength);
         isNull = false;
         wasImpaled = false;
         lifeStageTransitionTimeStepCounter = 0;
         ageCounterMature = 0;
+        scoreCounter = 0;
         //this.transform.localPosition = startPos.startPosition;
         //float semiMajorSize = fullSize.magnitude;
         //this.transform.localScale = new Vector3(semiMajorSize, semiMajorSize, 1f);
 
         InitializeModules(genome, this, startPos);      // Modules need to be created first so that Brain can map its neurons to existing modules  
+
+        // Create blank Modules here so they can be populated during body construction??
+
+        // Upgrade this to proper Pooling!!!!
+        ReconstructAgentGameObjects(genome, startPos);
 
         brain = new Brain(genome.brainGenome, this);
 
@@ -1127,4 +1164,5 @@ public class Agent : MonoBehaviour {
         smoothedThrottle = new Vector2(0f, 0.01f);
         //prevPos = transform.localPosition;
     }
+        
 }
