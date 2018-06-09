@@ -43,7 +43,7 @@ public class CritterModuleAppearanceGenome {
     }
 
     public CritterModuleAppearanceGenome(int parentID, int inno) {
-        Debug.Log("CritterModuleAppearanceGenome() Constructor!!");
+        //Debug.Log("CritterModuleAppearanceGenome() Constructor!!");
 
         this.parentID = parentID;
         this.inno = inno;

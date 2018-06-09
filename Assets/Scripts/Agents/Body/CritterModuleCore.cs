@@ -21,6 +21,8 @@ public class CritterModuleCore {
     public float healthHead = 1f;
     public float healthBody = 1f;
     public float healthExternal = 1f;
+
+
         
     // Nearest Edible Object:
     public float[] foodPosX;
@@ -76,11 +78,12 @@ public class CritterModuleCore {
     public float[] outComm2;
     public float[] outComm3;  // 7 Out?
 
-    public FoodModule nearestFoodModule;
+    public FoodChunk nearestFoodModule;
     public PredatorModule nearestPredatorModule;
     public Agent nearestFriendAgent;
 
     public CritterMouthComponent mouthRef;
+    
 
 	public CritterModuleCore() {
 
@@ -445,6 +448,10 @@ public class CritterModuleCore {
             
             // Already biting
             mouthRef.bitingFrameCounter++;
+
+            // Adjust trigger size & offset:
+            //mouthRef.triggerCollider.radius = mouthRef.mouthDimensionsBite.x; // update to capsule later!! ****
+            //mouthRef.triggerCollider.offset = new Vector2(0f, mouthRef.mouthOffsetBite);
 
             if(mouthRef.bitingFrameCounter >= mouthRef.biteCooldown) {
                 mouthRef.bitingFrameCounter = 0;

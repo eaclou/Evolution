@@ -2,19 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FoodModule : MonoBehaviour {
-
-    //public Material material;
-    //public MeshRenderer meshRendererBeauty;
-    //public MeshRenderer meshRendererFluidCollider;
-    //public Texture2D texture;
-
+public class FoodChunk : MonoBehaviour {
+        
     public int index;
-
-    public FoodModule parentModule;
-    public FoodModule childModule;
-    public bool hasChildren = false;
-
+    
     public CapsuleCollider2D collisionCollider;
     public CapsuleCollider2D collisionTrigger;
 
@@ -25,7 +16,7 @@ public class FoodModule : MonoBehaviour {
         Decaying,
         Null
     }
-    private int growDurationTimeSteps = 150;
+    private int growDurationTimeSteps = 6;
     public int _GrowDurationTimeSteps
     {
         get
@@ -37,7 +28,7 @@ public class FoodModule : MonoBehaviour {
 
         }
     }
-    private int matureDurationTimeSteps = 6000;  // max oldAge
+    private int matureDurationTimeSteps = 6000;  // max oldAge Time to rot
     public int _MatureDurationTimeSteps
     {
         get
@@ -49,7 +40,7 @@ public class FoodModule : MonoBehaviour {
 
         }
     }
-    private int decayDurationTimeSteps = 150;
+    private int decayDurationTimeSteps = 6;
     public int _DecayDurationTimeSteps
     {
         get
@@ -68,7 +59,7 @@ public class FoodModule : MonoBehaviour {
 
     private int colliderCount = 0;
 
-    private float feedingRate = 0.05f;
+    //private float feedingRate = 0.05f;
 
     public float growthStatus = 0f;  // 0-1 born --> mature
     public float decayStatus = 0f;
@@ -79,9 +70,7 @@ public class FoodModule : MonoBehaviour {
     public Vector2 curSize;
 
     private Vector2 minSize = new Vector2(0.25f, 0.25f);
-    //public float curScale = 1f;
-    //private float maxScale = 4.5f;
-
+    
     private float minMass = 0.25f;
     private float maxMass = 5f;
 
@@ -116,23 +105,15 @@ public class FoodModule : MonoBehaviour {
     void Update () {
 		
 	}
-
-    /*public void Respawn() {
-        amountR = UnityEngine.Random.Range(0f, 1f);
-        amountG = UnityEngine.Random.Range(0f, 1f);
-        amountB = UnityEngine.Random.Range(0f, 1f);
-        isDepleted = false;
-        prevPos = transform.localPosition;
-    }*/
-
-    public void InitializeFoodFromGenome(FoodGenome genome, StartPositionGenome startPos, FoodModule parentFood) {
+    
+    public void InitializeFoodFromGenome(FoodGenome genome, StartPositionGenome startPos, FoodChunk parentFood) {
         curLifeStage = FoodLifeStage.Growing;
 
         index = genome.index;
         this.fullSize = genome.fullSize;
-        amountR = 1f; // UnityEngine.Random.Range(0f, 1f); // ** revisit eventually
-        amountG = 1f; // UnityEngine.Random.Range(0f, 1f);
-        amountB = 1f; // UnityEngine.Random.Range(0f, 1f);
+        amountR = this.fullSize.x * this.fullSize.y;
+        amountG = 0f;
+        amountB = 0f; 
 
         lifeStageTransitionTimeStepCounter = 0;
         ageCounterMature = 0;
@@ -143,64 +124,15 @@ public class FoodModule : MonoBehaviour {
         this.transform.localScale = new Vector3(0.1f, 0.1f, 1f);
 
         Rigidbody2D rigidBody = this.GetComponent<Rigidbody2D>();
-        HingeJoint2D joint = this.GetComponent<HingeJoint2D>();
-        if(parentFood != null) {
-            //HingeJoint2D joint = this.GetComponent<HingeJoint2D>();
-            joint.enabled = true;
-            joint.connectedBody = parentFood.GetComponent<Rigidbody2D>();
-            joint.autoConfigureConnectedAnchor = false;
-            joint.connectedAnchor = new Vector2(0f, 0.5f);
-            //joint.autoConfigureConnectedAnchor = true;
-
-            parentFood.hasChildren = true;
-            parentFood.childModule = this;
-            parentModule = parentFood;
-            //joint.isActiveAndEnabled = true;
-            //Debug.Log("Init Food - parentPos: " + parentFood.transform.position.ToString() + ", startPos: " + startPos.startPosition.ToString());
-
-            //rigidBody.isKinematic = false;
-        }
-        else {
-            
-            parentModule = null;
-            
-            joint.enabled = false;
-            joint.connectedBody = null;
-
-            //rigidBody.isKinematic = true;
-        }
-
-        
+        //HingeJoint2D joint = this.GetComponent<HingeJoint2D>();
+                
         rigidBody.velocity = Vector2.zero;
         rigidBody.angularVelocity = 0f;
         //rigidBody.
 
-        if(childModule != null) {
-            childModule.parentModule = null;
-            childModule.GetComponent<HingeJoint2D>().enabled = false;
-            childModule.GetComponent<HingeJoint2D>().connectedBody = null;
-        }
-
-        hasChildren = false;
-        childModule = null;
         isDepleted = false;
         healthStructural = 1f;
-        //hasChildren = false;
-        prevPos = transform.localPosition;
-
-        //curLifeStage = AgentLifeStage.Egg;
-        //this.fullSize = genome.fullSize;
-        //isNull = false;
-        //lifeStageTransitionTimeStepCounter = 0;
-        //ageCounterMature = 0;
-        //this.transform.localPosition = startPos.agentStartPosition;
-        //this.transform.localScale = new Vector3(size.x, size.y, 1f);
-        //InitializeModules(genome, this, startPos);      // Modules need to be created first so that Brain can map its neurons to existing modules  
-        //brain = new Brain(genome.brainGenome, this);
-        //facingDirection = new Vector2(0f, 1f);
-        //throttle = Vector2.zero;
-        //smoothedThrottle = Vector2.zero;
-        //prevPos = transform.localPosition;
+        prevPos = transform.localPosition;        
     }
 
     private void CheckForLifeStageTransition() {
@@ -212,7 +144,7 @@ public class FoodModule : MonoBehaviour {
                     //Debug.Log("EGG HATCHED!");
                     lifeStageTransitionTimeStepCounter = 0;
                     //this.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
-                    this.GetComponent<Rigidbody2D>().velocity *= 0.36f;
+                    //this.GetComponent<Rigidbody2D>().velocity *= 0.36f;
                     //foodArray[i].GetComponent<Rigidbody2D>().AddForce(new Vector2(1f, 1f), ForceMode2D.Force); //
                     // Looks like AddForce has less of an effect on a GO/Rigidbody2D that is being scaled through a script... ??
                     // Feels like rigidbody is accumulating velocity which is then released all at once when the scaling stops??
@@ -253,9 +185,9 @@ public class FoodModule : MonoBehaviour {
                     //Debug.Log("FOOD NO LONGER EXISTS!");
                     lifeStageTransitionTimeStepCounter = 0;
                     isDepleted = true;  // flagged for respawn
-                    HingeJoint2D joint = this.GetComponent<HingeJoint2D>();
-                    joint.enabled = false;
-                    joint.connectedBody = null;
+                    //HingeJoint2D joint = this.GetComponent<HingeJoint2D>();
+                    //joint.enabled = false;
+                    //joint.connectedBody = null;
                 }
                 break;
             case FoodLifeStage.Null:
@@ -331,18 +263,16 @@ public class FoodModule : MonoBehaviour {
         curSize = Vector2.Lerp(new Vector3(0.1f, 0.1f), fullSize, Mathf.Clamp01(avgAmount + 0.4f)); // lerpAmount);  // *** <<< REVISIT!!! ****
         //float mass = Mathf.Lerp(minMass, maxMass, lerpAmount);  // *** <<< REVISIT!!! ****
         //GetComponent<Rigidbody2D>().mass = mass;
+
+        float sidesRatio = fullSize.x / fullSize.y;
+        float sideY = Mathf.Sqrt(amountR / sidesRatio);
+        float sideX = sideY * sidesRatio;
+        curSize = new Vector3(sideX, sideY);
         transform.localScale = new Vector3(curSize.x, curSize.y, 1f);
         
-
         isDepleted = CheckIfDepleted();
 
-        ageCounterMature++;
-        
-        //Vector3 curPos = transform.localPosition;        
-        //prevPos = curPos;
-        
-        
-
+        ageCounterMature++;        
     }
     private void TickDecaying() {
         float decayPercentage = (float)lifeStageTransitionTimeStepCounter / (float)decayDurationTimeSteps;

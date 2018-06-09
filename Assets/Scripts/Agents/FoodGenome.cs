@@ -41,7 +41,7 @@ public class FoodGenome {
 
     public void InitializeAsRandomGenome() {
 
-        fullSize = new Vector2(UnityEngine.Random.Range(2.5f, 2.5f), UnityEngine.Random.Range(5f, 5f));
+        fullSize = new Vector2(UnityEngine.Random.Range(0.1f, 2.5f), UnityEngine.Random.Range(0.1f, 2.5f));
         
         fruitHue = new Vector3(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f));
         leafHue = new Vector3(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f));

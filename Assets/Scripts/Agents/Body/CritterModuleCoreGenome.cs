@@ -30,8 +30,8 @@ public class CritterModuleCoreGenome {
         Debug.Log("GenerateRandomGenome()");
 
         numSegments = UnityEngine.Random.Range(1, 12);
-        coreWidth = UnityEngine.Random.Range(0.5f, 3f);
-        coreLength = coreWidth * UnityEngine.Random.Range(1f, 4f);
+        coreWidth = UnityEngine.Random.Range(0.5f, 2f);
+        coreLength = coreWidth * UnityEngine.Random.Range(1f, 3f);
 
         relativeWidthHead = UnityEngine.Random.Range(0.5f, 1f);
         relativeWidthBody = UnityEngine.Random.Range(0.5f, 1f);

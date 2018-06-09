@@ -18,7 +18,7 @@ public class CritterMovementTestScript : MonoBehaviour {
     public float jointMaxTorque = 250f;
     public float swimAnimationCycleSpeed = 0.01f;
     public float smoothedThrottleLerp = 0.1f;
-    public float restingJointTorque = 10f;
+    public float restingJointTorque = 11f;
     public float bendRatioHead = 0f;
     public float bendRatioTailTip = 1f;
 

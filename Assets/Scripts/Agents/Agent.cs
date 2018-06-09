@@ -16,7 +16,7 @@ public class Agent : MonoBehaviour {
     public float jointMaxTorque = 250f;
     public float swimAnimationCycleSpeed = 0.01f;
     public float smoothedThrottleLerp = 0.25f;
-    public float restingJointTorque = 50f;
+    public float restingJointTorque = 10f;
     public float bendRatioHead = 0f;
     public float bendRatioTailTip = 1f;
 
@@ -30,6 +30,7 @@ public class Agent : MonoBehaviour {
         Young,
         Mature,
         Decaying,
+        SwallowedWhole,
         Null
     }
     private int gestationDurationTimeSteps = 60;
@@ -70,6 +71,8 @@ public class Agent : MonoBehaviour {
     }
 
     private int growthScalingSkipFrames = 12;
+
+    public float growthPercentage = 0f;
    
     public Brain brain;
     public CritterSegment[] critterSegmentsArray;
@@ -368,6 +371,7 @@ public class Agent : MonoBehaviour {
                     curLifeStage = AgentLifeStage.Young;
                     //Debug.Log("EGG HATCHED!");
                     lifeStageTransitionTimeStepCounter = 0;
+                    growthPercentage = 0f;
                 }
                 break;
             case AgentLifeStage.Young:
@@ -377,7 +381,8 @@ public class Agent : MonoBehaviour {
                     //Debug.Log("EGG HATCHED!");
                     lifeStageTransitionTimeStepCounter = 0;
 
-                    ScaleBody(1f);
+                    growthPercentage = 1f; // FULLY GROWN!!!
+                    ScaleBody(growthPercentage);
                 }
 
                 CheckForDeathStarvation();
@@ -398,6 +403,13 @@ public class Agent : MonoBehaviour {
                     lifeStageTransitionTimeStepCounter = 0;
                     isNull = true;  // flagged for respawn
                 }
+                break;
+            case AgentLifeStage.SwallowedWhole:
+                //
+                curLifeStage = AgentLifeStage.Null;
+                //Debug.Log("AGENT NO LONGER EXISTS!");
+                lifeStageTransitionTimeStepCounter = 0;
+                isNull = true;  // flagged for respawn
                 break;
             case AgentLifeStage.Null:
                 //
@@ -531,11 +543,12 @@ public class Agent : MonoBehaviour {
     }
     private void TickYoung() {
 
+        growthPercentage = (float)lifeStageTransitionTimeStepCounter / (float)youngDurationTimeSteps;
+
         // Scaling Test:
         int frameNum = lifeStageTransitionTimeStepCounter % growthScalingSkipFrames;
         if(frameNum == 0) {
-            float growthLerp = (float)lifeStageTransitionTimeStepCounter / (float)youngDurationTimeSteps;
-            ScaleBody(growthLerp);  
+            ScaleBody(growthPercentage);  
         }
 
         TickModules(); // update inputs for Brain        
@@ -571,7 +584,8 @@ public class Agent : MonoBehaviour {
                 segmentsArray[i].GetComponent<HingeJoint2D>().anchor = new Vector2(0f, 0.5f) * segmentFullSizeArray[i].y * scale;
                 segmentsArray[i].GetComponent<HingeJoint2D>().connectedAnchor = new Vector2(0f, -0.5f) * segmentFullSizeArray[i].y * scale;
             }
-            else {
+            else { // Root segment
+                // MOUTH TRIGGER:::
                 segmentsArray[i].GetComponent<CircleCollider2D>().radius = segmentFullSizeArray[i].x * scale * 0.5f;
                 segmentsArray[i].GetComponent<CircleCollider2D>().offset = new Vector2(0f, segmentFullSizeArray[i].y * scale * 0.5f);
             }
@@ -1067,6 +1081,7 @@ public class Agent : MonoBehaviour {
                 collider.direction = CapsuleDirection2D.Vertical;
                 
             }
+            critterSegmentsArray[i].segmentCollider = collider; // save reference
             
             
             // RENDER OBJECTS:::
@@ -1098,6 +1113,7 @@ public class Agent : MonoBehaviour {
                 coreModule.mouthRef = segmentsArray[0].AddComponent<CritterMouthComponent>();
                 coreModule.mouthRef.agentIndex = this.index;
                 coreModule.mouthRef.agentRef = this;
+                coreModule.mouthRef.triggerCollider = mouthTrigger;
             }
             else {
                 // Hinge Joint!

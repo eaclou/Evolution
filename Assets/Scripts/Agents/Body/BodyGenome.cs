@@ -21,7 +21,7 @@ public class BodyGenome {
     //public List<ValueInputGenome> valueInputList;
 
     public BodyGenome() {
-        Debug.Log("BodyGenome() EMPTY CONSTRUCTOR");
+        //Debug.Log("BodyGenome() EMPTY CONSTRUCTOR");
     }
 
     public void FirstTimeInitializeCritterModuleGenomes() {

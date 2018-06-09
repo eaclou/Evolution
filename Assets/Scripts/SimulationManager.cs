@@ -81,7 +81,7 @@ public class SimulationManager : MonoBehaviour {
     private AgentGenome[] savedGenomePoolArray2;
     private AgentGenome[] savedGenomePoolArray3;
     public FoodGenome[] foodGenomePoolArray;
-    public FoodModule[] foodArray;
+    public FoodChunk[] foodArray;
     private int numFood = 48;
     public int _NumFood {
         get
@@ -93,7 +93,7 @@ public class SimulationManager : MonoBehaviour {
             numFood = value;
         }
     }    
-    public FoodModule[] foodDeadAnimalArray;
+    public FoodChunk[] foodDeadAnimalArray;
     public PredatorModule[] predatorArray;
     private int numPredators = 64;
     public int _NumPredators {
@@ -368,22 +368,22 @@ public class SimulationManager : MonoBehaviour {
     }
     private void LoadingInstantiateFood() {
         // FOOODDDD!!!!
-        foodArray = new FoodModule[numFood]; // create array
+        foodArray = new FoodChunk[numFood]; // create array
         int numDeadAnimalFood = 32;
-        foodDeadAnimalArray = new FoodModule[numDeadAnimalFood];
+        foodDeadAnimalArray = new FoodChunk[numDeadAnimalFood];
 
         //Debug.Log("SpawnFood!");
         for (int i = 0; i < foodArray.Length; i++) {
             GameObject foodGO = Instantiate(Resources.Load("Prefabs/FoodPrefab")) as GameObject;
             foodGO.name = "Food" + i.ToString();
-            FoodModule newFood = foodGO.GetComponent<FoodModule>();
+            FoodChunk newFood = foodGO.GetComponent<FoodChunk>();
             foodArray[i] = newFood; // Add to stored list of current Food objects                     
         }
 
         for(int j = 0; j < numDeadAnimalFood; j++) {
             GameObject deadAnimalGO = Instantiate(Resources.Load("Prefabs/FoodPrefab")) as GameObject;
             deadAnimalGO.name = "DeadAnimal" + j.ToString();
-            FoodModule newDeadAnimal = deadAnimalGO.GetComponent<FoodModule>();
+            FoodChunk newDeadAnimal = deadAnimalGO.GetComponent<FoodChunk>();
             newDeadAnimal.gameObject.SetActive(false);
             foodDeadAnimalArray[j] = newDeadAnimal; // Add to stored list of current Food objects        
         }
@@ -558,7 +558,7 @@ public class SimulationManager : MonoBehaviour {
         }
         for (int i = 0; i < foodArray.Length; i++) { // *** cache rigidBody reference
             float hackyScalingForceMultiplier = 1f;
-            if (foodArray[i].curLifeStage == FoodModule.FoodLifeStage.Growing) {
+            if (foodArray[i].curLifeStage == FoodChunk.FoodLifeStage.Growing) {
                 hackyScalingForceMultiplier = 2f;
             }
             foodArray[i].GetComponent<Rigidbody2D>().AddForce(simStateData.fluidVelocitiesAtFoodPositionsArray[i] * 20f * hackyScalingForceMultiplier * foodArray[i].GetComponent<Rigidbody2D>().mass, ForceMode2D.Impulse); //
@@ -675,7 +675,7 @@ public class SimulationManager : MonoBehaviour {
             for (int i = 0; i < mapGridCellArray[xCoord][yCoord].foodIndicesList.Count; i++) {
                 // FOOD:
                 if(foodArray[mapGridCellArray[xCoord][yCoord].foodIndicesList[i]].enabled) { // if enabled:
-                    if(foodArray[mapGridCellArray[xCoord][yCoord].foodIndicesList[i]].curLifeStage == FoodModule.FoodLifeStage.Mature) {
+                    if(foodArray[mapGridCellArray[xCoord][yCoord].foodIndicesList[i]].curLifeStage == FoodChunk.FoodLifeStage.Mature) {
                         //Debug.Log("Found valid Food!");
                         Vector2 foodPos = new Vector2(foodArray[mapGridCellArray[xCoord][yCoord].foodIndicesList[i]].transform.localPosition.x, foodArray[mapGridCellArray[xCoord][yCoord].foodIndicesList[i]].transform.localPosition.y);
                         float distFood = (foodPos - agentPos).magnitude - (foodArray[mapGridCellArray[xCoord][yCoord].foodIndicesList[i]].curSize.magnitude + 1f) * 0.5f;  // subtract food & agent radii
@@ -692,7 +692,7 @@ public class SimulationManager : MonoBehaviour {
             for (int i = 0; i < mapGridCellArray[xCoord][yCoord].deadAnimalIndicesList.Count; i++) {
                 // DEAD ANIMALS!!!:
                 if(foodDeadAnimalArray[mapGridCellArray[xCoord][yCoord].deadAnimalIndicesList[i]].enabled) { // if enabled:
-                    if(foodDeadAnimalArray[mapGridCellArray[xCoord][yCoord].deadAnimalIndicesList[i]].curLifeStage == FoodModule.FoodLifeStage.Mature) {
+                    if(foodDeadAnimalArray[mapGridCellArray[xCoord][yCoord].deadAnimalIndicesList[i]].curLifeStage == FoodChunk.FoodLifeStage.Mature) {
                         //Debug.Log("Found valid Food!");
                         Vector2 foodPos = new Vector2(foodDeadAnimalArray[mapGridCellArray[xCoord][yCoord].deadAnimalIndicesList[i]].transform.localPosition.x, foodDeadAnimalArray[mapGridCellArray[xCoord][yCoord].deadAnimalIndicesList[i]].transform.localPosition.y);
                         float distFood = (foodPos - agentPos).magnitude - (foodDeadAnimalArray[mapGridCellArray[xCoord][yCoord].deadAnimalIndicesList[i]].curSize.magnitude + 1f) * 0.5f;  // subtract food & agent radii
@@ -1012,7 +1012,7 @@ public class SimulationManager : MonoBehaviour {
         //int parentIndex = -1;
         for(int i = 0; i < numParentSearches; i++) {
             int randomIndex = UnityEngine.Random.Range(0, numFood);
-            if(foodArray[randomIndex].curLifeStage == FoodModule.FoodLifeStage.Mature && foodArray[randomIndex].hasChildren == false) {
+            if(foodArray[randomIndex].curLifeStage == FoodChunk.FoodLifeStage.Mature) {
                 
                 //return startPosGenome;
                 parentIndex = randomIndex;

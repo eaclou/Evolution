@@ -8,6 +8,8 @@ public class CritterSegment : MonoBehaviour {
     public Agent agentRef;
     public int segmentIndex;
 
+    public CapsuleCollider2D segmentCollider;
+
 	// Use this for initialization
 	void Start () {
 		

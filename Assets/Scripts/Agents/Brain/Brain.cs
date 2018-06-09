@@ -33,7 +33,7 @@ public class Brain {
             IDs.Add(genome.hiddenNeuronList[i].nid, i);
             neuronList.Add(neuron);
         }
-        Debug.Log("RebuildBrain " + genome.bodyNeuronList.Count + ", " + neuronList.Count.ToString());
+        //Debug.Log("RebuildBrain " + genome.bodyNeuronList.Count + ", " + neuronList.Count.ToString());
 
         // Create Axons:
         axonList = new List<Axon>();
