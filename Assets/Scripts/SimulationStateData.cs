@@ -189,7 +189,7 @@ public class SimulationStateData {
             foodSimDataArray[i].velocity = new Vector2(simManager.foodArray[i].GetComponent<Rigidbody2D>().velocity.x, simManager.agentsArray[i].rigidbodiesArray[0].velocity.y);
             foodSimDataArray[i].heading = simManager.foodArray[i].facingDirection;
             foodSimDataArray[i].fullSize = simManager.foodArray[i].fullSize;
-            foodSimDataArray[i].foodAmount = new Vector3(simManager.foodArray[i].amountR, simManager.foodArray[i].amountG, simManager.foodArray[i].amountB);
+            foodSimDataArray[i].foodAmount = new Vector3(simManager.foodArray[i].amountR, simManager.foodArray[i].amountR, simManager.foodArray[i].amountR);
             foodSimDataArray[i].growth = simManager.foodArray[i].growthStatus;
             foodSimDataArray[i].decay = simManager.foodArray[i].decayStatus;
             foodSimDataArray[i].health = simManager.foodArray[i].healthStructural;

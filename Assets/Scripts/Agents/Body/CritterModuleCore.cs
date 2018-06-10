@@ -16,13 +16,14 @@ public class CritterModuleCore {
     public float coreWidth;
     public float coreLength;
     
-    public float energy = 1f;
+    public float energyRaw = 1f;
     //public float stamina = 1f;
     public float healthHead = 1f;
     public float healthBody = 1f;
     public float healthExternal = 1f;
 
-
+    public float stomachContents = 0f;  // absolute values
+    public float stomachCapacity = 0.5f;
         
     // Nearest Edible Object:
     public float[] foodPosX;
@@ -163,7 +164,7 @@ public class CritterModuleCore {
             foodAmountB[0] = 1f;
         }
 
-        energy = 0.5f;
+        energyRaw = 0.5f;
         healthHead = 1f;
         healthBody = 1f;
         healthExternal = 1f;
@@ -453,9 +454,10 @@ public class CritterModuleCore {
             //mouthRef.triggerCollider.radius = mouthRef.mouthDimensionsBite.x; // update to capsule later!! ****
             //mouthRef.triggerCollider.offset = new Vector2(0f, mouthRef.mouthOffsetBite);
 
-            if(mouthRef.bitingFrameCounter >= mouthRef.biteCooldown) {
+            if(mouthRef.bitingFrameCounter >= mouthRef.biteChargeUpDuration + mouthRef.biteCooldownDuration) {
                 mouthRef.bitingFrameCounter = 0;
                 mouthRef.isBiting = false;
+                //mouthRef.triggerCollider.enabled = false;
             }
         }
         //mouthRef.foodInRange = false;
@@ -474,6 +476,7 @@ public class CritterModuleCore {
         //Debug.Log(LayerMask.GetMask("EnvironmentCollision"));
         //Debug.Log(mask.ToString());
         
+        /*
         // TOP
         float raycastMaxLength = 10f;
         RaycastHit2D hitTop = Physics2D.Raycast(ownPos, Vector2.up, raycastMaxLength, rayLayer);  // UP
@@ -532,7 +535,7 @@ public class CritterModuleCore {
             distance = (hitTopLeft.point - ownPos).magnitude;
         }
         distTopLeft[0] = (raycastMaxLength - distance) / raycastMaxLength;
-        
+        */
         //
         /*
         inComm0[0] = Mathf.Round(friendTestModule.outComm0[0] * 3f / 2f);

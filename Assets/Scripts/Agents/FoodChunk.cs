@@ -54,8 +54,8 @@ public class FoodChunk : MonoBehaviour {
     }
 
     public float amountR;
-    public float amountG;
-    public float amountB;
+    //public float amountG;
+    //public float amountB;
 
     private int colliderCount = 0;
 
@@ -112,8 +112,8 @@ public class FoodChunk : MonoBehaviour {
         index = genome.index;
         this.fullSize = genome.fullSize;
         amountR = this.fullSize.x * this.fullSize.y;
-        amountG = 0f;
-        amountB = 0f; 
+        //amountG = 0f;
+        //amountB = 0f; 
 
         lifeStageTransitionTimeStepCounter = 0;
         ageCounterMature = 0;
@@ -150,7 +150,7 @@ public class FoodChunk : MonoBehaviour {
                     // Feels like rigidbody is accumulating velocity which is then released all at once when the scaling stops??
                     // Hacking through it by increasign force on growing food:
                 }
-                float maxFoodAvg = Mathf.Max(Mathf.Max(amountR, amountG), amountB);
+                float maxFoodAvg = amountR; // Mathf.Max(Mathf.Max(amountR, amountG), amountB);
                 if (maxFoodAvg <= 0f) {
                     curLifeStage = FoodLifeStage.Decaying;
                     //isNull = true;
@@ -163,7 +163,7 @@ public class FoodChunk : MonoBehaviour {
                 //
                 // Check for Death:
                 //float minFood = Mathf.Min(Mathf.Min(testModule.foodAmountR[0], testModule.foodAmountG[0]), testModule.foodAmountB[0]);
-                float maxFood = Mathf.Max(Mathf.Max(amountR, amountG), amountB);
+                float maxFood = amountR; // Mathf.Max(Mathf.Max(amountR, amountG), amountB);
                 if (maxFood <= 0f) {
                     curLifeStage = FoodLifeStage.Decaying;
                     //isNull = true;
@@ -257,10 +257,10 @@ public class FoodChunk : MonoBehaviour {
     private void TickMature() {
         growthStatus = 1f;
 
-        float avgAmount = (amountR + amountG + amountB) / 3.0f;
-        float lerpAmount = Mathf.Sqrt(avgAmount);
+        //float avgAmount = amountR; // (amountR + amountG + amountB) / 3.0f;
+        //float lerpAmount = Mathf.Sqrt(avgAmount);
 
-        curSize = Vector2.Lerp(new Vector3(0.1f, 0.1f), fullSize, Mathf.Clamp01(avgAmount + 0.4f)); // lerpAmount);  // *** <<< REVISIT!!! ****
+        //curSize = Vector2.Lerp(new Vector3(0.1f, 0.1f), fullSize, Mathf.Clamp01(avgAmount + 0.4f)); // lerpAmount);  // *** <<< REVISIT!!! ****
         //float mass = Mathf.Lerp(minMass, maxMass, lerpAmount);  // *** <<< REVISIT!!! ****
         //GetComponent<Rigidbody2D>().mass = mass;
 
@@ -277,8 +277,8 @@ public class FoodChunk : MonoBehaviour {
     private void TickDecaying() {
         float decayPercentage = (float)lifeStageTransitionTimeStepCounter / (float)decayDurationTimeSteps;
         decayStatus = decayPercentage;
-        curSize = Vector2.Lerp(fullSize * 0.4f, new Vector3(0.0f, 0.0f), Mathf.Clamp01(decayStatus * 6f));
-        transform.localScale = new Vector3(curSize.x, curSize.y, 1f);
+        //curSize = Vector2.Lerp(fullSize * 0.4f, new Vector3(0.0f, 0.0f), Mathf.Clamp01(decayStatus * 6f));
+        //transform.localScale = new Vector3(curSize.x, curSize.y, 1f);
         lifeStageTransitionTimeStepCounter++;
     }
     
@@ -365,10 +365,10 @@ public class FoodChunk : MonoBehaviour {
         bool depleted = true;
         if (amountR > 0f)
             depleted = false;
-        if (amountG > 0f)
-            depleted = false;
-        if (amountB > 0f)
-            depleted = false;
+        //if (amountG > 0f)
+        //    depleted = false;
+        //if (amountB > 0f)
+        //    depleted = false;
         // If any of the the 3 types
         return depleted;
     }

@@ -90,6 +90,7 @@ public class Agent : MonoBehaviour {
     //private Rigidbody2D rigidBody2D; // ** segments???
         
     public Vector2 fullSize;
+    public float totalBodyAreaEmpty = 1f;
 
     //public float fullBodyLength;
     //public float maxBodyWidth;
@@ -344,7 +345,7 @@ public class Agent : MonoBehaviour {
 
     private void CheckForDeathStarvation() {
         // STARVATION::
-        if (coreModule.energy <= 0f) {
+        if (coreModule.energyRaw <= 0f) {
             curLifeStage = AgentLifeStage.Decaying;
         }
     }
@@ -434,7 +435,12 @@ public class Agent : MonoBehaviour {
     }
 
     public void EatFood(float amount) {
-        if(humanControlled) {
+        coreModule.stomachContents += amount;
+        if(coreModule.stomachContents > coreModule.stomachCapacity) {
+            coreModule.stomachContents = coreModule.stomachCapacity;
+        }
+
+        if (humanControlled) {
             coreModule.foodAmountR[0] += amount * 0.720f;  // 0.33 is too little
             coreModule.foodAmountG[0] += amount * 0.720f;
             coreModule.foodAmountB[0] += amount * 0.720f;
@@ -509,7 +515,7 @@ public class Agent : MonoBehaviour {
         if(texture != null) {  // **** Will have to move this into general Tick() method and account for death types & lifeCycle transitions!
             if(humanControlled) {
                 //Debug.Log(texture.ToString());
-                float displayFoodAmount = coreModule.energy; // coreModule.foodAmountR[0];
+                float displayFoodAmount = coreModule.energyRaw; // coreModule.foodAmountR[0];
                 //displayFoodAmount = coreModule.foodAmountR[0];
                 if(curLifeStage == AgentLifeStage.Egg) {
                     displayFoodAmount = (float)lifeStageTransitionTimeStepCounter / (float)gestationDurationTimeSteps;
@@ -560,6 +566,12 @@ public class Agent : MonoBehaviour {
     private void TickMature() {
         // Check for death & stuff? Or is this handled inside OnCollisionEnter() events?
 
+        // Scaling Test:
+        int frameNum = ageCounterMature % growthScalingSkipFrames;
+        if(frameNum == 0) {
+            ScaleBody(growthPercentage);  
+        }
+
         TickModules(); // update inputs for Brain        
         TickBrain(); // Tick Brain
         TickActions(); // Execute Actions  -- Also Updates Resources!!! ***
@@ -575,9 +587,22 @@ public class Agent : MonoBehaviour {
         //segmentFullSizeArray
         float scale = Mathf.Lerp(0.1f, 1f, growthPercentage); // Minimum size = 0.1 ???
 
+        totalBodyAreaEmpty = coreModule.coreWidth * coreModule.coreLength * scale;
+
+        coreModule.stomachCapacity = totalBodyAreaEmpty * 1f;
+
         for(int i = 0; i < numSegments; i++) {
+
+            // bulgeMultiplier:
+            float segmentMidPoint = 1f / (float)numSegments / 2f;
+            segmentMidPoint = segmentMidPoint + (float)i / (float)numSegments;
+            float bulgeMultiplier = 1f - 2f * Mathf.Abs(0.5f - segmentMidPoint);
+            // Modify Size based on Food:
+            //coreModule.foodAmountR[0] * 0.5f;
             
-            segmentsArray[i].GetComponent<CapsuleCollider2D>().size = segmentFullSizeArray[i] * scale;
+            Vector2 segmentDimensions = segmentFullSizeArray[i] * scale;
+            segmentDimensions.x = segmentDimensions.x * (1f + coreModule.foodAmountR[0] * 0.5f * bulgeMultiplier);
+            segmentsArray[i].GetComponent<CapsuleCollider2D>().size = segmentDimensions;
 
             if(i != 0) {
                 segmentsArray[i].GetComponent<HingeJoint2D>().autoConfigureConnectedAnchor = false;
@@ -590,7 +615,7 @@ public class Agent : MonoBehaviour {
                 segmentsArray[i].GetComponent<CircleCollider2D>().offset = new Vector2(0f, segmentFullSizeArray[i].y * scale * 0.5f);
             }
 
-            tempRenderObjectsArray[i].transform.localScale = new Vector3(segmentFullSizeArray[i].x * scale, segmentFullSizeArray[i].y * scale, 1f);
+            tempRenderObjectsArray[i].transform.localScale = new Vector3(segmentDimensions.x, segmentDimensions.y, segmentDimensions.y);
 
 
             // MASS ???
@@ -640,19 +665,37 @@ public class Agent : MonoBehaviour {
 
         // ENERGY!!!!
         // Digestion:
-        float amountDigested = 0.02f;
-        float digestionAmount = Mathf.Min(coreModule.foodAmountR[0], amountDigested);
+        float amountDigested = 0.01f * totalBodyAreaEmpty;
+        float digestionAmount = Mathf.Min(coreModule.stomachContents, amountDigested);
         float foodToEnergyConversion = 1.0f;
         float createdEnergy = digestionAmount * foodToEnergyConversion;
-        coreModule.foodAmountR[0] -= digestionAmount;
-        if(coreModule.foodAmountR[0] < 0f) {
-            coreModule.foodAmountR[0] = 0f;
+        coreModule.stomachContents -= digestionAmount;
+        if(coreModule.stomachContents < 0f) {
+            coreModule.stomachContents = 0f;
         }
-        coreModule.energy += createdEnergy;
-        if(coreModule.energy > 5f) {
-            coreModule.energy = 5f;
+        //coreModule.foodAmountR[0] -= digestionAmount;
+        //if(coreModule.foodAmountR[0] < 0f) {
+        //    coreModule.foodAmountR[0] = 0f;
+        //}
+        coreModule.energyRaw += createdEnergy;
+        if(coreModule.energyRaw > 5f) {
+            coreModule.energyRaw = 5f;
         }
 
+        // Heal:
+        float healRate = 0.0001f;
+        float energyToHealthConversionRate = 6f;
+        if(coreModule.healthBody < 1f) {
+            coreModule.healthBody += healRate;
+            coreModule.healthHead += healRate;
+            coreModule.healthExternal += healRate;
+
+            coreModule.energyRaw -= healRate / energyToHealthConversionRate;
+        }
+
+        //ENERGY:
+        float energyCost = 0.001f * Mathf.Sqrt(totalBodyAreaEmpty); // * Mathf.Lerp(totalBodyAreaEmpty, 1f, 0.0f);
+        
         float throttleMag = smoothedThrottle.magnitude;
         if(throttleMag > 0.01f) {
             // ***** UPDATE THIS!!! Right now you can get "free" energy/stamina if current amount is less than the cost
@@ -663,10 +706,10 @@ public class Agent : MonoBehaviour {
                 coreModule.stamina[0] = 0f;
             }
 
-            float energyCost = 0.002f; // + 0.001f * throttleMag;  // idle + movement calorie burn
-            coreModule.energy -= energyCost;
-            if(coreModule.energy < 0f) {
-                coreModule.energy = 0f;
+            //float energyCost = 0.002f; // + 0.001f * throttleMag;  // idle + movement calorie burn
+            coreModule.energyRaw -= energyCost;
+            if(coreModule.energyRaw < 0f) {
+                coreModule.energyRaw = 0f;
             }
         }
         else {
@@ -675,10 +718,10 @@ public class Agent : MonoBehaviour {
                 coreModule.stamina[0] = 1f;
             }
 
-            float energyCost = 0.002f; // idle calorie burn
-            coreModule.energy -= energyCost;
-            if(coreModule.energy < 0f) {
-                coreModule.energy = 0f;
+            //float energyCost = 0.002f; // idle calorie burn
+            coreModule.energyRaw -= energyCost;
+            if(coreModule.energyRaw < 0f) {
+                coreModule.energyRaw = 0f;
             }
         }
 

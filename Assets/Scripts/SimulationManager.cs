@@ -81,6 +81,7 @@ public class SimulationManager : MonoBehaviour {
     private AgentGenome[] savedGenomePoolArray2;
     private AgentGenome[] savedGenomePoolArray3;
     public FoodGenome[] foodGenomePoolArray;
+    private FoodGenome foodGenomeAnimalCorpse;
     public FoodChunk[] foodArray;
     private int numFood = 48;
     public int _NumFood {
@@ -322,6 +323,9 @@ public class SimulationManager : MonoBehaviour {
 
             foodGenomePoolArray[i] = foodGenome;
         }
+
+        foodGenomeAnimalCorpse = new FoodGenome(-1);
+        foodGenomeAnimalCorpse.InitializeAsRandomGenome();
     }
     private void LoadingInitializeFluidSim() {
         environmentFluidManager.InitializeFluidSystem();
@@ -661,7 +665,7 @@ public class SimulationManager : MonoBehaviour {
             // **** Only checking its own grid cell!!! Will need to expand to adjacent cells as well!
             for (int i = 0; i < mapGridCellArray[xCoord][yCoord].friendIndicesList.Count; i++) {
                 // FRIEND:
-                Vector2 neighborPos = new Vector2(agentsArray[mapGridCellArray[xCoord][yCoord].friendIndicesList[i]].transform.localPosition.x, agentsArray[mapGridCellArray[xCoord][yCoord].friendIndicesList[i]].transform.localPosition.y);
+                Vector2 neighborPos = new Vector2(agentsArray[mapGridCellArray[xCoord][yCoord].friendIndicesList[i]].rigidbodiesArray[0].transform.localPosition.x, agentsArray[mapGridCellArray[xCoord][yCoord].friendIndicesList[i]].rigidbodiesArray[0].transform.localPosition.y);
                 float squaredDistFriend = (neighborPos - agentPos).sqrMagnitude;
                                
                 if (squaredDistFriend <= nearestFriendSquaredDistance) { // if now the closest so far, update index and dist:
@@ -815,7 +819,13 @@ public class SimulationManager : MonoBehaviour {
                                                                            agentsArray[agentIndex].rigidbodiesArray[0].transform.position.y, 
                                                                            0f), 
                                                                            Quaternion.identity);
-        foodDeadAnimalArray[deadAnimalIndex].InitializeFoodFromGenome(foodGenomePoolArray[0], startPos, null); // Spawn that genome in dead Agent's body and revive it!
+
+        // calculate amount of food to leave:        
+        float droppedFoodAmount = agentsArray[agentIndex].totalBodyAreaEmpty + agentsArray[agentIndex].coreModule.foodAmountR[0];
+        float foodSideLength = Mathf.Sqrt(droppedFoodAmount);
+        foodGenomeAnimalCorpse.fullSize = new Vector2(foodSideLength, foodSideLength);
+
+        foodDeadAnimalArray[deadAnimalIndex].InitializeFoodFromGenome(foodGenomeAnimalCorpse, startPos, null); // Spawn that genome in dead Agent's body and revive it!
         
         foodDeadAnimalArray[deadAnimalIndex].gameObject.SetActive(true);
 

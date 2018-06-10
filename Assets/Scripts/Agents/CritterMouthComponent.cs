@@ -14,8 +14,8 @@ public class CritterMouthComponent : MonoBehaviour {
     
     public float mouthRadius;  // relative to head size?
     public float mouthOffset;  // also relative?
-    public int biteChargeUpDuration = 10;
-    public int biteCooldownDuration = 20;
+    public int biteChargeUpDuration = 4;
+    public int biteCooldownDuration = 26;
     public float biteStrength;
     public float biteSharpness;
         
@@ -138,13 +138,14 @@ public class CritterMouthComponent : MonoBehaviour {
         }
         else {
             isBiting = true;
+            triggerCollider.enabled = true;
             bitingFrameCounter = 0;
         }
     }
 
     private void ActiveBiteCheck(Collider2D collider) {
         // own Bite Capacity:
-        float ownBiteArea = triggerCollider.radius * triggerCollider.radius;
+        float ownBiteArea = triggerCollider.radius * triggerCollider.radius * 4f;
         float targetArea = 1f;
 
         CritterSegment collidingSegment = collider.gameObject.GetComponent<CritterSegment>();
@@ -226,7 +227,7 @@ public class CritterMouthComponent : MonoBehaviour {
         Debug.Log("SwallowAnimalWhole");
         preyAgent.curLifeStage = Agent.AgentLifeStage.SwallowedWhole;
         // Credit food:
-        float flow = agentRef.growthPercentage * agentRef.coreModule.coreWidth * agentRef.coreModule.coreLength;
+        float flow = agentRef.growthPercentage * agentRef.coreModule.coreWidth * agentRef.coreModule.coreLength + agentRef.coreModule.stomachContents;
         agentRef.EatFood(flow * 1f); // assumes all foodAmounts are equal !! *****    
     }
     private void SwallowFoodWhole(FoodChunk foodModule) {
@@ -234,12 +235,12 @@ public class CritterMouthComponent : MonoBehaviour {
         float flow = foodModule.curSize.x * foodModule.curSize.y;        
         agentRef.EatFood(flow * 1f);    
         foodModule.amountR = 0f;
-        foodModule.amountG = 0f;
-        foodModule.amountB = 0f;
+        //foodModule.amountG = 0f;
+        //foodModule.amountB = 0f;
     }
     private void BiteDamageAnimal(Agent preyAgent, float ownBiteArea, float targetArea) {
         //Debug.Log("BiteDamageAnimal");
-        float baseDamage = 0.5f;
+        float baseDamage = 1f;
 
         //float mouthSize = triggerCollider.radius * triggerCollider.radius;
         //float targetSize = segment.agentRef.growthPercentage * segment.agentRef.coreModule.coreLength * segment.agentRef.coreModule.coreWidth;
@@ -270,7 +271,7 @@ public class CritterMouthComponent : MonoBehaviour {
         if (foodModule.amountR < 0f) {
             foodModule.amountR = 0f;
         }
-        float flowG = Mathf.Min(foodModule.amountG, flow);
+        /*float flowG = Mathf.Min(foodModule.amountG, flow);
         foodModule.amountG -= flowG;
         if (foodModule.amountG < 0f) {
             foodModule.amountG = 0f;
@@ -279,7 +280,7 @@ public class CritterMouthComponent : MonoBehaviour {
         foodModule.amountB -= flowB;
         if (foodModule.amountB < 0f) {
             foodModule.amountB = 0f;
-        }
+        }*/
     }
 
     private void TriggerCheck(Collider2D collider) {
