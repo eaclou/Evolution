@@ -29,9 +29,9 @@ public class CritterModuleCoreGenome {
         // Do stuff:
         Debug.Log("GenerateRandomGenome()");
 
-        numSegments = UnityEngine.Random.Range(1, 12);
+        numSegments = 1;
         coreWidth = UnityEngine.Random.Range(0.5f, 2.5f);
-        coreLength = coreWidth * UnityEngine.Random.Range(2f, 6f);
+        coreLength = coreWidth * UnityEngine.Random.Range(1f, 6f);
 
         relativeWidthHead = UnityEngine.Random.Range(0.5f, 1f);
         relativeWidthBody = UnityEngine.Random.Range(0.5f, 1f);
@@ -166,10 +166,10 @@ public class CritterModuleCoreGenome {
 
 
         coreWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.coreWidth, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.5f, 2.5f);
-        coreLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.coreLength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, coreWidth * 2f, coreWidth * 6f);
+        coreLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.coreLength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, coreWidth * 1f, coreWidth * 6f);
 
         //numSegments = parentGenome.numSegments;
-        numSegments = UtilityMutationFunctions.GetMutatedIntAdditive(parentGenome.numSegments, settings.defaultBodyMutationChance, 3, 1, 12);
+        numSegments = 1; // UtilityMutationFunctions.GetMutatedIntAdditive(parentGenome.numSegments, settings.defaultBodyMutationChance, 3, 1, 12);
         
         relativeWidthHead = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.relativeWidthHead, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.1f, 1f);
         relativeWidthBody = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.relativeWidthBody, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.1f, 1f);

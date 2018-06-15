@@ -18,6 +18,17 @@ public class SimulationStateData {
         public float eatingStatus;
         public float foodAmount;
     }
+    public struct DebugBodyResourcesData {
+        public float developmentPercentage;
+        public float health;
+        public float energy;
+        public float stamina;
+        public float stomachContents;
+        public Vector2 mouthDimensions;
+        public float mouthOffset;
+        public float isBiting;
+        public float isDamageFrame;        
+    }
     public struct FoodSimData {  
         public Vector2 worldPos;
         public Vector2 velocity;
@@ -65,11 +76,13 @@ public class SimulationStateData {
 
     // Store information from CPU simulation, to be passed to GPU:
     public AgentSimData[] agentSimDataArray;
+    public DebugBodyResourcesData[] debugBodyResourcesArray;
     public FoodSimData[] foodSimDataArray;
     public PredatorSimData[] predatorSimDataArray;
 
     // Store computeBuffers here or in RenderKing?? These ones seem appropo for StateData but buffers of floatyBits for ex. might be better in RK....
     public ComputeBuffer agentSimDataCBuffer;
+    public ComputeBuffer debugBodyResourcesCBuffer;
     public ComputeBuffer foodSimDataCBuffer;
     public ComputeBuffer predatorSimDataCBuffer;
 
@@ -97,6 +110,12 @@ public class SimulationStateData {
             agentSimDataArray[i] = new AgentSimData();
         }
         agentSimDataCBuffer = new ComputeBuffer(agentSimDataArray.Length, sizeof(float) * 18);
+
+        debugBodyResourcesArray = new DebugBodyResourcesData[simManager._NumAgents];
+        for(int i = 0; i < debugBodyResourcesArray.Length; i++) {
+            debugBodyResourcesArray[i] = new DebugBodyResourcesData();
+        }
+        debugBodyResourcesCBuffer = new ComputeBuffer(debugBodyResourcesArray.Length, sizeof(float) * 10);
 
         foodSimDataArray = new FoodSimData[simManager._NumFood];
         for (int i = 0; i < foodSimDataArray.Length; i++) {
@@ -129,7 +148,7 @@ public class SimulationStateData {
     public void PopulateSimDataArrays(SimulationManager simManager) {
         
         for(int i = 0; i < agentSimDataArray.Length; i++) {  
-            Vector3 agentPos = simManager.agentsArray[i].rigidbodiesArray[0].position;
+            Vector3 agentPos = simManager.agentsArray[i].bodyRigidbody.position;
             agentSimDataArray[i].worldPos = new Vector2(agentPos.x, agentPos.y);  // in world(scene) coordinates
             //agentSimDataArray[i].velocity = simManager.agentsArray[i].smoothedThrottle;
             if(simManager.agentsArray[i].smoothedThrottle.sqrMagnitude == 0f) {
@@ -182,11 +201,31 @@ public class SimulationStateData {
         }
         agentSimDataCBuffer.SetData(agentSimDataArray); // send data to GPU for Rendering
 
+        for(int i = 0; i < debugBodyResourcesArray.Length; i++) {  
+            
+            debugBodyResourcesArray[i].developmentPercentage = simManager.agentsArray[i].growthPercentage;
+            debugBodyResourcesArray[i].energy = simManager.agentsArray[i].coreModule.energyRaw; // *** max energy storage?? ****
+            debugBodyResourcesArray[i].health = simManager.agentsArray[i].coreModule.healthBody;
+            float biting = 0f;
+            if (simManager.agentsArray[i].mouthRef.isBiting)
+                biting = 1f;
+            float damageFrame = 0f;
+            if (simManager.agentsArray[i].mouthRef.bitingFrameCounter == simManager.agentsArray[i].mouthRef.biteChargeUpDuration)
+                damageFrame = 1f;
+            debugBodyResourcesArray[i].isBiting = biting;
+            debugBodyResourcesArray[i].isDamageFrame = damageFrame;
+            debugBodyResourcesArray[i].mouthDimensions = new Vector2(1f, 1f);
+            debugBodyResourcesArray[i].mouthOffset = 0f;
+            debugBodyResourcesArray[i].stamina = simManager.agentsArray[i].coreModule.stamina[0];
+            debugBodyResourcesArray[i].stomachContents = simManager.agentsArray[i].coreModule.stomachContents / simManager.agentsArray[i].coreModule.stomachCapacity;
+        }
+        debugBodyResourcesCBuffer.SetData(debugBodyResourcesArray); // send data to GPU for Rendering
+
         for (int i = 0; i < foodSimDataArray.Length; i++) {
             Vector3 foodPos = simManager.foodArray[i].transform.position;
             foodSimDataArray[i].worldPos = new Vector2(foodPos.x, foodPos.y);
             // *** Revisit to avoid using GetComponent, should use cached reference instead for speed:
-            foodSimDataArray[i].velocity = new Vector2(simManager.foodArray[i].GetComponent<Rigidbody2D>().velocity.x, simManager.agentsArray[i].rigidbodiesArray[0].velocity.y);
+            foodSimDataArray[i].velocity = new Vector2(simManager.foodArray[i].GetComponent<Rigidbody2D>().velocity.x, simManager.agentsArray[i].bodyRigidbody.velocity.y);
             foodSimDataArray[i].heading = simManager.foodArray[i].facingDirection;
             foodSimDataArray[i].fullSize = simManager.foodArray[i].fullSize;
             foodSimDataArray[i].foodAmount = new Vector3(simManager.foodArray[i].amountR, simManager.foodArray[i].amountR, simManager.foodArray[i].amountR);

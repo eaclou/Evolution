@@ -7,8 +7,8 @@ public class CritterModuleMovement {
     public int parentID;
     public int inno;
 
-    public float horsepower = 100f;
-    public float turnRate = 100f;
+    public float horsepower;
+    public float turnRate;
     
     public float[] ownVelX;
     public float[] ownVelY;

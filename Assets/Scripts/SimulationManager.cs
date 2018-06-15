@@ -253,7 +253,7 @@ public class SimulationManager : MonoBehaviour {
         // ***** ^^^^^ Might need to call this every frame???
 
         // Hook up Camera to data -- fill out CameraManager class
-        cameraManager.targetTransform = agentsArray[0].segmentsArray[0].transform;
+        cameraManager.targetTransform = agentsArray[0].bodyGO.transform;
         // ***** Hook up UI to proper data or find a way to handle that ****
         // possibly just top-down let cameraManager read simulation data
         LoadingHookUpUIManager();
@@ -556,7 +556,7 @@ public class SimulationManager : MonoBehaviour {
     private void ApplyFluidForcesToDynamicObjects() {
         // ********** REVISIT CONVERSION btw fluid/scene coords and Force Amounts !!!! *************
         for (int i = 0; i < agentsArray.Length; i++) {
-            agentsArray[i].rigidbodiesArray[0].AddForce(simStateData.fluidVelocitiesAtAgentPositionsArray[i] * 40f, ForceMode2D.Impulse);
+            agentsArray[i].bodyRigidbody.AddForce(simStateData.fluidVelocitiesAtAgentPositionsArray[i] * 40f, ForceMode2D.Impulse);
 
             agentsArray[i].avgFluidVel = Mathf.Lerp(agentsArray[i].avgFluidVel, simStateData.fluidVelocitiesAtAgentPositionsArray[i].magnitude, 0.25f);
         }
@@ -639,7 +639,7 @@ public class SimulationManager : MonoBehaviour {
         // Find NearestNeighbors:
         for (int a = 0; a < agentsArray.Length; a++) {
             // Find which gridCell this Agent is in:    
-            Vector2 agentPos = new Vector2(agentsArray[a].rigidbodiesArray[0].transform.localPosition.x, agentsArray[a].rigidbodiesArray[0].transform.localPosition.y);
+            Vector2 agentPos = new Vector2(agentsArray[a].bodyRigidbody.transform.localPosition.x, agentsArray[a].bodyRigidbody.transform.localPosition.y);
             int xCoord = Mathf.FloorToInt((agentPos.x + mapSize) / (mapSize * 2f) * (float)agentGridCellResolution);
             xCoord = Mathf.Clamp(xCoord, 0, agentGridCellResolution - 1);
             int yCoord = Mathf.FloorToInt((agentPos.y + mapSize) / (mapSize * 2f) * (float)agentGridCellResolution);
@@ -665,7 +665,7 @@ public class SimulationManager : MonoBehaviour {
             // **** Only checking its own grid cell!!! Will need to expand to adjacent cells as well!
             for (int i = 0; i < mapGridCellArray[xCoord][yCoord].friendIndicesList.Count; i++) {
                 // FRIEND:
-                Vector2 neighborPos = new Vector2(agentsArray[mapGridCellArray[xCoord][yCoord].friendIndicesList[i]].rigidbodiesArray[0].transform.localPosition.x, agentsArray[mapGridCellArray[xCoord][yCoord].friendIndicesList[i]].rigidbodiesArray[0].transform.localPosition.y);
+                Vector2 neighborPos = new Vector2(agentsArray[mapGridCellArray[xCoord][yCoord].friendIndicesList[i]].bodyRigidbody.transform.localPosition.x, agentsArray[mapGridCellArray[xCoord][yCoord].friendIndicesList[i]].bodyRigidbody.transform.localPosition.y);
                 float squaredDistFriend = (neighborPos - agentPos).sqrMagnitude;
                                
                 if (squaredDistFriend <= nearestFriendSquaredDistance) { // if now the closest so far, update index and dist:
@@ -815,13 +815,13 @@ public class SimulationManager : MonoBehaviour {
             }
         }
         // spawn corpseFood:
-        StartPositionGenome startPos = new StartPositionGenome(new Vector3(agentsArray[agentIndex].rigidbodiesArray[0].transform.position.x, 
-                                                                           agentsArray[agentIndex].rigidbodiesArray[0].transform.position.y, 
+        StartPositionGenome startPos = new StartPositionGenome(new Vector3(agentsArray[agentIndex].bodyRigidbody.transform.position.x, 
+                                                                           agentsArray[agentIndex].bodyRigidbody.transform.position.y, 
                                                                            0f), 
                                                                            Quaternion.identity);
 
         // calculate amount of food to leave:        
-        float droppedFoodAmount = agentsArray[agentIndex].totalBodyAreaEmpty + agentsArray[agentIndex].coreModule.foodAmountR[0];
+        float droppedFoodAmount = agentsArray[agentIndex].totalBodyAreaNeutral + agentsArray[agentIndex].coreModule.foodAmountR[0];
         float foodSideLength = Mathf.Sqrt(droppedFoodAmount);
         foodGenomeAnimalCorpse.fullSize = new Vector2(foodSideLength, foodSideLength);
 
@@ -860,7 +860,7 @@ public class SimulationManager : MonoBehaviour {
         }*/
 
         if(agentIndex == 0) {
-            cameraManager.targetTransform = agentsArray[0].segmentsArray[0].transform;
+            cameraManager.targetTransform = agentsArray[0].bodyGO.transform;
             cameraManager.StartPlayerRespawn();
         }
     }
@@ -1207,7 +1207,7 @@ public class SimulationManager : MonoBehaviour {
         theRenderKing.SimPlayerGlow();
         
         // Adjust Camera to position of agent
-        cameraManager.targetTransform = agentsArray[0].segmentsArray[0].transform;
+        cameraManager.targetTransform = agentsArray[0].bodyGO.transform;
         cameraManager.StartPlayerRespawn();
         // Fade-in from black?
         // Reset things that need to be reset i.e score counter?
@@ -1346,6 +1346,9 @@ public class SimulationManager : MonoBehaviour {
         if(simStateData != null) {
             if (simStateData.agentSimDataCBuffer != null) {
                 simStateData.agentSimDataCBuffer.Release();
+            }
+            if (simStateData.debugBodyResourcesCBuffer != null) {
+                simStateData.debugBodyResourcesCBuffer.Release();
             }
             if (simStateData.foodSimDataCBuffer != null) {
                 simStateData.foodSimDataCBuffer.Release();

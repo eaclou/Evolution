@@ -42,6 +42,9 @@ public class TheRenderKing : MonoBehaviour {
     public Material waterSplinesMat;
     public Material waterChainsMat;
     public Material uberFlowChainBrushMat1;
+    public Material debugAgentResourcesMat;
+
+    public bool isDebugRenderOn = true;
     
     //public Material debugMat;
 
@@ -116,6 +119,8 @@ public class TheRenderKing : MonoBehaviour {
 
     private BasicStrokeData[] colorInjectionStrokeDataArray;
     private ComputeBuffer colorInjectionStrokesCBuffer;
+
+    //private ComputeBuffer debugAgentResourcesCBuffer;
 
     public Material debugMaterial;
     public Mesh debugMesh;
@@ -202,7 +207,7 @@ public class TheRenderKing : MonoBehaviour {
 		public Vector2 scale;
 		public Vector2 heading;
 		public int brushType;
-    }
+    }    
 
     private int debugFrameCounter = 0;
     
@@ -268,7 +273,10 @@ public class TheRenderKing : MonoBehaviour {
         InitializeRipplesBuffer();
         InitializeWaterSplinesCBuffer();
         InitializeWaterChainsCBuffer();
-        
+
+        //InitializeDebugBuffers(); 
+
+
         /*        
         // TRAIL DOTS:
         TrailDotData[] trailDotsDataArray = new TrailDotData[numTrailDotsPerAgent * agentSimDataCBuffer.count];
@@ -572,6 +580,24 @@ public class TheRenderKing : MonoBehaviour {
         waterChains0CBuffer.SetData(waterChainDataArray);
         waterChains1CBuffer = new ComputeBuffer(waterChainDataArray.Length, sizeof(float) * 2);
     }
+    /*private void InitializeDebugBuffers() {
+        debugAgentResourcesCBuffer = new ComputeBuffer(simManager._NumAgents, sizeof(float) * 10);
+        SimulationStateData.DebugBodyResourcesData[] debugAgentResourcesArray = new SimulationStateData.DebugBodyResourcesData[debugAgentResourcesCBuffer.count];
+        for (int i = 0; i < debugAgentResourcesArray.Length; i++) {
+            SimulationStateData.DebugBodyResourcesData data = new SimulationStateData.DebugBodyResourcesData();
+            data.developmentPercentage = 0f;
+            data.energy = 0f;
+            data.health = 0f;
+            data.isBiting = 0f;
+            data.isDamageFrame = 0f;
+            data.mouthDimensions = new Vector2(1f, 1f);
+            data.mouthOffset = 0f;
+            data.stamina = 0f;
+            data.stomachContents = 0f;
+            debugAgentResourcesArray[i] = data;
+        }        
+        debugAgentResourcesCBuffer.SetData(debugAgentResourcesArray);
+    }*/
 
     private void InitializeMaterials() {
         agentEyesDisplayMat.SetPass(0); // Eyes
@@ -614,6 +640,10 @@ public class TheRenderKing : MonoBehaviour {
         waterChainsMat.SetPass(0);
         waterChainsMat.SetBuffer("verticesCBuffer", quadVerticesCBuffer);
         waterChainsMat.SetBuffer("waterChainsReadCBuffer", waterChains0CBuffer);
+
+        debugAgentResourcesMat.SetPass(0);
+        debugAgentResourcesMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        //debugAgentResourcesMat.SetBuffer("indexCBuffer", debugAgentResourcesCBuffer);
 
         /*
         trailDotsDisplayMat.SetPass(0);
@@ -1360,7 +1390,7 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, playerGlowyBitsDisplayMat, 0, MeshTopology.Triangles, 6, playerGlowyBitsCBuffer.count);
         */
 
-        bool displayAgents = false;
+        bool displayAgents = true;
         if(displayAgents) {
             
             /*
@@ -1405,6 +1435,19 @@ public class TheRenderKing : MonoBehaviour {
             cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, predatorProceduralDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.predatorSimDataCBuffer.count);
         
         
+        }
+
+
+        if(isDebugRenderOn) {
+            
+            
+            debugAgentResourcesMat.SetPass(0);
+            debugAgentResourcesMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+            debugAgentResourcesMat.SetBuffer("debugAgentResourcesCBuffer", simManager.simStateData.debugBodyResourcesCBuffer);
+            debugAgentResourcesMat.SetBuffer("agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
+            cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, debugAgentResourcesMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.debugBodyResourcesCBuffer.count);
+            
+
         }
         
         
@@ -1563,7 +1606,7 @@ public class TheRenderKing : MonoBehaviour {
 
         if(uberFlowChainBrush1 != null) {
             uberFlowChainBrush1.CleanUp();
-        }
+        }        
     }
 
     /*public PointStrokeData GeneratePointStrokeData(int index, Vector2 size, Vector2 pos, Vector2 dir, Vector3 hue, float str, int brushType) {

@@ -82,8 +82,7 @@ public class CritterModuleCore {
     public FoodChunk nearestFoodModule;
     public PredatorModule nearestPredatorModule;
     public Agent nearestFriendAgent;
-
-    public CritterMouthComponent mouthRef;
+      
     
 
 	public CritterModuleCore() {
@@ -395,9 +394,9 @@ public class CritterModuleCore {
         Vector2 friendDir = Vector2.zero;
         Vector2 friendVel = Vector2.zero;
         if(nearestFriendAgent != null) {
-            friendPos = new Vector2(nearestFriendAgent.rigidbodiesArray[0].transform.localPosition.x - ownPos.x, nearestFriendAgent.rigidbodiesArray[0].transform.localPosition.y - ownPos.y);
+            friendPos = new Vector2(nearestFriendAgent.bodyRigidbody.transform.localPosition.x - ownPos.x, nearestFriendAgent.bodyRigidbody.transform.localPosition.y - ownPos.y);
             friendDir = friendPos.normalized;
-            friendVel = new Vector2(nearestFriendAgent.rigidbodiesArray[0].velocity.x, nearestFriendAgent.rigidbodiesArray[0].velocity.y);
+            friendVel = new Vector2(nearestFriendAgent.bodyRigidbody.velocity.x, nearestFriendAgent.bodyRigidbody.velocity.y);
         }
 
         Vector2 enemyPos = Vector2.zero;
@@ -441,25 +440,8 @@ public class CritterModuleCore {
         contactForceY[0] = 0f;
         //hitPoints[0] = Mathf.Max(hitPoints[0], 0f);
         //stamina[0] = 1f;
-
-
-        // Update Mouth:::: 
         
-        if(mouthRef.isBiting) {
-            
-            // Already biting
-            mouthRef.bitingFrameCounter++;
-
-            // Adjust trigger size & offset:
-            //mouthRef.triggerCollider.radius = mouthRef.mouthDimensionsBite.x; // update to capsule later!! ****
-            //mouthRef.triggerCollider.offset = new Vector2(0f, mouthRef.mouthOffsetBite);
-
-            if(mouthRef.bitingFrameCounter >= mouthRef.biteChargeUpDuration + mouthRef.biteCooldownDuration) {
-                mouthRef.bitingFrameCounter = 0;
-                mouthRef.isBiting = false;
-                //mouthRef.triggerCollider.enabled = false;
-            }
-        }
+        
         //mouthRef.foodInRange = false;
         
         // *** Handled within Agent.TickActions()
