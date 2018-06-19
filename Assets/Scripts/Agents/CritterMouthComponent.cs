@@ -12,14 +12,15 @@ public class CritterMouthComponent : MonoBehaviour {
     public int bitingFrameCounter = 0;
     public int biteCooldown = 30;
     
-    public float mouthRadius;  // relative to head size?
-    public float mouthOffset;  // also relative?
+    public Vector2 mouthSize;  // relative to head size?
+    public Vector2 biteZoneDimensions;
+    public float biteZoneOffset;
+    //public float mouthOffset;  // also relative?
     public int biteChargeUpDuration = 4;
     public int biteCooldownDuration = 26;
     public float biteStrength;
     public float biteSharpness;
         
-
     //public float feedingRate = 0.4f;
 
     public Agent agentRef;
@@ -240,7 +241,7 @@ public class CritterMouthComponent : MonoBehaviour {
     }
     private void BiteDamageAnimal(Agent preyAgent, float ownBiteArea, float targetArea) {
         //Debug.Log("BiteDamageAnimal");
-        float baseDamage = 1f;
+        float baseDamage = 0.5f;
 
         //float mouthSize = triggerCollider.radius * triggerCollider.radius;
         //float targetSize = segment.agentRef.growthPercentage * segment.agentRef.coreModule.coreLength * segment.agentRef.coreModule.coreWidth;

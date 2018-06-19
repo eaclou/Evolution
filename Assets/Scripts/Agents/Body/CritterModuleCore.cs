@@ -91,8 +91,8 @@ public class CritterModuleCore {
 
     public void Initialize(CritterModuleCoreGenome genome, Agent agent, StartPositionGenome startPos) {
 
-        coreWidth = genome.coreWidth;
-        coreLength = genome.coreLength;
+        coreWidth = genome.fullBodyWidth;
+        coreLength = genome.fullBodyLength;
 
         //numSegments = genome.numSegments;
 

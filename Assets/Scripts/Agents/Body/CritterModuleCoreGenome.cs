@@ -8,16 +8,30 @@ public class CritterModuleCoreGenome {
     public int parentID;
     public int inno;
 
-    public float coreWidth;
-    public float coreLength;
+    public float fullBodyWidth;
+    public float fullBodyLength;
 
-    public float relativeWidthHead = 1f;
-    public float relativeWidthBody = 1f;
-    public float relativeWidthTail = 1f;
-    public float headStart = 0.33f;
-    public float tailStart = 0.67f;
+    public float relWidthMouth = 1f;
+    public float relWidthHead = 1f;
+    public float relWidthTorso = 1f;
+    public float relWidthTail = 1f;
+    public float relLengthMouth = 1f;
+    public float relLengthHead = 1f;
+    public float relLengthTorso = 1f;
+    public float relLengthTail = 1f;
 
     public int numSegments; // Number of GameObject / Rigidbodies
+
+    public bool isPassive;
+    public Vector2 mouthSize;  // relative to head size?
+    public Vector2 biteZoneDimensions;
+    public float biteZoneOffset;
+    public int biteChargeUpDuration = 4;
+    public int biteCooldownDuration = 26;
+    public float biteStrength;
+    public float biteSharpness;
+
+
 
 	public CritterModuleCoreGenome(int parentID, int inno) {
         this.parentID = parentID;
@@ -30,14 +44,17 @@ public class CritterModuleCoreGenome {
         Debug.Log("GenerateRandomGenome()");
 
         numSegments = 1;
-        coreWidth = UnityEngine.Random.Range(0.5f, 2.5f);
-        coreLength = coreWidth * UnityEngine.Random.Range(1f, 6f);
+        fullBodyWidth = UnityEngine.Random.Range(0.5f, 2.5f);
+        fullBodyLength = fullBodyWidth * UnityEngine.Random.Range(2f, 6f);
 
-        relativeWidthHead = UnityEngine.Random.Range(0.5f, 1f);
-        relativeWidthBody = UnityEngine.Random.Range(0.5f, 1f);
-        relativeWidthTail = UnityEngine.Random.Range(0.5f, 1f);
-        headStart = UnityEngine.Random.Range(0.2f, 5f);
-        tailStart = UnityEngine.Random.Range(0.5f, 1f);
+        relWidthMouth = UnityEngine.Random.Range(0.25f, 4f);
+        relWidthHead = UnityEngine.Random.Range(0.25f, 4f);
+        relWidthTorso = UnityEngine.Random.Range(0.25f, 4f);
+        relWidthTail = UnityEngine.Random.Range(0.25f, 4f);
+        relLengthMouth = UnityEngine.Random.Range(0.25f, 4f);
+        relLengthHead = UnityEngine.Random.Range(0.25f, 4f);
+        relLengthTorso = UnityEngine.Random.Range(0.25f, 4f);
+        relLengthTail = UnityEngine.Random.Range(0.25f, 4f);
     }
 
     public void AppendModuleNeuronsToMasterList(ref List<NeuronGenome> neuronList) {
@@ -165,17 +182,23 @@ public class CritterModuleCoreGenome {
     public void SetToMutatedCopyOfParentGenome(CritterModuleCoreGenome parentGenome, MutationSettings settings) {
 
 
-        coreWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.coreWidth, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.5f, 2.5f);
-        coreLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.coreLength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, coreWidth * 1f, coreWidth * 6f);
+        fullBodyWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.fullBodyWidth, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.5f, 2.5f);
+        fullBodyLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.fullBodyLength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, fullBodyWidth * 2f, fullBodyWidth * 6f);
+        if(fullBodyLength < fullBodyWidth) {
+            fullBodyLength = fullBodyWidth * 2f;
+        }
 
         //numSegments = parentGenome.numSegments;
         numSegments = 1; // UtilityMutationFunctions.GetMutatedIntAdditive(parentGenome.numSegments, settings.defaultBodyMutationChance, 3, 1, 12);
         
-        relativeWidthHead = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.relativeWidthHead, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.1f, 1f);
-        relativeWidthBody = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.relativeWidthBody, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.1f, 1f);
-        relativeWidthTail = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.relativeWidthTail, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.1f, 1f);
-        headStart = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.headStart, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.1f, 1f);
-        tailStart = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.tailStart, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.1f, 1f);
-        
+        relWidthHead = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.relWidthHead, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.25f, 4f);
+        relWidthHead = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.relWidthHead, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.25f, 4f);
+        relWidthTorso = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.relWidthTorso, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.25f, 4f);
+        relWidthTail = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.relWidthTail, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.25f, 4f);
+
+        relLengthHead = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.relLengthHead, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.25f, 4f);
+        relLengthHead = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.relLengthHead, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.25f, 4f);
+        relLengthTorso = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.relLengthTorso, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.25f, 4f);
+        relLengthTail = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.relLengthTail, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.25f, 4f);
     }
 }

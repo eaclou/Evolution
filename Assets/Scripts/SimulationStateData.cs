@@ -29,6 +29,12 @@ public class SimulationStateData {
         public float isBiting;
         public float isDamageFrame;        
     }
+    public struct AgentMovementAnimData {
+        public float animCycle;
+        public float turnAmount;
+        public float accel;
+		public float smoothedThrottle;
+    }
     public struct FoodSimData {  
         public Vector2 worldPos;
         public Vector2 velocity;
@@ -77,12 +83,14 @@ public class SimulationStateData {
     // Store information from CPU simulation, to be passed to GPU:
     public AgentSimData[] agentSimDataArray;
     public DebugBodyResourcesData[] debugBodyResourcesArray;
+    public AgentMovementAnimData[] agentMovementAnimDataArray;
     public FoodSimData[] foodSimDataArray;
     public PredatorSimData[] predatorSimDataArray;
 
     // Store computeBuffers here or in RenderKing?? These ones seem appropo for StateData but buffers of floatyBits for ex. might be better in RK....
     public ComputeBuffer agentSimDataCBuffer;
     public ComputeBuffer debugBodyResourcesCBuffer;
+    public ComputeBuffer agentMovementAnimDataCBuffer;
     public ComputeBuffer foodSimDataCBuffer;
     public ComputeBuffer predatorSimDataCBuffer;
 
@@ -97,7 +105,6 @@ public class SimulationStateData {
     public Vector2[] fluidVelocitiesAtPredatorPositionsArray;
     public Vector4[] predatorFluidPositionsArray;
         
-    
 
     public SimulationStateData(SimulationManager simManager) {
         InitializeData(simManager);
@@ -116,6 +123,12 @@ public class SimulationStateData {
             debugBodyResourcesArray[i] = new DebugBodyResourcesData();
         }
         debugBodyResourcesCBuffer = new ComputeBuffer(debugBodyResourcesArray.Length, sizeof(float) * 10);
+
+        agentMovementAnimDataArray = new AgentMovementAnimData[simManager._NumAgents];
+        for(int i = 0; i < agentMovementAnimDataArray.Length; i++) {
+            agentMovementAnimDataArray[i] = new AgentMovementAnimData();
+        }
+        agentMovementAnimDataCBuffer = new ComputeBuffer(agentMovementAnimDataArray.Length, sizeof(float) * 4);
 
         foodSimDataArray = new FoodSimData[simManager._NumFood];
         for (int i = 0; i < foodSimDataArray.Length; i++) {
@@ -158,7 +171,7 @@ public class SimulationStateData {
                 agentSimDataArray[i].velocity = simManager.agentsArray[i].smoothedThrottle.normalized;
             }
             agentSimDataArray[i].heading = simManager.agentsArray[i].facingDirection;
-            agentSimDataArray[i].size = simManager.agentsArray[i].fullSize;
+            agentSimDataArray[i].size = simManager.agentsArray[i].bodyCritterSegment.GetComponent<CapsuleCollider2D>().size;
             agentSimDataArray[i].primaryHue = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.huePrimary;
             agentSimDataArray[i].secondaryHue = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.hueSecondary;
             float maturity = 1f;
@@ -187,8 +200,8 @@ public class SimulationStateData {
             float eatingCycle = Mathf.Sin(agentSimDataArray[i].eatingStatus * Mathf.PI);
             agentSimDataArray[i].worldPos += simManager.agentsArray[i].facingDirection * eatingCycle * 0.25f;
             agentSimDataArray[i].heading = (simManager.agentsArray[i].facingDirection + UnityEngine.Random.insideUnitCircle * 0.2f * eatingCycle).normalized;
-            agentSimDataArray[i].size.y *= (eatingCycle * 0.2f + 1.0f);
-            agentSimDataArray[i].size.x *= (1.0f - eatingCycle * 0.2f);
+            //agentSimDataArray[i].size.y *= (eatingCycle * 0.2f + 1.0f);
+            //agentSimDataArray[i].size.x *= (1.0f - eatingCycle * 0.2f);
 
             agentSimDataArray[i].foodAmount = simManager.agentsArray[i].coreModule.foodAmountR[0];
             
@@ -196,8 +209,8 @@ public class SimulationStateData {
             // convert from scene coords (-mapSize --> +mapSize to fluid coords (0 --> 1):::
             agentFluidPositionsArray[i] = new Vector4((agentPos.x + simManager._MapSize) / (simManager._MapSize * 2f), 
                                                       (agentPos.y + simManager._MapSize) / (simManager._MapSize * 2f), 
-                                                      (simManager.agentsArray[i].fullSize.x + 0.1f) / (simManager._MapSize * 2f), 
-                                                      (simManager.agentsArray[i].fullSize.y + 0.1f) / (simManager._MapSize * 2f)); //... 0.5/140 ...
+                                                      (simManager.agentsArray[i].fullSizeBoundingBox.x + 0.1f) / (simManager._MapSize * 2f), 
+                                                      (simManager.agentsArray[i].fullSizeBoundingBox.y + 0.1f) / (simManager._MapSize * 2f)); //... 0.5/140 ...
         }
         agentSimDataCBuffer.SetData(agentSimDataArray); // send data to GPU for Rendering
 
@@ -220,6 +233,16 @@ public class SimulationStateData {
             debugBodyResourcesArray[i].stomachContents = simManager.agentsArray[i].coreModule.stomachContents / simManager.agentsArray[i].coreModule.stomachCapacity;
         }
         debugBodyResourcesCBuffer.SetData(debugBodyResourcesArray); // send data to GPU for Rendering
+
+        // Movement Animation Test:
+        for(int i = 0; i < agentMovementAnimDataArray.Length; i++) {            
+            agentMovementAnimDataArray[i].animCycle = simManager.agentsArray[i].animationCycle;
+            agentMovementAnimDataArray[i].turnAmount = simManager.agentsArray[i].turningAmount;
+            agentMovementAnimDataArray[i].accel += Mathf.Clamp01(simManager.agentsArray[i].curAccel) * 1f;
+            agentMovementAnimDataArray[i].smoothedThrottle = simManager.agentsArray[i].smoothedThrottle.magnitude;
+        }
+        agentMovementAnimDataCBuffer.SetData(agentMovementAnimDataArray); // send data to GPU for Rendering
+
 
         for (int i = 0; i < foodSimDataArray.Length; i++) {
             Vector3 foodPos = simManager.foodArray[i].transform.position;

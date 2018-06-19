@@ -14,13 +14,14 @@ public class Agent : MonoBehaviour {
     public float speed = 500f;
     public float jointSpeed = 100f;
     public float jointMaxTorque = 250f;
-    public float swimAnimationCycleSpeed = 0.01f;
+    public float swimAnimationCycleSpeed = 0.025f;
     public float smoothedThrottleLerp = 0.25f;
     public float restingJointTorque = 10f;
     public float bendRatioHead = 0f;
     public float bendRatioTailTip = 1f;
 
     public float animationCycle = 0f;
+    public float turningAmount = 0f;
 
     public float spawnStartingScale = 0.25f;
 
@@ -96,9 +97,12 @@ public class Agent : MonoBehaviour {
     public CritterMouthComponent mouthRef;
 
     //private Rigidbody2D rigidBody2D; // ** segments???
-        
-    public Vector2 fullSize;
-    public float totalBodyAreaNeutral = 1f;
+
+    //public Vector2 fullSize;
+    public Vector2 fullSizeBoundingBox;
+    public float averageFullSizeWidth = 1f;  // used to determine size of collider
+    public float fullSizeBodyVolume = 1f;
+    public float centerOfMass = 0f;
 
     //public float fullBodyLength;
     //public float maxBodyWidth;
@@ -114,7 +118,9 @@ public class Agent : MonoBehaviour {
 
     public bool wasImpaled = false;
         
-    public Texture2D texture;
+    public Texture2D textureHealth;
+    private int widthsTexResolution = 16;
+    public float[] agentWidthsArray;
 
     public int ageCounterMature = 0; // only counts when agent is an adult
     public int lifeStageTransitionTimeStepCounter = 0; // keeps track of how long agent has been in its current lifeStage
@@ -132,6 +138,9 @@ public class Agent : MonoBehaviour {
 
         }
     }
+    public float prevVel;
+    public float curVel;
+    public float curAccel;
 
     public Vector2 throttle;
     public Vector2 smoothedThrottle;
@@ -529,9 +538,17 @@ public class Agent : MonoBehaviour {
         }*/
         isInsideFood = false;
         
-        Vector3 curPos = transform.localPosition;
-        avgVel = Mathf.Lerp(avgVel, (curPos - prevPos).magnitude, 0.25f);
+        Vector3 curPos = bodyRigidbody.transform.position;
+        
+        curVel = (curPos - prevPos).magnitude;
+        curAccel = curVel - prevVel;
+
+        avgVel = Mathf.Lerp(avgVel, (curPos - prevPos).magnitude, 0.25f); // OLD
+
         prevPos = curPos;
+        prevVel = curVel;
+
+        
 
         //transform.localScale = new Vector3(fullSize.x, fullSize.y, 1f);
 
@@ -539,7 +556,7 @@ public class Agent : MonoBehaviour {
         //rigidBody2D.MoveRotation(Quaternion.FromToRotation(new Vector3(1f, 0f, 0f), new Vector3(facingDirection.x, facingDirection.y, 0f)));
 
         // DebugDisplay
-        if(texture != null) {  // **** Will have to move this into general Tick() method and account for death types & lifeCycle transitions!
+        if(textureHealth != null) {  // **** Will have to move this into general Tick() method and account for death types & lifeCycle transitions!
             if(humanControlled) {
                 //Debug.Log(texture.ToString());
                 float displayFoodAmount = coreModule.energyRaw; // coreModule.foodAmountR[0];
@@ -550,21 +567,21 @@ public class Agent : MonoBehaviour {
                 if(curLifeStage == AgentLifeStage.Decaying || curLifeStage == AgentLifeStage.Null) {
                     displayFoodAmount = 0f;
                 }
-                texture.SetPixel(0, 0, new Color(coreModule.hitPoints[0], coreModule.hitPoints[0], coreModule.hitPoints[0]));
-                texture.SetPixel(1, 0, new Color(displayFoodAmount, displayFoodAmount, displayFoodAmount));
-                texture.SetPixel(2, 0, new Color(displayFoodAmount, displayFoodAmount, displayFoodAmount));
-                texture.SetPixel(3, 0, new Color(displayFoodAmount, displayFoodAmount, displayFoodAmount));
+                textureHealth.SetPixel(0, 0, new Color(coreModule.hitPoints[0], coreModule.hitPoints[0], coreModule.hitPoints[0]));
+                textureHealth.SetPixel(1, 0, new Color(displayFoodAmount, displayFoodAmount, displayFoodAmount));
+                textureHealth.SetPixel(2, 0, new Color(displayFoodAmount, displayFoodAmount, displayFoodAmount));
+                textureHealth.SetPixel(3, 0, new Color(displayFoodAmount, displayFoodAmount, displayFoodAmount));
 
                 float comm0 = coreModule.outComm0[0] * 0.5f + 0.5f;
                 float comm1 = coreModule.outComm1[0] * 0.5f + 0.5f;
                 float comm2 = coreModule.outComm2[0] * 0.5f + 0.5f;
                 float comm3 = coreModule.outComm3[0] * 0.5f + 0.5f;
-                texture.SetPixel(0, 1, new Color(comm0, comm0, comm0));
-                texture.SetPixel(1, 1, new Color(comm1, comm1, comm1));
-                texture.SetPixel(2, 1, new Color(comm2, comm2, comm2));
-                texture.SetPixel(3, 1, new Color(comm3, comm3, comm3));
+                textureHealth.SetPixel(0, 1, new Color(comm0, comm0, comm0));
+                textureHealth.SetPixel(1, 1, new Color(comm1, comm1, comm1));
+                textureHealth.SetPixel(2, 1, new Color(comm2, comm2, comm2));
+                textureHealth.SetPixel(3, 1, new Color(comm3, comm3, comm3));
 
-                texture.Apply();
+                textureHealth.Apply();
             }            
         }
 
@@ -613,14 +630,12 @@ public class Agent : MonoBehaviour {
     private void ScaleBody(float growthPercentage) {
         //segmentFullSizeArray
         float scale = Mathf.Lerp(spawnStartingScale, 1f, growthPercentage); // Minimum size = 0.1 ???
-
-        totalBodyAreaNeutral = coreModule.coreWidth * coreModule.coreLength * scale;
-
-        coreModule.stomachCapacity = totalBodyAreaNeutral * 1f;
+        float currentBodyVolume = coreModule.coreWidth * coreModule.coreLength * scale; // *** REFACTOR!!!! ****
+        coreModule.stomachCapacity = currentBodyVolume * 1f;
 
         bodyCritterSegment.GetComponent<CapsuleCollider2D>().size = new Vector2(coreModule.coreWidth, coreModule.coreLength) * scale;
 
-        bodyRigidbody.mass = totalBodyAreaNeutral;
+        bodyRigidbody.mass = currentBodyVolume;
 
         // MOUTH:
         bodyCritterSegment.GetComponent<CircleCollider2D>().radius = coreModule.coreWidth * scale * 0.5f;
@@ -702,7 +717,7 @@ public class Agent : MonoBehaviour {
 
         // ENERGY!!!!
         // Digestion:
-        float amountDigested = 0.01f * totalBodyAreaNeutral;
+        float amountDigested = 0.01f * fullSizeBodyVolume;
         float digestionAmount = Mathf.Min(coreModule.stomachContents, amountDigested);
         float foodToEnergyConversion = 1.0f;
         float createdEnergy = digestionAmount * foodToEnergyConversion;
@@ -731,7 +746,7 @@ public class Agent : MonoBehaviour {
         }
 
         //ENERGY:
-        float energyCost = 0.003f * Mathf.Sqrt(totalBodyAreaNeutral); // * Mathf.Lerp(totalBodyAreaEmpty, 1f, 0.0f);
+        float energyCost = 0.003f * Mathf.Sqrt(fullSizeBodyVolume); // * Mathf.Lerp(totalBodyAreaEmpty, 1f, 0.0f);
         
         float throttleMag = smoothedThrottle.magnitude;
         if(throttleMag > 0.01f) {
@@ -762,6 +777,10 @@ public class Agent : MonoBehaviour {
             }
         }
 
+        if(humanControlled) {
+            coreModule.energyRaw = 1f;
+        }
+
         ApplyPhysicsForces(smoothedThrottle);
 
         float rotationInRadians = (bodyRigidbody.transform.localRotation.eulerAngles.z + 90f) * Mathf.Deg2Rad;
@@ -787,6 +806,8 @@ public class Agent : MonoBehaviour {
         //    jointAnglesArray[j] = hingeJointsArray[j].jointAngle;            
         //}
 
+        turningAmount = Mathf.Lerp(turningAmount, this.bodyRigidbody.angularVelocity * Mathf.Deg2Rad * 0.1f, 0.15f);
+
         if (throttle.sqrMagnitude > 0.0001f) {  // Throttle is NOT == ZERO
             
             Vector2 headForwardDir = new Vector2(this.bodyRigidbody.transform.up.x, this.bodyRigidbody.transform.up.y).normalized;
@@ -797,15 +818,18 @@ public class Agent : MonoBehaviour {
             float headTurn = Vector2.Dot(throttleDir, headRightDir) * -1f * turnSharpness;
             float headTurnSign = Mathf.Clamp(Vector2.Dot(throttleDir, headRightDir) * -10000f, -1f, 1f);
 
+
+            //turningAmount = Mathf.Lerp(turningAmount, this.bodyRigidbody.angularVelocity * Mathf.Deg2Rad * 0.1f, 0.15f);
+
             //this.rigidbodiesArray[0].AddForce(headForwardDir * speed * Time.deltaTime, ForceMode2D.Impulse);
 
-            animationCycle += swimAnimationCycleSpeed;
+            animationCycle += swimAnimationCycleSpeed * throttle.magnitude / (Mathf.Lerp(coreModule.coreLength, 1f, 0.75f) * (growthPercentage * 0.25f + 0.75f));
             //animationCycle = animationCycle % 1.0f;
             
             // Forward Slide
             for(int k = 0; k < numSegments; k++) {
                 Vector2 segmentForwardDir = new Vector2(this.bodyRigidbody.transform.up.x, this.bodyRigidbody.transform.up.y).normalized;
-                this.bodyRigidbody.AddForce(segmentForwardDir * (1f - turnSharpness) * movementModule.horsepower * this.bodyRigidbody.mass * Time.deltaTime, ForceMode2D.Impulse);
+                this.bodyRigidbody.AddForce(segmentForwardDir * (1f - turnSharpness * 0.25f) * movementModule.horsepower * this.bodyRigidbody.mass * Time.deltaTime, ForceMode2D.Impulse);
             }
 
             // Head turn:
@@ -852,35 +876,62 @@ public class Agent : MonoBehaviour {
 
         movementModule = new CritterModuleMovement();
         movementModule.Initialize(genome.bodyGenome.movementGenome);
+
+        agentWidthsArray = new float[widthsTexResolution];
     }
 
     public void ReconstructAgentGameObjects(AgentGenome genome, StartPositionGenome startPos) {
+        
+        // Calculate Widths, total volume, center of mass, etc:
+        // REFACTOR!!! ******
+        this.fullSizeBoundingBox = new Vector2(genome.bodyGenome.coreGenome.fullBodyWidth, genome.bodyGenome.coreGenome.fullBodyLength);
 
-        // Delete existing children GameObjects:
-        //foreach (Transform child in this.transform) {
-        //     GameObject.Destroy(child.gameObject);
-         //}
+        // Calculate body regions lengthwise:
+        float totalRelativeLength = genome.bodyGenome.coreGenome.relLengthMouth + genome.bodyGenome.coreGenome.relLengthHead + genome.bodyGenome.coreGenome.relLengthTorso + genome.bodyGenome.coreGenome.relLengthTail;
+        float normalizedMouthLength = genome.bodyGenome.coreGenome.relLengthMouth / totalRelativeLength;
+        float normalizedHeadLength = genome.bodyGenome.coreGenome.relLengthHead / totalRelativeLength;
+        float normalizedTorsoLength = genome.bodyGenome.coreGenome.relLengthTorso / totalRelativeLength;
+        float normalizedTailLength = genome.bodyGenome.coreGenome.relLengthTail / totalRelativeLength;
 
-        //fullBodyLength = genome.bodyGenome.coreGenome.coreLength;
-        //maxBodyWidth = genome.bodyGenome.coreGenome.coreWidth;
+        // Calculate body Widths:
+        //float totalRelativeWidth = genome.bodyGenome.coreGenome.relWidthMouth + genome.bodyGenome.coreGenome.relWidthHead + genome.bodyGenome.coreGenome.relWidthTorso + genome.bodyGenome.coreGenome.relWidthTail;
+        float maxRelWidth = Mathf.Max(genome.bodyGenome.coreGenome.relWidthMouth, genome.bodyGenome.coreGenome.relWidthHead, genome.bodyGenome.coreGenome.relWidthTorso, genome.bodyGenome.coreGenome.relWidthTail);
+        float normalizedMouthWidth = genome.bodyGenome.coreGenome.relWidthMouth / maxRelWidth;
+        float normalizedHeadWidth = genome.bodyGenome.coreGenome.relWidthHead / maxRelWidth;
+        float normalizedTorsoWidth = genome.bodyGenome.coreGenome.relWidthTorso / maxRelWidth;
+        float normalizedTailWidth = genome.bodyGenome.coreGenome.relWidthTail / maxRelWidth;
+        
+        // Calculate Width:
+        //int numWidthSamples = 16; // resolution to sample at
+        float sampleIncrementSize = 1f / (float)widthsTexResolution;
+        float totalWidth = 0f;
+        for(int j = 0; j < widthsTexResolution; j++) {
+            float yCoord = j / (float)widthsTexResolution;
 
-        float widthHead = genome.bodyGenome.coreGenome.relativeWidthHead;
-        float widthBody = genome.bodyGenome.coreGenome.relativeWidthBody;
-        float widthTail = genome.bodyGenome.coreGenome.relativeWidthTail;
-        float headStart = genome.bodyGenome.coreGenome.headStart;
-        float tailStart = genome.bodyGenome.coreGenome.tailStart;
+            float sampledWidth = normalizedMouthWidth;
+            if(yCoord > normalizedMouthLength) {
+                sampledWidth = normalizedHeadWidth;
+            }
+            if(yCoord > normalizedMouthLength + normalizedHeadLength) {
+                sampledWidth = normalizedTorsoWidth;
+            }
+            if(yCoord > normalizedMouthLength + normalizedHeadLength + normalizedTorsoLength) {
+                sampledWidth = normalizedTailWidth;
+            }
+            // get absolute from relative value:
+            sampledWidth = sampledWidth * genome.bodyGenome.coreGenome.fullBodyWidth;
 
-        //coreModule.numSegments = genome.bodyGenome.coreGenome.numSegments;
+            totalWidth += sampledWidth;
 
-        float segmentLength = genome.bodyGenome.coreGenome.coreLength / (float)numSegments;
+            agentWidthsArray[j] = sampledWidth;
+        }
+        float avgSegmentWidth = totalWidth / (float)widthsTexResolution;
 
-        //critterSegmentsArray = new CritterSegment[numSegments];
-        //segmentsArray = new GameObject[numSegments];
-        //tempRenderObjectsArray = new GameObject[numSegments];
-        //rigidbodiesArray = new Rigidbody2D[numSegments];
-        //hingeJointsArray = new HingeJoint2D[Mathf.RoundToInt(Mathf.Max(1, numSegments - 1))];
-        //segmentFullSizeArray = new Vector2[numSegments];
-        //jointAnglesArray = new float[hingeJointsArray.Length];
+        fullSizeBodyVolume = avgSegmentWidth * genome.bodyGenome.coreGenome.fullBodyLength;
+        averageFullSizeWidth = avgSegmentWidth;       
+
+        float segmentLength = genome.bodyGenome.coreGenome.fullBodyLength / (float)numSegments;
+                
 
         // Create Physics GameObject:
         if(bodyGO == null) {
@@ -921,123 +972,7 @@ public class Agent : MonoBehaviour {
         
         
 
-        /*
-        for (int i = 0; i < numSegments; i++) {
-
-            float segmentStartCoord = (float)i / (float)numSegments;
-            float segmentEndCoord = (float)(i + 1) / (float)numSegments;
-
-
-            // Calculate Width:
-            int numWidthSamples = 12; // resolution to sample at
-            float totalWidth = 0f;
-            for(int j = 0; j < numWidthSamples; j++) {
-                float xCoord = Mathf.Lerp(segmentStartCoord, segmentEndCoord, j / (float)(numWidthSamples - 1));
-
-                float sampledWidth = widthHead;
-                if(xCoord > headStart) {
-                    sampledWidth = widthBody;
-                }
-                if(xCoord > tailStart) {
-                    sampledWidth = widthTail;
-                }
-                // get absolute from relative value:
-                sampledWidth = sampledWidth * genome.bodyGenome.coreGenome.coreWidth;
-
-                totalWidth += sampledWidth;
-            }
-            float avgSegmentWidth = totalWidth / (float)numWidthSamples;
-
-            // CACHE FULLSIZE DIMENSIONS:
-            //segmentFullSizeArray[i] = new Vector2(avgSegmentWidth, segmentLength);
-            
-            // Create Physics GameObject:
-            GameObject segmentGO = new GameObject("Segment" + i.ToString());
-            segmentGO.transform.parent = this.gameObject.transform;
-            segmentGO.transform.localPosition = new Vector3(0f, -i * segmentLength - segmentLength / 2f, 0f) * 0.1f + startPos.startPosition;
-            segmentGO.tag = "LiveAnimal";
-            segmentsArray[i] = segmentGO;
-            critterSegmentsArray[i] = segmentGO.AddComponent<CritterSegment>();
-            critterSegmentsArray[i].agentIndex = this.index;
-            critterSegmentsArray[i].agentRef = this;
-            critterSegmentsArray[i].segmentIndex = i;
-            rigidbodiesArray[i] = segmentGO.AddComponent<Rigidbody2D>();
-            rigidbodiesArray[i].drag = 12.5f; // bodyDrag;
-            rigidbodiesArray[i].angularDrag = 12.5f;
-            // Collision!
-            // Switch this to smart-aligned Capsules!!
-            CapsuleCollider2D collider = segmentGO.AddComponent<CapsuleCollider2D>(); // change this to Capsule Later -- upgrade!!!!
-            collider.size = new Vector2(avgSegmentWidth, segmentLength) * 0.1f;
-            if(avgSegmentWidth > segmentLength) {
-                collider.direction = CapsuleDirection2D.Horizontal;
-            }
-            else {
-                collider.direction = CapsuleDirection2D.Vertical;
-                
-            }
-            critterSegmentsArray[i].segmentCollider = collider; // save reference
-            
-            
-            // RENDER OBJECTS:::
-            //GameObject segmentGO = new GameObject("Segment" + i.ToString());
-            string assetURL = "Prefabs/DebugCritterSegmentRender";
-            GameObject renderGO = Instantiate(Resources.Load(assetURL)) as GameObject;
-            renderGO.name = "Render" + i.ToString();
-            renderGO.transform.parent = segmentGO.transform; // Parent under this Agent GO
-            renderGO.transform.localPosition = Vector3.zero;
-            renderGO.transform.localScale = new Vector3(avgSegmentWidth, segmentLength, 1f) * 0.1f;
-            tempRenderObjectsArray[i] = renderGO;
-            //renderGO.SetActive(false);
-          
-            if(i == 0) {  // ROOT SEGMENT!
-                prevPos = segmentGO.transform.localPosition;
-                facingDirection = new Vector2(0f, 1f);
-
-                rigidbodiesArray[i].drag = 12.5f; // headDrag; // only on root? // will need to suss out proper balance for this
-                rigidbodiesArray[i].mass = 1f; // headMass;
-
-                // Mouth Trigger:
-                CircleCollider2D mouthTrigger = segmentsArray[0].AddComponent<CircleCollider2D>();
-                mouthTrigger.isTrigger = true;
-                mouthTrigger.radius = avgSegmentWidth / 2f * 0.1f;
-                mouthTrigger.offset = new Vector2(0f, segmentLength / 2f * 0.1f);
-
-                //segmentsArray[0].AddComponent<CritterMouthComponent>().agentIndex = index;
-
-                coreModule.mouthRef = segmentsArray[0].AddComponent<CritterMouthComponent>();
-                coreModule.mouthRef.agentIndex = this.index;
-                coreModule.mouthRef.agentRef = this;
-                coreModule.mouthRef.triggerCollider = mouthTrigger;
-            }
-            else {
-                // Hinge Joint!
-                HingeJoint2D hingeJoint = segmentGO.AddComponent<HingeJoint2D>();
-                hingeJointsArray[i - 1] = hingeJoint;
-                
-                hingeJoint.connectedBody = rigidbodiesArray[i - 1];
-                hingeJoint.autoConfigureConnectedAnchor = false;
-                hingeJoint.anchor = new Vector2(0f, 0.5f) * segmentLength * 0.1f;
-                hingeJoint.connectedAnchor = new Vector2(0f, -0.5f) * segmentLength * 0.1f;
-                hingeJoint.useMotor = false;
-
-                JointMotor2D motor = hingeJoint.motor;
-                motor.maxMotorTorque = 0f;
-                hingeJoint.motor = motor;
-
-                hingeJoint.useLimits = true;
-                JointAngleLimits2D jointLimits = hingeJoint.limits;
-                jointLimits.min = -35f;
-                jointLimits.max = 35f;
-                hingeJoint.limits = jointLimits;
-                
-                rigidbodiesArray[i].mass = bodyMass;
-            }   
-            
-            //float segmentArea = avgSegmentWidth * segmentLength;
-            //float massProportion = 1f / (float)numSegments * avgSegmentWidth;
-            //rigidbodiesArray[i].mass = massProportion * 10f;
-        }
-        */
+        
 
         //ScaleBody(0f);
     }
@@ -1047,10 +982,12 @@ public class Agent : MonoBehaviour {
 
         index = agentIndex;
 
+        animationCycle = 0f;
+
         numSegments = genome.bodyGenome.coreGenome.numSegments;
         
         curLifeStage = AgentLifeStage.Egg;
-        this.fullSize = new Vector2(genome.bodyGenome.coreGenome.coreWidth, genome.bodyGenome.coreGenome.coreLength);
+        this.fullSizeBoundingBox = new Vector2(genome.bodyGenome.coreGenome.fullBodyWidth, genome.bodyGenome.coreGenome.fullBodyLength); // ** REFACTOR ***
         isNull = false;
         wasImpaled = false;
         lifeStageTransitionTimeStepCounter = 0;

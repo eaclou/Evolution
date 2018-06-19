@@ -43,6 +43,7 @@ public class TheRenderKing : MonoBehaviour {
     public Material waterChainsMat;
     public Material uberFlowChainBrushMat1;
     public Material debugAgentResourcesMat;
+    public Material testSwimmingBodyMat;
 
     public bool isDebugRenderOn = true;
     
@@ -80,6 +81,9 @@ public class TheRenderKing : MonoBehaviour {
     private int numCurveRibbonQuads = 6;
     private ComputeBuffer curveRibbonVerticesCBuffer;  // short ribbon mesh
     private ComputeBuffer agentSmearStrokesCBuffer;
+
+    private int numBodyQuads = 16;
+    private ComputeBuffer bodySwimAnimVerticesCBuffer;
 
     private ComputeBuffer agentEyeStrokesCBuffer;
 
@@ -125,6 +129,8 @@ public class TheRenderKing : MonoBehaviour {
     public Material debugMaterial;
     public Mesh debugMesh;
     public RenderTexture debugRT; // Used to see texture inside editor (inspector)
+
+    public Texture2D critterBodyWidthsTex;
 
     public float fullscreenFade = 1f;
     
@@ -226,6 +232,9 @@ public class TheRenderKing : MonoBehaviour {
     public void InitializeRiseAndShine(SimulationManager simManager) {
         this.simManager = simManager;
 
+        // temp bodyWidthsTexture:
+        critterBodyWidthsTex = new Texture2D(16, simManager._NumAgents, TextureFormat.RGBAFloat, false, true);
+        
         InitializeBuffers();
         InitializeMaterials();
         InitializeUberBrushes();
@@ -237,7 +246,7 @@ public class TheRenderKing : MonoBehaviour {
 
         for(int i = 0; i < simManager._NumFood; i++) {
             UpdateDynamicFoodBuffers(i);
-        }
+        }        
 
         isInitialized = true;  // we did it, guys!
     }
@@ -254,7 +263,8 @@ public class TheRenderKing : MonoBehaviour {
         InitializeQuadMeshBuffer(); // Set up Quad Mesh billboard for brushStroke rendering            
         InitializeCurveRibbonMeshBuffer(); // Set up Curve Ribbon Mesh billboard for brushStroke rendering
         InitializeWaterSplineMeshBuffer(); // same for water splines
-        InitializeFluidRenderMesh(); 
+        InitializeFluidRenderMesh();
+        InitializeBodySwimAnimMeshBuffer(); // test movementAnimation
         
         obstacleStrokesCBuffer = new ComputeBuffer(simManager._NumAgents + simManager._NumFood + simManager._NumPredators, sizeof(float) * 10);
         obstacleStrokeDataArray = new BasicStrokeData[obstacleStrokesCBuffer.count];
@@ -372,6 +382,27 @@ public class TheRenderKing : MonoBehaviour {
         fluidRenderMesh.vertices = vertices;
         fluidRenderMesh.uv = uvs;
         fluidRenderMesh.triangles = triangles;
+    }
+    private void InitializeBodySwimAnimMeshBuffer() {
+        
+        float rowSize = 1f / (float)numBodyQuads;
+
+        bodySwimAnimVerticesCBuffer = new ComputeBuffer(6 * numBodyQuads, sizeof(float) * 3);
+        Vector3[] verticesArray = new Vector3[bodySwimAnimVerticesCBuffer.count];
+        for(int i = 0; i < numBodyQuads; i++) {
+            int baseIndex = i * 6;
+
+            float startCoord = (float)i;
+            float endCoord = (float)(i + 1);
+            verticesArray[baseIndex + 0] = new Vector3(0.5f, startCoord * rowSize);
+            verticesArray[baseIndex + 1] = new Vector3(0.5f, endCoord * rowSize);
+            verticesArray[baseIndex + 2] = new Vector3(-0.5f, endCoord * rowSize);
+            verticesArray[baseIndex + 3] = new Vector3(-0.5f, endCoord * rowSize);
+            verticesArray[baseIndex + 4] = new Vector3(-0.5f, startCoord * rowSize);
+            verticesArray[baseIndex + 5] = new Vector3(0.5f, startCoord * rowSize); 
+        }
+
+        bodySwimAnimVerticesCBuffer.SetData(verticesArray);
     }
 
     private void InitializeUberBrushes() {
@@ -522,13 +553,13 @@ public class TheRenderKing : MonoBehaviour {
             agentSmearStrokesDataArray[i].parentIndex = i; // link to Agent
             agentSmearStrokesDataArray[i].hue = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.huePrimary;
 
-            agentSmearStrokesDataArray[i].restLength = simManager.agentsArray[i].fullSize.y * 0.25f; // simManager.agentGenomePoolArray[i].bodyGenome.sizeAndAspectRatio.y * 0.25f;
+            agentSmearStrokesDataArray[i].restLength = simManager.agentsArray[i].fullSizeBoundingBox.y * 0.25f; // simManager.agentGenomePoolArray[i].bodyGenome.sizeAndAspectRatio.y * 0.25f;
 
             agentSmearStrokesDataArray[i].p0 = new Vector2(0f, 0f);
             agentSmearStrokesDataArray[i].p1 = agentSmearStrokesDataArray[i].p0 - new Vector2(0f, agentSmearStrokesDataArray[i].restLength);
             agentSmearStrokesDataArray[i].p2 = agentSmearStrokesDataArray[i].p0 - new Vector2(0f, agentSmearStrokesDataArray[i].restLength * 2f);
             agentSmearStrokesDataArray[i].p3 = agentSmearStrokesDataArray[i].p0 - new Vector2(0f, agentSmearStrokesDataArray[i].restLength * 3f);
-            agentSmearStrokesDataArray[i].width = simManager.agentsArray[i].fullSize.x; // simManager.agentGenomePoolArray[i].bodyGenome.sizeAndAspectRatio.x;
+            agentSmearStrokesDataArray[i].width = simManager.agentsArray[i].fullSizeBoundingBox.x; // simManager.agentGenomePoolArray[i].bodyGenome.sizeAndAspectRatio.x;
             
             agentSmearStrokesDataArray[i].strength = 1f;
             agentSmearStrokesDataArray[i].brushType = 0;
@@ -644,6 +675,10 @@ public class TheRenderKing : MonoBehaviour {
         debugAgentResourcesMat.SetPass(0);
         debugAgentResourcesMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         //debugAgentResourcesMat.SetBuffer("indexCBuffer", debugAgentResourcesCBuffer);
+
+        testSwimmingBodyMat.SetPass(0);
+        testSwimmingBodyMat.SetTexture("widthsTex", critterBodyWidthsTex);
+        testSwimmingBodyMat.SetBuffer("meshVerticesCBuffer", bodySwimAnimVerticesCBuffer);
 
         /*
         trailDotsDisplayMat.SetPass(0);
@@ -836,11 +871,11 @@ public class TheRenderKing : MonoBehaviour {
             Vector3 agentPos = simManager.agentsArray[i].transform.position;
             colorInjectionStrokeDataArray[baseIndex + i].worldPos = new Vector2(agentPos.x, agentPos.y);
             colorInjectionStrokeDataArray[baseIndex + i].localDir = simManager.agentsArray[i].facingDirection;
-            colorInjectionStrokeDataArray[baseIndex + i].scale = simManager.agentsArray[i].fullSize * 1.0f;
+            colorInjectionStrokeDataArray[baseIndex + i].scale = simManager.agentsArray[i].fullSizeBoundingBox * 1.0f;
             
             float agentAlpha = 0.024f;
             if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Mature) {
-                agentAlpha = 2.2f / simManager.agentsArray[i].fullSize.magnitude;
+                agentAlpha = 2.2f / simManager.agentsArray[i].fullSizeBoundingBox.magnitude;
             }
             if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Decaying) {
                 agentAlpha = 3f * Mathf.Clamp01(1f - (float)simManager.agentsArray[i].lifeStageTransitionTimeStepCounter * 2f / (float)simManager.agentsArray[i]._DecayDurationTimeSteps);
@@ -885,6 +920,13 @@ public class TheRenderKing : MonoBehaviour {
         colorInjectionStrokesCBuffer.SetData(colorInjectionStrokeDataArray);
     }
     
+    public void UpdateAgentWidthsTexture(Agent agent) {
+        for(int i = 0; i < agent.agentWidthsArray.Length; i++) {
+            critterBodyWidthsTex.SetPixel(i, agent.index, new Color(agent.agentWidthsArray[i], agent.agentWidthsArray[i], agent.agentWidthsArray[i]));
+        }
+        critterBodyWidthsTex.Apply();
+    }
+
     public void UpdateAgentBodyStrokesBuffer(int agentIndex) {
         // Doing it this way to avoid resetting ALL agents whenever ONE is respawned!
         ComputeBuffer singleAgentBodyStrokeCBuffer = new ComputeBuffer(1, sizeof(float) * 7 + sizeof(int) * 3);
@@ -962,13 +1004,13 @@ public class TheRenderKing : MonoBehaviour {
         singleCurveStrokeArray[0].parentIndex = agentIndex; // link to Agent
         singleCurveStrokeArray[0].hue = simManager.agentGenomePoolArray[agentIndex].bodyGenome.appearanceGenome.huePrimary;
 
-        singleCurveStrokeArray[0].restLength = simManager.agentsArray[agentIndex].fullSize.y * 0.25f;  // simManager.agentGenomePoolArray[agentIndex].bodyGenome.sizeAndAspectRatio.y * 0.25f;
+        singleCurveStrokeArray[0].restLength = simManager.agentsArray[agentIndex].fullSizeBoundingBox.y * 0.25f;  // simManager.agentGenomePoolArray[agentIndex].bodyGenome.sizeAndAspectRatio.y * 0.25f;
 
         singleCurveStrokeArray[0].p0 = new Vector2(simManager.agentsArray[agentIndex]._PrevPos.x, simManager.agentsArray[agentIndex]._PrevPos.y);
         singleCurveStrokeArray[0].p1 = singleCurveStrokeArray[0].p0 - new Vector2(0f, singleCurveStrokeArray[0].restLength);
         singleCurveStrokeArray[0].p2 = singleCurveStrokeArray[0].p0 - new Vector2(0f, singleCurveStrokeArray[0].restLength * 2f);
         singleCurveStrokeArray[0].p3 = singleCurveStrokeArray[0].p0 - new Vector2(0f, singleCurveStrokeArray[0].restLength * 3f);
-        singleCurveStrokeArray[0].width = simManager.agentsArray[agentIndex].fullSize.x; //simManager.agentGenomePoolArray[agentIndex].bodyGenome.sizeAndAspectRatio.x;
+        singleCurveStrokeArray[0].width = simManager.agentsArray[agentIndex].fullSizeBoundingBox.x; //simManager.agentGenomePoolArray[agentIndex].bodyGenome.sizeAndAspectRatio.x;
         
         singleCurveStrokeArray[0].strength = 1f;
         singleCurveStrokeArray[0].brushType = 0;
@@ -1390,7 +1432,7 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, playerGlowyBitsDisplayMat, 0, MeshTopology.Triangles, 6, playerGlowyBitsCBuffer.count);
         */
 
-        bool displayAgents = true;
+        bool displayAgents = false;
         if(displayAgents) {
             
             /*
@@ -1449,7 +1491,12 @@ public class TheRenderKing : MonoBehaviour {
             
 
         }
-        
+
+        testSwimmingBodyMat.SetPass(0);
+        testSwimmingBodyMat.SetBuffer("meshVerticesCBuffer", bodySwimAnimVerticesCBuffer);
+        testSwimmingBodyMat.SetBuffer("agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
+        testSwimmingBodyMat.SetBuffer("agentMovementAnimDataCBuffer", simManager.simStateData.agentMovementAnimDataCBuffer);
+        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, testSwimmingBodyMat, 0, MeshTopology.Triangles, 6 * numBodyQuads, simManager.simStateData.agentMovementAnimDataCBuffer.count);
         
         
         //foodProceduralDisplayMat.SetPass(0);
@@ -1606,7 +1653,12 @@ public class TheRenderKing : MonoBehaviour {
 
         if(uberFlowChainBrush1 != null) {
             uberFlowChainBrush1.CleanUp();
-        }        
+        }  
+        
+        if(bodySwimAnimVerticesCBuffer != null) {
+            bodySwimAnimVerticesCBuffer.Release();
+        }
+        
     }
 
     /*public PointStrokeData GeneratePointStrokeData(int index, Vector2 size, Vector2 pos, Vector2 dir, Vector3 hue, float str, int brushType) {

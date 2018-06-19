@@ -426,7 +426,7 @@ public class SimulationManager : MonoBehaviour {
     private void LoadingHookUpUIManager() {
         Texture2D playerTex = new Texture2D(4, 2);  // Health, foodAmountRGB, 4 outCommChannels
         playerTex.filterMode = FilterMode.Point;
-        agentsArray[0].texture = playerTex;
+        agentsArray[0].textureHealth = playerTex;
 
         uiManager.healthDisplayTex = playerTex;
         uiManager.SetDisplayTextures();
@@ -821,7 +821,7 @@ public class SimulationManager : MonoBehaviour {
                                                                            Quaternion.identity);
 
         // calculate amount of food to leave:        
-        float droppedFoodAmount = agentsArray[agentIndex].totalBodyAreaNeutral + agentsArray[agentIndex].coreModule.foodAmountR[0];
+        float droppedFoodAmount = agentsArray[agentIndex].fullSizeBodyVolume + agentsArray[agentIndex].coreModule.foodAmountR[0];
         float foodSideLength = Mathf.Sqrt(droppedFoodAmount);
         foodGenomeAnimalCorpse.fullSize = new Vector2(foodSideLength, foodSideLength);
 
@@ -861,7 +861,7 @@ public class SimulationManager : MonoBehaviour {
 
         if(agentIndex == 0) {
             cameraManager.targetTransform = agentsArray[0].bodyGO.transform;
-            cameraManager.StartPlayerRespawn();
+            //cameraManager.StartPlayerRespawn();
         }
     }
     public void ProcessDeadFood(int foodIndex) {
@@ -999,7 +999,7 @@ public class SimulationManager : MonoBehaviour {
         //StartPositionGenome startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
         agentsArray[agentIndex].InitializeAgentFromGenome(agentIndex, agentGenomePoolArray[agentIndex], GetRandomAgentSpawnPosition()); // Spawn that genome in dead Agent's body and revive it!
 
-
+        theRenderKing.UpdateAgentWidthsTexture(agentsArray[agentIndex]);
         //if(agentIndex == 0) {
             //if Player:
 
@@ -1208,7 +1208,7 @@ public class SimulationManager : MonoBehaviour {
         
         // Adjust Camera to position of agent
         cameraManager.targetTransform = agentsArray[0].bodyGO.transform;
-        cameraManager.StartPlayerRespawn();
+        //cameraManager.StartPlayerRespawn();
         // Fade-in from black?
         // Reset things that need to be reset i.e score counter?
 
@@ -1350,6 +1350,9 @@ public class SimulationManager : MonoBehaviour {
             if (simStateData.debugBodyResourcesCBuffer != null) {
                 simStateData.debugBodyResourcesCBuffer.Release();
             }
+            if (simStateData.agentMovementAnimDataCBuffer != null) {
+                simStateData.agentMovementAnimDataCBuffer.Release();
+            }            
             if (simStateData.foodSimDataCBuffer != null) {
                 simStateData.foodSimDataCBuffer.Release();
             }
