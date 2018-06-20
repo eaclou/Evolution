@@ -177,7 +177,10 @@ public class SimulationStateData {
             float maturity = 1f;
             float decay = 0f;
             if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Egg) {
-                maturity = (float)simManager.agentsArray[i].lifeStageTransitionTimeStepCounter / (float)simManager.agentsArray[i]._GestationDurationTimeSteps;
+                maturity = simManager.agentsArray[i].spawnStartingScale; // (float)simManager.agentsArray[i].lifeStageTransitionTimeStepCounter / (float)simManager.agentsArray[i]._GestationDurationTimeSteps;
+            }
+            if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Young) {
+                maturity = Mathf.Lerp(simManager.agentsArray[i].spawnStartingScale, 1f, simManager.agentsArray[i].growthPercentage);
             }
             if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Decaying) {
                 decay = (float)simManager.agentsArray[i].lifeStageTransitionTimeStepCounter / (float)simManager.agentsArray[i]._DecayDurationTimeSteps;

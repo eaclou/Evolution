@@ -19,13 +19,8 @@
 			#pragma fragment frag
 			#pragma target 5.0
 			#include "UnityCG.cginc"
+			#include "Assets/Resources/Shaders/Inc/CritterBodyAnimation.cginc"
 
-			struct AgentMovementAnimData {
-				float animCycle;
-				float turnAmount;
-				float accel;
-				float smoothedThrottle;
-			};
 
 			struct AgentSimData {
 				float2 worldPos;
@@ -54,42 +49,7 @@
 			StructuredBuffer<float3> meshVerticesCBuffer;
 			Texture2D<float4> widthsTex;
 
-			float2 rotate_point(float2 pivot,float angle, float2 p)
-			{
-				float2 rotatedPoint = p;
-				float s = sin(angle);
-				float c = cos(angle);
-
-				// translate point back to origin:
-				rotatedPoint -= pivot;
-			  
-				// rotate point
-				float xnew = rotatedPoint.x * c - rotatedPoint.y * s;
-				float ynew = rotatedPoint.x * s + rotatedPoint.y * c;
-
-				rotatedPoint = float2(xnew, ynew);
-
-				// translate point back:
-				rotatedPoint += pivot;
-
-				return rotatedPoint;
-			}
-
-			float2 getWarpedPoint(float2 originalPoint, float v, float turnAmount, float warpStrength, float pivot, float animCycle, float accel, float throttle) {
-				// --------------Swim Anim:-----------------------
-				float animSpeed = 30;
-				float accelAnimSpeed = 55;
-				float offsetMask = saturate(1 - v * 0.75);
-				//float2 horOffset = float2(0,0);
-				
-				// panning yaw:
-				//float bodyAspectRatio = agentSimData.size.y / agentSimData.size.x;
-				float panningYawStrength = warpStrength; //0.5 * saturate(bodyAspectRatio * 0.5 - 0.4);
-				float turningAngle = turnAmount;
-				float2 warpedPoint = rotate_point(float2(0,pivot), clamp(turningAngle * -1, -1, 1) * offsetMask + panningYawStrength * sin(v * 3.2 + animCycle * animSpeed + accel * accelAnimSpeed) * offsetMask * throttle, originalPoint);
-				
-				return warpedPoint;
-			}
+			
 			
 			v2f vert(uint id : SV_VertexID, uint inst : SV_InstanceID)
 			{
@@ -112,7 +72,7 @@
 				
 				float2 scale = agentSimData.size * agentSimData.maturity;  // assume bodyStroke is 1:1 agentSize
 
-				float4 texWidth = widthsTex[int2(floor(quadPoint.y * 16), inst)];
+				float4 texWidth = widthsTex[int2(floor((1.0 - quadPoint.y) * 16), inst)];
 				scale.x = texWidth.x * agentSimData.maturity;
 
 				quadPoint.y -= 0.5;

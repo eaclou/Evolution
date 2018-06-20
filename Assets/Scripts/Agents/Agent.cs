@@ -887,19 +887,20 @@ public class Agent : MonoBehaviour {
         this.fullSizeBoundingBox = new Vector2(genome.bodyGenome.coreGenome.fullBodyWidth, genome.bodyGenome.coreGenome.fullBodyLength);
 
         // Calculate body regions lengthwise:
-        float totalRelativeLength = genome.bodyGenome.coreGenome.relLengthMouth + genome.bodyGenome.coreGenome.relLengthHead + genome.bodyGenome.coreGenome.relLengthTorso + genome.bodyGenome.coreGenome.relLengthTail;
-        float normalizedMouthLength = genome.bodyGenome.coreGenome.relLengthMouth / totalRelativeLength;
+        float totalRelativeLength = genome.bodyGenome.coreGenome.relLengthSnout + genome.bodyGenome.coreGenome.relLengthHead + genome.bodyGenome.coreGenome.relLengthTorso + genome.bodyGenome.coreGenome.relLengthTail;
+        float normalizedSnoutLength = genome.bodyGenome.coreGenome.relLengthSnout / totalRelativeLength;
         float normalizedHeadLength = genome.bodyGenome.coreGenome.relLengthHead / totalRelativeLength;
         float normalizedTorsoLength = genome.bodyGenome.coreGenome.relLengthTorso / totalRelativeLength;
         float normalizedTailLength = genome.bodyGenome.coreGenome.relLengthTail / totalRelativeLength;
 
         // Calculate body Widths:
         //float totalRelativeWidth = genome.bodyGenome.coreGenome.relWidthMouth + genome.bodyGenome.coreGenome.relWidthHead + genome.bodyGenome.coreGenome.relWidthTorso + genome.bodyGenome.coreGenome.relWidthTail;
-        float maxRelWidth = Mathf.Max(genome.bodyGenome.coreGenome.relWidthMouth, genome.bodyGenome.coreGenome.relWidthHead, genome.bodyGenome.coreGenome.relWidthTorso, genome.bodyGenome.coreGenome.relWidthTail);
-        float normalizedMouthWidth = genome.bodyGenome.coreGenome.relWidthMouth / maxRelWidth;
+        float maxRelWidth = Mathf.Max(genome.bodyGenome.coreGenome.relWidthHead, genome.bodyGenome.coreGenome.relWidthTorso);        
         float normalizedHeadWidth = genome.bodyGenome.coreGenome.relWidthHead / maxRelWidth;
         float normalizedTorsoWidth = genome.bodyGenome.coreGenome.relWidthTorso / maxRelWidth;
-        float normalizedTailWidth = genome.bodyGenome.coreGenome.relWidthTail / maxRelWidth;
+
+        float normalizedSnoutWidth = genome.bodyGenome.coreGenome.relWidthSnout * normalizedHeadWidth;
+        float normalizedTailWidth = genome.bodyGenome.coreGenome.relWidthTail * normalizedTorsoWidth;
         
         // Calculate Width:
         //int numWidthSamples = 16; // resolution to sample at
@@ -908,18 +909,23 @@ public class Agent : MonoBehaviour {
         for(int j = 0; j < widthsTexResolution; j++) {
             float yCoord = j / (float)widthsTexResolution;
 
-            float sampledWidth = normalizedMouthWidth;
-            if(yCoord > normalizedMouthLength) {
-                sampledWidth = normalizedHeadWidth;
+            float sampledWidth = Mathf.Lerp(normalizedSnoutWidth, normalizedHeadWidth, genome.bodyGenome.coreGenome.snoutTaper * (yCoord / normalizedSnoutLength));
+            if(yCoord > normalizedSnoutLength) {
+                //sampledWidth = normalizedHeadWidth;
+                sampledWidth = Mathf.Lerp(normalizedHeadWidth, normalizedTorsoWidth, (yCoord - normalizedSnoutLength) / normalizedHeadLength);
             }
-            if(yCoord > normalizedMouthLength + normalizedHeadLength) {
+            if(yCoord > normalizedSnoutLength + normalizedHeadLength) {
                 sampledWidth = normalizedTorsoWidth;
             }
-            if(yCoord > normalizedMouthLength + normalizedHeadLength + normalizedTorsoLength) {
-                sampledWidth = normalizedTailWidth;
+            if(yCoord > normalizedSnoutLength + normalizedHeadLength + normalizedTorsoLength) {
+                //sampledWidth = normalizedTailWidth;
+                sampledWidth = Mathf.Lerp(normalizedTailWidth, normalizedTorsoWidth, genome.bodyGenome.coreGenome.tailTaper * ((1f - yCoord) / normalizedTailLength));
             }
             // get absolute from relative value:
-            sampledWidth = sampledWidth * genome.bodyGenome.coreGenome.fullBodyWidth;
+            float circleWidth = Mathf.Sqrt(1f - (yCoord * 2f - 1f) * (yCoord * 2f - 1f));
+            sampledWidth = Mathf.Min(sampledWidth, circleWidth) * genome.bodyGenome.coreGenome.fullBodyWidth;
+
+            
 
             totalWidth += sampledWidth;
 
@@ -970,11 +976,6 @@ public class Agent : MonoBehaviour {
         mouthRef.agentIndex = this.index;
         mouthRef.agentRef = this;
         
-        
-
-        
-
-        //ScaleBody(0f);
     }
 
     public void InitializeAgentFromGenome(int agentIndex, AgentGenome genome, StartPositionGenome startPos) {
@@ -993,10 +994,7 @@ public class Agent : MonoBehaviour {
         lifeStageTransitionTimeStepCounter = 0;
         ageCounterMature = 0;
         scoreCounter = 0;
-        //this.transform.localPosition = startPos.startPosition;
-        //float semiMajorSize = fullSize.magnitude;
-        //this.transform.localScale = new Vector3(semiMajorSize, semiMajorSize, 1f);
-
+        
         InitializeModules(genome, this, startPos);      // Modules need to be created first so that Brain can map its neurons to existing modules  
 
         // Create blank Modules here so they can be populated during body construction??

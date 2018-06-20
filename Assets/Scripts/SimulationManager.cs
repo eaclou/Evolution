@@ -246,6 +246,10 @@ public class SimulationManager : MonoBehaviour {
         // Wake up the Render King and prepare him for the day ahead, proudly ruling over Renderland.
         LoadingGentlyRouseTheRenderMonarchHisHighnessLordOfPixels();
         
+        // TEMP!!! ****
+        for(int i = 0; i < numAgents; i++) {
+            theRenderKing.UpdateAgentWidthsTexture(agentsArray[i]);
+        }
         
         yield return null;
                 
@@ -367,7 +371,7 @@ public class SimulationManager : MonoBehaviour {
     }
     private void LoadingInitializeAgentsFromGenomes() {        
         for (int i = 0; i < numAgents; i++) {
-            agentsArray[i].InitializeAgentFromGenome(i, agentGenomePoolArray[i], GetRandomAgentSpawnPosition());
+            agentsArray[i].InitializeAgentFromGenome(i, agentGenomePoolArray[i], GetRandomAgentSpawnPosition());            
         }
     }
     private void LoadingInstantiateFood() {

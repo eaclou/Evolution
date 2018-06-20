@@ -44,6 +44,7 @@ public class TheRenderKing : MonoBehaviour {
     public Material uberFlowChainBrushMat1;
     public Material debugAgentResourcesMat;
     public Material testSwimmingBodyMat;
+    public Material critterBodyStrokesMat;
 
     public bool isDebugRenderOn = true;
     
@@ -93,6 +94,9 @@ public class TheRenderKing : MonoBehaviour {
 
     private int numFrameBufferStrokesPerDimension = 512;
     private ComputeBuffer frameBufferStrokesCBuffer;
+
+    private int numStrokesPerCritterBody = 128;
+    private ComputeBuffer critterBodyStrokesCBuffer;
 
     private BasicStrokeData[] playerGlowInitPos;
     private ComputeBuffer playerGlowCBuffer;
@@ -167,6 +171,11 @@ public class TheRenderKing : MonoBehaviour {
         public int brushTypeX;  // what texture/mask/brush pattern to use
         public int brushTypeY;  // what texture/mask/brush pattern to use
     }
+    //public struct CritterBodyStrokeData {
+    //    public int parentIndex;
+    //    public Vector2 localPos;
+    //    public 
+    //}
     public struct CurveStrokeData {
         public int parentIndex;
         public Vector3 hue;
@@ -272,7 +281,8 @@ public class TheRenderKing : MonoBehaviour {
         colorInjectionStrokesCBuffer = new ComputeBuffer(simManager._NumAgents + simManager._NumFood + simManager._NumPredators, sizeof(float) * 10);
         colorInjectionStrokeDataArray = new BasicStrokeData[colorInjectionStrokesCBuffer.count];
 
-        InitializeAgentBodyStrokesBuffer();         
+        InitializeAgentBodyStrokesBuffer();
+        InitializeCritterBodyStrokesCBuffer();
         InitializeAgentEyeStrokesBuffer();
         InitializeAgentSmearStrokesBuffer();
         InitializeAgentTailStrokesBuffer();
@@ -543,6 +553,26 @@ public class TheRenderKing : MonoBehaviour {
         }        
         agentBodyStrokesCBuffer.SetData(agentBodyStrokesArray);
     }
+    public void InitializeCritterBodyStrokesCBuffer() {
+        critterBodyStrokesCBuffer = new ComputeBuffer(simManager._NumAgents * numStrokesPerCritterBody, sizeof(float) * 7 + sizeof(int) * 3);
+        AgentBodyStrokeData[] critterBodyStrokesArray = new AgentBodyStrokeData[critterBodyStrokesCBuffer.count];
+        for (int i = 0; i < simManager._NumAgents; i++) {
+            for(int j = 0; j < numStrokesPerCritterBody; j++) {
+                AgentBodyStrokeData bodyStroke = new AgentBodyStrokeData();
+                bodyStroke.parentIndex = i;
+                bodyStroke.localPos = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f));
+                float width = simManager.agentsArray[i].agentWidthsArray[Mathf.RoundToInt((bodyStroke.localPos.y * 0.5f + 0.5f) * 15f)];
+                bodyStroke.localPos.x *= width;
+                bodyStroke.localDir = new Vector2(0f, 1f); // start up? shouldn't matter
+                bodyStroke.localScale = new Vector2(0.2f * width, 0.2f); // simManager.agentGenomePoolArray[i].bodyGenome.sizeAndAspectRatio;
+                bodyStroke.strength = 1f;
+                bodyStroke.brushTypeX = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.bodyStrokeBrushTypeX; // ** Revisit
+                bodyStroke.brushTypeY = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.bodyStrokeBrushTypeY;
+                critterBodyStrokesArray[i * numStrokesPerCritterBody + j] = bodyStroke;
+            }            
+        }        
+        critterBodyStrokesCBuffer.SetData(critterBodyStrokesArray);
+    }
     public void InitializeAgentSmearStrokesBuffer() {
         // **** Just Curves to start!!!! ********        
         agentSmearStrokesDataArray = new CurveStrokeData[simManager._NumAgents]; // **** Temporarily just for Agents! ******
@@ -635,6 +665,9 @@ public class TheRenderKing : MonoBehaviour {
         //pointStrokeDisplayMat.SetBuffer("agentSimDataCBuffer", agentSimDataCBuffer);
         agentEyesDisplayMat.SetBuffer("agentEyesStrokesCBuffer", agentEyeStrokesCBuffer);
         agentEyesDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+
+        critterBodyStrokesMat.SetPass(0);
+        critterBodyStrokesMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
                 
         curveStrokeDisplayMat.SetPass(0);
         curveStrokeDisplayMat.SetBuffer("curveRibbonVerticesCBuffer", curveRibbonVerticesCBuffer);
@@ -1492,12 +1525,19 @@ public class TheRenderKing : MonoBehaviour {
 
         }
 
-        testSwimmingBodyMat.SetPass(0);
+        /*testSwimmingBodyMat.SetPass(0);
         testSwimmingBodyMat.SetBuffer("meshVerticesCBuffer", bodySwimAnimVerticesCBuffer);
         testSwimmingBodyMat.SetBuffer("agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
         testSwimmingBodyMat.SetBuffer("agentMovementAnimDataCBuffer", simManager.simStateData.agentMovementAnimDataCBuffer);
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, testSwimmingBodyMat, 0, MeshTopology.Triangles, 6 * numBodyQuads, simManager.simStateData.agentMovementAnimDataCBuffer.count);
-        
+        */
+        // AGENT BODY:
+        critterBodyStrokesMat.SetPass(0);
+        critterBodyStrokesMat.SetBuffer("agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
+        critterBodyStrokesMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        critterBodyStrokesMat.SetBuffer("bodyStrokesCBuffer", critterBodyStrokesCBuffer);
+        critterBodyStrokesMat.SetBuffer("agentMovementAnimDataCBuffer", simManager.simStateData.agentMovementAnimDataCBuffer);
+        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, critterBodyStrokesMat, 0, MeshTopology.Triangles, 6, critterBodyStrokesCBuffer.count);
         
         //foodProceduralDisplayMat.SetPass(0);
         //foodProceduralDisplayMat.SetBuffer("foodSimDataCBuffer", simManager.simStateData.foodSimDataCBuffer);
@@ -1658,7 +1698,9 @@ public class TheRenderKing : MonoBehaviour {
         if(bodySwimAnimVerticesCBuffer != null) {
             bodySwimAnimVerticesCBuffer.Release();
         }
-        
+        if(critterBodyStrokesCBuffer != null) {
+            critterBodyStrokesCBuffer.Release();
+        }
     }
 
     /*public PointStrokeData GeneratePointStrokeData(int index, Vector2 size, Vector2 pos, Vector2 dir, Vector3 hue, float str, int brushType) {
