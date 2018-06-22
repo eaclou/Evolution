@@ -187,8 +187,11 @@ public class SimulationStateData {
             }
             agentSimDataArray[i].maturity = maturity;
             agentSimDataArray[i].decay = decay;            
-            if(simManager.agentsArray[i].isInsideFood) {
-                agentSimDataArray[i].eatingStatus = (agentSimDataArray[i].eatingStatus + 0.11f) % 1.0f;  // cycle around 0-1
+            if(simManager.agentsArray[i].mouthRef.isBiting) {
+                agentSimDataArray[i].eatingStatus = (float)simManager.agentsArray[i].mouthRef.bitingFrameCounter /
+                                                    ((float)simManager.agentsArray[i].mouthRef.biteChargeUpDuration + (float)simManager.agentsArray[i].mouthRef.biteCooldownDuration);
+                // (agentSimDataArray[i].eatingStatus + 0.11f) % 1.0f;  // cycle around 0-1
+                agentSimDataArray[i].eatingStatus = Mathf.Pow(agentSimDataArray[i].eatingStatus, 0.5f);
             }
             else {
                 //if(agentSimDataArray[i].eatingStatus > 0.5f) {
@@ -197,16 +200,16 @@ public class SimulationStateData {
                 //else {
                 //    agentSimDataArray[i].eatingStatus *= 0.9f;
                 //}
-                agentSimDataArray[i].eatingStatus *= 0.7f;
+                //agentSimDataArray[i].eatingStatus *= 0.1f;
             }
             // Experimental! move display data forward when chomping:
-            float eatingCycle = Mathf.Sin(agentSimDataArray[i].eatingStatus * Mathf.PI);
-            agentSimDataArray[i].worldPos += simManager.agentsArray[i].facingDirection * eatingCycle * 0.25f;
-            agentSimDataArray[i].heading = (simManager.agentsArray[i].facingDirection + UnityEngine.Random.insideUnitCircle * 0.2f * eatingCycle).normalized;
-            //agentSimDataArray[i].size.y *= (eatingCycle * 0.2f + 1.0f);
-            //agentSimDataArray[i].size.x *= (1.0f - eatingCycle * 0.2f);
+            //float eatingCycle = Mathf.Sin(agentSimDataArray[i].eatingStatus * Mathf.PI);
+            //agentSimDataArray[i].worldPos += simManager.agentsArray[i].facingDirection * eatingCycle * 0.25f;
+            //agentSimDataArray[i].heading = (simManager.agentsArray[i].facingDirection + UnityEngine.Random.insideUnitCircle * 0.2f * eatingCycle).normalized;
+            //agentSimDataArray[i].size.y *= (eatingCycle * 0.25f + 1.0f);
+            //agentSimDataArray[i].size.x *= (1.0f - eatingCycle * 0.25f);
 
-            agentSimDataArray[i].foodAmount = simManager.agentsArray[i].coreModule.foodAmountR[0];
+            agentSimDataArray[i].foodAmount = Mathf.Lerp(agentSimDataArray[i].foodAmount, simManager.agentsArray[i].coreModule.stomachContents / simManager.agentsArray[i].coreModule.stomachCapacity, 0.16f);
             
             // Z & W coords represents agent's x/y Radii (in FluidCoords)
             // convert from scene coords (-mapSize --> +mapSize to fluid coords (0 --> 1):::

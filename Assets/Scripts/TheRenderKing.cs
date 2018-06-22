@@ -562,14 +562,14 @@ public class TheRenderKing : MonoBehaviour {
                 bodyStroke.parentIndex = i;
                 bodyStroke.localPos = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f));
                 float width = simManager.agentsArray[i].agentWidthsArray[Mathf.RoundToInt((bodyStroke.localPos.y * 0.5f + 0.5f) * 15f)];
-                bodyStroke.localPos.x *= width;
+                bodyStroke.localPos.x *= width * 0.5f;
                 bodyStroke.localDir = new Vector2(0f, 1f); // start up? shouldn't matter
-                bodyStroke.localScale = new Vector2(0.2f * width, 0.2f); // simManager.agentGenomePoolArray[i].bodyGenome.sizeAndAspectRatio;
+                bodyStroke.localScale = new Vector2(0.12f * width, 0.12f); // simManager.agentGenomePoolArray[i].bodyGenome.sizeAndAspectRatio;
                 bodyStroke.strength = 1f;
                 bodyStroke.brushTypeX = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.bodyStrokeBrushTypeX; // ** Revisit
                 bodyStroke.brushTypeY = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.bodyStrokeBrushTypeY;
                 critterBodyStrokesArray[i * numStrokesPerCritterBody + j] = bodyStroke;
-            }            
+            }
         }        
         critterBodyStrokesCBuffer.SetData(critterBodyStrokesArray);
     }
@@ -1491,18 +1491,22 @@ public class TheRenderKing : MonoBehaviour {
             curveStrokeDisplayMat.SetBuffer("agentCurveStrokesReadCBuffer", agentSmearStrokesCBuffer);
             cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, curveStrokeDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, agentSmearStrokesCBuffer.count);
             */
+            /*
             // AGENT BODY:
             agentBodyDisplayMat.SetPass(0);
             agentBodyDisplayMat.SetBuffer("agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
             agentBodyDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
             agentBodyDisplayMat.SetBuffer("bodyStrokesCBuffer", agentBodyStrokesCBuffer);
             cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, agentBodyDisplayMat, 0, MeshTopology.Triangles, 6, agentBodyStrokesCBuffer.count);
+            */
+
+            
             // AGENT EYES:
-            agentEyesDisplayMat.SetPass(0);
-            agentEyesDisplayMat.SetBuffer("agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
-            agentEyesDisplayMat.SetBuffer("agentEyesStrokesCBuffer", agentEyeStrokesCBuffer);
-            agentEyesDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-            cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, agentEyesDisplayMat, 0, MeshTopology.Triangles, 6, agentEyeStrokesCBuffer.count);
+            //agentEyesDisplayMat.SetPass(0);
+            //agentEyesDisplayMat.SetBuffer("agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
+            //agentEyesDisplayMat.SetBuffer("agentEyesStrokesCBuffer", agentEyeStrokesCBuffer);
+            //agentEyesDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+            //cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, agentEyesDisplayMat, 0, MeshTopology.Triangles, 6, agentEyeStrokesCBuffer.count);
 
             predatorProceduralDisplayMat.SetPass(0);
             predatorProceduralDisplayMat.SetBuffer("predatorSimDataCBuffer", simManager.simStateData.predatorSimDataCBuffer);
@@ -1524,13 +1528,14 @@ public class TheRenderKing : MonoBehaviour {
             
 
         }
-
-        /*testSwimmingBodyMat.SetPass(0);
+        /*
+        testSwimmingBodyMat.SetPass(0);
         testSwimmingBodyMat.SetBuffer("meshVerticesCBuffer", bodySwimAnimVerticesCBuffer);
         testSwimmingBodyMat.SetBuffer("agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
         testSwimmingBodyMat.SetBuffer("agentMovementAnimDataCBuffer", simManager.simStateData.agentMovementAnimDataCBuffer);
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, testSwimmingBodyMat, 0, MeshTopology.Triangles, 6 * numBodyQuads, simManager.simStateData.agentMovementAnimDataCBuffer.count);
         */
+
         // AGENT BODY:
         critterBodyStrokesMat.SetPass(0);
         critterBodyStrokesMat.SetBuffer("agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
@@ -1538,6 +1543,14 @@ public class TheRenderKing : MonoBehaviour {
         critterBodyStrokesMat.SetBuffer("bodyStrokesCBuffer", critterBodyStrokesCBuffer);
         critterBodyStrokesMat.SetBuffer("agentMovementAnimDataCBuffer", simManager.simStateData.agentMovementAnimDataCBuffer);
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, critterBodyStrokesMat, 0, MeshTopology.Triangles, 6, critterBodyStrokesCBuffer.count);
+        
+        // AGENT EYES:
+        agentEyesDisplayMat.SetPass(0);
+        agentEyesDisplayMat.SetBuffer("agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
+        agentEyesDisplayMat.SetBuffer("agentEyesStrokesCBuffer", agentEyeStrokesCBuffer);
+        agentEyesDisplayMat.SetBuffer("agentMovementAnimDataCBuffer", simManager.simStateData.agentMovementAnimDataCBuffer);
+        agentEyesDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, agentEyesDisplayMat, 0, MeshTopology.Triangles, 6, agentEyeStrokesCBuffer.count);
         
         //foodProceduralDisplayMat.SetPass(0);
         //foodProceduralDisplayMat.SetBuffer("foodSimDataCBuffer", simManager.simStateData.foodSimDataCBuffer);

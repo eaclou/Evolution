@@ -72,8 +72,8 @@
 				
 				float2 scale = agentSimData.size * agentSimData.maturity;  // assume bodyStroke is 1:1 agentSize
 
-				float4 texWidth = widthsTex[int2(floor((1.0 - quadPoint.y) * 16), inst)];
-				scale.x = texWidth.x * agentSimData.maturity;
+				//float4 texWidth = widthsTex[int2(floor((1.0 - quadPoint.y) * 16), inst)];
+				//scale.x = texWidth.x * agentSimData.maturity;
 
 				quadPoint.y -= 0.5;
 				quadPoint *= float3(scale, 1.0);

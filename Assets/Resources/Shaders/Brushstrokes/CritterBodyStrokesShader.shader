@@ -83,32 +83,31 @@
 				float3 worldPosition = float3(agentSimData.worldPos, -0.5);
 
 				float3 quadPoint = quadVerticesCBuffer[id];				
-				float2 scale = bodyStrokeData.localScale;  // assume bodyStroke is 1:1 agentSize				
-				//quadPoint.y = quadPoint.y * 0.5 + 0.5;
+				float2 scale = bodyStrokeData.localScale;  // assume bodyStroke is 1:1 agentSize
+				
 				quadPoint *= float3(scale, 1.0);
 
-				//worldPosition.xy += quadPoint.xy;
-
-				float2 localPosition = bodyStrokeData.localPos * agentSimData.size * 0.5 + (quadPoint.xy * agentSimData.size);
 				
-				//worldPosition.xy += bodyStrokeData.localPos * agentSimData.size * 0.5;
+				//float clock = _Time.y;
+
+				float2 localPosition = bodyStrokeData.localPos;
+				localPosition = getWarpedPoint(localPosition, 
+												bodyStrokeData.localPos, 
+												quadPoint.xy,
+												animData.turnAmount, 
+												animData.animCycle, 
+												animData.accel, 
+												animData.smoothedThrottle,
+												agentSimData.foodAmount,
+												agentSimData.size,
+												agentSimData.eatingStatus);				
+
+
 				// Rotation of Billboard center around Agent's Center (no effect if localPos and localDir are zero/default)'
 				float2 forwardAgent = agentSimData.heading;
 				float2 rightAgent = float2(forwardAgent.y, -forwardAgent.x);
-				
-				//float2 localPos = bodyStrokeData.localPos;
-				float bodyAspectRatio = agentSimData.size.y / agentSimData.size.x;
-				float panningYawStrength = 0.5 * saturate(bodyAspectRatio * 0.5 - 0.4);
-				//panningYawStrength = 1;
-				localPosition = getWarpedPoint(localPosition, bodyStrokeData.localPos.y * 0.5 + 0.5, animData.turnAmount, panningYawStrength, agentSimData.size.y * 0.25, animData.animCycle, animData.accel, animData.smoothedThrottle);
+
 				localPosition = localPosition.x * rightAgent + localPosition.y * forwardAgent;
-				
-				//localPosition = localPosition.x * agentSimData.size.x * rightAgent + localPosition.y * agentSimData.size.y * forwardAgent;
-				//float2 localPos = getWarpedPoint(bodyStrokeData.localPos, bodyStrokeData.localPos.y * 0.5 + 0.5, animData.turnAmount, panningYawStrength, 0, animData.animCycle, animData.accel, animData.smoothedThrottle);
-				//float2 localPos = bodyStrokeData.localPos;
-				//float2 positionOffset = float2(localPos.x * agentSimData.size.x * rightAgent + localPos.y * agentSimData.size.y * forwardAgent) * 0.5;
-								
-				//worldPosition.xy += positionOffset; // Place properly
 
 				//worldPosition.xy = getWarpedPoint(worldPosition.xy, agentSimData.worldPos.xy, animData.turnAmount, panningYawStrength, 0, animData.animCycle, animData.accel, animData.smoothedThrottle);
 				worldPosition.xy += localPosition;
@@ -163,12 +162,13 @@
 				float4 texColor = tex2D(_MainTex, i.uv);  // Read Brush Texture start Row
 				//float4 texColor1 = tex2D(_MainTex, i.uv.zw);  // Read Brush Texture end Row
 
-				float4 patternSample = tex2Dlod(_PatternTex, float4(i.uvPattern, 0, 3));
+				float4 patternSample = tex2Dlod(_PatternTex, float4(i.uvPattern, 0, 5));
 				
 				//float4 brushColor = lerp(texColor0, texColor1, i.frameBlendLerp);
 
 				float4 finalColor = float4(lerp(agentSimData.primaryHue, agentSimData.secondaryHue, patternSample.x), texColor.a);
 				
+
 				return finalColor;
 				
 			}

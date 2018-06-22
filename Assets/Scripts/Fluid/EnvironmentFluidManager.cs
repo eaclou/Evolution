@@ -219,7 +219,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
         }
     }
     private void SetClimateInitial() {
-        Debug.Log("UpdateSimulationClimate Initial!");
+        //Debug.Log("UpdateSimulationClimate Initial!");
         //CreateForcePoints(0.08f, 60f, 300f);
         float lerpAmount = 0.3f;
 
@@ -231,7 +231,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
         forceMultiplier = Mathf.Lerp(forceMultiplier, 1f, lerpAmount);
     }
     private void SetClimateStormy() {
-        Debug.Log("UpdateSimulationClimate Stormy!");
+        //Debug.Log("UpdateSimulationClimate Stormy!");
         //CreateForcePoints(2f, 60f, 300f);
         float lerpAmount = 0.3f;
 
@@ -244,7 +244,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
         forceMultiplier = Mathf.Lerp(forceMultiplier, 14f, lerpAmount);
     }
     private void SetClimateThick() {
-        Debug.Log("UpdateSimulationClimate Thick!");
+        //Debug.Log("UpdateSimulationClimate Thick!");
         float lerpAmount = 0.3f;
 
         viscosity = Mathf.Lerp(viscosity, 0.02f, lerpAmount);

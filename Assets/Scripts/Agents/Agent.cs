@@ -60,7 +60,7 @@ public class Agent : MonoBehaviour {
 
         }
     }
-    private int decayDurationTimeSteps = 2;
+    private int decayDurationTimeSteps = 120;
     public int _DecayDurationTimeSteps
     {
         get
@@ -717,7 +717,7 @@ public class Agent : MonoBehaviour {
 
         // ENERGY!!!!
         // Digestion:
-        float amountDigested = 0.01f * fullSizeBodyVolume;
+        float amountDigested = 0.003f * fullSizeBodyVolume;
         float digestionAmount = Mathf.Min(coreModule.stomachContents, amountDigested);
         float foodToEnergyConversion = 1.0f;
         float createdEnergy = digestionAmount * foodToEnergyConversion;
@@ -823,7 +823,7 @@ public class Agent : MonoBehaviour {
 
             //this.rigidbodiesArray[0].AddForce(headForwardDir * speed * Time.deltaTime, ForceMode2D.Impulse);
 
-            animationCycle += swimAnimationCycleSpeed * throttle.magnitude / (Mathf.Lerp(coreModule.coreLength, 1f, 0.75f) * (growthPercentage * 0.25f + 0.75f));
+            animationCycle += swimAnimationCycleSpeed * throttle.magnitude / (Mathf.Lerp(coreModule.coreLength, 1f, 0.6f) * (growthPercentage * 0.4f + 0.6f));
             //animationCycle = animationCycle % 1.0f;
             
             // Forward Slide
