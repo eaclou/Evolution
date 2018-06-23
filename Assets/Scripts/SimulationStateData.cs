@@ -18,6 +18,31 @@ public class SimulationStateData {
         public float eatingStatus;
         public float foodAmount;
     }
+    public struct CritterInitData {
+        public Vector2 boundingBoxSize;
+        public float spawnSizePercentage;
+        public float maxEnergy;
+        public Vector3 primaryHue;
+        public Vector3 secondaryHue;
+        public int bodyPatternX;  // what grid cell of texture sheet to use
+        public int bodyPatternY;  // what grid cell of texture sheet to use
+    }
+    public struct CritterSimData {
+        public Vector2 worldPos;
+        public Vector2 velocity;
+        public Vector2 heading;
+        public float growthPercentage;
+        public float decayPercentage;
+        public float foodAmount;
+        public float energy;
+        public float health;
+        public float stamina;
+        public float biteAnimCycle;
+        public float moveAnimCycle;
+        public float turnAmount;
+        public float accel;
+		public float smoothedThrottle;
+    }
     public struct DebugBodyResourcesData {
         public float developmentPercentage;
         public float health;
@@ -82,6 +107,8 @@ public class SimulationStateData {
 
     // Store information from CPU simulation, to be passed to GPU:
     public AgentSimData[] agentSimDataArray;
+    public CritterInitData[] critterInitDataArray;
+    public CritterSimData[] critterSimDataArray;
     public DebugBodyResourcesData[] debugBodyResourcesArray;
     public AgentMovementAnimData[] agentMovementAnimDataArray;
     public FoodSimData[] foodSimDataArray;
@@ -89,6 +116,8 @@ public class SimulationStateData {
 
     // Store computeBuffers here or in RenderKing?? These ones seem appropo for StateData but buffers of floatyBits for ex. might be better in RK....
     public ComputeBuffer agentSimDataCBuffer;
+    public ComputeBuffer critterInitDataCBuffer;
+    public ComputeBuffer critterSimDataCBuffer;
     public ComputeBuffer debugBodyResourcesCBuffer;
     public ComputeBuffer agentMovementAnimDataCBuffer;
     public ComputeBuffer foodSimDataCBuffer;
@@ -117,6 +146,18 @@ public class SimulationStateData {
             agentSimDataArray[i] = new AgentSimData();
         }
         agentSimDataCBuffer = new ComputeBuffer(agentSimDataArray.Length, sizeof(float) * 18);
+
+        critterInitDataArray = new CritterInitData[simManager._NumAgents];
+        for(int i = 0; i < critterInitDataArray.Length; i++) {
+            critterInitDataArray[i] = new CritterInitData();
+        }
+        critterInitDataCBuffer = new ComputeBuffer(critterInitDataArray.Length, sizeof(float) * 10 + sizeof(int) * 2);
+
+        critterSimDataArray = new CritterSimData[simManager._NumAgents];
+        for(int i = 0; i < critterSimDataArray.Length; i++) {
+            critterSimDataArray[i] = new CritterSimData();
+        }
+        critterSimDataCBuffer = new ComputeBuffer(critterSimDataArray.Length, sizeof(float) * 17);
 
         debugBodyResourcesArray = new DebugBodyResourcesData[simManager._NumAgents];
         for(int i = 0; i < debugBodyResourcesArray.Length; i++) {
@@ -219,6 +260,49 @@ public class SimulationStateData {
                                                       (simManager.agentsArray[i].fullSizeBoundingBox.y + 0.1f) / (simManager._MapSize * 2f)); //... 0.5/140 ...
         }
         agentSimDataCBuffer.SetData(agentSimDataArray); // send data to GPU for Rendering
+
+        // CRITTER INIT: // *** MOVE INTO OWN FUNCTION -- update more efficiently with compute shader?
+        for(int i = 0; i < critterInitDataArray.Length; i++) {
+            critterInitDataArray[i].boundingBoxSize = simManager.agentsArray[i].fullSizeBoundingBox;
+            critterInitDataArray[i].spawnSizePercentage = simManager.agentsArray[i].spawnStartingScale;
+            critterInitDataArray[i].maxEnergy = Mathf.Min(simManager.agentsArray[i].fullSizeBoundingBox.x * simManager.agentsArray[i].fullSizeBoundingBox.y, 0.5f);
+            critterInitDataArray[i].primaryHue = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.huePrimary;
+            critterInitDataArray[i].secondaryHue = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.hueSecondary;
+            critterInitDataArray[i].bodyPatternX = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.bodyStrokeBrushTypeX;
+            critterInitDataArray[i].bodyPatternY = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.bodyStrokeBrushTypeY;  // what grid cell of texture sheet to use
+        }
+        critterInitDataCBuffer.SetData(critterInitDataArray);
+        
+        // CRITTER SIM DATA: updated every frame:
+        for(int i = 0; i < critterSimDataArray.Length; i++) {
+            Vector3 agentPos = simManager.agentsArray[i].bodyRigidbody.position;            
+            critterSimDataArray[i].worldPos = new Vector2(agentPos.x, agentPos.y);  // in world(scene) coordinates
+            if(simManager.agentsArray[i].smoothedThrottle.sqrMagnitude > 0f) {
+                critterSimDataArray[i].velocity = simManager.agentsArray[i].smoothedThrottle.normalized;
+            }
+            critterSimDataArray[i].heading = simManager.agentsArray[i].facingDirection;
+            critterSimDataArray[i].growthPercentage = simManager.agentsArray[i].growthPercentage;
+            float decay = 0f;
+            if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Decaying) {
+                decay = (float)simManager.agentsArray[i].lifeStageTransitionTimeStepCounter / (float)simManager.agentsArray[i]._DecayDurationTimeSteps;
+            }
+            critterSimDataArray[i].decayPercentage = decay;
+            critterSimDataArray[i].foodAmount = Mathf.Lerp(agentSimDataArray[i].foodAmount, simManager.agentsArray[i].coreModule.stomachContents / simManager.agentsArray[i].coreModule.stomachCapacity, 0.16f);
+            critterSimDataArray[i].energy = simManager.agentsArray[i].coreModule.energyRaw;
+            critterSimDataArray[i].health = simManager.agentsArray[i].coreModule.healthBody;
+            critterSimDataArray[i].stamina = simManager.agentsArray[i].coreModule.stamina[0];
+            if(simManager.agentsArray[i].mouthRef.isBiting) {
+                critterSimDataArray[i].biteAnimCycle = (float)simManager.agentsArray[i].mouthRef.bitingFrameCounter /
+                                                    ((float)simManager.agentsArray[i].mouthRef.biteChargeUpDuration + (float)simManager.agentsArray[i].mouthRef.biteCooldownDuration);
+                // (agentSimDataArray[i].eatingStatus + 0.11f) % 1.0f;  // cycle around 0-1
+                critterSimDataArray[i].biteAnimCycle = Mathf.Pow(critterSimDataArray[i].biteAnimCycle, 0.5f);
+            }
+            critterSimDataArray[i].moveAnimCycle = simManager.agentsArray[i].animationCycle;
+            critterSimDataArray[i].turnAmount = simManager.agentsArray[i].turningAmount;
+            critterSimDataArray[i].accel += Mathf.Clamp01(simManager.agentsArray[i].curAccel) * 1f; // ** RE-FACTOR!!!!
+		    critterSimDataArray[i].smoothedThrottle = simManager.agentsArray[i].smoothedThrottle.magnitude;
+        }
+        critterSimDataCBuffer.SetData(critterSimDataArray);
 
         for(int i = 0; i < debugBodyResourcesArray.Length; i++) {  
             

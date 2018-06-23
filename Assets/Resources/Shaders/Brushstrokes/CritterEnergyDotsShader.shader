@@ -1,10 +1,8 @@
-﻿Shader "Critter/CritterBodyStrokesShader"
+﻿Shader "Critter/CritterEnergyDotsShader"
 {
 	Properties
 	{
-		_MainTex ("Main Texture", 2D) = "white" {}
-		_PatternTex ("Pattern Texture", 2D) = "white" {}
-		//_BumpMap("Normal Map", 2D) = "bump" {}		
+		_MainTex ("Main Texture", 2D) = "white" {}		
 	}
 	SubShader
 	{		
@@ -25,8 +23,6 @@
 			#include "Assets/Resources/Shaders/Inc/CritterBodyAnimation.cginc"
 
 			sampler2D _MainTex;
-			sampler2D _PatternTex;
-			//sampler2D _BumpMap;
 			
 			struct CritterStrokeData {
 				int parentIndex;  // what agent/object is this attached to?				
@@ -80,8 +76,6 @@
 			StructuredBuffer<CritterSimData> critterSimDataCBuffer;
 			StructuredBuffer<CritterStrokeData> bodyStrokesCBuffer;
 
-			//StructuredBuffer<AgentSimData> agentSimDataCBuffer;			
-			//StructuredBuffer<AgentMovementAnimData> agentMovementAnimDataCBuffer;
 			StructuredBuffer<float3> quadVerticesCBuffer;
 			
 			struct v2f
@@ -91,7 +85,6 @@
 				float4 color : TEXCOORD1;
 				float3 worldPos : TEXCOORD6;
 				float2 uvPattern : TEXCOORD8;
-				int2 bufferIndices : TEXCOORD9;
 			};
 
 			float rand(float2 co){   // OUTPUT is in [0,1] RANGE!!!
@@ -107,15 +100,13 @@
 				CritterInitData critterInitData = critterInitDataCBuffer[agentIndex];
 				CritterSimData critterSimData = critterSimDataCBuffer[agentIndex];
 
-				o.bufferIndices = int2(inst, agentIndex);
-				
 				float2 critterPosition = critterSimData.worldPos.xy;
 				float2 centerToVertexOffset = quadVerticesCBuffer[id];
 				
 				float2 curAgentSize = critterInitData.boundingBoxSize * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage);
 
 				// spriteCenterPos!!! ::::  ===========================================================================
-				float2 centerPosition = bodyStrokeData.localPos;
+				float2 centerPosition = bodyStrokeData.localPos * 0.5 * (saturate(critterSimData.energy / critterInitData.maxEnergy) * 0.5 + 0.5);
 				// foodBloat (normalized coords -1,1)
 				centerPosition = foodBloatAnimPos(centerPosition, bodyStrokeData.localPos.y, critterSimData.foodAmount);
 				// biteAnim (normalized coords -1, 1)
@@ -130,61 +121,13 @@
 				centerPosition = rotatePointVector(centerPosition, float2(0,0), critterSimData.heading);
 
 				// vertexOffsetFromSpriteCenter!!! :::: ===============================================================
-				centerToVertexOffset *= bodyStrokeData.localScale * curAgentSize;
+				centerToVertexOffset *= bodyStrokeData.localScale * length(curAgentSize) * saturate(critterSimData.energy / critterInitData.maxEnergy);
 				centerToVertexOffset = rotatePointVector(centerToVertexOffset, float2(0,0), critterSimData.heading);
 
-				float3 worldPosition = float3(bodyStrokeData.worldPos + centerToVertexOffset, -0.5);
-				//float3 worldPosition = float3(critterPosition + centerPosition + centerToVertexOffset, -0.5);
+				
+				float3 worldPosition = float3(critterPosition + centerPosition + centerToVertexOffset, -0.5);
 
 				//======================================================================================================
-
-
-
-				//float2 localPosition = bodyStrokeData.localPos;
-				/*localPosition = getWarpedPoint(localPosition, 
-												bodyStrokeData.localPos, 
-												quadPoint.xy,
-												animData.turnAmount, 
-												animData.animCycle, 
-												animData.accel, 
-												animData.smoothedThrottle,
-												agentSimData.foodAmount,
-												agentSimData.size,
-												agentSimData.eatingStatus);				
-				*/
-
-				// Rotation of Billboard center around Agent's Center (no effect if localPos and localDir are zero/default)'
-				//float2 forwardAgent = critterSimData.heading;
-				//float2 rightAgent = float2(forwardAgent.y, -forwardAgent.x);
-				//localPosition = localPosition.x * rightAgent + localPosition.y * forwardAgent;
-
-				
-				//worldPosition.xy = getWarpedPoint(worldPosition.xy, agentSimData.worldPos.xy, animData.turnAmount, panningYawStrength, 0, animData.animCycle, animData.accel, animData.smoothedThrottle);
-				//worldPosition.xy += localPosition + quadPoint.xy;
-				// NoiseWobble offset:
-				//float clock = _Time.y;
-
-				// Figure out final facing Vectors!!!
-				//float2 forward0 = critterSimData.heading;
-				//float2 right0 = float2(forward0.y, -forward0.x); // perpendicular to forward vector
-				//float2 rotatedPoint0 = float2(bodyStrokeData.localDir.x * right0 + bodyStrokeData.localDir.y * forward0);  // Rotate localRotation by AgentRotation
-
-				//float2 forward1 = rotatedPoint0;
-				//float2 right1 = float2(forward1.y, -forward1.x);
-				// With final facing Vectors, find rotation of QuadPoints:
-				//float3 rotatedPoint1 = float3(quadPoint.x * right1 + quadPoint.y * forward1,
-				//							 quadPoint.z);
-
-				//float alpha = 1;
-				//alpha = alpha * (1.0 - agentSimData.decay);
-				//float activeColorLerp = 1;
-				//activeColorLerp = activeColorLerp * floor(agentSimData.maturity + 0.01);
-				//activeColorLerp = activeColorLerp * floor((1.0 - agentSimData.decay) + 0.01);
-				
-				//o.pos = mul(UNITY_MATRIX_VP, float4(rotatedPoint, 0.0f));
-
-				// !!!*** TEMP!!!::::
-				//worldPosition = float3(quadPoint.xy * 1 + critterSimData.worldPos, -1.0);
 
 				float alpha = saturate(1.0 - critterSimData.decayPercentage * 1.2);
 
@@ -212,23 +155,11 @@
 
 			fixed4 frag(v2f i) : SV_Target
 			{
-				//CritterStrokeData bodyStrokeData = bodyStrokesCBuffer[i.bufferIndices.x];
-				//AgentSimData agentSimData = agentSimDataCBuffer[i.bufferIndices.y];
-				CritterInitData critterInitData = critterInitDataCBuffer[i.bufferIndices.y];
-
-				float4 texColor = tex2D(_MainTex, i.uv);  // Read Brush Texture start Row
-				//float4 texColor1 = tex2D(_MainTex, i.uv.zw);  // Read Brush Texture end Row
-
-				float4 patternSample = tex2Dlod(_PatternTex, float4(i.uvPattern, 0, 3));
 				
-				//float4 brushColor = lerp(texColor0, texColor1, i.frameBlendLerp);
+				float4 texColor = tex2D(_MainTex, i.uv);  // Read Brush Texture start Row
+				
+				return float4(0,0.5,2,1);
 
-				// *** Better way to handle this???
-				float4 finalColor = float4(lerp(critterInitData.primaryHue, critterInitData.secondaryHue, patternSample.x), texColor.a);
-				finalColor.a *= i.color.a;
-				//return float4(1,1,1,1);
-
-				return finalColor;
 				
 			}
 		ENDCG

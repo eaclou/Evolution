@@ -11,6 +11,45 @@
 #pragma kernel CSUpdateDynamicLeafBuffers
 #pragma kernel CSUpdateDynamicFruitBuffers
 #pragma kernel CSSimulateFruit
+#pragma kernel CSSimulateCritterStrokes
+
+#include "Assets/Resources/Shaders/Inc/CritterBodyAnimation.cginc"
+
+
+struct CritterStrokeData {
+	int parentIndex;  // what agent/object is this attached to?				
+	float2 worldPos;
+	float2 localPos;
+	float2 localDir;
+	float2 localScale;
+	float strength;  // abstraction for pressure of brushstroke + amount of paint 
+	int brushType;
+};
+struct CritterInitData {
+	float2 boundingBoxSize;
+	float spawnSizePercentage;
+	float maxEnergy;
+	float3 primaryHue;
+	float3 secondaryHue;
+	int bodyPatternX;  // what grid cell of texture sheet to use
+	int bodyPatternY;  // what grid cell of texture sheet to use
+};
+struct CritterSimData {
+	float2 worldPos;
+	float2 velocity;
+	float2 heading;
+	float growthPercentage;
+	float decayPercentage;
+	float foodAmount;
+	float energy;
+	float health;
+	float stamina;
+	float biteAnimCycle;
+	float moveAnimCycle;
+	float turnAmount;
+	float accel;
+	float smoothedThrottle;
+};
 
 struct AgentSimData {
 	float2 worldPos;
@@ -109,12 +148,16 @@ struct FruitData {
     float attached;  // if attached, sticks to parent food, else, floats in water
 };
 
+StructuredBuffer<CritterInitData> critterInitDataCBuffer;
+StructuredBuffer<CritterSimData> critterSimDataCBuffer;
 StructuredBuffer<AgentSimData> agentSimDataCBuffer;
 StructuredBuffer<FoodSimData> foodSimDataCBuffer;
 StructuredBuffer<int> agentInitializeCBuffer;
 StructuredBuffer<CurveStrokeData> agentCurveStrokesReadCBuffer; // use this for updating
 RWStructuredBuffer<CurveStrokeData> agentCurveStrokesWriteCBuffer;
 int _CurveStrokesUpdateAgentIndex;
+
+RWStructuredBuffer<CritterStrokeData> critterStrokesWriteCBuffer;
 
 StructuredBuffer<BodyStrokeData> agentBodyStrokesReadCBuffer; // use this for updating
 RWStructuredBuffer<BodyStrokeData> agentBodyStrokesWriteCBuffer;
@@ -137,6 +180,10 @@ RWStructuredBuffer<FrameBufferStrokeData> terrainFrameBufferStrokesCBuffer;
 Texture2D<float4> velocityRead;
 
 SamplerState _LinearRepeat;
+
+float rand(float2 co){   // OUTPUT is in [0,1] RANGE!!!
+	return frac(sin(dot(co.xy ,float2(12.9898,78.233))) * 43758.5453);
+}
 
 float length_squared(float2 v, float2 w) {
 	float2 r = w - v;
@@ -389,6 +436,54 @@ void CSSimulateFruit (uint3 id : SV_DispatchThreadID)
 	foodFruitDataWriteCBuffer[id.x].worldPos = newPos;
 }
 
+
+[numthreads(16,1,1)]
+void CSSimulateCritterStrokes (uint3 id : SV_DispatchThreadID)
+{
+	// If detached, actual worldPos can lag behind pinned default position on agent:
+
+	CritterStrokeData brushData = critterStrokesWriteCBuffer[id.x];
+	int agentIndex = brushData.parentIndex;	
+	CritterInitData critterInitData = critterInitDataCBuffer[agentIndex];
+	CritterSimData critterSimData = critterSimDataCBuffer[agentIndex];
+
+
+	
+
+	// Find new targetPosition
+	float2 critterPosition = critterSimData.worldPos.xy;
+					
+	float2 curAgentSize = critterInitData.boundingBoxSize * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage);
+
+	// spriteCenterPos!!! ::::  ===========================================================================
+	float2 centerPosition = brushData.localPos;
+	
+	centerPosition = foodBloatAnimPos(centerPosition, brushData.localPos.y, critterSimData.foodAmount);
+	
+	centerPosition = biteAnimPos(centerPosition, brushData.localPos.y, critterSimData.biteAnimCycle);
+	
+	centerPosition = centerPosition * curAgentSize * 0.5;
+	
+	float bodyAspectRatio = critterInitData.boundingBoxSize.y / critterInitData.boundingBoxSize.x;
+	float bendStrength = 0.5 * saturate(bodyAspectRatio * 0.5 - 0.4);
+	centerPosition = swimAnimPos(centerPosition, brushData.localPos.y, critterSimData.moveAnimCycle, critterSimData.accel, critterSimData.smoothedThrottle, bendStrength, critterSimData.turnAmount);
+	
+	centerPosition = rotatePointVector(centerPosition, float2(0,0), critterSimData.heading);
+
+	float2 curWorldPos = brushData.worldPos;
+	float2 newWorldPos = centerPosition + critterSimData.worldPos;
+
+	float2 uv = (curWorldPos + 70) / 140;
+	float2 fluidVel = velocityRead.SampleLevel(_LinearRepeat, uv, 0).xy;
+	float speedMult = 0.033 * 140;
+
+	curWorldPos = curWorldPos + fluidVel * speedMult * 0.1;
+
+	float attachThreshold = rand(brushData.localPos * 100); //critterSimData.health
+	float pinnedAmount = saturate(100.0 * (critterSimData.health - attachThreshold)) * (1.0 - critterSimData.decayPercentage);   //brushData.strength;
+
+	critterStrokesWriteCBuffer[id.x].worldPos = lerp(curWorldPos, newWorldPos, pinnedAmount);
+}
 
 
 // &&&&& OLD OLD OLD !!! &&&&&&&&&&&

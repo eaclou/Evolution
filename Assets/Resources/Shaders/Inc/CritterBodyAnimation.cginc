@@ -26,6 +26,51 @@ float2 rotate_point(float2 pivot, float angle, float2 p)
 	return rotatedPoint;
 }
 
+float2 rotatePointVector(float2 p, float2 pivot, float2 forward) {
+	float2 newPos = p - pivot;
+	float2 right = float2(forward.y, -forward.x);
+	newPos = newPos.x * right + newPos.y * forward;
+	newPos += pivot;
+	return newPos;
+}
+
+// scale to critter size
+// keep pivot & billboard vertex offset separate?
+
+float2 foodBloatAnimPos(float2 originalPos, float t, float foodAmount) {
+	
+	float bloatPivotY = (saturate(foodAmount - 0.5) - 0.5) * 2;
+	float bloatMask = smoothstep(0, 1, (1 - saturate(abs((t - bloatPivotY) * 1))) * 1); // smoothstep makes a more gaussain-looking shape than pointy
+	float bloatMagnitude = foodAmount * foodAmount;
+	
+	float2 newPos = originalPos * (1.0 + bloatMask * bloatMagnitude * 1.0);
+	
+	return newPos;
+}
+
+float2 biteAnimPos(float2 originalPos, float t, float biteAnimCycle) {
+	
+	float eatingCycle = sin(biteAnimCycle * 3.141592);
+	float biteMask = saturate(t + 0.25);
+	
+	float2 newPos = originalPos * (1.0 + eatingCycle * 0.33f * biteMask);	
+	newPos.y *= (eatingCycle * 0.15f * biteMask + 1.0f);
+	newPos.x *= (1.0f - eatingCycle * 0.25f * biteMask);
+	
+	return newPos;
+}
+
+float2 swimAnimPos(float2 originalPos, float t, float animCycle, float accel, float throttle, float magnitude, float turnAmount) {
+	float animSpeed = 15;
+	float accelAnimSpeed = 45;
+	float v = t * 0.5 + 0.5;
+	float offsetMask = saturate(1 - v * 0.75); 
+
+	float2 newPos = rotate_point(float2(0,0), clamp(turnAmount * -1, -1, 1) * offsetMask + magnitude * sin(v * 3.2 + animCycle * animSpeed + accel * accelAnimSpeed) * offsetMask * throttle, originalPos);
+	return newPos;
+}
+
+
 float2 getWarpedPoint(float2 originalPoint, float2 brushCenter, float2 spriteVertexLocalPos, float turnAmount, float animCycle, float accel, float throttle, float foodAmount, float2 size, float eatingStatus) {
 	
 	float2 spritePivotPos = originalPoint;				

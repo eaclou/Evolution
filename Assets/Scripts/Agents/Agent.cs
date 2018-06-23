@@ -993,6 +993,7 @@ public class Agent : MonoBehaviour {
         wasImpaled = false;
         lifeStageTransitionTimeStepCounter = 0;
         ageCounterMature = 0;
+        growthPercentage = 0f;
         scoreCounter = 0;
         
         InitializeModules(genome, this, startPos);      // Modules need to be created first so that Brain can map its neurons to existing modules  

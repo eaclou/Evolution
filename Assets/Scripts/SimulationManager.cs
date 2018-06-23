@@ -1351,6 +1351,12 @@ public class SimulationManager : MonoBehaviour {
             if (simStateData.agentSimDataCBuffer != null) {
                 simStateData.agentSimDataCBuffer.Release();
             }
+            if (simStateData.critterInitDataCBuffer != null) {
+                simStateData.critterInitDataCBuffer.Release();
+            }
+            if (simStateData.critterSimDataCBuffer != null) {
+                simStateData.critterSimDataCBuffer.Release();
+            }
             if (simStateData.debugBodyResourcesCBuffer != null) {
                 simStateData.debugBodyResourcesCBuffer.Release();
             }
