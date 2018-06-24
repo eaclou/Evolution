@@ -31,6 +31,7 @@
 				float2 localDir;
 				float2 localScale;
 				float strength;  // abstraction for pressure of brushstroke + amount of paint 
+				float lifeStatus;
 				int brushType;
 			};
 			struct CritterInitData {
@@ -103,10 +104,13 @@
 				float2 critterPosition = critterSimData.worldPos.xy;
 				float2 centerToVertexOffset = quadVerticesCBuffer[id];
 				
-				float2 curAgentSize = critterInitData.boundingBoxSize * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage);
+				float growthScale = lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage);
+				float2 curAgentSize = critterInitData.boundingBoxSize * growthScale;
 
 				// spriteCenterPos!!! ::::  ===========================================================================
-				float2 centerPosition = bodyStrokeData.localPos * 0.5 * (critterSimData.foodAmount * 0.5 + 0.5);
+				float2 centerPosition = bodyStrokeData.localPos * 0.7 * (critterSimData.foodAmount * 0.5 + 0.5);
+				centerPosition.y *= 0.6;
+				float v = centerPosition.y;
 				// foodBloat (normalized coords -1,1)
 				centerPosition = foodBloatAnimPos(centerPosition, bodyStrokeData.localPos.y, critterSimData.foodAmount);
 				// biteAnim (normalized coords -1, 1)
@@ -116,12 +120,13 @@
 				// swimAnim:
 				float bodyAspectRatio = critterInitData.boundingBoxSize.y / critterInitData.boundingBoxSize.x;
 				float bendStrength = 0.5 * saturate(bodyAspectRatio * 0.5 - 0.4);
-				centerPosition = swimAnimPos(centerPosition, bodyStrokeData.localPos.y, critterSimData.moveAnimCycle, critterSimData.accel, critterSimData.smoothedThrottle, bendStrength, critterSimData.turnAmount);
+				
+				centerPosition = swimAnimPos(centerPosition, v, critterSimData.moveAnimCycle, critterSimData.accel, critterSimData.smoothedThrottle, bendStrength, critterSimData.turnAmount);
 				// rotate with agent:
 				centerPosition = rotatePointVector(centerPosition, float2(0,0), critterSimData.heading);
 
 				// vertexOffsetFromSpriteCenter!!! :::: ===============================================================
-				centerToVertexOffset *= bodyStrokeData.localScale * curAgentSize * critterSimData.foodAmount;
+				centerToVertexOffset *= bodyStrokeData.localScale * (curAgentSize.x + curAgentSize.y) / 2.5 * critterSimData.foodAmount * (1.0 - critterSimData.decayPercentage);
 				centerToVertexOffset = rotatePointVector(centerToVertexOffset, float2(0,0), critterSimData.heading);
 
 				
@@ -156,7 +161,7 @@
 				
 				float4 texColor = tex2D(_MainTex, i.uv);  // Read Brush Texture start Row
 				
-				return float4(0.15,0.65,0.05,texColor.a);
+				return float4(1.75,2.35,0.65,texColor.a);
 							
 				
 			}

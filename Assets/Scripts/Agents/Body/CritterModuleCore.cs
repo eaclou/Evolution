@@ -163,7 +163,7 @@ public class CritterModuleCore {
             foodAmountB[0] = 1f;
         }
 
-        energyRaw = 0.5f;
+        energyRaw = Mathf.Max(Mathf.Lerp(0.5f, coreWidth * coreLength, 0.1f), 0.5f);
         healthHead = 1f;
         healthBody = 1f;
         healthExternal = 1f;

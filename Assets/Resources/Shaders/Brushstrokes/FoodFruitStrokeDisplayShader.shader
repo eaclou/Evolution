@@ -222,12 +222,14 @@
 				//hue = lerp(hue, float3(1,1,1), growBrushColor.b); //); // temp flower color use stem color
 				hue = lerp(hue, float3(0.1,0.9,0.2), 0.7);
 				hue = lerp(hue, rawData.fruitHue, growBrushColor.g) + zDir * 0.45; //); // temp flower color use stem color
-				finalGrowColor.rgb = hue * lerp(saturate(i.color.z * 0.6 + 0.2), 1, 1.0 - rawData.foodAmount.r);
+				//finalGrowColor.rgb = float3(1.75,2.35,0.65) * lerp(saturate(i.color.z * 0.6 + 0.2), 1, 1.0 - rawData.foodAmount.r);
 
 				
 				finalGrowColor.a *= saturate(1.0 - rawData.decay * 1);
 				finalGrowColor.a *= saturate(rawData.foodAmount.r * 0.6 + 0.4);
 				finalGrowColor.a *= 1;
+
+				finalGrowColor.rgb = lerp(finalGrowColor.rgb, float3(1.75,2.35,0.65), 0.95);
 				
 				return finalGrowColor;
 			}

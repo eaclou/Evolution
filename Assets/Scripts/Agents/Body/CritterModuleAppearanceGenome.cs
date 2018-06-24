@@ -66,7 +66,7 @@ public class CritterModuleAppearanceGenome {
         
         eyeGenome = new EyeGenome();
         eyeGenome.localPos = new Vector2(0.5f, 0.8f);
-        eyeGenome.localScale = new Vector2(0.32f, 1f);
+        eyeGenome.localScale = new Vector2(0.25f, 1f);
         eyeGenome.irisHue = new Vector3(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f));
         eyeGenome.pupilHue = Vector3.zero;
         eyeGenome.eyeBrushType = UnityEngine.Random.Range(0, 8);        
@@ -90,9 +90,9 @@ public class CritterModuleAppearanceGenome {
 
         eyeGenome = new EyeGenome();
 
-        eyeGenome.localPos = UtilityMutationFunctions.GetMutatedVector2Additive(parentGenome.eyeGenome.localPos, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, new Vector2(0.33f, 0.33f), new Vector2(1f, 1f));
+        eyeGenome.localPos = UtilityMutationFunctions.GetMutatedVector2Additive(parentGenome.eyeGenome.localPos, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, new Vector2(0.5f, 0.25f), new Vector2(1f, 1f));
         // EYES SCALE IS: (x= size, y= aspectRatio)
-        eyeGenome.localScale = UtilityMutationFunctions.GetMutatedVector2Additive(parentGenome.eyeGenome.localScale, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, new Vector2(0.33f, 0.85f), new Vector2(0.5f, 1.2f));
+        eyeGenome.localScale = UtilityMutationFunctions.GetMutatedVector2Additive(parentGenome.eyeGenome.localScale, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, new Vector2(0.18f, 0.85f), new Vector2(0.36f, 1.2f));
         eyeGenome.irisHue = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.eyeGenome.irisHue, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
         eyeGenome.pupilHue = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.eyeGenome.pupilHue, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
         eyeGenome.eyeBrushType = UtilityMutationFunctions.GetMutatedIntAdditive(parentGenome.eyeGenome.eyeBrushType, settings.defaultBodyMutationChance, 7, 0, 7);

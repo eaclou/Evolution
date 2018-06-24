@@ -60,7 +60,7 @@ public class Agent : MonoBehaviour {
 
         }
     }
-    private int decayDurationTimeSteps = 120;
+    private int decayDurationTimeSteps = 60;
     public int _DecayDurationTimeSteps
     {
         get
@@ -471,7 +471,7 @@ public class Agent : MonoBehaviour {
     }
 
     public void EatFood(float amount) {
-        coreModule.stomachContents += amount;
+        coreModule.stomachContents += amount * 2f;
         if(coreModule.stomachContents > coreModule.stomachCapacity) {
             coreModule.stomachContents = coreModule.stomachCapacity;
         }
@@ -638,8 +638,8 @@ public class Agent : MonoBehaviour {
         bodyRigidbody.mass = currentBodyVolume;
 
         // MOUTH:
-        bodyCritterSegment.GetComponent<CircleCollider2D>().radius = coreModule.coreWidth * scale * 0.5f;
-        bodyCritterSegment.GetComponent<CircleCollider2D>().offset = new Vector2(0f, coreModule.coreLength * scale * 0.5f);
+        bodyCritterSegment.agentRef.mouthRef.triggerCollider.radius = coreModule.coreWidth * scale * 0.5f;
+        bodyCritterSegment.agentRef.mouthRef.triggerCollider.offset = new Vector2(0f, coreModule.coreLength * scale * 0.5f);
 
         
         /*
@@ -730,12 +730,13 @@ public class Agent : MonoBehaviour {
         //    coreModule.foodAmountR[0] = 0f;
         //}
         coreModule.energyRaw += createdEnergy;
-        if(coreModule.energyRaw > 5f) {
-            coreModule.energyRaw = 5f;
+        float maxEnergy = coreModule.coreWidth * coreModule.coreLength;
+        if(coreModule.energyRaw > maxEnergy) {
+            coreModule.energyRaw = maxEnergy;
         }
 
         // Heal:
-        float healRate = 0.0001f;
+        float healRate = 0.0002f;
         float energyToHealthConversionRate = 6f;
         if(coreModule.healthBody < 1f) {
             coreModule.healthBody += healRate;
@@ -778,7 +779,7 @@ public class Agent : MonoBehaviour {
         }
 
         if(humanControlled) {
-            coreModule.energyRaw = 1f;
+            coreModule.energyRaw = maxEnergy;
         }
 
         ApplyPhysicsForces(smoothedThrottle);
@@ -806,7 +807,7 @@ public class Agent : MonoBehaviour {
         //    jointAnglesArray[j] = hingeJointsArray[j].jointAngle;            
         //}
 
-        turningAmount = Mathf.Lerp(turningAmount, this.bodyRigidbody.angularVelocity * Mathf.Deg2Rad * 0.1f, 0.15f);
+        turningAmount = Mathf.Lerp(turningAmount, this.bodyRigidbody.angularVelocity * Mathf.Deg2Rad * 0.1f, 0.08f);
 
         if (throttle.sqrMagnitude > 0.0001f) {  // Throttle is NOT == ZERO
             
@@ -818,6 +819,7 @@ public class Agent : MonoBehaviour {
             float headTurn = Vector2.Dot(throttleDir, headRightDir) * -1f * turnSharpness;
             float headTurnSign = Mathf.Clamp(Vector2.Dot(throttleDir, headRightDir) * -10000f, -1f, 1f);
 
+            float fatigueMultiplier = Mathf.Clamp01(coreModule.energyRaw * 0.25f / fullSizeBoundingBox.x * fullSizeBoundingBox.y) * Mathf.Clamp01(growthPercentage * 10f);
 
             //turningAmount = Mathf.Lerp(turningAmount, this.bodyRigidbody.angularVelocity * Mathf.Deg2Rad * 0.1f, 0.15f);
 
@@ -829,11 +831,11 @@ public class Agent : MonoBehaviour {
             // Forward Slide
             for(int k = 0; k < numSegments; k++) {
                 Vector2 segmentForwardDir = new Vector2(this.bodyRigidbody.transform.up.x, this.bodyRigidbody.transform.up.y).normalized;
-                this.bodyRigidbody.AddForce(segmentForwardDir * (1f - turnSharpness * 0.25f) * movementModule.horsepower * this.bodyRigidbody.mass * Time.deltaTime, ForceMode2D.Impulse);
+                this.bodyRigidbody.AddForce(segmentForwardDir * (1f - turnSharpness * 0.25f) * movementModule.horsepower * this.bodyRigidbody.mass * Time.deltaTime * fatigueMultiplier, ForceMode2D.Impulse);
             }
 
             // Head turn:
-            this.bodyRigidbody.AddTorque(headTurn * movementModule.turnRate * this.bodyRigidbody.mass * this.bodyRigidbody.mass * Time.deltaTime, ForceMode2D.Impulse);
+            this.bodyRigidbody.AddTorque(headTurn * movementModule.turnRate * this.bodyRigidbody.mass * this.bodyRigidbody.mass * Time.deltaTime * fatigueMultiplier, ForceMode2D.Impulse);
             
             // OLD:::
             /*
@@ -949,9 +951,12 @@ public class Agent : MonoBehaviour {
             bodyRigidbody = bodySegmentGO.AddComponent<Rigidbody2D>();
             CapsuleCollider2D bodyCollider = bodyGO.AddComponent<CapsuleCollider2D>(); // change this to Capsule Later -- upgrade!!!!
             bodyCritterSegment.segmentCollider = bodyCollider;
-            
-            mouthRef = bodyGO.AddComponent<CritterMouthComponent>();
-            CircleCollider2D mouthTrigger = bodyGO.AddComponent<CircleCollider2D>();
+
+            GameObject testMouthGO = new GameObject("Mouth");
+            testMouthGO.transform.parent = bodyGO.transform;
+            testMouthGO.transform.localPosition = Vector3.zero;
+            mouthRef = testMouthGO.AddComponent<CritterMouthComponent>();
+            CircleCollider2D mouthTrigger = testMouthGO.AddComponent<CircleCollider2D>();
             mouthRef.triggerCollider = mouthTrigger;
         } 
         
@@ -995,6 +1000,8 @@ public class Agent : MonoBehaviour {
         ageCounterMature = 0;
         growthPercentage = 0f;
         scoreCounter = 0;
+
+        turningAmount = 5f;
         
         InitializeModules(genome, this, startPos);      // Modules need to be created first so that Brain can map its neurons to existing modules  
 

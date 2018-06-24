@@ -228,7 +228,7 @@ public class CritterMouthComponent : MonoBehaviour {
         //Debug.Log("SwallowAnimalWhole");
         preyAgent.curLifeStage = Agent.AgentLifeStage.SwallowedWhole;
         // Credit food:
-        float flow = agentRef.growthPercentage * agentRef.coreModule.coreWidth * agentRef.coreModule.coreLength + agentRef.coreModule.stomachContents;
+        float flow = preyAgent.growthPercentage * preyAgent.coreModule.coreWidth * preyAgent.coreModule.coreLength + preyAgent.coreModule.stomachContents;
         agentRef.EatFood(flow * 1f); // assumes all foodAmounts are equal !! *****    
     }
     private void SwallowFoodWhole(FoodChunk foodModule) {
@@ -261,7 +261,7 @@ public class CritterMouthComponent : MonoBehaviour {
         //Debug.Log("BiteDamageFood");
         //Debug.Log("BiteFood");
         // CONSUME FOOD!
-        float flow = ownArea; // / colliderCount;
+        float flow = ownArea * 2f; // / colliderCount;
 
         float flowR = Mathf.Min(foodModule.amountR, flow);
         //collidingAgent.testModule.foodAmountR[0] += flowR * 2f;  // make sure Agent doesn't receive food from empty dispenser

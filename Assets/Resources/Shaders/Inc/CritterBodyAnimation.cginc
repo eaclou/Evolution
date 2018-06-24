@@ -66,7 +66,8 @@ float2 swimAnimPos(float2 originalPos, float t, float animCycle, float accel, fl
 	float v = t * 0.5 + 0.5;
 	float offsetMask = saturate(1 - v * 0.75); 
 
-	float2 newPos = rotate_point(float2(0,0), clamp(turnAmount * -1, -1, 1) * offsetMask + magnitude * sin(v * 3.2 + animCycle * animSpeed + accel * accelAnimSpeed) * offsetMask * throttle, originalPos);
+	float2 newPos = rotate_point(float2(0,0), clamp(turnAmount * -1, -6.2, 6.2) * offsetMask + magnitude * sin(v * 3.2 + animCycle * animSpeed + accel * accelAnimSpeed) * offsetMask * throttle, originalPos);
+	
 	return newPos;
 }
 

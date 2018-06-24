@@ -23,6 +23,7 @@ struct CritterStrokeData {
 	float2 localDir;
 	float2 localScale;
 	float strength;  // abstraction for pressure of brushstroke + amount of paint 
+	float lifeStatus;
 	int brushType;
 };
 struct CritterInitData {
@@ -477,10 +478,30 @@ void CSSimulateCritterStrokes (uint3 id : SV_DispatchThreadID)
 	float2 fluidVel = velocityRead.SampleLevel(_LinearRepeat, uv, 0).xy;
 	float speedMult = 0.033 * 140;
 
-	curWorldPos = curWorldPos + fluidVel * speedMult * 0.1;
+	curWorldPos = curWorldPos + fluidVel * speedMult;
 
 	float attachThreshold = rand(brushData.localPos * 100); //critterSimData.health
 	float pinnedAmount = saturate(100.0 * (critterSimData.health - attachThreshold)) * (1.0 - critterSimData.decayPercentage);   //brushData.strength;
+	
+	//critterStrokesWriteCBuffer[id.x].strength = pinnedAmount;
+
+	critterStrokesWriteCBuffer[id.x].strength  = critterStrokesWriteCBuffer[id.x].strength + 0.006;
+
+	if(pinnedAmount < 0.01) {
+		
+		critterStrokesWriteCBuffer[id.x].lifeStatus = 0;
+		critterStrokesWriteCBuffer[id.x].strength = saturate(critterStrokesWriteCBuffer[id.x].strength);
+	}
+	else {
+		if(critterStrokesWriteCBuffer[id.x].lifeStatus < 0.5) {
+			critterStrokesWriteCBuffer[id.x].strength = 0;
+			critterStrokesWriteCBuffer[id.x].lifeStatus = 1;
+		}
+		critterStrokesWriteCBuffer[id.x].strength = min(0.5, critterStrokesWriteCBuffer[id.x].strength);
+		pinnedAmount = 1.0;
+	}
+
+	
 
 	critterStrokesWriteCBuffer[id.x].worldPos = lerp(curWorldPos, newWorldPos, pinnedAmount);
 }

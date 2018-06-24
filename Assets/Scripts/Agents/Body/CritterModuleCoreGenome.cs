@@ -46,8 +46,8 @@ public class CritterModuleCoreGenome {
         Debug.Log("GenerateRandomGenome()");
 
         numSegments = 1;
-        fullBodyWidth = UnityEngine.Random.Range(0.5f, 2.5f);
-        fullBodyLength = fullBodyWidth * UnityEngine.Random.Range(2f, 6f);
+        fullBodyWidth = UnityEngine.Random.Range(0.35f, 2f);
+        fullBodyLength = fullBodyWidth * UnityEngine.Random.Range(1.5f, 4f);
 
         relWidthSnout = UnityEngine.Random.Range(0.25f, 1f);
         relWidthHead = UnityEngine.Random.Range(0.5f, 2f);
@@ -187,8 +187,8 @@ public class CritterModuleCoreGenome {
     public void SetToMutatedCopyOfParentGenome(CritterModuleCoreGenome parentGenome, MutationSettings settings) {
 
 
-        fullBodyWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.fullBodyWidth, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.5f, 2.5f);
-        fullBodyLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.fullBodyLength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, fullBodyWidth * 2f, fullBodyWidth * 6f);
+        fullBodyWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.fullBodyWidth, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.35f, 2f);
+        fullBodyLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.fullBodyLength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, fullBodyWidth * 1.5f, fullBodyWidth * 4f);
         if(fullBodyLength < fullBodyWidth * 2f) {
             fullBodyLength = fullBodyWidth * 2f;
         }

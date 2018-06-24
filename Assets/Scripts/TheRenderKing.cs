@@ -184,7 +184,8 @@ public class TheRenderKing : MonoBehaviour {
         public Vector2 localPos;
         public Vector2 localDir;
         public Vector2 localScale;
-        public float strength;  // abstraction for pressure of brushstroke + amount of paint 
+        public float strength;  // abstraction for pressure of brushstroke + amount of paint
+        public float lifeStatus;
         public int brushType;  // what brush alpha mask?  // just make it random???
     }
     public struct CurveStrokeData {
@@ -565,7 +566,7 @@ public class TheRenderKing : MonoBehaviour {
         agentBodyStrokesCBuffer.SetData(agentBodyStrokesArray);
     }
     public void InitializeCritterBodyStrokesCBuffer() {
-        critterBodyStrokesCBuffer = new ComputeBuffer(simManager._NumAgents * numStrokesPerCritterBody, sizeof(float) * 9 + sizeof(int) * 2);
+        critterBodyStrokesCBuffer = new ComputeBuffer(simManager._NumAgents * numStrokesPerCritterBody, sizeof(float) * 10 + sizeof(int) * 2);
         CritterBodyStrokeData[] critterBodyStrokesArray = new CritterBodyStrokeData[critterBodyStrokesCBuffer.count];
         for (int i = 0; i < simManager._NumAgents; i++) {
             for(int j = 0; j < numStrokesPerCritterBody; j++) {
@@ -576,8 +577,9 @@ public class TheRenderKing : MonoBehaviour {
                 float width = simManager.agentsArray[i].agentWidthsArray[Mathf.RoundToInt((bodyStroke.localPos.y * 0.5f + 0.5f) * 15f)];
                 bodyStroke.localPos.x *= width * 0.5f;
                 bodyStroke.localDir = new Vector2(0f, 1f); // start up? shouldn't matter
-                bodyStroke.localScale = new Vector2(0.12f * width, 0.12f); // simManager.agentGenomePoolArray[i].bodyGenome.sizeAndAspectRatio;
+                bodyStroke.localScale = new Vector2(0.15f * width, 0.15f); // simManager.agentGenomePoolArray[i].bodyGenome.sizeAndAspectRatio;
                 bodyStroke.strength = UnityEngine.Random.Range(0f, 1f);
+                bodyStroke.lifeStatus = 0f;
                 bodyStroke.brushType = 0; // ** Revisit
                 critterBodyStrokesArray[i * numStrokesPerCritterBody + j] = bodyStroke;
             }
@@ -585,7 +587,7 @@ public class TheRenderKing : MonoBehaviour {
         critterBodyStrokesCBuffer.SetData(critterBodyStrokesArray);
 
         // ENERGY DOTS:::::
-        critterEnergyDotsCBuffer = new ComputeBuffer(simManager._NumAgents * numEnergyDotsPerCritter, sizeof(float) * 9 + sizeof(int) * 2);
+        critterEnergyDotsCBuffer = new ComputeBuffer(simManager._NumAgents * numEnergyDotsPerCritter, sizeof(float) * 10 + sizeof(int) * 2);
         CritterBodyStrokeData[] energyDotsArray = new CritterBodyStrokeData[critterEnergyDotsCBuffer.count];
         for (int i = 0; i < simManager._NumAgents; i++) {
             for(int j = 0; j < numEnergyDotsPerCritter; j++) {
@@ -593,11 +595,12 @@ public class TheRenderKing : MonoBehaviour {
                 energyDot.parentIndex = i;
                 energyDot.worldPos = new Vector2(0f, 0f);
                 energyDot.localPos = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f));
-                //float width = simManager.agentsArray[i].agentWidthsArray[Mathf.RoundToInt((energyDot.localPos.y * 0.5f + 0.5f) * 15f)];
-                //energyDot.localPos.x *= width * 0.5f;
+                float width = simManager.agentsArray[i].agentWidthsArray[Mathf.RoundToInt((energyDot.localPos.y * 0.5f + 0.5f) * 15f)];
+                energyDot.localPos.x *= width * 0.5f;
                 energyDot.localDir = new Vector2(0f, 1f); // start up? shouldn't matter
                 energyDot.localScale = new Vector2(0.1f, 0.1f);
                 energyDot.strength = UnityEngine.Random.Range(0f, 1f);
+                energyDot.lifeStatus = 0f;
                 energyDot.brushType = 0; // ** Revisit
                 energyDotsArray[i * numEnergyDotsPerCritter + j] = energyDot;
             }
@@ -606,17 +609,20 @@ public class TheRenderKing : MonoBehaviour {
 
 
         // FOOD DOTS::::
-        critterFoodDotsCBuffer = new ComputeBuffer(simManager._NumAgents * numFoodDotsPerCritter, sizeof(float) * 9 + sizeof(int) * 2);
+        critterFoodDotsCBuffer = new ComputeBuffer(simManager._NumAgents * numFoodDotsPerCritter, sizeof(float) * 10 + sizeof(int) * 2);
         CritterBodyStrokeData[] foodDotsArray = new CritterBodyStrokeData[critterFoodDotsCBuffer.count];
         for (int i = 0; i < simManager._NumAgents; i++) {
             for(int j = 0; j < numFoodDotsPerCritter; j++) {
                 CritterBodyStrokeData foodDot = new CritterBodyStrokeData();
                 foodDot.parentIndex = i;
                 foodDot.worldPos = new Vector2(0f, 0f);
-                foodDot.localPos = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f));                
+                foodDot.localPos = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)); 
+                float width = simManager.agentsArray[i].agentWidthsArray[Mathf.RoundToInt((foodDot.localPos.y * 0.5f + 0.5f) * 15f)];
+                foodDot.localPos.x *= width * 0.5f;
                 foodDot.localDir = new Vector2(0f, 1f); // start up? shouldn't matter
                 foodDot.localScale = new Vector2(0.1f, 0.1f); // simManager.agentGenomePoolArray[i].bodyGenome.sizeAndAspectRatio;
                 foodDot.strength = UnityEngine.Random.Range(0f, 1f);
+                foodDot.lifeStatus = 0f;
                 foodDot.brushType = 0; // ** Revisit
                 foodDotsArray[i * numFoodDotsPerCritter + j] = foodDot;
             }
@@ -1532,7 +1538,7 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, playerGlowyBitsDisplayMat, 0, MeshTopology.Triangles, 6, playerGlowyBitsCBuffer.count);
         */
 
-        bool displayAgents = false;
+        bool displayAgents = true;
         if(displayAgents) {
             
             /*
@@ -1603,13 +1609,8 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, testSwimmingBodyMat, 0, MeshTopology.Triangles, 6 * numBodyQuads, simManager.simStateData.agentMovementAnimDataCBuffer.count);
         */
 
-        critterEnergyDotsMat.SetPass(0);
-        critterEnergyDotsMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
-        critterEnergyDotsMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
-        critterEnergyDotsMat.SetBuffer("bodyStrokesCBuffer", critterEnergyDotsCBuffer);
-        critterEnergyDotsMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, critterEnergyDotsMat, 0, MeshTopology.Triangles, 6, critterEnergyDotsCBuffer.count);
-
+        
+        
         critterFoodDotsMat.SetPass(0);
         critterFoodDotsMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
         critterFoodDotsMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
@@ -1625,11 +1626,20 @@ public class TheRenderKing : MonoBehaviour {
         critterBodyStrokesMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, critterBodyStrokesMat, 0, MeshTopology.Triangles, 6, critterBodyStrokesCBuffer.count);
         
+        critterEnergyDotsMat.SetPass(0);
+        critterEnergyDotsMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
+        critterEnergyDotsMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
+        critterEnergyDotsMat.SetBuffer("bodyStrokesCBuffer", critterEnergyDotsCBuffer);
+        critterEnergyDotsMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, critterEnergyDotsMat, 0, MeshTopology.Triangles, 6, critterEnergyDotsCBuffer.count);
+        
         // AGENT EYES:
         agentEyesDisplayMat.SetPass(0);
-        agentEyesDisplayMat.SetBuffer("agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
+        agentEyesDisplayMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
+        agentEyesDisplayMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
+        //agentEyesDisplayMat.SetBuffer("agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
         agentEyesDisplayMat.SetBuffer("agentEyesStrokesCBuffer", agentEyeStrokesCBuffer);
-        agentEyesDisplayMat.SetBuffer("agentMovementAnimDataCBuffer", simManager.simStateData.agentMovementAnimDataCBuffer);
+        //agentEyesDisplayMat.SetBuffer("agentMovementAnimDataCBuffer", simManager.simStateData.agentMovementAnimDataCBuffer);
         agentEyesDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, agentEyesDisplayMat, 0, MeshTopology.Triangles, 6, agentEyeStrokesCBuffer.count);
         

@@ -38,23 +38,38 @@
 				float strength;  // abstraction for pressure of brushstroke + amount of paint 
 				int brushType;  // what texture/mask/brush pattern to use
 			};
-
-			struct AgentSimData {
+			struct CritterInitData {
+				float2 boundingBoxSize;
+				float spawnSizePercentage;
+				float maxEnergy;
+				float3 primaryHue;
+				float3 secondaryHue;
+				int bodyPatternX;  // what grid cell of texture sheet to use
+				int bodyPatternY;  // what grid cell of texture sheet to use
+			};
+			struct CritterSimData {
 				float2 worldPos;
 				float2 velocity;
 				float2 heading;
-				float2 size;
-				float3 primaryHue;  // can eventually pull these static variables out of here to avoid per-frame updates on non-dynamic attributes
-				float3 secondaryHue;
-				float maturity;
-				float decay;
-				float eatingStatus;
+				float growthPercentage;
+				float decayPercentage;
 				float foodAmount;
+				float energy;
+				float health;
+				float stamina;
+				float biteAnimCycle;
+				float moveAnimCycle;
+				float turnAmount;
+				float accel;
+				float smoothedThrottle;
 			};
 
-			StructuredBuffer<AgentSimData> agentSimDataCBuffer;
+			StructuredBuffer<CritterInitData> critterInitDataCBuffer;
+			StructuredBuffer<CritterSimData> critterSimDataCBuffer;
 			StructuredBuffer<AgentEyeStrokeData> agentEyesStrokesCBuffer;
-			StructuredBuffer<AgentMovementAnimData> agentMovementAnimDataCBuffer;
+			
+			//StructuredBuffer<AgentSimData> agentSimDataCBuffer;
+			//StructuredBuffer<AgentMovementAnimData> agentMovementAnimDataCBuffer;
 			StructuredBuffer<float3> quadVerticesCBuffer;
 			
 			struct v2f
@@ -75,64 +90,48 @@
 				v2f o;
 								
 				AgentEyeStrokeData eyeData = agentEyesStrokesCBuffer[inst];
-				AgentSimData agentSimData = agentSimDataCBuffer[eyeData.parentIndex];
-				AgentMovementAnimData animData = agentMovementAnimDataCBuffer[eyeData.parentIndex];
-				o.bufferIndices = int2(eyeData.parentIndex, inst);
+				int agentIndex = eyeData.parentIndex;
+				CritterInitData critterInitData = critterInitDataCBuffer[agentIndex];
+				CritterSimData critterSimData = critterSimDataCBuffer[agentIndex];
 
-				float3 quadPoint = quadVerticesCBuffer[id];
-				float random1 = rand(float2(inst, inst));
-				float random2 = rand(float2(random1, random1));
+				o.bufferIndices = int2(agentIndex, inst);
+
+				float2 critterPosition = critterSimData.worldPos.xy;
+				float2 centerToVertexOffset = quadVerticesCBuffer[id];
+				
+				float growthScale = lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage);
+				float2 curAgentSize = critterInitData.boundingBoxSize * growthScale;
+
+				// spriteCenterPos!!! ::::  ===========================================================================
+				float2 centerPosition = eyeData.localPos;
+				// foodBloat (normalized coords -1,1)
+				centerPosition = foodBloatAnimPos(centerPosition, eyeData.localPos.y, critterSimData.foodAmount);
+				// biteAnim (normalized coords -1, 1)
+				centerPosition = biteAnimPos(centerPosition, eyeData.localPos.y, critterSimData.biteAnimCycle);
+				// scale coords by agent size? does order of ops matter?
+				centerPosition = centerPosition * curAgentSize * 0.5;
+				// swimAnim:
+				float bodyAspectRatio = critterInitData.boundingBoxSize.y / critterInitData.boundingBoxSize.x;
+				float bendStrength = 0.5 * saturate(bodyAspectRatio * 0.5 - 0.4);
+				centerPosition = swimAnimPos(centerPosition, eyeData.localPos.y, critterSimData.moveAnimCycle, critterSimData.accel, critterSimData.smoothedThrottle, bendStrength, critterSimData.turnAmount);
+				// rotate with agent:
+				centerPosition = rotatePointVector(centerPosition, float2(0,0), critterSimData.heading);
+
+				// vertexOffsetFromSpriteCenter!!! :::: ===============================================================
+				//float dotGrowth = saturate(bodyStrokeData.strength * 2.0);
+				//float dotDecay = saturate((bodyStrokeData.strength - 0.5) * 2);
+				//float dotHealthValue = dotGrowth * (1.0 - dotDecay);
 				float aspect = eyeData.localScale.y;				
-				float2 scale = float2(eyeData.localScale.x * aspect, eyeData.localScale.x * (1.0 / aspect)); // * saturate(agentSimData.maturity * 4 - 3);
-				quadPoint *= float3(scale, 1.0);
-
-				float3 worldPosition = float3(agentSimData.worldPos, -0.5);
-				
-				// OLD:
-				//float2 positionOffset = float2(eyeData.localPos.x * agentSimData.size.x * rightAgent + eyeData.localPos.y * agentSimData.size.y * forwardAgent) * 0.5;
-
-				// Rotation of Billboard center around Agent's Center (no effect if localPos and localDir are zero/default)'
-				float2 forwardAgent = agentSimData.heading;
-				float2 rightAgent = float2(forwardAgent.y, -forwardAgent.x);
-				// Figure out final facing Vectors!!!
-				float2 forwardGaze = normalize(agentSimData.velocity);
-				if(length(agentSimData.velocity) < 0.0001) {
-					forwardGaze = forwardAgent;
+				float2 eyeLocalScale = float2(eyeData.localScale.x * aspect, eyeData.localScale.x * (1.0 / aspect));
+				centerToVertexOffset *= eyeLocalScale * growthScale * (critterInitData.boundingBoxSize.x + critterInitData.boundingBoxSize.y) * 0.5 * (1.0 - critterSimData.decayPercentage);
+				float2 forwardGaze = normalize(critterSimData.velocity);
+				if(length(critterSimData.velocity) < 0.0001) {
+					forwardGaze = critterSimData.heading;
 				}
-				float2 rightGaze = float2(forwardGaze.y, -forwardGaze.x);
-				float2 rotatedPoint0 = float2(eyeData.localDir.x * rightGaze + eyeData.localDir.y * forwardGaze);  // Rotate localRotation by AgentRotation
-				//float2 rotatedQuad = float2(quadPoint.x / agentSimData.size.x * rightGaze + quadPoint.y / agentSimData.size.y * forwardGaze); 
-				//float2 rotatedQuad = quadPoint / agentSimData.size;
-				float2 rotatedQuad = float2(quadPoint.x * rightGaze + quadPoint.y * forwardGaze); 
-				rotatedQuad = rotatedQuad / agentSimData.size * 2 * agentSimData.maturity;
-				float2 positionOffset = eyeData.localPos;
-				
-				positionOffset = getWarpedPoint(positionOffset, 
-												eyeData.localPos, 
-												rotatedQuad,
-												animData.turnAmount, 
-												animData.animCycle, 
-												animData.accel, 
-												animData.smoothedThrottle,
-												agentSimData.foodAmount,
-												agentSimData.size,
-												agentSimData.eatingStatus);
-				
-				
-				positionOffset = positionOffset.x * rightAgent + positionOffset.y * forwardAgent;
-				
-				worldPosition.xy += positionOffset; // Place properly
+				centerToVertexOffset = rotatePointVector(centerToVertexOffset, float2(0,0), forwardGaze);
 
-				
-				
-				float2 forward1 = rotatedPoint0;
-				float2 right1 = float2(forward1.y, -forward1.x);
-				// With final facing Vectors, find rotation of QuadPoints:
-				float3 rotatedPoint1 = float3(quadPoint.x * right1 + quadPoint.y * forward1,
-											 quadPoint.z);
-				
-				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(0,0,-1, 1.0)) + float4(quadPoint* 10, 0.0));
-				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)) + float4(rotatedPoint1, 0.0));
+				float3 worldPosition = float3(critterPosition + centerPosition + centerToVertexOffset, -0.5);
+
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
 				o.color = float4(1, 1, 1, 1);	// change color of eyes if dead X's?'
 				
@@ -150,9 +149,9 @@
 				// Figure out how much to blur:
 				// Y coords = animation frame!  // 0 = normal, 1 = closed, 2 = dead
 				float animFrame = 0; // sin(agentSimData.eatingStatus * 3.141592) * 0.99;	
-				//if(agentSimData.decay > 0) {
-				//	animFrame = 2;
-				//}
+				if(critterSimData.decayPercentage > 0) {
+					animFrame = 2;
+				}
 				float frameRow0 = floor(animFrame);  // 0-2
 				float frameRow1 = ceil(animFrame); // 1-3
 				float animFrameBlendLerp = animFrame - frameRow0;
@@ -172,24 +171,22 @@
 				//return float4(1,1,1,1);
 
 				AgentEyeStrokeData eyeData = agentEyesStrokesCBuffer[i.bufferIndices.y];
-				AgentSimData agentSimData = agentSimDataCBuffer[i.bufferIndices.x];
+				CritterInitData critterInitData = critterInitDataCBuffer[i.bufferIndices.x];
+				CritterSimData critterSimData = critterSimDataCBuffer[i.bufferIndices.x];
 				
 				float4 texColor0 = tex2D(_MainTex, i.uv.xy);  // Read Brush Texture start Row
 				float4 texColor1 = tex2D(_MainTex, i.uv.zw);  // Read Brush Texture end Row
 				
 				float4 brushColor = lerp(texColor0, texColor1, i.animFrameBlendLerp);
 
-				float3 rgb = agentSimData.primaryHue;
+				float3 rgb = critterInitData.primaryHue;
 				rgb = lerp(rgb, float3(1,1,1), brushColor.r);  // White of the eye
 				rgb = lerp(rgb, eyeData.irisHue, brushColor.g);  // Iris
 				rgb = lerp(rgb, eyeData.pupilHue, brushColor.b);  // Pupil
 				
-				float4 finalColor = float4(rgb, brushColor.a); // float4(rgb, brushColor.a * saturate(2.0 - agentSimData.decay * 2));
+				float4 finalColor = float4(rgb * 1.25, brushColor.a);
+				finalColor.rgb = lerp(float3(0.45, 0.45, 0.45), finalColor.rgb, saturate(critterSimData.energy * 5));
 
-				//if(agentSimData.maturity < 0.99) {
-				//finalColor.a *= saturate(agentSimData.maturity * 4 - 3);
-				//}
-				
 				//return float4(1,1,1,1);
 				return finalColor;
 				
