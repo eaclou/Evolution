@@ -297,7 +297,12 @@ public class CritterMouthComponent : MonoBehaviour {
                 }
             }
             else {
-                InitiateActiveBite();
+                if(collider.gameObject.CompareTag("HazardCollider")) {
+
+                }
+                else {
+                    InitiateActiveBite();
+                }                
             }
         }
     }

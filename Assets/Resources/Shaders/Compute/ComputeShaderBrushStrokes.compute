@@ -425,7 +425,7 @@ void CSSimulateFruit (uint3 id : SV_DispatchThreadID)
 
 	float2 targetPos = foodData.worldPos + positionOffset; // + transformed offset of fruit
 
-	float lerpSpeed = 0.1;
+	float lerpSpeed = 1;
 	float2 newPos = lerp(curPos, targetPos, lerpSpeed * fruitData.attached);
 
 	float2 uv = (newPos + 70) / 140;

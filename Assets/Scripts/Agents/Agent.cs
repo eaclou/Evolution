@@ -471,7 +471,7 @@ public class Agent : MonoBehaviour {
     }
 
     public void EatFood(float amount) {
-        coreModule.stomachContents += amount * 2f;
+        coreModule.stomachContents += amount;
         if(coreModule.stomachContents > coreModule.stomachCapacity) {
             coreModule.stomachContents = coreModule.stomachCapacity;
         }
@@ -819,7 +819,7 @@ public class Agent : MonoBehaviour {
             float headTurn = Vector2.Dot(throttleDir, headRightDir) * -1f * turnSharpness;
             float headTurnSign = Mathf.Clamp(Vector2.Dot(throttleDir, headRightDir) * -10000f, -1f, 1f);
 
-            float fatigueMultiplier = Mathf.Clamp01(coreModule.energyRaw * 0.25f / fullSizeBoundingBox.x * fullSizeBoundingBox.y) * Mathf.Clamp01(growthPercentage * 10f);
+            float fatigueMultiplier = Mathf.Clamp01(coreModule.energyRaw * 1f / fullSizeBoundingBox.x * fullSizeBoundingBox.y) * Mathf.Clamp01(growthPercentage * 10f);
 
             //turningAmount = Mathf.Lerp(turningAmount, this.bodyRigidbody.angularVelocity * Mathf.Deg2Rad * 0.1f, 0.15f);
 
@@ -835,7 +835,7 @@ public class Agent : MonoBehaviour {
             }
 
             // Head turn:
-            this.bodyRigidbody.AddTorque(headTurn * movementModule.turnRate * this.bodyRigidbody.mass * this.bodyRigidbody.mass * Time.deltaTime * fatigueMultiplier, ForceMode2D.Impulse);
+            this.bodyRigidbody.AddTorque(Mathf.Lerp(headTurn, headTurnSign, 0.5f) * movementModule.turnRate * this.bodyRigidbody.mass * this.bodyRigidbody.mass * Time.deltaTime, ForceMode2D.Impulse);
             
             // OLD:::
             /*

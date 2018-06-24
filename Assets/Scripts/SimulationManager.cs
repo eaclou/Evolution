@@ -751,7 +751,7 @@ public class SimulationManager : MonoBehaviour {
         // CHECK FOR DEAD FOOD!!! :::::::
         for (int f = 0; f < foodArray.Length; f++) {
             if (foodArray[f].isDepleted) {
-                ProcessDeadFood(f);
+                ProcessDeadFood(true, f);
             }
         }
 
@@ -868,7 +868,7 @@ public class SimulationManager : MonoBehaviour {
             //cameraManager.StartPlayerRespawn();
         }
     }
-    public void ProcessDeadFood(int foodIndex) {
+    public void ProcessDeadFood(bool isPlant, int foodIndex) {
         
         //CheckForRecordAgentScore(foodIndex);
         //ProcessAgentScores(foodIndex);
@@ -879,7 +879,7 @@ public class SimulationManager : MonoBehaviour {
         // Reproduction!!!
         CreateMutatedCopyOfFood(foodIndex); 
         
-        theRenderKing.UpdateDynamicFoodBuffers(foodIndex);
+        theRenderKing.UpdateDynamicFoodBuffers(isPlant, foodIndex);
         //theRenderKing.UpdateAgentBodyStrokesBuffer(foodIndex);
         //theRenderKing.InitializeAgentEyeStrokesBuffer();
     }

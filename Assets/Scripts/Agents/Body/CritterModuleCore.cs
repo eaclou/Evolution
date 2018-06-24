@@ -163,7 +163,7 @@ public class CritterModuleCore {
             foodAmountB[0] = 1f;
         }
 
-        energyRaw = Mathf.Max(Mathf.Lerp(0.5f, coreWidth * coreLength, 0.1f), 0.5f);
+        energyRaw = Mathf.Max(Mathf.Lerp(0.5f, coreWidth * coreLength, 0.25f), 0.5f);
         healthHead = 1f;
         healthBody = 1f;
         healthExternal = 1f;
@@ -458,7 +458,7 @@ public class CritterModuleCore {
         //Debug.Log(LayerMask.GetMask("EnvironmentCollision"));
         //Debug.Log(mask.ToString());
         
-        /*
+        
         // TOP
         float raycastMaxLength = 10f;
         RaycastHit2D hitTop = Physics2D.Raycast(ownPos, Vector2.up, raycastMaxLength, rayLayer);  // UP
@@ -517,7 +517,7 @@ public class CritterModuleCore {
             distance = (hitTopLeft.point - ownPos).magnitude;
         }
         distTopLeft[0] = (raycastMaxLength - distance) / raycastMaxLength;
-        */
+        
         //
         /*
         inComm0[0] = Mathf.Round(friendTestModule.outComm0[0] * 3f / 2f);

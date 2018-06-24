@@ -171,7 +171,7 @@ public class SimulationStateData {
         }
         agentMovementAnimDataCBuffer = new ComputeBuffer(agentMovementAnimDataArray.Length, sizeof(float) * 4);
 
-        foodSimDataArray = new FoodSimData[simManager._NumFood];
+        foodSimDataArray = new FoodSimData[simManager._NumFood + 32]; // **** temp hard-coded dead agent food
         for (int i = 0; i < foodSimDataArray.Length; i++) {
             foodSimDataArray[i] = new FoodSimData();
         }
@@ -183,7 +183,7 @@ public class SimulationStateData {
         //}
         foodStemDataCBuffer = new ComputeBuffer(simManager._NumFood, sizeof(float) * 7 + sizeof(int) * 1);
         foodLeafDataCBuffer = new ComputeBuffer(simManager._NumFood * 16, sizeof(float) * 7 + sizeof(int) * 1);
-        foodFruitDataCBuffer = new ComputeBuffer(simManager._NumFood * 64, sizeof(float) * 7 + sizeof(int) * 1);
+        foodFruitDataCBuffer = new ComputeBuffer(foodSimDataCBuffer.count * 64, sizeof(float) * 7 + sizeof(int) * 1);
 
         predatorSimDataArray = new PredatorSimData[simManager._NumPredators];
         for (int i = 0; i < predatorSimDataArray.Length; i++) {
@@ -334,11 +334,11 @@ public class SimulationStateData {
         agentMovementAnimDataCBuffer.SetData(agentMovementAnimDataArray); // send data to GPU for Rendering
 
 
-        for (int i = 0; i < foodSimDataArray.Length; i++) {
+        for (int i = 0; i < simManager._NumFood; i++) {
             Vector3 foodPos = simManager.foodArray[i].transform.position;
             foodSimDataArray[i].worldPos = new Vector2(foodPos.x, foodPos.y);
             // *** Revisit to avoid using GetComponent, should use cached reference instead for speed:
-            foodSimDataArray[i].velocity = new Vector2(simManager.foodArray[i].GetComponent<Rigidbody2D>().velocity.x, simManager.agentsArray[i].bodyRigidbody.velocity.y);
+            foodSimDataArray[i].velocity = new Vector2(simManager.foodArray[i].GetComponent<Rigidbody2D>().velocity.x, simManager.foodArray[i].GetComponent<Rigidbody2D>().velocity.y);
             foodSimDataArray[i].heading = simManager.foodArray[i].facingDirection;
             foodSimDataArray[i].fullSize = simManager.foodArray[i].fullSize;
             foodSimDataArray[i].foodAmount = new Vector3(simManager.foodArray[i].amountR, simManager.foodArray[i].amountR, simManager.foodArray[i].amountR);
@@ -362,6 +362,38 @@ public class SimulationStateData {
                                                       (foodPos.y + simManager._MapSize) / (simManager._MapSize * 2f), 
                                                       (simManager.foodArray[i].curSize.x + 0.1f) / (simManager._MapSize * 2f), 
                                                       (simManager.foodArray[i].curSize.y + 0.1f) / (simManager._MapSize * 2f));
+        }
+        for (int i = 0; i < 32; i++) {  // Agent corpse food
+            int dataIndex = simManager._NumFood + i;
+
+            Vector3 foodPos = simManager.foodDeadAnimalArray[i].transform.position;
+            foodSimDataArray[dataIndex].worldPos = new Vector2(foodPos.x, foodPos.y);
+            // *** Revisit to avoid using GetComponent, should use cached reference instead for speed:
+            foodSimDataArray[dataIndex].velocity = new Vector2(simManager.foodDeadAnimalArray[i].GetComponent<Rigidbody2D>().velocity.x, simManager.foodDeadAnimalArray[i].GetComponent<Rigidbody2D>().velocity.y);
+            foodSimDataArray[dataIndex].heading = simManager.foodDeadAnimalArray[i].facingDirection;
+            foodSimDataArray[dataIndex].fullSize = simManager.foodDeadAnimalArray[i].fullSize;
+            foodSimDataArray[dataIndex].foodAmount = new Vector3(simManager.foodDeadAnimalArray[i].amountR, simManager.foodDeadAnimalArray[i].amountR, simManager.foodDeadAnimalArray[i].amountR);
+            foodSimDataArray[dataIndex].growth = simManager.foodDeadAnimalArray[i].growthStatus;
+            foodSimDataArray[dataIndex].decay = simManager.foodDeadAnimalArray[i].decayStatus;
+            foodSimDataArray[dataIndex].health = simManager.foodDeadAnimalArray[i].healthStructural;
+            // v v v below can be moved to a more static buffer eventually since they don't change every frame:
+            foodSimDataArray[dataIndex].stemBrushType = simManager.foodGenomePoolArray[i].stemBrushType;
+            foodSimDataArray[dataIndex].leafBrushType = simManager.foodGenomePoolArray[i].leafBrushType;
+            foodSimDataArray[dataIndex].fruitBrushType = simManager.foodGenomePoolArray[i].fruitBrushType;
+            foodSimDataArray[dataIndex].stemHue = simManager.foodGenomePoolArray[i].stemHue;
+            foodSimDataArray[dataIndex].leafHue = simManager.foodGenomePoolArray[i].leafHue;
+            foodSimDataArray[dataIndex].fruitHue = simManager.foodGenomePoolArray[i].fruitHue;
+            
+            /*
+            // Z & W coords represents agent's x/y Radii (in FluidCoords)
+            // convert from scene coords (-mapSize --> +mapSize to fluid coords (0 --> 1):::
+            // **** Revisit and get working properly in both X and Y dimensions independently *********
+            //float sampleRadius = (simManager.foodArray[i].curSize.magnitude + 0.1f) / (simManager._MapSize * 2f); // ****  ***** Revisit the 0.1f offset -- should be one pixel in fluidCoords?
+            foodFluidPositionsArray[i] = new Vector4((foodPos.x + simManager._MapSize) / (simManager._MapSize * 2f), 
+                                                      (foodPos.y + simManager._MapSize) / (simManager._MapSize * 2f), 
+                                                      (simManager.foodArray[i].curSize.x + 0.1f) / (simManager._MapSize * 2f), 
+                                                      (simManager.foodArray[i].curSize.y + 0.1f) / (simManager._MapSize * 2f));
+                                                      */
         }
         foodSimDataCBuffer.SetData(foodSimDataArray); // send data to GPU for Rendering
         

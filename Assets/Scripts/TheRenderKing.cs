@@ -266,8 +266,11 @@ public class TheRenderKing : MonoBehaviour {
         AlignFrameBufferStrokesToTerrain();
 
         for(int i = 0; i < simManager._NumFood; i++) {
-            UpdateDynamicFoodBuffers(i);
-        }        
+            UpdateDynamicFoodBuffers(true, i);
+        }
+        for(int i = 0; i < 32; i++) {
+            UpdateDynamicFoodBuffers(false, i);
+        }
 
         isInitialized = true;  // we did it, guys!
     }
@@ -1127,80 +1130,103 @@ public class TheRenderKing : MonoBehaviour {
     public void UpdateAgentTailStrokesBuffer(int agentIndex) {
 
     }
-    public void UpdateDynamicFoodBuffers(int foodIndex) {
+    public void UpdateDynamicFoodBuffers(bool isPlant, int foodIndex) {
+        if(isPlant) {
+            ComputeBuffer singleStemCBuffer = new ComputeBuffer(1, sizeof(float) * 7 + sizeof(int) * 1);
+            SimulationStateData.StemData[] singleStemDataArray = new SimulationStateData.StemData[1];        
+            singleStemDataArray[0] = new SimulationStateData.StemData();
+            singleStemDataArray[0].foodIndex = foodIndex;
+            singleStemDataArray[0].localBaseCoords = new Vector2(0f, -1f);
+            singleStemDataArray[0].localTipCoords = new Vector2(0f, 1f);
+            singleStemDataArray[0].childGrowth = 0f;
+            singleStemDataArray[0].width = simManager.foodGenomePoolArray[foodIndex].stemWidth;
+            singleStemDataArray[0].attached = 1f;
+            singleStemCBuffer.SetData(singleStemDataArray);
+            int kernelCSUpdateDynamicStemBuffers = computeShaderBrushStrokes.FindKernel("CSUpdateDynamicStemBuffers");
+            //computeShaderBrushStrokes.SetInt("_CurveStrokesUpdateAgentIndex", agentIndex); // ** can I just use parentIndex instead?
+            computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicStemBuffers, "foodSimDataCBuffer", simManager.simStateData.foodSimDataCBuffer);
+            computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicStemBuffers, "foodStemDataUpdateCBuffer", singleStemCBuffer);
+            computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicStemBuffers, "foodStemDataWriteCBuffer", simManager.simStateData.foodStemDataCBuffer);
+            computeShaderBrushStrokes.Dispatch(kernelCSUpdateDynamicStemBuffers, 1, 1, 1);        
+            singleStemCBuffer.Release();
 
-        ComputeBuffer singleStemCBuffer = new ComputeBuffer(1, sizeof(float) * 7 + sizeof(int) * 1);
-        SimulationStateData.StemData[] singleStemDataArray = new SimulationStateData.StemData[1];        
-        singleStemDataArray[0] = new SimulationStateData.StemData();
-        singleStemDataArray[0].foodIndex = foodIndex;
-        singleStemDataArray[0].localBaseCoords = new Vector2(0f, -1f);
-        singleStemDataArray[0].localTipCoords = new Vector2(0f, 1f);
-        singleStemDataArray[0].childGrowth = 0f;
-        singleStemDataArray[0].width = simManager.foodGenomePoolArray[foodIndex].stemWidth;
-        singleStemDataArray[0].attached = 1f;
-        singleStemCBuffer.SetData(singleStemDataArray);
-        int kernelCSUpdateDynamicStemBuffers = computeShaderBrushStrokes.FindKernel("CSUpdateDynamicStemBuffers");
-        //computeShaderBrushStrokes.SetInt("_CurveStrokesUpdateAgentIndex", agentIndex); // ** can I just use parentIndex instead?
-        computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicStemBuffers, "foodSimDataCBuffer", simManager.simStateData.foodSimDataCBuffer);
-        computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicStemBuffers, "foodStemDataUpdateCBuffer", singleStemCBuffer);
-        computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicStemBuffers, "foodStemDataWriteCBuffer", simManager.simStateData.foodStemDataCBuffer);
-        computeShaderBrushStrokes.Dispatch(kernelCSUpdateDynamicStemBuffers, 1, 1, 1);        
-        singleStemCBuffer.Release();
+            // *** Hard-coded 16 leaves per food object!!!! *** BEWARE!!!
+            ComputeBuffer foodLeafUpdateCBuffer = new ComputeBuffer(16, sizeof(float) * 7 + sizeof(int) * 1);
+            SimulationStateData.LeafData[] foodLeafDataArray = new SimulationStateData.LeafData[16];
+            for (int i = 0; i < 16; i++) {
+                foodLeafDataArray[i] = new SimulationStateData.LeafData();
+                foodLeafDataArray[i].foodIndex = foodIndex;
+                foodLeafDataArray[i].worldPos = new Vector3(0f, 0f, 0f);
+                foodLeafDataArray[i].localCoords = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f));
+                foodLeafDataArray[i].localScale =  simManager.foodGenomePoolArray[foodIndex].leafScale;          
+                foodLeafDataArray[i].attached = 1f;
+            }
+            foodLeafUpdateCBuffer.SetData(foodLeafDataArray);
+            int kernelCSUpdateDynamicLeafBuffers = computeShaderBrushStrokes.FindKernel("CSUpdateDynamicLeafBuffers");
+            //computeShaderBrushStrokes.SetInt("_CurveStrokesUpdateAgentIndex", agentIndex); // ** can I just use parentIndex instead?
+            computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicLeafBuffers, "foodSimDataCBuffer", simManager.simStateData.foodSimDataCBuffer);
+            computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicLeafBuffers, "foodLeafDataUpdateCBuffer", foodLeafUpdateCBuffer);
+            computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicLeafBuffers, "foodLeafDataWriteCBuffer", simManager.simStateData.foodLeafDataCBuffer);
+            computeShaderBrushStrokes.Dispatch(kernelCSUpdateDynamicLeafBuffers, 1, 1, 1);        
+            foodLeafUpdateCBuffer.Release();
 
-        // *** Hard-coded 16 leaves per food object!!!! *** BEWARE!!!
-        ComputeBuffer foodLeafUpdateCBuffer = new ComputeBuffer(16, sizeof(float) * 7 + sizeof(int) * 1);
-        SimulationStateData.LeafData[] foodLeafDataArray = new SimulationStateData.LeafData[16];
-        for (int i = 0; i < 16; i++) {
-            foodLeafDataArray[i] = new SimulationStateData.LeafData();
-            foodLeafDataArray[i].foodIndex = foodIndex;
-            foodLeafDataArray[i].worldPos = new Vector3(0f, 0f, 0f);
-            foodLeafDataArray[i].localCoords = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f));
-            foodLeafDataArray[i].localScale =  simManager.foodGenomePoolArray[foodIndex].leafScale;          
-            foodLeafDataArray[i].attached = 1f;
+            // DEBUG ***** RACE CONDITIONS -- NEVER FORGET!!! ********
+            // DEBUG ***** RACE CONDITIONS -- NEVER FORGET!!! ********
+            //SimulationStateData.LeafData[] testDataArray = new SimulationStateData.LeafData[simManager.simStateData.foodLeafDataCBuffer.count];
+            //simManager.simStateData.foodLeafDataCBuffer.GetData(testDataArray);
+            //string txt = "";
+            //for(int i = 0; i < 32; i++) {
+            //    int index = i * 15;
+            //    txt += "\n" + (index).ToString() + ", foodIndex: " + testDataArray[index].foodIndex.ToString();
+            //}
+            //Debug.Log(txt);
+            //Debug.Log("foodLeafDataArray length " + foodLeafDataArray.Length.ToString() + " foodLeafDataCBuffer: " + simManager.simStateData.foodLeafDataCBuffer.count.ToString() + ", index: " + foodLeafDataArray[9].foodIndex.ToString());
+            // DEBUG ***** RACE CONDITIONS -- NEVER FORGET!!! ********
+            // DEBUG ***** RACE CONDITIONS -- NEVER FORGET!!! ********
+
+            // *** Hard-coded 64 Fruits per food object!!!! *** BEWARE!!!
+            ComputeBuffer foodFruitUpdateCBuffer = new ComputeBuffer(64, sizeof(float) * 7 + sizeof(int) * 1);
+
+            SimulationStateData.FruitData[] foodFruitDataArray = new SimulationStateData.FruitData[64];
+            for(int i = 0; i < 64; i++) {
+                foodFruitDataArray[i] = new SimulationStateData.FruitData();
+                foodFruitDataArray[i].foodIndex = foodIndex;
+                foodFruitDataArray[i].localCoords = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)) * 0.5f + UnityEngine.Random.insideUnitCircle * 0.4f;
+                foodFruitDataArray[i].localScale = simManager.foodGenomePoolArray[foodIndex].fruitScale;  
+                foodFruitDataArray[i].worldPos = simManager.foodArray[foodIndex].transform.position;
+                foodFruitDataArray[i].attached = 1f;
+            }        
+            foodFruitUpdateCBuffer.SetData(foodFruitDataArray);
+            int kernelCSUpdateDynamicFruitBuffers = computeShaderBrushStrokes.FindKernel("CSUpdateDynamicFruitBuffers");
+            //computeShaderBrushStrokes.SetInt("_CurveStrokesUpdateAgentIndex", agentIndex); // ** can I just use parentIndex instead?
+            computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicFruitBuffers, "foodSimDataCBuffer", simManager.simStateData.foodSimDataCBuffer);
+            computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicFruitBuffers, "foodFruitDataUpdateCBuffer", foodFruitUpdateCBuffer);
+            computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicFruitBuffers, "foodFruitDataWriteCBuffer", simManager.simStateData.foodFruitDataCBuffer);
+            computeShaderBrushStrokes.Dispatch(kernelCSUpdateDynamicFruitBuffers, 1, 1, 1);        
+            foodFruitUpdateCBuffer.Release();
         }
-        foodLeafUpdateCBuffer.SetData(foodLeafDataArray);
-        int kernelCSUpdateDynamicLeafBuffers = computeShaderBrushStrokes.FindKernel("CSUpdateDynamicLeafBuffers");
-        //computeShaderBrushStrokes.SetInt("_CurveStrokesUpdateAgentIndex", agentIndex); // ** can I just use parentIndex instead?
-        computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicLeafBuffers, "foodSimDataCBuffer", simManager.simStateData.foodSimDataCBuffer);
-        computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicLeafBuffers, "foodLeafDataUpdateCBuffer", foodLeafUpdateCBuffer);
-        computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicLeafBuffers, "foodLeafDataWriteCBuffer", simManager.simStateData.foodLeafDataCBuffer);
-        computeShaderBrushStrokes.Dispatch(kernelCSUpdateDynamicLeafBuffers, 1, 1, 1);        
-        foodLeafUpdateCBuffer.Release();
+        else {
+            ComputeBuffer foodFruitUpdateCBuffer = new ComputeBuffer(64, sizeof(float) * 7 + sizeof(int) * 1);
 
-        // DEBUG ***** RACE CONDITIONS -- NEVER FORGET!!! ********
-        // DEBUG ***** RACE CONDITIONS -- NEVER FORGET!!! ********
-        //SimulationStateData.LeafData[] testDataArray = new SimulationStateData.LeafData[simManager.simStateData.foodLeafDataCBuffer.count];
-        //simManager.simStateData.foodLeafDataCBuffer.GetData(testDataArray);
-        //string txt = "";
-        //for(int i = 0; i < 32; i++) {
-        //    int index = i * 15;
-        //    txt += "\n" + (index).ToString() + ", foodIndex: " + testDataArray[index].foodIndex.ToString();
-        //}
-        //Debug.Log(txt);
-        //Debug.Log("foodLeafDataArray length " + foodLeafDataArray.Length.ToString() + " foodLeafDataCBuffer: " + simManager.simStateData.foodLeafDataCBuffer.count.ToString() + ", index: " + foodLeafDataArray[9].foodIndex.ToString());
-        // DEBUG ***** RACE CONDITIONS -- NEVER FORGET!!! ********
-        // DEBUG ***** RACE CONDITIONS -- NEVER FORGET!!! ********
-
-        // *** Hard-coded 32 Fruits per food object!!!! *** BEWARE!!!
-        ComputeBuffer foodFruitUpdateCBuffer = new ComputeBuffer(64, sizeof(float) * 7 + sizeof(int) * 1);
-
-        SimulationStateData.FruitData[] foodFruitDataArray = new SimulationStateData.FruitData[64];
-        for(int i = 0; i < 64; i++) {
-            foodFruitDataArray[i] = new SimulationStateData.FruitData();
-            foodFruitDataArray[i].foodIndex = foodIndex;
-            foodFruitDataArray[i].localCoords = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)) * 0.5f + UnityEngine.Random.insideUnitCircle * 0.4f;
-            foodFruitDataArray[i].localScale = simManager.foodGenomePoolArray[foodIndex].fruitScale;  
-            foodFruitDataArray[i].worldPos = simManager.foodArray[foodIndex].transform.position;
-            foodFruitDataArray[i].attached = 1f;
-        }        
-        foodFruitUpdateCBuffer.SetData(foodFruitDataArray);
-        int kernelCSUpdateDynamicFruitBuffers = computeShaderBrushStrokes.FindKernel("CSUpdateDynamicFruitBuffers");
-        //computeShaderBrushStrokes.SetInt("_CurveStrokesUpdateAgentIndex", agentIndex); // ** can I just use parentIndex instead?
-        computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicFruitBuffers, "foodSimDataCBuffer", simManager.simStateData.foodSimDataCBuffer);
-        computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicFruitBuffers, "foodFruitDataUpdateCBuffer", foodFruitUpdateCBuffer);
-        computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicFruitBuffers, "foodFruitDataWriteCBuffer", simManager.simStateData.foodFruitDataCBuffer);
-        computeShaderBrushStrokes.Dispatch(kernelCSUpdateDynamicFruitBuffers, 1, 1, 1);        
-        foodFruitUpdateCBuffer.Release();
+            SimulationStateData.FruitData[] foodFruitDataArray = new SimulationStateData.FruitData[64];
+            for(int i = 0; i < 64; i++) {
+                foodFruitDataArray[i] = new SimulationStateData.FruitData();
+                foodFruitDataArray[i].foodIndex = simManager._NumFood + foodIndex;
+                foodFruitDataArray[i].localCoords = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)) * 0.5f + UnityEngine.Random.insideUnitCircle * 0.4f;
+                foodFruitDataArray[i].localScale = simManager.foodGenomePoolArray[foodIndex].fruitScale;  
+                foodFruitDataArray[i].worldPos = simManager.foodDeadAnimalArray[foodIndex].transform.position;
+                foodFruitDataArray[i].attached = 1f;
+            }        
+            foodFruitUpdateCBuffer.SetData(foodFruitDataArray);
+            int kernelCSUpdateDynamicFruitBuffers = computeShaderBrushStrokes.FindKernel("CSUpdateDynamicFruitBuffers");
+            //computeShaderBrushStrokes.SetInt("_CurveStrokesUpdateAgentIndex", agentIndex); // ** can I just use parentIndex instead?
+            computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicFruitBuffers, "foodSimDataCBuffer", simManager.simStateData.foodSimDataCBuffer);
+            computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicFruitBuffers, "foodFruitDataUpdateCBuffer", foodFruitUpdateCBuffer);
+            computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicFruitBuffers, "foodFruitDataWriteCBuffer", simManager.simStateData.foodFruitDataCBuffer);
+            computeShaderBrushStrokes.Dispatch(kernelCSUpdateDynamicFruitBuffers, 1, 1, 1);        
+            foodFruitUpdateCBuffer.Release();
+        }
+        
 
 
     }
