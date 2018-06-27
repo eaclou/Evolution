@@ -17,6 +17,7 @@ public class CritterModuleCore {
     public float coreLength;
     
     public float energyRaw = 1f;
+    public float maxEnergyStorage = 1f;
     //public float stamina = 1f;
     public float healthHead = 1f;
     public float healthBody = 1f;
@@ -163,7 +164,7 @@ public class CritterModuleCore {
             foodAmountB[0] = 1f;
         }
 
-        energyRaw = Mathf.Max(Mathf.Lerp(0.5f, coreWidth * coreLength, 0.25f), 0.5f);
+        energyRaw = coreWidth * coreLength * Mathf.Lerp(agent.spawnStartingScale, 1f, agent.growthPercentage);
         healthHead = 1f;
         healthBody = 1f;
         healthExternal = 1f;
@@ -438,8 +439,8 @@ public class CritterModuleCore {
         isContact[0] = 0f;
         contactForceX[0] = 0f;
         contactForceY[0] = 0f;
-        //hitPoints[0] = Mathf.Max(hitPoints[0], 0f);
-        //stamina[0] = 1f;
+        hitPoints[0] = Mathf.Max(healthBody, 0f);
+        stamina[0] = energyRaw / maxEnergyStorage;
         
         
         //mouthRef.foodInRange = false;
@@ -518,13 +519,13 @@ public class CritterModuleCore {
         }
         distTopLeft[0] = (raycastMaxLength - distance) / raycastMaxLength;
         
-        //
-        /*
-        inComm0[0] = Mathf.Round(friendTestModule.outComm0[0] * 3f / 2f);
-        inComm1[0] = Mathf.Round(friendTestModule.outComm1[0] * 3f / 2f);
-        inComm2[0] = Mathf.Round(friendTestModule.outComm2[0] * 3f / 2f);
-        inComm3[0] = Mathf.Round(friendTestModule.outComm3[0] * 3f / 2f);
-        */
+        
+        
+        inComm0[0] = Mathf.Round(nearestFriendAgent.coreModule.outComm0[0] * 3f / 2f);
+        inComm1[0] = Mathf.Round(nearestFriendAgent.coreModule.outComm1[0] * 3f / 2f);
+        inComm2[0] = Mathf.Round(nearestFriendAgent.coreModule.outComm2[0] * 3f / 2f);
+        inComm3[0] = Mathf.Round(nearestFriendAgent.coreModule.outComm3[0] * 3f / 2f);
+        
         
     }
 }

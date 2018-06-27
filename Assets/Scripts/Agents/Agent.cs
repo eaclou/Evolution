@@ -48,7 +48,7 @@ public class Agent : MonoBehaviour {
 
         }
     }
-    private int youngDurationTimeSteps = 360;
+    private int youngDurationTimeSteps = 600;
     public int _YoungDurationTimeSteps
     {
         get
@@ -630,8 +630,10 @@ public class Agent : MonoBehaviour {
     private void ScaleBody(float growthPercentage) {
         //segmentFullSizeArray
         float scale = Mathf.Lerp(spawnStartingScale, 1f, growthPercentage); // Minimum size = 0.1 ???
-        float currentBodyVolume = coreModule.coreWidth * coreModule.coreLength * scale; // *** REFACTOR!!!! ****
+        float currentBodyVolume = fullSizeBodyVolume * scale; // *** REFACTOR!!!! ****
         coreModule.stomachCapacity = currentBodyVolume * 1f;
+
+        coreModule.maxEnergyStorage = fullSizeBodyVolume * scale;
 
         bodyCritterSegment.GetComponent<CapsuleCollider2D>().size = new Vector2(coreModule.coreWidth, coreModule.coreLength) * scale;
 
@@ -714,10 +716,16 @@ public class Agent : MonoBehaviour {
             throttle = Vector2.zero;
             smoothedThrottle = Vector2.zero;
         }
+        else {
+            // BITE!!!
+            if(movementModule.dash[0] > 0f) {
+                mouthRef.InitiateActiveBite();
+            }            
+        }
 
         // ENERGY!!!!
         // Digestion:
-        float amountDigested = 0.003f * fullSizeBodyVolume;
+        float amountDigested = 0.006f * fullSizeBodyVolume;
         float digestionAmount = Mathf.Min(coreModule.stomachContents, amountDigested);
         float foodToEnergyConversion = 1.0f;
         float createdEnergy = digestionAmount * foodToEnergyConversion;
@@ -730,13 +738,13 @@ public class Agent : MonoBehaviour {
         //    coreModule.foodAmountR[0] = 0f;
         //}
         coreModule.energyRaw += createdEnergy;
-        float maxEnergy = coreModule.coreWidth * coreModule.coreLength;
+        float maxEnergy = fullSizeBodyVolume;
         if(coreModule.energyRaw > maxEnergy) {
             coreModule.energyRaw = maxEnergy;
         }
 
         // Heal:
-        float healRate = 0.0002f;
+        float healRate = 0.0005f * fullSizeBodyVolume;
         float energyToHealthConversionRate = 6f;
         if(coreModule.healthBody < 1f) {
             coreModule.healthBody += healRate;
@@ -747,7 +755,7 @@ public class Agent : MonoBehaviour {
         }
 
         //ENERGY:
-        float energyCost = 0.003f * Mathf.Sqrt(fullSizeBodyVolume); // * Mathf.Lerp(totalBodyAreaEmpty, 1f, 0.0f);
+        float energyCost = 0.0025f * fullSizeBodyVolume;
         
         float throttleMag = smoothedThrottle.magnitude;
         if(throttleMag > 0.01f) {
@@ -757,25 +765,18 @@ public class Agent : MonoBehaviour {
             coreModule.stamina[0] -= staminaCost;
             if(coreModule.stamina[0] < 0f) {
                 coreModule.stamina[0] = 0f;
-            }
-
-            //float energyCost = 0.002f; // + 0.001f * throttleMag;  // idle + movement calorie burn
-            coreModule.energyRaw -= energyCost;
-            if(coreModule.energyRaw < 0f) {
-                coreModule.energyRaw = 0f;
-            }
+            }            
         }
         else {
             coreModule.stamina[0] += 0.01f;  // recovery
             if(coreModule.stamina[0] > 1f) {
                 coreModule.stamina[0] = 1f;
-            }
-
-            //float energyCost = 0.002f; // idle calorie burn
-            coreModule.energyRaw -= energyCost;
-            if(coreModule.energyRaw < 0f) {
-                coreModule.energyRaw = 0f;
-            }
+            }            
+        }
+        // ENERGY DRAIN::::
+        coreModule.energyRaw -= energyCost;
+        if(coreModule.energyRaw < 0f) {
+            coreModule.energyRaw = 0f;
         }
 
         if(humanControlled) {
@@ -831,7 +832,7 @@ public class Agent : MonoBehaviour {
             // Forward Slide
             for(int k = 0; k < numSegments; k++) {
                 Vector2 segmentForwardDir = new Vector2(this.bodyRigidbody.transform.up.x, this.bodyRigidbody.transform.up.y).normalized;
-                this.bodyRigidbody.AddForce(segmentForwardDir * (1f - turnSharpness * 0.25f) * movementModule.horsepower * this.bodyRigidbody.mass * Time.deltaTime * fatigueMultiplier, ForceMode2D.Impulse);
+                this.bodyRigidbody.AddForce(segmentForwardDir * (1f - turnSharpness * 0.25f) * movementModule.horsepower * this.bodyRigidbody.mass * Time.deltaTime, ForceMode2D.Impulse);
             }
 
             // Head turn:

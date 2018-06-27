@@ -134,7 +134,13 @@
 				float dotGrowth = saturate(bodyStrokeData.strength * 2.0);
 				float dotDecay = saturate((bodyStrokeData.strength - 0.5) * 2);
 				float dotHealthValue = dotGrowth * (1.0 - dotDecay);
-				centerToVertexOffset *= bodyStrokeData.localScale * curAgentSize * dotHealthValue;
+				centerToVertexOffset *= bodyStrokeData.localScale * curAgentSize * dotHealthValue * 1.5;
+				centerToVertexOffset.x *= 1.33;
+
+				float bodyAspectRatio = critterInitData.boundingBoxSize.y / critterInitData.boundingBoxSize.x;
+				float bendStrength = 0.5; // * saturate(bodyAspectRatio * 0.5 - 0.4);
+				float swimAngle = getSwimAngle(bodyStrokeData.localPos.y, critterSimData.moveAnimCycle, critterSimData.accel, critterSimData.smoothedThrottle, bendStrength, critterSimData.turnAmount);
+				centerToVertexOffset = rotate_point(float2(0,0), swimAngle, centerToVertexOffset);
 				centerToVertexOffset = rotatePointVector(centerToVertexOffset, float2(0,0), critterSimData.heading);
 
 				float3 worldPosition = float3(bodyStrokeData.worldPos + centerToVertexOffset, -0.5);
@@ -236,9 +242,10 @@
 				float4 finalColor = float4(lerp(critterInitData.primaryHue, critterInitData.secondaryHue, patternSample.x), texColor.a);
 				finalColor.a *= i.color.a;
 				finalColor.rgb = lerp(float3(1, 0.5, 0.5), finalColor.rgb, i.color.g) * 0.75;
+				finalColor.rgb *= lerp(1, i.color.b * 1.5, 0.25);
 				finalColor.rgb = lerp(float3(0.65, 0.65, 0.65), finalColor.rgb, saturate(critterSimData.growthPercentage * 10));
 				finalColor.rgb = lerp(float3(0.45, 0.45, 0.45), finalColor.rgb, saturate(critterSimData.energy * 5));
-				finalColor.rgb *= lerp(1, i.color.b, 0.4);
+				
 				//return float4(1,1,1,1);
 
 				return finalColor;

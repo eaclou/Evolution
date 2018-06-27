@@ -124,6 +124,8 @@ public class SimulationManager : MonoBehaviour {
 
     public int numInitialHiddenNeurons = 16;
 
+    private int numSpecies = 4;
+
     //public bool isTrainingPersistent = false; // RENAME ONCE FUNCTIONAL
     //private float lastHorizontalInput = 0f;
     //private float lastVerticalInput = 0f;
@@ -308,11 +310,11 @@ public class SimulationManager : MonoBehaviour {
         }
 
         // Sort Fitness Scores Persistent:
-        rankedIndicesList = new int[numAgents-1];
-        rankedFitnessList = new float[numAgents-1];
+        rankedIndicesList = new int[numAgents];
+        rankedFitnessList = new float[numAgents];
 
         for (int i = 0; i < rankedIndicesList.Length; i++) {
-            rankedIndicesList[i] = i+1;
+            rankedIndicesList[i] = i;
             rankedFitnessList[i] = 1f;
         }
 
@@ -851,9 +853,10 @@ public class SimulationManager : MonoBehaviour {
         CheckForRecordAgentScore(agentIndex);
         ProcessAgentScores(agentIndex);
         // Updates rankedIndicesArray[] so agents are ordered by score:
-        ProcessAndRankAgentFitness();
+        int speciesIndex = Mathf.FloorToInt((float)agentIndex / (float)numAgents * (float)numSpecies);
+        ProcessAndRankAgentFitness(speciesIndex);
         // Reproduction!!!
-        CreateMutatedCopyOfAgent(agentIndex); 
+        CreateMutatedCopyOfAgent(agentIndex, speciesIndex); 
         
         theRenderKing.UpdateAgentSmearStrokesBuffer(agentIndex);
         theRenderKing.UpdateAgentBodyStrokesBuffer(agentIndex);
@@ -911,34 +914,44 @@ public class SimulationManager : MonoBehaviour {
     private void RefreshFitnessGraphTexture() {
         uiManager.RefreshFitnessTexture(fitnessScoresEachGenerationList);
     }
-    private void ProcessAndRankAgentFitness() {
+    private void ProcessAndRankAgentFitness(int speciesIndex) {
         // Measure fitness of all current agents (their genomes, actually)  NOT PLAYER!!!!
-            for (int i = 0; i < rawFitnessScoresArray.Length; i++) {
-                rawFitnessScoresArray[i] = (float)agentsArray[i].scoreCounter;
+        for (int i = 0; i < rawFitnessScoresArray.Length; i++) {
+            rawFitnessScoresArray[i] = (float)agentsArray[i].scoreCounter;
+        }
+
+        int popSize = (numAgents / numSpecies);
+        int startIndex = popSize * speciesIndex;
+        int endIndex = popSize * (speciesIndex + 1);
+
+        // populate arrays:
+        for (int i = startIndex; i < endIndex; i++) {
+            try {
+                rankedIndicesList[i] = i; // i+1;
             }
+            catch {
+                Debug.Log("Error! i = " + i.ToString() + ", arrayLength: " + rankedIndicesList.Length.ToString() + ", popSize: " + popSize.ToString() + "si: " + speciesIndex.ToString());
+            }
+            
+            rankedFitnessList[i] = rawFitnessScoresArray[i]; //rawFitnessScoresArray[i+1];
+        } // Sort By Fitness
+        for (int i = startIndex; i < endIndex - 1; i++) {
+            for (int j = startIndex; j < endIndex - 1; j++) {
+                float swapFitA = rankedFitnessList[j];
+                float swapFitB = rankedFitnessList[j + 1];
+                int swapIdA = rankedIndicesList[j];
+                int swapIdB = rankedIndicesList[j + 1];
 
-            // populate arrays:
-            for (int i = 0; i < rankedIndicesList.Length; i++) {
-                rankedIndicesList[i] = i+1;
-                rankedFitnessList[i] = rawFitnessScoresArray[i+1];
-            } // Sort By Fitness
-            for (int i = 0; i < rankedIndicesList.Length - 1; i++) {
-                for (int j = 0; j < rankedIndicesList.Length - 1; j++) {
-                    float swapFitA = rankedFitnessList[j];
-                    float swapFitB = rankedFitnessList[j + 1];
-                    int swapIdA = rankedIndicesList[j];
-                    int swapIdB = rankedIndicesList[j + 1];
-
-                    if (swapFitA < swapFitB) {  // bigger is better now after inversion
-                        rankedFitnessList[j] = swapFitB;
-                        rankedFitnessList[j + 1] = swapFitA;
-                        rankedIndicesList[j] = swapIdB;
-                        rankedIndicesList[j + 1] = swapIdA;
-                    }
+                if (swapFitA < swapFitB) {  // bigger is better now after inversion
+                    rankedFitnessList[j] = swapFitB;
+                    rankedFitnessList[j + 1] = swapFitA;
+                    rankedIndicesList[j] = swapIdB;
+                    rankedIndicesList[j + 1] = swapIdA;
                 }
             }
+        }
     }
-    private void CreateMutatedCopyOfAgent(int agentIndex) {
+    private void CreateMutatedCopyOfAgent(int agentIndex, int speciesIndex) {
         //int parentGenomeIndex = agentIndex;
         // Randomly select a good one based on fitness Lottery (oldest = best)
         if (rankedIndicesList[0] == agentIndex) {  // if Top Agent, just respawn identical copy:
@@ -948,13 +961,9 @@ public class SimulationManager : MonoBehaviour {
             BodyGenome newBodyGenome = new BodyGenome();
             BrainGenome newBrainGenome = new BrainGenome();
 
-            bool isEven = false; // HACKY TEST!!!!
-            if(agentIndex % 2 == 0) {
-                isEven = true;
-            }
-            int parentGenomeIndex = GetAgentIndexByLottery(rankedFitnessList, rankedIndicesList);
+            int parentGenomeIndex = GetAgentIndexByLottery(rankedFitnessList, rankedIndicesList, speciesIndex);
 
-            //Debug.Log("Agent[" + agentIndex.ToString() + "] (" + (agentIndex % 2).ToString() + ") parentIndex: " + parentGenomeIndex.ToString());
+            //Debug.Log("Agent[" + agentIndex.ToString() + "] species[" + speciesIndex.ToString() + "] parentIndex: " + parentGenomeIndex.ToString());
             
             BodyGenome parentBodyGenome = agentGenomePoolArray[parentGenomeIndex].bodyGenome;
             BrainGenome parentBrainGenome = agentGenomePoolArray[parentGenomeIndex].brainGenome;
@@ -1204,7 +1213,7 @@ public class SimulationManager : MonoBehaviour {
         // respawn the Agent // mutates, respawns, updates RenderKingBuffers
         agentsArray[0].humanControlled = true;
         agentsArray[0].humanControlLerp = 1f;
-        CreateMutatedCopyOfAgent(0);         
+        CreateMutatedCopyOfAgent(0, 0);         
         theRenderKing.UpdateAgentSmearStrokesBuffer(0);
         theRenderKing.UpdateAgentBodyStrokesBuffer(0);
         theRenderKing.UpdateAgentEyeStrokesBuffer(0);
@@ -1322,18 +1331,22 @@ public class SimulationManager : MonoBehaviour {
     #endregion
 
     #region Utility Functions // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& UTILITY FUNCTIONS! &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-    public int GetAgentIndexByLottery(float[] rankedFitnessList, int[] rankedIndicesList) {
+    public int GetAgentIndexByLottery(float[] rankedFitnessList, int[] rankedIndicesList, int speciesIndex) {
         int selectedIndex = 0;
+
+        int popSize = (numAgents / numSpecies);
+        int startIndex = popSize * speciesIndex;
+        int endIndex = popSize * (speciesIndex + 1);
         
         // calculate total fitness of all EVEN and ODD agents separately!
         float totalFitness = 0f;
-        for (int i = 0; i < rankedFitnessList.Length; i++) {            
+        for (int i = startIndex; i < endIndex; i++) {            
             totalFitness += rankedFitnessList[i];
         }
         // generate random lottery value between 0f and totalFitness:
         float lotteryValue = UnityEngine.Random.Range(0f, totalFitness);
         float currentValue = 0f;
-        for (int i = 0; i < rankedFitnessList.Length; i++) {
+        for (int i = startIndex; i < endIndex; i++) {
             if (lotteryValue >= currentValue && lotteryValue < (currentValue + rankedFitnessList[i])) {
                 // Jackpot!
                 selectedIndex = rankedIndicesList[i];

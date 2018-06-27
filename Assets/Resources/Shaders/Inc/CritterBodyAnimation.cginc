@@ -60,13 +60,22 @@ float2 biteAnimPos(float2 originalPos, float t, float biteAnimCycle) {
 	return newPos;
 }
 
-float2 swimAnimPos(float2 originalPos, float t, float animCycle, float accel, float throttle, float magnitude, float turnAmount) {
+float2 getSwimAngle(float t, float animCycle, float accel, float throttle, float magnitude, float turnAmount) {
 	float animSpeed = 15;
 	float accelAnimSpeed = 45;
 	float v = t * 0.5 + 0.5;
 	float offsetMask = saturate(1 - v * 0.75); 
+	
+	float angle = 1.33 * magnitude * sin(v * 3.2 + animCycle * animSpeed + accel * accelAnimSpeed) * offsetMask * throttle + clamp(turnAmount * -1.33, -6.2, 6.2) * offsetMask;
 
-	float2 newPos = rotate_point(float2(0,0), clamp(turnAmount * -1, -6.2, 6.2) * offsetMask + magnitude * sin(v * 3.2 + animCycle * animSpeed + accel * accelAnimSpeed) * offsetMask * throttle, originalPos);
+	return angle;
+}
+
+float2 swimAnimPos(float2 originalPos, float t, float animCycle, float accel, float throttle, float magnitude, float turnAmount) {
+	
+
+	float swimAngle = getSwimAngle(t, animCycle, accel, throttle, magnitude, turnAmount);
+	float2 newPos = rotate_point(float2(0,0), swimAngle, originalPos);
 	
 	return newPos;
 }

@@ -301,7 +301,7 @@ public class CritterMouthComponent : MonoBehaviour {
 
                 }
                 else {
-                    InitiateActiveBite();
+                    //InitiateActiveBite();
                 }                
             }
         }
