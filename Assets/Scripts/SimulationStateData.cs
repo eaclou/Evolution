@@ -377,12 +377,12 @@ public class SimulationStateData {
             foodSimDataArray[dataIndex].decay = simManager.foodDeadAnimalArray[i].decayStatus;
             foodSimDataArray[dataIndex].health = simManager.foodDeadAnimalArray[i].healthStructural;
             // v v v below can be moved to a more static buffer eventually since they don't change every frame:
-            foodSimDataArray[dataIndex].stemBrushType = simManager.foodGenomePoolArray[i].stemBrushType;
-            foodSimDataArray[dataIndex].leafBrushType = simManager.foodGenomePoolArray[i].leafBrushType;
-            foodSimDataArray[dataIndex].fruitBrushType = simManager.foodGenomePoolArray[i].fruitBrushType;
-            foodSimDataArray[dataIndex].stemHue = simManager.foodGenomePoolArray[i].stemHue;
-            foodSimDataArray[dataIndex].leafHue = simManager.foodGenomePoolArray[i].leafHue;
-            foodSimDataArray[dataIndex].fruitHue = simManager.foodGenomePoolArray[i].fruitHue;
+            foodSimDataArray[dataIndex].stemBrushType = simManager.foodGenomePoolArray[0].stemBrushType;
+            foodSimDataArray[dataIndex].leafBrushType = simManager.foodGenomePoolArray[0].leafBrushType;
+            foodSimDataArray[dataIndex].fruitBrushType = simManager.foodGenomePoolArray[0].fruitBrushType;
+            foodSimDataArray[dataIndex].stemHue = simManager.foodGenomePoolArray[0].stemHue;
+            foodSimDataArray[dataIndex].leafHue = simManager.foodGenomePoolArray[0].leafHue;
+            foodSimDataArray[dataIndex].fruitHue = simManager.foodGenomePoolArray[0].fruitHue;
             
             /*
             // Z & W coords represents agent's x/y Radii (in FluidCoords)

@@ -1213,7 +1213,7 @@ public class TheRenderKing : MonoBehaviour {
                 foodFruitDataArray[i] = new SimulationStateData.FruitData();
                 foodFruitDataArray[i].foodIndex = simManager._NumFood + foodIndex;
                 foodFruitDataArray[i].localCoords = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)) * 0.5f + UnityEngine.Random.insideUnitCircle * 0.4f;
-                foodFruitDataArray[i].localScale = simManager.foodGenomePoolArray[foodIndex].fruitScale;  
+                foodFruitDataArray[i].localScale = simManager.foodGenomePoolArray[0].fruitScale;  
                 foodFruitDataArray[i].worldPos = simManager.foodDeadAnimalArray[foodIndex].transform.position;
                 foodFruitDataArray[i].attached = 1f;
             }        

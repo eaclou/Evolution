@@ -152,18 +152,21 @@ public class CritterMouthComponent : MonoBehaviour {
         CritterSegment collidingSegment = collider.gameObject.GetComponent<CritterSegment>();
         if(collidingSegment != null) {
             if(agentIndex != collidingSegment.agentIndex) {
-                // ANIMAL:
-                // Compare sizes:
-                targetArea = collidingSegment.agentRef.growthPercentage * collidingSegment.agentRef.coreModule.coreWidth * collidingSegment.agentRef.coreModule.coreLength;
-                //targetArea = 0.2f; // TEMP TEST!! ***
-                if(ownBiteArea > targetArea) {
-                    // Swallow!:::
-                    SwallowAnimalWhole(collidingSegment.agentRef);
-                }
-                else {
-                    // Toothy Attack Bite GO!!!
-                    BiteDamageAnimal(collidingSegment.agentRef, ownBiteArea, targetArea);        
-                }
+
+                if(agentRef.speciesIndex != collidingSegment.agentRef.speciesIndex) {
+                    // ANIMAL:
+                    // Compare sizes:
+                    targetArea = collidingSegment.agentRef.growthPercentage * collidingSegment.agentRef.coreModule.coreWidth * collidingSegment.agentRef.coreModule.coreLength;
+                    //targetArea = 0.2f; // TEMP TEST!! ***
+                    if(ownBiteArea > targetArea) {
+                        // Swallow!:::
+                        SwallowAnimalWhole(collidingSegment.agentRef);
+                    }
+                    else {
+                        // Toothy Attack Bite GO!!!
+                        BiteDamageAnimal(collidingSegment.agentRef, ownBiteArea, targetArea);        
+                    }
+                }                
             }
             else {
                 //Debug.Log("SELF");

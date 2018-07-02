@@ -114,8 +114,8 @@
 				//if(altitude < 0) {
 				//	return float4(1,1,1,1);
 				//}
-
-				return float4(0.5, 0.5, 0.5, 1);
+				finalColor = lerp(finalColor, float4(0.5, 0.5, 0.5, 1), 0.5);
+				//return float4(0.5, 0.5, 0.5, 1);
 				
 				return finalColor;
 			}

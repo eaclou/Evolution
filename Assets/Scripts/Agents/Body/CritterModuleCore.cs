@@ -83,7 +83,7 @@ public class CritterModuleCore {
     public FoodChunk nearestFoodModule;
     public PredatorModule nearestPredatorModule;
     public Agent nearestFriendAgent;
-      
+    public Agent nearestEnemyAgent;  
     
 
 	public CritterModuleCore() {
@@ -403,11 +403,16 @@ public class CritterModuleCore {
         Vector2 enemyPos = Vector2.zero;
         Vector2 enemyDir = Vector2.zero;
         Vector2 enemyVel = Vector2.zero;
-        if (nearestPredatorModule != null) {
+        if(nearestEnemyAgent != null) {
+            enemyPos = new Vector2(nearestEnemyAgent.bodyRigidbody.transform.localPosition.x - ownPos.x, nearestEnemyAgent.bodyRigidbody.transform.localPosition.y - ownPos.y);
+            enemyDir = enemyPos.normalized;
+            enemyVel = new Vector2(nearestEnemyAgent.bodyRigidbody.velocity.x, nearestEnemyAgent.bodyRigidbody.velocity.y);
+        }
+        /*if (nearestPredatorModule != null) {
             enemyPos = new Vector2(nearestPredatorModule.rigidBody.transform.localPosition.x - ownPos.x, nearestPredatorModule.rigidBody.transform.localPosition.y - ownPos.y);
             enemyDir = enemyPos.normalized;
             enemyVel = new Vector2(nearestPredatorModule.rigidBody.velocity.x, nearestPredatorModule.rigidBody.velocity.y);
-        }
+        }*/
 
         foodPosX[0] = foodPos.x / 20f;
         foodPosY[0] = foodPos.y / 20f;

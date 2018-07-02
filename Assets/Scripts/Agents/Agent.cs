@@ -148,6 +148,8 @@ public class Agent : MonoBehaviour {
 
     public float avgVel;
     public float avgFluidVel;
+
+    public int speciesIndex = -1;
     
     // Use this for initialization
     private void Awake() {

@@ -347,7 +347,8 @@ public class SimulationManager : MonoBehaviour {
         agentsArray = new Agent[numAgents];
         for (int i = 0; i < agentsArray.Length; i++) {
             GameObject agentGO = new GameObject("Agent" + i.ToString());
-            Agent newAgent = agentGO.AddComponent<Agent>();  // Script placed on Prefab already            
+            Agent newAgent = agentGO.AddComponent<Agent>();  // Script placed on Prefab already   
+            newAgent.speciesIndex = Mathf.FloorToInt((float)i / (float)numAgents * (float)numSpecies);
             agentsArray[i] = newAgent; // Add to stored list of current Agents            
         }
 
@@ -653,12 +654,16 @@ public class SimulationManager : MonoBehaviour {
 
             int closestFriendIndex = a;  // default to self
             float nearestFriendSquaredDistance = float.PositiveInfinity;
+            int closestEnemyAgentIndex = 0;
+            float nearestEnemyAgentSqDistance = float.PositiveInfinity;
             int closestFoodIndex = -1; // default to -1??? ***            
             float nearestFoodDistance = float.PositiveInfinity;
             int closestPredIndex = 0; // default to 0???
             float nearestPredDistance = float.PositiveInfinity;
 
             bool closestFoodIsDeadAnimal = false;
+
+            int ownSpeciesIndex = Mathf.FloorToInt((float)a / (float)numAgents * (float)numSpecies);
 
             // **** Only checking its own grid cell!!! Will need to expand to adjacent cells as well!
             /*int index = -1;
@@ -670,15 +675,30 @@ public class SimulationManager : MonoBehaviour {
             } */
             // **** Only checking its own grid cell!!! Will need to expand to adjacent cells as well!
             for (int i = 0; i < mapGridCellArray[xCoord][yCoord].friendIndicesList.Count; i++) {
+                int neighborIndex = mapGridCellArray[xCoord][yCoord].friendIndicesList[i];
                 // FRIEND:
-                Vector2 neighborPos = new Vector2(agentsArray[mapGridCellArray[xCoord][yCoord].friendIndicesList[i]].bodyRigidbody.transform.localPosition.x, agentsArray[mapGridCellArray[xCoord][yCoord].friendIndicesList[i]].bodyRigidbody.transform.localPosition.y);
-                float squaredDistFriend = (neighborPos - agentPos).sqrMagnitude;
-                               
-                if (squaredDistFriend <= nearestFriendSquaredDistance) { // if now the closest so far, update index and dist:
-                    if(a != mapGridCellArray[xCoord][yCoord].friendIndicesList[i]) {  // make sure it doesn't consider itself:
-                        closestFriendIndex = mapGridCellArray[xCoord][yCoord].friendIndicesList[i];
-                        nearestFriendSquaredDistance = squaredDistFriend;
-                    }                    
+                Vector2 neighborPos = new Vector2(agentsArray[neighborIndex].bodyRigidbody.transform.localPosition.x, agentsArray[neighborIndex].bodyRigidbody.transform.localPosition.y);
+                float squaredDistNeighbor = (neighborPos - agentPos).sqrMagnitude;
+                                
+                if (squaredDistNeighbor <= nearestFriendSquaredDistance) { // if now the closest so far, update index and dist:
+                    int neighborSpeciesIndex = Mathf.FloorToInt((float)neighborIndex / (float)numAgents * (float)numSpecies);
+                    if(ownSpeciesIndex == neighborSpeciesIndex) {  // if two agents are of same species - friends
+                        if(a != neighborIndex) {  // make sure it doesn't consider itself:
+                            closestFriendIndex = neighborIndex;
+                            nearestFriendSquaredDistance = squaredDistNeighbor;
+                        } 
+                    }                                       
+                }
+
+                if (squaredDistNeighbor <= nearestEnemyAgentSqDistance) { // if now the closest so far, update index and dist:
+                    int neighborSpeciesIndex = Mathf.FloorToInt((float)neighborIndex / (float)numAgents * (float)numSpecies);
+                    if(ownSpeciesIndex != neighborSpeciesIndex) {  // if two agents are of different species - enemy
+                        if(a != neighborIndex) {  // make sure it doesn't consider itself:
+                            closestEnemyAgentIndex = neighborIndex;
+                            nearestEnemyAgentSqDistance = squaredDistNeighbor;
+                        }
+                    }
+                                        
                 }
             }
             
@@ -732,6 +752,7 @@ public class SimulationManager : MonoBehaviour {
             // Set proper references between AgentBrains and Environment/Game Objects:::
             // ***** DISABLED!!!! *** NEED TO RE_IMPLEMENT THIS LATER!!!! ********************************************
             agentsArray[a].coreModule.nearestFriendAgent = agentsArray[closestFriendIndex];
+            agentsArray[a].coreModule.nearestEnemyAgent = agentsArray[closestEnemyAgentIndex];
             if(closestFoodIndex != -1) {
                 if(closestFoodIsDeadAnimal) {                    
                     agentsArray[a].coreModule.nearestFoodModule = foodDeadAnimalArray[closestFoodIndex];

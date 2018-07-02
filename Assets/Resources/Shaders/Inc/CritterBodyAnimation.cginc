@@ -51,11 +51,11 @@ float2 foodBloatAnimPos(float2 originalPos, float t, float foodAmount) {
 float2 biteAnimPos(float2 originalPos, float t, float biteAnimCycle) {
 	
 	float eatingCycle = sin(biteAnimCycle * 3.141592);
-	float biteMask = saturate(t + 0.25);
+	float biteMask = saturate(1 - t);
 	
-	float2 newPos = originalPos * (1.0 + eatingCycle * 0.33f * biteMask);	
-	newPos.y *= (eatingCycle * 0.15f * biteMask + 1.0f);
-	newPos.x *= (1.0f - eatingCycle * 0.25f * biteMask);
+	float2 newPos = originalPos * (1.0 + eatingCycle * 0.67f * biteMask);	
+	newPos.y *= (eatingCycle * 0.3f * biteMask + 1.0f);
+	newPos.x *= (1.0f - eatingCycle * 0.5f * biteMask);
 	
 	return newPos;
 }
