@@ -61,7 +61,7 @@ public class UIManager : MonoBehaviour {
     public Button buttonToggleHUD;
     public bool isActiveHUD = true;
     public Button buttonToggleDebug;
-    public bool isActiveDebug = false;
+    public bool isActiveDebug = true;
 
     public bool isObserverMode = false;
     public bool deathScreenOn = false;

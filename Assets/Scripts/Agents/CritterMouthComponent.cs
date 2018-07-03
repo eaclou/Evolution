@@ -144,6 +144,8 @@ public class CritterMouthComponent : MonoBehaviour {
         }
     }
 
+    
+
     private void ActiveBiteCheck(Collider2D collider) {
         // own Bite Capacity:
         float ownBiteArea = triggerCollider.radius * triggerCollider.radius * 4f;
@@ -190,6 +192,8 @@ public class CritterMouthComponent : MonoBehaviour {
         }
     }
     private void PassiveBiteCheck(Collider2D collider) {
+        // disabled -- handling this differently...
+        /*
         // own Bite Capacity:
         float ownBiteArea = triggerCollider.radius * triggerCollider.radius;
         float targetArea = 1f;
@@ -225,6 +229,7 @@ public class CritterMouthComponent : MonoBehaviour {
                 // do nothing - unless it's able to nibble at edge?
             }
         }
+        */
     }
 
     private void SwallowAnimalWhole(Agent preyAgent) {

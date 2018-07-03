@@ -4,6 +4,24 @@ using UnityEngine;
 
 public static class UtilityMutationFunctions {
 
+    public static bool GetMutatedBool(bool curValue, float mutationChance, float mutationStepSize) {
+        bool mutatedValue = curValue;
+
+        float randomRoll = UnityEngine.Random.Range(0f, 1f);
+
+        if (randomRoll < mutationChance) {
+            float newVal = UnityEngine.Random.Range(0f, 1f);
+            if(newVal < 0.5f) {
+                mutatedValue = false;
+            }
+            else {
+                mutatedValue = true;
+            }
+        }
+
+        return mutatedValue;
+    }
+
 	public static float GetMutatedFloatAdditive(float curValue, float mutationChance, float mutationStepSize, float minValue, float maxValue) {
         float mutatedValue = curValue;
 

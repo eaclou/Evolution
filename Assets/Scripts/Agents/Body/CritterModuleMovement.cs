@@ -13,10 +13,15 @@ public class CritterModuleMovement {
     public float[] ownVelX;
     public float[] ownVelY;
 
+    public float[] facingDirX; 
+    public float[] facingDirY; 
+
     public float[] throttleX;
     public float[] throttleY;
     public float[] dash;
 
+    public float smallestCreatureBaseSpeed = 50f;
+    public float largestCreatureBaseSpeed = 200f;
 	
     public CritterModuleMovement() {
         
@@ -29,6 +34,9 @@ public class CritterModuleMovement {
         
         ownVelX = new float[1]; // 20
         ownVelY = new float[1]; // 21
+
+        facingDirX = new float[1];  // 207
+        facingDirY = new float[1];  // 208
         
         throttleX = new float[1]; // 0
         throttleY = new float[1]; // 1
@@ -49,6 +57,14 @@ public class CritterModuleMovement {
                 neuron.currentValue = ownVelY;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
+            if (nid.neuronID == 207) {
+                neuron.currentValue = facingDirX;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 208) {
+                neuron.currentValue = facingDirY;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
 
             if (nid.neuronID == 100) {
                 neuron.currentValue = throttleX;
@@ -65,12 +81,15 @@ public class CritterModuleMovement {
         }
     }
 
-    public void Tick(bool isPlayer, Vector2 ownVel) {
+    public void Tick(bool isPlayer, Agent agentRef, Vector2 ownVel) {
 
         //Vector2 ownPos = new Vector2(agent.rigidbodiesArray[0].transform.localPosition.x, agent.rigidbodiesArray[0].transform.localPosition.y);
         //Vector2 ownVel = new Vector2(rigidbody.velocity.x, rigidbody.velocity.y);
 
         ownVelX[0] = ownVel.x / 15f;
         ownVelY[0] = ownVel.y / 15f;
+
+        facingDirX[0] = agentRef.facingDirection.x;
+        facingDirY[0] = agentRef.facingDirection.y;
     }
 }

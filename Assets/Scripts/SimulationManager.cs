@@ -848,7 +848,7 @@ public class SimulationManager : MonoBehaviour {
                                                                            Quaternion.identity);
 
         // calculate amount of food to leave:        
-        float droppedFoodAmount = agentsArray[agentIndex].fullSizeBodyVolume + agentsArray[agentIndex].coreModule.foodAmountR[0];
+        float droppedFoodAmount = agentsArray[agentIndex].fullSizeBodyVolume + agentsArray[agentIndex].coreModule.stomachContents;
         float foodSideLength = Mathf.Sqrt(droppedFoodAmount);
         foodGenomeAnimalCorpse.fullSize = new Vector2(foodSideLength, foodSideLength);
 

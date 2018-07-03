@@ -25,15 +25,20 @@ public class CritterModuleCore {
 
     public float stomachContents = 0f;  // absolute values
     public float stomachCapacity = 0.5f;
+
+    public float debugFoodValue = 0f;
+
+    public Vector2 currentBodySize;
         
     // Nearest Edible Object:
     public float[] foodPosX;
     public float[] foodPosY;
     public float[] foodDirX;
     public float[] foodDirY;
-    public float[] foodTypeR;
-    public float[] foodTypeG;
-    public float[] foodTypeB;
+    public float[] foodRelSize;
+    //public float[] foodTypeR;
+    //public float[] foodTypeG;
+    //public float[] foodTypeB;
 
     public float[] friendPosX;
     public float[] friendPosY;
@@ -48,18 +53,28 @@ public class CritterModuleCore {
     public float[] enemyVelY;
     public float[] enemyDirX;
     public float[] enemyDirY;
+
+    public float[] enemyRelSize;
+    public float[] enemyHealth;
+    public float[] enemyGrowthStage;
+    public float[] enemyThreatRating;
     
-    public float[] temperature;
-    public float[] pressure;
+    //public float[] temperature;
+    //public float[] pressure;
     public float[] isContact;
     public float[] contactForceX;
     public float[] contactForceY;
+
     public float[] hitPoints;
     public float[] stamina;
+    public float[] energyStored;
+    public float[] foodStored;
 
-    public float[] foodAmountR;
-    public float[] foodAmountG;
-    public float[] foodAmountB;
+    //public float[] ownMouthStatus;
+
+    //public float[] foodAmountR;
+    //public float[] foodAmountG;
+    //public float[] foodAmountB;
     
     public float[] distUp; // start up and go clockwise!
     public float[] distTopRight;
@@ -79,6 +94,8 @@ public class CritterModuleCore {
     public float[] outComm1;
     public float[] outComm2;
     public float[] outComm3;  // 7 Out?
+
+    public float[] mouthEffector;
 
     public FoodChunk nearestFoodModule;
     public PredatorModule nearestPredatorModule;
@@ -102,9 +119,11 @@ public class CritterModuleCore {
         foodPosY = new float[1]; // 2
         foodDirX = new float[1];  // 3
         foodDirY = new float[1];  // 4
-        foodTypeR = new float[1]; // 5
-        foodTypeG = new float[1]; // 6
-        foodTypeB = new float[1]; // 7
+        foodRelSize = new float[1];  // 5
+        
+        //foodTypeR = new float[1]; // 5
+        //foodTypeG = new float[1]; // 6
+        //foodTypeB = new float[1]; // 7
 
         friendPosX = new float[1]; // 8
         friendPosY = new float[1]; // 9
@@ -119,18 +138,26 @@ public class CritterModuleCore {
         enemyVelY = new float[1]; // 17
         enemyDirX = new float[1]; // 18
         enemyDirY = new float[1]; // 19
+
+        enemyRelSize = new float[1];  // 200
+        enemyHealth = new float[1];   // 201
+        enemyGrowthStage = new float[1]; // 202
+        enemyThreatRating = new float[1]; // 203
         
-        temperature = new float[1]; // 22
-        pressure = new float[1]; // 23
+        //temperature = new float[1]; // 22
+        //pressure = new float[1]; // 23
         isContact = new float[1]; // 24
         contactForceX = new float[1]; // 25
         contactForceY = new float[1]; // 26
+
         hitPoints = new float[1]; // 27
         stamina = new float[1]; // 28
+        energyStored = new float[1];  // 204
+        foodStored = new float[1];  // 205
 
-        foodAmountR = new float[1]; // 29
-        foodAmountG = new float[1]; // 30
-        foodAmountB = new float[1]; // 31
+        //foodAmountR = new float[1]; // 29
+        //foodAmountG = new float[1]; // 30
+        //foodAmountB = new float[1]; // 31
         
         distUp = new float[1]; // 32 // start up and go clockwise!
         distTopRight = new float[1]; // 33
@@ -151,10 +178,13 @@ public class CritterModuleCore {
         outComm1 = new float[1]; // 4
         outComm2 = new float[1]; // 5
         outComm3 = new float[1]; // 6 
+
+        mouthEffector = new float[1];  // 206
+
         // 7 Total Outputs
                 
         // ===============================================================================================================================
-        
+        /*
         foodAmountR[0] = 0.01f;
         foodAmountG[0] = 0.01f;
         foodAmountB[0] = 0.01f;
@@ -162,7 +192,8 @@ public class CritterModuleCore {
             foodAmountR[0] = 1f;
             foodAmountG[0] = 1f;
             foodAmountB[0] = 1f;
-        }
+        }*/
+        
 
         energyRaw = coreWidth * coreLength * Mathf.Lerp(agent.spawnStartingScale, 1f, agent.growthPercentage);
         healthHead = 1f;
@@ -173,6 +204,8 @@ public class CritterModuleCore {
         
         hitPoints[0] = 1f;
         stamina[0] = 1f;
+        energyStored[0] = 1f;
+        foodStored[0] = 0f;
         
         parentID = genome.parentID;
         inno = genome.inno;
@@ -202,6 +235,10 @@ public class CritterModuleCore {
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
             if (nid.neuronID == 5) {
+                neuron.currentValue = foodRelSize;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            /*if (nid.neuronID == 5) {
                 neuron.currentValue = foodTypeR;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
@@ -212,7 +249,7 @@ public class CritterModuleCore {
             if (nid.neuronID == 7) {
                 neuron.currentValue = foodTypeB;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
+            }*/
             if (nid.neuronID == 8) {
                 neuron.currentValue = friendPosX;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
@@ -262,15 +299,32 @@ public class CritterModuleCore {
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
 
+            if (nid.neuronID == 200) {
+                neuron.currentValue = enemyRelSize;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 201) {
+                neuron.currentValue = enemyHealth;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 202) {
+                neuron.currentValue = enemyGrowthStage;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 203) {
+                neuron.currentValue = enemyThreatRating;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+
             
-            if (nid.neuronID == 22) {
+            /*if (nid.neuronID == 22) {
                 neuron.currentValue = temperature;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
             if (nid.neuronID == 23) {
                 neuron.currentValue = pressure;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
+            }*/
             if (nid.neuronID == 24) {
                 neuron.currentValue = isContact;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
@@ -291,7 +345,15 @@ public class CritterModuleCore {
                 neuron.currentValue = stamina;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
-            if (nid.neuronID == 29) {
+            if (nid.neuronID == 204) {
+                neuron.currentValue = energyStored;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 205) {
+                neuron.currentValue = foodStored;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            /*if (nid.neuronID == 29) {
                 neuron.currentValue = foodAmountR;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
@@ -302,7 +364,7 @@ public class CritterModuleCore {
             if (nid.neuronID == 31) {
                 neuron.currentValue = foodAmountB;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
+            }*/
             if (nid.neuronID == 32) {
                 neuron.currentValue = distUp;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
@@ -372,6 +434,11 @@ public class CritterModuleCore {
                 neuron.currentValue = outComm3;
                 neuron.neuronType = NeuronGenome.NeuronType.Out;
             }
+
+            if (nid.neuronID == 206) {
+                neuron.currentValue = mouthEffector;
+                neuron.neuronType = NeuronGenome.NeuronType.Out;
+            }
         }
     }
 
@@ -380,15 +447,16 @@ public class CritterModuleCore {
 
         Vector2 foodPos = Vector2.zero;
         Vector2 foodDir = Vector2.zero;
-        float typeR = 0f;
-        float typeG = 0f;
-        float typeB = 0f;
+        float foodAmount = 0f;
+        //float typeG = 0f;
+        //float typeB = 0f;
         if(nearestFoodModule != null) {
             foodPos = new Vector2(nearestFoodModule.transform.localPosition.x - ownPos.x, nearestFoodModule.transform.localPosition.y - ownPos.y);
             foodDir = foodPos.normalized;
             //typeR = nearestFoodModule.amountR;  // make a FoodModule Class to hold as reference which will contain Type info
             //typeG = nearestFoodModule.amountG;
             //typeB = nearestFoodModule.amountB;
+            foodAmount = nearestFoodModule.amountR;
         }
 
         Vector2 friendPos = Vector2.zero;
@@ -407,6 +475,29 @@ public class CritterModuleCore {
             enemyPos = new Vector2(nearestEnemyAgent.bodyRigidbody.transform.localPosition.x - ownPos.x, nearestEnemyAgent.bodyRigidbody.transform.localPosition.y - ownPos.y);
             enemyDir = enemyPos.normalized;
             enemyVel = new Vector2(nearestEnemyAgent.bodyRigidbody.velocity.x, nearestEnemyAgent.bodyRigidbody.velocity.y);
+
+            float ownSize = currentBodySize.x;
+            float enemySize = nearestEnemyAgent.coreModule.currentBodySize.x;
+
+            if(ownSize != 0f && enemySize != 0) {
+                float sizeRatio = enemySize / ownSize - 1f; 
+                if(enemySize < ownSize) {
+                    sizeRatio = -1f * (ownSize / enemySize - 1f);
+                }
+                enemyRelSize[0] = sizeRatio;  // smaller creatures negative values, larger creatures positive, 0 = same size
+            }
+            else {
+
+            }            
+
+            enemyHealth[0] = nearestEnemyAgent.coreModule.hitPoints[0];
+            enemyGrowthStage[0] = nearestEnemyAgent.growthPercentage;
+
+            float threat = 1f;
+            if(nearestEnemyAgent.mouthRef.isPassive) {
+                threat = 0f;
+            }
+            enemyThreatRating[0] = threat;
         }
         /*if (nearestPredatorModule != null) {
             enemyPos = new Vector2(nearestPredatorModule.rigidBody.transform.localPosition.x - ownPos.x, nearestPredatorModule.rigidBody.transform.localPosition.y - ownPos.y);
@@ -418,9 +509,10 @@ public class CritterModuleCore {
         foodPosY[0] = foodPos.y / 20f;
         foodDirX[0] = foodDir.x;
         foodDirY[0] = foodDir.y;
-        foodTypeR[0] = typeR;
-        foodTypeG[0] = typeG;
-        foodTypeB[0] = typeB;
+        //foodTypeR[0] = typeR;
+        //foodTypeG[0] = typeG;
+        //foodTypeB[0] = typeB;
+        foodRelSize[0] = foodAmount;
         
         friendPosX[0] = friendPos.x / 20f;
         friendPosY[0] = friendPos.y / 20f;
@@ -436,17 +528,20 @@ public class CritterModuleCore {
         enemyDirX[0] = enemyDir.x;
         enemyDirY[0] = enemyDir.y;
 
+        
+
         //ownVelX[0] = ownVel.x / 15f;
         //ownVelY[0] = ownVel.y / 15f;
 
-        temperature[0] = 0f;
-        pressure[0] = 0f;
+        //temperature[0] = 0f;
+        //pressure[0] = 0f;
         isContact[0] = 0f;
         contactForceX[0] = 0f;
         contactForceY[0] = 0f;
         hitPoints[0] = Mathf.Max(healthBody, 0f);
-        stamina[0] = energyRaw / maxEnergyStorage;
-        
+        //stamina[0] = stamina; // set in Agent.cs
+        energyStored[0] = Mathf.Clamp01(energyRaw / maxEnergyStorage);
+        foodStored[0] = stomachContents / stomachCapacity;
         
         //mouthRef.foodInRange = false;
         

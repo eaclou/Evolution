@@ -60,6 +60,7 @@ public class Agent : MonoBehaviour {
 
         }
     }
+    public int maxAgeTimeSteps = 1200;
     private int decayDurationTimeSteps = 60;
     public int _DecayDurationTimeSteps
     {
@@ -347,7 +348,7 @@ public class Agent : MonoBehaviour {
         Vector2 ownVel = new Vector2(bodyRigidbody.velocity.x, bodyRigidbody.velocity.y); // change this to ownPos - prevPos *****************
 
         coreModule.Tick(humanControlled, ownPos, ownVel);
-        movementModule.Tick(humanControlled, ownVel);
+        movementModule.Tick(humanControlled, this, ownVel);
         // Add more sensor Modules later:
 
         // Update Mouth:::: 
@@ -402,6 +403,14 @@ public class Agent : MonoBehaviour {
             wasImpaled = true;
         }
     }
+    private void CheckForDeathOldAge() {
+        if(ageCounterMature > maxAgeTimeSteps) {
+            curLifeStage = Agent.AgentLifeStage.Decaying;
+            lifeStageTransitionTimeStepCounter = 0;
+
+            //Debug.Log("Died of old age!");
+        }
+    }
     private void CheckForLifeStageTransition() {
         switch(curLifeStage) {
             case AgentLifeStage.Egg:
@@ -426,12 +435,14 @@ public class Agent : MonoBehaviour {
 
                 CheckForDeathStarvation();
                 CheckForDeathHealth();
+                CheckForDeathOldAge();
                 break;
             case AgentLifeStage.Mature:
                 
                 // Check for Death:
                 CheckForDeathStarvation();
                 CheckForDeathHealth();
+                CheckForDeathOldAge();
                 
                 break;
             case AgentLifeStage.Decaying:
@@ -477,7 +488,7 @@ public class Agent : MonoBehaviour {
         if(coreModule.stomachContents > coreModule.stomachCapacity) {
             coreModule.stomachContents = coreModule.stomachCapacity;
         }
-
+        /*
         if (humanControlled) {
             coreModule.foodAmountR[0] += amount * 0.720f;  // 0.33 is too little
             coreModule.foodAmountG[0] += amount * 0.720f;
@@ -498,6 +509,7 @@ public class Agent : MonoBehaviour {
         if(coreModule.foodAmountB[0] > 1f) {
             coreModule.foodAmountB[0] = 1f;
         }
+        */
     }
 
     public void Tick() {
@@ -549,8 +561,7 @@ public class Agent : MonoBehaviour {
 
         prevPos = curPos;
         prevVel = curVel;
-
-        
+                
 
         //transform.localScale = new Vector3(fullSize.x, fullSize.y, 1f);
 
@@ -633,11 +644,14 @@ public class Agent : MonoBehaviour {
         //segmentFullSizeArray
         float scale = Mathf.Lerp(spawnStartingScale, 1f, growthPercentage); // Minimum size = 0.1 ???
         float currentBodyVolume = fullSizeBodyVolume * scale; // *** REFACTOR!!!! ****
+
+        coreModule.currentBodySize = new Vector2(coreModule.coreWidth, coreModule.coreLength) * scale;
+
         coreModule.stomachCapacity = currentBodyVolume * 1f;
 
         coreModule.maxEnergyStorage = fullSizeBodyVolume * scale;
 
-        bodyCritterSegment.GetComponent<CapsuleCollider2D>().size = new Vector2(coreModule.coreWidth, coreModule.coreLength) * scale;
+        bodyCritterSegment.GetComponent<CapsuleCollider2D>().size = coreModule.currentBodySize;
 
         bodyRigidbody.mass = currentBodyVolume;
 
@@ -711,19 +725,12 @@ public class Agent : MonoBehaviour {
         
         // Facing Direction:
         throttle = new Vector2(horizontalMovementInput, verticalMovementInput);
+        //if(horizontalMovementInput != 0 && verticalMovementInput != 0) {
+        //
+        //}
         smoothedThrottle = Vector2.Lerp(smoothedThrottle, throttle, smoothedThrottleLerp);
         Vector2 throttleForwardDir = throttle.normalized;
-
-        if(curLifeStage == AgentLifeStage.Decaying || curLifeStage == AgentLifeStage.Egg) {
-            throttle = Vector2.zero;
-            smoothedThrottle = Vector2.zero;
-        }
-        else {
-            // BITE!!!
-            if(movementModule.dash[0] > 0f) {
-                mouthRef.InitiateActiveBite();
-            }            
-        }
+                
 
         // ENERGY!!!!
         // Digestion:
@@ -773,7 +780,9 @@ public class Agent : MonoBehaviour {
             coreModule.stamina[0] += 0.01f;  // recovery
             if(coreModule.stamina[0] > 1f) {
                 coreModule.stamina[0] = 1f;
-            }            
+            } 
+            
+
         }
         // ENERGY DRAIN::::
         coreModule.energyRaw -= energyCost;
@@ -783,6 +792,39 @@ public class Agent : MonoBehaviour {
 
         if(humanControlled) {
             coreModule.energyRaw = maxEnergy;
+        }
+
+        if(curLifeStage == AgentLifeStage.Decaying || curLifeStage == AgentLifeStage.Egg) {
+            throttle = Vector2.zero;
+            smoothedThrottle = Vector2.zero;
+        }
+        else {
+            // BITE!!!
+            if(mouthRef.isPassive) {
+                // PAssive filter feeding:
+                if(coreModule.mouthEffector[0] > 0f) {
+                    float ambientFoodDensity = 0.001f;
+                    float mouthArea = mouthRef.triggerCollider.radius * 4f;                
+
+                    // Try basing food amount on proximity to food chunks:
+                    float distToNearestFood = (coreModule.nearestFoodModule.gameObject.transform.position - bodyRigidbody.transform.position).magnitude;
+                    float proximityScore = 1f - Mathf.Clamp01((distToNearestFood + 2.5f) * 0.1f);
+
+                    float filteredFoodAmount = mouthArea * ambientFoodDensity * proximityScore;
+
+                    coreModule.stomachContents += filteredFoodAmount;
+                    if(coreModule.stomachContents > coreModule.stomachCapacity) {
+                        coreModule.stomachContents = coreModule.stomachCapacity;
+                    }
+                    coreModule.debugFoodValue = distToNearestFood;
+                }                
+            }
+            else {
+                if(coreModule.mouthEffector[0] > 0f) {
+                    mouthRef.InitiateActiveBite();
+                    //coreModule.mouth
+                }
+            }                        
         }
 
         ApplyPhysicsForces(smoothedThrottle);
@@ -823,18 +865,22 @@ public class Agent : MonoBehaviour {
             float headTurnSign = Mathf.Clamp(Vector2.Dot(throttleDir, headRightDir) * -10000f, -1f, 1f);
 
             float fatigueMultiplier = Mathf.Clamp01(coreModule.energyRaw * 1f / fullSizeBoundingBox.x * fullSizeBoundingBox.y) * Mathf.Clamp01(growthPercentage * 10f);
-
+            float developmentMultiplier = Mathf.Lerp(0.25f, 1f, Mathf.Clamp01(growthPercentage * 2f));
             //turningAmount = Mathf.Lerp(turningAmount, this.bodyRigidbody.angularVelocity * Mathf.Deg2Rad * 0.1f, 0.15f);
 
             //this.rigidbodiesArray[0].AddForce(headForwardDir * speed * Time.deltaTime, ForceMode2D.Impulse);
 
             animationCycle += swimAnimationCycleSpeed * throttle.magnitude / (Mathf.Lerp(coreModule.coreLength, 1f, 0.6f) * (growthPercentage * 0.4f + 0.6f));
             //animationCycle = animationCycle % 1.0f;
-            
+
+            // get size in 0-1 range from minSize to maxSize:
+            float sizeValue = (coreModule.coreWidth - 0.1f) / 2.5f; // ** Hardcoded assuming size ranges from 0.1 --> 2.5 !!! ********
+            float swimSpeed = Mathf.Lerp(movementModule.smallestCreatureBaseSpeed, movementModule.largestCreatureBaseSpeed, sizeValue);
+            speed = swimSpeed;
             // Forward Slide
             for(int k = 0; k < numSegments; k++) {
                 Vector2 segmentForwardDir = new Vector2(this.bodyRigidbody.transform.up.x, this.bodyRigidbody.transform.up.y).normalized;
-                this.bodyRigidbody.AddForce(segmentForwardDir * (1f - turnSharpness * 0.25f) * movementModule.horsepower * this.bodyRigidbody.mass * Time.deltaTime, ForceMode2D.Impulse);
+                this.bodyRigidbody.AddForce(segmentForwardDir * (1f - turnSharpness * 0.25f) * swimSpeed * this.bodyRigidbody.mass * Time.deltaTime * developmentMultiplier, ForceMode2D.Impulse);
             }
 
             // Head turn:
@@ -954,6 +1000,7 @@ public class Agent : MonoBehaviour {
             bodyRigidbody = bodySegmentGO.AddComponent<Rigidbody2D>();
             CapsuleCollider2D bodyCollider = bodyGO.AddComponent<CapsuleCollider2D>(); // change this to Capsule Later -- upgrade!!!!
             bodyCritterSegment.segmentCollider = bodyCollider;
+            bodyRigidbody.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
 
             GameObject testMouthGO = new GameObject("Mouth");
             testMouthGO.transform.parent = bodyGO.transform;
@@ -975,7 +1022,8 @@ public class Agent : MonoBehaviour {
         bodyCritterSegment.segmentCollider.size = new Vector2(coreModule.coreWidth, coreModule.coreLength) * spawnStartingScale;  // spawn size percentage 1/10th      
         bodyCritterSegment.segmentCollider.direction = CapsuleDirection2D.Vertical;
 
-        // Mouth Trigger:       
+        // Mouth Trigger:
+        mouthRef.isPassive = genome.bodyGenome.coreGenome.isPassive;
         mouthRef.triggerCollider.isTrigger = true;
         mouthRef.triggerCollider.radius = coreModule.coreWidth / 2f * spawnStartingScale;
         mouthRef.triggerCollider.offset = new Vector2(0f, segmentLength / 2f * spawnStartingScale);

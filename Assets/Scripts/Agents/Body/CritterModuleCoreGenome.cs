@@ -45,8 +45,10 @@ public class CritterModuleCoreGenome {
         // Do stuff:
         Debug.Log("GenerateRandomGenome()");
 
+        isPassive = true;
+
         numSegments = 1;
-        fullBodyWidth = UnityEngine.Random.Range(0.1f, 1.5f);
+        fullBodyWidth = UnityEngine.Random.Range(0.1f, 2.5f);
         fullBodyLength = fullBodyWidth * UnityEngine.Random.Range(1.25f, 4f);
 
         relWidthSnout = UnityEngine.Random.Range(0.25f, 1f);
@@ -68,10 +70,11 @@ public class CritterModuleCoreGenome {
         NeuronGenome foodPosY = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 2);
         NeuronGenome foodDirX = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 3);
         NeuronGenome foodDirY = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 4);
-        NeuronGenome foodTypeR = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 5);
-        NeuronGenome foodTypeG = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 6);
-        NeuronGenome foodTypeB = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 7);
-
+        //NeuronGenome foodTypeR = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 5);
+        //NeuronGenome foodTypeG = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 6);
+        //NeuronGenome foodTypeB = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 7);
+        NeuronGenome foodRelSize = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 5);
+        
         NeuronGenome friendPosX = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 8);
         NeuronGenome friendPosY = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 9);
         NeuronGenome friendVelX = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 10);
@@ -86,18 +89,24 @@ public class CritterModuleCoreGenome {
         NeuronGenome enemyDirX = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 18);
         NeuronGenome enemyDirY = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 19);
 
-        NeuronGenome ownVelX = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 20); // 20
-        NeuronGenome ownVelY = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 21); // 21
-        NeuronGenome temperature = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 22); // 22
-        NeuronGenome pressure = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 23); // 23
+        NeuronGenome enemyRelSize = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 200);
+        NeuronGenome enemyHealth = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 201);
+        NeuronGenome enemyGrowthStage = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 202);
+        NeuronGenome enemyThreatRating = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 203);
+                
+        //NeuronGenome temperature = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 22); // 22
+        //NeuronGenome pressure = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 23); // 23
         NeuronGenome isContact = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 24); // 24
         NeuronGenome contactForceX = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 25); // 25
         NeuronGenome contactForceY = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 26); // 26
+        
+        //NeuronGenome foodAmountR = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 29); // 29
+        //NeuronGenome foodAmountG = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 30); // 30
+        //NeuronGenome foodAmountB = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 31); // 31
         NeuronGenome hitPoints = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 27); // 27
         NeuronGenome stamina = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 28); // 28
-        NeuronGenome foodAmountR = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 29); // 29
-        NeuronGenome foodAmountG = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 30); // 30
-        NeuronGenome foodAmountB = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 31); // 31
+        NeuronGenome energyStored = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 204); // 27
+        NeuronGenome foodStored = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 205); // 28
 
         NeuronGenome distUp = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 32); // 32 // start up and go clockwise!
         NeuronGenome distTopRight = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 33); // 33
@@ -113,24 +122,22 @@ public class CritterModuleCoreGenome {
         NeuronGenome inComm2 = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 42); // 42
         NeuronGenome inComm3 = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 43); // 43 
         // 44 Total Inputs
-
-        NeuronGenome throttleX = new NeuronGenome(NeuronGenome.NeuronType.Out, inno, 100); // 100
-        NeuronGenome throttleY = new NeuronGenome(NeuronGenome.NeuronType.Out, inno, 101); // 101
-        NeuronGenome dash = new NeuronGenome(NeuronGenome.NeuronType.Out, inno, 102); // 102
         NeuronGenome outComm0 = new NeuronGenome(NeuronGenome.NeuronType.Out, inno, 103); // 103
         NeuronGenome outComm1 = new NeuronGenome(NeuronGenome.NeuronType.Out, inno, 104); // 104
         NeuronGenome outComm2 = new NeuronGenome(NeuronGenome.NeuronType.Out, inno, 105); // 105
         NeuronGenome outComm3 = new NeuronGenome(NeuronGenome.NeuronType.Out, inno, 106); // 106
 
+        NeuronGenome mouthEffector = new NeuronGenome(NeuronGenome.NeuronType.Out, inno, 206); // 106
 
         neuronList.Add(bias);   //0
         neuronList.Add(foodPosX);  //1
         neuronList.Add(foodPosY); // 2
         neuronList.Add(foodDirX);  // 3
         neuronList.Add(foodDirY);  // 4
-        neuronList.Add(foodTypeR); // 5
-        neuronList.Add(foodTypeG); // 6
-        neuronList.Add(foodTypeB); // 7
+        //neuronList.Add(foodTypeR); // 5
+        //neuronList.Add(foodTypeG); // 6
+        //neuronList.Add(foodTypeB); // 7
+        neuronList.Add(foodRelSize);  // 5
 
         neuronList.Add(friendPosX); // 8
         neuronList.Add(friendPosY); // 9
@@ -146,18 +153,24 @@ public class CritterModuleCoreGenome {
         neuronList.Add(enemyDirX); // 18
         neuronList.Add(enemyDirY); // 19
 
-        neuronList.Add(ownVelX); // 20
-        neuronList.Add(ownVelY); // 21
-        neuronList.Add(temperature); // 22
-        neuronList.Add(pressure); // 23
+        neuronList.Add(enemyRelSize); // 200
+        neuronList.Add(enemyHealth); // 201
+        neuronList.Add(enemyGrowthStage); // 202
+        neuronList.Add(enemyThreatRating); // 203
+        
+        //neuronList.Add(temperature); // 22
+        //neuronList.Add(pressure); // 23
         neuronList.Add(isContact); // 24
         neuronList.Add(contactForceX); // 25
         neuronList.Add(contactForceY); // 26
+        
+        //neuronList.Add(foodAmountR); // 29
+        //neuronList.Add(foodAmountG); // 30
+        //neuronList.Add(foodAmountB); // 31
         neuronList.Add(hitPoints); // 27
         neuronList.Add(stamina); // 28
-        neuronList.Add(foodAmountR); // 29
-        neuronList.Add(foodAmountG); // 30
-        neuronList.Add(foodAmountB); // 31
+        neuronList.Add(energyStored); // 204
+        neuronList.Add(foodStored); // 205
 
         neuronList.Add(distUp); // 32 // start up and go clockwise!
         neuronList.Add(distTopRight); // 33
@@ -173,21 +186,20 @@ public class CritterModuleCoreGenome {
         neuronList.Add(inComm2); // 42
         neuronList.Add(inComm3); // 43 
         // 44 Total Inputs
-
-        neuronList.Add(throttleX); // 100
-        neuronList.Add(throttleY); // 101
-        neuronList.Add(dash); // 102
+                
         neuronList.Add(outComm0); // 103
         neuronList.Add(outComm1); // 104
         neuronList.Add(outComm2); // 105
         neuronList.Add(outComm3); // 106 
         // 7 Total Outputs
+        neuronList.Add(mouthEffector); // 206
     }
 
     public void SetToMutatedCopyOfParentGenome(CritterModuleCoreGenome parentGenome, MutationSettings settings) {
 
-
-        fullBodyWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.fullBodyWidth, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.1f, 1.5f);
+        isPassive = UtilityMutationFunctions.GetMutatedBool(parentGenome.isPassive, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize);
+        
+        fullBodyWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.fullBodyWidth, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.1f, 2.5f);
         fullBodyLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.fullBodyLength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, fullBodyWidth * 1.25f, fullBodyWidth * 4f);
         if(fullBodyLength < fullBodyWidth * 1.25f) {
             fullBodyLength = fullBodyWidth * 1.25f;

@@ -307,7 +307,7 @@ public class SimulationStateData {
         for(int i = 0; i < debugBodyResourcesArray.Length; i++) {  
             
             debugBodyResourcesArray[i].developmentPercentage = simManager.agentsArray[i].growthPercentage;
-            debugBodyResourcesArray[i].energy = simManager.agentsArray[i].coreModule.energyRaw; // *** max energy storage?? ****
+            debugBodyResourcesArray[i].energy = simManager.agentsArray[i].coreModule.energyRaw / simManager.agentsArray[i].coreModule.maxEnergyStorage; // *** max energy storage?? ****
             debugBodyResourcesArray[i].health = simManager.agentsArray[i].coreModule.healthBody;
             float biting = 0f;
             if (simManager.agentsArray[i].mouthRef.isBiting)

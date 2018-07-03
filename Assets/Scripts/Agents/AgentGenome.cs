@@ -20,6 +20,11 @@ public class AgentGenome {
     public void GenerateInitialRandomBodyGenome() {
         bodyGenome.FirstTimeInitializeCritterModuleGenomes();
         bodyGenome.GenerateRandomBodyGenome();
+
+        // **** TEMPORARY !!!! TESTING!!! ******
+        if(index < 41) {
+            //bodyGenome.coreGenome.isPassive = false;
+        }
     }
 
     /*public void InitializeBodyGenomeFromTemplate(BodyGenome bodyGenomeTemplate) {  // OLD
