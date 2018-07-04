@@ -140,6 +140,7 @@ public class TheRenderKing : MonoBehaviour {
     public Material debugMaterial;
     public Mesh debugMesh;
     public RenderTexture debugRT; // Used to see texture inside editor (inspector)
+    
 
     public Texture2D critterBodyWidthsTex;
 

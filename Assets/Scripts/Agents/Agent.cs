@@ -813,7 +813,7 @@ public class Agent : MonoBehaviour {
                     //float proximityScore = 1f - Mathf.Clamp01((distToNearestFood + 0.25f) * 0.5f);
 
                     // *** Can double dip !!! BROKEN! **** Check reservoir first to avoid overdrafting!! ******
-                    float filteredFoodAmount = Mathf.Min(mouthArea * ambientFoodDensity, mouthArea); // * proximityScore;
+                    float filteredFoodAmount = Mathf.Min(mouthArea * ambientFoodDensity, mouthArea * 0.005f); // * proximityScore;
                     gridCell.foodAmountsPerLayerArray[0] -= filteredFoodAmount;
                     gridCell.foodAmountsPerLayerArray[0] = Mathf.Max(0f, gridCell.foodAmountsPerLayerArray[0]);
 

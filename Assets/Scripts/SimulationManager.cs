@@ -126,9 +126,10 @@ public class SimulationManager : MonoBehaviour {
 
     private int numSpecies = 4;
 
-    private int foodGridResolution = 8;
+    private int foodGridResolution = 32;
     public FoodGridCell[][] foodGrid;
     public float[][] foodGridSwapArray;
+    public Texture2D debugFoodTexture;
 
     //public bool isTrainingPersistent = false; // RENAME ONCE FUNCTIONAL
     //private float lastHorizontalInput = 0f;
@@ -385,6 +386,10 @@ public class SimulationManager : MonoBehaviour {
     private void LoadingInitializeFoodGrid() {
         foodGrid = new FoodGridCell[foodGridResolution][];
         foodGridSwapArray = new float[foodGridResolution][];
+
+        debugFoodTexture = new Texture2D(foodGridResolution, foodGridResolution);
+        debugFoodTexture.filterMode = FilterMode.Point;
+        theRenderKing.fluidRenderMat.SetTexture("_DebugTex", debugFoodTexture);
 
         int numFoodSizeLayers = 4;
         for(int x = 0; x < foodGridResolution; x++) {
@@ -656,22 +661,28 @@ public class SimulationManager : MonoBehaviour {
 
                 foodGrid[x][y].gradientFoodAmountsPerLayerArray[0] = grad;
 
-                foodGridSwapArray[x][y] = (amountCenter * 0.95f + (amountRight + amountLeft + amountUp + amountDown) * 0.0125f);
+                foodGridSwapArray[x][y] = Mathf.Lerp(amountCenter, (amountCenter + amountRight + amountLeft + amountUp + amountDown)  / 5f, 0.01f);
 
                 totalFoodLayer0 += foodGrid[x][y].foodAmountsPerLayerArray[0];
                 // ^^^^ HAVE TO DO THIS FOR EACH FOOD SIZE LAYER!!! ^^^^^ **********************
+                                
             }
         }
         for(int x = 0; x < foodGridResolution; x++) {                        
             // for each cell:
             for (int y = 0; y < foodGridResolution; y++) {
                 foodGrid[x][y].foodAmountsPerLayerArray[0] = foodGridSwapArray[x][y];
+
+                // COLOR: TEMP:::
+                Color pixelColor = new Color(foodGridSwapArray[x][y], foodGridSwapArray[x][y], foodGridSwapArray[x][y], 1);
+                debugFoodTexture.SetPixel(x, y, pixelColor);
             }
         }
+        debugFoodTexture.Apply();        
 
         float spawnNewFoodChance = 0.125f;
         float spawnFoodPercentage = UnityEngine.Random.Range(0f, 1f);
-        float maxGlobalFood = foodGridResolution * foodGridResolution * 0.25f * 0.15f;
+        float maxGlobalFood = foodGridResolution * foodGridResolution * 0.25f * 0.1f;
 
         if(totalFoodLayer0 < maxGlobalFood) {
             float randRoll = UnityEngine.Random.Range(0f, 1f);

@@ -8,6 +8,7 @@
 		_DivergenceTex ("_DivergenceTex", 2D) = "white" {}
 		_ObstaclesTex ("_ObstaclesTex", 2D) = "white" {}
 		_TerrainHeightTex ("_TerrainHeightTex", 2D) = "grey" {}
+		_DebugTex ("_DebugTex", 2D) = "black" {}
 	}
 	SubShader
 	{
@@ -43,6 +44,7 @@
 			sampler2D _DivergenceTex;
 			sampler2D _ObstaclesTex;
 			sampler2D _TerrainHeightTex;
+			sampler2D _DebugTex;
 			
 			v2f vert (appdata v)
 			{
@@ -116,7 +118,13 @@
 				//}
 				finalColor = lerp(finalColor, float4(0.5, 0.5, 0.5, 1), 0.5);
 				//return float4(0.5, 0.5, 0.5, 1);
-				
+
+				float4 debugColor = tex2D(_DebugTex, i.uv);
+				debugColor.a = 1;
+				debugColor.rgb *= 10;
+				debugColor.rb = 0;
+				return debugColor;
+
 				return finalColor;
 			}
 			ENDCG
