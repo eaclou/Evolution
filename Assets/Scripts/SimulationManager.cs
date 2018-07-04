@@ -126,6 +126,10 @@ public class SimulationManager : MonoBehaviour {
 
     private int numSpecies = 4;
 
+    private int foodGridResolution = 8;
+    public FoodGridCell[][] foodGrid;
+    public float[][] foodGridSwapArray;
+
     //public bool isTrainingPersistent = false; // RENAME ONCE FUNCTIONAL
     //private float lastHorizontalInput = 0f;
     //private float lastVerticalInput = 0f;
@@ -221,8 +225,9 @@ public class SimulationManager : MonoBehaviour {
         agentsArray[0].humanControlled = true;
         agentsArray[0].humanControlLerp = 1f;
         LoadingInitializeAgentsFromGenomes(); // This was "RespawnAgents()" --  Used to actually place the Agent in the game in a random spot and set the Agent's atributes ffrom its genome
-        
+
         // Initialize Food:
+        LoadingInitializeFoodGrid();
         LoadingInstantiateFood();
         LoadingInitializeFoodFromGenome();
         // Initialize Predators:
@@ -377,6 +382,27 @@ public class SimulationManager : MonoBehaviour {
             agentsArray[i].InitializeAgentFromGenome(i, agentGenomePoolArray[i], GetRandomAgentSpawnPosition());            
         }
     }
+    private void LoadingInitializeFoodGrid() {
+        foodGrid = new FoodGridCell[foodGridResolution][];
+        foodGridSwapArray = new float[foodGridResolution][];
+
+        int numFoodSizeLayers = 4;
+        for(int x = 0; x < foodGridResolution; x++) {
+
+            foodGrid[x] = new FoodGridCell[foodGridResolution];
+            foodGridSwapArray[x] = new float[foodGridResolution];
+
+            for (int y = 0; y < foodGridResolution; y++) {
+                FoodGridCell gridCell = new FoodGridCell(numFoodSizeLayers);
+                // Set amounts of Food per layer -- based on noise?
+                foodGrid[x][y] = gridCell;
+
+            }
+
+            
+
+        }
+    }
     private void LoadingInstantiateFood() {
         // FOOODDDD!!!!
         foodArray = new FoodChunk[numFood]; // create array
@@ -511,7 +537,7 @@ public class SimulationManager : MonoBehaviour {
     #region Every Frame  //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& EVERY FRAME &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
     public void TickSimulation() {
-
+        UpdateFoodGrid();
         // ******** REVISIT CODE ORDERING!!!!  -- Should check for death Before or After agent Tick/PhysX ???
         CheckForDeadFood();
         CheckForDeadAgents();  // Result of this will affect: "simStateData.PopulateSimDataArrays(this)" !!!!!
@@ -535,7 +561,15 @@ public class SimulationManager : MonoBehaviour {
         // Load gameState into Agent Brain, process brain function, read out brainResults,
         // Execute Agent Actions -- apply propulsive force to each Agent:
         for (int i = 0; i < agentsArray.Length; i++) {
-            agentsArray[i].Tick();
+            // *** FIND FOOD GRID CELL!!!!  ************
+            Vector2 agentPos = agentsArray[i].bodyRigidbody.transform.position;
+
+            int foodGridIndexX = Mathf.FloorToInt((agentPos.x + 70f) / 140f * (float)foodGridResolution);
+            foodGridIndexX = Mathf.Clamp(foodGridIndexX, 0, foodGridResolution - 1);
+            int foodGridIndexY = Mathf.FloorToInt((agentPos.y + 70f) / 140f * (float)foodGridResolution);
+            foodGridIndexY = Mathf.Clamp(foodGridIndexY, 0, foodGridResolution - 1);
+
+            agentsArray[i].Tick(foodGrid[foodGridIndexX][foodGridIndexY]);  
         }
         for (int i = 0; i < foodArray.Length; i++) {
             foodArray[i].Tick();
@@ -583,6 +617,90 @@ public class SimulationManager : MonoBehaviour {
         }
     }
 
+    private void UpdateFoodGrid() {
+        float totalFoodLayer0 = 0f;
+
+        for(int x = 0; x < foodGridResolution; x++) {
+                        
+            // for each cell:
+            for (int y = 0; y < foodGridResolution; y++) {
+
+                // cell[x,y]:
+                int leftIndex = x - 1;
+                if(leftIndex < 0) {
+                    leftIndex = 0;
+                }
+                int rightIndex = x + 1;
+                if(rightIndex >= foodGridResolution) {
+                    rightIndex = foodGridResolution - 1;
+                }
+                int downIndex = y - 1;
+                if(downIndex < 0) {
+                    downIndex = 0;
+                }
+                int upIndex = y + 1;
+                if(upIndex >= foodGridResolution) {
+                    upIndex = foodGridResolution - 1;
+                }
+
+                float amountRight = foodGrid[rightIndex][y].foodAmountsPerLayerArray[0];
+                float amountLeft = foodGrid[leftIndex][y].foodAmountsPerLayerArray[0];
+                float amountUp = foodGrid[x][upIndex].foodAmountsPerLayerArray[0];
+                float amountDown = foodGrid[x][downIndex].foodAmountsPerLayerArray[0];
+                float amountCenter = foodGrid[x][y].foodAmountsPerLayerArray[0];
+
+                float deltaX = amountRight - amountLeft;
+                float deltaY = amountUp - amountDown;
+
+                Vector2 grad = new Vector2(deltaX, deltaY).normalized;
+
+                foodGrid[x][y].gradientFoodAmountsPerLayerArray[0] = grad;
+
+                foodGridSwapArray[x][y] = (amountCenter * 0.95f + (amountRight + amountLeft + amountUp + amountDown) * 0.0125f);
+
+                totalFoodLayer0 += foodGrid[x][y].foodAmountsPerLayerArray[0];
+                // ^^^^ HAVE TO DO THIS FOR EACH FOOD SIZE LAYER!!! ^^^^^ **********************
+            }
+        }
+        for(int x = 0; x < foodGridResolution; x++) {                        
+            // for each cell:
+            for (int y = 0; y < foodGridResolution; y++) {
+                foodGrid[x][y].foodAmountsPerLayerArray[0] = foodGridSwapArray[x][y];
+            }
+        }
+
+        float spawnNewFoodChance = 0.125f;
+        float spawnFoodPercentage = UnityEngine.Random.Range(0f, 1f);
+        float maxGlobalFood = foodGridResolution * foodGridResolution * 0.25f * 0.15f;
+
+        if(totalFoodLayer0 < maxGlobalFood) {
+            float randRoll = UnityEngine.Random.Range(0f, 1f);
+            if(randRoll < spawnNewFoodChance) {
+                // pick random cell:
+                int randX = UnityEngine.Random.Range(0, foodGridResolution - 1);
+                int randY = UnityEngine.Random.Range(0, foodGridResolution - 1);
+
+                float foodAvailable = maxGlobalFood - totalFoodLayer0;
+
+                float newFoodAmount = foodAvailable * spawnFoodPercentage;
+
+                foodGrid[randX][randY].foodAmountsPerLayerArray[0] += newFoodAmount;
+
+                //Debug.Log("ADDED FOOD! GridCell[" + randX.ToString() + "][" + randY.ToString() + "]: " + newFoodAmount.ToString());
+            }
+        }
+        
+        /*for(int i = 0; i < foodGrid.Length; i++) {
+            int xIndex = i % foodGridResolution;
+            int yIndex = Mathf.FloorToInt((float)i / (float)foodGridResolution);
+
+            // Calculate Empirical Gradient:
+            if(xIndex - 1 < 0) {
+                leftIndex = 0;
+            }
+            int leftIndex = yIndex * foodGridResolution + (xIndex - 1);
+        }*/
+    }
     private void PopulateGridCells() {
 
         // Inefficient!!!

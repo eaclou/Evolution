@@ -69,7 +69,7 @@ public class FoodChunk : MonoBehaviour {
     public Vector2 fullSize;
     public Vector2 curSize;
 
-    private Vector2 minSize = new Vector2(0.25f, 0.25f);
+    private Vector2 minSize = new Vector2(0.1f, 0.1f);
     
     private float minMass = 0.25f;
     private float maxMass = 5f;

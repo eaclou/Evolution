@@ -442,7 +442,7 @@ public class CritterModuleCore {
         }
     }
 
-    public void Tick(bool isPlayer, Vector2 ownPos, Vector2 ownVel) {        
+    public void Tick(FoodGridCell gridCell, bool isPlayer, Vector2 ownPos, Vector2 ownVel) {        
                
 
         Vector2 foodPos = Vector2.zero;
@@ -484,7 +484,7 @@ public class CritterModuleCore {
                 if(enemySize < ownSize) {
                     sizeRatio = -1f * (ownSize / enemySize - 1f);
                 }
-                enemyRelSize[0] = sizeRatio;  // smaller creatures negative values, larger creatures positive, 0 = same size
+                enemyRelSize[0] = TransferFunctions.Evaluate(TransferFunctions.TransferFunction.RationalSigmoid, sizeRatio);  // smaller creatures negative values, larger creatures positive, 0 = same size
             }
             else {
 
@@ -505,14 +505,14 @@ public class CritterModuleCore {
             enemyVel = new Vector2(nearestPredatorModule.rigidBody.velocity.x, nearestPredatorModule.rigidBody.velocity.y);
         }*/
 
-        foodPosX[0] = foodPos.x / 20f;
-        foodPosY[0] = foodPos.y / 20f;
-        foodDirX[0] = foodDir.x;
-        foodDirY[0] = foodDir.y;
+        foodPosX[0] = 0f; // foodPos.x / 20f;
+        foodPosY[0] = 0f; // foodPos.y / 20f;
+        foodDirX[0] = gridCell.gradientFoodAmountsPerLayerArray[0].x;
+        foodDirY[0] = gridCell.gradientFoodAmountsPerLayerArray[0].y;
         //foodTypeR[0] = typeR;
         //foodTypeG[0] = typeG;
         //foodTypeB[0] = typeB;
-        foodRelSize[0] = foodAmount;
+        foodRelSize[0] = gridCell.foodAmountsPerLayerArray[0];
         
         friendPosX[0] = friendPos.x / 20f;
         friendPosY[0] = friendPos.y / 20f;

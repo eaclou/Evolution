@@ -60,7 +60,7 @@ public class Agent : MonoBehaviour {
 
         }
     }
-    public int maxAgeTimeSteps = 1200;
+    public int maxAgeTimeSteps = 2400;
     private int decayDurationTimeSteps = 60;
     public int _DecayDurationTimeSteps
     {
@@ -331,7 +331,7 @@ public class Agent : MonoBehaviour {
     public void TickBrain() {
         brain.BrainMasterFunction();
     }
-    public void TickModules() { // Updates internal state of body - i.e health, energy etc. -- updates input Neuron values!!!
+    public void TickModules(FoodGridCell gridCell) { // Updates internal state of body - i.e health, energy etc. -- updates input Neuron values!!!
                                 // Update Stocks & Flows ::: new health, energy, stamina
                                 // This should have happened during last frame's Internal PhysX Update
 
@@ -347,7 +347,7 @@ public class Agent : MonoBehaviour {
         Vector2 ownPos = new Vector2(bodyRigidbody.transform.localPosition.x, bodyRigidbody.transform.localPosition.y);
         Vector2 ownVel = new Vector2(bodyRigidbody.velocity.x, bodyRigidbody.velocity.y); // change this to ownPos - prevPos *****************
 
-        coreModule.Tick(humanControlled, ownPos, ownVel);
+        coreModule.Tick(gridCell, humanControlled, ownPos, ownVel);
         movementModule.Tick(humanControlled, this, ownVel);
         // Add more sensor Modules later:
 
@@ -512,7 +512,7 @@ public class Agent : MonoBehaviour {
         */
     }
 
-    public void Tick() {
+    public void Tick(FoodGridCell gridCell) {
         // Any external inputs updated by simManager just before this
 
         // Check for StateChange:
@@ -524,11 +524,11 @@ public class Agent : MonoBehaviour {
                 TickEgg();
                 break;
             case AgentLifeStage.Young:
-                TickYoung();
+                TickYoung(gridCell);
                 break;
             case AgentLifeStage.Mature:
                 //
-                TickMature();
+                TickMature(gridCell);
                 break;
             case AgentLifeStage.Decaying:
                 //
@@ -604,7 +604,7 @@ public class Agent : MonoBehaviour {
     private void TickEgg() {        
         lifeStageTransitionTimeStepCounter++;
     }
-    private void TickYoung() {
+    private void TickYoung(FoodGridCell gridCell) {
 
         growthPercentage = (float)lifeStageTransitionTimeStepCounter / (float)youngDurationTimeSteps;
 
@@ -614,13 +614,13 @@ public class Agent : MonoBehaviour {
             ScaleBody(growthPercentage);  
         }
 
-        TickModules(); // update inputs for Brain        
+        TickModules(gridCell); // update inputs for Brain        
         TickBrain(); // Tick Brain
-        TickActions(); // Execute Actions  -- Also Updates Resources!!! ***
+        TickActions(gridCell); // Execute Actions  -- Also Updates Resources!!! ***
         lifeStageTransitionTimeStepCounter++;
         scoreCounter++;
     }
-    private void TickMature() {
+    private void TickMature(FoodGridCell gridCell) {
         // Check for death & stuff? Or is this handled inside OnCollisionEnter() events?
 
         // Scaling Test:
@@ -629,9 +629,9 @@ public class Agent : MonoBehaviour {
             ScaleBody(growthPercentage);  
         }
 
-        TickModules(); // update inputs for Brain        
+        TickModules(gridCell); // update inputs for Brain        
         TickBrain(); // Tick Brain
-        TickActions(); // Execute Actions  -- Also Updates Resources!!! ***
+        TickActions(gridCell); // Execute Actions  -- Also Updates Resources!!! ***
         
         ageCounterMature++;
         scoreCounter++;
@@ -693,7 +693,7 @@ public class Agent : MonoBehaviour {
         }*/
     }
 
-    public void TickActions() {
+    public void TickActions(FoodGridCell gridCell) {
         float horizontalMovementInput = 0f;
         float verticalMovementInput = 0f;
         
@@ -803,20 +803,25 @@ public class Agent : MonoBehaviour {
             if(mouthRef.isPassive) {
                 // PAssive filter feeding:
                 if(coreModule.mouthEffector[0] > 0f) {
-                    float ambientFoodDensity = 0.001f;
-                    float mouthArea = mouthRef.triggerCollider.radius * 4f;                
+                    //float foodAmount = gridCell.foodAmountsPerLayerArray[0];
+
+                    float ambientFoodDensity = gridCell.foodAmountsPerLayerArray[0] * 0.2f;
+                    float mouthArea = mouthRef.triggerCollider.radius * mouthRef.triggerCollider.radius * Mathf.PI;                
 
                     // Try basing food amount on proximity to food chunks:
-                    float distToNearestFood = (coreModule.nearestFoodModule.gameObject.transform.position - bodyRigidbody.transform.position).magnitude;
-                    float proximityScore = 1f - Mathf.Clamp01((distToNearestFood + 2.5f) * 0.1f);
+                    //float distToNearestFood = (coreModule.nearestFoodModule.gameObject.transform.position - bodyRigidbody.transform.position).magnitude;
+                    //float proximityScore = 1f - Mathf.Clamp01((distToNearestFood + 0.25f) * 0.5f);
 
-                    float filteredFoodAmount = mouthArea * ambientFoodDensity * proximityScore;
+                    // *** Can double dip !!! BROKEN! **** Check reservoir first to avoid overdrafting!! ******
+                    float filteredFoodAmount = Mathf.Min(mouthArea * ambientFoodDensity, mouthArea); // * proximityScore;
+                    gridCell.foodAmountsPerLayerArray[0] -= filteredFoodAmount;
+                    gridCell.foodAmountsPerLayerArray[0] = Mathf.Max(0f, gridCell.foodAmountsPerLayerArray[0]);
 
                     coreModule.stomachContents += filteredFoodAmount;
                     if(coreModule.stomachContents > coreModule.stomachCapacity) {
                         coreModule.stomachContents = coreModule.stomachCapacity;
                     }
-                    coreModule.debugFoodValue = distToNearestFood;
+                    coreModule.debugFoodValue = filteredFoodAmount;
                 }                
             }
             else {

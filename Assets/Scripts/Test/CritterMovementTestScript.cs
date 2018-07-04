@@ -49,7 +49,7 @@ public class CritterMovementTestScript : MonoBehaviour {
         }
 
 
-        testAgent.Tick();
+        //testAgent.Tick();
     }
 
     private void InitializeCritter() {
