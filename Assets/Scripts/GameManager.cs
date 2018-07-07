@@ -69,7 +69,7 @@ public class GameManager : MonoBehaviour {
             case 2:
                 // High
                 simulationManager._NumAgents = 96;
-                simulationManager._NumFood = 4;
+                simulationManager._NumFood = 64;
                 simulationManager._NumPredators = 1;
                 simulationManager.numInitialHiddenNeurons = 16;
                 break;

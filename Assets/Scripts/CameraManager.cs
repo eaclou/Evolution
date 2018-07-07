@@ -58,12 +58,19 @@ public class CameraManager : MonoBehaviour {
 
     private void UpdateCameraOld() {
         float orthoLerp = 0.9f;
+        float timeScaleLerp = 0.02f;
+
+        float targetTimeScale = Mathf.Lerp(0.5f, 1.5f, (camera.orthographicSize - 5f) / 40f);
+        Time.timeScale = Mathf.Lerp(Time.timeScale, targetTimeScale, timeScaleLerp);
+        float targetFixedTimeStep = Mathf.Lerp(0.00675f, 0.0167f, (camera.orthographicSize - 5f) / 40f);
+        Time.fixedDeltaTime = Mathf.Lerp(Time.fixedDeltaTime, targetFixedTimeStep, timeScaleLerp);
+        
 
         switch (curMode) {
             case GameMode.ModeA:
                 //
                 targetCamPos = Vector3.Lerp(targetCamPos, targetTransform.position, 0.08f);
-                lerpSpeed = lerpSpeedA;
+                lerpSpeed = lerpSpeedA;                
                 break;
             case GameMode.ModeB:
                 //

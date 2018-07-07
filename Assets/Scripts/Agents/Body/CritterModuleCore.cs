@@ -442,7 +442,7 @@ public class CritterModuleCore {
         }
     }
 
-    public void Tick(FoodGridCell gridCell, bool isPlayer, Vector2 ownPos, Vector2 ownVel) {        
+    public void Tick(Vector4 nutrientCellInfo, bool isPassiveMouth, bool isPlayer, Vector2 ownPos, Vector2 ownVel) {        
                
 
         Vector2 foodPos = Vector2.zero;
@@ -504,15 +504,24 @@ public class CritterModuleCore {
             enemyDir = enemyPos.normalized;
             enemyVel = new Vector2(nearestPredatorModule.rigidBody.velocity.x, nearestPredatorModule.rigidBody.velocity.y);
         }*/
-
-        foodPosX[0] = 0f; // foodPos.x / 20f;
-        foodPosY[0] = 0f; // foodPos.y / 20f;
-        foodDirX[0] = gridCell.gradientFoodAmountsPerLayerArray[0].x;
-        foodDirY[0] = gridCell.gradientFoodAmountsPerLayerArray[0].y;
+        
+        if(isPassiveMouth) {
+            foodPosX[0] = 0f; 
+            foodPosY[0] = 0f;
+            foodDirX[0] = nutrientCellInfo.y;
+            foodDirY[0] = nutrientCellInfo.z;            
+        }
+        else {
+            foodPosX[0] = foodPos.x / 20f;
+            foodPosY[0] = foodPos.y / 20f;
+            foodDirX[0] = foodDir.x;
+            foodDirY[0] = foodDir.y;
+        }
+        
         //foodTypeR[0] = typeR;
         //foodTypeG[0] = typeG;
         //foodTypeB[0] = typeB;
-        foodRelSize[0] = gridCell.foodAmountsPerLayerArray[0];
+        foodRelSize[0] = nutrientCellInfo.x;
         
         friendPosX[0] = friendPos.x / 20f;
         friendPosY[0] = friendPos.y / 20f;

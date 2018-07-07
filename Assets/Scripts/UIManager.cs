@@ -262,7 +262,7 @@ public class UIManager : MonoBehaviour {
         debugTxt += "Agent[0] # Neurons: " + simManager.agentsArray[0].brain.neuronList.Count.ToString() + ", # Axons: " + simManager.agentsArray[0].brain.axonList.Count.ToString() + "\n";
         debugTxt += "CurOldestAge: " + simManager.currentOldestAgent.ToString() + ", numChildrenBorn: " + simManager.numAgentsBorn.ToString() + ", ~Gen: " + ((float)simManager.numAgentsBorn / (float)simManager._NumAgents).ToString();
         debugTxt += "\nBotRecordAge: " + simManager.recordBotAge.ToString() + ", PlayerRecordAge: " + simManager.recordPlayerAge.ToString();
-        debugTxt += "\nAverageAgentScore: " + simManager.rollingAverageAgentScore.ToString();
+        debugTxt += "\nAverageAgentScore: " + simManager.rollingAverageAgentScoresArray[0].ToString();
         
         textDebugTrainingInfo.text = debugTxt;
 
@@ -327,7 +327,7 @@ public class UIManager : MonoBehaviour {
             panelObserverMode.SetActive(true);
 
             textCurGen.text = "Generation: " + gameManager.simulationManager.curApproxGen.ToString("F0");
-            textAvgLifespan.text = "Average Lifespan: " + Mathf.RoundToInt(gameManager.simulationManager.rollingAverageAgentScore).ToString();
+            textAvgLifespan.text = "Average Lifespan: " + Mathf.RoundToInt(gameManager.simulationManager.rollingAverageAgentScoresArray[0]).ToString();
 
             if(Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W)) {
                 obsZoomLevel = obsZoomLevel + 1;
@@ -336,10 +336,10 @@ public class UIManager : MonoBehaviour {
                 }
 
                 if(obsZoomLevel == 1) {
-                    ClickButtonModeA();
+                    ClickButtonModeB();
                 }
                 if(obsZoomLevel == 2) {
-                    ClickButtonModeB();
+                    ClickButtonModeA();
                 }                
             }
             if(Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.S)) {
@@ -349,7 +349,7 @@ public class UIManager : MonoBehaviour {
                 }
 
                 if(obsZoomLevel == 1) {
-                    ClickButtonModeA();
+                    ClickButtonModeB();
                 }
                 if(obsZoomLevel == 0) {
                     ClickButtonModeC();
@@ -389,16 +389,19 @@ public class UIManager : MonoBehaviour {
         }
     }
 
-    public void RefreshFitnessTexture(List<float> generationScores) {
+    public void RefreshFitnessTexture(List<Vector4> generationScores) {
         fitnessDisplayTexture.Resize(Mathf.Max(1, generationScores.Count), 1);
 
         // Find Score Range:
         float bestScore = 1f;
         for (int i = 0; i < generationScores.Count; i++) {
-            bestScore = Mathf.Max(bestScore, generationScores[i]);
+            bestScore = Mathf.Max(bestScore, generationScores[i].x);
+            bestScore = Mathf.Max(bestScore, generationScores[i].y);
+            bestScore = Mathf.Max(bestScore, generationScores[i].z);
+            bestScore = Mathf.Max(bestScore, generationScores[i].w);
         }
         for(int i = 0; i < generationScores.Count; i++) {
-            fitnessDisplayTexture.SetPixel(i, 0, new Color(generationScores[i], 0f, 0f));
+            fitnessDisplayTexture.SetPixel(i, 0, new Color(generationScores[i].x, generationScores[i].y, generationScores[i].z, generationScores[i].w));
         }
         fitnessDisplayTexture.Apply();
 

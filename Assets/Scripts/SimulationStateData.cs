@@ -288,7 +288,7 @@ public class SimulationStateData {
             }
             critterSimDataArray[i].decayPercentage = decay;
             critterSimDataArray[i].foodAmount = Mathf.Lerp(agentSimDataArray[i].foodAmount, simManager.agentsArray[i].coreModule.stomachContents / simManager.agentsArray[i].coreModule.stomachCapacity, 0.16f);
-            critterSimDataArray[i].energy = simManager.agentsArray[i].coreModule.energyRaw;
+            critterSimDataArray[i].energy = simManager.agentsArray[i].coreModule.energyRaw / simManager.agentsArray[i].coreModule.maxEnergyStorage;;
             critterSimDataArray[i].health = simManager.agentsArray[i].coreModule.healthBody;
             critterSimDataArray[i].stamina = simManager.agentsArray[i].coreModule.stamina[0];
             if(simManager.agentsArray[i].mouthRef.isBiting) {

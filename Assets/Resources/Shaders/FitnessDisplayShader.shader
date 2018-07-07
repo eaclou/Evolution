@@ -98,15 +98,19 @@ Shader "Unlit/FitnessDisplayShader"
 				half4 onColor = half4(0.24, 0.33, 0.26, 1.0);
 				half4 centerLineColor = half4(0.5, 0.5, 0.5, 1.0);
 				half4 gridColor = half4(0.14, 0.14, 0.14, 1.0);
-				half4 rChannelColor = half4(1.0, 0.65, 0.65, 1.0);
-				half4 gChannelColor = half4(0.65, 1.0, 0.65, 1.0);
-				half4 bChannelColor = half4(0.65, 0.65, 1.0, 1.0);
+				half4 rChannelColor = half4(1.0, 0.35, 0.35, 1.0);
+				half4 gChannelColor = half4(0.35, 1.0, 0.35, 1.0);
+				half4 bChannelColor = half4(0.35, 0.35, 1.0, 1.0);
+				half4 aChannelColor = half4(1.0, 1.0, 1.0, 1.0);
 								
 				half4 pixColor = bgColor;
 
-				float fitnessScore = tex2D(_MainTex, finalCoords.x).x / _BestScore;
+				float4 fitnessScores = tex2D(_MainTex, float2(finalCoords.x, 0)) / _BestScore;
 
-				float distR = abs(finalCoords.y - fitnessScore);
+				float distR = abs(finalCoords.y - fitnessScores.x);
+				float distG = abs(finalCoords.y - fitnessScores.y);
+				float distB = abs(finalCoords.y - fitnessScores.z);
+				float distA = abs(finalCoords.y - fitnessScores.w);
 								
 				// Create GRIDLINES:
 				for(int j = 0; j < gridDivisions; j++) {
@@ -129,8 +133,20 @@ Shader "Unlit/FitnessDisplayShader"
 				
 				if(distR < (lineWidth + lineFadeWidth)) {
 					float smoothDist = smoothstep(0.0, lineFadeWidth, distR - lineWidth);
-					pixColor += lerp(rChannelColor, pixColor, smoothDist) * 1;
-				}				
+					pixColor = lerp(rChannelColor, pixColor, smoothDist) * 1;
+				}	
+				if(distG < (lineWidth + lineFadeWidth)) {
+					float smoothDist = smoothstep(0.0, lineFadeWidth, distG - lineWidth);
+					pixColor = lerp(gChannelColor, pixColor, smoothDist) * 1;
+				}
+				if(distB < (lineWidth + lineFadeWidth)) {
+					float smoothDist = smoothstep(0.0, lineFadeWidth, distB - lineWidth);
+					pixColor = lerp(bChannelColor, pixColor, smoothDist) * 1;
+				}
+				if(distA < (lineWidth + lineFadeWidth)) {
+					float smoothDist = smoothstep(0.0, lineFadeWidth, distA - lineWidth);
+					pixColor = lerp(aChannelColor, pixColor, smoothDist) * 1;
+				}
 				
 				float distToSideScreenEdge = min((1.0 - finalCoords.x), finalCoords.x);
 				//if(distToSideScreenEdge < 0.3) {

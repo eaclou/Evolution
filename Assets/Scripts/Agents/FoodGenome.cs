@@ -41,7 +41,7 @@ public class FoodGenome {
 
     public void InitializeAsRandomGenome() {
 
-        fullSize = new Vector2(UnityEngine.Random.Range(0.05f, 0.5f), UnityEngine.Random.Range(0.05f, 0.5f));
+        fullSize = new Vector2(UnityEngine.Random.Range(0.05f, 1f), UnityEngine.Random.Range(0.25f, 2.5f));
         
         fruitHue = new Vector3(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f));
         leafHue = new Vector3(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f));
@@ -60,7 +60,7 @@ public class FoodGenome {
     public void SetToMutatedCopyOfParentGenome(FoodGenome parentFoodGenome, MutationSettings settings) {
         // *** Result needs to be fully independent copy and share no references!!!
         
-        fullSize = UtilityMutationFunctions.GetMutatedVector2Additive(parentFoodGenome.fullSize, settings.defaultFoodMutationChance, settings.defaultFoodMutationStepSize, 0.05f, 0.5f);
+        fullSize = UtilityMutationFunctions.GetMutatedVector2Additive(parentFoodGenome.fullSize, settings.defaultFoodMutationChance, settings.defaultFoodMutationStepSize, 0.25f, 2.5f);
         if(fullSize.y < fullSize.x) {
             fullSize.y = fullSize.x;
         }

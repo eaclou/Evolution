@@ -331,7 +331,7 @@ public class Agent : MonoBehaviour {
     public void TickBrain() {
         brain.BrainMasterFunction();
     }
-    public void TickModules(FoodGridCell gridCell) { // Updates internal state of body - i.e health, energy etc. -- updates input Neuron values!!!
+    public void TickModules(Vector4 nutrientCellInfo) { // Updates internal state of body - i.e health, energy etc. -- updates input Neuron values!!!
                                 // Update Stocks & Flows ::: new health, energy, stamina
                                 // This should have happened during last frame's Internal PhysX Update
 
@@ -347,7 +347,7 @@ public class Agent : MonoBehaviour {
         Vector2 ownPos = new Vector2(bodyRigidbody.transform.localPosition.x, bodyRigidbody.transform.localPosition.y);
         Vector2 ownVel = new Vector2(bodyRigidbody.velocity.x, bodyRigidbody.velocity.y); // change this to ownPos - prevPos *****************
 
-        coreModule.Tick(gridCell, humanControlled, ownPos, ownVel);
+        coreModule.Tick(nutrientCellInfo, mouthRef.isPassive, humanControlled, ownPos, ownVel);
         movementModule.Tick(humanControlled, this, ownVel);
         // Add more sensor Modules later:
 
@@ -512,7 +512,7 @@ public class Agent : MonoBehaviour {
         */
     }
 
-    public void Tick(FoodGridCell gridCell) {
+    public void Tick(Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray) {
         // Any external inputs updated by simManager just before this
 
         // Check for StateChange:
@@ -524,11 +524,11 @@ public class Agent : MonoBehaviour {
                 TickEgg();
                 break;
             case AgentLifeStage.Young:
-                TickYoung(gridCell);
+                TickYoung(nutrientCellInfo, ref eatAmountsArray);
                 break;
             case AgentLifeStage.Mature:
                 //
-                TickMature(gridCell);
+                TickMature(nutrientCellInfo, ref eatAmountsArray);
                 break;
             case AgentLifeStage.Decaying:
                 //
@@ -604,7 +604,7 @@ public class Agent : MonoBehaviour {
     private void TickEgg() {        
         lifeStageTransitionTimeStepCounter++;
     }
-    private void TickYoung(FoodGridCell gridCell) {
+    private void TickYoung(Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray) {
 
         growthPercentage = (float)lifeStageTransitionTimeStepCounter / (float)youngDurationTimeSteps;
 
@@ -614,13 +614,13 @@ public class Agent : MonoBehaviour {
             ScaleBody(growthPercentage);  
         }
 
-        TickModules(gridCell); // update inputs for Brain        
+        TickModules(nutrientCellInfo); // update inputs for Brain        
         TickBrain(); // Tick Brain
-        TickActions(gridCell); // Execute Actions  -- Also Updates Resources!!! ***
+        TickActions(nutrientCellInfo, ref eatAmountsArray); // Execute Actions  -- Also Updates Resources!!! ***
         lifeStageTransitionTimeStepCounter++;
         scoreCounter++;
     }
-    private void TickMature(FoodGridCell gridCell) {
+    private void TickMature(Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray) {
         // Check for death & stuff? Or is this handled inside OnCollisionEnter() events?
 
         // Scaling Test:
@@ -629,9 +629,9 @@ public class Agent : MonoBehaviour {
             ScaleBody(growthPercentage);  
         }
 
-        TickModules(gridCell); // update inputs for Brain        
+        TickModules(nutrientCellInfo); // update inputs for Brain        
         TickBrain(); // Tick Brain
-        TickActions(gridCell); // Execute Actions  -- Also Updates Resources!!! ***
+        TickActions(nutrientCellInfo, ref eatAmountsArray); // Execute Actions  -- Also Updates Resources!!! ***
         
         ageCounterMature++;
         scoreCounter++;
@@ -693,7 +693,7 @@ public class Agent : MonoBehaviour {
         }*/
     }
 
-    public void TickActions(FoodGridCell gridCell) {
+    public void TickActions(Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray) {
         float horizontalMovementInput = 0f;
         float verticalMovementInput = 0f;
         
@@ -794,6 +794,8 @@ public class Agent : MonoBehaviour {
             coreModule.energyRaw = maxEnergy;
         }
 
+        eatAmountsArray[index].x = 0f;
+
         if(curLifeStage == AgentLifeStage.Decaying || curLifeStage == AgentLifeStage.Egg) {
             throttle = Vector2.zero;
             smoothedThrottle = Vector2.zero;
@@ -805,17 +807,16 @@ public class Agent : MonoBehaviour {
                 if(coreModule.mouthEffector[0] > 0f) {
                     //float foodAmount = gridCell.foodAmountsPerLayerArray[0];
 
-                    float ambientFoodDensity = gridCell.foodAmountsPerLayerArray[0] * 0.2f;
+                    float ambientFoodDensity = nutrientCellInfo.x;
                     float mouthArea = mouthRef.triggerCollider.radius * mouthRef.triggerCollider.radius * Mathf.PI;                
 
-                    // Try basing food amount on proximity to food chunks:
-                    //float distToNearestFood = (coreModule.nearestFoodModule.gameObject.transform.position - bodyRigidbody.transform.position).magnitude;
-                    //float proximityScore = 1f - Mathf.Clamp01((distToNearestFood + 0.25f) * 0.5f);
-
                     // *** Can double dip !!! BROKEN! **** Check reservoir first to avoid overdrafting!! ******
-                    float filteredFoodAmount = Mathf.Min(mouthArea * ambientFoodDensity, mouthArea * 0.005f); // * proximityScore;
-                    gridCell.foodAmountsPerLayerArray[0] -= filteredFoodAmount;
-                    gridCell.foodAmountsPerLayerArray[0] = Mathf.Max(0f, gridCell.foodAmountsPerLayerArray[0]);
+                    float filteredFoodAmount = Mathf.Min(mouthArea * ambientFoodDensity, mouthArea * 0.002f); // * proximityScore;
+                    //gridCell.foodAmountsPerLayerArray[0] -= filteredFoodAmount;
+                    //gridCell.foodAmountsPerLayerArray[0] = Mathf.Max(0f, gridCell.foodAmountsPerLayerArray[0]);
+
+                    // Needs to use Compute shader here to sample the current nutrientMapRT:::: ****
+                    eatAmountsArray[index].x = mouthArea;
 
                     coreModule.stomachContents += filteredFoodAmount;
                     if(coreModule.stomachContents > coreModule.stomachCapacity) {
