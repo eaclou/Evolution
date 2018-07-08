@@ -134,7 +134,7 @@
 				float dotGrowth = saturate(bodyStrokeData.strength * 2.0);
 				float dotDecay = saturate((bodyStrokeData.strength - 0.5) * 2);
 				float dotHealthValue = dotGrowth * (1.0 - dotDecay);
-				centerToVertexOffset *= bodyStrokeData.localScale * curAgentSize * dotHealthValue * 1.5;
+				centerToVertexOffset *= bodyStrokeData.localScale * curAgentSize * dotHealthValue * 0.7;
 				centerToVertexOffset.x *= 1.33;
 
 				float bodyAspectRatio = critterInitData.boundingBoxSize.y / critterInitData.boundingBoxSize.x;

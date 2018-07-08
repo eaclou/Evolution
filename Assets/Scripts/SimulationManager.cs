@@ -142,6 +142,14 @@ public class SimulationManager : MonoBehaviour {
     private Vector4[] nutrientSamplesArray;
     private Vector4[] nutrientEatAmountsArray;
 
+    private RenderTexture tempTex16;
+    private RenderTexture tempTex8;
+    private RenderTexture tempTex4;
+    private RenderTexture tempTex2;
+    private RenderTexture tempTex1;
+
+    ComputeBuffer nutrientSamplesCBuffer;
+
     //public bool isTrainingPersistent = false; // RENAME ONCE FUNCTIONAL
     //private float lastHorizontalInput = 0f;
     //private float lastVerticalInput = 0f;
@@ -427,8 +435,40 @@ public class SimulationManager : MonoBehaviour {
         environmentFluidManager.computeShaderFluidSim.Dispatch(kernelCSInitializeNutrientMap, nutrientMapResolution / 32, nutrientMapResolution / 32, 1);
         Graphics.Blit(nutrientMapRT1, nutrientMapRT2);
 
-        theRenderKing.fluidRenderMat.SetTexture("_DebugTex", nutrientMapRT1);
+        tempTex16 = new RenderTexture(16, 16, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+        tempTex16.wrapMode = TextureWrapMode.Clamp;
+        tempTex16.filterMode = FilterMode.Point;
+        tempTex16.enableRandomWrite = true;
+        tempTex16.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
 
+        tempTex8 = new RenderTexture(8, 8, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+        tempTex8.wrapMode = TextureWrapMode.Clamp;
+        tempTex8.filterMode = FilterMode.Point;
+        tempTex8.enableRandomWrite = true;
+        tempTex8.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
+
+        tempTex4 = new RenderTexture(4, 4, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+        tempTex4.wrapMode = TextureWrapMode.Clamp;
+        tempTex4.filterMode = FilterMode.Point;
+        tempTex4.enableRandomWrite = true;
+        tempTex4.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
+
+        tempTex2 = new RenderTexture(2, 2, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+        tempTex2.wrapMode = TextureWrapMode.Clamp;
+        tempTex2.filterMode = FilterMode.Point;
+        tempTex2.enableRandomWrite = true;
+        tempTex2.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
+
+        tempTex1 = new RenderTexture(1, 1, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+        tempTex1.wrapMode = TextureWrapMode.Clamp;
+        tempTex1.filterMode = FilterMode.Point;
+        tempTex1.enableRandomWrite = true;
+        tempTex1.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
+
+        nutrientSamplesCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 4);
+
+        theRenderKing.fluidRenderMat.SetTexture("_DebugTex", nutrientMapRT1);
+        
         int numFoodSizeLayers = 4;
         for(int x = 0; x < foodGridResolution; x++) {
 
@@ -583,7 +623,10 @@ public class SimulationManager : MonoBehaviour {
 
     public void TickSimulation() {
         //UpdateFoodGrid();
-        UpdateNutrientMap();
+
+        float totalNutrients = MeasureTotalNutrients();
+        GetNutrientValuesAtMouthPositions();
+                
         // ******** REVISIT CODE ORDERING!!!!  -- Should check for death Before or After agent Tick/PhysX ???
         CheckForDeadFood();
         CheckForDeadAgents();  // Result of this will affect: "simStateData.PopulateSimDataArrays(this)" !!!!!
@@ -629,7 +672,33 @@ public class SimulationManager : MonoBehaviour {
         // **** TEMPORARILY DISABLED!
         //ApplyFluidForcesToDynamicObjects();
 
-        RemoveEatenNutrients();
+        RemoveEatenNutrients();        
+
+        float spawnNewFoodChance = 0.125f;
+        float spawnFoodPercentage = UnityEngine.Random.Range(0f, 1f);
+        float maxGlobalFood = 10f;
+
+        if(totalNutrients < maxGlobalFood) {
+            float randRoll = UnityEngine.Random.Range(0f, 1f);
+            if(randRoll < spawnNewFoodChance) {
+                // pick random cell:
+                int randX = UnityEngine.Random.Range(0, nutrientMapResolution - 1);
+                int randY = UnityEngine.Random.Range(0, nutrientMapResolution - 1);
+
+                float foodAvailable = maxGlobalFood - totalNutrients;
+
+                float newFoodAmount = foodAvailable * spawnFoodPercentage;
+
+                // ADD FOOD HERE::
+                AddNutrientsAtCoords(newFoodAmount, randX, randY);
+                //foodGrid[randX][randY].foodAmountsPerLayerArray[0] += newFoodAmount;
+
+                //Debug.Log("ADDED FOOD! GridCell[" + randX.ToString() + "][" + randY.ToString() + "]: " + newFoodAmount.ToString());
+            }
+        }
+
+        ApplyDiffusionOnNutrientMap();
+                
 
         // TEMP AUDIO EFFECTS!!!!
         //float playerSpeed = (agentsArray[0].transform.position - agentsArray[0]._PrevPos).magnitude;
@@ -665,7 +734,7 @@ public class SimulationManager : MonoBehaviour {
         }
     }
 
-    private void UpdateNutrientMap() {
+    private void ApplyDiffusionOnNutrientMap() {
         int kernelCSUpdateNutrientMap = environmentFluidManager.computeShaderFluidSim.FindKernel("CSUpdateNutrientMap");
         environmentFluidManager.computeShaderFluidSim.SetTexture(kernelCSUpdateNutrientMap, "ObstaclesRead", environmentFluidManager._ObstaclesRT);
         environmentFluidManager.computeShaderFluidSim.SetTexture(kernelCSUpdateNutrientMap, "nutrientMapRead", nutrientMapRT1);
@@ -673,24 +742,82 @@ public class SimulationManager : MonoBehaviour {
         environmentFluidManager.computeShaderFluidSim.Dispatch(kernelCSUpdateNutrientMap, nutrientMapResolution / 32, nutrientMapResolution / 32, 1);
 
         Graphics.Blit(nutrientMapRT2, nutrientMapRT1);
-
-        GetNutrientSamples();
+        
     }
-    private void GetNutrientSamples() {
+    private void GetNutrientValuesAtMouthPositions() {
         // Doing it this way to avoid resetting ALL agents whenever ONE is respawned!
-        ComputeBuffer nutrientSamplesCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 4);
-                
-        nutrientSamplesCBuffer.GetData(nutrientSamplesArray);
-
-        int kernelCSGetNutrientSamples = environmentFluidManager.computeShaderFluidSim.FindKernel("CSGetNutrientSamples");        
+        //ComputeBuffer nutrientSamplesCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 4);
+        
+        int kernelCSGetNutrientSamples = environmentFluidManager.computeShaderFluidSim.FindKernel("CSGetNutrientSamples");   
+        //environmentFluidManager.computeShaderFluidSim.SetBuffer(kernelCSGetNutrientSamples, "critterInitDataCBuffer", simStateData.critterInitDataCBuffer);
         environmentFluidManager.computeShaderFluidSim.SetBuffer(kernelCSGetNutrientSamples, "critterSimDataCBuffer", simStateData.critterSimDataCBuffer);
         environmentFluidManager.computeShaderFluidSim.SetBuffer(kernelCSGetNutrientSamples, "nutrientSamplesCBuffer", nutrientSamplesCBuffer);
         environmentFluidManager.computeShaderFluidSim.SetTexture(kernelCSGetNutrientSamples, "nutrientMapRead", nutrientMapRT1);
         environmentFluidManager.computeShaderFluidSim.Dispatch(kernelCSGetNutrientSamples, nutrientSamplesCBuffer.count, 1, 1);
+
+        nutrientSamplesCBuffer.GetData(nutrientSamplesArray); // Disappearing body strokes due to this !?!?!?!?!?
         
-        nutrientSamplesCBuffer.Release();
+        //nutrientSamplesCBuffer.Release();
         
         // Read out sample values::::
+    }
+    private float MeasureTotalNutrients() {
+
+        ComputeBuffer outputValuesCBuffer = new ComputeBuffer(1, sizeof(float) * 4);  // holds the result of measurement: total sum of pix colors in texture
+        Vector4[] outputValuesArray = new Vector4[1];
+
+        // 32 --> 16:
+        int kernelCSMeasureTotalNutrients = environmentFluidManager.computeShaderFluidSim.FindKernel("CSMeasureTotalNutrients");   
+        environmentFluidManager.computeShaderFluidSim.SetBuffer(kernelCSMeasureTotalNutrients, "outputValuesCBuffer", outputValuesCBuffer);
+        environmentFluidManager.computeShaderFluidSim.SetTexture(kernelCSMeasureTotalNutrients, "measureValuesTex", nutrientMapRT1);
+        environmentFluidManager.computeShaderFluidSim.SetTexture(kernelCSMeasureTotalNutrients, "pooledResultTex", tempTex16);
+        environmentFluidManager.computeShaderFluidSim.Dispatch(kernelCSMeasureTotalNutrients, 16, 16, 1);
+        // 16 --> 8:
+        environmentFluidManager.computeShaderFluidSim.SetBuffer(kernelCSMeasureTotalNutrients, "outputValuesCBuffer", outputValuesCBuffer);
+        environmentFluidManager.computeShaderFluidSim.SetTexture(kernelCSMeasureTotalNutrients, "measureValuesTex", tempTex16);
+        environmentFluidManager.computeShaderFluidSim.SetTexture(kernelCSMeasureTotalNutrients, "pooledResultTex", tempTex8);
+        environmentFluidManager.computeShaderFluidSim.Dispatch(kernelCSMeasureTotalNutrients, 8, 8, 1);
+        // 8 --> 4:
+        environmentFluidManager.computeShaderFluidSim.SetBuffer(kernelCSMeasureTotalNutrients, "outputValuesCBuffer", outputValuesCBuffer);
+        environmentFluidManager.computeShaderFluidSim.SetTexture(kernelCSMeasureTotalNutrients, "measureValuesTex", tempTex8);
+        environmentFluidManager.computeShaderFluidSim.SetTexture(kernelCSMeasureTotalNutrients, "pooledResultTex", tempTex4);
+        environmentFluidManager.computeShaderFluidSim.Dispatch(kernelCSMeasureTotalNutrients, 4, 4, 1);        
+        // 4 --> 2:
+        environmentFluidManager.computeShaderFluidSim.SetBuffer(kernelCSMeasureTotalNutrients, "outputValuesCBuffer", outputValuesCBuffer);
+        environmentFluidManager.computeShaderFluidSim.SetTexture(kernelCSMeasureTotalNutrients, "measureValuesTex", tempTex4);
+        environmentFluidManager.computeShaderFluidSim.SetTexture(kernelCSMeasureTotalNutrients, "pooledResultTex", tempTex2);
+        environmentFluidManager.computeShaderFluidSim.Dispatch(kernelCSMeasureTotalNutrients, 2, 2, 1);
+        // 2 --> 1:
+        environmentFluidManager.computeShaderFluidSim.SetBuffer(kernelCSMeasureTotalNutrients, "outputValuesCBuffer", outputValuesCBuffer);
+        environmentFluidManager.computeShaderFluidSim.SetTexture(kernelCSMeasureTotalNutrients, "measureValuesTex", tempTex2);
+        environmentFluidManager.computeShaderFluidSim.SetTexture(kernelCSMeasureTotalNutrients, "pooledResultTex", tempTex1);
+        environmentFluidManager.computeShaderFluidSim.Dispatch(kernelCSMeasureTotalNutrients, 1, 1, 1);
+                
+
+        outputValuesCBuffer.GetData(outputValuesArray);
+
+        outputValuesCBuffer.Release();
+
+        //Debug.Log("TotalNutrients: " + outputValuesArray[0].x.ToString() + ", " + outputValuesArray[0].y.ToString());
+
+        return outputValuesArray[0].x;
+    }
+     
+    private void AddNutrientsAtCoords(float amount, int x, int y) {
+        ComputeBuffer addNutrientsCBuffer = new ComputeBuffer(1, sizeof(float) * 4);
+        Vector4[] addNutrientsArray = new Vector4[1];
+        addNutrientsArray[0] = new Vector4(amount, (float)x / 32f, (float)y / 32f, 1f);
+        addNutrientsCBuffer.SetData(addNutrientsArray);
+
+        int kernelCSAddNutrientsAtCoords = environmentFluidManager.computeShaderFluidSim.FindKernel("CSAddNutrientsAtCoords");
+        environmentFluidManager.computeShaderFluidSim.SetBuffer(kernelCSAddNutrientsAtCoords, "addNutrientsCBuffer", addNutrientsCBuffer);        
+        environmentFluidManager.computeShaderFluidSim.SetTexture(kernelCSAddNutrientsAtCoords, "nutrientMapRead", nutrientMapRT1);
+        environmentFluidManager.computeShaderFluidSim.SetTexture(kernelCSAddNutrientsAtCoords, "nutrientMapWrite", nutrientMapRT2);
+        environmentFluidManager.computeShaderFluidSim.Dispatch(kernelCSAddNutrientsAtCoords, addNutrientsCBuffer.count, 1, 1);
+        
+        Graphics.Blit(nutrientMapRT2, nutrientMapRT1);
+
+        addNutrientsCBuffer.Release();
     }
     private void RemoveEatenNutrients() {
         ComputeBuffer eatAmountsCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 4);
@@ -1632,7 +1759,18 @@ public class SimulationManager : MonoBehaviour {
             if (simStateData.foodFruitDataCBuffer != null) {
                 simStateData.foodFruitDataCBuffer.Release();
             }
-        }        
+        }
+        
+        if(tempTex1 != null) {
+            tempTex1.Release();
+            tempTex2.Release();
+            tempTex4.Release();
+            tempTex8.Release();
+            tempTex16.Release();
+        }
+        if(nutrientSamplesCBuffer != null) {
+            nutrientSamplesCBuffer.Release();
+        }
     }
 
     public void SaveTrainingData() {

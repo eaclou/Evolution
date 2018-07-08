@@ -811,18 +811,18 @@ public class Agent : MonoBehaviour {
                     float mouthArea = mouthRef.triggerCollider.radius * mouthRef.triggerCollider.radius * Mathf.PI;                
 
                     // *** Can double dip !!! BROKEN! **** Check reservoir first to avoid overdrafting!! ******
-                    float filteredFoodAmount = Mathf.Min(mouthArea * ambientFoodDensity, mouthArea * 0.002f); // * proximityScore;
+                    float filteredFoodAmount = Mathf.Min(ambientFoodDensity, mouthArea * 0.05f); // * proximityScore;
                     //gridCell.foodAmountsPerLayerArray[0] -= filteredFoodAmount;
                     //gridCell.foodAmountsPerLayerArray[0] = Mathf.Max(0f, gridCell.foodAmountsPerLayerArray[0]);
 
                     // Needs to use Compute shader here to sample the current nutrientMapRT:::: ****
-                    eatAmountsArray[index].x = mouthArea;
+                    eatAmountsArray[index].x = filteredFoodAmount;
 
                     coreModule.stomachContents += filteredFoodAmount;
                     if(coreModule.stomachContents > coreModule.stomachCapacity) {
                         coreModule.stomachContents = coreModule.stomachCapacity;
                     }
-                    coreModule.debugFoodValue = filteredFoodAmount;
+                    
                 }                
             }
             else {
@@ -832,6 +832,7 @@ public class Agent : MonoBehaviour {
                 }
             }                        
         }
+        coreModule.debugFoodValue = nutrientCellInfo.x;
 
         ApplyPhysicsForces(smoothedThrottle);
 

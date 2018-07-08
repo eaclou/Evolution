@@ -1505,7 +1505,7 @@ public class TheRenderKing : MonoBehaviour {
         frameBufferStrokeDisplayMat.SetBuffer("frameBufferStrokesCBuffer", frameBufferStrokesCBuffer);         
         // Use this technique for Environment Brushstrokes:
         cmdBufferMainRender.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
-        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, frameBufferStrokeDisplayMat, 0, MeshTopology.Triangles, 6, frameBufferStrokesCBuffer.count);
+        //cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, frameBufferStrokeDisplayMat, 0, MeshTopology.Triangles, 6, frameBufferStrokesCBuffer.count);
         
         /*
         // WATER SPLINES:::
@@ -1653,13 +1653,13 @@ public class TheRenderKing : MonoBehaviour {
         critterBodyStrokesMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, critterBodyStrokesMat, 0, MeshTopology.Triangles, 6, critterBodyStrokesCBuffer.count);
         
-        critterEnergyDotsMat.SetPass(0);
+        /*critterEnergyDotsMat.SetPass(0);
         critterEnergyDotsMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
         critterEnergyDotsMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
         critterEnergyDotsMat.SetBuffer("bodyStrokesCBuffer", critterEnergyDotsCBuffer);
         critterEnergyDotsMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, critterEnergyDotsMat, 0, MeshTopology.Triangles, 6, critterEnergyDotsCBuffer.count);
-        
+        */
         // AGENT EYES:
         agentEyesDisplayMat.SetPass(0);
         agentEyesDisplayMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);

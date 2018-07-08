@@ -117,15 +117,30 @@
 				centerPosition = centerPosition * curAgentSize * 0.5;
 				// swimAnim:
 				float bodyAspectRatio = critterInitData.boundingBoxSize.y / critterInitData.boundingBoxSize.x;
-				float bendStrength = 0.5 * saturate(bodyAspectRatio * 0.5 - 0.4);
-				centerPosition = swimAnimPos(centerPosition, v, critterSimData.moveAnimCycle, critterSimData.accel, critterSimData.smoothedThrottle, bendStrength, critterSimData.turnAmount);
+				float bendStrength = 0.5; // * saturate(bodyAspectRatio * 0.5 - 0.4);
+				float swimAngle = getSwimAngle(bodyStrokeData.localPos.y, critterSimData.moveAnimCycle, critterSimData.accel, critterSimData.smoothedThrottle, bendStrength, critterSimData.turnAmount);
+
+				centerPosition = rotate_point(float2(0,0), swimAngle, centerPosition);
 				// rotate with agent:
 				centerPosition = rotatePointVector(centerPosition, float2(0,0), critterSimData.heading);
 
-				// vertexOffsetFromSpriteCenter!!! :::: ===============================================================
-				centerToVertexOffset *= bodyStrokeData.localScale * length(curAgentSize) * saturate(critterSimData.energy / critterInitData.maxEnergy) * 0.2 * (1.0 - critterSimData.decayPercentage);
-				centerToVertexOffset = rotatePointVector(centerToVertexOffset, float2(0,0), critterSimData.heading);
+				
+				//centerToVertexOffset *= bodyStrokeData.localScale * length(curAgentSize) * saturate(critterSimData.energy / critterInitData.maxEnergy) * 0.2 * (1.0 - critterSimData.decayPercentage);
+				//centerToVertexOffset = rotatePointVector(centerToVertexOffset, float2(0,0), critterSimData.heading);
 
+
+				//======================================================================================================================&&&&&&&&&&
+				
+				//float dotGrowth = saturate(bodyStrokeData.strength * 2.0);
+				//float dotDecay = saturate((bodyStrokeData.strength - 0.5) * 2);
+				//float dotHealthValue = dotGrowth * (1.0 - dotDecay);
+				
+				centerToVertexOffset *= bodyStrokeData.localScale * curAgentSize * 0.1;
+				centerToVertexOffset.x *= 1.33;
+				
+				centerToVertexOffset = rotate_point(float2(0,0), swimAngle, centerToVertexOffset);
+				centerToVertexOffset = rotatePointVector(centerToVertexOffset, float2(0,0), critterSimData.heading);
+				//========================================================================================================================&&&&&&&&&
 				
 				float3 worldPosition = float3(critterPosition + centerPosition + centerToVertexOffset, -0.5);
 

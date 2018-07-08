@@ -21,6 +21,8 @@
 #pragma kernel CSUpdateNutrientMap
 #pragma kernel CSInitializeNutrientMap
 #pragma kernel CSRemoveNutrientsAtLocations
+#pragma kernel CSMeasureTotalNutrients
+#pragma kernel CSAddNutrientsAtCoords
 
 struct ForcePoint {
     float posX;
@@ -138,6 +140,11 @@ StructuredBuffer<float4> nutrientEatAmountsCBuffer;
 
 Texture2D<float4> nutrientMapRead;
 RWTexture2D<float4> nutrientMapWrite;
+
+RWStructuredBuffer<float4> outputValuesCBuffer;
+StructuredBuffer<float4> addNutrientsCBuffer;
+Texture2D<float4> measureValuesTex;
+RWTexture2D<float4> pooledResultTex;
 
 SamplerState _LinearClamp;
 SamplerState _LinearRepeat;
@@ -736,7 +743,7 @@ void CSGetNutrientSamples (uint3 id : SV_DispatchThreadID)
 	CritterSimData critterSimData = critterSimDataCBuffer[id.x];
 
 	float2 uv = (critterSimData.worldPos + 70.0) / 140.0;
-	float4 nutrientAmount = nutrientMapRead.SampleLevel(_LinearClamp, uv, 0);
+	float4 nutrientAmount = nutrientMapRead.SampleLevel(_PointClamp, uv, 0);
 
 	// want gradient! -- pack into .yz channels :::
 	// calculate gradient each step and store value
@@ -782,7 +789,7 @@ void CSUpdateNutrientMap (uint3 id : SV_DispatchThreadID)
     float2 grad = normalize(float2(deltaX, deltaY));
 	// Make sure this doesn't return null/undefined!!!!! ******
 	
-	float newAmount = lerp(amountCenter, (amountCenter + amountRight + amountLeft + amountUp + amountDown) / 5, 0.01);
+	float newAmount = lerp(amountCenter, (amountCenter + amountRight + amountLeft + amountUp + amountDown) / 5, 0.025);
 
 	nutrientMapWrite[id.xy] = float4(newAmount, grad, 1.0);
 }
@@ -790,7 +797,7 @@ void CSUpdateNutrientMap (uint3 id : SV_DispatchThreadID)
 [numthreads(32,32,1)]
 void CSInitializeNutrientMap (uint3 id : SV_DispatchThreadID)
 {	
-	nutrientMapWrite[id.xy] = float4(frac((float)id.x / 8.0), 1, 1, 1);
+	nutrientMapWrite[id.xy] = float4(0.0025, 1, 1, 1);
 }
 
 [numthreads(1,1,1)]
@@ -816,9 +823,45 @@ void CSRemoveNutrientsAtLocations (uint3 id : SV_DispatchThreadID)
 	// WHY SO SLOW????
 }
 
-// InitializeNutrientMap()
-// AddNutrientDensityAtLocation()
-// RemoveNutrientsAtLocations()
-// Measure TotalAmount
+[numthreads(1,1,1)]
+void CSMeasureTotalNutrients (uint3 id : SV_DispatchThreadID)
+{	
+	// for each output pixel, loop through original 2x2 pixels and sum them together
+
+	float totalNutrients = 0.0;
+
+	for(int x = 0; x < 2; x++) {
+		for(int y = 0; y < 2; y++) {
+			int xIndex = id.x * 2 + x;
+			int yIndex = id.y * 2 + y;
+
+			totalNutrients += measureValuesTex[int2(xIndex, yIndex)].x;
+		}
+	}
+
+	float4 pixValue = float4(totalNutrients,1,1,1);
+
+	pooledResultTex[id.xy] = pixValue;
+
+	outputValuesCBuffer[0] = pixValue;
+}
+
+[numthreads(1,1,1)]
+void CSAddNutrientsAtCoords (uint3 id : SV_DispatchThreadID)
+{	
+	float4 data = addNutrientsCBuffer[id.x];
+	
+	float amount = data.x;
+	int xIndex = floor(data.y * 32.0);
+	int yIndex = floor(data.z * 32.0);
+	int2 index = int2(xIndex, yIndex);
+
+	float4 currentNutrients = nutrientMapRead[index];
+
+	currentNutrients.x += amount;
+
+	nutrientMapWrite[index] = currentNutrients;
+}
+
 
 
