@@ -9,6 +9,18 @@ public class SettingsManager : MonoBehaviour {
 
     public MutationSettings mutationSettingsRandomBody;
 
+    public float maxGlobalNutrients = 5f;
+    public float eatRateMultiplier = 1f;
+    public float energyDrainMultiplier = 1f;
+    public float spawnNewFoodChance = 0.01f;
+    public float foodDiffusionRate = 0.0125f;
+    public float minSizeFeedingEfficiency = 1f;
+    public float maxSizeFeedingEfficiency = 1f;
+
+    public float minSizeCritterSpeed = 150f;
+    public float maxSizeCritterSpeed = 150f;
+    
+
     // Use this for initialization
     void Start () {
 		

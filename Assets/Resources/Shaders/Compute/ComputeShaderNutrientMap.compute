@@ -1,0 +1,162 @@
+﻿#pragma kernel CSGetNutrientSamples
+#pragma kernel CSUpdateNutrientMap
+#pragma kernel CSInitializeNutrientMap
+#pragma kernel CSRemoveNutrientsAtLocations
+#pragma kernel CSMeasureTotalNutrients
+#pragma kernel CSAddNutrientsAtCoords
+
+
+#include "Assets/Resources/Shaders/Inc/StructsCritterData.cginc"
+
+StructuredBuffer<CritterInitData> critterInitDataCBuffer;
+StructuredBuffer<CritterSimData> critterSimDataCBuffer;
+
+Texture2D<float4> ObstaclesRead;
+
+RWStructuredBuffer<float4> nutrientSamplesCBuffer;
+StructuredBuffer<float4> nutrientEatAmountsCBuffer;
+
+Texture2D<float4> nutrientMapRead;
+RWTexture2D<float4> nutrientMapWrite;
+
+RWStructuredBuffer<float4> outputValuesCBuffer;
+StructuredBuffer<float4> addNutrientsCBuffer;
+Texture2D<float4> measureValuesTex;
+RWTexture2D<float4> pooledResultTex;
+
+SamplerState _LinearClamp;
+SamplerState _LinearRepeat;
+SamplerState _PointClamp;
+SamplerState _PointRepeat;
+
+uniform float _NutrientDiffusion;
+
+[numthreads(1,1,1)]
+void CSGetNutrientSamples (uint3 id : SV_DispatchThreadID)
+{	
+	CritterSimData critterSimData = critterSimDataCBuffer[id.x];
+
+	float2 uv = (critterSimData.worldPos + 70.0) / 140.0;
+	float4 nutrientAmount = nutrientMapRead.SampleLevel(_PointClamp, uv, 0);
+
+	// want gradient! -- pack into .yz channels :::
+	// calculate gradient each step and store value
+
+	nutrientSamplesCBuffer[id.x] = nutrientAmount;
+}
+
+[numthreads(32,32,1)]
+void CSUpdateNutrientMap (uint3 id : SV_DispatchThreadID)
+{	
+	// Diffusion - food blurs and spreads out
+	// Store Gradient of increasing food density
+			
+    float amountRight = nutrientMapRead[int2(id.x + 1, id.y)].x;
+    float amountLeft = nutrientMapRead[int2(id.x - 1, id.y)].x;
+    float amountUp = nutrientMapRead[int2(id.x, id.y + 1)].x;
+    float amountDown = nutrientMapRead[int2(id.x, id.y - 1)].x;
+    float amountCenter = nutrientMapRead[id.xy].x;
+
+	// Check vs obstacles??
+	float xCoord = ((float)id.x + 0.5)  / 32;  // ** Bad hardcoded!!!!!
+	float yCoord = ((float)id.y + 0.5)  / 32;
+	float2 uvOrigin = float2(xCoord, yCoord);
+	float ps = 1.0 / 32;
+	
+	half4 centerObstacle = ObstaclesRead.SampleLevel(_LinearClamp, uvOrigin, 0);
+
+	half4 leftObstacle = ObstaclesRead.SampleLevel(_LinearClamp, uvOrigin + half2(-ps, 0), 0);
+	half4 rightObstacle = ObstaclesRead.SampleLevel(_LinearClamp, uvOrigin + half2(ps, 0), 0);
+	half4 topObstacle = ObstaclesRead.SampleLevel(_LinearClamp, uvOrigin + half2(0, ps), 0);
+	half4 bottomObstacle = ObstaclesRead.SampleLevel(_LinearClamp, uvOrigin + half2(0, -ps), 0);	
+		
+	if(centerObstacle.b > 0.5) amountCenter = 0.0;
+	if(leftObstacle.b > 0.5) amountLeft = amountCenter;
+	if(rightObstacle.b > 0.5) amountRight = amountCenter;
+	if(topObstacle.b > 0.5) amountUp = amountCenter;
+	if(bottomObstacle.b > 0.5) amountDown = amountCenter;
+		
+
+    float deltaX = amountRight - amountLeft;
+    float deltaY = amountUp - amountDown;
+
+	float2 grad = float2(0,0);
+	if(abs(deltaX) > 0.00000001 || abs(deltaY) > 0.00000001) {
+		grad = normalize(float2(deltaX, deltaY));
+	}
+    //float2 grad = normalize(float2(deltaX, deltaY));
+	// Make sure this doesn't return null/undefined!!!!! ******  ***  (I didn't) ****
+	
+	float newAmount = lerp(amountCenter, (amountCenter + amountRight + amountLeft + amountUp + amountDown) / 5, _NutrientDiffusion);
+
+	nutrientMapWrite[id.xy] = float4(newAmount, grad, 1.0);
+}
+
+[numthreads(32,32,1)]
+void CSInitializeNutrientMap (uint3 id : SV_DispatchThreadID)
+{	
+	nutrientMapWrite[id.xy] = float4(0.0025, 1, 1, 1);
+}
+
+[numthreads(1,1,1)]
+void CSRemoveNutrientsAtLocations (uint3 id : SV_DispatchThreadID)
+{	
+	// takes a list of info:
+	// --cell index x,y
+	// --amount of food to remove / mouth stats
+	// buffer of floats per Critter?
+
+	uint xIndex = floor((critterSimDataCBuffer[id.x].worldPos.x + 70) / 140 * 32);
+	uint yIndex = floor((critterSimDataCBuffer[id.x].worldPos.y + 70) / 140 * 32);
+
+	uint2 cellIndex = uint2(xIndex, yIndex);
+
+	float4 currentAmount = nutrientMapRead[cellIndex];
+	float amountToRemove = nutrientEatAmountsCBuffer[id.x].x;
+
+	currentAmount.x = max(0.0, currentAmount.x - amountToRemove);
+
+	nutrientMapWrite[cellIndex] = currentAmount;
+
+	// WHY SO SLOW????
+}
+
+[numthreads(1,1,1)]
+void CSMeasureTotalNutrients (uint3 id : SV_DispatchThreadID)
+{	
+	// for each output pixel, loop through original 2x2 pixels and sum them together
+
+	float totalNutrients = 0.0;
+
+	for(int x = 0; x < 2; x++) {
+		for(int y = 0; y < 2; y++) {
+			int xIndex = id.x * 2 + x;
+			int yIndex = id.y * 2 + y;
+
+			totalNutrients += measureValuesTex[int2(xIndex, yIndex)].x;
+		}
+	}
+
+	float4 pixValue = float4(totalNutrients,1,1,1);
+
+	pooledResultTex[id.xy] = pixValue;
+
+	outputValuesCBuffer[0] = pixValue;
+}
+
+[numthreads(1,1,1)]
+void CSAddNutrientsAtCoords (uint3 id : SV_DispatchThreadID)
+{	
+	float4 data = addNutrientsCBuffer[id.x];
+	
+	float amount = data.x;
+	int xIndex = floor(data.y * 32.0);
+	int yIndex = floor(data.z * 32.0);
+	int2 index = int2(xIndex, yIndex);
+
+	float4 currentNutrients = nutrientMapRead[index];
+
+	currentNutrients.x += amount;
+
+	nutrientMapWrite[index] = currentNutrients;
+}

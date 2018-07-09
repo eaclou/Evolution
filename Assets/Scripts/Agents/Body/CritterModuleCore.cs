@@ -517,7 +517,7 @@ public class CritterModuleCore {
             foodDirX[0] = foodDir.x;
             foodDirY[0] = foodDir.y;
         }
-        
+
         //foodTypeR[0] = typeR;
         //foodTypeG[0] = typeG;
         //foodTypeB[0] = typeB;

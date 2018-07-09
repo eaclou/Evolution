@@ -19,6 +19,7 @@ public class Agent : MonoBehaviour {
     public float restingJointTorque = 10f;
     public float bendRatioHead = 0f;
     public float bendRatioTailTip = 1f;
+       
 
     public float animationCycle = 0f;
     public float turningAmount = 0f;
@@ -512,7 +513,7 @@ public class Agent : MonoBehaviour {
         */
     }
 
-    public void Tick(Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray) {
+    public void Tick(Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray, SettingsManager settings) {
         // Any external inputs updated by simManager just before this
 
         // Check for StateChange:
@@ -524,11 +525,11 @@ public class Agent : MonoBehaviour {
                 TickEgg();
                 break;
             case AgentLifeStage.Young:
-                TickYoung(nutrientCellInfo, ref eatAmountsArray);
+                TickYoung(nutrientCellInfo, ref eatAmountsArray, settings);
                 break;
             case AgentLifeStage.Mature:
                 //
-                TickMature(nutrientCellInfo, ref eatAmountsArray);
+                TickMature(nutrientCellInfo, ref eatAmountsArray, settings);
                 break;
             case AgentLifeStage.Decaying:
                 //
@@ -604,7 +605,7 @@ public class Agent : MonoBehaviour {
     private void TickEgg() {        
         lifeStageTransitionTimeStepCounter++;
     }
-    private void TickYoung(Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray) {
+    private void TickYoung(Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray, SettingsManager settings) {
 
         growthPercentage = (float)lifeStageTransitionTimeStepCounter / (float)youngDurationTimeSteps;
 
@@ -616,11 +617,11 @@ public class Agent : MonoBehaviour {
 
         TickModules(nutrientCellInfo); // update inputs for Brain        
         TickBrain(); // Tick Brain
-        TickActions(nutrientCellInfo, ref eatAmountsArray); // Execute Actions  -- Also Updates Resources!!! ***
+        TickActions(nutrientCellInfo, ref eatAmountsArray, settings); // Execute Actions  -- Also Updates Resources!!! ***
         lifeStageTransitionTimeStepCounter++;
         scoreCounter++;
     }
-    private void TickMature(Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray) {
+    private void TickMature(Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray, SettingsManager settings) {
         // Check for death & stuff? Or is this handled inside OnCollisionEnter() events?
 
         // Scaling Test:
@@ -631,7 +632,7 @@ public class Agent : MonoBehaviour {
 
         TickModules(nutrientCellInfo); // update inputs for Brain        
         TickBrain(); // Tick Brain
-        TickActions(nutrientCellInfo, ref eatAmountsArray); // Execute Actions  -- Also Updates Resources!!! ***
+        TickActions(nutrientCellInfo, ref eatAmountsArray, settings); // Execute Actions  -- Also Updates Resources!!! ***
         
         ageCounterMature++;
         scoreCounter++;
@@ -693,7 +694,7 @@ public class Agent : MonoBehaviour {
         }*/
     }
 
-    public void TickActions(Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray) {
+    public void TickActions(Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray, SettingsManager settings) {
         float horizontalMovementInput = 0f;
         float verticalMovementInput = 0f;
         
@@ -755,19 +756,19 @@ public class Agent : MonoBehaviour {
         // Heal:
         float healRate = 0.0005f * fullSizeBodyVolume;
         float energyToHealthConversionRate = 6f;
-        if(coreModule.healthBody < 1f) {
+        /*if(coreModule.healthBody < 1f) {
             coreModule.healthBody += healRate;
             coreModule.healthHead += healRate;
             coreModule.healthExternal += healRate;
 
             coreModule.energyRaw -= healRate / energyToHealthConversionRate;
-        }
+        }*/
 
         //ENERGY:
-        float energyCost = 0.0025f * fullSizeBodyVolume;
+        float energyCost = 0.0025f * fullSizeBodyVolume * settings.energyDrainMultiplier;
         
         float throttleMag = smoothedThrottle.magnitude;
-        if(throttleMag > 0.01f) {
+        /*if(throttleMag > 0.01f) {
             // ***** UPDATE THIS!!! Right now you can get "free" energy/stamina if current amount is less than the cost
             // Will want to check energy levels before performing Actions!!
             float staminaCost = throttleMag * 0.01f;
@@ -783,7 +784,7 @@ public class Agent : MonoBehaviour {
             } 
             
 
-        }
+        }*/
         // ENERGY DRAIN::::
         coreModule.energyRaw -= energyCost;
         if(coreModule.energyRaw < 0f) {
@@ -808,10 +809,14 @@ public class Agent : MonoBehaviour {
                     //float foodAmount = gridCell.foodAmountsPerLayerArray[0];
 
                     float ambientFoodDensity = nutrientCellInfo.x;
-                    float mouthArea = mouthRef.triggerCollider.radius * mouthRef.triggerCollider.radius * Mathf.PI;                
+                    float mouthArea = mouthRef.triggerCollider.radius * mouthRef.triggerCollider.radius * Mathf.PI;
 
+                    float maxEatRate = mouthArea * 1f * settings.eatRateMultiplier;
+                    float sizeValue = (coreModule.coreWidth - 0.1f) / 2.5f; // ** Hardcoded assuming size ranges from 0.1 --> 2.5 !!! ********
+                    float efficiency = Mathf.Lerp(settings.minSizeFeedingEfficiency, settings.maxSizeFeedingEfficiency, sizeValue) * ambientFoodDensity;
+                    
                     // *** Can double dip !!! BROKEN! **** Check reservoir first to avoid overdrafting!! ******
-                    float filteredFoodAmount = Mathf.Min(ambientFoodDensity, mouthArea * 0.05f); // * proximityScore;
+                    float filteredFoodAmount = Mathf.Min(maxEatRate * efficiency, maxEatRate); // * proximityScore;
                     //gridCell.foodAmountsPerLayerArray[0] -= filteredFoodAmount;
                     //gridCell.foodAmountsPerLayerArray[0] = Mathf.Max(0f, gridCell.foodAmountsPerLayerArray[0]);
 
