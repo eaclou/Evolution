@@ -152,16 +152,19 @@ public class SimulationManager : MonoBehaviour {
     private ComputeBuffer nutrientSamplesCBuffer;
 
     private int numFoodParticles = 1024;
-    private ComputeBuffer foodParticlesCBuffer;
+    public ComputeBuffer foodParticlesCBuffer;
     private ComputeBuffer foodParticlesCBufferSwap;
     //private ComputeBuffer[] foodParticlesMipsCBufferArray;  // smaller sizes used as temporary data while sorting/computing totals
     private RenderTexture foodParticlesNearestCritters1024;
     private RenderTexture foodParticlesNearestCritters32;
     private RenderTexture foodParticlesNearestCritters1;
     private ComputeBuffer closestFoodParticlesDataCBuffer;
-    private FoodParticleData[] closestFoodParticlesDataArray;
+    public FoodParticleData[] closestFoodParticlesDataArray;
     private ComputeBuffer foodParticlesEatAmountsCBuffer;
-    private float[] foodParticlesEatAmountsArray;
+    public float[] foodParticlesEatAmountsArray;
+    private ComputeBuffer foodParticlesMeasure32;
+    private ComputeBuffer foodParticlesMeasure1;
+    private FoodParticleData[] foodParticleMeasurementTotalsData;
 
     public struct FoodParticleData {
         public int index;
@@ -438,13 +441,14 @@ public class SimulationManager : MonoBehaviour {
             FoodParticleData data = new FoodParticleData();
             data.index = i;            
             data.worldPos = new Vector2(UnityEngine.Random.Range(-70f, 70f), UnityEngine.Random.Range(-70f, 70f));
-            data.radius = UnityEngine.Random.Range(0.1f, 2.5f);
-            data.foodAmount = 0.1f;
-            data.active = 0f;
+            data.radius = UnityEngine.Random.Range(0.025f, 0.25f);
+            data.foodAmount = 1.0f;
+            data.active = 1f;
             foodParticlesArray[i] = data;
         }
 
         foodParticlesCBuffer.SetData(foodParticlesArray);
+        foodParticlesCBufferSwap.SetData(foodParticlesArray);
 
         foodParticlesNearestCritters1024 = new RenderTexture(numFoodParticles, numAgents, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
         foodParticlesNearestCritters1024.wrapMode = TextureWrapMode.Clamp;
@@ -469,6 +473,10 @@ public class SimulationManager : MonoBehaviour {
 
         foodParticlesEatAmountsCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 1);
         foodParticlesEatAmountsArray = new float[numAgents];
+
+        foodParticleMeasurementTotalsData = new FoodParticleData[1];
+        foodParticlesMeasure32 = new ComputeBuffer(32, sizeof(float) * 5 + sizeof(int) * 1);
+        foodParticlesMeasure1 = new ComputeBuffer(1, sizeof(float) * 5 + sizeof(int) * 1);
     }
     private void LoadingInitializeFoodGrid() {
         foodGrid = new FoodGridCell[foodGridResolution][];
@@ -691,6 +699,7 @@ public class SimulationManager : MonoBehaviour {
 
         //Find closest critters to foodParticles:
         FindClosestFoodParticleToCritters();
+        MeasureTotalFoodParticlesAmount();
                 
         // ******** REVISIT CODE ORDERING!!!!  -- Should check for death Before or After agent Tick/PhysX ???
         CheckForDeadFood();
@@ -724,7 +733,7 @@ public class SimulationManager : MonoBehaviour {
             foodGridIndexY = Mathf.Clamp(foodGridIndexY, 0, foodGridResolution - 1);
 
             //agentsArray[i].Tick(new Vector4(0f,0f,0f,0f), ref nutrientEatAmountsArray);  
-            agentsArray[i].Tick(nutrientSamplesArray[i], ref nutrientEatAmountsArray, settingsManager);  
+            agentsArray[i].Tick(this, nutrientSamplesArray[i], ref nutrientEatAmountsArray, settingsManager);  
         }
         for (int i = 0; i < foodArray.Length; i++) {
             foodArray[i].Tick();
@@ -739,13 +748,19 @@ public class SimulationManager : MonoBehaviour {
         //ApplyFluidForcesToDynamicObjects();
 
         EatSelectedFoodParticles(); // 
+                
         // *******************************************************************************************************
         // TO-DO::::
-        // Respawn Food and place initially
-        // Check if food is not in water
+        // Respawn Food and place initially        
         // measure total amount of food
         // upgrade critterSimData to have more bite/mouth info
         // Render foodParticles
+        // Credit food to critters that eat GPU foodParticles
+        // Hook GPU particle info up to critter input modules (food sensors)
+        // check food vs mouth position, not body center -- also for sensors?
+        // Adjust Amount of food in foodParticles * efficiency multiplier
+        // Check if food is not in water
+        // food flow in water -- later, requires water sensors probably
         // *******************************************************************************************************
 
         RemoveEatenNutrients();        
@@ -775,7 +790,8 @@ public class SimulationManager : MonoBehaviour {
 
 
         ApplyDiffusionOnNutrientMap();
-                
+        
+        RespawnFoodParticles();
 
         // TEMP AUDIO EFFECTS!!!!
         //float playerSpeed = (agentsArray[0].transform.position - agentsArray[0]._PrevPos).magnitude;
@@ -914,8 +930,40 @@ public class SimulationManager : MonoBehaviour {
         
         eatAmountsCBuffer.Release();
     }
-    private void RespawnSelectedFoodParticles() {
+    
+    private void RespawnFoodParticles() {
+        // Go through foodParticleData and check for inactive
+        // determined by current total food -- done!
+        // if flag on shader for Respawn is on, set to active and initialize
 
+        float maxFoodParticleTotal = 1000f;
+
+        int kernelCSRespawnFoodParticles = computeShaderFoodParticles.FindKernel("CSRespawnFoodParticles");
+        computeShaderFoodParticles.SetBuffer(kernelCSRespawnFoodParticles, "foodParticlesRead", foodParticlesCBuffer);
+        computeShaderFoodParticles.SetBuffer(kernelCSRespawnFoodParticles, "foodParticlesWrite", foodParticlesCBufferSwap);
+        computeShaderFoodParticles.SetTexture(kernelCSRespawnFoodParticles, "nutrientMapTex", nutrientMapRT1);
+            
+        //computeShaderFoodParticles.SetFloat("_RespawnFoodParticles", 1f);
+        computeShaderFoodParticles.SetFloat("_Time", Time.realtimeSinceStartup);
+
+        if(foodParticleMeasurementTotalsData[0].foodAmount < maxFoodParticleTotal) {
+            computeShaderFoodParticles.SetFloat("_RespawnFoodParticles", 1f);                       
+        }
+        else {
+            computeShaderFoodParticles.SetFloat("_RespawnFoodParticles", 0f);      
+        }
+
+        computeShaderFoodParticles.Dispatch(kernelCSRespawnFoodParticles, 1, 1, 1);
+
+        
+
+        // Copy/Swap Food PArticle Buffer:
+        int kernelCSCopyFoodParticlesBuffer = computeShaderFoodParticles.FindKernel("CSCopyFoodParticlesBuffer");
+        computeShaderFoodParticles.SetBuffer(kernelCSCopyFoodParticlesBuffer, "foodParticlesRead", foodParticlesCBufferSwap);
+        computeShaderFoodParticles.SetBuffer(kernelCSCopyFoodParticlesBuffer, "foodParticlesWrite", foodParticlesCBuffer);
+        computeShaderFoodParticles.Dispatch(kernelCSCopyFoodParticlesBuffer, 1, 1, 1);
+        
+        
     }
     private void EatSelectedFoodParticles() {  // removes gpu particle & sends consumption data back to CPU
         // Use CritterSimData to determine critter mouth locations
@@ -941,7 +989,7 @@ public class SimulationManager : MonoBehaviour {
         for(int i = 0; i < foodParticlesEatAmountsCBuffer.count; i++) {
             totalFoodEaten += foodParticlesEatAmountsArray[i];
         }
-        Debug.Log("EatenFoodParticle: " + totalFoodEaten.ToString());
+        //Debug.Log("EatenFoodParticle: " + totalFoodEaten.ToString());
 
         //int kernelCSRemoveEatenFoodParticles = computeShaderFoodParticles.FindKernel("CSRemoveEatenFoodParticles");
         //computeShaderFoodParticles.SetBuffer(kernelCSRemoveEatenFoodParticles, "foodParticlesWrite", foodParticlesCBuffer);
@@ -985,7 +1033,20 @@ public class SimulationManager : MonoBehaviour {
         //Debug.Log("ClosestFoodParticle: " + closestFoodParticlesDataArray[0].index.ToString() + ", " + closestFoodParticlesDataArray[0].worldPos.ToString());
     }
     private void MeasureTotalFoodParticlesAmount() {
+        // pool values 32x reduction:
+        // 1024 --> 32
+        int kernelCSMeasureTotalFoodParticlesAmount = computeShaderFoodParticles.FindKernel("CSMeasureTotalFoodParticlesAmount");
+        computeShaderFoodParticles.SetBuffer(kernelCSMeasureTotalFoodParticlesAmount, "foodParticlesRead", foodParticlesCBuffer);
+        computeShaderFoodParticles.SetBuffer(kernelCSMeasureTotalFoodParticlesAmount, "foodParticlesWrite", foodParticlesMeasure32);
+        computeShaderFoodParticles.Dispatch(kernelCSMeasureTotalFoodParticlesAmount, 32, 1, 1);
+        // 32 --> 1 entry - totals
+        computeShaderFoodParticles.SetBuffer(kernelCSMeasureTotalFoodParticlesAmount, "foodParticlesRead", foodParticlesMeasure32);
+        computeShaderFoodParticles.SetBuffer(kernelCSMeasureTotalFoodParticlesAmount, "foodParticlesWrite", foodParticlesMeasure1);
+        computeShaderFoodParticles.Dispatch(kernelCSMeasureTotalFoodParticlesAmount, 1, 1, 1);
 
+        foodParticlesMeasure1.GetData(foodParticleMeasurementTotalsData);
+
+        //Debug.Log("FoodParticlesTotalAmount: " + foodParticleMeasurementTotalsData[0].foodAmount.ToString());
     }
     private void UpdateFoodGrid() {
         float totalFoodLayer0 = 0f;
@@ -1940,6 +2001,13 @@ public class SimulationManager : MonoBehaviour {
         if(foodParticlesEatAmountsCBuffer != null) {
             foodParticlesEatAmountsCBuffer.Release();
         }
+        if(foodParticlesMeasure32 != null) {
+            foodParticlesMeasure32.Release();
+        }
+        if(foodParticlesMeasure1 != null) {
+            foodParticlesMeasure1.Release();
+        }
+        
     }
 
     public void SaveTrainingData() {

@@ -53,6 +53,7 @@
 				float energy;
 				float health;
 				float stamina;
+				float isBiting;
 				float biteAnimCycle;
 				float moveAnimCycle;
 				float turnAmount;

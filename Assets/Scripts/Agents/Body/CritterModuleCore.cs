@@ -442,7 +442,7 @@ public class CritterModuleCore {
         }
     }
 
-    public void Tick(Vector4 nutrientCellInfo, bool isPassiveMouth, bool isPlayer, Vector2 ownPos, Vector2 ownVel) {        
+    public void Tick(SimulationManager simManager, Vector4 nutrientCellInfo, bool isPassiveMouth, bool isPlayer, Vector2 ownPos, Vector2 ownVel, int agentIndex) {        
                
 
         Vector2 foodPos = Vector2.zero;
@@ -457,6 +457,7 @@ public class CritterModuleCore {
             //typeG = nearestFoodModule.amountG;
             //typeB = nearestFoodModule.amountB;
             foodAmount = nearestFoodModule.amountR;
+            foodRelSize[0] = foodAmount;
         }
 
         Vector2 friendPos = Vector2.zero;
@@ -504,24 +505,31 @@ public class CritterModuleCore {
             enemyDir = enemyPos.normalized;
             enemyVel = new Vector2(nearestPredatorModule.rigidBody.velocity.x, nearestPredatorModule.rigidBody.velocity.y);
         }*/
+
+        float nearestFoodParticle = simManager.closestFoodParticlesDataArray[agentIndex].foodAmount;
+        Vector2 critterToFoodParticle = simManager.closestFoodParticlesDataArray[agentIndex].worldPos - ownPos;
+        float distToNearestFoodParticle = critterToFoodParticle.magnitude;
         
         if(isPassiveMouth) {
-            foodPosX[0] = 0f; 
-            foodPosY[0] = 0f;
+            foodPosX[0] = critterToFoodParticle.x / 10f; 
+            foodPosY[0] = critterToFoodParticle.y / 10f;
             foodDirX[0] = nutrientCellInfo.y;
-            foodDirY[0] = nutrientCellInfo.z;            
+            foodDirY[0] = nutrientCellInfo.z;  
+            foodRelSize[0] = nutrientCellInfo.x;
         }
         else {
             foodPosX[0] = foodPos.x / 20f;
             foodPosY[0] = foodPos.y / 20f;
             foodDirX[0] = foodDir.x;
             foodDirY[0] = foodDir.y;
+            
         }
 
         //foodTypeR[0] = typeR;
         //foodTypeG[0] = typeG;
         //foodTypeB[0] = typeB;
-        foodRelSize[0] = nutrientCellInfo.x;
+        
+        //foodRelSize[0] = nutrientCellInfo.x;
         
         friendPosX[0] = friendPos.x / 20f;
         friendPosY[0] = friendPos.y / 20f;

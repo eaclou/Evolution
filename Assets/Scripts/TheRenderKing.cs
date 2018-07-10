@@ -47,6 +47,7 @@ public class TheRenderKing : MonoBehaviour {
     public Material critterBodyStrokesMat;
     public Material critterEnergyDotsMat;
     public Material critterFoodDotsMat;
+    public Material foodParticleDisplayMat;
 
     public bool isDebugRenderOn = true;
     
@@ -778,6 +779,9 @@ public class TheRenderKing : MonoBehaviour {
 
         critterFoodDotsMat.SetPass(0);
         critterFoodDotsMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+
+        foodParticleDisplayMat.SetPass(0);
+        foodParticleDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
 
         /*
         trailDotsDisplayMat.SetPass(0);
@@ -1670,6 +1674,11 @@ public class TheRenderKing : MonoBehaviour {
         agentEyesDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, agentEyesDisplayMat, 0, MeshTopology.Triangles, 6, agentEyeStrokesCBuffer.count);
         
+        foodParticleDisplayMat.SetPass(0);
+        foodParticleDisplayMat.SetBuffer("foodParticleDataCBuffer", simManager.foodParticlesCBuffer);
+        foodParticleDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, foodParticleDisplayMat, 0, MeshTopology.Triangles, 6, simManager.foodParticlesCBuffer.count);
+
         //foodProceduralDisplayMat.SetPass(0);
         //foodProceduralDisplayMat.SetBuffer("foodSimDataCBuffer", simManager.simStateData.foodSimDataCBuffer);
         //foodProceduralDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);

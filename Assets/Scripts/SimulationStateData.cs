@@ -24,6 +24,7 @@ public class SimulationStateData {
         public float maxEnergy;
         public Vector3 primaryHue;
         public Vector3 secondaryHue;
+        public float mouthIsActive;
         public int bodyPatternX;  // what grid cell of texture sheet to use
         public int bodyPatternY;  // what grid cell of texture sheet to use
     }
@@ -37,6 +38,7 @@ public class SimulationStateData {
         public float energy;
         public float health;
         public float stamina;
+        public float isBiting;
         public float biteAnimCycle;
         public float moveAnimCycle;
         public float turnAmount;
@@ -151,13 +153,13 @@ public class SimulationStateData {
         for(int i = 0; i < critterInitDataArray.Length; i++) {
             critterInitDataArray[i] = new CritterInitData();
         }
-        critterInitDataCBuffer = new ComputeBuffer(critterInitDataArray.Length, sizeof(float) * 10 + sizeof(int) * 2);
+        critterInitDataCBuffer = new ComputeBuffer(critterInitDataArray.Length, sizeof(float) * 11 + sizeof(int) * 2);
 
         critterSimDataArray = new CritterSimData[simManager._NumAgents];
         for(int i = 0; i < critterSimDataArray.Length; i++) {
             critterSimDataArray[i] = new CritterSimData();
         }
-        critterSimDataCBuffer = new ComputeBuffer(critterSimDataArray.Length, sizeof(float) * 17);
+        critterSimDataCBuffer = new ComputeBuffer(critterSimDataArray.Length, sizeof(float) * 18);
 
         debugBodyResourcesArray = new DebugBodyResourcesData[simManager._NumAgents];
         for(int i = 0; i < debugBodyResourcesArray.Length; i++) {

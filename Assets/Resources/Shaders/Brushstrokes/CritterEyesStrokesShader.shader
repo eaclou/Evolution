@@ -22,6 +22,7 @@
 			#pragma target 5.0
 			#include "UnityCG.cginc"
 			#include "Assets/Resources/Shaders/Inc/CritterBodyAnimation.cginc"
+			#include "Assets/Resources/Shaders/Inc/StructsCritterData.cginc"
 
 			sampler2D _MainTex;
 			float4 _MainTex_ST;
@@ -38,32 +39,7 @@
 				float strength;  // abstraction for pressure of brushstroke + amount of paint 
 				int brushType;  // what texture/mask/brush pattern to use
 			};
-			struct CritterInitData {
-				float2 boundingBoxSize;
-				float spawnSizePercentage;
-				float maxEnergy;
-				float3 primaryHue;
-				float3 secondaryHue;
-				int bodyPatternX;  // what grid cell of texture sheet to use
-				int bodyPatternY;  // what grid cell of texture sheet to use
-			};
-			struct CritterSimData {
-				float2 worldPos;
-				float2 velocity;
-				float2 heading;
-				float growthPercentage;
-				float decayPercentage;
-				float foodAmount;
-				float energy;
-				float health;
-				float stamina;
-				float biteAnimCycle;
-				float moveAnimCycle;
-				float turnAmount;
-				float accel;
-				float smoothedThrottle;
-			};
-
+			
 			StructuredBuffer<CritterInitData> critterInitDataCBuffer;
 			StructuredBuffer<CritterSimData> critterSimDataCBuffer;
 			StructuredBuffer<AgentEyeStrokeData> agentEyesStrokesCBuffer;

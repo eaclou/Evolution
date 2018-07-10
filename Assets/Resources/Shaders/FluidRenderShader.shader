@@ -120,7 +120,7 @@
 				//return float4(0.5, 0.5, 0.5, 1);
 
 				float4 debugTexColor = tex2D(_DebugTex, i.uv);
-				float4 debugColor = float4(0, debugTexColor.x * 5, 0, 1.0);
+				float4 debugColor = float4(debugTexColor.x * 3, debugTexColor.x * 3, 0, 1.0);
 				//debugColor.a = 1;
 				//debugColor.rgb *= 10;
 				//debugColor.rb = 0;

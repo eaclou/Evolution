@@ -4,6 +4,7 @@ struct CritterInitData {
 	float maxEnergy;
 	float3 primaryHue;
 	float3 secondaryHue;
+	float mouthIsActive;	
 	int bodyPatternX;  // what grid cell of texture sheet to use
 	int bodyPatternY;  // what grid cell of texture sheet to use
 };
@@ -17,6 +18,7 @@ struct CritterSimData {
 	float energy;
 	float health;
 	float stamina;
+	float isBiting;
 	float biteAnimCycle;
 	float moveAnimCycle;
 	float turnAmount;

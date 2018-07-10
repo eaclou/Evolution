@@ -2,6 +2,8 @@
 #pragma kernel CSReduceCritterDistances32
 #pragma kernel CSEatSelectedFoodParticles
 #pragma kernel CSCopyFoodParticlesBuffer
+#pragma kernel CSMeasureTotalFoodParticlesAmount
+#pragma kernel CSRespawnFoodParticles
 
 #include "Assets/Resources/Shaders/Inc/StructsCritterData.cginc"
 
@@ -28,10 +30,19 @@ RWStructuredBuffer<float> foodParticlesEatAmountsCBuffer;
 Texture2D<float4> critterDistancesRead; // used to reduce foodParticlesNearestCrittersRT down to minimum distances
 RWTexture2D<float4> critterDistancesWrite;
 
+Texture2D<float4> nutrientMapTex;
+
+uniform float _RespawnFoodParticles;
+uniform float _Time;
+
 SamplerState _LinearClamp;
 SamplerState _LinearRepeat;
 SamplerState _PointClamp;
 SamplerState _PointRepeat;
+
+float rand(float2 co){   // OUTPUT is in [0,1] RANGE!!!
+	return frac(sin(dot(co.xy ,float2(12.9898,78.233))) * 43758.5453);
+}
 
 [numthreads(1024,1,1)]
 void CSMeasureInitCritterDistances (uint3 id : SV_DispatchThreadID)
@@ -98,6 +109,7 @@ void CSEatSelectedFoodParticles (uint3 id : SV_DispatchThreadID)
 		eatenAmount = particleData.foodAmount;
 		//foodParticlesCBuffer[particleIndex].foodAmount = 0;  // can;'t read & write to same buffer at same time
 		foodParticlesWrite[particleIndex].foodAmount = 0;
+		foodParticlesWrite[particleIndex].active = 0;
 	}	
 
 	foodParticlesEatAmountsCBuffer[id.x] = eatenAmount;
@@ -107,5 +119,61 @@ void CSEatSelectedFoodParticles (uint3 id : SV_DispatchThreadID)
 void CSCopyFoodParticlesBuffer (uint3 id : SV_DispatchThreadID)
 {	
 	FoodParticleData particleData = foodParticlesRead[id.x];
+	//particleData.foodAmount = foodParticlesRead[id.x].foodAmount;
 	foodParticlesWrite[id.x] = particleData;
+}
+
+
+[numthreads(1,1,1)]
+void CSMeasureTotalFoodParticlesAmount (uint3 id : SV_DispatchThreadID)
+{	
+	float totalFoodAmount = 0;
+
+	FoodParticleData newData;
+	newData.index = 0;
+	newData.worldPos = float2(0,0);
+	newData.radius = 0.1;
+	newData.active = 1;
+
+	int totalIndex = 0;
+
+	for(int i = 0; i < 32; i++) {
+		
+		int particleIndex = id.x * 32 + i;
+		
+		FoodParticleData particleData = foodParticlesRead[particleIndex];
+		newData.foodAmount = 0.4; //particleData.foodAmount;
+		totalIndex += particleData.index;
+		totalFoodAmount += particleData.foodAmount;
+	}
+	newData.index = totalIndex;
+	newData.foodAmount = totalFoodAmount;
+	foodParticlesWrite[id.x] = newData;
+}
+
+
+[numthreads(1024,1,1)]
+void CSRespawnFoodParticles (uint3 id : SV_DispatchThreadID)
+{
+	float2 uv = (foodParticlesRead[id.x].worldPos + 70) / 140; // float2(0,0);
+	float nutrientMapValue = nutrientMapTex.SampleLevel(_PointClamp, uv, 0).x;
+	if(nutrientMapValue < 0.001) {
+		float randX = rand(float2((float)id.x, _Time * 100));
+		float randY = rand(float2(randX, (float)id.x));
+		foodParticlesWrite[id.x].worldPos = float2(randX * 140 - 70, randY * 140 - 70);
+		foodParticlesWrite[id.x].active = 1.0;
+	}
+
+	if(_RespawnFoodParticles > 0.5) {
+		if(foodParticlesRead[id.x].active < 0.5) {
+			foodParticlesWrite[id.x].foodAmount = 1;
+			float randX = rand(float2((float)id.x, _Time));
+			float randY = rand(float2(randX, (float)id.x));
+			foodParticlesWrite[id.x].worldPos = float2(randX * 140 - 70, randY * 140 - 70);
+			foodParticlesWrite[id.x].radius = foodParticlesRead[id.x].radius;
+			foodParticlesWrite[id.x].active = 1.0;
+		}		
+	}
+
+	
 }

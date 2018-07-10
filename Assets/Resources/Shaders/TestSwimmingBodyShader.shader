@@ -105,7 +105,7 @@
 
 				float bodyAspectRatio = agentSimData.size.y / agentSimData.size.x;
 				float panningYawStrength = 0.5 * saturate(bodyAspectRatio * 0.5 - 0.4);
-				quadPoint.xy = getWarpedPoint(quadPoint.xy, quadUV.y, animData.turnAmount, panningYawStrength, agentSimData.size.y * 0.25, animData.animCycle, animData.accel, animData.smoothedThrottle);
+				//quadPoint.xy = getWarpedPoint(quadPoint.xy, quadUV.y, animData.turnAmount, panningYawStrength, agentSimData.size.y * 0.25, animData.animCycle, animData.accel, animData.smoothedThrottle);
 				
 				float3 rotatedPoint1 = float3(quadPoint.x * rightAgent + quadPoint.y * forwardAgent,
 											 quadPoint.z);

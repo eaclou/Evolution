@@ -199,7 +199,7 @@ public class CritterModuleCoreGenome {
 
         isPassive = UtilityMutationFunctions.GetMutatedBool(parentGenome.isPassive, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize);
         
-        fullBodyWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.fullBodyWidth, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.1f, 2.5f);
+        fullBodyWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.fullBodyWidth, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.1f, 4.5f);
         fullBodyLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.fullBodyLength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, fullBodyWidth * 1.25f, fullBodyWidth * 4f);
         if(fullBodyLength < fullBodyWidth * 1.25f) {
             fullBodyLength = fullBodyWidth * 1.25f;

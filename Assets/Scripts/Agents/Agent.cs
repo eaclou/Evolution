@@ -332,7 +332,7 @@ public class Agent : MonoBehaviour {
     public void TickBrain() {
         brain.BrainMasterFunction();
     }
-    public void TickModules(Vector4 nutrientCellInfo) { // Updates internal state of body - i.e health, energy etc. -- updates input Neuron values!!!
+    public void TickModules(SimulationManager simManager, Vector4 nutrientCellInfo) { // Updates internal state of body - i.e health, energy etc. -- updates input Neuron values!!!
                                 // Update Stocks & Flows ::: new health, energy, stamina
                                 // This should have happened during last frame's Internal PhysX Update
 
@@ -348,7 +348,7 @@ public class Agent : MonoBehaviour {
         Vector2 ownPos = new Vector2(bodyRigidbody.transform.localPosition.x, bodyRigidbody.transform.localPosition.y);
         Vector2 ownVel = new Vector2(bodyRigidbody.velocity.x, bodyRigidbody.velocity.y); // change this to ownPos - prevPos *****************
 
-        coreModule.Tick(nutrientCellInfo, mouthRef.isPassive, humanControlled, ownPos, ownVel);
+        coreModule.Tick(simManager, nutrientCellInfo, mouthRef.isPassive, humanControlled, ownPos, ownVel, index);
         movementModule.Tick(humanControlled, this, ownVel);
         // Add more sensor Modules later:
 
@@ -513,7 +513,7 @@ public class Agent : MonoBehaviour {
         */
     }
 
-    public void Tick(Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray, SettingsManager settings) {
+    public void Tick(SimulationManager simManager, Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray, SettingsManager settings) {
         // Any external inputs updated by simManager just before this
 
         // Check for StateChange:
@@ -525,11 +525,11 @@ public class Agent : MonoBehaviour {
                 TickEgg();
                 break;
             case AgentLifeStage.Young:
-                TickYoung(nutrientCellInfo, ref eatAmountsArray, settings);
+                TickYoung(simManager, nutrientCellInfo, ref eatAmountsArray, settings);
                 break;
             case AgentLifeStage.Mature:
                 //
-                TickMature(nutrientCellInfo, ref eatAmountsArray, settings);
+                TickMature(simManager, nutrientCellInfo, ref eatAmountsArray, settings);
                 break;
             case AgentLifeStage.Decaying:
                 //
@@ -605,7 +605,7 @@ public class Agent : MonoBehaviour {
     private void TickEgg() {        
         lifeStageTransitionTimeStepCounter++;
     }
-    private void TickYoung(Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray, SettingsManager settings) {
+    private void TickYoung(SimulationManager simManager, Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray, SettingsManager settings) {
 
         growthPercentage = (float)lifeStageTransitionTimeStepCounter / (float)youngDurationTimeSteps;
 
@@ -615,13 +615,13 @@ public class Agent : MonoBehaviour {
             ScaleBody(growthPercentage);  
         }
 
-        TickModules(nutrientCellInfo); // update inputs for Brain        
+        TickModules(simManager, nutrientCellInfo); // update inputs for Brain        
         TickBrain(); // Tick Brain
-        TickActions(nutrientCellInfo, ref eatAmountsArray, settings); // Execute Actions  -- Also Updates Resources!!! ***
+        TickActions(simManager, nutrientCellInfo, ref eatAmountsArray, settings); // Execute Actions  -- Also Updates Resources!!! ***
         lifeStageTransitionTimeStepCounter++;
         scoreCounter++;
     }
-    private void TickMature(Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray, SettingsManager settings) {
+    private void TickMature(SimulationManager simManager, Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray, SettingsManager settings) {
         // Check for death & stuff? Or is this handled inside OnCollisionEnter() events?
 
         // Scaling Test:
@@ -630,9 +630,9 @@ public class Agent : MonoBehaviour {
             ScaleBody(growthPercentage);  
         }
 
-        TickModules(nutrientCellInfo); // update inputs for Brain        
+        TickModules(simManager, nutrientCellInfo); // update inputs for Brain        
         TickBrain(); // Tick Brain
-        TickActions(nutrientCellInfo, ref eatAmountsArray, settings); // Execute Actions  -- Also Updates Resources!!! ***
+        TickActions(simManager, nutrientCellInfo, ref eatAmountsArray, settings); // Execute Actions  -- Also Updates Resources!!! ***
         
         ageCounterMature++;
         scoreCounter++;
@@ -694,7 +694,7 @@ public class Agent : MonoBehaviour {
         }*/
     }
 
-    public void TickActions(Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray, SettingsManager settings) {
+    public void TickActions(SimulationManager simManager, Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray, SettingsManager settings) {
         float horizontalMovementInput = 0f;
         float verticalMovementInput = 0f;
         
@@ -802,8 +802,20 @@ public class Agent : MonoBehaviour {
             smoothedThrottle = Vector2.zero;
         }
         else {
+
+            // FOOD PARTICLES: Either mouth type for now:
+            float foodParticleEatAmount = simManager.foodParticlesEatAmountsArray[index];
+            coreModule.stomachContents += foodParticleEatAmount;
+            if(coreModule.stomachContents > coreModule.stomachCapacity) {
+                coreModule.stomachContents = coreModule.stomachCapacity;
+            }
+            //if(foodParticleEatAmount > 0.1f) {
+            //    Debug.Log("Ate Food PArticle! amount: " + foodParticleEatAmount.ToString() + ", agent[" + index.ToString() + "] stomach contents: " + coreModule.stomachContents.ToString());
+            //}
+
             // BITE!!!
             if(mouthRef.isPassive) {
+
                 // PAssive filter feeding:
                 if(coreModule.mouthEffector[0] > 0f) {
                     //float foodAmount = gridCell.foodAmountsPerLayerArray[0];
