@@ -62,8 +62,8 @@ public class CameraManager : MonoBehaviour {
 
         float targetTimeScale = Mathf.Lerp(0.5f, 1.5f, (camera.orthographicSize - 5f) / 40f);
         Time.timeScale = Mathf.Lerp(Time.timeScale, targetTimeScale, timeScaleLerp);
-        float targetFixedTimeStep = Mathf.Lerp(0.00675f, 0.0167f, (camera.orthographicSize - 5f) / 40f);
-        Time.fixedDeltaTime = Mathf.Lerp(Time.fixedDeltaTime, targetFixedTimeStep, timeScaleLerp);
+        //float targetFixedTimeStep = Mathf.Lerp(0.00675f, 0.0167f, (camera.orthographicSize - 5f) / 40f);
+        Time.fixedDeltaTime = Time.timeScale * 0.02f; // Mathf.Lerp(Time.fixedDeltaTime, targetFixedTimeStep, timeScaleLerp);
         
 
         switch (curMode) {

@@ -270,6 +270,10 @@ public class SimulationStateData {
             critterInitDataArray[i].maxEnergy = Mathf.Min(simManager.agentsArray[i].fullSizeBoundingBox.x * simManager.agentsArray[i].fullSizeBoundingBox.y, 0.5f);
             critterInitDataArray[i].primaryHue = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.huePrimary;
             critterInitDataArray[i].secondaryHue = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.hueSecondary;
+            critterInitDataArray[i].mouthIsActive = 1f;
+            if(simManager.agentsArray[i].mouthRef.isPassive) {
+                critterInitDataArray[i].mouthIsActive = 0f;
+            }
             critterInitDataArray[i].bodyPatternX = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.bodyStrokeBrushTypeX;
             critterInitDataArray[i].bodyPatternY = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.bodyStrokeBrushTypeY;  // what grid cell of texture sheet to use
         }
@@ -293,7 +297,11 @@ public class SimulationStateData {
             critterSimDataArray[i].energy = simManager.agentsArray[i].coreModule.energyRaw / simManager.agentsArray[i].coreModule.maxEnergyStorage;;
             critterSimDataArray[i].health = simManager.agentsArray[i].coreModule.healthBody;
             critterSimDataArray[i].stamina = simManager.agentsArray[i].coreModule.stamina[0];
-            if(simManager.agentsArray[i].mouthRef.isBiting) {
+            critterSimDataArray[i].isBiting = 0f;
+            if(simManager.agentsArray[i].coreModule.mouthEffector[0] > 0.0f) {
+                critterSimDataArray[i].isBiting = 1f;
+            }
+            if(simManager.agentsArray[i].mouthRef.isBiting) {                
                 critterSimDataArray[i].biteAnimCycle = (float)simManager.agentsArray[i].mouthRef.bitingFrameCounter /
                                                     ((float)simManager.agentsArray[i].mouthRef.biteChargeUpDuration + (float)simManager.agentsArray[i].mouthRef.biteCooldownDuration);
                 // (agentSimDataArray[i].eatingStatus + 0.11f) % 1.0f;  // cycle around 0-1

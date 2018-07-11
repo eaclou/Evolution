@@ -437,12 +437,16 @@ public class SimulationManager : MonoBehaviour {
         foodParticlesCBufferSwap = new ComputeBuffer(numFoodParticles, sizeof(float) * 5 + sizeof(int) * 1);
         FoodParticleData[] foodParticlesArray = new FoodParticleData[numFoodParticles];
 
+        float minParticleSize = settingsManager.avgFoodParticleRadius / settingsManager.foodParticleRadiusVariance;
+        float maxParticleSize = settingsManager.avgFoodParticleRadius * settingsManager.foodParticleRadiusVariance;
+
         for(int i = 0; i < foodParticlesCBuffer.count; i++) {
             FoodParticleData data = new FoodParticleData();
             data.index = i;            
             data.worldPos = new Vector2(UnityEngine.Random.Range(-70f, 70f), UnityEngine.Random.Range(-70f, 70f));
-            data.radius = UnityEngine.Random.Range(0.025f, 0.25f);
-            data.foodAmount = 1.0f;
+
+            data.radius = UnityEngine.Random.Range(minParticleSize, maxParticleSize);
+            data.foodAmount = data.radius * data.radius * Mathf.PI * settingsManager.foodParticleNutrientDensity;
             data.active = 1f;
             foodParticlesArray[i] = data;
         }
@@ -748,19 +752,31 @@ public class SimulationManager : MonoBehaviour {
         //ApplyFluidForcesToDynamicObjects();
 
         EatSelectedFoodParticles(); // 
-                
+
         // *******************************************************************************************************
-        // TO-DO::::
+        // DONE::::        
         // Respawn Food and place initially        
         // measure total amount of food
         // upgrade critterSimData to have more bite/mouth info
         // Render foodParticles
         // Credit food to critters that eat GPU foodParticles
         // Hook GPU particle info up to critter input modules (food sensors)
-        // check food vs mouth position, not body center -- also for sensors?
-        // Adjust Amount of food in foodParticles * efficiency multiplier
         // Check if food is not in water
-        // food flow in water -- later, requires water sensors probably
+        // pass mouth data into SimStateData
+        // check food vs mouth position and biting state, not body center -- also for sensors?  
+        // Adjust Amount of food in foodParticles * efficiency multiplier  
+        // Restrict being able to eat foodPArticles by size, mouthType
+        // only consumable food is passed to brain Data - pa/small are filtered out
+
+        // TO-DO::::-------------------------------------------------------------------------------------------------------------
+        // Create multiple mouth types:  
+        //      Jaw +Teeth (creatures, eggs, foodParticles)  
+        //      Jaw (eggs, foodParticles)  
+        //      Mouth (foodParticles, foodGrid)
+        //      None (foodGrid)
+        // add new inputs for food dir (dedicated one for nutrient gradient map)           
+        // food flow in water -- later, requires water sensors probably        
+        
         // *******************************************************************************************************
 
         RemoveEatenNutrients();        
@@ -936,12 +952,12 @@ public class SimulationManager : MonoBehaviour {
         // determined by current total food -- done!
         // if flag on shader for Respawn is on, set to active and initialize
 
-        float maxFoodParticleTotal = 1000f;
+        float maxFoodParticleTotal = settingsManager.maxFoodParticleTotalAmount;
 
         int kernelCSRespawnFoodParticles = computeShaderFoodParticles.FindKernel("CSRespawnFoodParticles");
         computeShaderFoodParticles.SetBuffer(kernelCSRespawnFoodParticles, "foodParticlesRead", foodParticlesCBuffer);
         computeShaderFoodParticles.SetBuffer(kernelCSRespawnFoodParticles, "foodParticlesWrite", foodParticlesCBufferSwap);
-        computeShaderFoodParticles.SetTexture(kernelCSRespawnFoodParticles, "nutrientMapTex", nutrientMapRT1);
+        computeShaderFoodParticles.SetTexture(kernelCSRespawnFoodParticles, "obstaclesRead", environmentFluidManager._ObstaclesRT);
             
         //computeShaderFoodParticles.SetFloat("_RespawnFoodParticles", 1f);
         computeShaderFoodParticles.SetFloat("_Time", Time.realtimeSinceStartup);
@@ -952,6 +968,13 @@ public class SimulationManager : MonoBehaviour {
         else {
             computeShaderFoodParticles.SetFloat("_RespawnFoodParticles", 0f);      
         }
+
+        float minParticleSize = settingsManager.avgFoodParticleRadius / settingsManager.foodParticleRadiusVariance;
+        float maxParticleSize = settingsManager.avgFoodParticleRadius * settingsManager.foodParticleRadiusVariance;
+
+        computeShaderFoodParticles.SetFloat("_MinParticleSize", minParticleSize);   
+        computeShaderFoodParticles.SetFloat("_MaxParticleSize", maxParticleSize);      
+        computeShaderFoodParticles.SetFloat("_ParticleNutrientDensity", settingsManager.foodParticleNutrientDensity);      
 
         computeShaderFoodParticles.Dispatch(kernelCSRespawnFoodParticles, 1, 1, 1);
 
@@ -975,6 +998,7 @@ public class SimulationManager : MonoBehaviour {
         // Record how much food successfully eaten per Critter
 
         int kernelCSEatSelectedFoodParticles = computeShaderFoodParticles.FindKernel("CSEatSelectedFoodParticles");
+        computeShaderFoodParticles.SetBuffer(kernelCSEatSelectedFoodParticles, "critterInitDataCBuffer", simStateData.critterInitDataCBuffer);
         computeShaderFoodParticles.SetBuffer(kernelCSEatSelectedFoodParticles, "critterSimDataCBuffer", simStateData.critterSimDataCBuffer);
         computeShaderFoodParticles.SetBuffer(kernelCSEatSelectedFoodParticles, "foodParticlesRead", foodParticlesCBuffer);
         computeShaderFoodParticles.SetBuffer(kernelCSEatSelectedFoodParticles, "foodParticlesWrite", foodParticlesCBufferSwap);
@@ -1008,6 +1032,7 @@ public class SimulationManager : MonoBehaviour {
 
         int kernelCSMeasureInitCritterDistances = computeShaderFoodParticles.FindKernel("CSMeasureInitCritterDistances");
         computeShaderFoodParticles.SetBuffer(kernelCSMeasureInitCritterDistances, "critterSimDataCBuffer", simStateData.critterSimDataCBuffer);
+        computeShaderFoodParticles.SetBuffer(kernelCSMeasureInitCritterDistances, "critterInitDataCBuffer", simStateData.critterInitDataCBuffer);
         computeShaderFoodParticles.SetBuffer(kernelCSMeasureInitCritterDistances, "foodParticlesRead", foodParticlesCBuffer);
         computeShaderFoodParticles.SetTexture(kernelCSMeasureInitCritterDistances, "foodParticlesNearestCrittersRT", foodParticlesNearestCritters1024);
         computeShaderFoodParticles.Dispatch(kernelCSMeasureInitCritterDistances, foodParticlesCBuffer.count / 1024, simStateData.critterSimDataCBuffer.count, 1);

@@ -17,6 +17,12 @@ public class SettingsManager : MonoBehaviour {
     public float minSizeFeedingEfficiency = 1f;
     public float maxSizeFeedingEfficiency = 1f;
 
+    public float maxFoodParticleTotalAmount = 512f;
+    public float avgFoodParticleRadius = 0.25f;
+    public float foodParticleRadiusVariance = 4f;
+    public float foodParticleNutrientDensity = 1f;
+    public float efficiencyFalloff = 0f;  // how much less food rewarded from particles that are further from optimal size for the consuming Critter
+
     public float minSizeCritterSpeed = 150f;
     public float maxSizeCritterSpeed = 150f;
     

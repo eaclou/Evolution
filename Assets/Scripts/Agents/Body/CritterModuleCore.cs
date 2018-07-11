@@ -450,6 +450,7 @@ public class CritterModuleCore {
         float foodAmount = 0f;
         //float typeG = 0f;
         //float typeB = 0f;
+        float nearestFoodChunkSquareDistance = 100f;
         if(nearestFoodModule != null) {
             foodPos = new Vector2(nearestFoodModule.transform.localPosition.x - ownPos.x, nearestFoodModule.transform.localPosition.y - ownPos.y);
             foodDir = foodPos.normalized;
@@ -458,7 +459,10 @@ public class CritterModuleCore {
             //typeB = nearestFoodModule.amountB;
             foodAmount = nearestFoodModule.amountR;
             foodRelSize[0] = foodAmount;
+
+            nearestFoodChunkSquareDistance = foodPos.sqrMagnitude;
         }
+
 
         Vector2 friendPos = Vector2.zero;
         Vector2 friendDir = Vector2.zero;
@@ -506,23 +510,34 @@ public class CritterModuleCore {
             enemyVel = new Vector2(nearestPredatorModule.rigidBody.velocity.x, nearestPredatorModule.rigidBody.velocity.y);
         }*/
 
-        float nearestFoodParticle = simManager.closestFoodParticlesDataArray[agentIndex].foodAmount;
+        //float nearestFoodParticle = simManager.closestFoodParticlesDataArray[agentIndex].foodAmount;
         Vector2 critterToFoodParticle = simManager.closestFoodParticlesDataArray[agentIndex].worldPos - ownPos;
         float distToNearestFoodParticle = critterToFoodParticle.magnitude;
-        
+
+        Vector2 foodParticleDir = critterToFoodParticle.normalized;
         if(isPassiveMouth) {
-            foodPosX[0] = critterToFoodParticle.x / 10f; 
-            foodPosY[0] = critterToFoodParticle.y / 10f;
-            foodDirX[0] = nutrientCellInfo.y;
-            foodDirY[0] = nutrientCellInfo.z;  
-            foodRelSize[0] = nutrientCellInfo.x;
+            float nearestFoodParticleSquareDistance = critterToFoodParticle.sqrMagnitude;
+            if(nearestFoodParticleSquareDistance < nearestFoodChunkSquareDistance) { // GPU Food PArticle:
+                foodPosX[0] = critterToFoodParticle.x / 20f; 
+                foodPosY[0] = critterToFoodParticle.y / 20f;
+                foodDirX[0] = foodParticleDir.x; // nutrientCellInfo.y;
+                foodDirY[0] = foodParticleDir.y; // nutrientCellInfo.z;  
+                foodRelSize[0] = simManager.closestFoodParticlesDataArray[agentIndex].foodAmount; // nutrientCellInfo.x;
+            }
+            else { // CPU foodChunk:
+                foodPosX[0] = foodPos.x / 20f; 
+                foodPosY[0] = foodPos.y / 20f;
+                foodDirX[0] = foodDir.x;
+                foodDirY[0] = foodDir.y; 
+                foodRelSize[0] = foodAmount; 
+            }
+            
         }
         else {
             foodPosX[0] = foodPos.x / 20f;
             foodPosY[0] = foodPos.y / 20f;
             foodDirX[0] = foodDir.x;
-            foodDirY[0] = foodDir.y;
-            
+            foodDirY[0] = foodDir.y;            
         }
 
         //foodTypeR[0] = typeR;

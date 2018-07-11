@@ -222,7 +222,8 @@
 				finalColor.rgb *= lerp(1, i.color.b * 1.5, 0.25);
 				finalColor.rgb = lerp(float3(0.65, 0.65, 0.65), finalColor.rgb, saturate(critterSimData.growthPercentage * 10));
 				finalColor.rgb = lerp(float3(0.45, 0.45, 0.45), finalColor.rgb, saturate(critterSimData.energy * 5));
-				
+				finalColor.rgb += 0.35;
+				finalColor.rgb = float3(0.15 ,0.4 ,0.8);
 				//return float4(1,1,1,1);
 
 				return finalColor;
