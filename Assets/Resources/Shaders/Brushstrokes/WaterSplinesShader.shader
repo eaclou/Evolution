@@ -50,7 +50,9 @@
 
 			sampler2D _MainTex;
 			float4 _MainTex_ST;
-			sampler2D _FluidColorTex;  
+			sampler2D _FluidColorTex; 
+			
+			uniform float _MapSize;
 
 			StructuredBuffer<WaterSplineData> waterSplinesReadCBuffer;
 			StructuredBuffer<float3> verticesCBuffer;
@@ -86,7 +88,7 @@
 				float2 uv = verticesCBuffer[id];
 				uv.x += 0.5;
 								
-				o.fluidTexUV = (worldPosition.xy + 70) / 140;
+				o.fluidTexUV = worldPosition.xy / _MapSize;
 
 				float random1 = rand(float2(inst, inst));
 				float random2 = rand(float2(random1, random1));

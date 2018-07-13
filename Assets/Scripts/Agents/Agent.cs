@@ -903,7 +903,7 @@ public class Agent : MonoBehaviour {
             speed = swimSpeed;
             // Forward Slide
             for(int k = 0; k < numSegments; k++) {
-                Vector2 segmentForwardDir = throttleDir.normalized; // new Vector2(this.bodyRigidbody.transform.up.x, this.bodyRigidbody.transform.up.y).normalized;
+                Vector2 segmentForwardDir = new Vector2(this.bodyRigidbody.transform.up.x, this.bodyRigidbody.transform.up.y).normalized;
                 this.bodyRigidbody.AddForce(segmentForwardDir * (1f - turnSharpness * 0.25f) * swimSpeed * this.bodyRigidbody.mass * Time.deltaTime * developmentMultiplier, ForceMode2D.Impulse);
             }
 

@@ -36,7 +36,7 @@
 			StructuredBuffer<FloatyBitData> floatyBitsCBuffer;
 			StructuredBuffer<float3> quadVerticesCBuffer;
 
-			
+			uniform float _MapSize;
 
 			struct v2f
 			{
@@ -55,7 +55,7 @@
 				v2f o;
 								
 				FloatyBitData floatyBitData = floatyBitsCBuffer[inst];
-				float3 worldPosition = float3(floatyBitData.coords * 140 - 70, -0.015);
+				float3 worldPosition = float3(floatyBitData.coords * _MapSize, -0.015);
 				float3 quadPoint = quadVerticesCBuffer[id];
 
 				o.fluidCoords = floatyBitData.coords;

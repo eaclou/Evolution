@@ -36,7 +36,8 @@
 			
 			sampler2D _MainTex;
 			float4 _MainTex_ST;
-			sampler2D _SourceColorTex; 			
+			sampler2D _SourceColorTex; 
+			uniform float _MapSize;
 
 			//StructuredBuffer<AgentSimData> agentSimDataCBuffer;
 			StructuredBuffer<LinkData> chainsReadCBuffer;
@@ -57,7 +58,7 @@
 
 				float3 worldPosition = float3(linkData.worldPos, -0.5);
 
-				o.fluidTexUV = (chainsReadCBuffer[headIndex].worldPos + 70) / 140;
+				o.fluidTexUV = chainsReadCBuffer[headIndex].worldPos / _MapSize;
 
 				o.segmentUV = verticesCBuffer[id].xy + 0.5;
 				

@@ -154,7 +154,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
         computeShaderFluidSim.SetFloat("_ForceMagnitude", forceMultiplier);
         computeShaderFluidSim.SetFloat("_Viscosity", viscosity);
         computeShaderFluidSim.SetFloat("_Damping", damping);
-        //computeShaderFluidSim.SetFloat("_ForceSize", invBrushSize);
+        computeShaderFluidSim.SetFloat("_MapSize", SimulationManager._MapSize);
         computeShaderFluidSim.SetFloat("_ColorRefreshAmount", colorRefreshBackgroundMultiplier);
 
         // Lerp towards sourceTexture color:
@@ -333,6 +333,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
         computeShaderFluidSim.SetBuffer(kernelGetObjectVelocities, "ObjectPositionsCBuffer", objectDataInFluidCoordsCBuffer);
         computeShaderFluidSim.SetBuffer(kernelGetObjectVelocities, "VelocityValuesCBuffer", velocityValuesCBuffer);
         computeShaderFluidSim.SetTexture(kernelGetObjectVelocities, "VelocityRead", velocityA);
+        //computeShaderFluidSim.SetFloat("_MapSize", SimulationManager._MapSize);
         computeShaderFluidSim.Dispatch(kernelGetObjectVelocities, positionsArray.Length, 1, 1);
 
         velocityValuesCBuffer.GetData(objectVelocitiesArray);
@@ -350,6 +351,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
         computeShaderFluidSim.SetFloat("_TextureResolution", (float)resolution);
         computeShaderFluidSim.SetFloat("_DeltaTime", deltaTime);
         computeShaderFluidSim.SetFloat("_InvGridScale", invGridScale);
+        computeShaderFluidSim.SetFloat("_MapSize", SimulationManager._MapSize);
 
         computeShaderFluidSim.SetFloat("_ColorRefreshDynamicMultiplier", colorRefreshDynamicMultiplier);
         computeShaderFluidSim.SetFloat("_ColorRefreshAmount", colorRefreshBackgroundMultiplier);
@@ -367,6 +369,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
         computeShaderFluidSim.SetFloat("_TextureResolution", (float)resolution);
         computeShaderFluidSim.SetFloat("_DeltaTime", deltaTime);
         computeShaderFluidSim.SetFloat("_InvGridScale", invGridScale);
+        computeShaderFluidSim.SetFloat("_MapSize", SimulationManager._MapSize);
         computeShaderFluidSim.SetTexture(kernelAdvection, "ObstaclesRead", obstaclesRT);
         computeShaderFluidSim.SetTexture(kernelAdvection, "VelocityRead", velocityA);
         computeShaderFluidSim.SetTexture(kernelAdvection, "VelocityWrite", velocityB);

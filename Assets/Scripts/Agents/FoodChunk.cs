@@ -174,7 +174,7 @@ public class FoodChunk : MonoBehaviour {
                 if(ageCounterMature >= matureDurationTimeSteps) {
                     curLifeStage = FoodLifeStage.Decaying;                    
                 }
-                if(transform.position.x > 70f || transform.position.x < -70f || transform.position.y > 70f || transform.position.y < -70f) {
+                if(transform.position.x > SimulationManager._MapSize || transform.position.x < 0f || transform.position.y > SimulationManager._MapSize || transform.position.y < 0f) {
                     curLifeStage = FoodLifeStage.Decaying;   
                 }
                 break;

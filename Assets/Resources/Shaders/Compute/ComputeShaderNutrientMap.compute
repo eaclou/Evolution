@@ -30,13 +30,14 @@ SamplerState _PointClamp;
 SamplerState _PointRepeat;
 
 uniform float _NutrientDiffusion;
+uniform float _MapSize;
 
 [numthreads(1,1,1)]
 void CSGetNutrientSamples (uint3 id : SV_DispatchThreadID)
 {	
 	CritterSimData critterSimData = critterSimDataCBuffer[id.x];
 
-	float2 uv = (critterSimData.worldPos + 70.0) / 140.0;
+	float2 uv = critterSimData.worldPos / _MapSize;
 	float4 nutrientAmount = nutrientMapRead.SampleLevel(_PointClamp, uv, 0);
 
 	// want gradient! -- pack into .yz channels :::
@@ -106,8 +107,8 @@ void CSRemoveNutrientsAtLocations (uint3 id : SV_DispatchThreadID)
 	// --amount of food to remove / mouth stats
 	// buffer of floats per Critter?
 
-	uint xIndex = floor((critterSimDataCBuffer[id.x].worldPos.x + 70) / 140 * 32);
-	uint yIndex = floor((critterSimDataCBuffer[id.x].worldPos.y + 70) / 140 * 32);
+	uint xIndex = floor(critterSimDataCBuffer[id.x].worldPos.x / _MapSize * 32);
+	uint yIndex = floor(critterSimDataCBuffer[id.x].worldPos.y / _MapSize * 32);
 
 	uint2 cellIndex = uint2(xIndex, yIndex);
 

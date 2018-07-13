@@ -11,16 +11,26 @@ public class CameraManager : MonoBehaviour {
     public float targetZoomValueC = 46f;
     private float targetZoomValue;
 
+    public float perspZoomDistNear = 10f;
+    public float perspZoomDistMid = 36f;
+    public float perspZoomDistFar = 120f;
+    private float perspZoomDist;
+    public float targetTiltAngleDegrees = 12.5f;
+
     public float lerpSpeedA = 1f;
     public float lerpSpeedB = 2f;
     public float lerpSpeedC = 4f;
     private float lerpSpeed;
+
+    public float centeringOffset = 0f;
 
     public float camMaxSpeed = 1f;
     public float camAccel = 0.05f;
 
     public Vector3 targetCamPos;
     public Transform targetTransform;
+    public Agent targetAgent;
+    public int targetCritterIndex = 0;
 
     Vector2 prevCameraPosition, prevTargetPosition;
 
@@ -43,55 +53,81 @@ public class CameraManager : MonoBehaviour {
         //this.transform.position = new Vector3(0f, 0f, -50f);
     }
 
-    private void Update() {
-        
-        //UpdateCameraTestBaseline();
-        
-        UpdateCameraOld();
-            
+    public void SetTarget(Agent agent, int index) {
+        Debug.Log("SetTarget! " + index.ToString());
+        targetAgent = agent;
+        targetTransform = agent.bodyGO.transform;
+        targetCritterIndex = index;
+    }
 
-        //Debug.Log("mode: " + curMode.ToString());
-        //this.transform.position = SmoothApproach(Vector2 pastPosition, Vector2 pastTargetPosition, Vector2 targetPosition, float speed);
-        //this.transform.position = Vector3.Lerp(this.transform.position, new Vector3(targetCamPos.x, targetCamPos.y, -50f), 2f * Time.deltaTime);
-        //new Vector3(targetCamPos.x, targetCamPos.y, -50f);
+    private void Update() {
+       
+        UpdateCameraOld();
     }
 
     private void UpdateCameraOld() {
-        float orthoLerp = 0.9f;
+        //float orthoLerp = 0.9f;
         float timeScaleLerp = 0.02f;
 
-        float targetTimeScale = Mathf.Lerp(0.5f, 1.5f, (camera.orthographicSize - 5f) / 40f);
-        Time.timeScale = Mathf.Lerp(Time.timeScale, targetTimeScale, timeScaleLerp);
-        //float targetFixedTimeStep = Mathf.Lerp(0.00675f, 0.0167f, (camera.orthographicSize - 5f) / 40f);
-        Time.fixedDeltaTime = Time.timeScale * 0.02f; // Mathf.Lerp(Time.fixedDeltaTime, targetFixedTimeStep, timeScaleLerp);
-        
+        //float targetTimeScale = Mathf.Lerp(0.5f, 1.5f, (camera.orthographicSize - 5f) / 40f);
+        //Time.timeScale = Mathf.Lerp(Time.timeScale, targetTimeScale, timeScaleLerp);        
+        //Time.fixedDeltaTime = Time.timeScale * 0.02f; // Mathf.Lerp(Time.fixedDeltaTime, targetFixedTimeStep, timeScaleLerp);
+        float targetPosX = 0f;
+        float targetPosY = 0f;
+        float targetPosZ = 0f;
 
-        switch (curMode) {
-            case GameMode.ModeA:
-                //
-                targetCamPos = Vector3.Lerp(targetCamPos, targetTransform.position, 0.08f);
-                lerpSpeed = lerpSpeedA;                
-                break;
-            case GameMode.ModeB:
-                //
-                if(targetTransform != null) {
-                    targetCamPos = Vector3.Lerp(targetCamPos, targetTransform.position, 0.08f);
+        if (targetTransform != null) {
+            switch (curMode) {
+                case GameMode.ModeA:
+                    //
+                    targetPosX = targetTransform.position.x; // Mathf.Lerp(targetCamPos.x, targetTransform.position.x, 0.08f);
+                    targetPosY = targetTransform.position.y; // Mathf.Lerp(targetCamPos.y, targetTransform.position.y, 0.08f);
+                    //targetCamPos = Vector3.Lerp(targetCamPos, targetTransform.position, 0.08f);
+                    lerpSpeed = lerpSpeedA;
+                    perspZoomDist = perspZoomDistNear;
+                    break;
+                case GameMode.ModeB:
+                    //
+                    targetPosX = targetTransform.position.x;
+                    targetPosY = targetTransform.position.y;
+                    //targetPosX = Mathf.Lerp(targetCamPos.x, targetTransform.position.x, 0.08f);
+                    //targetPosY = Mathf.Lerp(targetCamPos.y, targetTransform.position.y, 0.08f);
+                    //if(targetTransform != null) {
+                        //targetCamPos = Vector3.Lerp(targetCamPos, targetTransform.position, 0.08f);
                     lerpSpeed = lerpSpeedB;
-                }
-                orthoLerp = 0.9f;
-                break;
-            case GameMode.ModeC:
-                targetCamPos = Vector3.Lerp(targetCamPos, Vector3.zero, 0.08f);
-                lerpSpeed = lerpSpeedC;
-                orthoLerp = 0.6f;
-                //
-                break;
-            default:
-                //
-                break;
-        }
+                    perspZoomDist = perspZoomDistMid;
+                    //}
+                    //orthoLerp = 0.9f;
+                    break;
+                case GameMode.ModeC:
+                    targetPosX = 0f; // Mathf.Lerp(targetCamPos.x, 0f, 0.08f);
+                    targetPosY = 0f; // Mathf.Lerp(targetCamPos.y, 0f, 0.08f);
+                    //targetCamPos = Vector3.Lerp(targetCamPos, Vector3.zero, 0.08f);
+                    lerpSpeed = lerpSpeedC;
+                    perspZoomDist = perspZoomDistFar;
+                    //orthoLerp = 0.6f;
+                    //
+                    break;
+                default:
+                    //
+                    break;
+            }
+        }        
 
-        camera.orthographicSize = Mathf.Lerp(camera.orthographicSize, targetZoomValue, orthoLerp * Time.deltaTime);
+        targetPosZ = -perspZoomDist;
+       
+        this.transform.localEulerAngles = new Vector3(-targetTiltAngleDegrees, 0f, 0f);
+        float centeringVerticalOffset = Mathf.Abs(targetPosZ) * Mathf.Tan(targetTiltAngleDegrees * Mathf.Deg2Rad); // compensate for camera tilt
+        targetPosY -= centeringVerticalOffset;
+        centeringOffset = centeringVerticalOffset;
+
+        targetCamPos = new Vector3(targetPosX, targetPosY, targetPosZ);
+
+        this.transform.position = Vector3.Lerp(this.transform.position, targetCamPos, lerpSpeed * Time.deltaTime);
+
+
+        //camera.orthographicSize = Mathf.Lerp(camera.orthographicSize, targetZoomValue, orthoLerp * Time.deltaTime);
+        
         //Vector3 curPos = transform.position;
         //Vector2 targetPos = new Vector2(targetCamPos.x, targetCamPos.y);
         //Vector2 targetCamDir = new Vector2(targetCamPos.x, targetCamPos.y) - new Vector2(curPos.x, curPos.y);
@@ -99,14 +135,13 @@ public class CameraManager : MonoBehaviour {
         // Max Camera Bounds!
         //float paddingX = -3f;
         //float paddingY = 2f;
-        float minPos = -70f + (camera.orthographicSize);
-        float maxPos = 70f - (camera.orthographicSize);
 
-        targetCamPos.x = Mathf.Min(Mathf.Max(targetCamPos.x, minPos), maxPos);
-        targetCamPos.y = Mathf.Min(Mathf.Max(targetCamPos.y, minPos), maxPos);
+        //float minPos = -70f + (camera.orthographicSize);
+        //float maxPos = 70f - (camera.orthographicSize);
 
-        this.transform.position = Vector3.Lerp(this.transform.position, new Vector3(targetCamPos.x, targetCamPos.y, -50f), lerpSpeed * Time.deltaTime);
-
+        //targetCamPos.x = Mathf.Min(Mathf.Max(targetCamPos.x, minPos), maxPos);
+        //targetCamPos.y = Mathf.Min(Mathf.Max(targetCamPos.y, minPos), maxPos);
+        
         // Fuck it for now.... stupid lerp jitter...
         // Come back to this after sorting out Execution order and data flow in rest of program...
         /*if(debugFrameCounter > 200) {
@@ -195,11 +230,11 @@ public class CameraManager : MonoBehaviour {
         //camTransform.position = new Vector3(targetTransform.position.x, targetTransform.position.y, targetTransform.position.z - 15);
     }
 
-    public void StartPlayerRespawn() {
+    /*public void StartPlayerRespawn() {
         targetCamPos = targetTransform.position;
         camera.orthographicSize = 5f;
         this.transform.position = new Vector3(targetCamPos.x, targetCamPos.y, -50f);
-    }
+    }*/
 
     private Vector2 SmoothApproach(Vector2 pastPosition, Vector2 pastTargetPosition, Vector2 targetPosition, float speed) {
         float t = Time.deltaTime * speed;

@@ -157,6 +157,8 @@ Texture2D<float4> velocityRead;
 
 SamplerState _LinearRepeat;
 
+uniform float _MapSize;
+
 float rand(float2 co){   // OUTPUT is in [0,1] RANGE!!!
 	return frac(sin(dot(co.xy ,float2(12.9898,78.233))) * 43758.5453);
 }
@@ -330,7 +332,7 @@ void CSIterateTrailStrokesData (uint3 id : SV_DispatchThreadID)
 		float2 parentPos = agentTrailStrokesReadCBuffer[trailPointIndex - 1].worldPos;
 		float2 currentPos = agentTrailStrokesReadCBuffer[trailPointIndex].worldPos;
 		
-		float2 uv = saturate((currentPos + 70) / 140);
+		float2 uv = saturate(currentPos / _MapSize);
 		float2 vel = velocityRead.SampleLevel(_LinearRepeat, uv, 0).xy;
 		float speedMult = 1;
 
@@ -349,7 +351,7 @@ void CSAlignFrameBufferStrokes (uint3 id : SV_DispatchThreadID)
 
 	// find uv for sampling terrainHeightMap
 
-	float2 uv = (data.worldPos.xy + 140) / 280;
+	float2 uv = data.worldPos.xy / _MapSize;
 	float pixelOffset = 1.0 / 512;  // resolution
 
 	float altitudeCenter = terrainHeightTex.SampleLevel(_LinearRepeat, uv, 0).x;
@@ -372,7 +374,7 @@ void CSAlignFrameBufferStrokes (uint3 id : SV_DispatchThreadID)
 	}
 
 	terrainFrameBufferStrokesCBuffer[id.x].heading = grad;
-	terrainFrameBufferStrokesCBuffer[id.x].worldPos.z = altitudeCenter * 64 - 32;
+	terrainFrameBufferStrokesCBuffer[id.x].worldPos.z = -altitudeCenter * 16 + 8;
 }
 
 [numthreads(64,1,1)]
@@ -403,9 +405,9 @@ void CSSimulateFruit (uint3 id : SV_DispatchThreadID)
 	float lerpSpeed = 1;
 	float2 newPos = lerp(curPos, targetPos, lerpSpeed * fruitData.attached);
 
-	float2 uv = (newPos + 70) / 140;
+	float2 uv = newPos / _MapSize;
 	float2 fluidVel = velocityRead.SampleLevel(_LinearRepeat, uv, 0).xy;
-	float speedMult = 0.033 * 140;
+	float speedMult = 0.033 * _MapSize;
 
 	newPos = newPos + fluidVel * speedMult;
 
@@ -449,9 +451,9 @@ void CSSimulateCritterStrokes (uint3 id : SV_DispatchThreadID)
 	float2 curWorldPos = brushData.worldPos;
 	float2 newWorldPos = centerPosition + critterSimData.worldPos;
 
-	float2 uv = (curWorldPos + 70) / 140;
+	float2 uv = curWorldPos / _MapSize;
 	float2 fluidVel = velocityRead.SampleLevel(_LinearRepeat, uv, 0).xy;
-	float speedMult = 0.033 * 140;
+	float speedMult = 0.033 * _MapSize;
 
 	curWorldPos = curWorldPos + fluidVel * speedMult;
 

@@ -38,6 +38,8 @@
 			float _PosX;
 			float _PosY;
 
+			uniform float _MapSize;
+
 			float4 _PrimaryHue;
 
 			struct v2f
@@ -57,7 +59,7 @@
 				
 				//o.color = floatingGlowyBitsCBuffer[inst].color;
 				PlayerGlowyBitData data = playerGlowyBitsCBuffer[inst];
-				float3 worldPosition = float3(data.coords * 140 - 70, -0.05);
+				float3 worldPosition = float3(data.coords * _MapSize, -0.05);
 				float3 quadPoint = quadVerticesCBuffer[id];
 
 				float2 velocity = data.vel;

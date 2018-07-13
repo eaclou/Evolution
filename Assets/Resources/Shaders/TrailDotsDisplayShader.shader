@@ -73,7 +73,7 @@
 
 				//int parentIndex = data.parentIndex;
 
-				float3 worldPosition = float3(data.coords01 * 140 - 70, -0.3);
+				float3 worldPosition = float3(data.coords01 * _MapSize, -0.3);
 				float3 quadPoint = quadVerticesCBuffer[id];
 
 				float2 velocity = float2(0,1); //floatyBitData.zw;

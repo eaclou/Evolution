@@ -127,6 +127,7 @@ SamplerState _PointRepeat;
 uniform float _TextureResolution;
 uniform float _DeltaTime;
 uniform float _InvGridScale;
+uniform float _MapSize;
 
 uniform float _ForcePosX;
 uniform float _ForcePosY;
@@ -235,7 +236,7 @@ void SimRipples (uint3 id : SV_DispatchThreadID)
 	int parentIndex = rippleData.parentIndex;
 	AgentSimData agentSimData = AgentSimDataCBuffer[parentIndex];
 
-	float2 parentCoords = (agentSimData.worldPos + 70) / 140;
+	float2 parentCoords = agentSimData.worldPos / _MapSize;
 
 	float2 uv = rippleData.coords01;
 	float2 fluidVel = VelocityRead.SampleLevel(_LinearRepeat, uv, 0).xy;
@@ -271,7 +272,7 @@ void SimTrailDots (uint3 id : SV_DispatchThreadID)
 	int parentIndex = trailDotData.parentIndex;
 	AgentSimData agentSimData = AgentSimDataCBuffer[parentIndex];
 
-	float2 parentCoords = (agentSimData.worldPos + 70) / 140;
+	float2 parentCoords = agentSimData.worldPos / _MapSize;
 
 	float2 uv = trailDotData.coords01;
 	
@@ -290,14 +291,14 @@ void SimTrailDots (uint3 id : SV_DispatchThreadID)
 	float2 rightDir = float2(forwardDir.y, -forwardDir.x);
 	//float randAngle = id.x * 109.27;
 	//float randRadius = 0; //fmod(id.x * 10.257, 8) / 8;
-	float2 localOffsets[4] = {float2(0,0.45 / 140), float2(0.45 / 140,0), float2(0,-0.45 / 140), float2(-0.45 / 140,0)};
+	float2 localOffsets[4] = {float2(0,0.45 / _MapSize), float2(0.45 / _MapSize,0), float2(0,-0.45 / _MapSize), float2(-0.45 / _MapSize,0)};
 
 	int localIndex = id.x % 4;
 
 	float2 rimOffset = (forwardDir * localOffsets[localIndex].y) + rightDir * localOffsets[localIndex].x;
 
 	if(age >= 1.0) {
-		// float2(cos(randAngle) * randRadiusds * 0.4 / 140, sin(randAngle) * randRadius * 0.4 / 140);
+		// float2(cos(randAngle) * randRadiusds * 0.4 / _MapSize, sin(randAngle) * randRadius * 0.4 / _MapSize);
 		
 		age -= 1.0;
 		float frameProportion = age / frameDuration;
@@ -328,7 +329,7 @@ void SimWaterSplines (uint3 id : SV_DispatchThreadID)
 
 	// ***** Move Head Point0: //
 
-	float2 uv = (waterSplineData.p0 + 70) / 140;
+	float2 uv = waterSplineData.p0 / _MapSize;
 	float2 vel = VelocityRead.SampleLevel(_LinearRepeat, uv, 3).xy;
 	float speedMult = 0.033;
 	
@@ -340,35 +341,23 @@ void SimWaterSplines (uint3 id : SV_DispatchThreadID)
 	if(waterSplineData.age > 1.0) {
 		
 		float2 spawnPos = float2(rand(float2(id.x, uv.x)), rand(float2(uv.y, id.x)));		
-		waterSplineData.p0 = spawnPos * 140 - 70;
+		waterSplineData.p0 = spawnPos * _MapSize;
 		waterSplineData.p1 = waterSplineData.p0 - float2(0, -1);
 		waterSplineData.p2 = waterSplineData.p1 - float2(0, -1);
 		waterSplineData.p3 = waterSplineData.p2 - float2(0, -1);
 		waterSplineData.age -= 1;
 
-		float2 sampleUV = (waterSplineData.p0 + 70) / 140;
+		float2 sampleUV = waterSplineData.p0 / _MapSize;
 		float3 fluidDensityColor = DensityRead.SampleLevel(_LinearRepeat, sampleUV, 0).xyz;
 		waterSplineData.hue = fluidDensityColor;
 	}
 	else {
-		waterSplineData.p0 = nextPos * 140 - 70;
+		waterSplineData.p0 = nextPos * _MapSize;
 
 		float3 fluidDensityColor = DensityRead.SampleLevel(_LinearRepeat, uv, 0).xyz;
 		waterSplineData.hue = lerp(waterSplineData.hue, fluidDensityColor, 0.02);
 	}
-	
-	// ***** Move Tail points!!! ** //
-	/*
-	float2 vel1 = VelocityRead.SampleLevel(_LinearRepeat, (waterSplineData.p1 + 70) / 140, 3).xy;
-	float2 nextPos1 = (waterSplineData.p1 + 70) / 140 + vel1 * speedMult * 0.375;
-	waterSplineData.p1 = nextPos1 * 140 - 70;
-	float2 vel2 = VelocityRead.SampleLevel(_LinearRepeat, (waterSplineData.p2 + 70) / 140, 3).xy;
-	float2 nextPos2 = (waterSplineData.p2 + 70) / 140 + vel2 * speedMult * 0.275;
-	waterSplineData.p2 = nextPos2 * 140 - 70;
-	float2 vel3 = VelocityRead.SampleLevel(_LinearRepeat, (waterSplineData.p3 + 70) / 140, 3).xy;
-	float2 nextPos3 = (waterSplineData.p3 + 70) / 140 + vel3 * speedMult * 0.175;
-	waterSplineData.p3 = nextPos3 * 140 - 70;
-	*/
+		
 
 	float restDistance = 2;
 	float lerpStrength = 0.5;
@@ -398,7 +387,7 @@ void SimWaterSplines (uint3 id : SV_DispatchThreadID)
 [numthreads(1,1,1)]
 void GetVelAtCoords (uint3 id : SV_DispatchThreadID)
 {	
-	float uvOffset = 0.005357;  // 0.75/140
+	float uvOffset = 0.75 / _MapSize; // 0.005357;  // 0.75/140   ***** REVISIT!!! *******************************
 	float2 uv = float2(_SampleCoordX, _SampleCoordY);
 	float2 velLeft = VelocityRead.SampleLevel(_LinearRepeat, uv + float2(-uvOffset, 0), 0).xy;
 	float2 velRight = VelocityRead.SampleLevel(_LinearRepeat, uv + float2(uvOffset, 0), 0).xy;
@@ -659,7 +648,7 @@ void CSPinWaterChainsData (uint3 id : SV_DispatchThreadID)
 	int rootIndex = id.x * 16; // hardcoded 16 !!!!! ***********************
 	float2 waterChainData = waterChainsReadCBuffer[rootIndex];
 	
-	float2 uv = (waterChainData + 70) / 140;
+	float2 uv = waterChainData / _MapSize;
 	
 	float speedMult = 0.033;
 	
@@ -669,7 +658,7 @@ void CSPinWaterChainsData (uint3 id : SV_DispatchThreadID)
 	
 	float2 nextCoords = uv + fluidVel * speedMult;
 	
-	waterChainsWriteCBuffer[rootIndex] = nextCoords * 140 - 70;
+	waterChainsWriteCBuffer[rootIndex] = nextCoords * _MapSize;
 }
 
 [numthreads(1024,1,1)]

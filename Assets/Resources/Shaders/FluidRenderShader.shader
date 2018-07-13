@@ -124,7 +124,7 @@
 				//debugColor.a = 1;
 				//debugColor.rgb *= 10;
 				//debugColor.rb = 0;
-				return debugColor;
+				//return debugColor;
 
 				return finalColor;
 			}

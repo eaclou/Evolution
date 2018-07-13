@@ -24,6 +24,7 @@
 
 			sampler2D _MainTex;
 			float4 _MainTex_ST;
+			uniform float _MapSize;
 			//float4 _Tint;
 			//float4 _Size;
 
@@ -73,7 +74,7 @@
 
 				//int parentIndex = data.parentIndex;
 
-				float3 worldPosition = float3(data.coords01 * 140 - 70, -0.3);
+				float3 worldPosition = float3(data.coords01 * _MapSize, -0.3);
 				float3 quadPoint = quadVerticesCBuffer[id];
 
 				float2 velocity = float2(0,1); //floatyBitData.zw;

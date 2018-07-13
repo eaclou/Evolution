@@ -355,6 +355,20 @@ public class UIManager : MonoBehaviour {
                     ClickButtonModeC();
                 }
             }
+            if(Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.D)) {
+                int newIndex = cameraManager.targetCritterIndex + 1;
+                if(newIndex >= gameManager.simulationManager._NumAgents) {
+                    newIndex = 0;                    
+                }
+                cameraManager.SetTarget(gameManager.simulationManager.agentsArray[newIndex], newIndex);
+            }
+            if(Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A)) {
+                int newIndex = cameraManager.targetCritterIndex - 1;
+                if(newIndex < 0) {
+                    newIndex = (gameManager.simulationManager._NumAgents - 1);                    
+                }
+                cameraManager.SetTarget(gameManager.simulationManager.agentsArray[newIndex], newIndex);
+            }
         }
         else {
             panelObserverMode.SetActive(false);

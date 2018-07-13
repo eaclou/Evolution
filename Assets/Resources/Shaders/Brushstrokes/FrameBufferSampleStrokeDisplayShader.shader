@@ -69,7 +69,7 @@
 
 				//float velMag = saturate(length(agentSimData.velocity)) * 0.5;
 				
-				float2 scale = strokeData.scale * randomAspect;
+				float2 scale = strokeData.scale * randomAspect * 1.33;
 				quadPoint *= float3(scale, 1.0);
 
 				// &&&& Screen-space UV of center of brushstroke:
@@ -126,14 +126,16 @@
 				
 				float4 brushColor = tex2D(_MainTex, i.uv);				
 				float4 frameBufferColor = tex2D(_RenderedSceneRT, i.centerUV);  //  Color of brushtroke source	
+				// use separate camera?
 				
 				float4 finalColor = frameBufferColor;
 				finalColor.a = brushColor.a;
 
 				float altitude = i.worldPos.z / 32; // [-1,1] range
-				finalColor.xyz = lerp(finalColor.xyz, float3(0,0.1,0.36), saturate(-altitude) * 0.92);
-				finalColor.a = saturate((altitude + 0.08) * 7) * brushColor.a;
+				finalColor.xyz = lerp(finalColor.xyz, float3(0,0.07,0.27), saturate(altitude * 40) * 0.2 + 0.4 * (saturate(altitude * 6)));
+				//finalColor.a = saturate((altitude + 0.08) * 7) * brushColor.a;
 				
+				//return float4(1,1,1,finalColor.a);
 				return finalColor;
 				
 			}

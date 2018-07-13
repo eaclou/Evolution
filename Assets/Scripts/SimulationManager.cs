@@ -47,8 +47,8 @@ public class SimulationManager : MonoBehaviour {
     private int numWarmUpTimeSteps = 10;
     private int currentWarmUpTimeStep = 0;
 
-    private float mapSize = 70f;  // This determines scale of environment, size of FluidSim plane!!! Important!
-    public float _MapSize
+    private static float mapSize = 256f;  // This determines scale of environment, size of FluidSim plane!!! Important!
+    public static float _MapSize
     {
         get
         {
@@ -219,6 +219,7 @@ public class SimulationManager : MonoBehaviour {
                 }
 
                 RespawnPlayer(); // Needed???? *****
+                
             }
             else {
                 //Debug.Log("WarmUp Step " + currentWarmUpTimeStep.ToString());
@@ -309,7 +310,8 @@ public class SimulationManager : MonoBehaviour {
         // ***** ^^^^^ Might need to call this every frame???
 
         // Hook up Camera to data -- fill out CameraManager class
-        cameraManager.targetTransform = agentsArray[0].bodyGO.transform;
+        //cameraManager.SetTarget(cameraManager.targetAgent, cameraManager.targetCritterIndex);
+        //cameraManager.targetTransform = agentsArray[cameraManager.targetCritterIndex].bodyGO.transform;
         // ***** Hook up UI to proper data or find a way to handle that ****
         // possibly just top-down let cameraManager read simulation data
         LoadingHookUpUIManager();
@@ -443,7 +445,7 @@ public class SimulationManager : MonoBehaviour {
         for(int i = 0; i < foodParticlesCBuffer.count; i++) {
             FoodParticleData data = new FoodParticleData();
             data.index = i;            
-            data.worldPos = new Vector2(UnityEngine.Random.Range(-70f, 70f), UnityEngine.Random.Range(-70f, 70f));
+            data.worldPos = new Vector2(UnityEngine.Random.Range(0f, mapSize), UnityEngine.Random.Range(0f, mapSize));
 
             data.radius = UnityEngine.Random.Range(minParticleSize, maxParticleSize);
             data.foodAmount = data.radius * data.radius * Mathf.PI * settingsManager.foodParticleNutrientDensity;
@@ -631,9 +633,9 @@ public class SimulationManager : MonoBehaviour {
 
         for (int x = 0; x < agentGridCellResolution; x++) {
             for (int y = 0; y < agentGridCellResolution; y++) {
-                Vector2 cellTopLeft = new Vector2(cellSize * x, cellSize * y);
-                Vector2 cellBottomRight = new Vector2(cellSize * (x + 1), cellSize * (y + 1));
-                mapGridCellArray[x][y] = new MapGridCell(cellTopLeft, cellBottomRight);
+                Vector2 cellBottomLeft = new Vector2(cellSize * x, cellSize * y);
+                Vector2 cellTopRight = new Vector2(cellSize * (x + 1), cellSize * (y + 1));
+                mapGridCellArray[x][y] = new MapGridCell(cellBottomLeft, cellTopRight);
             }
         }
     }
@@ -731,9 +733,9 @@ public class SimulationManager : MonoBehaviour {
             // *** FIND FOOD GRID CELL!!!!  ************
             Vector2 agentPos = agentsArray[i].bodyRigidbody.transform.position;
 
-            int foodGridIndexX = Mathf.FloorToInt((agentPos.x + 70f) / 140f * (float)foodGridResolution);
+            int foodGridIndexX = Mathf.FloorToInt(agentPos.x / mapSize * (float)foodGridResolution);
             foodGridIndexX = Mathf.Clamp(foodGridIndexX, 0, foodGridResolution - 1);
-            int foodGridIndexY = Mathf.FloorToInt((agentPos.y + 70f) / 140f * (float)foodGridResolution);
+            int foodGridIndexY = Mathf.FloorToInt(agentPos.y / mapSize * (float)foodGridResolution);
             foodGridIndexY = Mathf.Clamp(foodGridIndexY, 0, foodGridResolution - 1);
 
             //agentsArray[i].Tick(new Vector4(0f,0f,0f,0f), ref nutrientEatAmountsArray);  
@@ -958,6 +960,7 @@ public class SimulationManager : MonoBehaviour {
         computeShaderFoodParticles.SetBuffer(kernelCSRespawnFoodParticles, "foodParticlesRead", foodParticlesCBuffer);
         computeShaderFoodParticles.SetBuffer(kernelCSRespawnFoodParticles, "foodParticlesWrite", foodParticlesCBufferSwap);
         computeShaderFoodParticles.SetTexture(kernelCSRespawnFoodParticles, "obstaclesRead", environmentFluidManager._ObstaclesRT);
+        computeShaderFoodParticles.SetFloat("_MapSize", mapSize);
             
         //computeShaderFoodParticles.SetFloat("_RespawnFoodParticles", 1f);
         computeShaderFoodParticles.SetFloat("_Time", Time.realtimeSinceStartup);
@@ -1174,45 +1177,53 @@ public class SimulationManager : MonoBehaviour {
             }
         }
 
-        //float mapSize = 160f;
-        //float cellSize = mapSize / agentGridCellResolution;
-
+        // !! ******* MAP CHANGE!! ***** Now starts at 0,0 (bottomLeft) and goes up to mapSize,mapSize (topRight) just like UV coords *****
+        // This should make conversions between CPU and GPU coords a bit simpler in the long run
+        
         // FOOD!!! :::::::
         for (int f = 0; f < foodArray.Length; f++) {
-            //if(foodArray[f].curLifeStage == FoodModule.FoodLifeStage.Mature) {
-                float xPos = foodArray[f].transform.localPosition.x;
-                float yPos = foodArray[f].transform.localPosition.y;
-                int xCoord = Mathf.FloorToInt((xPos + mapSize) / (mapSize * 2f) * (float)agentGridCellResolution);
-                int yCoord = Mathf.FloorToInt((yPos + mapSize) / (mapSize * 2f) * (float)agentGridCellResolution);
+            
+            float xPos = foodArray[f].transform.position.x;
+            float yPos = foodArray[f].transform.position.y;
+            int xCoord = Mathf.FloorToInt(xPos / mapSize * (float)agentGridCellResolution);
+            int yCoord = Mathf.FloorToInt(yPos / mapSize * (float)agentGridCellResolution);
+            xCoord = Mathf.Clamp(xCoord, 0, agentGridCellResolution - 1);
+            yCoord = Mathf.Clamp(yCoord, 0, agentGridCellResolution - 1);
 
-                mapGridCellArray[xCoord][yCoord].foodIndicesList.Add(f);
-            //}            
+            mapGridCellArray[xCoord][yCoord].foodIndicesList.Add(f);
+                       
         }
         for(int a = 0; a < foodDeadAnimalArray.Length; a++) {  // DEAD ANIMALS!!!
-            float xPos = foodDeadAnimalArray[a].transform.localPosition.x;
-            float yPos = foodDeadAnimalArray[a].transform.localPosition.y;
-            int xCoord = Mathf.FloorToInt((xPos + mapSize) / (mapSize * 2f) * (float)agentGridCellResolution);
-            int yCoord = Mathf.FloorToInt((yPos + mapSize) / (mapSize * 2f) * (float)agentGridCellResolution);
+            float xPos = foodDeadAnimalArray[a].transform.position.x;
+            float yPos = foodDeadAnimalArray[a].transform.position.y;
+            int xCoord = Mathf.FloorToInt(xPos / mapSize * (float)agentGridCellResolution);
+            int yCoord = Mathf.FloorToInt(yPos / mapSize * (float)agentGridCellResolution);
+            xCoord = Mathf.Clamp(xCoord, 0, agentGridCellResolution - 1);
+            yCoord = Mathf.Clamp(yCoord, 0, agentGridCellResolution - 1);
 
             mapGridCellArray[xCoord][yCoord].deadAnimalIndicesList.Add(a);
         }
 
         // FRIENDS::::::
         for (int a = 0; a < agentsArray.Length; a++) {
-            float xPos = agentsArray[a].transform.localPosition.x;
-            float yPos = agentsArray[a].transform.localPosition.y;
-            int xCoord = Mathf.FloorToInt((xPos + mapSize) / (mapSize * 2f) * (float)agentGridCellResolution);
-            int yCoord = Mathf.FloorToInt((yPos + mapSize) / (mapSize * 2f) * (float)agentGridCellResolution);
+            float xPos = agentsArray[a].bodyGO.transform.position.x;
+            float yPos = agentsArray[a].bodyGO.transform.position.y;
+            int xCoord = Mathf.FloorToInt(xPos / mapSize * (float)agentGridCellResolution);
+            int yCoord = Mathf.FloorToInt(yPos / mapSize * (float)agentGridCellResolution);
+            xCoord = Mathf.Clamp(xCoord, 0, agentGridCellResolution - 1);
+            yCoord = Mathf.Clamp(yCoord, 0, agentGridCellResolution - 1);
 
             mapGridCellArray[xCoord][yCoord].friendIndicesList.Add(a);
         }
 
         // PREDATORS !!! :::::::
         for (int p = 0; p < predatorArray.Length; p++) {
-            float xPos = predatorArray[p].transform.localPosition.x;
-            float yPos = predatorArray[p].transform.localPosition.y;
-            int xCoord = Mathf.FloorToInt((xPos + mapSize) / (mapSize * 2f) * (float)agentGridCellResolution);
-            int yCoord = Mathf.FloorToInt((yPos + mapSize) / (mapSize * 2f) * (float)agentGridCellResolution);
+            float xPos = predatorArray[p].transform.position.x;
+            float yPos = predatorArray[p].transform.position.y;
+            int xCoord = Mathf.FloorToInt(xPos / mapSize * (float)agentGridCellResolution);
+            int yCoord = Mathf.FloorToInt(yPos / mapSize * (float)agentGridCellResolution);
+            xCoord = Mathf.Clamp(xCoord, 0, agentGridCellResolution - 1);
+            yCoord = Mathf.Clamp(yCoord, 0, agentGridCellResolution - 1);
 
             mapGridCellArray[xCoord][yCoord].predatorIndicesList.Add(p);
         }
@@ -1226,10 +1237,10 @@ public class SimulationManager : MonoBehaviour {
         // Find NearestNeighbors:
         for (int a = 0; a < agentsArray.Length; a++) {
             // Find which gridCell this Agent is in:    
-            Vector2 agentPos = new Vector2(agentsArray[a].bodyRigidbody.transform.localPosition.x, agentsArray[a].bodyRigidbody.transform.localPosition.y);
-            int xCoord = Mathf.FloorToInt((agentPos.x + mapSize) / (mapSize * 2f) * (float)agentGridCellResolution);
+            Vector2 agentPos = new Vector2(agentsArray[a].bodyRigidbody.transform.position.x, agentsArray[a].bodyRigidbody.transform.position.y);
+            int xCoord = Mathf.FloorToInt(agentPos.x / mapSize * (float)agentGridCellResolution); // Mathf.FloorToInt((agentPos.x + mapSize) / (mapSize * 2f) * (float)agentGridCellResolution);
             xCoord = Mathf.Clamp(xCoord, 0, agentGridCellResolution - 1);
-            int yCoord = Mathf.FloorToInt((agentPos.y + mapSize) / (mapSize * 2f) * (float)agentGridCellResolution);
+            int yCoord = Mathf.FloorToInt(agentPos.y / mapSize * (float)agentGridCellResolution);
             yCoord = Mathf.Clamp(yCoord, 0, agentGridCellResolution - 1);
 
             int closestFriendIndex = a;  // default to self
@@ -1468,7 +1479,7 @@ public class SimulationManager : MonoBehaviour {
         }*/
 
         if(agentIndex == 0) {
-            cameraManager.targetTransform = agentsArray[0].bodyGO.transform;
+            //cameraManager.targetTransform = agentsArray[cameraManager.targetCritterIndex].bodyGO.transform;
             //cameraManager.StartPlayerRespawn();
         }
     }
@@ -1816,7 +1827,11 @@ public class SimulationManager : MonoBehaviour {
     }
     public void RespawnPlayer() {
         Debug.Log("Manual New Player RESPAWN!");
+
+        cameraManager.SetTarget(agentsArray[0], 0);
+
         // respawn the Agent // mutates, respawns, updates RenderKingBuffers
+
         agentsArray[0].humanControlled = true;
         agentsArray[0].humanControlLerp = 1f;
         CreateMutatedCopyOfAgent(0, 0);         
@@ -1826,7 +1841,7 @@ public class SimulationManager : MonoBehaviour {
         theRenderKing.SimPlayerGlow();
         
         // Adjust Camera to position of agent
-        cameraManager.targetTransform = agentsArray[0].bodyGO.transform;
+        //cameraManager.SetTarget(cameraManager.targetAgent, cameraManager.targetTransform, cameraManager.targetCritterIndex);
         //cameraManager.StartPlayerRespawn();
         // Fade-in from black?
         // Reset things that need to be reset i.e score counter?

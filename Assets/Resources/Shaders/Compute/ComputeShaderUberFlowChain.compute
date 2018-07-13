@@ -6,6 +6,8 @@ Texture2D<float4> velocityRead;
 RWStructuredBuffer<float2> chainsReadCBuffer;
 RWStructuredBuffer<float2> chainsWriteCBuffer;
 
+uniform float _MapSize;
+
 SamplerState _LinearClamp;
 SamplerState _LinearRepeat;
 SamplerState _PointClamp;
@@ -17,7 +19,7 @@ void CSPinChainsData (uint3 id : SV_DispatchThreadID)
 	int rootIndex = id.x * 32; // hardcoded 32 !!!!! ***********************
 	float2 linkData = chainsReadCBuffer[rootIndex];
 	
-	float2 uv = (linkData + 70) / 140;
+	float2 uv = linkData / _MapSize;
 	
 	float speedMult = 0.033;	
 
@@ -25,7 +27,7 @@ void CSPinChainsData (uint3 id : SV_DispatchThreadID)
 	
 	float2 nextCoords = uv + fluidVel * speedMult;
 	
-	chainsWriteCBuffer[rootIndex] = nextCoords * 140 - 70;  // *** hardcoded map scale!!!
+	chainsWriteCBuffer[rootIndex] = nextCoords * _MapSize;
 }
 
 [numthreads(1024,1,1)]

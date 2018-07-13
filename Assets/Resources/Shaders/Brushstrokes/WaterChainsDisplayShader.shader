@@ -36,7 +36,8 @@
 			
 			sampler2D _MainTex;
 			float4 _MainTex_ST;
-			sampler2D _FluidColorTex; 			
+			sampler2D _FluidColorTex; 	
+			uniform float _MapSize;
 
 			//StructuredBuffer<AgentSimData> agentSimDataCBuffer;
 			StructuredBuffer<TrailStrokeData> waterChainsReadCBuffer;
@@ -57,7 +58,7 @@
 
 				float3 worldPosition = float3(trailStrokeData.worldPos, -0.2);
 
-				o.fluidTexUV = (waterChainsReadCBuffer[headIndex].worldPos + 70) / 140;
+				o.fluidTexUV = waterChainsReadCBuffer[headIndex].worldPos / _MapSize;
 
 				o.segmentUV = quadVerticesCBuffer[id].xy + 0.5;
 				

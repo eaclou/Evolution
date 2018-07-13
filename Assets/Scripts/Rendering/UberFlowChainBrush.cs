@@ -50,6 +50,7 @@ public class UberFlowChainBrush {
         this.renderMat.SetPass(0);
         this.renderMat.SetBuffer("verticesCBuffer", quadVerticesCBuffer);
         this.renderMat.SetBuffer("chainsReadCBuffer", chains0CBuffer);
+        this.renderMat.SetFloat("_MapSize", SimulationManager._MapSize);
         
     }
 

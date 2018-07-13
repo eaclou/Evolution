@@ -34,6 +34,7 @@ Texture2D<float4> obstaclesRead;
 
 uniform float _RespawnFoodParticles;
 uniform float _Time;
+uniform float _MapSize;
 
 uniform float _MinParticleSize;
 uniform float _MaxParticleSize;
@@ -188,12 +189,12 @@ void CSRespawnFoodParticles (uint3 id : SV_DispatchThreadID)
 {
 	// Check if particle isn't in the water:
 
-	float2 uv = (foodParticlesRead[id.x].worldPos + 70) / 140; // float2(0,0);
+	float2 uv = foodParticlesRead[id.x].worldPos / _MapSize; // float2(0,0);
 	float obstacleValue = obstaclesRead.SampleLevel(_LinearClamp, uv, 2).z;
 	if(obstacleValue > 0.01) {
 		float randX = rand(float2((float)id.x, _Time * 100));
 		float randY = rand(float2(randX, (float)id.x));
-		foodParticlesWrite[id.x].worldPos = float2(randX * 140 - 70, randY * 140 - 70);
+		foodParticlesWrite[id.x].worldPos = float2(randX * _MapSize, randY * _MapSize);
 		foodParticlesWrite[id.x].active = 1.0;
 	}
 
@@ -202,7 +203,7 @@ void CSRespawnFoodParticles (uint3 id : SV_DispatchThreadID)
 			
 			float randX = rand(float2((float)id.x, _Time));
 			float randY = rand(float2(randX, (float)id.x));
-			foodParticlesWrite[id.x].worldPos = float2(randX * 140 - 70, randY * 140 - 70);
+			foodParticlesWrite[id.x].worldPos = float2(randX * _MapSize, randY * _MapSize);
 
 			float randRadius = rand(float2(randX * 10, randY * -3.37)) * (_MaxParticleSize - _MinParticleSize) + _MinParticleSize;
 			foodParticlesWrite[id.x].radius = randRadius;
