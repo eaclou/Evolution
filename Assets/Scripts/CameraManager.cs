@@ -100,8 +100,8 @@ public class CameraManager : MonoBehaviour {
                     //orthoLerp = 0.9f;
                     break;
                 case GameMode.ModeC:
-                    targetPosX = 0f; // Mathf.Lerp(targetCamPos.x, 0f, 0.08f);
-                    targetPosY = 0f; // Mathf.Lerp(targetCamPos.y, 0f, 0.08f);
+                    targetPosX = SimulationManager._MapSize * 0.5f; // Mathf.Lerp(targetCamPos.x, 0f, 0.08f);
+                    targetPosY = SimulationManager._MapSize * 0.5f; // Mathf.Lerp(targetCamPos.y, 0f, 0.08f);
                     //targetCamPos = Vector3.Lerp(targetCamPos, Vector3.zero, 0.08f);
                     lerpSpeed = lerpSpeedC;
                     perspZoomDist = perspZoomDistFar;
@@ -124,118 +124,10 @@ public class CameraManager : MonoBehaviour {
         targetCamPos = new Vector3(targetPosX, targetPosY, targetPosZ);
 
         this.transform.position = Vector3.Lerp(this.transform.position, targetCamPos, lerpSpeed * Time.deltaTime);
-
-
-        //camera.orthographicSize = Mathf.Lerp(camera.orthographicSize, targetZoomValue, orthoLerp * Time.deltaTime);
         
-        //Vector3 curPos = transform.position;
-        //Vector2 targetPos = new Vector2(targetCamPos.x, targetCamPos.y);
-        //Vector2 targetCamDir = new Vector2(targetCamPos.x, targetCamPos.y) - new Vector2(curPos.x, curPos.y);
-
-        // Max Camera Bounds!
-        //float paddingX = -3f;
-        //float paddingY = 2f;
-
-        //float minPos = -70f + (camera.orthographicSize);
-        //float maxPos = 70f - (camera.orthographicSize);
-
-        //targetCamPos.x = Mathf.Min(Mathf.Max(targetCamPos.x, minPos), maxPos);
-        //targetCamPos.y = Mathf.Min(Mathf.Max(targetCamPos.y, minPos), maxPos);
-        
-        // Fuck it for now.... stupid lerp jitter...
-        // Come back to this after sorting out Execution order and data flow in rest of program...
-        /*if(debugFrameCounter > 200) {
-            this.transform.position = Vector3.Lerp(this.transform.position, new Vector3(targetCamPos.x, targetCamPos.y, -50f), lerpSpeed * Time.deltaTime);
-            debugFrameCounter = 0;
-        }        
-        debugFrameCounter++;*/
-
-        /*this.transform.position = new Vector3(this.transform.position.x + 10f * Time.deltaTime, this.transform.position.y, this.transform.position.z);
-        if(this.transform.position.x > 70f) {
-            this.transform.position = new Vector3(-70f, this.transform.position.y, -50f);
-        }*/
-        
-
     }
-    /*private void UpdateCameraTestBaseline() {
-        //float orbitRadius = 35f;
-        //orbitSpeed
-        //curOrbitAngle
-
-        Vector3 currentCamPos = this.transform.position;
-
-        curOrbitAngle += orbitSpeed * Time.deltaTime;
-        float xDir = Mathf.Cos(curOrbitAngle);
-        float yDir = Mathf.Sin(curOrbitAngle);
-
-        //Vector3 newCameraPosition = new Vector3(xDir * orbitRadius, yDir * orbitRadius, -50f);
-        Vector3 newCameraPosition = new Vector3(xDir * orbitRadius, 0f, -50f);
-
-        this.transform.position = newCameraPosition;
-
-    }*/
-    // Update is called once per frame
-    void FixedUpdate () {
-
-        //UpdateCameraTestBaseline();
-        //UpdateCameraOld();
-
-        //targetCamPos = new Vector3(playerAgent.transform.position.x, playerAgent.transform.position.y, -10f);
-        //mainCam.transform.position = Vector3.Lerp(mainCam.transform.position, camPos, 0.08f);
-        /*switch (curMode) {
-            case GameMode.ModeA:
-                //
-                targetCamPos = Vector3.Lerp(targetCamPos, targetTransform.position, 0.1f);
-                lerpSpeed = lerpSpeedA;
-                break;
-            case GameMode.ModeB:
-                //
-                targetCamPos = Vector3.Lerp(targetCamPos, targetTransform.position, 0.1f);
-                lerpSpeed = lerpSpeedB;
-                break;
-            case GameMode.ModeC:
-                targetCamPos = Vector3.Lerp(targetCamPos, Vector3.zero, 0.1f);
-                lerpSpeed = lerpSpeedC;
-                //
-                break;
-            default:
-                //
-                break;
-        }
-
-        camera.orthographicSize = Mathf.Lerp(camera.orthographicSize, targetZoomValue, 0.5f * Time.deltaTime);
-        //Vector3 curPos = transform.position;
-        //Vector2 targetPos = new Vector2(targetCamPos.x, targetCamPos.y);
-        //Vector2 targetCamDir = new Vector2(targetCamPos.x, targetCamPos.y) - new Vector2(curPos.x, curPos.y);
-
-        // Fuck it for now.... stupid lerp jitter...
-        // Come back to this after sorting out Execution order and data flow in rest of program...
-        this.transform.position = Vector3.Lerp(this.transform.position, new Vector3(targetCamPos.x, targetCamPos.y, -50f), 2.5f * Time.deltaTime);
-
-        //Vector2 
-        */
-        //transform.position = Vector3.Lerp(transform.position, targetPos, Mathf.Clamp01(lerpSpeed * Time.deltaTime)).normalized * camMaxSpeed;
-
-
-        // move target //
-        //targetTransform.position += Vector3.right * Time.deltaTime * 200;
-
-        // move follower //
-        //Vector2 newCamPosition = SmoothApproach(prevCameraPosition, prevTargetPosition, targetPos, 10f);
-        //this.transform.position = new Vector3(newCamPosition.x, newCamPosition.y, -10f);
-        //prevCameraPosition = new Vector2(transform.position.x, transform.position.y);
-        //prevTargetPosition = targetPos;
-
-        // move camera along side the target //
-        //camTransform.position = new Vector3(targetTransform.position.x, targetTransform.position.y, targetTransform.position.z - 15);
-    }
-
-    /*public void StartPlayerRespawn() {
-        targetCamPos = targetTransform.position;
-        camera.orthographicSize = 5f;
-        this.transform.position = new Vector3(targetCamPos.x, targetCamPos.y, -50f);
-    }*/
-
+  
+    
     private Vector2 SmoothApproach(Vector2 pastPosition, Vector2 pastTargetPosition, Vector2 targetPosition, float speed) {
         float t = Time.deltaTime * speed;
         Vector2 v = (targetPosition - pastTargetPosition) / t;

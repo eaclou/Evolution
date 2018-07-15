@@ -24,6 +24,7 @@
 
 			sampler2D _MainTex;
 			float4 _MainTex_ST;
+			uniform float _MapSize;
 			//float4 _Tint;
 			//float4 _Size;
 

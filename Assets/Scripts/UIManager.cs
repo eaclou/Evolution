@@ -355,6 +355,7 @@ public class UIManager : MonoBehaviour {
                     ClickButtonModeC();
                 }
             }
+            
             if(Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.D)) {
                 int newIndex = cameraManager.targetCritterIndex + 1;
                 if(newIndex >= gameManager.simulationManager._NumAgents) {
@@ -369,6 +370,7 @@ public class UIManager : MonoBehaviour {
                 }
                 cameraManager.SetTarget(gameManager.simulationManager.agentsArray[newIndex], newIndex);
             }
+            
         }
         else {
             panelObserverMode.SetActive(false);

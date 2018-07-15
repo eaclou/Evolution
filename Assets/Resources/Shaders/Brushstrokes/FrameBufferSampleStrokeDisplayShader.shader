@@ -43,7 +43,7 @@
 			{
 				float4 pos : SV_POSITION;
 				float2 uv : TEXCOORD0;  // uv of the brushstroke quad itself, particle texture
-				float2 centerUV : TEXCOORD1;
+				float4 centerUV : TEXCOORD1;
 				float3 worldPos : TEXCOORD2;
 			};
 
@@ -69,14 +69,14 @@
 
 				//float velMag = saturate(length(agentSimData.velocity)) * 0.5;
 				
-				float2 scale = strokeData.scale * randomAspect * 1.33;
+				float2 scale = strokeData.scale * randomAspect * 1;
 				quadPoint *= float3(scale, 1.0);
 
 				// &&&& Screen-space UV of center of brushstroke:
 				// Magic to get proper UV's for sampling from GBuffers:
 				float4 pos = mul(UNITY_MATRIX_VP, float4(worldPosition, 1.0)); // *** Revisit to better understand!!!! ***
 				float4 centerUV = ComputeScreenPos(pos);
-				o.centerUV = centerUV.xy / centerUV.w;
+				o.centerUV = centerUV; //centerUV.xy / centerUV.w;
 
 				// Figure out final facing Vectors!!!
 				float2 forward = strokeData.heading;
@@ -124,18 +124,21 @@
 				//float4 texColor0 = tex2D(_MainTex, i.uv.xy);  // Read Brush Texture start Row
 				//float4 texColor1 = tex2D(_MainTex, i.uv.zw);  // Read Brush Texture end Row
 				
-				float4 brushColor = tex2D(_MainTex, i.uv);				
-				float4 frameBufferColor = tex2D(_RenderedSceneRT, i.centerUV);  //  Color of brushtroke source	
+				float4 brushColor = tex2D(_MainTex, i.uv);	
+				float2 screenUV = i.centerUV.xy / i.centerUV.w;
+				float4 frameBufferColor = tex2D(_RenderedSceneRT, screenUV);  //  Color of brushtroke source	
 				// use separate camera?
 				
 				float4 finalColor = frameBufferColor;
 				finalColor.a = brushColor.a;
 
-				float altitude = i.worldPos.z / 32; // [-1,1] range
-				finalColor.xyz = lerp(finalColor.xyz, float3(0,0.07,0.27), saturate(altitude * 40) * 0.2 + 0.4 * (saturate(altitude * 6)));
+				float altitude = i.worldPos.z / 10; // [-1,1] range
+				finalColor.xyz = lerp(finalColor.xyz, float3(0.02,0.17,0.67), 0.25 * (saturate(altitude * 20) * 0.2 + 0.4 * (saturate(altitude * 4))));
 				//finalColor.a = saturate((altitude + 0.08) * 7) * brushColor.a;
 				
 				//return float4(1,1,1,finalColor.a);
+
+				finalColor.rgb *= (sin(altitude * 20) * 0.5 + 0.5) * 0.5 + 0.5;
 				return finalColor;
 				
 			}
