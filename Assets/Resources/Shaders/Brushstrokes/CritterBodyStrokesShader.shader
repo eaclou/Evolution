@@ -120,7 +120,7 @@
 				centerToVertexOffset = rotate_point(float2(0,0), swimAngle, centerToVertexOffset);
 				centerToVertexOffset = rotatePointVector(centerToVertexOffset, float2(0,0), critterSimData.heading);
 
-				float3 worldPosition = float3(bodyStrokeData.worldPos + centerToVertexOffset, -0.5);
+				float3 worldPosition = float3(bodyStrokeData.worldPos + centerToVertexOffset, curAgentSize.x);
 				//float3 worldPosition = float3(critterPosition + centerPosition + centerToVertexOffset, -0.5);
 
 				//======================================================================================================

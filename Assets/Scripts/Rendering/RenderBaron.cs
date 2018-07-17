@@ -13,7 +13,7 @@ public class RenderBaron : MonoBehaviour {
 
     }
 
-    public virtual void RenderCommands(ref CommandBuffer cmdBuffer) {
+    public virtual void RenderCommands(ref CommandBuffer cmdBuffer, int frameBufferID) {
 
     }
 

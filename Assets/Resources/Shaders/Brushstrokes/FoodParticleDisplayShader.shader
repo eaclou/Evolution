@@ -61,7 +61,7 @@
 							
 				FoodParticleData particleData = foodParticleDataCBuffer[inst];
 
-				float3 worldPosition = float3(particleData.worldPos, -0.5);    //float3(rawData.worldPos, -random2);
+				float3 worldPosition = float3(particleData.worldPos, 1);    //float3(rawData.worldPos, -random2);
 				quadPoint = quadPoint * particleData.radius * particleData.active;
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(quadPoint, 0.0f));				
 				o.uv = quadVerticesCBuffer[id].xy + 0.5f;		

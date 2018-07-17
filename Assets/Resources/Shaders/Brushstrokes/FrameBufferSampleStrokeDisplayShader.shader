@@ -133,12 +133,19 @@
 				finalColor.a = brushColor.a;
 
 				float altitude = i.worldPos.z / 10; // [-1,1] range
-				finalColor.xyz = lerp(finalColor.xyz, float3(0.02,0.17,0.67), 0.25 * (saturate(altitude * 20) * 0.2 + 0.4 * (saturate(altitude * 4))));
+
+				float isUnderwater = saturate(altitude * 10000);
+
+				float3 waterFogColor = float3(0.03,0.4,0.3) * 0.4;
+				finalColor.rgb *= (sin(altitude * 20) * 0.5 + 0.5) * 0.5 + 0.5;
+				
+				finalColor.rgb = lerp(finalColor.xyz, waterFogColor, 1 * (saturate(altitude * 0.8)) + 0.25 * isUnderwater);
+
 				//finalColor.a = saturate((altitude + 0.08) * 7) * brushColor.a;
 				
 				//return float4(1,1,1,finalColor.a);
 
-				finalColor.rgb *= (sin(altitude * 20) * 0.5 + 0.5) * 0.5 + 0.5;
+				//finalColor.rgb *= (sin(altitude * 20) * 0.5 + 0.5) * 0.5 + 0.5;
 				return finalColor;
 				
 			}

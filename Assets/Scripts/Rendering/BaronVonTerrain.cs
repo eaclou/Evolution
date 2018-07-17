@@ -320,9 +320,9 @@ public class BaronVonTerrain : RenderBaron {
 
     }
 
-    public override void RenderCommands(ref CommandBuffer cmdBuffer) {
+    public override void RenderCommands(ref CommandBuffer cmdBuffer, int frameBufferID) {
         // Create RenderTargets:
-        int renderedSceneID = Shader.PropertyToID("_RenderedSceneID");
+        /*int renderedSceneID = Shader.PropertyToID("_RenderedSceneID");
         cmdBuffer.GetTemporaryRT(renderedSceneID, -1, -1, 0, FilterMode.Bilinear);  // save contents of Standard Rendering Pipeline
         cmdBuffer.Blit(BuiltinRenderTextureType.CameraTarget, renderedSceneID);  // save contents of Standard Rendering Pipeline
 
@@ -331,7 +331,7 @@ public class BaronVonTerrain : RenderBaron {
         cmdBuffer.ClearRenderTarget(true, true, Color.black, 1.0f);  // clear -- needed???
         //cmdBufferMainRender.ClearRenderTarget(true, true, new Color(225f / 255f, 217f / 255f, 200f / 255f), 1.0f);  // clear -- needed???
           
-        
+        */
         // BACKGROUND STROKES:::
         //frameBufferStrokeDisplayMat.SetPass(0);
         //frameBufferStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -346,21 +346,21 @@ public class BaronVonTerrain : RenderBaron {
         groundStrokesLrgDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         groundStrokesLrgDisplayMat.SetBuffer("frameBufferStrokesCBuffer", groundStrokesLrgCBuffer);    
         groundStrokesLrgDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
-        cmdBuffer.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
+        cmdBuffer.SetGlobalTexture("_RenderedSceneRT", frameBufferID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
         cmdBuffer.DrawProcedural(Matrix4x4.identity, groundStrokesLrgDisplayMat, 0, MeshTopology.Triangles, 6, groundStrokesLrgCBuffer.count);
         
         // MEDIUM STROKES!!!!
         groundStrokesMedDisplayMat.SetPass(0);
         groundStrokesMedDisplayMat.SetBuffer("frameBufferStrokesCBuffer", groundStrokesMedCBuffer);    
         groundStrokesMedDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
-        cmdBuffer.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
+        cmdBuffer.SetGlobalTexture("_RenderedSceneRT", frameBufferID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
         cmdBuffer.DrawProcedural(Matrix4x4.identity, groundStrokesMedDisplayMat, 0, MeshTopology.Triangles, 6, groundStrokesMedCBuffer.count);
         
         // SMALL STROKES!!!!
         groundStrokesSmlDisplayMat.SetPass(0);
         groundStrokesSmlDisplayMat.SetBuffer("frameBufferStrokesCBuffer", groundStrokesSmlCBuffer);    
         groundStrokesSmlDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
-        cmdBuffer.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
+        cmdBuffer.SetGlobalTexture("_RenderedSceneRT", frameBufferID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
         cmdBuffer.DrawProcedural(Matrix4x4.identity, groundStrokesSmlDisplayMat, 0, MeshTopology.Triangles, 6, groundStrokesSmlCBuffer.count);
         
     }

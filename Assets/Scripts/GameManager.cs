@@ -8,9 +8,9 @@ public class GameManager : MonoBehaviour {
     public SimulationManager simulationManager;
     public UIManager uiManager;
     public TheRenderKing theRenderKing;
-    public Camera mainCam;
-    private CommandBuffer distortionCommandBuffer;
-    public Material rippleDistortUIMat;
+    //public Camera mainCam;
+    //private CommandBuffer distortionCommandBuffer;
+    //public Material rippleDistortUIMat;
 
     private GameState currentGameState = GameState.MainMenu;
     public GameState CurrentGameState
@@ -31,9 +31,9 @@ public class GameManager : MonoBehaviour {
     }
 
     private void Awake() {
-        distortionCommandBuffer = new CommandBuffer();
-        distortionCommandBuffer.name = "distortionCommandBuffer";
-        mainCam.AddCommandBuffer(CameraEvent.AfterEverything, distortionCommandBuffer);
+        //distortionCommandBuffer = new CommandBuffer();
+        //distortionCommandBuffer.name = "distortionCommandBuffer";
+        //mainCam.AddCommandBuffer(CameraEvent.AfterEverything, distortionCommandBuffer);
     }
 
     // Use this for initialization ....or don't, it's really up to you.
@@ -107,13 +107,13 @@ public class GameManager : MonoBehaviour {
         //simulationManager.UpdateDebugUI();
 
         // *** TEMP TEST RIPPLE DISTORTION!! ***
-        distortionCommandBuffer.Clear();
+        //distortionCommandBuffer.Clear();
 
         // Create RenderTargets:
-        int renderedSceneID = Shader.PropertyToID("_RenderedSceneID");
-        distortionCommandBuffer.GetTemporaryRT(renderedSceneID, -1, -1, 0, FilterMode.Bilinear);  // save contents of Standard Rendering Pipeline
-        distortionCommandBuffer.Blit(BuiltinRenderTextureType.CameraTarget, renderedSceneID);  // save contents of Standard Rendering Pipeline        
-        distortionCommandBuffer.Blit(renderedSceneID, BuiltinRenderTextureType.CameraTarget, rippleDistortUIMat);  // apply ripple shit
+        //int renderedSceneID = Shader.PropertyToID("_RenderedSceneID");
+       // distortionCommandBuffer.GetTemporaryRT(renderedSceneID, -1, -1, 0, FilterMode.Bilinear);  // save contents of Standard Rendering Pipeline
+        //distortionCommandBuffer.Blit(BuiltinRenderTextureType.CameraTarget, renderedSceneID);  // save contents of Standard Rendering Pipeline        
+        //distortionCommandBuffer.Blit(renderedSceneID, BuiltinRenderTextureType.CameraTarget, rippleDistortUIMat);  // apply ripple shit
         
     }
 
@@ -187,7 +187,7 @@ public class GameManager : MonoBehaviour {
                 this.currentGameState = nextState;
                 
                 // temp remove UI commandBuffer **********
-                mainCam.RemoveAllCommandBuffers();
+                //mainCam.RemoveAllCommandBuffers();
 
                 uiManager.TransitionToNewGameState(nextState);
                 break;

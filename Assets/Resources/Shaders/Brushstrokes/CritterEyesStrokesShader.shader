@@ -106,7 +106,7 @@
 				}
 				centerToVertexOffset = rotatePointVector(centerToVertexOffset, float2(0,0), forwardGaze);
 
-				float3 worldPosition = float3(critterPosition + centerPosition + centerToVertexOffset, -0.5);
+				float3 worldPosition = float3(critterPosition + centerPosition + centerToVertexOffset, curAgentSize.x);
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
 				o.color = float4(1, 1, 1, 1);	// change color of eyes if dead X's?'

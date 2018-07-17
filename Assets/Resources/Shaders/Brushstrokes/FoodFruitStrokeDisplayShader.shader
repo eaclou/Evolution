@@ -116,7 +116,7 @@
 
 				//float growthLerp = saturate(rawData.growth * 3 - 2 + random2 * 1);
 
-				float3 worldPosition = float3(fruitData.worldPos, orderVal);    //float3(rawData.worldPos, -random2);
+				float3 worldPosition = float3(fruitData.worldPos, orderVal + 1);    //float3(rawData.worldPos, -random2);
 				// Rotation of Billboard center around Agent's Center (no effect if localPos and localDir are zero/default)'
 				float2 forwardAgent = rawData.heading;
 				float2 rightAgent = float2(forwardAgent.y, -forwardAgent.x);
