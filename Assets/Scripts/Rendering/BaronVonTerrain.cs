@@ -341,25 +341,32 @@ public class BaronVonTerrain : RenderBaron {
         //cmdBuffer.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
         //cmdBuffer.DrawProcedural(Matrix4x4.identity, frameBufferStrokeDisplayMat, 0, MeshTopology.Triangles, 6, frameBufferStrokesCBuffer.count);
         
+        
+
         // LARGE STROKES!!!!
         groundStrokesLrgDisplayMat.SetPass(0);
         groundStrokesLrgDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         groundStrokesLrgDisplayMat.SetBuffer("frameBufferStrokesCBuffer", groundStrokesLrgCBuffer);    
         groundStrokesLrgDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        groundStrokesLrgDisplayMat.SetTexture("_AltitudeTex", terrainHeightMap);
         cmdBuffer.SetGlobalTexture("_RenderedSceneRT", frameBufferID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
         cmdBuffer.DrawProcedural(Matrix4x4.identity, groundStrokesLrgDisplayMat, 0, MeshTopology.Triangles, 6, groundStrokesLrgCBuffer.count);
         
         // MEDIUM STROKES!!!!
         groundStrokesMedDisplayMat.SetPass(0);
+        groundStrokesMedDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         groundStrokesMedDisplayMat.SetBuffer("frameBufferStrokesCBuffer", groundStrokesMedCBuffer);    
         groundStrokesMedDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        groundStrokesMedDisplayMat.SetTexture("_AltitudeTex", terrainHeightMap);
         cmdBuffer.SetGlobalTexture("_RenderedSceneRT", frameBufferID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
         cmdBuffer.DrawProcedural(Matrix4x4.identity, groundStrokesMedDisplayMat, 0, MeshTopology.Triangles, 6, groundStrokesMedCBuffer.count);
         
         // SMALL STROKES!!!!
         groundStrokesSmlDisplayMat.SetPass(0);
+        groundStrokesSmlDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         groundStrokesSmlDisplayMat.SetBuffer("frameBufferStrokesCBuffer", groundStrokesSmlCBuffer);    
         groundStrokesSmlDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        groundStrokesSmlDisplayMat.SetTexture("_AltitudeTex", terrainHeightMap);
         cmdBuffer.SetGlobalTexture("_RenderedSceneRT", frameBufferID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
         cmdBuffer.DrawProcedural(Matrix4x4.identity, groundStrokesSmlDisplayMat, 0, MeshTopology.Triangles, 6, groundStrokesSmlCBuffer.count);
         

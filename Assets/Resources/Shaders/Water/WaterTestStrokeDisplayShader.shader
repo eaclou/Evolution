@@ -5,10 +5,8 @@
 		_MainTex ("Main Texture", 2D) = "white" {}
 		_AltitudeTex ("_AltitudeTex", 2D) = "gray" {}
 		_VelocityTex ("_VelocityTex", 2D) = "black" {}
-		_Cube("Reflection Map", CUBE) = "" {}
-		//_FluidColorTex ("_FluidColorTex", 2D) = "black" {}
-		//_Tint("Color", Color) = (1,1,1,1)
-		//_Size("Size", vector) = (1,1,1,1)
+		_SkyTex ("_SkyTex", 2D) = "white" {}
+		
 	}
 	SubShader
 	{		
@@ -24,14 +22,17 @@
 			#pragma fragment frag
 			#pragma target 5.0
 			#include "UnityCG.cginc"
+			#include "Assets/Resources/Shaders/Inc/NoiseShared.cginc"
 
 			sampler2D _MainTex;
 			sampler2D _AltitudeTex;			
 			sampler2D _VelocityTex;
-			samplerCUBE _Cube;
+			sampler2D _SkyTex;
 			
 			sampler2D _RenderedSceneRT;  // Provided by CommandBuffer -- global tex??? seems confusing... ** revisit this
 			
+			uniform float _MapSize;
+
 			struct FrameBufferStrokeData {
 				float3 worldPos;
 				float2 scale;
@@ -39,16 +40,29 @@
 				int brushType;
 			};
 
-			StructuredBuffer<FrameBufferStrokeData> frameBufferStrokesCBuffer;
+			struct WaterQuadData {
+				int index;
+				float3 worldPos;
+				float2 heading;
+				float2 localScale;
+				float age;
+				float initAlpha;
+				int brushType;
+			};
+
+			StructuredBuffer<WaterQuadData> waterQuadStrokesCBuffer;
 			StructuredBuffer<float3> quadVerticesCBuffer;			
 
 			struct v2f
 			{
 				float4 pos : SV_POSITION;
+				float4 color : COLOR;
 				float2 quadUV : TEXCOORD0;  // uv of the brushstroke quad itself, particle texture
-				float2 centerUV : TEXCOORD1;
+				float2 altitudeUV : TEXCOORD1;
 				float4 screenUV : TEXCOORD2;
 				float3 worldPos : TEXCOORD3;
+				float4 vignetteLerp : TEXCOORD4;
+				float2 skyUV : TEXCOORD5;
 			};
 
 			float rand(float2 co){   // OUTPUT is in [0,1] RANGE!!!
@@ -59,18 +73,18 @@
 			{
 				v2f o;
 								
-				FrameBufferStrokeData strokeData = frameBufferStrokesCBuffer[inst];
+				WaterQuadData waterQuadData = waterQuadStrokesCBuffer[inst];
 
-				float3 worldPosition = strokeData.worldPos;
+				float3 worldPosition = waterQuadData.worldPos;
 				float3 quadPoint = quadVerticesCBuffer[id];
 
 				o.quadUV = quadPoint + 0.5;
 				o.worldPos = worldPosition;
 				float2 uv = (worldPosition.xy + 128) / 512;
-				o.centerUV = uv;
+				o.altitudeUV = uv;
 				
-				float2 scale = strokeData.scale * 3;
-				scale.x *= 0.5;
+				float2 scale = waterQuadData.localScale * 3.2;
+				scale.x *= 0.4;
 				quadPoint *= float3(scale, 1.0);
 				
 				float4 fluidVelocity = tex2Dlod(_VelocityTex, float4(worldPosition.xy / 256, 0, 3));
@@ -79,8 +93,9 @@
 					fluidDir = normalize(fluidVelocity.xy);
 				}
 
+
 				// Figure out final facing Vectors!!!
-				float2 forward = fluidDir; //strokeData.heading;
+				float2 forward = fluidDir; //waterQuadData.heading;
 				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
 				float2 rotatedPoint = float2(quadPoint.x * right + quadPoint.y * forward);  // Rotate localRotation by AgentRotation
 
@@ -89,20 +104,44 @@
 
 				float4 pos = mul(UNITY_MATRIX_VP, float4(worldPosition, 1.0)); // *** Revisit to better understand!!!! ***
 				float4 screenUV = ComputeScreenPos(pos);
-				o.screenUV = screenUV; //centerUV.xy / centerUV.w;
+				o.screenUV = screenUV; //altitudeUV.xy / altitudeUV.w;
+
+				o.skyUV = worldPosition.xy / _MapSize + float2(-0.25, 0.08) * 0.14 * _Time.y;
+
+				//float2 rand = Value2D(float2((float)inst, (float)inst + 30), 100);
+				float randNoise1 = Value3D(float3(worldPosition.x - _Time.y * 5.34, worldPosition.y + _Time.y * 7.1, _Time.y * 15), 0.03).x * 0.5 + 0.5; //				
+				float randNoise2 = Value3D(float3(worldPosition.x + _Time.y * 7.34, worldPosition.y - _Time.y * 6.1, _Time.y * -10), 0.1).x * 0.5 + 0.5;
+				float randNoise3 = Value3D(float3(worldPosition.x + _Time.y * 3.34, worldPosition.y - _Time.y * 5.1, _Time.y * 5), 0.3).x * 0.5 + 0.5;
+				float randNoise4 = Value3D(float3(worldPosition.x - _Time.y * 8.34, worldPosition.y + _Time.y * 4.1, _Time.y * -2.5),0.75).x * 0.5 + 0.5;
+				randNoise1 *= 1;
+				randNoise2 *= 1;
+				randNoise3 *= 1;
+				randNoise4 *= 1;
+				float randThreshold = (randNoise1 + randNoise2 + randNoise3 + randNoise4) / 4;	
+				float2 sampleUV = screenUV.xy / screenUV.w;
+				float vignetteRadius = length((sampleUV - 0.5) * 2);
+				float testNewVignetteMask = saturate((randThreshold + 0.75 - vignetteRadius) * 2);
+				o.vignetteLerp = float4(testNewVignetteMask,sampleUV,saturate(vignetteRadius));
+
+				float fadeDuration = 0.1;
+				float fadeIn = saturate(waterQuadData.age / fadeDuration);  // fade time = 0.1
+				float fadeOut = saturate((1 - waterQuadData.age) / fadeDuration);
+							
+				float alpha = fadeIn * fadeOut;
+				o.color = float4(1,1,1,alpha);
 				
 				return o;
 			}
 
 			fixed4 frag(v2f i) : SV_Target
 			{
+				/*
 				float2 screenUV = i.screenUV.xy / i.screenUV.w;
 
 				float distFromScreenCenter = length(screenUV * 2 - 1);
 				float vignetteMask = smoothstep(0.5, 2.0, distFromScreenCenter) * 0.8;
 
 				// get view space position of vertex
-                //float3 viewPos = UnityObjectToViewPos(i.worldPos);
 				float3 cameraToVertex = i.worldPos - _WorldSpaceCameraPos;
                 float3 cameraToVertexDir = normalize(cameraToVertex);
 
@@ -113,32 +152,65 @@
 
 				float3 reflectedViewDir = cameraToVertexDir + 2 * waterWorldNormal;
 
-				float3 coords = reflectedViewDir; //normalize(float3(i.centerUV, 1));
+				float3 coords = reflectedViewDir; //normalize(float3(i.altitudeUV, 1));
 				float4 cubeMapColor = texCUBE(_Cube, coords);
-                //finalColor.xyz = DecodeHDR(val, unity_SpecCube0_HDR);
-
-				//float4 texColor0 = tex2D(_MainTex, i.uv.xy);  // Read Brush Texture start Row
-				//float4 texColor1 = tex2D(_MainTex, i.uv.zw);  // Read Brush Texture end Row
-				
+                
 				float4 brushColor = tex2D(_MainTex, i.quadUV);	
-				//float4 frameBufferColor = tex2D(_RenderedSceneRT, screenUV);  //  Color of brushtroke source	
+				float4 frameBufferColor = tex2D(_RenderedSceneRT, screenUV);  //  Color of brushtroke source	
+				frameBufferColor.a = 1;
+				frameBufferColor.rgb += 0.2;
+				//return frameBufferColor;
 				// use separate camera?
-								
-				float altitude = tex2D(_AltitudeTex, i.centerUV); // [-1,1] range
+				return frameBufferColor;
+				
+				float altitude = tex2D(_AltitudeTex, i.altitudeUV); // [-1,1] range
 				float isUnderwater = saturate((-altitude + 0.5) * 10000);
 
 				float val = 1;
 				float3 valColor = float3(val, val, val);
 
-				float4 finalColor = float4(cubeMapColor.rgb, isUnderwater * brushColor.a);
-				finalColor.a *= vignetteMask;
+				float4 backgroundColor = float4(cubeMapColor.rgb, isUnderwater * brushColor.a);
+				backgroundColor.a *= vignetteMask;
+				*/
 
-				//finalColor.xyz = lerp(finalColor.xyz, float3(0.02,0.17,0.67), 0.25 * (saturate(altitude * 20) * 0.2 + 0.4 * (saturate(altitude * 4))));
-				//finalColor.a = saturate((altitude + 0.08) * 7) * brushColor.a;
+				//==================================================================================================================
+				float4 brushColor = tex2D(_MainTex, i.quadUV);	
+				float2 screenUV = i.screenUV.xy / i.screenUV.w;
+				float4 frameBufferColor = tex2D(_RenderedSceneRT, screenUV);  //  Color of brushtroke source	
+				// use separate camera?
+
+
 				
-				//return float4(1,1,1,finalColor.a);
+				float4 backgroundColor = frameBufferColor;
+				backgroundColor.a = brushColor.a;
+				
+				float altitude = tex2D(_AltitudeTex, i.altitudeUV); // i.worldPos.z / 10; // [-1,1] range
+				// 0-1 range --> -1 to 1
+				altitude = (altitude * 2 - 1) * -1;
+				float isUnderwater = saturate(altitude * 10000);
+				float3 waterFogColor = float3(0.03,0.4,0.3) * 0.4;
+				float strataColorMultiplier = (sin(altitude * (1.0 + i.worldPos.x * 0.01 - i.worldPos.y * -0.01) + i.worldPos.x * 0.01 - i.worldPos.y * 0.01) * 0.5 + 0.5) * 0.5 + 0.5;
+				backgroundColor.rgb *= strataColorMultiplier;				
+				backgroundColor.rgb = lerp(backgroundColor.rgb, waterFogColor, 1 * (saturate(altitude * 0.8)) + 0.25 * isUnderwater);
 
-				//finalColor.rgb *= (sin(altitude * 20) * 0.5 + 0.5) * 0.5 + 0.5;
+				float snowAmount = saturate((-altitude - 0.6) * 2 +
+								   ((sin(i.worldPos.x * 0.0785 + i.worldPos.y * 0.02843) * 0.5 + 0.5) * 1 - 
+								   (cos(i.worldPos.x * 0.012685 + i.worldPos.y * -0.01843) * 0.5 + 0.5) * 0.9 +
+								   (sin(i.worldPos.x * 0.2685 + i.worldPos.y * -0.1843) * 0.5 + 0.5) * 0.45 - 
+								   (cos(i.worldPos.x * -0.2843 + i.worldPos.y * 0.01143) * 0.5 + 0.5) * 0.45 +
+								   (sin(i.worldPos.x * 0.1685 + i.worldPos.y * -0.03843) * 0.5 + 0.5) * 0.3 - 
+								   (cos(i.worldPos.x * -0.1843 + i.worldPos.y * 0.243) * 0.5 + 0.5) * 0.3) * 0.5);
+				
+				backgroundColor.rgb = lerp(backgroundColor.rgb, float3(0.56, 1, 0.34) * 0.6, snowAmount * 1);
+				//==================================================================================================================
+				backgroundColor.a *= isUnderwater;
+
+				
+				float4 reflectedColor = float4(tex2Dlod(_SkyTex, float4((i.skyUV), 0, 1)).rgb, backgroundColor.a); //col;
+				
+				float4 finalColor = lerp(reflectedColor, backgroundColor, 1 - (1 - i.vignetteLerp.x) * 0.7); //float4(1,1,1,1);
+				finalColor.a *= saturate(i.vignetteLerp.w * 2 - 0.45); //(1 - saturate(i.vignetteLerp.x) * 0.4) * 0.5;
+				finalColor.a *= i.color.a;
 				return finalColor;
 				
 			}

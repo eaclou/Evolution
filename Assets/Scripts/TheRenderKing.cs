@@ -60,6 +60,8 @@ public class TheRenderKing : MonoBehaviour {
 
     private Mesh fluidRenderMesh;
 
+    //private RenderTexture primaryRT;
+
     private bool isInitialized = false;
 
     private const float velScale = 0.17f; // Conversion for rigidBody Vel --> fluid vel units ----  // approx guess for now
@@ -257,6 +259,13 @@ public class TheRenderKing : MonoBehaviour {
     }
     // Use this for initialization:
     public void InitializeRiseAndShine(SimulationManager simManager) {
+        //primaryRT = new RenderTexture(1024, 1024, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);        
+        //primaryRT.wrapMode = TextureWrapMode.Clamp;
+        //primaryRT.enableRandomWrite = true;
+        //primaryRT.Create();
+
+        //simManager.cameraManager.camera.targetTexture = primaryRT;
+
         this.simManager = simManager;
 
         // temp bodyWidthsTexture:
@@ -1523,9 +1532,8 @@ public class TheRenderKing : MonoBehaviour {
         // Create RenderTargets:
         int renderedSceneID = Shader.PropertyToID("_RenderedSceneID");
         cmdBufferTest.GetTemporaryRT(renderedSceneID, -1, -1, 0, FilterMode.Bilinear);  // save contents of Standard Rendering Pipeline
-        cmdBufferTest.Blit(BuiltinRenderTextureType.CameraTarget, renderedSceneID);  // save contents of Standard Rendering Pipeline
-
         RenderTargetIdentifier renderTarget = new RenderTargetIdentifier(BuiltinRenderTextureType.CameraTarget);
+        cmdBufferTest.Blit(renderTarget, renderedSceneID);  // save contents of Standard Rendering Pipeline
         cmdBufferTest.SetRenderTarget(renderTarget);  // Set render Target
         cmdBufferTest.ClearRenderTarget(true, true, Color.black, 1.0f);  // clear -- needed???
         //cmdBufferMainRender.ClearRenderTarget(true, true, new Color(225f / 255f, 217f / 255f, 200f / 255f), 1.0f);  // clear -- needed???
@@ -1533,6 +1541,10 @@ public class TheRenderKing : MonoBehaviour {
 
         baronVonTerrain.RenderCommands(ref cmdBufferTest, renderedSceneID);
 
+        //renderedSceneID = Shader.PropertyToID("_RenderedSceneID");
+        //cmdBufferTest.GetTemporaryRT(renderedSceneID, -1, -1, 0, FilterMode.Bilinear);  // save contents of Standard Rendering Pipeline
+        //cmdBufferTest.Blit(BuiltinRenderTextureType.CameraTarget, renderedSceneID);  // save contents of Standard Rendering Pipeline
+        /*
         foodParticleDisplayMat.SetPass(0);
         foodParticleDisplayMat.SetBuffer("foodParticleDataCBuffer", simManager.foodParticlesCBuffer);
         foodParticleDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -1556,27 +1568,41 @@ public class TheRenderKing : MonoBehaviour {
         //agentEyesDisplayMat.SetBuffer("agentMovementAnimDataCBuffer", simManager.simStateData.agentMovementAnimDataCBuffer);
         agentEyesDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, agentEyesDisplayMat, 0, MeshTopology.Triangles, 6, agentEyeStrokesCBuffer.count);
-        
+        */
 
         // WATER :::::
         //baronVonWater.RenderCommands(ref cmdBufferTest, renderedSceneID);
-        /*
-        baronVonWater.testStrokesDisplayMat.SetPass(0);
-        baronVonWater.testStrokesDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        baronVonWater.testStrokesDisplayMat.SetBuffer("frameBufferStrokesCBuffer", baronVonWater.testStrokesCBuffer);
-        baronVonWater.testStrokesDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
-        baronVonWater.testStrokesDisplayMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
-        baronVonWater.testStrokesDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        // Re-capture FrameBuffer to match backgroundColor
+        //int renderedSceneID2 = Shader.PropertyToID("_RenderedSceneID2");
+        //cmdBufferTest.SetRenderTarget();
+        //cmdBufferTest.GetTemporaryRT(renderedSceneID2, -1, -1, 0, FilterMode.Bilinear);  // save contents of Standard Rendering Pipeline
+        //renderTarget = new RenderTargetIdentifier(primaryRT);
+        //cmdBufferTest.SetRenderTarget(renderTarget);  // Set render Target
+        //cmdBufferTest.Blit(renderTarget, renderedSceneID2);  // save contents of Standard Rendering Pipeline
+
+        //RenderTargetIdentifier waterTargetID = new RenderTargetIdentifier(primaryRT);
+        //cmdBufferTest.Blit(waterTargetID, primaryRT);
+        
+        baronVonWater.waterQuadStrokesDisplayMat.SetPass(0);
+        baronVonWater.waterQuadStrokesDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        baronVonWater.waterQuadStrokesDisplayMat.SetBuffer("frameBufferStrokesCBuffer", baronVonWater.waterQuadStrokesCBuffer);
+        baronVonWater.waterQuadStrokesDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+        baronVonWater.waterQuadStrokesDisplayMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
+        //cmdBufferTest.SetGlobalTexture(("_SceneRT", primaryRT);
+        baronVonWater.waterQuadStrokesDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
         // Use this technique for Environment Brushstrokes:
+        //RenderTargetIdentifier customTarget = new RenderTargetIdentifier(primaryRT);
+        //cmdBufferTest.Blit(customTarget, renderedSceneID);
         cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
-        cmdBufferTest.DrawProcedural(Matrix4x4.identity, baronVonWater.testStrokesDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.testStrokesCBuffer.count);
-        */
+        cmdBufferTest.DrawProcedural(Matrix4x4.identity, baronVonWater.waterQuadStrokesDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterQuadStrokesCBuffer.count);
+        
         // WATER SPLINES:::
         baronVonWater.waterCurveStrokeDisplayMat.SetPass(0);
         baronVonWater.waterCurveStrokeDisplayMat.SetBuffer("verticesCBuffer", baronVonWater.waterCurveVerticesCBuffer);
         baronVonWater.waterCurveStrokeDisplayMat.SetBuffer("waterCurveStrokesCBuffer", baronVonWater.waterCurveStrokesCBuffer);
         baronVonWater.waterCurveStrokeDisplayMat.SetTexture("_FluidColorTex", fluidManager._DensityA);
-        cmdBufferTest.DrawProcedural(Matrix4x4.identity, baronVonWater.waterCurveStrokeDisplayMat, 0, MeshTopology.Triangles, 6 * baronVonWater.numWaterCurveMeshQuads, baronVonWater.waterCurveStrokesCBuffer.count);
+        baronVonWater.waterCurveStrokeDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+        //cmdBufferTest.DrawProcedural(Matrix4x4.identity, baronVonWater.waterCurveStrokeDisplayMat, 0, MeshTopology.Triangles, 6 * baronVonWater.numWaterCurveMeshQuads, baronVonWater.waterCurveStrokesCBuffer.count);
         
         // WATER CHAINS:::
         baronVonWater.waterChainStrokeDisplayMat.SetPass(0);
@@ -1584,6 +1610,9 @@ public class TheRenderKing : MonoBehaviour {
         baronVonWater.waterChainStrokeDisplayMat.SetBuffer("waterChainsReadCBuffer", baronVonWater.waterChains0CBuffer);
         baronVonWater.waterChainStrokeDisplayMat.SetTexture("_FluidColorTex", fluidManager._DensityA);
         //cmdBufferTest.DrawProcedural(Matrix4x4.identity, baronVonWater.waterChainStrokeDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterChains0CBuffer.count);
+
+        //renderTarget = new RenderTargetIdentifier(BuiltinRenderTextureType.CameraTarget);
+        //cmdBufferTest.Blit(primaryRT, renderTarget);  // save contents of Standard Rendering Pipeline
 
         // TEMP!
         //baronVonWater.computeShaderWaterRender.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
