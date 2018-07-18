@@ -73,7 +73,7 @@
 			{
 				float4 texColor = tex2D(_MainTex, i.uv);
 				
-				return float4(1,1,0,texColor.a);
+				return float4(0.7,1,0.1,texColor.a * 0.75);
 			}
 		ENDCG
 		}

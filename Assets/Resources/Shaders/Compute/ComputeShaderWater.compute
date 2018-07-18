@@ -21,7 +21,7 @@ struct WaterQuadData {
 	float2 heading;
 	float2 localScale;
 	float age;
-	float initAlpha;
+	float speed;
 	int brushType;
 };
 
@@ -99,6 +99,8 @@ void CSSimWaterQuadsData (uint3 id : SV_DispatchThreadID)
 	float2 altitudeUV = uv * 0.5 + 0.25;
 	float2 vel = VelocityRead.SampleLevel(_LinearRepeat, uv, 1).xy;
 	float speedMult = 0.085;
+
+	waterQuadData.speed = length(vel);
 	
 	float2 nextPos = uv + vel * speedMult;
 

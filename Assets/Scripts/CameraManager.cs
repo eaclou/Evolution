@@ -15,7 +15,11 @@ public class CameraManager : MonoBehaviour {
     public float perspZoomDistMid = 36f;
     public float perspZoomDistFar = 120f;
     private float perspZoomDist;
-    public float targetTiltAngleDegrees = 12.5f;
+    private float targetTiltAngleDegrees = 12.5f;
+    private float curTiltAngle;
+    public float targetTiltAngleA = 10.5f;
+    public float targetTiltAngleB = 26.5f;
+    public float targetTiltAngleC = 42.5f;
 
     public float lerpSpeedA = 1f;
     public float lerpSpeedB = 2f;
@@ -85,6 +89,7 @@ public class CameraManager : MonoBehaviour {
                     //targetCamPos = Vector3.Lerp(targetCamPos, targetTransform.position, 0.08f);
                     lerpSpeed = lerpSpeedA;
                     perspZoomDist = perspZoomDistNear;
+                    targetTiltAngleDegrees = targetTiltAngleA;
                     break;
                 case GameMode.ModeB:
                     //
@@ -96,15 +101,17 @@ public class CameraManager : MonoBehaviour {
                         //targetCamPos = Vector3.Lerp(targetCamPos, targetTransform.position, 0.08f);
                     lerpSpeed = lerpSpeedB;
                     perspZoomDist = perspZoomDistMid;
+                    targetTiltAngleDegrees = targetTiltAngleB;
                     //}
                     //orthoLerp = 0.9f;
                     break;
                 case GameMode.ModeC:
                     targetPosX = SimulationManager._MapSize * 0.5f; // Mathf.Lerp(targetCamPos.x, 0f, 0.08f);
-                    targetPosY = SimulationManager._MapSize * 0.5f; // Mathf.Lerp(targetCamPos.y, 0f, 0.08f);
+                    targetPosY = SimulationManager._MapSize * 0.4f; // Mathf.Lerp(targetCamPos.y, 0f, 0.08f);
                     //targetCamPos = Vector3.Lerp(targetCamPos, Vector3.zero, 0.08f);
                     lerpSpeed = lerpSpeedC;
                     perspZoomDist = perspZoomDistFar;
+                    targetTiltAngleDegrees = targetTiltAngleC;
                     //orthoLerp = 0.6f;
                     //
                     break;
@@ -115,8 +122,10 @@ public class CameraManager : MonoBehaviour {
         }        
 
         targetPosZ = -perspZoomDist;
-       
-        this.transform.localEulerAngles = new Vector3(-targetTiltAngleDegrees, 0f, 0f);
+
+        curTiltAngle = Mathf.Lerp(curTiltAngle, -targetTiltAngleDegrees, 0.08f);
+        float rotateX = curTiltAngle;
+        this.transform.localEulerAngles = new Vector3(rotateX, 0f, 0f);
         float centeringVerticalOffset = Mathf.Abs(targetPosZ) * Mathf.Tan(targetTiltAngleDegrees * Mathf.Deg2Rad); // compensate for camera tilt
         targetPosY -= centeringVerticalOffset;
         centeringOffset = centeringVerticalOffset;

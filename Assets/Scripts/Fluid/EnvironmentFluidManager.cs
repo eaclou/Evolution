@@ -204,7 +204,8 @@ public class EnvironmentFluidManager : MonoBehaviour {
 
     public void UpdateSimulationClimate(float generation) {
         //SetClimateStormy();
-
+        SetClimateInitial();
+        /*
         float cycleValue = generation % 21f;
 
         if(cycleValue <= 12) {
@@ -217,18 +218,19 @@ public class EnvironmentFluidManager : MonoBehaviour {
             SetClimateInitial();
             //SetClimateThick();
         }
+        */
     }
     private void SetClimateInitial() {
         //Debug.Log("UpdateSimulationClimate Initial!");
         //CreateForcePoints(0.08f, 60f, 300f);
-        float lerpAmount = 0.3f;
+        float lerpAmount = 1f;
 
         viscosity = Mathf.Lerp(viscosity, 0.0002f, lerpAmount);
-        damping = Mathf.Lerp(damping, 0.002f, lerpAmount);
+        damping = Mathf.Lerp(damping, 0.003f, lerpAmount);
         colorRefreshBackgroundMultiplier = Mathf.Lerp(colorRefreshBackgroundMultiplier, 0.0001f, lerpAmount);
         colorRefreshDynamicMultiplier = Mathf.Lerp(colorRefreshDynamicMultiplier, 0.0075f, lerpAmount);
 
-        forceMultiplier = Mathf.Lerp(forceMultiplier, 1f, lerpAmount);
+        forceMultiplier = Mathf.Lerp(forceMultiplier, 2f, lerpAmount);
     }
     private void SetClimateStormy() {
         //Debug.Log("UpdateSimulationClimate Stormy!");

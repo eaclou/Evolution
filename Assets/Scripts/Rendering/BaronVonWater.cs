@@ -67,7 +67,7 @@ public class BaronVonWater : RenderBaron {
 	    public Vector2 heading;
 	    public Vector2 localScale;
 	    public float age;
-	    public float initAlpha;
+	    public float speed;
         public int brushType;
     };
 
@@ -80,7 +80,7 @@ public class BaronVonWater : RenderBaron {
         InitializeQuadMeshBuffer(); // Set up Quad Mesh billboard for brushStroke rendering           
         InitializeWaterQuadStrokesBuffer();
         InitializeWaterCurveMeshBuffer();
-        InitializeWaterQuadStrokesBuffer();
+        //InitializeWaterQuadStrokesBuffer();
         InitializeWaterCurveStrokesCBuffer();
         InitializeWaterChainStrokesCBuffer();
     }
@@ -162,7 +162,7 @@ public class BaronVonWater : RenderBaron {
                 Vector2 offset = new Vector2(UnityEngine.Random.Range(-0.5f, 0.5f), UnityEngine.Random.Range(-0.5f, 0.5f));
                 Vector3 pos = new Vector3(xPos + offset.x, yPos + offset.y, 0f);
                 waterQuadStrokesArray[index].worldPos = pos;
-                waterQuadStrokesArray[index].localScale = new Vector2(1.15f, 2.20f) * 0.6f; // Y is forward, along stroke
+                waterQuadStrokesArray[index].localScale = new Vector2(UnityEngine.Random.Range(0.9f, 1.5f), UnityEngine.Random.Range(1.1f, 2.5f)) * UnityEngine.Random.Range(0.36f, 0.65f); // Y is forward, along stroke
                 waterQuadStrokesArray[index].heading = new Vector2(UnityEngine.Random.Range(-3f, 3f), UnityEngine.Random.Range(-0.5f, 0.5f)).normalized;
                 waterQuadStrokesArray[index].brushType = UnityEngine.Random.Range(0,4);
                 waterQuadStrokesArray[index].age = UnityEngine.Random.Range(1f, 2f);
@@ -291,19 +291,20 @@ public class BaronVonWater : RenderBaron {
     }
 
     public override void Cleanup() {
-        if (waterQuadStrokesCBuffer != null) {
-            waterQuadStrokesCBuffer.Release();
-        }
+        
         if (quadVerticesCBuffer != null) {
             quadVerticesCBuffer.Release();
-        }
-        
-        if (waterCurveStrokesCBuffer != null) {
-            waterCurveStrokesCBuffer.Release();
         }
         if (waterCurveVerticesCBuffer != null) {
             waterCurveVerticesCBuffer.Release();
         }
+        if (waterCurveStrokesCBuffer != null) {
+            waterCurveStrokesCBuffer.Release();
+        }
+        if (waterQuadStrokesCBuffer != null) {
+            waterQuadStrokesCBuffer.Release();
+        }
+        
         if (waterChains0CBuffer != null) {
             waterChains0CBuffer.Release();
         }

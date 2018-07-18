@@ -332,6 +332,8 @@ public class SimulationManager : MonoBehaviour {
 
         //yield return new WaitForSeconds(5f); // TEMP!!!
 
+        environmentFluidManager.UpdateSimulationClimate(0);
+
         // Done - will be detected by GameManager next frame
         loadingComplete = true;
 
@@ -959,6 +961,7 @@ public class SimulationManager : MonoBehaviour {
         int kernelCSRespawnFoodParticles = computeShaderFoodParticles.FindKernel("CSRespawnFoodParticles");
         computeShaderFoodParticles.SetBuffer(kernelCSRespawnFoodParticles, "foodParticlesRead", foodParticlesCBuffer);
         computeShaderFoodParticles.SetBuffer(kernelCSRespawnFoodParticles, "foodParticlesWrite", foodParticlesCBufferSwap);
+        computeShaderFoodParticles.SetTexture(kernelCSRespawnFoodParticles, "velocityRead", environmentFluidManager._VelocityA);        
         computeShaderFoodParticles.SetTexture(kernelCSRespawnFoodParticles, "obstaclesRead", environmentFluidManager._ObstaclesRT);
         computeShaderFoodParticles.SetFloat("_MapSize", mapSize);
             
@@ -983,10 +986,10 @@ public class SimulationManager : MonoBehaviour {
 
         
 
-        // Copy/Swap Food PArticle Buffer:
+        // Copy/Swap Food Particle Buffer:
         int kernelCSCopyFoodParticlesBuffer = computeShaderFoodParticles.FindKernel("CSCopyFoodParticlesBuffer");
         computeShaderFoodParticles.SetBuffer(kernelCSCopyFoodParticlesBuffer, "foodParticlesRead", foodParticlesCBufferSwap);
-        computeShaderFoodParticles.SetBuffer(kernelCSCopyFoodParticlesBuffer, "foodParticlesWrite", foodParticlesCBuffer);
+        computeShaderFoodParticles.SetBuffer(kernelCSCopyFoodParticlesBuffer, "foodParticlesWrite", foodParticlesCBuffer);        
         computeShaderFoodParticles.Dispatch(kernelCSCopyFoodParticlesBuffer, 1, 1, 1);
         
         

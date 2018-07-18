@@ -2,6 +2,7 @@
 #pragma kernel CSReduceCritterDistances32
 #pragma kernel CSEatSelectedFoodParticles
 #pragma kernel CSCopyFoodParticlesBuffer
+#pragma kernel CSSimFoodParticlesBuffer
 #pragma kernel CSMeasureTotalFoodParticlesAmount
 #pragma kernel CSRespawnFoodParticles
 
@@ -31,6 +32,7 @@ Texture2D<float4> critterDistancesRead; // used to reduce foodParticlesNearestCr
 RWTexture2D<float4> critterDistancesWrite;
 
 Texture2D<float4> obstaclesRead;
+Texture2D<float4> velocityRead;
 
 uniform float _RespawnFoodParticles;
 uniform float _Time;
@@ -155,6 +157,15 @@ void CSCopyFoodParticlesBuffer (uint3 id : SV_DispatchThreadID)
 	foodParticlesWrite[id.x] = particleData;
 }
 
+[numthreads(1024,1,1)]
+void CSSimFoodParticlesBuffer (uint3 id : SV_DispatchThreadID)
+{	
+	FoodParticleData particleData = foodParticlesRead[id.x];
+
+	
+	
+	foodParticlesWrite[id.x] = particleData;
+}
 
 [numthreads(1,1,1)]
 void CSMeasureTotalFoodParticlesAmount (uint3 id : SV_DispatchThreadID)
@@ -197,6 +208,14 @@ void CSRespawnFoodParticles (uint3 id : SV_DispatchThreadID)
 		foodParticlesWrite[id.x].worldPos = float2(randX * _MapSize, randY * _MapSize);
 		foodParticlesWrite[id.x].active = 1.0;
 	}
+	else {
+		float2 vel = velocityRead.SampleLevel(_LinearRepeat, uv, 2).xy;
+		float speedMult = 0.085;	
+		//vel = float2(1,1)* 0.001;	
+		float2 nextPos = uv + vel * speedMult;	
+		foodParticlesWrite[id.x].worldPos = nextPos * _MapSize;
+	}
+	
 
 	if(_RespawnFoodParticles > 0.5) {
 		if(foodParticlesRead[id.x].active < 0.5) {
@@ -211,6 +230,4 @@ void CSRespawnFoodParticles (uint3 id : SV_DispatchThreadID)
 			foodParticlesWrite[id.x].active = 1.0;
 		}		
 	}
-
-	
 }

@@ -1544,13 +1544,13 @@ public class TheRenderKing : MonoBehaviour {
         //renderedSceneID = Shader.PropertyToID("_RenderedSceneID");
         //cmdBufferTest.GetTemporaryRT(renderedSceneID, -1, -1, 0, FilterMode.Bilinear);  // save contents of Standard Rendering Pipeline
         //cmdBufferTest.Blit(BuiltinRenderTextureType.CameraTarget, renderedSceneID);  // save contents of Standard Rendering Pipeline
-        /*
+        
         foodParticleDisplayMat.SetPass(0);
         foodParticleDisplayMat.SetBuffer("foodParticleDataCBuffer", simManager.foodParticlesCBuffer);
         foodParticleDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, foodParticleDisplayMat, 0, MeshTopology.Triangles, 6, simManager.foodParticlesCBuffer.count);
         
-
+        
         // AGENT BODY:
         critterBodyStrokesMat.SetPass(0);
         critterBodyStrokesMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
@@ -1558,7 +1558,7 @@ public class TheRenderKing : MonoBehaviour {
         critterBodyStrokesMat.SetBuffer("bodyStrokesCBuffer", critterBodyStrokesCBuffer);
         critterBodyStrokesMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, critterBodyStrokesMat, 0, MeshTopology.Triangles, 6, critterBodyStrokesCBuffer.count);
-        
+        /*
         // AGENT EYES:
         agentEyesDisplayMat.SetPass(0);
         agentEyesDisplayMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);

@@ -46,7 +46,7 @@
 				float2 heading;
 				float2 localScale;
 				float age;
-				float initAlpha;
+				float speed;
 				int brushType;
 			};
 
@@ -83,8 +83,9 @@
 				float2 uv = (worldPosition.xy + 128) / 512;
 				o.altitudeUV = uv;
 				
-				float2 scale = waterQuadData.localScale * 3.2;
-				scale.x *= 0.4;
+				float2 scale = waterQuadData.localScale * 3;
+				scale.x *= 0.66;
+				scale.y = scale.y * (1 + saturate(waterQuadData.speed * 64));
 				quadPoint *= float3(scale, 1.0);
 				
 				float4 fluidVelocity = tex2Dlod(_VelocityTex, float4(worldPosition.xy / 256, 0, 3));
@@ -109,10 +110,10 @@
 				o.skyUV = worldPosition.xy / _MapSize + float2(-0.25, 0.08) * 0.14 * _Time.y;
 
 				//float2 rand = Value2D(float2((float)inst, (float)inst + 30), 100);
-				float randNoise1 = Value3D(float3(worldPosition.x - _Time.y * 5.34, worldPosition.y + _Time.y * 7.1, _Time.y * 15), 0.03).x * 0.5 + 0.5; //				
-				float randNoise2 = Value3D(float3(worldPosition.x + _Time.y * 7.34, worldPosition.y - _Time.y * 6.1, _Time.y * -10), 0.1).x * 0.5 + 0.5;
-				float randNoise3 = Value3D(float3(worldPosition.x + _Time.y * 3.34, worldPosition.y - _Time.y * 5.1, _Time.y * 5), 0.3).x * 0.5 + 0.5;
-				float randNoise4 = Value3D(float3(worldPosition.x - _Time.y * 8.34, worldPosition.y + _Time.y * 4.1, _Time.y * -2.5),0.75).x * 0.5 + 0.5;
+				float randNoise1 = Value3D(float3(worldPosition.x - _Time.y * 5.34, worldPosition.y + _Time.y * 7.1, _Time.y * 15), 0.1).x * 0.5 + 0.5; //				
+				float randNoise2 = Value3D(float3(worldPosition.x + _Time.y * 7.34, worldPosition.y - _Time.y * 6.1, _Time.y * -10), 0.25).x * 0.5 + 0.5;
+				float randNoise3 = Value3D(float3(worldPosition.x + _Time.y * 3.34, worldPosition.y - _Time.y * 5.1, _Time.y * 7.5), 0.36).x * 0.5 + 0.5;
+				float randNoise4 = Value3D(float3(worldPosition.x - _Time.y * 8.34, worldPosition.y + _Time.y * 4.1, _Time.y * -3.5),0.55).x * 0.5 + 0.5;
 				randNoise1 *= 1;
 				randNoise2 *= 1;
 				randNoise3 *= 1;
@@ -120,7 +121,7 @@
 				float randThreshold = (randNoise1 + randNoise2 + randNoise3 + randNoise4) / 4;	
 				float2 sampleUV = screenUV.xy / screenUV.w;
 				float vignetteRadius = length((sampleUV - 0.5) * 2);
-				float testNewVignetteMask = saturate((randThreshold + 0.75 - vignetteRadius) * 2);
+				float testNewVignetteMask = saturate(((randThreshold + 0.6 - (saturate(vignetteRadius) * 0.4 + 0.3)) * 2));
 				o.vignetteLerp = float4(testNewVignetteMask,sampleUV,saturate(vignetteRadius));
 
 				float fadeDuration = 0.1;
@@ -128,6 +129,7 @@
 				float fadeOut = saturate((1 - waterQuadData.age) / fadeDuration);
 							
 				float alpha = fadeIn * fadeOut;
+
 				o.color = float4(1,1,1,alpha);
 				
 				return o;
@@ -173,6 +175,7 @@
 				backgroundColor.a *= vignetteMask;
 				*/
 
+				//return float4(i.color.x * 1000, 0, 0, 1);
 				//==================================================================================================================
 				float4 brushColor = tex2D(_MainTex, i.quadUV);	
 				float2 screenUV = i.screenUV.xy / i.screenUV.w;
@@ -208,8 +211,8 @@
 				
 				float4 reflectedColor = float4(tex2Dlod(_SkyTex, float4((i.skyUV), 0, 1)).rgb, backgroundColor.a); //col;
 				
-				float4 finalColor = lerp(reflectedColor, backgroundColor, 1 - (1 - i.vignetteLerp.x) * 0.7); //float4(1,1,1,1);
-				finalColor.a *= saturate(i.vignetteLerp.w * 2 - 0.45); //(1 - saturate(i.vignetteLerp.x) * 0.4) * 0.5;
+				float4 finalColor = lerp(reflectedColor, backgroundColor, saturate(1 - (1 - i.vignetteLerp.x) * 0.5)); //float4(1,1,1,1);
+				finalColor.a *= saturate(i.vignetteLerp.w * 1.4 - 0.25); //(1 - saturate(i.vignetteLerp.x) * 0.4) * 0.5;
 				finalColor.a *= i.color.a;
 				return finalColor;
 				
