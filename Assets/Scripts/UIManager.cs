@@ -357,7 +357,7 @@ public class UIManager : MonoBehaviour {
             }
             
             if(Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.D)) {
-                int newIndex = cameraManager.targetCritterIndex + 1;
+                int newIndex = cameraManager.targetCritterIndex + 24;
                 if(newIndex >= gameManager.simulationManager._NumAgents) {
                     newIndex = 0;                    
                 }
@@ -366,7 +366,7 @@ public class UIManager : MonoBehaviour {
             if(Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A)) {
                 int newIndex = cameraManager.targetCritterIndex - 1;
                 if(newIndex < 0) {
-                    newIndex = (gameManager.simulationManager._NumAgents - 1);                    
+                    newIndex = newIndex + 24;                    
                 }
                 cameraManager.SetTarget(gameManager.simulationManager.agentsArray[newIndex], newIndex);
             }

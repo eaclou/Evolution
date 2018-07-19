@@ -24,6 +24,7 @@ public class TheRenderKing : MonoBehaviour {
 
     public ComputeShader computeShaderBrushStrokes;
     public ComputeShader computeShaderUberChains;
+    public ComputeShader computeShaderCritters;
     //public ComputeShader computeShaderTerrainGeneration;
 
     public Material agentEyesDisplayMat;
@@ -188,13 +189,16 @@ public class TheRenderKing : MonoBehaviour {
     }
     public struct CritterBodyStrokeData {
         public int parentIndex;  // what agent/object is this attached to?
-        public Vector2 worldPos;
-        public Vector2 localPos;
-        public Vector2 localDir;
+        public int brushType;  // what brush alpha mask?  // just make it random???
+        public Vector3 worldPos;
+        public Vector3 localPos;
+        public Vector3 localDir;
         public Vector2 localScale;
         public float strength;  // abstraction for pressure of brushstroke + amount of paint
         public float lifeStatus;
-        public int brushType;  // what brush alpha mask?  // just make it random???
+        public float age;
+		public float randomSeed;
+		public float followLerp;        
     }
     public struct CurveStrokeData {
         public int parentIndex;
@@ -263,6 +267,8 @@ public class TheRenderKing : MonoBehaviour {
         //primaryRT.wrapMode = TextureWrapMode.Clamp;
         //primaryRT.enableRandomWrite = true;
         //primaryRT.Create();
+
+        //Debug.Log("Quaternion in z: " + Quaternion.AngleAxis(45f, new Vector3(0f, 0f, 1f)));
 
         //simManager.cameraManager.camera.targetTexture = primaryRT;
 
@@ -588,21 +594,30 @@ public class TheRenderKing : MonoBehaviour {
         agentBodyStrokesCBuffer.SetData(agentBodyStrokesArray);
     }
     public void InitializeCritterBodyStrokesCBuffer() {
-        critterBodyStrokesCBuffer = new ComputeBuffer(simManager._NumAgents * numStrokesPerCritterBody, sizeof(float) * 10 + sizeof(int) * 2);
+        critterBodyStrokesCBuffer = new ComputeBuffer(simManager._NumAgents * numStrokesPerCritterBody, sizeof(float) * 16 + sizeof(int) * 2);
         CritterBodyStrokeData[] critterBodyStrokesArray = new CritterBodyStrokeData[critterBodyStrokesCBuffer.count];
         for (int i = 0; i < simManager._NumAgents; i++) {
             for(int j = 0; j < numStrokesPerCritterBody; j++) {
                 CritterBodyStrokeData bodyStroke = new CritterBodyStrokeData();
                 bodyStroke.parentIndex = i;
-                bodyStroke.worldPos = new Vector2(0f, 0f);
-                bodyStroke.localPos = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f));
+                bodyStroke.brushType = 0; // ** Revisit
+
+                bodyStroke.worldPos = new Vector3(SimulationManager._MapSize / 2f, SimulationManager._MapSize / 2f, 0f);
+
+                bodyStroke.localPos = UnityEngine.Random.onUnitSphere;
                 float width = simManager.agentsArray[i].agentWidthsArray[Mathf.RoundToInt((bodyStroke.localPos.y * 0.5f + 0.5f) * 15f)];
                 bodyStroke.localPos.x *= width * 0.5f;
-                bodyStroke.localDir = new Vector2(0f, 1f); // start up? shouldn't matter
+                bodyStroke.localPos.z *= width * 0.5f;
+
+                bodyStroke.localDir = new Vector3(0f, 1f, 0f); // start up? shouldn't matter
                 bodyStroke.localScale = new Vector2(0.15f * width, 0.15f); // simManager.agentGenomePoolArray[i].bodyGenome.sizeAndAspectRatio;
                 bodyStroke.strength = UnityEngine.Random.Range(0f, 1f);
                 bodyStroke.lifeStatus = 0f;
-                bodyStroke.brushType = 0; // ** Revisit
+
+                bodyStroke.age = UnityEngine.Random.Range(1f, 2f);
+                bodyStroke.randomSeed = UnityEngine.Random.Range(0f, 1f);
+                bodyStroke.followLerp = 1f;
+
                 critterBodyStrokesArray[i * numStrokesPerCritterBody + j] = bodyStroke;
             }
         }        
@@ -1414,13 +1429,13 @@ public class TheRenderKing : MonoBehaviour {
         debugFrameCounter++;
     }
     private void SimCritterStrokes() {
-        int kernelCSCSSimulateCritterStrokes = computeShaderBrushStrokes.FindKernel("CSSimulateCritterStrokes");
+        int kernelCSCSSimulateCritterStrokes = computeShaderCritters.FindKernel("CSSimulateCritterStrokes");
         
-        computeShaderBrushStrokes.SetTexture(kernelCSCSSimulateCritterStrokes, "velocityRead", fluidManager._VelocityA);
-        computeShaderBrushStrokes.SetBuffer(kernelCSCSSimulateCritterStrokes, "critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
-        computeShaderBrushStrokes.SetBuffer(kernelCSCSSimulateCritterStrokes, "critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
-        computeShaderBrushStrokes.SetBuffer(kernelCSCSSimulateCritterStrokes, "critterStrokesWriteCBuffer", critterBodyStrokesCBuffer);
-        computeShaderBrushStrokes.Dispatch(kernelCSCSSimulateCritterStrokes, critterBodyStrokesCBuffer.count / 16, 1, 1);
+        computeShaderCritters.SetTexture(kernelCSCSSimulateCritterStrokes, "velocityRead", fluidManager._VelocityA);
+        computeShaderCritters.SetBuffer(kernelCSCSSimulateCritterStrokes, "critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
+        computeShaderCritters.SetBuffer(kernelCSCSSimulateCritterStrokes, "critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
+        computeShaderCritters.SetBuffer(kernelCSCSSimulateCritterStrokes, "critterStrokesWriteCBuffer", critterBodyStrokesCBuffer);
+        computeShaderCritters.Dispatch(kernelCSCSSimulateCritterStrokes, critterBodyStrokesCBuffer.count / 16, 1, 1);
     }
 
     public void Tick() {  // should be called from SimManager at proper time!

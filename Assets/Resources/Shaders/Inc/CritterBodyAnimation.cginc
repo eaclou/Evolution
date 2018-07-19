@@ -60,7 +60,7 @@ float2 biteAnimPos(float2 originalPos, float t, float biteAnimCycle) {
 	return newPos;
 }
 
-float2 getSwimAngle(float t, float animCycle, float accel, float throttle, float magnitude, float turnAmount) {
+float getSwimAngle(float t, float animCycle, float accel, float throttle, float magnitude, float turnAmount) {
 	float animSpeed = 15;
 	float accelAnimSpeed = 45;
 	float v = t * 0.5 + 0.5;

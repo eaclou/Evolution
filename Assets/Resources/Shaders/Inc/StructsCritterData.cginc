@@ -25,3 +25,16 @@ struct CritterSimData {
 	float accel;
 	float smoothedThrottle;
 };
+struct CritterBodyStrokeData {
+	int parentIndex;  // what agent/object is this attached to?	
+	int brushType;
+	float3 worldPos;
+	float3 localPos;
+	float3 localDir;
+	float2 localScale;
+	float strength;  // abstraction for pressure of brushstroke + amount of paint 
+	float lifeStatus;
+	float age;
+	float randomSeed;
+	float followLerp;				
+};
