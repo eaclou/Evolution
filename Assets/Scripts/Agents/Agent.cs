@@ -1041,8 +1041,8 @@ public class Agent : MonoBehaviour {
         bodyCritterSegment.agentIndex = this.index;
         bodyCritterSegment.agentRef = this;
         bodyCritterSegment.segmentIndex = 0;        
-        bodyRigidbody.drag = 12.5f; // bodyDrag;
-        bodyRigidbody.angularDrag = 12.5f;
+        bodyRigidbody.drag = 10f; // bodyDrag;
+        bodyRigidbody.angularDrag = 10f;
         //bodyRigidbody.mass 
         // Collision!
         bodyCritterSegment.segmentCollider.size = new Vector2(coreModule.coreWidth, coreModule.coreLength) * spawnStartingScale;  // spawn size percentage 1/10th      

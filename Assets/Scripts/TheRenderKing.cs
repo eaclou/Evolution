@@ -55,6 +55,7 @@ public class TheRenderKing : MonoBehaviour {
     public Material critterFoodDotsMat;
     public Material foodParticleDisplayMat;
     public Material critterSkinStrokesDisplayMat;
+    public Material critterShadowStrokesDisplayMat;
 
     public bool isDebugRenderOn = true;
     
@@ -110,6 +111,9 @@ public class TheRenderKing : MonoBehaviour {
     private int numStrokesPerCritterSkin = 128;
     private ComputeBuffer critterSkinStrokesCBuffer;
 
+    //private int numStrokesPerCritterShadow = 4;
+    //private ComputeBuffer critterShadowStrokesCBuffer;
+
     private int numEnergyDotsPerCritter = 32;
     private ComputeBuffer critterEnergyDotsCBuffer;
     private int numFoodDotsPerCritter = 32;
@@ -121,7 +125,7 @@ public class TheRenderKing : MonoBehaviour {
     private int numPlayerGlowyBits = 1024 * 10;
     private ComputeBuffer playerGlowyBitsCBuffer;
 
-    private int numFloatyBits = 1024 * 6;
+    private int numFloatyBits = 1024 * 64;
     private ComputeBuffer floatyBitsCBuffer;
         
     private int numRipplesPerAgent = 8;
@@ -500,10 +504,13 @@ public class TheRenderKing : MonoBehaviour {
         for(int i = 0; i < numFloatyBits; i++) {
             //floatyBitsInitPos[i] = new Vector4(UnityEngine.Random.Range(0.2f, 0.8f), UnityEngine.Random.Range(0.2f, 0.8f), 1f, 0f);
             FloatyBitData data = new FloatyBitData();
-            data.coords = new Vector2(UnityEngine.Random.Range(0.2f, 0.8f), UnityEngine.Random.Range(0.2f, 0.8f)); // (UnityEngine.Random.Range(0.2f, 0.8f), UnityEngine.Random.Range(0.2f, 0.8f), 1f, 0f);
+            data.coords = new Vector2(UnityEngine.Random.Range(0.25f, 0.35f), UnityEngine.Random.Range(0.65f, 0.75f)); // (UnityEngine.Random.Range(0.2f, 0.8f), UnityEngine.Random.Range(0.2f, 0.8f), 1f, 0f);
             data.vel = new Vector2(1f, 0f);
             data.heading = new Vector2(1f, 0f);
-            data.age = (float)i / (float)numFloatyBits;
+            int numGroups = 2;
+            int randGroup = UnityEngine.Random.Range(0, numGroups);
+            float startGroupAge = (float)randGroup / (float)numGroups;
+            data.age = startGroupAge; // (float)i / (float)numFloatyBits;
             floatyBitsInitPos[i] = data;
         }
         floatyBitsCBuffer.SetData(floatyBitsInitPos);
@@ -778,6 +785,9 @@ public class TheRenderKing : MonoBehaviour {
         //critterSkinStrokesMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         critterSkinStrokesDisplayMat.SetPass(0);
         critterSkinStrokesDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+
+        critterShadowStrokesDisplayMat.SetPass(0);
+        critterShadowStrokesDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
                 
         curveStrokeDisplayMat.SetPass(0);
         curveStrokeDisplayMat.SetBuffer("curveRibbonVerticesCBuffer", curveRibbonVerticesCBuffer);
@@ -1469,10 +1479,10 @@ public class TheRenderKing : MonoBehaviour {
         // Read current stateData and update all Buffers, send data to GPU
         // Execute computeShaders to update any dynamic particles that are purely cosmetic
         //SimPlayerGlow();
-        SimAgentSmearStrokes(); // start with this one?
+        //SimAgentSmearStrokes(); // start with this one?
         //IterateTrailStrokesData();
         //SimPlayerGlowyBits();
-        //SimFloatyBits();
+        SimFloatyBits();
         //SimRipples();
         SimFruit();
         //SimWaterSplines();
@@ -1576,12 +1586,12 @@ public class TheRenderKing : MonoBehaviour {
         //renderedSceneID = Shader.PropertyToID("_RenderedSceneID");
         //cmdBufferTest.GetTemporaryRT(renderedSceneID, -1, -1, 0, FilterMode.Bilinear);  // save contents of Standard Rendering Pipeline
         //cmdBufferTest.Blit(BuiltinRenderTextureType.CameraTarget, renderedSceneID);  // save contents of Standard Rendering Pipeline
-        /*
+        
         foodParticleDisplayMat.SetPass(0);
         foodParticleDisplayMat.SetBuffer("foodParticleDataCBuffer", simManager.foodParticlesCBuffer);
         foodParticleDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, foodParticleDisplayMat, 0, MeshTopology.Triangles, 6, simManager.foodParticlesCBuffer.count);
-        
+        /*
         foodFruitDisplayMat.SetPass(0);
         foodFruitDisplayMat.SetBuffer("fruitDataCBuffer", simManager.simStateData.foodFruitDataCBuffer);
         foodFruitDisplayMat.SetBuffer("foodSimDataCBuffer", simManager.simStateData.foodSimDataCBuffer);
@@ -1615,6 +1625,19 @@ public class TheRenderKing : MonoBehaviour {
         //RenderTargetIdentifier waterTargetID = new RenderTargetIdentifier(primaryRT);
         //cmdBufferTest.Blit(waterTargetID, primaryRT);
 
+        // SHADOWS TEST:
+        critterShadowStrokesDisplayMat.SetPass(0);
+        critterShadowStrokesDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        critterShadowStrokesDisplayMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
+        critterShadowStrokesDisplayMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
+        critterShadowStrokesDisplayMat.SetBuffer("critterSkinStrokesCBuffer", critterSkinStrokesCBuffer);     
+        critterShadowStrokesDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+        critterShadowStrokesDisplayMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
+        critterShadowStrokesDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID);
+        cmdBufferTest.DrawProcedural(Matrix4x4.identity, critterShadowStrokesDisplayMat, 0, MeshTopology.Triangles, 6, critterSkinStrokesCBuffer.count);
+
+        // CRITTER SKIN:
         critterSkinStrokesDisplayMat.SetPass(0);
         critterSkinStrokesDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         critterSkinStrokesDisplayMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
@@ -1640,6 +1663,14 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, baronVonWater.waterQuadStrokesDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterQuadStrokesCBuffer.count);
         
+        // FLOATY BITS!
+        floatyBitsDisplayMat.SetPass(0);
+        floatyBitsDisplayMat.SetTexture("_FluidColorTex", fluidManager._DensityA);
+        floatyBitsDisplayMat.SetBuffer("floatyBitsCBuffer", floatyBitsCBuffer);
+        floatyBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        cmdBufferTest.DrawProcedural(Matrix4x4.identity, floatyBitsDisplayMat, 0, MeshTopology.Triangles, 6, floatyBitsCBuffer.count);
+
+
         /*
         // WATER SPLINES:::
         baronVonWater.waterCurveStrokeDisplayMat.SetPass(0);

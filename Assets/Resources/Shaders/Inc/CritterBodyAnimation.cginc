@@ -44,8 +44,8 @@ float2 RotatePointVector2D(float2 p, float2 pivot, float2 forward) {
 }
 
 float GetSwimAngle(float t, float animCycle, float accel, float throttle, float magnitude, float turnAmount) {
-	float animSpeed = 8;
-	float accelAnimSpeed = 150;
+	float animSpeed = 12;
+	float accelAnimSpeed = 250;
 	float v = t * 0.5 + 0.5;
 	float offsetMask = saturate(1 - v * 0.75); 
 	

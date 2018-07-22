@@ -55,7 +55,7 @@
 				v2f o;
 								
 				FloatyBitData floatyBitData = floatyBitsCBuffer[inst];
-				float3 worldPosition = float3(floatyBitData.coords * _MapSize, -0.015);
+				float3 worldPosition = float3(floatyBitData.coords * _MapSize, 0);
 				float3 quadPoint = quadVerticesCBuffer[id];
 
 				o.fluidCoords = floatyBitData.coords;
@@ -66,10 +66,10 @@
 				float random1 = rand(float2(inst, inst));
 				float random2 = rand(float2(random1, random1));
 
-				float randomAspect = lerp(0.75, 1.33, random1);
+				float randomAspect = lerp(0.75, 1.36, random1);
 				float randomValue = rand(float2(inst, randomAspect * 10));
-				float randomScale = lerp(0.6, 1.5, random2);
-				float2 scale = float2(0.22 * randomAspect, 0.9 * (1.0 / randomAspect) * (velMag * 30 + 0.4)) * randomScale; //float2(randomAspect * randomScale, (1.0 / randomAspect) * randomScale * (length(velocity) * 25 + 1.61));
+				float randomScale = lerp(0.75, 1.4, random2);
+				float2 scale = float2(0.05 * randomAspect, 0.05 * (1.0 / randomAspect)) * randomScale; //float2(randomAspect * randomScale, (1.0 / randomAspect) * randomScale * (length(velocity) * 25 + 1.61));
 				//scale.x *= 1.35;
 				quadPoint *= float3(scale, 1.0);
 				
@@ -78,10 +78,10 @@
 				float3 rotatedPoint = float3(quadPoint.x * right + quadPoint.y * forward,
 											 quadPoint.z);
 				
-				float fadeIn = saturate(floatyBitData.age / 0.01);
-				float fadeOut = saturate((1.0 - floatyBitData.age) / 0.01);
+				float fadeIn = saturate(floatyBitData.age / 0.2);
+				float fadeOut = saturate((1.0 - floatyBitData.age) / 0.2);
 				float alpha = fadeIn * fadeOut;
-				alpha = alpha * (saturate(velMag * 20 + 0.5));
+				//alpha = alpha * (saturate(velMag * 20 + 0.5));
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(rotatedPoint, 0.0f));
 				float brightness = (random1);
@@ -95,12 +95,14 @@
 			{
 				
 				float4 texColor = tex2D(_MainTex, i.uv);  // Read Brush Texture
-				float4 fluidColor = tex2D(_FluidColorTex, i.fluidCoords * 1); // i.fluidCoords); 
+				//float4 fluidColor = tex2D(_FluidColorTex, i.fluidCoords * 1); // i.fluidCoords); 
 
-				float4 finalColor = float4(i.color) * texColor; //texColor * _Tint * float4(i.color, 1);
-				finalColor.rgb = lerp(fluidColor.rgb, i.color.rgb, 0.06);
-				finalColor.a *= 0.65;
-				finalColor.rgb *= 1.16;
+				float4 finalColor = texColor; //float4(1,1,1,1); //float4(0.1,0.1,0.05,1) * texColor; //texColor * _Tint * float4(i.color, 1);
+				finalColor.rgb = float3(0.9, 0.8, 0.5) * (0.25 + 0.75 * i.color.x);
+				finalColor.a *= i.color.a * 0.25;
+				//finalColor.rgb = lerp(fluidColor.rgb, i.color.rgb, 0.06);
+				//finalColor.a *= 0.65;
+				//finalColor.rgb *= 1.16;
 				//finalColor.rgb = float3(1,1,1);
 				return finalColor;
 				

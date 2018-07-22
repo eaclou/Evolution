@@ -44,7 +44,7 @@ public class CritterModuleMovementGenome {
 
     public void GenerateRandomGenome() {
         // Do stuff:
-        horsepower = 160f;
+        horsepower = 140f;
         turnRate = 24f;
     }
 
