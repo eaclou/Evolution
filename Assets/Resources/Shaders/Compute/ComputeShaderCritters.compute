@@ -1,12 +1,11 @@
 ﻿#pragma kernel CSSimulateCritterStrokes
 
 #include "Assets/Resources/Shaders/Inc/CritterBodyAnimation.cginc"
-#include "Assets/Resources/Shaders/Inc/StructsCritterData.cginc"
 
 StructuredBuffer<CritterInitData> critterInitDataCBuffer;
 StructuredBuffer<CritterSimData> critterSimDataCBuffer;
 
-RWStructuredBuffer<CritterBodyStrokeData> critterStrokesWriteCBuffer;
+RWStructuredBuffer<CritterSkinStrokeData> critterSkinStrokesWriteCBuffer;
 
 Texture2D<float4> terrainHeightTex;
 //RWStructuredBuffer<FrameBufferStrokeData> terrainFrameBufferStrokesCBuffer;
@@ -27,8 +26,8 @@ float rand(float2 co){   // OUTPUT is in [0,1] RANGE!!!
 void CSSimulateCritterStrokes (uint3 id : SV_DispatchThreadID)
 {
 	// If detached, actual worldPos can lag behind pinned default position on agent:
-
-	CritterBodyStrokeData brushData = critterStrokesWriteCBuffer[id.x];
+	/*
+	CritterBodyStrokeData brushData = critterSkinStrokesWriteCBuffer[id.x];
 	
 	int agentIndex = brushData.parentIndex;	
 	CritterInitData critterInitData = critterInitDataCBuffer[agentIndex];
@@ -51,7 +50,8 @@ void CSSimulateCritterStrokes (uint3 id : SV_DispatchThreadID)
 
 
 	brushData.worldPos = float3(critterSimData.worldPos, 0) + centerPosition;	
-	critterStrokesWriteCBuffer[id.x] = brushData;
+	critterSkinStrokesWriteCBuffer[id.x] = brushData;
+	*/
 }
 
 /*   OLD:::::
@@ -60,7 +60,7 @@ void CSSimulateCritterStrokes (uint3 id : SV_DispatchThreadID)
 {
 	// If detached, actual worldPos can lag behind pinned default position on agent:
 
-	CritterBodyStrokeData brushData = critterStrokesWriteCBuffer[id.x];
+	CritterBodyStrokeData brushData = critterSkinStrokesWriteCBuffer[id.x];
 	
 	int agentIndex = brushData.parentIndex;	
 	CritterInitData critterInitData = critterInitDataCBuffer[agentIndex];
@@ -99,26 +99,26 @@ void CSSimulateCritterStrokes (uint3 id : SV_DispatchThreadID)
 	float attachThreshold = rand(brushData.localPos.xy * 100); //critterSimData.health
 	float pinnedAmount = saturate(100.0 * (critterSimData.health - attachThreshold)) * (1.0 - critterSimData.decayPercentage);   //brushData.strength;
 	
-	//critterStrokesWriteCBuffer[id.x].strength = pinnedAmount;
+	//critterSkinStrokesWriteCBuffer[id.x].strength = pinnedAmount;
 
-	critterStrokesWriteCBuffer[id.x].strength  = critterStrokesWriteCBuffer[id.x].strength + 0.006;
+	critterSkinStrokesWriteCBuffer[id.x].strength  = critterSkinStrokesWriteCBuffer[id.x].strength + 0.006;
 
 	if(pinnedAmount < 0.01) {
 		
-		critterStrokesWriteCBuffer[id.x].lifeStatus = 0;
-		critterStrokesWriteCBuffer[id.x].strength = saturate(critterStrokesWriteCBuffer[id.x].strength);
+		critterSkinStrokesWriteCBuffer[id.x].lifeStatus = 0;
+		critterSkinStrokesWriteCBuffer[id.x].strength = saturate(critterSkinStrokesWriteCBuffer[id.x].strength);
 	}
 	else {
-		if(critterStrokesWriteCBuffer[id.x].lifeStatus < 0.5) {
-			critterStrokesWriteCBuffer[id.x].strength = 0;
-			critterStrokesWriteCBuffer[id.x].lifeStatus = 1;
+		if(critterSkinStrokesWriteCBuffer[id.x].lifeStatus < 0.5) {
+			critterSkinStrokesWriteCBuffer[id.x].strength = 0;
+			critterSkinStrokesWriteCBuffer[id.x].lifeStatus = 1;
 		}
-		critterStrokesWriteCBuffer[id.x].strength = min(0.5, critterStrokesWriteCBuffer[id.x].strength);
+		critterSkinStrokesWriteCBuffer[id.x].strength = min(0.5, critterSkinStrokesWriteCBuffer[id.x].strength);
 		pinnedAmount = 1.0;
 	}
 
 	
 
-	critterStrokesWriteCBuffer[id.x].worldPos = lerp(curWorldPos, newWorldPos, pinnedAmount);
+	critterSkinStrokesWriteCBuffer[id.x].worldPos = lerp(curWorldPos, newWorldPos, pinnedAmount);
 }
 */

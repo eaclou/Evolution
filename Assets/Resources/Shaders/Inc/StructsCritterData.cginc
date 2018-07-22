@@ -1,5 +1,5 @@
 struct CritterInitData {
-	float2 boundingBoxSize;
+	float3 boundingBoxSize;
 	float spawnSizePercentage;
 	float maxEnergy;
 	float3 primaryHue;
@@ -9,7 +9,7 @@ struct CritterInitData {
 	int bodyPatternY;  // what grid cell of texture sheet to use
 };
 struct CritterSimData {
-	float2 worldPos;
+	float3 worldPos;
 	float2 velocity;
 	float2 heading;
 	float growthPercentage;
@@ -25,7 +25,7 @@ struct CritterSimData {
 	float accel;
 	float smoothedThrottle;
 };
-struct CritterBodyStrokeData {
+struct CritterSkinStrokeData {
 	int parentIndex;  // what agent/object is this attached to?	
 	int brushType;
 	float3 worldPos;

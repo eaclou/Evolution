@@ -229,7 +229,7 @@
 				finalGrowColor.a *= saturate(rawData.foodAmount.r * 0.6 + 0.4);
 				finalGrowColor.a *= 1;
 
-				finalGrowColor.rgb = lerp(finalGrowColor.rgb, float3(1,1,0.05), 1);
+				finalGrowColor.rgb = lerp(finalGrowColor.rgb, float3(0.7,1,0.1), 1);
 				
 				return finalGrowColor;
 			}

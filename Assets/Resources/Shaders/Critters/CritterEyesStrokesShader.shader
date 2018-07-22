@@ -22,7 +22,6 @@
 			#pragma target 5.0
 			#include "UnityCG.cginc"
 			#include "Assets/Resources/Shaders/Inc/CritterBodyAnimation.cginc"
-			#include "Assets/Resources/Shaders/Inc/StructsCritterData.cginc"
 
 			sampler2D _MainTex;
 			float4 _MainTex_ST;
@@ -81,17 +80,17 @@
 				// spriteCenterPos!!! ::::  ===========================================================================
 				float2 centerPosition = eyeData.localPos;
 				// foodBloat (normalized coords -1,1)
-				centerPosition = foodBloatAnimPos(centerPosition, eyeData.localPos.y, critterSimData.foodAmount);
+				//centerPosition = foodBloatAnimPos(centerPosition, eyeData.localPos.y, critterSimData.foodAmount);
 				// biteAnim (normalized coords -1, 1)
-				centerPosition = biteAnimPos(centerPosition, eyeData.localPos.y, critterSimData.biteAnimCycle);
+				//centerPosition = biteAnimPos(centerPosition, eyeData.localPos.y, critterSimData.biteAnimCycle);
 				// scale coords by agent size? does order of ops matter?
-				centerPosition = centerPosition * curAgentSize * 0.5;
+				//centerPosition = centerPosition * curAgentSize * 0.5;
 				// swimAnim:
 				float bodyAspectRatio = critterInitData.boundingBoxSize.y / critterInitData.boundingBoxSize.x;
 				float bendStrength = 0.5 * saturate(bodyAspectRatio * 0.5 - 0.4);
-				centerPosition = swimAnimPos(centerPosition, eyeData.localPos.y, critterSimData.moveAnimCycle, critterSimData.accel, critterSimData.smoothedThrottle, bendStrength, critterSimData.turnAmount);
+				//centerPosition = swimAnimPos(centerPosition, eyeData.localPos.y, critterSimData.moveAnimCycle, critterSimData.accel, critterSimData.smoothedThrottle, bendStrength, critterSimData.turnAmount);
 				// rotate with agent:
-				centerPosition = rotatePointVector(centerPosition, float2(0,0), critterSimData.heading);
+				//centerPosition = rotatePointVector(centerPosition, float2(0,0), critterSimData.heading);
 
 				// vertexOffsetFromSpriteCenter!!! :::: ===============================================================
 				//float dotGrowth = saturate(bodyStrokeData.strength * 2.0);
@@ -104,7 +103,7 @@
 				if(length(critterSimData.velocity) < 0.0001) {
 					forwardGaze = critterSimData.heading;
 				}
-				centerToVertexOffset = rotatePointVector(centerToVertexOffset, float2(0,0), forwardGaze);
+				//centerToVertexOffset = rotatePointVector(centerToVertexOffset, float2(0,0), forwardGaze);
 
 				float3 worldPosition = float3(critterPosition + centerPosition + centerToVertexOffset, curAgentSize.x);
 

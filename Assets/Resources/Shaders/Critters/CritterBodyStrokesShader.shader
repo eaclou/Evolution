@@ -17,6 +17,8 @@
 		Pass
 		{
 			CGPROGRAM
+// Upgrade NOTE: excluded shader from DX11, OpenGL ES 2.0 because it uses unsized arrays
+#pragma exclude_renderers d3d11 gles
 			#pragma vertex vert
 			#pragma fragment frag
 			#pragma target 5.0
@@ -61,50 +63,50 @@
 				uint agentIndex = bodyStrokeData.parentIndex;
 				CritterInitData critterInitData = critterInitDataCBuffer[agentIndex];
 				CritterSimData critterSimData = critterSimDataCBuffer[agentIndex];
-
 				o.bufferIndices = int2(inst, agentIndex);
 				
+				float3 critterWorldPos = critterSimData.worldPos;
+				float3 critterCurScale = critterInitData[].boundingBoxSize * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage);
+
+				float3 worldPosition = float3(128,128,0) + quadVerticesCBuffer[id] * 10; //bodyStrokeData.worldPos + quadVerticesCBuffer[id];
+				
+				/*
 				float2 critterPosition = critterSimData.worldPos.xy;
-				float2 centerToVertexOffset = quadVerticesCBuffer[id];
+				float2 centerToVertexOffset = quadVerticesCBuffer[id] * 1;
 				
 				float2 curAgentSize = critterInitData.boundingBoxSize * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage);
 				
-				// ******
-				//curAgentSize *= 5;
-				//*****
-
 				float dotGrowth = saturate(bodyStrokeData.strength * 2.0);
 				float dotDecay = saturate((bodyStrokeData.strength - 0.5) * 2);
 				float dotHealthValue = dotGrowth * (1.0 - dotDecay);
-				centerToVertexOffset *= bodyStrokeData.localScale * curAgentSize * dotHealthValue * 1.7;
-				centerToVertexOffset.x *= 1.33;
-
+				
+				centerToVertexOffset *= bodyStrokeData.localScale * curAgentSize * dotHealthValue;	
+				
 				float bodyAspectRatio = critterInitData.boundingBoxSize.y / critterInitData.boundingBoxSize.x;
 				float bendStrength = 0.5; // * saturate(bodyAspectRatio * 0.5 - 0.4);
 				float swimAngle = getSwimAngle(bodyStrokeData.localPos.y, critterSimData.moveAnimCycle, critterSimData.accel, critterSimData.smoothedThrottle, bendStrength, critterSimData.turnAmount);
 				centerToVertexOffset = rotate_point(float2(0,0), swimAngle, centerToVertexOffset);
 				centerToVertexOffset = rotatePointVector(centerToVertexOffset, float2(0,0), critterSimData.heading);
 
-				float3 worldPosition = float3(bodyStrokeData.worldPos + centerToVertexOffset, curAgentSize.x);
+				float3 worldPosition = float3(bodyStrokeData.worldPos + float3(centerToVertexOffset, 0));
+				*/
+				
+				/*
 				
 				float3 localNormal = normalize(bodyStrokeData.localPos);
 				float3 worldNormal = localNormal;
+				worldNormal = normalize(float3(worldNormal.x * critterInitData.boundingBoxSize.y, worldNormal.y * critterInitData.boundingBoxSize.x, worldNormal.z * critterInitData.boundingBoxSize.y));
 				worldNormal.xy = float2(localNormal.x * cos(swimAngle) - localNormal.y * sin(swimAngle), localNormal.y * cos(swimAngle) + localNormal.x * sin(swimAngle));
-				
-				o.worldNormal = worldNormal;
-				
+				worldNormal.xy = rotatePointVector(worldNormal.xy, float2(0,0), critterSimData.heading);
+				*/
 				float alpha = saturate(1.0 - critterSimData.decayPercentage * 1.2);
-
-				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)));
-				o.worldPos = worldPosition; // + rotatedPoint1;
-
-				float2 fakeNml = rotatePointVector(normalize(bodyStrokeData.localPos), float2(0,0), critterSimData.heading);
-				float diffuse = saturate(dot(fakeNml, float2(0,1)));
 				
-				o.color = float4(saturate(dotHealthValue * 10),bodyStrokeData.lifeStatus,diffuse,alpha);
+				o.worldNormal = float3(0,0,-1); //worldNormal;
+				o.worldPos = worldPosition;
+				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)));
+				o.color = float4(saturate(dotHealthValue * 10),bodyStrokeData.lifeStatus,0,alpha);
 
 				const float tilePercentage = (1.0 / 8.0);
-
 				float2 baseUV = quadVerticesCBuffer[id] + 0.5f;				
 
 				// PATTERNS UV:
@@ -114,8 +116,8 @@
 				patternUV *= tilePercentage; // randVariation eventually
 				patternUV.x += tilePercentage * randPatternIDX;
 				patternUV.y += tilePercentage * randPatternIDY;
-				o.uvPattern = patternUV;
-								
+				
+				o.uvPattern = patternUV;								
 				o.uv = baseUV;
 				
 				return o;
@@ -123,6 +125,9 @@
 
 			fixed4 frag(v2f i) : SV_Target
 			{
+				
+				return float4(1,1,1,1);
+				/*
 				//CritterBodyStrokeData bodyStrokeData = bodyStrokesCBuffer[i.bufferIndices.x];
 				//AgentSimData agentSimData = agentSimDataCBuffer[i.bufferIndices.y];
 				CritterInitData critterInitData = critterInitDataCBuffer[i.bufferIndices.y];
@@ -131,33 +136,22 @@
 				float4 texColor = tex2D(_MainTex, i.uv);  // Read Brush Texture start Row
 				//float4 texColor1 = tex2D(_MainTex, i.uv.zw);  // Read Brush Texture end Row
 
-				float4 patternSample = tex2Dlod(_PatternTex, float4(i.uvPattern, 0, 3));
-				
+				float4 patternSample = tex2Dlod(_PatternTex, float4(i.uvPattern, 0, 3));				
 				//float4 brushColor = lerp(texColor0, texColor1, i.frameBlendLerp);
 
 				// *** Better way to handle this???
 				float4 finalColor = float4(lerp(critterInitData.primaryHue, critterInitData.secondaryHue, patternSample.x), texColor.a);
 				finalColor.a *= i.color.a;
 				finalColor.rgb = lerp(float3(1, 0.5, 0.5), finalColor.rgb, i.color.g) * 0.75;
-				//finalColor.rgb *= lerp(1, i.color.b * 1.5, 0.25);
-				//finalColor.rgb = lerp(float3(0.65, 0.65, 0.65), finalColor.rgb, saturate(critterSimData.growthPercentage * 10));
-				//finalColor.rgb = lerp(float3(0.45, 0.45, 0.45), finalColor.rgb, saturate(critterSimData.energy * 5));
 				
-				//finalColor.rgb += 0.35;
-				//finalColor.rgb = float3(0.15 ,0.4 ,0.8);
+				float3 lightDir = normalize(_WorldSpaceLightPos0.xyz);
+				float diffuseLight = saturate(dot(lightDir, normalize(i.worldNormal)));
+				//return float4(i.worldNormal,1);
 
-				// how to keep track of proper surface normal??? do it int he compute shader and store it?
-				// Rotate in direction of agent for now:
-				//float3 normal = bodyStrokeData.localPos;
-				//float angle = 2.0;
-				//normal.xy = float2(bodyStrokeData.localPos.x * cos(angle) - bodyStrokeData.localPos.y * sin(angle), bodyStrokeData.localPos.y * cos(angle) + bodyStrokeData.localPos.x * sin(angle));
-
-				float3 lightDir = normalize(float3(1, 0, 0));
-				float diffuseLight = dot(lightDir, normalize(i.worldNormal));
 				return float4(diffuseLight,diffuseLight,diffuseLight,1);
 
 				return finalColor;
-				
+				*/
 			}
 		ENDCG
 		}

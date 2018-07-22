@@ -1,13 +1,20 @@
-struct AgentMovementAnimData {
+#include "Assets/Resources/Shaders/Inc/StructsCritterData.cginc"
+
+struct CritterSwimAnimData {
 	float animCycle;
 	float turnAmount;
 	float accel;
 	float smoothedThrottle;
 };
 
-float2 rotate_point(float2 pivot, float angle, float2 p)
+//struct CritterAnimOutData {
+//	float3 spritePivotPos;
+//	float3 spriteVertexPos;
+//};
+
+float3 RotatePointAroundZAngle(float3 pivot, float angle, float3 p)
 {
-	float2 rotatedPoint = p;
+	float3 rotatedPoint = p;
 	float s = sin(angle);
 	float c = cos(angle);
 
@@ -17,22 +24,104 @@ float2 rotate_point(float2 pivot, float angle, float2 p)
 	// rotate point
 	float xnew = rotatedPoint.x * c - rotatedPoint.y * s;
 	float ynew = rotatedPoint.x * s + rotatedPoint.y * c;
-
-	rotatedPoint = float2(xnew, ynew);
+	
+	rotatedPoint.xy = float2(xnew, ynew);
 
 	// translate point back:
 	rotatedPoint += pivot;
 
+	rotatedPoint.z = p.z;
+
 	return rotatedPoint;
 }
 
-float2 rotatePointVector(float2 p, float2 pivot, float2 forward) {
+float2 RotatePointVector2D(float2 p, float2 pivot, float2 forward) {
 	float2 newPos = p - pivot;
 	float2 right = float2(forward.y, -forward.x);
 	newPos = newPos.x * right + newPos.y * forward;
 	newPos += pivot;
 	return newPos;
 }
+
+float GetSwimAngle(float t, float animCycle, float accel, float throttle, float magnitude, float turnAmount) {
+	float animSpeed = 8;
+	float accelAnimSpeed = 150;
+	float v = t * 0.5 + 0.5;
+	float offsetMask = saturate(1 - v * 0.75); 
+	
+	//float angle = clamp(turnAmount * -1.33, -6.282, 6.282) * offsetMask;
+	//float angle = magnitude * sin(v * 3.141592 + animCycle * animSpeed + accel * accelAnimSpeed);// * offsetMask;
+
+	float angle = magnitude * sin(v * 3.141592 + animCycle * animSpeed + accel * accelAnimSpeed) * offsetMask * throttle + clamp(turnAmount * -1.33, -6.2, 6.2) * offsetMask;
+
+	return angle;
+}
+
+float3 TransformPosRotateYaw() {
+	
+}
+
+float3 TransformPosRotateRoll() {
+
+}
+
+float3 TransformDirRotateYaw() {
+
+}
+
+float3 TransformDirRotateRoll() {
+
+}
+
+float3 GetAnimatedPos(float3 inPos, float3 pivotPos, CritterInitData critterInitData, CritterSimData critterSimData, CritterSkinStrokeData strokeData) {
+	
+	float magnitude = 0.5;
+
+	float swimAngle = GetSwimAngle(strokeData.localPos.y, critterSimData.moveAnimCycle, critterSimData.accel, critterSimData.smoothedThrottle, magnitude, critterSimData.turnAmount);
+	float3 outPos = RotatePointAroundZAngle(float3(0,0,0), swimAngle, inPos);
+
+	// Rotate with Critter:
+	float2 forward = critterSimData.heading;;
+	float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
+	float2 rotatedPoint = float2(outPos.x * right + outPos.y * forward);  // Rotate localRotation by AgentRotation
+	
+	outPos.xy = rotatedPoint;
+
+	return outPos;
+}
+float3 GetAnimatedDir(float3 inDir, float3 pivotPos, CritterInitData critterInitData, CritterSimData critterSimData, CritterSkinStrokeData strokeData) {
+	float magnitude = 0.5;
+
+	float swimAngle = GetSwimAngle(strokeData.localPos.y, critterSimData.moveAnimCycle, critterSimData.accel, critterSimData.smoothedThrottle, magnitude, critterSimData.turnAmount);
+	float3 outDir = RotatePointAroundZAngle(float3(0,0,0), swimAngle, inDir);
+
+	// Rotate with Critter:
+	float2 forward = critterSimData.heading;;
+	float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
+	float2 rotatedPoint = float2(outDir.x * right + outDir.y * forward);  // Rotate localRotation by AgentRotation
+	
+	outDir.xy = rotatedPoint;
+
+	return outDir;
+}
+
+
+
+
+
+// *********************************************************************************************************************************************************
+// OLD:::::
+// *********************************************************************************************************************************************************
+
+/*
+struct AgentMovementAnimData {
+	float animCycle;
+	float turnAmount;
+	float accel;
+	float smoothedThrottle;
+};
+
+
 
 // scale to critter size
 // keep pivot & billboard vertex offset separate?
@@ -75,7 +164,7 @@ float2 swimAnimPos(float2 originalPos, float t, float animCycle, float accel, fl
 	
 
 	float swimAngle = getSwimAngle(t, animCycle, accel, throttle, magnitude, turnAmount);
-	float2 newPos = rotate_point(float2(0,0), swimAngle, originalPos);
+	float2 newPos = RotatePointAngle2D(float2(0,0), swimAngle, originalPos);
 	
 	return newPos;
 }
@@ -114,7 +203,8 @@ float2 getWarpedPoint(float2 originalPoint, float2 brushCenter, float2 spriteVer
 	float panningYawStrength = 0.5 * saturate(bodyAspectRatio * 0.5 - 0.4);
 	float turningAngle = turnAmount;
 	//float2 warpedPoint = originalPoint + spriteVertexLocalPos; //rotate_point(float2(0,size.y * 0.25), clamp(turningAngle * -1, -1, 1) * offsetMask + panningYawStrength * sin(v * 3.2 + animCycle * animSpeed + accel * accelAnimSpeed) * offsetMask * throttle, originalPoint);
-	float2 warpedPoint = rotate_point(float2(0,size.y * 0.25), clamp(turningAngle * -1, -1, 1) * offsetMask + panningYawStrength * sin(v * 3.2 + animCycle * animSpeed + accel * accelAnimSpeed) * offsetMask * throttle, localPosition);
+	float2 warpedPoint = RotatePointAngle2D(float2(0,size.y * 0.25), clamp(turningAngle * -1, -1, 1) * offsetMask + panningYawStrength * sin(v * 3.2 + animCycle * animSpeed + accel * accelAnimSpeed) * offsetMask * throttle, localPosition);
 				
 	return warpedPoint;
 }
+*/

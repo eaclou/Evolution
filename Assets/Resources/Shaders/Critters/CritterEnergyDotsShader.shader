@@ -24,43 +24,6 @@
 
 			sampler2D _MainTex;
 			
-			struct CritterStrokeData {
-				int parentIndex;  // what agent/object is this attached to?				
-				float2 worldPos;
-				float2 localPos;
-				float2 localDir;
-				float2 localScale;
-				float strength;  // abstraction for pressure of brushstroke + amount of paint 
-				float lifeStatus;
-				int brushType;
-			};
-			struct CritterInitData {
-				float2 boundingBoxSize;
-				float spawnSizePercentage;
-				float maxEnergy;
-				float3 primaryHue;
-				float3 secondaryHue;
-				int bodyPatternX;  // what grid cell of texture sheet to use
-				int bodyPatternY;  // what grid cell of texture sheet to use
-			};
-			struct CritterSimData {
-				float2 worldPos;
-				float2 velocity;
-				float2 heading;
-				float growthPercentage;
-				float decayPercentage;
-				float foodAmount;
-				float energy;
-				float health;
-				float stamina;
-				float isBiting;
-				float biteAnimCycle;
-				float moveAnimCycle;
-				float turnAmount;
-				float accel;
-				float smoothedThrottle;
-			};
-
 			struct AgentSimData {
 				float2 worldPos;
 				float2 velocity;
@@ -76,7 +39,7 @@
 
 			StructuredBuffer<CritterInitData> critterInitDataCBuffer;
 			StructuredBuffer<CritterSimData> critterSimDataCBuffer;
-			StructuredBuffer<CritterStrokeData> bodyStrokesCBuffer;
+			StructuredBuffer<CritterSkinStrokeData> bodyStrokesCBuffer;
 
 			StructuredBuffer<float3> quadVerticesCBuffer;
 			
@@ -97,7 +60,7 @@
 			{
 				v2f o;
 								
-				CritterStrokeData bodyStrokeData = bodyStrokesCBuffer[inst];
+				CritterSkinStrokeData bodyStrokeData = bodyStrokesCBuffer[inst];
 				uint agentIndex = bodyStrokeData.parentIndex;
 				CritterInitData critterInitData = critterInitDataCBuffer[agentIndex];
 				CritterSimData critterSimData = critterSimDataCBuffer[agentIndex];
@@ -111,19 +74,19 @@
 				float2 centerPosition = bodyStrokeData.localPos * 0.9;
 				float v = centerPosition.y;
 				// foodBloat (normalized coords -1,1)
-				centerPosition = foodBloatAnimPos(centerPosition, bodyStrokeData.localPos.y, critterSimData.foodAmount);
+				//centerPosition = foodBloatAnimPos(centerPosition, bodyStrokeData.localPos.y, critterSimData.foodAmount);
 				// biteAnim (normalized coords -1, 1)
-				centerPosition = biteAnimPos(centerPosition, bodyStrokeData.localPos.y, critterSimData.biteAnimCycle);
+				//centerPosition = biteAnimPos(centerPosition, bodyStrokeData.localPos.y, critterSimData.biteAnimCycle);
 				// scale coords by agent size? does order of ops matter?
 				centerPosition = centerPosition * curAgentSize * 0.5;
 				// swimAnim:
 				float bodyAspectRatio = critterInitData.boundingBoxSize.y / critterInitData.boundingBoxSize.x;
 				float bendStrength = 0.5; // * saturate(bodyAspectRatio * 0.5 - 0.4);
-				float swimAngle = getSwimAngle(bodyStrokeData.localPos.y, critterSimData.moveAnimCycle, critterSimData.accel, critterSimData.smoothedThrottle, bendStrength, critterSimData.turnAmount);
+				//float swimAngle = getSwimAngle(bodyStrokeData.localPos.y, critterSimData.moveAnimCycle, critterSimData.accel, critterSimData.smoothedThrottle, bendStrength, critterSimData.turnAmount);
 
-				centerPosition = rotate_point(float2(0,0), swimAngle, centerPosition);
+				//centerPosition = rotate_point(float2(0,0), swimAngle, centerPosition);
 				// rotate with agent:
-				centerPosition = rotatePointVector(centerPosition, float2(0,0), critterSimData.heading);
+				//centerPosition = rotatePointVector(centerPosition, float2(0,0), critterSimData.heading);
 
 				
 				//centerToVertexOffset *= bodyStrokeData.localScale * length(curAgentSize) * saturate(critterSimData.energy / critterInitData.maxEnergy) * 0.2 * (1.0 - critterSimData.decayPercentage);
@@ -139,8 +102,8 @@
 				centerToVertexOffset *= bodyStrokeData.localScale * curAgentSize * 0.1;
 				centerToVertexOffset.x *= 1.33;
 				
-				centerToVertexOffset = rotate_point(float2(0,0), swimAngle, centerToVertexOffset);
-				centerToVertexOffset = rotatePointVector(centerToVertexOffset, float2(0,0), critterSimData.heading);
+				//centerToVertexOffset = rotate_point(float2(0,0), swimAngle, centerToVertexOffset);
+				//centerToVertexOffset = rotatePointVector(centerToVertexOffset, float2(0,0), critterSimData.heading);
 				//========================================================================================================================&&&&&&&&&
 				
 				float3 worldPosition = float3(critterPosition + centerPosition + centerToVertexOffset, -0.5);

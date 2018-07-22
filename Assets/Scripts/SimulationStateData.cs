@@ -19,7 +19,7 @@ public class SimulationStateData {
         public float foodAmount;
     }
     public struct CritterInitData {
-        public Vector2 boundingBoxSize;
+        public Vector3 boundingBoxSize;
         public float spawnSizePercentage;
         public float maxEnergy;
         public Vector3 primaryHue;
@@ -29,7 +29,7 @@ public class SimulationStateData {
         public int bodyPatternY;  // what grid cell of texture sheet to use
     }
     public struct CritterSimData {
-        public Vector2 worldPos;
+        public Vector3 worldPos;
         public Vector2 velocity;
         public Vector2 heading;
         public float growthPercentage;
@@ -153,13 +153,13 @@ public class SimulationStateData {
         for(int i = 0; i < critterInitDataArray.Length; i++) {
             critterInitDataArray[i] = new CritterInitData();
         }
-        critterInitDataCBuffer = new ComputeBuffer(critterInitDataArray.Length, sizeof(float) * 11 + sizeof(int) * 2);
+        critterInitDataCBuffer = new ComputeBuffer(critterInitDataArray.Length, sizeof(float) * 12 + sizeof(int) * 2);
 
         critterSimDataArray = new CritterSimData[simManager._NumAgents];
         for(int i = 0; i < critterSimDataArray.Length; i++) {
             critterSimDataArray[i] = new CritterSimData();
         }
-        critterSimDataCBuffer = new ComputeBuffer(critterSimDataArray.Length, sizeof(float) * 18);
+        critterSimDataCBuffer = new ComputeBuffer(critterSimDataArray.Length, sizeof(float) * 19);
 
         debugBodyResourcesArray = new DebugBodyResourcesData[simManager._NumAgents];
         for(int i = 0; i < debugBodyResourcesArray.Length; i++) {
@@ -281,7 +281,7 @@ public class SimulationStateData {
         // CRITTER SIM DATA: updated every frame:
         for(int i = 0; i < critterSimDataArray.Length; i++) {
             Vector3 agentPos = simManager.agentsArray[i].bodyRigidbody.position;            
-            critterSimDataArray[i].worldPos = new Vector2(agentPos.x, agentPos.y);  // in world(scene) coordinates
+            critterSimDataArray[i].worldPos = new Vector3(agentPos.x, agentPos.y, simManager.agentsArray[i].fullSizeBoundingBox.x * 0.5f);  // in world(scene) coordinates
             if(simManager.agentsArray[i].smoothedThrottle.sqrMagnitude > 0f) {
                 critterSimDataArray[i].velocity = simManager.agentsArray[i].smoothedThrottle.normalized;
             }

@@ -214,9 +214,9 @@ public class SimulationManager : MonoBehaviour {
                 audioManager.TurnOffMenuAudioGroup();
 
                 // Populate renderKingBuffers:
-                for(int i = 0; i < numAgents; i++) {
-                    theRenderKing.UpdateAgentBodyStrokesBuffer(i); // hacky fix but seems to work...
-                }
+                //for(int i = 0; i < numAgents; i++) {
+                //    theRenderKing.UpdateAgentBodyStrokesBuffer(i); // hacky fix but seems to work...
+                //}
 
                 RespawnPlayer(); // Needed???? *****
                 
@@ -1474,7 +1474,7 @@ public class SimulationManager : MonoBehaviour {
         CreateMutatedCopyOfAgent(agentIndex, speciesIndex); 
         
         theRenderKing.UpdateAgentSmearStrokesBuffer(agentIndex);
-        theRenderKing.UpdateAgentBodyStrokesBuffer(agentIndex);
+        //theRenderKing.UpdateAgentBodyStrokesBuffer(agentIndex);
         theRenderKing.UpdateAgentEyeStrokesBuffer(agentIndex);
         /*}
         else {
@@ -1723,7 +1723,7 @@ public class SimulationManager : MonoBehaviour {
 
         int randZone = UnityEngine.Random.Range(0, numSpawnZones);
 
-        float randRadius = 10f;
+        float randRadius = startPositionsPresets.spawnZonesList[randZone].radius;
 
         Vector2 randOffset = UnityEngine.Random.insideUnitCircle * randRadius;
 
@@ -1839,7 +1839,7 @@ public class SimulationManager : MonoBehaviour {
         agentsArray[0].humanControlLerp = 1f;
         CreateMutatedCopyOfAgent(0, 0);         
         theRenderKing.UpdateAgentSmearStrokesBuffer(0);
-        theRenderKing.UpdateAgentBodyStrokesBuffer(0);
+        //theRenderKing.UpdateAgentBodyStrokesBuffer(0);
         theRenderKing.UpdateAgentEyeStrokesBuffer(0);
         theRenderKing.SimPlayerGlow();
         

@@ -101,7 +101,7 @@ public class Agent : MonoBehaviour {
     //private Rigidbody2D rigidBody2D; // ** segments???
 
     //public Vector2 fullSize;
-    public Vector2 fullSizeBoundingBox;
+    public Vector3 fullSizeBoundingBox;
     public float averageFullSizeWidth = 1f;  // used to determine size of collider
     public float fullSizeBodyVolume = 1f;
     public float centerOfMass = 0f;
@@ -556,7 +556,7 @@ public class Agent : MonoBehaviour {
         Vector3 curPos = bodyRigidbody.transform.position;
         
         curVel = (curPos - prevPos).magnitude;
-        curAccel = curVel - prevVel;
+        curAccel = Mathf.Lerp(curAccel, (curVel - prevVel), 0.2f);
 
         avgVel = Mathf.Lerp(avgVel, (curPos - prevPos).magnitude, 0.25f); // OLD
 
@@ -878,7 +878,9 @@ public class Agent : MonoBehaviour {
 
         turningAmount = Mathf.Lerp(turningAmount, this.bodyRigidbody.angularVelocity * Mathf.Deg2Rad * 0.1f, 0.08f);
 
-        if (throttle.sqrMagnitude > 0.0001f) {  // Throttle is NOT == ZERO
+        animationCycle += smoothedThrottle.magnitude * swimAnimationCycleSpeed / (Mathf.Lerp(fullSizeBoundingBox.y, 1f, 0.75f) * (growthPercentage * 0.25f + 0.75f));;
+
+        if (throttle.sqrMagnitude > 0.000001f) {  // Throttle is NOT == ZERO
             
             Vector2 headForwardDir = new Vector2(this.bodyRigidbody.transform.up.x, this.bodyRigidbody.transform.up.y).normalized;
             Vector2 headRightDir =  new Vector2(this.bodyRigidbody.transform.right.x, this.bodyRigidbody.transform.right.y).normalized;
@@ -894,7 +896,7 @@ public class Agent : MonoBehaviour {
 
             //this.rigidbodiesArray[0].AddForce(headForwardDir * speed * Time.deltaTime, ForceMode2D.Impulse);
 
-            animationCycle += swimAnimationCycleSpeed * throttle.magnitude / (Mathf.Lerp(coreModule.coreLength, 1f, 0.6f) * (growthPercentage * 0.4f + 0.6f));
+            //animationCycle += 0.01f; // swimAnimationCycleSpeed; // * smoothedThrottle.magnitude / (Mathf.Lerp(fullSizeBoundingBox.y, 1f, 0.6f) * (growthPercentage * 0.4f + 0.6f));
             //animationCycle = animationCycle % 1.0f;
 
             // get size in 0-1 range from minSize to maxSize:
@@ -959,7 +961,7 @@ public class Agent : MonoBehaviour {
         
         // Calculate Widths, total volume, center of mass, etc:
         // REFACTOR!!! ******
-        this.fullSizeBoundingBox = new Vector2(genome.bodyGenome.coreGenome.fullBodyWidth, genome.bodyGenome.coreGenome.fullBodyLength);
+        this.fullSizeBoundingBox = new Vector3(genome.bodyGenome.coreGenome.fullBodyWidth, genome.bodyGenome.coreGenome.fullBodyLength, genome.bodyGenome.coreGenome.fullBodyWidth);
 
         // Calculate body regions lengthwise:
         float totalRelativeLength = genome.bodyGenome.coreGenome.relLengthSnout + genome.bodyGenome.coreGenome.relLengthHead + genome.bodyGenome.coreGenome.relLengthTorso + genome.bodyGenome.coreGenome.relLengthTail;
@@ -1068,7 +1070,7 @@ public class Agent : MonoBehaviour {
         numSegments = genome.bodyGenome.coreGenome.numSegments;
         
         curLifeStage = AgentLifeStage.Egg;
-        this.fullSizeBoundingBox = new Vector2(genome.bodyGenome.coreGenome.fullBodyWidth, genome.bodyGenome.coreGenome.fullBodyLength); // ** REFACTOR ***
+        this.fullSizeBoundingBox = new Vector3(genome.bodyGenome.coreGenome.fullBodyWidth, genome.bodyGenome.coreGenome.fullBodyLength, genome.bodyGenome.coreGenome.fullBodyWidth); // ** REFACTOR ***
         isNull = false;
         wasImpaled = false;
         lifeStageTransitionTimeStepCounter = 0;

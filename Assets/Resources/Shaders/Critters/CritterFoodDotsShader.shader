@@ -21,20 +21,9 @@
 			#include "UnityCG.cginc"
 			#include "Assets/Resources/Shaders/Inc/NoiseShared.cginc"
 			#include "Assets/Resources/Shaders/Inc/CritterBodyAnimation.cginc"
-			#include "Assets/Resources/Shaders/Inc/StructsCritterData.cginc"
 
 			sampler2D _MainTex;
 			
-			struct CritterStrokeData {
-				int parentIndex;  // what agent/object is this attached to?				
-				float2 worldPos;
-				float2 localPos;
-				float2 localDir;
-				float2 localScale;
-				float strength;  // abstraction for pressure of brushstroke + amount of paint 
-				float lifeStatus;
-				int brushType;
-			};
 			
 
 			struct AgentSimData {
@@ -52,7 +41,7 @@
 
 			StructuredBuffer<CritterInitData> critterInitDataCBuffer;
 			StructuredBuffer<CritterSimData> critterSimDataCBuffer;
-			StructuredBuffer<CritterStrokeData> bodyStrokesCBuffer;
+			StructuredBuffer<CritterSkinStrokeData> bodyStrokesCBuffer;
 
 			StructuredBuffer<float3> quadVerticesCBuffer;
 			
@@ -73,7 +62,7 @@
 			{
 				v2f o;
 								
-				CritterStrokeData bodyStrokeData = bodyStrokesCBuffer[inst];
+				CritterSkinStrokeData bodyStrokeData = bodyStrokesCBuffer[inst];
 				uint agentIndex = bodyStrokeData.parentIndex;
 				CritterInitData critterInitData = critterInitDataCBuffer[agentIndex];
 				CritterSimData critterSimData = critterSimDataCBuffer[agentIndex];
@@ -89,22 +78,22 @@
 				centerPosition.y *= 0.6;
 				float v = centerPosition.y;
 				// foodBloat (normalized coords -1,1)
-				centerPosition = foodBloatAnimPos(centerPosition, bodyStrokeData.localPos.y, critterSimData.foodAmount);
+				//centerPosition = foodBloatAnimPos(centerPosition, bodyStrokeData.localPos.y, critterSimData.foodAmount);
 				// biteAnim (normalized coords -1, 1)
-				centerPosition = biteAnimPos(centerPosition, bodyStrokeData.localPos.y, critterSimData.biteAnimCycle);
+				//centerPosition = biteAnimPos(centerPosition, bodyStrokeData.localPos.y, critterSimData.biteAnimCycle);
 				// scale coords by agent size? does order of ops matter?
-				centerPosition = centerPosition * curAgentSize * 0.5;
+				//centerPosition = centerPosition * curAgentSize * 0.5;
 				// swimAnim:
 				float bodyAspectRatio = critterInitData.boundingBoxSize.y / critterInitData.boundingBoxSize.x;
 				float bendStrength = 0.5 * saturate(bodyAspectRatio * 0.5 - 0.4);
 				
-				centerPosition = swimAnimPos(centerPosition, v, critterSimData.moveAnimCycle, critterSimData.accel, critterSimData.smoothedThrottle, bendStrength, critterSimData.turnAmount);
+				//centerPosition = swimAnimPos(centerPosition, v, critterSimData.moveAnimCycle, critterSimData.accel, critterSimData.smoothedThrottle, bendStrength, critterSimData.turnAmount);
 				// rotate with agent:
-				centerPosition = rotatePointVector(centerPosition, float2(0,0), critterSimData.heading);
+				//centerPosition = rotatePointVector(centerPosition, float2(0,0), critterSimData.heading);
 
 				// vertexOffsetFromSpriteCenter!!! :::: ===============================================================
 				centerToVertexOffset *= bodyStrokeData.localScale * (curAgentSize.x + curAgentSize.y) / 2.5 * critterSimData.foodAmount * (1.0 - critterSimData.decayPercentage);
-				centerToVertexOffset = rotatePointVector(centerToVertexOffset, float2(0,0), critterSimData.heading);
+				//centerToVertexOffset = rotatePointVector(centerToVertexOffset, float2(0,0), critterSimData.heading);
 
 				
 				float3 worldPosition = float3(critterPosition + centerPosition + centerToVertexOffset, -0.5);
@@ -129,6 +118,8 @@
 				o.uvPattern = patternUV;
 								
 				o.uv = baseUV;
+
+				o.worldPos = float3(128,128,-1) + quadVerticesCBuffer[id] * 20;
 				
 				return o;
 			}
@@ -136,6 +127,8 @@
 			fixed4 frag(v2f i) : SV_Target
 			{
 				
+				return float4(1,1,1,1);
+
 				float4 texColor = tex2D(_MainTex, i.uv);  // Read Brush Texture start Row
 				
 				return float4(1.75,2.35,0.65,texColor.a);

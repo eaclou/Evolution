@@ -45,7 +45,7 @@
 			float4 _MainTex_ST;
 
 			StructuredBuffer<AgentSimData> agentSimDataCBuffer;
-			StructuredBuffer<AgentMovementAnimData> agentMovementAnimDataCBuffer;
+			//StructuredBuffer<AgentMovementAnimData> agentMovementAnimDataCBuffer;
 			StructuredBuffer<float3> meshVerticesCBuffer;
 			Texture2D<float4> widthsTex;
 
@@ -57,7 +57,7 @@
 								
 				
 				AgentSimData agentSimData = agentSimDataCBuffer[inst];
-				AgentMovementAnimData animData = agentMovementAnimDataCBuffer[inst];
+				//AgentMovementAnimData animData = agentMovementAnimDataCBuffer[inst];
 												
 				float3 worldPosition = float3(agentSimData.worldPos, -0.5);
 				// Rotation of Billboard center around Agent's Center (no effect if localPos and localDir are zero/default)'

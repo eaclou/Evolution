@@ -64,13 +64,15 @@
 				float3 worldPosition = float3(particleData.worldPos, 1);    //float3(rawData.worldPos, -random2);
 				quadPoint = quadPoint * particleData.radius * particleData.active;
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(quadPoint, 0.0f));				
-				o.uv = quadVerticesCBuffer[id].xy + 0.5f;		
-
+				o.uv = quadVerticesCBuffer[id].xy + 0.5f;	
+				
 				return o;
 			}
 
 			fixed4 frag(v2f i) : SV_Target
 			{
+				//return float4(1,1,1,1);
+
 				float4 texColor = tex2D(_MainTex, i.uv);
 				
 				return float4(0.7,1,0.1,texColor.a * 0.75);

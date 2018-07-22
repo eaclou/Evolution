@@ -11,21 +11,8 @@
 #pragma kernel CSUpdateDynamicLeafBuffers
 #pragma kernel CSUpdateDynamicFruitBuffers
 #pragma kernel CSSimulateFruit
-#pragma kernel CSSimulateCritterStrokes
 
 #include "Assets/Resources/Shaders/Inc/CritterBodyAnimation.cginc"
-#include "Assets/Resources/Shaders/Inc/StructsCritterData.cginc"
-
-struct CritterStrokeData {
-	int parentIndex;  // what agent/object is this attached to?				
-	float2 worldPos;
-	float2 localPos;
-	float2 localDir;
-	float2 localScale;
-	float strength;  // abstraction for pressure of brushstroke + amount of paint 
-	float lifeStatus;
-	int brushType;
-};
 
 struct AgentSimData {
 	float2 worldPos;
@@ -133,7 +120,7 @@ StructuredBuffer<CurveStrokeData> agentCurveStrokesReadCBuffer; // use this for 
 RWStructuredBuffer<CurveStrokeData> agentCurveStrokesWriteCBuffer;
 int _CurveStrokesUpdateAgentIndex;
 
-RWStructuredBuffer<CritterStrokeData> critterStrokesWriteCBuffer;
+RWStructuredBuffer<CritterSkinStrokeData> critterStrokesWriteCBuffer;
 
 StructuredBuffer<BodyStrokeData> agentBodyStrokesReadCBuffer; // use this for updating
 RWStructuredBuffer<BodyStrokeData> agentBodyStrokesWriteCBuffer;
@@ -418,74 +405,6 @@ void CSSimulateFruit (uint3 id : SV_DispatchThreadID)
 	foodFruitDataWriteCBuffer[id.x].worldPos = newPos;
 }
 
-
-[numthreads(16,1,1)]
-void CSSimulateCritterStrokes (uint3 id : SV_DispatchThreadID)
-{
-	// If detached, actual worldPos can lag behind pinned default position on agent:
-
-	CritterStrokeData brushData = critterStrokesWriteCBuffer[id.x];
-	int agentIndex = brushData.parentIndex;	
-	CritterInitData critterInitData = critterInitDataCBuffer[agentIndex];
-	CritterSimData critterSimData = critterSimDataCBuffer[agentIndex];
-
-
-	
-
-	// Find new targetPosition
-	float2 critterPosition = critterSimData.worldPos.xy;
-					
-	float2 curAgentSize = critterInitData.boundingBoxSize * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage);
-
-	// spriteCenterPos!!! ::::  ===========================================================================
-	float2 centerPosition = brushData.localPos;
-	
-	centerPosition = foodBloatAnimPos(centerPosition, brushData.localPos.y, critterSimData.foodAmount);
-	
-	centerPosition = biteAnimPos(centerPosition, brushData.localPos.y, critterSimData.biteAnimCycle);
-	
-	centerPosition = centerPosition * curAgentSize * 0.5;
-	
-	float bodyAspectRatio = critterInitData.boundingBoxSize.y / critterInitData.boundingBoxSize.x;
-	float bendStrength = 0.5; // * saturate(bodyAspectRatio * 0.5 - 0.4);
-	centerPosition = swimAnimPos(centerPosition, brushData.localPos.y, critterSimData.moveAnimCycle, critterSimData.accel, critterSimData.smoothedThrottle, bendStrength, critterSimData.turnAmount);
-	
-	centerPosition = rotatePointVector(centerPosition, float2(0,0), critterSimData.heading);
-
-	float2 curWorldPos = brushData.worldPos;
-	float2 newWorldPos = centerPosition + critterSimData.worldPos;
-
-	float2 uv = curWorldPos / _MapSize;
-	float2 fluidVel = velocityRead.SampleLevel(_LinearRepeat, uv, 0).xy;
-	float speedMult = 0.033 * _MapSize;
-
-	curWorldPos = curWorldPos + fluidVel * speedMult;
-
-	float attachThreshold = rand(brushData.localPos * 100); //critterSimData.health
-	float pinnedAmount = saturate(100.0 * (critterSimData.health - attachThreshold)) * (1.0 - critterSimData.decayPercentage);   //brushData.strength;
-	
-	//critterStrokesWriteCBuffer[id.x].strength = pinnedAmount;
-
-	critterStrokesWriteCBuffer[id.x].strength  = critterStrokesWriteCBuffer[id.x].strength + 0.006;
-
-	if(pinnedAmount < 0.01) {
-		
-		critterStrokesWriteCBuffer[id.x].lifeStatus = 0;
-		critterStrokesWriteCBuffer[id.x].strength = saturate(critterStrokesWriteCBuffer[id.x].strength);
-	}
-	else {
-		if(critterStrokesWriteCBuffer[id.x].lifeStatus < 0.5) {
-			critterStrokesWriteCBuffer[id.x].strength = 0;
-			critterStrokesWriteCBuffer[id.x].lifeStatus = 1;
-		}
-		critterStrokesWriteCBuffer[id.x].strength = min(0.5, critterStrokesWriteCBuffer[id.x].strength);
-		pinnedAmount = 1.0;
-	}
-
-	
-
-	critterStrokesWriteCBuffer[id.x].worldPos = lerp(curWorldPos, newWorldPos, pinnedAmount);
-}
 
 
 // &&&&& OLD OLD OLD !!! &&&&&&&&&&&

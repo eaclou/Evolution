@@ -146,7 +146,7 @@ public class CameraManager : MonoBehaviour {
 
     public void ChangeGameMode(GameMode mode) {
         curMode = mode;
-        Debug.Log("ChangeGameMode(" + mode.ToString() + ")");
+        //Debug.Log("ChangeGameMode(" + mode.ToString() + ")");
         switch(curMode) {
             case GameMode.ModeA:
                 //

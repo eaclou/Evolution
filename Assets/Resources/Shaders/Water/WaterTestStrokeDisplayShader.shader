@@ -212,7 +212,7 @@
 				float4 reflectedColor = float4(tex2Dlod(_SkyTex, float4((i.skyUV), 0, 1)).rgb, backgroundColor.a); //col;
 				
 				float4 finalColor = lerp(reflectedColor, backgroundColor, saturate(1 - (1 - i.vignetteLerp.x) * 0.5)); //float4(1,1,1,1);
-				finalColor.a *= saturate(i.vignetteLerp.w * 1.4 - 0.25); //(1 - saturate(i.vignetteLerp.x) * 0.4) * 0.5;
+				finalColor.a *= saturate(i.vignetteLerp.w * 0.65 - 0.45); //(1 - saturate(i.vignetteLerp.x) * 0.4) * 0.5;
 				finalColor.a *= i.color.a;
 				return finalColor;
 				
