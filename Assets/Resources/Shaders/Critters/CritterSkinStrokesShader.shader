@@ -40,6 +40,7 @@
 				float2 patternUV : TEXCOORD6;
 				int2 bufferIndices : TEXCOORD7;
 				float4 vignetteLerp : TEXCOORD8;
+				float4 color : COLOR;
 				//float2 altitudeUV : TEXCOORD1;
 				//float4 screenUV : TEXCOORD2;
 				//float3 worldPos : TEXCOORD3;
@@ -84,13 +85,14 @@
 
 				float3 spriteLocalPos = skinStrokeData.localPos * critterCurScale;
 				float3 vertexWorldOffset = quadPoint;
-				vertexWorldOffset.xy = vertexWorldOffset.xy * skinStrokeData.localScale * critterCurScale;
+				vertexWorldOffset.xy = vertexWorldOffset.xy * skinStrokeData.localScale * critterCurScale * (1.0 - critterSimData.decayPercentage);
 				
 				float3 spriteWorldOffset = spriteLocalPos; // **** Vector from critter origin to sprite origin
 				
 				//spriteWorldOffset = GetAnimatedPos(spriteWorldOffset, float3(0,0,0), critterInitData, critterSimData, skinStrokeData);
-				vertexWorldOffset = GetAnimatedPos(vertexWorldOffset + spriteWorldOffset, float3(0,0,0), critterInitData, critterSimData, skinStrokeData);
-				float3 worldPosition = critterWorldPos + vertexWorldOffset; //				
+				vertexWorldOffset = GetAnimatedPos(vertexWorldOffset, float3(0,0,0), critterInitData, critterSimData, skinStrokeData);
+				
+				float3 worldPosition = skinStrokeData.worldPos + vertexWorldOffset; //critterWorldPos + vertexWorldOffset; //				
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
 				o.worldPos = worldPosition;
 
@@ -101,7 +103,7 @@
 				//worldNormal.xy = rotatePointVector(worldNormal.xy, float2(0,0), critterSimData.heading);
 
 				float3 worldNormal = GetAnimatedPos(localNormal, float3(0,0,0), critterInitData, critterSimData, skinStrokeData); //skinStrokeData.localPos;
-				o.worldNormal = worldNormal;
+				o.worldNormal = normalize(worldNormal);
 
 				// UVS:
 				//=============================================================================================================
@@ -140,6 +142,7 @@
 				float testNewVignetteMask = saturate(((randThreshold + 0.6 - (saturate(vignetteRadius) * 0.4 + 0.3)) * 2));
 				o.vignetteLerp = float4(testNewVignetteMask,sampleUV,saturate(vignetteRadius));
 				
+				o.color = float4(1, 1, critterSimData.growthPercentage, critterSimData.decayPercentage);
 				
 				return o;
 			}
@@ -187,7 +190,7 @@
 				//==================================================================================================================
 				backgroundColor.a *= isUnderwater;
 
-				float fogAmount = saturate(i.worldPos.z * 0.5);
+				float fogAmount = 0.25; //saturate((i.worldPos.z + 1) * 0.5);
 				finalColor.rgb = lerp(finalColor.rgb, waterFogColor, fogAmount);
 
 				
@@ -196,6 +199,11 @@
 				finalColor = lerp(reflectedColor, finalColor, saturate(1 - (1 - i.vignetteLerp.x) * 1)); //float4(1,1,1,1);
 				//finalColor.a *= saturate(i.vignetteLerp.w * 1.4 - 0.25); //(1 - saturate(i.vignetteLerp.x) * 0.4) * 0.5;
 				//finalColor.a *= i.color.a;
+
+				finalColor.rgb *= saturate(1.0 - i.color.w * 32) * 0.5 + 0.5;
+				
+				//finalColor.a *= (1.0 - i.color.w);
+				//return float4(i.color.w, i.color.w, i.color.w, 1);
 				return finalColor;
 
 				//return finalColor;

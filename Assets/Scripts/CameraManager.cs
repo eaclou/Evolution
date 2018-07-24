@@ -44,6 +44,9 @@ public class CameraManager : MonoBehaviour {
 
     private int debugFrameCounter = 0;
 
+    public float targetAgentSize = 0f;
+    public float cameraZoomAmount = 0f;
+
     private GameMode curMode;
     public enum GameMode {
         ModeA,
@@ -53,7 +56,7 @@ public class CameraManager : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-        ChangeGameMode(GameMode.ModeB);
+        ChangeGameMode(GameMode.ModeA);
         //this.transform.position = new Vector3(0f, 0f, -50f);
     }
 
@@ -88,7 +91,10 @@ public class CameraManager : MonoBehaviour {
                     targetPosY = targetTransform.position.y; // Mathf.Lerp(targetCamPos.y, targetTransform.position.y, 0.08f);
                     //targetCamPos = Vector3.Lerp(targetCamPos, targetTransform.position, 0.08f);
                     lerpSpeed = lerpSpeedA;
-                    perspZoomDist = perspZoomDistNear;
+                    float linearAgentSize = Mathf.Lerp(targetAgent.spawnStartingScale, 1f, targetAgent.growthPercentage) * targetAgent.fullSizeBoundingBox.x;
+
+                    perspZoomDist = perspZoomDistNear * linearAgentSize;
+                    targetAgentSize = linearAgentSize;
                     targetTiltAngleDegrees = targetTiltAngleA;
                     break;
                 case GameMode.ModeB:
@@ -100,7 +106,9 @@ public class CameraManager : MonoBehaviour {
                     //if(targetTransform != null) {
                         //targetCamPos = Vector3.Lerp(targetCamPos, targetTransform.position, 0.08f);
                     lerpSpeed = lerpSpeedB;
-                    perspZoomDist = perspZoomDistMid;
+                    linearAgentSize = Mathf.Lerp(targetAgent.spawnStartingScale, 1f, targetAgent.growthPercentage) * targetAgent.fullSizeBoundingBox.x;
+                    targetAgentSize = linearAgentSize;
+                    perspZoomDist = perspZoomDistMid * linearAgentSize;
                     targetTiltAngleDegrees = targetTiltAngleB;
                     //}
                     //orthoLerp = 0.9f;
@@ -122,6 +130,7 @@ public class CameraManager : MonoBehaviour {
         }        
 
         targetPosZ = -perspZoomDist;
+        cameraZoomAmount = targetPosZ;
 
         curTiltAngle = Mathf.Lerp(curTiltAngle, -targetTiltAngleDegrees, 0.08f);
         float rotateX = curTiltAngle;

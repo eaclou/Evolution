@@ -62,7 +62,7 @@ public class Agent : MonoBehaviour {
         }
     }
     public int maxAgeTimeSteps = 2400;
-    private int decayDurationTimeSteps = 60;
+    private int decayDurationTimeSteps = 360;
     public int _DecayDurationTimeSteps
     {
         get
@@ -387,6 +387,7 @@ public class Agent : MonoBehaviour {
         // STARVATION::
         if (coreModule.energyRaw <= 0f) {
             curLifeStage = AgentLifeStage.Decaying;
+            lifeStageTransitionTimeStepCounter = 0;
         }
     }
     private void CheckForDeathHealth() {

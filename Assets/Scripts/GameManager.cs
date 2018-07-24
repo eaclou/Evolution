@@ -54,17 +54,17 @@ public class GameManager : MonoBehaviour {
         switch(uiManager.gameOptionsManager.gameOptions.simulationComplexity) {
             case 0:
                 // Low quality
-                simulationManager._NumAgents = 32;
-                simulationManager._NumFood = 32;
+                simulationManager._NumAgents = 40;
+                simulationManager._NumFood = 40;
                 simulationManager._NumPredators = 2;
                 simulationManager.numInitialHiddenNeurons = 4;
                 break;
             case 1:
                 // Medium
-                simulationManager._NumAgents = 48;
+                simulationManager._NumAgents = 64;
                 simulationManager._NumFood = 48;
                 simulationManager._NumPredators = 2;
-                simulationManager.numInitialHiddenNeurons = 4;
+                simulationManager.numInitialHiddenNeurons = 6;
                 break;
             case 2:
                 // High

@@ -1,6 +1,7 @@
-﻿#pragma kernel CSSimulateCritterStrokes
+﻿#pragma kernel CSSimulateSkinCritterStrokes
 
 #include "Assets/Resources/Shaders/Inc/CritterBodyAnimation.cginc"
+#include "Assets/Resources/Shaders/Inc/NoiseShared.cginc"
 
 StructuredBuffer<CritterInitData> critterInitDataCBuffer;
 StructuredBuffer<CritterSimData> critterSimDataCBuffer;
@@ -23,35 +24,71 @@ float rand(float2 co){   // OUTPUT is in [0,1] RANGE!!!
 
 
 [numthreads(16,1,1)]
-void CSSimulateCritterStrokes (uint3 id : SV_DispatchThreadID)
+void CSSimulateSkinCritterStrokes (uint3 id : SV_DispatchThreadID)
 {
-	// If detached, actual worldPos can lag behind pinned default position on agent:
-	/*
-	CritterBodyStrokeData brushData = critterSkinStrokesWriteCBuffer[id.x];
 	
-	int agentIndex = brushData.parentIndex;	
+	
+	
+	// If detached, actual worldPos can lag behind pinned default position on agent:
+	
+	CritterSkinStrokeData skinStrokeData = critterSkinStrokesWriteCBuffer[id.x];
+	
+	int agentIndex = skinStrokeData.parentIndex;	
 	CritterInitData critterInitData = critterInitDataCBuffer[agentIndex];
 	CritterSimData critterSimData = critterSimDataCBuffer[agentIndex];
 
-	float3 curAgentSize;
-	curAgentSize.xy = critterInitData.boundingBoxSize * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage);
-	curAgentSize.z = curAgentSize.x;
+	float3 critterWorldPos = critterSimData.worldPos;
+	float3 critterCurScale = critterInitData.boundingBoxSize * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage);
+		
+	float3 spriteLocalPos = skinStrokeData.localPos * critterCurScale;
+				
+	float3 spriteWorldOffset = spriteLocalPos; // **** Vector from critter origin to sprite origin		
+	// SWIM ANIMS:
+	spriteWorldOffset = GetAnimatedPos(spriteWorldOffset, float3(0,0,0), critterInitData, critterSimData, skinStrokeData);		
+			
+	float3 newWorldPos = critterWorldPos + spriteWorldOffset;
+	float3 curWorldPos = skinStrokeData.worldPos;
 
-	float3 centerPosition = brushData.localPos;
-	centerPosition.xy = foodBloatAnimPos(centerPosition.xy, brushData.localPos.y, critterSimData.foodAmount);	
-	centerPosition.xy = biteAnimPos(centerPosition.xy, brushData.localPos.y, critterSimData.biteAnimCycle);	
-	centerPosition = centerPosition * curAgentSize * 0.5;
+	// FLUID FLOW:
+	float2 uv = curWorldPos.xy / _MapSize;
+	float2 fluidVel = velocityRead.SampleLevel(_LinearRepeat, uv, 0).xy;
+	float speedMult = 0.085 * _MapSize;
+	curWorldPos.xy = curWorldPos.xy + fluidVel * speedMult;
+	// NOISE:
+	float3 noiseVel = Value3D(curWorldPos, 4).yzw;
+	curWorldPos.xy += noiseVel * 0.025;
 
-	float bodyAspectRatio = critterInitData.boundingBoxSize.y / critterInitData.boundingBoxSize.x;
-	float bendStrength = 0.5; // * saturate(bodyAspectRatio * 0.5 - 0.4);
-	centerPosition.xy = swimAnimPos(centerPosition.xy, brushData.localPos.y, critterSimData.moveAnimCycle, critterSimData.accel, critterSimData.smoothedThrottle, bendStrength, critterSimData.turnAmount);
+	float pinnedAmount = saturate((1.0 - critterSimData.decayPercentage * 12));
+	pinnedAmount *= 1;
 	
-	centerPosition.xy = rotatePointVector(centerPosition.xy, float2(0,0), critterSimData.heading);
+	float3 worldPosition = lerp(curWorldPos, newWorldPos, pinnedAmount);
+
+			
+	skinStrokeData.worldPos = worldPosition;
+	critterSkinStrokesWriteCBuffer[id.x] = skinStrokeData;
+	//-------------------------------------------------------------------------------------------------------------------------------
 
 
-	brushData.worldPos = float3(critterSimData.worldPos, 0) + centerPosition;	
-	critterSkinStrokesWriteCBuffer[id.x] = brushData;
-	*/
+
+	//===================================:::::OLD:::::==================================================================================
+	//float3 curAgentSize;
+	//curAgentSize.xy = critterInitData.boundingBoxSize * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage);
+	//curAgentSize.z = curAgentSize.x;
+	//float3 centerPosition = brushData.localPos;
+
+	//centerPosition.xy = foodBloatAnimPos(centerPosition.xy, brushData.localPos.y, critterSimData.foodAmount);	
+	//centerPosition.xy = biteAnimPos(centerPosition.xy, brushData.localPos.y, critterSimData.biteAnimCycle);	
+	//centerPosition = centerPosition * curAgentSize * 0.5;
+
+	//float bodyAspectRatio = critterInitData.boundingBoxSize.y / critterInitData.boundingBoxSize.x;
+	//float bendStrength = 0.5; // * saturate(bodyAspectRatio * 0.5 - 0.4);
+	//centerPosition.xy = swimAnimPos(centerPosition.xy, brushData.localPos.y, critterSimData.moveAnimCycle, critterSimData.accel, critterSimData.smoothedThrottle, bendStrength, critterSimData.turnAmount);
+	
+	//centerPosition.xy = rotatePointVector(centerPosition.xy, float2(0,0), critterSimData.heading);
+
+
+	
+	
 }
 
 /*   OLD:::::
@@ -98,10 +135,9 @@ void CSSimulateCritterStrokes (uint3 id : SV_DispatchThreadID)
 
 	float attachThreshold = rand(brushData.localPos.xy * 100); //critterSimData.health
 	float pinnedAmount = saturate(100.0 * (critterSimData.health - attachThreshold)) * (1.0 - critterSimData.decayPercentage);   //brushData.strength;
+	pinnedAmount *= 0.025;
 	
-	//critterSkinStrokesWriteCBuffer[id.x].strength = pinnedAmount;
-
-	critterSkinStrokesWriteCBuffer[id.x].strength  = critterSkinStrokesWriteCBuffer[id.x].strength + 0.006;
+	//critterSkinStrokesWriteCBuffer[id.x].strength  = critterSkinStrokesWriteCBuffer[id.x].strength + 0.006;
 
 	if(pinnedAmount < 0.01) {
 		
@@ -117,8 +153,8 @@ void CSSimulateCritterStrokes (uint3 id : SV_DispatchThreadID)
 		pinnedAmount = 1.0;
 	}
 
-	
+	brushData.worldPos = lerp(curWorldPos, newWorldPos, pinnedAmount);
 
-	critterSkinStrokesWriteCBuffer[id.x].worldPos = lerp(curWorldPos, newWorldPos, pinnedAmount);
+	critterSkinStrokesWriteCBuffer[id.x] = brushData;
 }
 */

@@ -1,8 +1,9 @@
-﻿Shader "Brushstrokes/FoodParticleDisplayShader"
+﻿Shader "Brushstrokes/FoodParticleShadowDisplayShader"
 {
 	Properties
 	{
-		_MainTex ("Main Texture", 2D) = "white" {}  // stem texture sheet		
+		_MainTex ("Main Texture", 2D) = "white" {}  // stem texture sheet	
+		_AltitudeTex ("_AltitudeTex", 2D) = "gray" {}
 		//_Tint("Color", Color) = (1,1,1,1)
 		//_Size("Size", vector) = (1,1,1,1)
 	}
@@ -24,12 +25,9 @@
 			#include "Assets/Resources/Shaders/Inc/NoiseShared.cginc"
 
 			sampler2D _MainTex;
-			
-			//float4 _MainTex_ST;
-			//float4 _Tint;
-			//float4 _Size;
+			sampler2D _AltitudeTex;	
+			uniform float _MapSize;
 
-			
 			struct FoodParticleData {
 				int index;
 				float2 worldPos;
@@ -61,8 +59,16 @@
 							
 				FoodParticleData particleData = foodParticleDataCBuffer[inst];
 
-				float3 worldPosition = float3(particleData.worldPos, 1);    //float3(rawData.worldPos, -random2);
+				float3 worldPosition = float3(particleData.worldPos, 5);    //float3(rawData.worldPos, -random2);
 				quadPoint = quadPoint * particleData.radius * particleData.active;
+				
+				float2 altUV = (worldPosition.xy + 128) / 512;
+				//o.altitudeUV = altUV;
+				
+				worldPosition.z = -(tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 2)).x * 2 - 1) * 10;
+				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
+				//o.worldPos = worldPosition;
+				
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(quadPoint, 0.0f));				
 				o.uv = quadVerticesCBuffer[id].xy + 0.5f;	
 				
@@ -73,9 +79,13 @@
 			{
 				//return float4(1,1,1,1);
 
-				float4 texColor = tex2D(_MainTex, i.uv);
-				
-				return float4(0.7,1,0.1,texColor.a * 0.75);
+				float4 texColor = tex2D(_MainTex, i.uv);	
+				float3 waterFogColor = float3(0.03,0.4,0.3) * 0.4;
+				texColor.rgb = waterFogColor;  // shadow
+
+
+				return texColor;
+				//return float4(0.7,1,0.1,texColor.a * 0.75);
 			}
 		ENDCG
 		}

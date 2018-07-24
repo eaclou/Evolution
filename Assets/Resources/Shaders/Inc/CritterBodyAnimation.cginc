@@ -45,7 +45,7 @@ float2 RotatePointVector2D(float2 p, float2 pivot, float2 forward) {
 
 float GetSwimAngle(float t, float animCycle, float accel, float throttle, float magnitude, float turnAmount) {
 	float animSpeed = 12;
-	float accelAnimSpeed = 250;
+	float accelAnimSpeed = 200;
 	float v = t * 0.5 + 0.5;
 	float offsetMask = saturate(1 - v * 0.75); 
 	
@@ -78,6 +78,36 @@ float3 GetAnimatedPos(float3 inPos, float3 pivotPos, CritterInitData critterInit
 	float magnitude = 0.5;
 
 	float swimAngle = GetSwimAngle(strokeData.localPos.y, critterSimData.moveAnimCycle, critterSimData.accel, critterSimData.smoothedThrottle, magnitude, critterSimData.turnAmount);
+	
+	// FOOD BLOAT:
+	float foodAmount = critterSimData.foodAmount;
+	float bloatPivotY = (saturate(foodAmount - 0.5) - 0.5) * 2;
+	float bloatMask = smoothstep(0, 1, (1 - saturate(abs((strokeData.localPos.y - bloatPivotY) * 1))) * 1); // smoothstep makes a more gaussian-looking shape than pointy
+	float bloatMagnitude = foodAmount * foodAmount * 1.5;
+	
+	inPos *= 1.0 + bloatMask * bloatMagnitude * 1.0;
+	// end FOOD BLOAT
+	
+	// BITE!!!!
+	float t = strokeData.localPos.y * 0.5 + 0.5;  // [0-1]
+	float biteAnimCycle = critterSimData.biteAnimCycle;
+	float eatingCycle = sin(biteAnimCycle * 3.141592);
+	float biteMask = saturate(t * 2 - 1);
+	
+	float3 newPos = inPos.xyz * (1.0 + eatingCycle * 0.67 * biteMask);	
+	newPos.y *= (eatingCycle * 0.24 * biteMask + 1.0);
+	newPos.x *= (0.75 - eatingCycle * -0.25 * biteMask);
+	//newXY.z *= (0.75 - eatingCycle * -0.25 * biteMask);
+	//float newZ = inPos.z; // * (1.0 + eatingCycle * 0.67 * biteMask);
+	float headOrJaw = saturate(strokeData.localPos.z * 100);
+	float posNeg = (headOrJaw * 2 - 1);
+	//newZ *= (eatingCycle * posNeg * 0.5 * biteMask);
+	
+	inPos.xyz = newPos;
+	//inPos.z = newZ;
+	// end BITE
+
+	
 	float3 outPos = RotatePointAroundZAngle(float3(0,0,0), swimAngle, inPos);
 
 	// Rotate with Critter:

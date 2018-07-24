@@ -113,7 +113,7 @@ public class UIManager : MonoBehaviour {
                     if(!isPaused) {
                         if(isObserverMode) {
                             isObserverMode = false;
-                            ClickButtonModeB();
+                            ClickButtonModeA();
                             // Respawn PLAYER!!! ****
                             gameManager.simulationManager.RespawnPlayer();
                             deathScreenOn = false;
@@ -473,12 +473,15 @@ public class UIManager : MonoBehaviour {
     }
     public void ClickButtonModeA() {
         cameraManager.ChangeGameMode(CameraManager.GameMode.ModeA);
+        obsZoomLevel = 2; // C, zoomed out max
     }
     public void ClickButtonModeB() {
         cameraManager.ChangeGameMode(CameraManager.GameMode.ModeB);
+        obsZoomLevel = 1; // C, zoomed out max
     }
     public void ClickButtonModeC() {
         cameraManager.ChangeGameMode(CameraManager.GameMode.ModeC);
+        obsZoomLevel = 0; // C, zoomed out max
     }
 
     public void ClickButtonToggleHUD() {

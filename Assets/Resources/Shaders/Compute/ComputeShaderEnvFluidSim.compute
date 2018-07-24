@@ -226,8 +226,8 @@ void SimFloatyBits (uint3 id : SV_DispatchThreadID)
 		float randZoneY = floor(rand(float2(val01, (float)id.x)) * (float)numZones);
 		
 		//x:// rand(float2((float)id.x + vel.x - vel.y, val01 + randZoneY)) * 0.01
-		float2 randOffset = float2(0, 0.055 * (float)id.x / (1024 * 64));
-		randOffset.x += 0.024 * rand(uv);
+		float2 randOffset = float2(0, 0.075 * (float)id.x / (1024 * 512));
+		randOffset.x += 0.05 * rand(uv);
 		float2 spawnCoords = randOffset + float2(randZoneX / 3.0 + 0.25, randZoneY / 3.0 + 0.25); // + float2(randZoneX, randZoneY)
 
 		floatyBitData.coords = spawnCoords; //float2(rand(float2((float)id.x,0)) * 0.04 + 0.48, 0.495 + 0.01 * (float)id.x / (1024 * 64)); //spawnPos;
