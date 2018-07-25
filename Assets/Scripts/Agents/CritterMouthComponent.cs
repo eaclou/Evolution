@@ -10,14 +10,14 @@ public class CritterMouthComponent : MonoBehaviour {
 
     public bool isBiting = false;
     public int bitingFrameCounter = 0;
-    public int biteCooldown = 30;
+    public int biteCooldown = 100;
     
     public Vector2 mouthSize;  // relative to head size?
     public Vector2 biteZoneDimensions;
     public float biteZoneOffset;
     //public float mouthOffset;  // also relative?
-    public int biteChargeUpDuration = 4;
-    public int biteCooldownDuration = 26;
+    public int biteChargeUpDuration = 6;
+    public int biteCooldownDuration = 70;
     public float biteStrength;
     public float biteSharpness;
         

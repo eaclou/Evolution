@@ -85,7 +85,8 @@
 
 				float3 spriteLocalPos = skinStrokeData.localPos * critterCurScale;
 				float3 vertexWorldOffset = quadPoint;
-				vertexWorldOffset.xy = vertexWorldOffset.xy * skinStrokeData.localScale * critterCurScale * (1.0 - critterSimData.decayPercentage);
+				vertexWorldOffset.xy = vertexWorldOffset.xy * ((skinStrokeData.localScale.x + skinStrokeData.localScale.y) / 2.0) * critterCurScale * saturate(0.99 - critterSimData.decayPercentage * 2);
+				//vertexWorldOffset.xy = vertexWorldOffset.xy * skinStrokeData.localScale * critterCurScale * (1.0 - critterSimData.decayPercentage);
 				
 				float3 spriteWorldOffset = spriteLocalPos; // **** Vector from critter origin to sprite origin
 				
@@ -156,7 +157,7 @@
 
 
 				float4 texColor = tex2D(_MainTex, i.spriteUV);
-				float4 patternSample = tex2Dlod(_PatternTex, float4(i.patternUV, 0, 2));	
+				float4 patternSample = tex2Dlod(_PatternTex, float4(i.patternUV, 0, 1));	
 
 				float3 lightDir = normalize(_WorldSpaceLightPos0.xyz);
 				float diffuseLight = saturate(dot(lightDir, normalize(i.worldNormal)));
@@ -201,7 +202,7 @@
 				//finalColor.a *= i.color.a;
 
 				finalColor.rgb *= saturate(1.0 - i.color.w * 32) * 0.5 + 0.5;
-				
+				finalColor.rgb = lerp(finalColor.rgb, backgroundColor, i.color.w);
 				//finalColor.a *= (1.0 - i.color.w);
 				//return float4(i.color.w, i.color.w, i.color.w, 1);
 				return finalColor;

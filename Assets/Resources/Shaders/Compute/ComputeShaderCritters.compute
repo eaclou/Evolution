@@ -51,18 +51,21 @@ void CSSimulateSkinCritterStrokes (uint3 id : SV_DispatchThreadID)
 
 	// FLUID FLOW:
 	float2 uv = curWorldPos.xy / _MapSize;
-	float2 fluidVel = velocityRead.SampleLevel(_LinearRepeat, uv, 0).xy;
-	float speedMult = 0.085 * _MapSize;
+	float2 fluidVel = velocityRead.SampleLevel(_LinearRepeat, uv, 2).xy;
+	float speedMult = 0.035 * _MapSize;
 	curWorldPos.xy = curWorldPos.xy + fluidVel * speedMult;
 	// NOISE:
-	float3 noiseVel = Value3D(curWorldPos, 4).yzw;
-	curWorldPos.xy += noiseVel * 0.025;
+	float3 noiseVel = Value3D(curWorldPos * 0.05, 17.75).yzw;
+	
 
 	float pinnedAmount = saturate((1.0 - critterSimData.decayPercentage * 12));
 	pinnedAmount *= 1;
 	
+	curWorldPos.xyz += skinStrokeData.localPos * 0.05 * critterCurScale.x;
+	curWorldPos.z += 0.01;
 	float3 worldPosition = lerp(curWorldPos, newWorldPos, pinnedAmount);
-
+	worldPosition.xy += noiseVel * 0.033 * critterCurScale.x;
+	//worldPosition.xyz += skinStrokeData.localPos * 0.1;
 			
 	skinStrokeData.worldPos = worldPosition;
 	critterSkinStrokesWriteCBuffer[id.x] = skinStrokeData;
