@@ -48,11 +48,12 @@ float GetSwimAngle(float t, float animCycle, float accel, float throttle, float 
 	float accelAnimSpeed = 200;
 	float v = t * 0.5 + 0.5;
 	float offsetMask = saturate(1 - v * 0.75);
+	float turnMask = saturate((1.0 - v) * 1.0);
 	
 	//float angle = clamp(turnAmount * -1.33, -6.282, 6.282) * offsetMask;
 	//float angle = magnitude * sin(v * 3.141592 + animCycle * animSpeed + accel * accelAnimSpeed);// * offsetMask;
 
-	float angle = magnitude * sin(v * 3.141592 + animCycle * animSpeed + accel * accelAnimSpeed) * offsetMask * throttle + clamp(turnAmount * -1.33, -6.2, 6.2) * offsetMask;
+	float angle = magnitude * sin(v * 3.141592 + animCycle * animSpeed + accel * accelAnimSpeed) * offsetMask * throttle + clamp(turnAmount * -1.0, -6.2, 6.2) * turnMask;
 
 	return angle;
 }
