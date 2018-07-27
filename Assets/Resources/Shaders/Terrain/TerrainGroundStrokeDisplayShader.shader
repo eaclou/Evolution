@@ -4,6 +4,7 @@
 	{
 		_MainTex ("Main Texture", 2D) = "white" {}
 		_AltitudeTex ("_AltitudeTex", 2D) = "gray" {}
+		_WaterSurfaceTex ("_WaterSurfaceTex", 2D) = "black" {}
 		
 	}
 	SubShader
@@ -23,6 +24,7 @@
 
 			sampler2D _MainTex;
 			sampler2D _AltitudeTex;
+			sampler2D _WaterSurfaceTex;
 			
 			sampler2D _RenderedSceneRT;  // Provided by CommandBuffer -- global tex??? seems confusing... ** revisit this
 			
@@ -62,6 +64,14 @@
 
 				float2 altUV = (worldPosition.xy + 128) / 512;
 				o.altitudeUV = altUV;
+
+				float altitude = tex2Dlod(_AltitudeTex, float4(altUV, 0, 0)).x; //i.worldPos.z / 10; // [-1,1] range
+				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(((altUV - 0.25) * 2), 0, 0)).yzw;
+				float depth = saturate(-altitude + 0.5);
+				float refractionStrength = depth * 12.5;
+				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
+				//float diffuse = dot(surfaceNormal, _WorldSpaceLightPos0.xyz);
+				//finalColor.rgb = float3(diffuse, diffuse, diffuse);
 				
 				float random1 = rand(float2(inst, inst));
 				float random2 = rand(float2(random1, random1));
@@ -101,7 +111,7 @@
 				float4 finalColor = frameBufferColor;
 				finalColor.a = brushColor.a;
 				
-				float altitude = tex2D(_AltitudeTex, i.altitudeUV);; //i.worldPos.z / 10; // [-1,1] range
+				float altitude = tex2D(_AltitudeTex, i.altitudeUV); //i.worldPos.z / 10; // [-1,1] range
 				// 0-1 range --> -1 to 1
 				altitude = (altitude * 2 - 1) * -1;
 				float isUnderwater = saturate(altitude * 10000);
@@ -120,6 +130,13 @@
 				
 				finalColor.rgb = lerp(finalColor.rgb, float3(0.56, 1, 0.34) * 0.6, snowAmount * 1);
 				
+				//finalColor.rgb = tex2D(_WaterSurfaceTex, (i.altitudeUV - 0.25) * 2).yzw;
+				//finalColor.rg = finalColor.rg * 0.5 + 0.5;
+				//finalColor.a = 1;
+
+				//float3 surfaceNormal = tex2D(_WaterSurfaceTex, (i.altitudeUV - 0.25) * 2).yzw;
+				//float diffuse = dot(surfaceNormal, _WorldSpaceLightPos0.xyz);
+				//finalColor.rgb = float3(diffuse, diffuse, diffuse);
 
 				return finalColor;
 				

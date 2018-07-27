@@ -1589,10 +1589,41 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferTest.Blit(renderTarget, renderedSceneID);  // save contents of Standard Rendering Pipeline
         cmdBufferTest.SetRenderTarget(renderTarget);  // Set render Target
         cmdBufferTest.ClearRenderTarget(true, true, Color.black, 1.0f);  // clear -- needed???
-        //cmdBufferMainRender.ClearRenderTarget(true, true, new Color(225f / 255f, 217f / 255f, 200f / 255f), 1.0f);  // clear -- needed???
-         
+                                                                         //cmdBufferMainRender.ClearRenderTarget(true, true, new Color(225f / 255f, 217f / 255f, 200f / 255f), 1.0f);  // clear -- needed???
 
-        baronVonTerrain.RenderCommands(ref cmdBufferTest, renderedSceneID);
+
+        //baronVonTerrain.RenderCommands(ref cmdBufferTest, renderedSceneID);
+        // GROUND:
+        // LARGE STROKES!!!!
+        baronVonTerrain.groundStrokesLrgDisplayMat.SetPass(0);
+        baronVonTerrain.groundStrokesLrgDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        baronVonTerrain.groundStrokesLrgDisplayMat.SetBuffer("frameBufferStrokesCBuffer", baronVonTerrain.groundStrokesLrgCBuffer);
+        baronVonTerrain.groundStrokesLrgDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        baronVonTerrain.groundStrokesLrgDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+        baronVonTerrain.groundStrokesLrgDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT0);
+        cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
+        cmdBufferTest.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundStrokesLrgDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.groundStrokesLrgCBuffer.count);
+
+        // MEDIUM STROKES!!!!
+        baronVonTerrain.groundStrokesMedDisplayMat.SetPass(0);
+        baronVonTerrain.groundStrokesMedDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        baronVonTerrain.groundStrokesMedDisplayMat.SetBuffer("frameBufferStrokesCBuffer", baronVonTerrain.groundStrokesMedCBuffer);
+        baronVonTerrain.groundStrokesMedDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        baronVonTerrain.groundStrokesMedDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+        baronVonTerrain.groundStrokesMedDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT0);
+        cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
+        cmdBufferTest.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundStrokesMedDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.groundStrokesMedCBuffer.count);
+
+        // SMALL STROKES!!!!
+        baronVonTerrain.groundStrokesSmlDisplayMat.SetPass(0);
+        baronVonTerrain.groundStrokesSmlDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        baronVonTerrain.groundStrokesSmlDisplayMat.SetBuffer("frameBufferStrokesCBuffer", baronVonTerrain.groundStrokesSmlCBuffer);
+        baronVonTerrain.groundStrokesSmlDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        baronVonTerrain.groundStrokesSmlDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+        baronVonTerrain.groundStrokesSmlDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT0);
+        cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
+        cmdBufferTest.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundStrokesSmlDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.groundStrokesSmlCBuffer.count);
+
 
         //renderedSceneID = Shader.PropertyToID("_RenderedSceneID");
         //cmdBufferTest.GetTemporaryRT(renderedSceneID, -1, -1, 0, FilterMode.Bilinear);  // save contents of Standard Rendering Pipeline
@@ -1603,19 +1634,21 @@ public class TheRenderKing : MonoBehaviour {
         foodParticleShadowDisplayMat.SetBuffer("foodParticleDataCBuffer", simManager.foodParticlesCBuffer);
         foodParticleShadowDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
         foodParticleShadowDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        foodParticleShadowDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT0);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, foodParticleShadowDisplayMat, 0, MeshTopology.Triangles, 6, simManager.foodParticlesCBuffer.count);
         
         foodParticleDisplayMat.SetPass(0);
         foodParticleDisplayMat.SetBuffer("foodParticleDataCBuffer", simManager.foodParticlesCBuffer);
         foodParticleDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        foodParticleDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT0);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, foodParticleDisplayMat, 0, MeshTopology.Triangles, 6, simManager.foodParticlesCBuffer.count);
-        
+        /*
         foodFruitDisplayMat.SetPass(0);
         foodFruitDisplayMat.SetBuffer("fruitDataCBuffer", simManager.simStateData.foodFruitDataCBuffer);
         foodFruitDisplayMat.SetBuffer("foodSimDataCBuffer", simManager.simStateData.foodSimDataCBuffer);
         foodFruitDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, foodFruitDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.foodFruitDataCBuffer.count);
-        
+        */
         // CRITTER BODY:
                 
         /*
@@ -1651,6 +1684,7 @@ public class TheRenderKing : MonoBehaviour {
         critterShadowStrokesDisplayMat.SetBuffer("critterSkinStrokesCBuffer", critterSkinStrokesCBuffer);     
         critterShadowStrokesDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
         critterShadowStrokesDisplayMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
+        critterShadowStrokesDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT0);
         critterShadowStrokesDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
         cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, critterShadowStrokesDisplayMat, 0, MeshTopology.Triangles, 6, critterSkinStrokesCBuffer.count);
@@ -1663,6 +1697,7 @@ public class TheRenderKing : MonoBehaviour {
         critterSkinStrokesDisplayMat.SetBuffer("critterSkinStrokesCBuffer", critterSkinStrokesCBuffer);     
         critterSkinStrokesDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
         critterSkinStrokesDisplayMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
+        critterSkinStrokesDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT0);
         critterSkinStrokesDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
         cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, critterSkinStrokesDisplayMat, 0, MeshTopology.Triangles, 6, critterSkinStrokesCBuffer.count);
@@ -1673,6 +1708,7 @@ public class TheRenderKing : MonoBehaviour {
         baronVonWater.waterQuadStrokesDisplayMat.SetBuffer("frameBufferStrokesCBuffer", baronVonWater.waterQuadStrokesCBuffer);
         baronVonWater.waterQuadStrokesDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
         baronVonWater.waterQuadStrokesDisplayMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
+        baronVonWater.waterQuadStrokesDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT0);
         //cmdBufferTest.SetGlobalTexture(("_SceneRT", primaryRT);
         baronVonWater.waterQuadStrokesDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
         // Use this technique for Environment Brushstrokes:

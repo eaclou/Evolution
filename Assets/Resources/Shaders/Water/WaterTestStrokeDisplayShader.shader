@@ -6,6 +6,7 @@
 		_AltitudeTex ("_AltitudeTex", 2D) = "gray" {}
 		_VelocityTex ("_VelocityTex", 2D) = "black" {}
 		_SkyTex ("_SkyTex", 2D) = "white" {}
+		_WaterSurfaceTex ("_WaterSurfaceTex", 2D) = "black" {}
 		
 	}
 	SubShader
@@ -28,6 +29,7 @@
 			sampler2D _AltitudeTex;			
 			sampler2D _VelocityTex;
 			sampler2D _SkyTex;
+			sampler2D _WaterSurfaceTex;
 			
 			sampler2D _RenderedSceneRT;  // Provided by CommandBuffer -- global tex??? seems confusing... ** revisit this
 			
@@ -107,7 +109,7 @@
 				float4 screenUV = ComputeScreenPos(pos);
 				o.screenUV = screenUV; //altitudeUV.xy / altitudeUV.w;
 
-				o.skyUV = worldPosition.xy / _MapSize + float2(-0.25, 0.08) * 0.14 * _Time.y;
+				o.skyUV = worldPosition.xy / _MapSize;
 
 				//float2 rand = Value2D(float2((float)inst, (float)inst + 30), 100);
 				float randNoise1 = Value3D(float3(worldPosition.x - _Time.y * 5.34, worldPosition.y + _Time.y * 7.1, _Time.y * 15), 0.1).x * 0.5 + 0.5; //				
@@ -209,11 +211,29 @@
 				backgroundColor.a *= isUnderwater;
 
 				
-				float4 reflectedColor = float4(tex2Dlod(_SkyTex, float4((i.skyUV), 0, 1)).rgb, backgroundColor.a); //col;
+				
+
+				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4((i.altitudeUV - 0.25) * 2, 0, 0)).yzw;
+				float diffuse = dot(surfaceNormal, _WorldSpaceLightPos0.xyz);
+				//float refractionStrength = 0.5;
+				//worldPosition.xy += -surfaceNormal.xy * refractionStrength;
+				//float diffuse = 
+
+				float3 cameraToVertex = i.worldPos - _WorldSpaceCameraPos;
+                float3 cameraToVertexDir = normalize(cameraToVertex);
+				float3 reflectedViewDir = cameraToVertexDir + 2 * surfaceNormal;
+
+				float2 skyCoords = reflectedViewDir.xy * 0.5 + 0.5;
+
+				float4 reflectedColor = float4(tex2Dlod(_SkyTex, float4((skyCoords) - _Time.y * 0.015, 0, 1)).rgb, backgroundColor.a); //col;
 				
 				float4 finalColor = lerp(reflectedColor, backgroundColor, saturate(1 - (1 - i.vignetteLerp.x) * 0.5)); //float4(1,1,1,1);
-				finalColor.a *= saturate(i.vignetteLerp.w * 0.65 - 0.45); //(1 - saturate(i.vignetteLerp.x) * 0.4) * 0.5;
+				finalColor.a *= saturate(i.vignetteLerp.w * 0.55 - 0.25); //(1 - saturate(i.vignetteLerp.x) * 0.4) * 0.5;
 				finalColor.a *= i.color.a;
+				//finalColor.rgb *= diffuse;
+				//finalColor.rgb *= 0.75;
+				//return float4(1,1,1,1);
+				
 				return finalColor;
 				
 			}

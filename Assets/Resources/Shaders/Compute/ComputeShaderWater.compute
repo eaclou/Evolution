@@ -5,8 +5,8 @@
 #pragma kernel CSPinWaterChainsData
 #pragma kernel CSShiftWaterChainsData
 #pragma kernel CSSwapWaterChainsData
-
-
+#pragma kernel CSUpdateWaterSurface
+#pragma kernel CSCalculateWaterSurfaceNormals
 
 struct TrailDotData {
     int parentIndex;
@@ -39,6 +39,7 @@ struct WaterCurveData {   // 2 ints, 17 floats
 };
 
 #include "Assets/Resources/Shaders/Inc/StructsCritterData.cginc"
+#include "Assets/Resources/Shaders/Inc/NoiseShared.cginc"
 
 
 Texture2D<float4> InputVelocityTex;
@@ -60,6 +61,9 @@ RWStructuredBuffer<float4> outputValuesCBuffer;
 StructuredBuffer<float4> addNutrientsCBuffer;
 Texture2D<float4> measureValuesTex;
 RWTexture2D<float4> pooledResultTex;
+
+Texture2D<float4> waterSurfaceDataReadRT;
+RWTexture2D<float4> waterSurfaceDataWriteRT;
 
 SamplerState _LinearClamp;
 SamplerState _LinearRepeat;
@@ -259,4 +263,50 @@ void CSShiftWaterChainsData (uint3 id : SV_DispatchThreadID)
 void CSSwapWaterChainsData (uint3 id : SV_DispatchThreadID)
 {	
 	waterChainsWriteCBuffer[id.x] = waterChainsReadCBuffer[id.x];
+}
+
+
+[numthreads(32,32,1)]
+void CSUpdateWaterSurface (uint3 id : SV_DispatchThreadID)
+{	
+	//float4 currentColor = waterSurfaceDataReadRT[id.xy];
+	//float3 coords = 
+	float4 noiseSample0 = Value3D((float3)id.xyz * 1 + float3(_Time * 1, _Time * 0.8, _Time * 0.35 + (float)id.x * 10 - (float)id.y * 20) * 13, 0.09);
+	float4 noiseSample1 = Value3D((float3)id.xyz * 1 + float3(-_Time * 0.1, _Time * 0.1, -_Time * 0.095 + (float)id.x * 12 + (float)id.y * 20) * 16, 6);
+	float4 noiseSample2 = Value3D((float3)id.xyz * 1 + float3(_Time * 0.01, -_Time * 0.01, _Time * 0.015 + (float)id.x * 9 - (float)id.y * 20) * 14, 34);
+	float4 noiseSample3 = Value3D((float3)id.xyz * 1 + float3(-_Time * 0.005, -_Time * 0.008, -_Time * 0.0025 + (float)id.x * 10 - (float)id.y * 20) * 1, 364.1);
+
+	//float3 normal = float3((noiseSample0.yz + 3) * 0.1, 0);
+
+	float height = noiseSample0.x * 1.0 + noiseSample1.x * 0.1 + noiseSample2.x * 0.05 + noiseSample3.x * 0.025;
+
+	//float height = noiseSample0.x * 0.5 + 0.5;
+	waterSurfaceDataWriteRT[id.xy] = float4(height, 0, 0, 1);
+}
+
+[numthreads(32,32,1)]
+void CSCalculateWaterSurfaceNormals (uint3 id : SV_DispatchThreadID)
+{	
+	float4 curValue = waterSurfaceDataWriteRT[id.xy];
+
+	float heightCenter = curValue.x;
+
+	float heightUp = waterSurfaceDataWriteRT[id.xy + uint2(0, 1)].x;
+	float heightRight = waterSurfaceDataWriteRT[id.xy + uint2(1, 0)].x;
+	float heightDown = waterSurfaceDataWriteRT[id.xy + uint2(0, -1)].x;
+	float heightLeft = waterSurfaceDataWriteRT[id.xy + uint2(-1, 0)].x;
+
+	float2 grad = float2(heightRight - heightLeft, heightUp - heightDown);
+	float zx = -grad.x;
+	float zy = -grad.y;
+
+	float heightScale = 0.1;
+	grad *= heightScale;
+	float z = sqrt(1.0 - (grad.x * grad.x) - (grad.y * grad.y));
+
+	float3 normal = normalize(float3(-grad.x, -grad.y, -z));
+	
+	curValue.yzw = normal;
+
+	waterSurfaceDataWriteRT[id.xy] = curValue;
 }

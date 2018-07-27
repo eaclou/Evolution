@@ -7,6 +7,7 @@
 		_AltitudeTex ("_AltitudeTex", 2D) = "gray" {}
 		_VelocityTex ("_VelocityTex", 2D) = "black" {}
 		_SkyTex ("_SkyTex", 2D) = "white" {}
+		_WaterSurfaceTex ("_WaterSurfaceTex", 2D) = "black" {}
 	}
 	SubShader
 	{
@@ -53,6 +54,7 @@
 			sampler2D _AltitudeTex;			
 			sampler2D _VelocityTex;
 			sampler2D _SkyTex;
+			sampler2D _WaterSurfaceTex;
 			
 			sampler2D _RenderedSceneRT;  // Provided by CommandBuffer -- global tex??? seems confusing... ** revisit this
 			
@@ -93,7 +95,14 @@
 				vertexWorldOffset = GetAnimatedPos(vertexWorldOffset, float3(0,0,0), critterInitData, critterSimData, skinStrokeData);
 				
 				float3 worldPosition = skinStrokeData.worldPos + vertexWorldOffset; //critterWorldPos + vertexWorldOffset; //	
-				//float3 worldPosition = critterWorldPos + vertexWorldOffset; //	
+				//float3 worldPosition = critterWorldPos + vertexWorldOffset; //
+				// REFRACTION:
+				//float altitude = tex2Dlod(_AltitudeTex, float4(altUV, 0, 0)).x; //i.worldPos.z / 10; // [-1,1] range
+				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / 256, 0, 0)).yzw;
+				//float depth = saturate(-altitude + 0.5);
+				float refractionStrength = 2.5;
+				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
+
 
 				float2 altUV = (worldPosition.xy + 128) / 512;
 				o.altitudeUV = altUV;

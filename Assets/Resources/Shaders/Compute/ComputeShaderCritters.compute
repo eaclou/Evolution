@@ -59,12 +59,12 @@ void CSSimulateSkinCritterStrokes (uint3 id : SV_DispatchThreadID)
 	
 
 	float pinnedAmount = saturate((1.0 - critterSimData.decayPercentage * 12));
-	pinnedAmount *= 1;
+	pinnedAmount = 1;
 	
-	curWorldPos.xyz += skinStrokeData.localPos * 0.05 * critterCurScale.x;
-	curWorldPos.z += 0.01;
+	//curWorldPos.xyz += skinStrokeData.localPos * 0.05 * critterCurScale.x;
+	//curWorldPos.z += 0.01;
 	float3 worldPosition = lerp(curWorldPos, newWorldPos, pinnedAmount);
-	worldPosition.xy += noiseVel * 0.033 * critterCurScale.x;
+	//worldPosition.xy += noiseVel * 0.3 * critterCurScale.x;
 	//worldPosition.xyz += skinStrokeData.localPos * 0.1;
 			
 	skinStrokeData.worldPos = worldPosition;

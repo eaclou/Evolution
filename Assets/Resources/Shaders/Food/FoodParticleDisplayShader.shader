@@ -3,6 +3,7 @@
 	Properties
 	{
 		_MainTex ("Main Texture", 2D) = "white" {}  // stem texture sheet		
+		_WaterSurfaceTex ("_WaterSurfaceTex", 2D) = "black" {}
 		//_Tint("Color", Color) = (1,1,1,1)
 		//_Size("Size", vector) = (1,1,1,1)
 	}
@@ -24,6 +25,7 @@
 			#include "Assets/Resources/Shaders/Inc/NoiseShared.cginc"
 
 			sampler2D _MainTex;
+			sampler2D _WaterSurfaceTex;
 			
 			//float4 _MainTex_ST;
 			//float4 _Tint;
@@ -62,6 +64,13 @@
 				FoodParticleData particleData = foodParticleDataCBuffer[inst];
 
 				float3 worldPosition = float3(particleData.worldPos, 0);    //float3(rawData.worldPos, -random2);
+				// REFRACTION:
+				//float altitude = tex2Dlod(_AltitudeTex, float4(altUV, 0, 0)).x; //i.worldPos.z / 10; // [-1,1] range
+				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / 256, 0, 0)).yzw;
+				//float depth = saturate(-altitude + 0.5);
+				float refractionStrength = 2.5;
+				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
+
 				quadPoint = quadPoint * particleData.radius * particleData.active;
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(quadPoint, 0.0f));				
 				o.uv = quadVerticesCBuffer[id].xy + 0.5f;	

@@ -4,6 +4,7 @@
 	{
 		_MainTex ("Main Texture", 2D) = "white" {}  // stem texture sheet	
 		_AltitudeTex ("_AltitudeTex", 2D) = "gray" {}
+		_WaterSurfaceTex ("_WaterSurfaceTex", 2D) = "black" {}
 		//_Tint("Color", Color) = (1,1,1,1)
 		//_Size("Size", vector) = (1,1,1,1)
 	}
@@ -26,6 +27,7 @@
 
 			sampler2D _MainTex;
 			sampler2D _AltitudeTex;	
+			sampler2D _WaterSurfaceTex;
 			uniform float _MapSize;
 
 			struct FoodParticleData {
@@ -60,6 +62,13 @@
 				FoodParticleData particleData = foodParticleDataCBuffer[inst];
 
 				float3 worldPosition = float3(particleData.worldPos, 5);    //float3(rawData.worldPos, -random2);
+				// REFRACTION:
+				//float altitude = tex2Dlod(_AltitudeTex, float4(altUV, 0, 0)).x; //i.worldPos.z / 10; // [-1,1] range
+				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / 256, 0, 0)).yzw;
+				//float depth = saturate(-altitude + 0.5);
+				float refractionStrength = 2.5;
+				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
+
 				quadPoint = quadPoint * particleData.radius * particleData.active;
 				
 				float2 altUV = (worldPosition.xy + 128) / 512;

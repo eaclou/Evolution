@@ -7,6 +7,7 @@
 		_AltitudeTex ("_AltitudeTex", 2D) = "gray" {}
 		_VelocityTex ("_VelocityTex", 2D) = "black" {}
 		_SkyTex ("_SkyTex", 2D) = "white" {}
+		_WaterSurfaceTex ("_WaterSurfaceTex", 2D) = "black" {}
 	}
 	SubShader
 	{
@@ -53,6 +54,7 @@
 			sampler2D _AltitudeTex;			
 			sampler2D _VelocityTex;
 			sampler2D _SkyTex;
+			sampler2D _WaterSurfaceTex;
 			
 			sampler2D _RenderedSceneRT;  // Provided by CommandBuffer -- global tex??? seems confusing... ** revisit this
 			
@@ -88,12 +90,23 @@
 				vertexWorldOffset.xy = vertexWorldOffset.xy * ((skinStrokeData.localScale.x + skinStrokeData.localScale.y) / 2.0) * critterCurScale * saturate(0.99 - critterSimData.decayPercentage * 2);
 				//vertexWorldOffset.xy = vertexWorldOffset.xy * skinStrokeData.localScale * critterCurScale * (1.0 - critterSimData.decayPercentage);
 				
-				float3 spriteWorldOffset = spriteLocalPos; // **** Vector from critter origin to sprite origin
+				//float3 spriteWorldOffset = spriteLocalPos; // **** Vector from critter origin to sprite origin
 				
 				//spriteWorldOffset = GetAnimatedPos(spriteWorldOffset, float3(0,0,0), critterInitData, critterSimData, skinStrokeData);
 				vertexWorldOffset = GetAnimatedPos(vertexWorldOffset, float3(0,0,0), critterInitData, critterSimData, skinStrokeData);
 				
-				float3 worldPosition = skinStrokeData.worldPos + vertexWorldOffset; //critterWorldPos + vertexWorldOffset; //				
+				// REFRACTION:
+				float3 offset = skinStrokeData.worldPos;				
+				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(offset.xy / 256, 0, 0)).yzw;
+				float refractionStrength = 2.5;
+				offset.xy += -surfaceNormal.xy * refractionStrength;
+
+
+				float3 worldPosition = offset + vertexWorldOffset; //critterWorldPos + vertexWorldOffset; //
+				
+
+				float embryoStatus = skinStrokeData.lifeStatus;
+
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
 				o.worldPos = worldPosition;
 

@@ -38,9 +38,9 @@ public class BaronVonTerrain : RenderBaron {
     private int numGroundStrokesLrg = 64;
     private int numGroundStrokesMed = 128;
     private int numGroundStrokesSml = 256;
-    private ComputeBuffer groundStrokesLrgCBuffer;
-    private ComputeBuffer groundStrokesMedCBuffer;
-    private ComputeBuffer groundStrokesSmlCBuffer;
+    public ComputeBuffer groundStrokesLrgCBuffer;
+    public ComputeBuffer groundStrokesMedCBuffer;
+    public ComputeBuffer groundStrokesSmlCBuffer;
 
     public struct TerrainSimpleBrushData { // background terrain
         public Vector3 worldPos;
@@ -342,7 +342,7 @@ public class BaronVonTerrain : RenderBaron {
         //cmdBuffer.DrawProcedural(Matrix4x4.identity, frameBufferStrokeDisplayMat, 0, MeshTopology.Triangles, 6, frameBufferStrokesCBuffer.count);
         
         
-
+        /*
         // LARGE STROKES!!!!
         groundStrokesLrgDisplayMat.SetPass(0);
         groundStrokesLrgDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -369,7 +369,7 @@ public class BaronVonTerrain : RenderBaron {
         groundStrokesSmlDisplayMat.SetTexture("_AltitudeTex", terrainHeightMap);
         cmdBuffer.SetGlobalTexture("_RenderedSceneRT", frameBufferID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
         cmdBuffer.DrawProcedural(Matrix4x4.identity, groundStrokesSmlDisplayMat, 0, MeshTopology.Triangles, 6, groundStrokesSmlCBuffer.count);
-        
+        */
     }
 
     public override void Cleanup() {
