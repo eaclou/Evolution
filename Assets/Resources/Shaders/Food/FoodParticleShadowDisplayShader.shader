@@ -62,14 +62,14 @@
 				FoodParticleData particleData = foodParticleDataCBuffer[inst];
 
 				float3 worldPosition = float3(particleData.worldPos, 5);    //float3(rawData.worldPos, -random2);
+				
+				quadPoint = quadPoint * particleData.radius * particleData.active;
+
+				worldPosition = worldPosition + quadPoint;
 				// REFRACTION:
-				//float altitude = tex2Dlod(_AltitudeTex, float4(altUV, 0, 0)).x; //i.worldPos.z / 10; // [-1,1] range
 				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / 256, 0, 0)).yzw;
-				//float depth = saturate(-altitude + 0.5);
 				float refractionStrength = 2.5;
 				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
-
-				quadPoint = quadPoint * particleData.radius * particleData.active;
 				
 				float2 altUV = (worldPosition.xy + 128) / 512;
 				//o.altitudeUV = altUV;
@@ -77,8 +77,10 @@
 				worldPosition.z = -(tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 2)).x * 2 - 1) * 10;
 				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
 				//o.worldPos = worldPosition;
+
 				
-				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(quadPoint, 0.0f));				
+				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
+				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(quadPoint, 0.0f));				
 				o.uv = quadVerticesCBuffer[id].xy + 0.5f;	
 				
 				return o;

@@ -49,7 +49,7 @@ float GetSwimAngle(float t, float animCycle, float accel, float throttle, float 
 	float v = t * 0.5 + 0.5;
 	float offsetMask = saturate(1 - v * 0.75);
 	float turnMask = saturate((1.0 - v) * 1.0);
-	
+
 	//float angle = clamp(turnAmount * -1.33, -6.282, 6.282) * offsetMask;
 	//float angle = magnitude * sin(v * 3.141592 + animCycle * animSpeed + accel * accelAnimSpeed);// * offsetMask;
 
@@ -90,6 +90,7 @@ float3 GetAnimatedPos(float3 inPos, float3 pivotPos, CritterInitData critterInit
 	// end FOOD BLOAT
 	
 	// BITE!!!!
+	/*
 	float t = strokeData.localPos.y * 0.5 + 0.5;  // [0-1]
 	float biteAnimCycle = critterSimData.biteAnimCycle;
 	float eatingCycle = sin(biteAnimCycle * 3.141592);
@@ -107,7 +108,7 @@ float3 GetAnimatedPos(float3 inPos, float3 pivotPos, CritterInitData critterInit
 	inPos.xyz = newPos;
 	//inPos.z = newZ;
 	// end BITE
-
+	*/
 	
 	float3 outPos = RotatePointAroundZAngle(float3(0,0,0), swimAngle, inPos);
 

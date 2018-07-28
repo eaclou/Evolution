@@ -32,6 +32,7 @@ public class SimulationStateData {
         public Vector3 worldPos;
         public Vector2 velocity;
         public Vector2 heading;
+        public float embryoPercentage;
         public float growthPercentage;
         public float decayPercentage;
         public float foodAmount;
@@ -159,7 +160,7 @@ public class SimulationStateData {
         for(int i = 0; i < critterSimDataArray.Length; i++) {
             critterSimDataArray[i] = new CritterSimData();
         }
-        critterSimDataCBuffer = new ComputeBuffer(critterSimDataArray.Length, sizeof(float) * 19);
+        critterSimDataCBuffer = new ComputeBuffer(critterSimDataArray.Length, sizeof(float) * 20);
 
         debugBodyResourcesArray = new DebugBodyResourcesData[simManager._NumAgents];
         for(int i = 0; i < debugBodyResourcesArray.Length; i++) {
@@ -217,6 +218,7 @@ public class SimulationStateData {
             agentSimDataArray[i].size = simManager.agentsArray[i].bodyCritterSegment.GetComponent<CapsuleCollider2D>().size;
             agentSimDataArray[i].primaryHue = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.huePrimary;
             agentSimDataArray[i].secondaryHue = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.hueSecondary;
+            
             float maturity = 1f;
             float decay = 0f;
             if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Egg) {
@@ -286,6 +288,15 @@ public class SimulationStateData {
                 critterSimDataArray[i].velocity = simManager.agentsArray[i].smoothedThrottle.normalized;
             }
             critterSimDataArray[i].heading = simManager.agentsArray[i].facingDirection;
+            float embryo = 1f;
+            if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Egg) {
+                embryo = (float)simManager.agentsArray[i].lifeStageTransitionTimeStepCounter / (float)simManager.agentsArray[i]._GestationDurationTimeSteps;
+                embryo = Mathf.Clamp01(embryo);
+            }
+            else {
+                embryo = 1f;
+            }
+            critterSimDataArray[i].embryoPercentage = embryo;
             critterSimDataArray[i].growthPercentage = simManager.agentsArray[i].growthPercentage;
             float decay = 0f;
             if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Decaying) {

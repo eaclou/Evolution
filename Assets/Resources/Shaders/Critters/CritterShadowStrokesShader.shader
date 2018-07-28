@@ -87,7 +87,8 @@
 
 				float3 spriteLocalPos = skinStrokeData.localPos * critterCurScale;
 				float3 vertexWorldOffset = quadPoint;
-				vertexWorldOffset.xy = vertexWorldOffset.xy * skinStrokeData.localScale * critterCurScale * (1.0 - critterSimData.decayPercentage);
+				vertexWorldOffset.xy = vertexWorldOffset.xy * ((skinStrokeData.localScale.x + skinStrokeData.localScale.y) / 2.0) * ((critterCurScale.x + critterCurScale.y) / 2.0) * saturate(0.99 - critterSimData.decayPercentage * 2);
+				//vertexWorldOffset.xy = vertexWorldOffset.xy * skinStrokeData.localScale * critterCurScale * (1.0 - critterSimData.decayPercentage);
 				
 				float3 spriteWorldOffset = spriteLocalPos; // **** Vector from critter origin to sprite origin
 				
@@ -141,6 +142,7 @@
 				o.screenUV = screenUV;
 
 				worldPosition.z = -(tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 2)).x * 2 - 1) * 10;
+
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
 				o.worldPos = worldPosition;
 
@@ -216,13 +218,15 @@
 				float4 reflectedColor = float4(tex2Dlod(_SkyTex, float4((i.skyUV), 0, 1)).rgb, backgroundColor.a); //col;
 				
 				finalColor = lerp(reflectedColor, finalColor, saturate(1 - (1 - i.vignetteLerp.x) * 1)); //float4(1,1,1,1);
+
+				finalColor.rgb = lerp(finalColor.rgb, backgroundColor, i.color.a);
 				//finalColor.a *= saturate(i.vignetteLerp.w * 1.4 - 0.25); //(1 - saturate(i.vignetteLerp.x) * 0.4) * 0.5;
 				//finalColor.a *= i.color.a;
 				finalColor.rgb = float3(0,0,0);
 				finalColor.rgb = lerp(finalColor.rgb, waterFogColor, fogAmount);
 				finalColor.a *= 0.5;
 				
-				finalColor.a *= (1.0 - i.color.w);
+				finalColor.a *= (1.0 - i.color.a);
 				
 				return finalColor;
 

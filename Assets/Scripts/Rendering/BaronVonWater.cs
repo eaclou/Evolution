@@ -21,7 +21,7 @@ public class BaronVonWater : RenderBaron {
 
     public Texture2D altitudeMapRef;
 
-    public int waterSurfaceMapResolution = 256;
+    public int waterSurfaceMapResolution = 1024;
     public RenderTexture waterSurfaceDataRT0;  // 2 for swapping enabled
     public RenderTexture waterSurfaceDataRT1;
 
@@ -36,6 +36,8 @@ public class BaronVonWater : RenderBaron {
     public ComputeBuffer waterChains1CBuffer;
 
     private int debugFrameCounter = 0;
+
+    public float camDistNormalized = 1f;
     
     public struct WaterCurveStrokeData {   // 2 ints, 17 floats
         public int index;        
@@ -176,12 +178,12 @@ public class BaronVonWater : RenderBaron {
     private void InitializeWaterSurface()
     {
         waterSurfaceDataRT0 = new RenderTexture(waterSurfaceMapResolution, waterSurfaceMapResolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        waterSurfaceDataRT0.wrapMode = TextureWrapMode.Repeat;
+        waterSurfaceDataRT0.wrapMode = TextureWrapMode.Clamp;
         waterSurfaceDataRT0.enableRandomWrite = true;
         waterSurfaceDataRT0.Create();
 
         waterSurfaceDataRT1 = new RenderTexture(waterSurfaceMapResolution, waterSurfaceMapResolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        waterSurfaceDataRT1.wrapMode = TextureWrapMode.Repeat;
+        waterSurfaceDataRT1.wrapMode = TextureWrapMode.Clamp;
         waterSurfaceDataRT1.enableRandomWrite = true;
         waterSurfaceDataRT1.Create();
     }
@@ -258,13 +260,18 @@ public class BaronVonWater : RenderBaron {
         computeShaderWaterRender.SetTexture(kernelCSUpdateWaterSurface, "waterSurfaceDataWriteRT", waterSurfaceDataRT0);
         computeShaderWaterRender.SetFloat("_Time", Time.realtimeSinceStartup);
         computeShaderWaterRender.SetFloat("_MapSize", SimulationManager._MapSize);
+        computeShaderWaterRender.SetFloat("_CamDistNormalized", camDistNormalized);
         computeShaderWaterRender.Dispatch(kernelCSUpdateWaterSurface, waterSurfaceMapResolution / 32, waterSurfaceMapResolution / 32, 1);
 
+        
         int kernelCSCalculateWaterSurfaceNormals = computeShaderWaterRender.FindKernel("CSCalculateWaterSurfaceNormals");
-        computeShaderWaterRender.SetTexture(kernelCSCalculateWaterSurfaceNormals, "waterSurfaceDataWriteRT", waterSurfaceDataRT0);
+        computeShaderWaterRender.SetTexture(kernelCSCalculateWaterSurfaceNormals, "waterSurfaceDataReadRT", waterSurfaceDataRT0);
+        computeShaderWaterRender.SetTexture(kernelCSCalculateWaterSurfaceNormals, "waterSurfaceDataWriteRT", waterSurfaceDataRT1);
         computeShaderWaterRender.SetFloat("_Time", Time.realtimeSinceStartup);
         computeShaderWaterRender.SetFloat("_MapSize", SimulationManager._MapSize);
+        computeShaderWaterRender.SetFloat("_CamDistNormalized", camDistNormalized);
         computeShaderWaterRender.Dispatch(kernelCSCalculateWaterSurfaceNormals, waterSurfaceMapResolution / 32, waterSurfaceMapResolution / 32, 1);
+        
     }
 
     public override void Tick() {

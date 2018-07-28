@@ -43,6 +43,6 @@ public class SettingsManager : MonoBehaviour {
 
         mutationSettingsRandomBody = new MutationSettings(0.25f, 0.02f, 1f, 0.0f, 0.999f, 0.0f, 0.0f);
         mutationSettingsRandomBody.defaultBodyMutationChance = 0.025f;
-        mutationSettingsRandomBody.defaultBodyMutationStepSize = 0.335f;
+        mutationSettingsRandomBody.defaultBodyMutationStepSize = 0.1835f;
     }
 }

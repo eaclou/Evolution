@@ -86,6 +86,8 @@ uniform const float _VelConversionConst = 0.033;
 
 uniform float4 _PlayerPos;
 
+uniform float _CamDistNormalized;
+
 
 float rand(float2 co){   // OUTPUT is in [0,1] RANGE!!!
 	return frac(sin(dot(co.xy ,float2(12.9898,78.233))) * 43758.5453);
@@ -271,42 +273,61 @@ void CSUpdateWaterSurface (uint3 id : SV_DispatchThreadID)
 {	
 	//float4 currentColor = waterSurfaceDataReadRT[id.xy];
 	//float3 coords = 
-	float4 noiseSample0 = Value3D((float3)id.xyz * 1 + float3(_Time * 1, _Time * 0.8, _Time * 0.35 + (float)id.x * 10 - (float)id.y * 20) * 13, 0.09);
-	float4 noiseSample1 = Value3D((float3)id.xyz * 1 + float3(-_Time * 0.1, _Time * 0.1, -_Time * 0.095 + (float)id.x * 12 + (float)id.y * 20) * 16, 6);
-	float4 noiseSample2 = Value3D((float3)id.xyz * 1 + float3(_Time * 0.01, -_Time * 0.01, _Time * 0.015 + (float)id.x * 9 - (float)id.y * 20) * 14, 34);
-	float4 noiseSample3 = Value3D((float3)id.xyz * 1 + float3(-_Time * 0.005, -_Time * 0.008, -_Time * 0.0025 + (float)id.x * 10 - (float)id.y * 20) * 1, 364.1);
+	//float4 noiseSample0 = Value3D((float3)id.xyz * 1 + float3(_Time * 1, _Time * 0.8, _Time * 0.35 + (float)id.x * 10 - (float)id.y * 20) * 13, 0.1);
+
+	float camDistNormalized = _CamDistNormalized;
+
+	float distWeight0 = 1.0 - saturate(2.0 * abs(1 - camDistNormalized));
+	float distWeight1 = 1.0 - saturate(2.0 * abs(0.67 - camDistNormalized));
+	float distWeight2 = 1.0 - saturate(2.0 * abs(0.33 - camDistNormalized));
+	float distWeight3 = 1.0 - saturate(2.0 * abs(0 - camDistNormalized));
+
+	float4 noiseSample0 = Value3D((float3)id.xyz + float3(_Time * 6.1, _Time * 9.08,  _Time * 14.81879 + (float)id.y * 0.36 + (float)id.x * 0.39), 0.06);
+	float4 noiseSample1 = Value3D((float3)id.xyz + float3(-_Time * 2.1, -_Time * 1.68,  _Time * 7.221879 - (float)id.y * 0.2 - (float)id.x * 0.16), 0.2);
+	float4 noiseSample2 = Value3D((float3)id.xyz * 1 + float3(_Time * 0.01, -_Time * 0.01, _Time * 1.015 + (float)id.x * 1 - (float)id.y * 1.341), 2.81);
+	float4 noiseSample3 = Value3D((float3)id.xyz * 1 + float3(-_Time * 0.005, -_Time * 0.005, -_Time * 0.3 + (float)id.x * 10 - (float)id.y * 7.8) * 1, 11.41);
 
 	//float3 normal = float3((noiseSample0.yz + 3) * 0.1, 0);
 
-	float height = noiseSample0.x * 1.0 + noiseSample1.x * 0.1 + noiseSample2.x * 0.05 + noiseSample3.x * 0.025;
+	float height = (1.0 - abs(noiseSample0.x)) * 1.1 * distWeight0 + 
+					(1.0 - abs(noiseSample1.x)) * 0.6 * distWeight1 + 
+					(1.0 - abs(noiseSample2.x)) * 0.15 * distWeight2 + 
+					(1.0 - abs(noiseSample3.x)) * 0.04 * distWeight3;
 
 	//float height = noiseSample0.x * 0.5 + 0.5;
-	waterSurfaceDataWriteRT[id.xy] = float4(height, 0, 0, 1);
+	waterSurfaceDataWriteRT[id.xy] = float4(height * 0.8, 0, 0, 1);
 }
 
 [numthreads(32,32,1)]
 void CSCalculateWaterSurfaceNormals (uint3 id : SV_DispatchThreadID)
 {	
-	float4 curValue = waterSurfaceDataWriteRT[id.xy];
+	float4 curValue = waterSurfaceDataReadRT[id.xy];
 
+
+	
 	float heightCenter = curValue.x;
 
-	float heightUp = waterSurfaceDataWriteRT[id.xy + uint2(0, 1)].x;
-	float heightRight = waterSurfaceDataWriteRT[id.xy + uint2(1, 0)].x;
-	float heightDown = waterSurfaceDataWriteRT[id.xy + uint2(0, -1)].x;
-	float heightLeft = waterSurfaceDataWriteRT[id.xy + uint2(-1, 0)].x;
-
+	uint2 upIndex = uint2(id.x, min(1023, id.y + 1));
+	float heightUp = waterSurfaceDataReadRT[upIndex].x;
+	uint2 rightIndex = uint2(min(1023, id.x + 1), id.y);
+	float heightRight = waterSurfaceDataReadRT[rightIndex].x;
+	uint2 downIndex = uint2(id.x, max(0, id.y - 1));
+	float heightDown = waterSurfaceDataReadRT[downIndex].x;
+	uint2 leftIndex = uint2(max(0, id.x - 1), id.y);
+	float heightLeft = waterSurfaceDataReadRT[leftIndex].x;
+		
+	
 	float2 grad = float2(heightRight - heightLeft, heightUp - heightDown);
 	float zx = -grad.x;
 	float zy = -grad.y;
 
-	float heightScale = 0.1;
+	float heightScale = 1;
 	grad *= heightScale;
 	float z = sqrt(1.0 - (grad.x * grad.x) - (grad.y * grad.y));
 
 	float3 normal = normalize(float3(-grad.x, -grad.y, -z));
 	
 	curValue.yzw = normal;
-
-	waterSurfaceDataWriteRT[id.xy] = curValue;
+	
+	waterSurfaceDataWriteRT[id.xy] = curValue; //float4(1,1,1,1); //curValue;
 }

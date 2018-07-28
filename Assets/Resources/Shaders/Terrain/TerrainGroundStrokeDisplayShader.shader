@@ -68,7 +68,7 @@
 				float altitude = tex2Dlod(_AltitudeTex, float4(altUV, 0, 0)).x; //i.worldPos.z / 10; // [-1,1] range
 				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(((altUV - 0.25) * 2), 0, 0)).yzw;
 				float depth = saturate(-altitude + 0.5);
-				float refractionStrength = depth * 12.5;
+				float refractionStrength = depth * 8.5;
 				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
 				//float diffuse = dot(surfaceNormal, _WorldSpaceLightPos0.xyz);
 				//finalColor.rgb = float3(diffuse, diffuse, diffuse);
@@ -118,7 +118,7 @@
 				float3 waterFogColor = float3(0.03,0.4,0.3) * 0.4;
 				float strataColorMultiplier = (sin(altitude * (1.0 + i.worldPos.x * 0.01 - i.worldPos.y * -0.01) + i.worldPos.x * 0.01 - i.worldPos.y * 0.01) * 0.5 + 0.5) * 0.5 + 0.5;
 				finalColor.rgb *= strataColorMultiplier;				
-				finalColor.rgb = lerp(finalColor.rgb, waterFogColor, 1 * (saturate(altitude * 0.8)) + 0.25 * isUnderwater);
+				
 
 				float snowAmount = saturate((-altitude - 0.6) * 2 +
 								   ((sin(i.worldPos.x * 0.0785 + i.worldPos.y * 0.02843) * 0.5 + 0.5) * 1 - 
@@ -130,6 +130,22 @@
 				
 				finalColor.rgb = lerp(finalColor.rgb, float3(0.56, 1, 0.34) * 0.6, snowAmount * 1);
 				
+
+				// FAKE CAUSTICS:::
+				float3 surfaceNormal = tex2D(_WaterSurfaceTex, (i.altitudeUV - 0.25) * 2).yzw;
+				float dotLight = dot(surfaceNormal, _WorldSpaceLightPos0.xyz);
+				dotLight = dotLight * dotLight;
+
+				finalColor.rgb = lerp(finalColor.rgb, finalColor.rgb * (dotLight * 0.33 + 0.67) + dotLight * 0.75, isUnderwater); //dotLight * 1.0;
+
+
+				// FOG:
+				finalColor.rgb = lerp(finalColor.rgb, waterFogColor, 1 * (saturate(altitude * 0.8)) + 0.25 * isUnderwater);
+
+				//return float4(dotLight, dotLight, dotLight, 1);
+
+				//float4 waterSurfaceSample = tex2D(_WaterSurfaceTex, (i.altitudeUV - 0.25) * 2);
+				//finalColor = float4(waterSurfaceSample.yzw * 0.5 + 0.5, 1);
 				//finalColor.rgb = tex2D(_WaterSurfaceTex, (i.altitudeUV - 0.25) * 2).yzw;
 				//finalColor.rg = finalColor.rg * 0.5 + 0.5;
 				//finalColor.a = 1;

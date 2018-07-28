@@ -87,7 +87,7 @@
 
 				float3 spriteLocalPos = skinStrokeData.localPos * critterCurScale;
 				float3 vertexWorldOffset = quadPoint;
-				vertexWorldOffset.xy = vertexWorldOffset.xy * ((skinStrokeData.localScale.x + skinStrokeData.localScale.y) / 2.0) * critterCurScale * saturate(0.99 - critterSimData.decayPercentage * 2);
+				vertexWorldOffset.xy = vertexWorldOffset.xy * ((skinStrokeData.localScale.x + skinStrokeData.localScale.y) / 2.0) * ((critterCurScale.x + critterCurScale.y) / 2.0) * saturate(0.99 - critterSimData.decayPercentage * 2);
 				//vertexWorldOffset.xy = vertexWorldOffset.xy * skinStrokeData.localScale * critterCurScale * (1.0 - critterSimData.decayPercentage);
 				
 				//float3 spriteWorldOffset = spriteLocalPos; // **** Vector from critter origin to sprite origin
@@ -101,11 +101,14 @@
 				float refractionStrength = 2.5;
 				offset.xy += -surfaceNormal.xy * refractionStrength;
 
+				float embryoStatus = critterSimData.embryoPercentage;
+
 
 				float3 worldPosition = offset + vertexWorldOffset; //critterWorldPos + vertexWorldOffset; //
 				
+				worldPosition = lerp(critterSimData.worldPos, worldPosition, embryoStatus);
 
-				float embryoStatus = skinStrokeData.lifeStatus;
+				
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
 				o.worldPos = worldPosition;
@@ -174,16 +177,23 @@
 
 				float3 lightDir = normalize(_WorldSpaceLightPos0.xyz);
 				float diffuseLight = saturate(dot(lightDir, normalize(i.worldNormal)));
+				
+				float altitude = tex2D(_AltitudeTex, i.altitudeUV); // i.worldPos.z / 10; // [-1,1] range
+
 				//return float4(i.worldNormal,1);
 
 				float4 finalColor = float4(lerp(critterInitData.primaryHue, critterInitData.secondaryHue, patternSample.x), texColor.a);
+
+				float3 surfaceNormal = tex2D(_WaterSurfaceTex, (i.altitudeUV - 0.25) * 2).yzw;
+				float dotLight = dot(surfaceNormal, _WorldSpaceLightPos0.xyz);
+				dotLight = dotLight * dotLight;
 				
-				finalColor.rgb *= diffuseLight * 0.75 + 0.25;
+				finalColor.rgb *= diffuseLight * 0.67 + 0.33;
 				
 				float4 backgroundColor = frameBufferColor;
 				backgroundColor.a = texColor.a;
 				
-				float altitude = tex2D(_AltitudeTex, i.altitudeUV); // i.worldPos.z / 10; // [-1,1] range
+				
 				// 0-1 range --> -1 to 1
 				altitude = (altitude * 2 - 1) * -1;
 				float isUnderwater = saturate(altitude * 10000);
@@ -205,7 +215,7 @@
 				backgroundColor.a *= isUnderwater;
 
 				float fogAmount = 0.25; //saturate((i.worldPos.z + 1) * 0.5);
-				finalColor.rgb = lerp(finalColor.rgb, waterFogColor, fogAmount);
+				//finalColor.rgb = lerp(finalColor.rgb, waterFogColor, fogAmount);
 
 				
 				float4 reflectedColor = float4(tex2Dlod(_SkyTex, float4((i.skyUV), 0, 1)).rgb, backgroundColor.a); //col;
@@ -215,7 +225,19 @@
 				//finalColor.a *= i.color.a;
 
 				finalColor.rgb *= saturate(1.0 - i.color.w * 32) * 0.5 + 0.5;
-				finalColor.rgb = lerp(finalColor.rgb, backgroundColor, i.color.w);
+				finalColor.rgb = lerp(finalColor.rgb, backgroundColor, i.color.a);
+				
+				// FAKE CAUSTICS:::				
+				dotLight *= saturate(diffuseLight * 2.5);
+				finalColor.rgb = lerp(finalColor.rgb, finalColor.rgb * (dotLight * 0.6 + 0.4) + dotLight * 1.1, isUnderwater); //dotLight * 1.0;
+
+				finalColor.rgb = lerp(finalColor.rgb, waterFogColor, fogAmount);
+
+				// FOG:
+				//finalColor.rgb = lerp(finalColor.rgb, waterFogColor, 1 * (saturate(altitude * 0.8)) + 0.25 * isUnderwater);
+				
+				
+				
 				//finalColor.a *= (1.0 - i.color.w);
 				//return float4(i.color.w, i.color.w, i.color.w, 1);
 				return finalColor;
