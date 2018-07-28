@@ -90,25 +90,31 @@ float3 GetAnimatedPos(float3 inPos, float3 pivotPos, CritterInitData critterInit
 	// end FOOD BLOAT
 	
 	// BITE!!!!
-	/*
+	
 	float t = strokeData.localPos.y * 0.5 + 0.5;  // [0-1]
 	float biteAnimCycle = critterSimData.biteAnimCycle;
 	float eatingCycle = sin(biteAnimCycle * 3.141592);
-	float biteMask = saturate(t * 2 - 1);
+	float biteMask = saturate((t - 0.667) * 3);
+	float lowerJawMask = biteMask * saturate(strokeData.localPos.z * 100);
+	float upperJawMask = biteMask * saturate(-strokeData.localPos.z * 100);
+
+	float3 critterCurScale = critterInitData.boundingBoxSize * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage);
+
+	inPos.xyz = lerp(inPos.xyz, inPos.xyz + float3(0,0,critterCurScale.z * 0.67), lowerJawMask * eatingCycle);
+	inPos.xyz = lerp(inPos.xyz, inPos.xyz + float3(0,0,-critterCurScale.z * 0.67), upperJawMask * eatingCycle);
+	inPos.y *= (eatingCycle * 0.2 * biteMask + 1.0);
+	inPos.x *= ((1 - eatingCycle) * 0.2 * biteMask + 1.0);
 	
-	float3 newPos = inPos.xyz * (1.0 + eatingCycle * 0.67 * biteMask);	
-	newPos.y *= (eatingCycle * 0.24 * biteMask + 1.0);
-	newPos.x *= (0.75 - eatingCycle * -0.25 * biteMask);
-	//newXY.z *= (0.75 - eatingCycle * -0.25 * biteMask);
-	//float newZ = inPos.z; // * (1.0 + eatingCycle * 0.67 * biteMask);
-	float headOrJaw = saturate(strokeData.localPos.z * 100);
-	float posNeg = (headOrJaw * 2 - 1);
-	//newZ *= (eatingCycle * posNeg * 0.5 * biteMask);
+	//float3 newPos = inPos.xyz * (1.0 + eatingCycle * 0.67 * biteMask);	
+	//newPos.y *= (eatingCycle * 0.24 * biteMask + 1.0);
+	//newPos.x *= (0.75 - eatingCycle * -0.25 * biteMask);
+	//float headOrJaw = saturate(strokeData.localPos.z * 100);
+	//float posNeg = (headOrJaw * 2 - 1);
 	
-	inPos.xyz = newPos;
+	//inPos.xyz = newPos;
 	//inPos.z = newZ;
 	// end BITE
-	*/
+	
 	
 	float3 outPos = RotatePointAroundZAngle(float3(0,0,0), swimAngle, inPos);
 
