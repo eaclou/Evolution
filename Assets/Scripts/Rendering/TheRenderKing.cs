@@ -58,6 +58,7 @@ public class TheRenderKing : MonoBehaviour {
     public Material foodParticleShadowDisplayMat;
     public Material critterSkinStrokesDisplayMat;
     public Material critterShadowStrokesDisplayMat;
+    //public Material critterEyeStrokesDisplayMat;
 
     public bool isDebugRenderOn = true;
     
@@ -566,6 +567,8 @@ public class TheRenderKing : MonoBehaviour {
             dataLeftEye.parentIndex = i;
             dataLeftEye.localPos = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.localPos;
             dataLeftEye.localPos.x *= -1f; // LEFT SIDE!
+            float width = simManager.agentsArray[i].agentWidthsArray[Mathf.RoundToInt((dataLeftEye.localPos.y * 0.5f + 0.5f) * 15f)];
+            dataLeftEye.localPos.x *= width * 0.5f;
             dataLeftEye.localDir = new Vector2(0f, 1f);
             dataLeftEye.localScale = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.localScale;
             dataLeftEye.irisHue = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.irisHue;
@@ -576,6 +579,8 @@ public class TheRenderKing : MonoBehaviour {
             AgentEyeStrokeData dataRightEye = new AgentEyeStrokeData();
             dataRightEye.parentIndex = i;
             dataRightEye.localPos = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.localPos;
+            width = simManager.agentsArray[i].agentWidthsArray[Mathf.RoundToInt((dataRightEye.localPos.y * 0.5f + 0.5f) * 15f)];
+            dataRightEye.localPos.x *= width * 0.5f;
             dataRightEye.localDir = new Vector2(0f, 1f);
             dataRightEye.localScale = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.localScale;
             dataRightEye.irisHue = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.irisHue;
@@ -622,7 +627,7 @@ public class TheRenderKing : MonoBehaviour {
                 skinStroke.localPos.x *= width * 0.5f;
                 skinStroke.localPos.z *= width * 0.5f;                
                 skinStroke.localDir = new Vector3(0f, 1f, 0f); // start up? shouldn't matter
-                skinStroke.localScale = new Vector2(0.25f, 0.38f); // simManager.agentGenomePoolArray[i].bodyGenome.sizeAndAspectRatio;
+                skinStroke.localScale = new Vector2(0.25f, 0.38f) * 1.2f; // simManager.agentGenomePoolArray[i].bodyGenome.sizeAndAspectRatio;
                 skinStroke.strength = UnityEngine.Random.Range(0f, 1f);
                 skinStroke.lifeStatus = 0f;
                 skinStroke.age = UnityEngine.Random.Range(1f, 2f);
@@ -1148,6 +1153,8 @@ public class TheRenderKing : MonoBehaviour {
         dataLeftEye.parentIndex = agentIndex;
         dataLeftEye.localPos = simManager.agentGenomePoolArray[agentIndex].bodyGenome.appearanceGenome.eyeGenome.localPos;
         dataLeftEye.localPos.x *= -1f; // LEFT SIDE!
+        float width = simManager.agentsArray[agentIndex].agentWidthsArray[Mathf.RoundToInt((dataLeftEye.localPos.y * 0.5f + 0.5f) * 15f)];
+        dataLeftEye.localPos.x *= width * 0.5f;
         dataLeftEye.localDir = new Vector2(0f, 1f);
         dataLeftEye.localScale = simManager.agentGenomePoolArray[agentIndex].bodyGenome.appearanceGenome.eyeGenome.localScale;
         dataLeftEye.irisHue = simManager.agentGenomePoolArray[agentIndex].bodyGenome.appearanceGenome.eyeGenome.irisHue;
@@ -1158,6 +1165,8 @@ public class TheRenderKing : MonoBehaviour {
         AgentEyeStrokeData dataRightEye = new AgentEyeStrokeData();
         dataRightEye.parentIndex = agentIndex;
         dataRightEye.localPos = simManager.agentGenomePoolArray[agentIndex].bodyGenome.appearanceGenome.eyeGenome.localPos;
+        width = simManager.agentsArray[agentIndex].agentWidthsArray[Mathf.RoundToInt((dataRightEye.localPos.y * 0.5f + 0.5f) * 15f)];
+        dataRightEye.localPos.x *= width * 0.5f;
         dataRightEye.localDir = new Vector2(0f, 1f);
         dataRightEye.localScale = simManager.agentGenomePoolArray[agentIndex].bodyGenome.appearanceGenome.eyeGenome.localScale;
         dataRightEye.irisHue = simManager.agentGenomePoolArray[agentIndex].bodyGenome.appearanceGenome.eyeGenome.irisHue;
@@ -1652,18 +1661,7 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, foodFruitDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.foodFruitDataCBuffer.count);
         */
         // CRITTER BODY:
-                
-        /*
-        // AGENT EYES:
-        agentEyesDisplayMat.SetPass(0);
-        agentEyesDisplayMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
-        agentEyesDisplayMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
-        //agentEyesDisplayMat.SetBuffer("agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
-        agentEyesDisplayMat.SetBuffer("agentEyesStrokesCBuffer", agentEyeStrokesCBuffer);
-        //agentEyesDisplayMat.SetBuffer("agentMovementAnimDataCBuffer", simManager.simStateData.agentMovementAnimDataCBuffer);
-        agentEyesDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        cmdBufferTest.DrawProcedural(Matrix4x4.identity, agentEyesDisplayMat, 0, MeshTopology.Triangles, 6, agentEyeStrokesCBuffer.count);
-        */
+                  
 
         // WATER :::::
         //baronVonWater.RenderCommands(ref cmdBufferTest, renderedSceneID);
@@ -1703,6 +1701,19 @@ public class TheRenderKing : MonoBehaviour {
         critterSkinStrokesDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
         cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, critterSkinStrokesDisplayMat, 0, MeshTopology.Triangles, 6, critterSkinStrokesCBuffer.count);
+
+        // AGENT EYES:
+        agentEyesDisplayMat.SetPass(0);
+        agentEyesDisplayMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
+        agentEyesDisplayMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
+        agentEyesDisplayMat.SetBuffer("agentEyesStrokesCBuffer", agentEyeStrokesCBuffer);
+        agentEyesDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        agentEyesDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+        agentEyesDisplayMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
+        agentEyesDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+        agentEyesDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        cmdBufferTest.DrawProcedural(Matrix4x4.identity, agentEyesDisplayMat, 0, MeshTopology.Triangles, 6, agentEyeStrokesCBuffer.count);
+        
 
         
         baronVonWater.waterQuadStrokesDisplayMat.SetPass(0);

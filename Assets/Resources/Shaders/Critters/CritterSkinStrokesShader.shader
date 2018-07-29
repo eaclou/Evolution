@@ -87,13 +87,15 @@
 
 				float3 spriteLocalPos = skinStrokeData.localPos * critterCurScale;
 				float3 vertexWorldOffset = quadPoint;
-				vertexWorldOffset.xy = vertexWorldOffset.xy * ((skinStrokeData.localScale.x + skinStrokeData.localScale.y) / 2.0) * ((critterCurScale.x + critterCurScale.y) / 2.0) * saturate(0.99 - critterSimData.decayPercentage * 2);
+				float2 brushAspectRatio = float2(lerp((skinStrokeData.localScale.x + skinStrokeData.localScale.y) / 2.0, skinStrokeData.localScale.x, 0.5),
+												lerp((skinStrokeData.localScale.x + skinStrokeData.localScale.y) / 2.0, skinStrokeData.localScale.y, 0.5));
+				vertexWorldOffset.xy = vertexWorldOffset.xy * brushAspectRatio * critterCurScale * saturate(0.99 - critterSimData.decayPercentage * 2);
 				//vertexWorldOffset.xy = vertexWorldOffset.xy * skinStrokeData.localScale * critterCurScale * (1.0 - critterSimData.decayPercentage);
 				
 				//float3 spriteWorldOffset = spriteLocalPos; // **** Vector from critter origin to sprite origin
 				
 				//spriteWorldOffset = GetAnimatedPos(spriteWorldOffset, float3(0,0,0), critterInitData, critterSimData, skinStrokeData);
-				vertexWorldOffset = GetAnimatedPos(vertexWorldOffset, float3(0,0,0), critterInitData, critterSimData, skinStrokeData);
+				vertexWorldOffset = GetAnimatedPos(vertexWorldOffset, float3(0,0,0), critterInitData, critterSimData, skinStrokeData.localPos);
 				
 				// REFRACTION:
 				float3 offset = skinStrokeData.worldPos;				
@@ -119,7 +121,7 @@
 				//worldNormal.xy = float2(localNormal.x * cos(swimAngle) - localNormal.y * sin(swimAngle), localNormal.y * cos(swimAngle) + localNormal.x * sin(swimAngle));
 				//worldNormal.xy = rotatePointVector(worldNormal.xy, float2(0,0), critterSimData.heading);
 
-				float3 worldNormal = GetAnimatedPos(localNormal, float3(0,0,0), critterInitData, critterSimData, skinStrokeData); //skinStrokeData.localPos;
+				float3 worldNormal = GetAnimatedPos(localNormal, float3(0,0,0), critterInitData, critterSimData, skinStrokeData.localPos); //skinStrokeData.localPos;
 				o.worldNormal = normalize(worldNormal);
 
 				// UVS:
@@ -218,9 +220,9 @@
 				//finalColor.rgb = lerp(finalColor.rgb, waterFogColor, fogAmount);
 
 				
-				float4 reflectedColor = float4(tex2Dlod(_SkyTex, float4((i.skyUV), 0, 1)).rgb, backgroundColor.a); //col;
+				//float4 reflectedColor = float4(tex2Dlod(_SkyTex, float4((i.skyUV), 0, 1)).rgb, backgroundColor.a); //col;
 				
-				finalColor = lerp(reflectedColor, finalColor, saturate(1 - (1 - i.vignetteLerp.x) * 1)); //float4(1,1,1,1);
+				//finalColor = lerp(reflectedColor, finalColor, saturate(1 - (1 - i.vignetteLerp.x) * 1)); //float4(1,1,1,1);
 				//finalColor.a *= saturate(i.vignetteLerp.w * 1.4 - 0.25); //(1 - saturate(i.vignetteLerp.x) * 0.4) * 0.5;
 				//finalColor.a *= i.color.a;
 

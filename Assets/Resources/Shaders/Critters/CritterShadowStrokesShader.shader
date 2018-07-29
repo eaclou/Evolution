@@ -93,7 +93,7 @@
 				float3 spriteWorldOffset = spriteLocalPos; // **** Vector from critter origin to sprite origin
 				
 				//spriteWorldOffset = GetAnimatedPos(spriteWorldOffset, float3(0,0,0), critterInitData, critterSimData, skinStrokeData);
-				vertexWorldOffset = GetAnimatedPos(vertexWorldOffset, float3(0,0,0), critterInitData, critterSimData, skinStrokeData);
+				vertexWorldOffset = GetAnimatedPos(vertexWorldOffset, float3(0,0,0), critterInitData, critterSimData, skinStrokeData.localPos);
 				
 				float3 worldPosition = skinStrokeData.worldPos + vertexWorldOffset; //critterWorldPos + vertexWorldOffset; //	
 				//float3 worldPosition = critterWorldPos + vertexWorldOffset; //
@@ -119,7 +119,7 @@
 				//worldNormal.xy = float2(localNormal.x * cos(swimAngle) - localNormal.y * sin(swimAngle), localNormal.y * cos(swimAngle) + localNormal.x * sin(swimAngle));
 				//worldNormal.xy = rotatePointVector(worldNormal.xy, float2(0,0), critterSimData.heading);
 
-				float3 worldNormal = GetAnimatedPos(localNormal, float3(0,0,0), critterInitData, critterSimData, skinStrokeData); //skinStrokeData.localPos;
+				float3 worldNormal = GetAnimatedPos(localNormal, float3(0,0,0), critterInitData, critterSimData, skinStrokeData.localPos); //skinStrokeData.localPos;
 				o.worldNormal = worldNormal;
 
 				// UVS:

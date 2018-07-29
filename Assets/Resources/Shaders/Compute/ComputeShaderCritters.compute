@@ -44,7 +44,7 @@ void CSSimulateSkinCritterStrokes (uint3 id : SV_DispatchThreadID)
 				
 	float3 spriteWorldOffset = spriteLocalPos; // **** Vector from critter origin to sprite origin		
 	// SWIM ANIMS:
-	spriteWorldOffset = GetAnimatedPos(spriteWorldOffset, float3(0,0,0), critterInitData, critterSimData, skinStrokeData);		
+	spriteWorldOffset = GetAnimatedPos(spriteWorldOffset, float3(0,0,0), critterInitData, critterSimData, skinStrokeData.localPos);		
 			
 	float3 newWorldPos = critterWorldPos + spriteWorldOffset;
 	float3 curWorldPos = skinStrokeData.worldPos;

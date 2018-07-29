@@ -74,16 +74,16 @@ float3 TransformDirRotateRoll() {
 
 }
 
-float3 GetAnimatedPos(float3 inPos, float3 pivotPos, CritterInitData critterInitData, CritterSimData critterSimData, CritterSkinStrokeData strokeData) {
+float3 GetAnimatedPos(float3 inPos, float3 pivotPos, CritterInitData critterInitData, CritterSimData critterSimData, float3 strokeLocalPos) {
 	
 	float magnitude = 0.5;
 
-	float swimAngle = GetSwimAngle(strokeData.localPos.y, critterSimData.moveAnimCycle, critterSimData.accel, critterSimData.smoothedThrottle, magnitude, critterSimData.turnAmount);
+	float swimAngle = GetSwimAngle(strokeLocalPos.y, critterSimData.moveAnimCycle, critterSimData.accel, critterSimData.smoothedThrottle, magnitude, critterSimData.turnAmount);
 	
 	// FOOD BLOAT:
 	float foodAmount = critterSimData.foodAmount;
 	float bloatPivotY = (saturate(foodAmount - 0.5) - 0.5) * 2;
-	float bloatMask = smoothstep(0, 1, (1 - saturate(abs((strokeData.localPos.y - bloatPivotY) * 1))) * 1); // smoothstep makes a more gaussian-looking shape than pointy
+	float bloatMask = smoothstep(0, 1, (1 - saturate(abs((strokeLocalPos.y - bloatPivotY) * 1))) * 1); // smoothstep makes a more gaussian-looking shape than pointy
 	float bloatMagnitude = foodAmount * foodAmount * 1.5;
 	
 	inPos *= 1.0 + bloatMask * bloatMagnitude * 1.0;
@@ -91,24 +91,24 @@ float3 GetAnimatedPos(float3 inPos, float3 pivotPos, CritterInitData critterInit
 	
 	// BITE!!!!
 	
-	float t = strokeData.localPos.y * 0.5 + 0.5;  // [0-1]
+	float t = strokeLocalPos.y * 0.5 + 0.5;  // [0-1]
 	float biteAnimCycle = critterSimData.biteAnimCycle;
 	float eatingCycle = sin(biteAnimCycle * 3.141592);
-	float biteMask = saturate((t - 0.667) * 3);
-	float lowerJawMask = biteMask * saturate(strokeData.localPos.z * 100);
-	float upperJawMask = biteMask * saturate(-strokeData.localPos.z * 100);
+	float biteMask = saturate((t - 0.75) * 4);
+	float lowerJawMask = biteMask * saturate(strokeLocalPos.z * 1000);
+	float upperJawMask = biteMask * saturate(-strokeLocalPos.z * 1000);
 
 	float3 critterCurScale = critterInitData.boundingBoxSize * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage);
 
-	inPos.xyz = lerp(inPos.xyz, inPos.xyz + float3(0,0,critterCurScale.z * 0.67), lowerJawMask * eatingCycle);
-	inPos.xyz = lerp(inPos.xyz, inPos.xyz + float3(0,0,-critterCurScale.z * 0.67), upperJawMask * eatingCycle);
-	inPos.y *= (eatingCycle * 0.2 * biteMask + 1.0);
-	inPos.x *= ((1 - eatingCycle) * 0.2 * biteMask + 1.0);
+	inPos.xyz = lerp(inPos.xyz, inPos.xyz + float3(0,0,critterCurScale.z * 0.5), lowerJawMask * eatingCycle);
+	inPos.xyz = lerp(inPos.xyz, inPos.xyz + float3(0,0,-critterCurScale.z * 0.25), upperJawMask * eatingCycle);
+	inPos.y *= (eatingCycle * 0.3 * biteMask + 1.0);
+	inPos.x *= ((1 - eatingCycle) * 0.3 * biteMask + 1.0);
 	
 	//float3 newPos = inPos.xyz * (1.0 + eatingCycle * 0.67 * biteMask);	
 	//newPos.y *= (eatingCycle * 0.24 * biteMask + 1.0);
 	//newPos.x *= (0.75 - eatingCycle * -0.25 * biteMask);
-	//float headOrJaw = saturate(strokeData.localPos.z * 100);
+	//float headOrJaw = saturate(strokeLocalPos.z * 100);
 	//float posNeg = (headOrJaw * 2 - 1);
 	
 	//inPos.xyz = newPos;
