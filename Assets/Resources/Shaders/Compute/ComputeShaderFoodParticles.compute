@@ -64,7 +64,7 @@ void CSMeasureInitCritterDistances (uint3 id : SV_DispatchThreadID)
 	float mouthRadius = critterInitData.boundingBoxSize.x * critterSimData.growthPercentage; // **** REMEMBER TO *0.5 EVENTUALLY FOR ACCURATE SIZE
 	float2 mouthCenterPos = critterSimData.heading * critterInitData.boundingBoxSize.y * 0.5 * critterSimData.growthPercentage;
 
-	float2 particleToCritter = critterSimData.worldPos + mouthCenterPos * 1.0 - particleData.worldPos;
+	float2 particleToCritter = critterSimData.worldPos.xy + mouthCenterPos * 1.0 - particleData.worldPos;
 
 	float distanceSquared = particleToCritter.x * particleToCritter.x + particleToCritter.y * particleToCritter.y;
 

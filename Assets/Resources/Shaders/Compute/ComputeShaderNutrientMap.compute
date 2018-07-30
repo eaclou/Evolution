@@ -82,7 +82,7 @@ void CSUpdateNutrientMap (uint3 id : SV_DispatchThreadID)
     float deltaY = amountUp - amountDown;
 
 	float2 grad = float2(0,0);
-	if(abs(deltaX) > 0.00000001 || abs(deltaY) > 0.00000001) {
+	if(abs(deltaX) > 0.000001 || abs(deltaY) > 0.000001) {
 		grad = normalize(float2(deltaX, deltaY));
 	}
     //float2 grad = normalize(float2(deltaX, deltaY));
@@ -96,7 +96,7 @@ void CSUpdateNutrientMap (uint3 id : SV_DispatchThreadID)
 [numthreads(32,32,1)]
 void CSInitializeNutrientMap (uint3 id : SV_DispatchThreadID)
 {	
-	nutrientMapWrite[id.xy] = float4(0.0025, 1, 1, 1);
+	nutrientMapWrite[id.xy] = float4(0.033, 0, 0, 1);
 }
 
 [numthreads(1,1,1)]
@@ -138,7 +138,7 @@ void CSMeasureTotalNutrients (uint3 id : SV_DispatchThreadID)
 		}
 	}
 
-	float4 pixValue = float4(totalNutrients,1,1,1);
+	float4 pixValue = float4(totalNutrients,9,1,1);
 
 	pooledResultTex[id.xy] = pixValue;
 

@@ -498,13 +498,13 @@ public class SimulationManager : MonoBehaviour {
         nutrientMapRT1.wrapMode = TextureWrapMode.Clamp;
         nutrientMapRT1.filterMode = FilterMode.Point;
         nutrientMapRT1.enableRandomWrite = true;
-        nutrientMapRT1.useMipMap = true;
+        //nutrientMapRT1.useMipMap = true;
         nutrientMapRT1.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***    
 
         nutrientMapRT2 = new RenderTexture(nutrientMapResolution, nutrientMapResolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
         nutrientMapRT2.wrapMode = TextureWrapMode.Clamp;
         nutrientMapRT2.enableRandomWrite = true;
-        nutrientMapRT2.useMipMap = true;
+        //nutrientMapRT2.useMipMap = true;
         nutrientMapRT2.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***  
         
         nutrientSamplesArray = new Vector4[numAgents];
@@ -802,8 +802,9 @@ public class SimulationManager : MonoBehaviour {
 
                 // ADD FOOD HERE::
                 AddNutrientsAtCoords(newFoodAmount, randX, randY);
+                
+                
                 //foodGrid[randX][randY].foodAmountsPerLayerArray[0] += newFoodAmount;
-
                 //Debug.Log("ADDED FOOD! GridCell[" + randX.ToString() + "][" + randY.ToString() + "]: " + newFoodAmount.ToString());
             }
         }
@@ -945,6 +946,7 @@ public class SimulationManager : MonoBehaviour {
         computeShaderNutrientMap.SetBuffer(kernelCSRemoveNutrientsAtLocations, "critterSimDataCBuffer", simStateData.critterSimDataCBuffer);
         computeShaderNutrientMap.SetTexture(kernelCSRemoveNutrientsAtLocations, "nutrientMapRead", nutrientMapRT1);
         computeShaderNutrientMap.SetTexture(kernelCSRemoveNutrientsAtLocations, "nutrientMapWrite", nutrientMapRT2);
+        computeShaderNutrientMap.SetFloat("_MapSize", mapSize);
         computeShaderNutrientMap.Dispatch(kernelCSRemoveNutrientsAtLocations, eatAmountsCBuffer.count, 1, 1);
 
         Graphics.Blit(nutrientMapRT2, nutrientMapRT1);

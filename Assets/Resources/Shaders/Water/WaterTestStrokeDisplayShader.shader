@@ -254,7 +254,7 @@
 				//finalColor.a = 1;
 				//float foodAmt = nutrientGridSample.x * 2;
 				//finalColor.rgb = float3(foodAmt, foodAmt, foodAmt);
-				finalColor.rgb = lerp(finalColor.rgb, float3(0,1,0), saturate(nutrientGridSample.x * 1));
+				finalColor.rgb = lerp(finalColor.rgb, float3(0,1,0), saturate(nutrientGridSample.x * 5));
 				
 				return finalColor;
 				
