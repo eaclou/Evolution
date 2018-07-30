@@ -627,7 +627,7 @@ public class TheRenderKing : MonoBehaviour {
                 skinStroke.localPos.x *= width * 0.5f;
                 skinStroke.localPos.z *= width * 0.5f;                
                 skinStroke.localDir = new Vector3(0f, 1f, 0f); // start up? shouldn't matter
-                skinStroke.localScale = new Vector2(0.25f, 0.38f) * 1.2f; // simManager.agentGenomePoolArray[i].bodyGenome.sizeAndAspectRatio;
+                skinStroke.localScale = new Vector2(0.25f, 0.38f) * 0.92f; // simManager.agentGenomePoolArray[i].bodyGenome.sizeAndAspectRatio;
                 skinStroke.strength = UnityEngine.Random.Range(0f, 1f);
                 skinStroke.lifeStatus = 0f;
                 skinStroke.age = UnityEngine.Random.Range(1f, 2f);
@@ -1653,13 +1653,13 @@ public class TheRenderKing : MonoBehaviour {
         foodParticleDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         foodParticleDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, foodParticleDisplayMat, 0, MeshTopology.Triangles, 6, simManager.foodParticlesCBuffer.count);
-        /*
+        
         foodFruitDisplayMat.SetPass(0);
         foodFruitDisplayMat.SetBuffer("fruitDataCBuffer", simManager.simStateData.foodFruitDataCBuffer);
         foodFruitDisplayMat.SetBuffer("foodSimDataCBuffer", simManager.simStateData.foodSimDataCBuffer);
         foodFruitDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, foodFruitDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.foodFruitDataCBuffer.count);
-        */
+        
         // CRITTER BODY:
                   
 
@@ -1722,6 +1722,7 @@ public class TheRenderKing : MonoBehaviour {
         baronVonWater.waterQuadStrokesDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
         baronVonWater.waterQuadStrokesDisplayMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
         baronVonWater.waterQuadStrokesDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+        baronVonWater.waterQuadStrokesDisplayMat.SetTexture("_NutrientTex", simManager.nutrientMapRT1);
         //cmdBufferTest.SetGlobalTexture(("_SceneRT", primaryRT);
         baronVonWater.waterQuadStrokesDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
         // Use this technique for Environment Brushstrokes:
@@ -1734,10 +1735,11 @@ public class TheRenderKing : MonoBehaviour {
         // FLOATY BITS!
         floatyBitsDisplayMat.SetPass(0);
         floatyBitsDisplayMat.SetTexture("_FluidColorTex", fluidManager._DensityA);
+        floatyBitsDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
         floatyBitsDisplayMat.SetBuffer("floatyBitsCBuffer", floatyBitsCBuffer);
         floatyBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, floatyBitsDisplayMat, 0, MeshTopology.Triangles, 6, floatyBitsCBuffer.count);
-*/
+        */
 
         /*
         // WATER SPLINES:::

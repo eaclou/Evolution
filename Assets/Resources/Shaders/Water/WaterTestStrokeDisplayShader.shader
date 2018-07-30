@@ -7,7 +7,7 @@
 		_VelocityTex ("_VelocityTex", 2D) = "black" {}
 		_SkyTex ("_SkyTex", 2D) = "white" {}
 		_WaterSurfaceTex ("_WaterSurfaceTex", 2D) = "black" {}
-		
+		_NutrientTex ("_NutrientTex", 2D) = "black" {}
 	}
 	SubShader
 	{		
@@ -30,6 +30,7 @@
 			sampler2D _VelocityTex;
 			sampler2D _SkyTex;
 			sampler2D _WaterSurfaceTex;
+			sampler2D _NutrientTex;
 			
 			sampler2D _RenderedSceneRT;  // Provided by CommandBuffer -- global tex??? seems confusing... ** revisit this
 			
@@ -248,6 +249,12 @@
 				finalColor.a = (1 - viewDotRemapped) * backgroundColor.a; //viewDotRemapped;
 				finalColor.a *= finalColor.a;
 				finalColor.a *= 0.33;
+
+				float4 nutrientGridSample = tex2D(_NutrientTex, (i.altitudeUV - 0.25) * 2.0); 
+				//finalColor.a = 1;
+				//float foodAmt = nutrientGridSample.x * 2;
+				//finalColor.rgb = float3(foodAmt, foodAmt, foodAmt);
+				finalColor.rgb = lerp(finalColor.rgb, float3(0,1,0), saturate(nutrientGridSample.x * 1));
 				
 				return finalColor;
 				

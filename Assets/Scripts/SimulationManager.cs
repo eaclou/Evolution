@@ -786,7 +786,7 @@ public class SimulationManager : MonoBehaviour {
         RemoveEatenNutrients();        
 
         float spawnNewFoodChance = settingsManager.spawnNewFoodChance;
-        float spawnFoodPercentage = UnityEngine.Random.Range(0f, 1f);
+        float spawnFoodPercentage = UnityEngine.Random.Range(0f, 0.25f);
         float maxGlobalFood = settingsManager.maxGlobalNutrients;
 
         if(totalNutrients < maxGlobalFood) {
@@ -867,6 +867,7 @@ public class SimulationManager : MonoBehaviour {
         computeShaderNutrientMap.SetBuffer(kernelCSGetNutrientSamples, "critterSimDataCBuffer", simStateData.critterSimDataCBuffer);
         computeShaderNutrientMap.SetBuffer(kernelCSGetNutrientSamples, "nutrientSamplesCBuffer", nutrientSamplesCBuffer);
         computeShaderNutrientMap.SetTexture(kernelCSGetNutrientSamples, "nutrientMapRead", nutrientMapRT1);
+        computeShaderNutrientMap.SetFloat("_MapSize", mapSize);
         computeShaderNutrientMap.Dispatch(kernelCSGetNutrientSamples, nutrientSamplesCBuffer.count, 1, 1);
 
         //Vector4[] outArray = new Vector4[_NumAgents];

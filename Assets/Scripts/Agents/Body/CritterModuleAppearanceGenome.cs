@@ -65,7 +65,7 @@ public class CritterModuleAppearanceGenome {
         bodyStrokeBrushTypeY = UnityEngine.Random.Range(0, 8);
         
         eyeGenome = new EyeGenome();
-        eyeGenome.localPos = new Vector2(UnityEngine.Random.Range(0.45f, 1f), UnityEngine.Random.Range(0f, 1f));
+        eyeGenome.localPos = new Vector2(UnityEngine.Random.Range(0.45f, 1f), UnityEngine.Random.Range(0.4f, 1f));
         eyeGenome.localScale = new Vector2(1f, 1f);
         eyeGenome.irisHue = new Vector3(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f));
         eyeGenome.pupilHue = Vector3.zero;
@@ -90,7 +90,7 @@ public class CritterModuleAppearanceGenome {
 
         eyeGenome = new EyeGenome();
 
-        eyeGenome.localPos = UtilityMutationFunctions.GetMutatedVector2Additive(parentGenome.eyeGenome.localPos, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, new Vector2(0.45f, 0f), new Vector2(1f, 1f));
+        eyeGenome.localPos = UtilityMutationFunctions.GetMutatedVector2Additive(parentGenome.eyeGenome.localPos, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, new Vector2(0.45f, 0.4f), new Vector2(1f, 1f));
         // EYES SCALE IS: (x= size, y= aspectRatio)
         eyeGenome.localScale = UtilityMutationFunctions.GetMutatedVector2Additive(parentGenome.eyeGenome.localScale, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, new Vector2(1f, 1f), new Vector2(1f, 1f));
         eyeGenome.irisHue = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.eyeGenome.irisHue, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);

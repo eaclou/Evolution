@@ -88,7 +88,7 @@
 				float3 vertexWorldOffset = quadVerticesCBuffer[id];
 
 				
-				vertexWorldOffset.xy = vertexWorldOffset.xy * critterCurScale.x * saturate(0.99 - critterSimData.decayPercentage * 2) * 0.75;
+				vertexWorldOffset.xy = vertexWorldOffset.xy * critterCurScale.x * saturate(0.99 - critterSimData.decayPercentage * 2) * 0.5;
 				
 				
 				float3 worldPosition = critterWorldPos + GetAnimatedPos(spriteLocalPos + vertexWorldOffset, float3(0,0,0), critterInitData, critterSimData, float3(eyeData.localPos, 0));

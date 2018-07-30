@@ -37,7 +37,7 @@ void CSGetNutrientSamples (uint3 id : SV_DispatchThreadID)
 {	
 	CritterSimData critterSimData = critterSimDataCBuffer[id.x];
 
-	float2 uv = critterSimData.worldPos / _MapSize;
+	float2 uv = critterSimData.worldPos.xy / _MapSize;
 	float4 nutrientAmount = nutrientMapRead.SampleLevel(_PointClamp, uv, 0);
 
 	// want gradient! -- pack into .yz channels :::
