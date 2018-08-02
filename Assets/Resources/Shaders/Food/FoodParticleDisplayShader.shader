@@ -38,6 +38,7 @@
 				float radius;
 				float foodAmount;
 				float active;
+				float refactoryAge;
 			};
 
 			StructuredBuffer<FoodParticleData> foodParticleDataCBuffer;			
@@ -47,6 +48,7 @@
 			{
 				float4 pos : SV_POSITION;
 				float2 uv : TEXCOORD0;  // uv of the brushstroke quad itself, particle texture	
+				float4 color : COLOR;
 				
 			};
 
@@ -65,7 +67,7 @@
 
 				float3 worldPosition = float3(particleData.worldPos, 0);    //float3(rawData.worldPos, -random2);
 				
-				quadPoint = quadPoint * particleData.radius * particleData.active;
+				quadPoint = quadPoint * particleData.radius; // * particleData.active * 3; // *** remove * 3 after!!!
 				worldPosition = worldPosition + quadPoint;
 
 				// REFRACTION:
@@ -78,6 +80,8 @@
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
 				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(quadPoint, 0.0f));				
 				o.uv = quadVerticesCBuffer[id].xy + 0.5f;	
+
+				o.color = float4(particleData.refactoryAge,particleData.active,1,1);
 				
 				return o;
 			}
@@ -85,6 +89,8 @@
 			fixed4 frag(v2f i) : SV_Target
 			{
 				//return float4(1,1,1,1);
+
+				return float4(1.0 - i.color.g, i.color.r, i.color.g, 1);
 
 				float4 texColor = tex2D(_MainTex, i.uv);
 				

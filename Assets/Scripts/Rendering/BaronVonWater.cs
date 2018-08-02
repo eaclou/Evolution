@@ -10,18 +10,27 @@ public class BaronVonWater : RenderBaron {
 
     public EnvironmentFluidManager fluidManagerRef;
 
-    public Material waterQuadStrokesDisplayMat;
+    public Material waterQuadStrokesLrgDisplayMat;
+    public Material waterQuadStrokesSmlDisplayMat;
     public Material waterCurveStrokeDisplayMat;
     public Material waterChainStrokeDisplayMat;
-    
+
+    public Material waterNutrientsBitsDisplayMat;
+    public Material waterSurfaceBitsDisplayMat;
+    public Material waterSurfaceBitsShadowsDisplayMat;
+    public Material waterDebrisBitsDisplayMat;
+    public Material waterDebrisBitsShadowsDisplayMat;
+
     public ComputeBuffer quadVerticesCBuffer;  // quad mesh
 
-    private int numWaterQuadStrokesPerDimension = 256;
-    public ComputeBuffer waterQuadStrokesCBuffer;
+    private int numWaterQuadStrokesPerDimensionLrg = 256;
+    public ComputeBuffer waterQuadStrokesCBufferLrg;
+    private int numWaterQuadStrokesPerDimensionSml = 128;
+    public ComputeBuffer waterQuadStrokesCBufferSml;
 
     public Texture2D altitudeMapRef;
 
-    public int waterSurfaceMapResolution = 1024;
+    public int waterSurfaceMapResolution = 128;
     public RenderTexture waterSurfaceDataRT0;  // 2 for swapping enabled
     public RenderTexture waterSurfaceDataRT1;
 
@@ -34,6 +43,18 @@ public class BaronVonWater : RenderBaron {
     public int numPointsPerWaterChain = 16;
     public ComputeBuffer waterChains0CBuffer;
     public ComputeBuffer waterChains1CBuffer;
+
+    public int numNutrientsBits = 1024 * 16;
+    public int numSurfaceBits = 1024;
+    public int numDebrisBits = 1024 * 4;
+    public ComputeBuffer waterNutrientsBitsCBuffer;
+    public ComputeBuffer waterSurfaceBitsCBuffer;
+    public ComputeBuffer waterSurfaceBitsShadowsCBuffer;
+    public ComputeBuffer waterDebrisBitsCBuffer;
+    public ComputeBuffer waterDebrisBitsShadowsCBuffer;
+
+
+    public Vector4 spawnBoundsCameraDetails;
 
     private int debugFrameCounter = 0;
 
@@ -88,7 +109,13 @@ public class BaronVonWater : RenderBaron {
         InitializeWaterCurveStrokesCBuffer();
         InitializeWaterChainStrokesCBuffer();
         InitializeWaterSurface();
+        InitializeWaterNutrientsBits();
+        InitializeWaterSurfaceBits();
+        InitializeWaterDebrisBits();
     }
+
+    
+
 
     private void InitializeWaterCurveMeshBuffer() {
         
@@ -155,25 +182,153 @@ public class BaronVonWater : RenderBaron {
         waterChains1CBuffer = new ComputeBuffer(waterChainDataArray.Length, sizeof(float) * 2);
     }
     private void InitializeWaterQuadStrokesBuffer() {
-        waterQuadStrokesCBuffer = new ComputeBuffer(numWaterQuadStrokesPerDimension * numWaterQuadStrokesPerDimension, sizeof(float) * 9 + sizeof(int) * 2);
-        WaterQuadData[] waterQuadStrokesArray = new WaterQuadData[waterQuadStrokesCBuffer.count];
+        waterQuadStrokesCBufferLrg = new ComputeBuffer(numWaterQuadStrokesPerDimensionLrg * numWaterQuadStrokesPerDimensionLrg, sizeof(float) * 9 + sizeof(int) * 2);
+        WaterQuadData[] waterQuadStrokesArrayLrg = new WaterQuadData[waterQuadStrokesCBufferLrg.count];
         float waterQuadStrokesBounds = 256f;
-        for(int x = 0; x < numWaterQuadStrokesPerDimension; x++) {
-            for(int y = 0; y < numWaterQuadStrokesPerDimension; y++) {
-                int index = x * numWaterQuadStrokesPerDimension + y;
-                float xPos = (float)x / (float)(numWaterQuadStrokesPerDimension - 1) * waterQuadStrokesBounds;
-                float yPos = (float)y / (float)(numWaterQuadStrokesPerDimension - 1) * waterQuadStrokesBounds;
+        for(int x = 0; x < numWaterQuadStrokesPerDimensionLrg; x++) {
+            for(int y = 0; y < numWaterQuadStrokesPerDimensionLrg; y++) {
+                int index = x * numWaterQuadStrokesPerDimensionLrg + y;
+                float xPos = (float)x / (float)(numWaterQuadStrokesPerDimensionLrg - 1) * waterQuadStrokesBounds;
+                float yPos = (float)y / (float)(numWaterQuadStrokesPerDimensionLrg - 1) * waterQuadStrokesBounds;
                 Vector2 offset = new Vector2(UnityEngine.Random.Range(-0.5f, 0.5f), UnityEngine.Random.Range(-0.5f, 0.5f));
                 Vector3 pos = new Vector3(xPos + offset.x, yPos + offset.y, 0f);
-                waterQuadStrokesArray[index].worldPos = pos;
-                waterQuadStrokesArray[index].localScale = new Vector2(UnityEngine.Random.Range(0.9f, 1.5f), UnityEngine.Random.Range(1.1f, 2.5f)) * UnityEngine.Random.Range(0.36f, 0.65f); // Y is forward, along stroke
-                waterQuadStrokesArray[index].heading = new Vector2(UnityEngine.Random.Range(-3f, 3f), UnityEngine.Random.Range(-0.5f, 0.5f)).normalized;
-                waterQuadStrokesArray[index].brushType = UnityEngine.Random.Range(0,4);
-                waterQuadStrokesArray[index].age = UnityEngine.Random.Range(1f, 2f);
+                waterQuadStrokesArrayLrg[index].worldPos = pos;
+                waterQuadStrokesArrayLrg[index].localScale = new Vector2(UnityEngine.Random.Range(0.9f, 1.5f), UnityEngine.Random.Range(1.1f, 2.5f)) * UnityEngine.Random.Range(0.36f, 0.65f); // Y is forward, along stroke
+                waterQuadStrokesArrayLrg[index].heading = new Vector2(UnityEngine.Random.Range(-3f, 3f), UnityEngine.Random.Range(-0.5f, 0.5f)).normalized;
+                waterQuadStrokesArrayLrg[index].brushType = UnityEngine.Random.Range(0,4);
+                waterQuadStrokesArrayLrg[index].age = UnityEngine.Random.Range(1f, 2f);
             
             }
         }
-        waterQuadStrokesCBuffer.SetData(waterQuadStrokesArray);
+        waterQuadStrokesCBufferLrg.SetData(waterQuadStrokesArrayLrg);
+
+        waterQuadStrokesCBufferSml = new ComputeBuffer(numWaterQuadStrokesPerDimensionSml * numWaterQuadStrokesPerDimensionSml, sizeof(float) * 9 + sizeof(int) * 2);
+        WaterQuadData[] waterQuadStrokesArraySml = new WaterQuadData[waterQuadStrokesCBufferSml.count];
+        
+        for (int x = 0; x < numWaterQuadStrokesPerDimensionSml; x++)
+        {
+            for (int y = 0; y < numWaterQuadStrokesPerDimensionSml; y++)
+            {
+                int index = x * numWaterQuadStrokesPerDimensionSml + y;
+                float xPos = (float)x / (float)(numWaterQuadStrokesPerDimensionSml - 1) * 64f + 128f;
+                float yPos = (float)y / (float)(numWaterQuadStrokesPerDimensionSml - 1) * 64f + 128f;
+                Vector2 offset = new Vector2(UnityEngine.Random.Range(-0.5f, 0.5f), UnityEngine.Random.Range(-0.5f, 0.5f));
+                Vector3 pos = new Vector3(xPos + offset.x, yPos + offset.y, 0f);
+                waterQuadStrokesArraySml[index].worldPos = pos;
+                waterQuadStrokesArraySml[index].localScale = 0.1f * new Vector2(UnityEngine.Random.Range(0.9f, 1.5f), UnityEngine.Random.Range(1.1f, 2.5f)) * UnityEngine.Random.Range(0.36f, 0.65f); // Y is forward, along stroke
+                waterQuadStrokesArraySml[index].heading = new Vector2(UnityEngine.Random.Range(-3f, 3f), UnityEngine.Random.Range(-0.5f, 0.5f)).normalized;
+                waterQuadStrokesArraySml[index].brushType = UnityEngine.Random.Range(0, 4);
+                waterQuadStrokesArraySml[index].age = UnityEngine.Random.Range(1f, 2f);
+
+            }
+        }
+        waterQuadStrokesCBufferSml.SetData(waterQuadStrokesArraySml);
+    }
+    private void InitializeWaterNutrientsBits()
+    {
+        waterNutrientsBitsCBuffer = new ComputeBuffer(numNutrientsBits, sizeof(float) * 9 + sizeof(int) * 2);
+        WaterQuadData[] waterNutrientsBitsArray = new WaterQuadData[waterNutrientsBitsCBuffer.count];
+
+        for (int x = 0; x < numNutrientsBits; x++)
+        {
+
+            float xPos = 128f; // (float)x / (float)(numNutrientsBits - 1) * waterNutrientsBitsBounds;
+            float yPos = 128f; // (float)y / (float)(numwaterNutrientsBitsPerDimension - 1) * waterNutrientsBitsBounds;
+            Vector2 offset = new Vector2(UnityEngine.Random.Range(-0.5f, 0.5f), UnityEngine.Random.Range(-0.5f, 0.5f));
+            Vector3 pos = new Vector3(xPos + offset.x, yPos + offset.y, 0f);
+            waterNutrientsBitsArray[x].worldPos = pos;
+            waterNutrientsBitsArray[x].localScale = 0.035f * new Vector2(UnityEngine.Random.Range(0.5f, 2f), UnityEngine.Random.Range(0.75f, 3.5f)) * UnityEngine.Random.Range(0.2f, 0.8f); // Y is forward, along stroke
+            waterNutrientsBitsArray[x].heading = new Vector2(UnityEngine.Random.Range(-3f, 3f), UnityEngine.Random.Range(-0.5f, 0.5f)).normalized;
+            waterNutrientsBitsArray[x].brushType = UnityEngine.Random.Range(0, 4);
+            waterNutrientsBitsArray[x].age = UnityEngine.Random.Range(1f, 2f);
+
+            
+        }
+        waterNutrientsBitsCBuffer.SetData(waterNutrientsBitsArray);
+    }
+    private void InitializeWaterSurfaceBits()
+    {
+        waterSurfaceBitsCBuffer = new ComputeBuffer(numSurfaceBits, sizeof(float) * 9 + sizeof(int) * 2);
+        WaterQuadData[] waterSurfaceBitsArray = new WaterQuadData[waterSurfaceBitsCBuffer.count];
+
+        for (int x = 0; x < numSurfaceBits; x++)
+        {
+
+            float xPos = 128f; // (float)x / (float)(numSurfaceBits - 1) * waterSurfaceBitsBounds;
+            float yPos = 128f; // (float)y / (float)(numwaterSurfaceBitsPerDimension - 1) * waterSurfaceBitsBounds;
+            Vector2 offset = new Vector2(UnityEngine.Random.Range(-0.5f, 0.5f), UnityEngine.Random.Range(-0.5f, 0.5f));
+            Vector3 pos = new Vector3(xPos + offset.x, yPos + offset.y, 0f);
+            waterSurfaceBitsArray[x].worldPos = pos;
+            waterSurfaceBitsArray[x].localScale = new Vector2(UnityEngine.Random.Range(0.9f, 1.5f), UnityEngine.Random.Range(1.1f, 2.5f)) * UnityEngine.Random.Range(0.36f, 0.65f); // Y is forward, along stroke
+            waterSurfaceBitsArray[x].heading = new Vector2(UnityEngine.Random.Range(-3f, 3f), UnityEngine.Random.Range(-0.5f, 0.5f)).normalized;
+            waterSurfaceBitsArray[x].brushType = UnityEngine.Random.Range(0, 4);
+            waterSurfaceBitsArray[x].age = UnityEngine.Random.Range(1f, 2f);
+
+
+        }
+        waterSurfaceBitsCBuffer.SetData(waterSurfaceBitsArray);
+
+        waterSurfaceBitsShadowsCBuffer = new ComputeBuffer(numSurfaceBits, sizeof(float) * 9 + sizeof(int) * 2);
+        WaterQuadData[] waterSurfaceBitsShadowsArray = new WaterQuadData[waterSurfaceBitsShadowsCBuffer.count];
+
+        for (int x = 0; x < numSurfaceBits; x++)
+        {
+
+            float xPos = 128f; // (float)x / (float)(numSurfaceShadowsBits - 1) * waterSurfaceShadowsBitsBounds;
+            float yPos = 128f; // (float)y / (float)(numwaterSurfaceShadowsBitsPerDimension - 1) * waterSurfaceShadowsBitsBounds;
+            Vector2 offset = new Vector2(UnityEngine.Random.Range(-0.5f, 0.5f), UnityEngine.Random.Range(-0.5f, 0.5f));
+            Vector3 pos = new Vector3(xPos + offset.x, yPos + offset.y, 0f);
+            waterSurfaceBitsShadowsArray[x].worldPos = pos;
+            waterSurfaceBitsShadowsArray[x].localScale = new Vector2(UnityEngine.Random.Range(0.9f, 1.5f), UnityEngine.Random.Range(1.1f, 2.5f)) * UnityEngine.Random.Range(0.36f, 0.65f); // Y is forward, along stroke
+            waterSurfaceBitsShadowsArray[x].heading = new Vector2(UnityEngine.Random.Range(-3f, 3f), UnityEngine.Random.Range(-0.5f, 0.5f)).normalized;
+            waterSurfaceBitsShadowsArray[x].brushType = UnityEngine.Random.Range(0, 4);
+            waterSurfaceBitsShadowsArray[x].age = UnityEngine.Random.Range(1f, 2f);
+
+
+        }
+        waterSurfaceBitsShadowsCBuffer.SetData(waterSurfaceBitsShadowsArray);
+    }
+    private void InitializeWaterDebrisBits()
+    {
+        waterDebrisBitsCBuffer = new ComputeBuffer(numDebrisBits, sizeof(float) * 9 + sizeof(int) * 2);
+        WaterQuadData[] waterDebrisBitsArray = new WaterQuadData[waterDebrisBitsCBuffer.count];
+
+        for (int x = 0; x < numDebrisBits; x++)
+        {
+
+            float xPos = 128f; // (float)x / (float)(numDebrisBits - 1) * waterDebrisBitsBounds;
+            float yPos = 128f; // (float)y / (float)(numwaterDebrisBitsPerDimension - 1) * waterDebrisBitsBounds;
+            Vector2 offset = new Vector2(UnityEngine.Random.Range(-0.5f, 0.5f), UnityEngine.Random.Range(-0.5f, 0.5f)) * 2f;
+            Vector3 pos = new Vector3(xPos + offset.x, yPos + offset.y, 0f);
+            waterDebrisBitsArray[x].worldPos = pos;
+            waterDebrisBitsArray[x].localScale = new Vector2(UnityEngine.Random.Range(0.4f, 2f), UnityEngine.Random.Range(0.4f, 2f)) * UnityEngine.Random.Range(0.26f, 0.85f); // Y is forward, along stroke
+            waterDebrisBitsArray[x].heading = new Vector2(UnityEngine.Random.Range(-3f, 3f), UnityEngine.Random.Range(-0.5f, 0.5f)).normalized;
+            waterDebrisBitsArray[x].brushType = UnityEngine.Random.Range(0, 4);
+            waterDebrisBitsArray[x].age = UnityEngine.Random.Range(1f, 2f);
+
+
+        }
+        waterDebrisBitsCBuffer.SetData(waterDebrisBitsArray);
+
+        waterDebrisBitsShadowsCBuffer = new ComputeBuffer(numDebrisBits, sizeof(float) * 9 + sizeof(int) * 2);
+        WaterQuadData[] waterDebrisBitsShadowsArray = new WaterQuadData[waterDebrisBitsShadowsCBuffer.count];
+
+        for (int x = 0; x < numDebrisBits; x++)
+        {
+
+            float xPos = 128f; // (float)x / (float)(numDebrisShadowsBits - 1) * waterDebrisShadowsBitsBounds;
+            float yPos = 128f; // (float)y / (float)(numwaterDebrisShadowsBitsPerDimension - 1) * waterDebrisShadowsBitsBounds;
+            Vector2 offset = new Vector2(UnityEngine.Random.Range(-0.5f, 0.5f), UnityEngine.Random.Range(-0.5f, 0.5f));
+            Vector3 pos = new Vector3(xPos + offset.x, yPos + offset.y, 0f);
+            waterDebrisBitsShadowsArray[x].worldPos = pos;
+            waterDebrisBitsShadowsArray[x].localScale = new Vector2(UnityEngine.Random.Range(0.9f, 1.5f), UnityEngine.Random.Range(1.1f, 2.5f)) * UnityEngine.Random.Range(0.36f, 0.65f); // Y is forward, along stroke
+            waterDebrisBitsShadowsArray[x].heading = new Vector2(UnityEngine.Random.Range(-3f, 3f), UnityEngine.Random.Range(-0.5f, 0.5f)).normalized;
+            waterDebrisBitsShadowsArray[x].brushType = UnityEngine.Random.Range(0, 4);
+            waterDebrisBitsShadowsArray[x].age = UnityEngine.Random.Range(1f, 2f);
+
+
+        }
+        waterDebrisBitsShadowsCBuffer.SetData(waterDebrisBitsShadowsArray);
     }
     private void InitializeWaterSurface()
     {
@@ -189,11 +344,16 @@ public class BaronVonWater : RenderBaron {
     }
 
     private void InitializeMaterials() {
-        waterQuadStrokesDisplayMat.SetPass(0);
-        waterQuadStrokesDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
-        waterQuadStrokesDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        waterQuadStrokesDisplayMat.SetBuffer("waterQuadStrokesCBuffer", waterQuadStrokesCBuffer);   
-        
+        waterQuadStrokesLrgDisplayMat.SetPass(0);
+        waterQuadStrokesLrgDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        waterQuadStrokesLrgDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        waterQuadStrokesLrgDisplayMat.SetBuffer("waterQuadStrokesCBuffer", waterQuadStrokesCBufferLrg);
+
+        waterQuadStrokesSmlDisplayMat.SetPass(0);
+        waterQuadStrokesSmlDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        waterQuadStrokesSmlDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        waterQuadStrokesSmlDisplayMat.SetBuffer("waterQuadStrokesCBuffer", waterQuadStrokesCBufferSml);
+
         waterCurveStrokeDisplayMat.SetPass(0);
         waterCurveStrokeDisplayMat.SetBuffer("verticesCBuffer", waterCurveVerticesCBuffer);
         waterCurveStrokeDisplayMat.SetBuffer("waterCurveStrokesCBuffer", waterCurveStrokesCBuffer);
@@ -203,17 +363,92 @@ public class BaronVonWater : RenderBaron {
         waterChainStrokeDisplayMat.SetBuffer("verticesCBuffer", quadVerticesCBuffer);
         waterChainStrokeDisplayMat.SetBuffer("waterChainsReadCBuffer", waterChains0CBuffer);
         waterChainStrokeDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
-                
+
+        // waterBits:
+        waterNutrientsBitsDisplayMat.SetPass(0);
+        waterNutrientsBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        waterNutrientsBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        waterNutrientsBitsDisplayMat.SetBuffer("waterQuadStrokesCBuffer", waterNutrientsBitsCBuffer);
+
+        waterSurfaceBitsDisplayMat.SetPass(0);
+        waterSurfaceBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        waterSurfaceBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        waterSurfaceBitsDisplayMat.SetBuffer("waterQuadStrokesCBuffer", waterSurfaceBitsCBuffer);
+
+        waterSurfaceBitsShadowsDisplayMat.SetPass(0);
+        waterSurfaceBitsShadowsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        waterSurfaceBitsShadowsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        waterSurfaceBitsShadowsDisplayMat.SetBuffer("waterQuadStrokesCBuffer", waterSurfaceBitsShadowsCBuffer);
+
+        waterDebrisBitsDisplayMat.SetPass(0);
+        waterDebrisBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        waterDebrisBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        waterDebrisBitsDisplayMat.SetBuffer("waterQuadStrokesCBuffer", waterDebrisBitsCBuffer);
+
+        waterDebrisBitsShadowsDisplayMat.SetPass(0);
+        waterDebrisBitsShadowsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        waterDebrisBitsShadowsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        waterDebrisBitsShadowsDisplayMat.SetBuffer("waterQuadStrokesCBuffer", waterDebrisBitsShadowsCBuffer);
+
     }
     private void SimWaterQuads() {
         int kernelSimWaterQuads = computeShaderWaterRender.FindKernel("CSSimWaterQuadsData");
                 
-        computeShaderWaterRender.SetBuffer(kernelSimWaterQuads, "waterQuadStrokesCBuffer", waterQuadStrokesCBuffer);
+        computeShaderWaterRender.SetBuffer(kernelSimWaterQuads, "waterQuadStrokesCBuffer", waterQuadStrokesCBufferLrg);
         computeShaderWaterRender.SetTexture(kernelSimWaterQuads, "VelocityRead", fluidManagerRef._VelocityA);    
         computeShaderWaterRender.SetTexture(kernelSimWaterQuads, "AltitudeRead", altitudeMapRef);     
         computeShaderWaterRender.SetFloat("_MapSize", SimulationManager._MapSize);
         
-        computeShaderWaterRender.Dispatch(kernelSimWaterQuads, waterQuadStrokesCBuffer.count / 1024, 1, 1);
+        computeShaderWaterRender.Dispatch(kernelSimWaterQuads, waterQuadStrokesCBufferLrg.count / 1024, 1, 1);
+
+        // SML:
+        kernelSimWaterQuads = computeShaderWaterRender.FindKernel("CSSimWaterQuadsData");
+
+        computeShaderWaterRender.SetBuffer(kernelSimWaterQuads, "waterQuadStrokesCBuffer", waterQuadStrokesCBufferSml);
+        computeShaderWaterRender.SetTexture(kernelSimWaterQuads, "VelocityRead", fluidManagerRef._VelocityA);
+        computeShaderWaterRender.SetTexture(kernelSimWaterQuads, "AltitudeRead", altitudeMapRef);
+        computeShaderWaterRender.SetFloat("_MapSize", SimulationManager._MapSize);
+
+        computeShaderWaterRender.Dispatch(kernelSimWaterQuads, waterQuadStrokesCBufferSml.count / 1024, 1, 1);
+
+        // WATER BITS HERE::: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        int kernelSimDetailBitsData = computeShaderWaterRender.FindKernel("CSSimDetailBitsData");
+        computeShaderWaterRender.SetBuffer(kernelSimDetailBitsData, "waterQuadStrokesCBuffer", waterNutrientsBitsCBuffer);
+        computeShaderWaterRender.SetTexture(kernelSimDetailBitsData, "VelocityRead", fluidManagerRef._VelocityA);
+        computeShaderWaterRender.SetTexture(kernelSimDetailBitsData, "AltitudeRead", altitudeMapRef);
+        computeShaderWaterRender.SetFloat("_MapSize", SimulationManager._MapSize);
+        computeShaderWaterRender.SetVector("_SpawnBoundsCameraDetails", spawnBoundsCameraDetails);
+        computeShaderWaterRender.Dispatch(kernelSimDetailBitsData, waterNutrientsBitsCBuffer.count / 1024, 1, 1);
+
+        kernelSimDetailBitsData = computeShaderWaterRender.FindKernel("CSSimDetailBitsData");
+        computeShaderWaterRender.SetBuffer(kernelSimDetailBitsData, "waterQuadStrokesCBuffer", waterSurfaceBitsCBuffer);
+        computeShaderWaterRender.SetTexture(kernelSimDetailBitsData, "VelocityRead", fluidManagerRef._VelocityA);
+        computeShaderWaterRender.SetTexture(kernelSimDetailBitsData, "AltitudeRead", altitudeMapRef);
+        computeShaderWaterRender.SetFloat("_MapSize", SimulationManager._MapSize);
+        computeShaderWaterRender.Dispatch(kernelSimDetailBitsData, waterSurfaceBitsCBuffer.count / 1024, 1, 1);
+
+        kernelSimDetailBitsData = computeShaderWaterRender.FindKernel("CSSimDetailBitsData");
+        computeShaderWaterRender.SetBuffer(kernelSimDetailBitsData, "waterQuadStrokesCBuffer", waterSurfaceBitsShadowsCBuffer);
+        computeShaderWaterRender.SetTexture(kernelSimDetailBitsData, "VelocityRead", fluidManagerRef._VelocityA);
+        computeShaderWaterRender.SetTexture(kernelSimDetailBitsData, "AltitudeRead", altitudeMapRef);
+        computeShaderWaterRender.SetFloat("_MapSize", SimulationManager._MapSize);
+        computeShaderWaterRender.Dispatch(kernelSimDetailBitsData, waterSurfaceBitsShadowsCBuffer.count / 1024, 1, 1);
+
+        // DEBRIS BITS::::::::: %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        kernelSimDetailBitsData = computeShaderWaterRender.FindKernel("CSSimDetailBitsData");
+        computeShaderWaterRender.SetBuffer(kernelSimDetailBitsData, "waterQuadStrokesCBuffer", waterDebrisBitsCBuffer);
+        computeShaderWaterRender.SetTexture(kernelSimDetailBitsData, "VelocityRead", fluidManagerRef._VelocityA);
+        computeShaderWaterRender.SetTexture(kernelSimDetailBitsData, "AltitudeRead", altitudeMapRef);
+        computeShaderWaterRender.SetFloat("_MapSize", SimulationManager._MapSize);
+        computeShaderWaterRender.Dispatch(kernelSimDetailBitsData, waterDebrisBitsCBuffer.count / 1024, 1, 1);
+
+        kernelSimDetailBitsData = computeShaderWaterRender.FindKernel("CSSimDetailBitsData");
+        computeShaderWaterRender.SetBuffer(kernelSimDetailBitsData, "waterQuadStrokesCBuffer", waterDebrisBitsShadowsCBuffer);
+        computeShaderWaterRender.SetTexture(kernelSimDetailBitsData, "VelocityRead", fluidManagerRef._VelocityA);
+        computeShaderWaterRender.SetTexture(kernelSimDetailBitsData, "AltitudeRead", altitudeMapRef);
+        computeShaderWaterRender.SetFloat("_MapSize", SimulationManager._MapSize);
+        computeShaderWaterRender.Dispatch(kernelSimDetailBitsData, waterDebrisBitsShadowsCBuffer.count / 1024, 1, 1);
+
     }
     private void SimWaterCurves() {
         int kernelSimWaterCurves = computeShaderWaterRender.FindKernel("CSSimWaterCurvesData");
@@ -338,10 +573,35 @@ public class BaronVonWater : RenderBaron {
         if (waterCurveStrokesCBuffer != null) {
             waterCurveStrokesCBuffer.Release();
         }
-        if (waterQuadStrokesCBuffer != null) {
-            waterQuadStrokesCBuffer.Release();
+        if (waterQuadStrokesCBufferLrg != null) {
+            waterQuadStrokesCBufferLrg.Release();
         }
-        
+        if (waterQuadStrokesCBufferSml != null) {
+            waterQuadStrokesCBufferSml.Release();
+        }
+
+        if (waterNutrientsBitsCBuffer != null)
+        {
+            waterNutrientsBitsCBuffer.Release();
+        }
+        if (waterSurfaceBitsCBuffer != null)
+        {
+            waterSurfaceBitsCBuffer.Release();
+        }
+        if (waterSurfaceBitsShadowsCBuffer != null)
+        {
+            waterSurfaceBitsShadowsCBuffer.Release();
+        }
+
+        if (waterDebrisBitsCBuffer != null)
+        {
+            waterDebrisBitsCBuffer.Release();
+        }
+        if (waterDebrisBitsShadowsCBuffer != null)
+        {
+            waterDebrisBitsShadowsCBuffer.Release();
+        }
+
         if (waterChains0CBuffer != null) {
             waterChains0CBuffer.Release();
         }

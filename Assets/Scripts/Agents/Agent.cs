@@ -15,7 +15,7 @@ public class Agent : MonoBehaviour {
     public float jointSpeed = 100f;
     public float jointMaxTorque = 250f;
     public float swimAnimationCycleSpeed = 0.025f;
-    public float smoothedThrottleLerp = 0.25f;
+    public float smoothedThrottleLerp = 0.65f;
     public float restingJointTorque = 10f;
     public float bendRatioHead = 0f;
     public float bendRatioTailTip = 1f;
@@ -61,8 +61,8 @@ public class Agent : MonoBehaviour {
 
         }
     }
-    public int maxAgeTimeSteps = 2400;
-    private int decayDurationTimeSteps = 360;
+    public int maxAgeTimeSteps = 3600;
+    private int decayDurationTimeSteps = 120;
     public int _DecayDurationTimeSteps
     {
         get
@@ -907,7 +907,10 @@ public class Agent : MonoBehaviour {
             // Forward Slide
             for(int k = 0; k < numSegments; k++) {
                 Vector2 segmentForwardDir = new Vector2(this.bodyRigidbody.transform.up.x, this.bodyRigidbody.transform.up.y).normalized;
-                this.bodyRigidbody.AddForce(segmentForwardDir * (1f - turnSharpness * 0.25f) * swimSpeed * this.bodyRigidbody.mass * Time.deltaTime * developmentMultiplier, ForceMode2D.Impulse);
+
+                Vector2 forwardThrustDir = Vector2.Lerp(segmentForwardDir, throttleDir, 0.1f).normalized;
+
+                this.bodyRigidbody.AddForce(forwardThrustDir * (1f - turnSharpness * 0.25f) * swimSpeed * this.bodyRigidbody.mass * Time.deltaTime * developmentMultiplier, ForceMode2D.Impulse);
             }
 
             // Head turn:
@@ -1042,8 +1045,8 @@ public class Agent : MonoBehaviour {
         bodyCritterSegment.agentIndex = this.index;
         bodyCritterSegment.agentRef = this;
         bodyCritterSegment.segmentIndex = 0;        
-        bodyRigidbody.drag = 10f; // bodyDrag;
-        bodyRigidbody.angularDrag = 10f;
+        bodyRigidbody.drag = 13f; // bodyDrag;
+        bodyRigidbody.angularDrag = 15f;
         //bodyRigidbody.mass 
         // Collision!
         bodyCritterSegment.segmentCollider.size = new Vector2(coreModule.coreWidth, coreModule.coreLength) * spawnStartingScale;  // spawn size percentage 1/10th      

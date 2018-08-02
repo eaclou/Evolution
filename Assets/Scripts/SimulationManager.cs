@@ -172,6 +172,7 @@ public class SimulationManager : MonoBehaviour {
         public float radius;
         public float foodAmount;
         public float active;  // not disabled
+        public float refactoryAge;
     }
 
     //public bool isTrainingPersistent = false; // RENAME ONCE FUNCTIONAL
@@ -437,8 +438,8 @@ public class SimulationManager : MonoBehaviour {
     }
     private void LoadingInitializeFoodParticles() {
 
-        foodParticlesCBuffer = new ComputeBuffer(numFoodParticles, sizeof(float) * 5 + sizeof(int) * 1);
-        foodParticlesCBufferSwap = new ComputeBuffer(numFoodParticles, sizeof(float) * 5 + sizeof(int) * 1);
+        foodParticlesCBuffer = new ComputeBuffer(numFoodParticles, sizeof(float) * 6 + sizeof(int) * 1);
+        foodParticlesCBufferSwap = new ComputeBuffer(numFoodParticles, sizeof(float) * 6 + sizeof(int) * 1);
         FoodParticleData[] foodParticlesArray = new FoodParticleData[numFoodParticles];
 
         float minParticleSize = settingsManager.avgFoodParticleRadius / settingsManager.foodParticleRadiusVariance;
@@ -452,6 +453,7 @@ public class SimulationManager : MonoBehaviour {
             data.radius = UnityEngine.Random.Range(minParticleSize, maxParticleSize);
             data.foodAmount = data.radius * data.radius * Mathf.PI * settingsManager.foodParticleNutrientDensity;
             data.active = 1f;
+            data.refactoryAge = 0f;
             foodParticlesArray[i] = data;
         }
 
@@ -496,7 +498,7 @@ public class SimulationManager : MonoBehaviour {
                 
         nutrientMapRT1 = new RenderTexture(nutrientMapResolution, nutrientMapResolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
         nutrientMapRT1.wrapMode = TextureWrapMode.Clamp;
-        nutrientMapRT1.filterMode = FilterMode.Point;
+        nutrientMapRT1.filterMode = FilterMode.Bilinear;
         nutrientMapRT1.enableRandomWrite = true;
         //nutrientMapRT1.useMipMap = true;
         nutrientMapRT1.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***    
@@ -966,6 +968,7 @@ public class SimulationManager : MonoBehaviour {
         computeShaderFoodParticles.SetBuffer(kernelCSRespawnFoodParticles, "foodParticlesWrite", foodParticlesCBufferSwap);
         computeShaderFoodParticles.SetTexture(kernelCSRespawnFoodParticles, "velocityRead", environmentFluidManager._VelocityA);        
         computeShaderFoodParticles.SetTexture(kernelCSRespawnFoodParticles, "obstaclesRead", environmentFluidManager._ObstaclesRT);
+        computeShaderFoodParticles.SetTexture(kernelCSRespawnFoodParticles, "_SpawnDensityMap", nutrientMapRT1);
         computeShaderFoodParticles.SetFloat("_MapSize", mapSize);
             
         //computeShaderFoodParticles.SetFloat("_RespawnFoodParticles", 1f);
@@ -983,7 +986,8 @@ public class SimulationManager : MonoBehaviour {
 
         computeShaderFoodParticles.SetFloat("_MinParticleSize", minParticleSize);   
         computeShaderFoodParticles.SetFloat("_MaxParticleSize", maxParticleSize);      
-        computeShaderFoodParticles.SetFloat("_ParticleNutrientDensity", settingsManager.foodParticleNutrientDensity);      
+        computeShaderFoodParticles.SetFloat("_ParticleNutrientDensity", settingsManager.foodParticleNutrientDensity);
+        computeShaderFoodParticles.SetFloat("_FoodParticleRegrowthRate", settingsManager.foodParticleRegrowthRate);
 
         computeShaderFoodParticles.Dispatch(kernelCSRespawnFoodParticles, 1, 1, 1);
 

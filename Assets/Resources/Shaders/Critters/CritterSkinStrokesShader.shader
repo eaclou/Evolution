@@ -79,7 +79,7 @@
 				float3 quadPoint = quadVerticesCBuffer[id];				
 				
 				float3 critterWorldPos = critterSimData.worldPos;
-				float3 critterCurScale = critterInitData.boundingBoxSize * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage);
+				float3 critterCurScale = critterInitData.boundingBoxSize * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage) * 0.5;
 
 				float dotGrowth = saturate(skinStrokeData.strength * 2.0);
 				float dotDecay = saturate((skinStrokeData.strength - 0.5) * 2);

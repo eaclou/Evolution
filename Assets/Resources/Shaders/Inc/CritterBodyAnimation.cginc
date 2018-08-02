@@ -98,7 +98,7 @@ float3 GetAnimatedPos(float3 inPos, float3 pivotPos, CritterInitData critterInit
 	float lowerJawMask = biteMask * saturate(strokeLocalPos.z * 1000);
 	float upperJawMask = biteMask * saturate(-strokeLocalPos.z * 1000);
 
-	float3 critterCurScale = critterInitData.boundingBoxSize * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage);
+	float3 critterCurScale = critterInitData.boundingBoxSize * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage) * 0.5;
 
 	inPos.xyz = lerp(inPos.xyz, inPos.xyz + float3(0,0,critterCurScale.z * 0.5), lowerJawMask * eatingCycle);
 	inPos.xyz = lerp(inPos.xyz, inPos.xyz + float3(0,0,-critterCurScale.z * 0.25), upperJawMask * eatingCycle);

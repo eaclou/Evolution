@@ -36,6 +36,7 @@
 				float radius;
 				float foodAmount;
 				float active;
+				float refactoryAge;
 			};
 
 			StructuredBuffer<FoodParticleData> foodParticleDataCBuffer;			

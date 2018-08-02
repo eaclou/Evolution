@@ -1,4 +1,4 @@
-﻿Shader "Unlit/WaterTestStrokeDisplayShader"
+﻿Shader "Water/WaterDebrisBitsDisplayShader"
 {
 	Properties
 	{
@@ -86,11 +86,6 @@
 				float2 uv = (worldPosition.xy + 128) / 512;
 				o.altitudeUV = uv;
 				
-				float2 scale = waterQuadData.localScale * 2.37;
-				scale.x *= 0.66;
-				scale.y = scale.y * (1 + saturate(waterQuadData.speed * 64));
-				quadPoint *= float3(scale, 1.0);
-				
 				float4 fluidVelocity = tex2Dlod(_VelocityTex, float4(worldPosition.xy / 256, 0, 2));
 				float2 fluidDir = float2(0,1); //normalize(fluidVelocity.xy);
 				if(length(fluidVelocity) > 0.0000001) {
@@ -99,12 +94,28 @@
 
 				// Wave Surface Height:
 				// Water Surface:
-				float4 waterSurfaceData = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / 256, 0, 0));
-				float dotLight = dot(waterSurfaceData.yzw, _WorldSpaceLightPos0.xyz);
-				dotLight = dotLight * dotLight;
-				float waveHeight = waterSurfaceData.x;
+				//float4 waterSurfaceData = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / 256, 0, 0));
+				//float dotLight = dot(waterSurfaceData.yzw, _WorldSpaceLightPos0.xyz);
+				//dotLight = dotLight * dotLight;
+				//float waveHeight = waterSurfaceData.x;
 
-				worldPosition.z -= waveHeight * 2.5;
+				//worldPosition.z -= waveHeight * 2.5;
+
+				float altitude = tex2Dlod(_AltitudeTex, float4(o.altitudeUV, 0, 1)).x; // i.worldPos.z / 10; // [-1,1] range
+				// 0-1 range --> -1 to 1
+				//altitude = (altitude * 2 - 1) * -1;
+				//float isUnderwater = saturate(altitude * 10000);
+
+				float debrisDepth = (float)inst / (1024 * 4) * (saturate((1.0 - altitude) * 2.0 - 1.0));
+				
+				worldPosition.z = saturate(debrisDepth) * 9 + 1.0;
+
+				float2 scale = waterQuadData.localScale * 0.16 * (debrisDepth * 0.8 + 0.2);
+				scale.x *= 0.66;
+				scale.y = scale.y * (1 + saturate(waterQuadData.speed * 64));
+				quadPoint *= float3(scale, 1.0);
+
+
 
 
 				// Figure out final facing Vectors!!!
@@ -142,7 +153,8 @@
 							
 				float alpha = fadeIn * fadeOut;
 
-				o.color = float4(1,1,1,alpha);
+				float fogAmount = worldPosition.z / 10;
+				o.color = float4(debrisDepth,worldPosition.z,fogAmount,alpha);
 				
 				return o;
 			}
@@ -196,19 +208,19 @@
 
 
 				
-				float4 backgroundColor = frameBufferColor;
+				float4 backgroundColor = float4(0.3, 0.15, 0.01, 1) * 2; //frameBufferColor;
 				backgroundColor.a = brushColor.a;
 				
-				float altitude = tex2D(_AltitudeTex, i.altitudeUV); // i.worldPos.z / 10; // [-1,1] range
+				float altitude = i.color.z; //tex2D(_AltitudeTex, i.altitudeUV); // i.worldPos.z / 10; // [-1,1] range
 				// 0-1 range --> -1 to 1
-				altitude = (altitude * 2 - 1) * -1;
-				float isUnderwater = saturate(altitude * 10000);
+				//altitude = (altitude * 2 - 1) * -1;
+				float isUnderwater = 1.0; //saturate(altitude * 10000);
 				float3 waterFogColor = float3(0.03,0.4,0.3) * 0.4;
-				float strataColorMultiplier = (sin(altitude * (1.0 + i.worldPos.x * 0.01 - i.worldPos.y * -0.01) + i.worldPos.x * 0.01 - i.worldPos.y * 0.01) * 0.5 + 0.5) * 0.5 + 0.5;
-				backgroundColor.rgb *= strataColorMultiplier;				
+				//float strataColorMultiplier = (sin(altitude * (1.0 + i.worldPos.x * 0.01 - i.worldPos.y * -0.01) + i.worldPos.x * 0.01 - i.worldPos.y * 0.01) * 0.5 + 0.5) * 0.5 + 0.5;
+				//backgroundColor.rgb *= strataColorMultiplier;				
 				backgroundColor.rgb = lerp(backgroundColor.rgb, waterFogColor, 1 * (saturate(altitude * 0.8)) + 0.25 * isUnderwater);
 
-				float snowAmount = saturate((-altitude - 0.6) * 2 +
+				/*float snowAmount = saturate((-altitude - 0.6) * 2 +
 								   ((sin(i.worldPos.x * 0.0785 + i.worldPos.y * 0.02843) * 0.5 + 0.5) * 1 - 
 								   (cos(i.worldPos.x * 0.012685 + i.worldPos.y * -0.01843) * 0.5 + 0.5) * 0.9 +
 								   (sin(i.worldPos.x * 0.2685 + i.worldPos.y * -0.1843) * 0.5 + 0.5) * 0.45 - 
@@ -219,7 +231,7 @@
 				backgroundColor.rgb = lerp(backgroundColor.rgb, float3(0.56, 1, 0.34) * 0.6, snowAmount * 1);
 				//==================================================================================================================
 				backgroundColor.a *= isUnderwater;
-
+				*/
 				
 				
 
@@ -244,8 +256,22 @@
 				float2 skyCoords = reflectedViewDir.xy * 0.5 + 0.5;
 
 				float4 reflectedColor = float4(tex2Dlod(_SkyTex, float4((skyCoords) - _Time.y * 0.015, 0, 1)).rgb, backgroundColor.a); //col;
+
+				float4 finalColor = backgroundColor;
+
+				float3 lightDir = normalize(_WorldSpaceLightPos0.xyz);				
+				//float3 surfaceNormal = tex2D(_WaterSurfaceTex, (i.altitudeUV - 0.25) * 2).yzw;
+				float diffuseLight = saturate(dot(lightDir, normalize(surfaceNormal)));
+				float dotLight = dot(surfaceNormal, _WorldSpaceLightPos0.xyz);
+				// FAKE CAUSTICS:::				
+				dotLight *= saturate(diffuseLight * 2.5);
+				//finalColor.rgb = lerp(finalColor.rgb, finalColor.rgb * (dotLight * 0.6 + 0.4) + dotLight * 1.1, isUnderwater); //dotLight * 1.0;
+				//finalColor.rgb = lerp(finalColor.rgb, waterFogColor, fogAmount);
+
+
+
 				
-				float4 finalColor = lerp(reflectedColor, backgroundColor, viewDotRemapped); //saturate(1 - (1 - i.vignetteLerp.x) * 0.5)); //float4(1,1,1,1);
+				 //lerp(reflectedColor, backgroundColor, viewDotRemapped); //saturate(1 - (1 - i.vignetteLerp.x) * 0.5)); //float4(1,1,1,1);
 				//finalColor.a *= saturate(i.vignetteLerp.w * 0.55 - 0.25); //(1 - saturate(i.vignetteLerp.x) * 0.4) * 0.5;
 				//finalColor.a *= i.color.a;
 				//finalColor.rgb *= diffuse;
@@ -259,12 +285,14 @@
 				//finalColor.a *= finalColor.a;
 				//finalColor.a *= 0.33;
 
-				float4 nutrientGridSample = tex2D(_NutrientTex, (i.altitudeUV - 0.25) * 2.0); 
+				//float4 nutrientGridSample = tex2D(_NutrientTex, (i.altitudeUV - 0.25) * 2.0); 
 				//finalColor.a = 1;
 				//float foodAmt = nutrientGridSample.x * 2;
 				//finalColor.rgb = float3(foodAmt, foodAmt, foodAmt);
-				finalColor.rgb = lerp(float3(0,0,0), float3(0,1,0), saturate(nutrientGridSample.x * 10));
+				//finalColor.rgb = lerp(float3(0,0,0), float3(0,1,0), saturate(nutrientGridSample.x * 10));
 				
+				//return float4(finalColor.rgb,1);
+
 				return finalColor;
 				
 			}

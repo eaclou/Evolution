@@ -38,7 +38,7 @@ void CSSimulateSkinCritterStrokes (uint3 id : SV_DispatchThreadID)
 	CritterSimData critterSimData = critterSimDataCBuffer[agentIndex];
 
 	float3 critterWorldPos = critterSimData.worldPos;
-	float3 critterCurScale = critterInitData.boundingBoxSize * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage);
+	float3 critterCurScale = critterInitData.boundingBoxSize * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage) * 0.5;
 		
 	float3 spriteLocalPos = skinStrokeData.localPos * critterCurScale;
 				

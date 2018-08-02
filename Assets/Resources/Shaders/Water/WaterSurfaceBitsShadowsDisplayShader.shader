@@ -1,4 +1,4 @@
-﻿Shader "Unlit/WaterTestStrokeDisplayShader"
+﻿Shader "Water/WaterSurfaceBitsShadowsDisplayShader"
 {
 	Properties
 	{
@@ -264,6 +264,8 @@
 				//float foodAmt = nutrientGridSample.x * 2;
 				//finalColor.rgb = float3(foodAmt, foodAmt, foodAmt);
 				finalColor.rgb = lerp(float3(0,0,0), float3(0,1,0), saturate(nutrientGridSample.x * 10));
+
+				return float4(0.2,0.2,0.4,1);
 				
 				return finalColor;
 				

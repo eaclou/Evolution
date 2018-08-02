@@ -1,4 +1,4 @@
-﻿Shader "Unlit/WaterTestStrokeDisplayShader"
+﻿Shader "Water/WaterNutrientsBitsDisplayShader"
 {
 	Properties
 	{
@@ -85,10 +85,15 @@
 				o.worldPos = worldPosition;
 				float2 uv = (worldPosition.xy + 128) / 512;
 				o.altitudeUV = uv;
-				
+								
 				float2 scale = waterQuadData.localScale * 2.37;
 				scale.x *= 0.66;
 				scale.y = scale.y * (1 + saturate(waterQuadData.speed * 64));
+				
+				float4 nutrientGridSample = tex2Dlod(_NutrientTex, float4((o.altitudeUV - 0.25) * 2.0, 0, 0));
+				scale *= nutrientGridSample.x * 15;
+				
+				
 				quadPoint *= float3(scale, 1.0);
 				
 				float4 fluidVelocity = tex2Dlod(_VelocityTex, float4(worldPosition.xy / 256, 0, 2));
@@ -104,7 +109,9 @@
 				dotLight = dotLight * dotLight;
 				float waveHeight = waterSurfaceData.x;
 
-				worldPosition.z -= waveHeight * 2.5;
+
+				float rand0 = rand(float2(id.x, 0));
+				worldPosition.z -= waveHeight * 1 + rand0;
 
 
 				// Figure out final facing Vectors!!!
@@ -112,6 +119,7 @@
 				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
 				float2 rotatedPoint = float2(quadPoint.x * right + quadPoint.y * forward);  // Rotate localRotation by AgentRotation
 
+				worldPosition.z = 1.0;
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)) + float4(rotatedPoint, 0, 0));
 
 
@@ -263,8 +271,11 @@
 				//finalColor.a = 1;
 				//float foodAmt = nutrientGridSample.x * 2;
 				//finalColor.rgb = float3(foodAmt, foodAmt, foodAmt);
-				finalColor.rgb = lerp(float3(0,0,0), float3(0,1,0), saturate(nutrientGridSample.x * 10));
+				finalColor.rgb = lerp(float3(0.05,0.04,0.015), float3(0.1,1.25,0.25), saturate(nutrientGridSample.x * 10));
 				
+				//return float4(1,1,1,1);
+				//return float4(0.2,1,0.2,1);
+
 				return finalColor;
 				
 			}
