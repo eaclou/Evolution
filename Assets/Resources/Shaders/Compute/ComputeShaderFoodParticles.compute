@@ -229,7 +229,7 @@ void CSRespawnFoodParticles (uint3 id : SV_DispatchThreadID)
 		}
 		else {  // Otherwise simulate
 			float2 vel = velocityRead.SampleLevel(_LinearRepeat, uv, 2).xy;
-			float speedMult = 0.0033;	
+			float speedMult = 0.01;	
 			//vel = float2(1,1)* 0.001;	
 			float2 nextPos = uv + vel * speedMult;	
 			foodParticlesWrite[id.x].worldPos = nextPos * _MapSize;

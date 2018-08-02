@@ -1511,7 +1511,7 @@ public class TheRenderKing : MonoBehaviour {
         SimCritterSkinStrokes();
 
         baronVonWater.altitudeMapRef = baronVonTerrain.terrainHeightMap;
-        float camDist = Mathf.Clamp01(-1f * simManager.cameraManager.gameObject.transform.position.z / (125f - 10f));
+        float camDist = Mathf.Clamp01(-1f * simManager.cameraManager.gameObject.transform.position.z / (65f - 5f));
         baronVonWater.camDistNormalized = camDist;
         Vector2 boxSizeHalf = 0.5f * Vector2.Lerp(new Vector2(16f, 9f), new Vector2(160f, 90f), Mathf.Clamp01(-(simManager.cameraManager.gameObject.transform.position.z) / 150f));
         if(simManager.cameraManager.targetAgent != null)
@@ -1740,7 +1740,7 @@ public class TheRenderKing : MonoBehaviour {
 
         cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, baronVonWater.waterNutrientsBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterNutrientsBitsCBuffer.count);
-        /*
+        
         baronVonWater.waterSurfaceBitsDisplayMat.SetPass(0);
         baronVonWater.waterSurfaceBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         baronVonWater.waterSurfaceBitsDisplayMat.SetBuffer("frameBufferStrokesCBuffer", baronVonWater.waterSurfaceBitsCBuffer);
@@ -1751,7 +1751,7 @@ public class TheRenderKing : MonoBehaviour {
         baronVonWater.waterSurfaceBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
         cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, baronVonWater.waterSurfaceBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterSurfaceBitsCBuffer.count);
-
+        /*
         baronVonWater.waterSurfaceBitsShadowsDisplayMat.SetPass(0);
         baronVonWater.waterSurfaceBitsShadowsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         baronVonWater.waterSurfaceBitsShadowsDisplayMat.SetBuffer("frameBufferStrokesCBuffer", baronVonWater.waterSurfaceBitsShadowsCBuffer);

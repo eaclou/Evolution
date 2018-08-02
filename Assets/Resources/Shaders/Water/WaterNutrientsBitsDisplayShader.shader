@@ -91,7 +91,7 @@
 				scale.y = scale.y * (1 + saturate(waterQuadData.speed * 64));
 				
 				float4 nutrientGridSample = tex2Dlod(_NutrientTex, float4((o.altitudeUV - 0.25) * 2.0, 0, 0));
-				scale *= nutrientGridSample.x * 15;
+				scale *= (nutrientGridSample.x * 0.75 + 0.25) * 1;
 				
 				
 				quadPoint *= float3(scale, 1.0);
@@ -110,8 +110,14 @@
 				float waveHeight = waterSurfaceData.x;
 
 
-				float rand0 = rand(float2(id.x, 0));
-				worldPosition.z -= waveHeight * 1 + rand0;
+				float rand0 = rand(float2(inst, 0));
+				worldPosition.z -= waveHeight * 1 - rand0 - 1;
+
+				// REFRACTION:
+				//float3 offset = worldPosition;				
+				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / 256, 0, 0)).yzw;
+				float refractionStrength = 1.5 * (rand0 * 0.5 + 0.5);
+				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
 
 
 				// Figure out final facing Vectors!!!
@@ -119,7 +125,7 @@
 				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
 				float2 rotatedPoint = float2(quadPoint.x * right + quadPoint.y * forward);  // Rotate localRotation by AgentRotation
 
-				worldPosition.z = 1.0;
+				//worldPosition.z = 1.0;
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)) + float4(rotatedPoint, 0, 0));
 
 
