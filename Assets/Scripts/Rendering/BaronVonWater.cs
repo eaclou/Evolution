@@ -45,11 +45,11 @@ public class BaronVonWater : RenderBaron {
     public ComputeBuffer waterChains1CBuffer;
 
     public int numNutrientsBits = 1024 * 16;
-    public int numSurfaceBits = 1024;
+    public int numSurfaceBits = 1024 * 8;
     public int numDebrisBits = 1024 * 4;
     public ComputeBuffer waterNutrientsBitsCBuffer;
     public ComputeBuffer waterSurfaceBitsCBuffer;
-    public ComputeBuffer waterSurfaceBitsShadowsCBuffer;
+    //public ComputeBuffer waterSurfaceBitsShadowsCBuffer;
     public ComputeBuffer waterDebrisBitsCBuffer;
     public ComputeBuffer waterDebrisBitsShadowsCBuffer;
 
@@ -259,7 +259,7 @@ public class BaronVonWater : RenderBaron {
             Vector2 offset = new Vector2(UnityEngine.Random.Range(-0.5f, 0.5f), UnityEngine.Random.Range(-0.5f, 0.5f));
             Vector3 pos = new Vector3(xPos + offset.x, yPos + offset.y, 0f);
             waterSurfaceBitsArray[x].worldPos = pos;
-            waterSurfaceBitsArray[x].localScale = new Vector2(UnityEngine.Random.Range(0.9f, 1.5f), UnityEngine.Random.Range(1.1f, 2.5f)) * UnityEngine.Random.Range(0.36f, 0.65f); // Y is forward, along stroke
+            waterSurfaceBitsArray[x].localScale = new Vector2(UnityEngine.Random.Range(0.33f, 2.5f), UnityEngine.Random.Range(0.67f, 2.5f)) * UnityEngine.Random.Range(0.26f, 0.48f); // Y is forward, along stroke
             waterSurfaceBitsArray[x].heading = new Vector2(UnityEngine.Random.Range(-3f, 3f), UnityEngine.Random.Range(-0.5f, 0.5f)).normalized;
             waterSurfaceBitsArray[x].brushType = UnityEngine.Random.Range(0, 4);
             waterSurfaceBitsArray[x].age = UnityEngine.Random.Range(1f, 2f);
@@ -268,7 +268,7 @@ public class BaronVonWater : RenderBaron {
         }
         waterSurfaceBitsCBuffer.SetData(waterSurfaceBitsArray);
 
-        waterSurfaceBitsShadowsCBuffer = new ComputeBuffer(numSurfaceBits, sizeof(float) * 9 + sizeof(int) * 2);
+        /*waterSurfaceBitsShadowsCBuffer = new ComputeBuffer(numSurfaceBits, sizeof(float) * 9 + sizeof(int) * 2);
         WaterQuadData[] waterSurfaceBitsShadowsArray = new WaterQuadData[waterSurfaceBitsShadowsCBuffer.count];
 
         for (int x = 0; x < numSurfaceBits; x++)
@@ -287,6 +287,7 @@ public class BaronVonWater : RenderBaron {
 
         }
         waterSurfaceBitsShadowsCBuffer.SetData(waterSurfaceBitsShadowsArray);
+        */
     }
     private void InitializeWaterDebrisBits()
     {
@@ -378,7 +379,7 @@ public class BaronVonWater : RenderBaron {
         waterSurfaceBitsShadowsDisplayMat.SetPass(0);
         waterSurfaceBitsShadowsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
         waterSurfaceBitsShadowsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        waterSurfaceBitsShadowsDisplayMat.SetBuffer("waterQuadStrokesCBuffer", waterSurfaceBitsShadowsCBuffer);
+        waterSurfaceBitsShadowsDisplayMat.SetBuffer("waterQuadStrokesCBuffer", waterSurfaceBitsCBuffer);
 
         waterDebrisBitsDisplayMat.SetPass(0);
         waterDebrisBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
@@ -420,20 +421,23 @@ public class BaronVonWater : RenderBaron {
         computeShaderWaterRender.SetVector("_SpawnBoundsCameraDetails", spawnBoundsCameraDetails);
         computeShaderWaterRender.Dispatch(kernelSimDetailBitsData, waterNutrientsBitsCBuffer.count / 1024, 1, 1);
 
-        kernelSimDetailBitsData = computeShaderWaterRender.FindKernel("CSSimDetailBitsData");
-        computeShaderWaterRender.SetBuffer(kernelSimDetailBitsData, "waterQuadStrokesCBuffer", waterSurfaceBitsCBuffer);
-        computeShaderWaterRender.SetTexture(kernelSimDetailBitsData, "VelocityRead", fluidManagerRef._VelocityA);
-        computeShaderWaterRender.SetTexture(kernelSimDetailBitsData, "AltitudeRead", altitudeMapRef);
+        int kernelSimSurfaceBitsData = computeShaderWaterRender.FindKernel("CSSimSurfaceBitsData");
+        computeShaderWaterRender.SetBuffer(kernelSimSurfaceBitsData, "waterQuadStrokesCBuffer", waterSurfaceBitsCBuffer);
+        computeShaderWaterRender.SetTexture(kernelSimSurfaceBitsData, "VelocityRead", fluidManagerRef._VelocityA);
+        computeShaderWaterRender.SetTexture(kernelSimSurfaceBitsData, "AltitudeRead", altitudeMapRef);
         computeShaderWaterRender.SetFloat("_MapSize", SimulationManager._MapSize);
-        computeShaderWaterRender.Dispatch(kernelSimDetailBitsData, waterSurfaceBitsCBuffer.count / 1024, 1, 1);
-
-        kernelSimDetailBitsData = computeShaderWaterRender.FindKernel("CSSimDetailBitsData");
-        computeShaderWaterRender.SetBuffer(kernelSimDetailBitsData, "waterQuadStrokesCBuffer", waterSurfaceBitsShadowsCBuffer);
-        computeShaderWaterRender.SetTexture(kernelSimDetailBitsData, "VelocityRead", fluidManagerRef._VelocityA);
-        computeShaderWaterRender.SetTexture(kernelSimDetailBitsData, "AltitudeRead", altitudeMapRef);
+        computeShaderWaterRender.SetFloat("_Time", Time.realtimeSinceStartup);
+        computeShaderWaterRender.Dispatch(kernelSimSurfaceBitsData, waterSurfaceBitsCBuffer.count / 1024, 1, 1);
+        /*
+        kernelSimSurfaceBitsData = computeShaderWaterRender.FindKernel("CSSimSurfaceBitsData");
+        computeShaderWaterRender.SetBuffer(kernelSimSurfaceBitsData, "waterQuadStrokesCBuffer", waterSurfaceBitsShadowsCBuffer);
+        computeShaderWaterRender.SetTexture(kernelSimSurfaceBitsData, "VelocityRead", fluidManagerRef._VelocityA);
+        computeShaderWaterRender.SetTexture(kernelSimSurfaceBitsData, "AltitudeRead", altitudeMapRef);
         computeShaderWaterRender.SetFloat("_MapSize", SimulationManager._MapSize);
-        computeShaderWaterRender.Dispatch(kernelSimDetailBitsData, waterSurfaceBitsShadowsCBuffer.count / 1024, 1, 1);
-
+        computeShaderWaterRender.SetFloat("_Time", Time.realtimeSinceStartup);
+        computeShaderWaterRender.Dispatch(kernelSimSurfaceBitsData, waterSurfaceBitsShadowsCBuffer.count / 1024, 1, 1);
+        */
+        /*
         // DEBRIS BITS::::::::: %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         kernelSimDetailBitsData = computeShaderWaterRender.FindKernel("CSSimDetailBitsData");
         computeShaderWaterRender.SetBuffer(kernelSimDetailBitsData, "waterQuadStrokesCBuffer", waterDebrisBitsCBuffer);
@@ -448,7 +452,7 @@ public class BaronVonWater : RenderBaron {
         computeShaderWaterRender.SetTexture(kernelSimDetailBitsData, "AltitudeRead", altitudeMapRef);
         computeShaderWaterRender.SetFloat("_MapSize", SimulationManager._MapSize);
         computeShaderWaterRender.Dispatch(kernelSimDetailBitsData, waterDebrisBitsShadowsCBuffer.count / 1024, 1, 1);
-
+        */
     }
     private void SimWaterCurves() {
         int kernelSimWaterCurves = computeShaderWaterRender.FindKernel("CSSimWaterCurvesData");
@@ -588,10 +592,10 @@ public class BaronVonWater : RenderBaron {
         {
             waterSurfaceBitsCBuffer.Release();
         }
-        if (waterSurfaceBitsShadowsCBuffer != null)
+        /*if (waterSurfaceBitsShadowsCBuffer != null)
         {
             waterSurfaceBitsShadowsCBuffer.Release();
-        }
+        }*/
 
         if (waterDebrisBitsCBuffer != null)
         {

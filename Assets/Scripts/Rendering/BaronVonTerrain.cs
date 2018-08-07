@@ -12,6 +12,8 @@ public class BaronVonTerrain : RenderBaron {
     public Material groundStrokesLrgDisplayMat;
     public Material groundStrokesMedDisplayMat;
     public Material groundStrokesSmlDisplayMat;
+    public Material groundBitsDisplayMat;
+    public Material carpetBitsDisplayMat;
     //public Material frameBufferStrokeDisplayMat;
 
 
@@ -42,14 +44,33 @@ public class BaronVonTerrain : RenderBaron {
     public ComputeBuffer groundStrokesMedCBuffer;
     public ComputeBuffer groundStrokesSmlCBuffer;
 
+    private int numGroundBits = 1024 * 16;
+    public ComputeBuffer groundBitsCBuffer;
+    private int numCarpetBits = 1024 * 8;
+    public ComputeBuffer carpetBitsCBuffer;
+
+    public Vector4 spawnBoundsCameraDetails;
+
     public struct TerrainSimpleBrushData { // background terrain
         public Vector3 worldPos;
 		public Vector2 scale;
 		public Vector2 heading;
 		public int brushType;
-    } 
+    }
 
-	public override void Initialize() {
+    public struct GroundBitsData
+    {
+        public int index;
+        public Vector3 worldPos;
+        public Vector2 heading;
+        public Vector2 localScale;
+        public float age;
+        public float speed;
+        public float noiseVal;
+        public int brushType;
+    };
+
+    public override void Initialize() {
         InitializeBuffers();        
         InitializeMaterials();
         InitializeTerrain();
@@ -61,6 +82,56 @@ public class BaronVonTerrain : RenderBaron {
         InitializeQuadMeshBuffer(); // Set up Quad Mesh billboard for brushStroke rendering     
         InitializeFrameBufferStrokesBuffer();
         InitializeGroundStrokeBuffers();
+        InitializeGroundBits();
+        InitializeCarpetBits();
+    }
+
+    private void InitializeGroundBits()
+    {
+        groundBitsCBuffer = new ComputeBuffer(numGroundBits, sizeof(float) * 10 + sizeof(int) * 2);
+        GroundBitsData[] groundBitsArray = new GroundBitsData[groundBitsCBuffer.count];
+        float boundsLrg = 256f;
+        for (int x = 0; x < numGroundBits; x++)
+        {
+            groundBitsArray[x].index = x;
+            //int index = y * numGroundStrokesLrg + x;
+            float xPos = (float)x / (float)(numGroundBits - 1) * boundsLrg;
+            float yPos = xPos; // (1f - (float)y / (float)(numGroundStrokesLrg - 1)) * boundsLrg;
+            Vector2 offset = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f) * 0.0f) * 16f;
+            Vector3 pos = new Vector3(xPos + offset.x, yPos + offset.y, 0f);
+            groundBitsArray[x].worldPos = pos;
+            groundBitsArray[x].heading = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)).normalized;
+            groundBitsArray[x].localScale = new Vector2(UnityEngine.Random.Range(0.4f, 1.5f), UnityEngine.Random.Range(1.0f, 2.5f)) * UnityEngine.Random.Range(1.5f, 4.2f); // Y is forward, along stroke
+            groundBitsArray[x].age = UnityEngine.Random.Range(1f, 2f);
+            groundBitsArray[x].speed = 0f;
+            groundBitsArray[x].noiseVal = 1f;
+            groundBitsArray[x].brushType = UnityEngine.Random.Range(0, 4);
+            
+        }
+        groundBitsCBuffer.SetData(groundBitsArray);
+}
+    private void InitializeCarpetBits()
+    {
+        carpetBitsCBuffer = new ComputeBuffer(numCarpetBits, sizeof(float) * 10 + sizeof(int) * 2);
+        GroundBitsData[] carpetBitsArray = new GroundBitsData[carpetBitsCBuffer.count];
+        float boundsLrg = 256f;
+        for (int x = 0; x < numCarpetBits; x++)
+        {
+            carpetBitsArray[x].index = x;
+            //int index = y * numcarpetStrokesLrg + x;
+            float xPos = (float)x / (float)(numCarpetBits - 1) * boundsLrg;
+            float yPos = xPos; // (1f - (float)y / (float)(numcarpetStrokesLrg - 1)) * boundsLrg;
+            Vector2 offset = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f) * 0.0f) * 16f;
+            Vector3 pos = new Vector3(xPos + offset.x, yPos + offset.y, 0f);
+            carpetBitsArray[x].worldPos = pos;
+            carpetBitsArray[x].heading = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)).normalized;
+            carpetBitsArray[x].localScale = new Vector2(UnityEngine.Random.Range(0.4f, 0.8f), UnityEngine.Random.Range(1.5f, 4.5f)) * UnityEngine.Random.Range(0.25f, 1f); // Y is forward, along stroke
+            carpetBitsArray[x].age = UnityEngine.Random.Range(1f, 2f);
+            carpetBitsArray[x].speed = 0f;
+            carpetBitsArray[x].noiseVal = 1f;
+            carpetBitsArray[x].brushType = UnityEngine.Random.Range(0, 4);
+        }
+        carpetBitsCBuffer.SetData(carpetBitsArray);
     }
 
     private void InitializeGroundStrokeBuffers() {
@@ -77,7 +148,7 @@ public class BaronVonTerrain : RenderBaron {
                 Vector2 offset = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f) * 0.0f) * 16f;
                 Vector3 pos = new Vector3(xPos + offset.x, yPos + offset.y, 0f);
                 groundStrokesLrgArray[index].worldPos = pos;
-                groundStrokesLrgArray[index].scale = new Vector2(UnityEngine.Random.Range(0.4f, 0.8f), UnityEngine.Random.Range(1.5f, 2f)) * 8f; // Y is forward, along stroke
+                groundStrokesLrgArray[index].scale = new Vector2(UnityEngine.Random.Range(0.4f, 0.8f), UnityEngine.Random.Range(1.5f, 2f)) * 12f; // Y is forward, along stroke
                 groundStrokesLrgArray[index].heading = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)).normalized;
                 groundStrokesLrgArray[index].brushType = UnityEngine.Random.Range(0,4);
             }
@@ -97,7 +168,7 @@ public class BaronVonTerrain : RenderBaron {
                 Vector2 offset = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f) * 0.0f) * 16f;
                 Vector3 pos = new Vector3(xPos + offset.x, yPos + offset.y, 0f);
                 groundStrokesMedArray[index].worldPos = pos;
-                groundStrokesMedArray[index].scale = new Vector2(UnityEngine.Random.Range(0.4f, 0.8f), UnityEngine.Random.Range(1.55f, 2.3f)) * 3.6f; // Y is forward, along stroke
+                groundStrokesMedArray[index].scale = new Vector2(UnityEngine.Random.Range(0.4f, 0.8f), UnityEngine.Random.Range(1.55f, 2.3f)) * 4.20f; // Y is forward, along stroke
                 groundStrokesMedArray[index].heading = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)).normalized;
                 groundStrokesMedArray[index].brushType = UnityEngine.Random.Range(0,4);
             }
@@ -177,7 +248,18 @@ public class BaronVonTerrain : RenderBaron {
         groundStrokesSmlDisplayMat.SetPass(0);
         groundStrokesSmlDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
         groundStrokesSmlDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        groundStrokesSmlDisplayMat.SetBuffer("frameBufferStrokesCBuffer", groundStrokesSmlCBuffer);    
+        groundStrokesSmlDisplayMat.SetBuffer("frameBufferStrokesCBuffer", groundStrokesSmlCBuffer);
+
+        groundBitsDisplayMat.SetPass(0);
+        groundBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        groundBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        groundBitsDisplayMat.SetBuffer("groundBitsCBuffer", groundBitsCBuffer);
+
+        carpetBitsDisplayMat.SetPass(0);
+        carpetBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        carpetBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        carpetBitsDisplayMat.SetBuffer("groundBitsCBuffer", carpetBitsCBuffer);
+
     }
 
     private void InitializeTerrain() {
@@ -317,6 +399,27 @@ public class BaronVonTerrain : RenderBaron {
     }
 
     public override void Tick() {
+        SimTerrainBits();
+    }
+
+    private void SimTerrainBits()
+    {
+        
+        int kernelSimGroundBits = computeShaderTerrainGeneration.FindKernel("CSSimGroundBitsData");
+        computeShaderTerrainGeneration.SetBuffer(kernelSimGroundBits, "groundBitsCBuffer", groundBitsCBuffer);
+        //computeShaderTerrainGeneration.SetTexture(kernelSimGroundBits, "VelocityRead", fluidManagerRef._VelocityA);
+        computeShaderTerrainGeneration.SetTexture(kernelSimGroundBits, "AltitudeRead", terrainHeightMap);
+        computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
+        computeShaderTerrainGeneration.SetVector("_SpawnBoundsCameraDetails", spawnBoundsCameraDetails);
+
+        computeShaderTerrainGeneration.Dispatch(kernelSimGroundBits, groundBitsCBuffer.count / 1024, 1, 1);
+
+        int kernelSimCarpetBits = computeShaderTerrainGeneration.FindKernel("CSSimCarpetBitsData");
+        computeShaderTerrainGeneration.SetBuffer(kernelSimCarpetBits, "groundBitsCBuffer", carpetBitsCBuffer);
+        computeShaderTerrainGeneration.SetTexture(kernelSimCarpetBits, "AltitudeRead", terrainHeightMap);
+        computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
+        computeShaderTerrainGeneration.SetVector("_SpawnBoundsCameraDetails", spawnBoundsCameraDetails);
+        computeShaderTerrainGeneration.Dispatch(kernelSimCarpetBits, carpetBitsCBuffer.count / 1024, 1, 1);
 
     }
 
@@ -388,5 +491,14 @@ public class BaronVonTerrain : RenderBaron {
         if (groundStrokesSmlCBuffer != null) {
             groundStrokesSmlCBuffer.Release();
         }
+        if (groundBitsCBuffer != null)
+        {
+            groundBitsCBuffer.Release();
+        }
+        if (carpetBitsCBuffer != null)
+        {
+            carpetBitsCBuffer.Release();
+        }
+        
     }
 }

@@ -365,7 +365,7 @@ void CSAlignFrameBufferStrokes (uint3 id : SV_DispatchThreadID)
 	grad = float2(grad.y, -grad.x);
 
 	terrainFrameBufferStrokesCBuffer[id.x].heading = grad; //lerp(data.heading, grad, _GroundStrokeTerrainAlign);
-	terrainFrameBufferStrokesCBuffer[id.x].worldPos.z = -altitudeCenter * 20 + 9.9;
+	terrainFrameBufferStrokesCBuffer[id.x].worldPos.z = -altitudeCenter * 20 + 10;
 }
 
 [numthreads(64,1,1)]

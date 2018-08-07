@@ -43,7 +43,7 @@ public class CritterModuleCoreGenome {
 
     public void GenerateRandomGenome() {
         // Do stuff:
-        Debug.Log("GenerateRandomGenome()");
+        //Debug.Log("GenerateRandomGenome()");
 
         isPassive = true;
 

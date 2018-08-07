@@ -136,7 +136,7 @@
 				float dotLight = dot(surfaceNormal, _WorldSpaceLightPos0.xyz);
 				dotLight = dotLight * dotLight;
 
-				finalColor.rgb = lerp(finalColor.rgb, finalColor.rgb * (dotLight * 0.33 + 0.67) + dotLight * 0.75, isUnderwater); //dotLight * 1.0;
+				finalColor.rgb = lerp(finalColor.rgb, finalColor.rgb * (dotLight * 0.33 + 0.67) + dotLight * 0.75, isUnderwater * (1.0 - altitude)); //dotLight * 1.0;
 
 
 				// FOG:

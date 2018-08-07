@@ -36,6 +36,8 @@
 			
 			uniform float _MapSize;
 
+			uniform float _CamDistNormalized;
+
 			struct FrameBufferStrokeData {
 				float3 worldPos;
 				float2 scale;
@@ -85,11 +87,16 @@
 				o.worldPos = worldPosition;
 				float2 uv = (worldPosition.xy + 128) / 512;
 				o.altitudeUV = uv;
+
+				float fadeDuration = 0.1;
+				float fadeIn = saturate(waterQuadData.age / fadeDuration);  // fade time = 0.1
+				float fadeOut = saturate((1 - waterQuadData.age) / fadeDuration);							
+				float alpha = fadeIn * fadeOut;
 				
-				float2 scale = waterQuadData.localScale * 2.37;
-				scale.x *= 0.66;
-				scale.y = scale.y * (1 + saturate(waterQuadData.speed * 64));
-				quadPoint *= float3(scale, 1.0);
+				float2 scale = waterQuadData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25);
+				//scale.x *= 0.66;
+				//scale.y = scale.y * (1 + saturate(waterQuadData.speed * 64));
+				quadPoint *= float3(scale * 2, 1.0);
 				
 				float4 fluidVelocity = tex2Dlod(_VelocityTex, float4(worldPosition.xy / 256, 0, 2));
 				float2 fluidDir = float2(0,1); //normalize(fluidVelocity.xy);
@@ -121,7 +128,7 @@
 
 				o.skyUV = worldPosition.xy / _MapSize;
 
-				//float2 rand = Value2D(float2((float)inst, (float)inst + 30), 100);
+				
 				float randNoise1 = Value3D(float3(worldPosition.x - _Time.y * 5.34, worldPosition.y + _Time.y * 7.1, _Time.y * 15), 0.1).x * 0.5 + 0.5; //				
 				float randNoise2 = Value3D(float3(worldPosition.x + _Time.y * 7.34, worldPosition.y - _Time.y * 6.1, _Time.y * -10), 0.25).x * 0.5 + 0.5;
 				float randNoise3 = Value3D(float3(worldPosition.x + _Time.y * 3.34, worldPosition.y - _Time.y * 5.1, _Time.y * 7.5), 0.36).x * 0.5 + 0.5;
@@ -136,13 +143,9 @@
 				float testNewVignetteMask = saturate(((randThreshold + 0.6 - (saturate(vignetteRadius) * 0.4 + 0.3)) * 2));
 				o.vignetteLerp = float4(testNewVignetteMask,sampleUV,saturate(vignetteRadius));
 
-				float fadeDuration = 0.1;
-				float fadeIn = saturate(waterQuadData.age / fadeDuration);  // fade time = 0.1
-				float fadeOut = saturate((1 - waterQuadData.age) / fadeDuration);
-							
-				float alpha = fadeIn * fadeOut;
-
-				o.color = float4(1,1,1,alpha);
+				
+				float rand = Value2D(float2((float)inst, (float)inst + 30), 100).x;
+				o.color = float4(rand,1,1,alpha);
 				
 				return o;
 			}
@@ -196,18 +199,18 @@
 
 
 				
-				float4 backgroundColor = frameBufferColor;
+				float4 backgroundColor = float4(0.37, 0.53, 0.26, 1); //frameBufferColor;
 				backgroundColor.a = brushColor.a;
 				
 				float altitude = tex2D(_AltitudeTex, i.altitudeUV); // i.worldPos.z / 10; // [-1,1] range
 				// 0-1 range --> -1 to 1
 				altitude = (altitude * 2 - 1) * -1;
 				float isUnderwater = saturate(altitude * 10000);
-				float3 waterFogColor = float3(0.03,0.4,0.3) * 0.4;
-				float strataColorMultiplier = (sin(altitude * (1.0 + i.worldPos.x * 0.01 - i.worldPos.y * -0.01) + i.worldPos.x * 0.01 - i.worldPos.y * 0.01) * 0.5 + 0.5) * 0.5 + 0.5;
-				backgroundColor.rgb *= strataColorMultiplier;				
-				backgroundColor.rgb = lerp(backgroundColor.rgb, waterFogColor, 1 * (saturate(altitude * 0.8)) + 0.25 * isUnderwater);
-
+				//float3 waterFogColor = float3(0.03,0.4,0.3) * 0.4;
+				//float strataColorMultiplier = (sin(altitude * (1.0 + i.worldPos.x * 0.01 - i.worldPos.y * -0.01) + i.worldPos.x * 0.01 - i.worldPos.y * 0.01) * 0.5 + 0.5) * 0.5 + 0.5;
+				//backgroundColor.rgb *= strataColorMultiplier;				
+				//backgroundColor.rgb = lerp(backgroundColor.rgb, waterFogColor, 1 * (saturate(altitude * 0.8)) + 0.25 * isUnderwater);
+				/*
 				float snowAmount = saturate((-altitude - 0.6) * 2 +
 								   ((sin(i.worldPos.x * 0.0785 + i.worldPos.y * 0.02843) * 0.5 + 0.5) * 1 - 
 								   (cos(i.worldPos.x * 0.012685 + i.worldPos.y * -0.01843) * 0.5 + 0.5) * 0.9 +
@@ -218,8 +221,10 @@
 				
 				backgroundColor.rgb = lerp(backgroundColor.rgb, float3(0.56, 1, 0.34) * 0.6, snowAmount * 1);
 				//==================================================================================================================
+				*/
+				
 				backgroundColor.a *= isUnderwater;
-
+				
 				
 				
 
@@ -245,7 +250,14 @@
 
 				float4 reflectedColor = float4(tex2Dlod(_SkyTex, float4((skyCoords) - _Time.y * 0.015, 0, 1)).rgb, backgroundColor.a); //col;
 				
-				float4 finalColor = lerp(reflectedColor, backgroundColor, viewDotRemapped); //saturate(1 - (1 - i.vignetteLerp.x) * 0.5)); //float4(1,1,1,1);
+				float4 finalColor = backgroundColor; //lerp(reflectedColor, backgroundColor, viewDotRemapped); //saturate(1 - (1 - i.vignetteLerp.x) * 0.5)); //float4(1,1,1,1);
+				
+				finalColor.rgb = (finalColor.rgb + reflectedColor.rgb * 0.25) * (saturate(diffuse) * 0.5 + 0.5);
+				
+				finalColor.rgb *= i.color.r * 0.1 + 0.9;
+
+				//finalColor.rgb = reflectedColor.rgb;
+				
 				//finalColor.a *= saturate(i.vignetteLerp.w * 0.55 - 0.25); //(1 - saturate(i.vignetteLerp.x) * 0.4) * 0.5;
 				//finalColor.a *= i.color.a;
 				//finalColor.rgb *= diffuse;
@@ -259,13 +271,15 @@
 				//finalColor.a *= finalColor.a;
 				//finalColor.a *= 0.33;
 
-				float4 nutrientGridSample = tex2D(_NutrientTex, (i.altitudeUV - 0.25) * 2.0); 
+				//float4 nutrientGridSample = tex2D(_NutrientTex, (i.altitudeUV - 0.25) * 2.0); 
 				//finalColor.a = 1;
 				//float foodAmt = nutrientGridSample.x * 2;
 				//finalColor.rgb = float3(foodAmt, foodAmt, foodAmt);
-				finalColor.rgb = lerp(float3(0,0,0), float3(0,1,0), saturate(nutrientGridSample.x * 10));
+				//finalColor.rgb = lerp(float3(0,0,0), float3(0,1,0), saturate(nutrientGridSample.x * 10));
 				
-				return float4(1,1,1,1);
+				//return float4(1,1,1,finalColor.a);
+
+				//finalColor.a *= i.color.a;
 
 				return finalColor;
 				
