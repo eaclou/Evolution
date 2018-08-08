@@ -82,9 +82,9 @@ float3 GetAnimatedPos(float3 inPos, float3 pivotPos, CritterInitData critterInit
 	
 	// FOOD BLOAT:
 	float foodAmount = critterSimData.foodAmount;
-	float bloatPivotY = (saturate(foodAmount - 0.5) - 0.5) * 2;
-	float bloatMask = smoothstep(0, 1, (1 - saturate(abs((strokeLocalPos.y - bloatPivotY) * 1))) * 1); // smoothstep makes a more gaussian-looking shape than pointy
-	float bloatMagnitude = foodAmount * foodAmount * 1.5;
+	float bloatPivotY = 0; //(saturate(foodAmount - 0.5) - 0.5) * 2;
+	float bloatMask = smoothstep(0, 1, (1 - saturate(abs((strokeLocalPos.y - bloatPivotY) * 1.5))) * 1); // smoothstep makes a more gaussian-looking shape than pointy
+	float bloatMagnitude = foodAmount * 2.4;
 	
 	inPos *= 1.0 + bloatMask * bloatMagnitude * 1.0;
 	// end FOOD BLOAT

@@ -10,6 +10,9 @@
 
 struct FoodParticleData {
     int index;
+	int critterIndex; // index of creature which swallowed this foodParticle
+    float isSwallowed;   // 0 = normal, 1 = in critter's belly
+    float digestedAmount;  // 0 = freshly eaten, 1 = fully dissolved/shrunk        
     float2 worldPos;
     float radius;
     float foodAmount;
@@ -150,6 +153,10 @@ void CSEatSelectedFoodParticles (uint3 id : SV_DispatchThreadID)
 			
 				foodParticlesWrite[particleIndex].foodAmount = 0;
 				foodParticlesWrite[particleIndex].active = 0;
+
+				// NEW:
+				foodParticlesWrite[particleIndex].isSwallowed = 1.0;
+				foodParticlesWrite[particleIndex].critterIndex = critterIndex;
 			}			
 		}
 	}	
@@ -201,6 +208,9 @@ void CSMeasureTotalFoodParticlesAmount (uint3 id : SV_DispatchThreadID)
 	newData.foodAmount = totalFoodAmount;
 
 	newData.refactoryAge = 0; // ***** Might cause problems? **
+	newData.isSwallowed = 0;
+	newData.critterIndex = 0;
+	newData.digestedAmount = 0;
 
 	foodParticlesWrite[id.x] = newData;
 }
@@ -227,18 +237,26 @@ void CSRespawnFoodParticles (uint3 id : SV_DispatchThreadID)
 
 			// Respawn if on land ^^^:
 		}
-		else {  // Otherwise simulate
+		else {  // Otherwise simulate as normal
+			
+			
 			float2 vel = velocityRead.SampleLevel(_LinearRepeat, uv, 2).xy;
 			float speedMult = 0.01;	
 			//vel = float2(1,1)* 0.001;	
-			float2 nextPos = uv + vel * speedMult;	
-			foodParticlesWrite[id.x].worldPos = nextPos * _MapSize;
+			float2 nextPos = uv + vel * speedMult;
 
-		
+			float2 defaultNextPos = nextPos * _MapSize;
+			//float2 swallowedPos = critterSimDataCBuffer[foodParticle.critterIndex].worldPos.xy;
+			foodParticlesWrite[id.x].worldPos = defaultNextPos; //lerp(defaultNextPos, swallowedPos, foodParticle.isSwallowed);		
 		}
 	}
 	else {  // INACTIVE:::
 		foodParticlesWrite[id.x].refactoryAge = foodParticle.refactoryAge + _FoodParticleRegrowthRate;
+
+		//foodParticle.critterIndex
+		float2 swallowedPos = critterSimDataCBuffer[foodParticle.critterIndex].worldPos.xy;
+					
+		foodParticlesWrite[id.x].worldPos = swallowedPos;
 	}
 	
 	
@@ -266,6 +284,7 @@ void CSRespawnFoodParticles (uint3 id : SV_DispatchThreadID)
 				foodParticlesWrite[id.x].foodAmount = randRadius * randRadius * 3.141592 * _ParticleNutrientDensity;
 				foodParticlesWrite[id.x].active = 1.0;
 				foodParticlesWrite[id.x].refactoryAge = 0.0;
+				foodParticlesWrite[id.x].isSwallowed = 0.0;
 			}
 		}		
 	}

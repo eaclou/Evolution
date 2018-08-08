@@ -34,6 +34,9 @@
 			
 			struct FoodParticleData {
 				int index;
+				int critterIndex; // index of creature which swallowed this foodParticle
+				float isSwallowed;   // 0 = normal, 1 = in critter's belly
+				float digestedAmount;  // 0 = freshly eaten, 1 = fully dissolved/shrunk      
 				float2 worldPos;
 				float radius;
 				float foodAmount;
@@ -67,7 +70,7 @@
 
 				float3 worldPosition = float3(particleData.worldPos, 0);    //float3(rawData.worldPos, -random2);
 				
-				quadPoint = quadPoint * particleData.radius * particleData.active; // *** remove * 3 after!!!
+				quadPoint = quadPoint * particleData.radius; // * particleData.active; // *** remove * 3 after!!!
 				worldPosition = worldPosition + quadPoint;
 
 				// REFRACTION:
@@ -81,7 +84,7 @@
 				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(quadPoint, 0.0f));				
 				o.uv = quadVerticesCBuffer[id].xy + 0.5f;	
 
-				o.color = float4(particleData.refactoryAge,particleData.active,1,1);
+				o.color = float4(particleData.refactoryAge,particleData.active,particleData.isSwallowed,1);
 				
 				return o;
 			}
@@ -94,7 +97,7 @@
 
 				float4 texColor = tex2D(_MainTex, i.uv);
 				
-				return float4(0.7,1,0.1,texColor.a * 0.75);
+				return float4(i.color.z, i.color.z, i.color.z,1); //texColor.a * 1);
 			}
 		ENDCG
 		}

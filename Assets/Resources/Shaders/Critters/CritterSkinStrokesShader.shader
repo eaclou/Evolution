@@ -90,17 +90,16 @@
 				float2 brushAspectRatio = float2(lerp((skinStrokeData.localScale.x + skinStrokeData.localScale.y) / 2.0, skinStrokeData.localScale.x, 0.5),
 												lerp((skinStrokeData.localScale.x + skinStrokeData.localScale.y) / 2.0, skinStrokeData.localScale.y, 0.5));
 				vertexWorldOffset.xy = vertexWorldOffset.xy * brushAspectRatio * critterCurScale * saturate(0.99 - critterSimData.decayPercentage * 2);
-				//vertexWorldOffset.xy = vertexWorldOffset.xy * skinStrokeData.localScale * critterCurScale * (1.0 - critterSimData.decayPercentage);
 				
-				//float3 spriteWorldOffset = spriteLocalPos; // **** Vector from critter origin to sprite origin
 				
-				//spriteWorldOffset = GetAnimatedPos(spriteWorldOffset, float3(0,0,0), critterInitData, critterSimData, skinStrokeData);
-				vertexWorldOffset = GetAnimatedPos(vertexWorldOffset, float3(0,0,0), critterInitData, critterSimData, skinStrokeData.localPos);
+				// ANIMATIONS:
+				//vertexWorldOffset = GetAnimatedPos(vertexWorldOffset, float3(0,0,0), critterInitData, critterSimData, skinStrokeData.localPos);
 				
+
 				// REFRACTION:
 				float3 offset = skinStrokeData.worldPos;				
 				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(offset.xy / 256, 0, 0)).yzw;
-				float refractionStrength = 2.5;
+				float refractionStrength = 2.45;
 				offset.xy += -surfaceNormal.xy * refractionStrength;
 
 				float embryoStatus = critterSimData.embryoPercentage;

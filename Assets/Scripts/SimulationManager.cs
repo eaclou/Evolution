@@ -168,6 +168,9 @@ public class SimulationManager : MonoBehaviour {
 
     public struct FoodParticleData {
         public int index;
+        public int critterIndex;
+        public float isSwallowed;   // 0 = normal, 1 = in critter's belly
+        public float digestedAmount;  // 0 = freshly eaten, 1 = fully dissolved/shrunk
         public Vector2 worldPos;
         public float radius;
         public float foodAmount;
@@ -438,8 +441,8 @@ public class SimulationManager : MonoBehaviour {
     }
     private void LoadingInitializeFoodParticles() {
 
-        foodParticlesCBuffer = new ComputeBuffer(numFoodParticles, sizeof(float) * 6 + sizeof(int) * 1);
-        foodParticlesCBufferSwap = new ComputeBuffer(numFoodParticles, sizeof(float) * 6 + sizeof(int) * 1);
+        foodParticlesCBuffer = new ComputeBuffer(numFoodParticles, sizeof(float) * 8 + sizeof(int) * 2);
+        foodParticlesCBufferSwap = new ComputeBuffer(numFoodParticles, sizeof(float) * 8 + sizeof(int) * 2);
         FoodParticleData[] foodParticlesArray = new FoodParticleData[numFoodParticles];
 
         float minParticleSize = settingsManager.avgFoodParticleRadius / settingsManager.foodParticleRadiusVariance;
@@ -964,6 +967,7 @@ public class SimulationManager : MonoBehaviour {
         float maxFoodParticleTotal = settingsManager.maxFoodParticleTotalAmount;
 
         int kernelCSRespawnFoodParticles = computeShaderFoodParticles.FindKernel("CSRespawnFoodParticles");
+        computeShaderFoodParticles.SetBuffer(kernelCSRespawnFoodParticles, "critterSimDataCBuffer", simStateData.critterSimDataCBuffer);
         computeShaderFoodParticles.SetBuffer(kernelCSRespawnFoodParticles, "foodParticlesRead", foodParticlesCBuffer);
         computeShaderFoodParticles.SetBuffer(kernelCSRespawnFoodParticles, "foodParticlesWrite", foodParticlesCBufferSwap);
         computeShaderFoodParticles.SetTexture(kernelCSRespawnFoodParticles, "velocityRead", environmentFluidManager._VelocityA);        

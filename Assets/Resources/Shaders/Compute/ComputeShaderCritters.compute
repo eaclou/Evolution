@@ -26,9 +26,7 @@ float rand(float2 co){   // OUTPUT is in [0,1] RANGE!!!
 [numthreads(16,1,1)]
 void CSSimulateSkinCritterStrokes (uint3 id : SV_DispatchThreadID)
 {
-	
-	
-	
+		
 	// If detached, actual worldPos can lag behind pinned default position on agent:
 	
 	CritterSkinStrokeData skinStrokeData = critterSkinStrokesWriteCBuffer[id.x];
@@ -55,24 +53,20 @@ void CSSimulateSkinCritterStrokes (uint3 id : SV_DispatchThreadID)
 	float speedMult = 0.035 * _MapSize;
 	curWorldPos.xy = curWorldPos.xy + fluidVel * speedMult;
 	// NOISE:
-	float3 noiseVel = Value3D(curWorldPos * 0.05, 17.75).yzw;
-	
+	float3 noiseVel = Value3D(curWorldPos * 0.05, 17.75).yzw;	
 
 	float pinnedAmount = saturate((1.0 - critterSimData.decayPercentage * 12));
 	pinnedAmount = 1;
 	
-	//curWorldPos.xyz += skinStrokeData.localPos * 0.05 * critterCurScale.x;
-	//curWorldPos.z += 0.01;
 	float3 worldPosition = lerp(curWorldPos, newWorldPos, pinnedAmount);
-	//worldPosition.xy += noiseVel * 0.3 * critterCurScale.x;
-	//worldPosition.xyz += skinStrokeData.localPos * 0.1;
 			
 	skinStrokeData.worldPos = worldPosition;
 	critterSkinStrokesWriteCBuffer[id.x] = skinStrokeData;
+
+
+
+
 	//-------------------------------------------------------------------------------------------------------------------------------
-
-
-
 	//===================================:::::OLD:::::==================================================================================
 	//float3 curAgentSize;
 	//curAgentSize.xy = critterInitData.boundingBoxSize * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage);
@@ -87,11 +81,7 @@ void CSSimulateSkinCritterStrokes (uint3 id : SV_DispatchThreadID)
 	//float bendStrength = 0.5; // * saturate(bodyAspectRatio * 0.5 - 0.4);
 	//centerPosition.xy = swimAnimPos(centerPosition.xy, brushData.localPos.y, critterSimData.moveAnimCycle, critterSimData.accel, critterSimData.smoothedThrottle, bendStrength, critterSimData.turnAmount);
 	
-	//centerPosition.xy = rotatePointVector(centerPosition.xy, float2(0,0), critterSimData.heading);
-
-
-	
-	
+	//centerPosition.xy = rotatePointVector(centerPosition.xy, float2(0,0), critterSimData.heading);	
 }
 
 /*   OLD:::::

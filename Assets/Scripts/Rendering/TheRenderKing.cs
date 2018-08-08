@@ -627,7 +627,7 @@ public class TheRenderKing : MonoBehaviour {
                 skinStroke.localPos.x *= width * 0.5f;
                 skinStroke.localPos.z *= width * 0.5f;                
                 skinStroke.localDir = new Vector3(0f, 1f, 0f); // start up? shouldn't matter
-                skinStroke.localScale = new Vector2(0.25f, 0.38f) * 1f; // simManager.agentGenomePoolArray[i].bodyGenome.sizeAndAspectRatio;
+                skinStroke.localScale = new Vector2(0.25f, 0.420f) * 0.5f; // simManager.agentGenomePoolArray[i].bodyGenome.sizeAndAspectRatio;
                 skinStroke.strength = UnityEngine.Random.Range(0f, 1f);
                 skinStroke.lifeStatus = 0f;
                 skinStroke.age = UnityEngine.Random.Range(1f, 2f);
@@ -1679,6 +1679,7 @@ public class TheRenderKing : MonoBehaviour {
         //cmdBufferTest.GetTemporaryRT(renderedSceneID, -1, -1, 0, FilterMode.Bilinear);  // save contents of Standard Rendering Pipeline
         //cmdBufferTest.Blit(BuiltinRenderTextureType.CameraTarget, renderedSceneID);  // save contents of Standard Rendering Pipeline
 
+        /*
         // FOOD PARTICLE SHADOWS::::
         foodParticleShadowDisplayMat.SetPass(0);
         foodParticleShadowDisplayMat.SetBuffer("foodParticleDataCBuffer", simManager.foodParticlesCBuffer);
@@ -1686,7 +1687,7 @@ public class TheRenderKing : MonoBehaviour {
         foodParticleShadowDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         foodParticleShadowDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, foodParticleShadowDisplayMat, 0, MeshTopology.Triangles, 6, simManager.foodParticlesCBuffer.count);
-
+        */
         // Surface Bits Shadows:
         baronVonWater.waterSurfaceBitsShadowsDisplayMat.SetPass(0);
         baronVonWater.waterSurfaceBitsShadowsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -1724,13 +1725,13 @@ public class TheRenderKing : MonoBehaviour {
         foodParticleDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         foodParticleDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, foodParticleDisplayMat, 0, MeshTopology.Triangles, 6, simManager.foodParticlesCBuffer.count);
-        /*
+        
         foodFruitDisplayMat.SetPass(0);
         foodFruitDisplayMat.SetBuffer("fruitDataCBuffer", simManager.simStateData.foodFruitDataCBuffer);
         foodFruitDisplayMat.SetBuffer("foodSimDataCBuffer", simManager.simStateData.foodSimDataCBuffer);
         foodFruitDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, foodFruitDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.foodFruitDataCBuffer.count);
-        */
+        
         // CRITTER BODY:
 
 
