@@ -96,7 +96,7 @@ public class SimulationManager : MonoBehaviour {
             numFood = value;
         }
     }    
-    public FoodChunk[] foodDeadAnimalArray;
+    //public FoodChunk[] foodDeadAnimalArray;
     public PredatorModule[] predatorArray;
     private int numPredators = 64;
     public int _NumPredators {
@@ -572,8 +572,8 @@ public class SimulationManager : MonoBehaviour {
     private void LoadingInstantiateFood() {
         // FOOODDDD!!!!
         foodArray = new FoodChunk[numFood]; // create array
-        int numDeadAnimalFood = 32;
-        foodDeadAnimalArray = new FoodChunk[numDeadAnimalFood];
+        //int numDeadAnimalFood = 32;
+        //foodDeadAnimalArray = new FoodChunk[numDeadAnimalFood];
 
         //Debug.Log("SpawnFood!");
         for (int i = 0; i < foodArray.Length; i++) {
@@ -582,14 +582,14 @@ public class SimulationManager : MonoBehaviour {
             FoodChunk newFood = foodGO.GetComponent<FoodChunk>();
             foodArray[i] = newFood; // Add to stored list of current Food objects                     
         }
-
+        /*
         for(int j = 0; j < numDeadAnimalFood; j++) {
             GameObject deadAnimalGO = Instantiate(Resources.Load("Prefabs/FoodPrefab")) as GameObject;
             deadAnimalGO.name = "DeadAnimal" + j.ToString();
             FoodChunk newDeadAnimal = deadAnimalGO.GetComponent<FoodChunk>();
             newDeadAnimal.gameObject.SetActive(false);
             foodDeadAnimalArray[j] = newDeadAnimal; // Add to stored list of current Food objects        
-        }
+        }*/
     }
     private void LoadingInitializeFoodFromGenome() {
         for (int i = 0; i < foodArray.Length; i++) {
@@ -751,11 +751,11 @@ public class SimulationManager : MonoBehaviour {
         for (int i = 0; i < foodArray.Length; i++) {
             foodArray[i].Tick();
         }
-        for (int i = 0; i < foodDeadAnimalArray.Length; i++) {
+        /*for (int i = 0; i < foodDeadAnimalArray.Length; i++) {
             if(foodDeadAnimalArray[i].gameObject.activeSelf) {
                 foodDeadAnimalArray[i].Tick();
             }            
-        }
+        }*/
         // Apply External Forces to dynamic objects: (internal PhysX Updates):
         // **** TEMPORARILY DISABLED!
         //ApplyFluidForcesToDynamicObjects();
@@ -1207,7 +1207,7 @@ public class SimulationManager : MonoBehaviour {
             mapGridCellArray[xCoord][yCoord].foodIndicesList.Add(f);
                        
         }
-        for(int a = 0; a < foodDeadAnimalArray.Length; a++) {  // DEAD ANIMALS!!!
+        /*for(int a = 0; a < foodDeadAnimalArray.Length; a++) {  // DEAD ANIMALS!!!
             float xPos = foodDeadAnimalArray[a].transform.position.x;
             float yPos = foodDeadAnimalArray[a].transform.position.y;
             int xCoord = Mathf.FloorToInt(xPos / mapSize * (float)agentGridCellResolution);
@@ -1216,7 +1216,7 @@ public class SimulationManager : MonoBehaviour {
             yCoord = Mathf.Clamp(yCoord, 0, agentGridCellResolution - 1);
 
             mapGridCellArray[xCoord][yCoord].deadAnimalIndicesList.Add(a);
-        }
+        }*/
 
         // FRIENDS::::::
         for (int a = 0; a < agentsArray.Length; a++) {
@@ -1266,7 +1266,7 @@ public class SimulationManager : MonoBehaviour {
             int closestPredIndex = 0; // default to 0???
             float nearestPredDistance = float.PositiveInfinity;
 
-            bool closestFoodIsDeadAnimal = false;
+           // bool closestFoodIsDeadAnimal = false;
 
             int ownSpeciesIndex = Mathf.FloorToInt((float)a / (float)numAgents * (float)numSpecies);
 
@@ -1323,7 +1323,7 @@ public class SimulationManager : MonoBehaviour {
                     } 
                 }                             
             }
-
+            /*
             for (int i = 0; i < mapGridCellArray[xCoord][yCoord].deadAnimalIndicesList.Count; i++) {
                 // DEAD ANIMALS!!!:
                 if(foodDeadAnimalArray[mapGridCellArray[xCoord][yCoord].deadAnimalIndicesList[i]].enabled) { // if enabled:
@@ -1341,7 +1341,7 @@ public class SimulationManager : MonoBehaviour {
                     } 
                 }                             
             }
-            
+            */
 
             for (int i = 0; i < mapGridCellArray[xCoord][yCoord].predatorIndicesList.Count; i++) {
                 // PREDATORS:::::::
@@ -1359,12 +1359,13 @@ public class SimulationManager : MonoBehaviour {
             agentsArray[a].coreModule.nearestFriendAgent = agentsArray[closestFriendIndex];
             agentsArray[a].coreModule.nearestEnemyAgent = agentsArray[closestEnemyAgentIndex];
             if(closestFoodIndex != -1) {
-                if(closestFoodIsDeadAnimal) {                    
+                agentsArray[a].coreModule.nearestFoodModule = foodArray[closestFoodIndex];
+                /*if(closestFoodIsDeadAnimal) {                    
                     agentsArray[a].coreModule.nearestFoodModule = foodDeadAnimalArray[closestFoodIndex];
                 }
                 else {                    
                     agentsArray[a].coreModule.nearestFoodModule = foodArray[closestFoodIndex];
-                }
+                }*/
             }            
             agentsArray[a].coreModule.nearestPredatorModule = predatorArray[closestPredIndex];            
         }
@@ -1379,15 +1380,15 @@ public class SimulationManager : MonoBehaviour {
         // CHECK FOR DEAD FOOD!!! :::::::
         for (int f = 0; f < foodArray.Length; f++) {
             if (foodArray[f].isDepleted) {
-                ProcessDeadFood(true, f);
+                ProcessDeadFood(f);
             }
         }
 
-        for (int a = 0; a < foodDeadAnimalArray.Length; a++) {
+        /*for (int a = 0; a < foodDeadAnimalArray.Length; a++) {
             if (foodDeadAnimalArray[a].isDepleted) {
                 foodDeadAnimalArray[a].gameObject.SetActive(false);
             }
-        }
+        }*/
     }
     private void CheckForDeadAgents() { 
         for (int a = 0; a < agentsArray.Length; a++) {
@@ -1437,7 +1438,7 @@ public class SimulationManager : MonoBehaviour {
         
     } // *** confirm these are set up alright      
     public void ProcessDeadAgent(int agentIndex) {
-
+        /*
         // Convert to DeadAnimal Food:
         int deadAnimalIndex = 0;
         for(int i = 0; i < foodDeadAnimalArray.Length; i++) {
@@ -1460,6 +1461,7 @@ public class SimulationManager : MonoBehaviour {
         foodDeadAnimalArray[deadAnimalIndex].InitializeFoodFromGenome(foodGenomeAnimalCorpse, startPos, null); // Spawn that genome in dead Agent's body and revive it!
         
         foodDeadAnimalArray[deadAnimalIndex].gameObject.SetActive(true);
+        */
 
         /*bool processAsAI = true;
 
@@ -1497,7 +1499,7 @@ public class SimulationManager : MonoBehaviour {
             //cameraManager.StartPlayerRespawn();
         }
     }
-    public void ProcessDeadFood(bool isPlant, int foodIndex) {
+    public void ProcessDeadFood(int foodIndex) {
         
         //CheckForRecordAgentScore(foodIndex);
         //ProcessAgentScores(foodIndex);
@@ -1508,7 +1510,7 @@ public class SimulationManager : MonoBehaviour {
         // Reproduction!!!
         CreateMutatedCopyOfFood(foodIndex); 
         
-        theRenderKing.UpdateDynamicFoodBuffers(isPlant, foodIndex);
+        theRenderKing.UpdateDynamicFoodBuffers(foodIndex);
         //theRenderKing.UpdateAgentBodyStrokesBuffer(foodIndex);
         //theRenderKing.InitializeAgentEyeStrokesBuffer();
     }

@@ -68,36 +68,34 @@
 							
 				FoodParticleData particleData = foodParticleDataCBuffer[inst];
 
-				float3 worldPosition = float3(particleData.worldPos, 0);    //float3(rawData.worldPos, -random2);
+				float3 worldPosition = float3(particleData.worldPos, 1.0);    //float3(rawData.worldPos, -random2);
 				
-				quadPoint = quadPoint * particleData.radius; // * particleData.active; // *** remove * 3 after!!!
+				quadPoint = quadPoint * particleData.radius * (1.0 - particleData.digestedAmount); // * particleData.active; // *** remove * 3 after!!!
 				worldPosition = worldPosition + quadPoint;
 
 				// REFRACTION:
-				//float altitude = tex2Dlod(_AltitudeTex, float4(altUV, 0, 0)).x; //i.worldPos.z / 10; // [-1,1] range
-				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / 256, 0, 0)).yzw;
-				//float depth = saturate(-altitude + 0.5);
+				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / 256, 0, 0)).yzw;				
 				float refractionStrength = 2.5;
 				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
+
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
 				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(quadPoint, 0.0f));				
 				o.uv = quadVerticesCBuffer[id].xy + 0.5f;	
 
-				o.color = float4(particleData.refactoryAge,particleData.active,particleData.isSwallowed,1);
+				o.color = float4(particleData.refactoryAge,particleData.active,particleData.isSwallowed, particleData.digestedAmount);
 				
 				return o;
 			}
 
 			fixed4 frag(v2f i) : SV_Target
 			{
-				//return float4(1,1,1,1);
-
-				//return float4(1.0 - i.color.g, i.color.r, i.color.g, 1);
-
+				
 				float4 texColor = tex2D(_MainTex, i.uv);
 				
-				return float4(i.color.z, i.color.z, i.color.z,1); //texColor.a * 1);
+				float val = i.color.a;
+
+				return float4(val, 1, val, texColor.a);
 			}
 		ENDCG
 		}

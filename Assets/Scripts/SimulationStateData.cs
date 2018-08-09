@@ -174,7 +174,7 @@ public class SimulationStateData {
         }
         agentMovementAnimDataCBuffer = new ComputeBuffer(agentMovementAnimDataArray.Length, sizeof(float) * 4);
 
-        foodSimDataArray = new FoodSimData[simManager._NumFood + 32]; // **** temp hard-coded dead agent food
+        foodSimDataArray = new FoodSimData[simManager._NumFood];
         for (int i = 0; i < foodSimDataArray.Length; i++) {
             foodSimDataArray[i] = new FoodSimData();
         }
@@ -227,7 +227,7 @@ public class SimulationStateData {
             if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Young) {
                 maturity = Mathf.Lerp(simManager.agentsArray[i].spawnStartingScale, 1f, simManager.agentsArray[i].growthPercentage);
             }
-            if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Decaying) {
+            if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Dead) {
                 decay = (float)simManager.agentsArray[i].lifeStageTransitionTimeStepCounter / (float)simManager.agentsArray[i]._DecayDurationTimeSteps;
             }
             agentSimDataArray[i].maturity = maturity;
@@ -282,8 +282,8 @@ public class SimulationStateData {
         
         // CRITTER SIM DATA: updated every frame:
         for(int i = 0; i < critterSimDataArray.Length; i++) {
-            Vector3 agentPos = simManager.agentsArray[i].bodyRigidbody.position;            
-            critterSimDataArray[i].worldPos = new Vector3(agentPos.x, agentPos.y, simManager.agentsArray[i].fullSizeBoundingBox.x * 0.5f);  // in world(scene) coordinates
+            Vector3 agentPos = simManager.agentsArray[i].bodyRigidbody.position;
+            critterSimDataArray[i].worldPos = new Vector3(agentPos.x, agentPos.y, 1f); // simManager.agentsArray[i].fullSizeBoundingBox.x * 0.5f);  // in world(scene) coordinates
             if(simManager.agentsArray[i].smoothedThrottle.sqrMagnitude > 0f) {
                 critterSimDataArray[i].velocity = simManager.agentsArray[i].smoothedThrottle.normalized;
             }
@@ -299,7 +299,7 @@ public class SimulationStateData {
             critterSimDataArray[i].embryoPercentage = embryo;
             critterSimDataArray[i].growthPercentage = simManager.agentsArray[i].growthPercentage;
             float decay = 0f;
-            if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Decaying) {
+            if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Dead) {
                 decay = (float)simManager.agentsArray[i].lifeStageTransitionTimeStepCounter / (float)simManager.agentsArray[i]._DecayDurationTimeSteps;
             }
             critterSimDataArray[i].decayPercentage = decay;
@@ -383,7 +383,7 @@ public class SimulationStateData {
                                                       (simManager.foodArray[i].curSize.x + 0.1f) * 0.5f / SimulationManager._MapSize, 
                                                       (simManager.foodArray[i].curSize.y + 0.1f) * 0.5f / SimulationManager._MapSize);
         }
-        for (int i = 0; i < 32; i++) {  // Agent corpse food
+        /*for (int i = 0; i < 32; i++) {  // Agent corpse food
             int dataIndex = simManager._NumFood + i;
 
             Vector3 foodPos = simManager.foodDeadAnimalArray[i].transform.position;
@@ -403,18 +403,8 @@ public class SimulationStateData {
             foodSimDataArray[dataIndex].stemHue = simManager.foodGenomePoolArray[0].stemHue;
             foodSimDataArray[dataIndex].leafHue = simManager.foodGenomePoolArray[0].leafHue;
             foodSimDataArray[dataIndex].fruitHue = simManager.foodGenomePoolArray[0].fruitHue;
-            
-            /*
-            // Z & W coords represents agent's x/y Radii (in FluidCoords)
-            // convert from scene coords (-mapSize --> +mapSize to fluid coords (0 --> 1):::
-            // **** Revisit and get working properly in both X and Y dimensions independently *********
-            //float sampleRadius = (simManager.foodArray[i].curSize.magnitude + 0.1f) / (simManager._MapSize * 2f); // ****  ***** Revisit the 0.1f offset -- should be one pixel in fluidCoords?
-            foodFluidPositionsArray[i] = new Vector4((foodPos.x + simManager._MapSize) / (simManager._MapSize * 2f), 
-                                                      (foodPos.y + simManager._MapSize) / (simManager._MapSize * 2f), 
-                                                      (simManager.foodArray[i].curSize.x + 0.1f) / (simManager._MapSize * 2f), 
-                                                      (simManager.foodArray[i].curSize.y + 0.1f) / (simManager._MapSize * 2f));
-                                                      */
-        }
+                       
+        }*/
         foodSimDataCBuffer.SetData(foodSimDataArray); // send data to GPU for Rendering
         
         for (int i = 0; i < predatorSimDataArray.Length; i++) {

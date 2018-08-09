@@ -234,7 +234,7 @@ public class CritterMouthComponent : MonoBehaviour {
 
     private void SwallowAnimalWhole(Agent preyAgent) {
         //Debug.Log("SwallowAnimalWhole");
-        preyAgent.curLifeStage = Agent.AgentLifeStage.SwallowedWhole;
+        preyAgent.curLifeStage = Agent.AgentLifeStage.Dead;
         // Credit food:
         float flow = preyAgent.growthPercentage * preyAgent.coreModule.coreWidth * preyAgent.coreModule.coreLength + preyAgent.coreModule.stomachContents;
         agentRef.EatFood(flow * 1f); // assumes all foodAmounts are equal !! *****    

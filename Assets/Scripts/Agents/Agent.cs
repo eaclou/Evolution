@@ -33,8 +33,7 @@ public class Agent : MonoBehaviour {
         Egg,
         Young,
         Mature,
-        Decaying,
-        SwallowedWhole,
+        Dead,
         Null
     }
     private int gestationDurationTimeSteps = 60;
@@ -62,7 +61,7 @@ public class Agent : MonoBehaviour {
         }
     }
     public int maxAgeTimeSteps = 3600;
-    private int decayDurationTimeSteps = 120;
+    private int decayDurationTimeSteps = 360;
     public int _DecayDurationTimeSteps
     {
         get
@@ -95,8 +94,10 @@ public class Agent : MonoBehaviour {
     //public TestModule testModule;
     public CritterModuleCore coreModule;
     public CritterModuleMovement movementModule;
-
     public CritterMouthComponent mouthRef;
+
+    private CapsuleCollider2D colliderBody;
+    private SpringJoint2D springJoint;
 
     //private Rigidbody2D rigidBody2D; // ** segments???
 
@@ -386,7 +387,7 @@ public class Agent : MonoBehaviour {
     private void CheckForDeathStarvation() {
         // STARVATION::
         if (coreModule.energyRaw <= 0f) {
-            curLifeStage = AgentLifeStage.Decaying;
+            curLifeStage = AgentLifeStage.Dead;
             lifeStageTransitionTimeStepCounter = 0;
         }
     }
@@ -394,20 +395,20 @@ public class Agent : MonoBehaviour {
         // HEALTH FAILURE:
         if (coreModule.healthHead <= 0f) {
 
-            curLifeStage = Agent.AgentLifeStage.Decaying;
+            curLifeStage = Agent.AgentLifeStage.Dead;
             lifeStageTransitionTimeStepCounter = 0;
             wasImpaled = true;
         }
         if (coreModule.healthBody <= 0f) {
 
-            curLifeStage = Agent.AgentLifeStage.Decaying;
+            curLifeStage = Agent.AgentLifeStage.Dead;
             lifeStageTransitionTimeStepCounter = 0;
             wasImpaled = true;
         }
     }
     private void CheckForDeathOldAge() {
         if(ageCounterMature > maxAgeTimeSteps) {
-            curLifeStage = Agent.AgentLifeStage.Decaying;
+            curLifeStage = Agent.AgentLifeStage.Dead;
             lifeStageTransitionTimeStepCounter = 0;
 
             //Debug.Log("Died of old age!");
@@ -447,7 +448,7 @@ public class Agent : MonoBehaviour {
                 CheckForDeathOldAge();
                 
                 break;
-            case AgentLifeStage.Decaying:
+            case AgentLifeStage.Dead:
                 //
                 if(lifeStageTransitionTimeStepCounter >= decayDurationTimeSteps) {
                     curLifeStage = AgentLifeStage.Null;
@@ -456,13 +457,13 @@ public class Agent : MonoBehaviour {
                     isNull = true;  // flagged for respawn
                 }
                 break;
-            case AgentLifeStage.SwallowedWhole:
+            /*case AgentLifeStage.SwallowedWhole:
                 //
                 curLifeStage = AgentLifeStage.Null;
                 //Debug.Log("AGENT NO LONGER EXISTS!");
                 lifeStageTransitionTimeStepCounter = 0;
                 isNull = true;  // flagged for respawn
-                break;
+                break;*/
             case AgentLifeStage.Null:
                 //
                 if(humanControlled) {
@@ -532,9 +533,9 @@ public class Agent : MonoBehaviour {
                 //
                 TickMature(simManager, nutrientCellInfo, ref eatAmountsArray, settings);
                 break;
-            case AgentLifeStage.Decaying:
+            case AgentLifeStage.Dead:
                 //
-                TickDecaying();
+                TickDead();
                 break;
             case AgentLifeStage.Null:
                 //
@@ -579,7 +580,7 @@ public class Agent : MonoBehaviour {
                 if(curLifeStage == AgentLifeStage.Egg) {
                     displayFoodAmount = (float)lifeStageTransitionTimeStepCounter / (float)gestationDurationTimeSteps;
                 }
-                if(curLifeStage == AgentLifeStage.Decaying || curLifeStage == AgentLifeStage.Null) {
+                if(curLifeStage == AgentLifeStage.Dead || curLifeStage == AgentLifeStage.Null) {
                     displayFoodAmount = 0f;
                 }
                 textureHealth.SetPixel(0, 0, new Color(coreModule.hitPoints[0], coreModule.hitPoints[0], coreModule.hitPoints[0]));
@@ -638,7 +639,7 @@ public class Agent : MonoBehaviour {
         ageCounterMature++;
         scoreCounter++;
     }
-    private void TickDecaying() {
+    private void TickDead() {
         lifeStageTransitionTimeStepCounter++;
     }
 
@@ -798,7 +799,7 @@ public class Agent : MonoBehaviour {
 
         eatAmountsArray[index].x = 0f;
 
-        if(curLifeStage == AgentLifeStage.Decaying || curLifeStage == AgentLifeStage.Egg) {
+        if(curLifeStage == AgentLifeStage.Dead || curLifeStage == AgentLifeStage.Egg) {
             throttle = Vector2.zero;
             smoothedThrottle = Vector2.zero;
         }
@@ -1028,9 +1029,17 @@ public class Agent : MonoBehaviour {
             bodyGO = bodySegmentGO;
             bodyCritterSegment = bodySegmentGO.AddComponent<CritterSegment>();
             bodyRigidbody = bodySegmentGO.AddComponent<Rigidbody2D>();
-            CapsuleCollider2D bodyCollider = bodyGO.AddComponent<CapsuleCollider2D>(); // change this to Capsule Later -- upgrade!!!!
-            bodyCritterSegment.segmentCollider = bodyCollider;
+            colliderBody = bodyGO.AddComponent<CapsuleCollider2D>();
+            //this.colliderBody = bodyCollider;
+            bodyCritterSegment.segmentCollider = colliderBody;
             bodyRigidbody.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+
+            springJoint = bodyGO.AddComponent<SpringJoint2D>();
+            springJoint.enabled = false;
+            springJoint.autoConfigureDistance = false;
+            springJoint.distance = 0f;
+            springJoint.dampingRatio = 0.1f;
+            springJoint.frequency = 1f;
 
             GameObject testMouthGO = new GameObject("Mouth");
             testMouthGO.transform.parent = bodyGO.transform;
