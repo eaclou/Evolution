@@ -10,14 +10,15 @@ public class CritterMouthComponent : MonoBehaviour {
 
     public bool isBiting = false;
     public int bitingFrameCounter = 0;
-    public int biteCooldown = 100;
+    //public int biteCooldown = 100;
     
     public Vector2 mouthSize;  // relative to head size?
     public Vector2 biteZoneDimensions;
     public float biteZoneOffset;
     //public float mouthOffset;  // also relative?
-    public int biteChargeUpDuration = 12;
-    public int biteCooldownDuration = 48;
+    public int biteHalfCycleDuration = 12;
+    //public int biteResetDuration = 12;
+    public int biteCooldownDuration = 36;
     public float biteStrength;
     public float biteSharpness;
         
@@ -36,102 +37,6 @@ public class CritterMouthComponent : MonoBehaviour {
 	void Update () {
 		
 	}
-
-    /*public void Bite() {
-        // BITING:
-        // *** TEMP: ***
-        // RESET trigger flags before OnTriggerEnter2D runs later in frame: must do this AFTER checking for it from previous frame
-        if(coreModule.mouthRef.foodInRange) {
-            Debug.Log("foodInRange agent: " + index.ToString());
-
-            // Initiate BITE!
-            if(coreModule.mouthRef.isBiting) {
-                
-            }
-            else {
-                coreModule.mouthRef.isBiting = true;
-
-                // ACTUALLY BITE:
-                coreModule.mouthRef.Bite();
-            }
-            
-            // RESET FOR NEXT FRAME:
-            coreModule.mouthRef.foodInRange = false;
-        }
-        else {
-            
-        }
-
-        if(coreModule.mouthRef.isBiting) {
-            // in cooldown
-            coreModule.mouthRef.bitingFrameCounter++;
-
-            if(coreModule.mouthRef.bitingFrameCounter >= coreModule.mouthRef.biteCooldown) {
-                coreModule.mouthRef.bitingFrameCounter = 0;
-                coreModule.mouthRef.isBiting = false;
-            }
-        }
-    }
-    private void BiteFood(FoodModule foodModule) {
-        
-        if (isBiting) {
-            // animation playing:
-            if(bitingFrameCounter == biteChargeUpDuration) {
-                // BITE!!
-            }
-        }
-        else { // Not in Cooldown!
-
-            //Debug.Log("BiteFood");
-            // CONSUME FOOD!
-            float flow = 0.4f; // / colliderCount;
-
-            float flowR = Mathf.Min(foodModule.amountR, flow);
-            //collidingAgent.testModule.foodAmountR[0] += flowR * 2f;  // make sure Agent doesn't receive food from empty dispenser
-
-            agentRef.EatFood(flowR * 1f); // assumes all foodAmounts are equal !! *****
-    
-            foodModule.amountR -= flowR;
-            if (foodModule.amountR < 0f) {
-                foodModule.amountR = 0f;
-            }
-            float flowG = Mathf.Min(foodModule.amountG, flow);
-            foodModule.amountG -= flowG;
-            if (foodModule.amountG < 0f) {
-                foodModule.amountG = 0f;
-            }
-            float flowB = Mathf.Min(foodModule.amountB, flow);
-            foodModule.amountB -= flowB;
-            if (foodModule.amountB < 0f) {
-                foodModule.amountB = 0f;
-            }
-
-            //SET:
-            isBiting = true;
-        }
-    }
-    private void BiteAnimal(CritterSegment segment) {
-        float baseDamage = 0.4f;
-
-        float mouthSize = triggerCollider.radius * triggerCollider.radius;
-        float targetSize = segment.agentRef.growthPercentage * segment.agentRef.coreModule.coreLength * segment.agentRef.coreModule.coreWidth;
-
-        float sizeRatio = mouthSize / targetSize; // for now clamped to 10x
-
-        float damage = baseDamage * sizeRatio;
-        damage = Mathf.Clamp(damage, 0.01f, 10f);
-
-        //Debug.Log("BiteAnimal! ownSize: " + mouthSize.ToString() + ", targetSize: " + targetSize.ToString() + ", sizeRatio: " + damage.ToString());
-
-        segment.agentRef.coreModule.hitPoints[0] -= damage;
-        // currently no distinctionbetween regions:
-        segment.agentRef.coreModule.healthHead -= damage;
-        segment.agentRef.coreModule.healthBody -= damage;
-        segment.agentRef.coreModule.healthExternal -= damage;
-
-    }
-
-    */
 
     public void InitiateActiveBite() {
         if (isBiting) {
@@ -158,7 +63,7 @@ public class CritterMouthComponent : MonoBehaviour {
                 if(agentRef.speciesIndex != collidingSegment.agentRef.speciesIndex) {
                     // ANIMAL:
                     // Compare sizes:
-                    targetArea = collidingSegment.agentRef.growthPercentage * collidingSegment.agentRef.coreModule.coreWidth * collidingSegment.agentRef.coreModule.coreLength;
+                    targetArea = collidingSegment.agentRef.coreModule.currentBodySize.x * collidingSegment.agentRef.coreModule.currentBodySize.y;
                     //targetArea = 0.2f; // TEMP TEST!! ***
                     if(ownBiteArea > targetArea) {
                         // Swallow!:::
@@ -166,7 +71,14 @@ public class CritterMouthComponent : MonoBehaviour {
                     }
                     else {
                         // Toothy Attack Bite GO!!!
-                        BiteDamageAnimal(collidingSegment.agentRef, ownBiteArea, targetArea);        
+                        if(collidingSegment.agentRef.curLifeStage == Agent.AgentLifeStage.Dead)
+                        {
+                            BiteCorpseFood(collidingSegment.agentRef, ownBiteArea, targetArea);
+                        }
+                        else
+                        {
+                            BiteDamageAnimal(collidingSegment.agentRef, ownBiteArea, targetArea);
+                        }                               
                     }
                 }                
             }
@@ -291,6 +203,40 @@ public class CritterMouthComponent : MonoBehaviour {
             foodModule.amountB = 0f;
         }*/
     }
+    private void BiteCorpseFood(Agent corpseAgent, float ownBiteArea, float targetArea)
+    {
+        float flow = ownBiteArea * 2f; // / colliderCount;
+
+        float flowR = Mathf.Min(corpseAgent.corpseFoodAmount, flow);
+        //collidingAgent.testModule.foodAmountR[0] += flowR * 2f;  // make sure Agent doesn't receive food from empty dispenser
+
+        agentRef.EatFood(flowR * 1f); // assumes all foodAmounts are equal !! *****
+
+        corpseAgent.corpseFoodAmount -= flowR;
+        if (corpseAgent.corpseFoodAmount < 0f)
+        {
+            corpseAgent.corpseFoodAmount = 0f;
+        }
+        else
+        {
+            float sidesRatio = corpseAgent.coreModule.coreWidth / corpseAgent.coreModule.coreLength;
+            float sideY = Mathf.Sqrt(corpseAgent.corpseFoodAmount / sidesRatio);
+            float sideX = sideY * sidesRatio;
+            //curSize = new Vector3(sideX, sideY);
+            //transform.localScale = new Vector3(curSize.x, curSize.y, 1f);
+
+            corpseAgent.coreModule.currentBodySize = new Vector2(sideX, sideY);
+
+            corpseAgent.bodyCritterSegment.GetComponent<CapsuleCollider2D>().size = corpseAgent.coreModule.currentBodySize;
+
+            // MOUTH:
+            corpseAgent.mouthRef.triggerCollider.radius = corpseAgent.coreModule.currentBodySize.x * 0.5f;
+            corpseAgent.mouthRef.triggerCollider.offset = new Vector2(0f, corpseAgent.coreModule.currentBodySize.y * 0.5f);
+        }
+
+
+        
+    }
 
     private void TriggerCheck(Collider2D collider) {
         if(isPassive) {
@@ -299,7 +245,7 @@ public class CritterMouthComponent : MonoBehaviour {
         else {  // Active Bite Animation:
             // TEMP!!!
             if(isBiting) {
-                if(bitingFrameCounter == biteChargeUpDuration) {  // is the current frame the Damage-Frame?
+                if(bitingFrameCounter == biteHalfCycleDuration) {  // is the current frame the Damage-Frame?
                     // if so, BITE!!
                     ActiveBiteCheck(collider);                
                 }
@@ -320,4 +266,103 @@ public class CritterMouthComponent : MonoBehaviour {
     private void OnTriggerStay2D(Collider2D collider) {
         TriggerCheck(collider);       
     }
+
+
+
+    /*public void Bite() {
+        // BITING:
+        // *** TEMP: ***
+        // RESET trigger flags before OnTriggerEnter2D runs later in frame: must do this AFTER checking for it from previous frame
+        if(coreModule.mouthRef.foodInRange) {
+            Debug.Log("foodInRange agent: " + index.ToString());
+
+            // Initiate BITE!
+            if(coreModule.mouthRef.isBiting) {
+                
+            }
+            else {
+                coreModule.mouthRef.isBiting = true;
+
+                // ACTUALLY BITE:
+                coreModule.mouthRef.Bite();
+            }
+            
+            // RESET FOR NEXT FRAME:
+            coreModule.mouthRef.foodInRange = false;
+        }
+        else {
+            
+        }
+
+        if(coreModule.mouthRef.isBiting) {
+            // in cooldown
+            coreModule.mouthRef.bitingFrameCounter++;
+
+            if(coreModule.mouthRef.bitingFrameCounter >= coreModule.mouthRef.biteCooldown) {
+                coreModule.mouthRef.bitingFrameCounter = 0;
+                coreModule.mouthRef.isBiting = false;
+            }
+        }
+    }
+    private void BiteFood(FoodModule foodModule) {
+        
+        if (isBiting) {
+            // animation playing:
+            if(bitingFrameCounter == biteChargeUpDuration) {
+                // BITE!!
+            }
+        }
+        else { // Not in Cooldown!
+
+            //Debug.Log("BiteFood");
+            // CONSUME FOOD!
+            float flow = 0.4f; // / colliderCount;
+
+            float flowR = Mathf.Min(foodModule.amountR, flow);
+            //collidingAgent.testModule.foodAmountR[0] += flowR * 2f;  // make sure Agent doesn't receive food from empty dispenser
+
+            agentRef.EatFood(flowR * 1f); // assumes all foodAmounts are equal !! *****
+    
+            foodModule.amountR -= flowR;
+            if (foodModule.amountR < 0f) {
+                foodModule.amountR = 0f;
+            }
+            float flowG = Mathf.Min(foodModule.amountG, flow);
+            foodModule.amountG -= flowG;
+            if (foodModule.amountG < 0f) {
+                foodModule.amountG = 0f;
+            }
+            float flowB = Mathf.Min(foodModule.amountB, flow);
+            foodModule.amountB -= flowB;
+            if (foodModule.amountB < 0f) {
+                foodModule.amountB = 0f;
+            }
+
+            //SET:
+            isBiting = true;
+        }
+    }
+    private void BiteAnimal(CritterSegment segment) {
+        float baseDamage = 0.4f;
+
+        float mouthSize = triggerCollider.radius * triggerCollider.radius;
+        float targetSize = segment.agentRef.growthPercentage * segment.agentRef.coreModule.coreLength * segment.agentRef.coreModule.coreWidth;
+
+        float sizeRatio = mouthSize / targetSize; // for now clamped to 10x
+
+        float damage = baseDamage * sizeRatio;
+        damage = Mathf.Clamp(damage, 0.01f, 10f);
+
+        //Debug.Log("BiteAnimal! ownSize: " + mouthSize.ToString() + ", targetSize: " + targetSize.ToString() + ", sizeRatio: " + damage.ToString());
+
+        segment.agentRef.coreModule.hitPoints[0] -= damage;
+        // currently no distinctionbetween regions:
+        segment.agentRef.coreModule.healthHead -= damage;
+        segment.agentRef.coreModule.healthBody -= damage;
+        segment.agentRef.coreModule.healthExternal -= damage;
+
+    }
+
+    */
+
 }

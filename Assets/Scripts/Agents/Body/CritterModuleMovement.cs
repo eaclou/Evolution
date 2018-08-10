@@ -20,7 +20,7 @@ public class CritterModuleMovement {
     public float[] throttleY;
     public float[] dash;
 
-    public float smallestCreatureBaseSpeed = 100f;
+    public float smallestCreatureBaseSpeed = 36f;
     public float largestCreatureBaseSpeed = 180f;
 	
     public CritterModuleMovement() {

@@ -129,6 +129,8 @@ public class Agent : MonoBehaviour {
     public int lifeStageTransitionTimeStepCounter = 0; // keeps track of how long agent has been in its current lifeStage
     public int scoreCounter = 0;
 
+    public float corpseFoodAmount = 1f;
+
     private Vector3 prevPos;
     public Vector3 _PrevPos
     {
@@ -364,11 +366,15 @@ public class Agent : MonoBehaviour {
             //mouthRef.triggerCollider.radius = mouthRef.mouthDimensionsBite.x; // update to capsule later!! ****
             //mouthRef.triggerCollider.offset = new Vector2(0f, mouthRef.mouthOffsetBite);
 
-            if(mouthRef.bitingFrameCounter >= mouthRef.biteChargeUpDuration + mouthRef.biteCooldownDuration) {
+            if(mouthRef.bitingFrameCounter >= mouthRef.biteHalfCycleDuration * 2 + mouthRef.biteCooldownDuration) {
                 mouthRef.bitingFrameCounter = 0;
                 mouthRef.isBiting = false;
                 //mouthRef.triggerCollider.enabled = false;
             }
+        }
+        else
+        {
+            mouthRef.bitingFrameCounter = 0;
         }
 
         //testModule.Tick(humanControlled); // old
@@ -389,6 +395,8 @@ public class Agent : MonoBehaviour {
         if (coreModule.energyRaw <= 0f) {
             curLifeStage = AgentLifeStage.Dead;
             lifeStageTransitionTimeStepCounter = 0;
+
+            InitializeCorpseAsFood();
         }
     }
     private void CheckForDeathHealth() {
@@ -398,12 +406,16 @@ public class Agent : MonoBehaviour {
             curLifeStage = Agent.AgentLifeStage.Dead;
             lifeStageTransitionTimeStepCounter = 0;
             wasImpaled = true;
+
+            InitializeCorpseAsFood();
         }
         if (coreModule.healthBody <= 0f) {
 
             curLifeStage = Agent.AgentLifeStage.Dead;
             lifeStageTransitionTimeStepCounter = 0;
             wasImpaled = true;
+
+            InitializeCorpseAsFood();
         }
     }
     private void CheckForDeathOldAge() {
@@ -412,7 +424,13 @@ public class Agent : MonoBehaviour {
             lifeStageTransitionTimeStepCounter = 0;
 
             //Debug.Log("Died of old age!");
+            InitializeCorpseAsFood();
         }
+    }
+    private void InitializeCorpseAsFood()
+    {
+        corpseFoodAmount = coreModule.currentBodySize.x * coreModule.currentBodySize.y;
+        //Debug.Log("new corpse food! " + corpseFoodAmount.ToString());
     }
     private void CheckForLifeStageTransition() {
         switch(curLifeStage) {
@@ -641,6 +659,14 @@ public class Agent : MonoBehaviour {
     }
     private void TickDead() {
         lifeStageTransitionTimeStepCounter++;
+
+        if(corpseFoodAmount <= 0f)
+        {
+            curLifeStage = AgentLifeStage.Null;
+            //Debug.Log("AGENT NO LONGER EXISTS!");
+            lifeStageTransitionTimeStepCounter = 0;
+            isNull = true;  // flagged for respawn
+        }
     }
 
     private void ScaleBody(float growthPercentage) {
@@ -846,10 +872,27 @@ public class Agent : MonoBehaviour {
             }
             else {
                 if(coreModule.mouthEffector[0] > 0f) {
-                    mouthRef.InitiateActiveBite();
-                    //coreModule.mouth
+                    if(!humanControlled)
+                    {
+                        mouthRef.InitiateActiveBite();
+                    }
                 }
-            }                        
+            }
+
+            if (humanControlled)
+            {
+                if (mouthRef.isPassive) {
+
+                }
+                else
+                {
+                    if (Input.GetKey("space") || Input.GetKey("e"))
+                    {
+                        mouthRef.InitiateActiveBite();
+                        //Debug.Log("BITE!");
+                    }
+                } 
+            }
         }
         coreModule.debugFoodValue = nutrientCellInfo.x;
 
@@ -958,7 +1001,7 @@ public class Agent : MonoBehaviour {
 
         movementModule = new CritterModuleMovement();
         movementModule.Initialize(genome.bodyGenome.movementGenome);
-
+                
         agentWidthsArray = new float[widthsTexResolution];
     }
 
@@ -1106,6 +1149,7 @@ public class Agent : MonoBehaviour {
         throttle = Vector2.zero;
         smoothedThrottle = new Vector2(0f, 0.01f);
         //prevPos = transform.localPosition;
+
     }
 
 

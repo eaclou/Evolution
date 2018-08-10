@@ -45,7 +45,7 @@ public class CritterModuleCoreGenome {
         // Do stuff:
         //Debug.Log("GenerateRandomGenome()");
 
-        isPassive = true;
+        isPassive = false;
 
         numSegments = 1;
         fullBodyWidth = UnityEngine.Random.Range(0.1f, 0.5f);

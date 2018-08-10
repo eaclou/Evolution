@@ -46,7 +46,7 @@ public class SimulationStateData {
         public float accel;
 		public float smoothedThrottle;
     }
-    public struct DebugBodyResourcesData {
+    /*public struct DebugBodyResourcesData {
         public float developmentPercentage;
         public float health;
         public float energy;
@@ -56,7 +56,7 @@ public class SimulationStateData {
         public float mouthOffset;
         public float isBiting;
         public float isDamageFrame;        
-    }
+    }*/
     public struct AgentMovementAnimData {
         public float animCycle;
         public float turnAmount;
@@ -112,7 +112,7 @@ public class SimulationStateData {
     public AgentSimData[] agentSimDataArray;
     public CritterInitData[] critterInitDataArray;
     public CritterSimData[] critterSimDataArray;
-    public DebugBodyResourcesData[] debugBodyResourcesArray;
+    //public DebugBodyResourcesData[] debugBodyResourcesArray;
     public AgentMovementAnimData[] agentMovementAnimDataArray;
     public FoodSimData[] foodSimDataArray;
     public PredatorSimData[] predatorSimDataArray;
@@ -161,13 +161,13 @@ public class SimulationStateData {
             critterSimDataArray[i] = new CritterSimData();
         }
         critterSimDataCBuffer = new ComputeBuffer(critterSimDataArray.Length, sizeof(float) * 20);
-
+        /*
         debugBodyResourcesArray = new DebugBodyResourcesData[simManager._NumAgents];
         for(int i = 0; i < debugBodyResourcesArray.Length; i++) {
             debugBodyResourcesArray[i] = new DebugBodyResourcesData();
         }
         debugBodyResourcesCBuffer = new ComputeBuffer(debugBodyResourcesArray.Length, sizeof(float) * 10);
-
+        */
         agentMovementAnimDataArray = new AgentMovementAnimData[simManager._NumAgents];
         for(int i = 0; i < agentMovementAnimDataArray.Length; i++) {
             agentMovementAnimDataArray[i] = new AgentMovementAnimData();
@@ -234,7 +234,7 @@ public class SimulationStateData {
             agentSimDataArray[i].decay = decay;            
             if(simManager.agentsArray[i].mouthRef.isBiting) {
                 agentSimDataArray[i].eatingStatus = (float)simManager.agentsArray[i].mouthRef.bitingFrameCounter /
-                                                    ((float)simManager.agentsArray[i].mouthRef.biteChargeUpDuration + (float)simManager.agentsArray[i].mouthRef.biteCooldownDuration);
+                                                    ((float)simManager.agentsArray[i].mouthRef.biteHalfCycleDuration + (float)simManager.agentsArray[i].mouthRef.biteCooldownDuration);
                 // (agentSimDataArray[i].eatingStatus + 0.11f) % 1.0f;  // cycle around 0-1
                 agentSimDataArray[i].eatingStatus = Mathf.Pow(agentSimDataArray[i].eatingStatus, 0.5f);
             }
@@ -304,19 +304,43 @@ public class SimulationStateData {
             }
             critterSimDataArray[i].decayPercentage = decay;
             critterSimDataArray[i].foodAmount = Mathf.Lerp(agentSimDataArray[i].foodAmount, simManager.agentsArray[i].coreModule.stomachContents / simManager.agentsArray[i].coreModule.stomachCapacity, 0.16f);
-            critterSimDataArray[i].energy = simManager.agentsArray[i].coreModule.energyRaw / simManager.agentsArray[i].coreModule.maxEnergyStorage;;
+            critterSimDataArray[i].energy = simManager.agentsArray[i].coreModule.energyRaw / simManager.agentsArray[i].coreModule.maxEnergyStorage;
             critterSimDataArray[i].health = simManager.agentsArray[i].coreModule.healthBody;
             critterSimDataArray[i].stamina = simManager.agentsArray[i].coreModule.stamina[0];
             critterSimDataArray[i].isBiting = 0f;
-            if(simManager.agentsArray[i].coreModule.mouthEffector[0] > 0.0f) {
-                critterSimDataArray[i].isBiting = 1f;
+            if(simManager.agentsArray[i].growthPercentage > 0.01f)
+            {
+                if (simManager.agentsArray[i].coreModule.mouthEffector[0] > 0.0f)
+                {
+                    if (simManager.agentsArray[i].mouthRef.isPassive)
+                    {
+                        critterSimDataArray[i].isBiting = 1f;
+                    }
+                    else
+                    {
+                        if (simManager.agentsArray[i].mouthRef.isBiting)
+                        {
+                            if (simManager.agentsArray[i].mouthRef.bitingFrameCounter <= simManager.agentsArray[i].mouthRef.biteHalfCycleDuration)
+                            {
+                                critterSimDataArray[i].isBiting = 1f;
+                            }
+                        }
+                    }
+                }
+                if (simManager.agentsArray[i].mouthRef.isBiting)
+                {
+                    if (simManager.agentsArray[i].mouthRef.isPassive)
+                    {
+
+                    }
+                    else
+                    {
+                        critterSimDataArray[i].biteAnimCycle = Mathf.Clamp01((float)simManager.agentsArray[i].mouthRef.bitingFrameCounter / (float)(simManager.agentsArray[i].mouthRef.biteHalfCycleDuration * 2));
+
+                    }
+                }
             }
-            if(simManager.agentsArray[i].mouthRef.isBiting) {                
-                critterSimDataArray[i].biteAnimCycle = (float)simManager.agentsArray[i].mouthRef.bitingFrameCounter /
-                                                    ((float)simManager.agentsArray[i].mouthRef.biteChargeUpDuration + (float)simManager.agentsArray[i].mouthRef.biteCooldownDuration);
-                // (agentSimDataArray[i].eatingStatus + 0.11f) % 1.0f;  // cycle around 0-1
-                critterSimDataArray[i].biteAnimCycle = Mathf.Pow(critterSimDataArray[i].biteAnimCycle, 0.5f);
-            }
+            
             critterSimDataArray[i].moveAnimCycle = simManager.agentsArray[i].animationCycle;
             critterSimDataArray[i].turnAmount = simManager.agentsArray[i].turningAmount;
             critterSimDataArray[i].accel += Mathf.Clamp01(simManager.agentsArray[i].curAccel) * 1f; // ** RE-FACTOR!!!!
@@ -324,7 +348,7 @@ public class SimulationStateData {
         }
         critterSimDataCBuffer.SetData(critterSimDataArray);
 
-        for(int i = 0; i < debugBodyResourcesArray.Length; i++) {  
+        /*for(int i = 0; i < debugBodyResourcesArray.Length; i++) {  
             
             debugBodyResourcesArray[i].developmentPercentage = simManager.agentsArray[i].growthPercentage;
             debugBodyResourcesArray[i].energy = simManager.agentsArray[i].coreModule.energyRaw / simManager.agentsArray[i].coreModule.maxEnergyStorage; // *** max energy storage?? ****
@@ -333,7 +357,7 @@ public class SimulationStateData {
             if (simManager.agentsArray[i].mouthRef.isBiting)
                 biting = 1f;
             float damageFrame = 0f;
-            if (simManager.agentsArray[i].mouthRef.bitingFrameCounter == simManager.agentsArray[i].mouthRef.biteChargeUpDuration)
+            if (simManager.agentsArray[i].mouthRef.bitingFrameCounter == simManager.agentsArray[i].mouthRef.biteHalfCycleDuration)
                 damageFrame = 1f;
             debugBodyResourcesArray[i].isBiting = biting;
             debugBodyResourcesArray[i].isDamageFrame = damageFrame;
@@ -343,6 +367,7 @@ public class SimulationStateData {
             debugBodyResourcesArray[i].stomachContents = simManager.agentsArray[i].coreModule.stomachContents / simManager.agentsArray[i].coreModule.stomachCapacity;
         }
         debugBodyResourcesCBuffer.SetData(debugBodyResourcesArray); // send data to GPU for Rendering
+        */
 
         // Movement Animation Test:
         for(int i = 0; i < agentMovementAnimDataArray.Length; i++) {            

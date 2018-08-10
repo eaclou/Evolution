@@ -36,7 +36,7 @@ public class GameOptionsManager : MonoBehaviour {
         // Set Defaults:  ** CHANGE LATER WHEN SUPPORTING PERSISTENT OPTIONS!! ***
         gameOptions.fluidPhysicsQuality = 1;
         dropdownFluidPhysicsQuality.value = gameOptions.fluidPhysicsQuality;
-        gameOptions.simulationComplexity = 1; 
+        gameOptions.simulationComplexity = 2; 
         dropdownSimulationComplexity.value = gameOptions.simulationComplexity;
                 
                 

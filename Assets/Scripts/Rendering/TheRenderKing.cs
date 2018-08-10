@@ -1843,7 +1843,21 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, baronVonWater.waterSurfaceBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterSurfaceBitsCBuffer.count);
 
 
-        
+
+        if(isDebugRenderOn) {
+            
+            
+            debugAgentResourcesMat.SetPass(0);
+            debugAgentResourcesMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+            debugAgentResourcesMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
+            debugAgentResourcesMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
+            //debugAgentResourcesMat.SetBuffer("debugAgentResourcesCBuffer", simManager.simStateData.debugBodyResourcesCBuffer);
+            //debugAgentResourcesMat.SetBuffer("agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
+            cmdBufferTest.DrawProcedural(Matrix4x4.identity, debugAgentResourcesMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.critterInitDataCBuffer.count);
+            
+
+        }
+
 
         /*
         baronVonWater.waterQuadStrokesLrgDisplayMat.SetPass(0);
@@ -1862,7 +1876,7 @@ public class TheRenderKing : MonoBehaviour {
         //cmdBufferTest.DrawProcedural(Matrix4x4.identity, baronVonWater.waterQuadStrokesLrgDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterQuadStrokesCBufferLrg.count);
         */
         // Detail brushes:
-        
+
 
         /*
         // FLOATY BITS!

@@ -259,7 +259,7 @@ void CSRespawnFoodParticles (uint3 id : SV_DispatchThreadID)
 					
 		foodParticlesWrite[id.x].worldPos = swallowedPos;
 
-		foodParticlesWrite[id.x].digestedAmount = saturate(foodParticle.digestedAmount + 0.01);
+		foodParticlesWrite[id.x].digestedAmount = saturate(foodParticle.digestedAmount + 0.0075);
 	}
 	
 	
