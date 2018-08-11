@@ -84,7 +84,7 @@
 				float3 critterCurScale = critterInitData.boundingBoxSize * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage) * 0.5;
 				//float2 curAgentSize = critterInitData.boundingBoxSize * growthScale;
 				
-				float3 spriteLocalPos = float3(eyeData.localPos.x, eyeData.localPos.y * 1, -0.25) * critterCurScale;
+				float3 spriteLocalPos = float3(eyeData.localPos.x, eyeData.localPos.y * 1, -0.5) * critterCurScale;
 				float3 vertexWorldOffset = quadVerticesCBuffer[id];
 
 				

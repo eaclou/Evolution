@@ -61,7 +61,7 @@ public class Agent : MonoBehaviour {
         }
     }
     public int maxAgeTimeSteps = 3600;
-    private int decayDurationTimeSteps = 360;
+    private int decayDurationTimeSteps = 600;
     public int _DecayDurationTimeSteps
     {
         get
@@ -96,8 +96,8 @@ public class Agent : MonoBehaviour {
     public CritterModuleMovement movementModule;
     public CritterMouthComponent mouthRef;
 
-    private CapsuleCollider2D colliderBody;
-    private SpringJoint2D springJoint;
+    public CapsuleCollider2D colliderBody;
+    public SpringJoint2D springJoint;
 
     //private Rigidbody2D rigidBody2D; // ** segments???
 
@@ -155,6 +155,14 @@ public class Agent : MonoBehaviour {
     public float avgFluidVel;
 
     public int speciesIndex = -1;
+
+    public bool isSwallowingPrey = false;
+    public bool isBeingSwallowed = false;
+    public int beingSwallowedFrameCounter = 0;
+    public int swallowingPreyFrameCounter = 0;
+    public int swallowDuration = 60;
+    public Agent predatorAgentRef;
+    public Agent preyAgentRef;
     
     // Use this for initialization
     private void Awake() {
@@ -162,6 +170,19 @@ public class Agent : MonoBehaviour {
     }
     void Start() { // *** MOVE THIS TO BETTER SPOT! ***
                     
+    }
+
+    public void InitiateBeingSwallowed(Agent predatorAgent)
+    {
+        isBeingSwallowed = true;
+        beingSwallowedFrameCounter = 0;
+        predatorAgentRef = predatorAgent;
+    }
+    public void InitiateSwallowingPrey(Agent preyAgent)
+    {
+        isSwallowingPrey = true;
+        swallowingPreyFrameCounter = 0;
+        preyAgentRef = preyAgent;
     }
 
     private int GetNumInputs() {
@@ -407,6 +428,10 @@ public class Agent : MonoBehaviour {
             lifeStageTransitionTimeStepCounter = 0;
             wasImpaled = true;
 
+            coreModule.healthHead = 0f;
+            coreModule.healthBody = 0f;
+            coreModule.healthExternal = 0f;
+
             InitializeCorpseAsFood();
         }
         if (coreModule.healthBody <= 0f) {
@@ -414,6 +439,10 @@ public class Agent : MonoBehaviour {
             curLifeStage = Agent.AgentLifeStage.Dead;
             lifeStageTransitionTimeStepCounter = 0;
             wasImpaled = true;
+
+            coreModule.healthHead = 0f;
+            coreModule.healthBody = 0f;
+            coreModule.healthExternal = 0f;
 
             InitializeCorpseAsFood();
         }
@@ -534,6 +563,54 @@ public class Agent : MonoBehaviour {
     }
 
     public void Tick(SimulationManager simManager, Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray, SettingsManager settings) {
+
+        if(isSwallowingPrey)
+        {
+            swallowingPreyFrameCounter++;
+
+            if (swallowingPreyFrameCounter >= swallowDuration)
+            {
+                Debug.Log("isSwallowingPrey + swallow Complete!");
+
+                swallowingPreyFrameCounter = 0;
+                isSwallowingPrey = false;
+
+                springJoint.enabled = false;
+                springJoint.connectedBody = null;
+            }
+            else
+            {
+
+                
+            }
+        }
+
+        if(isBeingSwallowed)
+        {
+            beingSwallowedFrameCounter++;
+
+            if(beingSwallowedFrameCounter >= swallowDuration)
+            {
+                Debug.Log("isBeingSwallowed + swallow Complete!");
+
+                curLifeStage = AgentLifeStage.Null;
+                lifeStageTransitionTimeStepCounter = 0;
+                isNull = true;  // flagged for respawn
+
+                beingSwallowedFrameCounter = 0;
+                isBeingSwallowed = false;
+
+                colliderBody.enabled = true;
+            }
+            else
+            {
+                float scale = (float)beingSwallowedFrameCounter / (float)swallowDuration;
+
+                ScaleBody((1.0f - scale) * 0.9f);
+            }
+        }
+        
+
         // Any external inputs updated by simManager just before this
 
         // Check for StateChange:
@@ -659,7 +736,7 @@ public class Agent : MonoBehaviour {
     }
     private void TickDead() {
         lifeStageTransitionTimeStepCounter++;
-
+        /*
         if(corpseFoodAmount <= 0f)
         {
             curLifeStage = AgentLifeStage.Null;
@@ -667,6 +744,7 @@ public class Agent : MonoBehaviour {
             lifeStageTransitionTimeStepCounter = 0;
             isNull = true;  // flagged for respawn
         }
+        */
     }
 
     private void ScaleBody(float growthPercentage) {
@@ -945,7 +1023,7 @@ public class Agent : MonoBehaviour {
             //animationCycle = animationCycle % 1.0f;
 
             // get size in 0-1 range from minSize to maxSize:
-            float sizeValue = (coreModule.coreWidth - 0.1f) / 2.5f; // ** Hardcoded assuming size ranges from 0.1 --> 2.5 !!! ********
+            float sizeValue = Mathf.Clamp01((coreModule.coreWidth - 0.1f) / 2.5f); // ** Hardcoded assuming size ranges from 0.1 --> 2.5 !!! ********
             float swimSpeed = Mathf.Lerp(movementModule.smallestCreatureBaseSpeed, movementModule.largestCreatureBaseSpeed, sizeValue);
             speed = swimSpeed;
             // Forward Slide
@@ -957,8 +1035,11 @@ public class Agent : MonoBehaviour {
                 this.bodyRigidbody.AddForce(forwardThrustDir * (1f - turnSharpness * 0.25f) * swimSpeed * this.bodyRigidbody.mass * Time.deltaTime * developmentMultiplier, ForceMode2D.Impulse);
             }
 
+            // modify turning rate based on body proportions:
+            float turnRatePenalty = Mathf.Lerp(0.25f, 1f, 1f - sizeValue);
+
             // Head turn:
-            this.bodyRigidbody.AddTorque(Mathf.Lerp(headTurn, headTurnSign, 0.75f) * movementModule.turnRate * this.bodyRigidbody.mass * this.bodyRigidbody.mass * Time.deltaTime, ForceMode2D.Impulse);
+            this.bodyRigidbody.AddTorque(Mathf.Lerp(headTurn, headTurnSign, 0.75f) * turnRatePenalty * movementModule.turnRate * this.bodyRigidbody.mass * this.bodyRigidbody.mass * Time.deltaTime, ForceMode2D.Impulse);
             
             // OLD:::
             /*
@@ -1054,7 +1135,7 @@ public class Agent : MonoBehaviour {
 
             totalWidth += sampledWidth;
 
-            agentWidthsArray[j] = sampledWidth;
+            agentWidthsArray[j] = Mathf.Lerp(1f, sampledWidth, 0.5f); // sampledWidth;  *** 1f temporarily to test ***
         }
         float avgSegmentWidth = totalWidth / (float)widthsTexResolution;
 

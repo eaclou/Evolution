@@ -2,7 +2,8 @@
 {
 	Properties
 	{
-		_MainTex ("Main Texture", 2D) = "white" {}	
+		_MainTex ("Main Texture", 2D) = "white" {}		
+		_WaterSurfaceTex ("_WaterSurfaceTex", 2D) = "black" {}
 	}
 	SubShader
 	{		
@@ -23,22 +24,8 @@
 			#include "Assets/Resources/Shaders/Inc/CritterBodyAnimation.cginc"
 
 			sampler2D _MainTex;
+			sampler2D _WaterSurfaceTex;
 			
-			
-
-			struct AgentSimData {
-				float2 worldPos;
-				float2 velocity;
-				float2 heading;
-				float2 size;
-				float3 primaryHue;  // can eventually pull these static variables out of here to avoid per-frame updates on non-dynamic attributes
-				float3 secondaryHue;
-				float maturity;
-				float decay;
-				float eatingStatus;
-				float foodAmount;
-			};
-
 			StructuredBuffer<CritterInitData> critterInitDataCBuffer;
 			StructuredBuffer<CritterSimData> critterSimDataCBuffer;
 			StructuredBuffer<CritterSkinStrokeData> bodyStrokesCBuffer;
@@ -66,37 +53,46 @@
 				uint agentIndex = bodyStrokeData.parentIndex;
 				CritterInitData critterInitData = critterInitDataCBuffer[agentIndex];
 				CritterSimData critterSimData = critterSimDataCBuffer[agentIndex];
-
+				/*
 				float2 critterPosition = critterSimData.worldPos.xy;
 				float2 centerToVertexOffset = quadVerticesCBuffer[id];
 				
 				float growthScale = lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage);
 				float2 curAgentSize = critterInitData.boundingBoxSize * growthScale;
 
-				// spriteCenterPos!!! ::::  ===========================================================================
 				float2 centerPosition = bodyStrokeData.localPos * 0.7 * (critterSimData.foodAmount * 0.5 + 0.5);
 				centerPosition.y *= 0.6;
 				float v = centerPosition.y;
-				// foodBloat (normalized coords -1,1)
-				//centerPosition = foodBloatAnimPos(centerPosition, bodyStrokeData.localPos.y, critterSimData.foodAmount);
-				// biteAnim (normalized coords -1, 1)
-				//centerPosition = biteAnimPos(centerPosition, bodyStrokeData.localPos.y, critterSimData.biteAnimCycle);
-				// scale coords by agent size? does order of ops matter?
-				//centerPosition = centerPosition * curAgentSize * 0.5;
-				// swimAnim:
+				
 				float bodyAspectRatio = critterInitData.boundingBoxSize.y / critterInitData.boundingBoxSize.x;
 				float bendStrength = 0.5 * saturate(bodyAspectRatio * 0.5 - 0.4);
 				
-				//centerPosition = swimAnimPos(centerPosition, v, critterSimData.moveAnimCycle, critterSimData.accel, critterSimData.smoothedThrottle, bendStrength, critterSimData.turnAmount);
-				// rotate with agent:
-				//centerPosition = rotatePointVector(centerPosition, float2(0,0), critterSimData.heading);
-
-				// vertexOffsetFromSpriteCenter!!! :::: ===============================================================
 				centerToVertexOffset *= bodyStrokeData.localScale * (curAgentSize.x + curAgentSize.y) / 2.5 * critterSimData.foodAmount * (1.0 - critterSimData.decayPercentage);
-				//centerToVertexOffset = rotatePointVector(centerToVertexOffset, float2(0,0), critterSimData.heading);
-
 				
 				float3 worldPosition = float3(critterPosition + centerPosition + centerToVertexOffset, -0.5);
+				*/
+
+				
+				float3 quadPoint = quadVerticesCBuffer[id];		
+
+				float3 critterWorldPos = critterSimData.worldPos;
+				float3 critterCurScale = critterInitData.boundingBoxSize * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage) * 0.5;
+		
+				float3 spriteLocalPos = bodyStrokeData.localPos * critterCurScale;
+				
+				float3 spriteWorldOffset = spriteLocalPos * critterSimData.foodAmount * 0.88 * (1.0 - critterSimData.decayPercentage); // **** Vector from critter origin to sprite origin		
+				// SWIM ANIMS:
+				spriteWorldOffset = GetAnimatedPos(spriteWorldOffset, float3(0,0,0), critterInitData, critterSimData, bodyStrokeData.localPos);		
+
+				float3 worldPosition = critterWorldPos + spriteWorldOffset + quadPoint * 0.6667 * critterSimData.foodAmount * critterCurScale * (1.0 - critterSimData.decayPercentage);
+
+				// REFRACTION:
+				//float3 offset = spriteWorldOffset;				
+				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / 256, 0, 0)).yzw;
+				float refractionStrength = 2.45;
+				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
+			
+				
 
 				float alpha = saturate(1.0 - critterSimData.decayPercentage * 1.2);
 
@@ -127,11 +123,11 @@
 			fixed4 frag(v2f i) : SV_Target
 			{
 				
-				return float4(1,1,1,1);
+				//return float4(1,1,1,1);
 
 				float4 texColor = tex2D(_MainTex, i.uv);  // Read Brush Texture start Row
 				
-				return float4(1.75,2.35,0.65,texColor.a);
+				return float4(0.2,1,0.2,texColor.a);
 							
 				
 			}

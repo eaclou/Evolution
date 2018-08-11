@@ -2,7 +2,8 @@
 {
 	Properties
 	{
-		_MainTex ("Main Texture", 2D) = "white" {}		
+		_MainTex ("Main Texture", 2D) = "white" {}			
+		_WaterSurfaceTex ("_WaterSurfaceTex", 2D) = "black" {}
 	}
 	SubShader
 	{		
@@ -23,20 +24,8 @@
 			#include "Assets/Resources/Shaders/Inc/CritterBodyAnimation.cginc"
 
 			sampler2D _MainTex;
+			sampler2D _WaterSurfaceTex;
 			
-			struct AgentSimData {
-				float2 worldPos;
-				float2 velocity;
-				float2 heading;
-				float2 size;
-				float3 primaryHue;  // can eventually pull these static variables out of here to avoid per-frame updates on non-dynamic attributes
-				float3 secondaryHue;
-				float maturity;
-				float decay;
-				float eatingStatus;
-				float foodAmount;
-			};
-
 			StructuredBuffer<CritterInitData> critterInitDataCBuffer;
 			StructuredBuffer<CritterSimData> critterSimDataCBuffer;
 			StructuredBuffer<CritterSkinStrokeData> bodyStrokesCBuffer;
@@ -65,6 +54,32 @@
 				CritterInitData critterInitData = critterInitDataCBuffer[agentIndex];
 				CritterSimData critterSimData = critterSimDataCBuffer[agentIndex];
 
+				float3 quadPoint = quadVerticesCBuffer[id];		
+
+				float3 critterWorldPos = critterSimData.worldPos;
+				float3 critterCurScale = critterInitData.boundingBoxSize * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage) * 0.5;
+		
+				float3 spriteLocalPos = bodyStrokeData.localPos * critterCurScale;
+				
+				float3 spriteWorldOffset = spriteLocalPos; // **** Vector from critter origin to sprite origin		
+				// SWIM ANIMS:
+				spriteWorldOffset = GetAnimatedPos(spriteWorldOffset, float3(0,0,0), critterInitData, critterSimData, bodyStrokeData.localPos);		
+
+				float3 worldPosition = critterWorldPos + spriteWorldOffset + quadPoint * 0.02 * critterCurScale;
+
+				// REFRACTION:
+				//float3 offset = spriteWorldOffset;				
+				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / 256, 0, 0)).yzw;
+				float refractionStrength = 2.45;
+				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
+							
+				float embryoStatus = critterSimData.embryoPercentage;
+								
+				worldPosition = lerp(critterSimData.worldPos, worldPosition, embryoStatus);
+
+				
+			
+				/*
 				float2 critterPosition = critterSimData.worldPos.xy;
 				float2 centerToVertexOffset = quadVerticesCBuffer[id];
 				
@@ -109,8 +124,9 @@
 				float3 worldPosition = float3(critterPosition + centerPosition + centerToVertexOffset, -0.5);
 
 				//======================================================================================================
+				*/
 
-				float alpha = saturate(1.0 - critterSimData.decayPercentage * 1.2);
+				float alpha = saturate(1.0 - critterSimData.decayPercentage * 1.2) * critterSimData.energy * critterSimData.embryoPercentage;
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)));
 				o.worldPos = worldPosition; // + rotatedPoint1;
@@ -140,7 +156,7 @@
 				
 				float4 texColor = tex2D(_MainTex, i.uv);  // Read Brush Texture start Row
 				
-				return float4(0.25,0.9,2.4,texColor.a);
+				return float4(0.25,0.9,2.4,texColor.a * i.color.a);
 
 				
 			}

@@ -30,6 +30,7 @@ public class CritterModuleMovement {
     public void Initialize(CritterModuleMovementGenome genome) {
 
         horsepower = genome.horsepower;
+                
         turnRate = genome.turnRate;
         
         ownVelX = new float[1]; // 20

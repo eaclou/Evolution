@@ -627,7 +627,7 @@ public class TheRenderKing : MonoBehaviour {
                 skinStroke.localPos.x *= width * 0.5f;
                 skinStroke.localPos.z *= width * 0.5f;                
                 skinStroke.localDir = new Vector3(0f, 1f, 0f); // start up? shouldn't matter
-                skinStroke.localScale = new Vector2(0.25f, 0.420f) * 0.5f; // simManager.agentGenomePoolArray[i].bodyGenome.sizeAndAspectRatio;
+                skinStroke.localScale = new Vector2(0.25f, 0.420f) * 1.25f; // simManager.agentGenomePoolArray[i].bodyGenome.sizeAndAspectRatio;
                 skinStroke.strength = UnityEngine.Random.Range(0f, 1f);
                 skinStroke.lifeStatus = 0f;
                 skinStroke.age = UnityEngine.Random.Range(1f, 2f);
@@ -1786,8 +1786,18 @@ public class TheRenderKing : MonoBehaviour {
 
         cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, baronVonWater.waterNutrientsBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterNutrientsBitsCBuffer.count);
-        
-        
+
+
+        // Critter Stomach Bits
+        critterFoodDotsMat.SetPass(0);
+        critterFoodDotsMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+        critterFoodDotsMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
+        critterFoodDotsMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
+        critterFoodDotsMat.SetBuffer("bodyStrokesCBuffer", critterFoodDotsCBuffer);
+        critterFoodDotsMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        cmdBufferTest.DrawProcedural(Matrix4x4.identity, critterFoodDotsMat, 0, MeshTopology.Triangles, 6, critterFoodDotsCBuffer.count);
+
+
         // CRITTER SKIN:
         critterSkinStrokesDisplayMat.SetPass(0);
         critterSkinStrokesDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -1800,6 +1810,17 @@ public class TheRenderKing : MonoBehaviour {
         critterSkinStrokesDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
         cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, critterSkinStrokesDisplayMat, 0, MeshTopology.Triangles, 6, critterSkinStrokesCBuffer.count);
+
+        
+        // Critter Energy blops!
+        critterEnergyDotsMat.SetPass(0);
+        critterEnergyDotsMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+        critterEnergyDotsMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
+        critterEnergyDotsMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
+        critterEnergyDotsMat.SetBuffer("bodyStrokesCBuffer", critterEnergyDotsCBuffer);
+        critterEnergyDotsMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        cmdBufferTest.DrawProcedural(Matrix4x4.identity, critterEnergyDotsMat, 0, MeshTopology.Triangles, 6, critterEnergyDotsCBuffer.count);
+        
 
         // AGENT EYES:
         agentEyesDisplayMat.SetPass(0);
@@ -1913,9 +1934,6 @@ public class TheRenderKing : MonoBehaviour {
         //CritterSkinStrokeData[] critterBodyStrokesArray = new CritterSkinStrokeData[critterSkinStrokesCBuffer.count];
         //critterSkinStrokesCBuffer.GetData(critterBodyStrokesArray);
         //Debug.Log(critterBodyStrokesArray[0].worldPos.ToString());
-
-
-
         //renderTarget = new RenderTargetIdentifier(BuiltinRenderTextureType.CameraTarget);
         //cmdBufferTest.Blit(primaryRT, renderTarget);  // save contents of Standard Rendering Pipeline
 
@@ -1963,6 +1981,7 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferMainRender.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, frameBufferStrokeDisplayMat, 0, MeshTopology.Triangles, 6, frameBufferStrokesCBuffer.count);
         */
+
         /*
         // WATER SPLINES:::
         waterSplinesMat.SetPass(0);
@@ -1990,8 +2009,7 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, uberFlowChainBrush1.renderMat, 0, MeshTopology.Triangles, 6, uberFlowChainBrush1.chains0CBuffer.count);
         */
 
-        /*
-        
+        /*        
         // RIPPLES:
         ripplesDisplayMat.SetPass(0);
         ripplesDisplayMat.SetBuffer("agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
@@ -2007,7 +2025,6 @@ public class TheRenderKing : MonoBehaviour {
         playerGlowMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, playerGlowMat, 0, MeshTopology.Triangles, 6, playerGlowCBuffer.count);
         //}
-
         */
 
         /*
@@ -2055,8 +2072,6 @@ public class TheRenderKing : MonoBehaviour {
             agentBodyDisplayMat.SetBuffer("bodyStrokesCBuffer", agentBodyStrokesCBuffer);
             cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, agentBodyDisplayMat, 0, MeshTopology.Triangles, 6, agentBodyStrokesCBuffer.count);
             */
-
-            
             // AGENT EYES:
             //agentEyesDisplayMat.SetPass(0);
             //agentEyesDisplayMat.SetBuffer("agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
@@ -2071,7 +2086,6 @@ public class TheRenderKing : MonoBehaviour {
         */
         
         }
-
 
         /*if(isDebugRenderOn) {
             
@@ -2092,27 +2106,6 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, testSwimmingBodyMat, 0, MeshTopology.Triangles, 6 * numBodyQuads, simManager.simStateData.agentMovementAnimDataCBuffer.count);
         */
 
-        
-        
-        /*
-        critterFoodDotsMat.SetPass(0);
-        critterFoodDotsMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
-        critterFoodDotsMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
-        critterFoodDotsMat.SetBuffer("bodyStrokesCBuffer", critterFoodDotsCBuffer);
-        critterFoodDotsMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        cmdBufferTest.DrawProcedural(Matrix4x4.identity, critterFoodDotsMat, 0, MeshTopology.Triangles, 6, critterFoodDotsCBuffer.count);
-        */
-        
-        /*critterEnergyDotsMat.SetPass(0);
-        critterEnergyDotsMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
-        critterEnergyDotsMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
-        critterEnergyDotsMat.SetBuffer("bodyStrokesCBuffer", critterEnergyDotsCBuffer);
-        critterEnergyDotsMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        cmdBufferMainRender.DrawProcedural(Matrix4x4.identity, critterEnergyDotsMat, 0, MeshTopology.Triangles, 6, critterEnergyDotsCBuffer.count);
-        */
-        
-        
-        
         //foodProceduralDisplayMat.SetPass(0);
         //foodProceduralDisplayMat.SetBuffer("foodSimDataCBuffer", simManager.simStateData.foodSimDataCBuffer);
         //foodProceduralDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -2123,10 +2116,7 @@ public class TheRenderKing : MonoBehaviour {
         //SimulationStateData.LeafData[] testDataArray = new SimulationStateData.LeafData[simManager.simStateData.foodLeafDataCBuffer.count];
         //simManager.simStateData.foodLeafDataCBuffer.GetData(testDataArray);
         //Debug.Log("testDataArray[0] " + testDataArray[0].foodIndex.ToString() + " testDataArray[15] " + testDataArray[15].foodIndex.ToString() + ", testDataArray[570]: " + testDataArray[570].foodIndex.ToString());
-               
-        
-        
-
+           
         //cmdBufferMainRender.Blit()
         /*int mainTexID = Shader.PropertyToID("_MainTex");        
         fadeToBlackBlitMat.SetPass(0);

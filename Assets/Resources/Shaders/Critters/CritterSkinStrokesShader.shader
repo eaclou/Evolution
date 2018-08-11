@@ -89,12 +89,18 @@
 				float3 vertexWorldOffset = quadPoint;
 				float2 brushAspectRatio = float2(lerp((skinStrokeData.localScale.x + skinStrokeData.localScale.y) / 2.0, skinStrokeData.localScale.x, 0.5),
 												lerp((skinStrokeData.localScale.x + skinStrokeData.localScale.y) / 2.0, skinStrokeData.localScale.y, 0.5));
-				vertexWorldOffset.xy = vertexWorldOffset.xy * brushAspectRatio * critterCurScale; // * saturate(0.99 - critterSimData.decayPercentage * 2);
+				vertexWorldOffset.xy = vertexWorldOffset.xy * brushAspectRatio * critterCurScale * (saturate(2.0 * critterSimData.health) * 0.5 + 0.5) * (saturate(2.0 * critterSimData.energy) * 0.5 + 0.5) * saturate(1 - critterSimData.decayPercentage);
 				
 				
 				// ANIMATIONS:
 				//vertexWorldOffset = GetAnimatedPos(vertexWorldOffset, float3(0,0,0), critterInitData, critterSimData, skinStrokeData.localPos);
-				
+				float magnitude = 0.5;
+				float swimAngle = GetSwimAngle(skinStrokeData.localPos.y, critterSimData.moveAnimCycle, critterSimData.accel, critterSimData.smoothedThrottle, magnitude, critterSimData.turnAmount);
+				vertexWorldOffset = RotatePointAroundZAngle(float3(0,0,0), swimAngle, vertexWorldOffset);
+				//vertexWorldOffset // Rotate with Critter:
+				float2 forward = critterSimData.heading;;
+				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
+				vertexWorldOffset = float3(vertexWorldOffset.x * right + vertexWorldOffset.y * forward, 0);  // Rotate localRotation by AgentRotation
 
 				// REFRACTION:
 				float3 offset = skinStrokeData.worldPos;				
@@ -160,7 +166,7 @@
 				float testNewVignetteMask = saturate(((randThreshold + 0.6 - (saturate(vignetteRadius) * 0.4 + 0.3)) * 2));
 				o.vignetteLerp = float4(testNewVignetteMask,sampleUV,saturate(vignetteRadius));
 				
-				o.color = float4(1, 1, critterSimData.growthPercentage, critterSimData.decayPercentage);
+				o.color = float4(critterSimData.health, critterSimData.energy, critterSimData.growthPercentage, critterSimData.decayPercentage);
 				
 				return o;
 			}
@@ -227,6 +233,12 @@
 
 				finalColor.rgb *= saturate(1.0 - i.color.w * 32) * 0.5 + 0.5;
 				finalColor.rgb = lerp(finalColor.rgb, backgroundColor, i.color.a);
+
+				// Health & Energy:::: **
+				float health = i.color.x;
+				float energy = i.color.y;
+				finalColor.rgb = lerp(float3(1,0,0), finalColor.rgb, saturate(health * 2.0) * 0.5 + 0.5);
+				finalColor.rgb = lerp(float3(0.4,0.4,0.4), finalColor.rgb, saturate(energy * 2.0));
 				
 				// FAKE CAUSTICS:::				
 				dotLight *= saturate(diffuseLight * 2.5);

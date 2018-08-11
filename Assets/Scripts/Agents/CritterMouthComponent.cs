@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class CritterMouthComponent : MonoBehaviour {
 
@@ -16,9 +14,9 @@ public class CritterMouthComponent : MonoBehaviour {
     public Vector2 biteZoneDimensions;
     public float biteZoneOffset;
     //public float mouthOffset;  // also relative?
-    public int biteHalfCycleDuration = 12;
+    public int biteHalfCycleDuration = 6;
     //public int biteResetDuration = 12;
-    public int biteCooldownDuration = 36;
+    public int biteCooldownDuration = 24;
     public float biteStrength;
     public float biteSharpness;
         
@@ -60,7 +58,7 @@ public class CritterMouthComponent : MonoBehaviour {
         if(collidingSegment != null) {
             if(agentIndex != collidingSegment.agentIndex) {
 
-                if(agentRef.speciesIndex != collidingSegment.agentRef.speciesIndex) {
+                if(true) { //agentRef.speciesIndex != collidingSegment.agentRef.speciesIndex) {   // *** true == CANNIBALISM ALLOWED!!!!!! *****
                     // ANIMAL:
                     // Compare sizes:
                     targetArea = collidingSegment.agentRef.coreModule.currentBodySize.x * collidingSegment.agentRef.coreModule.currentBodySize.y;
@@ -70,6 +68,7 @@ public class CritterMouthComponent : MonoBehaviour {
                         SwallowAnimalWhole(collidingSegment.agentRef);
                     }
                     else {
+                        Debug.Log("Bite Animal!");
                         // Toothy Attack Bite GO!!!
                         if(collidingSegment.agentRef.curLifeStage == Agent.AgentLifeStage.Dead)
                         {
@@ -146,10 +145,27 @@ public class CritterMouthComponent : MonoBehaviour {
 
     private void SwallowAnimalWhole(Agent preyAgent) {
         //Debug.Log("SwallowAnimalWhole");
-        preyAgent.curLifeStage = Agent.AgentLifeStage.Dead;
+        ProcessPredatorySwallowAttempt(agentRef, preyAgent);
+        //preyAgent.curLifeStage = Agent.AgentLifeStage.Dead;
         // Credit food:
         float flow = preyAgent.growthPercentage * preyAgent.coreModule.coreWidth * preyAgent.coreModule.coreLength + preyAgent.coreModule.stomachContents;
-        agentRef.EatFood(flow * 1f); // assumes all foodAmounts are equal !! *****    
+        agentRef.EatFood(10f);// flow * 1f); // assumes all foodAmounts are equal !! *****  
+        Debug.Log("SwallowAnimalWhole. foodFlow: " + flow.ToString() + ", agentStomachContents: " + agentRef.coreModule.stomachContents.ToString());
+        // **** Not removing Animal? --> need to attach?
+    }
+    private void ProcessPredatorySwallowAttempt(Agent predatorAgent, Agent preyAgent)
+    {
+        preyAgent.curLifeStage = Agent.AgentLifeStage.Dead;
+        preyAgent.colliderBody.enabled = false;
+        preyAgent.InitiateBeingSwallowed(predatorAgent);
+
+        predatorAgent.springJoint.connectedBody = preyAgent.bodyRigidbody;
+        predatorAgent.springJoint.distance = 0.005f;
+        predatorAgent.springJoint.enableCollision = false;
+        predatorAgent.springJoint.enabled = true;
+        predatorAgent.InitiateSwallowingPrey(preyAgent);
+
+        predatorAgent.springJoint.frequency = 5f;
     }
     private void SwallowFoodWhole(FoodChunk foodModule) {
         //Debug.Log("SwallowFoodWhole");
@@ -204,7 +220,7 @@ public class CritterMouthComponent : MonoBehaviour {
         }*/
     }
     private void BiteCorpseFood(Agent corpseAgent, float ownBiteArea, float targetArea)
-    {
+    {        
         float flow = ownBiteArea * 2f; // / colliderCount;
 
         float flowR = Mathf.Min(corpseAgent.corpseFoodAmount, flow);
@@ -234,8 +250,9 @@ public class CritterMouthComponent : MonoBehaviour {
             corpseAgent.mouthRef.triggerCollider.offset = new Vector2(0f, corpseAgent.coreModule.currentBodySize.y * 0.5f);
         }
 
+        Debug.Log("BiteCorpseFood!!! ownBiteArea: " + ownBiteArea.ToString() + ", targetArea: " + targetArea.ToString() + ", flowR: " + flowR.ToString() + ", corpseFoodAmount: " + corpseAgent.corpseFoodAmount.ToString() + ", corpseDimensions: " + corpseAgent.coreModule.currentBodySize.ToString());
 
-        
+
     }
 
     private void TriggerCheck(Collider2D collider) {

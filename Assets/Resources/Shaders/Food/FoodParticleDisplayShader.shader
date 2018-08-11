@@ -70,7 +70,7 @@
 
 				float3 worldPosition = float3(particleData.worldPos, 1.0);    //float3(rawData.worldPos, -random2);
 				
-				quadPoint = quadPoint * particleData.radius * (1.0 - particleData.digestedAmount); // * particleData.active; // *** remove * 3 after!!!
+				quadPoint = quadPoint * particleData.radius * (1.0 - particleData.digestedAmount) * 2.5; // * particleData.active; // *** remove * 3 after!!!
 				worldPosition = worldPosition + quadPoint;
 
 				// REFRACTION:

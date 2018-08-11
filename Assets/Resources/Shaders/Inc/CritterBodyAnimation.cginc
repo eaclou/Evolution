@@ -94,17 +94,33 @@ float3 GetAnimatedPos(float3 inPos, float3 pivotPos, CritterInitData critterInit
 	float t = strokeLocalPos.y * 0.5 + 0.5;  // [0-1]
 	float biteAnimCycle = critterSimData.biteAnimCycle;
 	float eatingCycle = sin(biteAnimCycle * 3.141592);
-	float biteMask = saturate((t - 0.5) * 2);
+	float biteMask = saturate((t - 0.66667) * 3);
 	float lowerJawMask = biteMask * saturate(strokeLocalPos.z * 1000);
 	float upperJawMask = biteMask * saturate(-strokeLocalPos.z * 1000);
 
 	float3 critterCurScale = critterInitData.boundingBoxSize * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage) * 0.5;
 
-	//inPos.xyz = lerp(inPos.xyz, inPos.xyz + float3(0,0,critterCurScale.z * 0.5), lowerJawMask * eatingCycle);
-	//inPos.xyz = lerp(inPos.xyz, inPos.xyz + float3(0,0,-critterCurScale.z * 0.25), upperJawMask * eatingCycle);
-	inPos.y *= (eatingCycle * 1.5 * biteMask + 1.0);
-	//inPos.x *= ((1 - eatingCycle) * 1.5 * biteMask + 1.0);
-	inPos.y += eatingCycle * critterInitData.boundingBoxSize.y * 0.25;
+	float activeMouthMask = critterInitData.mouthIsActive;
+
+	// PASSIVE MOUTH:::
+	float3 passiveMouthPos = inPos;
+	// Mouth Opening:
+	passiveMouthPos.xyz = lerp(passiveMouthPos.xyz, passiveMouthPos.xyz + float3(0,0,critterCurScale.z * 0.65), lowerJawMask * biteAnimCycle);
+	passiveMouthPos.xyz = lerp(passiveMouthPos.xyz, passiveMouthPos.xyz + float3(0,0,-critterCurScale.z * 0.35), upperJawMask * biteAnimCycle);
+	// Lunge Forward:
+	//passiveMouthPos.y *= (eatingCycle * 0.5 * biteMask + 1.0);
+	//passiveMouthPos.y += (eatingCycle * critterInitData.boundingBoxSize.y * 0.175);
+
+	// ACTIVE MOUTH:::
+	float3 activeMouthPos = inPos;
+	// Mouth Opening:
+	activeMouthPos.xyz = lerp(activeMouthPos.xyz, activeMouthPos.xyz + float3(0,0,critterCurScale.z * 0.65), lowerJawMask * eatingCycle);
+	activeMouthPos.xyz = lerp(activeMouthPos.xyz, activeMouthPos.xyz + float3(0,0,-critterCurScale.z * 0.35), upperJawMask * eatingCycle);
+	// Lunge Forward:
+	activeMouthPos.y *= (eatingCycle * 0.5 * biteMask + 1.0);
+	activeMouthPos.y += (eatingCycle * critterInitData.boundingBoxSize.y * 0.175);
+
+	inPos = lerp(passiveMouthPos, activeMouthPos, activeMouthMask);
 	
 	// end BITE
 		
