@@ -89,7 +89,7 @@
 				float3 vertexWorldOffset = quadPoint;
 				float2 brushAspectRatio = float2(lerp((skinStrokeData.localScale.x + skinStrokeData.localScale.y) / 2.0, skinStrokeData.localScale.x, 0.5),
 												lerp((skinStrokeData.localScale.x + skinStrokeData.localScale.y) / 2.0, skinStrokeData.localScale.y, 0.5));
-				vertexWorldOffset.xy = vertexWorldOffset.xy * brushAspectRatio * critterCurScale * (saturate(2.0 * critterSimData.health) * 0.5 + 0.5) * (saturate(2.0 * critterSimData.energy) * 0.5 + 0.5) * saturate(1 - critterSimData.decayPercentage);
+				vertexWorldOffset.xy = vertexWorldOffset.xy * brushAspectRatio * critterCurScale * (saturate(2.0 * critterSimData.health) * 0.5 + 0.5) * (saturate(2.0 * critterSimData.energy) * 0.67 + 0.33) * saturate(1 - critterSimData.decayPercentage);
 				
 				
 				// ANIMATIONS:

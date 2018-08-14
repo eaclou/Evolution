@@ -16,7 +16,7 @@ public class CritterMouthComponent : MonoBehaviour {
     //public float mouthOffset;  // also relative?
     public int biteHalfCycleDuration = 6;
     //public int biteResetDuration = 12;
-    public int biteCooldownDuration = 24;
+    public int biteCooldownDuration = 48;
     public float biteStrength;
     public float biteSharpness;
         
@@ -68,7 +68,7 @@ public class CritterMouthComponent : MonoBehaviour {
                         SwallowAnimalWhole(collidingSegment.agentRef);
                     }
                     else {
-                        Debug.Log("Bite Animal!");
+                        //Debug.Log("Bite Animal!");
                         // Toothy Attack Bite GO!!!
                         if(collidingSegment.agentRef.curLifeStage == Agent.AgentLifeStage.Dead)
                         {
@@ -149,23 +149,45 @@ public class CritterMouthComponent : MonoBehaviour {
         //preyAgent.curLifeStage = Agent.AgentLifeStage.Dead;
         // Credit food:
         float flow = preyAgent.growthPercentage * preyAgent.coreModule.coreWidth * preyAgent.coreModule.coreLength + preyAgent.coreModule.stomachContents;
-        agentRef.EatFood(10f);// flow * 1f); // assumes all foodAmounts are equal !! *****  
-        Debug.Log("SwallowAnimalWhole. foodFlow: " + flow.ToString() + ", agentStomachContents: " + agentRef.coreModule.stomachContents.ToString());
+        agentRef.EatFood(flow * 2f); // assumes all foodAmounts are equal !! *****  
+        //Debug.Log("SwallowAnimalWhole. foodFlow: " + flow.ToString() + ", agentStomachContents: " + agentRef.coreModule.stomachContents.ToString());
         // **** Not removing Animal? --> need to attach?
     }
     private void ProcessPredatorySwallowAttempt(Agent predatorAgent, Agent preyAgent)
     {
-        preyAgent.curLifeStage = Agent.AgentLifeStage.Dead;
-        preyAgent.colliderBody.enabled = false;
-        preyAgent.InitiateBeingSwallowed(predatorAgent);
+        // add boolean check here? possibly attempting to swallow multiple things?
+        if(predatorAgent.isSwallowingPrey)
+        {
 
-        predatorAgent.springJoint.connectedBody = preyAgent.bodyRigidbody;
-        predatorAgent.springJoint.distance = 0.005f;
-        predatorAgent.springJoint.enableCollision = false;
-        predatorAgent.springJoint.enabled = true;
-        predatorAgent.InitiateSwallowingPrey(preyAgent);
+        }
+        else
+        {
+            preyAgent.InitiateBeingSwallowed(predatorAgent);
+            preyAgent.curLifeStage = Agent.AgentLifeStage.Dead;
+            preyAgent.colliderBody.enabled = false;
 
-        predatorAgent.springJoint.frequency = 5f;
+
+            predatorAgent.InitiateSwallowingPrey(preyAgent);
+            predatorAgent.springJoint.connectedBody = preyAgent.bodyRigidbody;
+            predatorAgent.springJoint.distance = 0.005f;
+            predatorAgent.springJoint.enableCollision = false;
+            predatorAgent.springJoint.enabled = true;
+            predatorAgent.springJoint.frequency = 2.5f;
+
+
+            Vector3 predPos = predatorAgent.bodyRigidbody.transform.position;
+            Vector3 preyPos = preyAgent.bodyRigidbody.transform.position;
+            float dist = (preyPos - predPos).magnitude;
+
+            //Debug.Log("ProcessPredatorySwallowAttempt!\nPredPos: " + predPos.ToString() + "\nPreyPos: " + preyPos.ToString() + "\nDistance: " + dist.ToString());
+            if(dist > 5f)
+            {
+                Debug.Log("ProcessPredatorySwallowAttempt!\nDistance: " + dist.ToString() + "\nPredPos: " + predPos.ToString() + "\nPreyPos: " + preyPos.ToString() + "\n");
+            }
+            
+        }
+
+        
     }
     private void SwallowFoodWhole(FoodChunk foodModule) {
         //Debug.Log("SwallowFoodWhole");
@@ -250,7 +272,7 @@ public class CritterMouthComponent : MonoBehaviour {
             corpseAgent.mouthRef.triggerCollider.offset = new Vector2(0f, corpseAgent.coreModule.currentBodySize.y * 0.5f);
         }
 
-        Debug.Log("BiteCorpseFood!!! ownBiteArea: " + ownBiteArea.ToString() + ", targetArea: " + targetArea.ToString() + ", flowR: " + flowR.ToString() + ", corpseFoodAmount: " + corpseAgent.corpseFoodAmount.ToString() + ", corpseDimensions: " + corpseAgent.coreModule.currentBodySize.ToString());
+        //Debug.Log("BiteCorpseFood!!! ownBiteArea: " + ownBiteArea.ToString() + ", targetArea: " + targetArea.ToString() + ", flowR: " + flowR.ToString() + ", corpseFoodAmount: " + corpseAgent.corpseFoodAmount.ToString() + ", corpseDimensions: " + corpseAgent.coreModule.currentBodySize.ToString());
 
 
     }
@@ -264,7 +286,10 @@ public class CritterMouthComponent : MonoBehaviour {
             if(isBiting) {
                 if(bitingFrameCounter == biteHalfCycleDuration) {  // is the current frame the Damage-Frame?
                     // if so, BITE!!
-                    ActiveBiteCheck(collider);                
+                    if(agentRef.curLifeStage != Agent.AgentLifeStage.Dead)
+                    {
+                        ActiveBiteCheck(collider);
+                    }               
                 }
             }
             else {

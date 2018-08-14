@@ -84,7 +84,7 @@
 				// SWIM ANIMS:
 				spriteWorldOffset = GetAnimatedPos(spriteWorldOffset, float3(0,0,0), critterInitData, critterSimData, bodyStrokeData.localPos);		
 
-				float3 worldPosition = critterWorldPos + spriteWorldOffset + quadPoint * 0.6667 * critterSimData.foodAmount * critterCurScale * (1.0 - critterSimData.decayPercentage);
+				float3 worldPosition = critterWorldPos + spriteWorldOffset + quadPoint * 0.35 * critterSimData.foodAmount * critterCurScale * (1.0 - critterSimData.decayPercentage);
 
 				// REFRACTION:
 				//float3 offset = spriteWorldOffset;				

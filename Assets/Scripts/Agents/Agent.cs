@@ -60,8 +60,8 @@ public class Agent : MonoBehaviour {
 
         }
     }
-    public int maxAgeTimeSteps = 3600;
-    private int decayDurationTimeSteps = 600;
+    public int maxAgeTimeSteps = 6400;
+    private int decayDurationTimeSteps = 400;
     public int _DecayDurationTimeSteps
     {
         get
@@ -174,6 +174,7 @@ public class Agent : MonoBehaviour {
 
     public void InitiateBeingSwallowed(Agent predatorAgent)
     {
+
         isBeingSwallowed = true;
         beingSwallowedFrameCounter = 0;
         predatorAgentRef = predatorAgent;
@@ -460,6 +461,12 @@ public class Agent : MonoBehaviour {
     {
         corpseFoodAmount = coreModule.currentBodySize.x * coreModule.currentBodySize.y;
         //Debug.Log("new corpse food! " + corpseFoodAmount.ToString());
+
+        if(isBeingSwallowed)
+        {
+            predatorAgentRef.springJoint.enabled = false;
+            predatorAgentRef.springJoint.connectedBody = null;
+        }
     }
     private void CheckForLifeStageTransition() {
         switch(curLifeStage) {
@@ -517,7 +524,15 @@ public class Agent : MonoBehaviour {
                     // player agent stays null for extended period of time
                 }
                 else {
-                    Debug.Log("agent is null - probably shouldn't have gotten to this point...;");
+                    //Debug.Log("agent is null - probably shouldn't have gotten to this point...;");
+
+                    //Debug.Log("isSwallowingPrey + swallow Complete!");
+
+                    beingSwallowedFrameCounter = 0;
+                    isBeingSwallowed = false;
+
+                    springJoint.enabled = false;
+                    springJoint.connectedBody = null;
                 }                
                 break;
             default:
@@ -570,7 +585,7 @@ public class Agent : MonoBehaviour {
 
             if (swallowingPreyFrameCounter >= swallowDuration)
             {
-                Debug.Log("isSwallowingPrey + swallow Complete!");
+                //Debug.Log("isSwallowingPrey + swallow Complete!");
 
                 swallowingPreyFrameCounter = 0;
                 isSwallowingPrey = false;
@@ -583,15 +598,32 @@ public class Agent : MonoBehaviour {
 
                 
             }
+
+            float dist = (bodyRigidbody.transform.position - preyAgentRef.bodyRigidbody.transform.position).magnitude;
+            if (dist > 6f)
+            {
+                string debugString = "isSwallowingPrey!\nDistance: " + dist.ToString() + "\nPredPos: " + bodyRigidbody.transform.position.ToString() + "\nPreyPos: " + preyAgentRef.bodyRigidbody.transform.position.ToString();
+                debugString += "\n Pred  Age: " + curLifeStage.ToString() + lifeStageTransitionTimeStepCounter.ToString() + ", Health: " + coreModule.healthBody.ToString() + ", Energy: " + coreModule.energyRaw.ToString();
+                debugString += "\n Prey  Age: " + preyAgentRef.curLifeStage.ToString() + preyAgentRef.lifeStageTransitionTimeStepCounter.ToString() + ", Health: " + preyAgentRef.coreModule.healthBody.ToString() + ", Energy: " + preyAgentRef.coreModule.energyRaw.ToString();
+                Debug.Log(debugString);
+            }
+        }
+        else
+        {
+            swallowingPreyFrameCounter = 0;
+            isSwallowingPrey = false;
+
+            springJoint.enabled = false;
+            springJoint.connectedBody = null;
         }
 
         if(isBeingSwallowed)
         {
             beingSwallowedFrameCounter++;
 
-            if(beingSwallowedFrameCounter >= swallowDuration)
+            if(beingSwallowedFrameCounter >= swallowDuration + 6)
             {
-                Debug.Log("isBeingSwallowed + swallow Complete!");
+                //Debug.Log("isBeingSwallowed + swallow Complete!");
 
                 curLifeStage = AgentLifeStage.Null;
                 lifeStageTransitionTimeStepCounter = 0;
@@ -601,12 +633,21 @@ public class Agent : MonoBehaviour {
                 isBeingSwallowed = false;
 
                 colliderBody.enabled = true;
+
+                predatorAgentRef.springJoint.enabled = false;
+                predatorAgentRef.springJoint.connectedBody = null;
             }
             else
             {
                 float scale = (float)beingSwallowedFrameCounter / (float)swallowDuration;
 
-                ScaleBody((1.0f - scale) * 0.9f);
+                ScaleBody((1.0f - scale) * 0.8f);
+            }
+
+            float dist = (bodyRigidbody.transform.position - predatorAgentRef.bodyRigidbody.transform.position).magnitude;
+            if (dist > 6f)
+            {
+                Debug.Log("isBeingSwallowed!\nDistance: " + dist.ToString() + "\nPredPos: " + predatorAgentRef.bodyRigidbody.transform.position.ToString() + "\nPreyPos: " + bodyRigidbody.transform.position.ToString() + "\n");
             }
         }
         
@@ -701,6 +742,28 @@ public class Agent : MonoBehaviour {
     // *** Condense these into ONE?
     private void TickEgg() {        
         lifeStageTransitionTimeStepCounter++;
+
+        if(isBeingSwallowed)
+        {
+            predatorAgentRef.isSwallowingPrey = false;
+            predatorAgentRef.swallowingPreyFrameCounter = 0;
+            predatorAgentRef.springJoint.enabled = false;
+            predatorAgentRef.springJoint.connectedBody = null;
+
+            isBeingSwallowed = false;
+            beingSwallowedFrameCounter = 0;
+
+            Debug.Log("HUH????");
+        }
+
+        /*isSwallowingPrey = false;
+        swallowingPreyFrameCounter = 0;
+        springJoint.enabled = false;
+        springJoint.connectedBody = null;
+
+        mouthRef.isBiting = false;*/
+
+
     }
     private void TickYoung(SimulationManager simManager, Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray, SettingsManager settings) {
 
@@ -736,6 +799,14 @@ public class Agent : MonoBehaviour {
     }
     private void TickDead() {
         lifeStageTransitionTimeStepCounter++;
+
+        isSwallowingPrey = false;
+        swallowingPreyFrameCounter = 0;
+        springJoint.enabled = false;
+        springJoint.connectedBody = null;
+
+        mouthRef.isBiting = false;
+
         /*
         if(corpseFoodAmount <= 0f)
         {
@@ -999,9 +1070,22 @@ public class Agent : MonoBehaviour {
         //    jointAnglesArray[j] = hingeJointsArray[j].jointAngle;            
         //}
 
+        float bitingPenalty = 1f;
+        /*
+        if(mouthRef.isBiting)
+        {
+            bitingPenalty = 1f;
+        }
+        if(coreModule.mouthEffector[0] > 0f)
+        {
+            bitingPenalty = 1f;
+        }
+        */
+        float fatigueMultiplier = Mathf.Clamp01(coreModule.energyRaw * 5f / coreModule.maxEnergyStorage);
+
         turningAmount = Mathf.Lerp(turningAmount, this.bodyRigidbody.angularVelocity * Mathf.Deg2Rad * 0.1f, 0.08f);
 
-        animationCycle += smoothedThrottle.magnitude * swimAnimationCycleSpeed / (Mathf.Lerp(fullSizeBoundingBox.y, 1f, 0.75f) * (growthPercentage * 0.25f + 0.75f));;
+        animationCycle += smoothedThrottle.magnitude * swimAnimationCycleSpeed / (Mathf.Lerp(fullSizeBoundingBox.y, 1f, 0.75f) * (growthPercentage * 0.25f + 0.75f)) * fatigueMultiplier;
 
         if (throttle.sqrMagnitude > 0.000001f) {  // Throttle is NOT == ZERO
             
@@ -1013,7 +1097,7 @@ public class Agent : MonoBehaviour {
             float headTurn = Vector2.Dot(throttleDir, headRightDir) * -1f * turnSharpness;
             float headTurnSign = Mathf.Clamp(Vector2.Dot(throttleDir, headRightDir) * -10000f, -1f, 1f);
 
-            float fatigueMultiplier = Mathf.Clamp01(coreModule.energyRaw * 1f / fullSizeBoundingBox.x * fullSizeBoundingBox.y) * Mathf.Clamp01(growthPercentage * 10f);
+            
             float developmentMultiplier = Mathf.Lerp(0.25f, 1f, Mathf.Clamp01(growthPercentage * 2f));
             //turningAmount = Mathf.Lerp(turningAmount, this.bodyRigidbody.angularVelocity * Mathf.Deg2Rad * 0.1f, 0.15f);
 
@@ -1032,14 +1116,14 @@ public class Agent : MonoBehaviour {
 
                 Vector2 forwardThrustDir = Vector2.Lerp(segmentForwardDir, throttleDir, 0.1f).normalized;
 
-                this.bodyRigidbody.AddForce(forwardThrustDir * (1f - turnSharpness * 0.25f) * swimSpeed * this.bodyRigidbody.mass * Time.deltaTime * developmentMultiplier, ForceMode2D.Impulse);
+                this.bodyRigidbody.AddForce(forwardThrustDir * (1f - turnSharpness * 0.25f) * swimSpeed * this.bodyRigidbody.mass * Time.deltaTime * developmentMultiplier * fatigueMultiplier * bitingPenalty, ForceMode2D.Impulse);
             }
 
             // modify turning rate based on body proportions:
             float turnRatePenalty = Mathf.Lerp(0.25f, 1f, 1f - sizeValue);
 
             // Head turn:
-            this.bodyRigidbody.AddTorque(Mathf.Lerp(headTurn, headTurnSign, 0.75f) * turnRatePenalty * movementModule.turnRate * this.bodyRigidbody.mass * this.bodyRigidbody.mass * Time.deltaTime, ForceMode2D.Impulse);
+            this.bodyRigidbody.AddTorque(Mathf.Lerp(headTurn, headTurnSign, 0.75f) * turnRatePenalty * movementModule.turnRate * this.bodyRigidbody.mass * this.bodyRigidbody.mass * fatigueMultiplier * bitingPenalty * Time.deltaTime, ForceMode2D.Impulse);
             
             // OLD:::
             /*

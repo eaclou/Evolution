@@ -654,6 +654,7 @@ public class TheRenderKing : MonoBehaviour {
                 float width = simManager.agentsArray[i].agentWidthsArray[Mathf.RoundToInt((energyDot.localPos.y * 0.5f + 0.5f) * 15f)];
                 energyDot.localPos.x *= width * 0.5f;
                 energyDot.localPos.z *= width * 0.5f;
+                energyDot.localPos *= 0.67f;
                 energyDot.localDir = new Vector3(0f, 1f, 0f); // start up? shouldn't matter
                 energyDot.localScale = new Vector2(0.1f, 0.1f);
                 energyDot.strength = UnityEngine.Random.Range(0f, 1f);
