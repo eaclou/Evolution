@@ -457,7 +457,7 @@ public class CritterModuleCore {
             //typeR = nearestFoodModule.amountR;  // make a FoodModule Class to hold as reference which will contain Type info
             //typeG = nearestFoodModule.amountG;
             //typeB = nearestFoodModule.amountB;
-            foodAmount = nearestFoodModule.amountR;
+            foodAmount = nearestFoodModule.foodAmount;
             foodRelSize[0] = foodAmount;
 
             nearestFoodChunkSquareDistance = foodPos.sqrMagnitude;

@@ -79,6 +79,8 @@ float3 GetAnimatedPos(float3 inPos, float3 pivotPos, CritterInitData critterInit
 	float magnitude = 0.5;
 
 	float swimAngle = GetSwimAngle(strokeLocalPos.y, critterSimData.moveAnimCycle, critterSimData.accel, critterSimData.smoothedThrottle, magnitude, critterSimData.turnAmount);
+
+	float growthPercentage = critterSimData.growthPercentage;
 	
 	// FOOD BLOAT:
 	float foodAmount = critterSimData.foodAmount;
@@ -119,8 +121,8 @@ float3 GetAnimatedPos(float3 inPos, float3 pivotPos, CritterInitData critterInit
 	// PASSIVE MOUTH:::
 	float3 passiveMouthPos = inPos;
 	// Mouth Opening:
-	passiveMouthPos.xyz = lerp(passiveMouthPos.xyz, passiveMouthPos.xyz + float3(0,0,critterCurScale.z * 0.65), lowerJawMask * biteAnimCycle);
-	passiveMouthPos.xyz = lerp(passiveMouthPos.xyz, passiveMouthPos.xyz + float3(0,0,-critterCurScale.z * 0.35), upperJawMask * biteAnimCycle);
+	passiveMouthPos.xyz = lerp(passiveMouthPos.xyz, passiveMouthPos.xyz + float3(0,0,critterCurScale.z * 0.65), lowerJawMask * biteAnimCycle * saturate(growthPercentage * 4));
+	passiveMouthPos.xyz = lerp(passiveMouthPos.xyz, passiveMouthPos.xyz + float3(0,0,-critterCurScale.z * 0.35), upperJawMask * biteAnimCycle * saturate(growthPercentage * 4));
 	// Lunge Forward:
 	//passiveMouthPos.y *= (eatingCycle * 0.5 * biteMask + 1.0);
 	//passiveMouthPos.y += (eatingCycle * critterInitData.boundingBoxSize.y * 0.175);
@@ -128,11 +130,11 @@ float3 GetAnimatedPos(float3 inPos, float3 pivotPos, CritterInitData critterInit
 	// ACTIVE MOUTH:::
 	float3 activeMouthPos = inPos;
 	// Mouth Opening:
-	activeMouthPos.xyz = lerp(activeMouthPos.xyz, activeMouthPos.xyz + float3(0,0,critterCurScale.z * 0.65), lowerJawMask * eatingCycle);
-	activeMouthPos.xyz = lerp(activeMouthPos.xyz, activeMouthPos.xyz + float3(0,0,-critterCurScale.z * 0.35), upperJawMask * eatingCycle);
+	activeMouthPos.xyz = lerp(activeMouthPos.xyz, activeMouthPos.xyz + float3(0,0,critterCurScale.z * 0.65), lowerJawMask * eatingCycle * saturate(growthPercentage * 4));
+	activeMouthPos.xyz = lerp(activeMouthPos.xyz, activeMouthPos.xyz + float3(0,0,-critterCurScale.z * 0.35), upperJawMask * eatingCycle * saturate(growthPercentage * 4));
 	// Lunge Forward:
-	activeMouthPos.y *= (eatingCycle * 0.5 * biteMask + 1.0);
-	activeMouthPos.y += (eatingCycle * critterInitData.boundingBoxSize.y * 0.175);
+	activeMouthPos.y *= (eatingCycle * 0.5 * biteMask * saturate(growthPercentage * 4) + 1.0);
+	activeMouthPos.y += (eatingCycle * critterInitData.boundingBoxSize.y * 0.175 * saturate(growthPercentage * 4));
 
 	inPos = lerp(passiveMouthPos, activeMouthPos, activeMouthMask);
 	

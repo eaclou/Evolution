@@ -24,8 +24,11 @@ public class SettingsManager : MonoBehaviour {
     public float foodParticleRegrowthRate = 0.0001f;
     public float efficiencyFalloff = 0f;  // how much less food rewarded from particles that are further from optimal size for the consuming Critter
 
-    public float minSizeCritterSpeed = 150f;
-    public float maxSizeCritterSpeed = 150f;
+    public float maxEggFood = 1024f;
+    public float eggLayingRate = 1f;
+
+    //public float minSizeCritterSpeed = 150f;
+    //public float maxSizeCritterSpeed = 150f;
     
 
     // Use this for initialization
@@ -43,7 +46,7 @@ public class SettingsManager : MonoBehaviour {
         mutationSettingsPersistent = new MutationSettings(0.25f, 0.012f, 1f, 0.0f, 0.9975f, 0.0f, 0.0f);
 
         mutationSettingsRandomBody = new MutationSettings(0.25f, 0.02f, 1f, 0.0f, 0.999f, 0.0f, 0.0f);
-        mutationSettingsRandomBody.defaultBodyMutationChance = 0.025f;
-        mutationSettingsRandomBody.defaultBodyMutationStepSize = 0.1835f;
+        mutationSettingsRandomBody.defaultBodyMutationChance = 0.05f;
+        mutationSettingsRandomBody.defaultBodyMutationStepSize = 0.535f;
     }
 }

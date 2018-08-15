@@ -466,6 +466,8 @@ public class Agent : MonoBehaviour {
         {
             predatorAgentRef.springJoint.enabled = false;
             predatorAgentRef.springJoint.connectedBody = null;
+
+            colliderBody.enabled = true;
         }
     }
     private void CheckForLifeStageTransition() {
@@ -531,6 +533,8 @@ public class Agent : MonoBehaviour {
                     beingSwallowedFrameCounter = 0;
                     isBeingSwallowed = false;
 
+                    colliderBody.enabled = true;
+
                     springJoint.enabled = false;
                     springJoint.connectedBody = null;
                 }                
@@ -590,6 +594,8 @@ public class Agent : MonoBehaviour {
                 swallowingPreyFrameCounter = 0;
                 isSwallowingPrey = false;
 
+                colliderBody.enabled = true;
+
                 springJoint.enabled = false;
                 springJoint.connectedBody = null;
             }
@@ -612,6 +618,8 @@ public class Agent : MonoBehaviour {
         {
             swallowingPreyFrameCounter = 0;
             isSwallowingPrey = false;
+
+            colliderBody.enabled = true;
 
             springJoint.enabled = false;
             springJoint.connectedBody = null;
@@ -647,7 +655,7 @@ public class Agent : MonoBehaviour {
             float dist = (bodyRigidbody.transform.position - predatorAgentRef.bodyRigidbody.transform.position).magnitude;
             if (dist > 6f)
             {
-                Debug.Log("isBeingSwallowed!\nDistance: " + dist.ToString() + "\nPredPos: " + predatorAgentRef.bodyRigidbody.transform.position.ToString() + "\nPreyPos: " + bodyRigidbody.transform.position.ToString() + "\n");
+                //Debug.Log("isBeingSwallowed!\nDistance: " + dist.ToString() + "\nPredPos: " + predatorAgentRef.bodyRigidbody.transform.position.ToString() + "\nPreyPos: " + bodyRigidbody.transform.position.ToString() + "\n");
             }
         }
         
@@ -750,6 +758,8 @@ public class Agent : MonoBehaviour {
             predatorAgentRef.springJoint.enabled = false;
             predatorAgentRef.springJoint.connectedBody = null;
 
+            colliderBody.enabled = true;
+
             isBeingSwallowed = false;
             beingSwallowedFrameCounter = 0;
 
@@ -804,6 +814,8 @@ public class Agent : MonoBehaviour {
         swallowingPreyFrameCounter = 0;
         springJoint.enabled = false;
         springJoint.connectedBody = null;
+
+        //colliderBody.enabled = true;
 
         mouthRef.isBiting = false;
 
@@ -932,14 +944,14 @@ public class Agent : MonoBehaviour {
 
         // Heal:
         float healRate = 0.0005f * fullSizeBodyVolume;
-        float energyToHealthConversionRate = 6f;
-        /*if(coreModule.healthBody < 1f) {
+        float energyToHealthConversionRate = 10f;
+        if(coreModule.healthBody < 1f) {
             coreModule.healthBody += healRate;
             coreModule.healthHead += healRate;
             coreModule.healthExternal += healRate;
 
             coreModule.energyRaw -= healRate / energyToHealthConversionRate;
-        }*/
+        }
 
         //ENERGY:
         float energyCost = 0.0025f * fullSizeBodyVolume * settings.energyDrainMultiplier;
@@ -1082,10 +1094,13 @@ public class Agent : MonoBehaviour {
         }
         */
         float fatigueMultiplier = Mathf.Clamp01(coreModule.energyRaw * 5f / coreModule.maxEnergyStorage);
+        float lowHealthPenalty = Mathf.Clamp01(coreModule.healthBody * 5f) * 0.5f + 0.5f;
+        fatigueMultiplier *= lowHealthPenalty;
+        float growthStatus = 
 
-        turningAmount = Mathf.Lerp(turningAmount, this.bodyRigidbody.angularVelocity * Mathf.Deg2Rad * 0.1f, 0.08f);
+        turningAmount = Mathf.Lerp(turningAmount, this.bodyRigidbody.angularVelocity * Mathf.Deg2Rad * 0.1f, 0.28f);
 
-        animationCycle += smoothedThrottle.magnitude * swimAnimationCycleSpeed / (Mathf.Lerp(fullSizeBoundingBox.y, 1f, 0.75f) * (growthPercentage * 0.25f + 0.75f)) * fatigueMultiplier;
+        animationCycle += smoothedThrottle.magnitude * swimAnimationCycleSpeed / (Mathf.Lerp(fullSizeBoundingBox.y, 1f, 0.75f) * (growthPercentage * 0.5f + 0.5f)) * fatigueMultiplier;
 
         if (throttle.sqrMagnitude > 0.000001f) {  // Throttle is NOT == ZERO
             

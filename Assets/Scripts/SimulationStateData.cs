@@ -136,6 +136,8 @@ public class SimulationStateData {
     public Vector4[] foodFluidPositionsArray;
     public Vector2[] fluidVelocitiesAtPredatorPositionsArray;
     public Vector4[] predatorFluidPositionsArray;
+
+    public Vector3[] depthAtAgentPositionsArray;
         
 
     public SimulationStateData(SimulationManager simManager) {
@@ -200,6 +202,8 @@ public class SimulationStateData {
         agentFluidPositionsArray = new Vector4[simManager._NumAgents];
         foodFluidPositionsArray = new Vector4[simManager._NumFood];
         predatorFluidPositionsArray = new Vector4[simManager._NumPredators];
+
+        depthAtAgentPositionsArray = new Vector3[simManager._NumAgents];
     }
 
     public void PopulateSimDataArrays(SimulationManager simManager) {
@@ -288,6 +292,7 @@ public class SimulationStateData {
                 critterSimDataArray[i].velocity = simManager.agentsArray[i].smoothedThrottle.normalized;
             }
             critterSimDataArray[i].heading = simManager.agentsArray[i].facingDirection;
+            
             float embryo = 1f;
             if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Egg) {
                 embryo = (float)simManager.agentsArray[i].lifeStageTransitionTimeStepCounter / (float)simManager.agentsArray[i]._GestationDurationTimeSteps;
@@ -314,7 +319,7 @@ public class SimulationStateData {
             critterSimDataArray[i].energy = simManager.agentsArray[i].coreModule.energyRaw / simManager.agentsArray[i].coreModule.maxEnergyStorage;
             critterSimDataArray[i].health = simManager.agentsArray[i].coreModule.healthHead;
             critterSimDataArray[i].stamina = simManager.agentsArray[i].coreModule.stamina[0];
-            critterSimDataArray[i].isBiting = 0f;
+            critterSimDataArray[i].isBiting = 0f;            
             if(simManager.agentsArray[i].growthPercentage > 0.01f)
             {
                 if (simManager.agentsArray[i].coreModule.mouthEffector[0] > 0.0f)
@@ -347,7 +352,19 @@ public class SimulationStateData {
                     }
                 }
             }
-            
+            if (simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Egg)
+            {
+                critterSimDataArray[i].isBiting = 0f;
+                critterSimDataArray[i].biteAnimCycle *= 0.75f;
+            }
+            if (simManager.agentsArray[i].humanControlled)
+            {
+                if (simManager.agentsArray[i].mouthRef.isPassive)
+                {
+                    critterSimDataArray[i].isBiting = 1f;
+                }
+            }
+
             critterSimDataArray[i].moveAnimCycle = simManager.agentsArray[i].animationCycle;
             critterSimDataArray[i].turnAmount = simManager.agentsArray[i].turningAmount;
             critterSimDataArray[i].accel += Mathf.Clamp01(simManager.agentsArray[i].curAccel) * 1f; // ** RE-FACTOR!!!!
@@ -393,7 +410,7 @@ public class SimulationStateData {
             foodSimDataArray[i].velocity = new Vector2(simManager.foodArray[i].GetComponent<Rigidbody2D>().velocity.x, simManager.foodArray[i].GetComponent<Rigidbody2D>().velocity.y);
             foodSimDataArray[i].heading = simManager.foodArray[i].facingDirection;
             foodSimDataArray[i].fullSize = simManager.foodArray[i].fullSize;
-            foodSimDataArray[i].foodAmount = new Vector3(simManager.foodArray[i].amountR, simManager.foodArray[i].amountR, simManager.foodArray[i].amountR);
+            foodSimDataArray[i].foodAmount = new Vector3(simManager.foodArray[i].foodAmount, simManager.foodArray[i].foodAmount, simManager.foodArray[i].foodAmount);
             foodSimDataArray[i].growth = simManager.foodArray[i].growthStatus;
             foodSimDataArray[i].decay = simManager.foodArray[i].decayStatus;
             foodSimDataArray[i].health = simManager.foodArray[i].healthStructural;
@@ -459,5 +476,7 @@ public class SimulationStateData {
         fluidVelocitiesAtAgentPositionsArray = simManager.environmentFluidManager.GetFluidVelocityAtObjectPositions(agentFluidPositionsArray);
         fluidVelocitiesAtFoodPositionsArray = simManager.environmentFluidManager.GetFluidVelocityAtObjectPositions(foodFluidPositionsArray);
         fluidVelocitiesAtPredatorPositionsArray = simManager.environmentFluidManager.GetFluidVelocityAtObjectPositions(predatorFluidPositionsArray);
+
+        depthAtAgentPositionsArray = simManager.theRenderKing.GetDepthAtObjectPositions(agentFluidPositionsArray);
     }
 }

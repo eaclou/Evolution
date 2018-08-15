@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class FoodChunk : MonoBehaviour {
         
@@ -16,7 +14,7 @@ public class FoodChunk : MonoBehaviour {
         Decaying,
         Null
     }
-    private int growDurationTimeSteps = 6;
+    private int growDurationTimeSteps = 120;
     public int _GrowDurationTimeSteps
     {
         get
@@ -28,7 +26,7 @@ public class FoodChunk : MonoBehaviour {
 
         }
     }
-    private int matureDurationTimeSteps = 6000;  // max oldAge Time to rot
+    private int matureDurationTimeSteps = 3600;  // max oldAge Time to rot
     public int _MatureDurationTimeSteps
     {
         get
@@ -40,7 +38,7 @@ public class FoodChunk : MonoBehaviour {
 
         }
     }
-    private int decayDurationTimeSteps = 6;
+    private int decayDurationTimeSteps = 60;
     public int _DecayDurationTimeSteps
     {
         get
@@ -53,7 +51,7 @@ public class FoodChunk : MonoBehaviour {
         }
     }
 
-    public float amountR;
+    public float foodAmount;
     //public float amountG;
     //public float amountB;
 
@@ -111,7 +109,7 @@ public class FoodChunk : MonoBehaviour {
 
         index = genome.index;
         this.fullSize = genome.fullSize;
-        amountR = this.fullSize.x * this.fullSize.y;
+        foodAmount = this.fullSize.x * this.fullSize.y;
         //amountG = 0f;
         //amountB = 0f; 
 
@@ -150,7 +148,7 @@ public class FoodChunk : MonoBehaviour {
                     // Feels like rigidbody is accumulating velocity which is then released all at once when the scaling stops??
                     // Hacking through it by increasign force on growing food:
                 }
-                float maxFoodAvg = amountR; // Mathf.Max(Mathf.Max(amountR, amountG), amountB);
+                float maxFoodAvg = foodAmount; // Mathf.Max(Mathf.Max(amountR, amountG), amountB);
                 if (maxFoodAvg <= 0f) {
                     curLifeStage = FoodLifeStage.Decaying;
                     //isNull = true;
@@ -163,7 +161,7 @@ public class FoodChunk : MonoBehaviour {
                 //
                 // Check for Death:
                 //float minFood = Mathf.Min(Mathf.Min(testModule.foodAmountR[0], testModule.foodAmountG[0]), testModule.foodAmountB[0]);
-                float maxFood = amountR; // Mathf.Max(Mathf.Max(amountR, amountG), amountB);
+                float maxFood = foodAmount; // Mathf.Max(Mathf.Max(amountR, amountG), amountB);
                 if (maxFood <= 0f) {
                     curLifeStage = FoodLifeStage.Decaying;
                     //isNull = true;
@@ -192,7 +190,7 @@ public class FoodChunk : MonoBehaviour {
                 break;
             case FoodLifeStage.Null:
                 //
-                Debug.Log("FoodLifeStage is null - probably shouldn't have gotten to this point...;");
+                //Debug.Log("FoodLifeStage is null - probably shouldn't have gotten to this point...;");
                 break;
             default:
                 Debug.LogError("NO SUCH ENUM ENTRY IMPLEMENTED, YOU FOOL!!! (" + curLifeStage.ToString() + ")");
@@ -265,7 +263,7 @@ public class FoodChunk : MonoBehaviour {
         //GetComponent<Rigidbody2D>().mass = mass;
 
         float sidesRatio = fullSize.x / fullSize.y;
-        float sideY = Mathf.Sqrt(amountR / sidesRatio);
+        float sideY = Mathf.Sqrt(foodAmount / sidesRatio);
         float sideX = sideY * sidesRatio;
         curSize = new Vector3(sideX, sideY);
         transform.localScale = new Vector3(curSize.x, curSize.y, 1f);
@@ -363,7 +361,7 @@ public class FoodChunk : MonoBehaviour {
 
     private bool CheckIfDepleted() {
         bool depleted = true;
-        if (amountR > 0f)
+        if (foodAmount > 0f)
             depleted = false;
         //if (amountG > 0f)
         //    depleted = false;

@@ -214,6 +214,8 @@ public class SimulationManager : MonoBehaviour {
                 Debug.Log("WarmUp Complete!!! ");
                 simulationWarmUpComplete = true;
 
+                //LoadTrainingData();
+
                 //turn off menu music:
                 audioManager.TurnOffMenuAudioGroup();
 
@@ -289,6 +291,7 @@ public class SimulationManager : MonoBehaviour {
 
         // Load pre-saved genomes:
         LoadingLoadGenepoolFiles();
+               
 
         yield return null;
 
@@ -337,6 +340,7 @@ public class SimulationManager : MonoBehaviour {
         //yield return new WaitForSeconds(5f); // TEMP!!!
 
         environmentFluidManager.UpdateSimulationClimate(0);
+
 
         // Done - will be detected by GameManager next frame
         loadingComplete = true;
@@ -436,7 +440,9 @@ public class SimulationManager : MonoBehaviour {
     }
     private void LoadingInitializeAgentsFromGenomes() {        
         for (int i = 0; i < numAgents; i++) {
-            agentsArray[i].InitializeAgentFromGenome(i, agentGenomePoolArray[i], GetRandomAgentSpawnPosition());            
+            
+            int speciesIndex = Mathf.FloorToInt((float)i / (float)numAgents * (float)numSpecies);
+            agentsArray[i].InitializeAgentFromGenome(i, agentGenomePoolArray[i], GetInitialAgentSpawnPosition(speciesIndex));            
         }
     }
     private void LoadingInitializeFoodParticles() {
@@ -758,7 +764,7 @@ public class SimulationManager : MonoBehaviour {
         }*/
         // Apply External Forces to dynamic objects: (internal PhysX Updates):
         // **** TEMPORARILY DISABLED!
-        //ApplyFluidForcesToDynamicObjects();
+        ApplyFluidForcesToDynamicObjects();
 
         EatSelectedFoodParticles(); // 
 
@@ -833,7 +839,17 @@ public class SimulationManager : MonoBehaviour {
     private void ApplyFluidForcesToDynamicObjects() {
         // ********** REVISIT CONVERSION btw fluid/scene coords and Force Amounts !!!! *************
         for (int i = 0; i < agentsArray.Length; i++) {
-            agentsArray[i].bodyRigidbody.AddForce(simStateData.fluidVelocitiesAtAgentPositionsArray[i] * 40f, ForceMode2D.Impulse);
+
+            Vector3 depthSample = simStateData.depthAtAgentPositionsArray[i];
+            float agentSize = agentsArray[i].fullSizeBoundingBox.x;
+            float floorDepth = depthSample.x * 10f;
+            if (floorDepth < agentSize)
+            {
+                float wallForce = Mathf.Clamp01(agentSize - floorDepth);
+                agentsArray[i].bodyRigidbody.AddForce(new Vector2(depthSample.y, depthSample.z) * 16f * agentsArray[i].bodyRigidbody.mass * wallForce, ForceMode2D.Impulse);
+            }
+
+            agentsArray[i].bodyRigidbody.AddForce(simStateData.fluidVelocitiesAtAgentPositionsArray[i] * 40f * agentsArray[i].bodyRigidbody.mass, ForceMode2D.Impulse);
 
             agentsArray[i].avgFluidVel = Mathf.Lerp(agentsArray[i].avgFluidVel, simStateData.fluidVelocitiesAtAgentPositionsArray[i].magnitude, 0.25f);
         }
@@ -1500,17 +1516,29 @@ public class SimulationManager : MonoBehaviour {
         }
     }
     public void ProcessDeadFood(int foodIndex) {
-        
+
+        // Check for timer?
+
+        // How much food is already out there?
+        float totalEggFoodVolume = 0f;
+        for(int i = 0; i < _NumFood; i++)
+        {
+            totalEggFoodVolume += foodArray[i].foodAmount;
+        }
+
+        if (totalEggFoodVolume < 12800f)
+        {
+            // Reproduction!!!
+            //Debug.Log("ProcessDeadFood totalEggFoodVolume < 128f " + totalEggFoodVolume.ToString());
+            CreateMutatedCopyOfFood(foodIndex);
+
+            theRenderKing.UpdateDynamicFoodBuffers(foodIndex);
+        }
+
         //CheckForRecordAgentScore(foodIndex);
-        //ProcessAgentScores(foodIndex);
-        
+        //ProcessAgentScores(foodIndex);        
         // Updates rankedIndicesArray[] so agents are ordered by score:
         //ProcessAndRankAgentFitness();
-
-        // Reproduction!!!
-        CreateMutatedCopyOfFood(foodIndex); 
-        
-        theRenderKing.UpdateDynamicFoodBuffers(foodIndex);
         //theRenderKing.UpdateAgentBodyStrokesBuffer(foodIndex);
         //theRenderKing.InitializeAgentEyeStrokesBuffer();
     }
@@ -1638,12 +1666,12 @@ public class SimulationManager : MonoBehaviour {
 
             numAgentsBorn++;
             currentOldestAgent = agentsArray[rankedIndicesList[0]].scoreCounter;
-        }        
-        
+        }
+
         // **** !!! REvisit StartPos!!!
         //Vector3 startPos = new Vector3(UnityEngine.Random.Range(-30f, 30f), UnityEngine.Random.Range(-30f, 30f), 0f);
         //StartPositionGenome startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
-        agentsArray[agentIndex].InitializeAgentFromGenome(agentIndex, agentGenomePoolArray[agentIndex], GetRandomAgentSpawnPosition()); // Spawn that genome in dead Agent's body and revive it!
+        agentsArray[agentIndex].InitializeAgentFromGenome(agentIndex, agentGenomePoolArray[agentIndex], GetRandomAgentSpawnPosition(speciesIndex)); // Spawn that genome in dead Agent's body and revive it!
 
         theRenderKing.UpdateAgentWidthsTexture(agentsArray[agentIndex]);
         //if(agentIndex == 0) {
@@ -1658,84 +1686,81 @@ public class SimulationManager : MonoBehaviour {
     }
     private void CreateMutatedCopyOfFood(int foodIndex) {
 
-        Vector3 startPos; // = new Vector3(foodArray[parentIndex].transform.position.x, foodArray[parentIndex].transform.position.x, 0f) + new Vector3(0f, 0f, 0f);
-        StartPositionGenome startPosGenome; // = new StartPositionGenome(startPos, Quaternion.identity);
+        int speciesIndex = Mathf.FloorToInt((float)foodIndex / (float)numFood * (float)numSpecies);
 
-        int parentIndex = UnityEngine.Random.Range(0, numFood);;
-        bool foundParent = false;
-        // Ttry to find a suitable startPos:
+        int parentIndex = UnityEngine.Random.Range(0, numFood);
+                
+
+        //bool foundParent = false;
+        // Try to find a suitable startPos:
         int numParentSearches = 1;
         //int parentIndex = -1;
         for(int i = 0; i < numParentSearches; i++) {
-            int randomIndex = UnityEngine.Random.Range(0, numFood);
+            int foodGroupSize = numFood / numSpecies;
+            int randomIndex = UnityEngine.Random.Range(speciesIndex * foodGroupSize, (speciesIndex + 1) * foodGroupSize);
             if(foodArray[randomIndex].curLifeStage == FoodChunk.FoodLifeStage.Mature) {
                 
                 //return startPosGenome;
                 parentIndex = randomIndex;
-                foundParent = true;
+                //foundParent = true;
                 break;
             }            
         }
-        //Vector3 parentForward = foodArray[parentIndex].transform.up;
-        //startPos = new Vector3(foodArray[parentIndex].transform.position.x, foodArray[parentIndex].transform.position.y, 0f) + parentForward * (foodArray[parentIndex].curSize.y + 0.25f);
-        
-        //startPosGenome = new StartPositionGenome()
-        
+       
         FoodGenome newFoodGenome = new FoodGenome(foodIndex);
 
         newFoodGenome.SetToMutatedCopyOfParentGenome(foodGenomePoolArray[parentIndex], settingsManager.mutationSettingsPersistent);
 
         foodGenomePoolArray[foodIndex] = newFoodGenome;
 
-        /*FoodModule parentFood = null;
-        if(foundParent) {
-            parentFood = foodArray[parentIndex];
-            //startPos = parentFood.transform.position;
-            Vector3 parentForward = foodArray[parentIndex].transform.up;
-            startPos = new Vector3(foodArray[parentIndex].transform.position.x, foodArray[parentIndex].transform.position.y, 0f) + parentForward * (foodArray[parentIndex].curSize.y + 0.25f);
-
-            startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
-            //Debug.Log("foundParent! parentPos: " + parentFood.transform.position.ToString() + ", startPos: " + startPos.ToString());
-        }
-        else {
-            startPosGenome = GetRandomFoodSpawnPosition();
-        }*/
-
         foodArray[foodIndex].InitializeFoodFromGenome(foodGenomePoolArray[foodIndex], GetRandomFoodSpawnPosition(), null); // Spawn that genome in dead Agent's body and revive it!
-       
-        // Randomly select a good one based on fitness Lottery (oldest = best)
-        /*if (rankedIndicesList[0] == foodIndex) {  // if Top Agent, just respawn identical copy:
-                               
-        }
-        else {
-            BodyGenome newBodyGenome = new BodyGenome();
-            BrainGenome newBrainGenome = new BrainGenome();
-            
-            int parentGenomeIndex = GetAgentIndexByLottery(rankedFitnessList, rankedIndicesList);
-
-            BodyGenome parentBodyGenome = agentGenomePoolArray[parentGenomeIndex].bodyGenome;
-            BrainGenome parentBrainGenome = agentGenomePoolArray[parentGenomeIndex].brainGenome;
-
-            // MUTATE BODY:
-            // Mutate body here
-            newBodyGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome, settingsManager.mutationSettingsPersistent);
-            // Create duplicate Genome
-            newBrainGenome.SetToMutatedCopyOfParentGenome(parentBrainGenome, settingsManager.mutationSettingsPersistent);
-
-            agentGenomePoolArray[foodIndex].bodyGenome = newBodyGenome; // update genome to new one
-            agentGenomePoolArray[foodIndex].brainGenome = newBrainGenome; // update genome to new one
-
-            numAgentsBorn++;
-            currentOldestAgent = agentsArray[rankedIndicesList[0]].ageCounterMature;
-        }*/
-
-        
+               
     }
-    private StartPositionGenome GetRandomAgentSpawnPosition() {
+    private StartPositionGenome GetRandomAgentSpawnPosition(int speciesIndex) {
         int numSpawnZones = startPositionsPresets.spawnZonesList.Count;
 
         int randZone = UnityEngine.Random.Range(0, numSpawnZones);
 
+        int numPotentialParents = numFood / numSpecies;
+        int lowIndex = numPotentialParents * speciesIndex;
+        int highIndex = (numPotentialParents + 1) * speciesIndex;
+
+        int randParentIndex = UnityEngine.Random.Range(lowIndex, highIndex);
+
+
+        float randRadius = startPositionsPresets.spawnZonesList[randZone].radius;
+
+        Vector2 randOffset = UnityEngine.Random.insideUnitCircle * randRadius;
+
+        if(randParentIndex >= foodArray.Length)
+        {
+            Debug.Log("ERROR!: " + randParentIndex.ToString() + ", " + numFood.ToString());
+        }
+        Vector3 parentEggPos = foodArray[randParentIndex].transform.position;
+
+        Vector3 agentStartPos = new Vector3(parentEggPos.x + randOffset.x,
+                               parentEggPos.y + randOffset.y,
+                               0f);
+
+        Vector3 randStartPos = new Vector3(startPositionsPresets.spawnZonesList[randZone].transform.position.x + randOffset.x, 
+                               startPositionsPresets.spawnZonesList[randZone].transform.position.y + randOffset.y, 
+                               0f);
+
+        Vector3 startPos = Vector3.Lerp(agentStartPos, randStartPos, Mathf.Round(UnityEngine.Random.Range(0f, 1f)));
+        StartPositionGenome startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
+        return startPosGenome;
+
+        // OLD:
+        /*Vector3 startPos = new Vector3(UnityEngine.Random.Range(-50f, 50f), UnityEngine.Random.Range(-50f, 50f), 0f);
+        StartPositionGenome startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
+        return startPosGenome;*/
+    }
+    private StartPositionGenome GetInitialAgentSpawnPosition(int speciesIndex)
+    {
+        int numSpawnZones = startPositionsPresets.spawnZonesList.Count;
+
+        int randZone = UnityEngine.Random.Range(0, numSpawnZones);
+        
         float randRadius = startPositionsPresets.spawnZonesList[randZone].radius;
 
         Vector2 randOffset = UnityEngine.Random.insideUnitCircle * randRadius;
@@ -1746,10 +1771,6 @@ public class SimulationManager : MonoBehaviour {
         StartPositionGenome startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
         return startPosGenome;
 
-        // OLD:
-        /*Vector3 startPos = new Vector3(UnityEngine.Random.Range(-50f, 50f), UnityEngine.Random.Range(-50f, 50f), 0f);
-        StartPositionGenome startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
-        return startPosGenome;*/
     }
     private StartPositionGenome GetRandomFoodSpawnPosition() {
 
@@ -1807,6 +1828,44 @@ public class SimulationManager : MonoBehaviour {
 
         //startPos = new Vector3(UnityEngine.Random.Range(-30f, 30f), UnityEngine.Random.Range(-50f, 50f), 0f);
         //startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
+        return startPosGenome;
+    }
+    private StartPositionGenome GetRandomEggClusterSpawnPosition(int speciesIndex)
+    {
+
+        Vector3 startPos;
+        StartPositionGenome startPosGenome;
+
+        int numPotentialParents = numAgents / numSpecies;
+
+        int lowIndex = numPotentialParents * speciesIndex;
+        int highIndex = (numPotentialParents + 1) * speciesIndex;
+
+        int parentIndex = UnityEngine.Random.Range(lowIndex, highIndex);
+
+        for (int i = 0; i < 10; i++)
+        {
+            int randParentIndex = UnityEngine.Random.Range(lowIndex, highIndex);
+
+            if (agentsArray[randParentIndex].curLifeStage == Agent.AgentLifeStage.Mature && agentsArray[randParentIndex].coreModule.energyRaw / agentsArray[randParentIndex].coreModule.maxEnergyStorage > 0.5f)
+            {
+                parentIndex = randParentIndex;
+                break;
+            }
+        }
+        
+
+        float randRadius = 1f;
+
+        Vector2 randOffset = UnityEngine.Random.insideUnitCircle * randRadius;
+
+        Vector3 parentAgentPos = agentsArray[parentIndex].bodyRigidbody.transform.position;
+
+        startPos = new Vector3(parentAgentPos.x + randOffset.x,
+                               parentAgentPos.y + randOffset.y,
+                               0f);
+        startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
+        
         return startPosGenome;
     }
     private Vector3 GetRandomPredatorSpawnPosition() {

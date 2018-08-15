@@ -108,11 +108,11 @@
 				float refractionStrength = 2.45;
 				offset.xy += -surfaceNormal.xy * refractionStrength;
 
-				float embryoStatus = critterSimData.embryoPercentage;
+				float embryoStatus = smoothstep(0,1,critterSimData.embryoPercentage);
 
 
 				float3 worldPosition = offset + vertexWorldOffset; //critterWorldPos + vertexWorldOffset; //
-				
+				//
 				worldPosition = lerp(critterSimData.worldPos, worldPosition, embryoStatus);
 
 				
@@ -221,7 +221,7 @@
 				//==================================================================================================================
 				backgroundColor.a *= isUnderwater;
 
-				float fogAmount = 0.25; //saturate((i.worldPos.z + 1) * 0.5);
+				float fogAmount = 0.05; //saturate((i.worldPos.z + 1) * 0.5);
 				//finalColor.rgb = lerp(finalColor.rgb, waterFogColor, fogAmount);
 
 				

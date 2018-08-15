@@ -907,7 +907,7 @@ public class TheRenderKing : MonoBehaviour {
         //()
         
     }
-    
+
     /*private void InitializeTerrain() {
         Debug.Log("InitializeTerrain!");
 
@@ -1012,7 +1012,35 @@ public class TheRenderKing : MonoBehaviour {
 
         return terrainMesh;
     }*/
-    
+
+    public Vector3[] GetDepthAtObjectPositions(Vector4[] positionsArray)
+    {
+
+        ComputeBuffer objectDataInFluidCoordsCBuffer = new ComputeBuffer(positionsArray.Length, sizeof(float) * 4);
+        ComputeBuffer depthValuesCBuffer = new ComputeBuffer(positionsArray.Length, sizeof(float) * 3);
+
+        Vector3[] objectDepthsArray = new Vector3[positionsArray.Length];
+
+        objectDataInFluidCoordsCBuffer.SetData(positionsArray);
+
+        int kernelGetObjectDepths = baronVonTerrain.computeShaderTerrainGeneration.FindKernel("CSGetObjectDepths");
+        baronVonTerrain.computeShaderTerrainGeneration.SetBuffer(kernelGetObjectDepths, "ObjectPositionsCBuffer", objectDataInFluidCoordsCBuffer);
+        baronVonTerrain.computeShaderTerrainGeneration.SetBuffer(kernelGetObjectDepths, "DepthValuesCBuffer", depthValuesCBuffer);
+        baronVonTerrain.computeShaderTerrainGeneration.SetTexture(kernelGetObjectDepths, "AltitudeRead", baronVonTerrain.terrainHeightMap);
+        //computeShaderFluidSim.SetFloat("_MapSize", SimulationManager._MapSize);
+        baronVonTerrain.computeShaderTerrainGeneration.Dispatch(kernelGetObjectDepths, positionsArray.Length, 1, 1);
+
+        depthValuesCBuffer.GetData(objectDepthsArray);
+
+        depthValuesCBuffer.Release();
+        objectDataInFluidCoordsCBuffer.Release();
+
+        //Debug.Log("Depth at 0: " + objectDepthsArray[0].ToString());
+
+        return objectDepthsArray;
+
+    }
+
     private void PopulateObstaclesBuffer() {
         
         int baseIndex = 0;

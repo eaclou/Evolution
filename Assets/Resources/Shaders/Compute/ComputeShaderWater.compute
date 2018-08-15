@@ -411,7 +411,7 @@ void CSUpdateWaterSurface (uint3 id : SV_DispatchThreadID)
 					(1.0 - abs(noiseSample3.x)) * 0.04 * distWeight3;
 
 	//float height = noiseSample0.x * 0.5 + 0.5;
-	waterSurfaceDataWriteRT[id.xy] = float4(height * 0.8, 0, 0, 1);
+	waterSurfaceDataWriteRT[id.xy] = float4(height * 0.4, 0, 0, 1);
 }
 
 [numthreads(32,32,1)]

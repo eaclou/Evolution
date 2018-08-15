@@ -522,7 +522,7 @@ public class TestModule {
         if(nearestFoodModule != null) {
             foodPos = new Vector2(nearestFoodModule.transform.localPosition.x - ownPos.x, nearestFoodModule.transform.localPosition.y - ownPos.y);
             foodDir = foodPos.normalized;
-            typeR = nearestFoodModule.amountR;  // make a FoodModule Class to hold as reference which will contain Type info
+            typeR = nearestFoodModule.foodAmount;  // make a FoodModule Class to hold as reference which will contain Type info
             //typeG = nearestFoodModule.amountG;
             //typeB = nearestFoodModule.amountB;
         }

@@ -172,7 +172,7 @@ public class CritterMouthComponent : MonoBehaviour {
             predatorAgent.springJoint.distance = 0.005f;
             predatorAgent.springJoint.enableCollision = false;
             predatorAgent.springJoint.enabled = true;
-            predatorAgent.springJoint.frequency = 2.5f;
+            predatorAgent.springJoint.frequency = 3.9f;
 
 
             Vector3 predPos = predatorAgent.bodyRigidbody.transform.position;
@@ -193,7 +193,7 @@ public class CritterMouthComponent : MonoBehaviour {
         //Debug.Log("SwallowFoodWhole");
         float flow = foodModule.curSize.x * foodModule.curSize.y;        
         agentRef.EatFood(flow * 1f);    
-        foodModule.amountR = 0f;
+        foodModule.foodAmount = 0f;
         //foodModule.amountG = 0f;
         //foodModule.amountB = 0f;
     }
@@ -221,14 +221,14 @@ public class CritterMouthComponent : MonoBehaviour {
         // CONSUME FOOD!
         float flow = ownArea * 2f; // / colliderCount;
 
-        float flowR = Mathf.Min(foodModule.amountR, flow);
+        float flowR = Mathf.Min(foodModule.foodAmount, flow);
         //collidingAgent.testModule.foodAmountR[0] += flowR * 2f;  // make sure Agent doesn't receive food from empty dispenser
 
         agentRef.EatFood(flowR * 1f); // assumes all foodAmounts are equal !! *****
     
-        foodModule.amountR -= flowR;
-        if (foodModule.amountR < 0f) {
-            foodModule.amountR = 0f;
+        foodModule.foodAmount -= flowR;
+        if (foodModule.foodAmount < 0f) {
+            foodModule.foodAmount = 0f;
         }
         /*float flowG = Mathf.Min(foodModule.amountG, flow);
         foodModule.amountG -= flowG;
