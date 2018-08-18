@@ -28,8 +28,8 @@ public class CritterModuleCoreGenome {
     public Vector2 mouthSize;  // relative to head size?
     public Vector2 biteZoneDimensions;
     public float biteZoneOffset;
-    public int biteChargeUpDuration = 4;
-    public int biteCooldownDuration = 26;
+    public int biteChargeUpDuration = 6;
+    public int biteCooldownDuration = 16;
     public float biteStrength;
     public float biteSharpness;
 
@@ -45,7 +45,7 @@ public class CritterModuleCoreGenome {
         // Do stuff:
         //Debug.Log("GenerateRandomGenome()");
 
-        isPassive = false;
+        isPassive = true;
 
         numSegments = 1;
         fullBodyWidth = UnityEngine.Random.Range(0.1f, 0.5f);

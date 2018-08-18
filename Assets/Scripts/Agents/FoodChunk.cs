@@ -69,8 +69,8 @@ public class FoodChunk : MonoBehaviour {
 
     private Vector2 minSize = new Vector2(0.1f, 0.1f);
     
-    private float minMass = 0.25f;
-    private float maxMass = 5f;
+    private float minMass = 0.33f;
+    private float maxMass = 3.33f;
 
     public float isBeingEaten = 0f;
     private float isBeingDamaged = 0f;

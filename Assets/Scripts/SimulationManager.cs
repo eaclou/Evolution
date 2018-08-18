@@ -841,12 +841,12 @@ public class SimulationManager : MonoBehaviour {
         for (int i = 0; i < agentsArray.Length; i++) {
 
             Vector3 depthSample = simStateData.depthAtAgentPositionsArray[i];
-            float agentSize = agentsArray[i].fullSizeBoundingBox.x;
+            float agentSize = agentsArray[i].fullSizeBoundingBox.x * 2.25f + 1.25f;
             float floorDepth = depthSample.x * 10f;
             if (floorDepth < agentSize)
             {
-                float wallForce = Mathf.Clamp01(agentSize - floorDepth);
-                agentsArray[i].bodyRigidbody.AddForce(new Vector2(depthSample.y, depthSample.z) * 16f * agentsArray[i].bodyRigidbody.mass * wallForce, ForceMode2D.Impulse);
+                float wallForce = Mathf.Clamp01(agentSize - floorDepth) / agentSize;
+                agentsArray[i].bodyRigidbody.AddForce(new Vector2(depthSample.y, depthSample.z).normalized * 2.5f * agentsArray[i].bodyRigidbody.mass * wallForce, ForceMode2D.Impulse);
             }
 
             agentsArray[i].bodyRigidbody.AddForce(simStateData.fluidVelocitiesAtAgentPositionsArray[i] * 40f * agentsArray[i].bodyRigidbody.mass, ForceMode2D.Impulse);

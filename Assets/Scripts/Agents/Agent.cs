@@ -1047,7 +1047,7 @@ public class Agent : MonoBehaviour {
                 }
                 else
                 {
-                    if (Input.GetKey("space") || Input.GetKey("e"))
+                    if (Input.GetKey("e"))
                     {
                         mouthRef.InitiateActiveBite();
                         //Debug.Log("BITE!");
