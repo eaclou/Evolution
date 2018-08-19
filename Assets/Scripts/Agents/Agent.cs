@@ -98,6 +98,7 @@ public class Agent : MonoBehaviour {
 
     public CapsuleCollider2D colliderBody;
     public SpringJoint2D springJoint;
+    public CapsuleCollider mouseClickCollider;
 
     //private Rigidbody2D rigidBody2D; // ** segments???
 
@@ -850,6 +851,13 @@ public class Agent : MonoBehaviour {
         bodyCritterSegment.agentRef.mouthRef.triggerCollider.radius = coreModule.coreWidth * scale * 0.5f;
         bodyCritterSegment.agentRef.mouthRef.triggerCollider.offset = new Vector2(0f, coreModule.coreLength * scale * 0.5f);
 
+        // MouseClickCollider MCC
+        //mouseClickCollider.direction = 1; // Y-Axis ???
+        //mouseClickCollider.center = Vector3.zero;
+        mouseClickCollider.radius = coreModule.coreWidth * scale * 0.5f;        
+        mouseClickCollider.height = coreModule.coreLength * scale;
+        mouseClickCollider.radius *= 1.67f; // ** TEMP
+        //mouseClickCollider.height *= 1.25f; // ** TEMP
         
         /*
         for(int i = 0; i < numSegments; i++) {
@@ -1271,6 +1279,12 @@ public class Agent : MonoBehaviour {
             mouthRef = testMouthGO.AddComponent<CritterMouthComponent>();
             CircleCollider2D mouthTrigger = testMouthGO.AddComponent<CircleCollider2D>();
             mouthRef.triggerCollider = mouthTrigger;
+
+            GameObject mouseClickColliderGO = new GameObject("MouseClickCollider");
+            mouseClickColliderGO.transform.parent = bodyGO.transform;
+            mouseClickColliderGO.transform.localPosition = new Vector3(0f, 0f, 1f);
+            mouseClickCollider = mouseClickColliderGO.AddComponent<CapsuleCollider>();
+            mouseClickCollider.isTrigger = true;
         } 
         
         bodyGO.transform.localPosition = new Vector3(0f, 0f, 0f) + startPos.startPosition;
@@ -1294,7 +1308,14 @@ public class Agent : MonoBehaviour {
         mouthRef.bitingFrameCounter = 0;
         mouthRef.agentIndex = this.index;
         mouthRef.agentRef = this;
-        
+
+
+        //mouseclickcollider MCC
+        mouseClickCollider.direction = 1; // Y-Axis ???
+        mouseClickCollider.center = Vector3.zero;
+        mouseClickCollider.radius = coreModule.coreWidth / 2f * spawnStartingScale;
+        mouseClickCollider.radius *= 1.25f; // ** TEMP
+        mouseClickCollider.height = coreModule.coreLength / 2f * spawnStartingScale;
     }
 
     public void InitializeAgentFromGenome(int agentIndex, AgentGenome genome, StartPositionGenome startPos) {

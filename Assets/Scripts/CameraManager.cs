@@ -36,6 +36,10 @@ public class CameraManager : MonoBehaviour {
     public Agent targetAgent;
     public int targetCritterIndex = 0;
 
+    public int mouseHoverAgentIndex = 0;
+    public bool isMouseHoverAgent = false;
+    public Agent mouseHoverAgentRef;
+
     Vector2 prevCameraPosition, prevTargetPosition;
 
     public float orbitRadius = 35f;

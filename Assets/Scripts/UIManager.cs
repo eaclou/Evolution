@@ -161,29 +161,8 @@ public class UIManager : MonoBehaviour {
             }
 
             // &&&&&&&&&&&&&&&&& MOUSE: &&&&&&&&&&&&&&&
-            if (Input.GetMouseButtonDown(0)) {
-                //Debug.Log("LEFT CLICK!");
-
-                // CHECK IF CLICKED ON AN OBJECT OF INTEREST:
-                Ray ray = cameraManager.camera.ScreenPointToRay(Input.mousePosition);
-                RaycastHit2D hit = Physics2D.GetRayIntersection(ray);
-
-                if (hit.point != null) {
-                    //Debug.Log("CLICKED ON: [ " + hit.ToString() + " ]);
-
-                    if(hit.collider != null) {
-                        Agent agentRef = hit.collider.gameObject.GetComponentInParent<Agent>();
-                        if(agentRef != null) {
-                            Debug.Log("AGENT: [ " + agentRef.gameObject.name + " ] #" + agentRef.index.ToString());
-
-                            cameraManager.SetTarget(agentRef, agentRef.index);
-                        }
-
-
-                        Debug.Log("CLICKED ON: [ " + hit.collider.gameObject.name + " ] Ray= " + ray.ToString() + ", hit= " + hit.point.ToString());
-                    }
-                }
-            }
+            MouseRaycast(Input.GetMouseButtonDown(0));
+            
             if (Input.GetMouseButtonDown(1)) {
                 Debug.Log("RIGHT CLICKETY-CLICK!");
             }
@@ -226,6 +205,40 @@ public class UIManager : MonoBehaviour {
         }
         else {
             panelObserverMode.SetActive(false);
+        }
+    }
+
+    private void MouseRaycast(bool clicked) {
+        
+        Vector3 camPos = cameraManager.camera.gameObject.transform.position;                
+        Ray ray = cameraManager.camera.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit = new RaycastHit();
+        Physics.Raycast(ray, out hit);
+
+        cameraManager.isMouseHoverAgent = false;
+        cameraManager.mouseHoverAgentIndex = 0;
+        cameraManager.mouseHoverAgentRef = null;
+
+        if (hit.point != null) {
+            
+            if(hit.collider != null) {
+                Agent agentRef = hit.collider.gameObject.GetComponentInParent<Agent>();
+                if(agentRef != null) {
+                    //Debug.Log("AGENT: [ " + agentRef.gameObject.name + " ] #" + agentRef.index.ToString());
+                    
+                    if(clicked) {
+                        cameraManager.SetTarget(agentRef, agentRef.index);
+                    }
+                    else {
+
+                    }
+
+                    cameraManager.isMouseHoverAgent = true;
+                    cameraManager.mouseHoverAgentIndex = agentRef.index;
+                    cameraManager.mouseHoverAgentRef = agentRef;
+                }
+                //Debug.Log("CLICKED ON: [ " + hit.collider.gameObject.name + " ] Ray= " + ray.ToString() + ", hit= " + hit.point.ToString());
+            }
         }
     }
 	
@@ -396,6 +409,7 @@ public class UIManager : MonoBehaviour {
         int agentIndex = agentRef.index;
 
         //debugTxt1 += "Agent[" + agentIndex.ToString() + "] # Neurons: " + cameraManager.targetAgent.brain.neuronList.Count.ToString() + ", # Axons: " + cameraManager.targetAgent.brain.axonList.Count.ToString() + "\n";
+        debugTxt1 += "HoverAgentIndex: " + cameraManager.mouseHoverAgentIndex.ToString() + "\n";
         debugTxt1 += "CurOldestAge: " + simManager.currentOldestAgent.ToString() + ", numChildrenBorn: " + simManager.numAgentsBorn.ToString() + ", ~Gen: " + ((float)simManager.numAgentsBorn / (float)simManager._NumAgents).ToString();
         debugTxt1 += "\nBotRecordAge: " + simManager.recordBotAge.ToString() + ", PlayerRecordAge: " + simManager.recordPlayerAge.ToString();
         debugTxt1 += "\nAverageAgentScore: " + simManager.rollingAverageAgentScoresArray[0].ToString();
@@ -408,8 +422,31 @@ public class UIManager : MonoBehaviour {
         debugTxt2 += "OutComms: [ " + agentRef.coreModule.outComm0[0].ToString("F2") + ", " + agentRef.coreModule.outComm1[0].ToString("F2") + ", " + agentRef.coreModule.outComm2[0].ToString("F2")  + ", " + agentRef.coreModule.outComm3[0].ToString("F2") + " ]\n";
         debugTxt2 += "Dash: " + agentRef.movementModule.dash[0].ToString("F2") + "\n";
 
-        string debugTxt3 = "";
-        debugTxt3 += "CRITTER # " + agentIndex.ToString() + " ( " + agentRef.curLifeStage.ToString() + " )  Age: " + agentRef.scoreCounter.ToString() + " Frames\n\n";
+        //+++++++++++++++++++++++++++++++++++++ CRITTER: ++++++++++++++++++++++++++++++++++++++++++++
+        string debugTxt3 = "";        
+        int curCount = 0;
+        int maxCount = 1;
+        if(agentRef.curLifeStage == Agent.AgentLifeStage.Egg) {
+            curCount = agentRef.lifeStageTransitionTimeStepCounter;
+            maxCount = agentRef._GestationDurationTimeSteps;
+        }
+        if(agentRef.curLifeStage == Agent.AgentLifeStage.Young) {
+            curCount = agentRef.lifeStageTransitionTimeStepCounter;
+            maxCount = agentRef._YoungDurationTimeSteps;
+        }
+        if(agentRef.curLifeStage == Agent.AgentLifeStage.Mature) {
+            curCount = agentRef.ageCounterMature;
+            maxCount = agentRef.maxAgeTimeSteps;
+        }
+        if(agentRef.curLifeStage == Agent.AgentLifeStage.Dead) {
+            curCount = agentRef.lifeStageTransitionTimeStepCounter;
+            maxCount = agentRef._DecayDurationTimeSteps;
+        }
+        int progressPercent = Mathf.RoundToInt((float)curCount / (float)maxCount * 100f);
+        string lifeStageProgressTxt = " " + agentRef.curLifeStage.ToString() + " " + curCount.ToString() + "/" + maxCount.ToString() + "  " + progressPercent.ToString() + "% ";
+
+
+        debugTxt3 += "CRITTER # " + agentIndex.ToString() + " (" + lifeStageProgressTxt + ")  Age: " + agentRef.scoreCounter.ToString() + " Frames\n\n";
         debugTxt3 += "Energy: " + agentRef.coreModule.energyStored[0].ToString("F4") + "\n";
         debugTxt3 += "Health: " + agentRef.coreModule.healthBody.ToString("F2") + "\n";
         debugTxt3 += "Food: " + agentRef.coreModule.foodStored[0].ToString("F2") + "\n";
