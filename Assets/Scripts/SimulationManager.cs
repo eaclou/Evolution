@@ -273,8 +273,8 @@ public class SimulationManager : MonoBehaviour {
 
         // Initialize Agents:
         LoadingInstantiateAgents();  // Fills the AgentsArray, Instantiates Agent Objects (MonoBehaviors + GameObjects)
-        agentsArray[0].humanControlled = true;
-        agentsArray[0].humanControlLerp = 1f;
+        //agentsArray[0].humanControlled = true;
+        //agentsArray[0].humanControlLerp = 1f;
         LoadingInitializeAgentsFromGenomes(); // This was "RespawnAgents()" --  Used to actually place the Agent in the game in a random spot and set the Agent's atributes ffrom its genome
 
         // Initialize Food:
@@ -1907,8 +1907,8 @@ public class SimulationManager : MonoBehaviour {
 
         // respawn the Agent // mutates, respawns, updates RenderKingBuffers
 
-        agentsArray[0].humanControlled = true;
-        agentsArray[0].humanControlLerp = 1f;
+        //agentsArray[0].humanControlled = true;
+        //agentsArray[0].humanControlLerp = 1f;
         CreateMutatedCopyOfAgent(0, 0);         
         theRenderKing.UpdateAgentSmearStrokesBuffer(0);
         //theRenderKing.UpdateAgentBodyStrokesBuffer(0);

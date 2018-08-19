@@ -46,7 +46,10 @@ public class UIManager : MonoBehaviour {
     public Button buttonModeB;
     public Button buttonModeC;
 
-    public Text textDebugTrainingInfo;
+    public Text textDebugTrainingInfo1;
+    public Text textDebugTrainingInfo2;
+    public Text textDebugTrainingInfo3;
+    public Text textDebugSimSettings;
     public Button buttonToggleRecording;
     public Button buttonToggleTrainingSupervised;
     public Button buttonResetGenomes;
@@ -85,6 +88,146 @@ public class UIManager : MonoBehaviour {
         
         
     }
+
+    public void UpdateObserverModeUI() {
+        if(isObserverMode) {
+            panelObserverMode.SetActive(true);
+
+            textCurGen.text = "Generation: " + gameManager.simulationManager.curApproxGen.ToString("F0");
+            textAvgLifespan.text = "Average Lifespan: " + Mathf.RoundToInt(gameManager.simulationManager.rollingAverageAgentScoresArray[0]).ToString();
+
+            if(Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W)) {  // UP !!!!
+                
+                //cameraManager
+                
+                /*obsZoomLevel = obsZoomLevel + 1;
+                if(obsZoomLevel > 2) {
+                    obsZoomLevel = 2;
+                }
+
+                if(obsZoomLevel == 1) {
+                    ClickButtonModeB();
+                }
+                if(obsZoomLevel == 2) {
+                    ClickButtonModeA();
+                } */               
+            }
+            if(Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.S)) {  // DOWN !!!!
+                /*obsZoomLevel = obsZoomLevel - 1;
+                if(obsZoomLevel < 0) {
+                    obsZoomLevel = 0;
+                }
+
+                if(obsZoomLevel == 1) {
+                    ClickButtonModeB();
+                }
+                if(obsZoomLevel == 0) {
+                    ClickButtonModeC();
+                }*/
+            }
+            
+            if(Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.D)) {  // RIGHT !!!!
+                /*int newIndex = cameraManager.targetCritterIndex + 24;
+                if(newIndex >= gameManager.simulationManager._NumAgents) {
+                    newIndex = 0;                    
+                }
+                cameraManager.SetTarget(gameManager.simulationManager.agentsArray[newIndex], newIndex);
+                */
+            }
+            if(Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A)) {  // LEFT !!!!!
+                /*
+                int newIndex = cameraManager.targetCritterIndex - 1;
+                if(newIndex < 0) {
+                    newIndex = newIndex + 24;                    
+                }
+                cameraManager.SetTarget(gameManager.simulationManager.agentsArray[newIndex], newIndex);
+                */
+            }
+            if(Input.GetKeyDown(KeyCode.Escape)) {
+                Debug.Log("Pressed Escape!");
+                isPaused = !isPaused;
+
+                if(isPaused) {
+                    ClickButtonPause();
+                }
+                else {
+                    ClickButtonPlayNormal();
+                }
+            }
+            if(Input.GetKeyDown(KeyCode.Space)) {
+                Debug.Log("Pressed Spacebar!");
+                    
+                // Detach from following creature
+            }
+
+            // &&&&&&&&&&&&&&&&& MOUSE: &&&&&&&&&&&&&&&
+            if (Input.GetMouseButtonDown(0)) {
+                //Debug.Log("LEFT CLICK!");
+
+                // CHECK IF CLICKED ON AN OBJECT OF INTEREST:
+                Ray ray = cameraManager.camera.ScreenPointToRay(Input.mousePosition);
+                RaycastHit2D hit = Physics2D.GetRayIntersection(ray);
+
+                if (hit.point != null) {
+                    //Debug.Log("CLICKED ON: [ " + hit.ToString() + " ]);
+
+                    if(hit.collider != null) {
+                        Agent agentRef = hit.collider.gameObject.GetComponentInParent<Agent>();
+                        if(agentRef != null) {
+                            Debug.Log("AGENT: [ " + agentRef.gameObject.name + " ] #" + agentRef.index.ToString());
+
+                            cameraManager.SetTarget(agentRef, agentRef.index);
+                        }
+
+
+                        Debug.Log("CLICKED ON: [ " + hit.collider.gameObject.name + " ] Ray= " + ray.ToString() + ", hit= " + hit.point.ToString());
+                    }
+                }
+            }
+            if (Input.GetMouseButtonDown(1)) {
+                Debug.Log("RIGHT CLICKETY-CLICK!");
+            }
+
+            if (Input.GetAxis("Mouse ScrollWheel") > 0f ) //  Forwards
+            {
+                Debug.Log("Mouse ScrollWheel Forward");
+
+                // ** TEMPORARY!!!! ****!!!!
+
+                obsZoomLevel = obsZoomLevel + 1;
+                if(obsZoomLevel > 2) {
+                    obsZoomLevel = 2;
+                }
+
+                if(obsZoomLevel == 1) {
+                    ClickButtonModeB();
+                }
+                if(obsZoomLevel == 2) {
+                    ClickButtonModeA();
+                }
+            }
+            else if (Input.GetAxis("Mouse ScrollWheel") < 0f ) //  Backwarfds
+            {
+                Debug.Log("Mouse ScrollWheel Backward");
+
+                obsZoomLevel = obsZoomLevel - 1;
+                if(obsZoomLevel < 0) {
+                    obsZoomLevel = 0;
+                }
+
+                if(obsZoomLevel == 1) {
+                    ClickButtonModeB();
+                }
+                if(obsZoomLevel == 0) {
+                    ClickButtonModeC();
+                }
+            }
+                    
+        }
+        else {
+            panelObserverMode.SetActive(false);
+        }
+    }
 	
 	// Update is called once per frame
 	void Update () {
@@ -97,7 +240,7 @@ public class UIManager : MonoBehaviour {
                 break;
             case GameManager.GameState.Playing:
                 // Check for Key PResses!
-                if(Input.GetKeyDown(KeyCode.Escape)) {
+                /*if(Input.GetKeyDown(KeyCode.Escape)) {
                     Debug.Log("Pressed Escape Key!");
                     //if(!deathScreenOn) {
                     //    EnterObserverMode();                        
@@ -106,8 +249,8 @@ public class UIManager : MonoBehaviour {
 
                         EnterObserverMode();                        
                     }  
-                }
-                if(Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKeyDown(KeyCode.Return)) {
+                }*/
+                /*if(Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKeyDown(KeyCode.Return)) {
                     Debug.Log("Pressed ENTER Key!");
 
                     if(!isPaused) {
@@ -125,18 +268,8 @@ public class UIManager : MonoBehaviour {
                         }
                         
                     }                    
-                }
-                if(Input.GetKeyDown(KeyCode.Space)) {
-                    Debug.Log("Pressed Spacebar!");
-                    isPaused = !isPaused;
-
-                    if(isPaused) {
-                        ClickButtonPause();
-                    }
-                    else {
-                        ClickButtonPlayNormal();
-                    }
-                }
+                }*/
+                
                 UpdateSimulationUI();
                 break;
             default:
@@ -233,7 +366,7 @@ public class UIManager : MonoBehaviour {
         UpdateDebugUI();
         UpdateHUDUI();
         UpdateObserverModeUI();
-        UpdateDeathScreenUI();
+        //UpdateDeathScreenUI();
         UpdatePausedUI();
     }
 
@@ -254,17 +387,57 @@ public class UIManager : MonoBehaviour {
         // DISABLED!!!! -- Need to establish good method for grabbing data from SimulationManager!
         SimulationManager simManager = gameManager.simulationManager;
 
-        string debugTxt = "Training: False";
-        
+        string debugTxt1 = ""; // Training: False";
+
         //debugTxt = "Training: ACTIVE   numSamples: " + dataSamplesList.Count.ToString() + "\n";
         //debugTxt += "Gen: " + curGen.ToString() + ", Agent: " + curTestingGenomeSupervised.ToString() + ", Sample: " + curTestingSample.ToString() + "\n";
         //debugTxt += "Fitness Best: " + bestFitnessScoreSupervised.ToString() + " ( Avg: " + avgFitnessLastGenSupervised.ToString() + " ) Blank: " + lastGenBlankAgentFitnessSupervised.ToString() + "\n";
-        debugTxt += "Agent[0] # Neurons: " + simManager.agentsArray[0].brain.neuronList.Count.ToString() + ", # Axons: " + simManager.agentsArray[0].brain.axonList.Count.ToString() + "\n";
-        debugTxt += "CurOldestAge: " + simManager.currentOldestAgent.ToString() + ", numChildrenBorn: " + simManager.numAgentsBorn.ToString() + ", ~Gen: " + ((float)simManager.numAgentsBorn / (float)simManager._NumAgents).ToString();
-        debugTxt += "\nBotRecordAge: " + simManager.recordBotAge.ToString() + ", PlayerRecordAge: " + simManager.recordPlayerAge.ToString();
-        debugTxt += "\nAverageAgentScore: " + simManager.rollingAverageAgentScoresArray[0].ToString();
+        Agent agentRef = cameraManager.targetAgent;
+        int agentIndex = agentRef.index;
+
+        //debugTxt1 += "Agent[" + agentIndex.ToString() + "] # Neurons: " + cameraManager.targetAgent.brain.neuronList.Count.ToString() + ", # Axons: " + cameraManager.targetAgent.brain.axonList.Count.ToString() + "\n";
+        debugTxt1 += "CurOldestAge: " + simManager.currentOldestAgent.ToString() + ", numChildrenBorn: " + simManager.numAgentsBorn.ToString() + ", ~Gen: " + ((float)simManager.numAgentsBorn / (float)simManager._NumAgents).ToString();
+        debugTxt1 += "\nBotRecordAge: " + simManager.recordBotAge.ToString() + ", PlayerRecordAge: " + simManager.recordPlayerAge.ToString();
+        debugTxt1 += "\nAverageAgentScore: " + simManager.rollingAverageAgentScoresArray[0].ToString();
         
-        textDebugTrainingInfo.text = debugTxt;
+
+        string debugTxt2 = "";
+        debugTxt2 += "THE BRAIN !!!\n\n"; // + agentRef.coreModule.coreWidth.ToString() + "\n";
+        debugTxt2 += "# Neurons: " + cameraManager.targetAgent.brain.neuronList.Count.ToString() + ", # Axons: " + cameraManager.targetAgent.brain.axonList.Count.ToString() + "\n\n";
+        debugTxt2 += "Throttle: [ " + agentRef.movementModule.throttleX[0].ToString("F3") + ", " + agentRef.movementModule.throttleY[0].ToString("F3") + " ]\n\n";
+        debugTxt2 += "OutComms: [ " + agentRef.coreModule.outComm0[0].ToString("F2") + ", " + agentRef.coreModule.outComm1[0].ToString("F2") + ", " + agentRef.coreModule.outComm2[0].ToString("F2")  + ", " + agentRef.coreModule.outComm3[0].ToString("F2") + " ]\n";
+        debugTxt2 += "Dash: " + agentRef.movementModule.dash[0].ToString("F2") + "\n";
+
+        string debugTxt3 = "";
+        debugTxt3 += "CRITTER # " + agentIndex.ToString() + " ( " + agentRef.curLifeStage.ToString() + " )  Age: " + agentRef.scoreCounter.ToString() + " Frames\n\n";
+        debugTxt3 += "Energy: " + agentRef.coreModule.energyStored[0].ToString("F4") + "\n";
+        debugTxt3 += "Health: " + agentRef.coreModule.healthBody.ToString("F2") + "\n";
+        debugTxt3 += "Food: " + agentRef.coreModule.foodStored[0].ToString("F2") + "\n";
+        debugTxt3 += "Stamina: " + agentRef.coreModule.stamina[0].ToString("F2") + "\n\n";
+        debugTxt3 += "Width: " + agentRef.coreModule.coreWidth.ToString("F2") + ",  Length: " + agentRef.coreModule.coreLength.ToString("F2") + "\n";
+        /*
+        string debugTxtSimSettings = "\nSIMULATION SETTINGS\n\n";
+        debugTxtSimSettings += "Mutation Parameters:\nBODY: Frequency: " + simManager.settingsManager.mutationSettingsPersistent.defaultBodyMutationChance.ToString("F4") + ", Magnitude: " + simManager.settingsManager.mutationSettingsPersistent.defaultBodyMutationStepSize.ToString("F4") + "\n";
+        debugTxtSimSettings += "BRAIN: Frequency: " + simManager.settingsManager.mutationSettingsPersistent.mutationChance.ToString("F4") + ", Magnitude: " + simManager.settingsManager.mutationSettingsPersistent.mutationStepSize.ToString("F4") + "\n";
+        debugTxtSimSettings += "New Axon Chance: " + simManager.settingsManager.mutationSettingsPersistent.newLinkChance.ToString("F4") + ",  New Neuron Chance: " + simManager.settingsManager.mutationSettingsPersistent.newHiddenNodeChance.ToString("F4") + ",  Weight Decay: " + simManager.settingsManager.mutationSettingsPersistent.weightDecayAmount.ToString("F4") + "\n";
+        debugTxtSimSettings += "\nFood:\n";
+        debugTxtSimSettings += "Energy Burn Rate Multiplier: " + simManager.settingsManager.energyDrainMultiplier.ToString("F2") + "\n";
+        debugTxtSimSettings += "Max Global Food [Tiny]: " + simManager.settingsManager.maxGlobalNutrients.ToString("F2") + "\n";
+        debugTxtSimSettings += "Eat Rate Multiplier: " + simManager.settingsManager.eatRateMultiplier.ToString("F3") + "\n";
+        debugTxtSimSettings += "Spawn New Food Rate: " + simManager.settingsManager.spawnNewFoodChance.ToString("F3") + "\n";
+        debugTxtSimSettings += "Diffusion Rate: " + simManager.settingsManager.foodDiffusionRate.ToString("F2") + "\n";
+        debugTxtSimSettings += "Feeding Efficiency Smallest Critter: " + simManager.settingsManager.minSizeFeedingEfficiency.ToString("F2") + "\n";
+        debugTxtSimSettings += "Feeding Efficiency Largest Critter: : " + simManager.settingsManager.maxSizeFeedingEfficiency.ToString("F2") + "\n";
+        debugTxtSimSettings += "\nMax Global Food [Particle]: " + simManager.settingsManager.maxFoodParticleTotalAmount.ToString("F2") + "\n";
+        debugTxtSimSettings += "Avg Radius: " + simManager.settingsManager.avgFoodParticleRadius.ToString("F3") + "\n";
+        debugTxtSimSettings += "Radii Variance: " + simManager.settingsManager.foodParticleRadiusVariance.ToString("F2") + "\n";
+        debugTxtSimSettings += "Nutrients Bonus Multiplier: x" + simManager.settingsManager.foodParticleNutrientDensity.ToString("F2") + "\n";
+        debugTxtSimSettings += "Respawn Rate: " + simManager.settingsManager.foodParticleRegrowthRate.ToString("F5") + "\n";
+        */
+        textDebugTrainingInfo1.text = debugTxt1;
+        textDebugTrainingInfo2.text = debugTxt2;
+        textDebugTrainingInfo3.text = debugTxt3;
+        //textDebugSimSettings.text = debugTxtSimSettings;
 
         /*if (recording) {
             ColorBlock colorBlock = buttonToggleRecording.colors;
@@ -322,61 +495,8 @@ public class UIManager : MonoBehaviour {
             panelPaused.SetActive(false);
         }
     }
-    public void UpdateObserverModeUI() {
-        if(isObserverMode) {
-            panelObserverMode.SetActive(true);
-
-            textCurGen.text = "Generation: " + gameManager.simulationManager.curApproxGen.ToString("F0");
-            textAvgLifespan.text = "Average Lifespan: " + Mathf.RoundToInt(gameManager.simulationManager.rollingAverageAgentScoresArray[0]).ToString();
-
-            if(Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W)) {
-                obsZoomLevel = obsZoomLevel + 1;
-                if(obsZoomLevel > 2) {
-                    obsZoomLevel = 2;
-                }
-
-                if(obsZoomLevel == 1) {
-                    ClickButtonModeB();
-                }
-                if(obsZoomLevel == 2) {
-                    ClickButtonModeA();
-                }                
-            }
-            if(Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.S)) {
-                obsZoomLevel = obsZoomLevel - 1;
-                if(obsZoomLevel < 0) {
-                    obsZoomLevel = 0;
-                }
-
-                if(obsZoomLevel == 1) {
-                    ClickButtonModeB();
-                }
-                if(obsZoomLevel == 0) {
-                    ClickButtonModeC();
-                }
-            }
-            
-            if(Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.D)) {
-                int newIndex = cameraManager.targetCritterIndex + 24;
-                if(newIndex >= gameManager.simulationManager._NumAgents) {
-                    newIndex = 0;                    
-                }
-                cameraManager.SetTarget(gameManager.simulationManager.agentsArray[newIndex], newIndex);
-            }
-            if(Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A)) {
-                int newIndex = cameraManager.targetCritterIndex - 1;
-                if(newIndex < 0) {
-                    newIndex = newIndex + 24;                    
-                }
-                cameraManager.SetTarget(gameManager.simulationManager.agentsArray[newIndex], newIndex);
-            }
-            
-        }
-        else {
-            panelObserverMode.SetActive(false);
-        }
-    }
-    public void UpdateDeathScreenUI() {
+    
+    /*public void UpdateDeathScreenUI() {
         if(deathScreenOn) {
             panelDeathScreen.SetActive(true);
 
@@ -403,7 +523,7 @@ public class UIManager : MonoBehaviour {
         else {
             panelDeathScreen.SetActive(false);
         }
-    }
+    }*/
 
     public void RefreshFitnessTexture(List<Vector4> generationScores) {
         fitnessDisplayTexture.Resize(Mathf.Max(1, generationScores.Count), 1);

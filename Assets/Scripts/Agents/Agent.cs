@@ -604,7 +604,7 @@ public class Agent : MonoBehaviour {
 
                 
             }
-
+            /*
             float dist = (bodyRigidbody.transform.position - preyAgentRef.bodyRigidbody.transform.position).magnitude;
             if (dist > 6f)
             {
@@ -613,6 +613,7 @@ public class Agent : MonoBehaviour {
                 debugString += "\n Prey  Age: " + preyAgentRef.curLifeStage.ToString() + preyAgentRef.lifeStageTransitionTimeStepCounter.ToString() + ", Health: " + preyAgentRef.coreModule.healthBody.ToString() + ", Energy: " + preyAgentRef.coreModule.energyRaw.ToString();
                 Debug.Log(debugString);
             }
+            */
         }
         else
         {

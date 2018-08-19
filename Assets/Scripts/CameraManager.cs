@@ -56,7 +56,7 @@ public class CameraManager : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-        ChangeGameMode(GameMode.ModeA);
+        ChangeGameMode(GameMode.ModeC);
         //this.transform.position = new Vector3(0f, 0f, -50f);
     }
 
