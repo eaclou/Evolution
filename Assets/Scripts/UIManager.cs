@@ -96,10 +96,31 @@ public class UIManager : MonoBehaviour {
             textCurGen.text = "Generation: " + gameManager.simulationManager.curApproxGen.ToString("F0");
             textAvgLifespan.text = "Average Lifespan: " + Mathf.RoundToInt(gameManager.simulationManager.rollingAverageAgentScoresArray[0]).ToString();
 
-            if(Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W)) {  // UP !!!!
-                
+            float minDistance = 1f;
+            float maxDistance = 420f;
+            float relSize = Mathf.Clamp01((cameraManager.masterTargetDistance - minDistance) / (minDistance + maxDistance));
+
+            float minSizePanSpeedMult = 0.1f;
+            float maxSizePanSpeedMult = 12f;
+            float panSpeedMult = Mathf.Lerp(minSizePanSpeedMult, maxSizePanSpeedMult, relSize);
+
+            float minSizeZoomSpeedMult = 0.25f;
+            float maxSizeZoomSpeedMult = 2.5f;
+            float zoomSpeedMult = Mathf.Lerp(minSizeZoomSpeedMult, maxSizeZoomSpeedMult, relSize);
+
+            float minSizeTiltSpeedMult = 1f;
+            float maxSizeTiltSpeedMult = 1f;
+            float tiltSpeedMult = Mathf.Lerp(minSizeTiltSpeedMult, maxSizeTiltSpeedMult, relSize);
+
+            float camPanSpeed = cameraManager.masterPanSpeed * panSpeedMult * Time.deltaTime;
+
+            if(Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W)) {  // UP !!!!
+
+                cameraManager.isFollowing = false;
+                cameraManager.targetCamPos.y += camPanSpeed;
+
                 //cameraManager
-                
+
                 /*obsZoomLevel = obsZoomLevel + 1;
                 if(obsZoomLevel > 2) {
                     obsZoomLevel = 2;
@@ -110,9 +131,13 @@ public class UIManager : MonoBehaviour {
                 }
                 if(obsZoomLevel == 2) {
                     ClickButtonModeA();
-                } */               
+                } */
             }
-            if(Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.S)) {  // DOWN !!!!
+            if(Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S)) {  // DOWN !!!!
+
+                cameraManager.isFollowing = false;
+                cameraManager.targetCamPos.y -= camPanSpeed;
+
                 /*obsZoomLevel = obsZoomLevel - 1;
                 if(obsZoomLevel < 0) {
                     obsZoomLevel = 0;
@@ -126,7 +151,11 @@ public class UIManager : MonoBehaviour {
                 }*/
             }
             
-            if(Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.D)) {  // RIGHT !!!!
+            if(Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D)) {  // RIGHT !!!!
+
+                cameraManager.isFollowing = false;
+                cameraManager.targetCamPos.x += camPanSpeed;
+
                 /*int newIndex = cameraManager.targetCritterIndex + 24;
                 if(newIndex >= gameManager.simulationManager._NumAgents) {
                     newIndex = 0;                    
@@ -134,7 +163,11 @@ public class UIManager : MonoBehaviour {
                 cameraManager.SetTarget(gameManager.simulationManager.agentsArray[newIndex], newIndex);
                 */
             }
-            if(Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A)) {  // LEFT !!!!!
+            if(Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A)) {  // LEFT !!!!!
+
+                cameraManager.isFollowing = false;
+                cameraManager.targetCamPos.x -= camPanSpeed;
+
                 /*
                 int newIndex = cameraManager.targetCritterIndex - 1;
                 if(newIndex < 0) {
@@ -143,21 +176,40 @@ public class UIManager : MonoBehaviour {
                 cameraManager.SetTarget(gameManager.simulationManager.agentsArray[newIndex], newIndex);
                 */
             }
-            if(Input.GetKeyDown(KeyCode.Escape)) {
-                Debug.Log("Pressed Escape!");
-                isPaused = !isPaused;
+            if (Input.GetKey(KeyCode.R)) 
+            {
 
-                if(isPaused) {
-                    ClickButtonPause();
-                }
-                else {
-                    ClickButtonPlayNormal();
-                }
+                cameraManager.masterTiltAngle -= cameraManager.masterTiltSpeed * tiltSpeedMult * Time.deltaTime;
+
+            }
+            if (Input.GetKey(KeyCode.F)) 
+            {
+
+                cameraManager.masterTiltAngle += cameraManager.masterTiltSpeed * tiltSpeedMult * Time.deltaTime;
+
+            }
+            if (Input.GetKeyDown(KeyCode.Escape)) {
+                Debug.Log("Pressed Escape!");
+
+                ClickButtonToggleDebug();
+                
+
             }
             if(Input.GetKeyDown(KeyCode.Space)) {
                 Debug.Log("Pressed Spacebar!");
-                    
-                // Detach from following creature
+
+                
+                isPaused = !isPaused;
+
+                if (isPaused)
+                {
+                    ClickButtonPause();
+                }
+                else
+                {
+                    ClickButtonPlayNormal();
+                }
+
             }
 
             // &&&&&&&&&&&&&&&&& MOUSE: &&&&&&&&&&&&&&&
@@ -167,39 +219,21 @@ public class UIManager : MonoBehaviour {
                 Debug.Log("RIGHT CLICKETY-CLICK!");
             }
 
+            float zoomSpeed = cameraManager.masterZoomSpeed * zoomSpeedMult * Time.deltaTime;
+
             if (Input.GetAxis("Mouse ScrollWheel") > 0f ) //  Forwards
             {
                 Debug.Log("Mouse ScrollWheel Forward");
 
-                // ** TEMPORARY!!!! ****!!!!
+                cameraManager.masterTargetDistance -= zoomSpeed;
 
-                obsZoomLevel = obsZoomLevel + 1;
-                if(obsZoomLevel > 2) {
-                    obsZoomLevel = 2;
-                }
-
-                if(obsZoomLevel == 1) {
-                    ClickButtonModeB();
-                }
-                if(obsZoomLevel == 2) {
-                    ClickButtonModeA();
-                }
             }
             else if (Input.GetAxis("Mouse ScrollWheel") < 0f ) //  Backwarfds
             {
                 Debug.Log("Mouse ScrollWheel Backward");
 
-                obsZoomLevel = obsZoomLevel - 1;
-                if(obsZoomLevel < 0) {
-                    obsZoomLevel = 0;
-                }
-
-                if(obsZoomLevel == 1) {
-                    ClickButtonModeB();
-                }
-                if(obsZoomLevel == 0) {
-                    ClickButtonModeC();
-                }
+                cameraManager.masterTargetDistance += zoomSpeed;
+               
             }
                     
         }
@@ -228,6 +262,7 @@ public class UIManager : MonoBehaviour {
                     
                     if(clicked) {
                         cameraManager.SetTarget(agentRef, agentRef.index);
+                        cameraManager.isFollowing = true;
                     }
                     else {
 
@@ -235,7 +270,7 @@ public class UIManager : MonoBehaviour {
 
                     cameraManager.isMouseHoverAgent = true;
                     cameraManager.mouseHoverAgentIndex = agentRef.index;
-                    cameraManager.mouseHoverAgentRef = agentRef;
+                    cameraManager.mouseHoverAgentRef = agentRef;                    
                 }
                 //Debug.Log("CLICKED ON: [ " + hit.collider.gameObject.name + " ] Ray= " + ray.ToString() + ", hit= " + hit.point.ToString());
             }
@@ -629,15 +664,15 @@ public class UIManager : MonoBehaviour {
         Time.timeScale = 2.5f;
     }
     public void ClickButtonModeA() {
-        cameraManager.ChangeGameMode(CameraManager.GameMode.ModeA);
+        //cameraManager.ChangeGameMode(CameraManager.GameMode.ModeA);
         obsZoomLevel = 2; // C, zoomed out max
     }
     public void ClickButtonModeB() {
-        cameraManager.ChangeGameMode(CameraManager.GameMode.ModeB);
+        //cameraManager.ChangeGameMode(CameraManager.GameMode.ModeB);
         obsZoomLevel = 1; // C, zoomed out max
     }
     public void ClickButtonModeC() {
-        cameraManager.ChangeGameMode(CameraManager.GameMode.ModeC);
+        //cameraManager.ChangeGameMode(CameraManager.GameMode.ModeC);
         obsZoomLevel = 0; // C, zoomed out max
     }
 

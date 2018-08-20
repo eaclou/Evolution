@@ -856,9 +856,10 @@ public class Agent : MonoBehaviour {
         //mouseClickCollider.center = Vector3.zero;
         mouseClickCollider.radius = coreModule.coreWidth * scale * 0.5f;        
         mouseClickCollider.height = coreModule.coreLength * scale;
-        mouseClickCollider.radius *= 1.67f; // ** TEMP
+        mouseClickCollider.radius *= 3.6f; // ** TEMP
+        mouseClickCollider.height *= 1.4f;
         //mouseClickCollider.height *= 1.25f; // ** TEMP
-        
+
         /*
         for(int i = 0; i < numSegments; i++) {
 

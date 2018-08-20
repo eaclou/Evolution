@@ -56,10 +56,32 @@
 				CritterSimData critterSimData = critterSimDataCBuffer[agentIndex];
 
 				float3 worldPosition = critterSimData.worldPos;
-				float3 quadPoint = quadVerticesCBuffer[id] * 6;
+				float3 quadPoint = quadVerticesCBuffer[id];
 
-				float4 pos = mul(UNITY_MATRIX_VP, float4(worldPosition + quadPoint, 1.0)); // *** Revisit to better understand!!!! ***
-			
+				float radiusMult = 4;
+				quadPoint *= radiusMult;
+				
+				float3 critterWorldPos = critterSimData.worldPos;
+				//critterWorldPos
+				float3 critterCurScale = ((critterInitData.boundingBoxSize.x + critterInitData.boundingBoxSize.y) * 0.5) * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage);
+				quadPoint *= critterCurScale;
+
+				float2 altUV = (worldPosition.xy + 128) / 512;
+				o.altitudeUV = altUV;
+
+				float2 forward = critterSimData.heading;
+				float2 right = float2(forward.y, -forward.x);
+				quadPoint.xy = quadPoint.x * right + quadPoint.y * forward;				
+
+				float4 centerPos = mul(UNITY_MATRIX_VP, float4(worldPosition, 1.0)); // *** Revisit to better understand!!!! ***
+				float4 screenUV = ComputeScreenPos(centerPos);
+				o.screenUV = screenUV;
+
+				worldPosition.xy += quadPoint.xy;
+				
+				float4 pos = mul(UNITY_MATRIX_VP, float4(worldPosition, 1.0)); // *** Revisit to better understand!!!! ***
+				
+				o.worldPos = pos;
 				o.pos = pos;
 				o.uv = quadVerticesCBuffer[id] + 0.5; // full texture
 
@@ -71,9 +93,15 @@
 			fixed4 frag(v2f i) : SV_Target
 			{
 				
-				float4 finalCol = float4(i.color.rgb, 1.0);
+				float4 finalColor = float4(1, 1, 1, 0.1);
 				
-				return finalCol;
+				float4 texColor = tex2D(_MainTex, i.uv);
+
+				finalColor.a *= i.color.x * texColor.a;  // hide if mouse not hovering over
+				finalColor.rgb *= 1;
+
+				
+				return finalColor;
 
 			}
 		ENDCG

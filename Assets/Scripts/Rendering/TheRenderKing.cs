@@ -1842,6 +1842,23 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, baronVonWater.waterNutrientsBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterNutrientsBitsCBuffer.count);
 
 
+        agentHoverHighlightMat.SetPass(0);
+        agentHoverHighlightMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        agentHoverHighlightMat.SetBuffer("agentHoverHighlightData", agentHoverHighlightCBuffer);
+        agentHoverHighlightMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
+        agentHoverHighlightMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
+        agentHoverHighlightMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+        agentHoverHighlightMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+        agentHoverHighlightMat.SetInt("_HoverAgentIndex", simManager.cameraManager.mouseHoverAgentIndex);
+        float isHighlightOn = 0f;
+        if (simManager.cameraManager.isMouseHoverAgent)
+        {
+            isHighlightOn = 1f;
+        }
+        agentHoverHighlightMat.SetFloat("_IsHover", isHighlightOn);
+        cmdBufferTest.DrawProcedural(Matrix4x4.identity, agentHoverHighlightMat, 0, MeshTopology.Triangles, 6, 1);
+
+
         // Critter Stomach Bits
         critterFoodDotsMat.SetPass(0);
         critterFoodDotsMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
@@ -1932,21 +1949,7 @@ public class TheRenderKing : MonoBehaviour {
 
         }
 
-        agentHoverHighlightMat.SetPass(0);
-        agentHoverHighlightMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        agentHoverHighlightMat.SetBuffer("agentHoverHighlightData", agentHoverHighlightCBuffer);
-        agentHoverHighlightMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
-        agentHoverHighlightMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
-        agentHoverHighlightMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
-        agentHoverHighlightMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-        agentHoverHighlightMat.SetInt("_HoverAgentIndex", simManager.cameraManager.mouseHoverAgentIndex);
-        float isHighlightOn = 0f;
-        if(simManager.cameraManager.isMouseHoverAgent) {
-            isHighlightOn = 1f;
-        }
-        agentHoverHighlightMat.SetFloat("_IsHover", isHighlightOn);        
-        cmdBufferTest.DrawProcedural(Matrix4x4.identity, agentHoverHighlightMat, 0, MeshTopology.Triangles, 6, 1);
-
+        
 
         /*
         baronVonWater.waterQuadStrokesLrgDisplayMat.SetPass(0);
