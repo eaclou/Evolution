@@ -119,8 +119,12 @@ public class SimulationManager : MonoBehaviour {
     public int lastPlayerScore = 0;
     //public bool playerIsDead = false;
 
+        // Species
     private int numSpecies = 4;
-
+    public float[] speciesAvgFoodEaten;
+    public Vector2[] speciesAvgSizes;
+    public float[] speciesAvgMouthTypes;
+    
     public int recordBotAge = 0;
     public float[] rollingAverageAgentScoresArray;
     public List<Vector4> fitnessScoresEachGenerationList;
@@ -128,8 +132,6 @@ public class SimulationManager : MonoBehaviour {
     public int curApproxGen = 1;
 
     public int numInitialHiddenNeurons = 16;
-
-    
 
 
     private int foodGridResolution = 32;
@@ -177,6 +179,8 @@ public class SimulationManager : MonoBehaviour {
         public float active;  // not disabled
         public float refactoryAge;
     }
+
+
 
     //public bool isTrainingPersistent = false; // RENAME ONCE FUNCTIONAL
     //private float lastHorizontalInput = 0f;
@@ -355,6 +359,10 @@ public class SimulationManager : MonoBehaviour {
 
         //debugScores:
         rollingAverageAgentScoresArray = new float[numSpecies];
+
+        speciesAvgFoodEaten = new float[numSpecies];
+        speciesAvgSizes = new Vector2[numSpecies];
+        speciesAvgMouthTypes = new float[numSpecies];
         
         //bodyGenomeTemplate = new BodyGenome();
         //bodyGenomeTemplate.InitializeGenomeAsDefault(); // ****  Come back to this and make sure using bodyGenome in a good way
@@ -703,6 +711,18 @@ public class SimulationManager : MonoBehaviour {
         for(int i = 0; i < rollingAverageAgentScoresArray.Length; i++) {
             rollingAverageAgentScoresArray[i] = 0f;
         }
+
+        for(int i = 0; i < speciesAvgFoodEaten.Length; i++) {
+            speciesAvgFoodEaten[i] = 0f;
+        }
+        for(int i = 0; i < speciesAvgSizes.Length; i++) {
+            speciesAvgSizes[i] = Vector2.one;
+        }
+        for(int i = 0; i < speciesAvgMouthTypes.Length; i++) {
+            speciesAvgMouthTypes[i] = 0f;
+        }
+
+
         curApproxGen = 1;
 
         RefreshFitnessGraphTexture();
@@ -1550,6 +1570,14 @@ public class SimulationManager : MonoBehaviour {
     private void ProcessAgentScores(int agentIndex) {
         //get species index:
         int speciesIndex = Mathf.FloorToInt((float)agentIndex / (float)_NumAgents * (float)numSpecies);
+
+        speciesAvgFoodEaten[speciesIndex] = Mathf.Lerp(speciesAvgFoodEaten[speciesIndex], agentsArray[agentIndex].totalFoodEaten, 1f / 64f);
+        speciesAvgSizes[speciesIndex] = Vector2.Lerp(speciesAvgSizes[speciesIndex], new Vector2(agentsArray[agentIndex].coreModule.coreWidth, agentsArray[agentIndex].coreModule.coreLength), 1f / 64f);
+        float mouthType = 0f;
+        if(agentsArray[agentIndex].mouthRef.isPassive == false) {
+            mouthType = 1f;
+        }
+        speciesAvgMouthTypes[speciesIndex] = Mathf.Lerp(speciesAvgMouthTypes[speciesIndex], mouthType, 1f / 64f);
 
         rollingAverageAgentScoresArray[speciesIndex] = Mathf.Lerp(rollingAverageAgentScoresArray[speciesIndex], (float)agentsArray[agentIndex].scoreCounter, 1f / 128f);
         float approxGen = (float)numAgentsBorn / (float)(numAgents - 1);

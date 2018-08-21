@@ -19,7 +19,8 @@ public class Agent : MonoBehaviour {
     public float restingJointTorque = 10f;
     public float bendRatioHead = 0f;
     public float bendRatioTailTip = 1f;
-       
+
+    public float totalFoodEaten = 0f;
 
     public float animationCycle = 0f;
     public float turningAmount = 0f;
@@ -558,6 +559,8 @@ public class Agent : MonoBehaviour {
         if(coreModule.stomachContents > coreModule.stomachCapacity) {
             coreModule.stomachContents = coreModule.stomachCapacity;
         }
+
+        totalFoodEaten += amount;
         /*
         if (humanControlled) {
             coreModule.foodAmountR[0] += amount * 0.720f;  // 0.33 is too little
@@ -1008,6 +1011,8 @@ public class Agent : MonoBehaviour {
             if(coreModule.stomachContents > coreModule.stomachCapacity) {
                 coreModule.stomachContents = coreModule.stomachCapacity;
             }
+
+            totalFoodEaten += foodParticleEatAmount;
             //if(foodParticleEatAmount > 0.1f) {
             //    Debug.Log("Ate Food PArticle! amount: " + foodParticleEatAmount.ToString() + ", agent[" + index.ToString() + "] stomach contents: " + coreModule.stomachContents.ToString());
             //}
@@ -1039,6 +1044,7 @@ public class Agent : MonoBehaviour {
                         coreModule.stomachContents = coreModule.stomachCapacity;
                     }
                     
+                    totalFoodEaten += filteredFoodAmount;
                 }                
             }
             else {
@@ -1336,6 +1342,8 @@ public class Agent : MonoBehaviour {
         ageCounterMature = 0;
         growthPercentage = 0f;
         scoreCounter = 0;
+
+        totalFoodEaten = 0f;
 
         turningAmount = 5f;
         

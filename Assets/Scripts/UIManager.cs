@@ -445,6 +445,13 @@ public class UIManager : MonoBehaviour {
 
         //debugTxt1 += "Agent[" + agentIndex.ToString() + "] # Neurons: " + cameraManager.targetAgent.brain.neuronList.Count.ToString() + ", # Axons: " + cameraManager.targetAgent.brain.axonList.Count.ToString() + "\n";
         debugTxt1 += "HoverAgentIndex: " + cameraManager.mouseHoverAgentIndex.ToString() + "\n";
+        debugTxt1 += "\n";
+        for(int i = 0; i < 4; i++) {
+            debugTxt1 += "Species[" + i.ToString() + "] Avg Lifespan: " + simManager.rollingAverageAgentScoresArray[i].ToString() + "\n";
+            debugTxt1 += "Species[" + i.ToString() + "] Avg Size: " + simManager.speciesAvgSizes[i].ToString() + "\n";
+            debugTxt1 += "Species[" + i.ToString() + "] Avg Mouth Type: " + simManager.speciesAvgMouthTypes[i].ToString() + "\n";
+            debugTxt1 += "Species[" + i.ToString() + "] Avg Food Eaten: " + simManager.speciesAvgFoodEaten[i].ToString() + "\n\n";
+        }
         debugTxt1 += "CurOldestAge: " + simManager.currentOldestAgent.ToString() + ", numChildrenBorn: " + simManager.numAgentsBorn.ToString() + ", ~Gen: " + ((float)simManager.numAgentsBorn / (float)simManager._NumAgents).ToString();
         debugTxt1 += "\nBotRecordAge: " + simManager.recordBotAge.ToString() + ", PlayerRecordAge: " + simManager.recordPlayerAge.ToString();
         debugTxt1 += "\nAverageAgentScore: " + simManager.rollingAverageAgentScoresArray[0].ToString();
@@ -482,6 +489,7 @@ public class UIManager : MonoBehaviour {
 
 
         debugTxt3 += "CRITTER # " + agentIndex.ToString() + " (" + lifeStageProgressTxt + ")  Age: " + agentRef.scoreCounter.ToString() + " Frames\n\n";
+        debugTxt3 += "SpeciesID: " + agentRef.speciesIndex.ToString() + "\n";
         debugTxt3 += "Energy: " + agentRef.coreModule.energyStored[0].ToString("F4") + "\n";
         debugTxt3 += "Health: " + agentRef.coreModule.healthBody.ToString("F2") + "\n";
         debugTxt3 += "Food: " + agentRef.coreModule.foodStored[0].ToString("F2") + "\n";
