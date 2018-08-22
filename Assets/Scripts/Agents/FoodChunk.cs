@@ -55,7 +55,7 @@ public class FoodChunk : MonoBehaviour {
     //public float amountG;
     //public float amountB;
 
-    private int colliderCount = 0;
+    //private int colliderCount = 0;
 
     //private float feedingRate = 0.05f;
 
@@ -67,13 +67,13 @@ public class FoodChunk : MonoBehaviour {
     public Vector2 fullSize;
     public Vector2 curSize;
 
-    private Vector2 minSize = new Vector2(0.1f, 0.1f);
+    //private Vector2 minSize = new Vector2(0.1f, 0.1f);
     
     private float minMass = 0.33f;
     private float maxMass = 3.33f;
 
     public float isBeingEaten = 0f;
-    private float isBeingDamaged = 0f;
+    //private float isBeingDamaged = 0f;
     public float healthStructural = 1f;
 
     public int ageCounterMature = 0; // only counts when Food is fully grown
@@ -291,7 +291,7 @@ public class FoodChunk : MonoBehaviour {
         float dotProd = Vector2.Dot(agentHeading, agentToFoodDir);
 
         if(dotProd > 0f) {
-            isBeingDamaged = 1.0f;
+            //isBeingDamaged = 1.0f;
             collidingAgent.isInsideFood = true;
         }        
     }

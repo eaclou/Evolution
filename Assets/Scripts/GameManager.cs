@@ -174,6 +174,12 @@ public class GameManager : MonoBehaviour {
         //}
     }
 
+    public void EscapeToMainMenu() {
+        TransitionToGameState(GameState.MainMenu);
+    }
+    public void ResumePlaying() {
+        TransitionToGameState(GameState.Playing);
+    }
     private void TransitionToGameState(GameState nextState) {
         Debug.Log("TransitionToGameState(" + nextState.ToString() + ")");
         switch (nextState) {

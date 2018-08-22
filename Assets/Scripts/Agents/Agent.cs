@@ -115,7 +115,7 @@ public class Agent : MonoBehaviour {
     
 
     public bool isInsideFood = false;
-    private float eatingLoopAnimFrame = 0f;
+    //private float eatingLoopAnimFrame = 0f;
         
     public bool humanControlled = false;
     public float humanControlLerp = 0f;
@@ -1112,7 +1112,7 @@ public class Agent : MonoBehaviour {
         float fatigueMultiplier = Mathf.Clamp01(coreModule.energyRaw * 5f / coreModule.maxEnergyStorage);
         float lowHealthPenalty = Mathf.Clamp01(coreModule.healthBody * 5f) * 0.5f + 0.5f;
         fatigueMultiplier *= lowHealthPenalty;
-        float growthStatus = 
+        //float growthStatus = 
 
         turningAmount = Mathf.Lerp(turningAmount, this.bodyRigidbody.angularVelocity * Mathf.Deg2Rad * 0.1f, 0.28f);
 
@@ -1225,7 +1225,7 @@ public class Agent : MonoBehaviour {
         
         // Calculate Width:
         //int numWidthSamples = 16; // resolution to sample at
-        float sampleIncrementSize = 1f / (float)widthsTexResolution;
+        //float sampleIncrementSize = 1f / (float)widthsTexResolution;
         float totalWidth = 0f;
         for(int j = 0; j < widthsTexResolution; j++) {
             float yCoord = j / (float)widthsTexResolution;

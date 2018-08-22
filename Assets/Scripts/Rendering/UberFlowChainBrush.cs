@@ -37,7 +37,7 @@ public class UberFlowChainBrush {
 
         ChainLinkData[] chainDataArray = new ChainLinkData[numChains * numLinksPerChain];
         for (int i = 0; i < chainDataArray.Length; i++) {
-            int agentIndex = (int)Mathf.Floor((float)i / numLinksPerChain);
+            //int agentIndex = (int)Mathf.Floor((float)i / numLinksPerChain);
             float trailPos = (float)i % (float)numLinksPerChain;
             Vector2 randPos = new Vector2(UnityEngine.Random.Range(-60f, 60f), UnityEngine.Random.Range(-60f, 60f));
             chainDataArray[i] = new ChainLinkData();

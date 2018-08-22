@@ -172,7 +172,7 @@ public class BaronVonWater : RenderBaron {
     public void InitializeWaterChainStrokesCBuffer() {
         Vector2[] waterChainDataArray = new Vector2[numWaterChains * numPointsPerWaterChain];
         for (int i = 0; i < waterChainDataArray.Length; i++) {
-            int agentIndex = (int)Mathf.Floor((float)i / numPointsPerWaterChain);
+            //int agentIndex = (int)Mathf.Floor((float)i / numPointsPerWaterChain);
             float trailPos = (float)i % (float)numPointsPerWaterChain;
             Vector2 randPos = new Vector2(UnityEngine.Random.Range(-60f, 60f), UnityEngine.Random.Range(-60f, 60f));
             waterChainDataArray[i] = randPos + new Vector2(0f, trailPos * -1f);

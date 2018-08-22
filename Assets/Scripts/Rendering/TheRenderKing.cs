@@ -729,7 +729,7 @@ public class TheRenderKing : MonoBehaviour {
     public void InitializeAgentTailStrokesBuffer() {
         TrailStrokeData[] trailStrokeDataArray = new TrailStrokeData[simManager._NumAgents * numTrailPointsPerAgent];
         for (int i = 0; i < trailStrokeDataArray.Length; i++) {
-            int agentIndex = (int)Mathf.Floor((float)i / numTrailPointsPerAgent);
+            //int agentIndex = (int)Mathf.Floor((float)i / numTrailPointsPerAgent);
             float trailPos = (float)i % (float)numTrailPointsPerAgent;
             trailStrokeDataArray[i] = new TrailStrokeData();
             trailStrokeDataArray[i].worldPos = new Vector2(0f, trailPos * -1f);
@@ -761,7 +761,7 @@ public class TheRenderKing : MonoBehaviour {
     public void InitializeWaterChainsCBuffer() {
         TrailStrokeData[] waterChainDataArray = new TrailStrokeData[numWaterChains * numPointsPerWaterChain];
         for (int i = 0; i < waterChainDataArray.Length; i++) {
-            int agentIndex = (int)Mathf.Floor((float)i / numPointsPerWaterChain);
+            //int agentIndex = (int)Mathf.Floor((float)i / numPointsPerWaterChain);
             float trailPos = (float)i % (float)numPointsPerWaterChain;
             Vector2 randPos = new Vector2(UnityEngine.Random.Range(-60f, 60f), UnityEngine.Random.Range(-60f, 60f));
             waterChainDataArray[i] = new TrailStrokeData();

@@ -10,14 +10,47 @@ public class UIManager : MonoBehaviour {
     public CameraManager cameraManager;
     public GameOptionsManager gameOptionsManager;
 
+    private bool firstTimeStartup = true;
+
+    // Main Menu:
+    public Button buttonPlayResume;
+
+
     public Texture2D healthDisplayTex;
 
     public GameObject panelTint;
 
+    public bool controlsMenuOn = false;
     public bool optionsMenuOn = false;
 
     public Text textLoadingTooltips;
 
+    public GameObject panelStatsHUD;
+    public Animator animatorStatsPanel;
+    public Button buttonStats;
+    public bool isActiveStatsPanel = false;
+
+    public ToolType curActiveTool;
+    public enum ToolType {
+        Move,
+        Inspect,
+        Feed
+    }
+
+    public Color buttonActiveColor = new Color(1f, 1f, 1f, 1f);
+    public Color buttonDisabledColor = new Color(0.5f, 0.5f, 0.5f, 1f);
+
+    public bool isActiveInspectPanel = false;
+    public GameObject panelInspectHUD;
+    public GameObject panelInspectTopHUD;
+    public GameObject panelInspectBottomHUD;
+    public Animator animatorInspectPanelTop;
+    public Animator animatorInspectPanelBottom;
+    public Button buttonToolMove;
+    public Button buttonToolInspect;
+    public Button buttonToolFeed;
+    //public Button buttonToolGenetics;
+    
     public GameObject panelHUD;
     public Image imageFood;
     public Image imageHitPoints;
@@ -80,15 +113,22 @@ public class UIManager : MonoBehaviour {
 
     public float loadingProgress = 0f;
 
-    private int obsZoomLevel = 0;  // 0 most zoomed out
+    //private int obsZoomLevel = 0;  // 0 most zoomed out
 
     
 	// Use this for initialization
 	void Start () {
-        
-        
+
+        animatorStatsPanel.enabled = false;
+        animatorInspectPanelTop.enabled = false;
+        animatorInspectPanelBottom.enabled = false;
+
+        buttonToolMove.GetComponent<Image>().color = buttonActiveColor;   
+        buttonToolInspect.GetComponent<Image>().color = buttonDisabledColor;        
+        buttonToolFeed.GetComponent<Image>().color = buttonDisabledColor;
     }
 
+    
     public void UpdateObserverModeUI() {
         if(isObserverMode) {
             panelObserverMode.SetActive(true);
@@ -191,6 +231,14 @@ public class UIManager : MonoBehaviour {
             if (Input.GetKeyDown(KeyCode.Escape)) {
                 Debug.Log("Pressed Escape!");
 
+                // Pause & Main Menu? :::
+                ClickButtonPause();
+
+                gameManager.EscapeToMainMenu();
+            }
+            if (Input.GetKeyDown(KeyCode.Tab)) {
+                Debug.Log("Pressed Tab!");
+
                 ClickButtonToggleDebug();
                 
 
@@ -252,28 +300,24 @@ public class UIManager : MonoBehaviour {
         cameraManager.isMouseHoverAgent = false;
         cameraManager.mouseHoverAgentIndex = 0;
         cameraManager.mouseHoverAgentRef = null;
-
-        if (hit.point != null) {
-            
-            if(hit.collider != null) {
-                Agent agentRef = hit.collider.gameObject.GetComponentInParent<Agent>();
-                if(agentRef != null) {
-                    //Debug.Log("AGENT: [ " + agentRef.gameObject.name + " ] #" + agentRef.index.ToString());
+        if(hit.collider != null) {
+            Agent agentRef = hit.collider.gameObject.GetComponentInParent<Agent>();
+            if(agentRef != null) {
+                //Debug.Log("AGENT: [ " + agentRef.gameObject.name + " ] #" + agentRef.index.ToString());
                     
-                    if(clicked) {
-                        cameraManager.SetTarget(agentRef, agentRef.index);
-                        cameraManager.isFollowing = true;
-                    }
-                    else {
-
-                    }
-
-                    cameraManager.isMouseHoverAgent = true;
-                    cameraManager.mouseHoverAgentIndex = agentRef.index;
-                    cameraManager.mouseHoverAgentRef = agentRef;                    
+                if(clicked) {
+                    cameraManager.SetTarget(agentRef, agentRef.index);
+                    cameraManager.isFollowing = true;
                 }
-                //Debug.Log("CLICKED ON: [ " + hit.collider.gameObject.name + " ] Ray= " + ray.ToString() + ", hit= " + hit.point.ToString());
+                else {
+
+                }
+
+                cameraManager.isMouseHoverAgent = true;
+                cameraManager.mouseHoverAgentIndex = agentRef.index;
+                cameraManager.mouseHoverAgentRef = agentRef;                    
             }
+            //Debug.Log("CLICKED ON: [ " + hit.collider.gameObject.name + " ] Ray= " + ray.ToString() + ", hit= " + hit.point.ToString());
         }
     }
 	
@@ -327,7 +371,7 @@ public class UIManager : MonoBehaviour {
     }
 
     public void EnterObserverMode() {
-        obsZoomLevel = 0; // C, zoomed out max
+        //obsZoomLevel = 0; // C, zoomed out max
 
         ClickButtonModeC();
 
@@ -346,6 +390,7 @@ public class UIManager : MonoBehaviour {
                 EnterLoadingUI();
                 break;
             case GameManager.GameState.Playing:
+                firstTimeStartup = false;
                 EnterPlayingUI();
                 break;
             default:
@@ -354,6 +399,12 @@ public class UIManager : MonoBehaviour {
         }
     }
     private void EnterMainMenuUI() {
+        if(firstTimeStartup) {
+            buttonPlayResume.GetComponentInChildren<Text>().text = "NEW SIMULATION";
+        }
+        else {
+            buttonPlayResume.GetComponentInChildren<Text>().text = "RESUME";
+        }
         panelMainMenu.SetActive(true);
         if (optionsMenuOn) {
             panelGameOptions.SetActive(true);
@@ -375,7 +426,7 @@ public class UIManager : MonoBehaviour {
             fitnessDisplayMat.SetTexture("_MainTex", fitnessDisplayTexture);
         }        
         
-        ClickButtonModeB();
+        //ClickButtonModeB();
     }
     private void EnterLoadingUI() {
         panelMainMenu.SetActive(false);
@@ -636,6 +687,102 @@ public class UIManager : MonoBehaviour {
         hitPointsMat.SetTexture("_MainTex", healthDisplayTex);
     }
 
+    public void ClickStatsButton() {
+        //Debug.Log("ClickStatsButton");
+        animatorStatsPanel.enabled = true;
+        if(isActiveStatsPanel) {
+            Debug.Log("ClickStatsButton - deactivate");            
+
+            isActiveStatsPanel = false;
+            animatorStatsPanel.Play("SlideOffPanelStats");
+
+            buttonStats.GetComponent<Image>().color = buttonDisabledColor;
+
+            //panelStatsHUD.SetActive(false);
+        }
+        else {
+            Debug.Log("ClickStatsButton - activate");
+            //panelStatsHUD.SetActive(true);
+
+            isActiveStatsPanel = true;
+            //animatorStatsPanel.enabled = true;
+            animatorStatsPanel.Play("SlideOnPanelStats");
+
+            buttonStats.GetComponent<Image>().color = buttonActiveColor;
+        }
+    }
+
+    public void ClickToolButtonMove() {
+
+        if(curActiveTool != ToolType.Move) {
+            curActiveTool = ToolType.Move;
+                        
+            TurnOffInspectTool();
+
+            buttonToolMove.GetComponent<Image>().color = buttonActiveColor;        
+            buttonToolFeed.GetComponent<Image>().color = buttonDisabledColor;
+        }
+        
+    }
+
+    public void ClickToolButtonInspect() {
+
+        if(curActiveTool != ToolType.Inspect) {
+            curActiveTool = ToolType.Inspect;
+
+            TurnOnInspectTool();
+
+            buttonToolMove.GetComponent<Image>().color = buttonDisabledColor;        
+            buttonToolFeed.GetComponent<Image>().color = buttonDisabledColor;
+        }
+        
+    }
+
+    public void ClickToolButtonFeed() {
+
+        if(curActiveTool != ToolType.Feed) {
+            curActiveTool = ToolType.Feed;
+
+            TurnOffInspectTool();
+
+            buttonToolMove.GetComponent<Image>().color = buttonDisabledColor;        
+            buttonToolFeed.GetComponent<Image>().color = buttonActiveColor;
+        }
+        
+    }
+
+    private void TurnOnInspectTool() {
+        if(!isActiveInspectPanel) {
+            isActiveInspectPanel = true;
+            //panelInspectHUD.SetActive(true);
+
+            buttonToolInspect.GetComponent<Image>().color = buttonActiveColor;
+
+            animatorInspectPanelTop.enabled = true;
+            animatorInspectPanelBottom.enabled = true;
+            animatorInspectPanelTop.Play("SlideOnPanelInspectTop");
+            animatorInspectPanelBottom.Play("SlideOnPanelInspectBottom");
+        }
+        
+    }    
+    private void TurnOffInspectTool() {
+        if(isActiveInspectPanel) {
+            isActiveInspectPanel = false;
+            buttonToolInspect.GetComponent<Image>().color = buttonDisabledColor;
+        
+            animatorInspectPanelTop.enabled = true;
+            animatorInspectPanelBottom.enabled = true;
+            animatorInspectPanelTop.Play("SlideOffPanelInspectTop");
+            animatorInspectPanelBottom.Play("SlideOffPanelInspectBottom");
+
+            //panelInspectHUD.SetActive(false);
+        }        
+    }
+
+    public void ClickControlsMenu() {
+        controlsMenuOn = true;
+        EnterMainMenuUI();
+    }
     public void ClickOptionsMenu() {
         optionsMenuOn = true;
         EnterMainMenuUI();
@@ -646,7 +793,17 @@ public class UIManager : MonoBehaviour {
     }
     public void ClickStartGame() {
         Debug.Log("ClickStartGame()!");
-        gameManager.StartNewGame();
+        if(firstTimeStartup) {
+            gameManager.StartNewGame();
+        }
+        else {
+            animatorStatsPanel.enabled = false;
+            animatorInspectPanelTop.enabled = false;
+            animatorInspectPanelBottom.enabled = false;
+            gameManager.ResumePlaying();
+            ClickButtonPlayNormal();
+
+        }        
     }
 
     public void ClickResetWorld() {
@@ -673,15 +830,15 @@ public class UIManager : MonoBehaviour {
     }
     public void ClickButtonModeA() {
         //cameraManager.ChangeGameMode(CameraManager.GameMode.ModeA);
-        obsZoomLevel = 2; // C, zoomed out max
+        //obsZoomLevel = 2; // C, zoomed out max
     }
     public void ClickButtonModeB() {
         //cameraManager.ChangeGameMode(CameraManager.GameMode.ModeB);
-        obsZoomLevel = 1; // C, zoomed out max
+        //obsZoomLevel = 1; // C, zoomed out max
     }
     public void ClickButtonModeC() {
         //cameraManager.ChangeGameMode(CameraManager.GameMode.ModeC);
-        obsZoomLevel = 0; // C, zoomed out max
+        //obsZoomLevel = 0; // C, zoomed out max
     }
 
     public void ClickButtonToggleHUD() {

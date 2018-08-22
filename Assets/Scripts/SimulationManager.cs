@@ -1657,7 +1657,7 @@ public class SimulationManager : MonoBehaviour {
             BodyGenome parentBodyGenome = agentGenomePoolArray[parentGenomeIndex].bodyGenome;
             BrainGenome parentBrainGenome = agentGenomePoolArray[parentGenomeIndex].brainGenome;
 
-            MutationSettings mutationSettings = settingsManager.mutationSettingsPersistent;
+            //MutationSettings mutationSettings = settingsManager.mutationSettingsPersistent;
 
             // Can randomly pull from saved Genepool database:
             bool usePreTrained = false;
@@ -1665,7 +1665,7 @@ public class SimulationManager : MonoBehaviour {
             if(usePreTrained) {
                 float randRoll = UnityEngine.Random.Range(0f, 1f);
                 if(randRoll < 0.006f) {
-                    mutationSettings = settingsManager.mutationSettingsRandomBody;
+                    //mutationSettings = settingsManager.mutationSettingsRandomBody;
                     randRoll = UnityEngine.Random.Range(0f, 1f);
                     if(randRoll < 0.55f) {                
                         parentBodyGenome = savedGenomePoolArray1[parentGenomeIndex].bodyGenome;

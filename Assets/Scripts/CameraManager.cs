@@ -32,7 +32,7 @@ public class CameraManager : MonoBehaviour {
     public float masterTiltSpeed = 1f;
 
     private float curTiltAngle;
-    private float targetTiltAngleDegrees = 12.5f;
+    //private float targetTiltAngleDegrees = 12.5f;
     public float centeringOffset = 0f;
 
     //public float camMaxSpeed = 1f;
@@ -60,7 +60,7 @@ public class CameraManager : MonoBehaviour {
     //public float orbitSpeed = 1f;
    // public float curOrbitAngle = 0f;
 
-    private int debugFrameCounter = 0;
+    //private int debugFrameCounter = 0;
 
     public float targetAgentSize = 0f;
     public float cameraZoomAmount = 0f;

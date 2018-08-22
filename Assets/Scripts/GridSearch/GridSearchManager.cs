@@ -195,9 +195,9 @@ public class GridSearchManager : ScriptableObject {
 
         // Save TXT:::
         string saveNameResults = "GS_" + "Results";
-        float bestScore = storedResults.highestScoreAchieved;
+        //float bestScore = storedResults.highestScoreAchieved;
         if(!biggerIsBetter) {
-            bestScore = storedResults.lowestScoreAchieved;
+            //bestScore = storedResults.lowestScoreAchieved;
         }
         string resultsString = "Grid Search Results! highest: " + storedResults.highestScoreAchieved.ToString() + ", lowest: " + storedResults.lowestScoreAchieved.ToString() + ", std: " + standardDeviation.ToString() + "\n";
         for(int i = 0; i < storedResults.readoutList.Count; i++) {

@@ -8,13 +8,13 @@ public class PredatorModule : MonoBehaviour {
     public MeshRenderer meshRendererBeauty;
     public MeshRenderer meshRendererFluidCollider;
 
-    private float speed = 250f;
+    //private float speed = 250f;
 
     private float damage = 0.55f;
     private int counter = 0;
 
-    private float randX;
-    private float randY;
+    //private float randX;
+    //private float randY;
 
     private float minScale = 1.6f;
     private float maxScale = 3.2f;
@@ -61,8 +61,8 @@ public class PredatorModule : MonoBehaviour {
     private void FixedUpdate() {
         counter = (counter + 1) % framesPerDirChange;
         if(counter == 0) {
-            randX = UnityEngine.Random.Range(-1f, 1f);
-            randY = UnityEngine.Random.Range(-1f, 1f);
+            //randX = UnityEngine.Random.Range(-1f, 1f);
+            //randY = UnityEngine.Random.Range(-1f, 1f);
         }
         // MOVEMENT HERE:
         // ** DISABLED!!!
