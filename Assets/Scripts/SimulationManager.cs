@@ -19,6 +19,8 @@ public class SimulationManager : MonoBehaviour {
     public ComputeShader computeShaderNutrientMap;
     public ComputeShader computeShaderFoodParticles;
 
+    public bool isQuickStart = true;
+
     private bool isLoading = false;
     private bool loadingComplete = false;
     public bool _LoadingComplete
@@ -127,7 +129,9 @@ public class SimulationManager : MonoBehaviour {
     
     public int recordBotAge = 0;
     public float[] rollingAverageAgentScoresArray;
-    public List<Vector4> fitnessScoresEachGenerationList;
+    public List<Vector4> statsLifespanEachGenerationList;
+    public List<Vector4> statsFoodEatenEachGenerationList;
+    public List<Vector4> statsPredationEachGenerationList;
     public float agentAvgRecordScore = 1f;
     public int curApproxGen = 1;
 
@@ -205,8 +209,7 @@ public class SimulationManager : MonoBehaviour {
     #region loading   // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& LOADING LOADING LOADING &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
     public void TickLoading() {
         // "Hey, I'm Loadin' Here!!!"
-
-
+        
         
 
         // Has basic loading phase completed?
@@ -295,7 +298,16 @@ public class SimulationManager : MonoBehaviour {
 
         // Load pre-saved genomes:
         LoadingLoadGenepoolFiles();
-               
+        
+        yield return null;
+        
+        if(isQuickStart) {
+            Debug.Log("QUICK START! Loading Pre-Trained Genomes!");
+            LoadTrainingData();
+        }
+        else {
+
+        }
 
         yield return null;
 
@@ -669,7 +681,9 @@ public class SimulationManager : MonoBehaviour {
     private void LoadingSetUpFitnessStorage() {
         rawFitnessScoresArray = new float[numAgents];
 
-        fitnessScoresEachGenerationList = new List<Vector4>(); // 
+        statsLifespanEachGenerationList = new List<Vector4>(); // 
+        statsFoodEatenEachGenerationList = new List<Vector4>();
+        statsPredationEachGenerationList = new List<Vector4>();
     }
     private void LoadingLoadGenepoolFiles() {
         
@@ -702,7 +716,9 @@ public class SimulationManager : MonoBehaviour {
         //agentsArray[0].humanControlLerp = 1f;
         LoadingInitializeAgentsFromGenomes(); // This was "RespawnAgents()" --  Used to actually place the Agent in the game in a random spot and set the Agent's atributes ffrom its genome
 
-        fitnessScoresEachGenerationList.Clear();
+        statsLifespanEachGenerationList.Clear();
+        statsFoodEatenEachGenerationList.Clear();
+        statsPredationEachGenerationList.Clear();
         numAgentsBorn = 0;
         currentOldestAgent = 0;
         recordPlayerAge = 0;
@@ -725,7 +741,10 @@ public class SimulationManager : MonoBehaviour {
 
         curApproxGen = 1;
 
-        RefreshFitnessGraphTexture();
+        //RefreshFitnessGraphTexture();
+        RefreshGraphTextureLifespan();
+        RefreshGraphTextureFoodEaten();
+        RefreshGraphTexturePredation();
     }
 
     #region Every Frame  //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& EVERY FRAME &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
@@ -1583,14 +1602,23 @@ public class SimulationManager : MonoBehaviour {
         float approxGen = (float)numAgentsBorn / (float)(numAgents - 1);
         if (approxGen > curApproxGen) {
             Vector4 scores = new Vector4(rollingAverageAgentScoresArray[0], rollingAverageAgentScoresArray[1], rollingAverageAgentScoresArray[2], rollingAverageAgentScoresArray[3]); ;
-            
-            fitnessScoresEachGenerationList.Add(scores); // ** UPDATE THIS TO SAVE aLLL 4 SCORES!!! ***
+            statsLifespanEachGenerationList.Add(scores); // ** UPDATE THIS TO SAVE aLLL 4 SCORES!!! ***
             if (rollingAverageAgentScoresArray[speciesIndex] > agentAvgRecordScore) {
                 agentAvgRecordScore = rollingAverageAgentScoresArray[speciesIndex];
             }
             curApproxGen++;
 
-            RefreshFitnessGraphTexture();
+            //RefreshFitnessGraphTexture(); // OLD
+
+            Vector4 foodEaten = new Vector4(speciesAvgFoodEaten[0], speciesAvgFoodEaten[1], speciesAvgFoodEaten[2], speciesAvgFoodEaten[3]); ;
+            statsFoodEatenEachGenerationList.Add(foodEaten);
+
+            Vector4 predation = new Vector4(speciesAvgMouthTypes[0], speciesAvgMouthTypes[1], speciesAvgMouthTypes[2], speciesAvgMouthTypes[3]); ;
+            statsPredationEachGenerationList.Add(predation);
+
+            RefreshGraphTextureLifespan();
+            RefreshGraphTextureFoodEaten();
+            RefreshGraphTexturePredation();
 
             UpdateSimulationClimate();
         }
@@ -1600,8 +1628,18 @@ public class SimulationManager : MonoBehaviour {
         // Inject pre-trained critters
         environmentFluidManager.UpdateSimulationClimate((float)curApproxGen);
     }
-    private void RefreshFitnessGraphTexture() {
+    /*private void RefreshFitnessGraphTexture() {
         uiManager.RefreshFitnessTexture(fitnessScoresEachGenerationList);
+    }*/
+    
+    private void RefreshGraphTextureLifespan() {
+        uiManager.UpdateStatsTextureLifespan(statsLifespanEachGenerationList);
+    }
+    private void RefreshGraphTextureFoodEaten() {
+        uiManager.UpdateStatsTextureFoodEaten(statsFoodEatenEachGenerationList);
+    }
+    private void RefreshGraphTexturePredation() {
+        uiManager.UpdateStatsTexturePredation(statsPredationEachGenerationList);
     }
     private void ProcessAndRankAgentFitness(int speciesIndex) {
         // Measure fitness of all current agents (their genomes, actually)  NOT PLAYER!!!!

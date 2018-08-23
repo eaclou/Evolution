@@ -38,6 +38,7 @@ public class CameraManager : MonoBehaviour {
     //public float camMaxSpeed = 1f;
     //public float camAccel = 0.05f;
 
+    public bool isFollowing = false;
     public Vector3 targetCamPos;
     public Transform targetTransform;
     public Agent targetAgent;
@@ -52,7 +53,7 @@ public class CameraManager : MonoBehaviour {
     public float masterLerpSpeed = 2f;
     
 
-    public bool isFollowing = false;
+    
 
     Vector2 prevCameraPosition, prevTargetPosition;
 

@@ -41,12 +41,19 @@ public class GameManager : MonoBehaviour {
         TransitionToGameState(GameState.MainMenu); // better way to do this???
     }
 
-    public void StartNewGame() {
+    public void StartNewGameBlank() {
         // Apply Quality Settings from Game Options:
-        ApplyQualitySettings();        
-
+        ApplyQualitySettings();
+        simulationManager.isQuickStart = false;
         // SimulationManager needs to Load First:
-        TransitionToGameState(GameState.Loading);        
+        TransitionToGameState(GameState.Loading);       
+    }
+    public void StartNewGameQuick() {
+        // Apply Quality Settings from Game Options:
+        ApplyQualitySettings();
+        simulationManager.isQuickStart = true;
+        // SimulationManager needs to Load First:
+        TransitionToGameState(GameState.Loading);       
     }
 
     private void ApplyQualitySettings() {

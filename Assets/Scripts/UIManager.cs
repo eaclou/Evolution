@@ -13,8 +13,9 @@ public class UIManager : MonoBehaviour {
     private bool firstTimeStartup = true;
 
     // Main Menu:
-    public Button buttonPlayResume;
-
+    public Button buttonQuickStartResume;
+    public Button buttonNewSimulation;
+    public Text textMouseOverInfo;
 
     public Texture2D healthDisplayTex;
 
@@ -41,11 +42,31 @@ public class UIManager : MonoBehaviour {
     public Color buttonDisabledColor = new Color(0.5f, 0.5f, 0.5f, 1f);
 
     public bool isActiveInspectPanel = false;
+    public Material inspectWidgetDietMat;
+    public Material inspectWidgetStomachFoodMat;
+    public Material inspectWidgetEnergyMat;
+    public Material inspectWidgetLifeCycleMat;
+    public Material inspectWidgetDimensionsMat;
+    public Material inspectWidgetHealthMat;
+    public Material inspectWidgetSpeciesIconMat;
+    public Material inspectWidgetAgentIconMat;
+    public Button buttonInspectCyclePrevSpecies;
+    public Button buttonInspectCycleNextSpecies;
+    public Button buttonInspectCyclePrevAgent;
+    public Button buttonInspectCycleNextAgent;
+    public Text textDiet;
+    public Text textDimensionsWidth;
+    public Text textDimensionsLength;
+    public Text textSpeciesID;
+    public Text textAgentID;
+    // &(&^*(^&*(^&*(^&*(^&*(  ADD OTHER WIDGET MATS AND VARS HERE! %&^*$&*%^&*%&*%^&*%^&*%^&*%^*%&^*%&^*%67
+
+    // &(&^*(^&*(^&*(^&*(^&*(  ADD OTHER WIDGET MATS AND VARS HERE! %&^*$&*%^&*%&*%^&*%^&*%^&*%^*%&^*%&^*%67
+
     public GameObject panelInspectHUD;
-    public GameObject panelInspectTopHUD;
-    public GameObject panelInspectBottomHUD;
-    public Animator animatorInspectPanelTop;
-    public Animator animatorInspectPanelBottom;
+    //public GameObject panelInspectTopHUD;
+    //public GameObject panelInspectBottomHUD;
+    public Animator animatorInspectPanel;
     public Button buttonToolMove;
     public Button buttonToolInspect;
     public Button buttonToolFeed;
@@ -113,15 +134,35 @@ public class UIManager : MonoBehaviour {
 
     public float loadingProgress = 0f;
 
-    //private int obsZoomLevel = 0;  // 0 most zoomed out
+    public Image imageStatsGraphDisplay;
+    public Material statsGraphMatLifespan;
+    public Material statsGraphMatFoodEaten;
+    public Material statsGraphMatPredation;
+    //public Texture2D statsGraphDataTex;
+    public Texture2D statsTextureLifespan;
+    public Texture2D statsTextureFoodEaten;
+    public Texture2D statsTexturePredation;
+    public Text statsPanelTextMaxValue;
+    public Text textStatsGraphTitle;
+    public GraphMode curStatsGraphMode = GraphMode.Lifespan;
+    public enum GraphMode {
+        Lifespan,
+        FoodEaten,
+        Predation
+    }
+    public float maxLifespanValue = 0.00001f;
+    public float maxFoodEatenValue = 0.00001f;
+    public float maxPredationValue = 0.00001f;
 
+    public Button buttonGraphLifespan;
+    public Button buttonGraphFoodEaten;
+    public Button buttonGraphPredation;
     
 	// Use this for initialization
 	void Start () {
 
         animatorStatsPanel.enabled = false;
-        animatorInspectPanelTop.enabled = false;
-        animatorInspectPanelBottom.enabled = false;
+        animatorInspectPanel.enabled = false;
 
         buttonToolMove.GetComponent<Image>().color = buttonActiveColor;   
         buttonToolInspect.GetComponent<Image>().color = buttonDisabledColor;        
@@ -155,100 +196,44 @@ public class UIManager : MonoBehaviour {
             float camPanSpeed = cameraManager.masterPanSpeed * panSpeedMult * Time.deltaTime;
 
             if(Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W)) {  // UP !!!!
-
-                cameraManager.isFollowing = false;
                 cameraManager.targetCamPos.y += camPanSpeed;
-
-                //cameraManager
-
-                /*obsZoomLevel = obsZoomLevel + 1;
-                if(obsZoomLevel > 2) {
-                    obsZoomLevel = 2;
-                }
-
-                if(obsZoomLevel == 1) {
-                    ClickButtonModeB();
-                }
-                if(obsZoomLevel == 2) {
-                    ClickButtonModeA();
-                } */
+                StopFollowing();                
             }
-            if(Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S)) {  // DOWN !!!!
-
-                cameraManager.isFollowing = false;
+            if(Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S)) {  // DOWN !!!!                
                 cameraManager.targetCamPos.y -= camPanSpeed;
-
-                /*obsZoomLevel = obsZoomLevel - 1;
-                if(obsZoomLevel < 0) {
-                    obsZoomLevel = 0;
-                }
-
-                if(obsZoomLevel == 1) {
-                    ClickButtonModeB();
-                }
-                if(obsZoomLevel == 0) {
-                    ClickButtonModeC();
-                }*/
-            }
-            
+                StopFollowing(); 
+            }            
             if(Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D)) {  // RIGHT !!!!
-
-                cameraManager.isFollowing = false;
                 cameraManager.targetCamPos.x += camPanSpeed;
-
-                /*int newIndex = cameraManager.targetCritterIndex + 24;
-                if(newIndex >= gameManager.simulationManager._NumAgents) {
-                    newIndex = 0;                    
-                }
-                cameraManager.SetTarget(gameManager.simulationManager.agentsArray[newIndex], newIndex);
-                */
+                StopFollowing(); 
             }
-            if(Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A)) {  // LEFT !!!!!
-
-                cameraManager.isFollowing = false;
+            if(Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A)) {  // LEFT !!!!!                
                 cameraManager.targetCamPos.x -= camPanSpeed;
+                StopFollowing(); 
 
-                /*
-                int newIndex = cameraManager.targetCritterIndex - 1;
-                if(newIndex < 0) {
-                    newIndex = newIndex + 24;                    
-                }
-                cameraManager.SetTarget(gameManager.simulationManager.agentsArray[newIndex], newIndex);
-                */
             }
+
             if (Input.GetKey(KeyCode.R)) 
             {
-
                 cameraManager.masterTiltAngle -= cameraManager.masterTiltSpeed * tiltSpeedMult * Time.deltaTime;
-
             }
             if (Input.GetKey(KeyCode.F)) 
             {
-
                 cameraManager.masterTiltAngle += cameraManager.masterTiltSpeed * tiltSpeedMult * Time.deltaTime;
-
             }
             if (Input.GetKeyDown(KeyCode.Escape)) {
                 Debug.Log("Pressed Escape!");
-
                 // Pause & Main Menu? :::
                 ClickButtonPause();
-
                 gameManager.EscapeToMainMenu();
             }
             if (Input.GetKeyDown(KeyCode.Tab)) {
                 Debug.Log("Pressed Tab!");
-
                 ClickButtonToggleDebug();
-                
-
             }
             if(Input.GetKeyDown(KeyCode.Space)) {
                 Debug.Log("Pressed Spacebar!");
-
-                
                 isPaused = !isPaused;
-
                 if (isPaused)
                 {
                     ClickButtonPause();
@@ -257,7 +242,6 @@ public class UIManager : MonoBehaviour {
                 {
                     ClickButtonPlayNormal();
                 }
-
             }
 
             // &&&&&&&&&&&&&&&&& MOUSE: &&&&&&&&&&&&&&&
@@ -272,22 +256,33 @@ public class UIManager : MonoBehaviour {
             if (Input.GetAxis("Mouse ScrollWheel") > 0f ) //  Forwards
             {
                 Debug.Log("Mouse ScrollWheel Forward");
-
                 cameraManager.masterTargetDistance -= zoomSpeed;
-
             }
             else if (Input.GetAxis("Mouse ScrollWheel") < 0f ) //  Backwarfds
             {
                 Debug.Log("Mouse ScrollWheel Backward");
-
-                cameraManager.masterTargetDistance += zoomSpeed;
-               
-            }
-                    
+                cameraManager.masterTargetDistance += zoomSpeed;               
+            }                    
         }
         else {
             panelObserverMode.SetActive(false);
         }
+    }
+    public void StopFollowing() {
+        cameraManager.isFollowing = false;
+        
+        if(isActiveInspectPanel) {
+            isActiveInspectPanel = false;
+            //buttonToolInspect.GetComponent<Image>().color = buttonDisabledColor;        
+            animatorInspectPanel.enabled = true;
+            animatorInspectPanel.Play("SlideOffPanelInspect");
+        } 
+    }
+    public void StartFollowing() {
+        cameraManager.isFollowing = true;
+        isActiveInspectPanel = true;    
+        animatorInspectPanel.enabled = true;
+        animatorInspectPanel.Play("SlideOnPanelInspect");        
     }
 
     private void MouseRaycast(bool clicked) {
@@ -308,6 +303,8 @@ public class UIManager : MonoBehaviour {
                 if(clicked) {
                     cameraManager.SetTarget(agentRef, agentRef.index);
                     cameraManager.isFollowing = true;
+                                        
+                    StartFollowing();
                 }
                 else {
 
@@ -399,34 +396,38 @@ public class UIManager : MonoBehaviour {
         }
     }
     private void EnterMainMenuUI() {
-        if(firstTimeStartup) {
-            buttonPlayResume.GetComponentInChildren<Text>().text = "NEW SIMULATION";
-        }
-        else {
-            buttonPlayResume.GetComponentInChildren<Text>().text = "RESUME";
-        }
         panelMainMenu.SetActive(true);
-        if (optionsMenuOn) {
-            panelGameOptions.SetActive(true);
-            panelTitleMenu.SetActive(false);
-        }
-        else {
-            panelGameOptions.SetActive(false);
-            panelTitleMenu.SetActive(true);
-        }
-        panelLoading.SetActive(false);
-        panelPlaying.SetActive(false);
 
-        panelHUD.SetActive(isActiveHUD);
-        panelDebug.SetActive(isActiveDebug);
+        UpdateMainMenuUI();
+                        
 
-        if(fitnessDisplayTexture == null) {
+        /*if(fitnessDisplayTexture == null) {
             fitnessDisplayTexture = new Texture2D(1, 1, TextureFormat.RGBAFloat, true);
             fitnessDisplayTexture.wrapMode = TextureWrapMode.Clamp;
             fitnessDisplayMat.SetTexture("_MainTex", fitnessDisplayTexture);
-        }        
+        }*/
         
-        //ClickButtonModeB();
+        if(statsTextureLifespan == null) {
+            statsTextureLifespan = new Texture2D(1, 1, TextureFormat.RGBAFloat, true);
+            statsTextureLifespan.filterMode = FilterMode.Bilinear;
+            statsTextureLifespan.wrapMode = TextureWrapMode.Clamp;            
+        } 
+        statsGraphMatLifespan.SetTexture("_MainTex", statsTextureLifespan);
+        if(statsTextureFoodEaten == null) {
+            statsTextureFoodEaten = new Texture2D(1, 1, TextureFormat.RGBAFloat, true);
+            statsTextureFoodEaten.filterMode = FilterMode.Bilinear;
+            statsTextureFoodEaten.wrapMode = TextureWrapMode.Clamp;
+        }
+        statsGraphMatFoodEaten.SetTexture("_MainTex", statsTextureFoodEaten);
+        if(statsTexturePredation == null) {
+            statsTexturePredation = new Texture2D(1, 1, TextureFormat.RGBAFloat, true);
+            statsTexturePredation.filterMode = FilterMode.Bilinear;
+            statsTexturePredation.wrapMode = TextureWrapMode.Clamp;
+        }
+        statsGraphMatPredation.SetTexture("_MainTex", statsTexturePredation);
+        //statsPanelGraphMat.SetTexture("_MainTex", statsTextureLifespan);
+
+        
     }
     private void EnterLoadingUI() {
         panelMainMenu.SetActive(false);
@@ -441,7 +442,31 @@ public class UIManager : MonoBehaviour {
         panelGameOptions.SetActive(false);
     }
     private void UpdateMainMenuUI() {
-                
+        
+        if(firstTimeStartup) {
+            buttonQuickStartResume.GetComponentInChildren<Text>().text = "QUICK START";
+        }
+        else {
+            buttonQuickStartResume.GetComponentInChildren<Text>().text = "RESUME";
+            buttonNewSimulation.gameObject.SetActive(false); // *** For now, 1 sim at a time ***
+            textMouseOverInfo.gameObject.SetActive(false);
+        }
+
+        if (optionsMenuOn) {
+            panelGameOptions.SetActive(true);
+            textMouseOverInfo.gameObject.SetActive(false);
+            //panelTitleMenu.SetActive(false);
+        }
+        else {
+            panelGameOptions.SetActive(false);
+            //panelTitleMenu.SetActive(true);
+        }
+
+        panelLoading.SetActive(false);
+        panelPlaying.SetActive(false);
+
+        panelHUD.SetActive(isActiveHUD);
+        panelDebug.SetActive(isActiveDebug);
     }
     private void UpdateLoadingUI() {
         if (loadingProgress < 1f) {
@@ -467,6 +492,9 @@ public class UIManager : MonoBehaviour {
         UpdateObserverModeUI();
         //UpdateDeathScreenUI();
         UpdatePausedUI();
+
+        UpdateStatsPanelUI();
+        UpdateInspectPanelUI();
     }
 
     public void PlayerDied(bool starved) {
@@ -626,7 +654,129 @@ public class UIManager : MonoBehaviour {
             panelPaused.SetActive(false);
         }
     }
-    
+    private void UpdateStatsPanelUI() {
+        //statsPanelGraphMat.SetPass(0);
+        if(curStatsGraphMode == GraphMode.Lifespan) {
+            statsGraphMatLifespan.SetFloat("_MaxValue", maxLifespanValue);
+            //statsGraphDataTex = statsTextureLifespan;
+            //statsGraphMatLifespan.SetTexture("_MainTex", statsTextureLifespan);
+            statsPanelTextMaxValue.text = maxLifespanValue.ToString("F0");
+            textStatsGraphTitle.text = "Average Lifespan Over Time:";
+            buttonGraphLifespan.GetComponent<Image>().color = buttonActiveColor;
+
+            buttonGraphFoodEaten.GetComponent<Image>().color = buttonDisabledColor;
+            buttonGraphPredation.GetComponent<Image>().color = buttonDisabledColor;
+
+            imageStatsGraphDisplay.material = statsGraphMatLifespan;
+        }
+
+        if(curStatsGraphMode == GraphMode.FoodEaten) {
+            statsGraphMatFoodEaten.SetFloat("_MaxValue", maxFoodEatenValue);
+            //statsGraphDataTex = statsTextureFoodEaten;
+            //statsGraphMatFoodEaten.SetTexture("_MainTex", statsTextureFoodEaten);
+            statsPanelTextMaxValue.text = maxFoodEatenValue.ToString("F4");
+            textStatsGraphTitle.text = "Average Food Eaten Over Time:";
+            buttonGraphFoodEaten.GetComponent<Image>().color = buttonActiveColor;
+
+            buttonGraphLifespan.GetComponent<Image>().color = buttonDisabledColor;
+            buttonGraphPredation.GetComponent<Image>().color = buttonDisabledColor;
+
+            imageStatsGraphDisplay.material = statsGraphMatFoodEaten;
+        }
+
+        if(curStatsGraphMode == GraphMode.Predation) {
+            statsGraphMatPredation.SetFloat("_MaxValue", maxPredationValue);
+            //statsGraphDataTex = statsTexturePredation;
+            //statsGraphMatPredation.SetTexture("_MainTex", statsTexturePredation);
+            statsPanelTextMaxValue.text = maxPredationValue.ToString("F2");
+            textStatsGraphTitle.text = "Average Predatory Behavior Over Time:";
+            buttonGraphPredation.GetComponent<Image>().color = buttonActiveColor;
+
+            buttonGraphLifespan.GetComponent<Image>().color = buttonDisabledColor;
+            buttonGraphFoodEaten.GetComponent<Image>().color = buttonDisabledColor;
+            
+            imageStatsGraphDisplay.material = statsGraphMatPredation;
+        }
+        //statsPanelGraphMat.SetTexture("_MainTex", statsGraphDataTex);
+    }
+    private void UpdateInspectPanelUI() {
+        int critterIndex = cameraManager.targetCritterIndex;
+
+        // DIET:
+        string txt = "Diet:\nHerbivore";
+        Color dietColor = new Color(0.5f, 1f, 0.3f);
+        if(gameManager.simulationManager.simStateData.critterInitDataArray[critterIndex].mouthIsActive > 0.5) {
+            txt = "Diet:\nCarnivore";
+            dietColor = new Color(1f, 0.5f, 0.3f);
+        }
+        textDiet.text = txt;
+        inspectWidgetDietMat.SetPass(0);
+        inspectWidgetDietMat.SetColor("_Tint", dietColor);
+
+        // STOMACH FOOD:
+        inspectWidgetStomachFoodMat.SetPass(0);
+        inspectWidgetStomachFoodMat.SetColor("_Tint", Color.yellow);        
+        float percentage = gameManager.simulationManager.simStateData.critterSimDataArray[critterIndex].foodAmount;
+        inspectWidgetStomachFoodMat.SetFloat("_FillPercentage", percentage);
+
+        // ENERGY:
+        Color energyHue = new Color(0.3f, 0.5f, 1f);
+        inspectWidgetEnergyMat.SetPass(0);
+        inspectWidgetEnergyMat.SetColor("_Tint", energyHue);        
+        percentage = gameManager.simulationManager.simStateData.critterSimDataArray[critterIndex].energy;
+        inspectWidgetEnergyMat.SetFloat("_FillPercentage", percentage);
+
+
+        // Life Cycle
+        inspectWidgetLifeCycleMat.SetPass(0);
+        inspectWidgetLifeCycleMat.SetColor("_Tint", Color.white);
+        percentage = gameManager.simulationManager.simStateData.critterSimDataArray[critterIndex].growthPercentage;
+        inspectWidgetLifeCycleMat.SetFloat("_FillPercentage", percentage);
+
+        // Dimensions
+        inspectWidgetDimensionsMat.SetPass(0);
+        inspectWidgetDimensionsMat.SetColor("_Tint", Color.gray);
+        float width = gameManager.simulationManager.simStateData.critterInitDataArray[critterIndex].boundingBoxSize.x;
+        float length = gameManager.simulationManager.simStateData.critterInitDataArray[critterIndex].boundingBoxSize.y;
+        inspectWidgetDimensionsMat.SetFloat("_Width", width);
+        inspectWidgetDimensionsMat.SetFloat("_Length", length);
+        textDimensionsWidth.text = width.ToString("F2") + " Wide";
+        textDimensionsLength.text = length.ToString("F2") + " Long";
+
+        // HEALTH:
+        Color liveHue = new Color(0.5f, 1f, 0.3f);
+        Color deadHue = new Color(0.5f, 0.25f, 0.15f);
+        percentage = gameManager.simulationManager.simStateData.critterSimDataArray[critterIndex].health;
+        Color healthHue = Color.Lerp(deadHue, liveHue, percentage);                
+        inspectWidgetHealthMat.SetPass(0);
+        inspectWidgetHealthMat.SetColor("_Tint", healthHue);
+        inspectWidgetHealthMat.SetFloat("_FillPercentage", percentage);
+        
+        // Species Icon:
+        textSpeciesID.text = "A";
+        Color speciesHue = Color.red;
+        if(cameraManager.targetAgent.speciesIndex == 1) {
+            speciesHue = Color.green;
+            textSpeciesID.text = "B";
+        }
+        else if(cameraManager.targetAgent.speciesIndex == 2) {
+            speciesHue = Color.blue;
+            textSpeciesID.text = "C";
+        }
+        else if(cameraManager.targetAgent.speciesIndex == 3) {
+            speciesHue = Color.white;
+            textSpeciesID.text = "D";
+        }
+        inspectWidgetSpeciesIconMat.SetPass(0);
+        inspectWidgetSpeciesIconMat.SetColor("_Tint", speciesHue);
+
+        // AGENT ICON
+        inspectWidgetAgentIconMat.SetPass(0);
+        inspectWidgetAgentIconMat.SetColor("_Tint", Color.gray);
+        textAgentID.text = cameraManager.targetAgent.index.ToString();
+        
+
+    }
     /*public void UpdateDeathScreenUI() {
         if(deathScreenOn) {
             panelDeathScreen.SetActive(true);
@@ -656,7 +806,7 @@ public class UIManager : MonoBehaviour {
         }
     }*/
 
-    public void RefreshFitnessTexture(List<Vector4> generationScores) {
+    /*public void RefreshFitnessTexture(List<Vector4> generationScores) {
         fitnessDisplayTexture.Resize(Mathf.Max(1, generationScores.Count), 1);
 
         // Find Score Range:
@@ -673,8 +823,64 @@ public class UIManager : MonoBehaviour {
         fitnessDisplayTexture.Apply();
 
         fitnessDisplayMat.SetFloat("_BestScore", bestScore);
-        fitnessDisplayMat.SetTexture("_MainTex", fitnessDisplayTexture);
-        
+        fitnessDisplayMat.SetTexture("_MainTex", fitnessDisplayTexture);        
+    }
+    */
+    public void UpdateStatsTextureLifespan(List<Vector4> data) {
+        statsTextureLifespan.Resize(Mathf.Max(1, data.Count), 1);
+
+        // Find Score Range:
+        float maxValue = 0.00001f;
+        for (int i = 0; i < data.Count; i++) {
+            maxValue = Mathf.Max(maxValue, data[i].x);
+            maxValue = Mathf.Max(maxValue, data[i].y);
+            maxValue = Mathf.Max(maxValue, data[i].z);
+            maxValue = Mathf.Max(maxValue, data[i].w);
+        }
+        for(int i = 0; i < data.Count; i++) {
+            statsTextureLifespan.SetPixel(i, 0, new Color(data[i].x, data[i].y, data[i].z, data[i].w));
+        }
+        statsTextureLifespan.Apply();
+
+        maxLifespanValue = maxValue;
+        //statsPanelGraphMat.SetFloat("_BestScore", bestScore);
+        //statsPanelGraphMat.SetTexture("_MainTex", statsTextureLifespan);     
+    }
+    public void UpdateStatsTextureFoodEaten(List<Vector4> data) {
+        statsTextureFoodEaten.Resize(Mathf.Max(1, data.Count), 1);
+
+        // Find Score Range:
+        float maxValue = 0.00001f;
+        for (int i = 0; i < data.Count; i++) {
+            maxValue = Mathf.Max(maxValue, data[i].x);
+            maxValue = Mathf.Max(maxValue, data[i].y);
+            maxValue = Mathf.Max(maxValue, data[i].z);
+            maxValue = Mathf.Max(maxValue, data[i].w);
+        }
+        for(int i = 0; i < data.Count; i++) {
+            statsTextureFoodEaten.SetPixel(i, 0, new Color(data[i].x, data[i].y, data[i].z, data[i].w));
+        }
+        statsTextureFoodEaten.Apply();
+
+        maxFoodEatenValue = maxValue;     
+    }
+    public void UpdateStatsTexturePredation(List<Vector4> data) {
+        statsTexturePredation.Resize(Mathf.Max(1, data.Count), 1);
+
+        // Find Score Range:
+        float maxValue = 1f;
+        /*for (int i = 0; i < data.Count; i++) {
+            maxValue = Mathf.Max(maxValue, data[i].x);
+            maxValue = Mathf.Max(maxValue, data[i].y);
+            maxValue = Mathf.Max(maxValue, data[i].z);
+            maxValue = Mathf.Max(maxValue, data[i].w);
+        }*/
+        for(int i = 0; i < data.Count; i++) {
+            statsTexturePredation.SetPixel(i, 0, new Color(data[i].x, data[i].y, data[i].z, data[i].w));
+        }
+        statsTexturePredation.Apply();
+
+        maxPredationValue = maxValue;     
     }
 
     public void UpdateScoreText(int score) {
@@ -711,7 +917,25 @@ public class UIManager : MonoBehaviour {
             buttonStats.GetComponent<Image>().color = buttonActiveColor;
         }
     }
-
+    public void ClickGraphButtonLifespan() {
+        if (curStatsGraphMode != GraphMode.Lifespan) {
+            curStatsGraphMode = GraphMode.Lifespan;
+            UpdateStatsPanelUI();
+        }
+    }
+    public void ClickGraphButtonFoodEaten() {
+        if (curStatsGraphMode != GraphMode.FoodEaten) {
+            curStatsGraphMode = GraphMode.FoodEaten;
+            UpdateStatsPanelUI();
+        }
+    }
+    public void ClickGraphButtonPredation() {
+        if (curStatsGraphMode != GraphMode.Predation) {
+            curStatsGraphMode = GraphMode.Predation;
+            UpdateStatsPanelUI();
+        }
+    }
+    
     public void ClickToolButtonMove() {
 
         if(curActiveTool != ToolType.Move) {
@@ -724,7 +948,6 @@ public class UIManager : MonoBehaviour {
         }
         
     }
-
     public void ClickToolButtonInspect() {
 
         if(curActiveTool != ToolType.Inspect) {
@@ -737,7 +960,6 @@ public class UIManager : MonoBehaviour {
         }
         
     }
-
     public void ClickToolButtonFeed() {
 
         if(curActiveTool != ToolType.Feed) {
@@ -752,59 +974,82 @@ public class UIManager : MonoBehaviour {
     }
 
     private void TurnOnInspectTool() {
-        if(!isActiveInspectPanel) {
+        buttonToolInspect.GetComponent<Image>().color = buttonActiveColor;
+        /*if(!isActiveInspectPanel) {
             isActiveInspectPanel = true;
-            //panelInspectHUD.SetActive(true);
-
             buttonToolInspect.GetComponent<Image>().color = buttonActiveColor;
-
-            animatorInspectPanelTop.enabled = true;
-            animatorInspectPanelBottom.enabled = true;
-            animatorInspectPanelTop.Play("SlideOnPanelInspectTop");
-            animatorInspectPanelBottom.Play("SlideOnPanelInspectBottom");
-        }
-        
+            animatorInspectPanel.enabled = true;
+            animatorInspectPanel.Play("SlideOnPanelInspect");
+        }   */     
     }    
     private void TurnOffInspectTool() {
         if(isActiveInspectPanel) {
             isActiveInspectPanel = false;
-            buttonToolInspect.GetComponent<Image>().color = buttonDisabledColor;
-        
-            animatorInspectPanelTop.enabled = true;
-            animatorInspectPanelBottom.enabled = true;
-            animatorInspectPanelTop.Play("SlideOffPanelInspectTop");
-            animatorInspectPanelBottom.Play("SlideOffPanelInspectBottom");
-
-            //panelInspectHUD.SetActive(false);
-        }        
+            buttonToolInspect.GetComponent<Image>().color = buttonDisabledColor;        
+            animatorInspectPanel.enabled = true;
+            animatorInspectPanel.Play("SlideOffPanelInspect");
+        }
+        StopFollowing();
     }
 
     public void ClickControlsMenu() {
         controlsMenuOn = true;
-        EnterMainMenuUI();
+        optionsMenuOn = false;
+        UpdateMainMenuUI();
     }
     public void ClickOptionsMenu() {
         optionsMenuOn = true;
-        EnterMainMenuUI();
+        controlsMenuOn = false;
+        UpdateMainMenuUI();
     }
-    public void ClickBackToMainMenu() {
+    /*public void ClickBackToMainMenu() {
         optionsMenuOn = false;
-        EnterMainMenuUI();
-    }
-    public void ClickStartGame() {
-        Debug.Log("ClickStartGame()!");
+        UpdateMainMenuUI();
+    }*/
+    public void ClickQuickStart() {
+        Debug.Log("ClickQuickStart()!");
         if(firstTimeStartup) {
-            gameManager.StartNewGame();
+            gameManager.StartNewGameQuick();
         }
         else {
             animatorStatsPanel.enabled = false;
-            animatorInspectPanelTop.enabled = false;
-            animatorInspectPanelBottom.enabled = false;
+            animatorInspectPanel.enabled = false;
+            gameManager.ResumePlaying();
+            ClickButtonPlayNormal();
+
+        } 
+    }
+    public void ClickNewSimulation() {
+        Debug.Log("ClickNewSimulation()!");
+        if(firstTimeStartup) {
+            gameManager.StartNewGameBlank();
+        }
+        else {
+            animatorStatsPanel.enabled = false;
+            animatorInspectPanel.enabled = false;
             gameManager.ResumePlaying();
             ClickButtonPlayNormal();
 
         }        
     }
+
+    public void MouseEnterQuickStart() {
+        textMouseOverInfo.gameObject.SetActive(true);
+        textMouseOverInfo.text = "Start with an existing ecosystem full of various living organisms.";
+    }
+    public void MouseExitQuickStart() {
+        textMouseOverInfo.gameObject.SetActive(false);
+    }
+
+    public void MouseEnterNewSimulation() {
+        textMouseOverInfo.gameObject.SetActive(true);
+        textMouseOverInfo.text = "Create a brand new ecosystem from scratch. It might take a significant amount of time for intelligent creatures to evolve.";//\nNot recommended for first-time players.";
+    }
+    public void MouseExitNewSimulation() {
+        textMouseOverInfo.gameObject.SetActive(false);
+    }
+
+
 
     public void ClickResetWorld() {
         Debug.Log("Reset The World!");
@@ -848,6 +1093,39 @@ public class UIManager : MonoBehaviour {
     public void ClickButtonToggleDebug() {
         isActiveDebug = !isActiveDebug;
         panelDebug.SetActive(isActiveDebug);
+    }
+
+    public void ClickPrevSpecies() {
+        Debug.Log("ClickPrevSpecies");
+        int newIndex = cameraManager.targetCritterIndex - gameManager.simulationManager._NumAgents / 4;
+        if(newIndex < 0) {
+            newIndex = newIndex + gameManager.simulationManager._NumAgents / 4;                    
+        }
+        cameraManager.SetTarget(gameManager.simulationManager.agentsArray[newIndex], newIndex);      
+    }
+    public void ClickNextSpecies() {
+        Debug.Log("ClickNextSpecies");
+        int newIndex = cameraManager.targetCritterIndex + gameManager.simulationManager._NumAgents / 4;
+        if(newIndex >= gameManager.simulationManager._NumAgents) {
+            newIndex = newIndex - gameManager.simulationManager._NumAgents;                      
+        }
+        cameraManager.SetTarget(gameManager.simulationManager.agentsArray[newIndex], newIndex);    
+    }
+    public void ClickPrevAgent() {
+        Debug.Log("ClickPrevAgent");
+        int newIndex = cameraManager.targetCritterIndex - 1;
+        if(newIndex < 0) {
+            newIndex = newIndex + gameManager.simulationManager._NumAgents / 4;                    
+        }
+        cameraManager.SetTarget(gameManager.simulationManager.agentsArray[newIndex], newIndex);                
+    }
+    public void ClickNextAgent() {
+        Debug.Log("ClickNextAgent");
+        int newIndex = cameraManager.targetCritterIndex + 1;
+        if(newIndex >= gameManager.simulationManager._NumAgents) {
+            newIndex = 0;                      
+        }
+        cameraManager.SetTarget(gameManager.simulationManager.agentsArray[newIndex], newIndex);                
     }
 
 

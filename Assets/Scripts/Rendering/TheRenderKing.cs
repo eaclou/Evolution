@@ -1329,10 +1329,10 @@ public class TheRenderKing : MonoBehaviour {
         // DEBUG ***** RACE CONDITIONS -- NEVER FORGET!!! ********
 
         // *** Hard-coded 64 Fruits per food object!!!! *** BEWARE!!!
-        ComputeBuffer foodFruitUpdateCBuffer = new ComputeBuffer(64, sizeof(float) * 7 + sizeof(int) * 1);
+        ComputeBuffer foodFruitUpdateCBuffer = new ComputeBuffer(simManager._NumFood, sizeof(float) * 7 + sizeof(int) * 1);
 
-        SimulationStateData.FruitData[] foodFruitDataArray = new SimulationStateData.FruitData[64];
-        for(int i = 0; i < 64; i++) {
+        SimulationStateData.FruitData[] foodFruitDataArray = new SimulationStateData.FruitData[simManager._NumFood];
+        for(int i = 0; i < foodFruitDataArray.Length; i++) {
             foodFruitDataArray[i] = new SimulationStateData.FruitData();
             foodFruitDataArray[i].foodIndex = foodIndex;
             foodFruitDataArray[i].localCoords = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)) * 0.5f + UnityEngine.Random.insideUnitCircle * 0.4f;
