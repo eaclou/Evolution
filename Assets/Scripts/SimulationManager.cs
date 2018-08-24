@@ -172,6 +172,8 @@ public class SimulationManager : MonoBehaviour {
     private ComputeBuffer foodParticlesMeasure1;
     private FoodParticleData[] foodParticleMeasurementTotalsData;
 
+    private int numAgentsProcessed = 0;
+
     public struct FoodParticleData {
         public int index;
         public int critterIndex;
@@ -298,17 +300,7 @@ public class SimulationManager : MonoBehaviour {
 
         // Load pre-saved genomes:
         LoadingLoadGenepoolFiles();
-        
-        yield return null;
-        
-        if(isQuickStart) {
-            Debug.Log("QUICK START! Loading Pre-Trained Genomes!");
-            LoadTrainingData();
-        }
-        else {
-
-        }
-
+       
         yield return null;
 
         // **** How to handle sharing simulation data between different Managers???
@@ -381,6 +373,11 @@ public class SimulationManager : MonoBehaviour {
 
         
         LoadingInitializePopulationGenomes();
+
+        if(isQuickStart) {
+            Debug.Log("QUICK START! Loading Pre-Trained Genomes!");
+            LoadTrainingData();
+        }
 
         simStateData = new SimulationStateData(this);
     }
@@ -684,6 +681,9 @@ public class SimulationManager : MonoBehaviour {
         statsLifespanEachGenerationList = new List<Vector4>(); // 
         statsFoodEatenEachGenerationList = new List<Vector4>();
         statsPredationEachGenerationList = new List<Vector4>();
+        statsLifespanEachGenerationList.Add(Vector4.one * 0.0001f);
+        statsFoodEatenEachGenerationList.Add(Vector4.one * 0.0001f);
+        statsPredationEachGenerationList.Add(Vector4.one * 0.0001f);
     }
     private void LoadingLoadGenepoolFiles() {
         
@@ -708,6 +708,7 @@ public class SimulationManager : MonoBehaviour {
     #endregion
 
     public void ResetWorld() {
+        Debug.Log("RESET WORLD!!!$%^&$%^&$%^&$%^&$%^&$%^&");
         // Initialize Agents:
         //LoadingInstantiateAgents();  // Fills the AgentsArray, Instantiates Agent Objects (MonoBehaviors + GameObjects)
 
@@ -719,7 +720,12 @@ public class SimulationManager : MonoBehaviour {
         statsLifespanEachGenerationList.Clear();
         statsFoodEatenEachGenerationList.Clear();
         statsPredationEachGenerationList.Clear();
+        statsLifespanEachGenerationList.Add(Vector4.one * 0.0001f);
+        statsFoodEatenEachGenerationList.Add(Vector4.one * 0.0001f);
+        statsPredationEachGenerationList.Add(Vector4.one * 0.0001f);
+
         numAgentsBorn = 0;
+        numAgentsProcessed = 0;
         currentOldestAgent = 0;
         recordPlayerAge = 0;
         lastPlayerScore = 0;
@@ -1587,18 +1593,22 @@ public class SimulationManager : MonoBehaviour {
         }
     }
     private void ProcessAgentScores(int agentIndex) {
+        numAgentsProcessed++;
         //get species index:
         int speciesIndex = Mathf.FloorToInt((float)agentIndex / (float)_NumAgents * (float)numSpecies);
 
-        speciesAvgFoodEaten[speciesIndex] = Mathf.Lerp(speciesAvgFoodEaten[speciesIndex], agentsArray[agentIndex].totalFoodEaten, 1f / 64f);
-        speciesAvgSizes[speciesIndex] = Vector2.Lerp(speciesAvgSizes[speciesIndex], new Vector2(agentsArray[agentIndex].coreModule.coreWidth, agentsArray[agentIndex].coreModule.coreLength), 1f / 64f);
+        float weightedAvgLerpVal = 1f / 128f;
+        weightedAvgLerpVal = Mathf.Max(weightedAvgLerpVal, 1f / (float)(numAgentsProcessed + 1));
+
+        speciesAvgFoodEaten[speciesIndex] = Mathf.Lerp(speciesAvgFoodEaten[speciesIndex], agentsArray[agentIndex].totalFoodEaten, weightedAvgLerpVal);
+        speciesAvgSizes[speciesIndex] = Vector2.Lerp(speciesAvgSizes[speciesIndex], new Vector2(agentsArray[agentIndex].coreModule.coreWidth, agentsArray[agentIndex].coreModule.coreLength), weightedAvgLerpVal);
         float mouthType = 0f;
         if(agentsArray[agentIndex].mouthRef.isPassive == false) {
             mouthType = 1f;
         }
-        speciesAvgMouthTypes[speciesIndex] = Mathf.Lerp(speciesAvgMouthTypes[speciesIndex], mouthType, 1f / 64f);
+        speciesAvgMouthTypes[speciesIndex] = Mathf.Lerp(speciesAvgMouthTypes[speciesIndex], mouthType, weightedAvgLerpVal);
 
-        rollingAverageAgentScoresArray[speciesIndex] = Mathf.Lerp(rollingAverageAgentScoresArray[speciesIndex], (float)agentsArray[agentIndex].scoreCounter, 1f / 128f);
+        rollingAverageAgentScoresArray[speciesIndex] = Mathf.Lerp(rollingAverageAgentScoresArray[speciesIndex], (float)agentsArray[agentIndex].scoreCounter, weightedAvgLerpVal);
         float approxGen = (float)numAgentsBorn / (float)(numAgents - 1);
         if (approxGen > curApproxGen) {
             Vector4 scores = new Vector4(rollingAverageAgentScoresArray[0], rollingAverageAgentScoresArray[1], rollingAverageAgentScoresArray[2], rollingAverageAgentScoresArray[3]); ;
@@ -1610,7 +1620,7 @@ public class SimulationManager : MonoBehaviour {
 
             //RefreshFitnessGraphTexture(); // OLD
 
-            Vector4 foodEaten = new Vector4(speciesAvgFoodEaten[0], speciesAvgFoodEaten[1], speciesAvgFoodEaten[2], speciesAvgFoodEaten[3]); ;
+            Vector4 foodEaten = new Vector4(speciesAvgFoodEaten[0], speciesAvgFoodEaten[1], speciesAvgFoodEaten[2], speciesAvgFoodEaten[3]); 
             statsFoodEatenEachGenerationList.Add(foodEaten);
 
             Vector4 predation = new Vector4(speciesAvgMouthTypes[0], speciesAvgMouthTypes[1], speciesAvgMouthTypes[2], speciesAvgMouthTypes[3]); ;
@@ -1621,6 +1631,32 @@ public class SimulationManager : MonoBehaviour {
             RefreshGraphTexturePredation();
 
             UpdateSimulationClimate();
+        }
+        else {
+            if(numAgentsProcessed < 130) {
+                if(numAgentsProcessed % 8 == 0) {
+                    Debug.Log("process Stats!! + " + curApproxGen.ToString() + ", numProcessed: " + numAgentsProcessed.ToString());
+                    Vector4 scores = new Vector4(rollingAverageAgentScoresArray[0], rollingAverageAgentScoresArray[1], rollingAverageAgentScoresArray[2], rollingAverageAgentScoresArray[3]); ;
+                    statsLifespanEachGenerationList[curApproxGen - 1] = scores;
+                    //statsLifespanEachGenerationList.Add(scores); // ** UPDATE THIS TO SAVE aLLL 4 SCORES!!! ***
+                    //if (rollingAverageAgentScoresArray[speciesIndex] > agentAvgRecordScore) {
+                    //    agentAvgRecordScore = rollingAverageAgentScoresArray[speciesIndex];
+                    //}
+                    //curApproxGen++;
+                    
+                    Vector4 foodEaten = new Vector4(speciesAvgFoodEaten[0], speciesAvgFoodEaten[1], speciesAvgFoodEaten[2], speciesAvgFoodEaten[3]); 
+                    statsFoodEatenEachGenerationList[curApproxGen - 1] = foodEaten;
+
+                    Vector4 predation = new Vector4(speciesAvgMouthTypes[0], speciesAvgMouthTypes[1], speciesAvgMouthTypes[2], speciesAvgMouthTypes[3]); ;
+                    statsPredationEachGenerationList[curApproxGen - 1] = predation;
+
+                    RefreshGraphTextureLifespan();
+                    RefreshGraphTextureFoodEaten();
+                    RefreshGraphTexturePredation();
+
+                    //UpdateSimulationClimate();
+                }
+            }
         }
     }
     private void UpdateSimulationClimate() {

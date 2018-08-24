@@ -48,15 +48,25 @@
 			fixed4 frag (v2f i) : SV_Target
 			{
 				float distToOrigin = length((i.uv - 0.5) * 2);
-				float alpha = 1.0 - saturate((distToOrigin - 0.95) * 25);
+				float alpha = 1.0 - saturate((distToOrigin - 0.95) * 20);
 
-				float fillMask = saturate(_FillPercentage - i.uv.y) * 10;
+				float fillMask = saturate(_FillPercentage - i.uv.y) * 20;
 
-				float3 emptyColor = float3(0.4,0.4,0.4); 
+				float4 emptyColor = float4(0.5, 0.5, 0.5, alpha * (saturate(distToOrigin)));
+
+				float4 fullHealthColor = float4(0.65, 1, 0.45, alpha);
+				fullHealthColor.rgb *= 1.3;
+				float4 deadColor = float4(0.4, 0.1, 0.03, alpha);
+
+				float4 liquidColor = lerp(deadColor, fullHealthColor, _FillPercentage);
+
+				alpha *= (saturate(distToOrigin));
+
 				// sample the texture
-				fixed4 col = float4(alpha,fillMask,0,alpha); //tex2D(_MainTex, i.uv);
-				col.rgb = lerp(emptyColor, _Tint.rgb, fillMask);
-				
+				//fixed4 col = float4(alpha,fillMask,0,alpha); //tex2D(_MainTex, i.uv);
+				fixed4 col = lerp(emptyColor, liquidColor, saturate(fillMask));
+				col.rgb *= ((i.uv.y * 0.6) + 0.4) * (1.0 - saturate(distToOrigin) * 0.36);
+
 				return col;
 			}
 			ENDCG

@@ -59,7 +59,8 @@ public class TheRenderKing : MonoBehaviour {
     public Material critterSkinStrokesDisplayMat;
     public Material critterShadowStrokesDisplayMat;
 
-    public Material agentHoverHighlightMat;
+    //public Material agentHoverHighlightMat;
+    public Material critterInspectHighlightMat;
 
     //public Material critterEyeStrokesDisplayMat;
 
@@ -149,7 +150,7 @@ public class TheRenderKing : MonoBehaviour {
 
     private UberFlowChainBrush uberFlowChainBrush1;
 
-    private ComputeBuffer agentHoverHighlightCBuffer;
+    //private ComputeBuffer agentHoverHighlightCBuffer;
 
     private BasicStrokeData[] obstacleStrokeDataArray;
     private ComputeBuffer obstacleStrokesCBuffer;
@@ -347,7 +348,7 @@ public class TheRenderKing : MonoBehaviour {
         InitializeWaterSplinesCBuffer();
         InitializeWaterChainsCBuffer();
 
-        InitializeAgentHoverHighlightCBuffer();
+        //InitializeAgentHoverHighlightCBuffer();
 
         //InitializeDebugBuffers(); 
 
@@ -789,12 +790,12 @@ public class TheRenderKing : MonoBehaviour {
         }        
         debugAgentResourcesCBuffer.SetData(debugAgentResourcesArray);
     }*/
-    public void InitializeAgentHoverHighlightCBuffer() {
+    /*public void InitializeAgentHoverHighlightCBuffer() {
         agentHoverHighlightCBuffer = new ComputeBuffer(1, sizeof(float) * 4);
         Vector4[] agentHoverHighlightArray = new Vector4[1];
         agentHoverHighlightArray[0] = new Vector4(0f, 0f, 0f, 0f);
         agentHoverHighlightCBuffer.SetData(agentHoverHighlightArray);
-    }
+    }*/
 
     private void InitializeMaterials() {
         agentEyesDisplayMat.SetPass(0); // Eyes
@@ -877,8 +878,8 @@ public class TheRenderKing : MonoBehaviour {
         foodParticleShadowDisplayMat.SetPass(0);
         foodParticleShadowDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
 
-        agentHoverHighlightMat.SetPass(0);
-        agentHoverHighlightMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        critterInspectHighlightMat.SetPass(0);
+        critterInspectHighlightMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
 
         /*
         trailDotsDisplayMat.SetPass(0);
@@ -1529,9 +1530,9 @@ public class TheRenderKing : MonoBehaviour {
         computeShaderCritters.SetFloat("_MapSize", SimulationManager._MapSize);
         computeShaderCritters.Dispatch(kernelCSCSSimulateCritterSkinStrokes, critterSkinStrokesCBuffer.count / 16, 1, 1);
     }
-    private void UpdateAgentHighlightData() {
+    /*private void UpdateAgentHighlightData() {
         //agentHoverHighlightCBuffer = new ComputeBuffer(1, sizeof(float) * 4);
-
+        
         float isHighlightOn = 0f;
         if(simManager.cameraManager.isMouseHoverAgent) {
             isHighlightOn = 1f;
@@ -1540,7 +1541,7 @@ public class TheRenderKing : MonoBehaviour {
         Vector4[] agentHoverHighlightArray = new Vector4[1];
         agentHoverHighlightArray[0] = new Vector4(isHighlightOn, 0f, 0f, 0f);
         agentHoverHighlightCBuffer.SetData(agentHoverHighlightArray);
-    }
+    }*/
 
     public void Tick() {  // should be called from SimManager at proper time!
         fullscreenFade = 1f;
@@ -1565,7 +1566,7 @@ public class TheRenderKing : MonoBehaviour {
         //SimWaterSplines();
         //SimWaterChains();
 
-        UpdateAgentHighlightData();
+        //UpdateAgentHighlightData();
 
         SimCritterSkinStrokes();
 
@@ -1842,21 +1843,32 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, baronVonWater.waterNutrientsBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterNutrientsBitsCBuffer.count);
 
 
-        agentHoverHighlightMat.SetPass(0);
-        agentHoverHighlightMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        agentHoverHighlightMat.SetBuffer("agentHoverHighlightData", agentHoverHighlightCBuffer);
-        agentHoverHighlightMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
-        agentHoverHighlightMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
-        agentHoverHighlightMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
-        agentHoverHighlightMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-        agentHoverHighlightMat.SetInt("_HoverAgentIndex", simManager.cameraManager.mouseHoverAgentIndex);
+        critterInspectHighlightMat.SetPass(0);
+        critterInspectHighlightMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        //critterInspectHighlightMat.SetBuffer("agentHoverHighlightData", agentHoverHighlightCBuffer);
+        critterInspectHighlightMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
+        critterInspectHighlightMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
+        critterInspectHighlightMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+        critterInspectHighlightMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+        critterInspectHighlightMat.SetInt("_HoverAgentIndex", simManager.cameraManager.mouseHoverAgentIndex);
+        critterInspectHighlightMat.SetInt("_LockedOnAgentIndex", simManager.cameraManager.targetCritterIndex);
+
+        float isHoverOn = 0f;
+        if (simManager.cameraManager.isMouseHoverAgent) {
+            isHoverOn = 1f;
+        }
         float isHighlightOn = 0f;
-        if (simManager.cameraManager.isMouseHoverAgent)
-        {
+        if (simManager.uiManager.curActiveTool == UIManager.ToolType.Inspect) {
             isHighlightOn = 1f;
         }
-        agentHoverHighlightMat.SetFloat("_IsHover", isHighlightOn);
-        cmdBufferTest.DrawProcedural(Matrix4x4.identity, agentHoverHighlightMat, 0, MeshTopology.Triangles, 6, 1);
+        float isLockedOn = 0f;
+        if (simManager.cameraManager.isFollowing) {
+            isLockedOn = 1f;
+        }
+        critterInspectHighlightMat.SetFloat("_IsHover", isHoverOn);
+        critterInspectHighlightMat.SetFloat("_IsHighlighted", isHighlightOn);
+        critterInspectHighlightMat.SetFloat("_IsLockedOn", isLockedOn);
+        cmdBufferTest.DrawProcedural(Matrix4x4.identity, critterInspectHighlightMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.critterInitDataCBuffer.count);
 
 
         // Critter Stomach Bits
@@ -2366,9 +2378,9 @@ public class TheRenderKing : MonoBehaviour {
         if(critterFoodDotsCBuffer != null) {
             critterFoodDotsCBuffer.Release();
         }
-        if(agentHoverHighlightCBuffer != null) {
+        /*if(agentHoverHighlightCBuffer != null) {
             agentHoverHighlightCBuffer.Release();
-        }
+        }*/
     }
 
     /*public PointStrokeData GeneratePointStrokeData(int index, Vector2 size, Vector2 pos, Vector2 dir, Vector3 hue, float str, int brushType) {

@@ -48,7 +48,8 @@
 			{
 				float distToOrigin = length((i.uv - 0.5) * 2);
 				float alpha = 1.0 - saturate((distToOrigin - 0.95) * 25);
-				fixed4 col = float4(_Tint.rgb,alpha);			
+				fixed4 col = float4(_Tint.rgb,alpha);	
+				col.rgb *= ((i.uv.y * 0.6) + 0.4) * (1.0 - saturate(distToOrigin) * 0.36);
 				return col;
 			}
 			ENDCG

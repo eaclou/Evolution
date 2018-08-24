@@ -49,6 +49,21 @@
 			fixed4 frag (v2f i) : SV_Target
 			{
 				float distToOrigin = length((i.uv - 0.5) * 2);
+				float alpha = 1.0 - saturate((distToOrigin - 0.95) * 20);
+
+				float fillMask = saturate(_FillPercentage - i.uv.y) * 20;
+
+				float4 emptyColor = float4(0.5, 0.5, 0.5, alpha * (saturate(distToOrigin)));
+				float4 liquidColor = float4(_Tint.rgb, alpha);
+
+				alpha *= (saturate(distToOrigin));
+
+				fixed4 col = lerp(emptyColor, liquidColor, saturate(fillMask));
+				col.rgb *= ((i.uv.y * 0.6) + 0.4) * (1.0 - saturate(distToOrigin) * 0.36);
+				
+				return col;
+
+				/*float distToOrigin = length((i.uv - 0.5) * 2);
 				float alpha = 1.0 - saturate((distToOrigin - 0.95) * 25);
 
 				float fillMask = saturate(_FillPercentage - i.uv.y) * 10;
@@ -58,7 +73,7 @@
 				fixed4 col = float4(alpha,fillMask,0,alpha); //tex2D(_MainTex, i.uv);
 				col.rgb = lerp(emptyColor, _Tint.rgb, fillMask);
 				
-				return col;
+				return col;*/
 			}
 			ENDCG
 		}

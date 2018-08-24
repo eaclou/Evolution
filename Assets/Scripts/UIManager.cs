@@ -59,6 +59,7 @@ public class UIManager : MonoBehaviour {
     public Text textDimensionsLength;
     public Text textSpeciesID;
     public Text textAgentID;
+    public Text textLifeCycle;
     // &(&^*(^&*(^&*(^&*(^&*(  ADD OTHER WIDGET MATS AND VARS HERE! %&^*$&*%^&*%&*%^&*%^&*%^&*%^*%&^*%&^*%67
 
     // &(&^*(^&*(^&*(^&*(^&*(  ADD OTHER WIDGET MATS AND VARS HERE! %&^*$&*%^&*%&*%^&*%^&*%^&*%^*%&^*%&^*%67
@@ -144,6 +145,7 @@ public class UIManager : MonoBehaviour {
     public Texture2D statsTexturePredation;
     public Text statsPanelTextMaxValue;
     public Text textStatsGraphTitle;
+    public Text textStatsCurGen;
     public GraphMode curStatsGraphMode = GraphMode.Lifespan;
     public enum GraphMode {
         Lifespan,
@@ -245,7 +247,9 @@ public class UIManager : MonoBehaviour {
             }
 
             // &&&&&&&&&&&&&&&&& MOUSE: &&&&&&&&&&&&&&&
-            MouseRaycast(Input.GetMouseButtonDown(0));
+            if(curActiveTool == ToolType.Inspect) {
+                MouseRaycast(Input.GetMouseButtonDown(0));
+            }            
             
             if (Input.GetMouseButtonDown(1)) {
                 Debug.Log("RIGHT CLICKETY-CLICK!");
@@ -698,6 +702,9 @@ public class UIManager : MonoBehaviour {
             imageStatsGraphDisplay.material = statsGraphMatPredation;
         }
         //statsPanelGraphMat.SetTexture("_MainTex", statsGraphDataTex);
+
+        int numBorn = gameManager.simulationManager.numAgentsBorn + gameManager.simulationManager._NumAgents;
+        textStatsCurGen.text = "Generation:\n" + gameManager.simulationManager.curApproxGen.ToString() + "\n\n# Born:\n" + numBorn.ToString();
     }
     private void UpdateInspectPanelUI() {
         int critterIndex = cameraManager.targetCritterIndex;
@@ -723,15 +730,38 @@ public class UIManager : MonoBehaviour {
         Color energyHue = new Color(0.3f, 0.5f, 1f);
         inspectWidgetEnergyMat.SetPass(0);
         inspectWidgetEnergyMat.SetColor("_Tint", energyHue);        
-        percentage = gameManager.simulationManager.simStateData.critterSimDataArray[critterIndex].energy;
+        percentage = gameManager.simulationManager.simStateData.critterSimDataArray[critterIndex].energy *
+                    gameManager.simulationManager.simStateData.critterSimDataArray[critterIndex].embryoPercentage;
+        if(gameManager.simulationManager.agentsArray[critterIndex].curLifeStage == Agent.AgentLifeStage.Dead) {
+            percentage = 0.05f;
+        } 
         inspectWidgetEnergyMat.SetFloat("_FillPercentage", percentage);
 
 
         // Life Cycle
         inspectWidgetLifeCycleMat.SetPass(0);
-        inspectWidgetLifeCycleMat.SetColor("_Tint", Color.white);
-        percentage = gameManager.simulationManager.simStateData.critterSimDataArray[critterIndex].growthPercentage;
+        inspectWidgetLifeCycleMat.SetColor("_Tint", Color.blue);
+        
+        if(gameManager.simulationManager.agentsArray[critterIndex].curLifeStage == Agent.AgentLifeStage.Egg) {
+            percentage = (float)gameManager.simulationManager.agentsArray[critterIndex].lifeStageTransitionTimeStepCounter / 
+                        (float)gameManager.simulationManager.agentsArray[critterIndex]._GestationDurationTimeSteps;
+        }
+        if(gameManager.simulationManager.agentsArray[critterIndex].curLifeStage == Agent.AgentLifeStage.Young) {
+            percentage = (float)gameManager.simulationManager.agentsArray[critterIndex].lifeStageTransitionTimeStepCounter / 
+                        (float)gameManager.simulationManager.agentsArray[critterIndex]._YoungDurationTimeSteps;
+        }
+        if(gameManager.simulationManager.agentsArray[critterIndex].curLifeStage == Agent.AgentLifeStage.Mature) {
+            percentage = (float)gameManager.simulationManager.agentsArray[critterIndex].ageCounterMature / 
+                        (float)gameManager.simulationManager.agentsArray[critterIndex].maxAgeTimeSteps;
+        }
+        if(gameManager.simulationManager.agentsArray[critterIndex].curLifeStage == Agent.AgentLifeStage.Dead) {
+            percentage = (float)gameManager.simulationManager.agentsArray[critterIndex].lifeStageTransitionTimeStepCounter / 
+                        (float)gameManager.simulationManager.agentsArray[critterIndex]._DecayDurationTimeSteps;
+        }        
         inspectWidgetLifeCycleMat.SetFloat("_FillPercentage", percentage);
+        inspectWidgetLifeCycleMat.SetInt("_CurLifeStage", (int)gameManager.simulationManager.agentsArray[critterIndex].curLifeStage);
+        textLifeCycle.text = "Life Stage:\n" + gameManager.simulationManager.agentsArray[critterIndex].curLifeStage.ToString() + "\n" + gameManager.simulationManager.agentsArray[critterIndex].scoreCounter.ToString();
+
 
         // Dimensions
         inspectWidgetDimensionsMat.SetPass(0);
@@ -746,25 +776,29 @@ public class UIManager : MonoBehaviour {
         // HEALTH:
         Color liveHue = new Color(0.5f, 1f, 0.3f);
         Color deadHue = new Color(0.5f, 0.25f, 0.15f);
-        percentage = gameManager.simulationManager.simStateData.critterSimDataArray[critterIndex].health;
-        Color healthHue = Color.Lerp(deadHue, liveHue, percentage);                
+        percentage = gameManager.simulationManager.simStateData.critterSimDataArray[critterIndex].health *
+                    gameManager.simulationManager.simStateData.critterSimDataArray[critterIndex].embryoPercentage;
+        Color healthHue = Color.Lerp(deadHue, liveHue, percentage); 
+        if(gameManager.simulationManager.agentsArray[critterIndex].curLifeStage == Agent.AgentLifeStage.Dead) {
+            percentage = 0.05f;
+        }  
         inspectWidgetHealthMat.SetPass(0);
         inspectWidgetHealthMat.SetColor("_Tint", healthHue);
         inspectWidgetHealthMat.SetFloat("_FillPercentage", percentage);
         
         // Species Icon:
         textSpeciesID.text = "A";
-        Color speciesHue = Color.red;
+        Color speciesHue = new Color(1f, 0.33f, 0.33f);
         if(cameraManager.targetAgent.speciesIndex == 1) {
-            speciesHue = Color.green;
+            speciesHue = new Color(0.33f, 1f, 0.33f);
             textSpeciesID.text = "B";
         }
         else if(cameraManager.targetAgent.speciesIndex == 2) {
-            speciesHue = Color.blue;
+            speciesHue = new Color(0.33f, 0.33f, 1f);
             textSpeciesID.text = "C";
         }
         else if(cameraManager.targetAgent.speciesIndex == 3) {
-            speciesHue = Color.white;
+            speciesHue = new Color(1f, 1f, 1f);
             textSpeciesID.text = "D";
         }
         inspectWidgetSpeciesIconMat.SetPass(0);
@@ -974,21 +1008,16 @@ public class UIManager : MonoBehaviour {
     }
 
     private void TurnOnInspectTool() {
-        buttonToolInspect.GetComponent<Image>().color = buttonActiveColor;
-        /*if(!isActiveInspectPanel) {
-            isActiveInspectPanel = true;
-            buttonToolInspect.GetComponent<Image>().color = buttonActiveColor;
-            animatorInspectPanel.enabled = true;
-            animatorInspectPanel.Play("SlideOnPanelInspect");
-        }   */     
+        buttonToolInspect.GetComponent<Image>().color = buttonActiveColor;            
     }    
     private void TurnOffInspectTool() {
+                
+        buttonToolInspect.GetComponent<Image>().color = buttonDisabledColor;  
         if(isActiveInspectPanel) {
-            isActiveInspectPanel = false;
-            buttonToolInspect.GetComponent<Image>().color = buttonDisabledColor;        
             animatorInspectPanel.enabled = true;
             animatorInspectPanel.Play("SlideOffPanelInspect");
-        }
+        }        
+        isActiveInspectPanel = false;
         StopFollowing();
     }
 
@@ -1043,7 +1072,7 @@ public class UIManager : MonoBehaviour {
 
     public void MouseEnterNewSimulation() {
         textMouseOverInfo.gameObject.SetActive(true);
-        textMouseOverInfo.text = "Create a brand new ecosystem from scratch. It might take a significant amount of time for intelligent creatures to evolve.";//\nNot recommended for first-time players.";
+        textMouseOverInfo.text = "Create a brand new ecosystem from scratch. It might take a significant amount of time for intelligent creatures to evolve.\n*Not recommended for first-time players.";
     }
     public void MouseExitNewSimulation() {
         textMouseOverInfo.gameObject.SetActive(false);
@@ -1099,7 +1128,7 @@ public class UIManager : MonoBehaviour {
         Debug.Log("ClickPrevSpecies");
         int newIndex = cameraManager.targetCritterIndex - gameManager.simulationManager._NumAgents / 4;
         if(newIndex < 0) {
-            newIndex = newIndex + gameManager.simulationManager._NumAgents / 4;                    
+            newIndex = newIndex + gameManager.simulationManager._NumAgents;                    
         }
         cameraManager.SetTarget(gameManager.simulationManager.agentsArray[newIndex], newIndex);      
     }
@@ -1115,7 +1144,7 @@ public class UIManager : MonoBehaviour {
         Debug.Log("ClickPrevAgent");
         int newIndex = cameraManager.targetCritterIndex - 1;
         if(newIndex < 0) {
-            newIndex = newIndex + gameManager.simulationManager._NumAgents / 4;                    
+            newIndex = gameManager.simulationManager._NumAgents - 1;                    
         }
         cameraManager.SetTarget(gameManager.simulationManager.agentsArray[newIndex], newIndex);                
     }

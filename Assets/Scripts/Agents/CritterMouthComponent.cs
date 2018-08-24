@@ -199,7 +199,7 @@ public class CritterMouthComponent : MonoBehaviour {
     }
     private void BiteDamageAnimal(Agent preyAgent, float ownBiteArea, float targetArea) {
         //Debug.Log("BiteDamageAnimal");
-        float baseDamage = 1f;
+        float baseDamage = 0.55f;
 
         //float mouthSize = triggerCollider.radius * triggerCollider.radius;
         //float targetSize = segment.agentRef.growthPercentage * segment.agentRef.coreModule.coreLength * segment.agentRef.coreModule.coreWidth;

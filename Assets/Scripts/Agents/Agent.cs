@@ -37,7 +37,7 @@ public class Agent : MonoBehaviour {
         Dead,
         Null
     }
-    private int gestationDurationTimeSteps = 60;
+    private int gestationDurationTimeSteps = 180;
     public int _GestationDurationTimeSteps
     {
         get
@@ -769,6 +769,9 @@ public class Agent : MonoBehaviour {
             beingSwallowedFrameCounter = 0;
 
             Debug.Log("HUH????");
+        }
+        else {
+            coreModule.energyStored[0] = 1f;
         }
 
         /*isSwallowingPrey = false;
