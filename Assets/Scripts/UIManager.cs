@@ -11,7 +11,7 @@ public class UIManager : MonoBehaviour {
     public GameOptionsManager gameOptionsManager;
 
     private bool firstTimeStartup = true;
-
+        
     // Main Menu:
     public Button buttonQuickStartResume;
     public Button buttonNewSimulation;
@@ -33,13 +33,19 @@ public class UIManager : MonoBehaviour {
 
     public ToolType curActiveTool;
     public enum ToolType {
-        Move,
+        None,
+        Stir,
         Inspect,
-        Feed
+        Feed,
+        Mutate
     }
 
     public Color buttonActiveColor = new Color(1f, 1f, 1f, 1f);
     public Color buttonDisabledColor = new Color(0.5f, 0.5f, 0.5f, 1f);
+
+    public GameObject mouseRaycastWaterPlane;
+    private Vector3 prevMousePositionOnWaterPlane;
+    public Vector3 curMousePositionOnWaterPlane;
 
     public bool isActiveInspectPanel = false;
     public Material inspectWidgetDietMat;
@@ -59,20 +65,38 @@ public class UIManager : MonoBehaviour {
     public Text textDimensionsLength;
     public Text textSpeciesID;
     public Text textAgentID;
-    public Text textLifeCycle;
-    // &(&^*(^&*(^&*(^&*(^&*(  ADD OTHER WIDGET MATS AND VARS HERE! %&^*$&*%^&*%&*%^&*%^&*%^&*%^*%&^*%&^*%67
-
-    // &(&^*(^&*(^&*(^&*(^&*(  ADD OTHER WIDGET MATS AND VARS HERE! %&^*$&*%^&*%&*%^&*%^&*%^&*%^*%&^*%&^*%67
-
+    public Text textLifeCycle;    
     public GameObject panelInspectHUD;
-    //public GameObject panelInspectTopHUD;
-    //public GameObject panelInspectBottomHUD;
     public Animator animatorInspectPanel;
-    public Button buttonToolMove;
+    
+    public bool isActiveFeedToolPanel = false;
+    public GameObject panelFeedToolHUD;
+    public Animator animatorFeedToolPanel;
+    public Button buttonFeedToolSprinkle;
+    public Button buttonFeedToolPour;
+    public Slider sliderNutrientRegrowthRate;
+    private bool foodToolSprinkleOn = true;
+    private bool foodToolPourOn = false;
+
+    public bool isActiveMutateToolPanel = false;
+    public GameObject panelMutateToolHUD;
+    public Animator animatorMutateToolPanel;
+    public Slider sliderMutationRate;
+
+    public bool isActiveStirToolPanel = false;
+    public GameObject panelStirToolHUD;
+    public Animator animatorStirToolPanel;
+
+    public bool isActiveToolsPanel = false;
+    public Button buttonToolOpenClose;
+    public Button buttonToolStir;
     public Button buttonToolInspect;
     public Button buttonToolFeed;
-    //public Button buttonToolGenetics;
-    
+    public Button buttonToolMutate;
+    public GameObject panelTools;
+    public Animator animatorToolsPanel;
+        
+
     public GameObject panelHUD;
     public Image imageFood;
     public Image imageHitPoints;
@@ -137,38 +161,62 @@ public class UIManager : MonoBehaviour {
 
     public Image imageStatsGraphDisplay;
     public Material statsGraphMatLifespan;
+    public Material statsGraphMatBodySizes;
     public Material statsGraphMatFoodEaten;
     public Material statsGraphMatPredation;
+    public Material statsGraphMatNutrients;
+    public Material statsGraphMatMutation;
     //public Texture2D statsGraphDataTex;
-    public Texture2D statsTextureLifespan;
-    public Texture2D statsTextureFoodEaten;
-    public Texture2D statsTexturePredation;
+    private Texture2D statsTextureLifespan;
+    private Texture2D statsTextureBodySizes;
+    private Texture2D statsTextureFoodEaten;
+    private Texture2D statsTexturePredation;
+    private Texture2D statsTextureNutrients;
+    private Texture2D statsTextureMutation;
     public Text statsPanelTextMaxValue;
     public Text textStatsGraphTitle;
+    public Text textStatsGraphLegend;
     public Text textStatsCurGen;
     public GraphMode curStatsGraphMode = GraphMode.Lifespan;
     public enum GraphMode {
         Lifespan,
-        FoodEaten,
-        Predation
+        BodySizes,
+        Consumption,
+        Predation,
+        Nutrients,
+        Mutation
     }
+    public Button buttonGraphLifespan;
+    public Button buttonGraphBodySizes;
+    public Button buttonGraphConsumption;
+    public Button buttonGraphPredation;
+    public Button buttonGraphNutrients;
+    public Button buttonGraphMutation;
+
     public float maxLifespanValue = 0.00001f;
+    public float maxBodySizeValue = 0.00001f;
     public float maxFoodEatenValue = 0.00001f;
     public float maxPredationValue = 0.00001f;
+    public float maxNutrientsValue = 0.00001f;
+    public float maxMutationValue = 0.00001f;
 
-    public Button buttonGraphLifespan;
-    public Button buttonGraphFoodEaten;
-    public Button buttonGraphPredation;
+    public Vector2 smoothedMouseVel;
+    private Vector2 prevMousePos;
     
 	// Use this for initialization
 	void Start () {
 
         animatorStatsPanel.enabled = false;
         animatorInspectPanel.enabled = false;
+        animatorToolsPanel.enabled = false;
+        animatorFeedToolPanel.enabled = false;
+        animatorMutateToolPanel.enabled = false;
+        animatorStirToolPanel.enabled = false;
 
-        buttonToolMove.GetComponent<Image>().color = buttonActiveColor;   
+        buttonToolStir.GetComponent<Image>().color = buttonDisabledColor;   
         buttonToolInspect.GetComponent<Image>().color = buttonDisabledColor;        
         buttonToolFeed.GetComponent<Image>().color = buttonDisabledColor;
+        buttonToolMutate.GetComponent<Image>().color = buttonDisabledColor;
     }
 
     
@@ -247,9 +295,18 @@ public class UIManager : MonoBehaviour {
             }
 
             // &&&&&&&&&&&&&&&&& MOUSE: &&&&&&&&&&&&&&&
+            bool leftClickThisFrame = Input.GetMouseButtonDown(0);
+            bool isDragging = Input.GetMouseButton(0);
             if(curActiveTool == ToolType.Inspect) {
-                MouseRaycast(Input.GetMouseButtonDown(0));
-            }            
+                MouseRaycastInspect(leftClickThisFrame);
+            }
+            if(curActiveTool == ToolType.Feed || curActiveTool == ToolType.Stir) {       
+                mouseRaycastWaterPlane.SetActive(true);
+                MouseRaycastWaterPlane(isDragging);            
+            }
+            else {
+                mouseRaycastWaterPlane.SetActive(false);
+            }
             
             if (Input.GetMouseButtonDown(1)) {
                 Debug.Log("RIGHT CLICKETY-CLICK!");
@@ -288,12 +345,49 @@ public class UIManager : MonoBehaviour {
         animatorInspectPanel.enabled = true;
         animatorInspectPanel.Play("SlideOnPanelInspect");        
     }
-
-    private void MouseRaycast(bool clicked) {
+    private void MouseRaycastWaterPlane(bool clicked) {
         
         Vector3 camPos = cameraManager.camera.gameObject.transform.position;                
         Ray ray = cameraManager.camera.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit = new RaycastHit();
+        int layerMask = 1 << 12;
+        Physics.Raycast(ray, out hit, layerMask);
+
+        if(hit.collider != null) {
+            curMousePositionOnWaterPlane = hit.point;
+
+            if (clicked) {
+                //Debug.Log("CLICK Hit Water Plane! Coords: " + hit.point.ToString());
+                if(curActiveTool == ToolType.Stir) {
+                    Vector2 forceVector = new Vector2(curMousePositionOnWaterPlane.x - prevMousePositionOnWaterPlane.x, curMousePositionOnWaterPlane.y - prevMousePositionOnWaterPlane.y);
+                    float mag = smoothedMouseVel.magnitude;
+
+                    if(mag > 0f) {
+                        gameManager.simulationManager.PlayerToolStirOn(hit.point, smoothedMouseVel);
+                    }
+                }
+                if(curActiveTool == ToolType.Feed) {
+                    if(foodToolSprinkleOn) {
+                        gameManager.simulationManager.PlayerFeedToolSprinkle(hit.point);
+                    }
+                    if(foodToolPourOn) {
+                        gameManager.simulationManager.PlayerFeedToolPour(hit.point);
+                    }
+                }
+            }
+            else {
+                gameManager.simulationManager.PlayerToolStirOff();
+            }
+
+            prevMousePositionOnWaterPlane = curMousePositionOnWaterPlane;
+        }
+    }
+    private void MouseRaycastInspect(bool clicked) {
+        
+        Vector3 camPos = cameraManager.camera.gameObject.transform.position;                
+        Ray ray = cameraManager.camera.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit = new RaycastHit();
+        int layerMask = 0;
         Physics.Raycast(ray, out hit);
 
         cameraManager.isMouseHoverAgent = false;
@@ -302,7 +396,7 @@ public class UIManager : MonoBehaviour {
         if(hit.collider != null) {
             Agent agentRef = hit.collider.gameObject.GetComponentInParent<Agent>();
             if(agentRef != null) {
-                //Debug.Log("AGENT: [ " + agentRef.gameObject.name + " ] #" + agentRef.index.ToString());
+                Debug.Log("AGENT: [ " + agentRef.gameObject.name + " ] #" + agentRef.index.ToString());
                     
                 if(clicked) {
                     cameraManager.SetTarget(agentRef, agentRef.index);
@@ -405,32 +499,47 @@ public class UIManager : MonoBehaviour {
         UpdateMainMenuUI();
                         
 
-        /*if(fitnessDisplayTexture == null) {
-            fitnessDisplayTexture = new Texture2D(1, 1, TextureFormat.RGBAFloat, true);
-            fitnessDisplayTexture.wrapMode = TextureWrapMode.Clamp;
-            fitnessDisplayMat.SetTexture("_MainTex", fitnessDisplayTexture);
-        }*/
-        
         if(statsTextureLifespan == null) {
             statsTextureLifespan = new Texture2D(1, 1, TextureFormat.RGBAFloat, true);
             statsTextureLifespan.filterMode = FilterMode.Bilinear;
             statsTextureLifespan.wrapMode = TextureWrapMode.Clamp;            
-        } 
+        }         
         statsGraphMatLifespan.SetTexture("_MainTex", statsTextureLifespan);
-        if(statsTextureFoodEaten == null) {
+
+        if(statsTextureBodySizes == null) {
+            statsTextureBodySizes = new Texture2D(1, 1, TextureFormat.RGBAFloat, true);
+            statsTextureBodySizes.filterMode = FilterMode.Bilinear;
+            statsTextureBodySizes.wrapMode = TextureWrapMode.Clamp;            
+        }         
+        statsGraphMatBodySizes.SetTexture("_MainTex", statsTextureBodySizes);
+
+        if (statsTextureFoodEaten == null) {
             statsTextureFoodEaten = new Texture2D(1, 1, TextureFormat.RGBAFloat, true);
             statsTextureFoodEaten.filterMode = FilterMode.Bilinear;
             statsTextureFoodEaten.wrapMode = TextureWrapMode.Clamp;
         }
         statsGraphMatFoodEaten.SetTexture("_MainTex", statsTextureFoodEaten);
-        if(statsTexturePredation == null) {
+
+        if (statsTexturePredation == null) {
             statsTexturePredation = new Texture2D(1, 1, TextureFormat.RGBAFloat, true);
             statsTexturePredation.filterMode = FilterMode.Bilinear;
             statsTexturePredation.wrapMode = TextureWrapMode.Clamp;
         }
         statsGraphMatPredation.SetTexture("_MainTex", statsTexturePredation);
-        //statsPanelGraphMat.SetTexture("_MainTex", statsTextureLifespan);
+        
+        if (statsTextureNutrients == null) {
+            statsTextureNutrients = new Texture2D(1, 1, TextureFormat.RGBAFloat, true);
+            statsTextureNutrients.filterMode = FilterMode.Bilinear;
+            statsTextureNutrients.wrapMode = TextureWrapMode.Clamp;
+        }
+        statsGraphMatNutrients.SetTexture("_MainTex", statsTextureNutrients);
 
+        if (statsTextureMutation == null) {
+            statsTextureMutation = new Texture2D(1, 1, TextureFormat.RGBAFloat, true);
+            statsTextureMutation.filterMode = FilterMode.Bilinear;
+            statsTextureMutation.wrapMode = TextureWrapMode.Clamp;
+        }
+        statsGraphMatMutation.SetTexture("_MainTex", statsTextureMutation);
         
     }
     private void EnterLoadingUI() {
@@ -499,6 +608,17 @@ public class UIManager : MonoBehaviour {
 
         UpdateStatsPanelUI();
         UpdateInspectPanelUI();
+        UpdateFeedToolPanelUI();
+        UpdateMutateToolPanelUI();
+        UpdateStirToolPanelUI();
+
+        Vector2 curMousePos = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
+
+        Vector2 instantMouseVel = curMousePos - prevMousePos;
+
+        smoothedMouseVel = Vector2.Lerp(smoothedMouseVel, instantMouseVel, 0.2f);
+
+        prevMousePos = curMousePos;
     }
 
     public void PlayerDied(bool starved) {
@@ -659,49 +779,67 @@ public class UIManager : MonoBehaviour {
         }
     }
     private void UpdateStatsPanelUI() {
-        //statsPanelGraphMat.SetPass(0);
+        buttonGraphLifespan.GetComponent<Image>().color = buttonDisabledColor;
+        buttonGraphBodySizes.GetComponent<Image>().color = buttonDisabledColor;
+        buttonGraphConsumption.GetComponent<Image>().color = buttonDisabledColor;
+        buttonGraphPredation.GetComponent<Image>().color = buttonDisabledColor;
+        buttonGraphNutrients.GetComponent<Image>().color = buttonDisabledColor;
+        buttonGraphMutation.GetComponent<Image>().color = buttonDisabledColor;
+
+        textStatsGraphLegend.text = "<color=#ff0000ff>Species A -----</color>\n\n<color=#00ff00ff>Species B -----</color>\n\n<color=#0000ffff>Species C -----</color>\n\n<color=#ffffffff>Species D -----</color>";
+        
         if(curStatsGraphMode == GraphMode.Lifespan) {
-            statsGraphMatLifespan.SetFloat("_MaxValue", maxLifespanValue);
-            //statsGraphDataTex = statsTextureLifespan;
-            //statsGraphMatLifespan.SetTexture("_MainTex", statsTextureLifespan);
+            statsGraphMatLifespan.SetFloat("_MaxValue", maxLifespanValue);            
             statsPanelTextMaxValue.text = maxLifespanValue.ToString("F0");
             textStatsGraphTitle.text = "Average Lifespan Over Time:";
-            buttonGraphLifespan.GetComponent<Image>().color = buttonActiveColor;
-
-            buttonGraphFoodEaten.GetComponent<Image>().color = buttonDisabledColor;
-            buttonGraphPredation.GetComponent<Image>().color = buttonDisabledColor;
-
+            buttonGraphLifespan.GetComponent<Image>().color = buttonActiveColor;            
             imageStatsGraphDisplay.material = statsGraphMatLifespan;
         }
 
-        if(curStatsGraphMode == GraphMode.FoodEaten) {
+        if(curStatsGraphMode == GraphMode.BodySizes) {
+            statsGraphMatBodySizes.SetFloat("_MaxValue", maxBodySizeValue);            
+            statsPanelTextMaxValue.text = maxBodySizeValue.ToString("F2");
+            textStatsGraphTitle.text = "Average Creature Body Sizes Over Time:";
+            buttonGraphBodySizes.GetComponent<Image>().color = buttonActiveColor;
+            imageStatsGraphDisplay.material = statsGraphMatBodySizes;
+        }
+
+        if(curStatsGraphMode == GraphMode.Consumption) {
             statsGraphMatFoodEaten.SetFloat("_MaxValue", maxFoodEatenValue);
-            //statsGraphDataTex = statsTextureFoodEaten;
-            //statsGraphMatFoodEaten.SetTexture("_MainTex", statsTextureFoodEaten);
             statsPanelTextMaxValue.text = maxFoodEatenValue.ToString("F4");
             textStatsGraphTitle.text = "Average Food Eaten Over Time:";
-            buttonGraphFoodEaten.GetComponent<Image>().color = buttonActiveColor;
-
-            buttonGraphLifespan.GetComponent<Image>().color = buttonDisabledColor;
-            buttonGraphPredation.GetComponent<Image>().color = buttonDisabledColor;
-
+            buttonGraphConsumption.GetComponent<Image>().color = buttonActiveColor;
             imageStatsGraphDisplay.material = statsGraphMatFoodEaten;
         }
 
         if(curStatsGraphMode == GraphMode.Predation) {
             statsGraphMatPredation.SetFloat("_MaxValue", maxPredationValue);
-            //statsGraphDataTex = statsTexturePredation;
-            //statsGraphMatPredation.SetTexture("_MainTex", statsTexturePredation);
             statsPanelTextMaxValue.text = maxPredationValue.ToString("F2");
             textStatsGraphTitle.text = "Average Predatory Behavior Over Time:";
             buttonGraphPredation.GetComponent<Image>().color = buttonActiveColor;
-
-            buttonGraphLifespan.GetComponent<Image>().color = buttonDisabledColor;
-            buttonGraphFoodEaten.GetComponent<Image>().color = buttonDisabledColor;
-            
             imageStatsGraphDisplay.material = statsGraphMatPredation;
         }
-        //statsPanelGraphMat.SetTexture("_MainTex", statsGraphDataTex);
+        
+        if(curStatsGraphMode == GraphMode.Nutrients) {
+            statsGraphMatNutrients.SetFloat("_MaxValue", maxNutrientsValue);            
+            statsPanelTextMaxValue.text = maxNutrientsValue.ToString("F2");
+            textStatsGraphTitle.text = "Global Nutrient Levels Over Time:";
+            buttonGraphNutrients.GetComponent<Image>().color = buttonActiveColor;
+            imageStatsGraphDisplay.material = statsGraphMatNutrients;
+
+            // ** CHANGE GRAPH LEGEND!!! ***
+            textStatsGraphLegend.text = "<color=#ff8800ff>Small -----</color>\n\n<color=#88ff00ff>Medium -----</color>";
+        }
+
+        if(curStatsGraphMode == GraphMode.Mutation) {
+            statsGraphMatMutation.SetFloat("_MaxValue", maxMutationValue);            
+            statsPanelTextMaxValue.text = maxMutationValue.ToString("F2");
+            textStatsGraphTitle.text = "Average Mutation Rates Over Time:";
+            buttonGraphMutation.GetComponent<Image>().color = buttonActiveColor;
+            imageStatsGraphDisplay.material = statsGraphMatMutation;
+
+            textStatsGraphLegend.text = "<color=#ffffffff>Mutation -----</color>";
+        }
 
         int numBorn = gameManager.simulationManager.numAgentsBorn + gameManager.simulationManager._NumAgents;
         textStatsCurGen.text = "Generation:\n" + gameManager.simulationManager.curApproxGen.ToString() + "\n\n# Born:\n" + numBorn.ToString();
@@ -811,6 +949,28 @@ public class UIManager : MonoBehaviour {
         
 
     }
+    private void UpdateFeedToolPanelUI() {
+        if(foodToolSprinkleOn) {
+            buttonFeedToolSprinkle.GetComponent<Image>().color = buttonActiveColor;
+        }
+        else {
+            buttonFeedToolSprinkle.GetComponent<Image>().color = buttonDisabledColor;
+        }
+
+        if(foodToolPourOn) {
+            buttonFeedToolPour.GetComponent<Image>().color = buttonActiveColor;
+        }
+        else {
+            buttonFeedToolPour.GetComponent<Image>().color = buttonDisabledColor;
+        }
+    }
+    private void UpdateMutateToolPanelUI() {
+
+
+    }
+    private void UpdateStirToolPanelUI() {
+
+    }
     /*public void UpdateDeathScreenUI() {
         if(deathScreenOn) {
             panelDeathScreen.SetActive(true);
@@ -880,6 +1040,24 @@ public class UIManager : MonoBehaviour {
         //statsPanelGraphMat.SetFloat("_BestScore", bestScore);
         //statsPanelGraphMat.SetTexture("_MainTex", statsTextureLifespan);     
     }
+    public void UpdateStatsTextureBodySizes(List<Vector4> data) {
+        statsTextureBodySizes.Resize(Mathf.Max(1, data.Count), 1);
+
+        // Find Score Range:
+        float maxValue = 0.00001f;
+        for (int i = 0; i < data.Count; i++) {
+            maxValue = Mathf.Max(maxValue, data[i].x);
+            maxValue = Mathf.Max(maxValue, data[i].y);
+            maxValue = Mathf.Max(maxValue, data[i].z);
+            maxValue = Mathf.Max(maxValue, data[i].w);
+        }
+        for(int i = 0; i < data.Count; i++) {
+            statsTextureBodySizes.SetPixel(i, 0, new Color(data[i].x, data[i].y, data[i].z, data[i].w));
+        }
+        statsTextureBodySizes.Apply();
+
+        maxBodySizeValue = maxValue;    
+    }
     public void UpdateStatsTextureFoodEaten(List<Vector4> data) {
         statsTextureFoodEaten.Resize(Mathf.Max(1, data.Count), 1);
 
@@ -916,6 +1094,39 @@ public class UIManager : MonoBehaviour {
 
         maxPredationValue = maxValue;     
     }
+    public void UpdateStatsTextureNutrients(List<Vector4> data) {
+        statsTextureNutrients.Resize(Mathf.Max(1, data.Count), 1);
+
+        // Find Score Range:
+        float maxValue = 0.00001f;
+        for (int i = 0; i < data.Count; i++) {
+            maxValue = Mathf.Max(maxValue, data[i].x);
+            maxValue = Mathf.Max(maxValue, data[i].y);
+            maxValue = Mathf.Max(maxValue, data[i].z);
+            maxValue = Mathf.Max(maxValue, data[i].w);
+        }
+        for(int i = 0; i < data.Count; i++) {
+            statsTextureNutrients.SetPixel(i, 0, new Color(data[i].x, data[i].y, data[i].z, data[i].w));
+        }
+        statsTextureNutrients.Apply();
+
+        maxNutrientsValue = maxValue;    
+    }
+    public void UpdateStatsTextureMutation(List<float> data) {
+        statsTextureMutation.Resize(Mathf.Max(1, data.Count), 1);
+
+        // Find Score Range:
+        float maxValue = 0.00001f;
+        for (int i = 0; i < data.Count; i++) {
+            maxValue = Mathf.Max(maxValue, data[i]);
+        }
+        for(int i = 0; i < data.Count; i++) {
+            statsTextureMutation.SetPixel(i, 0, new Color(data[i], data[i], data[i], data[i]));
+        }
+        statsTextureMutation.Apply();
+
+        maxMutationValue = maxValue;  
+    }
 
     public void UpdateScoreText(int score) {
         textScore.text = "Score: " + score.ToString();
@@ -927,6 +1138,22 @@ public class UIManager : MonoBehaviour {
         hitPointsMat.SetTexture("_MainTex", healthDisplayTex);
     }
 
+    public void ClickToolsButtonOpenClose() {
+        animatorToolsPanel.enabled = true;
+        if(isActiveToolsPanel) {
+            Debug.Log("ClickToolsButton - deactivate"); 
+            isActiveToolsPanel = false;
+            animatorToolsPanel.Play("SlideOffPanelTools");
+            buttonToolOpenClose.GetComponent<Image>().color = buttonDisabledColor;
+        }
+        else {
+            Debug.Log("ClickToolsButton - activate");
+            isActiveToolsPanel = true;
+            animatorToolsPanel.Play("SlideOnPanelTools");
+
+            buttonToolOpenClose.GetComponent<Image>().color = buttonActiveColor;
+        }
+    }
     public void ClickStatsButton() {
         //Debug.Log("ClickStatsButton");
         animatorStatsPanel.enabled = true;
@@ -957,9 +1184,15 @@ public class UIManager : MonoBehaviour {
             UpdateStatsPanelUI();
         }
     }
+    public void ClickGraphButtonBodySizes() {
+        if (curStatsGraphMode != GraphMode.BodySizes) {
+            curStatsGraphMode = GraphMode.BodySizes;
+            UpdateStatsPanelUI();
+        }
+    }
     public void ClickGraphButtonFoodEaten() {
-        if (curStatsGraphMode != GraphMode.FoodEaten) {
-            curStatsGraphMode = GraphMode.FoodEaten;
+        if (curStatsGraphMode != GraphMode.Consumption) {
+            curStatsGraphMode = GraphMode.Consumption;
             UpdateStatsPanelUI();
         }
     }
@@ -969,18 +1202,37 @@ public class UIManager : MonoBehaviour {
             UpdateStatsPanelUI();
         }
     }
-    
-    public void ClickToolButtonMove() {
-
-        if(curActiveTool != ToolType.Move) {
-            curActiveTool = ToolType.Move;
-                        
-            TurnOffInspectTool();
-
-            buttonToolMove.GetComponent<Image>().color = buttonActiveColor;        
-            buttonToolFeed.GetComponent<Image>().color = buttonDisabledColor;
+    public void ClickGraphButtonNutrients() {
+        if (curStatsGraphMode != GraphMode.Nutrients) {
+            curStatsGraphMode = GraphMode.Nutrients;
+            UpdateStatsPanelUI();
         }
-        
+    }
+    public void ClickGraphButtonMutation() {
+        if (curStatsGraphMode != GraphMode.Mutation) {
+            curStatsGraphMode = GraphMode.Mutation;
+            UpdateStatsPanelUI();
+        }
+    }
+    
+    public void ClickToolButtonStir() {
+
+        if(curActiveTool != ToolType.Stir) {
+            curActiveTool = ToolType.Stir;
+             
+            isActiveStirToolPanel = true;    
+            animatorStirToolPanel.enabled = true;
+            animatorStirToolPanel.Play("SlideOnPanelStirTool"); 
+            buttonToolStir.GetComponent<Image>().color = buttonActiveColor; 
+
+            TurnOffInspectTool();  
+            TurnOffFeedTool();
+            TurnOffMutateTool();
+        }
+        else {
+            curActiveTool = ToolType.None;
+            TurnOffStirTool();
+        }        
     }
     public void ClickToolButtonInspect() {
 
@@ -988,23 +1240,86 @@ public class UIManager : MonoBehaviour {
             curActiveTool = ToolType.Inspect;
 
             TurnOnInspectTool();
-
-            buttonToolMove.GetComponent<Image>().color = buttonDisabledColor;        
-            buttonToolFeed.GetComponent<Image>().color = buttonDisabledColor;
-        }
-        
+            TurnOffStirTool();  
+            TurnOffFeedTool();
+            TurnOffMutateTool();
+        } 
+        else {
+            curActiveTool = ToolType.None;
+            TurnOffInspectTool();
+        } 
     }
     public void ClickToolButtonFeed() {
 
         if(curActiveTool != ToolType.Feed) {
             curActiveTool = ToolType.Feed;
 
-            TurnOffInspectTool();
-
-            buttonToolMove.GetComponent<Image>().color = buttonDisabledColor;        
+            isActiveFeedToolPanel = true;    
+            animatorFeedToolPanel.enabled = true;
+            animatorFeedToolPanel.Play("SlideOnPanelFeedTool"); 
             buttonToolFeed.GetComponent<Image>().color = buttonActiveColor;
-        }
+
+            TurnOffInspectTool();
+            TurnOffStirTool();
+            TurnOffMutateTool();
+        }  
+        else {
+            curActiveTool = ToolType.None;
+            TurnOffFeedTool();
+        } 
+    }
+    public void ClickFeedToolSprinkle() {
         
+        if(foodToolSprinkleOn) {
+            // already on
+        }
+        else {
+            foodToolSprinkleOn = true;
+            foodToolPourOn = false;
+            Debug.Log("ClickFeedToolSprinkle()! foodToolSprinkleOn = true");
+        }
+        UpdateFeedToolPanelUI();
+    }
+    public void ClickFeedToolPour() {
+        
+        if(foodToolPourOn) {
+            // already on
+        }
+        else {
+            foodToolPourOn = true;
+            foodToolSprinkleOn = false;
+            Debug.Log("ClickFeedToolPour()! foodToolPourOn = true");
+        }
+        UpdateFeedToolPanelUI();
+    }
+    public void ClickFeedToolRegrowthSlider(float val) {
+        Debug.Log("ClickFeedToolRegrowthSlider()!");
+    }
+    public void ClickMutateToolGlobalRateSlider(float val) {
+        Debug.Log("ClickMutateToolGlobalRateSlider()!");
+        gameManager.simulationManager.curPlayerMutationRate = val;
+    }
+    public void ClickToolButtonMutate() {
+
+        if(curActiveTool != ToolType.Mutate) {
+            curActiveTool = ToolType.Mutate;
+
+            isActiveMutateToolPanel = true;    
+            animatorMutateToolPanel.enabled = true;
+            animatorMutateToolPanel.Play("SlideOnPanelMutateTool"); 
+            buttonToolMutate.GetComponent<Image>().color = buttonActiveColor; 
+                        
+            TurnOffInspectTool();
+            TurnOffStirTool();
+            TurnOffFeedTool();
+            // *** make these their own private functions for reuse: OLD:::
+            //buttonToolStir.GetComponent<Image>().color = buttonDisabledColor;  
+            //buttonToolFeed.GetComponent<Image>().color = buttonDisabledColor;
+        }
+        else {
+            curActiveTool = ToolType.None;
+            TurnOffMutateTool();
+        }        
     }
 
     private void TurnOnInspectTool() {
@@ -1019,6 +1334,33 @@ public class UIManager : MonoBehaviour {
         }        
         isActiveInspectPanel = false;
         StopFollowing();
+    }
+    private void TurnOffFeedTool() {
+        buttonToolFeed.GetComponent<Image>().color = buttonDisabledColor;
+
+        if(isActiveFeedToolPanel) {
+            animatorFeedToolPanel.enabled = true;
+            animatorFeedToolPanel.Play("SlideOffPanelFeedTool");
+        }        
+        isActiveFeedToolPanel = false;
+    }
+    private void TurnOffMutateTool() {
+        buttonToolMutate.GetComponent<Image>().color = buttonDisabledColor;
+
+        if(isActiveMutateToolPanel) {
+            animatorMutateToolPanel.enabled = true;
+            animatorMutateToolPanel.Play("SlideOffPanelMutateTool");
+        }        
+        isActiveMutateToolPanel = false;
+    }
+    private void TurnOffStirTool() {
+        buttonToolStir.GetComponent<Image>().color = buttonDisabledColor;
+
+        if(isActiveStirToolPanel) {
+            animatorStirToolPanel.enabled = true;
+            animatorStirToolPanel.Play("SlideOffPanelStirTool");
+        }        
+        isActiveStirToolPanel = false;
     }
 
     public void ClickControlsMenu() {
@@ -1075,6 +1417,14 @@ public class UIManager : MonoBehaviour {
         textMouseOverInfo.text = "Create a brand new ecosystem from scratch. It might take a significant amount of time for intelligent creatures to evolve.\n*Not recommended for first-time players.";
     }
     public void MouseExitNewSimulation() {
+        textMouseOverInfo.gameObject.SetActive(false);
+    }
+
+    public void MouseEnterControlsButton() {
+        textMouseOverInfo.gameObject.SetActive(true);
+        textMouseOverInfo.text = "Arrows or WASD for movement, scrollwheel for zoom. 'R' and 'F' tilt Camera.\nKeyboard & Mouse only - Controller support coming soon.";
+    }
+    public void MouseExitControlsButton() {
         textMouseOverInfo.gameObject.SetActive(false);
     }
 

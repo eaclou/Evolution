@@ -18,6 +18,8 @@ public class EnvironmentFluidManager : MonoBehaviour {
     public float colorRefreshBackgroundMultiplier = 0.01f;
     public float colorRefreshDynamicMultiplier = 0.01f;
 
+    public float isStirring = 0f;
+
     private RenderTexture velocityA;
     public RenderTexture _VelocityA
     {
@@ -108,7 +110,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
         public float velX;
         public float velY;
         public float size;
-    }
+    }    
 
     private float forceMultiplier;
     /*private int numColorPoints = 77;
@@ -131,6 +133,45 @@ public class EnvironmentFluidManager : MonoBehaviour {
         divergence,
         obstacles
     }
+
+    public void StirWaterOff() {
+        computeShaderFluidSim.SetFloat("_ForcePosX", 0.5f);
+        computeShaderFluidSim.SetFloat("_ForcePosY", 0.5f);
+        computeShaderFluidSim.SetFloat("_ForceDirX", 0f);
+        computeShaderFluidSim.SetFloat("_ForceDirY", 0f);
+        computeShaderFluidSim.SetFloat("_ForceSize", 100f);
+        computeShaderFluidSim.SetFloat("_ForceOn", 0f);
+    }
+    public void StirWaterOn(Vector3 pos, Vector2 forceVector) {
+        /*computeShaderFluidSim.SetFloat("_ForcePosX", pos.x / 256f);
+        computeShaderFluidSim.SetFloat("_ForcePosY", pos.y / 256f);
+        computeShaderFluidSim.SetFloat("_ForceDirX", 1f);
+        computeShaderFluidSim.SetFloat("_ForceDirY", 0f);
+        computeShaderFluidSim.SetFloat("_ForceSize", 100f);
+        computeShaderFluidSim.SetFloat("_ForceOn", 1f);*/
+
+        computeShaderFluidSim.SetFloat("_ForcePosX", pos.x / 256f);
+        computeShaderFluidSim.SetFloat("_ForcePosY", pos.y / 256f);
+        computeShaderFluidSim.SetFloat("_ForceDirX", forceVector.x);
+        computeShaderFluidSim.SetFloat("_ForceDirY", forceVector.y);
+        computeShaderFluidSim.SetFloat("_ForceSize", 100f);
+        computeShaderFluidSim.SetFloat("_ForceOn", 1f);
+          
+        /*
+        //forcePointsArray[0]
+        ForcePoint stirPoint = new ForcePoint();
+            
+        float forceStrength = magnitude * 0.1f;
+        stirPoint.posX = pos.x / 256f;
+        stirPoint.posY = pos.y / 256f;
+        stirPoint.velX = forceVector.x * forceStrength;
+        stirPoint.velY = forceVector.y * forceStrength;
+        stirPoint.size = UnityEngine.Random.Range(100f, 100f);  // 60f, 300f originally
+        forcePointsArray[0] = stirPoint;
+               
+        forcePointsCBuffer.SetData(forcePointsArray);
+        */
+    }
     
     public void InitializeFluidSystem() {
         CreateTextures(); // create RT's        
@@ -147,6 +188,8 @@ public class EnvironmentFluidManager : MonoBehaviour {
         CreateForcePoints(0.1f, 50f, 250f);
 
         debugMat.SetTexture("_MainTex", sourceColorRT);
+
+        computeShaderFluidSim.SetFloat("_ForceOn", 0f);
     }    
     public void Tick() {
         //Debug.Log("Tick!");

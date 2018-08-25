@@ -21,6 +21,8 @@ public class SimulationManager : MonoBehaviour {
 
     public bool isQuickStart = true;
 
+    public float curPlayerMutationRate = 0.25f;  // UI-based value, giving player control over mutation frequency with one parameter
+
     private bool isLoading = false;
     private bool loadingComplete = false;
     public bool _LoadingComplete
@@ -126,12 +128,21 @@ public class SimulationManager : MonoBehaviour {
     public float[] speciesAvgFoodEaten;
     public Vector2[] speciesAvgSizes;
     public float[] speciesAvgMouthTypes;
+
+    public Vector4 statsAvgGlobalNutrients;
+    public float statsAvgMutationRate;
+
+    private float curGlobalNutrients = 0f;
+    private float curGlobalFoodParticles = 0f;
     
     public int recordBotAge = 0;
     public float[] rollingAverageAgentScoresArray;
     public List<Vector4> statsLifespanEachGenerationList;
+    public List<Vector4> statsBodySizesEachGenerationList;
     public List<Vector4> statsFoodEatenEachGenerationList;
     public List<Vector4> statsPredationEachGenerationList;
+    public List<Vector4> statsNutrientsEachGenerationList;
+    public List<float> statsMutationEachGenerationList;
     public float agentAvgRecordScore = 1f;
     public int curApproxGen = 1;
 
@@ -681,9 +692,15 @@ public class SimulationManager : MonoBehaviour {
         statsLifespanEachGenerationList = new List<Vector4>(); // 
         statsFoodEatenEachGenerationList = new List<Vector4>();
         statsPredationEachGenerationList = new List<Vector4>();
+        statsBodySizesEachGenerationList = new List<Vector4>(); // 
+        statsNutrientsEachGenerationList = new List<Vector4>();
+        statsMutationEachGenerationList = new List<float>();
         statsLifespanEachGenerationList.Add(Vector4.one * 0.0001f);
         statsFoodEatenEachGenerationList.Add(Vector4.one * 0.0001f);
         statsPredationEachGenerationList.Add(Vector4.one * 0.0001f);
+        statsBodySizesEachGenerationList.Add(Vector4.one * 0.0001f);
+        statsNutrientsEachGenerationList.Add(Vector4.one * 0.0001f);
+        statsMutationEachGenerationList.Add(0.0001f);
     }
     private void LoadingLoadGenepoolFiles() {
         
@@ -720,9 +737,15 @@ public class SimulationManager : MonoBehaviour {
         statsLifespanEachGenerationList.Clear();
         statsFoodEatenEachGenerationList.Clear();
         statsPredationEachGenerationList.Clear();
+        statsBodySizesEachGenerationList.Clear();
+        statsNutrientsEachGenerationList.Clear();
+        statsMutationEachGenerationList.Clear();
         statsLifespanEachGenerationList.Add(Vector4.one * 0.0001f);
         statsFoodEatenEachGenerationList.Add(Vector4.one * 0.0001f);
         statsPredationEachGenerationList.Add(Vector4.one * 0.0001f);
+        statsBodySizesEachGenerationList.Add(Vector4.one * 0.0001f);
+        statsNutrientsEachGenerationList.Add(Vector4.one * 0.0001f);
+        statsMutationEachGenerationList.Add(0.0001f);
 
         numAgentsBorn = 0;
         numAgentsProcessed = 0;
@@ -980,6 +1003,8 @@ public class SimulationManager : MonoBehaviour {
 
         outputValuesCBuffer.GetData(outputValuesArray);
 
+        curGlobalNutrients = outputValuesArray[0].x;
+
         outputValuesCBuffer.Release();
 
         //Debug.Log("TotalNutrients: " + outputValuesArray[0].x.ToString() + ", " + outputValuesArray[0].y.ToString());
@@ -1055,8 +1080,7 @@ public class SimulationManager : MonoBehaviour {
         computeShaderFoodParticles.SetFloat("_FoodParticleRegrowthRate", settingsManager.foodParticleRegrowthRate);
 
         computeShaderFoodParticles.Dispatch(kernelCSRespawnFoodParticles, 1, 1, 1);
-
-        
+                
 
         // Copy/Swap Food Particle Buffer:
         int kernelCSCopyFoodParticlesBuffer = computeShaderFoodParticles.FindKernel("CSCopyFoodParticlesBuffer");
@@ -1147,9 +1171,41 @@ public class SimulationManager : MonoBehaviour {
         computeShaderFoodParticles.SetBuffer(kernelCSMeasureTotalFoodParticlesAmount, "foodParticlesWrite", foodParticlesMeasure1);
         computeShaderFoodParticles.Dispatch(kernelCSMeasureTotalFoodParticlesAmount, 1, 1, 1);
 
+        curGlobalFoodParticles = foodParticleMeasurementTotalsData[0].foodAmount;
+        //Debug.Log("total food particle nutrients: " + curGlobalFoodParticles.ToString());
         foodParticlesMeasure1.GetData(foodParticleMeasurementTotalsData);
 
         //Debug.Log("FoodParticlesTotalAmount: " + foodParticleMeasurementTotalsData[0].foodAmount.ToString());
+    }
+    public void PlayerToolStirOn(Vector3 origin, Vector2 forceVector) {
+        float magnitude = forceVector.magnitude;
+        if(magnitude == 0f) {
+            Debug.Log("ERROR null vector!");
+        }
+        magnitude *= 0.03f;
+        float maxMag = 0.5f;
+        if(magnitude > maxMag) {
+            magnitude = maxMag;            
+        }
+        forceVector = forceVector.normalized * magnitude;
+
+        Debug.Log("PlayerToolStir pos: " + origin.ToString() + ", forceVec: [" + forceVector.x.ToString() + "," + forceVector.y.ToString() + "]  mag: " + magnitude.ToString());
+
+        environmentFluidManager.StirWaterOn(origin, forceVector);
+    }
+    public void PlayerToolStirOff() {        
+        environmentFluidManager.StirWaterOff();
+    }
+    public void PlayerFeedToolSprinkle(Vector3 pos) {
+        Debug.Log("PlayerFeedToolSprinkle pos: " + pos.ToString());
+    }
+    public void PlayerFeedToolPour(Vector3 pos) {        
+        int xCoord = Mathf.RoundToInt(pos.x / 256f * nutrientMapResolution);
+        int yCoord = Mathf.RoundToInt(pos.y / 256f * nutrientMapResolution);
+
+        Debug.Log("PlayerFeedToolPour pos: " + xCoord.ToString() + ", " + yCoord.ToString());
+
+        AddNutrientsAtCoords(2f, xCoord, yCoord);
     }
     private void UpdateFoodGrid() {
         float totalFoodLayer0 = 0f;
@@ -1607,8 +1663,11 @@ public class SimulationManager : MonoBehaviour {
             mouthType = 1f;
         }
         speciesAvgMouthTypes[speciesIndex] = Mathf.Lerp(speciesAvgMouthTypes[speciesIndex], mouthType, weightedAvgLerpVal);
-
         rollingAverageAgentScoresArray[speciesIndex] = Mathf.Lerp(rollingAverageAgentScoresArray[speciesIndex], (float)agentsArray[agentIndex].scoreCounter, weightedAvgLerpVal);
+        
+        //statsAvgGlobalNutrients = Vector4.Lerp(statsAvgGlobalNutrients, new Vector4(1f, 1f, 0f, 0f), weightedAvgLerpVal);
+        //statsAvgMutationRate = Mathf.Lerp(statsAvgMutationRate, curPlayerMutationRate
+
         float approxGen = (float)numAgentsBorn / (float)(numAgents - 1);
         if (approxGen > curApproxGen) {
             Vector4 scores = new Vector4(rollingAverageAgentScoresArray[0], rollingAverageAgentScoresArray[1], rollingAverageAgentScoresArray[2], rollingAverageAgentScoresArray[3]); ;
@@ -1617,25 +1676,34 @@ public class SimulationManager : MonoBehaviour {
                 agentAvgRecordScore = rollingAverageAgentScoresArray[speciesIndex];
             }
             curApproxGen++;
-
-            //RefreshFitnessGraphTexture(); // OLD
-
+            
             Vector4 foodEaten = new Vector4(speciesAvgFoodEaten[0], speciesAvgFoodEaten[1], speciesAvgFoodEaten[2], speciesAvgFoodEaten[3]); 
             statsFoodEatenEachGenerationList.Add(foodEaten);
 
             Vector4 predation = new Vector4(speciesAvgMouthTypes[0], speciesAvgMouthTypes[1], speciesAvgMouthTypes[2], speciesAvgMouthTypes[3]); ;
             statsPredationEachGenerationList.Add(predation);
 
+            //bodySizes:
+            Vector4 bodySizes = new Vector4(speciesAvgSizes[0].x * speciesAvgSizes[0].y, speciesAvgSizes[1].x * speciesAvgSizes[1].y, speciesAvgSizes[2].x * speciesAvgSizes[2].y, speciesAvgSizes[3].x * speciesAvgSizes[3].y);
+            //Debug.Log("BodySizeAreas: " + bodySizes.ToString());
+            statsBodySizesEachGenerationList.Add(bodySizes);
+
+            statsMutationEachGenerationList.Add(curPlayerMutationRate);
+            statsNutrientsEachGenerationList.Add(new Vector4(curGlobalNutrients, curGlobalFoodParticles, 0f, 0f));
+
             RefreshGraphTextureLifespan();
             RefreshGraphTextureFoodEaten();
             RefreshGraphTexturePredation();
+            RefreshGraphTextureBodySizes();
+            RefreshGraphTextureNutrients();
+            RefreshGraphTextureMutation();
 
             UpdateSimulationClimate();
         }
         else {
             if(numAgentsProcessed < 130) {
                 if(numAgentsProcessed % 8 == 0) {
-                    Debug.Log("process Stats!! + " + curApproxGen.ToString() + ", numProcessed: " + numAgentsProcessed.ToString());
+                    //Debug.Log("process Stats!! + " + curApproxGen.ToString() + ", numProcessed: " + numAgentsProcessed.ToString());
                     Vector4 scores = new Vector4(rollingAverageAgentScoresArray[0], rollingAverageAgentScoresArray[1], rollingAverageAgentScoresArray[2], rollingAverageAgentScoresArray[3]); ;
                     statsLifespanEachGenerationList[curApproxGen - 1] = scores;
                     //statsLifespanEachGenerationList.Add(scores); // ** UPDATE THIS TO SAVE aLLL 4 SCORES!!! ***
@@ -1650,9 +1718,17 @@ public class SimulationManager : MonoBehaviour {
                     Vector4 predation = new Vector4(speciesAvgMouthTypes[0], speciesAvgMouthTypes[1], speciesAvgMouthTypes[2], speciesAvgMouthTypes[3]); ;
                     statsPredationEachGenerationList[curApproxGen - 1] = predation;
 
+                    //bodySizes:
+                    Vector4 bodySizes = new Vector4(speciesAvgSizes[0].x * speciesAvgSizes[0].y, speciesAvgSizes[1].x * speciesAvgSizes[1].y, speciesAvgSizes[2].x * speciesAvgSizes[2].y, speciesAvgSizes[3].x * speciesAvgSizes[3].y);
+                    statsBodySizesEachGenerationList[curApproxGen - 1] = bodySizes;
+
+                    statsMutationEachGenerationList[curApproxGen - 1] = curPlayerMutationRate;
+                    statsNutrientsEachGenerationList[curApproxGen - 1] = new Vector4(curGlobalNutrients, curGlobalFoodParticles, 0f, 0f);
+
                     RefreshGraphTextureLifespan();
                     RefreshGraphTextureFoodEaten();
                     RefreshGraphTexturePredation();
+                    RefreshGraphTextureBodySizes();
 
                     //UpdateSimulationClimate();
                 }
@@ -1671,11 +1747,20 @@ public class SimulationManager : MonoBehaviour {
     private void RefreshGraphTextureLifespan() {
         uiManager.UpdateStatsTextureLifespan(statsLifespanEachGenerationList);
     }
+    private void RefreshGraphTextureBodySizes() {
+        uiManager.UpdateStatsTextureBodySizes(statsBodySizesEachGenerationList);
+    }
     private void RefreshGraphTextureFoodEaten() {
         uiManager.UpdateStatsTextureFoodEaten(statsFoodEatenEachGenerationList);
     }
     private void RefreshGraphTexturePredation() {
         uiManager.UpdateStatsTexturePredation(statsPredationEachGenerationList);
+    }
+    private void RefreshGraphTextureNutrients() {
+        uiManager.UpdateStatsTextureNutrients(statsNutrientsEachGenerationList);
+    }
+    private void RefreshGraphTextureMutation() {
+        uiManager.UpdateStatsTextureMutation(statsMutationEachGenerationList);
     }
     private void ProcessAndRankAgentFitness(int speciesIndex) {
         // Measure fitness of all current agents (their genomes, actually)  NOT PLAYER!!!!

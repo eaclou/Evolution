@@ -548,8 +548,16 @@ void VelocityInjectionPoints (uint3 id : SV_DispatchThreadID)
 		newForce = lerp(newForce, forceVal, influenceAmount);
 	}
 	float damping = saturate(_Damping);
-	float2 constantVel = float2(0.005, 0.03) * 0.0;
-	VelocityWrite[id.xy] = float4(newForce + constantVel, 0, 0) * (1.0 - damping);  //(currentVelocity + float4(newForce, 0, 0)) * (1.0 - damping);  //lerp(currentVelocity, float4(newForce, 0, 0) * 20, 1);
+
+	// STIR TOOL::::	
+	float2 stirCoords = float2(_ForcePosX, _ForcePosY);
+	float distanceToStirOrigin = length(pixelCoords - stirCoords);
+	float attenuation = exp(-_ForceSize * ((stirCoords.x - pixelCoords.x) * (stirCoords.x - pixelCoords.x) + (stirCoords.y - pixelCoords.y) * (stirCoords.y - pixelCoords.y)) / distanceToStirOrigin);
+	float2 playerStirVel = float2(_ForceDirX, _ForceDirY);
+	
+	newForce = lerp(newForce, playerStirVel, attenuation * _ForceOn);
+
+	VelocityWrite[id.xy] = float4(newForce, 0, 0) * (1.0 - damping);
 }
 
 [numthreads(16,16,1)]
