@@ -226,50 +226,42 @@ public class UIManager : MonoBehaviour {
 
             textCurGen.text = "Generation: " + gameManager.simulationManager.curApproxGen.ToString("F0");
             textAvgLifespan.text = "Average Lifespan: " + Mathf.RoundToInt(gameManager.simulationManager.rollingAverageAgentScoresArray[0]).ToString();
-
-            float minDistance = 1f;
-            float maxDistance = 420f;
-            float relSize = Mathf.Clamp01((cameraManager.masterTargetDistance - minDistance) / (minDistance + maxDistance));
-
-            float minSizePanSpeedMult = 0.1f;
-            float maxSizePanSpeedMult = 12f;
-            float panSpeedMult = Mathf.Lerp(minSizePanSpeedMult, maxSizePanSpeedMult, relSize);
-
-            float minSizeZoomSpeedMult = 0.25f;
-            float maxSizeZoomSpeedMult = 2.5f;
-            float zoomSpeedMult = Mathf.Lerp(minSizeZoomSpeedMult, maxSizeZoomSpeedMult, relSize);
-
-            float minSizeTiltSpeedMult = 1f;
-            float maxSizeTiltSpeedMult = 1f;
-            float tiltSpeedMult = Mathf.Lerp(minSizeTiltSpeedMult, maxSizeTiltSpeedMult, relSize);
-
-            float camPanSpeed = cameraManager.masterPanSpeed * panSpeedMult * Time.deltaTime;
-
+            
+            Vector2 moveDir = Vector2.zero;
+            bool isInput = false;
             if(Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W)) {  // UP !!!!
-                cameraManager.targetCamPos.y += camPanSpeed;
-                StopFollowing();                
+                moveDir.y = 1f;
+                isInput = true;
+                //cameraManager.targetCamPos.y += camPanSpeed;
+                //StopFollowing();                
             }
             if(Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S)) {  // DOWN !!!!                
-                cameraManager.targetCamPos.y -= camPanSpeed;
-                StopFollowing(); 
+                moveDir.y = -1f;
+                isInput = true;
             }            
             if(Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D)) {  // RIGHT !!!!
-                cameraManager.targetCamPos.x += camPanSpeed;
-                StopFollowing(); 
+                moveDir.x = 1f;
+                isInput = true;
             }
             if(Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A)) {  // LEFT !!!!!                
-                cameraManager.targetCamPos.x -= camPanSpeed;
-                StopFollowing(); 
-
+                moveDir.x = -1f;
+                isInput = true;
             }
+            if(isInput) {
+                moveDir = moveDir.normalized;
+                StopFollowing();
+            }
+            cameraManager.MoveCamera(moveDir);
 
             if (Input.GetKey(KeyCode.R)) 
             {
-                cameraManager.masterTiltAngle -= cameraManager.masterTiltSpeed * tiltSpeedMult * Time.deltaTime;
+                cameraManager.TiltCamera(-1f);
+                //cameraManager.masterTargetTiltAngle -= cameraManager.masterTiltSpeed * tiltSpeedMult * Time.deltaTime;
             }
             if (Input.GetKey(KeyCode.F)) 
             {
-                cameraManager.masterTiltAngle += cameraManager.masterTiltSpeed * tiltSpeedMult * Time.deltaTime;
+                cameraManager.TiltCamera(1f);
+                //cameraManager.masterTargetTiltAngle += cameraManager.masterTiltSpeed * tiltSpeedMult * Time.deltaTime;
             }
             if (Input.GetKeyDown(KeyCode.Escape)) {
                 Debug.Log("Pressed Escape!");
@@ -351,17 +343,19 @@ public class UIManager : MonoBehaviour {
                 Debug.Log("RIGHT CLICKETY-CLICK!");
             }
 
-            float zoomSpeed = cameraManager.masterZoomSpeed * zoomSpeedMult * Time.deltaTime;
-
             if (Input.GetAxis("Mouse ScrollWheel") > 0f ) //  Forwards
             {
-                Debug.Log("Mouse ScrollWheel Forward");
-                cameraManager.masterTargetDistance -= zoomSpeed;
+                cameraManager.ZoomCamera(-1f);
+
+                //Debug.Log("Mouse ScrollWheel Forward");                
+                //cameraManager.masterTargetDistance -= zoomSpeed;
             }
             else if (Input.GetAxis("Mouse ScrollWheel") < 0f ) //  Backwarfds
             {
-                Debug.Log("Mouse ScrollWheel Backward");
-                cameraManager.masterTargetDistance += zoomSpeed;               
+                cameraManager.ZoomCamera(1f);
+
+                //Debug.Log("Mouse ScrollWheel Backward");
+                //cameraManager.masterTargetDistance += zoomSpeed;               
             }                    
         }
         else {
@@ -386,8 +380,8 @@ public class UIManager : MonoBehaviour {
     }
     private void MouseRaycastWaterPlane(bool clicked, bool heldDown) {
         
-        Vector3 camPos = cameraManager.camera.gameObject.transform.position;                
-        Ray ray = cameraManager.camera.ScreenPointToRay(Input.mousePosition);
+        Vector3 camPos = cameraManager.gameObject.transform.position;                
+        Ray ray = cameraManager.gameObject.GetComponent<Camera>().ScreenPointToRay(Input.mousePosition);
         RaycastHit hit = new RaycastHit();
         int layerMask = 1 << 12;
         Physics.Raycast(ray, out hit, layerMask);
@@ -427,8 +421,8 @@ public class UIManager : MonoBehaviour {
     }
     private void MouseRaycastInspect(bool clicked) {
         
-        Vector3 camPos = cameraManager.camera.gameObject.transform.position;                
-        Ray ray = cameraManager.camera.ScreenPointToRay(Input.mousePosition);
+        Vector3 camPos = cameraManager.gameObject.transform.position;                
+        Ray ray = cameraManager.gameObject.GetComponent<Camera>().ScreenPointToRay(Input.mousePosition);
         RaycastHit hit = new RaycastHit();
         int layerMask = 0;
         Physics.Raycast(ray, out hit);

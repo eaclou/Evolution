@@ -1592,19 +1592,18 @@ public class TheRenderKing : MonoBehaviour {
         float camDist = Mathf.Clamp01(-1f * simManager.cameraManager.gameObject.transform.position.z / (65f - 5f));
         baronVonWater.camDistNormalized = camDist;
         Vector2 boxSizeHalf = 0.5f * Vector2.Lerp(new Vector2(16f, 9f) * 2, new Vector2(256f, 180f), Mathf.Clamp01(-(simManager.cameraManager.gameObject.transform.position.z) / 150f));
-        if(simManager.cameraManager.targetAgent != null)
+        /*if(simManager.cameraManager.targetAgent != null)
         {
-            baronVonWater.spawnBoundsCameraDetails = new Vector4(simManager.cameraManager.targetAgent.bodyRigidbody.position.x - boxSizeHalf.x,
-                                                            simManager.cameraManager.targetAgent.bodyRigidbody.position.y - boxSizeHalf.y,
-                                                            simManager.cameraManager.targetAgent.bodyRigidbody.position.x + boxSizeHalf.x,
-                                                            simManager.cameraManager.targetAgent.bodyRigidbody.position.y + boxSizeHalf.y);
-
-            
         }
         else
         {
             baronVonWater.spawnBoundsCameraDetails = new Vector4(0f, 0f, SimulationManager._MapSize, SimulationManager._MapSize);
-        }
+        }*/
+        baronVonWater.spawnBoundsCameraDetails = new Vector4(simManager.cameraManager.curCameraFocusPivotPos.x - boxSizeHalf.x,
+                                                            simManager.cameraManager.curCameraFocusPivotPos.y - boxSizeHalf.y,
+                                                            simManager.cameraManager.curCameraFocusPivotPos.x + boxSizeHalf.x,
+                                                            simManager.cameraManager.curCameraFocusPivotPos.y + boxSizeHalf.y);
+
         baronVonTerrain.spawnBoundsCameraDetails = baronVonWater.spawnBoundsCameraDetails;
 
         baronVonTerrain.Tick();

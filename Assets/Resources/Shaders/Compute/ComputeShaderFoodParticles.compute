@@ -150,9 +150,12 @@ void CSEatSelectedFoodParticles (uint3 id : SV_DispatchThreadID)
 	float particleRadius = particleData.radius;
 	float combinedRadius = mouthRadius + particleRadius;
 
+	float isAlive01 = saturate((critterSimData.embryoPercentage - 0.99) * 10000) * saturate(((1.0 - critterSimData.decayPercentage) - 0.99) * 10000);
+
+	float biteRadiusScore = mouthRadius * 3 * isAlive01;
 	if(distanceSquared < combinedRadius * combinedRadius) {		
-		//if(mouthRadius > particleRadius) {
-			//if(critterSimData.isBiting > 0.5) {
+		if(biteRadiusScore * 3 > particleRadius) {
+			//if(critterSimData.isBiting > 0.5) {   // revisit
 				eatenAmount = particleData.foodAmount;
 			
 				//foodParticlesCBuffer[particleIndex].foodAmount = 0;  // can;'t read & write to same buffer at same time !!! *** REMEMBER ***
@@ -166,7 +169,7 @@ void CSEatSelectedFoodParticles (uint3 id : SV_DispatchThreadID)
 				foodParticlesWrite[particleIndex].critterIndex = critterIndex;
 
 			//}			
-		//}
+		}
 	}	
 
 	foodParticlesEatAmountsCBuffer[id.x] = eatenAmount;
@@ -185,8 +188,6 @@ void CSSimFoodParticlesBuffer (uint3 id : SV_DispatchThreadID)
 {	
 	FoodParticleData particleData = foodParticlesRead[id.x];
 
-	
-	
 	foodParticlesWrite[id.x] = particleData;
 }
 
@@ -206,37 +207,6 @@ void CSMeasureTotalFoodParticlesAmount (uint3 id : SV_DispatchThreadID)
 	copyData.foodAmount = totalFoodAmount;
 	
 	foodParticlesWrite[id.x] = copyData;
-
-	//=================== OLD ==================================================================
-	/*float totalFoodAmount = 0;
-
-	FoodParticleData newData;
-	newData.index = 0;
-	newData.worldPos = float2(0,0);
-	newData.radius = 0.1;
-	newData.active = 1;
-
-	int totalIndex = 0;
-
-	for(int i = 0; i < 32; i++) {
-		
-		int particleIndex = id.x * 32 + i;
-		
-		FoodParticleData particleData = foodParticlesRead[particleIndex];
-		newData.foodAmount = 0.4; //particleData.foodAmount;
-		totalIndex += particleData.index;
-		totalFoodAmount += particleData.foodAmount;
-	}
-	newData.index = totalIndex;
-	newData.foodAmount = totalFoodAmount;
-
-	newData.refactoryAge = 0; // ***** Might cause problems? **
-	newData.isSwallowed = 0;
-	newData.critterIndex = 0;
-	newData.digestedAmount = 0;
-	
-	foodParticlesWrite[id.x] = copyData; //newData;
-	*/
 }
 
 [numthreads(1024,1,1)]
@@ -247,7 +217,6 @@ void CSRespawnFoodParticles (uint3 id : SV_DispatchThreadID)
 	FoodParticleData foodParticle = foodParticlesRead[id.x];
 	
 	float2 uv = foodParticle.worldPos / _MapSize;
-
 	
 
 	if(foodParticle.active > 0.5) {
