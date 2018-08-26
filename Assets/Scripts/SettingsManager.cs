@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class SettingsManager : MonoBehaviour {
 
-    public MutationSettings mutationSettingsSupervised;
+    //public MutationSettings mutationSettingsSupervised;
     public MutationSettings mutationSettingsPersistent;
 
-    public MutationSettings mutationSettingsRandomBody;
+    //public MutationSettings mutationSettingsRandomBody;
 
     public float maxGlobalNutrients = 5f;
     public float eatRateMultiplier = 1f;
@@ -27,9 +27,21 @@ public class SettingsManager : MonoBehaviour {
     public float maxEggFood = 1024f;
     public float eggLayingRate = 1f;
 
+    private float minBrainMutationRate = 0.0f;
+    private float maxBrainMutationRate = 0.05f;
+
+    private float minBodyMutationRate = 0.0f;
+    private float maxBodyMutationRate = 0.33f;
+    private float minBodyMutationStepSize = 0.025f;
+    private float maxBodyMutationStepSize = 0.9f;
+
     //public float minSizeCritterSpeed = 150f;
     //public float maxSizeCritterSpeed = 150f;
-    
+    public void SetGlobalMutationRate(float normalizedVal) {
+        mutationSettingsPersistent.defaultBodyMutationChance = Mathf.Lerp(minBodyMutationRate, maxBodyMutationRate, normalizedVal * normalizedVal * normalizedVal);
+        mutationSettingsPersistent.defaultBodyMutationStepSize = Mathf.Lerp(minBodyMutationStepSize, maxBodyMutationStepSize, normalizedVal);
+        Debug.Log("mutateRate: " + mutationSettingsPersistent.defaultBodyMutationChance.ToString());
+    }
 
     // Use this for initialization
     void Start () {
@@ -42,11 +54,11 @@ public class SettingsManager : MonoBehaviour {
 	}
 
     public void Initialize() {
-        mutationSettingsSupervised = new MutationSettings(0.5f, 0.015f, 1f, 0.005f, 1f, 0.1f, 0.001f);
+        //mutationSettingsSupervised = new MutationSettings(0.5f, 0.015f, 1f, 0.005f, 1f, 0.1f, 0.001f);
         mutationSettingsPersistent = new MutationSettings(0.25f, 0.012f, 1f, 0.0f, 0.9975f, 0.0f, 0.0f);
 
-        mutationSettingsRandomBody = new MutationSettings(0.25f, 0.02f, 1f, 0.0f, 0.999f, 0.0f, 0.0f);
-        mutationSettingsRandomBody.defaultBodyMutationChance = 0.05f;
-        mutationSettingsRandomBody.defaultBodyMutationStepSize = 0.535f;
+        //mutationSettingsRandomBody = new MutationSettings(0.25f, 0.02f, 1f, 0.0f, 0.999f, 0.0f, 0.0f);
+        //mutationSettingsRandomBody.defaultBodyMutationChance = 0.05f;
+        //mutationSettingsRandomBody.defaultBodyMutationStepSize = 0.535f;
     }
 }

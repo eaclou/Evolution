@@ -300,11 +300,50 @@ public class UIManager : MonoBehaviour {
             if(curActiveTool == ToolType.Inspect) {
                 MouseRaycastInspect(leftClickThisFrame);
             }
-            if(curActiveTool == ToolType.Feed || curActiveTool == ToolType.Stir) {       
+
+            Vector4[] dataArray = new Vector4[1];
+            Vector4 gizmoPos = new Vector4(curMousePositionOnWaterPlane.x, curMousePositionOnWaterPlane.y, 0f, 0f);
+            dataArray[0] = gizmoPos;
+            gameManager.theRenderKing.gizmoStirToolPosCBuffer.SetData(dataArray);
+
+            if(curActiveTool == ToolType.Stir) {                    
                 mouseRaycastWaterPlane.SetActive(true);
-                MouseRaycastWaterPlane(isDragging);            
+                MouseRaycastWaterPlane(false, isDragging); 
+                
+                //gameManager.theRenderKing.gizmoStirToolPosCBuffer.SetData(dataArray);
+                gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_IsVisible", 1f);
+                float isActing = 0f;
+                if (isDragging)
+                    isActing = 1f;
+                gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_IsStirring", isActing);
+                gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_Radius", 4f);
             }
             else {
+                gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_IsVisible", 0f);
+            }
+            if(curActiveTool == ToolType.Feed) {                    
+                mouseRaycastWaterPlane.SetActive(true);
+                MouseRaycastWaterPlane(leftClickThisFrame, false);
+
+                //gameManager.theRenderKing.gizmoFeedToolPosCBuffer.SetData(dataArray);
+                //gizmoFeedToolMat
+
+                float brushRadius = 5f;
+                if(foodToolPourOn) {
+                    brushRadius = 15f;
+                }
+                gameManager.theRenderKing.gizmoFeedToolMat.SetFloat("_IsVisible", 1f);
+                float isActing = 0f;
+                if (leftClickThisFrame)
+                    isActing = 1f;
+                gameManager.theRenderKing.gizmoFeedToolMat.SetFloat("_IsStirring", isActing);
+                gameManager.theRenderKing.gizmoFeedToolMat.SetFloat("_Radius", brushRadius);
+            }
+            else {
+                gameManager.theRenderKing.gizmoFeedToolMat.SetFloat("_IsVisible", 0f);
+            }
+
+            if(curActiveTool != ToolType.Feed && curActiveTool != ToolType.Stir) {
                 mouseRaycastWaterPlane.SetActive(false);
             }
             
@@ -345,7 +384,7 @@ public class UIManager : MonoBehaviour {
         animatorInspectPanel.enabled = true;
         animatorInspectPanel.Play("SlideOnPanelInspect");        
     }
-    private void MouseRaycastWaterPlane(bool clicked) {
+    private void MouseRaycastWaterPlane(bool clicked, bool heldDown) {
         
         Vector3 camPos = cameraManager.camera.gameObject.transform.position;                
         Ray ray = cameraManager.camera.ScreenPointToRay(Input.mousePosition);
@@ -355,17 +394,9 @@ public class UIManager : MonoBehaviour {
 
         if(hit.collider != null) {
             curMousePositionOnWaterPlane = hit.point;
-
+            
             if (clicked) {
-                //Debug.Log("CLICK Hit Water Plane! Coords: " + hit.point.ToString());
-                if(curActiveTool == ToolType.Stir) {
-                    Vector2 forceVector = new Vector2(curMousePositionOnWaterPlane.x - prevMousePositionOnWaterPlane.x, curMousePositionOnWaterPlane.y - prevMousePositionOnWaterPlane.y);
-                    float mag = smoothedMouseVel.magnitude;
-
-                    if(mag > 0f) {
-                        gameManager.simulationManager.PlayerToolStirOn(hit.point, smoothedMouseVel);
-                    }
-                }
+                //Debug.Log("CLICK Hit Water Plane! Coords: " + hit.point.ToString());                
                 if(curActiveTool == ToolType.Feed) {
                     if(foodToolSprinkleOn) {
                         gameManager.simulationManager.PlayerFeedToolSprinkle(hit.point);
@@ -375,9 +406,21 @@ public class UIManager : MonoBehaviour {
                     }
                 }
             }
+
+            if(heldDown) {
+                if(curActiveTool == ToolType.Stir) {
+                    Vector2 forceVector = new Vector2(curMousePositionOnWaterPlane.x - prevMousePositionOnWaterPlane.x, curMousePositionOnWaterPlane.y - prevMousePositionOnWaterPlane.y);
+                    float mag = smoothedMouseVel.magnitude;
+
+                    if(mag > 0f) {
+                        gameManager.simulationManager.PlayerToolStirOn(hit.point, smoothedMouseVel);
+                    }
+                }
+            }
             else {
                 gameManager.simulationManager.PlayerToolStirOff();
             }
+            
 
             prevMousePositionOnWaterPlane = curMousePositionOnWaterPlane;
         }
@@ -1296,8 +1339,9 @@ public class UIManager : MonoBehaviour {
         Debug.Log("ClickFeedToolRegrowthSlider()!");
     }
     public void ClickMutateToolGlobalRateSlider(float val) {
-        Debug.Log("ClickMutateToolGlobalRateSlider()!");
+        Debug.Log("ClickMutateToolGlobalRateSlider(" + val.ToString() + ")!");
         gameManager.simulationManager.curPlayerMutationRate = val;
+        gameManager.simulationManager.ChangeGlobalMutationRate(val); // normalizedVal);
     }
     public void ClickToolButtonMutate() {
 

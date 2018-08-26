@@ -95,7 +95,7 @@
 				
 				float val = i.color.a;
 
-				return float4(val, 1, val, texColor.a);
+				return float4(val, i.color.g, val, texColor.a);
 			}
 		ENDCG
 		}

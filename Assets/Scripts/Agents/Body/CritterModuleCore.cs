@@ -515,25 +515,26 @@ public class CritterModuleCore {
         float distToNearestFoodParticle = critterToFoodParticle.magnitude;
 
         Vector2 foodParticleDir = critterToFoodParticle.normalized;
+        float nearestFoodParticleSquareDistance = critterToFoodParticle.sqrMagnitude;
         if(isPassiveMouth) {
-            float nearestFoodParticleSquareDistance = critterToFoodParticle.sqrMagnitude;
-            if(nearestFoodParticleSquareDistance < nearestFoodChunkSquareDistance) { // GPU Food PArticle:
+            //float nearestFoodParticleSquareDistance = critterToFoodParticle.sqrMagnitude;
+            //if(nearestFoodParticleSquareDistance < nearestFoodChunkSquareDistance) { // GPU Food PArticle:
                 foodPosX[0] = critterToFoodParticle.x / 20f; 
                 foodPosY[0] = critterToFoodParticle.y / 20f;
                 foodDirX[0] = foodParticleDir.x; // nutrientCellInfo.y;
                 foodDirY[0] = foodParticleDir.y; // nutrientCellInfo.z;  
                 foodRelSize[0] = simManager.closestFoodParticlesDataArray[agentIndex].foodAmount; // nutrientCellInfo.x;
-            }
+            /*}
             else { // CPU foodChunk:
                 foodPosX[0] = foodPos.x / 20f; 
                 foodPosY[0] = foodPos.y / 20f;
                 foodDirX[0] = foodDir.x;
                 foodDirY[0] = foodDir.y; 
                 foodRelSize[0] = foodAmount; 
-            }
+            }*/
             
         }
-        else {
+        else { // Predator -- use CPU egg chunks:
             foodPosX[0] = foodPos.x / 20f;
             foodPosY[0] = foodPos.y / 20f;
             foodDirX[0] = foodDir.x;

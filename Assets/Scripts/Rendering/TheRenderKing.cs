@@ -62,6 +62,11 @@ public class TheRenderKing : MonoBehaviour {
     //public Material agentHoverHighlightMat;
     public Material critterInspectHighlightMat;
 
+    public Material gizmoStirToolMat;
+    public Material gizmoFeedToolMat;
+
+    public ComputeBuffer gizmoStirToolPosCBuffer;
+    public ComputeBuffer gizmoFeedToolPosCBuffer;
     //public Material critterEyeStrokesDisplayMat;
 
     public bool isDebugRenderOn = true;
@@ -75,7 +80,8 @@ public class TheRenderKing : MonoBehaviour {
     private bool isInitialized = false;
 
     private const float velScale = 0.17f; // Conversion for rigidBody Vel --> fluid vel units ----  // approx guess for now
-
+    
+    
     /*public GameObject terrainGO;
     public Material terrainObstaclesHeightMaskMat;
     public Texture2D terrainHeightMap;         
@@ -347,7 +353,7 @@ public class TheRenderKing : MonoBehaviour {
         InitializeRipplesBuffer();
         InitializeWaterSplinesCBuffer();
         InitializeWaterChainsCBuffer();
-
+        InitializeGizmos();
         //InitializeAgentHoverHighlightCBuffer();
 
         //InitializeDebugBuffers(); 
@@ -772,6 +778,13 @@ public class TheRenderKing : MonoBehaviour {
         waterChains0CBuffer.SetData(waterChainDataArray);
         waterChains1CBuffer = new ComputeBuffer(waterChainDataArray.Length, sizeof(float) * 2);
     }
+    public void InitializeGizmos() {
+        Vector4[] dataArray = new Vector4[1];
+        Vector4 gizmoPos = new Vector4(128f, 128f, 0f, 0f);
+        dataArray[0] = gizmoPos;
+        gizmoStirToolPosCBuffer = new ComputeBuffer(1, sizeof(float) * 4);
+        gizmoStirToolPosCBuffer.SetData(dataArray);
+    }
     /*private void InitializeDebugBuffers() {
         debugAgentResourcesCBuffer = new ComputeBuffer(simManager._NumAgents, sizeof(float) * 10);
         SimulationStateData.DebugBodyResourcesData[] debugAgentResourcesArray = new SimulationStateData.DebugBodyResourcesData[debugAgentResourcesCBuffer.count];
@@ -881,6 +894,10 @@ public class TheRenderKing : MonoBehaviour {
         critterInspectHighlightMat.SetPass(0);
         critterInspectHighlightMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
 
+        gizmoStirToolMat.SetPass(0);
+        gizmoStirToolMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        gizmoFeedToolMat.SetPass(0);
+        gizmoFeedToolMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         /*
         trailDotsDisplayMat.SetPass(0);
         trailDotsDisplayMat.SetBuffer("agentSimDataCBuffer", agentSimDataCBuffer);
@@ -1542,6 +1559,7 @@ public class TheRenderKing : MonoBehaviour {
         agentHoverHighlightArray[0] = new Vector4(isHighlightOn, 0f, 0f, 0f);
         agentHoverHighlightCBuffer.SetData(agentHoverHighlightArray);
     }*/
+    
 
     public void Tick() {  // should be called from SimManager at proper time!
         fullscreenFade = 1f;
@@ -1870,6 +1888,21 @@ public class TheRenderKing : MonoBehaviour {
         critterInspectHighlightMat.SetFloat("_IsLockedOn", isLockedOn);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, critterInspectHighlightMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.critterInitDataCBuffer.count);
 
+        gizmoStirToolMat.SetPass(0);
+        gizmoStirToolMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        gizmoStirToolMat.SetBuffer("gizmoStirToolPosCBuffer", gizmoStirToolPosCBuffer);
+        gizmoStirToolMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+        gizmoStirToolMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);       
+        cmdBufferTest.DrawProcedural(Matrix4x4.identity, gizmoStirToolMat, 0, MeshTopology.Triangles, 6, 1);
+
+        gizmoFeedToolMat.SetPass(0);
+        gizmoFeedToolMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        gizmoFeedToolMat.SetBuffer("gizmoStirToolPosCBuffer", gizmoStirToolPosCBuffer);
+        gizmoFeedToolMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+        gizmoFeedToolMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);       
+        cmdBufferTest.DrawProcedural(Matrix4x4.identity, gizmoFeedToolMat, 0, MeshTopology.Triangles, 6, 1);
+        
+
 
         // Critter Stomach Bits
         critterFoodDotsMat.SetPass(0);
@@ -1960,7 +1993,6 @@ public class TheRenderKing : MonoBehaviour {
             
 
         }
-
         
 
         /*
@@ -2377,6 +2409,13 @@ public class TheRenderKing : MonoBehaviour {
         }
         if(critterFoodDotsCBuffer != null) {
             critterFoodDotsCBuffer.Release();
+        }
+
+        if(gizmoStirToolPosCBuffer != null) {
+            gizmoStirToolPosCBuffer.Release();
+        }
+        if(gizmoFeedToolPosCBuffer != null) {
+            gizmoFeedToolPosCBuffer.Release();
         }
         /*if(agentHoverHighlightCBuffer != null) {
             agentHoverHighlightCBuffer.Release();

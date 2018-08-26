@@ -182,7 +182,7 @@ public class SimulationManager : MonoBehaviour {
     private ComputeBuffer foodParticlesMeasure32;
     private ComputeBuffer foodParticlesMeasure1;
     private FoodParticleData[] foodParticleMeasurementTotalsData;
-
+    
     private int numAgentsProcessed = 0;
 
     public struct FoodParticleData {
@@ -516,14 +516,14 @@ public class SimulationManager : MonoBehaviour {
         foodParticlesNearestCritters1.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
 
         closestFoodParticlesDataArray = new FoodParticleData[numAgents];
-        closestFoodParticlesDataCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 5 + sizeof(int) * 1);
+        closestFoodParticlesDataCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 8 + sizeof(int) * 2);
 
         foodParticlesEatAmountsCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 1);
         foodParticlesEatAmountsArray = new float[numAgents];
 
         foodParticleMeasurementTotalsData = new FoodParticleData[1];
-        foodParticlesMeasure32 = new ComputeBuffer(32, sizeof(float) * 5 + sizeof(int) * 1);
-        foodParticlesMeasure1 = new ComputeBuffer(1, sizeof(float) * 5 + sizeof(int) * 1);
+        foodParticlesMeasure32 = new ComputeBuffer(32, sizeof(float) * 8 + sizeof(int) * 2);
+        foodParticlesMeasure1 = new ComputeBuffer(1, sizeof(float) * 8 + sizeof(int) * 2);
     }
     private void LoadingInitializeFoodGrid() {
         foodGrid = new FoodGridCell[foodGridResolution][];
@@ -999,8 +999,7 @@ public class SimulationManager : MonoBehaviour {
         computeShaderNutrientMap.SetTexture(kernelCSMeasureTotalNutrients, "measureValuesTex", tempTex2);
         computeShaderNutrientMap.SetTexture(kernelCSMeasureTotalNutrients, "pooledResultTex", tempTex1);
         computeShaderNutrientMap.Dispatch(kernelCSMeasureTotalNutrients, 1, 1, 1);
-                
-
+        
         outputValuesCBuffer.GetData(outputValuesArray);
 
         curGlobalNutrients = outputValuesArray[0].x;
@@ -1012,20 +1011,27 @@ public class SimulationManager : MonoBehaviour {
         return outputValuesArray[0].x;
     }     
     private void AddNutrientsAtCoords(float amount, int x, int y) {
-        ComputeBuffer addNutrientsCBuffer = new ComputeBuffer(1, sizeof(float) * 4);
-        Vector4[] addNutrientsArray = new Vector4[1];
-        addNutrientsArray[0] = new Vector4(amount, (float)x / 32f, (float)y / 32f, 1f);
-        addNutrientsCBuffer.SetData(addNutrientsArray);
+        if(curGlobalNutrients < 128f) {
+            ComputeBuffer addNutrientsCBuffer = new ComputeBuffer(1, sizeof(float) * 4);
+            Vector4[] addNutrientsArray = new Vector4[1];
+            addNutrientsArray[0] = new Vector4(amount, (float)x / 32f, (float)y / 32f, 1f);
+            addNutrientsCBuffer.SetData(addNutrientsArray);
 
-        int kernelCSAddNutrientsAtCoords = computeShaderNutrientMap.FindKernel("CSAddNutrientsAtCoords");
-        computeShaderNutrientMap.SetBuffer(kernelCSAddNutrientsAtCoords, "addNutrientsCBuffer", addNutrientsCBuffer);        
-        computeShaderNutrientMap.SetTexture(kernelCSAddNutrientsAtCoords, "nutrientMapRead", nutrientMapRT1);
-        computeShaderNutrientMap.SetTexture(kernelCSAddNutrientsAtCoords, "nutrientMapWrite", nutrientMapRT2);
-        computeShaderNutrientMap.Dispatch(kernelCSAddNutrientsAtCoords, addNutrientsCBuffer.count, 1, 1);
+            int kernelCSAddNutrientsAtCoords = computeShaderNutrientMap.FindKernel("CSAddNutrientsAtCoords");
+            computeShaderNutrientMap.SetBuffer(kernelCSAddNutrientsAtCoords, "addNutrientsCBuffer", addNutrientsCBuffer);        
+            computeShaderNutrientMap.SetTexture(kernelCSAddNutrientsAtCoords, "nutrientMapRead", nutrientMapRT1);
+            computeShaderNutrientMap.SetTexture(kernelCSAddNutrientsAtCoords, "nutrientMapWrite", nutrientMapRT2);
+            computeShaderNutrientMap.Dispatch(kernelCSAddNutrientsAtCoords, addNutrientsCBuffer.count, 1, 1);
         
-        Graphics.Blit(nutrientMapRT2, nutrientMapRT1);
+            Graphics.Blit(nutrientMapRT2, nutrientMapRT1);
 
-        addNutrientsCBuffer.Release();
+            addNutrientsCBuffer.Release();
+        }
+        else {
+            Debug.Log("Can't add nutrients, exceeds max level");
+        }
+
+        
     }
     private void RemoveEatenNutrients() {
         ComputeBuffer eatAmountsCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 4);
@@ -1044,7 +1050,26 @@ public class SimulationManager : MonoBehaviour {
         
         eatAmountsCBuffer.Release();
     }
-    
+    private void ReviveSelectFoodParticles(int[] indicesArray, float radius, Vector4 spawnCoords) {
+
+        ComputeBuffer selectRespawnFoodParticleIndicesCBuffer = new ComputeBuffer(indicesArray.Length, sizeof(int));
+        selectRespawnFoodParticleIndicesCBuffer.SetData(indicesArray);
+        //selectRespawnFoodParticleIndicesCBuffer
+
+        int kernelCSReviveSelectFoodParticles = computeShaderFoodParticles.FindKernel("CSReviveSelectFoodParticles");
+        computeShaderFoodParticles.SetBuffer(kernelCSReviveSelectFoodParticles, "critterSimDataCBuffer", simStateData.critterSimDataCBuffer);
+        computeShaderFoodParticles.SetBuffer(kernelCSReviveSelectFoodParticles, "selectRespawnFoodParticleIndicesCBuffer", selectRespawnFoodParticleIndicesCBuffer);
+        
+        computeShaderFoodParticles.SetFloat("_MapSize", _MapSize);
+        computeShaderFoodParticles.SetFloat("_Time", Time.realtimeSinceStartup);
+        computeShaderFoodParticles.SetVector("_FoodSprinklePos", spawnCoords);
+        computeShaderFoodParticles.SetFloat("_FoodSprinkleRadius", radius);
+        computeShaderFoodParticles.SetBuffer(kernelCSReviveSelectFoodParticles, "foodParticlesWrite", foodParticlesCBufferSwap);
+        computeShaderFoodParticles.Dispatch(kernelCSReviveSelectFoodParticles, indicesArray.Length, 1, 1);
+       
+
+        selectRespawnFoodParticleIndicesCBuffer.Release();
+    }
     private void RespawnFoodParticles() {
         // Go through foodParticleData and check for inactive
         // determined by current total food -- done!
@@ -1138,8 +1163,7 @@ public class SimulationManager : MonoBehaviour {
         computeShaderFoodParticles.SetBuffer(kernelCSMeasureInitCritterDistances, "foodParticlesRead", foodParticlesCBuffer);
         computeShaderFoodParticles.SetTexture(kernelCSMeasureInitCritterDistances, "foodParticlesNearestCrittersRT", foodParticlesNearestCritters1024);
         computeShaderFoodParticles.Dispatch(kernelCSMeasureInitCritterDistances, foodParticlesCBuffer.count / 1024, simStateData.critterSimDataCBuffer.count, 1);
-                
-
+        
         // Reduce from 1024 --> 32 particles per critter:
         int kernelCSReduceCritterDistances32 = computeShaderFoodParticles.FindKernel("CSReduceCritterDistances32");
         computeShaderFoodParticles.SetTexture(kernelCSReduceCritterDistances32, "critterDistancesRead", foodParticlesNearestCritters1024);
@@ -1157,25 +1181,51 @@ public class SimulationManager : MonoBehaviour {
 
         closestFoodParticlesDataCBuffer.GetData(closestFoodParticlesDataArray);
 
-        //Debug.Log("ClosestFoodParticle: " + closestFoodParticlesDataArray[0].index.ToString() + ", " + closestFoodParticlesDataArray[0].worldPos.ToString());
+        //Debug.Log("ClosestFoodParticle: " + closestFoodParticlesDataArray[0].index.ToString() + ", " + closestFoodParticlesDataArray[0].worldPos.ToString() + ", amt: " + closestFoodParticlesDataArray[0].foodAmount.ToString());
     }
     private void MeasureTotalFoodParticlesAmount() {
+
+        //FoodParticleData[] readout1024 = new FoodParticleData[1024];
+        //foodParticlesCBuffer.GetData(readout1024);
+        //int pi = 0;
+        //Debug.Log("1024 Buffer[0] index: " + readout1024[pi].index.ToString() + ", rad: " + readout1024[pi].radius.ToString() + ", pos: " + readout1024[pi].worldPos.ToString() + ", food Amount: " + readout1024[pi].foodAmount.ToString());
         // pool values 32x reduction:
         // 1024 --> 32
         int kernelCSMeasureTotalFoodParticlesAmount = computeShaderFoodParticles.FindKernel("CSMeasureTotalFoodParticlesAmount");
         computeShaderFoodParticles.SetBuffer(kernelCSMeasureTotalFoodParticlesAmount, "foodParticlesRead", foodParticlesCBuffer);
         computeShaderFoodParticles.SetBuffer(kernelCSMeasureTotalFoodParticlesAmount, "foodParticlesWrite", foodParticlesMeasure32);
+         
+        // DISPATCH !!!
         computeShaderFoodParticles.Dispatch(kernelCSMeasureTotalFoodParticlesAmount, 32, 1, 1);
+        
+        //FoodParticleData[] readout32 = new FoodParticleData[32];
+        //foodParticlesMeasure32.GetData(readout32);
+        //Debug.Log("32 Buffer[0] index: " + readout32[pi].index.ToString() + ", rad: " + readout32[pi].radius.ToString() + ", pos: " + readout32[pi].worldPos.ToString() + ", food Amount: " + readout32[pi].foodAmount.ToString());
+        
+        
+        // +++++++++++++++++++++++++++++++
         // 32 --> 1 entry - totals
+        
         computeShaderFoodParticles.SetBuffer(kernelCSMeasureTotalFoodParticlesAmount, "foodParticlesRead", foodParticlesMeasure32);
         computeShaderFoodParticles.SetBuffer(kernelCSMeasureTotalFoodParticlesAmount, "foodParticlesWrite", foodParticlesMeasure1);
         computeShaderFoodParticles.Dispatch(kernelCSMeasureTotalFoodParticlesAmount, 1, 1, 1);
+        
+        //FoodParticleData[] readout1 = new FoodParticleData[1];
+        //foodParticlesMeasure1.GetData(readout1);
+        //Debug.Log("1 Buffer[0] index: " + readout1[pi].index.ToString() + ", rad: " + readout1[pi].radius.ToString() + ", pos: " + readout1[pi].worldPos.ToString() + ", food Amount: " + readout1[pi].foodAmount.ToString());
 
-        curGlobalFoodParticles = foodParticleMeasurementTotalsData[0].foodAmount;
-        //Debug.Log("total food particle nutrients: " + curGlobalFoodParticles.ToString());
         foodParticlesMeasure1.GetData(foodParticleMeasurementTotalsData);
+        curGlobalFoodParticles = foodParticleMeasurementTotalsData[0].foodAmount;
 
-        //Debug.Log("FoodParticlesTotalAmount: " + foodParticleMeasurementTotalsData[0].foodAmount.ToString());
+        //curGlobalFoodParticles = readout1[0].foodAmount;
+
+        /*
+        
+        //Debug.Log("total food particle nutrients: " + curGlobalFoodParticles.ToString());
+        
+        
+        */
+        //Debug.Log("1 Buffer[0]: " + foodParticleMeasurementTotalsData[0].foodAmount.ToString());
     }
     public void PlayerToolStirOn(Vector3 origin, Vector2 forceVector) {
         float magnitude = forceVector.magnitude;
@@ -1198,6 +1248,11 @@ public class SimulationManager : MonoBehaviour {
     }
     public void PlayerFeedToolSprinkle(Vector3 pos) {
         Debug.Log("PlayerFeedToolSprinkle pos: " + pos.ToString());
+        int[] respawnIndices = new int[4];
+        for(int i = 0; i < respawnIndices.Length; i++) {
+            respawnIndices[i] = UnityEngine.Random.Range(0, 1024);
+        }
+        ReviveSelectFoodParticles(respawnIndices, 1.25f, new Vector4(pos.x / _MapSize, pos.y / _MapSize, 0f, 0f));
     }
     public void PlayerFeedToolPour(Vector3 pos) {        
         int xCoord = Mathf.RoundToInt(pos.x / 256f * nutrientMapResolution);
@@ -1205,8 +1260,18 @@ public class SimulationManager : MonoBehaviour {
 
         Debug.Log("PlayerFeedToolPour pos: " + xCoord.ToString() + ", " + yCoord.ToString());
 
-        AddNutrientsAtCoords(2f, xCoord, yCoord);
+        AddNutrientsAtCoords(5f, xCoord, yCoord);
+
+        int[] respawnIndices = new int[32];
+        for(int i = 0; i < respawnIndices.Length; i++) {
+            respawnIndices[i] = UnityEngine.Random.Range(0, 1024);
+        }
+        ReviveSelectFoodParticles(respawnIndices, 6f, new Vector4(pos.x / _MapSize, pos.y / _MapSize, 0f, 0f));
     }
+    public void ChangeGlobalMutationRate(float normalizedVal) {
+        settingsManager.SetGlobalMutationRate(normalizedVal);
+    }
+
     private void UpdateFoodGrid() {
         float totalFoodLayer0 = 0f;
         /*
