@@ -33,8 +33,9 @@
 
 			
 			struct FoodParticleData {
-				int index;
+				int index;				
 				int critterIndex; // index of creature which swallowed this foodParticle
+				int nearestCritterIndex;
 				float isSwallowed;   // 0 = normal, 1 = in critter's belly
 				float digestedAmount;  // 0 = freshly eaten, 1 = fully dissolved/shrunk      
 				float2 worldPos;
@@ -83,7 +84,7 @@
 				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(quadPoint, 0.0f));				
 				o.uv = quadVerticesCBuffer[id].xy + 0.5f;	
 
-				o.color = float4(particleData.refactoryAge,particleData.active,particleData.isSwallowed, particleData.digestedAmount);
+				o.color = float4((float)particleData.nearestCritterIndex / 64.0, particleData.active, particleData.refactoryAge, particleData.digestedAmount);
 				
 				return o;
 			}
@@ -95,7 +96,7 @@
 				
 				float val = i.color.a;
 
-				return float4(val, i.color.g, val, texColor.a);
+				return float4(i.color.rgb, 1);
 			}
 		ENDCG
 		}

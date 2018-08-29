@@ -1,20 +1,33 @@
 ﻿using UnityEngine;
 
-public class FoodChunk : MonoBehaviour {
+public class EggSack : MonoBehaviour {
         
     public int index;
     
     public CapsuleCollider2D collisionCollider;
     public CapsuleCollider2D collisionTrigger;
 
-    public FoodLifeStage curLifeStage;
-    public enum FoodLifeStage {
-        Growing,
-        Mature,
-        Decaying,
+    public EggLifeStage curLifeStage;
+    public enum EggLifeStage {
+        GrowingInsideParent,  // still attached to agent
+        GrowingIndependent,  // eggsack has been laid by parent
+        Mature,  // Developed enough for some eggs to start hatching
+        Decaying,  // all eggs either hatched or failed
         Null
     }
-    private int growDurationTimeSteps = 120;
+    private int pregnantDurationTimeSteps = 360;
+    public int _PregnantDurationTimeSteps
+    {
+        get
+        {
+            return pregnantDurationTimeSteps;
+        }
+        set
+        {
+
+        }
+    }
+    private int growDurationTimeSteps = 360;
     public int _GrowDurationTimeSteps
     {
         get
@@ -26,7 +39,7 @@ public class FoodChunk : MonoBehaviour {
 
         }
     }
-    private int matureDurationTimeSteps = 3600;  // max oldAge Time to rot
+    private int matureDurationTimeSteps = 600;  // max oldAge Time to rot
     public int _MatureDurationTimeSteps
     {
         get
@@ -38,7 +51,7 @@ public class FoodChunk : MonoBehaviour {
 
         }
     }
-    private int decayDurationTimeSteps = 60;
+    private int decayDurationTimeSteps = 360;
     public int _DecayDurationTimeSteps
     {
         get
@@ -94,6 +107,13 @@ public class FoodChunk : MonoBehaviour {
 
     public Vector2 facingDirection;
 
+    //public CapsuleCollider2D colliderBody;
+    public int parentCritterIndex = -1;
+    public SpringJoint2D springJoint;
+    public CapsuleCollider mouseClickCollider;
+
+    public bool isAttachedToCritter = false;
+
     // Use this for initialization
     void Start() {
         //Respawn();
@@ -103,9 +123,12 @@ public class FoodChunk : MonoBehaviour {
     void Update () {
 		
 	}
-    
-    public void InitializeFoodFromGenome(FoodGenome genome, StartPositionGenome startPos, FoodChunk parentFood) {
-        curLifeStage = FoodLifeStage.Growing;
+
+    public void InitializeEggSackFromGenomePregnant(EggSackGenome genome, Agent parentAgent, EggSack parentEggSack) {
+
+    }
+    public void InitializeEggSackFromGenomeImmaculate(EggSackGenome genome, StartPositionGenome startPos) {
+        curLifeStage = EggLifeStage.GrowingInsideParent;
 
         index = genome.index;
         this.fullSize = genome.fullSize;
@@ -135,10 +158,19 @@ public class FoodChunk : MonoBehaviour {
 
     private void CheckForLifeStageTransition() {
         switch(curLifeStage) {
-            case FoodLifeStage.Growing:
+            case EggLifeStage.GrowingInsideParent:
+                // 
+                // Preggers
+                if(lifeStageTransitionTimeStepCounter >= pregnantDurationTimeSteps) {
+                    curLifeStage = EggLifeStage.GrowingIndependent;
+                    Debug.Log("EGGS BEING LAID (LAIN?)!");
+                    lifeStageTransitionTimeStepCounter = 0;
+                }
+                break;
+            case EggLifeStage.GrowingIndependent:
                 //
                 if(lifeStageTransitionTimeStepCounter >= growDurationTimeSteps) {
-                    curLifeStage = FoodLifeStage.Mature;
+                    curLifeStage = EggLifeStage.Mature;
                     //Debug.Log("EGG HATCHED!");
                     lifeStageTransitionTimeStepCounter = 0;
                     //this.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
@@ -150,36 +182,36 @@ public class FoodChunk : MonoBehaviour {
                 }
                 float maxFoodAvg = foodAmount; // Mathf.Max(Mathf.Max(amountR, amountG), amountB);
                 if (maxFoodAvg <= 0f) {
-                    curLifeStage = FoodLifeStage.Decaying;
+                    curLifeStage = EggLifeStage.Decaying;
                     //isNull = true;
                 }
                 if (healthStructural <= 0f) {
-                    curLifeStage = FoodLifeStage.Decaying;
+                    curLifeStage = EggLifeStage.Decaying;
                 }
                 break;
-            case FoodLifeStage.Mature:
+            case EggLifeStage.Mature:
                 //
                 // Check for Death:
                 //float minFood = Mathf.Min(Mathf.Min(testModule.foodAmountR[0], testModule.foodAmountG[0]), testModule.foodAmountB[0]);
                 float maxFood = foodAmount; // Mathf.Max(Mathf.Max(amountR, amountG), amountB);
                 if (maxFood <= 0f) {
-                    curLifeStage = FoodLifeStage.Decaying;
+                    curLifeStage = EggLifeStage.Decaying;
                     //isNull = true;
                 }
                 if (healthStructural <= 0f) {
-                    curLifeStage = FoodLifeStage.Decaying;
+                    curLifeStage = EggLifeStage.Decaying;
                 }
                 if(ageCounterMature >= matureDurationTimeSteps) {
-                    curLifeStage = FoodLifeStage.Decaying;                    
+                    curLifeStage = EggLifeStage.Decaying;                    
                 }
                 if(transform.position.x > SimulationManager._MapSize || transform.position.x < 0f || transform.position.y > SimulationManager._MapSize || transform.position.y < 0f) {
-                    curLifeStage = FoodLifeStage.Decaying;   
+                    curLifeStage = EggLifeStage.Decaying;   
                 }
                 break;
-            case FoodLifeStage.Decaying:
+            case EggLifeStage.Decaying:
                 //
                 if(lifeStageTransitionTimeStepCounter >= decayDurationTimeSteps) {
-                    curLifeStage = FoodLifeStage.Null;
+                    curLifeStage = EggLifeStage.Null;
                     //Debug.Log("FOOD NO LONGER EXISTS!");
                     lifeStageTransitionTimeStepCounter = 0;
                     isDepleted = true;  // flagged for respawn
@@ -188,7 +220,7 @@ public class FoodChunk : MonoBehaviour {
                     //joint.connectedBody = null;
                 }
                 break;
-            case FoodLifeStage.Null:
+            case EggLifeStage.Null:
                 //
                 //Debug.Log("FoodLifeStage is null - probably shouldn't have gotten to this point...;");
                 break;
@@ -210,19 +242,23 @@ public class FoodChunk : MonoBehaviour {
         CheckForLifeStageTransition();
         
         switch(curLifeStage) {
-            case FoodLifeStage.Growing:
+            case EggLifeStage.GrowingInsideParent:
                 //
-                TickGrowing();
+                TickGrowingInsideParent();
                 break;
-            case FoodLifeStage.Mature:
+            case EggLifeStage.GrowingIndependent:
+                //
+                TickGrowingIndependent();
+                break;
+            case EggLifeStage.Mature:
                 //
                 TickMature();
                 break;
-            case FoodLifeStage.Decaying:
+            case EggLifeStage.Decaying:
                 //
                 TickDecaying();
                 break;
-            case FoodLifeStage.Null:
+            case EggLifeStage.Null:
                 //
                 //Debug.Log("agent is null - probably shouldn't have gotten to this point...;");
                 break;
@@ -237,7 +273,7 @@ public class FoodChunk : MonoBehaviour {
         isBeingEaten = 0.0f;
     }
 
-    private void TickGrowing() {
+    private void TickGrowingInsideParent() {
         lifeStageTransitionTimeStepCounter++;
 
         float growthPercentage = (float)lifeStageTransitionTimeStepCounter / (float)growDurationTimeSteps;
@@ -251,6 +287,11 @@ public class FoodChunk : MonoBehaviour {
                 
 
         //Debug.Log("TickGrowing growDurationTimeSteps++");
+    }
+    private void TickGrowingIndependent() {
+        lifeStageTransitionTimeStepCounter++;
+
+        
     }
     private void TickMature() {
         growthStatus = 1f;

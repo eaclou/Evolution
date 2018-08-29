@@ -99,7 +99,7 @@ public class TestModule {
 
     //public Transform enemyTransform;
     public Rigidbody2D ownRigidBody2D;
-    public FoodChunk nearestFoodModule;
+    public EggSack nearestFoodModule;
     public TestModule friendTestModule;
     public PredatorModule nearestPredatorModule;
 

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FoodGenome {
+public class EggSackGenome {
 
     public int index = -1;
 
@@ -25,17 +25,8 @@ public class FoodGenome {
     public Vector2 fruitScale;
 
     public Vector2 randomSeed; // ??
-
-    // In Future Add:
-    // Brush type
-    // Leaf texture type
-    // Fruit Texture type
-    // Stem texture type
-    // Stem Girth
-    // Preferred Branching Angle
-    // etc. etc. etc....
-
-	public FoodGenome(int index) {
+    
+	public EggSackGenome(int index) {
         this.index = index;
     }
 
@@ -57,7 +48,7 @@ public class FoodGenome {
         fruitScale = new Vector2(UnityEngine.Random.Range(0.06f, 0.15f), UnityEngine.Random.Range(0.06f, 0.15f));
     }
 
-    public void SetToMutatedCopyOfParentGenome(FoodGenome parentFoodGenome, MutationSettings settings) {
+    public void SetToMutatedCopyOfParentGenome(EggSackGenome parentFoodGenome, MutationSettings settings) {
         // *** Result needs to be fully independent copy and share no references!!!
         
         fullSize = UtilityMutationFunctions.GetMutatedVector2Additive(parentFoodGenome.fullSize, settings.defaultFoodMutationChance, settings.defaultFoodMutationStepSize, 0.25f, 4.5f);

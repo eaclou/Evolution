@@ -30,9 +30,10 @@ public class CritterModuleCore {
 
     public Vector2 currentBodySize;
 
-    public FoodChunk nearestFoodModule;
+    public EggSack nearestEggSackModule;
+    public Vector2 nearestEggSackPos;
     public int nearestFoodParticleIndex = -1;  // debugging ** TEMP
-    public Vector3 nearestFoodParticlePos;
+    public Vector2 nearestFoodParticlePos;
         
     // Nearest Edible Object:
     public float[] foodPosX;
@@ -448,7 +449,10 @@ public class CritterModuleCore {
     public void Tick(SimulationManager simManager, Vector4 nutrientCellInfo, bool isPassiveMouth, bool isPlayer, Vector2 ownPos, Vector2 ownVel, int agentIndex) {
 
         nearestFoodParticleIndex = simManager.closestFoodParticlesDataArray[agentIndex].index;
-        nearestFoodParticlePos = simManager.closestFoodParticlesDataArray[agentIndex].worldPos;
+        nearestFoodParticlePos = simManager.closestFoodParticlesDataArray[agentIndex].worldPos - new Vector2(simManager.agentsArray[agentIndex].bodyRigidbody.transform.position.x,
+                                                                                                           simManager.agentsArray[agentIndex].bodyRigidbody.transform.position.y);
+
+        
 
         Vector2 foodPos = Vector2.zero;
         Vector2 foodDir = Vector2.zero;
@@ -456,16 +460,18 @@ public class CritterModuleCore {
         //float typeG = 0f;
         //float typeB = 0f;
         float nearestFoodChunkSquareDistance = 100f;
-        if(nearestFoodModule != null) {
-            foodPos = new Vector2(nearestFoodModule.transform.localPosition.x - ownPos.x, nearestFoodModule.transform.localPosition.y - ownPos.y);
+        if(nearestEggSackModule != null) {
+            foodPos = new Vector2(nearestEggSackModule.transform.localPosition.x - ownPos.x, nearestEggSackModule.transform.localPosition.y - ownPos.y);
             foodDir = foodPos.normalized;
             //typeR = nearestFoodModule.amountR;  // make a FoodModule Class to hold as reference which will contain Type info
             //typeG = nearestFoodModule.amountG;
             //typeB = nearestFoodModule.amountB;
-            foodAmount = nearestFoodModule.foodAmount;
+            foodAmount = nearestEggSackModule.foodAmount;
             foodRelSize[0] = foodAmount;
 
             nearestFoodChunkSquareDistance = foodPos.sqrMagnitude;
+
+            nearestEggSackPos = foodPos;
         }
 
 
@@ -528,7 +534,7 @@ public class CritterModuleCore {
                 foodPosY[0] = foodParticleDir.y;
                 foodDirX[0] = nutrientCellInfo.y;
                 foodDirY[0] = nutrientCellInfo.z;
-            foodRelSize[0] = nutrientCellInfo.x; // simManager.closestFoodParticlesDataArray[agentIndex].foodAmount; // nutrientCellInfo.x;
+                foodRelSize[0] = nutrientCellInfo.x; // simManager.closestFoodParticlesDataArray[agentIndex].foodAmount; // nutrientCellInfo.x;
             /*}
             else { // CPU foodChunk:
                 foodPosX[0] = foodPos.x / 20f; 
@@ -540,10 +546,10 @@ public class CritterModuleCore {
             
         }
         else { // Predator -- use CPU egg chunks:
-            foodPosX[0] = foodPos.x / 20f;
-            foodPosY[0] = foodPos.y / 20f;
-            foodDirX[0] = foodDir.x;
-            foodDirY[0] = foodDir.y;            
+            foodPosX[0] = foodDir.x;  // foodPos.x / 20f;
+            foodPosY[0] = foodDir.y;  //foodPos.y / 20f;
+            foodDirX[0] = enemyDir.x; // foodParticleDir.x;
+            foodDirY[0] = enemyDir.y; // foodParticleDir.y;
         }
 
         //foodTypeR[0] = typeR;

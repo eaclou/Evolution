@@ -86,7 +86,7 @@ public class CritterMouthComponent : MonoBehaviour {
             }
         }
 
-        FoodChunk collidingFoodModule = collider.gameObject.GetComponent<FoodChunk>();
+        EggSack collidingFoodModule = collider.gameObject.GetComponent<EggSack>();
         if (collidingFoodModule != null) {
             // FOOD:
             // Compare sizes:
@@ -189,7 +189,7 @@ public class CritterMouthComponent : MonoBehaviour {
 
         
     }
-    private void SwallowFoodWhole(FoodChunk foodModule) {
+    private void SwallowFoodWhole(EggSack foodModule) {
         //Debug.Log("SwallowFoodWhole");
         float flow = foodModule.curSize.x * foodModule.curSize.y;        
         agentRef.EatFood(flow * 1f);    
@@ -215,7 +215,7 @@ public class CritterMouthComponent : MonoBehaviour {
         preyAgent.coreModule.healthBody -= damage;
         preyAgent.coreModule.healthExternal -= damage;
     }
-    private void BiteDamageFood(FoodChunk foodModule, float ownArea, float targetArea) {
+    private void BiteDamageFood(EggSack foodModule, float ownArea, float targetArea) {
         //Debug.Log("BiteDamageFood");
         //Debug.Log("BiteFood");
         // CONSUME FOOD!

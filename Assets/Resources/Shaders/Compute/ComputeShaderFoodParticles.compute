@@ -12,6 +12,7 @@
 struct FoodParticleData {
     int index;
 	int critterIndex; // index of creature which swallowed this foodParticle
+	int nearestCritterIndex;
     float isSwallowed;   // 0 = normal, 1 = in critter's belly
     float digestedAmount;  // 0 = freshly eaten, 1 = fully dissolved/shrunk        
     float2 worldPos;
@@ -87,6 +88,10 @@ void CSMeasureInitCritterDistances (uint3 id : SV_DispatchThreadID)
 	//}
 
 	foodParticlesNearestCrittersRT[int2(particleIndex, critterIndex)] = float4(particleData.index, distanceSquared, particleData.worldPos);
+
+	// Store closest critter?
+	//particleData.nearestCritterIndex = critterIndex;
+	//foodParticlesWrite[particleIndex] = particleData;  // Copy data to other buffer
 }
 
 [numthreads(1,1,1)]
@@ -121,6 +126,10 @@ void CSReduceCritterDistances32 (uint3 id : SV_DispatchThreadID)
 	}
 		
 	FoodParticleData closestFoodData = foodParticlesRead[closestParticleIndex];
+
+	//closestFoodData.nearestCritterIndex = critterIndex;
+
+	//foodParticlesWrite[closestParticleIndex] = closestFoodData; // copy over to other buffer
 	
 	critterDistancesWrite[int2(id.x, critterIndex)] = float4(closestParticleIndex, minSquaredDistance, 1.0, 1.0);
 	closestParticlesDataCBuffer[critterIndex] = closestFoodData; // assuming there's only 1 thread at end
@@ -154,7 +163,7 @@ void CSEatSelectedFoodParticles (uint3 id : SV_DispatchThreadID)
 
 	float biteRadiusScore = mouthRadius * 3 * isAlive01;
 	if(distanceSquared < combinedRadius * combinedRadius) {		
-		if(biteRadiusScore * 3 > particleRadius) {
+		//if(biteRadiusScore * 3 > particleRadius) {
 			//if(critterSimData.isBiting > 0.5) {   // revisit
 				eatenAmount = particleData.foodAmount;
 			
@@ -169,7 +178,7 @@ void CSEatSelectedFoodParticles (uint3 id : SV_DispatchThreadID)
 				foodParticlesWrite[particleIndex].critterIndex = critterIndex;
 
 			//}			
-		}
+		//}
 	}	
 
 	foodParticlesEatAmountsCBuffer[id.x] = eatenAmount;
@@ -219,7 +228,8 @@ void CSRespawnFoodParticles (uint3 id : SV_DispatchThreadID)
 	float2 uv = foodParticle.worldPos / _MapSize;
 	
 
-	if(foodParticle.active > 0.5) {
+	if(foodParticle.active > 0.5) { // poor man's boolean
+	// *** Update this to sample altitude instead.  ** to avoid unreachable food
 		float obstacleValue = obstaclesRead.SampleLevel(_LinearClamp, uv, 2).z;
 		if(obstacleValue > 0.01) {
 			float randX = rand(float2((float)id.x, _Time * 100));
@@ -273,6 +283,7 @@ void CSRespawnFoodParticles (uint3 id : SV_DispatchThreadID)
 					foodParticlesWrite[id.x].worldPos = float2(randX * _MapSize, randY * _MapSize);
 
 					float randRadius = rand(float2(randX * 10, randY * -3.37)) * (_MaxParticleSize - _MinParticleSize) + _MinParticleSize;
+					//foodParticlesWrite[id.x].critterIndex = 
 					foodParticlesWrite[id.x].radius = randRadius;
 					foodParticlesWrite[id.x].foodAmount = randRadius * randRadius * 3.141592 * _ParticleNutrientDensity;
 					foodParticlesWrite[id.x].active = 1.0;

@@ -86,9 +86,9 @@ public class SimulationManager : MonoBehaviour {
     private AgentGenome[] savedGenomePoolArray1;
     private AgentGenome[] savedGenomePoolArray2;
     private AgentGenome[] savedGenomePoolArray3;
-    public FoodGenome[] foodGenomePoolArray;
-    private FoodGenome foodGenomeAnimalCorpse;
-    public FoodChunk[] foodArray;
+    public EggSackGenome[] foodGenomePoolArray;
+    private EggSackGenome foodGenomeAnimalCorpse;
+    public EggSack[] foodArray;
     private int numFood = 48;
     public int _NumFood {
         get
@@ -188,6 +188,7 @@ public class SimulationManager : MonoBehaviour {
     public struct FoodParticleData {
         public int index;
         public int critterIndex;
+        public int nearestCritterIndex;
         public float isSwallowed;   // 0 = normal, 1 = in critter's belly
         public float digestedAmount;  // 0 = freshly eaten, 1 = fully dissolved/shrunk
         public Vector2 worldPos;
@@ -414,17 +415,17 @@ public class SimulationManager : MonoBehaviour {
 
 
         // FOOD:
-        foodGenomePoolArray = new FoodGenome[numFood];
+        foodGenomePoolArray = new EggSackGenome[numFood];
 
         for(int i = 0; i < foodGenomePoolArray.Length; i++) {
-            FoodGenome foodGenome = new FoodGenome(i);
+            EggSackGenome foodGenome = new EggSackGenome(i);
 
             foodGenome.InitializeAsRandomGenome();
 
             foodGenomePoolArray[i] = foodGenome;
         }
 
-        foodGenomeAnimalCorpse = new FoodGenome(-1);
+        foodGenomeAnimalCorpse = new EggSackGenome(-1);
         foodGenomeAnimalCorpse.InitializeAsRandomGenome();
     }
     private void LoadingInitializeFluidSim() {
@@ -475,8 +476,8 @@ public class SimulationManager : MonoBehaviour {
     }
     private void LoadingInitializeFoodParticles() {
 
-        foodParticlesCBuffer = new ComputeBuffer(numFoodParticles, sizeof(float) * 8 + sizeof(int) * 2);
-        foodParticlesCBufferSwap = new ComputeBuffer(numFoodParticles, sizeof(float) * 8 + sizeof(int) * 2);
+        foodParticlesCBuffer = new ComputeBuffer(numFoodParticles, sizeof(float) * 8 + sizeof(int) * 3);
+        foodParticlesCBufferSwap = new ComputeBuffer(numFoodParticles, sizeof(float) * 8 + sizeof(int) * 3);
         FoodParticleData[] foodParticlesArray = new FoodParticleData[numFoodParticles];
 
         float minParticleSize = settingsManager.avgFoodParticleRadius / settingsManager.foodParticleRadiusVariance;
@@ -516,14 +517,14 @@ public class SimulationManager : MonoBehaviour {
         foodParticlesNearestCritters1.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
 
         closestFoodParticlesDataArray = new FoodParticleData[numAgents];
-        closestFoodParticlesDataCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 8 + sizeof(int) * 2);
+        closestFoodParticlesDataCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 8 + sizeof(int) * 3);
 
         foodParticlesEatAmountsCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 1);
         foodParticlesEatAmountsArray = new float[numAgents];
 
         foodParticleMeasurementTotalsData = new FoodParticleData[1];
-        foodParticlesMeasure32 = new ComputeBuffer(32, sizeof(float) * 8 + sizeof(int) * 2);
-        foodParticlesMeasure1 = new ComputeBuffer(1, sizeof(float) * 8 + sizeof(int) * 2);
+        foodParticlesMeasure32 = new ComputeBuffer(32, sizeof(float) * 8 + sizeof(int) * 3);
+        foodParticlesMeasure1 = new ComputeBuffer(1, sizeof(float) * 8 + sizeof(int) * 3);
     }
     private void LoadingInitializeFoodGrid() {
         foodGrid = new FoodGridCell[foodGridResolution][];
@@ -605,7 +606,7 @@ public class SimulationManager : MonoBehaviour {
     }
     private void LoadingInstantiateFood() {
         // FOOODDDD!!!!
-        foodArray = new FoodChunk[numFood]; // create array
+        foodArray = new EggSack[numFood]; // create array
         //int numDeadAnimalFood = 32;
         //foodDeadAnimalArray = new FoodChunk[numDeadAnimalFood];
 
@@ -613,7 +614,7 @@ public class SimulationManager : MonoBehaviour {
         for (int i = 0; i < foodArray.Length; i++) {
             GameObject foodGO = Instantiate(Resources.Load("Prefabs/FoodPrefab")) as GameObject;
             foodGO.name = "Food" + i.ToString();
-            FoodChunk newFood = foodGO.GetComponent<FoodChunk>();
+            EggSack newFood = foodGO.GetComponent<EggSack>();
             foodArray[i] = newFood; // Add to stored list of current Food objects                     
         }
         /*
@@ -627,7 +628,7 @@ public class SimulationManager : MonoBehaviour {
     }
     private void LoadingInitializeFoodFromGenome() {
         for (int i = 0; i < foodArray.Length; i++) {
-            foodArray[i].InitializeFoodFromGenome(foodGenomePoolArray[i], GetRandomFoodSpawnPosition(), null);
+            foodArray[i].InitializeEggSackFromGenomeImmaculate(foodGenomePoolArray[i], GetRandomFoodSpawnPosition());
             //ReviveFood(i);
         }
     }
@@ -922,11 +923,11 @@ public class SimulationManager : MonoBehaviour {
             agentsArray[i].avgFluidVel = Mathf.Lerp(agentsArray[i].avgFluidVel, simStateData.fluidVelocitiesAtAgentPositionsArray[i].magnitude, 0.25f);
         }
         for (int i = 0; i < foodArray.Length; i++) { // *** cache rigidBody reference
-            float hackyScalingForceMultiplier = 1f;
-            if (foodArray[i].curLifeStage == FoodChunk.FoodLifeStage.Growing) {
-                hackyScalingForceMultiplier = 2f;
-            }
-            foodArray[i].GetComponent<Rigidbody2D>().AddForce(simStateData.fluidVelocitiesAtFoodPositionsArray[i] * 20f * hackyScalingForceMultiplier * foodArray[i].GetComponent<Rigidbody2D>().mass, ForceMode2D.Impulse); //
+            //float hackyScalingForceMultiplier = 1f;
+            //if (foodArray[i].curLifeStage == EggSack.EggLifeStage.Growing) {
+            //    hackyScalingForceMultiplier = 2f;
+            //}
+            foodArray[i].GetComponent<Rigidbody2D>().AddForce(simStateData.fluidVelocitiesAtFoodPositionsArray[i] * 20f * foodArray[i].GetComponent<Rigidbody2D>().mass, ForceMode2D.Impulse); //
             //foodArray[i].GetComponent<Rigidbody2D>().AddForce(new Vector2(1f, 1f), ForceMode2D.Force); //
             // Looks like AddForce has less of an effect on a GO/Rigidbody2D that is being scaled through a script... ??
             // Feels like rigidbody is accumulating velocity which is then released all at once when the scaling stops??
@@ -1161,6 +1162,7 @@ public class SimulationManager : MonoBehaviour {
         computeShaderFoodParticles.SetBuffer(kernelCSMeasureInitCritterDistances, "critterSimDataCBuffer", simStateData.critterSimDataCBuffer);
         computeShaderFoodParticles.SetBuffer(kernelCSMeasureInitCritterDistances, "critterInitDataCBuffer", simStateData.critterInitDataCBuffer);
         computeShaderFoodParticles.SetBuffer(kernelCSMeasureInitCritterDistances, "foodParticlesRead", foodParticlesCBuffer);
+        //computeShaderFoodParticles.SetBuffer(kernelCSMeasureInitCritterDistances, "foodParticlesWrite", foodParticlesCBufferSwap);
         computeShaderFoodParticles.SetTexture(kernelCSMeasureInitCritterDistances, "foodParticlesNearestCrittersRT", foodParticlesNearestCritters1024);
         computeShaderFoodParticles.Dispatch(kernelCSMeasureInitCritterDistances, foodParticlesCBuffer.count / 1024, simStateData.critterSimDataCBuffer.count, 1);
         
@@ -1168,6 +1170,8 @@ public class SimulationManager : MonoBehaviour {
         int kernelCSReduceCritterDistances32 = computeShaderFoodParticles.FindKernel("CSReduceCritterDistances32");
         computeShaderFoodParticles.SetTexture(kernelCSReduceCritterDistances32, "critterDistancesRead", foodParticlesNearestCritters1024);
         computeShaderFoodParticles.SetTexture(kernelCSReduceCritterDistances32, "critterDistancesWrite", foodParticlesNearestCritters32);
+        computeShaderFoodParticles.SetBuffer(kernelCSMeasureInitCritterDistances, "foodParticlesRead", foodParticlesCBuffer);
+        //computeShaderFoodParticles.SetBuffer(kernelCSMeasureInitCritterDistances, "foodParticlesWrite", foodParticlesCBuffer);
         //computeShaderFoodParticles.SetBuffer(kernelCSReduceCritterDistances32, "closestParticlesDataCBuffer", closestFoodParticlesDataCBuffer);
         computeShaderFoodParticles.Dispatch(kernelCSReduceCritterDistances32, 32, simStateData.critterSimDataCBuffer.count, 1);
 
@@ -1176,6 +1180,7 @@ public class SimulationManager : MonoBehaviour {
         computeShaderFoodParticles.SetTexture(kernelCSReduceCritterDistances32, "critterDistancesRead", foodParticlesNearestCritters32);
         computeShaderFoodParticles.SetTexture(kernelCSReduceCritterDistances32, "critterDistancesWrite", foodParticlesNearestCritters1);
         computeShaderFoodParticles.SetBuffer(kernelCSReduceCritterDistances32, "foodParticlesRead", foodParticlesCBuffer);
+        //computeShaderFoodParticles.SetBuffer(kernelCSReduceCritterDistances32, "foodParticlesWrite", foodParticlesCBufferSwap);
         computeShaderFoodParticles.SetBuffer(kernelCSReduceCritterDistances32, "closestParticlesDataCBuffer", closestFoodParticlesDataCBuffer);
         computeShaderFoodParticles.Dispatch(kernelCSReduceCritterDistances32, 1, simStateData.critterSimDataCBuffer.count, 1);
 
@@ -1492,7 +1497,7 @@ public class SimulationManager : MonoBehaviour {
             for (int i = 0; i < mapGridCellArray[xCoord][yCoord].foodIndicesList.Count; i++) {
                 // FOOD:
                 if(foodArray[mapGridCellArray[xCoord][yCoord].foodIndicesList[i]].enabled) { // if enabled:
-                    if(foodArray[mapGridCellArray[xCoord][yCoord].foodIndicesList[i]].curLifeStage == FoodChunk.FoodLifeStage.Mature) {
+                    if(foodArray[mapGridCellArray[xCoord][yCoord].foodIndicesList[i]].curLifeStage == EggSack.EggLifeStage.Hatching) {
                         //Debug.Log("Found valid Food!");
                         Vector2 foodPos = new Vector2(foodArray[mapGridCellArray[xCoord][yCoord].foodIndicesList[i]].transform.localPosition.x, foodArray[mapGridCellArray[xCoord][yCoord].foodIndicesList[i]].transform.localPosition.y);
                         float distFood = (foodPos - agentPos).magnitude - (foodArray[mapGridCellArray[xCoord][yCoord].foodIndicesList[i]].curSize.magnitude + 1f) * 0.5f;  // subtract food & agent radii
@@ -1541,7 +1546,7 @@ public class SimulationManager : MonoBehaviour {
             agentsArray[a].coreModule.nearestFriendAgent = agentsArray[closestFriendIndex];
             agentsArray[a].coreModule.nearestEnemyAgent = agentsArray[closestEnemyAgentIndex];
             if(closestFoodIndex != -1) {
-                agentsArray[a].coreModule.nearestFoodModule = foodArray[closestFoodIndex];
+                agentsArray[a].coreModule.nearestEggSackModule = foodArray[closestFoodIndex];
                 /*if(closestFoodIsDeadAnimal) {                    
                     agentsArray[a].coreModule.nearestFoodModule = foodDeadAnimalArray[closestFoodIndex];
                 }
@@ -1950,7 +1955,7 @@ public class SimulationManager : MonoBehaviour {
         for(int i = 0; i < numParentSearches; i++) {
             int foodGroupSize = numFood / numSpecies;
             int randomIndex = UnityEngine.Random.Range(speciesIndex * foodGroupSize, (speciesIndex + 1) * foodGroupSize);
-            if(foodArray[randomIndex].curLifeStage == FoodChunk.FoodLifeStage.Mature) {
+            if(foodArray[randomIndex].curLifeStage == EggSack.EggLifeStage.Hatching) {
                 
                 //return startPosGenome;
                 parentIndex = randomIndex;
@@ -1959,13 +1964,13 @@ public class SimulationManager : MonoBehaviour {
             }            
         }
        
-        FoodGenome newFoodGenome = new FoodGenome(foodIndex);
+        EggSackGenome newFoodGenome = new EggSackGenome(foodIndex);
 
         newFoodGenome.SetToMutatedCopyOfParentGenome(foodGenomePoolArray[parentIndex], settingsManager.mutationSettingsPersistent);
 
         foodGenomePoolArray[foodIndex] = newFoodGenome;
 
-        foodArray[foodIndex].InitializeFoodFromGenome(foodGenomePoolArray[foodIndex], GetRandomFoodSpawnPosition(), null); // Spawn that genome in dead Agent's body and revive it!
+        foodArray[foodIndex].InitializeEggSackFromGenomeImmaculate(foodGenomePoolArray[foodIndex], GetRandomFoodSpawnPosition(), null); // Spawn that genome in dead Agent's body and revive it!
                
     }
     private StartPositionGenome GetRandomAgentSpawnPosition(int speciesIndex) {
