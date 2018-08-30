@@ -329,10 +329,9 @@ public class SimulationManager : MonoBehaviour {
 
 
         yield return null;
-
-        //simStateData.PopulateSimDataArrays(this); // testing if this works...
+                
         // Wake up the Render King and prepare him for the day ahead, proudly ruling over Renderland.
-        LoadingGentlyRouseTheRenderMonarchHisHighnessLordOfPixels();
+        GentlyRouseTheRenderMonarchHisHighnessLordOfPixels();
         
         // TEMP!!! ****
         for(int i = 0; i < numAgents; i++) {
@@ -433,7 +432,7 @@ public class SimulationManager : MonoBehaviour {
     private void LoadingInitializeFluidSim() {
         environmentFluidManager.InitializeFluidSystem();
     }
-    private void LoadingGentlyRouseTheRenderMonarchHisHighnessLordOfPixels() {
+    private void GentlyRouseTheRenderMonarchHisHighnessLordOfPixels() {
         theRenderKing.InitializeRiseAndShine(this);
     }
     private void LoadingInstantiateAgents() {
@@ -444,6 +443,7 @@ public class SimulationManager : MonoBehaviour {
             GameObject agentGO = new GameObject("Agent" + i.ToString());
             Agent newAgent = agentGO.AddComponent<Agent>();
             newAgent.speciesIndex = Mathf.FloorToInt((float)i / (float)numAgents * (float)numSpecies);
+            newAgent.FirstTimeInitialize(agentGenomePoolArray[i]);
             agentsArray[i] = newAgent; // Add to stored list of current Agents            
         }
     }
@@ -592,19 +592,13 @@ public class SimulationManager : MonoBehaviour {
 
         //Debug.Log("SpawnFood!");
         for (int i = 0; i < eggSackArray.Length; i++) {
-            GameObject foodGO = Instantiate(Resources.Load("Prefabs/FoodPrefab")) as GameObject;
-            foodGO.name = "Food" + i.ToString();
-            EggSack newFood = foodGO.GetComponent<EggSack>();
-            eggSackArray[i] = newFood; // Add to stored list of current Food objects                     
+            GameObject eggSackGO = new GameObject("EggSack" + i.ToString()); // Instantiate(Resources.Load("Prefabs/FoodPrefab")) as GameObject;
+            //eggSackGO.name = "EggSack" + i.ToString();
+            EggSack newEggSack = eggSackGO.AddComponent<EggSack>();
+            newEggSack.speciesIndex = Mathf.FloorToInt((float)i / (float)numEggSacks * (float)numSpecies);
+            newEggSack.FirstTimeInitialize();
+            eggSackArray[i] = newEggSack; // Add to stored list of current Food objects                     
         }
-        /*
-        for(int j = 0; j < numDeadAnimalFood; j++) {
-            GameObject deadAnimalGO = Instantiate(Resources.Load("Prefabs/FoodPrefab")) as GameObject;
-            deadAnimalGO.name = "DeadAnimal" + j.ToString();
-            FoodChunk newDeadAnimal = deadAnimalGO.GetComponent<FoodChunk>();
-            newDeadAnimal.gameObject.SetActive(false);
-            foodDeadAnimalArray[j] = newDeadAnimal; // Add to stored list of current Food objects        
-        }*/
     }
     private void LoadingInitializeEggSacksFirstTime() {  // Skip pregnancy, Instantiate EggSacks that begin as 'GrowingIndependent' ?
         for (int i = 0; i < eggSackArray.Length; i++) {
@@ -1428,8 +1422,8 @@ public class SimulationManager : MonoBehaviour {
             float nearestEnemyAgentSqDistance = float.PositiveInfinity;
             int closestEggSackIndex = -1; // default to -1??? ***            
             float nearestFoodDistance = float.PositiveInfinity;
-            int closestPredIndex = 0; // default to 0???
-            float nearestPredDistance = float.PositiveInfinity;
+            //int closestPredIndex = 0; // default to 0???
+            //float nearestPredDistance = float.PositiveInfinity;
 
            // bool closestFoodIsDeadAnimal = false;
 
@@ -1577,21 +1571,24 @@ public class SimulationManager : MonoBehaviour {
         EggSack parentEggSack = null;
         // Find an appropriate EggSack to spawn from:
 
-        int speciesPopulationSize = (_NumAgents / numSpecies);
+        int speciesPopulationSize = (_NumEggSacks / numSpecies);
         int startIndex = speciesIndex * speciesPopulationSize;
+
+        List<int> validEggSackIndicesList = new List<int>();
 
         for(int i = startIndex; i < startIndex + speciesPopulationSize; i++) {  // if EggSack belongs to the right species
             if(eggSackArray[i].curLifeStage == EggSack.EggLifeStage.GrowingIndependent) {
                 if(eggSackArray[i].lifeStageTransitionTimeStepCounter < eggSackArray[i]._GrowDurationTimeSteps / 4) {  // egg sack is at proper stage of development
-                    // This Eggsack
-                    Debug.Log("EggSackFound! " + i.ToString());
-                    parentEggSack = eggSackArray[i];
-                    break;
+                    // This Eggsack Index                    
+                    validEggSackIndicesList.Add(i);
                 }
             }
         }
 
-        if(parentEggSack != null) {
+        if(validEggSackIndicesList.Count > 0) {  // move this inside the for loop ??
+            int randIndex = UnityEngine.Random.Range(0, validEggSackIndicesList.Count);
+            Debug.Log("EggSackFound! " + validEggSackIndicesList[randIndex].ToString());
+            parentEggSack = eggSackArray[validEggSackIndicesList[randIndex]];
             SpawnAgentFromGenome(agentIndex, speciesIndex, parentEggSack);
         }
         else {

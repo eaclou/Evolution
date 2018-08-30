@@ -156,6 +156,9 @@ public class Agent : MonoBehaviour {
     // Use this for initialization
     private void Awake() {
         //size = new Vector2(1f, 1f); // Better way to handle this! ****
+
+        // temp fix for delayed spawning of Agents (leading to nullReferenceExceptions)
+        agentWidthsArray = new float[widthsTexResolution];
     }
     void Start() { // *** MOVE THIS TO BETTER SPOT! ***
                     
@@ -446,6 +449,9 @@ public class Agent : MonoBehaviour {
     }
     private void CheckForLifeStageTransition() {
         switch(curLifeStage) {
+            case AgentLifeStage.AwaitingRespawn:
+                //
+                break;
             case AgentLifeStage.Egg:
                 //
                 if(lifeStageTransitionTimeStepCounter >= gestationDurationTimeSteps) {
@@ -511,42 +517,39 @@ public class Agent : MonoBehaviour {
 
         totalFoodEaten += amount;        
     }
+    public void ProcessBeingEaten(float amount) {
+        // if this agent is dead, it acts as food.
+        // it was just bitten by another creature and removed material -- 
 
-    public void Tick(SimulationManager simManager, Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray, SettingsManager settings) {
-
-        if(isSwallowingPrey)
+        corpseFoodAmount -= amount;
+        if (corpseFoodAmount < 0f)
         {
-            swallowingPreyFrameCounter++;
+            corpseFoodAmount = 0f;
 
-            if (swallowingPreyFrameCounter >= swallowDuration)
-            {
-                //Debug.Log("isSwallowingPrey + swallow Complete!");
-
-                swallowingPreyFrameCounter = 0;
-                isSwallowingPrey = false;
-
-                colliderBody.enabled = true;
-
-                springJoint.enabled = false;
-                springJoint.connectedBody = null;
-            }
-            else
-            {
-
-                
-            }
+            // fully consumed?? Should this case be checked for earlier in the pipe ???
+            // Need to 
         }
         else
         {
-            swallowingPreyFrameCounter = 0;
-            isSwallowingPrey = false;
+            
+            float sidesRatio = coreModule.coreWidth / coreModule.coreLength;
+            float sideY = Mathf.Sqrt(corpseFoodAmount / sidesRatio);
+            float sideX = sideY * sidesRatio;
 
-            colliderBody.enabled = true;
+            // v v v move this into ScaleBody function?  Or re-organize into sub functions?
+            // Do I even use currentBodySize as a trusted value?
+            coreModule.currentBodySize = new Vector2(sideX, sideY);
+            colliderBody.size = coreModule.currentBodySize;
 
-            springJoint.enabled = false;
-            springJoint.connectedBody = null;
+            // MOUTH:  // probably look to remove this in the future? mouth should be disabled anyway....
+            mouthRef.triggerCollider.radius = coreModule.currentBodySize.x * 0.5f;
+            mouthRef.triggerCollider.offset = new Vector2(0f, coreModule.currentBodySize.y * 0.5f);
+            
         }
+    }
 
+    public void Tick(SimulationManager simManager, Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray, SettingsManager settings) {
+        
         if(isBeingSwallowed)
         {
             beingSwallowedFrameCounter++;
@@ -579,6 +582,9 @@ public class Agent : MonoBehaviour {
         CheckForLifeStageTransition();
         
         switch(curLifeStage) {
+            case AgentLifeStage.AwaitingRespawn:
+                //
+                break;
             case AgentLifeStage.Egg:
                 //
                 TickEgg();
@@ -671,6 +677,7 @@ public class Agent : MonoBehaviour {
 
     }
     private void TickYoung(SimulationManager simManager, Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray, SettingsManager settings) {
+        ProcessSwallowing();
 
         growthPercentage = (float)lifeStageTransitionTimeStepCounter / (float)youngDurationTimeSteps;
 
@@ -686,7 +693,44 @@ public class Agent : MonoBehaviour {
         lifeStageTransitionTimeStepCounter++;
         scoreCounter++;
     }
+    private void ProcessSwallowing() {
+        if(isSwallowingPrey)
+        {
+            swallowingPreyFrameCounter++;
+
+            if (swallowingPreyFrameCounter >= swallowDuration)
+            {
+                //Debug.Log("isSwallowingPrey + swallow Complete!");
+
+                swallowingPreyFrameCounter = 0;
+                isSwallowingPrey = false;
+
+                colliderBody.enabled = true;
+
+                springJoint.enabled = false;
+                springJoint.connectedBody = null;
+            }
+            else
+            {
+
+                
+            }
+        }
+        else
+        {
+            swallowingPreyFrameCounter = 0;
+            isSwallowingPrey = false;
+
+            colliderBody.enabled = true;
+
+            springJoint.enabled = false;
+            springJoint.connectedBody = null;
+        }
+    }
     private void TickMature(SimulationManager simManager, Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray, SettingsManager settings) {
+
+        ProcessSwallowing();
+
         // Check for death & stuff? Or is this handled inside OnCollisionEnter() events?
 
         // Scaling Test:
@@ -952,19 +996,56 @@ public class Agent : MonoBehaviour {
         }
     }
 
-    public void InitializeModules(AgentGenome genome, Agent agent) {
+    public void InitializeModules(AgentGenome genome) {
         
         coreModule = new CritterModuleCore();
-        coreModule.Initialize(genome.bodyGenome.coreGenome, agent);
+        coreModule.Initialize(genome.bodyGenome.coreGenome, this);
 
         movementModule = new CritterModuleMovement();
         movementModule.Initialize(genome.bodyGenome.movementGenome);
-                
-        agentWidthsArray = new float[widthsTexResolution];
+            
     }
 
-    public void ReconstructAgentGameObjects(AgentGenome genome, EggSack parentEggSack) {
-        
+    public void FirstTimeInitialize(AgentGenome genome) {
+        InitializeAgentWidths(genome);
+        InitializeGameObjectsAndComponents();
+        InitializeModules(genome);
+    }
+    private void InitializeGameObjectsAndComponents() {
+        // Create Physics GameObject:
+        if(bodyGO == null) {
+            GameObject bodySegmentGO = new GameObject("RootSegment");
+            bodySegmentGO.transform.parent = this.gameObject.transform;            
+            bodySegmentGO.tag = "LiveAnimal";
+            bodyGO = bodySegmentGO;
+            //bodyCritterSegment = bodySegmentGO.AddComponent<CritterSegment>();
+            bodyRigidbody = bodySegmentGO.AddComponent<Rigidbody2D>();
+            colliderBody = bodyGO.AddComponent<CapsuleCollider2D>();            
+            //bodyCritterSegment.segmentCollider = colliderBody;
+            bodyRigidbody.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+
+            springJoint = bodyGO.AddComponent<SpringJoint2D>();
+            springJoint.enabled = false;
+            springJoint.autoConfigureDistance = false;
+            springJoint.distance = 0f;
+            springJoint.dampingRatio = 0.1f;
+            springJoint.frequency = 1f;
+
+            GameObject testMouthGO = new GameObject("Mouth");
+            testMouthGO.transform.parent = bodyGO.transform;
+            testMouthGO.transform.localPosition = Vector3.zero;
+            mouthRef = testMouthGO.AddComponent<CritterMouthComponent>();
+            CircleCollider2D mouthTrigger = testMouthGO.AddComponent<CircleCollider2D>();
+            mouthRef.triggerCollider = mouthTrigger;
+
+            GameObject mouseClickColliderGO = new GameObject("MouseClickCollider");
+            mouseClickColliderGO.transform.parent = bodyGO.transform;
+            mouseClickColliderGO.transform.localPosition = new Vector3(0f, 0f, 1f);
+            mouseClickCollider = mouseClickColliderGO.AddComponent<CapsuleCollider>();
+            mouseClickCollider.isTrigger = true;
+        }
+    }
+    public void InitializeAgentWidths(AgentGenome genome) {
         // Calculate Widths, total volume, center of mass, etc:
         // REFACTOR!!! ******
         this.fullSizeBoundingBox = new Vector3(genome.bodyGenome.coreGenome.fullBodyWidth, genome.bodyGenome.coreGenome.fullBodyLength, genome.bodyGenome.coreGenome.fullBodyWidth);
@@ -1007,8 +1088,7 @@ public class Agent : MonoBehaviour {
             // get absolute from relative value:
             float circleWidth = Mathf.Sqrt(1f - (yCoord * 2f - 1f) * (yCoord * 2f - 1f));
             sampledWidth = Mathf.Min(sampledWidth, circleWidth) * genome.bodyGenome.coreGenome.fullBodyWidth;
-
-            
+                       
 
             totalWidth += sampledWidth;
 
@@ -1018,39 +1098,12 @@ public class Agent : MonoBehaviour {
 
         fullSizeBodyVolume = avgSegmentWidth * genome.bodyGenome.coreGenome.fullBodyLength;
         averageFullSizeWidth = avgSegmentWidth;       
-        
-        // Create Physics GameObject:
-        if(bodyGO == null) {
-            GameObject bodySegmentGO = new GameObject("RootSegment");
-            bodySegmentGO.transform.parent = this.gameObject.transform;            
-            bodySegmentGO.tag = "LiveAnimal";
-            bodyGO = bodySegmentGO;
-            //bodyCritterSegment = bodySegmentGO.AddComponent<CritterSegment>();
-            bodyRigidbody = bodySegmentGO.AddComponent<Rigidbody2D>();
-            colliderBody = bodyGO.AddComponent<CapsuleCollider2D>();            
-            //bodyCritterSegment.segmentCollider = colliderBody;
-            bodyRigidbody.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+    }
+    
+    public void ReconstructAgentGameObjects(AgentGenome genome, EggSack parentEggSack) {
 
-            springJoint = bodyGO.AddComponent<SpringJoint2D>();
-            springJoint.enabled = false;
-            springJoint.autoConfigureDistance = false;
-            springJoint.distance = 0f;
-            springJoint.dampingRatio = 0.1f;
-            springJoint.frequency = 1f;
-
-            GameObject testMouthGO = new GameObject("Mouth");
-            testMouthGO.transform.parent = bodyGO.transform;
-            testMouthGO.transform.localPosition = Vector3.zero;
-            mouthRef = testMouthGO.AddComponent<CritterMouthComponent>();
-            CircleCollider2D mouthTrigger = testMouthGO.AddComponent<CircleCollider2D>();
-            mouthRef.triggerCollider = mouthTrigger;
-
-            GameObject mouseClickColliderGO = new GameObject("MouseClickCollider");
-            mouseClickColliderGO.transform.parent = bodyGO.transform;
-            mouseClickColliderGO.transform.localPosition = new Vector3(0f, 0f, 1f);
-            mouseClickCollider = mouseClickColliderGO.AddComponent<CapsuleCollider>();
-            mouseClickCollider.isTrigger = true;
-        }
+        InitializeAgentWidths(genome);
+        InitializeGameObjectsAndComponents();        
 
         // *** Positioning and Pinning to parentEggSack HERE:
         bodyGO.transform.localPosition = parentEggSack.gameObject.transform.position; // startPos.startPosition;        
@@ -1103,13 +1156,12 @@ public class Agent : MonoBehaviour {
         throttle = Vector2.zero;
         smoothedThrottle = new Vector2(0f, 0.01f); 
         
-        InitializeModules(genome, this);      // Modules need to be created first so that Brain can map its neurons to existing modules  
+        InitializeModules(genome);      // Modules need to be created first so that Brain can map its neurons to existing modules  
         
         // Upgrade this to proper Pooling!!!!
         ReconstructAgentGameObjects(genome, parentEggSack);
 
         brain = new Brain(genome.brainGenome, this);
-
                
     }
 

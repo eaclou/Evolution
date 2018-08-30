@@ -3,10 +3,11 @@
 public class EggSack : MonoBehaviour {
         
     public int index;
+    public int speciesIndex; // temp - based on static species
     
-    public CapsuleCollider2D collisionCollider;
-    public CapsuleCollider2D collisionTrigger;
-    public Rigidbody2D rigidbodyRef;
+    //public CapsuleCollider2D collisionCollider;
+    //public CapsuleCollider2D collisionTrigger;
+    //public Rigidbody2D rigidbodyRef;
 
     //private int acceptingNewAgentsDuration = 
 
@@ -114,8 +115,10 @@ public class EggSack : MonoBehaviour {
     public int parentCritterIndex = -1;
     public SpringJoint2D springJoint;
     public CapsuleCollider mouseClickCollider;
+    public CapsuleCollider2D mainCollider;
+    public Rigidbody2D rigidbodyRef;
 
-    public bool isAttachedToCritter = false;
+    public bool isAttachedToCritter = false; // while pregnant? is this redumdamt n
 
     // Use this for initialization
     void Start() {
@@ -127,18 +130,47 @@ public class EggSack : MonoBehaviour {
 		
 	}
 
-    public void InitializeEggSackFromGenomePregnant(EggSackGenome genome, Agent parentAgent, EggSack parentEggSack) {
+    public void FirstTimeInitialize() {        
+        if(rigidbodyRef == null) {
+            
+            rigidbodyRef = this.gameObject.AddComponent<Rigidbody2D>();
+            mainCollider = this.gameObject.AddComponent<CapsuleCollider2D>();
+            rigidbodyRef.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
 
+            springJoint = this.gameObject.AddComponent<SpringJoint2D>();
+            springJoint.enabled = false;
+            springJoint.autoConfigureDistance = false;
+            springJoint.distance = 0.1f;
+            springJoint.dampingRatio = 0.1f;
+            springJoint.frequency = 1f;
+            
+            GameObject mouseClickColliderGO = new GameObject("MouseClickCollider");
+            mouseClickColliderGO.transform.parent = this.gameObject.transform;
+            mouseClickColliderGO.transform.localPosition = new Vector3(0f, 0f, 1f);
+            mouseClickCollider = mouseClickColliderGO.AddComponent<CapsuleCollider>();
+            mouseClickCollider.isTrigger = true;
+            mouseClickColliderGO.SetActive(false);
+        }
     }
-    public void InitializeEggSackFromGenomeImmaculate(EggSackGenome genome, StartPositionGenome startPos) {
+
+    public void InitializeEggSackFromGenomePregnant(EggSackGenome genome, Agent parentAgent, EggSack parentEggSack) {
         curLifeStage = EggLifeStage.GrowingInsideParent;
 
         index = genome.index;
         this.fullSize = genome.fullSize;
-        foodAmount = this.fullSize.x * this.fullSize.y;
-        //amountG = 0f;
-        //amountB = 0f; 
 
+        lifeStageTransitionTimeStepCounter = 0;
+        ageCounterMature = 0;
+        growthStatus = 0f;
+        decayStatus = 0f;
+    }
+    public void InitializeEggSackFromGenomeImmaculate(EggSackGenome genome, StartPositionGenome startPos) {
+        curLifeStage = EggLifeStage.GrowingIndependent;
+
+        index = genome.index;
+        this.fullSize = genome.fullSize;
+        foodAmount = this.fullSize.x * this.fullSize.y;
+        
         lifeStageTransitionTimeStepCounter = 0;
         ageCounterMature = 0;
         growthStatus = 0f;
@@ -146,15 +178,12 @@ public class EggSack : MonoBehaviour {
 
         this.transform.localPosition = startPos.startPosition; // + new Vector3(0f, 0.25f * 0.5f, 0f);
         this.transform.localScale = new Vector3(0.1f, 0.1f, 1f);
-
-        Rigidbody2D rigidBody = this.GetComponent<Rigidbody2D>();
-        rigidbodyRef = rigidBody;
-        //HingeJoint2D joint = this.GetComponent<HingeJoint2D>();
-                
-        rigidBody.velocity = Vector2.zero;
-        rigidBody.angularVelocity = 0f;
-        //rigidBody.
-
+                        
+        rigidbodyRef.velocity = Vector2.zero;
+        rigidbodyRef.angularVelocity = 0f;
+        rigidbodyRef.drag = 7.5f;
+        rigidbodyRef.angularDrag = 5f;
+       
         isDepleted = false;
         healthStructural = 1f;
         prevPos = transform.localPosition;        

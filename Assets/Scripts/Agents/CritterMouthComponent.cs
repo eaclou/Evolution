@@ -250,7 +250,9 @@ public class CritterMouthComponent : MonoBehaviour {
 
         agentRef.EatFood(flowR * 1f); // assumes all foodAmounts are equal !! *****
 
-        corpseAgent.corpseFoodAmount -= flowR;
+        corpseAgent.ProcessBeingEaten(flowR);
+
+        /*corpseAgent.corpseFoodAmount -= flowR;
         if (corpseAgent.corpseFoodAmount < 0f)
         {
             corpseAgent.corpseFoodAmount = 0f;
@@ -258,9 +260,9 @@ public class CritterMouthComponent : MonoBehaviour {
         else
         {
             // Update CorpseAgent after it's been bitten and had pieces removed:
-            corpseAgent.ProcessBeingEaten();
+            //corpseAgent.ProcessBeingEaten(flowR);
 
-            /*
+            
             float sidesRatio = corpseAgent.coreModule.coreWidth / corpseAgent.coreModule.coreLength;
             float sideY = Mathf.Sqrt(corpseAgent.corpseFoodAmount / sidesRatio);
             float sideX = sideY * sidesRatio;
@@ -273,8 +275,8 @@ public class CritterMouthComponent : MonoBehaviour {
             // MOUTH:
             corpseAgent.mouthRef.triggerCollider.radius = corpseAgent.coreModule.currentBodySize.x * 0.5f;
             corpseAgent.mouthRef.triggerCollider.offset = new Vector2(0f, corpseAgent.coreModule.currentBodySize.y * 0.5f);
-            */
-        }
+            
+        }*/
 
         //Debug.Log("BiteCorpseFood!!! ownBiteArea: " + ownBiteArea.ToString() + ", targetArea: " + targetArea.ToString() + ", flowR: " + flowR.ToString() + ", corpseFoodAmount: " + corpseAgent.corpseFoodAmount.ToString() + ", corpseDimensions: " + corpseAgent.coreModule.currentBodySize.ToString());
 
