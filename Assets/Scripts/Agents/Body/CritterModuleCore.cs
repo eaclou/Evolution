@@ -111,24 +111,18 @@ public class CritterModuleCore {
 
     }
 
-    public void Initialize(CritterModuleCoreGenome genome, Agent agent, StartPositionGenome startPos) {
+    public void Initialize(CritterModuleCoreGenome genome, Agent agent) {
 
         coreWidth = genome.fullBodyWidth;
         coreLength = genome.fullBodyLength;
-
-        //numSegments = genome.numSegments;
-
+        
         bias = new float[1];   //0
         foodPosX = new float[1];  //1
         foodPosY = new float[1]; // 2
         foodDirX = new float[1];  // 3
         foodDirY = new float[1];  // 4
         foodRelSize = new float[1];  // 5
-        
-        //foodTypeR = new float[1]; // 5
-        //foodTypeG = new float[1]; // 6
-        //foodTypeB = new float[1]; // 7
-
+       
         friendPosX = new float[1]; // 8
         friendPosY = new float[1]; // 9
         friendVelX = new float[1]; // 10
@@ -176,29 +170,14 @@ public class CritterModuleCore {
         inComm1 = new float[1]; // 41
         inComm2 = new float[1]; // 42
         inComm3 = new float[1]; // 43 
-        // 44 Total Inputs
-                
+        // 44 Total Inputs                
         outComm0 = new float[1]; // 3
         outComm1 = new float[1]; // 4
         outComm2 = new float[1]; // 5
         outComm3 = new float[1]; // 6 
-
         mouthEffector = new float[1];  // 206
-
         // 7 Total Outputs
-                
-        // ===============================================================================================================================
-        /*
-        foodAmountR[0] = 0.01f;
-        foodAmountG[0] = 0.01f;
-        foodAmountB[0] = 0.01f;
-        if(agent.humanControlled) {  // if is Player:
-            foodAmountR[0] = 1f;
-            foodAmountG[0] = 1f;
-            foodAmountB[0] = 1f;
-        }*/
-        
-
+         
         energyRaw = coreWidth * coreLength * Mathf.Lerp(agent.spawnStartingScale, 1f, agent.growthPercentage);
         healthHead = 1f;
         healthBody = 1f;
@@ -446,7 +425,7 @@ public class CritterModuleCore {
         }
     }
 
-    public void Tick(SimulationManager simManager, Vector4 nutrientCellInfo, bool isPassiveMouth, bool isPlayer, Vector2 ownPos, Vector2 ownVel, int agentIndex) {
+    public void Tick(SimulationManager simManager, Vector4 nutrientCellInfo, bool isPassiveMouth, Vector2 ownPos, Vector2 ownVel, int agentIndex) {
 
         nearestFoodParticleIndex = simManager.closestFoodParticlesDataArray[agentIndex].index;
         nearestFoodParticlePos = simManager.closestFoodParticlesDataArray[agentIndex].worldPos - new Vector2(simManager.agentsArray[agentIndex].bodyRigidbody.transform.position.x,

@@ -211,11 +211,7 @@ public class TestModule {
         foodAmountR[0] = 0.5f;
         foodAmountG[0] = 0.5f;
         foodAmountB[0] = 0.5f;
-        if(agent.humanControlled) {  // if is Player:
-            foodAmountR[0] = 1f;
-            foodAmountG[0] = 1f;
-            foodAmountB[0] = 1f;
-        }
+        
         hitPoints[0] = 1f;
         stamina[0] = 1f;
 

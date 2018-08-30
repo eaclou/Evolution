@@ -6,10 +6,13 @@ public class EggSack : MonoBehaviour {
     
     public CapsuleCollider2D collisionCollider;
     public CapsuleCollider2D collisionTrigger;
+    public Rigidbody2D rigidbodyRef;
+
+    //private int acceptingNewAgentsDuration = 
 
     public EggLifeStage curLifeStage;
     public enum EggLifeStage {
-        GrowingInsideParent,  // still attached to agent
+        GrowingInsideParent,  // still attached to agent        
         GrowingIndependent,  // eggsack has been laid by parent
         Mature,  // Developed enough for some eggs to start hatching
         Decaying,  // all eggs either hatched or failed
@@ -145,6 +148,7 @@ public class EggSack : MonoBehaviour {
         this.transform.localScale = new Vector3(0.1f, 0.1f, 1f);
 
         Rigidbody2D rigidBody = this.GetComponent<Rigidbody2D>();
+        rigidbodyRef = rigidBody;
         //HingeJoint2D joint = this.GetComponent<HingeJoint2D>();
                 
         rigidBody.velocity = Vector2.zero;
@@ -321,7 +325,7 @@ public class EggSack : MonoBehaviour {
         lifeStageTransitionTimeStepCounter++;
     }
     
-    private void ComputeCollisionDamage(Collider2D coll) {
+    /*private void ComputeCollisionDamage(Collider2D coll) {
         
         //healthStructural -= 0.002f;
         Agent collidingAgent = coll.gameObject.GetComponentInParent<Agent>();
@@ -335,7 +339,7 @@ public class EggSack : MonoBehaviour {
             //isBeingDamaged = 1.0f;
             collidingAgent.isInsideFood = true;
         }        
-    }
+    }*/
     /*
     private void OnCollisionEnter2D(Collision2D coll) {
         Agent collidingAgent = coll.gameObject.GetComponentInParent<Agent>();

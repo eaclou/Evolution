@@ -69,8 +69,8 @@ public class CritterMovementTestScript : MonoBehaviour {
         agentGO.transform.parent = this.transform;
         testAgent = agentGO.AddComponent<Agent>();
 
-        testAgent.humanControlLerp = 1f;
-        testAgent.humanControlled = true;
+        //testAgent.humanControlLerp = 1f;
+        //testAgent.humanControlled = true;
 
         testAgentGenome.bodyGenome.coreGenome.numSegments = numSegments;
         testAgentGenome.bodyGenome.coreGenome.fullBodyLength = bodyLength;
@@ -94,6 +94,6 @@ public class CritterMovementTestScript : MonoBehaviour {
 
         // initialize Agent based on genome:
         StartPositionGenome startPosGenome = new StartPositionGenome(Vector3.zero, Quaternion.identity);
-        testAgent.InitializeAgentFromGenome(0, testAgentGenome, startPosGenome);  // This also rebuilds GameObjects
+        //testAgent.InitializeAgentFromGenome(0, testAgentGenome, startPosGenome);  // This also rebuilds GameObjects
     }
 }

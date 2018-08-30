@@ -82,7 +82,7 @@ public class CritterModuleMovement {
         }
     }
 
-    public void Tick(bool isPlayer, Agent agentRef, Vector2 ownVel) {
+    public void Tick(Agent agentRef, Vector2 ownVel) {
 
         //Vector2 ownPos = new Vector2(agent.rigidbodiesArray[0].transform.localPosition.x, agent.rigidbodiesArray[0].transform.localPosition.y);
         //Vector2 ownVel = new Vector2(rigidbody.velocity.x, rigidbody.velocity.y);

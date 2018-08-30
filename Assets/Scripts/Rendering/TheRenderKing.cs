@@ -309,7 +309,7 @@ public class TheRenderKing : MonoBehaviour {
 
         //AlignFrameBufferStrokesToTerrain();
 
-        for(int i = 0; i < simManager._NumFood; i++) {
+        for(int i = 0; i < simManager._NumEggSacks; i++) {
             UpdateDynamicFoodBuffers(i);
         }
         /*for(int i = 0; i < 32; i++) {
@@ -335,10 +335,10 @@ public class TheRenderKing : MonoBehaviour {
         InitializeFluidRenderMesh();
         InitializeBodySwimAnimMeshBuffer(); // test movementAnimation
         
-        obstacleStrokesCBuffer = new ComputeBuffer(simManager._NumAgents + simManager._NumFood + simManager._NumPredators, sizeof(float) * 10);
+        obstacleStrokesCBuffer = new ComputeBuffer(simManager._NumAgents + simManager._NumEggSacks, sizeof(float) * 10);
         obstacleStrokeDataArray = new BasicStrokeData[obstacleStrokesCBuffer.count];
 
-        colorInjectionStrokesCBuffer = new ComputeBuffer(simManager._NumAgents + simManager._NumFood + simManager._NumPredators, sizeof(float) * 10);
+        colorInjectionStrokesCBuffer = new ComputeBuffer(simManager._NumAgents + simManager._NumEggSacks, sizeof(float) * 10);
         colorInjectionStrokeDataArray = new BasicStrokeData[colorInjectionStrokesCBuffer.count];
 
         InitializeAgentBodyStrokesBuffer();
@@ -350,7 +350,7 @@ public class TheRenderKing : MonoBehaviour {
         InitializePlayerGlowBuffer();
         InitializePlayerGlowyBitsBuffer();
         InitializeFloatyBitsBuffer();
-        InitializeRipplesBuffer();
+        //InitializeRipplesBuffer();
         InitializeWaterSplinesCBuffer();
         InitializeWaterChainsCBuffer();
         InitializeGizmos();
@@ -535,7 +535,7 @@ public class TheRenderKing : MonoBehaviour {
         fluidManager.computeShaderFluidSim.SetBuffer(kernelSimFloatyBits, "FloatyBitsCBuffer", floatyBitsCBuffer);
 
     }
-    private void InitializeRipplesBuffer() {
+    /*private void InitializeRipplesBuffer() {
         // RIPPLES:
         TrailDotData[] ripplesDataArray = new TrailDotData[numRipplesPerAgent * simManager.simStateData.agentSimDataCBuffer.count];
         for (int i = 0; i < simManager.simStateData.agentSimDataCBuffer.count; i++) {
@@ -553,7 +553,7 @@ public class TheRenderKing : MonoBehaviour {
         fluidManager.computeShaderFluidSim.SetBuffer(kernelSimRipples, "AgentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
         fluidManager.computeShaderFluidSim.SetBuffer(kernelSimRipples, "RipplesCBuffer", ripplesCBuffer);
         ripplesCBuffer.SetData(ripplesDataArray);
-    }
+    }*/
     /*private void InitializeFrameBufferStrokesBuffer() {
         frameBufferStrokesCBuffer = new ComputeBuffer(numFrameBufferStrokesPerDimension * numFrameBufferStrokesPerDimension, sizeof(float) * 7 + sizeof(int));
         FrameBufferStrokeData[] frameBufferStrokesArray = new FrameBufferStrokeData[frameBufferStrokesCBuffer.count];
@@ -1092,19 +1092,19 @@ public class TheRenderKing : MonoBehaviour {
         }
         // FOOD:
         baseIndex = simManager.agentsArray.Length;
-        for(int i = 0; i < simManager.foodArray.Length; i++) {
-            Vector3 foodPos = simManager.foodArray[i].transform.position;
+        for(int i = 0; i < simManager.eggSackArray.Length; i++) {
+            Vector3 foodPos = simManager.eggSackArray[i].transform.position;
             obstacleStrokeDataArray[baseIndex + i].worldPos = new Vector2(foodPos.x, foodPos.y);
-            obstacleStrokeDataArray[baseIndex + i].localDir = simManager.foodArray[i].facingDirection;
-            obstacleStrokeDataArray[baseIndex + i].scale = simManager.foodArray[i].curSize * 0.95f;
+            obstacleStrokeDataArray[baseIndex + i].localDir = simManager.eggSackArray[i].facingDirection;
+            obstacleStrokeDataArray[baseIndex + i].scale = simManager.eggSackArray[i].curSize * 0.95f;
 
-            float velX = (foodPos.x - simManager.foodArray[i]._PrevPos.x) * velScale;
-            float velY = (foodPos.y - simManager.foodArray[i]._PrevPos.y) * velScale;
+            float velX = (foodPos.x - simManager.eggSackArray[i]._PrevPos.x) * velScale;
+            float velY = (foodPos.y - simManager.eggSackArray[i]._PrevPos.y) * velScale;
 
             obstacleStrokeDataArray[baseIndex + i].color = new Vector4(velX, velY, 1f, 1f);
         }
         // PREDATORS:
-        baseIndex = simManager.agentsArray.Length + simManager.foodArray.Length;
+        /*baseIndex = simManager.agentsArray.Length + simManager.eggSackArray.Length;
         for(int i = 0; i < simManager.predatorArray.Length; i++) {
             Vector3 predatorPos = simManager.predatorArray[i].transform.position;
             obstacleStrokeDataArray[baseIndex + i].worldPos = new Vector2(predatorPos.x, predatorPos.y);
@@ -1115,7 +1115,7 @@ public class TheRenderKing : MonoBehaviour {
             float velY = (predatorPos.y - simManager.predatorArray[i]._PrevPos.y) * velScale;
 
             obstacleStrokeDataArray[baseIndex + i].color = new Vector4(velX, velY, 1f, 1f);
-        }
+        }*/
 
         obstacleStrokesCBuffer.SetData(obstacleStrokeDataArray);
     }
@@ -1137,33 +1137,33 @@ public class TheRenderKing : MonoBehaviour {
                 agentAlpha = 3f * Mathf.Clamp01(1f - (float)simManager.agentsArray[i].lifeStageTransitionTimeStepCounter * 2f / (float)simManager.agentsArray[i]._DecayDurationTimeSteps);
             }
             Color drawColor = new Color(simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.huePrimary.x, simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.huePrimary.y, simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.huePrimary.z, agentAlpha);
-            if(simManager.agentsArray[i].wasImpaled) {
+            /*if(simManager.agentsArray[i].wasImpaled) {
                 drawColor.r = 0.8f;
                 drawColor.g = 0.1f;
                 drawColor.b = 0f;
                 drawColor.a = 1.4f;
                 colorInjectionStrokeDataArray[baseIndex + i].scale *= 1.25f;
-            }
+            }*/
             colorInjectionStrokeDataArray[baseIndex + i].color = drawColor;
             
         }
         // FOOD:
         baseIndex = simManager.agentsArray.Length;
-        for(int i = 0; i < simManager.foodArray.Length; i++) {
-            Vector3 foodPos = simManager.foodArray[i].transform.position;
+        for(int i = 0; i < simManager.eggSackArray.Length; i++) {
+            Vector3 foodPos = simManager.eggSackArray[i].transform.position;
             colorInjectionStrokeDataArray[baseIndex + i].worldPos = new Vector2(foodPos.x, foodPos.y);
-            colorInjectionStrokeDataArray[baseIndex + i].localDir = simManager.foodArray[i].facingDirection;
-            colorInjectionStrokeDataArray[baseIndex + i].scale = simManager.foodArray[i].curSize * 1.0f;
+            colorInjectionStrokeDataArray[baseIndex + i].localDir = simManager.eggSackArray[i].facingDirection;
+            colorInjectionStrokeDataArray[baseIndex + i].scale = simManager.eggSackArray[i].curSize * 1.0f;
             
             float foodAlpha = 0.06f;
-            if(simManager.foodArray[i].isBeingEaten > 0.5) {
+            if(simManager.eggSackArray[i].isBeingEaten > 0.5) {
                 foodAlpha = 1.2f;
             }
 
-            colorInjectionStrokeDataArray[baseIndex + i].color = new Vector4(Mathf.Lerp(simManager.foodGenomePoolArray[i].fruitHue.x, 0.1f, 0.7f), Mathf.Lerp(simManager.foodGenomePoolArray[i].fruitHue.y, 0.9f, 0.7f), Mathf.Lerp(simManager.foodGenomePoolArray[i].fruitHue.z, 0.2f, 0.7f), foodAlpha);
+            colorInjectionStrokeDataArray[baseIndex + i].color = new Vector4(Mathf.Lerp(simManager.eggSackGenomePoolArray[i].fruitHue.x, 0.1f, 0.7f), Mathf.Lerp(simManager.eggSackGenomePoolArray[i].fruitHue.y, 0.9f, 0.7f), Mathf.Lerp(simManager.eggSackGenomePoolArray[i].fruitHue.z, 0.2f, 0.7f), foodAlpha);
         }
         // PREDATORS:
-        baseIndex = simManager.agentsArray.Length + simManager.foodArray.Length;
+        /*baseIndex = simManager.agentsArray.Length + simManager.eggSackArray.Length;
         for(int i = 0; i < simManager.predatorArray.Length; i++) {
             Vector3 predatorPos = simManager.predatorArray[i].transform.position;
             colorInjectionStrokeDataArray[baseIndex + i].worldPos = new Vector2(predatorPos.x, predatorPos.y);
@@ -1171,7 +1171,7 @@ public class TheRenderKing : MonoBehaviour {
             colorInjectionStrokeDataArray[baseIndex + i].scale = new Vector2(simManager.predatorArray[i].curScale, simManager.predatorArray[i].curScale) * 0.9f;
             
             colorInjectionStrokeDataArray[baseIndex + i].color = new Vector4(1f, 0.25f, 0f, 0.2f);
-        }
+        }*/
 
         colorInjectionStrokesCBuffer.SetData(colorInjectionStrokeDataArray);
     }
@@ -1183,7 +1183,7 @@ public class TheRenderKing : MonoBehaviour {
         critterBodyWidthsTex.Apply();
     }
 
-    public void UpdateAgentBodyStrokesBuffer(int agentIndex) {
+    /*public void UpdateAgentBodyStrokesBuffer(int agentIndex) {
         // Doing it this way to avoid resetting ALL agents whenever ONE is respawned!
         ComputeBuffer singleAgentBodyStrokeCBuffer = new ComputeBuffer(1, sizeof(float) * 7 + sizeof(int) * 3);
         AgentBodyStrokeData[] singleBodyStrokeArray = new AgentBodyStrokeData[1];
@@ -1206,8 +1206,8 @@ public class TheRenderKing : MonoBehaviour {
         computeShaderBrushStrokes.Dispatch(kernelCSUpdateBodyStrokeDataAgentIndex, 1, 1, 1);
         
         singleAgentBodyStrokeCBuffer.Release();        
-    }    
-    public void UpdateAgentEyeStrokesBuffer(int agentIndex) {
+    }  */  
+    /*public void UpdateAgentEyeStrokesBuffer(int agentIndex) {
         // Doing it this way to avoid resetting ALL agents whenever ONE is respawned!
         ComputeBuffer singleAgentEyeStrokeCBuffer = new ComputeBuffer(2, sizeof(float) * 13 + sizeof(int) * 2);
         AgentEyeStrokeData[] singleAgentEyeStrokeArray = new AgentEyeStrokeData[singleAgentEyeStrokeCBuffer.count];        
@@ -1253,8 +1253,8 @@ public class TheRenderKing : MonoBehaviour {
         //AgentEyeStrokeData[] agentEyesDataArray = new AgentEyeStrokeData[agentEyeStrokesCBuffer.count];
         //agentEyeStrokesCBuffer.GetData(agentEyesDataArray);
         //Debug.Log(" " + agentEyesDataArray[agentIndex].parentIndex.ToString() + ", pos: " + agentEyesDataArray[agentIndex].localPos.ToString());
-    }
-    public void UpdateAgentSmearStrokesBuffer(int agentIndex) {
+    }*/
+    /*public void UpdateAgentSmearStrokesBuffer(int agentIndex) {
         // Doing it this way to avoid resetting ALL agents whenever ONE is respawned!
 
         ComputeBuffer singleAgentSmearStrokeCBuffer = new ComputeBuffer(1, sizeof(float) * 14 + sizeof(int) * 2);
@@ -1288,10 +1288,8 @@ public class TheRenderKing : MonoBehaviour {
         singleAgentSmearStrokeCBuffer.Release();
 
         //Debug.Log("Update curve Strokes! [" + singleCurveStrokeArray[0].p0.ToString() + ", " + singleCurveStrokeArray[0].p1.ToString() + ", " + singleCurveStrokeArray[0].p2.ToString() + ", " + singleCurveStrokeArray[0].p3.ToString() + "]");
-    }    
-    public void UpdateAgentTailStrokesBuffer(int agentIndex) {
-
-    }
+    }  */  
+    
     public void UpdateDynamicFoodBuffers(int foodIndex) {
         //if(isPlant) {
         ComputeBuffer singleStemCBuffer = new ComputeBuffer(1, sizeof(float) * 7 + sizeof(int) * 1);
@@ -1301,12 +1299,12 @@ public class TheRenderKing : MonoBehaviour {
         singleStemDataArray[0].localBaseCoords = new Vector2(0f, -1f);
         singleStemDataArray[0].localTipCoords = new Vector2(0f, 1f);
         singleStemDataArray[0].childGrowth = 0f;
-        singleStemDataArray[0].width = simManager.foodGenomePoolArray[foodIndex].stemWidth;
+        singleStemDataArray[0].width = simManager.eggSackGenomePoolArray[foodIndex].stemWidth;
         singleStemDataArray[0].attached = 1f;
         singleStemCBuffer.SetData(singleStemDataArray);
         int kernelCSUpdateDynamicStemBuffers = computeShaderBrushStrokes.FindKernel("CSUpdateDynamicStemBuffers");
         //computeShaderBrushStrokes.SetInt("_CurveStrokesUpdateAgentIndex", agentIndex); // ** can I just use parentIndex instead?
-        computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicStemBuffers, "foodSimDataCBuffer", simManager.simStateData.foodSimDataCBuffer);
+        computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicStemBuffers, "foodSimDataCBuffer", simManager.simStateData.eggSackSimDataCBuffer);
         computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicStemBuffers, "foodStemDataUpdateCBuffer", singleStemCBuffer);
         computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicStemBuffers, "foodStemDataWriteCBuffer", simManager.simStateData.foodStemDataCBuffer);
         computeShaderBrushStrokes.Dispatch(kernelCSUpdateDynamicStemBuffers, 1, 1, 1);        
@@ -1320,13 +1318,13 @@ public class TheRenderKing : MonoBehaviour {
             foodLeafDataArray[i].foodIndex = foodIndex;
             foodLeafDataArray[i].worldPos = new Vector3(0f, 0f, 0f);
             foodLeafDataArray[i].localCoords = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f));
-            foodLeafDataArray[i].localScale =  simManager.foodGenomePoolArray[foodIndex].leafScale;          
+            foodLeafDataArray[i].localScale =  simManager.eggSackGenomePoolArray[foodIndex].leafScale;          
             foodLeafDataArray[i].attached = 1f;
         }
         foodLeafUpdateCBuffer.SetData(foodLeafDataArray);
         int kernelCSUpdateDynamicLeafBuffers = computeShaderBrushStrokes.FindKernel("CSUpdateDynamicLeafBuffers");
         //computeShaderBrushStrokes.SetInt("_CurveStrokesUpdateAgentIndex", agentIndex); // ** can I just use parentIndex instead?
-        computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicLeafBuffers, "foodSimDataCBuffer", simManager.simStateData.foodSimDataCBuffer);
+        computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicLeafBuffers, "foodSimDataCBuffer", simManager.simStateData.eggSackSimDataCBuffer);
         computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicLeafBuffers, "foodLeafDataUpdateCBuffer", foodLeafUpdateCBuffer);
         computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicLeafBuffers, "foodLeafDataWriteCBuffer", simManager.simStateData.foodLeafDataCBuffer);
         computeShaderBrushStrokes.Dispatch(kernelCSUpdateDynamicLeafBuffers, 1, 1, 1);        
@@ -1347,21 +1345,21 @@ public class TheRenderKing : MonoBehaviour {
         // DEBUG ***** RACE CONDITIONS -- NEVER FORGET!!! ********
 
         // *** Hard-coded 64 Fruits per food object!!!! *** BEWARE!!!
-        ComputeBuffer foodFruitUpdateCBuffer = new ComputeBuffer(simManager._NumFood, sizeof(float) * 7 + sizeof(int) * 1);
+        ComputeBuffer foodFruitUpdateCBuffer = new ComputeBuffer(simManager._NumEggSacks, sizeof(float) * 7 + sizeof(int) * 1);
 
-        SimulationStateData.FruitData[] foodFruitDataArray = new SimulationStateData.FruitData[simManager._NumFood];
+        SimulationStateData.FruitData[] foodFruitDataArray = new SimulationStateData.FruitData[simManager._NumEggSacks];
         for(int i = 0; i < foodFruitDataArray.Length; i++) {
             foodFruitDataArray[i] = new SimulationStateData.FruitData();
             foodFruitDataArray[i].foodIndex = foodIndex;
             foodFruitDataArray[i].localCoords = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)) * 0.5f + UnityEngine.Random.insideUnitCircle * 0.4f;
-            foodFruitDataArray[i].localScale = simManager.foodGenomePoolArray[foodIndex].fruitScale;  
-            foodFruitDataArray[i].worldPos = simManager.foodArray[foodIndex].transform.position;
+            foodFruitDataArray[i].localScale = simManager.eggSackGenomePoolArray[foodIndex].fruitScale;  
+            foodFruitDataArray[i].worldPos = simManager.eggSackArray[foodIndex].transform.position;
             foodFruitDataArray[i].attached = 1f;
         }        
         foodFruitUpdateCBuffer.SetData(foodFruitDataArray);
         int kernelCSUpdateDynamicFruitBuffers = computeShaderBrushStrokes.FindKernel("CSUpdateDynamicFruitBuffers");
         //computeShaderBrushStrokes.SetInt("_CurveStrokesUpdateAgentIndex", agentIndex); // ** can I just use parentIndex instead?
-        computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicFruitBuffers, "foodSimDataCBuffer", simManager.simStateData.foodSimDataCBuffer);
+        computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicFruitBuffers, "foodSimDataCBuffer", simManager.simStateData.eggSackSimDataCBuffer);
         computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicFruitBuffers, "foodFruitDataUpdateCBuffer", foodFruitUpdateCBuffer);
         computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicFruitBuffers, "foodFruitDataWriteCBuffer", simManager.simStateData.foodFruitDataCBuffer);
         computeShaderBrushStrokes.Dispatch(kernelCSUpdateDynamicFruitBuffers, 1, 1, 1);        
@@ -1393,13 +1391,13 @@ public class TheRenderKing : MonoBehaviour {
 
     }
 
-    private void SimAgentSmearStrokes() {
+    /*private void SimAgentSmearStrokes() {
         int kernelCSSinglePassCurveBrushData = computeShaderBrushStrokes.FindKernel("CSSinglePassCurveBrushData");
         
         computeShaderBrushStrokes.SetBuffer(kernelCSSinglePassCurveBrushData, "agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
         computeShaderBrushStrokes.SetBuffer(kernelCSSinglePassCurveBrushData, "agentCurveStrokesWriteCBuffer", agentSmearStrokesCBuffer);
         computeShaderBrushStrokes.Dispatch(kernelCSSinglePassCurveBrushData, agentSmearStrokesCBuffer.count, 1, 1);        
-    }    
+    }  */  
     public void SimPlayerGlow() {
         //Vector3 agentPos = simManager.agentsArray[0].transform.position;
         //playerGlowInitPos[0].worldPos = new Vector2(agentPos.x, agentPos.y);
@@ -1441,7 +1439,7 @@ public class TheRenderKing : MonoBehaviour {
         fluidManager.computeShaderFluidSim.SetTexture(kernelSimFloatyBits, "VelocityRead", fluidManager._VelocityA);        
         fluidManager.computeShaderFluidSim.Dispatch(kernelSimFloatyBits, floatyBitsCBuffer.count / 1024, 1, 1);
     }
-    private void SimRipples() {
+    /*private void SimRipples() {
         int kernelSimRipples = fluidManager.computeShaderFluidSim.FindKernel("SimRipples");
         
         fluidManager.computeShaderFluidSim.SetFloat("_TextureResolution", (float)fluidManager.resolution);
@@ -1452,16 +1450,16 @@ public class TheRenderKing : MonoBehaviour {
         fluidManager.computeShaderFluidSim.SetBuffer(kernelSimRipples, "RipplesCBuffer", ripplesCBuffer);
         fluidManager.computeShaderFluidSim.SetTexture(kernelSimRipples, "VelocityRead", fluidManager._VelocityA);
         fluidManager.computeShaderFluidSim.Dispatch(kernelSimRipples, ripplesCBuffer.count / 8, 1, 1);
-    }
+    }*/
     private void SimFruit() {
         int kernelCSSimulateFruit = computeShaderBrushStrokes.FindKernel("CSSimulateFruit");
         
         computeShaderBrushStrokes.SetTexture(kernelCSSimulateFruit, "velocityRead", fluidManager._VelocityA);
-        computeShaderBrushStrokes.SetBuffer(kernelCSSimulateFruit, "foodSimDataCBuffer", simManager.simStateData.foodSimDataCBuffer);
+        computeShaderBrushStrokes.SetBuffer(kernelCSSimulateFruit, "foodSimDataCBuffer", simManager.simStateData.eggSackSimDataCBuffer);
         computeShaderBrushStrokes.SetBuffer(kernelCSSimulateFruit, "foodFruitDataWriteCBuffer", simManager.simStateData.foodFruitDataCBuffer);
         computeShaderBrushStrokes.Dispatch(kernelCSSimulateFruit, simManager.simStateData.foodFruitDataCBuffer.count / 64, 1, 1);        
     }
-    private void IterateTrailStrokesData() {
+    /*private void IterateTrailStrokesData() {
         // Set position of trail Roots:
         int kernelCSPinRootTrailStrokesData = computeShaderBrushStrokes.FindKernel("CSPinRootTrailStrokesData");        
         computeShaderBrushStrokes.SetBuffer(kernelCSPinRootTrailStrokesData, "agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
@@ -1499,7 +1497,7 @@ public class TheRenderKing : MonoBehaviour {
         computeShaderBrushStrokes.SetTexture(kernelCSIterateTrailStrokesData, "velocityRead", fluidManager._VelocityA);
         computeShaderBrushStrokes.Dispatch(kernelCSIterateTrailStrokesData, agentTrailStrokes0CBuffer.count, 1, 1);
         //}
-    }
+    }*/
     private void SimWaterSplines() {
         int kernelSimWaterSplines = fluidManager.computeShaderFluidSim.FindKernel("SimWaterSplines");
 
@@ -1800,7 +1798,7 @@ public class TheRenderKing : MonoBehaviour {
         
         foodFruitDisplayMat.SetPass(0);
         foodFruitDisplayMat.SetBuffer("fruitDataCBuffer", simManager.simStateData.foodFruitDataCBuffer);
-        foodFruitDisplayMat.SetBuffer("foodSimDataCBuffer", simManager.simStateData.foodSimDataCBuffer);
+        foodFruitDisplayMat.SetBuffer("foodSimDataCBuffer", simManager.simStateData.eggSackSimDataCBuffer);
         foodFruitDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, foodFruitDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.foodFruitDataCBuffer.count);
         

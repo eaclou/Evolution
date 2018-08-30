@@ -6,7 +6,7 @@ public class SimulationStateData {
 
     // Stores data about the current simulation to be shared with RenderKing and FluidManager:
 
-    public struct AgentSimData {
+    /*public struct AgentSimData {
         public Vector2 worldPos;
         public Vector2 velocity;
         public Vector2 heading;
@@ -17,7 +17,7 @@ public class SimulationStateData {
         public float decay;  // 0-1 indicating decayStatus
         public float eatingStatus;
         public float foodAmount;
-    }
+    }*/
     public struct CritterInitData {
         public Vector3 boundingBoxSize;
         public float spawnSizePercentage;
@@ -102,29 +102,29 @@ public class SimulationStateData {
         public float attached;  // if attached, sticks to parent food, else, floats in water
     }
 
-    public struct PredatorSimData {
+    /*public struct PredatorSimData {
         public Vector2 worldPos;
         public Vector2 velocity;
         public float scale;
-    }
+    }*/
 
     // Store information from CPU simulation, to be passed to GPU:
-    public AgentSimData[] agentSimDataArray;
+    //public AgentSimData[] agentSimDataArray;
     public CritterInitData[] critterInitDataArray;
     public CritterSimData[] critterSimDataArray;
     //public DebugBodyResourcesData[] debugBodyResourcesArray;
     public AgentMovementAnimData[] agentMovementAnimDataArray;
-    public FoodSimData[] foodSimDataArray;
-    public PredatorSimData[] predatorSimDataArray;
+    public FoodSimData[] eggSackSimDataArray;
+    //public PredatorSimData[] predatorSimDataArray;
 
     // Store computeBuffers here or in RenderKing?? These ones seem appropo for StateData but buffers of floatyBits for ex. might be better in RK....
-    public ComputeBuffer agentSimDataCBuffer;
+    //public ComputeBuffer agentSimDataCBuffer;
     public ComputeBuffer critterInitDataCBuffer;
     public ComputeBuffer critterSimDataCBuffer;
     public ComputeBuffer debugBodyResourcesCBuffer;
     public ComputeBuffer agentMovementAnimDataCBuffer;
-    public ComputeBuffer foodSimDataCBuffer;
-    public ComputeBuffer predatorSimDataCBuffer;
+    public ComputeBuffer eggSackSimDataCBuffer;
+    //public ComputeBuffer predatorSimDataCBuffer;
 
     public ComputeBuffer foodStemDataCBuffer;
     public ComputeBuffer foodLeafDataCBuffer;
@@ -132,10 +132,10 @@ public class SimulationStateData {
         
     public Vector2[] fluidVelocitiesAtAgentPositionsArray;  // Grabs info about how Fluid should affect Agents from GPU
     public Vector4[] agentFluidPositionsArray;  // zw coords holds xy radius of agent  // **** Revisit this?? Redundancy btw AgentSimData worldPos (but simData doesn't have agent Radius)
-    public Vector2[] fluidVelocitiesAtFoodPositionsArray;
-    public Vector4[] foodFluidPositionsArray;
-    public Vector2[] fluidVelocitiesAtPredatorPositionsArray;
-    public Vector4[] predatorFluidPositionsArray;
+    public Vector2[] fluidVelocitiesAtEggSackPositionsArray;
+    public Vector4[] eggSackFluidPositionsArray;
+    //public Vector2[] fluidVelocitiesAtPredatorPositionsArray;
+    //public Vector4[] predatorFluidPositionsArray;
 
     public Vector3[] depthAtAgentPositionsArray;
         
@@ -146,12 +146,12 @@ public class SimulationStateData {
 	
     private void InitializeData(SimulationManager simManager) {
 
-        agentSimDataArray = new AgentSimData[simManager._NumAgents];
+        /*agentSimDataArray = new AgentSimData[simManager._NumAgents];
         for(int i = 0; i < agentSimDataArray.Length; i++) {
             agentSimDataArray[i] = new AgentSimData();
         }
         agentSimDataCBuffer = new ComputeBuffer(agentSimDataArray.Length, sizeof(float) * 18);
-
+        */
         critterInitDataArray = new CritterInitData[simManager._NumAgents];
         for(int i = 0; i < critterInitDataArray.Length; i++) {
             critterInitDataArray[i] = new CritterInitData();
@@ -176,39 +176,40 @@ public class SimulationStateData {
         }
         agentMovementAnimDataCBuffer = new ComputeBuffer(agentMovementAnimDataArray.Length, sizeof(float) * 4);
 
-        foodSimDataArray = new FoodSimData[simManager._NumFood];
-        for (int i = 0; i < foodSimDataArray.Length; i++) {
-            foodSimDataArray[i] = new FoodSimData();
+        eggSackSimDataArray = new FoodSimData[simManager._NumEggSacks];
+        for (int i = 0; i < eggSackSimDataArray.Length; i++) {
+            eggSackSimDataArray[i] = new FoodSimData();
         }
-        foodSimDataCBuffer = new ComputeBuffer(foodSimDataArray.Length, sizeof(float) * 23 + sizeof(int) * 3); // got big
+        eggSackSimDataCBuffer = new ComputeBuffer(eggSackSimDataArray.Length, sizeof(float) * 23 + sizeof(int) * 3); // got big
 
         //StemData[] stemDataArray = new StemData[simManager._NumFood]; // one per food at first: // do this individually in a loop using the update kernel?
         //for (int i = 0; i < stemDataArray.Length; i++) {
         //    stemDataArray[i] = new StemData();
         //}
-        foodStemDataCBuffer = new ComputeBuffer(simManager._NumFood, sizeof(float) * 7 + sizeof(int) * 1);
-        foodLeafDataCBuffer = new ComputeBuffer(simManager._NumFood * 16, sizeof(float) * 7 + sizeof(int) * 1);
-        foodFruitDataCBuffer = new ComputeBuffer(foodSimDataCBuffer.count * 64, sizeof(float) * 7 + sizeof(int) * 1);
+        foodStemDataCBuffer = new ComputeBuffer(simManager._NumEggSacks, sizeof(float) * 7 + sizeof(int) * 1);
+        foodLeafDataCBuffer = new ComputeBuffer(simManager._NumEggSacks * 16, sizeof(float) * 7 + sizeof(int) * 1);
+        foodFruitDataCBuffer = new ComputeBuffer(eggSackSimDataCBuffer.count * 64, sizeof(float) * 7 + sizeof(int) * 1);
 
-        predatorSimDataArray = new PredatorSimData[simManager._NumPredators];
+        /*predatorSimDataArray = new PredatorSimData[simManager._NumPredators];
         for (int i = 0; i < predatorSimDataArray.Length; i++) {
             predatorSimDataArray[i] = new PredatorSimData();
         }
         predatorSimDataCBuffer = new ComputeBuffer(predatorSimDataArray.Length, sizeof(float) * 5);
+        */
 
         fluidVelocitiesAtAgentPositionsArray = new Vector2[simManager._NumAgents];
-        fluidVelocitiesAtFoodPositionsArray = new Vector2[simManager._NumFood];
-        fluidVelocitiesAtPredatorPositionsArray = new Vector2[simManager._NumPredators];
+        fluidVelocitiesAtEggSackPositionsArray = new Vector2[simManager._NumEggSacks];
+        //fluidVelocitiesAtPredatorPositionsArray = new Vector2[simManager._NumPredators];
         agentFluidPositionsArray = new Vector4[simManager._NumAgents];
-        foodFluidPositionsArray = new Vector4[simManager._NumFood];
-        predatorFluidPositionsArray = new Vector4[simManager._NumPredators];
+        eggSackFluidPositionsArray = new Vector4[simManager._NumEggSacks];
+        //predatorFluidPositionsArray = new Vector4[simManager._NumPredators];
 
         depthAtAgentPositionsArray = new Vector3[simManager._NumAgents];
     }
 
     public void PopulateSimDataArrays(SimulationManager simManager) {
         
-        for(int i = 0; i < agentSimDataArray.Length; i++) {  
+        /*for(int i = 0; i < agentSimDataArray.Length; i++) {  
             Vector3 agentPos = simManager.agentsArray[i].bodyRigidbody.position;
             agentSimDataArray[i].worldPos = new Vector2(agentPos.x, agentPos.y);  // in world(scene) coordinates
             //agentSimDataArray[i].velocity = simManager.agentsArray[i].smoothedThrottle;
@@ -267,6 +268,8 @@ public class SimulationStateData {
                                                       (simManager.agentsArray[i].fullSizeBoundingBox.y + 0.1f) * 0.5f / SimulationManager._MapSize); //... 0.5/140 ...
         }
         agentSimDataCBuffer.SetData(agentSimDataArray); // send data to GPU for Rendering
+        */
+
 
         // CRITTER INIT: // *** MOVE INTO OWN FUNCTION -- update more efficiently with compute shader?
         for(int i = 0; i < critterInitDataArray.Length; i++) {
@@ -315,7 +318,7 @@ public class SimulationStateData {
                 critterSimDataArray[i].growthPercentage = 1f - digestedPercentage;
                 critterSimDataArray[i].decayPercentage = digestedPercentage;
             }
-            critterSimDataArray[i].foodAmount = Mathf.Lerp(agentSimDataArray[i].foodAmount, simManager.agentsArray[i].coreModule.stomachContents / simManager.agentsArray[i].coreModule.stomachCapacity, 0.16f);
+            critterSimDataArray[i].foodAmount = Mathf.Lerp(critterSimDataArray[i].foodAmount, simManager.agentsArray[i].coreModule.stomachContents / simManager.agentsArray[i].coreModule.stomachCapacity, 0.16f);
             critterSimDataArray[i].energy = simManager.agentsArray[i].coreModule.energyRaw / simManager.agentsArray[i].coreModule.maxEnergyStorage;
             critterSimDataArray[i].health = simManager.agentsArray[i].coreModule.healthHead;
             critterSimDataArray[i].stamina = simManager.agentsArray[i].coreModule.stamina[0];
@@ -357,13 +360,6 @@ public class SimulationStateData {
                 critterSimDataArray[i].isBiting = 0f;
                 critterSimDataArray[i].biteAnimCycle *= 0.75f;
             }
-            if (simManager.agentsArray[i].humanControlled)
-            {
-                if (simManager.agentsArray[i].mouthRef.isPassive)
-                {
-                    critterSimDataArray[i].isBiting = 1f;
-                }
-            }
 
             critterSimDataArray[i].moveAnimCycle = simManager.agentsArray[i].animationCycle;
             critterSimDataArray[i].turnAmount = simManager.agentsArray[i].turningAmount;
@@ -403,60 +399,38 @@ public class SimulationStateData {
         agentMovementAnimDataCBuffer.SetData(agentMovementAnimDataArray); // send data to GPU for Rendering
 
 
-        for (int i = 0; i < simManager._NumFood; i++) {
-            Vector3 foodPos = simManager.foodArray[i].transform.position;
-            foodSimDataArray[i].worldPos = new Vector2(foodPos.x, foodPos.y);
+        for (int i = 0; i < simManager._NumEggSacks; i++) {
+            Vector3 eggSackPos = simManager.eggSackArray[i].transform.position;
+            eggSackSimDataArray[i].worldPos = new Vector2(eggSackPos.x, eggSackPos.y);
             // *** Revisit to avoid using GetComponent, should use cached reference instead for speed:
-            foodSimDataArray[i].velocity = new Vector2(simManager.foodArray[i].GetComponent<Rigidbody2D>().velocity.x, simManager.foodArray[i].GetComponent<Rigidbody2D>().velocity.y);
-            foodSimDataArray[i].heading = simManager.foodArray[i].facingDirection;
-            foodSimDataArray[i].fullSize = simManager.foodArray[i].fullSize;
-            foodSimDataArray[i].foodAmount = new Vector3(simManager.foodArray[i].foodAmount, simManager.foodArray[i].foodAmount, simManager.foodArray[i].foodAmount);
-            foodSimDataArray[i].growth = simManager.foodArray[i].growthStatus;
-            foodSimDataArray[i].decay = simManager.foodArray[i].decayStatus;
-            foodSimDataArray[i].health = simManager.foodArray[i].healthStructural;
+            eggSackSimDataArray[i].velocity = new Vector2(simManager.eggSackArray[i].GetComponent<Rigidbody2D>().velocity.x, simManager.eggSackArray[i].GetComponent<Rigidbody2D>().velocity.y);
+            eggSackSimDataArray[i].heading = simManager.eggSackArray[i].facingDirection;
+            eggSackSimDataArray[i].fullSize = simManager.eggSackArray[i].fullSize;
+            eggSackSimDataArray[i].foodAmount = new Vector3(simManager.eggSackArray[i].foodAmount, simManager.eggSackArray[i].foodAmount, simManager.eggSackArray[i].foodAmount);
+            eggSackSimDataArray[i].growth = simManager.eggSackArray[i].growthStatus;
+            eggSackSimDataArray[i].decay = simManager.eggSackArray[i].decayStatus;
+            eggSackSimDataArray[i].health = simManager.eggSackArray[i].healthStructural;
             // v v v below can be moved to a more static buffer eventually since they don't change every frame:
-            foodSimDataArray[i].stemBrushType = simManager.foodGenomePoolArray[i].stemBrushType;
-            foodSimDataArray[i].leafBrushType = simManager.foodGenomePoolArray[i].leafBrushType;
-            foodSimDataArray[i].fruitBrushType = simManager.foodGenomePoolArray[i].fruitBrushType;
-            foodSimDataArray[i].stemHue = simManager.foodGenomePoolArray[i].stemHue;
-            foodSimDataArray[i].leafHue = simManager.foodGenomePoolArray[i].leafHue;
-            foodSimDataArray[i].fruitHue = simManager.foodGenomePoolArray[i].fruitHue;
+            eggSackSimDataArray[i].stemBrushType = simManager.eggSackGenomePoolArray[i].stemBrushType;
+            eggSackSimDataArray[i].leafBrushType = simManager.eggSackGenomePoolArray[i].leafBrushType;
+            eggSackSimDataArray[i].fruitBrushType = simManager.eggSackGenomePoolArray[i].fruitBrushType;
+            eggSackSimDataArray[i].stemHue = simManager.eggSackGenomePoolArray[i].stemHue;
+            eggSackSimDataArray[i].leafHue = simManager.eggSackGenomePoolArray[i].leafHue;
+            eggSackSimDataArray[i].fruitHue = simManager.eggSackGenomePoolArray[i].fruitHue;
             
 
             // Z & W coords represents agent's x/y Radii (in FluidCoords)
             // convert from scene coords (-mapSize --> +mapSize to fluid coords (0 --> 1):::
             // **** Revisit and get working properly in both X and Y dimensions independently *********
             //float sampleRadius = (simManager.foodArray[i].curSize.magnitude + 0.1f) / (simManager._MapSize * 2f); // ****  ***** Revisit the 0.1f offset -- should be one pixel in fluidCoords?
-            foodFluidPositionsArray[i] = new Vector4(foodPos.x / SimulationManager._MapSize, 
-                                                      foodPos.y / SimulationManager._MapSize, 
-                                                      (simManager.foodArray[i].curSize.x + 0.1f) * 0.5f / SimulationManager._MapSize, 
-                                                      (simManager.foodArray[i].curSize.y + 0.1f) * 0.5f / SimulationManager._MapSize);
+            eggSackFluidPositionsArray[i] = new Vector4(eggSackPos.x / SimulationManager._MapSize, 
+                                                      eggSackPos.y / SimulationManager._MapSize, 
+                                                      (simManager.eggSackArray[i].curSize.x + 0.1f) * 0.5f / SimulationManager._MapSize, 
+                                                      (simManager.eggSackArray[i].curSize.y + 0.1f) * 0.5f / SimulationManager._MapSize);
         }
-        /*for (int i = 0; i < 32; i++) {  // Agent corpse food
-            int dataIndex = simManager._NumFood + i;
-
-            Vector3 foodPos = simManager.foodDeadAnimalArray[i].transform.position;
-            foodSimDataArray[dataIndex].worldPos = new Vector2(foodPos.x, foodPos.y);
-            // *** Revisit to avoid using GetComponent, should use cached reference instead for speed:
-            foodSimDataArray[dataIndex].velocity = new Vector2(simManager.foodDeadAnimalArray[i].GetComponent<Rigidbody2D>().velocity.x, simManager.foodDeadAnimalArray[i].GetComponent<Rigidbody2D>().velocity.y);
-            foodSimDataArray[dataIndex].heading = simManager.foodDeadAnimalArray[i].facingDirection;
-            foodSimDataArray[dataIndex].fullSize = simManager.foodDeadAnimalArray[i].fullSize;
-            foodSimDataArray[dataIndex].foodAmount = new Vector3(simManager.foodDeadAnimalArray[i].amountR, simManager.foodDeadAnimalArray[i].amountR, simManager.foodDeadAnimalArray[i].amountR);
-            foodSimDataArray[dataIndex].growth = simManager.foodDeadAnimalArray[i].growthStatus;
-            foodSimDataArray[dataIndex].decay = simManager.foodDeadAnimalArray[i].decayStatus;
-            foodSimDataArray[dataIndex].health = simManager.foodDeadAnimalArray[i].healthStructural;
-            // v v v below can be moved to a more static buffer eventually since they don't change every frame:
-            foodSimDataArray[dataIndex].stemBrushType = simManager.foodGenomePoolArray[0].stemBrushType;
-            foodSimDataArray[dataIndex].leafBrushType = simManager.foodGenomePoolArray[0].leafBrushType;
-            foodSimDataArray[dataIndex].fruitBrushType = simManager.foodGenomePoolArray[0].fruitBrushType;
-            foodSimDataArray[dataIndex].stemHue = simManager.foodGenomePoolArray[0].stemHue;
-            foodSimDataArray[dataIndex].leafHue = simManager.foodGenomePoolArray[0].leafHue;
-            foodSimDataArray[dataIndex].fruitHue = simManager.foodGenomePoolArray[0].fruitHue;
-                       
-        }*/
-        foodSimDataCBuffer.SetData(foodSimDataArray); // send data to GPU for Rendering
+        eggSackSimDataCBuffer.SetData(eggSackSimDataArray); // send data to GPU for Rendering
         
-        for (int i = 0; i < predatorSimDataArray.Length; i++) {
+        /*for (int i = 0; i < predatorSimDataArray.Length; i++) {
             Vector3 predatorPos = simManager.predatorArray[i].transform.position;
             predatorSimDataArray[i].worldPos = new Vector2(predatorPos.x, predatorPos.y);
             predatorSimDataArray[i].velocity = new Vector2(simManager.predatorArray[i].rigidBody.velocity.x, simManager.predatorArray[i].rigidBody.velocity.y);
@@ -471,11 +445,11 @@ public class SimulationStateData {
                                                       (simManager.predatorArray[i].curScale + 0.1f) * 0.5f / SimulationManager._MapSize);
         }
         predatorSimDataCBuffer.SetData(predatorSimDataArray);  // send data to GPU for Rendering
-
+        */
         // Grab data from GPU FluidSim!        
         fluidVelocitiesAtAgentPositionsArray = simManager.environmentFluidManager.GetFluidVelocityAtObjectPositions(agentFluidPositionsArray);
-        fluidVelocitiesAtFoodPositionsArray = simManager.environmentFluidManager.GetFluidVelocityAtObjectPositions(foodFluidPositionsArray);
-        fluidVelocitiesAtPredatorPositionsArray = simManager.environmentFluidManager.GetFluidVelocityAtObjectPositions(predatorFluidPositionsArray);
+        fluidVelocitiesAtEggSackPositionsArray = simManager.environmentFluidManager.GetFluidVelocityAtObjectPositions(eggSackFluidPositionsArray);
+        //fluidVelocitiesAtPredatorPositionsArray = simManager.environmentFluidManager.GetFluidVelocityAtObjectPositions(predatorFluidPositionsArray);
 
         depthAtAgentPositionsArray = simManager.theRenderKing.GetDepthAtObjectPositions(agentFluidPositionsArray);
     }
