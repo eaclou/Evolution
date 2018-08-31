@@ -5,15 +5,11 @@ public class EggSack : MonoBehaviour {
     public int index;
     public int speciesIndex; // temp - based on static species
     
-    //public CapsuleCollider2D collisionCollider;
-    //public CapsuleCollider2D collisionTrigger;
-    //public Rigidbody2D rigidbodyRef;
-
-    //private int acceptingNewAgentsDuration = 
 
     public EggLifeStage curLifeStage;
     public enum EggLifeStage {
-        GrowingInsideParent,  // still attached to agent        
+        GrowingInsideParent,  // still attached to agent     
+        BeingBorn,
         GrowingIndependent,  // eggsack has been laid by parent
         Mature,  // Developed enough for some eggs to start hatching
         Decaying,  // all eggs either hatched or failed
@@ -31,6 +27,7 @@ public class EggSack : MonoBehaviour {
 
         }
     }
+    private int birthDurationTimeSteps = 30;
     private int growDurationTimeSteps = 360;
     public int _GrowDurationTimeSteps
     {
@@ -43,7 +40,7 @@ public class EggSack : MonoBehaviour {
 
         }
     }
-    private int matureDurationTimeSteps = 600;  // max oldAge Time to rot
+    private int matureDurationTimeSteps = 600;  // max oldAge Time before beginning to rot
     public int _MatureDurationTimeSteps
     {
         get
@@ -55,7 +52,7 @@ public class EggSack : MonoBehaviour {
 
         }
     }
-    private int decayDurationTimeSteps = 360;
+    private int decayDurationTimeSteps = 360;  // how long it takes to rot/decay
     public int _DecayDurationTimeSteps
     {
         get
@@ -68,14 +65,8 @@ public class EggSack : MonoBehaviour {
         }
     }
 
-    public float foodAmount;
-    //public float amountG;
-    //public float amountB;
-
-    //private int colliderCount = 0;
-
-    //private float feedingRate = 0.05f;
-
+    public float foodAmount;  // if eaten, how much nutrients is the entire EggSack worth?
+    
     public float growthStatus = 0f;  // 0-1 born --> mature
     public float decayStatus = 0f;
 
@@ -93,8 +84,10 @@ public class EggSack : MonoBehaviour {
     //private float isBeingDamaged = 0f;
     public float healthStructural = 1f;
 
-    public int ageCounterMature = 0; // only counts when Food is fully grown
+    //public int ageCounterMature = 0; // only counts when Food is fully grown
     public int lifeStageTransitionTimeStepCounter = 0; // keeps track of how long food has been in its current lifeStage
+
+    private int numSkipFramesResize = 7;
 
     private Vector2 prevPos;
     public Vector3 _PrevPos
@@ -118,7 +111,10 @@ public class EggSack : MonoBehaviour {
     public CapsuleCollider2D mainCollider;
     public Rigidbody2D rigidbodyRef;
 
+    public Agent parentAgentRef;
     public bool isAttachedToCritter = false; // while pregnant? is this redumdamt n
+
+    private float springJointMaxStrength = 5f;
 
     // Use this for initialization
     void Start() {
@@ -141,7 +137,7 @@ public class EggSack : MonoBehaviour {
             springJoint.enabled = false;
             springJoint.autoConfigureDistance = false;
             springJoint.distance = 0.1f;
-            springJoint.dampingRatio = 0.1f;
+            springJoint.dampingRatio = 1f;
             springJoint.frequency = 1f;
             
             GameObject mouseClickColliderGO = new GameObject("MouseClickCollider");
@@ -153,16 +149,12 @@ public class EggSack : MonoBehaviour {
         }
     }
 
-    public void InitializeEggSackFromGenomePregnant(EggSackGenome genome, Agent parentAgent, EggSack parentEggSack) {
-        curLifeStage = EggLifeStage.GrowingInsideParent;
-
+    public void InitializeEggSackFromGenomePregnant(EggSackGenome genome, Agent parentAgent) {
+        
         index = genome.index;
         this.fullSize = genome.fullSize;
 
-        lifeStageTransitionTimeStepCounter = 0;
-        ageCounterMature = 0;
-        growthStatus = 0f;
-        decayStatus = 0f;
+        BeginLifeStageGrowingPregnant(parentAgent);
     }
     public void InitializeEggSackFromGenomeImmaculate(EggSackGenome genome, StartPositionGenome startPos) {
         curLifeStage = EggLifeStage.GrowingIndependent;
@@ -172,12 +164,11 @@ public class EggSack : MonoBehaviour {
         foodAmount = this.fullSize.x * this.fullSize.y;
         
         lifeStageTransitionTimeStepCounter = 0;
-        ageCounterMature = 0;
+        
         growthStatus = 0f;
         decayStatus = 0f;
 
-        this.transform.localPosition = startPos.startPosition; // + new Vector3(0f, 0.25f * 0.5f, 0f);
-        this.transform.localScale = new Vector3(0.1f, 0.1f, 1f);
+        this.transform.localPosition = startPos.startPosition;        
                         
         rigidbodyRef.velocity = Vector2.zero;
         rigidbodyRef.angularVelocity = 0f;
@@ -186,55 +177,126 @@ public class EggSack : MonoBehaviour {
        
         isDepleted = false;
         healthStructural = 1f;
-        prevPos = transform.localPosition;        
+        prevPos = transform.position;        
     }
 
+    private void UpdateEggSackSize(float percentage) {
+
+        mainCollider.size = fullSize * Mathf.Max(0.01f, percentage);
+
+        float mass = mainCollider.size.x * mainCollider.size.y; // Mathf.Lerp(minMass, maxMass, percentage);  // *** <<< REVISIT!!! ****
+        mass = Mathf.Max(mass, 0.05f);  // constrain minimum
+        rigidbodyRef.mass = mass;
+
+        curSize = mainCollider.size;
+        
+        //if(lifeStageTransitionTimeStepCounter % numSkipFramesResize == 0) {
+            //float sidesRatio = fullSize.x / fullSize.y;
+            //float sideY = Mathf.Sqrt(foodAmount / sidesRatio);
+            //float sideX = sideY * sidesRatio;
+            //curSize = new Vector2(sideX, sideY);
+
+            //mainCollider.size = fullSize * percentage;
+            //transform.localScale = new Vector3(curSize.x, curSize.y, 1f); // ** CHANGE THIS!!!
+        
+        //}
+    }
+
+    private void BeginLifeStageGrowingPregnant(Agent parentAgent) {
+        curLifeStage = EggLifeStage.GrowingInsideParent;        
+        lifeStageTransitionTimeStepCounter = 0;
+        parentAgentRef = parentAgent;
+
+        growthStatus = 0f;
+        decayStatus = 0f;
+
+        rigidbodyRef.MovePosition(parentAgent.bodyRigidbody.position);
+
+        springJoint.connectedBody = parentAgent.bodyRigidbody;
+        springJoint.autoConfigureConnectedAnchor = false;
+        springJoint.anchor = Vector2.zero;
+        springJoint.connectedAnchor = Vector2.zero;
+        springJoint.dampingRatio = 1f;
+        springJoint.distance = 0f;
+        springJoint.enableCollision = false;
+        springJoint.enabled = true;
+        springJoint.frequency = 1f;
+
+        mainCollider.enabled = true;  // ?? maybe??
+
+        UpdateEggSackSize(0f);
+    }
+    private void CommenceBeingBorn() {
+        curLifeStage = EggLifeStage.BeingBorn;
+        Debug.Log("Begin Birth!");
+        lifeStageTransitionTimeStepCounter = 0;
+    }
+    private void BeginLifeStageGrowingIndependent() {
+        curLifeStage = EggLifeStage.GrowingIndependent;
+        Debug.Log("EGGS BEING LAID (LAIN?)!");
+        lifeStageTransitionTimeStepCounter = 0;
+
+        springJoint.enabled = false;
+        springJoint.enableCollision = true;
+        springJoint.connectedBody = null;
+
+        mainCollider.enabled = true;
+        // size collider properly here:
+    }
+    private void BeginLifeStageMature() {
+        curLifeStage = EggLifeStage.Mature;
+                    
+        lifeStageTransitionTimeStepCounter = 0;
+
+        growthStatus = 1f;
+
+        UpdateEggSackSize(1f);
+    }
+   
     private void CheckForLifeStageTransition() {
         switch(curLifeStage) {
             case EggLifeStage.GrowingInsideParent:
                 // 
                 // Preggers
-                if(lifeStageTransitionTimeStepCounter >= pregnantDurationTimeSteps) {
-                    curLifeStage = EggLifeStage.GrowingIndependent;
-                    Debug.Log("EGGS BEING LAID (LAIN?)!");
-                    lifeStageTransitionTimeStepCounter = 0;
+                if(lifeStageTransitionTimeStepCounter >= pregnantDurationTimeSteps) {                   
+                    // transition from being attached to parent Agent rigidbody, to free-floating:
+                    CommenceBeingBorn();
+                }
+                break;
+            case EggLifeStage.BeingBorn:
+                //
+                if(lifeStageTransitionTimeStepCounter >= birthDurationTimeSteps) {                                        
+                    // Disconnect from parent:
+                    BeginLifeStageGrowingIndependent();                    
                 }
                 break;
             case EggLifeStage.GrowingIndependent:
                 //
                 if(lifeStageTransitionTimeStepCounter >= growDurationTimeSteps) {
-                    curLifeStage = EggLifeStage.Mature;
-                    //Debug.Log("EGG HATCHED!");
-                    lifeStageTransitionTimeStepCounter = 0;
-                    //this.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
-                    //this.GetComponent<Rigidbody2D>().velocity *= 0.36f;
-                    //foodArray[i].GetComponent<Rigidbody2D>().AddForce(new Vector2(1f, 1f), ForceMode2D.Force); //
-                    // Looks like AddForce has less of an effect on a GO/Rigidbody2D that is being scaled through a script... ??
-                    // Feels like rigidbody is accumulating velocity which is then released all at once when the scaling stops??
-                    // Hacking through it by increasign force on growing food:
+                    BeginLifeStageMature();
                 }
-                float maxFoodAvg = foodAmount; // Mathf.Max(Mathf.Max(amountR, amountG), amountB);
+                /*float maxFoodAvg = foodAmount; // Mathf.Max(Mathf.Max(amountR, amountG), amountB);
                 if (maxFoodAvg <= 0f) {
                     curLifeStage = EggLifeStage.Decaying;
                     //isNull = true;
                 }
                 if (healthStructural <= 0f) {
                     curLifeStage = EggLifeStage.Decaying;
-                }
+                }*/
                 break;
             case EggLifeStage.Mature:
                 //
                 // Check for Death:
                 //float minFood = Mathf.Min(Mathf.Min(testModule.foodAmountR[0], testModule.foodAmountG[0]), testModule.foodAmountB[0]);
-                float maxFood = foodAmount; // Mathf.Max(Mathf.Max(amountR, amountG), amountB);
+                /*float maxFood = foodAmount; // Mathf.Max(Mathf.Max(amountR, amountG), amountB);
                 if (maxFood <= 0f) {
                     curLifeStage = EggLifeStage.Decaying;
                     //isNull = true;
                 }
                 if (healthStructural <= 0f) {
                     curLifeStage = EggLifeStage.Decaying;
-                }
-                if(ageCounterMature >= matureDurationTimeSteps) {
+                }*/
+                if(lifeStageTransitionTimeStepCounter >= matureDurationTimeSteps) {
                     curLifeStage = EggLifeStage.Decaying;                    
                 }
                 if(transform.position.x > SimulationManager._MapSize || transform.position.x < 0f || transform.position.y > SimulationManager._MapSize || transform.position.y < 0f) {
@@ -248,9 +310,6 @@ public class EggSack : MonoBehaviour {
                     //Debug.Log("FOOD NO LONGER EXISTS!");
                     lifeStageTransitionTimeStepCounter = 0;
                     isDepleted = true;  // flagged for respawn
-                    //HingeJoint2D joint = this.GetComponent<HingeJoint2D>();
-                    //joint.enabled = false;
-                    //joint.connectedBody = null;
                 }
                 break;
             case EggLifeStage.Null:
@@ -261,13 +320,6 @@ public class EggSack : MonoBehaviour {
                 Debug.LogError("NO SUCH ENUM ENTRY IMPLEMENTED, YOU FOOL!!! (" + curLifeStage.ToString() + ")");
                 break;
         }
-
-        //if (testModule.hitPoints[0] <= 0f) {
-
-            //curLifeStage = AgentLifeStage.Decaying;
-            //lifeStageTransitionTimeStepCounter = 0;
-            //Debug.Log("Agent DEAD!");
-        //}
     }
     public void Tick() {
         facingDirection = new Vector2(Mathf.Cos(Mathf.Deg2Rad * transform.localEulerAngles.z + Mathf.PI * 0.5f), Mathf.Sin(Mathf.Deg2Rad * transform.localEulerAngles.z + Mathf.PI * 0.5f));
@@ -278,6 +330,10 @@ public class EggSack : MonoBehaviour {
             case EggLifeStage.GrowingInsideParent:
                 //
                 TickGrowingInsideParent();
+                break;
+            case EggLifeStage.BeingBorn:
+                //
+                TickBeingBorn();
                 break;
             case EggLifeStage.GrowingIndependent:
                 //
@@ -306,45 +362,42 @@ public class EggSack : MonoBehaviour {
         isBeingEaten = 0.0f;
     }
 
-    private void TickGrowingInsideParent() {
+    private void TickGrowingInsideParent() {    ///  ***** v v v *** REFACTOR!!!!!
         lifeStageTransitionTimeStepCounter++;
 
-        float growthPercentage = (float)lifeStageTransitionTimeStepCounter / (float)growDurationTimeSteps;
+        float growthPercentage = (float)lifeStageTransitionTimeStepCounter / (float)(pregnantDurationTimeSteps + birthDurationTimeSteps + growDurationTimeSteps);
         growthStatus = growthPercentage;
 
-        float mass = Mathf.Lerp(minMass, maxMass, growthPercentage);  // *** <<< REVISIT!!! ****
-        GetComponent<Rigidbody2D>().mass = mass;
+        if(lifeStageTransitionTimeStepCounter % numSkipFramesResize == 0) {
+            UpdateEggSackSize(growthStatus);
+        }        
+    }
+    private void TickBeingBorn() {
+        lifeStageTransitionTimeStepCounter++;
 
-        curSize = Vector2.Lerp(new Vector3(0.1f, 0.1f), fullSize, growthStatus);
-        transform.localScale = new Vector3(curSize.x, curSize.y, 1f);
-                
+        float birthPercentage = (float)lifeStageTransitionTimeStepCounter / (float)birthDurationTimeSteps;
+        float springStrength = Mathf.Lerp(springJointMaxStrength, 0.001f, birthPercentage);
+        float springDistance = Mathf.Lerp(0f, parentAgentRef.colliderBody.size.magnitude, birthPercentage);
 
-        //Debug.Log("TickGrowing growDurationTimeSteps++");
+        springJoint.frequency = springStrength;
+        springJoint.distance = springDistance;
     }
     private void TickGrowingIndependent() {
         lifeStageTransitionTimeStepCounter++;
 
-        
+        float growthPercentage = (float)(lifeStageTransitionTimeStepCounter + pregnantDurationTimeSteps + birthDurationTimeSteps) / (float)(pregnantDurationTimeSteps + birthDurationTimeSteps + growDurationTimeSteps);
+        growthStatus = growthPercentage;
+
+        if(lifeStageTransitionTimeStepCounter % numSkipFramesResize == 0) {
+            UpdateEggSackSize(growthStatus);
+        } 
     }
     private void TickMature() {
         growthStatus = 1f;
-
-        //float avgAmount = amountR; // (amountR + amountG + amountB) / 3.0f;
-        //float lerpAmount = Mathf.Sqrt(avgAmount);
-
-        //curSize = Vector2.Lerp(new Vector3(0.1f, 0.1f), fullSize, Mathf.Clamp01(avgAmount + 0.4f)); // lerpAmount);  // *** <<< REVISIT!!! ****
-        //float mass = Mathf.Lerp(minMass, maxMass, lerpAmount);  // *** <<< REVISIT!!! ****
-        //GetComponent<Rigidbody2D>().mass = mass;
-
-        float sidesRatio = fullSize.x / fullSize.y;
-        float sideY = Mathf.Sqrt(foodAmount / sidesRatio);
-        float sideX = sideY * sidesRatio;
-        curSize = new Vector3(sideX, sideY);
-        transform.localScale = new Vector3(curSize.x, curSize.y, 1f);
-        
+                
         isDepleted = CheckIfDepleted();
 
-        ageCounterMature++;        
+        //ageCounterMature++;        
     }
     private void TickDecaying() {
         float decayPercentage = (float)lifeStageTransitionTimeStepCounter / (float)decayDurationTimeSteps;

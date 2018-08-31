@@ -147,12 +147,7 @@ public class SimulationManager : MonoBehaviour {
     public int curApproxGen = 1;
 
     public int numInitialHiddenNeurons = 16;
-    
-    //private int foodGridResolution = 32;
-    //public FoodGridCell[][] foodGrid;
-    //public float[][] foodGridSwapArray;
-    //public Texture2D debugFoodTexture;
-
+        
     private int nutrientMapResolution = 32;
     public RenderTexture nutrientMapRT1;
     public RenderTexture nutrientMapRT2;
@@ -197,26 +192,6 @@ public class SimulationManager : MonoBehaviour {
         public float refactoryAge;
     }
     
-    //public bool isTrainingPersistent = false; // RENAME ONCE FUNCTIONAL
-    //private float lastHorizontalInput = 0f;
-    //private float lastVerticalInput = 0f;
-    //private int timeStepCounter = 1; // needed???
-    //public int curGen;
-    //public float avgFitnessLastGen = 0f;
-    //public float bestFitnessScore = 0f;    
-    //private bool firstTimeTraining = true; // might not be needed    
-    //private int idleFramesToBotControl = 10; // probably no longer needed....
-    //private int idleFramesCounter = 0;
-    //public int botToHumanControlTransitionFrameCount = 8;
-    //public int humanToBotControlTransitionFrameCount = 30;
-     // needed?
-    // GRID SEARCH!!!
-    // Temporarily out of use:::
-    //public GridSearchManager gridSearchManager;
-    //public bool isGridSearching = false;
-    // need to be able to update Agent's Brain on the fly?  --- but needs to access the Module to set up inputs/outputs???
-    // Ability to run a Brain Headless (without instantiating an Agent?)
-
     #region loading   // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& LOADING LOADING LOADING &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
     public void TickLoading() {
         // "Hey, I'm Loadin' Here!!!"
@@ -1564,7 +1539,6 @@ public class SimulationManager : MonoBehaviour {
             }
         }
     }
-
     private void AttemptToSpawnAgent(int agentIndex, int speciesIndex) {
 
         //bool foundValidEggSack = false;
@@ -1594,6 +1568,16 @@ public class SimulationManager : MonoBehaviour {
         else {
             Debug.Log("Tried to spawn Agent[" + agentIndex.ToString() + "] but no suitable EggSack was found!");
         }        
+    }
+    private void CheckForNewEggSack() {
+        // what are pregnancy requirements? Food eaten relative to body size?
+        // Reach a certain age?
+        // no egg sacks in the world -- add some minimum number in
+        // Find parent Agent
+        //Spawn:
+    }
+    private void SpawnNewEggSack(Agent parentAgent) {
+
     }
         
     // AFTER PHYSX!!!
