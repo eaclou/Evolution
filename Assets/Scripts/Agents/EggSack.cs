@@ -40,7 +40,7 @@ public class EggSack : MonoBehaviour {
 
         }
     }
-    private int matureDurationTimeSteps = 600;  // max oldAge Time before beginning to rot
+    private int matureDurationTimeSteps = 360;  // max oldAge Time before beginning to rot
     public int _MatureDurationTimeSteps
     {
         get
@@ -105,14 +105,13 @@ public class EggSack : MonoBehaviour {
     public Vector2 facingDirection;
 
     //public CapsuleCollider2D colliderBody;
-    public int parentCritterIndex = -1;
+    //public int parentCritterIndex = -1;
     public SpringJoint2D springJoint;
     public CapsuleCollider mouseClickCollider;
     public CapsuleCollider2D mainCollider;
     public Rigidbody2D rigidbodyRef;
-
     public Agent parentAgentRef;
-    public bool isAttachedToCritter = false; // while pregnant? is this redumdamt n
+    //public bool isAttachedToCritter = false; // while pregnant? is this redumdamt n
 
     private float springJointMaxStrength = 5f;
 
@@ -153,7 +152,8 @@ public class EggSack : MonoBehaviour {
         
         index = genome.index;
         this.fullSize = genome.fullSize;
-
+        foodAmount = 0.123456789f;  //  ********* UPDATE HOW FOODAMOUNT IS CALCULATED!!! -- maybe tie it into Resize() function?
+        
         BeginLifeStageGrowingPregnant(parentAgent);
     }
     public void InitializeEggSackFromGenomeImmaculate(EggSackGenome genome, StartPositionGenome startPos) {
@@ -163,8 +163,7 @@ public class EggSack : MonoBehaviour {
         this.fullSize = genome.fullSize;
         foodAmount = this.fullSize.x * this.fullSize.y;
         
-        lifeStageTransitionTimeStepCounter = 0;
-        
+        lifeStageTransitionTimeStepCounter = 0;        
         growthStatus = 0f;
         decayStatus = 0f;
 
@@ -210,7 +209,12 @@ public class EggSack : MonoBehaviour {
         growthStatus = 0f;
         decayStatus = 0f;
 
-        rigidbodyRef.MovePosition(parentAgent.bodyRigidbody.position);
+        //rigidbodyRef.MovePosition(parentAgent.bodyRigidbody.position);
+        rigidbodyRef.mass = 0.05f;
+        rigidbodyRef.transform.position = parentAgent.bodyRigidbody.position;
+        rigidbodyRef.velocity = Vector2.zero;
+        rigidbodyRef.angularVelocity = 0f;
+
 
         springJoint.connectedBody = parentAgent.bodyRigidbody;
         springJoint.autoConfigureConnectedAnchor = false;
@@ -224,6 +228,10 @@ public class EggSack : MonoBehaviour {
 
         mainCollider.enabled = true;  // ?? maybe??
 
+        isDepleted = false;
+        healthStructural = 1f;
+        prevPos = transform.position;        
+
         UpdateEggSackSize(0f);
     }
     private void CommenceBeingBorn() {
@@ -233,8 +241,12 @@ public class EggSack : MonoBehaviour {
     }
     private void BeginLifeStageGrowingIndependent() {
         curLifeStage = EggLifeStage.GrowingIndependent;
-        Debug.Log("EGGS BEING LAID (LAIN?)!");
+        Debug.Log("EGGS FULLY LAID (LAIN?)!");
         lifeStageTransitionTimeStepCounter = 0;
+
+        parentAgentRef.EndPregnancy(); // ???
+        parentAgentRef = null;
+        
 
         springJoint.enabled = false;
         springJoint.enableCollision = true;
@@ -393,6 +405,8 @@ public class EggSack : MonoBehaviour {
         } 
     }
     private void TickMature() {
+        lifeStageTransitionTimeStepCounter++;
+
         growthStatus = 1f;
                 
         isDepleted = CheckIfDepleted();

@@ -433,7 +433,7 @@ public class UIManager : MonoBehaviour {
         if(hit.collider != null) {
             Agent agentRef = hit.collider.gameObject.GetComponentInParent<Agent>();
             if(agentRef != null) {
-                Debug.Log("AGENT: [ " + agentRef.gameObject.name + " ] #" + agentRef.index.ToString());
+                //Debug.Log("AGENT: [ " + agentRef.gameObject.name + " ] #" + agentRef.index.ToString());
                     
                 if(clicked) {
                     cameraManager.SetTarget(agentRef, agentRef.index);

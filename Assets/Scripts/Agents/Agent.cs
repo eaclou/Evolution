@@ -114,6 +114,7 @@ public class Agent : MonoBehaviour {
     public int ageCounterMature = 0; // only counts when agent is an adult
     public int lifeStageTransitionTimeStepCounter = 0; // keeps track of how long agent has been in its current lifeStage
     public int scoreCounter = 0;
+    public int pregnancyRefactoryTimeStepCounter = 0;
 
     public float corpseFoodAmount = 1f;
 
@@ -151,7 +152,11 @@ public class Agent : MonoBehaviour {
     public Agent preyAgentRef;
 
     public EggSack parentEggSackRef;  // instead of using own fixed embry development duration - look up parentEggSack and use its counter?
-    
+    public bool isAttachedToParentEggSack = false;
+
+    public EggSack childEggSackRef;
+    public bool isPregnantAndCarryingEggs = false;
+    public int pregnancyRefactoryDuration = 720;
     
     // Use this for initialization
     private void Awake() {
@@ -446,6 +451,11 @@ public class Agent : MonoBehaviour {
 
             colliderBody.enabled = true;
         }
+
+        springJoint.connectedBody = null;
+        springJoint.enabled = false;
+
+        EndPregnancy();
     }
     private void CheckForLifeStageTransition() {
         switch(curLifeStage) {
@@ -455,10 +465,7 @@ public class Agent : MonoBehaviour {
             case AgentLifeStage.Egg:
                 //
                 if(lifeStageTransitionTimeStepCounter >= gestationDurationTimeSteps) {
-                    curLifeStage = AgentLifeStage.Young;
-                    //Debug.Log("EGG HATCHED!");
-                    lifeStageTransitionTimeStepCounter = 0;
-                    growthPercentage = 0f;
+                    BeginHatching();
                 }
                 break;
             case AgentLifeStage.Young:
@@ -496,8 +503,14 @@ public class Agent : MonoBehaviour {
                 
                 beingSwallowedFrameCounter = 0;
                 isBeingSwallowed = false;
+                isSwallowingPrey = false;
 
-                colliderBody.enabled = true;
+                parentEggSackRef = null;
+                childEggSackRef = null;
+
+                EndPregnancy();
+
+                colliderBody.enabled = false;
 
                 springJoint.enabled = false;
                 springJoint.connectedBody = null;
@@ -676,6 +689,23 @@ public class Agent : MonoBehaviour {
         }
 
     }
+    private void BeginHatching() {
+
+        curLifeStage = AgentLifeStage.Young;
+        //Debug.Log("EGG HATCHED!");
+        lifeStageTransitionTimeStepCounter = 0;
+        growthPercentage = 0f; // can I handle growth percentage in a better, more continuous way?
+
+        // Detach from parent EggSack
+        parentEggSackRef = null;
+        isAttachedToParentEggSack = false;
+
+        springJoint.connectedBody = null;
+        springJoint.enabled = false;
+        // Play animation / rendering whatever.
+        
+        // update boolean flags
+    }
     private void TickYoung(SimulationManager simManager, Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray, SettingsManager settings) {
         ProcessSwallowing();
 
@@ -745,6 +775,23 @@ public class Agent : MonoBehaviour {
         
         ageCounterMature++;
         scoreCounter++;
+        if(!isPregnantAndCarryingEggs) {
+            pregnancyRefactoryTimeStepCounter++;
+        }
+        
+    }
+    public void BeginPregnancy(EggSack developingEggSackRef) {
+        //Debug.Log("BeginPregnancy! [" + developingEggSackRef.index.ToString() + "]");
+        isPregnantAndCarryingEggs = true;
+        childEggSackRef = developingEggSackRef;
+        
+    }
+    public void EndPregnancy() {
+        //Debug.Log("EndPregnancy!");
+        isPregnantAndCarryingEggs = false;
+        childEggSackRef = null;
+
+        pregnancyRefactoryTimeStepCounter = 0;
     }
     private void TickDead() {
         lifeStageTransitionTimeStepCounter++;
@@ -1014,7 +1061,7 @@ public class Agent : MonoBehaviour {
     private void InitializeGameObjectsAndComponents() {
         // Create Physics GameObject:
         if(bodyGO == null) {
-            GameObject bodySegmentGO = new GameObject("RootSegment");
+            GameObject bodySegmentGO = new GameObject("RootSegment" + index.ToString());
             bodySegmentGO.transform.parent = this.gameObject.transform;            
             bodySegmentGO.tag = "LiveAnimal";
             bodyGO = bodySegmentGO;
@@ -1147,6 +1194,7 @@ public class Agent : MonoBehaviour {
         
         animationCycle = 0f;
         lifeStageTransitionTimeStepCounter = 0;
+        pregnancyRefactoryTimeStepCounter = 0;
         ageCounterMature = 0;
         growthPercentage = 0f;
         scoreCounter = 0;
