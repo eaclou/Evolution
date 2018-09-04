@@ -21,7 +21,7 @@ public class SimulationManager : MonoBehaviour {
 
     public bool isQuickStart = true;
 
-    public float curPlayerMutationRate = 0.25f;  // UI-based value, giving player control over mutation frequency with one parameter
+    public float curPlayerMutationRate = 0.33f;  // UI-based value, giving player control over mutation frequency with one parameter
 
     private bool isLoading = false;
     private bool loadingComplete = false;
@@ -178,6 +178,9 @@ public class SimulationManager : MonoBehaviour {
     private FoodParticleData[] foodParticleMeasurementTotalsData;
     
     private int numAgentsProcessed = 0;
+
+    private int eggSackRespawnCounter = 0;
+    private int agentRespawnCounter = 0;
 
     public struct FoodParticleData {
         public int index;
@@ -577,7 +580,16 @@ public class SimulationManager : MonoBehaviour {
     }
     private void LoadingInitializeEggSacksFirstTime() {  // Skip pregnancy, Instantiate EggSacks that begin as 'GrowingIndependent' ?
         for (int i = 0; i < eggSackArray.Length; i++) {
-            eggSackArray[i].InitializeEggSackFromGenomeImmaculate(eggSackGenomePoolArray[i], GetRandomFoodSpawnPosition());            
+            eggSackArray[i].isDepleted = true;
+            
+            /*
+            //get randomParentAgentGenome from same specieis?? this should be refactored later.. ***            
+            int speciesSize = _NumAgents / numSpecies;
+            int eggSpecies = Mathf.FloorToInt((float)i / (float)_NumEggSacks * (float)numSpecies);
+            int agentGenomeIndex = UnityEngine.Random.Range(eggSpecies * speciesSize, (eggSpecies + 1) * speciesSize);
+            //Debug.Log("agentGenomeIndex: " + agentGenomeIndex.ToString() + ", speciesID: " + eggSpecies.ToString() + ", speciesSize: " + speciesSize.ToString());
+            eggSackArray[i].InitializeEggSackFromGenomeImmaculate(i, agentGenomePoolArray[agentGenomeIndex], GetRandomFoodSpawnPosition());           
+            */
         }
     }
     /*private void LoadingInstantiatePredators() {
@@ -727,6 +739,8 @@ public class SimulationManager : MonoBehaviour {
 
     public void TickSimulation() {
         //UpdateFoodGrid();
+        eggSackRespawnCounter++;
+        agentRespawnCounter++;
 
         float totalNutrients = MeasureTotalNutrients();
         GetNutrientValuesAtMouthPositions();
@@ -1533,11 +1547,13 @@ public class SimulationManager : MonoBehaviour {
         }
     }  // *** revisit
     private void CheckForReadyToSpawnAgents() {
-        for (int a = 0; a < agentsArray.Length; a++) {
-            if (agentsArray[a].curLifeStage == Agent.AgentLifeStage.AwaitingRespawn) {                
-                AttemptToSpawnAgent(a, agentsArray[a].speciesIndex);                                
+        if(agentRespawnCounter > 11) {
+            for (int a = 0; a < agentsArray.Length; a++) {
+                if (agentsArray[a].curLifeStage == Agent.AgentLifeStage.AwaitingRespawn) {                
+                    AttemptToSpawnAgent(a, agentsArray[a].speciesIndex);                   
+                }
             }
-        }
+        }        
     }
     private void AttemptToSpawnAgent(int agentIndex, int speciesIndex) {
 
@@ -1552,9 +1568,15 @@ public class SimulationManager : MonoBehaviour {
 
         for(int i = startIndex; i < startIndex + speciesPopulationSize; i++) {  // if EggSack belongs to the right species
             if(eggSackArray[i].curLifeStage == EggSack.EggLifeStage.GrowingIndependent) {
-                if(eggSackArray[i].lifeStageTransitionTimeStepCounter < eggSackArray[i]._GrowDurationTimeSteps / 4) {  // egg sack is at proper stage of development
-                    // This Eggsack Index                    
-                    validEggSackIndicesList.Add(i);
+                if(eggSackArray[i].lifeStageTransitionTimeStepCounter < eggSackArray[i]._GrowDurationTimeSteps) {  // egg sack is at proper stage of development
+                    // This Eggsack Index    
+                    if(speciesIndex == eggSackArray[i].speciesIndex) {
+                        validEggSackIndicesList.Add(i);
+                    }
+                    else {
+                        Debug.Log("!!! DIFFERENT SPECIES!!!");
+                    }
+                    
                 }
             }
         }
@@ -1563,10 +1585,14 @@ public class SimulationManager : MonoBehaviour {
             int randIndex = UnityEngine.Random.Range(0, validEggSackIndicesList.Count);
 
             parentEggSack = eggSackArray[validEggSackIndicesList[randIndex]];
-            SpawnAgentFromGenome(agentIndex, speciesIndex, parentEggSack);
+            SpawnAgentFromEggSack(agentIndex, speciesIndex, parentEggSack);
         }
         else {
             //Debug.Log("Tried to spawn Agent[" + agentIndex.ToString() + "] but no suitable EggSack was found!");
+            if(agentRespawnCounter > 33) {
+                // So spawn Agent on its own somewhere:
+                SpawnAgentImmaculate(agentIndex, speciesIndex);
+            }            
         }        
     }
     private void CheckForNewEggSack() {
@@ -1576,9 +1602,7 @@ public class SimulationManager : MonoBehaviour {
         // Find parent Agent
         //Spawn:
     }
-    private void SpawnNewEggSack(Agent parentAgent) {
-
-    }
+    
         
     // AFTER PHYSX!!!
     private void OnTriggerEnter2D(Collider2D collision) {
@@ -1623,55 +1647,76 @@ public class SimulationManager : MonoBehaviour {
         agentsArray[agentIndex].SetToAwaitingRespawn();
     }
     public void ProcessDeadEggSack(int eggSackIndex) {
-        // Check for timer?        
-        // How many active EggSacks are there in play?
-        int totalSuitableParentAgents = 0;
-        List<int> suitableParentAgentsList = new List<int>();
-        for(int i = 0; i < _NumAgents; i++) {
-            if(agentsArray[i].curLifeStage == Agent.AgentLifeStage.Mature) {
-                if(agentsArray[i].isPregnantAndCarryingEggs) {
-                    // already carrying, not available
-                }
-                else {
-                    if(agentsArray[i].pregnancyRefactoryTimeStepCounter > agentsArray[i].pregnancyRefactoryDuration) {
-                        // Able to grow eggs
-                        totalSuitableParentAgents++;
-                        suitableParentAgentsList.Add(i);
+        //Debug.Log("ProcessDeadEggSack(" + eggSackIndex.ToString() + ") eggSackRespawnCounter " + eggSackRespawnCounter.ToString());
+        // Check for timer?
+        if(eggSackRespawnCounter > 9) {
+            
+            // How many active EggSacks are there in play?
+            int totalSuitableParentAgents = 0;
+            List<int> suitableParentAgentsList = new List<int>();
+            for(int i = 0; i < _NumAgents; i++) {
+                if(agentsArray[i].speciesIndex == eggSackArray[eggSackIndex].speciesIndex) {
+                    if(agentsArray[i].curLifeStage == Agent.AgentLifeStage.Mature) {
+                        if(agentsArray[i].isPregnantAndCarryingEggs) {
+                            // already carrying, not available
+                        }
+                        else {
+                            if(agentsArray[i].pregnancyRefactoryTimeStepCounter > agentsArray[i].pregnancyRefactoryDuration) {
+                                // Able to grow eggs
+                                totalSuitableParentAgents++;
+                                suitableParentAgentsList.Add(i);
 
-                        if(agentsArray[i].childEggSackRef != null || agentsArray[i].isPregnantAndCarryingEggs) {
-                            Debug.Log("UNSUITABLE AGENT FOUND!! egg[" + agentsArray[i].childEggSackRef.index.ToString() + "]  Agent[" + i.ToString() + "]");
+                                //if(agentsArray[i].childEggSackRef != null || agentsArray[i].isPregnantAndCarryingEggs) {
+                                //    Debug.Log("UNSUITABLE AGENT FOUND!! egg[" + agentsArray[i].childEggSackRef.index.ToString() + "]  Agent[" + i.ToString() + "]");
+                                //}
+                            }
                         }
                     }
+                    else {
+
+                    }
+                }                
+            }
+        
+            if(totalSuitableParentAgents > 0) {
+                // At Least ONE fertile Agent available:
+                int randParentAgentIndex = suitableParentAgentsList[UnityEngine.Random.Range(0, totalSuitableParentAgents)];
+
+                // RespawnFood  // *** REFACTOR -- Need to sync egg and agent genomes to match each other
+                EggSackGenome newFoodGenome = new EggSackGenome(eggSackIndex);
+                newFoodGenome.SetToMutatedCopyOfParentGenome(eggSackGenomePoolArray[eggSackIndex], settingsManager.mutationSettingsPersistent);
+                eggSackGenomePoolArray[eggSackIndex] = newFoodGenome;
+
+                //Debug.Log("BeginPregnancy! Egg[" + eggSackIndex.ToString() + "]  Agent[" + randParentAgentIndex.ToString() + "]");
+                if(agentsArray[randParentAgentIndex].childEggSackRef != null && agentsArray[randParentAgentIndex].isPregnantAndCarryingEggs) {
+                    Debug.Log("DOUBLE PREGNANT!! egg[" + agentsArray[randParentAgentIndex].childEggSackRef.index.ToString() + "]  Agent[" + randParentAgentIndex.ToString() + "]");
                 }
+
+                eggSackArray[eggSackIndex].InitializeEggSackFromGenomePregnant(eggSackIndex, agentGenomePoolArray[randParentAgentIndex], agentsArray[randParentAgentIndex]);
+            
+                agentsArray[randParentAgentIndex].BeginPregnancy(eggSackArray[eggSackIndex]);
+
+                eggSackRespawnCounter = 0;
             }
             else {
+                // Wait? SpawnImmaculate?
+                //if(eggSackRespawnCounter > 23) {  // try to encourage more pregnancies?
+                    //Debug.Log("InitializeEggSackFromGenomeImmaculate! Egg[" + eggSackIndex.ToString() + "]");
+                    /*int speciesSize = _NumAgents / numSpecies;
+                    int eggSpecies = Mathf.FloorToInt((float)eggSackIndex / (float)_NumEggSacks * (float)numSpecies);
+                    int agentGenomeIndex = UnityEngine.Random.Range(eggSpecies * speciesSize, (eggSpecies + 1) * speciesSize);
 
+                    eggSackArray[eggSackIndex].InitializeEggSackFromGenomeImmaculate(eggSackIndex, agentGenomePoolArray[agentGenomeIndex], GetRandomFoodSpawnPosition());
+
+                    eggSackRespawnCounter = 0;
+                    */
+                //}                
             }
-        }
-        
-        if(totalSuitableParentAgents > 0) {
-            // At Least ONE fertile Agent available:
-            int randParentAgentIndex = suitableParentAgentsList[UnityEngine.Random.Range(0, totalSuitableParentAgents)];
-
-            // RespawnFood  // *** REFACTOR -- Need to sync egg and agent genomes to match each other
-            EggSackGenome newFoodGenome = new EggSackGenome(eggSackIndex);
-            newFoodGenome.SetToMutatedCopyOfParentGenome(eggSackGenomePoolArray[eggSackIndex], settingsManager.mutationSettingsPersistent);
-            eggSackGenomePoolArray[eggSackIndex] = newFoodGenome;
-
-            //Debug.Log("BeginPregnancy! Egg[" + eggSackIndex.ToString() + "]  Agent[" + randParentAgentIndex.ToString() + "]");
-            if(agentsArray[randParentAgentIndex].childEggSackRef != null && agentsArray[randParentAgentIndex].isPregnantAndCarryingEggs) {
-                Debug.Log("DOUBLE PREGNANT!! egg[" + agentsArray[randParentAgentIndex].childEggSackRef.index.ToString() + "]  Agent[" + randParentAgentIndex.ToString() + "]");
-            }
-
-            eggSackArray[eggSackIndex].InitializeEggSackFromGenomePregnant(newFoodGenome, agentsArray[randParentAgentIndex]);
-            
-            agentsArray[randParentAgentIndex].BeginPregnancy(eggSackArray[eggSackIndex]);
         }
         else {
-            // Wait? SpawnImmaculate?
-            //Debug.Log("InitializeEggSackFromGenomeImmaculate! Egg[" + eggSackIndex.ToString() + "]");
-            eggSackArray[eggSackIndex].InitializeEggSackFromGenomeImmaculate(eggSackGenomePoolArray[eggSackIndex], GetRandomFoodSpawnPosition());
+
         }
+        
     }
     private void CheckForRecordAgentScore(int agentIndex) {
         if (agentsArray[agentIndex].scoreCounter > recordBotAge && agentIndex != 0) {
@@ -1827,13 +1872,25 @@ public class SimulationManager : MonoBehaviour {
         }
     }
 
-    private void SpawnAgentFromGenome(int agentIndex, int speciesIndex, EggSack parentEggSack) {
+    private void SpawnAgentFromEggSack(int agentIndex, int speciesIndex, EggSack parentEggSack) {
         numAgentsBorn++;
         currentOldestAgent = agentsArray[rankedIndicesList[0]].scoreCounter;
 
-        agentsArray[agentIndex].InitializeSpawnAgentFromGenome(agentIndex, agentGenomePoolArray[agentIndex], parentEggSack); // Spawn that genome in dead Agent's body and revive it!
+        agentsArray[agentIndex].InitializeSpawnAgentFromEggSack(agentIndex, agentGenomePoolArray[agentIndex], parentEggSack); // Spawn that genome in dead Agent's body and revive it!
 
         theRenderKing.UpdateAgentWidthsTexture(agentsArray[agentIndex]);
+
+        agentRespawnCounter = 0;
+    }
+    private void SpawnAgentImmaculate(int agentIndex, int speciesIndex) {
+        numAgentsBorn++;
+        currentOldestAgent = agentsArray[rankedIndicesList[0]].scoreCounter;
+
+        agentsArray[agentIndex].InitializeSpawnAgentImmaculate(agentIndex, agentGenomePoolArray[agentIndex], GetRandomFoodSpawnPosition()); // Spawn that genome in dead Agent's body and revive it!
+
+        theRenderKing.UpdateAgentWidthsTexture(agentsArray[agentIndex]);
+
+        agentRespawnCounter = 0;
     }
     private void SetAgentGenomeToMutatedCopyOfParentGenome(int agentIndex, AgentGenome parentGenome) {
 
@@ -1996,7 +2053,7 @@ public class SimulationManager : MonoBehaviour {
                 break;  // use this one
             }
             else {
-                if(startPositionsPresets.spawnZonesList[randZone].refactoryCounter > 300) {
+                if(startPositionsPresets.spawnZonesList[randZone].refactoryCounter > 100) {
                     startPositionsPresets.spawnZonesList[randZone].refactoryCounter = 0;
                     startPositionsPresets.spawnZonesList[randZone].active = true;
                     break;
@@ -2292,8 +2349,8 @@ public class SimulationManager : MonoBehaviour {
             if (simStateData.foodLeafDataCBuffer != null) {
                 simStateData.foodLeafDataCBuffer.Release();
             }
-            if (simStateData.foodFruitDataCBuffer != null) {
-                simStateData.foodFruitDataCBuffer.Release();
+            if (simStateData.eggDataCBuffer != null) {
+                simStateData.eggDataCBuffer.Release();
             }
         }
         

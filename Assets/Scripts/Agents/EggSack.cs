@@ -28,7 +28,7 @@ public class EggSack : MonoBehaviour {
         }
     }
     private int birthDurationTimeSteps = 30;
-    private int growDurationTimeSteps = 360;
+    private int growDurationTimeSteps = 450;
     public int _GrowDurationTimeSteps
     {
         get
@@ -40,7 +40,7 @@ public class EggSack : MonoBehaviour {
 
         }
     }
-    private int matureDurationTimeSteps = 360;  // max oldAge Time before beginning to rot
+    private int matureDurationTimeSteps = 60;  // max oldAge Time before beginning to rot
     public int _MatureDurationTimeSteps
     {
         get
@@ -75,6 +75,8 @@ public class EggSack : MonoBehaviour {
     public Vector2 fullSize;
     public Vector2 curSize;
 
+    public float timeOfBirthGrowthPercentage = 0.75f;
+
     //private Vector2 minSize = new Vector2(0.1f, 0.1f);
     
     private float minMass = 0.33f;
@@ -106,14 +108,15 @@ public class EggSack : MonoBehaviour {
 
     //public CapsuleCollider2D colliderBody;
     //public int parentCritterIndex = -1;
-    public SpringJoint2D springJoint;
+    public FixedJoint2D fixedJoint;
     public CapsuleCollider mouseClickCollider;
     public CapsuleCollider2D mainCollider;
     public Rigidbody2D rigidbodyRef;
     public Agent parentAgentRef;
+    public int parentAgentIndex;
     //public bool isAttachedToCritter = false; // while pregnant? is this redumdamt n
 
-    private float springJointMaxStrength = 5f;
+    private float springJointMaxStrength = 8f;
 
     // Use this for initialization
     void Start() {
@@ -132,12 +135,14 @@ public class EggSack : MonoBehaviour {
             mainCollider = this.gameObject.AddComponent<CapsuleCollider2D>();
             rigidbodyRef.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
 
-            springJoint = this.gameObject.AddComponent<SpringJoint2D>();
-            springJoint.enabled = false;
-            springJoint.autoConfigureDistance = false;
-            springJoint.distance = 0.1f;
-            springJoint.dampingRatio = 1f;
-            springJoint.frequency = 1f;
+            fixedJoint = this.gameObject.AddComponent<FixedJoint2D>();
+            fixedJoint.enabled = false;
+            fixedJoint.autoConfigureConnectedAnchor = false;
+            fixedJoint.anchor = new Vector2(0f, 0.05f);
+            //fixedJoint.autoConfigureDistance = false;
+            //fixedJoint.distance = 0.1f;
+            fixedJoint.dampingRatio = 0.001f;
+            fixedJoint.frequency = springJointMaxStrength;
             
             GameObject mouseClickColliderGO = new GameObject("MouseClickCollider");
             mouseClickColliderGO.transform.parent = this.gameObject.transform;
@@ -148,20 +153,34 @@ public class EggSack : MonoBehaviour {
         }
     }
 
-    public void InitializeEggSackFromGenomePregnant(EggSackGenome genome, Agent parentAgent) {
-        
-        index = genome.index;
-        this.fullSize = genome.fullSize;
-        foodAmount = 0.123456789f;  //  ********* UPDATE HOW FOODAMOUNT IS CALCULATED!!! -- maybe tie it into Resize() function?
+    public void InitializeEggSackFromGenomePregnant(int index, AgentGenome agentGenome, Agent parentAgent) {
+        parentAgentIndex = parentAgent.index;
+        this.index = index;
+        //float parentScale = agentGenome.bodyGenome.coreGenome.fullBodyWidth * 0.5f + agentGenome.bodyGenome.coreGenome.fullBodyLength * 0.5f;
+        //this.fullSize.x = parentScale * 0.6f; 
+        //this.fullSize.y = this.fullSize.x * 1.6f;
+
+        this.fullSize = new Vector2(agentGenome.bodyGenome.coreGenome.fullBodyWidth, agentGenome.bodyGenome.coreGenome.fullBodyLength) * 0.64f;
+
+        foodAmount = this.fullSize.x * this.fullSize.y;
+        //this.fullSize *= 1.4f;
         
         BeginLifeStageGrowingPregnant(parentAgent);
     }
-    public void InitializeEggSackFromGenomeImmaculate(EggSackGenome genome, StartPositionGenome startPos) {
+    public void InitializeEggSackFromGenomeImmaculate(int eggSackIndex, AgentGenome genome, StartPositionGenome startPos) {
         curLifeStage = EggLifeStage.GrowingIndependent;
 
-        index = genome.index;
-        this.fullSize = genome.fullSize;
+        parentAgentIndex = 0;
+
+        index = eggSackIndex;
+        float parentScale = genome.bodyGenome.coreGenome.fullBodyWidth * 0.5f + genome.bodyGenome.coreGenome.fullBodyLength * 0.5f;
+        this.fullSize.x = parentScale * 0.9f;  // golden ratio? // easter egg for math nerds?
+        this.fullSize.y = this.fullSize.x * 1.16f;    
+        
+        //this.fullSize = new Vector2(genome.bodyGenome.coreGenome.fullBodyWidth, genome.bodyGenome.coreGenome.fullBodyLength) * 0.64f;
+
         foodAmount = this.fullSize.x * this.fullSize.y;
+        this.fullSize *= 1.2f;
         
         lifeStageTransitionTimeStepCounter = 0;        
         growthStatus = 0f;
@@ -215,16 +234,15 @@ public class EggSack : MonoBehaviour {
         rigidbodyRef.velocity = Vector2.zero;
         rigidbodyRef.angularVelocity = 0f;
 
-
-        springJoint.connectedBody = parentAgent.bodyRigidbody;
-        springJoint.autoConfigureConnectedAnchor = false;
-        springJoint.anchor = Vector2.zero;
-        springJoint.connectedAnchor = Vector2.zero;
-        springJoint.dampingRatio = 1f;
-        springJoint.distance = 0f;
-        springJoint.enableCollision = false;
-        springJoint.enabled = true;
-        springJoint.frequency = 1f;
+        fixedJoint.connectedBody = parentAgent.bodyRigidbody;
+        fixedJoint.autoConfigureConnectedAnchor = false;
+        fixedJoint.anchor = new Vector2(0f, parentAgentRef.coreModule.coreLength * 0.05f);
+        fixedJoint.connectedAnchor = new Vector2(0f, -0.05f);
+        //fixedJoint.dampingRatio = 0.25f;
+        //fixedJoint.distance = 0f;
+        fixedJoint.enableCollision = false;
+        fixedJoint.enabled = true;
+        fixedJoint.frequency = springJointMaxStrength;
 
         mainCollider.enabled = true;  // ?? maybe??
 
@@ -232,25 +250,29 @@ public class EggSack : MonoBehaviour {
         healthStructural = 1f;
         prevPos = transform.position;        
 
-        UpdateEggSackSize(0f);
+        UpdateEggSackSize(0.1f);
     }
     private void CommenceBeingBorn() {
         curLifeStage = EggLifeStage.BeingBorn;
-        Debug.Log("Begin Birth!");
+        //Debug.Log("Begin Birth!");
         lifeStageTransitionTimeStepCounter = 0;
     }
     private void BeginLifeStageGrowingIndependent() {
         curLifeStage = EggLifeStage.GrowingIndependent;
-        Debug.Log("EGGS FULLY LAID (LAIN?)!");
+        //Debug.Log("EGGS FULLY LAID (LAIN?)!");
         lifeStageTransitionTimeStepCounter = 0;
 
-        parentAgentRef.EndPregnancy(); // ???
-        parentAgentRef = null;
-        
+        if(parentAgentRef != null) {
+            parentAgentRef.EndPregnancy(true); // ???
+            parentAgentRef = null;   
+        }             
 
-        springJoint.enabled = false;
-        springJoint.enableCollision = true;
-        springJoint.connectedBody = null;
+        fixedJoint.enabled = false;
+        fixedJoint.enableCollision = false;
+        //fixedJoint.connectedBody = null;
+        
+        fixedJoint.dampingRatio = 0.001f;
+        fixedJoint.frequency = 0f;
 
         mainCollider.enabled = true;
         // size collider properly here:
@@ -263,6 +285,17 @@ public class EggSack : MonoBehaviour {
         growthStatus = 1f;
 
         UpdateEggSackSize(1f);
+    }
+    public void ParentDiedWhilePregnant() {
+
+        parentAgentRef = null;
+        fixedJoint.enabled = false;
+        fixedJoint.enableCollision = false;
+        fixedJoint.connectedBody = null;
+
+        curLifeStage = EggLifeStage.Decaying;
+
+        lifeStageTransitionTimeStepCounter = 0;
     }
    
     private void CheckForLifeStageTransition() {
@@ -309,10 +342,12 @@ public class EggSack : MonoBehaviour {
                     curLifeStage = EggLifeStage.Decaying;
                 }*/
                 if(lifeStageTransitionTimeStepCounter >= matureDurationTimeSteps) {
-                    curLifeStage = EggLifeStage.Decaying;                    
+                    curLifeStage = EggLifeStage.Decaying;
+                    lifeStageTransitionTimeStepCounter = 0;
                 }
                 if(transform.position.x > SimulationManager._MapSize || transform.position.x < 0f || transform.position.y > SimulationManager._MapSize || transform.position.y < 0f) {
-                    curLifeStage = EggLifeStage.Decaying;   
+                    curLifeStage = EggLifeStage.Decaying;
+                    lifeStageTransitionTimeStepCounter = 0;
                 }
                 break;
             case EggLifeStage.Decaying:
@@ -334,7 +369,11 @@ public class EggSack : MonoBehaviour {
         }
     }
     public void Tick() {
-        facingDirection = new Vector2(Mathf.Cos(Mathf.Deg2Rad * transform.localEulerAngles.z + Mathf.PI * 0.5f), Mathf.Sin(Mathf.Deg2Rad * transform.localEulerAngles.z + Mathf.PI * 0.5f));
+        //facingDirection = new Vector2(Mathf.Cos(Mathf.Deg2Rad * transform.localEulerAngles.z + Mathf.PI * 0.5f), Mathf.Sin(Mathf.Deg2Rad * transform.localEulerAngles.z + Mathf.PI * 0.5f));
+
+        float rotationInRadians = (rigidbodyRef.transform.localRotation.eulerAngles.z + 90f) * Mathf.Deg2Rad;
+        facingDirection = new Vector2(Mathf.Cos(rotationInRadians), Mathf.Sin(rotationInRadians));
+
         // Check for StateChange:
         CheckForLifeStageTransition();
         
@@ -377,7 +416,7 @@ public class EggSack : MonoBehaviour {
     private void TickGrowingInsideParent() {    ///  ***** v v v *** REFACTOR!!!!!
         lifeStageTransitionTimeStepCounter++;
 
-        float growthPercentage = (float)lifeStageTransitionTimeStepCounter / (float)(pregnantDurationTimeSteps + birthDurationTimeSteps + growDurationTimeSteps);
+        float growthPercentage = (float)lifeStageTransitionTimeStepCounter / (float)(pregnantDurationTimeSteps + birthDurationTimeSteps);
         growthStatus = growthPercentage;
 
         if(lifeStageTransitionTimeStepCounter % numSkipFramesResize == 0) {
@@ -387,22 +426,34 @@ public class EggSack : MonoBehaviour {
     private void TickBeingBorn() {
         lifeStageTransitionTimeStepCounter++;
 
-        float birthPercentage = (float)lifeStageTransitionTimeStepCounter / (float)birthDurationTimeSteps;
-        float springStrength = Mathf.Lerp(springJointMaxStrength, 0.001f, birthPercentage);
-        float springDistance = Mathf.Lerp(0f, parentAgentRef.colliderBody.size.magnitude, birthPercentage);
+        float growthPercentage = (float)(lifeStageTransitionTimeStepCounter + pregnantDurationTimeSteps) / (float)(pregnantDurationTimeSteps + birthDurationTimeSteps);
+        growthStatus = growthPercentage;
+        
+        float birthPercentage = Mathf.Clamp01((float)lifeStageTransitionTimeStepCounter / (float)birthDurationTimeSteps);
+        float lerpVal = birthPercentage * birthPercentage;
 
-        springJoint.frequency = springStrength;
-        springJoint.distance = springDistance;
+        float springStrength = Mathf.Lerp(springJointMaxStrength, 0f, lerpVal);
+        //float springDistance = Mathf.Lerp(0f, parentAgentRef.colliderBody.size.magnitude, birthPercentage);
+
+        fixedJoint.frequency = springStrength;
+        //fixedJoint.dampingRatio = Mathf.Lerp(0.25f, 0f, birthPercentage);
+
+        fixedJoint.anchor = Vector2.Lerp(new Vector2(0f, parentAgentRef.coreModule.coreLength * 0.05f), new Vector2(0f, parentAgentRef.coreModule.coreLength * 1.4f), birthPercentage);
+        fixedJoint.connectedAnchor = Vector2.Lerp(new Vector2(0f, -parentAgentRef.coreModule.coreLength * 0.05f), new Vector2(0f, -parentAgentRef.coreModule.coreLength * 1.4f), birthPercentage);
+
+        //fixedJoint.distance = springDistance;
+
     }
     private void TickGrowingIndependent() {
         lifeStageTransitionTimeStepCounter++;
 
-        float growthPercentage = (float)(lifeStageTransitionTimeStepCounter + pregnantDurationTimeSteps + birthDurationTimeSteps) / (float)(pregnantDurationTimeSteps + birthDurationTimeSteps + growDurationTimeSteps);
+
+        float growthPercentage = 1f; // Mathf.Clamp01((float)(lifeStageTransitionTimeStepCounter) / (float)(36));
         growthStatus = growthPercentage;
 
         if(lifeStageTransitionTimeStepCounter % numSkipFramesResize == 0) {
-            UpdateEggSackSize(growthStatus);
-        } 
+            UpdateEggSackSize(growthStatus); // * (1f - timeOfBirthGrowthPercentage) + timeOfBirthGrowthPercentage);
+        }
     }
     private void TickMature() {
         lifeStageTransitionTimeStepCounter++;

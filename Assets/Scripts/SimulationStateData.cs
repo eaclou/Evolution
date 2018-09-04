@@ -63,6 +63,19 @@ public class SimulationStateData {
         public float accel;
 		public float smoothedThrottle;
     }
+    public struct EggSackSimData {  // 12f + 2i
+        public int parentAgentIndex;
+        public Vector2 worldPos;
+        public Vector2 velocity;
+        public Vector2 heading;
+        public Vector2 fullSize;
+        public float foodAmount;
+        public float growth;
+        public float decay;
+        public float health;
+        public int brushType;
+    }
+    /*
     public struct FoodSimData {  
         public Vector2 worldPos;
         public Vector2 velocity;
@@ -79,6 +92,7 @@ public class SimulationStateData {
         public Vector3 leafHue;
         public Vector3 fruitHue;
     }
+    */
     public struct StemData {  // Only the main trunk for now!!! worry about other ones later!!! SIMPLIFY!!!
         public int foodIndex;
         public Vector2 localBaseCoords;  // main trunk is always (0, -1f) --> (0f, 1f), secondary stems need to start with x=0 (to be on main trunk)
@@ -94,11 +108,12 @@ public class SimulationStateData {
         public Vector2 localScale;
         public float attached;  // if attached, sticks to parent food, else, floats in water
     }
-    public struct FruitData {
-        public int foodIndex;
+    public struct EggData {  // 8f + 1i
+        public int eggSackIndex;
         public Vector2 worldPos;
         public Vector2 localCoords;
         public Vector2 localScale;
+        public float lifeStage;  // how grown is it?
         public float attached;  // if attached, sticks to parent food, else, floats in water
     }
 
@@ -114,7 +129,7 @@ public class SimulationStateData {
     public CritterSimData[] critterSimDataArray;
     //public DebugBodyResourcesData[] debugBodyResourcesArray;
     public AgentMovementAnimData[] agentMovementAnimDataArray;
-    public FoodSimData[] eggSackSimDataArray;
+    public EggSackSimData[] eggSackSimDataArray;
     //public PredatorSimData[] predatorSimDataArray;
 
     // Store computeBuffers here or in RenderKing?? These ones seem appropo for StateData but buffers of floatyBits for ex. might be better in RK....
@@ -128,7 +143,7 @@ public class SimulationStateData {
 
     public ComputeBuffer foodStemDataCBuffer;
     public ComputeBuffer foodLeafDataCBuffer;
-    public ComputeBuffer foodFruitDataCBuffer;
+    public ComputeBuffer eggDataCBuffer;
         
     public Vector2[] fluidVelocitiesAtAgentPositionsArray;  // Grabs info about how Fluid should affect Agents from GPU
     public Vector4[] agentFluidPositionsArray;  // zw coords holds xy radius of agent  // **** Revisit this?? Redundancy btw AgentSimData worldPos (but simData doesn't have agent Radius)
@@ -176,11 +191,11 @@ public class SimulationStateData {
         }
         agentMovementAnimDataCBuffer = new ComputeBuffer(agentMovementAnimDataArray.Length, sizeof(float) * 4);
 
-        eggSackSimDataArray = new FoodSimData[simManager._NumEggSacks];
+        eggSackSimDataArray = new EggSackSimData[simManager._NumEggSacks];
         for (int i = 0; i < eggSackSimDataArray.Length; i++) {
-            eggSackSimDataArray[i] = new FoodSimData();
+            eggSackSimDataArray[i] = new EggSackSimData();
         }
-        eggSackSimDataCBuffer = new ComputeBuffer(eggSackSimDataArray.Length, sizeof(float) * 23 + sizeof(int) * 3); // got big
+        eggSackSimDataCBuffer = new ComputeBuffer(eggSackSimDataArray.Length, sizeof(float) * 12 + sizeof(int) * 2);
 
         //StemData[] stemDataArray = new StemData[simManager._NumFood]; // one per food at first: // do this individually in a loop using the update kernel?
         //for (int i = 0; i < stemDataArray.Length; i++) {
@@ -188,7 +203,8 @@ public class SimulationStateData {
         //}
         foodStemDataCBuffer = new ComputeBuffer(simManager._NumEggSacks, sizeof(float) * 7 + sizeof(int) * 1);
         foodLeafDataCBuffer = new ComputeBuffer(simManager._NumEggSacks * 16, sizeof(float) * 7 + sizeof(int) * 1);
-        foodFruitDataCBuffer = new ComputeBuffer(eggSackSimDataCBuffer.count * 64, sizeof(float) * 7 + sizeof(int) * 1);
+
+        eggDataCBuffer = new ComputeBuffer(eggSackSimDataCBuffer.count * 64, sizeof(float) * 8 + sizeof(int) * 1);
 
         /*predatorSimDataArray = new PredatorSimData[simManager._NumPredators];
         for (int i = 0; i < predatorSimDataArray.Length; i++) {
@@ -310,6 +326,9 @@ public class SimulationStateData {
             if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Dead) {
                 decay = (float)simManager.agentsArray[i].lifeStageTransitionTimeStepCounter / (float)simManager.agentsArray[i]._DecayDurationTimeSteps;
             }
+            if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.AwaitingRespawn) {
+                decay = 1f;
+            }
             critterSimDataArray[i].decayPercentage = decay;
 
             if(simManager.agentsArray[i].isBeingSwallowed)
@@ -401,22 +420,31 @@ public class SimulationStateData {
 
         for (int i = 0; i < simManager._NumEggSacks; i++) {
             Vector3 eggSackPos = simManager.eggSackArray[i].transform.position;
+            int speciesSize = simManager._NumAgents / 4;
+            int eggSpecies = Mathf.FloorToInt((float)i / (float)simManager._NumEggSacks * 4f);
+            int agentGenomeIndex = simManager.eggSackArray[i].parentAgentIndex; // eggSpecies * speciesSize; // UnityEngine.Random.Range(eggSpecies * speciesSize, (eggSpecies + 1) * speciesSize);
+            //if(simManager.eggSackArray[i].parentAgentRef != null) {
+                //agentGenomeIndex = eggSpecies * speciesSize;
+                //agentGenomeIndex = simManager.eggSackArray[i].parentAgentRef.index;
+            //}            
+            eggSackSimDataArray[i].parentAgentIndex = agentGenomeIndex;
             eggSackSimDataArray[i].worldPos = new Vector2(eggSackPos.x, eggSackPos.y);
             // *** Revisit to avoid using GetComponent, should use cached reference instead for speed:
-            eggSackSimDataArray[i].velocity = new Vector2(simManager.eggSackArray[i].GetComponent<Rigidbody2D>().velocity.x, simManager.eggSackArray[i].GetComponent<Rigidbody2D>().velocity.y);
+            eggSackSimDataArray[i].velocity = simManager.eggSackArray[i].rigidbodyRef.velocity; // new Vector2(simManager.eggSackArray[i].rigidbodyRef.velocity.x, simManager.eggSackArray[i].rigidbodyRef.velocity.y);
             eggSackSimDataArray[i].heading = simManager.eggSackArray[i].facingDirection;
+            //eggSackSimDataArray[i].heading = new Vector2(Mathf.Cos(Time.realtimeSinceStartup), Mathf.Sin(Time.realtimeSinceStartup)).normalized;
             eggSackSimDataArray[i].fullSize = simManager.eggSackArray[i].fullSize;
-            eggSackSimDataArray[i].foodAmount = new Vector3(simManager.eggSackArray[i].foodAmount, simManager.eggSackArray[i].foodAmount, simManager.eggSackArray[i].foodAmount);
+            eggSackSimDataArray[i].foodAmount = simManager.eggSackArray[i].foodAmount; // new Vector3(simManager.eggSackArray[i].foodAmount, simManager.eggSackArray[i].foodAmount, simManager.eggSackArray[i].foodAmount);
             eggSackSimDataArray[i].growth = simManager.eggSackArray[i].growthStatus;
             eggSackSimDataArray[i].decay = simManager.eggSackArray[i].decayStatus;
             eggSackSimDataArray[i].health = simManager.eggSackArray[i].healthStructural;
             // v v v below can be moved to a more static buffer eventually since they don't change every frame:
-            eggSackSimDataArray[i].stemBrushType = simManager.eggSackGenomePoolArray[i].stemBrushType;
-            eggSackSimDataArray[i].leafBrushType = simManager.eggSackGenomePoolArray[i].leafBrushType;
-            eggSackSimDataArray[i].fruitBrushType = simManager.eggSackGenomePoolArray[i].fruitBrushType;
-            eggSackSimDataArray[i].stemHue = simManager.eggSackGenomePoolArray[i].stemHue;
-            eggSackSimDataArray[i].leafHue = simManager.eggSackGenomePoolArray[i].leafHue;
-            eggSackSimDataArray[i].fruitHue = simManager.eggSackGenomePoolArray[i].fruitHue;
+            //eggSackSimDataArray[i].stemBrushType = simManager.eggSackGenomePoolArray[i].stemBrushType;
+            //eggSackSimDataArray[i].leafBrushType = simManager.eggSackGenomePoolArray[i].leafBrushType;
+            //eggSackSimDataArray[i].fruitBrushType = simManager.eggSackGenomePoolArray[i].fruitBrushType;
+            //eggSackSimDataArray[i].stemHue = simManager.eggSackGenomePoolArray[i].stemHue;
+            //eggSackSimDataArray[i].leafHue = simManager.eggSackGenomePoolArray[i].leafHue;
+            //eggSackSimDataArray[i].fruitHue = simManager.eggSackGenomePoolArray[i].fruitHue;
             
 
             // Z & W coords represents agent's x/y Radii (in FluidCoords)

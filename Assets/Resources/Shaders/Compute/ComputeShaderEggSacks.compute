@@ -1,0 +1,92 @@
+﻿#pragma kernel CSSimulateEggs
+#pragma kernel CSUpdateDynamicEggBuffers
+
+#include "Assets/Resources/Shaders/Inc/StructsEggData.cginc"
+#include "Assets/Resources/Shaders/Inc/CritterBodyAnimation.cginc"
+
+StructuredBuffer<CritterInitData> critterInitDataCBuffer;
+StructuredBuffer<CritterSimData> critterSimDataCBuffer;
+StructuredBuffer<EggSackSimData> eggSackSimDataCBuffer;
+StructuredBuffer<EggData> eggDataUpdateCBuffer;
+RWStructuredBuffer<EggData> eggDataWriteCBuffer;
+
+Texture2D<float4> velocityRead;
+
+SamplerState _LinearClamp;
+SamplerState _LinearRepeat;
+
+uniform float _MapSize;
+
+float rand(float2 co){   // OUTPUT is in [0,1] RANGE!!!
+	return frac(sin(dot(co.xy ,float2(12.9898,78.233))) * 43758.5453);
+}
+
+float length_squared(float2 v, float2 w) {
+	float2 r = w - v;
+	float distSqr = (r.x * r.x + r.y * r.y);
+	return distSqr;
+}
+
+float minimum_distance(float2 v, float2 w, float2 p) {
+	// Return minimum distance between line segment vw and point p
+	const float l2 = length_squared(v, w);  // i.e. |w-v|^2 -  avoid a sqrt
+	if (l2 == 0.0) {
+	return length(v - p);   // v == w case
+	}
+	// Consider the line extending the segment, parameterized as v + t (w - v).
+	// We find projection of point p onto the line. 
+	// It falls where t = [(p-v) . (w-v)] / |w-v|^2
+	// We clamp t from [0,1] to handle points outside the segment vw.
+	const float t = max(0, min(1, dot(p - v, w - v) / l2));
+	const float2 projection = v + t * (w - v);  // Projection falls on the segment
+	return distance(p, projection);
+}
+
+[numthreads(64,1,1)]
+void CSSimulateEggs (uint3 id : SV_DispatchThreadID)
+{
+	EggData eggData = eggDataWriteCBuffer[id.x];
+	EggSackSimData eggSackSimData = eggSackSimDataCBuffer[eggData.eggSackIndex];
+
+	float orderVal = fmod(id.x, 64) / 64;
+	float distToCore = minimum_distance(float2(0,-0.5), float2(0,0.5), eggData.localCoords);
+	float eatenLerp = saturate(((distToCore + 0.065) * 1.0 - eggSackSimData.foodAmount) * 8);
+
+	float attached = 1; // = saturate(length(eggSackSimData.foodAmount));
+	
+	if(eatenLerp > 0.5) {
+		attached = 0;
+	}
+	eggData.attached = attached;
+
+	float2 curPos = eggData.worldPos;
+	
+	float2 forwardFood = eggSackSimData.heading;
+	float2 rightFood = float2(forwardFood.y, -forwardFood.x);
+	float2 positionOffset = float2(eggData.localCoords.x * rightFood * eggSackSimData.fullSize.x + eggData.localCoords.y * forwardFood * eggSackSimData.fullSize.y) * 0.6 * saturate(eggSackSimData.growth * 1.46);
+
+	positionOffset = float2(rand(float2(orderVal * 8.14, (float)id.x * 9.1132)), rand(float2((float)id.x, orderVal * -2.14)));
+	float2 targetPos = eggSackSimData.worldPos + positionOffset; // + transformed offset of fruit
+
+	float lerpSpeed = 1;
+	float2 newPos = lerp(curPos, targetPos, lerpSpeed * eggData.attached);
+
+	float2 uv = newPos / _MapSize;
+	float2 fluidVel = velocityRead.SampleLevel(_LinearRepeat, uv, 0).xy;
+	float speedMult = 0.033 * _MapSize;
+
+	newPos = newPos + fluidVel * speedMult;
+
+	eggDataWriteCBuffer[id.x].worldPos = newPos;
+}
+
+[numthreads(1,1,1)]
+void CSUpdateDynamicEggBuffers (uint3 id : SV_DispatchThreadID)
+{	
+	for(int i = 0; i < 64; i++) {
+		EggData eggData = eggDataUpdateCBuffer[i];
+		int eggSackIndex = eggData.eggSackIndex;
+
+		eggDataWriteCBuffer[eggSackIndex * 64 + i] = eggData;
+	}		
+}

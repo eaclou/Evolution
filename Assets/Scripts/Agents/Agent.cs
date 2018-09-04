@@ -156,7 +156,7 @@ public class Agent : MonoBehaviour {
 
     public EggSack childEggSackRef;
     public bool isPregnantAndCarryingEggs = false;
-    public int pregnancyRefactoryDuration = 720;
+    public int pregnancyRefactoryDuration = 320;
     
     // Use this for initialization
     private void Awake() {
@@ -455,7 +455,9 @@ public class Agent : MonoBehaviour {
         springJoint.connectedBody = null;
         springJoint.enabled = false;
 
-        EndPregnancy();
+        if(isPregnantAndCarryingEggs) {
+            EndPregnancy(false);
+        }        
     }
     private void CheckForLifeStageTransition() {
         switch(curLifeStage) {
@@ -508,7 +510,7 @@ public class Agent : MonoBehaviour {
                 parentEggSackRef = null;
                 childEggSackRef = null;
 
-                EndPregnancy();
+                //EndPregnancy(false); // needed? should have been handled during ProcessDeath function
 
                 colliderBody.enabled = false;
 
@@ -668,6 +670,7 @@ public class Agent : MonoBehaviour {
     // *** Condense these into ONE?
     private void TickEgg() {        
         lifeStageTransitionTimeStepCounter++;
+
         
         // *** This seems wrong -- Should be handled in a different spot
         if(isBeingSwallowed)
@@ -686,6 +689,17 @@ public class Agent : MonoBehaviour {
         }
         else {
             coreModule.energyStored[0] = 1f;
+
+            if(parentEggSackRef != null) {
+                float growthPercentage = (float)lifeStageTransitionTimeStepCounter / (float)_GestationDurationTimeSteps;
+
+                float targetDist = Mathf.Lerp(0.05f, parentEggSackRef.fullSize.magnitude * 0.5f, growthPercentage);
+
+                springJoint.distance = targetDist;
+            }
+            else {
+                springJoint.enableCollision = false;
+            }
         }
 
     }
@@ -786,8 +800,16 @@ public class Agent : MonoBehaviour {
         childEggSackRef = developingEggSackRef;
         
     }
-    public void EndPregnancy() {
+    public void EndPregnancy(bool wasSuccessful) {
         //Debug.Log("EndPregnancy!");
+
+        if(wasSuccessful) {
+
+        }
+        else {
+            childEggSackRef.ParentDiedWhilePregnant();
+        }
+        
         isPregnantAndCarryingEggs = false;
         childEggSackRef = null;
 
@@ -1147,18 +1169,27 @@ public class Agent : MonoBehaviour {
         averageFullSizeWidth = avgSegmentWidth;       
     }
     
-    public void ReconstructAgentGameObjects(AgentGenome genome, EggSack parentEggSack) {
+    public void ReconstructAgentGameObjects(AgentGenome genome, EggSack parentEggSack, Vector3 startPos, bool isImmaculate) {
 
         InitializeAgentWidths(genome);
         InitializeGameObjectsAndComponents();        
 
         // *** Positioning and Pinning to parentEggSack HERE:
-        bodyGO.transform.localPosition = parentEggSack.gameObject.transform.position; // startPos.startPosition;        
-        springJoint.connectedBody = parentEggSack.rigidbodyRef;
+        bodyGO.transform.position = startPos;
+
         springJoint.distance = 0.005f;
-        springJoint.enableCollision = false;
-        springJoint.enabled = true;
-        springJoint.frequency = 3.9f;
+        springJoint.enableCollision = false;        
+        springJoint.frequency = 5f;
+
+        if(isImmaculate) {            
+            springJoint.connectedBody = null; // parentEggSack.rigidbodyRef;
+            springJoint.enabled = false;
+        }
+        else {
+            //bodyGO.transform.localPosition = parentEggSack.gameObject.transform.position; // startPos.startPosition;        
+            springJoint.connectedBody = parentEggSack.rigidbodyRef;
+            springJoint.enabled = true;
+        }                
               
         bodyRigidbody.drag = 13f; // bodyDrag;
         bodyRigidbody.angularDrag = 15f;
@@ -1185,7 +1216,33 @@ public class Agent : MonoBehaviour {
         mouseClickCollider.height = coreModule.coreLength / 2f * spawnStartingScale;
     }
 
-    public void InitializeSpawnAgentFromGenome(int agentIndex, AgentGenome genome, EggSack parentEggSack) {        
+    public void InitializeSpawnAgentImmaculate(int agentIndex, AgentGenome genome, StartPositionGenome startPos) {        
+        index = agentIndex;        
+                
+        curLifeStage = AgentLifeStage.Egg;
+        parentEggSackRef = null;
+        this.fullSizeBoundingBox = new Vector3(genome.bodyGenome.coreGenome.fullBodyWidth, genome.bodyGenome.coreGenome.fullBodyLength, genome.bodyGenome.coreGenome.fullBodyWidth); // ** REFACTOR ***
+        
+        animationCycle = 0f;
+        lifeStageTransitionTimeStepCounter = 0;
+        pregnancyRefactoryTimeStepCounter = 0;
+        ageCounterMature = 0;
+        growthPercentage = 0f;
+        scoreCounter = 0;
+        totalFoodEaten = 0f;
+        turningAmount = 5f; // temporary for zygote animation
+        facingDirection = new Vector2(0f, 1f);
+        throttle = Vector2.zero;
+        smoothedThrottle = new Vector2(0f, 0.01f); 
+        
+        InitializeModules(genome);      // Modules need to be created first so that Brain can map its neurons to existing modules  
+        
+        // Upgrade this to proper Pooling!!!!
+        ReconstructAgentGameObjects(genome, null, startPos.startPosition, true);
+
+        brain = new Brain(genome.brainGenome, this);               
+    }
+    public void InitializeSpawnAgentFromEggSack(int agentIndex, AgentGenome genome, EggSack parentEggSack) {        
         index = agentIndex;        
                 
         curLifeStage = AgentLifeStage.Egg;
@@ -1207,10 +1264,9 @@ public class Agent : MonoBehaviour {
         InitializeModules(genome);      // Modules need to be created first so that Brain can map its neurons to existing modules  
         
         // Upgrade this to proper Pooling!!!!
-        ReconstructAgentGameObjects(genome, parentEggSack);
+        ReconstructAgentGameObjects(genome, parentEggSack, parentEggSack.gameObject.transform.position, false);
 
-        brain = new Brain(genome.brainGenome, this);
-               
+        brain = new Brain(genome.brainGenome, this);               
     }
 
 
