@@ -36,6 +36,15 @@ public class CritterMouthComponent : MonoBehaviour {
 		
 	}
 
+    public void Disable() {
+        triggerCollider.enabled = false;
+        isBiting = false;        
+    }
+    public void Enable() {
+        triggerCollider.enabled = true;
+        bitingFrameCounter = 0;
+    }
+
     public void InitiateActiveBite() {
         if (isBiting) {
 
@@ -46,7 +55,6 @@ public class CritterMouthComponent : MonoBehaviour {
             bitingFrameCounter = 0;
         }
     }
-
     
 
     private void ActiveBiteCheck(Collider2D collider) {
@@ -94,7 +102,7 @@ public class CritterMouthComponent : MonoBehaviour {
 
             if(ownBiteArea > targetArea) {
                 // Swallow!:::
-                SwallowFoodWhole(collidingFoodModule);
+                SwallowEggSackWhole(collidingFoodModule);
             }
             else {
                 // Bite off a smaller chunk -- sharper teeth better?
@@ -149,7 +157,7 @@ public class CritterMouthComponent : MonoBehaviour {
         //preyAgent.curLifeStage = Agent.AgentLifeStage.Dead;
         // Credit food:
         float flow = preyAgent.growthPercentage * preyAgent.coreModule.coreWidth * preyAgent.coreModule.coreLength + preyAgent.coreModule.stomachContents;
-        agentRef.EatFood(flow * 2f); // assumes all foodAmounts are equal !! *****  
+        agentRef.EatFood(flow * 1f); // assumes all foodAmounts are equal !! *****  
         //Debug.Log("SwallowAnimalWhole. foodFlow: " + flow.ToString() + ", agentStomachContents: " + agentRef.coreModule.stomachContents.ToString());
         // **** Not removing Animal? --> need to attach?
     }
@@ -162,47 +170,22 @@ public class CritterMouthComponent : MonoBehaviour {
         }
         else
         {
-            preyAgent.InitiateBeingSwallowed(predatorAgent);
-            preyAgent.curLifeStage = Agent.AgentLifeStage.Dead;
-            preyAgent.colliderBody.enabled = false;
-
-
+            preyAgent.InitiateBeingSwallowed(predatorAgent);            
             predatorAgent.InitiateSwallowingPrey(preyAgent);
-            predatorAgent.springJoint.connectedBody = preyAgent.bodyRigidbody;
-            predatorAgent.springJoint.distance = 0.005f;
-            predatorAgent.springJoint.enableCollision = false;
-            predatorAgent.springJoint.enabled = true;
-            predatorAgent.springJoint.frequency = 3.9f;
 
-
-            Vector3 predPos = predatorAgent.bodyRigidbody.transform.position;
-            Vector3 preyPos = preyAgent.bodyRigidbody.transform.position;
-            float dist = (preyPos - predPos).magnitude;
-
-            //Debug.Log("ProcessPredatorySwallowAttempt!\nPredPos: " + predPos.ToString() + "\nPreyPos: " + preyPos.ToString() + "\nDistance: " + dist.ToString());
-            if(dist > 5f)
-            {
-                Debug.Log("ProcessPredatorySwallowAttempt!\nDistance: " + dist.ToString() + "\nPredPos: " + predPos.ToString() + "\nPreyPos: " + preyPos.ToString() + "\n");
-            }
-            
         }
 
         
     }
-    private void SwallowFoodWhole(EggSack foodModule) {
+    private void SwallowEggSackWhole(EggSack foodModule) {
         //Debug.Log("SwallowFoodWhole");
         float flow = foodModule.curSize.x * foodModule.curSize.y;        
         agentRef.EatFood(flow * 1f);    
         foodModule.foodAmount = 0f;
-        //foodModule.amountG = 0f;
-        //foodModule.amountB = 0f;
     }
     private void BiteDamageAnimal(Agent preyAgent, float ownBiteArea, float targetArea) {
         //Debug.Log("BiteDamageAnimal");
-        float baseDamage = 0.55f;
-
-        //float mouthSize = triggerCollider.radius * triggerCollider.radius;
-        //float targetSize = segment.agentRef.growthPercentage * segment.agentRef.coreModule.coreLength * segment.agentRef.coreModule.coreWidth;
+        float baseDamage = 0.5f;
 
         float sizeRatio = ownBiteArea / targetArea; // for now clamped to 10x
 
@@ -245,7 +228,7 @@ public class CritterMouthComponent : MonoBehaviour {
     {        
         float flow = ownBiteArea * 2f; // / colliderCount;
 
-        float flowR = Mathf.Min(corpseAgent.corpseFoodAmount, flow);
+        float flowR = Mathf.Min(corpseAgent.currentCorpseFoodAmount, flow);
         //collidingAgent.testModule.foodAmountR[0] += flowR * 2f;  // make sure Agent doesn't receive food from empty dispenser
 
         agentRef.EatFood(flowR * 1f); // assumes all foodAmounts are equal !! *****

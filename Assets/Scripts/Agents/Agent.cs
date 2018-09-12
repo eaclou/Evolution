@@ -4,28 +4,17 @@ using UnityEngine;
 
 public class Agent : MonoBehaviour {
 
-    public float frequency = 4.5f;
-    public float amplitude = 0f;
-    public float offsetDelay = 1.3f;
-    public float headDrag = 8f;
-    public float bodyDrag = 8f;
-    public float headMass = 1f;
-    public float bodyMass = 1f;
-    public float speed = 500f;
-    public float jointSpeed = 100f;
-    public float jointMaxTorque = 250f;
-    public float swimAnimationCycleSpeed = 0.025f;
-    public float smoothedThrottleLerp = 0.65f;
-    public float restingJointTorque = 10f;
-    public float bendRatioHead = 0f;
-    public float bendRatioTailTip = 1f;
-
     public float totalFoodEaten = 0f;
 
+    public float speed = 500f;
+    public float smoothedThrottleLerp = 0.2f;
     public float animationCycle = 0f;
     public float turningAmount = 0f;
+    public float swimAnimationCycleSpeed = 0.025f;
 
-    public float spawnStartingScale = 0.25f;
+    public float spawnStartingScale = 0.167f; // *** REFACTOR!!! SYNC WITH EGGS!!!
+
+    public bool isInert = true;  // when inert, colliders disabled
 
     public int index;
     
@@ -38,7 +27,7 @@ public class Agent : MonoBehaviour {
         Dead,
         Null
     }
-    private int gestationDurationTimeSteps = 180;
+    private int gestationDurationTimeSteps = 640;
     public int _GestationDurationTimeSteps
     {
         get
@@ -50,7 +39,7 @@ public class Agent : MonoBehaviour {
 
         }
     }
-    private int youngDurationTimeSteps = 600;
+    private int youngDurationTimeSteps = 480;
     public int _YoungDurationTimeSteps
     {
         get
@@ -75,23 +64,23 @@ public class Agent : MonoBehaviour {
 
         }
     }
+    private int maxGrowthPeriod = 1280;
 
-    private int growthScalingSkipFrames = 12;
+    private int growthScalingSkipFrames = 8;
 
     public float growthPercentage = 0f;
    
     public Brain brain;
     public GameObject bodyGO;
     public Rigidbody2D bodyRigidbody;
-    //public CritterSegment bodyCritterSegment;
-
+    
         // MODULES:::
     public CritterModuleCore coreModule;
     public CritterModuleMovement movementModule;
     public CritterMouthComponent mouthRef;
 
     public CapsuleCollider2D colliderBody;
-    public SpringJoint2D springJoint;
+    public SpringJoint2D springJoint;   // Used to attach to EggSack Object while still in Egg stage
     public CapsuleCollider mouseClickCollider;
     
     public Vector3 fullSizeBoundingBox;
@@ -99,15 +88,7 @@ public class Agent : MonoBehaviour {
     public float fullSizeBodyVolume = 1f;
     public float centerOfMass = 0f;
     
-    //public bool isInsideFood = false;
-        
-    //public bool humanControlled = false;
-    //public float humanControlLerp = 0f;
-    //public bool isNull = false;
-
-    //public bool wasImpaled = false;
-        
-    public Texture2D textureHealth;
+    //public Texture2D textureHealth;
     private int widthsTexResolution = 16;
     public float[] agentWidthsArray;
 
@@ -116,7 +97,8 @@ public class Agent : MonoBehaviour {
     public int scoreCounter = 0;
     public int pregnancyRefactoryTimeStepCounter = 0;
 
-    public float corpseFoodAmount = 1f;
+    public float currentCorpseFoodAmount = 1f;
+    //private float maxCorpseFoodAmountAtDeath
 
     private Vector3 prevPos;
     public Vector3 _PrevPos
@@ -140,6 +122,7 @@ public class Agent : MonoBehaviour {
 
     public float avgVel;
     public float avgFluidVel;
+    public float depth;
 
     public int speciesIndex = -1;
 
@@ -156,7 +139,9 @@ public class Agent : MonoBehaviour {
 
     public EggSack childEggSackRef;
     public bool isPregnantAndCarryingEggs = false;
-    public int pregnancyRefactoryDuration = 320;
+    public int pregnancyRefactoryDuration = 480;
+
+    public float overflowFoodAmount = 0f;
     
     // Use this for initialization
     private void Awake() {
@@ -171,14 +156,32 @@ public class Agent : MonoBehaviour {
 
     public void SetToAwaitingRespawn() {
         curLifeStage = AgentLifeStage.AwaitingRespawn;
+
+        isInert = true;
     }
 
     public void InitiateBeingSwallowed(Agent predatorAgent)
     {
+        curLifeStage = Agent.AgentLifeStage.Dead; // ....
 
+        //predatorAgent.springJoint.enabled = false; // spring joint is used while an Egg to attach to main eggSack, and when being swallowed to pin it to predator stomach?
+        //predatorAgent.springJoint.connectedBody = null;
+        isInert = true;
+
+        colliderBody.enabled = false;
         isBeingSwallowed = true;
         beingSwallowedFrameCounter = 0;
         predatorAgentRef = predatorAgent;
+
+        springJoint.connectedBody = predatorAgentRef.bodyRigidbody;
+        springJoint.autoConfigureConnectedAnchor = false;
+        springJoint.anchor = Vector2.zero;
+        springJoint.connectedAnchor = Vector2.zero;
+        springJoint.autoConfigureDistance = false;
+        springJoint.distance = 0.005f;
+        springJoint.enableCollision = false;
+        springJoint.enabled = true;
+        springJoint.frequency = 15f;
     }
     public void InitiateSwallowingPrey(Agent preyAgent)
     {
@@ -193,9 +196,9 @@ public class Agent : MonoBehaviour {
     private int GetNumOutputs() {
         return 7;  // make more robust later!
     } // *** UPGRADE!!!!
-    public DataSample RecordData() {
+    /*public DataSample RecordData() {
         DataSample sample = new DataSample(GetNumInputs(), GetNumOutputs());
-        /*
+        
         bias = new float[1];   //0
         foodPosX = new float[1];  //1
         foodPosY = new float[1]; // 2
@@ -255,7 +258,6 @@ public class Agent : MonoBehaviour {
         outComm2 = new float[1]; // 5
         outComm3 = new float[1]; // 6 
         */
-
         /*
         sample.inputDataArray[0] = 1f; // bias
         sample.inputDataArray[1] = testModule.foodPosX[0];
@@ -326,10 +328,10 @@ public class Agent : MonoBehaviour {
         sample.outputDataArray[5] = 0f; //outComm2;
         sample.outputDataArray[6] = 0f; //outComm3;
 
-        */
+        
 
         return sample;
-    }
+    }*/
 
     public void MapNeuronToModule(NID nid, Neuron neuron) {
         //testModule.MapNeuron(nid, neuron); // OLD
@@ -402,7 +404,7 @@ public class Agent : MonoBehaviour {
             curLifeStage = AgentLifeStage.Dead;
             lifeStageTransitionTimeStepCounter = 0;
 
-            InitializeCorpseAsFood();
+            InitializeDeath();
         }
     }
     private void CheckForDeathHealth() {
@@ -416,7 +418,7 @@ public class Agent : MonoBehaviour {
             coreModule.healthBody = 0f;
             coreModule.healthExternal = 0f;
 
-            InitializeCorpseAsFood();
+            InitializeDeath();
         }
         if (coreModule.healthBody <= 0f) {
 
@@ -427,7 +429,7 @@ public class Agent : MonoBehaviour {
             coreModule.healthBody = 0f;
             coreModule.healthExternal = 0f;
 
-            InitializeCorpseAsFood();
+            InitializeDeath();
         }
     }
     private void CheckForDeathOldAge() {
@@ -436,28 +438,25 @@ public class Agent : MonoBehaviour {
             lifeStageTransitionTimeStepCounter = 0;
 
             //Debug.Log("Died of old age!");
-            InitializeCorpseAsFood();
+            InitializeDeath();
         }
     }
-    private void InitializeCorpseAsFood()
+
+    private void InitializeDeath()   // THIS CAN BE A LOT CLEANER!!!!! *****
     {
-        corpseFoodAmount = coreModule.currentBodySize.x * coreModule.currentBodySize.y;
-        //Debug.Log("new corpse food! " + corpseFoodAmount.ToString());
-
-        if(isBeingSwallowed)
-        {
-            predatorAgentRef.springJoint.enabled = false;
-            predatorAgentRef.springJoint.connectedBody = null;
-
-            colliderBody.enabled = true;
+        currentCorpseFoodAmount = coreModule.currentBodySize.x * coreModule.currentBodySize.y;
+        
+        if(isPregnantAndCarryingEggs) {
+            AbortPregnancy();
         }
 
-        springJoint.connectedBody = null;
-        springJoint.enabled = false;
+        isSwallowingPrey = false;
+        swallowingPreyFrameCounter = 0;
 
-        if(isPregnantAndCarryingEggs) {
-            EndPregnancy(false);
-        }        
+        //parentEggSackRef;  // instead of using own fixed embry development duration - look up parentEggSack and use its counter?
+        //isAttachedToParentEggSack = false;
+
+        mouthRef.Disable();
     }
     private void CheckForLifeStageTransition() {
         switch(curLifeStage) {
@@ -474,11 +473,10 @@ public class Agent : MonoBehaviour {
                 //
                 if(lifeStageTransitionTimeStepCounter >= youngDurationTimeSteps) {
                     curLifeStage = AgentLifeStage.Mature;
-                    //Debug.Log("EGG HATCHED!");
+                    
                     lifeStageTransitionTimeStepCounter = 0;
 
-                    growthPercentage = 1f; // FULLY GROWN!!!
-                    ScaleBody(growthPercentage);
+                    //growthPercentage = 1f; // FULLY GROWN!!!                    
                 }
 
                 CheckForDeathStarvation();
@@ -494,10 +492,9 @@ public class Agent : MonoBehaviour {
                 
                 break;
             case AgentLifeStage.Dead:
-                //
-                if(lifeStageTransitionTimeStepCounter >= decayDurationTimeSteps) {
-                    curLifeStage = AgentLifeStage.Null;
-                    //Debug.Log("AGENT NO LONGER EXISTS!");
+                
+                if(lifeStageTransitionTimeStepCounter >= decayDurationTimeSteps) { //  Corpse naturally decayed without being fully consumed:
+                    curLifeStage = AgentLifeStage.Null;                    
                     lifeStageTransitionTimeStepCounter = 0;
                 }
                 break;
@@ -509,8 +506,6 @@ public class Agent : MonoBehaviour {
 
                 parentEggSackRef = null;
                 childEggSackRef = null;
-
-                //EndPregnancy(false); // needed? should have been handled during ProcessDeath function
 
                 colliderBody.enabled = false;
 
@@ -536,19 +531,19 @@ public class Agent : MonoBehaviour {
         // if this agent is dead, it acts as food.
         // it was just bitten by another creature and removed material -- 
 
-        corpseFoodAmount -= amount;
-        if (corpseFoodAmount < 0f)
+        currentCorpseFoodAmount -= amount;
+        if (currentCorpseFoodAmount < 0f)
         {
-            corpseFoodAmount = 0f;
+            currentCorpseFoodAmount = 0f;
 
             // fully consumed?? Should this case be checked for earlier in the pipe ???
             // Need to 
         }
         else
         {
-            
+            // ******** CHANGE THIS LATER IT"S FUCKING AWFUL!!!! **************************************************
             float sidesRatio = coreModule.coreWidth / coreModule.coreLength;
-            float sideY = Mathf.Sqrt(corpseFoodAmount / sidesRatio);
+            float sideY = Mathf.Sqrt(currentCorpseFoodAmount / sidesRatio);
             float sideX = sideY * sidesRatio;
 
             // v v v move this into ScaleBody function?  Or re-organize into sub functions?
@@ -556,10 +551,6 @@ public class Agent : MonoBehaviour {
             coreModule.currentBodySize = new Vector2(sideX, sideY);
             colliderBody.size = coreModule.currentBodySize;
 
-            // MOUTH:  // probably look to remove this in the future? mouth should be disabled anyway....
-            mouthRef.triggerCollider.radius = coreModule.currentBodySize.x * 0.5f;
-            mouthRef.triggerCollider.offset = new Vector2(0f, coreModule.currentBodySize.y * 0.5f);
-            
         }
     }
 
@@ -578,10 +569,10 @@ public class Agent : MonoBehaviour {
                 beingSwallowedFrameCounter = 0;
                 isBeingSwallowed = false;
 
-                colliderBody.enabled = true; // **** IS THIS RIGHT???????? ***
+                //colliderBody.enabled = true; // **** IS THIS RIGHT???????? ***
 
-                predatorAgentRef.springJoint.enabled = false;
-                predatorAgentRef.springJoint.connectedBody = null;
+                //predatorAgentRef.springJoint.enabled = false;
+                //predatorAgentRef.springJoint.connectedBody = null;
             }
             else
             {
@@ -633,47 +624,36 @@ public class Agent : MonoBehaviour {
 
         prevPos = curPos;
         prevVel = curVel;
-                
-
-        // DebugDisplay
-        /*if(textureHealth != null) {  // **** Will have to move this into general Tick() method and account for death types & lifeCycle transitions!
-            if(humanControlled) {
-                //Debug.Log(texture.ToString());
-                float displayFoodAmount = coreModule.energyRaw; // coreModule.foodAmountR[0];
-                //displayFoodAmount = coreModule.foodAmountR[0];
-                if(curLifeStage == AgentLifeStage.Egg) {
-                    displayFoodAmount = (float)lifeStageTransitionTimeStepCounter / (float)gestationDurationTimeSteps;
-                }
-                if(curLifeStage == AgentLifeStage.Dead || curLifeStage == AgentLifeStage.Null) {
-                    displayFoodAmount = 0f;
-                }
-                textureHealth.SetPixel(0, 0, new Color(coreModule.hitPoints[0], coreModule.hitPoints[0], coreModule.hitPoints[0]));
-                textureHealth.SetPixel(1, 0, new Color(displayFoodAmount, displayFoodAmount, displayFoodAmount));
-                textureHealth.SetPixel(2, 0, new Color(displayFoodAmount, displayFoodAmount, displayFoodAmount));
-                textureHealth.SetPixel(3, 0, new Color(displayFoodAmount, displayFoodAmount, displayFoodAmount));
-
-                float comm0 = coreModule.outComm0[0] * 0.5f + 0.5f;
-                float comm1 = coreModule.outComm1[0] * 0.5f + 0.5f;
-                float comm2 = coreModule.outComm2[0] * 0.5f + 0.5f;
-                float comm3 = coreModule.outComm3[0] * 0.5f + 0.5f;
-                textureHealth.SetPixel(0, 1, new Color(comm0, comm0, comm0));
-                textureHealth.SetPixel(1, 1, new Color(comm1, comm1, comm1));
-                textureHealth.SetPixel(2, 1, new Color(comm2, comm2, comm2));
-                textureHealth.SetPixel(3, 1, new Color(comm3, comm3, comm3));
-
-                textureHealth.Apply();
-            }            
-        }*/
-
+          
     }
 
     // *** Condense these into ONE?
     private void TickEgg() {        
         lifeStageTransitionTimeStepCounter++;
 
+        //coreModule.energyStored[0] = 1f;
+
+        growthPercentage = Mathf.Clamp01(((float)lifeStageTransitionTimeStepCounter / (float)gestationDurationTimeSteps) * spawnStartingScale);
+
+        // Scaling Test:
+        int frameNum = lifeStageTransitionTimeStepCounter % growthScalingSkipFrames;
+        if(frameNum == 3) {
+            ScaleBody(growthPercentage);  
+        }
+
+        if(isAttachedToParentEggSack) {
+            float growthPercentage = (float)lifeStageTransitionTimeStepCounter / (float)_GestationDurationTimeSteps;
+
+            float targetDist = Mathf.Lerp(0.01f, parentEggSackRef.fullSize.magnitude * 0.5f, growthPercentage);
+
+            springJoint.distance = targetDist;
+        }
+        else {
+            //springJoint.enableCollision = false;
+        }
         
         // *** This seems wrong -- Should be handled in a different spot
-        if(isBeingSwallowed)
+        /*if(isBeingSwallowed)
         {
             predatorAgentRef.isSwallowingPrey = false;
             predatorAgentRef.swallowingPreyFrameCounter = 0;
@@ -700,7 +680,7 @@ public class Agent : MonoBehaviour {
             else {
                 springJoint.enableCollision = false;
             }
-        }
+        }*/
 
     }
     private void BeginHatching() {
@@ -708,7 +688,7 @@ public class Agent : MonoBehaviour {
         curLifeStage = AgentLifeStage.Young;
         //Debug.Log("EGG HATCHED!");
         lifeStageTransitionTimeStepCounter = 0;
-        growthPercentage = 0f; // can I handle growth percentage in a better, more continuous way?
+        //growthPercentage = 0f; // can I handle growth percentage in a better, more continuous way?
 
         // Detach from parent EggSack
         parentEggSackRef = null;
@@ -716,18 +696,25 @@ public class Agent : MonoBehaviour {
 
         springJoint.connectedBody = null;
         springJoint.enabled = false;
+
+        colliderBody.enabled = true;
         // Play animation / rendering whatever.
-        
+
+        //ScaleBody(growthPercentage);
+
+        //coreModule.coreWidth * coreModule.coreLength * scale;
+        coreModule.energyRaw = coreModule.maxEnergyStorage;
+        //coreModule.energyStored[0] = 1f;
         // update boolean flags
     }
     private void TickYoung(SimulationManager simManager, Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray, SettingsManager settings) {
-        ProcessSwallowing();
+        //ProcessSwallowing();
 
-        growthPercentage = (float)lifeStageTransitionTimeStepCounter / (float)youngDurationTimeSteps;
+        growthPercentage = Mathf.Clamp01(((float)scoreCounter / (float)maxGrowthPeriod) * (1.0f - spawnStartingScale) + spawnStartingScale);
 
         // Scaling Test:
         int frameNum = lifeStageTransitionTimeStepCounter % growthScalingSkipFrames;
-        if(frameNum == 0) {
+        if(frameNum == 3) {
             ScaleBody(growthPercentage);  
         }
 
@@ -737,7 +724,7 @@ public class Agent : MonoBehaviour {
         lifeStageTransitionTimeStepCounter++;
         scoreCounter++;
     }
-    private void ProcessSwallowing() {
+    /*private void ProcessSwallowing() {
         if(isSwallowingPrey)
         {
             swallowingPreyFrameCounter++;
@@ -749,10 +736,9 @@ public class Agent : MonoBehaviour {
                 swallowingPreyFrameCounter = 0;
                 isSwallowingPrey = false;
 
-                colliderBody.enabled = true;
-
-                springJoint.enabled = false;
-                springJoint.connectedBody = null;
+                //colliderBody.enabled = true;
+                //springJoint.enabled = false;
+                //springJoint.connectedBody = null;
             }
             else
             {
@@ -770,23 +756,25 @@ public class Agent : MonoBehaviour {
             springJoint.enabled = false;
             springJoint.connectedBody = null;
         }
-    }
+    }*/
     private void TickMature(SimulationManager simManager, Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray, SettingsManager settings) {
 
-        ProcessSwallowing();
+        //ProcessSwallowing();
 
         // Check for death & stuff? Or is this handled inside OnCollisionEnter() events?
+        growthPercentage = Mathf.Clamp01(((float)scoreCounter / (float)maxGrowthPeriod) * (1.0f - spawnStartingScale) + spawnStartingScale);
 
         // Scaling Test:
         int frameNum = ageCounterMature % growthScalingSkipFrames;
         if(frameNum == 0) {
-            ScaleBody(growthPercentage);  
+            ScaleBody(growthPercentage);
         }
 
         TickModules(simManager, nutrientCellInfo); // update inputs for Brain        
         TickBrain(); // Tick Brain
         TickActions(simManager, nutrientCellInfo, ref eatAmountsArray, settings); // Execute Actions  -- Also Updates Resources!!! ***
-        
+
+        lifeStageTransitionTimeStepCounter++;
         ageCounterMature++;
         scoreCounter++;
         if(!isPregnantAndCarryingEggs) {
@@ -795,48 +783,40 @@ public class Agent : MonoBehaviour {
         
     }
     public void BeginPregnancy(EggSack developingEggSackRef) {
-        //Debug.Log("BeginPregnancy! [" + developingEggSackRef.index.ToString() + "]");
+        Debug.Log("BeginPregnancy! [" + developingEggSackRef.index.ToString() + "]");
         isPregnantAndCarryingEggs = true;
         childEggSackRef = developingEggSackRef;
         
     }
-    public void EndPregnancy(bool wasSuccessful) {
-        //Debug.Log("EndPregnancy!");
-
-        if(wasSuccessful) {
-
-        }
-        else {
-            childEggSackRef.ParentDiedWhilePregnant();
-        }
-        
-        isPregnantAndCarryingEggs = false;
+    public void AbortPregnancy() {
+        childEggSackRef.ParentDiedWhilePregnant();
         childEggSackRef = null;
 
+        isPregnantAndCarryingEggs = false;
+        pregnancyRefactoryTimeStepCounter = 0;
+    }
+    public void CompletedPregnancy() {
+        childEggSackRef = null;
+        
+        isPregnantAndCarryingEggs = false;
         pregnancyRefactoryTimeStepCounter = 0;
     }
     private void TickDead() {
         lifeStageTransitionTimeStepCounter++;
-
-        isSwallowingPrey = false;
-        swallowingPreyFrameCounter = 0;
-        springJoint.enabled = false;
-        springJoint.connectedBody = null;
         
-        mouthRef.isBiting = false;        
+        // DECAY HERE!
+        // Should shrink as well as lose foodContent
     }
 
     private void ScaleBody(float growthPercentage) {
         //segmentFullSizeArray
-        float scale = Mathf.Lerp(spawnStartingScale, 1f, growthPercentage); // Minimum size = 0.1 ???
-        float currentBodyVolume = fullSizeBodyVolume * scale; // *** REFACTOR!!!! ****
+        float minScale = 0.005f;
+        float scale = Mathf.Lerp(minScale, 1f, growthPercentage); // Minimum size = 0.1 ???  // SYNC WITH EGG SIZE!!!
+        float currentBodyVolume = coreModule.coreWidth * coreModule.coreLength * growthPercentage;
 
-        coreModule.currentBodySize = new Vector2(coreModule.coreWidth, coreModule.coreLength) * scale;
-
-        coreModule.stomachCapacity = currentBodyVolume * 1f;
-
-        coreModule.maxEnergyStorage = fullSizeBodyVolume * scale;
-
+        coreModule.currentBodySize = new Vector2(coreModule.coreWidth, coreModule.coreLength) * growthPercentage;
+        coreModule.stomachCapacity = currentBodyVolume;
+        coreModule.maxEnergyStorage = coreModule.coreWidth * coreModule.coreLength * growthPercentage;
         colliderBody.size = coreModule.currentBodySize;
 
         bodyRigidbody.mass = currentBodyVolume;
@@ -847,7 +827,7 @@ public class Agent : MonoBehaviour {
         
         mouseClickCollider.radius = coreModule.coreWidth * scale * 0.5f;        
         mouseClickCollider.height = coreModule.coreLength * scale;
-        mouseClickCollider.radius *= 3.6f; // ** TEMP
+        mouseClickCollider.radius *= 3.6f; // ** TEMP -- should be based on camera distance also
         mouseClickCollider.height *= 1.4f;        
     }
 
@@ -860,10 +840,11 @@ public class Agent : MonoBehaviour {
         throttle = new Vector2(horizontalMovementInput, verticalMovementInput);        
         smoothedThrottle = Vector2.Lerp(smoothedThrottle, throttle, smoothedThrottleLerp);
         Vector2 throttleForwardDir = throttle.normalized;
-                
+
+        float agentSizeMultiplier = coreModule.maxEnergyStorage; // coreModule.coreWidth * coreModule.coreLength * growthPercentage;
         // ENERGY!!!!
         // Digestion:
-        float amountDigested = 0.006f * fullSizeBodyVolume;
+        float amountDigested = 0.006f * agentSizeMultiplier;
         float digestionAmount = Mathf.Min(coreModule.stomachContents, amountDigested);
         float foodToEnergyConversion = 1.0f;
         float createdEnergy = digestionAmount * foodToEnergyConversion;
@@ -872,13 +853,13 @@ public class Agent : MonoBehaviour {
             coreModule.stomachContents = 0f;
         }
         coreModule.energyRaw += createdEnergy;
-        float maxEnergy = fullSizeBodyVolume;
+        float maxEnergy = agentSizeMultiplier;
         if(coreModule.energyRaw > maxEnergy) {
             coreModule.energyRaw = maxEnergy;
         }
 
         // Heal:
-        float healRate = 0.0005f * fullSizeBodyVolume;
+        float healRate = 0.0005f * agentSizeMultiplier;
         float energyToHealthConversionRate = 10f;
         if(coreModule.healthBody < 1f) {
             coreModule.healthBody += healRate;
@@ -889,7 +870,7 @@ public class Agent : MonoBehaviour {
         }
 
         //ENERGY:
-        float energyCost = 0.0025f * fullSizeBodyVolume * settings.energyDrainMultiplier;
+        float energyCost = 0.00085f * agentSizeMultiplier * settings.energyDrainMultiplier;
         
         float throttleMag = smoothedThrottle.magnitude;
         
@@ -958,15 +939,8 @@ public class Agent : MonoBehaviour {
     }
 
     private void ApplyPhysicsForces(Vector2 throttle) {
-        //MovementNaiveSin(throttle);
-        //MovementBasicSteering(throttle);
-        //MovementSteeringSwim(throttle);
-        //MovementForwardSlide(throttle);
-        MovementScalingTest(throttle);
         
-        //Debug.Log(jointAnglesArray[0].ToString());
-
-        //this.rigidbodiesArray[0].AddForce(Vector2.one * movementModule.horsepower * Time.deltaTime, ForceMode2D.Impulse);
+        MovementScalingTest(throttle);
     }
     
     private void MovementScalingTest(Vector2 throttle) {
@@ -1098,7 +1072,7 @@ public class Agent : MonoBehaviour {
             springJoint.autoConfigureDistance = false;
             springJoint.distance = 0f;
             springJoint.dampingRatio = 0.1f;
-            springJoint.frequency = 1f;
+            springJoint.frequency = 15f;
 
             GameObject testMouthGO = new GameObject("Mouth");
             testMouthGO.transform.parent = bodyGO.transform;
@@ -1165,7 +1139,7 @@ public class Agent : MonoBehaviour {
         }
         float avgSegmentWidth = totalWidth / (float)widthsTexResolution;
 
-        fullSizeBodyVolume = avgSegmentWidth * genome.bodyGenome.coreGenome.fullBodyLength;
+        fullSizeBodyVolume = genome.bodyGenome.coreGenome.fullBodyWidth * genome.bodyGenome.coreGenome.fullBodyLength; ////avgSegmentWidth * genome.bodyGenome.coreGenome.fullBodyLength;
         averageFullSizeWidth = avgSegmentWidth;       
     }
     
@@ -1179,16 +1153,22 @@ public class Agent : MonoBehaviour {
 
         springJoint.distance = 0.005f;
         springJoint.enableCollision = false;        
-        springJoint.frequency = 5f;
+        springJoint.frequency = 15f;
 
         if(isImmaculate) {            
             springJoint.connectedBody = null; // parentEggSack.rigidbodyRef;
             springJoint.enabled = false;
+            isAttachedToParentEggSack = false;
+
+            colliderBody.enabled = true;
         }
         else {
             //bodyGO.transform.localPosition = parentEggSack.gameObject.transform.position; // startPos.startPosition;        
             springJoint.connectedBody = parentEggSack.rigidbodyRef;
             springJoint.enabled = true;
+            isAttachedToParentEggSack = true;
+
+            colliderBody.enabled = false;
         }                
               
         bodyRigidbody.drag = 13f; // bodyDrag;
@@ -1259,8 +1239,8 @@ public class Agent : MonoBehaviour {
         turningAmount = 5f; // temporary for zygote animation
         facingDirection = new Vector2(0f, 1f);
         throttle = Vector2.zero;
-        smoothedThrottle = new Vector2(0f, 0.01f); 
-        
+        smoothedThrottle = new Vector2(0f, 0.01f);
+                
         InitializeModules(genome);      // Modules need to be created first so that Brain can map its neurons to existing modules  
         
         // Upgrade this to proper Pooling!!!!
@@ -1269,229 +1249,4 @@ public class Agent : MonoBehaviour {
         brain = new Brain(genome.brainGenome, this);               
     }
 
-
-    // OLD!!!!
-    /*
-    private void MovementNaiveSin(Vector2 throttle) {  // Applies a Sin force to each segment based on its position in the spinal column while moving
-        // MOVEMENT HERE:
-        //this.rigidbodiesArray[0].AddForce(throttle.normalized * speed * Time.deltaTime, ForceMode2D.Impulse);
-        
-
-        if (throttle.sqrMagnitude > 0.01f) {
-            //facingDirection = Vector2.Lerp(facingDirection + Vector2.one * 0.025f, throttleForwardDir, 0.25f).normalized;
-            animationCycle += 0.01f;
-
-            animationCycle = animationCycle % 1.0f;
-
-            // JOINTS!!!
-            //float time = Time.realtimeSinceStartup;        
-
-            for(int i = 1; i < numSegments; i++) {
-
-                float delayValue = (float)(i - 1) / (float)(numSegments - 1) * offsetDelay;
-                float targetSpeed = Mathf.Sin((animationCycle + delayValue) * Mathf.PI * 2f * frequency) * amplitude;
-
-                hingeJointsArray[i - 1].useMotor = true;
-
-                JointMotor2D motor = hingeJointsArray[i-1].motor;            
-                motor.motorSpeed = targetSpeed;
-                motor.maxMotorTorque = 200f;
-
-                hingeJointsArray[i-1].motor = motor;
-            }
-        }
-        else {
-            for(int i = 1; i < numSegments; i++) {
-                
-                JointMotor2D motor = hingeJointsArray[i-1].motor;            
-                motor.motorSpeed = 0f;
-                motor.maxMotorTorque = 0f;
-                hingeJointsArray[i-1].motor = motor;
-            }
-        }
-    }
-    private void MovementBasicSteering(Vector2 throttle) {
-        
-        for(int j = 0; j < numSegments - 1; j++) {
-            jointAnglesArray[j] = hingeJointsArray[j].jointAngle;            
-        }
-        
-
-        if (throttle.sqrMagnitude > 0.01f) {
-            
-
-            Vector2 headForwardDir = new Vector2(this.rigidbodiesArray[0].transform.up.x, this.rigidbodiesArray[0].transform.up.y).normalized;
-            Vector2 headRightDir =  new Vector2(this.rigidbodiesArray[0].transform.right.x, this.rigidbodiesArray[0].transform.right.y).normalized;
-            Vector2 throttleDir = throttle.normalized;
-
-            float turnSign = Mathf.Clamp(Vector2.Dot(throttleDir, headRightDir) * -10000f, -1f, 1f);
-
-            //facingDirection = Vector2.Lerp(facingDirection + Vector2.one * 0.025f, headDir.normalized, 0.25f).normalized;
-             
-            this.rigidbodiesArray[0].AddForce(headForwardDir * speed * Time.deltaTime, ForceMode2D.Impulse);
-
-            animationCycle += 0.01f;
-            animationCycle = animationCycle % 1.0f;
-
-            // JOINTS!!!
-            //float time = Time.realtimeSinceStartup;        
-            
-            for(int i = 1; i < numSegments; i++) {
-
-                float delayValue = (float)(i - 1) / (float)(numSegments - 1) * offsetDelay;
-                float targetSpeed = Mathf.Sin((animationCycle + delayValue) * Mathf.PI * 2f * frequency) * amplitude;
-
-                hingeJointsArray[i - 1].useMotor = true;
-
-                JointMotor2D motor = hingeJointsArray[i-1].motor;            
-                motor.motorSpeed = 0f;
-                motor.maxMotorTorque = 1f;
-
-                hingeJointsArray[i-1].motor = motor;
-            }
-
-            JointMotor2D motor0 = hingeJointsArray[0].motor;            
-            motor0.motorSpeed = turnSign * 500f;
-            motor0.maxMotorTorque = 500f;
-            hingeJointsArray[0].motor = motor0;
-            
-        }
-        else {
-            for(int i = 1; i < numSegments; i++) {
-                
-                JointMotor2D motor = hingeJointsArray[i-1].motor;            
-                motor.motorSpeed = 0f;
-                motor.maxMotorTorque = 1f;
-                hingeJointsArray[i-1].motor = motor;
-            }
-        }
-    }
-    private void MovementSteeringSwim(Vector2 throttle) {
-        // Save current joint angles:
-        for(int j = 0; j < numSegments - 1; j++) {
-            jointAnglesArray[j] = hingeJointsArray[j].jointAngle;            
-        }
-
-        if (throttle.sqrMagnitude > 0.01f) {  // Throttle is NOT == ZERO
-            
-            Vector2 headForwardDir = new Vector2(this.rigidbodiesArray[0].transform.up.x, this.rigidbodiesArray[0].transform.up.y).normalized;
-            Vector2 headRightDir =  new Vector2(this.rigidbodiesArray[0].transform.right.x, this.rigidbodiesArray[0].transform.right.y).normalized;
-            Vector2 throttleDir = throttle.normalized;
-
-            float headTurnSign = Mathf.Clamp(Vector2.Dot(throttleDir, headRightDir) * -10000f, -1f, 1f);
-
-            this.rigidbodiesArray[0].AddForce(headForwardDir * speed * Time.deltaTime, ForceMode2D.Impulse);
-
-            animationCycle += swimAnimationCycleSpeed;
-            //animationCycle = animationCycle % 1.0f;
-
-
-
-            for(int i = 1; i < numSegments; i++) {
-
-                float phaseOffset = (float)(i - 1) / (float)(numSegments - 1) * offsetDelay;
-                //float targetSpeed = Mathf.Sin((animationCycle + phaseOffset) * Mathf.PI * 2f * frequency) * amplitude;
-
-                float targetAngle = Mathf.Sin((-animationCycle + phaseOffset) * Mathf.PI * 2f * frequency);
-
-                float targetWaveSpeed = targetAngle - (jointAnglesArray[i - 1] * Mathf.PI / 180f);
-                //Debug.Log("Joint[" + i.ToString() + "] DeltaAngle: " + targetWaveSpeed.ToString());
-
-                //float bendMultiplier = Mathf.Lerp(bendRatioHead, bendRatioTailTip, (float)(i - 1) / (float)(numSegments - 1));
-                float bendMultiplier = Mathf.Lerp(bendRatioHead, bendRatioTailTip, (float)(i - 1) / (float)(numSegments - 1));
-
-                float targetTurnSpeed = headTurnSign / (float)numSegments * 2f;
-
-                hingeJointsArray[i - 1].useMotor = true;
-
-                JointMotor2D motor = hingeJointsArray[i-1].motor;            
-                motor.motorSpeed = (targetWaveSpeed * bendMultiplier + targetTurnSpeed) * jointSpeed;
-                motor.maxMotorTorque = jointMaxTorque;
-
-                hingeJointsArray[i-1].motor = motor;
-            }
-
-            // Head Joint:
-            //JointMotor2D motor0 = hingeJointsArray[0].motor;            
-            //motor0.motorSpeed = headTurnSign * jointSpeed;
-            //motor0.maxMotorTorque = jointMaxTorque;
-            //hingeJointsArray[0].motor = motor0;
-
-            
-        }
-        else {
-            for(int i = 1; i < numSegments; i++) {
-                
-                JointMotor2D motor = hingeJointsArray[i-1].motor;            
-                motor.motorSpeed = 0f;
-                motor.maxMotorTorque = restingJointTorque;
-                hingeJointsArray[i-1].motor = motor;
-            }
-        }
-    }
-    private void MovementForwardSlide(Vector2 throttle) {
-        // Save current joint angles:
-        for(int j = 0; j < numSegments - 1; j++) {
-            jointAnglesArray[j] = hingeJointsArray[j].jointAngle;            
-        }
-
-        if (throttle.sqrMagnitude > 0.0001f) {  // Throttle is NOT == ZERO
-            
-            Vector2 headForwardDir = new Vector2(this.rigidbodiesArray[0].transform.up.x, this.rigidbodiesArray[0].transform.up.y).normalized;
-            Vector2 headRightDir =  new Vector2(this.rigidbodiesArray[0].transform.right.x, this.rigidbodiesArray[0].transform.right.y).normalized;
-            Vector2 throttleDir = throttle.normalized;
-
-            float headTurnSign = Mathf.Clamp(Vector2.Dot(throttleDir, headRightDir) * -10000f, -1f, 1f);
-
-            //this.rigidbodiesArray[0].AddForce(headForwardDir * speed * Time.deltaTime, ForceMode2D.Impulse);
-
-            animationCycle += swimAnimationCycleSpeed;
-            //animationCycle = animationCycle % 1.0f;
-            
-            for(int i = 1; i < numSegments; i++) {
-
-                float phaseOffset = (float)(i - 1) / (float)(numSegments - 1) * offsetDelay;
-                
-                float targetOscillateAngle = Mathf.Sin((-animationCycle + phaseOffset) * Mathf.PI * 2f * frequency);
-
-                float oscillateTorque = targetOscillateAngle - (jointAnglesArray[i - 1] * Mathf.PI / 180f);
-                
-                float bendMultiplier = Mathf.Lerp(bendRatioHead, bendRatioTailTip, (float)(i - 1) / (float)(numSegments - 1));
-                
-                float targetTurnAngle = -10f * Vector2.Dot(throttleDir, headRightDir) * Mathf.PI / 4f / ((float)numSegments - 1f);
-                float turningTorque = targetTurnAngle - (jointAnglesArray[i - 1] * Mathf.PI / 180f);
-
-                float uTurnMultiplier = -Vector2.Dot(throttleDir, headRightDir) * 0.5f + 0.5f;
-                float turningMultiplier = (Mathf.Abs(Vector2.Dot(throttleDir, headRightDir)) + 0.05f) * (1.0f + uTurnMultiplier);                
-                float oscillateMultiplier = (Vector2.Dot(throttleDir, headForwardDir) * 0.5f + 0.4f);
-
-                float finalTorque = oscillateTorque * oscillateMultiplier + turningTorque * turningMultiplier * bendMultiplier;
-
-                hingeJointsArray[i - 1].useMotor = true;
-
-                JointMotor2D motor = hingeJointsArray[i-1].motor;           
-                motor.motorSpeed = finalTorque * jointSpeed;
-                motor.maxMotorTorque = jointMaxTorque * throttle.magnitude;
-
-                hingeJointsArray[i-1].motor = motor;
-            }
-
-            // Forward Slide
-            for(int k = 0; k < numSegments; k++) {
-                Vector2 segmentForwardDir = new Vector2(this.rigidbodiesArray[k].transform.up.x, this.rigidbodiesArray[k].transform.up.y).normalized;
-                this.rigidbodiesArray[k].AddForce(segmentForwardDir * speed * Time.deltaTime, ForceMode2D.Impulse);
-            }
-        }
-        else {
-            for(int i = 1; i < numSegments; i++) {
-                
-                JointMotor2D motor = hingeJointsArray[i-1].motor;            
-                motor.motorSpeed = 0f;
-                motor.maxMotorTorque = restingJointTorque;
-                hingeJointsArray[i-1].motor = motor;
-            }
-        }
-    }
-    */
-        
 }

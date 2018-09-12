@@ -76,7 +76,7 @@ public class CritterMovementTestScript : MonoBehaviour {
         testAgentGenome.bodyGenome.coreGenome.fullBodyLength = bodyLength;
 
         testAgent.speed = speed;
-
+        /*
         testAgent.frequency = frequency;
         testAgent.amplitude = amplitude;
         testAgent.offsetDelay = offsetDelay;
@@ -91,7 +91,7 @@ public class CritterMovementTestScript : MonoBehaviour {
         testAgent.restingJointTorque = restingJointTorque;
         testAgent.bendRatioHead = bendRatioHead;
         testAgent.bendRatioTailTip = bendRatioTailTip;
-
+        */
         // initialize Agent based on genome:
         StartPositionGenome startPosGenome = new StartPositionGenome(Vector3.zero, Quaternion.identity);
         //testAgent.InitializeAgentFromGenome(0, testAgentGenome, startPosGenome);  // This also rebuilds GameObjects

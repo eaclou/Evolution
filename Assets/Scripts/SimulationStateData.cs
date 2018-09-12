@@ -277,11 +277,7 @@ public class SimulationStateData {
 
             agentSimDataArray[i].foodAmount = Mathf.Lerp(agentSimDataArray[i].foodAmount, simManager.agentsArray[i].coreModule.stomachContents / simManager.agentsArray[i].coreModule.stomachCapacity, 0.16f);
             
-            // Z & W coords represents agent's x/y Radii (in FluidCoords)
-            agentFluidPositionsArray[i] = new Vector4(agentPos.x / SimulationManager._MapSize, 
-                                                      agentPos.y / SimulationManager._MapSize, 
-                                                      (simManager.agentsArray[i].fullSizeBoundingBox.x + 0.1f) * 0.5f / SimulationManager._MapSize, // **** RE-VISIT!!!!! ****
-                                                      (simManager.agentsArray[i].fullSizeBoundingBox.y + 0.1f) * 0.5f / SimulationManager._MapSize); //... 0.5/140 ...
+            
         }
         agentSimDataCBuffer.SetData(agentSimDataArray); // send data to GPU for Rendering
         */
@@ -306,7 +302,9 @@ public class SimulationStateData {
         // CRITTER SIM DATA: updated every frame:
         for(int i = 0; i < critterSimDataArray.Length; i++) {
             Vector3 agentPos = simManager.agentsArray[i].bodyRigidbody.position;
+
             critterSimDataArray[i].worldPos = new Vector3(agentPos.x, agentPos.y, 1f); // simManager.agentsArray[i].fullSizeBoundingBox.x * 0.5f);  // in world(scene) coordinates
+
             if(simManager.agentsArray[i].smoothedThrottle.sqrMagnitude > 0f) {
                 critterSimDataArray[i].velocity = simManager.agentsArray[i].smoothedThrottle.normalized;
             }
@@ -384,6 +382,12 @@ public class SimulationStateData {
             critterSimDataArray[i].turnAmount = simManager.agentsArray[i].turningAmount;
             critterSimDataArray[i].accel += Mathf.Clamp01(simManager.agentsArray[i].curAccel) * 1f; // ** RE-FACTOR!!!!
 		    critterSimDataArray[i].smoothedThrottle = simManager.agentsArray[i].smoothedThrottle.magnitude;
+
+            // Z & W coords represents agent's x/y Radii (in FluidCoords)
+            agentFluidPositionsArray[i] = new Vector4(agentPos.x / SimulationManager._MapSize, 
+                                                      agentPos.y / SimulationManager._MapSize, 
+                                                      (simManager.agentsArray[i].fullSizeBoundingBox.x + 0.1f) * 0.5f / SimulationManager._MapSize, // **** RE-VISIT!!!!! ****
+                                                      (simManager.agentsArray[i].fullSizeBoundingBox.y + 0.1f) * 0.5f / SimulationManager._MapSize); //... 0.5/140 ...
         }
         critterSimDataCBuffer.SetData(critterSimDataArray);
 

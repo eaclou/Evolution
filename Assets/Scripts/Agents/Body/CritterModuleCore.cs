@@ -176,9 +176,9 @@ public class CritterModuleCore {
         outComm2 = new float[1]; // 5
         outComm3 = new float[1]; // 6 
         mouthEffector = new float[1];  // 206
-        // 7 Total Outputs
-         
-        energyRaw = coreWidth * coreLength * Mathf.Lerp(agent.spawnStartingScale, 1f, agent.growthPercentage);
+                                       // 7 Total Outputs
+
+        energyRaw = 1f; //-- whatever--- coreWidth * coreLength * Mathf.Lerp(agent.spawnStartingScale, 1f, agent.growthPercentage);
         healthHead = 1f;
         healthBody = 1f;
         healthExternal = 1f;
