@@ -12,7 +12,7 @@ public class Agent : MonoBehaviour {
     public float turningAmount = 0f;
     public float swimAnimationCycleSpeed = 0.025f;
 
-    public float spawnStartingScale = 0.167f; // *** REFACTOR!!! SYNC WITH EGGS!!!
+    public float spawnStartingScale = 0.1f; // *** REFACTOR!!! SYNC WITH EGGS!!!
 
     public bool isInert = true;  // when inert, colliders disabled
 
@@ -500,6 +500,7 @@ public class Agent : MonoBehaviour {
                 if(lifeStageTransitionTimeStepCounter >= decayDurationTimeSteps) { //  Corpse naturally decayed without being fully consumed:
                     curLifeStage = AgentLifeStage.Null;                    
                     lifeStageTransitionTimeStepCounter = 0;
+                    
                 }
                 break;
             case AgentLifeStage.Null:
@@ -512,9 +513,11 @@ public class Agent : MonoBehaviour {
                 childEggSackRef = null;
 
                 colliderBody.enabled = false;
-
                 springJoint.enabled = false;
                 springJoint.connectedBody = null;
+
+                bodyRigidbody.velocity = Vector2.zero;
+                bodyRigidbody.angularVelocity = 0f;
                               
                 break;
             default:
@@ -650,8 +653,8 @@ public class Agent : MonoBehaviour {
                 //  *** eventually look into aborting agents who are attached to EggSacks which don't reach birth ***
             }
             else {
-                float growthPercentage = (float)lifeStageTransitionTimeStepCounter / (float)_GestationDurationTimeSteps;
-                float targetDist = Mathf.Lerp(0.01f, parentEggSackRef.fullSize.magnitude * 0.5f, growthPercentage);
+                float embryoPercentage = (float)lifeStageTransitionTimeStepCounter / (float)_GestationDurationTimeSteps;
+                float targetDist = Mathf.Lerp(0.01f, parentEggSackRef.fullSize.magnitude * 0.35f, embryoPercentage);
                 springJoint.distance = targetDist;
             }            
         }
@@ -710,12 +713,18 @@ public class Agent : MonoBehaviour {
                 coreModule.energyRaw = coreModule.maxEnergyStorage;
             }
             else {
-                Debug.Log("BeginHatching but OH NO!!! parentEggSack ref is gone or decaying :(   Killed Agent");
+                //Debug.Log("BeginHatching but OH NO!!! parentEggSack ref is gone or decaying :(   Killed Agent");
                 curLifeStage = AgentLifeStage.Dead;
                 lifeStageTransitionTimeStepCounter = 0;
                 InitializeDeath();
             }
-        }        
+        }
+        else {
+            //Debug.Log("BeginHatching but OH NO!!! parentEggSack ref is gone or decaying :(   Killed Agent");
+            curLifeStage = AgentLifeStage.Dead;
+            lifeStageTransitionTimeStepCounter = 0;
+            InitializeDeath();
+        }
     }
     private void TickYoung(SimulationManager simManager, Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray, SettingsManager settings) {
         //ProcessSwallowing();
@@ -1188,7 +1197,7 @@ public class Agent : MonoBehaviour {
             colliderBody.enabled = false;
         }                
               
-        bodyRigidbody.drag = 13f; // bodyDrag;
+        bodyRigidbody.drag = 12f; // bodyDrag;
         bodyRigidbody.angularDrag = 15f;
         
         // Collision!
@@ -1259,9 +1268,11 @@ public class Agent : MonoBehaviour {
         smoothedThrottle = new Vector2(0f, 0.01f);
                 
         InitializeModules(genome);      // Modules need to be created first so that Brain can map its neurons to existing modules  
-        
+
         // Upgrade this to proper Pooling!!!!
-        ReconstructAgentGameObjects(genome, parentEggSack, parentEggSack.gameObject.transform.position, false);
+        Vector3 spawnOffset = UnityEngine.Random.insideUnitSphere * parentEggSack.curSize.magnitude * 0.15f;
+        spawnOffset.z = 0f;
+        ReconstructAgentGameObjects(genome, parentEggSack, parentEggSack.gameObject.transform.position + spawnOffset, false);
 
         brain = new Brain(genome.brainGenome, this);               
     }

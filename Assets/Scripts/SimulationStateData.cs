@@ -311,13 +311,14 @@ public class SimulationStateData {
             critterSimDataArray[i].heading = simManager.agentsArray[i].facingDirection;
             
             float embryo = 1f;
-            if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Egg) {
-                embryo = (float)simManager.agentsArray[i].lifeStageTransitionTimeStepCounter / (float)simManager.agentsArray[i]._GestationDurationTimeSteps;
-                embryo = Mathf.Clamp01(embryo);
+            if(simManager.agentsArray[i].curLifeStage != Agent.AgentLifeStage.Egg) {
+                //embryo = (float)simManager.agentsArray[i].lifeStageTransitionTimeStepCounter / (float)simManager.agentsArray[i]._GestationDurationTimeSteps;
+                //embryo = Mathf.Clamp01(embryo);
+                embryo = 0f;
             }
-            else {
-                embryo = 1f;
-            }
+            //else {
+            //    embryo = 1f;
+            //}
             critterSimDataArray[i].embryoPercentage = embryo;
             critterSimDataArray[i].growthPercentage = simManager.agentsArray[i].growthPercentage;
             float decay = 0f;

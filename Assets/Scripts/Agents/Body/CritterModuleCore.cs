@@ -512,14 +512,14 @@ public class CritterModuleCore {
             foodPosY[0] = foodParticleDir.y;
             foodDirX[0] = nutrientCellInfo.y;
             foodDirY[0] = nutrientCellInfo.z;
-            foodRelSize[0] = nutrientCellInfo.x; // simManager.closestFoodParticlesDataArray[agentIndex].foodAmount; // nutrientCellInfo.x;
+            //foodRelSize[0] = nutrientCellInfo.x; // simManager.closestFoodParticlesDataArray[agentIndex].foodAmount; // nutrientCellInfo.x;
                         
         }
         else { // Predator -- use CPU egg chunks:
-            foodPosX[0] = foodParticleDir.x;  //foodDir.x;  // foodPos.x / 20f;
-            foodPosY[0] = foodParticleDir.y; // foodDir.y;  //foodPos.y / 20f;
-            foodDirX[0] = foodDir.x; // foodParticleDir.x;
-            foodDirY[0] = foodDir.y; // foodParticleDir.y;
+            foodPosX[0] = foodDir.x;  // foodPos.x / 20f;
+            foodPosY[0] = foodDir.y;  //foodPos.y / 20f;
+            foodDirX[0] = foodParticleDir.x;
+            foodDirY[0] = foodParticleDir.y;
         }
 
         //foodTypeR[0] = typeR;

@@ -38,7 +38,7 @@ public class SettingsManager : MonoBehaviour {
     //public float minSizeCritterSpeed = 150f;
     //public float maxSizeCritterSpeed = 150f;
     public void SetGlobalMutationRate(float normalizedVal) {
-        mutationSettingsPersistent.defaultBodyMutationChance = Mathf.Lerp(minBodyMutationRate, maxBodyMutationRate, normalizedVal * normalizedVal * normalizedVal);
+        mutationSettingsPersistent.defaultBodyMutationChance = Mathf.Lerp(minBodyMutationRate, maxBodyMutationRate, normalizedVal * normalizedVal);
         mutationSettingsPersistent.defaultBodyMutationStepSize = Mathf.Lerp(minBodyMutationStepSize, maxBodyMutationStepSize, normalizedVal);
         Debug.Log("mutateRate: " + mutationSettingsPersistent.defaultBodyMutationChance.ToString());
     }

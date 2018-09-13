@@ -50,7 +50,7 @@ public class EggSack : MonoBehaviour {
 
         }
     }
-    private int decayDurationTimeSteps = 330;  // how long it takes to rot/decay
+    private int decayDurationTimeSteps = 720;  // how long it takes to rot/decay
     public int _DecayDurationTimeSteps
     {
         get
@@ -218,13 +218,13 @@ public class EggSack : MonoBehaviour {
 
         Vector2 newSize = fullSize * Mathf.Max(0.01f, percentage);
         if(resizeCollider) {
-            mainCollider.size = newSize;
+            mainCollider.size = newSize * 0.8f;
             float mass = mainCollider.size.x * mainCollider.size.y; // Mathf.Lerp(minMass, maxMass, percentage);  // *** <<< REVISIT!!! ****
             mass = Mathf.Max(mass, 0.05f);  // constrain minimum
             rigidbodyRef.mass = mass;
         }  
 
-        curSize = newSize;     
+        curSize = newSize;    
         
         foodAmount = (float)curNumEggs / (float)maxNumEggs * curSize.x * curSize.y;
     }

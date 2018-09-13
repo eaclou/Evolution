@@ -59,6 +59,7 @@ public class TheRenderKing : MonoBehaviour {
     public Material foodParticleShadowDisplayMat;
     public Material critterSkinStrokesDisplayMat;
     public Material critterShadowStrokesDisplayMat;
+    public Material eggCoverDisplayMat;
 
     //public Material agentHoverHighlightMat;
     public Material critterInspectHighlightMat;
@@ -891,6 +892,9 @@ public class TheRenderKing : MonoBehaviour {
 
         foodParticleShadowDisplayMat.SetPass(0);
         foodParticleShadowDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+
+        eggCoverDisplayMat.SetPass(0);
+        eggCoverDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
 
         critterInspectHighlightMat.SetPass(0);
         critterInspectHighlightMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -1933,14 +1937,14 @@ public class TheRenderKing : MonoBehaviour {
 
         
         // Critter Energy blops!
-        critterEnergyDotsMat.SetPass(0);
+        /*critterEnergyDotsMat.SetPass(0);
         critterEnergyDotsMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
         critterEnergyDotsMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
         critterEnergyDotsMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
         critterEnergyDotsMat.SetBuffer("bodyStrokesCBuffer", critterEnergyDotsCBuffer);
         critterEnergyDotsMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, critterEnergyDotsMat, 0, MeshTopology.Triangles, 6, critterEnergyDotsCBuffer.count);
-        
+        */
 
         // AGENT EYES:
         agentEyesDisplayMat.SetPass(0);
@@ -1968,7 +1972,12 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, baronVonWater.waterQuadStrokesSmlDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterQuadStrokesCBufferSml.count);
         */
 
-
+        eggCoverDisplayMat.SetPass(0);
+        eggCoverDisplayMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
+        eggCoverDisplayMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
+        eggCoverDisplayMat.SetBuffer("eggSackSimDataCBuffer", simManager.simStateData.eggSackSimDataCBuffer);
+        eggCoverDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        cmdBufferTest.DrawProcedural(Matrix4x4.identity, eggCoverDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.critterInitDataCBuffer.count);
 
         // SURFACE BITS FLOATY:::::
         baronVonWater.waterSurfaceBitsDisplayMat.SetPass(0);
@@ -1984,7 +1993,7 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, baronVonWater.waterSurfaceBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterSurfaceBitsCBuffer.count);
      
 
-        if(isDebugRenderOn) {
+        /*if(isDebugRenderOn) {
             
             
             debugAgentResourcesMat.SetPass(0);
@@ -1996,7 +2005,7 @@ public class TheRenderKing : MonoBehaviour {
             cmdBufferTest.DrawProcedural(Matrix4x4.identity, debugAgentResourcesMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.critterInitDataCBuffer.count);
             
 
-        }
+        }*/
         
 
         /*

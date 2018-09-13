@@ -90,14 +90,14 @@
 				float random1 = rand(float2(inst, inst));
 				float random2 = rand(float2(random1, random1));
 
-				float randomScale = lerp(0.7, 0.9, random2);				
-				float scale = length(eggData.localScale) * length(rawData.fullSize) * saturate(rawData.growth * 1.5f) * randomScale * (1.0 + rawData.decay);
-				scale *= saturate((rawData.growth + eggData.localCoords.y * 0.0) * 17.0 - 16.0) * 0.35 + 0.65;
+				float randomScale = lerp(1, 1.25, random2);				
+				float scale = length(rawData.fullSize) * rawData.growth * randomScale * 0.35;
+				//scale *= saturate(rawData.growth) * 0.35 + 0.65;
 
 				float2 forward1 = rawData.heading; //rotatedPoint0;
 				float2 right1 = float2(forward1.y, -forward1.x);
 
-				float2 offsetFromParentCenter = eggData.localCoords * rawData.fullSize * 0.5; //scale;				
+				float2 offsetFromParentCenter = eggData.localCoords * rawData.fullSize * 0.5 * (rawData.growth * 0.75 + 0.25); //scale;				
 				offsetFromParentCenter = float2(offsetFromParentCenter.x * right1 + offsetFromParentCenter.y * forward1);
 				
 				float3 worldPosition = float3(rawData.worldPos + offsetFromParentCenter, orderVal * scale + (1.0 + scale * 0.15));    //float3(rawData.worldPos, -random2);
@@ -105,16 +105,13 @@
 				float2 forwardAgent = rawData.heading;
 				float2 rightAgent = float2(forwardAgent.y, -forwardAgent.x);
 				
-				float clock = _Time.y * 0.4;
-				
-				float freq = 11.45;
-				float amp = 0.035;
-				float3 noiseOffset = Value2D(worldPosition.x * 0.036 + clock * 0.16 + (float)inst, freq) * saturate(1 - rawData.decay * 8) * rawData.growth;
-				
-				worldPosition.xy += noiseOffset.yz * amp * (saturate(rawData.growth * 14.0 - 13.0) * 0.8 + 0.2);
-				
-				
-				quadPoint *= scale * 0.5 * ((1.0 - rawData.decay) * 0.75 + 0.25);
+				//float clock = _Time.y * 0.4;				
+				//float freq = 11.45;
+				//float amp = 0.035;
+				//float3 noiseOffset = Value2D(worldPosition.x * 0.036 + clock * 0.16 + (float)inst, freq) * saturate(1 - rawData.decay * 8) * rawData.growth;				
+				//worldPosition.xy += noiseOffset.yz * amp * (saturate(rawData.growth * 14.0 - 13.0) * 0.8 + 0.2);
+								
+				quadPoint *= scale * 0.5; // * ((1.0 - rawData.decay) * 0.75 + 0.25);
 
 				// Figure out final facing Vectors!!!
 				float rotationAngle = random1 * 10.0 * 3.141592;  // radians

@@ -21,7 +21,7 @@ public class SimulationManager : MonoBehaviour {
 
     public bool isQuickStart = true;
 
-    public float curPlayerMutationRate = 0.5f;  // UI-based value, giving player control over mutation frequency with one parameter
+    public float curPlayerMutationRate = 0.75f;  // UI-based value, giving player control over mutation frequency with one parameter
 
     private bool isLoading = false;
     private bool loadingComplete = false;
@@ -1474,22 +1474,22 @@ public class SimulationManager : MonoBehaviour {
                 // EggSacks:
                 int eggSackIndex = mapGridCellArray[xCoord][yCoord].eggSackIndicesList[i];
 
-                if(eggSackArray[eggSackIndex].enabled) { // if enabled:
-                    if(eggSackArray[eggSackIndex].isProtectedByParent) {
+                if(eggSackArray[eggSackIndex].curLifeStage != EggSack.EggLifeStage.Null) { // if enabled:
+                    if(!eggSackArray[eggSackIndex].isProtectedByParent) {
                         //Debug.Log("Found valid Food!");
-                        Vector2 eggSackPos = new Vector2(eggSackArray[eggSackIndex].transform.localPosition.x, eggSackArray[eggSackIndex].transform.localPosition.y);
+                        Vector2 eggSackPos = new Vector2(eggSackArray[eggSackIndex].rigidbodyRef.transform.position.x, eggSackArray[eggSackIndex].rigidbodyRef.transform.position.y);
                         float distEggSack = (eggSackPos - agentPos).magnitude - (eggSackArray[eggSackIndex].curSize.magnitude + 1f) * 0.5f;  // subtract food & agent radii
 
                         if (distEggSack <= nearestFoodDistance) { // if now the closest so far, update index and dist:
 
-                            int neighborSpeciesIndex = Mathf.FloorToInt((float)eggSackIndex / (float)numEggSacks * (float)numSpecies);
+                            //int neighborSpeciesIndex = Mathf.FloorToInt((float)eggSackIndex / (float)numEggSacks * (float)numSpecies);
 
-                            if (ownSpeciesIndex != neighborSpeciesIndex) {  // if eggSack and Agent diff species
+                            //if (ownSpeciesIndex != neighborSpeciesIndex) {  // if eggSack and Agent diff species
                                 //if (a != eggSackIndex) {  // make sure it doesn't consider itself:
-                                closestEggSackIndex = eggSackIndex;
-                                nearestFoodDistance = distEggSack;
+                            closestEggSackIndex = eggSackIndex;
+                            nearestFoodDistance = distEggSack;
                                 //}
-                            }                            
+                            //}                            
                         }
                     } 
                 }                             
@@ -1589,7 +1589,7 @@ public class SimulationManager : MonoBehaviour {
         int startIndex = speciesIndex * speciesPopulationSize;
 
         List<int> validEggSackIndicesList = new List<int>();
-
+        //Debug.Log("startIndex = " + startIndex.ToString() + ", endIndex: " + (startIndex + speciesPopulationSize).ToString());
         for(int i = startIndex; i < startIndex + speciesPopulationSize; i++) {  // if EggSack belongs to the right species
             if(eggSackArray[i].curLifeStage == EggSack.EggLifeStage.Growing) {
                 if(eggSackArray[i].lifeStageTransitionTimeStepCounter < eggSackArray[i]._MatureDurationTimeSteps) {  // egg sack is at proper stage of development
@@ -1607,7 +1607,7 @@ public class SimulationManager : MonoBehaviour {
 
         if(validEggSackIndicesList.Count > 0) {  // move this inside the for loop ??
             int randIndex = UnityEngine.Random.Range(0, validEggSackIndicesList.Count);
-
+            //Debug.Log("listLength:" + validEggSackIndicesList.Count.ToString() + ", randIndex = " + randIndex.ToString() + ", p: " + validEggSackIndicesList[randIndex].ToString());
             parentEggSack = eggSackArray[validEggSackIndicesList[randIndex]];
             SpawnAgentFromEggSack(agentIndex, speciesIndex, parentEggSack);
         }
@@ -1670,6 +1670,27 @@ public class SimulationManager : MonoBehaviour {
 
         agentsArray[agentIndex].SetToAwaitingRespawn();
     }
+    private void SpawnAgentFromEggSack(int agentIndex, int speciesIndex, EggSack parentEggSack) {
+        //Debug.Log("SpawnAgentFromEggSack! " + agentIndex.ToString());
+        numAgentsBorn++;
+        currentOldestAgent = agentsArray[rankedIndicesList[0]].scoreCounter;
+
+        agentsArray[agentIndex].InitializeSpawnAgentFromEggSack(agentIndex, agentGenomePoolArray[agentIndex], parentEggSack); // Spawn that genome in dead Agent's body and revive it!
+
+        theRenderKing.UpdateAgentWidthsTexture(agentsArray[agentIndex]);
+                
+        agentRespawnCounter[speciesIndex] = 0;        
+    }
+    private void SpawnAgentImmaculate(int agentIndex, int speciesIndex) {
+        numAgentsBorn++;
+        currentOldestAgent = agentsArray[rankedIndicesList[0]].scoreCounter;
+
+        agentsArray[agentIndex].InitializeSpawnAgentImmaculate(agentIndex, agentGenomePoolArray[agentIndex], GetRandomFoodSpawnPosition()); // Spawn that genome in dead Agent's body and revive it!
+
+        theRenderKing.UpdateAgentWidthsTexture(agentsArray[agentIndex]);
+                
+        agentRespawnCounter[speciesIndex] = 0;        
+    }
     public void ProcessDeadEggSack(int eggSackIndex) {
         //Debug.Log("ProcessDeadEggSack(" + eggSackIndex.ToString() + ") eggSackRespawnCounter " + eggSackRespawnCounter.ToString());
         // Check for timer?
@@ -1729,8 +1750,8 @@ public class SimulationManager : MonoBehaviour {
                 int eggSpecies = Mathf.FloorToInt((float)eggSackIndex / (float)_NumEggSacks * (float)numSpecies);
 
                 int respawnCooldown = 200;
-                if (curApproxGen < 1) {
-                    respawnCooldown = 17;
+                if (curApproxGen < 2) {
+                    respawnCooldown = 7;
                 }
 
                 if(eggSackRespawnCounter[eggSpecies] > respawnCooldown) {  // try to encourage more pregnancies?
@@ -1907,30 +1928,7 @@ public class SimulationManager : MonoBehaviour {
         }
     }
 
-    private void SpawnAgentFromEggSack(int agentIndex, int speciesIndex, EggSack parentEggSack) {
-        //Debug.Log("SpawnAgentFromEggSack! " + agentIndex.ToString());
-        numAgentsBorn++;
-        currentOldestAgent = agentsArray[rankedIndicesList[0]].scoreCounter;
-
-        agentsArray[agentIndex].InitializeSpawnAgentFromEggSack(agentIndex, agentGenomePoolArray[agentIndex], parentEggSack); // Spawn that genome in dead Agent's body and revive it!
-
-        theRenderKing.UpdateAgentWidthsTexture(agentsArray[agentIndex]);
-
-        
-        agentRespawnCounter[speciesIndex] = 0;
-        
-    }
-    private void SpawnAgentImmaculate(int agentIndex, int speciesIndex) {
-        numAgentsBorn++;
-        currentOldestAgent = agentsArray[rankedIndicesList[0]].scoreCounter;
-
-        agentsArray[agentIndex].InitializeSpawnAgentImmaculate(agentIndex, agentGenomePoolArray[agentIndex], GetRandomFoodSpawnPosition()); // Spawn that genome in dead Agent's body and revive it!
-
-        theRenderKing.UpdateAgentWidthsTexture(agentsArray[agentIndex]);
-                
-        agentRespawnCounter[speciesIndex] = 0;
-        
-    }
+    
     private void SetAgentGenomeToMutatedCopyOfParentGenome(int agentIndex, AgentGenome parentGenome) {
 
         BodyGenome newBodyGenome = new BodyGenome();

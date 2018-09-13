@@ -236,7 +236,7 @@ public class CritterMouthComponent : MonoBehaviour {
             eggSack.foodAmount = 0f;
         }*/
 
-        Debug.Log("BiteDamageEggSack:    Agent [" + agentRef.index.ToString() + "] ---> EggSack [" + eggSack.index.ToString() + "] ownArea: " + ownArea.ToString() + ", flow: " + flowR.ToString() + ", numEggs: " + eggSack.curNumEggs.ToString() + ", foodAmount: " + eggSack.foodAmount.ToString());
+        //Debug.Log("BiteDamageEggSack:    Agent [" + agentRef.index.ToString() + "] ---> EggSack [" + eggSack.index.ToString() + "] ownArea: " + ownArea.ToString() + ", flow: " + flowR.ToString() + ", numEggs: " + eggSack.curNumEggs.ToString() + ", foodAmount: " + eggSack.foodAmount.ToString());
        
     }
     private void BiteCorpseFood(Agent corpseAgent, float ownBiteArea, float targetArea)
