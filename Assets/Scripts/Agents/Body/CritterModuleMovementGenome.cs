@@ -45,7 +45,7 @@ public class CritterModuleMovementGenome {
     public void GenerateRandomGenome() {
         // Do stuff:
         horsepower = 140f;
-        turnRate = 80.0f;
+        turnRate = 60.0f;
     }
 
     public void SetToMutatedCopyOfParentGenome(CritterModuleMovementGenome parentGenome, MutationSettings settings) {

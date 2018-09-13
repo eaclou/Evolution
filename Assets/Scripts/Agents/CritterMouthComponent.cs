@@ -94,19 +94,20 @@ public class CritterMouthComponent : MonoBehaviour {
             }
         }
 
-        EggSack collidingFoodModule = collider.gameObject.GetComponent<EggSack>();
-        if (collidingFoodModule != null) {
+        EggSack collidingEggSack = collider.gameObject.GetComponent<EggSack>();
+        if (collidingEggSack != null) {
             // FOOD:
             // Compare sizes:
-            targetArea = collidingFoodModule.curSize.x * collidingFoodModule.curSize.y;
+            targetArea = collidingEggSack.curSize.x * collidingEggSack.curSize.y;
 
             if(ownBiteArea > targetArea) {
                 // Swallow!:::
-                SwallowEggSackWhole(collidingFoodModule);
+                Debug.Log("SwallowEggSackWhole:    Agent [" + agentRef.index.ToString() + "] biteSize: " + ownBiteArea.ToString() + "   ---> EggSack [" + collidingEggSack.index.ToString() + "] food: " + collidingEggSack.foodAmount.ToString() + ", growthStatus: " + collidingEggSack.growthStatus.ToString());
+                SwallowEggSackWhole(collidingEggSack);
             }
             else {
                 // Bite off a smaller chunk -- sharper teeth better?
-                BiteDamageFood(collidingFoodModule, ownBiteArea, targetArea);      
+                BiteDamageEggSack(collidingEggSack, ownBiteArea, targetArea);      
             }
         }
     }
@@ -152,7 +153,7 @@ public class CritterMouthComponent : MonoBehaviour {
     }
 
     private void SwallowAnimalWhole(Agent preyAgent) {
-        //Debug.Log("SwallowAnimalWhole");
+        Debug.Log("SwallowAnimalWhole [" + agentRef.index.ToString() + "] ---> [" + preyAgent.index.ToString() + "]");
         ProcessPredatorySwallowAttempt(agentRef, preyAgent);
         //preyAgent.curLifeStage = Agent.AgentLifeStage.Dead;
         // Credit food:
@@ -177,13 +178,18 @@ public class CritterMouthComponent : MonoBehaviour {
 
         
     }
-    private void SwallowEggSackWhole(EggSack foodModule) {
+    private void SwallowEggSackWhole(EggSack eggSack) {
+        
         //Debug.Log("SwallowFoodWhole");
-        float flow = foodModule.curSize.x * foodModule.curSize.y;        
-        agentRef.EatFood(flow * 1f);    
-        foodModule.foodAmount = 0f;
+        float flow = eggSack.foodAmount;        
+        agentRef.EatFood(flow * 1f);
+
+        eggSack.ConsumedByPredatorAgent();
+        
+        //eggSack.foodAmount = 0f;
     }
     private void BiteDamageAnimal(Agent preyAgent, float ownBiteArea, float targetArea) {
+        
         //Debug.Log("BiteDamageAnimal");
         float baseDamage = 0.5f;
 
@@ -197,72 +203,52 @@ public class CritterMouthComponent : MonoBehaviour {
         preyAgent.coreModule.healthHead -= damage;
         preyAgent.coreModule.healthBody -= damage;
         preyAgent.coreModule.healthExternal -= damage;
+
+        Debug.Log("BiteDamageAnimal [" + agentRef.index.ToString() + "] ---> [" + preyAgent.index.ToString() + "] damage: " + damage.ToString() + ", preyHealth: " + preyAgent.coreModule.healthHead.ToString());
     }
-    private void BiteDamageFood(EggSack foodModule, float ownArea, float targetArea) {
+    private void BiteDamageEggSack(EggSack eggSack, float ownArea, float targetArea) {
+
+        float sizeOfEachEgg = (float)eggSack.individualEggMaxSize * eggSack.growthStatus;
+                
+        int numEggsEaten = Mathf.FloorToInt(ownArea / sizeOfEachEgg);
+        numEggsEaten = Mathf.Min(numEggsEaten, eggSack.curNumEggs);  // prevent overdraw
+
+        eggSack.curNumEggs -= numEggsEaten;
+        if(eggSack.curNumEggs <= 0) {
+            eggSack.curNumEggs = 0;
+
+            eggSack.ConsumedByPredatorAgent();
+        }
+        eggSack.foodAmount = (float)eggSack.curNumEggs / (float)eggSack.maxNumEggs * eggSack.curSize.x * eggSack.curSize.y;
         //Debug.Log("BiteDamageFood");
         //Debug.Log("BiteFood");
         // CONSUME FOOD!
-        float flow = ownArea * 2f; // / colliderCount;
-
-        float flowR = Mathf.Min(foodModule.foodAmount, flow);
-        //collidingAgent.testModule.foodAmountR[0] += flowR * 2f;  // make sure Agent doesn't receive food from empty dispenser
-
+        float flowR = 0f;
+        if(numEggsEaten > 0) {
+            float flow = ownArea * 2f; // bonus for predators?
+            flowR = Mathf.Min(eggSack.foodAmount, flow);
+        }        
+        
         agentRef.EatFood(flowR * 1f); // assumes all foodAmounts are equal !! *****
     
-        foodModule.foodAmount -= flowR;
-        if (foodModule.foodAmount < 0f) {
-            foodModule.foodAmount = 0f;
-        }
-        /*float flowG = Mathf.Min(foodModule.amountG, flow);
-        foodModule.amountG -= flowG;
-        if (foodModule.amountG < 0f) {
-            foodModule.amountG = 0f;
-        }
-        float flowB = Mathf.Min(foodModule.amountB, flow);
-        foodModule.amountB -= flowB;
-        if (foodModule.amountB < 0f) {
-            foodModule.amountB = 0f;
+        /*eggSack.foodAmount -= flowR;
+        if (eggSack.foodAmount < 0f) {
+            eggSack.foodAmount = 0f;
         }*/
+
+        Debug.Log("BiteDamageEggSack:    Agent [" + agentRef.index.ToString() + "] ---> EggSack [" + eggSack.index.ToString() + "] ownArea: " + ownArea.ToString() + ", flow: " + flowR.ToString() + ", numEggs: " + eggSack.curNumEggs.ToString() + ", foodAmount: " + eggSack.foodAmount.ToString());
+       
     }
     private void BiteCorpseFood(Agent corpseAgent, float ownBiteArea, float targetArea)
-    {        
+    {  
+        Debug.Log("BiteCorpseFood [" + agentRef.index.ToString() + "] ---> [" + corpseAgent.index.ToString() + "]");
         float flow = ownBiteArea * 2f; // / colliderCount;
 
         float flowR = Mathf.Min(corpseAgent.currentCorpseFoodAmount, flow);
-        //collidingAgent.testModule.foodAmountR[0] += flowR * 2f;  // make sure Agent doesn't receive food from empty dispenser
-
+        
         agentRef.EatFood(flowR * 1f); // assumes all foodAmounts are equal !! *****
 
         corpseAgent.ProcessBeingEaten(flowR);
-
-        /*corpseAgent.corpseFoodAmount -= flowR;
-        if (corpseAgent.corpseFoodAmount < 0f)
-        {
-            corpseAgent.corpseFoodAmount = 0f;
-        }
-        else
-        {
-            // Update CorpseAgent after it's been bitten and had pieces removed:
-            //corpseAgent.ProcessBeingEaten(flowR);
-
-            
-            float sidesRatio = corpseAgent.coreModule.coreWidth / corpseAgent.coreModule.coreLength;
-            float sideY = Mathf.Sqrt(corpseAgent.corpseFoodAmount / sidesRatio);
-            float sideX = sideY * sidesRatio;
-            //curSize = new Vector3(sideX, sideY);
-            //transform.localScale = new Vector3(curSize.x, curSize.y, 1f);
-
-            corpseAgent.coreModule.currentBodySize = new Vector2(sideX, sideY);
-            corpseAgent.bodyCritterSegment.GetComponent<CapsuleCollider2D>().size = corpseAgent.coreModule.currentBodySize;
-
-            // MOUTH:
-            corpseAgent.mouthRef.triggerCollider.radius = corpseAgent.coreModule.currentBodySize.x * 0.5f;
-            corpseAgent.mouthRef.triggerCollider.offset = new Vector2(0f, corpseAgent.coreModule.currentBodySize.y * 0.5f);
-            
-        }*/
-
-        //Debug.Log("BiteCorpseFood!!! ownBiteArea: " + ownBiteArea.ToString() + ", targetArea: " + targetArea.ToString() + ", flowR: " + flowR.ToString() + ", corpseFoodAmount: " + corpseAgent.corpseFoodAmount.ToString() + ", corpseDimensions: " + corpseAgent.coreModule.currentBodySize.ToString());
-
 
     }
 

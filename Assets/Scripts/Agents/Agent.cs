@@ -27,7 +27,7 @@ public class Agent : MonoBehaviour {
         Dead,
         Null
     }
-    private int gestationDurationTimeSteps = 640;
+    private int gestationDurationTimeSteps = 540;
     public int _GestationDurationTimeSteps
     {
         get
@@ -69,6 +69,7 @@ public class Agent : MonoBehaviour {
     private int growthScalingSkipFrames = 8;
 
     public float growthPercentage = 0f;
+    //public float decayPercentage = 0f;  // so that scaling works if agent dies at various stages of growth, rather than assuming it's fullsize
    
     public Brain brain;
     public GameObject bodyGO;
@@ -128,6 +129,7 @@ public class Agent : MonoBehaviour {
 
     public bool isSwallowingPrey = false;
     public bool isBeingSwallowed = false;
+    public bool isSexuallyMature = false;
     public int beingSwallowedFrameCounter = 0;
     public int swallowingPreyFrameCounter = 0;
     public int swallowDuration = 60;
@@ -139,7 +141,7 @@ public class Agent : MonoBehaviour {
 
     public EggSack childEggSackRef;
     public bool isPregnantAndCarryingEggs = false;
-    public int pregnancyRefactoryDuration = 480;
+    public int pregnancyRefactoryDuration = 360;
 
     public float overflowFoodAmount = 0f;
     
@@ -170,6 +172,7 @@ public class Agent : MonoBehaviour {
 
         colliderBody.enabled = false;
         isBeingSwallowed = true;
+        isSexuallyMature = false;
         beingSwallowedFrameCounter = 0;
         predatorAgentRef = predatorAgent;
 
@@ -450,6 +453,7 @@ public class Agent : MonoBehaviour {
             AbortPregnancy();
         }
 
+        isSexuallyMature = false;
         isSwallowingPrey = false;
         swallowingPreyFrameCounter = 0;
 
@@ -524,7 +528,6 @@ public class Agent : MonoBehaviour {
         if(coreModule.stomachContents > coreModule.stomachCapacity) {
             coreModule.stomachContents = coreModule.stomachCapacity;
         }
-
         totalFoodEaten += amount;        
     }
     public void ProcessBeingEaten(float amount) {
@@ -541,8 +544,8 @@ public class Agent : MonoBehaviour {
         }
         else
         {
-            // ******** CHANGE THIS LATER IT"S FUCKING AWFUL!!!! **************************************************
-            float sidesRatio = coreModule.coreWidth / coreModule.coreLength;
+            // ******** CHANGE THIS LATER IT"S FUCKING AWFUL!!!! **************************************************  *** ***** ***** ***** **
+            /*float sidesRatio = coreModule.coreWidth / coreModule.coreLength;
             float sideY = Mathf.Sqrt(currentCorpseFoodAmount / sidesRatio);
             float sideX = sideY * sidesRatio;
 
@@ -550,7 +553,7 @@ public class Agent : MonoBehaviour {
             // Do I even use currentBodySize as a trusted value?
             coreModule.currentBodySize = new Vector2(sideX, sideY);
             colliderBody.size = coreModule.currentBodySize;
-
+            */
         }
     }
 
@@ -569,16 +572,15 @@ public class Agent : MonoBehaviour {
                 beingSwallowedFrameCounter = 0;
                 isBeingSwallowed = false;
 
-                //colliderBody.enabled = true; // **** IS THIS RIGHT???????? ***
-
-                //predatorAgentRef.springJoint.enabled = false;
-                //predatorAgentRef.springJoint.connectedBody = null;
+                colliderBody.enabled = false;
+                springJoint.enabled = false;
+                springJoint.connectedBody = null;
             }
             else
             {
                 float scale = (float)beingSwallowedFrameCounter / (float)swallowDuration;
 
-                ScaleBody((1.0f - scale) * 0.8f);
+                ScaleBody((1.0f - scale) * 0.8f, true);
             }
         }        
 
@@ -637,16 +639,21 @@ public class Agent : MonoBehaviour {
 
         // Scaling Test:
         int frameNum = lifeStageTransitionTimeStepCounter % growthScalingSkipFrames;
+        bool resizeCollider = false;
         if(frameNum == 3) {
-            ScaleBody(growthPercentage);  
+            resizeCollider = true;            
         }
+        ScaleBody(growthPercentage, resizeCollider);  
 
         if(isAttachedToParentEggSack) {
-            float growthPercentage = (float)lifeStageTransitionTimeStepCounter / (float)_GestationDurationTimeSteps;
-
-            float targetDist = Mathf.Lerp(0.01f, parentEggSackRef.fullSize.magnitude * 0.5f, growthPercentage);
-
-            springJoint.distance = targetDist;
+            if(parentEggSackRef == null) {
+                //  *** eventually look into aborting agents who are attached to EggSacks which don't reach birth ***
+            }
+            else {
+                float growthPercentage = (float)lifeStageTransitionTimeStepCounter / (float)_GestationDurationTimeSteps;
+                float targetDist = Mathf.Lerp(0.01f, parentEggSackRef.fullSize.magnitude * 0.5f, growthPercentage);
+                springJoint.distance = targetDist;
+            }            
         }
         else {
             //springJoint.enableCollision = false;
@@ -685,27 +692,30 @@ public class Agent : MonoBehaviour {
     }
     private void BeginHatching() {
 
-        curLifeStage = AgentLifeStage.Young;
-        //Debug.Log("EGG HATCHED!");
-        lifeStageTransitionTimeStepCounter = 0;
-        //growthPercentage = 0f; // can I handle growth percentage in a better, more continuous way?
-
-        // Detach from parent EggSack
-        parentEggSackRef = null;
-        isAttachedToParentEggSack = false;
-
         springJoint.connectedBody = null;
         springJoint.enabled = false;
 
-        colliderBody.enabled = true;
-        // Play animation / rendering whatever.
-
-        //ScaleBody(growthPercentage);
-
-        //coreModule.coreWidth * coreModule.coreLength * scale;
-        coreModule.energyRaw = coreModule.maxEnergyStorage;
-        //coreModule.energyStored[0] = 1f;
-        // update boolean flags
+        if(parentEggSackRef != null) {
+            if(parentEggSackRef.curLifeStage == EggSack.EggLifeStage.Growing || parentEggSackRef.curLifeStage == EggSack.EggLifeStage.Mature) {
+                curLifeStage = AgentLifeStage.Young;
+                //Debug.Log("EGG HATCHED!");
+                lifeStageTransitionTimeStepCounter = 0;
+                
+                // Detach from parent EggSack
+                parentEggSackRef = null;
+                isAttachedToParentEggSack = false;        
+                
+                colliderBody.enabled = true;
+                
+                coreModule.energyRaw = coreModule.maxEnergyStorage;
+            }
+            else {
+                Debug.Log("BeginHatching but OH NO!!! parentEggSack ref is gone or decaying :(   Killed Agent");
+                curLifeStage = AgentLifeStage.Dead;
+                lifeStageTransitionTimeStepCounter = 0;
+                InitializeDeath();
+            }
+        }        
     }
     private void TickYoung(SimulationManager simManager, Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray, SettingsManager settings) {
         //ProcessSwallowing();
@@ -714,9 +724,11 @@ public class Agent : MonoBehaviour {
 
         // Scaling Test:
         int frameNum = lifeStageTransitionTimeStepCounter % growthScalingSkipFrames;
-        if(frameNum == 3) {
-            ScaleBody(growthPercentage);  
+        bool resizeFrame = false;
+        if(frameNum == 2) {
+            resizeFrame = true;            
         }
+        ScaleBody(growthPercentage, resizeFrame);  
 
         TickModules(simManager, nutrientCellInfo); // update inputs for Brain        
         TickBrain(); // Tick Brain
@@ -766,9 +778,11 @@ public class Agent : MonoBehaviour {
 
         // Scaling Test:
         int frameNum = ageCounterMature % growthScalingSkipFrames;
-        if(frameNum == 0) {
-            ScaleBody(growthPercentage);
+        bool resizeFrame = false;
+        if(frameNum == 1) {
+            resizeFrame = true;            
         }
+        ScaleBody(growthPercentage, resizeFrame);  
 
         TickModules(simManager, nutrientCellInfo); // update inputs for Brain        
         TickBrain(); // Tick Brain
@@ -783,12 +797,13 @@ public class Agent : MonoBehaviour {
         
     }
     public void BeginPregnancy(EggSack developingEggSackRef) {
-        Debug.Log("BeginPregnancy! [" + developingEggSackRef.index.ToString() + "]");
+        //Debug.Log("BeginPregnancy! [" + developingEggSackRef.index.ToString() + "]");
         isPregnantAndCarryingEggs = true;
         childEggSackRef = developingEggSackRef;
         
     }
     public void AbortPregnancy() {
+        //childEggSackRef
         childEggSackRef.ParentDiedWhilePregnant();
         childEggSackRef = null;
 
@@ -808,27 +823,29 @@ public class Agent : MonoBehaviour {
         // Should shrink as well as lose foodContent
     }
 
-    private void ScaleBody(float growthPercentage) {
+    private void ScaleBody(float growthPercentage, bool resizeColliders) {
         //segmentFullSizeArray
         float minScale = 0.005f;
         float scale = Mathf.Lerp(minScale, 1f, growthPercentage); // Minimum size = 0.1 ???  // SYNC WITH EGG SIZE!!!
-        float currentBodyVolume = coreModule.coreWidth * coreModule.coreLength * growthPercentage;
-
         coreModule.currentBodySize = new Vector2(coreModule.coreWidth, coreModule.coreLength) * growthPercentage;
+        float currentBodyVolume = coreModule.currentBodySize.x * coreModule.currentBodySize.y;
+                
         coreModule.stomachCapacity = currentBodyVolume;
         coreModule.maxEnergyStorage = coreModule.coreWidth * coreModule.coreLength * growthPercentage;
-        colliderBody.size = coreModule.currentBodySize;
-
-        bodyRigidbody.mass = currentBodyVolume;
-
-        // MOUTH:
-        mouthRef.triggerCollider.radius = coreModule.coreWidth * scale * 0.5f;
-        mouthRef.triggerCollider.offset = new Vector2(0f, coreModule.coreLength * scale * 0.5f);
         
-        mouseClickCollider.radius = coreModule.coreWidth * scale * 0.5f;        
-        mouseClickCollider.height = coreModule.coreLength * scale;
-        mouseClickCollider.radius *= 3.6f; // ** TEMP -- should be based on camera distance also
-        mouseClickCollider.height *= 1.4f;        
+        if(resizeColliders) {            
+            colliderBody.size = coreModule.currentBodySize;
+            bodyRigidbody.mass = currentBodyVolume;
+
+            // MOUTH:
+            mouthRef.triggerCollider.radius = coreModule.coreWidth * scale * 0.5f;
+            mouthRef.triggerCollider.offset = new Vector2(0f, coreModule.coreLength * scale * 0.5f);
+        
+            mouseClickCollider.radius = coreModule.coreWidth * scale * 0.5f;        
+            mouseClickCollider.height = coreModule.coreLength * scale;
+            mouseClickCollider.radius *= 3.6f; // ** TEMP -- should be based on camera distance also
+            mouseClickCollider.height *= 1.4f; 
+        }               
     }
 
     public void TickActions(SimulationManager simManager, Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray, SettingsManager settings) {
@@ -870,7 +887,7 @@ public class Agent : MonoBehaviour {
         }
 
         //ENERGY:
-        float energyCost = 0.00085f * agentSizeMultiplier * settings.energyDrainMultiplier;
+        float energyCost = 0.00125f * agentSizeMultiplier * settings.energyDrainMultiplier;
         
         float throttleMag = smoothedThrottle.magnitude;
         

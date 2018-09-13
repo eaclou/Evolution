@@ -430,8 +430,7 @@ public class CritterModuleCore {
         nearestFoodParticleIndex = simManager.closestFoodParticlesDataArray[agentIndex].index;
         nearestFoodParticlePos = simManager.closestFoodParticlesDataArray[agentIndex].worldPos - new Vector2(simManager.agentsArray[agentIndex].bodyRigidbody.transform.position.x,
                                                                                                            simManager.agentsArray[agentIndex].bodyRigidbody.transform.position.y);
-
-        
+                
 
         Vector2 foodPos = Vector2.zero;
         Vector2 foodDir = Vector2.zero;
@@ -509,26 +508,18 @@ public class CritterModuleCore {
         if(isPassiveMouth) {
             //float nearestFoodParticleSquareDistance = critterToFoodParticle.sqrMagnitude;
             //if(nearestFoodParticleSquareDistance < nearestFoodChunkSquareDistance) { // GPU Food PArticle:
-                foodPosX[0] = foodParticleDir.x; ; // critterToFoodParticle.x / 20f; 
-                foodPosY[0] = foodParticleDir.y;
-                foodDirX[0] = nutrientCellInfo.y;
-                foodDirY[0] = nutrientCellInfo.z;
-                foodRelSize[0] = nutrientCellInfo.x; // simManager.closestFoodParticlesDataArray[agentIndex].foodAmount; // nutrientCellInfo.x;
-            /*}
-            else { // CPU foodChunk:
-                foodPosX[0] = foodPos.x / 20f; 
-                foodPosY[0] = foodPos.y / 20f;
-                foodDirX[0] = foodDir.x;
-                foodDirY[0] = foodDir.y; 
-                foodRelSize[0] = foodAmount; 
-            }*/
-            
+            foodPosX[0] = foodParticleDir.x; ; // critterToFoodParticle.x / 20f; 
+            foodPosY[0] = foodParticleDir.y;
+            foodDirX[0] = nutrientCellInfo.y;
+            foodDirY[0] = nutrientCellInfo.z;
+            foodRelSize[0] = nutrientCellInfo.x; // simManager.closestFoodParticlesDataArray[agentIndex].foodAmount; // nutrientCellInfo.x;
+                        
         }
         else { // Predator -- use CPU egg chunks:
-            foodPosX[0] = foodDir.x;  // foodPos.x / 20f;
-            foodPosY[0] = foodDir.y;  //foodPos.y / 20f;
-            foodDirX[0] = enemyDir.x; // foodParticleDir.x;
-            foodDirY[0] = enemyDir.y; // foodParticleDir.y;
+            foodPosX[0] = foodParticleDir.x;  //foodDir.x;  // foodPos.x / 20f;
+            foodPosY[0] = foodParticleDir.y; // foodDir.y;  //foodPos.y / 20f;
+            foodDirX[0] = foodDir.x; // foodParticleDir.x;
+            foodDirY[0] = foodDir.y; // foodParticleDir.y;
         }
 
         //foodTypeR[0] = typeR;

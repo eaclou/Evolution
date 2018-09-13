@@ -1472,16 +1472,24 @@ public class SimulationManager : MonoBehaviour {
             
             for (int i = 0; i < mapGridCellArray[xCoord][yCoord].eggSackIndicesList.Count; i++) {
                 // EggSacks:
-                if(eggSackArray[mapGridCellArray[xCoord][yCoord].eggSackIndicesList[i]].enabled) { // if enabled:
-                    if(eggSackArray[mapGridCellArray[xCoord][yCoord].eggSackIndicesList[i]].isProtectedByParent) {
+                int eggSackIndex = mapGridCellArray[xCoord][yCoord].eggSackIndicesList[i];
+
+                if(eggSackArray[eggSackIndex].enabled) { // if enabled:
+                    if(eggSackArray[eggSackIndex].isProtectedByParent) {
                         //Debug.Log("Found valid Food!");
-                        Vector2 eggSackPos = new Vector2(eggSackArray[mapGridCellArray[xCoord][yCoord].eggSackIndicesList[i]].transform.localPosition.x, eggSackArray[mapGridCellArray[xCoord][yCoord].eggSackIndicesList[i]].transform.localPosition.y);
-                        float distEggSack = (eggSackPos - agentPos).magnitude - (eggSackArray[mapGridCellArray[xCoord][yCoord].eggSackIndicesList[i]].curSize.magnitude + 1f) * 0.5f;  // subtract food & agent radii
+                        Vector2 eggSackPos = new Vector2(eggSackArray[eggSackIndex].transform.localPosition.x, eggSackArray[eggSackIndex].transform.localPosition.y);
+                        float distEggSack = (eggSackPos - agentPos).magnitude - (eggSackArray[eggSackIndex].curSize.magnitude + 1f) * 0.5f;  // subtract food & agent radii
+
                         if (distEggSack <= nearestFoodDistance) { // if now the closest so far, update index and dist:
-                            if (a != mapGridCellArray[xCoord][yCoord].eggSackIndicesList[i]) {  // make sure it doesn't consider itself:
-                                closestEggSackIndex = mapGridCellArray[xCoord][yCoord].eggSackIndicesList[i];
+
+                            int neighborSpeciesIndex = Mathf.FloorToInt((float)eggSackIndex / (float)numEggSacks * (float)numSpecies);
+
+                            if (ownSpeciesIndex != neighborSpeciesIndex) {  // if eggSack and Agent diff species
+                                //if (a != eggSackIndex) {  // make sure it doesn't consider itself:
+                                closestEggSackIndex = eggSackIndex;
                                 nearestFoodDistance = distEggSack;
-                            }
+                                //}
+                            }                            
                         }
                     } 
                 }                             
@@ -1716,17 +1724,28 @@ public class SimulationManager : MonoBehaviour {
             }
             else {
                 // Wait? SpawnImmaculate?
-                //if(eggSackRespawnCounter > 23) {  // try to encourage more pregnancies?
+                //if(curApproxGen < 2) {
+                int speciesSize = _NumAgents / numSpecies;
+                int eggSpecies = Mathf.FloorToInt((float)eggSackIndex / (float)_NumEggSacks * (float)numSpecies);
+
+                int respawnCooldown = 200;
+                if (curApproxGen < 1) {
+                    respawnCooldown = 17;
+                }
+
+                if(eggSackRespawnCounter[eggSpecies] > respawnCooldown) {  // try to encourage more pregnancies?
                     //Debug.Log("InitializeEggSackFromGenomeImmaculate! Egg[" + eggSackIndex.ToString() + "]");
-                    /*int speciesSize = _NumAgents / numSpecies;
-                    int eggSpecies = Mathf.FloorToInt((float)eggSackIndex / (float)_NumEggSacks * (float)numSpecies);
+                        
                     int agentGenomeIndex = UnityEngine.Random.Range(eggSpecies * speciesSize, (eggSpecies + 1) * speciesSize);
 
-                    eggSackArray[eggSackIndex].InitializeEggSackFromGenomeImmaculate(eggSackIndex, agentGenomePoolArray[agentGenomeIndex], GetRandomFoodSpawnPosition());
+                    eggSackArray[eggSackIndex].parentAgentIndex = agentGenomeIndex;
+                    eggSackArray[eggSackIndex].InitializeEggSackFromGenome(eggSackIndex, agentGenomePoolArray[agentGenomeIndex], null, GetRandomFoodSpawnPosition().startPosition);
 
-                    eggSackRespawnCounter = 0;
-                    */
-                //}                
+                    eggSackRespawnCounter[eggSpecies] = 0;
+                    
+                }
+                //}
+                                
             }
         }
         else {
@@ -2165,150 +2184,7 @@ public class SimulationManager : MonoBehaviour {
                                startPositionsPresets.spawnZonesList[randZone].transform.position.y + randOffset.y, 
                                0f);
         return startPos;
-    }
-    /*public void ProcessDeadPlayer() {
-        
-        //playerIsDead = true;  // so this function won't be called continuously
-        // Display Death screen, send player's Score, cause of death, etc.
-        lastPlayerScore = agentsArray[0].scoreCounter;
-        if (agentsArray[0].scoreCounter > recordPlayerAge) {
-            recordPlayerAge = agentsArray[0].scoreCounter;
-        }
-        // Wait certain amount of time OR press enter to immediately respawn.
-        // Countdown display showing time to auto-respawn
-        bool didStarve = true;
-        if(agentsArray[0].wasImpaled) {
-            didStarve = false;
-        }
-        Debug.Log("ProcessDeadPlayer! starved: " + didStarve.ToString());
-        uiManager.PlayerDied(didStarve);
-        // Fade To Black
-        
-    }*/
-    /*public void RespawnPlayer() {
-        Debug.Log("Manual New Player RESPAWN!");
-
-        cameraManager.SetTarget(agentsArray[0], 0);
-
-        // respawn the Agent // mutates, respawns, updates RenderKingBuffers
-
-        //agentsArray[0].humanControlled = true;
-        //agentsArray[0].humanControlLerp = 1f;
-        CreateMutatedCopyOfAgent(0, 0);         
-        theRenderKing.UpdateAgentSmearStrokesBuffer(0);
-        //theRenderKing.UpdateAgentBodyStrokesBuffer(0);
-        theRenderKing.UpdateAgentEyeStrokesBuffer(0);
-        theRenderKing.SimPlayerGlow();
-        
-        // Adjust Camera to position of agent
-        //cameraManager.SetTarget(cameraManager.targetAgent, cameraManager.targetTransform, cameraManager.targetCritterIndex);
-        //cameraManager.StartPlayerRespawn();
-        // Fade-in from black?
-        // Reset things that need to be reset i.e score counter?
-
-        // Agent energy display should grow as agent grows through Egg stage
-                
-        //playerIsDead = false;
-    }*/
-    /*public void EnterObserverMode() {
-        agentsArray[0].humanControlled = false;
-        agentsArray[0].humanControlLerp = 0f;
-
-        //playerIsDead = false; // maybe rename this? bypasses Agent lifeCycleStage being Null for extended periods...
-    }*/
-    
-    /*
-    private void MutateBody {
-        //====================================================================================================================================
-        // Mutate Body Colors:
-        // Mutate Body Colors:
-        // Mutate Body Colors:
-        agentsArray[agentIndex].huePrimary = agentsArray[parentIndex].huePrimary;
-        agentsArray[agentIndex].hueSecondary = agentsArray[parentIndex].hueSecondary;
-
-        agentsArray[agentIndex].size = agentsArray[parentIndex].size;
-        float randomMutate = UnityEngine.Random.Range(0f, 1f);
-        if (randomMutate < 0.08f) {  // SIZE
-            agentsArray[agentIndex].size.x = Mathf.Clamp(agentsArray[agentIndex].size.x + Gaussian.GetRandomGaussian(0f, 0.1f), 0.5f, 2f);
-            agentsArray[agentIndex].size.y = Mathf.Clamp(agentsArray[agentIndex].size.y + Gaussian.GetRandomGaussian(0f, 0.1f), 0.5f, 2f);
-        }
-        randomMutate = UnityEngine.Random.Range(0f, 1f);
-        if (randomMutate < 0.08f) {  // RED
-            agentsArray[agentIndex].huePrimary.x = Mathf.Clamp01(agentsArray[agentIndex].huePrimary.x + Gaussian.GetRandomGaussian(0f, 0.1f));
-        }
-        randomMutate = UnityEngine.Random.Range(0f, 1f);
-        if (randomMutate < 0.08f) {  // GREEN
-            agentsArray[agentIndex].huePrimary.y = Mathf.Clamp01(agentsArray[agentIndex].huePrimary.y + Gaussian.GetRandomGaussian(0f, 0.1f));
-        }
-        randomMutate = UnityEngine.Random.Range(0f, 1f);
-        if (randomMutate < 0.08f) {  // BLUE
-            agentsArray[agentIndex].huePrimary.z = Mathf.Clamp01(agentsArray[agentIndex].huePrimary.z + Gaussian.GetRandomGaussian(0f, 0.1f));
-        }
-        randomMutate = UnityEngine.Random.Range(0f, 1f);
-        if (randomMutate < 0.08f) {  // RED
-            agentsArray[agentIndex].hueSecondary.x = Mathf.Clamp01(agentsArray[agentIndex].hueSecondary.x + Gaussian.GetRandomGaussian(0f, 0.1f));
-        }
-        randomMutate = UnityEngine.Random.Range(0f, 1f);
-        if (randomMutate < 0.08f) {  // GREEN
-            agentsArray[agentIndex].hueSecondary.y = Mathf.Clamp01(agentsArray[agentIndex].hueSecondary.y + Gaussian.GetRandomGaussian(0f, 0.1f));
-        }
-        randomMutate = UnityEngine.Random.Range(0f, 1f);
-        if (randomMutate < 0.08f) {  // BLUE
-            agentsArray[agentIndex].hueSecondary.z = Mathf.Clamp01(agentsArray[agentIndex].hueSecondary.z + Gaussian.GetRandomGaussian(0f, 0.1f));
-        }
-        agentsArray[agentIndex].bodyPointStroke.parentIndex = agentIndex; // agentsArray[parentIndex].decorationPointStrokesArray[b].parentIndex;
-        agentsArray[agentIndex].bodyPointStroke.strength = agentsArray[parentIndex].bodyPointStroke.strength;
-        agentsArray[agentIndex].bodyPointStroke.localScale = agentsArray[parentIndex].bodyPointStroke.localScale;
-        agentsArray[agentIndex].bodyPointStroke.localPos = agentsArray[parentIndex].bodyPointStroke.localPos;
-        agentsArray[agentIndex].bodyPointStroke.localDir = agentsArray[parentIndex].bodyPointStroke.localDir;
-        agentsArray[agentIndex].bodyPointStroke.hue = agentsArray[agentIndex].huePrimary;
-
-        for (int b = 0; b < agentsArray[agentIndex].decorationPointStrokesArray.Length; b++) {
-
-            agentsArray[agentIndex].decorationPointStrokesArray[b].parentIndex = agentIndex; // agentsArray[parentIndex].decorationPointStrokesArray[b].parentIndex;
-            agentsArray[agentIndex].decorationPointStrokesArray[b].strength = agentsArray[parentIndex].decorationPointStrokesArray[b].strength;
-            agentsArray[agentIndex].decorationPointStrokesArray[b].localScale = agentsArray[parentIndex].decorationPointStrokesArray[b].localScale;
-            agentsArray[agentIndex].decorationPointStrokesArray[b].localPos = agentsArray[parentIndex].decorationPointStrokesArray[b].localPos;
-            agentsArray[agentIndex].decorationPointStrokesArray[b].localDir = agentsArray[parentIndex].decorationPointStrokesArray[b].localDir;
-            agentsArray[agentIndex].decorationPointStrokesArray[b].hue = agentsArray[parentIndex].decorationPointStrokesArray[b].hue;
-
-            // Don't mutate Eyes:
-            if (b > 1) {
-                // mutate decoration stroke:
-                randomMutate = UnityEngine.Random.Range(0f, 1f);
-                if (randomMutate < 0.1f) {  // 
-                    agentsArray[agentIndex].decorationPointStrokesArray[b].strength = Mathf.Clamp01(agentsArray[agentIndex].decorationPointStrokesArray[b].strength + Gaussian.GetRandomGaussian(0f, 0.25f));
-                }
-                randomMutate = UnityEngine.Random.Range(0f, 1f);
-                if (randomMutate < 0.1f) {  // Scale
-                    agentsArray[agentIndex].decorationPointStrokesArray[b].localScale.x = Mathf.Clamp(agentsArray[agentIndex].decorationPointStrokesArray[b].localScale.x + Gaussian.GetRandomGaussian(0f, 0.05f), 0.1f, 0.5f);
-                    agentsArray[agentIndex].decorationPointStrokesArray[b].localScale.y = Mathf.Clamp(agentsArray[agentIndex].decorationPointStrokesArray[b].localScale.y + Gaussian.GetRandomGaussian(0f, 0.05f), 0.1f, 0.5f);
-                }
-                randomMutate = UnityEngine.Random.Range(0f, 1f);
-                if (randomMutate < 0.1f) {  // Position
-                    agentsArray[agentIndex].decorationPointStrokesArray[b].localPos.x = Mathf.Clamp(agentsArray[agentIndex].decorationPointStrokesArray[b].localPos.x + Gaussian.GetRandomGaussian(0f, 0.05f), -0.35f, 0.35f);
-                    agentsArray[agentIndex].decorationPointStrokesArray[b].localPos.y = Mathf.Clamp(agentsArray[agentIndex].decorationPointStrokesArray[b].localPos.y + Gaussian.GetRandomGaussian(0f, 0.05f), -0.35f, 0.35f);
-                }
-                randomMutate = UnityEngine.Random.Range(0f, 1f);
-                if (randomMutate < 0.1f) {  // Direction
-                    agentsArray[agentIndex].decorationPointStrokesArray[b].localDir.x = agentsArray[agentIndex].decorationPointStrokesArray[b].localDir.x + Gaussian.GetRandomGaussian(0f, 0.1f);
-                    agentsArray[agentIndex].decorationPointStrokesArray[b].localDir.y = agentsArray[agentIndex].decorationPointStrokesArray[b].localDir.y + Gaussian.GetRandomGaussian(0f, 0.1f);
-                    agentsArray[agentIndex].decorationPointStrokesArray[b].localDir = agentsArray[agentIndex].decorationPointStrokesArray[b].localDir.normalized;
-                }
-                randomMutate = UnityEngine.Random.Range(0f, 1f);
-                if (randomMutate < 0.1f) {  // Brush Type
-                    agentsArray[agentIndex].decorationPointStrokesArray[b].brushType = UnityEngine.Random.Range(0, 4);
-                }
-
-                agentsArray[agentIndex].decorationPointStrokesArray[b].hue = Vector3.Lerp(agentsArray[agentIndex].huePrimary, agentsArray[agentIndex].hueSecondary, agentsArray[agentIndex].decorationPointStrokesArray[b].strength);
-            }
-        }
-        // Mutate Body Colors:
-        // Mutate Body Colors:
-        // Mutate Body Colors:
-        //====================================================================================================================================
-    }
-    */ // Mutate Body remnant code
+    }    
     #endregion
 
     #region Utility Functions // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& UTILITY FUNCTIONS! &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&

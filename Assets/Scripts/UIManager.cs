@@ -1336,8 +1336,8 @@ public class UIManager : MonoBehaviour {
     }
     public void ClickMutateToolGlobalRateSlider(float val) {
         Debug.Log("ClickMutateToolGlobalRateSlider(" + val.ToString() + ")!");
-        gameManager.simulationManager.curPlayerMutationRate = val;
-        gameManager.simulationManager.ChangeGlobalMutationRate(val); // normalizedVal);
+        //gameManager.simulationManager.curPlayerMutationRate = val;
+        //gameManager.simulationManager.ChangeGlobalMutationRate(val); // normalizedVal);
     }
     public void ClickToolButtonMutate() {
 
