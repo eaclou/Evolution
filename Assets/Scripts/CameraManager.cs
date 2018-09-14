@@ -84,7 +84,7 @@ public class CameraManager : MonoBehaviour {
         //masterTargetCamPosition.y = Mathf.Max(masterTargetCamPosition.y, 0f);
 
         // Lerp towards Target Transform Position & Orientation:
-        float minDistance = 1f;
+        float minDistance = 2.5f;
         float maxDistance = 256f;
         float relSize = (masterTargetDistance - minDistance) / (minDistance + maxDistance);
 

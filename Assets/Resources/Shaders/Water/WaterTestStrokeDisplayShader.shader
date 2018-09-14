@@ -89,7 +89,7 @@
 				o.altitudeUV = uv;
 				
 				float2 scale = waterQuadData.localScale * 32;
-				scale.x *= 0.66;
+				scale.x *= 0.76;
 				scale.y = scale.y * (1 + saturate(waterQuadData.speed * 64));
 				quadPoint *= float3(scale, 1.0);
 				
@@ -106,7 +106,7 @@
 				dotLight = dotLight * dotLight;
 				float waveHeight = waterSurfaceData.x;
 
-				worldPosition.z -= waveHeight * 2.5;
+				worldPosition.z -= waveHeight * 3.5;  // STANDARDIZE!
 				
 
 				float4 pos = mul(UNITY_MATRIX_VP, float4(worldPosition, 1.0)); // *** Revisit to better understand!!!! ***
@@ -127,16 +127,17 @@
 				float randThreshold = (randNoise1 + randNoise2 + randNoise3 + randNoise4) / 4;	
 				float2 sampleUV = screenUV.xy / screenUV.w;
 				float vignetteRadius = length((sampleUV - 0.5) * 2);
-				float testNewVignetteMask = saturate(((randThreshold + 0.6 - (saturate(vignetteRadius) * 0.4 + 0.3)) * 2));
+				float testNewVignetteMask = saturate(((randThreshold * 0.4 + 1 - (saturate((vignetteRadius - 0.75) * 2))) * 1) + 0.2);
 				o.vignetteLerp = float4(testNewVignetteMask,sampleUV,saturate(vignetteRadius));
 
-				float fadeDuration = 0.1;
+				float fadeDuration = 0.25;
 				float fadeIn = saturate(waterQuadData.age / fadeDuration);  // fade time = 0.1
 				float fadeOut = saturate((1 - waterQuadData.age) / fadeDuration);
 							
 				float alpha = fadeIn * fadeOut;
 
-				quadPoint *= saturate((vignetteRadius - 0.677) * 1.75) * alpha * (_CamDistNormalized * 0.75 + 0.25);
+				quadPoint *= alpha * (_CamDistNormalized * 0.9 + 0.1);
+				//quadPoint *= saturate((vignetteRadius - 0.56) * 1.75) * alpha * (_CamDistNormalized * 0.9 + 0.1);
 
 				// Figure out final facing Vectors!!!
 				float2 forward = fluidDir; //waterQuadData.heading;
@@ -158,7 +159,7 @@
 				// use separate camera?
 
 				float distFromScreenCenter = length(screenUV * 2 - 1);
-				float vignetteMask = smoothstep(0.5, 2.0, distFromScreenCenter) * 0.8;
+				//float vignetteMask = smoothstep(0.5, 2.0, distFromScreenCenter) * 0.8;
 				
 				float4 finalColor = frameBufferColor;
 				finalColor.a = brushColor.a;
@@ -195,19 +196,23 @@
 				float3 reflectedViewDir = cameraToVertexDir + 2 * surfaceNormal * 0.05;
 
 				float viewDot = dot(-cameraToVertexDir, surfaceNormal);
-				float rangeStart = 0.25;
-				float rangeEnd = 1;
+				float rangeStart = 0.6;
+				float rangeEnd = 0.8;
 				float rangeSize = rangeEnd - rangeStart;
 
-				float viewDotRemapped = saturate((viewDot / rangeSize) - (0.25 / rangeSize));
+				float viewDotRemapped = saturate((viewDot - 0.6) * 2.5); //saturate(viewDot - rangeStart) * rangeSize + rangeStart;
 
 				float2 skyCoords = reflectedViewDir.xy * 0.5 + 0.5;
 
 				float4 reflectedColor = float4(tex2Dlod(_SkyTex, float4((skyCoords) - _Time.y * 0.015, 0, 1)).rgb, finalColor.a); //col;
 				
-				finalColor = lerp(reflectedColor, finalColor, saturate(1 - (1 - i.vignetteLerp.x) * 0.5)); //viewDotRemapped); //saturate(1 - (1 - i.vignetteLerp.x) * 0.5)); //float4(1,1,1,1);
+				finalColor = lerp(reflectedColor, finalColor, viewDotRemapped) ;//(saturate(i.vignetteLerp.x - 0.1 + viewDotRemapped * 0.1)) * 0.8 + 0.2); //viewDotRemapped); //saturate(1 - (1 - i.vignetteLerp.x) * 0.5)); //float4(1,1,1,1);
 				
+				//finalColor.a *= (i.vignetteLerp.x * 0.2 + 0.8) * (viewDotRemapped * 0.75 + 0.25) * 0.8;
 
+				//TEMP DEBUG:
+				//float debugVal = saturate(viewDotRemapped);
+				//finalColor.rgb = float3(debugVal, debugVal, debugVal);
 
 				return finalColor;
 

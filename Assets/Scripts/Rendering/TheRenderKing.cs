@@ -1597,9 +1597,9 @@ public class TheRenderKing : MonoBehaviour {
         SimCritterSkinStrokes();
 
         baronVonWater.altitudeMapRef = baronVonTerrain.terrainHeightMap;
-        float camDist = Mathf.Clamp01(-1f * simManager.cameraManager.gameObject.transform.position.z / (65f - 5f));
+        float camDist = Mathf.Clamp01(-1f * simManager.cameraManager.gameObject.transform.position.z / (210f - 10f));
         baronVonWater.camDistNormalized = camDist;
-        Vector2 boxSizeHalf = 0.5f * Vector2.Lerp(new Vector2(16f, 9f) * 2, new Vector2(256f, 180f), Mathf.Clamp01(-(simManager.cameraManager.gameObject.transform.position.z) / 150f));
+        Vector2 boxSizeHalf = 0.67f * Vector2.Lerp(new Vector2(16f, 12f) * 2, new Vector2(256f, 204f), Mathf.Clamp01(-(simManager.cameraManager.gameObject.transform.position.z) / 150f));
         /*if(simManager.cameraManager.targetAgent != null)
         {
         }
@@ -1969,7 +1969,24 @@ public class TheRenderKing : MonoBehaviour {
         agentEyesDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
         agentEyesDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, agentEyesDisplayMat, 0, MeshTopology.Triangles, 6, agentEyeStrokesCBuffer.count);
-        /*
+        
+        float yOffset = Mathf.Sin(simManager.cameraManager.curTiltAngleDegrees * Mathf.Deg2Rad) * simManager.cameraManager.curCameraPos.z;
+        Vector4 camFocusPos = new Vector4(simManager.cameraManager.curCameraPos.x, simManager.cameraManager.curCameraPos.y + yOffset, 0f, 0f);
+        
+        // Water surface reflective
+        baronVonWater.waterQuadStrokesLrgDisplayMat.SetPass(0);
+        baronVonWater.waterQuadStrokesLrgDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        baronVonWater.waterQuadStrokesLrgDisplayMat.SetBuffer("frameBufferStrokesCBuffer", baronVonWater.waterQuadStrokesCBufferLrg);
+        baronVonWater.waterQuadStrokesLrgDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+        baronVonWater.waterQuadStrokesLrgDisplayMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
+        baronVonWater.waterQuadStrokesLrgDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+        baronVonWater.waterQuadStrokesLrgDisplayMat.SetTexture("_NutrientTex", simManager.nutrientMapRT1);
+        baronVonWater.waterQuadStrokesLrgDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        baronVonWater.waterQuadStrokesLrgDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized); // Mathf.Lerp(0f, 1f, Mathf.Clamp01((simManager.cameraManager.gameObject.transform.position.z * -1f) / 100f)));
+        baronVonWater.waterQuadStrokesLrgDisplayMat.SetVector("_CamFocusPosition", camFocusPos);
+        cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
+        cmdBufferTest.DrawProcedural(Matrix4x4.identity, baronVonWater.waterQuadStrokesLrgDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterQuadStrokesCBufferLrg.count);
+
         // Water surface reflective
         baronVonWater.waterQuadStrokesSmlDisplayMat.SetPass(0);
         baronVonWater.waterQuadStrokesSmlDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -1979,12 +1996,13 @@ public class TheRenderKing : MonoBehaviour {
         baronVonWater.waterQuadStrokesSmlDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
         baronVonWater.waterQuadStrokesSmlDisplayMat.SetTexture("_NutrientTex", simManager.nutrientMapRT1);
         baronVonWater.waterQuadStrokesSmlDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
-        baronVonWater.waterQuadStrokesSmlDisplayMat.SetFloat("_CamDistNormalized", Mathf.Lerp(0f, 1f, Mathf.Clamp01((simManager.cameraManager.gameObject.transform.position.z * -1f) / 100f)));
+        baronVonWater.waterQuadStrokesSmlDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized); // Mathf.Lerp(0f, 1f, Mathf.Clamp01((simManager.cameraManager.gameObject.transform.position.z * -1f) / 100f)));
+        baronVonWater.waterQuadStrokesSmlDisplayMat.SetVector("_CamFocusPosition", camFocusPos);
         cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, baronVonWater.waterQuadStrokesSmlDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterQuadStrokesCBufferSml.count);
-        */
+        
                 
-        // SURFACE BITS FLOATY:::::
+        // SURFACE BITS FLOATY:::::  // LILY PADS
         baronVonWater.waterSurfaceBitsDisplayMat.SetPass(0);
         baronVonWater.waterSurfaceBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         baronVonWater.waterSurfaceBitsDisplayMat.SetBuffer("frameBufferStrokesCBuffer", baronVonWater.waterSurfaceBitsCBuffer);
@@ -1993,7 +2011,7 @@ public class TheRenderKing : MonoBehaviour {
         baronVonWater.waterSurfaceBitsDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
         baronVonWater.waterSurfaceBitsDisplayMat.SetTexture("_NutrientTex", simManager.nutrientMapRT1);
         baronVonWater.waterSurfaceBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
-        baronVonWater.waterSurfaceBitsDisplayMat.SetFloat("_CamDistNormalized", Mathf.Lerp(0f, 1f, Mathf.Clamp01((simManager.cameraManager.gameObject.transform.position.z * -1f) / 100f)));
+        baronVonWater.waterSurfaceBitsDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
         cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, baronVonWater.waterSurfaceBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterSurfaceBitsCBuffer.count);
      

@@ -152,8 +152,8 @@
 				float frameLerp = rawData.growth * 4 + rawData.decay * 3 + random2 * 0.1; // (rawData.growth * 0.5 + (1.0 - rawData.decay) * 0.5) * 7; //saturate(growthLerp) * 3;
 			
 				// Can use this for random variations?
-				float row0 = floor(frameLerp);  // 0-6
-				float row1 = clamp(row0 + 1, 1, 7); // 1-7
+				float row0 = 0; //floor(frameLerp);  // 0-6
+				float row1 = 1; //clamp(row0 + 1, 1, 7); // 1-7
 				
 				uv0.y = uv0.y * tilePercentage + tilePercentage * row0;
 				uv1.y = uv1.y * tilePercentage + tilePercentage * row1;
@@ -162,7 +162,7 @@
 				float3 secondaryHue = critterInitDataCBuffer[rawData.parentAgentIndex].secondaryHue;
 
 				o.color = float4(lerp(primaryHue, secondaryHue, random1), rawData.health);
-				o.frameLerp = frameLerp - row0;
+				o.frameLerp = rawData.growth; //frameLerp - row0;
 				o.uv = float4(uv0, uv1);
 				o.foodIndex = eggData.eggSackIndex;
 				o.quadCoords = quadVerticesCBuffer[id].xy;	

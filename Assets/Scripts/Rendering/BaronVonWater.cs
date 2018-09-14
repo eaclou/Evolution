@@ -25,12 +25,12 @@ public class BaronVonWater : RenderBaron {
 
     private int numWaterQuadStrokesPerDimensionLrg = 256;
     public ComputeBuffer waterQuadStrokesCBufferLrg;
-    private int numWaterQuadStrokesPerDimensionSml = 128;
+    private int numWaterQuadStrokesPerDimensionSml = 256;
     public ComputeBuffer waterQuadStrokesCBufferSml;
 
     public Texture2D altitudeMapRef;
 
-    public int waterSurfaceMapResolution = 128;
+    public int waterSurfaceMapResolution = 256;
     public RenderTexture waterSurfaceDataRT0;  // 2 for swapping enabled
     public RenderTexture waterSurfaceDataRT1;
 
@@ -103,7 +103,7 @@ public class BaronVonWater : RenderBaron {
 
     private void InitializeBuffers() {
         InitializeQuadMeshBuffer(); // Set up Quad Mesh billboard for brushStroke rendering           
-        InitializeWaterQuadStrokesBuffer();
+        InitializeWaterSurfaceReflectiveBuffers();
         InitializeWaterCurveMeshBuffer();
         //InitializeWaterQuadStrokesBuffer();
         InitializeWaterCurveStrokesCBuffer();
@@ -181,10 +181,10 @@ public class BaronVonWater : RenderBaron {
         waterChains0CBuffer.SetData(waterChainDataArray);
         waterChains1CBuffer = new ComputeBuffer(waterChainDataArray.Length, sizeof(float) * 2);
     }
-    private void InitializeWaterQuadStrokesBuffer() {
+    private void InitializeWaterSurfaceReflectiveBuffers() {
         waterQuadStrokesCBufferLrg = new ComputeBuffer(numWaterQuadStrokesPerDimensionLrg * numWaterQuadStrokesPerDimensionLrg, sizeof(float) * 9 + sizeof(int) * 2);
         WaterQuadData[] waterQuadStrokesArrayLrg = new WaterQuadData[waterQuadStrokesCBufferLrg.count];
-        float waterQuadStrokesBounds = 256f;
+        float waterQuadStrokesBounds = SimulationManager._MapSize;
         for(int x = 0; x < numWaterQuadStrokesPerDimensionLrg; x++) {
             for(int y = 0; y < numWaterQuadStrokesPerDimensionLrg; y++) {
                 int index = x * numWaterQuadStrokesPerDimensionLrg + y;
@@ -193,8 +193,8 @@ public class BaronVonWater : RenderBaron {
                 Vector2 offset = new Vector2(UnityEngine.Random.Range(-0.5f, 0.5f), UnityEngine.Random.Range(-0.5f, 0.5f));
                 Vector3 pos = new Vector3(xPos + offset.x, yPos + offset.y, 0f);
                 waterQuadStrokesArrayLrg[index].worldPos = pos;
-                waterQuadStrokesArrayLrg[index].localScale = new Vector2(UnityEngine.Random.Range(0.9f, 1.5f), UnityEngine.Random.Range(1.1f, 2.5f)) * UnityEngine.Random.Range(0.36f, 0.65f); // Y is forward, along stroke
-                waterQuadStrokesArrayLrg[index].heading = new Vector2(UnityEngine.Random.Range(-3f, 3f), UnityEngine.Random.Range(-0.5f, 0.5f)).normalized;
+                waterQuadStrokesArrayLrg[index].localScale = 3f * new Vector2(UnityEngine.Random.Range(0.5f, 0.75f), UnityEngine.Random.Range(2.1f, 3.5f)) * UnityEngine.Random.Range(0.75f, 1.33f); // Y is forward, along stroke
+                waterQuadStrokesArrayLrg[index].heading = new Vector2(Mathf.Round(UnityEngine.Random.Range(0f, 1f)) * 2f - 1f, UnityEngine.Random.Range(-0.15f, 0.15f)).normalized;
                 waterQuadStrokesArrayLrg[index].brushType = UnityEngine.Random.Range(0,4);
                 waterQuadStrokesArrayLrg[index].age = UnityEngine.Random.Range(1f, 2f);
             
@@ -215,7 +215,7 @@ public class BaronVonWater : RenderBaron {
                 Vector2 offset = new Vector2(UnityEngine.Random.Range(-0.5f, 0.5f), UnityEngine.Random.Range(-0.5f, 0.5f));
                 Vector3 pos = new Vector3(xPos + offset.x, yPos + offset.y, 0f);
                 waterQuadStrokesArraySml[index].worldPos = pos;
-                waterQuadStrokesArraySml[index].localScale = 0.1f * new Vector2(UnityEngine.Random.Range(0.9f, 1.5f), UnityEngine.Random.Range(1.1f, 2.5f)) * UnityEngine.Random.Range(0.36f, 0.65f); // Y is forward, along stroke
+                waterQuadStrokesArraySml[index].localScale = 0.15f * new Vector2(UnityEngine.Random.Range(0.9f, 1.5f), UnityEngine.Random.Range(1.1f, 2.5f)) * UnityEngine.Random.Range(0.36f, 0.65f); // Y is forward, along stroke
                 waterQuadStrokesArraySml[index].heading = new Vector2(UnityEngine.Random.Range(-3f, 3f), UnityEngine.Random.Range(-0.5f, 0.5f)).normalized;
                 waterQuadStrokesArraySml[index].brushType = UnityEngine.Random.Range(0, 4);
                 waterQuadStrokesArraySml[index].age = UnityEngine.Random.Range(1f, 2f);
@@ -393,23 +393,23 @@ public class BaronVonWater : RenderBaron {
 
     }
     private void SimWaterQuads() {
-        int kernelSimWaterQuads = computeShaderWaterRender.FindKernel("CSSimWaterQuadsData");
-                
+        int kernelSimWaterQuads = computeShaderWaterRender.FindKernel("CSSimWaterQuadsData");                
         computeShaderWaterRender.SetBuffer(kernelSimWaterQuads, "waterQuadStrokesCBuffer", waterQuadStrokesCBufferLrg);
         computeShaderWaterRender.SetTexture(kernelSimWaterQuads, "VelocityRead", fluidManagerRef._VelocityA);    
         computeShaderWaterRender.SetTexture(kernelSimWaterQuads, "AltitudeRead", altitudeMapRef);     
         computeShaderWaterRender.SetFloat("_MapSize", SimulationManager._MapSize);
-        
+        computeShaderWaterRender.SetVector("_SpawnBoundsCameraDetails", new Vector4(0f, 0f, SimulationManager._MapSize, SimulationManager._MapSize));
+        computeShaderWaterRender.SetInt("_BufferLength", waterQuadStrokesCBufferLrg.count);
         computeShaderWaterRender.Dispatch(kernelSimWaterQuads, waterQuadStrokesCBufferLrg.count / 1024, 1, 1);
 
         // SML:
         kernelSimWaterQuads = computeShaderWaterRender.FindKernel("CSSimWaterQuadsData");
-
         computeShaderWaterRender.SetBuffer(kernelSimWaterQuads, "waterQuadStrokesCBuffer", waterQuadStrokesCBufferSml);
         computeShaderWaterRender.SetTexture(kernelSimWaterQuads, "VelocityRead", fluidManagerRef._VelocityA);
         computeShaderWaterRender.SetTexture(kernelSimWaterQuads, "AltitudeRead", altitudeMapRef);
+        computeShaderWaterRender.SetVector("_SpawnBoundsCameraDetails", spawnBoundsCameraDetails);
         computeShaderWaterRender.SetFloat("_MapSize", SimulationManager._MapSize);
-
+        computeShaderWaterRender.SetInt("_BufferLength", waterQuadStrokesCBufferSml.count);
         computeShaderWaterRender.Dispatch(kernelSimWaterQuads, waterQuadStrokesCBufferSml.count / 1024, 1, 1);
 
         // WATER BITS HERE::: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
