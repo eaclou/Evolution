@@ -67,8 +67,9 @@ public class EggSack : MonoBehaviour {
     public int maxNumEggs = 64;
     public int curNumEggs = 64;
     public float foodAmount;  // if eaten, how much nutrients is the entire EggSack worth?
-    
-    public float growthStatus = 0f;  // 0-1 born --> mature
+
+    public float developmentProgress = 0f; // 0-1 born --> mature
+    public float growthScaleNormalized = 0f; // the normalized size compared to max fullgrown size
     public float decayStatus = 0f;
 
     public bool isDepleted = false;
@@ -218,15 +219,17 @@ public class EggSack : MonoBehaviour {
 
         Vector2 newSize = fullSize * Mathf.Max(0.01f, percentage);
         if(resizeCollider) {
-            mainCollider.size = newSize * 0.8f;
+            mainCollider.size = fullSize * Mathf.Clamp01(Mathf.Max(0.01f, percentage + 0.2f));
             float mass = mainCollider.size.x * mainCollider.size.y; // Mathf.Lerp(minMass, maxMass, percentage);  // *** <<< REVISIT!!! ****
-            mass = Mathf.Max(mass, 0.05f);  // constrain minimum
+            mass = Mathf.Max(mass, 0.25f);  // constrain minimum
             rigidbodyRef.mass = mass;
         }  
 
         curSize = newSize;    
         
-        foodAmount = (float)curNumEggs / (float)maxNumEggs * curSize.x * curSize.y;
+        healthStructural = (float)curNumEggs / (float)maxNumEggs;
+
+        foodAmount = healthStructural * curSize.x * curSize.y;
     }
 
     private void BeginLifeStageGrowing(Agent parentAgentRef, AgentGenome parentGenomeRef, Vector3 startPos) {
@@ -236,16 +239,16 @@ public class EggSack : MonoBehaviour {
         birthTimeStepsCounter = 0;
 
         curNumEggs = maxNumEggs;
-        
-        growthStatus = 0f;
+        developmentProgress = 0f;
+        growthScaleNormalized = 0.01f;
         decayStatus = 0f;
 
         //rigidbodyRef.MovePosition(parentAgent.bodyRigidbody.position);
-        rigidbodyRef.mass = 0.05f;
+        rigidbodyRef.mass = 5f;
         rigidbodyRef.velocity = Vector2.zero;
         rigidbodyRef.angularVelocity = 0f;
         rigidbodyRef.drag = 7.5f;
-        rigidbodyRef.angularDrag = 7.5f;
+        rigidbodyRef.angularDrag = 1.5f;
 
         if(parentAgentRef == null) {
             //curLifeStage = EggLifeStage.GrowingIndependent;
@@ -286,8 +289,6 @@ public class EggSack : MonoBehaviour {
         
         isDepleted = false;
         isBeingBorn = false;
-        
-        healthStructural = 1f;
         prevPos = transform.position;        
 
         UpdateEggSackSize(0.05f, true);
@@ -303,7 +304,7 @@ public class EggSack : MonoBehaviour {
                     
         lifeStageTransitionTimeStepCounter = 0;
 
-        growthStatus = 1f;
+        developmentProgress = 1f;
 
         UpdateEggSackSize(1f, true);
     }
@@ -395,7 +396,8 @@ public class EggSack : MonoBehaviour {
                 break;
             case EggLifeStage.Null:
                 //
-                //Debug.Log("FoodLifeStage is null - probably shouldn't have gotten to this point...;");
+                healthStructural = 0f; // temp hack
+                
                 break;
             default:
                 Debug.LogError("NO SUCH ENUM ENTRY IMPLEMENTED, YOU FOOL!!! (" + curLifeStage.ToString() + ")");
@@ -432,6 +434,14 @@ public class EggSack : MonoBehaviour {
                 Debug.LogError("NO SUCH ENUM ENTRY IMPLEMENTED, YOU FOOL!!! (" + curLifeStage.ToString() + ")");
                 break;
         }
+                
+        growthScaleNormalized = developmentProgress * (healthStructural * (1f - decayStatus) * 0.75f + 0.25f);
+
+        bool resizeCollider = false;
+        if(lifeStageTransitionTimeStepCounter % numSkipFramesResize == 2) {
+            resizeCollider = true;            
+        } 
+        UpdateEggSackSize(growthScaleNormalized, resizeCollider);
         
         Vector3 curPos = transform.localPosition;        
         prevPos = curPos;
@@ -442,15 +452,8 @@ public class EggSack : MonoBehaviour {
     private void TickGrowing() {
         lifeStageTransitionTimeStepCounter++;
 
-        float growthPercentage = (float)lifeStageTransitionTimeStepCounter / (float)(growDurationTimeSteps);
-        growthStatus = growthPercentage;
-
-        bool resizeCollider = false;
-        if(lifeStageTransitionTimeStepCounter % numSkipFramesResize == 0) {
-            resizeCollider = true;            
-        } 
-        UpdateEggSackSize(growthStatus, resizeCollider);
-
+        developmentProgress = Mathf.Clamp01((float)lifeStageTransitionTimeStepCounter / (float)(growDurationTimeSteps));
+                        
         if(isBeingBorn) {
             birthTimeStepsCounter++;
 
@@ -473,7 +476,7 @@ public class EggSack : MonoBehaviour {
     }    
     private void TickMature() {
         lifeStageTransitionTimeStepCounter++;
-        growthStatus = 1f;                
+        //growthScaleNormalized = 1f;                
         isDepleted = CheckIfDepleted();      
     }
     private void TickDecaying() {

@@ -1,6 +1,7 @@
 ﻿#pragma kernel CSSimulateEggs
 #pragma kernel CSUpdateDynamicEggBuffers
 
+#include "Assets/Resources/Shaders/Inc/NoiseShared.cginc"
 #include "Assets/Resources/Shaders/Inc/StructsEggData.cginc"
 #include "Assets/Resources/Shaders/Inc/CritterBodyAnimation.cginc"
 
@@ -16,6 +17,8 @@ SamplerState _LinearClamp;
 SamplerState _LinearRepeat;
 
 uniform float _MapSize;
+
+uniform float _Time;
 
 float rand(float2 co){   // OUTPUT is in [0,1] RANGE!!!
 	return frac(sin(dot(co.xy ,float2(12.9898,78.233))) * 43758.5453);
@@ -52,21 +55,20 @@ void CSSimulateEggs (uint3 id : SV_DispatchThreadID)
 	float distToCore = minimum_distance(float2(0,-0.5), float2(0,0.5), eggData.localCoords);
 	float eatenLerp = saturate(((distToCore + 0.065) * 1.0 - eggSackSimData.foodAmount) * 8);
 
-	float attached = 1; // = saturate(length(eggSackSimData.foodAmount));
-	
-	if(eatenLerp > 0.5) {
-		attached = 0;
-	}
+	float numEggsNormalized = eggSackSimData.health;
+	float numEggsMask = saturate((numEggsNormalized - (1.0 - orderVal)) * 1000);
+	//numEggsMask *= numEggsMask; // Purely Cosmetic -- tends too look sparser
+
+	float attached = 0.64;
 	eggData.attached = attached;
 
 	float2 curPos = eggData.worldPos;
 	
 	float2 forwardFood = eggSackSimData.heading;
 	float2 rightFood = float2(forwardFood.y, -forwardFood.x);
-	float2 positionOffset = float2(eggData.localCoords.x * rightFood * eggSackSimData.fullSize.x + eggData.localCoords.y * forwardFood * eggSackSimData.fullSize.y) * 0.6 * saturate(eggSackSimData.growth * 1.46);
-
-	positionOffset = float2(rand(float2(orderVal * 8.14, (float)id.x * 9.1132)), rand(float2((float)id.x, orderVal * -2.14)));
-	float2 targetPos = eggSackSimData.worldPos + positionOffset; // + transformed offset of fruit
+	float2 positionOffset = float2(eggData.localCoords.x * rightFood * eggSackSimData.fullSize.x + eggData.localCoords.y * forwardFood * eggSackSimData.fullSize.y) * 0.6 * saturate(eggSackSimData.growth) * saturate(eggSackSimData.health + 0.1) * saturate(1.0 - eggSackSimData.decay * 0.8);
+		
+	float2 targetPos = eggSackSimData.worldPos + positionOffset;
 
 	float lerpSpeed = 1;
 	float2 newPos = lerp(curPos, targetPos, lerpSpeed * eggData.attached);
@@ -75,7 +77,23 @@ void CSSimulateEggs (uint3 id : SV_DispatchThreadID)
 	float2 fluidVel = velocityRead.SampleLevel(_LinearRepeat, uv, 0).xy;
 	float speedMult = 0.033 * _MapSize;
 
-	newPos = newPos + fluidVel * speedMult;
+	// ** ADD WOBBLE HERE: &&&&&&
+	float staticWobbleFreq = 2.40;
+	float staticWobbleAmplitude = 0.5; // * eggSackSimData.growth;
+	float2 staticWobblePhaseOffset = eggData.localCoords * _Time * staticWobbleFreq;
+
+	float movingWobbleFreq = 0.00125;
+	float movingWobbleAmplitude = 1.7 * length(eggSackSimData.velocity);
+	float2 movingWobblePhaseOffset = curPos * movingWobbleFreq;
+		
+	float2 noiseInputVec = movingWobblePhaseOffset * movingWobbleAmplitude + staticWobblePhaseOffset * staticWobbleAmplitude;
+	float3 noiseVal = Value2D(noiseInputVec, 1);
+
+	float wobbleAmplitude = 0.1;
+	float2 wobbleOffset = noiseVal.yz * wobbleAmplitude;
+	// &&&&&&&&&&&&&&&&&&&&&&&&&&
+
+	newPos = newPos + fluidVel * speedMult + wobbleOffset;
 
 	eggDataWriteCBuffer[id.x].worldPos = newPos;
 }

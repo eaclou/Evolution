@@ -102,7 +102,7 @@ public class CritterMouthComponent : MonoBehaviour {
 
             if(ownBiteArea > targetArea) {
                 // Swallow!:::
-                Debug.Log("SwallowEggSackWhole:    Agent [" + agentRef.index.ToString() + "] biteSize: " + ownBiteArea.ToString() + "   ---> EggSack [" + collidingEggSack.index.ToString() + "] food: " + collidingEggSack.foodAmount.ToString() + ", growthStatus: " + collidingEggSack.growthStatus.ToString());
+                //Debug.Log("SwallowEggSackWhole:    Agent [" + agentRef.index.ToString() + "] biteSize: " + ownBiteArea.ToString() + "   ---> EggSack [" + collidingEggSack.index.ToString() + "] food: " + collidingEggSack.foodAmount.ToString() + ", growthStatus: " + collidingEggSack.growthStatus.ToString());
                 SwallowEggSackWhole(collidingEggSack);
             }
             else {
@@ -208,7 +208,7 @@ public class CritterMouthComponent : MonoBehaviour {
     }
     private void BiteDamageEggSack(EggSack eggSack, float ownArea, float targetArea) {
 
-        float sizeOfEachEgg = (float)eggSack.individualEggMaxSize * eggSack.growthStatus;
+        float sizeOfEachEgg = (float)eggSack.individualEggMaxSize * eggSack.growthScaleNormalized;
                 
         int numEggsEaten = Mathf.FloorToInt(ownArea / sizeOfEachEgg);
         numEggsEaten = Mathf.Min(numEggsEaten, eggSack.curNumEggs);  // prevent overdraw
@@ -225,7 +225,7 @@ public class CritterMouthComponent : MonoBehaviour {
         // CONSUME FOOD!
         float flowR = 0f;
         if(numEggsEaten > 0) {
-            float flow = ownArea * 2f; // bonus for predators?
+            float flow = ownArea * 5f; // bonus for predators?
             flowR = Mathf.Min(eggSack.foodAmount, flow);
         }        
         

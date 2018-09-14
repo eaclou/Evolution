@@ -311,14 +311,11 @@ public class SimulationStateData {
             critterSimDataArray[i].heading = simManager.agentsArray[i].facingDirection;
             
             float embryo = 1f;
-            if(simManager.agentsArray[i].curLifeStage != Agent.AgentLifeStage.Egg) {
-                //embryo = (float)simManager.agentsArray[i].lifeStageTransitionTimeStepCounter / (float)simManager.agentsArray[i]._GestationDurationTimeSteps;
-                //embryo = Mathf.Clamp01(embryo);
-                embryo = 0f;
+            if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Egg) {
+                embryo = (float)simManager.agentsArray[i].lifeStageTransitionTimeStepCounter / (float)simManager.agentsArray[i]._GestationDurationTimeSteps;
+                embryo = Mathf.Clamp01(embryo);
+                //embryo = 0f;
             }
-            //else {
-            //    embryo = 1f;
-            //}
             critterSimDataArray[i].embryoPercentage = embryo;
             critterSimDataArray[i].growthPercentage = simManager.agentsArray[i].growthPercentage;
             float decay = 0f;
@@ -392,6 +389,67 @@ public class SimulationStateData {
         }
         critterSimDataCBuffer.SetData(critterSimDataArray);
 
+        for (int i = 0; i < simManager._NumEggSacks; i++) {
+            Vector3 eggSackPos = simManager.eggSackArray[i].transform.position;
+            int speciesSize = simManager._NumAgents / 4;
+            int eggSpecies = Mathf.FloorToInt((float)i / (float)simManager._NumEggSacks * 4f);
+            int agentGenomeIndex = simManager.eggSackArray[i].parentAgentIndex; // eggSpecies * speciesSize; // UnityEngine.Random.Range(eggSpecies * speciesSize, (eggSpecies + 1) * speciesSize);
+                     
+            eggSackSimDataArray[i].parentAgentIndex = agentGenomeIndex;
+            eggSackSimDataArray[i].worldPos = new Vector2(eggSackPos.x, eggSackPos.y);
+            eggSackSimDataArray[i].velocity = simManager.eggSackArray[i].rigidbodyRef.velocity; // new Vector2(simManager.eggSackArray[i].rigidbodyRef.velocity.x, simManager.eggSackArray[i].rigidbodyRef.velocity.y);
+            eggSackSimDataArray[i].heading = simManager.eggSackArray[i].facingDirection;            
+            eggSackSimDataArray[i].fullSize = simManager.eggSackArray[i].fullSize;
+            eggSackSimDataArray[i].foodAmount = simManager.eggSackArray[i].foodAmount; // new Vector3(simManager.eggSackArray[i].foodAmount, simManager.eggSackArray[i].foodAmount, simManager.eggSackArray[i].foodAmount);
+            eggSackSimDataArray[i].growth = simManager.eggSackArray[i].developmentProgress;
+            eggSackSimDataArray[i].decay = simManager.eggSackArray[i].decayStatus;
+            eggSackSimDataArray[i].health = simManager.eggSackArray[i].healthStructural;
+            
+            // Z & W coords represents agent's x/y Radii (in FluidCoords)
+            // convert from scene coords (-mapSize --> +mapSize to fluid coords (0 --> 1):::
+            // **** Revisit and get working properly in both X and Y dimensions independently *********
+            //float sampleRadius = (simManager.foodArray[i].curSize.magnitude + 0.1f) / (simManager._MapSize * 2f); // ****  ***** Revisit the 0.1f offset -- should be one pixel in fluidCoords?
+            eggSackFluidPositionsArray[i] = new Vector4(eggSackPos.x / SimulationManager._MapSize, 
+                                                      eggSackPos.y / SimulationManager._MapSize, 
+                                                      (simManager.eggSackArray[i].curSize.x + 0.1f) * 0.5f / SimulationManager._MapSize, 
+                                                      (simManager.eggSackArray[i].curSize.y + 0.1f) * 0.5f / SimulationManager._MapSize);
+        }
+        eggSackSimDataCBuffer.SetData(eggSackSimDataArray); // send data to GPU for Rendering
+        
+        // Grab data from GPU FluidSim!        
+        fluidVelocitiesAtAgentPositionsArray = simManager.environmentFluidManager.GetFluidVelocityAtObjectPositions(agentFluidPositionsArray);
+        fluidVelocitiesAtEggSackPositionsArray = simManager.environmentFluidManager.GetFluidVelocityAtObjectPositions(eggSackFluidPositionsArray);
+        //fluidVelocitiesAtPredatorPositionsArray = simManager.environmentFluidManager.GetFluidVelocityAtObjectPositions(predatorFluidPositionsArray);
+
+        depthAtAgentPositionsArray = simManager.theRenderKing.GetDepthAtObjectPositions(agentFluidPositionsArray);
+
+
+        
+        // Movement Animation Test:
+        /*for(int i = 0; i < agentMovementAnimDataArray.Length; i++) {            
+            agentMovementAnimDataArray[i].animCycle = simManager.agentsArray[i].animationCycle;
+            agentMovementAnimDataArray[i].turnAmount = simManager.agentsArray[i].turningAmount;
+            agentMovementAnimDataArray[i].accel += Mathf.Clamp01(simManager.agentsArray[i].curAccel) * 1f;
+            agentMovementAnimDataArray[i].smoothedThrottle = simManager.agentsArray[i].smoothedThrottle.magnitude;
+        }
+        agentMovementAnimDataCBuffer.SetData(agentMovementAnimDataArray); // send data to GPU for Rendering
+        */
+        /*for (int i = 0; i < predatorSimDataArray.Length; i++) {
+            Vector3 predatorPos = simManager.predatorArray[i].transform.position;
+            predatorSimDataArray[i].worldPos = new Vector2(predatorPos.x, predatorPos.y);
+            predatorSimDataArray[i].velocity = new Vector2(simManager.predatorArray[i].rigidBody.velocity.x, simManager.predatorArray[i].rigidBody.velocity.y);
+            predatorSimDataArray[i].scale = simManager.predatorArray[i].curScale;
+
+            // Z & W coords represents agent's x/y Radii (in FluidCoords)
+            // convert from scene coords (-mapSize --> +mapSize to fluid coords (0 --> 1):::
+            //float sampleRadius = (simManager.predatorArray[i].curScale + 0.1f) / (simManager._MapSize * 2f); // ****  ***** Revisit the 0.1f offset -- should be one pixel in fluidCoords?
+            predatorFluidPositionsArray[i] = new Vector4(predatorPos.x / SimulationManager._MapSize, 
+                                                      predatorPos.y / SimulationManager._MapSize, 
+                                                      (simManager.predatorArray[i].curScale + 0.1f) * 0.5f / SimulationManager._MapSize, 
+                                                      (simManager.predatorArray[i].curScale + 0.1f) * 0.5f / SimulationManager._MapSize);
+        }
+        predatorSimDataCBuffer.SetData(predatorSimDataArray);  // send data to GPU for Rendering
+        */
         /*for(int i = 0; i < debugBodyResourcesArray.Length; i++) {  
             
             debugBodyResourcesArray[i].developmentPercentage = simManager.agentsArray[i].growthPercentage;
@@ -412,78 +470,5 @@ public class SimulationStateData {
         }
         debugBodyResourcesCBuffer.SetData(debugBodyResourcesArray); // send data to GPU for Rendering
         */
-
-        // Movement Animation Test:
-        for(int i = 0; i < agentMovementAnimDataArray.Length; i++) {            
-            agentMovementAnimDataArray[i].animCycle = simManager.agentsArray[i].animationCycle;
-            agentMovementAnimDataArray[i].turnAmount = simManager.agentsArray[i].turningAmount;
-            agentMovementAnimDataArray[i].accel += Mathf.Clamp01(simManager.agentsArray[i].curAccel) * 1f;
-            agentMovementAnimDataArray[i].smoothedThrottle = simManager.agentsArray[i].smoothedThrottle.magnitude;
-        }
-        agentMovementAnimDataCBuffer.SetData(agentMovementAnimDataArray); // send data to GPU for Rendering
-
-
-        for (int i = 0; i < simManager._NumEggSacks; i++) {
-            Vector3 eggSackPos = simManager.eggSackArray[i].transform.position;
-            int speciesSize = simManager._NumAgents / 4;
-            int eggSpecies = Mathf.FloorToInt((float)i / (float)simManager._NumEggSacks * 4f);
-            int agentGenomeIndex = simManager.eggSackArray[i].parentAgentIndex; // eggSpecies * speciesSize; // UnityEngine.Random.Range(eggSpecies * speciesSize, (eggSpecies + 1) * speciesSize);
-            //if(simManager.eggSackArray[i].parentAgentRef != null) {
-                //agentGenomeIndex = eggSpecies * speciesSize;
-                //agentGenomeIndex = simManager.eggSackArray[i].parentAgentRef.index;
-            //}            
-            eggSackSimDataArray[i].parentAgentIndex = agentGenomeIndex;
-            eggSackSimDataArray[i].worldPos = new Vector2(eggSackPos.x, eggSackPos.y);
-            // *** Revisit to avoid using GetComponent, should use cached reference instead for speed:
-            eggSackSimDataArray[i].velocity = simManager.eggSackArray[i].rigidbodyRef.velocity; // new Vector2(simManager.eggSackArray[i].rigidbodyRef.velocity.x, simManager.eggSackArray[i].rigidbodyRef.velocity.y);
-            eggSackSimDataArray[i].heading = simManager.eggSackArray[i].facingDirection;
-            //eggSackSimDataArray[i].heading = new Vector2(Mathf.Cos(Time.realtimeSinceStartup), Mathf.Sin(Time.realtimeSinceStartup)).normalized;
-            eggSackSimDataArray[i].fullSize = simManager.eggSackArray[i].fullSize;
-            eggSackSimDataArray[i].foodAmount = simManager.eggSackArray[i].foodAmount; // new Vector3(simManager.eggSackArray[i].foodAmount, simManager.eggSackArray[i].foodAmount, simManager.eggSackArray[i].foodAmount);
-            eggSackSimDataArray[i].growth = simManager.eggSackArray[i].growthStatus;
-            eggSackSimDataArray[i].decay = simManager.eggSackArray[i].decayStatus;
-            eggSackSimDataArray[i].health = simManager.eggSackArray[i].healthStructural;
-            // v v v below can be moved to a more static buffer eventually since they don't change every frame:
-            //eggSackSimDataArray[i].stemBrushType = simManager.eggSackGenomePoolArray[i].stemBrushType;
-            //eggSackSimDataArray[i].leafBrushType = simManager.eggSackGenomePoolArray[i].leafBrushType;
-            //eggSackSimDataArray[i].fruitBrushType = simManager.eggSackGenomePoolArray[i].fruitBrushType;
-            //eggSackSimDataArray[i].stemHue = simManager.eggSackGenomePoolArray[i].stemHue;
-            //eggSackSimDataArray[i].leafHue = simManager.eggSackGenomePoolArray[i].leafHue;
-            //eggSackSimDataArray[i].fruitHue = simManager.eggSackGenomePoolArray[i].fruitHue;
-            
-
-            // Z & W coords represents agent's x/y Radii (in FluidCoords)
-            // convert from scene coords (-mapSize --> +mapSize to fluid coords (0 --> 1):::
-            // **** Revisit and get working properly in both X and Y dimensions independently *********
-            //float sampleRadius = (simManager.foodArray[i].curSize.magnitude + 0.1f) / (simManager._MapSize * 2f); // ****  ***** Revisit the 0.1f offset -- should be one pixel in fluidCoords?
-            eggSackFluidPositionsArray[i] = new Vector4(eggSackPos.x / SimulationManager._MapSize, 
-                                                      eggSackPos.y / SimulationManager._MapSize, 
-                                                      (simManager.eggSackArray[i].curSize.x + 0.1f) * 0.5f / SimulationManager._MapSize, 
-                                                      (simManager.eggSackArray[i].curSize.y + 0.1f) * 0.5f / SimulationManager._MapSize);
-        }
-        eggSackSimDataCBuffer.SetData(eggSackSimDataArray); // send data to GPU for Rendering
-        
-        /*for (int i = 0; i < predatorSimDataArray.Length; i++) {
-            Vector3 predatorPos = simManager.predatorArray[i].transform.position;
-            predatorSimDataArray[i].worldPos = new Vector2(predatorPos.x, predatorPos.y);
-            predatorSimDataArray[i].velocity = new Vector2(simManager.predatorArray[i].rigidBody.velocity.x, simManager.predatorArray[i].rigidBody.velocity.y);
-            predatorSimDataArray[i].scale = simManager.predatorArray[i].curScale;
-
-            // Z & W coords represents agent's x/y Radii (in FluidCoords)
-            // convert from scene coords (-mapSize --> +mapSize to fluid coords (0 --> 1):::
-            //float sampleRadius = (simManager.predatorArray[i].curScale + 0.1f) / (simManager._MapSize * 2f); // ****  ***** Revisit the 0.1f offset -- should be one pixel in fluidCoords?
-            predatorFluidPositionsArray[i] = new Vector4(predatorPos.x / SimulationManager._MapSize, 
-                                                      predatorPos.y / SimulationManager._MapSize, 
-                                                      (simManager.predatorArray[i].curScale + 0.1f) * 0.5f / SimulationManager._MapSize, 
-                                                      (simManager.predatorArray[i].curScale + 0.1f) * 0.5f / SimulationManager._MapSize);
-        }
-        predatorSimDataCBuffer.SetData(predatorSimDataArray);  // send data to GPU for Rendering
-        */
-        // Grab data from GPU FluidSim!        
-        fluidVelocitiesAtAgentPositionsArray = simManager.environmentFluidManager.GetFluidVelocityAtObjectPositions(agentFluidPositionsArray);
-        fluidVelocitiesAtEggSackPositionsArray = simManager.environmentFluidManager.GetFluidVelocityAtObjectPositions(eggSackFluidPositionsArray);
-        //fluidVelocitiesAtPredatorPositionsArray = simManager.environmentFluidManager.GetFluidVelocityAtObjectPositions(predatorFluidPositionsArray);
-
-        depthAtAgentPositionsArray = simManager.theRenderKing.GetDepthAtObjectPositions(agentFluidPositionsArray);
     }
 }

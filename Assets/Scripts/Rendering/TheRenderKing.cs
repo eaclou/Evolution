@@ -1466,6 +1466,7 @@ public class TheRenderKing : MonoBehaviour {
         computeShaderEggSacks.SetBuffer(kernelCSSimulateEggs, "eggSackSimDataCBuffer", simManager.simStateData.eggSackSimDataCBuffer);
         computeShaderEggSacks.SetBuffer(kernelCSSimulateEggs, "eggDataWriteCBuffer", simManager.simStateData.eggDataCBuffer);
         computeShaderEggSacks.SetFloat("_MapSize", SimulationManager._MapSize);
+        computeShaderEggSacks.SetFloat("_Time", Time.realtimeSinceStartup);
         computeShaderEggSacks.Dispatch(kernelCSSimulateEggs, simManager.simStateData.eggDataCBuffer.count / 64, 1, 1);        
     }
     /*private void IterateTrailStrokesData() {
@@ -1811,8 +1812,19 @@ public class TheRenderKing : MonoBehaviour {
         eggSackStrokeDisplayMat.SetBuffer("eggDataCBuffer", simManager.simStateData.eggDataCBuffer);
         eggSackStrokeDisplayMat.SetBuffer("eggSackSimDataCBuffer", simManager.simStateData.eggSackSimDataCBuffer);
         eggSackStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        eggSackStrokeDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        eggSackStrokeDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, eggSackStrokeDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.eggDataCBuffer.count);
         
+        eggCoverDisplayMat.SetPass(0);
+        eggCoverDisplayMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
+        eggCoverDisplayMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
+        eggCoverDisplayMat.SetBuffer("eggSackSimDataCBuffer", simManager.simStateData.eggSackSimDataCBuffer);
+        eggCoverDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        eggCoverDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        eggCoverDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+        cmdBufferTest.DrawProcedural(Matrix4x4.identity, eggCoverDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.critterInitDataCBuffer.count);
+
         // CRITTER BODY:
 
 
@@ -1971,14 +1983,7 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, baronVonWater.waterQuadStrokesSmlDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterQuadStrokesCBufferSml.count);
         */
-
-        eggCoverDisplayMat.SetPass(0);
-        eggCoverDisplayMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
-        eggCoverDisplayMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
-        eggCoverDisplayMat.SetBuffer("eggSackSimDataCBuffer", simManager.simStateData.eggSackSimDataCBuffer);
-        eggCoverDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        cmdBufferTest.DrawProcedural(Matrix4x4.identity, eggCoverDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.critterInitDataCBuffer.count);
-
+                
         // SURFACE BITS FLOATY:::::
         baronVonWater.waterSurfaceBitsDisplayMat.SetPass(0);
         baronVonWater.waterSurfaceBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);

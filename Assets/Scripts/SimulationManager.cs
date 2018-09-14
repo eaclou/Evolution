@@ -898,7 +898,7 @@ public class SimulationManager : MonoBehaviour {
             //if (foodArray[i].curLifeStage == EggSack.EggLifeStage.Growing) {
             //    hackyScalingForceMultiplier = 2f;
             //}
-            eggSackArray[i].GetComponent<Rigidbody2D>().AddForce(simStateData.fluidVelocitiesAtEggSackPositionsArray[i] * 10f * eggSackArray[i].GetComponent<Rigidbody2D>().mass, ForceMode2D.Impulse); //
+            eggSackArray[i].GetComponent<Rigidbody2D>().AddForce(simStateData.fluidVelocitiesAtEggSackPositionsArray[i] * 16f * eggSackArray[i].GetComponent<Rigidbody2D>().mass, ForceMode2D.Impulse); //
             
             //eggSackArray[i].debugFluidVel = simStateData.fluidVelocitiesAtEggSackPositionsArray[i].sqrMagnitude;
 

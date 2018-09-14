@@ -79,7 +79,7 @@
 				float3 quadPoint = quadVerticesCBuffer[id];				
 				
 				float3 critterWorldPos = critterSimData.worldPos;
-				float3 critterCurScale = critterInitData.boundingBoxSize * critterSimData.growthPercentage * 0.5;
+				float3 critterCurScale = critterInitData.boundingBoxSize * critterSimData.growthPercentage * 0.75;
 
 				float dotGrowth = saturate(skinStrokeData.strength * 2.0);
 				float dotDecay = saturate((skinStrokeData.strength - 0.5) * 2);
@@ -87,9 +87,18 @@
 
 				float3 spriteLocalPos = skinStrokeData.localPos * critterCurScale;
 				float3 vertexWorldOffset = quadPoint;
+
+				// EGG EMBRYO MASK:
+				float eggMask = saturate(saturate(critterSimData.embryoPercentage - 0.99) * 100);
+				float softEggMask = critterSimData.embryoPercentage * (1.0 - eggMask) * 0.25 + critterSimData.embryoPercentage * eggMask;
+				
+				
+				spriteLocalPos *= softEggMask;
+				//vertexWorldOffset *= eggMask;
+
 				float2 brushAspectRatio = float2(lerp((skinStrokeData.localScale.x + skinStrokeData.localScale.y) / 2.0, skinStrokeData.localScale.x, 0.5),
 												lerp((skinStrokeData.localScale.x + skinStrokeData.localScale.y) / 2.0, skinStrokeData.localScale.y, 0.5));
-				vertexWorldOffset.xy = vertexWorldOffset.xy * brushAspectRatio * critterCurScale * (saturate(2.0 * critterSimData.health) * 0.5 + 0.5) * (saturate(2.0 * critterSimData.energy) * 0.67 + 0.33) * saturate(1 - critterSimData.decayPercentage);
+				vertexWorldOffset.xy = vertexWorldOffset.xy * brushAspectRatio * critterCurScale * (saturate(2.0 * critterSimData.energy) * 0.33 + 0.67) * saturate(1 - critterSimData.decayPercentage * 0.85);
 				
 				
 				// ANIMATIONS:
@@ -104,17 +113,11 @@
 
 				// REFRACTION:
 				float3 offset = skinStrokeData.worldPos;				
-				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(offset.xy / 256, 0, 0)).yzw;
+				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(offset.xy /  _MapSize, 0, 0)).yzw;
 				float refractionStrength = 2.45;
 				offset.xy += -surfaceNormal.xy * refractionStrength;
 
-				//float embryoStatus = smoothstep(0,1,critterSimData.embryoPercentage);
-
-
 				float3 worldPosition = offset + vertexWorldOffset; //critterWorldPos + vertexWorldOffset; //
-				//
-				//worldPosition = lerp(critterSimData.worldPos, worldPosition, embryoStatus);
-
 				
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
@@ -145,7 +148,7 @@
 				float2 altUV = (worldPosition.xy + 128) / 512;
 				o.altitudeUV = altUV;
 
-				float4 pos = mul(UNITY_MATRIX_VP, float4(worldPosition, 1.0)); // *** Revisit to better understand!!!! ***
+				float4 pos = mul(UNITY_MATRIX_VP, float4(worldPosition, 1.0));
 				float4 screenUV = ComputeScreenPos(pos);
 				o.screenUV = screenUV;
 
@@ -166,7 +169,7 @@
 				float testNewVignetteMask = saturate(((randThreshold + 0.6 - (saturate(vignetteRadius) * 0.4 + 0.3)) * 2));
 				o.vignetteLerp = float4(testNewVignetteMask,sampleUV,saturate(vignetteRadius));
 				
-				o.color = float4(critterSimData.health, critterSimData.energy, critterSimData.growthPercentage, critterSimData.decayPercentage);
+				o.color = float4(critterSimData.health, critterSimData.energy, softEggMask, critterSimData.decayPercentage);
 				
 				return o;
 			}
@@ -194,9 +197,7 @@
 				float3 surfaceNormal = tex2D(_WaterSurfaceTex, (i.altitudeUV - 0.25) * 2).yzw;
 				float dotLight = dot(surfaceNormal, _WorldSpaceLightPos0.xyz);
 				dotLight = dotLight * dotLight;
-				
-				finalColor.rgb *= diffuseLight * 0.67 + 0.33;
-				
+								
 				float4 backgroundColor = frameBufferColor;
 				backgroundColor.a = texColor.a;
 				
@@ -223,16 +224,11 @@
 
 				float fogAmount = 0.05; //saturate((i.worldPos.z + 1) * 0.5);
 				//finalColor.rgb = lerp(finalColor.rgb, waterFogColor, fogAmount);
-
 				
-				//float4 reflectedColor = float4(tex2Dlod(_SkyTex, float4((i.skyUV), 0, 1)).rgb, backgroundColor.a); //col;
-				
+				//float4 reflectedColor = float4(tex2Dlod(_SkyTex, float4((i.skyUV), 0, 1)).rgb, backgroundColor.a); //col;				
 				//finalColor = lerp(reflectedColor, finalColor, saturate(1 - (1 - i.vignetteLerp.x) * 1)); //float4(1,1,1,1);
 				//finalColor.a *= saturate(i.vignetteLerp.w * 1.4 - 0.25); //(1 - saturate(i.vignetteLerp.x) * 0.4) * 0.5;
 				//finalColor.a *= i.color.a;
-
-				finalColor.rgb *= saturate(1.0 - i.color.w * 32) * 0.5 + 0.5;
-				finalColor.rgb = lerp(finalColor.rgb, backgroundColor, i.color.a);
 
 				// Health & Energy:::: **
 				float health = i.color.x;
@@ -241,18 +237,24 @@
 				finalColor.rgb = lerp(float3(0.4,0.4,0.4), finalColor.rgb, saturate(energy * 2.0));
 				
 				// FAKE CAUSTICS:::				
-				dotLight *= saturate(diffuseLight * 2.5);
-				finalColor.rgb = lerp(finalColor.rgb, finalColor.rgb * (dotLight * 0.6 + 0.4) + dotLight * 1.1, isUnderwater); //dotLight * 1.0;
+				//dotLight *= saturate(diffuseLight * 2.5);
+				//finalColor.rgb = lerp(finalColor.rgb, finalColor.rgb * (dotLight * 0.6 + 0.4) + dotLight * 1.1, isUnderwater); //dotLight * 1.0;
 
-				finalColor.rgb = lerp(finalColor.rgb, waterFogColor, fogAmount);
+				// Egg EmbryoFade
+				finalColor.a *= i.color.b;
 
+				finalColor.rgb *= diffuseLight * 0.67 + 0.33;
+
+				// Decay
+				//finalColor.rgb *= saturate(1.0 - i.color.a * 32) * 0.5 + 0.5;
+				finalColor.rgb = lerp(finalColor.rgb, backgroundColor, i.color.a * 0.67);
+
+				//finalColor.rgb = lerp(finalColor.rgb, waterFogColor, fogAmount);
 				// FOG:
 				//finalColor.rgb = lerp(finalColor.rgb, waterFogColor, 1 * (saturate(altitude * 0.8)) + 0.25 * isUnderwater);
-				
-				
-				
 				//finalColor.a *= (1.0 - i.color.w);
 				//return float4(i.color.w, i.color.w, i.color.w, 1);
+
 				return finalColor;
 
 				//return finalColor;

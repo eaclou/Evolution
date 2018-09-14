@@ -87,6 +87,10 @@
 				float3 spriteLocalPos = float3(eyeData.localPos.x, eyeData.localPos.y * 1, -0.5) * critterCurScale;
 				float3 vertexWorldOffset = quadVerticesCBuffer[id];
 
+				// EGG EMBRYO MASK:
+				float eggMask = saturate(saturate(critterSimData.embryoPercentage - 0.9) * 10);
+				spriteLocalPos *= eggMask;
+				vertexWorldOffset *= eggMask;
 				
 				vertexWorldOffset.xy = vertexWorldOffset.xy * critterCurScale.x * saturate(0.99 - critterSimData.decayPercentage * 2) * 0.5;
 				
@@ -106,32 +110,17 @@
 
 				//float3 worldPosition = offset + vertexWorldOffset; //critterWorldPos + vertexWorldOffset; //
 				
-				worldPosition = lerp(critterSimData.worldPos, worldPosition, embryoStatus);
+				//worldPosition = lerp(critterSimData.worldPos, worldPosition, embryoStatus);
 
 
 
-				//worldPosition = critterWorldPos + quadVerticesCBuffer[id]
+				//worldPosition = critterWorldPos + quadVerticesCBuffer[id];
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
 				o.worldPos = worldPosition;
 
 				float2 altUV = (worldPosition.xy + 128) / 512;
 				o.altitudeUV = altUV;
-
-				/*
-				float2 centerPosition = eyeData.localPos;				
-				float bodyAspectRatio = critterInitData.boundingBoxSize.y / critterInitData.boundingBoxSize.x;
-				float bendStrength = 0.5 * saturate(bodyAspectRatio * 0.5 - 0.4);				
-				float aspect = eyeData.localScale.y;				
-				float2 eyeLocalScale = float2(eyeData.localScale.x * aspect, eyeData.localScale.x * (1.0 / aspect));
-				centerToVertexOffset *= eyeLocalScale * growthScale * (critterInitData.boundingBoxSize.x + critterInitData.boundingBoxSize.y) * 0.5 * (1.0 - critterSimData.decayPercentage);
-				float2 forwardGaze = normalize(critterSimData.velocity);
-				if(length(critterSimData.velocity) < 0.0001) {
-					forwardGaze = critterSimData.heading;
-				}
-				float3 worldPosition = float3(critterPosition + centerPosition + centerToVertexOffset, 1.0);
-				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
-				*/
 
 				o.color = float4(1, 1, 1, 1);	// change color of eyes if dead X's?'
 				
@@ -199,7 +188,7 @@
 				dotLight *= saturate(diffuseLight * 2.5);
 				finalColor.rgb = lerp(finalColor.rgb, finalColor.rgb * (dotLight * 0.6 + 0.4) + dotLight * 1.1, 1); //dotLight * 1.0;
 				float3 waterFogColor = float3(0.03,0.4,0.3) * 0.4;
-				finalColor.rgb = lerp(finalColor.rgb, waterFogColor, fogAmount);
+				//finalColor.rgb = lerp(finalColor.rgb, waterFogColor, fogAmount);
 
 				//return float4(1,1,1,1);
 				return finalColor;

@@ -4,8 +4,7 @@
 	{
 		_MainTex ("Main Texture", 2D) = "white" {}  // stem texture sheet
 		_MatureToDecayTex ("_MatureToDecayTex", 2D) = "white" {}
-		//_Tint("Color", Color) = (1,1,1,1)
-		//_Size("Size", vector) = (1,1,1,1)
+		_WaterSurfaceTex ("_WaterSurfaceTex", 2D) = "black" {}
 	}
 	SubShader
 	{		
@@ -28,15 +27,15 @@
 
 			sampler2D _MainTex;
 			sampler2D _MatureToDecayTex;
-			//float4 _MainTex_ST;
-			//float4 _Tint;
-			//float4 _Size;
-
+			sampler2D _WaterSurfaceTex;
 			
 			StructuredBuffer<CritterInitData> critterInitDataCBuffer;
 			StructuredBuffer<CritterSimData> critterSimDataCBuffer;			
 			StructuredBuffer<EggSackSimData> eggSackSimDataCBuffer;
 			StructuredBuffer<float3> quadVerticesCBuffer;
+
+			uniform float _MapSize;
+
 			
 			struct v2f
 			{
@@ -102,11 +101,18 @@
 				//float3 noiseOffset = Value2D(worldPosition.x * 0.036 + clock * 0.16 + (float)inst, freq) * saturate(1 - critterSimData.decayPercentage * 8) * critterSimData.growthPercentage;
 								
 				quadPoint *= scale * 0.5; // * ((1.0 - rawData.decay) * 0.75 + 0.25);
-
+				
+				float eggMask = 1.0 - saturate(saturate(critterSimData.embryoPercentage - 0.995) * 1000);
+				quadPoint *= eggMask;
 				
 				// With final facing Vectors, find rotation of QuadPoints:
 				float3 rotatedPoint = float3(quadPoint.x * rightAgent + quadPoint.y * forwardAgent,
 											 quadPoint.z);
+
+				// REFRACTION:		
+				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / _MapSize, 0, 0)).yzw;
+				float refractionStrength = 2.45;
+				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
 				
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)) + float4(rotatedPoint, 0.0));
 				
@@ -135,7 +141,7 @@
 				float3 primaryHue = critterInitDataCBuffer[inst].primaryHue;
 				float3 secondaryHue = critterInitDataCBuffer[inst].secondaryHue;
 
-				o.color = float4(lerp(primaryHue, secondaryHue, random2), critterSimData.embryoPercentage);
+				o.color = float4(lerp(primaryHue, secondaryHue, random2), 1); //critterSimData.embryoPercentage);
 				o.frameLerp = frameLerp - row0;
 				o.uv = float4(uv0, uv1);
 				//o.foodIndex = eggData.eggSackIndex;

@@ -643,8 +643,9 @@ public class Agent : MonoBehaviour {
         // Scaling Test:
         int frameNum = lifeStageTransitionTimeStepCounter % growthScalingSkipFrames;
         bool resizeCollider = false;
-        if(frameNum == 3) {
-            resizeCollider = true;            
+        if(frameNum == 1) {
+            resizeCollider = true;
+            this.bodyRigidbody.AddForce(UnityEngine.Random.insideUnitCircle * 250f * this.bodyRigidbody.mass * Time.deltaTime, ForceMode2D.Impulse);
         }
         ScaleBody(growthPercentage, resizeCollider);  
 
@@ -654,77 +655,39 @@ public class Agent : MonoBehaviour {
             }
             else {
                 float embryoPercentage = (float)lifeStageTransitionTimeStepCounter / (float)_GestationDurationTimeSteps;
-                float targetDist = Mathf.Lerp(0.01f, parentEggSackRef.fullSize.magnitude * 0.35f, embryoPercentage);
+                float targetDist = Mathf.Lerp(0.01f, parentEggSackRef.fullSize.magnitude * 0.15f, embryoPercentage);
                 springJoint.distance = targetDist;
+
+                if(parentEggSackRef.isProtectedByParent == false) {
+                    //if the EggSack is independent (not inside a critters belly)
+                    //colliderBody.enabled = true;
+                    //springJoint.enableCollision = false;
+                }
             }            
         }
         else {
             //springJoint.enableCollision = false;
         }
         
-        // *** This seems wrong -- Should be handled in a different spot
-        /*if(isBeingSwallowed)
-        {
-            predatorAgentRef.isSwallowingPrey = false;
-            predatorAgentRef.swallowingPreyFrameCounter = 0;
-            predatorAgentRef.springJoint.enabled = false;
-            predatorAgentRef.springJoint.connectedBody = null;
-
-            colliderBody.enabled = true;
-
-            isBeingSwallowed = false;
-            beingSwallowedFrameCounter = 0;
-
-            Debug.Log("HUH????");
-        }
-        else {
-            coreModule.energyStored[0] = 1f;
-
-            if(parentEggSackRef != null) {
-                float growthPercentage = (float)lifeStageTransitionTimeStepCounter / (float)_GestationDurationTimeSteps;
-
-                float targetDist = Mathf.Lerp(0.05f, parentEggSackRef.fullSize.magnitude * 0.5f, growthPercentage);
-
-                springJoint.distance = targetDist;
-            }
-            else {
-                springJoint.enableCollision = false;
-            }
-        }*/
-
+        
     }
     private void BeginHatching() {
 
         springJoint.connectedBody = null;
         springJoint.enabled = false;
 
-        if(parentEggSackRef != null) {
-            if(parentEggSackRef.curLifeStage == EggSack.EggLifeStage.Growing || parentEggSackRef.curLifeStage == EggSack.EggLifeStage.Mature) {
-                curLifeStage = AgentLifeStage.Young;
-                //Debug.Log("EGG HATCHED!");
-                lifeStageTransitionTimeStepCounter = 0;
+        curLifeStage = AgentLifeStage.Young;
+        //Debug.Log("EGG HATCHED!");
+        lifeStageTransitionTimeStepCounter = 0;
                 
-                // Detach from parent EggSack
-                parentEggSackRef = null;
-                isAttachedToParentEggSack = false;        
+        // Detach from parent EggSack
+        parentEggSackRef = null;
+        isAttachedToParentEggSack = false;        
                 
-                colliderBody.enabled = true;
+        colliderBody.enabled = true;
                 
-                coreModule.energyRaw = coreModule.maxEnergyStorage;
-            }
-            else {
-                //Debug.Log("BeginHatching but OH NO!!! parentEggSack ref is gone or decaying :(   Killed Agent");
-                curLifeStage = AgentLifeStage.Dead;
-                lifeStageTransitionTimeStepCounter = 0;
-                InitializeDeath();
-            }
-        }
-        else {
-            //Debug.Log("BeginHatching but OH NO!!! parentEggSack ref is gone or decaying :(   Killed Agent");
-            curLifeStage = AgentLifeStage.Dead;
-            lifeStageTransitionTimeStepCounter = 0;
-            InitializeDeath();
-        }
+        coreModule.energyRaw = coreModule.maxEnergyStorage;
+
     }
     private void TickYoung(SimulationManager simManager, Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray, SettingsManager settings) {
         //ProcessSwallowing();
@@ -1172,7 +1135,9 @@ public class Agent : MonoBehaviour {
     public void ReconstructAgentGameObjects(AgentGenome genome, EggSack parentEggSack, Vector3 startPos, bool isImmaculate) {
 
         InitializeAgentWidths(genome);
-        InitializeGameObjectsAndComponents();        
+        InitializeGameObjectsAndComponents();
+
+        growthPercentage = 0.002f;
 
         // *** Positioning and Pinning to parentEggSack HERE:
         bodyGO.transform.position = startPos;
@@ -1196,19 +1161,20 @@ public class Agent : MonoBehaviour {
 
             colliderBody.enabled = false;
         }                
-              
+            
+        bodyRigidbody.mass = 0.01f; // min mass
         bodyRigidbody.drag = 12f; // bodyDrag;
         bodyRigidbody.angularDrag = 15f;
         
         // Collision!
-        colliderBody.size = new Vector2(coreModule.coreWidth, coreModule.coreLength) * spawnStartingScale;  // spawn size percentage 1/10th      
+        colliderBody.size = new Vector2(coreModule.coreWidth, coreModule.coreLength) * growthPercentage;  // spawn size percentage 1/10th      
         colliderBody.direction = CapsuleDirection2D.Vertical;
 
         // Mouth Trigger:
         mouthRef.isPassive = genome.bodyGenome.coreGenome.isPassive;
         mouthRef.triggerCollider.isTrigger = true;
-        mouthRef.triggerCollider.radius = coreModule.coreWidth / 2f * spawnStartingScale;
-        mouthRef.triggerCollider.offset = new Vector2(0f, coreModule.coreLength / 2f * spawnStartingScale);
+        mouthRef.triggerCollider.radius = coreModule.coreWidth / 2f * growthPercentage;
+        mouthRef.triggerCollider.offset = new Vector2(0f, coreModule.coreLength / 2f * growthPercentage);
         mouthRef.isBiting = false;
         mouthRef.bitingFrameCounter = 0;
         mouthRef.agentIndex = this.index;
@@ -1217,9 +1183,9 @@ public class Agent : MonoBehaviour {
         //mouseclickcollider MCC
         mouseClickCollider.direction = 1; // Y-Axis ???
         mouseClickCollider.center = Vector3.zero;
-        mouseClickCollider.radius = coreModule.coreWidth / 2f * spawnStartingScale;
+        mouseClickCollider.radius = coreModule.coreWidth / 2f * growthPercentage;
         mouseClickCollider.radius *= 1.25f; // ** TEMP
-        mouseClickCollider.height = coreModule.coreLength / 2f * spawnStartingScale;
+        mouseClickCollider.height = coreModule.coreLength / 2f * growthPercentage;
     }
 
     public void InitializeSpawnAgentImmaculate(int agentIndex, AgentGenome genome, StartPositionGenome startPos) {        
@@ -1270,7 +1236,7 @@ public class Agent : MonoBehaviour {
         InitializeModules(genome);      // Modules need to be created first so that Brain can map its neurons to existing modules  
 
         // Upgrade this to proper Pooling!!!!
-        Vector3 spawnOffset = UnityEngine.Random.insideUnitSphere * parentEggSack.curSize.magnitude * 0.15f;
+        Vector3 spawnOffset = UnityEngine.Random.insideUnitSphere * parentEggSack.curSize.magnitude * 0.167f;
         spawnOffset.z = 0f;
         ReconstructAgentGameObjects(genome, parentEggSack, parentEggSack.gameObject.transform.position + spawnOffset, false);
 
