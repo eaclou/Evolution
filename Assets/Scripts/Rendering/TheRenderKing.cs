@@ -43,6 +43,7 @@ public class TheRenderKing : MonoBehaviour {
     public Material foodStemDisplayMat;
     public Material foodLeafDisplayMat;
     public Material eggSackStrokeDisplayMat;
+    public Material eggSackShadowDisplayMat;
     public Material agentBodyDisplayMat;
     public Material playerGlowyBitsDisplayMat;
     public Material playerGlowMat; // soft glow to indicate it is the one player is controlling!
@@ -895,6 +896,9 @@ public class TheRenderKing : MonoBehaviour {
 
         eggCoverDisplayMat.SetPass(0);
         eggCoverDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+                
+        eggSackShadowDisplayMat.SetPass(0);
+        eggSackShadowDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
 
         critterInspectHighlightMat.SetPass(0);
         critterInspectHighlightMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -1599,7 +1603,7 @@ public class TheRenderKing : MonoBehaviour {
         baronVonWater.altitudeMapRef = baronVonTerrain.terrainHeightMap;
         float camDist = Mathf.Clamp01(-1f * simManager.cameraManager.gameObject.transform.position.z / (210f - 10f));
         baronVonWater.camDistNormalized = camDist;
-        Vector2 boxSizeHalf = 0.67f * Vector2.Lerp(new Vector2(16f, 12f) * 2, new Vector2(256f, 204f), Mathf.Clamp01(-(simManager.cameraManager.gameObject.transform.position.z) / 150f));
+        Vector2 boxSizeHalf = 0.8f * Vector2.Lerp(new Vector2(16f, 12f) * 2, new Vector2(256f, 204f), Mathf.Clamp01(-(simManager.cameraManager.gameObject.transform.position.z) / 150f));
         /*if(simManager.cameraManager.targetAgent != null)
         {
         }
@@ -1764,15 +1768,7 @@ public class TheRenderKing : MonoBehaviour {
         //cmdBufferTest.GetTemporaryRT(renderedSceneID, -1, -1, 0, FilterMode.Bilinear);  // save contents of Standard Rendering Pipeline
         //cmdBufferTest.Blit(BuiltinRenderTextureType.CameraTarget, renderedSceneID);  // save contents of Standard Rendering Pipeline
 
-        /*
-        // FOOD PARTICLE SHADOWS::::
-        foodParticleShadowDisplayMat.SetPass(0);
-        foodParticleShadowDisplayMat.SetBuffer("foodParticleDataCBuffer", simManager.foodParticlesCBuffer);
-        foodParticleShadowDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
-        foodParticleShadowDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        foodParticleShadowDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-        cmdBufferTest.DrawProcedural(Matrix4x4.identity, foodParticleShadowDisplayMat, 0, MeshTopology.Triangles, 6, simManager.foodParticlesCBuffer.count);
-        */
+        
         // Surface Bits Shadows:
         baronVonWater.waterSurfaceBitsShadowsDisplayMat.SetPass(0);
         baronVonWater.waterSurfaceBitsShadowsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -1800,11 +1796,36 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, critterShadowStrokesDisplayMat, 0, MeshTopology.Triangles, 6, critterSkinStrokesCBuffer.count);
         
+        eggSackShadowDisplayMat.SetPass(0);
+        eggSackShadowDisplayMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
+        eggSackShadowDisplayMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
+        eggSackShadowDisplayMat.SetBuffer("eggDataCBuffer", simManager.simStateData.eggDataCBuffer);
+        eggSackShadowDisplayMat.SetBuffer("eggSackSimDataCBuffer", simManager.simStateData.eggSackSimDataCBuffer);
+        eggSackShadowDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        eggSackShadowDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        eggSackShadowDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+        eggSackShadowDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+        cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID);
+        cmdBufferTest.DrawProcedural(Matrix4x4.identity, eggSackShadowDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.eggDataCBuffer.count);
+        
+        /*
+        // FOOD PARTICLE SHADOWS::::
+        foodParticleShadowDisplayMat.SetPass(0);
+        foodParticleShadowDisplayMat.SetBuffer("foodParticleDataCBuffer", simManager.foodParticlesCBuffer);
+        foodParticleShadowDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+        foodParticleShadowDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        foodParticleShadowDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+        cmdBufferTest.DrawProcedural(Matrix4x4.identity, foodParticleShadowDisplayMat, 0, MeshTopology.Triangles, 6, simManager.foodParticlesCBuffer.count);
+        */
+
         foodParticleDisplayMat.SetPass(0);
         foodParticleDisplayMat.SetBuffer("foodParticleDataCBuffer", simManager.foodParticlesCBuffer);
         foodParticleDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         foodParticleDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, foodParticleDisplayMat, 0, MeshTopology.Triangles, 6, simManager.foodParticlesCBuffer.count);
+
+        
+        
         
         eggSackStrokeDisplayMat.SetPass(0);
         eggSackStrokeDisplayMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
@@ -1880,49 +1901,7 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, baronVonWater.waterNutrientsBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterNutrientsBitsCBuffer.count);
 
-
-        critterInspectHighlightMat.SetPass(0);
-        critterInspectHighlightMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        //critterInspectHighlightMat.SetBuffer("agentHoverHighlightData", agentHoverHighlightCBuffer);
-        critterInspectHighlightMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
-        critterInspectHighlightMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
-        critterInspectHighlightMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
-        critterInspectHighlightMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-        critterInspectHighlightMat.SetInt("_HoverAgentIndex", simManager.cameraManager.mouseHoverAgentIndex);
-        critterInspectHighlightMat.SetInt("_LockedOnAgentIndex", simManager.cameraManager.targetCritterIndex);
-
-        float isHoverOn = 0f;
-        if (simManager.cameraManager.isMouseHoverAgent) {
-            isHoverOn = 1f;
-        }
-        float isHighlightOn = 0f;
-        if (simManager.uiManager.curActiveTool == UIManager.ToolType.Inspect) {
-            isHighlightOn = 1f;
-        }
-        float isLockedOn = 0f;
-        if (simManager.cameraManager.isFollowing) {
-            isLockedOn = 1f;
-        }
-        critterInspectHighlightMat.SetFloat("_IsHover", isHoverOn);
-        critterInspectHighlightMat.SetFloat("_IsHighlighted", isHighlightOn);
-        critterInspectHighlightMat.SetFloat("_IsLockedOn", isLockedOn);
-        cmdBufferTest.DrawProcedural(Matrix4x4.identity, critterInspectHighlightMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.critterInitDataCBuffer.count);
-
-        gizmoStirToolMat.SetPass(0);
-        gizmoStirToolMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        gizmoStirToolMat.SetBuffer("gizmoStirToolPosCBuffer", gizmoStirToolPosCBuffer);
-        gizmoStirToolMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
-        gizmoStirToolMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);       
-        cmdBufferTest.DrawProcedural(Matrix4x4.identity, gizmoStirToolMat, 0, MeshTopology.Triangles, 6, 1);
-
-        gizmoFeedToolMat.SetPass(0);
-        gizmoFeedToolMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        gizmoFeedToolMat.SetBuffer("gizmoStirToolPosCBuffer", gizmoStirToolPosCBuffer);
-        gizmoFeedToolMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
-        gizmoFeedToolMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);       
-        cmdBufferTest.DrawProcedural(Matrix4x4.identity, gizmoFeedToolMat, 0, MeshTopology.Triangles, 6, 1);
-        
-
+                
 
         // Critter Stomach Bits
         critterFoodDotsMat.SetPass(0);
@@ -2015,6 +1994,57 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, baronVonWater.waterSurfaceBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterSurfaceBitsCBuffer.count);
      
+        // DRY LAND!!!!!!
+        baronVonTerrain.groundDryLandDisplayMat.SetPass(0);
+        baronVonTerrain.groundDryLandDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        baronVonTerrain.groundDryLandDisplayMat.SetBuffer("frameBufferStrokesCBuffer", baronVonTerrain.groundStrokesSmlCBuffer);
+        baronVonTerrain.groundDryLandDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        baronVonTerrain.groundDryLandDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+        baronVonTerrain.groundDryLandDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+        cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
+        cmdBufferTest.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundDryLandDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.groundStrokesSmlCBuffer.count);
+
+
+        critterInspectHighlightMat.SetPass(0);
+        critterInspectHighlightMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        critterInspectHighlightMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
+        critterInspectHighlightMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
+        critterInspectHighlightMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+        critterInspectHighlightMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+        critterInspectHighlightMat.SetInt("_HoverAgentIndex", simManager.cameraManager.mouseHoverAgentIndex);
+        critterInspectHighlightMat.SetInt("_LockedOnAgentIndex", simManager.cameraManager.targetCritterIndex);
+        
+        float isHoverOn = 0f;
+        if (simManager.cameraManager.isMouseHoverAgent) {
+            isHoverOn = 1f;
+        }
+        float isHighlightOn = 0f;
+        if (simManager.uiManager.curActiveTool == UIManager.ToolType.Inspect) {
+            isHighlightOn = 1f;
+        }
+        float isLockedOn = 0f;
+        if (simManager.cameraManager.isFollowing) {
+            isLockedOn = 1f;
+        }
+        critterInspectHighlightMat.SetFloat("_IsHover", isHoverOn);
+        critterInspectHighlightMat.SetFloat("_IsHighlighted", isHighlightOn);
+        critterInspectHighlightMat.SetFloat("_IsLockedOn", isLockedOn);
+        cmdBufferTest.DrawProcedural(Matrix4x4.identity, critterInspectHighlightMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.critterInitDataCBuffer.count);
+
+        gizmoStirToolMat.SetPass(0);
+        gizmoStirToolMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        gizmoStirToolMat.SetBuffer("gizmoStirToolPosCBuffer", gizmoStirToolPosCBuffer);
+        gizmoStirToolMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+        gizmoStirToolMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);       
+        cmdBufferTest.DrawProcedural(Matrix4x4.identity, gizmoStirToolMat, 0, MeshTopology.Triangles, 6, 1);
+
+        gizmoFeedToolMat.SetPass(0);
+        gizmoFeedToolMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        gizmoFeedToolMat.SetBuffer("gizmoStirToolPosCBuffer", gizmoStirToolPosCBuffer);
+        gizmoFeedToolMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+        gizmoFeedToolMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);       
+        cmdBufferTest.DrawProcedural(Matrix4x4.identity, gizmoFeedToolMat, 0, MeshTopology.Triangles, 6, 1);
+        
 
         /*if(isDebugRenderOn) {
             

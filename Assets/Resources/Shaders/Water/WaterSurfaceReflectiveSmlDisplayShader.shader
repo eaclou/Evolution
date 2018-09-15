@@ -90,17 +90,17 @@
 				float2 uv = (worldPosition.xy + 128) / 512;
 				o.altitudeUV = uv;
 				
-				float2 scale = waterQuadData.localScale * 26;
-				scale.x *= 1;
-				scale.y = scale.y * (1 + saturate(waterQuadData.speed * 48));
+				float2 scale = waterQuadData.localScale * 32;
+				//scale.x *= 1;
+				//scale.y = scale.y * (1 + saturate(waterQuadData.speed * 48));
 				quadPoint *= float3(scale, 1.0);
 				
 				float4 fluidVelocity = tex2Dlod(_VelocityTex, float4(worldPosition.xy / _MapSize, 0, 1));
-				float2 fluidDir = float2(0,1); //normalize(fluidVelocity.xy);
-				if(length(fluidVelocity) > 0.0000001) {
-					fluidVelocity.y *= 0.35;
-					fluidDir = normalize(fluidVelocity.xy);
-				}
+				float2 fluidDir = waterQuadData.heading; //float2(1,0); //normalize(fluidVelocity.xy);
+				//if(length(fluidVelocity) > 0.0000001) {
+				//	fluidVelocity.y *= 0.35;
+				//	fluidDir = normalize(fluidVelocity.xy);
+				//}
 
 				// Wave Surface Height:
 				// Water Surface:
@@ -110,7 +110,7 @@
 				dotLight = dotLight * dotLight;
 				float waveHeight = waterSurfaceData.x;
 
-				worldPosition.z -= waveHeight * 3.5;  // STANDARDIZE!
+				worldPosition.z -= waveHeight * 2.5 + 1;  // STANDARDIZE!
 
 				float4 pos = mul(UNITY_MATRIX_VP, float4(worldPosition, 1.0)); // *** Revisit to better understand!!!! ***
 				float4 screenUV = ComputeScreenPos(pos);
@@ -122,11 +122,11 @@
 				float3 cameraToVertex = worldPosition - _WorldSpaceCameraPos;
                 float3 cameraToVertexDir = normalize(cameraToVertex);				
 				float viewDot = dot(-cameraToVertexDir, surfaceNormal);
-				float reflectLerp = GetReflectionLerp(worldPosition, surfaceNormal, viewDot, _CamDistNormalized, _CamFocusPosition, vignetteRadius);
+				float reflectLerp = GetReflectionLerpSml(worldPosition, surfaceNormal, viewDot, _CamDistNormalized, _CamFocusPosition, vignetteRadius);
 
 				o.skyUV = worldPosition.xy / _MapSize;
 
-				o.vignetteLerp = float4(0,0,0,0); //float4(testNewVignetteMask,sampleUV,saturate(vignetteRadius));
+				o.vignetteLerp = float4(reflectLerp,0,0,0); //float4(testNewVignetteMask,sampleUV,saturate(vignetteRadius));
 
 				float fadeDuration = 0.25;
 				float fadeIn = saturate(waterQuadData.age / fadeDuration);  // fade time = 0.1
@@ -134,7 +134,7 @@
 							
 				float alpha = fadeIn * fadeOut;
 				
-				quadPoint *= alpha * (_CamDistNormalized * 0.8 + 0.2) * saturate(reflectLerp * 6);
+				quadPoint *= alpha * (_CamDistNormalized * 0.4 + 0.5) * saturate(reflectLerp * 6);
 				
 				// Figure out final facing Vectors!!!
 				float2 forward = fluidDir; //waterQuadData.heading;
@@ -155,7 +155,7 @@
 				float4 frameBufferColor = tex2D(_RenderedSceneRT, screenUV);  //  Color of brushtroke source	
 				// use separate camera?
 
-				float distFromScreenCenter = length(screenUV * 2 - 1);
+				//float distFromScreenCenter = length(screenUV * 2 - 1);
 				
 				float4 finalColor = frameBufferColor;
 				finalColor.a = brushColor.a;
@@ -189,16 +189,13 @@
 				float3 cameraToVertex = i.worldPos - _WorldSpaceCameraPos;
                 float3 cameraToVertexDir = normalize(cameraToVertex);
 				float3 reflectedViewDir = cameraToVertexDir + 2 * surfaceNormal * 0.05;
-				float viewDot = dot(-cameraToVertexDir, surfaceNormal);
+				//float viewDot = dot(-cameraToVertexDir, surfaceNormal);
 
 				float2 skyCoords = reflectedViewDir.xy * 0.5 + 0.5;
 
 				float4 reflectedColor = float4(tex2Dlod(_SkyTex, float4((skyCoords) - _Time.y * 0.015, 0, 1)).rgb, finalColor.a); //col;
-				
-				float2 sampleUV = i.screenUV.xy / i.screenUV.w;
-				float vignetteRadius = length((sampleUV - 0.5) * 2);
-
-				float reflectLerp = GetReflectionLerp(i.worldPos, surfaceNormal, viewDot, _CamDistNormalized, _CamFocusPosition, vignetteRadius);
+								
+				float reflectLerp = i.vignetteLerp.x;
 				finalColor = lerp(finalColor, reflectedColor, reflectLerp);
 				finalColor.a *= saturate(reflectLerp * 8);
 				

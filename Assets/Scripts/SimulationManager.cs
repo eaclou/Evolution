@@ -141,8 +141,10 @@ public class SimulationManager : MonoBehaviour {
     public List<Vector4> statsBodySizesEachGenerationList;
     public List<Vector4> statsFoodEatenEachGenerationList;
     public List<Vector4> statsPredationEachGenerationList;
-    public List<Vector4> statsNutrientsEachGenerationList;
+    public List<Vector4> statsNutrientsEachGenerationList;    
     public List<float> statsMutationEachGenerationList;
+    public List<Color> statsSpeciesPrimaryColorsList;
+    public List<Color> statsSpeciesSecondaryColorsList;
     public float agentAvgRecordScore = 1f;
     public int curApproxGen = 1;
 
@@ -878,12 +880,12 @@ public class SimulationManager : MonoBehaviour {
         for (int i = 0; i < agentsArray.Length; i++) {
 
             Vector3 depthSample = simStateData.depthAtAgentPositionsArray[i];
-            float agentSize = agentsArray[i].fullSizeBoundingBox.x * 1.25f + 0.25f;
+            float agentSize = agentsArray[i].fullSizeBoundingBox.x * 1.6f + 0.15f;
             float floorDepth = depthSample.x * 10f;
             if (floorDepth < agentSize)
             {
                 float wallForce = Mathf.Clamp01(agentSize - floorDepth) / agentSize;
-                agentsArray[i].bodyRigidbody.AddForce(new Vector2(depthSample.y, depthSample.z).normalized * 4.20f * agentsArray[i].bodyRigidbody.mass * wallForce, ForceMode2D.Impulse);
+                agentsArray[i].bodyRigidbody.AddForce(new Vector2(depthSample.y, depthSample.z).normalized * 50.20f * agentsArray[i].bodyRigidbody.mass * wallForce, ForceMode2D.Impulse);
             }
 
             //agentsArray[i].bodyRigidbody.AddForce(Vector2.one * 2.5f * agentsArray[i].bodyRigidbody.mass, ForceMode2D.Impulse);
@@ -1059,7 +1061,7 @@ public class SimulationManager : MonoBehaviour {
         computeShaderFoodParticles.SetBuffer(kernelCSRespawnFoodParticles, "foodParticlesRead", foodParticlesCBuffer);
         computeShaderFoodParticles.SetBuffer(kernelCSRespawnFoodParticles, "foodParticlesWrite", foodParticlesCBufferSwap);
         computeShaderFoodParticles.SetTexture(kernelCSRespawnFoodParticles, "velocityRead", environmentFluidManager._VelocityA);        
-        computeShaderFoodParticles.SetTexture(kernelCSRespawnFoodParticles, "obstaclesRead", environmentFluidManager._ObstaclesRT);
+        computeShaderFoodParticles.SetTexture(kernelCSRespawnFoodParticles, "altitudeRead", theRenderKing.baronVonTerrain.terrainHeightMap);
         computeShaderFoodParticles.SetTexture(kernelCSRespawnFoodParticles, "_SpawnDensityMap", nutrientMapRT1);
         computeShaderFoodParticles.SetFloat("_MapSize", mapSize);
             
@@ -1139,7 +1141,7 @@ public class SimulationManager : MonoBehaviour {
         computeShaderFoodParticles.SetBuffer(kernelCSMeasureInitCritterDistances, "critterInitDataCBuffer", simStateData.critterInitDataCBuffer);
         computeShaderFoodParticles.SetBuffer(kernelCSMeasureInitCritterDistances, "foodParticlesRead", foodParticlesCBuffer);
         //computeShaderFoodParticles.SetBuffer(kernelCSMeasureInitCritterDistances, "foodParticlesWrite", foodParticlesCBufferSwap);
-        computeShaderFoodParticles.SetTexture(kernelCSMeasureInitCritterDistances, "foodParticlesNearestCrittersRT", foodParticlesNearestCritters1024);
+        computeShaderFoodParticles.SetTexture(kernelCSMeasureInitCritterDistances, "foodParticlesNearestCrittersRT", foodParticlesNearestCritters1024);        
         computeShaderFoodParticles.Dispatch(kernelCSMeasureInitCritterDistances, foodParticlesCBuffer.count / 1024, simStateData.critterSimDataCBuffer.count, 1);
         
         // Reduce from 1024 --> 32 particles per critter:

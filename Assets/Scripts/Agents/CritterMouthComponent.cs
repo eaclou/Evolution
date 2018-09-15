@@ -55,6 +55,15 @@ public class CritterMouthComponent : MonoBehaviour {
             bitingFrameCounter = 0;
         }
     }
+    public void InitiatePassiveBite() {
+        if (isBiting) {
+
+        }
+        else {
+            isBiting = true;            
+            bitingFrameCounter = 0;
+        }
+    }
     
 
     private void ActiveBiteCheck(Collider2D collider) {
@@ -62,29 +71,29 @@ public class CritterMouthComponent : MonoBehaviour {
         float ownBiteArea = triggerCollider.radius * triggerCollider.radius * 4f;
         float targetArea = 1f;
 
-        CritterSegment collidingSegment = collider.gameObject.GetComponent<CritterSegment>();
-        if(collidingSegment != null) {
-            if(agentIndex != collidingSegment.agentIndex) {
+        Agent collidingAgent = collider.gameObject.GetComponentInParent<Agent>();
+        if(collidingAgent != null) {
+            if(agentIndex != collidingAgent.index) {
 
                 if(true) { //agentRef.speciesIndex != collidingSegment.agentRef.speciesIndex) {   // *** true == CANNIBALISM ALLOWED!!!!!! *****
                     // ANIMAL:
                     // Compare sizes:
-                    targetArea = collidingSegment.agentRef.coreModule.currentBodySize.x * collidingSegment.agentRef.coreModule.currentBodySize.y;
+                    targetArea = collidingAgent.coreModule.currentBodySize.x * collidingAgent.coreModule.currentBodySize.y;
                     //targetArea = 0.2f; // TEMP TEST!! ***
                     if(ownBiteArea > targetArea) {
                         // Swallow!:::
-                        SwallowAnimalWhole(collidingSegment.agentRef);
+                        SwallowAnimalWhole(collidingAgent);
                     }
                     else {
                         //Debug.Log("Bite Animal!");
                         // Toothy Attack Bite GO!!!
-                        if(collidingSegment.agentRef.curLifeStage == Agent.AgentLifeStage.Dead)
+                        if(collidingAgent.curLifeStage == Agent.AgentLifeStage.Dead)
                         {
-                            BiteCorpseFood(collidingSegment.agentRef, ownBiteArea, targetArea);
+                            BiteCorpseFood(collidingAgent, ownBiteArea, targetArea);
                         }
                         else
                         {
-                            BiteDamageAnimal(collidingSegment.agentRef, ownBiteArea, targetArea);
+                            BiteDamageAnimal(collidingAgent, ownBiteArea, targetArea);
                         }                               
                     }
                 }                
@@ -216,16 +225,17 @@ public class CritterMouthComponent : MonoBehaviour {
         eggSack.curNumEggs -= numEggsEaten;
         if(eggSack.curNumEggs <= 0) {
             eggSack.curNumEggs = 0;
-
+            
             eggSack.ConsumedByPredatorAgent();
         }
         eggSack.foodAmount = (float)eggSack.curNumEggs / (float)eggSack.maxNumEggs * eggSack.curSize.x * eggSack.curSize.y;
         //Debug.Log("BiteDamageFood");
         //Debug.Log("BiteFood");
+        
         // CONSUME FOOD!
         float flowR = 0f;
         if(numEggsEaten > 0) {
-            float flow = ownArea * 5f; // bonus for predators?
+            float flow = ownArea * 2f; // bonus for predators?
             flowR = Mathf.Min(eggSack.foodAmount, flow);
         }        
         
@@ -249,7 +259,6 @@ public class CritterMouthComponent : MonoBehaviour {
         agentRef.EatFood(flowR * 1f); // assumes all foodAmounts are equal !! *****
 
         corpseAgent.ProcessBeingEaten(flowR);
-
     }
 
     private void TriggerCheck(Collider2D collider) {

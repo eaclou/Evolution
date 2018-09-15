@@ -44,9 +44,9 @@ public class BaronVonWater : RenderBaron {
     public ComputeBuffer waterChains0CBuffer;
     public ComputeBuffer waterChains1CBuffer;
 
-    public int numNutrientsBits = 1024 * 16;
-    public int numSurfaceBits = 1024 * 8;
-    public int numDebrisBits = 1024 * 4;
+    private int numNutrientsBits = 1024 * 8;
+    private int numSurfaceBits = 1024 * 16;
+    private int numDebrisBits = 1024 * 4;
     public ComputeBuffer waterNutrientsBitsCBuffer;
     public ComputeBuffer waterSurfaceBitsCBuffer;
     //public ComputeBuffer waterSurfaceBitsShadowsCBuffer;
@@ -215,8 +215,8 @@ public class BaronVonWater : RenderBaron {
                 Vector2 offset = new Vector2(UnityEngine.Random.Range(-0.5f, 0.5f), UnityEngine.Random.Range(-0.5f, 0.5f));
                 Vector3 pos = new Vector3(xPos + offset.x, yPos + offset.y, 0f);
                 waterQuadStrokesArraySml[index].worldPos = pos;
-                waterQuadStrokesArraySml[index].localScale = 0.15f * new Vector2(UnityEngine.Random.Range(0.9f, 1.5f), UnityEngine.Random.Range(1.1f, 2.5f)) * UnityEngine.Random.Range(0.36f, 0.65f); // Y is forward, along stroke
-                waterQuadStrokesArraySml[index].heading = new Vector2(UnityEngine.Random.Range(-3f, 3f), UnityEngine.Random.Range(-0.5f, 0.5f)).normalized;
+                waterQuadStrokesArraySml[index].localScale = 0.08f * new Vector2(UnityEngine.Random.Range(0.5f, 0.75f), UnityEngine.Random.Range(2.1f, 3.5f)) * UnityEngine.Random.Range(0.75f, 1.33f); // Y is forward, along stroke
+                waterQuadStrokesArraySml[index].heading = new Vector2(Mathf.Round(UnityEngine.Random.Range(0f, 1f)) * 2f - 1f, UnityEngine.Random.Range(-0.15f, 0.15f)).normalized;
                 waterQuadStrokesArraySml[index].brushType = UnityEngine.Random.Range(0, 4);
                 waterQuadStrokesArraySml[index].age = UnityEngine.Random.Range(1f, 2f);
 
@@ -253,18 +253,15 @@ public class BaronVonWater : RenderBaron {
 
         for (int x = 0; x < numSurfaceBits; x++)
         {
-
             float xPos = 128f; // (float)x / (float)(numSurfaceBits - 1) * waterSurfaceBitsBounds;
             float yPos = 128f; // (float)y / (float)(numwaterSurfaceBitsPerDimension - 1) * waterSurfaceBitsBounds;
             Vector2 offset = new Vector2(UnityEngine.Random.Range(-0.5f, 0.5f), UnityEngine.Random.Range(-0.5f, 0.5f));
             Vector3 pos = new Vector3(xPos + offset.x, yPos + offset.y, 0f);
             waterSurfaceBitsArray[x].worldPos = pos;
             waterSurfaceBitsArray[x].localScale = new Vector2(UnityEngine.Random.Range(0.33f, 2.5f), UnityEngine.Random.Range(0.67f, 2.5f)) * UnityEngine.Random.Range(0.26f, 0.48f); // Y is forward, along stroke
-            waterSurfaceBitsArray[x].heading = new Vector2(UnityEngine.Random.Range(-3f, 3f), UnityEngine.Random.Range(-0.5f, 0.5f)).normalized;
+            waterSurfaceBitsArray[x].heading = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)).normalized;
             waterSurfaceBitsArray[x].brushType = UnityEngine.Random.Range(0, 4);
             waterSurfaceBitsArray[x].age = UnityEngine.Random.Range(1f, 2f);
-
-
         }
         waterSurfaceBitsCBuffer.SetData(waterSurfaceBitsArray);
 

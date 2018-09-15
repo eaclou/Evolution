@@ -344,7 +344,7 @@ public class SimulationStateData {
                 {
                     if (simManager.agentsArray[i].mouthRef.isPassive)
                     {
-                        critterSimDataArray[i].isBiting = 1f;
+                        critterSimDataArray[i].isBiting = 0.55f;
                     }
                     else
                     {
@@ -361,7 +361,7 @@ public class SimulationStateData {
                 {
                     if (simManager.agentsArray[i].mouthRef.isPassive)
                     {
-                        critterSimDataArray[i].biteAnimCycle = Mathf.Lerp(1f, critterSimDataArray[i].biteAnimCycle, 0.1f);
+                        critterSimDataArray[i].biteAnimCycle = Mathf.Clamp01((float)simManager.agentsArray[i].mouthRef.bitingFrameCounter / (float)(simManager.agentsArray[i].mouthRef.biteHalfCycleDuration * 4)); //Mathf.Lerp(1f, critterSimDataArray[i].biteAnimCycle, 0.1f);
                     }
                     else
                     {

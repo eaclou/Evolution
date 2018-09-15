@@ -42,11 +42,6 @@
 				int2 bufferIndices : TEXCOORD7;
 				float4 vignetteLerp : TEXCOORD8;
 				float4 color : COLOR;
-				//float2 altitudeUV : TEXCOORD1;
-				//float4 screenUV : TEXCOORD2;
-				//float3 worldPos : TEXCOORD3;
-				//float4 vignetteLerp : TEXCOORD4;
-				//float2 skyUV : TEXCOORD5;
 			};
 
 			sampler2D _MainTex;
@@ -103,22 +98,14 @@
 				//float depth = saturate(-altitude + 0.5);
 				float refractionStrength = 2.5;
 				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
-
-
+				
 				float2 altUV = (worldPosition.xy + 128) / 512;
 				o.altitudeUV = altUV;
-
-				//vertexWorldOffset *=
-
-				
-
-				
+												
 				float3 localNormal = normalize(skinStrokeData.localPos);
-				//float3 worldNormal = localNormal;
+				
 				localNormal = normalize(float3(localNormal.x * critterInitData.boundingBoxSize.y, localNormal.y * critterInitData.boundingBoxSize.x, localNormal.z * critterInitData.boundingBoxSize.y));
-				//worldNormal.xy = float2(localNormal.x * cos(swimAngle) - localNormal.y * sin(swimAngle), localNormal.y * cos(swimAngle) + localNormal.x * sin(swimAngle));
-				//worldNormal.xy = rotatePointVector(worldNormal.xy, float2(0,0), critterSimData.heading);
-
+				
 				float3 worldNormal = GetAnimatedPos(localNormal, float3(0,0,0), critterInitData, critterSimData, skinStrokeData.localPos); //skinStrokeData.localPos;
 				o.worldNormal = worldNormal;
 
@@ -134,9 +121,7 @@
 				patternUV.x += tilePercentage * randPatternIDX;
 				patternUV.y += tilePercentage * randPatternIDY;				
 				o.patternUV = patternUV;
-
 				
-
 				float4 pos = mul(UNITY_MATRIX_VP, float4(worldPosition, 1.0)); // *** Revisit to better understand!!!! ***
 				float4 screenUV = ComputeScreenPos(pos);
 				o.screenUV = screenUV;
@@ -174,8 +159,7 @@
 
 				float2 screenUV = i.screenUV.xy / i.screenUV.w;
 				float4 frameBufferColor = tex2D(_RenderedSceneRT, screenUV);  //  Color of brushtroke source	
-
-
+				
 				float4 texColor = tex2D(_MainTex, i.spriteUV);
 				float4 patternSample = tex2Dlod(_PatternTex, float4(i.patternUV, 0, 2));	
 
@@ -193,7 +177,7 @@
 				float altitude = tex2D(_AltitudeTex, i.altitudeUV); // i.worldPos.z / 10; // [-1,1] range
 				// 0-1 range --> -1 to 1
 				altitude = (altitude * 2 - 1) * -1;
-				float isUnderwater = saturate(altitude * 10000);
+				float isUnderwater = 1; //saturate(altitude * 10000);
 				float3 waterFogColor = float3(0.03,0.4,0.3) * 0.4;
 				float strataColorMultiplier = (sin(altitude * (1.0 + i.worldPos.x * 0.01 - i.worldPos.y * -0.01) + i.worldPos.x * 0.01 - i.worldPos.y * 0.01) * 0.5 + 0.5) * 0.5 + 0.5;
 				backgroundColor.rgb *= strataColorMultiplier;				
@@ -212,17 +196,14 @@
 				backgroundColor.a *= isUnderwater;
 
 				float fogAmount = saturate(i.worldPos.z * 0.5);
-				
-
-				
+								
 				float4 reflectedColor = float4(tex2Dlod(_SkyTex, float4((i.skyUV), 0, 1)).rgb, backgroundColor.a); //col;
 				
 				finalColor = lerp(reflectedColor, finalColor, saturate(1 - (1 - i.vignetteLerp.x) * 1)); //float4(1,1,1,1);
 
 				finalColor.rgb = lerp(finalColor.rgb, backgroundColor, i.color.a);
-				//finalColor.a *= saturate(i.vignetteLerp.w * 1.4 - 0.25); //(1 - saturate(i.vignetteLerp.x) * 0.4) * 0.5;
-				//finalColor.a *= i.color.a;
-				finalColor.rgb = float3(0,0,0);
+				
+				//finalColor.rgb = float3(0,0,0);
 				finalColor.rgb = lerp(finalColor.rgb, waterFogColor, fogAmount);
 				finalColor.a *= 0.5;
 				

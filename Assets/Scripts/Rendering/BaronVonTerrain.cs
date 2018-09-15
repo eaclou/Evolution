@@ -14,6 +14,8 @@ public class BaronVonTerrain : RenderBaron {
     public Material groundStrokesSmlDisplayMat;
     public Material groundBitsDisplayMat;
     public Material carpetBitsDisplayMat;
+    public Material groundDryLandDisplayMat;
+
     //public Material frameBufferStrokeDisplayMat;
 
 
@@ -260,6 +262,11 @@ public class BaronVonTerrain : RenderBaron {
         carpetBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         carpetBitsDisplayMat.SetBuffer("groundBitsCBuffer", carpetBitsCBuffer);
 
+        
+        groundDryLandDisplayMat.SetPass(0);
+        groundDryLandDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        groundDryLandDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        groundDryLandDisplayMat.SetBuffer("frameBufferStrokesCBuffer", groundStrokesSmlCBuffer);  
     }
 
     private void InitializeTerrain() {
@@ -407,11 +414,9 @@ public class BaronVonTerrain : RenderBaron {
         
         int kernelSimGroundBits = computeShaderTerrainGeneration.FindKernel("CSSimGroundBitsData");
         computeShaderTerrainGeneration.SetBuffer(kernelSimGroundBits, "groundBitsCBuffer", groundBitsCBuffer);
-        //computeShaderTerrainGeneration.SetTexture(kernelSimGroundBits, "VelocityRead", fluidManagerRef._VelocityA);
         computeShaderTerrainGeneration.SetTexture(kernelSimGroundBits, "AltitudeRead", terrainHeightMap);
         computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
         computeShaderTerrainGeneration.SetVector("_SpawnBoundsCameraDetails", spawnBoundsCameraDetails);
-
         computeShaderTerrainGeneration.Dispatch(kernelSimGroundBits, groundBitsCBuffer.count / 1024, 1, 1);
 
         int kernelSimCarpetBits = computeShaderTerrainGeneration.FindKernel("CSSimCarpetBitsData");

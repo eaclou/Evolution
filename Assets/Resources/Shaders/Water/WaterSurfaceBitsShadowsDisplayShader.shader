@@ -115,20 +115,10 @@
 				quadPoint *= float3(scale * 2, 1.0);
 				
 				float4 fluidVelocity = tex2Dlod(_VelocityTex, float4(worldPosition.xy / 256, 0, 2));
-				float2 fluidDir = float2(0,1); //normalize(fluidVelocity.xy);
-				if(length(fluidVelocity) > 0.0000001) {
-					fluidDir = normalize(fluidVelocity.xy);
-				}
-
-				// Wave Surface Height:
-				// Water Surface:
-				/*float4 waterSurfaceData = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / 256, 0, 0));
-				float dotLight = dot(waterSurfaceData.yzw, _WorldSpaceLightPos0.xyz);
-				dotLight = dotLight * dotLight;
-				float waveHeight = waterSurfaceData.x;
-
-				worldPosition.z -= waveHeight * 2.5;
-				*/
+				float2 fluidDir = waterQuadData.heading; //float2(0,1); //normalize(fluidVelocity.xy);
+				//if(length(fluidVelocity) > 0.0000001) {
+				//	fluidDir = normalize(fluidVelocity.xy);
+				//}
 
 				worldPosition.z = -10.0 * (altitude * 2.0 - 1.0);
 
@@ -136,6 +126,8 @@
 				float2 forward = fluidDir; //waterQuadData.heading;
 				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
 				float2 rotatedPoint = float2(quadPoint.x * right + quadPoint.y * forward);  // Rotate localRotation by AgentRotation
+				rotatedPoint.x *= 2.0;
+				rotatedPoint.y *= 0.74;
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)) + float4(rotatedPoint, 0, 0));
 
@@ -204,11 +196,10 @@
 				float dotLight = dot(surfaceNormal, _WorldSpaceLightPos0.xyz);
 				dotLight = dotLight * dotLight;
 
-				finalColor.rgb = lerp(finalColor.rgb, finalColor.rgb * (dotLight * 0.33 + 0.67) + dotLight * 0.75, isUnderwater * (1.0 - altitude)); //dotLight * 1.0;
+				finalColor.rgb = lerp(finalColor.rgb, finalColor.rgb * (dotLight * 0.33 + 0.67) + dotLight * 0.75, isUnderwater * (1.0 - altitude)) * 0.75; //dotLight * 1.0;
 				
 				// FOG:
 				finalColor.rgb = lerp(finalColor.rgb, waterFogColor, 1 * (saturate(altitude * 0.8)) + 0.25 * isUnderwater);
-						
 				
 				finalColor.rgb = lerp(waterFogColor, finalColor.rgb, (i.color.z * 0.75 + 0.25));
 

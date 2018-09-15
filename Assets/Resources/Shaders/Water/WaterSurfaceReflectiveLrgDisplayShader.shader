@@ -109,7 +109,7 @@
 				dotLight = dotLight * dotLight;
 				float waveHeight = waterSurfaceData.x;
 
-				worldPosition.z -= waveHeight * 3.5;  // STANDARDIZE!
+				worldPosition.z -= waveHeight * 2.5 + 2.25;  // STANDARDIZE!
 				
 				float4 pos = mul(UNITY_MATRIX_VP, float4(worldPosition, 1.0)); // *** Revisit to better understand!!!! ***
 				float4 screenUV = ComputeScreenPos(pos);
@@ -121,11 +121,11 @@
 				float3 cameraToVertex = worldPosition - _WorldSpaceCameraPos;
                 float3 cameraToVertexDir = normalize(cameraToVertex);				
 				float viewDot = dot(-cameraToVertexDir, surfaceNormal);
-				float reflectLerp = GetReflectionLerp(worldPosition, surfaceNormal, viewDot, _CamDistNormalized, _CamFocusPosition, vignetteRadius);
+				float reflectLerp = GetReflectionLerpLrg(worldPosition, surfaceNormal, viewDot, _CamDistNormalized, _CamFocusPosition, vignetteRadius);
 				
 				o.skyUV = worldPosition.xy / _MapSize;
 				
-				o.vignetteLerp = float4(0,0,0,0);
+				o.vignetteLerp = float4(reflectLerp,0,0,0);
 
 				float fadeDuration = 0.25;
 				float fadeIn = saturate(waterQuadData.age / fadeDuration);  // fade time = 0.1
@@ -133,7 +133,7 @@
 							
 				float alpha = fadeIn * fadeOut;
 
-				quadPoint *= alpha * saturate(reflectLerp * 6);
+				quadPoint *= alpha * saturate(reflectLerp * 24);
 				
 				// Figure out final facing Vectors!!!
 				float2 forward = waterQuadData.heading;
@@ -189,16 +189,16 @@
                 float3 cameraToVertexDir = normalize(cameraToVertex);
 				float3 reflectedViewDir = cameraToVertexDir + 2 * surfaceNormal * 0.05;
 
-				float viewDot = dot(-cameraToVertexDir, surfaceNormal);
+				//float viewDot = dot(-cameraToVertexDir, surfaceNormal);
 			
 				float2 skyCoords = reflectedViewDir.xy * 0.5 + 0.5;
 
 				float4 reflectedColor = float4(tex2Dlod(_SkyTex, float4((skyCoords) - _Time.y * 0.015, 0, 1)).rgb, finalColor.a); //col;
 				
-				float2 sampleUV = i.screenUV.xy / i.screenUV.w;
-				float vignetteRadius = length((sampleUV - 0.5) * 2);
+				//float2 sampleUV = i.screenUV.xy / i.screenUV.w;
+				//float vignetteRadius = length((sampleUV - 0.5) * 2);
 
-				float reflectLerp = GetReflectionLerp(i.worldPos, surfaceNormal, viewDot, _CamDistNormalized, _CamFocusPosition, vignetteRadius);
+				float reflectLerp = i.vignetteLerp; // GetReflectionLerp(i.worldPos, surfaceNormal, viewDot, _CamDistNormalized, _CamFocusPosition, vignetteRadius);
 				finalColor = lerp(finalColor, reflectedColor, reflectLerp);
 				finalColor.a *= saturate(reflectLerp * 8);
 

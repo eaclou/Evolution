@@ -334,10 +334,16 @@ public class EggSack : MonoBehaviour {
 
     public void ConsumedByPredatorAgent() {
         mainCollider.enabled = false;
-        curLifeStage = EggLifeStage.Decaying;
-        isDepleted = true;
+        curLifeStage = EggLifeStage.Null;
+        isDepleted = true;        
+        lifeStageTransitionTimeStepCounter = 0;
+        growthScaleNormalized = 0.01f;
+        UpdateEggSackSize(growthScaleNormalized, false);
+
+        fixedJoint.enabled = false;
+        isAttachedBySpring = false;
+        isProtectedByParent = false;
         decayStatus = 1f;
-        
     }
    
     private void CheckForLifeStageTransition() {
@@ -427,6 +433,7 @@ public class EggSack : MonoBehaviour {
                 TickDecaying();
                 break;
             case EggLifeStage.Null:
+                decayStatus = 1f;
                 //
                 //Debug.Log("agent is null - probably shouldn't have gotten to this point...;");
                 break;

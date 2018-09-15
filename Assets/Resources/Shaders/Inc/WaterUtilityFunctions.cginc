@@ -1,32 +1,20 @@
 
-float GetReflectionLerp(float3 worldPos, float3 surfaceNormal, float viewDot, float camDistNormalized, float2 camFocusPositionXY, float vignetteRadius) {
+float GetReflectionLerpSml(float3 worldPos, float3 surfaceNormal, float viewDot, float camDistNormalized, float2 camFocusPositionXY, float vignetteRadius) {
 	float waveDot = dot(normalize(float3(0,-0.05,-1)), surfaceNormal);
 	
-	float2 vertexToFocus = camFocusPositionXY - worldPos.xy;
-	vertexToFocus.x *= 1.65;  // 16:9 aspect
-	float distToFocusPos = length(vertexToFocus);
-
-	float waveMaskNear = (1.0 - saturate((waveDot - 0.96) * 25)) * 0.6 + 0.3;
-	float waveMaskFar = (1.0 - saturate((waveDot - 0.96) * 25)) * 0.2;
+	float waveMaskNear = (1.0 - saturate((waveDot - 0.96) * 25)) * 0.99 + 0.03;
+	float waveMaskFar = (1.0 - saturate((waveDot - 0.96) * 25)) * 0.24;
 	float waveMask = lerp(waveMaskNear, waveMaskFar, camDistNormalized);
 	
-	float addMaskNear = saturate((vignetteRadius - 0.5) * 1.26) * 1.3;
-	float addMaskFar = (1.0 - saturate((viewDot - 0.6) * 2.5)) * 0.85 + saturate((vignetteRadius + 0.5) * 0.25) * 0.5;
+	float addMaskNear = saturate((vignetteRadius - 0.5) * 1.26) * 1.2;
+	float addMaskFar = (1.0 - saturate((viewDot - 0.56) * 2.4)) * 0.95 + saturate((vignetteRadius + 0.5) * 0.35) * 0.57;
 	float addMask = saturate(lerp(addMaskNear, addMaskFar, camDistNormalized));
 	
-	float subtractMaskNear = saturate((vignetteRadius + 0.75) * 0.6) * 1.25 + saturate((vignetteRadius + 0.25) * 4) * 0.33;
-	float subtractMaskFar = saturate((vignetteRadius - 0.5) * 0.35) * 0.15;
+	float subtractMaskNear = saturate((vignetteRadius + 0.75) * 0.6) * 0.5 + saturate((vignetteRadius + 0.25) * 4) * 0.5;
+	float subtractMaskFar = saturate((vignetteRadius - 0.5) * 0.95) * 0.35;
 	float subtractMask = lerp(subtractMaskNear, subtractMaskFar, camDistNormalized);
 
-	/*
-	float viewMask = viewDot;	
-	float vignetteStart = lerp(1, 0.2, camDistNormalized);
-	float vignetteEnd = lerp(2, 1, camDistNormalized);
-	float vignetteStrength = camDistNormalized;
-	float remappedVignette = saturate(saturate(vignetteRadius - vignetteStart) / (vignetteEnd - vignetteStart));
-	float vignetteMask = remappedVignette;
-	*/
-	float maxReflectionStr = 0.54;
+	float maxReflectionStr = lerp(0.2, 0.5, camDistNormalized);
 
 	float finalMask = saturate(waveMask + addMask - subtractMask) * maxReflectionStr;
 
@@ -35,7 +23,26 @@ float GetReflectionLerp(float3 worldPos, float3 surfaceNormal, float viewDot, fl
 	
 }
 
-float GetReflectionVignette() {
+float GetReflectionLerpLrg(float3 worldPos, float3 surfaceNormal, float viewDot, float camDistNormalized, float2 camFocusPositionXY, float vignetteRadius) {
+	float waveDot = dot(normalize(float3(0,-0.05,-1)), surfaceNormal);
+	
+	float waveMaskNear = (1.0 - saturate((waveDot - 0.96) * 25)) * 0.3;
+	float waveMaskFar = (1.0 - saturate((waveDot - 0.96) * 25)) * 0.4;
+	float waveMask = lerp(waveMaskNear, waveMaskFar, camDistNormalized);
+	
+	float addMaskNear = saturate((vignetteRadius - 0.5) * 1.26) * 1.35;
+	float addMaskFar = (1.0 - saturate((viewDot - 0.5) * 2.0)) * 1.1 + saturate((vignetteRadius + 0.5) * 0.45) * 0.5;
+	float addMask = saturate(lerp(addMaskNear, addMaskFar, camDistNormalized));
+	
+	float subtractMaskNear = saturate((vignetteRadius + 0.75) * 0.6) * 0.96 + saturate((vignetteRadius + 0.25) * 4) * 0.6 + 0.07;
+	float subtractMaskFar = saturate((vignetteRadius - 0.5) * 0.75) * 0.395;
+	float subtractMask = lerp(subtractMaskNear, subtractMaskFar, camDistNormalized);
 
-	return 1.0;
+	float maxReflectionStr = lerp(0.2, 0.5, camDistNormalized);
+
+	float finalMask = saturate(waveMask + addMask - subtractMask) * maxReflectionStr;
+
+	// 0 = clear, 1 = REFLECTION FULL
+	return finalMask;
+	
 }

@@ -84,6 +84,7 @@ float3 GetAnimatedPos(float3 inPos, float3 pivotPos, CritterInitData critterInit
 	
 	// FOOD BLOAT:
 	float foodAmount = critterSimData.foodAmount;
+	float approxFoodRadius = sqrt(foodAmount);
 	float bloatPivotY = 0; //(saturate(foodAmount - 0.5) - 0.5) * 2;
 	float bloatMask = smoothstep(0, 1, (1 - saturate(abs((strokeLocalPos.y - bloatPivotY + 0.1) * 1.45))) * 1); // smoothstep makes a more gaussian-looking shape than pointy
 	float bloatMagnitude = foodAmount * 2.5;
@@ -92,18 +93,16 @@ float3 GetAnimatedPos(float3 inPos, float3 pivotPos, CritterInitData critterInit
 
 	float starveMultiplier = starvartionMask;
 
+	float distSquared = (inPos.x * inPos.x + inPos.y * inPos.y + inPos.z * inPos.z);
+	float dist = sqrt(distSquared);
+	float3 pointDir = inPos / dist;
 	
-	
-	inPos *= (1.0 + bloatMask * bloatMagnitude * 1.0);
 	inPos.x = lerp(inPos.x, inPos.x * starveMultiplier, bloatMask);
 	inPos.z = lerp(inPos.z, inPos.z * starveMultiplier, bloatMask);
-	//inPos.x *= saturate(starveMultiplier);
-	//inPos.z *= saturate(starveMultiplier);
-
-	//inPos.z *= starveMultiplier;
-	//inPos.x = lerp(inPos.x, inPos.x * starveMultiplier, bloatMask);
-	//inPos.y = lerp(inPos.y, inPos.y * starveMultiplier, bloatMask);
-	// end FOOD BLOAT
+	
+	float newDist = max(dist, sqrt(foodAmount) + 0.05);
+	newDist = min(newDist, dist * 1.8);
+	inPos = pointDir * newDist;  // in the direction of original brushstroke, at surface of food sphere
 	
 	// BITE!!!!
 	

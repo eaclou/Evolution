@@ -538,15 +538,32 @@ public class Agent : MonoBehaviour {
         // it was just bitten by another creature and removed material -- 
 
         currentCorpseFoodAmount -= amount;
+
         if (currentCorpseFoodAmount < 0f)
         {
             currentCorpseFoodAmount = 0f;
+
+            coreModule.healthBody = 0f;
+            coreModule.healthHead = 0f;
+            coreModule.healthExternal = 0f;
+
+            curLifeStage = AgentLifeStage.Null;
+            lifeStageTransitionTimeStepCounter = 0;
+                
+            beingSwallowedFrameCounter = 0;
+            isBeingSwallowed = false;
+
+            colliderBody.enabled = false;
+            springJoint.enabled = false;
+            springJoint.connectedBody = null;
 
             // fully consumed?? Should this case be checked for earlier in the pipe ???
             // Need to 
         }
         else
         {
+            ScaleBody(growthPercentage, true);
+
             // ******** CHANGE THIS LATER IT"S FUCKING AWFUL!!!! **************************************************  *** ***** ***** ***** **
             /*float sidesRatio = coreModule.coreWidth / coreModule.coreLength;
             float sideY = Mathf.Sqrt(currentCorpseFoodAmount / sidesRatio);
@@ -558,6 +575,8 @@ public class Agent : MonoBehaviour {
             colliderBody.size = coreModule.currentBodySize;
             */
         }
+
+        
     }
 
     public void Tick(SimulationManager simManager, Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray, SettingsManager settings) {
@@ -658,10 +677,12 @@ public class Agent : MonoBehaviour {
                 float targetDist = Mathf.Lerp(0.01f, parentEggSackRef.fullSize.magnitude * 0.15f, embryoPercentage);
                 springJoint.distance = targetDist;
 
-                if(parentEggSackRef.isProtectedByParent == false) {
-                    //if the EggSack is independent (not inside a critters belly)
-                    //colliderBody.enabled = true;
-                    //springJoint.enableCollision = false;
+                if(parentEggSackRef.curLifeStage == EggSack.EggLifeStage.Null) {                    
+                    isAttachedToParentEggSack = false;
+                    springJoint.connectedBody = null;
+                    springJoint.enabled = false;
+                    colliderBody.enabled = true;
+                    parentEggSackRef = null;  
                 }
             }            
         }
@@ -848,7 +869,7 @@ public class Agent : MonoBehaviour {
         }
 
         // Heal:
-        float healRate = 0.0005f * agentSizeMultiplier;
+        float healRate = 0.00009f * agentSizeMultiplier;
         float energyToHealthConversionRate = 10f;
         if(coreModule.healthBody < 1f) {
             coreModule.healthBody += healRate;
@@ -879,6 +900,9 @@ public class Agent : MonoBehaviour {
 
             // FOOD PARTICLES: Either mouth type for now:
             float foodParticleEatAmount = simManager.foodParticlesEatAmountsArray[index];
+            if(foodParticleEatAmount > coreModule.stomachCapacity * 0.05f) {
+                mouthRef.InitiatePassiveBite();
+            }
             coreModule.stomachContents += foodParticleEatAmount;
             if(coreModule.stomachContents > coreModule.stomachCapacity) {
                 coreModule.stomachContents = coreModule.stomachCapacity;
@@ -891,12 +915,12 @@ public class Agent : MonoBehaviour {
 
                 // PAssive filter feeding:
                 if(coreModule.mouthEffector[0] > 0f) {
-                    
+                                        
                     float ambientFoodDensity = nutrientCellInfo.x;
                     float mouthArea = mouthRef.triggerCollider.radius * mouthRef.triggerCollider.radius * Mathf.PI;
 
-                    float maxEatRate = mouthArea * 1f * settings.eatRateMultiplier;
-                    float sizeValue = (coreModule.coreWidth - 0.1f) / 2.5f; // ** Hardcoded assuming size ranges from 0.1 --> 2.5 !!! ********
+                    float maxEatRate = mouthArea * 4f * settings.eatRateMultiplier;
+                    float sizeValue = Mathf.Clamp01((coreModule.coreWidth - 0.1f) / 4f); // ** Hardcoded assuming size ranges from 0.1 --> 2.5 !!! ********
                     float efficiency = Mathf.Lerp(settings.minSizeFeedingEfficiency, settings.maxSizeFeedingEfficiency, sizeValue) * ambientFoodDensity;
                     
                     // *** Can double dip !!! BROKEN! **** Check reservoir first to avoid overdrafting!! ******

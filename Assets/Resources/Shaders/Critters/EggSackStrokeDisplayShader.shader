@@ -108,7 +108,7 @@
 				//float2 forwardAgent = rawData.heading;
 				//float2 rightAgent = float2(forwardAgent.y, -forwardAgent.x);
 							
-				quadPoint *= scale * 0.4 * ((1.0 - rawData.decay) * 0.75 + 0.25);
+				quadPoint *= scale * 0.4 * ((1.0 - rawData.decay));
 
 				// Figure out final facing Vectors!!!
 				float rotationAngle = random1 * 10.0 * 3.141592;  // radians

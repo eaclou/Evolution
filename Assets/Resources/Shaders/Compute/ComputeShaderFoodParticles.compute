@@ -41,6 +41,7 @@ RWTexture2D<float4> critterDistancesWrite;
 
 Texture2D<float4> obstaclesRead;
 Texture2D<float4> velocityRead;
+Texture2D<float4> altitudeRead;
 
 Texture2D<float4> _SpawnDensityMap;
 
@@ -230,8 +231,10 @@ void CSRespawnFoodParticles (uint3 id : SV_DispatchThreadID)
 
 	if(foodParticle.active > 0.5) { // poor man's boolean
 	// *** Update this to sample altitude instead.  ** to avoid unreachable food
-		float obstacleValue = obstaclesRead.SampleLevel(_LinearClamp, uv, 2).z;
-		if(obstacleValue > 0.01) {
+		float2 altUV = uv * 0.5 + 0.25;
+		float altitude = altitudeRead.SampleLevel(_LinearClamp, altUV, 1).x;
+		//float obstacleValue = obstaclesRead.SampleLevel(_LinearClamp, uv, 2).z;
+		if(altitude > 0.48) {
 			float randX = rand(float2((float)id.x, _Time * 100));
 			float randY = rand(float2(randX, (float)id.x));
 			foodParticlesWrite[id.x].worldPos = float2(randX * _MapSize, randY * _MapSize);
