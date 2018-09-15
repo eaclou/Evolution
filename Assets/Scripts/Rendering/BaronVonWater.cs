@@ -258,7 +258,7 @@ public class BaronVonWater : RenderBaron {
             Vector2 offset = new Vector2(UnityEngine.Random.Range(-0.5f, 0.5f), UnityEngine.Random.Range(-0.5f, 0.5f));
             Vector3 pos = new Vector3(xPos + offset.x, yPos + offset.y, 0f);
             waterSurfaceBitsArray[x].worldPos = pos;
-            waterSurfaceBitsArray[x].localScale = new Vector2(UnityEngine.Random.Range(0.33f, 2.5f), UnityEngine.Random.Range(0.67f, 2.5f)) * UnityEngine.Random.Range(0.26f, 0.48f); // Y is forward, along stroke
+            waterSurfaceBitsArray[x].localScale = new Vector2(UnityEngine.Random.Range(0.6f, 1.6f), UnityEngine.Random.Range(0.67f, 1.5f)) * UnityEngine.Random.Range(0.49f, 0.66f); // Y is forward, along stroke
             waterSurfaceBitsArray[x].heading = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)).normalized;
             waterSurfaceBitsArray[x].brushType = UnityEngine.Random.Range(0, 4);
             waterSurfaceBitsArray[x].age = UnityEngine.Random.Range(1f, 2f);

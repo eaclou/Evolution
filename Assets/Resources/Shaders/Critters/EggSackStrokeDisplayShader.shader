@@ -94,7 +94,7 @@
 				float random2 = rand(float2(random1, random1));
 
 				float randomScale = lerp(1, 1.25, random2);				
-				float scale = length(rawData.fullSize) * rawData.growth * randomScale * 0.35;
+				float scale = length(rawData.fullSize) * saturate(rawData.growth) * randomScale * 0.35;
 				//scale *= saturate(rawData.growth) * 0.35 + 0.65;
 
 				//float2 forward1 = rawData.heading; //rotatedPoint0;
@@ -108,7 +108,7 @@
 				//float2 forwardAgent = rawData.heading;
 				//float2 rightAgent = float2(forwardAgent.y, -forwardAgent.x);
 							
-				quadPoint *= scale * 0.4 * ((1.0 - rawData.decay));
+				quadPoint *= scale * 0.4 * saturate((1.0 - rawData.decay));
 
 				// Figure out final facing Vectors!!!
 				float rotationAngle = random1 * 10.0 * 3.141592;  // radians

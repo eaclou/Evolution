@@ -202,6 +202,12 @@ public class UIManager : MonoBehaviour {
 
     public Vector2 smoothedMouseVel;
     private Vector2 prevMousePos;
+
+    public Vector2 smoothedCtrlCursorVel;
+    private Vector2 prevCtrlCursorPos;
+    private Vector3 prevCtrlCursorPositionOnWaterPlane;
+    public Vector3 curCtrlCursorPositionOnWaterPlane;
+    private bool rightTriggerOn = false;
     
 	// Use this for initialization
 	void Start () {
@@ -228,27 +234,53 @@ public class UIManager : MonoBehaviour {
             textAvgLifespan.text = "Average Lifespan: " + Mathf.RoundToInt(gameManager.simulationManager.rollingAverageAgentScoresArray[0]).ToString();
             
             Vector2 moveDir = Vector2.zero;
-            bool isInput = false;
+            bool isKeyboardInput = false;
+            // CONTROLLER:
+            float controllerHorizontal = Input.GetAxis ("Horizontal"); 
+            float controllerVertical = Input.GetAxis ("Vertical");
+            moveDir.x = controllerHorizontal;
+            moveDir.y = controllerVertical;
+            
+            Vector2 rightStickInput = new Vector2(Input.GetAxis("RightStickHorizontal"), Input.GetAxis("RightStickVertical"));
+            
+            float leftTrigger = Input.GetAxis ("LeftTrigger");
+            float rightTrigger = Input.GetAxis ("RightTrigger");
+            //float buttonA = Input.GetAxis("ButtonA");
+            //float buttonB = Input.GetAxis("ButtonB");
+            //float buttonX = Input.GetAxis("ButtonX");
+            //float buttonY = Input.GetAxis("ButtonY");
+
+            /*if(rightStickInput.sqrMagnitude > 0.01f) {
+                Debug.Log("Controller Right Stick: (" + rightStickInput.x.ToString() + ", " + rightStickInput.y.ToString() + 
+                ")\nTriggers (" + leftTrigger.ToString() + ", " + rightTrigger.ToString() + ") A: " + 
+                buttonA.ToString() + ", B: " + buttonB.ToString() + ", X: " + buttonX.ToString() + ", Y: " + buttonY.ToString());
+
+            }*/
+            
             if(Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W)) {  // UP !!!!
                 moveDir.y = 1f;
-                isInput = true;
+                isKeyboardInput = true;
                 //cameraManager.targetCamPos.y += camPanSpeed;
                 //StopFollowing();                
             }
             if(Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S)) {  // DOWN !!!!                
                 moveDir.y = -1f;
-                isInput = true;
+                isKeyboardInput = true;
             }            
             if(Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D)) {  // RIGHT !!!!
                 moveDir.x = 1f;
-                isInput = true;
+                isKeyboardInput = true;
             }
             if(Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A)) {  // LEFT !!!!!                
                 moveDir.x = -1f;
-                isInput = true;
+                isKeyboardInput = true;
             }
-            if(isInput) {
+            
+            if(isKeyboardInput) {   
                 moveDir = moveDir.normalized;
+                StopFollowing();
+            }
+            if(moveDir.sqrMagnitude > 0.001f) {                
                 StopFollowing();
             }
             cameraManager.MoveCamera(moveDir);
@@ -286,6 +318,31 @@ public class UIManager : MonoBehaviour {
                 }
             }
 
+            if (Input.GetKeyDown("joystick button 7")) {
+                Debug.Log("Pressed Start!");
+                //ClickButtonQuit();
+            }
+            if (Input.GetKeyDown("joystick button 0")) {
+                Debug.Log("Pressed ButtonA!");                
+                //ClickStatsButton();
+            }
+            if (Input.GetKeyDown("joystick button 1")) {
+                Debug.Log("Pressed ButtonB!");                
+                //ClickStatsButton();
+            }
+            if (Input.GetKeyDown("joystick button 2")) {
+                Debug.Log("Pressed ButtonX!");                
+                //ClickStatsButton();
+            }
+            if (Input.GetKeyDown("joystick button 3")) {
+                Debug.Log("Pressed ButtonY!");                
+                ClickStatsButton();
+            }
+            if (Input.GetAxis("RightTrigger") > 0.01f) {
+                Debug.Log("Pressed RightTrigger: " + Input.GetAxis("RightTrigger").ToString());                
+                //ClickStatsButton();
+            }
+
             // &&&&&&&&&&&&&&&&& MOUSE: &&&&&&&&&&&&&&&
             bool leftClickThisFrame = Input.GetMouseButtonDown(0);
             bool isDragging = Input.GetMouseButton(0);
@@ -293,14 +350,57 @@ public class UIManager : MonoBehaviour {
                 MouseRaycastInspect(leftClickThisFrame);
             }
 
+            bool rightTriggerDownThisFrame = false;
+            float rightTriggerVal = Input.GetAxis("RightTrigger");
+            bool ctrlCursorDragging = false;
+            if(rightTriggerVal > 0.01f) {
+                if(rightTriggerOn) {    
+                    ctrlCursorDragging = true;
+                }
+                else {
+                    rightTriggerDownThisFrame = true;
+                }
+                rightTriggerOn = true;
+                
+            }
+            else {
+                rightTriggerOn = false;
+            }
+
+            Vector2 curRightStickPos = rightStickInput;
+            curRightStickPos.y *= -1f;
+            Vector2 instantCtrlCursorVel = curRightStickPos - prevCtrlCursorPos;           
+            smoothedCtrlCursorVel = Vector2.Lerp(smoothedCtrlCursorVel, instantCtrlCursorVel, 0.167f);
+            prevCtrlCursorPos = curRightStickPos;
+
             Vector4[] dataArray = new Vector4[1];
             Vector4 gizmoPos = new Vector4(curMousePositionOnWaterPlane.x, curMousePositionOnWaterPlane.y, 0f, 0f);
+
+            if(rightTriggerOn) {                    
+                mouseRaycastWaterPlane.SetActive(true);
+                MouseRaycastWaterPlane(false, ctrlCursorDragging, true, new Vector3((rightStickInput.x * 0.5f + 0.5f) * 1920f, (-rightStickInput.y * 0.5f + 0.5f) * 1080f, 0f), smoothedCtrlCursorVel * 512f); // smoothedCtrlCursorVel); 
+
+                gizmoPos = new Vector4(curCtrlCursorPositionOnWaterPlane.x, curCtrlCursorPositionOnWaterPlane.y, 0f, 0f);
+                
+                //gameManager.theRenderKing.gizmoStirToolPosCBuffer.SetData(dataArray);
+                gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_IsVisible", 1f);
+                float isActing = 0f;
+                if (ctrlCursorDragging)
+                    isActing = 1f;
+                gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_IsStirring", isActing);
+                gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_Radius", 6f);
+            }
+            else {
+                gameManager.simulationManager.PlayerToolStirOff();
+                gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_IsVisible", 0f);
+            }
+
             dataArray[0] = gizmoPos;
             gameManager.theRenderKing.gizmoStirToolPosCBuffer.SetData(dataArray);
 
             if(curActiveTool == ToolType.Stir) {                    
                 mouseRaycastWaterPlane.SetActive(true);
-                MouseRaycastWaterPlane(false, isDragging); 
+                MouseRaycastWaterPlane(false, isDragging, true, Input.mousePosition, smoothedMouseVel); 
                 
                 //gameManager.theRenderKing.gizmoStirToolPosCBuffer.SetData(dataArray);
                 gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_IsVisible", 1f);
@@ -311,15 +411,14 @@ public class UIManager : MonoBehaviour {
                 gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_Radius", 4f);
             }
             else {
-                gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_IsVisible", 0f);
+                if (!rightTriggerOn) {
+                    gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_IsVisible", 0f);
+                }                
             }
             if(curActiveTool == ToolType.Feed) {                    
                 mouseRaycastWaterPlane.SetActive(true);
-                MouseRaycastWaterPlane(leftClickThisFrame, false);
-
-                //gameManager.theRenderKing.gizmoFeedToolPosCBuffer.SetData(dataArray);
-                //gizmoFeedToolMat
-
+                MouseRaycastWaterPlane(leftClickThisFrame, false, false, Input.mousePosition, smoothedMouseVel);
+                
                 float brushRadius = 5f;
                 if(foodToolPourOn) {
                     brushRadius = 15f;
@@ -356,7 +455,23 @@ public class UIManager : MonoBehaviour {
 
                 //Debug.Log("Mouse ScrollWheel Backward");
                 //cameraManager.masterTargetDistance += zoomSpeed;               
-            }                    
+            }
+
+            float zoomSpeed = 0.167f;
+            float zoomVal = 0f;
+            //cameraManager.ZoomCamera(Input.GetAxis("RightShoulder") * zoomSpeed);
+            //Debug.Log("RightShoulder " + Input.GetAxis("RightShoulder").ToString() );
+            if (Input.GetKey("joystick button 4")) //  Forwards
+            {
+                zoomVal += 1f;
+                //Debug.Log("RightShoulder");     
+            }
+            if (Input.GetKey("joystick button 5")) //  Backwarfds
+            {
+                zoomVal -= 1f; 
+                //Debug.Log("LeftShoulder");    
+            }
+            cameraManager.ZoomCamera(zoomVal * zoomSpeed);  
         }
         else {
             panelObserverMode.SetActive(false);
@@ -378,16 +493,18 @@ public class UIManager : MonoBehaviour {
         animatorInspectPanel.enabled = true;
         animatorInspectPanel.Play("SlideOnPanelInspect");        
     }
-    private void MouseRaycastWaterPlane(bool clicked, bool heldDown) {
+    
+    private void MouseRaycastWaterPlane(bool clicked, bool heldDown, bool stirOn, Vector3 screenPos, Vector2 smoothedVel) {
         
         Vector3 camPos = cameraManager.gameObject.transform.position;                
-        Ray ray = cameraManager.gameObject.GetComponent<Camera>().ScreenPointToRay(Input.mousePosition);
+        Ray ray = cameraManager.gameObject.GetComponent<Camera>().ScreenPointToRay(screenPos);
         RaycastHit hit = new RaycastHit();
         int layerMask = 1 << 12;
         Physics.Raycast(ray, out hit, layerMask);
 
         if(hit.collider != null) {
             curMousePositionOnWaterPlane = hit.point;
+            curCtrlCursorPositionOnWaterPlane = hit.point;
             
             if (clicked) {
                 //Debug.Log("CLICK Hit Water Plane! Coords: " + hit.point.ToString());                
@@ -402,12 +519,12 @@ public class UIManager : MonoBehaviour {
             }
 
             if(heldDown) {
-                if(curActiveTool == ToolType.Stir) {
-                    Vector2 forceVector = new Vector2(curMousePositionOnWaterPlane.x - prevMousePositionOnWaterPlane.x, curMousePositionOnWaterPlane.y - prevMousePositionOnWaterPlane.y);
-                    float mag = smoothedMouseVel.magnitude;
+                if(stirOn) {
+                    //Vector2 forceVector = new Vector2(curMousePositionOnWaterPlane.x - prevMousePositionOnWaterPlane.x, curMousePositionOnWaterPlane.y - prevMousePositionOnWaterPlane.y);
+                    float mag = smoothedVel.magnitude;
 
                     if(mag > 0f) {
-                        gameManager.simulationManager.PlayerToolStirOn(hit.point, smoothedMouseVel);
+                        gameManager.simulationManager.PlayerToolStirOn(hit.point, smoothedVel);
                     }
                 }
             }
@@ -417,6 +534,7 @@ public class UIManager : MonoBehaviour {
             
 
             prevMousePositionOnWaterPlane = curMousePositionOnWaterPlane;
+            prevCtrlCursorPositionOnWaterPlane = curCtrlCursorPositionOnWaterPlane;
         }
     }
     private void MouseRaycastInspect(bool clicked) {
@@ -654,6 +772,7 @@ public class UIManager : MonoBehaviour {
         Vector2 instantMouseVel = curMousePos - prevMousePos;
 
         smoothedMouseVel = Vector2.Lerp(smoothedMouseVel, instantMouseVel, 0.2f);
+        //smoothedCtrlCursorVel = Vector2.Lerp(smoothedCtrlCursorVel, )
 
         prevMousePos = curMousePos;
     }
@@ -1197,23 +1316,15 @@ public class UIManager : MonoBehaviour {
         //Debug.Log("ClickStatsButton");
         animatorStatsPanel.enabled = true;
         if(isActiveStatsPanel) {
-            Debug.Log("ClickStatsButton - deactivate");            
-
+            Debug.Log("ClickStatsButton - deactivate");
             isActiveStatsPanel = false;
             animatorStatsPanel.Play("SlideOffPanelStats");
-
             buttonStats.GetComponent<Image>().color = buttonDisabledColor;
-
-            //panelStatsHUD.SetActive(false);
         }
         else {
             Debug.Log("ClickStatsButton - activate");
-            //panelStatsHUD.SetActive(true);
-
             isActiveStatsPanel = true;
-            //animatorStatsPanel.enabled = true;
             animatorStatsPanel.Play("SlideOnPanelStats");
-
             buttonStats.GetComponent<Image>().color = buttonActiveColor;
         }
     }

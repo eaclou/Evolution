@@ -848,7 +848,7 @@ public class SimulationManager : MonoBehaviour {
 
                 float foodAvailable = maxGlobalFood - totalNutrients;
 
-                float newFoodAmount = foodAvailable * spawnFoodPercentage;
+                float newFoodAmount = Mathf.Min(1f, foodAvailable * spawnFoodPercentage);
 
                 // ADD FOOD HERE::
                 AddNutrientsAtCoords(newFoodAmount, randX, randY);

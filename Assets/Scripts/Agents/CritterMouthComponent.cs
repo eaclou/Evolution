@@ -162,7 +162,7 @@ public class CritterMouthComponent : MonoBehaviour {
     }
 
     private void SwallowAnimalWhole(Agent preyAgent) {
-        Debug.Log("SwallowAnimalWhole [" + agentRef.index.ToString() + "] ---> [" + preyAgent.index.ToString() + "]");
+        //Debug.Log("SwallowAnimalWhole [" + agentRef.index.ToString() + "] ---> [" + preyAgent.index.ToString() + "]");
         ProcessPredatorySwallowAttempt(agentRef, preyAgent);
         //preyAgent.curLifeStage = Agent.AgentLifeStage.Dead;
         // Credit food:
@@ -213,7 +213,7 @@ public class CritterMouthComponent : MonoBehaviour {
         preyAgent.coreModule.healthBody -= damage;
         preyAgent.coreModule.healthExternal -= damage;
 
-        Debug.Log("BiteDamageAnimal [" + agentRef.index.ToString() + "] ---> [" + preyAgent.index.ToString() + "] damage: " + damage.ToString() + ", preyHealth: " + preyAgent.coreModule.healthHead.ToString());
+        //Debug.Log("BiteDamageAnimal [" + agentRef.index.ToString() + "] ---> [" + preyAgent.index.ToString() + "] damage: " + damage.ToString() + ", preyHealth: " + preyAgent.coreModule.healthHead.ToString());
     }
     private void BiteDamageEggSack(EggSack eggSack, float ownArea, float targetArea) {
 
@@ -251,7 +251,7 @@ public class CritterMouthComponent : MonoBehaviour {
     }
     private void BiteCorpseFood(Agent corpseAgent, float ownBiteArea, float targetArea)
     {  
-        Debug.Log("BiteCorpseFood [" + agentRef.index.ToString() + "] ---> [" + corpseAgent.index.ToString() + "]");
+        //Debug.Log("BiteCorpseFood [" + agentRef.index.ToString() + "] ---> [" + corpseAgent.index.ToString() + "]");
         float flow = ownBiteArea * 2f; // / colliderCount;
 
         float flowR = Mathf.Min(corpseAgent.currentCorpseFoodAmount, flow);

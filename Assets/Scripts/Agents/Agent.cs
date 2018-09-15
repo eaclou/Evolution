@@ -797,8 +797,10 @@ public class Agent : MonoBehaviour {
     }
     public void AbortPregnancy() {
         //childEggSackRef
-        childEggSackRef.ParentDiedWhilePregnant();
-        childEggSackRef = null;
+        if(childEggSackRef != null) {
+            childEggSackRef.ParentDiedWhilePregnant();
+            childEggSackRef = null;
+        }        
 
         isPregnantAndCarryingEggs = false;
         pregnancyRefactoryTimeStepCounter = 0;
@@ -920,7 +922,7 @@ public class Agent : MonoBehaviour {
                     float mouthArea = mouthRef.triggerCollider.radius * mouthRef.triggerCollider.radius * Mathf.PI;
 
                     float maxEatRate = mouthArea * 4f * settings.eatRateMultiplier;
-                    float sizeValue = Mathf.Clamp01((coreModule.coreWidth - 0.1f) / 4f); // ** Hardcoded assuming size ranges from 0.1 --> 2.5 !!! ********
+                    float sizeValue = Mathf.Clamp01((coreModule.coreWidth - 0.35f) / 3.5f); // ** Hardcoded assuming size ranges from 0.1 --> 2.5 !!! ********
                     float efficiency = Mathf.Lerp(settings.minSizeFeedingEfficiency, settings.maxSizeFeedingEfficiency, sizeValue) * ambientFoodDensity;
                     
                     // *** Can double dip !!! BROKEN! **** Check reservoir first to avoid overdrafting!! ******
