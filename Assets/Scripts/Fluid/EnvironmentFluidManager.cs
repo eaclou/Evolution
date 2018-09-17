@@ -142,7 +142,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
         computeShaderFluidSim.SetFloat("_ForceSize", 100f);
         computeShaderFluidSim.SetFloat("_ForceOn", 0f);
     }
-    public void StirWaterOn(Vector3 pos, Vector2 forceVector) {
+    public void StirWaterOn(Vector3 pos, Vector2 forceVector, float radiusMult) {
         /*computeShaderFluidSim.SetFloat("_ForcePosX", pos.x / 256f);
         computeShaderFluidSim.SetFloat("_ForcePosY", pos.y / 256f);
         computeShaderFluidSim.SetFloat("_ForceDirX", 1f);
@@ -154,7 +154,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
         computeShaderFluidSim.SetFloat("_ForcePosY", pos.y / 256f);
         computeShaderFluidSim.SetFloat("_ForceDirX", forceVector.x);
         computeShaderFluidSim.SetFloat("_ForceDirY", forceVector.y);
-        computeShaderFluidSim.SetFloat("_ForceSize", 100f);
+        computeShaderFluidSim.SetFloat("_ForceSize", 100f / radiusMult);
         computeShaderFluidSim.SetFloat("_ForceOn", 1f);
           
         /*

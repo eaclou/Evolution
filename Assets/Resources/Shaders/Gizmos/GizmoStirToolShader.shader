@@ -37,6 +37,7 @@
 			uniform float _IsVisible;
 			uniform float _IsStirring;
 			uniform float _Radius;
+			uniform float _CamDistNormalized;
 
 			struct v2f
 			{
@@ -63,7 +64,7 @@
 				float3 quadPoint = quadVerticesCBuffer[id];
 
 				float radiusMult = _Radius;
-				radiusMult *= (1.0 + _IsStirring * 0.25);
+				radiusMult *= (1.0 + _IsStirring * 0.25 + _CamDistNormalized * 1.25);
 				quadPoint *= radiusMult;
 				
 				

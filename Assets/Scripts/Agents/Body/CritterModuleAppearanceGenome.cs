@@ -86,7 +86,7 @@ public class CritterModuleAppearanceGenome {
         hueSecondary = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.hueSecondary, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
         // ***** v v v Revisit when implementing #BrushTypes!! **** REVISIT!!
         bodyStrokeBrushTypeX = UtilityMutationFunctions.GetMutatedIntAdditive(parentGenome.bodyStrokeBrushTypeX, settings.defaultBodyMutationChance, 2, 0, 7); // *****
-        bodyStrokeBrushTypeY = UtilityMutationFunctions.GetMutatedIntAdditive(parentGenome.bodyStrokeBrushTypeY, settings.defaultBodyMutationChance, 2, 0, 7);
+        bodyStrokeBrushTypeY = UtilityMutationFunctions.GetMutatedIntAdditive(parentGenome.bodyStrokeBrushTypeY, settings.defaultBodyMutationChance, 2, 0, 3);
 
         eyeGenome = new EyeGenome();
 

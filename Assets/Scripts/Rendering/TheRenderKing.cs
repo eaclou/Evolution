@@ -2035,7 +2035,8 @@ public class TheRenderKing : MonoBehaviour {
         gizmoStirToolMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         gizmoStirToolMat.SetBuffer("gizmoStirToolPosCBuffer", gizmoStirToolPosCBuffer);
         gizmoStirToolMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
-        gizmoStirToolMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);       
+        gizmoStirToolMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+        gizmoStirToolMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, gizmoStirToolMat, 0, MeshTopology.Triangles, 6, 1);
 
         gizmoFeedToolMat.SetPass(0);

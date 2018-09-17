@@ -417,13 +417,14 @@ public class Agent : MonoBehaviour {
             curLifeStage = Agent.AgentLifeStage.Dead;
             lifeStageTransitionTimeStepCounter = 0;
             
+            coreModule.hitPoints[0] = 0f;
             coreModule.healthHead = 0f;
             coreModule.healthBody = 0f;
             coreModule.healthExternal = 0f;
 
             InitializeDeath();
         }
-        if (coreModule.healthBody <= 0f) {
+        /*if (coreModule.healthBody <= 0f) {
 
             curLifeStage = Agent.AgentLifeStage.Dead;
             lifeStageTransitionTimeStepCounter = 0;
@@ -433,7 +434,7 @@ public class Agent : MonoBehaviour {
             coreModule.healthExternal = 0f;
 
             InitializeDeath();
-        }
+        }*/
     }
     private void CheckForDeathOldAge() {
         if(ageCounterMature > maxAgeTimeSteps) {
@@ -533,6 +534,16 @@ public class Agent : MonoBehaviour {
         }
         totalFoodEaten += amount;        
     }
+    public void ProcessBeingBitten(float damage) {
+
+        coreModule.hitPoints[0] -= damage;
+        // currently no distinctionbetween regions:
+        coreModule.healthHead -= damage;
+        coreModule.healthBody -= damage;
+        coreModule.healthExternal -= damage;
+
+        CheckForDeathHealth();
+    }
     public void ProcessBeingEaten(float amount) {
         // if this agent is dead, it acts as food.
         // it was just bitten by another creature and removed material -- 
@@ -602,7 +613,7 @@ public class Agent : MonoBehaviour {
             {
                 float scale = (float)beingSwallowedFrameCounter / (float)swallowDuration;
 
-                ScaleBody((1.0f - scale) * 0.8f, true);
+                ScaleBody((1.0f - scale) * 1f * growthPercentage, true);
             }
         }        
 
@@ -709,6 +720,8 @@ public class Agent : MonoBehaviour {
                 
         coreModule.energyRaw = coreModule.maxEnergyStorage;
 
+        //turn mouth on
+        mouthRef.Enable();
     }
     private void TickYoung(SimulationManager simManager, Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray, SettingsManager settings) {
         //ProcessSwallowing();
@@ -871,14 +884,14 @@ public class Agent : MonoBehaviour {
         }
 
         // Heal:
-        float healRate = 0.00009f * agentSizeMultiplier;
+        float healRate = 0.0005f;
         float energyToHealthConversionRate = 10f;
         if(coreModule.healthBody < 1f) {
             coreModule.healthBody += healRate;
             coreModule.healthHead += healRate;
             coreModule.healthExternal += healRate;
 
-            coreModule.energyRaw -= healRate / energyToHealthConversionRate;
+            coreModule.energyRaw -= healRate / energyToHealthConversionRate * agentSizeMultiplier;
         }
 
         //ENERGY:
@@ -1205,6 +1218,8 @@ public class Agent : MonoBehaviour {
         mouthRef.bitingFrameCounter = 0;
         mouthRef.agentIndex = this.index;
         mouthRef.agentRef = this;
+
+        mouthRef.Disable();
 
         //mouseclickcollider MCC
         mouseClickCollider.direction = 1; // Y-Axis ???

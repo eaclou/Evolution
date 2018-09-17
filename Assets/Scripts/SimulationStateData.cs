@@ -317,7 +317,7 @@ public class SimulationStateData {
                 //embryo = 0f;
             }
             critterSimDataArray[i].embryoPercentage = embryo;
-            critterSimDataArray[i].growthPercentage = simManager.agentsArray[i].growthPercentage;
+            critterSimDataArray[i].growthPercentage = Mathf.Clamp01(simManager.agentsArray[i].growthPercentage);
             float decay = 0f;
             if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Dead) {
                 decay = (float)simManager.agentsArray[i].lifeStageTransitionTimeStepCounter / (float)simManager.agentsArray[i]._DecayDurationTimeSteps;
@@ -330,7 +330,7 @@ public class SimulationStateData {
             if(simManager.agentsArray[i].isBeingSwallowed)
             {
                 float digestedPercentage = (float)simManager.agentsArray[i].beingSwallowedFrameCounter / (float)simManager.agentsArray[i].swallowDuration;
-                critterSimDataArray[i].growthPercentage = 1f - digestedPercentage;
+                //critterSimDataArray[i].growthPercentage = 1f - digestedPercentage;
                 critterSimDataArray[i].decayPercentage = digestedPercentage;
             }
             critterSimDataArray[i].foodAmount = Mathf.Lerp(critterSimDataArray[i].foodAmount, simManager.agentsArray[i].coreModule.stomachContents / simManager.agentsArray[i].coreModule.stomachCapacity, 0.16f);
@@ -338,7 +338,7 @@ public class SimulationStateData {
             critterSimDataArray[i].health = simManager.agentsArray[i].coreModule.healthHead;
             critterSimDataArray[i].stamina = simManager.agentsArray[i].coreModule.stamina[0];
             critterSimDataArray[i].isBiting = 0f;            
-            if(simManager.agentsArray[i].growthPercentage > 0.01f)
+            if(simManager.agentsArray[i].growthPercentage > 0.025f)
             {
                 if (simManager.agentsArray[i].coreModule.mouthEffector[0] > 0.0f)
                 {

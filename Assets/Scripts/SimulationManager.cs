@@ -1210,13 +1210,13 @@ public class SimulationManager : MonoBehaviour {
         */
         //Debug.Log("1 Buffer[0]: " + foodParticleMeasurementTotalsData[0].foodAmount.ToString());
     }
-    public void PlayerToolStirOn(Vector3 origin, Vector2 forceVector) {
+    public void PlayerToolStirOn(Vector3 origin, Vector2 forceVector, float radiusMult) {
         float magnitude = forceVector.magnitude;
         if(magnitude == 0f) {
             Debug.Log("ERROR null vector!");
         }
-        magnitude *= 0.03f;
-        float maxMag = 0.5f;
+        magnitude *= 0.04f;
+        float maxMag = 0.9f;
         if(magnitude > maxMag) {
             magnitude = maxMag;            
         }
@@ -1224,7 +1224,7 @@ public class SimulationManager : MonoBehaviour {
 
         //Debug.Log("PlayerToolStir pos: " + origin.ToString() + ", forceVec: [" + forceVector.x.ToString() + "," + forceVector.y.ToString() + "]  mag: " + magnitude.ToString());
 
-        environmentFluidManager.StirWaterOn(origin, forceVector);
+        environmentFluidManager.StirWaterOn(origin, forceVector, radiusMult);
     }
     public void PlayerToolStirOff() {        
         environmentFluidManager.StirWaterOff();

@@ -200,18 +200,14 @@ public class CritterMouthComponent : MonoBehaviour {
     private void BiteDamageAnimal(Agent preyAgent, float ownBiteArea, float targetArea) {
         
         //Debug.Log("BiteDamageAnimal");
-        float baseDamage = 0.5f;
+        float baseDamage = 0.45f;
 
         float sizeRatio = ownBiteArea / targetArea; // for now clamped to 10x
 
         float damage = baseDamage * sizeRatio;
-        damage = Mathf.Clamp(damage, 0.01f, 10f);
-        
-        preyAgent.coreModule.hitPoints[0] -= damage;
-        // currently no distinctionbetween regions:
-        preyAgent.coreModule.healthHead -= damage;
-        preyAgent.coreModule.healthBody -= damage;
-        preyAgent.coreModule.healthExternal -= damage;
+        damage = Mathf.Clamp01(damage);
+
+        preyAgent.ProcessBeingBitten(damage);
 
         //Debug.Log("BiteDamageAnimal [" + agentRef.index.ToString() + "] ---> [" + preyAgent.index.ToString() + "] damage: " + damage.ToString() + ", preyHealth: " + preyAgent.coreModule.healthHead.ToString());
     }

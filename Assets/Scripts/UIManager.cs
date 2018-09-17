@@ -522,9 +522,10 @@ public class UIManager : MonoBehaviour {
                 if(stirOn) {
                     //Vector2 forceVector = new Vector2(curMousePositionOnWaterPlane.x - prevMousePositionOnWaterPlane.x, curMousePositionOnWaterPlane.y - prevMousePositionOnWaterPlane.y);
                     float mag = smoothedVel.magnitude;
+                    float radiusMult = (0.75f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.5f);
 
                     if(mag > 0f) {
-                        gameManager.simulationManager.PlayerToolStirOn(hit.point, smoothedVel);
+                        gameManager.simulationManager.PlayerToolStirOn(hit.point, smoothedVel * (0.75f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.25f), radiusMult);
                     }
                 }
             }
