@@ -30,7 +30,7 @@ public class BaronVonWater : RenderBaron {
 
     public Texture2D altitudeMapRef;
 
-    public int waterSurfaceMapResolution = 256;
+    public int waterSurfaceMapResolution = 128;
     public RenderTexture waterSurfaceDataRT0;  // 2 for swapping enabled
     public RenderTexture waterSurfaceDataRT1;
 

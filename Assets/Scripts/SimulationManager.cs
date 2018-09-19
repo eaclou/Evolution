@@ -688,58 +688,6 @@ public class SimulationManager : MonoBehaviour {
 
     #endregion
 
-    /*public void ResetWorld() {
-        Debug.Log("RESET WORLD!!!$%^&$%^&$%^&$%^&$%^&$%^&");
-        // Initialize Agents:
-        //LoadingInstantiateAgents();  // Fills the AgentsArray, Instantiates Agent Objects (MonoBehaviors + GameObjects)
-
-        LoadingInitializePopulationGenomes();
-        //agentsArray[0].humanControlled = true;
-        //agentsArray[0].humanControlLerp = 1f;
-        LoadingInitializeAgentsFromGenomes(); // This was "RespawnAgents()" --  Used to actually place the Agent in the game in a random spot and set the Agent's atributes ffrom its genome
-
-        statsLifespanEachGenerationList.Clear();
-        statsFoodEatenEachGenerationList.Clear();
-        statsPredationEachGenerationList.Clear();
-        statsBodySizesEachGenerationList.Clear();
-        statsNutrientsEachGenerationList.Clear();
-        statsMutationEachGenerationList.Clear();
-        statsLifespanEachGenerationList.Add(Vector4.one * 0.0001f);
-        statsFoodEatenEachGenerationList.Add(Vector4.one * 0.0001f);
-        statsPredationEachGenerationList.Add(Vector4.one * 0.0001f);
-        statsBodySizesEachGenerationList.Add(Vector4.one * 0.0001f);
-        statsNutrientsEachGenerationList.Add(Vector4.one * 0.0001f);
-        statsMutationEachGenerationList.Add(0.0001f);
-
-        numAgentsBorn = 0;
-        numAgentsProcessed = 0;
-        currentOldestAgent = 0;
-        recordPlayerAge = 0;
-        lastPlayerScore = 0;
-        recordBotAge = 0;
-        for(int i = 0; i < rollingAverageAgentScoresArray.Length; i++) {
-            rollingAverageAgentScoresArray[i] = 0f;
-        }
-
-        for(int i = 0; i < speciesAvgFoodEaten.Length; i++) {
-            speciesAvgFoodEaten[i] = 0f;
-        }
-        for(int i = 0; i < speciesAvgSizes.Length; i++) {
-            speciesAvgSizes[i] = Vector2.one;
-        }
-        for(int i = 0; i < speciesAvgMouthTypes.Length; i++) {
-            speciesAvgMouthTypes[i] = 0f;
-        }
-
-
-        curApproxGen = 1;
-
-        //RefreshFitnessGraphTexture();
-        RefreshGraphTextureLifespan();
-        RefreshGraphTextureFoodEaten();
-        RefreshGraphTexturePredation();
-    }*/
-
     #region Every Frame  //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& EVERY FRAME &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
     public void TickSimulation() {
@@ -2303,7 +2251,7 @@ public class SimulationManager : MonoBehaviour {
     }
     public void LoadTrainingData() {
         
-        Debug.Log("LOAD Population!");
+        //Debug.Log("LOAD Population!");
         //"E:\Unity Projects\GitHub\Evolution\Assets\GridSearchSaves\2018_2_13_12_35\GS_RawScores.json"
         string filePath = Path.Combine(Application.streamingAssetsPath, "testSave.json");
         //string filePath = Application.dataPath + "/Resources/SavedGenePools/testSave.json";
@@ -2311,7 +2259,18 @@ public class SimulationManager : MonoBehaviour {
         string dataAsJson = File.ReadAllText(filePath);
         // Pass the json to JsonUtility, and tell it to create a GameData object from it
         GenePool loadedData = JsonUtility.FromJson<GenePool>(dataAsJson);
-        agentGenomePoolArray = loadedData.genomeArray;
+
+        // Try to respect current size:
+        int numAgents = agentGenomePoolArray.Length;
+        int smallerArrayLength = Mathf.Min(numAgents, loadedData.genomeArray.Length);
+        Debug.Log("LOAD Population! numAgents: " + numAgents.ToString());
+        for(int i = 0; i < numAgents; i++) {
+
+            int loadedIndex = i % smallerArrayLength;
+
+            agentGenomePoolArray[i] = loadedData.genomeArray[loadedIndex];
+        }
+        //agentGenomePoolArray = loadedData.genomeArray;
         
     }
     

@@ -146,16 +146,11 @@ public class Agent : MonoBehaviour {
     public float overflowFoodAmount = 0f;
     
     // Use this for initialization
-    private void Awake() {
-        //size = new Vector2(1f, 1f); // Better way to handle this! ****
-
+    private void Awake() {        
         // temp fix for delayed spawning of Agents (leading to nullReferenceExceptions)
         agentWidthsArray = new float[widthsTexResolution];
     }
-    void Start() { // *** MOVE THIS TO BETTER SPOT! ***
-                    
-    }
-
+    
     public void SetToAwaitingRespawn() {
         curLifeStage = AgentLifeStage.AwaitingRespawn;
 
