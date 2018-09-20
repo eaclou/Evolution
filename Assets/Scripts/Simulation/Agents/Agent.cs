@@ -909,7 +909,7 @@ public class Agent : MonoBehaviour {
         else {
 
             // FOOD PARTICLES: Either mouth type for now:
-            float foodParticleEatAmount = simManager.foodParticlesEatAmountsArray[index];
+            float foodParticleEatAmount = simManager.foodManager.foodParticlesEatAmountsArray[index];
             if(foodParticleEatAmount > coreModule.stomachCapacity * 0.05f) {
                 mouthRef.InitiatePassiveBite();
             }
@@ -1068,14 +1068,14 @@ public class Agent : MonoBehaviour {
         coreModule.Initialize(genome.bodyGenome.coreGenome, this);
 
         movementModule = new CritterModuleMovement();
-        movementModule.Initialize(genome.bodyGenome.movementGenome);
-            
+        movementModule.Initialize(genome.bodyGenome.movementGenome);            
     }
 
-    public void FirstTimeInitialize(AgentGenome genome) {
-        InitializeAgentWidths(genome);
+    public void FirstTimeInitialize() {//AgentGenome genome) {  // ** See if I can get away with init sans Genome
+        curLifeStage = AgentLifeStage.AwaitingRespawn;
+        //InitializeAgentWidths(genome);
         InitializeGameObjectsAndComponents();
-        InitializeModules(genome);
+        //InitializeModules(genome);
     }
     private void InitializeGameObjectsAndComponents() {
         // Create Physics GameObject:

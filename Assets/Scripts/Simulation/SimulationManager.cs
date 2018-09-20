@@ -18,6 +18,8 @@ public class SimulationManager : MonoBehaviour {
     public StartPositionsPresetLists startPositionsPresets;
     public ComputeShader computeShaderNutrientMap;
     public ComputeShader computeShaderFoodParticles;
+    public MasterGenomePool masterGenomePool;
+    public FoodManager foodManager;
 
     public bool isQuickStart = true;
 
@@ -48,7 +50,7 @@ public class SimulationManager : MonoBehaviour {
 
         }
     }
-    private int numWarmUpTimeSteps = 10;
+    private int numWarmUpTimeSteps = 60;
     private int currentWarmUpTimeStep = 0;
 
     private static float mapSize = 256f;  // This determines scale of environment, size of FluidSim plane!!! Important!
@@ -77,15 +79,13 @@ public class SimulationManager : MonoBehaviour {
             numAgents = value;
         }
     }
-    //private int agentGenomePoolSize = 64;  // spawned as Agents that live until they are killed naturally, tested on Fitness Function
-    //public Agent playerAgent; // Should just be a reference to whichever #Agent that the player is currently controlling
-    // playerAgent is always agentsArray[0]
-    public Agent[] agentsArray;
-    //public BodyGenome bodyGenomeTemplate; // .... refactor?
-    public AgentGenome[] agentGenomePoolArray;
-    private AgentGenome[] savedGenomePoolArray1;
-    private AgentGenome[] savedGenomePoolArray2;
-    private AgentGenome[] savedGenomePoolArray3;
+    
+    public Agent[] agentsArray;    
+    //public AgentGenome[] agentGenomePoolArray;  *** OLD
+
+    //private AgentGenome[] savedGenomePoolArray1;
+    //private AgentGenome[] savedGenomePoolArray2;
+    //private AgentGenome[] savedGenomePoolArray3;
     public EggSackGenome[] eggSackGenomePoolArray;
     //private EggSackGenome foodGenomeAnimalCorpse;
     public EggSack[] eggSackArray;
@@ -100,103 +100,42 @@ public class SimulationManager : MonoBehaviour {
             numEggSacks = value;
         }
     }    
-    //public FoodChunk[] foodDeadAnimalArray;
-    /*public PredatorModule[] predatorArray;
-    private int numPredators = 64;
-    public int _NumPredators {
-        get
-        {
-            return numPredators;
-        }
-        set
-        {
-            numPredators = value;
-        }
-    }*/
-   
+    
     public float[] rawFitnessScoresArray;
     private int[] rankedIndicesList;
     private float[] rankedFitnessList;
     public int numAgentsBorn = 0;
     public int currentOldestAgent = 0;
-    //public int recordPlayerAge = 0;
-    //public int lastPlayerScore = 0;
-    //public bool playerIsDead = false;
-
+    
         // Species
     private int numSpecies = 4;
     public float[] speciesAvgFoodEaten;
     public Vector2[] speciesAvgSizes;
     public float[] speciesAvgMouthTypes;
-
-    public Vector4 statsAvgGlobalNutrients;
-    public float statsAvgMutationRate;
-
-    private float curGlobalNutrients = 0f;
-    private float curGlobalFoodParticles = 0f;
     
     public int recordBotAge = 0;
+    public Vector4 statsAvgGlobalNutrients;
+    public float statsAvgMutationRate;
     public float[] rollingAverageAgentScoresArray;
-    public List<Vector4> statsLifespanEachGenerationList;
-    public List<Vector4> statsBodySizesEachGenerationList;
-    public List<Vector4> statsFoodEatenEachGenerationList;
-    public List<Vector4> statsPredationEachGenerationList;
-    public List<Vector4> statsNutrientsEachGenerationList;    
-    public List<float> statsMutationEachGenerationList;
-    public List<Color> statsSpeciesPrimaryColorsList;
-    public List<Color> statsSpeciesSecondaryColorsList;
+    //public List<Vector4> statsLifespanEachGenerationList;
+    //public List<Vector4> statsBodySizesEachGenerationList;
+    //public List<Vector4> statsFoodEatenEachGenerationList;
+    //public List<Vector4> statsPredationEachGenerationList;
+    //public List<Vector4> statsNutrientsEachGenerationList;    
+    //public List<float> statsMutationEachGenerationList;
+    //public List<Color> statsSpeciesPrimaryColorsList;
+    //public List<Color> statsSpeciesSecondaryColorsList;
     public float agentAvgRecordScore = 1f;
     public int curApproxGen = 1;
 
     public int numInitialHiddenNeurons = 16;
-        
-    private int nutrientMapResolution = 32;
-    public RenderTexture nutrientMapRT1;
-    public RenderTexture nutrientMapRT2;
-    private Vector4[] nutrientSamplesArray;
-    private Vector4[] nutrientEatAmountsArray;
-
-    private RenderTexture tempTex16;
-    private RenderTexture tempTex8;
-    private RenderTexture tempTex4;
-    private RenderTexture tempTex2;
-    private RenderTexture tempTex1;
-
-    private ComputeBuffer nutrientSamplesCBuffer;
-
-    private int numFoodParticles = 1024;
-    public ComputeBuffer foodParticlesCBuffer;
-    private ComputeBuffer foodParticlesCBufferSwap;
-    //private ComputeBuffer[] foodParticlesMipsCBufferArray;  // smaller sizes used as temporary data while sorting/computing totals
-    private RenderTexture foodParticlesNearestCritters1024;
-    private RenderTexture foodParticlesNearestCritters32;
-    private RenderTexture foodParticlesNearestCritters1;
-    private ComputeBuffer closestFoodParticlesDataCBuffer;
-    public FoodParticleData[] closestFoodParticlesDataArray;
-    private ComputeBuffer foodParticlesEatAmountsCBuffer;
-    public float[] foodParticlesEatAmountsArray;
-    private ComputeBuffer foodParticlesMeasure32;
-    private ComputeBuffer foodParticlesMeasure1;
-    private FoodParticleData[] foodParticleMeasurementTotalsData;
-    
+            
     private int numAgentsProcessed = 0;
 
     private int[] eggSackRespawnCounter;
     private int[] agentRespawnCounter;
 
-    public struct FoodParticleData {
-        public int index;
-        public int critterIndex;
-        public int nearestCritterIndex;
-        public float isSwallowed;   // 0 = normal, 1 = in critter's belly
-        public float digestedAmount;  // 0 = freshly eaten, 1 = fully dissolved/shrunk
-        public Vector2 worldPos;
-        public float radius;
-        public float foodAmount;
-        public float active;  // not disabled
-        public float refactoryAge;
-    }
-    
+
     #region loading   // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& LOADING LOADING LOADING &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
     public void TickLoading() {
         // "Hey, I'm Loadin' Here!!!"
@@ -293,9 +232,6 @@ public class SimulationManager : MonoBehaviour {
 
         LoadingInitializeFoodGrid();
         
-        // Initialize Predators:
-        //LoadingInstantiatePredators();
-        //LoadingInitializePredatorsFromGenome();
         
         yield return null;
 
@@ -358,6 +294,7 @@ public class SimulationManager : MonoBehaviour {
         // allocate memory and initialize data structures, classes, arrays, etc.
 
         settingsManager.Initialize();
+        foodManager = new FoodManager(settingsManager);
 
         //debugScores:
         rollingAverageAgentScoresArray = new float[numSpecies];
@@ -379,16 +316,19 @@ public class SimulationManager : MonoBehaviour {
         simStateData = new SimulationStateData(this);
     }
     private void LoadingInitializePopulationGenomes() {
-        agentGenomePoolArray = new AgentGenome[numAgents];
+        masterGenomePool = new MasterGenomePool();
+        masterGenomePool.FirstTimeInitialize(64, settingsManager.mutationSettingsPersistent);
 
+        /*agentGenomePoolArray = new AgentGenome[numAgents];
         for (int i = 0; i < agentGenomePoolArray.Length; i++) {   // Create initial Population Supervised Learners
             AgentGenome agentGenome = new AgentGenome(i);
             agentGenome.GenerateInitialRandomBodyGenome();
             //agentGenome.InitializeBodyGenomeFromTemplate(bodyGenomeTemplate);  // OLD
             agentGenome.InitializeRandomBrainFromCurrentBody(settingsManager.mutationSettingsPersistent.initialConnectionChance, numInitialHiddenNeurons);
             agentGenomePoolArray[i] = agentGenome;
-        }
+        }*/
 
+        // THIS WILL BE FORCED TO BE REFACTORED!!! :::::::::
         // Sort Fitness Scores Persistent:
         rankedIndicesList = new int[numAgents];
         rankedFitnessList = new float[numAgents];
@@ -407,10 +347,7 @@ public class SimulationManager : MonoBehaviour {
             eggSackGenome.InitializeAsRandomGenome();
 
             eggSackGenomePoolArray[i] = eggSackGenome;
-        }
-
-        //foodGenomeAnimalCorpse = new EggSackGenome(-1);
-        //foodGenomeAnimalCorpse.InitializeAsRandomGenome();
+        }        
     }
     private void LoadingInitializeFluidSim() {
         environmentFluidManager.InitializeFluidSystem();
@@ -426,7 +363,7 @@ public class SimulationManager : MonoBehaviour {
             GameObject agentGO = new GameObject("Agent" + i.ToString());
             Agent newAgent = agentGO.AddComponent<Agent>();
             newAgent.speciesIndex = Mathf.FloorToInt((float)i / (float)numAgents * (float)numSpecies);
-            newAgent.FirstTimeInitialize(agentGenomePoolArray[i]);
+            newAgent.FirstTimeInitialize(); // agentGenomePoolArray[i]);
             agentsArray[i] = newAgent; // Add to stored list of current Agents            
         }
     }
@@ -439,7 +376,9 @@ public class SimulationManager : MonoBehaviour {
     }*/
     private void LoadingInitializeFoodParticles() {
 
-        foodParticlesCBuffer = new ComputeBuffer(numFoodParticles, sizeof(float) * 8 + sizeof(int) * 3);
+        foodManager.InitializeFoodParticles(numAgents, computeShaderFoodParticles);
+
+        /*foodParticlesCBuffer = new ComputeBuffer(numFoodParticles, sizeof(float) * 8 + sizeof(int) * 3);
         foodParticlesCBufferSwap = new ComputeBuffer(numFoodParticles, sizeof(float) * 8 + sizeof(int) * 3);
         FoodParticleData[] foodParticlesArray = new FoodParticleData[numFoodParticles];
 
@@ -488,15 +427,13 @@ public class SimulationManager : MonoBehaviour {
         foodParticleMeasurementTotalsData = new FoodParticleData[1];
         foodParticlesMeasure32 = new ComputeBuffer(32, sizeof(float) * 8 + sizeof(int) * 3);
         foodParticlesMeasure1 = new ComputeBuffer(1, sizeof(float) * 8 + sizeof(int) * 3);
+        */
     }
     private void LoadingInitializeFoodGrid() {
-        //foodGrid = new FoodGridCell[foodGridResolution][];
-        //foodGridSwapArray = new float[foodGridResolution][];
 
-        //debugFoodTexture = new Texture2D(foodGridResolution, foodGridResolution);
-        //debugFoodTexture.filterMode = FilterMode.Point;
-        
-                
+        foodManager.InitializeNutrientsMap(numAgents, computeShaderNutrientMap);
+
+        /*        
         nutrientMapRT1 = new RenderTexture(nutrientMapResolution, nutrientMapResolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
         nutrientMapRT1.wrapMode = TextureWrapMode.Clamp;
         nutrientMapRT1.filterMode = FilterMode.Bilinear;
@@ -551,28 +488,12 @@ public class SimulationManager : MonoBehaviour {
         nutrientSamplesCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 4);
 
         theRenderKing.fluidRenderMat.SetTexture("_DebugTex", nutrientMapRT1);
-        /*
-        int numFoodSizeLayers = 4;
-        for(int x = 0; x < foodGridResolution; x++) {
-
-            foodGrid[x] = new FoodGridCell[foodGridResolution];
-            foodGridSwapArray[x] = new float[foodGridResolution];
-
-            for (int y = 0; y < foodGridResolution; y++) {
-                FoodGridCell gridCell = new FoodGridCell(numFoodSizeLayers);
-                // Set amounts of Food per layer -- based on noise?
-                foodGrid[x][y] = gridCell;
-
-            }
-        }
         */
     }
     private void LoadingInstantiateEggSacks() {
         // FOOODDDD!!!!
         eggSackArray = new EggSack[numEggSacks]; // create array
-        //int numDeadAnimalFood = 32;
-        //foodDeadAnimalArray = new FoodChunk[numDeadAnimalFood];
-
+        
         //Debug.Log("SpawnFood!");
         for (int i = 0; i < eggSackArray.Length; i++) {
             GameObject eggSackGO = new GameObject("EggSack" + i.ToString()); // Instantiate(Resources.Load("Prefabs/FoodPrefab")) as GameObject;
@@ -587,32 +508,10 @@ public class SimulationManager : MonoBehaviour {
         for (int i = 0; i < eggSackArray.Length; i++) {
             eggSackArray[i].isDepleted = true;
             eggSackArray[i].curLifeStage = EggSack.EggLifeStage.Null;
-            /*
-            //get randomParentAgentGenome from same specieis?? this should be refactored later.. ***            
-            int speciesSize = _NumAgents / numSpecies;
-            int eggSpecies = Mathf.FloorToInt((float)i / (float)_NumEggSacks * (float)numSpecies);
-            int agentGenomeIndex = UnityEngine.Random.Range(eggSpecies * speciesSize, (eggSpecies + 1) * speciesSize);
-            //Debug.Log("agentGenomeIndex: " + agentGenomeIndex.ToString() + ", speciesID: " + eggSpecies.ToString() + ", speciesSize: " + speciesSize.ToString());
-            eggSackArray[i].InitializeEggSackFromGenomeImmaculate(i, agentGenomePoolArray[agentGenomeIndex], GetRandomFoodSpawnPosition());           
-            */
-        }
-    }
-    /*private void LoadingInstantiatePredators() {
-        predatorArray = new PredatorModule[numPredators];
-        Debug.Log("SpawnPredators!");
-        for (int i = 0; i < predatorArray.Length; i++) {
-            GameObject predatorGO = Instantiate(Resources.Load("Prefabs/PredatorPrefab")) as GameObject;
-            predatorGO.name = "Predator" + i.ToString();
-            PredatorModule newPredator = predatorGO.GetComponent<PredatorModule>();
-            predatorArray[i] = newPredator; // Add to stored list of current Agents
             
         }
-    }*/
-    /*private void LoadingInitializePredatorsFromGenome() {
-        for (int i = 0; i < predatorArray.Length; i++) {
-            RevivePredator(i);
-        }
-    }*/
+    }
+    
     private void LoadingHookUpFluidAndRenderKing() {
         // **** NEED TO ADDRESS THIS!!!!!! ************************
         theRenderKing.fluidObstaclesRenderCamera.targetTexture = environmentFluidManager._ObstaclesRT; // *** See if this works **
@@ -620,14 +519,7 @@ public class SimulationManager : MonoBehaviour {
         //temp:
         theRenderKing.debugRT = environmentFluidManager._SourceColorRT;
     }
-    //private void LoadingHookUpUIManager() {
-        //Texture2D playerTex = new Texture2D(4, 2);  // Health, foodAmountRGB, 4 outCommChannels
-        //playerTex.filterMode = FilterMode.Point;
-        //agentsArray[0].textureHealth = playerTex;
-
-        //uiManager.healthDisplayTex = playerTex;
-        //uiManager.SetDisplayTextures();
-    //}
+    
     private void LoadingInitializeGridCells() {
         mapGridCellArray = new MapGridCell[agentGridCellResolution][];
         for (int i = 0; i < agentGridCellResolution; i++) {
@@ -652,7 +544,7 @@ public class SimulationManager : MonoBehaviour {
     }
     private void LoadingSetUpFitnessStorage() {
         rawFitnessScoresArray = new float[numAgents];
-
+        /*
         statsLifespanEachGenerationList = new List<Vector4>(); // 
         statsFoodEatenEachGenerationList = new List<Vector4>();
         statsPredationEachGenerationList = new List<Vector4>();
@@ -665,8 +557,9 @@ public class SimulationManager : MonoBehaviour {
         statsBodySizesEachGenerationList.Add(Vector4.one * 0.0001f);
         statsNutrientsEachGenerationList.Add(Vector4.one * 0.0001f);
         statsMutationEachGenerationList.Add(0.0001f);
+        */
     }
-    private void LoadingLoadGenepoolFiles() {
+    /*private void LoadingLoadGenepoolFiles() {
         
         Debug.Log("LOAD LoadingLoadGenepoolFiles!");
         string filePath1 = Path.Combine(Application.streamingAssetsPath, "savedGenePool310.json");
@@ -684,7 +577,7 @@ public class SimulationManager : MonoBehaviour {
         GenePool loadedData3 = JsonUtility.FromJson<GenePool>(dataAsJson3);
         savedGenomePoolArray3 = loadedData3.genomeArray;
         
-    }
+    }*/
 
     #endregion
 
@@ -699,28 +592,24 @@ public class SimulationManager : MonoBehaviour {
             agentRespawnCounter[i]++;
         }        
 
-        float totalNutrients = MeasureTotalNutrients();
-        GetNutrientValuesAtMouthPositions();
+        float totalNutrients = foodManager.MeasureTotalNutrients();
+        foodManager.GetNutrientValuesAtMouthPositions(simStateData);
 
         //Find closest critters to foodParticles:
-        FindClosestFoodParticleToCritters();
-        MeasureTotalFoodParticlesAmount();
+        foodManager.FindClosestFoodParticleToCritters(simStateData);
+        foodManager.MeasureTotalFoodParticlesAmount();
                 
         // ******** REVISIT CODE ORDERING!!!!  -- Should check for death Before or After agent Tick/PhysX ???
         CheckForDevouredEggSacks();
         CheckForNullAgents();  // Result of this will affect: "simStateData.PopulateSimDataArrays(this)" !!!!!
         CheckForReadyToSpawnAgents();
-        //CheckForRecordPlayerScore();  
-        // Gather state data information -- current simulation state after previous frame's internal PhysX update:
-        //stateData Populate Arrays
-        simStateData.PopulateSimDataArrays(this);  // reads from GameObject Transforms & RigidBodies!!! ++ from FluidSimulationData!!!
-        // Render fluidSimulationCameras()  -- Will that work to actually render at the proper time???? we'll see..... *****
+        
+        simStateData.PopulateSimDataArrays(this);  // reads from GameObject Transforms & RigidBodies!!! ++ from FluidSimulationData!!!        
         theRenderKing.RenderSimulationCameras(); // will pass current info to FluidSim before it Ticks()
         // Reads from CameraRenders, GameObjects, and query GPU for fluidState
         // eventually, if agents get fluid sensors, will want to download FluidSim data from GPU into simStateData!*        
               
-        // **** Figure out proper Execution Order / in which Class to Run RenderOps while being synced w/ results of physX sim!!!
-        //theRenderKing.velocityTex = environmentFluidManager.velocityA; // *** Better way to share DATA!!!
+        // **** Figure out proper Execution Order / in which Class to Run RenderOps while being synced w/ results of physX sim!!!        
         theRenderKing.Tick(); // updates all renderData, buffers, brushStrokes etc.
 
         HookUpModules(); // Sets nearest-neighbors etc. feed current data into agent Brains
@@ -739,49 +628,19 @@ public class SimulationManager : MonoBehaviour {
             foodGridIndexY = Mathf.Clamp(foodGridIndexY, 0, foodGridResolution - 1);
             */
             //agentsArray[i].Tick(new Vector4(0f,0f,0f,0f), ref nutrientEatAmountsArray);  
-            agentsArray[i].Tick(this, nutrientSamplesArray[i], ref nutrientEatAmountsArray, settingsManager);  
+            agentsArray[i].Tick(this, foodManager.nutrientSamplesArray[i], ref foodManager.nutrientEatAmountsArray, settingsManager);  
         }
         for (int i = 0; i < eggSackArray.Length; i++) {
             eggSackArray[i].Tick();
         }
-        /*for (int i = 0; i < foodDeadAnimalArray.Length; i++) {
-            if(foodDeadAnimalArray[i].gameObject.activeSelf) {
-                foodDeadAnimalArray[i].Tick();
-            }            
-        }*/
+        
         // Apply External Forces to dynamic objects: (internal PhysX Updates):
         // **** TEMPORARILY DISABLED!
         ApplyFluidForcesToDynamicObjects();
 
-        EatSelectedFoodParticles(); // 
-
-        // *******************************************************************************************************
-        // DONE::::        
-        // Respawn Food and place initially        
-        // measure total amount of food
-        // upgrade critterSimData to have more bite/mouth info
-        // Render foodParticles
-        // Credit food to critters that eat GPU foodParticles
-        // Hook GPU particle info up to critter input modules (food sensors)
-        // Check if food is not in water
-        // pass mouth data into SimStateData
-        // check food vs mouth position and biting state, not body center -- also for sensors?  
-        // Adjust Amount of food in foodParticles * efficiency multiplier  
-        // Restrict being able to eat foodPArticles by size, mouthType
-        // only consumable food is passed to brain Data - pa/small are filtered out
-
-        // TO-DO::::-------------------------------------------------------------------------------------------------------------
-        // Create multiple mouth types:  
-        //      Jaw +Teeth (creatures, eggs, foodParticles)  
-        //      Jaw (eggs, foodParticles)  
-        //      Mouth (foodParticles, foodGrid)
-        //      None (foodGrid)
-        // add new inputs for food dir (dedicated one for nutrient gradient map)           
-        // food flow in water -- later, requires water sensors probably        
+        foodManager.EatSelectedFoodParticles(simStateData); // 
         
-        // *******************************************************************************************************
-
-        RemoveEatenNutrients();        
+        foodManager.RemoveEatenNutrients(numAgents, simStateData);        
 
         float spawnNewFoodChance = settingsManager.spawnNewFoodChance;
         float spawnFoodPercentage = UnityEngine.Random.Range(0f, 0.25f);
@@ -791,32 +650,26 @@ public class SimulationManager : MonoBehaviour {
             float randRoll = UnityEngine.Random.Range(0f, 1f);
             if(randRoll < spawnNewFoodChance) {
                 // pick random cell:
-                int randX = UnityEngine.Random.Range(0, nutrientMapResolution - 1);
-                int randY = UnityEngine.Random.Range(0, nutrientMapResolution - 1);
+                int randX = UnityEngine.Random.Range(0, foodManager.nutrientMapResolution - 1);
+                int randY = UnityEngine.Random.Range(0, foodManager.nutrientMapResolution - 1);
 
                 float foodAvailable = maxGlobalFood - totalNutrients;
 
                 float newFoodAmount = Mathf.Min(1f, foodAvailable * spawnFoodPercentage);
 
                 // ADD FOOD HERE::
-                AddNutrientsAtCoords(newFoodAmount, randX, randY);
-                
-                
-                //foodGrid[randX][randY].foodAmountsPerLayerArray[0] += newFoodAmount;
-                //Debug.Log("ADDED FOOD! GridCell[" + randX.ToString() + "][" + randY.ToString() + "]: " + newFoodAmount.ToString());
+                foodManager.AddNutrientsAtCoords(newFoodAmount, randX, randY);                
             }
         }
 
 
-        ApplyDiffusionOnNutrientMap();
+        foodManager.ApplyDiffusionOnNutrientMap(environmentFluidManager);
         
-        RespawnFoodParticles();
+        foodManager.RespawnFoodParticles(environmentFluidManager, theRenderKing, simStateData);
 
-        // TEMP AUDIO EFFECTS!!!!
-        //float playerSpeed = (agentsArray[0].transform.position - agentsArray[0]._PrevPos).magnitude;
+        // TEMP AUDIO EFFECTS!!!!        
         float volume = agentsArray[0].smoothedThrottle.magnitude * 0.24f;
-        audioManager.SetPlayerSwimLoopVolume(volume);
-        //agentsArray[0].avgVel       
+        audioManager.SetPlayerSwimLoopVolume(volume);              
                 
         // Simulate timestep of fluid Sim - update density/velocity maps:
         // Or should this be right at beginning of frame????? ***************** revisit...
@@ -835,8 +688,7 @@ public class SimulationManager : MonoBehaviour {
                 float wallForce = Mathf.Clamp01(agentSize - floorDepth) / agentSize;
                 agentsArray[i].bodyRigidbody.AddForce(new Vector2(depthSample.y, depthSample.z).normalized * 50.20f * agentsArray[i].bodyRigidbody.mass * wallForce, ForceMode2D.Impulse);
             }
-
-            //agentsArray[i].bodyRigidbody.AddForce(Vector2.one * 2.5f * agentsArray[i].bodyRigidbody.mass, ForceMode2D.Impulse);
+            
             agentsArray[i].bodyRigidbody.AddForce(simStateData.fluidVelocitiesAtAgentPositionsArray[i] * 30f * agentsArray[i].bodyRigidbody.mass, ForceMode2D.Impulse);
 
             agentsArray[i].avgFluidVel = Mathf.Lerp(agentsArray[i].avgFluidVel, simStateData.fluidVelocitiesAtAgentPositionsArray[i].magnitude, 0.25f);
@@ -844,320 +696,12 @@ public class SimulationManager : MonoBehaviour {
             agentsArray[i].depth = depthSample.x;
         }
         for (int i = 0; i < eggSackArray.Length; i++) { // *** cache rigidBody reference
-            //float hackyScalingForceMultiplier = 1f;
-            //if (foodArray[i].curLifeStage == EggSack.EggLifeStage.Growing) {
-            //    hackyScalingForceMultiplier = 2f;
-            //}
+            
             eggSackArray[i].GetComponent<Rigidbody2D>().AddForce(simStateData.fluidVelocitiesAtEggSackPositionsArray[i] * 16f * eggSackArray[i].GetComponent<Rigidbody2D>().mass, ForceMode2D.Impulse); //
             
-            //eggSackArray[i].debugFluidVel = simStateData.fluidVelocitiesAtEggSackPositionsArray[i].sqrMagnitude;
-
-            //eggSackArray[i].debugDepth = simStateData.d
-
-            //foodArray[i].GetComponent<Rigidbody2D>().AddForce(new Vector2(1f, 1f), ForceMode2D.Force); //
-            // Looks like AddForce has less of an effect on a GO/Rigidbody2D that is being scaled through a script... ??
-            // Feels like rigidbody is accumulating velocity which is then released all at once when the scaling stops??
-            // Hacking through it by increasign force on growing food:
         }
-        /*for (int i = 0; i < predatorArray.Length; i++) {
-            predatorArray[i].rigidBody.AddForce(simStateData.fluidVelocitiesAtPredatorPositionsArray[i] * 25f * predatorArray[i].rigidBody.mass, ForceMode2D.Impulse);
-        }*/
     }
-
-    private void ApplyDiffusionOnNutrientMap() {
-        int kernelCSUpdateNutrientMap = computeShaderNutrientMap.FindKernel("CSUpdateNutrientMap");
-        computeShaderNutrientMap.SetFloat("_NutrientDiffusion", settingsManager.foodDiffusionRate);
-        computeShaderNutrientMap.SetTexture(kernelCSUpdateNutrientMap, "ObstaclesRead", environmentFluidManager._ObstaclesRT);
-        computeShaderNutrientMap.SetTexture(kernelCSUpdateNutrientMap, "nutrientMapRead", nutrientMapRT1);
-        computeShaderNutrientMap.SetTexture(kernelCSUpdateNutrientMap, "nutrientMapWrite", nutrientMapRT2);
-        computeShaderNutrientMap.Dispatch(kernelCSUpdateNutrientMap, nutrientMapResolution / 32, nutrientMapResolution / 32, 1);
-
-        Graphics.Blit(nutrientMapRT2, nutrientMapRT1);
-        
-    }
-    private void GetNutrientValuesAtMouthPositions() {
-        // Doing it this way to avoid resetting ALL agents whenever ONE is respawned!
-        //ComputeBuffer nutrientSamplesCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 4);
-        
-        int kernelCSGetNutrientSamples = computeShaderNutrientMap.FindKernel("CSGetNutrientSamples");   
-        //computeShaderNutrientMap.SetBuffer(kernelCSGetNutrientSamples, "critterInitDataCBuffer", simStateData.critterInitDataCBuffer);
-        computeShaderNutrientMap.SetBuffer(kernelCSGetNutrientSamples, "critterSimDataCBuffer", simStateData.critterSimDataCBuffer);
-        computeShaderNutrientMap.SetBuffer(kernelCSGetNutrientSamples, "nutrientSamplesCBuffer", nutrientSamplesCBuffer);
-        computeShaderNutrientMap.SetTexture(kernelCSGetNutrientSamples, "nutrientMapRead", nutrientMapRT1);
-        computeShaderNutrientMap.SetFloat("_MapSize", mapSize);
-        computeShaderNutrientMap.Dispatch(kernelCSGetNutrientSamples, nutrientSamplesCBuffer.count, 1, 1);
-
-        //Vector4[] outArray = new Vector4[_NumAgents];
-        nutrientSamplesCBuffer.GetData(nutrientSamplesArray); // Disappearing body strokes due to this !?!?!?!?!?
-
-        //Debug.Log("Food: " + nutrientSamplesArray[0].x.ToString());
-        //nutrientSamplesCBuffer.Release();
-        
-        // Read out sample values::::
-    }
-    private float MeasureTotalNutrients() {
-
-        ComputeBuffer outputValuesCBuffer = new ComputeBuffer(1, sizeof(float) * 4);  // holds the result of measurement: total sum of pix colors in texture
-        Vector4[] outputValuesArray = new Vector4[1];
-
-        // 32 --> 16:
-        int kernelCSMeasureTotalNutrients = computeShaderNutrientMap.FindKernel("CSMeasureTotalNutrients");   
-        computeShaderNutrientMap.SetBuffer(kernelCSMeasureTotalNutrients, "outputValuesCBuffer", outputValuesCBuffer);
-        computeShaderNutrientMap.SetTexture(kernelCSMeasureTotalNutrients, "measureValuesTex", nutrientMapRT1);
-        computeShaderNutrientMap.SetTexture(kernelCSMeasureTotalNutrients, "pooledResultTex", tempTex16);
-        computeShaderNutrientMap.Dispatch(kernelCSMeasureTotalNutrients, 16, 16, 1);
-        // 16 --> 8:
-        computeShaderNutrientMap.SetBuffer(kernelCSMeasureTotalNutrients, "outputValuesCBuffer", outputValuesCBuffer);
-        computeShaderNutrientMap.SetTexture(kernelCSMeasureTotalNutrients, "measureValuesTex", tempTex16);
-        computeShaderNutrientMap.SetTexture(kernelCSMeasureTotalNutrients, "pooledResultTex", tempTex8);
-        computeShaderNutrientMap.Dispatch(kernelCSMeasureTotalNutrients, 8, 8, 1);
-        // 8 --> 4:
-        computeShaderNutrientMap.SetBuffer(kernelCSMeasureTotalNutrients, "outputValuesCBuffer", outputValuesCBuffer);
-        computeShaderNutrientMap.SetTexture(kernelCSMeasureTotalNutrients, "measureValuesTex", tempTex8);
-        computeShaderNutrientMap.SetTexture(kernelCSMeasureTotalNutrients, "pooledResultTex", tempTex4);
-        computeShaderNutrientMap.Dispatch(kernelCSMeasureTotalNutrients, 4, 4, 1);        
-        // 4 --> 2:
-        computeShaderNutrientMap.SetBuffer(kernelCSMeasureTotalNutrients, "outputValuesCBuffer", outputValuesCBuffer);
-        computeShaderNutrientMap.SetTexture(kernelCSMeasureTotalNutrients, "measureValuesTex", tempTex4);
-        computeShaderNutrientMap.SetTexture(kernelCSMeasureTotalNutrients, "pooledResultTex", tempTex2);
-        computeShaderNutrientMap.Dispatch(kernelCSMeasureTotalNutrients, 2, 2, 1);
-        // 2 --> 1:
-        computeShaderNutrientMap.SetBuffer(kernelCSMeasureTotalNutrients, "outputValuesCBuffer", outputValuesCBuffer);
-        computeShaderNutrientMap.SetTexture(kernelCSMeasureTotalNutrients, "measureValuesTex", tempTex2);
-        computeShaderNutrientMap.SetTexture(kernelCSMeasureTotalNutrients, "pooledResultTex", tempTex1);
-        computeShaderNutrientMap.Dispatch(kernelCSMeasureTotalNutrients, 1, 1, 1);
-        
-        outputValuesCBuffer.GetData(outputValuesArray);
-
-        curGlobalNutrients = outputValuesArray[0].x;
-
-        outputValuesCBuffer.Release();
-
-        //Debug.Log("TotalNutrients: " + outputValuesArray[0].x.ToString() + ", " + outputValuesArray[0].y.ToString());
-
-        return outputValuesArray[0].x;
-    }     
-    private void AddNutrientsAtCoords(float amount, int x, int y) {
-        if(curGlobalNutrients < 128f) {
-            ComputeBuffer addNutrientsCBuffer = new ComputeBuffer(1, sizeof(float) * 4);
-            Vector4[] addNutrientsArray = new Vector4[1];
-            addNutrientsArray[0] = new Vector4(amount, (float)x / 32f, (float)y / 32f, 1f);
-            addNutrientsCBuffer.SetData(addNutrientsArray);
-
-            int kernelCSAddNutrientsAtCoords = computeShaderNutrientMap.FindKernel("CSAddNutrientsAtCoords");
-            computeShaderNutrientMap.SetBuffer(kernelCSAddNutrientsAtCoords, "addNutrientsCBuffer", addNutrientsCBuffer);        
-            computeShaderNutrientMap.SetTexture(kernelCSAddNutrientsAtCoords, "nutrientMapRead", nutrientMapRT1);
-            computeShaderNutrientMap.SetTexture(kernelCSAddNutrientsAtCoords, "nutrientMapWrite", nutrientMapRT2);
-            computeShaderNutrientMap.Dispatch(kernelCSAddNutrientsAtCoords, addNutrientsCBuffer.count, 1, 1);
-        
-            Graphics.Blit(nutrientMapRT2, nutrientMapRT1);
-
-            addNutrientsCBuffer.Release();
-        }
-        else {
-            Debug.Log("Can't add nutrients, exceeds max level");
-        }
-
-        
-    }
-    private void RemoveEatenNutrients() {
-        ComputeBuffer eatAmountsCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 4);
-                
-        eatAmountsCBuffer.SetData(nutrientEatAmountsArray);
-
-        int kernelCSRemoveNutrientsAtLocations = computeShaderNutrientMap.FindKernel("CSRemoveNutrientsAtLocations");
-        computeShaderNutrientMap.SetBuffer(kernelCSRemoveNutrientsAtLocations, "nutrientEatAmountsCBuffer", eatAmountsCBuffer);
-        computeShaderNutrientMap.SetBuffer(kernelCSRemoveNutrientsAtLocations, "critterSimDataCBuffer", simStateData.critterSimDataCBuffer);
-        computeShaderNutrientMap.SetTexture(kernelCSRemoveNutrientsAtLocations, "nutrientMapRead", nutrientMapRT1);
-        computeShaderNutrientMap.SetTexture(kernelCSRemoveNutrientsAtLocations, "nutrientMapWrite", nutrientMapRT2);
-        computeShaderNutrientMap.SetFloat("_MapSize", mapSize);
-        computeShaderNutrientMap.Dispatch(kernelCSRemoveNutrientsAtLocations, eatAmountsCBuffer.count, 1, 1);
-
-        Graphics.Blit(nutrientMapRT2, nutrientMapRT1);
-        
-        eatAmountsCBuffer.Release();
-    }
-    private void ReviveSelectFoodParticles(int[] indicesArray, float radius, Vector4 spawnCoords) {
-
-        ComputeBuffer selectRespawnFoodParticleIndicesCBuffer = new ComputeBuffer(indicesArray.Length, sizeof(int));
-        selectRespawnFoodParticleIndicesCBuffer.SetData(indicesArray);
-        //selectRespawnFoodParticleIndicesCBuffer
-
-        int kernelCSReviveSelectFoodParticles = computeShaderFoodParticles.FindKernel("CSReviveSelectFoodParticles");
-        computeShaderFoodParticles.SetBuffer(kernelCSReviveSelectFoodParticles, "critterSimDataCBuffer", simStateData.critterSimDataCBuffer);
-        computeShaderFoodParticles.SetBuffer(kernelCSReviveSelectFoodParticles, "selectRespawnFoodParticleIndicesCBuffer", selectRespawnFoodParticleIndicesCBuffer);
-        
-        computeShaderFoodParticles.SetFloat("_MapSize", _MapSize);
-        computeShaderFoodParticles.SetFloat("_Time", Time.realtimeSinceStartup);
-        computeShaderFoodParticles.SetVector("_FoodSprinklePos", spawnCoords);
-        computeShaderFoodParticles.SetFloat("_FoodSprinkleRadius", radius);
-        computeShaderFoodParticles.SetBuffer(kernelCSReviveSelectFoodParticles, "foodParticlesWrite", foodParticlesCBufferSwap);
-        computeShaderFoodParticles.Dispatch(kernelCSReviveSelectFoodParticles, indicesArray.Length, 1, 1);
-       
-
-        selectRespawnFoodParticleIndicesCBuffer.Release();
-    }
-    private void RespawnFoodParticles() {
-        // Go through foodParticleData and check for inactive
-        // determined by current total food -- done!
-        // if flag on shader for Respawn is on, set to active and initialize
-
-        float maxFoodParticleTotal = settingsManager.maxFoodParticleTotalAmount;
-
-        int kernelCSRespawnFoodParticles = computeShaderFoodParticles.FindKernel("CSRespawnFoodParticles");
-        computeShaderFoodParticles.SetBuffer(kernelCSRespawnFoodParticles, "critterSimDataCBuffer", simStateData.critterSimDataCBuffer);
-        computeShaderFoodParticles.SetBuffer(kernelCSRespawnFoodParticles, "foodParticlesRead", foodParticlesCBuffer);
-        computeShaderFoodParticles.SetBuffer(kernelCSRespawnFoodParticles, "foodParticlesWrite", foodParticlesCBufferSwap);
-        computeShaderFoodParticles.SetTexture(kernelCSRespawnFoodParticles, "velocityRead", environmentFluidManager._VelocityA);        
-        computeShaderFoodParticles.SetTexture(kernelCSRespawnFoodParticles, "altitudeRead", theRenderKing.baronVonTerrain.terrainHeightMap);
-        computeShaderFoodParticles.SetTexture(kernelCSRespawnFoodParticles, "_SpawnDensityMap", nutrientMapRT1);
-        computeShaderFoodParticles.SetFloat("_MapSize", mapSize);
-            
-        //computeShaderFoodParticles.SetFloat("_RespawnFoodParticles", 1f);
-        computeShaderFoodParticles.SetFloat("_Time", Time.realtimeSinceStartup);
-
-        if(foodParticleMeasurementTotalsData[0].foodAmount < maxFoodParticleTotal) {
-            computeShaderFoodParticles.SetFloat("_RespawnFoodParticles", 1f);                       
-        }
-        else {
-            computeShaderFoodParticles.SetFloat("_RespawnFoodParticles", 0f);      
-        }
-
-        float minParticleSize = settingsManager.avgFoodParticleRadius / settingsManager.foodParticleRadiusVariance;
-        float maxParticleSize = settingsManager.avgFoodParticleRadius * settingsManager.foodParticleRadiusVariance;
-
-        computeShaderFoodParticles.SetFloat("_MinParticleSize", minParticleSize);   
-        computeShaderFoodParticles.SetFloat("_MaxParticleSize", maxParticleSize);      
-        computeShaderFoodParticles.SetFloat("_ParticleNutrientDensity", settingsManager.foodParticleNutrientDensity);
-        computeShaderFoodParticles.SetFloat("_FoodParticleRegrowthRate", settingsManager.foodParticleRegrowthRate);
-
-        computeShaderFoodParticles.Dispatch(kernelCSRespawnFoodParticles, 1, 1, 1);
-                
-
-        // Copy/Swap Food Particle Buffer:
-        int kernelCSCopyFoodParticlesBuffer = computeShaderFoodParticles.FindKernel("CSCopyFoodParticlesBuffer");
-        computeShaderFoodParticles.SetBuffer(kernelCSCopyFoodParticlesBuffer, "foodParticlesRead", foodParticlesCBufferSwap);
-        computeShaderFoodParticles.SetBuffer(kernelCSCopyFoodParticlesBuffer, "foodParticlesWrite", foodParticlesCBuffer);        
-        computeShaderFoodParticles.Dispatch(kernelCSCopyFoodParticlesBuffer, 1, 1, 1);
-        
-        
-    }
-    private void EatSelectedFoodParticles() {  // removes gpu particle & sends consumption data back to CPU
-        // Use CritterSimData to determine critter mouth locations
-
-        // run through all foodParticles, check against each critter position, then measure min value with recursive reduction:
-
-        // Need to update CritterSim&InitData structs to have more mouth/bite info
-
-        // Record how much food successfully eaten per Critter
-
-        int kernelCSEatSelectedFoodParticles = computeShaderFoodParticles.FindKernel("CSEatSelectedFoodParticles");
-        computeShaderFoodParticles.SetBuffer(kernelCSEatSelectedFoodParticles, "critterInitDataCBuffer", simStateData.critterInitDataCBuffer);
-        computeShaderFoodParticles.SetBuffer(kernelCSEatSelectedFoodParticles, "critterSimDataCBuffer", simStateData.critterSimDataCBuffer);
-        computeShaderFoodParticles.SetBuffer(kernelCSEatSelectedFoodParticles, "foodParticlesRead", foodParticlesCBuffer);
-        computeShaderFoodParticles.SetBuffer(kernelCSEatSelectedFoodParticles, "foodParticlesWrite", foodParticlesCBufferSwap);
-        computeShaderFoodParticles.SetBuffer(kernelCSEatSelectedFoodParticles, "foodParticlesEatAmountsCBuffer", foodParticlesEatAmountsCBuffer);        
-        computeShaderFoodParticles.SetBuffer(kernelCSEatSelectedFoodParticles, "closestParticlesDataCBuffer", closestFoodParticlesDataCBuffer);  
-        computeShaderFoodParticles.SetTexture(kernelCSEatSelectedFoodParticles, "critterDistancesRead", foodParticlesNearestCritters1);
-        computeShaderFoodParticles.Dispatch(kernelCSEatSelectedFoodParticles, simStateData.critterSimDataCBuffer.count, 1, 1);
-
-        foodParticlesEatAmountsCBuffer.GetData(foodParticlesEatAmountsArray);
-
-        float totalFoodEaten = 0f;
-        for(int i = 0; i < foodParticlesEatAmountsCBuffer.count; i++) {
-            totalFoodEaten += foodParticlesEatAmountsArray[i];
-        }
-        //Debug.Log("EatenFoodParticle: " + totalFoodEaten.ToString());
-
-        //int kernelCSRemoveEatenFoodParticles = computeShaderFoodParticles.FindKernel("CSRemoveEatenFoodParticles");
-        //computeShaderFoodParticles.SetBuffer(kernelCSRemoveEatenFoodParticles, "foodParticlesWrite", foodParticlesCBuffer);
-        //computeShaderFoodParticles.SetBuffer(kernelCSRemoveEatenFoodParticles, "foodParticlesEatAmountsRead", foodParticlesEatAmountsCBuffer);
-        //computeShaderFoodParticles.Dispatch(kernelCSRemoveEatenFoodParticles, simStateData.critterSimDataCBuffer.count, 1, 1);
-
-        // Copy/Swap Food PArticle Buffer:
-        int kernelCSCopyFoodParticlesBuffer = computeShaderFoodParticles.FindKernel("CSCopyFoodParticlesBuffer");
-        computeShaderFoodParticles.SetBuffer(kernelCSCopyFoodParticlesBuffer, "foodParticlesRead", foodParticlesCBufferSwap);
-        computeShaderFoodParticles.SetBuffer(kernelCSCopyFoodParticlesBuffer, "foodParticlesWrite", foodParticlesCBuffer);
-        computeShaderFoodParticles.Dispatch(kernelCSCopyFoodParticlesBuffer, 1, 1, 1);
-    }
-    private void FindClosestFoodParticleToCritters() {  // need to send info on closest particle pos/dir/amt back to CPU also
-        
-        // Populate main RenderTexture with distances for each foodParticle to each Critter:
-
-        int kernelCSMeasureInitCritterDistances = computeShaderFoodParticles.FindKernel("CSMeasureInitCritterDistances");
-        computeShaderFoodParticles.SetBuffer(kernelCSMeasureInitCritterDistances, "critterSimDataCBuffer", simStateData.critterSimDataCBuffer);
-        computeShaderFoodParticles.SetBuffer(kernelCSMeasureInitCritterDistances, "critterInitDataCBuffer", simStateData.critterInitDataCBuffer);
-        computeShaderFoodParticles.SetBuffer(kernelCSMeasureInitCritterDistances, "foodParticlesRead", foodParticlesCBuffer);
-        //computeShaderFoodParticles.SetBuffer(kernelCSMeasureInitCritterDistances, "foodParticlesWrite", foodParticlesCBufferSwap);
-        computeShaderFoodParticles.SetTexture(kernelCSMeasureInitCritterDistances, "foodParticlesNearestCrittersRT", foodParticlesNearestCritters1024);        
-        computeShaderFoodParticles.Dispatch(kernelCSMeasureInitCritterDistances, foodParticlesCBuffer.count / 1024, simStateData.critterSimDataCBuffer.count, 1);
-        
-        // Reduce from 1024 --> 32 particles per critter:
-        int kernelCSReduceCritterDistances32 = computeShaderFoodParticles.FindKernel("CSReduceCritterDistances32");
-        computeShaderFoodParticles.SetTexture(kernelCSReduceCritterDistances32, "critterDistancesRead", foodParticlesNearestCritters1024);
-        computeShaderFoodParticles.SetTexture(kernelCSReduceCritterDistances32, "critterDistancesWrite", foodParticlesNearestCritters32);
-        computeShaderFoodParticles.SetBuffer(kernelCSMeasureInitCritterDistances, "foodParticlesRead", foodParticlesCBuffer);
-        //computeShaderFoodParticles.SetBuffer(kernelCSMeasureInitCritterDistances, "foodParticlesWrite", foodParticlesCBuffer);
-        //computeShaderFoodParticles.SetBuffer(kernelCSReduceCritterDistances32, "closestParticlesDataCBuffer", closestFoodParticlesDataCBuffer);
-        computeShaderFoodParticles.Dispatch(kernelCSReduceCritterDistances32, 32, simStateData.critterSimDataCBuffer.count, 1);
-
-        // Reduce from 32 --> 1 particles per critter:
-        //int kernelCSReduceCritterDistances1 = computeShaderFoodParticles.FindKernel("CSReduceCritterDistances32");
-        computeShaderFoodParticles.SetTexture(kernelCSReduceCritterDistances32, "critterDistancesRead", foodParticlesNearestCritters32);
-        computeShaderFoodParticles.SetTexture(kernelCSReduceCritterDistances32, "critterDistancesWrite", foodParticlesNearestCritters1);
-        computeShaderFoodParticles.SetBuffer(kernelCSReduceCritterDistances32, "foodParticlesRead", foodParticlesCBuffer);
-        //computeShaderFoodParticles.SetBuffer(kernelCSReduceCritterDistances32, "foodParticlesWrite", foodParticlesCBufferSwap);
-        computeShaderFoodParticles.SetBuffer(kernelCSReduceCritterDistances32, "closestParticlesDataCBuffer", closestFoodParticlesDataCBuffer);
-        computeShaderFoodParticles.Dispatch(kernelCSReduceCritterDistances32, 1, simStateData.critterSimDataCBuffer.count, 1);
-
-        closestFoodParticlesDataCBuffer.GetData(closestFoodParticlesDataArray);
-
-        //Debug.Log("ClosestFoodParticle: " + closestFoodParticlesDataArray[0].index.ToString() + ", " + closestFoodParticlesDataArray[0].worldPos.ToString() + ", amt: " + closestFoodParticlesDataArray[0].foodAmount.ToString());
-    }
-    private void MeasureTotalFoodParticlesAmount() {
-
-        //FoodParticleData[] readout1024 = new FoodParticleData[1024];
-        //foodParticlesCBuffer.GetData(readout1024);
-        //int pi = 0;
-        //Debug.Log("1024 Buffer[0] index: " + readout1024[pi].index.ToString() + ", rad: " + readout1024[pi].radius.ToString() + ", pos: " + readout1024[pi].worldPos.ToString() + ", food Amount: " + readout1024[pi].foodAmount.ToString());
-        // pool values 32x reduction:
-        // 1024 --> 32
-        int kernelCSMeasureTotalFoodParticlesAmount = computeShaderFoodParticles.FindKernel("CSMeasureTotalFoodParticlesAmount");
-        computeShaderFoodParticles.SetBuffer(kernelCSMeasureTotalFoodParticlesAmount, "foodParticlesRead", foodParticlesCBuffer);
-        computeShaderFoodParticles.SetBuffer(kernelCSMeasureTotalFoodParticlesAmount, "foodParticlesWrite", foodParticlesMeasure32);
-         
-        // DISPATCH !!!
-        computeShaderFoodParticles.Dispatch(kernelCSMeasureTotalFoodParticlesAmount, 32, 1, 1);
-        
-        //FoodParticleData[] readout32 = new FoodParticleData[32];
-        //foodParticlesMeasure32.GetData(readout32);
-        //Debug.Log("32 Buffer[0] index: " + readout32[pi].index.ToString() + ", rad: " + readout32[pi].radius.ToString() + ", pos: " + readout32[pi].worldPos.ToString() + ", food Amount: " + readout32[pi].foodAmount.ToString());
-        
-        
-        // +++++++++++++++++++++++++++++++
-        // 32 --> 1 entry - totals
-        
-        computeShaderFoodParticles.SetBuffer(kernelCSMeasureTotalFoodParticlesAmount, "foodParticlesRead", foodParticlesMeasure32);
-        computeShaderFoodParticles.SetBuffer(kernelCSMeasureTotalFoodParticlesAmount, "foodParticlesWrite", foodParticlesMeasure1);
-        computeShaderFoodParticles.Dispatch(kernelCSMeasureTotalFoodParticlesAmount, 1, 1, 1);
-        
-        //FoodParticleData[] readout1 = new FoodParticleData[1];
-        //foodParticlesMeasure1.GetData(readout1);
-        //Debug.Log("1 Buffer[0] index: " + readout1[pi].index.ToString() + ", rad: " + readout1[pi].radius.ToString() + ", pos: " + readout1[pi].worldPos.ToString() + ", food Amount: " + readout1[pi].foodAmount.ToString());
-
-        foodParticlesMeasure1.GetData(foodParticleMeasurementTotalsData);
-        curGlobalFoodParticles = foodParticleMeasurementTotalsData[0].foodAmount;
-
-        //curGlobalFoodParticles = readout1[0].foodAmount;
-
-        /*
-        
-        //Debug.Log("total food particle nutrients: " + curGlobalFoodParticles.ToString());
-        
-        
-        */
-        //Debug.Log("1 Buffer[0]: " + foodParticleMeasurementTotalsData[0].foodAmount.ToString());
-    }
+    
     public void PlayerToolStirOn(Vector3 origin, Vector2 forceVector, float radiusMult) {
         float magnitude = forceVector.magnitude;
         if(magnitude == 0f) {
@@ -1183,116 +727,26 @@ public class SimulationManager : MonoBehaviour {
         for(int i = 0; i < respawnIndices.Length; i++) {
             respawnIndices[i] = UnityEngine.Random.Range(0, 1024);
         }
-        ReviveSelectFoodParticles(respawnIndices, 1.25f, new Vector4(pos.x / _MapSize, pos.y / _MapSize, 0f, 0f));
+        foodManager.ReviveSelectFoodParticles(respawnIndices, 1.25f, new Vector4(pos.x / _MapSize, pos.y / _MapSize, 0f, 0f), simStateData);
     }
     public void PlayerFeedToolPour(Vector3 pos) {        
-        int xCoord = Mathf.RoundToInt(pos.x / 256f * nutrientMapResolution);
-        int yCoord = Mathf.RoundToInt(pos.y / 256f * nutrientMapResolution);
+        int xCoord = Mathf.RoundToInt(pos.x / 256f * foodManager.nutrientMapResolution);
+        int yCoord = Mathf.RoundToInt(pos.y / 256f * foodManager.nutrientMapResolution);
 
         Debug.Log("PlayerFeedToolPour pos: " + xCoord.ToString() + ", " + yCoord.ToString());
 
-        AddNutrientsAtCoords(5f, xCoord, yCoord);
+        foodManager.AddNutrientsAtCoords(5f, xCoord, yCoord);
 
         int[] respawnIndices = new int[32];
         for(int i = 0; i < respawnIndices.Length; i++) {
             respawnIndices[i] = UnityEngine.Random.Range(0, 1024);
         }
-        ReviveSelectFoodParticles(respawnIndices, 6f, new Vector4(pos.x / _MapSize, pos.y / _MapSize, 0f, 0f));
+        foodManager.ReviveSelectFoodParticles(respawnIndices, 6f, new Vector4(pos.x / _MapSize, pos.y / _MapSize, 0f, 0f), simStateData);
     }
     public void ChangeGlobalMutationRate(float normalizedVal) {
         settingsManager.SetGlobalMutationRate(normalizedVal);
     }
-
-    /*private void UpdateFoodGrid() {
-        float totalFoodLayer0 = 0f;
-        
-        for(int x = 0; x < foodGridResolution; x++) {
-                        
-            // for each cell:
-            for (int y = 0; y < foodGridResolution; y++) {
-
-                // cell[x,y]:
-                int leftIndex = x - 1;
-                if(leftIndex < 0) {
-                    leftIndex = 0;
-                }
-                int rightIndex = x + 1;
-                if(rightIndex >= foodGridResolution) {
-                    rightIndex = foodGridResolution - 1;
-                }
-                int downIndex = y - 1;
-                if(downIndex < 0) {
-                    downIndex = 0;
-                }
-                int upIndex = y + 1;
-                if(upIndex >= foodGridResolution) {
-                    upIndex = foodGridResolution - 1;
-                }
-
-                float amountRight = foodGrid[rightIndex][y].foodAmountsPerLayerArray[0];
-                float amountLeft = foodGrid[leftIndex][y].foodAmountsPerLayerArray[0];
-                float amountUp = foodGrid[x][upIndex].foodAmountsPerLayerArray[0];
-                float amountDown = foodGrid[x][downIndex].foodAmountsPerLayerArray[0];
-                float amountCenter = foodGrid[x][y].foodAmountsPerLayerArray[0];
-
-                float deltaX = amountRight - amountLeft;
-                float deltaY = amountUp - amountDown;
-
-                Vector2 grad = new Vector2(deltaX, deltaY).normalized;
-
-                foodGrid[x][y].gradientFoodAmountsPerLayerArray[0] = grad;
-
-                foodGridSwapArray[x][y] = Mathf.Lerp(amountCenter, (amountCenter + amountRight + amountLeft + amountUp + amountDown)  / 5f, 0.01f);
-
-                totalFoodLayer0 += foodGrid[x][y].foodAmountsPerLayerArray[0];
-                // ^^^^ HAVE TO DO THIS FOR EACH FOOD SIZE LAYER!!! ^^^^^ **********************
-                                
-            }
-        }
-        for(int x = 0; x < foodGridResolution; x++) {                        
-            // for each cell:
-            for (int y = 0; y < foodGridResolution; y++) {
-                foodGrid[x][y].foodAmountsPerLayerArray[0] = foodGridSwapArray[x][y];
-
-                // COLOR: TEMP:::
-                Color pixelColor = new Color(foodGridSwapArray[x][y], foodGridSwapArray[x][y], foodGridSwapArray[x][y], 1);
-                debugFoodTexture.SetPixel(x, y, pixelColor);
-            }
-        }
-        debugFoodTexture.Apply();        
-        
-        float spawnNewFoodChance = 0.125f;
-        float spawnFoodPercentage = UnityEngine.Random.Range(0f, 1f);
-        float maxGlobalFood = foodGridResolution * foodGridResolution * 0.25f * 0.075f;
-
-        if(totalFoodLayer0 < maxGlobalFood) {
-            float randRoll = UnityEngine.Random.Range(0f, 1f);
-            if(randRoll < spawnNewFoodChance) {
-                // pick random cell:
-                int randX = UnityEngine.Random.Range(0, foodGridResolution - 1);
-                int randY = UnityEngine.Random.Range(0, foodGridResolution - 1);
-
-                float foodAvailable = maxGlobalFood - totalFoodLayer0;
-
-                float newFoodAmount = foodAvailable * spawnFoodPercentage;
-
-                foodGrid[randX][randY].foodAmountsPerLayerArray[0] += newFoodAmount;
-
-                //Debug.Log("ADDED FOOD! GridCell[" + randX.ToString() + "][" + randY.ToString() + "]: " + newFoodAmount.ToString());
-            }
-        }
-        
-        for(int i = 0; i < foodGrid.Length; i++) {
-            int xIndex = i % foodGridResolution;
-            int yIndex = Mathf.FloorToInt((float)i / (float)foodGridResolution);
-
-            // Calculate Empirical Gradient:
-            if(xIndex - 1 < 0) {
-                leftIndex = 0;
-            }
-            int leftIndex = yIndex * foodGridResolution + (xIndex - 1);
-        }
-    }*/
+    
     private void PopulateGridCells() {
 
         // Inefficient!!!
@@ -1320,17 +774,7 @@ public class SimulationManager : MonoBehaviour {
             mapGridCellArray[xCoord][yCoord].eggSackIndicesList.Add(f);
                        
         }
-        /*for(int a = 0; a < foodDeadAnimalArray.Length; a++) {  // DEAD ANIMALS!!!
-            float xPos = foodDeadAnimalArray[a].transform.position.x;
-            float yPos = foodDeadAnimalArray[a].transform.position.y;
-            int xCoord = Mathf.FloorToInt(xPos / mapSize * (float)agentGridCellResolution);
-            int yCoord = Mathf.FloorToInt(yPos / mapSize * (float)agentGridCellResolution);
-            xCoord = Mathf.Clamp(xCoord, 0, agentGridCellResolution - 1);
-            yCoord = Mathf.Clamp(yCoord, 0, agentGridCellResolution - 1);
-
-            mapGridCellArray[xCoord][yCoord].deadAnimalIndicesList.Add(a);
-        }*/
-
+        
         // FRIENDS::::::
         for (int a = 0; a < agentsArray.Length; a++) {
             float xPos = agentsArray[a].bodyGO.transform.position.x;
@@ -1342,18 +786,7 @@ public class SimulationManager : MonoBehaviour {
 
             mapGridCellArray[xCoord][yCoord].agentIndicesList.Add(a);
         }
-
-        // PREDATORS !!! :::::::
-        /*for (int p = 0; p < predatorArray.Length; p++) {
-            float xPos = predatorArray[p].transform.position.x;
-            float yPos = predatorArray[p].transform.position.y;
-            int xCoord = Mathf.FloorToInt(xPos / mapSize * (float)agentGridCellResolution);
-            int yCoord = Mathf.FloorToInt(yPos / mapSize * (float)agentGridCellResolution);
-            xCoord = Mathf.Clamp(xCoord, 0, agentGridCellResolution - 1);
-            yCoord = Mathf.Clamp(yCoord, 0, agentGridCellResolution - 1);
-
-            mapGridCellArray[xCoord][yCoord].predatorIndicesList.Add(p);
-        }*/
+        
     }
     private void HookUpModules() {
                 
@@ -1376,10 +809,7 @@ public class SimulationManager : MonoBehaviour {
             float nearestEnemyAgentSqDistance = float.PositiveInfinity;
             int closestEggSackIndex = -1; // default to -1??? ***            
             float nearestFoodDistance = float.PositiveInfinity;
-            //int closestPredIndex = 0; // default to 0???
-            //float nearestPredDistance = float.PositiveInfinity;
-
-           // bool closestFoodIsDeadAnimal = false;
+            
 
             int ownSpeciesIndex = Mathf.FloorToInt((float)a / (float)numAgents * (float)numSpecies);
 
@@ -1444,37 +874,7 @@ public class SimulationManager : MonoBehaviour {
                     } 
                 }                             
             }
-            /*
-            for (int i = 0; i < mapGridCellArray[xCoord][yCoord].deadAnimalIndicesList.Count; i++) {
-                // DEAD ANIMALS!!!:
-                if(foodDeadAnimalArray[mapGridCellArray[xCoord][yCoord].deadAnimalIndicesList[i]].enabled) { // if enabled:
-                    if(foodDeadAnimalArray[mapGridCellArray[xCoord][yCoord].deadAnimalIndicesList[i]].curLifeStage == FoodChunk.FoodLifeStage.Mature) {
-                        //Debug.Log("Found valid Food!");
-                        Vector2 foodPos = new Vector2(foodDeadAnimalArray[mapGridCellArray[xCoord][yCoord].deadAnimalIndicesList[i]].transform.localPosition.x, foodDeadAnimalArray[mapGridCellArray[xCoord][yCoord].deadAnimalIndicesList[i]].transform.localPosition.y);
-                        float distFood = (foodPos - agentPos).magnitude - (foodDeadAnimalArray[mapGridCellArray[xCoord][yCoord].deadAnimalIndicesList[i]].curSize.magnitude + 1f) * 0.5f;  // subtract food & agent radii
-                        if (distFood <= nearestFoodDistance) { // if now the closest so far, update index and dist:
-                            if (a != mapGridCellArray[xCoord][yCoord].deadAnimalIndicesList[i]) {  // make sure it doesn't consider itself:
-                                closestFoodIndex = mapGridCellArray[xCoord][yCoord].deadAnimalIndicesList[i];
-                                nearestFoodDistance = distFood;
-                                closestFoodIsDeadAnimal = true;
-                            }
-                        }
-                    } 
-                }                             
-            }
-            */
-
-            /*for (int i = 0; i < mapGridCellArray[xCoord][yCoord].predatorIndicesList.Count; i++) {
-                // PREDATORS:::::::
-                Vector2 predatorPos = new Vector2(predatorArray[mapGridCellArray[xCoord][yCoord].predatorIndicesList[i]].transform.localPosition.x, predatorArray[mapGridCellArray[xCoord][yCoord].predatorIndicesList[i]].transform.localPosition.y);
-                float distPred = (predatorPos - agentPos).magnitude - (predatorArray[mapGridCellArray[xCoord][yCoord].predatorIndicesList[i]].curScale + 1f) * 0.5f;  // subtract pred & agent radii;
-                if (distPred <= nearestPredDistance) { // if now the closest so far, update index and dist:
-                    if (a != mapGridCellArray[xCoord][yCoord].predatorIndicesList[i]) {  // make sure it doesn't consider itself:
-                        closestPredIndex = mapGridCellArray[xCoord][yCoord].predatorIndicesList[i];
-                        nearestPredDistance = distPred;
-                    }
-                }
-            }*/
+            
             // Set proper references between AgentBrains and Environment/Game Objects:::
             // ***** DISABLED!!!! *** NEED TO RE_IMPLEMENT THIS LATER!!!! ********************************************
             agentsArray[a].coreModule.nearestFriendAgent = agentsArray[closestFriendIndex];
@@ -1491,12 +891,7 @@ public class SimulationManager : MonoBehaviour {
             //agentsArray[a].coreModule.nearestPredatorModule = predatorArray[closestPredIndex];            
         }
     }
-    /*private void CheckForRecordPlayerScore() {
-        // Check for Record Agent AGE!
-        if (agentsArray[0].scoreCounter > recordPlayerAge) {
-            recordPlayerAge = agentsArray[0].scoreCounter;
-        }
-    }*/
+    
     private void CheckForDevouredEggSacks() { // *** revisit
         // CHECK FOR DEAD FOOD!!! :::::::
         for (int f = 0; f < eggSackArray.Length; f++) {
@@ -1504,12 +899,6 @@ public class SimulationManager : MonoBehaviour {
                 ProcessDeadEggSack(f);
             }
         }
-
-        /*for (int a = 0; a < foodDeadAnimalArray.Length; a++) {
-            if (foodDeadAnimalArray[a].isDepleted) {
-                foodDeadAnimalArray[a].gameObject.SetActive(false);
-            }
-        }*/
     }
     private void CheckForNullAgents() { 
         for (int a = 0; a < agentsArray.Length; a++) {
@@ -1579,7 +968,7 @@ public class SimulationManager : MonoBehaviour {
     
         
     // AFTER PHYSX!!!
-    private void OnTriggerEnter2D(Collider2D collision) {
+    /*private void OnTriggerEnter2D(Collider2D collision) {
         TriggerTestOrder();
     }
     private void OnTriggerStay2D(Collider2D collision) {
@@ -1587,44 +976,42 @@ public class SimulationManager : MonoBehaviour {
     }
     private void TriggerTestOrder() {
         
-
         //Vector3 agentPos = playerAgent.testModule.ownRigidBody2D.position;
         //Debug.Log("OnTriggerStay2D AgentPos: (" + agentPos.x.ToString() + ", " + agentPos.y.ToString() + ") Time: " + Time.realtimeSinceStartup.ToString());
-    }
+    }*/
     
     #endregion
 
     #region Process Events // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& PROCESS EVENTS! &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-    /*public void ReviveFood(int index) {
-        Vector3 startPos = new Vector3(UnityEngine.Random.Range(-36f, 36f), UnityEngine.Random.Range(-36f, 36f), 0f);
-        foodArray[index].transform.localPosition = startPos;
-        foodArray[index].Respawn();
-    }*/ // *** confirm these are set up alright
-    /*public void RevivePredator(int index) {
-        Vector3 startPos = GetRandomPredatorSpawnPosition(); // new Vector3(UnityEngine.Random.Range(-36f, 36f), UnityEngine.Random.Range(-36f, 36f), 0f);
-        predatorArray[index].transform.localPosition = startPos;
-        predatorArray[index].InitializePredator();
-        
-    }*/ // *** confirm these are set up alright      
+    
+    // *** confirm these are set up alright      
     public void ProcessNullAgent(int agentIndex) {
-                        
+
+        // Now, this function should:
+        // -- look up the connected CandidateGenome
+        // -- save its fitness score
+        // -- check if it has finished all of its evaluations
+        // -- if it has, then push the candidate to Leaderboard List so it is eligible for reproduction
+        // -- Clear Agent object so that it's ready to be reused
+
+        // -- Check for spawning new agent? Or leave that separate?              
+        
         CheckForRecordAgentScore(agentIndex);
         ProcessAgentScores(agentIndex);
         // Updates rankedIndicesArray[] so agents are ordered by score:
         int speciesIndex = Mathf.FloorToInt((float)agentIndex / (float)numAgents * (float)numSpecies);
         ProcessAndRankAgentFitness(speciesIndex);
-
         int parentGenomeIndex = GetAgentIndexByLottery(rankedFitnessList, rankedIndicesList, speciesIndex);
-
         SetAgentGenomeToMutatedCopyOfParentGenome(agentIndex, agentGenomePoolArray[parentGenomeIndex]);
-
         agentsArray[agentIndex].SetToAwaitingRespawn();
     }
     private void SpawnAgentFromEggSack(int agentIndex, int speciesIndex, EggSack parentEggSack) {
+
+        // Refactor this function to work with new GenomePool architecture!!!
+
         //Debug.Log("SpawnAgentFromEggSack! " + agentIndex.ToString());
         numAgentsBorn++;
         currentOldestAgent = agentsArray[rankedIndicesList[0]].scoreCounter;
-
         agentsArray[agentIndex].InitializeSpawnAgentFromEggSack(agentIndex, agentGenomePoolArray[agentIndex], parentEggSack); // Spawn that genome in dead Agent's body and revive it!
 
         theRenderKing.UpdateAgentWidthsTexture(agentsArray[agentIndex]);
@@ -1632,9 +1019,13 @@ public class SimulationManager : MonoBehaviour {
         agentRespawnCounter[speciesIndex] = 0;        
     }
     private void SpawnAgentImmaculate(int agentIndex, int speciesIndex) {
+
+        // Refactor this function to work with new GenomePool architecture!!!
+
+
+
         numAgentsBorn++;
         currentOldestAgent = agentsArray[rankedIndicesList[0]].scoreCounter;
-
         agentsArray[agentIndex].InitializeSpawnAgentImmaculate(agentIndex, agentGenomePoolArray[agentIndex], GetRandomFoodSpawnPosition()); // Spawn that genome in dead Agent's body and revive it!
 
         theRenderKing.UpdateAgentWidthsTexture(agentsArray[agentIndex]);
@@ -1660,10 +1051,6 @@ public class SimulationManager : MonoBehaviour {
                                 // Able to grow eggs
                                 totalSuitableParentAgents++;
                                 suitableParentAgentsList.Add(i);
-
-                                //if(agentsArray[i].childEggSackRef != null || agentsArray[i].isPregnantAndCarryingEggs) {
-                                //    Debug.Log("UNSUITABLE AGENT FOUND!! egg[" + agentsArray[i].childEggSackRef.index.ToString() + "]  Agent[" + i.ToString() + "]");
-                                //}
                             }
                         }
                     }
@@ -1730,6 +1117,10 @@ public class SimulationManager : MonoBehaviour {
         }
     }
     private void ProcessAgentScores(int agentIndex) {
+
+        // REFACTOR!! This will need to be per-species, updated when leaderboard candidate list is updated
+
+
         numAgentsProcessed++;
         //get species index:
         int speciesIndex = Mathf.FloorToInt((float)agentIndex / (float)_NumAgents * (float)numSpecies);
@@ -1748,6 +1139,7 @@ public class SimulationManager : MonoBehaviour {
         
         float approxGen = (float)numAgentsBorn / (float)(numAgents - 1);
         if (approxGen > curApproxGen) {
+            /*
             Vector4 scores = new Vector4(rollingAverageAgentScoresArray[0], rollingAverageAgentScoresArray[1], rollingAverageAgentScoresArray[2], rollingAverageAgentScoresArray[3]); ;
             statsLifespanEachGenerationList.Add(scores); // ** UPDATE THIS TO SAVE aLLL 4 SCORES!!! ***
             if (rollingAverageAgentScoresArray[speciesIndex] > agentAvgRecordScore) {
@@ -1767,7 +1159,7 @@ public class SimulationManager : MonoBehaviour {
             statsBodySizesEachGenerationList.Add(bodySizes);
 
             statsMutationEachGenerationList.Add(curPlayerMutationRate);
-            statsNutrientsEachGenerationList.Add(new Vector4(curGlobalNutrients, curGlobalFoodParticles, 0f, 0f));
+            statsNutrientsEachGenerationList.Add(new Vector4(foodManager.curGlobalNutrients, foodManager.curGlobalFoodParticles, 0f, 0f));
 
             RefreshGraphTextureLifespan();
             RefreshGraphTextureFoodEaten();
@@ -1775,6 +1167,8 @@ public class SimulationManager : MonoBehaviour {
             RefreshGraphTextureBodySizes();
             RefreshGraphTextureNutrients();
             RefreshGraphTextureMutation();
+            
+            */
 
             UpdateSimulationClimate();
         }
@@ -1782,13 +1176,10 @@ public class SimulationManager : MonoBehaviour {
             if(numAgentsProcessed < 130) {
                 if(numAgentsProcessed % 8 == 0) {
                     //Debug.Log("process Stats!! + " + curApproxGen.ToString() + ", numProcessed: " + numAgentsProcessed.ToString());
+
+                    /*
                     Vector4 scores = new Vector4(rollingAverageAgentScoresArray[0], rollingAverageAgentScoresArray[1], rollingAverageAgentScoresArray[2], rollingAverageAgentScoresArray[3]); ;
                     statsLifespanEachGenerationList[curApproxGen - 1] = scores;
-                    //statsLifespanEachGenerationList.Add(scores); // ** UPDATE THIS TO SAVE aLLL 4 SCORES!!! ***
-                    //if (rollingAverageAgentScoresArray[speciesIndex] > agentAvgRecordScore) {
-                    //    agentAvgRecordScore = rollingAverageAgentScoresArray[speciesIndex];
-                    //}
-                    //curApproxGen++;
                     
                     Vector4 foodEaten = new Vector4(speciesAvgFoodEaten[0], speciesAvgFoodEaten[1], speciesAvgFoodEaten[2], speciesAvgFoodEaten[3]); 
                     statsFoodEatenEachGenerationList[curApproxGen - 1] = foodEaten;
@@ -1801,14 +1192,13 @@ public class SimulationManager : MonoBehaviour {
                     statsBodySizesEachGenerationList[curApproxGen - 1] = bodySizes;
 
                     statsMutationEachGenerationList[curApproxGen - 1] = curPlayerMutationRate;
-                    statsNutrientsEachGenerationList[curApproxGen - 1] = new Vector4(curGlobalNutrients, curGlobalFoodParticles, 0f, 0f);
+                    statsNutrientsEachGenerationList[curApproxGen - 1] = new Vector4(foodManager.curGlobalNutrients, foodManager.curGlobalFoodParticles, 0f, 0f);
 
                     RefreshGraphTextureLifespan();
                     RefreshGraphTextureFoodEaten();
                     RefreshGraphTexturePredation();
                     RefreshGraphTextureBodySizes();
-
-                    //UpdateSimulationClimate();
+                    */
                 }
             }
         }
@@ -1818,27 +1208,23 @@ public class SimulationManager : MonoBehaviour {
         // Inject pre-trained critters
         environmentFluidManager.UpdateSimulationClimate((float)curApproxGen);
     }
-    /*private void RefreshFitnessGraphTexture() {
-        uiManager.RefreshFitnessTexture(fitnessScoresEachGenerationList);
-    }*/
-    
     private void RefreshGraphTextureLifespan() {
-        uiManager.UpdateStatsTextureLifespan(statsLifespanEachGenerationList);
+        //uiManager.UpdateStatsTextureLifespan(statsLifespanEachGenerationList);
     }
     private void RefreshGraphTextureBodySizes() {
-        uiManager.UpdateStatsTextureBodySizes(statsBodySizesEachGenerationList);
+        //uiManager.UpdateStatsTextureBodySizes(statsBodySizesEachGenerationList);
     }
     private void RefreshGraphTextureFoodEaten() {
-        uiManager.UpdateStatsTextureFoodEaten(statsFoodEatenEachGenerationList);
+        //uiManager.UpdateStatsTextureFoodEaten(statsFoodEatenEachGenerationList);
     }
     private void RefreshGraphTexturePredation() {
-        uiManager.UpdateStatsTexturePredation(statsPredationEachGenerationList);
+        //uiManager.UpdateStatsTexturePredation(statsPredationEachGenerationList);
     }
     private void RefreshGraphTextureNutrients() {
-        uiManager.UpdateStatsTextureNutrients(statsNutrientsEachGenerationList);
+        //uiManager.UpdateStatsTextureNutrients(statsNutrientsEachGenerationList);
     }
     private void RefreshGraphTextureMutation() {
-        uiManager.UpdateStatsTextureMutation(statsMutationEachGenerationList);
+        //uiManager.UpdateStatsTextureMutation(statsMutationEachGenerationList);
     }
     private void ProcessAndRankAgentFitness(int speciesIndex) {
         // Measure fitness of all current agents (their genomes, actually)  NOT PLAYER!!!!
@@ -1877,7 +1263,6 @@ public class SimulationManager : MonoBehaviour {
             }
         }
     }
-
     
     private void SetAgentGenomeToMutatedCopyOfParentGenome(int agentIndex, AgentGenome parentGenome) {
 
@@ -1890,83 +1275,10 @@ public class SimulationManager : MonoBehaviour {
         newBodyGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome, settingsManager.mutationSettingsPersistent);
         newBrainGenome.SetToMutatedCopyOfParentGenome(parentBrainGenome, settingsManager.mutationSettingsPersistent);
         
-        agentGenomePoolArray[agentIndex].bodyGenome = newBodyGenome; // = GetMutatedCopyOfAgentGenome(agentGenomePoolArray[parentGenomeIndex]);
-        agentGenomePoolArray[agentIndex].brainGenome = newBrainGenome; 
-
-            //int parentGenomeIndex = GetAgentIndexByLottery(rankedFitnessList, rankedIndicesList, speciesIndex);
-            //Debug.Log("Agent[" + agentIndex.ToString() + "] species[" + speciesIndex.ToString() + "] parentIndex: " + parentGenomeIndex.ToString());
-            
-        // MUTATE BODY:
-        // Mutate body here
-        
-        // Get new AgentGenome for this index
-        //int parentGenomeIndex = GetAgentIndexByLottery(rankedFitnessList, rankedIndicesList, speciesIndex);
-        
-
-        //int parentGenomeIndex = agentIndex;
-        // Randomly select a good one based on fitness Lottery (oldest = best)
-        //if (rankedIndicesList[0] == agentIndex) { // if Top Agent, just respawn identical copy:
-                               
-        //}
-        //else {
-            
-            //MutationSettings mutationSettings = settingsManager.mutationSettingsPersistent;
-
-            // Can randomly pull from saved Genepool database:
-            /*bool usePreTrained = false;
-
-            if(usePreTrained) {
-                float randRoll = UnityEngine.Random.Range(0f, 1f);
-                if(randRoll < 0.006f) {
-                    //mutationSettings = settingsManager.mutationSettingsRandomBody;
-                    randRoll = UnityEngine.Random.Range(0f, 1f);
-                    if(randRoll < 0.55f) {                
-                        parentBodyGenome = savedGenomePoolArray1[parentGenomeIndex].bodyGenome;
-                        parentBrainGenome = savedGenomePoolArray1[parentGenomeIndex].brainGenome;
-                    }
-                    else if(randRoll < 0.85f) {                
-                        parentBodyGenome = savedGenomePoolArray2[parentGenomeIndex].bodyGenome;
-                        parentBrainGenome = savedGenomePoolArray2[parentGenomeIndex].brainGenome;
-                    }
-                    else {
-                        parentBodyGenome = savedGenomePoolArray3[parentGenomeIndex].bodyGenome;
-                        parentBrainGenome = savedGenomePoolArray3[parentGenomeIndex].brainGenome;
-                    }                
-                }
-            }*/            
-        //}
+        agentGenomePoolArray[agentIndex].bodyGenome = newBodyGenome; 
+        agentGenomePoolArray[agentIndex].brainGenome = newBrainGenome;         
     }
-    /*private void CreateMutatedCopyOfFood(int foodIndex) {
-
-        int speciesIndex = Mathf.FloorToInt((float)foodIndex / (float)numFood * (float)numSpecies);
-
-        int parentIndex = UnityEngine.Random.Range(0, numFood);
-                
-
-        //bool foundParent = false;
-        // Try to find a suitable startPos:
-        int numParentSearches = 1;
-        //int parentIndex = -1;
-        for(int i = 0; i < numParentSearches; i++) {
-            int foodGroupSize = numFood / numSpecies;
-            int randomIndex = UnityEngine.Random.Range(speciesIndex * foodGroupSize, (speciesIndex + 1) * foodGroupSize);
-            if(foodArray[randomIndex].curLifeStage == EggSack.EggLifeStage.Mature) {
-                                
-                parentIndex = randomIndex;
-                //foundParent = true;
-                break;
-            }            
-        }
-       
-        EggSackGenome newFoodGenome = new EggSackGenome(foodIndex);
-
-        newFoodGenome.SetToMutatedCopyOfParentGenome(foodGenomePoolArray[parentIndex], settingsManager.mutationSettingsPersistent);
-
-        foodGenomePoolArray[foodIndex] = newFoodGenome;
-
-        foodArray[foodIndex].InitializeEggSackFromGenomeImmaculate(foodGenomePoolArray[foodIndex], GetRandomFoodSpawnPosition(), null); // Spawn that genome in dead Agent's body and revive it!
-               
-    }*/
+    
     private StartPositionGenome GetRandomAgentSpawnPosition(int speciesIndex) {
         int numSpawnZones = startPositionsPresets.spawnZonesList.Count;
 
@@ -2000,11 +1312,6 @@ public class SimulationManager : MonoBehaviour {
         Vector3 startPos = Vector3.Lerp(agentStartPos, randStartPos, Mathf.Round(UnityEngine.Random.Range(0f, 1f)));
         StartPositionGenome startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
         return startPosGenome;
-
-        // OLD:
-        /*Vector3 startPos = new Vector3(UnityEngine.Random.Range(-50f, 50f), UnityEngine.Random.Range(-50f, 50f), 0f);
-        StartPositionGenome startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
-        return startPosGenome;*/
     }
     private StartPositionGenome GetInitialAgentSpawnPosition(int speciesIndex)
     {
@@ -2064,62 +1371,10 @@ public class SimulationManager : MonoBehaviour {
                                startPositionsPresets.spawnZonesList[randZone].transform.position.y + randOffset.y, 
                                0f);
         startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
-        // Ttry to find a suitable startPos:
-        /*int numParentSearches = 4;
-        //int parentIndex = -1;
-        for(int i = 0; i < numParentSearches; i++) {
-            int parentIndex = UnityEngine.Random.Range(0, numFood);
-            if(foodArray[parentIndex].curLifeStage == FoodModule.FoodLifeStage.Mature) {
-                startPos = new Vector3(foodArray[parentIndex].transform.position.x, foodArray[parentIndex].transform.position.x, 0f) + new Vector3(0f, 0f, 0f);
-                startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
-
-                return startPosGenome;
-            }            
-        }*/
-
-        //startPos = new Vector3(UnityEngine.Random.Range(-30f, 30f), UnityEngine.Random.Range(-50f, 50f), 0f);
-        //startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
-        return startPosGenome;
-    }
-    /*private StartPositionGenome GetRandomEggClusterSpawnPosition(int speciesIndex)
-    {
-
-        Vector3 startPos;
-        StartPositionGenome startPosGenome;
-
-        int numPotentialParents = numAgents / numSpecies;
-
-        int lowIndex = numPotentialParents * speciesIndex;
-        int highIndex = (numPotentialParents + 1) * speciesIndex;
-
-        int parentIndex = UnityEngine.Random.Range(lowIndex, highIndex);
-
-        for (int i = 0; i < 10; i++)
-        {
-            int randParentIndex = UnityEngine.Random.Range(lowIndex, highIndex);
-
-            if (agentsArray[randParentIndex].curLifeStage == Agent.AgentLifeStage.Mature && agentsArray[randParentIndex].coreModule.energyRaw / agentsArray[randParentIndex].coreModule.maxEnergyStorage > 0.5f)
-            {
-                parentIndex = randParentIndex;
-                break;
-            }
-        }
-        
-
-        float randRadius = 1f;
-
-        Vector2 randOffset = UnityEngine.Random.insideUnitCircle * randRadius;
-
-        Vector3 parentAgentPos = agentsArray[parentIndex].bodyRigidbody.transform.position;
-
-        startPos = new Vector3(parentAgentPos.x + randOffset.x,
-                               parentAgentPos.y + randOffset.y,
-                               0f);
-        startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
         
         return startPosGenome;
     }
-    */
+    
     private Vector3 GetRandomPredatorSpawnPosition() {
 
         Vector3 startPos;
@@ -2197,40 +1452,8 @@ public class SimulationManager : MonoBehaviour {
                 simStateData.eggDataCBuffer.Release();
             }
         }
-        
-        if(tempTex1 != null) {
-            tempTex1.Release();
-            tempTex2.Release();
-            tempTex4.Release();
-            tempTex8.Release();
-            tempTex16.Release();
-        }
-        if(foodParticlesNearestCritters1 != null) {
-            foodParticlesNearestCritters1.Release();
-            foodParticlesNearestCritters32.Release();
-            foodParticlesNearestCritters1024.Release();
-        }
-        if(nutrientSamplesCBuffer != null) {
-            nutrientSamplesCBuffer.Release();
-        }
-        if(foodParticlesCBuffer != null) {
-            foodParticlesCBuffer.Release();
-        }  
-        if(foodParticlesCBufferSwap != null) {
-            foodParticlesCBufferSwap.Release();
-        } 
-        if(closestFoodParticlesDataCBuffer != null) {
-            closestFoodParticlesDataCBuffer.Release();
-        }
-        if(foodParticlesEatAmountsCBuffer != null) {
-            foodParticlesEatAmountsCBuffer.Release();
-        }
-        if(foodParticlesMeasure32 != null) {
-            foodParticlesMeasure32.Release();
-        }
-        if(foodParticlesMeasure1 != null) {
-            foodParticlesMeasure1.Release();
-        }
+
+        foodManager.ClearBuffers();
         
     }
 

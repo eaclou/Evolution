@@ -427,8 +427,8 @@ public class CritterModuleCore {
 
     public void Tick(SimulationManager simManager, Vector4 nutrientCellInfo, bool isPassiveMouth, Vector2 ownPos, Vector2 ownVel, int agentIndex) {
 
-        nearestFoodParticleIndex = simManager.closestFoodParticlesDataArray[agentIndex].index;
-        nearestFoodParticlePos = simManager.closestFoodParticlesDataArray[agentIndex].worldPos - new Vector2(simManager.agentsArray[agentIndex].bodyRigidbody.transform.position.x,
+        nearestFoodParticleIndex = simManager.foodManager.closestFoodParticlesDataArray[agentIndex].index;
+        nearestFoodParticlePos = simManager.foodManager.closestFoodParticlesDataArray[agentIndex].worldPos - new Vector2(simManager.agentsArray[agentIndex].bodyRigidbody.transform.position.x,
                                                                                                            simManager.agentsArray[agentIndex].bodyRigidbody.transform.position.y);
                 
 
@@ -500,7 +500,7 @@ public class CritterModuleCore {
         }*/
 
         //float nearestFoodParticle = simManager.closestFoodParticlesDataArray[agentIndex].foodAmount;
-        Vector2 critterToFoodParticle = simManager.closestFoodParticlesDataArray[agentIndex].worldPos - ownPos;
+        Vector2 critterToFoodParticle = simManager.foodManager.closestFoodParticlesDataArray[agentIndex].worldPos - ownPos;
         float distToNearestFoodParticle = critterToFoodParticle.magnitude;
 
         Vector2 foodParticleDir = critterToFoodParticle.normalized;

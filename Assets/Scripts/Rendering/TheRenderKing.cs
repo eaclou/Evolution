@@ -1776,7 +1776,7 @@ public class TheRenderKing : MonoBehaviour {
         baronVonWater.waterSurfaceBitsShadowsDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
         baronVonWater.waterSurfaceBitsShadowsDisplayMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
         baronVonWater.waterSurfaceBitsShadowsDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-        baronVonWater.waterSurfaceBitsShadowsDisplayMat.SetTexture("_NutrientTex", simManager.nutrientMapRT1);
+        baronVonWater.waterSurfaceBitsShadowsDisplayMat.SetTexture("_NutrientTex", simManager.foodManager.nutrientMapRT1);
         baronVonWater.waterSurfaceBitsShadowsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
         baronVonWater.waterSurfaceBitsDisplayMat.SetFloat("_CamDistNormalized", Mathf.Lerp(0f, 1f, Mathf.Clamp01((simManager.cameraManager.gameObject.transform.position.z * -1f) / 100f)));
         cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
@@ -1819,10 +1819,10 @@ public class TheRenderKing : MonoBehaviour {
         */
 
         foodParticleDisplayMat.SetPass(0);
-        foodParticleDisplayMat.SetBuffer("foodParticleDataCBuffer", simManager.foodParticlesCBuffer);
+        foodParticleDisplayMat.SetBuffer("foodParticleDataCBuffer", simManager.foodManager.foodParticlesCBuffer);
         foodParticleDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         foodParticleDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-        cmdBufferTest.DrawProcedural(Matrix4x4.identity, foodParticleDisplayMat, 0, MeshTopology.Triangles, 6, simManager.foodParticlesCBuffer.count);
+        cmdBufferTest.DrawProcedural(Matrix4x4.identity, foodParticleDisplayMat, 0, MeshTopology.Triangles, 6, simManager.foodManager.foodParticlesCBuffer.count);
 
         
         
@@ -1895,7 +1895,7 @@ public class TheRenderKing : MonoBehaviour {
         baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
         baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
         baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-        baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_NutrientTex", simManager.nutrientMapRT1);
+        baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_NutrientTex", simManager.foodManager.nutrientMapRT1);
         baronVonWater.waterNutrientsBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
 
         cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
@@ -1959,7 +1959,7 @@ public class TheRenderKing : MonoBehaviour {
         baronVonWater.waterQuadStrokesLrgDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
         baronVonWater.waterQuadStrokesLrgDisplayMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
         baronVonWater.waterQuadStrokesLrgDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-        baronVonWater.waterQuadStrokesLrgDisplayMat.SetTexture("_NutrientTex", simManager.nutrientMapRT1);
+        baronVonWater.waterQuadStrokesLrgDisplayMat.SetTexture("_NutrientTex", simManager.foodManager.nutrientMapRT1);
         baronVonWater.waterQuadStrokesLrgDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
         baronVonWater.waterQuadStrokesLrgDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized); // Mathf.Lerp(0f, 1f, Mathf.Clamp01((simManager.cameraManager.gameObject.transform.position.z * -1f) / 100f)));
         baronVonWater.waterQuadStrokesLrgDisplayMat.SetVector("_CamFocusPosition", camFocusPos);
@@ -1973,7 +1973,7 @@ public class TheRenderKing : MonoBehaviour {
         baronVonWater.waterQuadStrokesSmlDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
         baronVonWater.waterQuadStrokesSmlDisplayMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
         baronVonWater.waterQuadStrokesSmlDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-        baronVonWater.waterQuadStrokesSmlDisplayMat.SetTexture("_NutrientTex", simManager.nutrientMapRT1);
+        baronVonWater.waterQuadStrokesSmlDisplayMat.SetTexture("_NutrientTex", simManager.foodManager.nutrientMapRT1);
         baronVonWater.waterQuadStrokesSmlDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
         baronVonWater.waterQuadStrokesSmlDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized); // Mathf.Lerp(0f, 1f, Mathf.Clamp01((simManager.cameraManager.gameObject.transform.position.z * -1f) / 100f)));
         baronVonWater.waterQuadStrokesSmlDisplayMat.SetVector("_CamFocusPosition", camFocusPos);
@@ -1988,7 +1988,7 @@ public class TheRenderKing : MonoBehaviour {
         baronVonWater.waterSurfaceBitsDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
         baronVonWater.waterSurfaceBitsDisplayMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
         baronVonWater.waterSurfaceBitsDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-        baronVonWater.waterSurfaceBitsDisplayMat.SetTexture("_NutrientTex", simManager.nutrientMapRT1);
+        baronVonWater.waterSurfaceBitsDisplayMat.SetTexture("_NutrientTex", simManager.foodManager.nutrientMapRT1);
         baronVonWater.waterSurfaceBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
         baronVonWater.waterSurfaceBitsDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
         cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
