@@ -16,7 +16,9 @@ public class Agent : MonoBehaviour {
 
     public bool isInert = true;  // when inert, colliders disabled
 
-    public int index;
+    public int index;    
+    public int speciesIndex = -1;  // ********************** NEED to set these at birth!
+    public CandidateAgentData candidateRef;
     
     public AgentLifeStage curLifeStage;
     public enum AgentLifeStage {
@@ -124,9 +126,7 @@ public class Agent : MonoBehaviour {
     public float avgVel;
     public float avgFluidVel;
     public float depth;
-
-    public int speciesIndex = -1;
-
+    
     public bool isSwallowingPrey = false;
     public bool isBeingSwallowed = false;
     public bool isSexuallyMature = false;
@@ -1169,11 +1169,11 @@ public class Agent : MonoBehaviour {
     public void ReconstructAgentGameObjects(AgentGenome genome, EggSack parentEggSack, Vector3 startPos, bool isImmaculate) {
 
         InitializeAgentWidths(genome);
-        InitializeGameObjectsAndComponents();
+        InitializeGameObjectsAndComponents();  // Not needed??? ***
 
         growthPercentage = 0.002f;
 
-        // *** Positioning and Pinning to parentEggSack HERE:
+        // Positioning and Pinning to parentEggSack HERE:
         bodyGO.transform.position = startPos;
 
         springJoint.distance = 0.005f;

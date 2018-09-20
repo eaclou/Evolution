@@ -132,16 +132,17 @@ public class SimulationManager : MonoBehaviour {
             
     private int numAgentsProcessed = 0;
 
-    private int[] eggSackRespawnCounter;
-    private int[] agentRespawnCounter;
+    private int[] eggSackRespawnCounterArrayOld;
+    private int[] agentRespawnCounterArrayOld;
+    private int agentRespawnCounter = 0;
 
+    private int numAgentEvaluationsPerGenome = 1;
 
     #region loading   // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& LOADING LOADING LOADING &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
     public void TickLoading() {
         // "Hey, I'm Loadin' Here!!!"
         
         
-
         // Has basic loading phase completed?
         if(loadingComplete) {
             // if so, warming up:
@@ -163,8 +164,7 @@ public class SimulationManager : MonoBehaviour {
                 //    theRenderKing.UpdateAgentBodyStrokesBuffer(i); // hacky fix but seems to work...
                 //}
 
-                //RespawnPlayer(); // Needed???? *****
-                
+                //RespawnPlayer(); // Needed???? *****                
             }
             else {
                 //Debug.Log("WarmUp Step " + currentWarmUpTimeStep.ToString());
@@ -177,8 +177,6 @@ public class SimulationManager : MonoBehaviour {
 
                 currentWarmUpTimeStep++;
             }
-
-            
         }
         else {
             // Check if already loading or if this is the first time startup:
@@ -303,8 +301,8 @@ public class SimulationManager : MonoBehaviour {
         speciesAvgSizes = new Vector2[numSpecies];
         speciesAvgMouthTypes = new float[numSpecies];
 
-        agentRespawnCounter = new int[numSpecies];
-        eggSackRespawnCounter = new int[numSpecies];
+        agentRespawnCounterArrayOld = new int[numSpecies];
+        eggSackRespawnCounterArrayOld = new int[numSpecies];
                 
         LoadingInitializePopulationGenomes();
 
@@ -584,26 +582,28 @@ public class SimulationManager : MonoBehaviour {
     #region Every Frame  //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& EVERY FRAME &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
     public void TickSimulation() {
-        //UpdateFoodGrid();
-        for(int i = 0; i < eggSackRespawnCounter.Length; i++) {
-            eggSackRespawnCounter[i]++;
+        
+        for(int i = 0; i < eggSackRespawnCounterArrayOld.Length; i++) {  // ****** BROKEN BY SPECIATION UPDATE!!! ******
+            eggSackRespawnCounterArrayOld[i]++;
         } 
-        for(int i = 0; i < agentRespawnCounter.Length; i++) {
-            agentRespawnCounter[i]++;
-        }        
+        for(int i = 0; i < agentRespawnCounterArrayOld.Length; i++) {
+            agentRespawnCounterArrayOld[i]++;
+        }
+        agentRespawnCounter++;
 
         float totalNutrients = foodManager.MeasureTotalNutrients();
         foodManager.GetNutrientValuesAtMouthPositions(simStateData);
-
         //Find closest critters to foodParticles:
         foodManager.FindClosestFoodParticleToCritters(simStateData);
         foodManager.MeasureTotalFoodParticlesAmount();
+
                 
         // ******** REVISIT CODE ORDERING!!!!  -- Should check for death Before or After agent Tick/PhysX ???
         CheckForDevouredEggSacks();
         CheckForNullAgents();  // Result of this will affect: "simStateData.PopulateSimDataArrays(this)" !!!!!
         CheckForReadyToSpawnAgents();
         
+
         simStateData.PopulateSimDataArrays(this);  // reads from GameObject Transforms & RigidBodies!!! ++ from FluidSimulationData!!!        
         theRenderKing.RenderSimulationCameras(); // will pass current info to FluidSim before it Ticks()
         // Reads from CameraRenders, GameObjects, and query GPU for fluidState
@@ -634,19 +634,16 @@ public class SimulationManager : MonoBehaviour {
             eggSackArray[i].Tick();
         }
         
-        // Apply External Forces to dynamic objects: (internal PhysX Updates):
-        // **** TEMPORARILY DISABLED!
+        // Apply External Forces to dynamic objects: (internal PhysX Updates):        
         ApplyFluidForcesToDynamicObjects();
 
-        foodManager.EatSelectedFoodParticles(simStateData); // 
-        
-        foodManager.RemoveEatenNutrients(numAgents, simStateData);        
-
+        foodManager.EatSelectedFoodParticles(simStateData); //         
+        foodManager.RemoveEatenNutrients(numAgents, simStateData);
         float spawnNewFoodChance = settingsManager.spawnNewFoodChance;
         float spawnFoodPercentage = UnityEngine.Random.Range(0f, 0.25f);
         float maxGlobalFood = settingsManager.maxGlobalNutrients;
 
-        if(totalNutrients < maxGlobalFood) {
+        if(totalNutrients < maxGlobalFood) {   // **** MOVE THIS INTO FOOD MANAGER?
             float randRoll = UnityEngine.Random.Range(0f, 1f);
             if(randRoll < spawnNewFoodChance) {
                 // pick random cell:
@@ -661,11 +658,9 @@ public class SimulationManager : MonoBehaviour {
                 foodManager.AddNutrientsAtCoords(newFoodAmount, randX, randY);                
             }
         }
-
-
         foodManager.ApplyDiffusionOnNutrientMap(environmentFluidManager);
-        
         foodManager.RespawnFoodParticles(environmentFluidManager, theRenderKing, simStateData);
+
 
         // TEMP AUDIO EFFECTS!!!!        
         float volume = agentsArray[0].smoothedThrottle.magnitude * 0.24f;
@@ -909,27 +904,52 @@ public class SimulationManager : MonoBehaviour {
     }  // *** revisit
     private void CheckForReadyToSpawnAgents() {
         
-            for (int a = 0; a < agentsArray.Length; a++) {
-                if (agentRespawnCounter[agentsArray[a].speciesIndex] > 5) {
-                    if (agentsArray[a].curLifeStage == Agent.AgentLifeStage.AwaitingRespawn) {
-                        AttemptToSpawnAgent(a, agentsArray[a].speciesIndex);
-                    }
-                }
+        for (int a = 0; a < agentsArray.Length; a++) {
+            if(agentRespawnCounter > 2) {
+                AttemptToSpawnAgent(a); //, agentsArray[a].speciesIndex);
             }
-                
+
+
+            //if (agentRespawnCounter[agentsArray[a].speciesIndex] > 5) {
+            //if (agentsArray[a].curLifeStage == Agent.AgentLifeStage.AwaitingRespawn) {
+            //    AttemptToSpawnAgent(a); //, agentsArray[a].speciesIndex);
+            //}
+            //}
+        }                
     }
-    private void AttemptToSpawnAgent(int agentIndex, int speciesIndex) {
+    private void AttemptToSpawnAgent(int agentIndex) { //, int speciesIndex) {
+
+        // Which Species will the new agent belong to?
+        // Random selection? Lottery-Selection among Species? Use this Agent's previous-life's Species?  Global Ranked Selection (across all species w/ modifiers) ?
+
+        // Using Random Selection as first naive implementation:
+        int randomTableIndex = UnityEngine.Random.Range(0, masterGenomePool.currentlyActiveSpeciesIDList.Count);
+        int speciesIndex = masterGenomePool.currentlyActiveSpeciesIDList[randomTableIndex];
+
+        // Find next-in-line genome waiting to be evaluated:
+        AgentGenome newGenome = masterGenomePool.completeSpeciesPoolsList[speciesIndex].GetNextAvailableCandidateGenome();
+        if(newGenome == null) {
+            // all candidates are currently being tested, or candidate list is empty?
+        }
+        else {
+            // Good to go?
+            SpawnAgentImmaculate(newGenome, agentIndex, speciesIndex);
+        }
+
+
+        // &&&&&& OLD OLD OLD &&&&&&&&&&&&&&&& OLD OLD OLD &&&&&&&&&&&&&&&
 
         //bool foundValidEggSack = false;
-        EggSack parentEggSack = null;
+        //EggSack parentEggSack = null;
         // Find an appropriate EggSack to spawn from:
 
-        int speciesPopulationSize = (_NumEggSacks / numSpecies);
-        int startIndex = speciesIndex * speciesPopulationSize;
+        //int speciesPopulationSize = (_NumEggSacks / numSpecies);
+        //int startIndex = speciesIndex * speciesPopulationSize;
 
-        List<int> validEggSackIndicesList = new List<int>();
+        //List<int> validEggSackIndicesList = new List<int>();
+        // *** FIND VALID EGGSACKS (of matching species) ***
         //Debug.Log("startIndex = " + startIndex.ToString() + ", endIndex: " + (startIndex + speciesPopulationSize).ToString());
-        for(int i = startIndex; i < startIndex + speciesPopulationSize; i++) {  // if EggSack belongs to the right species
+        /*for(int i = startIndex; i < startIndex + speciesPopulationSize; i++) {  // if EggSack belongs to the right species
             if(eggSackArray[i].curLifeStage == EggSack.EggLifeStage.Growing) {
                 if(eggSackArray[i].lifeStageTransitionTimeStepCounter < eggSackArray[i]._MatureDurationTimeSteps) {  // egg sack is at proper stage of development
                     // This Eggsack Index    
@@ -942,21 +962,25 @@ public class SimulationManager : MonoBehaviour {
                     
                 }
             }
-        }
+        }*/
 
-        if(validEggSackIndicesList.Count > 0) {  // move this inside the for loop ??
-            int randIndex = UnityEngine.Random.Range(0, validEggSackIndicesList.Count);
+        //if(validEggSackIndicesList.Count > 0) {  // move this inside the for loop ??   // **** BROKEN BY SPECIATION UPDATE!!! *****
+            //int randIndex = UnityEngine.Random.Range(0, validEggSackIndicesList.Count);
             //Debug.Log("listLength:" + validEggSackIndicesList.Count.ToString() + ", randIndex = " + randIndex.ToString() + ", p: " + validEggSackIndicesList[randIndex].ToString());
-            parentEggSack = eggSackArray[validEggSackIndicesList[randIndex]];
-            SpawnAgentFromEggSack(agentIndex, speciesIndex, parentEggSack);
-        }
-        else {
+            //parentEggSack = eggSackArray[validEggSackIndicesList[randIndex]];
+            //SpawnAgentFromEggSack(agentIndex, speciesIndex, parentEggSack);
+        //}
+        //else {
+            //SpawnAgentImmaculate(0, 0); // ************** REFACTOR!!! *****
+            //if(agentRespawnCounter > 1) {
+                
+            //}
             //Debug.Log("Tried to spawn Agent[" + agentIndex.ToString() + "] but no suitable EggSack was found!");
-            if(agentRespawnCounter[speciesIndex] > 87) {
+            //if(agentRespawnCounterArrayOld[speciesIndex] > 87) {
                 // So spawn Agent on its own somewhere:
-                SpawnAgentImmaculate(agentIndex, speciesIndex);
-            }            
-        }        
+                //SpawnAgentImmaculate(agentIndex, speciesIndex);
+            //}            
+        //}        
     }
     private void CheckForNewEggSack() {
         // what are pregnancy requirements? Food eaten relative to body size?
@@ -965,37 +989,51 @@ public class SimulationManager : MonoBehaviour {
         // Find parent Agent
         //Spawn:
     }
-    
-        
-    // AFTER PHYSX!!!
-    /*private void OnTriggerEnter2D(Collider2D collision) {
-        TriggerTestOrder();
-    }
-    private void OnTriggerStay2D(Collider2D collision) {
-        TriggerTestOrder();
-    }
-    private void TriggerTestOrder() {
-        
-        //Vector3 agentPos = playerAgent.testModule.ownRigidBody2D.position;
-        //Debug.Log("OnTriggerStay2D AgentPos: (" + agentPos.x.ToString() + ", " + agentPos.y.ToString() + ") Time: " + Time.realtimeSinceStartup.ToString());
-    }*/
-    
+   
     #endregion
 
     #region Process Events // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& PROCESS EVENTS! &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
     
-    // *** confirm these are set up alright      
-    public void ProcessNullAgent(int agentIndex) {
+    // *** confirm these are set up alright       
+    public void ProcessNullAgent(Agent agentRef) {   // (Upon Agent Death:)
 
         // Now, this function should:
-        // -- look up the connected CandidateGenome
-        // -- save its fitness score
-        // -- check if it has finished all of its evaluations
-        // -- if it has, then push the candidate to Leaderboard List so it is eligible for reproduction
-        // -- Clear Agent object so that it's ready to be reused
+        // -- look up the connected CandidateGenome & its speciesID
+        CandidateAgentData candidateData = agentRef.candidateRef;
+        int speciesIndex = agentRef.speciesIndex;
+        SpeciesGenomePool speciesPool = masterGenomePool.completeSpeciesPoolsList[speciesIndex];
 
-        // -- Check for spawning new agent? Or leave that separate?              
+        // -- save its fitness score
+        candidateData.ProcessCompletedEvaluation(agentRef);
         
+        // -- check if it has finished all of its evaluations
+        if(candidateData.numCompletedEvaluations >= numAgentEvaluationsPerGenome) {
+            // -- If it has:
+            // -- then push the candidate to Leaderboard List so it is eligible for reproduction
+            // -- at the same time, remove it from the ToBeEvaluated pool
+            speciesPool.ProcessCompletedCandidate(candidateData);            
+        }
+        else {
+            // -- Else:
+            // -- (move to end of pool queue OR evaluate all Trials of one genome before moving onto the next)
+
+        }
+        // -- Select a ParentGenome from the leaderboardList and create a mutated copy (childGenome):
+        speciesPool.GetNewMutatedGenome();
+        // -- Check which species this new childGenome should belong to (most likely this one, but maybe it creates a new species or better fits in with a diff existing species)
+        //........
+
+        // -- Add the new childGenomeCandidate to its respective Species (toBeEvaluated pool) - Reset candidate info like beingEvaluated, scores, numEvals etc.
+
+        // -- Clear Agent object so that it's ready to be reused
+            // i.e. Set curLifecycle to .AwaitingRespawn ^
+            // then new Agents should use the next available genome from the updated ToBeEvaluated pool      
+        
+        agentRef.SetToAwaitingRespawn();
+
+
+        // &&&&&& OLD OLD OLD &&&&&&&&&&&& OLD OLD &&&&&&&&&&&&&&&&& OLD &&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+        /*
         CheckForRecordAgentScore(agentIndex);
         ProcessAgentScores(agentIndex);
         // Updates rankedIndicesArray[] so agents are ordered by score:
@@ -1003,7 +1041,9 @@ public class SimulationManager : MonoBehaviour {
         ProcessAndRankAgentFitness(speciesIndex);
         int parentGenomeIndex = GetAgentIndexByLottery(rankedFitnessList, rankedIndicesList, speciesIndex);
         SetAgentGenomeToMutatedCopyOfParentGenome(agentIndex, agentGenomePoolArray[parentGenomeIndex]);
+        
         agentsArray[agentIndex].SetToAwaitingRespawn();
+        */
     }
     private void SpawnAgentFromEggSack(int agentIndex, int speciesIndex, EggSack parentEggSack) {
 
@@ -1016,26 +1056,27 @@ public class SimulationManager : MonoBehaviour {
 
         theRenderKing.UpdateAgentWidthsTexture(agentsArray[agentIndex]);
                 
-        agentRespawnCounter[speciesIndex] = 0;        
+        agentRespawnCounterArrayOld[speciesIndex] = 0;
+        agentRespawnCounter = 0;
     }
-    private void SpawnAgentImmaculate(int agentIndex, int speciesIndex) {
+    private void SpawnAgentImmaculate(AgentGenome parentGenome, int agentIndex, int speciesIndex) {
 
         // Refactor this function to work with new GenomePool architecture!!!
-
-
+        
 
         numAgentsBorn++;
         currentOldestAgent = agentsArray[rankedIndicesList[0]].scoreCounter;
-        agentsArray[agentIndex].InitializeSpawnAgentImmaculate(agentIndex, agentGenomePoolArray[agentIndex], GetRandomFoodSpawnPosition()); // Spawn that genome in dead Agent's body and revive it!
+        agentsArray[agentIndex].InitializeSpawnAgentImmaculate(agentIndex, parentGenome, GetRandomFoodSpawnPosition()); // Spawn that genome in dead Agent's body and revive it!
 
         theRenderKing.UpdateAgentWidthsTexture(agentsArray[agentIndex]);
                 
-        agentRespawnCounter[speciesIndex] = 0;        
+        agentRespawnCounterArrayOld[speciesIndex] = 0;
+        agentRespawnCounter = 0;
     }
     public void ProcessDeadEggSack(int eggSackIndex) {
         //Debug.Log("ProcessDeadEggSack(" + eggSackIndex.ToString() + ") eggSackRespawnCounter " + eggSackRespawnCounter.ToString());
         // Check for timer?
-        if(eggSackRespawnCounter[eggSackArray[eggSackIndex].speciesIndex] > 3) {
+        if(eggSackRespawnCounterArrayOld[eggSackArray[eggSackIndex].speciesIndex] > 3) {
             
             // How many active EggSacks are there in play?
             int totalSuitableParentAgents = 0;
@@ -1078,7 +1119,7 @@ public class SimulationManager : MonoBehaviour {
             
                 agentsArray[randParentAgentIndex].BeginPregnancy(eggSackArray[eggSackIndex]);
 
-                eggSackRespawnCounter[eggSackArray[eggSackIndex].speciesIndex] = 0;
+                eggSackRespawnCounterArrayOld[eggSackArray[eggSackIndex].speciesIndex] = 0;
             }
             else {
                 // Wait? SpawnImmaculate?
@@ -1091,7 +1132,7 @@ public class SimulationManager : MonoBehaviour {
                     respawnCooldown = 7;
                 }
 
-                if(eggSackRespawnCounter[eggSpecies] > respawnCooldown) {  // try to encourage more pregnancies?
+                if(eggSackRespawnCounterArrayOld[eggSpecies] > respawnCooldown) {  // try to encourage more pregnancies?
                     //Debug.Log("InitializeEggSackFromGenomeImmaculate! Egg[" + eggSackIndex.ToString() + "]");
                         
                     int agentGenomeIndex = UnityEngine.Random.Range(eggSpecies * speciesSize, (eggSpecies + 1) * speciesSize);
@@ -1099,7 +1140,7 @@ public class SimulationManager : MonoBehaviour {
                     eggSackArray[eggSackIndex].parentAgentIndex = agentGenomeIndex;
                     eggSackArray[eggSackIndex].InitializeEggSackFromGenome(eggSackIndex, agentGenomePoolArray[agentGenomeIndex], null, GetRandomFoodSpawnPosition().startPosition);
 
-                    eggSackRespawnCounter[eggSpecies] = 0;
+                    eggSackRespawnCounterArrayOld[eggSpecies] = 0;
                     
                 }
                 //}
@@ -1203,6 +1244,7 @@ public class SimulationManager : MonoBehaviour {
             }
         }
     }
+
     private void UpdateSimulationClimate() {
         // Change force of turbulence, damping, other fluidSim parameters,
         // Inject pre-trained critters
@@ -1226,6 +1268,7 @@ public class SimulationManager : MonoBehaviour {
     private void RefreshGraphTextureMutation() {
         //uiManager.UpdateStatsTextureMutation(statsMutationEachGenerationList);
     }
+
     private void ProcessAndRankAgentFitness(int speciesIndex) {
         // Measure fitness of all current agents (their genomes, actually)  NOT PLAYER!!!!
         for (int i = 0; i < rawFitnessScoresArray.Length; i++) {

@@ -19,4 +19,18 @@ public class CandidateAgentData {
         allEvaluationsComplete = false;
         isBeingEvaluated = false;
     }
+
+    public void ProcessCompletedEvaluation(Agent agentRef) {
+        evaluationScoresList.Add(agentRef.scoreCounter);
+        numCompletedEvaluations++;
+        isBeingEvaluated = false;
+    }
+
+    public void Reset(AgentGenome genome) {
+        candidateGenome = genome;
+        numCompletedEvaluations = 0;
+        evaluationScoresList.Clear();
+        allEvaluationsComplete = false;
+        isBeingEvaluated = false;
+    }
 }

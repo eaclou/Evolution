@@ -344,13 +344,13 @@ public class TheRenderKing : MonoBehaviour {
         colorInjectionStrokesCBuffer = new ComputeBuffer(simManager._NumAgents + simManager._NumEggSacks, sizeof(float) * 10);
         colorInjectionStrokeDataArray = new BasicStrokeData[colorInjectionStrokesCBuffer.count];
 
-        InitializeAgentBodyStrokesBuffer();
+        //InitializeAgentBodyStrokesBuffer();
         InitializeCritterSkinStrokesCBuffer();
         InitializeAgentEyeStrokesBuffer();
-        InitializeAgentSmearStrokesBuffer();
+        //InitializeAgentSmearStrokesBuffer();
         InitializeAgentTailStrokesBuffer();
         //InitializeFrameBufferStrokesBuffer();
-        InitializePlayerGlowBuffer();
+        //InitializePlayerGlowBuffer();
         InitializePlayerGlowyBitsBuffer();
         InitializeFloatyBitsBuffer();
         //InitializeRipplesBuffer();
@@ -485,7 +485,7 @@ public class TheRenderKing : MonoBehaviour {
         uberFlowChainBrush1.Initialize(computeShaderUberChains, uberFlowChainBrushMat1);
     }
     //playerGlowCBuffer
-    private void InitializePlayerGlowBuffer() {
+    /*private void InitializePlayerGlowBuffer() {
         playerGlowInitPos = new BasicStrokeData[1];
         playerGlowCBuffer = new ComputeBuffer(1, sizeof(float) * 10);
         Vector3 agentPos = simManager.agentsArray[0].transform.position;
@@ -501,7 +501,7 @@ public class TheRenderKing : MonoBehaviour {
         //int kernelSimPlayerGlow = fluidManager.computeShaderFluidSim.FindKernel("SimPlayerGlowyBits");
         //fluidManager.computeShaderFluidSim.SetBuffer(kernelSimPlayerGlowyBits, "PlayerGlowyBitsCBuffer", playerGlowyBitsCBuffer);
 
-    }
+    }*/
     private void InitializePlayerGlowyBitsBuffer() {
         PlayerGlowyBitData[] playerGlowyBitsInitPos = new PlayerGlowyBitData[numPlayerGlowyBits];
         playerGlowyBitsCBuffer = new ComputeBuffer(numPlayerGlowyBits, sizeof(float) * 7);
@@ -576,41 +576,41 @@ public class TheRenderKing : MonoBehaviour {
         }
         frameBufferStrokesCBuffer.SetData(frameBufferStrokesArray);
     }*/
-    public void InitializeAgentEyeStrokesBuffer() {
+    public void InitializeAgentEyeStrokesBuffer() {  // ************* BROKEN BY SPECIATION UPDATE!!!!! **************************************************************************** !!!!!!
         agentEyeStrokesCBuffer = new ComputeBuffer(simManager._NumAgents * 2, sizeof(float) * 13 + sizeof(int) * 2); // pointStrokeData size
         AgentEyeStrokeData[] agentEyesDataArray = new AgentEyeStrokeData[agentEyeStrokesCBuffer.count];        
         for (int i = 0; i < simManager._NumAgents; i++) {
             AgentEyeStrokeData dataLeftEye = new AgentEyeStrokeData();
             dataLeftEye.parentIndex = i;
-            dataLeftEye.localPos = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.localPos;
+            dataLeftEye.localPos = new Vector2(-0.5f, 0.5f); // simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.localPos;
             dataLeftEye.localPos.x *= -1f; // LEFT SIDE!
             float width = simManager.agentsArray[i].agentWidthsArray[Mathf.RoundToInt((dataLeftEye.localPos.y * 0.5f + 0.5f) * 15f)];
             dataLeftEye.localPos.x *= width * 0.5f;
             dataLeftEye.localDir = new Vector2(0f, 1f);
-            dataLeftEye.localScale = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.localScale;
-            dataLeftEye.irisHue = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.irisHue;
-            dataLeftEye.pupilHue = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.pupilHue;
+            dataLeftEye.localScale = Vector2.one * 0.1f; // simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.localScale;
+            dataLeftEye.irisHue = Vector3.one; // simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.irisHue;
+            dataLeftEye.pupilHue = Vector3.zero; // simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.pupilHue;
             dataLeftEye.strength = 1f;
-            dataLeftEye.brushType = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.eyeBrushType;
+            dataLeftEye.brushType = 0; // simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.eyeBrushType;
 
             AgentEyeStrokeData dataRightEye = new AgentEyeStrokeData();
             dataRightEye.parentIndex = i;
-            dataRightEye.localPos = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.localPos;
+            dataRightEye.localPos = new Vector2(0.5f, 0.5f); // simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.localPos;
             width = simManager.agentsArray[i].agentWidthsArray[Mathf.RoundToInt((dataRightEye.localPos.y * 0.5f + 0.5f) * 15f)];
             dataRightEye.localPos.x *= width * 0.5f;
             dataRightEye.localDir = new Vector2(0f, 1f);
-            dataRightEye.localScale = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.localScale;
-            dataRightEye.irisHue = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.irisHue;
-            dataRightEye.pupilHue = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.pupilHue;
+            dataRightEye.localScale = Vector2.one * 0.1f; // simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.localScale;
+            dataRightEye.irisHue = Vector3.one; // simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.irisHue;
+            dataRightEye.pupilHue = Vector3.zero; // simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.pupilHue;
             dataRightEye.strength = 1f;
-            dataRightEye.brushType = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.eyeBrushType;
+            dataRightEye.brushType = 0; // simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.eyeBrushType;
             
             agentEyesDataArray[i * 2 + 0] = dataLeftEye;
             agentEyesDataArray[i * 2 + 1] = dataRightEye;
         }
         agentEyeStrokesCBuffer.SetData(agentEyesDataArray);
     }
-    public void InitializeAgentBodyStrokesBuffer() {
+    /*public void InitializeAgentBodyStrokesBuffer() {
         agentBodyStrokesCBuffer = new ComputeBuffer(simManager._NumAgents, sizeof(float) * 7 + sizeof(int) * 3);
         AgentBodyStrokeData[] agentBodyStrokesArray = new AgentBodyStrokeData[agentBodyStrokesCBuffer.count];
         for (int i = 0; i < agentBodyStrokesArray.Length; i++) {
@@ -624,7 +624,7 @@ public class TheRenderKing : MonoBehaviour {
             bodyStroke.brushTypeY = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.bodyStrokeBrushTypeY;
         }        
         agentBodyStrokesCBuffer.SetData(agentBodyStrokesArray);
-    }
+    }*/
     public void InitializeCritterSkinStrokesCBuffer() {
         critterSkinStrokesCBuffer = new ComputeBuffer(simManager._NumAgents * numStrokesPerCritterSkin, sizeof(float) * 16 + sizeof(int) * 2);
         CritterSkinStrokeData[] critterSkinStrokesArray = new CritterSkinStrokeData[critterSkinStrokesCBuffer.count];
@@ -713,7 +713,7 @@ public class TheRenderKing : MonoBehaviour {
         }        
         critterFoodDotsCBuffer.SetData(foodDotsArray);
     }
-    public void InitializeAgentSmearStrokesBuffer() {
+    /*public void InitializeAgentSmearStrokesBuffer() {
         // **** Just Curves to start!!!! ********        
         agentSmearStrokesDataArray = new CurveStrokeData[simManager._NumAgents]; // **** Temporarily just for Agents! ******
         agentSmearStrokesCBuffer = new ComputeBuffer(agentSmearStrokesDataArray.Length, sizeof(float) * 14 + sizeof(int) * 2);
@@ -735,7 +735,7 @@ public class TheRenderKing : MonoBehaviour {
             agentSmearStrokesDataArray[i].brushType = 0;
         }        
         agentSmearStrokesCBuffer.SetData(agentSmearStrokesDataArray);
-    }
+    }*/
     public void InitializeAgentTailStrokesBuffer() {
         TrailStrokeData[] trailStrokeDataArray = new TrailStrokeData[simManager._NumAgents * numTrailPointsPerAgent];
         for (int i = 0; i < trailStrokeDataArray.Length; i++) {
@@ -1145,7 +1145,10 @@ public class TheRenderKing : MonoBehaviour {
             if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Dead) {
                 agentAlpha = 3f * Mathf.Clamp01(1f - (float)simManager.agentsArray[i].lifeStageTransitionTimeStepCounter * 2f / (float)simManager.agentsArray[i]._DecayDurationTimeSteps);
             }
-            Color drawColor = new Color(simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.huePrimary.x, simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.huePrimary.y, simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.huePrimary.z, agentAlpha);
+            // ********** BROKEN BY SPECIATION UPDATE!!!! *****************************
+            Color drawColor = new Color(1f, 1f, 1f);
+            //Color drawColor = new Color(simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.huePrimary.x, simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.huePrimary.y, simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.huePrimary.z, agentAlpha);
+            
             /*if(simManager.agentsArray[i].wasImpaled) {
                 drawColor.r = 0.8f;
                 drawColor.g = 0.1f;
@@ -1410,7 +1413,7 @@ public class TheRenderKing : MonoBehaviour {
         computeShaderBrushStrokes.SetBuffer(kernelCSSinglePassCurveBrushData, "agentCurveStrokesWriteCBuffer", agentSmearStrokesCBuffer);
         computeShaderBrushStrokes.Dispatch(kernelCSSinglePassCurveBrushData, agentSmearStrokesCBuffer.count, 1, 1);        
     }  */  
-    public void SimPlayerGlow() {
+    /*public void SimPlayerGlow() {
         //Vector3 agentPos = simManager.agentsArray[0].transform.position;
         //playerGlowInitPos[0].worldPos = new Vector2(agentPos.x, agentPos.y);
         //playerGlowInitPos[0].localDir = simManager.agentsArray[0].facingDirection;
@@ -1440,7 +1443,7 @@ public class TheRenderKing : MonoBehaviour {
         fluidManager.computeShaderFluidSim.SetBuffer(kernelSimPlayerGlowyBits, "PlayerGlowyBitsCBuffer", playerGlowyBitsCBuffer);
         fluidManager.computeShaderFluidSim.SetTexture(kernelSimPlayerGlowyBits, "VelocityRead", fluidManager._VelocityA);        
         fluidManager.computeShaderFluidSim.Dispatch(kernelSimPlayerGlowyBits, playerGlowyBitsCBuffer.count / 1024, 1, 1);
-    }
+    }*/
     public void SimFloatyBits() {
         int kernelSimFloatyBits = fluidManager.computeShaderFluidSim.FindKernel("SimFloatyBits");
 
