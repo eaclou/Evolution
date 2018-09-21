@@ -789,6 +789,10 @@ public class SimulationManager : MonoBehaviour {
         //float cellSize = mapSize / agentGridCellResolution;
         //Vector2 playerPos = new Vector2(playerAgent.transform.localPosition.x, playerAgent.transform.localPosition.y);
 
+
+        // ***** Check for inactive/Null agents and cull them from consideration:
+        // ******  REFACTOR!!! BROKEN BY SPECIATION UPDATE! ***
+
         // Find NearestNeighbors:
         for (int a = 0; a < agentsArray.Length; a++) {
             // Find which gridCell this Agent is in:    
@@ -898,7 +902,7 @@ public class SimulationManager : MonoBehaviour {
     private void CheckForNullAgents() { 
         for (int a = 0; a < agentsArray.Length; a++) {
             if (agentsArray[a].curLifeStage == Agent.AgentLifeStage.Null) {                
-                ProcessNullAgent(a);                                
+                ProcessNullAgent(agentsArray[a]);                                
             }
         }
     }  // *** revisit
@@ -1019,12 +1023,13 @@ public class SimulationManager : MonoBehaviour {
 
         }
         // -- Select a ParentGenome from the leaderboardList and create a mutated copy (childGenome):
-        speciesPool.GetNewMutatedGenome();
+        AgentGenome newGenome = speciesPool.GetNewMutatedGenome();
         // -- Check which species this new childGenome should belong to (most likely this one, but maybe it creates a new species or better fits in with a diff existing species)
         //........
+        int newGenomeSpeciesIndex = masterGenomePool.GetClosestActiveSpeciesToGenome(newGenome); // *** This function UNFINISHED!
 
         // -- Add the new childGenomeCandidate to its respective Species (toBeEvaluated pool) - Reset candidate info like beingEvaluated, scores, numEvals etc.
-
+        masterGenomePool.completeSpeciesPoolsList[newGenomeSpeciesIndex].AddNewCandidateGenome(newGenome);
         // -- Clear Agent object so that it's ready to be reused
             // i.e. Set curLifecycle to .AwaitingRespawn ^
             // then new Agents should use the next available genome from the updated ToBeEvaluated pool      
@@ -1045,7 +1050,8 @@ public class SimulationManager : MonoBehaviour {
         agentsArray[agentIndex].SetToAwaitingRespawn();
         */
     }
-    private void SpawnAgentFromEggSack(int agentIndex, int speciesIndex, EggSack parentEggSack) {
+    // ********** RE-IMPLEMENT THIS LATER!!!! ******************************************************************************
+    /*private void SpawnAgentFromEggSack(int agentIndex, int speciesIndex, EggSack parentEggSack) {
 
         // Refactor this function to work with new GenomePool architecture!!!
 
@@ -1058,7 +1064,7 @@ public class SimulationManager : MonoBehaviour {
                 
         agentRespawnCounterArrayOld[speciesIndex] = 0;
         agentRespawnCounter = 0;
-    }
+    }*/
     private void SpawnAgentImmaculate(AgentGenome parentGenome, int agentIndex, int speciesIndex) {
 
         // Refactor this function to work with new GenomePool architecture!!!
@@ -1115,7 +1121,7 @@ public class SimulationManager : MonoBehaviour {
                     Debug.Log("DOUBLE PREGNANT!! egg[" + agentsArray[randParentAgentIndex].childEggSackRef.index.ToString() + "]  Agent[" + randParentAgentIndex.ToString() + "]");
                 }
 
-                eggSackArray[eggSackIndex].InitializeEggSackFromGenome(eggSackIndex, agentGenomePoolArray[randParentAgentIndex], agentsArray[randParentAgentIndex], GetRandomFoodSpawnPosition().startPosition);
+                eggSackArray[eggSackIndex].InitializeEggSackFromGenome(eggSackIndex, agentsArray[randParentAgentIndex].candidateRef.candidateGenome, agentsArray[randParentAgentIndex], GetRandomFoodSpawnPosition().startPosition);
             
                 agentsArray[randParentAgentIndex].BeginPregnancy(eggSackArray[eggSackIndex]);
 
@@ -1135,10 +1141,10 @@ public class SimulationManager : MonoBehaviour {
                 if(eggSackRespawnCounterArrayOld[eggSpecies] > respawnCooldown) {  // try to encourage more pregnancies?
                     //Debug.Log("InitializeEggSackFromGenomeImmaculate! Egg[" + eggSackIndex.ToString() + "]");
                         
-                    int agentGenomeIndex = UnityEngine.Random.Range(eggSpecies * speciesSize, (eggSpecies + 1) * speciesSize);
+                    int agentGenomeIndex = UnityEngine.Random.Range(0, numAgents);
 
                     eggSackArray[eggSackIndex].parentAgentIndex = agentGenomeIndex;
-                    eggSackArray[eggSackIndex].InitializeEggSackFromGenome(eggSackIndex, agentGenomePoolArray[agentGenomeIndex], null, GetRandomFoodSpawnPosition().startPosition);
+                    eggSackArray[eggSackIndex].InitializeEggSackFromGenome(eggSackIndex, agentsArray[agentGenomeIndex].candidateRef.candidateGenome, null, GetRandomFoodSpawnPosition().startPosition);
 
                     eggSackRespawnCounterArrayOld[eggSpecies] = 0;
                     
@@ -1307,7 +1313,7 @@ public class SimulationManager : MonoBehaviour {
         }
     }
     
-    private void SetAgentGenomeToMutatedCopyOfParentGenome(int agentIndex, AgentGenome parentGenome) {
+    /*private void SetAgentGenomeToMutatedCopyOfParentGenome(int agentIndex, AgentGenome parentGenome) {
 
         BodyGenome newBodyGenome = new BodyGenome();
         BrainGenome newBrainGenome = new BrainGenome();
@@ -1320,7 +1326,7 @@ public class SimulationManager : MonoBehaviour {
         
         agentGenomePoolArray[agentIndex].bodyGenome = newBodyGenome; 
         agentGenomePoolArray[agentIndex].brainGenome = newBrainGenome;         
-    }
+    }*/
     
     private StartPositionGenome GetRandomAgentSpawnPosition(int speciesIndex) {
         int numSpawnZones = startPositionsPresets.spawnZonesList.Count;
@@ -1500,8 +1506,8 @@ public class SimulationManager : MonoBehaviour {
         
     }
 
-    public void SaveTrainingData() {
-        
+    public void SaveTrainingData() {  // ********* BROKEN BY SPECIATION UPDATE!!!!!!!!!!!!! ****************
+        /*
         Debug.Log("SAVE Population!");
         GenePool pool = new GenePool(agentGenomePoolArray);
         string json = JsonUtility.ToJson(pool);
@@ -1513,10 +1519,10 @@ public class SimulationManager : MonoBehaviour {
         //Debug.Log(Application.persistentDataPath);
         Debug.Log(filePath);
         System.IO.File.WriteAllText(filePath, json);
-        
+        */
     }
-    public void LoadTrainingData() {
-        
+    public void LoadTrainingData() {  // ********* BROKEN BY SPECIATION UPDATE!!!!!!!!!!!!! ****************
+        /*
         //Debug.Log("LOAD Population!");
         //"E:\Unity Projects\GitHub\Evolution\Assets\GridSearchSaves\2018_2_13_12_35\GS_RawScores.json"
         string filePath = Path.Combine(Application.streamingAssetsPath, "testSave.json");
@@ -1537,7 +1543,7 @@ public class SimulationManager : MonoBehaviour {
             agentGenomePoolArray[i] = loadedData.genomeArray[loadedIndex];
         }
         //agentGenomePoolArray = loadedData.genomeArray;
-        
+        */
     }
     
     #region OLD CODE: // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& OLD CODE! &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&

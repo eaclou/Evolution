@@ -288,14 +288,14 @@ public class SimulationStateData {
             critterInitDataArray[i].boundingBoxSize = simManager.agentsArray[i].fullSizeBoundingBox;
             critterInitDataArray[i].spawnSizePercentage = simManager.agentsArray[i].spawnStartingScale;
             critterInitDataArray[i].maxEnergy = Mathf.Min(simManager.agentsArray[i].fullSizeBoundingBox.x * simManager.agentsArray[i].fullSizeBoundingBox.y, 0.5f);
-            critterInitDataArray[i].primaryHue = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.huePrimary;
-            critterInitDataArray[i].secondaryHue = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.hueSecondary;
+            critterInitDataArray[i].primaryHue = simManager.agentsArray[i].candidateRef.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
+            critterInitDataArray[i].secondaryHue = simManager.agentsArray[i].candidateRef.candidateGenome.bodyGenome.appearanceGenome.hueSecondary;
             critterInitDataArray[i].mouthIsActive = 1f;
             if(simManager.agentsArray[i].mouthRef.isPassive) {
                 critterInitDataArray[i].mouthIsActive = 0f;
             }
-            critterInitDataArray[i].bodyPatternX = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.bodyStrokeBrushTypeX;
-            critterInitDataArray[i].bodyPatternY = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.bodyStrokeBrushTypeY;  // what grid cell of texture sheet to use
+            critterInitDataArray[i].bodyPatternX = simManager.agentsArray[i].candidateRef.candidateGenome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeX;
+            critterInitDataArray[i].bodyPatternY = simManager.agentsArray[i].candidateRef.candidateGenome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeY;  // what grid cell of texture sheet to use
         }
         critterInitDataCBuffer.SetData(critterInitDataArray);
         

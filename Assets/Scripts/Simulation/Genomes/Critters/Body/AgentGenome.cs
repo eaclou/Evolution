@@ -5,7 +5,7 @@ using UnityEngine;
 [System.Serializable]
 public class AgentGenome {
 
-    public int index = -1;
+    public int index = -1;  // *** THIS IS NOW MEANINGLESS??
     public BodyGenome bodyGenome;
     public BrainGenome brainGenome;
 

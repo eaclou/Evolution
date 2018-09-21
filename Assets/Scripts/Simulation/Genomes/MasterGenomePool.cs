@@ -29,5 +29,9 @@ public class MasterGenomePool {
         completeSpeciesPoolsList.Add(firstSpecies);
     }
         
-	
+	public int GetClosestActiveSpeciesToGenome(AgentGenome genome) {
+
+        // temp:
+        return currentlyActiveSpeciesIDList[0];
+    }
 }

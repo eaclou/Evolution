@@ -1075,7 +1075,7 @@ public class Agent : MonoBehaviour {
         curLifeStage = AgentLifeStage.AwaitingRespawn;
         //InitializeAgentWidths(genome);
         InitializeGameObjectsAndComponents();
-        //InitializeModules(genome);
+        //InitializeModules(genome);  //  This breaks MapGridCell update, because coreModule doesn't exist?
     }
     private void InitializeGameObjectsAndComponents() {
         // Create Physics GameObject:
