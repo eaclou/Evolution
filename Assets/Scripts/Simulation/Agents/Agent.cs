@@ -1070,7 +1070,7 @@ public class Agent : MonoBehaviour {
         movementModule = new CritterModuleMovement();
         movementModule.Initialize(genome.bodyGenome.movementGenome);            
     }
-
+    
     public void FirstTimeInitialize() {//AgentGenome genome) {  // ** See if I can get away with init sans Genome
         curLifeStage = AgentLifeStage.AwaitingRespawn;
         //InitializeAgentWidths(genome);
