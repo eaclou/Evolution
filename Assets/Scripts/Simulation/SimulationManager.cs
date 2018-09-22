@@ -360,7 +360,7 @@ public class SimulationManager : MonoBehaviour {
         for (int i = 0; i < agentsArray.Length; i++) {
             GameObject agentGO = new GameObject("Agent" + i.ToString());
             Agent newAgent = agentGO.AddComponent<Agent>();
-            newAgent.speciesIndex = Mathf.FloorToInt((float)i / (float)numAgents * (float)numSpecies);
+            //newAgent.speciesIndex = Mathf.FloorToInt((float)i / (float)numAgents * (float)numSpecies);
             newAgent.FirstTimeInitialize(); // agentGenomePoolArray[i]);
             agentsArray[i] = newAgent; // Add to stored list of current Agents            
         }
@@ -904,19 +904,15 @@ public class SimulationManager : MonoBehaviour {
             }
         }
     }  // *** revisit
-    private void CheckForReadyToSpawnAgents() {
-        
+    private void CheckForReadyToSpawnAgents() {        
         for (int a = 0; a < agentsArray.Length; a++) {
-            if(agentRespawnCounter > 2) {
-                AttemptToSpawnAgent(a); //, agentsArray[a].speciesIndex);
+            if(agentRespawnCounter > 21) {
+                if (agentsArray[a].curLifeStage == Agent.AgentLifeStage.AwaitingRespawn) {
+                    //Debug.Log("AttemptToSpawnAgent(" + a.ToString() + ")");
+                    AttemptToSpawnAgent(a);
+                    agentRespawnCounter = 0;
+                }
             }
-
-
-            //if (agentRespawnCounter[agentsArray[a].speciesIndex] > 5) {
-            //if (agentsArray[a].curLifeStage == Agent.AgentLifeStage.AwaitingRespawn) {
-            //    AttemptToSpawnAgent(a); //, agentsArray[a].speciesIndex);
-            //}
-            //}
         }                
     }
     private void AttemptToSpawnAgent(int agentIndex) { //, int speciesIndex) {
@@ -929,25 +925,27 @@ public class SimulationManager : MonoBehaviour {
         int speciesIndex = masterGenomePool.currentlyActiveSpeciesIDList[randomTableIndex];
 
         // Find next-in-line genome waiting to be evaluated:
-        AgentGenome newGenome = masterGenomePool.completeSpeciesPoolsList[speciesIndex].GetNextAvailableCandidateGenome();
-        if(newGenome == null) {
+        CandidateAgentData candidateData = masterGenomePool.completeSpeciesPoolsList[speciesIndex].GetNextAvailableCandidate();
+
+        //Debug.Log("AttemptToSpawnAgent(" + agentIndex.ToString() + ") speciesIndex: " + speciesIndex.ToString() + " candidates: " + masterGenomePool.completeSpeciesPoolsList[speciesIndex].candidateGenomesList.Count.ToString());
+
+        if(candidateData == null) {
             // all candidates are currently being tested, or candidate list is empty?
+            //Debug.Log("AttemptToSpawnAgent(" + agentIndex.ToString() + ") candidateData == null");
         }
         else {
             // Good to go?
-            SpawnAgentImmaculate(newGenome, agentIndex, speciesIndex);
+            SpawnAgentImmaculate(candidateData, agentIndex, speciesIndex);
+            candidateData.isBeingEvaluated = true;
         }
 
 
         // &&&&&& OLD OLD OLD &&&&&&&&&&&&&&&& OLD OLD OLD &&&&&&&&&&&&&&&
-
         //bool foundValidEggSack = false;
         //EggSack parentEggSack = null;
         // Find an appropriate EggSack to spawn from:
-
         //int speciesPopulationSize = (_NumEggSacks / numSpecies);
         //int startIndex = speciesIndex * speciesPopulationSize;
-
         //List<int> validEggSackIndicesList = new List<int>();
         // *** FIND VALID EGGSACKS (of matching species) ***
         //Debug.Log("startIndex = " + startIndex.ToString() + ", endIndex: " + (startIndex + speciesPopulationSize).ToString());
@@ -965,7 +963,6 @@ public class SimulationManager : MonoBehaviour {
                 }
             }
         }*/
-
         //if(validEggSackIndicesList.Count > 0) {  // move this inside the for loop ??   // **** BROKEN BY SPECIATION UPDATE!!! *****
             //int randIndex = UnityEngine.Random.Range(0, validEggSackIndicesList.Count);
             //Debug.Log("listLength:" + validEggSackIndicesList.Count.ToString() + ", randIndex = " + randIndex.ToString() + ", p: " + validEggSackIndicesList[randIndex].ToString());
@@ -1003,6 +1000,7 @@ public class SimulationManager : MonoBehaviour {
         // -- look up the connected CandidateGenome & its speciesID
         CandidateAgentData candidateData = agentRef.candidateRef;
         int speciesIndex = agentRef.speciesIndex;
+        //Debug.Log("masterGenomePool.completeSpeciesPoolsList: " + masterGenomePool.completeSpeciesPoolsList.Count.ToString());
         SpeciesGenomePool speciesPool = masterGenomePool.completeSpeciesPoolsList[speciesIndex];
 
         // -- save its fitness score
@@ -1063,19 +1061,19 @@ public class SimulationManager : MonoBehaviour {
         agentRespawnCounterArrayOld[speciesIndex] = 0;
         agentRespawnCounter = 0;
     }*/
-    private void SpawnAgentImmaculate(AgentGenome parentGenome, int agentIndex, int speciesIndex) {
+    private void SpawnAgentImmaculate(CandidateAgentData sourceCandidate, int agentIndex, int speciesIndex) {
 
         // Refactor this function to work with new GenomePool architecture!!!
         
 
         numAgentsBorn++;
         currentOldestAgent = agentsArray[rankedIndicesList[0]].scoreCounter;
-        agentsArray[agentIndex].InitializeSpawnAgentImmaculate(agentIndex, parentGenome, GetRandomFoodSpawnPosition()); // Spawn that genome in dead Agent's body and revive it!
+        agentsArray[agentIndex].InitializeSpawnAgentImmaculate(agentIndex, sourceCandidate, GetRandomFoodSpawnPosition()); // Spawn that genome in dead Agent's body and revive it!
 
         theRenderKing.UpdateAgentWidthsTexture(agentsArray[agentIndex]);
                 
-        agentRespawnCounterArrayOld[speciesIndex] = 0;
-        agentRespawnCounter = 0;
+        //agentRespawnCounterArrayOld[speciesIndex] = 0;
+        
     }
     public void ProcessDeadEggSack(int eggSackIndex) {
         //Debug.Log("ProcessDeadEggSack(" + eggSackIndex.ToString() + ") eggSackRespawnCounter " + eggSackRespawnCounter.ToString());
@@ -1137,18 +1135,26 @@ public class SimulationManager : MonoBehaviour {
                 }
 
                 if(eggSackRespawnCounterArrayOld[eggSpecies] > respawnCooldown) {  // try to encourage more pregnancies?
-                    //Debug.Log("InitializeEggSackFromGenomeImmaculate! Egg[" + eggSackIndex.ToString() + "]");
-                        
-                    int agentGenomeIndex = UnityEngine.Random.Range(0, numAgents);
+                   
+                    List<int> eligibleAgentIndicesList = new List<int>();
+                    for(int a = 0; a < numAgents; a++) {
+                        if(agentsArray[a].isInert) {
 
-                    eggSackArray[eggSackIndex].parentAgentIndex = agentGenomeIndex;
-                    eggSackArray[eggSackIndex].InitializeEggSackFromGenome(eggSackIndex, agentsArray[agentGenomeIndex].candidateRef.candidateGenome, null, GetRandomFoodSpawnPosition().startPosition);
-
-                    eggSackRespawnCounterArrayOld[eggSpecies] = 0;
+                        }
+                        else {
+                            eligibleAgentIndicesList.Add(a);
+                        }
+                    }
+                    if(eligibleAgentIndicesList.Count > 0) {
+                        int randListIndex = UnityEngine.Random.Range(0, eligibleAgentIndicesList.Count);
+                        int agentIndex = eligibleAgentIndicesList[randListIndex];
                     
-                }
-                //}
-                                
+                        eggSackArray[eggSackIndex].parentAgentIndex = agentIndex;
+                        eggSackArray[eggSackIndex].InitializeEggSackFromGenome(eggSackIndex, agentsArray[agentIndex].candidateRef.candidateGenome, null, GetRandomFoodSpawnPosition().startPosition);
+
+                        eggSackRespawnCounterArrayOld[eggSpecies] = 0;       
+                    }         
+                }             
             }
         }
         else {

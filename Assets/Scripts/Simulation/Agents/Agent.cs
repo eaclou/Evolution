@@ -149,6 +149,7 @@ public class Agent : MonoBehaviour {
     private void Awake() {        
         // temp fix for delayed spawning of Agents (leading to nullReferenceExceptions)
         agentWidthsArray = new float[widthsTexResolution];
+        isInert = true;
     }
     
     public void SetToAwaitingRespawn() {
@@ -161,8 +162,6 @@ public class Agent : MonoBehaviour {
     {
         curLifeStage = Agent.AgentLifeStage.Dead; // ....
 
-        //predatorAgent.springJoint.enabled = false; // spring joint is used while an Egg to attach to main eggSack, and when being swallowed to pin it to predator stomach?
-        //predatorAgent.springJoint.connectedBody = null;
         isInert = true;
 
         colliderBody.enabled = false;
@@ -496,11 +495,12 @@ public class Agent : MonoBehaviour {
                 if(lifeStageTransitionTimeStepCounter >= decayDurationTimeSteps) { //  Corpse naturally decayed without being fully consumed:
                     curLifeStage = AgentLifeStage.Null;                    
                     lifeStageTransitionTimeStepCounter = 0;
-                    
+                    isInert = true;
                 }
                 break;
             case AgentLifeStage.Null:
-                
+                isInert = true;
+
                 beingSwallowedFrameCounter = 0;
                 isBeingSwallowed = false;
                 isSwallowingPrey = false;
@@ -1224,8 +1224,11 @@ public class Agent : MonoBehaviour {
         mouseClickCollider.height = coreModule.coreLength / 2f * growthPercentage;
     }
 
-    public void InitializeSpawnAgentImmaculate(int agentIndex, AgentGenome genome, StartPositionGenome startPos) {        
-        index = agentIndex;        
+    public void InitializeSpawnAgentImmaculate(int agentIndex, CandidateAgentData candidateData, StartPositionGenome startPos) {        
+        index = agentIndex;
+        speciesIndex = candidateData.speciesID;
+        candidateRef = candidateData;
+        AgentGenome genome = candidateRef.candidateGenome;
                 
         curLifeStage = AgentLifeStage.Egg;
         parentEggSackRef = null;
@@ -1248,10 +1251,14 @@ public class Agent : MonoBehaviour {
         // Upgrade this to proper Pooling!!!!
         ReconstructAgentGameObjects(genome, null, startPos.startPosition, true);
 
-        brain = new Brain(genome.brainGenome, this);               
+        brain = new Brain(genome.brainGenome, this); 
+        
+        isInert = false;
     }
-    public void InitializeSpawnAgentFromEggSack(int agentIndex, AgentGenome genome, EggSack parentEggSack) {        
-        index = agentIndex;        
+    public void InitializeSpawnAgentFromEggSack(int agentIndex, CandidateAgentData candidateData, EggSack parentEggSack) {        
+        index = agentIndex;
+        candidateRef = candidateData;
+        AgentGenome genome = candidateRef.candidateGenome;
                 
         curLifeStage = AgentLifeStage.Egg;
         parentEggSackRef = parentEggSack;
@@ -1276,7 +1283,9 @@ public class Agent : MonoBehaviour {
         spawnOffset.z = 0f;
         ReconstructAgentGameObjects(genome, parentEggSack, parentEggSack.gameObject.transform.position + spawnOffset, false);
 
-        brain = new Brain(genome.brainGenome, this);               
+        brain = new Brain(genome.brainGenome, this);   
+        
+        isInert = false;
     }
 
 }

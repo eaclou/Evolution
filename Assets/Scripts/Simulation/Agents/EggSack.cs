@@ -2,7 +2,7 @@
 
 public class EggSack : MonoBehaviour {
         
-    public int index;
+    public int index;    
     public int speciesIndex; // temp - based on static species    
 
     public EggLifeStage curLifeStage;

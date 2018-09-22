@@ -60,7 +60,7 @@ public class CritterMovementTestScript : MonoBehaviour {
          }
 
         // Create dummy genome
-        testAgentGenome = new AgentGenome(0);
+        testAgentGenome = new AgentGenome();
         testAgentGenome.GenerateInitialRandomBodyGenome();
         testAgentGenome.InitializeRandomBrainFromCurrentBody(0f, 0);
         

@@ -31,12 +31,12 @@ public class SpeciesGenomePool {
         leaderboardGenomesList = new List<CandidateAgentData>();
                 
         for (int i = 0; i < numGenomes; i++) {
-            AgentGenome agentGenome = new AgentGenome(i);
+            AgentGenome agentGenome = new AgentGenome();
             agentGenome.GenerateInitialRandomBodyGenome();
             int tempNumHiddenNeurons = 0;
             agentGenome.InitializeRandomBrainFromCurrentBody(mutationSettingsRef.initialConnectionChance, tempNumHiddenNeurons);
 
-            CandidateAgentData candidate = new CandidateAgentData(agentGenome);
+            CandidateAgentData candidate = new CandidateAgentData(agentGenome, speciesID);
 
             candidateGenomesList.Add(candidate);
             leaderboardGenomesList.Add(candidate);
@@ -45,20 +45,19 @@ public class SpeciesGenomePool {
         representativeGenome = candidateGenomesList[0].candidateGenome;
     }
 
-    public AgentGenome GetNextAvailableCandidateGenome() {
+    public CandidateAgentData GetNextAvailableCandidate() {
 
-        AgentGenome genome = null; // candidateGenomesList[0].candidateGenome;
+        CandidateAgentData candidateData = null; // candidateGenomesList[0].candidateGenome;
         for(int i = 0; i < candidateGenomesList.Count; i++) {
             if(candidateGenomesList[i].isBeingEvaluated) {
                 // already being tested
             }
             else {
-                genome = candidateGenomesList[i].candidateGenome;
-                candidateGenomesList[i].isBeingEvaluated = true;
+                candidateData = candidateGenomesList[i];                
             }
         }
         
-        return genome;
+        return candidateData;
     }  
     
     public void ProcessCompletedCandidate(CandidateAgentData candidateData) {
@@ -72,7 +71,7 @@ public class SpeciesGenomePool {
     }
 
     public void AddNewCandidateGenome(AgentGenome newGenome) {
-        CandidateAgentData newCandidateData = new CandidateAgentData(newGenome);
+        CandidateAgentData newCandidateData = new CandidateAgentData(newGenome, speciesID);
         candidateGenomesList.Add(newCandidateData);
     }
 
@@ -127,7 +126,7 @@ public class SpeciesGenomePool {
         //return selectedIndex;
         // choose genome by lottery
         AgentGenome parentGenome = leaderboardGenomesList[selectedIndex].candidateGenome;
-        AgentGenome childGenome = new AgentGenome(-1);
+        AgentGenome childGenome = new AgentGenome();
         // return genome
 
         BodyGenome newBodyGenome = new BodyGenome();

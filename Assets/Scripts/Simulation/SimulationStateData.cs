@@ -225,169 +225,114 @@ public class SimulationStateData {
 
     public void PopulateSimDataArrays(SimulationManager simManager) {
         
-        /*for(int i = 0; i < agentSimDataArray.Length; i++) {  
-            Vector3 agentPos = simManager.agentsArray[i].bodyRigidbody.position;
-            agentSimDataArray[i].worldPos = new Vector2(agentPos.x, agentPos.y);  // in world(scene) coordinates
-            //agentSimDataArray[i].velocity = simManager.agentsArray[i].smoothedThrottle;
-            if(simManager.agentsArray[i].smoothedThrottle.sqrMagnitude == 0f) {
-                //agentSimDataArray[i].velocity = simManager.agentsArray[i].facingDirection;
-            }
-            else {
-                agentSimDataArray[i].velocity = simManager.agentsArray[i].smoothedThrottle.normalized;
-            }
-            agentSimDataArray[i].heading = simManager.agentsArray[i].facingDirection;
-            agentSimDataArray[i].size = simManager.agentsArray[i].bodyCritterSegment.GetComponent<CapsuleCollider2D>().size;
-            agentSimDataArray[i].primaryHue = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.huePrimary;
-            agentSimDataArray[i].secondaryHue = simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.hueSecondary;
-            
-            float maturity = 1f;
-            float decay = 0f;
-            if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Egg) {
-                maturity = simManager.agentsArray[i].spawnStartingScale; // (float)simManager.agentsArray[i].lifeStageTransitionTimeStepCounter / (float)simManager.agentsArray[i]._GestationDurationTimeSteps;
-            }
-            if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Young) {
-                maturity = Mathf.Lerp(simManager.agentsArray[i].spawnStartingScale, 1f, simManager.agentsArray[i].growthPercentage);
-            }
-            if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Dead) {
-                decay = (float)simManager.agentsArray[i].lifeStageTransitionTimeStepCounter / (float)simManager.agentsArray[i]._DecayDurationTimeSteps;
-            }
-            agentSimDataArray[i].maturity = maturity;
-            agentSimDataArray[i].decay = decay;            
-            if(simManager.agentsArray[i].mouthRef.isBiting) {
-                agentSimDataArray[i].eatingStatus = (float)simManager.agentsArray[i].mouthRef.bitingFrameCounter /
-                                                    ((float)simManager.agentsArray[i].mouthRef.biteHalfCycleDuration + (float)simManager.agentsArray[i].mouthRef.biteCooldownDuration);
-                // (agentSimDataArray[i].eatingStatus + 0.11f) % 1.0f;  // cycle around 0-1
-                agentSimDataArray[i].eatingStatus = Mathf.Pow(agentSimDataArray[i].eatingStatus, 0.5f);
-            }
-            else {
-                //if(agentSimDataArray[i].eatingStatus > 0.5f) {
-                //    agentSimDataArray[i].eatingStatus *= 1.1f;
-                //}
-                //else {
-                //    agentSimDataArray[i].eatingStatus *= 0.9f;
-                //}
-                //agentSimDataArray[i].eatingStatus *= 0.1f;
-            }
-            // Experimental! move display data forward when chomping:
-            //float eatingCycle = Mathf.Sin(agentSimDataArray[i].eatingStatus * Mathf.PI);
-            //agentSimDataArray[i].worldPos += simManager.agentsArray[i].facingDirection * eatingCycle * 0.25f;
-            //agentSimDataArray[i].heading = (simManager.agentsArray[i].facingDirection + UnityEngine.Random.insideUnitCircle * 0.2f * eatingCycle).normalized;
-            //agentSimDataArray[i].size.y *= (eatingCycle * 0.25f + 1.0f);
-            //agentSimDataArray[i].size.x *= (1.0f - eatingCycle * 0.25f);
-
-            agentSimDataArray[i].foodAmount = Mathf.Lerp(agentSimDataArray[i].foodAmount, simManager.agentsArray[i].coreModule.stomachContents / simManager.agentsArray[i].coreModule.stomachCapacity, 0.16f);
-            
-            
-        }
-        agentSimDataCBuffer.SetData(agentSimDataArray); // send data to GPU for Rendering
-        */
-
-
         // CRITTER INIT: // *** MOVE INTO OWN FUNCTION -- update more efficiently with compute shader?
-        for(int i = 0; i < critterInitDataArray.Length; i++) {
-            critterInitDataArray[i].boundingBoxSize = simManager.agentsArray[i].fullSizeBoundingBox;
-            critterInitDataArray[i].spawnSizePercentage = simManager.agentsArray[i].spawnStartingScale;
-            critterInitDataArray[i].maxEnergy = Mathf.Min(simManager.agentsArray[i].fullSizeBoundingBox.x * simManager.agentsArray[i].fullSizeBoundingBox.y, 0.5f);
-            critterInitDataArray[i].primaryHue = simManager.agentsArray[i].candidateRef.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
-            critterInitDataArray[i].secondaryHue = simManager.agentsArray[i].candidateRef.candidateGenome.bodyGenome.appearanceGenome.hueSecondary;
-            critterInitDataArray[i].mouthIsActive = 1f;
-            if(simManager.agentsArray[i].mouthRef.isPassive) {
-                critterInitDataArray[i].mouthIsActive = 0f;
-            }
-            critterInitDataArray[i].bodyPatternX = simManager.agentsArray[i].candidateRef.candidateGenome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeX;
-            critterInitDataArray[i].bodyPatternY = simManager.agentsArray[i].candidateRef.candidateGenome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeY;  // what grid cell of texture sheet to use
-        }
-        critterInitDataCBuffer.SetData(critterInitDataArray);
-        
-        // CRITTER SIM DATA: updated every frame:
-        for(int i = 0; i < critterSimDataArray.Length; i++) {
-            Vector3 agentPos = simManager.agentsArray[i].bodyRigidbody.position;
+        for(int i = 0; i < simManager._NumAgents; i++) {
 
-            critterSimDataArray[i].worldPos = new Vector3(agentPos.x, agentPos.y, 1f); // simManager.agentsArray[i].fullSizeBoundingBox.x * 0.5f);  // in world(scene) coordinates
+            if (simManager.agentsArray[i].isInert) {
 
-            if(simManager.agentsArray[i].smoothedThrottle.sqrMagnitude > 0f) {
-                critterSimDataArray[i].velocity = simManager.agentsArray[i].smoothedThrottle.normalized;
             }
-            critterSimDataArray[i].heading = simManager.agentsArray[i].facingDirection;
-            
-            float embryo = 1f;
-            if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Egg) {
-                embryo = (float)simManager.agentsArray[i].lifeStageTransitionTimeStepCounter / (float)simManager.agentsArray[i]._GestationDurationTimeSteps;
-                embryo = Mathf.Clamp01(embryo);
-                //embryo = 0f;
-            }
-            critterSimDataArray[i].embryoPercentage = embryo;
-            critterSimDataArray[i].growthPercentage = Mathf.Clamp01(simManager.agentsArray[i].growthPercentage);
-            float decay = 0f;
-            if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Dead) {
-                decay = (float)simManager.agentsArray[i].lifeStageTransitionTimeStepCounter / (float)simManager.agentsArray[i]._DecayDurationTimeSteps;
-            }
-            if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.AwaitingRespawn) {
-                decay = 1f;
-            }
-            critterSimDataArray[i].decayPercentage = decay;
+            else {
+                //Debug.Log("Error isInert FALSE: " + i.ToString());
+                // INITDATA ::==========================================================================================================================================================================
+                critterInitDataArray[i].boundingBoxSize = simManager.agentsArray[i].fullSizeBoundingBox;
+                critterInitDataArray[i].spawnSizePercentage = simManager.agentsArray[i].spawnStartingScale;
+                critterInitDataArray[i].maxEnergy = Mathf.Min(simManager.agentsArray[i].fullSizeBoundingBox.x * simManager.agentsArray[i].fullSizeBoundingBox.y, 0.5f);
+                critterInitDataArray[i].primaryHue = simManager.agentsArray[i].candidateRef.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
+                critterInitDataArray[i].secondaryHue = simManager.agentsArray[i].candidateRef.candidateGenome.bodyGenome.appearanceGenome.hueSecondary;
+                critterInitDataArray[i].mouthIsActive = 1f;
+                if(simManager.agentsArray[i].mouthRef.isPassive) {
+                    critterInitDataArray[i].mouthIsActive = 0f;
+                }
+                critterInitDataArray[i].bodyPatternX = simManager.agentsArray[i].candidateRef.candidateGenome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeX;
+                critterInitDataArray[i].bodyPatternY = simManager.agentsArray[i].candidateRef.candidateGenome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeY;  // what grid cell of texture sheet to use
+                
 
-            if(simManager.agentsArray[i].isBeingSwallowed)
-            {
-                float digestedPercentage = (float)simManager.agentsArray[i].beingSwallowedFrameCounter / (float)simManager.agentsArray[i].swallowDuration;
-                //critterSimDataArray[i].growthPercentage = 1f - digestedPercentage;
-                critterSimDataArray[i].decayPercentage = digestedPercentage;
-            }
-            critterSimDataArray[i].foodAmount = Mathf.Lerp(critterSimDataArray[i].foodAmount, simManager.agentsArray[i].coreModule.stomachContents / simManager.agentsArray[i].coreModule.stomachCapacity, 0.16f);
-            critterSimDataArray[i].energy = simManager.agentsArray[i].coreModule.energyRaw / simManager.agentsArray[i].coreModule.maxEnergyStorage;
-            critterSimDataArray[i].health = simManager.agentsArray[i].coreModule.healthHead;
-            critterSimDataArray[i].stamina = simManager.agentsArray[i].coreModule.stamina[0];
-            critterSimDataArray[i].isBiting = 0f;            
-            if(simManager.agentsArray[i].growthPercentage > 0.025f)
-            {
-                if (simManager.agentsArray[i].coreModule.mouthEffector[0] > 0.0f)
+
+                // SIMDATA ::===========================================================================================================================================================================
+                Vector3 agentPos = simManager.agentsArray[i].bodyRigidbody.position;
+                critterSimDataArray[i].worldPos = new Vector3(agentPos.x, agentPos.y, 1f);
+                if(simManager.agentsArray[i].smoothedThrottle.sqrMagnitude > 0f) {
+                    critterSimDataArray[i].velocity = simManager.agentsArray[i].smoothedThrottle.normalized;
+                }
+                critterSimDataArray[i].heading = simManager.agentsArray[i].facingDirection;            
+                float embryo = 1f;
+                if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Egg) {
+                    embryo = (float)simManager.agentsArray[i].lifeStageTransitionTimeStepCounter / (float)simManager.agentsArray[i]._GestationDurationTimeSteps;
+                    embryo = Mathf.Clamp01(embryo);
+                }
+                critterSimDataArray[i].embryoPercentage = embryo;
+                critterSimDataArray[i].growthPercentage = Mathf.Clamp01(simManager.agentsArray[i].growthPercentage);
+                float decay = 0f;
+                if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Dead) {
+                    decay = (float)simManager.agentsArray[i].lifeStageTransitionTimeStepCounter / (float)simManager.agentsArray[i]._DecayDurationTimeSteps;
+                }
+                if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.AwaitingRespawn) {
+                    decay = 1f;
+                }
+                critterSimDataArray[i].decayPercentage = decay;
+
+                if(simManager.agentsArray[i].isBeingSwallowed)
                 {
-                    if (simManager.agentsArray[i].mouthRef.isPassive)
+                    float digestedPercentage = (float)simManager.agentsArray[i].beingSwallowedFrameCounter / (float)simManager.agentsArray[i].swallowDuration;
+                    critterSimDataArray[i].decayPercentage = digestedPercentage;
+                }
+                critterSimDataArray[i].foodAmount = Mathf.Lerp(critterSimDataArray[i].foodAmount, simManager.agentsArray[i].coreModule.stomachContents / simManager.agentsArray[i].coreModule.stomachCapacity, 0.16f);
+                critterSimDataArray[i].energy = simManager.agentsArray[i].coreModule.energyRaw / simManager.agentsArray[i].coreModule.maxEnergyStorage;
+                critterSimDataArray[i].health = simManager.agentsArray[i].coreModule.healthHead;
+                critterSimDataArray[i].stamina = simManager.agentsArray[i].coreModule.stamina[0];
+                critterSimDataArray[i].isBiting = 0f;            
+                if(simManager.agentsArray[i].growthPercentage > 0.025f)
+                {
+                    if (simManager.agentsArray[i].coreModule.mouthEffector[0] > 0.0f)
                     {
-                        critterSimDataArray[i].isBiting = 0.55f;
-                    }
-                    else
-                    {
-                        if (simManager.agentsArray[i].mouthRef.isBiting)
+                        if (simManager.agentsArray[i].mouthRef.isPassive)
                         {
-                            if (simManager.agentsArray[i].mouthRef.bitingFrameCounter <= simManager.agentsArray[i].mouthRef.biteHalfCycleDuration)
+                            critterSimDataArray[i].isBiting = 0.55f;
+                        }
+                        else
+                        {
+                            if (simManager.agentsArray[i].mouthRef.isBiting)
                             {
-                                critterSimDataArray[i].isBiting = 1f;
+                                if (simManager.agentsArray[i].mouthRef.bitingFrameCounter <= simManager.agentsArray[i].mouthRef.biteHalfCycleDuration)
+                                {
+                                    critterSimDataArray[i].isBiting = 1f;
+                                }
                             }
                         }
                     }
+                    if (simManager.agentsArray[i].mouthRef.isBiting)
+                    {
+                        if (simManager.agentsArray[i].mouthRef.isPassive)
+                        {
+                            critterSimDataArray[i].biteAnimCycle = Mathf.Clamp01((float)simManager.agentsArray[i].mouthRef.bitingFrameCounter / (float)(simManager.agentsArray[i].mouthRef.biteHalfCycleDuration * 4)); //Mathf.Lerp(1f, critterSimDataArray[i].biteAnimCycle, 0.1f);
+                        }
+                        else
+                        {
+                            critterSimDataArray[i].biteAnimCycle = Mathf.Clamp01((float)simManager.agentsArray[i].mouthRef.bitingFrameCounter / (float)(simManager.agentsArray[i].mouthRef.biteHalfCycleDuration * 2));
+                        }
+                    }
                 }
-                if (simManager.agentsArray[i].mouthRef.isBiting)
+                if (simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Egg)
                 {
-                    if (simManager.agentsArray[i].mouthRef.isPassive)
-                    {
-                        critterSimDataArray[i].biteAnimCycle = Mathf.Clamp01((float)simManager.agentsArray[i].mouthRef.bitingFrameCounter / (float)(simManager.agentsArray[i].mouthRef.biteHalfCycleDuration * 4)); //Mathf.Lerp(1f, critterSimDataArray[i].biteAnimCycle, 0.1f);
-                    }
-                    else
-                    {
-                        critterSimDataArray[i].biteAnimCycle = Mathf.Clamp01((float)simManager.agentsArray[i].mouthRef.bitingFrameCounter / (float)(simManager.agentsArray[i].mouthRef.biteHalfCycleDuration * 2));
-
-                    }
+                    critterSimDataArray[i].isBiting = 0f;
+                    critterSimDataArray[i].biteAnimCycle *= 0.75f;
                 }
-            }
-            if (simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Egg)
-            {
-                critterSimDataArray[i].isBiting = 0f;
-                critterSimDataArray[i].biteAnimCycle *= 0.75f;
-            }
 
-            critterSimDataArray[i].moveAnimCycle = simManager.agentsArray[i].animationCycle;
-            critterSimDataArray[i].turnAmount = simManager.agentsArray[i].turningAmount;
-            critterSimDataArray[i].accel += Mathf.Clamp01(simManager.agentsArray[i].curAccel) * 1f; // ** RE-FACTOR!!!!
-		    critterSimDataArray[i].smoothedThrottle = simManager.agentsArray[i].smoothedThrottle.magnitude;
+                critterSimDataArray[i].moveAnimCycle = simManager.agentsArray[i].animationCycle;
+                critterSimDataArray[i].turnAmount = simManager.agentsArray[i].turningAmount;
+                critterSimDataArray[i].accel += Mathf.Clamp01(simManager.agentsArray[i].curAccel) * 1f; // ** RE-FACTOR!!!!
+		        critterSimDataArray[i].smoothedThrottle = simManager.agentsArray[i].smoothedThrottle.magnitude;
 
-            // Z & W coords represents agent's x/y Radii (in FluidCoords)
-            agentFluidPositionsArray[i] = new Vector4(agentPos.x / SimulationManager._MapSize, 
-                                                      agentPos.y / SimulationManager._MapSize, 
-                                                      (simManager.agentsArray[i].fullSizeBoundingBox.x + 0.1f) * 0.5f / SimulationManager._MapSize, // **** RE-VISIT!!!!! ****
-                                                      (simManager.agentsArray[i].fullSizeBoundingBox.y + 0.1f) * 0.5f / SimulationManager._MapSize); //... 0.5/140 ...
+                // Z & W coords represents agent's x/y Radii (in FluidCoords)
+                agentFluidPositionsArray[i] = new Vector4(agentPos.x / SimulationManager._MapSize, 
+                                                          agentPos.y / SimulationManager._MapSize, 
+                                                          (simManager.agentsArray[i].fullSizeBoundingBox.x + 0.1f) * 0.5f / SimulationManager._MapSize, // **** RE-VISIT!!!!! ****
+                                                          (simManager.agentsArray[i].fullSizeBoundingBox.y + 0.1f) * 0.5f / SimulationManager._MapSize); //... 0.5/140 ...
+            }
         }
+        critterInitDataCBuffer.SetData(critterInitDataArray);        
         critterSimDataCBuffer.SetData(critterSimDataArray);
+
 
         for (int i = 0; i < simManager._NumEggSacks; i++) {
             Vector3 eggSackPos = simManager.eggSackArray[i].transform.position;

@@ -5,13 +5,13 @@ using UnityEngine;
 [System.Serializable]
 public class AgentGenome {
 
-    public int index = -1;  // *** THIS IS NOW MEANINGLESS??
+    //public int index = -1;  // *** THIS IS NOW MEANINGLESS??
     public BodyGenome bodyGenome;
     public BrainGenome brainGenome;
 
     // Constructor
-    public AgentGenome(int index) {
-        this.index = index;
+    public AgentGenome() {
+        //this.index = index;
 
         bodyGenome = new BodyGenome();  // empty constructors:
         brainGenome = new BrainGenome();
@@ -22,9 +22,9 @@ public class AgentGenome {
         bodyGenome.GenerateRandomBodyGenome();
 
         // **** TEMPORARY !!!! TESTING!!! ******
-        if(index < 41) {
+        //if(index < 41) {
             //bodyGenome.coreGenome.isPassive = false;
-        }
+        //}
     }
 
     /*public void InitializeBodyGenomeFromTemplate(BodyGenome bodyGenomeTemplate) {  // OLD
