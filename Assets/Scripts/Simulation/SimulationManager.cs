@@ -105,6 +105,7 @@ public class SimulationManager : MonoBehaviour {
     private int[] rankedIndicesList;
     private float[] rankedFitnessList;
     public int numAgentsBorn = 0;
+    public int numAgentsDied = 0;
     public int currentOldestAgent = 0;
     
         // Species
@@ -121,7 +122,7 @@ public class SimulationManager : MonoBehaviour {
     //public List<Vector4> statsBodySizesEachGenerationList;
     //public List<Vector4> statsFoodEatenEachGenerationList;
     //public List<Vector4> statsPredationEachGenerationList;
-    //public List<Vector4> statsNutrientsEachGenerationList;    
+    public List<Vector4> statsNutrientsEachGenerationList;    
     //public List<float> statsMutationEachGenerationList;
     //public List<Color> statsSpeciesPrimaryColorsList;
     //public List<Color> statsSpeciesSecondaryColorsList;
@@ -315,7 +316,7 @@ public class SimulationManager : MonoBehaviour {
     }
     private void LoadingInitializePopulationGenomes() {
         masterGenomePool = new MasterGenomePool();
-        masterGenomePool.FirstTimeInitialize(64, settingsManager.mutationSettingsPersistent);
+        masterGenomePool.FirstTimeInitialize(numAgents, settingsManager.mutationSettingsPersistent);
 
         /*agentGenomePoolArray = new AgentGenome[numAgents];
         for (int i = 0; i < agentGenomePoolArray.Length; i++) {   // Create initial Population Supervised Learners
@@ -542,6 +543,8 @@ public class SimulationManager : MonoBehaviour {
     }
     private void LoadingSetUpFitnessStorage() {
         rawFitnessScoresArray = new float[numAgents];
+        statsNutrientsEachGenerationList = new List<Vector4>();
+        statsNutrientsEachGenerationList.Add(Vector4.one * 0.0001f);
         /*
         statsLifespanEachGenerationList = new List<Vector4>(); // 
         statsFoodEatenEachGenerationList = new List<Vector4>();
@@ -596,6 +599,8 @@ public class SimulationManager : MonoBehaviour {
         //Find closest critters to foodParticles:
         foodManager.FindClosestFoodParticleToCritters(simStateData);
         foodManager.MeasureTotalFoodParticlesAmount();
+
+        masterGenomePool.Tick(); // keep track of when species created so can't create multiple per frame?
 
                 
         // ******** REVISIT CODE ORDERING!!!!  -- Should check for death Before or After agent Tick/PhysX ???
@@ -906,7 +911,7 @@ public class SimulationManager : MonoBehaviour {
     }  // *** revisit
     private void CheckForReadyToSpawnAgents() {        
         for (int a = 0; a < agentsArray.Length; a++) {
-            if(agentRespawnCounter > 21) {
+            if(agentRespawnCounter > 6) {
                 if (agentsArray[a].curLifeStage == Agent.AgentLifeStage.AwaitingRespawn) {
                     //Debug.Log("AttemptToSpawnAgent(" + a.ToString() + ")");
                     AttemptToSpawnAgent(a);
@@ -923,7 +928,7 @@ public class SimulationManager : MonoBehaviour {
         // Using Random Selection as first naive implementation:
         int randomTableIndex = UnityEngine.Random.Range(0, masterGenomePool.currentlyActiveSpeciesIDList.Count);
         int speciesIndex = masterGenomePool.currentlyActiveSpeciesIDList[randomTableIndex];
-
+        
         // Find next-in-line genome waiting to be evaluated:
         CandidateAgentData candidateData = masterGenomePool.completeSpeciesPoolsList[speciesIndex].GetNextAvailableCandidate();
 
@@ -935,8 +940,28 @@ public class SimulationManager : MonoBehaviour {
         }
         else {
             // Good to go?
-            SpawnAgentImmaculate(candidateData, agentIndex, speciesIndex);
-            candidateData.isBeingEvaluated = true;
+            // Look for avaialbe EggSacks first:
+            bool foundValidEggSack = false;
+            EggSack parentEggSack = null;
+            List<int> validEggSackIndicesList = new List<int>();
+            for(int i = 0; i < numEggSacks; i++) {  // if EggSack belongs to the right species
+                if(eggSackArray[i].curLifeStage == EggSack.EggLifeStage.Growing) {
+                    if(eggSackArray[i].lifeStageTransitionTimeStepCounter < eggSackArray[i]._MatureDurationTimeSteps) {  // egg sack is at proper stage of development
+                        validEggSackIndicesList.Add(i);
+                    }
+                }
+            }
+            if(validEggSackIndicesList.Count > 0) {  // move this inside the for loop ??   // **** BROKEN BY SPECIATION UPDATE!!! *****
+                int randIndex = UnityEngine.Random.Range(0, validEggSackIndicesList.Count);
+                //Debug.Log("listLength:" + validEggSackIndicesList.Count.ToString() + ", randIndex = " + randIndex.ToString() + ", p: " + validEggSackIndicesList[randIndex].ToString());
+                parentEggSack = eggSackArray[validEggSackIndicesList[randIndex]];
+                SpawnAgentFromEggSack(candidateData, agentIndex, speciesIndex, parentEggSack);
+                candidateData.isBeingEvaluated = true;
+            }
+            else { // No eggSack found:
+                SpawnAgentImmaculate(candidateData, agentIndex, speciesIndex);
+                candidateData.isBeingEvaluated = true;
+            }
         }
 
 
@@ -995,7 +1020,7 @@ public class SimulationManager : MonoBehaviour {
     
     // *** confirm these are set up alright       
     public void ProcessNullAgent(Agent agentRef) {   // (Upon Agent Death:)
-
+        numAgentsDied++;
         // Now, this function should:
         // -- look up the connected CandidateGenome & its speciesID
         CandidateAgentData candidateData = agentRef.candidateRef;
@@ -1011,27 +1036,31 @@ public class SimulationManager : MonoBehaviour {
             // -- If it has:
             // -- then push the candidate to Leaderboard List so it is eligible for reproduction
             // -- at the same time, remove it from the ToBeEvaluated pool
-            speciesPool.ProcessCompletedCandidate(candidateData);            
+            speciesPool.ProcessCompletedCandidate(candidateData);
+            float lerpAmount = Mathf.Max(0.01f, 1f / (float)speciesPool.numAgentsEvaluated);
+            masterGenomePool.completeSpeciesPoolsList[speciesIndex].avgFitnessScore = Mathf.Lerp(speciesPool.avgFitnessScore , (float)agentRef.scoreCounter, lerpAmount);
         }
         else {
             // -- Else:
             // -- (move to end of pool queue OR evaluate all Trials of one genome before moving onto the next)
 
         }
-        // -- Select a ParentGenome from the leaderboardList and create a mutated copy (childGenome):
-        AgentGenome newGenome = speciesPool.GetNewMutatedGenome();
-        // -- Check which species this new childGenome should belong to (most likely this one, but maybe it creates a new species or better fits in with a diff existing species)
-        //........
-        int newGenomeSpeciesIndex = masterGenomePool.GetClosestActiveSpeciesToGenome(newGenome); // *** This function UNFINISHED!
 
-        // -- Add the new childGenomeCandidate to its respective Species (toBeEvaluated pool) - Reset candidate info like beingEvaluated, scores, numEvals etc.
-        masterGenomePool.completeSpeciesPoolsList[newGenomeSpeciesIndex].AddNewCandidateGenome(newGenome);
+        // &&&&& *****  HERE!!!! **** &&&&&&   --- Select a species first to serve as parentGenome !! ***** &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+        // Can be random selection (unbiased), or proportional to species avg Fitnesses?
+        SpeciesGenomePool sourceSpeciesPool = masterGenomePool.SelectNewGenomeSourceSpecies();
+        // -- Select a ParentGenome from the leaderboardList and create a mutated copy (childGenome):
+        AgentGenome newGenome = sourceSpeciesPool.GetNewMutatedGenome();
+        // -- Check which species this new childGenome should belong to (most likely its parent, but maybe it creates a new species or better fits in with a diff existing species)        
+        masterGenomePool.AssignNewMutatedGenomeToSpecies(newGenome, sourceSpeciesPool.speciesID); // Checks which species this new genome should belong to and adds it to queue / does necessary processing   
+                
         // -- Clear Agent object so that it's ready to be reused
             // i.e. Set curLifecycle to .AwaitingRespawn ^
             // then new Agents should use the next available genome from the updated ToBeEvaluated pool      
         
         agentRef.SetToAwaitingRespawn();
 
+        ProcessAgentScores(agentRef);  // *** CLEAN THIS UP!!! ***
 
         // &&&&&& OLD OLD OLD &&&&&&&&&&&& OLD OLD &&&&&&&&&&&&&&&&& OLD &&&&&&&&&&&&&&&&&&&&&&&&&&&&&
         /*
@@ -1047,20 +1076,20 @@ public class SimulationManager : MonoBehaviour {
         */
     }
     // ********** RE-IMPLEMENT THIS LATER!!!! ******************************************************************************
-    /*private void SpawnAgentFromEggSack(int agentIndex, int speciesIndex, EggSack parentEggSack) {
+    private void SpawnAgentFromEggSack(CandidateAgentData sourceCandidate, int agentIndex, int speciesIndex, EggSack parentEggSack) {
 
         // Refactor this function to work with new GenomePool architecture!!!
 
         //Debug.Log("SpawnAgentFromEggSack! " + agentIndex.ToString());
         numAgentsBorn++;
         currentOldestAgent = agentsArray[rankedIndicesList[0]].scoreCounter;
-        agentsArray[agentIndex].InitializeSpawnAgentFromEggSack(agentIndex, agentGenomePoolArray[agentIndex], parentEggSack); // Spawn that genome in dead Agent's body and revive it!
+        agentsArray[agentIndex].InitializeSpawnAgentFromEggSack(agentIndex, sourceCandidate, parentEggSack); // Spawn that genome in dead Agent's body and revive it!
 
         theRenderKing.UpdateAgentWidthsTexture(agentsArray[agentIndex]);
                 
-        agentRespawnCounterArrayOld[speciesIndex] = 0;
-        agentRespawnCounter = 0;
-    }*/
+        //agentRespawnCounterArrayOld[speciesIndex] = 0;
+        //agentRespawnCounter = 0;
+    }
     private void SpawnAgentImmaculate(CandidateAgentData sourceCandidate, int agentIndex, int speciesIndex) {
 
         // Refactor this function to work with new GenomePool architecture!!!
@@ -1167,29 +1196,31 @@ public class SimulationManager : MonoBehaviour {
             recordBotAge = agentsArray[agentIndex].scoreCounter;
         }
     }
-    private void ProcessAgentScores(int agentIndex) {
+    private void ProcessAgentScores(Agent agentRef) {
 
         // REFACTOR!! This will need to be per-species, updated when leaderboard candidate list is updated
-
-
+        
         numAgentsProcessed++;
         //get species index:
-        int speciesIndex = Mathf.FloorToInt((float)agentIndex / (float)_NumAgents * (float)numSpecies);
+        int speciesIndex = agentRef.speciesIndex; // Mathf.FloorToInt((float)agentIndex / (float)_NumAgents * (float)numSpecies);
 
         float weightedAvgLerpVal = 1f / 128f;
         weightedAvgLerpVal = Mathf.Max(weightedAvgLerpVal, 1f / (float)(numAgentsProcessed + 1));
 
-        speciesAvgFoodEaten[speciesIndex] = Mathf.Lerp(speciesAvgFoodEaten[speciesIndex], agentsArray[agentIndex].totalFoodEaten, weightedAvgLerpVal);
-        speciesAvgSizes[speciesIndex] = Vector2.Lerp(speciesAvgSizes[speciesIndex], new Vector2(agentsArray[agentIndex].coreModule.coreWidth, agentsArray[agentIndex].coreModule.coreLength), weightedAvgLerpVal);
+        //speciesAvgFoodEaten[speciesIndex] = Mathf.Lerp(speciesAvgFoodEaten[speciesIndex], agentsArray[agentIndex].totalFoodEaten, weightedAvgLerpVal);
+        //speciesAvgSizes[speciesIndex] = Vector2.Lerp(speciesAvgSizes[speciesIndex], new Vector2(agentsArray[agentIndex].coreModule.coreWidth, agentsArray[agentIndex].coreModule.coreLength), weightedAvgLerpVal);
         float mouthType = 0f;
-        if(agentsArray[agentIndex].mouthRef.isPassive == false) {
-            mouthType = 1f;
-        }
-        speciesAvgMouthTypes[speciesIndex] = Mathf.Lerp(speciesAvgMouthTypes[speciesIndex], mouthType, weightedAvgLerpVal);
-        rollingAverageAgentScoresArray[speciesIndex] = Mathf.Lerp(rollingAverageAgentScoresArray[speciesIndex], (float)agentsArray[agentIndex].scoreCounter, weightedAvgLerpVal);
+        //if(agentsArray[agentIndex].mouthRef.isPassive == false) {
+        //    mouthType = 1f;
+        //}
+        //speciesAvgMouthTypes[speciesIndex] = Mathf.Lerp(speciesAvgMouthTypes[speciesIndex], mouthType, weightedAvgLerpVal);
+        //rollingAverageAgentScoresArray[speciesIndex] = Mathf.Lerp(rollingAverageAgentScoresArray[speciesIndex], (float)agentsArray[agentIndex].scoreCounter, weightedAvgLerpVal);
         
         float approxGen = (float)numAgentsBorn / (float)(numAgents - 1);
         if (approxGen > curApproxGen) {
+            statsNutrientsEachGenerationList.Add(new Vector4(foodManager.curGlobalNutrients, foodManager.curGlobalFoodParticles, 0f, 0f));
+            RefreshGraphTextureNutrients();
+            curApproxGen++;
             /*
             Vector4 scores = new Vector4(rollingAverageAgentScoresArray[0], rollingAverageAgentScoresArray[1], rollingAverageAgentScoresArray[2], rollingAverageAgentScoresArray[3]); ;
             statsLifespanEachGenerationList.Add(scores); // ** UPDATE THIS TO SAVE aLLL 4 SCORES!!! ***
@@ -1226,6 +1257,8 @@ public class SimulationManager : MonoBehaviour {
         else {
             if(numAgentsProcessed < 130) {
                 if(numAgentsProcessed % 8 == 0) {
+                    statsNutrientsEachGenerationList[curApproxGen - 1] = new Vector4(foodManager.curGlobalNutrients, foodManager.curGlobalFoodParticles, 0f, 0f);
+                    RefreshGraphTextureNutrients();
                     //Debug.Log("process Stats!! + " + curApproxGen.ToString() + ", numProcessed: " + numAgentsProcessed.ToString());
 
                     /*
@@ -1273,7 +1306,7 @@ public class SimulationManager : MonoBehaviour {
         //uiManager.UpdateStatsTexturePredation(statsPredationEachGenerationList);
     }
     private void RefreshGraphTextureNutrients() {
-        //uiManager.UpdateStatsTextureNutrients(statsNutrientsEachGenerationList);
+        uiManager.UpdateStatsTextureNutrients(statsNutrientsEachGenerationList);
     }
     private void RefreshGraphTextureMutation() {
         //uiManager.UpdateStatsTextureMutation(statsMutationEachGenerationList);

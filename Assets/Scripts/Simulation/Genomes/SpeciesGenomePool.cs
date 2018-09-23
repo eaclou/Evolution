@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
 public class SpeciesGenomePool {
 
     public int speciesID;
@@ -14,11 +15,17 @@ public class SpeciesGenomePool {
     public List<CandidateAgentData> leaderboardGenomesList;
     public List<CandidateAgentData> candidateGenomesList;
 
-    public int maxLeaderboardGenomePoolSize = 64;
+    public int maxLeaderboardGenomePoolSize = 32;
+    public float avgFitnessScore = 0f;
+    public int numAgentsEvaluated = 0;
+
+    public bool isFlaggedForExtinction = false;
+    public bool isExtinct = false;
 	
-    public SpeciesGenomePool(int ID, MutationSettings settings) {
+    public SpeciesGenomePool(int ID, int parentID, MutationSettings settings) {
 
         speciesID = ID;
+        parentSpeciesID = parentID;
         mutationSettingsRef = settings;
     }
 
@@ -26,6 +33,8 @@ public class SpeciesGenomePool {
     // **** Create a bunch of random genomes and then organize them into Species first?
     // **** THEN create species and place genomes in?
     public void FirstTimeInitialize(int numGenomes) {  
+        isFlaggedForExtinction = false;
+        isExtinct = false;
 
         candidateGenomesList = new List<CandidateAgentData>();
         leaderboardGenomesList = new List<CandidateAgentData>();
@@ -38,11 +47,27 @@ public class SpeciesGenomePool {
 
             CandidateAgentData candidate = new CandidateAgentData(agentGenome, speciesID);
 
-            candidateGenomesList.Add(candidate);
-            leaderboardGenomesList.Add(candidate);
+            if(i < maxLeaderboardGenomePoolSize) {
+                leaderboardGenomesList.Add(candidate);
+            }
+            candidateGenomesList.Add(candidate);            
         }
 
         representativeGenome = candidateGenomesList[0].candidateGenome;
+    }
+    public void FirstTimeInitialize(AgentGenome foundingGenome) {  
+        isFlaggedForExtinction = false;
+        isExtinct = false;
+
+        candidateGenomesList = new List<CandidateAgentData>();
+        leaderboardGenomesList = new List<CandidateAgentData>();
+        
+        CandidateAgentData candidate = new CandidateAgentData(foundingGenome, speciesID);
+
+        candidateGenomesList.Add(candidate);
+        leaderboardGenomesList.Add(candidate);
+        
+        representativeGenome = foundingGenome;
     }
 
     public CandidateAgentData GetNextAvailableCandidate() {
@@ -62,15 +87,37 @@ public class SpeciesGenomePool {
     
     public void ProcessCompletedCandidate(CandidateAgentData candidateData) {
 
+        numAgentsEvaluated++;
+
         leaderboardGenomesList.Insert(0, candidateData);  // place at front of leaderboard list (genomes eligible for being parents)
         if(leaderboardGenomesList.Count > maxLeaderboardGenomePoolSize) {
             leaderboardGenomesList.RemoveAt(leaderboardGenomesList.Count - 1);
         }
 
-        candidateGenomesList.Remove(candidateData);  // Will this work? never used this before
+        int beforeCount = candidateGenomesList.Count;
+        int listIndex = -1;
+        for(int i = 0; i < candidateGenomesList.Count; i++) {
+            if(candidateData.candidateID == candidateGenomesList[i].candidateID) {
+                listIndex = i;
+            }
+        }
+        //Debug.Log("Removed! " + beforeCount.ToString() + " #: " + listIndex.ToString() + ", candID: " + candidateData.candidateID.ToString());
+        if(listIndex > 0) {
+            candidateGenomesList.RemoveAt(listIndex);  // Will this work? never used this before
+        }
+        else {
+            Debug.LogError("ERROR NO INDEX FOUND!");
+        }
+        
+        // *** NOTE! *** List.Remove() was unreliable - worked sometimes but not others? still unsure about it
+        //int afterCount = candidateGenomesList.Count;
+        //if(beforeCount - afterCount > 0) {
+        //    
+        //}
     }
 
     public void AddNewCandidateGenome(AgentGenome newGenome) {
+        //Debug.Log("AddedNewCandidate! " + candidateGenomesList.Count.ToString());
         CandidateAgentData newCandidateData = new CandidateAgentData(newGenome, speciesID);
         candidateGenomesList.Add(newCandidateData);
     }

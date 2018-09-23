@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
 public class CandidateAgentData {
 
-    //public int candidateID;
+    public int candidateID;
     public int speciesID;
     public AgentGenome candidateGenome;
     public int numCompletedEvaluations = 0;
@@ -13,6 +14,11 @@ public class CandidateAgentData {
     public bool isBeingEvaluated = false;
 
     public CandidateAgentData(AgentGenome genome, int speciesID) {
+        //Debug.Log("NewCandidateData: " + MasterGenomePool.nextCandidateIndex.ToString());
+        int ID = MasterGenomePool.nextCandidateIndex;
+        MasterGenomePool.nextCandidateIndex++;
+
+        this.candidateID = ID;
         this.speciesID = speciesID;
         candidateGenome = genome;
         numCompletedEvaluations = 0;
@@ -27,12 +33,12 @@ public class CandidateAgentData {
         isBeingEvaluated = false;
     }
 
-    public void Reset(AgentGenome genome, int speciesID) {
+    /*public void Reset(AgentGenome genome, int speciesID) {
         this.speciesID = speciesID;
         candidateGenome = genome;
         numCompletedEvaluations = 0;
         evaluationScoresList.Clear();
         allEvaluationsComplete = false;
         isBeingEvaluated = false;
-    }
+    }*/
 }

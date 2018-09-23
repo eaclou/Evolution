@@ -1257,6 +1257,7 @@ public class Agent : MonoBehaviour {
     }
     public void InitializeSpawnAgentFromEggSack(int agentIndex, CandidateAgentData candidateData, EggSack parentEggSack) {        
         index = agentIndex;
+        speciesIndex = candidateData.speciesID;
         candidateRef = candidateData;
         AgentGenome genome = candidateRef.candidateGenome;
                 

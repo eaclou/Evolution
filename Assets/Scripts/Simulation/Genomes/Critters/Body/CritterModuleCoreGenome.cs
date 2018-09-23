@@ -51,8 +51,8 @@ public class CritterModuleCoreGenome {
         }
 
         numSegments = 1;
-        fullBodyWidth = UnityEngine.Random.Range(0.1f, 2.5f);
-        fullBodyLength = fullBodyWidth * UnityEngine.Random.Range(1.25f, 4f);
+        fullBodyWidth = UnityEngine.Random.Range(0.33f, 0.5f);
+        fullBodyLength = fullBodyWidth * UnityEngine.Random.Range(1.25f, 2f);
 
         relWidthSnout = UnityEngine.Random.Range(0.25f, 1f);
         relWidthHead = UnityEngine.Random.Range(0.5f, 2f);

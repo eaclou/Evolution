@@ -795,7 +795,7 @@ public class UIManager : MonoBehaviour {
         // DISABLED!!!! -- Need to establish good method for grabbing data from SimulationManager!
         SimulationManager simManager = gameManager.simulationManager;
 
-        string debugTxt1 = ""; // Training: False";
+        string debugTxt1 = "avgFitnessScore: " + simManager.masterGenomePool.completeSpeciesPoolsList[0].avgFitnessScore.ToString() + "\n"; // Training: False";
 
         //debugTxt = "Training: ACTIVE   numSamples: " + dataSamplesList.Count.ToString() + "\n";
         //debugTxt += "Gen: " + curGen.ToString() + ", Agent: " + curTestingGenomeSupervised.ToString() + ", Sample: " + curTestingSample.ToString() + "\n";
@@ -814,7 +814,7 @@ public class UIManager : MonoBehaviour {
             debugTxt1 += "Species[" + i.ToString() + "] Avg Mouth Type: " + simManager.speciesAvgMouthTypes[i].ToString() + "\n";
             debugTxt1 += "Species[" + i.ToString() + "] Avg Food Eaten: " + simManager.speciesAvgFoodEaten[i].ToString() + "\n\n";
         }
-        debugTxt1 += "CurOldestAge: " + simManager.currentOldestAgent.ToString() + ", numChildrenBorn: " + simManager.numAgentsBorn.ToString() + ", ~Gen: " + ((float)simManager.numAgentsBorn / (float)simManager._NumAgents).ToString();
+        debugTxt1 += "CurOldestAge: " + simManager.currentOldestAgent.ToString() + ", numChildrenBorn: " + simManager.numAgentsBorn.ToString() + ", numDied: " + simManager.numAgentsDied.ToString() + ", ~Gen: " + ((float)simManager.numAgentsBorn / (float)simManager._NumAgents).ToString();
         //debugTxt1 += "\nBotRecordAge: " + simManager.recordBotAge.ToString() + ", PlayerRecordAge: " + simManager.recordPlayerAge.ToString();
         debugTxt1 += "\nAverageAgentScore: " + simManager.rollingAverageAgentScoresArray[0].ToString();
         
@@ -849,13 +849,38 @@ public class UIManager : MonoBehaviour {
         int progressPercent = Mathf.RoundToInt((float)curCount / (float)maxCount * 100f);
         string lifeStageProgressTxt = " " + agentRef.curLifeStage.ToString() + " " + curCount.ToString() + "/" + maxCount.ToString() + "  " + progressPercent.ToString() + "% ";
 
+        int numActiveSpecies = simManager.masterGenomePool.currentlyActiveSpeciesIDList.Count;
+        debugTxt3 += numActiveSpecies.ToString() + " Active Species:\n";
+        for (int s = 0; s < numActiveSpecies; s++) {
+            int speciesID = simManager.masterGenomePool.currentlyActiveSpeciesIDList[s];
+            int parentSpeciesID = simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].parentSpeciesID;
+            int numCandidates = simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].candidateGenomesList.Count;
+            int numLeaders = simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].leaderboardGenomesList.Count;
+            int numBorn = simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].numAgentsEvaluated;
+            int speciesPopSize = 0;
+            float avgFitness = simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgFitnessScore;
+            for(int a = 0; a < simManager._NumAgents; a++) {
+                if (simManager.agentsArray[a].speciesIndex == speciesID) {
+                    speciesPopSize++;
+                }
+            }
+            debugTxt3 += "Species[" + speciesID.ToString() + "] p(" + parentSpeciesID.ToString() + "), size: " + speciesPopSize.ToString() + ", #cands: " + numCandidates.ToString() + ", numEvals: " + numBorn.ToString() + ", avgFitness: " + avgFitness.ToString() + "\n";
+        }
+        debugTxt3 += "\n\nAll-Time Species List:\n"; 
+        for(int p = 0; p < simManager.masterGenomePool.completeSpeciesPoolsList.Count; p++) {
+            string extString = "Active!";
+            if(simManager.masterGenomePool.completeSpeciesPoolsList[p].isExtinct) {
+                extString = "Extinct!";
+            }
+            debugTxt3 += "Species[" + p.ToString() + "] p(" + simManager.masterGenomePool.completeSpeciesPoolsList[p].parentSpeciesID.ToString() + ") " + extString + "\n";
+        }
 
-        debugTxt3 += "CRITTER # " + agentIndex.ToString() + " (" + lifeStageProgressTxt + ")  Age: " + agentRef.scoreCounter.ToString() + " Frames\n\n";
+        debugTxt3 += "\nCRITTER # " + agentIndex.ToString() + " (" + lifeStageProgressTxt + ")  Age: " + agentRef.scoreCounter.ToString() + " Frames\n\n";
         debugTxt3 += "SpeciesID: " + agentRef.speciesIndex.ToString() + "\n";
-        debugTxt3 += "Energy: " + agentRef.coreModule.energyStored[0].ToString("F4") + "\n";
-        debugTxt3 += "Health: " + agentRef.coreModule.healthBody.ToString("F2") + "\n";
-        debugTxt3 += "Food: " + agentRef.coreModule.foodStored[0].ToString("F2") + "\n";
-        debugTxt3 += "Stamina: " + agentRef.coreModule.stamina[0].ToString("F2") + "\n\n";
+        //debugTxt3 += "Energy: " + agentRef.coreModule.energyStored[0].ToString("F4") + "\n";
+        //debugTxt3 += "Health: " + agentRef.coreModule.healthBody.ToString("F2") + "\n";
+        //debugTxt3 += "Food: " + agentRef.coreModule.foodStored[0].ToString("F2") + "\n";
+        //debugTxt3 += "Stamina: " + agentRef.coreModule.stamina[0].ToString("F2") + "\n\n";
         debugTxt3 += "Width: " + agentRef.coreModule.coreWidth.ToString("F2") + ",  Length: " + agentRef.coreModule.coreLength.ToString("F2") + "\n";
         /*
         string debugTxtSimSettings = "\nSIMULATION SETTINGS\n\n";
