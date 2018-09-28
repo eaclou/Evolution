@@ -85,7 +85,7 @@ public class SpeciesGenomePool {
         return candidateData;
     }  
     
-    public void ProcessCompletedCandidate(CandidateAgentData candidateData) {
+    public void ProcessCompletedCandidate(CandidateAgentData candidateData, MasterGenomePool masterGenomePool) {
 
         numAgentsEvaluated++;
 
@@ -102,11 +102,15 @@ public class SpeciesGenomePool {
             }
         }
         //Debug.Log("Removed! " + beforeCount.ToString() + " #: " + listIndex.ToString() + ", candID: " + candidateData.candidateID.ToString());
-        if(listIndex > 0) {
+        if(listIndex > -1) {
+            //Debug.Log("RemoveAt(" + listIndex.ToString() + "),[" + candidateGenomesList[listIndex].candidateID.ToString() + "], candID: " + candidateData.candidateID.ToString() + ", SpeciesPool: " + this.speciesID.ToString() + ", CDSID: " + candidateData.speciesID.ToString());
             candidateGenomesList.RemoveAt(listIndex);  // Will this work? never used this before
         }
         else {
-            Debug.LogError("ERROR NO INDEX FOUND!");
+            Debug.LogError("ERROR NO INDEX FOUND! " + candidateData.candidateID.ToString() + ", species: " + this.speciesID.ToString() + ", CDSID: " + candidateData.speciesID.ToString() + ", [0]: " + candidateGenomesList[0].candidateID.ToString());
+
+            // Find it:
+            masterGenomePool.GlobalFindCandidateID(candidateData.candidateID); // temp debug
         }
         
         // *** NOTE! *** List.Remove() was unreliable - worked sometimes but not others? still unsure about it

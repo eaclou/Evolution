@@ -143,7 +143,10 @@ public class MasterGenomePool {
 
         if(!assignedToNewSpecies) {
             completeSpeciesPoolsList[closestSpeciesID].AddNewCandidateGenome(newGenome);
-        } 
+        }
+        else {
+            // *** ???
+        }
         
         if(currentlyActiveSpeciesIDList.Count < maxNumActiveSpecies) {
             speciesSimilarityDistanceThreshold *= 0.995f;
@@ -155,14 +158,42 @@ public class MasterGenomePool {
 
         CheckForExtinction();
     }
-        
-	//public int GetClosestActiveSpeciesToGenome(AgentGenome genome) {
 
+    public void GlobalFindCandidateID(int ID) {
         
-        
-        //return closestSpeciesID;
-    //}
+        int foundSpeciesID = -1;
+        bool foundCandidate = false;
 
+        for(int i = 0; i < currentlyActiveSpeciesIDList.Count; i++) {
+            int completeSpeciesIndex = currentlyActiveSpeciesIDList[i];
+            for(int j = 0; j < completeSpeciesPoolsList[completeSpeciesIndex].candidateGenomesList.Count; j++) {
+                int refID = completeSpeciesPoolsList[completeSpeciesIndex].candidateGenomesList[j].candidateID;
+
+                if(refID == ID) {
+                    foundCandidate = true;
+                    foundSpeciesID = completeSpeciesPoolsList[completeSpeciesIndex].speciesID;
+                    Debug.Log("FOUND! " + ID.ToString() + ", species: " + foundSpeciesID.ToString() + ", CDSID: " + refID.ToString());
+                }
+            }
+        } 
+        
+        if(foundCandidate == false) {
+            // look through ALL species?
+
+            for(int a = 0; a < completeSpeciesPoolsList.Count; a++) {
+                for(int b = 0; b < completeSpeciesPoolsList[a].candidateGenomesList.Count; b++) {
+                    int refID = completeSpeciesPoolsList[a].candidateGenomesList[b].candidateID;
+
+                    if(refID == ID) {
+                        foundCandidate = true;
+                        foundSpeciesID = completeSpeciesPoolsList[a].speciesID;
+                        Debug.Log("FOUND COMPLETE! " + ID.ToString() + ", species: " + foundSpeciesID.ToString() + ", CDSID: " + refID.ToString());
+                    }
+                }                
+            }
+        }
+    }
+     
     public float GetSimilarityScore(AgentGenome newGenome, AgentGenome repGenome) {
 
         float dWidth = Mathf.Abs(newGenome.bodyGenome.coreGenome.fullBodyWidth - repGenome.bodyGenome.coreGenome.fullBodyWidth);

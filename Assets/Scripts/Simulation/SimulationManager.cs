@@ -1024,9 +1024,13 @@ public class SimulationManager : MonoBehaviour {
         // Now, this function should:
         // -- look up the connected CandidateGenome & its speciesID
         CandidateAgentData candidateData = agentRef.candidateRef;
-        int speciesIndex = agentRef.speciesIndex;
+        int agentSpeciesIndex = agentRef.speciesIndex;
+        int candidateSpeciesIndex = candidateData.speciesID;
+        if(agentSpeciesIndex != candidateSpeciesIndex) {
+            Debug.LogError("agentSpeciesIndex (" + agentSpeciesIndex.ToString() + " != candidateSpeciesIndex (" + candidateSpeciesIndex.ToString());
+        }
         //Debug.Log("masterGenomePool.completeSpeciesPoolsList: " + masterGenomePool.completeSpeciesPoolsList.Count.ToString());
-        SpeciesGenomePool speciesPool = masterGenomePool.completeSpeciesPoolsList[speciesIndex];
+        SpeciesGenomePool speciesPool = masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex];
 
         // -- save its fitness score
         candidateData.ProcessCompletedEvaluation(agentRef);
@@ -1036,9 +1040,9 @@ public class SimulationManager : MonoBehaviour {
             // -- If it has:
             // -- then push the candidate to Leaderboard List so it is eligible for reproduction
             // -- at the same time, remove it from the ToBeEvaluated pool
-            speciesPool.ProcessCompletedCandidate(candidateData);
+            speciesPool.ProcessCompletedCandidate(candidateData, masterGenomePool);
             float lerpAmount = Mathf.Max(0.01f, 1f / (float)speciesPool.numAgentsEvaluated);
-            masterGenomePool.completeSpeciesPoolsList[speciesIndex].avgFitnessScore = Mathf.Lerp(speciesPool.avgFitnessScore , (float)agentRef.scoreCounter, lerpAmount);
+            masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgFitnessScore = Mathf.Lerp(speciesPool.avgFitnessScore , (float)agentRef.scoreCounter, lerpAmount);
         }
         else {
             // -- Else:
