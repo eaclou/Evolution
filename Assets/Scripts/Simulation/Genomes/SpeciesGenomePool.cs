@@ -8,6 +8,8 @@ public class SpeciesGenomePool {
     public int speciesID;
     public int parentSpeciesID;  // keep track of tree of life
 
+    public int depthLevel;
+
     [System.NonSerialized]
     public MutationSettings mutationSettingsRef;  // Or remove this later to keep everything saveable?
 
@@ -32,10 +34,12 @@ public class SpeciesGenomePool {
     // **** Change this for special-case of First-Time startup?
     // **** Create a bunch of random genomes and then organize them into Species first?
     // **** THEN create species and place genomes in?
-    public void FirstTimeInitialize(int numGenomes) {  
+    public void FirstTimeInitialize(int numGenomes, int depth) {  
         isFlaggedForExtinction = false;
         isExtinct = false;
 
+        depthLevel = depth;
+        
         candidateGenomesList = new List<CandidateAgentData>();
         leaderboardGenomesList = new List<CandidateAgentData>();
                 
@@ -55,9 +59,11 @@ public class SpeciesGenomePool {
 
         representativeGenome = candidateGenomesList[0].candidateGenome;
     }
-    public void FirstTimeInitialize(AgentGenome foundingGenome) {  
+    public void FirstTimeInitialize(AgentGenome foundingGenome, int depth) {  
         isFlaggedForExtinction = false;
         isExtinct = false;
+
+        depthLevel = depth;
 
         candidateGenomesList = new List<CandidateAgentData>();
         leaderboardGenomesList = new List<CandidateAgentData>();

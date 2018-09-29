@@ -153,6 +153,8 @@ public class UIManager : MonoBehaviour {
     public GameObject panelLoading;
     public GameObject panelPlaying;
 
+    public GameObject treeOfLifeAnchorGO;
+
     public Texture2D fitnessDisplayTexture;
 
     public float timeOfLastPlayerDeath = 0f;
@@ -567,6 +569,18 @@ public class UIManager : MonoBehaviour {
                 cameraManager.isMouseHoverAgent = true;
                 cameraManager.mouseHoverAgentIndex = agentRef.index;
                 cameraManager.mouseHoverAgentRef = agentRef;                    
+            }
+            else {
+                TreeOfLifeNodeRaycastTarget speciesNodeRayTarget = hit.collider.gameObject.GetComponent<TreeOfLifeNodeRaycastTarget>();
+
+                if(speciesNodeRayTarget != null) {
+                    if(clicked) {
+                        Debug.Log("Clicked Species[" + speciesNodeRayTarget.nodeData.speciesPool.speciesID.ToString() + "]");
+                    }
+                    else {
+
+                    }
+                }
             }
             //Debug.Log("CLICKED ON: [ " + hit.collider.gameObject.name + " ] Ray= " + ray.ToString() + ", hit= " + hit.point.ToString());
         }

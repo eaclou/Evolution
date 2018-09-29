@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class TreeOfLifeSpeciesNodeData {
 
-    public SpeciesGenomePool speciesPool;    
+    public SpeciesGenomePool speciesPool;   
 	//public int speciesID;
     //public bool isActive; // extinct or not?
 

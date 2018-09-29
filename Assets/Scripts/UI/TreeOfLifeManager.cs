@@ -11,13 +11,16 @@ public class TreeOfLifeManager {
     public List<TreeOfLifeStemSegmentData> stemSegmentsList;
 
     private Vector3 treeOriginPos;
+    private GameObject treeOfLifeAnchorGO;
+
+    private float scaleMultiplier = 12f;
 
     // Instantiated Objects:
     public List<TreeOfLifeNodeRaycastTarget> nodeRaycastTargetsList;
 
 
-	public TreeOfLifeManager() {
-        
+	public TreeOfLifeManager(GameObject anchorGO) {
+        treeOfLifeAnchorGO = anchorGO;
     }
 
     public void FirstTimeInitialize(MasterGenomePool masterGenomePool) {
@@ -33,14 +36,15 @@ public class TreeOfLifeManager {
             
             // RaycastColliderGameObject:
             GameObject speciesNodeColliderGO = new GameObject("SpeciesNodeRaycastCollider_" + i.ToString());
-            speciesNodeColliderGO.transform.localPosition = new Vector3(-1f * (float)i, 0f, 0f);
+            speciesNodeColliderGO.transform.parent = treeOfLifeAnchorGO.transform;
+            speciesNodeColliderGO.transform.localPosition = new Vector3(-1f * (float)nodeData.speciesPool.depthLevel, -1f, 0f) * scaleMultiplier;
+            speciesNodeColliderGO.transform.localScale = Vector3.one * scaleMultiplier;
             TreeOfLifeNodeRaycastTarget rayTarget = speciesNodeColliderGO.AddComponent<TreeOfLifeNodeRaycastTarget>();
             rayTarget.Initialize(nodeData);
             rayTarget.rayCollider = speciesNodeColliderGO.AddComponent<CapsuleCollider>();
             rayTarget.rayCollider.isTrigger = true;
 
-            nodeRaycastTargetsList.Add(rayTarget);
-            
+            nodeRaycastTargetsList.Add(rayTarget);            
         }
 
         // Create StemSegmentData:
@@ -50,7 +54,7 @@ public class TreeOfLifeManager {
             SpeciesGenomePool curSpecies = speciesNodesList[i].speciesPool;
 
             // CONSOLIDATE CODE!!!! *************
-            int backupCounter = 0;
+            int backupCounter = 0;            
             bool reachedRootNode = false;
             while(!reachedRootNode) {
                 backupCounter++;
@@ -79,7 +83,9 @@ public class TreeOfLifeManager {
                     Debug.LogError("INFINITE WHILE LOOP!");
                     break;
                 }
-            }           
+            }
+            
+
         }       
     }
 
@@ -91,7 +97,9 @@ public class TreeOfLifeManager {
             
         // RaycastColliderGameObject:
         GameObject speciesNodeColliderGO = new GameObject("SpeciesNodeRaycastCollider_" + newSpeciesID.ToString());
-        speciesNodeColliderGO.transform.localPosition = new Vector3(-1f * (float)newSpeciesID, UnityEngine.Random.Range(-1f, 1f), 0f);
+        speciesNodeColliderGO.transform.parent = treeOfLifeAnchorGO.transform;
+        speciesNodeColliderGO.transform.localPosition = new Vector3(-1f * (float)nodeData.speciesPool.depthLevel, UnityEngine.Random.Range(-2f, 0f), 0f) * scaleMultiplier;
+        speciesNodeColliderGO.transform.localScale = Vector3.one * scaleMultiplier;
         TreeOfLifeNodeRaycastTarget rayTarget = speciesNodeColliderGO.AddComponent<TreeOfLifeNodeRaycastTarget>();
         rayTarget.Initialize(nodeData);
         rayTarget.rayCollider = speciesNodeColliderGO.AddComponent<CapsuleCollider>();

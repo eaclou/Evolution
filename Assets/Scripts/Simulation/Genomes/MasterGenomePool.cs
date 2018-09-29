@@ -31,7 +31,7 @@ public class MasterGenomePool {
         
     }
 
-    public void FirstTimeInitialize(int numAgentGenomes, MutationSettings mutationSettingsRef) {
+    public void FirstTimeInitialize(int numAgentGenomes, MutationSettings mutationSettingsRef, UIManager uiManagerRef) {
         debugRecentlyDeletedCandidateIDsList = new List<int>();
 
         nextCandidateIndex = 0;
@@ -41,13 +41,13 @@ public class MasterGenomePool {
 
         // Create foundational Species:
         SpeciesGenomePool firstSpecies = new SpeciesGenomePool(0, -1, mutationSettingsRef);
-        firstSpecies.FirstTimeInitialize(numAgentGenomes);
+        firstSpecies.FirstTimeInitialize(numAgentGenomes, 0);
 
         currentlyActiveSpeciesIDList.Add(0);
         completeSpeciesPoolsList.Add(firstSpecies);
 
         // After self Initialized:
-        treeOfLifeManager = new TreeOfLifeManager();
+        treeOfLifeManager = new TreeOfLifeManager(uiManagerRef.treeOfLifeAnchorGO);
         treeOfLifeManager.FirstTimeInitialize(this);
     }
 
@@ -136,7 +136,7 @@ public class MasterGenomePool {
                     int newSpeciesID = completeSpeciesPoolsList.Count;
                     closestSpeciesID = newSpeciesID;
                     SpeciesGenomePool newSpecies = new SpeciesGenomePool(newSpeciesID, parentSpeciesID, mutationSettingsRef);
-                    newSpecies.FirstTimeInitialize(newGenome);
+                    newSpecies.FirstTimeInitialize(newGenome, completeSpeciesPoolsList[parentSpeciesID].depthLevel + 1);
 
                     currentlyActiveSpeciesIDList.Add(newSpeciesID);
                     completeSpeciesPoolsList.Add(newSpecies);
@@ -169,10 +169,10 @@ public class MasterGenomePool {
         }
         
         if(currentlyActiveSpeciesIDList.Count < maxNumActiveSpecies) {
-            speciesSimilarityDistanceThreshold *= 0.993f;  // lower while creating treeOfLifeUI
+            speciesSimilarityDistanceThreshold *= 0.999f;  // lower while creating treeOfLifeUI
         }
         else {
-            speciesSimilarityDistanceThreshold *= 1.0045f;
+            speciesSimilarityDistanceThreshold *= 1.02f;
             speciesSimilarityDistanceThreshold = Mathf.Min(speciesSimilarityDistanceThreshold, 5f); // cap
         }
 

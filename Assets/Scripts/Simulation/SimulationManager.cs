@@ -316,7 +316,7 @@ public class SimulationManager : MonoBehaviour {
     }
     private void LoadingInitializePopulationGenomes() {
         masterGenomePool = new MasterGenomePool();
-        masterGenomePool.FirstTimeInitialize(numAgents, settingsManager.mutationSettingsPersistent);
+        masterGenomePool.FirstTimeInitialize(numAgents, settingsManager.mutationSettingsPersistent, uiManager);
 
         /*agentGenomePoolArray = new AgentGenome[numAgents];
         for (int i = 0; i < agentGenomePoolArray.Length; i++) {   // Create initial Population Supervised Learners

@@ -124,11 +124,8 @@
 				o.worldPos = worldPosition;
 
 				float3 localNormal = normalize(skinStrokeData.localPos);
-				//float3 worldNormal = localNormal;
 				localNormal = normalize(float3(localNormal.x * critterInitData.boundingBoxSize.y, localNormal.y * critterInitData.boundingBoxSize.x, localNormal.z * critterInitData.boundingBoxSize.y));
-				//worldNormal.xy = float2(localNormal.x * cos(swimAngle) - localNormal.y * sin(swimAngle), localNormal.y * cos(swimAngle) + localNormal.x * sin(swimAngle));
-				//worldNormal.xy = rotatePointVector(worldNormal.xy, float2(0,0), critterSimData.heading);
-
+				
 				float3 worldNormal = GetAnimatedPos(localNormal, float3(0,0,0), critterInitData, critterSimData, skinStrokeData.localPos); //skinStrokeData.localPos;
 				o.worldNormal = normalize(worldNormal);
 
@@ -190,8 +187,6 @@
 				
 				float altitude = tex2D(_AltitudeTex, i.altitudeUV); // i.worldPos.z / 10; // [-1,1] range
 
-				//return float4(i.worldNormal,1);
-
 				float4 finalColor = float4(lerp(critterInitData.primaryHue, critterInitData.secondaryHue, patternSample.x), texColor.a);
 
 				float3 surfaceNormal = tex2D(_WaterSurfaceTex, (i.altitudeUV - 0.25) * 2).yzw;
@@ -223,13 +218,7 @@
 				backgroundColor.a *= isUnderwater;
 
 				float fogAmount = 0.05; //saturate((i.worldPos.z + 1) * 0.5);
-				//finalColor.rgb = lerp(finalColor.rgb, waterFogColor, fogAmount);
 				
-				//float4 reflectedColor = float4(tex2Dlod(_SkyTex, float4((i.skyUV), 0, 1)).rgb, backgroundColor.a); //col;				
-				//finalColor = lerp(reflectedColor, finalColor, saturate(1 - (1 - i.vignetteLerp.x) * 1)); //float4(1,1,1,1);
-				//finalColor.a *= saturate(i.vignetteLerp.w * 1.4 - 0.25); //(1 - saturate(i.vignetteLerp.x) * 0.4) * 0.5;
-				//finalColor.a *= i.color.a;
-
 				// Health & Energy:::: **
 				float health = i.color.x;
 				float energy = i.color.y;
@@ -246,19 +235,10 @@
 				finalColor.rgb *= diffuseLight * 0.67 + 0.33;
 
 				// Decay
-				//finalColor.rgb *= saturate(1.0 - i.color.a * 32) * 0.5 + 0.5;
 				finalColor.rgb = lerp(finalColor.rgb, backgroundColor, i.color.a * 0.67);
-
-				//finalColor.rgb = lerp(finalColor.rgb, waterFogColor, fogAmount);
-				// FOG:
-				//finalColor.rgb = lerp(finalColor.rgb, waterFogColor, 1 * (saturate(altitude * 0.8)) + 0.25 * isUnderwater);
-				//finalColor.a *= (1.0 - i.color.w);
-				//return float4(i.color.w, i.color.w, i.color.w, 1);
 
 				return finalColor;
 
-				//return finalColor;
-				//return col;
 			}
 			ENDCG
 		}
