@@ -5,6 +5,8 @@ using UnityEngine;
 [System.Serializable]
 public class MasterGenomePool {
 
+    public TreeOfLifeManager treeOfLifeManager;
+
     public static int nextCandidateIndex = 0;
 
     public int maxNumActiveSpecies = 6;
@@ -19,18 +21,21 @@ public class MasterGenomePool {
 
     private MutationSettings mutationSettingsRef;
 
+    public List<int> debugRecentlyDeletedCandidateIDsList;
+
     //public int curNumSpecies;
     //private int maxNumSpecies = 6;
 
     public MasterGenomePool() {
         // empty constructor
+        
     }
 
     public void FirstTimeInitialize(int numAgentGenomes, MutationSettings mutationSettingsRef) {
+        debugRecentlyDeletedCandidateIDsList = new List<int>();
+
         nextCandidateIndex = 0;
-
         this.mutationSettingsRef = mutationSettingsRef;
-
         currentlyActiveSpeciesIDList = new List<int>();
         completeSpeciesPoolsList = new List<SpeciesGenomePool>();
 
@@ -40,11 +45,14 @@ public class MasterGenomePool {
 
         currentlyActiveSpeciesIDList.Add(0);
         completeSpeciesPoolsList.Add(firstSpecies);
+
+        // After self Initialized:
+        treeOfLifeManager = new TreeOfLifeManager();
+        treeOfLifeManager.FirstTimeInitialize(this);
     }
 
     public void Tick() {
         speciesCreatedOrDestroyedThisFrame = false;
-
 
     }
 
@@ -123,6 +131,8 @@ public class MasterGenomePool {
                     assignedToNewSpecies = true;
                     // if so, update this 
                     // Create foundational Species:
+
+                    // WRAP THIS IN A FUNCTION!!! &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
                     int newSpeciesID = completeSpeciesPoolsList.Count;
                     closestSpeciesID = newSpeciesID;
                     SpeciesGenomePool newSpecies = new SpeciesGenomePool(newSpeciesID, parentSpeciesID, mutationSettingsRef);
@@ -133,8 +143,15 @@ public class MasterGenomePool {
 
                     speciesCreatedOrDestroyedThisFrame = true;
 
+                    treeOfLifeManager.AddNewSpecies(this, newSpeciesID);
+                    // WRAP THIS IN A FUNCTION!!! &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
+
                     Debug.Log("New Species Created!!! (" + newSpeciesID.ToString() + "] score: " + closestDistance.ToString());
-                }                
+                }               
+            }
+            else {
+                Debug.Log("speciesCreatedOrDestroyedThisFrame closestDistanceSpeciesID: " + closestSpeciesID.ToString() + ", score: " + closestDistance.ToString());
             }
         }
         else {
@@ -142,17 +159,20 @@ public class MasterGenomePool {
         }
 
         if(!assignedToNewSpecies) {
+            // *** maybe something fishy here??
+            //completeSpeciesPoolsList[parentSpeciesID].AddNewCandidateGenome(newGenome);
             completeSpeciesPoolsList[closestSpeciesID].AddNewCandidateGenome(newGenome);
         }
         else {
             // *** ???
+            Debug.Log("assignedToNewSpecies closestDistanceSpeciesID: " + closestSpeciesID.ToString() + ", score: " + closestDistance.ToString());
         }
         
         if(currentlyActiveSpeciesIDList.Count < maxNumActiveSpecies) {
-            speciesSimilarityDistanceThreshold *= 0.995f;
+            speciesSimilarityDistanceThreshold *= 0.993f;  // lower while creating treeOfLifeUI
         }
         else {
-            speciesSimilarityDistanceThreshold *= 1.005f;
+            speciesSimilarityDistanceThreshold *= 1.0045f;
             speciesSimilarityDistanceThreshold = Mathf.Min(speciesSimilarityDistanceThreshold, 5f); // cap
         }
 
@@ -192,9 +212,22 @@ public class MasterGenomePool {
                 }                
             }
         }
+
+        if(foundCandidate == false) {
+            for(int k = 0; k < debugRecentlyDeletedCandidateIDsList.Count; k++) {
+                if(debugRecentlyDeletedCandidateIDsList[k] == ID) {
+                    foundCandidate = true;
+                    //foundSpeciesID = completeSpeciesPoolsList[a].speciesID;
+                    // It was somehow deleted twice?  Or simply looking in the wrong SpeciesPool?
+                    Debug.Log("FOUND COMPLETE! " + ID.ToString() + ", CDSID: " + debugRecentlyDeletedCandidateIDsList[k].ToString());
+                }
+            }
+        }
     }
      
     public float GetSimilarityScore(AgentGenome newGenome, AgentGenome repGenome) {
+
+        // DUE FOR UPGRADE / OVERHAUL!!!!  ******
 
         float dWidth = Mathf.Abs(newGenome.bodyGenome.coreGenome.fullBodyWidth - repGenome.bodyGenome.coreGenome.fullBodyWidth);
         float dLength = Mathf.Abs(newGenome.bodyGenome.coreGenome.fullBodyLength - repGenome.bodyGenome.coreGenome.fullBodyLength);

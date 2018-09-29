@@ -11,14 +11,18 @@ Shader "DataVis/StatsPanelGraphShader"
 	{
 		Tags
 		{ 
-			"RenderType"="Opaque"
+			"Queue" = "Transparent"
+			"IgnoreProjector" = "True"
+			"RenderType" = "Transparent"
+			"PreviewType" = "Plane"
+			"CanUseSpriteAtlas" = "True"
 		}
 		
-		//Cull Off
-		//Lighting Off
-		//ZWrite Off
+		Cull Off
+		Lighting Off
+		ZWrite Off
 		//ZTest [unity_GUIZTestMode]
-		//Blend SrcAlpha OneMinusSrcAlpha
+		Blend SrcAlpha OneMinusSrcAlpha
 		//ColorMask [_ColorMask]
 
 		Pass
