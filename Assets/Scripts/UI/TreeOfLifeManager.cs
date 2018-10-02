@@ -18,9 +18,20 @@ public class TreeOfLifeManager {
     // Instantiated Objects:
     public List<TreeOfLifeNodeRaycastTarget> nodeRaycastTargetsList;
 
+    //private int treeOfLifeDisplayResolution = 256;
+    //public RenderTexture treeOfLifeDisplayRT;
 
-	public TreeOfLifeManager(GameObject anchorGO) {
+	public TreeOfLifeManager(GameObject anchorGO, UIManager uiManagerRef) { //, Camera renderCamera) {
         treeOfLifeAnchorGO = anchorGO;
+
+        //treeOfLifeDisplayRT = new RenderTexture(treeOfLifeDisplayResolution, treeOfLifeDisplayResolution, 0, RenderTextureFormat.Default, RenderTextureReadWrite.Default);
+        //treeOfLifeDisplayRT.wrapMode = TextureWrapMode.Clamp;
+        //treeOfLifeDisplayRT.enableRandomWrite = true;
+        //treeOfLifeDisplayRT.Create();
+
+        //uiManagerRef.imageTreeOfLifeDisplay.material.SetTexture("_MainTex", treeOfLifeDisplayRT);
+
+        //renderCamera.targetTexture = treeOfLifeDisplayRT;
     }
 
     public void FirstTimeInitialize(MasterGenomePool masterGenomePool) {

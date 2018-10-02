@@ -29,12 +29,15 @@ public class CameraManager : MonoBehaviour {
     public float masterPanSpeed = 1f;
     public float masterZoomSpeed = 1f;
     public float masterTiltSpeed = 1f;
-    //private float curTiltAngle;
-    //public float centeringOffset = 0f;
-    //public Vector3 targetCamPos;
-    //Vector2 prevCameraPosition, prevTargetPosition;
-    //public float targetAgentSize = 0f;
-    //public float cameraZoomAmount = 0f;
+
+    private Camera cameraRef;
+    public float worldSpaceCornersDistance = 10f;
+    public Vector3 worldSpaceTopLeft;
+    public Vector3 worldSpaceTopRight;
+    public Vector3 worldSpaceBottomLeft;
+    public Vector3 worldSpaceBottomRight;
+    public Vector3 worldSpaceCameraRightDir;
+    public Vector3 worldSpaceCameraUpDir;
     
     // Use this for initialization
     void Start () {
@@ -43,6 +46,7 @@ public class CameraManager : MonoBehaviour {
     }
 
     private void InitializeCamera() {
+        cameraRef = this.GetComponent<Camera>();
         curCameraFocusPivotPos = new Vector3(128f, 128f, 1f);
     }
 
@@ -66,8 +70,7 @@ public class CameraManager : MonoBehaviour {
 
         float offsetY = Mathf.Abs(masterTargetDistance) * Mathf.Sin(masterTargetTiltAngle * Mathf.Deg2Rad); // compensate for camera tilt
         float offsetZ = Mathf.Abs(masterTargetDistance) * Mathf.Cos(masterTargetTiltAngle * Mathf.Deg2Rad);
-
-        
+                
         curCameraFocusPivotPos.x = Mathf.Min(curCameraFocusPivotPos.x, 256f);
         curCameraFocusPivotPos.x = Mathf.Max(curCameraFocusPivotPos.x, 0f);
         curCameraFocusPivotPos.y = Mathf.Min(curCameraFocusPivotPos.y, 256f);
@@ -76,12 +79,6 @@ public class CameraManager : MonoBehaviour {
         masterTargetCamPosition = curCameraFocusPivotPos;
         masterTargetCamPosition.y -= offsetY;
         masterTargetCamPosition.z -= offsetZ;  // camera is towards the negative Z axis.... a bit awkward.
-
-        //masterTargetCamPosition.x = Mathf.Min(masterTargetCamPosition.x, 256f);
-        //masterTargetCamPosition.x = Mathf.Max(masterTargetCamPosition.x, 0f);
-
-        //masterTargetCamPosition.y = Mathf.Min(masterTargetCamPosition.y, 256f);
-        //masterTargetCamPosition.y = Mathf.Max(masterTargetCamPosition.y, 0f);
 
         // Lerp towards Target Transform Position & Orientation:
         float minDistance = 6f;
@@ -104,6 +101,14 @@ public class CameraManager : MonoBehaviour {
         prevCameraPos = curCameraPos;
         prevTiltAngleDegrees = curTiltAngleDegrees;
         prevCameraFocusPivotPos = curCameraFocusPivotPos;
+    }
+    private void UpdateWorldSpaceCorners() {
+        worldSpaceBottomLeft = cameraRef.ScreenToWorldPoint( new Vector3(0f, 0f, worldSpaceCornersDistance));
+        worldSpaceTopLeft = cameraRef.ScreenToWorldPoint( new Vector3(0f, cameraRef.pixelWidth, worldSpaceCornersDistance));
+        worldSpaceTopRight = cameraRef.ScreenToWorldPoint( new Vector3(cameraRef.pixelHeight, cameraRef.pixelWidth, worldSpaceCornersDistance));
+        worldSpaceBottomRight = cameraRef.ScreenToWorldPoint( new Vector3(cameraRef.pixelHeight, 0f, worldSpaceCornersDistance));
+        worldSpaceCameraRightDir = this.gameObject.transform.right;
+        worldSpaceCameraUpDir = this.gameObject.transform.up;
     }
 
     public void MoveCamera(Vector2 dir) {

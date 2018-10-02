@@ -1,0 +1,47 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSTick  // update positions, increment age, fake n-body sim
+#pragma kernel CSAddNewSpecies
+#pragma kernel CSExctinctSpecies
+#pragma kernel CSGetNodeColliderData
+
+#include "Assets/Resources/Shaders/Inc/StructsTreeOfLife.cginc"
+
+RWStructuredBuffer<TreeOfLifeNodeColliderData> treeOfLifeNodeColliderDataCBuffer;
+RWStructuredBuffer<TreeOfLifeLeafNodeData> treeOfLifeLeafNodeDataCBuffer;
+RWStructuredBuffer<TreeOfLifeStemSegmentData> treeOfLifeStemSegmentDataCBuffer;
+
+StructuredBuffer<int> speciesIndexCBuffer;
+StructuredBuffer<TreeOfLifeLeafNodeData> updateSpeciesNodeDataCBuffer;
+
+uniform int _UpdateBufferStartIndex;
+
+[numthreads(1,1,1)]
+void CSTick (uint3 id : SV_DispatchThreadID)
+{
+	// Repel / Re-Position
+
+	// Increment Age
+}
+
+[numthreads(1,1,1)]
+void CSAddNewSpecies (uint3 id : SV_DispatchThreadID)
+{
+	int speciesID = speciesIndexCBuffer[id.x];	
+	treeOfLifeLeafNodeDataCBuffer[speciesID] = updateSpeciesNodeDataCBuffer[0];
+	int parentSpeciesID = treeOfLifeLeafNodeDataCBuffer[speciesID].parentSpeciesID;
+	float3 parentLocalPos = treeOfLifeNodeColliderDataCBuffer[parentSpeciesID].localPos;
+	treeOfLifeNodeColliderDataCBuffer[speciesID].localPos = float3(parentLocalPos.x + 0.5, parentLocalPos.y - (float)speciesID * 0.15, parentLocalPos.z) * 2;
+		
+}
+
+[numthreads(1,1,1)]
+void CSExctinctSpecies (uint3 id : SV_DispatchThreadID)
+{
+	
+}
+
+[numthreads(1,1,1)]
+void CSGetNodeColliderData (uint3 id : SV_DispatchThreadID)
+{
+	
+}

@@ -47,7 +47,7 @@ public class MasterGenomePool {
         completeSpeciesPoolsList.Add(firstSpecies);
 
         // After self Initialized:
-        treeOfLifeManager = new TreeOfLifeManager(uiManagerRef.treeOfLifeAnchorGO);
+        treeOfLifeManager = new TreeOfLifeManager(uiManagerRef.treeOfLifeAnchorGO, uiManagerRef);
         treeOfLifeManager.FirstTimeInitialize(this);
     }
 
@@ -108,7 +108,7 @@ public class MasterGenomePool {
         return completeSpeciesPoolsList[speciesIndex];
     }
 
-    public void AssignNewMutatedGenomeToSpecies(AgentGenome newGenome, int parentSpeciesID) {
+    public void AssignNewMutatedGenomeToSpecies(AgentGenome newGenome, int parentSpeciesID, SimulationManager simManagerRef) {
         int closestSpeciesID = -1;
 
         float closestDistance = 99999f;
@@ -144,6 +144,7 @@ public class MasterGenomePool {
                     speciesCreatedOrDestroyedThisFrame = true;
 
                     treeOfLifeManager.AddNewSpecies(this, newSpeciesID);
+                    simManagerRef.theRenderKing.TreeOfLifeAddNewSpecies(newSpeciesID, parentSpeciesID);
                     // WRAP THIS IN A FUNCTION!!! &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
 

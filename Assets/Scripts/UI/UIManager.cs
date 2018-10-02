@@ -10,6 +10,8 @@ public class UIManager : MonoBehaviour {
     public CameraManager cameraManager;
     public GameOptionsManager gameOptionsManager;
 
+    //public Canvas canvasMain;
+
     private bool firstTimeStartup = true;
         
     // Main Menu:
@@ -210,6 +212,9 @@ public class UIManager : MonoBehaviour {
     private Vector3 prevCtrlCursorPositionOnWaterPlane;
     public Vector3 curCtrlCursorPositionOnWaterPlane;
     private bool rightTriggerOn = false;
+
+    // Tree of Life:
+    //public Image imageTreeOfLifeDisplay;
     
 	// Use this for initialization
 	void Start () {
@@ -649,12 +654,14 @@ public class UIManager : MonoBehaviour {
     public void TransitionToNewGameState(GameManager.GameState gameState) {
         switch (gameState) {
             case GameManager.GameState.MainMenu:
+                //canvasMain.renderMode = RenderMode.ScreenSpaceOverlay;
                 EnterMainMenuUI();
                 break;
             case GameManager.GameState.Loading:
                 EnterLoadingUI();
                 break;
             case GameManager.GameState.Playing:
+                //canvasMain.renderMode = RenderMode.ScreenSpaceCamera;
                 firstTimeStartup = false;
                 EnterPlayingUI();
                 break;

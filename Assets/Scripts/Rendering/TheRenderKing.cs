@@ -15,17 +15,22 @@ public class TheRenderKing : MonoBehaviour {
     public Camera mainRenderCam;
     public Camera fluidObstaclesRenderCamera;
     public Camera fluidColorRenderCamera;
+    //public Camera treeOfLifeRenderCamera;
+    public Camera speciesPortraitRenderCamera;
 
     private CommandBuffer cmdBufferTest;
     private CommandBuffer cmdBufferPrimary;
     private CommandBuffer cmdBufferMainRender;
     private CommandBuffer cmdBufferFluidObstacles;
     private CommandBuffer cmdBufferFluidColor;
+    private CommandBuffer cmdBufferTreeOfLifeDisplay;
+    private CommandBuffer cmdBufferSpeciesPortraitDisplay;
 
     public ComputeShader computeShaderBrushStrokes;
     public ComputeShader computeShaderUberChains;
     public ComputeShader computeShaderCritters;
     public ComputeShader computeShaderEggSacks;
+    public ComputeShader computeShaderTreeOfLife;
     //public ComputeShader computeShaderTerrainGeneration;
 
     public Material agentEyesDisplayMat;
@@ -67,6 +72,9 @@ public class TheRenderKing : MonoBehaviour {
 
     public Material gizmoStirToolMat;
     public Material gizmoFeedToolMat;
+
+    public Material treeOfLifeLeafNodesMat;
+    public Material treeOfLifeStemSegmentsMat;
 
     public ComputeBuffer gizmoStirToolPosCBuffer;
     public ComputeBuffer gizmoFeedToolPosCBuffer;
@@ -176,6 +184,38 @@ public class TheRenderKing : MonoBehaviour {
     public Texture2D critterBodyWidthsTex;
 
     public float fullscreenFade = 1f;
+
+    private int numTreeOfLifeStemSegmentQuads = 4;
+    private ComputeBuffer treeOfLifeStemSegmentVerticesCBuffer;  // short ribbon mesh
+    private int maxNumTreeOfLifeNodes = 512; // max numSpecies
+    private int maxNumTreeOfLifeSegments = 512 * 32;  
+    private TreeOfLifeNodeColliderData[] treeOfLifeNodeColliderDataArray;
+    private ComputeBuffer treeOfLifeNodeColliderDataCBuffer;
+    private TreeOfLifeLeafNodeData[] treeOfLifeLeafNodeDataArray;
+    private ComputeBuffer treeOfLifeLeafNodeDataCBuffer;
+    private TreeOfLifeStemSegmentData[] treeOfLifeStemSegmentDataArray;
+    private ComputeBuffer treeOfLifeStemSegmentDataCBuffer;
+
+    public struct TreeOfLifeNodeColliderData {  // only the data that needs to be transferred between CPU & GPU  - minimize!!
+        public Vector3 localPos;
+        public Vector3 scale;        
+    }
+    public struct TreeOfLifeLeafNodeData {
+        public int speciesID;
+        public int parentSpeciesID;
+        public int graphDepth;
+        public Vector3 primaryHue;
+        public Vector3 secondaryHue;
+        public float growthPercentage;
+        public float age;
+        public float decayPercentage; 
+        public float isAlive;
+    }
+    public struct TreeOfLifeStemSegmentData {
+        public int speciesID;
+        public int fromID;
+        public int toID;        
+    }
     
     public struct PlayerGlowyBitData {
 		public Vector2 coords;
@@ -283,18 +323,12 @@ public class TheRenderKing : MonoBehaviour {
     private void Awake() {
         fluidObstaclesRenderCamera.enabled = false;
         fluidColorRenderCamera.enabled = false;
+        //treeOfLifeRenderCamera.enabled = false;
+        speciesPortraitRenderCamera.enabled = false;
     }
     // Use this for initialization:
     public void InitializeRiseAndShine(SimulationManager simManager) {
-        //primaryRT = new RenderTexture(1024, 1024, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);        
-        //primaryRT.wrapMode = TextureWrapMode.Clamp;
-        //primaryRT.enableRandomWrite = true;
-        //primaryRT.Create();
-
-        //Debug.Log("Quaternion in z: " + Quaternion.AngleAxis(45f, new Vector3(0f, 0f, 1f)));
-
-        //simManager.cameraManager.camera.targetTexture = primaryRT;
-
+        
         this.simManager = simManager;
 
         // temp bodyWidthsTexture:
@@ -308,27 +342,15 @@ public class TheRenderKing : MonoBehaviour {
         baronVonTerrain.Initialize();
         baronVonWater.Initialize();
 
-        //InitializeTerrain();
-
-        //AlignFrameBufferStrokesToTerrain();
-
         for(int i = 0; i < simManager._NumEggSacks; i++) {
             UpdateDynamicFoodBuffers(i);
         }
-        /*for(int i = 0; i < 32; i++) {
-            UpdateDynamicFoodBuffers(false, i);
-        }*/
+
+        //TreeOfLifeAddNewSpecies(0); // ** HACKY!!!! ***
 
         isInitialized = true;  // we did it, guys!
     }
-    /*
-    private void AlignFrameBufferStrokesToTerrain() {
-        int kernelCSAlignFrameBufferStrokes = computeShaderBrushStrokes.FindKernel("CSAlignFrameBufferStrokes");
-        computeShaderBrushStrokes.SetTexture(kernelCSAlignFrameBufferStrokes, "terrainHeightTex", terrainHeightMap);
-        computeShaderBrushStrokes.SetBuffer(kernelCSAlignFrameBufferStrokes, "terrainFrameBufferStrokesCBuffer", frameBufferStrokesCBuffer);
-        computeShaderBrushStrokes.SetFloat("_MapSize", SimulationManager._MapSize);
-        computeShaderBrushStrokes.Dispatch(kernelCSAlignFrameBufferStrokes, frameBufferStrokesCBuffer.count, 1, 1);
-    }*/
+    
     // Actual mix of rendering passes will change!!! 
     private void InitializeBuffers() {  // primary function -- calls sub-functions for initializing each buffer
             
@@ -358,30 +380,11 @@ public class TheRenderKing : MonoBehaviour {
         InitializeWaterChainsCBuffer();
         InitializeGizmos();
         //InitializeAgentHoverHighlightCBuffer();
-
+        InitializeTreeOfLifeBuffers();
         //InitializeDebugBuffers(); 
 
-
-        /*        
-        // TRAIL DOTS:
-        TrailDotData[] trailDotsDataArray = new TrailDotData[numTrailDotsPerAgent * agentSimDataCBuffer.count];
-        for (int i = 0; i < agentSimDataCBuffer.count; i++) {
-            for (int t = 0; t < numTrailDotsPerAgent; t++) {
-                TrailDotData data = new TrailDotData();
-                data.parentIndex = i;
-                data.coords01 = new Vector2((agentSimDataArray[i].worldPos.x + 70f) / 140f, (agentSimDataArray[i].worldPos.y + 70f) / 140f);
-                data.age = (float)t / (float)numTrailDotsPerAgent;
-                data.initAlpha = 1f;
-                trailDotsDataArray[i * numTrailDotsPerAgent + t] = data;
-            }
-        }
-        trailDotsCBuffer = new ComputeBuffer(numTrailDotsPerAgent * agentSimDataCBuffer.count, sizeof(int) + sizeof(float) * 4);
-        int kernelSimTrailDots = computeShaderFluidSim.FindKernel("SimTrailDots");
-        computeShaderFluidSim.SetBuffer(kernelSimTrailDots, "AgentSimDataCBuffer", agentSimDataCBuffer);
-        computeShaderFluidSim.SetBuffer(kernelSimTrailDots, "TrailDotsCBuffer", trailDotsCBuffer);
-        trailDotsCBuffer.SetData(trailDotsDataArray);
-        */
     }
+    
     private void InitializeCurveRibbonMeshBuffer() {
         
         float rowSize = 1f / (float)numCurveRibbonQuads;
@@ -788,6 +791,61 @@ public class TheRenderKing : MonoBehaviour {
         gizmoStirToolPosCBuffer = new ComputeBuffer(1, sizeof(float) * 4);
         gizmoStirToolPosCBuffer.SetData(dataArray);
     }
+    private void InitializeTreeOfLifeBuffers() {
+        treeOfLifeNodeColliderDataArray = new TreeOfLifeNodeColliderData[maxNumTreeOfLifeNodes];
+        treeOfLifeNodeColliderDataCBuffer = new ComputeBuffer(treeOfLifeNodeColliderDataArray.Length, sizeof(float) * 6);
+        for(int i = 0; i < treeOfLifeNodeColliderDataArray.Length; i++) {
+            TreeOfLifeNodeColliderData data = new TreeOfLifeNodeColliderData();
+            data.localPos = Vector3.zero;
+            data.scale = Vector3.one;
+            treeOfLifeNodeColliderDataArray[i] = data;
+        }
+        treeOfLifeNodeColliderDataCBuffer.SetData(treeOfLifeNodeColliderDataArray);
+
+        treeOfLifeLeafNodeDataArray = new TreeOfLifeLeafNodeData[maxNumTreeOfLifeNodes];
+        treeOfLifeLeafNodeDataCBuffer = new ComputeBuffer(treeOfLifeLeafNodeDataArray.Length, sizeof(int) * 3 + sizeof(float) * 10);
+        for(int i = 0; i < treeOfLifeLeafNodeDataArray.Length; i++) {
+            TreeOfLifeLeafNodeData data = new TreeOfLifeLeafNodeData();
+            data.speciesID = i;
+            data.parentSpeciesID = 0;
+            data.graphDepth = 0;
+            data.primaryHue = Vector3.one;
+            data.secondaryHue = Vector3.zero;
+            data.growthPercentage = 1f;
+            data.age = 0f;
+            data.decayPercentage = 0f;       
+            data.isAlive = 0f;
+            treeOfLifeLeafNodeDataArray[i] = data;
+        }
+        treeOfLifeLeafNodeDataCBuffer.SetData(treeOfLifeLeafNodeDataArray);        
+
+        // Stem Segments:
+        // QuadVertices:        
+        float rowSize = 1f / (float)numTreeOfLifeStemSegmentQuads;
+        treeOfLifeStemSegmentVerticesCBuffer = new ComputeBuffer(6 * numTreeOfLifeStemSegmentQuads, sizeof(float) * 3);
+        Vector3[] verticesArray = new Vector3[treeOfLifeStemSegmentVerticesCBuffer.count];
+        for(int i = 0; i < numTreeOfLifeStemSegmentQuads; i++) {
+            int baseIndex = i * 6;
+
+            float startCoord = (float)i;
+            float endCoord = (float)(i + 1);
+            verticesArray[baseIndex + 0] = new Vector3(0.5f, startCoord * rowSize);
+            verticesArray[baseIndex + 1] = new Vector3(0.5f, endCoord * rowSize);
+            verticesArray[baseIndex + 2] = new Vector3(-0.5f, endCoord * rowSize);
+            verticesArray[baseIndex + 3] = new Vector3(-0.5f, endCoord * rowSize);
+            verticesArray[baseIndex + 4] = new Vector3(-0.5f, startCoord * rowSize);
+            verticesArray[baseIndex + 5] = new Vector3(0.5f, startCoord * rowSize); 
+        }
+        treeOfLifeStemSegmentVerticesCBuffer.SetData(verticesArray);
+    
+
+        // actual segments buffer:
+        //treeOfLifeStemSegmentDataArray = new TreeOfLifeStemSegmentData[maxNumTreeOfLifeNodes * maxTreeOfLifeStemDepth];
+        treeOfLifeStemSegmentDataCBuffer = new ComputeBuffer(maxNumTreeOfLifeSegments, sizeof(int) * 3);
+        // might not have to do anything here -- update piece-meal with ComputeShader Dispatches?
+
+        TreeOfLifeAddNewSpecies(0, 0);
+    }
     /*private void InitializeDebugBuffers() {
         debugAgentResourcesCBuffer = new ComputeBuffer(simManager._NumAgents, sizeof(float) * 10);
         SimulationStateData.DebugBodyResourcesData[] debugAgentResourcesArray = new SimulationStateData.DebugBodyResourcesData[debugAgentResourcesCBuffer.count];
@@ -907,6 +965,11 @@ public class TheRenderKing : MonoBehaviour {
         gizmoStirToolMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         gizmoFeedToolMat.SetPass(0);
         gizmoFeedToolMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+
+        treeOfLifeLeafNodesMat.SetPass(0);
+        treeOfLifeLeafNodesMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        treeOfLifeStemSegmentsMat.SetPass(0);
+        treeOfLifeStemSegmentsMat.SetBuffer("quadVerticesCBuffer", treeOfLifeStemSegmentVerticesCBuffer);
         /*
         trailDotsDisplayMat.SetPass(0);
         trailDotsDisplayMat.SetBuffer("agentSimDataCBuffer", agentSimDataCBuffer);
@@ -947,7 +1010,14 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferFluidColor = new CommandBuffer();
         cmdBufferFluidColor.name = "cmdBufferFluidColor";
         fluidColorRenderCamera.AddCommandBuffer(CameraEvent.BeforeDepthNormalsTexture, cmdBufferFluidColor);
-        //()
+
+        //cmdBufferTreeOfLifeDisplay = new CommandBuffer();
+        //cmdBufferTreeOfLifeDisplay.name = "cmdBufferTreeOfLifeDisplay";
+        //treeOfLifeRenderCamera.AddCommandBuffer(CameraEvent.AfterEverything, cmdBufferTreeOfLifeDisplay);
+        
+        cmdBufferSpeciesPortraitDisplay = new CommandBuffer();
+        cmdBufferSpeciesPortraitDisplay.name = "cmdBufferSpeciesPortraitDisplay";
+        speciesPortraitRenderCamera.AddCommandBuffer(CameraEvent.BeforeDepthNormalsTexture, cmdBufferSpeciesPortraitDisplay);
         
     }
 
@@ -1637,7 +1707,6 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferFluidObstacles.SetRenderTarget(fluidManager._ObstaclesRT);
         cmdBufferFluidObstacles.ClearRenderTarget(true, true, Color.black, 1.0f);  // clear -- needed???
         cmdBufferFluidObstacles.SetViewProjectionMatrices(fluidObstaclesRenderCamera.worldToCameraMatrix, fluidObstaclesRenderCamera.projectionMatrix);
-
         // Draw Solid Land boundaries:
         cmdBufferFluidObstacles.DrawMesh(baronVonTerrain.terrainMesh, Matrix4x4.identity, baronVonTerrain.terrainObstaclesHeightMaskMat); // Masks out areas above the fluid "Sea Level"
         // Draw dynamic Obstacles:
@@ -1647,7 +1716,6 @@ public class TheRenderKing : MonoBehaviour {
         basicStrokeDisplayMat.SetBuffer("basicStrokesCBuffer", obstacleStrokesCBuffer);        
         cmdBufferFluidObstacles.DrawProcedural(Matrix4x4.identity, basicStrokeDisplayMat, 0, MeshTopology.Triangles, 6, obstacleStrokesCBuffer.count);
             */  // Disabling for now -- starting with one-way interaction between fluid & objects (fluid pushes objects, they don't push back)
-            
         Graphics.ExecuteCommandBuffer(cmdBufferFluidObstacles);
         // Still not sure if this will work correctly... ****
         fluidObstaclesRenderCamera.Render(); // is this even needed? all drawcalls taken care of within commandBuffer?
@@ -1674,6 +1742,65 @@ public class TheRenderKing : MonoBehaviour {
 
         fluidColorRenderCamera.Render();
         // Update this ^^ to use Graphics.ExecuteCommandBuffer()  ****
+
+
+        // TREE OF LIFE:
+        /*UpdateTreeOfLifeData();
+        cmdBufferTreeOfLifeDisplay.Clear();
+        cmdBufferTreeOfLifeDisplay.SetRenderTarget(simManager.masterGenomePool.treeOfLifeManager.treeOfLifeDisplayRT);
+        cmdBufferTreeOfLifeDisplay.ClearRenderTarget(true, true, new Color(0f,0f,0f,0f), 1.0f);  // clear -- needed???
+        cmdBufferTreeOfLifeDisplay.SetViewProjectionMatrices(treeOfLifeRenderCamera.worldToCameraMatrix, treeOfLifeRenderCamera.projectionMatrix);
+        // UI TREE OF LIFE TESTING:
+        treeOfLifeLeafNodesMat.SetPass(0);
+        treeOfLifeLeafNodesMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        treeOfLifeLeafNodesMat.SetBuffer("treeOfLifeLeafNodeDataCBuffer", treeOfLifeLeafNodeDataCBuffer);
+        treeOfLifeLeafNodesMat.SetBuffer("treeOfLifeNodeColliderDataCBuffer", treeOfLifeNodeColliderDataCBuffer);
+        cmdBufferTreeOfLifeDisplay.DrawProcedural(Matrix4x4.identity, treeOfLifeLeafNodesMat, 0, MeshTopology.Triangles, 6, treeOfLifeLeafNodeDataCBuffer.count);
+        Graphics.ExecuteCommandBuffer(cmdBufferTreeOfLifeDisplay);
+        treeOfLifeRenderCamera.Render();
+        */
+    }
+    private void UpdateTreeOfLifeData() {
+
+    }
+    public void TreeOfLifeAddNewSpecies(int speciesID, int parentSpeciesID) {
+        
+        int kernelCSAddNewSpecies = computeShaderTreeOfLife.FindKernel("CSAddNewSpecies");
+
+        //computeShaderTreeOfLife.SetTexture(kernelCSAddNewSpecies, "velocityRead", fluidManager._VelocityA);
+        int[] speciesIDArray = new int[1];
+        speciesIDArray[0] = speciesID;
+        ComputeBuffer speciesIDCBuffer = new ComputeBuffer(1, sizeof(int));
+        speciesIDCBuffer.SetData(speciesIDArray);
+
+        TreeOfLifeLeafNodeData[] updateLeafNodeDataArray = new TreeOfLifeLeafNodeData[1];
+        ComputeBuffer updateLeafNodeDataCBuffer = new ComputeBuffer(updateLeafNodeDataArray.Length, sizeof(int) * 3 + sizeof(float) * 10);
+        
+        TreeOfLifeLeafNodeData data = new TreeOfLifeLeafNodeData();
+        data.speciesID = speciesID;
+        data.parentSpeciesID = parentSpeciesID;
+        data.graphDepth = 0;
+        data.primaryHue = Vector3.one;
+        data.secondaryHue = Vector3.zero;
+        data.growthPercentage = 1f;
+        data.age = 0f;
+        data.decayPercentage = 0f;       
+        data.isAlive = 1f;
+
+        updateLeafNodeDataArray[0] = data;        
+        updateLeafNodeDataCBuffer.SetData(updateLeafNodeDataArray);    
+
+        computeShaderTreeOfLife.SetBuffer(kernelCSAddNewSpecies, "treeOfLifeNodeColliderDataCBuffer", treeOfLifeNodeColliderDataCBuffer);
+        computeShaderTreeOfLife.SetBuffer(kernelCSAddNewSpecies, "treeOfLifeLeafNodeDataCBuffer", treeOfLifeLeafNodeDataCBuffer);
+        computeShaderTreeOfLife.SetBuffer(kernelCSAddNewSpecies, "updateSpeciesNodeDataCBuffer", updateLeafNodeDataCBuffer);
+        computeShaderTreeOfLife.SetBuffer(kernelCSAddNewSpecies, "speciesIndexCBuffer", speciesIDCBuffer);
+        computeShaderTreeOfLife.Dispatch(kernelCSAddNewSpecies, speciesIDCBuffer.count, 1, 1);
+
+        speciesIDCBuffer.Release();
+        updateLeafNodeDataCBuffer.Release();
+    }
+    public void TreeOfLifeExtinctSpecies(int speciesID) {
+
     }
     /*private void Render() {
         cmdBufferPrimary.Clear();
@@ -2050,6 +2177,13 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, gizmoFeedToolMat, 0, MeshTopology.Triangles, 6, 1);
         
 
+        // UI TREE OF LIFE TESTING:
+        treeOfLifeLeafNodesMat.SetPass(0);
+        treeOfLifeLeafNodesMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        treeOfLifeLeafNodesMat.SetBuffer("treeOfLifeLeafNodeDataCBuffer", treeOfLifeLeafNodeDataCBuffer);
+        treeOfLifeLeafNodesMat.SetBuffer("treeOfLifeNodeColliderDataCBuffer", treeOfLifeNodeColliderDataCBuffer);
+        cmdBufferTest.DrawProcedural(Matrix4x4.identity, treeOfLifeLeafNodesMat, 0, MeshTopology.Triangles, 6, treeOfLifeLeafNodeDataCBuffer.count);
+        
         /*if(isDebugRenderOn) {
             
             
@@ -2384,6 +2518,12 @@ public class TheRenderKing : MonoBehaviour {
         if(fluidObstaclesRenderCamera != null) {
             fluidObstaclesRenderCamera.RemoveAllCommandBuffers();
         }
+        /*if(treeOfLifeRenderCamera != null) {
+            treeOfLifeRenderCamera.RemoveAllCommandBuffers();
+        }*/
+        if(speciesPortraitRenderCamera != null) {
+            speciesPortraitRenderCamera.RemoveAllCommandBuffers();
+        }
 
         if(baronVonTerrain != null) {
             baronVonTerrain.Cleanup();
@@ -2487,6 +2627,21 @@ public class TheRenderKing : MonoBehaviour {
         if(gizmoFeedToolPosCBuffer != null) {
             gizmoFeedToolPosCBuffer.Release();
         }
+        // TREE OF LIFE:
+        if(treeOfLifeLeafNodeDataCBuffer != null) {
+            treeOfLifeLeafNodeDataCBuffer.Release();
+        }
+        if(treeOfLifeNodeColliderDataCBuffer != null) {
+            treeOfLifeNodeColliderDataCBuffer.Release();
+        }
+        if(treeOfLifeStemSegmentDataCBuffer != null) {
+            treeOfLifeStemSegmentDataCBuffer.Release();
+        }
+        if(treeOfLifeStemSegmentVerticesCBuffer != null) {
+            treeOfLifeStemSegmentVerticesCBuffer.Release();
+        }
+
+
         /*if(agentHoverHighlightCBuffer != null) {
             agentHoverHighlightCBuffer.Release();
         }*/

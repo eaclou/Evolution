@@ -317,6 +317,7 @@ public class SimulationManager : MonoBehaviour {
     private void LoadingInitializePopulationGenomes() {
         masterGenomePool = new MasterGenomePool();
         masterGenomePool.FirstTimeInitialize(numAgents, settingsManager.mutationSettingsPersistent, uiManager);
+               
 
         /*agentGenomePoolArray = new AgentGenome[numAgents];
         for (int i = 0; i < agentGenomePoolArray.Length; i++) {   // Create initial Population Supervised Learners
@@ -515,6 +516,7 @@ public class SimulationManager : MonoBehaviour {
         // **** NEED TO ADDRESS THIS!!!!!! ************************
         theRenderKing.fluidObstaclesRenderCamera.targetTexture = environmentFluidManager._ObstaclesRT; // *** See if this works **
         theRenderKing.fluidColorRenderCamera.targetTexture = environmentFluidManager._SourceColorRT;
+
         //temp:
         theRenderKing.debugRT = environmentFluidManager._SourceColorRT;
     }
@@ -1056,7 +1058,7 @@ public class SimulationManager : MonoBehaviour {
         // -- Select a ParentGenome from the leaderboardList and create a mutated copy (childGenome):
         AgentGenome newGenome = sourceSpeciesPool.GetNewMutatedGenome();
         // -- Check which species this new childGenome should belong to (most likely its parent, but maybe it creates a new species or better fits in with a diff existing species)        
-        masterGenomePool.AssignNewMutatedGenomeToSpecies(newGenome, sourceSpeciesPool.speciesID); // Checks which species this new genome should belong to and adds it to queue / does necessary processing   
+        masterGenomePool.AssignNewMutatedGenomeToSpecies(newGenome, sourceSpeciesPool.speciesID, this); // Checks which species this new genome should belong to and adds it to queue / does necessary processing   
                 
         // -- Clear Agent object so that it's ready to be reused
             // i.e. Set curLifecycle to .AwaitingRespawn ^
