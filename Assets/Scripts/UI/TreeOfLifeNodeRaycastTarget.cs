@@ -4,14 +4,15 @@ using UnityEngine;
 
 public class TreeOfLifeNodeRaycastTarget : MonoBehaviour {
 
-    public TreeOfLifeSpeciesNodeData nodeData;
+    public SpeciesGenomePool speciesRef;
+    //public TreeOfLifeSpeciesNodeData nodeData;
     //public int speciesID;
     //public bool isActive; // extinct or not?
 
     public CapsuleCollider rayCollider;
 
-    public void Initialize(TreeOfLifeSpeciesNodeData nodeData) {
-        this.nodeData = nodeData;
+    public void Initialize(SpeciesGenomePool speciesRef) {
+        this.speciesRef = speciesRef;
     }
 
     // Use this for initialization

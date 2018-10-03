@@ -188,13 +188,14 @@ public class TheRenderKing : MonoBehaviour {
     private int numTreeOfLifeStemSegmentQuads = 4;
     private ComputeBuffer treeOfLifeStemSegmentVerticesCBuffer;  // short ribbon mesh
     private int maxNumTreeOfLifeNodes = 512; // max numSpecies
-    private int maxNumTreeOfLifeSegments = 512 * 32;  
+    private int maxNumTreeOfLifeSegments = 512;  
     private TreeOfLifeNodeColliderData[] treeOfLifeNodeColliderDataArray;
     private ComputeBuffer treeOfLifeNodeColliderDataCBuffer;
     private TreeOfLifeLeafNodeData[] treeOfLifeLeafNodeDataArray;
     private ComputeBuffer treeOfLifeLeafNodeDataCBuffer;
-    private TreeOfLifeStemSegmentData[] treeOfLifeStemSegmentDataArray;
+    //private TreeOfLifeStemSegmentStruct[] treeOfLifeStemSegmentDataArray;
     private ComputeBuffer treeOfLifeStemSegmentDataCBuffer;
+    private int curNumTreeOfLifeStemSegments = 0;
 
     public struct TreeOfLifeNodeColliderData {  // only the data that needs to be transferred between CPU & GPU  - minimize!!
         public Vector3 localPos;
@@ -211,7 +212,7 @@ public class TheRenderKing : MonoBehaviour {
         public float decayPercentage; 
         public float isAlive;
     }
-    public struct TreeOfLifeStemSegmentData {
+    public struct TreeOfLifeStemSegmentStruct {
         public int speciesID;
         public int fromID;
         public int toID;        
@@ -840,11 +841,21 @@ public class TheRenderKing : MonoBehaviour {
     
 
         // actual segments buffer:
-        //treeOfLifeStemSegmentDataArray = new TreeOfLifeStemSegmentData[maxNumTreeOfLifeNodes * maxTreeOfLifeStemDepth];
+        TreeOfLifeStemSegmentStruct[] treeOfLifeStemSegmentDataArray = new TreeOfLifeStemSegmentStruct[maxNumTreeOfLifeSegments];
         treeOfLifeStemSegmentDataCBuffer = new ComputeBuffer(maxNumTreeOfLifeSegments, sizeof(int) * 3);
+        for(int i = 0; i < treeOfLifeStemSegmentDataArray.Length; i++) {
+            TreeOfLifeStemSegmentStruct newStruct = new TreeOfLifeStemSegmentStruct();
+            newStruct.speciesID = 0;
+            newStruct.fromID = 0;
+            newStruct.toID = 0;
+            treeOfLifeStemSegmentDataArray[i] = newStruct;
+        }
+        treeOfLifeStemSegmentDataCBuffer.SetData(treeOfLifeStemSegmentDataArray);
         // might not have to do anything here -- update piece-meal with ComputeShader Dispatches?
+        treeOfLifeStemSegmentDataCBuffer.GetData(treeOfLifeStemSegmentDataArray);
+        Debug.Log("WTF M8 treeOfLifeStemSegmentDataArray " + treeOfLifeStemSegmentDataArray[32].speciesID.ToString());
 
-        TreeOfLifeAddNewSpecies(0, 0);
+        //TreeOfLifeAddNewSpecies(0, 0);
     }
     /*private void InitializeDebugBuffers() {
         debugAgentResourcesCBuffer = new ComputeBuffer(simManager._NumAgents, sizeof(float) * 10);
@@ -963,11 +974,13 @@ public class TheRenderKing : MonoBehaviour {
 
         gizmoStirToolMat.SetPass(0);
         gizmoStirToolMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+
         gizmoFeedToolMat.SetPass(0);
         gizmoFeedToolMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
 
         treeOfLifeLeafNodesMat.SetPass(0);
         treeOfLifeLeafNodesMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+
         treeOfLifeStemSegmentsMat.SetPass(0);
         treeOfLifeStemSegmentsMat.SetBuffer("quadVerticesCBuffer", treeOfLifeStemSegmentVerticesCBuffer);
         /*
@@ -1632,6 +1645,9 @@ public class TheRenderKing : MonoBehaviour {
         computeShaderCritters.SetFloat("_MapSize", SimulationManager._MapSize);
         computeShaderCritters.Dispatch(kernelCSCSSimulateCritterSkinStrokes, critterSkinStrokesCBuffer.count / 16, 1, 1);
     }
+    private void SimTreeOfLife() {
+
+    }
     /*private void UpdateAgentHighlightData() {
         //agentHoverHighlightCBuffer = new ComputeBuffer(1, sizeof(float) * 4);
         
@@ -1668,6 +1684,7 @@ public class TheRenderKing : MonoBehaviour {
         SimEggSacks();
         //SimWaterSplines();
         //SimWaterChains();
+        SimTreeOfLife(); // issues with this being on FixedUpdate() cycle vs Update() ?? ***
 
         //UpdateAgentHighlightData();
 
@@ -1760,44 +1777,85 @@ public class TheRenderKing : MonoBehaviour {
         treeOfLifeRenderCamera.Render();
         */
     }
-    private void UpdateTreeOfLifeData() {
+    
+    public void TreeOfLifeAddNewSpecies(MasterGenomePool masterGenomePool, int newSpeciesID) { //int speciesID, int parentSpeciesID) {
 
-    }
-    public void TreeOfLifeAddNewSpecies(int speciesID, int parentSpeciesID) {
-        
-        int kernelCSAddNewSpecies = computeShaderTreeOfLife.FindKernel("CSAddNewSpecies");
+        SpeciesGenomePool newSpecies = masterGenomePool.completeSpeciesPoolsList[newSpeciesID];
 
         //computeShaderTreeOfLife.SetTexture(kernelCSAddNewSpecies, "velocityRead", fluidManager._VelocityA);
         int[] speciesIDArray = new int[1];
-        speciesIDArray[0] = speciesID;
+        speciesIDArray[0] = newSpecies.speciesID;
         ComputeBuffer speciesIDCBuffer = new ComputeBuffer(1, sizeof(int));
         speciesIDCBuffer.SetData(speciesIDArray);
 
-        TreeOfLifeLeafNodeData[] updateLeafNodeDataArray = new TreeOfLifeLeafNodeData[1];
-        ComputeBuffer updateLeafNodeDataCBuffer = new ComputeBuffer(updateLeafNodeDataArray.Length, sizeof(int) * 3 + sizeof(float) * 10);
+        TreeOfLifeLeafNodeData[] updateLeafNodeDataArray = new TreeOfLifeLeafNodeData[1];        
         
         TreeOfLifeLeafNodeData data = new TreeOfLifeLeafNodeData();
-        data.speciesID = speciesID;
-        data.parentSpeciesID = parentSpeciesID;
-        data.graphDepth = 0;
-        data.primaryHue = Vector3.one;
-        data.secondaryHue = Vector3.zero;
+        data.speciesID = newSpecies.speciesID;
+        data.parentSpeciesID = newSpecies.parentSpeciesID;
+        data.graphDepth = newSpecies.depthLevel;
+        data.primaryHue = newSpecies.representativeGenome.bodyGenome.appearanceGenome.huePrimary;
+        data.secondaryHue = newSpecies.representativeGenome.bodyGenome.appearanceGenome.hueSecondary;
         data.growthPercentage = 1f;
         data.age = 0f;
         data.decayPercentage = 0f;       
         data.isAlive = 1f;
+        updateLeafNodeDataArray[0] = data;   
 
-        updateLeafNodeDataArray[0] = data;        
+        ComputeBuffer updateLeafNodeDataCBuffer = new ComputeBuffer(updateLeafNodeDataArray.Length, sizeof(int) * 3 + sizeof(float) * 10);
         updateLeafNodeDataCBuffer.SetData(updateLeafNodeDataArray);    
 
-        computeShaderTreeOfLife.SetBuffer(kernelCSAddNewSpecies, "treeOfLifeNodeColliderDataCBuffer", treeOfLifeNodeColliderDataCBuffer);
-        computeShaderTreeOfLife.SetBuffer(kernelCSAddNewSpecies, "treeOfLifeLeafNodeDataCBuffer", treeOfLifeLeafNodeDataCBuffer);
-        computeShaderTreeOfLife.SetBuffer(kernelCSAddNewSpecies, "updateSpeciesNodeDataCBuffer", updateLeafNodeDataCBuffer);
-        computeShaderTreeOfLife.SetBuffer(kernelCSAddNewSpecies, "speciesIndexCBuffer", speciesIDCBuffer);
-        computeShaderTreeOfLife.Dispatch(kernelCSAddNewSpecies, speciesIDCBuffer.count, 1, 1);
+        int kernelCSAddNewSpeciesNode = computeShaderTreeOfLife.FindKernel("CSAddNewSpeciesNode");
+        computeShaderTreeOfLife.SetBuffer(kernelCSAddNewSpeciesNode, "treeOfLifeNodeColliderDataCBuffer", treeOfLifeNodeColliderDataCBuffer);
+        computeShaderTreeOfLife.SetBuffer(kernelCSAddNewSpeciesNode, "treeOfLifeLeafNodeDataCBuffer", treeOfLifeLeafNodeDataCBuffer);
+        computeShaderTreeOfLife.SetBuffer(kernelCSAddNewSpeciesNode, "updateSpeciesNodeDataCBuffer", updateLeafNodeDataCBuffer);
+        computeShaderTreeOfLife.SetBuffer(kernelCSAddNewSpeciesNode, "speciesIndexCBuffer", speciesIDCBuffer);
+        computeShaderTreeOfLife.Dispatch(kernelCSAddNewSpeciesNode, speciesIDCBuffer.count, 1, 1);
 
         speciesIDCBuffer.Release();
         updateLeafNodeDataCBuffer.Release();
+
+        // STEM SEGMENTS:
+        
+        if(newSpeciesID > 0) {  // if not root node
+            TreeOfLifeStemSegmentStruct[] segmentStructUpdateArray = new TreeOfLifeStemSegmentStruct[newSpecies.depthLevel]; // *** +1?
+            ComputeBuffer updateStemSegmentDataCBuffer = new ComputeBuffer(segmentStructUpdateArray.Length, sizeof(int) * 3);
+
+            int curSpeciesID = newSpeciesID;
+
+            for(int i = 0; i < newSpecies.depthLevel; i++) {
+
+                int parentSpeciesID = masterGenomePool.completeSpeciesPoolsList[curSpeciesID].parentSpeciesID;
+
+                // Create StemSegment!    
+                TreeOfLifeStemSegmentStruct newStemSegment = new TreeOfLifeStemSegmentStruct();
+                newStemSegment.speciesID = newSpeciesID;
+                newStemSegment.fromID = parentSpeciesID;
+                newStemSegment.toID = curSpeciesID;
+
+                segmentStructUpdateArray[i] = newStemSegment;
+                
+                curSpeciesID = parentSpeciesID;  // set curSpecies to ParentSpecies (traverse up tree)                
+            }
+
+            updateStemSegmentDataCBuffer.SetData(segmentStructUpdateArray);
+
+            // DISPATCH::
+            int kernelCSAddNewSpeciesStemSegments = computeShaderTreeOfLife.FindKernel("CSAddNewSpeciesStemSegments");
+            //computeShaderTreeOfLife.SetBuffer(kernelCSAddNewSpeciesStemSegments, "treeOfLifeNodeColliderDataCBuffer", treeOfLifeNodeColliderDataCBuffer);
+            //computeShaderTreeOfLife.SetupdateStemSegmentDataCBufferBuffer(kernelCSAddNewSpeciesStemSegments, "treeOfLifeLeafNodeDataCBuffer", treeOfLifeLeafNodeDataCBuffer);
+            computeShaderTreeOfLife.SetBuffer(kernelCSAddNewSpeciesStemSegments, "treeOfLifeStemSegmentDataCBuffer", treeOfLifeStemSegmentDataCBuffer);
+            computeShaderTreeOfLife.SetBuffer(kernelCSAddNewSpeciesStemSegments, "updateStemSegmentDataCBuffer", updateStemSegmentDataCBuffer);
+            computeShaderTreeOfLife.SetInt("_UpdateBufferStartIndex", curNumTreeOfLifeStemSegments);
+            computeShaderTreeOfLife.Dispatch(kernelCSAddNewSpeciesStemSegments, updateStemSegmentDataCBuffer.count, 1, 1);
+
+            Debug.Log("UPDATE STEM SEGMENTS: " + newSpeciesID.ToString() + ", depth: " + newSpecies.depthLevel.ToString());
+
+            updateStemSegmentDataCBuffer.Release();
+
+            curNumTreeOfLifeStemSegments += newSpecies.depthLevel;  // keep track of start index
+        }       
+        
     }
     public void TreeOfLifeExtinctSpecies(int speciesID) {
 
@@ -2178,11 +2236,19 @@ public class TheRenderKing : MonoBehaviour {
         
 
         // UI TREE OF LIFE TESTING:
+        treeOfLifeStemSegmentsMat.SetPass(0);
+        treeOfLifeStemSegmentsMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        treeOfLifeStemSegmentsMat.SetBuffer("treeOfLifeNodeColliderDataCBuffer", treeOfLifeNodeColliderDataCBuffer);
+        treeOfLifeStemSegmentsMat.SetBuffer("treeOfLifeLeafNodeDataCBuffer", treeOfLifeLeafNodeDataCBuffer);
+        treeOfLifeStemSegmentsMat.SetBuffer("treeOfLifeStemSegmentDataCBuffer", treeOfLifeStemSegmentDataCBuffer);
+        cmdBufferTest.DrawProcedural(Matrix4x4.identity, treeOfLifeStemSegmentsMat, 0, MeshTopology.Triangles, 6, treeOfLifeStemSegmentDataCBuffer.count);
+        
         treeOfLifeLeafNodesMat.SetPass(0);
         treeOfLifeLeafNodesMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         treeOfLifeLeafNodesMat.SetBuffer("treeOfLifeLeafNodeDataCBuffer", treeOfLifeLeafNodeDataCBuffer);
         treeOfLifeLeafNodesMat.SetBuffer("treeOfLifeNodeColliderDataCBuffer", treeOfLifeNodeColliderDataCBuffer);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, treeOfLifeLeafNodesMat, 0, MeshTopology.Triangles, 6, treeOfLifeLeafNodeDataCBuffer.count);
+        
         
         /*if(isDebugRenderOn) {
             

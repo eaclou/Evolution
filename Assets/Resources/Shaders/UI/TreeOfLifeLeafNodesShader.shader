@@ -51,7 +51,7 @@
 				//o.pos = float4((quadVerticesCBuffer[5 - id].xy) * 2.0, 0.0, 1.0);  // Winding order opposite ?????
 				o.uv = quadVerticesCBuffer[id].xy + 0.5;
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0))); //float4(quadVerticesCBuffer[id], 1);
-				o.color = float4(activeMask, activeMask, activeMask, 1.0);
+				o.color = float4(leafData.primaryHue, 1.0);
 				//o.vertex = UnityObjectToClipPos(v.vertex);
 				//o.uv = TRANSFORM_TEX(v.uv, _MainTex);
 				return o;
@@ -59,7 +59,7 @@
 			
 			fixed4 frag (v2f i) : SV_Target
 			{
-				return float4(i.uv, i.color.b, 1); // * i.color;
+				return i.color;
 
 				// sample the texture
 				//fixed4 col = tex2D(_MainTex, i.uv);

@@ -5,14 +5,14 @@ using UnityEngine;
 [System.Serializable]
 public class MasterGenomePool {
 
-    public TreeOfLifeManager treeOfLifeManager;
+    //public TreeOfLifeManager treeOfLifeManager;
 
     public static int nextCandidateIndex = 0;
 
     public int maxNumActiveSpecies = 6;
     private int targetNumSpecies = 4;
-    public float speciesSimilarityDistanceThreshold = 5f;
-    private int minNumGauranteedEvalsForNewSpecies = 256;
+    public float speciesSimilarityDistanceThreshold = 3f;
+    private int minNumGauranteedEvalsForNewSpecies = 128;
     
     public List<int> currentlyActiveSpeciesIDList;
     public List<SpeciesGenomePool> completeSpeciesPoolsList;
@@ -44,11 +44,7 @@ public class MasterGenomePool {
         firstSpecies.FirstTimeInitialize(numAgentGenomes, 0);
 
         currentlyActiveSpeciesIDList.Add(0);
-        completeSpeciesPoolsList.Add(firstSpecies);
-
-        // After self Initialized:
-        treeOfLifeManager = new TreeOfLifeManager(uiManagerRef.treeOfLifeAnchorGO, uiManagerRef);
-        treeOfLifeManager.FirstTimeInitialize(this);
+        completeSpeciesPoolsList.Add(firstSpecies);        
     }
 
     public void Tick() {
@@ -109,6 +105,7 @@ public class MasterGenomePool {
     }
 
     public void AssignNewMutatedGenomeToSpecies(AgentGenome newGenome, int parentSpeciesID, SimulationManager simManagerRef) {
+        // *** Gross code organization btw this and SimManager ***
         int closestSpeciesID = -1;
 
         float closestDistance = 99999f;
@@ -131,24 +128,9 @@ public class MasterGenomePool {
                     assignedToNewSpecies = true;
                     // if so, update this 
                     // Create foundational Species:
-
-                    // WRAP THIS IN A FUNCTION!!! &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-                    int newSpeciesID = completeSpeciesPoolsList.Count;
-                    closestSpeciesID = newSpeciesID;
-                    SpeciesGenomePool newSpecies = new SpeciesGenomePool(newSpeciesID, parentSpeciesID, mutationSettingsRef);
-                    newSpecies.FirstTimeInitialize(newGenome, completeSpeciesPoolsList[parentSpeciesID].depthLevel + 1);
-
-                    currentlyActiveSpeciesIDList.Add(newSpeciesID);
-                    completeSpeciesPoolsList.Add(newSpecies);
-
-                    speciesCreatedOrDestroyedThisFrame = true;
-
-                    treeOfLifeManager.AddNewSpecies(this, newSpeciesID);
-                    simManagerRef.theRenderKing.TreeOfLifeAddNewSpecies(newSpeciesID, parentSpeciesID);
-                    // WRAP THIS IN A FUNCTION!!! &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-
-
-                    Debug.Log("New Species Created!!! (" + newSpeciesID.ToString() + "] score: " + closestDistance.ToString());
+                    
+                    simManagerRef.AddNewSpecies(newGenome, parentSpeciesID);
+                    
                 }               
             }
             else {
@@ -170,7 +152,7 @@ public class MasterGenomePool {
         }
         
         if(currentlyActiveSpeciesIDList.Count < maxNumActiveSpecies) {
-            speciesSimilarityDistanceThreshold *= 0.999f;  // lower while creating treeOfLifeUI
+            speciesSimilarityDistanceThreshold *= 0.995f;  // lower while creating treeOfLifeUI
         }
         else {
             speciesSimilarityDistanceThreshold *= 1.02f;

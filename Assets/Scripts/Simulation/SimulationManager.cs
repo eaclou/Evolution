@@ -247,6 +247,11 @@ public class SimulationManager : MonoBehaviour {
                 
         // Wake up the Render King and prepare him for the day ahead, proudly ruling over Renderland.
         GentlyRouseTheRenderMonarchHisHighnessLordOfPixels();
+
+        // TreeOfLife Render buffers here ???
+        // Tree Of LIFE UI collider & RenderKing updates:
+        //uiManager.treeOfLifeManager.AddNewSpecies(masterGenomePool, 0);
+        theRenderKing.TreeOfLifeAddNewSpecies(masterGenomePool, 0);
         
         // TEMP!!! ****
         for(int i = 0; i < numAgents; i++) {
@@ -1354,6 +1359,23 @@ public class SimulationManager : MonoBehaviour {
                 }
             }
         }
+    }
+
+    public void AddNewSpecies(AgentGenome newGenome, int parentSpeciesID) {
+        int newSpeciesID = masterGenomePool.completeSpeciesPoolsList.Count;
+        
+        SpeciesGenomePool newSpecies = new SpeciesGenomePool(newSpeciesID, parentSpeciesID, settingsManager.mutationSettingsPersistent);
+        newSpecies.FirstTimeInitialize(newGenome, masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].depthLevel + 1);
+        masterGenomePool.currentlyActiveSpeciesIDList.Add(newSpeciesID);
+        masterGenomePool.completeSpeciesPoolsList.Add(newSpecies);
+        masterGenomePool.speciesCreatedOrDestroyedThisFrame = true;
+
+        // Tree Of LIFE UI collider & RenderKing updates:
+        uiManager.treeOfLifeManager.AddNewSpecies(masterGenomePool, newSpeciesID);
+        theRenderKing.TreeOfLifeAddNewSpecies(masterGenomePool, newSpeciesID);
+        // WRAP THIS IN A FUNCTION!!! &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
+        //Debug.Log("New Species Created!!! (" + newSpeciesID.ToString() + "] score: " + closestDistance.ToString());
     }
     
     /*private void SetAgentGenomeToMutatedCopyOfParentGenome(int agentIndex, AgentGenome parentGenome) {

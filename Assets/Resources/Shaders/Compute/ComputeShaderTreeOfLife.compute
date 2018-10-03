@@ -1,6 +1,7 @@
 ﻿// Each #kernel tells which function to compile; you can have many kernels
 #pragma kernel CSTick  // update positions, increment age, fake n-body sim
-#pragma kernel CSAddNewSpecies
+#pragma kernel CSAddNewSpeciesNode
+#pragma kernel CSAddNewSpeciesStemSegments
 #pragma kernel CSExctinctSpecies
 #pragma kernel CSGetNodeColliderData
 
@@ -12,6 +13,7 @@ RWStructuredBuffer<TreeOfLifeStemSegmentData> treeOfLifeStemSegmentDataCBuffer;
 
 StructuredBuffer<int> speciesIndexCBuffer;
 StructuredBuffer<TreeOfLifeLeafNodeData> updateSpeciesNodeDataCBuffer;
+StructuredBuffer<TreeOfLifeStemSegmentData> updateStemSegmentDataCBuffer;
 
 uniform int _UpdateBufferStartIndex;
 
@@ -24,7 +26,7 @@ void CSTick (uint3 id : SV_DispatchThreadID)
 }
 
 [numthreads(1,1,1)]
-void CSAddNewSpecies (uint3 id : SV_DispatchThreadID)
+void CSAddNewSpeciesNode (uint3 id : SV_DispatchThreadID)
 {
 	int speciesID = speciesIndexCBuffer[id.x];	
 	treeOfLifeLeafNodeDataCBuffer[speciesID] = updateSpeciesNodeDataCBuffer[0];
@@ -32,6 +34,25 @@ void CSAddNewSpecies (uint3 id : SV_DispatchThreadID)
 	float3 parentLocalPos = treeOfLifeNodeColliderDataCBuffer[parentSpeciesID].localPos;
 	treeOfLifeNodeColliderDataCBuffer[speciesID].localPos = float3(parentLocalPos.x + 0.5, parentLocalPos.y - (float)speciesID * 0.15, parentLocalPos.z) * 2;
 		
+}
+
+[numthreads(1,1,1)]
+void CSAddNewSpeciesStemSegments (uint3 id : SV_DispatchThreadID)
+{
+	int stemSegmentIndex = _UpdateBufferStartIndex + id.x;
+	treeOfLifeStemSegmentDataCBuffer[stemSegmentIndex] = updateStemSegmentDataCBuffer[id.x];
+	
+	//treeOfLifeStemSegmentDataCBuffer[6].speciesID = 1;
+	//treeOfLifeStemSegmentDataCBuffer[4].fromID = 4;
+	//treeOfLifeStemSegmentDataCBuffer[id.x].toID = 1;
+
+	//TreeOfLifeStemSegmentData newData;
+	//newData.speciesID = 2;
+	//newData.fromID = 0;
+	//newData.toID = 2;
+	//treeOfLifeStemSegmentDataCBuffer[0] = newData;
+	//treeOfLifeStemSegmentDataCBuffer[5].speciesID = 10;
+	//treeOfLifeStemSegmentDataCBuffer[5].fromID = 3;
 }
 
 [numthreads(1,1,1)]

@@ -9,6 +9,7 @@ public class UIManager : MonoBehaviour {
     //public SimulationManager simManager;
     public CameraManager cameraManager;
     public GameOptionsManager gameOptionsManager;
+    public TreeOfLifeManager treeOfLifeManager;
 
     //public Canvas canvasMain;
 
@@ -580,7 +581,7 @@ public class UIManager : MonoBehaviour {
 
                 if(speciesNodeRayTarget != null) {
                     if(clicked) {
-                        Debug.Log("Clicked Species[" + speciesNodeRayTarget.nodeData.speciesPool.speciesID.ToString() + "]");
+                        Debug.Log("Clicked Species[" + speciesNodeRayTarget.speciesRef.speciesID.ToString() + "]");
                     }
                     else {
 
@@ -662,6 +663,10 @@ public class UIManager : MonoBehaviour {
                 break;
             case GameManager.GameState.Playing:
                 //canvasMain.renderMode = RenderMode.ScreenSpaceCamera;
+                // After self Initialized:
+                treeOfLifeManager = new TreeOfLifeManager(treeOfLifeAnchorGO, this);
+                treeOfLifeManager.FirstTimeInitialize(gameManager.simulationManager.masterGenomePool);
+
                 firstTimeStartup = false;
                 EnterPlayingUI();
                 break;
