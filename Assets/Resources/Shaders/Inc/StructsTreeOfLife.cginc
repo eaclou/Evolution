@@ -11,7 +11,11 @@ struct TreeOfLifeLeafNodeData {
     float growthPercentage;
     float age;
     float decayPercentage; 
-    float isAlive;
+    float isActive;
+    float isExtinct;
+	float isHover;
+	float isSelected;
+	float relFitnessScore;
 };
 struct TreeOfLifeStemSegmentData {
     int speciesID;

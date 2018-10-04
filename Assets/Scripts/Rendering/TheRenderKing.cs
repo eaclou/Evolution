@@ -185,7 +185,7 @@ public class TheRenderKing : MonoBehaviour {
 
     public float fullscreenFade = 1f;
 
-    private int numTreeOfLifeStemSegmentQuads = 4;
+    private int numTreeOfLifeStemSegmentQuads = 8;
     private ComputeBuffer treeOfLifeStemSegmentVerticesCBuffer;  // short ribbon mesh
     private int maxNumTreeOfLifeNodes = 512; // max numSpecies
     private int maxNumTreeOfLifeSegments = 512;  
@@ -209,8 +209,12 @@ public class TheRenderKing : MonoBehaviour {
         public Vector3 secondaryHue;
         public float growthPercentage;
         public float age;
-        public float decayPercentage; 
-        public float isAlive;
+        public float decayPercentage;
+        public float isActive;
+        public float isExtinct;
+        public float isHover;
+	    public float isSelected;
+        public float relFitnessScore;
     }
     public struct TreeOfLifeStemSegmentStruct {
         public int speciesID;
@@ -804,7 +808,7 @@ public class TheRenderKing : MonoBehaviour {
         treeOfLifeNodeColliderDataCBuffer.SetData(treeOfLifeNodeColliderDataArray);
 
         treeOfLifeLeafNodeDataArray = new TreeOfLifeLeafNodeData[maxNumTreeOfLifeNodes];
-        treeOfLifeLeafNodeDataCBuffer = new ComputeBuffer(treeOfLifeLeafNodeDataArray.Length, sizeof(int) * 3 + sizeof(float) * 10);
+        treeOfLifeLeafNodeDataCBuffer = new ComputeBuffer(treeOfLifeLeafNodeDataArray.Length, sizeof(int) * 3 + sizeof(float) * 14);
         for(int i = 0; i < treeOfLifeLeafNodeDataArray.Length; i++) {
             TreeOfLifeLeafNodeData data = new TreeOfLifeLeafNodeData();
             data.speciesID = i;
@@ -815,7 +819,8 @@ public class TheRenderKing : MonoBehaviour {
             data.growthPercentage = 1f;
             data.age = 0f;
             data.decayPercentage = 0f;       
-            data.isAlive = 0f;
+            data.isActive = 0f;
+            data.isExtinct = 0f;
             treeOfLifeLeafNodeDataArray[i] = data;
         }
         treeOfLifeLeafNodeDataCBuffer.SetData(treeOfLifeLeafNodeDataArray);        
@@ -829,13 +834,24 @@ public class TheRenderKing : MonoBehaviour {
             int baseIndex = i * 6;
 
             float startCoord = (float)i;
-            float endCoord = (float)(i + 1);
-            verticesArray[baseIndex + 0] = new Vector3(0.5f, startCoord * rowSize);
-            verticesArray[baseIndex + 1] = new Vector3(0.5f, endCoord * rowSize);
-            verticesArray[baseIndex + 2] = new Vector3(-0.5f, endCoord * rowSize);
-            verticesArray[baseIndex + 3] = new Vector3(-0.5f, endCoord * rowSize);
-            verticesArray[baseIndex + 4] = new Vector3(-0.5f, startCoord * rowSize);
-            verticesArray[baseIndex + 5] = new Vector3(0.5f, startCoord * rowSize); 
+            float endCoord = (float)(i + 1);   // **** WHY WAS THERE A WINDING ORDER PROBLEM???? *****
+            verticesArray[baseIndex + 0] = new Vector3(-0.5f, endCoord * rowSize - 0.5f);
+            verticesArray[baseIndex + 1] = new Vector3(0.5f, endCoord * rowSize - 0.5f);
+            verticesArray[baseIndex + 2] = new Vector3(0.5f, startCoord * rowSize - 0.5f);
+            verticesArray[baseIndex + 3] = new Vector3(0.5f, startCoord * rowSize - 0.5f);
+            verticesArray[baseIndex + 4] = new Vector3(-0.5f, startCoord * rowSize - 0.5f);
+            verticesArray[baseIndex + 5] = new Vector3(-0.5f, endCoord * rowSize - 0.5f); 
+
+            /*quadVerticesCBuffer = new ComputeBuffer(6, sizeof(float) * 3);
+        quadVerticesCBuffer.SetData(new[] {
+            new Vector3(-0.5f, 0.5f),
+            new Vector3(0.5f, 0.5f),
+            new Vector3(0.5f, -0.5f),
+            new Vector3(0.5f, -0.5f),
+            new Vector3(-0.5f, -0.5f),
+            new Vector3(-0.5f, 0.5f)
+        });*/
+
         }
         treeOfLifeStemSegmentVerticesCBuffer.SetData(verticesArray);
     
@@ -852,8 +868,8 @@ public class TheRenderKing : MonoBehaviour {
         }
         treeOfLifeStemSegmentDataCBuffer.SetData(treeOfLifeStemSegmentDataArray);
         // might not have to do anything here -- update piece-meal with ComputeShader Dispatches?
-        treeOfLifeStemSegmentDataCBuffer.GetData(treeOfLifeStemSegmentDataArray);
-        Debug.Log("WTF M8 treeOfLifeStemSegmentDataArray " + treeOfLifeStemSegmentDataArray[32].speciesID.ToString());
+        //treeOfLifeStemSegmentDataCBuffer.GetData(treeOfLifeStemSegmentDataArray);
+        //Debug.Log("WTF M8 treeOfLifeStemSegmentDataArray " + treeOfLifeStemSegmentDataArray[32].speciesID.ToString());
 
         //TreeOfLifeAddNewSpecies(0, 0);
     }
@@ -982,7 +998,7 @@ public class TheRenderKing : MonoBehaviour {
         treeOfLifeLeafNodesMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
 
         treeOfLifeStemSegmentsMat.SetPass(0);
-        treeOfLifeStemSegmentsMat.SetBuffer("quadVerticesCBuffer", treeOfLifeStemSegmentVerticesCBuffer);
+        treeOfLifeStemSegmentsMat.SetBuffer("treeOfLifeStemSegmentVerticesCBuffer", treeOfLifeStemSegmentVerticesCBuffer);
         /*
         trailDotsDisplayMat.SetPass(0);
         trailDotsDisplayMat.SetBuffer("agentSimDataCBuffer", agentSimDataCBuffer);
@@ -1646,7 +1662,15 @@ public class TheRenderKing : MonoBehaviour {
         computeShaderCritters.Dispatch(kernelCSCSSimulateCritterSkinStrokes, critterSkinStrokesCBuffer.count / 16, 1, 1);
     }
     private void SimTreeOfLife() {
+        int kernelCSTick = computeShaderTreeOfLife.FindKernel("CSTick");
+        
+        computeShaderTreeOfLife.SetBuffer(kernelCSTick, "treeOfLifeStemSegmentDataCBuffer", treeOfLifeStemSegmentDataCBuffer);
+        computeShaderTreeOfLife.SetBuffer(kernelCSTick, "treeOfLifeNodeColliderDataCBuffer", treeOfLifeNodeColliderDataCBuffer);
+        computeShaderTreeOfLife.SetBuffer(kernelCSTick, "treeOfLifeLeafNodeDataCBuffer", treeOfLifeLeafNodeDataCBuffer);
+        //computeShaderTreeOfLife.SetFloat("_MapSize", SimulationManager._MapSize);
+        computeShaderTreeOfLife.Dispatch(kernelCSTick, treeOfLifeNodeColliderDataCBuffer.count / 512, 1, 1);
 
+        TreeOfLifeGetColliderNodePositionData();
     }
     /*private void UpdateAgentHighlightData() {
         //agentHoverHighlightCBuffer = new ComputeBuffer(1, sizeof(float) * 4);
@@ -1799,10 +1823,11 @@ public class TheRenderKing : MonoBehaviour {
         data.growthPercentage = 1f;
         data.age = 0f;
         data.decayPercentage = 0f;       
-        data.isAlive = 1f;
+        data.isActive = 1f;
+        data.isExtinct = 0f;
         updateLeafNodeDataArray[0] = data;   
 
-        ComputeBuffer updateLeafNodeDataCBuffer = new ComputeBuffer(updateLeafNodeDataArray.Length, sizeof(int) * 3 + sizeof(float) * 10);
+        ComputeBuffer updateLeafNodeDataCBuffer = new ComputeBuffer(updateLeafNodeDataArray.Length, sizeof(int) * 3 + sizeof(float) * 14);
         updateLeafNodeDataCBuffer.SetData(updateLeafNodeDataArray);    
 
         int kernelCSAddNewSpeciesNode = computeShaderTreeOfLife.FindKernel("CSAddNewSpeciesNode");
@@ -1858,7 +1883,50 @@ public class TheRenderKing : MonoBehaviour {
         
     }
     public void TreeOfLifeExtinctSpecies(int speciesID) {
+        //computeShaderTreeOfLife.SetTexture(kernelCSAddNewSpecies, "velocityRead", fluidManager._VelocityA);
+        int[] speciesIDArray = new int[1];
+        speciesIDArray[0] = speciesID;
+        ComputeBuffer speciesIDCBuffer = new ComputeBuffer(1, sizeof(int));
+        speciesIDCBuffer.SetData(speciesIDArray);
 
+        TreeOfLifeLeafNodeData[] updateLeafNodeDataArray = new TreeOfLifeLeafNodeData[1];        
+        
+        TreeOfLifeLeafNodeData data = new TreeOfLifeLeafNodeData();
+        data.speciesID = speciesID;
+        data.parentSpeciesID = 0;
+        data.graphDepth = 0;
+        data.primaryHue = Vector3.zero;
+        data.secondaryHue = Vector3.zero;
+        data.growthPercentage = 0f;
+        data.age = 0f;
+        data.decayPercentage = 0f;       
+        data.isActive = 1f;
+        data.isExtinct = 1f;
+        updateLeafNodeDataArray[0] = data;   
+
+        ComputeBuffer updateLeafNodeDataCBuffer = new ComputeBuffer(updateLeafNodeDataArray.Length, sizeof(int) * 3 + sizeof(float) * 14);
+        updateLeafNodeDataCBuffer.SetData(updateLeafNodeDataArray);    
+
+        // DISPATCH::
+        int kernelCSCSExctinctSpecies = computeShaderTreeOfLife.FindKernel("CSExctinctSpecies");
+        computeShaderTreeOfLife.SetBuffer(kernelCSCSExctinctSpecies, "treeOfLifeLeafNodeDataCBuffer", treeOfLifeLeafNodeDataCBuffer);
+        computeShaderTreeOfLife.SetBuffer(kernelCSCSExctinctSpecies, "updateSpeciesNodeDataCBuffer", updateLeafNodeDataCBuffer);
+        computeShaderTreeOfLife.SetBuffer(kernelCSCSExctinctSpecies, "speciesIndexCBuffer", speciesIDCBuffer);
+        computeShaderTreeOfLife.Dispatch(kernelCSCSExctinctSpecies, updateLeafNodeDataCBuffer.count, 1, 1);
+
+        speciesIDCBuffer.Release();
+        updateLeafNodeDataCBuffer.Release();
+        //Debug.Log("UPDATE STEM SEGMENTS: " + newSpeciesID.ToString() + ", depth: " + newSpecies.depthLevel.ToString());
+    }
+    public void TreeOfLifeGetColliderNodePositionData() {
+
+        treeOfLifeNodeColliderDataCBuffer.GetData(treeOfLifeNodeColliderDataArray);
+        //Debug.Log("TreeOfLifeGetColliderNodePositionData: " + simManager.ToString());
+        //Debug.Log("TreeOfLifeGetColliderNodePositionData: " + simManager.uiManager.ToString());
+        //Debug.Log("TreeOfLifeGetColliderNodePositionData: " + simManager.uiManager.treeOfLifeManager.ToString());
+        simManager.uiManager.treeOfLifeManager.UpdateNodePositionsFromGPU(simManager.uiManager.cameraManager, treeOfLifeNodeColliderDataArray);
+        
+        
     }
     /*private void Render() {
         cmdBufferPrimary.Clear();
@@ -2237,16 +2305,27 @@ public class TheRenderKing : MonoBehaviour {
 
         // UI TREE OF LIFE TESTING:
         treeOfLifeStemSegmentsMat.SetPass(0);
-        treeOfLifeStemSegmentsMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        treeOfLifeStemSegmentsMat.SetBuffer("treeOfLifeStemSegmentVerticesCBuffer", treeOfLifeStemSegmentVerticesCBuffer);
         treeOfLifeStemSegmentsMat.SetBuffer("treeOfLifeNodeColliderDataCBuffer", treeOfLifeNodeColliderDataCBuffer);
         treeOfLifeStemSegmentsMat.SetBuffer("treeOfLifeLeafNodeDataCBuffer", treeOfLifeLeafNodeDataCBuffer);
         treeOfLifeStemSegmentsMat.SetBuffer("treeOfLifeStemSegmentDataCBuffer", treeOfLifeStemSegmentDataCBuffer);
-        cmdBufferTest.DrawProcedural(Matrix4x4.identity, treeOfLifeStemSegmentsMat, 0, MeshTopology.Triangles, 6, treeOfLifeStemSegmentDataCBuffer.count);
+        treeOfLifeStemSegmentsMat.SetVector("_TopLeftCornerWorldPos", simManager.cameraManager.worldSpaceTopLeft);
+        treeOfLifeStemSegmentsMat.SetVector("_CamRightDir", simManager.cameraManager.worldSpaceCameraRightDir);
+        treeOfLifeStemSegmentsMat.SetVector("_CamUpDir", simManager.cameraManager.worldSpaceCameraUpDir);
+        treeOfLifeStemSegmentsMat.SetFloat("_HoverID", simManager.uiManager.treeOfLifeManager.hoverID);
+        treeOfLifeStemSegmentsMat.SetFloat("_SelectedID", simManager.uiManager.treeOfLifeManager.selectedID);
+        
+        cmdBufferTest.DrawProcedural(Matrix4x4.identity, treeOfLifeStemSegmentsMat, 0, MeshTopology.Triangles, treeOfLifeStemSegmentVerticesCBuffer.count, treeOfLifeStemSegmentDataCBuffer.count);
         
         treeOfLifeLeafNodesMat.SetPass(0);
         treeOfLifeLeafNodesMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         treeOfLifeLeafNodesMat.SetBuffer("treeOfLifeLeafNodeDataCBuffer", treeOfLifeLeafNodeDataCBuffer);
         treeOfLifeLeafNodesMat.SetBuffer("treeOfLifeNodeColliderDataCBuffer", treeOfLifeNodeColliderDataCBuffer);
+        treeOfLifeLeafNodesMat.SetVector("_TopLeftCornerWorldPos", simManager.cameraManager.worldSpaceTopLeft);
+        treeOfLifeLeafNodesMat.SetVector("_CamRightDir", simManager.cameraManager.worldSpaceCameraRightDir);
+        treeOfLifeLeafNodesMat.SetVector("_CamUpDir", simManager.cameraManager.worldSpaceCameraUpDir);
+        treeOfLifeLeafNodesMat.SetFloat("_HoverID", simManager.uiManager.treeOfLifeManager.hoverID);
+        treeOfLifeLeafNodesMat.SetFloat("_SelectedID", simManager.uiManager.treeOfLifeManager.selectedID);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, treeOfLifeLeafNodesMat, 0, MeshTopology.Triangles, 6, treeOfLifeLeafNodeDataCBuffer.count);
         
         

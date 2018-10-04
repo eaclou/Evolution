@@ -5,6 +5,7 @@
 #pragma kernel CSExctinctSpecies
 #pragma kernel CSGetNodeColliderData
 
+
 #include "Assets/Resources/Shaders/Inc/StructsTreeOfLife.cginc"
 
 RWStructuredBuffer<TreeOfLifeNodeColliderData> treeOfLifeNodeColliderDataCBuffer;
@@ -17,12 +18,53 @@ StructuredBuffer<TreeOfLifeStemSegmentData> updateStemSegmentDataCBuffer;
 
 uniform int _UpdateBufferStartIndex;
 
-[numthreads(1,1,1)]
+[numthreads(512,1,1)]
 void CSTick (uint3 id : SV_DispatchThreadID)
 {
 	// Repel / Re-Position
+	TreeOfLifeNodeColliderData colliderData = treeOfLifeNodeColliderDataCBuffer[id.x];
+	TreeOfLifeLeafNodeData leafNodeData = treeOfLifeLeafNodeDataCBuffer[id.x];
+
+	// compare to nearest neighbors:
+	float3 ownPos = colliderData.localPos;
+	float3 repelForce = float3(0,0,0);
+	for(int i = 0; i < 32; i++) {
+		int neighborIndex = max(0, i - 15);
+		float3 neighborPos = treeOfLifeNodeColliderDataCBuffer[neighborIndex].localPos;
+
+		float3 vecToNeighbor = neighborPos - ownPos;
+		
+		float dist = length(vecToNeighbor);
+		if(dist < (leafNodeData.age * 0.5)) {
+			repelForce += vecToNeighbor * -0.001;
+
+			if(dist < 0.001) {
+				repelForce += ((float)neighborIndex - (float)id.x) * 0.051;
+			}
+		}		
+	}
+
+	// AttractForce:
+	float3 targetPos = float3((float)leafNodeData.graphDepth * 1 * 0.85, treeOfLifeNodeColliderDataCBuffer[leafNodeData.parentSpeciesID].localPos.y - leafNodeData.isExtinct * 0.5, 0.0);
+	float3 vecToTarget = targetPos - ownPos;
+	float3 attractForce = vecToTarget * 0.001;
+
+	//repelForce.x *= 0.55;
+	//repelForce.z *= 2.0;
+	//attractForce.y *= 0.01;
+	//attractForce.x *= 0.35;
+	colliderData.localPos += (repelForce + attractForce) * (1.1 - leafNodeData.isExtinct);
+	//colliderData.localPos.z = 0;
+	
+	treeOfLifeNodeColliderDataCBuffer[id.x] = colliderData;
+
+	treeOfLifeNodeColliderDataCBuffer[0].localPos = float3(0,0,0); // *** REFACTOR!!!! ***
 
 	// Increment Age
+	leafNodeData.age = saturate(leafNodeData.age + 0.0015);
+	leafNodeData.decayPercentage = saturate(leafNodeData.decayPercentage + 0.001 * leafNodeData.isExtinct);
+	treeOfLifeLeafNodeDataCBuffer[id.x] = leafNodeData;
+
 }
 
 [numthreads(1,1,1)]
@@ -30,9 +72,10 @@ void CSAddNewSpeciesNode (uint3 id : SV_DispatchThreadID)
 {
 	int speciesID = speciesIndexCBuffer[id.x];	
 	treeOfLifeLeafNodeDataCBuffer[speciesID] = updateSpeciesNodeDataCBuffer[0];
+	
 	int parentSpeciesID = treeOfLifeLeafNodeDataCBuffer[speciesID].parentSpeciesID;
 	float3 parentLocalPos = treeOfLifeNodeColliderDataCBuffer[parentSpeciesID].localPos;
-	treeOfLifeNodeColliderDataCBuffer[speciesID].localPos = float3(parentLocalPos.x + 0.5, parentLocalPos.y - (float)speciesID * 0.15, parentLocalPos.z) * 2;
+	treeOfLifeNodeColliderDataCBuffer[speciesID].localPos = float3(parentLocalPos.x + 0.015, parentLocalPos.y - (float)(speciesID) * 0.005, parentLocalPos.z - (float)speciesID * 0.0025);
 		
 }
 
@@ -58,6 +101,12 @@ void CSAddNewSpeciesStemSegments (uint3 id : SV_DispatchThreadID)
 [numthreads(1,1,1)]
 void CSExctinctSpecies (uint3 id : SV_DispatchThreadID)
 {
+	int speciesID = speciesIndexCBuffer[id.x];	
+	treeOfLifeLeafNodeDataCBuffer[speciesID].isExtinct = updateSpeciesNodeDataCBuffer[id.x].isExtinct;
+	
+	//int parentSpeciesID = treeOfLifeLeafNodeDataCBuffer[speciesID].parentSpeciesID;
+	//float3 parentLocalPos = treeOfLifeNodeColliderDataCBuffer[parentSpeciesID].localPos;
+	//treeOfLifeNodeColliderDataCBuffer[speciesID].localPos = float3(parentLocalPos.x + 0.015, parentLocalPos.y - (float)(speciesID) * 0.005, parentLocalPos.z - (float)speciesID * 0.0025);
 	
 }
 

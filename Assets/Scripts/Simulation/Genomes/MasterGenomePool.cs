@@ -9,10 +9,12 @@ public class MasterGenomePool {
 
     public static int nextCandidateIndex = 0;
 
-    public int maxNumActiveSpecies = 6;
+    public int maxNumActiveSpecies = 8;
     private int targetNumSpecies = 4;
-    public float speciesSimilarityDistanceThreshold = 3f;
-    private int minNumGauranteedEvalsForNewSpecies = 128;
+    public float speciesSimilarityDistanceThreshold = 4f;
+    private int minNumGauranteedEvalsForNewSpecies = 64;
+
+    public int currentHighestDepth = 0;
     
     public List<int> currentlyActiveSpeciesIDList;
     public List<SpeciesGenomePool> completeSpeciesPoolsList;
@@ -52,7 +54,7 @@ public class MasterGenomePool {
 
     }
 
-    private void CheckForExtinction() {
+    private void CheckForExtinction(SimulationManager simManagerRef) {
         if(currentlyActiveSpeciesIDList.Count > targetNumSpecies) {
             int leastFitSpeciesID = -1;
             float worstFitness = 99999f;
@@ -67,7 +69,7 @@ public class MasterGenomePool {
                     noCurrentlyExtinctFlaggedSpecies = false;
 
                     if(completeSpeciesPoolsList[currentlyActiveSpeciesIDList[i]].candidateGenomesList.Count < 1) {
-                        ExtinctifySpecies(currentlyActiveSpeciesIDList[i]);
+                        ExtinctifySpecies(simManagerRef, currentlyActiveSpeciesIDList[i]);
                     }
                 }
             }
@@ -81,7 +83,7 @@ public class MasterGenomePool {
             }
         }
     }
-    private void ExtinctifySpecies(int speciesID) {
+    private void ExtinctifySpecies(SimulationManager simManagerRef, int speciesID) {
         Debug.Log("REMOVE SPECIES " + speciesID.ToString());
 
         // find and remove from active list:
@@ -94,6 +96,10 @@ public class MasterGenomePool {
 
         currentlyActiveSpeciesIDList.RemoveAt(listIndex);
         completeSpeciesPoolsList[speciesID].isExtinct = true;
+
+        //Signal RenderKing/TreeOfLifeManager to update:
+        simManagerRef.uiManager.treeOfLifeManager.RemoveExtinctSpecies(speciesID);
+        simManagerRef.theRenderKing.TreeOfLifeExtinctSpecies(speciesID);
     }
 
     public SpeciesGenomePool SelectNewGenomeSourceSpecies() {
@@ -152,14 +158,14 @@ public class MasterGenomePool {
         }
         
         if(currentlyActiveSpeciesIDList.Count < maxNumActiveSpecies) {
-            speciesSimilarityDistanceThreshold *= 0.995f;  // lower while creating treeOfLifeUI
+            speciesSimilarityDistanceThreshold *= 0.9965f;  // lower while creating treeOfLifeUI
         }
         else {
             speciesSimilarityDistanceThreshold *= 1.02f;
             speciesSimilarityDistanceThreshold = Mathf.Min(speciesSimilarityDistanceThreshold, 5f); // cap
         }
 
-        CheckForExtinction();
+        CheckForExtinction(simManagerRef);
     }
 
     public void GlobalFindCandidateID(int ID) {
@@ -224,7 +230,7 @@ public class MasterGenomePool {
         float dPriColor = Mathf.Abs((newGenome.bodyGenome.appearanceGenome.huePrimary - repGenome.bodyGenome.appearanceGenome.huePrimary).sqrMagnitude);
         float dSecColor = Mathf.Abs((newGenome.bodyGenome.appearanceGenome.hueSecondary - repGenome.bodyGenome.appearanceGenome.hueSecondary).sqrMagnitude);
 
-        float delta = dWidth + dLength + dMouth + dPriColor + dSecColor;
+        float delta = dWidth + dLength + dMouth + dPriColor * 5f + dSecColor * 5f;
 
         return delta;
     }

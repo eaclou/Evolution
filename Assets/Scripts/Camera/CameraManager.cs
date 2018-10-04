@@ -32,12 +32,14 @@ public class CameraManager : MonoBehaviour {
 
     private Camera cameraRef;
     public float worldSpaceCornersDistance = 10f;
-    public Vector3 worldSpaceTopLeft;
-    public Vector3 worldSpaceTopRight;
-    public Vector3 worldSpaceBottomLeft;
-    public Vector3 worldSpaceBottomRight;
-    public Vector3 worldSpaceCameraRightDir;
-    public Vector3 worldSpaceCameraUpDir;
+    public Vector4 worldSpaceTopLeft;
+    public Vector4 worldSpaceTopRight;
+    public Vector4 worldSpaceBottomLeft;
+    public Vector4 worldSpaceBottomRight;
+    public Vector4 worldSpaceCameraRightDir;
+    public Vector4 worldSpaceCameraUpDir;
+
+    public GameObject debugMarker;
     
     // Use this for initialization
     void Start () {
@@ -101,14 +103,24 @@ public class CameraManager : MonoBehaviour {
         prevCameraPos = curCameraPos;
         prevTiltAngleDegrees = curTiltAngleDegrees;
         prevCameraFocusPivotPos = curCameraFocusPivotPos;
+
+        UpdateWorldSpaceCorners();
     }
     private void UpdateWorldSpaceCorners() {
-        worldSpaceBottomLeft = cameraRef.ScreenToWorldPoint( new Vector3(0f, 0f, worldSpaceCornersDistance));
-        worldSpaceTopLeft = cameraRef.ScreenToWorldPoint( new Vector3(0f, cameraRef.pixelWidth, worldSpaceCornersDistance));
-        worldSpaceTopRight = cameraRef.ScreenToWorldPoint( new Vector3(cameraRef.pixelHeight, cameraRef.pixelWidth, worldSpaceCornersDistance));
-        worldSpaceBottomRight = cameraRef.ScreenToWorldPoint( new Vector3(cameraRef.pixelHeight, 0f, worldSpaceCornersDistance));
-        worldSpaceCameraRightDir = this.gameObject.transform.right;
-        worldSpaceCameraUpDir = this.gameObject.transform.up;
+        Vector3 botLeft = cameraRef.ScreenToWorldPoint( new Vector3(0f, 0f, worldSpaceCornersDistance));
+        worldSpaceBottomLeft = new Vector4(botLeft.x, botLeft.y, botLeft.z, 0f);
+        Vector3 topLeft = cameraRef.ViewportToWorldPoint(new Vector3(0f,1f,10f)); //cameraRef.ScreenToWorldPoint( new Vector3(0f, cameraRef.pixelWidth, worldSpaceCornersDistance));
+        worldSpaceTopLeft = new Vector4(topLeft.x, topLeft.y, topLeft.z, 0f);
+        Vector3 topRight = cameraRef.ScreenToWorldPoint( new Vector3(cameraRef.pixelHeight, cameraRef.pixelWidth, worldSpaceCornersDistance));
+        worldSpaceTopRight = new Vector4(topRight.x, topRight.y, topRight.z, 0f);
+        Vector3 botRight = cameraRef.ViewportToWorldPoint(new Vector3(1f,0f,10f)); //cameraRef.ScreenToWorldPoint( new Vector3(cameraRef.pixelHeight, 0f, worldSpaceCornersDistance));
+        worldSpaceBottomRight = new Vector4(botRight.x, botRight.y, botRight.z, 0f);
+        Vector3 camRight = this.gameObject.transform.right;
+        worldSpaceCameraRightDir = new Vector4(camRight.x, camRight.y, camRight.z, 0f);
+        Vector3 camUp = this.gameObject.transform.up;
+        worldSpaceCameraUpDir = new Vector4(camUp.x, camUp.y, camUp.z, 0f);
+
+        debugMarker.transform.position = topLeft;
     }
 
     public void MoveCamera(Vector2 dir) {

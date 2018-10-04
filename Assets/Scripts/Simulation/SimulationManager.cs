@@ -318,6 +318,9 @@ public class SimulationManager : MonoBehaviour {
         }
 
         simStateData = new SimulationStateData(this);
+
+        uiManager.treeOfLifeManager = new TreeOfLifeManager(uiManager.treeOfLifeAnchorGO, uiManager);
+        uiManager.treeOfLifeManager.FirstTimeInitialize(masterGenomePool);
     }
     private void LoadingInitializePopulationGenomes() {
         masterGenomePool = new MasterGenomePool();
@@ -1375,6 +1378,9 @@ public class SimulationManager : MonoBehaviour {
         theRenderKing.TreeOfLifeAddNewSpecies(masterGenomePool, newSpeciesID);
         // WRAP THIS IN A FUNCTION!!! &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
+        if(newSpecies.depthLevel > masterGenomePool.currentHighestDepth) {
+            masterGenomePool.currentHighestDepth = newSpecies.depthLevel;
+        }
         //Debug.Log("New Species Created!!! (" + newSpeciesID.ToString() + "] score: " + closestDistance.ToString());
     }
     

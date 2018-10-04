@@ -582,6 +582,8 @@ public class UIManager : MonoBehaviour {
                 if(speciesNodeRayTarget != null) {
                     if(clicked) {
                         Debug.Log("Clicked Species[" + speciesNodeRayTarget.speciesRef.speciesID.ToString() + "]");
+
+                        treeOfLifeManager.selectedID = speciesNodeRayTarget.speciesRef.speciesID;
                     }
                     else {
 
@@ -660,12 +662,12 @@ public class UIManager : MonoBehaviour {
                 break;
             case GameManager.GameState.Loading:
                 EnterLoadingUI();
+                //treeOfLifeManager = new TreeOfLifeManager(treeOfLifeAnchorGO, this);
+                //treeOfLifeManager.FirstTimeInitialize(gameManager.simulationManager.masterGenomePool);
                 break;
             case GameManager.GameState.Playing:
                 //canvasMain.renderMode = RenderMode.ScreenSpaceCamera;
-                // After self Initialized:
-                treeOfLifeManager = new TreeOfLifeManager(treeOfLifeAnchorGO, this);
-                treeOfLifeManager.FirstTimeInitialize(gameManager.simulationManager.masterGenomePool);
+                // After self Initialized:                
 
                 firstTimeStartup = false;
                 EnterPlayingUI();
