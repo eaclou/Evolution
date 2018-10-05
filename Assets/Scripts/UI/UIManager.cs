@@ -156,7 +156,20 @@ public class UIManager : MonoBehaviour {
     public GameObject panelLoading;
     public GameObject panelPlaying;
 
-    public GameObject treeOfLifeAnchorGO;
+    public GameObject treeOfLifeAnchorGO;  
+    public Button buttonShowHideTOL;
+    public GameObject panelTreeOfLifeScaleHideGroup;
+    public GameObject panelTreeOfLifeInfoBlock;
+    public GameObject panelTreeOfLifeInfoA;
+    public GameObject panelTreeOfLifeInfoB;
+    public GameObject panelTreeOfLifeInfoC;    
+    public Button buttonInfoA;
+    public Button buttonInfoB;
+    public Button buttonInfoC;
+    private bool treeOfLifePanelOn = true;
+    private bool treeOfLifeInfoOnA = false;
+    private bool treeOfLifeInfoOnB = false;
+    private bool treeOfLifeInfoOnC = false;
 
     public Texture2D fitnessDisplayTexture;
 
