@@ -31,6 +31,8 @@
 			uniform float4 _CamRightDir;
 			uniform float4 _CamUpDir;
 
+			uniform float _CamScale;
+
 			uniform int _HoverID;
 			uniform int _SelectedID;
 
@@ -59,7 +61,7 @@
 
 				float extinctMask = 1.0 - speciesData.isExtinct;
 
-				float3 pivot = _TopLeftCornerWorldPos.xyz + (_CamRightDir.xyz - _CamUpDir.xyz * 0.5) * 1.05;
+				float3 pivot = _TopLeftCornerWorldPos.xyz + (_CamRightDir.xyz - _CamUpDir.xyz * 0.5) * _CamScale;
 
 				float3 debugOffset = float3(-0.05,(float)segmentData.speciesID * -0.01,0) * (float)inst;
 				float3 startPos = fromNodeData.localPos;
@@ -76,7 +78,7 @@
 				
 
 				float3 worldPosition = lerp(startPos, endPos, v);
-				worldPosition += pivot + rightDir * (1.0 + selectedMask * 0.5) * speciesData.age * (treeOfLifeStemSegmentVerticesCBuffer[id].x * 0.025 * (float)(speciesData.graphDepth - fromSpeciesData.graphDepth) + sin(-_Time.y * 2.01 - (1.0 - (treeOfLifeStemSegmentVerticesCBuffer[id].y + 0.5)) * 6.28 + (float)speciesData.speciesID * 3.33) * wobbleMask * 0.0325 * (1.2 - speciesData.decayPercentage) + (float)speciesData.speciesID * 0.0001);
+				worldPosition += pivot + (rightDir * (1.0 + selectedMask * 0.5) * speciesData.age * (treeOfLifeStemSegmentVerticesCBuffer[id].x * 0.025 * (float)(speciesData.graphDepth - fromSpeciesData.graphDepth) + sin(-_Time.y * 2.01 - (1.0 - (treeOfLifeStemSegmentVerticesCBuffer[id].y + 0.5)) * 6.28 + (float)speciesData.speciesID * 3.33) * wobbleMask * 0.0325 * (1.2 - speciesData.decayPercentage) + (float)speciesData.speciesID * 0.0001)) * _CamScale;
 				
 				//float3 worldPosition = float3(rightDir * quadVerticesCBuffer[id].x * 0.1 + forwardDir * (quadVerticesCBuffer[id].y + 0.5), 0.0);
 				//float activeMask = leafData.isAlive;

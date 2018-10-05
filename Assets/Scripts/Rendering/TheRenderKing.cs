@@ -2312,6 +2312,7 @@ public class TheRenderKing : MonoBehaviour {
         treeOfLifeStemSegmentsMat.SetVector("_TopLeftCornerWorldPos", simManager.cameraManager.worldSpaceTopLeft);
         treeOfLifeStemSegmentsMat.SetVector("_CamRightDir", simManager.cameraManager.worldSpaceCameraRightDir);
         treeOfLifeStemSegmentsMat.SetVector("_CamUpDir", simManager.cameraManager.worldSpaceCameraUpDir);
+        treeOfLifeStemSegmentsMat.SetFloat("_CamScale", simManager.uiManager.treeOfLifeManager.camScale);        
         treeOfLifeStemSegmentsMat.SetFloat("_HoverID", simManager.uiManager.treeOfLifeManager.hoverID);
         treeOfLifeStemSegmentsMat.SetFloat("_SelectedID", simManager.uiManager.treeOfLifeManager.selectedID);
         
@@ -2324,6 +2325,7 @@ public class TheRenderKing : MonoBehaviour {
         treeOfLifeLeafNodesMat.SetVector("_TopLeftCornerWorldPos", simManager.cameraManager.worldSpaceTopLeft);
         treeOfLifeLeafNodesMat.SetVector("_CamRightDir", simManager.cameraManager.worldSpaceCameraRightDir);
         treeOfLifeLeafNodesMat.SetVector("_CamUpDir", simManager.cameraManager.worldSpaceCameraUpDir);
+        treeOfLifeLeafNodesMat.SetFloat("_CamScale", simManager.uiManager.treeOfLifeManager.camScale);  
         treeOfLifeLeafNodesMat.SetFloat("_HoverID", simManager.uiManager.treeOfLifeManager.hoverID);
         treeOfLifeLeafNodesMat.SetFloat("_SelectedID", simManager.uiManager.treeOfLifeManager.selectedID);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, treeOfLifeLeafNodesMat, 0, MeshTopology.Triangles, 6, treeOfLifeLeafNodeDataCBuffer.count);

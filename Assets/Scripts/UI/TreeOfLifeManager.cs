@@ -13,13 +13,20 @@ public class TreeOfLifeManager {
     private Vector3 treeOriginPos;
     private GameObject treeOfLifeAnchorGO;
 
-    private float scaleMultiplier = 0.167f;
+    private float colliderBaseScaleMultiplier = 0.167f;
 
     // Instantiated Objects:
     public List<TreeOfLifeNodeRaycastTarget> nodeRaycastTargetsList;
 
     public int selectedID = -1;
     public int hoverID = -1;
+
+    public float camScale = 1f;
+    public float treeOfLifeScale = 1f;
+
+    //public float screenScaleX = 1f;
+    //public float screenScaleY = 1f;
+    
 
     //private int treeOfLifeDisplayResolution = 256;
     //public RenderTexture treeOfLifeDisplayRT;
@@ -106,11 +113,16 @@ public class TreeOfLifeManager {
     }
 
     public void UpdateNodePositionsFromGPU(CameraManager cam, TheRenderKing.TreeOfLifeNodeColliderData[] dataArray) {
+        camScale = 720f / (float)cam.cameraRef.pixelHeight;  // Can be improved precision-wise, but maybe close enough for now        
+        //float screenScaleX = camScale;
+        //float screenScaleY = camScale;
+        treeOfLifeScale = 1f;
 
         for(int i = 0; i < nodeRaycastTargetsList.Count; i++) {
             
             Vector4 localPos = new Vector3(dataArray[i].localPos.x, dataArray[i].localPos.y, dataArray[i].localPos.z);
-            Vector3 worldPos = cam.worldSpaceTopLeft + cam.worldSpaceCameraRightDir * 1f - cam.worldSpaceCameraUpDir * 0.5f + localPos * 1.05f;
+            Vector3 worldPos = cam.worldSpaceTopLeft + cam.worldSpaceCameraRightDir * camScale - cam.worldSpaceCameraUpDir * camScale * 0.5f + localPos * camScale;
+
             nodeRaycastTargetsList[i].transform.position = worldPos;
         }
     }
@@ -122,7 +134,7 @@ public class TreeOfLifeManager {
         GameObject speciesNodeColliderGO = new GameObject("SpeciesNodeRaycastCollider_" + newSpeciesID.ToString());
         speciesNodeColliderGO.transform.parent = treeOfLifeAnchorGO.transform;
         speciesNodeColliderGO.transform.localPosition = Vector3.zero; // new Vector3(-1f * (float)speciesPool.depthLevel, UnityEngine.Random.Range(-2f, 0f), 0f) * scaleMultiplier;
-        speciesNodeColliderGO.transform.localScale = Vector3.one * scaleMultiplier;
+        speciesNodeColliderGO.transform.localScale = Vector3.one * colliderBaseScaleMultiplier;
         TreeOfLifeNodeRaycastTarget rayTarget = speciesNodeColliderGO.AddComponent<TreeOfLifeNodeRaycastTarget>();
         rayTarget.Initialize(speciesPool);
         rayTarget.rayCollider = speciesNodeColliderGO.AddComponent<CapsuleCollider>();

@@ -30,7 +30,7 @@ public class CameraManager : MonoBehaviour {
     public float masterZoomSpeed = 1f;
     public float masterTiltSpeed = 1f;
 
-    private Camera cameraRef;
+    public Camera cameraRef;
     public float worldSpaceCornersDistance = 10f;
     public Vector4 worldSpaceTopLeft;
     public Vector4 worldSpaceTopRight;

@@ -59,9 +59,9 @@ void CSTick (uint3 id : SV_DispatchThreadID)
 	treeOfLifeNodeColliderDataCBuffer[id.x] = colliderData;
 
 	treeOfLifeNodeColliderDataCBuffer[0].localPos = float3(0,0,0); // *** REFACTOR!!!! ***
-
+		
 	// Increment Age
-	leafNodeData.age = saturate(leafNodeData.age + 0.0015);
+	leafNodeData.age = saturate(leafNodeData.age + 0.0025);
 	leafNodeData.decayPercentage = saturate(leafNodeData.decayPercentage + 0.001 * leafNodeData.isExtinct);
 	treeOfLifeLeafNodeDataCBuffer[id.x] = leafNodeData;
 

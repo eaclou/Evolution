@@ -11,7 +11,7 @@ public class MasterGenomePool {
 
     public int maxNumActiveSpecies = 8;
     private int targetNumSpecies = 4;
-    public float speciesSimilarityDistanceThreshold = 4f;
+    public float speciesSimilarityDistanceThreshold = 10f;
     private int minNumGauranteedEvalsForNewSpecies = 64;
 
     public int currentHighestDepth = 0;
@@ -162,7 +162,7 @@ public class MasterGenomePool {
         }
         else {
             speciesSimilarityDistanceThreshold *= 1.02f;
-            speciesSimilarityDistanceThreshold = Mathf.Min(speciesSimilarityDistanceThreshold, 5f); // cap
+            speciesSimilarityDistanceThreshold = Mathf.Min(speciesSimilarityDistanceThreshold, 10f); // cap
         }
 
         CheckForExtinction(simManagerRef);

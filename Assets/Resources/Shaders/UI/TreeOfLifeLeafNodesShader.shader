@@ -31,6 +31,8 @@
 			uniform float4 _CamRightDir;
 			uniform float4 _CamUpDir;
 
+			uniform float _CamScale;
+
 			uniform int _HoverID;
 			uniform int _SelectedID;
 			
@@ -59,8 +61,8 @@
 
 				//float3 worldPosition = nodeData.localPos + quadVerticesCBuffer[id] * activeMask * 0.8 * leafData.age;
 				//worldPosition += _TopLeftCornerWorldPos.xyz + float3(5, -5, 0);
-				float3 pivot = _TopLeftCornerWorldPos.xyz + (_CamRightDir.xyz - _CamUpDir.xyz * 0.5) * 1.05;
-				float3 worldPosition = pivot + nodeData.localPos + quadVerticesCBuffer[id] * 0.1 * (activeMask + extinctMask + selectedMask * 0.5) * leafData.age * (1.02 - leafData.decayPercentage); //_TopLeftCornerWorldPos.xyz + _CamRightDir.xyz + _CamUpDir.xyz + quadVerticesCBuffer[id];
+				float3 pivot = _TopLeftCornerWorldPos.xyz + (_CamRightDir.xyz - _CamUpDir.xyz * 0.5) * _CamScale;
+				float3 worldPosition = pivot + (nodeData.localPos + quadVerticesCBuffer[id] * 0.1 * (activeMask + extinctMask + selectedMask * 0.5) * leafData.age * (1.02 - leafData.decayPercentage)) * _CamScale; //_TopLeftCornerWorldPos.xyz + _CamRightDir.xyz + _CamUpDir.xyz + quadVerticesCBuffer[id];
 
 				//float3 camCenterPos = _TopLeftCornerWorldPos.xyz;
 
