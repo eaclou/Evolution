@@ -77,6 +77,7 @@ public class TheRenderKing : MonoBehaviour {
     public Material treeOfLifeStemSegmentsMat;
     public Material treeOfLifeBackdropMat;
     public Material treeOfLifePortraitMat;
+    public Material treeOfLifePortraitEyeMat;
     public Material treeOfLifeDecorationMat;
 
     public ComputeBuffer gizmoStirToolPosCBuffer;
@@ -202,6 +203,9 @@ public class TheRenderKing : MonoBehaviour {
 
     public ComputeBuffer treeOfLifeBasicStrokeDataCBuffer;
     public ComputeBuffer treeOflifePortraitDataCBuffer;
+    public ComputeBuffer treeOfLifePortraitEyeDataCBuffer;
+    public ComputeBuffer treeOfLifePortraitCritterInitDataCBuffer;
+    public ComputeBuffer treeOfLifePortraitCritterSimDataCBuffer;
 
     public struct TreeOfLifeNodeColliderData {  // only the data that needs to be transferred between CPU & GPU  - minimize!!
         public Vector3 localPos;
@@ -882,7 +886,17 @@ public class TheRenderKing : MonoBehaviour {
         // Backdrop:
         // float2 forward = data.localDir;
         // float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
-        int numPortraitBackdropStrokes = 128;
+        BasicStrokeData[] treeOfLifeBasicStrokeDataArray = new BasicStrokeData[1];
+        treeOfLifeBasicStrokeDataCBuffer = new ComputeBuffer(treeOfLifeBasicStrokeDataArray.Length, sizeof(float) * 10);        
+        BasicStrokeData strokeData = new BasicStrokeData();
+        strokeData.worldPos = new Vector2(0f, 0f);
+        strokeData.localDir = new Vector2(1f, 0f);
+        strokeData.scale = new Vector2(6f, 3f);
+        strokeData.color = new Vector4(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), 1f);
+        treeOfLifeBasicStrokeDataArray[0] = strokeData;
+        treeOfLifeBasicStrokeDataCBuffer.SetData(treeOfLifeBasicStrokeDataArray);
+
+        /*int numPortraitBackdropStrokes = 128;
         int numTreeBackdropStrokes = 128;
         BasicStrokeData[] treeOfLifeBasicStrokeDataArray = new BasicStrokeData[numPortraitBackdropStrokes + numTreeBackdropStrokes];
         treeOfLifeBasicStrokeDataCBuffer = new ComputeBuffer(treeOfLifeBasicStrokeDataArray.Length, sizeof(float) * 10);
@@ -903,8 +917,9 @@ public class TheRenderKing : MonoBehaviour {
             strokeData.scale = new Vector2(1.25f, 3.5f) * 0.1f; // * (strokeData.worldPos.magnitude * 0.5f + 0.5f);
             strokeData.color = new Vector4(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), 1f);
             treeOfLifeBasicStrokeDataArray[i + numTreeBackdropStrokes] = strokeData;
-        }               
+        }             
         treeOfLifeBasicStrokeDataCBuffer.SetData(treeOfLifeBasicStrokeDataArray);
+        */
 
         // Portrait:
         // Update single-element buffer on-demand through UI -- repopulate from given genome
@@ -1732,6 +1747,70 @@ public class TheRenderKing : MonoBehaviour {
         computeShaderCritters.Dispatch(kernelCSCSSimulateCritterSkinStrokes, critterSkinStrokesCBuffer.count / 16, 1, 1);
     }
     private void SimTreeOfLife() {
+        
+        SimulationStateData.CritterInitData[] treeOfLifePortraitCritterInitDataArray = new SimulationStateData.CritterInitData[1];
+        SimulationStateData.CritterInitData initData  = new SimulationStateData.CritterInitData();
+
+        int selectedSpeciesID = simManager.uiManager.treeOfLifeManager.selectedID;
+        if(selectedSpeciesID < 0) {
+            selectedSpeciesID = 0;  // Temporary catch
+        }
+        SpeciesGenomePool speciesPool = simManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesID];
+        AgentGenome genome = speciesPool.representativeGenome;
+        // set values
+        initData.boundingBoxSize = new Vector3(genome.bodyGenome.coreGenome.fullBodyWidth, genome.bodyGenome.coreGenome.fullBodyLength, genome.bodyGenome.coreGenome.fullBodyWidth);
+        initData.spawnSizePercentage = 0.1f;
+        initData.maxEnergy = Mathf.Min(initData.boundingBoxSize.x * initData.boundingBoxSize.y, 0.5f);
+        initData.primaryHue = genome.bodyGenome.appearanceGenome.huePrimary;
+        initData.secondaryHue = genome.bodyGenome.appearanceGenome.hueSecondary;
+        initData.mouthIsActive = 0.25f;
+        //if(simManager.agentsArray[i].mouthRef.isPassive) {
+        //    initData.mouthIsActive = 0f;
+        //}
+        initData.bodyPatternX = genome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeX;
+        initData.bodyPatternY = genome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeY;  // what grid cell of texture sheet to use
+        
+        treeOfLifePortraitCritterInitDataArray[0] = initData;
+        if(treeOfLifePortraitCritterInitDataCBuffer != null) {
+            treeOfLifePortraitCritterInitDataCBuffer.Release();
+        }
+        treeOfLifePortraitCritterInitDataCBuffer = new ComputeBuffer(1, sizeof(float) * 12 + sizeof(int) * 2);
+        treeOfLifePortraitCritterInitDataCBuffer.SetData(treeOfLifePortraitCritterInitDataArray);
+        
+        //upload data to GPU
+        SimulationStateData.CritterSimData[] treeOfLifePortraitCritterSimDataArray = new SimulationStateData.CritterSimData[1];
+        SimulationStateData.CritterSimData simData = new SimulationStateData.CritterSimData();
+        // SIMDATA ::===========================================================================================================================================================================
+        Vector3 agentPos = new Vector3(0f, 0f, 0f); // simManager.agentsArray[i].bodyRigidbody.position;
+        simData.worldPos = new Vector3(agentPos.x, agentPos.y, 1f);
+        float angle = Mathf.Cos(Time.realtimeSinceStartup * 0.37f);
+        float angle2 = angle + Time.realtimeSinceStartup * 0.1f; // + (Mathf.PI * 0.5f);
+        Vector2 facingDir = new Vector2(Mathf.Cos(angle2 + (Mathf.PI * 0.5f)), Mathf.Sin(angle2 + (Mathf.PI * 0.5f)));
+        simData.velocity = facingDir.normalized; //new Vector2(0f, 1f); // facingDir.normalized;
+        simData.heading = facingDir.normalized; //new Vector2(0f, 1f); //     facingDir.normalized;        //new Vector2(0f, 1f); //     
+        float embryo = 1f;        
+        simData.embryoPercentage = embryo;
+        simData.growthPercentage = 1f;
+        float decay = 0f;        
+        simData.decayPercentage = decay;
+        simData.foodAmount = 0f; // Mathf.Lerp(simData.foodAmount, simManager.agentsArray[i].coreModule.stomachContents / simManager.agentsArray[i].coreModule.stomachCapacity, 0.16f);
+        simData.energy = 1; // simManager.agentsArray[i].coreModule.energyRaw / simManager.agentsArray[i].coreModule.maxEnergyStorage;
+        simData.health = 1; // simManager.agentsArray[i].coreModule.healthHead;
+        simData.stamina = 1; // simManager.agentsArray[i].coreModule.stamina[0];
+        simData.isBiting = Mathf.Sin(angle2 * 3.19f) * 0.5f + 0.5f;
+        simData.biteAnimCycle = (Time.realtimeSinceStartup * 0.1f) % 1f;
+        simData.moveAnimCycle = (Time.realtimeSinceStartup * 1f) % 1f;
+        simData.turnAmount = Mathf.Sin(Time.realtimeSinceStartup * 3.654321f) * 0.25f + 0.25f;
+        simData.accel = (Mathf.Sin(Time.realtimeSinceStartup * 1.79f) * 0.5f + 0.5f) * 0.081f; // Mathf.Clamp01(simManager.agentsArray[i].curAccel) * 1f; // ** RE-FACTOR!!!!
+		simData.smoothedThrottle = (Mathf.Sin(Time.realtimeSinceStartup * 2f + 0.4f) * 0.5f + 0.5f) * 0.8f;
+        treeOfLifePortraitCritterSimDataArray[0] = simData;     
+        if(treeOfLifePortraitCritterSimDataCBuffer != null) {
+            treeOfLifePortraitCritterSimDataCBuffer.Release();
+        }
+        treeOfLifePortraitCritterSimDataCBuffer = new ComputeBuffer(1, sizeof(float) * 20);
+        treeOfLifePortraitCritterSimDataCBuffer.SetData(treeOfLifePortraitCritterSimDataArray);
+        // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
         int kernelCSTick = computeShaderTreeOfLife.FindKernel("CSTick");
         
         computeShaderTreeOfLife.SetBuffer(kernelCSTick, "treeOfLifeStemSegmentDataCBuffer", treeOfLifeStemSegmentDataCBuffer);
@@ -1740,7 +1819,47 @@ public class TheRenderKing : MonoBehaviour {
         //computeShaderTreeOfLife.SetFloat("_MapSize", SimulationManager._MapSize);
         computeShaderTreeOfLife.Dispatch(kernelCSTick, treeOfLifeNodeColliderDataCBuffer.count / 512, 1, 1);
 
-        TreeOfLifeGetColliderNodePositionData();
+        TreeOfLifeGetColliderNodePositionData(); // timing before or after?
+
+
+        // Portrait Eyes:
+        if(treeOfLifePortraitEyeDataCBuffer != null) {
+            treeOfLifePortraitEyeDataCBuffer.Release();
+        }
+        treeOfLifePortraitEyeDataCBuffer = new ComputeBuffer(2, sizeof(float) * 13 + sizeof(int) * 2);
+        AgentEyeStrokeData[] singleAgentEyeStrokeArray = new AgentEyeStrokeData[treeOfLifePortraitEyeDataCBuffer.count];        
+        
+        AgentEyeStrokeData dataLeftEye = new AgentEyeStrokeData();
+        dataLeftEye.parentIndex = 0;
+        dataLeftEye.localPos = genome.bodyGenome.appearanceGenome.eyeGenome.localPos;
+        dataLeftEye.localPos.x *= -1f; // LEFT SIDE!
+        float width = 1f; // genome.bodyGenome.appearanceGenome.eyeGenome.localScale.x; // simManager.agentsArray[agentIndex].agentWidthsArray[Mathf.RoundToInt((dataLeftEye.localPos.y * 0.5f + 0.5f) * 15f)];
+        dataLeftEye.localPos.x *= width * 0.5f;
+        dataLeftEye.localDir = new Vector2(0f, 1f);
+        dataLeftEye.localScale = genome.bodyGenome.appearanceGenome.eyeGenome.localScale;
+        dataLeftEye.irisHue = genome.bodyGenome.appearanceGenome.eyeGenome.irisHue;
+        dataLeftEye.pupilHue = genome.bodyGenome.appearanceGenome.eyeGenome.pupilHue;
+        dataLeftEye.strength = 1f;
+        dataLeftEye.brushType = genome.bodyGenome.appearanceGenome.eyeGenome.eyeBrushType;
+
+        AgentEyeStrokeData dataRightEye = new AgentEyeStrokeData();
+        dataRightEye.parentIndex = 0;
+        dataRightEye.localPos = genome.bodyGenome.appearanceGenome.eyeGenome.localPos;
+        width = 1f; //genome.bodyGenome.appearanceGenome.eyeGenome.localScale.x;
+        dataRightEye.localPos.x *= width * 0.5f;
+        dataRightEye.localDir = new Vector2(0f, 1f);
+        dataRightEye.localScale = genome.bodyGenome.appearanceGenome.eyeGenome.localScale;
+        dataRightEye.irisHue = genome.bodyGenome.appearanceGenome.eyeGenome.irisHue;
+        dataRightEye.pupilHue = genome.bodyGenome.appearanceGenome.eyeGenome.pupilHue;
+        dataRightEye.strength = 1f;
+        dataRightEye.brushType = genome.bodyGenome.appearanceGenome.eyeGenome.eyeBrushType;
+            
+        singleAgentEyeStrokeArray[0] = dataLeftEye;
+        singleAgentEyeStrokeArray[1] = dataRightEye;
+        
+        treeOfLifePortraitEyeDataCBuffer.SetData(singleAgentEyeStrokeArray);
+        
+        
     }
     /*private void UpdateAgentHighlightData() {
         //agentHoverHighlightCBuffer = new ComputeBuffer(1, sizeof(float) * 4);
@@ -1778,6 +1897,7 @@ public class TheRenderKing : MonoBehaviour {
         SimEggSacks();
         //SimWaterSplines();
         //SimWaterChains();
+
         SimTreeOfLife(); // issues with this being on FixedUpdate() cycle vs Update() ?? ***
 
         //UpdateAgentHighlightData();
@@ -2372,69 +2492,91 @@ public class TheRenderKing : MonoBehaviour {
         gizmoFeedToolMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);       
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, gizmoFeedToolMat, 0, MeshTopology.Triangles, 6, 1);
 
-
-        // UI TREE OF LIFE TESTING:
-        // Backdrop:
-        treeOfLifeBackdropMat.SetPass(0);
-        treeOfLifeBackdropMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        treeOfLifeBackdropMat.SetBuffer("treeOfLifeBasicStrokeDataCBuffer", treeOfLifeBasicStrokeDataCBuffer);
-        treeOfLifeBackdropMat.SetVector("_TopLeftCornerWorldPos", simManager.cameraManager.worldSpaceTopLeft);
-        treeOfLifeBackdropMat.SetVector("_CamRightDir", simManager.cameraManager.worldSpaceCameraRightDir);
-        treeOfLifeBackdropMat.SetVector("_CamUpDir", simManager.cameraManager.worldSpaceCameraUpDir);
-        treeOfLifeBackdropMat.SetFloat("_CamScale", simManager.uiManager.treeOfLifeManager.camScale);        
-        treeOfLifeBackdropMat.SetFloat("_AnimatedScale1", 1f);
-        treeOfLifeBackdropMat.SetFloat("_AnimatedScale2", 1f);
-        cmdBufferTest.DrawProcedural(Matrix4x4.identity, treeOfLifeBackdropMat, 0, MeshTopology.Triangles, 6, treeOfLifeBasicStrokeDataCBuffer.count);
+        if(simManager.uiManager.treeOfLifePanelOn) {
+            SimTreeOfLife();
+            // UI TREE OF LIFE TESTING:
+            // Backdrop:
+            treeOfLifeBackdropMat.SetPass(0);
+            treeOfLifeBackdropMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+            treeOfLifeBackdropMat.SetBuffer("treeOfLifeBasicStrokeDataCBuffer", treeOfLifeBasicStrokeDataCBuffer);
+            treeOfLifeBackdropMat.SetVector("_TopLeftCornerWorldPos", simManager.cameraManager.worldSpaceTopLeft);
+            treeOfLifeBackdropMat.SetVector("_CamRightDir", simManager.cameraManager.worldSpaceCameraRightDir);
+            treeOfLifeBackdropMat.SetVector("_CamUpDir", simManager.cameraManager.worldSpaceCameraUpDir);
+            treeOfLifeBackdropMat.SetFloat("_CamScale", simManager.uiManager.treeOfLifeManager.camScale);        
+            treeOfLifeBackdropMat.SetFloat("_AnimatedScale1", 1f);
+            treeOfLifeBackdropMat.SetFloat("_AnimatedScale2", 1f);
+            cmdBufferTest.DrawProcedural(Matrix4x4.identity, treeOfLifeBackdropMat, 0, MeshTopology.Triangles, 6, treeOfLifeBasicStrokeDataCBuffer.count);
         
-        // Critter Portrait!
-        treeOfLifePortraitMat.SetPass(0);
-        treeOfLifePortraitMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        treeOfLifePortraitMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
-        treeOfLifePortraitMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
-        treeOfLifePortraitMat.SetBuffer("critterSkinStrokesCBuffer", treeOflifePortraitDataCBuffer);     
-        treeOfLifePortraitMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
-        treeOfLifePortraitMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
-        treeOfLifePortraitMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-        treeOfLifePortraitMat.SetFloat("_MapSize", SimulationManager._MapSize);
-        treeOfLifePortraitMat.SetVector("_TopLeftCornerWorldPos", simManager.cameraManager.worldSpaceTopLeft);
-        treeOfLifePortraitMat.SetVector("_CamRightDir", simManager.cameraManager.worldSpaceCameraRightDir);
-        treeOfLifePortraitMat.SetVector("_CamUpDir", simManager.cameraManager.worldSpaceCameraUpDir);
-        treeOfLifePortraitMat.SetFloat("_CamScale", simManager.uiManager.treeOfLifeManager.camScale);        
-        treeOfLifePortraitMat.SetFloat("_AnimatedScale1", 1f);
-        treeOfLifePortraitMat.SetFloat("_AnimatedScale2", 1f);
-        cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID);
-        cmdBufferTest.DrawProcedural(Matrix4x4.identity, treeOfLifePortraitMat, 0, MeshTopology.Triangles, 6, treeOflifePortraitDataCBuffer.count);
+            // Critter Portrait!
+            treeOfLifePortraitMat.SetPass(0);
+            treeOfLifePortraitMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+            treeOfLifePortraitMat.SetBuffer("critterInitDataCBuffer", treeOfLifePortraitCritterInitDataCBuffer);
+            treeOfLifePortraitMat.SetBuffer("critterSimDataCBuffer", treeOfLifePortraitCritterSimDataCBuffer);
+            treeOfLifePortraitMat.SetBuffer("critterSkinStrokesCBuffer", treeOflifePortraitDataCBuffer);     
+            treeOfLifePortraitMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+            treeOfLifePortraitMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
+            treeOfLifePortraitMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+            treeOfLifePortraitMat.SetFloat("_MapSize", SimulationManager._MapSize);
+            treeOfLifePortraitMat.SetVector("_TopLeftCornerWorldPos", simManager.cameraManager.worldSpaceTopLeft);
+            treeOfLifePortraitMat.SetVector("_CamRightDir", simManager.cameraManager.worldSpaceCameraRightDir);
+            treeOfLifePortraitMat.SetVector("_CamUpDir", simManager.cameraManager.worldSpaceCameraUpDir);
+            treeOfLifePortraitMat.SetFloat("_CamScale", simManager.uiManager.treeOfLifeManager.camScale);        
+            treeOfLifePortraitMat.SetFloat("_AnimatedScale1", 1f);
+            treeOfLifePortraitMat.SetFloat("_AnimatedScale2", 1f);
+            cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID);
+            cmdBufferTest.DrawProcedural(Matrix4x4.identity, treeOfLifePortraitMat, 0, MeshTopology.Triangles, 6, treeOflifePortraitDataCBuffer.count);
+            // PORTRAIT EYES!!!!
+            treeOfLifePortraitEyeMat.SetPass(0);
+            treeOfLifePortraitEyeMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+            treeOfLifePortraitEyeMat.SetBuffer("critterInitDataCBuffer", treeOfLifePortraitCritterInitDataCBuffer);
+            treeOfLifePortraitEyeMat.SetBuffer("critterSimDataCBuffer", treeOfLifePortraitCritterSimDataCBuffer);
+            treeOfLifePortraitEyeMat.SetBuffer("agentEyesStrokesCBuffer", treeOfLifePortraitEyeDataCBuffer);     
+            treeOfLifePortraitEyeMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+            treeOfLifePortraitEyeMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
+            treeOfLifePortraitEyeMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+            treeOfLifePortraitEyeMat.SetFloat("_MapSize", SimulationManager._MapSize);
+            treeOfLifePortraitEyeMat.SetVector("_TopLeftCornerWorldPos", simManager.cameraManager.worldSpaceTopLeft);
+            treeOfLifePortraitEyeMat.SetVector("_CamRightDir", simManager.cameraManager.worldSpaceCameraRightDir);
+            treeOfLifePortraitEyeMat.SetVector("_CamUpDir", simManager.cameraManager.worldSpaceCameraUpDir);
+            treeOfLifePortraitEyeMat.SetFloat("_CamScale", simManager.uiManager.treeOfLifeManager.camScale);        
+            treeOfLifePortraitEyeMat.SetFloat("_AnimatedScale1", 1f);
+            treeOfLifePortraitEyeMat.SetFloat("_AnimatedScale2", 1f);
+            cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID);
+            cmdBufferTest.DrawProcedural(Matrix4x4.identity, treeOfLifePortraitEyeMat, 0, MeshTopology.Triangles, 6, treeOfLifePortraitEyeDataCBuffer.count);
 
 
-        // STEMS:::
-        treeOfLifeStemSegmentsMat.SetPass(0);
-        treeOfLifeStemSegmentsMat.SetBuffer("treeOfLifeStemSegmentVerticesCBuffer", treeOfLifeStemSegmentVerticesCBuffer);
-        treeOfLifeStemSegmentsMat.SetBuffer("treeOfLifeNodeColliderDataCBuffer", treeOfLifeNodeColliderDataCBuffer);
-        treeOfLifeStemSegmentsMat.SetBuffer("treeOfLifeLeafNodeDataCBuffer", treeOfLifeLeafNodeDataCBuffer);
-        treeOfLifeStemSegmentsMat.SetBuffer("treeOfLifeStemSegmentDataCBuffer", treeOfLifeStemSegmentDataCBuffer);
-        treeOfLifeStemSegmentsMat.SetVector("_TopLeftCornerWorldPos", simManager.cameraManager.worldSpaceTopLeft);
-        treeOfLifeStemSegmentsMat.SetVector("_CamRightDir", simManager.cameraManager.worldSpaceCameraRightDir);
-        treeOfLifeStemSegmentsMat.SetVector("_CamUpDir", simManager.cameraManager.worldSpaceCameraUpDir);
-        treeOfLifeStemSegmentsMat.SetFloat("_CamScale", simManager.uiManager.treeOfLifeManager.camScale);        
-        treeOfLifeStemSegmentsMat.SetFloat("_HoverID", simManager.uiManager.treeOfLifeManager.hoverID);
-        treeOfLifeStemSegmentsMat.SetFloat("_SelectedID", simManager.uiManager.treeOfLifeManager.selectedID);        
-        cmdBufferTest.DrawProcedural(Matrix4x4.identity, treeOfLifeStemSegmentsMat, 0, MeshTopology.Triangles, treeOfLifeStemSegmentVerticesCBuffer.count, treeOfLifeStemSegmentDataCBuffer.count);
+            // STEMS:::
+            treeOfLifeStemSegmentsMat.SetPass(0);
+            treeOfLifeStemSegmentsMat.SetBuffer("treeOfLifeStemSegmentVerticesCBuffer", treeOfLifeStemSegmentVerticesCBuffer);
+            treeOfLifeStemSegmentsMat.SetBuffer("treeOfLifeNodeColliderDataCBuffer", treeOfLifeNodeColliderDataCBuffer);
+            treeOfLifeStemSegmentsMat.SetBuffer("treeOfLifeLeafNodeDataCBuffer", treeOfLifeLeafNodeDataCBuffer);
+            treeOfLifeStemSegmentsMat.SetBuffer("treeOfLifeStemSegmentDataCBuffer", treeOfLifeStemSegmentDataCBuffer);
+            treeOfLifeStemSegmentsMat.SetVector("_TopLeftCornerWorldPos", simManager.cameraManager.worldSpaceTopLeft);
+            treeOfLifeStemSegmentsMat.SetVector("_CamRightDir", simManager.cameraManager.worldSpaceCameraRightDir);
+            treeOfLifeStemSegmentsMat.SetVector("_CamUpDir", simManager.cameraManager.worldSpaceCameraUpDir);
+            treeOfLifeStemSegmentsMat.SetFloat("_CamScale", simManager.uiManager.treeOfLifeManager.camScale);        
+            treeOfLifeStemSegmentsMat.SetFloat("_HoverID", simManager.uiManager.treeOfLifeManager.hoverID);
+            treeOfLifeStemSegmentsMat.SetFloat("_SelectedID", simManager.uiManager.treeOfLifeManager.selectedID);        
+            cmdBufferTest.DrawProcedural(Matrix4x4.identity, treeOfLifeStemSegmentsMat, 0, MeshTopology.Triangles, treeOfLifeStemSegmentVerticesCBuffer.count, treeOfLifeStemSegmentDataCBuffer.count);
         
-        // Decorations:::
+            // Decorations:::
 
-        // NODES:::
-        treeOfLifeLeafNodesMat.SetPass(0);
-        treeOfLifeLeafNodesMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        treeOfLifeLeafNodesMat.SetBuffer("treeOfLifeLeafNodeDataCBuffer", treeOfLifeLeafNodeDataCBuffer);
-        treeOfLifeLeafNodesMat.SetBuffer("treeOfLifeNodeColliderDataCBuffer", treeOfLifeNodeColliderDataCBuffer);
-        treeOfLifeLeafNodesMat.SetVector("_TopLeftCornerWorldPos", simManager.cameraManager.worldSpaceTopLeft);
-        treeOfLifeLeafNodesMat.SetVector("_CamRightDir", simManager.cameraManager.worldSpaceCameraRightDir);
-        treeOfLifeLeafNodesMat.SetVector("_CamUpDir", simManager.cameraManager.worldSpaceCameraUpDir);
-        treeOfLifeLeafNodesMat.SetFloat("_CamScale", simManager.uiManager.treeOfLifeManager.camScale);  
-        treeOfLifeLeafNodesMat.SetFloat("_HoverID", simManager.uiManager.treeOfLifeManager.hoverID);
-        treeOfLifeLeafNodesMat.SetFloat("_SelectedID", simManager.uiManager.treeOfLifeManager.selectedID);
-        cmdBufferTest.DrawProcedural(Matrix4x4.identity, treeOfLifeLeafNodesMat, 0, MeshTopology.Triangles, 6, treeOfLifeLeafNodeDataCBuffer.count);
+            // NODES:::
+            treeOfLifeLeafNodesMat.SetPass(0);
+            treeOfLifeLeafNodesMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+            treeOfLifeLeafNodesMat.SetBuffer("treeOfLifeLeafNodeDataCBuffer", treeOfLifeLeafNodeDataCBuffer);
+            treeOfLifeLeafNodesMat.SetBuffer("treeOfLifeNodeColliderDataCBuffer", treeOfLifeNodeColliderDataCBuffer);
+            treeOfLifeLeafNodesMat.SetVector("_TopLeftCornerWorldPos", simManager.cameraManager.worldSpaceTopLeft);
+            treeOfLifeLeafNodesMat.SetVector("_CamRightDir", simManager.cameraManager.worldSpaceCameraRightDir);
+            treeOfLifeLeafNodesMat.SetVector("_CamUpDir", simManager.cameraManager.worldSpaceCameraUpDir);
+            treeOfLifeLeafNodesMat.SetFloat("_CamScale", simManager.uiManager.treeOfLifeManager.camScale);  
+            treeOfLifeLeafNodesMat.SetFloat("_HoverID", simManager.uiManager.treeOfLifeManager.hoverID);
+            treeOfLifeLeafNodesMat.SetFloat("_SelectedID", simManager.uiManager.treeOfLifeManager.selectedID);
+            cmdBufferTest.DrawProcedural(Matrix4x4.identity, treeOfLifeLeafNodesMat, 0, MeshTopology.Triangles, 6, treeOfLifeLeafNodeDataCBuffer.count);
         
+        
+        }
+
         
         /*if(isDebugRenderOn) {
             
@@ -2889,6 +3031,7 @@ public class TheRenderKing : MonoBehaviour {
         if(treeOfLifeStemSegmentDataCBuffer != null) {
             treeOfLifeStemSegmentDataCBuffer.Release();
         }
+        
         if(treeOfLifeStemSegmentVerticesCBuffer != null) {
             treeOfLifeStemSegmentVerticesCBuffer.Release();
         }
@@ -2898,8 +3041,16 @@ public class TheRenderKing : MonoBehaviour {
         if(treeOflifePortraitDataCBuffer != null) {
             treeOflifePortraitDataCBuffer.Release();
         }
-
-
+        if(treeOfLifePortraitEyeDataCBuffer != null) {
+            treeOfLifePortraitEyeDataCBuffer.Release();
+        }
+        if(treeOfLifePortraitCritterInitDataCBuffer != null) {
+            treeOfLifePortraitCritterInitDataCBuffer.Release();
+        }
+        if(treeOfLifePortraitCritterSimDataCBuffer != null) {
+            treeOfLifePortraitCritterSimDataCBuffer.Release();
+        }
+        
         /*if(agentHoverHighlightCBuffer != null) {
             agentHoverHighlightCBuffer.Release();
         }*/

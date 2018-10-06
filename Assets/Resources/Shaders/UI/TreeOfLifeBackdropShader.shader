@@ -57,15 +57,16 @@
 				//_AnimatedScale1 = 0.5;
 
 				float3 localPos = float3(data.worldPos, 0);
-				float3 pivot = _TopLeftCornerWorldPos.xyz; // + (_CamRightDir.xyz * 0.5 - _CamUpDir.xyz * 0.5) * _CamScale;
-				float3 vertexWorldOffset = float3(quadVerticesCBuffer[id].xy * data.scale, 0);
+				float3 pivot = _TopLeftCornerWorldPos.xyz - _CamUpDir.xyz * data.scale.y * _CamScale; // + (_CamRightDir.xyz * 0.5 - _CamUpDir.xyz * 0.5) * _CamScale;
+				float2 uvCoords = quadVerticesCBuffer[id].xy + 0.5;
+				//float3 vertexWorldOffset = float3(quadVerticesCBuffer[id].xy * data.scale, 0);
 
-				float2 forward = data.localDir;
-				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
-				vertexWorldOffset = float3(vertexWorldOffset.x * right + vertexWorldOffset.y * forward, 0);  // Rotate localRotation by AgentRotation
+				//float2 forward = data.localDir;
+				//float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
+				//vertexWorldOffset = float3(vertexWorldOffset.x * right + vertexWorldOffset.y * forward, 0);  // Rotate localRotation by AgentRotation
 
-				float3 orthoPos = (vertexWorldOffset + localPos) * _CamScale * _AnimatedScale1;
-				float3 worldPosition = pivot + (_CamRightDir.xyz * orthoPos.x + _CamUpDir.xyz * orthoPos.y); //_CamRightDir.xyz * quadVerticesCBuffer[id].x * 1.0 * _CamScale + _CamUpDir.xyz * quadVerticesCBuffer[id].y * 1.0 * _CamScale;
+				//float3 orthoPos = (vertexWorldOffset + localPos) * _CamScale * _AnimatedScale1;
+				float3 worldPosition = pivot + (_CamRightDir.xyz * uvCoords.x * data.scale.x + _CamUpDir.xyz * uvCoords.y * data.scale.y) * _CamScale; //_CamRightDir.xyz * quadVerticesCBuffer[id].x * 1.0 * _CamScale + _CamUpDir.xyz * quadVerticesCBuffer[id].y * 1.0 * _CamScale;
 				
 				o.uv = quadVerticesCBuffer[id].xy + 0.5;
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0))); //float4(quadVerticesCBuffer[id], 1);
@@ -87,10 +88,10 @@
 				return finalColor;
 				*/
 				// sample the texture
-				float brightness = ((i.color.r + i.color.g + i.color.b) / 3.0) * 0.1 + 0.01;
+				//float brightness = ((i.color.r + i.color.g + i.color.b) / 3.0) * 0.1 + 0.01;
 				fixed4 col = tex2D(_MainTex, i.uv);
-				col.rgb *= brightness;
-				col.a *= 0.25;
+				//col.rgb *= brightness;
+				//col.a *= 0.25;
 				return col;
 			}
 			ENDCG

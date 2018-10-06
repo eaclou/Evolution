@@ -38,7 +38,7 @@ void CSTick (uint3 id : SV_DispatchThreadID)
 		if(dist < (leafNodeData.age * 0.5)) {
 			repelForce += vecToNeighbor * -0.001;
 
-			if(dist < 0.001) {
+			if(dist < 0.003) {
 				repelForce += ((float)neighborIndex - (float)id.x) * 0.051;
 			}
 		}		

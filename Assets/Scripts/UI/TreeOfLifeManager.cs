@@ -13,7 +13,7 @@ public class TreeOfLifeManager {
     private Vector3 treeOriginPos;
     private GameObject treeOfLifeAnchorGO;
 
-    private float colliderBaseScaleMultiplier = 0.167f;
+    private float colliderBaseScaleMultiplier = 0.275f;
 
     // Instantiated Objects:
     public List<TreeOfLifeNodeRaycastTarget> nodeRaycastTargetsList;
@@ -119,10 +119,10 @@ public class TreeOfLifeManager {
         treeOfLifeScale = 1f;
 
         for(int i = 0; i < nodeRaycastTargetsList.Count; i++) {
-            
-            Vector4 localPos = new Vector3(dataArray[i].localPos.x, dataArray[i].localPos.y, dataArray[i].localPos.z);
-            Vector3 worldPos = cam.worldSpaceTopLeft + cam.worldSpaceCameraRightDir * camScale - cam.worldSpaceCameraUpDir * camScale * 0.5f + localPos * camScale;
 
+            Vector4 localPos = new Vector3(dataArray[i].localPos.x, dataArray[i].localPos.y, 0f); // dataArray[i].localPos.z);
+            Vector3 worldPos = cam.worldSpaceTopLeft + cam.worldSpaceCameraRightDir * camScale - cam.worldSpaceCameraUpDir * camScale * 0.5f + localPos * camScale;
+            
             nodeRaycastTargetsList[i].transform.position = worldPos;
         }
     }
@@ -134,7 +134,7 @@ public class TreeOfLifeManager {
         GameObject speciesNodeColliderGO = new GameObject("SpeciesNodeRaycastCollider_" + newSpeciesID.ToString());
         speciesNodeColliderGO.transform.parent = treeOfLifeAnchorGO.transform;
         speciesNodeColliderGO.transform.localPosition = Vector3.zero; // new Vector3(-1f * (float)speciesPool.depthLevel, UnityEngine.Random.Range(-2f, 0f), 0f) * scaleMultiplier;
-        speciesNodeColliderGO.transform.localScale = Vector3.one * colliderBaseScaleMultiplier;
+        speciesNodeColliderGO.transform.localScale = Vector3.one * colliderBaseScaleMultiplier * camScale;
         TreeOfLifeNodeRaycastTarget rayTarget = speciesNodeColliderGO.AddComponent<TreeOfLifeNodeRaycastTarget>();
         rayTarget.Initialize(speciesPool);
         rayTarget.rayCollider = speciesNodeColliderGO.AddComponent<CapsuleCollider>();
@@ -145,5 +145,24 @@ public class TreeOfLifeManager {
 
     public void RemoveExtinctSpecies(int speciesID) {
         //CSExctinctSpecies
+        nodeRaycastTargetsList[speciesID].gameObject.SetActive(false);
+    }
+
+    public void UpdateVisualUI(bool isOn) {
+        treeOfLifeAnchorGO.SetActive(isOn);
+        for(int i = 0; i < nodeRaycastTargetsList.Count; i++) {
+            //nodeRaycastTargetsList[i].gameObject.SetActive(isOn);
+            nodeRaycastTargetsList[i].gameObject.transform.localScale = Vector3.one * colliderBaseScaleMultiplier * camScale;
+        }
+    }
+
+    public void ClickedOnSpeciesNode(int speciesID) {
+        selectedID = speciesID;
+    }
+    public void HoverOverSpeciesNode(int speciesID) {
+        hoverID = speciesID;
+    }
+    public void HoverAllOff() {
+        hoverID = -1;
     }
 }

@@ -161,12 +161,16 @@ public class UIManager : MonoBehaviour {
     public GameObject panelTreeOfLifeScaleHideGroup;
     public GameObject panelTreeOfLifeInfoBlock;
     public GameObject panelTreeOfLifeInfoA;
+    public Text textTreeOfLifeInfoA;
     public GameObject panelTreeOfLifeInfoB;
-    public GameObject panelTreeOfLifeInfoC;    
+    public Text textTreeOfLifeInfoB;
+    public GameObject panelTreeOfLifeInfoC;
+    public Text textTreeOfLifeInfoC;
+    public Text textTreeOfLifeSpeciesID;
     public Button buttonInfoA;
     public Button buttonInfoB;
     public Button buttonInfoC;
-    private bool treeOfLifePanelOn = true;
+    public bool treeOfLifePanelOn = true;
     private bool treeOfLifeInfoOnA = false;
     private bool treeOfLifeInfoOnB = false;
     private bool treeOfLifeInfoOnC = false;
@@ -367,9 +371,10 @@ public class UIManager : MonoBehaviour {
             // &&&&&&&&&&&&&&&&& MOUSE: &&&&&&&&&&&&&&&
             bool leftClickThisFrame = Input.GetMouseButtonDown(0);
             bool isDragging = Input.GetMouseButton(0);
-            if(curActiveTool == ToolType.Inspect) {
-                MouseRaycastInspect(leftClickThisFrame);
-            }
+            //if(curActiveTool == ToolType.Inspect) {
+            //    MouseRaycastInspect(leftClickThisFrame);
+            //}
+            MouseRaycastCheck(leftClickThisFrame);
 
             bool rightTriggerDownThisFrame = false;
             float rightTriggerVal = Input.GetAxis("RightTrigger");
@@ -559,7 +564,7 @@ public class UIManager : MonoBehaviour {
             prevCtrlCursorPositionOnWaterPlane = curCtrlCursorPositionOnWaterPlane;
         }
     }
-    private void MouseRaycastInspect(bool clicked) {
+    private void MouseRaycastCheck(bool clicked) {
         
         Vector3 camPos = cameraManager.gameObject.transform.position;                
         Ray ray = cameraManager.gameObject.GetComponent<Camera>().ScreenPointToRay(Input.mousePosition);
@@ -570,7 +575,33 @@ public class UIManager : MonoBehaviour {
         cameraManager.isMouseHoverAgent = false;
         cameraManager.mouseHoverAgentIndex = 0;
         cameraManager.mouseHoverAgentRef = null;
+
         if(hit.collider != null) {
+            // How to handle multiple hits? UI Trumps environmental?
+            TreeOfLifeNodeRaycastTarget speciesNodeRayTarget = hit.collider.gameObject.GetComponent<TreeOfLifeNodeRaycastTarget>();
+
+            if(speciesNodeRayTarget != null) {
+                int selectedID = speciesNodeRayTarget.speciesRef.speciesID;
+                if(clicked) {                    
+                    Debug.Log("Clicked Species[" + selectedID.ToString() + "]");                    
+                    treeOfLifeManager.ClickedOnSpeciesNode(selectedID);
+                    textTreeOfLifeSpeciesID.text = "Species #" + selectedID.ToString();
+
+                    string speciesInfoTxt = "";
+                    speciesInfoTxt += "Parent Species: " + gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedID].parentSpeciesID.ToString() + "\n";
+                    speciesInfoTxt += "Dimensions: { " + gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedID].representativeGenome.bodyGenome.coreGenome.fullBodyWidth.ToString("F2") + ", " +
+                        gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedID].representativeGenome.bodyGenome.coreGenome.fullBodyLength.ToString("F2") + " }\n";
+                    speciesInfoTxt += "Avg Fitness: " + gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedID].avgFitnessScore.ToString("F2");
+                    textTreeOfLifeInfoA.text = speciesInfoTxt;
+                }
+                else {
+                    treeOfLifeManager.HoverOverSpeciesNode(selectedID);
+                }
+            }
+            else {
+                treeOfLifeManager.HoverAllOff();
+            }
+            // CHECK FOR AGENT COLLISION:
             Agent agentRef = hit.collider.gameObject.GetComponentInParent<Agent>();
             if(agentRef != null) {
                 //Debug.Log("AGENT: [ " + agentRef.gameObject.name + " ] #" + agentRef.index.ToString());
@@ -590,20 +621,12 @@ public class UIManager : MonoBehaviour {
                 cameraManager.mouseHoverAgentRef = agentRef;                    
             }
             else {
-                TreeOfLifeNodeRaycastTarget speciesNodeRayTarget = hit.collider.gameObject.GetComponent<TreeOfLifeNodeRaycastTarget>();
-
-                if(speciesNodeRayTarget != null) {
-                    if(clicked) {
-                        Debug.Log("Clicked Species[" + speciesNodeRayTarget.speciesRef.speciesID.ToString() + "]");
-
-                        treeOfLifeManager.selectedID = speciesNodeRayTarget.speciesRef.speciesID;
-                    }
-                    else {
-
-                    }
-                }
+                
             }
             //Debug.Log("CLICKED ON: [ " + hit.collider.gameObject.name + " ] Ray= " + ray.ToString() + ", hit= " + hit.point.ToString());
+        }
+        else {
+            treeOfLifeManager.HoverAllOff();
         }
     }
 	
@@ -750,6 +773,7 @@ public class UIManager : MonoBehaviour {
         panelLoading.SetActive(false);
         panelPlaying.SetActive(true);
         panelGameOptions.SetActive(false);
+        treeOfLifeManager.UpdateVisualUI(treeOfLifePanelOn);
     }
     private void UpdateMainMenuUI() {
         
@@ -1725,5 +1749,26 @@ public class UIManager : MonoBehaviour {
         cameraManager.SetTarget(gameManager.simulationManager.agentsArray[newIndex], newIndex);                
     }
 
+    public void ClickTreeOfLifeGroupOnOff() {
+        treeOfLifePanelOn = !treeOfLifePanelOn;
 
+        // Update panel:
+        if(treeOfLifePanelOn) {            
+            // Update treeOfLife colliders & display            
+        }
+        else {
+
+        }
+        panelTreeOfLifeScaleHideGroup.SetActive(treeOfLifePanelOn);
+        treeOfLifeManager.UpdateVisualUI(treeOfLifePanelOn);
+    }
+    public void ClickTreeOfLifeInfoA() {
+
+    }
+    public void ClickTreeOfLifeInfoB() {
+
+    }
+    public void ClickTreeOfLifeInfoC() {
+
+    }
 }

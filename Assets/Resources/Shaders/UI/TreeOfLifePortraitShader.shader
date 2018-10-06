@@ -90,6 +90,8 @@
 
 				float3 spriteLocalPos = skinStrokeData.localPos * critterCurScale;
 				float3 vertexWorldOffset = quadPoint;
+				//vertexWorldOffset.x *= 0.25;
+				//vertexWorldOffset.y *= 2.5;
 
 				// EGG EMBRYO MASK:
 				//float eggMask = saturate(saturate(critterSimData.embryoPercentage - 0.99) * 100);
@@ -105,20 +107,24 @@
 				// ANIMATIONS:
 				spriteLocalPos = GetAnimatedPos(spriteLocalPos, float3(0,0,0), critterInitData, critterSimData, skinStrokeData.localPos);
 				float magnitude = 0.5;
+				//float swimAngle = GetSwimAngle(strokeLocalPos.y, critterSimData.moveAnimCycle, critterSimData.accel, critterSimData.smoothedThrottle, magnitude, critterSimData.turnAmount);
 				float swimAngle = GetSwimAngle(skinStrokeData.localPos.y, critterSimData.moveAnimCycle, critterSimData.accel, critterSimData.smoothedThrottle, magnitude, critterSimData.turnAmount);
 				vertexWorldOffset = RotatePointAroundZAngle(float3(0,0,0), swimAngle, vertexWorldOffset);
 				//vertexWorldOffset // Rotate with Critter:
-				float2 forward = critterSimData.heading;;
-				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
-				vertexWorldOffset = float3(vertexWorldOffset.x * right + vertexWorldOffset.y * forward, 0);  
-				spriteLocalPos = float3(spriteLocalPos.x * right + spriteLocalPos.y * forward, spriteLocalPos.z); 
+				//float2 forward1 = critterSimData.heading;
+				//float2 right1 = float2(forward1.y, -forward1.x);
+				//vertexWorldOffset = RotatePointAroundZAngle(float3(0,0,0), swimAngle, vertexWorldOffset);
+				float2 forward2 = critterSimData.heading;
+				float2 right2 = float2(forward2.y, -forward2.x); // perpendicular to forward vector
+				vertexWorldOffset = float3(vertexWorldOffset.x * right2 + vertexWorldOffset.y * forward2, 0);  
+				//spriteLocalPos = float3(spriteLocalPos.x * right2 + spriteLocalPos.y * forward2, spriteLocalPos.z); 
 				// REFRACTION:
 				float3 offset = skinStrokeData.worldPos;				
 				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(offset.xy /  _MapSize, 0, 0)).yzw;
 				float refractionStrength = 2.45;
 				offset.xy += -surfaceNormal.xy * refractionStrength;
 
-				float3 worldPosition = offset + vertexWorldOffset; //critterWorldPos + vertexWorldOffset; //
+				float3 worldPosition;// = offset + vertexWorldOffset; //critterWorldPos + vertexWorldOffset; //
 				
 				worldPosition = uiPivot + vertexWorldOffset + spriteLocalPos;
 

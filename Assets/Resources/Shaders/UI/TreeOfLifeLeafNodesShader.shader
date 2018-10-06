@@ -56,7 +56,7 @@
 
 				float activeMask = leafData.isActive;
 				float extinctMask = (1.0 - leafData.isExtinct) * activeMask;
-				float hoverMask = saturate((float)_HoverID - (float)leafData.speciesID);  // speciesData.isHover;
+				float hoverMask = saturate(1.0 - saturate(abs((float)_HoverID - (float)leafData.speciesID)));; //saturate((float)_HoverID - (float)leafData.speciesID);  // speciesData.isHover;
 				float selectedMask = saturate(1.0 - saturate(abs((float)_SelectedID - (float)leafData.speciesID)));
 
 				//float3 worldPosition = nodeData.localPos + quadVerticesCBuffer[id] * activeMask * 0.8 * leafData.age;
