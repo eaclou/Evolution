@@ -252,7 +252,10 @@ public class SimulationManager : MonoBehaviour {
         // Tree Of LIFE UI collider & RenderKing updates:
         //uiManager.treeOfLifeManager.AddNewSpecies(masterGenomePool, 0);
         theRenderKing.TreeOfLifeAddNewSpecies(masterGenomePool, 0);
-        
+        theRenderKing.TreeOfLifeAddNewSpecies(masterGenomePool, 1);
+        masterGenomePool.completeSpeciesPoolsList[0].isFlaggedForExtinction = true;
+        masterGenomePool.ExtinctifySpecies(this, masterGenomePool.currentlyActiveSpeciesIDList[0]);
+
         // TEMP!!! ****
         for(int i = 0; i < numAgents; i++) {
             theRenderKing.UpdateAgentWidthsTexture(agentsArray[i]);
@@ -319,8 +322,8 @@ public class SimulationManager : MonoBehaviour {
 
         simStateData = new SimulationStateData(this);
 
-        uiManager.treeOfLifeManager = new TreeOfLifeManager(uiManager.treeOfLifeAnchorGO, uiManager);
-        uiManager.treeOfLifeManager.FirstTimeInitialize(masterGenomePool);
+        //uiManager.treeOfLifeManager = new TreeOfLifeManager(uiManager.treeOfLifeAnchorGO, uiManager);  // Moved inside MasterGenome Init!!! ***
+        //uiManager.treeOfLifeManager.FirstTimeInitialize(masterGenomePool);
     }
     private void LoadingInitializePopulationGenomes() {
         masterGenomePool = new MasterGenomePool();

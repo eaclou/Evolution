@@ -582,17 +582,8 @@ public class UIManager : MonoBehaviour {
 
             if(speciesNodeRayTarget != null) {
                 int selectedID = speciesNodeRayTarget.speciesRef.speciesID;
-                if(clicked) {                    
-                    Debug.Log("Clicked Species[" + selectedID.ToString() + "]");                    
-                    treeOfLifeManager.ClickedOnSpeciesNode(selectedID);
-                    textTreeOfLifeSpeciesID.text = "Species #" + selectedID.ToString();
-
-                    string speciesInfoTxt = "";
-                    speciesInfoTxt += "Parent Species: " + gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedID].parentSpeciesID.ToString() + "\n";
-                    speciesInfoTxt += "Dimensions: { " + gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedID].representativeGenome.bodyGenome.coreGenome.fullBodyWidth.ToString("F2") + ", " +
-                        gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedID].representativeGenome.bodyGenome.coreGenome.fullBodyLength.ToString("F2") + " }\n";
-                    speciesInfoTxt += "Avg Fitness: " + gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedID].avgFitnessScore.ToString("F2");
-                    textTreeOfLifeInfoA.text = speciesInfoTxt;
+                if(clicked) {
+                    ClickOnSpeciesNode(selectedID);                    
                 }
                 else {
                     treeOfLifeManager.HoverOverSpeciesNode(selectedID);
@@ -628,6 +619,19 @@ public class UIManager : MonoBehaviour {
         else {
             treeOfLifeManager.HoverAllOff();
         }
+    }
+
+    private void ClickOnSpeciesNode(int ID) {
+        Debug.Log("Clicked Species[" + ID.ToString() + "]");                    
+        treeOfLifeManager.ClickedOnSpeciesNode(ID);
+        textTreeOfLifeSpeciesID.text = "Species #" + ID.ToString();
+
+        string speciesInfoTxt = "";
+        speciesInfoTxt += "Parent Species: " + gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[ID].parentSpeciesID.ToString() + "\n";
+        speciesInfoTxt += "Dimensions: { " + gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[ID].representativeGenome.bodyGenome.coreGenome.fullBodyWidth.ToString("F2") + ", " +
+            gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[ID].representativeGenome.bodyGenome.coreGenome.fullBodyLength.ToString("F2") + " }\n";
+        speciesInfoTxt += "Avg Fitness: " + gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[ID].avgFitnessScore.ToString("F2");
+        textTreeOfLifeInfoA.text = speciesInfoTxt;
     }
 	
 	// Update is called once per frame
@@ -698,13 +702,14 @@ public class UIManager : MonoBehaviour {
                 break;
             case GameManager.GameState.Loading:
                 EnterLoadingUI();
+                
                 //treeOfLifeManager = new TreeOfLifeManager(treeOfLifeAnchorGO, this);
                 //treeOfLifeManager.FirstTimeInitialize(gameManager.simulationManager.masterGenomePool);
                 break;
             case GameManager.GameState.Playing:
                 //canvasMain.renderMode = RenderMode.ScreenSpaceCamera;
                 // After self Initialized:                
-
+                ClickOnSpeciesNode(1);
                 firstTimeStartup = false;
                 EnterPlayingUI();
                 break;

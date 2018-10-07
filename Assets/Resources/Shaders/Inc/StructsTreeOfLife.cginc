@@ -20,5 +20,6 @@ struct TreeOfLifeLeafNodeData {
 struct TreeOfLifeStemSegmentData {
     int speciesID;
     int fromID;
-    int toID;        
+    int toID;  
+	float attachPosLerp;
 };

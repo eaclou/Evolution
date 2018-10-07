@@ -41,12 +41,21 @@ public class MasterGenomePool {
         currentlyActiveSpeciesIDList = new List<int>();
         completeSpeciesPoolsList = new List<SpeciesGenomePool>();
 
-        // Create foundational Species:
-        SpeciesGenomePool firstSpecies = new SpeciesGenomePool(0, -1, mutationSettingsRef);
-        firstSpecies.FirstTimeInitialize(numAgentGenomes, 0);
-
+        SpeciesGenomePool rootSpecies = new SpeciesGenomePool(0, -1, mutationSettingsRef);
+        rootSpecies.FirstTimeInitialize(numAgentGenomes, 0);
         currentlyActiveSpeciesIDList.Add(0);
-        completeSpeciesPoolsList.Add(firstSpecies);        
+        completeSpeciesPoolsList.Add(rootSpecies);
+        // When do I create nodeCollider & shit?
+
+        // Create foundational Species:
+        SpeciesGenomePool firstSpecies = new SpeciesGenomePool(1, 0, mutationSettingsRef);
+        firstSpecies.FirstTimeInitialize(numAgentGenomes, 1);
+
+        currentlyActiveSpeciesIDList.Add(1);
+        completeSpeciesPoolsList.Add(firstSpecies);
+        
+        uiManagerRef.treeOfLifeManager = new TreeOfLifeManager(uiManagerRef.treeOfLifeAnchorGO, uiManagerRef);
+        uiManagerRef.treeOfLifeManager.FirstTimeInitialize(this);                
     }
 
     public void Tick() {
@@ -83,7 +92,7 @@ public class MasterGenomePool {
             }
         }
     }
-    private void ExtinctifySpecies(SimulationManager simManagerRef, int speciesID) {
+    public void ExtinctifySpecies(SimulationManager simManagerRef, int speciesID) {
         Debug.Log("REMOVE SPECIES " + speciesID.ToString());
 
         // find and remove from active list:
