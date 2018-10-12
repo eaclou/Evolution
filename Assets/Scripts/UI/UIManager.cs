@@ -231,6 +231,9 @@ public class UIManager : MonoBehaviour {
     public Vector3 curCtrlCursorPositionOnWaterPlane;
     private bool rightTriggerOn = false;
 
+    public bool isDraggingMouse = false;
+    public bool isDraggingSpeciesNode = false;
+
     // Tree of Life:
     //public Image imageTreeOfLifeDisplay;
     
@@ -370,7 +373,16 @@ public class UIManager : MonoBehaviour {
 
             // &&&&&&&&&&&&&&&&& MOUSE: &&&&&&&&&&&&&&&
             bool leftClickThisFrame = Input.GetMouseButtonDown(0);
-            bool isDragging = Input.GetMouseButton(0);
+            bool letGoThisFrame = Input.GetMouseButtonUp(0);
+            isDraggingMouse = Input.GetMouseButton(0);
+
+            if (letGoThisFrame) {
+                isDraggingMouse = false;
+                isDraggingSpeciesNode = false;
+            }
+            
+            //bool isDragging = Input.GetMouseButton(0);
+            
             //if(curActiveTool == ToolType.Inspect) {
             //    MouseRaycastInspect(leftClickThisFrame);
             //}
@@ -426,12 +438,12 @@ public class UIManager : MonoBehaviour {
 
             if(curActiveTool == ToolType.Stir) {                    
                 mouseRaycastWaterPlane.SetActive(true);
-                MouseRaycastWaterPlane(false, isDragging, true, Input.mousePosition, smoothedMouseVel); 
+                MouseRaycastWaterPlane(false, isDraggingMouse, true, Input.mousePosition, smoothedMouseVel); 
                 
                 //gameManager.theRenderKing.gizmoStirToolPosCBuffer.SetData(dataArray);
                 gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_IsVisible", 1f);
                 float isActing = 0f;
-                if (isDragging)
+                if (isDraggingMouse)
                     isActing = 1f;
                 gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_IsStirring", isActing);
                 gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_Radius", 4f);
@@ -624,7 +636,7 @@ public class UIManager : MonoBehaviour {
     private void ClickOnSpeciesNode(int ID) {
         Debug.Log("Clicked Species[" + ID.ToString() + "]");                    
         treeOfLifeManager.ClickedOnSpeciesNode(ID);
-        textTreeOfLifeSpeciesID.text = "Species #" + ID.ToString();
+        textTreeOfLifeSpeciesID.text = "Species <size=24> " + ID.ToString() + "</size>";
 
         string speciesInfoTxt = "";
         speciesInfoTxt += "Parent Species: " + gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[ID].parentSpeciesID.ToString() + "\n";
@@ -632,6 +644,8 @@ public class UIManager : MonoBehaviour {
             gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[ID].representativeGenome.bodyGenome.coreGenome.fullBodyLength.ToString("F2") + " }\n";
         speciesInfoTxt += "Avg Fitness: " + gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[ID].avgFitnessScore.ToString("F2");
         textTreeOfLifeInfoA.text = speciesInfoTxt;
+
+        isDraggingSpeciesNode = true;
     }
 	
 	// Update is called once per frame
@@ -709,7 +723,7 @@ public class UIManager : MonoBehaviour {
             case GameManager.GameState.Playing:
                 //canvasMain.renderMode = RenderMode.ScreenSpaceCamera;
                 // After self Initialized:                
-                ClickOnSpeciesNode(1);
+                //ClickOnSpeciesNode(1);
                 firstTimeStartup = false;
                 EnterPlayingUI();
                 break;

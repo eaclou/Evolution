@@ -80,7 +80,7 @@
 				
 				float3 quadPoint = quadVerticesCBuffer[id];				
 				
-				float3 uiPivot = _TopLeftCornerWorldPos.xyz + (_CamRightDir.xyz * 0.5 - _CamUpDir.xyz * 0.5) * _CamScale;
+				float3 uiPivot = _TopLeftCornerWorldPos.xyz + (_CamRightDir.xyz * 0.6 - _CamUpDir.xyz * 0.6) * _CamScale;
 				float3 critterWorldPos = uiPivot; //critterSimData.worldPos;
 				float3 critterCurScale = critterInitData.boundingBoxSize * 0.25; // * critterSimData.growthPercentage * 0.75;
 
@@ -126,7 +126,7 @@
 
 				float3 worldPosition;// = offset + vertexWorldOffset; //critterWorldPos + vertexWorldOffset; //
 				
-				worldPosition = uiPivot + vertexWorldOffset + spriteLocalPos;
+				worldPosition = uiPivot + (vertexWorldOffset + spriteLocalPos) * 0.8;
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
 				o.worldPos = worldPosition;

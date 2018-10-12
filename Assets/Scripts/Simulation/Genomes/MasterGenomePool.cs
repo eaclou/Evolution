@@ -14,7 +14,7 @@ public class MasterGenomePool {
     public float speciesSimilarityDistanceThreshold = 10f;
     private int minNumGauranteedEvalsForNewSpecies = 64;
 
-    public int currentHighestDepth = 0;
+    public int currentHighestDepth = 1;
     
     public List<int> currentlyActiveSpeciesIDList;
     public List<SpeciesGenomePool> completeSpeciesPoolsList;

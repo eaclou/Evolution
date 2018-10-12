@@ -27,6 +27,7 @@ public class SimulationStateData {
         public float mouthIsActive;
         public int bodyPatternX;  // what grid cell of texture sheet to use
         public int bodyPatternY;  // what grid cell of texture sheet to use
+        public int speciesID;
     }
     public struct CritterSimData {
         public Vector3 worldPos;
@@ -171,7 +172,7 @@ public class SimulationStateData {
         for(int i = 0; i < critterInitDataArray.Length; i++) {
             critterInitDataArray[i] = new CritterInitData();
         }
-        critterInitDataCBuffer = new ComputeBuffer(critterInitDataArray.Length, sizeof(float) * 12 + sizeof(int) * 2);
+        critterInitDataCBuffer = new ComputeBuffer(critterInitDataArray.Length, sizeof(float) * 12 + sizeof(int) * 3);
 
         critterSimDataArray = new CritterSimData[simManager._NumAgents];
         for(int i = 0; i < critterSimDataArray.Length; i++) {
@@ -245,7 +246,7 @@ public class SimulationStateData {
                 }
                 critterInitDataArray[i].bodyPatternX = simManager.agentsArray[i].candidateRef.candidateGenome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeX;
                 critterInitDataArray[i].bodyPatternY = simManager.agentsArray[i].candidateRef.candidateGenome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeY;  // what grid cell of texture sheet to use
-                
+                critterInitDataArray[i].speciesID = simManager.agentsArray[i].speciesIndex;
 
 
                 // SIMDATA ::===========================================================================================================================================================================

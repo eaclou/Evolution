@@ -104,11 +104,11 @@
 				vertexWorldOffset *= eggMask;				
 				vertexWorldOffset.xy = vertexWorldOffset.xy * critterCurScale.x * saturate(0.99 - critterSimData.decayPercentage * 2) * 0.5;				
 				
-				float3 pivot = _TopLeftCornerWorldPos.xyz + (_CamRightDir.xyz * 0.5f - _CamUpDir.xyz * 0.5f) * _CamScale; 
+				float3 pivot = _TopLeftCornerWorldPos.xyz + (_CamRightDir.xyz * 0.6 - _CamUpDir.xyz * 0.6) * _CamScale; 
 				spriteLocalPos = GetAnimatedPos(spriteLocalPos, float3(0,0,0), critterInitData, critterSimData, float3(eyeData.localPos, 0));
 				//float3 localPos = GetAnimatedPos(spriteLocalPos, float3(0,0,0), critterInitData, critterSimData, float3(eyeData.localPos, 0));
-				
-				float3 worldPosition = pivot + spriteLocalPos;
+				spriteLocalPos.z += 0.033;
+				float3 worldPosition = pivot + spriteLocalPos * 0.8;
 				
 				// REFRACTION:			
 				//float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(float2(128, 128) / 256, 0, 0)).yzw;
@@ -121,7 +121,7 @@
 				vertexWorldOffset = float3(vertexWorldOffset.x * right + vertexWorldOffset.y * forward, vertexWorldOffset.z);  // Rotate localRotation by AgentRotation
 				//spriteLocalPos = float3(spriteLocalPos.x * right + spriteLocalPos.y * forward, spriteLocalPos.z);
 				//worldPosition = pivot + spriteLocalPos * 0.75 + vertexWorldOffset; //quadVerticesCBuffer[id];
-				worldPosition += vertexWorldOffset;
+				worldPosition += vertexWorldOffset * 0.67;
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
 				o.worldPos = worldPosition;
 
@@ -182,7 +182,7 @@
 				float4 finalColor = float4(rgb * 1.0, brushColor.a);
 				
 				float fogAmount = 0.25; //saturate((i.worldPos.z + 1) * 0.5);		
-				float3 surfaceNormal = tex2D(_WaterSurfaceTex, (i.altitudeUV - 0.25) * 2).yzw;
+				float3 surfaceNormal = tex2D(_WaterSurfaceTex, float2(0.5, 0.5)).yzw;
 				float dotLight = dot(surfaceNormal, _WorldSpaceLightPos0.xyz);
 				dotLight = dotLight * dotLight;
 

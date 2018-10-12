@@ -7,6 +7,7 @@ struct CritterInitData {
 	float mouthIsActive;	
 	int bodyPatternX;  // what grid cell of texture sheet to use
 	int bodyPatternY;  // what grid cell of texture sheet to use
+	int speciesID;
 };
 struct CritterSimData {
 	float3 worldPos;

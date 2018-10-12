@@ -3,6 +3,8 @@
 	Properties
 	{
 		_MainTex ("Texture", 2D) = "white" {}
+		_TintPri ("_TintPri", Color) = (1,1,1,1)
+		_TintSec ("_TintSec", Color) = (1,1,1,1)
 	}
 	SubShader
 	{
@@ -39,6 +41,8 @@
 			uniform float _AnimatedScale2; // signal from main CPU program of whether the panel is active, hidden, or interpolating
 
 			sampler2D _MainTex;
+			float4 _TintPri;
+			float4 _TintSec;
 
 			struct v2f
 			{
@@ -63,7 +67,7 @@
 
 				//float2 forward = data.localDir;
 				//float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
-				//vertexWorldOffset = float3(vertexWorldOffset.x * right + vertexWorldOffset.y * forward, 0);  // Rotate localRotation by AgentRotation
+				//uvCoords = float2(uvCoords.x * right + uvCoords.y * forward);  // Rotate localRotation by AgentRotation
 
 				//float3 orthoPos = (vertexWorldOffset + localPos) * _CamScale * _AnimatedScale1;
 				float3 worldPosition = pivot + (_CamRightDir.xyz * uvCoords.x * data.scale.x + _CamUpDir.xyz * uvCoords.y * data.scale.y) * _CamScale; //_CamRightDir.xyz * quadVerticesCBuffer[id].x * 1.0 * _CamScale + _CamUpDir.xyz * quadVerticesCBuffer[id].y * 1.0 * _CamScale;
@@ -90,8 +94,9 @@
 				// sample the texture
 				//float brightness = ((i.color.r + i.color.g + i.color.b) / 3.0) * 0.1 + 0.01;
 				fixed4 col = tex2D(_MainTex, i.uv);
-				//col.rgb *= brightness;
-				//col.a *= 0.25;
+				col.rgb *= lerp(_TintPri.rgb, _TintSec.rgb, i.uv.y);
+				//col.rgb *= 0.85;
+				//col.a *= 0.85;
 				return col;
 			}
 			ENDCG

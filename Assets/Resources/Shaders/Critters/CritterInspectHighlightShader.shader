@@ -38,6 +38,7 @@
 			uniform float _IsHover;
 			uniform float _IsHighlighted;
 			uniform float _IsLockedOn;
+			uniform int _SelectedSpecies;
 
 			struct v2f
 			{
@@ -57,6 +58,8 @@
 				uint agentIndex = inst.x; //data.parentIndex;
 				CritterInitData critterInitData = critterInitDataCBuffer[agentIndex];
 				CritterSimData critterSimData = critterSimDataCBuffer[agentIndex];
+
+				float selectedSpeciesMask = saturate(1.0 - saturate(abs((float)_SelectedSpecies - (float)critterInitData.speciesID)));
 
 				float3 worldPosition = critterSimData.worldPos;
 				float3 quadPoint = quadVerticesCBuffer[id];
@@ -118,8 +121,8 @@
 					}
 				}
 
-				float4 col = lerp(highlightedColor, hoverColor, hoverLerp);
-				col = lerp(col, lockedOnColor, lockedOnLerp);
+				float4 col = float4(critterInitData.primaryHue ,1) * selectedSpeciesMask * 0.75; // lerp(highlightedColor, hoverColor, hoverLerp);
+				//col = lerp(col, lockedOnColor, lockedOnLerp);
 
 				col.a *= saturate(1.0 - critterSimData.decayPercentage) * critterSimData.embryoPercentage;
 
@@ -139,7 +142,7 @@
 				//finalColor.a *= i.color.x * texColor.a;  // hide if mouse not hovering over
 				//finalColor.rgb *= 1;
 
-				finalColor = i.color * texColor;
+				finalColor = texColor * i.color;
 				
 				return finalColor;
 
