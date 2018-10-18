@@ -11,10 +11,12 @@ public class BodyGenome {
     public CritterModuleAppearanceGenome appearanceGenome;    
     public CritterModuleCoreGenome coreGenome;
     public CritterModuleDevelopmentalGenome developmentalGenome;
-    public CritterModuleDigestiveGenome digestiveGenome;
-    public CritterModuleEnergyGenome energyGenome;
-    public CritterModuleExteriorGenome exteriorGenome;
+    //public CritterModuleDigestiveGenome digestiveGenome;  // not needed?
+    //public CritterModuleEnergyGenome energyGenome;  // not needed?
+    //public CritterModuleExteriorGenome exteriorGenome; // not needed?
     public CritterModuleMovementGenome movementGenome;
+
+    public Vector3 fullsizeBoundingBox;   // Z = forward, Y = up
 
     //public List<HealthGenome> healthModuleList;
     //public List<OscillatorGenome> oscillatorInputList;
@@ -30,23 +32,36 @@ public class BodyGenome {
         appearanceGenome = new CritterModuleAppearanceGenome(0, 0);
         coreGenome = new CritterModuleCoreGenome(0, 0);
         developmentalGenome = new CritterModuleDevelopmentalGenome(0, 0);
-        digestiveGenome = new CritterModuleDigestiveGenome(0, 0);
-        energyGenome = new CritterModuleEnergyGenome(0, 0);
-        exteriorGenome = new CritterModuleExteriorGenome(0, 0);
+        //digestiveGenome = new CritterModuleDigestiveGenome(0, 0);
+        //energyGenome = new CritterModuleEnergyGenome(0, 0);
+        //exteriorGenome = new CritterModuleExteriorGenome(0, 0);
         movementGenome = new CritterModuleMovementGenome(0, 0);
-        
+
+        // Calculate BoundingBox:
+        CalculateFullsizeBoundingBox();
+        //
+
         //OLD:
         //testModuleGenome = new TestModuleGenome(0, 0);
                    
     }
 
+    public void CalculateFullsizeBoundingBox() {
+        fullsizeBoundingBox = Vector3.one;
+
+        if(coreGenome != null) {
+            // calculate fullsizeBoundingBox from genome stuff
+
+        }
+    }
+
     public void GenerateRandomBodyGenome() {
         appearanceGenome.GenerateRandomGenome();
-        coreGenome.GenerateRandomGenome();
+        coreGenome.GenerateRandomInitialGenome();
         developmentalGenome.GenerateRandomGenome();
-        digestiveGenome.GenerateRandomGenome();
-        energyGenome.GenerateRandomGenome();
-        exteriorGenome.GenerateRandomGenome();
+        //digestiveGenome.GenerateRandomGenome();
+        //energyGenome.GenerateRandomGenome();
+        //exteriorGenome.GenerateRandomGenome();
         movementGenome.GenerateRandomGenome();
     }
     
@@ -56,9 +71,9 @@ public class BodyGenome {
         appearanceGenome.AppendModuleNeuronsToMasterList(ref neuronList);
         coreGenome.AppendModuleNeuronsToMasterList(ref neuronList);
         developmentalGenome.AppendModuleNeuronsToMasterList(ref neuronList);
-        digestiveGenome.AppendModuleNeuronsToMasterList(ref neuronList);
-        energyGenome.AppendModuleNeuronsToMasterList(ref neuronList);
-        exteriorGenome.AppendModuleNeuronsToMasterList(ref neuronList);
+        //digestiveGenome.AppendModuleNeuronsToMasterList(ref neuronList);
+        //energyGenome.AppendModuleNeuronsToMasterList(ref neuronList);
+        //exteriorGenome.AppendModuleNeuronsToMasterList(ref neuronList);
         movementGenome.AppendModuleNeuronsToMasterList(ref neuronList);
 
 

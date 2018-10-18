@@ -262,7 +262,7 @@ public class SimulationStateData {
                     embryo = Mathf.Clamp01(embryo);
                 }
                 critterSimDataArray[i].embryoPercentage = embryo;
-                critterSimDataArray[i].growthPercentage = Mathf.Clamp01(simManager.agentsArray[i].growthPercentage);
+                critterSimDataArray[i].growthPercentage = Mathf.Clamp01(simManager.agentsArray[i].sizePercentage);
                 float decay = 0f;
                 if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Dead) {
                     decay = (float)simManager.agentsArray[i].lifeStageTransitionTimeStepCounter / (float)simManager.agentsArray[i]._DecayDurationTimeSteps;
@@ -282,7 +282,7 @@ public class SimulationStateData {
                 critterSimDataArray[i].health = simManager.agentsArray[i].coreModule.healthHead;
                 critterSimDataArray[i].stamina = simManager.agentsArray[i].coreModule.stamina[0];
                 critterSimDataArray[i].isBiting = 0f;            
-                if(simManager.agentsArray[i].growthPercentage > 0.025f)
+                if(simManager.agentsArray[i].sizePercentage > 0.025f)
                 {
                     if (simManager.agentsArray[i].coreModule.mouthEffector[0] > 0.0f)
                     {

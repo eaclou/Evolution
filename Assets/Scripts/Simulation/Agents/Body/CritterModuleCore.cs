@@ -13,8 +13,8 @@ public class CritterModuleCore {
 
     public float foodConsumptionRate = 0.0025f * 0.5f; // *** *0.5 temporary!
 
-    public float coreWidth;
-    public float coreLength;
+    //public float coreWidth;
+    //public float coreLength;
     
     public float energyRaw = 1f;
     public float maxEnergyStorage = 1f;
@@ -28,7 +28,7 @@ public class CritterModuleCore {
 
     public float debugFoodValue = 0f;
 
-    public Vector2 currentBodySize;
+    //public Vector2 currentBodySize;
 
     public EggSack nearestEggSackModule;
     public Vector2 nearestEggSackPos;
@@ -113,8 +113,8 @@ public class CritterModuleCore {
 
     public void Initialize(CritterModuleCoreGenome genome, Agent agent) {
 
-        coreWidth = genome.fullBodyWidth;
-        coreLength = genome.fullBodyLength;
+        //coreWidth = genome.fullBodyWidth;
+        //coreLength = genome.fullBodyLength;
         
         bias = new float[1];   //0
         foodPosX = new float[1];  //1
@@ -470,8 +470,8 @@ public class CritterModuleCore {
             enemyDir = enemyPos.normalized;
             enemyVel = new Vector2(nearestEnemyAgent.bodyRigidbody.velocity.x, nearestEnemyAgent.bodyRigidbody.velocity.y);
 
-            float ownSize = currentBodySize.x;
-            float enemySize = nearestEnemyAgent.coreModule.currentBodySize.x;
+            float ownSize = 1f; // currentBodySize.x;
+            float enemySize = 1f; // nearestEnemyAgent.coreModule.currentBodySize.x;
 
             if(ownSize != 0f && enemySize != 0) {
                 float sizeRatio = enemySize / ownSize - 1f; 
@@ -485,7 +485,7 @@ public class CritterModuleCore {
             }            
 
             enemyHealth[0] = nearestEnemyAgent.coreModule.hitPoints[0];
-            enemyGrowthStage[0] = nearestEnemyAgent.growthPercentage;
+            enemyGrowthStage[0] = nearestEnemyAgent.sizePercentage;
 
             float threat = 1f;
             if(nearestEnemyAgent.mouthRef.isPassive) {

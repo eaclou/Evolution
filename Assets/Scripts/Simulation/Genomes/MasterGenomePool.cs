@@ -227,8 +227,8 @@ public class MasterGenomePool {
 
         // DUE FOR UPGRADE / OVERHAUL!!!!  ******
 
-        float dWidth = Mathf.Abs(newGenome.bodyGenome.coreGenome.fullBodyWidth - repGenome.bodyGenome.coreGenome.fullBodyWidth);
-        float dLength = Mathf.Abs(newGenome.bodyGenome.coreGenome.fullBodyLength - repGenome.bodyGenome.coreGenome.fullBodyLength);
+        float dWidth = Mathf.Abs(newGenome.bodyGenome.fullsizeBoundingBox.x - repGenome.bodyGenome.fullsizeBoundingBox.x);
+        float dLength = Mathf.Abs(newGenome.bodyGenome.fullsizeBoundingBox.z - repGenome.bodyGenome.fullsizeBoundingBox.z);
         float mouthA = 1f;
         if (newGenome.bodyGenome.coreGenome.isPassive)
             mouthA = 0f;

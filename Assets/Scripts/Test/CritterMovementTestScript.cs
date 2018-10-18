@@ -72,8 +72,8 @@ public class CritterMovementTestScript : MonoBehaviour {
         //testAgent.humanControlLerp = 1f;
         //testAgent.humanControlled = true;
 
-        testAgentGenome.bodyGenome.coreGenome.numSegments = numSegments;
-        testAgentGenome.bodyGenome.coreGenome.fullBodyLength = bodyLength;
+        //testAgentGenome.bodyGenome.coreGenome.numSegments = numSegments;
+        //testAgentGenome.bodyGenome.coreGenome.fullBodyLength = bodyLength;
 
         testAgent.speed = speed;
         /*

@@ -78,7 +78,7 @@ public class CritterMouthComponent : MonoBehaviour {
                 if(true) { //agentRef.speciesIndex != collidingSegment.agentRef.speciesIndex) {   // *** true == CANNIBALISM ALLOWED!!!!!! *****
                     // ANIMAL:
                     // Compare sizes:
-                    targetArea = collidingAgent.coreModule.currentBodySize.x * collidingAgent.coreModule.currentBodySize.y;
+                    targetArea = collidingAgent.currentBoundingBoxSize.x * collidingAgent.currentBoundingBoxSize.z;
                     //targetArea = 0.2f; // TEMP TEST!! ***
                     if(ownBiteArea > targetArea) {
                         // Swallow!:::
@@ -166,7 +166,7 @@ public class CritterMouthComponent : MonoBehaviour {
         ProcessPredatorySwallowAttempt(agentRef, preyAgent);
         //preyAgent.curLifeStage = Agent.AgentLifeStage.Dead;
         // Credit food:
-        float flow = preyAgent.growthPercentage * preyAgent.coreModule.coreWidth * preyAgent.coreModule.coreLength + preyAgent.coreModule.stomachContents;
+        float flow = preyAgent.sizePercentage * preyAgent.fullSizeBoundingBox.x * preyAgent.fullSizeBoundingBox.z + preyAgent.coreModule.stomachContents;
         agentRef.EatFood(flow * 1f); // assumes all foodAmounts are equal !! *****  
         //Debug.Log("SwallowAnimalWhole. foodFlow: " + flow.ToString() + ", agentStomachContents: " + agentRef.coreModule.stomachContents.ToString());
         // **** Not removing Animal? --> need to attach?

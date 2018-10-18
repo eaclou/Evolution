@@ -40,3 +40,7 @@ struct CritterSkinStrokeData {
 	float randomSeed;
 	float followLerp;				
 };
+struct CritterGenericStrokeData {
+	int parentIndex;  // which Critter is this attached to?	
+	int brushType;				
+};

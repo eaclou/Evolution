@@ -66,6 +66,7 @@ public class TheRenderKing : MonoBehaviour {
     public Material critterSkinStrokesDisplayMat;
     public Material critterShadowStrokesDisplayMat;
     public Material eggCoverDisplayMat;
+    public Material critterDebugGenericStrokeMat;
 
     //public Material agentHoverHighlightMat;
     public Material critterInspectHighlightMat;
@@ -607,8 +608,8 @@ public class TheRenderKing : MonoBehaviour {
             dataLeftEye.parentIndex = i;
             dataLeftEye.localPos = new Vector2(-0.5f, 0.5f); // simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.localPos;
             dataLeftEye.localPos.x *= -1f; // LEFT SIDE!
-            float width = simManager.agentsArray[i].agentWidthsArray[Mathf.RoundToInt((dataLeftEye.localPos.y * 0.5f + 0.5f) * 15f)];
-            dataLeftEye.localPos.x *= width * 0.5f;
+            //float width = simManager.agentsArray[i].agentWidthsArray[Mathf.RoundToInt((dataLeftEye.localPos.y * 0.5f + 0.5f) * 15f)];
+            dataLeftEye.localPos.x *= 0.5f;
             dataLeftEye.localDir = new Vector2(0f, 1f);
             dataLeftEye.localScale = Vector2.one * 0.1f; // simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.localScale;
             dataLeftEye.irisHue = Vector3.one; // simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.irisHue;
@@ -619,8 +620,8 @@ public class TheRenderKing : MonoBehaviour {
             AgentEyeStrokeData dataRightEye = new AgentEyeStrokeData();
             dataRightEye.parentIndex = i;
             dataRightEye.localPos = new Vector2(0.5f, 0.5f); // simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.localPos;
-            width = simManager.agentsArray[i].agentWidthsArray[Mathf.RoundToInt((dataRightEye.localPos.y * 0.5f + 0.5f) * 15f)];
-            dataRightEye.localPos.x *= width * 0.5f;
+            //width = simManager.agentsArray[i].agentWidthsArray[Mathf.RoundToInt((dataRightEye.localPos.y * 0.5f + 0.5f) * 15f)];
+            dataRightEye.localPos.x *= 0.5f;
             dataRightEye.localDir = new Vector2(0f, 1f);
             dataRightEye.localScale = Vector2.one * 0.1f; // simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.localScale;
             dataRightEye.irisHue = Vector3.one; // simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.eyeGenome.irisHue;
@@ -663,7 +664,7 @@ public class TheRenderKing : MonoBehaviour {
                 float radiusAtZ = Mathf.Sqrt(1f - zCoord * zCoord); // pythagorean theorem
                 Vector2 xyCoords = UnityEngine.Random.insideUnitCircle.normalized * radiusAtZ; // possibility for (0,0) ??? ***** undefined/null divide by zero hazard!
                 skinStroke.localPos = new Vector3(xyCoords.x, xyCoords.y, zCoord);
-                float width = simManager.agentsArray[i].agentWidthsArray[Mathf.RoundToInt((skinStroke.localPos.y * 0.5f + 0.5f) * 15f)];
+                //float width = simManager.agentsArray[i].agentWidthsArray[Mathf.RoundToInt((skinStroke.localPos.y * 0.5f + 0.5f) * 15f)];
                 skinStroke.localPos.x *= 0.5f;
                 skinStroke.localPos.z *= 0.5f;               // * width  
                 skinStroke.localDir = new Vector3(0f, 1f, 0f); // start up? shouldn't matter
@@ -691,9 +692,9 @@ public class TheRenderKing : MonoBehaviour {
                 energyDot.brushType = 0; // ** Revisit
                 energyDot.worldPos = new Vector3(0f, 0f, 0f);
                 energyDot.localPos = new Vector3(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f));
-                float width = simManager.agentsArray[i].agentWidthsArray[Mathf.RoundToInt((energyDot.localPos.y * 0.5f + 0.5f) * 15f)];
-                energyDot.localPos.x *= width * 0.5f;
-                energyDot.localPos.z *= width * 0.5f;
+                //float width = simManager.agentsArray[i].agentWidthsArray[Mathf.RoundToInt((energyDot.localPos.y * 0.5f + 0.5f) * 15f)];
+                energyDot.localPos.x *= 0.5f;
+                energyDot.localPos.z *= 0.5f;
                 energyDot.localPos *= 0.67f;
                 energyDot.localDir = new Vector3(0f, 1f, 0f); // start up? shouldn't matter
                 energyDot.localScale = new Vector2(0.1f, 0.1f);
@@ -720,9 +721,9 @@ public class TheRenderKing : MonoBehaviour {
                 foodDot.brushType = 0; // ** Revisit
                 foodDot.worldPos = new Vector3(0f, 0f, 0f);
                 foodDot.localPos = new Vector3(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)); 
-                float width = simManager.agentsArray[i].agentWidthsArray[Mathf.RoundToInt((foodDot.localPos.y * 0.5f + 0.5f) * 15f)];
-                foodDot.localPos.x *= width * 0.5f;
-                foodDot.localPos.z *= width * 0.5f;
+                //float width = simManager.agentsArray[i].agentWidthsArray[Mathf.RoundToInt((foodDot.localPos.y * 0.5f + 0.5f) * 15f)];
+                foodDot.localPos.x *= 0.5f;
+                foodDot.localPos.z *= 0.5f;
                 foodDot.localDir = new Vector3(0f, 1f, 0f); // start up? shouldn't matter
                 foodDot.localScale = new Vector2(0.1f, 0.1f); // simManager.agentGenomePoolArray[i].bodyGenome.sizeAndAspectRatio;
                 foodDot.strength = UnityEngine.Random.Range(0f, 1f);
@@ -1392,12 +1393,12 @@ public class TheRenderKing : MonoBehaviour {
         colorInjectionStrokesCBuffer.SetData(colorInjectionStrokeDataArray);
     }
     
-    public void UpdateAgentWidthsTexture(Agent agent) {
+    /*public void UpdateAgentWidthsTexture(Agent agent) {
         for(int i = 0; i < agent.agentWidthsArray.Length; i++) {
             critterBodyWidthsTex.SetPixel(i, agent.index, new Color(agent.agentWidthsArray[i], agent.agentWidthsArray[i], agent.agentWidthsArray[i]));
         }
         critterBodyWidthsTex.Apply();
-    }
+    }*/
 
     /*public void UpdateAgentBodyStrokesBuffer(int agentIndex) {
         // Doing it this way to avoid resetting ALL agents whenever ONE is respawned!
@@ -1786,7 +1787,7 @@ public class TheRenderKing : MonoBehaviour {
         treeOfLifeBackdropPortraitBorderMat.SetColor("_TintSec", new Color(genome.bodyGenome.appearanceGenome.hueSecondary.x, genome.bodyGenome.appearanceGenome.hueSecondary.y, genome.bodyGenome.appearanceGenome.hueSecondary.z));
 
         // set values
-        initData.boundingBoxSize = new Vector3(genome.bodyGenome.coreGenome.fullBodyWidth, genome.bodyGenome.coreGenome.fullBodyLength, genome.bodyGenome.coreGenome.fullBodyWidth);
+        initData.boundingBoxSize = genome.bodyGenome.fullsizeBoundingBox; // new Vector3(genome.bodyGenome.coreGenome.fullBodyWidth, genome.bodyGenome.coreGenome.fullBodyLength, genome.bodyGenome.coreGenome.fullBodyWidth);
         initData.spawnSizePercentage = 0.1f;
         initData.maxEnergy = Mathf.Min(initData.boundingBoxSize.x * initData.boundingBoxSize.y, 0.5f);
         initData.primaryHue = genome.bodyGenome.appearanceGenome.huePrimary;

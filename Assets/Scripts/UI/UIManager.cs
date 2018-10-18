@@ -640,8 +640,8 @@ public class UIManager : MonoBehaviour {
 
         string speciesInfoTxt = "";
         speciesInfoTxt += "Parent Species: " + gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[ID].parentSpeciesID.ToString() + "\n";
-        speciesInfoTxt += "Dimensions: { " + gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[ID].representativeGenome.bodyGenome.coreGenome.fullBodyWidth.ToString("F2") + ", " +
-            gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[ID].representativeGenome.bodyGenome.coreGenome.fullBodyLength.ToString("F2") + " }\n";
+        speciesInfoTxt += "Dimensions: { " + gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[ID].representativeGenome.bodyGenome.fullsizeBoundingBox.x.ToString("F2") + ", " +
+            gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[ID].representativeGenome.bodyGenome.fullsizeBoundingBox.z.ToString("F2") + " }\n";
         speciesInfoTxt += "Avg Fitness: " + gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[ID].avgFitnessScore.ToString("F2");
         textTreeOfLifeInfoA.text = speciesInfoTxt;
 
@@ -965,7 +965,7 @@ public class UIManager : MonoBehaviour {
         //debugTxt3 += "Health: " + agentRef.coreModule.healthBody.ToString("F2") + "\n";
         //debugTxt3 += "Food: " + agentRef.coreModule.foodStored[0].ToString("F2") + "\n";
         //debugTxt3 += "Stamina: " + agentRef.coreModule.stamina[0].ToString("F2") + "\n\n";
-        debugTxt3 += "Width: " + agentRef.coreModule.coreWidth.ToString("F2") + ",  Length: " + agentRef.coreModule.coreLength.ToString("F2") + "\n";
+        debugTxt3 += "Width: " + agentRef.fullSizeBoundingBox.x.ToString("F2") + ",  Length: " + agentRef.fullSizeBoundingBox.z.ToString("F2") + "\n";
         /*
         string debugTxtSimSettings = "\nSIMULATION SETTINGS\n\n";
         debugTxtSimSettings += "Mutation Parameters:\nBODY: Frequency: " + simManager.settingsManager.mutationSettingsPersistent.defaultBodyMutationChance.ToString("F4") + ", Magnitude: " + simManager.settingsManager.mutationSettingsPersistent.defaultBodyMutationStepSize.ToString("F4") + "\n";

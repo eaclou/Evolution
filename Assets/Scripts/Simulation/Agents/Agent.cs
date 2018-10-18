@@ -70,7 +70,7 @@ public class Agent : MonoBehaviour {
 
     private int growthScalingSkipFrames = 8;
 
-    public float growthPercentage = 0f;
+    public float sizePercentage = 0f;
     //public float decayPercentage = 0f;  // so that scaling works if agent dies at various stages of growth, rather than assuming it's fullsize
    
     public Brain brain;
@@ -86,14 +86,15 @@ public class Agent : MonoBehaviour {
     public SpringJoint2D springJoint;   // Used to attach to EggSack Object while still in Egg stage
     public CapsuleCollider mouseClickCollider;
     
-    public Vector3 fullSizeBoundingBox;
-    public float averageFullSizeWidth = 1f;  // used to determine size of collider
+    public Vector3 fullSizeBoundingBox;  // ASSUMES Z=LENGTH, Y=HEIGHT, X=WIDTH
+    public Vector3 currentBoundingBoxSize;
+    //public float averageFullSizeWidth = 1f;  // used to determine size of collider
     public float fullSizeBodyVolume = 1f;
     public float centerOfMass = 0f;
     
     //public Texture2D textureHealth;
-    private int widthsTexResolution = 16;
-    public float[] agentWidthsArray;
+    //private int widthsTexResolution = 16;
+    //public float[] agentWidthsArray;
 
     public int ageCounterMature = 0; // only counts when agent is an adult
     public int lifeStageTransitionTimeStepCounter = 0; // keeps track of how long agent has been in its current lifeStage
@@ -148,7 +149,7 @@ public class Agent : MonoBehaviour {
     // Use this for initialization
     private void Awake() {        
         // temp fix for delayed spawning of Agents (leading to nullReferenceExceptions)
-        agentWidthsArray = new float[widthsTexResolution];
+        //agentWidthsArray = new float[widthsTexResolution];
         isInert = true;
     }
     
@@ -442,7 +443,7 @@ public class Agent : MonoBehaviour {
 
     private void InitializeDeath()   // THIS CAN BE A LOT CLEANER!!!!! *****
     {
-        currentCorpseFoodAmount = coreModule.currentBodySize.x * coreModule.currentBodySize.y;
+        currentCorpseFoodAmount = currentBoundingBoxSize.x * currentBoundingBoxSize.z;
         
         if(isPregnantAndCarryingEggs) {
             AbortPregnancy();
@@ -568,7 +569,7 @@ public class Agent : MonoBehaviour {
         }
         else
         {
-            ScaleBody(growthPercentage, true);
+            ScaleBody(sizePercentage, true);
 
             // ******** CHANGE THIS LATER IT"S FUCKING AWFUL!!!! **************************************************  *** ***** ***** ***** **
             /*float sidesRatio = coreModule.coreWidth / coreModule.coreLength;
@@ -608,7 +609,7 @@ public class Agent : MonoBehaviour {
             {
                 float scale = (float)beingSwallowedFrameCounter / (float)swallowDuration;
 
-                ScaleBody((1.0f - scale) * 1f * growthPercentage, true);
+                ScaleBody((1.0f - scale) * 1f * sizePercentage, true);
             }
         }        
 
@@ -663,7 +664,7 @@ public class Agent : MonoBehaviour {
 
         //coreModule.energyStored[0] = 1f;
 
-        growthPercentage = Mathf.Clamp01(((float)lifeStageTransitionTimeStepCounter / (float)gestationDurationTimeSteps) * spawnStartingScale);
+        sizePercentage = Mathf.Clamp01(((float)lifeStageTransitionTimeStepCounter / (float)gestationDurationTimeSteps) * spawnStartingScale);
 
         // Scaling Test:
         int frameNum = lifeStageTransitionTimeStepCounter % growthScalingSkipFrames;
@@ -672,7 +673,7 @@ public class Agent : MonoBehaviour {
             resizeCollider = true;
             this.bodyRigidbody.AddForce(UnityEngine.Random.insideUnitCircle * 250f * this.bodyRigidbody.mass * Time.deltaTime, ForceMode2D.Impulse);
         }
-        ScaleBody(growthPercentage, resizeCollider);  
+        ScaleBody(sizePercentage, resizeCollider);  
 
         if(isAttachedToParentEggSack) {
             if(parentEggSackRef == null) {
@@ -721,7 +722,7 @@ public class Agent : MonoBehaviour {
     private void TickYoung(SimulationManager simManager, Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray, SettingsManager settings) {
         //ProcessSwallowing();
 
-        growthPercentage = Mathf.Clamp01(((float)scoreCounter / (float)maxGrowthPeriod) * (1.0f - spawnStartingScale) + spawnStartingScale);
+        sizePercentage = Mathf.Clamp01(((float)scoreCounter / (float)maxGrowthPeriod) * (1.0f - spawnStartingScale) + spawnStartingScale);
 
         // Scaling Test:
         int frameNum = lifeStageTransitionTimeStepCounter % growthScalingSkipFrames;
@@ -729,7 +730,7 @@ public class Agent : MonoBehaviour {
         if(frameNum == 2) {
             resizeFrame = true;            
         }
-        ScaleBody(growthPercentage, resizeFrame);  
+        ScaleBody(sizePercentage, resizeFrame);  
 
         TickModules(simManager, nutrientCellInfo); // update inputs for Brain        
         TickBrain(); // Tick Brain
@@ -775,7 +776,7 @@ public class Agent : MonoBehaviour {
         //ProcessSwallowing();
 
         // Check for death & stuff? Or is this handled inside OnCollisionEnter() events?
-        growthPercentage = Mathf.Clamp01(((float)scoreCounter / (float)maxGrowthPeriod) * (1.0f - spawnStartingScale) + spawnStartingScale);
+        sizePercentage = Mathf.Clamp01(((float)scoreCounter / (float)maxGrowthPeriod) * (1.0f - spawnStartingScale) + spawnStartingScale);
 
         // Scaling Test:
         int frameNum = ageCounterMature % growthScalingSkipFrames;
@@ -783,7 +784,7 @@ public class Agent : MonoBehaviour {
         if(frameNum == 1) {
             resizeFrame = true;            
         }
-        ScaleBody(growthPercentage, resizeFrame);  
+        ScaleBody(sizePercentage, resizeFrame);  
 
         TickModules(simManager, nutrientCellInfo); // update inputs for Brain        
         TickBrain(); // Tick Brain
@@ -826,26 +827,28 @@ public class Agent : MonoBehaviour {
         // Should shrink as well as lose foodContent
     }
 
-    private void ScaleBody(float growthPercentage, bool resizeColliders) {
+    private void ScaleBody(float sizePercentage, bool resizeColliders) {
         //segmentFullSizeArray
         float minScale = 0.005f;
-        float scale = Mathf.Lerp(minScale, 1f, growthPercentage); // Minimum size = 0.1 ???  // SYNC WITH EGG SIZE!!!
-        coreModule.currentBodySize = new Vector2(coreModule.coreWidth, coreModule.coreLength) * growthPercentage;
-        float currentBodyVolume = coreModule.currentBodySize.x * coreModule.currentBodySize.y;
+        float scale = Mathf.Lerp(minScale, 1f, sizePercentage); // Minimum size = 0.1 ???  // SYNC WITH EGG SIZE!!!
+        currentBoundingBoxSize = fullSizeBoundingBox * scale;
+        //coreModule.currentBodySize = new Vector2(coreModule.coreWidth, coreModule.coreLength) * growthPercentage;
+        float currentBodyVolume = currentBoundingBoxSize.x * currentBoundingBoxSize.y * currentBoundingBoxSize.z; // coreModule.currentBodySize.x * coreModule.currentBodySize.y;
                 
         coreModule.stomachCapacity = currentBodyVolume;
-        coreModule.maxEnergyStorage = coreModule.coreWidth * coreModule.coreLength * growthPercentage;
+        coreModule.maxEnergyStorage = fullSizeBoundingBox.x * fullSizeBoundingBox.z * scale;  // Z = length, x = width  // ****
         
-        if(resizeColliders) {            
-            colliderBody.size = coreModule.currentBodySize;
+        if(resizeColliders) {
+            colliderBody.size = new Vector2(currentBoundingBoxSize.x, currentBoundingBoxSize.z); // coreModule.currentBodySize;
             bodyRigidbody.mass = currentBodyVolume;
 
             // MOUTH:
-            mouthRef.triggerCollider.radius = coreModule.coreWidth * scale * 0.5f;
-            mouthRef.triggerCollider.offset = new Vector2(0f, coreModule.coreLength * scale * 0.5f);
+            mouthRef.triggerCollider.radius = currentBoundingBoxSize.x * scale * 0.5f;
+            mouthRef.triggerCollider.offset = new Vector2(0f, currentBoundingBoxSize.z * scale * 0.5f);
         
-            mouseClickCollider.radius = coreModule.coreWidth * scale * 0.5f;        
-            mouseClickCollider.height = coreModule.coreLength * scale;
+            // THIS IS HOT GARBAGE !!! RE-FACTOR!! *****
+            mouseClickCollider.radius = currentBoundingBoxSize.x * scale * 0.5f;        
+            mouseClickCollider.height = currentBoundingBoxSize.y * scale;
             mouseClickCollider.radius *= 3.6f; // ** TEMP -- should be based on camera distance also
             mouseClickCollider.height *= 1.4f; 
         }               
@@ -930,7 +933,8 @@ public class Agent : MonoBehaviour {
                     float mouthArea = mouthRef.triggerCollider.radius * mouthRef.triggerCollider.radius * Mathf.PI;
 
                     float maxEatRate = mouthArea * 4f * settings.eatRateMultiplier;
-                    float sizeValue = Mathf.Clamp01((coreModule.coreWidth - 0.35f) / 3.5f); // ** Hardcoded assuming size ranges from 0.1 --> 2.5 !!! ********
+                    // *** This is gross - CHANGE IT:::
+                    float sizeValue = Mathf.Clamp01((fullSizeBoundingBox.x - 0.35f) / 3.5f); // ** Hardcoded assuming size ranges from 0.1 --> 2.5 !!! ********
                     float efficiency = Mathf.Lerp(settings.minSizeFeedingEfficiency, settings.maxSizeFeedingEfficiency, sizeValue) * ambientFoodDensity;
                     
                     // *** Can double dip !!! BROKEN! **** Check reservoir first to avoid overdrafting!! ******
@@ -990,7 +994,7 @@ public class Agent : MonoBehaviour {
 
         turningAmount = Mathf.Lerp(turningAmount, this.bodyRigidbody.angularVelocity * Mathf.Deg2Rad * 0.1f, 0.28f);
 
-        animationCycle += smoothedThrottle.magnitude * swimAnimationCycleSpeed / (Mathf.Lerp(fullSizeBoundingBox.y, 1f, 0.75f) * (growthPercentage * 0.5f + 0.5f)) * fatigueMultiplier;
+        animationCycle += smoothedThrottle.magnitude * swimAnimationCycleSpeed / (Mathf.Lerp(fullSizeBoundingBox.y, 1f, 0.75f) * (sizePercentage * 0.5f + 0.5f)) * fatigueMultiplier;
 
         if (throttle.sqrMagnitude > 0.000001f) {  // Throttle is NOT == ZERO
             
@@ -1003,7 +1007,7 @@ public class Agent : MonoBehaviour {
             float headTurnSign = Mathf.Clamp(Vector2.Dot(throttleDir, headRightDir) * -10000f, -1f, 1f);
 
             
-            float developmentMultiplier = Mathf.Lerp(0.25f, 1f, Mathf.Clamp01(growthPercentage * 2f));
+            float developmentMultiplier = Mathf.Lerp(0.25f, 1f, Mathf.Clamp01(sizePercentage * 2f));
             //turningAmount = Mathf.Lerp(turningAmount, this.bodyRigidbody.angularVelocity * Mathf.Deg2Rad * 0.1f, 0.15f);
 
             //this.rigidbodiesArray[0].AddForce(headForwardDir * speed * Time.deltaTime, ForceMode2D.Impulse);
@@ -1012,7 +1016,7 @@ public class Agent : MonoBehaviour {
             //animationCycle = animationCycle % 1.0f;
 
             // get size in 0-1 range from minSize to maxSize:
-            float sizeValue = Mathf.Clamp01((coreModule.coreWidth - 0.1f) / 2.5f); // ** Hardcoded assuming size ranges from 0.1 --> 2.5 !!! ********
+            float sizeValue = Mathf.Clamp01((fullSizeBoundingBox.x - 0.1f) / 2.5f); // ** Hardcoded assuming size ranges from 0.1 --> 2.5 !!! ********
             float swimSpeed = Mathf.Lerp(movementModule.smallestCreatureBaseSpeed, movementModule.largestCreatureBaseSpeed, sizeValue);
             speed = swimSpeed;
             // Forward Slide
@@ -1111,7 +1115,10 @@ public class Agent : MonoBehaviour {
             mouseClickCollider.isTrigger = true;
         }
     }
-    public void InitializeAgentWidths(AgentGenome genome) {
+    
+    // Colliders Footprint???  *************************************************************************************************************
+
+    /*public void InitializeAgentWidths(AgentGenome genome) {   // This is no longer needed -- going point-by-point instead???
         // Calculate Widths, total volume, center of mass, etc:
         // REFACTOR!!! ******
         this.fullSizeBoundingBox = new Vector3(genome.bodyGenome.coreGenome.fullBodyWidth, genome.bodyGenome.coreGenome.fullBodyLength, genome.bodyGenome.coreGenome.fullBodyWidth);
@@ -1164,14 +1171,14 @@ public class Agent : MonoBehaviour {
 
         fullSizeBodyVolume = genome.bodyGenome.coreGenome.fullBodyWidth * genome.bodyGenome.coreGenome.fullBodyLength; ////avgSegmentWidth * genome.bodyGenome.coreGenome.fullBodyLength;
         averageFullSizeWidth = avgSegmentWidth;       
-    }
+    }*/
     
     public void ReconstructAgentGameObjects(AgentGenome genome, EggSack parentEggSack, Vector3 startPos, bool isImmaculate) {
 
-        InitializeAgentWidths(genome);
+        //InitializeAgentWidths(genome);
         InitializeGameObjectsAndComponents();  // Not needed??? ***
 
-        growthPercentage = 0.002f;
+        sizePercentage = 0.005f;
 
         // Positioning and Pinning to parentEggSack HERE:
         bodyGO.transform.position = startPos;
@@ -1201,14 +1208,14 @@ public class Agent : MonoBehaviour {
         bodyRigidbody.angularDrag = 15f;
         
         // Collision!
-        colliderBody.size = new Vector2(coreModule.coreWidth, coreModule.coreLength) * growthPercentage;  // spawn size percentage 1/10th      
+        colliderBody.size = new Vector2(fullSizeBoundingBox.x, fullSizeBoundingBox.z) * sizePercentage;  // spawn size percentage 1/10th      
         colliderBody.direction = CapsuleDirection2D.Vertical;
 
         // Mouth Trigger:
         mouthRef.isPassive = genome.bodyGenome.coreGenome.isPassive;
         mouthRef.triggerCollider.isTrigger = true;
-        mouthRef.triggerCollider.radius = coreModule.coreWidth / 2f * growthPercentage;
-        mouthRef.triggerCollider.offset = new Vector2(0f, coreModule.coreLength / 2f * growthPercentage);
+        mouthRef.triggerCollider.radius = fullSizeBoundingBox.x / 2f * sizePercentage;
+        mouthRef.triggerCollider.offset = new Vector2(0f, fullSizeBoundingBox.z / 2f * sizePercentage);
         mouthRef.isBiting = false;
         mouthRef.bitingFrameCounter = 0;
         mouthRef.agentIndex = this.index;
@@ -1219,9 +1226,9 @@ public class Agent : MonoBehaviour {
         //mouseclickcollider MCC
         mouseClickCollider.direction = 1; // Y-Axis ???
         mouseClickCollider.center = Vector3.zero;
-        mouseClickCollider.radius = coreModule.coreWidth / 2f * growthPercentage;
+        mouseClickCollider.radius = fullSizeBoundingBox.x / 2f * sizePercentage;
         mouseClickCollider.radius *= 1.25f; // ** TEMP
-        mouseClickCollider.height = coreModule.coreLength / 2f * growthPercentage;
+        mouseClickCollider.height = fullSizeBoundingBox.z / 2f * sizePercentage;
     }
 
     public void InitializeSpawnAgentImmaculate(int agentIndex, CandidateAgentData candidateData, StartPositionGenome startPos) {        
@@ -1229,16 +1236,19 @@ public class Agent : MonoBehaviour {
         speciesIndex = candidateData.speciesID;
         candidateRef = candidateData;
         AgentGenome genome = candidateRef.candidateGenome;
+
+        // **** Separate out this code into shared function to avoid duplicate code::::
                 
         curLifeStage = AgentLifeStage.Egg;
         parentEggSackRef = null;
-        this.fullSizeBoundingBox = new Vector3(genome.bodyGenome.coreGenome.fullBodyWidth, genome.bodyGenome.coreGenome.fullBodyLength, genome.bodyGenome.coreGenome.fullBodyWidth); // ** REFACTOR ***
+        this.fullSizeBoundingBox = genome.bodyGenome.fullsizeBoundingBox; // 
+        //this.fullSizeBoundingBox = new Vector3(genome.bodyGenome.coreGenome.fullBodyWidth, genome.bodyGenome.coreGenome.fullBodyLength, genome.bodyGenome.coreGenome.fullBodyWidth); // ** REFACTOR ***
         
         animationCycle = 0f;
         lifeStageTransitionTimeStepCounter = 0;
         pregnancyRefactoryTimeStepCounter = 0;
         ageCounterMature = 0;
-        growthPercentage = 0f;
+        sizePercentage = 0f;
         scoreCounter = 0;
         totalFoodEaten = 0f;
         turningAmount = 5f; // temporary for zygote animation
@@ -1263,13 +1273,14 @@ public class Agent : MonoBehaviour {
                 
         curLifeStage = AgentLifeStage.Egg;
         parentEggSackRef = parentEggSack;
-        this.fullSizeBoundingBox = new Vector3(genome.bodyGenome.coreGenome.fullBodyWidth, genome.bodyGenome.coreGenome.fullBodyLength, genome.bodyGenome.coreGenome.fullBodyWidth); // ** REFACTOR ***
+        // CHANGE THIS::::
+        this.fullSizeBoundingBox = genome.bodyGenome.fullsizeBoundingBox; // new Vector3(genome.bodyGenome.coreGenome.fullBodyWidth, genome.bodyGenome.coreGenome.fullBodyLength, genome.bodyGenome.coreGenome.fullBodyWidth); // ** REFACTOR ***
         
         animationCycle = 0f;
         lifeStageTransitionTimeStepCounter = 0;
         pregnancyRefactoryTimeStepCounter = 0;
         ageCounterMature = 0;
-        growthPercentage = 0f;
+        sizePercentage = 0f;
         scoreCounter = 0;
         totalFoodEaten = 0f;
         turningAmount = 5f; // temporary for zygote animation

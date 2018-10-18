@@ -9,30 +9,24 @@ public class CritterModuleAppearanceGenome {
     public int inno;
 	
     // BODY:
-    public Vector2 sizeAndAspectRatio;
+    //public Vector2 sizeAndAspectRatio;
 
-
+         /// <summary>
+         ///  CHANGE ALL OF THIS!!!!!!! ****
+         /// </summary>
+    
     public Vector3 huePrimary;
     public Vector3 hueSecondary;
+
+    // List of Pattern Modifiers?
+
+
+
+
     public int bodyStrokeBrushTypeX;  // derives rest of information from Agent size & hue?
     public int bodyStrokeBrushTypeY;
     public EyeGenome eyeGenome;
     
-    public struct DecorationGenome {
-        public Vector2 localPos;
-        public Vector2 localDir;
-        public Vector2 localScale;
-        public float colorLerp;
-        public float strength;
-        public int brushType;
-    }
-
-    public struct TentacleGenome {
-        public Vector2 attachDir;
-        public float length;
-        public float startWidth;
-        public float endWidth;
-    }
     [System.Serializable]
     public struct EyeGenome {
         public Vector2 localPos;
@@ -57,7 +51,7 @@ public class CritterModuleAppearanceGenome {
     public void GenerateRandomGenome() {
         // Do stuff:
 
-        sizeAndAspectRatio = new Vector2(1f, 1f);
+        //sizeAndAspectRatio = new Vector2(1f, 1f);
 
         huePrimary = new Vector3(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f));
         hueSecondary = new Vector3(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f));
@@ -78,10 +72,8 @@ public class CritterModuleAppearanceGenome {
         
         // Set equal to parent at first, then check for possible mutation of that value:
         // SIZE IS: (x= size, y= aspectRatio)   aspect = x/y
-        sizeAndAspectRatio = UtilityMutationFunctions.GetMutatedVector2Additive(parentGenome.sizeAndAspectRatio, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, new Vector2(0.8f, 0.6f), new Vector2(2.4f, 1f));
-
-
-
+        //sizeAndAspectRatio = UtilityMutationFunctions.GetMutatedVector2Additive(parentGenome.sizeAndAspectRatio, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, new Vector2(0.8f, 0.6f), new Vector2(2.4f, 1f));
+        
         huePrimary = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.huePrimary, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
         hueSecondary = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.hueSecondary, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
         // ***** v v v Revisit when implementing #BrushTypes!! **** REVISIT!!

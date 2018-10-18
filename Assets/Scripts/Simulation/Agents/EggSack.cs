@@ -178,7 +178,7 @@ public class EggSack : MonoBehaviour {
         }
         
         this.index = index;        
-        this.fullSize = new Vector2(agentGenome.bodyGenome.coreGenome.fullBodyWidth, agentGenome.bodyGenome.coreGenome.fullBodyLength) * 1f;
+        this.fullSize = new Vector2(agentGenome.bodyGenome.fullsizeBoundingBox.x, agentGenome.bodyGenome.fullsizeBoundingBox.z) * 1f;
         //foodAmount = this.fullSize.x * this.fullSize.y;
        
         BeginLifeStageGrowing(parentAgent, agentGenome, startPos);
@@ -261,7 +261,7 @@ public class EggSack : MonoBehaviour {
             
             //index = eggSackIndex;
             // REVISIT THIS:
-            float parentScale = parentGenomeRef.bodyGenome.coreGenome.fullBodyWidth * 0.5f + parentGenomeRef.bodyGenome.coreGenome.fullBodyLength * 0.5f;
+            float parentScale = parentGenomeRef.bodyGenome.fullsizeBoundingBox.x * 0.5f + parentGenomeRef.bodyGenome.fullsizeBoundingBox.z * 0.5f;
             this.fullSize.x = parentScale * 1f;  // golden ratio? // easter egg for math nerds?
             this.fullSize.y = parentScale * 1f;            
             //foodAmount = this.fullSize.x * this.fullSize.y;
@@ -278,8 +278,8 @@ public class EggSack : MonoBehaviour {
         
             fixedJoint.connectedBody = parentAgentRef.bodyRigidbody;
             fixedJoint.autoConfigureConnectedAnchor = false;
-            fixedJoint.anchor = new Vector2(0f, this.parentAgentRef.coreModule.coreLength * 0.05f);
-            fixedJoint.connectedAnchor = new Vector2(0f, -this.parentAgentRef.coreModule.coreLength * 0.05f);            
+            fixedJoint.anchor = new Vector2(0f, this.parentAgentRef.fullSizeBoundingBox.z * 0.05f);
+            fixedJoint.connectedAnchor = new Vector2(0f, -this.parentAgentRef.fullSizeBoundingBox.z * 0.05f);            
             fixedJoint.enableCollision = false;
             fixedJoint.enabled = true;
             fixedJoint.frequency = springJointMaxStrength;
@@ -476,8 +476,8 @@ public class EggSack : MonoBehaviour {
 
             //Debug.Log("_" + fixedJoint.ToString());
             //Debug.Log("_" + parentAgentRef.ToString());
-            fixedJoint.anchor = Vector2.Lerp(new Vector2(0f, parentAgentRef.coreModule.coreLength * 0.05f), new Vector2(0f, parentAgentRef.coreModule.coreLength * 2f), birthPercentage);
-            fixedJoint.connectedAnchor = Vector2.Lerp(new Vector2(0f, -parentAgentRef.coreModule.coreLength * 0.05f), new Vector2(0f, -parentAgentRef.coreModule.coreLength * 2f), birthPercentage);
+            fixedJoint.anchor = Vector2.Lerp(new Vector2(0f, parentAgentRef.fullSizeBoundingBox.z * 0.05f), new Vector2(0f, parentAgentRef.fullSizeBoundingBox.z * 2f), birthPercentage);
+            fixedJoint.connectedAnchor = Vector2.Lerp(new Vector2(0f, -parentAgentRef.fullSizeBoundingBox.z * 0.05f), new Vector2(0f, -parentAgentRef.fullSizeBoundingBox.z * 2f), birthPercentage);
 
         }
     }    
