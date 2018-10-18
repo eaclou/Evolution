@@ -42,5 +42,7 @@ struct CritterSkinStrokeData {
 };
 struct CritterGenericStrokeData {
 	int parentIndex;  // which Critter is this attached to?	
-	int brushType;				
+	int brushType;
+	float3 bindPos;  // object-coordinates (z=forward, y=up)
+    float uniformScale;
 };

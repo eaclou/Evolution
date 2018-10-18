@@ -1,22 +1,27 @@
 ﻿#pragma kernel CSSimulateSkinCritterStrokes
+#pragma kernel CSUpdateCritterGenericStrokes
+#pragma kernel CSSimulateCritterGenericStrokes
 
 #include "Assets/Resources/Shaders/Inc/CritterBodyAnimation.cginc"
 #include "Assets/Resources/Shaders/Inc/NoiseShared.cginc"
 
 StructuredBuffer<CritterInitData> critterInitDataCBuffer;
 StructuredBuffer<CritterSimData> critterSimDataCBuffer;
-
 RWStructuredBuffer<CritterSkinStrokeData> critterSkinStrokesWriteCBuffer;
 
+StructuredBuffer<CritterGenericStrokeData> critterGenericStrokesUpdateCBuffer;
+RWStructuredBuffer<CritterGenericStrokeData> critterGenericStrokesWriteCBuffer;
+
 Texture2D<float4> terrainHeightTex;
-//RWStructuredBuffer<FrameBufferStrokeData> terrainFrameBufferStrokesCBuffer;
 
 Texture2D<float4> velocityRead;
 
+uniform float _MapSize;
+
+uniform int _UpdateBufferStartIndex;
+
 SamplerState _LinearClamp;
 SamplerState _LinearRepeat;
-
-uniform float _MapSize;
 
 float rand(float2 co){   // OUTPUT is in [0,1] RANGE!!!
 	return frac(sin(dot(co.xy ,float2(12.9898,78.233))) * 43758.5453);
@@ -63,25 +68,24 @@ void CSSimulateSkinCritterStrokes (uint3 id : SV_DispatchThreadID)
 	skinStrokeData.worldPos = worldPosition;
 	critterSkinStrokesWriteCBuffer[id.x] = skinStrokeData;
 
+}
 
-
-
-	//-------------------------------------------------------------------------------------------------------------------------------
-	//===================================:::::OLD:::::==================================================================================
-	//float3 curAgentSize;
-	//curAgentSize.xy = critterInitData.boundingBoxSize * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage);
-	//curAgentSize.z = curAgentSize.x;
-	//float3 centerPosition = brushData.localPos;
-
-	//centerPosition.xy = foodBloatAnimPos(centerPosition.xy, brushData.localPos.y, critterSimData.foodAmount);	
-	//centerPosition.xy = biteAnimPos(centerPosition.xy, brushData.localPos.y, critterSimData.biteAnimCycle);	
-	//centerPosition = centerPosition * curAgentSize * 0.5;
-
-	//float bodyAspectRatio = critterInitData.boundingBoxSize.y / critterInitData.boundingBoxSize.x;
-	//float bendStrength = 0.5; // * saturate(bodyAspectRatio * 0.5 - 0.4);
-	//centerPosition.xy = swimAnimPos(centerPosition.xy, brushData.localPos.y, critterSimData.moveAnimCycle, critterSimData.accel, critterSimData.smoothedThrottle, bendStrength, critterSimData.turnAmount);
+// Can optimize by parallellizing this more (32 - 256 linear)
+[numthreads(1,1,1)]
+void CSUpdateCritterGenericStrokes (uint3 id : SV_DispatchThreadID)
+{
+	int masterIndex = _UpdateBufferStartIndex + id.x;
 	
-	//centerPosition.xy = rotatePointVector(centerPosition.xy, float2(0,0), critterSimData.heading);	
+	CritterGenericStrokeData data;
+	data = critterGenericStrokesUpdateCBuffer[id.x];
+
+	critterGenericStrokesWriteCBuffer[masterIndex] = data;
+}
+
+[numthreads(16,1,1)]
+void CSSimulateCritterGenericStrokes (uint3 id : SV_DispatchThreadID)
+{
+		
 }
 
 /*   OLD:::::

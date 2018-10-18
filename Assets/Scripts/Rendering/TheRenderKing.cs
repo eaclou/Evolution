@@ -142,6 +142,9 @@ public class TheRenderKing : MonoBehaviour {
     private int numStrokesPerCritterSkin = 128;
     private ComputeBuffer critterSkinStrokesCBuffer;
 
+    private int numStrokesPerCritterGeneric = 256;
+    private ComputeBuffer critterGenericStrokesCBuffer;
+
     //private int numStrokesPerCritterShadow = 4;
     //private ComputeBuffer critterShadowStrokesCBuffer;
 
@@ -284,6 +287,12 @@ public class TheRenderKing : MonoBehaviour {
 		public float randomSeed;
 		public float followLerp;        
     }
+    public struct CritterGenericStrokeData {
+	    public int parentIndex;  // which Critter is this attached to?	
+	    public int brushType;
+        public Vector3 bindPos;  // object-coordinates (z=forward, y=up)
+        public float uniformScale;
+    }
     public struct CurveStrokeData {
         public int parentIndex;
         public Vector3 hue;
@@ -387,6 +396,7 @@ public class TheRenderKing : MonoBehaviour {
         colorInjectionStrokesCBuffer = new ComputeBuffer(simManager._NumAgents + simManager._NumEggSacks, sizeof(float) * 10);
         colorInjectionStrokeDataArray = new BasicStrokeData[colorInjectionStrokesCBuffer.count];
 
+        InitializeCritterStrokesBuffers();
         //InitializeAgentBodyStrokesBuffer();
         InitializeCritterSkinStrokesCBuffer();
         InitializeAgentEyeStrokesBuffer();
@@ -404,6 +414,33 @@ public class TheRenderKing : MonoBehaviour {
         InitializeTreeOfLifeBuffers();
         //InitializeDebugBuffers(); 
 
+    }
+
+    private void InitializeCritterStrokesBuffers() {
+        // Most of this will be populated piece-meal later as critters are generated:
+        int bufferLength = simManager._NumAgents * numStrokesPerCritterGeneric;
+        critterGenericStrokesCBuffer = new ComputeBuffer(bufferLength, GetMemorySizeCritterGenericData());
+
+
+        // DEBUG HACKY:::
+        /*
+        CritterGenericStrokeData[] singleCritterGenericStrokesArray = new CritterGenericStrokeData[critterGenericStrokesCBuffer.count];
+
+        for(int i = 0; i < singleCritterGenericStrokesArray.Length; i++) {
+            CritterGenericStrokeData newData = new CritterGenericStrokeData();
+            newData.parentIndex = i % simManager._NumAgents;
+            newData.brushType = 0;
+            newData.bindPos = UnityEngine.Random.insideUnitSphere;
+            newData.uniformScale = 1f;
+
+            singleCritterGenericStrokesArray[i] = newData;
+        }        
+        critterGenericStrokesCBuffer.SetData(singleCritterGenericStrokesArray);
+        */
+    }
+    private int GetMemorySizeCritterGenericData() {
+        int numBytes = sizeof(int) * 2 + sizeof(float) * 4;
+        return numBytes;
     }
     
     private void InitializeCurveRibbonMeshBuffer() {
@@ -503,7 +540,6 @@ public class TheRenderKing : MonoBehaviour {
 
         bodySwimAnimVerticesCBuffer.SetData(verticesArray);
     }
-
     private void InitializeUberBrushes() {
         uberFlowChainBrush1 = new UberFlowChainBrush();
         uberFlowChainBrush1.Initialize(computeShaderUberChains, uberFlowChainBrushMat1);
@@ -1611,6 +1647,75 @@ public class TheRenderKing : MonoBehaviour {
 
     }
 
+    public void UpdateCritterGenericStrokesData(int critterIndex, AgentGenome genome) {
+        ComputeBuffer singleCritterGenericStrokesCBuffer = new ComputeBuffer(numStrokesPerCritterGeneric, GetMemorySizeCritterGenericData());
+        CritterGenericStrokeData[] singleCritterGenericStrokesArray = new CritterGenericStrokeData[numStrokesPerCritterGeneric];  // optimize this later?? ***
+
+        // NEED:
+        //  AgentGenome
+        int lengthResolution = 16;
+        int crossResolution = 16;
+
+        float halfPolyArc = 1f / (float)crossResolution * 0.5f;
+
+        for(int y = 0; y < crossResolution; y++) {
+
+            float verticalLerpPos = (float)y / (float)crossResolution + halfPolyArc;
+            float leftRightMult = (float)(y % 2) * 2f - 1f;
+            float angleRad = verticalLerpPos * Mathf.PI;
+            Vector2 crossSectionCoords = new Vector2(Mathf.Sin(angleRad), Mathf.Cos(angleRad) * -1f);  // <-- have to flip vertical pos/neg
+                        
+            for(int z = 0; z < lengthResolution; z++) {
+                // do a line from head to tail at same altitude:
+                int brushIndex = y * lengthResolution + z;
+
+                float zLerp = Mathf.Clamp01(1f - (float)z / (float)(lengthResolution - 1));
+
+                // ALSO NEED ACTUAL Z-Pos, not just normalized
+
+                // Find radiusXY at this coord along spine:
+                //float radius = CritterGenomeInterpretor.GetBindPosFromNormalizedCoords(new Vector3(crossSectionCoords.x , crossSectionCoords.y, zLerp), genome);
+
+                Vector3 brushPos = CritterGenomeInterpretor.GetBindPosFromNormalizedCoords(new Vector3(crossSectionCoords.x, crossSectionCoords.y, zLerp), genome);
+                //               = new Vector3(crossSectionCoords.x * leftRightMult * 0.5f * radius, crossSectionCoords.y * 0.5f * radius, zLerp);
+
+
+                // Create Data:
+                CritterGenericStrokeData newData = new CritterGenericStrokeData();
+                newData.parentIndex = critterIndex;
+                newData.brushType = 0;
+                newData.bindPos = brushPos;
+                newData.uniformScale = 1f;
+
+                singleCritterGenericStrokesArray[brushIndex] = newData;
+            }
+        }
+
+        // Get data for this critter -- this function will eventually be called from outside RenderKing at time of new critter generation
+        // TEMP METHOD HACKY!:
+        /*for(int i = 0; i < numStrokesPerCritterGeneric; i++) {
+            CritterGenericStrokeData newData = new CritterGenericStrokeData();
+            newData.parentIndex = critterIndex;
+            newData.brushType = 0;
+
+            newData.bindPos = UnityEngine.Random.insideUnitSphere;
+
+            newData.uniformScale = 1f;
+
+            singleCritterGenericStrokesArray[i] = newData;
+        } */
+        
+        singleCritterGenericStrokesCBuffer.SetData(singleCritterGenericStrokesArray);
+
+        int kernelCSUpdateCritterGenericStrokes = computeShaderCritters.FindKernel("CSUpdateCritterGenericStrokes");        
+        computeShaderCritters.SetBuffer(kernelCSUpdateCritterGenericStrokes, "critterGenericStrokesWriteCBuffer", critterGenericStrokesCBuffer);
+        computeShaderCritters.SetBuffer(kernelCSUpdateCritterGenericStrokes, "critterGenericStrokesUpdateCBuffer", singleCritterGenericStrokesCBuffer);
+        computeShaderCritters.SetInt("_UpdateBufferStartIndex", critterIndex * numStrokesPerCritterGeneric);
+        computeShaderCritters.Dispatch(kernelCSUpdateCritterGenericStrokes, singleCritterGenericStrokesCBuffer.count, 1, 1);
+        
+        singleCritterGenericStrokesCBuffer.Release(); 
+    }
+
     /*private void SimAgentSmearStrokes() {
         int kernelCSSinglePassCurveBrushData = computeShaderBrushStrokes.FindKernel("CSSinglePassCurveBrushData");
         
@@ -2405,7 +2510,7 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, baronVonWater.waterNutrientsBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterNutrientsBitsCBuffer.count);
 
                 
-
+        /*
         // Critter Stomach Bits
         critterFoodDotsMat.SetPass(0);
         critterFoodDotsMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
@@ -2428,7 +2533,7 @@ public class TheRenderKing : MonoBehaviour {
         critterSkinStrokesDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
         cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, critterSkinStrokesDisplayMat, 0, MeshTopology.Triangles, 6, critterSkinStrokesCBuffer.count);
-
+        */
         
         // Critter Energy blops!
         /*critterEnergyDotsMat.SetPass(0);
@@ -2451,6 +2556,22 @@ public class TheRenderKing : MonoBehaviour {
         agentEyesDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
         agentEyesDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, agentEyesDisplayMat, 0, MeshTopology.Triangles, 6, agentEyeStrokesCBuffer.count);
+
+        // DEBUG BODY START:
+        // Test Debug Critter Body:
+        //critterDebugGenericStrokeMat
+        critterDebugGenericStrokeMat.SetPass(0);
+        critterDebugGenericStrokeMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        critterDebugGenericStrokeMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
+        critterDebugGenericStrokeMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
+        critterDebugGenericStrokeMat.SetBuffer("critterGenericStrokesCBuffer", critterGenericStrokesCBuffer);     
+        //critterDebugGenericStrokeMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+        //critterDebugGenericStrokeMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
+        //critterDebugGenericStrokeMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+        //critterDebugGenericStrokeMat.SetFloat("_MapSize", SimulationManager._MapSize);            
+        cmdBufferTest.DrawProcedural(Matrix4x4.identity, critterDebugGenericStrokeMat, 0, MeshTopology.Triangles, 6, critterGenericStrokesCBuffer.count);
+            
+
         
         float yOffset = Mathf.Sin(simManager.cameraManager.curTiltAngleDegrees * Mathf.Deg2Rad) * simManager.cameraManager.curCameraPos.z;
         Vector4 camFocusPos = new Vector4(simManager.cameraManager.curCameraPos.x, simManager.cameraManager.curCameraPos.y + yOffset, 0f, 0f);
@@ -2610,7 +2731,7 @@ public class TheRenderKing : MonoBehaviour {
             treeOfLifeBackdropPortraitBorderMat.SetFloat("_AnimatedScale1", 1f);
             treeOfLifeBackdropPortraitBorderMat.SetFloat("_AnimatedScale2", 1f);
             cmdBufferTest.DrawProcedural(Matrix4x4.identity, treeOfLifeBackdropPortraitBorderMat, 0, MeshTopology.Triangles, 6, treeOfLifePortraitBorderDataCBuffer.count);
-            
+                        
             // Critter Portrait!
             treeOfLifePortraitMat.SetPass(0);
             treeOfLifePortraitMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -3080,7 +3201,9 @@ public class TheRenderKing : MonoBehaviour {
         if(critterSkinStrokesCBuffer != null) {
             critterSkinStrokesCBuffer.Release();
         }
-        
+        if(critterGenericStrokesCBuffer != null) {
+            critterGenericStrokesCBuffer.Release();
+        }
         if(critterEnergyDotsCBuffer != null) {
             critterEnergyDotsCBuffer.Release();
         }
