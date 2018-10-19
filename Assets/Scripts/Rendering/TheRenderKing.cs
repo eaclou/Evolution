@@ -1661,22 +1661,17 @@ public class TheRenderKing : MonoBehaviour {
         for(int y = 0; y < crossResolution; y++) {
 
             float verticalLerpPos = (float)y / (float)crossResolution + halfPolyArc;
-            float leftRightMult = (float)(y % 2) * 2f - 1f;
+            float leftRightMult = (float)(y % 2) * 2f - 1f;  // -1 or +1
             float angleRad = verticalLerpPos * Mathf.PI;
-            Vector2 crossSectionCoords = new Vector2(Mathf.Sin(angleRad), Mathf.Cos(angleRad) * -1f);  // <-- have to flip vertical pos/neg
+            Vector2 crossSectionNormalizedCoords = new Vector2(Mathf.Sin(angleRad), Mathf.Cos(angleRad) * -1f);  // <-- have to flip vertical pos/neg since pos=depth, not altitude
                         
             for(int z = 0; z < lengthResolution; z++) {
                 // do a line from head to tail at same altitude:
                 int brushIndex = y * lengthResolution + z;
 
                 float zLerp = Mathf.Clamp01(1f - (float)z / (float)(lengthResolution - 1));
-
-                // ALSO NEED ACTUAL Z-Pos, not just normalized
-
-                // Find radiusXY at this coord along spine:
-                //float radius = CritterGenomeInterpretor.GetBindPosFromNormalizedCoords(new Vector3(crossSectionCoords.x , crossSectionCoords.y, zLerp), genome);
-
-                Vector3 brushPos = CritterGenomeInterpretor.GetBindPosFromNormalizedCoords(new Vector3(crossSectionCoords.x, crossSectionCoords.y, zLerp), genome);
+                
+                Vector3 brushPos = CritterGenomeInterpretor.GetBindPosFromNormalizedCoords(new Vector3(crossSectionNormalizedCoords.x * leftRightMult, crossSectionNormalizedCoords.y, zLerp), genome);
                 //               = new Vector3(crossSectionCoords.x * leftRightMult * 0.5f * radius, crossSectionCoords.y * 0.5f * radius, zLerp);
 
 

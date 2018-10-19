@@ -48,14 +48,20 @@
 				float3 critterWorldPos = critterSimData.worldPos;
 
 				// WEIRD COORDINATES!!! Positive Z = DEEPER!!!
-				float3 strokeBindPos = float3(genericStrokeData.bindPos.x, genericStrokeData.bindPos.z, -genericStrokeData.bindPos.y);
+				float3 strokeBindPos = float3(genericStrokeData.bindPos.x, genericStrokeData.bindPos.z, -genericStrokeData.bindPos.y) * 0.8;
 
-				float3 vertexWorldPos = critterWorldPos + strokeBindPos * 1 + quadVerticesCBuffer[id] * 0.1;
+				//Temp align with creatures:
+				float2 critterForwardDir = critterSimData.heading;
+				float2 critterRightDir = float2(critterForwardDir.y, -critterForwardDir.x);
+
+				strokeBindPos.xy = critterRightDir * strokeBindPos.x + critterForwardDir * strokeBindPos.y;
+
+				float3 vertexWorldPos = critterWorldPos + strokeBindPos + quadVerticesCBuffer[id] * 0.2;
 
 				o.vertex = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(vertexWorldPos, 1.0)));
 				o.uv = quadVerticesCBuffer[id].xy;
 				o.color = float4(genericStrokeData.bindPos.z, genericStrokeData.bindPos.z, genericStrokeData.bindPos.z, 1);
-
+				o.color.rgb *= 0.4;
 				return o;
 			}
 			

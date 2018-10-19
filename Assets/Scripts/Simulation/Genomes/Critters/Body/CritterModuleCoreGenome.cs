@@ -129,39 +129,39 @@ public class CritterModuleCoreGenome {
 
         // Or start with deformed sphere???? *****
         // Mouth/Snout:
-        mouthLength = 0.1f;
-        mouthFrontWidth = 0.1f;  // width of snout at front of critter
+        mouthLength = 0.25f;
+        mouthFrontWidth = 0.3f;  // width of snout at front of critter
         mouthFrontHeight = 0.1f; // height of snout at front of critter
         mouthFrontVerticalOffset = 0f; // shift up/down pivot/cylinder center
         mouthBackWidth = 0.5f; 
-        mouthBackHeight = 0.5f;
+        mouthBackHeight = 0.1f;
         mouthBackVerticalOffset = 0f;
         mouthToHeadTransitionSize = 0.5f;  // 0-1 normalized
         // Head
-        headLength = 0.2f;
+        headLength = 0.5f;
         headFrontWidth = 0.5f;
-        headFrontHeight = 0.5f;
+        headFrontHeight = 0.25f;
         headFrontVerticalOffset = 0f;
         headBackWidth = 0.6f; 
         headBackHeight = 0.6f;
         headBackVerticalOffset = 0f;
         headToBodyTransitionSize = 0.5f;  // 0-1 normalized
         // Body:
-        bodyLength = 0.5f;
+        bodyLength = 1.45f;
         bodyFrontWidth = 0.8f;  // width of snout at front of critter
         bodyFrontHeight = 0.8f; // height of snout at front of critter
         bodyFrontVerticalOffset = 0f; // shift up/down pivot/cylinder center
-        bodyBackWidth = 0.5f; 
-        bodyBackHeight = 0.5f;
+        bodyBackWidth = 0.75f; 
+        bodyBackHeight = 0.75f;
         bodyBackVerticalOffset = 0f;
         bodyToTailTransitionSize = 0.5f;  // 0-1 normalized
         //Tail:
-        tailLength = 0.2f;
+        tailLength = 1.1f;
         tailFrontWidth = 0.3f;  // width of snout at front of critter
         tailFrontHeight = 0.3f; // height of snout at front of critter
         tailFrontVerticalOffset = 0f; // shift up/down pivot/cylinder center
-        tailBackWidth = 0.1f; 
-        tailBackHeight = 0.1f;
+        tailBackWidth = 0.05f; 
+        tailBackHeight = 0.65f;
         tailBackVerticalOffset = 0f;
 
         //numSegments = 1;
