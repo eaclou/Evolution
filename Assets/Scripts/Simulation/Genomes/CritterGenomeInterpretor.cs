@@ -19,7 +19,7 @@ public class CritterGenomeInterpretor {
 
         Vector2 CSScale = GetCrossSectionScale(coords.z, genome);
 
-        Vector3 bindPos = new Vector3(coords.x * CSScale.x, coords.y * CSScale.y, coords.z * fullsizeCritterLength); //coords;
+        Vector3 bindPos = new Vector3(coords.x * CSScale.x, coords.y * CSScale.y, coords.z * fullsizeCritterLength - fullsizeCritterLength * 0.5f); //coords;
 
         return bindPos;
     }

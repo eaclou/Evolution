@@ -60,8 +60,8 @@
 
 				o.vertex = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(vertexWorldPos, 1.0)));
 				o.uv = quadVerticesCBuffer[id].xy;
-				o.color = float4(genericStrokeData.bindPos.z, genericStrokeData.bindPos.z, genericStrokeData.bindPos.z, 1);
-				o.color.rgb *= 0.4;
+				o.color = float4(genericStrokeData.bindPos.x * 0.5 + 0.5, genericStrokeData.bindPos.z * 0.33 + 0.5, genericStrokeData.bindPos.y * 0.5 + 0.5, 1);
+				//o.color.rgb *= 0.4;
 				return o;
 			}
 			
