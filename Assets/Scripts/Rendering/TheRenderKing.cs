@@ -142,7 +142,7 @@ public class TheRenderKing : MonoBehaviour {
     private int numStrokesPerCritterSkin = 128;
     private ComputeBuffer critterSkinStrokesCBuffer;
 
-    private int numStrokesPerCritterGeneric = 256;
+    private int numStrokesPerCritterGeneric = 1024;
     private ComputeBuffer critterGenericStrokesCBuffer;
 
     //private int numStrokesPerCritterShadow = 4;
@@ -1653,8 +1653,8 @@ public class TheRenderKing : MonoBehaviour {
 
         // NEED:
         //  AgentGenome
-        int lengthResolution = 16;
-        int crossResolution = 16;
+        int lengthResolution = 32;
+        int crossResolution = 32;
 
         float halfPolyArc = 1f / (float)crossResolution * 0.5f;
 
@@ -1670,8 +1670,13 @@ public class TheRenderKing : MonoBehaviour {
                 int brushIndex = y * lengthResolution + z;
 
                 float zLerp = Mathf.Clamp01(1f - (float)z / (float)(lengthResolution - 1));
-                
-                Vector3 brushPos = CritterGenomeInterpretor.GetBindPosFromNormalizedCoords(new Vector3(crossSectionNormalizedCoords.x * leftRightMult, crossSectionNormalizedCoords.y, zLerp), genome);
+
+                CritterGenomeInterpretor.BrushPoint newBrushPoint = new CritterGenomeInterpretor.BrushPoint();
+                newBrushPoint.initCoordsNormalized = new Vector3(crossSectionNormalizedCoords.x * leftRightMult, crossSectionNormalizedCoords.y, zLerp);
+                newBrushPoint.uv = new Vector2(verticalLerpPos, zLerp);  // not correct
+
+                newBrushPoint = CritterGenomeInterpretor.ProcessBrushPoint(newBrushPoint, genome);
+                //Vector3 brushPos = CritterGenomeInterpretor.GetBindPosFromNormalizedCoords(new Vector3(crossSectionNormalizedCoords.x * leftRightMult, crossSectionNormalizedCoords.y, zLerp), genome);
                 //               = new Vector3(crossSectionCoords.x * leftRightMult * 0.5f * radius, crossSectionCoords.y * 0.5f * radius, zLerp);
 
 
@@ -1679,7 +1684,7 @@ public class TheRenderKing : MonoBehaviour {
                 CritterGenericStrokeData newData = new CritterGenericStrokeData();
                 newData.parentIndex = critterIndex;
                 newData.brushType = 0;
-                newData.bindPos = brushPos;
+                newData.bindPos = newBrushPoint.curCoords;
                 newData.uniformScale = 1f;
 
                 singleCritterGenericStrokesArray[brushIndex] = newData;

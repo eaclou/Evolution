@@ -56,7 +56,7 @@
 
 				strokeBindPos.xy = critterRightDir * strokeBindPos.x + critterForwardDir * strokeBindPos.y;
 
-				float3 vertexWorldPos = critterWorldPos + strokeBindPos + quadVerticesCBuffer[id] * 0.2;
+				float3 vertexWorldPos = critterWorldPos + strokeBindPos + quadVerticesCBuffer[id] * 0.125;
 
 				o.vertex = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(vertexWorldPos, 1.0)));
 				o.uv = quadVerticesCBuffer[id].xy;

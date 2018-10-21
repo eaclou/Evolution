@@ -4,6 +4,14 @@ using UnityEngine;
 
 public class CritterGenomeInterpretor {
 
+    public struct BrushPoint {
+        public Vector3 initCoordsNormalized;
+        public Vector2 uv;
+        public Vector3 curCoords;
+        public Vector3 normal;
+        public Vector3 tangent;
+    }
+
 
     public CritterGenomeInterpretor() {
         // empty constructor
@@ -11,20 +19,33 @@ public class CritterGenomeInterpretor {
 
     // static helper methods :::: ?
 
+    public static BrushPoint ProcessBrushPoint(BrushPoint inPoint, AgentGenome genome) {
+
+        float fullsizeCritterLength = GetCritterFullsizeLength(genome);
+        Vector2 CSScale = GetInitCrossSectionScale(inPoint.initCoordsNormalized.z, genome);
+        Vector3 bindPos = new Vector3(inPoint.initCoordsNormalized.x * CSScale.x, inPoint.initCoordsNormalized.y * CSScale.y, inPoint.initCoordsNormalized.z * fullsizeCritterLength - fullsizeCritterLength * 0.5f); //coords;
+        inPoint.curCoords = bindPos;
+        return inPoint;
+    }
+
     public static Vector3 GetBindPosFromNormalizedCoords(Vector3 coords, AgentGenome genome) {
         //float tempDist = 1f - Mathf.Clamp01(Mathf.Abs(0.5f - coords.z) * 2f);
         //return tempDist;
         float fullsizeCritterLength = GetCritterFullsizeLength(genome);
         //float radius = 1f - Mathf.Clamp01(Mathf.Abs(0.5f - coords.z) * 2f);
 
-        Vector2 CSScale = GetCrossSectionScale(coords.z, genome);
+        Vector2 CSScale = GetInitCrossSectionScale(coords.z, genome);
+
+        // *** Instead of passing Vector3, create a class that holds extra data:
+        // UV, Normal, Tangent, BiTangent, etc.
+        // *** and pass that through the various modifier functions
 
         Vector3 bindPos = new Vector3(coords.x * CSScale.x, coords.y * CSScale.y, coords.z * fullsizeCritterLength - fullsizeCritterLength * 0.5f); //coords;
 
         return bindPos;
     }
     // GetWidthAtSpineLoc:  
-    private static Vector2 GetCrossSectionScale(float zCoordNormalized, AgentGenome genome) {
+    private static Vector2 GetInitCrossSectionScale(float zCoordNormalized, AgentGenome genome) {
 
         float fullsizeCritterLength = GetCritterFullsizeLength(genome);
         float bindPoseZ = zCoordNormalized * fullsizeCritterLength;
@@ -106,6 +127,22 @@ public class CritterGenomeInterpretor {
 
         Vector2 crossSectionScale = new Vector2(width, height);
 
+        // Now Body Modifiers are processed:
+        //for(int i = 0; i < numModifiers; i++) {
+        //
+        //}
+        
+        // SIN:
+        float modifierCenter = 0.5f;
+        float modifierFalloff = 1f;
+        float modifierFrequency = 25f;
+        float modifierAmplitude = 0.25f;
+        float modifierPhase = 0f;
+        float distToModCenter = zCoordNormalized - modifierCenter;
+        float modStrength = Mathf.Clamp01(1f - modifierFalloff);
+        float radiusMult = Mathf.Sin((distToModCenter + modifierPhase) * modifierFrequency) * modifierAmplitude + 1f;
+        crossSectionScale *= radiusMult;
+        
         return crossSectionScale;
     }
     private float GetCrossSectionRadiusAtCoords(float zCoordNormalized) {
