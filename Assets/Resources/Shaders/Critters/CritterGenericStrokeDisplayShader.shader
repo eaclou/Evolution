@@ -53,6 +53,8 @@
 				//Temp align with creatures:
 				float2 critterForwardDir = critterSimData.heading;
 				float2 critterRightDir = float2(critterForwardDir.y, -critterForwardDir.x);
+								
+				
 
 				strokeBindPos.xy = critterRightDir * strokeBindPos.x + critterForwardDir * strokeBindPos.y;
 
@@ -60,7 +62,9 @@
 
 				o.vertex = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(vertexWorldPos, 1.0)));
 				o.uv = quadVerticesCBuffer[id].xy;
-				o.color = float4(genericStrokeData.bindPos.x * 0.5 + 0.5, genericStrokeData.bindPos.z * 0.33 + 0.5, genericStrokeData.bindPos.y * 0.5 + 0.5, 1);
+
+				float crudeDiffuse = dot(normalize(strokeBindPos), normalize(float3(-0.42, 0.25, -1))) * 0.75 + 0.25;
+				o.color = float4(crudeDiffuse, crudeDiffuse, crudeDiffuse, 1); //genericStrokeData.bindPos.x * 0.5 + 0.5, genericStrokeData.bindPos.z * 0.33 + 0.5, genericStrokeData.bindPos.y * 0.5 + 0.5, 1);
 				//o.color.rgb *= 0.4;
 				return o;
 			}

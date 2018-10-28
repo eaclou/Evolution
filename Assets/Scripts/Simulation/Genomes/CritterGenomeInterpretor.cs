@@ -12,6 +12,36 @@ public class CritterGenomeInterpretor {
         public Vector3 tangent;
     }
 
+    
+
+    // MASK TYPES:
+    public struct MaskDataLinearFalloff {
+        public float slope;
+    }
+    public struct MaskDataInvDistFalloff {
+
+    }
+    public struct MaskDataUniformDir {
+
+    }    
+    public struct MaskDataSin {
+        public float modifierCenter;
+        public float modifierFalloff;
+        public float modifierFrequency;
+        public float modifierAmplitude;
+        public float modifierPhase;
+    }
+    public struct FalloffMaskDataGeneric {
+        public float modifierCenter;
+        public float modifierFalloffRate;
+        public float modifierFrequency;
+        public float modifierAmplitude;
+        public float modifierPhase;
+    }
+    public struct MaskDataLengthwiseEdges {
+
+    }
+
 
     public CritterGenomeInterpretor() {
         // empty constructor
@@ -128,20 +158,38 @@ public class CritterGenomeInterpretor {
         Vector2 crossSectionScale = new Vector2(width, height);
 
         // Now Body Modifiers are processed:
-        //for(int i = 0; i < numModifiers; i++) {
-        //
-        //}
-        
-        // SIN:
-        float modifierCenter = 0.5f;
-        float modifierFalloff = 1f;
-        float modifierFrequency = 25f;
-        float modifierAmplitude = 0.25f;
-        float modifierPhase = 0f;
-        float distToModCenter = zCoordNormalized - modifierCenter;
-        float modStrength = Mathf.Clamp01(1f - modifierFalloff);
-        float radiusMult = Mathf.Sin((distToModCenter + modifierPhase) * modifierFrequency) * modifierAmplitude + 1f;
-        crossSectionScale *= radiusMult;
+        for(int i = 0; i < genome.bodyGenome.coreGenome.shapeModifiersList.Count; i++) {
+            if(genome.bodyGenome.coreGenome.shapeModifiersList[i].modifierTypeID == 0) {  // extrude
+                if(genome.bodyGenome.coreGenome.shapeModifiersList[i].modifierCoordinateTypeID == 0) {  // lengthwise
+
+                    // Get coordData:
+                    CritterModuleCoreGenome.ModifierCoordinateData coordData = genome.bodyGenome.coreGenome.modifierCoordinateDataList[genome.bodyGenome.coreGenome.shapeModifiersList[i].modifierCoordinateDataIndex];
+
+                    if(genome.bodyGenome.coreGenome.shapeModifiersList[i].maskFalloffTypeID == 0) {  // linear falloff curve
+                        FalloffMaskDataGeneric falloffCurveData = genome.bodyGenome.coreGenome.maskDataListGeneric[genome.bodyGenome.coreGenome.shapeModifiersList[i].maskDataIndex];
+
+                        float distToModCenter = zCoordNormalized - falloffCurveData.modifierCenter;
+                        float modStrength = Mathf.Clamp01(1f - distToModCenter * falloffCurveData.modifierFalloffRate);
+                        float radiusMult = modStrength * falloffCurveData.modifierAmplitude + 1f;
+                        crossSectionScale *= radiusMult;
+                    }
+
+                    if(genome.bodyGenome.coreGenome.shapeModifiersList[i].maskFalloffTypeID == 2) {  // Sin() falloff curve
+                        FalloffMaskDataGeneric falloffCurveData = genome.bodyGenome.coreGenome.maskDataListGeneric[genome.bodyGenome.coreGenome.shapeModifiersList[i].maskDataIndex];
+                        float distToModCenter = zCoordNormalized - falloffCurveData.modifierCenter;
+                        float modStrength = Mathf.Clamp01(1f - falloffCurveData.modifierFalloffRate);
+                        float radiusMult = Mathf.Sin((distToModCenter + falloffCurveData.modifierPhase) * falloffCurveData.modifierFrequency) * falloffCurveData.modifierAmplitude + 1f;
+                        crossSectionScale *= radiusMult;
+                    }
+                }
+            }
+        }
+
+        // SIN:        
+        //float distToModCenter = zCoordNormalized - genome.bodyGenome.coreGenome.maskDataSinTemp.modifierCenter;
+        //float modStrength = Mathf.Clamp01(1f - genome.bodyGenome.coreGenome.maskDataSinTemp.modifierFalloff);
+        //float radiusMult = Mathf.Sin((distToModCenter + genome.bodyGenome.coreGenome.maskDataSinTemp.modifierPhase) * genome.bodyGenome.coreGenome.maskDataSinTemp.modifierFrequency) * genome.bodyGenome.coreGenome.maskDataSinTemp.modifierAmplitude + 1f;
+        //crossSectionScale *= radiusMult;
         
         return crossSectionScale;
     }

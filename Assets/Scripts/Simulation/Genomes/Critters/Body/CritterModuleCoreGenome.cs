@@ -54,51 +54,52 @@ public class CritterModuleCoreGenome {
     // Eyes???
 
     // List of Shape/Form modifiers here???:::
+    //public CritterGenomeInterpretor.MaskDataSin maskDataSinTemp;
+
     [System.Serializable]
     public enum ShapeModifierType {
-        RadialExtrude,  // shift vertex along major normal
-        NoisyExtrude,  // same but with
-        UniformOffset,
-        Polygonify
+        Extrude,  // shift vertex along major normal
+        UniformScale
+    }
+    [System.Serializable]
+    public enum ModifierCoordinateType {
+        Lengthwise,
+        Radial,  // uv distance
+        SingleAxis,  // arbitrary direction of coordinate flow
+        Polygonize  // facet body circumference        
+    }
+    [System.Serializable]
+    public enum FalloffCurveType {
+        Linear,
+        InvDist,
+        Sin      
     }
 
     [System.Serializable]
-    public struct ShapeModifierData {
-        public int modifierTypeID;
-        public float epicenter01;
-        public float falloffDistMask;
-        public Vector4 segmentsMask;  // how much to affect each of the 4 major sections
-        public Vector2 axesMask;   // scale in XZ -- 
-        public Vector2 direction;  // only affects vertices in this direction (XZ)   
-        public float directionMask;
-        public float frequency;  // generic stats used for periodic functions:
-        public float amplitude;
-        public float phaseOffset;
-        public int numSides;
+    public struct ModifierCoordinateData {
+        public float cycleDistance;
+        public int numPolyEdges;
+        public Vector2 axisDir;
+        public bool repeat;
+    }
+    [System.Serializable]
+    public struct ShapeModifierData {  // each modifer gets interpreted by script, picks from correct maskData list
+        public int modifierTypeID;  // extrude; axis-aligned scale; twist/pinch/etc?
+        public int modifierCoordinateTypeID;  // lengthwise, radial, world, polyEdges lateral
+        public int modifierCoordinateDataIndex;  // numSides, spiral, coordAxisDir, cycle length
+        public int maskFalloffTypeID;  // method of falloff
+        public int maskDataIndex;  // falloff magnitude, loop, 
     }
 
-    public List<ShapeModifierData> shapeModifiersList;  // holds list of all modifiers to overall critter shape/structure
+    public List<ShapeModifierData> shapeModifiersList;  // holds list of all modifiers to overall critter shape/structure, in order of application
+    public List<ModifierCoordinateData> modifierCoordinateDataList;
+    // FalloffCurveMasksData:
+    public List<CritterGenomeInterpretor.FalloffMaskDataGeneric> maskDataListGeneric;
+    //public List<CritterGenomeInterpretor.MaskDataLinearFalloff> maskListLinearFalloff;
+    //public List<CritterGenomeInterpretor.MaskDataSin> maskListSin;
+    
 
-
-        // OLD:::::
-        /*
-    public float fullBodyWidth;
-    public float fullBodyLength;
-    public float relWidthSnout = 1f;  // Relative to Head Width!
-    public float relWidthHead = 1f;
-    public float relWidthTorso = 1f;
-    public float relWidthTail = 1f;  // Relative to Body Width!!
-    public float relLengthSnout = 1f;
-    public float relLengthHead = 1f;
-    public float relLengthTorso = 1f;
-    public float relLengthTail = 1f;
-    public float snoutTaper = 0f;
-    public float tailTaper = 0f;
-    */
-    // Critter local coordinates!!! Z-forward, Y-Forward????? *************
-
-    //public int numSegments; // Number of GameObject / Rigidbodies
-
+    
     public bool isPassive;
     public Vector2 mouthSize;  // relative to head size?
     public Vector2 biteZoneDimensions;
@@ -126,43 +127,74 @@ public class CritterModuleCoreGenome {
 
         shapeModifiersList = new List<ShapeModifierData>();  // empty
 
+        modifierCoordinateDataList = new List<ModifierCoordinateData>();
+        maskDataListGeneric = new List<CritterGenomeInterpretor.FalloffMaskDataGeneric>();
+        //maskListSin = new List<CritterGenomeInterpretor.MaskDataSin>();
+        //maskListLinearFalloff = new List<CritterGenomeInterpretor.MaskDataLinearFalloff>();
+
+        // TEMP HARDCODED:
+        ShapeModifierData initModifier = new ShapeModifierData();
+        initModifier.modifierTypeID = 0;
+        initModifier.modifierCoordinateTypeID = 0;
+
+        ModifierCoordinateData coordData = new ModifierCoordinateData();
+        coordData.cycleDistance = 0.25f;
+        coordData.numPolyEdges = 1;
+        coordData.axisDir = new Vector2(0f, 1f);
+        coordData.repeat = true;
+
+        modifierCoordinateDataList.Add(coordData);
+        initModifier.modifierCoordinateDataIndex = modifierCoordinateDataList.Count - 1;
+
+        initModifier.maskFalloffTypeID = 2; // Sin //// // Linear
+        CritterGenomeInterpretor.FalloffMaskDataGeneric falloffData = new CritterGenomeInterpretor.FalloffMaskDataGeneric();
+        falloffData.modifierCenter = 0.5f;
+        falloffData.modifierFalloffRate = 1f;
+        falloffData.modifierAmplitude = 0.25f;
+        falloffData.modifierFrequency = 10f;
+
+        maskDataListGeneric.Add(falloffData);
+        initModifier.maskDataIndex = maskDataListGeneric.Count - 1;
+
+        shapeModifiersList.Add(initModifier);
 
         // Or start with deformed sphere???? *****
         // Mouth/Snout:
         mouthLength = 0.25f;
-        mouthFrontWidth = 0.3f;  // width of snout at front of critter
-        mouthFrontHeight = 0.1f; // height of snout at front of critter
+        mouthFrontWidth = 0.25f;  // width of snout at front of critter
+        mouthFrontHeight = 0.25f; // height of snout at front of critter
         mouthFrontVerticalOffset = 0f; // shift up/down pivot/cylinder center
-        mouthBackWidth = 0.5f; 
-        mouthBackHeight = 0.1f;
+        mouthBackWidth = 0.25f; 
+        mouthBackHeight = 0.25f;
         mouthBackVerticalOffset = 0f;
         mouthToHeadTransitionSize = 0.5f;  // 0-1 normalized
         // Head
-        headLength = 0.5f;
-        headFrontWidth = 0.5f;
+        headLength = 0.25f;
+        headFrontWidth = 0.25f;
         headFrontHeight = 0.25f;
         headFrontVerticalOffset = 0f;
-        headBackWidth = 0.6f; 
-        headBackHeight = 0.6f;
+        headBackWidth = 0.25f; 
+        headBackHeight = 0.25f;
         headBackVerticalOffset = 0f;
         headToBodyTransitionSize = 0.5f;  // 0-1 normalized
         // Body:
-        bodyLength = 1.45f;
-        bodyFrontWidth = 0.8f;  // width of snout at front of critter
-        bodyFrontHeight = 0.8f; // height of snout at front of critter
+        bodyLength = 0.25f;
+        bodyFrontWidth = 0.25f;  // width of snout at front of critter
+        bodyFrontHeight = 0.25f; // height of snout at front of critter
         bodyFrontVerticalOffset = 0f; // shift up/down pivot/cylinder center
-        bodyBackWidth = 0.75f; 
-        bodyBackHeight = 0.75f;
+        bodyBackWidth = 0.25f; 
+        bodyBackHeight = 0.25f;
         bodyBackVerticalOffset = 0f;
         bodyToTailTransitionSize = 0.5f;  // 0-1 normalized
         //Tail:
-        tailLength = 1.16f;
-        tailFrontWidth = 0.3f;  // width of snout at front of critter
-        tailFrontHeight = 0.2f; // height of snout at front of critter
+        tailLength = 0.25f;
+        tailFrontWidth = 0.25f;  // width of snout at front of critter
+        tailFrontHeight = 0.25f; // height of snout at front of critter
         tailFrontVerticalOffset = 0f; // shift up/down pivot/cylinder center
-        tailBackWidth = 0.05f; 
-        tailBackHeight = 0.65f;
+        tailBackWidth = 0.25f; 
+        tailBackHeight = 0.25f;
         tailBackVerticalOffset = 0f;
+
 
         //numSegments = 1;
         /*
@@ -317,6 +349,12 @@ public class CritterModuleCoreGenome {
     public void SetToMutatedCopyOfParentGenome(CritterModuleCoreGenome parentGenome, MutationSettings settings) {
 
         isPassive = UtilityMutationFunctions.GetMutatedBool(parentGenome.isPassive, 0.033f, settings.defaultBodyMutationStepSize);
+
+        //maskDataSinTemp.modifierCenter = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.maskDataSinTemp.modifierCenter, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
+        //maskDataSinTemp.modifierFalloff = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.maskDataSinTemp.modifierFalloff, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 2f);
+        //maskDataSinTemp.modifierFrequency = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.maskDataSinTemp.modifierFrequency, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.25f, 36f);
+        //maskDataSinTemp.modifierAmplitude = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.maskDataSinTemp.modifierAmplitude, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 0.5f);
+        //maskDataSinTemp.modifierPhase = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.maskDataSinTemp.modifierPhase, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, -5f, 5f);
         
         // Copy modifiers list? do I need to create copies of each entry? or staright copy should work since they are structs (value-typed)
         shapeModifiersList = new List<ShapeModifierData>();  // empty
@@ -325,10 +363,35 @@ public class CritterModuleCoreGenome {
             newData = parentGenome.shapeModifiersList[i];  // only works if this is NOT a reference type!!! ***
             shapeModifiersList.Add(newData);
         }
+        // Mutate Add New Modifiers Here:?
+
+        // Do same for rest of Lists:
+        modifierCoordinateDataList = new List<ModifierCoordinateData>();
+        for(int i = 0; i < parentGenome.modifierCoordinateDataList.Count; i++) {
+            ModifierCoordinateData newData = new ModifierCoordinateData();
+            newData = parentGenome.modifierCoordinateDataList[i];  // only works if this is NOT a reference type!!! ***
+            // Mutate Values Here:
+            modifierCoordinateDataList.Add(newData);
+        }
+        maskDataListGeneric = new List<CritterGenomeInterpretor.FalloffMaskDataGeneric>();
+        for(int i = 0; i < parentGenome.maskDataListGeneric.Count; i++) {
+            CritterGenomeInterpretor.FalloffMaskDataGeneric newData = new CritterGenomeInterpretor.FalloffMaskDataGeneric();
+            newData = parentGenome.maskDataListGeneric[i];  // only works if this is NOT a reference type!!! ***
+            newData.modifierCenter = UtilityMutationFunctions.GetMutatedFloatAdditive(newData.modifierCenter, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
+            newData.modifierFalloffRate = UtilityMutationFunctions.GetMutatedFloatAdditive(newData.modifierFalloffRate, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.25f, 2f);
+            newData.modifierFrequency = UtilityMutationFunctions.GetMutatedFloatAdditive(newData.modifierFrequency, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.25f, 36f);
+            newData.modifierAmplitude = UtilityMutationFunctions.GetMutatedFloatAdditive(newData.modifierAmplitude, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 0.5f);
+            newData.modifierPhase = UtilityMutationFunctions.GetMutatedFloatAdditive(newData.modifierPhase, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, -5f, 5f);
+        
+            // Mutate Values Here:
+            maskDataListGeneric.Add(newData);
+        }
+
+
 
         // Or start with deformed sphere???? *****
         // Mouth/Snout:
-        mouthLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.mouthLength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.01f, 2f);
+        mouthLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.mouthLength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.01f, 4f);
         mouthFrontWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.mouthFrontWidth, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.01f, 1.5f);;  // width of snout at front of critter
         mouthFrontHeight = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.mouthFrontHeight, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.01f, 1.5f);
         mouthFrontVerticalOffset = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.mouthFrontVerticalOffset, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, -1f, 1f);
@@ -337,7 +400,7 @@ public class CritterModuleCoreGenome {
         mouthBackVerticalOffset = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.mouthBackVerticalOffset, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, -1f, 1f);
         mouthToHeadTransitionSize = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.mouthToHeadTransitionSize, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.1f, 1f);
         // Head
-        headLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.headLength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.01f, 1.5f);
+        headLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.headLength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.01f, 4f);
         headFrontWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.headFrontWidth, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.01f, 1.5f);
         headFrontHeight = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.headFrontHeight, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.01f, 1.5f);
         headFrontVerticalOffset = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.headFrontVerticalOffset, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, -1f, 1f);
@@ -346,7 +409,7 @@ public class CritterModuleCoreGenome {
         headBackVerticalOffset = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.headBackVerticalOffset, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, -1f, 1f);
         headToBodyTransitionSize = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.headToBodyTransitionSize, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.1f, 1f);
         // Body:
-        bodyLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.bodyLength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.01f, 2.5f);
+        bodyLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.bodyLength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.01f, 4f);
         bodyFrontWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.bodyFrontWidth, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.01f, 1.5f);
         bodyFrontHeight = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.bodyFrontHeight, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.01f, 1.5f);
         bodyFrontVerticalOffset = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.bodyFrontVerticalOffset, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, -1f, 1f);
@@ -355,7 +418,7 @@ public class CritterModuleCoreGenome {
         bodyBackVerticalOffset = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.bodyBackVerticalOffset, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, -1f, 1f);
         bodyToTailTransitionSize = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.bodyToTailTransitionSize, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.1f, 1f);
         //Tail:
-        tailLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.tailLength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.01f, 2.5f);
+        tailLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.tailLength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.01f, 4f);
         tailFrontWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.tailFrontWidth, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.01f, 1.5f);
         tailFrontHeight = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.tailFrontHeight, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.01f, 1.5f);
         tailFrontVerticalOffset = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.tailFrontVerticalOffset, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, -1f, 1f);
