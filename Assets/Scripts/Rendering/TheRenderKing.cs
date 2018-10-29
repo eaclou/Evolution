@@ -1684,7 +1684,7 @@ public class TheRenderKing : MonoBehaviour {
                 CritterGenericStrokeData newData = new CritterGenericStrokeData();
                 newData.parentIndex = critterIndex;
                 newData.brushType = 0;
-                newData.bindPos = newBrushPoint.curCoords;
+                newData.bindPos = newBrushPoint.bindPos;
                 newData.uniformScale = 1f;
 
                 singleCritterGenericStrokesArray[brushIndex] = newData;

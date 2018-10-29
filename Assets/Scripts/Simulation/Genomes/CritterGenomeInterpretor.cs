@@ -7,41 +7,10 @@ public class CritterGenomeInterpretor {
     public struct BrushPoint {
         public Vector3 initCoordsNormalized;
         public Vector2 uv;
-        public Vector3 curCoords;
+        public Vector3 bindPos;
         public Vector3 normal;
         public Vector3 tangent;
     }
-
-    
-
-    // MASK TYPES:
-    public struct MaskDataLinearFalloff {
-        public float slope;
-    }
-    public struct MaskDataInvDistFalloff {
-
-    }
-    public struct MaskDataUniformDir {
-
-    }    
-    public struct MaskDataSin {
-        public float modifierCenter;
-        public float modifierFalloff;
-        public float modifierFrequency;
-        public float modifierAmplitude;
-        public float modifierPhase;
-    }
-    public struct FalloffMaskDataGeneric {
-        public float modifierCenter;
-        public float modifierFalloffRate;
-        public float modifierFrequency;
-        public float modifierAmplitude;
-        public float modifierPhase;
-    }
-    public struct MaskDataLengthwiseEdges {
-
-    }
-
 
     public CritterGenomeInterpretor() {
         // empty constructor
@@ -51,14 +20,165 @@ public class CritterGenomeInterpretor {
 
     public static BrushPoint ProcessBrushPoint(BrushPoint inPoint, AgentGenome genome) {
 
-        float fullsizeCritterLength = GetCritterFullsizeLength(genome);
-        Vector2 CSScale = GetInitCrossSectionScale(inPoint.initCoordsNormalized.z, genome);
-        Vector3 bindPos = new Vector3(inPoint.initCoordsNormalized.x * CSScale.x, inPoint.initCoordsNormalized.y * CSScale.y, inPoint.initCoordsNormalized.z * fullsizeCritterLength - fullsizeCritterLength * 0.5f); //coords;
-        inPoint.curCoords = bindPos;
+        //float fullsizeCritterLength = GetCritterFullsizeLength(genome);
+
+        ProcessBrushPointBaseBody(ref inPoint, genome); // basic proportions
+
+        // Extras:
+
+        //Vector2 CSScale = GetInitCrossSectionScale(inPoint.initCoordsNormalized.z, genome);
+
+        //Vector3 bindPos = new Vector3(inPoint.initCoordsNormalized.x * CSScale.x, inPoint.initCoordsNormalized.y * CSScale.y, inPoint.initCoordsNormalized.z * fullsizeCritterLength - fullsizeCritterLength * 0.5f); //coords;
+        //inPoint.bindPos = bindPos;
         return inPoint;
     }
 
-    public static Vector3 GetBindPosFromNormalizedCoords(Vector3 coords, AgentGenome genome) {
+    private static void ProcessBrushPointBaseBody(ref BrushPoint point, AgentGenome genome) {
+        float fullsizeCritterLength = GetCritterFullsizeLength(genome);
+        float bindPoseZ = point.initCoordsNormalized.z * fullsizeCritterLength;
+
+        float width = 1f;
+        float height = 1f;
+
+        if(bindPoseZ > genome.bodyGenome.coreGenome.tailLength) {
+            if(bindPoseZ > genome.bodyGenome.coreGenome.bodyLength + genome.bodyGenome.coreGenome.tailLength) {
+                if(bindPoseZ > genome.bodyGenome.coreGenome.headLength + genome.bodyGenome.coreGenome.bodyLength + genome.bodyGenome.coreGenome.tailLength) {
+                    // this point is in the MOUTH Section:
+                    float subSectionCoords01 = (bindPoseZ - genome.bodyGenome.coreGenome.tailLength - genome.bodyGenome.coreGenome.bodyLength - genome.bodyGenome.coreGenome.headLength) / genome.bodyGenome.coreGenome.mouthLength;
+                    float mouthTipBlendLerpAmount = Mathf.Clamp01((genome.bodyGenome.coreGenome.mouthToTipTransitionSize * 0.5f - (1f - subSectionCoords01)) / (genome.bodyGenome.coreGenome.mouthToTipTransitionSize * 0.5f));
+                    float headBlendLerpAmount = Mathf.Clamp01((genome.bodyGenome.coreGenome.mouthToHeadTransitionSize * 0.5f - (subSectionCoords01)) / (genome.bodyGenome.coreGenome.mouthToHeadTransitionSize * 0.5f)) * 0.5f;
+
+                    float headSectionWidth = genome.bodyGenome.coreGenome.bodyBackWidth;
+                    float mouthSectionWidth = Mathf.Lerp(genome.bodyGenome.coreGenome.mouthBackWidth, genome.bodyGenome.coreGenome.mouthFrontWidth, subSectionCoords01);
+                    width = Mathf.Lerp(mouthSectionWidth, headSectionWidth, headBlendLerpAmount);
+                    width = Mathf.Lerp(width, 0f, Mathf.Pow(mouthTipBlendLerpAmount, 2.5f));
+                    width = width * genome.bodyGenome.coreGenome.mouthLength;
+
+                    float headSectionHeight = genome.bodyGenome.coreGenome.bodyBackHeight;
+                    float mouthSectionHeight = Mathf.Lerp(genome.bodyGenome.coreGenome.mouthBackHeight, genome.bodyGenome.coreGenome.mouthFrontHeight, subSectionCoords01);
+                    height = Mathf.Lerp(mouthSectionHeight, headSectionHeight, headBlendLerpAmount);
+                    height = Mathf.Lerp(height, 0f, Mathf.Pow(mouthTipBlendLerpAmount, 2.5f));
+                    height = height * genome.bodyGenome.coreGenome.mouthLength;
+
+                    if (bindPoseZ > fullsizeCritterLength) { // ERROR                        
+                        Debug.LogError("bindPoseZ is longer than the creature is! ");
+                    }
+                }
+                else {
+                    // this point is in the HEAD Section:
+                    float subSectionCoords01 = (bindPoseZ - genome.bodyGenome.coreGenome.tailLength - genome.bodyGenome.coreGenome.bodyLength) / genome.bodyGenome.coreGenome.headLength;    
+                    float bodyBlendLerpAmount = Mathf.Clamp01((genome.bodyGenome.coreGenome.headToBodyTransitionSize * 0.5f - subSectionCoords01) / (genome.bodyGenome.coreGenome.headToBodyTransitionSize * 0.5f)) * 0.5f;
+                    float mouthBlendLerpAmount = Mathf.Clamp01((genome.bodyGenome.coreGenome.mouthToHeadTransitionSize * 0.5f - (1f - subSectionCoords01)) / (genome.bodyGenome.coreGenome.mouthToHeadTransitionSize * 0.5f)) * 0.5f;
+
+                    float bodySectionWidth = genome.bodyGenome.coreGenome.bodyFrontWidth;
+                    float headSectionWidth = Mathf.Lerp(genome.bodyGenome.coreGenome.headBackWidth, genome.bodyGenome.coreGenome.headFrontWidth, subSectionCoords01);
+                    float mouthSectionWidth = genome.bodyGenome.coreGenome.mouthBackWidth;
+                    width = Mathf.Lerp(headSectionWidth, bodySectionWidth, bodyBlendLerpAmount);
+                    width = Mathf.Lerp(width, mouthSectionWidth, mouthBlendLerpAmount);
+                    width = width * genome.bodyGenome.coreGenome.headLength;
+
+                    float bodySectionHeight = genome.bodyGenome.coreGenome.bodyFrontHeight;
+                    float headSectionHeight = Mathf.Lerp(genome.bodyGenome.coreGenome.headBackHeight, genome.bodyGenome.coreGenome.headFrontHeight, subSectionCoords01);
+                    float mouthSectionHeight = genome.bodyGenome.coreGenome.mouthBackHeight;
+                    height = Mathf.Lerp(headSectionHeight, bodySectionHeight, bodyBlendLerpAmount);
+                    height = Mathf.Lerp(height, mouthSectionHeight, mouthBlendLerpAmount);
+                    height = height * genome.bodyGenome.coreGenome.headLength;
+                }
+            }
+            else {
+                // this point is in the BODY Section:
+                float subSectionCoords01 = (bindPoseZ - genome.bodyGenome.coreGenome.tailLength) / genome.bodyGenome.coreGenome.bodyLength;                
+                float tailBlendLerpAmount = Mathf.Clamp01((genome.bodyGenome.coreGenome.bodyToTailTransitionSize * 0.5f - subSectionCoords01) / (genome.bodyGenome.coreGenome.bodyToTailTransitionSize * 0.5f)) * 0.5f;
+                float headBlendLerpAmount = Mathf.Clamp01((genome.bodyGenome.coreGenome.headToBodyTransitionSize * 0.5f - (1f - subSectionCoords01)) / (genome.bodyGenome.coreGenome.headToBodyTransitionSize * 0.5f)) * 0.5f;
+
+                float tailSectionWidth = genome.bodyGenome.coreGenome.tailFrontWidth;
+                float bodySectionWidth = Mathf.Lerp(genome.bodyGenome.coreGenome.bodyBackWidth, genome.bodyGenome.coreGenome.bodyFrontWidth, subSectionCoords01);
+                float headSectionWidth = genome.bodyGenome.coreGenome.headBackWidth;                
+                width = Mathf.Lerp(bodySectionWidth, tailSectionWidth, tailBlendLerpAmount);
+                width = Mathf.Lerp(width, headSectionWidth, headBlendLerpAmount);
+                width = width * genome.bodyGenome.coreGenome.bodyLength;
+
+                float tailSectionHeight = genome.bodyGenome.coreGenome.tailFrontHeight;
+                float bodySectionHeight = Mathf.Lerp(genome.bodyGenome.coreGenome.bodyBackHeight, genome.bodyGenome.coreGenome.bodyFrontHeight, subSectionCoords01);
+                float headSectionHeight = genome.bodyGenome.coreGenome.headBackHeight;                
+                height = Mathf.Lerp(bodySectionHeight, tailSectionHeight, tailBlendLerpAmount);
+                height = Mathf.Lerp(height, headSectionHeight, headBlendLerpAmount);
+                height = height * genome.bodyGenome.coreGenome.bodyLength;
+            }
+        }
+        else {
+            // this point is in the TAIL Section:
+            float subSectionCoords01 = bindPoseZ / genome.bodyGenome.coreGenome.tailLength; // divide by zero if no tail?
+            float bodyBlendLerpAmount = Mathf.Clamp01((genome.bodyGenome.coreGenome.bodyToTailTransitionSize * 0.5f - (1f - subSectionCoords01)) / (genome.bodyGenome.coreGenome.bodyToTailTransitionSize * 0.5f)) * 0.5f;
+            float tailTipBlendLerpAmount = Mathf.Clamp01((genome.bodyGenome.coreGenome.tailToTipTransitionSize * 0.5f - subSectionCoords01) / (genome.bodyGenome.coreGenome.tailToTipTransitionSize * 0.5f));
+
+            float tailSectionWidth = Mathf.Lerp(genome.bodyGenome.coreGenome.tailBackWidth, genome.bodyGenome.coreGenome.tailFrontWidth, subSectionCoords01);
+            float bodySectionWidth = genome.bodyGenome.coreGenome.bodyBackWidth;
+            width = Mathf.Lerp(tailSectionWidth, bodySectionWidth, bodyBlendLerpAmount);
+            width = Mathf.Lerp(width, 0f, tailTipBlendLerpAmount);
+            width = width * genome.bodyGenome.coreGenome.tailLength;
+
+            float tailSectionHeight = Mathf.Lerp(genome.bodyGenome.coreGenome.tailBackHeight, genome.bodyGenome.coreGenome.tailFrontHeight, subSectionCoords01);
+            float bodySectionHeight = genome.bodyGenome.coreGenome.bodyBackHeight;
+            height = Mathf.Lerp(tailSectionHeight, bodySectionHeight, bodyBlendLerpAmount);
+            height = Mathf.Lerp(height, 0f, tailTipBlendLerpAmount);
+            height = height * genome.bodyGenome.coreGenome.tailLength;
+        }
+
+        Vector2 crossSectionScale = new Vector2(width, height);
+
+
+        // Now Body Modifiers are processed:
+        for(int i = 0; i < genome.bodyGenome.coreGenome.shapeModifiersList.Count; i++) {
+            CritterModuleCoreGenome.ShapeModifierData modifierData = genome.bodyGenome.coreGenome.shapeModifiersList[i];
+            if(modifierData.modifierTypeID == CritterModuleCoreGenome.ShapeModifierType.Extrude) {  // extrude
+                // Find extrude amount:
+                float maskValue = 1f;
+
+                for(int j = 0; j < genome.bodyGenome.coreGenome.shapeModifiersList[i].masksList.Count; j++) {
+                    CritterModuleCoreGenome.ModifierMaskData maskData = genome.bodyGenome.coreGenome.shapeModifiersList[i].masksList[j];
+
+                    float rawMaskValue = GetMaskValue(point, maskData);
+
+                    // taper distance?:
+                    float taperMask = 1f - Mathf.Clamp01(Mathf.Abs(point.initCoordsNormalized.z - maskData.origin) / modifierData.taperDistance);
+
+                    maskValue *= rawMaskValue * taperMask;
+                    
+                }
+                
+                float radiusMult = maskValue * modifierData.amplitude + 1f;
+                crossSectionScale *= radiusMult;
+            }
+        }
+
+        point.bindPos = new Vector3(point.initCoordsNormalized.x * crossSectionScale.x, point.initCoordsNormalized.y * crossSectionScale.y, point.initCoordsNormalized.z * fullsizeCritterLength - fullsizeCritterLength * 0.5f);
+    }
+
+    private static float GetMaskValue(BrushPoint point, CritterModuleCoreGenome.ModifierMaskData maskData) {        
+        float outValue = 0f;
+        float inValue = 0f;
+
+        // MASK COORDINATE TYPES:
+        if (maskData.coordinateTypeID == CritterModuleCoreGenome.MaskCoordinateType.Lengthwise) {
+            inValue = Mathf.Abs(point.initCoordsNormalized.z - maskData.origin);
+        }
+
+        // FUNCTION TYPES:
+        if (maskData.functionTypeID == CritterModuleCoreGenome.MaskFunctionType.Linear) {            
+            outValue = Mathf.Clamp01(1f - (inValue / maskData.cycleDistance));
+        }
+        if (maskData.functionTypeID == CritterModuleCoreGenome.MaskFunctionType.InvDist) {            
+            outValue = Mathf.Clamp01(1f / Mathf.Max(Mathf.Pow(inValue, 1f), 0.01f));
+        }
+        if (maskData.functionTypeID == CritterModuleCoreGenome.MaskFunctionType.Cos) {           
+            outValue = Mathf.Cos((inValue / maskData.cycleDistance) * Mathf.PI);
+        }
+
+        return outValue;
+    }
+
+    /*public static Vector3 GetBindPosFromNormalizedCoords(Vector3 coords, AgentGenome genome) {
         //float tempDist = 1f - Mathf.Clamp01(Mathf.Abs(0.5f - coords.z) * 2f);
         //return tempDist;
         float fullsizeCritterLength = GetCritterFullsizeLength(genome);
@@ -73,7 +193,7 @@ public class CritterGenomeInterpretor {
         Vector3 bindPos = new Vector3(coords.x * CSScale.x, coords.y * CSScale.y, coords.z * fullsizeCritterLength - fullsizeCritterLength * 0.5f); //coords;
 
         return bindPos;
-    }
+    }*/
     // GetWidthAtSpineLoc:  
     private static Vector2 GetInitCrossSectionScale(float zCoordNormalized, AgentGenome genome) {
 
