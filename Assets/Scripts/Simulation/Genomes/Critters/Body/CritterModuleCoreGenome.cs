@@ -66,19 +66,19 @@ public class CritterModuleCoreGenome {
     [System.Serializable]
     public enum MaskCoordinateType {
         Lengthwise,
-        Radial,  // uv distance
+        //Radial,  // uv distance
         SingleAxis,  // arbitrary direction of uv coordinate flow
         Polygonize  // facet body circumference        
     }
     [System.Serializable]
     public enum MaskFunctionType {
         Linear,
-        InvDist,
+        Sin,
         Cos      
     }
 
     [System.Serializable]
-    public struct ModifierMaskData {
+    public struct MaskData {
         public MaskCoordinateType coordinateTypeID;
         public MaskFunctionType functionTypeID;     
         public float origin;
@@ -87,19 +87,21 @@ public class CritterModuleCoreGenome {
         public float phase;
         public int numPolyEdges;
         public Vector2 axisDir;
-        public bool repeat;        
+        public bool repeat;       
     }
     [System.Serializable]
     public struct ShapeModifierData {  // each modifer gets interpreted by script, picks from correct maskData list
         public ShapeModifierType modifierTypeID;  // extrude; axis-aligned scale; twist/pinch/etc?
-        public List<ModifierMaskData> masksList;  // method of falloff
-        public float taperDistance;
+        public List<int> maskIndicesList;  // method of falloff
+        public float taperDistance; // keep/remove?
         public float amplitude;  // move to Range of mult like (0.8 to 1.25)?
     }
     // or should I keep masks as separate list and refer to them through indices to allow for mask re-use?
     public List<ShapeModifierData> shapeModifiersList;  // holds list of all modifiers to overall critter shape/structure, in order of application
+    public List<MaskData> masksList;
     
-    
+
+
     // OLD:
     public bool isPassive;
     public Vector2 mouthSize;  // relative to head size?
@@ -127,6 +129,7 @@ public class CritterModuleCoreGenome {
         }
 
         shapeModifiersList = new List<ShapeModifierData>();  // empty
+        masksList = new List<MaskData>();
 
         //modifierCoordinateDataList = new List<ModifierCoordinateData>();
         //maskDataListGeneric = new List<CritterGenomeInterpretor.FalloffMaskDataGeneric>();
@@ -136,24 +139,24 @@ public class CritterModuleCoreGenome {
         // TEMP HARDCODED:
         ShapeModifierData initModifier = new ShapeModifierData();
         initModifier.modifierTypeID = ShapeModifierType.Extrude;
-        initModifier.masksList = new List<ModifierMaskData>();
-        initModifier.amplitude = 0.5f;
-        initModifier.taperDistance = 0.35f;
+        initModifier.maskIndicesList = new List<int>();
+        initModifier.amplitude = 0.1f;
+        initModifier.taperDistance = 0.5f;
 
         // Masks for this modifier:
-        ModifierMaskData maskData = new ModifierMaskData();
+        MaskData maskData = new MaskData();
         maskData.coordinateTypeID = MaskCoordinateType.Lengthwise;
-        maskData.functionTypeID = MaskFunctionType.Cos;
+        maskData.functionTypeID = MaskFunctionType.Linear;
         maskData.origin = 0.5f; // normalized along length of creature
         maskData.amplitude = 1f;
-        maskData.cycleDistance = 0.1f;
+        maskData.cycleDistance = 0.5f;
         maskData.phase = 0f;
         maskData.numPolyEdges = 1;
         maskData.axisDir = new Vector2(0f, 1f);
         maskData.repeat = true;
 
-        initModifier.masksList.Add(maskData);
-    
+        masksList.Add(maskData);
+        initModifier.maskIndicesList.Add(masksList.Count - 1); // reference mask by index to allow re-use by other shape modifiers    
         shapeModifiersList.Add(initModifier);
 
         // Or start with deformed sphere???? *****
@@ -349,30 +352,71 @@ public class CritterModuleCoreGenome {
 
         isPassive = UtilityMutationFunctions.GetMutatedBool(parentGenome.isPassive, 0.033f, settings.defaultBodyMutationStepSize);
 
-        //maskDataSinTemp.modifierCenter = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.maskDataSinTemp.modifierCenter, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
-        //maskDataSinTemp.modifierFalloff = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.maskDataSinTemp.modifierFalloff, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 2f);
-        //maskDataSinTemp.modifierFrequency = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.maskDataSinTemp.modifierFrequency, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.25f, 36f);
-        //maskDataSinTemp.modifierAmplitude = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.maskDataSinTemp.modifierAmplitude, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 0.5f);
-        //maskDataSinTemp.modifierPhase = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.maskDataSinTemp.modifierPhase, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, -5f, 5f);
-        
         // Copy modifiers list? do I need to create copies of each entry? or staright copy should work since they are structs (value-typed)
         shapeModifiersList = new List<ShapeModifierData>();  // empty
         for(int i = 0; i < parentGenome.shapeModifiersList.Count; i++) {
             ShapeModifierData newData = new ShapeModifierData();
-            newData.masksList = new List<ModifierMaskData>();
-            for(int j = 0; j < parentGenome.shapeModifiersList[i].masksList.Count; j++) {
-                ModifierMaskData newMaskData = new ModifierMaskData();
-                newMaskData = parentGenome.shapeModifiersList[i].masksList[j];
-                newData.masksList.Add(newMaskData);
-            }
+            newData.maskIndicesList = new List<int>();
+            for(int j = 0; j < parentGenome.shapeModifiersList[i].maskIndicesList.Count; j++) {
+                int maskIndex = parentGenome.shapeModifiersList[i].maskIndicesList[j];
+                // MUTATE?
+                maskIndex = UtilityMutationFunctions.GetMutatedIntAdditive(maskIndex, settings.defaultBodyMutationChance, 2, 0, parentGenome.shapeModifiersList[i].maskIndicesList.Count - 1);
+                newData.maskIndicesList.Add(maskIndex); // make sure this isn't passing as a reference? it's an 'int' (data-type) so should be ok... // newMaskData);
+            }            
             newData.modifierTypeID = parentGenome.shapeModifiersList[i].modifierTypeID;  // only works if this is NOT a reference type!!! ***
-            newData.amplitude = parentGenome.shapeModifiersList[i].amplitude;
-            newData.taperDistance = parentGenome.shapeModifiersList[i].taperDistance;
+            newData.amplitude = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.shapeModifiersList[i].amplitude, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, -0.5f, 0.5f); //parentGenome.shapeModifiersList[i].amplitude;
+            newData.taperDistance = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.shapeModifiersList[i].taperDistance, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.1f, 2.5f); //;
             shapeModifiersList.Add(newData);
         }
+        masksList = new List<MaskData>();
+        for(int i = 0; i < parentGenome.masksList.Count; i++) {
+            MaskData newMask = new MaskData();
+            newMask = parentGenome.masksList[i];
+            int maskCoordinateTypeID = (int)newMask.coordinateTypeID;
+            newMask.coordinateTypeID = (MaskCoordinateType)UtilityMutationFunctions.GetMutatedIntAdditive(maskCoordinateTypeID, settings.defaultBodyMutationChance, 2, 0, 2);
+            int maskFunctionTypeID = (int)newMask.functionTypeID;
+            newMask.functionTypeID = (MaskFunctionType)UtilityMutationFunctions.GetMutatedIntAdditive(maskFunctionTypeID, settings.defaultBodyMutationChance, 2, 0, 2);
+            newMask.numPolyEdges = UtilityMutationFunctions.GetMutatedIntAdditive(newMask.numPolyEdges, settings.defaultBodyMutationChance, 1, 1, 12);
+            newMask.origin = UtilityMutationFunctions.GetMutatedFloatAdditive(newMask.origin, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
+            newMask.phase = UtilityMutationFunctions.GetMutatedFloatAdditive(newMask.phase, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, -5f, 5f);
+            newMask.cycleDistance = UtilityMutationFunctions.GetMutatedFloatAdditive(newMask.origin, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.1f, 2f);
+            newMask.amplitude = UtilityMutationFunctions.GetMutatedFloatAdditive(newMask.origin, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, -1f, 1f);
+            newMask.axisDir = UtilityMutationFunctions.GetMutatedVector2Additive(newMask.axisDir, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, -1f, 1f).normalized;
+            masksList.Add(newMask);
+        }
         // Mutate Add New Modifiers Here:?
+        if(shapeModifiersList.Count < 5) {
+            float randRoll = UnityEngine.Random.Range(0f, 1f);
+            if(randRoll < 0.01f) {
+                // Add new shapeModifier:
+                ShapeModifierData initModifier = new ShapeModifierData();
+                initModifier.modifierTypeID = ShapeModifierType.Extrude;
+                initModifier.maskIndicesList = new List<int>();
+                initModifier.amplitude = 0.1f;
+                initModifier.taperDistance = 0.5f;
 
+                shapeModifiersList.Add(initModifier);
+            }
+        }
+        if(masksList.Count < 4) {
+            float randRoll = UnityEngine.Random.Range(0f, 1f);
+            if(randRoll < 0.02f) {
+                // Add new MASK:
+                MaskData maskData = new MaskData();
+                maskData.coordinateTypeID = MaskCoordinateType.Lengthwise;
+                maskData.functionTypeID = MaskFunctionType.Linear;
+                maskData.origin = 0.5f; // normalized along length of creature
+                maskData.amplitude = 1f;
+                maskData.cycleDistance = 0.5f;
+                maskData.phase = 0f;
+                maskData.numPolyEdges = 1;
+                maskData.axisDir = new Vector2(0f, 1f);
+                maskData.repeat = true;
 
+                masksList.Add(maskData);
+            }
+        }        
+        
         // Or start with deformed sphere???? *****
         // Mouth/Snout:
         mouthLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.mouthLength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.01f, 4f);

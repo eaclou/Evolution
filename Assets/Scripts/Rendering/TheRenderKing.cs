@@ -1661,9 +1661,10 @@ public class TheRenderKing : MonoBehaviour {
         for(int y = 0; y < crossResolution; y++) {
 
             float verticalLerpPos = (float)y / (float)crossResolution + halfPolyArc;
-            float leftRightMult = (float)(y % 2) * 2f - 1f;  // -1 or +1
-            float angleRad = verticalLerpPos * Mathf.PI;
-            Vector2 crossSectionNormalizedCoords = new Vector2(Mathf.Sin(angleRad), Mathf.Cos(angleRad) * -1f);  // <-- have to flip vertical pos/neg since pos=depth, not altitude
+            //float leftRightMult = (float)(y % 2) * 2f - 1f;  // -1 or +1
+            float angleRad = ((float)y / (float)crossResolution) * Mathf.PI * 2f; // verticalLerpPos * Mathf.PI;
+            //Vector2 crossSectionNormalizedCoords = new Vector2(Mathf.Sin(angleRad), Mathf.Cos(angleRad) * -1f);  // <-- have to flip vertical pos/neg since pos=depth, not altitude
+            Vector2 crossSectionNormalizedCoords = new Vector2(Mathf.Sin(angleRad), Mathf.Cos(angleRad)) * -1f;
                         
             for(int z = 0; z < lengthResolution; z++) {
                 // do a line from head to tail at same altitude:
@@ -1672,9 +1673,11 @@ public class TheRenderKing : MonoBehaviour {
                 float zLerp = Mathf.Clamp01(1f - (float)z / (float)(lengthResolution - 1));
 
                 CritterGenomeInterpretor.BrushPoint newBrushPoint = new CritterGenomeInterpretor.BrushPoint();
-                newBrushPoint.initCoordsNormalized = new Vector3(crossSectionNormalizedCoords.x * leftRightMult, crossSectionNormalizedCoords.y, zLerp);
-                newBrushPoint.uv = new Vector2(verticalLerpPos, zLerp);  // not correct
-
+                //newBrushPoint.initCoordsNormalized = new Vector3(crossSectionNormalizedCoords.x * leftRightMult, crossSectionNormalizedCoords.y, zLerp);
+                newBrushPoint.initCoordsNormalized = new Vector3(crossSectionNormalizedCoords.x, crossSectionNormalizedCoords.y, zLerp);
+                newBrushPoint.uv = new Vector2((float)y / (float)crossResolution, (float)z / (float)lengthResolution);  // not correct
+                newBrushPoint.ix = z;
+                newBrushPoint.iy = y;
                 newBrushPoint = CritterGenomeInterpretor.ProcessBrushPoint(newBrushPoint, genome);
                 //Vector3 brushPos = CritterGenomeInterpretor.GetBindPosFromNormalizedCoords(new Vector3(crossSectionNormalizedCoords.x * leftRightMult, crossSectionNormalizedCoords.y, zLerp), genome);
                 //               = new Vector3(crossSectionCoords.x * leftRightMult * 0.5f * radius, crossSectionCoords.y * 0.5f * radius, zLerp);
