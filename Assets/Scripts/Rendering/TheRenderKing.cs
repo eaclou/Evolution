@@ -291,7 +291,10 @@ public class TheRenderKing : MonoBehaviour {
 	    public int parentIndex;  // which Critter is this attached to?	
 	    public int brushType;
         public Vector3 bindPos;  // object-coordinates (z=forward, y=up)
-        public float uniformScale;
+        public Vector3 normal;
+        public Vector3 tangent;
+        public Vector2 uv;
+        public Vector2 scale;
     }
     public struct CurveStrokeData {
         public int parentIndex;
@@ -439,7 +442,7 @@ public class TheRenderKing : MonoBehaviour {
         */
     }
     private int GetMemorySizeCritterGenericData() {
-        int numBytes = sizeof(int) * 2 + sizeof(float) * 4;
+        int numBytes = sizeof(int) * 2 + sizeof(float) * 13;
         return numBytes;
     }
     
@@ -1651,6 +1654,8 @@ public class TheRenderKing : MonoBehaviour {
         ComputeBuffer singleCritterGenericStrokesCBuffer = new ComputeBuffer(numStrokesPerCritterGeneric, GetMemorySizeCritterGenericData());
         CritterGenericStrokeData[] singleCritterGenericStrokesArray = new CritterGenericStrokeData[numStrokesPerCritterGeneric];  // optimize this later?? ***
 
+        CritterGenomeInterpretor.BrushPoint[] brushPointArray = new CritterGenomeInterpretor.BrushPoint[numStrokesPerCritterGeneric];
+
         // NEED:
         //  AgentGenome
         int lengthResolution = 32;
@@ -1681,34 +1686,82 @@ public class TheRenderKing : MonoBehaviour {
                 newBrushPoint = CritterGenomeInterpretor.ProcessBrushPoint(newBrushPoint, genome);
                 //Vector3 brushPos = CritterGenomeInterpretor.GetBindPosFromNormalizedCoords(new Vector3(crossSectionNormalizedCoords.x * leftRightMult, crossSectionNormalizedCoords.y, zLerp), genome);
                 //               = new Vector3(crossSectionCoords.x * leftRightMult * 0.5f * radius, crossSectionCoords.y * 0.5f * radius, zLerp);
-
+                brushPointArray[brushIndex] = newBrushPoint;
 
                 // Create Data:
                 CritterGenericStrokeData newData = new CritterGenericStrokeData();
                 newData.parentIndex = critterIndex;
                 newData.brushType = 0;
                 newData.bindPos = newBrushPoint.bindPos;
-                newData.uniformScale = 1f;
+                newData.scale = Vector2.one;
+                newData.uv = newBrushPoint.uv;
 
                 singleCritterGenericStrokesArray[brushIndex] = newData;
             }
         }
 
-        // Get data for this critter -- this function will eventually be called from outside RenderKing at time of new critter generation
-        // TEMP METHOD HACKY!:
-        /*for(int i = 0; i < numStrokesPerCritterGeneric; i++) {
-            CritterGenericStrokeData newData = new CritterGenericStrokeData();
-            newData.parentIndex = critterIndex;
-            newData.brushType = 0;
-
-            newData.bindPos = UnityEngine.Random.insideUnitSphere;
-
-            newData.uniformScale = 1f;
-
-            singleCritterGenericStrokesArray[i] = newData;
-        } */
+        // Loop through all points again and calculate normals/tangents/other things:
+        // Sort:
         
-        singleCritterGenericStrokesCBuffer.SetData(singleCritterGenericStrokesArray);
+        List<CritterGenericStrokeData> sortedBrushStrokesList = new List<CritterGenericStrokeData>(); // temporary naive approach:
+        for (int y = 0; y < crossResolution; y++) {                        
+                        
+            for(int x = 0; x < lengthResolution; x++) {
+                // do a line from head to tail at same altitude:
+                int indexCenter = y * lengthResolution + x;
+
+                // find neighbor positions: (all in bindPos object coordinates)
+                int indexNegX = y * lengthResolution + Mathf.Clamp((x - 1), 0, crossResolution - 1); // switch to modulo arithmetic for wrapping!
+                int indexPosX = y * lengthResolution + Mathf.Clamp((x + 1), 0, crossResolution - 1);
+                int indexNegY = Mathf.Clamp((y - 1), 0, lengthResolution - 1) * lengthResolution + x;
+                int indexPosY = Mathf.Clamp((y + 1), 0, lengthResolution - 1) * lengthResolution + x;
+
+                //Vector3 uTangentAvg = (brushPointArray[indexPosX].bindPos - brushPointArray[indexNegX].bindPos);
+                //Vector3 vTangentAvg = (brushPointArray[indexPosY].bindPos - brushPointArray[indexNegY].bindPos);
+                Vector3 uTangentAvg = (brushPointArray[indexPosX].bindPos - brushPointArray[indexCenter].bindPos);
+                Vector3 vTangentAvg = (brushPointArray[indexPosY].bindPos - brushPointArray[indexCenter].bindPos);
+
+                Vector3 normal = Vector3.Cross(vTangentAvg, uTangentAvg).normalized;
+
+                brushPointArray[indexCenter].normal = normal;
+                singleCritterGenericStrokesArray[indexCenter].normal = normal;
+                singleCritterGenericStrokesArray[indexCenter].tangent = vTangentAvg.normalized;
+                Vector2 scale = new Vector2(uTangentAvg.magnitude, vTangentAvg.magnitude);
+                singleCritterGenericStrokesArray[indexCenter].scale = scale;
+
+                // Sorting: SLOW!!!!
+                int listCount = sortedBrushStrokesList.Count;
+                if(listCount == 0) {
+                    sortedBrushStrokesList.Add(singleCritterGenericStrokesArray[indexCenter]);
+                }
+                else {
+                    for(int b = 0; b < listCount; b++) {
+                        if(singleCritterGenericStrokesArray[indexCenter].bindPos.y <= sortedBrushStrokesList[b].bindPos.y) {                            
+                            sortedBrushStrokesList.Insert(b, singleCritterGenericStrokesArray[indexCenter]);
+                            break;
+                        }
+                        else {
+                            if(b >= listCount - 1) {
+                                sortedBrushStrokesList.Add(singleCritterGenericStrokesArray[indexCenter]);
+                            }                           
+                        }
+                    }                    
+                }
+            }
+        }
+        // Copy sorted list into actual buffer:
+        if(sortedBrushStrokesList.Count == singleCritterGenericStrokesArray.Length) {
+            for(int i = 0; i < singleCritterGenericStrokesArray.Length; i++) {
+                singleCritterGenericStrokesArray[i] = sortedBrushStrokesList[i];
+            }
+        }
+        else {
+            Debug.Log("Arrays don't match length!!! sorted: " + sortedBrushStrokesList.Count.ToString() + ", master: " + singleCritterGenericStrokesArray.Length.ToString());
+        }
+        
+
+                
+        singleCritterGenericStrokesCBuffer.SetData(singleCritterGenericStrokesArray); // send data to gPU
 
         int kernelCSUpdateCritterGenericStrokes = computeShaderCritters.FindKernel("CSUpdateCritterGenericStrokes");        
         computeShaderCritters.SetBuffer(kernelCSUpdateCritterGenericStrokes, "critterGenericStrokesWriteCBuffer", critterGenericStrokesCBuffer);
@@ -2547,7 +2600,7 @@ public class TheRenderKing : MonoBehaviour {
         critterEnergyDotsMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, critterEnergyDotsMat, 0, MeshTopology.Triangles, 6, critterEnergyDotsCBuffer.count);
         */
-
+        /*
         // AGENT EYES:
         agentEyesDisplayMat.SetPass(0);
         agentEyesDisplayMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
@@ -2559,7 +2612,7 @@ public class TheRenderKing : MonoBehaviour {
         agentEyesDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
         agentEyesDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, agentEyesDisplayMat, 0, MeshTopology.Triangles, 6, agentEyeStrokesCBuffer.count);
-
+        */
         // DEBUG BODY START:
         // Test Debug Critter Body:
         //critterDebugGenericStrokeMat

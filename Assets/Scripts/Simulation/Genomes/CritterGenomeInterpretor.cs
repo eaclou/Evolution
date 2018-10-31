@@ -40,6 +40,10 @@ public class CritterGenomeInterpretor {
         return inPoint;
     }
 
+    private static void CalculateBrushNormals() {
+
+    }
+
     private static void ProcessBrushPointBaseBody(ref BrushPoint point, AgentGenome genome) {
         float fullsizeCritterLength = GetCritterFullsizeLength(genome);
         float bindPoseZ = point.initCoordsNormalized.z * fullsizeCritterLength;

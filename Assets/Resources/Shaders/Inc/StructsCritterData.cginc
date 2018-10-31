@@ -44,5 +44,8 @@ struct CritterGenericStrokeData {
 	int parentIndex;  // which Critter is this attached to?	
 	int brushType;
 	float3 bindPos;  // object-coordinates (z=forward, y=up)
-    float uniformScale;
+    float3 normal;
+    float3 tangent;
+    float2 uv;
+    float2 scale;
 };
