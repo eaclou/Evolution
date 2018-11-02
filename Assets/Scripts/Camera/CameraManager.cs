@@ -147,7 +147,7 @@ public class CameraManager : MonoBehaviour {
 
         masterTargetTiltAngle += tiltAngle * masterTiltSpeed * tiltSpeedMult * Time.deltaTime;
 
-        masterTargetTiltAngle = Mathf.Min(masterTargetTiltAngle, 55f);
+        masterTargetTiltAngle = Mathf.Min(masterTargetTiltAngle, 85f);
         masterTargetTiltAngle = Mathf.Max(masterTargetTiltAngle, 0);
 
         //cameraManager.masterTargetTiltAngle -= cameraManager.masterTiltSpeed * tiltSpeedMult * Time.deltaTime;

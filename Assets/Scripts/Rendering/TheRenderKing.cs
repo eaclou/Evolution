@@ -1661,31 +1661,28 @@ public class TheRenderKing : MonoBehaviour {
         int lengthResolution = 32;
         int crossResolution = 32;
 
-        float halfPolyArc = 1f / (float)crossResolution * 0.5f;
+        //float halfPolyArc = 1f / (float)crossResolution * 0.5f;
 
-        for(int y = 0; y < crossResolution; y++) {
+        // Loop through all brush points, starting at the tip of the tail (underside), (x=0, y=0, z=1)
+        // ... Then working its way to tip of head by doing series of cross-section rings
+        for(int y = 0; y < lengthResolution; y++) {
 
-            float verticalLerpPos = (float)y / (float)crossResolution + halfPolyArc;
-            //float leftRightMult = (float)(y % 2) * 2f - 1f;  // -1 or +1
-            float angleRad = ((float)y / (float)crossResolution) * Mathf.PI * 2f; // verticalLerpPos * Mathf.PI;
-            //Vector2 crossSectionNormalizedCoords = new Vector2(Mathf.Sin(angleRad), Mathf.Cos(angleRad) * -1f);  // <-- have to flip vertical pos/neg since pos=depth, not altitude
-            Vector2 crossSectionNormalizedCoords = new Vector2(Mathf.Sin(angleRad), Mathf.Cos(angleRad)) * -1f;
-                        
-            for(int z = 0; z < lengthResolution; z++) {
-                // do a line from head to tail at same altitude:
-                int brushIndex = y * lengthResolution + z;
-
-                float zLerp = Mathf.Clamp01(1f - (float)z / (float)(lengthResolution - 1));
-
-                CritterGenomeInterpretor.BrushPoint newBrushPoint = new CritterGenomeInterpretor.BrushPoint();
-                //newBrushPoint.initCoordsNormalized = new Vector3(crossSectionNormalizedCoords.x * leftRightMult, crossSectionNormalizedCoords.y, zLerp);
-                newBrushPoint.initCoordsNormalized = new Vector3(crossSectionNormalizedCoords.x, crossSectionNormalizedCoords.y, zLerp);
-                newBrushPoint.uv = new Vector2((float)y / (float)crossResolution, (float)z / (float)lengthResolution);  // not correct
-                newBrushPoint.ix = z;
+            float yLerp = Mathf.Clamp01((float)y / (float)(lengthResolution - 1)); // start at tail (Y = 0)
+            
+            for(int a = 0; a < crossResolution; a++) {
+                
+                int brushIndex = y * crossResolution + a;         
+                float angleRad = ((float)a / (float)crossResolution) * Mathf.PI * 2f; // verticalLerpPos * Mathf.PI;   
+                float crossSectionCoordX = Mathf.Sin(angleRad);
+                float crossSectionCoordZ = Mathf.Cos(angleRad);
+                Vector2 crossSectionNormalizedCoords = new Vector2(Mathf.Sin(angleRad), Mathf.Cos(angleRad)) * 1f;
+                
+                CritterGenomeInterpretor.BrushPoint newBrushPoint = new CritterGenomeInterpretor.BrushPoint();                
+                newBrushPoint.initCoordsNormalized = new Vector3(crossSectionCoordX, yLerp, crossSectionCoordZ);
+                newBrushPoint.uv = new Vector2((float)a / (float)crossResolution, (float)y / (float)lengthResolution);
+                newBrushPoint.ix = a;
                 newBrushPoint.iy = y;
-                newBrushPoint = CritterGenomeInterpretor.ProcessBrushPoint(newBrushPoint, genome);
-                //Vector3 brushPos = CritterGenomeInterpretor.GetBindPosFromNormalizedCoords(new Vector3(crossSectionNormalizedCoords.x * leftRightMult, crossSectionNormalizedCoords.y, zLerp), genome);
-                //               = new Vector3(crossSectionCoords.x * leftRightMult * 0.5f * radius, crossSectionCoords.y * 0.5f * radius, zLerp);
+                newBrushPoint = CritterGenomeInterpretor.ProcessBrushPoint(newBrushPoint, genome);                
                 brushPointArray[brushIndex] = newBrushPoint;
 
                 // Create Data:
@@ -1701,25 +1698,21 @@ public class TheRenderKing : MonoBehaviour {
         }
 
         // Loop through all points again and calculate normals/tangents/other things:
-        // Sort:
         
-        List<CritterGenericStrokeData> sortedBrushStrokesList = new List<CritterGenericStrokeData>(); // temporary naive approach:
-        for (int y = 0; y < crossResolution; y++) {                        
+        for (int y = 0; y < lengthResolution; y++) {                        
                         
-            for(int x = 0; x < lengthResolution; x++) {
+            for(int a = 0; a < crossResolution; a++) {
                 // do a line from head to tail at same altitude:
-                int indexCenter = y * lengthResolution + x;
+                int indexCenter = y * crossResolution + a;
 
                 // find neighbor positions: (all in bindPos object coordinates)
-                int indexNegX = y * lengthResolution + Mathf.Clamp((x - 1), 0, crossResolution - 1); // switch to modulo arithmetic for wrapping!
-                int indexPosX = y * lengthResolution + Mathf.Clamp((x + 1), 0, crossResolution - 1);
-                int indexNegY = Mathf.Clamp((y - 1), 0, lengthResolution - 1) * lengthResolution + x;
-                int indexPosY = Mathf.Clamp((y + 1), 0, lengthResolution - 1) * lengthResolution + x;
-
-                //Vector3 uTangentAvg = (brushPointArray[indexPosX].bindPos - brushPointArray[indexNegX].bindPos);
-                //Vector3 vTangentAvg = (brushPointArray[indexPosY].bindPos - brushPointArray[indexNegY].bindPos);
-                Vector3 uTangentAvg = (brushPointArray[indexPosX].bindPos - brushPointArray[indexCenter].bindPos);
-                Vector3 vTangentAvg = (brushPointArray[indexPosY].bindPos - brushPointArray[indexCenter].bindPos);
+                int indexNegX = y * crossResolution + Mathf.Clamp((a - 1), 0, crossResolution - 1); // switch to modulo arithmetic for wrapping!
+                int indexPosX = y * crossResolution + Mathf.Clamp((a + 1), 0, crossResolution - 1);
+                int indexNegY = Mathf.Clamp((y - 1), 0, lengthResolution - 1) * crossResolution + a;
+                int indexPosY = Mathf.Clamp((y + 1), 0, lengthResolution - 1) * crossResolution + a;
+                
+                Vector3 uTangentAvg = (brushPointArray[indexPosX].bindPos - brushPointArray[indexNegX].bindPos);
+                Vector3 vTangentAvg = (brushPointArray[indexPosY].bindPos - brushPointArray[indexNegY].bindPos);
 
                 Vector3 normal = Vector3.Cross(vTangentAvg, uTangentAvg).normalized;
 
@@ -1730,7 +1723,7 @@ public class TheRenderKing : MonoBehaviour {
                 singleCritterGenericStrokesArray[indexCenter].scale = scale;
 
                 // Sorting: SLOW!!!!
-                int listCount = sortedBrushStrokesList.Count;
+                /*int listCount = sortedBrushStrokesList.Count;
                 if(listCount == 0) {
                     sortedBrushStrokesList.Add(singleCritterGenericStrokesArray[indexCenter]);
                 }
@@ -1746,8 +1739,42 @@ public class TheRenderKing : MonoBehaviour {
                             }                           
                         }
                     }                    
-                }
+                }*/
             }
+        }
+        List<CritterGenericStrokeData> sortedBrushStrokesList = new List<CritterGenericStrokeData>(); // temporary naive approach:
+        // Add first brushstroke first:
+        sortedBrushStrokesList.Add(singleCritterGenericStrokesArray[0]);
+
+        for(int b = 1; b < singleCritterGenericStrokesArray.Length; b++) {
+            // For each brushstroke of this creature:
+            float brushDepth = singleCritterGenericStrokesArray[b].bindPos.z;
+            int listSize = sortedBrushStrokesList.Count;
+
+            int numSamples = 4;
+            float sampleCoord = 0.5f;
+            int sampleIndex = Mathf.RoundToInt((float)listSize * sampleCoord);
+            
+            for(int s = 0; s < numSamples; s++) {
+                // progressively bisect temporary sorted brushPointList to check if it is bigger/smaller
+                // 
+                if(listSize < Mathf.Pow(2f, s)) { // Add early break if list size is still tiny:
+                    break;
+                }
+                else {
+                    float sampleDepth = sortedBrushStrokesList[sampleIndex].bindPos.z;
+                    // Which half of current range to sample next
+                    if(brushDepth < sampleDepth) { 
+                        sampleCoord += 1f / Mathf.Pow(2f, s + 2f);
+                    }
+                    else { 
+                        sampleCoord -= 1f / Mathf.Pow(2f, s + 2f);
+                    }
+                    sampleIndex = Mathf.RoundToInt((float)listSize * sampleCoord);  // *** Might have to use FLoorToInt !!! ****
+                }                
+            }
+
+            sortedBrushStrokesList.Insert(sampleIndex, singleCritterGenericStrokesArray[b]);
         }
         // Copy sorted list into actual buffer:
         if(sortedBrushStrokesList.Count == singleCritterGenericStrokesArray.Length) {
@@ -1757,8 +1784,7 @@ public class TheRenderKing : MonoBehaviour {
         }
         else {
             Debug.Log("Arrays don't match length!!! sorted: " + sortedBrushStrokesList.Count.ToString() + ", master: " + singleCritterGenericStrokesArray.Length.ToString());
-        }
-        
+        }        
 
                 
         singleCritterGenericStrokesCBuffer.SetData(singleCritterGenericStrokesArray); // send data to gPU

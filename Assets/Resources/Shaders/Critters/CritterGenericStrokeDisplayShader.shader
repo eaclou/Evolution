@@ -51,28 +51,25 @@
 				float3 critterWorldPos = critterSimData.worldPos;
 
 				// WEIRD COORDINATES!!! Positive Z = DEEPER!!!
-				float3 strokeBindPos = float3(genericStrokeData.bindPos.x, genericStrokeData.bindPos.z, -genericStrokeData.bindPos.y) * 0.8;
+				float3 strokeBindPos = genericStrokeData.bindPos; //float3(genericStrokeData.bindPos.x, genericStrokeData.bindPos.z, -genericStrokeData.bindPos.y) * 0.8;
 
 				//Temp align with creatures:
-				float2 critterForwardDir = critterSimData.heading;
-				float2 critterRightDir = float2(critterForwardDir.y, -critterForwardDir.x);
+				float3 critterForwardDir = float3(critterSimData.heading, 0);
+				float3 critterRightDir = float3(critterForwardDir.y, -critterForwardDir.x, 0);
 								
-				strokeBindPos.xy = critterRightDir * strokeBindPos.x + critterForwardDir * strokeBindPos.y;
+				strokeBindPos = critterRightDir * strokeBindPos.x + critterForwardDir * strokeBindPos.y;
+				strokeBindPos.z = genericStrokeData.bindPos.z;
 
 				float3 brushScale = float3(genericStrokeData.scale, 1);
-				float3 bitangent = cross(genericStrokeData.normal, genericStrokeData.tangent);
 								
-				float3 worldNormal = float3(genericStrokeData.normal.x, genericStrokeData.normal.z, -genericStrokeData.normal.y);
-				worldNormal.xy = critterRightDir * worldNormal.x + critterForwardDir * worldNormal.y;
-				float3 worldTangent = float3(genericStrokeData.tangent.x, genericStrokeData.tangent.z, -genericStrokeData.tangent.y);
-				worldTangent.xy = critterRightDir * worldTangent.x + critterForwardDir * worldTangent.y;
-				float3 worldBitangent = float3(bitangent.x, bitangent.z, -bitangent.y);
-				worldBitangent.xy = critterRightDir * worldBitangent.x + critterForwardDir * worldBitangent.y;
+				float3 worldNormal = genericStrokeData.normal;
+				float3 worldTangent = genericStrokeData.tangent;
+				float3 worldBitangent = cross(worldNormal, worldTangent);
 
-				float2 quadPoints = float2((quadVerticesCBuffer[id].x + 0.5) * 2, quadVerticesCBuffer[id].y * 3.5);
-				float3 brushSpriteVertexPos = (quadPoints.x + 0.5) * worldBitangent * brushScale.x + (quadPoints.y) * worldTangent * brushScale.y;
-
-				float3 vertexWorldPos = critterWorldPos + strokeBindPos + brushSpriteVertexPos * 1.25;
+				//float2 quadPoints = float2((quadVerticesCBuffer[id].x + 0.5) * 2, quadVerticesCBuffer[id].y * 3.5);
+				//float3 brushSpriteVertexPos = (quadPoints.x + 0.5) * worldBitangent * brushScale.x + (quadPoints.y) * worldTangent * brushScale.y;
+				
+				float3 vertexWorldPos = critterWorldPos + strokeBindPos + quadVerticesCBuffer[id] * 0.45 * length(genericStrokeData.scale);
 
 				o.vertex = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(vertexWorldPos, 1.0)));
 				o.uv = quadVerticesCBuffer[id].xy + 0.5;	
@@ -87,7 +84,7 @@
 				
 				fixed4 col = tex2Dlod(_PatternTex, float4(patternUV, 0, 0));
 								
-				float crudeDiffuse = dot(normalize(worldNormal), normalize(float3(-0.52, 0.35, -1))) * 0.75 + 0.25;
+				float crudeDiffuse = dot(normalize(worldNormal), normalize(float3(-0.52, 0.35, 1))) * 0.75 + 0.25;
 				o.color = float4(lerp(critterInitData.secondaryHue, critterInitData.primaryHue, col.x) * crudeDiffuse, 1); //genericStrokeData.bindPos.x * 0.5 + 0.5, genericStrokeData.bindPos.z * 0.33 + 0.5, genericStrokeData.bindPos.y * 0.5 + 0.5, 1);
 				//o.color.rgb = ;
 				//o.color.rgb *= 0.4;
