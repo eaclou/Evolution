@@ -62,14 +62,12 @@
 
 				float3 brushScale = float3(genericStrokeData.scale, 1);
 								
-				float3 worldNormal = genericStrokeData.normal;
-				float3 worldTangent = genericStrokeData.tangent;
+				float3 worldNormal = genericStrokeData.bindNormal;
+				float3 worldTangent = genericStrokeData.bindTangent;
 				float3 worldBitangent = cross(worldNormal, worldTangent);
 
-				//float2 quadPoints = float2((quadVerticesCBuffer[id].x + 0.5) * 2, quadVerticesCBuffer[id].y * 3.5);
-				//float3 brushSpriteVertexPos = (quadPoints.x + 0.5) * worldBitangent * brushScale.x + (quadPoints.y) * worldTangent * brushScale.y;
-				
-				float3 vertexWorldPos = critterWorldPos + strokeBindPos + quadVerticesCBuffer[id] * 0.45 * length(genericStrokeData.scale);
+				// old //float3 vertexWorldPos = critterWorldPos + strokeBindPos + quadVerticesCBuffer[id] * 0.645 * length(genericStrokeData.scale);
+				float3 vertexWorldPos = genericStrokeData.worldPos + quadVerticesCBuffer[id] * 0.5 * length(genericStrokeData.scale) * critterSimData.growthPercentage * 1;
 
 				o.vertex = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(vertexWorldPos, 1.0)));
 				o.uv = quadVerticesCBuffer[id].xy + 0.5;	

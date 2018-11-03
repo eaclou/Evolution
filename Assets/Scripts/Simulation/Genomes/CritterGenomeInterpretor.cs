@@ -57,27 +57,36 @@ public class CritterGenomeInterpretor {
         float segmentsSummedCritterLength = GetCritterFullsizeLength(genome);
         float bindPoseY = point.initCoordsNormalized.y * segmentsSummedCritterLength;
 
-        float widthMultiplier = 1f;
-        float heightMultiplier = 1f;
+        float widthMultiplier = 0.5f;
+        float heightMultiplier = 0.5f;
+        // simplify round:
+        float pointCircleCoord = point.initCoordsNormalized.y * 2f - 1f; // get normalized coords 0 to 1 to sample circle
+        float circleSize = Mathf.Sqrt(1f - pointCircleCoord * pointCircleCoord);  // pythagorean theorem
+        float frontCapLerpAmount = Mathf.Clamp01(point.initCoordsNormalized.y - gene.creatureFrontTaperSize) / gene.creatureFrontTaperSize;
+        float backCapLerpAmount = Mathf.Clamp01((1f - point.initCoordsNormalized.y) - gene.creatureFrontTaperSize) / gene.creatureBackTaperSize;
+        float circularizeAmount = Mathf.Max(frontCapLerpAmount, backCapLerpAmount);
+        float circleWidthMultiplier = Mathf.Lerp(widthMultiplier, circleSize, circularizeAmount) * 0.5f;  // *0.5 for radius vs. diameter
+        float circleHeightMultiplier = Mathf.Lerp(heightMultiplier, circleSize, circularizeAmount) * 0.5f;
 
         if(bindPoseY > gene.tailLength) {
             if(bindPoseY > gene.bodyLength + gene.tailLength) {
                 if(bindPoseY > gene.headLength + gene.bodyLength + gene.tailLength) {
                     // this point is in the MOUTH Section:
                     float subSectionCoords01 = (bindPoseY - gene.tailLength - gene.bodyLength - gene.headLength) / gene.mouthLength;
-                    float mouthTipBlendLerpAmount = Mathf.Clamp01((gene.mouthEndCapTaperSize * 0.5f - (1f - subSectionCoords01)) / (gene.mouthEndCapTaperSize * 0.5f));
+                    //float mouthTipBlendLerpAmount = Mathf.Clamp01((gene.mouthEndCapTaperSize * 0.5f - (1f - subSectionCoords01)) / (gene.mouthEndCapTaperSize * 0.5f));
                     float headBlendLerpAmount = Mathf.Clamp01((gene.mouthToHeadTransitionSize * 0.5f - (subSectionCoords01)) / (gene.mouthToHeadTransitionSize * 0.5f)) * 0.5f;
-
+                                        
                     float headSectionWidth = gene.bodyBackWidth;
                     float mouthSectionWidth = Mathf.Lerp(gene.mouthBackWidth, gene.mouthFrontWidth, subSectionCoords01);
                     widthMultiplier = Mathf.Lerp(mouthSectionWidth, headSectionWidth, headBlendLerpAmount);
-                    widthMultiplier = Mathf.Lerp(widthMultiplier, 0f, Mathf.Pow(mouthTipBlendLerpAmount, 1f));
+                    //widthMultiplier = Mathf.Lerp(mult, widthMultiplier, headBlendLerpAmount);
+                    //widthMultiplier = Mathf.Lerp(widthMultiplier, 0f, Mathf.Pow(mouthTipBlendLerpAmount, 1f));
                     //widthMultiplier = widthMultiplier * gene.mouthLength;
 
                     float headSectionHeight = gene.bodyBackHeight;
                     float mouthSectionHeight = Mathf.Lerp(gene.mouthBackHeight, gene.mouthFrontHeight, subSectionCoords01);
                     heightMultiplier = Mathf.Lerp(mouthSectionHeight, headSectionHeight, headBlendLerpAmount);
-                    heightMultiplier = Mathf.Lerp(heightMultiplier, 0f, Mathf.Pow(mouthTipBlendLerpAmount, 1f));
+                    //heightMultiplier = Mathf.Lerp(heightMultiplier, 0f, Mathf.Pow(mouthTipBlendLerpAmount, 1f));
                     //heightMultiplier = heightMultiplier * gene.mouthLength;
 
                     if (bindPoseY > segmentsSummedCritterLength) { // ERROR                        
@@ -130,18 +139,18 @@ public class CritterGenomeInterpretor {
             // this point is in the TAIL Section:
             float subSectionCoords01 = bindPoseY / gene.tailLength; // divide by zero if no tail?
             float bodyBlendLerpAmount = Mathf.Clamp01((gene.bodyToTailTransitionSize * 0.5f - (1f - subSectionCoords01)) / (gene.bodyToTailTransitionSize * 0.5f)) * 0.5f;
-            float tailTipBlendLerpAmount = Mathf.Clamp01((gene.tailEndCapTaperSize - subSectionCoords01) / (gene.tailEndCapTaperSize));
+            //float tailTipBlendLerpAmount = Mathf.Clamp01((gene.tailEndCapTaperSize - subSectionCoords01) / (gene.tailEndCapTaperSize));
 
             float tailSectionWidth = Mathf.Lerp(gene.tailBackWidth, gene.tailFrontWidth, subSectionCoords01);
             float bodySectionWidth = gene.bodyBackWidth;
             widthMultiplier = Mathf.Lerp(tailSectionWidth, bodySectionWidth, bodyBlendLerpAmount);
-            widthMultiplier = Mathf.Lerp(widthMultiplier, 0f, tailTipBlendLerpAmount);
+            //widthMultiplier = Mathf.Lerp(widthMultiplier, 0f, tailTipBlendLerpAmount);
             //widthMultiplier = widthMultiplier * gene.tailLength;
 
             float tailSectionHeight = Mathf.Lerp(gene.tailBackHeight, gene.tailFrontHeight, subSectionCoords01);
             float bodySectionHeight = gene.bodyBackHeight;
             heightMultiplier = Mathf.Lerp(tailSectionHeight, bodySectionHeight, bodyBlendLerpAmount);
-            heightMultiplier = Mathf.Lerp(heightMultiplier, 0f, tailTipBlendLerpAmount);
+            //heightMultiplier = Mathf.Lerp(heightMultiplier, 0f, tailTipBlendLerpAmount);
             //heightMultiplier = heightMultiplier * gene.tailLength;
         }
 
@@ -149,6 +158,7 @@ public class CritterGenomeInterpretor {
         //float crossSectionWidth = 
 
         // Now Body Modifiers are processed:
+        float radiusMult = 0f;
         for(int i = 0; i < gene.shapeModifiersList.Count; i++) {
             CritterModuleCoreGenome.ShapeModifierData modifierData = gene.shapeModifiersList[i];
             if(modifierData.modifierTypeID == CritterModuleCoreGenome.ShapeModifierType.Extrude) {  // extrude
@@ -167,13 +177,34 @@ public class CritterGenomeInterpretor {
                     maskValue *= rawMaskValue * taperMask;
                     
                 }
-                
-                float radiusMult = maskValue * modifierData.amplitude + 1f;
-                widthMultiplier *= radiusMult;
-                heightMultiplier *= radiusMult;
+                radiusMult += maskValue * modifierData.amplitude;
+                // OLD:
+                //float radiusMult = maskValue * modifierData.amplitude + 1f;
+                //widthMultiplier *= radiusMult;
+                //heightMultiplier *= radiusMult;
             }
         }
+        radiusMult = Mathf.Min(Mathf.Max(radiusMult + 1f, 0.5f), 1.5f);
+        widthMultiplier *= radiusMult;
+        heightMultiplier *= radiusMult;
 
+
+        widthMultiplier *= circleWidthMultiplier;
+        heightMultiplier *= circleHeightMultiplier;
+
+        // simplify round:
+        /*
+        float pointCircleCoord = point.initCoordsNormalized.y * 2f - 1f; // get normalized coords 0 to 1 to sample circle
+        float circleWidthMultiplier = Mathf.Sqrt(1f - pointCircleCoord * pointCircleCoord);  // pythagorean theorem
+
+        float frontCapLerpAmount = Mathf.Clamp01(point.initCoordsNormalized.y - gene.creatureFrontTaperSize) * 2f;
+        float backCapLerpAmount = Mathf.Clamp01((1f - point.initCoordsNormalized.y) - gene.creatureFrontTaperSize) * 2f;
+        float circularizeAmount = Mathf.Max(frontCapLerpAmount, backCapLerpAmount);
+
+        widthMultiplier = Mathf.Lerp(widthMultiplier, circleWidthMultiplier, circularizeAmount) * 0.5f;  // *0.5 for radius vs. diameter
+        heightMultiplier = Mathf.Lerp(heightMultiplier, circleWidthMultiplier, circularizeAmount) * 0.5f;
+        */
+        
         float finalCreatureLength = segmentsSummedCritterLength * gene.creatureBaseLength;
         float finalCreatureThickness = 1f / gene.creatureBaseAspectRatio * finalCreatureLength;
         point.bindPos = new Vector3(point.initCoordsNormalized.x * widthMultiplier * finalCreatureThickness, point.initCoordsNormalized.y * finalCreatureLength - finalCreatureLength * 0.5f, point.initCoordsNormalized.z * heightMultiplier * finalCreatureThickness);
@@ -198,13 +229,13 @@ public class CritterGenomeInterpretor {
 
             inValue = dist;
         }
-        if(maskData.coordinateTypeID == CritterModuleCoreGenome.MaskCoordinateType.SingleAxis) {
+        /*if(maskData.coordinateTypeID == CritterModuleCoreGenome.MaskCoordinateType.SingleAxis) {
 
             float dot = Vector2.Dot(new Vector2(point.initCoordsNormalized.x, point.initCoordsNormalized.z).normalized, maskData.axisDir.normalized);  // *** IF I CHANGE coordinate Axes this needs to change!! ***
 
             inValue = (dot * 0.5f + 0.5f) / maskData.cycleDistance;
-        }
-
+        }*/
+        //inValue = Mathf.Clamp01(inValue); // *** ??? avoid discontinuities?
         // FUNCTION TYPES:
         if (maskData.functionTypeID == CritterModuleCoreGenome.MaskFunctionType.Linear) {            
             outValue = Mathf.Clamp01(1f - inValue);

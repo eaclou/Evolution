@@ -291,8 +291,11 @@ public class TheRenderKing : MonoBehaviour {
 	    public int parentIndex;  // which Critter is this attached to?	
 	    public int brushType;
         public Vector3 bindPos;  // object-coordinates (z=forward, y=up)
-        public Vector3 normal;
-        public Vector3 tangent;
+        public Vector3 worldPos;
+        public Vector3 bindNormal;
+        public Vector3 worldNormal;
+        public Vector3 bindTangent;
+        public Vector3 worldTangent;
         public Vector2 uv;
         public Vector2 scale;
     }
@@ -442,7 +445,7 @@ public class TheRenderKing : MonoBehaviour {
         */
     }
     private int GetMemorySizeCritterGenericData() {
-        int numBytes = sizeof(int) * 2 + sizeof(float) * 13;
+        int numBytes = sizeof(int) * 2 + sizeof(float) * 22;
         return numBytes;
     }
     
@@ -1717,8 +1720,8 @@ public class TheRenderKing : MonoBehaviour {
                 Vector3 normal = Vector3.Cross(vTangentAvg, uTangentAvg).normalized;
 
                 brushPointArray[indexCenter].normal = normal;
-                singleCritterGenericStrokesArray[indexCenter].normal = normal;
-                singleCritterGenericStrokesArray[indexCenter].tangent = vTangentAvg.normalized;
+                singleCritterGenericStrokesArray[indexCenter].bindNormal = normal;
+                singleCritterGenericStrokesArray[indexCenter].bindTangent = vTangentAvg.normalized;
                 Vector2 scale = new Vector2(uTangentAvg.magnitude, vTangentAvg.magnitude);
                 singleCritterGenericStrokesArray[indexCenter].scale = scale;
 
@@ -1753,7 +1756,7 @@ public class TheRenderKing : MonoBehaviour {
 
             int numSamples = 4;
             float sampleCoord = 0.5f;
-            int sampleIndex = Mathf.RoundToInt((float)listSize * sampleCoord);
+            int sampleIndex = Mathf.FloorToInt((float)listSize * sampleCoord);  // Floor?
             
             for(int s = 0; s < numSamples; s++) {
                 // progressively bisect temporary sorted brushPointList to check if it is bigger/smaller
@@ -1761,7 +1764,12 @@ public class TheRenderKing : MonoBehaviour {
                 if(listSize < Mathf.Pow(2f, s)) { // Add early break if list size is still tiny:
                     break;
                 }
-                else {
+                else {   
+                    if(sampleIndex >= sortedBrushStrokesList.Count) {  // *** GROSS HACK!!! **** 
+                        sampleIndex = sortedBrushStrokesList.Count - 1;
+                        //Debug.LogError("error: sampleIndex= " + sampleIndex.ToString() + ", listCount: " + sortedBrushStrokesList.Count.ToString());
+                        //sortedBrushStrokesList.Add(singleCritterGenericStrokesArray[b]);
+                    }
                     float sampleDepth = sortedBrushStrokesList[sampleIndex].bindPos.z;
                     // Which half of current range to sample next
                     if(brushDepth < sampleDepth) { 
@@ -1773,8 +1781,10 @@ public class TheRenderKing : MonoBehaviour {
                     sampleIndex = Mathf.RoundToInt((float)listSize * sampleCoord);  // *** Might have to use FLoorToInt !!! ****
                 }                
             }
-
+                        
             sortedBrushStrokesList.Insert(sampleIndex, singleCritterGenericStrokesArray[b]);
+            
+            
         }
         // Copy sorted list into actual buffer:
         if(sortedBrushStrokesList.Count == singleCritterGenericStrokesArray.Length) {
@@ -1953,6 +1963,15 @@ public class TheRenderKing : MonoBehaviour {
         computeShaderCritters.SetBuffer(kernelCSCSSimulateCritterSkinStrokes, "critterSkinStrokesWriteCBuffer", critterSkinStrokesCBuffer);
         computeShaderCritters.SetFloat("_MapSize", SimulationManager._MapSize);
         computeShaderCritters.Dispatch(kernelCSCSSimulateCritterSkinStrokes, critterSkinStrokesCBuffer.count / 16, 1, 1);
+    }
+    private void SimCritterGenericStrokes() {
+        int kernelCSSimulateCritterGenericStrokes = computeShaderCritters.FindKernel("CSSimulateCritterGenericStrokes");        
+        computeShaderCritters.SetTexture(kernelCSSimulateCritterGenericStrokes, "velocityRead", fluidManager._VelocityA);
+        computeShaderCritters.SetBuffer(kernelCSSimulateCritterGenericStrokes, "critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
+        computeShaderCritters.SetBuffer(kernelCSSimulateCritterGenericStrokes, "critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
+        computeShaderCritters.SetBuffer(kernelCSSimulateCritterGenericStrokes, "critterGenericStrokesWriteCBuffer", critterGenericStrokesCBuffer);
+        computeShaderCritters.SetFloat("_MapSize", SimulationManager._MapSize);
+        computeShaderCritters.Dispatch(kernelCSSimulateCritterGenericStrokes, critterGenericStrokesCBuffer.count / 16, 1, 1);
     }
     private void SimTreeOfLife() {
                 
@@ -2155,6 +2174,7 @@ public class TheRenderKing : MonoBehaviour {
         //UpdateAgentHighlightData();
 
         SimCritterSkinStrokes();
+        SimCritterGenericStrokes();
 
         baronVonWater.altitudeMapRef = baronVonTerrain.terrainHeightMap;
         float camDist = Mathf.Clamp01(-1f * simManager.cameraManager.gameObject.transform.position.z / (210f - 10f));

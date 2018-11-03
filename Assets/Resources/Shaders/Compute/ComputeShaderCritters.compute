@@ -85,7 +85,40 @@ void CSUpdateCritterGenericStrokes (uint3 id : SV_DispatchThreadID)
 [numthreads(16,1,1)]
 void CSSimulateCritterGenericStrokes (uint3 id : SV_DispatchThreadID)
 {
+	CritterGenericStrokeData strokeData = critterGenericStrokesWriteCBuffer[id.x];
+	int agentIndex = strokeData.parentIndex;
+
+	CritterInitData critterInitData = critterInitDataCBuffer[agentIndex];
+	CritterSimData critterSimData = critterSimDataCBuffer[agentIndex];
+
+	float3 critterWorldPos = critterSimData.worldPos;
+	float3 critterCurScale = float3(1,1,1) * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage) * 0.5;
+	//float3 critterCurScale = critterInitData.boundingBoxSize * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage) * 0.5;
 		
+	float3 spriteLocalPos = strokeData.bindPos * critterCurScale;
+				
+	float3 spriteWorldOffset = spriteLocalPos; // **** Vector from critter origin to sprite origin		
+	// SWIM ANIMS:
+	spriteWorldOffset = GetAnimatedPos(spriteWorldOffset, float3(0,0,0), critterInitData, critterSimData, strokeData.bindPos);		
+			
+	float3 newWorldPos = critterWorldPos + spriteWorldOffset;
+	float3 curWorldPos = strokeData.worldPos;
+
+	// FLUID FLOW:
+	float2 uv = curWorldPos.xy / _MapSize;
+	float2 fluidVel = velocityRead.SampleLevel(_LinearRepeat, uv, 2).xy;
+	float speedMult = 0.035 * _MapSize;
+	curWorldPos.xy = curWorldPos.xy + fluidVel * speedMult;
+	// NOISE:
+	float3 noiseVel = Value3D(curWorldPos * 0.05, 17.75).yzw;	
+
+	float pinnedAmount = saturate((1.0 - critterSimData.decayPercentage * 12));
+	pinnedAmount = 1;
+	
+	float3 worldPosition = lerp(curWorldPos, newWorldPos, pinnedAmount);
+			
+	strokeData.worldPos = worldPosition;
+	critterGenericStrokesWriteCBuffer[id.x] = strokeData;
 }
 
 /*   OLD:::::
