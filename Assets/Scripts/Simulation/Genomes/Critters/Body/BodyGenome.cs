@@ -49,10 +49,28 @@ public class BodyGenome {
     public void CalculateFullsizeBoundingBox() {
         fullsizeBoundingBox = Vector3.one;
 
-        if(coreGenome != null) {
+        /*if(coreGenome != null) {
             // calculate fullsizeBoundingBox from genome stuff
-
-        }
+            float fullLength = coreGenome.creatureBaseLength * (coreGenome.mouthLength + coreGenome.headLength + coreGenome.bodyLength + coreGenome.tailLength);
+            float approxAvgRadius = fullLength / coreGenome.creatureBaseAspectRatio;
+            fullsizeBoundingBox = new Vector3(approxAvgRadius, coreGenome.creatureBaseLength, approxAvgRadius);
+        }*/
+    }
+    public Vector3 GetFullsizeBoundingBox() {
+        return Vector3.one;
+        /*
+        float fullLength = coreGenome.creatureBaseLength * (coreGenome.mouthLength + coreGenome.headLength + coreGenome.bodyLength + coreGenome.tailLength);
+        float approxAvgRadius = fullLength / coreGenome.creatureBaseAspectRatio;
+        Vector3 size = new Vector3(approxAvgRadius, fullLength, approxAvgRadius);
+        return size;
+        */
+        //fullsizeBoundingBox = Vector3.one;
+        /*if(coreGenome != null) {
+            // calculate fullsizeBoundingBox from genome stuff
+            float fullLength = coreGenome.creatureBaseLength * (coreGenome.mouthLength + coreGenome.headLength + coreGenome.bodyLength + coreGenome.tailLength);
+            float approxAvgRadius = fullLength / coreGenome.creatureBaseAspectRatio;
+            fullsizeBoundingBox = new Vector3(approxAvgRadius, coreGenome.creatureBaseLength, approxAvgRadius);
+        }*/
     }
 
     public void GenerateRandomBodyGenome() {
@@ -63,6 +81,9 @@ public class BodyGenome {
         //energyGenome.GenerateRandomGenome();
         //exteriorGenome.GenerateRandomGenome();
         movementGenome.GenerateRandomGenome();
+
+        // Calculate BoundingBox:
+        //CalculateFullsizeBoundingBox();
     }
     
     public void InitializeBrainGenome(List<NeuronGenome> neuronList) {

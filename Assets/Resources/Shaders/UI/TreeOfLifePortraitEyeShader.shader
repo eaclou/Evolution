@@ -105,8 +105,8 @@
 				vertexWorldOffset.xy = vertexWorldOffset.xy * critterCurScale.x * saturate(0.99 - critterSimData.decayPercentage * 2) * 0.5;				
 				
 				float3 pivot = _TopLeftCornerWorldPos.xyz + (_CamRightDir.xyz * 0.6 - _CamUpDir.xyz * 0.6) * _CamScale; 
-				spriteLocalPos = GetAnimatedPos(spriteLocalPos, float3(0,0,0), critterInitData, critterSimData, float3(eyeData.localPos, 0));
-				//float3 localPos = GetAnimatedPos(spriteLocalPos, float3(0,0,0), critterInitData, critterSimData, float3(eyeData.localPos, 0));
+				spriteLocalPos = GetAnimatedPosOld(spriteLocalPos, float3(0,0,0), critterInitData, critterSimData, float3(eyeData.localPos, 0));
+				//float3 localPos = GetAnimatedPosOld(spriteLocalPos, float3(0,0,0), critterInitData, critterSimData, float3(eyeData.localPos, 0));
 				spriteLocalPos.z += 0.033;
 				float3 worldPosition = pivot + spriteLocalPos * 0.8;
 				

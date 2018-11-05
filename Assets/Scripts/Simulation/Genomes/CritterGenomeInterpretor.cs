@@ -57,16 +57,17 @@ public class CritterGenomeInterpretor {
         float segmentsSummedCritterLength = GetCritterFullsizeLength(genome);
         float bindPoseY = point.initCoordsNormalized.y * segmentsSummedCritterLength;
 
-        float widthMultiplier = 0.5f;
-        float heightMultiplier = 0.5f;
-        // simplify round:
-        float pointCircleCoord = point.initCoordsNormalized.y * 2f - 1f; // get normalized coords 0 to 1 to sample circle
-        float circleSize = Mathf.Sqrt(1f - pointCircleCoord * pointCircleCoord);  // pythagorean theorem
+        float widthMultiplier;
+        float heightMultiplier;
+        // simplify round:         
         float frontCapLerpAmount = Mathf.Clamp01(point.initCoordsNormalized.y - gene.creatureFrontTaperSize) / gene.creatureFrontTaperSize;
         float backCapLerpAmount = Mathf.Clamp01((1f - point.initCoordsNormalized.y) - gene.creatureFrontTaperSize) / gene.creatureBackTaperSize;
         float circularizeAmount = Mathf.Max(frontCapLerpAmount, backCapLerpAmount);
-        float circleWidthMultiplier = Mathf.Lerp(widthMultiplier, circleSize, circularizeAmount) * 0.5f;  // *0.5 for radius vs. diameter
-        float circleHeightMultiplier = Mathf.Lerp(heightMultiplier, circleSize, circularizeAmount) * 0.5f;
+        /// **** FIX THIS!! ***  circle coords depend on taper distance?
+        float pointCircleCoord = point.initCoordsNormalized.y * 2f - 1f; // get normalized coords 0 to 1 to sample circle 
+        float circleSize = Mathf.Sqrt(1f - pointCircleCoord * pointCircleCoord);  // pythagorean theorem
+        float circleWidthMultiplier = Mathf.Lerp(1f, circleSize, circularizeAmount) * 0.5f;  // *0.5 for radius vs. diameter
+        float circleHeightMultiplier = Mathf.Lerp(1f, circleSize, circularizeAmount) * 0.5f;
 
         if(bindPoseY > gene.tailLength) {
             if(bindPoseY > gene.bodyLength + gene.tailLength) {
@@ -156,7 +157,7 @@ public class CritterGenomeInterpretor {
 
         //Vector2 crossSectionScale = new Vector2(widthMultiplier, heightMultiplier);
         //float crossSectionWidth = 
-
+        
         // Now Body Modifiers are processed:
         float radiusMult = 0f;
         for(int i = 0; i < gene.shapeModifiersList.Count; i++) {
@@ -183,13 +184,14 @@ public class CritterGenomeInterpretor {
                 //widthMultiplier *= radiusMult;
                 //heightMultiplier *= radiusMult;
             }
-        }
+        }        
         radiusMult = Mathf.Min(Mathf.Max(radiusMult + 1f, 0.5f), 1.5f);
         widthMultiplier *= radiusMult;
         heightMultiplier *= radiusMult;
+        
 
 
-        widthMultiplier *= circleWidthMultiplier;
+        widthMultiplier *= circleWidthMultiplier;  // this includes * 0.5f from earlier to account for radius vs diameter
         heightMultiplier *= circleHeightMultiplier;
 
         // simplify round:

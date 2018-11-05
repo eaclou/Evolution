@@ -105,10 +105,10 @@
 				vertexWorldOffset.xy = vertexWorldOffset.xy * brushAspectRatio * critterCurScale;
 								
 				// ANIMATIONS:
-				spriteLocalPos = GetAnimatedPos(spriteLocalPos, float3(0,0,0), critterInitData, critterSimData, skinStrokeData.localPos);
+				spriteLocalPos = GetAnimatedPosOld(spriteLocalPos, float3(0,0,0), critterInitData, critterSimData, skinStrokeData.localPos);
 				float magnitude = 0.5;
 				//float swimAngle = GetSwimAngle(strokeLocalPos.y, critterSimData.moveAnimCycle, critterSimData.accel, critterSimData.smoothedThrottle, magnitude, critterSimData.turnAmount);
-				float swimAngle = GetSwimAngle(skinStrokeData.localPos.y, critterSimData.moveAnimCycle, critterSimData.accel, critterSimData.smoothedThrottle, magnitude, critterSimData.turnAmount);
+				float swimAngle = GetSwimAngleOld(skinStrokeData.localPos.y, critterSimData.moveAnimCycle, critterSimData.accel, critterSimData.smoothedThrottle, magnitude, critterSimData.turnAmount);
 				vertexWorldOffset = RotatePointAroundZAngle(float3(0,0,0), swimAngle, vertexWorldOffset);
 				//vertexWorldOffset // Rotate with Critter:
 				//float2 forward1 = critterSimData.heading;
@@ -134,7 +134,7 @@
 				float3 localNormal = normalize(skinStrokeData.localPos);
 				localNormal = normalize(float3(localNormal.x * critterInitData.boundingBoxSize.y, localNormal.y * critterInitData.boundingBoxSize.x, localNormal.z * critterInitData.boundingBoxSize.y));
 				
-				float3 worldNormal = GetAnimatedPos(localNormal, float3(0,0,0), critterInitData, critterSimData, skinStrokeData.localPos); //skinStrokeData.localPos;
+				float3 worldNormal = GetAnimatedPosOld(localNormal, float3(0,0,0), critterInitData, critterSimData, skinStrokeData.localPos); //skinStrokeData.localPos;
 				o.worldNormal = normalize(worldNormal);
 
 				// UVS:

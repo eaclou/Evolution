@@ -63,7 +63,7 @@
 				
 				float3 spriteWorldOffset = spriteLocalPos; // **** Vector from critter origin to sprite origin		
 				// SWIM ANIMS:
-				spriteWorldOffset = GetAnimatedPos(spriteWorldOffset, float3(0,0,0), critterInitData, critterSimData, bodyStrokeData.localPos);		
+				spriteWorldOffset = GetAnimatedPosOld(spriteWorldOffset, float3(0,0,0), critterInitData, critterSimData, bodyStrokeData.localPos);		
 
 				float3 worldPosition = critterWorldPos + spriteWorldOffset + quadPoint * 0.02 * critterCurScale;
 

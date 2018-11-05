@@ -1101,7 +1101,7 @@ public class SimulationManager : MonoBehaviour {
         numAgentsBorn++;
         currentOldestAgent = agentsArray[rankedIndicesList[0]].scoreCounter;
         agentsArray[agentIndex].InitializeSpawnAgentFromEggSack(agentIndex, sourceCandidate, parentEggSack); // Spawn that genome in dead Agent's body and revive it!
-        theRenderKing.UpdateCritterGenericStrokesData(agentIndex, sourceCandidate.candidateGenome);
+        theRenderKing.UpdateCritterGenericStrokesData(agentsArray[agentIndex]); // agentIndex, sourceCandidate.candidateGenome);
         //theRenderKing.UpdateAgentWidthsTexture(agentsArray[agentIndex]);
                 
         //agentRespawnCounterArrayOld[speciesIndex] = 0;
@@ -1115,7 +1115,7 @@ public class SimulationManager : MonoBehaviour {
         numAgentsBorn++;
         currentOldestAgent = agentsArray[rankedIndicesList[0]].scoreCounter;
         agentsArray[agentIndex].InitializeSpawnAgentImmaculate(agentIndex, sourceCandidate, GetRandomFoodSpawnPosition()); // Spawn that genome in dead Agent's body and revive it!
-        theRenderKing.UpdateCritterGenericStrokesData(agentIndex, sourceCandidate.candidateGenome);
+        theRenderKing.UpdateCritterGenericStrokesData(agentsArray[agentIndex]); //agentIndex, sourceCandidate.candidateGenome);
         //theRenderKing.UpdateAgentWidthsTexture(agentsArray[agentIndex]);
                 
         //agentRespawnCounterArrayOld[speciesIndex] = 0;

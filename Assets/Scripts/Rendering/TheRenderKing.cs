@@ -290,6 +290,7 @@ public class TheRenderKing : MonoBehaviour {
     public struct CritterGenericStrokeData {
 	    public int parentIndex;  // which Critter is this attached to?	
 	    public int brushType;
+        public float t;
         public Vector3 bindPos;  // object-coordinates (z=forward, y=up)
         public Vector3 worldPos;
         public Vector3 bindNormal;
@@ -445,7 +446,7 @@ public class TheRenderKing : MonoBehaviour {
         */
     }
     private int GetMemorySizeCritterGenericData() {
-        int numBytes = sizeof(int) * 2 + sizeof(float) * 22;
+        int numBytes = sizeof(int) * 2 + sizeof(float) * 23;
         return numBytes;
     }
     
@@ -1653,7 +1654,7 @@ public class TheRenderKing : MonoBehaviour {
 
     }
 
-    public void UpdateCritterGenericStrokesData(int critterIndex, AgentGenome genome) {
+    public void UpdateCritterGenericStrokesData(Agent agent) { //int critterIndex, AgentGenome genome) {
         ComputeBuffer singleCritterGenericStrokesCBuffer = new ComputeBuffer(numStrokesPerCritterGeneric, GetMemorySizeCritterGenericData());
         CritterGenericStrokeData[] singleCritterGenericStrokesArray = new CritterGenericStrokeData[numStrokesPerCritterGeneric];  // optimize this later?? ***
 
@@ -1685,15 +1686,17 @@ public class TheRenderKing : MonoBehaviour {
                 newBrushPoint.uv = new Vector2((float)a / (float)crossResolution, (float)y / (float)lengthResolution);
                 newBrushPoint.ix = a;
                 newBrushPoint.iy = y;
-                newBrushPoint = CritterGenomeInterpretor.ProcessBrushPoint(newBrushPoint, genome);                
+                newBrushPoint = CritterGenomeInterpretor.ProcessBrushPoint(newBrushPoint, agent.candidateRef.candidateGenome);
+                
                 brushPointArray[brushIndex] = newBrushPoint;
 
                 // Create Data:
                 CritterGenericStrokeData newData = new CritterGenericStrokeData();
-                newData.parentIndex = critterIndex;
+                newData.parentIndex = agent.index;
                 newData.brushType = 0;
+                newData.t = yLerp;
                 newData.bindPos = newBrushPoint.bindPos;
-                newData.scale = Vector2.one;
+                newData.scale = Vector2.one; // new Vector2(UnityEngine.Random.Range(0.75f, 1.33f), UnityEngine.Random.Range(0.75f, 1.33f));
                 newData.uv = newBrushPoint.uv;
 
                 singleCritterGenericStrokesArray[brushIndex] = newData;
@@ -1717,13 +1720,37 @@ public class TheRenderKing : MonoBehaviour {
                 Vector3 uTangentAvg = (brushPointArray[indexPosX].bindPos - brushPointArray[indexNegX].bindPos);
                 Vector3 vTangentAvg = (brushPointArray[indexPosY].bindPos - brushPointArray[indexNegY].bindPos);
 
-                Vector3 normal = Vector3.Cross(vTangentAvg, uTangentAvg).normalized;
+                Vector2 scale;
+                Vector3 normal;
+                Vector3 tangent;
 
+                if (y == 0) {  // tailtip
+                    scale = new Vector2(uTangentAvg.magnitude, vTangentAvg.magnitude) * 0.5f;
+                    normal = new Vector3(0f, -1f, 0f);
+                    tangent = new Vector3(0f, 0f, 1f);
+                }
+                else if (y == lengthResolution - 1) {  // headTip
+                    scale = new Vector2(uTangentAvg.magnitude, vTangentAvg.magnitude) * 0.5f;
+                    normal = new Vector3(0f, 1f, 0f);
+                    tangent = new Vector3(0f, 0f, 1f);
+                }
+                else {  // body
+                    scale = new Vector2(uTangentAvg.magnitude, vTangentAvg.magnitude);
+                    normal = Vector3.Cross(vTangentAvg, uTangentAvg).normalized;
+                    tangent = vTangentAvg.normalized;
+                }
+
+                //Vector3 bitangent = Vector3.Cross(normal, tangent);
+
+                float offsetShiftX = (float)(y % 2) * 0.25f;
+                float randShift = UnityEngine.Random.Range(-1f, 1f) * 0.05f;
+                singleCritterGenericStrokesArray[indexCenter].bindPos += uTangentAvg * offsetShiftX - vTangentAvg * randShift;
                 brushPointArray[indexCenter].normal = normal;
+                Vector2 randScale = new Vector2(UnityEngine.Random.Range(0.75f, 1.33f), UnityEngine.Random.Range(0.75f, 1.33f));
+                singleCritterGenericStrokesArray[indexCenter].scale = new Vector2(scale.x * randScale.x, scale.y * randScale.y);
                 singleCritterGenericStrokesArray[indexCenter].bindNormal = normal;
-                singleCritterGenericStrokesArray[indexCenter].bindTangent = vTangentAvg.normalized;
-                Vector2 scale = new Vector2(uTangentAvg.magnitude, vTangentAvg.magnitude);
-                singleCritterGenericStrokesArray[indexCenter].scale = scale;
+                singleCritterGenericStrokesArray[indexCenter].bindTangent = tangent;
+                
 
                 // Sorting: SLOW!!!!
                 /*int listCount = sortedBrushStrokesList.Count;
@@ -1802,7 +1829,7 @@ public class TheRenderKing : MonoBehaviour {
         int kernelCSUpdateCritterGenericStrokes = computeShaderCritters.FindKernel("CSUpdateCritterGenericStrokes");        
         computeShaderCritters.SetBuffer(kernelCSUpdateCritterGenericStrokes, "critterGenericStrokesWriteCBuffer", critterGenericStrokesCBuffer);
         computeShaderCritters.SetBuffer(kernelCSUpdateCritterGenericStrokes, "critterGenericStrokesUpdateCBuffer", singleCritterGenericStrokesCBuffer);
-        computeShaderCritters.SetInt("_UpdateBufferStartIndex", critterIndex * numStrokesPerCritterGeneric);
+        computeShaderCritters.SetInt("_UpdateBufferStartIndex", agent.index * numStrokesPerCritterGeneric);
         computeShaderCritters.Dispatch(kernelCSUpdateCritterGenericStrokes, singleCritterGenericStrokesCBuffer.count, 1, 1);
         
         singleCritterGenericStrokesCBuffer.Release(); 
@@ -2010,7 +2037,7 @@ public class TheRenderKing : MonoBehaviour {
         if(treeOfLifePortraitCritterInitDataCBuffer != null) {
             treeOfLifePortraitCritterInitDataCBuffer.Release();
         }
-        treeOfLifePortraitCritterInitDataCBuffer = new ComputeBuffer(1, sizeof(float) * 12 + sizeof(int) * 3);
+        treeOfLifePortraitCritterInitDataCBuffer = new ComputeBuffer(1, sizeof(float) * 17 + sizeof(int) * 3);
         treeOfLifePortraitCritterInitDataCBuffer.SetData(treeOfLifePortraitCritterInitDataArray);
         
         //upload data to GPU
@@ -2478,7 +2505,7 @@ public class TheRenderKing : MonoBehaviour {
         //cmdBufferTest.GetTemporaryRT(renderedSceneID, -1, -1, 0, FilterMode.Bilinear);  // save contents of Standard Rendering Pipeline
         //cmdBufferTest.Blit(BuiltinRenderTextureType.CameraTarget, renderedSceneID);  // save contents of Standard Rendering Pipeline
 
-        
+        /*
         // Surface Bits Shadows:
         baronVonWater.waterSurfaceBitsShadowsDisplayMat.SetPass(0);
         baronVonWater.waterSurfaceBitsShadowsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -2491,7 +2518,7 @@ public class TheRenderKing : MonoBehaviour {
         baronVonWater.waterSurfaceBitsDisplayMat.SetFloat("_CamDistNormalized", Mathf.Lerp(0f, 1f, Mathf.Clamp01((simManager.cameraManager.gameObject.transform.position.z * -1f) / 100f)));
         cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, baronVonWater.waterSurfaceBitsShadowsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterSurfaceBitsCBuffer.count);
-
+        */
 
         // SHADOWS TEST:
         critterShadowStrokesDisplayMat.SetPass(0);
@@ -2527,13 +2554,13 @@ public class TheRenderKing : MonoBehaviour {
         foodParticleShadowDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, foodParticleShadowDisplayMat, 0, MeshTopology.Triangles, 6, simManager.foodParticlesCBuffer.count);
         */
-
+        /*
         foodParticleDisplayMat.SetPass(0);
         foodParticleDisplayMat.SetBuffer("foodParticleDataCBuffer", simManager.foodManager.foodParticlesCBuffer);
         foodParticleDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         foodParticleDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, foodParticleDisplayMat, 0, MeshTopology.Triangles, 6, simManager.foodManager.foodParticlesCBuffer.count);
-
+        */
         
         
         
@@ -2597,7 +2624,7 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, baronVonWater.waterDebrisBitsShadowsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterDebrisBitsShadowsCBuffer.count);
         */
-
+        
         // WATER BITS TEMP::::::::::::::^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         baronVonWater.waterNutrientsBitsDisplayMat.SetPass(0);
         baronVonWater.waterNutrientsBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -2666,11 +2693,11 @@ public class TheRenderKing : MonoBehaviour {
         critterDebugGenericStrokeMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         critterDebugGenericStrokeMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
         critterDebugGenericStrokeMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
-        critterDebugGenericStrokeMat.SetBuffer("critterGenericStrokesCBuffer", critterGenericStrokesCBuffer);     
+        critterDebugGenericStrokeMat.SetBuffer("critterGenericStrokesCBuffer", critterGenericStrokesCBuffer);    
+        critterDebugGenericStrokeMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
         //critterDebugGenericStrokeMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
         //critterDebugGenericStrokeMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
-        //critterDebugGenericStrokeMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-        //critterDebugGenericStrokeMat.SetFloat("_MapSize", SimulationManager._MapSize);            
+        critterDebugGenericStrokeMat.SetFloat("_MapSize", SimulationManager._MapSize);            
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, critterDebugGenericStrokeMat, 0, MeshTopology.Triangles, 6, critterGenericStrokesCBuffer.count);
             
 
@@ -2706,7 +2733,7 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, baronVonWater.waterQuadStrokesSmlDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterQuadStrokesCBufferSml.count);
         
-                
+        /*        
         // SURFACE BITS FLOATY:::::  // LILY PADS
         baronVonWater.waterSurfaceBitsDisplayMat.SetPass(0);
         baronVonWater.waterSurfaceBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -2719,7 +2746,7 @@ public class TheRenderKing : MonoBehaviour {
         baronVonWater.waterSurfaceBitsDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
         cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, baronVonWater.waterSurfaceBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterSurfaceBitsCBuffer.count);
-     
+        */
         // DRY LAND!!!!!!
         baronVonTerrain.groundDryLandDisplayMat.SetPass(0);
         baronVonTerrain.groundDryLandDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);

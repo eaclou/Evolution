@@ -4,7 +4,12 @@ struct CritterInitData {
 	float maxEnergy;
 	float3 primaryHue;
 	float3 secondaryHue;
-	float mouthIsActive;	
+	float mouthIsActive;
+	float swimMagnitude;
+	float swimFrequency;
+	float swimAnimSpeed;
+	float bendOffCoord;  // 0 = headtip, 1 = tailtip
+	float bendOnCoord;
 	int bodyPatternX;  // what grid cell of texture sheet to use
 	int bodyPatternY;  // what grid cell of texture sheet to use
 	int speciesID;
@@ -43,6 +48,7 @@ struct CritterSkinStrokeData {
 struct CritterGenericStrokeData {
 	int parentIndex;  // which Critter is this attached to?	
 	int brushType;
+	float t;
 	float3 bindPos;  // object-coordinates (z=forward, y=up)
 	float3 worldPos;
     float3 bindNormal;

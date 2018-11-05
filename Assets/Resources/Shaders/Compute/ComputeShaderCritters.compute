@@ -47,7 +47,7 @@ void CSSimulateSkinCritterStrokes (uint3 id : SV_DispatchThreadID)
 				
 	float3 spriteWorldOffset = spriteLocalPos; // **** Vector from critter origin to sprite origin		
 	// SWIM ANIMS:
-	spriteWorldOffset = GetAnimatedPos(spriteWorldOffset, float3(0,0,0), critterInitData, critterSimData, skinStrokeData.localPos);		
+	spriteWorldOffset = GetAnimatedPosOld(spriteWorldOffset, float3(0,0,0), critterInitData, critterSimData, skinStrokeData.localPos);		
 			
 	float3 newWorldPos = critterWorldPos + spriteWorldOffset;
 	float3 curWorldPos = skinStrokeData.worldPos;
@@ -92,14 +92,17 @@ void CSSimulateCritterGenericStrokes (uint3 id : SV_DispatchThreadID)
 	CritterSimData critterSimData = critterSimDataCBuffer[agentIndex];
 
 	float3 critterWorldPos = critterSimData.worldPos;
-	float3 critterCurScale = float3(1,1,1) * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage) * 0.5;
+	float3 critterCurScale = float3(1,1,1) * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage) * 1; // *** should be 0.5??? *********
 	//float3 critterCurScale = critterInitData.boundingBoxSize * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage) * 0.5;
 		
 	float3 spriteLocalPos = strokeData.bindPos * critterCurScale;
 				
 	float3 spriteWorldOffset = spriteLocalPos; // **** Vector from critter origin to sprite origin		
 	// SWIM ANIMS:
-	spriteWorldOffset = GetAnimatedPos(spriteWorldOffset, float3(0,0,0), critterInitData, critterSimData, strokeData.bindPos);		
+	spriteWorldOffset = GetAnimatedPosNew(spriteWorldOffset, float3(0,0,0), critterInitData, critterSimData, strokeData.t);		
+	
+	float3 worldNormal = GetAnimatedDirNew(strokeData.bindNormal, float3(0,0,0), critterInitData, critterSimData, strokeData.t);
+	float3 worldTangent = GetAnimatedDirNew(strokeData.bindTangent, float3(0,0,0), critterInitData, critterSimData, strokeData.t);
 			
 	float3 newWorldPos = critterWorldPos + spriteWorldOffset;
 	float3 curWorldPos = strokeData.worldPos;
@@ -118,6 +121,8 @@ void CSSimulateCritterGenericStrokes (uint3 id : SV_DispatchThreadID)
 	float3 worldPosition = lerp(curWorldPos, newWorldPos, pinnedAmount);
 			
 	strokeData.worldPos = worldPosition;
+	strokeData.worldNormal = worldNormal;
+	strokeData.worldTangent = worldTangent;
 	critterGenericStrokesWriteCBuffer[id.x] = strokeData;
 }
 

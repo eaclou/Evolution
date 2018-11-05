@@ -95,7 +95,7 @@
 				vertexWorldOffset.xy = vertexWorldOffset.xy * critterCurScale.x * saturate(0.99 - critterSimData.decayPercentage * 2) * 0.5;
 				
 				
-				float3 worldPosition = critterWorldPos + GetAnimatedPos(spriteLocalPos + vertexWorldOffset, float3(0,0,0), critterInitData, critterSimData, float3(eyeData.localPos, 0));
+				float3 worldPosition = critterWorldPos + GetAnimatedPosOld(spriteLocalPos + vertexWorldOffset, float3(0,0,0), critterInitData, critterSimData, float3(eyeData.localPos, 0));
 				
 				//spriteLocalPos
 

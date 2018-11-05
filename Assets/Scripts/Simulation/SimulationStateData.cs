@@ -25,6 +25,11 @@ public class SimulationStateData {
         public Vector3 primaryHue;
         public Vector3 secondaryHue;
         public float mouthIsActive;
+        public float swimMagnitude;
+	    public float swimFrequency;
+	    public float swimAnimSpeed;
+	    public float bendOffCoord;  // 0 = headtip, 1 = tailtip
+	    public float bendOnCoord;
         public int bodyPatternX;  // what grid cell of texture sheet to use
         public int bodyPatternY;  // what grid cell of texture sheet to use
         public int speciesID;
@@ -172,7 +177,7 @@ public class SimulationStateData {
         for(int i = 0; i < critterInitDataArray.Length; i++) {
             critterInitDataArray[i] = new CritterInitData();
         }
-        critterInitDataCBuffer = new ComputeBuffer(critterInitDataArray.Length, sizeof(float) * 12 + sizeof(int) * 3);
+        critterInitDataCBuffer = new ComputeBuffer(critterInitDataArray.Length, sizeof(float) * 17 + sizeof(int) * 3);
 
         critterSimDataArray = new CritterSimData[simManager._NumAgents];
         for(int i = 0; i < critterSimDataArray.Length; i++) {
@@ -235,15 +240,26 @@ public class SimulationStateData {
             else {
                 //Debug.Log("Error isInert FALSE: " + i.ToString());
                 // INITDATA ::==========================================================================================================================================================================
-                critterInitDataArray[i].boundingBoxSize = simManager.agentsArray[i].fullSizeBoundingBox;
+                AgentGenome genome = simManager.agentsArray[i].candidateRef.candidateGenome;
+                critterInitDataArray[i].boundingBoxSize = genome.bodyGenome.GetFullsizeBoundingBox(); // simManager.agentsArray[i].fullSizeBoundingBox;
                 critterInitDataArray[i].spawnSizePercentage = simManager.agentsArray[i].spawnStartingScale;
                 critterInitDataArray[i].maxEnergy = Mathf.Min(simManager.agentsArray[i].fullSizeBoundingBox.x * simManager.agentsArray[i].fullSizeBoundingBox.y, 0.5f);
-                critterInitDataArray[i].primaryHue = simManager.agentsArray[i].candidateRef.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
-                critterInitDataArray[i].secondaryHue = simManager.agentsArray[i].candidateRef.candidateGenome.bodyGenome.appearanceGenome.hueSecondary;
+                critterInitDataArray[i].primaryHue = genome.bodyGenome.appearanceGenome.huePrimary;
+                critterInitDataArray[i].secondaryHue = genome.bodyGenome.appearanceGenome.hueSecondary;
                 critterInitDataArray[i].mouthIsActive = 1f;
                 if(simManager.agentsArray[i].mouthRef.isPassive) {
                     critterInitDataArray[i].mouthIsActive = 0f;
                 }
+                float critterFullsizeLength = genome.bodyGenome.coreGenome.tailLength + genome.bodyGenome.coreGenome.bodyLength - genome.bodyGenome.coreGenome.headLength + genome.bodyGenome.coreGenome.mouthLength;
+                float flexibilityScore = Mathf.Min((genome.bodyGenome.coreGenome.creatureBaseAspectRatio - 1f) * 0.75f, 6f);
+                float mouthLengthNormalized = genome.bodyGenome.coreGenome.mouthLength / critterFullsizeLength;
+                float approxRadius = genome.bodyGenome.coreGenome.creatureBaseLength / genome.bodyGenome.coreGenome.creatureBaseAspectRatio;
+                float approxSize = approxRadius * genome.bodyGenome.coreGenome.creatureBaseLength;
+                critterInitDataArray[i].swimMagnitude = 0.75f * (1f - flexibilityScore * 0.2f);
+                critterInitDataArray[i].swimFrequency = flexibilityScore * 1.5f;
+	            critterInitDataArray[i].swimAnimSpeed = 12f * (1f - approxSize * 0.25f);
+	            critterInitDataArray[i].bendOffCoord = mouthLengthNormalized / flexibilityScore;  // 0 = headtip, 1 = tailtip
+	            critterInitDataArray[i].bendOnCoord = (genome.bodyGenome.coreGenome.mouthLength + genome.bodyGenome.coreGenome.bodyLength) / flexibilityScore / critterFullsizeLength;
                 critterInitDataArray[i].bodyPatternX = simManager.agentsArray[i].candidateRef.candidateGenome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeX;
                 critterInitDataArray[i].bodyPatternY = simManager.agentsArray[i].candidateRef.candidateGenome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeY;  // what grid cell of texture sheet to use
                 critterInitDataArray[i].speciesID = simManager.agentsArray[i].speciesIndex;

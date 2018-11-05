@@ -1178,6 +1178,10 @@ public class Agent : MonoBehaviour {
         //InitializeAgentWidths(genome);
         InitializeGameObjectsAndComponents();  // Not needed??? ***
 
+        //Debug.Log("fullSize = " + genome.bodyGenome.GetFullsizeBoundingBox().ToString() + ", " + genome.bodyGenome.coreGenome.headLength.ToString());
+
+        fullSizeBoundingBox = genome.bodyGenome.GetFullsizeBoundingBox();
+
         sizePercentage = 0.005f;
 
         // Positioning and Pinning to parentEggSack HERE:
@@ -1208,14 +1212,14 @@ public class Agent : MonoBehaviour {
         bodyRigidbody.angularDrag = 15f;
         
         // Collision!
-        colliderBody.size = new Vector2(fullSizeBoundingBox.x, fullSizeBoundingBox.z) * sizePercentage;  // spawn size percentage 1/10th      
+        colliderBody.size = new Vector2(fullSizeBoundingBox.x, fullSizeBoundingBox.y) * sizePercentage;  // spawn size percentage 1/10th      
         colliderBody.direction = CapsuleDirection2D.Vertical;
 
         // Mouth Trigger:
         mouthRef.isPassive = genome.bodyGenome.coreGenome.isPassive;
         mouthRef.triggerCollider.isTrigger = true;
         mouthRef.triggerCollider.radius = fullSizeBoundingBox.x / 2f * sizePercentage;
-        mouthRef.triggerCollider.offset = new Vector2(0f, fullSizeBoundingBox.z / 2f * sizePercentage);
+        mouthRef.triggerCollider.offset = new Vector2(0f, fullSizeBoundingBox.y / 2f * sizePercentage);
         mouthRef.isBiting = false;
         mouthRef.bitingFrameCounter = 0;
         mouthRef.agentIndex = this.index;
@@ -1228,7 +1232,7 @@ public class Agent : MonoBehaviour {
         mouseClickCollider.center = Vector3.zero;
         mouseClickCollider.radius = fullSizeBoundingBox.x / 2f * sizePercentage;
         mouseClickCollider.radius *= 1.25f; // ** TEMP
-        mouseClickCollider.height = fullSizeBoundingBox.z / 2f * sizePercentage;
+        mouseClickCollider.height = fullSizeBoundingBox.y / 2f * sizePercentage;
     }
 
     public void InitializeSpawnAgentImmaculate(int agentIndex, CandidateAgentData candidateData, StartPositionGenome startPos) {        
@@ -1241,6 +1245,7 @@ public class Agent : MonoBehaviour {
                 
         curLifeStage = AgentLifeStage.Egg;
         parentEggSackRef = null;
+        //genome.bodyGenome.CalculateFullsizeBoundingBox();
         this.fullSizeBoundingBox = genome.bodyGenome.fullsizeBoundingBox; // 
         //this.fullSizeBoundingBox = new Vector3(genome.bodyGenome.coreGenome.fullBodyWidth, genome.bodyGenome.coreGenome.fullBodyLength, genome.bodyGenome.coreGenome.fullBodyWidth); // ** REFACTOR ***
         
@@ -1274,6 +1279,7 @@ public class Agent : MonoBehaviour {
         curLifeStage = AgentLifeStage.Egg;
         parentEggSackRef = parentEggSack;
         // CHANGE THIS::::
+        //genome.bodyGenome.CalculateFullsizeBoundingBox();
         this.fullSizeBoundingBox = genome.bodyGenome.fullsizeBoundingBox; // new Vector3(genome.bodyGenome.coreGenome.fullBodyWidth, genome.bodyGenome.coreGenome.fullBodyLength, genome.bodyGenome.coreGenome.fullBodyWidth); // ** REFACTOR ***
         
         animationCycle = 0f;
