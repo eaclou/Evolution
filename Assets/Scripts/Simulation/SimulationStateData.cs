@@ -251,7 +251,7 @@ public class SimulationStateData {
                     critterInitDataArray[i].mouthIsActive = 0f;
                 }
                 float critterFullsizeLength = genome.bodyGenome.coreGenome.tailLength + genome.bodyGenome.coreGenome.bodyLength - genome.bodyGenome.coreGenome.headLength + genome.bodyGenome.coreGenome.mouthLength;
-                float flexibilityScore = Mathf.Min((genome.bodyGenome.coreGenome.creatureBaseAspectRatio - 1f) * 0.75f, 6f);
+                float flexibilityScore = Mathf.Min((genome.bodyGenome.coreGenome.creatureBaseAspectRatio - 1f) * 0.8f, 6f);
                 float mouthLengthNormalized = genome.bodyGenome.coreGenome.mouthLength / critterFullsizeLength;
                 float approxRadius = genome.bodyGenome.coreGenome.creatureBaseLength / genome.bodyGenome.coreGenome.creatureBaseAspectRatio;
                 float approxSize = approxRadius * genome.bodyGenome.coreGenome.creatureBaseLength;

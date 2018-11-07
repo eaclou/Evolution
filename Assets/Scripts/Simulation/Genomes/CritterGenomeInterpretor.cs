@@ -54,7 +54,7 @@ public class CritterGenomeInterpretor {
     private static void ProcessBrushPointBaseBody(ref BrushPoint point, AgentGenome genome) {
         CritterModuleCoreGenome gene = genome.bodyGenome.coreGenome; // for readability
 
-        float segmentsSummedCritterLength = GetCritterFullsizeLength(genome);
+        float segmentsSummedCritterLength = gene.mouthLength + gene.headLength + gene.bodyLength + gene.tailLength;
         float bindPoseY = point.initCoordsNormalized.y * segmentsSummedCritterLength;
 
         float widthMultiplier;
@@ -252,11 +252,7 @@ public class CritterGenomeInterpretor {
         return outValue;
     }
 
-    private static float GetCritterFullsizeLength(AgentGenome genome) {
-        CritterModuleCoreGenome gene = genome.bodyGenome.coreGenome;
-        return (gene.mouthLength + gene.headLength + gene.bodyLength + gene.tailLength); // * gene.creatureBaseLength;
-    }
-
+   
     // Read genome, spit out renderBuffer data for different render passes:
 
     // Read genome, spit out collider object positions, sizes, orientations:
