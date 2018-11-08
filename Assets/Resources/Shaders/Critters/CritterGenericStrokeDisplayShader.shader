@@ -92,10 +92,12 @@
 				patternUV.x += tilePercentage * randPatternIDX;
 				patternUV.y += tilePercentage * randPatternIDY;				
 				
-				fixed4 col = tex2Dlod(_PatternTex, float4(patternUV, 0, 0));
+				fixed4 patternTexSample = tex2Dlod(_PatternTex, float4(patternUV, 0, 0));
 								
 				float crudeDiffuse = dot(normalize(worldNormal), normalize(float3(-0.52, 0.35, 1))) * 0.75 + 0.25;
-				o.color = float4(lerp(critterInitData.secondaryHue, critterInitData.primaryHue, col.x) * crudeDiffuse, 1); //genericStrokeData.bindPos.x * 0.5 + 0.5, genericStrokeData.bindPos.z * 0.33 + 0.5, genericStrokeData.bindPos.y * 0.5 + 0.5, 1);
+				float3 hue = lerp(critterInitData.secondaryHue, critterInitData.primaryHue, patternTexSample.x);
+				hue = lerp(hue, genericStrokeData.color.rgb, genericStrokeData.color.a);
+				o.color = float4(hue * crudeDiffuse, 1); //genericStrokeData.bindPos.x * 0.5 + 0.5, genericStrokeData.bindPos.z * 0.33 + 0.5, genericStrokeData.bindPos.y * 0.5 + 0.5, 1);
 				//o.color.rgb = ;
 				//o.color.rgb *= 0.4;
 				return o;

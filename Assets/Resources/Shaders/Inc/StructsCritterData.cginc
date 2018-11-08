@@ -57,4 +57,5 @@ struct CritterGenericStrokeData {
 	float3 worldTangent;
     float2 uv;
     float2 scale;
+	float4 color;
 };
