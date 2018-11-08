@@ -145,7 +145,7 @@ public class TheRenderKing : MonoBehaviour {
     //private int numStrokesPerCritterBody = 1024;       
     private int numStrokesPerCritterLength = 32;
     private int numStrokesPerCritterCross = 32;
-    private int numStrokesPerCritterEyes = 256;
+    private int numStrokesPerCritterEyes = 512;
     private ComputeBuffer critterGenericStrokesCBuffer;
 
     //private int numStrokesPerCritterShadow = 4;
@@ -1778,36 +1778,56 @@ public class TheRenderKing : MonoBehaviour {
 
         int arrayIndexStart = numStrokesPerCritterLength * numStrokesPerCritterCross;
 
-        int numEyes = 2;
-        float eyePosSpread = 1f;  // 1f == full hemisphere coverage, 0 == top
+        CritterModuleCoreGenome gene = agent.candidateRef.candidateGenome.bodyGenome.coreGenome; // for readability
+        float segmentsSummedCritterLength = gene.mouthLength + gene.headLength + gene.bodyLength + gene.tailLength;
+        //float fullCritterLength = segmentsSummedCritterLength * gene.creatureBaseLength;
+        //float fullCritterWidth = gene.creatureBaseLength / gene.creatureBaseAspectRatio;
+        float critterSizeScore = gene.creatureBaseLength / gene.creatureBaseAspectRatio; ; // 1f;// fullCritterWidth;
 
-        float totalEyeRadius = 0.25f;  // relative to creature size?
-        float eyeballRadiusFraction = 0.8f; // size of eyeball compared to total structure
-        float pupilWidthFraction = 0.75f;  // percentage of eyeball size
-        float pupilHeightFraction = 0.75f;
-        float socketHeight = 0.1f;  // relative?
+        int numEyes = gene.numEyes;
+        float eyePosSpread = gene.eyePosSpread;  // 1f == full hemisphere coverage, 0 == top
+        if(numEyes < 2) { eyePosSpread = 0f; }
+        float eyeLocAmplitude = gene.eyeLocAmplitude;
+        float eyeLocFrequency = gene.eyeLocFrequency;
+        float eyeLocOffset = gene.eyeLocOffset;
+        
+        float socketRadius = gene.socketRadius * critterSizeScore;  // relative to body size?
+        float socketHeight = gene.socketHeight * critterSizeScore; 
+        float socketBulge = gene.socketBulge;
+        float eyeballRadius = gene.eyeballRadius * critterSizeScore;
+        float eyeBulge = gene.eyeBulge;
+        float irisWidthFraction = gene.irisWidthFraction;        
+        float pupilWidthFraction = gene.pupilWidthFraction;  // percentage of iris size
+        float pupilHeightFraction = gene.pupilHeightFraction;
+        
 
-        int numPointsPerEye = numStrokesPerCritterEyes / numEyes;
+        int numPointsPerEye = (int)Mathf.Floor((float)numStrokesPerCritterEyes / (float)numEyes);
 
-        int totalLengthResolution = 10;
-        int baseCrossResolution = 12;
+        int totalLengthResolution = (int)Mathf.Floor(Mathf.Sqrt(numPointsPerEye));
+        int baseCrossResolution = totalLengthResolution;
 
-        int socketLengthResolution = totalLengthResolution / 3;
+        int socketLengthResolution = totalLengthResolution / 2;
         int eyeballLengthResolution = totalLengthResolution - socketLengthResolution;
 
-        Debug.Log("socketLengthResolution: " + socketLengthResolution.ToString() + ", eyeballLengthResolution: " + eyeballLengthResolution.ToString());
-
+        //Debug.Log("socketLengthResolution: " + socketLengthResolution.ToString() + ", eyeballLengthResolution: " + eyeballLengthResolution.ToString());
+        
         for(int eyeIndex = 0; eyeIndex < numEyes; eyeIndex++) {
 
-            // find eye anchor pos and normalDir:
-            CritterModuleCoreGenome gene = agent.candidateRef.candidateGenome.bodyGenome.coreGenome; // for readability
-            float segmentsSummedCritterLength = gene.mouthLength + gene.headLength + gene.bodyLength + gene.tailLength;
-            float headStartCoordV = (gene.bodyLength + gene.tailLength) / segmentsSummedCritterLength;
-            float headEndCoordV = (gene.headLength + gene.bodyLength + gene.tailLength) / segmentsSummedCritterLength;
+            // find eye anchor pos and normalDir:            
+            
+            float headStartCoordV = (gene.bodyLength * 0.9f + gene.tailLength) / segmentsSummedCritterLength;
+            float headEndCoordV = (gene.mouthLength * 0.33f + gene.headLength + gene.bodyLength + gene.tailLength) / segmentsSummedCritterLength;
 
-            float uRange = 0.5f * eyePosSpread;
-            int coordU = Mathf.RoundToInt(((float)eyeIndex / (float)Mathf.Min(1, numEyes - 1) * uRange + 0.25f + (0.5f - uRange) * 0.5f) * (float)numStrokesPerCritterCross);
-            int coordV = Mathf.RoundToInt(Mathf.Lerp(headStartCoordV, headEndCoordV, 0.5f) * (float)numStrokesPerCritterLength);
+            float uRange = 0.5f * eyePosSpread;            
+            
+            float eyeLerp = (float)eyeIndex / (float)Mathf.Max(1, numEyes - 1);
+            int coordU = Mathf.RoundToInt((eyeLerp * uRange + (1f - uRange) * 0.5f) * (float)numStrokesPerCritterCross);
+
+            float distToCenter = Mathf.Abs(eyeLerp * 2f - 1f);
+            //float foreAft = Mathf.Sin(distToCenter * Mathf.PI * eyeLocFrequency + eyeLocOffset) * eyeLocAmplitude;
+            //int coordU = Mathf.RoundToInt(0.5f * (float)numStrokesPerCritterCross);
+            //int coordV = Mathf.RoundToInt(Mathf.Lerp(headStartCoordV, headEndCoordV, 0f) * (float)numStrokesPerCritterLength);
+            int coordV = Mathf.RoundToInt(Mathf.Lerp(headStartCoordV, headEndCoordV, Mathf.Sin(distToCenter * eyeLocFrequency + eyeLocOffset) * eyeLocAmplitude * 0.5f + 0.5f) * (float)numStrokesPerCritterLength);
 
             int anchorIndex = coordV * numStrokesPerCritterCross + coordU;
 
@@ -1816,21 +1836,30 @@ public class TheRenderKing : MonoBehaviour {
             Vector3 eyeTangent = strokesArray[anchorIndex].bindTangent;
             Vector3 eyeBitangent = Vector3.Cross(eyeNormal, eyeTangent);
 
-            float prevRingRadius = totalEyeRadius; // hack for getting slope of normal?
+            //float prevRingRadius = socketRadius; // hack for getting slope of normal?
 
             for(int z = 0; z < totalLengthResolution; z++) {
                 float zFract = (float)z / (float)totalLengthResolution;
                 float socketFractZ = Mathf.Clamp01((float)z / (float)(socketLengthResolution - 1));
-                float eyeballFractZ = Mathf.Clamp01((float)(z - socketLengthResolution + 1) / (float)(eyeballLengthResolution - 1));
+                float eyeballFractZ = Mathf.Clamp01((float)(z - socketLengthResolution) / (float)(eyeballLengthResolution));
 
-                float radius = Mathf.Lerp(totalEyeRadius, totalEyeRadius * eyeballRadiusFraction, socketFractZ);
-                radius *= Mathf.Cos(eyeballFractZ * Mathf.PI * 0.5f);
+                float socketBulgeMultiplier = Mathf.Sin(socketFractZ * Mathf.PI) * socketBulge + 1f;
+                //float eyeballBulgeMultiplier
+                float radius = Mathf.Lerp(socketRadius, eyeballRadius, socketFractZ);
+                //radius *= Mathf.Cos(eyeballFractZ * Mathf.PI * 0.5f);
 
-                float deltaRadius = radius - prevRingRadius;
-                float deltaHeight = 1f / (float)totalLengthResolution;
-                float slope = deltaRadius / deltaHeight;
+                if(z < socketLengthResolution) {
+                    radius = Mathf.Lerp(socketRadius, eyeballRadius, socketFractZ) * socketBulgeMultiplier;
+                }
+                else {
+                    radius = Mathf.Cos(eyeballFractZ * Mathf.PI * 0.5f) * eyeballRadius;
+                }
+
+                //float deltaRadius = radius - prevRingRadius;
+                //float deltaHeight = 1f / (float)totalLengthResolution;
+                //float slope = deltaRadius / deltaHeight;
                 
-                Vector3 ringCenterPos = eyeAnchorPos - eyeNormal * (socketFractZ * socketHeight + eyeballFractZ * totalEyeRadius * eyeballRadiusFraction);
+                Vector3 ringCenterPos = eyeAnchorPos - eyeNormal * ((socketFractZ - 0.05f) * socketHeight + eyeballFractZ * eyeballRadius * eyeBulge);
 
                 for (int a = 0; a < baseCrossResolution; a++) {
 
@@ -1844,15 +1873,29 @@ public class TheRenderKing : MonoBehaviour {
                                         
                     //Vector3 tempNormal = Mathf.Cos(zFract * Mathf.PI * 0.5f) * ringNormal + Mathf.Sin(zFract * Mathf.PI * 0.5f) * eyeNormal;
                     //Vector3 ringTangent = Vector3.Cross(ringNormal, eyeNormal);
+                    Vector4 color = Vector4.zero;
 
+                    if(z > socketLengthResolution) {  // Is Part of Eyeball!
+                        color = new Vector4(gene.eyeballHue.x, gene.eyeballHue.y, gene.eyeballHue.z, 1f);
+
+                        if (radius / eyeballRadius < irisWidthFraction) {  // Is part of IRIS                        
+                            color = new Vector4(gene.irisHue.x, gene.irisHue.y, gene.irisHue.z, 1f);
+
+                            if (radius / eyeballRadius < pupilWidthFraction && radius / eyeballRadius < pupilHeightFraction) {  // PUPIL                        
+                                color = new Vector4(0f, 0f, 0f, 1f);
+                            }
+                        }                        
+                    }
+                    
                     // create stroke:
                     CritterGenericStrokeData newData = new CritterGenericStrokeData();
                     newData.parentIndex = agent.index;
                     newData.brushType = 0;
                     newData.t = strokesArray[anchorIndex].t;
                     newData.bindPos = ringCenterPos + offset; // new Vector3(0f, 0f, 0f); // ringCenterPos
-                    newData.scale = Vector2.one * 0.15f; // new Vector2(UnityEngine.Random.Range(0.75f, 1.33f), UnityEngine.Random.Range(0.75f, 1.33f));
+                    //newData.scale = Vector2.one * 0.15f; // new Vector2(UnityEngine.Random.Range(0.75f, 1.33f), UnityEngine.Random.Range(0.75f, 1.33f));
                     newData.uv = strokesArray[anchorIndex].uv;
+                    newData.color = color;
                     //newData.bindNormal = tempNormal; //.normalized; // -offset.normalized;
                     //newData.bindTangent = ringTangent; // eyeNormal; // strokesArray[anchorIndex].bindTangent;
                     strokesArray[eyeBrushPointIndex] = newData;
@@ -1878,29 +1921,31 @@ public class TheRenderKing : MonoBehaviour {
                     Vector2 scale;
                     Vector3 normal;
                     Vector3 tangent;
-                    Vector4 color = Vector4.zero;
-
-                    if(z >= socketLengthResolution) {
-                        color = Vector4.one;
-                    }
-
+                    
+                    
                     if (z == numStrokesPerCritterLength - 1) {  // PUPIL
-                        scale = new Vector2(uTangentAvg.magnitude, vTangentAvg.magnitude) * 0.5f;
+                        scale = new Vector2(uTangentAvg.magnitude, vTangentAvg.magnitude);
                         normal = new Vector3(0f, 1f, 0f);
                         tangent = new Vector3(0f, 0f, 1f);
-                        color = new Vector4(0f, 0f, 0f, 1f);
+                        //color = new Vector4(0f, 0f, 0f, 1f);
                     }
                     else {  // body
                         scale = new Vector2(uTangentAvg.magnitude, vTangentAvg.magnitude);
                         normal = Vector3.Cross(vTangentAvg, uTangentAvg).normalized;
                         tangent = vTangentAvg.normalized;
                     }
-
-
+                    
                     int eyeBrushPointIndex = arrayIndexStart + eyeIndex * (totalLengthResolution * baseCrossResolution) + z * baseCrossResolution + a;
+                    strokesArray[eyeBrushPointIndex].scale = scale * 1.1f;
                     strokesArray[eyeBrushPointIndex].bindNormal = normal; //.normalized; // -offset.normalized;
                     strokesArray[eyeBrushPointIndex].bindTangent = tangent; // eyeNormal; // strokesArray[anchorIndex].bindTangent;
-                    strokesArray[eyeBrushPointIndex].color = color;
+                    //strokesArray[eyeBrushPointIndex].color = color;
+                    /*if(z >= socketLengthResolution) {  // Is Part of Eyeball!
+                        
+                    }
+                    else {
+                        strokesArray[eyeBrushPointIndex].bindPos -= vTangentAvg * 0.5f;
+                    }*/
                 }
             }
         }
@@ -1915,7 +1960,7 @@ public class TheRenderKing : MonoBehaviour {
             float brushDepth = strokesArray[b].bindPos.z;
             int listSize = sortedBrushStrokesList.Count;
 
-            int numSamples = 4;
+            int numSamples = 6;
             float sampleCoord = 0.5f;
             int sampleIndex = Mathf.FloorToInt((float)listSize * sampleCoord);  // Floor?
             
