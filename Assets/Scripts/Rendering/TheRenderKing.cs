@@ -143,9 +143,15 @@ public class TheRenderKing : MonoBehaviour {
     private ComputeBuffer critterSkinStrokesCBuffer;
 
     //private int numStrokesPerCritterBody = 1024;       
-    private int numStrokesPerCritterLength = 32;
+    private int numStrokesPerCritterLength = 32;   // This is the official order of brush indexing!!!
     private int numStrokesPerCritterCross = 32;
-    private int numStrokesPerCritterEyes = 512;
+    private int numStrokesPerCritterEyes = 256;
+    private int numStrokesPerCritterMouth = 64;
+    private int numStrokesPerCritterTeeth = 64;
+    private int numStrokesPerCritterPectoralFins = 64;
+    private int numStrokesPerCritterDorsalFin = 64;
+    private int numStrokesPerCritterTailFin = 128;
+    private int numStrokesPerCritterSkinDetail = 128;
     private ComputeBuffer critterGenericStrokesCBuffer;
 
     //private int numStrokesPerCritterShadow = 4;
@@ -293,7 +299,7 @@ public class TheRenderKing : MonoBehaviour {
     public struct CritterGenericStrokeData {
 	    public int parentIndex;  // which Critter is this attached to?	
 	    public int brushType;
-        public float t;
+        public float t;  // normalized position along spine, 0=tailtip, 1=headtip
         public Vector3 bindPos;  // object-coordinates (z=forward, y=up)
         public Vector3 worldPos;
         public Vector3 bindNormal;
@@ -377,7 +383,7 @@ public class TheRenderKing : MonoBehaviour {
         
         InitializeBuffers();
         InitializeMaterials();
-        InitializeUberBrushes();
+        //InitializeUberBrushes(); // old uber
         InitializeCommandBuffers();
         
         baronVonTerrain.Initialize();
@@ -407,7 +413,7 @@ public class TheRenderKing : MonoBehaviour {
         colorInjectionStrokesCBuffer = new ComputeBuffer(simManager._NumAgents + simManager._NumEggSacks, sizeof(float) * 10);
         colorInjectionStrokeDataArray = new BasicStrokeData[colorInjectionStrokesCBuffer.count];
 
-        InitializeCritterStrokesBuffers();
+        InitializeCritterUberStrokesBuffer();
         //InitializeAgentBodyStrokesBuffer();
         InitializeCritterSkinStrokesCBuffer();
         InitializeAgentEyeStrokesBuffer();
@@ -427,32 +433,25 @@ public class TheRenderKing : MonoBehaviour {
 
     }
 
-    private int GetNumStrokesPerCritter() {
-        return (numStrokesPerCritterLength * numStrokesPerCritterCross + numStrokesPerCritterEyes);
+    private int GetNumUberStrokesPerCritter() {
+        int numStrokes = numStrokesPerCritterLength * numStrokesPerCritterCross +
+                            numStrokesPerCritterEyes +
+                            numStrokesPerCritterMouth +
+                            numStrokesPerCritterTeeth +
+                            numStrokesPerCritterPectoralFins +
+                            numStrokesPerCritterDorsalFin +                            
+                            numStrokesPerCritterTailFin +
+                            numStrokesPerCritterSkinDetail;
+                            
+        return numStrokes;
     }
-    private void InitializeCritterStrokesBuffers() {
+    private void InitializeCritterUberStrokesBuffer() {
         // Most of this will be populated piece-meal later as critters are generated:
-        int bufferLength = simManager._NumAgents * GetNumStrokesPerCritter();
-        critterGenericStrokesCBuffer = new ComputeBuffer(bufferLength, GetMemorySizeCritterGenericData());
-
-
-        // DEBUG HACKY:::
-        /*
-        CritterGenericStrokeData[] singleCritterGenericStrokesArray = new CritterGenericStrokeData[critterGenericStrokesCBuffer.count];
-
-        for(int i = 0; i < singleCritterGenericStrokesArray.Length; i++) {
-            CritterGenericStrokeData newData = new CritterGenericStrokeData();
-            newData.parentIndex = i % simManager._NumAgents;
-            newData.brushType = 0;
-            newData.bindPos = UnityEngine.Random.insideUnitSphere;
-            newData.uniformScale = 1f;
-
-            singleCritterGenericStrokesArray[i] = newData;
-        }        
-        critterGenericStrokesCBuffer.SetData(singleCritterGenericStrokesArray);
-        */
+        int bufferLength = simManager._NumAgents * GetNumUberStrokesPerCritter();
+        critterGenericStrokesCBuffer = new ComputeBuffer(bufferLength, GetMemorySizeCritterUberStrokeData());
+        
     }
-    private int GetMemorySizeCritterGenericData() {
+    private int GetMemorySizeCritterUberStrokeData() {
         int numBytes = sizeof(int) * 2 + sizeof(float) * 27;
         return numBytes;
     }
@@ -554,10 +553,10 @@ public class TheRenderKing : MonoBehaviour {
 
         bodySwimAnimVerticesCBuffer.SetData(verticesArray);
     }
-    private void InitializeUberBrushes() {
+    /*private void InitializeUberBrushes() {
         uberFlowChainBrush1 = new UberFlowChainBrush();
         uberFlowChainBrush1.Initialize(computeShaderUberChains, uberFlowChainBrushMat1);
-    }
+    }*/
     //playerGlowCBuffer
     /*private void InitializePlayerGlowBuffer() {
         playerGlowInitPos = new BasicStrokeData[1];
@@ -1662,9 +1661,9 @@ public class TheRenderKing : MonoBehaviour {
     }
 
     public void UpdateCritterGenericStrokesData(Agent agent) { //int critterIndex, AgentGenome genome) {
-        ComputeBuffer singleCritterGenericStrokesCBuffer = new ComputeBuffer(GetNumStrokesPerCritter(), GetMemorySizeCritterGenericData());
+        ComputeBuffer singleCritterGenericStrokesCBuffer = new ComputeBuffer(GetNumUberStrokesPerCritter(), GetMemorySizeCritterUberStrokeData());
         CritterGenericStrokeData[] singleCritterGenericStrokesArray = new CritterGenericStrokeData[singleCritterGenericStrokesCBuffer.count];  // optimize this later?? ***
-        CritterGenomeInterpretor.BrushPoint[] brushPointArray = new CritterGenomeInterpretor.BrushPoint[GetNumStrokesPerCritter()];
+        CritterGenomeInterpretor.BrushPoint[] brushPointArray = new CritterGenomeInterpretor.BrushPoint[GetNumUberStrokesPerCritter()];
         
         // Generate main body strokes:
         GenerateCritterBodyBrushstrokes(ref singleCritterGenericStrokesArray, brushPointArray, agent); 
@@ -1673,8 +1672,20 @@ public class TheRenderKing : MonoBehaviour {
         CalculateCritterBodyBrushstrokesNormals(ref singleCritterGenericStrokesArray, brushPointArray);        
         
         // Create Eye points here:
-        GenerateCritterEyeBrushstrokes(ref singleCritterGenericStrokesArray, agent); 
-        
+        GenerateCritterEyeBrushstrokes(ref singleCritterGenericStrokesArray, agent);
+
+        // Mouth
+        GenerateCritterMouthTeethBrushstrokes(ref singleCritterGenericStrokesArray, agent);
+        // Teeth
+
+        // Pectoral Fins
+        GenerateCritterPectoralFinsBrushstrokes(ref singleCritterGenericStrokesArray, agent);
+        // Dorsal Fin
+        GenerateCritterDorsalFinBrushstrokes(ref singleCritterGenericStrokesArray, agent);
+        // Tail Fin
+        GenerateCritterTailFinBrushstrokes(ref singleCritterGenericStrokesArray, agent);
+        // Skin Detail
+        GenerateCritterSkinDetailBrushstrokes(ref singleCritterGenericStrokesArray, agent);
         // SORT BRUSHSTROKES:::
         SortCritterBrushstrokes(ref singleCritterGenericStrokesArray);
         
@@ -1920,8 +1931,7 @@ public class TheRenderKing : MonoBehaviour {
 
                     Vector2 scale;
                     Vector3 normal;
-                    Vector3 tangent;
-                    
+                    Vector3 tangent;                    
                     
                     if (z == totalLengthResolution - 1) {  // PUPIL
                         scale = Vector2.one * eyeballRadius * irisWidthFraction * pupilHeightFraction * 0.2f; // new Vector2(uTangentAvg.magnitude, vTangentAvg.magnitude);
@@ -1950,6 +1960,148 @@ public class TheRenderKing : MonoBehaviour {
             }
         }
     }
+
+    private void GenerateCritterMouthTeethBrushstrokes(ref CritterGenericStrokeData[] strokesArray, Agent agent) {
+        int arrayIndexStart = numStrokesPerCritterLength * numStrokesPerCritterCross + numStrokesPerCritterEyes;
+
+        CritterModuleCoreGenome gene = agent.candidateRef.candidateGenome.bodyGenome.coreGenome; // for readability
+        float segmentsSummedCritterLength = gene.mouthLength + gene.headLength + gene.bodyLength + gene.tailLength;
+
+        float startCoordY = (gene.headLength + gene.bodyLength + gene.tailLength) / segmentsSummedCritterLength;
+        // how many rows? 1 at first
+
+        int numStrokesPerRowSide = numStrokesPerCritterMouth / 4;
+        float lipThickness = 0.05f;  // how to scale with creature size?
+        // maybe better to interpolate between existing body strokes? measure size by single row?
+        
+        // RIGHT side top:
+        for(int y = 0; y < numStrokesPerRowSide; y++) {
+            float yLerp = Mathf.Lerp(startCoordY, 1f, Mathf.Clamp01((float)y / (float)(numStrokesPerRowSide - 1))); // start at tail (Y = 0)            
+            int brushIndex = arrayIndexStart + y;
+            AddUberBrushPoint(ref strokesArray, agent, new Vector3(1f, yLerp, 0f), new Vector2(0.25f, yLerp), brushIndex);
+                        
+            if(y == 0) {
+
+            }
+            else {
+                Vector3 uTangentAvg = new Vector3(0f, 0f, 1f);
+                Vector3 vTangentAvg = (strokesArray[brushIndex].bindPos - strokesArray[brushIndex - 1].bindPos);
+                strokesArray[brushIndex].scale = new Vector2(0.1f, vTangentAvg.magnitude);
+                strokesArray[brushIndex].bindNormal = Vector3.Cross(vTangentAvg, uTangentAvg).normalized;
+                strokesArray[brushIndex].bindTangent = vTangentAvg.normalized;
+                strokesArray[brushIndex].color = Vector4.one;
+            }
+            
+        }
+        // LEFT side top:
+        for(int y = 0; y < numStrokesPerRowSide; y++) {
+            float yLerp = Mathf.Lerp(startCoordY, 1f, Mathf.Clamp01((float)y / (float)(numStrokesPerRowSide - 1))); // start at tail (Y = 0)            
+            int brushIndex = arrayIndexStart + numStrokesPerRowSide + y;
+            AddUberBrushPoint(ref strokesArray, agent, new Vector3(-1f, yLerp, 0f), new Vector2(0.75f, yLerp), brushIndex); 
+            
+            if(y == 0) {
+
+            }
+            else {
+                Vector3 uTangentAvg = new Vector3(0f, 0f, 1f);
+                Vector3 vTangentAvg = (strokesArray[brushIndex].bindPos - strokesArray[brushIndex - 1].bindPos);
+                strokesArray[brushIndex].scale = new Vector2(0.1f, vTangentAvg.magnitude);
+                strokesArray[brushIndex].bindNormal = Vector3.Cross(vTangentAvg, uTangentAvg).normalized;
+                strokesArray[brushIndex].bindTangent = vTangentAvg.normalized;
+                strokesArray[brushIndex].color = Vector4.one;
+            }
+        }
+
+        /*
+        int indexCenter = arrayIndexStart + eyeIndex * (totalLengthResolution * baseCrossResolution) + z * baseCrossResolution + a;
+
+        // find neighbor positions: (all in bindPos object coordinates)+
+        int indexNegX = arrayIndexStart + eyeIndex * (totalLengthResolution * baseCrossResolution) + z * baseCrossResolution + Mathf.Clamp((a - 1), 0, baseCrossResolution - 1);
+        int indexPosX = arrayIndexStart + eyeIndex * (totalLengthResolution * baseCrossResolution) + z * baseCrossResolution + Mathf.Clamp((a + 1), 0, baseCrossResolution - 1);
+        int indexNegY = arrayIndexStart + eyeIndex * (totalLengthResolution * baseCrossResolution) + Mathf.Clamp((z - 1), 0, totalLengthResolution - 1) * baseCrossResolution + a;
+        int indexPosY = arrayIndexStart + eyeIndex * (totalLengthResolution * baseCrossResolution) + Mathf.Clamp((z + 1), 0, totalLengthResolution - 1) * baseCrossResolution + a;
+                                    
+        Vector3 uTangentAvg = (strokesArray[indexPosX].bindPos - strokesArray[indexNegX].bindPos);
+        Vector3 vTangentAvg = (strokesArray[indexPosY].bindPos - strokesArray[indexNegY].bindPos);
+
+        Vector2 scale;
+        Vector3 normal;
+        Vector3 tangent;                    
+                    
+        if (z == totalLengthResolution - 1) {  // PUPIL
+            scale = Vector2.one * eyeballRadius * irisWidthFraction * pupilHeightFraction * 0.2f; // new Vector2(uTangentAvg.magnitude, vTangentAvg.magnitude);
+            normal = eyeNormal;
+            tangent = eyeTangent;
+            //color = new Vector4(0f, 0f, 0f, 1f);
+        }
+        else {  // body
+            scale = new Vector2(uTangentAvg.magnitude, vTangentAvg.magnitude);
+            normal = Vector3.Cross(vTangentAvg, uTangentAvg).normalized;
+            tangent = vTangentAvg.normalized;
+        }
+                    
+        int eyeBrushPointIndex = arrayIndexStart + eyeIndex * (totalLengthResolution * baseCrossResolution) + z * baseCrossResolution + a;
+        strokesArray[eyeBrushPointIndex].scale = scale * 1.15f;
+        strokesArray[eyeBrushPointIndex].bindNormal = normal; //.normalized; // -offset.normalized;
+        strokesArray[eyeBrushPointIndex].bindTangent = tangent;
+        */
+    }
+    private void AddUberBrushPoint(ref CritterGenericStrokeData[] strokesArray, Agent agent, Vector3 initCoords, Vector2 uv, int brushIndex) {
+        CritterGenomeInterpretor.BrushPoint newBrushPoint = new CritterGenomeInterpretor.BrushPoint();                
+        newBrushPoint.initCoordsNormalized = initCoords;
+        newBrushPoint.uv = uv;                
+        newBrushPoint = CritterGenomeInterpretor.ProcessBrushPoint(newBrushPoint, agent.candidateRef.candidateGenome);                
+            
+        // Create Data:
+        CritterGenericStrokeData newData = new CritterGenericStrokeData();
+        newData.parentIndex = agent.index;
+        newData.brushType = 0;
+        newData.t = initCoords.y;
+        newData.bindPos = newBrushPoint.bindPos;
+        newData.scale = Vector2.one * 1f;
+        newData.uv = newBrushPoint.uv;
+
+        strokesArray[brushIndex] = newData;
+    }
+    private void GenerateCritterPectoralFinsBrushstrokes(ref CritterGenericStrokeData[] strokesArray, Agent agent) {
+
+    }
+    private void GenerateCritterDorsalFinBrushstrokes(ref CritterGenericStrokeData[] strokesArray, Agent agent) {
+        int arrayIndexStart = numStrokesPerCritterLength * numStrokesPerCritterCross + numStrokesPerCritterEyes + numStrokesPerCritterMouth + numStrokesPerCritterTeeth + numStrokesPerCritterPectoralFins;
+
+        CritterModuleCoreGenome gene = agent.candidateRef.candidateGenome.bodyGenome.coreGenome; // for readability
+        float segmentsSummedCritterLength = gene.mouthLength + gene.headLength + gene.bodyLength + gene.tailLength;
+
+        float startCoordY = (gene.tailLength * 0.5f) / segmentsSummedCritterLength;
+        float endCoordY = (gene.headLength * 0.5f + gene.bodyLength + gene.tailLength) / segmentsSummedCritterLength;
+                
+        // top:
+        for(int y = 0; y < numStrokesPerCritterDorsalFin; y++) {
+            float yLerp = Mathf.Lerp(startCoordY, endCoordY, Mathf.Clamp01((float)y / (float)(numStrokesPerCritterDorsalFin - 1))); // start at tail (Y = 0)            
+            int brushIndex = arrayIndexStart + y;
+            AddUberBrushPoint(ref strokesArray, agent, new Vector3(0f, yLerp, -1f), new Vector2(0.5f, yLerp), brushIndex);
+                        
+            if(y == 0) {
+
+            }
+            else {
+                Vector3 uTangentAvg = (strokesArray[brushIndex].bindPos - strokesArray[brushIndex - 1].bindPos);
+                Vector3 vTangentAvg = new Vector3(0f, 0f, -1f);
+                strokesArray[brushIndex].scale = new Vector2(1f, 1f) * 0.25f; // vTangentAvg.magnitude);
+                strokesArray[brushIndex].bindNormal = new Vector3(1f, 0f, 0f); //Vector3.Cross(vTangentAvg, uTangentAvg).normalized;
+                strokesArray[brushIndex].bindTangent = vTangentAvg.normalized;
+                strokesArray[brushIndex].color = Vector4.one;
+            }
+            
+        }
+    }
+    private void GenerateCritterTailFinBrushstrokes(ref CritterGenericStrokeData[] strokesArray, Agent agent) {
+
+    }
+    private void GenerateCritterSkinDetailBrushstrokes(ref CritterGenericStrokeData[] strokesArray, Agent agent) {
+
+    }
+
     private void SortCritterBrushstrokes(ref CritterGenericStrokeData[] strokesArray) {
         List<CritterGenericStrokeData> sortedBrushStrokesList = new List<CritterGenericStrokeData>(); // temporary naive approach:
         // Add first brushstroke first:
