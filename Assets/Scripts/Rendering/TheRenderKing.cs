@@ -1786,15 +1786,15 @@ public class TheRenderKing : MonoBehaviour {
 
         int numEyes = gene.numEyes;
         float eyePosSpread = gene.eyePosSpread;  // 1f == full hemisphere coverage, 0 == top
-        if(numEyes < 2) { eyePosSpread = 0f; }
+        //if(numEyes < 2) { eyePosSpread = 0f; }
         float eyeLocAmplitude = gene.eyeLocAmplitude;
         float eyeLocFrequency = gene.eyeLocFrequency;
         float eyeLocOffset = gene.eyeLocOffset;
         
         float socketRadius = gene.socketRadius * critterSizeScore;  // relative to body size?
-        float socketHeight = gene.socketHeight * critterSizeScore; 
+        float socketHeight = gene.socketHeight * critterSizeScore * 2f; 
         float socketBulge = gene.socketBulge;
-        float eyeballRadius = gene.eyeballRadius * critterSizeScore;
+        float eyeballRadius = gene.socketRadius * gene.eyeballRadius * critterSizeScore;
         float eyeBulge = gene.eyeBulge;
         float irisWidthFraction = gene.irisWidthFraction;        
         float pupilWidthFraction = gene.pupilWidthFraction;  // percentage of iris size
@@ -1923,10 +1923,10 @@ public class TheRenderKing : MonoBehaviour {
                     Vector3 tangent;
                     
                     
-                    if (z == numStrokesPerCritterLength - 1) {  // PUPIL
-                        scale = new Vector2(uTangentAvg.magnitude, vTangentAvg.magnitude);
-                        normal = new Vector3(0f, 1f, 0f);
-                        tangent = new Vector3(0f, 0f, 1f);
+                    if (z == totalLengthResolution - 1) {  // PUPIL
+                        scale = Vector2.one * eyeballRadius * irisWidthFraction * pupilHeightFraction * 0.2f; // new Vector2(uTangentAvg.magnitude, vTangentAvg.magnitude);
+                        normal = eyeNormal;
+                        tangent = eyeTangent;
                         //color = new Vector4(0f, 0f, 0f, 1f);
                     }
                     else {  // body
@@ -1936,7 +1936,7 @@ public class TheRenderKing : MonoBehaviour {
                     }
                     
                     int eyeBrushPointIndex = arrayIndexStart + eyeIndex * (totalLengthResolution * baseCrossResolution) + z * baseCrossResolution + a;
-                    strokesArray[eyeBrushPointIndex].scale = scale * 1.1f;
+                    strokesArray[eyeBrushPointIndex].scale = scale * 1.15f;
                     strokesArray[eyeBrushPointIndex].bindNormal = normal; //.normalized; // -offset.normalized;
                     strokesArray[eyeBrushPointIndex].bindTangent = tangent; // eyeNormal; // strokesArray[anchorIndex].bindTangent;
                     //strokesArray[eyeBrushPointIndex].color = color;
