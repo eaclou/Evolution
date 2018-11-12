@@ -46,7 +46,8 @@ struct CritterSkinStrokeData {
 	float followLerp;				
 };
 struct CritterGenericStrokeData {
-	int parentIndex;  // which Critter is this attached to?	
+	int parentIndex;  // which Critter is this attached to?
+	int neighborIndex;
 	int brushType;
 	float t;
 	float3 bindPos;  // object-coordinates (z=forward, y=up)
@@ -58,4 +59,7 @@ struct CritterGenericStrokeData {
     float2 uv;
     float2 scale;
 	float4 color;
+	float jawMask;
+	float restDistance;
+	float thresholdValue;
 };

@@ -99,11 +99,11 @@ void CSSimulateCritterGenericStrokes (uint3 id : SV_DispatchThreadID)
 				
 	float3 spriteWorldOffset = spriteLocalPos; // **** Vector from critter origin to sprite origin		
 	// SWIM ANIMS:
-	spriteWorldOffset = GetAnimatedPosNew(spriteWorldOffset, float3(0,0,0), critterInitData, critterSimData, strokeData.t);		
-	
+	spriteWorldOffset = GetAnimatedPosNew(spriteWorldOffset, float3(0,0,0), critterInitData, critterSimData, strokeData, strokeData.t);		
+		
 	float3 worldNormal = GetAnimatedDirNew(strokeData.bindNormal, float3(0,0,0), critterInitData, critterSimData, strokeData.t);
 	float3 worldTangent = GetAnimatedDirNew(strokeData.bindTangent, float3(0,0,0), critterInitData, critterSimData, strokeData.t);
-			
+		
 	float3 newWorldPos = critterWorldPos + spriteWorldOffset;
 	float3 curWorldPos = strokeData.worldPos;
 

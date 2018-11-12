@@ -54,6 +54,9 @@
 
 				float3 critterWorldPos = critterSimData.worldPos;
 
+				float3 neighborWorldPos = critterGenericStrokesCBuffer[genericStrokeData.neighborIndex + agentIndex * 1856].worldPos;
+				float3 neighborAlignTangent = neighborWorldPos - genericStrokeData.worldPos;
+
 				// WEIRD COORDINATES!!! Positive Z = DEEPER!!!
 				//float3 strokeBindPos = genericStrokeData.bindPos; //float3(genericStrokeData.bindPos.x, genericStrokeData.bindPos.z, -genericStrokeData.bindPos.y) * 0.8;
 
@@ -64,11 +67,18 @@
 				//strokeBindPos = critterRightDir * strokeBindPos.x + critterForwardDir * strokeBindPos.y;
 				//strokeBindPos.z = genericStrokeData.bindPos.z;
 
+				
+
 				float3 brushScale = float3(genericStrokeData.scale, 1);
 								
 				float3 worldNormal = genericStrokeData.worldNormal;
-				float3 worldTangent = genericStrokeData.worldTangent;
+				float3 worldTangent = normalize(lerp(genericStrokeData.worldTangent, -neighborAlignTangent, genericStrokeData.thresholdValue));
 				float3 worldBitangent = cross(worldNormal, worldTangent);
+
+				float3 lightDir = normalize(float3(-0.52, -0.35, -1));
+				float3 viewDir = normalize(_WorldSpaceCameraPos - genericStrokeData.worldPos);
+				float3 reflectionDir = reflect(-lightDir, worldNormal);
+				float specTest = pow(saturate(dot(viewDir, reflectionDir)), 17);
 
 				float3 quadVertexOffset = quadVerticesCBuffer[id].x * worldBitangent * genericStrokeData.scale.x + quadVerticesCBuffer[id].y * worldTangent * genericStrokeData.scale.y;
 
@@ -94,7 +104,7 @@
 				
 				fixed4 patternTexSample = tex2Dlod(_PatternTex, float4(patternUV, 0, 0));
 								
-				float crudeDiffuse = dot(normalize(worldNormal), normalize(float3(-0.52, 0.35, 1))) * 0.75 + 0.25;
+				float crudeDiffuse = specTest * 1.25 + dot(normalize(worldNormal), lightDir) * 0.75 + 0.25;
 				float3 hue = lerp(critterInitData.secondaryHue, critterInitData.primaryHue, patternTexSample.x);
 				hue = lerp(hue, genericStrokeData.color.rgb, genericStrokeData.color.a);
 				o.color = float4(hue * crudeDiffuse, 1); //genericStrokeData.bindPos.x * 0.5 + 0.5, genericStrokeData.bindPos.z * 0.33 + 0.5, genericStrokeData.bindPos.y * 0.5 + 0.5, 1);
