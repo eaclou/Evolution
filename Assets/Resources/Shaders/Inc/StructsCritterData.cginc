@@ -8,8 +8,10 @@ struct CritterInitData {
 	float swimMagnitude;
 	float swimFrequency;
 	float swimAnimSpeed;
-	float bendOffCoord;  // 0 = headtip, 1 = tailtip
-	float bendOnCoord;
+	float bodyCoord;
+    float headCoord;
+    float mouthCoord;
+	float bendiness;
 	int bodyPatternX;  // what grid cell of texture sheet to use
 	int bodyPatternY;  // what grid cell of texture sheet to use
 	int speciesID;
@@ -61,5 +63,7 @@ struct CritterGenericStrokeData {
 	float4 color;
 	float jawMask;
 	float restDistance;
+	float neighborAlign;  // how much to adjust tangent towards neighbor point
+    float passiveFollow;
 	float thresholdValue;
 };

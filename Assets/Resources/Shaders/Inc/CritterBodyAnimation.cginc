@@ -99,8 +99,8 @@ float3 GetAnimatedPosNew(float3 inPos, float3 pivotPos, CritterInitData critterI
 	animData.turnAmount = critterSimData.turnAmount;
 	animData.animSpeed = critterInitData.swimAnimSpeed;
 	animData.frequency = critterInitData.swimFrequency;
-	animData.bendOffCoord = critterInitData.bendOffCoord;
-	animData.bendOnCoord = critterInitData.bendOnCoord;
+	animData.bendOffCoord = 1.0 - critterInitData.headCoord;
+	animData.bendOnCoord = 1.0 - critterInitData.bodyCoord;
 
 	float swimAngle = GetSwimAngleNew(animData);
 
@@ -133,7 +133,7 @@ float3 GetAnimatedPosNew(float3 inPos, float3 pivotPos, CritterInitData critterI
 	float v = t; // * 0.5 + 0.5;  // [0-1]
 	float biteAnimCycle = critterSimData.biteAnimCycle;
 	float eatingCycle = sin(biteAnimCycle * 3.141592);
-	float biteMask = saturate((v - (1 - critterInitData.bendOffCoord)) * (1 / (critterInitData.bendOffCoord)));   //saturate((v - 0.66667) * 3);
+	float biteMask = saturate((v - (critterInitData.mouthCoord)) * (1 / (1.0 - critterInitData.mouthCoord)));   //saturate((v - 0.66667) * 3);
 	float lowerJawMask = saturate(-strokeData.jawMask) * biteMask; // biteMask * saturate(inPos.z * 1000);
 	float upperJawMask = saturate(strokeData.jawMask) * biteMask; // biteMask * saturate(-inPos.z * 1000);
 
@@ -163,7 +163,7 @@ float3 GetAnimatedPosNew(float3 inPos, float3 pivotPos, CritterInitData critterI
 	
 	// end BITE
 	
-	float3 outPos = RotatePointAroundYAngle(float3(0,0,0), swimAngle * 0.6, inPos);
+	float3 outPos = RotatePointAroundYAngle(float3(0,0,0), swimAngle * 0.6 + critterSimData.decayPercentage * 4.25, inPos);
 	outPos = RotatePointAroundZAngle(float3(0,critterInitData.boundingBoxSize.y * 0.15,0), swimAngle, outPos);  // *** want to control pivot pos!!! ***
 
 	// Rotate with Critter:
@@ -186,8 +186,8 @@ float3 GetAnimatedDirNew(float3 inDir, float3 pivotPos, CritterInitData critterI
 	animData.turnAmount = critterSimData.turnAmount;
 	animData.animSpeed = critterInitData.swimAnimSpeed;
 	animData.frequency = critterInitData.swimFrequency;
-	animData.bendOffCoord = critterInitData.bendOffCoord;
-	animData.bendOnCoord = critterInitData.bendOnCoord;
+	animData.bendOffCoord = 1.0 - critterInitData.headCoord;
+	animData.bendOnCoord = 1.0 - critterInitData.bodyCoord;
 
 	float swimAngle = GetSwimAngleNew(animData);
 	float3 outDir = RotatePointAroundZAngle(float3(0,0,0), swimAngle, inDir);

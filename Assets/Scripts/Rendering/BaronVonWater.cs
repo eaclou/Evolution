@@ -331,12 +331,12 @@ public class BaronVonWater : RenderBaron {
     private void InitializeWaterSurface()
     {
         waterSurfaceDataRT0 = new RenderTexture(waterSurfaceMapResolution, waterSurfaceMapResolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        waterSurfaceDataRT0.wrapMode = TextureWrapMode.Clamp;
+        waterSurfaceDataRT0.wrapMode = TextureWrapMode.Repeat;
         waterSurfaceDataRT0.enableRandomWrite = true;
         waterSurfaceDataRT0.Create();
 
         waterSurfaceDataRT1 = new RenderTexture(waterSurfaceMapResolution, waterSurfaceMapResolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        waterSurfaceDataRT1.wrapMode = TextureWrapMode.Clamp;
+        waterSurfaceDataRT1.wrapMode = TextureWrapMode.Repeat;
         waterSurfaceDataRT1.enableRandomWrite = true;
         waterSurfaceDataRT1.Create();
     }

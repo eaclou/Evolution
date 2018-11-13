@@ -1,9 +1,9 @@
-﻿Shader "Critter/CritterGenericStrokeDisplayShader"
+﻿Shader "Critter/CritterUberStrokeShadowDisplayShader"
 {
 	Properties
 	{
 		_MainTex ("Texture", 2D) = "white" {}
-		_PatternTex ("Pattern Texture", 2D) = "white" {}
+		_AltitudeTex ("_AltitudeTex", 2D) = "gray" {}
 		_WaterSurfaceTex ("_WaterSurfaceTex", 2D) = "black" {}
 	}
 	SubShader
@@ -28,16 +28,19 @@
 				float2 uv : TEXCOORD0;
 				float4 vertex : SV_POSITION;
 				float4 color : COLOR;
-				float4 worldPos : TEXCOORD1;
-				//float2 bodyUV : TEXCOORD1;
+				float2 altitudeUV : TEXCOORD1;
+				float3 worldPos : TEXCOORD2;
+				float4 screenUV : TEXCOORD3;
 			};
 
 			sampler2D _MainTex;
 			//float4 _MainTex_ST;
-			sampler2D _PatternTex;
+			sampler2D _AltitudeTex;
 			sampler2D _WaterSurfaceTex;
 
 			uniform float _MapSize;
+
+			sampler2D _RenderedSceneRT;  // Provided by CommandBuffer -- global tex??? seems confusing... ** revisit this
 
 			StructuredBuffer<float3> quadVerticesCBuffer;			
 			StructuredBuffer<CritterInitData> critterInitDataCBuffer;
@@ -58,22 +61,11 @@
 				float3 neighborWorldPos = critterGenericStrokesCBuffer[genericStrokeData.neighborIndex + agentIndex * 1856].worldPos;
 				float3 neighborAlignTangent = neighborWorldPos - genericStrokeData.worldPos;
 
-				// WEIRD COORDINATES!!! Positive Z = DEEPER!!!
-				//float3 strokeBindPos = genericStrokeData.bindPos; //float3(genericStrokeData.bindPos.x, genericStrokeData.bindPos.z, -genericStrokeData.bindPos.y) * 0.8;
-
-				//Temp align with creatures:
-				//float3 critterForwardDir = float3(critterSimData.heading, 0);
-				//float3 critterRightDir = float3(critterForwardDir.y, -critterForwardDir.x, 0);
-								
-				//strokeBindPos = critterRightDir * strokeBindPos.x + critterForwardDir * strokeBindPos.y;
-				//strokeBindPos.z = genericStrokeData.bindPos.z;
-
 				// Decay color bleach value:
 				float decayTimeRange = 0.4;
 				float decayAmount = saturate((critterSimData.decayPercentage) / decayTimeRange - genericStrokeData.thresholdValue * 2);
 				float4 decayColor = float4(0.5, 0.4, 0.3, 1);
 				
-
 				float3 brushScale = float3(genericStrokeData.scale, 1);
 								
 				float3 worldNormal = genericStrokeData.worldNormal;
@@ -82,64 +74,79 @@
 				
 				float3 quadVertexOffset = quadVerticesCBuffer[id].x * worldBitangent * genericStrokeData.scale.x + quadVerticesCBuffer[id].y * worldTangent * genericStrokeData.scale.y;
 				quadVertexOffset *= (1 - critterSimData.decayPercentage);
+				quadVertexOffset *= 2;
 				// old //float3 vertexWorldPos = critterWorldPos + strokeBindPos + quadVerticesCBuffer[id] * 0.645 * length(genericStrokeData.scale);
 				float3 vertexWorldPos = genericStrokeData.worldPos + quadVertexOffset * 1.25 * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage) * 1;
-
+								
 				// REFRACTION:							
 				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(genericStrokeData.worldPos.xy /  _MapSize, 0, 0)).yzw;
 				float refractionStrength = 1;
-				vertexWorldPos.xy += -surfaceNormal.xy * refractionStrength;				
+				vertexWorldPos.xy += -surfaceNormal.xy * refractionStrength;		
 				
-				float3 lightDir = float3(-0.52, -0.35, -1);
-				lightDir.xy += -surfaceNormal.xy * 2.25;
-				lightDir = normalize(lightDir);
-				float3 viewDir = normalize(_WorldSpaceCameraPos - genericStrokeData.worldPos);
-				float3 reflectionDir = reflect(-lightDir, worldNormal);
-				float specTest = pow(saturate(dot(viewDir, reflectionDir)), 17);
-
+				float2 altUV = (vertexWorldPos.xy + 128) / 512;
+				o.altitudeUV = altUV;
+				vertexWorldPos.z = -(tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 2)).x * 2 - 1) * 10;
+				o.worldPos = vertexWorldPos;
+				
 				//vertexWorldPos.z += 1.0;
 				o.vertex = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(vertexWorldPos, 1.0)));
 				o.uv = quadVerticesCBuffer[id].xy + 0.5;	
-
-				const float tilePercentage = (1.0 / 8.0);
-				float2 patternUV = genericStrokeData.uv;
-				float randPatternIDX = critterInitData.bodyPatternX; // ** This is now inside CritterInitData!!!!!
-				float randPatternIDY = critterInitData.bodyPatternY; //  fmod(bodyStrokeData.brushTypeY, 4); // ********** UPDATE!!! **************
-				patternUV *= tilePercentage; // randVariation eventually
-				patternUV.x += tilePercentage * randPatternIDX;
-				patternUV.y += tilePercentage * randPatternIDY;				
-				
-				fixed4 patternTexSample = tex2Dlod(_PatternTex, float4(patternUV, 0, 0));
-								
-				float crudeDiffuse = dot(normalize(worldNormal), lightDir) * 0.75 + 0.25;
-				float3 hue = lerp(critterInitData.secondaryHue, critterInitData.primaryHue, patternTexSample.x);
-				hue = lerp(hue, genericStrokeData.color.rgb, genericStrokeData.color.a);
-				
+				float4 screenUV = ComputeScreenPos(o.vertex);
+				o.screenUV = screenUV;
+		
 				float alpha = saturate((critterSimData.embryoPercentage - 0.995) * 200);
-								
-				o.color = float4(specTest * 0.65 + hue * crudeDiffuse, alpha); //genericStrokeData.bindPos.x * 0.5 + 0.5, genericStrokeData.bindPos.z * 0.33 + 0.5, genericStrokeData.bindPos.y * 0.5 + 0.5, 1);
-				o.color = lerp(o.color, decayColor, saturate(decayAmount + saturate(critterSimData.decayPercentage * 50) * 0.25));
-				
-				o.worldPos = float4(vertexWorldPos, 1.0);
-				//o.color.rgb = ;
-				//o.color.rgb *= 0.4;
-								
-				//float debugColorVal = detachAmount;
-				//o.color.rgb = float3(debugColorVal, debugColorVal, debugColorVal);
 
+				o.color = float4(1,1,1,alpha);
+				
 				return o;
 			}
 			
 			fixed4 frag (v2f i) : SV_Target
 			{
-				//return i.color;
-				// sample the texture
-				float3 waterFogColor = float3(0.03,0.4,0.3) * 0.4;
+				float4 finalColor = float4(1,1,1,1);
 
-				fixed4 col = tex2D(_MainTex, i.uv) * i.color;
-				col.rgb = lerp(col.rgb, waterFogColor, 0.5 * saturate((i.worldPos.z - 0.75) * 0.5));
-				//fixed4 col = tex2D(_MainTex, i.bodyUV) * i.color;
-				return col;
+				float2 screenUV = i.screenUV.xy / i.screenUV.w;
+				float4 frameBufferColor = tex2D(_RenderedSceneRT, screenUV);  //  Color of brushtroke source	
+
+				fixed4 texColor = tex2D(_MainTex, i.uv);
+				
+				float4 backgroundColor = frameBufferColor;
+				backgroundColor.a = texColor.a;
+				
+				float altitude = tex2D(_AltitudeTex, i.altitudeUV); // i.worldPos.z / 10; // [-1,1] range
+				// 0-1 range --> -1 to 1
+				altitude = (altitude * 2 - 1) * -1;
+				float isUnderwater = 1; //saturate(altitude * 10000);
+				float3 waterFogColor = float3(0.03,0.4,0.3) * 0.4;
+				float strataColorMultiplier = (sin(altitude * (1.0 + i.worldPos.x * 0.01 - i.worldPos.y * -0.01) + i.worldPos.x * 0.01 - i.worldPos.y * 0.01) * 0.5 + 0.5) * 0.5 + 0.5;
+				backgroundColor.rgb *= strataColorMultiplier;				
+				backgroundColor.rgb = lerp(backgroundColor.rgb, waterFogColor, 1 * (saturate(altitude * 0.8)) + 0.25 * isUnderwater);
+
+				float snowAmount = saturate((-altitude - 0.6) * 2 +
+								   ((sin(i.worldPos.x * 0.0785 + i.worldPos.y * 0.02843) * 0.5 + 0.5) * 1 - 
+								   (cos(i.worldPos.x * 0.012685 + i.worldPos.y * -0.01843) * 0.5 + 0.5) * 0.9 +
+								   (sin(i.worldPos.x * 0.2685 + i.worldPos.y * -0.1843) * 0.5 + 0.5) * 0.45 - 
+								   (cos(i.worldPos.x * -0.2843 + i.worldPos.y * 0.01143) * 0.5 + 0.5) * 0.45 +
+								   (sin(i.worldPos.x * 0.1685 + i.worldPos.y * -0.03843) * 0.5 + 0.5) * 0.3 - 
+								   (cos(i.worldPos.x * -0.1843 + i.worldPos.y * 0.243) * 0.5 + 0.5) * 0.3) * 0.5);
+				
+				backgroundColor.rgb = lerp(backgroundColor.rgb, float3(0.56, 1, 0.34) * 0.6, snowAmount * 1);
+				//==================================================================================================================
+				backgroundColor.a *= isUnderwater;
+
+				float fogAmount = saturate(i.worldPos.z * 0.5);
+								
+				//float4 reflectedColor = float4(tex2Dlod(_SkyTex, float4((i.skyUV), 0, 1)).rgb, backgroundColor.a); //col;				
+				//finalColor = lerp(reflectedColor, finalColor, saturate(1 - (1 - i.vignetteLerp.x) * 1)); //float4(1,1,1,1);
+
+				finalColor.rgb = lerp(finalColor.rgb, backgroundColor, i.color.a);
+				
+				finalColor.rgb = lerp(finalColor.rgb, waterFogColor, fogAmount);
+				finalColor.a *= 0.1;
+				
+				//finalColor.a *= (1.0 - i.color.a);
+				//return float4(0,0,0,1);
+				return finalColor;
 			}
 			ENDCG
 		}

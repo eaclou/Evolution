@@ -83,9 +83,18 @@ public class CritterModuleCoreGenome {
     public Vector3 eyeballHue;
     public Vector3 irisHue;
     
-    
-    // Doodads / Attachments???
-    
+    // Dorsal Fin:
+    public float dorsalFinStartCoordY = 0.2f;
+    public float dorsalFinEndCoordY = 0.7f;
+    public float dorsalFinSlantAmount = 0.35f;
+    public float dorsalFinBaseHeight = 1f;
+
+    // TAIL FIN:
+    public float tailFinSpreadAngle = 0.35f;
+    public float tailFinBaseLength = 1f;
+    public Vector3 tailFinFrequencies = Vector3.one;
+    public Vector3 tailFinAmplitudes = Vector3.one;
+    public Vector3 tailFinOffsets = Vector3.zero;
 
     // List of Shape/Form modifiers here???:::
     //public CritterGenomeInterpretor.MaskDataSin maskDataSinTemp;
@@ -260,6 +269,19 @@ public class CritterModuleCoreGenome {
         eyeballHue = Vector3.one;
         irisHue = new Vector3(0.25f, 0.5f, 0.5f);
         
+
+        // Dorsal Fin:
+        dorsalFinStartCoordY = 0.2f;
+        dorsalFinEndCoordY = 0.7f;
+        dorsalFinSlantAmount = 0.35f;
+        dorsalFinBaseHeight = 0f;
+
+        // Tail Fin:
+        tailFinSpreadAngle = 0.3f;
+        tailFinBaseLength = 0f;
+        tailFinFrequencies = Vector3.one;
+        tailFinAmplitudes = Vector3.one;
+        tailFinOffsets = Vector3.zero;
 
         //numSegments = 1;
         /*
@@ -535,16 +557,29 @@ public class CritterModuleCoreGenome {
         eyeLocAmplitude = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.eyeLocAmplitude, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
         eyeLocFrequency = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.eyeLocFrequency, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.25f, 6f);
         eyeLocOffset = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.eyeLocOffset, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 5f);        
-        socketRadius = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.socketRadius, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.2f, 1f);
-        socketHeight = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.socketHeight, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.2f, 1.5f);
+        socketRadius = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.socketRadius, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.2f, 0.9f);
+        socketHeight = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.socketHeight, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.25f, 1.25f);
         socketBulge = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.socketBulge, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, -0.75f, 0.75f);
         eyeballRadius = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.eyeballRadius, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.5f, 1.75f); // relative to socket radius
-        eyeBulge = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.eyeBulge, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.33f, 1.25f);
-        irisWidthFraction = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.irisWidthFraction, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.67f, 0.95f);       
-        pupilWidthFraction = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.pupilWidthFraction, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.67f, 1f);  // percentage of iris size
-        pupilHeightFraction = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.pupilHeightFraction, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.67f, 1f);
+        eyeBulge = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.eyeBulge, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.4f, 1.35f);
+        irisWidthFraction = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.irisWidthFraction, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.6f, 0.9f);       
+        pupilWidthFraction = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.pupilWidthFraction, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.33f, 1f);  // percentage of iris size
+        pupilHeightFraction = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.pupilHeightFraction, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.33f, 1f);
         eyeballHue = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.eyeballHue, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.9f, 1f);
         irisHue = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.irisHue, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
+
+        // DORSAL FIN:
+        dorsalFinStartCoordY = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.dorsalFinStartCoordY, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 0.49f);
+        dorsalFinEndCoordY = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.dorsalFinEndCoordY, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.51f, 1f);
+        dorsalFinSlantAmount = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.dorsalFinSlantAmount, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 0.67f);
+        dorsalFinBaseHeight = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.dorsalFinBaseHeight, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.2f, 2f);
+
+        // Tail Fin:
+        tailFinSpreadAngle = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.tailFinSpreadAngle, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.05f, 0.8f);
+        tailFinBaseLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.tailFinBaseLength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.1f, 1f);
+        tailFinFrequencies = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.tailFinFrequencies, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.1f, 10f);
+        tailFinAmplitudes = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.tailFinAmplitudes, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
+        tailFinOffsets = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.tailFinOffsets, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, -10f, 10f);
 
         /*fullBodyWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.fullBodyWidth, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.1f, 4.5f);
         fullBodyLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.fullBodyLength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, fullBodyWidth * 1.25f, fullBodyWidth * 4f);

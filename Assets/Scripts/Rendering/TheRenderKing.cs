@@ -67,6 +67,7 @@ public class TheRenderKing : MonoBehaviour {
     public Material critterShadowStrokesDisplayMat;
     public Material eggCoverDisplayMat;
     public Material critterDebugGenericStrokeMat;
+    public Material critterUberStrokeShadowMat;
 
     //public Material agentHoverHighlightMat;
     public Material critterInspectHighlightMat;
@@ -296,7 +297,7 @@ public class TheRenderKing : MonoBehaviour {
 		public float randomSeed;
 		public float followLerp;        
     }
-    public struct CritterGenericStrokeData {
+    public struct CritterUberStrokeData {
 	    public int parentIndex;  // which Critter is this attached to?	
         public int neighborIndex;
 	    public int brushType;
@@ -310,9 +311,11 @@ public class TheRenderKing : MonoBehaviour {
         public Vector2 uv;
         public Vector2 scale;
         public Vector4 color;
-        public float jawMask;
+        public float jawMask;  // +1 top, -1 bottom.  Eventually look into better method, support different mouth/jaw types
 	    public float restDistance;
-	    public float thresholdValue;
+        public float neighborAlign;  // how much to adjust tangent towards neighbor point
+        public float passiveFollow;  // only look at neighborPos/restDistance for positioning
+	    public float thresholdValue;  // evenly distributed random 0-1 for decay
     }
     public struct CurveStrokeData {
         public int parentIndex;
@@ -456,7 +459,7 @@ public class TheRenderKing : MonoBehaviour {
         
     }
     private int GetMemorySizeCritterUberStrokeData() {
-        int numBytes = sizeof(int) * 3 + sizeof(float) * 30;
+        int numBytes = sizeof(int) * 3 + sizeof(float) * 32;
         return numBytes;
     }
     
@@ -1666,7 +1669,7 @@ public class TheRenderKing : MonoBehaviour {
 
     public void UpdateCritterGenericStrokesData(Agent agent) { //int critterIndex, AgentGenome genome) {
         ComputeBuffer singleCritterGenericStrokesCBuffer = new ComputeBuffer(GetNumUberStrokesPerCritter(), GetMemorySizeCritterUberStrokeData());
-        CritterGenericStrokeData[] singleCritterGenericStrokesArray = new CritterGenericStrokeData[singleCritterGenericStrokesCBuffer.count];  // optimize this later?? ***
+        CritterUberStrokeData[] singleCritterGenericStrokesArray = new CritterUberStrokeData[singleCritterGenericStrokesCBuffer.count];  // optimize this later?? ***
         CritterGenomeInterpretor.BrushPoint[] brushPointArray = new CritterGenomeInterpretor.BrushPoint[GetNumUberStrokesPerCritter()];
         
         // Generate main body strokes:
@@ -1703,7 +1706,7 @@ public class TheRenderKing : MonoBehaviour {
         singleCritterGenericStrokesCBuffer.Release(); 
     }
 
-    private void GenerateCritterBodyBrushstrokes(ref CritterGenericStrokeData[] strokesArray, CritterGenomeInterpretor.BrushPoint[] brushPointArray, Agent agent) {
+    private void GenerateCritterBodyBrushstrokes(ref CritterUberStrokeData[] strokesArray, CritterGenomeInterpretor.BrushPoint[] brushPointArray, Agent agent) {
         // Loop through all brush points, starting at the tip of the tail (underside), (x=0, y=0, z=1)
         // ... Then working its way to tip of head by doing series of cross-section rings
         for(int y = 0; y < numStrokesPerCritterLength; y++) {
@@ -1727,13 +1730,14 @@ public class TheRenderKing : MonoBehaviour {
                 brushPointArray[brushIndex] = newBrushPoint;
 
                 // Create Data:
-                CritterGenericStrokeData newData = new CritterGenericStrokeData();
+                CritterUberStrokeData newData = new CritterUberStrokeData();
                 newData.parentIndex = agent.index;                
                 newData.brushType = 0;
                 newData.t = yLerp;
                 newData.bindPos = newBrushPoint.bindPos;
                 newData.scale = Vector2.one; // new Vector2(UnityEngine.Random.Range(0.75f, 1.33f), UnityEngine.Random.Range(0.75f, 1.33f));
                 newData.uv = newBrushPoint.uv;
+                newData.thresholdValue = UnityEngine.Random.Range(0f, 1f);
                 if(crossSectionCoordZ >= 0f) {
                     newData.jawMask = -1f;
                 }
@@ -1744,7 +1748,7 @@ public class TheRenderKing : MonoBehaviour {
             }
         }
     }
-    private void CalculateCritterBodyBrushstrokesNormals(ref CritterGenericStrokeData[] strokesArray, CritterGenomeInterpretor.BrushPoint[] brushPointArray) {
+    private void CalculateCritterBodyBrushstrokesNormals(ref CritterUberStrokeData[] strokesArray, CritterGenomeInterpretor.BrushPoint[] brushPointArray) {
 
         for (int y = 0; y < numStrokesPerCritterLength; y++) {                        
                         
@@ -1789,15 +1793,15 @@ public class TheRenderKing : MonoBehaviour {
                 //brushPointArray[indexCenter].normal = normal; // not needed?>
                 Vector2 randScale = new Vector2(UnityEngine.Random.Range(0.75f, 1.33f), UnityEngine.Random.Range(0.75f, 1.33f));
                 strokesArray[indexCenter].scale = new Vector2(scale.x * randScale.x, scale.y * randScale.y);
-                strokesArray[indexCenter].bindNormal = normal; // + UnityEngine.Random.insideUnitSphere * 0.15f).normalized;
+                strokesArray[indexCenter].bindNormal = (normal + UnityEngine.Random.insideUnitSphere * 0.165f).normalized;
                 strokesArray[indexCenter].bindTangent = tangent;
 
                 strokesArray[indexCenter].neighborIndex = indexNegY;
-                strokesArray[indexCenter].thresholdValue = 1f;
+                strokesArray[indexCenter].neighborAlign = (1f - strokesArray[indexCenter].t);
             }
         }
     }
-    private void GenerateCritterEyeBrushstrokes(ref CritterGenericStrokeData[] strokesArray, Agent agent) {
+    private void GenerateCritterEyeBrushstrokes(ref CritterUberStrokeData[] strokesArray, Agent agent) {
 
         int arrayIndexStart = numStrokesPerCritterLength * numStrokesPerCritterCross;
 
@@ -1911,15 +1915,16 @@ public class TheRenderKing : MonoBehaviour {
                     }
                     
                     // create stroke:
-                    CritterGenericStrokeData newData = new CritterGenericStrokeData();
+                    CritterUberStrokeData newData = new CritterUberStrokeData();
                     newData.parentIndex = agent.index;
                     newData.brushType = 0;
                     newData.t = strokesArray[anchorIndex].t;
                     newData.bindPos = ringCenterPos + offset; // new Vector3(0f, 0f, 0f); // ringCenterPos
                     //newData.scale = Vector2.one * 0.15f; // new Vector2(UnityEngine.Random.Range(0.75f, 1.33f), UnityEngine.Random.Range(0.75f, 1.33f));
-                    newData.uv = strokesArray[anchorIndex].uv;
+                    newData.uv = strokesArray[anchorIndex].uv + new Vector2(ringX, ringY) * socketFractZ * gene.socketHeight * 0.1f;
                     newData.color = color;
                     newData.jawMask = 1f;
+                    newData.thresholdValue = UnityEngine.Random.Range(0f, 1f);
                     //newData.bindNormal = tempNormal; //.normalized; // -offset.normalized;
                     //newData.bindTangent = ringTangent; // eyeNormal; // strokesArray[anchorIndex].bindTangent;
                     strokesArray[eyeBrushPointIndex] = newData;
@@ -1947,7 +1952,7 @@ public class TheRenderKing : MonoBehaviour {
                     Vector3 tangent;                    
                     
                     if (z == totalLengthResolution - 1) {  // PUPIL
-                        scale = Vector2.one * eyeballRadius * irisWidthFraction * pupilHeightFraction * 0.75f; // new Vector2(uTangentAvg.magnitude, vTangentAvg.magnitude);
+                        scale = Vector2.one * eyeballRadius * irisWidthFraction * pupilHeightFraction * 0.5f; // new Vector2(uTangentAvg.magnitude, vTangentAvg.magnitude);
                         normal = -eyeNormal;
                         tangent = eyeTangent;
                         //color = new Vector4(0f, 0f, 0f, 1f);
@@ -1975,7 +1980,7 @@ public class TheRenderKing : MonoBehaviour {
         }
     }
 
-    private void GenerateCritterMouthTeethBrushstrokes(ref CritterGenericStrokeData[] strokesArray, Agent agent) {
+    private void GenerateCritterMouthTeethBrushstrokes(ref CritterUberStrokeData[] strokesArray, Agent agent) {
         int arrayIndexStart = numStrokesPerCritterLength * numStrokesPerCritterCross + numStrokesPerCritterEyes;
 
         CritterModuleCoreGenome gene = agent.candidateRef.candidateGenome.bodyGenome.coreGenome; // for readability
@@ -2006,13 +2011,13 @@ public class TheRenderKing : MonoBehaviour {
                 Vector3 uTangentAvg = new Vector3(0f, 0f, 1f);
                 Vector3 vTangentAvg = (strokesArray[brushIndexTop].bindPos - strokesArray[brushIndexTop - 1].bindPos);
                 strokesArray[brushIndexTop].scale = new Vector2(0.1f, vTangentAvg.magnitude);
-                strokesArray[brushIndexTop].bindNormal = Vector3.Cross(uTangentAvg, vTangentAvg).normalized;
+                strokesArray[brushIndexTop].bindNormal = Vector3.Cross(vTangentAvg, uTangentAvg).normalized;
                 strokesArray[brushIndexTop].bindTangent = vTangentAvg.normalized;
                 strokesArray[brushIndexTop].color = Vector4.one;
                 strokesArray[brushIndexTop].jawMask = 1f;
 
                 strokesArray[brushIndexBottom].scale = new Vector2(0.1f, vTangentAvg.magnitude);
-                strokesArray[brushIndexBottom].bindNormal = Vector3.Cross(uTangentAvg, vTangentAvg).normalized;
+                strokesArray[brushIndexBottom].bindNormal = Vector3.Cross(vTangentAvg, uTangentAvg).normalized;
                 strokesArray[brushIndexBottom].bindTangent = vTangentAvg.normalized;
                 strokesArray[brushIndexBottom].color = Vector4.one;
                 strokesArray[brushIndexBottom].jawMask = -1f;
@@ -2082,37 +2087,40 @@ public class TheRenderKing : MonoBehaviour {
         strokesArray[eyeBrushPointIndex].bindTangent = tangent;
         */
     }
-    private void AddUberBrushPoint(ref CritterGenericStrokeData[] strokesArray, Agent agent, Vector3 initCoords, Vector2 uv, int brushIndex) {
+    private void AddUberBrushPoint(ref CritterUberStrokeData[] strokesArray, Agent agent, Vector3 initCoords, Vector2 uv, int brushIndex) {
         CritterGenomeInterpretor.BrushPoint newBrushPoint = new CritterGenomeInterpretor.BrushPoint();                
         newBrushPoint.initCoordsNormalized = initCoords;
         newBrushPoint.uv = uv;                
         newBrushPoint = CritterGenomeInterpretor.ProcessBrushPoint(newBrushPoint, agent.candidateRef.candidateGenome);                
             
         // Create Data:
-        CritterGenericStrokeData newData = new CritterGenericStrokeData();
+        CritterUberStrokeData newData = new CritterUberStrokeData();
         newData.parentIndex = agent.index;
         newData.brushType = 0;
         newData.t = initCoords.y;
         newData.bindPos = newBrushPoint.bindPos;
         newData.scale = Vector2.one * 1f;
         newData.uv = newBrushPoint.uv;
+        newData.thresholdValue = UnityEngine.Random.Range(0f, 1f);
 
         strokesArray[brushIndex] = newData;
     }
-    private void GenerateCritterPectoralFinsBrushstrokes(ref CritterGenericStrokeData[] strokesArray, Agent agent) {
+    private void GenerateCritterPectoralFinsBrushstrokes(ref CritterUberStrokeData[] strokesArray, Agent agent) {
 
     }
-    private void GenerateCritterDorsalFinBrushstrokes(ref CritterGenericStrokeData[] strokesArray, Agent agent) {
+    private void GenerateCritterDorsalFinBrushstrokes(ref CritterUberStrokeData[] strokesArray, Agent agent) {
         int arrayIndexStart = numStrokesPerCritterLength * numStrokesPerCritterCross + numStrokesPerCritterEyes + numStrokesPerCritterMouth + numStrokesPerCritterTeeth + numStrokesPerCritterPectoralFins;
 
         CritterModuleCoreGenome gene = agent.candidateRef.candidateGenome.bodyGenome.coreGenome; // for readability
         float segmentsSummedCritterLength = gene.mouthLength + gene.headLength + gene.bodyLength + gene.tailLength;
 
-        float startCoordY = (gene.tailLength * 0.5f) / segmentsSummedCritterLength;
-        float endCoordY = (gene.headLength * 0.5f + gene.bodyLength + gene.tailLength) / segmentsSummedCritterLength;
+        // genome parameters:
+        float startCoordY = gene.dorsalFinStartCoordY; // (gene.tailLength * 0.5f) / segmentsSummedCritterLength;
+        float endCoordY = gene.dorsalFinEndCoordY;  // (gene.headLength * 0.5f + gene.bodyLength + gene.tailLength) / segmentsSummedCritterLength;
+        float slantAmount = gene.dorsalFinSlantAmount;
+        float baseHeight = gene.dorsalFinBaseHeight;
+        
 
-        float slantAmount = 0.5f;
-        float baseHeight = 1f;
 
         int numRows = 4;
         int pointsPerRow = numStrokesPerCritterDorsalFin / numRows / 2;  // 2 one facing each side
@@ -2120,19 +2128,7 @@ public class TheRenderKing : MonoBehaviour {
         
         // Initial position:
         for (int i = 0; i < numRows; i++) {
-            // top:
             
-            /*for(int p = 0; p < numStrokesPerCritterDorsalFin / numRows; p++) {
-                float yLerp = Mathf.Lerp(0f, 1f, Mathf.Clamp01((float)p / (float)(numStrokesPerCritterDorsalFin / numRows - 1))); // start at tail (Y = 0)            
-                int brushIndex = arrayIndexStart + i * (numStrokesPerCritterDorsalFin / numRows) + p;
-                AddUberBrushPoint(ref strokesArray, agent, new Vector3(0f, yLerp, -1f), new Vector2(0.5f, yLerp), brushIndex);
-                strokesArray[brushIndex].scale = Vector2.one * 25.25f; // new Vector2(uTangentAvg.magnitude, 0.125f); // vTangentAvg.magnitude);
-                strokesArray[brushIndex].bindNormal = new Vector3(1f, 0f, 0f);
-                strokesArray[brushIndex].bindTangent = new Vector3(0f, 0f, -1f);
-                strokesArray[brushIndex].color = Vector4.one;
-                strokesArray[brushIndex].jawMask = 1f;
-
-            }*/
             for(int y = 0; y < pointsPerRow; y++) {
                 float yLerp = Mathf.Lerp(startCoordY, endCoordY, Mathf.Clamp01((float)y / (float)(pointsPerRow - 1))); // start at tail (Y = 0)            
                 int brushIndexLeft = arrayIndexStart + pointsPerRow * i + y;
@@ -2140,9 +2136,7 @@ public class TheRenderKing : MonoBehaviour {
 
                 AddUberBrushPoint(ref strokesArray, agent, new Vector3(0f, yLerp, -1f), new Vector2(0.5f, yLerp), brushIndexLeft);
                 AddUberBrushPoint(ref strokesArray, agent, new Vector3(0f, yLerp, -1f), new Vector2(0.5f, yLerp), brushIndexRight);
-
-                //Debug.Log("pointsPerRow: " + pointsPerRow.ToString() + " brushIndexLeft: " + brushIndexLeft.ToString() + ", brushIndexRight: " + brushIndexRight.ToString() + ", yLerp: " + yLerp.ToString());
-                 
+                                
                 if(y == 0) {
 
                 }
@@ -2155,7 +2149,7 @@ public class TheRenderKing : MonoBehaviour {
                     //strokesArray[brushIndexLeft].color = Vector4.one;
                     strokesArray[brushIndexLeft].jawMask = 1f;
                     strokesArray[brushIndexLeft].neighborIndex = arrayIndexStart + pointsPerRow * i + Mathf.Max(0, (y - 1));
-                    strokesArray[brushIndexLeft].thresholdValue = 1f;
+                    strokesArray[brushIndexLeft].neighborAlign = 1f;
 
                     strokesArray[brushIndexRight].scale = strokesArray[brushIndexLeft].scale; // vTangentAvg.magnitude);
                     strokesArray[brushIndexRight].bindNormal = (new Vector3(-1f, 0f, -0.5f) + UnityEngine.Random.insideUnitSphere * 0.3f).normalized;
@@ -2163,19 +2157,8 @@ public class TheRenderKing : MonoBehaviour {
                     //strokesArray[brushIndexRight].color = Vector4.one;
                     strokesArray[brushIndexRight].jawMask = 1f;
                     strokesArray[brushIndexRight].neighborIndex = arrayIndexStart + pointsPerRow * i + Mathf.Max(0, (y - 1)) + (numStrokesPerCritterDorsalFin / 2);
-                    strokesArray[brushIndexRight].thresholdValue = 1f;
-
-                    /*strokesArray[brushIndexLeft].scale = Vector2.one * 25.25f; // new Vector2(uTangentAvg.magnitude, 0.125f); // vTangentAvg.magnitude);
-                    strokesArray[brushIndexLeft].bindNormal = (new Vector3(1f, 0f, -2f / (float)i) + UnityEngine.Random.insideUnitSphere * 0.6f).normalized;
-                    strokesArray[brushIndexLeft].bindTangent = (vTangentAvg + new Vector3(0f, -slantAmount, 0f)).normalized;
-                    strokesArray[brushIndexLeft].color = Vector4.one;
-                    strokesArray[brushIndexLeft].jawMask = 1f;
+                    strokesArray[brushIndexRight].neighborAlign = 1f;
                     
-                    strokesArray[brushIndexRight].scale = strokesArray[brushIndexLeft].scale; // new Vector2(uTangentAvg.magnitude, 0.2f); // vTangentAvg.magnitude);
-                    strokesArray[brushIndexRight].bindNormal = (new Vector3(-1f, 0f, -2f / (float)i) + UnityEngine.Random.insideUnitSphere * 0.6f).normalized; //Vector3.Cross(vTangentAvg, uTangentAvg).normalized;
-                    strokesArray[brushIndexRight].bindTangent = (vTangentAvg + new Vector3(0f, -slantAmount, 0f)).normalized;
-                    strokesArray[brushIndexRight].color = Vector4.one;
-                    strokesArray[brushIndexRight].jawMask = 1f;*/
                 } 
             }
         }
@@ -2211,19 +2194,25 @@ public class TheRenderKing : MonoBehaviour {
             }
         }
     }
-    private void GenerateCritterTailFinBrushstrokes(ref CritterGenericStrokeData[] strokesArray, Agent agent) {
+    private void GenerateCritterTailFinBrushstrokes(ref CritterUberStrokeData[] strokesArray, Agent agent) {
         int arrayIndexStart = numStrokesPerCritterLength * numStrokesPerCritterCross + numStrokesPerCritterEyes + numStrokesPerCritterMouth + numStrokesPerCritterTeeth + numStrokesPerCritterPectoralFins + numStrokesPerCritterDorsalFin;
 
         CritterModuleCoreGenome gene = agent.candidateRef.candidateGenome.bodyGenome.coreGenome; // for readability
         float segmentsSummedCritterLength = gene.mouthLength + gene.headLength + gene.bodyLength + gene.tailLength;
 
-        float spreadAngle = 0.3f;
-        float baseLength = 1f;
+        // Genome parameters:
+        float spreadAngle = gene.tailFinSpreadAngle;
+        float baseLength = gene.tailFinBaseLength * 3f;
+        Vector3 frequencies = gene.tailFinFrequencies;
+        Vector3 amplitudes = gene.tailFinAmplitudes;
+        Vector3 offsets = gene.tailFinOffsets;
 
         int numRows = 8;
         int numColumns = numStrokesPerCritterTailFin / numRows / 2;
 
         float lengthMult = baseLength * gene.creatureBaseLength / (float)numRows;
+
+        float tMult = segmentsSummedCritterLength * gene.creatureBaseLength;
 
         float angleInc = spreadAngle / (float)(numColumns - 1);
         
@@ -2243,8 +2232,12 @@ public class TheRenderKing : MonoBehaviour {
                 AddUberBrushPoint(ref strokesArray, agent, new Vector3(0f, 0.05f, -1f), new Vector2(0.5f, 0.05f), brushIndexLeft);
                 AddUberBrushPoint(ref strokesArray, agent, new Vector3(0f, 0.05f, -1f), new Vector2(0.5f, 0.05f), brushIndexRight);
                 // Build off that:
-                //float finHeight = Mathf.Sin(Mathf.PI * Mathf.Clamp01((float)y / (float)(pointsPerRow - 1)));
-                strokesArray[brushIndexLeft].scale = new Vector2(0.05f * (float)x, lengthMult);
+                float frac = Mathf.Clamp01((float)y / (float)(numColumns - 1));
+                float functionMult = (Mathf.Sin(Mathf.PI * frac * frequencies.x + offsets.x) * amplitudes.x * 0.5f + 1.5f +
+                                    Mathf.Cos(Mathf.PI * frac * frequencies.y + offsets.y) * amplitudes.y * 0.5f +
+                                    Mathf.Sin(Mathf.PI * frac * frequencies.z + offsets.z) * amplitudes.z * 0.5f) / 3f;
+
+                strokesArray[brushIndexLeft].scale = new Vector2(0.05f * (float)x, lengthMult * functionMult);
                 strokesArray[brushIndexRight].scale = strokesArray[brushIndexLeft].scale;
 
                 strokesArray[brushIndexLeft].bindNormal = (new Vector3(-1f, 0f, 0f) + UnityEngine.Random.insideUnitSphere * 0.3f).normalized;               
@@ -2252,23 +2245,24 @@ public class TheRenderKing : MonoBehaviour {
                 strokesArray[brushIndexLeft].bindPos += strokesArray[brushIndexLeft].bindTangent * strokesArray[brushIndexLeft].scale.y * (float)x;
                 strokesArray[brushIndexLeft].jawMask = 1f;
                 strokesArray[brushIndexLeft].scale.y *= 1.75f;
-                strokesArray[brushIndexLeft].t = 0.05f + (float)x * -0.025f;
+                strokesArray[brushIndexLeft].t = 0.05f - tangent.x * strokesArray[brushIndexLeft].scale.y * (float)x / tMult;
                 strokesArray[brushIndexLeft].neighborIndex = arrayIndexStart + numRows * y + Mathf.Max(0, (x - 1));
-                strokesArray[brushIndexLeft].thresholdValue = 1f;
-
-                
+                strokesArray[brushIndexLeft].neighborAlign = 1f;
+                strokesArray[brushIndexLeft].passiveFollow = Mathf.Lerp(0.3f, 0.7f, (float)x / (float)(numRows - 1));
+                                
                 strokesArray[brushIndexRight].bindNormal = (new Vector3(1f, 0f, 0f) + UnityEngine.Random.insideUnitSphere * 0.3f).normalized;               
                 strokesArray[brushIndexRight].bindTangent = new Vector3(0f, -tangent.x, tangent.y);
                 strokesArray[brushIndexRight].bindPos += strokesArray[brushIndexRight].bindTangent * strokesArray[brushIndexRight].scale.y * (float)x;
                 strokesArray[brushIndexRight].jawMask = 1f;
                 strokesArray[brushIndexRight].scale.y *= 1.75f;
-                strokesArray[brushIndexRight].t = 0.05f + (float)x * -0.025f;
+                strokesArray[brushIndexRight].t = 0.05f - tangent.x * strokesArray[brushIndexLeft].scale.y * (float)x / tMult;
                 strokesArray[brushIndexRight].neighborIndex = arrayIndexStart + numRows * y + Mathf.Max(0, (x - 1)) + (numStrokesPerCritterTailFin / 2); 
-                strokesArray[brushIndexRight].thresholdValue = 1f;
+                strokesArray[brushIndexRight].neighborAlign = 1f;
+                strokesArray[brushIndexRight].passiveFollow = Mathf.Lerp(0.3f, 0.7f, (float)x / (float)(numRows - 1));
             }
         }
     }
-    private void GenerateCritterSkinDetailBrushstrokes(ref CritterGenericStrokeData[] strokesArray, Agent agent) {
+    private void GenerateCritterSkinDetailBrushstrokes(ref CritterUberStrokeData[] strokesArray, Agent agent) {
         int arrayIndexStart = numStrokesPerCritterLength * numStrokesPerCritterCross + numStrokesPerCritterEyes + numStrokesPerCritterMouth + numStrokesPerCritterTeeth + numStrokesPerCritterPectoralFins + numStrokesPerCritterDorsalFin + numStrokesPerCritterTailFin;
 
         CritterModuleCoreGenome gene = agent.candidateRef.candidateGenome.bodyGenome.coreGenome; // for readability
@@ -2293,7 +2287,7 @@ public class TheRenderKing : MonoBehaviour {
             Vector3 anchorTangent = strokesArray[anchorIndex].bindTangent;
 
             strokesArray[brushIndex].scale = strokesArray[anchorIndex].scale * 0.4f;
-            strokesArray[brushIndex].bindNormal = (anchorNormal + UnityEngine.Random.insideUnitSphere * 0.3f).normalized;               
+            strokesArray[brushIndex].bindNormal = (anchorNormal + UnityEngine.Random.insideUnitSphere * 0.4f).normalized;               
             strokesArray[brushIndex].bindTangent = (anchorTangent + UnityEngine.Random.insideUnitSphere * 0.3f).normalized;      
             strokesArray[brushIndex].bindPos += anchorNormal * strokesArray[brushIndex].scale.x * 0.33f;
             strokesArray[brushIndex].jawMask = 1f;
@@ -2305,8 +2299,8 @@ public class TheRenderKing : MonoBehaviour {
         }
     }
 
-    private void SortCritterBrushstrokes(ref CritterGenericStrokeData[] strokesArray, int agentIndex) {
-        List<CritterGenericStrokeData> sortedBrushStrokesList = new List<CritterGenericStrokeData>(); // temporary naive approach:
+    private void SortCritterBrushstrokes(ref CritterUberStrokeData[] strokesArray, int agentIndex) {
+        List<CritterUberStrokeData> sortedBrushStrokesList = new List<CritterUberStrokeData>(); // temporary naive approach:
         // Add first brushstroke first:
         sortedBrushStrokesList.Add(strokesArray[0]);
 
@@ -2579,7 +2573,7 @@ public class TheRenderKing : MonoBehaviour {
         if(treeOfLifePortraitCritterInitDataCBuffer != null) {
             treeOfLifePortraitCritterInitDataCBuffer.Release();
         }
-        treeOfLifePortraitCritterInitDataCBuffer = new ComputeBuffer(1, sizeof(float) * 17 + sizeof(int) * 3);
+        treeOfLifePortraitCritterInitDataCBuffer = new ComputeBuffer(1, sizeof(float) * 19 + sizeof(int) * 3);
         treeOfLifePortraitCritterInitDataCBuffer.SetData(treeOfLifePortraitCritterInitDataArray);
         
         //upload data to GPU
@@ -3047,7 +3041,7 @@ public class TheRenderKing : MonoBehaviour {
         //cmdBufferTest.GetTemporaryRT(renderedSceneID, -1, -1, 0, FilterMode.Bilinear);  // save contents of Standard Rendering Pipeline
         //cmdBufferTest.Blit(BuiltinRenderTextureType.CameraTarget, renderedSceneID);  // save contents of Standard Rendering Pipeline
 
-        /*
+        
         // Surface Bits Shadows:
         baronVonWater.waterSurfaceBitsShadowsDisplayMat.SetPass(0);
         baronVonWater.waterSurfaceBitsShadowsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -3060,10 +3054,10 @@ public class TheRenderKing : MonoBehaviour {
         baronVonWater.waterSurfaceBitsDisplayMat.SetFloat("_CamDistNormalized", Mathf.Lerp(0f, 1f, Mathf.Clamp01((simManager.cameraManager.gameObject.transform.position.z * -1f) / 100f)));
         cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, baronVonWater.waterSurfaceBitsShadowsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterSurfaceBitsCBuffer.count);
-        */
+        
 
-        // SHADOWS TEST:
-        critterShadowStrokesDisplayMat.SetPass(0);
+        // SHADOWS TEST:  // OLD::::::
+        /*critterShadowStrokesDisplayMat.SetPass(0);
         critterShadowStrokesDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         critterShadowStrokesDisplayMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
         critterShadowStrokesDisplayMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
@@ -3074,7 +3068,20 @@ public class TheRenderKing : MonoBehaviour {
         critterShadowStrokesDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
         cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, critterShadowStrokesDisplayMat, 0, MeshTopology.Triangles, 6, critterSkinStrokesCBuffer.count);
+        */
+        critterUberStrokeShadowMat.SetPass(0);
+        critterUberStrokeShadowMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        critterUberStrokeShadowMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
+        critterUberStrokeShadowMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
+        critterUberStrokeShadowMat.SetBuffer("critterGenericStrokesCBuffer", critterGenericStrokesCBuffer); 
+        critterUberStrokeShadowMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+        //critterUberStrokeShadowMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
+        critterUberStrokeShadowMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+        critterUberStrokeShadowMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID);
+        cmdBufferTest.DrawProcedural(Matrix4x4.identity, critterUberStrokeShadowMat, 0, MeshTopology.Triangles, 6, critterGenericStrokesCBuffer.count);
         
+
         eggSackShadowDisplayMat.SetPass(0);
         eggSackShadowDisplayMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
         eggSackShadowDisplayMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
@@ -3096,13 +3103,12 @@ public class TheRenderKing : MonoBehaviour {
         foodParticleShadowDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, foodParticleShadowDisplayMat, 0, MeshTopology.Triangles, 6, simManager.foodParticlesCBuffer.count);
         */
-        /*
+        
         foodParticleDisplayMat.SetPass(0);
         foodParticleDisplayMat.SetBuffer("foodParticleDataCBuffer", simManager.foodManager.foodParticlesCBuffer);
         foodParticleDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         foodParticleDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, foodParticleDisplayMat, 0, MeshTopology.Triangles, 6, simManager.foodManager.foodParticlesCBuffer.count);
-        */
         
         
         
@@ -3142,9 +3148,9 @@ public class TheRenderKing : MonoBehaviour {
         //cmdBufferTest.Blit(waterTargetID, primaryRT);
 
         
-        /*
+        
         // WATER DEBRIS BITS:
-        baronVonWater.waterDebrisBitsDisplayMat.SetPass(0);
+        /*baronVonWater.waterDebrisBitsDisplayMat.SetPass(0);
         baronVonWater.waterDebrisBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         baronVonWater.waterDebrisBitsDisplayMat.SetBuffer("frameBufferStrokesCBuffer", baronVonWater.waterDebrisBitsCBuffer);
         baronVonWater.waterDebrisBitsDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
@@ -3275,7 +3281,7 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, baronVonWater.waterQuadStrokesSmlDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterQuadStrokesCBufferSml.count);
         
-        /*        
+                
         // SURFACE BITS FLOATY:::::  // LILY PADS
         baronVonWater.waterSurfaceBitsDisplayMat.SetPass(0);
         baronVonWater.waterSurfaceBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -3288,7 +3294,7 @@ public class TheRenderKing : MonoBehaviour {
         baronVonWater.waterSurfaceBitsDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
         cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, baronVonWater.waterSurfaceBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterSurfaceBitsCBuffer.count);
-        */
+        
         // DRY LAND!!!!!!
         baronVonTerrain.groundDryLandDisplayMat.SetPass(0);
         baronVonTerrain.groundDryLandDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
