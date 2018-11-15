@@ -119,7 +119,8 @@
 								
 				o.color = float4(specTest * 0.65 + hue * crudeDiffuse, alpha); //genericStrokeData.bindPos.x * 0.5 + 0.5, genericStrokeData.bindPos.z * 0.33 + 0.5, genericStrokeData.bindPos.y * 0.5 + 0.5, 1);
 				o.color = lerp(o.color, decayColor, saturate(decayAmount + saturate(critterSimData.decayPercentage * 50) * 0.25));
-				
+				o.color.a *= alpha;
+
 				o.worldPos = float4(vertexWorldPos, 1.0);
 				//o.color.rgb = ;
 				//o.color.rgb *= 0.4;

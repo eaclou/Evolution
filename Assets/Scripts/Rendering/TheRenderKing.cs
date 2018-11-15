@@ -1350,18 +1350,18 @@ public class TheRenderKing : MonoBehaviour {
         int baseIndex = 0;
         // AGENTS:
         for(int i = 0; i < simManager.agentsArray.Length; i++) {
-            Vector3 agentPos = simManager.agentsArray[i].transform.position;
+            Vector3 agentPos = simManager.agentsArray[i].bodyRigidbody.transform.position;
             obstacleStrokeDataArray[baseIndex + i].worldPos = new Vector2(agentPos.x, agentPos.y);
             obstacleStrokeDataArray[baseIndex + i].localDir = simManager.agentsArray[i].facingDirection;
-            obstacleStrokeDataArray[baseIndex + i].scale = new Vector2(simManager.agentsArray[i].transform.localScale.x, simManager.agentsArray[i].transform.localScale.y) * 0.9f; // ** revisit this later // should leave room for velSampling around Agent *** weird popping when * 0.9f
+            obstacleStrokeDataArray[baseIndex + i].scale = Vector2.one * 5.5f * simManager.agentsArray[i].sizePercentage; // new Vector2(simManager.agentsArray[i].transform.localScale.x, simManager.agentsArray[i].transform.localScale.y) * 2.9f; // ** revisit this later // should leave room for velSampling around Agent *** weird popping when * 0.9f
 
-            float velX = (agentPos.x - simManager.agentsArray[i]._PrevPos.x) * velScale;
-            float velY = (agentPos.y - simManager.agentsArray[i]._PrevPos.y) * velScale;
+            float velX = Mathf.Clamp01(agentPos.x - simManager.agentsArray[i]._PrevPos.x) * velScale * 1.45f;
+            float velY = Mathf.Clamp01(agentPos.y - simManager.agentsArray[i]._PrevPos.y) * velScale * 1.45f;
 
             obstacleStrokeDataArray[baseIndex + i].color = new Vector4(velX, velY, 1f, 1f);
         }
         // FOOD:
-        baseIndex = simManager.agentsArray.Length;
+        /*baseIndex = simManager.agentsArray.Length;
         for(int i = 0; i < simManager.eggSackArray.Length; i++) {
             Vector3 foodPos = simManager.eggSackArray[i].transform.position;
             obstacleStrokeDataArray[baseIndex + i].worldPos = new Vector2(foodPos.x, foodPos.y);
@@ -1372,7 +1372,7 @@ public class TheRenderKing : MonoBehaviour {
             float velY = (foodPos.y - simManager.eggSackArray[i]._PrevPos.y) * velScale;
 
             obstacleStrokeDataArray[baseIndex + i].color = new Vector4(velX, velY, 1f, 1f);
-        }
+        }*/
         // PREDATORS:
         /*baseIndex = simManager.agentsArray.Length + simManager.eggSackArray.Length;
         for(int i = 0; i < simManager.predatorArray.Length; i++) {
@@ -2776,12 +2776,12 @@ public class TheRenderKing : MonoBehaviour {
         // Draw Solid Land boundaries:
         cmdBufferFluidObstacles.DrawMesh(baronVonTerrain.terrainMesh, Matrix4x4.identity, baronVonTerrain.terrainObstaclesHeightMaskMat); // Masks out areas above the fluid "Sea Level"
         // Draw dynamic Obstacles:
-        /*
+        
         basicStrokeDisplayMat.SetPass(0);
         basicStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer); // *** Needed? or just set it once in beginning....
         basicStrokeDisplayMat.SetBuffer("basicStrokesCBuffer", obstacleStrokesCBuffer);        
         cmdBufferFluidObstacles.DrawProcedural(Matrix4x4.identity, basicStrokeDisplayMat, 0, MeshTopology.Triangles, 6, obstacleStrokesCBuffer.count);
-            */  // Disabling for now -- starting with one-way interaction between fluid & objects (fluid pushes objects, they don't push back)
+              // Disabling for now -- starting with one-way interaction between fluid & objects (fluid pushes objects, they don't push back)
         Graphics.ExecuteCommandBuffer(cmdBufferFluidObstacles);
         // Still not sure if this will work correctly... ****
         fluidObstaclesRenderCamera.Render(); // is this even needed? all drawcalls taken care of within commandBuffer?

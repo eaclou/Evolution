@@ -273,7 +273,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
         colorRefreshBackgroundMultiplier = Mathf.Lerp(colorRefreshBackgroundMultiplier, 0.0001f, lerpAmount);
         colorRefreshDynamicMultiplier = Mathf.Lerp(colorRefreshDynamicMultiplier, 0.0075f, lerpAmount);
 
-        forceMultiplier = Mathf.Lerp(forceMultiplier, 4.5f, lerpAmount);
+        forceMultiplier = Mathf.Lerp(forceMultiplier, 0.15f, lerpAmount);
     }
     private void SetClimateStormy() {
         //Debug.Log("UpdateSimulationClimate Stormy!");
