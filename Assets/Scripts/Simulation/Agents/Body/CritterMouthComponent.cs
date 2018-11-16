@@ -78,7 +78,7 @@ public class CritterMouthComponent : MonoBehaviour {
                 if(true) { //agentRef.speciesIndex != collidingSegment.agentRef.speciesIndex) {   // *** true == CANNIBALISM ALLOWED!!!!!! *****
                     // ANIMAL:
                     // Compare sizes:
-                    targetArea = collidingAgent.currentBoundingBoxSize.x * collidingAgent.currentBoundingBoxSize.z;
+                    targetArea = collidingAgent.currentBoundingBoxSize.x * collidingAgent.currentBoundingBoxSize.y;
                     //targetArea = 0.2f; // TEMP TEST!! ***
                     if(ownBiteArea > targetArea) {
                         // Swallow!:::

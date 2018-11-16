@@ -137,7 +137,8 @@ float3 GetAnimatedPosNew(float3 inPos, float3 pivotPos, CritterInitData critterI
 	float lowerJawMask = saturate(-strokeData.jawMask) * biteMask; // biteMask * saturate(inPos.z * 1000);
 	float upperJawMask = saturate(strokeData.jawMask) * biteMask; // biteMask * saturate(-inPos.z * 1000);
 
-	float3 critterCurScale = critterInitData.boundingBoxSize * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage) * 0.5;
+	float3 critterCurScale = float3(1,1,1) * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage) * 0.5;
+	// old: // float3 critterCurScale = critterInitData.boundingBoxSize * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage) * 0.5;
 
 	float activeMouthMask = critterInitData.mouthIsActive;
 
@@ -146,9 +147,7 @@ float3 GetAnimatedPosNew(float3 inPos, float3 pivotPos, CritterInitData critterI
 	// Mouth Opening:
 	passiveMouthPos.xyz = lerp(passiveMouthPos.xyz, passiveMouthPos.xyz + float3(0,0,critterCurScale.z * 0.65), lowerJawMask * biteAnimCycle * saturate(growthPercentage * 4));
 	passiveMouthPos.xyz = lerp(passiveMouthPos.xyz, passiveMouthPos.xyz + float3(0,0,-critterCurScale.z * 0.35), upperJawMask * biteAnimCycle * saturate(growthPercentage * 4));
-	// Lunge Forward:
-	//passiveMouthPos.y *= (eatingCycle * 0.5 * biteMask + 1.0);
-	//passiveMouthPos.y += (eatingCycle * critterInitData.boundingBoxSize.y * 0.175);
+	// Lunge Forward:	
 
 	// ACTIVE MOUTH:::
 	float3 activeMouthPos = inPos;
@@ -164,7 +163,7 @@ float3 GetAnimatedPosNew(float3 inPos, float3 pivotPos, CritterInitData critterI
 	// end BITE
 	
 	float3 outPos = RotatePointAroundYAngle(float3(0,0,0), swimAngle * 0.6 + critterSimData.decayPercentage * 4.25, inPos);
-	outPos = RotatePointAroundZAngle(float3(0,critterInitData.boundingBoxSize.y * 0.15,0), swimAngle, outPos);  // *** want to control pivot pos!!! ***
+	outPos = RotatePointAroundZAngle(float3(0, 0, 0), swimAngle, outPos);  // *** want to control pivot pos!!! ***
 
 	// Rotate with Critter:
 	float2 forward = critterSimData.heading;;
@@ -190,7 +189,8 @@ float3 GetAnimatedDirNew(float3 inDir, float3 pivotPos, CritterInitData critterI
 	animData.bendOnCoord = 1.0 - critterInitData.bodyCoord;
 
 	float swimAngle = GetSwimAngleNew(animData);
-	float3 outDir = RotatePointAroundZAngle(float3(0,0,0), swimAngle, inDir);
+	float3 outDir = RotatePointAroundYAngle(float3(0,0,0), swimAngle * 0.6 + critterSimData.decayPercentage * 4.25, inDir);
+	outDir = RotatePointAroundZAngle(float3(0,0,0), swimAngle, outDir);
 
 	// Rotate with Critter:
 	float2 forward = critterSimData.heading;;

@@ -34,6 +34,7 @@ public class CritterModuleCore {
     public Vector2 nearestEggSackPos;
     public int nearestFoodParticleIndex = -1;  // debugging ** TEMP
     public Vector2 nearestFoodParticlePos;
+    public float nearestFoodParticleAmount;
         
     // Nearest Edible Object:
     public float[] foodPosX;
@@ -430,7 +431,8 @@ public class CritterModuleCore {
         nearestFoodParticleIndex = simManager.foodManager.closestFoodParticlesDataArray[agentIndex].index;
         nearestFoodParticlePos = simManager.foodManager.closestFoodParticlesDataArray[agentIndex].worldPos - new Vector2(simManager.agentsArray[agentIndex].bodyRigidbody.transform.position.x,
                                                                                                            simManager.agentsArray[agentIndex].bodyRigidbody.transform.position.y);
-                
+
+        nearestFoodParticleAmount = simManager.foodManager.closestFoodParticlesDataArray[agentIndex].foodAmount;
 
         Vector2 foodPos = Vector2.zero;
         Vector2 foodDir = Vector2.zero;
@@ -508,10 +510,11 @@ public class CritterModuleCore {
         if(isPassiveMouth) {
             //float nearestFoodParticleSquareDistance = critterToFoodParticle.sqrMagnitude;
             //if(nearestFoodParticleSquareDistance < nearestFoodChunkSquareDistance) { // GPU Food PArticle:
-            foodPosX[0] = foodParticleDir.x; ; // critterToFoodParticle.x / 20f; 
-            foodPosY[0] = foodParticleDir.y;
-            foodDirX[0] = nutrientCellInfo.y;
-            foodDirY[0] = nutrientCellInfo.z;
+            foodPosX[0] = nutrientCellInfo.y; //critterToFoodParticle.x / 20f; 
+            foodPosY[0] = nutrientCellInfo.z;
+            foodDirX[0] = foodParticleDir.x;
+            foodDirY[0] = foodParticleDir.y;
+            foodRelSize[0] = nutrientCellInfo.x;
             //foodRelSize[0] = nutrientCellInfo.x; // simManager.closestFoodParticlesDataArray[agentIndex].foodAmount; // nutrientCellInfo.x;
                         
         }

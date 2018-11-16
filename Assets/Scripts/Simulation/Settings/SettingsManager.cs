@@ -11,7 +11,7 @@ public class SettingsManager : MonoBehaviour {
 
     public float maxGlobalNutrients = 5f;
     public float eatRateMultiplier = 1f;
-    public float energyDrainMultiplier = 1f;
+    public float energyDrainMultiplier = 0.2f;
     public float spawnNewFoodChance = 0.01f;
     public float foodDiffusionRate = 0.0125f;
     public float minSizeFeedingEfficiency = 1f;

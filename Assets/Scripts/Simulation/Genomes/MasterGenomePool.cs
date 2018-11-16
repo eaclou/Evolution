@@ -9,10 +9,10 @@ public class MasterGenomePool {
 
     public static int nextCandidateIndex = 0;
 
-    public int maxNumActiveSpecies = 8;
-    private int targetNumSpecies = 4;
+    public int maxNumActiveSpecies = 6;
+    private int targetNumSpecies = 3;
     public float speciesSimilarityDistanceThreshold = 10f;
-    private int minNumGauranteedEvalsForNewSpecies = 64;
+    private int minNumGuaranteedEvalsForNewSpecies = 64;
 
     public int currentHighestDepth = 1;
     
@@ -84,7 +84,7 @@ public class MasterGenomePool {
             }
 
             if(noCurrentlyExtinctFlaggedSpecies) {
-                if(completeSpeciesPoolsList[leastFitSpeciesID].numAgentsEvaluated > minNumGauranteedEvalsForNewSpecies) {
+                if(completeSpeciesPoolsList[leastFitSpeciesID].numAgentsEvaluated > minNumGuaranteedEvalsForNewSpecies) {
                     // OK to KILL!!!
                     completeSpeciesPoolsList[leastFitSpeciesID].isFlaggedForExtinction = true;
                     Debug.Log("FLAG EXTINCT: " + leastFitSpeciesID.ToString());

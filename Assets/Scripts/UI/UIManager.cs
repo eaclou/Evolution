@@ -234,6 +234,8 @@ public class UIManager : MonoBehaviour {
     public bool isDraggingMouse = false;
     public bool isDraggingSpeciesNode = false;
 
+    private int selectedAgentID;
+
     // Tree of Life:
     //public Image imageTreeOfLifeDisplay;
     
@@ -593,12 +595,12 @@ public class UIManager : MonoBehaviour {
             TreeOfLifeNodeRaycastTarget speciesNodeRayTarget = hit.collider.gameObject.GetComponent<TreeOfLifeNodeRaycastTarget>();
 
             if(speciesNodeRayTarget != null) {
-                int selectedID = speciesNodeRayTarget.speciesRef.speciesID;
+                selectedAgentID = speciesNodeRayTarget.speciesRef.speciesID;
                 if(clicked) {
-                    ClickOnSpeciesNode(selectedID);                    
+                    ClickOnSpeciesNode(selectedAgentID);                    
                 }
                 else {
-                    treeOfLifeManager.HoverOverSpeciesNode(selectedID);
+                    treeOfLifeManager.HoverOverSpeciesNode(selectedAgentID);
                 }
             }
             else {
@@ -879,7 +881,7 @@ public class UIManager : MonoBehaviour {
         // DISABLED!!!! -- Need to establish good method for grabbing data from SimulationManager!
         SimulationManager simManager = gameManager.simulationManager;
 
-        string debugTxt1 = "avgFitnessScore: " + simManager.masterGenomePool.completeSpeciesPoolsList[0].avgFitnessScore.ToString() + "\n"; // Training: False";
+        //string debugTxt1 = "avgFitnessScore: " + simManager.masterGenomePool.completeSpeciesPoolsList[0].avgFitnessScore.ToString() + "\n"; // Training: False";
 
         //debugTxt = "Training: ACTIVE   numSamples: " + dataSamplesList.Count.ToString() + "\n";
         //debugTxt += "Gen: " + curGen.ToString() + ", Agent: " + curTestingGenomeSupervised.ToString() + ", Sample: " + curTestingSample.ToString() + "\n";
@@ -887,18 +889,52 @@ public class UIManager : MonoBehaviour {
         
         Agent agentRef = cameraManager.targetAgent;        
         int agentIndex = agentRef.index;
-               
-
-        //debugTxt1 += "Agent[" + agentIndex.ToString() + "] # Neurons: " + cameraManager.targetAgent.brain.neuronList.Count.ToString() + ", # Axons: " + cameraManager.targetAgent.brain.axonList.Count.ToString() + "\n";
-        debugTxt1 += "HoverAgentIndex: " + cameraManager.mouseHoverAgentIndex.ToString() + "\n";
+        
+        // DebugTxt1 : use this for selected creature stats:
+                
+        string debugTxt1 = "Agent[" + agentIndex.ToString() + "] Species[" + agentRef.speciesIndex.ToString() + "]\n# Neurons: " + cameraManager.targetAgent.brain.neuronList.Count.ToString() + ", # Axons: " + cameraManager.targetAgent.brain.axonList.Count.ToString() + "\n";
+        //debugTxt1 += "HoverAgentIndex: " + cameraManager.mouseHoverAgentIndex.ToString() + "\n";
         debugTxt1 += "\n";
+
+        string mouthType = "Active";
+        if(agentRef.mouthRef.isPassive) { mouthType = "Passive"; }
+        debugTxt1 += "Mouth: [" + mouthType + "] " + agentRef.coreModule.mouthEffector[0].ToString() + "\n";
+        debugTxt1 += "Nearest Food: [" + agentRef.coreModule.nearestFoodParticleIndex.ToString() + 
+                    "] Amount: " + agentRef.coreModule.nearestFoodParticleAmount.ToString("F4") + 
+                    "\nPos: ( " + agentRef.coreModule.nearestFoodParticlePos.x.ToString("F2") +
+                    ", " + agentRef.coreModule.nearestFoodParticlePos.y.ToString("F2") + 
+                    " ), Dir: ( " + agentRef.coreModule.foodDirX[0].ToString("F2") +
+                    ", " + agentRef.coreModule.foodDirY[0].ToString("F2") + " )" +
+                    "\n";        
+        debugTxt1 += "\nNutrients: " + agentRef.coreModule.debugFoodValue.ToString("F4") + "\n";
+        debugTxt1 += "Gradient Dir: (" + agentRef.coreModule.foodPosX[0].ToString("F2") + ", " + agentRef.coreModule.foodPosY[0].ToString("F2") + ")\n";
+        debugTxt1 += "Total Food Eaten: " + agentRef.totalFoodEaten.ToString("F3") + ", Corpse Food Amount: " + agentRef.currentCorpseFoodAmount.ToString("F3") + "\n";
+
+        debugTxt1 += "\nFullSize: " + agentRef.fullSizeBoundingBox.ToString() + ", Volume: " + agentRef.fullSizeBodyVolume.ToString() + "\n";
+        debugTxt1 += "( " + (agentRef.sizePercentage * 100f).ToString("F0") + "% )\n";
+
+        debugTxt1 += "\nCurVel: " + agentRef.curVel.ToString("F3") + ", CurAccel: " + agentRef.curAccel.ToString("F3") + ", AvgVel: " + agentRef.avgVel.ToString("F3") + "\n";
+
+        debugTxt1 += "\nWater Depth: " + agentRef.depth.ToString("F3") + ", Vel: " + (agentRef.avgFluidVel * 10f).ToString("F3") + "\n";
+        // agentRef.sizePercentage
+       //agentRef.fullSizeBoundingBox
+       //agentRef.fullSizeBodyVolume
+       //agentRef.depth
+       //agentRef.currentCorpseFoodAmount
+       //agentRef.curVel
+       //agentRef.curAccel
+       //agentRef.avgVel
+       //agentRef.avgFluidVel
+
+        /*
         for(int i = 0; i < 4; i++) {
             debugTxt1 += "Species[" + i.ToString() + "] Avg Lifespan: " + simManager.rollingAverageAgentScoresArray[i].ToString() + "\n";
             debugTxt1 += "Species[" + i.ToString() + "] Avg Size: " + simManager.speciesAvgSizes[i].ToString() + "\n";
             debugTxt1 += "Species[" + i.ToString() + "] Avg Mouth Type: " + simManager.speciesAvgMouthTypes[i].ToString() + "\n";
             debugTxt1 += "Species[" + i.ToString() + "] Avg Food Eaten: " + simManager.speciesAvgFoodEaten[i].ToString() + "\n\n";
         }
-        debugTxt1 += "CurOldestAge: " + simManager.currentOldestAgent.ToString() + ", numChildrenBorn: " + simManager.numAgentsBorn.ToString() + ", numDied: " + simManager.numAgentsDied.ToString() + ", ~Gen: " + ((float)simManager.numAgentsBorn / (float)simManager._NumAgents).ToString();
+        */
+        debugTxt1 += "\n\nNumChildrenBorn: " + simManager.numAgentsBorn.ToString() + ", numDied: " + simManager.numAgentsDied.ToString() + ", ~Gen: " + ((float)simManager.numAgentsBorn / (float)simManager._NumAgents).ToString();
         //debugTxt1 += "\nBotRecordAge: " + simManager.recordBotAge.ToString() + ", PlayerRecordAge: " + simManager.recordPlayerAge.ToString();
         debugTxt1 += "\nAverageAgentScore: " + simManager.rollingAverageAgentScoresArray[0].ToString();
         

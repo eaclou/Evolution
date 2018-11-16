@@ -243,7 +243,7 @@ public class SimulationStateData {
                 //Debug.Log("Error isInert FALSE: " + i.ToString());
                 // INITDATA ::==========================================================================================================================================================================
                 AgentGenome genome = simManager.agentsArray[i].candidateRef.candidateGenome;
-                critterInitDataArray[i].boundingBoxSize = genome.bodyGenome.GetFullsizeBoundingBox(); // simManager.agentsArray[i].fullSizeBoundingBox;
+                critterInitDataArray[i].boundingBoxSize = simManager.agentsArray[i].fullSizeBoundingBox; //genome.bodyGenome.GetFullsizeBoundingBox(); // simManager.agentsArray[i].fullSizeBoundingBox;
                 critterInitDataArray[i].spawnSizePercentage = simManager.agentsArray[i].spawnStartingScale;
                 critterInitDataArray[i].maxEnergy = Mathf.Min(simManager.agentsArray[i].fullSizeBoundingBox.x * simManager.agentsArray[i].fullSizeBoundingBox.y, 0.5f);
                 critterInitDataArray[i].primaryHue = genome.bodyGenome.appearanceGenome.huePrimary;
