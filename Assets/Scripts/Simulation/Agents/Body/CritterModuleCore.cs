@@ -16,8 +16,9 @@ public class CritterModuleCore {
     //public float coreWidth;
     //public float coreLength;
     
-    public float energyRaw = 1f;
-    public float maxEnergyStorage = 1f;
+    //public float energyRaw = 1f;
+    //public float maxEnergyStorage = 1f;
+    public float energy = 1f;  // 0-1
     //public float stamina = 1f;
     public float healthHead = 1f;
     public float healthBody = 1f;
@@ -179,7 +180,8 @@ public class CritterModuleCore {
         mouthEffector = new float[1];  // 206
                                        // 7 Total Outputs
 
-        energyRaw = 1f; //-- whatever--- coreWidth * coreLength * Mathf.Lerp(agent.spawnStartingScale, 1f, agent.growthPercentage);
+        //energyRaw = 1f; //-- whatever--- coreWidth * coreLength * Mathf.Lerp(agent.spawnStartingScale, 1f, agent.growthPercentage);
+        energy = 1;
         healthHead = 1f;
         healthBody = 1f;
         healthExternal = 1f;
@@ -557,7 +559,7 @@ public class CritterModuleCore {
         contactForceY[0] = 0f;
         hitPoints[0] = Mathf.Max(healthBody, 0f);
         //stamina[0] = stamina; // set in Agent.cs
-        energyStored[0] = Mathf.Clamp01(energyRaw / maxEnergyStorage);
+        energyStored[0] = Mathf.Clamp01(energy);  // Mathf.Clamp01(energyRaw / maxEnergyStorage);
         foodStored[0] = stomachContents / stomachCapacity;
         
         //mouthRef.foodInRange = false;

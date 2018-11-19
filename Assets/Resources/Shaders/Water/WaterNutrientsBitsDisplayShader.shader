@@ -91,7 +91,7 @@
 				scale.y = scale.y * (1 + saturate(waterQuadData.speed * 64));
 				
 				float4 nutrientGridSample = tex2Dlod(_NutrientTex, float4((o.altitudeUV - 0.25) * 2.0, 0, 0));
-				scale *= (nutrientGridSample.x * 0.75 + 0.25) * 1;
+				scale *= (nutrientGridSample.x * 0.9 + 0.1) * 1;
 				
 				
 				quadPoint *= float3(scale, 1.0);

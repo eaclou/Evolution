@@ -398,7 +398,7 @@ public class Agent : MonoBehaviour {
 
     private void CheckForDeathStarvation() {
         // STARVATION::
-        if (coreModule.energyRaw <= 0f) {
+        if (coreModule.energy <= 0f) {
             curLifeStage = AgentLifeStage.Dead;
             lifeStageTransitionTimeStepCounter = 0;
 
@@ -713,8 +713,9 @@ public class Agent : MonoBehaviour {
         isAttachedToParentEggSack = false;        
                 
         colliderBody.enabled = true;
-                
-        coreModule.energyRaw = coreModule.maxEnergyStorage;
+
+        coreModule.energy = 1f;
+        //coreModule.energyRaw = coreModule.maxEnergyStorage;
 
         //turn mouth on
         mouthRef.Enable();
@@ -833,10 +834,10 @@ public class Agent : MonoBehaviour {
         float scale = Mathf.Lerp(minScale, 1f, sizePercentage); // Minimum size = 0.1 ???  // SYNC WITH EGG SIZE!!!
         currentBoundingBoxSize = fullSizeBoundingBox * scale;
         //coreModule.currentBodySize = new Vector2(coreModule.coreWidth, coreModule.coreLength) * growthPercentage;
-        float currentBodyVolume = currentBoundingBoxSize.x * currentBoundingBoxSize.y * currentBoundingBoxSize.z; // coreModule.currentBodySize.x * coreModule.currentBodySize.y;
+        float currentBodyVolume = currentBoundingBoxSize.y * (currentBoundingBoxSize.x + currentBoundingBoxSize.z) * 0.5f; // coreModule.currentBodySize.x * coreModule.currentBodySize.y;
                 
         coreModule.stomachCapacity = currentBodyVolume;
-        coreModule.maxEnergyStorage = fullSizeBoundingBox.x * fullSizeBoundingBox.y * scale;  // Z = length, x = width  // ****
+        //coreModule.maxEnergyStorage = fullSizeBoundingBox.x * fullSizeBoundingBox.y * scale;  // Z = length, x = width  // ****
         
         if(resizeColliders) {
             colliderBody.size = new Vector2(currentBoundingBoxSize.x, currentBoundingBoxSize.y); // coreModule.currentBodySize;
@@ -864,43 +865,43 @@ public class Agent : MonoBehaviour {
         smoothedThrottle = Vector2.Lerp(smoothedThrottle, throttle, smoothedThrottleLerp);
         Vector2 throttleForwardDir = throttle.normalized;
 
-        float agentSizeMultiplier = coreModule.maxEnergyStorage; // coreModule.coreWidth * coreModule.coreLength * growthPercentage;
+        //float agentSizeMultiplier = coreModule.maxEnergyStorage; // coreModule.coreWidth * coreModule.coreLength * growthPercentage;
         // ENERGY!!!!
         // Digestion:
-        float amountDigested = 0.003f * agentSizeMultiplier;
+        float amountDigested = 0.003f;
         float digestionAmount = Mathf.Min(coreModule.stomachContents, amountDigested);
-        float foodToEnergyConversion = 10.0f;
+        float foodToEnergyConversion = 2f;
         float createdEnergy = digestionAmount * foodToEnergyConversion;
         coreModule.stomachContents -= digestionAmount;
         if(coreModule.stomachContents < 0f) {
             coreModule.stomachContents = 0f;
         }
-        coreModule.energyRaw += createdEnergy;
-        float maxEnergy = agentSizeMultiplier;
-        if(coreModule.energyRaw > maxEnergy) {
-            coreModule.energyRaw = maxEnergy;
+        coreModule.energy += createdEnergy;
+        //float maxEnergy = agentSizeMultiplier;
+        if(coreModule.energy > 1f) {
+            coreModule.energy = 1f;
         }
 
         // Heal:
         float healRate = 0.0005f;
-        float energyToHealthConversionRate = 10f;
+        float energyToHealthConversionRate = 5f;
         if(coreModule.healthBody < 1f) {
             coreModule.healthBody += healRate;
             coreModule.healthHead += healRate;
             coreModule.healthExternal += healRate;
 
-            coreModule.energyRaw -= healRate / energyToHealthConversionRate * agentSizeMultiplier;
+            coreModule.energy -= healRate / energyToHealthConversionRate;
         }
 
         //ENERGY:
-        float energyCost = 0.00125f * agentSizeMultiplier * settings.energyDrainMultiplier;
+        float energyCost = 0.002f * settings.energyDrainMultiplier;
         
         float throttleMag = smoothedThrottle.magnitude;
         
         // ENERGY DRAIN::::
-        coreModule.energyRaw -= energyCost;
-        if(coreModule.energyRaw < 0f) {
-            coreModule.energyRaw = 0f;
+        coreModule.energy -= energyCost;
+        if(coreModule.energy < 0f) {
+            coreModule.energy = 0f;
         }
 
         eatAmountsArray[index].x = 0f;
@@ -910,16 +911,19 @@ public class Agent : MonoBehaviour {
             smoothedThrottle = Vector2.zero;
         }
         else {
-
+            // Food calc before energy/healing/etc? **************
+            
             // FOOD PARTICLES: Either mouth type for now:
             float foodParticleEatAmount = simManager.foodManager.foodParticlesEatAmountsArray[index];
-            if(foodParticleEatAmount > coreModule.stomachCapacity * 0.05f) {
+            if(foodParticleEatAmount > 0f) {
                 mouthRef.InitiatePassiveBite();
-            }
-            coreModule.stomachContents += foodParticleEatAmount;
-            if(coreModule.stomachContents > coreModule.stomachCapacity) {
-                coreModule.stomachContents = coreModule.stomachCapacity;
-            }
+
+
+                coreModule.stomachContents += (foodParticleEatAmount / coreModule.stomachCapacity);
+                if(coreModule.stomachContents > 1f) {
+                    coreModule.stomachContents = 1f;
+                }
+            }            
 
             totalFoodEaten += foodParticleEatAmount;
             
@@ -927,7 +931,7 @@ public class Agent : MonoBehaviour {
             /*
             if(mouthRef.isPassive) {
 
-                // PAssive filter feeding:
+                // PAssive filter feeding: *** NUTRIENTS
                 if(coreModule.mouthEffector[0] > 0f) {
                                         
                     float ambientFoodDensity = nutrientCellInfo.x;
@@ -944,19 +948,19 @@ public class Agent : MonoBehaviour {
                     // Needs to use Compute shader here to sample the current nutrientMapRT:::: ****
                     eatAmountsArray[index].x = filteredFoodAmount;
 
-                    coreModule.stomachContents += filteredFoodAmount;
-                    if(coreModule.stomachContents > coreModule.stomachCapacity) {
-                        coreModule.stomachContents = coreModule.stomachCapacity;
+                    coreModule.stomachContents += filteredFoodAmount / coreModule.stomachCapacity;
+                    if(coreModule.stomachContents > 1f) {
+                        coreModule.stomachContents = 1f;
                     }
                     
                     totalFoodEaten += filteredFoodAmount;
-                }                
+                }               
             }
             else {
                 if(coreModule.mouthEffector[0] > 0f) {                    
                     mouthRef.InitiateActiveBite();                    
                 }
-            }*/            
+            } */           
         }
         coreModule.debugFoodValue = nutrientCellInfo.x;
 
@@ -988,14 +992,14 @@ public class Agent : MonoBehaviour {
             bitingPenalty = 1f;
         }
         */
-        float fatigueMultiplier = Mathf.Clamp01(coreModule.energyRaw * 5f / coreModule.maxEnergyStorage);
+        float fatigueMultiplier = Mathf.Clamp01(coreModule.energy * 6f);
         float lowHealthPenalty = Mathf.Clamp01(coreModule.healthBody * 5f) * 0.5f + 0.5f;
         fatigueMultiplier *= lowHealthPenalty;
         //float growthStatus = 
 
         turningAmount = Mathf.Lerp(turningAmount, this.bodyRigidbody.angularVelocity * Mathf.Deg2Rad * 0.1f, 0.28f);
 
-        animationCycle += smoothedThrottle.magnitude * swimAnimationCycleSpeed / (Mathf.Lerp(fullSizeBoundingBox.y, 1f, 0.75f) * (sizePercentage * 0.5f + 0.5f)) * fatigueMultiplier;
+        animationCycle += smoothedThrottle.magnitude * swimAnimationCycleSpeed / (Mathf.Lerp(fullSizeBoundingBox.y, 1f, 1f) * (sizePercentage * 0.5f + 0.5f)) * fatigueMultiplier;
 
         if (throttle.sqrMagnitude > 0.000001f) {  // Throttle is NOT == ZERO
             
@@ -1017,8 +1021,9 @@ public class Agent : MonoBehaviour {
             //animationCycle = animationCycle % 1.0f;
 
             // get size in 0-1 range from minSize to maxSize:
-            float sizeValue = Mathf.Clamp01((fullSizeBoundingBox.x - 0.1f) / 2.5f); // ** Hardcoded assuming size ranges from 0.1 --> 2.5 !!! ********
+            float sizeValue = Mathf.Clamp01((candidateRef.candidateGenome.bodyGenome.coreGenome.creatureBaseLength - 0.2f) / 2f); ; // Mathf.Clamp01((fullSizeBoundingBox.x - 0.1f) / 2.5f); // ** Hardcoded assuming size ranges from 0.1 --> 2.5 !!! ********
             float swimSpeed = Mathf.Lerp(movementModule.smallestCreatureBaseSpeed, movementModule.largestCreatureBaseSpeed, sizeValue);
+            float turnRate = Mathf.Lerp(movementModule.smallestCreatureBaseTurnRate, movementModule.largestCreatureBaseTurnRate, sizeValue);
             speed = swimSpeed;
             // Forward Slide
             //for(int k = 0; k < numSegments; k++) {
@@ -1033,7 +1038,7 @@ public class Agent : MonoBehaviour {
             float turnRatePenalty = Mathf.Lerp(0.25f, 1f, 1f - sizeValue);
 
             // Head turn:
-            this.bodyRigidbody.AddTorque(Mathf.Lerp(headTurn, headTurnSign, 0.75f) * turnRatePenalty * movementModule.turnRate * this.bodyRigidbody.mass * this.bodyRigidbody.mass * fatigueMultiplier * bitingPenalty * Time.deltaTime, ForceMode2D.Impulse);
+            this.bodyRigidbody.AddTorque(Mathf.Lerp(headTurn, headTurnSign, 0.75f) * turnRatePenalty * turnRate * this.bodyRigidbody.mass * this.bodyRigidbody.mass * fatigueMultiplier * bitingPenalty * Time.deltaTime, ForceMode2D.Impulse);
             
             // OLD:::
             /*

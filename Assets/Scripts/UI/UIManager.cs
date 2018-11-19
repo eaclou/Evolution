@@ -63,6 +63,8 @@ public class UIManager : MonoBehaviour {
     public Button buttonInspectCycleNextSpecies;
     public Button buttonInspectCyclePrevAgent;
     public Button buttonInspectCycleNextAgent;
+    public Text textStomachContents;
+    public Text textEnergy;
     public Text textDiet;
     public Text textDimensionsWidth;
     public Text textDimensionsLength;
@@ -1167,6 +1169,7 @@ public class UIManager : MonoBehaviour {
         inspectWidgetStomachFoodMat.SetColor("_Tint", Color.yellow);        
         float percentage = gameManager.simulationManager.simStateData.critterSimDataArray[critterIndex].foodAmount;
         inspectWidgetStomachFoodMat.SetFloat("_FillPercentage", percentage);
+        textStomachContents.text = "Food\n" + (gameManager.simulationManager.simStateData.critterSimDataArray[critterIndex].foodAmount * 100f).ToString("F1") + "%\nCapacity: " + gameManager.simulationManager.agentsArray[critterIndex].coreModule.stomachCapacity.ToString("F3");
 
         // ENERGY:
         Color energyHue = new Color(0.3f, 0.5f, 1f);
@@ -1178,7 +1181,7 @@ public class UIManager : MonoBehaviour {
             percentage = 0.05f;
         } 
         inspectWidgetEnergyMat.SetFloat("_FillPercentage", percentage);
-
+        textEnergy.text = "Energy\n" + (gameManager.simulationManager.simStateData.critterSimDataArray[critterIndex].energy * 100f).ToString("F1") + "%";
 
         // Life Cycle
         inspectWidgetLifeCycleMat.SetPass(0);

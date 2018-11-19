@@ -71,7 +71,7 @@
 
 				float3 worldPosition = float3(particleData.worldPos, 1.0);    //float3(rawData.worldPos, -random2);
 				
-				quadPoint = quadPoint * particleData.radius * (1.0 - particleData.digestedAmount) * 0.9; // * particleData.active; // *** remove * 3 after!!!
+				quadPoint = quadPoint * particleData.radius * (1.0 - particleData.digestedAmount) * 0.7; // * particleData.active; // *** remove * 3 after!!!
 				worldPosition = worldPosition + quadPoint;
 
 				// REFRACTION:
@@ -95,8 +95,10 @@
 				float4 texColor = tex2D(_MainTex, i.uv);
 				
 				float val = i.color.a;
-
-				return float4(float3(0.25, 1, 0.05), texColor.a);
+				
+				float4 finalColor = float4(float3(i.color.y, i.color.z, i.color.w), 1); //texColor.a);
+				finalColor = float4(0.25, 1, 0.36, texColor.a);
+				return finalColor;
 			}
 		ENDCG
 		}

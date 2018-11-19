@@ -118,7 +118,7 @@ void CSSimulateCritterGenericStrokes (uint3 id : SV_DispatchThreadID)
 	curWorldPos.xy = curWorldPos.xy + fluidVel * speedMult * (strokeData.thresholdValue * 0.75 + 0.25);
 	// NOISE:
 	float3 noiseVel = Value3D(curWorldPos * 0.05 + strokeData.thresholdValue * 50, 17.75).yzw;
-	float3 noiseVelNew = Value3D(curWorldPos * 0.8123 + strokeData.thresholdValue * 0.01, 1.75 * (critterInitData.boundingBoxSize.x + critterInitData.boundingBoxSize.z)).yzw;	
+	float3 noiseVelNew = Value3D(curWorldPos * 0.8123 + strokeData.thresholdValue * 0.01, 1.75 / (critterInitData.boundingBoxSize.x + critterInitData.boundingBoxSize.z)).yzw;	
 	curWorldPos.xy += noiseVel.xy * 0.033 * strokeData.thresholdValue;
 	curWorldPos.z += 0.0002;
 	newWorldPos.xyz += noiseVelNew.xyz * -0.00733 * (critterInitData.boundingBoxSize.x + critterInitData.boundingBoxSize.z);
