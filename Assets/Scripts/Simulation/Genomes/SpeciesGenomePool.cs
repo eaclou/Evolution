@@ -17,32 +17,54 @@ public class SpeciesGenomePool {
     public List<CandidateAgentData> leaderboardGenomesList;
     public List<CandidateAgentData> candidateGenomesList;
 
-    public int maxLeaderboardGenomePoolSize = 32;
-    public float avgFitnessScore = 0f;
+    public int maxLeaderboardGenomePoolSize = 32;    
     public int numAgentsEvaluated = 0;
+     
+    public int yearCreated = -1;
+
+    public float avgLifespan = 0f;
+    public List<float> avgLifespanPerYearList;
+    public float avgConsumption = 0f;
+    public List<float> avgConsumptionPerYearList;
+    public float avgBodySize = 0f;
+    public List<float> avgBodySizePerYearList;
+    public float avgDietType = 0f;
+    public List<float> avgDietTypePerYearList;
 
     public bool isFlaggedForExtinction = false;
     public bool isExtinct = false;
 	
-    public SpeciesGenomePool(int ID, int parentID, MutationSettings settings) {
-
+    public SpeciesGenomePool(int ID, int parentID, int year, MutationSettings settings) {
+        yearCreated = year;
         speciesID = ID;
         parentSpeciesID = parentID;
         mutationSettingsRef = settings;
     }
 
-    // **** Change this for special-case of First-Time startup?
-    // **** Create a bunch of random genomes and then organize them into Species first?
-    // **** THEN create species and place genomes in?
-    public void FirstTimeInitialize(int numGenomes, int depth) {  
+    private void InitShared() {
         isFlaggedForExtinction = false;
         isExtinct = false;
 
-        depthLevel = depth;
-        
+        avgLifespanPerYearList = new List<float>();
+        avgLifespanPerYearList.Add(0);
+        avgConsumptionPerYearList = new List<float>();
+        avgConsumptionPerYearList.Add(0);
+        avgBodySizePerYearList = new List<float>();
+        avgBodySizePerYearList.Add(0);
+        avgDietTypePerYearList = new List<float>();
+        avgDietTypePerYearList.Add(0);
+
         candidateGenomesList = new List<CandidateAgentData>();
         leaderboardGenomesList = new List<CandidateAgentData>();
-                
+    }
+
+    // **** Change this for special-case of First-Time startup?
+    // **** Create a bunch of random genomes and then organize them into Species first?
+    // **** THEN create species and place genomes in?
+    public void FirstTimeInitialize(int numGenomes, int depth) {
+        InitShared();
+        depthLevel = depth;
+    
         for (int i = 0; i < numGenomes; i++) {
             AgentGenome agentGenome = new AgentGenome();
             agentGenome.GenerateInitialRandomBodyGenome();
@@ -59,14 +81,9 @@ public class SpeciesGenomePool {
 
         representativeGenome = candidateGenomesList[0].candidateGenome;
     }
-    public void FirstTimeInitialize(AgentGenome foundingGenome, int depth) {  
-        isFlaggedForExtinction = false;
-        isExtinct = false;
-
+    public void FirstTimeInitialize(AgentGenome foundingGenome, int depth) {
+        InitShared();
         depthLevel = depth;
-
-        candidateGenomesList = new List<CandidateAgentData>();
-        leaderboardGenomesList = new List<CandidateAgentData>();
         
         CandidateAgentData candidate = new CandidateAgentData(foundingGenome, speciesID);
 
@@ -74,6 +91,13 @@ public class SpeciesGenomePool {
         leaderboardGenomesList.Add(candidate);
         
         representativeGenome = foundingGenome;
+    }
+
+    public void UpdateYearlyStats(int year) {
+        avgLifespanPerYearList.Add(avgLifespan);
+        avgConsumptionPerYearList.Add(avgConsumption);
+        avgBodySizePerYearList.Add(avgBodySize);
+        avgDietTypePerYearList.Add(avgDietType);
     }
 
     public CandidateAgentData GetNextAvailableCandidate() {

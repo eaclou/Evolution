@@ -357,8 +357,8 @@ public class SimulationStateData {
 
         for (int i = 0; i < simManager._NumEggSacks; i++) {
             Vector3 eggSackPos = simManager.eggSackArray[i].transform.position;
-            int speciesSize = simManager._NumAgents / 4;
-            int eggSpecies = Mathf.FloorToInt((float)i / (float)simManager._NumEggSacks * 4f);
+            //int speciesSize = simManager._NumAgents / 4;
+            //int eggSpecies = Mathf.FloorToInt((float)i / (float)simManager._NumEggSacks * 4f);
             int agentGenomeIndex = simManager.eggSackArray[i].parentAgentIndex; // eggSpecies * speciesSize; // UnityEngine.Random.Range(eggSpecies * speciesSize, (eggSpecies + 1) * speciesSize);
                      
             eggSackSimDataArray[i].parentAgentIndex = agentGenomeIndex;

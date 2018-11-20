@@ -928,7 +928,7 @@ public class Agent : MonoBehaviour {
             totalFoodEaten += foodParticleEatAmount;
             
             // BITE!!!
-            /*
+            
             if(mouthRef.isPassive) {
 
                 // PAssive filter feeding: *** NUTRIENTS
@@ -939,7 +939,7 @@ public class Agent : MonoBehaviour {
 
                     float maxEatRate = mouthArea * 4f * settings.eatRateMultiplier;
                     // *** This is gross - CHANGE IT:::
-                    float sizeValue = Mathf.Clamp01((fullSizeBoundingBox.x - 0.35f) / 3.5f); // ** Hardcoded assuming size ranges from 0.1 --> 2.5 !!! ********
+                    float sizeValue = Mathf.Clamp01(((fullSizeBoundingBox.x + fullSizeBoundingBox.z) * 0.5f - 0.035f) / 2f); // ** Hardcoded assuming size ranges from 0.1 --> 2.5 !!! ********
                     float efficiency = Mathf.Lerp(settings.minSizeFeedingEfficiency, settings.maxSizeFeedingEfficiency, sizeValue) * ambientFoodDensity;
                     
                     // *** Can double dip !!! BROKEN! **** Check reservoir first to avoid overdrafting!! ******
@@ -960,7 +960,7 @@ public class Agent : MonoBehaviour {
                 if(coreModule.mouthEffector[0] > 0f) {                    
                     mouthRef.InitiateActiveBite();                    
                 }
-            } */           
+            }           
         }
         coreModule.debugFoodValue = nutrientCellInfo.x;
 
@@ -1187,7 +1187,7 @@ public class Agent : MonoBehaviour {
         genome.bodyGenome.CalculateFullsizeBoundingBox();
         //Debug.Log("fullSize = " + genome.bodyGenome.fullsizeBoundingBox.ToString() + ", head: " + genome.bodyGenome.coreGenome.headLength.ToString());
         fullSizeBoundingBox = genome.bodyGenome.fullsizeBoundingBox; // genome.bodyGenome.GetFullsizeBoundingBox();
-        fullSizeBodyVolume = fullSizeBoundingBox.x * fullSizeBoundingBox.y * fullSizeBoundingBox.z;
+        fullSizeBodyVolume = (fullSizeBoundingBox.x + fullSizeBoundingBox.z) * 0.5f * fullSizeBoundingBox.y; // * fullSizeBoundingBox.z;
 
         sizePercentage = 0.005f;
 

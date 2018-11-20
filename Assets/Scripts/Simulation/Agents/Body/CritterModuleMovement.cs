@@ -23,7 +23,7 @@ public class CritterModuleMovement {
     public float smallestCreatureBaseSpeed = 50f;
     public float largestCreatureBaseSpeed = 150f;
 
-    public float smallestCreatureBaseTurnRate = 65f;
+    public float smallestCreatureBaseTurnRate = 50f;
     public float largestCreatureBaseTurnRate = 1f;
 	
     public CritterModuleMovement() {

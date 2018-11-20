@@ -11,8 +11,8 @@ public class MasterGenomePool {
 
     public int maxNumActiveSpecies = 6;
     private int targetNumSpecies = 3;
-    public float speciesSimilarityDistanceThreshold = 10f;
-    private int minNumGuaranteedEvalsForNewSpecies = 64;
+    public float speciesSimilarityDistanceThreshold = 8f;
+    private int minNumGuaranteedEvalsForNewSpecies = 128;
 
     public int currentHighestDepth = 1;
     
@@ -41,14 +41,14 @@ public class MasterGenomePool {
         currentlyActiveSpeciesIDList = new List<int>();
         completeSpeciesPoolsList = new List<SpeciesGenomePool>();
 
-        SpeciesGenomePool rootSpecies = new SpeciesGenomePool(0, -1, mutationSettingsRef);
+        SpeciesGenomePool rootSpecies = new SpeciesGenomePool(0, -1, 0, mutationSettingsRef);
         rootSpecies.FirstTimeInitialize(numAgentGenomes, 0);
         currentlyActiveSpeciesIDList.Add(0);
         completeSpeciesPoolsList.Add(rootSpecies);
         // When do I create nodeCollider & shit?
 
         // Create foundational Species:
-        SpeciesGenomePool firstSpecies = new SpeciesGenomePool(1, 0, mutationSettingsRef);
+        SpeciesGenomePool firstSpecies = new SpeciesGenomePool(1, 0, 0, mutationSettingsRef);
         firstSpecies.FirstTimeInitialize(numAgentGenomes, 1);
 
         currentlyActiveSpeciesIDList.Add(1);
@@ -56,6 +56,13 @@ public class MasterGenomePool {
         
         uiManagerRef.treeOfLifeManager = new TreeOfLifeManager(uiManagerRef.treeOfLifeAnchorGO, uiManagerRef);
         uiManagerRef.treeOfLifeManager.FirstTimeInitialize(this);                
+    }
+
+    public void UpdateYearlySpeciesStats(int year) {
+
+        for(int i = 0; i < completeSpeciesPoolsList.Count; i++) {
+            completeSpeciesPoolsList[i].UpdateYearlyStats(year);
+        }
     }
 
     public void Tick() {
@@ -69,7 +76,7 @@ public class MasterGenomePool {
             float worstFitness = 99999f;
             bool noCurrentlyExtinctFlaggedSpecies = true;
             for(int i = 0; i < currentlyActiveSpeciesIDList.Count; i++) {
-                float fitness = completeSpeciesPoolsList[currentlyActiveSpeciesIDList[i]].avgFitnessScore;
+                float fitness = completeSpeciesPoolsList[currentlyActiveSpeciesIDList[i]].avgLifespan;
                 if(fitness < worstFitness) {
                     worstFitness = fitness;
                     leastFitSpeciesID = currentlyActiveSpeciesIDList[i];
@@ -145,7 +152,8 @@ public class MasterGenomePool {
                     // Create foundational Species:
                     
                     simManagerRef.AddNewSpecies(newGenome, parentSpeciesID);
-                    
+
+                    speciesSimilarityDistanceThreshold += 4f;
                 }               
             }
             else {
@@ -227,19 +235,44 @@ public class MasterGenomePool {
 
         // DUE FOR UPGRADE / OVERHAUL!!!!  ******
 
-        float dWidth = Mathf.Abs(newGenome.bodyGenome.fullsizeBoundingBox.x - repGenome.bodyGenome.fullsizeBoundingBox.x);
-        float dLength = Mathf.Abs(newGenome.bodyGenome.fullsizeBoundingBox.z - repGenome.bodyGenome.fullsizeBoundingBox.z);
+        // *** need to normalize all to 0-1 for more fair comparison? ***
+        // have centralized min/max values for each attribute?
+        float dBaseSize = Mathf.Abs(newGenome.bodyGenome.coreGenome.creatureBaseLength - repGenome.bodyGenome.coreGenome.creatureBaseLength);
+        float dBaseAspectRatio = Mathf.Abs(newGenome.bodyGenome.coreGenome.creatureBaseAspectRatio - repGenome.bodyGenome.coreGenome.creatureBaseAspectRatio);
         float mouthA = 1f;
         if (newGenome.bodyGenome.coreGenome.isPassive)
             mouthA = 0f;
         float mouthB = 1f;
         if (repGenome.bodyGenome.coreGenome.isPassive)
             mouthB = 0f;
-        float dMouth = Mathf.Abs(mouthA - mouthB);
+        float dMouthType = Mathf.Abs(mouthA - mouthB);
         float dPriColor = Mathf.Abs((newGenome.bodyGenome.appearanceGenome.huePrimary - repGenome.bodyGenome.appearanceGenome.huePrimary).sqrMagnitude);
         float dSecColor = Mathf.Abs((newGenome.bodyGenome.appearanceGenome.hueSecondary - repGenome.bodyGenome.appearanceGenome.hueSecondary).sqrMagnitude);
 
-        float delta = dWidth + dLength + dMouth + dPriColor * 5f + dSecColor * 5f;
+        // proportions:
+        float dMouthLength = Mathf.Abs(newGenome.bodyGenome.coreGenome.mouthLength - repGenome.bodyGenome.coreGenome.mouthLength);
+        float dHeadLength = Mathf.Abs(newGenome.bodyGenome.coreGenome.headLength - repGenome.bodyGenome.coreGenome.headLength);
+        float dBodyLength = Mathf.Abs(newGenome.bodyGenome.coreGenome.bodyLength - repGenome.bodyGenome.coreGenome.bodyLength);
+        float dTailLength = Mathf.Abs(newGenome.bodyGenome.coreGenome.tailLength - repGenome.bodyGenome.coreGenome.tailLength);
+        
+        // eyes
+        float dEyeSize = Mathf.Abs(newGenome.bodyGenome.coreGenome.socketRadius - repGenome.bodyGenome.coreGenome.socketRadius);
+        float dEyeHeight = Mathf.Abs(newGenome.bodyGenome.coreGenome.socketHeight - repGenome.bodyGenome.coreGenome.socketHeight);
+
+        // tail
+        float dTailFinLength = Mathf.Abs(newGenome.bodyGenome.coreGenome.tailFinBaseLength - repGenome.bodyGenome.coreGenome.tailFinBaseLength);
+        float dTailFinSpread = Mathf.Abs(newGenome.bodyGenome.coreGenome.tailFinSpreadAngle - repGenome.bodyGenome.coreGenome.tailFinSpreadAngle);
+
+        // sensors & shit:
+
+        float delta = dBaseSize + dBaseAspectRatio +
+            dMouthType +
+            dPriColor * 5f + dSecColor * 5f +
+            dMouthLength + dHeadLength + dBodyLength + dTailLength +
+            dEyeSize + dEyeHeight +
+            dTailFinLength + dTailFinSpread;
+
+        //Debug.Log("Difference Score: " + delta.ToString());
 
         return delta;
     }
