@@ -241,6 +241,7 @@ public class UIManager : MonoBehaviour {
 
     private int selectedAgentID;
 
+    private const int maxDisplaySpecies = 32;
     // Tree of Life:
     //public Image imageTreeOfLifeDisplay;
     
@@ -760,7 +761,7 @@ public class UIManager : MonoBehaviour {
         
         // Best place for these???
         if(statsSpeciesColorKey == null) {
-            statsSpeciesColorKey = new Texture2D(8, 1, TextureFormat.ARGB32, false);
+            statsSpeciesColorKey = new Texture2D(maxDisplaySpecies, 1, TextureFormat.ARGB32, false);
             statsSpeciesColorKey.filterMode = FilterMode.Point;
             statsSpeciesColorKey.wrapMode = TextureWrapMode.Clamp;
         }
@@ -1296,21 +1297,33 @@ public class UIManager : MonoBehaviour {
         int numTotalSpecies = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList.Count;
 
         gameManager.simulationManager.masterGenomePool.UpdateYearlySpeciesStats(year);
-
-        const int maxDisplaySpecies = 8;
-
+                
+        statsGraphMatLifespan.SetInt("_NumDisplayed", maxDisplaySpecies); 
+        statsGraphMatFoodEaten.SetInt("_NumDisplayed", maxDisplaySpecies); 
+        statsGraphMatBodySizes.SetInt("_NumDisplayed", maxDisplaySpecies); 
+        statsGraphMatPredation.SetInt("_NumDisplayed", maxDisplaySpecies); 
         // need way to sort & pick the current 8 species to display
         displaySpeciesIndicesArray = new int[maxDisplaySpecies];
-        for(int i = 0; i < displaySpeciesIndicesArray.Length; i++) {
-            if(i < numActiveSpecies) {  // Temporary
-                displaySpeciesIndicesArray[i] = gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList[i];
-            }
-            else {
-                displaySpeciesIndicesArray[i] = 0;
-            }
-            Vector3 hue = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[displaySpeciesIndicesArray[i]].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
+        
+         // Get Active ones first:
+        for(int i = 0; i < gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList.Count; i++) { 
+            Vector3 hue = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList[i]].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
             statsSpeciesColorKey.SetPixel(i, 1, new Color(hue.x, hue.y, hue.z));
+            //Debug.Log("(" + i.ToString() + ", " + gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList[i].ToString());
         }
+        // Then fill with most recently extinct:
+        for(int i = (numTotalSpecies - 1); i > Mathf.Clamp((numTotalSpecies - maxDisplaySpecies), 0, numTotalSpecies); i--) {
+            Vector3 hue = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[i].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
+            if(gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[i].isExtinct) {
+                hue = Vector3.Lerp(hue, Vector3.one * 0.25f, 0.5f);
+            }
+            statsSpeciesColorKey.SetPixel(i, 1, new Color(hue.x, hue.y, hue.z));
+            //Debug.Log("(" + i.ToString() + ", ");
+        }
+
+                
+
+
         statsSpeciesColorKey.Apply();
 
         // ========== data: =========== //
@@ -1328,31 +1341,38 @@ public class UIManager : MonoBehaviour {
         float maxValueDietType = 0.01f;
         // for each year & each species, create 2D texture with fitness scores:
         for(int s = 0; s < maxDisplaySpecies; s++) {            
-            SpeciesGenomePool speciesPool = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[displaySpeciesIndicesArray[s]];
+            
+            if(s < gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList.Count) {
 
-            for(int t = 0; t < years; t++) {
-                
-                int index = t - speciesPool.yearCreated;
-                float valLifespan = 0f;
-                float valConsumption = 0f;
-                float valBodySize = 0f;
-                float valDietType = 0f;
-                if(index >= 0) { // species didn't exist in this year - set fitness to 0
-                    valLifespan = speciesPool.avgLifespanPerYearList[index];
-                    valConsumption = speciesPool.avgConsumptionPerYearList[index];
-                    valBodySize = speciesPool.avgBodySizePerYearList[index];
-                    valDietType = speciesPool.avgDietTypePerYearList[index];
+                SpeciesGenomePool speciesPool = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[s];
+                if(speciesPool == null) {
+                    Debug.LogError("well shit");
                 }
-                maxValueLifespan = Mathf.Max(maxValueLifespan, valLifespan);
-                maxValueConsumption = Mathf.Max(maxValueConsumption, valConsumption);
-                maxValueBodySize = Mathf.Max(maxValueBodySize, valBodySize);
-                maxValueDietType = Mathf.Max(maxValueDietType, valDietType);
+                for(int t = 0; t < years; t++) {
+                
+                    int index = t - speciesPool.yearCreated;
+                    float valLifespan = 0f;
+                    float valConsumption = 0f;
+                    float valBodySize = 0f;
+                    float valDietType = 0f;
+                    if(index >= 0) { // species didn't exist in this year - set fitness to 0
+                        valLifespan = speciesPool.avgLifespanPerYearList[index];
+                        valConsumption = speciesPool.avgConsumptionPerYearList[index];
+                        valBodySize = speciesPool.avgBodySizePerYearList[index];
+                        valDietType = speciesPool.avgDietTypePerYearList[index];
+                    }
+                    maxValueLifespan = Mathf.Max(maxValueLifespan, valLifespan);
+                    maxValueConsumption = Mathf.Max(maxValueConsumption, valConsumption);
+                    maxValueBodySize = Mathf.Max(maxValueBodySize, valBodySize);
+                    maxValueDietType = Mathf.Max(maxValueDietType, valDietType);
 
-                statsTextureLifespan.SetPixel(t, s, new Color(valLifespan, valLifespan, valLifespan, valLifespan));  // *** look into ways to use the other 3 channels ***
-                statsTextureFoodEaten.SetPixel(t, s, new Color(valConsumption, valConsumption, valConsumption, valConsumption));
-                statsTextureBodySizes.SetPixel(t, s, new Color(valBodySize, valBodySize, valBodySize, valBodySize));
-                statsTexturePredation.SetPixel(t, s, new Color(valDietType, valDietType, valDietType, valDietType));
+                    statsTextureLifespan.SetPixel(t, s, new Color(valLifespan, valLifespan, valLifespan, valLifespan));  // *** look into ways to use the other 3 channels ***
+                    statsTextureFoodEaten.SetPixel(t, s, new Color(valConsumption, valConsumption, valConsumption, valConsumption));
+                    statsTextureBodySizes.SetPixel(t, s, new Color(valBodySize, valBodySize, valBodySize, valBodySize));
+                    statsTexturePredation.SetPixel(t, s, new Color(valDietType, valDietType, valDietType, valDietType));
+                }
             }
+            
         }
         statsTextureLifespan.Apply();
         statsTextureFoodEaten.Apply();

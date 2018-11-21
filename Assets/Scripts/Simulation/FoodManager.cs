@@ -45,6 +45,7 @@ public class FoodManager {
     private ComputeBuffer foodParticlesMeasure1;
     private FoodParticleData[] foodParticleMeasurementTotalsData;
 
+    public Vector2[] nutrientPatchesArray;
     
     public struct FoodParticleData {
         public int index;
@@ -63,9 +64,18 @@ public class FoodManager {
         int bitSize = sizeof(float) * 8 + sizeof(int) * 3;
         return bitSize;
     }
+
+    public void MoveRandomNutrientPatches(int index) {
+        nutrientPatchesArray[index] = UnityEngine.Random.insideUnitCircle + Vector2.one * 0.5f;
+    }
 	
     public FoodManager(SettingsManager settings) {
         settingsRef = settings;
+
+        nutrientPatchesArray = new Vector2[4];
+        for(int i = 0; i < nutrientPatchesArray.Length; i++) {
+            nutrientPatchesArray[i] = UnityEngine.Random.insideUnitCircle + Vector2.one * 0.5f;
+        }
     }
 
     public void InitializeFoodParticles(int numAgents, ComputeShader computeShader) {

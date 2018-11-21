@@ -166,8 +166,8 @@ public class CritterMouthComponent : MonoBehaviour {
         ProcessPredatorySwallowAttempt(agentRef, preyAgent);
         //preyAgent.curLifeStage = Agent.AgentLifeStage.Dead;
         // Credit food:
-        float flow = preyAgent.sizePercentage * preyAgent.fullSizeBoundingBox.x * preyAgent.fullSizeBoundingBox.z + preyAgent.coreModule.stomachContents;
-        agentRef.EatFood(flow * 1f); // assumes all foodAmounts are equal !! *****  
+        float flow = preyAgent.sizePercentage * (preyAgent.fullSizeBoundingBox.x + preyAgent.fullSizeBoundingBox.z) * preyAgent.fullSizeBoundingBox.y * 0.5f; // + preyAgent.coreModule.stomachContents;
+        agentRef.EatFood(flow); // assumes all foodAmounts are equal !! *****  
         //Debug.Log("SwallowAnimalWhole. foodFlow: " + flow.ToString() + ", agentStomachContents: " + agentRef.coreModule.stomachContents.ToString());
         // **** Not removing Animal? --> need to attach?
     }
@@ -191,7 +191,7 @@ public class CritterMouthComponent : MonoBehaviour {
         
         //Debug.Log("SwallowFoodWhole");
         float flow = eggSack.foodAmount;        
-        agentRef.EatFood(flow * 1f);
+        agentRef.EatFood(flow);
 
         eggSack.ConsumedByPredatorAgent();
         
@@ -200,7 +200,7 @@ public class CritterMouthComponent : MonoBehaviour {
     private void BiteDamageAnimal(Agent preyAgent, float ownBiteArea, float targetArea) {
         
         //Debug.Log("BiteDamageAnimal");
-        float baseDamage = 0.45f;
+        float baseDamage = 0.55f;
 
         float sizeRatio = ownBiteArea / targetArea; // for now clamped to 10x
 

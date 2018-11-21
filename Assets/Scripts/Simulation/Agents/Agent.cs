@@ -524,9 +524,9 @@ public class Agent : MonoBehaviour {
     }
 
     public void EatFood(float amount) {
-        coreModule.stomachContents += amount;
-        if(coreModule.stomachContents > coreModule.stomachCapacity) {
-            coreModule.stomachContents = coreModule.stomachCapacity;
+        coreModule.stomachContents += (amount / coreModule.stomachCapacity);
+        if(coreModule.stomachContents > 1f) {
+            coreModule.stomachContents = 1f;
         }
         totalFoodEaten += amount;        
     }
@@ -918,11 +918,7 @@ public class Agent : MonoBehaviour {
             if(foodParticleEatAmount > 0f) {
                 mouthRef.InitiatePassiveBite();
 
-
-                coreModule.stomachContents += (foodParticleEatAmount / coreModule.stomachCapacity);
-                if(coreModule.stomachContents > 1f) {
-                    coreModule.stomachContents = 1f;
-                }
+                EatFood(foodParticleEatAmount);                
             }            
 
             totalFoodEaten += foodParticleEatAmount;
@@ -948,12 +944,7 @@ public class Agent : MonoBehaviour {
                     // Needs to use Compute shader here to sample the current nutrientMapRT:::: ****
                     eatAmountsArray[index].x = filteredFoodAmount;
 
-                    coreModule.stomachContents += filteredFoodAmount / coreModule.stomachCapacity;
-                    if(coreModule.stomachContents > 1f) {
-                        coreModule.stomachContents = 1f;
-                    }
-                    
-                    totalFoodEaten += filteredFoodAmount;
+                    EatFood(filteredFoodAmount);
                 }               
             }
             else {

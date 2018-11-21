@@ -91,7 +91,7 @@
 				scale.y = scale.y * (1 + saturate(waterQuadData.speed * 64));
 				
 				float4 nutrientGridSample = tex2Dlod(_NutrientTex, float4((o.altitudeUV - 0.25) * 2.0, 0, 0));
-				scale *= (nutrientGridSample.x * 0.9 + 0.1) * 1;
+				scale *= (nutrientGridSample.x * 0.8 + 0.25) * 1.2;
 				
 				
 				quadPoint *= float3(scale, 1.0);
@@ -277,7 +277,7 @@
 				//finalColor.a = 1;
 				//float foodAmt = nutrientGridSample.x * 2;
 				//finalColor.rgb = float3(foodAmt, foodAmt, foodAmt);
-				finalColor.rgb = lerp(float3(0.05,0.04,0.015), float3(0.1,1.25,0.25), saturate(nutrientGridSample.x * 10));
+				finalColor.rgb = lerp(float3(0.05,0.04,0.015), float3(0.8,1.25,0.25), saturate(nutrientGridSample.x * 10 + 0.33));
 				
 				//return float4(1,1,1,1);
 				//return float4(0.2,1,0.2,1);

@@ -47,12 +47,7 @@ Shader "DataVis/GraphSpeciesStatsShader"
 				half2 texcoord  : TEXCOORD0;
 			};
 			
-			//uniform fixed4 _Color;
-			//uniform fixed _ZoomFactorX;
-			//uniform fixed _ZoomFactorY;
-			//uniform fixed _WarpFactorX;
-			//uniform fixed _WarpFactorY;
-
+			
 			v2f vert(appdata_t IN)
 			{
 				v2f OUT;
@@ -72,7 +67,7 @@ Shader "DataVis/GraphSpeciesStatsShader"
 			uniform float _MaxValue;
 
 			uniform int _SelectedSpeciesID;
-			
+			uniform int _NumDisplayed;
 
 			fixed4 frag(v2f IN) : SV_Target
 			{	
@@ -135,8 +130,8 @@ Shader "DataVis/GraphSpeciesStatsShader"
 				
 				// better as an array/forloop?
 				
-				for(int i = 0; i < 8; i++) {
-				float speciesCoord = (i + 0.5)/8;
+				for(int i = 0; i < _NumDisplayed; i++) {
+					float speciesCoord = (i + 0.5)/_NumDisplayed;
 					float isSelectedMask = saturate(1.0 - abs((float)_SelectedSpeciesID - (float)i));
 					half4 speciesColor = tex2D(_ColorKeyTex, half2(speciesCoord, 0.5)) * (isSelectedMask + 0.5);
 					half4 speciesDataSample = tex2D(_MainTex, float2(finalCoords.x, speciesCoord));

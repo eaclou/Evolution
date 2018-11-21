@@ -606,6 +606,10 @@ public class SimulationManager : MonoBehaviour {
             simAgeYearCounter = 0;
 
             // update graphs each "year"
+            if(curSimYear % 2 == 0) {                
+                foodManager.MoveRandomNutrientPatches(UnityEngine.Random.Range(0, foodManager.nutrientPatchesArray.Length));
+            }
+            
             RefreshGraphData();
         }
 
@@ -671,15 +675,17 @@ public class SimulationManager : MonoBehaviour {
             float randRoll = UnityEngine.Random.Range(0f, 1f);
             if(randRoll < spawnNewFoodChance) {
                 // pick random cell:
-                int randX = UnityEngine.Random.Range(0, foodManager.nutrientMapResolution - 1);
-                int randY = UnityEngine.Random.Range(0, foodManager.nutrientMapResolution - 1);
+                int nutrientPatchRandID = UnityEngine.Random.Range(0, foodManager.nutrientPatchesArray.Length);
+                int indexX = Mathf.FloorToInt(foodManager.nutrientMapResolution * foodManager.nutrientPatchesArray[nutrientPatchRandID].x);
+                int indexY = Mathf.FloorToInt(foodManager.nutrientMapResolution * foodManager.nutrientPatchesArray[nutrientPatchRandID].y);
 
                 float foodAvailable = maxGlobalFood - totalNutrients;
 
                 float newFoodAmount = Mathf.Min(1f, foodAvailable * spawnFoodPercentage);
 
                 // ADD FOOD HERE::
-                foodManager.AddNutrientsAtCoords(newFoodAmount, randX, randY);                
+                
+                foodManager.AddNutrientsAtCoords(newFoodAmount, indexX, indexY);                
             }
         }
         foodManager.ApplyDiffusionOnNutrientMap(environmentFluidManager);
