@@ -44,8 +44,8 @@ public class BaronVonWater : RenderBaron {
     public ComputeBuffer waterChains0CBuffer;
     public ComputeBuffer waterChains1CBuffer;
 
-    private int numNutrientsBits = 1024 * 8;
-    private int numSurfaceBits = 1024 * 16;
+    private int numNutrientsBits = 1024 * 64;
+    private int numSurfaceBits = 1024 * 8;
     private int numDebrisBits = 1024 * 4;
     public ComputeBuffer waterNutrientsBitsCBuffer;
     public ComputeBuffer waterSurfaceBitsCBuffer;
@@ -237,7 +237,7 @@ public class BaronVonWater : RenderBaron {
             Vector2 offset = new Vector2(UnityEngine.Random.Range(-0.5f, 0.5f), UnityEngine.Random.Range(-0.5f, 0.5f));
             Vector3 pos = new Vector3(xPos + offset.x, yPos + offset.y, 0f);
             waterNutrientsBitsArray[x].worldPos = pos;
-            waterNutrientsBitsArray[x].localScale = 0.035f * new Vector2(UnityEngine.Random.Range(0.5f, 2f), UnityEngine.Random.Range(0.75f, 3.5f)) * UnityEngine.Random.Range(0.2f, 0.8f); // Y is forward, along stroke
+            waterNutrientsBitsArray[x].localScale = 0.035f * new Vector2(UnityEngine.Random.Range(0.75f, 1.5f), UnityEngine.Random.Range(2f, 3.5f)) * UnityEngine.Random.Range(0.4f, 0.7f); // Y is forward, along stroke
             waterNutrientsBitsArray[x].heading = new Vector2(UnityEngine.Random.Range(-3f, 3f), UnityEngine.Random.Range(-0.5f, 0.5f)).normalized;
             waterNutrientsBitsArray[x].brushType = UnityEngine.Random.Range(0, 4);
             waterNutrientsBitsArray[x].age = UnityEngine.Random.Range(1f, 2f);

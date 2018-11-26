@@ -98,7 +98,7 @@ public class TheRenderKing : MonoBehaviour {
 
     private bool isInitialized = false;
 
-    private const float velScale = 0.17f; // Conversion for rigidBody Vel --> fluid vel units ----  // approx guess for now
+    private const float velScale = 0.390f; // Conversion for rigidBody Vel --> fluid vel units ----  // approx guess for now
     
     
     /*public GameObject terrainGO;
@@ -1353,10 +1353,10 @@ public class TheRenderKing : MonoBehaviour {
             Vector3 agentPos = simManager.agentsArray[i].bodyRigidbody.transform.position;
             obstacleStrokeDataArray[baseIndex + i].worldPos = new Vector2(agentPos.x, agentPos.y);
             obstacleStrokeDataArray[baseIndex + i].localDir = simManager.agentsArray[i].facingDirection;
-            obstacleStrokeDataArray[baseIndex + i].scale = Vector2.one * 5.5f * simManager.agentsArray[i].sizePercentage; // new Vector2(simManager.agentsArray[i].transform.localScale.x, simManager.agentsArray[i].transform.localScale.y) * 2.9f; // ** revisit this later // should leave room for velSampling around Agent *** weird popping when * 0.9f
+            obstacleStrokeDataArray[baseIndex + i].scale = new Vector2(simManager.agentsArray[i].currentBoundingBoxSize.x, simManager.agentsArray[i].currentBoundingBoxSize.y) * 0.9f; // Vector2.one * 5.5f * simManager.agentsArray[i].sizePercentage; // new Vector2(simManager.agentsArray[i].transform.localScale.x, simManager.agentsArray[i].transform.localScale.y) * 2.9f; // ** revisit this later // should leave room for velSampling around Agent *** weird popping when * 0.9f
 
-            float velX = Mathf.Clamp01(agentPos.x - simManager.agentsArray[i]._PrevPos.x) * velScale * 1.45f;
-            float velY = Mathf.Clamp01(agentPos.y - simManager.agentsArray[i]._PrevPos.y) * velScale * 1.45f;
+            float velX = Mathf.Clamp01(agentPos.x - simManager.agentsArray[i]._PrevPos.x) * velScale;
+            float velY = Mathf.Clamp01(agentPos.y - simManager.agentsArray[i]._PrevPos.y) * velScale;
 
             obstacleStrokeDataArray[baseIndex + i].color = new Vector4(velX, velY, 1f, 1f);
         }
@@ -2776,14 +2776,14 @@ public class TheRenderKing : MonoBehaviour {
         // Draw Solid Land boundaries:
         cmdBufferFluidObstacles.DrawMesh(baronVonTerrain.terrainMesh, Matrix4x4.identity, baronVonTerrain.terrainObstaclesHeightMaskMat); // Masks out areas above the fluid "Sea Level"
         
-        /*
+        
         // Draw dynamic Obstacles:        
         basicStrokeDisplayMat.SetPass(0);
         basicStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer); // *** Needed? or just set it once in beginning....
         basicStrokeDisplayMat.SetBuffer("basicStrokesCBuffer", obstacleStrokesCBuffer);        
         cmdBufferFluidObstacles.DrawProcedural(Matrix4x4.identity, basicStrokeDisplayMat, 0, MeshTopology.Triangles, 6, obstacleStrokesCBuffer.count);
         // Disabling for now -- starting with one-way interaction between fluid & objects (fluid pushes objects, they don't push back)
-        */
+        
 
         Graphics.ExecuteCommandBuffer(cmdBufferFluidObstacles);
         // Still not sure if this will work correctly... ****

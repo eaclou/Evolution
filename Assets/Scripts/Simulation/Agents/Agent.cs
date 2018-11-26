@@ -54,7 +54,7 @@ public class Agent : MonoBehaviour {
         }
     }
     public int maxAgeTimeSteps = 6400;
-    private int decayDurationTimeSteps = 400;
+    private int decayDurationTimeSteps = 1600;
     public int _DecayDurationTimeSteps
     {
         get
@@ -1206,7 +1206,7 @@ public class Agent : MonoBehaviour {
         }                
             
         bodyRigidbody.mass = 0.01f; // min mass
-        bodyRigidbody.drag = 12f; // bodyDrag;
+        bodyRigidbody.drag = 13f; // bodyDrag;
         bodyRigidbody.angularDrag = 15f;
         
         // Collision!

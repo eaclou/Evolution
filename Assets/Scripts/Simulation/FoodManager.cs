@@ -66,7 +66,8 @@ public class FoodManager {
     }
 
     public void MoveRandomNutrientPatches(int index) {
-        nutrientPatchesArray[index] = UnityEngine.Random.insideUnitCircle + Vector2.one * 0.5f;
+        nutrientPatchesArray[index] = new Vector2(UnityEngine.Random.Range(0.1f, 0.9f), UnityEngine.Random.Range(0.1f, 0.9f)); // (UnityEngine.Random.insideUnitCircle + Vector2.one) * 0.5f;
+        Debug.Log("Moved Nutrient Patch! [" + index.ToString() + "], " + nutrientPatchesArray[index].ToString());
     }
 	
     public FoodManager(SettingsManager settings) {
@@ -74,7 +75,7 @@ public class FoodManager {
 
         nutrientPatchesArray = new Vector2[4];
         for(int i = 0; i < nutrientPatchesArray.Length; i++) {
-            nutrientPatchesArray[i] = UnityEngine.Random.insideUnitCircle + Vector2.one * 0.5f;
+            nutrientPatchesArray[i] = new Vector2(UnityEngine.Random.Range(0.1f, 0.9f), UnityEngine.Random.Range(0.1f, 0.9f)); // (UnityEngine.Random.insideUnitCircle + Vector2.one) * 0.5f;
         }
     }
 

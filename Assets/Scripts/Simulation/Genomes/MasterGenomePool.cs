@@ -111,7 +111,7 @@ public class MasterGenomePool {
         }
 
         currentlyActiveSpeciesIDList.RemoveAt(listIndex);
-        completeSpeciesPoolsList[speciesID].isExtinct = true;
+        completeSpeciesPoolsList[speciesID].ProcessExtinction();
 
         //Signal RenderKing/TreeOfLifeManager to update:
         simManagerRef.uiManager.treeOfLifeManager.RemoveExtinctSpecies(speciesID);

@@ -93,6 +93,14 @@ public class SpeciesGenomePool {
         representativeGenome = foundingGenome;
     }
 
+    public void ProcessExtinction() {
+        isExtinct = true;
+        avgLifespan = 0f;
+        avgConsumption = 0f;
+        avgBodySize = 0f;
+        avgDietType = 0f;
+    }
+
     public void UpdateYearlyStats(int year) {
         avgLifespanPerYearList.Add(avgLifespan);
         avgConsumptionPerYearList.Add(avgConsumption);

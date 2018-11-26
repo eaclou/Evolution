@@ -29,8 +29,8 @@ public class MutationSettings {
         this.newLinkChance = newLinkChance;
         this.newHiddenNodeChance = newHiddenNodeChance;
 
-        defaultBodyMutationChance = 0.15f;
-        defaultBodyMutationStepSize = 0.125f;
+        defaultBodyMutationChance = 0.3f;
+        defaultBodyMutationStepSize = 0.15f;
 
         defaultFoodMutationChance = 0.01f;
         defaultFoodMutationStepSize = 0.14f;
