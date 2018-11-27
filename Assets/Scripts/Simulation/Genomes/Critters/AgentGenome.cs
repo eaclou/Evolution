@@ -19,7 +19,7 @@ public class AgentGenome {
 
     public void GenerateInitialRandomBodyGenome() {
         bodyGenome.FirstTimeInitializeCritterModuleGenomes();
-        bodyGenome.GenerateRandomBodyGenome();
+        bodyGenome.GenerateInitialRandomBodyGenome();
 
         // **** TEMPORARY !!!! TESTING!!! ******
         //if(index < 41) {

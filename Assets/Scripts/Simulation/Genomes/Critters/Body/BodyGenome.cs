@@ -8,20 +8,18 @@ public class BodyGenome {
     // BRAIN:
     public TestModuleGenome testModuleGenome;
 
-    public CritterModuleAppearanceGenome appearanceGenome;    
+    public CritterModuleAppearanceGenome appearanceGenome;
+    public CritterModuleCommunicationGenome communicationGenome;
     public CritterModuleCoreGenome coreGenome;
     public CritterModuleDevelopmentalGenome developmentalGenome;
-    //public CritterModuleDigestiveGenome digestiveGenome;  // not needed?
-    //public CritterModuleEnergyGenome energyGenome;  // not needed?
-    //public CritterModuleExteriorGenome exteriorGenome; // not needed?
+    public CritterModuleEnvironmentSensorsGenome environmentalGenome;
+    public CritterModuleFoodSensorsGenome foodGenome;
+    public CritterModuleFriendSensorsGenome friendGenome;
     public CritterModuleMovementGenome movementGenome;
+    public CritterModuleThreatSensorsGenome threatGenome;
 
     public Vector3 fullsizeBoundingBox;   // Z = forward, Y = up
-
-    //public List<HealthGenome> healthModuleList;
-    //public List<OscillatorGenome> oscillatorInputList;
-    //public List<ValueInputGenome> valueInputList;
-
+    
     public BodyGenome() {
         //Debug.Log("BodyGenome() EMPTY CONSTRUCTOR");
     }
@@ -30,12 +28,14 @@ public class BodyGenome {
 
         // ID and inno# needed???? ***** should only be required to keep track of evolving body functions
         appearanceGenome = new CritterModuleAppearanceGenome(0, 0);
-        coreGenome = new CritterModuleCoreGenome(0, 0);
-        developmentalGenome = new CritterModuleDevelopmentalGenome(0, 0);
-        //digestiveGenome = new CritterModuleDigestiveGenome(0, 0);
-        //energyGenome = new CritterModuleEnergyGenome(0, 0);
-        //exteriorGenome = new CritterModuleExteriorGenome(0, 0);
-        movementGenome = new CritterModuleMovementGenome(0, 0);
+        communicationGenome = new CritterModuleCommunicationGenome(0, 1);
+        coreGenome = new CritterModuleCoreGenome(0, 2);
+        developmentalGenome = new CritterModuleDevelopmentalGenome(0, 3);
+        environmentalGenome = new CritterModuleEnvironmentSensorsGenome(0, 4);
+        foodGenome = new CritterModuleFoodSensorsGenome(0, 5);
+        friendGenome = new CritterModuleFriendSensorsGenome(0, 6);
+        movementGenome = new CritterModuleMovementGenome(0, 7);
+        threatGenome = new CritterModuleThreatSensorsGenome(0, 8);
          
     }
 
@@ -51,40 +51,47 @@ public class BodyGenome {
         return size;        
     }
 
-    public void GenerateRandomBodyGenome() {
-        appearanceGenome.GenerateRandomGenome();
+    public void GenerateInitialRandomBodyGenome() {
+        appearanceGenome.GenerateRandomInitialGenome();
+        communicationGenome.GenerateRandomInitialGenome();
         coreGenome.GenerateRandomInitialGenome();
-        developmentalGenome.GenerateRandomGenome();
-        //digestiveGenome.GenerateRandomGenome();
-        //energyGenome.GenerateRandomGenome();
-        //exteriorGenome.GenerateRandomGenome();
-        movementGenome.GenerateRandomGenome();
-
-        // Calculate BoundingBox:
-        //CalculateFullsizeBoundingBox();
+        developmentalGenome.GenerateRandomInitialGenome();
+        environmentalGenome.GenerateRandomInitialGenome();
+        foodGenome.GenerateRandomInitialGenome();
+        friendGenome.GenerateRandomInitialGenome();
+        movementGenome.GenerateRandomInitialGenome();
+        threatGenome.GenerateRandomInitialGenome();
     }
     
     public void InitializeBrainGenome(List<NeuronGenome> neuronList) {
 
         // Go through each of the Body's Modules and add In/Out neurons based on module upgrades and settings:
         appearanceGenome.AppendModuleNeuronsToMasterList(ref neuronList);
+        communicationGenome.AppendModuleNeuronsToMasterList(ref neuronList);
         coreGenome.AppendModuleNeuronsToMasterList(ref neuronList);
         developmentalGenome.AppendModuleNeuronsToMasterList(ref neuronList);
-        //digestiveGenome.AppendModuleNeuronsToMasterList(ref neuronList);
-        //energyGenome.AppendModuleNeuronsToMasterList(ref neuronList);
-        //exteriorGenome.AppendModuleNeuronsToMasterList(ref neuronList);
+        environmentalGenome.AppendModuleNeuronsToMasterList(ref neuronList);
+        foodGenome.AppendModuleNeuronsToMasterList(ref neuronList);
+        friendGenome.AppendModuleNeuronsToMasterList(ref neuronList);
         movementGenome.AppendModuleNeuronsToMasterList(ref neuronList);
-        
+        threatGenome.AppendModuleNeuronsToMasterList(ref neuronList);        
     }
 
     public void SetToMutatedCopyOfParentGenome(BodyGenome parentBodyGenome, MutationSettings settings) {
-
+        // *** Result needs to be fully independent copy and share no references!!!
         // *** OPTIMIZATION:  convert this to use pooling rather than using new memory alloc every mutation
         FirstTimeInitializeCritterModuleGenomes(); // Re-constructs all modules as new() 
-        // *** Result needs to be fully independent copy and share no references!!!
+
+        // Add body-sensor/effector mutations here and Cleanup Brain Genome:
         appearanceGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome.appearanceGenome, settings);
+        communicationGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome.communicationGenome, settings);
         coreGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome.coreGenome, settings);
+        developmentalGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome.developmentalGenome, settings);
+        environmentalGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome.environmentalGenome, settings);
+        foodGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome.foodGenome, settings);
+        friendGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome.friendGenome, settings);        
         movementGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome.movementGenome, settings);
+        threatGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome.threatGenome, settings);
       
     }
     

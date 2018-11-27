@@ -42,7 +42,7 @@ public class CritterModuleMovementGenome {
         // currently, all within COREmoduleGenome
     }
 
-    public void GenerateRandomGenome() {
+    public void GenerateRandomInitialGenome() {
         // Do stuff:
         horsepower = 140f;
         turnRate = 55f;

@@ -70,21 +70,19 @@ public class GameManager : MonoBehaviour {
                 // Medium
                 simulationManager._NumAgents = 64;
                 simulationManager._NumEggSacks = 48;
-                //simulationManager._NumPredators = 2;
                 simulationManager.numInitialHiddenNeurons = 6;
                 break;
             case 2:
                 // High
                 simulationManager._NumAgents = 96;
                 simulationManager._NumEggSacks = 48;
-                //simulationManager._NumPredators = 1;
                 simulationManager.numInitialHiddenNeurons = 8;
                 break;
             case 3:
                 // EXTREME
                 simulationManager._NumAgents = 120;
                 simulationManager._NumEggSacks = 48;
-                simulationManager.numInitialHiddenNeurons = 6;
+                simulationManager.numInitialHiddenNeurons = 10;
                 break;
             default:
                 Debug.LogError("NO SWITCH ENTRY FOUND!!! " + uiManager.gameOptionsManager.gameOptions.simulationComplexity.ToString());

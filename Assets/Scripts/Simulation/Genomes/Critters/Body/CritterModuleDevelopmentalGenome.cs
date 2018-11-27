@@ -13,7 +13,7 @@ public class CritterModuleDevelopmentalGenome {
         this.inno = inno;
     }
 
-    public void GenerateRandomGenome() {
+    public void GenerateRandomInitialGenome() {
         // Do stuff:
 
     }

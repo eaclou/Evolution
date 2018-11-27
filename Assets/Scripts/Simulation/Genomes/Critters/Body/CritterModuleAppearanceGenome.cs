@@ -48,7 +48,7 @@ public class CritterModuleAppearanceGenome {
 
     }
 
-    public void GenerateRandomGenome() {
+    public void GenerateRandomInitialGenome() {
         // Do stuff:
 
         //sizeAndAspectRatio = new Vector2(1f, 1f);

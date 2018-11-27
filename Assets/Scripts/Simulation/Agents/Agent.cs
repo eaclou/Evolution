@@ -71,15 +71,20 @@ public class Agent : MonoBehaviour {
     private int growthScalingSkipFrames = 8;
 
     public float sizePercentage = 0f;
-    //public float decayPercentage = 0f;  // so that scaling works if agent dies at various stages of growth, rather than assuming it's fullsize
-   
+    
     public Brain brain;
     public GameObject bodyGO;
     public Rigidbody2D bodyRigidbody;
-    
-        // MODULES:::
+
+    // MODULES:::
+    public CritterModuleCommunication communicationModule;
     public CritterModuleCore coreModule;
+    public CritterModuleEnvironment environmentModule;
+    public CritterModuleFood foodModule;
+    public CritterModuleFriends friendModule;
     public CritterModuleMovement movementModule;
+    public CritterModuleThreats threatsModule;
+
     public CritterMouthComponent mouthRef;
 
     public CapsuleCollider2D colliderBody;
@@ -88,22 +93,16 @@ public class Agent : MonoBehaviour {
     
     public Vector3 fullSizeBoundingBox;  // ASSUMES Z=LENGTH, Y=HEIGHT, X=WIDTH
     public Vector3 currentBoundingBoxSize;
-    //public float averageFullSizeWidth = 1f;  // used to determine size of collider
     public float fullSizeBodyVolume = 1f;
     public float centerOfMass = 0f;
     
-    //public Texture2D textureHealth;
-    //private int widthsTexResolution = 16;
-    //public float[] agentWidthsArray;
-
     public int ageCounterMature = 0; // only counts when agent is an adult
     public int lifeStageTransitionTimeStepCounter = 0; // keeps track of how long agent has been in its current lifeStage
     public int scoreCounter = 0;
     public int pregnancyRefactoryTimeStepCounter = 0;
 
     public float currentCorpseFoodAmount = 1f;
-    //private float maxCorpseFoodAmountAtDeath
-
+    
     private Vector3 prevPos;
     public Vector3 _PrevPos
     {
@@ -119,6 +118,9 @@ public class Agent : MonoBehaviour {
     public float prevVel;
     public float curVel;
     public float curAccel;
+
+    public Vector2 ownPos;
+    public Vector2 ownVel;
 
     public Vector2 throttle;
     public Vector2 smoothedThrottle;
@@ -332,16 +334,21 @@ public class Agent : MonoBehaviour {
     }*/
 
     public void MapNeuronToModule(NID nid, Neuron neuron) {
-        //testModule.MapNeuron(nid, neuron); // OLD
-
-        coreModule.MapNeuron(nid, neuron);
-        movementModule.MapNeuron(nid, neuron);
-
+        
         // Hidden nodes!
         if (nid.moduleID == -1) {
             neuron.currentValue = new float[1];
             neuron.neuronType = NeuronGenome.NeuronType.Hid;
             neuron.previousValue = 0f;
+        }
+        else {  // In/Out nodes:::
+            communicationModule.MapNeuron(nid, neuron);
+            coreModule.MapNeuron(nid, neuron);
+            environmentModule.MapNeuron(nid, neuron);
+            foodModule.MapNeuron(nid, neuron);
+            friendModule.MapNeuron(nid, neuron);
+            movementModule.MapNeuron(nid, neuron);
+            threatsModule.MapNeuron(nid, neuron);
         }
     }
         
@@ -365,11 +372,16 @@ public class Agent : MonoBehaviour {
         
         //UpdateInternalResources();  // update energy, stamina, food -- or do this during TickActions?
 
-        Vector2 ownPos = new Vector2(bodyRigidbody.transform.localPosition.x, bodyRigidbody.transform.localPosition.y);
-        Vector2 ownVel = new Vector2(bodyRigidbody.velocity.x, bodyRigidbody.velocity.y); // change this to ownPos - prevPos *****************
+        ownPos = new Vector2(bodyRigidbody.transform.localPosition.x, bodyRigidbody.transform.localPosition.y);
+        ownVel = new Vector2(bodyRigidbody.velocity.x, bodyRigidbody.velocity.y); // change this to ownPos - prevPos *****************
 
-        coreModule.Tick(simManager, nutrientCellInfo, mouthRef.isPassive, ownPos, ownVel, index);
+        coreModule.Tick();
+        communicationModule.Tick(this);
+        environmentModule.Tick(this);
+        foodModule.Tick(simManager, nutrientCellInfo, this);
+        friendModule.Tick(this);
         movementModule.Tick(this, ownVel);
+        threatsModule.Tick(this);
         // Add more sensor Modules later:
 
         // Update Mouth::::         
@@ -388,14 +400,7 @@ public class Agent : MonoBehaviour {
             mouthRef.bitingFrameCounter = 0;
         }
     }
-
-    private void UpdateInternalResources() {
-        // Convert Food to Energy if there is some in stomach
-        // convert energy to stamina
-
-        // Each module can send back information about energy usage? Or store it as a value from last frame
-    }
-
+    
     private void CheckForDeathStarvation() {
         // STARVATION::
         if (coreModule.energy <= 0f) {
@@ -1064,12 +1069,27 @@ public class Agent : MonoBehaviour {
     }
 
     public void InitializeModules(AgentGenome genome) {
-        
+
+        communicationModule = new CritterModuleCommunication();
+        communicationModule.Initialize(genome.bodyGenome.communicationGenome, this);
+
         coreModule = new CritterModuleCore();
         coreModule.Initialize(genome.bodyGenome.coreGenome, this);
 
+        environmentModule = new CritterModuleEnvironment();
+        environmentModule.Initialize(genome.bodyGenome.environmentalGenome, this);
+
+        foodModule = new CritterModuleFood();
+        foodModule.Initialize(genome.bodyGenome.foodGenome, this);
+
+        friendModule = new CritterModuleFriends();
+        friendModule.Initialize(genome.bodyGenome.friendGenome, this);
+
         movementModule = new CritterModuleMovement();
-        movementModule.Initialize(genome.bodyGenome.movementGenome);            
+        movementModule.Initialize(genome.bodyGenome.movementGenome);
+
+        threatsModule = new CritterModuleThreats();
+        threatsModule.Initialize(genome.bodyGenome.threatGenome, this);
     }
     
     public void FirstTimeInitialize() {//AgentGenome genome) {  // ** See if I can get away with init sans Genome

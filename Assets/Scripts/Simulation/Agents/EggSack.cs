@@ -178,7 +178,7 @@ public class EggSack : MonoBehaviour {
         }
         
         this.index = index;        
-        this.fullSize = new Vector2(agentGenome.bodyGenome.fullsizeBoundingBox.x, agentGenome.bodyGenome.fullsizeBoundingBox.z) * 1f;
+        this.fullSize = Vector2.one * (agentGenome.bodyGenome.fullsizeBoundingBox.x + agentGenome.bodyGenome.fullsizeBoundingBox.y) * 0.5f; // new Vector2(agentGenome.bodyGenome.fullsizeBoundingBox.x, agentGenome.bodyGenome.fullsizeBoundingBox.y) * 1f;
         //foodAmount = this.fullSize.x * this.fullSize.y;
        
         BeginLifeStageGrowing(parentAgent, agentGenome, startPos);
@@ -261,7 +261,7 @@ public class EggSack : MonoBehaviour {
             
             //index = eggSackIndex;
             // REVISIT THIS:
-            float parentScale = parentGenomeRef.bodyGenome.fullsizeBoundingBox.x * 0.5f + parentGenomeRef.bodyGenome.fullsizeBoundingBox.z * 0.5f;
+            float parentScale = (parentGenomeRef.bodyGenome.fullsizeBoundingBox.x + parentGenomeRef.bodyGenome.fullsizeBoundingBox.y) * 0.5f;
             this.fullSize.x = parentScale * 1f;  // golden ratio? // easter egg for math nerds?
             this.fullSize.y = parentScale * 1f;            
             //foodAmount = this.fullSize.x * this.fullSize.y;

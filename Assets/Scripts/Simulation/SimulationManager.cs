@@ -706,12 +706,12 @@ public class SimulationManager : MonoBehaviour {
         for (int i = 0; i < agentsArray.Length; i++) {
 
             Vector3 depthSample = simStateData.depthAtAgentPositionsArray[i];
-            float agentSize = agentsArray[i].fullSizeBoundingBox.x * 1.6f + 0.15f;
+            float agentSize = agentsArray[i].fullSizeBoundingBox.z * 1.1f + 0.15f;
             float floorDepth = depthSample.x * 10f;
             if (floorDepth < agentSize)
             {
                 float wallForce = Mathf.Clamp01(agentSize - floorDepth) / agentSize;
-                agentsArray[i].bodyRigidbody.AddForce(new Vector2(depthSample.y, depthSample.z).normalized * 50.20f * agentsArray[i].bodyRigidbody.mass * wallForce, ForceMode2D.Impulse);
+                agentsArray[i].bodyRigidbody.AddForce(new Vector2(depthSample.y, depthSample.z).normalized * 36f * agentsArray[i].bodyRigidbody.mass * wallForce, ForceMode2D.Impulse);
             }
             
             agentsArray[i].bodyRigidbody.AddForce(simStateData.fluidVelocitiesAtAgentPositionsArray[i] * 30f * agentsArray[i].bodyRigidbody.mass, ForceMode2D.Impulse);
@@ -1024,13 +1024,15 @@ public class SimulationManager : MonoBehaviour {
             float lerpAmount = Mathf.Max(0.01f, 1f / (float)speciesPool.numAgentsEvaluated);
 
             masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgLifespan = Mathf.Lerp(speciesPool.avgLifespan, (float)agentRef.scoreCounter, lerpAmount);
-            masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgConsumption = Mathf.Lerp(speciesPool.avgConsumption, (float)agentRef.totalFoodEaten, lerpAmount);
-            masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgBodySize = Mathf.Lerp(speciesPool.avgBodySize, (float)agentRef.fullSizeBodyVolume, lerpAmount);
+            masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgConsumption = Mathf.Lerp(speciesPool.avgConsumption, agentRef.totalFoodEaten, lerpAmount);
+            masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgBodySize = Mathf.Lerp(speciesPool.avgBodySize, agentRef.fullSizeBodyVolume, lerpAmount);
             float mouthType = 1f;
             if(agentRef.mouthRef.isPassive) {
                 mouthType = 0f;
             }
             masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgDietType = Mathf.Lerp(speciesPool.avgDietType, mouthType, lerpAmount);
+            masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgNumNeurons = Mathf.Lerp(speciesPool.avgNumNeurons, (float)agentRef.brain.neuronList.Count, lerpAmount);
+            masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgNumAxons = Mathf.Lerp(speciesPool.avgNumAxons, (float)agentRef.brain.axonList.Count, lerpAmount);
         }
         else {
             // -- Else:

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EggSackGenome {
+public class EggSackGenome {  // is this even needed anymore??? *****
 
     public int index = -1;
 

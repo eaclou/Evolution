@@ -30,6 +30,10 @@ public class SpeciesGenomePool {
     public List<float> avgBodySizePerYearList;
     public float avgDietType = 0f;
     public List<float> avgDietTypePerYearList;
+    public float avgNumNeurons = 0f;
+    public List<float> avgNumNeuronsPerYearList;
+    public float avgNumAxons = 0f;
+    public List<float> avgNumAxonsPerYearList;
 
     public bool isFlaggedForExtinction = false;
     public bool isExtinct = false;
@@ -46,13 +50,17 @@ public class SpeciesGenomePool {
         isExtinct = false;
 
         avgLifespanPerYearList = new List<float>();
-        avgLifespanPerYearList.Add(0);
+        avgLifespanPerYearList.Add(0f);
         avgConsumptionPerYearList = new List<float>();
-        avgConsumptionPerYearList.Add(0);
+        avgConsumptionPerYearList.Add(0f);
         avgBodySizePerYearList = new List<float>();
-        avgBodySizePerYearList.Add(0);
+        avgBodySizePerYearList.Add(0f);
         avgDietTypePerYearList = new List<float>();
-        avgDietTypePerYearList.Add(0);
+        avgDietTypePerYearList.Add(0f);
+        avgNumNeuronsPerYearList = new List<float>();
+        avgNumNeuronsPerYearList.Add(0f);
+        avgNumAxonsPerYearList = new List<float>();
+        avgNumAxonsPerYearList.Add(0f);
 
         candidateGenomesList = new List<CandidateAgentData>();
         leaderboardGenomesList = new List<CandidateAgentData>();
@@ -99,6 +107,8 @@ public class SpeciesGenomePool {
         avgConsumption = 0f;
         avgBodySize = 0f;
         avgDietType = 0f;
+        avgNumNeurons = 0f;
+        avgNumAxons = 0f;
     }
 
     public void UpdateYearlyStats(int year) {
@@ -106,6 +116,8 @@ public class SpeciesGenomePool {
         avgConsumptionPerYearList.Add(avgConsumption);
         avgBodySizePerYearList.Add(avgBodySize);
         avgDietTypePerYearList.Add(avgDietType);
+        avgNumNeuronsPerYearList.Add(avgNumNeurons);
+        avgNumAxonsPerYearList.Add(avgNumAxons);
     }
 
     public CandidateAgentData GetNextAvailableCandidate() {
@@ -229,8 +241,20 @@ public class SpeciesGenomePool {
         BodyGenome parentBodyGenome = parentGenome.bodyGenome;
         BrainGenome parentBrainGenome = parentGenome.brainGenome;
 
+        // A)
+        // 1) Copy Brain, mutate weights, add/remove axons & hid neurons
+        // 2) Mutate Body, Add/Remove Sensors+Effectors
+        // 3) Cleanup brain based on new sensors/effectors (In/Out Neurons)
+
+        // B)   ************* STARTING WITH OPTION B!!! *************
+        // 1) Copy & Mutate Body Genome, Edit Attrs, Add/Remove Sensors/Effectors
+        // 2) Rebuild Brain's BodyNeurons (assumes unique ID for every module/neuron), Copy Axons & HiddenNeurons
+        // 3) Remove Vestigial Links
+
+        // C) Body & Brain in parallel, module by module?        
+
         newBodyGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome, mutationSettingsRef);
-        newBrainGenome.SetToMutatedCopyOfParentGenome(parentBrainGenome, mutationSettingsRef);
+        newBrainGenome.SetToMutatedCopyOfParentGenome(parentBrainGenome, newBodyGenome, mutationSettingsRef);
         
         childGenome.bodyGenome = newBodyGenome; 
         childGenome.brainGenome = newBrainGenome; 
