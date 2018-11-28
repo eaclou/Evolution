@@ -80,7 +80,8 @@ public class FoodManager {
     }
 
     public void InitializeFoodParticles(int numAgents, ComputeShader computeShader) {
-
+        //float startTime = Time.realtimeSinceStartup;
+        //Debug.Log((Time.realtimeSinceStartup - startTime).ToString());
         computeShaderFoodParticles = computeShader;
         
         foodParticlesCBuffer = new ComputeBuffer(numFoodParticles, GetFoodParticleDataSize());
@@ -101,28 +102,30 @@ public class FoodManager {
             data.refactoryAge = 0f;
             foodParticlesArray[i] = data;
         }
+        //Debug.Log("Fill Initial Particle Array Data CPU: " + (Time.realtimeSinceStartup - startTime).ToString());
 
         foodParticlesCBuffer.SetData(foodParticlesArray);
         foodParticlesCBufferSwap.SetData(foodParticlesArray);
+        //Debug.Log("Set Data GPU: " + (Time.realtimeSinceStartup - startTime).ToString());
 
         foodParticlesNearestCritters1024 = new RenderTexture(numFoodParticles, numAgents, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
         foodParticlesNearestCritters1024.wrapMode = TextureWrapMode.Clamp;
         foodParticlesNearestCritters1024.filterMode = FilterMode.Point;
         foodParticlesNearestCritters1024.enableRandomWrite = true;        
         foodParticlesNearestCritters1024.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***    
-
+        //Debug.Log("Create RT 1024: " + (Time.realtimeSinceStartup - startTime).ToString());
         foodParticlesNearestCritters32 = new RenderTexture(32, numAgents, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
         foodParticlesNearestCritters32.wrapMode = TextureWrapMode.Clamp;
         foodParticlesNearestCritters32.filterMode = FilterMode.Point;
         foodParticlesNearestCritters32.enableRandomWrite = true;        
         foodParticlesNearestCritters32.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***   
-
+        //Debug.Log("Create RT 32: " + (Time.realtimeSinceStartup - startTime).ToString());
         foodParticlesNearestCritters1 = new RenderTexture(1, numAgents, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
         foodParticlesNearestCritters1.wrapMode = TextureWrapMode.Clamp;
         foodParticlesNearestCritters1.filterMode = FilterMode.Point;
         foodParticlesNearestCritters1.enableRandomWrite = true;        
         foodParticlesNearestCritters1.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
-
+        //Debug.Log("Pre Buffer Creation: " + (Time.realtimeSinceStartup - startTime).ToString());
         closestFoodParticlesDataArray = new FoodParticleData[numAgents];
         closestFoodParticlesDataCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 8 + sizeof(int) * 3);
 
@@ -132,6 +135,7 @@ public class FoodManager {
         foodParticleMeasurementTotalsData = new FoodParticleData[1];
         foodParticlesMeasure32 = new ComputeBuffer(32, sizeof(float) * 8 + sizeof(int) * 3);
         foodParticlesMeasure1 = new ComputeBuffer(1, sizeof(float) * 8 + sizeof(int) * 3);
+        //Debug.Log("End: " + (Time.realtimeSinceStartup - startTime).ToString());
     }
     public void InitializeNutrientsMap(int numAgents, ComputeShader computeShader) {
 

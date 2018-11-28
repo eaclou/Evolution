@@ -270,7 +270,7 @@ public class BaronVonTerrain : RenderBaron {
     }
 
     private void InitializeTerrain() {
-        Debug.Log("InitializeTerrain!");
+        //Debug.Log("InitializeTerrain!");
 
         int meshResolution = 192;
         float mapSize = SimulationManager._MapSize;

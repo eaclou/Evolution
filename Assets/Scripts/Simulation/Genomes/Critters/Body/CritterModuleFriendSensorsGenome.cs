@@ -50,7 +50,23 @@ public class CritterModuleFriendSensorsGenome {
 	
     public void SetToMutatedCopyOfParentGenome(CritterModuleFriendSensorsGenome parentGenome, MutationSettings settings) {
         this.useFriendPos = parentGenome.useFriendPos;
+        float randChance = UnityEngine.Random.Range(0f, 1f);
+        if(randChance < settings.bodyModuleMutationChance) {
+            this.useFriendPos = !this.useFriendPos;
+        }
+
         this.useFriendVel = parentGenome.useFriendVel;
+        randChance = UnityEngine.Random.Range(0f, 1f);
+        if(randChance < settings.bodyModuleMutationChance) {
+            this.useFriendVel = !this.useFriendVel;
+        }
+
         this.useFriendDir = parentGenome.useFriendDir;
+        randChance = UnityEngine.Random.Range(0f, 1f);
+        if(randChance < settings.bodyModuleMutationChance) {
+            this.useFriendDir = !this.useFriendDir;
+        }
+
+
     }
 }

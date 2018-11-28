@@ -55,7 +55,9 @@ public class MasterGenomePool {
         completeSpeciesPoolsList.Add(firstSpecies);
         
         uiManagerRef.treeOfLifeManager = new TreeOfLifeManager(uiManagerRef.treeOfLifeAnchorGO, uiManagerRef);
-        uiManagerRef.treeOfLifeManager.FirstTimeInitialize(this);                
+        uiManagerRef.treeOfLifeManager.FirstTimeInitialize(this);
+
+        //yield return null;
     }
 
     public void UpdateYearlySpeciesStats(int year) {
@@ -100,7 +102,7 @@ public class MasterGenomePool {
         }
     }
     public void ExtinctifySpecies(SimulationManager simManagerRef, int speciesID) {
-        Debug.Log("REMOVE SPECIES " + speciesID.ToString());
+        //Debug.Log("REMOVE SPECIES " + speciesID.ToString());
 
         // find and remove from active list:
         int listIndex = -1;

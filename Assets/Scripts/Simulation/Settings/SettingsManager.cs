@@ -55,7 +55,7 @@ public class SettingsManager : MonoBehaviour {
 
     public void Initialize() {
         //mutationSettingsSupervised = new MutationSettings(0.5f, 0.015f, 1f, 0.005f, 1f, 0.1f, 0.001f);
-        mutationSettingsPersistent = new MutationSettings(0.25f, 0.012f, 1f, 0.0f, 0.9975f, 0.33f, 0.002f);
+        mutationSettingsPersistent = new MutationSettings(0.25f, 0.012f, 1f, 0.01f, 0.9975f, 0.55f, 0.005f);
 
         //mutationSettingsRandomBody = new MutationSettings(0.25f, 0.02f, 1f, 0.0f, 0.999f, 0.0f, 0.0f);
         //mutationSettingsRandomBody.defaultBodyMutationChance = 0.05f;

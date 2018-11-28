@@ -80,7 +80,7 @@ public class GameManager : MonoBehaviour {
                 break;
             case 3:
                 // EXTREME
-                simulationManager._NumAgents = 120;
+                simulationManager._NumAgents = 128;
                 simulationManager._NumEggSacks = 48;
                 simulationManager.numInitialHiddenNeurons = 10;
                 break;
@@ -192,7 +192,7 @@ public class GameManager : MonoBehaviour {
         TransitionToGameState(GameState.Playing);
     }
     private void TransitionToGameState(GameState nextState) {
-        Debug.Log("TransitionToGameState(" + nextState.ToString() + ")");
+        //Debug.Log("TransitionToGameState(" + nextState.ToString() + ")");
         switch (nextState) {
             case GameState.MainMenu:
                 // Can add more safety checks and additional logic later:

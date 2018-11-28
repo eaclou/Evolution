@@ -191,6 +191,7 @@ public class SimulationManager : MonoBehaviour {
             else {
                 // Start Loading coroutine!!!!:
                 isLoading = true;
+                Debug.Log("StartCoroutine(LoadingNewSimulation()); " + (Time.realtimeSinceStartup).ToString());
                 StartCoroutine(LoadingNewSimulation());
 
                 // Turn on Gameplay Audio:
@@ -200,55 +201,75 @@ public class SimulationManager : MonoBehaviour {
     }
 
     IEnumerator LoadingNewSimulation() {
-        Debug.Log("LoadingNewSimulation() ");
+        //Debug.Log("LoadingNewSimulation() ");
         //const float maxComputeTimePerFrame = 0.01f; // 10 milliseconds per frame
-        //float startTime = Time.realtimeSinceStartup;
+        float startTime = Time.realtimeSinceStartup;
+        float masterStartTime = Time.realtimeSinceStartup;
+        //Debug.Log("Start: " + (Time.realtimeSinceStartup - startTime).ToString());
         //float elapsedTime;
-
+        uiManager.textLoadingTooltips.text = "LoadingInitializeCoreSimulationState()";
         // Do some stuff:: LOAD!
         LoadingInitializeCoreSimulationState();  // creates arrays and stuff for the (hopefully)only time
-
+        Debug.Log("LoadingInitializeCoreSimulationState: " + (Time.realtimeSinceStartup - startTime).ToString());
         // Fitness Stuffs:::
+        startTime = Time.realtimeSinceStartup;
         LoadingSetUpFitnessStorage();
-
+        Debug.Log("LoadingSetUpFitnessStorage: " + (Time.realtimeSinceStartup - startTime).ToString());
         yield return null;
-
+        startTime = Time.realtimeSinceStartup;
+        uiManager.textLoadingTooltips.text = "LoadingInstantiateEggSacks()";
         // create first EggSacks:
         LoadingInstantiateEggSacks();
+        Debug.Log("LoadingInstantiateEggSacks: " + (Time.realtimeSinceStartup - startTime).ToString());
         yield return null;
+        startTime = Time.realtimeSinceStartup;
+        uiManager.textLoadingTooltips.text = "LoadingInitializeEggSacksFirstTime()";
         LoadingInitializeEggSacksFirstTime();
-
+        Debug.Log("LoadingInitializeEggSacksFirstTime: " + (Time.realtimeSinceStartup - startTime).ToString());
         yield return null;
-
+        startTime = Time.realtimeSinceStartup;
         // Can I create Egg Sacks and then immediately sapwn agents on them
         // Initialize Agents:
-        LoadingInstantiateAgents();  // Fills the AgentsArray, Instantiates Agent Objects (MonoBehaviors + GameObjects)
+        uiManager.textLoadingTooltips.text = "LoadingInstantiateAgents()";
+        //LoadingInstantiateAgents();  // Fills the AgentsArray, Instantiates Agent Objects (MonoBehaviors + GameObjects)
+        // TEMP BREAKOUT!!!
+        // Instantiate AI Agents
+        agentsArray = new Agent[numAgents];
+        for (int i = 0; i < agentsArray.Length; i++) {
+            GameObject agentGO = new GameObject("Agent" + i.ToString());
+            Agent newAgent = agentGO.AddComponent<Agent>();
+            //newAgent.speciesIndex = Mathf.FloorToInt((float)i / (float)numAgents * (float)numSpecies);
+            newAgent.FirstTimeInitialize(); // agentGenomePoolArray[i]);
+            agentsArray[i] = newAgent; // Add to stored list of current Agents 
+            yield return null;
+        }
         // Do *** !!!! *** v v v *** This is being replaced by a different mechanism for spawning Agents:
         //LoadingInitializeAgentsFromGenomes(); // This was "RespawnAgents()" --  Used to actually place the Agent in the game in a random spot and set the Agent's atributes ffrom its genome
-
+        Debug.Log("LoadingInstantiateAgents: " + (Time.realtimeSinceStartup - startTime).ToString());
+        Debug.Log("End Total up to LoadingInstantiateAgents: " + (Time.realtimeSinceStartup - masterStartTime).ToString());
         yield return null;
-
-        // Initialize Food:
-        LoadingInitializeFoodParticles();
-
-        yield return null;
-
-        LoadingInitializeFoodGrid();
         
         
-        yield return null;
 
         // Load pre-saved genomes:
         //LoadingLoadGenepoolFiles();       
         //yield return null;
-
+        uiManager.textLoadingTooltips.text = "LoadingInitializeFluidSim()";
         // **** How to handle sharing simulation data between different Managers???
         // Once Agents, Food, etc. are established, Initialize the Fluid:
         LoadingInitializeFluidSim();
-
+        Debug.Log("End Total up to LoadingInitializeFluidSim: " + (Time.realtimeSinceStartup - masterStartTime).ToString());
 
         yield return null;
-                
+        startTime = Time.realtimeSinceStartup;
+        // Initialize Food:
+        uiManager.textLoadingTooltips.text = "LoadingInitializeFoodParticles()";
+        LoadingInitializeFoodParticles();
+        Debug.Log("LoadingInitializeFoodParticles: " + (Time.realtimeSinceStartup - startTime).ToString());
+        Debug.Log("End Total up to LoadingInitializeFoodParticles: " + (Time.realtimeSinceStartup - masterStartTime).ToString());
+        yield return null;
+
+        uiManager.textLoadingTooltips.text = "GentlyRouseTheRenderMonarchHisHighnessLordOfPixels()";   
         // Wake up the Render King and prepare him for the day ahead, proudly ruling over Renderland.
         GentlyRouseTheRenderMonarchHisHighnessLordOfPixels();
 
@@ -264,9 +285,17 @@ public class SimulationManager : MonoBehaviour {
         /*for(int i = 0; i < numAgents; i++) {
             theRenderKing.UpdateAgentWidthsTexture(agentsArray[i]);
         }*/
-        
+        Debug.Log("End Total up to GentlyRouseTheRenderMonarchHisHighnessLordOfPixels: " + (Time.realtimeSinceStartup - masterStartTime).ToString());
+
         yield return null;
-                
+        startTime = Time.realtimeSinceStartup;
+        uiManager.textLoadingTooltips.text = "LoadingInitializeFoodGrid()";
+        LoadingInitializeFoodGrid();
+        Debug.Log("LoadingInitializeFoodGrid: " + (Time.realtimeSinceStartup - startTime).ToString());
+        Debug.Log("End Total up to LoadingInitializeFoodGrid: " + (Time.realtimeSinceStartup - masterStartTime).ToString());
+        yield return null;
+
+        uiManager.textLoadingTooltips.text = "LoadingHookUpFluidAndRenderKing()";        
         LoadingHookUpFluidAndRenderKing();  // fluid needs refs to RK's obstacle/color cameras' RenderTextures!
         // ***** ^^^^^ Might need to call this every frame???
 
@@ -277,9 +306,11 @@ public class SimulationManager : MonoBehaviour {
         // possibly just top-down let cameraManager read simulation data
         //LoadingHookUpUIManager();
         // Separate class to hold all simulation State Data?
-
+        Debug.Log("End Total up to LoadingHookUpFluidAndRenderKing: " + (Time.realtimeSinceStartup - masterStartTime).ToString());
         yield return null;
+        
 
+        uiManager.textLoadingTooltips.text = "LoadingInitializeGridCells()";
         LoadingInitializeGridCells();
         // Populates GridCells with their contents (agents/food/preds)
         LoadingFillGridCells();
@@ -292,7 +323,7 @@ public class SimulationManager : MonoBehaviour {
         //}
 
         //yield return new WaitForSeconds(5f); // TEMP!!!
-
+        Debug.Log("End Total: " + (Time.realtimeSinceStartup - masterStartTime).ToString());
         environmentFluidManager.UpdateSimulationClimate(0);
         
         // Done - will be detected by GameManager next frame
@@ -325,6 +356,8 @@ public class SimulationManager : MonoBehaviour {
 
         //uiManager.treeOfLifeManager = new TreeOfLifeManager(uiManager.treeOfLifeAnchorGO, uiManager);  // Moved inside MasterGenome Init!!! ***
         //uiManager.treeOfLifeManager.FirstTimeInitialize(masterGenomePool);
+
+        //yield return null;
     }
     private void LoadingInitializePopulationGenomes() {
         masterGenomePool = new MasterGenomePool();
@@ -359,7 +392,9 @@ public class SimulationManager : MonoBehaviour {
             eggSackGenome.InitializeAsRandomGenome();
 
             eggSackGenomePoolArray[i] = eggSackGenome;
-        }        
+        }
+
+        //yield return null;
     }
     private void LoadingInitializeFluidSim() {
         environmentFluidManager.InitializeFluidSystem();

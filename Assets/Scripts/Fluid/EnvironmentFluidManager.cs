@@ -318,7 +318,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
     }
     
     private void CreateTextures() {
-        Debug.Log("CreateTextures()!");
+        //Debug.Log("CreateTextures()!");
 
         velocityA = new RenderTexture(resolution, resolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
         velocityA.wrapMode = TextureWrapMode.Repeat;

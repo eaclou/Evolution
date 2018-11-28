@@ -126,7 +126,7 @@ public class BrainGenome {
             LinkGenome newLinkGenome = new LinkGenome(parentGenome.linkList[i].fromModuleID, parentGenome.linkList[i].fromNeuronID, parentGenome.linkList[i].toModuleID, parentGenome.linkList[i].toNeuronID, parentGenome.linkList[i].weight, true);
 
             float randZeroChance = UnityEngine.Random.Range(0f, 1f);
-            if (randZeroChance < settings.zeroWeightChance) {
+            if (randZeroChance < settings.removeLinkChance) {
                 newLinkGenome.weight = 0f;  // Remove fully??? *****
             }
 
@@ -247,7 +247,7 @@ public class BrainGenome {
             }
             else {
                 remove = true;
-                Debug.LogError("fromNID NOT FOUND " + linkList[j].fromModuleID.ToString() + ", " + linkList[j].fromNeuronID.ToString());
+                //Debug.LogError("fromNID NOT FOUND " + linkList[j].fromModuleID.ToString() + ", " + linkList[j].fromNeuronID.ToString());
             }
             int toID = -1;
             if (IDs.TryGetValue(new NID(linkList[j].toModuleID, linkList[j].toNeuronID), out toID)) {
@@ -255,7 +255,7 @@ public class BrainGenome {
             }
             else {
                 remove = true;
-                Debug.LogError("toNID NOT FOUND " + linkList[j].fromModuleID.ToString() + ", " + linkList[j].fromNeuronID.ToString());
+                //Debug.LogError("toNID NOT FOUND " + linkList[j].fromModuleID.ToString() + ", " + linkList[j].fromNeuronID.ToString());
             }
 
             if(remove) {

@@ -84,7 +84,9 @@ public class SpeciesGenomePool {
             if(i < maxLeaderboardGenomePoolSize) {
                 leaderboardGenomesList.Add(candidate);
             }
-            candidateGenomesList.Add(candidate);            
+            candidateGenomesList.Add(candidate);
+
+            //yield return null;
         }
 
         representativeGenome = candidateGenomesList[0].candidateGenome;

@@ -2900,7 +2900,7 @@ public class TheRenderKing : MonoBehaviour {
             computeShaderTreeOfLife.SetInt("_UpdateBufferStartIndex", curNumTreeOfLifeStemSegments);
             computeShaderTreeOfLife.Dispatch(kernelCSAddNewSpeciesStemSegments, updateStemSegmentDataCBuffer.count, 1, 1);
 
-            Debug.Log("UPDATE STEM SEGMENTS: " + newSpeciesID.ToString() + ", depth: " + newSpecies.depthLevel.ToString());
+            //Debug.Log("UPDATE STEM SEGMENTS: " + newSpeciesID.ToString() + ", depth: " + newSpecies.depthLevel.ToString());
 
             updateStemSegmentDataCBuffer.Release();
 
