@@ -270,7 +270,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
 
         viscosity = Mathf.Lerp(viscosity, 0.0002f, lerpAmount);
         damping = Mathf.Lerp(damping, 0.004f, lerpAmount);
-        colorRefreshBackgroundMultiplier = Mathf.Lerp(colorRefreshBackgroundMultiplier, 0.0001f, lerpAmount);
+        colorRefreshBackgroundMultiplier = Mathf.Lerp(colorRefreshBackgroundMultiplier, 0.001f, lerpAmount);
         colorRefreshDynamicMultiplier = Mathf.Lerp(colorRefreshDynamicMultiplier, 0.0075f, lerpAmount);
 
         forceMultiplier = Mathf.Lerp(forceMultiplier, 4.20f, lerpAmount);

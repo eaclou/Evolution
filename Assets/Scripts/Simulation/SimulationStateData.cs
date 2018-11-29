@@ -347,8 +347,8 @@ public class SimulationStateData {
                 // Z & W coords represents agent's x/y Radii (in FluidCoords)
                 agentFluidPositionsArray[i] = new Vector4(agentPos.x / SimulationManager._MapSize, 
                                                           agentPos.y / SimulationManager._MapSize, 
-                                                          (simManager.agentsArray[i].fullSizeBoundingBox.x + 0.1f) * 0.5f / SimulationManager._MapSize, // **** RE-VISIT!!!!! ****
-                                                          (simManager.agentsArray[i].fullSizeBoundingBox.y + 0.1f) * 0.5f / SimulationManager._MapSize); //... 0.5/140 ...
+                                                          (simManager.agentsArray[i].fullSizeBoundingBox.x + 0.25f) * 0.5f / SimulationManager._MapSize, // **** RE-VISIT!!!!! ****
+                                                          (simManager.agentsArray[i].fullSizeBoundingBox.y + 0.25f) * 0.5f / SimulationManager._MapSize); //... 0.5/140 ...
             }
         }
         critterInitDataCBuffer.SetData(critterInitDataArray);        

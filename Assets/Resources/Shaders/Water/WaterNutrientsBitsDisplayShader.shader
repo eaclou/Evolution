@@ -86,12 +86,12 @@
 				float2 uv = (worldPosition.xy + 128) / 512;
 				o.altitudeUV = uv;
 								
-				float2 scale = waterQuadData.localScale * 2.37;
+				float2 scale = waterQuadData.localScale * 2;
 				scale.x *= 0.66;
 				scale.y = scale.y * (1 + saturate(waterQuadData.speed * 128));
 				
-				float4 nutrientGridSample = tex2Dlod(_NutrientTex, float4((o.altitudeUV - 0.25) * 2.0, 0, 0));
-				scale *= (nutrientGridSample.x * 0.4 + 0.6) * 1;
+				//float4 nutrientGridSample = tex2Dlod(_NutrientTex, float4((o.altitudeUV - 0.25) * 2.0, 0, 0));
+				//scale *= (nutrientGridSample.x * 0.4 + 0.6) * 1;
 				
 				//scale = float2(1,1) * 0.033;
 				
@@ -112,7 +112,7 @@
 
 
 				float rand0 = rand(float2(inst, 0));
-				worldPosition.z -= waveHeight * 1 - rand0 - 1;
+				worldPosition.z -= waveHeight * 1 - rand0; // - 1;
 
 				// REFRACTION:
 				//float3 offset = worldPosition;				
@@ -157,7 +157,7 @@
 							
 				float alpha = fadeIn * fadeOut;
 
-				o.color = float4(1,1,1,alpha);
+				o.color = float4(rand(float2(-0.347 * inst, inst)),1,1,alpha);
 				
 				return o;
 			}
@@ -205,7 +205,7 @@
 
 				//return float4(i.color.x * 1000, 0, 0, 1);
 				//==================================================================================================================
-				float4 brushColor = tex2D(_MainTex, i.quadUV);	
+				/*float4 brushColor = tex2D(_MainTex, i.quadUV);	
 				float2 screenUV = i.screenUV.xy / i.screenUV.w;
 				float4 frameBufferColor = tex2D(_RenderedSceneRT, screenUV);  //  Color of brushtroke source	
 				// use separate camera?
@@ -269,17 +269,18 @@
 				//return float4(1,1,1,1);
 				//finalColor = float4(reflectedColor.rgb, 1);
 				//finalColor.rgb = float3(viewDotRemapped, viewDotRemapped, viewDotRemapped);
-
+				*/
 				
 				//finalColor.a = (1 - viewDotRemapped) * backgroundColor.a; //viewDotRemapped;
 				//finalColor.a *= finalColor.a;
 				//finalColor.a *= 0.33;
 
-				float4 nutrientGridSample = tex2D(_NutrientTex, (i.altitudeUV - 0.25) * 2.0); 
+				//float4 nutrientGridSample = tex2D(_NutrientTex, (i.altitudeUV - 0.25) * 2.0); 
 				//finalColor.a = 1;
 				//float foodAmt = nutrientGridSample.x * 2;
 				//finalColor.rgb = float3(foodAmt, foodAmt, foodAmt);
-				finalColor.rgb = lerp(float3(0.05,0.04,0.015), float3(0.9,1,0.2), saturate(nutrientGridSample.x * 10 + 0.033));
+				float4 finalColor = tex2D(_MainTex, i.quadUV);
+				finalColor.rgb = lerp(float3(0.05,0.04,0.015), float3(0.9,1,0.7) * 0.5, i.color.r); //rand()); //saturate(nutrientGridSample.x * 10 + 0.033));
 				finalColor.a *= i.color.a;
 				//return float4(1,1,1,1);
 				//return float4(0.2,1,0.2,1);

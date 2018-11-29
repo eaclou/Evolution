@@ -438,7 +438,7 @@ void RefreshColor (uint3 id : SV_DispatchThreadID)
 	float yCoord = ((float)id.y + 0.5)  / _TextureResolution;
 	float2 uvOrigin = float2(xCoord, yCoord);
 	
-	float4 sourceColorBackground = lerp(float4(0.03 * 0.4, 0.4 * 0.4, 0.3 * 0.4, 1), fluidBackgroundColorTex.SampleLevel(_LinearRepeat, uvOrigin, 0), 0.05);
+	float4 sourceColorBackground = lerp(float4(0.012, 0.16, 0.12, 1), fluidBackgroundColorTex.SampleLevel(_LinearRepeat, uvOrigin, 0), 0.04);
 	float4 sourceColorDynamic = colorInjectionRenderTex.SampleLevel(_LinearRepeat, uvOrigin, 0);
 	//sourceColor.a = saturate(sourceColor.a);
 	float4 currentColor = DensityRead[id.xy];

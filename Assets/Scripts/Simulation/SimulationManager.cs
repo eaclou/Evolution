@@ -749,7 +749,7 @@ public class SimulationManager : MonoBehaviour {
                 agentsArray[i].bodyRigidbody.AddForce(new Vector2(depthSample.y, depthSample.z).normalized * 36f * agentsArray[i].bodyRigidbody.mass * wallForce, ForceMode2D.Impulse);
             }
             
-            agentsArray[i].bodyRigidbody.AddForce(simStateData.fluidVelocitiesAtAgentPositionsArray[i] * 30f * agentsArray[i].bodyRigidbody.mass, ForceMode2D.Impulse);
+            agentsArray[i].bodyRigidbody.AddForce(simStateData.fluidVelocitiesAtAgentPositionsArray[i] * 15f * agentsArray[i].bodyRigidbody.mass, ForceMode2D.Impulse);
 
             agentsArray[i].avgFluidVel = Vector2.Lerp(agentsArray[i].avgFluidVel, simStateData.fluidVelocitiesAtAgentPositionsArray[i], 0.25f);
 
@@ -757,7 +757,7 @@ public class SimulationManager : MonoBehaviour {
         }
         for (int i = 0; i < eggSackArray.Length; i++) { // *** cache rigidBody reference
             
-            eggSackArray[i].GetComponent<Rigidbody2D>().AddForce(simStateData.fluidVelocitiesAtEggSackPositionsArray[i] * 16f * eggSackArray[i].GetComponent<Rigidbody2D>().mass, ForceMode2D.Impulse); //
+            eggSackArray[i].GetComponent<Rigidbody2D>().AddForce(simStateData.fluidVelocitiesAtEggSackPositionsArray[i] * 10f * eggSackArray[i].GetComponent<Rigidbody2D>().mass, ForceMode2D.Impulse); //
             
         }
     }
