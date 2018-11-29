@@ -204,7 +204,7 @@ public class CritterMouthComponent : MonoBehaviour {
 
         float sizeRatio = ownBiteArea / targetArea; // for now clamped to 10x
 
-        float damage = baseDamage * sizeRatio;
+        float damage = baseDamage * sizeRatio * agentRef.coreModule.damageBonus;
         damage = Mathf.Clamp01(damage);
 
         preyAgent.ProcessBeingBitten(damage);

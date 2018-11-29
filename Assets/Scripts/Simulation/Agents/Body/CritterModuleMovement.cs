@@ -25,15 +25,18 @@ public class CritterModuleMovement {
 
     public float smallestCreatureBaseTurnRate = 32f;
     public float largestCreatureBaseTurnRate = 0.05f;
+
+    public float accelBonus = 1f;
+    public float speedBonus = 1f;
+    public float turnBonus = 1f;
 	
     public CritterModuleMovement() {
         
     }
 
-    public void Initialize(CritterModuleMovementGenome genome) {
+    public void Initialize(AgentGenome agentGenome, CritterModuleMovementGenome genome) {
 
-        horsepower = genome.horsepower;
-                
+        horsepower = genome.horsepower;               
         turnRate = genome.turnRate;
         
         ownVelX = new float[1]; // 20
@@ -44,10 +47,15 @@ public class CritterModuleMovement {
         
         throttleX = new float[1]; // 0
         throttleY = new float[1]; // 1
+
         dash = new float[1]; // 2
         
         parentID = genome.parentID;
         inno = genome.inno;
+
+        float invAspectRatio = agentGenome.bodyGenome.coreGenome.creatureAspectRatio;
+
+        speedBonus = Mathf.Lerp(0.75f, 1.5f, 1f - invAspectRatio);
     }
 
     public void MapNeuron(NID nid, Neuron neuron) {

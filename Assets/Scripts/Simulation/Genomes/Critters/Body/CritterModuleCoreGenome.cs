@@ -15,12 +15,10 @@ public class CritterModuleCoreGenome {
     //    Tail
 
     public float creatureBaseLength;
-    public float creatureBaseAspectRatio;
-
-    //public float creatureComplexShapeLerp;
+    public float creatureAspectRatio;
+    
     // Mouth/Snout:
     public float creatureFrontTaperSize;
-    //public float creatureFrontTaperCurve;
     public float creatureBackTaperSize;
 
     //public float mouthComplexShapeLerp;  // 0 = spherical simple creature, 1 = use section proportions
@@ -95,6 +93,12 @@ public class CritterModuleCoreGenome {
     public Vector3 tailFinFrequencies = Vector3.one;
     public Vector3 tailFinAmplitudes = Vector3.one;
     public Vector3 tailFinOffsets = Vector3.zero;
+
+    // specialization Bonuses first try:
+    public float priorityDamage;
+    public float prioritySpeed;
+    public float priorityHealth;
+    public float priorityEnergy;
 
     // List of Shape/Form modifiers here???:::
     //public CritterGenomeInterpretor.MaskDataSin maskDataSinTemp;
@@ -201,7 +205,7 @@ public class CritterModuleCoreGenome {
         shapeModifiersList.Add(initModifier);
 
         creatureBaseLength = UnityEngine.Random.Range(0.2f, 0.3f);
-        creatureBaseAspectRatio = UnityEngine.Random.Range(2f, 3f);
+        creatureAspectRatio = UnityEngine.Random.Range(0.35f, 0.55f);
 
         //creatureComplexShapeLerp = 0f;
         // Or start with deformed sphere???? *****
@@ -282,6 +286,11 @@ public class CritterModuleCoreGenome {
         tailFinFrequencies = Vector3.one;
         tailFinAmplitudes = Vector3.one;
         tailFinOffsets = Vector3.zero;
+
+        priorityDamage = 0.5f;
+        prioritySpeed = 0.5f;
+        priorityHealth = 0.5f;
+        priorityEnergy = 0.5f;
 
         //numSegments = 1;
         /*
@@ -406,7 +415,7 @@ public class CritterModuleCoreGenome {
         
         // Or start with deformed sphere???? *****
         creatureBaseLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.creatureBaseLength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.05f, 2.25f);
-        creatureBaseAspectRatio = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.creatureBaseAspectRatio, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 1.5f, 11f);
+        creatureAspectRatio = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.creatureAspectRatio, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.1f, 0.75f);
         
         //creatureComplexShapeLerp = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.creatureComplexShapeLerp, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
         // Mouth/Snout:
@@ -482,6 +491,11 @@ public class CritterModuleCoreGenome {
         tailFinFrequencies = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.tailFinFrequencies, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.1f, 10f);
         tailFinAmplitudes = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.tailFinAmplitudes, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
         tailFinOffsets = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.tailFinOffsets, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, -10f, 10f);
+
+        priorityDamage = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.priorityDamage, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
+        prioritySpeed = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.prioritySpeed, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
+        priorityHealth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.priorityHealth, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
+        priorityEnergy = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.priorityEnergy, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
 
         /*fullBodyWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.fullBodyWidth, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.1f, 4.5f);
         fullBodyLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.fullBodyLength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, fullBodyWidth * 1.25f, fullBodyWidth * 4f);

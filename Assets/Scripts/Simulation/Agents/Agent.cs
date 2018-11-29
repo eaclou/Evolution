@@ -53,7 +53,7 @@ public class Agent : MonoBehaviour {
 
         }
     }
-    public int maxAgeTimeSteps = 6400;
+    public int maxAgeTimeSteps = 10000;
     private int decayDurationTimeSteps = 1600;
     public int _DecayDurationTimeSteps
     {
@@ -127,7 +127,7 @@ public class Agent : MonoBehaviour {
     public Vector2 facingDirection;  // based on throttle history
 
     public float avgVel;
-    public float avgFluidVel;
+    public Vector2 avgFluidVel;
     public float depth;
     
     public bool isSwallowingPrey = false;
@@ -537,6 +537,8 @@ public class Agent : MonoBehaviour {
     }
     public void ProcessBeingBitten(float damage) {
 
+        damage = damage / coreModule.healthBonus;
+
         coreModule.hitPoints[0] -= damage;
         // currently no distinctionbetween regions:
         coreModule.healthHead -= damage;
@@ -889,7 +891,7 @@ public class Agent : MonoBehaviour {
 
         // Heal:
         float healRate = 0.0005f;
-        float energyToHealthConversionRate = 5f;
+        float energyToHealthConversionRate = 5f * coreModule.healthBonus;
         if(coreModule.healthBody < 1f) {
             coreModule.healthBody += healRate;
             coreModule.healthHead += healRate;
@@ -899,7 +901,7 @@ public class Agent : MonoBehaviour {
         }
 
         //ENERGY:
-        float energyCost = 0.002f * settings.energyDrainMultiplier;
+        float energyCost = 0.002f * settings.energyDrainMultiplier / coreModule.energyBonus;
         
         float throttleMag = smoothedThrottle.magnitude;
         
@@ -1017,7 +1019,7 @@ public class Agent : MonoBehaviour {
             //animationCycle = animationCycle % 1.0f;
 
             // get size in 0-1 range from minSize to maxSize:
-            float sizeValue = Mathf.Clamp01((candidateRef.candidateGenome.bodyGenome.coreGenome.creatureBaseLength - 0.2f) / 2f); ; // Mathf.Clamp01((fullSizeBoundingBox.x - 0.1f) / 2.5f); // ** Hardcoded assuming size ranges from 0.1 --> 2.5 !!! ********
+            float sizeValue = Mathf.Clamp01(coreModule.speedBonus * (candidateRef.candidateGenome.bodyGenome.coreGenome.creatureBaseLength - 0.2f) / 2f); ; // Mathf.Clamp01((fullSizeBoundingBox.x - 0.1f) / 2.5f); // ** Hardcoded assuming size ranges from 0.1 --> 2.5 !!! ********
             float swimSpeed = Mathf.Lerp(movementModule.smallestCreatureBaseSpeed, movementModule.largestCreatureBaseSpeed, sizeValue);
             float turnRate = Mathf.Lerp(movementModule.smallestCreatureBaseTurnRate, movementModule.largestCreatureBaseTurnRate, sizeValue);
             speed = swimSpeed;
@@ -1086,7 +1088,7 @@ public class Agent : MonoBehaviour {
         friendModule.Initialize(genome.bodyGenome.friendGenome, this);
 
         movementModule = new CritterModuleMovement();
-        movementModule.Initialize(genome.bodyGenome.movementGenome);
+        movementModule.Initialize(genome, genome.bodyGenome.movementGenome);
 
         threatsModule = new CritterModuleThreats();
         threatsModule.Initialize(genome.bodyGenome.threatGenome, this);

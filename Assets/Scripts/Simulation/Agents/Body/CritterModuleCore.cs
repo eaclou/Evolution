@@ -25,7 +25,7 @@ public class CritterModuleCore {
     public float debugFoodValue = 0f;
     
     public EggSack nearestEggSackModule;
-    public Vector2 nearestEggSackPos;
+    //public Vector2 nearestEggSackPos;
     
     //public float[] temperature;
     //public float[] pressure;
@@ -42,7 +42,12 @@ public class CritterModuleCore {
         
     public PredatorModule nearestPredatorModule;
     public Agent nearestFriendAgent;
-    public Agent nearestEnemyAgent;      
+    public Agent nearestEnemyAgent; 
+    
+    public float damageBonus;
+    public float speedBonus;
+    public float healthBonus;
+    public float energyBonus;
 
 	public CritterModuleCore() {
 
@@ -79,6 +84,12 @@ public class CritterModuleCore {
         
         parentID = genome.parentID;
         inno = genome.inno;
+
+        Vector4 bonusVectorNorm = new Vector4(genome.priorityDamage, genome.prioritySpeed, genome.priorityHealth, genome.priorityEnergy).normalized;
+        damageBonus = Mathf.Lerp(0.5f, 2f, bonusVectorNorm.x);
+        speedBonus = Mathf.Lerp(0.5f, 2f, bonusVectorNorm.y);
+        healthBonus = Mathf.Lerp(0.5f, 2f, bonusVectorNorm.z);
+        energyBonus = Mathf.Lerp(0.5f, 2f, bonusVectorNorm.w);
     }
 
     public void MapNeuron(NID nid, Neuron neuron) {

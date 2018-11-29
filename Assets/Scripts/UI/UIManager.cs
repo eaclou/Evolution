@@ -949,8 +949,9 @@ public class UIManager : MonoBehaviour {
             debugTxtAgent += "CRITTER# [" + agentIndex.ToString() + "]     SPECIES# [" + agentRef.speciesIndex.ToString() + "]\n\n";
             // Init Attributes:
             // Body:
-            debugTxtAgent += "Base Size: " + agentRef.candidateRef.candidateGenome.bodyGenome.coreGenome.creatureBaseLength.ToString("F2") + ",  Aspect: " + agentRef.candidateRef.candidateGenome.bodyGenome.coreGenome.creatureBaseAspectRatio.ToString("F1") + "\n"; 
+            debugTxtAgent += "Base Size: " + agentRef.candidateRef.candidateGenome.bodyGenome.coreGenome.creatureBaseLength.ToString("F2") + ",  Aspect: " + agentRef.candidateRef.candidateGenome.bodyGenome.coreGenome.creatureAspectRatio.ToString("F1") + "\n"; 
             debugTxtAgent += "Fullsize Dimensions: ( " + agentRef.fullSizeBoundingBox.x.ToString("F2") + ", " + agentRef.fullSizeBoundingBox.y.ToString("F2") + ", " + agentRef.fullSizeBoundingBox.z.ToString("F2") + " )\n";
+            debugTxtAgent += "BONUS - Damage: " + agentRef.coreModule.damageBonus.ToString("F2") + ", Speed: " + agentRef.coreModule.speedBonus.ToString("F2") + ", Health: " + agentRef.coreModule.healthBonus.ToString("F2") + ", Energy: " + agentRef.coreModule.energyBonus.ToString("F2") + "\n";
             string mouthType = "Active";
             if (agentRef.mouthRef.isPassive) { mouthType = "Passive"; }
             debugTxtAgent += "Mouth: [" + mouthType + "]\n";
@@ -960,8 +961,9 @@ public class UIManager : MonoBehaviour {
             debugTxtAgent += "\nSENSORS:\n";
             debugTxtAgent += "Comms= " + agentRef.candidateRef.candidateGenome.bodyGenome.communicationGenome.useComms.ToString() + "\n";
             debugTxtAgent += "Enviro: Cardinals= " + agentRef.candidateRef.candidateGenome.bodyGenome.environmentalGenome.useCardinals.ToString() + ", Diagonals= " + agentRef.candidateRef.candidateGenome.bodyGenome.environmentalGenome.useDiagonals.ToString() + "\n";
-            debugTxtAgent += "Food: Pos= " + agentRef.candidateRef.candidateGenome.bodyGenome.foodGenome.usePos.ToString() + ",  Dir= " + agentRef.candidateRef.candidateGenome.bodyGenome.foodGenome.useDir.ToString() + ",  Stats= " + agentRef.candidateRef.candidateGenome.bodyGenome.foodGenome.useStats.ToString() + "\n";
-            debugTxtAgent += "Friend: Pos= " + agentRef.candidateRef.candidateGenome.bodyGenome.friendGenome.useFriendPos.ToString() + ",  Dir= " + agentRef.candidateRef.candidateGenome.bodyGenome.friendGenome.useFriendDir.ToString() + ",  Vel= " + agentRef.candidateRef.candidateGenome.bodyGenome.friendGenome.useFriendVel.ToString() + "\n";
+            CritterModuleFoodSensorsGenome foodGenome = agentRef.candidateRef.candidateGenome.bodyGenome.foodGenome;
+            debugTxtAgent += "Food: Nutrients= " + foodGenome.useNutrients.ToString() + ", Pos= " + foodGenome.usePos.ToString() + ",  Dir= " + foodGenome.useDir.ToString() + ",  Stats= " + foodGenome.useStats.ToString() + ", pref: " + agentRef.foodModule.foodPreferenceOrder[0] + " > " + agentRef.foodModule.foodPreferenceOrder[1] + " > " + agentRef.foodModule.foodPreferenceOrder[2] + "\n";
+            debugTxtAgent += "Friend: Pos= " + agentRef.candidateRef.candidateGenome.bodyGenome.friendGenome.usePos.ToString() + ",  Dir= " + agentRef.candidateRef.candidateGenome.bodyGenome.friendGenome.useDir.ToString() + ",  Vel= " + agentRef.candidateRef.candidateGenome.bodyGenome.friendGenome.useVel.ToString() + "\n";
             debugTxtAgent += "Threat: Pos= " + agentRef.candidateRef.candidateGenome.bodyGenome.threatGenome.usePos.ToString() + ",  Dir= " + agentRef.candidateRef.candidateGenome.bodyGenome.threatGenome.useDir.ToString() + ",  Vel= " + agentRef.candidateRef.candidateGenome.bodyGenome.threatGenome.useVel.ToString() + ",  Stats= " + agentRef.candidateRef.candidateGenome.bodyGenome.threatGenome.useStats.ToString() + "\n";
             // Realtime Values:
             debugTxtAgent += "\nREALTIME DATA:";
@@ -975,8 +977,8 @@ public class UIManager : MonoBehaviour {
                         " ), Dir: ( " + agentRef.foodModule.foodDirX[0].ToString("F2") +
                         ", " + agentRef.foodModule.foodDirY[0].ToString("F2") + " )" +
                         "\n";
-            debugTxtAgent += "\nNutrients: " + agentRef.coreModule.debugFoodValue.ToString("F4") + "\n";
-            debugTxtAgent += "Gradient Dir: (" + agentRef.foodModule.foodPosX[0].ToString("F2") + ", " + agentRef.foodModule.foodPosY[0].ToString("F2") + ")\n";
+            debugTxtAgent += "\nNutrients: " + agentRef.foodModule.nutrientDensity[0].ToString("F4") + "\n";
+            debugTxtAgent += "Gradient Dir: (" + agentRef.foodModule.nutrientGradX[0].ToString("F2") + ", " + agentRef.foodModule.nutrientGradY[0].ToString("F2") + ")\n";
             debugTxtAgent += "Total Food Eaten: " + agentRef.totalFoodEaten.ToString("F3") + ", Corpse Food Amount: " + agentRef.currentCorpseFoodAmount.ToString("F3") + "\n";
 
             //debugTxtAgent += "\nFullSize: " + agentRef.fullSizeBoundingBox.ToString() + ", Volume: " + agentRef.fullSizeBodyVolume.ToString() + "\n";

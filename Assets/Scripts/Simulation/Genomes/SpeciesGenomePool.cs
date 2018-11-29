@@ -125,14 +125,20 @@ public class SpeciesGenomePool {
     public CandidateAgentData GetNextAvailableCandidate() {
 
         CandidateAgentData candidateData = null; // candidateGenomesList[0].candidateGenome;
-        for(int i = 0; i < candidateGenomesList.Count; i++) {
-            if(candidateGenomesList[i].isBeingEvaluated) {
-                // already being tested
-            }
-            else {
-                candidateData = candidateGenomesList[i];                
+        if(candidateGenomesList.Count > 0) {
+            for (int i = 0; i < candidateGenomesList.Count; i++) {
+                if(candidateGenomesList[i].isBeingEvaluated) {
+                    // already being tested
+                }
+                else {
+                    candidateData = candidateGenomesList[i];                
+                }
             }
         }
+        else {
+            candidateData = new CandidateAgentData(representativeGenome, speciesID);
+        }
+        
         
         return candidateData;
     }  

@@ -11,8 +11,8 @@ public class MasterGenomePool {
 
     public int maxNumActiveSpecies = 6;
     private int targetNumSpecies = 3;
-    public float speciesSimilarityDistanceThreshold = 8f;
-    private int minNumGuaranteedEvalsForNewSpecies = 128;
+    public float speciesSimilarityDistanceThreshold = 4f;
+    private int minNumGuaranteedEvalsForNewSpecies = 256;
 
     public int currentHighestDepth = 1;
     
@@ -120,12 +120,81 @@ public class MasterGenomePool {
         simManagerRef.theRenderKing.TreeOfLifeExtinctSpecies(speciesID);
     }
 
-    public SpeciesGenomePool SelectNewGenomeSourceSpecies() {
-        // NAIVE RANDOM AT FIRST:
-        int randomTableIndex = UnityEngine.Random.Range(0, currentlyActiveSpeciesIDList.Count);
-        int speciesIndex = currentlyActiveSpeciesIDList[randomTableIndex];
+    public SpeciesGenomePool SelectNewGenomeSourceSpecies(bool weighted, float weightedAmount) {
+        if(weighted) {
+            // figure out which species has most evals
+            int totalNumActiveEvals = 0;
+            //int evalLeaderActiveIndex = 0;
+            int recordNumEvals = 0;            
+            for(int i = 0; i < currentlyActiveSpeciesIDList.Count; i++) {
+                int numEvals = completeSpeciesPoolsList[currentlyActiveSpeciesIDList[i]].numAgentsEvaluated + 1;
+                totalNumActiveEvals += numEvals;
+                if(numEvals > recordNumEvals) {
+                    recordNumEvals = numEvals;
+                    //evalLeaderActiveIndex = i;
+                }
+            }
+            float[] unsortedEvalScoresArray = new float[currentlyActiveSpeciesIDList.Count];
+            float[] rankedEvalScoresArray = new float[currentlyActiveSpeciesIDList.Count];
+            int[] rankedEvalIndices = new int[currentlyActiveSpeciesIDList.Count];
 
-        return completeSpeciesPoolsList[speciesIndex];
+            //float weightedAmount = 0.5f;
+            float avgFractionVal = 1f / currentlyActiveSpeciesIDList.Count;
+
+            for(int i = 0; i < currentlyActiveSpeciesIDList.Count; i++) {
+                float rawEvalFraction = 1f - (((float)completeSpeciesPoolsList[currentlyActiveSpeciesIDList[i]].numAgentsEvaluated + 1f) / (float)totalNumActiveEvals);
+                unsortedEvalScoresArray[i] = Mathf.Lerp(avgFractionVal, rawEvalFraction, weightedAmount);
+                rankedEvalScoresArray[i] = unsortedEvalScoresArray[i];
+                rankedEvalIndices[i] = i;
+            }
+
+            // SORT ARRAY BY #EVALS:
+            for (int i = 0; i < rankedEvalIndices.Length - 1; i++) {
+                for (int j = 0; j < rankedEvalIndices.Length - 1; j++) {
+                    float swapFitA = rankedEvalScoresArray[j];
+                    float swapFitB = rankedEvalScoresArray[j + 1];
+                    int swapIdA = rankedEvalIndices[j];
+                    int swapIdB = rankedEvalIndices[j + 1];
+
+                    if (swapFitA < swapFitB) {  // bigger is better now after inversion
+                        rankedEvalScoresArray[j] = swapFitB;
+                        rankedEvalScoresArray[j + 1] = swapFitA;
+                        rankedEvalIndices[j] = swapIdB;
+                        rankedEvalIndices[j + 1] = swapIdA;
+                    }
+                }
+            }
+
+            int selectedIndex = 0;
+            // generate random lottery value between 0f and totalFitness:
+            float lotteryValue = UnityEngine.Random.Range(0f, 1f);
+            float currentValue = 0f;
+            for (int i = 0; i < rankedEvalIndices.Length; i++) {
+                if (lotteryValue >= currentValue && lotteryValue < (currentValue + rankedEvalScoresArray[i])) {
+                    // Jackpot!
+                    selectedIndex = rankedEvalIndices[i];
+                    //Debug.Log("Selected: " + selectedIndex.ToString() + "! (" + i.ToString() + ") fit= " + currentValue.ToString() + "--" + (currentValue + (1f - rankedFitnessList[i])).ToString() + " / " + totalFitness.ToString() + ", lotto# " + lotteryValue.ToString() + ", fit= " + (1f - rankedFitnessList[i]).ToString());
+                }
+                currentValue += rankedEvalIndices[i]; // add this agent's fitness to current value for next check
+            }
+
+            return completeSpeciesPoolsList[currentlyActiveSpeciesIDList[selectedIndex]];        
+        }
+        else {
+            // NAIVE RANDOM AT FIRST:
+            int randomTableIndex = UnityEngine.Random.Range(0, currentlyActiveSpeciesIDList.Count);
+
+            // temp minor penalty to oldest species:
+            float oldestSpeciesRerollChance = 0.33f;
+            if(randomTableIndex == 0) {
+                if(UnityEngine.Random.Range(0f, 1f) < oldestSpeciesRerollChance) {
+                    randomTableIndex = UnityEngine.Random.Range(0, currentlyActiveSpeciesIDList.Count);
+                }
+            }
+            int speciesIndex = currentlyActiveSpeciesIDList[randomTableIndex];
+
+            return completeSpeciesPoolsList[speciesIndex];
+        }
     }
 
     public void AssignNewMutatedGenomeToSpecies(AgentGenome newGenome, int parentSpeciesID, SimulationManager simManagerRef) {
@@ -240,7 +309,8 @@ public class MasterGenomePool {
         // *** need to normalize all to 0-1 for more fair comparison? ***
         // have centralized min/max values for each attribute?
         float dBaseSize = Mathf.Abs(newGenome.bodyGenome.coreGenome.creatureBaseLength - repGenome.bodyGenome.coreGenome.creatureBaseLength);
-        float dBaseAspectRatio = Mathf.Abs(newGenome.bodyGenome.coreGenome.creatureBaseAspectRatio - repGenome.bodyGenome.coreGenome.creatureBaseAspectRatio);
+        float dBaseAspectRatio = Mathf.Abs(newGenome.bodyGenome.coreGenome.creatureAspectRatio - repGenome.bodyGenome.coreGenome.creatureAspectRatio);
+
         float mouthA = 1f;
         if (newGenome.bodyGenome.coreGenome.isPassive)
             mouthA = 0f;
@@ -248,6 +318,7 @@ public class MasterGenomePool {
         if (repGenome.bodyGenome.coreGenome.isPassive)
             mouthB = 0f;
         float dMouthType = Mathf.Abs(mouthA - mouthB);
+
         float dPriColor = Mathf.Abs((newGenome.bodyGenome.appearanceGenome.huePrimary - repGenome.bodyGenome.appearanceGenome.huePrimary).sqrMagnitude);
         float dSecColor = Mathf.Abs((newGenome.bodyGenome.appearanceGenome.hueSecondary - repGenome.bodyGenome.appearanceGenome.hueSecondary).sqrMagnitude);
 
@@ -266,13 +337,47 @@ public class MasterGenomePool {
         float dTailFinSpread = Mathf.Abs(newGenome.bodyGenome.coreGenome.tailFinSpreadAngle - repGenome.bodyGenome.coreGenome.tailFinSpreadAngle);
 
         // sensors & shit:
+        float dFoodPrefPart = Mathf.Abs(newGenome.bodyGenome.foodGenome.preferenceParticles - repGenome.bodyGenome.foodGenome.preferenceParticles);
+        float dFoodPrefEgg = Mathf.Abs(newGenome.bodyGenome.foodGenome.preferenceEggs - repGenome.bodyGenome.foodGenome.preferenceEggs);
+        float dFoodPrefCrea = Mathf.Abs(newGenome.bodyGenome.foodGenome.preferenceCreatures - repGenome.bodyGenome.foodGenome.preferenceCreatures);
+                
+        float dUseComms = newGenome.bodyGenome.communicationGenome.useComms == repGenome.bodyGenome.communicationGenome.useComms ? 0f : 1f;
+        float dUseWaterStats = newGenome.bodyGenome.environmentalGenome.useWaterStats == repGenome.bodyGenome.environmentalGenome.useWaterStats ? 0f : 1f;
+        float dUseCardinals = newGenome.bodyGenome.environmentalGenome.useCardinals == repGenome.bodyGenome.environmentalGenome.useCardinals ? 0f : 1f;
+        float dUseDiagonals = newGenome.bodyGenome.environmentalGenome.useDiagonals == repGenome.bodyGenome.environmentalGenome.useDiagonals ? 0f : 1f;
+        float dUseNutrients = newGenome.bodyGenome.foodGenome.useNutrients == repGenome.bodyGenome.foodGenome.useNutrients ? 0f : 1f;
+        float dUseFoodPos = newGenome.bodyGenome.foodGenome.usePos == repGenome.bodyGenome.foodGenome.usePos ? 0f : 1f;
+        float dUseFoodVel = newGenome.bodyGenome.foodGenome.useVel == repGenome.bodyGenome.foodGenome.useVel ? 0f : 1f;
+        float dUseFoodDir = newGenome.bodyGenome.foodGenome.useDir == repGenome.bodyGenome.foodGenome.useDir ? 0f : 1f;
+        float dUseFoodStats = newGenome.bodyGenome.foodGenome.useStats == repGenome.bodyGenome.foodGenome.useStats ? 0f : 1f;
+        float dUseFriendPos = newGenome.bodyGenome.friendGenome.usePos == repGenome.bodyGenome.friendGenome.usePos ? 0f : 1f;
+        float dUseFriendVel = newGenome.bodyGenome.friendGenome.useVel == repGenome.bodyGenome.friendGenome.useVel ? 0f : 1f;
+        float dUseFriendDir = newGenome.bodyGenome.friendGenome.useDir == repGenome.bodyGenome.friendGenome.useDir ? 0f : 1f;
+        float dUseThreatPos = newGenome.bodyGenome.threatGenome.usePos == repGenome.bodyGenome.threatGenome.usePos ? 0f : 1f;
+        float dUseThreatVel = newGenome.bodyGenome.threatGenome.useVel == repGenome.bodyGenome.threatGenome.useVel ? 0f : 1f;
+        float dUseThreatDir = newGenome.bodyGenome.threatGenome.useDir == repGenome.bodyGenome.threatGenome.useDir ? 0f : 1f;
+        float dUseThreatStats = newGenome.bodyGenome.threatGenome.useStats == repGenome.bodyGenome.threatGenome.useStats ? 0f : 1f;
 
-        float delta = dBaseSize + dBaseAspectRatio +
+        float dSensory = dFoodPrefPart + dFoodPrefEgg + dFoodPrefCrea + dUseComms + dUseWaterStats + dUseCardinals + dUseDiagonals +
+                         dUseNutrients + dUseFoodPos + dUseFoodVel + dUseFoodDir + dUseFoodStats + dUseFriendPos + dUseFriendVel + dUseFriendDir +
+                         dUseThreatPos + dUseThreatVel + dUseThreatDir + dUseThreatStats;
+        float dNeurons = Mathf.Abs(newGenome.brainGenome.hiddenNeuronList.Count - repGenome.brainGenome.hiddenNeuronList.Count);
+        float dAxons = Mathf.Abs(newGenome.brainGenome.linkList.Count - repGenome.brainGenome.linkList.Count) / (float)repGenome.brainGenome.bodyNeuronList.Count;
+
+        float dSpecialization = (new Vector4(newGenome.bodyGenome.coreGenome.priorityDamage, newGenome.bodyGenome.coreGenome.prioritySpeed, newGenome.bodyGenome.coreGenome.priorityHealth, newGenome.bodyGenome.coreGenome.priorityEnergy).normalized - 
+                                 new Vector4(repGenome.bodyGenome.coreGenome.priorityDamage, repGenome.bodyGenome.coreGenome.prioritySpeed, repGenome.bodyGenome.coreGenome.priorityHealth, repGenome.bodyGenome.coreGenome.priorityEnergy).normalized).magnitude;
+
+        dSensory *= 0.2f;
+        
+        float delta = dBaseSize * 2f + dBaseAspectRatio * 2f +
             dMouthType +
             dPriColor * 5f + dSecColor * 5f +
             dMouthLength + dHeadLength + dBodyLength + dTailLength +
             dEyeSize + dEyeHeight +
-            dTailFinLength + dTailFinSpread;
+            dTailFinLength + dTailFinSpread +
+            dSensory +
+            dNeurons + dAxons +
+            dSpecialization;
 
         //Debug.Log("Difference Score: " + delta.ToString());
 

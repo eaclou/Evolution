@@ -8,9 +8,9 @@ public class CritterModuleFriendSensorsGenome {
 	public int parentID;
     public int inno;
 
-    public bool useFriendPos;
-    public bool useFriendVel;
-    public bool useFriendDir;
+    public bool usePos;
+    public bool useVel;
+    public bool useDir;
 
     public float sensorRange;
 
@@ -22,25 +22,25 @@ public class CritterModuleFriendSensorsGenome {
     public void GenerateRandomInitialGenome() {
         // Do stuff:
 
-        useFriendPos = false;
-        useFriendVel = false;
-        useFriendDir = false;
+        usePos = false;
+        useVel = false;
+        useDir = false;
     }
 
     public void AppendModuleNeuronsToMasterList(ref List<NeuronGenome> neuronList) {
-        if(useFriendPos) {
+        if(usePos) {
             NeuronGenome friendPosX = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 8);
             NeuronGenome friendPosY = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 9);
             neuronList.Add(friendPosX); // 8
             neuronList.Add(friendPosY); // 9
         }
-        if(useFriendVel) {
+        if(useVel) {
             NeuronGenome friendVelX = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 10);
             NeuronGenome friendVelY = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 11);
             neuronList.Add(friendVelX); // 10
             neuronList.Add(friendVelY); // 11
         }
-        if(useFriendDir) {
+        if(useDir) {
             NeuronGenome friendDirX = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 12);
             NeuronGenome friendDirY = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 13);
             neuronList.Add(friendDirX); // 12
@@ -49,22 +49,22 @@ public class CritterModuleFriendSensorsGenome {
     }
 	
     public void SetToMutatedCopyOfParentGenome(CritterModuleFriendSensorsGenome parentGenome, MutationSettings settings) {
-        this.useFriendPos = parentGenome.useFriendPos;
+        this.usePos = parentGenome.usePos;
         float randChance = UnityEngine.Random.Range(0f, 1f);
         if(randChance < settings.bodyModuleMutationChance) {
-            this.useFriendPos = !this.useFriendPos;
+            this.usePos = !this.usePos;
         }
 
-        this.useFriendVel = parentGenome.useFriendVel;
+        this.useVel = parentGenome.useVel;
         randChance = UnityEngine.Random.Range(0f, 1f);
         if(randChance < settings.bodyModuleMutationChance) {
-            this.useFriendVel = !this.useFriendVel;
+            this.useVel = !this.useVel;
         }
 
-        this.useFriendDir = parentGenome.useFriendDir;
+        this.useDir = parentGenome.useDir;
         randChance = UnityEngine.Random.Range(0f, 1f);
         if(randChance < settings.bodyModuleMutationChance) {
-            this.useFriendDir = !this.useFriendDir;
+            this.useDir = !this.useDir;
         }
 
 

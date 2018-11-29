@@ -45,7 +45,7 @@ public class BodyGenome {
     public Vector3 GetFullsizeBoundingBox() {
         
         float fullLength = coreGenome.creatureBaseLength * (coreGenome.mouthLength + coreGenome.headLength + coreGenome.bodyLength + coreGenome.tailLength);
-        float approxAvgRadius = fullLength / coreGenome.creatureBaseAspectRatio;
+        float approxAvgRadius = fullLength * coreGenome.creatureAspectRatio;
 
         Vector3 size = new Vector3(approxAvgRadius, fullLength, approxAvgRadius);
         return size;        

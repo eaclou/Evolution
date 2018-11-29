@@ -5,6 +5,7 @@
 		_MainTex ("Main Texture", 2D) = "white" {}
 		_AltitudeTex ("_AltitudeTex", 2D) = "gray" {}
 		_WaterSurfaceTex ("_WaterSurfaceTex", 2D) = "black" {}
+		_FogColorTex ("_WaterSurfaceTex", 2D) = "black" {}
 		
 	}
 	SubShader
@@ -25,6 +26,7 @@
 			sampler2D _MainTex;
 			sampler2D _AltitudeTex;
 			sampler2D _WaterSurfaceTex;
+			sampler2D _FogColorTex;
 			
 			sampler2D _RenderedSceneRT;  // Provided by CommandBuffer -- global tex??? seems confusing... ** revisit this
 			
@@ -115,7 +117,7 @@
 				// 0-1 range --> -1 to 1
 				altitude = (altitude * 2 - 1) * -1;
 				float isUnderwater = saturate(altitude * 10000);
-				float3 waterFogColor = float3(0.03,0.4,0.3) * 0.4;
+				float3 waterFogColor = tex2D(_FogColorTex, (i.altitudeUV - 0.25) * 2).xyz; //float3(0.03,0.4,0.3) * 0.4;
 				float strataColorMultiplier = (sin(altitude * (1.0 + i.worldPos.x * 0.01 - i.worldPos.y * -0.01) + i.worldPos.x * 0.01 - i.worldPos.y * 0.01) * 0.5 + 0.5) * 0.5 + 0.5;
 				finalColor.rgb *= strataColorMultiplier;				
 				

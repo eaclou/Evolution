@@ -208,7 +208,7 @@ public class CritterGenomeInterpretor {
         */
         
         float finalCreatureLength = segmentsSummedCritterLength * gene.creatureBaseLength;
-        float finalCreatureThickness = 1f / gene.creatureBaseAspectRatio * finalCreatureLength;
+        float finalCreatureThickness = gene.creatureAspectRatio * finalCreatureLength;
         point.bindPos = new Vector3(point.initCoordsNormalized.x * widthMultiplier * finalCreatureThickness, point.initCoordsNormalized.y * finalCreatureLength - finalCreatureLength * 0.5f, point.initCoordsNormalized.z * heightMultiplier * finalCreatureThickness);
     }
 

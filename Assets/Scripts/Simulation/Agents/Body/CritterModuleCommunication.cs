@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class CritterModuleCommunication {
 
+    public CritterModuleCommunicationGenome genome;
 	public int parentID;
     public int inno;
 
@@ -22,6 +23,8 @@ public class CritterModuleCommunication {
     }
 
     public void Initialize(CritterModuleCommunicationGenome genome, Agent agent) {
+        this.genome = genome;
+
         inComm0 = new float[1]; // 40
         inComm1 = new float[1]; // 41
         inComm2 = new float[1]; // 42
@@ -75,10 +78,11 @@ public class CritterModuleCommunication {
     }
 
     public void Tick(Agent agent) {
-        inComm0[0] = Mathf.Round(agent.coreModule.nearestFriendAgent.communicationModule.outComm0[0] * 3f / 2f);
-        inComm1[0] = Mathf.Round(agent.coreModule.nearestFriendAgent.communicationModule.outComm1[0] * 3f / 2f);
-        inComm2[0] = Mathf.Round(agent.coreModule.nearestFriendAgent.communicationModule.outComm2[0] * 3f / 2f);
-        inComm3[0] = Mathf.Round(agent.coreModule.nearestFriendAgent.communicationModule.outComm3[0] * 3f / 2f);
-        
+        if(genome.useComms) {
+            inComm0[0] = Mathf.Round(agent.coreModule.nearestFriendAgent.communicationModule.outComm0[0] * 3f / 2f);
+            inComm1[0] = Mathf.Round(agent.coreModule.nearestFriendAgent.communicationModule.outComm1[0] * 3f / 2f);
+            inComm2[0] = Mathf.Round(agent.coreModule.nearestFriendAgent.communicationModule.outComm2[0] * 3f / 2f);
+            inComm3[0] = Mathf.Round(agent.coreModule.nearestFriendAgent.communicationModule.outComm3[0] * 3f / 2f);        
+        }
     }
 }

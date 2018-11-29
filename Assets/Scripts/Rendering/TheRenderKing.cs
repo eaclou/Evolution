@@ -1394,10 +1394,10 @@ public class TheRenderKing : MonoBehaviour {
         int baseIndex = 0;
         // AGENTS:
         for(int i = 0; i < simManager.agentsArray.Length; i++) {
-            Vector3 agentPos = simManager.agentsArray[i].transform.position;
+            Vector3 agentPos = simManager.agentsArray[i].bodyRigidbody.position;
             colorInjectionStrokeDataArray[baseIndex + i].worldPos = new Vector2(agentPos.x, agentPos.y);
             colorInjectionStrokeDataArray[baseIndex + i].localDir = simManager.agentsArray[i].facingDirection;
-            colorInjectionStrokeDataArray[baseIndex + i].scale = simManager.agentsArray[i].fullSizeBoundingBox * 1.0f;
+            colorInjectionStrokeDataArray[baseIndex + i].scale = simManager.agentsArray[i].fullSizeBoundingBox * 2.0f;
             
             float agentAlpha = 0.024f;
             if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Mature) {
@@ -1407,7 +1407,7 @@ public class TheRenderKing : MonoBehaviour {
                 agentAlpha = 3f * Mathf.Clamp01(1f - (float)simManager.agentsArray[i].lifeStageTransitionTimeStepCounter * 2f / (float)simManager.agentsArray[i]._DecayDurationTimeSteps);
             }
             // ********** BROKEN BY SPECIATION UPDATE!!!! *****************************
-            Color drawColor = new Color(1f, 1f, 1f);
+            Color drawColor = new Color(1f, 1f, 1f, 3f);
             //Color drawColor = new Color(simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.huePrimary.x, simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.huePrimary.y, simManager.agentGenomePoolArray[i].bodyGenome.appearanceGenome.huePrimary.z, agentAlpha);
             
             /*if(simManager.agentsArray[i].wasImpaled) {
@@ -1809,7 +1809,7 @@ public class TheRenderKing : MonoBehaviour {
         float segmentsSummedCritterLength = gene.mouthLength + gene.headLength + gene.bodyLength + gene.tailLength;
         //float fullCritterLength = segmentsSummedCritterLength * gene.creatureBaseLength;
         //float fullCritterWidth = gene.creatureBaseLength / gene.creatureBaseAspectRatio;
-        float critterSizeScore = gene.creatureBaseLength / gene.creatureBaseAspectRatio; ; // 1f;// fullCritterWidth;
+        float critterSizeScore = gene.creatureBaseLength * gene.creatureAspectRatio; ; // 1f;// fullCritterWidth;
 
         int numEyes = gene.numEyes;
         float eyePosSpread = gene.eyePosSpread;  // 1f == full hemisphere coverage, 0 == top
@@ -2996,6 +2996,7 @@ public class TheRenderKing : MonoBehaviour {
         baronVonTerrain.groundStrokesLrgDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
         baronVonTerrain.groundStrokesLrgDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
         baronVonTerrain.groundStrokesLrgDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+        baronVonTerrain.groundStrokesLrgDisplayMat.SetTexture("_FogColorTex", fluidManager._DensityA);
         cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundStrokesLrgDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.groundStrokesLrgCBuffer.count);
 
@@ -3006,6 +3007,7 @@ public class TheRenderKing : MonoBehaviour {
         baronVonTerrain.groundStrokesMedDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
         baronVonTerrain.groundStrokesMedDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
         baronVonTerrain.groundStrokesMedDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+        baronVonTerrain.groundStrokesMedDisplayMat.SetTexture("_FogColorTex", fluidManager._DensityA);
         cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundStrokesMedDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.groundStrokesMedCBuffer.count);
 
@@ -3016,6 +3018,7 @@ public class TheRenderKing : MonoBehaviour {
         baronVonTerrain.groundStrokesSmlDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
         baronVonTerrain.groundStrokesSmlDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
         baronVonTerrain.groundStrokesSmlDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+        baronVonTerrain.groundStrokesSmlDisplayMat.SetTexture("_FogColorTex", fluidManager._DensityA);
         cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundStrokesSmlDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.groundStrokesSmlCBuffer.count);
 
