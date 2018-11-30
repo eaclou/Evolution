@@ -1355,8 +1355,8 @@ public class TheRenderKing : MonoBehaviour {
             obstacleStrokeDataArray[baseIndex + i].localDir = simManager.agentsArray[i].facingDirection;
             obstacleStrokeDataArray[baseIndex + i].scale = new Vector2(simManager.agentsArray[i].currentBoundingBoxSize.x, simManager.agentsArray[i].currentBoundingBoxSize.y) * 1f; // Vector2.one * 5.5f * simManager.agentsArray[i].sizePercentage; // new Vector2(simManager.agentsArray[i].transform.localScale.x, simManager.agentsArray[i].transform.localScale.y) * 2.9f; // ** revisit this later // should leave room for velSampling around Agent *** weird popping when * 0.9f
 
-            float velX = Mathf.Clamp(simManager.agentsArray[i].ownVel.x, -1f, 1f) * velScale * 0.033f; // agentPos.x - simManager.agentsArray[i]._PrevPos.x * velScale;
-            float velY = Mathf.Clamp(simManager.agentsArray[i].ownVel.y, -1f, 1f) * velScale * 0.033f;
+            float velX = Mathf.Clamp(simManager.agentsArray[i].ownVel.x, -100f, 100f) * velScale * 0.015f; // agentPos.x - simManager.agentsArray[i]._PrevPos.x * velScale;
+            float velY = Mathf.Clamp(simManager.agentsArray[i].ownVel.y, -100f, 100f) * velScale * 0.015f;
             // OLD: not sure why this was Clamp01'ed?
             //float velX = Mathf.Clamp01(agentPos.x - simManager.agentsArray[i]._PrevPos.x) * velScale;
             //float velY = Mathf.Clamp01(agentPos.y - simManager.agentsArray[i]._PrevPos.y) * velScale;

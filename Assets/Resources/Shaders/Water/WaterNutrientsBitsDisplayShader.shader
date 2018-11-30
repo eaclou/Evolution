@@ -86,9 +86,9 @@
 				float2 uv = (worldPosition.xy + 128) / 512;
 				o.altitudeUV = uv;
 								
-				float2 scale = waterQuadData.localScale * 2;
-				scale.x *= 0.66;
-				scale.y = scale.y * (1 + saturate(waterQuadData.speed * 128));
+				float2 scale = waterQuadData.localScale * 2.25;
+				scale.x *= 0.8;
+				scale.y = scale.y * (1 + saturate(waterQuadData.speed * 64));
 				
 				//float4 nutrientGridSample = tex2Dlod(_NutrientTex, float4((o.altitudeUV - 0.25) * 2.0, 0, 0));
 				//scale *= (nutrientGridSample.x * 0.4 + 0.6) * 1;
@@ -112,7 +112,7 @@
 
 
 				float rand0 = rand(float2(inst, 0));
-				worldPosition.z -= waveHeight * 1 - rand0; // - 1;
+				worldPosition.z -= waveHeight * 1 - rand0 * 2; // - 1;
 
 				// REFRACTION:
 				//float3 offset = worldPosition;				

@@ -155,14 +155,14 @@ void CSEatSelectedFoodParticles (uint3 id : SV_DispatchThreadID)
 
 	float eatenAmount = 0.0;
 
+	float isAlive01 = saturate((critterSimData.embryoPercentage - 0.99) * 10000) * saturate(((1.0 - critterSimData.decayPercentage) - 0.99) * 10000);
+
 	float distanceSquared = data.y;
 	float mouthRadius = critterInitData.boundingBoxSize.x * critterSimData.growthPercentage;  // **** REMEMBER TO *0.5 EVENTUALLY FOR ACCURATE SIZE
 	float particleRadius = particleData.radius;
-	float combinedRadius = mouthRadius + particleRadius;
+	float combinedRadius = (mouthRadius + particleRadius) * isAlive;
 
-	float isAlive01 = saturate((critterSimData.embryoPercentage - 0.99) * 10000) * saturate(((1.0 - critterSimData.decayPercentage) - 0.99) * 10000);
-
-	float biteRadiusScore = mouthRadius * 3 * isAlive01;
+	//float biteRadiusScore = mouthRadius * 3 * isAlive01;
 	if(distanceSquared < combinedRadius * combinedRadius) {		
 		//if(biteRadiusScore * 3 > particleRadius) {
 			//if(critterSimData.isBiting > 0.5) {   // revisit

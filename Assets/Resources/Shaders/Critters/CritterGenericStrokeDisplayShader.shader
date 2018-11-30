@@ -113,7 +113,9 @@
 								
 				float crudeDiffuse = dot(normalize(worldNormal), lightDir) * 0.75 + 0.25;
 				float3 hue = lerp(critterInitData.secondaryHue, critterInitData.primaryHue, patternTexSample.x);
+				
 				hue = lerp(hue, genericStrokeData.color.rgb, genericStrokeData.color.a);
+				hue = lerp(float3(1,0,0), hue, critterSimData.health);
 				
 				float alpha = saturate((critterSimData.embryoPercentage - 0.995) * 200);
 								

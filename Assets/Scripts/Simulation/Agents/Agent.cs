@@ -1228,8 +1228,8 @@ public class Agent : MonoBehaviour {
         }                
             
         bodyRigidbody.mass = 0.01f; // min mass
-        bodyRigidbody.drag = 13f; // bodyDrag;
-        bodyRigidbody.angularDrag = 15f;
+        bodyRigidbody.drag = 13.5f; // bodyDrag;
+        bodyRigidbody.angularDrag = 15.5f;
         
         // Collision!
         colliderBody.direction = CapsuleDirection2D.Vertical;
