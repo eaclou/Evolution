@@ -24,7 +24,8 @@ public class SimulationStateData {
         public float maxEnergy;
         public Vector3 primaryHue;
         public Vector3 secondaryHue;
-        public float mouthIsActive;
+        public float mouthIsActive; // need this for animation? // morph this into mouthType?
+        // public float biteRadius; // triggerArea where bite is successful
         public float swimMagnitude;
 	    public float swimFrequency;
 	    public float swimAnimSpeed;
@@ -47,7 +48,7 @@ public class SimulationStateData {
         public float energy;
         public float health;
         public float stamina;
-        public float isBiting;
+        public float isBiting; // Use for particles
         public float biteAnimCycle;
         public float moveAnimCycle;
         public float turnAmount;
@@ -65,12 +66,12 @@ public class SimulationStateData {
         public float isBiting;
         public float isDamageFrame;        
     }*/
-    public struct AgentMovementAnimData {
+    /*public struct AgentMovementAnimData {
         public float animCycle;
         public float turnAmount;
         public float accel;
 		public float smoothedThrottle;
-    }
+    }*/
     public struct EggSackSimData {  // 12f + 2i
         public int parentAgentIndex;
         public Vector2 worldPos;
@@ -136,7 +137,7 @@ public class SimulationStateData {
     public CritterInitData[] critterInitDataArray;
     public CritterSimData[] critterSimDataArray;
     //public DebugBodyResourcesData[] debugBodyResourcesArray;
-    public AgentMovementAnimData[] agentMovementAnimDataArray;
+    //public AgentMovementAnimData[] agentMovementAnimDataArray;
     public EggSackSimData[] eggSackSimDataArray;
     //public PredatorSimData[] predatorSimDataArray;
 
@@ -193,12 +194,12 @@ public class SimulationStateData {
         }
         debugBodyResourcesCBuffer = new ComputeBuffer(debugBodyResourcesArray.Length, sizeof(float) * 10);
         */
-        agentMovementAnimDataArray = new AgentMovementAnimData[simManager._NumAgents];
+        /*agentMovementAnimDataArray = new AgentMovementAnimData[simManager._NumAgents];
         for(int i = 0; i < agentMovementAnimDataArray.Length; i++) {
             agentMovementAnimDataArray[i] = new AgentMovementAnimData();
         }
         agentMovementAnimDataCBuffer = new ComputeBuffer(agentMovementAnimDataArray.Length, sizeof(float) * 4);
-
+        */
         eggSackSimDataArray = new EggSackSimData[simManager._NumEggSacks];
         for (int i = 0; i < eggSackSimDataArray.Length; i++) {
             eggSackSimDataArray[i] = new EggSackSimData();

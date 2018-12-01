@@ -160,7 +160,7 @@ void CSEatSelectedFoodParticles (uint3 id : SV_DispatchThreadID)
 	float distanceSquared = data.y;
 	float mouthRadius = critterInitData.boundingBoxSize.x * critterSimData.growthPercentage;  // **** REMEMBER TO *0.5 EVENTUALLY FOR ACCURATE SIZE
 	float particleRadius = particleData.radius;
-	float combinedRadius = (mouthRadius + particleRadius) * isAlive;
+	float combinedRadius = (mouthRadius + particleRadius) * isAlive01;
 
 	//float biteRadiusScore = mouthRadius * 3 * isAlive01;
 	if(distanceSquared < combinedRadius * combinedRadius) {		
