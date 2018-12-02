@@ -170,7 +170,13 @@ public class SpeciesGenomePool {
             }
         }
         else {
-            Debug.LogError("ERROR NO INDEX FOUND! " + candidateData.candidateID.ToString() + ", species: " + this.speciesID.ToString() + ", CDSID: " + candidateData.speciesID.ToString() + ", [0]: " + candidateGenomesList[0].candidateID.ToString());
+            if (candidateGenomesList != null) {
+                Debug.LogError("ERROR NO INDEX FOUND! " + candidateData.candidateID.ToString() + ", species: " + this.speciesID.ToString() + ", CDSID: " + candidateData.speciesID.ToString() + ", [0]: " + candidateGenomesList[0].candidateID.ToString());
+            }
+            else {
+                Debug.LogError("META-ERROR NO INDEX FOUND! ");
+            }
+            
 
             // Find it:
             masterGenomePool.GlobalFindCandidateID(candidateData.candidateID); // temp debug
