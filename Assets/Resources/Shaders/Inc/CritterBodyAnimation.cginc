@@ -140,7 +140,7 @@ float3 GetAnimatedPosNew(float3 inPos, float3 pivotPos, CritterInitData critterI
 	float3 critterCurScale = float3(1,1,1) * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage) * 0.5;
 	// old: // float3 critterCurScale = critterInitData.boundingBoxSize * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage) * 0.5;
 
-	float activeMouthMask = critterInitData.mouthIsActive;
+	float activeMouthMask = 1.0; // ****** FIX FIX FIX ****** //critterInitData.mouthIsActive;
 
 	// PASSIVE MOUTH:::
 	float3 passiveMouthPos = inPos;
@@ -264,7 +264,7 @@ float3 GetAnimatedPosOld(float3 inPos, float3 pivotPos, CritterInitData critterI
 
 	float3 critterCurScale = critterInitData.boundingBoxSize * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage) * 0.5;
 
-	float activeMouthMask = critterInitData.mouthIsActive;
+	float activeMouthMask = 1.0; // *** FIX FIX FIX **** //critterInitData.mouthIsActive;
 
 	// PASSIVE MOUTH:::
 	float3 passiveMouthPos = inPos;

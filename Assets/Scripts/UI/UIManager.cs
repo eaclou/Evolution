@@ -1139,10 +1139,10 @@ public class UIManager : MonoBehaviour {
         // DIET:
         string txt = "Diet:\nHerbivore";
         Color dietColor = new Color(0.5f, 1f, 0.3f);
-        if(gameManager.simulationManager.simStateData.critterInitDataArray[critterIndex].mouthIsActive > 0.5) {
-            txt = "Diet:\nCarnivore";
-            dietColor = new Color(1f, 0.5f, 0.3f);
-        }
+        //if(gameManager.simulationManager.simStateData.critterInitDataArray[critterIndex].mouthIsActive > 0.5) {
+        //    txt = "Diet:\nCarnivore";
+        //    dietColor = new Color(1f, 0.5f, 0.3f);
+        //}
         textDiet.text = txt;
         inspectWidgetDietMat.SetPass(0);
         inspectWidgetDietMat.SetColor("_Tint", dietColor);
@@ -1215,9 +1215,10 @@ public class UIManager : MonoBehaviour {
         inspectWidgetHealthMat.SetFloat("_FillPercentage", percentage);
         
         // Species Icon:
-        textSpeciesID.text = "A";
-        Color speciesHue = new Color(1f, 0.33f, 0.33f);
-        if(cameraManager.targetAgent.speciesIndex == 1) {
+        textSpeciesID.text = gameManager.simulationManager.agentsArray[critterIndex].speciesIndex.ToString();
+        Vector3 primaryHue = gameManager.simulationManager.simStateData.critterInitDataArray[critterIndex].primaryHue;
+        Color speciesHue = new Color(primaryHue.x, primaryHue.y, primaryHue.z);
+        /*if(cameraManager.targetAgent.speciesIndex == 1) {
             speciesHue = new Color(0.33f, 1f, 0.33f);
             textSpeciesID.text = "B";
         }
@@ -1228,7 +1229,7 @@ public class UIManager : MonoBehaviour {
         else if(cameraManager.targetAgent.speciesIndex == 3) {
             speciesHue = new Color(1f, 1f, 1f);
             textSpeciesID.text = "D";
-        }
+        }*/
         inspectWidgetSpeciesIconMat.SetPass(0);
         inspectWidgetSpeciesIconMat.SetColor("_Tint", speciesHue);
 

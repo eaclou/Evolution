@@ -1599,8 +1599,9 @@ public class SimulationManager : MonoBehaviour {
             }
         }
 
-        foodManager.ClearBuffers();
-        
+        if(foodManager != null) {
+            foodManager.ClearBuffers();
+        }
     }
 
     public void SaveTrainingData() {  // ********* BROKEN BY SPECIATION UPDATE!!!!!!!!!!!!! ****************

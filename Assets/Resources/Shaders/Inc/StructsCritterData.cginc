@@ -2,9 +2,15 @@ struct CritterInitData {
 	float3 boundingBoxSize;
 	float spawnSizePercentage;
 	float maxEnergy;
+	float maxStomachCapacity;
 	float3 primaryHue;
 	float3 secondaryHue;
-	float mouthIsActive;
+	float biteConsumeRadius;   
+    float biteTriggerRadius;
+    float biteTriggerLength;
+    float eatEfficiencyPlant;
+    float eatEfficiencyDecay;
+    float eatEfficiencyMeat;
 	float swimMagnitude;
 	float swimFrequency;
 	float swimAnimSpeed;

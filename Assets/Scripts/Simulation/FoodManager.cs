@@ -58,10 +58,11 @@ public class FoodManager {
         public float foodAmount;
         public float active;  // not disabled
         public float refactoryAge;
+        public float age;
     }
     
     private int GetFoodParticleDataSize() {
-        int bitSize = sizeof(float) * 8 + sizeof(int) * 3;
+        int bitSize = sizeof(float) * 9 + sizeof(int) * 3;
         return bitSize;
     }
 
@@ -100,6 +101,7 @@ public class FoodManager {
             data.foodAmount = data.radius * data.radius * Mathf.PI * settingsRef.foodParticleNutrientDensity;
             data.active = 1f;
             data.refactoryAge = 0f;
+            data.age = 0f;
             foodParticlesArray[i] = data;
         }
         //Debug.Log("Fill Initial Particle Array Data CPU: " + (Time.realtimeSinceStartup - startTime).ToString());
@@ -127,14 +129,14 @@ public class FoodManager {
         foodParticlesNearestCritters1.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
         //Debug.Log("Pre Buffer Creation: " + (Time.realtimeSinceStartup - startTime).ToString());
         closestFoodParticlesDataArray = new FoodParticleData[numAgents];
-        closestFoodParticlesDataCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 8 + sizeof(int) * 3);
+        closestFoodParticlesDataCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 9 + sizeof(int) * 3);
 
         foodParticlesEatAmountsCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 1);
         foodParticlesEatAmountsArray = new float[numAgents];
 
         foodParticleMeasurementTotalsData = new FoodParticleData[1];
-        foodParticlesMeasure32 = new ComputeBuffer(32, sizeof(float) * 8 + sizeof(int) * 3);
-        foodParticlesMeasure1 = new ComputeBuffer(1, sizeof(float) * 8 + sizeof(int) * 3);
+        foodParticlesMeasure32 = new ComputeBuffer(32, sizeof(float) * 9 + sizeof(int) * 3);
+        foodParticlesMeasure1 = new ComputeBuffer(1, sizeof(float) * 9 + sizeof(int) * 3);
         //Debug.Log("End: " + (Time.realtimeSinceStartup - startTime).ToString());
     }
     public void InitializeNutrientsMap(int numAgents, ComputeShader computeShader) {
@@ -414,7 +416,7 @@ public class FoodManager {
         int kernelCSMeasureInitCritterDistances = computeShaderFoodParticles.FindKernel("CSMeasureInitCritterDistances");
         computeShaderFoodParticles.SetBuffer(kernelCSMeasureInitCritterDistances, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
         computeShaderFoodParticles.SetBuffer(kernelCSMeasureInitCritterDistances, "critterInitDataCBuffer", simStateDataRef.critterInitDataCBuffer);
-        computeShaderFoodParticles.SetBuffer(kernelCSMeasureInitCritterDistances, "foodParticlesRead", foodParticlesCBuffer);
+        computeShaderFoodParticles.SetBuffer(kernelCSMeasureInitCritterDistances, "foodParticlesRead", foodParticlesCBuffer);        
         computeShaderFoodParticles.SetTexture(kernelCSMeasureInitCritterDistances, "foodParticlesNearestCrittersRT", foodParticlesNearestCritters1024);        
         computeShaderFoodParticles.Dispatch(kernelCSMeasureInitCritterDistances, foodParticlesCBuffer.count / 1024, simStateDataRef.critterSimDataCBuffer.count, 1);
         
@@ -422,15 +424,21 @@ public class FoodManager {
         int kernelCSReduceCritterDistances32 = computeShaderFoodParticles.FindKernel("CSReduceCritterDistances32");
         computeShaderFoodParticles.SetTexture(kernelCSReduceCritterDistances32, "critterDistancesRead", foodParticlesNearestCritters1024);
         computeShaderFoodParticles.SetTexture(kernelCSReduceCritterDistances32, "critterDistancesWrite", foodParticlesNearestCritters32);
-        computeShaderFoodParticles.SetBuffer(kernelCSMeasureInitCritterDistances, "foodParticlesRead", foodParticlesCBuffer);
+        computeShaderFoodParticles.SetBuffer(kernelCSReduceCritterDistances32, "foodParticlesRead", foodParticlesCBuffer);        
         computeShaderFoodParticles.Dispatch(kernelCSReduceCritterDistances32, 32, simStateDataRef.critterSimDataCBuffer.count, 1);
-
+        
         // Reduce from 32 --> 1 particles per critter:
         computeShaderFoodParticles.SetTexture(kernelCSReduceCritterDistances32, "critterDistancesRead", foodParticlesNearestCritters32);
         computeShaderFoodParticles.SetTexture(kernelCSReduceCritterDistances32, "critterDistancesWrite", foodParticlesNearestCritters1);
         computeShaderFoodParticles.SetBuffer(kernelCSReduceCritterDistances32, "foodParticlesRead", foodParticlesCBuffer);
         computeShaderFoodParticles.SetBuffer(kernelCSReduceCritterDistances32, "closestParticlesDataCBuffer", closestFoodParticlesDataCBuffer);
         computeShaderFoodParticles.Dispatch(kernelCSReduceCritterDistances32, 1, simStateDataRef.critterSimDataCBuffer.count, 1);
+
+        // Copy/Swap Food PArticle Buffer:
+        //int kernelCSCopyFoodParticlesBuffer = computeShaderFoodParticles.FindKernel("CSCopyFoodParticlesBuffer");
+        //computeShaderFoodParticles.SetBuffer(kernelCSCopyFoodParticlesBuffer, "foodParticlesRead", foodParticlesCBufferSwap);
+        //computeShaderFoodParticles.SetBuffer(kernelCSCopyFoodParticlesBuffer, "foodParticlesWrite", foodParticlesCBuffer);
+        //computeShaderFoodParticles.Dispatch(kernelCSCopyFoodParticlesBuffer, 1, 1, 1);
 
         closestFoodParticlesDataCBuffer.GetData(closestFoodParticlesDataArray);
 

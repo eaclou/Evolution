@@ -18,14 +18,21 @@ public class SimulationStateData {
         public float eatingStatus;
         public float foodAmount;
     }*/
-    public struct CritterInitData {
+    public struct CritterInitData {  // 25f + 3i
         public Vector3 boundingBoxSize;
         public float spawnSizePercentage;
         public float maxEnergy;
+        public float maxStomachCapacity;
         public Vector3 primaryHue;
         public Vector3 secondaryHue;
-        public float mouthIsActive; // need this for animation? // morph this into mouthType?
+        //public float mouthIsActive; // need this for animation? // morph this into mouthType?
         // public float biteRadius; // triggerArea where bite is successful
+        public float biteConsumeRadius; 
+        public float biteTriggerRadius;
+        public float biteTriggerLength;
+        public float eatEfficiencyPlant;
+        public float eatEfficiencyDecay;
+        public float eatEfficiencyMeat;
         public float swimMagnitude;
 	    public float swimFrequency;
 	    public float swimAnimSpeed;
@@ -44,11 +51,11 @@ public class SimulationStateData {
         public float embryoPercentage;
         public float growthPercentage;
         public float decayPercentage;
-        public float foodAmount;
+        public float foodAmount;  // stomach conetents normalized 01
         public float energy;
         public float health;
         public float stamina;
-        public float isBiting; // Use for particles
+        public float isBiting; // Use for consumption
         public float biteAnimCycle;
         public float moveAnimCycle;
         public float turnAmount;
@@ -180,7 +187,7 @@ public class SimulationStateData {
         for(int i = 0; i < critterInitDataArray.Length; i++) {
             critterInitDataArray[i] = new CritterInitData();
         }
-        critterInitDataCBuffer = new ComputeBuffer(critterInitDataArray.Length, sizeof(float) * 19 + sizeof(int) * 3);
+        critterInitDataCBuffer = new ComputeBuffer(critterInitDataArray.Length, sizeof(float) * 25 + sizeof(int) * 3);
 
         critterSimDataArray = new CritterSimData[simManager._NumAgents];
         for(int i = 0; i < critterSimDataArray.Length; i++) {
@@ -247,12 +254,20 @@ public class SimulationStateData {
                 critterInitDataArray[i].boundingBoxSize = simManager.agentsArray[i].fullSizeBoundingBox; //genome.bodyGenome.GetFullsizeBoundingBox(); // simManager.agentsArray[i].fullSizeBoundingBox;
                 critterInitDataArray[i].spawnSizePercentage = simManager.agentsArray[i].spawnStartingScale;
                 critterInitDataArray[i].maxEnergy = Mathf.Min(simManager.agentsArray[i].fullSizeBoundingBox.x * simManager.agentsArray[i].fullSizeBoundingBox.y, 0.5f);
+                critterInitDataArray[i].maxStomachCapacity = simManager.agentsArray[i].coreModule.stomachCapacity;
                 critterInitDataArray[i].primaryHue = genome.bodyGenome.appearanceGenome.huePrimary;
                 critterInitDataArray[i].secondaryHue = genome.bodyGenome.appearanceGenome.hueSecondary;
-                critterInitDataArray[i].mouthIsActive = 1f;
-                if(simManager.agentsArray[i].mouthRef.isPassive) {
-                    critterInitDataArray[i].mouthIsActive = 0f;
-                }
+                // **** UPDATE THESE!!!
+                critterInitDataArray[i].biteConsumeRadius = 1f; 
+                critterInitDataArray[i].biteTriggerRadius = 1f;
+                critterInitDataArray[i].biteTriggerLength = 1f;  // start out with these 3 same radius, can add second collision area later
+                critterInitDataArray[i].eatEfficiencyPlant = 1f;
+                critterInitDataArray[i].eatEfficiencyDecay = 1f;
+                critterInitDataArray[i].eatEfficiencyMeat = 1f;  // can go negative for food/energy penalty in extreme cases?
+                //critterInitDataArray[i].mouthIsActive = 1f;
+                //if(simManager.agentsArray[i].mouthRef.isPassive) {
+                //    critterInitDataArray[i].mouthIsActive = 0f;
+                //}
                 float critterFullsizeLength = genome.bodyGenome.coreGenome.tailLength + genome.bodyGenome.coreGenome.bodyLength + genome.bodyGenome.coreGenome.headLength + genome.bodyGenome.coreGenome.mouthLength;
                 float flexibilityScore = Mathf.Min((1f / genome.bodyGenome.coreGenome.creatureAspectRatio - 1f) * 0.6f, 6f);
                 //float mouthLengthNormalized = genome.bodyGenome.coreGenome.mouthLength / critterFullsizeLength;
@@ -302,27 +317,27 @@ public class SimulationStateData {
                 critterSimDataArray[i].energy = simManager.agentsArray[i].coreModule.energy; // Raw / simManager.agentsArray[i].coreModule.maxEnergyStorage;
                 critterSimDataArray[i].health = simManager.agentsArray[i].coreModule.healthHead;
                 critterSimDataArray[i].stamina = simManager.agentsArray[i].coreModule.stamina[0];
-                critterSimDataArray[i].isBiting = 0f;            
+                critterSimDataArray[i].isBiting = 0f;    // Flag for intention to eat gpu food particle (plant-type)         
                 if(simManager.agentsArray[i].sizePercentage > 0.025f)
                 {
                     if (simManager.agentsArray[i].coreModule.mouthEffector[0] > 0.0f)
                     {
-                        if (simManager.agentsArray[i].mouthRef.isPassive)
-                        {
-                            critterSimDataArray[i].isBiting = 0.55f;
-                        }
-                        else
-                        {
-                            if (simManager.agentsArray[i].mouthRef.isBiting)
-                            {
-                                if (simManager.agentsArray[i].mouthRef.bitingFrameCounter <= simManager.agentsArray[i].mouthRef.biteHalfCycleDuration)
-                                {
-                                    critterSimDataArray[i].isBiting = 1f;
-                                }
-                            }
-                        }
+                        //if (simManager.agentsArray[i].mouthRef.isPassive)
+                        //{
+                        critterSimDataArray[i].isBiting = 1f;
+                        //}
+                        //else
+                        //{
+                        //    if (simManager.agentsArray[i].mouthRef.isBiting)
+                        //    {
+                        //        if (simManager.agentsArray[i].mouthRef.bitingFrameCounter <= simManager.agentsArray[i].mouthRef.biteHalfCycleDuration)
+                        //        {
+                        //            critterSimDataArray[i].isBiting = 1f;
+                        //        }
+                        //    }
+                        //}
                     }
-                    if (simManager.agentsArray[i].mouthRef.isBiting)
+                    /*if (simManager.agentsArray[i].mouthRef.isBiting)
                     {
                         if (simManager.agentsArray[i].mouthRef.isPassive)
                         {
@@ -332,12 +347,16 @@ public class SimulationStateData {
                         {
                             critterSimDataArray[i].biteAnimCycle = Mathf.Clamp01((float)simManager.agentsArray[i].mouthRef.bitingFrameCounter / (float)(simManager.agentsArray[i].mouthRef.biteHalfCycleDuration * 2));
                         }
-                    }
+                    }*/
                 }
                 if (simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Egg)
                 {
                     critterSimDataArray[i].isBiting = 0f;
                     critterSimDataArray[i].biteAnimCycle *= 0.75f;
+                }
+                if (simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Dead)
+                {
+                    critterSimDataArray[i].isBiting = 0f;
                 }
 
                 critterSimDataArray[i].moveAnimCycle = simManager.agentsArray[i].animationCycle;

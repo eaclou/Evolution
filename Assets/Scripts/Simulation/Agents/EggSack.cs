@@ -278,8 +278,8 @@ public class EggSack : MonoBehaviour {
         
             fixedJoint.connectedBody = parentAgentRef.bodyRigidbody;
             fixedJoint.autoConfigureConnectedAnchor = false;
-            fixedJoint.anchor = new Vector2(0f, this.parentAgentRef.fullSizeBoundingBox.z * 0.05f);
-            fixedJoint.connectedAnchor = new Vector2(0f, -this.parentAgentRef.fullSizeBoundingBox.z * 0.05f);            
+            fixedJoint.anchor = new Vector2(0f, this.parentAgentRef.fullSizeBoundingBox.y * 0.25f);
+            fixedJoint.connectedAnchor = new Vector2(0f, this.parentAgentRef.fullSizeBoundingBox.y * -0.25f);            
             fixedJoint.enableCollision = false;
             fixedJoint.enabled = true;
             fixedJoint.frequency = springJointMaxStrength;
@@ -476,8 +476,8 @@ public class EggSack : MonoBehaviour {
 
             //Debug.Log("_" + fixedJoint.ToString());
             //Debug.Log("_" + parentAgentRef.ToString());
-            fixedJoint.anchor = Vector2.Lerp(new Vector2(0f, parentAgentRef.fullSizeBoundingBox.z * 0.05f), new Vector2(0f, parentAgentRef.fullSizeBoundingBox.z * 2f), birthPercentage);
-            fixedJoint.connectedAnchor = Vector2.Lerp(new Vector2(0f, -parentAgentRef.fullSizeBoundingBox.z * 0.05f), new Vector2(0f, -parentAgentRef.fullSizeBoundingBox.z * 2f), birthPercentage);
+            fixedJoint.anchor = Vector2.Lerp(new Vector2(0f, 0f), new Vector2(0f, parentAgentRef.fullSizeBoundingBox.y * 0.25f), birthPercentage);
+            fixedJoint.connectedAnchor = Vector2.Lerp(new Vector2(0f, 0f), new Vector2(0f, parentAgentRef.fullSizeBoundingBox.y * -0.25f), birthPercentage);
 
         }
     }    

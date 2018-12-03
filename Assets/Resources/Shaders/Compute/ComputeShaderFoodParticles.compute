@@ -2,10 +2,10 @@
 #pragma kernel CSReduceCritterDistances32
 #pragma kernel CSEatSelectedFoodParticles
 #pragma kernel CSCopyFoodParticlesBuffer
-#pragma kernel CSSimFoodParticlesBuffer
+//#pragma kernel CSSimFoodParticlesBuffer
 #pragma kernel CSMeasureTotalFoodParticlesAmount
 #pragma kernel CSRespawnFoodParticles
-#pragma kernel CSReviveSelectFoodParticles
+//#pragma kernel CSReviveSelectFoodParticles
 
 #include "Assets/Resources/Shaders/Inc/StructsCritterData.cginc"
 
@@ -20,6 +20,7 @@ struct FoodParticleData {
     float foodAmount;
     float active;
 	float refactoryAge;
+	float age;
 };
 
 StructuredBuffer<CritterInitData> critterInitDataCBuffer;
@@ -83,16 +84,9 @@ void CSMeasureInitCritterDistances (uint3 id : SV_DispatchThreadID)
 	float2 particleToCritter = critterSimData.worldPos.xy + mouthCenterPos * 1.0 - particleData.worldPos;
 
 	float distanceSquared = particleToCritter.x * particleToCritter.x + particleToCritter.y * particleToCritter.y;
-
-	//if(particleData.radius > mouthRadius) {
-	//	distanceSquared = 10000;
-	//}
-
+	
 	foodParticlesNearestCrittersRT[int2(particleIndex, critterIndex)] = float4(particleData.index, distanceSquared, particleData.worldPos);
-
-	// Store closest critter?
-	//particleData.nearestCritterIndex = critterIndex;
-	//foodParticlesWrite[particleIndex] = particleData;  // Copy data to other buffer
+		
 }
 
 [numthreads(1,1,1)]
@@ -105,7 +99,7 @@ void CSReduceCritterDistances32 (uint3 id : SV_DispatchThreadID)
 	CritterSimData critterSimData = critterSimDataCBuffer[critterIndex];
 			
 	float closestParticleIndex = 0;
-	float minSquaredDistance = 10000;
+	float minSquaredDistance = 50000;
 		
 	for(int i = 0; i < 32; i++) {
 		
@@ -119,18 +113,11 @@ void CSReduceCritterDistances32 (uint3 id : SV_DispatchThreadID)
 			if(particleData.active > 0.5) {
 				minSquaredDistance = sourceData.y;
 				closestParticleIndex = sourceData.x;
-			}
-
-			//if(particleData.radius < critterInitData.boundingBoxSize.x * critterSimData.growthPercentage) {
-			//}					
+			}				
 		}
 	}
 		
-	FoodParticleData closestFoodData = foodParticlesRead[closestParticleIndex];
-
-	//closestFoodData.nearestCritterIndex = critterIndex;
-
-	//foodParticlesWrite[closestParticleIndex] = closestFoodData; // copy over to other buffer
+	FoodParticleData closestFoodData = foodParticlesRead[closestParticleIndex];	
 	
 	critterDistancesWrite[int2(id.x, critterIndex)] = float4(closestParticleIndex, minSquaredDistance, 1.0, 1.0);
 	closestParticlesDataCBuffer[critterIndex] = closestFoodData; // assuming there's only 1 thread at end
@@ -148,6 +135,7 @@ void CSEatSelectedFoodParticles (uint3 id : SV_DispatchThreadID)
 	int particleIndex = (int)data.x;
 
 	FoodParticleData particleData = foodParticlesRead[particleIndex];
+	//particleData.closestCritterDistance = data.y;
 	foodParticlesWrite[particleIndex] = particleData;
 
 	CritterInitData critterInitData = critterInitDataCBuffer[critterIndex];
@@ -160,27 +148,26 @@ void CSEatSelectedFoodParticles (uint3 id : SV_DispatchThreadID)
 	float distanceSquared = data.y;
 	float mouthRadius = critterInitData.boundingBoxSize.x * critterSimData.growthPercentage;  // **** REMEMBER TO *0.5 EVENTUALLY FOR ACCURATE SIZE
 	float particleRadius = particleData.radius;
-	float combinedRadius = (mouthRadius + particleRadius) * isAlive01;
+	float combinedRadius = (mouthRadius + particleRadius * 0.5) * isAlive01 * critterSimData.isBiting;
 
-	//float biteRadiusScore = mouthRadius * 3 * isAlive01;
-	if(distanceSquared < combinedRadius * combinedRadius) {		
-		//if(biteRadiusScore * 3 > particleRadius) {
-			//if(critterSimData.isBiting > 0.5) {   // revisit
-				eatenAmount = particleData.foodAmount;
+	//foodParticlesWrite[particleIndex].closestCritterDistance = 0.0;
+
+	if(distanceSquared < combinedRadius * combinedRadius) {	
+		
+		if(critterSimData.isBiting > 0.5) {   // revisit
+			eatenAmount = mouthRadius * mouthRadius * critterInitData.eatEfficiencyPlant; //particleData.foodAmount;				
 			
-				//foodParticlesCBuffer[particleIndex].foodAmount = 0;  // can;'t read & write to same buffer at same time !!! *** REMEMBER ***
-			
-				foodParticlesWrite[particleIndex].foodAmount = 0;
+			foodParticlesWrite[particleIndex].foodAmount = particleData.foodAmount - eatenAmount;
+			//foodParticlesWrite[particleIndex].closestCritterDistance = 1.0;
+				
+			if(foodParticlesWrite[particleIndex].foodAmount <= 0) {
 				foodParticlesWrite[particleIndex].active = 0;
-
-				// NEW:
 				foodParticlesWrite[particleIndex].isSwallowed = 1.0;
 				foodParticlesWrite[particleIndex].digestedAmount = 0.0;
-				foodParticlesWrite[particleIndex].critterIndex = critterIndex;
-
-			//}			
-		//}
-	}	
+				foodParticlesWrite[particleIndex].critterIndex = critterIndex;				
+			}
+		}	
+	}
 
 	foodParticlesEatAmountsCBuffer[id.x] = eatenAmount;
 }
@@ -190,14 +177,6 @@ void CSCopyFoodParticlesBuffer (uint3 id : SV_DispatchThreadID)
 {	
 	FoodParticleData particleData = foodParticlesRead[id.x];
 	
-	foodParticlesWrite[id.x] = particleData;
-}
-
-[numthreads(1024,1,1)]
-void CSSimFoodParticlesBuffer (uint3 id : SV_DispatchThreadID)
-{	
-	FoodParticleData particleData = foodParticlesRead[id.x];
-
 	foodParticlesWrite[id.x] = particleData;
 }
 
@@ -233,97 +212,72 @@ void CSRespawnFoodParticles (uint3 id : SV_DispatchThreadID)
 	// *** Update this to sample altitude instead.  ** to avoid unreachable food
 		float2 altUV = uv * 0.5 + 0.25;
 		float altitude = altitudeRead.SampleLevel(_LinearClamp, altUV, 1).x;
-		//float obstacleValue = obstaclesRead.SampleLevel(_LinearClamp, uv, 2).z;
-		if(altitude > 0.4) {
+		
+		if(altitude > 0.49) {
+			foodParticlesWrite[id.x].active = 0.0;
+			foodParticlesWrite[id.x].refactoryAge = 1.0;
+		/*
 			float randX = rand(float2((float)id.x, _Time * 100));
 			float randY = rand(float2(randX, (float)id.x));
-			foodParticlesWrite[id.x].worldPos = float2(randX * _MapSize, randY * _MapSize);
-			foodParticlesWrite[id.x].active = 1.0;
+			float randRadius = rand(float2(randX * 10, randY * -3.37)) * (_MaxParticleSize - _MinParticleSize) + _MinParticleSize;	
 
+			foodParticlesWrite[id.x].worldPos = float2(randX * _MapSize, randY * _MapSize);					
+			foodParticlesWrite[id.x].radius = randRadius;
+			foodParticlesWrite[id.x].foodAmount = randRadius * randRadius * 3.141592 * _ParticleNutrientDensity;
+			foodParticlesWrite[id.x].active = 1.0;
+			foodParticlesWrite[id.x].refactoryAge = 0.0;
+			foodParticlesWrite[id.x].isSwallowed = 0.0;
+			foodParticlesWrite[id.x].digestedAmount = 0.0;
+			*/
 			// Respawn if on land ^^^:
 		}
-		else {  // Otherwise simulate as normal
-			
+		else {  // Otherwise simulate as normal			
 			
 			float2 vel = velocityRead.SampleLevel(_LinearRepeat, uv, 2).xy;
-			float speedMult = 0.01;				
+			float speedMult = 0.005;				
 			float2 nextPos = uv + vel * speedMult;
 
 			float2 defaultNextPos = nextPos * _MapSize;
 			
-			foodParticlesWrite[id.x].worldPos = defaultNextPos; //lerp(defaultNextPos, swallowedPos, foodParticle.isSwallowed);		
+			foodParticlesWrite[id.x].age = foodParticle.age + 0.001;
+			foodParticlesWrite[id.x].worldPos = defaultNextPos;
 		}
 	}
 	else {  // INACTIVE:::
 		foodParticlesWrite[id.x].refactoryAge = foodParticle.refactoryAge + _FoodParticleRegrowthRate;
 
-		//foodParticle.critterIndex
-		float2 swallowedPos = critterSimDataCBuffer[foodParticle.critterIndex].worldPos.xy;
-					
-		foodParticlesWrite[id.x].worldPos = swallowedPos;
-
-		foodParticlesWrite[id.x].digestedAmount = saturate(foodParticle.digestedAmount + 0.0075);
+		//float2 swallowedPos = critterSimDataCBuffer[foodParticle.critterIndex].worldPos.xy;					
+		//foodParticlesWrite[id.x].worldPos = swallowedPos;
+		//foodParticlesWrite[id.x].digestedAmount = saturate(foodParticle.digestedAmount + 0.0075);
 	}
-	
-	
 
 	if(_RespawnFoodParticles > 0.5) {		
 		
 		if(foodParticlesRead[id.x].refactoryAge > 1.0) {
 			
-			float rand01 = rand(float2(_Time + foodParticlesRead[id.x].index, _Time));
+			float rand01 = rand(float2(_Time + (float)foodParticlesRead[id.x].index, _Time));
 			float randX = rand(float2((float)id.x, _Time));
-			float randY = rand(float2(randX, (float)id.x));
+			float randY = rand(float2(randX * 62.39 + _Time, (float)id.x));
 
-			float2 spawnUV = float2(randX, randY);
-			
+			float2 spawnUV = float2(randX, randY);			
 			float4 spawnDensitySample = _SpawnDensityMap.SampleLevel(_LinearClamp, spawnUV, 0);
 
-			float spawnThreshold = 0.0005;
-			if(rand01 < 0.01) {  // to prevent mass respawning, overshooting the intended max global food amount ?
+			float spawnThreshold = 0.2;
+			if(rand01 < 0.02) {  // to prevent mass respawning, overshooting the intended max global food amount ?
 				if(spawnDensitySample.x > spawnThreshold) {
 				
 					foodParticlesWrite[id.x].worldPos = float2(randX * _MapSize, randY * _MapSize);
 
-					float randRadius = rand(float2(randX * 10, randY * -3.37)) * (_MaxParticleSize - _MinParticleSize) + _MinParticleSize;
-					//foodParticlesWrite[id.x].critterIndex = 
+					float randRadius = rand(float2(randX * 10, randY * -3.37)) * (_MaxParticleSize - _MinParticleSize) + _MinParticleSize;					
 					foodParticlesWrite[id.x].radius = randRadius;
 					foodParticlesWrite[id.x].foodAmount = randRadius * randRadius * 3.141592 * _ParticleNutrientDensity;
 					foodParticlesWrite[id.x].active = 1.0;
 					foodParticlesWrite[id.x].refactoryAge = 0.0;
 					foodParticlesWrite[id.x].isSwallowed = 0.0;
 					foodParticlesWrite[id.x].digestedAmount = 0.0;
+					foodParticlesWrite[id.x].age = 0.0;
 				}			
 			}			
 		}		
 	}
-}
-
-
-[numthreads(1,1,1)]
-void CSReviveSelectFoodParticles (uint3 id : SV_DispatchThreadID)
-{
-	int particleIndex = selectRespawnFoodParticleIndicesCBuffer[id.x];
-		
-	float rand01 = rand(float2(_Time + foodParticlesRead[particleIndex].index, _Time));
-	float randX = _FoodSprinklePos.x; //rand(float2((float)particleIndex, _Time));
-	float randY = _FoodSprinklePos.y; //rand(float2(randX, (float)particleIndex));
-
-	float randOffsetX = rand(float2((float)particleIndex, _Time)) - 0.5;
-	float randOffsetY = rand(float2(randX, (float)particleIndex)) - 0.5;
-
-	float2 randOffset = float2(randOffsetX, randOffsetY) * _FoodSprinkleRadius * 0.01;
-
-	float2 spawnUV = float2(randX, randY) + randOffset;
-				
-	foodParticlesWrite[particleIndex].worldPos = spawnUV * _MapSize;
-
-	float randRadius = rand(float2((float)id.x * 10, randY * -3.37)) * (_MaxParticleSize - _MinParticleSize) + _MinParticleSize;
-	foodParticlesWrite[particleIndex].radius = randRadius;
-	foodParticlesWrite[particleIndex].foodAmount = randRadius * randRadius * 3.141592 * _ParticleNutrientDensity;
-	foodParticlesWrite[particleIndex].active = 1.0;
-	foodParticlesWrite[particleIndex].refactoryAge = 0.0;
-	foodParticlesWrite[particleIndex].isSwallowed = 0.0;
-	foodParticlesWrite[particleIndex].digestedAmount = 0.0;
-				
 }

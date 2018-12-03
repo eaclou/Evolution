@@ -2566,9 +2566,16 @@ public class TheRenderKing : MonoBehaviour {
         initData.boundingBoxSize = genome.bodyGenome.fullsizeBoundingBox; // new Vector3(genome.bodyGenome.coreGenome.fullBodyWidth, genome.bodyGenome.coreGenome.fullBodyLength, genome.bodyGenome.coreGenome.fullBodyWidth);
         initData.spawnSizePercentage = 0.1f;
         initData.maxEnergy = Mathf.Min(initData.boundingBoxSize.x * initData.boundingBoxSize.y, 0.5f);
+        initData.maxStomachCapacity = 1f;
         initData.primaryHue = genome.bodyGenome.appearanceGenome.huePrimary;
         initData.secondaryHue = genome.bodyGenome.appearanceGenome.hueSecondary;
-        initData.mouthIsActive = 0.25f;
+        initData.biteConsumeRadius = 1f; 
+        initData.biteTriggerRadius = 1f;
+        initData.biteTriggerLength = 1f;
+        initData.eatEfficiencyPlant = 1f;
+        initData.eatEfficiencyDecay = 1f;
+        initData.eatEfficiencyMeat = 1f;
+        //initData.mouthIsActive = 0.25f;
         //if(simManager.agentsArray[i].mouthRef.isPassive) {
         //    initData.mouthIsActive = 0f;
         //}
@@ -2580,7 +2587,7 @@ public class TheRenderKing : MonoBehaviour {
         if(treeOfLifePortraitCritterInitDataCBuffer != null) {
             treeOfLifePortraitCritterInitDataCBuffer.Release();
         }
-        treeOfLifePortraitCritterInitDataCBuffer = new ComputeBuffer(1, sizeof(float) * 19 + sizeof(int) * 3);
+        treeOfLifePortraitCritterInitDataCBuffer = new ComputeBuffer(1, sizeof(float) * 25 + sizeof(int) * 3);
         treeOfLifePortraitCritterInitDataCBuffer.SetData(treeOfLifePortraitCritterInitDataArray);
         
         //upload data to GPU

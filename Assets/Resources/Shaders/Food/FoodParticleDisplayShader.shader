@@ -43,6 +43,7 @@
 				float foodAmount;
 				float active;
 				float refactoryAge;
+				float age;
 			};
 
 			StructuredBuffer<FoodParticleData> foodParticleDataCBuffer;			
@@ -72,7 +73,7 @@
 				float3 worldPosition = float3(particleData.worldPos, 1.0);    //float3(rawData.worldPos, -random2);
 				
 				quadPoint = quadPoint * particleData.radius * (1.0 - particleData.digestedAmount) * 0.7; // * particleData.active; // *** remove * 3 after!!!
-				worldPosition = worldPosition + quadPoint;
+				worldPosition = worldPosition + quadPoint * particleData.active;
 
 				// REFRACTION:
 				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / 256, 0, 0)).yzw;				
@@ -84,7 +85,8 @@
 				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(quadPoint, 0.0f));				
 				o.uv = quadVerticesCBuffer[id].xy + 0.5f;	
 
-				o.color = float4((float)particleData.nearestCritterIndex / 64.0, particleData.active, particleData.refactoryAge, particleData.digestedAmount);
+				//o.color = float4();
+				o.color = float4(particleData.active, particleData.refactoryAge, saturate(particleData.foodAmount), saturate(particleData.age));
 				
 				return o;
 			}
@@ -96,8 +98,8 @@
 				
 				float val = i.color.a;
 				
-				float4 finalColor = float4(float3(i.color.y, i.color.z, i.color.w), 1); //texColor.a);
-				finalColor = float4(0.25, 1, 0.36, texColor.a);
+				float4 finalColor = float4(float3(i.color.z, i.color.z, i.color.w), i.color.x * 0.25 * texColor.a);
+				//finalColor = float4(0.25, 1, 0.36, texColor.a * 0.05);
 				return finalColor;
 			}
 		ENDCG
