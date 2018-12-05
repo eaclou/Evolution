@@ -113,9 +113,9 @@ public class CritterModuleThreats {
             enemyGrowthStage[0] = agent.coreModule.nearestEnemyAgent.sizePercentage;
 
             float threat = 1f;
-            if(agent.coreModule.nearestEnemyAgent.mouthRef.isPassive) {
-                threat = 0f;
-            }
+            //if(agent.coreModule.nearestEnemyAgent.mouthRef.isPassive) {
+            //    threat = 0f;
+            //}
             enemyThreatRating[0] = threat;
         }
 

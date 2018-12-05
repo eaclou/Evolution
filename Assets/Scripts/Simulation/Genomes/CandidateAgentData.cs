@@ -28,7 +28,7 @@ public class CandidateAgentData {
     }
 
     public void ProcessCompletedEvaluation(Agent agentRef) {
-        evaluationScoresList.Add(agentRef.scoreCounter);
+        evaluationScoresList.Add(agentRef.masterFitnessScore);
         numCompletedEvaluations++;
         isBeingEvaluated = false;
     }

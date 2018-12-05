@@ -118,7 +118,7 @@ void CSReduceCritterDistances32 (uint3 id : SV_DispatchThreadID)
 	}
 		
 	FoodParticleData closestFoodData = foodParticlesRead[closestParticleIndex];	
-	
+		
 	critterDistancesWrite[int2(id.x, critterIndex)] = float4(closestParticleIndex, minSquaredDistance, 1.0, 1.0);
 	closestParticlesDataCBuffer[critterIndex] = closestFoodData; // assuming there's only 1 thread at end
 }
@@ -148,14 +148,14 @@ void CSEatSelectedFoodParticles (uint3 id : SV_DispatchThreadID)
 	float distanceSquared = data.y;
 	float mouthRadius = critterInitData.boundingBoxSize.x * critterSimData.growthPercentage;  // **** REMEMBER TO *0.5 EVENTUALLY FOR ACCURATE SIZE
 	float particleRadius = particleData.radius;
-	float combinedRadius = (mouthRadius + particleRadius * 0.5) * isAlive01 * critterSimData.isBiting;
+	float combinedRadius = (mouthRadius + particleRadius * 0.5) * isAlive01 * critterSimData.consumeOn;
 
-	//foodParticlesWrite[particleIndex].closestCritterDistance = 0.0;
+	
 
 	if(distanceSquared < combinedRadius * combinedRadius) {	
 		
-		if(critterSimData.isBiting > 0.5) {   // revisit
-			eatenAmount = mouthRadius * mouthRadius * critterInitData.eatEfficiencyPlant; //particleData.foodAmount;				
+		if(critterSimData.consumeOn > 0.5) {   // revisit
+			eatenAmount = mouthRadius * mouthRadius * critterInitData.eatEfficiencyPlant * 0.167f; //particleData.foodAmount;				
 			
 			foodParticlesWrite[particleIndex].foodAmount = particleData.foodAmount - eatenAmount;
 			//foodParticlesWrite[particleIndex].closestCritterDistance = 1.0;
@@ -213,10 +213,11 @@ void CSRespawnFoodParticles (uint3 id : SV_DispatchThreadID)
 		float2 altUV = uv * 0.5 + 0.25;
 		float altitude = altitudeRead.SampleLevel(_LinearClamp, altUV, 1).x;
 		
-		if(altitude > 0.49) {
+		if(altitude > 0.45) {
 			foodParticlesWrite[id.x].active = 0.0;
-			foodParticlesWrite[id.x].refactoryAge = 1.0;
-		/*
+			foodParticlesWrite[id.x].refactoryAge = 0.0;
+
+			/*
 			float randX = rand(float2((float)id.x, _Time * 100));
 			float randY = rand(float2(randX, (float)id.x));
 			float randRadius = rand(float2(randX * 10, randY * -3.37)) * (_MaxParticleSize - _MinParticleSize) + _MinParticleSize;	
@@ -262,7 +263,7 @@ void CSRespawnFoodParticles (uint3 id : SV_DispatchThreadID)
 			float2 spawnUV = float2(randX, randY);			
 			float4 spawnDensitySample = _SpawnDensityMap.SampleLevel(_LinearClamp, spawnUV, 0);
 
-			float spawnThreshold = 0.2;
+			float spawnThreshold = 0.01;
 			if(rand01 < 0.02) {  // to prevent mass respawning, overshooting the intended max global food amount ?
 				if(spawnDensitySample.x > spawnThreshold) {
 				

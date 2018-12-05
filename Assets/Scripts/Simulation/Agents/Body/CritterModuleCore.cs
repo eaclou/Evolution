@@ -19,8 +19,11 @@ public class CritterModuleCore {
     public float healthBody = 1f;
     public float healthExternal = 1f;
 
-    public float stomachContents = 0f;  // absolute values
-    public float stomachCapacity = 0.5f;
+    public float stomachContentsNorm = 0f;  // 0-1 normalized
+    public float stomachCapacity = 0.5f;  // absolute value in units of (area?)
+    public float stomachContentsDecay = 0f;
+    public float stomachContentsPlant = 0f;
+    public float stomachContentsMeat = 0f;
 
     public float debugFoodValue = 0f;
     
@@ -48,6 +51,11 @@ public class CritterModuleCore {
     public float speedBonus;
     public float healthBonus;
     public float energyBonus;
+
+    // Diet specialization:
+    public float foodEfficiencyPlant;
+    public float foodEfficiencyDecay;
+    public float foodEfficiencyMeat;
 
 	public CritterModuleCore() {
 
@@ -90,6 +98,13 @@ public class CritterModuleCore {
         speedBonus = Mathf.Lerp(0.5f, 2f, bonusVectorNorm.y);
         healthBonus = Mathf.Lerp(0.5f, 2f, bonusVectorNorm.z);
         energyBonus = Mathf.Lerp(0.5f, 2f, bonusVectorNorm.w);
+
+
+        // Diet specialization:
+        Vector3 dietVectorNorm = new Vector3(genome.foodEfficiencyDecay, genome.foodEfficiencyPlant, genome.foodEfficiencyMeat).normalized;        
+        foodEfficiencyDecay = dietVectorNorm.x;
+        foodEfficiencyPlant = dietVectorNorm.y;
+        foodEfficiencyMeat = dietVectorNorm.z;
     }
 
     public void MapNeuron(NID nid, Neuron neuron) {
@@ -146,7 +161,7 @@ public class CritterModuleCore {
         hitPoints[0] = Mathf.Max(healthBody, 0f);
         //stamina[0] = stamina; // set in Agent.cs
         energyStored[0] = Mathf.Clamp01(energy);  // Mathf.Clamp01(energyRaw / maxEnergyStorage);
-        foodStored[0] = stomachContents / stomachCapacity;
+        foodStored[0] = stomachContentsNorm; // / stomachCapacity;
         
     }
 }

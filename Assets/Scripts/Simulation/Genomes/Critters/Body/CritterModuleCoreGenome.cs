@@ -94,11 +94,72 @@ public class CritterModuleCoreGenome {
     public Vector3 tailFinAmplitudes = Vector3.one;
     public Vector3 tailFinOffsets = Vector3.zero;
 
-    // specialization Bonuses first try:
+    // Specialization Paths first try:
     public float priorityDamage;
     public float prioritySpeed;
     public float priorityHealth;
     public float priorityEnergy;
+
+    // Diet specialization:
+    public float foodEfficiencyDecay;
+    public float foodEfficiencyPlant;    
+    public float foodEfficiencyMeat;
+
+    public TalentsDamage[] talentSpecDamage; // 5 tiers?    // tiers at specialization levels:  55%, 65%, 75%, 85%, 95%
+    public TalentsSpeed[] talentSpecSpeed; // 5 tiers?
+    public TalentsHealth[] talentSpecHealth; // 5 tiers?
+    public TalentsEnergy[] talentSpecEnergy; // 5 tiers?
+
+    public SkillsDamage[] skillDamage;  // up to 2 skills per category -- if choose same skill for both slots, use upgraded version of that skill
+    public SkillsSpeed[] skillSpeed;    // first skill at 70% specialization, second at 95%
+    public SkillsHealth[] skillHealth;
+    public SkillsEnergy[] skillEnergy;
+
+    public enum TalentsDamage {
+        RawDamageBonus,
+        QuickBite,
+        ReducedSpeedPenalty,
+        ReducedBiteCooldown,
+    }
+    public enum TalentsSpeed {
+        RawSpeedBonus,
+        TurnBonus,
+        SurfTheCurrent,
+        Dodge,
+    }
+    public enum TalentsHealth {
+        RawHealthBonus,
+        SafetyInNumbers,
+        HealRate,
+        Stamina,
+    }
+    public enum TalentsEnergy {
+        RawEfficiencyBonus,
+        SharedMeal,
+        RestingEfficiency,  // while not moving, barely lose energy
+        StoredEggEnergy,  // newborns start with extra food/energy
+    }
+
+    public enum SkillsDamage {
+        TailStrike,
+        MegaBite,
+        AmbushBite,
+    }
+    public enum SkillsSpeed {
+        Evade,
+        Sprint,
+        Whirlpool,  // spin in place and create current
+    }
+    public enum SkillsHealth {
+        ActiveHeal,
+        CurlUpArmor,
+        BonusFoodSpecEfficiency,  // can more easily eat any kind of food        
+    }
+    public enum SkillsEnergy {
+        SecondWind,
+        Burrow,
+        Stun,
+    }
 
     // List of Shape/Form modifiers here???:::
     //public CritterGenomeInterpretor.MaskDataSin maskDataSinTemp;
@@ -291,6 +352,10 @@ public class CritterModuleCoreGenome {
         prioritySpeed = 0.5f;
         priorityHealth = 0.5f;
         priorityEnergy = 0.5f;
+
+        foodEfficiencyPlant = 0.5f;
+        foodEfficiencyDecay = 0.5f;
+        foodEfficiencyMeat = 0.5f;
 
         //numSegments = 1;
         /*
@@ -497,6 +562,9 @@ public class CritterModuleCoreGenome {
         priorityHealth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.priorityHealth, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
         priorityEnergy = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.priorityEnergy, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
 
+        foodEfficiencyPlant = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.foodEfficiencyPlant, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
+        foodEfficiencyDecay = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.foodEfficiencyDecay, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
+        foodEfficiencyMeat = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.foodEfficiencyMeat, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
         /*fullBodyWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.fullBodyWidth, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.1f, 4.5f);
         fullBodyLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.fullBodyLength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, fullBodyWidth * 1.25f, fullBodyWidth * 4f);
         if(fullBodyLength < fullBodyWidth * 1.25f) {

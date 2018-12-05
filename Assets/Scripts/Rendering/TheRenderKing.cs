@@ -2610,7 +2610,7 @@ public class TheRenderKing : MonoBehaviour {
         simData.energy = 1; // simManager.agentsArray[i].coreModule.energyRaw / simManager.agentsArray[i].coreModule.maxEnergyStorage;
         simData.health = 1; // simManager.agentsArray[i].coreModule.healthHead;
         simData.stamina = 1; // simManager.agentsArray[i].coreModule.stamina[0];
-        simData.isBiting = Mathf.Sin(angle2 * 3.19f) * 0.5f + 0.5f;
+        simData.consumeOn = Mathf.Sin(angle2 * 3.19f) * 0.5f + 0.5f;
         simData.biteAnimCycle = (Time.realtimeSinceStartup * 0.1f) % 1f;
         simData.moveAnimCycle = (Time.realtimeSinceStartup * 1f) % 1f;
         simData.turnAmount = Mathf.Sin(Time.realtimeSinceStartup * 3.654321f) * 0.25f + 0.25f;

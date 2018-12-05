@@ -869,7 +869,7 @@ public class UIManager : MonoBehaviour {
         }
     }
     private void UpdateSimulationUI() {
-        UpdateScoreText(gameManager.simulationManager.agentsArray[0].scoreCounter);
+        UpdateScoreText(Mathf.RoundToInt(gameManager.simulationManager.agentsArray[0].masterFitnessScore));
 
         SetDisplayTextures();
 
@@ -929,12 +929,12 @@ public class UIManager : MonoBehaviour {
                 curCount = agentRef.lifeStageTransitionTimeStepCounter;
                 maxCount = agentRef._GestationDurationTimeSteps;
             }
-            if (agentRef.curLifeStage == Agent.AgentLifeStage.Young) {
+            /*if (agentRef.curLifeStage == Agent.AgentLifeStage.Young) {
                 curCount = agentRef.lifeStageTransitionTimeStepCounter;
                 maxCount = agentRef._YoungDurationTimeSteps;
-            }
+            }*/
             if (agentRef.curLifeStage == Agent.AgentLifeStage.Mature) {
-                curCount = agentRef.ageCounterMature;
+                curCount = agentRef.ageCounter;
                 maxCount = agentRef.maxAgeTimeSteps;
             }
             if (agentRef.curLifeStage == Agent.AgentLifeStage.Dead) {
@@ -952,9 +952,10 @@ public class UIManager : MonoBehaviour {
             debugTxtAgent += "Base Size: " + agentRef.candidateRef.candidateGenome.bodyGenome.coreGenome.creatureBaseLength.ToString("F2") + ",  Aspect: " + agentRef.candidateRef.candidateGenome.bodyGenome.coreGenome.creatureAspectRatio.ToString("F1") + "\n"; 
             debugTxtAgent += "Fullsize Dimensions: ( " + agentRef.fullSizeBoundingBox.x.ToString("F2") + ", " + agentRef.fullSizeBoundingBox.y.ToString("F2") + ", " + agentRef.fullSizeBoundingBox.z.ToString("F2") + " )\n";
             debugTxtAgent += "BONUS - Damage: " + agentRef.coreModule.damageBonus.ToString("F2") + ", Speed: " + agentRef.coreModule.speedBonus.ToString("F2") + ", Health: " + agentRef.coreModule.healthBonus.ToString("F2") + ", Energy: " + agentRef.coreModule.energyBonus.ToString("F2") + "\n";
-            string mouthType = "Active";
-            if (agentRef.mouthRef.isPassive) { mouthType = "Passive"; }
-            debugTxtAgent += "Mouth: [" + mouthType + "]\n";
+            debugTxtAgent += "DIET - Decay: " + agentRef.coreModule.foodEfficiencyDecay.ToString("F2") + ", Plant: " + agentRef.coreModule.foodEfficiencyPlant.ToString("F2") + ", Meat: " + agentRef.coreModule.foodEfficiencyMeat.ToString("F2") + "\n";
+            //string mouthType = "Active";
+            //if (agentRef.mouthRef.isPassive) { mouthType = "Passive"; }
+            //debugTxtAgent += "Mouth: [" + mouthType + "]\n";
             debugTxtAgent += "# Neurons: " + agentRef.brain.neuronList.Count.ToString() + ", # Axons: " + agentRef.brain.axonList.Count.ToString() + "\n";
             debugTxtAgent += "# In/Out Nodes: " + agentRef.candidateRef.candidateGenome.brainGenome.bodyNeuronList.Count.ToString() + ", # Hidden Nodes: " + agentRef.candidateRef.candidateGenome.brainGenome.hiddenNeuronList.Count.ToString() + ", # Links: " + agentRef.candidateRef.candidateGenome.brainGenome.linkList.Count.ToString() + "\n";
 
@@ -962,24 +963,25 @@ public class UIManager : MonoBehaviour {
             debugTxtAgent += "Comms= " + agentRef.candidateRef.candidateGenome.bodyGenome.communicationGenome.useComms.ToString() + "\n";
             debugTxtAgent += "Enviro: WaterStats: " + agentRef.candidateRef.candidateGenome.bodyGenome.environmentalGenome.useWaterStats.ToString() + ", Cardinals= " + agentRef.candidateRef.candidateGenome.bodyGenome.environmentalGenome.useCardinals.ToString() + ", Diagonals= " + agentRef.candidateRef.candidateGenome.bodyGenome.environmentalGenome.useDiagonals.ToString() + "\n";
             CritterModuleFoodSensorsGenome foodGenome = agentRef.candidateRef.candidateGenome.bodyGenome.foodGenome;
-            debugTxtAgent += "Food: Nutrients= " + foodGenome.useNutrients.ToString() + ", Pos= " + foodGenome.usePos.ToString() + ",  Dir= " + foodGenome.useDir.ToString() + ",  Stats= " + foodGenome.useStats.ToString() + ", pref: " + agentRef.foodModule.foodPreferenceOrder[0] + " > " + agentRef.foodModule.foodPreferenceOrder[1] + " > " + agentRef.foodModule.foodPreferenceOrder[2] + "\n";
+            debugTxtAgent += "Food: Nutrients= " + foodGenome.useNutrients.ToString() + ", Pos= " + foodGenome.usePos.ToString() + ",  Dir= " + foodGenome.useDir.ToString() + ",  Stats= " + foodGenome.useStats.ToString() + ", useEggs: " + foodGenome.useEggs.ToString() + ", useCorpse: " + foodGenome.useCorpse.ToString() + "\n";
             debugTxtAgent += "Friend: Pos= " + agentRef.candidateRef.candidateGenome.bodyGenome.friendGenome.usePos.ToString() + ",  Dir= " + agentRef.candidateRef.candidateGenome.bodyGenome.friendGenome.useDir.ToString() + ",  Vel= " + agentRef.candidateRef.candidateGenome.bodyGenome.friendGenome.useVel.ToString() + "\n";
             debugTxtAgent += "Threat: Pos= " + agentRef.candidateRef.candidateGenome.bodyGenome.threatGenome.usePos.ToString() + ",  Dir= " + agentRef.candidateRef.candidateGenome.bodyGenome.threatGenome.useDir.ToString() + ",  Vel= " + agentRef.candidateRef.candidateGenome.bodyGenome.threatGenome.useVel.ToString() + ",  Stats= " + agentRef.candidateRef.candidateGenome.bodyGenome.threatGenome.useStats.ToString() + "\n";
             // Realtime Values:
             debugTxtAgent += "\nREALTIME DATA:";
-            debugTxtAgent += "\n(" + lifeStageProgressTxt + ") Growth: " + (agentRef.sizePercentage * 100f).ToString("F0") + "%, Age: " + agentRef.scoreCounter.ToString() + " Frames\n\n";
+            debugTxtAgent += "\nExp: " + agentRef.totalExperience.ToString("F2") + ",  fitnessScore: " + agentRef.masterFitnessScore.ToString("F2") + ", LVL: " + agentRef.curLevel.ToString();
+            debugTxtAgent += "\n(" + lifeStageProgressTxt + ") Growth: " + (agentRef.sizePercentage * 100f).ToString("F0") + "%, Age: " + agentRef.ageCounter.ToString() + " Frames\n\n";
 
-            debugTxtAgent += "Mouth: " + agentRef.coreModule.mouthEffector[0].ToString() + "\n";
+            debugTxtAgent += "Intent To Consume: " + agentRef.coreModule.mouthEffector[0].ToString("F3") + "\n";
             debugTxtAgent += "Nearest Food: [" + agentRef.foodModule.nearestFoodParticleIndex.ToString() +
                         "] Amount: " + agentRef.foodModule.nearestFoodParticleAmount.ToString("F4") +
                         "\nPos: ( " + agentRef.foodModule.nearestFoodParticlePos.x.ToString("F2") +
                         ", " + agentRef.foodModule.nearestFoodParticlePos.y.ToString("F2") +
-                        " ), Dir: ( " + agentRef.foodModule.foodDirX[0].ToString("F2") +
-                        ", " + agentRef.foodModule.foodDirY[0].ToString("F2") + " )" +
+                        " ), Dir: ( " + agentRef.foodModule.foodPlantDirX[0].ToString("F2") +
+                        ", " + agentRef.foodModule.foodPlantDirY[0].ToString("F2") + " )" +
                         "\n";
-            debugTxtAgent += "\nNutrients: " + agentRef.foodModule.nutrientDensity[0].ToString("F4") + "\n";
+            debugTxtAgent += "\nNutrients: " + agentRef.foodModule.nutrientDensity[0].ToString("F4") + ", Stamina: " + agentRef.coreModule.stamina[0].ToString("F3") + "\n";
             debugTxtAgent += "Gradient Dir: (" + agentRef.foodModule.nutrientGradX[0].ToString("F2") + ", " + agentRef.foodModule.nutrientGradY[0].ToString("F2") + ")\n";
-            debugTxtAgent += "Total Food Eaten: " + agentRef.totalFoodEaten.ToString("F3") + ", Corpse Food Amount: " + agentRef.currentCorpseFoodAmount.ToString("F3") + "\n";
+            debugTxtAgent += "Total Food Eaten -- Decay: " + agentRef.totalFoodEatenDecay.ToString("F3") + ", Plant: " + agentRef.totalFoodEatenPlant.ToString("F2") + ", Meat: " + agentRef.totalFoodEatenMeat.ToString("F2") + "\nFood Stored: " + agentRef.coreModule.foodStored[0].ToString() + ", Corpse Food Amount: " + agentRef.currentCorpseFoodAmount.ToString("F3") + "\n";
 
             //debugTxtAgent += "\nFullSize: " + agentRef.fullSizeBoundingBox.ToString() + ", Volume: " + agentRef.fullSizeBodyVolume.ToString() + "\n";
             //debugTxtAgent += "( " + (agentRef.sizePercentage * 100f).ToString("F0") + "% )\n";
@@ -1022,12 +1024,14 @@ public class UIManager : MonoBehaviour {
                     }
                 }
                 debugTxtGlobalSim += "Species[" + speciesID.ToString() + "] p(" + parentSpeciesID.ToString() + "), size: " + speciesPopSize.ToString() + ", #cands: " + numCandidates.ToString() + ", numEvals: " + numBorn.ToString() + 
-                             ",   avgFitness: " + avgFitness.ToString() + 
-                             ",   avgConsumption: " + simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgConsumption.ToString() +
-                             ",   avgBodySize: " + simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgBodySize.ToString() +
-                             ",   avgPredation: " + simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgDietType.ToString() +
-                             ",   avgNumNeurons: " + simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgNumNeurons.ToString() +
-                             ",   avgNumAxons: " + simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgNumAxons.ToString() + "\n\n";
+                             ",   avgFitness: " + avgFitness.ToString("F2") + 
+                             ",   avgConsumption: (" + simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgConsumptionDecay.ToString("F4") + ", " + simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgConsumptionPlant.ToString("F4") + ", " + simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgConsumptionMeat.ToString("F4") +
+                             "),   avgBodySize: " + simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgBodySize.ToString("F3") +
+                             ",   avgDiet: (" + simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgFoodSpecDecay.ToString("F2") + ", " + simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgFoodSpecPlant.ToString("F2") + ", " + simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgFoodSpecMeat.ToString("F2") +
+                             "),   avgNumNeurons: " + simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgNumNeurons.ToString("F1") +
+                             ",   avgNumAxons: " + simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgNumAxons.ToString("F1") +
+                             ", avgFitness: " + simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgFitnessScore.ToString("F2") +
+                             ", avgExp: " + simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgExperience.ToString() + "\n\n";
             }
             /*debugTxtGlobalSim += "\n\nAll-Time Species List:\n";
             for (int p = 0; p < simManager.masterGenomePool.completeSpeciesPoolsList.Count; p++) {
@@ -1174,12 +1178,12 @@ public class UIManager : MonoBehaviour {
             percentage = (float)gameManager.simulationManager.agentsArray[critterIndex].lifeStageTransitionTimeStepCounter / 
                         (float)gameManager.simulationManager.agentsArray[critterIndex]._GestationDurationTimeSteps;
         }
-        if(gameManager.simulationManager.agentsArray[critterIndex].curLifeStage == Agent.AgentLifeStage.Young) {
+        /*if(gameManager.simulationManager.agentsArray[critterIndex].curLifeStage == Agent.AgentLifeStage.Young) {
             percentage = (float)gameManager.simulationManager.agentsArray[critterIndex].lifeStageTransitionTimeStepCounter / 
                         (float)gameManager.simulationManager.agentsArray[critterIndex]._YoungDurationTimeSteps;
-        }
+        }*/
         if(gameManager.simulationManager.agentsArray[critterIndex].curLifeStage == Agent.AgentLifeStage.Mature) {
-            percentage = (float)gameManager.simulationManager.agentsArray[critterIndex].ageCounterMature / 
+            percentage = (float)gameManager.simulationManager.agentsArray[critterIndex].ageCounter / 
                         (float)gameManager.simulationManager.agentsArray[critterIndex].maxAgeTimeSteps;
         }
         if(gameManager.simulationManager.agentsArray[critterIndex].curLifeStage == Agent.AgentLifeStage.Dead) {
@@ -1188,7 +1192,7 @@ public class UIManager : MonoBehaviour {
         }        
         inspectWidgetLifeCycleMat.SetFloat("_FillPercentage", percentage);
         inspectWidgetLifeCycleMat.SetInt("_CurLifeStage", (int)gameManager.simulationManager.agentsArray[critterIndex].curLifeStage);
-        textLifeCycle.text = "Life Stage:\n" + gameManager.simulationManager.agentsArray[critterIndex].curLifeStage.ToString() + "\n" + gameManager.simulationManager.agentsArray[critterIndex].scoreCounter.ToString();
+        textLifeCycle.text = "Life Stage:\n" + gameManager.simulationManager.agentsArray[critterIndex].curLifeStage.ToString() + "\n" + gameManager.simulationManager.agentsArray[critterIndex].ageCounter.ToString();
 
 
         // Dimensions
@@ -1375,22 +1379,22 @@ public class UIManager : MonoBehaviour {
                     float valLifespan = 0f;
                     float valConsumption = 0f;
                     float valBodySize = 0f;
-                    float valDietType = 0f;
+                    float valFoodSpec = 0f;
                     if(index >= 0) { // species didn't exist in this year - set fitness to 0
                         valLifespan = speciesPool.avgLifespanPerYearList[index];
-                        valConsumption = speciesPool.avgConsumptionPerYearList[index];
+                        valConsumption = speciesPool.avgConsumptionDecayPerYearList[index];
                         valBodySize = speciesPool.avgBodySizePerYearList[index];
-                        valDietType = speciesPool.avgDietTypePerYearList[index];
+                        valFoodSpec = speciesPool.avgFoodSpecDecayPerYearList[index]; // ** make these Vec3's
                     }
                     maxValueLifespan = Mathf.Max(maxValueLifespan, valLifespan);
                     maxValueConsumption = Mathf.Max(maxValueConsumption, valConsumption);
                     maxValueBodySize = Mathf.Max(maxValueBodySize, valBodySize);
-                    maxValueDietType = Mathf.Max(maxValueDietType, valDietType);
+                    maxValueDietType = Mathf.Max(maxValueDietType, valFoodSpec);
 
                     statsTextureLifespan.SetPixel(t, s, new Color(valLifespan, valLifespan, valLifespan, valLifespan));  // *** look into ways to use the other 3 channels ***
                     statsTextureFoodEaten.SetPixel(t, s, new Color(valConsumption, valConsumption, valConsumption, valConsumption));
                     statsTextureBodySizes.SetPixel(t, s, new Color(valBodySize, valBodySize, valBodySize, valBodySize));
-                    statsTexturePredation.SetPixel(t, s, new Color(valDietType, valDietType, valDietType, valDietType));
+                    statsTexturePredation.SetPixel(t, s, new Color(valFoodSpec, valFoodSpec, valFoodSpec, valFoodSpec));
                 }
             }
             

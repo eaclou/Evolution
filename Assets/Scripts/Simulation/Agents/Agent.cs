@@ -4,7 +4,9 @@ using UnityEngine;
 
 public class Agent : MonoBehaviour {
 
-    public float totalFoodEaten = 0f;
+    public float totalFoodEatenDecay = 0f;
+    public float totalFoodEatenPlant = 0f;
+    public float totalFoodEatenMeat = 0f;
 
     public float speed = 500f;
     public float smoothedThrottleLerp = 0.2f;
@@ -24,7 +26,6 @@ public class Agent : MonoBehaviour {
     public enum AgentLifeStage {
         AwaitingRespawn,
         Egg,
-        Young,
         Mature,
         Dead,
         Null
@@ -96,9 +97,20 @@ public class Agent : MonoBehaviour {
     public float fullSizeBodyVolume = 1f;
     public float centerOfMass = 0f;
     
-    public int ageCounterMature = 0; // only counts when agent is an adult
+    //public int ageCounterMature = 0; // only counts when agent is an adult
     public int lifeStageTransitionTimeStepCounter = 0; // keeps track of how long agent has been in its current lifeStage
-    public int scoreCounter = 0;
+    public int ageCounter = 0;
+    public float consumptionScore = 0f;
+    public float damageDealtScore = 0f;
+    public float damageReceivedScore = 0f;
+    public float energyEfficiencyScore = 0f;
+    public float reproductionScore = 0f;
+    public float supportScore = 0f;
+    public float masterFitnessScore = 0f;
+    public float totalExperience = 0f;
+    public float experienceForNextLevel = 2f; // 2, 4, 8, 16, 32, 64, 128, 256?
+    public int curLevel = 0;
+    //public int scoreCounter = 0;
     public int pregnancyRefactoryTimeStepCounter = 0;
 
     public float currentCorpseFoodAmount = 1f;
@@ -385,20 +397,7 @@ public class Agent : MonoBehaviour {
         // Add more sensor Modules later:
 
         // Update Mouth::::         
-        if(mouthRef.isBiting) {
-            
-            // Already biting
-            mouthRef.bitingFrameCounter++;
-            
-            if(mouthRef.bitingFrameCounter >= mouthRef.biteHalfCycleDuration * 2 + mouthRef.biteCooldownDuration) {
-                mouthRef.bitingFrameCounter = 0;
-                mouthRef.isBiting = false;
-            }
-        }
-        else
-        {
-            mouthRef.bitingFrameCounter = 0;
-        }
+        mouthRef.Tick();
     }
     
     private void CheckForDeathStarvation() {
@@ -437,7 +436,7 @@ public class Agent : MonoBehaviour {
         }*/
     }
     private void CheckForDeathOldAge() {
-        if(ageCounterMature > maxAgeTimeSteps) {
+        if(ageCounter > maxAgeTimeSteps) {
             curLifeStage = Agent.AgentLifeStage.Dead;
             lifeStageTransitionTimeStepCounter = 0;
 
@@ -458,6 +457,8 @@ public class Agent : MonoBehaviour {
         isSwallowingPrey = false;
         swallowingPreyFrameCounter = 0;
 
+        masterFitnessScore = totalExperience; // update this???
+
         //parentEggSackRef;  // instead of using own fixed embry development duration - look up parentEggSack and use its counter?
         //isAttachedToParentEggSack = false;
 
@@ -474,7 +475,7 @@ public class Agent : MonoBehaviour {
                     BeginHatching();
                 }
                 break;
-            case AgentLifeStage.Young:
+            /*case AgentLifeStage.Young:
                 //
                 if(lifeStageTransitionTimeStepCounter >= youngDurationTimeSteps) {
                     curLifeStage = AgentLifeStage.Mature;
@@ -487,7 +488,7 @@ public class Agent : MonoBehaviour {
                 CheckForDeathStarvation();
                 CheckForDeathHealth();
                 CheckForDeathOldAge();
-                break;
+                break;*/
             case AgentLifeStage.Mature:
                 
                 // Check for Death:
@@ -528,14 +529,65 @@ public class Agent : MonoBehaviour {
         }
     }
 
-    public void EatFood(float amount) {
-        coreModule.stomachContents += (amount / coreModule.stomachCapacity);
-        if(coreModule.stomachContents > 1f) {
-            coreModule.stomachContents = 1f;
+    public void EatFoodDecay(float amount) {
+        totalFoodEatenDecay += amount;
+        float stomachSpace = coreModule.stomachCapacity - coreModule.stomachContentsDecay - coreModule.stomachContentsPlant - coreModule.stomachContentsMeat;
+        if(amount > stomachSpace) {
+            amount = stomachSpace; // ??
         }
-        totalFoodEaten += amount;        
+        //amount *= coreModule.foodEfficiencyDecay; // move this to energy calculation?
+        coreModule.stomachContentsNorm += (amount / coreModule.stomachCapacity);
+        
+        if(coreModule.stomachContentsNorm > 1f) {
+            float overStuffAmount = coreModule.stomachContentsNorm - 1f;
+            //ProcessDamageReceived(overStuffAmount);
+            coreModule.stomachContentsNorm = 1f;
+        }             
+        else {
+            coreModule.stomachContentsDecay += amount;
+        }
+        GainExperience((amount / coreModule.stomachCapacity) * coreModule.foodEfficiencyDecay * 1f); // Exp for appropriate food
     }
-    public void ProcessBeingBitten(float damage) {
+    public void EatFoodPlant(float amount) {
+        totalFoodEatenPlant += amount;  
+        float stomachSpace = coreModule.stomachCapacity - coreModule.stomachContentsDecay - coreModule.stomachContentsPlant - coreModule.stomachContentsMeat;
+        if(amount > stomachSpace) {
+            amount = stomachSpace; // ??
+        }
+        //amount *= coreModule.foodEfficiencyPlant;
+        coreModule.stomachContentsNorm += (amount / coreModule.stomachCapacity);
+        
+        if(coreModule.stomachContentsNorm > 1f) {
+            float overStuffAmount = coreModule.stomachContentsNorm - 1f;
+            //ProcessDamageReceived(overStuffAmount);
+            coreModule.stomachContentsNorm = 1f;            
+        }
+        else {
+            coreModule.stomachContentsPlant += amount;
+        }
+        GainExperience((amount / coreModule.stomachCapacity) * coreModule.foodEfficiencyPlant * 1f); // Exp for appropriate food      
+    }
+    public void EatFoodMeat(float amount) {
+        totalFoodEatenMeat += amount; 
+        float stomachSpace = coreModule.stomachCapacity - coreModule.stomachContentsDecay - coreModule.stomachContentsPlant - coreModule.stomachContentsMeat;
+        if(amount > stomachSpace) {
+            amount = stomachSpace; // ??
+        }
+        //amount *= coreModule.foodEfficiencyMeat;
+        coreModule.stomachContentsNorm += (amount / coreModule.stomachCapacity);
+        
+        if(coreModule.stomachContentsNorm > 1f) {
+            float overStuffAmount = coreModule.stomachContentsNorm - 1f;
+            //ProcessDamageReceived(overStuffAmount);
+            coreModule.stomachContentsNorm = 1f;
+        }
+        else {
+            coreModule.stomachContentsMeat += amount;
+        }
+        
+        GainExperience((amount / coreModule.stomachCapacity) * coreModule.foodEfficiencyMeat * 1f); // Exp for appropriate food
+    }
+    public void ProcessDamageReceived(float damage) {
 
         damage = damage / coreModule.healthBonus;
 
@@ -633,9 +685,9 @@ public class Agent : MonoBehaviour {
                 //
                 TickEgg();
                 break;
-            case AgentLifeStage.Young:
-                TickYoung(simManager, nutrientCellInfo, ref eatAmountsArray, settings);
-                break;
+            //case AgentLifeStage.Young:
+            //    TickYoung(simManager, nutrientCellInfo, ref eatAmountsArray, settings);
+            //    break;
             case AgentLifeStage.Mature:
                 //
                 TickMature(simManager, nutrientCellInfo, ref eatAmountsArray, settings);
@@ -711,7 +763,7 @@ public class Agent : MonoBehaviour {
         springJoint.connectedBody = null;
         springJoint.enabled = false;
 
-        curLifeStage = AgentLifeStage.Young;
+        curLifeStage = AgentLifeStage.Mature;
         //Debug.Log("EGG HATCHED!");
         lifeStageTransitionTimeStepCounter = 0;
                 
@@ -725,9 +777,9 @@ public class Agent : MonoBehaviour {
         //coreModule.energyRaw = coreModule.maxEnergyStorage;
 
         //turn mouth on
-        mouthRef.Enable();
+        //mouthRef.Enable();
     }
-    private void TickYoung(SimulationManager simManager, Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray, SettingsManager settings) {
+    /*private void TickYoung(SimulationManager simManager, Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray, SettingsManager settings) {
         //ProcessSwallowing();
 
         sizePercentage = Mathf.Clamp01(((float)scoreCounter / (float)maxGrowthPeriod) * (1.0f - spawnStartingScale) + spawnStartingScale);
@@ -745,7 +797,7 @@ public class Agent : MonoBehaviour {
         TickActions(simManager, nutrientCellInfo, ref eatAmountsArray, settings); // Execute Actions  -- Also Updates Resources!!! ***
         lifeStageTransitionTimeStepCounter++;
         scoreCounter++;
-    }
+    }*/
     /*private void ProcessSwallowing() {
         if(isSwallowingPrey)
         {
@@ -784,13 +836,14 @@ public class Agent : MonoBehaviour {
         //ProcessSwallowing();
 
         // Check for death & stuff? Or is this handled inside OnCollisionEnter() events?
-        sizePercentage = Mathf.Clamp01(((float)scoreCounter / (float)maxGrowthPeriod) * (1.0f - spawnStartingScale) + spawnStartingScale);
+        sizePercentage = Mathf.Clamp01(((float)ageCounter / (float)maxGrowthPeriod) * (1.0f - spawnStartingScale) + spawnStartingScale);  // *** Revisit this::: ***
 
         // Scaling Test:
-        int frameNum = ageCounterMature % growthScalingSkipFrames;
+        int frameNum = ageCounter % growthScalingSkipFrames;
         bool resizeFrame = false;
         if(frameNum == 1) {
-            resizeFrame = true;            
+            resizeFrame = true;
+            GainExperience(0.025f); // Auto Exp for staying alive
         }
         ScaleBody(sizePercentage, resizeFrame);  
 
@@ -799,8 +852,9 @@ public class Agent : MonoBehaviour {
         TickActions(simManager, nutrientCellInfo, ref eatAmountsArray, settings); // Execute Actions  -- Also Updates Resources!!! ***
 
         lifeStageTransitionTimeStepCounter++;
-        ageCounterMature++;
-        scoreCounter++;
+        ageCounter++;
+        
+        //scoreCounter++;
         if(!isPregnantAndCarryingEggs) {
             pregnancyRefactoryTimeStepCounter++;
         }
@@ -875,15 +929,50 @@ public class Agent : MonoBehaviour {
         //float agentSizeMultiplier = coreModule.maxEnergyStorage; // coreModule.coreWidth * coreModule.coreLength * growthPercentage;
         // ENERGY!!!!
         // Digestion:
-        float amountDigested = 0.003f;
-        float digestionAmount = Mathf.Min(coreModule.stomachContents, amountDigested);
-        float foodToEnergyConversion = 2f;
-        float createdEnergy = digestionAmount * foodToEnergyConversion;
-        coreModule.stomachContents -= digestionAmount;
-        if(coreModule.stomachContents < 0f) {
-            coreModule.stomachContents = 0f;
+        float maxDigestionRate = 0.003f;
+        float foodToEnergyBaseConversion = 2f;
+        //amount *= coreModule.foodEfficiencyDecay; ***** Do diet specialization here!! ****
+        //float foodProportionDecay = coreModule.stomachContentsDecay; // Mathf.Min(coreModule.stomachContentsDecay / coreModule.stomachCapacity, maxDigestionRate); 
+        //float foodProportionPlant = coreModule.stomachContentsPlant; // Mathf.Min(coreModule.stomachContentsPlant / coreModule.stomachCapacity, maxDigestionRate); 
+        //float foodProportionMeat = coreModule.stomachContentsMeat; // Mathf.Min(coreModule.stomachContentsMeat / coreModule.stomachCapacity, maxDigestionRate);
+
+        Vector3 foodProportionsVec = new Vector3(coreModule.stomachContentsDecay, coreModule.stomachContentsPlant, coreModule.stomachContentsMeat) / (coreModule.stomachContentsDecay + coreModule.stomachContentsPlant + coreModule.stomachContentsMeat + 0.0001f);
+        float totalStomachContentsNorm = (coreModule.stomachContentsDecay + coreModule.stomachContentsPlant + coreModule.stomachContentsMeat) / coreModule.stomachCapacity;
+        coreModule.stomachContentsNorm = totalStomachContentsNorm; // ** we'll see.... ***
+        float digestedAmountTotal = Mathf.Min(totalStomachContentsNorm, maxDigestionRate);
+        float digestedProportionOfTotalContents = digestedAmountTotal / (totalStomachContentsNorm + 0.0001f);
+
+        float decayToEnergyAmount = digestedAmountTotal * foodProportionsVec.x * foodToEnergyBaseConversion * coreModule.foodEfficiencyDecay;
+        float plantToEnergyAmount = digestedAmountTotal * foodProportionsVec.y * foodToEnergyBaseConversion * coreModule.foodEfficiencyPlant;
+        float meatToEnergyAmount = digestedAmountTotal * foodProportionsVec.z * foodToEnergyBaseConversion * coreModule.foodEfficiencyMeat;
+
+        
+        //float digestMagnitude = digestAmountVec.magnitude;
+        //if(digestMagnitude > maxDigestionRate) {
+        //    digestAmountVec /= digestMagnitude;
+        //}
+
+
+        //
+        
+        //float digestionAmountTotal = digestedAmountDecay + digestedAmountPlant + digestedAmountMeat; // Mathf.Min(coreModule.stomachContents, maxDigestionRate);
+        float createdEnergyTotal = decayToEnergyAmount + plantToEnergyAmount + meatToEnergyAmount; // digestionAmount * foodToEnergyConversion;
+
+        //coreModule.stomachContentsNorm -= digestedAmountTotal;
+        coreModule.stomachContentsDecay -= digestedAmountTotal * foodProportionsVec.x;
+        if(coreModule.stomachContentsDecay < 0f) {
+            coreModule.stomachContentsDecay = 0f;
         }
-        coreModule.energy += createdEnergy;
+        coreModule.stomachContentsPlant -= digestedAmountTotal * foodProportionsVec.y;
+        if(coreModule.stomachContentsPlant < 0f) {
+            coreModule.stomachContentsPlant = 0f;
+        }
+        coreModule.stomachContentsMeat -= digestedAmountTotal * foodProportionsVec.z;
+        if(coreModule.stomachContentsMeat < 0f) {
+            coreModule.stomachContentsMeat = 0f;
+        }
+        coreModule.energy += createdEnergyTotal;
+
         //float maxEnergy = agentSizeMultiplier;
         if(coreModule.energy > 1f) {
             coreModule.energy = 1f;
@@ -898,6 +987,13 @@ public class Agent : MonoBehaviour {
             coreModule.healthExternal += healRate;
 
             coreModule.energy -= healRate / energyToHealthConversionRate;
+        }
+
+        float staminaRefillRate = 0.0025f;
+        float energyToStaminaConversionRate = 5f; // * coreModule.healthBonus;
+        if(coreModule.stamina[0] < 1f) {
+            coreModule.stamina[0] += staminaRefillRate;
+            coreModule.energy -= staminaRefillRate / energyToStaminaConversionRate;
         }
 
         //ENERGY:
@@ -923,42 +1019,47 @@ public class Agent : MonoBehaviour {
             // FOOD PARTICLES: Either mouth type for now:
             float foodParticleEatAmount = simManager.foodManager.foodParticlesEatAmountsArray[index];
             if(foodParticleEatAmount > 0f) {
-                mouthRef.InitiatePassiveBite();
+                //mouthRef.InitiatePassiveBite();
 
-                EatFood(foodParticleEatAmount);                
-            }            
-
-            totalFoodEaten += foodParticleEatAmount;
-            
+                EatFoodPlant(foodParticleEatAmount);                
+            }
+            //totalFoodEaten += foodParticleEatAmount;            
             // BITE!!!
-            
-            if(mouthRef.isPassive) {
 
-                // PAssive filter feeding: *** NUTRIENTS
-                if(coreModule.mouthEffector[0] > 0f) {
+            // DECAY NUTRIENTS:::
+            // PAssive filter feeding: *** NUTRIENTS
+            if(coreModule.mouthEffector[0] > 0f) {
+                mouthRef.Enable();
                                         
-                    float ambientFoodDensity = nutrientCellInfo.x;
-                    float mouthArea = mouthRef.triggerCollider.radius * mouthRef.triggerCollider.radius * Mathf.PI;
+                float ambientFoodDensity = nutrientCellInfo.x;
+                float mouthArea = mouthRef.triggerCollider.radius * mouthRef.triggerCollider.radius * Mathf.PI;
 
-                    float maxEatRate = mouthArea * 4f * settings.eatRateMultiplier;
-                    // *** This is gross - CHANGE IT:::
-                    float sizeValue = Mathf.Clamp01(((fullSizeBoundingBox.x + fullSizeBoundingBox.z) * 0.5f - 0.035f) / 2f); // ** Hardcoded assuming size ranges from 0.1 --> 2.5 !!! ********
-                    float efficiency = Mathf.Lerp(settings.minSizeFeedingEfficiency, settings.maxSizeFeedingEfficiency, sizeValue) * ambientFoodDensity;
+                float maxEatRate = mouthArea * 4f * settings.eatRateMultiplier;
+                // *** This is gross - CHANGE IT:::
+                float sizeValue = Mathf.Clamp01(((fullSizeBoundingBox.x + fullSizeBoundingBox.z) * 0.5f - 0.035f) / 2f); // ** Hardcoded assuming size ranges from 0.1 --> 2.5 !!! ********
+                float efficiency = Mathf.Lerp(settings.minSizeFeedingEfficiency, settings.maxSizeFeedingEfficiency, sizeValue) * ambientFoodDensity;
                     
-                    // *** Can double dip !!! BROKEN! **** Check reservoir first to avoid overdrafting!! ******
-                    float filteredFoodAmount = Mathf.Min(maxEatRate * efficiency, maxEatRate);
+                // *** Can double dip !!! BROKEN! **** Check reservoir first to avoid overdrafting!! ******
+                float filteredFoodAmount = Mathf.Min(maxEatRate * efficiency, maxEatRate);
                    
-                    // Needs to use Compute shader here to sample the current nutrientMapRT:::: ****
-                    eatAmountsArray[index].x = filteredFoodAmount;
+                // Needs to use Compute shader here to sample the current nutrientMapRT:::: ****
+                eatAmountsArray[index].x = filteredFoodAmount;
 
-                    EatFood(filteredFoodAmount);
-                }               
+                EatFoodDecay(filteredFoodAmount);
+            }  
+            else {
+                mouthRef.Disable();
+            }
+            
+            /*if(mouthRef.isPassive) {
+
+                            
             }
             else {
                 if(coreModule.mouthEffector[0] > 0f) {                    
-                    mouthRef.InitiateActiveBite();                    
+                    //mouthRef.InitiateActiveBite();      // ** do I need this still somewhere?               
                 }
-            }           
+            } */          
         }
         coreModule.debugFoodValue = nutrientCellInfo.x;
 
@@ -980,16 +1081,16 @@ public class Agent : MonoBehaviour {
         //}
 
         float bitingPenalty = 1f;
-        /*
-        if(mouthRef.isBiting)
+        
+        /*if(mouthRef.isBiting)
         {
             bitingPenalty = 1f;
-        }
+        }*/
         if(coreModule.mouthEffector[0] > 0f)
         {
-            bitingPenalty = 1f;
+            bitingPenalty = 0.5f;
         }
-        */
+        
         float fatigueMultiplier = Mathf.Clamp01(coreModule.energy * 6f);
         float lowHealthPenalty = Mathf.Clamp01(coreModule.healthBody * 5f) * 0.5f + 0.5f;
         fatigueMultiplier *= lowHealthPenalty;
@@ -1008,8 +1109,7 @@ public class Agent : MonoBehaviour {
             float turnSharpness = (-Vector2.Dot(throttleDir, headForwardDir) * 0.5f + 0.5f);
             float headTurn = Vector2.Dot(throttleDir, headRightDir) * -1f * turnSharpness;
             float headTurnSign = Mathf.Clamp(Vector2.Dot(throttleDir, headRightDir) * -10000f, -1f, 1f);
-
-            
+                        
             float developmentMultiplier = Mathf.Lerp(0.25f, 1f, Mathf.Clamp01(sizePercentage * 2f));
             //turningAmount = Mathf.Lerp(turningAmount, this.bodyRigidbody.angularVelocity * Mathf.Deg2Rad * 0.1f, 0.15f);
 
@@ -1068,6 +1168,17 @@ public class Agent : MonoBehaviour {
                 hingeJointsArray[i-1].motor = motor;
             }*/
         }
+    }
+
+    public void GainExperience(float exp) {
+        totalExperience += exp;
+        if(totalExperience >= experienceForNextLevel) {
+            GainLevel();
+        }
+    }
+    public void GainLevel() {
+        curLevel++;
+        experienceForNextLevel = experienceForNextLevel * 2f;
     }
 
     public void InitializeModules(AgentGenome genome) {
@@ -1236,7 +1347,7 @@ public class Agent : MonoBehaviour {
         colliderBody.size = new Vector2(fullSizeBoundingBox.x, fullSizeBoundingBox.y) * sizePercentage;  // spawn size percentage 1/10th  
 
         // Mouth Trigger:
-        mouthRef.isPassive = genome.bodyGenome.coreGenome.isPassive;
+        //mouthRef.isPassive = genome.bodyGenome.coreGenome.isPassive;
         mouthRef.triggerCollider.isTrigger = true;
         mouthRef.triggerCollider.radius = fullSizeBoundingBox.x / 2f * sizePercentage;
         mouthRef.triggerCollider.offset = new Vector2(0f, fullSizeBoundingBox.y / 2f * sizePercentage);
@@ -1255,31 +1366,43 @@ public class Agent : MonoBehaviour {
         mouseClickCollider.height = fullSizeBoundingBox.y / 2f * sizePercentage;
     }
 
-    public void InitializeSpawnAgentImmaculate(int agentIndex, CandidateAgentData candidateData, StartPositionGenome startPos) {        
-        index = agentIndex;
-        speciesIndex = candidateData.speciesID;
-        candidateRef = candidateData;
-        AgentGenome genome = candidateRef.candidateGenome;
-
-        // **** Separate out this code into shared function to avoid duplicate code::::
-                
-        curLifeStage = AgentLifeStage.Egg;
-        parentEggSackRef = null;
-        //genome.bodyGenome.CalculateFullsizeBoundingBox();
-        //this.fullSizeBoundingBox = genome.bodyGenome.fullsizeBoundingBox; // 
-        //this.fullSizeBoundingBox = new Vector3(genome.bodyGenome.coreGenome.fullBodyWidth, genome.bodyGenome.coreGenome.fullBodyLength, genome.bodyGenome.coreGenome.fullBodyWidth); // ** REFACTOR ***
-        
+    private void ResetStartingValues() {
         animationCycle = 0f;
         lifeStageTransitionTimeStepCounter = 0;
         pregnancyRefactoryTimeStepCounter = 0;
-        ageCounterMature = 0;
+        ageCounter = 0;
         sizePercentage = 0f;
-        scoreCounter = 0;
-        totalFoodEaten = 0f;
+        consumptionScore = 0f;
+        damageDealtScore = 0f;
+        damageReceivedScore = 0f;
+        energyEfficiencyScore = 0f;
+        reproductionScore = 0f;
+        supportScore = 0f;
+        masterFitnessScore = 0f;
+        totalExperience = 0f;
+        experienceForNextLevel = 2f; // 2, 4, 8, 16, 32, 64, 128, 256?
+        curLevel = 0;
+        //scoreCounter = 0;
+        totalFoodEatenDecay = 0f;
+        totalFoodEatenPlant = 0f;
+        totalFoodEatenMeat = 0f;
         turningAmount = 5f; // temporary for zygote animation
         facingDirection = new Vector2(0f, 1f);
         throttle = Vector2.zero;
         smoothedThrottle = new Vector2(0f, 0.01f); 
+    }
+
+    public void InitializeSpawnAgentImmaculate(int agentIndex, CandidateAgentData candidateData, StartPositionGenome startPos) {        
+        index = agentIndex;
+        speciesIndex = candidateData.speciesID;
+        candidateRef = candidateData;
+        AgentGenome genome = candidateRef.candidateGenome;        
+        
+        curLifeStage = AgentLifeStage.Egg;
+        parentEggSackRef = null;
+
+        // **** Separate out this code into shared function to avoid duplicate code::::
+        ResetStartingValues();
         
         InitializeModules(genome);      // Modules need to be created first so that Brain can map its neurons to existing modules  
         
@@ -1298,21 +1421,8 @@ public class Agent : MonoBehaviour {
                 
         curLifeStage = AgentLifeStage.Egg;
         parentEggSackRef = parentEggSack;
-        // CHANGE THIS::::
-        //genome.bodyGenome.CalculateFullsizeBoundingBox();
-        //this.fullSizeBoundingBox = genome.bodyGenome.fullsizeBoundingBox; // new Vector3(genome.bodyGenome.coreGenome.fullBodyWidth, genome.bodyGenome.coreGenome.fullBodyLength, genome.bodyGenome.coreGenome.fullBodyWidth); // ** REFACTOR ***
         
-        animationCycle = 0f;
-        lifeStageTransitionTimeStepCounter = 0;
-        pregnancyRefactoryTimeStepCounter = 0;
-        ageCounterMature = 0;
-        sizePercentage = 0f;
-        scoreCounter = 0;
-        totalFoodEaten = 0f;
-        turningAmount = 5f; // temporary for zygote animation
-        facingDirection = new Vector2(0f, 1f);
-        throttle = Vector2.zero;
-        smoothedThrottle = new Vector2(0f, 0.01f);
+        ResetStartingValues();
                 
         InitializeModules(genome);      // Modules need to be created first so that Brain can map its neurons to existing modules  
 

@@ -33,7 +33,7 @@ struct CritterSimData {
 	float energy;
 	float health;
 	float stamina;
-	float isBiting;
+	float consumeOn;
 	float biteAnimCycle;
 	float moveAnimCycle;
 	float turnAmount;

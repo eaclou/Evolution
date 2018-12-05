@@ -1060,16 +1060,20 @@ public class SimulationManager : MonoBehaviour {
             speciesPool.ProcessCompletedCandidate(candidateData, masterGenomePool);
             float lerpAmount = Mathf.Max(0.01f, 1f / (float)speciesPool.numAgentsEvaluated);
 
-            masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgLifespan = Mathf.Lerp(speciesPool.avgLifespan, (float)agentRef.scoreCounter, lerpAmount);
-            masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgConsumption = Mathf.Lerp(speciesPool.avgConsumption, agentRef.totalFoodEaten, lerpAmount);
-            masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgBodySize = Mathf.Lerp(speciesPool.avgBodySize, agentRef.fullSizeBodyVolume, lerpAmount);
-            float mouthType = 1f;
-            if(agentRef.mouthRef.isPassive) {
-                mouthType = 0f;
-            }
-            masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgDietType = Mathf.Lerp(speciesPool.avgDietType, mouthType, lerpAmount);
+            masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgLifespan = Mathf.Lerp(speciesPool.avgLifespan, (float)agentRef.ageCounter, lerpAmount);
+            masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgConsumptionDecay = Mathf.Lerp(speciesPool.avgConsumptionDecay, agentRef.totalFoodEatenDecay, lerpAmount);
+            masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgConsumptionPlant = Mathf.Lerp(speciesPool.avgConsumptionPlant, agentRef.totalFoodEatenPlant, lerpAmount);
+            masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgConsumptionMeat = Mathf.Lerp(speciesPool.avgConsumptionMeat, agentRef.totalFoodEatenMeat, lerpAmount);
+            masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgBodySize = Mathf.Lerp(speciesPool.avgBodySize, agentRef.fullSizeBodyVolume, lerpAmount);            
+            masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgFoodSpecDecay = Mathf.Lerp(speciesPool.avgFoodSpecDecay, (float)agentRef.coreModule.foodEfficiencyDecay, lerpAmount);
+            masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgFoodSpecPlant = Mathf.Lerp(speciesPool.avgFoodSpecPlant, (float)agentRef.coreModule.foodEfficiencyPlant, lerpAmount);
+            masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgFoodSpecMeat = Mathf.Lerp(speciesPool.avgFoodSpecMeat, (float)agentRef.coreModule.foodEfficiencyMeat, lerpAmount);
             masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgNumNeurons = Mathf.Lerp(speciesPool.avgNumNeurons, (float)agentRef.brain.neuronList.Count, lerpAmount);
             masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgNumAxons = Mathf.Lerp(speciesPool.avgNumAxons, (float)agentRef.brain.axonList.Count, lerpAmount);
+            masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgExperience = Mathf.Lerp(speciesPool.avgExperience, (float)agentRef.totalExperience, lerpAmount);
+            masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgFitnessScore = Mathf.Lerp(speciesPool.avgFitnessScore, (float)agentRef.masterFitnessScore, lerpAmount);
+            // More??
+            //masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].
         }
         else {
             // -- Else:
@@ -1113,7 +1117,7 @@ public class SimulationManager : MonoBehaviour {
 
         //Debug.Log("SpawnAgentFromEggSack! " + agentIndex.ToString());
         numAgentsBorn++;
-        currentOldestAgent = agentsArray[rankedIndicesList[0]].scoreCounter;
+        currentOldestAgent = agentsArray[rankedIndicesList[0]].ageCounter;
         agentsArray[agentIndex].InitializeSpawnAgentFromEggSack(agentIndex, sourceCandidate, parentEggSack); // Spawn that genome in dead Agent's body and revive it!
         theRenderKing.UpdateCritterGenericStrokesData(agentsArray[agentIndex]); // agentIndex, sourceCandidate.candidateGenome);
         //theRenderKing.UpdateAgentWidthsTexture(agentsArray[agentIndex]);
@@ -1127,7 +1131,7 @@ public class SimulationManager : MonoBehaviour {
         
 
         numAgentsBorn++;
-        currentOldestAgent = agentsArray[rankedIndicesList[0]].scoreCounter;
+        currentOldestAgent = agentsArray[rankedIndicesList[0]].ageCounter;
         agentsArray[agentIndex].InitializeSpawnAgentImmaculate(agentIndex, sourceCandidate, GetRandomFoodSpawnPosition()); // Spawn that genome in dead Agent's body and revive it!
         theRenderKing.UpdateCritterGenericStrokesData(agentsArray[agentIndex]); //agentIndex, sourceCandidate.candidateGenome);
         //theRenderKing.UpdateAgentWidthsTexture(agentsArray[agentIndex]);
@@ -1223,8 +1227,8 @@ public class SimulationManager : MonoBehaviour {
         
     }
     private void CheckForRecordAgentScore(int agentIndex) {
-        if (agentsArray[agentIndex].scoreCounter > recordBotAge && agentIndex != 0) {
-            recordBotAge = agentsArray[agentIndex].scoreCounter;
+        if (agentsArray[agentIndex].ageCounter > recordBotAge && agentIndex != 0) {
+            recordBotAge = agentsArray[agentIndex].ageCounter;
         }
     }
     private void ProcessAgentScores(Agent agentRef) {
@@ -1355,7 +1359,7 @@ public class SimulationManager : MonoBehaviour {
     private void ProcessAndRankAgentFitness(int speciesIndex) {
         // Measure fitness of all current agents (their genomes, actually)  NOT PLAYER!!!!
         for (int i = 0; i < rawFitnessScoresArray.Length; i++) {
-            rawFitnessScoresArray[i] = (float)agentsArray[i].scoreCounter;
+            rawFitnessScoresArray[i] = (float)agentsArray[i].masterFitnessScore;
         }
 
         int popSize = (numAgents / numSpecies);

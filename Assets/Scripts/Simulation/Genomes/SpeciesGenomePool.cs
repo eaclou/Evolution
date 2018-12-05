@@ -24,16 +24,28 @@ public class SpeciesGenomePool {
 
     public float avgLifespan = 0f;
     public List<float> avgLifespanPerYearList;
-    public float avgConsumption = 0f;
-    public List<float> avgConsumptionPerYearList;
+    public float avgConsumptionDecay = 0f;
+    public List<float> avgConsumptionDecayPerYearList;
+    public float avgConsumptionPlant = 0f;
+    public List<float> avgConsumptionPlantPerYearList;
+    public float avgConsumptionMeat = 0f;
+    public List<float> avgConsumptionMeatPerYearList;
     public float avgBodySize = 0f;
     public List<float> avgBodySizePerYearList;
-    public float avgDietType = 0f;
-    public List<float> avgDietTypePerYearList;
+    public float avgFoodSpecDecay = 0f;
+    public List<float> avgFoodSpecDecayPerYearList;
+    public float avgFoodSpecPlant = 0f;
+    public List<float> avgFoodSpecPlantPerYearList;
+    public float avgFoodSpecMeat = 0f;
+    public List<float> avgFoodSpecMeatPerYearList;
     public float avgNumNeurons = 0f;
     public List<float> avgNumNeuronsPerYearList;
     public float avgNumAxons = 0f;
     public List<float> avgNumAxonsPerYearList;
+    public float avgExperience = 0f;
+    public List<float> avgExperiencePerYearList;
+    public float avgFitnessScore = 0f;
+    public List<float> avgFitnessScorePerYearList;
 
     public bool isFlaggedForExtinction = false;
     public bool isExtinct = false;
@@ -51,16 +63,28 @@ public class SpeciesGenomePool {
 
         avgLifespanPerYearList = new List<float>();
         avgLifespanPerYearList.Add(0f);
-        avgConsumptionPerYearList = new List<float>();
-        avgConsumptionPerYearList.Add(0f);
+        avgConsumptionDecayPerYearList = new List<float>();
+        avgConsumptionDecayPerYearList.Add(0f);
+        avgConsumptionPlantPerYearList = new List<float>();
+        avgConsumptionPlantPerYearList.Add(0f);
+        avgConsumptionMeatPerYearList = new List<float>();
+        avgConsumptionMeatPerYearList.Add(0f);
         avgBodySizePerYearList = new List<float>();
         avgBodySizePerYearList.Add(0f);
-        avgDietTypePerYearList = new List<float>();
-        avgDietTypePerYearList.Add(0f);
+        avgFoodSpecDecayPerYearList = new List<float>();
+        avgFoodSpecDecayPerYearList.Add(0f);
+        avgFoodSpecPlantPerYearList = new List<float>();
+        avgFoodSpecPlantPerYearList.Add(0f);
+        avgFoodSpecMeatPerYearList = new List<float>();
+        avgFoodSpecMeatPerYearList.Add(0f);
         avgNumNeuronsPerYearList = new List<float>();
         avgNumNeuronsPerYearList.Add(0f);
         avgNumAxonsPerYearList = new List<float>();
         avgNumAxonsPerYearList.Add(0f);
+        avgExperiencePerYearList = new List<float>();
+        avgExperiencePerYearList.Add(0f);
+        avgFitnessScorePerYearList = new List<float>();
+        avgFitnessScorePerYearList.Add(0f);
 
         candidateGenomesList = new List<CandidateAgentData>();
         leaderboardGenomesList = new List<CandidateAgentData>();
@@ -106,20 +130,32 @@ public class SpeciesGenomePool {
     public void ProcessExtinction() {
         isExtinct = true;
         avgLifespan = 0f;
-        avgConsumption = 0f;
+        avgConsumptionDecay = 0f;
+        avgConsumptionPlant = 0f;
+        avgConsumptionMeat = 0f;
         avgBodySize = 0f;
-        avgDietType = 0f;
+        avgFoodSpecDecay = 0f;
+        avgFoodSpecPlant = 0f;
+        avgFoodSpecMeat = 0f;
         avgNumNeurons = 0f;
         avgNumAxons = 0f;
+        avgExperience = 0f;
+        avgFitnessScore = 0f;
     }
 
     public void UpdateYearlyStats(int year) {
         avgLifespanPerYearList.Add(avgLifespan);
-        avgConsumptionPerYearList.Add(avgConsumption);
+        avgConsumptionDecayPerYearList.Add(avgConsumptionDecay);
+        avgConsumptionPlantPerYearList.Add(avgConsumptionPlant);
+        avgConsumptionMeatPerYearList.Add(avgConsumptionMeat);
         avgBodySizePerYearList.Add(avgBodySize);
-        avgDietTypePerYearList.Add(avgDietType);
+        avgFoodSpecDecayPerYearList.Add(avgFoodSpecDecay);
+        avgFoodSpecPlantPerYearList.Add(avgFoodSpecPlant);
+        avgFoodSpecMeatPerYearList.Add(avgFoodSpecMeat);
         avgNumNeuronsPerYearList.Add(avgNumNeurons);
         avgNumAxonsPerYearList.Add(avgNumAxons);
+        avgExperiencePerYearList.Add(avgExperience);
+        avgFitnessScorePerYearList.Add(avgFitnessScore);
     }
 
     public CandidateAgentData GetNextAvailableCandidate() {
@@ -170,7 +206,7 @@ public class SpeciesGenomePool {
             }
         }
         else {
-            if (candidateGenomesList != null) {
+            if (candidateGenomesList.Count > 0) {
                 Debug.LogError("ERROR NO INDEX FOUND! " + candidateData.candidateID.ToString() + ", species: " + this.speciesID.ToString() + ", CDSID: " + candidateData.speciesID.ToString() + ", [0]: " + candidateGenomesList[0].candidateID.ToString());
             }
             else {

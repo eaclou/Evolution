@@ -337,9 +337,9 @@ public class MasterGenomePool {
         float dTailFinSpread = Mathf.Abs(newGenome.bodyGenome.coreGenome.tailFinSpreadAngle - repGenome.bodyGenome.coreGenome.tailFinSpreadAngle);
 
         // sensors & shit:
-        float dFoodPrefPart = Mathf.Abs(newGenome.bodyGenome.foodGenome.preferenceParticles - repGenome.bodyGenome.foodGenome.preferenceParticles);
-        float dFoodPrefEgg = Mathf.Abs(newGenome.bodyGenome.foodGenome.preferenceEggs - repGenome.bodyGenome.foodGenome.preferenceEggs);
-        float dFoodPrefCrea = Mathf.Abs(newGenome.bodyGenome.foodGenome.preferenceCreatures - repGenome.bodyGenome.foodGenome.preferenceCreatures);
+        float dFoodSpecDecay = Mathf.Abs(newGenome.bodyGenome.coreGenome.foodEfficiencyDecay - repGenome.bodyGenome.coreGenome.foodEfficiencyDecay);
+        float dFoodSpecPlant = Mathf.Abs(newGenome.bodyGenome.coreGenome.foodEfficiencyPlant - repGenome.bodyGenome.coreGenome.foodEfficiencyPlant);
+        float dFoodSpecMeat = Mathf.Abs(newGenome.bodyGenome.coreGenome.foodEfficiencyMeat - repGenome.bodyGenome.coreGenome.foodEfficiencyMeat);
                 
         float dUseComms = newGenome.bodyGenome.communicationGenome.useComms == repGenome.bodyGenome.communicationGenome.useComms ? 0f : 1f;
         float dUseWaterStats = newGenome.bodyGenome.environmentalGenome.useWaterStats == repGenome.bodyGenome.environmentalGenome.useWaterStats ? 0f : 1f;
@@ -350,6 +350,8 @@ public class MasterGenomePool {
         float dUseFoodVel = newGenome.bodyGenome.foodGenome.useVel == repGenome.bodyGenome.foodGenome.useVel ? 0f : 1f;
         float dUseFoodDir = newGenome.bodyGenome.foodGenome.useDir == repGenome.bodyGenome.foodGenome.useDir ? 0f : 1f;
         float dUseFoodStats = newGenome.bodyGenome.foodGenome.useStats == repGenome.bodyGenome.foodGenome.useStats ? 0f : 1f;
+        float dUseFoodEgg = newGenome.bodyGenome.foodGenome.useEggs == repGenome.bodyGenome.foodGenome.useEggs ? 0f : 1f;
+        float dUseFoodCorpse = newGenome.bodyGenome.foodGenome.useCorpse == repGenome.bodyGenome.foodGenome.useCorpse ? 0f : 1f;
         float dUseFriendPos = newGenome.bodyGenome.friendGenome.usePos == repGenome.bodyGenome.friendGenome.usePos ? 0f : 1f;
         float dUseFriendVel = newGenome.bodyGenome.friendGenome.useVel == repGenome.bodyGenome.friendGenome.useVel ? 0f : 1f;
         float dUseFriendDir = newGenome.bodyGenome.friendGenome.useDir == repGenome.bodyGenome.friendGenome.useDir ? 0f : 1f;
@@ -358,8 +360,8 @@ public class MasterGenomePool {
         float dUseThreatDir = newGenome.bodyGenome.threatGenome.useDir == repGenome.bodyGenome.threatGenome.useDir ? 0f : 1f;
         float dUseThreatStats = newGenome.bodyGenome.threatGenome.useStats == repGenome.bodyGenome.threatGenome.useStats ? 0f : 1f;
 
-        float dSensory = dFoodPrefPart + dFoodPrefEgg + dFoodPrefCrea + dUseComms + dUseWaterStats + dUseCardinals + dUseDiagonals +
-                         dUseNutrients + dUseFoodPos + dUseFoodVel + dUseFoodDir + dUseFoodStats + dUseFriendPos + dUseFriendVel + dUseFriendDir +
+        float dSensory = dFoodSpecDecay + dFoodSpecPlant + dFoodSpecMeat + dUseComms + dUseWaterStats + dUseCardinals + dUseDiagonals +
+                         dUseNutrients + dUseFoodPos + dUseFoodVel + dUseFoodDir + dUseFoodStats + dUseFoodEgg + dUseFoodCorpse + dUseFriendPos + dUseFriendVel + dUseFriendDir +
                          dUseThreatPos + dUseThreatVel + dUseThreatDir + dUseThreatStats;
         float dNeurons = Mathf.Abs(newGenome.brainGenome.hiddenNeuronList.Count - repGenome.brainGenome.hiddenNeuronList.Count);
         float dAxons = Mathf.Abs(newGenome.brainGenome.linkList.Count - repGenome.brainGenome.linkList.Count) / (float)repGenome.brainGenome.bodyNeuronList.Count;

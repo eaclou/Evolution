@@ -11,19 +11,28 @@ public class CritterModuleFood {
     public float[] nutrientDensity;
     public float[] nutrientGradX;
     public float[] nutrientGradY;
-    public float[] foodPosX;
-    public float[] foodPosY;
-    public float[] distance;
-    public float[] foodVelX;
-    public float[] foodVelY;
-    public float[] foodDirX;
-    public float[] foodDirY;    
-    public float[] foodQuality;
-    public float[] foodRelSize;
+
+    public float[] foodPlantPosX;
+    public float[] foodPlantPosY;
+    public float[] foodPlantDistance;
+    public float[] foodPlantVelX;
+    public float[] foodPlantVelY;
+    public float[] foodPlantDirX;
+    public float[] foodPlantDirY;    
+    public float[] foodPlantQuality;
+    public float[] foodPlantRelSize;
+
+    public float[] foodEggDistance;
+    public float[] foodEggDirX;
+    public float[] foodEggDirY;
+
+    public float[] foodCorpseDistance;
+    public float[] foodCorpseDirX;
+    public float[] foodCorpseDirY;
 
     public float sensorRange;
     public float preferredSize;
-    public int[] foodPreferenceOrder;
+    //public int[] foodPreferenceOrder;
 
     public int nearestFoodParticleIndex = -1;  // debugging ** TEMP
     public Vector2 nearestFoodParticlePos;
@@ -44,27 +53,35 @@ public class CritterModuleFood {
             nutrientGradY = new float[1];
         //}
         //if(genome.usePos) {
-            foodPosX = new float[1];
-            foodPosY = new float[1];
-            distance = new float[1];
+            foodPlantPosX = new float[1];
+            foodPlantPosY = new float[1];
+            foodPlantDistance = new float[1];
         //}
         //if(genome.useVel) {
-            foodVelX = new float[1];
-            foodVelY = new float[1];
+            foodPlantVelX = new float[1];
+            foodPlantVelY = new float[1];
         //}
         //if(genome.useDir) {
-            foodDirX = new float[1];
-            foodDirY = new float[1];
+            foodPlantDirX = new float[1];
+            foodPlantDirY = new float[1];
         //}
         //if(genome.useStats) {
-            foodQuality = new float[1];
-            foodRelSize = new float[1];
+            foodPlantQuality = new float[1];
+            foodPlantRelSize = new float[1];
         //}
+
+        foodEggDistance = new float[1];
+        foodEggDirX = new float[1];
+        foodEggDirY = new float[1];
+
+        foodCorpseDistance = new float[1];
+        foodCorpseDirX = new float[1];
+        foodCorpseDirY = new float[1];
 
         sensorRange = 25f; // TEMP HARDCODED *****
         preferredSize = genome.preferredSize;
 
-        foodPreferenceOrder = new int[3];  // 0 == particle, 1=egg, 2==creature
+        /*foodPreferenceOrder = new int[3];  // 0 == particle, 1=egg, 2==creature
         if(genome.preferenceParticles >= genome.preferenceEggs) {
             if(genome.preferenceParticles >= genome.preferenceCreatures) { // particles first place
                 foodPreferenceOrder[0] = 0;    
@@ -100,7 +117,7 @@ public class CritterModuleFood {
                 foodPreferenceOrder[1] = 1; 
                 foodPreferenceOrder[2] = 0;  
             }
-        }
+        }*/
 
         this.parentID = genome.parentID;
         this.inno = genome.inno;
@@ -121,39 +138,64 @@ public class CritterModuleFood {
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
             if (nid.neuronID == 4) {
-                neuron.currentValue = foodPosX;
+                neuron.currentValue = foodPlantPosX;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
             if (nid.neuronID == 5) {
-                neuron.currentValue = foodPosY;
+                neuron.currentValue = foodPlantPosY;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
             if (nid.neuronID == 6) {
-                neuron.currentValue = distance;
+                neuron.currentValue = foodPlantDistance;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
             if (nid.neuronID == 7) {
-                neuron.currentValue = foodVelX;
+                neuron.currentValue = foodPlantVelX;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
             if (nid.neuronID == 8) {
-                neuron.currentValue = foodVelY;
+                neuron.currentValue = foodPlantVelY;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
             if (nid.neuronID == 9) {
-                neuron.currentValue = foodDirX;
+                neuron.currentValue = foodPlantDirX;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
             if (nid.neuronID == 10) {
-                neuron.currentValue = foodDirY;
+                neuron.currentValue = foodPlantDirY;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
             if (nid.neuronID == 11) {
-                neuron.currentValue = foodQuality;
+                neuron.currentValue = foodPlantQuality;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
             if (nid.neuronID == 12) {
-                neuron.currentValue = foodRelSize;
+                neuron.currentValue = foodPlantRelSize;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+
+            if (nid.neuronID == 13) {
+                neuron.currentValue = foodEggDistance;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 14) {
+                neuron.currentValue = foodEggDirX;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 15) {
+                neuron.currentValue = foodEggDirY;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 16) {
+                neuron.currentValue = foodCorpseDistance;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 17) {
+                neuron.currentValue = foodCorpseDirX;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 18) {
+                neuron.currentValue = foodCorpseDirY;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
         }
@@ -167,79 +209,116 @@ public class CritterModuleFood {
             nutrientGradY[0] = nutrientCellInfo.z;
         }
 
-        Vector2 foodPos = Vector2.zero;
-        Vector2 foodDir = Vector2.zero;
-        Vector2 foodVel = Vector2.zero;
-        float dist = 0f;
-        float quality = 1f;
-        float relSize = 0f;
-        
+        ////Vector2 foodPos = Vector2.zero;
+        //Vector2 foodDir = Vector2.zero;
+        //Vector2 foodVel = Vector2.zero;
+        //float dist = 0f;
+        //float quality = 1f;
+        //float relSize = 0f;
+
         // eventually, if none of first preference are in range of sensor, use next in line: *****
-        if(foodPreferenceOrder[0] == 0) {  // particle
-            nearestFoodParticleIndex = simManager.foodManager.closestFoodParticlesDataArray[agent.index].index;
-            nearestFoodParticlePos = simManager.foodManager.closestFoodParticlesDataArray[agent.index].worldPos - 
-                                     new Vector2(simManager.agentsArray[agent.index].bodyRigidbody.transform.position.x,
-                                     simManager.agentsArray[agent.index].bodyRigidbody.transform.position.y);
+        //foodPreferenceOrder[0] = 0;
+        //if(foodPreferenceOrder[0] == 0) {  // particle
+        nearestFoodParticleIndex = simManager.foodManager.closestFoodParticlesDataArray[agent.index].index;
+        nearestFoodParticlePos = simManager.foodManager.closestFoodParticlesDataArray[agent.index].worldPos - 
+                                    new Vector2(simManager.agentsArray[agent.index].bodyRigidbody.transform.position.x,
+                                    simManager.agentsArray[agent.index].bodyRigidbody.transform.position.y);
 
-            nearestFoodParticleAmount = simManager.foodManager.closestFoodParticlesDataArray[agent.index].foodAmount;
-            Vector2 critterToFoodParticle = simManager.foodManager.closestFoodParticlesDataArray[agent.index].worldPos - agent.ownPos;
-            float distToNearestFoodParticle = critterToFoodParticle.magnitude;
-            Vector2 foodParticleDir = critterToFoodParticle.normalized;
-            float nearestFoodParticleDistance = Mathf.Clamp01((sensorRange - critterToFoodParticle.magnitude) / sensorRange); // inverted dist(proximity) 0-1
+        nearestFoodParticleAmount = simManager.foodManager.closestFoodParticlesDataArray[agent.index].foodAmount;
+        Vector2 critterToFoodParticle = simManager.foodManager.closestFoodParticlesDataArray[agent.index].worldPos - agent.ownPos;
+        float distToNearestFoodParticle = critterToFoodParticle.magnitude;
+        Vector2 foodParticleDir = critterToFoodParticle.normalized;
+        float nearestFoodParticleDistance = Mathf.Clamp01((sensorRange - critterToFoodParticle.magnitude) / sensorRange); // inverted dist(proximity) 0-1
 
-            foodPos = new Vector2(Mathf.Clamp(critterToFoodParticle.x / sensorRange, -1f, 1f), Mathf.Clamp(critterToFoodParticle.y / sensorRange, -1f, 1f));
-            foodDir = foodParticleDir;
-            dist = nearestFoodParticleDistance;
-            quality = 1f;
-            relSize = nearestFoodParticleAmount;
-            // no food particle Velocity yet! ***** nned to store in gpu struct?
+        //foodPos = new Vector2(Mathf.Clamp(critterToFoodParticle.x / sensorRange, -1f, 1f), Mathf.Clamp(critterToFoodParticle.y / sensorRange, -1f, 1f));
+        //foodDir = foodParticleDir;
+
+        foodPlantPosX[0] = Mathf.Clamp(critterToFoodParticle.x / sensorRange, -1f, 1f);
+        foodPlantPosY[0] = Mathf.Clamp(critterToFoodParticle.y / sensorRange, -1f, 1f);
+        foodPlantDistance[0] = nearestFoodParticleDistance;
+        foodPlantDirX[0] = foodParticleDir.x;
+        foodPlantDirY[0] = foodParticleDir.y;
+        foodPlantQuality[0] = 1f; // *** temp until particles can decay naturally
+        foodPlantRelSize[0] = nearestFoodParticleAmount;
+
+        //dist = nearestFoodParticleDistance;
+        //quality = 1f;
+        //relSize = nearestFoodParticleAmount;
+        // no food particle Velocity yet! ***** nned to store in gpu struct?
+        //}
+        //else {
+        //    if(foodPreferenceOrder[0] == 1) {  // egg
+
+        // EGGS:::::
+        if(agent.coreModule.nearestEggSackModule != null) {
+            Vector2 eggSackPos = new Vector2(agent.coreModule.nearestEggSackModule.rigidbodyRef.position.x - agent.ownPos.x, agent.coreModule.nearestEggSackModule.rigidbodyRef.position.y - agent.ownPos.y);
+            Vector2 eggSackDir = eggSackPos.normalized;
+            float nearestEggSackDistance = Mathf.Clamp01((sensorRange - eggSackPos.magnitude) / sensorRange);
+
+            foodEggDistance[0] = nearestEggSackDistance;
+            foodEggDirX[0] = eggSackDir.x;
+            foodEggDirY[0] = eggSackDir.y;
+
+            //foodPos = new Vector2(Mathf.Clamp(eggSackPos.x / sensorRange, -1f, 1f), Mathf.Clamp(eggSackPos.y / sensorRange, -1f, 1f));
+            //dist = nearestEggSackDistance;
+            // NO VEL YET!!! **** FIX!!!
+            //foodDir = eggSackDir;
+            //quality = 1f; // **** IMPLEMENT! (decay of eggSack?)
+            //relSize = agent.coreModule.nearestEggSackModule.foodAmount;
         }
         else {
-            if(foodPreferenceOrder[0] == 1) {  // egg
-                if(agent.coreModule.nearestEggSackModule != null) {
-                    Vector2 eggSackPos = new Vector2(agent.coreModule.nearestEggSackModule.rigidbodyRef.position.x - agent.ownPos.x, agent.coreModule.nearestEggSackModule.rigidbodyRef.position.y - agent.ownPos.y);
-                    Vector2 eggSackDir = eggSackPos.normalized;
-                    float nearestEggSackDistance = Mathf.Clamp01((sensorRange - eggSackPos.magnitude) / sensorRange);     
 
-                    foodPos = new Vector2(Mathf.Clamp(eggSackPos.x / sensorRange, -1f, 1f), Mathf.Clamp(eggSackPos.y / sensorRange, -1f, 1f));
-                    dist = nearestEggSackDistance;
-                    // NO VEL YET!!! **** FIX!!!
-                    foodDir = eggSackDir;
-                    quality = 1f; // **** IMPLEMENT! (decay of eggSack?)
-                    relSize = agent.coreModule.nearestEggSackModule.foodAmount;
-                }
-            }
-            else {  // creatures
-                if(agent.coreModule.nearestEnemyAgent != null) {
-                    Vector2 preyPos = new Vector2(agent.coreModule.nearestEnemyAgent.bodyRigidbody.position.x - agent.ownPos.x, agent.coreModule.nearestEnemyAgent.bodyRigidbody.position.y - agent.ownPos.y);
-                    Vector2 preyDir = preyPos.normalized;
-                    float nearestPreyDistance = Mathf.Clamp01((sensorRange - preyPos.magnitude) / sensorRange);     
-
-                    foodPos = new Vector2(Mathf.Clamp(preyPos.x / sensorRange, -1f, 1f), Mathf.Clamp(preyPos.y / sensorRange, -1f, 1f));
-                    dist = nearestPreyDistance;
-                    // NO VEL YET!!! **** FIX!!!
-                    foodDir = preyDir;
-                    quality = 1f; // **** IMPLEMENT! (decay of eggSack?)
-                    relSize = (agent.coreModule.nearestEnemyAgent.currentBoundingBoxSize.x * agent.coreModule.nearestEnemyAgent.currentBoundingBoxSize.y) / (agent.currentBoundingBoxSize.x * agent.currentBoundingBoxSize.y);
-                }
-            }
         }
+
+        // CORPSE FOOD:::::
+            //}
+            //else {  // creatures
+        if(agent.coreModule.nearestEnemyAgent != null) {
+            if(agent.curLifeStage == Agent.AgentLifeStage.Dead) {
+                Vector2 preyPos = new Vector2(agent.coreModule.nearestEnemyAgent.bodyRigidbody.position.x - agent.ownPos.x, agent.coreModule.nearestEnemyAgent.bodyRigidbody.position.y - agent.ownPos.y);
+                Vector2 preyDir = preyPos.normalized;
+                float nearestPreyDistance = Mathf.Clamp01((sensorRange - preyPos.magnitude) / sensorRange);  
+
+                foodCorpseDistance[0] = nearestPreyDistance;
+                foodCorpseDirX[0] = preyDir.x;
+                foodCorpseDirY[0] = preyDir.y;
+            }
+            else {
+
+            }
+            /*Vector2 preyPos = new Vector2(agent.coreModule.nearestEnemyAgent.bodyRigidbody.position.x - agent.ownPos.x, agent.coreModule.nearestEnemyAgent.bodyRigidbody.position.y - agent.ownPos.y);
+            Vector2 preyDir = preyPos.normalized;
+            float nearestPreyDistance = Mathf.Clamp01((sensorRange - preyPos.magnitude) / sensorRange);     
+
+            foodPos = new Vector2(Mathf.Clamp(preyPos.x / sensorRange, -1f, 1f), Mathf.Clamp(preyPos.y / sensorRange, -1f, 1f));
+            dist = nearestPreyDistance;
+            // NO VEL YET!!! **** FIX!!!
+            foodDir = preyDir;
+            quality = 1f; // **** IMPLEMENT! (decay of eggSack?)
+            relSize = (agent.coreModule.nearestEnemyAgent.currentBoundingBoxSize.x * agent.coreModule.nearestEnemyAgent.currentBoundingBoxSize.y) / (agent.currentBoundingBoxSize.x * agent.currentBoundingBoxSize.y);
+            */
+        }
+        else {
+
+        }
+            //}
+        //}
         
-        if(genome.usePos) {
-            foodPosX[0] = foodPos.x;
-            foodPosY[0] = foodPos.y;
-            distance[0] = dist;
+        /*if(genome.usePos) {
+            foodPlantPosX[0] = foodPos.x;
+            foodPlantPosY[0] = foodPos.y;
+            foodPlantDistance[0] = dist;
         }
         if(genome.useVel) {
 
         }
         if(genome.useDir) {
-            foodDirX[0] = foodDir.x;
-            foodDirY[0] = foodDir.y;
+            foodPlantDirX[0] = foodDir.x;
+            foodPlantDirY[0] = foodDir.y;
         }
         if(genome.useStats) {
-            foodQuality[0] = quality; // *** temp until particles can decay naturally
-            foodRelSize[0] = relSize;
-        }
+            foodPlantQuality[0] = quality; // *** temp until particles can decay naturally
+            foodPlantRelSize[0] = relSize;
+        }*/
     }
 }
