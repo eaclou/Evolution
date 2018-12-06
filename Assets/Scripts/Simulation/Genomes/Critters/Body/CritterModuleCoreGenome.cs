@@ -95,52 +95,70 @@ public class CritterModuleCoreGenome {
     public Vector3 tailFinOffsets = Vector3.zero;
 
     // Specialization Paths first try:
-    public float priorityDamage;
-    public float prioritySpeed;
-    public float priorityHealth;
-    public float priorityEnergy;
+    public float talentSpecializationAttack;
+    public float talentSpecializationDefense;
+    public float talentSpecializationSpeed;
+    public float talentSpecializationUtility;
 
     // Diet specialization:
-    public float foodEfficiencyDecay;
-    public float foodEfficiencyPlant;    
-    public float foodEfficiencyMeat;
+    public float dietSpecializationDecay;
+    public float dietSpecializationPlant;    
+    public float dietSpecializationMeat;
 
-    public TalentsDamage[] talentSpecDamage; // 5 tiers?    // tiers at specialization levels:  55%, 65%, 75%, 85%, 95%
+    public float mouthFeedFrequency;
+    public float mouthAttackAmplitude;
+
+    public TalentsAttack[] talentSpecAttack; // 5 tiers?    // tiers at specialization levels:  55%, 65%, 75%, 85%, 95%    
+    public TalentsDefend[] talentSpecDefend; // 5 tiers?
     public TalentsSpeed[] talentSpecSpeed; // 5 tiers?
-    public TalentsHealth[] talentSpecHealth; // 5 tiers?
-    public TalentsEnergy[] talentSpecEnergy; // 5 tiers?
+    public TalentsUtility[] talentSpecUtility; // 5 tiers?
 
-    public SkillsDamage[] skillDamage;  // up to 2 skills per category -- if choose same skill for both slots, use upgraded version of that skill
-    public SkillsSpeed[] skillSpeed;    // first skill at 70% specialization, second at 95%
-    public SkillsHealth[] skillHealth;
-    public SkillsEnergy[] skillEnergy;
+    public TalentsDecay[] talentSpecDecay;
+    public TalentsPlant[] talentSpecPlant;
+    public TalentsMeat[] talentSpecMeat;
+    //public 
 
-    public enum TalentsDamage {
+    public enum TalentsAttack {
         RawDamageBonus,
         QuickBite,
         ReducedSpeedPenalty,
-        ReducedBiteCooldown,
+        ReducedBiteCooldown
+    }
+    public enum TalentsDefend {
+        RawHealthBonus,
+        SafetyInNumbers,
+        HealRate,
+        Stamina
     }
     public enum TalentsSpeed {
         RawSpeedBonus,
         TurnBonus,
         SurfTheCurrent,
-        Dodge,
-    }
-    public enum TalentsHealth {
-        RawHealthBonus,
-        SafetyInNumbers,
-        HealRate,
-        Stamina,
-    }
-    public enum TalentsEnergy {
+        Dodge
+    }    
+    public enum TalentsUtility {
         RawEfficiencyBonus,
         SharedMeal,
         RestingEfficiency,  // while not moving, barely lose energy
-        StoredEggEnergy,  // newborns start with extra food/energy
+        StoredEggEnergy  // newborns start with extra food/energy
     }
 
-    public enum SkillsDamage {
+    public enum TalentsDecay {
+        None
+    } 
+    public enum TalentsPlant {
+        None
+    } 
+    public enum TalentsMeat {
+        None
+    } 
+
+    //public SkillsDamage[] skillDamage;  // up to 2 skills per category -- if choose same skill for both slots, use upgraded version of that skill    
+    //public SkillsHealth[] skillHealth;
+    //public SkillsSpeed[] skillSpeed;    // first skill at 70% specialization, second at 95%
+    //public SkillsEnergy[] skillEnergy;
+    
+    /*public enum SkillsDamage {
         TailStrike,
         MegaBite,
         AmbushBite,
@@ -159,7 +177,7 @@ public class CritterModuleCoreGenome {
         SecondWind,
         Burrow,
         Stun,
-    }
+    }*/
 
     // List of Shape/Form modifiers here???:::
     //public CritterGenomeInterpretor.MaskDataSin maskDataSinTemp;
@@ -348,14 +366,17 @@ public class CritterModuleCoreGenome {
         tailFinAmplitudes = Vector3.one;
         tailFinOffsets = Vector3.zero;
 
-        priorityDamage = 0.5f;
-        prioritySpeed = 0.5f;
-        priorityHealth = 0.5f;
-        priorityEnergy = 0.5f;
+        talentSpecializationAttack = 0.5f;
+        talentSpecializationDefense = 0.5f;
+        talentSpecializationSpeed = 0.5f;
+        talentSpecializationUtility = 0.5f;
 
-        foodEfficiencyPlant = 0.5f;
-        foodEfficiencyDecay = 0.5f;
-        foodEfficiencyMeat = 0.5f;
+        dietSpecializationPlant = 0.5f;
+        dietSpecializationDecay = 0.5f;
+        dietSpecializationMeat = 0.5f;
+
+        mouthFeedFrequency = 1f;
+        mouthAttackAmplitude = 1f;
 
         //numSegments = 1;
         /*
@@ -378,7 +399,8 @@ public class CritterModuleCoreGenome {
 
     public void AppendModuleNeuronsToMasterList(ref List<NeuronGenome> neuronList) {
         NeuronGenome bias = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 0);
-                        
+
+        NeuronGenome isMouthTrigger = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 21);
         //NeuronGenome temperature = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 22); // 22
         //NeuronGenome pressure = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 23); // 23
         NeuronGenome isContact = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 24); // 24
@@ -390,10 +412,11 @@ public class CritterModuleCoreGenome {
         NeuronGenome energyStored = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 204); // 27
         NeuronGenome foodStored = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 205); // 28
         
-        NeuronGenome mouthEffector = new NeuronGenome(NeuronGenome.NeuronType.Out, inno, 206); // 106
+        NeuronGenome mouthFeedEffector = new NeuronGenome(NeuronGenome.NeuronType.Out, inno, 206); // 106
 
         neuronList.Add(bias);   //0
-        
+
+        neuronList.Add(isMouthTrigger); // 21
         neuronList.Add(isContact); // 24
         neuronList.Add(contactForceX); // 25
         neuronList.Add(contactForceY); // 26 
@@ -404,9 +427,31 @@ public class CritterModuleCoreGenome {
         neuronList.Add(stamina); // 28
         neuronList.Add(energyStored); // 204
         neuronList.Add(foodStored); // 205
-                
-        // 7 Total Outputs
-        neuronList.Add(mouthEffector); // 206
+           
+        neuronList.Add(mouthFeedEffector); // 206
+
+        float talentSpecTotal = talentSpecializationAttack + talentSpecializationDefense + talentSpecializationSpeed + talentSpecializationUtility;
+        float talentSpecAttackNorm = talentSpecializationAttack / talentSpecTotal;
+        float talentSpecDefenseNorm = talentSpecializationDefense / talentSpecTotal;
+        float talentSpecSpeedNorm = talentSpecializationSpeed / talentSpecTotal;
+        float talentSpecUtilityNorm = talentSpecializationUtility / talentSpecTotal;
+
+        if(talentSpecAttackNorm > 0.2f) {
+            NeuronGenome mouthAttackEffector = new NeuronGenome(NeuronGenome.NeuronType.Out, inno, 207);
+            neuronList.Add(mouthAttackEffector);
+        }
+        if(talentSpecDefenseNorm > 0.2f) {
+            NeuronGenome defendEffector = new NeuronGenome(NeuronGenome.NeuronType.Out, inno, 208);
+            neuronList.Add(defendEffector);
+        }
+        if(talentSpecSpeedNorm > 0.2f) {
+            NeuronGenome dashEffector = new NeuronGenome(NeuronGenome.NeuronType.Out, inno, 209);
+            neuronList.Add(dashEffector);
+        }
+        if(talentSpecUtilityNorm > 0.2f) {
+            NeuronGenome healEffector = new NeuronGenome(NeuronGenome.NeuronType.Out, inno, 210);
+            neuronList.Add(healEffector);
+        }
     }
 
     public void SetToMutatedCopyOfParentGenome(CritterModuleCoreGenome parentGenome, MutationSettings settings) {
@@ -557,14 +602,18 @@ public class CritterModuleCoreGenome {
         tailFinAmplitudes = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.tailFinAmplitudes, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
         tailFinOffsets = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.tailFinOffsets, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, -10f, 10f);
 
-        priorityDamage = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.priorityDamage, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
-        prioritySpeed = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.prioritySpeed, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
-        priorityHealth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.priorityHealth, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
-        priorityEnergy = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.priorityEnergy, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
+        talentSpecializationAttack = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.talentSpecializationAttack, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.01f, 1f);
+        talentSpecializationDefense = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.talentSpecializationDefense, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.01f, 1f);
+        talentSpecializationSpeed = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.talentSpecializationSpeed, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.01f, 1f);
+        talentSpecializationUtility = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.talentSpecializationUtility, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.01f, 1f);
 
-        foodEfficiencyPlant = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.foodEfficiencyPlant, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
-        foodEfficiencyDecay = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.foodEfficiencyDecay, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
-        foodEfficiencyMeat = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.foodEfficiencyMeat, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
+        dietSpecializationPlant = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.dietSpecializationPlant, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.01f, 1f);
+        dietSpecializationDecay = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.dietSpecializationDecay, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.01f, 1f);
+        dietSpecializationMeat = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.dietSpecializationMeat, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.01f, 1f);
+        
+        mouthFeedFrequency = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.mouthFeedFrequency, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.25f, 4f);
+        mouthAttackAmplitude = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.mouthAttackAmplitude, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.25f, 4f);
+
         /*fullBodyWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.fullBodyWidth, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.1f, 4.5f);
         fullBodyLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.fullBodyLength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, fullBodyWidth * 1.25f, fullBodyWidth * 4f);
         if(fullBodyLength < fullBodyWidth * 1.25f) {

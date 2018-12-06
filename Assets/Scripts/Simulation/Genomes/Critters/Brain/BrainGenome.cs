@@ -33,7 +33,7 @@ public class BrainGenome {
     public void InitializeRandomBrainGenome(BodyGenome bodyGenome, float initialWeightMultiplier, int numInitHiddenNeurons) {
         InitializeNewBrainGenomeLists();
         InitializeBodyNeurons(bodyGenome);
-        InitializeAxons(initialWeightMultiplier, 0.125f, numInitHiddenNeurons);
+        InitializeAxons(initialWeightMultiplier, 0.2f, numInitHiddenNeurons);
     }
 
     public void InitializeBodyNeurons(BodyGenome bodyGenome) {

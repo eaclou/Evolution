@@ -65,6 +65,7 @@ public class UIManager : MonoBehaviour {
     public Button buttonInspectCycleNextAgent;
     public Text textStomachContents;
     public Text textEnergy;
+    public Text textHealth;
     public Text textDiet;
     public Text textDimensionsWidth;
     public Text textDimensionsLength;
@@ -970,8 +971,7 @@ public class UIManager : MonoBehaviour {
             debugTxtAgent += "\nREALTIME DATA:";
             debugTxtAgent += "\nExp: " + agentRef.totalExperience.ToString("F2") + ",  fitnessScore: " + agentRef.masterFitnessScore.ToString("F2") + ", LVL: " + agentRef.curLevel.ToString();
             debugTxtAgent += "\n(" + lifeStageProgressTxt + ") Growth: " + (agentRef.sizePercentage * 100f).ToString("F0") + "%, Age: " + agentRef.ageCounter.ToString() + " Frames\n\n";
-
-            debugTxtAgent += "Intent To Consume: " + agentRef.coreModule.mouthEffector[0].ToString("F3") + "\n";
+                        
             debugTxtAgent += "Nearest Food: [" + agentRef.foodModule.nearestFoodParticleIndex.ToString() +
                         "] Amount: " + agentRef.foodModule.nearestFoodParticleAmount.ToString("F4") +
                         "\nPos: ( " + agentRef.foodModule.nearestFoodParticlePos.x.ToString("F2") +
@@ -989,8 +989,12 @@ public class UIManager : MonoBehaviour {
             debugTxtAgent += "\nCurVel: " + agentRef.curVel.ToString("F3") + ", CurAccel: " + agentRef.curAccel.ToString("F3") + ", AvgVel: " + agentRef.avgVel.ToString("F3") + "\n";
 
             debugTxtAgent += "\nWater Depth: " + agentRef.depth.ToString("F3") + ", Vel: " + (agentRef.avgFluidVel * 10f).ToString("F3") + "\n";
-            debugTxtAgent += "Throttle: [ " + agentRef.movementModule.throttleX[0].ToString("F3") + ", " + agentRef.movementModule.throttleY[0].ToString("F3") + " ]\n\n";
-
+            debugTxtAgent += "Throttle: [ " + agentRef.movementModule.throttleX[0].ToString("F3") + ", " + agentRef.movementModule.throttleY[0].ToString("F3") + " ]\n";
+            debugTxtAgent += "FeedEffector: " + agentRef.coreModule.mouthFeedEffector[0].ToString("F2") + "\n";
+            debugTxtAgent += "AttackEffector: " + agentRef.coreModule.mouthAttackEffector[0].ToString("F2") + "\n";
+            debugTxtAgent += "DefendEffector: " + agentRef.coreModule.defendEffector[0].ToString("F2") + "\n";
+            debugTxtAgent += "DashEffector: " + agentRef.coreModule.dashEffector[0].ToString("F2") + "\n";
+            debugTxtAgent += "HealEffector: " + agentRef.coreModule.healEffector[0].ToString("F2") + "\n";
             
             
 
@@ -1217,6 +1221,7 @@ public class UIManager : MonoBehaviour {
         inspectWidgetHealthMat.SetPass(0);
         inspectWidgetHealthMat.SetColor("_Tint", healthHue);
         inspectWidgetHealthMat.SetFloat("_FillPercentage", percentage);
+        textHealth.text = "Health\n" + (gameManager.simulationManager.simStateData.critterSimDataArray[critterIndex].health * 100f).ToString("F1") + "%\nStam: " + gameManager.simulationManager.simStateData.critterSimDataArray[critterIndex].stamina.ToString("F2");
         
         // Species Icon:
         textSpeciesID.text = gameManager.simulationManager.agentsArray[critterIndex].speciesIndex.ToString();

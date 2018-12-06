@@ -28,8 +28,12 @@ public class CritterModuleCore {
     public float debugFoodValue = 0f;
     
     public EggSack nearestEggSackModule;
+    public PredatorModule nearestPredatorModule;
+    public Agent nearestFriendAgent;
+    public Agent nearestEnemyAgent;
     //public Vector2 nearestEggSackPos;
-    
+
+    public float[] isMouthTrigger;
     //public float[] temperature;
     //public float[] pressure;
     public float[] isContact;
@@ -41,21 +45,40 @@ public class CritterModuleCore {
     public float[] energyStored;
     public float[] foodStored;
     
-    public float[] mouthEffector;
-        
-    public PredatorModule nearestPredatorModule;
-    public Agent nearestFriendAgent;
-    public Agent nearestEnemyAgent; 
+    public float[] mouthFeedEffector;
+    public float[] mouthAttackEffector;
+    public float[] defendEffector;
+    public float[] dashEffector;
+    public float[] healEffector;
     
     public float damageBonus;
     public float speedBonus;
     public float healthBonus;
     public float energyBonus;
 
+    public float talentSpecAttackNorm;
+    public float talentSpecDefenseNorm;
+    public float talentSpecSpeedNorm;
+    public float talentSpecUtilityNorm;
+
+    public float dietSpecDecayNorm;
+    public float dietSpecPlantNorm;
+    public float dietSpecMeatNorm;
+
     // Diet specialization:
     public float foodEfficiencyPlant;
     public float foodEfficiencyDecay;
     public float foodEfficiencyMeat;
+
+    public bool isDashing = false;
+    public int dashFrameCounter = 0;
+    public int dashDuration = 20;
+    public int dashCooldown = 80;
+
+    public bool isDefending = false;
+    public int defendFrameCounter = 0;
+    public int defendDuration = 40;
+    public int defendCooldown = 120;
 
 	public CritterModuleCore() {
 
@@ -64,7 +87,8 @@ public class CritterModuleCore {
     public void Initialize(CritterModuleCoreGenome genome, Agent agent) {
         
         bias = new float[1];   //0
-        
+
+        isMouthTrigger = new float[1];
         //temperature = new float[1]; // 22
         //pressure = new float[1]; // 23
         isContact = new float[1]; // 24
@@ -76,7 +100,11 @@ public class CritterModuleCore {
         energyStored = new float[1];  // 204
         foodStored = new float[1];  // 205
                         
-        mouthEffector = new float[1];  // 206
+        mouthFeedEffector = new float[1];  // 206
+        mouthAttackEffector = new float[1];
+        defendEffector = new float[1];
+        dashEffector = new float[1];
+        healEffector = new float[1];
                                                                           
         energy = 1;
         healthHead = 1f;
@@ -93,18 +121,24 @@ public class CritterModuleCore {
         parentID = genome.parentID;
         inno = genome.inno;
 
-        Vector4 bonusVectorNorm = new Vector4(genome.priorityDamage, genome.prioritySpeed, genome.priorityHealth, genome.priorityEnergy).normalized;
-        damageBonus = Mathf.Lerp(0.5f, 2f, bonusVectorNorm.x);
-        speedBonus = Mathf.Lerp(0.5f, 2f, bonusVectorNorm.y);
-        healthBonus = Mathf.Lerp(0.5f, 2f, bonusVectorNorm.z);
-        energyBonus = Mathf.Lerp(0.5f, 2f, bonusVectorNorm.w);
-
-
+        float talentSpecTotal = genome.talentSpecializationAttack + genome.talentSpecializationDefense + genome.talentSpecializationSpeed + genome.talentSpecializationUtility;
+        talentSpecAttackNorm = genome.talentSpecializationAttack / talentSpecTotal;
+        talentSpecDefenseNorm = genome.talentSpecializationDefense / talentSpecTotal;
+        talentSpecSpeedNorm = genome.talentSpecializationSpeed / talentSpecTotal;
+        talentSpecUtilityNorm = genome.talentSpecializationUtility / talentSpecTotal;
+        damageBonus = Mathf.Lerp(0.33f, 2f, talentSpecAttackNorm);
+        healthBonus = Mathf.Lerp(0.33f, 2f, talentSpecDefenseNorm);
+        speedBonus = Mathf.Lerp(0.33f, 2f, talentSpecSpeedNorm);        
+        energyBonus = Mathf.Lerp(0.75f, 1.5f, talentSpecUtilityNorm);
+        
         // Diet specialization:
-        Vector3 dietVectorNorm = new Vector3(genome.foodEfficiencyDecay, genome.foodEfficiencyPlant, genome.foodEfficiencyMeat).normalized;        
-        foodEfficiencyDecay = dietVectorNorm.x;
-        foodEfficiencyPlant = dietVectorNorm.y;
-        foodEfficiencyMeat = dietVectorNorm.z;
+        float dietSpecTotal = genome.dietSpecializationDecay + genome.dietSpecializationPlant + genome.dietSpecializationMeat;        
+        dietSpecDecayNorm = genome.dietSpecializationDecay / dietSpecTotal;
+        foodEfficiencyDecay = Mathf.Lerp(0.33f, 2f, dietSpecDecayNorm);
+        dietSpecPlantNorm = genome.dietSpecializationPlant / dietSpecTotal;
+        foodEfficiencyPlant = Mathf.Lerp(0.33f, 2f, dietSpecPlantNorm);
+        dietSpecMeatNorm = genome.dietSpecializationMeat / dietSpecTotal;
+        foodEfficiencyMeat = Mathf.Lerp(0.33f, 2f, dietSpecMeatNorm);
     }
 
     public void MapNeuron(NID nid, Neuron neuron) {
@@ -114,7 +148,10 @@ public class CritterModuleCore {
                 neuron.currentValue = bias;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }            
-            
+            if (nid.neuronID == 21) {
+                neuron.currentValue = isMouthTrigger;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
             if (nid.neuronID == 24) {
                 neuron.currentValue = isContact;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
@@ -145,7 +182,23 @@ public class CritterModuleCore {
             }            
 
             if (nid.neuronID == 206) {
-                neuron.currentValue = mouthEffector;
+                neuron.currentValue = mouthFeedEffector;
+                neuron.neuronType = NeuronGenome.NeuronType.Out;
+            }
+            if (nid.neuronID == 207) {
+                neuron.currentValue = mouthAttackEffector;
+                neuron.neuronType = NeuronGenome.NeuronType.Out;
+            }
+            if (nid.neuronID == 208) {
+                neuron.currentValue = defendEffector;
+                neuron.neuronType = NeuronGenome.NeuronType.Out;
+            }
+            if (nid.neuronID == 209) {
+                neuron.currentValue = dashEffector;
+                neuron.neuronType = NeuronGenome.NeuronType.Out;
+            }
+            if (nid.neuronID == 210) {
+                neuron.currentValue = healEffector;
                 neuron.neuronType = NeuronGenome.NeuronType.Out;
             }
         }
@@ -163,5 +216,20 @@ public class CritterModuleCore {
         energyStored[0] = Mathf.Clamp01(energy);  // Mathf.Clamp01(energyRaw / maxEnergyStorage);
         foodStored[0] = stomachContentsNorm; // / stomachCapacity;
         
+        if(isDashing) {
+            dashFrameCounter++;
+            if(dashFrameCounter >= dashDuration + dashCooldown) {
+                dashFrameCounter = 0;
+                isDashing = false;
+            }
+        }
+        
+        if(isDefending) {
+            defendFrameCounter++;
+            if(defendFrameCounter >= defendDuration + defendCooldown) {
+                defendFrameCounter = 0;
+                isDefending = false;
+            }
+        }
     }
 }

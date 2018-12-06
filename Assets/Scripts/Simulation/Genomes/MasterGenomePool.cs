@@ -337,9 +337,9 @@ public class MasterGenomePool {
         float dTailFinSpread = Mathf.Abs(newGenome.bodyGenome.coreGenome.tailFinSpreadAngle - repGenome.bodyGenome.coreGenome.tailFinSpreadAngle);
 
         // sensors & shit:
-        float dFoodSpecDecay = Mathf.Abs(newGenome.bodyGenome.coreGenome.foodEfficiencyDecay - repGenome.bodyGenome.coreGenome.foodEfficiencyDecay);
-        float dFoodSpecPlant = Mathf.Abs(newGenome.bodyGenome.coreGenome.foodEfficiencyPlant - repGenome.bodyGenome.coreGenome.foodEfficiencyPlant);
-        float dFoodSpecMeat = Mathf.Abs(newGenome.bodyGenome.coreGenome.foodEfficiencyMeat - repGenome.bodyGenome.coreGenome.foodEfficiencyMeat);
+        float dFoodSpecDecay = Mathf.Abs(newGenome.bodyGenome.coreGenome.dietSpecializationDecay - repGenome.bodyGenome.coreGenome.dietSpecializationDecay);
+        float dFoodSpecPlant = Mathf.Abs(newGenome.bodyGenome.coreGenome.dietSpecializationPlant - repGenome.bodyGenome.coreGenome.dietSpecializationPlant);
+        float dFoodSpecMeat = Mathf.Abs(newGenome.bodyGenome.coreGenome.dietSpecializationMeat - repGenome.bodyGenome.coreGenome.dietSpecializationMeat);
                 
         float dUseComms = newGenome.bodyGenome.communicationGenome.useComms == repGenome.bodyGenome.communicationGenome.useComms ? 0f : 1f;
         float dUseWaterStats = newGenome.bodyGenome.environmentalGenome.useWaterStats == repGenome.bodyGenome.environmentalGenome.useWaterStats ? 0f : 1f;
@@ -366,8 +366,8 @@ public class MasterGenomePool {
         float dNeurons = Mathf.Abs(newGenome.brainGenome.hiddenNeuronList.Count - repGenome.brainGenome.hiddenNeuronList.Count);
         float dAxons = Mathf.Abs(newGenome.brainGenome.linkList.Count - repGenome.brainGenome.linkList.Count) / (float)repGenome.brainGenome.bodyNeuronList.Count;
 
-        float dSpecialization = (new Vector4(newGenome.bodyGenome.coreGenome.priorityDamage, newGenome.bodyGenome.coreGenome.prioritySpeed, newGenome.bodyGenome.coreGenome.priorityHealth, newGenome.bodyGenome.coreGenome.priorityEnergy).normalized - 
-                                 new Vector4(repGenome.bodyGenome.coreGenome.priorityDamage, repGenome.bodyGenome.coreGenome.prioritySpeed, repGenome.bodyGenome.coreGenome.priorityHealth, repGenome.bodyGenome.coreGenome.priorityEnergy).normalized).magnitude;
+        float dSpecialization = (new Vector4(newGenome.bodyGenome.coreGenome.talentSpecializationAttack, newGenome.bodyGenome.coreGenome.talentSpecializationDefense, newGenome.bodyGenome.coreGenome.talentSpecializationSpeed, newGenome.bodyGenome.coreGenome.talentSpecializationUtility).normalized - 
+                                 new Vector4(repGenome.bodyGenome.coreGenome.talentSpecializationAttack, repGenome.bodyGenome.coreGenome.talentSpecializationDefense, repGenome.bodyGenome.coreGenome.talentSpecializationSpeed, repGenome.bodyGenome.coreGenome.talentSpecializationUtility).normalized).magnitude;
 
         dSensory *= 0.2f;
         

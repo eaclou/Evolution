@@ -317,14 +317,23 @@ public class SimulationStateData {
                 critterSimDataArray[i].energy = simManager.agentsArray[i].coreModule.energy; // Raw / simManager.agentsArray[i].coreModule.maxEnergyStorage;
                 critterSimDataArray[i].health = simManager.agentsArray[i].coreModule.healthHead;
                 critterSimDataArray[i].stamina = simManager.agentsArray[i].coreModule.stamina[0];
-                critterSimDataArray[i].consumeOn = simManager.agentsArray[i].mouthRef.GetIsConsuming();    // Flag for intention to eat gpu food particle (plant-type)         
-                if(simManager.agentsArray[i].sizePercentage > 0.025f)
+                critterSimDataArray[i].consumeOn = simManager.agentsArray[i].mouthRef.GetIsFeeding();    // Flag for intention to eat gpu food particle (plant-type)         
+
+                critterSimDataArray[i].biteAnimCycle = 0f;
+                if(simManager.agentsArray[i].mouthRef.isFeeding) {
+                    critterSimDataArray[i].biteAnimCycle = Mathf.Clamp01((float)simManager.agentsArray[i].mouthRef.feedingFrameCounter / (float)simManager.agentsArray[i].mouthRef.feedAnimDuration);
+                }
+                if(simManager.agentsArray[i].mouthRef.isAttacking) {
+                    critterSimDataArray[i].biteAnimCycle = Mathf.Clamp01((float)simManager.agentsArray[i].mouthRef.attackingFrameCounter / (float)simManager.agentsArray[i].mouthRef.attackAnimDuration);
+                }
+
+                if (simManager.agentsArray[i].sizePercentage > 0.025f)
                 {
-                    if (simManager.agentsArray[i].coreModule.mouthEffector[0] > 0.0f)
+                    if (simManager.agentsArray[i].coreModule.mouthFeedEffector[0] > 0.0f)
                     {
                         //if (simManager.agentsArray[i].mouthRef.isPassive)
                         //{
-                        critterSimDataArray[i].consumeOn = 1f;
+                        //critterSimDataArray[i].consumeOn = 1f;
                         //}
                         //else
                         //{
@@ -352,7 +361,7 @@ public class SimulationStateData {
                 if (simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Egg)
                 {
                     critterSimDataArray[i].consumeOn = 0f;
-                    critterSimDataArray[i].biteAnimCycle *= 0.75f;
+                    //critterSimDataArray[i].biteAnimCycle *= 0.75f;
                 }
                 if (simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Dead)
                 {

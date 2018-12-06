@@ -20,8 +20,8 @@ public class CritterModuleMovement {
     public float[] throttleY;
     public float[] dash;
 
-    public float smallestCreatureBaseSpeed = 45f;
-    public float largestCreatureBaseSpeed = 90f;
+    public float smallestCreatureBaseSpeed = 75f;
+    public float largestCreatureBaseSpeed = 150f;
 
     public float smallestCreatureBaseTurnRate = 32f;
     public float largestCreatureBaseTurnRate = 0.05f;
@@ -55,7 +55,7 @@ public class CritterModuleMovement {
 
         float invAspectRatio = agentGenome.bodyGenome.coreGenome.creatureAspectRatio;
 
-        speedBonus = Mathf.Lerp(0.75f, 1.5f, 1f - invAspectRatio);
+        speedBonus = Mathf.Lerp(0.7f, 1.4f, 1f - invAspectRatio);
     }
 
     public void MapNeuron(NID nid, Neuron neuron) {
