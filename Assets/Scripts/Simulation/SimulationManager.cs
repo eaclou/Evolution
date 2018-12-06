@@ -1064,14 +1064,20 @@ public class SimulationManager : MonoBehaviour {
             masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgConsumptionDecay = Mathf.Lerp(speciesPool.avgConsumptionDecay, agentRef.totalFoodEatenDecay, lerpAmount);
             masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgConsumptionPlant = Mathf.Lerp(speciesPool.avgConsumptionPlant, agentRef.totalFoodEatenPlant, lerpAmount);
             masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgConsumptionMeat = Mathf.Lerp(speciesPool.avgConsumptionMeat, agentRef.totalFoodEatenMeat, lerpAmount);
-            masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgBodySize = Mathf.Lerp(speciesPool.avgBodySize, agentRef.fullSizeBodyVolume, lerpAmount);            
-            masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgFoodSpecDecay = Mathf.Lerp(speciesPool.avgFoodSpecDecay, (float)agentRef.coreModule.foodEfficiencyDecay, lerpAmount);
-            masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgFoodSpecPlant = Mathf.Lerp(speciesPool.avgFoodSpecPlant, (float)agentRef.coreModule.foodEfficiencyPlant, lerpAmount);
-            masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgFoodSpecMeat = Mathf.Lerp(speciesPool.avgFoodSpecMeat, (float)agentRef.coreModule.foodEfficiencyMeat, lerpAmount);
+            masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgBodySize = Mathf.Lerp(speciesPool.avgBodySize, agentRef.fullSizeBodyVolume, lerpAmount);
+            masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgSpecAttack = Mathf.Lerp(speciesPool.avgSpecAttack, (float)agentRef.coreModule.talentSpecAttackNorm, lerpAmount);
+            masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgSpecDefend = Mathf.Lerp(speciesPool.avgSpecDefend, (float)agentRef.coreModule.talentSpecDefenseNorm, lerpAmount);
+            masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgSpecSpeed = Mathf.Lerp(speciesPool.avgSpecSpeed, (float)agentRef.coreModule.talentSpecSpeedNorm, lerpAmount);
+            masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgSpecUtility = Mathf.Lerp(speciesPool.avgSpecUtility, (float)agentRef.coreModule.talentSpecUtilityNorm, lerpAmount);
+            masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgFoodSpecDecay = Mathf.Lerp(speciesPool.avgFoodSpecDecay, (float)agentRef.coreModule.dietSpecDecayNorm, lerpAmount);
+            masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgFoodSpecPlant = Mathf.Lerp(speciesPool.avgFoodSpecPlant, (float)agentRef.coreModule.dietSpecPlantNorm, lerpAmount);
+            masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgFoodSpecMeat = Mathf.Lerp(speciesPool.avgFoodSpecMeat, (float)agentRef.coreModule.dietSpecMeatNorm, lerpAmount);
             masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgNumNeurons = Mathf.Lerp(speciesPool.avgNumNeurons, (float)agentRef.brain.neuronList.Count, lerpAmount);
             masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgNumAxons = Mathf.Lerp(speciesPool.avgNumAxons, (float)agentRef.brain.axonList.Count, lerpAmount);
             masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgExperience = Mathf.Lerp(speciesPool.avgExperience, (float)agentRef.totalExperience, lerpAmount);
             masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgFitnessScore = Mathf.Lerp(speciesPool.avgFitnessScore, (float)agentRef.masterFitnessScore, lerpAmount);
+            masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgDamageDealt = Mathf.Lerp(speciesPool.avgDamageDealt, agentRef.totalDamageDealt, lerpAmount);
+            masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgDamageTaken = Mathf.Lerp(speciesPool.avgDamageTaken, agentRef.totalDamageTaken, lerpAmount);
             // More??
             //masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].
         }

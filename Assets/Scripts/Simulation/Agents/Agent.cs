@@ -7,6 +7,8 @@ public class Agent : MonoBehaviour {
     public float totalFoodEatenDecay = 0f;
     public float totalFoodEatenPlant = 0f;
     public float totalFoodEatenMeat = 0f;
+    public float totalDamageDealt = 0f;
+    public float totalDamageTaken = 0f;
 
     public float speed = 500f;
     public float smoothedThrottleLerp = 0.2f;
@@ -587,7 +589,7 @@ public class Agent : MonoBehaviour {
         
         GainExperience((amount / coreModule.stomachCapacity) * coreModule.foodEfficiencyMeat * 1f); // Exp for appropriate food
     }
-    public void ProcessDamageReceived(float damage) {
+    public void ProcessDamageReceived(float damage, Agent predatorAgentRef) {
 
         damage = damage / coreModule.healthBonus;
 
@@ -608,6 +610,9 @@ public class Agent : MonoBehaviour {
         coreModule.healthHead -= damage;
         coreModule.healthBody -= damage;
         coreModule.healthExternal -= damage;
+
+        totalDamageTaken += damage;
+        predatorAgentRef.totalDamageDealt += damage;
 
         CheckForDeathHealth();
     }
@@ -1420,6 +1425,8 @@ public class Agent : MonoBehaviour {
         totalFoodEatenDecay = 0f;
         totalFoodEatenPlant = 0f;
         totalFoodEatenMeat = 0f;
+        totalDamageDealt = 0f;
+        totalDamageTaken = 0f;
         turningAmount = 5f; // temporary for zygote animation
         facingDirection = new Vector2(0f, 1f);
         throttle = Vector2.zero;

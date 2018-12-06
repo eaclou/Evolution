@@ -32,6 +32,14 @@ public class SpeciesGenomePool {
     public List<float> avgConsumptionMeatPerYearList;
     public float avgBodySize = 0f;
     public List<float> avgBodySizePerYearList;
+    public float avgSpecAttack = 0f;
+    public List<float> avgSpecAttackPerYearList;
+    public float avgSpecDefend = 0f;
+    public List<float> avgSpecDefendPerYearList;
+    public float avgSpecSpeed = 0f;
+    public List<float> avgSpecSpeedPerYearList;
+    public float avgSpecUtility = 0f;
+    public List<float> avgSpecUtilityPerYearList;
     public float avgFoodSpecDecay = 0f;
     public List<float> avgFoodSpecDecayPerYearList;
     public float avgFoodSpecPlant = 0f;
@@ -46,6 +54,10 @@ public class SpeciesGenomePool {
     public List<float> avgExperiencePerYearList;
     public float avgFitnessScore = 0f;
     public List<float> avgFitnessScorePerYearList;
+    public float avgDamageDealt = 0f;
+    public List<float> avgDamageDealtPerYearList;
+    public float avgDamageTaken = 0f;
+    public List<float> avgDamageTakenPerYearList;
 
     public bool isFlaggedForExtinction = false;
     public bool isExtinct = false;
@@ -71,6 +83,14 @@ public class SpeciesGenomePool {
         avgConsumptionMeatPerYearList.Add(0f);
         avgBodySizePerYearList = new List<float>();
         avgBodySizePerYearList.Add(0f);
+        avgSpecAttackPerYearList = new List<float>();
+        avgSpecAttackPerYearList.Add(0f);
+        avgSpecDefendPerYearList = new List<float>();
+        avgSpecDefendPerYearList.Add(0f);
+        avgSpecSpeedPerYearList = new List<float>();
+        avgSpecSpeedPerYearList.Add(0f);
+        avgSpecUtilityPerYearList = new List<float>();
+        avgSpecUtilityPerYearList.Add(0f);
         avgFoodSpecDecayPerYearList = new List<float>();
         avgFoodSpecDecayPerYearList.Add(0f);
         avgFoodSpecPlantPerYearList = new List<float>();
@@ -85,6 +105,10 @@ public class SpeciesGenomePool {
         avgExperiencePerYearList.Add(0f);
         avgFitnessScorePerYearList = new List<float>();
         avgFitnessScorePerYearList.Add(0f);
+        avgDamageDealtPerYearList = new List<float>();
+        avgDamageDealtPerYearList.Add(0f);
+        avgDamageTakenPerYearList = new List<float>();
+        avgDamageTakenPerYearList.Add(0f);
 
         candidateGenomesList = new List<CandidateAgentData>();
         leaderboardGenomesList = new List<CandidateAgentData>();
@@ -134,6 +158,10 @@ public class SpeciesGenomePool {
         avgConsumptionPlant = 0f;
         avgConsumptionMeat = 0f;
         avgBodySize = 0f;
+        avgSpecAttack = 0f;
+        avgSpecDefend = 0f;
+        avgSpecSpeed = 0f;
+        avgSpecUtility = 0f;
         avgFoodSpecDecay = 0f;
         avgFoodSpecPlant = 0f;
         avgFoodSpecMeat = 0f;
@@ -141,6 +169,8 @@ public class SpeciesGenomePool {
         avgNumAxons = 0f;
         avgExperience = 0f;
         avgFitnessScore = 0f;
+        avgDamageDealt = 0f;
+        avgDamageTaken = 0f;
     }
 
     public void UpdateYearlyStats(int year) {
@@ -149,6 +179,10 @@ public class SpeciesGenomePool {
         avgConsumptionPlantPerYearList.Add(avgConsumptionPlant);
         avgConsumptionMeatPerYearList.Add(avgConsumptionMeat);
         avgBodySizePerYearList.Add(avgBodySize);
+        avgSpecAttackPerYearList.Add(avgSpecAttack);
+        avgSpecDefendPerYearList.Add(avgSpecDefend);
+        avgSpecSpeedPerYearList.Add(avgSpecSpeed);
+        avgSpecUtilityPerYearList.Add(avgSpecUtility);
         avgFoodSpecDecayPerYearList.Add(avgFoodSpecDecay);
         avgFoodSpecPlantPerYearList.Add(avgFoodSpecPlant);
         avgFoodSpecMeatPerYearList.Add(avgFoodSpecMeat);
@@ -156,6 +190,8 @@ public class SpeciesGenomePool {
         avgNumAxonsPerYearList.Add(avgNumAxons);
         avgExperiencePerYearList.Add(avgExperience);
         avgFitnessScorePerYearList.Add(avgFitnessScore);
+        avgDamageDealtPerYearList.Add(avgDamageDealt);
+        avgDamageTakenPerYearList.Add(avgDamageTaken);
     }
 
     public CandidateAgentData GetNextAvailableCandidate() {

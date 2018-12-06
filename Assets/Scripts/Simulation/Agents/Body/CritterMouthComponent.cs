@@ -263,7 +263,7 @@ public class CritterMouthComponent : MonoBehaviour {
                         }
                         else
                         {
-                            BiteDamageAnimal(collidingAgent, ownBiteArea, targetArea);
+                            //BiteDamageAnimal(collidingAgent, ownBiteArea, targetArea);
                         }                               
                     }
                 }
@@ -375,7 +375,7 @@ public class CritterMouthComponent : MonoBehaviour {
         float damage = baseDamage * sizeRatio * agentRef.coreModule.damageBonus;
         damage = Mathf.Clamp01(damage);
 
-        preyAgent.ProcessDamageReceived(damage);
+        preyAgent.ProcessDamageReceived(damage, agentRef);
 
         //if(agentRef.coreModule.foodEfficiencyMeat > 0.5f) { // ** // damage bonus -- provided has the required specialization level:::::
         //    agentRef.GainExperience(damage * 0.5f);  
