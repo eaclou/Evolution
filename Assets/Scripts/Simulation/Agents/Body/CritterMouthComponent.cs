@@ -13,10 +13,10 @@ public class CritterMouthComponent : MonoBehaviour {
     public int attackingFrameCounter = 0;
 
     public Vector2 mouthTriggerSize;
-    public int feedAnimDuration = 20;
-    public int feedAnimCooldown = 20;
-    public int attackAnimDuration = 40;
-    public int attackAnimCooldown = 80;
+    public int feedAnimDuration = 10;
+    public int feedAnimCooldown = 24;
+    public int attackAnimDuration = 8;
+    public int attackAnimCooldown = 60;
 
     // efficiency? calculated elsewhere?
     
@@ -54,8 +54,11 @@ public class CritterMouthComponent : MonoBehaviour {
         agentRef.coreModule.isMouthTrigger[0] = 0f;
 
         if(isFeeding) {
-            //Debug.Log("mouthTick(" + bitingFrameCounter.ToString() + ")");            
-            feedingFrameCounter++;     
+            //Debug.Log("mouthTick(" + bitingFrameCounter.ToString() + ")");  
+            float randChance = UnityEngine.Random.Range(0f, 1f);
+            if(randChance < 0.75f) {  // RANDOM DURATION VARIANCE
+                feedingFrameCounter++;
+            }                 
             if(feedingFrameCounter > feedAnimDuration) {
                 isCooldown = true;
                 //feedingFrameCounter = 0;
@@ -68,8 +71,11 @@ public class CritterMouthComponent : MonoBehaviour {
             }
         }
         if(isAttacking) {
-            //Debug.Log("mouthTick(" + bitingFrameCounter.ToString() + ")");            
-            attackingFrameCounter++;   
+            //Debug.Log("mouthTick(" + bitingFrameCounter.ToString() + ")");      
+            float randChance = UnityEngine.Random.Range(0f, 1f);
+            if(randChance < 0.75f) {  // RANDOM DURATION VARIANCE
+                attackingFrameCounter++;   
+            }
             if(attackingFrameCounter > attackAnimDuration) {
                 isCooldown = true;
             }
@@ -133,18 +139,18 @@ public class CritterMouthComponent : MonoBehaviour {
         // Set Values from Genome:
 
         //mouthTriggerSize;
-        float baseFeedDuration = 24f;
+        float baseFeedDuration = 12f;
         float baseFeedCooldown = 24f;
-        float baseAttackDuration = 40f;
-        float baseAttackCooldown = 80f;
+        float baseAttackDuration = 16f;
+        float baseAttackCooldown = 64f;
 
         if(agent.coreModule.dietSpecDecayNorm > 0.5f) {
-            baseFeedDuration = 36f;
-            baseFeedCooldown = 12f;
+            baseFeedDuration = Mathf.RoundToInt((float)baseFeedDuration * 2f);
+            baseFeedCooldown = Mathf.RoundToInt((float)baseFeedCooldown * 0.75f);
 
             if(agent.coreModule.dietSpecDecayNorm > 0.75f) {
-                baseFeedDuration = 64f;
-                baseFeedCooldown = 6f;
+                baseFeedDuration = Mathf.RoundToInt((float)baseFeedDuration * 4f);
+                baseFeedCooldown = Mathf.RoundToInt((float)baseFeedCooldown * 0.5f);
             }
         }
         if(agent.coreModule.dietSpecPlantNorm > 0.5f) {
@@ -154,16 +160,16 @@ public class CritterMouthComponent : MonoBehaviour {
             }
         }
         if(agent.coreModule.dietSpecMeatNorm > 0.5f) {
-            baseFeedDuration = 36f;
-            baseFeedCooldown = 48f;
-            baseAttackDuration = 32f;
-            baseAttackCooldown = 64f;
+            baseFeedDuration = Mathf.RoundToInt((float)baseFeedDuration * 0.8f);
+            baseFeedCooldown = Mathf.RoundToInt((float)baseFeedCooldown * 0.9f);
+            baseAttackDuration = Mathf.RoundToInt((float)baseAttackDuration * 0.75f);
+            baseAttackCooldown = Mathf.RoundToInt((float)baseAttackCooldown * 0.9f);
 
             if(agent.coreModule.dietSpecMeatNorm > 0.75f) {
-                baseFeedDuration = 60f;
-                baseFeedCooldown = 80f;
-                baseAttackDuration = 16f;
-                baseAttackCooldown = 48f;
+                baseFeedDuration = Mathf.RoundToInt((float)baseFeedDuration * 0.6f);
+                baseFeedCooldown = Mathf.RoundToInt((float)baseFeedCooldown * 0.7f);
+                baseAttackDuration = Mathf.RoundToInt((float)baseAttackDuration * 0.75f);  // Make this dependent on Attack Specialization rather than diet?
+                baseAttackCooldown = Mathf.RoundToInt((float)baseAttackCooldown * 0.4f);
             }
         }
 

@@ -991,6 +991,9 @@ public class Agent : MonoBehaviour {
 
         float staminaRefillRate = 0.0005f;
         float energyToStaminaConversionRate = 5f; // * coreModule.healthBonus;
+        if(coreModule.stamina[0] < 0.25f) {
+            staminaRefillRate *= 0.25f;
+        }
         if(coreModule.stamina[0] < 1f) {
             coreModule.stamina[0] += staminaRefillRate;
             coreModule.energy -= staminaRefillRate / energyToStaminaConversionRate;
@@ -1009,6 +1012,8 @@ public class Agent : MonoBehaviour {
 
         eatAmountsArray[index].x = 0f;
 
+        float sizeValue = BodyGenome.GetBodySizeScore01(candidateRef.candidateGenome.bodyGenome);
+
         if(curLifeStage == AgentLifeStage.Dead || curLifeStage == AgentLifeStage.Egg) {
             throttle = Vector2.zero;
             smoothedThrottle = Vector2.zero;
@@ -1021,7 +1026,9 @@ public class Agent : MonoBehaviour {
             if(foodParticleEatAmount > 0f) {
                 //mouthRef.InitiatePassiveBite();
 
-                EatFoodPlant(foodParticleEatAmount);                
+                float sizeEfficiencyPlant = Mathf.Lerp(settings.minSizeFeedingEfficiencyDecay, settings.maxSizeFeedingEfficiencyDecay, sizeValue);
+
+                EatFoodPlant(foodParticleEatAmount * sizeEfficiencyPlant);                
             }
             // DECAY NUTRIENTS:
             if(mouthRef.GetIsFeeding() > 0.5f) {
@@ -1032,11 +1039,11 @@ public class Agent : MonoBehaviour {
 
                 float maxEatRate = mouthArea * 4f * settings.eatRateMultiplier;
                 // *** This is gross - CHANGE IT:::
-                float sizeValue = Mathf.Clamp01(((fullSizeBoundingBox.x + fullSizeBoundingBox.z) * 0.5f - 0.035f) / 2f); // ** Hardcoded assuming size ranges from 0.1 --> 2.5 !!! ********
-                float efficiency = Mathf.Lerp(settings.minSizeFeedingEfficiency, settings.maxSizeFeedingEfficiency, sizeValue) * ambientFoodDensity;
+                // Mathf.Clamp01(((fullSizeBoundingBox.x + fullSizeBoundingBox.z) * 0.5f - 0.035f) / 2f); // ** Hardcoded assuming size ranges from 0.1 --> 2.5 !!! ********
+                float sizeEfficiencyDecay = Mathf.Lerp(settings.minSizeFeedingEfficiencyDecay, settings.maxSizeFeedingEfficiencyDecay, sizeValue) * ambientFoodDensity;
                     
                 // *** Can double dip !!! BROKEN! **** Check reservoir first to avoid overdrafting!! ******
-                float filteredFoodAmount = Mathf.Min(maxEatRate * efficiency, maxEatRate);
+                float filteredFoodAmount = Mathf.Min(maxEatRate * sizeEfficiencyDecay, maxEatRate);
                    
                 // Needs to use Compute shader here to sample the current nutrientMapRT:::: ****
                 eatAmountsArray[index].x = filteredFoodAmount;
@@ -1061,9 +1068,9 @@ public class Agent : MonoBehaviour {
                 mouthRef.AttemptInitiateActiveAttackBite();                
             }
             if(coreModule.dashEffector[0] >= mostActiveEffectorVal) {
-                if(!coreModule.isDashing && coreModule.stamina[0] > 0.15f) {
+                if(!coreModule.isDashing && coreModule.stamina[0] > 0.1f) {
                     coreModule.isDashing = true;
-                    coreModule.stamina[0] -= 0.15f;
+                    coreModule.stamina[0] -= 0.1f;
                 }
             }
             if(coreModule.defendEffector[0] >= mostActiveEffectorVal) {
@@ -1072,6 +1079,7 @@ public class Agent : MonoBehaviour {
                     coreModule.stamina[0] -= 0.1f;
                 }
             }
+            
             //if(coreModule.healEffector[0] >= mostActiveEffectorVal) {
             //    
             //}
@@ -1116,7 +1124,7 @@ public class Agent : MonoBehaviour {
             bitingPenalty = 0.5f;
         }
         
-        float fatigueMultiplier = Mathf.Clamp01(coreModule.energy * 6f);
+        float fatigueMultiplier = Mathf.Clamp01(coreModule.energy * 5f + 0.05f) * Mathf.Clamp01(coreModule.stamina[0] * 4f + 0.05f);
         float lowHealthPenalty = Mathf.Clamp01(coreModule.healthBody * 5f) * 0.5f + 0.5f;
         fatigueMultiplier *= lowHealthPenalty;
         //float growthStatus = 
@@ -1145,6 +1153,9 @@ public class Agent : MonoBehaviour {
 
             // get size in 0-1 range from minSize to maxSize:
             float sizeValue = Mathf.Clamp01(coreModule.speedBonus * (candidateRef.candidateGenome.bodyGenome.coreGenome.creatureBaseLength - 0.2f) / 2f); ; // Mathf.Clamp01((fullSizeBoundingBox.x - 0.1f) / 2.5f); // ** Hardcoded assuming size ranges from 0.1 --> 2.5 !!! ********
+
+            float aspectSpeedPenalty = Mathf.Lerp(1.2f, 0.4f, candidateRef.candidateGenome.bodyGenome.coreGenome.creatureAspectRatio);
+
             float swimSpeed = Mathf.Lerp(movementModule.smallestCreatureBaseSpeed, movementModule.largestCreatureBaseSpeed, sizeValue);
             float turnRate = Mathf.Lerp(movementModule.smallestCreatureBaseTurnRate, movementModule.largestCreatureBaseTurnRate, sizeValue);
             float dashBonus = 1f;
@@ -1156,7 +1167,7 @@ public class Agent : MonoBehaviour {
                     dashBonus = 0.7f; // cooldown penalty
                 }
             }
-            speed = swimSpeed * movementModule.speedBonus * dashBonus;
+            speed = swimSpeed * movementModule.speedBonus * dashBonus * aspectSpeedPenalty;
             // Forward Slide
             //for(int k = 0; k < numSegments; k++) {
             Vector2 segmentForwardDir = new Vector2(this.bodyRigidbody.transform.up.x, this.bodyRigidbody.transform.up.y).normalized;

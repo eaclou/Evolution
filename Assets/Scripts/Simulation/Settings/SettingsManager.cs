@@ -14,8 +14,12 @@ public class SettingsManager : MonoBehaviour {
     public float energyDrainMultiplier = 0.2f;
     public float spawnNewFoodChance = 0.01f;
     public float foodDiffusionRate = 0.0125f;
-    public float minSizeFeedingEfficiency = 1f;
-    public float maxSizeFeedingEfficiency = 1f;
+    public float minSizeFeedingEfficiencyDecay = 1f;
+    public float maxSizeFeedingEfficiencyDecay = 1f;
+    public float minSizeFeedingEfficiencyPlant = 1f;
+    public float maxSizeFeedingEfficiencyPlant = 1f;
+    public float minSizeFeedingEfficiencyMeat = 1f;
+    public float maxSizeFeedingEfficiencyMeat = 1f;
 
     public float maxFoodParticleTotalAmount = 512f;
     public float avgFoodParticleRadius = 0.25f;

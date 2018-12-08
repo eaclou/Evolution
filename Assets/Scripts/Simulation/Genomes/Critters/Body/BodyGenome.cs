@@ -24,6 +24,13 @@ public class BodyGenome {
         //Debug.Log("BodyGenome() EMPTY CONSTRUCTOR");
     }
 
+    public static float GetBodySizeScore01(BodyGenome genome) {
+
+        float normalizedSizeScore = Mathf.Clamp01(((genome.fullsizeBoundingBox.x + genome.fullsizeBoundingBox.z) / genome.fullsizeBoundingBox.y) / 25f); // *** Remember to redo this more robustly! 25f is hardcoded approximate!
+
+        return normalizedSizeScore;
+    }
+
     public void FirstTimeInitializeCritterModuleGenomes() {
 
         // ID and inno# needed???? ***** should only be required to keep track of evolving body functions
