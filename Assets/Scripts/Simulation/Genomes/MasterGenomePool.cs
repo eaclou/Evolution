@@ -78,7 +78,7 @@ public class MasterGenomePool {
             float worstFitness = 99999f;
             bool noCurrentlyExtinctFlaggedSpecies = true;
             for(int i = 0; i < currentlyActiveSpeciesIDList.Count; i++) {
-                float fitness = completeSpeciesPoolsList[currentlyActiveSpeciesIDList[i]].avgLifespan;
+                float fitness = completeSpeciesPoolsList[currentlyActiveSpeciesIDList[i]].avgFitnessScore;
                 if(fitness < worstFitness) {
                     worstFitness = fitness;
                     leastFitSpeciesID = currentlyActiveSpeciesIDList[i];
@@ -101,6 +101,7 @@ public class MasterGenomePool {
             }
         }
     }
+    
     public void ExtinctifySpecies(SimulationManager simManagerRef, int speciesID) {
         //Debug.Log("REMOVE SPECIES " + speciesID.ToString());
 
@@ -224,7 +225,7 @@ public class MasterGenomePool {
                     
                     simManagerRef.AddNewSpecies(newGenome, parentSpeciesID);
 
-                    speciesSimilarityDistanceThreshold += 4f;
+                    speciesSimilarityDistanceThreshold += 10f;
                 }               
             }
             else {

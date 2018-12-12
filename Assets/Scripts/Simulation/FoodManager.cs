@@ -46,6 +46,7 @@ public class FoodManager {
     private FoodParticleData[] foodParticleMeasurementTotalsData;
 
     public Vector2[] nutrientPatchesArray;
+
     
     public struct FoodParticleData {
         public int index;

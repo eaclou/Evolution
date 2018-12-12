@@ -39,6 +39,15 @@ public class SettingsManager : MonoBehaviour {
     private float minBodyMutationStepSize = 0.025f;
     private float maxBodyMutationStepSize = 0.9f;
 
+    public int curTierBodyMutation = 4;
+    public int curTierBrainMutation = 4;
+    public int curTierFoodDecay = 6;
+    public int curTierFoodPlant = 4;
+    public int curTierFoodEgg = 4;
+    public int curTierFoodCorpse = 4;
+
+    
+    
     //public float minSizeCritterSpeed = 150f;
     //public float maxSizeCritterSpeed = 150f;
     public void SetGlobalMutationRate(float normalizedVal) {
@@ -56,6 +65,34 @@ public class SettingsManager : MonoBehaviour {
 	void Update () {
 		
 	}
+
+    public void ChangeTierBrainMutation(int delta) {
+        curTierBrainMutation = Mathf.Clamp(curTierBrainMutation + delta, 0, 10);
+        float brainMutationLerp = (float)curTierBrainMutation / 10f;
+        mutationSettingsPersistent.mutationChance = Mathf.Lerp(0.001f, 0.06f, brainMutationLerp);
+    }
+    public void ChangeTierBodyMutation(int delta) {
+        curTierBodyMutation = Mathf.Clamp(curTierBodyMutation + delta, 0, 10);
+        float bodyMutationLerp = (float)curTierBodyMutation / 10f;
+        mutationSettingsPersistent.defaultBodyMutationChance = Mathf.Lerp(0.01f, 0.5f, bodyMutationLerp);
+    }
+    public void ChangeTierFoodDecay(int delta) {
+        curTierFoodDecay = Mathf.Clamp(curTierFoodDecay + delta, 0, 10);
+        maxGlobalNutrients = Mathf.Pow(2f, curTierFoodDecay); // 1 - 1024 // Mathf.Lerp(8f, 512f, lerp);
+        float lerp = (float)curTierFoodDecay / 10f;
+        spawnNewFoodChance = Mathf.Lerp(0.005f, 0.04f, lerp);
+    }
+    public void ChangeTierFoodPlant(int delta) {
+        curTierFoodPlant = Mathf.Clamp(curTierFoodPlant + delta, 0, 10);
+        float lerp = (float)curTierFoodPlant / 10f;
+        foodParticleRegrowthRate = Mathf.Lerp(0.001f, 0.01f, lerp);
+        maxFoodParticleTotalAmount = Mathf.Pow(2f, curTierFoodPlant); // 1 - 1024 
+    }
+    public void UpdateValuesFromCurTiers() {
+        
+
+        
+    }
 
     public void Initialize() {
         //mutationSettingsSupervised = new MutationSettings(0.5f, 0.015f, 1f, 0.005f, 1f, 0.1f, 0.001f);

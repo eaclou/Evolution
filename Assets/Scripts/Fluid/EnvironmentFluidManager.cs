@@ -20,6 +20,8 @@ public class EnvironmentFluidManager : MonoBehaviour {
 
     public float isStirring = 0f;
 
+    public int curTierWaterCurrents = 2;
+
     private RenderTexture velocityA;
     public RenderTexture _VelocityA
     {
@@ -247,7 +249,8 @@ public class EnvironmentFluidManager : MonoBehaviour {
 
     public void UpdateSimulationClimate(float generation) {
         //SetClimateStormy();
-        SetClimateInitial();
+        SetCurrentsByTier();
+        //SetClimateInitial();
         /*
         float cycleValue = generation % 21f;
 
@@ -262,6 +265,17 @@ public class EnvironmentFluidManager : MonoBehaviour {
             //SetClimateThick();
         }
         */
+    }
+    private void SetCurrentsByTier() {
+        float lerpAmount = 1f;
+        viscosity = Mathf.Lerp(viscosity, 0.0002f, lerpAmount);
+        damping = Mathf.Lerp(damping, 0.004f, lerpAmount);
+        colorRefreshBackgroundMultiplier = Mathf.Lerp(colorRefreshBackgroundMultiplier, 0.001f, lerpAmount);
+        colorRefreshDynamicMultiplier = Mathf.Lerp(colorRefreshDynamicMultiplier, 0.0075f, lerpAmount);
+
+        float targetSpeed = Mathf.Lerp(1f, 16f, (float)curTierWaterCurrents / 10f);
+        
+        forceMultiplier = Mathf.Lerp(forceMultiplier, targetSpeed, lerpAmount);
     }
     private void SetClimateInitial() {
         //Debug.Log("UpdateSimulationClimate Initial!");

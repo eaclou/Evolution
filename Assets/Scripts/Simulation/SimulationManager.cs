@@ -20,6 +20,7 @@ public class SimulationManager : MonoBehaviour {
     public ComputeShader computeShaderFoodParticles;
     public MasterGenomePool masterGenomePool;
     public FoodManager foodManager;
+    public SimEventsManager simEventsManager;
 
     public bool isQuickStart = true;
 
@@ -142,6 +143,9 @@ public class SimulationManager : MonoBehaviour {
     private int numStepsInSimYear = 2000;
     private int simAgeYearCounter = 0;
     public int curSimYear = 0;
+
+    //public int curEventBucks = 1;
+
 
     #region loading   // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& LOADING LOADING LOADING &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
     public void TickLoading() {
@@ -337,6 +341,7 @@ public class SimulationManager : MonoBehaviour {
 
         settingsManager.Initialize();
         foodManager = new FoodManager(settingsManager);
+        simEventsManager = new SimEventsManager(this);
 
         //debugScores:
         rollingAverageAgentScoresArray = new float[numSpecies];
@@ -638,6 +643,7 @@ public class SimulationManager : MonoBehaviour {
         simAgeYearCounter++;
         if(simAgeYearCounter >= numStepsInSimYear) {
             curSimYear++;
+            simEventsManager.curEventBucks += 2;
             simAgeYearCounter = 0;
 
             // update graphs each "year"
@@ -647,6 +653,8 @@ public class SimulationManager : MonoBehaviour {
             
             RefreshGraphData();
         }
+
+        simEventsManager.Tick();
 
         
         eggSackRespawnCounter++;
@@ -1035,6 +1043,10 @@ public class SimulationManager : MonoBehaviour {
 
     #region Process Events // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& PROCESS EVENTS! &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
     
+    public void ExecuteSimEvent(SimEventData eventData) {
+
+        simEventsManager.ExecuteEvent(this, eventData);
+    }
     // *** confirm these are set up alright       
     public void ProcessNullAgent(Agent agentRef) {   // (Upon Agent Death:)
         numAgentsDied++;

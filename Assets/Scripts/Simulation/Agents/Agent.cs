@@ -20,6 +20,9 @@ public class Agent : MonoBehaviour {
 
     public bool isInert = true;  // when inert, colliders disabled
 
+    public bool isActing = false;  // biting, defending, dashing, etc -- exclusive actions
+    public bool isResting = false;
+
     public int index;    
     public int speciesIndex = -1;  // ********************** NEED to set these at birth!
     public CandidateAgentData candidateRef;
@@ -994,6 +997,12 @@ public class Agent : MonoBehaviour {
         if(coreModule.stamina[0] < 0.25f) {
             staminaRefillRate *= 0.25f;
         }
+        if(coreModule.stamina[0] > 0.75f) {
+            staminaRefillRate *= 1.5f;
+        }
+        if(isResting) {
+            staminaRefillRate *= 5f;
+        }
         if(coreModule.stamina[0] < 1f) {
             coreModule.stamina[0] += staminaRefillRate;
             coreModule.energy -= staminaRefillRate / energyToStaminaConversionRate;
@@ -1059,7 +1068,7 @@ public class Agent : MonoBehaviour {
             mostActiveEffectorVal = Mathf.Max(mostActiveEffectorVal, coreModule.mouthAttackEffector[0]);
             mostActiveEffectorVal = Mathf.Max(mostActiveEffectorVal, coreModule.defendEffector[0]);
             mostActiveEffectorVal = Mathf.Max(mostActiveEffectorVal, coreModule.dashEffector[0]);
-            //mostActiveEffectorVal = Mathf.Max(mostActiveEffectorVal, coreModule.healEffector[0]);
+            mostActiveEffectorVal = Mathf.Max(mostActiveEffectorVal, coreModule.healEffector[0]);
 
             if(coreModule.mouthFeedEffector[0] >= mostActiveEffectorVal) {                
                 mouthRef.AttemptInitiateActiveFeedBite();                
@@ -1080,9 +1089,13 @@ public class Agent : MonoBehaviour {
                 }
             }
             
-            //if(coreModule.healEffector[0] >= mostActiveEffectorVal) {
-            //    
-            //}
+            isResting = false;
+            if(coreModule.healEffector[0] >= mostActiveEffectorVal) {
+                if(!coreModule.isDefending && !coreModule.isDashing && !mouthRef.isFeeding && !mouthRef.isAttacking) {
+                    isResting = true;
+                    //coreModule.stamina[0] -= 0.1f;
+                }                
+            }
             
             /*if(mouthRef.isPassive) {
 

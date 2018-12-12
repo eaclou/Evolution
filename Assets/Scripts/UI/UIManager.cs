@@ -159,6 +159,31 @@ public class UIManager : MonoBehaviour {
     public GameObject panelLoading;
     public GameObject panelPlaying;
 
+    // EVENTS TOOL SECTION:
+    public bool isActiveEventSelectionScreen = false;
+    public bool isActiveEventsMinor = false;
+    public bool isActiveEventsMajor = false;
+    public bool isActiveEventsExtreme = false;
+    //public int selectedEventCategoryID = 0;  // 0=minor, 1=major, 2=extreme
+    public GameObject panelEventMaster;
+    public Text textEventPointsWallet;
+    public GameObject panelEventSelectionScreen;
+    public Text textEventSelectionTitle;
+    public Text textEventSelectedDescription;
+    public Button buttonConfirmSelectedEvent;
+    public SimEventComponent simEvent0;
+    public SimEventComponent simEvent1;
+    public SimEventComponent simEvent2;
+    public SimEventComponent simEvent3;
+    public SimEventComponent[] simEventComponentsArray;
+    public int selectedMinorEventIndex = 0;
+    public int selectedMajorEventIndex = 0;
+    public int selectedExtremeEventIndex = 0;
+    public Button buttonEventsMinor;
+    public Button buttonEventsMajor;
+    public Button buttonEventsExtreme;
+
+    // TREE OF LIFE SECTION:
     public GameObject treeOfLifeAnchorGO;  
     public Button buttonShowHideTOL;
     public GameObject panelTreeOfLifeScaleHideGroup;
@@ -260,6 +285,12 @@ public class UIManager : MonoBehaviour {
         buttonToolInspect.GetComponent<Image>().color = buttonDisabledColor;        
         buttonToolFeed.GetComponent<Image>().color = buttonDisabledColor;
         buttonToolMutate.GetComponent<Image>().color = buttonDisabledColor;
+
+        simEventComponentsArray = new SimEventComponent[4];
+        simEventComponentsArray[0] = simEvent0;
+        simEventComponentsArray[1] = simEvent1;
+        simEventComponentsArray[2] = simEvent2;
+        simEventComponentsArray[3] = simEvent3;
     }
 
     
@@ -825,7 +856,7 @@ public class UIManager : MonoBehaviour {
         panelMainMenu.SetActive(false);
         panelLoading.SetActive(false);
         panelPlaying.SetActive(true);
-        panelGameOptions.SetActive(false);
+        panelGameOptions.SetActive(false);        
         treeOfLifeManager.UpdateVisualUI(treeOfLifePanelOn);
     }
     private void UpdateMainMenuUI() {
@@ -886,6 +917,8 @@ public class UIManager : MonoBehaviour {
         UpdateMutateToolPanelUI();
         UpdateStirToolPanelUI();
 
+        UpdateSimEventsUI();
+
         Vector2 curMousePos = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
 
         Vector2 instantMouseVel = curMousePos - prevMousePos;
@@ -896,18 +929,122 @@ public class UIManager : MonoBehaviour {
         prevMousePos = curMousePos;
     }
 
-    /*public void PlayerDied(bool starved) {
-        deathScreenOn = true;
-        timeOfLastPlayerDeath = Time.realtimeSinceStartup;
 
-        string causeOfDeath = "STARVED!";
-        if(!starved) {
-            causeOfDeath = "IMPALED!";
+    public void UpdateSimEventsUI() {
+        SimEventsManager eventsManager = gameManager.simulationManager.simEventsManager;
+
+        panelEventSelectionScreen.SetActive(isActiveEventSelectionScreen);
+
+        textEventPointsWallet.text = gameManager.simulationManager.simEventsManager.curEventBucks.ToString();
+
+        // Check for cooldown and currency to determine whether ot unlock menus:
+        buttonEventsMinor.interactable = false;
+        buttonEventsMajor.interactable = false;
+        buttonEventsExtreme.interactable = false;
+        if(eventsManager.isCooldown) {
+            //buttonEventsMinor.interactable = false;
+            //buttonEventsMajor.interactable = false;
+            //buttonEventsExtreme.interactable = false;
         }
-        textCauseOfDeath.text = causeOfDeath;
-        textPlayerScore.text = "Lived For " + gameManager.simulationManager.lastPlayerScore.ToString() + " Years!";
-    }*/
+        else {
+            if(eventsManager.curEventBucks >= 3) {                
+                buttonEventsMinor.interactable = true;
+            }
+            if(eventsManager.curEventBucks >= 15) {
+                buttonEventsMajor.interactable = true;
+            }
+            if(eventsManager.curEventBucks >= 75) {
+                buttonEventsExtreme.interactable = true;
+            }
+        }
+        //
+        //
 
+        if(isActiveEventSelectionScreen) {
+            string titleText = "";
+            if(isActiveEventsMinor) {
+                titleText = "MINOR EVENTS";
+
+                for(int i = 0; i < simEventComponentsArray.Length; i++) {                    
+                    if(selectedMinorEventIndex == i) {
+                        textEventSelectedDescription.text = gameManager.simulationManager.simEventsManager.availableMinorEventsList[i].description;
+                        simEventComponentsArray[i].isSelected = true;
+                       // simEventComponentsArray[i]  // if selected -- make bigger or glowy or whatever
+                    }
+                    else {
+                        simEventComponentsArray[i].isSelected = false;
+                    }
+                    simEventComponentsArray[i].UpdateSimEventPanel(this, gameManager.simulationManager.simEventsManager.availableMinorEventsList[i], i);
+                }
+            }
+            if(isActiveEventsMajor) {
+                titleText = "MAJOR EVENTS";
+
+                for(int i = 0; i < simEventComponentsArray.Length; i++) {                    
+                    if(selectedMajorEventIndex == i) {
+                        textEventSelectedDescription.text = gameManager.simulationManager.simEventsManager.availableMajorEventsList[i].description;
+                        simEventComponentsArray[i].isSelected = true;
+                    }
+                    else {
+                        simEventComponentsArray[i].isSelected = false;
+                    }
+                    simEventComponentsArray[i].UpdateSimEventPanel(this, gameManager.simulationManager.simEventsManager.availableMajorEventsList[i], i);
+                }
+            }
+            if(isActiveEventsExtreme) {
+                titleText = "EXTREME EVENTS";
+
+                for(int i = 0; i < simEventComponentsArray.Length; i++) {                    
+                    if(selectedExtremeEventIndex == i) {
+                        textEventSelectedDescription.text = gameManager.simulationManager.simEventsManager.availableExtremeEventsList[i].description;  // if selected -- make bigger or glowy or whatever
+                        simEventComponentsArray[i].isSelected = true;
+                    }
+                    else {
+                        simEventComponentsArray[i].isSelected = false;
+                    }
+                    simEventComponentsArray[i].UpdateSimEventPanel(this, gameManager.simulationManager.simEventsManager.availableExtremeEventsList[i], i);
+                }
+            }
+            textEventSelectionTitle.text = titleText;
+        }
+        else {
+            
+        }
+    }
+    public void ClickedOnEvent(SimEventComponent eventComponent) {
+        if(isActiveEventsMinor) {
+            selectedMinorEventIndex = eventComponent.index;
+        }
+        if(isActiveEventsMajor) {
+            selectedMajorEventIndex = eventComponent.index;
+        }
+        if(isActiveEventsExtreme) {
+            selectedExtremeEventIndex = eventComponent.index;
+        }
+    }
+    public void ClickConfirmEvent() {
+        
+        if(isActiveEventsMinor) {
+            SimEventData eventData = gameManager.simulationManager.simEventsManager.availableMinorEventsList[selectedMinorEventIndex];
+            gameManager.simulationManager.ExecuteSimEvent(eventData);            
+            Debug.Log("ClickConfirmEvent(" + selectedMinorEventIndex.ToString() + ") minor");
+           // selectedMinorEventIndex = eventComponent.index;
+        }
+        if(isActiveEventsMajor) {
+            SimEventData eventData = gameManager.simulationManager.simEventsManager.availableMajorEventsList[selectedMajorEventIndex];
+            gameManager.simulationManager.ExecuteSimEvent(eventData);
+            Debug.Log("ClickConfirmEvent(" + selectedMajorEventIndex.ToString() + ") major");
+
+        }
+        if(isActiveEventsExtreme) {
+            SimEventData eventData = gameManager.simulationManager.simEventsManager.availableExtremeEventsList[selectedExtremeEventIndex];
+            gameManager.simulationManager.ExecuteSimEvent(eventData);
+            Debug.Log("ClickConfirmEvent(" + selectedExtremeEventIndex.ToString() + ") extreme");
+        }
+
+        isActiveEventSelectionScreen = false;
+    }
+    
     public void UpdateDebugUI() {
 
         // DISABLED!!!! -- Need to establish good method for grabbing data from SimulationManager!
@@ -950,7 +1087,7 @@ public class UIManager : MonoBehaviour {
             debugTxtAgent += "CRITTER# [" + agentIndex.ToString() + "]     SPECIES# [" + agentRef.speciesIndex.ToString() + "]\n\n";
             // Init Attributes:
             // Body:
-            debugTxtAgent += "Base Size: " + agentRef.candidateRef.candidateGenome.bodyGenome.coreGenome.creatureBaseLength.ToString("F2") + ",  Aspect: " + agentRef.candidateRef.candidateGenome.bodyGenome.coreGenome.creatureAspectRatio.ToString("F1") + "\n"; 
+            debugTxtAgent += "Base Size: " + agentRef.candidateRef.candidateGenome.bodyGenome.coreGenome.creatureBaseLength.ToString("F2") + ",  Aspect: " + agentRef.candidateRef.candidateGenome.bodyGenome.coreGenome.creatureAspectRatio.ToString("F2") + "\n"; 
             debugTxtAgent += "Fullsize Dimensions: ( " + agentRef.fullSizeBoundingBox.x.ToString("F2") + ", " + agentRef.fullSizeBoundingBox.y.ToString("F2") + ", " + agentRef.fullSizeBoundingBox.z.ToString("F2") + " )\n";
             debugTxtAgent += "BONUS - Damage: " + agentRef.coreModule.damageBonus.ToString("F2") + ", Speed: " + agentRef.coreModule.speedBonus.ToString("F2") + ", Health: " + agentRef.coreModule.healthBonus.ToString("F2") + ", Energy: " + agentRef.coreModule.energyBonus.ToString("F2") + "\n";
             debugTxtAgent += "DIET - Decay: " + agentRef.coreModule.foodEfficiencyDecay.ToString("F2") + ", Plant: " + agentRef.coreModule.foodEfficiencyPlant.ToString("F2") + ", Meat: " + agentRef.coreModule.foodEfficiencyMeat.ToString("F2") + "\n";
@@ -1922,13 +2059,47 @@ public class UIManager : MonoBehaviour {
         panelTreeOfLifeScaleHideGroup.SetActive(treeOfLifePanelOn);
         treeOfLifeManager.UpdateVisualUI(treeOfLifePanelOn);
     }
-    public void ClickTreeOfLifeInfoA() {
 
-    }
-    public void ClickTreeOfLifeInfoB() {
 
+    public void ClickEventMinor() {
+        if(isActiveEventsMinor) {
+            isActiveEventsMinor = false;
+            isActiveEventSelectionScreen = false;
+        }
+        else {
+            isActiveEventsMinor = true;
+            isActiveEventSelectionScreen = true;
+            isActiveEventsMajor = false;
+            isActiveEventsExtreme = false;
+        }
+        UpdateSimEventsUI();
     }
-    public void ClickTreeOfLifeInfoC() {
+    public void ClickEventMajor() {
+        if(isActiveEventsMajor) {
+            isActiveEventsMajor = false;
+            isActiveEventSelectionScreen = false;
+        }
+        else {
+            isActiveEventsMajor = true;
+            isActiveEventSelectionScreen = true;
+            isActiveEventsMinor = false;
+            isActiveEventsExtreme = false;
+        }
+        UpdateSimEventsUI();
+    }
+    public void ClickEventExtreme() {
+        if(isActiveEventsExtreme) {
+            isActiveEventsExtreme = false;
+            isActiveEventSelectionScreen = false;
+        }
+        else {
+            isActiveEventsExtreme = true;
+            isActiveEventSelectionScreen = true;
+            isActiveEventsMinor = false;
+            isActiveEventsMajor = false;            
+        }
+        UpdateSimEventsUI();
+    }
 
-    }
+
 }
