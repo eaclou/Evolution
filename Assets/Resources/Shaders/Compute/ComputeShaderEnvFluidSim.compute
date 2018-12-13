@@ -4,6 +4,7 @@
 #pragma kernel Advection
 #pragma kernel ViscousDiffusion
 #pragma kernel VelocityInjectionPoints
+#pragma kernel VelocityInjectionPointsVortex
 #pragma kernel VelocityDivergence
 #pragma kernel PressureJacobi
 #pragma kernel SubtractGradient
@@ -546,6 +547,59 @@ void VelocityInjectionPoints (uint3 id : SV_DispatchThreadID)
 		float influenceAmount = exp(-fp.size * ((forceCoords.x - pixelCoords.x) * (forceCoords.x - pixelCoords.x) + (forceCoords.y - pixelCoords.y) * (forceCoords.y - pixelCoords.y)) / dist);
 		//newForce += forceVal * _DeltaTime * ;
 		newForce = lerp(newForce, forceVal, influenceAmount);
+	}
+	float damping = saturate(_Damping);
+
+	// STIR TOOL::::	
+	float2 stirCoords = float2(_ForcePosX, _ForcePosY);
+	float distanceToStirOrigin = length(pixelCoords - stirCoords);
+	float attenuation = exp(-_ForceSize * ((stirCoords.x - pixelCoords.x) * (stirCoords.x - pixelCoords.x) + (stirCoords.y - pixelCoords.y) * (stirCoords.y - pixelCoords.y)) / distanceToStirOrigin);
+	float2 playerStirVel = float2(_ForceDirX, _ForceDirY);
+	
+	newForce = lerp(newForce, playerStirVel, attenuation * _ForceOn);
+
+	VelocityWrite[id.xy] = float4(newForce, 0, 0) * (1.0 - damping);
+}
+
+[numthreads(16,16,1)]
+void VelocityInjectionPointsVortex (uint3 id : SV_DispatchThreadID)
+{	
+	float4 currentVelocity = VelocityRead[id.xy];
+
+	float isSolid = ObstaclesRead[id.xy].b;
+	if(isSolid > 0.5) {
+		VelocityWrite[id.xy] = currentVelocity;
+		return;
+	}
+	
+	uint elements;
+	uint stride;
+	ForcePointsCBuffer.GetDimensions(elements, stride);
+
+	float xCoord = ((float)id.x + 0.5) / _TextureResolution;
+	float yCoord = ((float)id.y + 0.5) / _TextureResolution;
+	float2 pixelCoords = float2(xCoord, yCoord);
+	
+	float2 newForce = currentVelocity.xy; //float2(0,0);
+
+	for(uint i = 0; i < elements; i++) {
+		
+		ForcePoint fp;
+		fp = ForcePointsCBuffer[i];	
+
+		float2 forceCoords = float2(fp.posX, fp.posY);
+		float animatedStrengthModifierX = sin((_Time + i * 1.01) * 0.2) * _ForceMagnitude;
+		float animatedStrengthModifierY = cos((_Time - i * 1.793) * 0.182451) * _ForceMagnitude;
+		float2 forceVal = float2(fp.velX * animatedStrengthModifierX, fp.velY * animatedStrengthModifierY);	
+		
+		float2 vortexOriginToPoint = pixelCoords - forceCoords;
+		float dist = length(vortexOriginToPoint);
+		float2 vortexToPointDir = normalize(vortexOriginToPoint);
+		float2 vortexForce = float2(vortexToPointDir.y, -vortexToPointDir.x) * dist * length(forceVal);
+		
+		float influenceAmount = exp(-fp.size * ((forceCoords.x - pixelCoords.x) * (forceCoords.x - pixelCoords.x) + (forceCoords.y - pixelCoords.y) * (forceCoords.y - pixelCoords.y)) / dist);
+		
+		newForce = lerp(newForce, vortexForce, influenceAmount);
 	}
 	float damping = saturate(_Damping);
 

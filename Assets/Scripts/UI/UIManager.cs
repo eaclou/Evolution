@@ -180,8 +180,12 @@ public class UIManager : MonoBehaviour {
     public int selectedMajorEventIndex = 0;
     public int selectedExtremeEventIndex = 0;
     public Button buttonEventsMinor;
+    public Image imageButtonEventsMinor;
     public Button buttonEventsMajor;
+    public Image imageButtonEventsMajor;
     public Button buttonEventsExtreme;
+    public Image imageButtonEventsExtreme;
+    public Text textRecentEvent;
 
     // TREE OF LIFE SECTION:
     public GameObject treeOfLifeAnchorGO;  
@@ -268,6 +272,10 @@ public class UIManager : MonoBehaviour {
     private int selectedAgentID;
 
     private const int maxDisplaySpecies = 32;
+
+    public Color buttonEventMinorColor = new Color(53f / 255f, 114f / 255f, 97f / 255f);
+    public Color buttonEventMajorColor = new Color(53f / 255f, 67f / 255f, 107f / 255f);
+    public Color buttonEventExtremeColor = new Color(144f / 255f, 54f / 255f, 82f / 255f);
     // Tree of Life:
     //public Image imageTreeOfLifeDisplay;
     
@@ -932,29 +940,49 @@ public class UIManager : MonoBehaviour {
 
     public void UpdateSimEventsUI() {
         SimEventsManager eventsManager = gameManager.simulationManager.simEventsManager;
-
+        
         panelEventSelectionScreen.SetActive(isActiveEventSelectionScreen);
 
-        textEventPointsWallet.text = gameManager.simulationManager.simEventsManager.curEventBucks.ToString();
-
+        textEventPointsWallet.text = "$" + gameManager.simulationManager.simEventsManager.curEventBucks.ToString();
+        
         // Check for cooldown and currency to determine whether ot unlock menus:
         buttonEventsMinor.interactable = false;
+        imageButtonEventsMinor.color = buttonEventMinorColor;
         buttonEventsMajor.interactable = false;
+        imageButtonEventsMajor.color = buttonEventMajorColor;
         buttonEventsExtreme.interactable = false;
+        imageButtonEventsExtreme.color = buttonEventExtremeColor;
         if(eventsManager.isCooldown) {
             //buttonEventsMinor.interactable = false;
             //buttonEventsMajor.interactable = false;
             //buttonEventsExtreme.interactable = false;
+            imageButtonEventsMinor.color = buttonEventMinorColor * 0.25f;
+            imageButtonEventsMajor.color = buttonEventMajorColor * 0.25f;
+            imageButtonEventsExtreme.color = buttonEventExtremeColor * 0.25f;
+            textRecentEvent.gameObject.SetActive(true);
+            textRecentEvent.text = eventsManager.mostRecentEventString;
         }
         else {
+            textRecentEvent.gameObject.SetActive(false);
+            //textRecentEvent.text = eventsManager.mostRecentEventString;
+
             if(eventsManager.curEventBucks >= 3) {                
                 buttonEventsMinor.interactable = true;
+            }
+            else {
+                imageButtonEventsMinor.color = buttonEventMinorColor * 0.25f;
             }
             if(eventsManager.curEventBucks >= 15) {
                 buttonEventsMajor.interactable = true;
             }
+            else {
+                imageButtonEventsMajor.color = buttonEventMajorColor * 0.25f;
+            }
             if(eventsManager.curEventBucks >= 75) {
                 buttonEventsExtreme.interactable = true;
+            }
+            else {
+                imageButtonEventsExtreme.color = buttonEventExtremeColor * 0.25f;
             }
         }
         //
@@ -976,6 +1004,8 @@ public class UIManager : MonoBehaviour {
                     }
                     simEventComponentsArray[i].UpdateSimEventPanel(this, gameManager.simulationManager.simEventsManager.availableMinorEventsList[i], i);
                 }
+
+                imageButtonEventsMinor.color = buttonEventMinorColor * 2f;
             }
             if(isActiveEventsMajor) {
                 titleText = "MAJOR EVENTS";
@@ -990,6 +1020,8 @@ public class UIManager : MonoBehaviour {
                     }
                     simEventComponentsArray[i].UpdateSimEventPanel(this, gameManager.simulationManager.simEventsManager.availableMajorEventsList[i], i);
                 }
+
+                imageButtonEventsMajor.color = buttonEventMajorColor * 2f;
             }
             if(isActiveEventsExtreme) {
                 titleText = "EXTREME EVENTS";
@@ -1004,6 +1036,8 @@ public class UIManager : MonoBehaviour {
                     }
                     simEventComponentsArray[i].UpdateSimEventPanel(this, gameManager.simulationManager.simEventsManager.availableExtremeEventsList[i], i);
                 }
+
+                imageButtonEventsExtreme.color = buttonEventExtremeColor * 2f;
             }
             textEventSelectionTitle.text = titleText;
         }
@@ -1043,6 +1077,9 @@ public class UIManager : MonoBehaviour {
         }
 
         isActiveEventSelectionScreen = false;
+        isActiveEventsMinor = false;
+        isActiveEventsMajor = false;
+        isActiveEventsExtreme = false;
     }
     
     public void UpdateDebugUI() {
@@ -1163,6 +1200,9 @@ public class UIManager : MonoBehaviour {
                     if (simManager.agentsArray[a].speciesIndex == speciesID) {
                         speciesPopSize++;
                     }
+                }
+                if(simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].isFlaggedForExtinction) {
+                    debugTxtGlobalSim += "xxx ";
                 }
                 debugTxtGlobalSim += "Species[" + speciesID.ToString() + "] p(" + parentSpeciesID.ToString() + "), size: " + speciesPopSize.ToString() + ", #cands: " + numCandidates.ToString() + ", numEvals: " + numBorn.ToString() + 
                              ",   avgFitness: " + avgFitness.ToString("F2") + 
@@ -2100,6 +2140,16 @@ public class UIManager : MonoBehaviour {
         }
         UpdateSimEventsUI();
     }
-
+    public void ClickEventReroll() {
+        if(isActiveEventsMinor) {
+            gameManager.simulationManager.simEventsManager.RegenerateAvailableMinorEvents(gameManager.simulationManager);
+        }
+        if(isActiveEventsMajor) {
+            gameManager.simulationManager.simEventsManager.RegenerateAvailableMajorEvents(gameManager.simulationManager);
+        }
+        if(isActiveEventsExtreme) {
+            gameManager.simulationManager.simEventsManager.RegenerateAvailableExtremeEvents(gameManager.simulationManager);
+        }
+    }
 
 }

@@ -8,11 +8,22 @@ public class SimEventData {
     public string description = "This is the longer description";
     public int cost = 10;
     public int duration = 1;  // in sim steps, or days?    
-    public SimEventType type;
-    public int simEventTier;
+    public SimEventTypeMinor typeMinor;
+    public SimEventTypeMajor typeMajor;
+    public SimEventTypeExtreme typeExtreme;
+    public SimEventCategories category;  // minor major extreme
+    public SpeciesQualifier speciesQualifier;
+    public int quantity;
     public bool isPositive;
+    public bool polarity;
 
-    public enum SimEventType {
+    public enum SimEventCategories {
+        Minor,
+        Major,
+        Extreme
+    }
+
+    /*public enum SimEventType {
         FoodDecay,
         FoodPlant,
         FoodEgg,
@@ -22,31 +33,72 @@ public class SimEventData {
         SpeciesLeastFit,
         SpeciesMostNovel,
         SpeciesLeastNovel,
-        BrainMutation,
-        BodyMutation,
+        BrainMutationBasic,
+        BrainMutationGrowth,
+        BodyMutationBasic,
+        BodyMutationModule,
         WaterCurrents
-    }
+    }*/
 
-    public enum SimEventAction {
-        Extinct,
-        NewSpecies
+    public enum SimEventTypeMinor {
+        FoodDecay,
+        FoodPlant,
+        FoodEgg,
+        FoodCorpse,
+        CreateSpecies,
+        KillSpecies,
+        BrainMutation,
+        BrainSize,        
+        BodyMutation,
+        BodyModules,
+        CalmWaters        
     }
-
-    public enum SimEventQualifier {
-        MostFit,
-        LeastFit,
-        MostNovel,
-        LeastNovel,
-        Largest,
-        Smallest,
-        Oldest,
-        Youngest
+    public enum SimEventTypeMajor {
+        FoodDecay,
+        FoodPlant,
+        FoodEgg,
+        FoodCorpse,
+        //FoodAll,
+        CreateSpecies,
+        KillSpecies,
+        BrainMutation,
+        BrainSize,        
+        BodyMutation,
+        BodyModules,
+        Gale 
+    }
+    public enum SimEventTypeExtreme {
+        FoodDecay,
+        FoodPlant,
+        FoodEgg,
+        FoodCorpse,
+        FoodAll,
+        CreateSpecies,
+        KillSpecies,
+        BrainMutation,
+        BrainSize,        
+        BodyMutation,
+        BodyModules,
+        Hurricane 
+    }
+    
+    public enum SpeciesQualifier {
+        Random,  // Minor cutoff
+        Fitness,
+        Novelty,
+        BodySize, 
+        Age,   // Major Cutoff
+        SpecAttack,
+        SpecDefend,
+        SpecSpeed,
+        SpecUtility,
+        SpecDecay,
+        SpecPlant,
+        SpecMeat
     }
     
 
 	public SimEventData() {
 
     }
-
-
 }

@@ -328,7 +328,7 @@ public class SimulationManager : MonoBehaviour {
 
         //yield return new WaitForSeconds(5f); // TEMP!!!
         Debug.Log("End Total: " + (Time.realtimeSinceStartup - masterStartTime).ToString());
-        environmentFluidManager.UpdateSimulationClimate(0);
+        environmentFluidManager.UpdateSimulationClimate();
         
         // Done - will be detected by GameManager next frame
         loadingComplete = true;
@@ -643,7 +643,7 @@ public class SimulationManager : MonoBehaviour {
         simAgeYearCounter++;
         if(simAgeYearCounter >= numStepsInSimYear) {
             curSimYear++;
-            simEventsManager.curEventBucks += 2;
+            simEventsManager.curEventBucks += 5; // temporarilly high!
             simAgeYearCounter = 0;
 
             // update graphs each "year"
@@ -652,6 +652,11 @@ public class SimulationManager : MonoBehaviour {
             }
             
             RefreshGraphData();
+            //environmentFluidManager.RerollForcePoints();
+        }
+
+        if(simAgeTimeSteps % 25 == 0) {
+            UpdateSimulationClimate();
         }
 
         simEventsManager.Tick();
@@ -811,9 +816,9 @@ public class SimulationManager : MonoBehaviour {
         }
         foodManager.ReviveSelectFoodParticles(respawnIndices, 6f, new Vector4(pos.x / _MapSize, pos.y / _MapSize, 0f, 0f), simStateData);
     }
-    public void ChangeGlobalMutationRate(float normalizedVal) {
-        settingsManager.SetGlobalMutationRate(normalizedVal);
-    }
+    //public void ChangeGlobalMutationRate(float normalizedVal) {
+    //    settingsManager.SetGlobalMutationRate(normalizedVal);
+    //}
     
     private void PopulateGridCells() {
 
@@ -1136,7 +1141,7 @@ public class SimulationManager : MonoBehaviour {
         //Debug.Log("SpawnAgentFromEggSack! " + agentIndex.ToString());
         numAgentsBorn++;
         currentOldestAgent = agentsArray[rankedIndicesList[0]].ageCounter;
-        agentsArray[agentIndex].InitializeSpawnAgentFromEggSack(agentIndex, sourceCandidate, parentEggSack); // Spawn that genome in dead Agent's body and revive it!
+        agentsArray[agentIndex].InitializeSpawnAgentFromEggSack(settingsManager, agentIndex, sourceCandidate, parentEggSack); // Spawn that genome in dead Agent's body and revive it!
         theRenderKing.UpdateCritterGenericStrokesData(agentsArray[agentIndex]); // agentIndex, sourceCandidate.candidateGenome);
         //theRenderKing.UpdateAgentWidthsTexture(agentsArray[agentIndex]);
                 
@@ -1150,7 +1155,7 @@ public class SimulationManager : MonoBehaviour {
 
         numAgentsBorn++;
         currentOldestAgent = agentsArray[rankedIndicesList[0]].ageCounter;
-        agentsArray[agentIndex].InitializeSpawnAgentImmaculate(agentIndex, sourceCandidate, GetRandomFoodSpawnPosition()); // Spawn that genome in dead Agent's body and revive it!
+        agentsArray[agentIndex].InitializeSpawnAgentImmaculate(settingsManager, agentIndex, sourceCandidate, GetRandomFoodSpawnPosition()); // Spawn that genome in dead Agent's body and revive it!
         theRenderKing.UpdateCritterGenericStrokesData(agentsArray[agentIndex]); //agentIndex, sourceCandidate.candidateGenome);
         //theRenderKing.UpdateAgentWidthsTexture(agentsArray[agentIndex]);
                 
@@ -1309,7 +1314,7 @@ public class SimulationManager : MonoBehaviour {
             
             */
 
-            UpdateSimulationClimate();
+            //UpdateSimulationClimate();
         }
         else {
             if(numAgentsProcessed < 130) {
@@ -1348,7 +1353,7 @@ public class SimulationManager : MonoBehaviour {
     private void UpdateSimulationClimate() {
         // Change force of turbulence, damping, other fluidSim parameters,
         // Inject pre-trained critters
-        environmentFluidManager.UpdateSimulationClimate((float)curApproxGen);
+        environmentFluidManager.UpdateSimulationClimate();
     }
     private void RefreshGraphData() {
         uiManager.UpdateGraphDataTextures(curSimYear);

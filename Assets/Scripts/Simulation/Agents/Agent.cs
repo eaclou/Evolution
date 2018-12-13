@@ -1363,7 +1363,12 @@ public class Agent : MonoBehaviour {
         averageFullSizeWidth = avgSegmentWidth;       
     }*/
     
-    public void ReconstructAgentGameObjects(AgentGenome genome, EggSack parentEggSack, Vector3 startPos, bool isImmaculate) {
+    public void ReconstructAgentGameObjects(SettingsManager settings, AgentGenome genome, EggSack parentEggSack, Vector3 startPos, bool isImmaculate) {
+        float corpseLerp = (float)settings.curTierFoodCorpse / 10f;
+        decayDurationTimeSteps = Mathf.RoundToInt(Mathf.Lerp(360f, 3600f, corpseLerp));
+        float eggLerp = (float)settings.curTierFoodEgg / 10f;
+        gestationDurationTimeSteps = Mathf.RoundToInt(Mathf.Lerp(360f, 1080f, eggLerp));
+        pregnancyRefactoryDuration = Mathf.RoundToInt(Mathf.Lerp(3600f, 800f, eggLerp));
 
         //InitializeAgentWidths(genome);
         InitializeGameObjectsAndComponents();  // Not needed??? ***
@@ -1457,7 +1462,7 @@ public class Agent : MonoBehaviour {
         smoothedThrottle = new Vector2(0f, 0.01f); 
     }
 
-    public void InitializeSpawnAgentImmaculate(int agentIndex, CandidateAgentData candidateData, StartPositionGenome startPos) {        
+    public void InitializeSpawnAgentImmaculate(SettingsManager settings, int agentIndex, CandidateAgentData candidateData, StartPositionGenome startPos) {        
         index = agentIndex;
         speciesIndex = candidateData.speciesID;
         candidateRef = candidateData;
@@ -1472,13 +1477,13 @@ public class Agent : MonoBehaviour {
         InitializeModules(genome);      // Modules need to be created first so that Brain can map its neurons to existing modules  
         
         // Upgrade this to proper Pooling!!!!
-        ReconstructAgentGameObjects(genome, null, startPos.startPosition, true);
+        ReconstructAgentGameObjects(settings, genome, null, startPos.startPosition, true);
 
         brain = new Brain(genome.brainGenome, this); 
         
         isInert = false;
     }
-    public void InitializeSpawnAgentFromEggSack(int agentIndex, CandidateAgentData candidateData, EggSack parentEggSack) {        
+    public void InitializeSpawnAgentFromEggSack(SettingsManager settings, int agentIndex, CandidateAgentData candidateData, EggSack parentEggSack) {        
         index = agentIndex;
         speciesIndex = candidateData.speciesID;
         candidateRef = candidateData;
@@ -1494,7 +1499,7 @@ public class Agent : MonoBehaviour {
         // Upgrade this to proper Pooling!!!!
         Vector3 spawnOffset = UnityEngine.Random.insideUnitSphere * parentEggSack.curSize.magnitude * 0.167f;
         spawnOffset.z = 0f;
-        ReconstructAgentGameObjects(genome, parentEggSack, parentEggSack.gameObject.transform.position + spawnOffset, false);
+        ReconstructAgentGameObjects(settings, genome, parentEggSack, parentEggSack.gameObject.transform.position + spawnOffset, false);
 
         brain = new Brain(genome.brainGenome, this);   
         

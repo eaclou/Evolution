@@ -103,7 +103,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
 
     //public bool tick = false;
     
-    private int numForcePoints = 32;
+    private int maxNumForcePoints = 32;
     public ForcePoint[] forcePointsArray;
     public ComputeBuffer forcePointsCBuffer;
     public struct ForcePoint {
@@ -185,14 +185,16 @@ public class EnvironmentFluidManager : MonoBehaviour {
         Graphics.Blit(firstTimeRelaxedColorTex, sourceColorRT);
         //InitializeVelocity();
         
-        forcePointsCBuffer = new ComputeBuffer(numForcePoints, sizeof(float) * 5);
-        forcePointsArray = new ForcePoint[numForcePoints];
-        CreateForcePoints(0.1f, 50f, 250f);
-
+        forcePointsCBuffer = new ComputeBuffer(maxNumForcePoints, sizeof(float) * 5);
+        forcePointsArray = new ForcePoint[maxNumForcePoints];
+        RerollForcePoints();
         debugMat.SetTexture("_MainTex", sourceColorRT);
 
         computeShaderFluidSim.SetFloat("_ForceOn", 0f);
-    }    
+    }
+    public void RerollForcePoints() {
+        CreateForcePoints(12f, 48f, 128f);
+    }
     public void Tick() {
         //Debug.Log("Tick!");
         computeShaderFluidSim.SetFloat("_Time", Time.time);
@@ -247,7 +249,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
         //SimTrailDots();
     }
 
-    public void UpdateSimulationClimate(float generation) {
+    public void UpdateSimulationClimate() {
         //SetClimateStormy();
         SetCurrentsByTier();
         //SetClimateInitial();
@@ -267,13 +269,14 @@ public class EnvironmentFluidManager : MonoBehaviour {
         */
     }
     private void SetCurrentsByTier() {
-        float lerpAmount = 1f;
+        float lerpAmount = 0.06f;
         viscosity = Mathf.Lerp(viscosity, 0.0002f, lerpAmount);
         damping = Mathf.Lerp(damping, 0.004f, lerpAmount);
         colorRefreshBackgroundMultiplier = Mathf.Lerp(colorRefreshBackgroundMultiplier, 0.001f, lerpAmount);
         colorRefreshDynamicMultiplier = Mathf.Lerp(colorRefreshDynamicMultiplier, 0.0075f, lerpAmount);
 
-        float targetSpeed = Mathf.Lerp(1f, 16f, (float)curTierWaterCurrents / 10f);
+        float baseTierLerp = Mathf.Clamp01((float)curTierWaterCurrents / 10f);
+        float targetSpeed = Mathf.Lerp(0f, 15f, baseTierLerp * baseTierLerp * baseTierLerp);
         
         forceMultiplier = Mathf.Lerp(forceMultiplier, targetSpeed, lerpAmount);
     }
@@ -317,7 +320,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
     
     private void CreateForcePoints(float magnitude, float minRadius, float maxRadius) {
         
-        for(int i = 0; i < numForcePoints; i++) {
+        for(int i = 0; i < maxNumForcePoints; i++) {
             ForcePoint agentPoint = new ForcePoint();
             
             float forceStrength = magnitude * 0.1f;
@@ -449,7 +452,8 @@ public class EnvironmentFluidManager : MonoBehaviour {
     }
     private void VelocityInjectionPoints(RenderTexture readRT, RenderTexture writeRT) {
         
-        int kernelVelocityInjectionPoints = computeShaderFluidSim.FindKernel("VelocityInjectionPoints");
+        //int kernelVelocityInjectionPoints = computeShaderFluidSim.FindKernel("VelocityInjectionPoints");
+        int kernelVelocityInjectionPoints = computeShaderFluidSim.FindKernel("VelocityInjectionPointsVortex");
         computeShaderFluidSim.SetFloat("_TextureResolution", (float)resolution);
         computeShaderFluidSim.SetFloat("_DeltaTime", deltaTime);
         computeShaderFluidSim.SetFloat("_InvGridScale", invGridScale);
