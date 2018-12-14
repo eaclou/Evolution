@@ -163,7 +163,6 @@ void CSEatSelectedFoodParticles (uint3 id : SV_DispatchThreadID)
 			if(foodParticlesWrite[particleIndex].foodAmount <= 0) {
 				foodParticlesWrite[particleIndex].active = 0;
 				foodParticlesWrite[particleIndex].isSwallowed = 1.0;
-				foodParticlesWrite[particleIndex].digestedAmount = 0.0;
 				foodParticlesWrite[particleIndex].critterIndex = critterIndex;				
 			}
 		}	
@@ -190,7 +189,7 @@ void CSMeasureTotalFoodParticlesAmount (uint3 id : SV_DispatchThreadID)
 	for(int i = 0; i < 32; i++) {		
 		int particleIndex = id.x * 32 + i;		
 		FoodParticleData particleData = foodParticlesRead[particleIndex];				
-		totalFoodAmount += particleData.foodAmount;
+		totalFoodAmount += particleData.foodAmount * particleData.active;
 	}
 
 	copyData.foodAmount = totalFoodAmount;
@@ -215,21 +214,7 @@ void CSRespawnFoodParticles (uint3 id : SV_DispatchThreadID)
 		
 		if(altitude > 0.5) {
 			foodParticlesWrite[id.x].active = 0.0;
-			foodParticlesWrite[id.x].refactoryAge = 0.0;
-
-			/*
-			float randX = rand(float2((float)id.x, _Time * 100));
-			float randY = rand(float2(randX, (float)id.x));
-			float randRadius = rand(float2(randX * 10, randY * -3.37)) * (_MaxParticleSize - _MinParticleSize) + _MinParticleSize;	
-
-			foodParticlesWrite[id.x].worldPos = float2(randX * _MapSize, randY * _MapSize);					
-			foodParticlesWrite[id.x].radius = randRadius;
-			foodParticlesWrite[id.x].foodAmount = randRadius * randRadius * 3.141592 * _ParticleNutrientDensity;
-			foodParticlesWrite[id.x].active = 1.0;
-			foodParticlesWrite[id.x].refactoryAge = 0.0;
-			foodParticlesWrite[id.x].isSwallowed = 0.0;
-			foodParticlesWrite[id.x].digestedAmount = 0.0;
-			*/
+			foodParticlesWrite[id.x].refactoryAge = 1.0;
 			// Respawn if on land ^^^:
 		}
 		else {  // Otherwise simulate as normal			
@@ -240,31 +225,35 @@ void CSRespawnFoodParticles (uint3 id : SV_DispatchThreadID)
 
 			float2 defaultNextPos = nextPos * _MapSize;
 			
-			foodParticlesWrite[id.x].age = foodParticle.age + 0.001;
+			foodParticlesWrite[id.x].age = foodParticle.age + 0.0003;
 			foodParticlesWrite[id.x].worldPos = defaultNextPos;
+		}
+
+		if(foodParticle.digestedAmount > 1.0) {  // Fully Decayed
+			foodParticlesWrite[id.x].active = 0.0;
+			foodParticlesWrite[id.x].refactoryAge = 1.0;
 		}
 	}
 	else {  // INACTIVE:::
 		foodParticlesWrite[id.x].refactoryAge = foodParticle.refactoryAge + _FoodParticleRegrowthRate;
-
-		//float2 swallowedPos = critterSimDataCBuffer[foodParticle.critterIndex].worldPos.xy;					
-		//foodParticlesWrite[id.x].worldPos = swallowedPos;
-		//foodParticlesWrite[id.x].digestedAmount = saturate(foodParticle.digestedAmount + 0.0075);
+	}
+	if(foodParticle.age > 2.0) {
+		foodParticlesWrite[id.x].digestedAmount = foodParticle.digestedAmount + 0.001;  // being used to indicate decayRate
 	}
 
 	if(_RespawnFoodParticles > 0.5) {		
 		
 		if(foodParticlesRead[id.x].refactoryAge > 1.0) {
 			
-			float rand01 = rand(float2(_Time + (float)foodParticlesRead[id.x].index, _Time));
+			float rand01 = rand(float2(_Time * 135.79 + (float)foodParticlesRead[id.x].index * 30.17896, _Time * 28.463));
 			float randX = rand(float2((float)id.x, _Time));
 			float randY = rand(float2(randX * 62.39 + _Time, (float)id.x));
 
 			float2 spawnUV = float2(randX, randY);			
 			float4 spawnDensitySample = _SpawnDensityMap.SampleLevel(_LinearClamp, spawnUV, 0);
 
-			float spawnThreshold = 0.01;
-			if(rand01 < 0.02) {  // to prevent mass respawning, overshooting the intended max global food amount ?
+			float spawnThreshold = 0.001;
+			if(rand01 < 0.025) {  // to prevent mass respawning, overshooting the intended max global food amount ?  // Needed?
 				if(spawnDensitySample.x > spawnThreshold) {
 				
 					foodParticlesWrite[id.x].worldPos = float2(randX * _MapSize, randY * _MapSize);
@@ -276,7 +265,7 @@ void CSRespawnFoodParticles (uint3 id : SV_DispatchThreadID)
 					foodParticlesWrite[id.x].refactoryAge = 0.0;
 					foodParticlesWrite[id.x].isSwallowed = 0.0;
 					foodParticlesWrite[id.x].digestedAmount = 0.0;
-					foodParticlesWrite[id.x].age = 0.0;
+					foodParticlesWrite[id.x].age = rand(float2(rand01 * 70.158, randX * 13.37));
 				}			
 			}			
 		}		

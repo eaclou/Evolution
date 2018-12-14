@@ -102,7 +102,7 @@ public class FoodManager {
             data.foodAmount = data.radius * data.radius * Mathf.PI * settingsRef.foodParticleNutrientDensity;
             data.active = 1f;
             data.refactoryAge = 0f;
-            data.age = 0f;
+            data.age = UnityEngine.Random.Range(0f, 1f);
             foodParticlesArray[i] = data;
         }
         //Debug.Log("Fill Initial Particle Array Data CPU: " + (Time.realtimeSinceStartup - startTime).ToString());

@@ -72,7 +72,7 @@
 
 				float3 worldPosition = float3(particleData.worldPos, 1.0);    //float3(rawData.worldPos, -random2);
 				
-				quadPoint = quadPoint * particleData.radius * (1.0 - particleData.digestedAmount) * 0.7; // * particleData.active; // *** remove * 3 after!!!
+				quadPoint = quadPoint * particleData.radius * 0.7; // * particleData.active; // *** remove * 3 after!!!
 				worldPosition = worldPosition + quadPoint * particleData.active;
 
 				// REFRACTION:
@@ -86,7 +86,7 @@
 				o.uv = quadVerticesCBuffer[id].xy + 0.5f;	
 
 				//o.color = float4();
-				o.color = float4(particleData.active, particleData.refactoryAge, saturate(particleData.foodAmount), saturate(particleData.age));
+				o.color = float4(particleData.active, saturate(particleData.foodAmount), saturate(particleData.digestedAmount), saturate(particleData.age * 0.5));
 				
 				return o;
 			}
@@ -98,7 +98,7 @@
 				
 				float val = i.color.a;
 				
-				float4 finalColor = float4(float3(i.color.z, i.color.z, i.color.w), i.color.x * 0.25 * texColor.a);
+				float4 finalColor = float4(float3(i.color.z * 1.2, 0.85, (1.0 - i.color.w) * 0.2) + i.color.y, texColor.a * i.color.x * 0.33 * (1 - i.color.z));
 				//finalColor = float4(0.25, 1, 0.36, texColor.a * 0.05);
 				return finalColor;
 			}

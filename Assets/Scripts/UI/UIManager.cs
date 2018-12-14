@@ -169,6 +169,7 @@ public class UIManager : MonoBehaviour {
     public Text textEventPointsWallet;
     public GameObject panelEventSelectionScreen;
     public Text textEventSelectionTitle;
+    public Image imageEventSelectionTitle;
     public Text textEventSelectedDescription;
     public Button buttonConfirmSelectedEvent;
     public SimEventComponent simEvent0;
@@ -970,7 +971,7 @@ public class UIManager : MonoBehaviour {
                 buttonEventsMinor.interactable = true;
             }
             else {
-                imageButtonEventsMinor.color = buttonEventMinorColor * 0.25f;
+                imageButtonEventsMinor.color = buttonEventMinorColor * 0.25f;    // also multiplying ALPHA!!! ... annoying              
             }
             if(eventsManager.curEventBucks >= 15) {
                 buttonEventsMajor.interactable = true;
@@ -1006,6 +1007,7 @@ public class UIManager : MonoBehaviour {
                 }
 
                 imageButtonEventsMinor.color = buttonEventMinorColor * 2f;
+                imageEventSelectionTitle.color = buttonEventMinorColor;
             }
             if(isActiveEventsMajor) {
                 titleText = "MAJOR EVENTS";
@@ -1022,8 +1024,9 @@ public class UIManager : MonoBehaviour {
                 }
 
                 imageButtonEventsMajor.color = buttonEventMajorColor * 2f;
+                imageEventSelectionTitle.color = buttonEventMajorColor;
             }
-            if(isActiveEventsExtreme) {
+                if(isActiveEventsExtreme) {
                 titleText = "EXTREME EVENTS";
 
                 for(int i = 0; i < simEventComponentsArray.Length; i++) {                    
@@ -1038,6 +1041,7 @@ public class UIManager : MonoBehaviour {
                 }
 
                 imageButtonEventsExtreme.color = buttonEventExtremeColor * 2f;
+                imageEventSelectionTitle.color = buttonEventExtremeColor;
             }
             textEventSelectionTitle.text = titleText;
         }

@@ -101,8 +101,10 @@ public class SimEventsManager {
                 simManager.environmentFluidManager.curTierWaterCurrents = 1; // Mathf.Clamp(simManager.environmentFluidManager.curTierWaterCurrents + deltaTiers, 0, 10);
                 //simManager.environmentFluidManager.RerollForcePoints();
                 break;
-            case SimEventData.SimEventTypeMinor.CreateSpecies:                                                
-                simManager.AddNewSpecies(simManager.masterGenomePool.completeSpeciesPoolsList[randomSpeciesID].leaderboardGenomesList[0].candidateGenome, randomSpeciesID);
+            case SimEventData.SimEventTypeMinor.CreateSpecies:   
+                AgentGenome newGenome = simManager.masterGenomePool.completeSpeciesPoolsList[randomSpeciesID].GetNewMutatedGenome();
+                simManager.AddNewSpecies(newGenome, randomSpeciesID);
+                //simManager.AddNewSpecies(simManager.masterGenomePool.completeSpeciesPoolsList[randomSpeciesID].leaderboardGenomesList[0].candidateGenome, randomSpeciesID);
                 break;
             case SimEventData.SimEventTypeMinor.FoodCorpse:
                 simManager.settingsManager.ChangeTierFoodCorpse(deltaTiers); 
@@ -117,9 +119,10 @@ public class SimEventsManager {
                 simManager.settingsManager.ChangeTierFoodPlant(deltaTiers); 
                 break;
             case SimEventData.SimEventTypeMinor.KillSpecies:
-                if(simManager.masterGenomePool.currentlyActiveSpeciesIDList.Count > 1) {                    
-                    simManager.masterGenomePool.completeSpeciesPoolsList[randomSpeciesID].isFlaggedForExtinction = true;
-                    Debug.Log("FLAG EXTINCT: " + randomSpeciesID.ToString());
+                if(simManager.masterGenomePool.currentlyActiveSpeciesIDList.Count > 1) {
+                    simManager.masterGenomePool.FlagSpeciesExtinct(randomSpeciesID);
+                    //simManager.masterGenomePool.completeSpeciesPoolsList[randomSpeciesID].isFlaggedForExtinction = true;
+                    //Debug.Log("FLAG EXTINCT: " + randomSpeciesID.ToString());
                 }
                 else {
                     Debug.LogError("ERROR: Couldn't Kill last remaining species");
@@ -175,8 +178,10 @@ public class SimEventsManager {
                 simManager.environmentFluidManager.RerollForcePoints();
                 break;
             case SimEventData.SimEventTypeMajor.CreateSpecies:                
-                //int speciesIndex = GetEventSpeciesID(simManager, data);                
-                simManager.AddNewSpecies(simManager.masterGenomePool.completeSpeciesPoolsList[speciesIndex].leaderboardGenomesList[0].candidateGenome, speciesIndex);
+                //int speciesIndex = GetEventSpeciesID(simManager, data);    
+                AgentGenome newGenome = simManager.masterGenomePool.completeSpeciesPoolsList[speciesIndex].GetNewMutatedGenome();
+                simManager.AddNewSpecies(newGenome, speciesIndex);
+                //simManager.AddNewSpecies(simManager.masterGenomePool.completeSpeciesPoolsList[speciesIndex].leaderboardGenomesList[0].candidateGenome, speciesIndex);
                 break;
             case SimEventData.SimEventTypeMajor.FoodCorpse:
                 simManager.settingsManager.ChangeTierFoodCorpse(deltaTiers); 
@@ -191,9 +196,10 @@ public class SimEventsManager {
                 simManager.settingsManager.ChangeTierFoodPlant(deltaTiers); 
                 break;
             case SimEventData.SimEventTypeMajor.KillSpecies:                
-                if(simManager.masterGenomePool.currentlyActiveSpeciesIDList.Count > 1) {                    
-                    simManager.masterGenomePool.completeSpeciesPoolsList[speciesIndex].isFlaggedForExtinction = true;
-                    Debug.Log("FLAG EXTINCT: " + speciesIndex.ToString());
+                if(simManager.masterGenomePool.currentlyActiveSpeciesIDList.Count > 1) {    
+                    simManager.masterGenomePool.FlagSpeciesExtinct(speciesIndex);
+                    //simManager.masterGenomePool.completeSpeciesPoolsList[speciesIndex].isFlaggedForExtinction = true;
+                    //Debug.Log("FLAG EXTINCT: " + speciesIndex.ToString());
                 }
                 else {
                     Debug.LogError("ERROR: Couldn't Kill last remaining species");
@@ -250,8 +256,11 @@ public class SimEventsManager {
                 //int speciesIndex = GetEventSpeciesID(simManager, data);     
                 for(int i = 0; i < data.quantity; i++) {
                     int speciesID = simManager.masterGenomePool.currentlyActiveSpeciesIDList[UnityEngine.Random.Range(0, simManager.masterGenomePool.currentlyActiveSpeciesIDList.Count)];
-                    int candID = UnityEngine.Random.Range(0, simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].leaderboardGenomesList.Count);
-                    simManager.AddNewSpecies(simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].leaderboardGenomesList[candID].candidateGenome, speciesID);
+                    //int candID = UnityEngine.Random.Range(0, simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].leaderboardGenomesList.Count);
+                    // Get mutated version first?
+                    //simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].leaderboardGenomesList[candID].candidateGenome
+                    AgentGenome newGenome = simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].GetNewMutatedGenome();
+                    simManager.AddNewSpecies(newGenome, speciesID);
                 }                
                 break;
             case SimEventData.SimEventTypeExtreme.FoodCorpse:
@@ -271,8 +280,9 @@ public class SimEventsManager {
                 if(simManager.masterGenomePool.currentlyActiveSpeciesIDList.Count > 1) {    
                     for(int i = 0; i < simManager.masterGenomePool.currentlyActiveSpeciesIDList.Count; i++) {
                         if(simManager.masterGenomePool.currentlyActiveSpeciesIDList[i] != randSpeciesID) {
-                            simManager.masterGenomePool.completeSpeciesPoolsList[simManager.masterGenomePool.currentlyActiveSpeciesIDList[i]].isFlaggedForExtinction = true;
-                            Debug.Log("FLAG EXTINCT: " + speciesIndex.ToString());
+                            simManager.masterGenomePool.FlagSpeciesExtinct(simManager.masterGenomePool.currentlyActiveSpeciesIDList[i]);
+                            //simManager.masterGenomePool.completeSpeciesPoolsList[simManager.masterGenomePool.currentlyActiveSpeciesIDList[i]].isFlaggedForExtinction = true;
+                            //Debug.Log("FLAG EXTINCT: " + speciesIndex.ToString());
                         }
                     }
                 }
@@ -311,13 +321,13 @@ public class SimEventsManager {
 
                 if(data.polarity) {
                     if (val > recordHigh) {
-                        recordLow = val;
+                        recordHigh = val;
                         speciesID = simManager.masterGenomePool.currentlyActiveSpeciesIDList[i];
                     }
                 }
                 else {
                     if (val < recordLow) {
-                        recordHigh = val;
+                        recordLow = val;
                         speciesID = simManager.masterGenomePool.currentlyActiveSpeciesIDList[i];
                     }
                 }
@@ -327,13 +337,13 @@ public class SimEventsManager {
 
                 if(data.polarity) {
                     if (val > recordHigh) {
-                        recordLow = val;
+                        recordHigh = val;
                         speciesID = simManager.masterGenomePool.currentlyActiveSpeciesIDList[i];
                     }
                 }
                 else {
                     if (val < recordLow) {
-                        recordHigh = val;
+                        recordLow = val;
                         speciesID = simManager.masterGenomePool.currentlyActiveSpeciesIDList[i];
                     }
                 }
@@ -343,13 +353,13 @@ public class SimEventsManager {
 
                 if(data.polarity) {
                     if (val > recordHigh) {
-                        recordLow = val;
+                        recordHigh = val;
                         speciesID = simManager.masterGenomePool.currentlyActiveSpeciesIDList[i];
                     }
                 }
                 else {
                     if (val < recordLow) {
-                        recordHigh = val;
+                        recordLow = val;
                         speciesID = simManager.masterGenomePool.currentlyActiveSpeciesIDList[i];
                     }
                 }
@@ -404,7 +414,7 @@ public class SimEventsManager {
                     }
                 }
                 if(duplicateDetected) {
-                    Debug.Log("Duplicate detected! iter: " + i.ToString());
+                    //Debug.Log("Duplicate detected! iter: " + i.ToString());
                     // try again (up to 8 times)
                 }
                 else {
@@ -470,7 +480,7 @@ public class SimEventsManager {
             case SimEventData.SimEventTypeMinor.CalmWaters:
                 
                 newEventData.name = "Calm Waters";                 
-                newEventData.description = "Set the speed of water currents to a tranquil state";  
+                newEventData.description = "Set the speed of water currents to a slow tranquil state";  
                 break;
             case SimEventData.SimEventTypeMinor.CreateSpecies:                
                 newEventData.speciesQualifier = SimEventData.SpeciesQualifier.Random;  // only random allowed for minor events
@@ -481,11 +491,11 @@ public class SimEventsManager {
             case SimEventData.SimEventTypeMinor.FoodCorpse:
                 if (newEventData.isPositive) {
                     newEventData.name = "Slow Decomposition I";
-                    newEventData.description = "Slow the rate at which dead creatures' bodies break down into nutrients";  
+                    newEventData.description = "Slightly Slow the rate at which dead creatures' bodies break down into nutrients";  
                 }
                 else {
                     newEventData.name = "Recycled Material I"; 
-                    newEventData.description = "Slow the rate at which dead creatures' bodies are broken down into their component parts";  
+                    newEventData.description = "Slightly Slow the rate at which dead creatures' bodies are broken down into their component parts";  
                 }
                 //newEventData.name = "Detritus";
                 //newEventData.description = qualifierTxt + " the global levels of decayed organic matter";  
@@ -493,31 +503,31 @@ public class SimEventsManager {
             case SimEventData.SimEventTypeMinor.FoodEgg:
                 if (newEventData.isPositive) {
                     newEventData.name = "Fertility I";
-                    newEventData.description = "INCREASE the global frequency of egg-laying and increases durability of egg sacks";  
+                    newEventData.description = "Slightly INCREASE the global frequency of egg-laying and increases durability of egg sacks";  
                 }
                 else {
                     newEventData.name = "Barren I"; 
-                    newEventData.description = "DECREASE the global frequency of egg-laying and lower durability of egg sacks";   
+                    newEventData.description = "Slightly DECREASE the global frequency of egg-laying and lower durability of egg sacks";   
                 }
                 break;
             case SimEventData.SimEventTypeMinor.FoodDecay:
                 if (newEventData.isPositive) {
                     newEventData.name = "Algae Bloom I";
-                    newEventData.description = "INCREASE the global levels of basic nutrients";  
+                    newEventData.description = "Slightly INCREASE the global levels of basic nutrients";  
                 }
                 else {
                     newEventData.name = "Nutrient Shortage I"; 
-                    newEventData.description = "DECREASE the global levels of basic nutrients";   
+                    newEventData.description = "Slightly DECREASE the global levels of basic nutrients";   
                 }
                 break;
             case SimEventData.SimEventTypeMinor.FoodPlant:
                 if (newEventData.isPositive) {
                     newEventData.name = "Blossom I";
-                    newEventData.description = "INCREASE the global levels of plants";  
+                    newEventData.description = "Slightly INCREASE the global levels of plants";  
                 }
                 else {
                     newEventData.name = "Wilt I"; 
-                    newEventData.description = "DECREASE the global levels of plants";   
+                    newEventData.description = "Slightly DECREASE the global levels of plants";   
                 }
                 break;
             case SimEventData.SimEventTypeMinor.KillSpecies:
@@ -574,7 +584,7 @@ public class SimEventsManager {
                     }
                 }
                 if(duplicateDetected) {
-                    Debug.Log("Duplicate detected! iter: " + i.ToString());
+                    //Debug.Log("Duplicate detected! iter: " + i.ToString());
                     // try again (up to 8 times)
                 }
                 else {
@@ -593,7 +603,7 @@ public class SimEventsManager {
             qualifierTxt = "INCREASE";
         }
 
-        SimEventData.SpeciesQualifier randQualifier = (SimEventData.SpeciesQualifier)UnityEngine.Random.Range(1, 4);
+        SimEventData.SpeciesQualifier randQualifier = (SimEventData.SpeciesQualifier)UnityEngine.Random.Range(1, 5);
         
         switch(randType) {
             case SimEventData.SimEventTypeMajor.BodyModules:
@@ -801,7 +811,7 @@ public class SimEventsManager {
                     }
                 }
                 if(duplicateDetected) {
-                    Debug.Log("Duplicate detected! iter: " + i.ToString());
+                    //Debug.Log("Duplicate detected! iter: " + i.ToString());
                     // try again (up to 8 times)
                 }
                 else {
@@ -820,7 +830,7 @@ public class SimEventsManager {
             qualifierTxt = "INCREASE";
         }
 
-        SimEventData.SpeciesQualifier randQualifier = (SimEventData.SpeciesQualifier)UnityEngine.Random.Range(1, 4);
+        SimEventData.SpeciesQualifier randQualifier = (SimEventData.SpeciesQualifier)UnityEngine.Random.Range(1, 5);
         
         switch(randType) {
             case SimEventData.SimEventTypeExtreme.BodyModules:

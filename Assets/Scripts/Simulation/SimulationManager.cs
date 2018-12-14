@@ -1116,7 +1116,7 @@ public class SimulationManager : MonoBehaviour {
             // i.e. Set curLifecycle to .AwaitingRespawn ^
             // then new Agents should use the next available genome from the updated ToBeEvaluated pool      
         
-        agentRef.SetToAwaitingRespawn();
+        agentRef.SetToAwaitingRespawn();    
 
         ProcessAgentScores(agentRef);  // *** CLEAN THIS UP!!! ***
 

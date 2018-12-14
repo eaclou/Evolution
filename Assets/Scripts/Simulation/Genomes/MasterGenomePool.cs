@@ -95,11 +95,17 @@ public class MasterGenomePool {
             if(noCurrentlyExtinctFlaggedSpecies) {
                 if(completeSpeciesPoolsList[leastFitSpeciesID].numAgentsEvaluated > minNumGuaranteedEvalsForNewSpecies) {
                     // OK to KILL!!!
-                    completeSpeciesPoolsList[leastFitSpeciesID].isFlaggedForExtinction = true;
-                    Debug.Log("FLAG EXTINCT: " + leastFitSpeciesID.ToString());
+                    FlagSpeciesExtinct(leastFitSpeciesID);
+                    //completeSpeciesPoolsList[leastFitSpeciesID].isFlaggedForExtinction = true;
+                    //Debug.Log("FLAG EXTINCT: " + leastFitSpeciesID.ToString());
                 }
             }
         }
+    }
+
+    public void FlagSpeciesExtinct(int speciesID) {
+        completeSpeciesPoolsList[speciesID].isFlaggedForExtinction = true;
+        Debug.Log("FLAG EXTINCT: " + speciesID.ToString());
     }
     
     public void ExtinctifySpecies(SimulationManager simManagerRef, int speciesID) {
@@ -123,6 +129,8 @@ public class MasterGenomePool {
 
     public SpeciesGenomePool SelectNewGenomeSourceSpecies(bool weighted, float weightedAmount) {
         if(weighted) {
+            // Filter Out species which are flagged for extinction?!?!?!
+            
             // figure out which species has most evals
             int totalNumActiveEvals = 0;
             //int evalLeaderActiveIndex = 0;
@@ -135,6 +143,7 @@ public class MasterGenomePool {
                     //evalLeaderActiveIndex = i;
                 }
             }
+
             float[] unsortedEvalScoresArray = new float[currentlyActiveSpeciesIDList.Count];
             float[] rankedEvalScoresArray = new float[currentlyActiveSpeciesIDList.Count];
             int[] rankedEvalIndices = new int[currentlyActiveSpeciesIDList.Count];
@@ -183,16 +192,27 @@ public class MasterGenomePool {
         }
         else {
             // NAIVE RANDOM AT FIRST:
-            int randomTableIndex = UnityEngine.Random.Range(0, currentlyActiveSpeciesIDList.Count);
+            // filter flagged extinct species:
+            List<int> eligibleSpeciesIDList = new List<int>();
+            for(int i = 0; i < currentlyActiveSpeciesIDList.Count; i++) {
+                if(completeSpeciesPoolsList[currentlyActiveSpeciesIDList[i]].isFlaggedForExtinction) {
+
+                }
+                else {
+                    eligibleSpeciesIDList.Add(currentlyActiveSpeciesIDList[i]);
+                }
+            }
+            //int randomTableIndex = UnityEngine.Random.Range(0, currentlyActiveSpeciesIDList.Count);
+            int randomTableIndex = UnityEngine.Random.Range(0, eligibleSpeciesIDList.Count);
 
             // temp minor penalty to oldest species:
             float oldestSpeciesRerollChance = 0.33f;
             if(randomTableIndex == 0) {
                 if(UnityEngine.Random.Range(0f, 1f) < oldestSpeciesRerollChance) {
-                    randomTableIndex = UnityEngine.Random.Range(0, currentlyActiveSpeciesIDList.Count);
+                    randomTableIndex = UnityEngine.Random.Range(0, eligibleSpeciesIDList.Count);
                 }
             }
-            int speciesIndex = currentlyActiveSpeciesIDList[randomTableIndex];
+            int speciesIndex = eligibleSpeciesIDList[randomTableIndex];
 
             return completeSpeciesPoolsList[speciesIndex];
         }
@@ -238,8 +258,23 @@ public class MasterGenomePool {
 
         if(!assignedToNewSpecies) {
             // *** maybe something fishy here??
-            //completeSpeciesPoolsList[parentSpeciesID].AddNewCandidateGenome(newGenome);
-            completeSpeciesPoolsList[closestSpeciesID].AddNewCandidateGenome(newGenome);
+            // **********************
+
+            // Allowing new creatures to be assigned to species other than its parent :
+            //    -- In theory should keep species closer to its Representative Genome?
+            //    -- causes issues with 0-candidate species....
+
+            // The alternative allows species to drift further away from the founding Representative genome???
+            // So far avg. fitness not improving at same rate as before????
+            // ****************
+            // could try going for a hybrid approach?
+
+
+            // NEW:::
+            completeSpeciesPoolsList[parentSpeciesID].AddNewCandidateGenome(newGenome);
+
+            // OLD:::
+            //completeSpeciesPoolsList[closestSpeciesID].AddNewCandidateGenome(newGenome);
         }
         else {
             // *** ???

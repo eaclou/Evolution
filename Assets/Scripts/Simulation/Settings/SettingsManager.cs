@@ -44,12 +44,12 @@ public class SettingsManager : MonoBehaviour {
     private int curTierBodyMutationModules = 4;
 
     private int curTierBrainMutationAmplitude = 5;
-    private int curTierBrainMutationFrequency = 5;
+    private int curTierBrainMutationFrequency = 4;
     private int curTierBrainMutationNewLink = 6;
     private int curTierBrainMutationNewHiddenNeuron = 2;
     private int curTierBrainMutationWeightDecay = 8;
     
-    private int curTierFoodDecay = 6;
+    private int curTierFoodDecay = 5;
     private int curTierFoodPlant = 5;
     public int curTierFoodEgg = 6;
     public int curTierFoodCorpse = 6;
@@ -78,7 +78,7 @@ public class SettingsManager : MonoBehaviour {
     public void ChangeTierBrainMutationWeightDecay(int delta) {
         curTierBrainMutationWeightDecay = Mathf.Clamp(curTierBrainMutationWeightDecay + delta, 0, 10);
         float tierLerp = (float)curTierBrainMutationWeightDecay / 10f;
-        mutationSettingsPersistent.weightDecayAmount = Mathf.Lerp(0.9f, 1f, tierLerp);
+        mutationSettingsPersistent.weightDecayAmount = Mathf.Lerp(0.98f, 1f, tierLerp);
     }
 
     public void ChangeTierBodyMutationAmplitude(int delta) {
@@ -99,7 +99,7 @@ public class SettingsManager : MonoBehaviour {
 
     public void ChangeTierFoodDecay(int delta) {
         curTierFoodDecay = Mathf.Clamp(curTierFoodDecay + delta, 0, 10);
-        maxGlobalNutrients = Mathf.Pow(2f, curTierFoodDecay); // 1 - 1024 // Mathf.Lerp(8f, 512f, lerp);
+        maxGlobalNutrients = Mathf.Pow(2f, (float)(curTierFoodDecay + 2)); // 1 - 1024 // Mathf.Lerp(8f, 512f, lerp);
         float lerp = (float)curTierFoodDecay / 10f;
         spawnNewFoodChance = Mathf.Lerp(0.005f, 0.05f, lerp);
     }
@@ -109,7 +109,7 @@ public class SettingsManager : MonoBehaviour {
         foodParticleRegrowthRate = Mathf.Lerp(0.001f, 0.05f, lerp * lerp);
         avgFoodParticleRadius = Mathf.Lerp(1f, 1.75f, lerp);
         foodParticleNutrientDensity = Mathf.Lerp(.02f, 0.06f, lerp);
-        maxFoodParticleTotalAmount = Mathf.Pow(2f, curTierFoodPlant); // 1 - 1024 
+        maxFoodParticleTotalAmount = Mathf.Pow(2f, (float)(curTierFoodPlant + 2)); // 1 - 1024 
     }
     public void ChangeTierFoodEgg(int delta) {
         curTierFoodEgg = Mathf.Clamp(curTierFoodEgg + delta, 0, 10);
