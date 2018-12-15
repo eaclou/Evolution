@@ -3367,7 +3367,13 @@ public class TheRenderKing : MonoBehaviour {
         gizmoFeedToolMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);       
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, gizmoFeedToolMat, 0, MeshTopology.Triangles, 6, 1);
 
+        
         if(simManager.uiManager.treeOfLifePanelOn) {
+            
+
+
+            // OLD BELOW:::::
+            /*
             SimTreeOfLife();
             // UI TREE OF LIFE TESTING:
             // Backdrop:
@@ -3464,7 +3470,7 @@ public class TheRenderKing : MonoBehaviour {
             treeOfLifePortraitEyeMat.SetFloat("_AnimatedScale2", 1f);
             cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID);
             cmdBufferTest.DrawProcedural(Matrix4x4.identity, treeOfLifePortraitEyeMat, 0, MeshTopology.Triangles, 6, treeOfLifePortraitEyeDataCBuffer.count);
-                    
+            */        
         }
 
         

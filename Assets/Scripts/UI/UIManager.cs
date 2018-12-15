@@ -189,8 +189,42 @@ public class UIManager : MonoBehaviour {
     public Text textRecentEvent;
 
     // TREE OF LIFE SECTION:
-    public GameObject treeOfLifeAnchorGO;  
     public Button buttonShowHideTOL;
+    // VV NEW HERE:::
+    public GameObject panelTolMaster;
+    public GameObject panelTolWorldStats;
+    public GameObject panelTolSpeciesTree;
+    public GameObject panelTolEventsTimeline;
+    public Button buttonTolWorldStats;
+    public Button buttonTolSpeciesTree;
+    public Button buttonTolSpeciesTreeExtinct;
+    public Button buttonTolEventsTimeline;
+    public Button buttonTolBrainDisplay;
+    public Button buttonTolInspect;
+    public Text textTolSpeciesTitle;
+    public Text textTolDescription;
+    public Image imageTolPortraitRender;
+    public Image imageTolWorldStatsRender;
+    public Image imageTolSpeciesTreeRender;
+    public Image imageTolEventsTimelineRender;
+    public Button buttonTolCycleWorldStatsPrev;
+    public Button buttonTolCycleWorldStatsNext;
+    public Button buttonTolCycleSpeciesStatsPrev;
+    public Button buttonTolCycleSpeciesStatsNext;
+    public Button buttonTolEventsMinorToggle;
+    public Button buttonTolEventsMajorToggle;
+    public Button buttonTolEventsExtremeToggle;
+    
+    public bool treeOfLifePanelOn = true;
+    public bool tolWorldStatsOn = true;
+    public bool tolSpeciesTreeOn = true;
+    public bool tolEventsTimelineOn = true;
+    public bool tolSpeciesTreeExtinctOn = false;
+    public bool tolBrainDisplayOn = false;
+    public bool tolInspectOn = false;
+
+    // VVV OLD BELOW:::
+    public GameObject treeOfLifeAnchorGO;     
     public GameObject panelTreeOfLifeScaleHideGroup;
     public GameObject panelTreeOfLifeInfoBlock;
     public GameObject panelTreeOfLifeInfoA;
@@ -203,12 +237,15 @@ public class UIManager : MonoBehaviour {
     public Button buttonInfoA;
     public Button buttonInfoB;
     public Button buttonInfoC;
-    public bool treeOfLifePanelOn = true;
+    
     private bool treeOfLifeInfoOnA = false;
     private bool treeOfLifeInfoOnB = false;
     private bool treeOfLifeInfoOnC = false;
-
-    public Texture2D fitnessDisplayTexture;
+    /// <summary>
+    /// //
+    /// </summary>
+    /// 
+    //public Texture2D fitnessDisplayTexture;
 
     public float timeOfLastPlayerDeath = 0f;
 
@@ -307,8 +344,8 @@ public class UIManager : MonoBehaviour {
         if(isObserverMode) {
             panelObserverMode.SetActive(true);
 
-            textCurGen.text = "Generation: " + gameManager.simulationManager.curApproxGen.ToString("F0");
-            textAvgLifespan.text = "Average Lifespan: " + Mathf.RoundToInt(gameManager.simulationManager.rollingAverageAgentScoresArray[0]).ToString();
+            //textCurGen.text = "Generation: " + gameManager.simulationManager.curApproxGen.ToString("F0");
+            //textAvgLifespan.text = "Average Lifespan: " + Mathf.RoundToInt(gameManager.simulationManager.rollingAverageAgentScoresArray[0]).ToString();
             
             Vector2 moveDir = Vector2.zero;
             bool isKeyboardInput = false;
@@ -2100,10 +2137,56 @@ public class UIManager : MonoBehaviour {
         else {
 
         }
-        panelTreeOfLifeScaleHideGroup.SetActive(treeOfLifePanelOn);
+        //panelTreeOfLifeScaleHideGroup.SetActive(treeOfLifePanelOn);
+        panelTolMaster.SetActive(treeOfLifePanelOn);
+
         treeOfLifeManager.UpdateVisualUI(treeOfLifePanelOn);
     }
 
+    public void ClickTolWorldStatsOnOff() {
+        tolWorldStatsOn = !tolWorldStatsOn;
+        panelTolWorldStats.SetActive(tolWorldStatsOn);
+    }
+    public void ClickTolSpeciesTreeOnOff() {
+        tolSpeciesTreeOn = !tolSpeciesTreeOn;
+        panelTolSpeciesTree.SetActive(tolSpeciesTreeOn);
+    }
+    public void ClickTolEventsTimelineOnOff() {
+        tolEventsTimelineOn = !tolEventsTimelineOn;
+        panelTolEventsTimeline.SetActive(tolEventsTimelineOn);
+    }
+
+    public void ClickTolSpeciesTreeExtinctToggle() {
+        tolSpeciesTreeExtinctOn = !tolSpeciesTreeExtinctOn;
+    }
+    public void ClickTolBrainDisplayToggle() {
+        tolBrainDisplayOn = !tolBrainDisplayOn;
+    }
+    public void ClickTolInspectOnOff() {
+        tolInspectOn = !tolInspectOn;
+    }
+
+    public void ClickTolWorldStatsCyclePrev() {
+
+    }
+    public void ClickTolWorldStatsCycleNext() {
+
+    }
+    public void ClickTolSpeciesTreeCyclePrev() {
+
+    }
+    public void ClickTolSpeciesTreeCycleNext() {
+
+    }
+    public void ClickTolEventsTimelineMinor() {
+
+    }
+    public void ClickTolEventsTimelineMajor() {
+
+    }
+    public void ClickTolEventsTimelineExtreme() {
+
+    }
 
     public void ClickEventMinor() {
         if(isActiveEventsMinor) {
