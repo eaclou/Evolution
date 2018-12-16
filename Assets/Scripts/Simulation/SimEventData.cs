@@ -16,6 +16,7 @@ public class SimEventData {
     public int quantity;
     public bool isPositive;
     public bool polarity;
+    public int timeStepActivated;
 
     public enum SimEventCategories {
         Minor,

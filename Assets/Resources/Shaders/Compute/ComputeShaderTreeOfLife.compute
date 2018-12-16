@@ -6,10 +6,14 @@
 #pragma kernel CSExctinctSpecies
 #pragma kernel CSGetNodeColliderData
 #pragma kernel CSPinRootNode
+#pragma kernel CSUpdateWordStatsValues
 
 #include "Assets/Resources/Shaders/Inc/StructsTreeOfLife.cginc"
 //#include "Assets/Resources/Shaders/Inc/TreeOfLife.cginc"
 #include "Assets/Resources/Shaders/Inc/NoiseShared.cginc"
+
+Texture2D<float4> treeOfLifeWorldStatsTex;
+RWStructuredBuffer<float> treeOfLifeWorldStatsValuesCBuffer;
 
 StructuredBuffer<TreeOfLifeNodeColliderData> treeOfLifeNodeColliderDataCBufferRead;
 RWStructuredBuffer<TreeOfLifeNodeColliderData> treeOfLifeNodeColliderDataCBufferWrite;
@@ -36,6 +40,12 @@ uniform float4 _DraggingForceVector;
 uniform int _CurDeepestGraphDepth;
 
 uniform float _Time;
+
+uniform float _WorldStatsMin;
+uniform float _WorldStatsMax;
+
+SamplerState _LinearClamp;
+SamplerState _LinearRepeat;
 
 [numthreads(512,1,1)]
 void CSTick (uint3 id : SV_DispatchThreadID)
@@ -143,4 +153,15 @@ void CSGetNodeColliderData (uint3 id : SV_DispatchThreadID)
 void CSPinRootNode (uint3 id : SV_DispatchThreadID)
 {
 	treeOfLifeNodeColliderDataCBufferWrite[0].localPos = float3(0,0,0);
+}
+
+[numthreads(64,1,1)]
+void CSUpdateWordStatsValues (uint3 id : SV_DispatchThreadID)
+{
+	float2 uv = float2((float)id.x / 64.0, 0.0);
+	float4 texColor = treeOfLifeWorldStatsTex.SampleLevel(_LinearClamp, uv, 1);
+
+	float height = (texColor.x - _WorldStatsMin) / _WorldStatsMax;
+
+	treeOfLifeWorldStatsValuesCBuffer[id.x] = height;
 }

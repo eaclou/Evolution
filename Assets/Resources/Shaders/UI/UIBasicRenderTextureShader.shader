@@ -3,8 +3,6 @@
 	Properties
 	{
 		_MainTex ("Texture", 2D) = "white" {}
-		_TintPri ("_TintPri", Color) = (1,1,1,1)
-		_TintSec ("_TintSec", Color) = (1,1,1,1)
 	}
 	SubShader
 	{
@@ -37,24 +35,24 @@
 
 			sampler2D _MainTex;
 			float4 _MainTex_ST;
-			float4 _TintPri;
-			float4 _TintSec;
 			
 			v2f vert (appdata v)
 			{
 				v2f o;
 				o.vertex = UnityObjectToClipPos(v.vertex);
-				o.uv = TRANSFORM_TEX(v.uv, _MainTex);
+				o.uv = v.uv; // TRANSFORM_TEX(v.uv, _MainTex);
+				// SOMETHING F'ed UP WITH UV/POS COORDS - Y-Axis Flipped!!!!!?????
+				// REMEMBER!!!! HACKY FIX Canvas Image Component is Flipped to compensate!!!!!! *************
 				return o;
 			}
 			
 			fixed4 frag (v2f i) : SV_Target
 			{
 				// sample the texture
+				//
 				fixed4 col = tex2D(_MainTex, i.uv);
-				//col.a = 1;
-				//col.rgb = lerp(_TintPri.rgb, _TintSec.rgb, i.uv.y);
-				
+				//col.a = 1;				
+				//col.rgb = float3(i.uv, 0);
 				return col;
 			}
 			ENDCG

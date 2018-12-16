@@ -262,7 +262,7 @@ public class UIManager : MonoBehaviour {
     public Material statsGraphMatMutation;
     //public Texture2D statsGraphDataTex;
     private Texture2D statsSpeciesColorKey;
-    private Texture2D statsTextureLifespan;
+    public Texture2D statsTextureLifespan;
     private Texture2D statsTextureBodySizes;
     private Texture2D statsTextureFoodEaten;
     private Texture2D statsTexturePredation;

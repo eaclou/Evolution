@@ -568,7 +568,7 @@ public class SimulationManager : MonoBehaviour {
         // **** NEED TO ADDRESS THIS!!!!!! ************************
         theRenderKing.fluidObstaclesRenderCamera.targetTexture = environmentFluidManager._ObstaclesRT; // *** See if this works **
         theRenderKing.fluidColorRenderCamera.targetTexture = environmentFluidManager._SourceColorRT;
-
+        //treeOfLifeSpeciesTreeRenderCamera targetTexture set in scene
         //temp:
         theRenderKing.debugRT = environmentFluidManager._SourceColorRT;
     }
@@ -652,6 +652,9 @@ public class SimulationManager : MonoBehaviour {
             }
             
             RefreshGraphData();
+
+            theRenderKing.UpdateTreeOfLifeEventLineData(simEventsManager.completeEventHistoryList);
+            theRenderKing.UpdateTreeOfLifeWorldStatsData(uiManager.statsTextureLifespan); // Revise this!!!
             //environmentFluidManager.RerollForcePoints();
         }
 

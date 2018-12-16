@@ -17,6 +17,7 @@ public class TheRenderKing : MonoBehaviour {
     public Camera fluidColorRenderCamera;
     //public Camera treeOfLifeRenderCamera;
     public Camera speciesPortraitRenderCamera;
+    public Camera treeOfLifeSpeciesTreeRenderCamera;
 
     private CommandBuffer cmdBufferTest;
     private CommandBuffer cmdBufferPrimary;
@@ -25,6 +26,7 @@ public class TheRenderKing : MonoBehaviour {
     private CommandBuffer cmdBufferFluidColor;
     private CommandBuffer cmdBufferTreeOfLifeDisplay;
     private CommandBuffer cmdBufferSpeciesPortraitDisplay;
+    private CommandBuffer cmdBufferTreeOfLifeSpeciesTree;
 
     public ComputeShader computeShaderBrushStrokes;
     public ComputeShader computeShaderUberChains;
@@ -83,6 +85,10 @@ public class TheRenderKing : MonoBehaviour {
     public Material treeOfLifePortraitMat;
     public Material treeOfLifePortraitEyeMat;
     public Material treeOfLifeDecorationMat;
+
+    public Material treeOfLifeWorldStatsMat;  // start with these simple ones first
+    public Material treeOfLifeSpeciesLineMat;
+    public Material treeOfLifeEventsLineMat;
 
     public ComputeBuffer gizmoStirToolPosCBuffer;
     public ComputeBuffer gizmoFeedToolPosCBuffer;
@@ -205,6 +211,12 @@ public class TheRenderKing : MonoBehaviour {
 
     public float fullscreenFade = 1f;
 
+    private Vector3[] testTreeOfLifePositionArray;
+    private ComputeBuffer testTreeOfLifePositionCBuffer;
+    private TreeOfLifeEventLineData[] treeOfLifeEventLineDataArray;
+    private ComputeBuffer treeOfLifeEventLineDataCBuffer;
+    private ComputeBuffer treeOfLifeWorldStatsValuesCBuffer;
+
     private int numTreeOfLifeStemSegmentQuads = 16;
     private ComputeBuffer treeOfLifeStemSegmentVerticesCBuffer;  // short ribbon mesh
     private int maxNumTreeOfLifeNodes = 512; // max numSpecies
@@ -224,6 +236,12 @@ public class TheRenderKing : MonoBehaviour {
     public ComputeBuffer treeOfLifePortraitEyeDataCBuffer;
     public ComputeBuffer treeOfLifePortraitCritterInitDataCBuffer;
     public ComputeBuffer treeOfLifePortraitCritterSimDataCBuffer;
+
+    public struct TreeOfLifeEventLineData {
+        public float xCoord;
+        public float eventMagnitude;  // minor major extreme 0, 0.5, 1.0
+        public float isActive;
+    }
 
     public struct TreeOfLifeNodeColliderData {  // only the data that needs to be transferred between CPU & GPU  - minimize!!
         public Vector3 localPos;
@@ -377,6 +395,7 @@ public class TheRenderKing : MonoBehaviour {
     private void Awake() {
         fluidObstaclesRenderCamera.enabled = false;
         fluidColorRenderCamera.enabled = false;
+        treeOfLifeSpeciesTreeRenderCamera.enabled = false;  // only render when the King commands it!!!
         //treeOfLifeRenderCamera.enabled = false;
         speciesPortraitRenderCamera.enabled = false;
     }
@@ -869,6 +888,31 @@ public class TheRenderKing : MonoBehaviour {
         gizmoStirToolPosCBuffer.SetData(dataArray);
     }
     private void InitializeTreeOfLifeBuffers() {
+
+        testTreeOfLifePositionArray = new Vector3[64];
+        testTreeOfLifePositionCBuffer = new ComputeBuffer(testTreeOfLifePositionArray.Length, sizeof(float) * 3);
+        for(int i = 0; i < testTreeOfLifePositionArray.Length; i++) {
+            Vector3 pos = new Vector3((float)i / 64f, 0f, 0f);
+            testTreeOfLifePositionArray[i] = pos;
+        }
+        testTreeOfLifePositionCBuffer.SetData(testTreeOfLifePositionArray);
+
+        treeOfLifeEventLineDataArray = new TreeOfLifeEventLineData[64];
+        treeOfLifeEventLineDataCBuffer = new ComputeBuffer(treeOfLifeEventLineDataArray.Length, sizeof(float) * 3);
+        for(int i = 0; i < testTreeOfLifePositionArray.Length; i++) {
+            TreeOfLifeEventLineData data = new TreeOfLifeEventLineData();
+            data.xCoord = (float)i / 64f;
+            data.eventMagnitude = UnityEngine.Random.Range(0f, 1f);
+            data.isActive = Mathf.Round(UnityEngine.Random.Range(0f, 1f));
+            treeOfLifeEventLineDataArray[i] = data;
+        }
+        treeOfLifeEventLineDataCBuffer.SetData(treeOfLifeEventLineDataArray);
+
+        treeOfLifeWorldStatsValuesCBuffer = new ComputeBuffer(64, sizeof(float));
+
+        // ========================================================================================================================================
+        // **** OLD BELOW:::: *********
+        // ========================================================================================================================================
         treeOfLifeNodeColliderDataArray = new TreeOfLifeNodeColliderData[maxNumTreeOfLifeNodes];
         treeOfLifeNodeColliderDataCBufferA = new ComputeBuffer(treeOfLifeNodeColliderDataArray.Length, sizeof(float) * 6);
         treeOfLifeNodeColliderDataCBufferB = new ComputeBuffer(treeOfLifeNodeColliderDataArray.Length, sizeof(float) * 6);
@@ -1201,6 +1245,10 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferFluidColor = new CommandBuffer();
         cmdBufferFluidColor.name = "cmdBufferFluidColor";
         fluidColorRenderCamera.AddCommandBuffer(CameraEvent.BeforeDepthNormalsTexture, cmdBufferFluidColor);
+
+        cmdBufferTreeOfLifeSpeciesTree = new CommandBuffer();
+        cmdBufferTreeOfLifeSpeciesTree.name = "cmdBufferTreeOfLifeSpeciesTree";
+        treeOfLifeSpeciesTreeRenderCamera.AddCommandBuffer(CameraEvent.BeforeDepthNormalsTexture, cmdBufferTreeOfLifeSpeciesTree);
 
         //cmdBufferTreeOfLifeDisplay = new CommandBuffer();
         //cmdBufferTreeOfLifeDisplay.name = "cmdBufferTreeOfLifeDisplay";
@@ -2543,6 +2591,31 @@ public class TheRenderKing : MonoBehaviour {
         computeShaderCritters.SetFloat("_MapSize", SimulationManager._MapSize);
         computeShaderCritters.Dispatch(kernelCSSimulateCritterGenericStrokes, critterGenericStrokesCBuffer.count / 16, 1, 1);
     }
+    public void UpdateTreeOfLifeEventLineData(List<SimEventData> eventDataList) {
+
+        treeOfLifeEventLineDataArray = new TreeOfLifeEventLineData[64]; // hardcoded!! 64 max!!!
+        treeOfLifeEventLineDataCBuffer = new ComputeBuffer(treeOfLifeEventLineDataArray.Length, sizeof(float) * 3);
+        for(int i = 0; i < testTreeOfLifePositionArray.Length; i++) {
+            TreeOfLifeEventLineData data = new TreeOfLifeEventLineData();
+
+            if(i < eventDataList.Count) {
+                data.xCoord = (float)eventDataList[i].timeStepActivated / (float)simManager.simAgeTimeSteps;
+                data.eventMagnitude = (float)(eventDataList[i].category + 1) * 0.333f;                
+                data.isActive = 1f;
+            }
+            
+            treeOfLifeEventLineDataArray[i] = data;
+        }
+        treeOfLifeEventLineDataCBuffer.SetData(treeOfLifeEventLineDataArray);
+    }
+    public void UpdateTreeOfLifeWorldStatsData(Texture2D sourceTex) {
+        int kernelCSUpdateWordStatsValues = computeShaderTreeOfLife.FindKernel("CSUpdateWordStatsValues");
+        computeShaderTreeOfLife.SetTexture(kernelCSUpdateWordStatsValues, "treeOfLifeWorldStatsTex", sourceTex); // simManager.uiManager.statsTextureLifespan);
+        computeShaderTreeOfLife.SetBuffer(kernelCSUpdateWordStatsValues, "treeOfLifeWorldStatsValuesCBuffer", treeOfLifeWorldStatsValuesCBuffer);
+        computeShaderTreeOfLife.SetFloat("_WorldStatsMin", 0f);
+        computeShaderTreeOfLife.SetFloat("_WorldStatsMax", simManager.uiManager.maxLifespanValue);
+        computeShaderTreeOfLife.Dispatch(kernelCSUpdateWordStatsValues, 1, 1, 1);
+    }
     private void SimTreeOfLife() {
                 
         
@@ -2828,6 +2901,27 @@ public class TheRenderKing : MonoBehaviour {
 
 
         // TREE OF LIFE:
+        cmdBufferTreeOfLifeSpeciesTree.Clear();
+        cmdBufferTreeOfLifeSpeciesTree.SetRenderTarget(treeOfLifeSpeciesTreeRenderCamera.targetTexture); // needed???
+        cmdBufferTreeOfLifeSpeciesTree.ClearRenderTarget(true, true, new Color(0f,0f,0f,0f), 1.0f);  // clear -- needed???
+        cmdBufferTreeOfLifeSpeciesTree.SetViewProjectionMatrices(treeOfLifeSpeciesTreeRenderCamera.worldToCameraMatrix, treeOfLifeSpeciesTreeRenderCamera.projectionMatrix);
+        // draw event lines first:
+        treeOfLifeEventsLineMat.SetPass(0);
+        treeOfLifeEventsLineMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        treeOfLifeEventsLineMat.SetBuffer("treeOfLifeEventLineDataCBuffer", treeOfLifeEventLineDataCBuffer);
+        cmdBufferTreeOfLifeSpeciesTree.DrawProcedural(Matrix4x4.identity, treeOfLifeEventsLineMat, 0, MeshTopology.Triangles, 6, treeOfLifeEventLineDataCBuffer.count);
+        
+        // World Stats graph lines:
+        treeOfLifeWorldStatsMat.SetPass(0);
+        treeOfLifeWorldStatsMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        treeOfLifeWorldStatsMat.SetBuffer("treeOfLifeWorldStatsValuesCBuffer", treeOfLifeWorldStatsValuesCBuffer);
+        cmdBufferTreeOfLifeSpeciesTree.DrawProcedural(Matrix4x4.identity, treeOfLifeWorldStatsMat, 0, MeshTopology.Triangles, 6, 64);
+
+        Graphics.ExecuteCommandBuffer(cmdBufferTreeOfLifeSpeciesTree);
+        treeOfLifeSpeciesTreeRenderCamera.Render();
+
+
+        // OLD BELOW:::::
         /*UpdateTreeOfLifeData();
         cmdBufferTreeOfLifeDisplay.Clear();
         cmdBufferTreeOfLifeDisplay.SetRenderTarget(simManager.masterGenomePool.treeOfLifeManager.treeOfLifeDisplayRT);
@@ -3808,6 +3902,9 @@ public class TheRenderKing : MonoBehaviour {
         if(fluidObstaclesRenderCamera != null) {
             fluidObstaclesRenderCamera.RemoveAllCommandBuffers();
         }
+        if(treeOfLifeSpeciesTreeRenderCamera != null) {
+            treeOfLifeSpeciesTreeRenderCamera.RemoveAllCommandBuffers();
+        }
         /*if(treeOfLifeRenderCamera != null) {
             treeOfLifeRenderCamera.RemoveAllCommandBuffers();
         }*/
@@ -3836,6 +3933,9 @@ public class TheRenderKing : MonoBehaviour {
         }
         if(cmdBufferFluidColor != null) {
             cmdBufferFluidColor.Release();
+        }
+        if(cmdBufferTreeOfLifeSpeciesTree != null) {
+            cmdBufferTreeOfLifeSpeciesTree.Release();
         }
         
         if (agentBodyStrokesCBuffer != null) {
@@ -3920,6 +4020,16 @@ public class TheRenderKing : MonoBehaviour {
             gizmoFeedToolPosCBuffer.Release();
         }
         // TREE OF LIFE:
+        if(testTreeOfLifePositionCBuffer != null) {
+            testTreeOfLifePositionCBuffer.Release();
+        }
+        if(treeOfLifeEventLineDataCBuffer != null) {
+            treeOfLifeEventLineDataCBuffer.Release();
+        }
+        if(treeOfLifeWorldStatsValuesCBuffer != null) {
+            treeOfLifeWorldStatsValuesCBuffer.Release();
+        }
+        // OLD TOL:
         if(treeOfLifeLeafNodeDataCBuffer != null) {
             treeOfLifeLeafNodeDataCBuffer.Release();
         }

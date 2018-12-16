@@ -17,11 +17,15 @@ public class SimEventsManager {
     public List<SimEventData> availableMajorEventsList;
     public List<SimEventData> availableExtremeEventsList;
 
+    public List<SimEventData> completeEventHistoryList;
+
 	public SimEventsManager(SimulationManager simManager) {
 
         availableMinorEventsList = new List<SimEventData>();
         availableMajorEventsList = new List<SimEventData>();
         availableExtremeEventsList = new List<SimEventData>();
+
+        completeEventHistoryList = new List<SimEventData>();
 
         RegenerateAvailableMinorEvents(simManager);
         RegenerateAvailableMajorEvents(simManager);
@@ -57,6 +61,9 @@ public class SimEventsManager {
         RegenerateAvailableMinorEvents(simManager);
         RegenerateAvailableMajorEvents(simManager);
         RegenerateAvailableExtremeEvents(simManager);
+
+        data.timeStepActivated = simManager.simAgeTimeSteps;
+        completeEventHistoryList.Add(data);
     }
     public void ExecuteEventMinor(SimulationManager simManager, SimEventData data) {
         
