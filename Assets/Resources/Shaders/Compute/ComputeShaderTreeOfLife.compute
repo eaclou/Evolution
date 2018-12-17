@@ -7,13 +7,18 @@
 #pragma kernel CSGetNodeColliderData
 #pragma kernel CSPinRootNode
 #pragma kernel CSUpdateWordStatsValues
+#pragma kernel CSUpdateSpeciesTreeData
 
 #include "Assets/Resources/Shaders/Inc/StructsTreeOfLife.cginc"
 //#include "Assets/Resources/Shaders/Inc/TreeOfLife.cginc"
 #include "Assets/Resources/Shaders/Inc/NoiseShared.cginc"
 
 Texture2D<float4> treeOfLifeWorldStatsTex;
-RWStructuredBuffer<float> treeOfLifeWorldStatsValuesCBuffer;
+//Texture2D<float4> treeOfLifeWorldStatsKeyTex;
+RWStructuredBuffer<float> treeOfLifeWorldStatsValuesCBuffer;  // one line drawn at a time for world stats - at first
+
+Texture2D<float4> treeOfLifeSpeciesTreeTex;
+RWStructuredBuffer<float> treeOfLifeSpeciesTreeCBuffer;
 
 StructuredBuffer<TreeOfLifeNodeColliderData> treeOfLifeNodeColliderDataCBufferRead;
 RWStructuredBuffer<TreeOfLifeNodeColliderData> treeOfLifeNodeColliderDataCBufferWrite;
@@ -43,6 +48,9 @@ uniform float _Time;
 
 uniform float _WorldStatsMin;
 uniform float _WorldStatsMax;
+uniform int _SelectedWorldStatsID;
+uniform int _NumWorldStatsIDs;
+uniform int _NumTimeSeriesEntries;
 
 SamplerState _LinearClamp;
 SamplerState _LinearRepeat;
@@ -159,9 +167,33 @@ void CSPinRootNode (uint3 id : SV_DispatchThreadID)
 void CSUpdateWordStatsValues (uint3 id : SV_DispatchThreadID)
 {
 	float2 uv = float2((float)id.x / 64.0, 0.0);
-	float4 texColor = treeOfLifeWorldStatsTex.SampleLevel(_LinearClamp, uv, 1);
+	uv.y = 0.0;
+	float4 texColor = treeOfLifeWorldStatsTex.SampleLevel(_LinearClamp, uv, 0);
+
+	float height = (texColor.y - _WorldStatsMin) / _WorldStatsMax;
+	//height += sin(_Time);
+	height += (sin(_Time * 5.31 + uv.x * 15.67) * 0.0410725) * uv.x;
+
+	height = height * 0.33 + 0.66;
+	// need more than height?
+	treeOfLifeWorldStatsValuesCBuffer[id.x] = lerp(treeOfLifeWorldStatsValuesCBuffer[id.x], height, 0.05);
+}
+
+[numthreads(64,1,1)]
+void CSUpdateSpeciesTreeData (uint3 id : SV_DispatchThreadID)
+{
+	float speciesID = floor((float)id.x / 64.0);
+	float segmentID = (id.x % 64);
+
+	float2 uv = float2(segmentID / 64.0, speciesID / 32.0 + 1.0 / 64.0);
+	
+	float4 texColor = treeOfLifeSpeciesTreeTex.SampleLevel(_LinearClamp, uv, 0);
 
 	float height = (texColor.x - _WorldStatsMin) / _WorldStatsMax;
+	
+	height += (sin(_Time * 5.31 + uv.x * 15.67 + speciesID * 49.21643) * 0.0410725) * uv.x;
 
-	treeOfLifeWorldStatsValuesCBuffer[id.x] = height;
+	height = height * 0.33 + 0.33;
+	
+	treeOfLifeSpeciesTreeCBuffer[id.x] = lerp(treeOfLifeSpeciesTreeCBuffer[id.x], height, 0.05);
 }

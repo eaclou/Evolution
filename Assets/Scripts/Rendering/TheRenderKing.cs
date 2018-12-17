@@ -216,6 +216,7 @@ public class TheRenderKing : MonoBehaviour {
     private TreeOfLifeEventLineData[] treeOfLifeEventLineDataArray;
     private ComputeBuffer treeOfLifeEventLineDataCBuffer;
     private ComputeBuffer treeOfLifeWorldStatsValuesCBuffer;
+    private ComputeBuffer treeOfLifeSpeciesTreeCBuffer;
 
     private int numTreeOfLifeStemSegmentQuads = 16;
     private ComputeBuffer treeOfLifeStemSegmentVerticesCBuffer;  // short ribbon mesh
@@ -909,6 +910,8 @@ public class TheRenderKing : MonoBehaviour {
         treeOfLifeEventLineDataCBuffer.SetData(treeOfLifeEventLineDataArray);
 
         treeOfLifeWorldStatsValuesCBuffer = new ComputeBuffer(64, sizeof(float));
+
+        treeOfLifeSpeciesTreeCBuffer = new ComputeBuffer(64 * 32, sizeof(float));
 
         // ========================================================================================================================================
         // **** OLD BELOW:::: *********
@@ -2600,7 +2603,7 @@ public class TheRenderKing : MonoBehaviour {
 
             if(i < eventDataList.Count) {
                 data.xCoord = (float)eventDataList[i].timeStepActivated / (float)simManager.simAgeTimeSteps;
-                data.eventMagnitude = (float)(eventDataList[i].category + 1) * 0.333f;                
+                data.eventMagnitude = (float)(eventDataList[i].category + 1) * 0.111f;                
                 data.isActive = 1f;
             }
             
@@ -2608,13 +2611,25 @@ public class TheRenderKing : MonoBehaviour {
         }
         treeOfLifeEventLineDataCBuffer.SetData(treeOfLifeEventLineDataArray);
     }
-    public void UpdateTreeOfLifeWorldStatsData(Texture2D sourceTex) {
+    public void SimTreeOfLifeWorldStatsData(Texture2D sourceTex) {
         int kernelCSUpdateWordStatsValues = computeShaderTreeOfLife.FindKernel("CSUpdateWordStatsValues");
         computeShaderTreeOfLife.SetTexture(kernelCSUpdateWordStatsValues, "treeOfLifeWorldStatsTex", sourceTex); // simManager.uiManager.statsTextureLifespan);
         computeShaderTreeOfLife.SetBuffer(kernelCSUpdateWordStatsValues, "treeOfLifeWorldStatsValuesCBuffer", treeOfLifeWorldStatsValuesCBuffer);
+        computeShaderTreeOfLife.SetFloat("_Time", Time.realtimeSinceStartup);
+        computeShaderTreeOfLife.SetFloat("_WorldStatsMin", 0f);
+        computeShaderTreeOfLife.SetFloat("_WorldStatsMax", simManager.uiManager.maxNutrientsValue);
+        computeShaderTreeOfLife.SetInt("_NumTimeSeriesEntries", sourceTex.width);
+        computeShaderTreeOfLife.Dispatch(kernelCSUpdateWordStatsValues, 1, 1, 1);
+    }
+    public void SimTreeOfLifeSpeciesTreeData(Texture2D sourceTex) {
+        int kernelCSUpdateSpeciesTreeData = computeShaderTreeOfLife.FindKernel("CSUpdateSpeciesTreeData");
+        computeShaderTreeOfLife.SetTexture(kernelCSUpdateSpeciesTreeData, "treeOfLifeSpeciesTreeTex", sourceTex); // simManager.uiManager.statsTextureLifespan);
+        computeShaderTreeOfLife.SetBuffer(kernelCSUpdateSpeciesTreeData, "treeOfLifeSpeciesTreeCBuffer", treeOfLifeSpeciesTreeCBuffer);
+        computeShaderTreeOfLife.SetFloat("_Time", Time.realtimeSinceStartup);
         computeShaderTreeOfLife.SetFloat("_WorldStatsMin", 0f);
         computeShaderTreeOfLife.SetFloat("_WorldStatsMax", simManager.uiManager.maxLifespanValue);
-        computeShaderTreeOfLife.Dispatch(kernelCSUpdateWordStatsValues, 1, 1, 1);
+        computeShaderTreeOfLife.SetInt("_NumTimeSeriesEntries", sourceTex.width);
+        computeShaderTreeOfLife.Dispatch(kernelCSUpdateSpeciesTreeData, 32, 1, 1);  // 32 = num of species displayed
     }
     private void SimTreeOfLife() {
                 
@@ -2821,6 +2836,8 @@ public class TheRenderKing : MonoBehaviour {
 
         SimTreeOfLife(); // issues with this being on FixedUpdate() cycle vs Update() ?? ***
 
+        SimTreeOfLifeWorldStatsData(simManager.uiManager.statsTextureNutrients);
+        SimTreeOfLifeSpeciesTreeData(simManager.uiManager.statsTextureLifespan);
         //UpdateAgentHighlightData();
 
         SimCritterSkinStrokes();
@@ -2916,6 +2933,12 @@ public class TheRenderKing : MonoBehaviour {
         treeOfLifeWorldStatsMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         treeOfLifeWorldStatsMat.SetBuffer("treeOfLifeWorldStatsValuesCBuffer", treeOfLifeWorldStatsValuesCBuffer);
         cmdBufferTreeOfLifeSpeciesTree.DrawProcedural(Matrix4x4.identity, treeOfLifeWorldStatsMat, 0, MeshTopology.Triangles, 6, 64);
+
+        treeOfLifeSpeciesLineMat.SetPass(0);
+        treeOfLifeSpeciesLineMat.SetTexture("_MainTex", simManager.uiManager.statsSpeciesColorKey);
+        treeOfLifeSpeciesLineMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        treeOfLifeSpeciesLineMat.SetBuffer("treeOfLifeSpeciesTreeCBuffer", treeOfLifeSpeciesTreeCBuffer);
+        cmdBufferTreeOfLifeSpeciesTree.DrawProcedural(Matrix4x4.identity, treeOfLifeSpeciesLineMat, 0, MeshTopology.Triangles, 6, 64 * 32);
 
         Graphics.ExecuteCommandBuffer(cmdBufferTreeOfLifeSpeciesTree);
         treeOfLifeSpeciesTreeRenderCamera.Render();
@@ -4028,6 +4051,9 @@ public class TheRenderKing : MonoBehaviour {
         }
         if(treeOfLifeWorldStatsValuesCBuffer != null) {
             treeOfLifeWorldStatsValuesCBuffer.Release();
+        }
+        if(treeOfLifeSpeciesTreeCBuffer != null) {
+            treeOfLifeSpeciesTreeCBuffer.Release();
         }
         // OLD TOL:
         if(treeOfLifeLeafNodeDataCBuffer != null) {

@@ -654,7 +654,7 @@ public class SimulationManager : MonoBehaviour {
             RefreshGraphData();
 
             theRenderKing.UpdateTreeOfLifeEventLineData(simEventsManager.completeEventHistoryList);
-            theRenderKing.UpdateTreeOfLifeWorldStatsData(uiManager.statsTextureLifespan); // Revise this!!!
+            //theRenderKing.SimTreeOfLifeWorldStatsData(uiManager.statsTextureLifespan); // Revise this!!!
             //environmentFluidManager.RerollForcePoints();
         }
 
