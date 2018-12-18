@@ -89,6 +89,7 @@ public class TheRenderKing : MonoBehaviour {
     public Material treeOfLifeWorldStatsMat;  // start with these simple ones first
     public Material treeOfLifeSpeciesLineMat;
     public Material treeOfLifeEventsLineMat;
+    public Material treeOfLifeSpeciesHeadTipMat;
 
     public ComputeBuffer gizmoStirToolPosCBuffer;
     public ComputeBuffer gizmoFeedToolPosCBuffer;
@@ -216,7 +217,20 @@ public class TheRenderKing : MonoBehaviour {
     private TreeOfLifeEventLineData[] treeOfLifeEventLineDataArray;
     private ComputeBuffer treeOfLifeEventLineDataCBuffer;
     private ComputeBuffer treeOfLifeWorldStatsValuesCBuffer;
-    private ComputeBuffer treeOfLifeSpeciesTreeCBuffer;
+    private ComputeBuffer treeOfLifeSpeciesSegmentsCBuffer;
+
+    public ComputeBuffer treeOfLifeSpeciesDataKeyCBuffer;
+    public Vector3[] treeOfLifeSpeciesDataHeadPosArray;
+    public ComputeBuffer treeOfLifeSpeciesDataHeadPosCBuffer;
+
+    public struct TreeOfLifeSpeciesKeyData {
+        public int timeCreated;        
+        public int timeExtinct;
+        public Vector3 hue;
+        public float isOn;
+        public float isExtinct;
+        public float isSelected;
+    }
 
     private int numTreeOfLifeStemSegmentQuads = 16;
     private ComputeBuffer treeOfLifeStemSegmentVerticesCBuffer;  // short ribbon mesh
@@ -911,7 +925,11 @@ public class TheRenderKing : MonoBehaviour {
 
         treeOfLifeWorldStatsValuesCBuffer = new ComputeBuffer(64, sizeof(float));
 
-        treeOfLifeSpeciesTreeCBuffer = new ComputeBuffer(64 * 32, sizeof(float));
+        treeOfLifeSpeciesSegmentsCBuffer = new ComputeBuffer(64 * 32, sizeof(float) * 3);
+
+        treeOfLifeSpeciesDataKeyCBuffer = new ComputeBuffer(32, sizeof(int) * 2 + sizeof(float) * 6);
+        treeOfLifeSpeciesDataHeadPosArray = new Vector3[32];
+        treeOfLifeSpeciesDataHeadPosCBuffer = new ComputeBuffer(32, sizeof(float) * 3);
 
         // ========================================================================================================================================
         // **** OLD BELOW:::: *********
@@ -2597,6 +2615,9 @@ public class TheRenderKing : MonoBehaviour {
     public void UpdateTreeOfLifeEventLineData(List<SimEventData> eventDataList) {
 
         treeOfLifeEventLineDataArray = new TreeOfLifeEventLineData[64]; // hardcoded!! 64 max!!!
+        if(treeOfLifeEventLineDataCBuffer != null) {
+            treeOfLifeEventLineDataCBuffer.Release();
+        }
         treeOfLifeEventLineDataCBuffer = new ComputeBuffer(treeOfLifeEventLineDataArray.Length, sizeof(float) * 3);
         for(int i = 0; i < testTreeOfLifePositionArray.Length; i++) {
             TreeOfLifeEventLineData data = new TreeOfLifeEventLineData();
@@ -2611,25 +2632,34 @@ public class TheRenderKing : MonoBehaviour {
         }
         treeOfLifeEventLineDataCBuffer.SetData(treeOfLifeEventLineDataArray);
     }
-    public void SimTreeOfLifeWorldStatsData(Texture2D sourceTex) {
-        int kernelCSUpdateWordStatsValues = computeShaderTreeOfLife.FindKernel("CSUpdateWordStatsValues");
-        computeShaderTreeOfLife.SetTexture(kernelCSUpdateWordStatsValues, "treeOfLifeWorldStatsTex", sourceTex); // simManager.uiManager.statsTextureLifespan);
-        computeShaderTreeOfLife.SetBuffer(kernelCSUpdateWordStatsValues, "treeOfLifeWorldStatsValuesCBuffer", treeOfLifeWorldStatsValuesCBuffer);
-        computeShaderTreeOfLife.SetFloat("_Time", Time.realtimeSinceStartup);
-        computeShaderTreeOfLife.SetFloat("_WorldStatsMin", 0f);
-        computeShaderTreeOfLife.SetFloat("_WorldStatsMax", simManager.uiManager.maxNutrientsValue);
-        computeShaderTreeOfLife.SetInt("_NumTimeSeriesEntries", sourceTex.width);
-        computeShaderTreeOfLife.Dispatch(kernelCSUpdateWordStatsValues, 1, 1, 1);
+    public void SimTreeOfLifeWorldStatsData(Texture2D dataTex, Texture2D keyTex) {
+        int kernelCSUpdateWorldStatsValues = computeShaderTreeOfLife.FindKernel("CSUpdateWorldStatsValues");
+        computeShaderTreeOfLife.SetTexture(kernelCSUpdateWorldStatsValues, "treeOfLifeWorldStatsTex", dataTex); // simManager.uiManager.statsTextureLifespan);
+        computeShaderTreeOfLife.SetTexture(kernelCSUpdateWorldStatsValues, "treeOfLifeWorldStatsKeyTex", keyTex);  // used for line color, max/min values reference, and other extra info per graph line (32 max)
+        computeShaderTreeOfLife.SetBuffer(kernelCSUpdateWorldStatsValues, "treeOfLifeWorldStatsValuesCBuffer", treeOfLifeWorldStatsValuesCBuffer);
+        computeShaderTreeOfLife.SetFloat("_Time", Time.realtimeSinceStartup); // for animation & shit
+        //computeShaderTreeOfLife.SetFloat("_WorldStatsMin", 0f);
+        //computeShaderTreeOfLife.SetFloat("_WorldStatsMax", simManager.uiManager.maxNutrientsValue);  // obsolete?
+        computeShaderTreeOfLife.SetInt("_SelectedWorldStatsID", simManager.uiManager.tolSelectedWorldStatsIndex); // UI control
+        computeShaderTreeOfLife.SetInt("_NumTimeSeriesEntries", dataTex.width);
+        computeShaderTreeOfLife.Dispatch(kernelCSUpdateWorldStatsValues, 1, 1, 1);  // need 32 * 64 segments? -- not yet - as long as one-at-a-time
+
     }
-    public void SimTreeOfLifeSpeciesTreeData(Texture2D sourceTex) {
+    public void SimTreeOfLifeSpeciesTreeData(Texture2D dataTex, float maxVal) {
         int kernelCSUpdateSpeciesTreeData = computeShaderTreeOfLife.FindKernel("CSUpdateSpeciesTreeData");
-        computeShaderTreeOfLife.SetTexture(kernelCSUpdateSpeciesTreeData, "treeOfLifeSpeciesTreeTex", sourceTex); // simManager.uiManager.statsTextureLifespan);
-        computeShaderTreeOfLife.SetBuffer(kernelCSUpdateSpeciesTreeData, "treeOfLifeSpeciesTreeCBuffer", treeOfLifeSpeciesTreeCBuffer);
+        computeShaderTreeOfLife.SetTexture(kernelCSUpdateSpeciesTreeData, "treeOfLifeSpeciesTreeTex", dataTex); // simManager.uiManager.statsTextureLifespan);
+        computeShaderTreeOfLife.SetBuffer(kernelCSUpdateSpeciesTreeData, "treeOfLifeSpeciesDataKeyCBuffer", treeOfLifeSpeciesDataKeyCBuffer);  // 32 indices
+        computeShaderTreeOfLife.SetBuffer(kernelCSUpdateSpeciesTreeData, "treeOfLifeSpeciesDataHeadPosCBuffer", treeOfLifeSpeciesDataHeadPosCBuffer);
+        computeShaderTreeOfLife.SetBuffer(kernelCSUpdateSpeciesTreeData, "treeOfLifeSpeciesSegmentsCBuffer", treeOfLifeSpeciesSegmentsCBuffer);
         computeShaderTreeOfLife.SetFloat("_Time", Time.realtimeSinceStartup);
-        computeShaderTreeOfLife.SetFloat("_WorldStatsMin", 0f);
-        computeShaderTreeOfLife.SetFloat("_WorldStatsMax", simManager.uiManager.maxLifespanValue);
-        computeShaderTreeOfLife.SetInt("_NumTimeSeriesEntries", sourceTex.width);
-        computeShaderTreeOfLife.Dispatch(kernelCSUpdateSpeciesTreeData, 32, 1, 1);  // 32 = num of species displayed
+        computeShaderTreeOfLife.SetFloat("_SpeciesStatsMin", 0f);
+        computeShaderTreeOfLife.SetFloat("_SpeciesStatsMax", maxVal); // *** REFACTOR TO SUPPORT CYCLING!
+        computeShaderTreeOfLife.SetInt("_CurSimStep", simManager.simAgeTimeSteps);
+        computeShaderTreeOfLife.SetInt("_CurSimYear", simManager.curSimYear);
+        computeShaderTreeOfLife.SetInt("_NumTimeSeriesEntries", dataTex.width);
+        computeShaderTreeOfLife.Dispatch(kernelCSUpdateSpeciesTreeData, 32, 1, 1);  // 32 = num of species displayed * 64 inside shader
+
+        treeOfLifeSpeciesDataHeadPosCBuffer.GetData(treeOfLifeSpeciesDataHeadPosArray);
     }
     private void SimTreeOfLife() {
                 
@@ -2836,8 +2866,25 @@ public class TheRenderKing : MonoBehaviour {
 
         SimTreeOfLife(); // issues with this being on FixedUpdate() cycle vs Update() ?? ***
 
-        SimTreeOfLifeWorldStatsData(simManager.uiManager.statsTextureNutrients);
-        SimTreeOfLifeSpeciesTreeData(simManager.uiManager.statsTextureLifespan);
+        SimTreeOfLifeWorldStatsData(simManager.uiManager.tolTextureWorldStats, simManager.uiManager.tolTextureWorldStatsKey);
+
+        Texture2D graphTex = simManager.uiManager.statsTextureLifespan;
+        float maxVal = simManager.uiManager.maxLifespanValue;
+        if(simManager.uiManager.tolSelectedSpeciesStatsIndex == 1) {
+            graphTex = simManager.uiManager.statsTextureFoodEaten;
+            maxVal = simManager.uiManager.maxFoodEatenValue;
+        }
+        if(simManager.uiManager.tolSelectedSpeciesStatsIndex == 2) {
+            graphTex = simManager.uiManager.statsTextureBodySizes;
+            maxVal = simManager.uiManager.maxBodySizeValue;
+        }
+        if(simManager.uiManager.tolSelectedSpeciesStatsIndex > 3) {
+            graphTex = simManager.uiManager.statsTexturePredation;
+            maxVal = simManager.uiManager.maxPredationValue;
+        }
+        SimTreeOfLifeSpeciesTreeData(graphTex, maxVal); // update this?
+        
+        
         //UpdateAgentHighlightData();
 
         SimCritterSkinStrokes();
@@ -2847,13 +2894,7 @@ public class TheRenderKing : MonoBehaviour {
         float camDist = Mathf.Clamp01(-1f * simManager.cameraManager.gameObject.transform.position.z / (210f - 10f));
         baronVonWater.camDistNormalized = camDist;
         Vector2 boxSizeHalf = 0.8f * Vector2.Lerp(new Vector2(16f, 12f) * 2, new Vector2(256f, 204f), Mathf.Clamp01(-(simManager.cameraManager.gameObject.transform.position.z) / 150f));
-        /*if(simManager.cameraManager.targetAgent != null)
-        {
-        }
-        else
-        {
-            baronVonWater.spawnBoundsCameraDetails = new Vector4(0f, 0f, SimulationManager._MapSize, SimulationManager._MapSize);
-        }*/
+        
         baronVonWater.spawnBoundsCameraDetails = new Vector4(simManager.cameraManager.curCameraFocusPivotPos.x - boxSizeHalf.x,
                                                             simManager.cameraManager.curCameraFocusPivotPos.y - boxSizeHalf.y,
                                                             simManager.cameraManager.curCameraFocusPivotPos.x + boxSizeHalf.x,
@@ -2863,8 +2904,7 @@ public class TheRenderKing : MonoBehaviour {
 
         baronVonTerrain.Tick();
         baronVonWater.Tick();  // <-- SimWaterCurves/Chains/Water surface
-
-        //uberFlowChainBrush1.Tick(fluidManager._VelocityA);
+        
     }
 
     public void RenderSimulationCameras() { // **** revisit
@@ -2930,15 +2970,30 @@ public class TheRenderKing : MonoBehaviour {
         
         // World Stats graph lines:
         treeOfLifeWorldStatsMat.SetPass(0);
+        treeOfLifeWorldStatsMat.SetTexture("_KeyTex", simManager.uiManager.tolTextureWorldStatsKey);
         treeOfLifeWorldStatsMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         treeOfLifeWorldStatsMat.SetBuffer("treeOfLifeWorldStatsValuesCBuffer", treeOfLifeWorldStatsValuesCBuffer);
+        treeOfLifeWorldStatsMat.SetInt("_SelectedWorldStatsID", simManager.uiManager.tolSelectedWorldStatsIndex);
         cmdBufferTreeOfLifeSpeciesTree.DrawProcedural(Matrix4x4.identity, treeOfLifeWorldStatsMat, 0, MeshTopology.Triangles, 6, 64);
 
         treeOfLifeSpeciesLineMat.SetPass(0);
-        treeOfLifeSpeciesLineMat.SetTexture("_MainTex", simManager.uiManager.statsSpeciesColorKey);
+        //treeOfLifeSpeciesLineMat.SetTexture("_KeyTex", simManager.uiManager.statSpeciesColorKey);
         treeOfLifeSpeciesLineMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        treeOfLifeSpeciesLineMat.SetBuffer("treeOfLifeSpeciesTreeCBuffer", treeOfLifeSpeciesTreeCBuffer);
+        treeOfLifeSpeciesLineMat.SetBuffer("treeOfLifeSpeciesDataKeyCBuffer", treeOfLifeSpeciesDataKeyCBuffer);        
+        treeOfLifeSpeciesLineMat.SetBuffer("treeOfLifeSpeciesSegmentsCBuffer", treeOfLifeSpeciesSegmentsCBuffer);
+        treeOfLifeSpeciesLineMat.SetInt("_CurSimStep", simManager.simAgeTimeSteps);
+        treeOfLifeSpeciesLineMat.SetInt("_CurSimYear", simManager.curSimYear);
         cmdBufferTreeOfLifeSpeciesTree.DrawProcedural(Matrix4x4.identity, treeOfLifeSpeciesLineMat, 0, MeshTopology.Triangles, 6, 64 * 32);
+
+        // Head Tips!
+        treeOfLifeSpeciesHeadTipMat.SetPass(0);
+        treeOfLifeSpeciesHeadTipMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        treeOfLifeSpeciesHeadTipMat.SetBuffer("treeOfLifeSpeciesDataKeyCBuffer", treeOfLifeSpeciesDataKeyCBuffer);        
+        treeOfLifeSpeciesHeadTipMat.SetBuffer("treeOfLifeSpeciesDataHeadPosCBuffer", treeOfLifeSpeciesDataHeadPosCBuffer);
+        treeOfLifeSpeciesHeadTipMat.SetInt("_CurSimStep", simManager.simAgeTimeSteps);
+        treeOfLifeSpeciesHeadTipMat.SetInt("_CurSimYear", simManager.curSimYear);
+        cmdBufferTreeOfLifeSpeciesTree.DrawProcedural(Matrix4x4.identity, treeOfLifeSpeciesHeadTipMat, 0, MeshTopology.Triangles, 6, 32);
+
 
         Graphics.ExecuteCommandBuffer(cmdBufferTreeOfLifeSpeciesTree);
         treeOfLifeSpeciesTreeRenderCamera.Render();
@@ -3077,7 +3132,7 @@ public class TheRenderKing : MonoBehaviour {
     }
     public void TreeOfLifeGetColliderNodePositionData() {
         treeOfLifeNodeColliderDataCBufferA.GetData(treeOfLifeNodeColliderDataArray);
-        simManager.uiManager.treeOfLifeManager.UpdateNodePositionsFromGPU(simManager.uiManager.cameraManager, treeOfLifeNodeColliderDataArray);        
+        simManager.uiManager.treeOfLifeManager.UpdateNodePositionsFromGPU(simManager.uiManager.cameraManager, treeOfLifeSpeciesDataHeadPosArray);        
         
     }
     /*private void Render() {
@@ -4052,8 +4107,14 @@ public class TheRenderKing : MonoBehaviour {
         if(treeOfLifeWorldStatsValuesCBuffer != null) {
             treeOfLifeWorldStatsValuesCBuffer.Release();
         }
-        if(treeOfLifeSpeciesTreeCBuffer != null) {
-            treeOfLifeSpeciesTreeCBuffer.Release();
+        if(treeOfLifeSpeciesSegmentsCBuffer != null) {
+            treeOfLifeSpeciesSegmentsCBuffer.Release();
+        }
+        if(treeOfLifeSpeciesDataKeyCBuffer != null) {
+            treeOfLifeSpeciesDataKeyCBuffer.Release();
+        }
+        if(treeOfLifeSpeciesDataHeadPosCBuffer != null) {
+            treeOfLifeSpeciesDataHeadPosCBuffer.Release();
         }
         // OLD TOL:
         if(treeOfLifeLeafNodeDataCBuffer != null) {

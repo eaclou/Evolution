@@ -39,18 +39,18 @@ public class SettingsManager : MonoBehaviour {
     private float minBodyMutationStepSize = 0.025f;
     private float maxBodyMutationStepSize = 0.9f;
 
-    private int curTierBodyMutationAmplitude = 2;
-    private int curTierBodyMutationFrequency = 4;
-    private int curTierBodyMutationModules = 4;
+    public int curTierBodyMutationAmplitude = 2;
+    public int curTierBodyMutationFrequency = 4;
+    public int curTierBodyMutationModules = 4;
 
-    private int curTierBrainMutationAmplitude = 5;
-    private int curTierBrainMutationFrequency = 4;
-    private int curTierBrainMutationNewLink = 6;
-    private int curTierBrainMutationNewHiddenNeuron = 2;
-    private int curTierBrainMutationWeightDecay = 8;
+    public int curTierBrainMutationAmplitude = 5;
+    public int curTierBrainMutationFrequency = 4;
+    public int curTierBrainMutationNewLink = 6;
+    public int curTierBrainMutationNewHiddenNeuron = 2;
+    public int curTierBrainMutationWeightDecay = 8;
     
-    private int curTierFoodDecay = 5;
-    private int curTierFoodPlant = 5;
+    public int curTierFoodDecay = 5;
+    public int curTierFoodPlant = 5;
     public int curTierFoodEgg = 6;
     public int curTierFoodCorpse = 6;
     

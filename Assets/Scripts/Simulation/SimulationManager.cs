@@ -123,7 +123,25 @@ public class SimulationManager : MonoBehaviour {
     //public List<Vector4> statsBodySizesEachGenerationList;
     //public List<Vector4> statsFoodEatenEachGenerationList;
     //public List<Vector4> statsPredationEachGenerationList;
-    public List<Vector4> statsNutrientsEachGenerationList;    
+        // 0 == decay nutrients  .x
+        // 1 == plant food  .y
+        // 2 == eggs food  .z
+        // 3 = corpse food  .w
+        // 4 = brain mutation freq
+        // 5 = brain mutation amp
+        // 6 = brain size bias
+        // 7 = body proportion freq
+        // 8 = body proportion amp
+        // 9 = body sensor mutation rate
+        // 10 = water current / storminess
+    public List<Vector4> statsNutrientsEachGenerationList;
+    public List<float> statsHistoryBrainMutationFreqList;
+    public List<float> statsHistoryBrainMutationAmpList;
+    public List<float> statsHistoryBrainSizeBiasList;
+    public List<float> statsHistoryBodyMutationFreqList;
+    public List<float> statsHistoryBodyMutationAmpList;
+    public List<float> statsHistoryBodySensorVarianceList;
+    public List<float> statsHistoryWaterCurrentsList;
     //public List<float> statsMutationEachGenerationList;
     //public List<Color> statsSpeciesPrimaryColorsList;
     //public List<Color> statsSpeciesSecondaryColorsList;
@@ -599,6 +617,22 @@ public class SimulationManager : MonoBehaviour {
         rawFitnessScoresArray = new float[numAgents];
         statsNutrientsEachGenerationList = new List<Vector4>();
         statsNutrientsEachGenerationList.Add(Vector4.one * 0.0001f);
+
+        statsHistoryBrainMutationFreqList = new List<float>();
+        statsHistoryBrainMutationFreqList.Add(0f);
+        statsHistoryBrainMutationAmpList = new List<float>();
+        statsHistoryBrainMutationAmpList.Add(0f);
+        statsHistoryBrainSizeBiasList = new List<float>();
+        statsHistoryBrainSizeBiasList.Add(0f);
+        statsHistoryBodyMutationFreqList = new List<float>();
+        statsHistoryBodyMutationFreqList.Add(0f);
+        statsHistoryBodyMutationAmpList = new List<float>();
+        statsHistoryBodyMutationAmpList.Add(0f);
+        statsHistoryBodySensorVarianceList = new List<float>();
+        statsHistoryBodySensorVarianceList.Add(0f);
+        statsHistoryWaterCurrentsList = new List<float>();
+        statsHistoryWaterCurrentsList.Add(0f);
+        
         /*
         statsLifespanEachGenerationList = new List<Vector4>(); // 
         statsFoodEatenEachGenerationList = new List<Vector4>();
@@ -650,16 +684,29 @@ public class SimulationManager : MonoBehaviour {
             if(curSimYear % 2 == 0) {                
                 foodManager.MoveRandomNutrientPatches(UnityEngine.Random.Range(0, foodManager.nutrientPatchesArray.Length));
             }
-            
-            RefreshGraphData();
 
-            theRenderKing.UpdateTreeOfLifeEventLineData(simEventsManager.completeEventHistoryList);
+            AddNewHistoricalDataEntry();
+            AddNewSpeciesDataEntry(curSimYear);
+            uiManager.UpdateSpeciesTreeDataTextures(curSimYear);
+            //RefeshGraphData();
+            
             //theRenderKing.SimTreeOfLifeWorldStatsData(uiManager.statsTextureLifespan); // Revise this!!!
             //environmentFluidManager.RerollForcePoints();
         }
 
         if(simAgeTimeSteps % 25 == 0) {
             UpdateSimulationClimate();
+
+            RefreshLatestHistoricalDataEntry();
+            RefreshLatestSpeciesDataEntry();
+            uiManager.UpdateSpeciesTreeDataTextures(curSimYear); // shouldn't lengthen!
+            //masterGenomePool.UpdateSpeciesStats();
+
+            uiManager.UpdateTolWorldStatsTexture(statsNutrientsEachGenerationList);
+
+            //RefreshGraphData();
+
+            theRenderKing.UpdateTreeOfLifeEventLineData(simEventsManager.completeEventHistoryList);
         }
 
         simEventsManager.Tick();
@@ -1257,97 +1304,27 @@ public class SimulationManager : MonoBehaviour {
             recordBotAge = agentsArray[agentIndex].ageCounter;
         }
     }
+    
     private void ProcessAgentScores(Agent agentRef) {
-
-        // REFACTOR!! This will need to be per-species, updated when leaderboard candidate list is updated
         
         numAgentsProcessed++;
         //get species index:
-        int speciesIndex = agentRef.speciesIndex; // Mathf.FloorToInt((float)agentIndex / (float)_NumAgents * (float)numSpecies);
+        int speciesIndex = agentRef.speciesIndex;
 
         float weightedAvgLerpVal = 1f / 128f;
         weightedAvgLerpVal = Mathf.Max(weightedAvgLerpVal, 1f / (float)(numAgentsProcessed + 1));
-
-        //speciesAvgFoodEaten[speciesIndex] = Mathf.Lerp(speciesAvgFoodEaten[speciesIndex], agentsArray[agentIndex].totalFoodEaten, weightedAvgLerpVal);
-        //speciesAvgSizes[speciesIndex] = Vector2.Lerp(speciesAvgSizes[speciesIndex], new Vector2(agentsArray[agentIndex].coreModule.coreWidth, agentsArray[agentIndex].coreModule.coreLength), weightedAvgLerpVal);
-        float mouthType = 0f;
-        //if(agentsArray[agentIndex].mouthRef.isPassive == false) {
-        //    mouthType = 1f;
-        //}
-        //speciesAvgMouthTypes[speciesIndex] = Mathf.Lerp(speciesAvgMouthTypes[speciesIndex], mouthType, weightedAvgLerpVal);
-        //rollingAverageAgentScoresArray[speciesIndex] = Mathf.Lerp(rollingAverageAgentScoresArray[speciesIndex], (float)agentsArray[agentIndex].scoreCounter, weightedAvgLerpVal);
         
         float approxGen = (float)numAgentsBorn / (float)(numAgents - 1);
         if (approxGen > curApproxGen) {
-            statsNutrientsEachGenerationList.Add(new Vector4(foodManager.curGlobalNutrients, foodManager.curGlobalFoodParticles, 0f, 0f));
-            //RefreshGraphTextureNutrients();
+            //statsNutrientsEachGenerationList.Add(new Vector4(foodManager.curGlobalNutrients, foodManager.curGlobalFoodParticles, 0f, 0f));
             
-            curApproxGen++;
-            
-            
-            
-            /*
-            Vector4 scores = new Vector4(rollingAverageAgentScoresArray[0], rollingAverageAgentScoresArray[1], rollingAverageAgentScoresArray[2], rollingAverageAgentScoresArray[3]); ;
-            statsLifespanEachGenerationList.Add(scores); // ** UPDATE THIS TO SAVE aLLL 4 SCORES!!! ***
-            if (rollingAverageAgentScoresArray[speciesIndex] > agentAvgRecordScore) {
-                agentAvgRecordScore = rollingAverageAgentScoresArray[speciesIndex];
-            }
-            curApproxGen++;
-            
-            Vector4 foodEaten = new Vector4(speciesAvgFoodEaten[0], speciesAvgFoodEaten[1], speciesAvgFoodEaten[2], speciesAvgFoodEaten[3]); 
-            statsFoodEatenEachGenerationList.Add(foodEaten);
-
-            Vector4 predation = new Vector4(speciesAvgMouthTypes[0], speciesAvgMouthTypes[1], speciesAvgMouthTypes[2], speciesAvgMouthTypes[3]); ;
-            statsPredationEachGenerationList.Add(predation);
-
-            //bodySizes:
-            Vector4 bodySizes = new Vector4(speciesAvgSizes[0].x * speciesAvgSizes[0].y, speciesAvgSizes[1].x * speciesAvgSizes[1].y, speciesAvgSizes[2].x * speciesAvgSizes[2].y, speciesAvgSizes[3].x * speciesAvgSizes[3].y);
-            //Debug.Log("BodySizeAreas: " + bodySizes.ToString());
-            statsBodySizesEachGenerationList.Add(bodySizes);
-
-            statsMutationEachGenerationList.Add(curPlayerMutationRate);
-            statsNutrientsEachGenerationList.Add(new Vector4(foodManager.curGlobalNutrients, foodManager.curGlobalFoodParticles, 0f, 0f));
-
-            RefreshGraphTextureLifespan();
-            RefreshGraphTextureFoodEaten();
-            RefreshGraphTexturePredation();
-            RefreshGraphTextureBodySizes();
-            RefreshGraphTextureNutrients();
-            RefreshGraphTextureMutation();
-            
-            */
-
-            //UpdateSimulationClimate();
+            curApproxGen++;            
         }
         else {
             if(numAgentsProcessed < 130) {
                 if(numAgentsProcessed % 8 == 0) {
-                    statsNutrientsEachGenerationList[curApproxGen - 1] = new Vector4(foodManager.curGlobalNutrients, foodManager.curGlobalFoodParticles, 0f, 0f);
-                    //RefreshGraphTextureNutrients();
-                    //Debug.Log("process Stats!! + " + curApproxGen.ToString() + ", numProcessed: " + numAgentsProcessed.ToString());
-
-                    /*
-                    Vector4 scores = new Vector4(rollingAverageAgentScoresArray[0], rollingAverageAgentScoresArray[1], rollingAverageAgentScoresArray[2], rollingAverageAgentScoresArray[3]); ;
-                    statsLifespanEachGenerationList[curApproxGen - 1] = scores;
+                    //statsNutrientsEachGenerationList[curApproxGen - 1] = new Vector4(foodManager.curGlobalNutrients, foodManager.curGlobalFoodParticles, 0f, 0f);
                     
-                    Vector4 foodEaten = new Vector4(speciesAvgFoodEaten[0], speciesAvgFoodEaten[1], speciesAvgFoodEaten[2], speciesAvgFoodEaten[3]); 
-                    statsFoodEatenEachGenerationList[curApproxGen - 1] = foodEaten;
-
-                    Vector4 predation = new Vector4(speciesAvgMouthTypes[0], speciesAvgMouthTypes[1], speciesAvgMouthTypes[2], speciesAvgMouthTypes[3]); ;
-                    statsPredationEachGenerationList[curApproxGen - 1] = predation;
-
-                    //bodySizes:
-                    Vector4 bodySizes = new Vector4(speciesAvgSizes[0].x * speciesAvgSizes[0].y, speciesAvgSizes[1].x * speciesAvgSizes[1].y, speciesAvgSizes[2].x * speciesAvgSizes[2].y, speciesAvgSizes[3].x * speciesAvgSizes[3].y);
-                    statsBodySizesEachGenerationList[curApproxGen - 1] = bodySizes;
-
-                    statsMutationEachGenerationList[curApproxGen - 1] = curPlayerMutationRate;
-                    statsNutrientsEachGenerationList[curApproxGen - 1] = new Vector4(foodManager.curGlobalNutrients, foodManager.curGlobalFoodParticles, 0f, 0f);
-
-                    RefreshGraphTextureLifespan();
-                    RefreshGraphTextureFoodEaten();
-                    RefreshGraphTexturePredation();
-                    RefreshGraphTextureBodySizes();
-                    */
                 }
             }
         }
@@ -1358,10 +1335,66 @@ public class SimulationManager : MonoBehaviour {
         // Inject pre-trained critters
         environmentFluidManager.UpdateSimulationClimate();
     }
-    private void RefreshGraphData() {
+    private void AddNewHistoricalDataEntry() {
+        // add new entries to historical data lists:        
+        statsNutrientsEachGenerationList.Add(new Vector4(foodManager.curGlobalNutrients, foodManager.curGlobalFoodParticles, 0f, 0f));
+        statsHistoryBrainMutationFreqList.Add((float)settingsManager.curTierBrainMutationFrequency);
+        statsHistoryBrainMutationAmpList.Add((float)settingsManager.curTierBrainMutationAmplitude);
+        statsHistoryBrainSizeBiasList.Add((float)settingsManager.curTierBrainMutationNewLink);
+        statsHistoryBodyMutationFreqList.Add((float)settingsManager.curTierBodyMutationFrequency);
+        statsHistoryBodyMutationAmpList.Add((float)settingsManager.curTierBodyMutationAmplitude);
+        statsHistoryBodySensorVarianceList.Add((float)settingsManager.curTierBodyMutationModules);
+        statsHistoryWaterCurrentsList.Add((float)environmentFluidManager.curTierWaterCurrents);
+    }
+    private void AddNewSpeciesDataEntry(int year) {
+        masterGenomePool.AddNewYearlySpeciesStats(year);
+    }
+    private void RefreshLatestHistoricalDataEntry() {
+        statsNutrientsEachGenerationList[statsNutrientsEachGenerationList.Count - 1] = new Vector4(foodManager.curGlobalNutrients, foodManager.curGlobalFoodParticles, 0f, 0f);
+        statsHistoryBrainMutationFreqList[statsHistoryBrainMutationFreqList.Count - 1] = settingsManager.curTierBrainMutationFrequency;
+        statsHistoryBrainMutationAmpList[statsHistoryBrainMutationAmpList.Count - 1] = settingsManager.curTierBrainMutationAmplitude;
+        statsHistoryBrainSizeBiasList[statsHistoryBrainSizeBiasList.Count - 1] = settingsManager.curTierBrainMutationNewLink;
+        statsHistoryBodyMutationFreqList[statsHistoryBodyMutationFreqList.Count - 1] = settingsManager.curTierBodyMutationFrequency;
+        statsHistoryBodyMutationAmpList[statsHistoryBodyMutationAmpList.Count - 1] = settingsManager.curTierBodyMutationAmplitude;
+        statsHistoryBodySensorVarianceList[statsHistoryBodySensorVarianceList.Count - 1] = settingsManager.curTierBodyMutationModules;
+        statsHistoryWaterCurrentsList[statsHistoryWaterCurrentsList.Count - 1] = environmentFluidManager.curTierWaterCurrents;
+    }
+    private void RefreshLatestSpeciesDataEntry() {
+        for(int i = 0; i < masterGenomePool.completeSpeciesPoolsList.Count; i++) {
+            masterGenomePool.completeSpeciesPoolsList[i].avgLifespanPerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgLifespanPerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgLifespan;
+            masterGenomePool.completeSpeciesPoolsList[i].avgConsumptionDecayPerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgConsumptionDecayPerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgConsumptionDecay;
+            masterGenomePool.completeSpeciesPoolsList[i].avgConsumptionPlantPerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgConsumptionPlantPerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgConsumptionPlant;
+            masterGenomePool.completeSpeciesPoolsList[i].avgConsumptionMeatPerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgConsumptionMeatPerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgConsumptionMeat;
+            masterGenomePool.completeSpeciesPoolsList[i].avgBodySizePerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgBodySizePerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgBodySize;
+            masterGenomePool.completeSpeciesPoolsList[i].avgSpecAttackPerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgSpecAttackPerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgSpecAttack;
+            masterGenomePool.completeSpeciesPoolsList[i].avgSpecDefendPerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgSpecDefendPerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgSpecDefend;
+            masterGenomePool.completeSpeciesPoolsList[i].avgSpecSpeedPerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgSpecSpeedPerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgSpecSpeed;
+            masterGenomePool.completeSpeciesPoolsList[i].avgSpecUtilityPerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgSpecUtilityPerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgSpecUtility;
+            masterGenomePool.completeSpeciesPoolsList[i].avgFoodSpecDecayPerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgFoodSpecDecayPerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgFoodSpecDecay;
+            masterGenomePool.completeSpeciesPoolsList[i].avgFoodSpecPlantPerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgFoodSpecPlantPerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgFoodSpecPlant;
+            masterGenomePool.completeSpeciesPoolsList[i].avgFoodSpecMeatPerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgFoodSpecMeatPerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgFoodSpecMeat;
+            masterGenomePool.completeSpeciesPoolsList[i].avgNumNeuronsPerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgNumNeuronsPerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgNumNeurons;
+            masterGenomePool.completeSpeciesPoolsList[i].avgNumAxonsPerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgNumAxonsPerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgNumAxons;
+            masterGenomePool.completeSpeciesPoolsList[i].avgExperiencePerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgExperiencePerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgExperience;
+            masterGenomePool.completeSpeciesPoolsList[i].avgFitnessScorePerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgFitnessScorePerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgFitnessScore;
+            masterGenomePool.completeSpeciesPoolsList[i].avgDamageDealtPerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgDamageDealtPerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgDamageDealt;
+            masterGenomePool.completeSpeciesPoolsList[i].avgDamageTakenPerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgDamageTakenPerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgDamageTaken;
+        }
+        //avgLifespanPerYearList[avgLifespanPerYearList.Count - 1] = avgLifespan;
+        
+    }
+    /*private void RefreshGraphData() {
+        
+        // Pack stats data into textures for GPU:
+        // NEW:
+        uiManager.UpdateTolWorldStatsTexture(statsNutrientsEachGenerationList);        
+        
+        // OLD:::
         uiManager.UpdateGraphDataTextures(curSimYear);
         uiManager.UpdateStatsTextureNutrients(statsNutrientsEachGenerationList);
-    }
+
+
+    }*/
     /*private void RefreshGraphTextureLifespan() {
         Debug.Log("Happy New Years! (refreshing graph) " + curSimYear.ToString());
         uiManager.UpdateStatsTextureLifespan(curSimYear);
@@ -1423,11 +1456,40 @@ public class SimulationManager : MonoBehaviour {
     public void AddNewSpecies(AgentGenome newGenome, int parentSpeciesID) {
         int newSpeciesID = masterGenomePool.completeSpeciesPoolsList.Count;
         
-        SpeciesGenomePool newSpecies = new SpeciesGenomePool(newSpeciesID, parentSpeciesID, curSimYear, settingsManager.mutationSettingsPersistent);
+        SpeciesGenomePool newSpecies = new SpeciesGenomePool(newSpeciesID, parentSpeciesID, curSimYear, simAgeTimeSteps, settingsManager.mutationSettingsPersistent);
         newSpecies.FirstTimeInitialize(newGenome, masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].depthLevel + 1);
         masterGenomePool.currentlyActiveSpeciesIDList.Add(newSpeciesID);
         masterGenomePool.completeSpeciesPoolsList.Add(newSpecies);
         masterGenomePool.speciesCreatedOrDestroyedThisFrame = true;
+
+        // Inherit Parent Data Stats:
+        newSpecies.avgLifespanPerYearList.Clear();
+        newSpecies.avgConsumptionDecayPerYearList.Clear();
+        newSpecies.avgConsumptionPlantPerYearList.Clear();
+        newSpecies.avgConsumptionMeatPerYearList.Clear();
+        newSpecies.avgBodySizePerYearList.Clear();
+        newSpecies.avgFoodSpecDecayPerYearList.Clear();
+        newSpecies.avgFoodSpecPlantPerYearList.Clear();
+        newSpecies.avgFoodSpecMeatPerYearList.Clear();
+        int lastIndex = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgLifespanPerYearList.Count - 1;
+        for(int i = 0; i < masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgLifespanPerYearList.Count; i++) {
+            newSpecies.avgLifespanPerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgLifespanPerYearList[i]);
+            newSpecies.avgConsumptionDecayPerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgConsumptionDecayPerYearList[i]);
+            newSpecies.avgConsumptionPlantPerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgConsumptionPlantPerYearList[i]);
+            newSpecies.avgConsumptionMeatPerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgConsumptionMeatPerYearList[i]);
+            newSpecies.avgBodySizePerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgBodySizePerYearList[i]);
+            newSpecies.avgFoodSpecDecayPerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgFoodSpecDecayPerYearList[i]);
+            newSpecies.avgFoodSpecPlantPerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgFoodSpecPlantPerYearList[i]);
+            newSpecies.avgFoodSpecMeatPerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgFoodSpecMeatPerYearList[i]);
+        }  // set
+        newSpecies.avgLifespan = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgLifespanPerYearList[lastIndex];
+        newSpecies.avgConsumptionDecay = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgConsumptionDecayPerYearList[lastIndex];
+        newSpecies.avgConsumptionPlant = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgConsumptionPlantPerYearList[lastIndex];
+        newSpecies.avgConsumptionMeat = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgConsumptionDecayPerYearList[lastIndex];
+        newSpecies.avgBodySize = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgBodySizePerYearList[lastIndex];
+        newSpecies.avgFoodSpecDecay = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgFoodSpecDecayPerYearList[lastIndex];
+        newSpecies.avgFoodSpecPlant = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgFoodSpecPlantPerYearList[lastIndex];
+        newSpecies.avgFoodSpecMeat = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgFoodSpecMeatPerYearList[lastIndex];
 
         // Tree Of LIFE UI collider & RenderKing updates:
         uiManager.treeOfLifeManager.AddNewSpecies(masterGenomePool, newSpeciesID);

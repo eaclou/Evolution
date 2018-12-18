@@ -66,8 +66,8 @@
 				float3 quadData = quadVerticesCBuffer[id];
 				TreeOfLifeEventLineData eventData = treeOfLifeEventLineDataCBuffer[inst];
 				quadData.y += 0.5;
-				quadData.y *= (eventData.eventMagnitude);
-				quadData.x *= 0.005;		
+				quadData.y *= (eventData.eventMagnitude) * 0.667;
+				quadData.x *= 0.0125;		
 				//quadData.y *= 1;		
 				o.uv = quadVerticesCBuffer[id].xy + 0.5;
 				
@@ -75,15 +75,23 @@
 								
 				
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
-				o.color = float4(eventData.eventMagnitude, 0, 0, 0);
+
+				float3 hueMinor = float3(0.55, 1, 0.6) * 0.8;
+				float3 hueMajor = float3(0.25, 0.55, 1) * 0.8;
+				float3 hueExtreme = float3(1, 0.55, 0.65) * 0.675;
+
+				float mag = saturate(eventData.eventMagnitude - 0.111) * 5;
+				float3 hue = lerp(hueMinor, hueMajor, saturate(mag * 2));
+				hue = lerp(hue, hueExtreme, saturate(mag - 0.5) * 2);
+				o.color = float4(hue, 0);
 				
 				return o;
 			}
 			
 			fixed4 frag (v2f i) : SV_Target
 			{
-				float4 finalColor = float4(1,1,1,1);
-				finalColor.rgb *= i.color.x;
+				float4 finalColor = float4(i.color.rgb,1);
+				//finalColor.rgb *= i.color.x;
 				return finalColor;
 			}
 			ENDCG

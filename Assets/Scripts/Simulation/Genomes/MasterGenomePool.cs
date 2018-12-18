@@ -41,14 +41,14 @@ public class MasterGenomePool {
         currentlyActiveSpeciesIDList = new List<int>();
         completeSpeciesPoolsList = new List<SpeciesGenomePool>();
 
-        SpeciesGenomePool rootSpecies = new SpeciesGenomePool(0, -1, 0, mutationSettingsRef);
+        SpeciesGenomePool rootSpecies = new SpeciesGenomePool(0, -1, 0, 0, mutationSettingsRef);
         rootSpecies.FirstTimeInitialize(numAgentGenomes, 0);
         currentlyActiveSpeciesIDList.Add(0);
         completeSpeciesPoolsList.Add(rootSpecies);
         // When do I create nodeCollider & shit?
 
         // Create foundational Species:
-        SpeciesGenomePool firstSpecies = new SpeciesGenomePool(1, 0, 0, mutationSettingsRef);
+        SpeciesGenomePool firstSpecies = new SpeciesGenomePool(1, 0, 0, 1, mutationSettingsRef);
         firstSpecies.FirstTimeInitialize(numAgentGenomes, 1);
 
         currentlyActiveSpeciesIDList.Add(1);
@@ -60,12 +60,16 @@ public class MasterGenomePool {
         //yield return null;
     }
 
-    public void UpdateYearlySpeciesStats(int year) {
-
+    public void AddNewYearlySpeciesStats(int year) {
         for(int i = 0; i < completeSpeciesPoolsList.Count; i++) {
-            completeSpeciesPoolsList[i].UpdateYearlyStats(year);
+            completeSpeciesPoolsList[i].AddNewYearlyStats(year);
         }
     }
+    /*public void UpdateSpeciesStats() {
+        for(int i = 0; i < completeSpeciesPoolsList.Count; i++) {
+            completeSpeciesPoolsList[i].UpdateSpeciesStats();
+        }
+    }*/
 
     public void Tick() {
         speciesCreatedOrDestroyedThisFrame = false;
@@ -120,7 +124,7 @@ public class MasterGenomePool {
         }
 
         currentlyActiveSpeciesIDList.RemoveAt(listIndex);
-        completeSpeciesPoolsList[speciesID].ProcessExtinction();
+        completeSpeciesPoolsList[speciesID].ProcessExtinction(simManagerRef.simAgeTimeSteps);
 
         //Signal RenderKing/TreeOfLifeManager to update:
         simManagerRef.uiManager.treeOfLifeManager.RemoveExtinctSpecies(speciesID);

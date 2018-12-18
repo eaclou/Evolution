@@ -2,7 +2,8 @@
 {
 	Properties
 	{
-		_MainTex ("Texture", 2D) = "white" {}
+		_DataTex ("_DataTex", 2D) = "black" {}
+		_KeyTex ("_KeyTex", 2D) = "black" {}
 	}
 	SubShader
 	{
@@ -34,7 +35,10 @@
 				float4 color : COLOR;
 			};
 
-			sampler2D _MainTex;
+			sampler2D _DataTex; // needed?
+			sampler2D _KeyTex;
+
+			uniform int _SelectedWorldStatsID;
 
 			v2f vert (uint id : SV_VertexID, uint inst : SV_InstanceID)
 			{
@@ -69,13 +73,14 @@
 				float3 worldPosition = float3(vertexCoord, 0);								
 				
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
-				o.color = float4(1, 0, 0, 0);
+				o.color = tex2Dlod(_KeyTex, float4(0,((float)_SelectedWorldStatsID + 0.5) / 32.0,0,0));
 				return o;
 			}
 			
 			fixed4 frag (v2f i) : SV_Target
 			{
-				float4 finalColor = float4(0.5,1,0.5,1);				
+				float4 finalColor = float4(i.color.rgb, 1.0);	
+				//finalColor = float4(0,1,1,1);
 				return finalColor;
 			}
 			ENDCG

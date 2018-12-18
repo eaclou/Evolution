@@ -7,7 +7,7 @@ public class TreeOfLifeManager {
     private Vector3 treeOriginPos;
     private GameObject treeOfLifeAnchorGO;
 
-    private float colliderBaseScaleMultiplier = 0.275f;
+    private float colliderBaseScaleMultiplier = 0.1f;
 
     // Instantiated Objects:
     public List<TreeOfLifeNodeRaycastTarget> nodeRaycastTargetsList;
@@ -32,18 +32,19 @@ public class TreeOfLifeManager {
         }      
     }
 
-    public void UpdateNodePositionsFromGPU(CameraManager cam, TheRenderKing.TreeOfLifeNodeColliderData[] dataArray) {
-        camScale = 720f / (float)cam.cameraRef.pixelHeight;  // Can be improved precision-wise, but maybe close enough for now        
+    public void UpdateNodePositionsFromGPU(CameraManager cam, Vector3[] posArray) {
+        //camScale = 720f / (float)cam.cameraRef.pixelHeight;  // Can be improved precision-wise, but maybe close enough for now        
         //float screenScaleX = camScale;
         //float screenScaleY = camScale;
         treeOfLifeScale = 1f;
 
         for(int i = 0; i < nodeRaycastTargetsList.Count; i++) {
 
-            Vector4 localPos = new Vector3(dataArray[i].localPos.x, dataArray[i].localPos.y, dataArray[i].localPos.z);
-            Vector3 worldPos = cam.worldSpaceTopLeft + cam.worldSpaceCameraRightDir * camScale - cam.worldSpaceCameraUpDir * camScale * 0.5f + localPos * camScale;
-            
-            nodeRaycastTargetsList[i].transform.position = worldPos;
+            //Vector4 localPos = new Vector3(dataArray[i].localPos.x, dataArray[i].localPos.y, dataArray[i].localPos.z);
+            //Vector3 worldPos = cam.worldSpaceTopLeft + cam.worldSpaceCameraRightDir * camScale - cam.worldSpaceCameraUpDir * camScale * 0.5f + localPos * camScale;
+
+            Vector3 pos = posArray[i];
+            nodeRaycastTargetsList[i].transform.position = pos;
         }
     }
 

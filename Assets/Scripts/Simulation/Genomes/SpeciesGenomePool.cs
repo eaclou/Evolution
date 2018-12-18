@@ -21,6 +21,8 @@ public class SpeciesGenomePool {
     public int numAgentsEvaluated = 0;
      
     public int yearCreated = -1;
+    public int timeStepCreated = 1;
+    public int timeStepExtinct = 2000000000;
 
     public float avgLifespan = 0f;
     public List<float> avgLifespanPerYearList;
@@ -62,11 +64,12 @@ public class SpeciesGenomePool {
     public bool isFlaggedForExtinction = false;
     public bool isExtinct = false;
 	
-    public SpeciesGenomePool(int ID, int parentID, int year, MutationSettings settings) {
+    public SpeciesGenomePool(int ID, int parentID, int year, int timeStep, MutationSettings settings) {
         yearCreated = year;
         speciesID = ID;
         parentSpeciesID = parentID;
         mutationSettingsRef = settings;
+        timeStepCreated = timeStep;
     }
 
     private void InitShared() {
@@ -151,7 +154,7 @@ public class SpeciesGenomePool {
         representativeGenome = foundingGenome;
     }
 
-    public void ProcessExtinction() {
+    public void ProcessExtinction(int curTimeStep) {
         isExtinct = true;
         avgLifespan = 0f;
         avgConsumptionDecay = 0f;
@@ -171,9 +174,11 @@ public class SpeciesGenomePool {
         avgFitnessScore = 0f;
         avgDamageDealt = 0f;
         avgDamageTaken = 0f;
+
+        timeStepExtinct = curTimeStep;
     }
 
-    public void UpdateYearlyStats(int year) {
+    public void AddNewYearlyStats(int year) {
         avgLifespanPerYearList.Add(avgLifespan);
         avgConsumptionDecayPerYearList.Add(avgConsumptionDecay);
         avgConsumptionPlantPerYearList.Add(avgConsumptionPlant);
@@ -193,6 +198,26 @@ public class SpeciesGenomePool {
         avgDamageDealtPerYearList.Add(avgDamageDealt);
         avgDamageTakenPerYearList.Add(avgDamageTaken);
     }
+    /*public void UpdateSpeciesStats() {
+        avgLifespanPerYearList[avgLifespanPerYearList.Count - 1] = avgLifespan;
+        avgConsumptionDecayPerYearList[avgConsumptionDecayPerYearList.Count - 1] = avgConsumptionDecay;
+        avgConsumptionPlantPerYearList[avgConsumptionPlantPerYearList.Count - 1] = avgConsumptionPlant;
+        avgConsumptionMeatPerYearList[avgConsumptionMeatPerYearList.Count - 1] = avgConsumptionMeat;
+        avgBodySizePerYearList[avgBodySizePerYearList.Count - 1] = avgBodySize;
+        avgSpecAttackPerYearList[avgSpecAttackPerYearList.Count - 1] = avgSpecAttack;
+        avgSpecDefendPerYearList[avgSpecDefendPerYearList.Count - 1] = avgSpecDefend;
+        avgSpecSpeedPerYearList[avgSpecSpeedPerYearList.Count - 1] = avgSpecSpeed;
+        avgSpecUtilityPerYearList[avgSpecUtilityPerYearList.Count - 1] = avgSpecUtility;
+        avgFoodSpecDecayPerYearList[avgFoodSpecDecayPerYearList.Count - 1] = avgFoodSpecDecay;
+        avgFoodSpecPlantPerYearList[avgFoodSpecPlantPerYearList.Count - 1] = avgFoodSpecPlant;
+        avgFoodSpecMeatPerYearList[avgFoodSpecMeatPerYearList.Count - 1] = avgFoodSpecMeat;
+        avgNumNeuronsPerYearList[avgNumNeuronsPerYearList.Count - 1] = avgNumNeurons;
+        avgNumAxonsPerYearList[avgNumAxonsPerYearList.Count - 1] = avgNumAxons;
+        avgExperiencePerYearList[avgExperiencePerYearList.Count - 1] = avgExperience;
+        avgFitnessScorePerYearList[avgFitnessScorePerYearList.Count - 1] = avgFitnessScore;
+        avgDamageDealtPerYearList[avgDamageDealtPerYearList.Count - 1] = avgDamageDealt;
+        avgDamageTakenPerYearList[avgDamageTakenPerYearList.Count - 1] = avgDamageTaken;
+    }*/
 
     public CandidateAgentData GetNextAvailableCandidate() {
 
