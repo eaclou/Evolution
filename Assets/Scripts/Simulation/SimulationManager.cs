@@ -1468,9 +1468,19 @@ public class SimulationManager : MonoBehaviour {
         newSpecies.avgConsumptionPlantPerYearList.Clear();
         newSpecies.avgConsumptionMeatPerYearList.Clear();
         newSpecies.avgBodySizePerYearList.Clear();
+        newSpecies.avgSpecAttackPerYearList.Clear();
+        newSpecies.avgSpecDefendPerYearList.Clear();
+        newSpecies.avgSpecSpeedPerYearList.Clear();
+        newSpecies.avgSpecUtilityPerYearList.Clear();
         newSpecies.avgFoodSpecDecayPerYearList.Clear();
         newSpecies.avgFoodSpecPlantPerYearList.Clear();
         newSpecies.avgFoodSpecMeatPerYearList.Clear();
+        newSpecies.avgNumNeuronsPerYearList.Clear();
+        newSpecies.avgNumAxonsPerYearList.Clear();
+        newSpecies.avgExperiencePerYearList.Clear();
+        newSpecies.avgFitnessScorePerYearList.Clear();
+        newSpecies.avgDamageDealtPerYearList.Clear();
+        newSpecies.avgDamageTakenPerYearList.Clear();
         int lastIndex = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgLifespanPerYearList.Count - 1;
         for(int i = 0; i < masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgLifespanPerYearList.Count; i++) {
             newSpecies.avgLifespanPerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgLifespanPerYearList[i]);
@@ -1478,18 +1488,38 @@ public class SimulationManager : MonoBehaviour {
             newSpecies.avgConsumptionPlantPerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgConsumptionPlantPerYearList[i]);
             newSpecies.avgConsumptionMeatPerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgConsumptionMeatPerYearList[i]);
             newSpecies.avgBodySizePerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgBodySizePerYearList[i]);
+            newSpecies.avgSpecAttackPerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgSpecAttackPerYearList[i]);
+            newSpecies.avgSpecDefendPerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgSpecDefendPerYearList[i]);
+            newSpecies.avgSpecSpeedPerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgSpecSpeedPerYearList[i]);
+            newSpecies.avgSpecUtilityPerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgSpecUtilityPerYearList[i]);
             newSpecies.avgFoodSpecDecayPerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgFoodSpecDecayPerYearList[i]);
             newSpecies.avgFoodSpecPlantPerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgFoodSpecPlantPerYearList[i]);
             newSpecies.avgFoodSpecMeatPerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgFoodSpecMeatPerYearList[i]);
+            newSpecies.avgNumNeuronsPerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgNumNeuronsPerYearList[i]);
+            newSpecies.avgNumAxonsPerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgNumAxonsPerYearList[i]);
+            newSpecies.avgExperiencePerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgExperiencePerYearList[i]);
+            newSpecies.avgFitnessScorePerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgFitnessScorePerYearList[i]);
+            newSpecies.avgDamageDealtPerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgDamageDealtPerYearList[i]);
+            newSpecies.avgDamageTakenPerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgDamageTakenPerYearList[i]);
         }  // set
         newSpecies.avgLifespan = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgLifespanPerYearList[lastIndex];
         newSpecies.avgConsumptionDecay = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgConsumptionDecayPerYearList[lastIndex];
         newSpecies.avgConsumptionPlant = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgConsumptionPlantPerYearList[lastIndex];
         newSpecies.avgConsumptionMeat = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgConsumptionDecayPerYearList[lastIndex];
         newSpecies.avgBodySize = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgBodySizePerYearList[lastIndex];
+        newSpecies.avgSpecAttack = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgSpecAttackPerYearList[lastIndex];
+        newSpecies.avgSpecDefend = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgSpecDefendPerYearList[lastIndex];
+        newSpecies.avgSpecSpeed = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgSpecSpeedPerYearList[lastIndex];
+        newSpecies.avgSpecUtility = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgSpecUtilityPerYearList[lastIndex];
         newSpecies.avgFoodSpecDecay = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgFoodSpecDecayPerYearList[lastIndex];
         newSpecies.avgFoodSpecPlant = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgFoodSpecPlantPerYearList[lastIndex];
         newSpecies.avgFoodSpecMeat = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgFoodSpecMeatPerYearList[lastIndex];
+        newSpecies.avgNumNeurons = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgNumNeuronsPerYearList[lastIndex];
+        newSpecies.avgNumAxons = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgNumAxonsPerYearList[lastIndex];
+        newSpecies.avgExperience = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgExperiencePerYearList[lastIndex];
+        newSpecies.avgFitnessScore = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgFitnessScorePerYearList[lastIndex];
+        newSpecies.avgDamageDealt = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgDamageDealtPerYearList[lastIndex];
+        newSpecies.avgDamageTaken = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgDamageTakenPerYearList[lastIndex];
 
         // Tree Of LIFE UI collider & RenderKing updates:
         uiManager.treeOfLifeManager.AddNewSpecies(masterGenomePool, newSpeciesID);

@@ -3,6 +3,7 @@
 	Properties
 	{
 		_KeyTex ("_KeyTex", 2D) = "white" {}
+		_BrushTex ("_BrushTex", 2D) = "white" {}
 	}
 	SubShader
 	{
@@ -43,6 +44,7 @@
 			};
 
 			sampler2D _KeyTex;
+			sampler2D _BrushTex;
 
 			v2f vert (uint id : SV_VertexID, uint inst : SV_InstanceID)
 			{
@@ -71,8 +73,13 @@
 				float instFloat = (float)(inst % 64);
 
 				float xCoord = instFloat / 64.0;
-				float creationTimeNormalized = saturate((float)(keyData.timeCreated - 128) / (float)_CurSimStep); //saturate((float)keyData.timeCreated); // / (float)_CurSimStep;
+				float creationTimeNormalized = saturate((float)keyData.timeCreated / (float)_CurSimStep - 0.2); //saturate((float)keyData.timeCreated); // / (float)_CurSimStep;
 				float isExtant = saturate((xCoord - creationTimeNormalized) * 1000);
+				float extinctionTimeNormalized = saturate((float)keyData.timeExtinct / (float)_CurSimStep);
+				float isExtinct = saturate((xCoord - extinctionTimeNormalized) * 1000);
+				isExtant *= (1.0 - isExtinct);
+
+				float zOffset = -keyData.isSelected; //(creationTimeNormalized - 0.2) * xCoord * -0.66;
 
 				float2 ownSubCoords = float2(instFloat / 64.0, ownScore);
 				float2 nextSubCoords = float2(saturate((instFloat + 1.0) / 64.0), nextScore);
@@ -82,25 +89,31 @@
 				float2 forward = normalize(thisToNextVec);
 				float2 right = float2(forward.y, -forward.x);
 
-				float width = 0.02 * keyData.isOn * ((1.0 - keyData.isExtinct) * 0.5 + 0.5) * isExtant;
-				float2 billboardVertexOffset = right * quadData.x * width; // + // + forward * quadData.y
+				float baseWidthLerpVal = (1.0 - xCoord / extinctionTimeNormalized);
+				float width = 0.94 * lerp(0.0085, 0.027, baseWidthLerpVal * baseWidthLerpVal);
+				width = width * keyData.isOn * isExtant;
+				float2 billboardVertexOffset = right * quadData.x * width + forward * quadData.y * 0.015;
 
 				float lerpVal = o.uv.y;
 				
 				float2 vertexCoord = lerp(ownSubCoords, nextSubCoords, lerpVal);
 				vertexCoord += billboardVertexOffset;
+								
+				float3 worldPosition = float3(vertexCoord, zOffset);								
 				
-				float3 worldPosition = float3(vertexCoord, 0);								
-				
+				o.uv.y = xCoord;
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
 				//o.color = float4(keyData.hue * keyData.isSelected, 0);
-				o.color = float4(keyData.hue * (1.0 + keyData.isSelected * 0.5), 0);
+				o.color = float4(keyData.hue * (0.5 + keyData.isSelected * 1.0), 0);
 				return o;
 			}
 			
 			fixed4 frag (v2f i) : SV_Target
 			{
-				float4 finalColor = float4(i.color.rgb,1);				
+				float4 brushColor = tex2D(_BrushTex, i.uv);
+				float shad = (1.0 - abs(i.uv.x - 0.5));
+				shad = 1;//shad * shad;
+				float4 finalColor = float4(i.color.rgb * brushColor.a * shad,1);				
 				return finalColor;
 			}
 			ENDCG

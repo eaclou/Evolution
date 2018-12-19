@@ -58,10 +58,10 @@
 
 				float width = 0.02 * keyData.isOn * keyData.isExtinct;
 				
-				float3 worldPosition = float3(pos + quadData * 0.05 * (1.0 + keyData.isSelected * 0.5));								
+				float3 worldPosition = float3(pos + quadData * 0.025 * (1.0 + keyData.isSelected * 0.5));								
 				
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
-				o.color = float4(keyData.hue * (1.0 + keyData.isSelected * 0.5), 0);
+				o.color = float4(keyData.hue * (0.5 + keyData.isSelected * 1.0), 0);
 				return o;
 			}
 			

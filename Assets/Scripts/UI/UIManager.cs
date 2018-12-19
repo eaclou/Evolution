@@ -270,6 +270,7 @@ public class UIManager : MonoBehaviour {
     public Material statsGraphMatNutrients;
     public Material statsGraphMatMutation;
     //public Texture2D statsGraphDataTex;
+    public Texture2D[] statsTreeOfLifeSpeciesTexArray;
     public Texture2D statsSpeciesColorKey;
     public Texture2D statsTextureLifespan;
     public Texture2D statsTextureBodySizes;
@@ -309,12 +310,22 @@ public class UIManager : MonoBehaviour {
     public enum SpeciesStatsMode {
         Lifespan,
         ConsumptionDecay,
-        //ConsumptionPlant,
-        //ConsumptionMeat,
+        ConsumptionPlant,
+        ConsumptionMeat,
         BodySize,
+        SpecAttack,
+        SpecDefend,
+        SpecSpeed,
+        SpecUtility,
         DietSpecDecay,
-        //DietSpecPlant,
-        //DietSpecMeat
+        DietSpecPlant,
+        DietSpecMeat,
+        NumNeurons,
+        NumAxons,
+        Experience,
+        Fitness,
+        DamageDealt,
+        DamageTaken
     }
 
     public Button buttonGraphLifespan;
@@ -323,6 +334,8 @@ public class UIManager : MonoBehaviour {
     public Button buttonGraphPredation;
     public Button buttonGraphNutrients;
     public Button buttonGraphMutation;
+
+    public float[] maxValuesStatArray;
 
     public float maxLifespanValue = 0.00001f;
     public float maxBodySizeValue = 0.00001f;
@@ -889,6 +902,25 @@ public class UIManager : MonoBehaviour {
             statsSpeciesColorKey.wrapMode = TextureWrapMode.Clamp;
         }
 
+        if(statsTreeOfLifeSpeciesTexArray.Length == 0) {
+            statsTreeOfLifeSpeciesTexArray = new Texture2D[16]; // start with 16 choosable stats
+
+            for(int i = 0; i < statsTreeOfLifeSpeciesTexArray.Length; i++) {
+                Texture2D statsTexture = new Texture2D(maxDisplaySpecies, 1, TextureFormat.RGBAFloat, false);
+                statsSpeciesColorKey.filterMode = FilterMode.Bilinear;
+                statsSpeciesColorKey.wrapMode = TextureWrapMode.Clamp;
+
+                statsTreeOfLifeSpeciesTexArray[i] = statsTexture;
+            }
+        }
+
+        if(maxValuesStatArray.Length == 0) {
+            maxValuesStatArray = new float[16];
+            for(int i = 0; i < maxValuesStatArray.Length; i++) {
+                maxValuesStatArray[i] = 1f;
+            }
+        }
+
         if(statsTextureLifespan == null) {
             statsTextureLifespan = new Texture2D(1, 1, TextureFormat.RFloat, true);
             statsTextureLifespan.filterMode = FilterMode.Bilinear;
@@ -897,6 +929,7 @@ public class UIManager : MonoBehaviour {
         statsGraphMatLifespan.SetTexture("_MainTex", statsTextureLifespan);
         statsGraphMatLifespan.SetTexture("_ColorKeyTex", statsSpeciesColorKey);
         
+
 
         if(statsTextureBodySizes == null) {
             statsTextureBodySizes = new Texture2D(1, 1, TextureFormat.RGBAFloat, true);
@@ -1575,10 +1608,10 @@ public class UIManager : MonoBehaviour {
 
         //gameManager.simulationManager.masterGenomePool.UpdateYearlySpeciesStats(year);
                 
-        statsGraphMatLifespan.SetInt("_NumDisplayed", maxDisplaySpecies); 
-        statsGraphMatFoodEaten.SetInt("_NumDisplayed", maxDisplaySpecies); 
-        statsGraphMatBodySizes.SetInt("_NumDisplayed", maxDisplaySpecies); 
-        statsGraphMatPredation.SetInt("_NumDisplayed", maxDisplaySpecies); 
+        //statsGraphMatLifespan.SetInt("_NumDisplayed", maxDisplaySpecies); 
+        //statsGraphMatFoodEaten.SetInt("_NumDisplayed", maxDisplaySpecies); 
+        //statsGraphMatBodySizes.SetInt("_NumDisplayed", maxDisplaySpecies); 
+        //statsGraphMatPredation.SetInt("_NumDisplayed", maxDisplaySpecies); 
         // need way to sort & pick the current 8 species to display
         displaySpeciesIndicesArray = new int[maxDisplaySpecies];
 
@@ -1649,17 +1682,24 @@ public class UIManager : MonoBehaviour {
         // ========== data: =========== //
         int years = Mathf.Min(2048, year);  // cap textures at 2k for now?
         // check for resize before doing it?
-        statsTextureLifespan.Resize(Mathf.Max(1, years), maxDisplaySpecies);
-        statsTextureFoodEaten.Resize(Mathf.Max(1, years), maxDisplaySpecies);
-        statsTextureBodySizes.Resize(Mathf.Max(1, years), maxDisplaySpecies);
-        statsTexturePredation.Resize(Mathf.Max(1, years), maxDisplaySpecies);
+        for(int i = 0; i < statsTreeOfLifeSpeciesTexArray.Length; i++) {
+            statsTreeOfLifeSpeciesTexArray[i].Resize(Mathf.Max(1, years), maxDisplaySpecies);
+        }
+        //statsTextureLifespan.Resize(Mathf.Max(1, years), maxDisplaySpecies);
+        //statsTextureFoodEaten.Resize(Mathf.Max(1, years), maxDisplaySpecies);
+        //statsTextureBodySizes.Resize(Mathf.Max(1, years), maxDisplaySpecies);
+        //statsTexturePredation.Resize(Mathf.Max(1, years), maxDisplaySpecies);
 
         //Debug.Log("tex: " + statsTextureLifespan.width.ToString() + ", " + statsTextureLifespan.height.ToString());
 
-        float maxValueLifespan = 0.01f;
-        float maxValueConsumptionDecay = 0.01f;
-        float maxValueBodySize = 0.01f;
-        float maxValueDietTypeDecay = 0.01f;
+        //float maxValueLifespan = 0.01f;
+        //float maxValueConsumptionDecay = 0.01f;
+        //float maxValueBodySize = 0.01f;
+        //float maxValueDietTypeDecay = 0.01f;
+        
+        for(int i = 0; i < maxValuesStatArray.Length; i++) {
+            maxValuesStatArray[i] = 1f;
+        }
         // for each year & each species, create 2D texture with fitness scores:
         for(int s = 0; s < maxDisplaySpecies; s++) {            
             
@@ -1673,23 +1713,72 @@ public class UIManager : MonoBehaviour {
                 
                     int index = t - speciesPool.yearCreated;
                     
-                    float valLifespan = 0f;
-                    float valConsumptionDecay = 0f;
-                    float valBodySize = 0f;
-                    float valFoodSpecDecay = 0f;
-                    if(index >= 0) { // species didn't exist in this year - set fitness to 0
-                        //valLifespan = speciesPool.avgLifespanPerYearList[t];
-                        //valConsumption = speciesPool.avgConsumptionDecayPerYearList[index];
-                        //valBodySize = speciesPool.avgBodySizePerYearList[index];
-                        //valFoodSpec = speciesPool.avgFoodSpecDecayPerYearList[index]; // ** make these Vec3's
-                    }
-                    else {
+                    for(int a = 0; a < statsTreeOfLifeSpeciesTexArray.Length; a++) {
+                        float valStat = 0f;
+                        //= speciesPool
+                        // I know there's a better way to do this:
+                        if(a == 0) {
+                            valStat = speciesPool.avgLifespanPerYearList[t];
+                        }
+                        else if(a == 1) {
+                            valStat = speciesPool.avgConsumptionDecayPerYearList[t];
+                        }
+                        else if(a == 2) {
+                            valStat = speciesPool.avgConsumptionPlantPerYearList[t];
+                        }
+                        else if(a == 3) {
+                            valStat = speciesPool.avgConsumptionMeatPerYearList[t];
+                        }
+                        else if(a == 4) {
+                            valStat = speciesPool.avgBodySizePerYearList[t];
+                        }
+                        else if(a == 5) {
+                            valStat = speciesPool.avgSpecAttackPerYearList[t];
+                        }
+                        else if(a == 6) {
+                            valStat = speciesPool.avgSpecDefendPerYearList[t];
+                        }
+                        else if(a == 7) {
+                            valStat = speciesPool.avgSpecSpeedPerYearList[t];
+                        }
+                        else if(a == 8) {
+                            valStat = speciesPool.avgSpecUtilityPerYearList[t];
+                        }
+                        else if(a == 9) {
+                            valStat = speciesPool.avgNumNeuronsPerYearList[t];
+                        }
+                        else if(a == 10) {
+                            valStat = speciesPool.avgNumAxonsPerYearList[t];
+                        }
+                        else if(a == 11) {
+                            valStat = speciesPool.avgExperiencePerYearList[t];
+                        }
+                        else if(a == 12) {
+                            valStat = speciesPool.avgFitnessScorePerYearList[t];
+                        }
+                        else if(a == 13) {
+                            valStat = speciesPool.avgDamageDealtPerYearList[t];
+                        }
+                        else if(a == 14) {
+                            valStat = speciesPool.avgDamageTakenPerYearList[t];
+                        }
+                        else if(a == 15) {
+                            valStat = speciesPool.avgLifespanPerYearList[t];
+                        }
 
+                        maxValuesStatArray[a] = Mathf.Max(maxValuesStatArray[a], valStat);
+
+                        //statsTreeOfLifeSpeciesTexArray[a].SetPixel(t, s, new Color(valStat, valStat, valStat, 1f));
+                        statsTreeOfLifeSpeciesTexArray[a].SetPixel(t, s, new Color(valStat, valStat, valStat, 1f));
                     }
-                    valLifespan = speciesPool.avgLifespanPerYearList[t];
-                    valConsumptionDecay = speciesPool.avgConsumptionDecayPerYearList[t];
-                    valBodySize = speciesPool.avgBodySizePerYearList[t];
-                    valFoodSpecDecay = speciesPool.avgFoodSpecDecayPerYearList[t]; // ** make these Vec3's
+
+                    
+                    
+                    
+                    /*float valLifespan = speciesPool.avgLifespanPerYearList[t];
+                    float valConsumptionDecay = speciesPool.avgConsumptionDecayPerYearList[t];
+                    float valBodySize = speciesPool.avgBodySizePerYearList[t];
+                    float valFoodSpecDecay = speciesPool.avgFoodSpecDecayPerYearList[t];                    
 
                     maxValueLifespan = Mathf.Max(maxValueLifespan, valLifespan);
                     maxValueConsumptionDecay = Mathf.Max(maxValueConsumptionDecay, valConsumptionDecay);
@@ -1700,17 +1789,21 @@ public class UIManager : MonoBehaviour {
                     statsTextureFoodEaten.SetPixel(t, s, new Color(valConsumptionDecay, valConsumptionDecay, valConsumptionDecay, valConsumptionDecay));
                     statsTextureBodySizes.SetPixel(t, s, new Color(valBodySize, valBodySize, valBodySize, valBodySize));
                     statsTexturePredation.SetPixel(t, s, new Color(valFoodSpecDecay, valFoodSpecDecay, valFoodSpecDecay, valFoodSpecDecay));
+                    */
+                }
+                for (int b = 0; b < statsTreeOfLifeSpeciesTexArray.Length; b++) {
+                    statsTreeOfLifeSpeciesTexArray[b].Apply();
                 }
             }
             
         }
-        statsTextureLifespan.Apply();
-        statsTextureFoodEaten.Apply();
-        statsTextureBodySizes.Apply();
-        statsTexturePredation.Apply();
+        //statsTextureLifespan.Apply();
+        //statsTextureFoodEaten.Apply();
+        //statsTextureBodySizes.Apply();
+        //statsTexturePredation.Apply();
 
         // move shader parameter setting here?
-        statsGraphMatLifespan.SetFloat("_MaxValue", maxValueLifespan); 
+        /*statsGraphMatLifespan.SetFloat("_MaxValue", maxValueLifespan); 
         statsGraphMatLifespan.SetFloat("_MinValue", 500f);
         statsGraphMatFoodEaten.SetFloat("_MaxValue", maxValueConsumptionDecay);
         statsGraphMatFoodEaten.SetFloat("_MinValue", 0f);
@@ -1718,12 +1811,12 @@ public class UIManager : MonoBehaviour {
         statsGraphMatBodySizes.SetFloat("_MinValue", 0f);
         statsGraphMatPredation.SetFloat("_MaxValue", maxValueDietTypeDecay);
         statsGraphMatPredation.SetFloat("_MinValue", 0f);
-
+        
         maxLifespanValue = maxValueLifespan;
         maxFoodEatenValue = maxValueConsumptionDecay;
         maxBodySizeValue = maxValueBodySize;
         maxPredationValue = maxValueDietTypeDecay;
-
+        */
         // *** TEMP!!!!! **********
         int selectedSpeciesID = 1;
         if(cameraManager.targetAgent != null) {
@@ -2467,13 +2560,13 @@ public class UIManager : MonoBehaviour {
     public void ClickTolSpeciesTreeCyclePrev() {
         tolSelectedSpeciesStatsIndex--;
         if(tolSelectedSpeciesStatsIndex < 0) {
-            tolSelectedSpeciesStatsIndex = 3;
+            tolSelectedSpeciesStatsIndex = 14;
         }
         textTolSpeciesStatsName.text = ((SpeciesStatsMode)tolSelectedSpeciesStatsIndex).ToString();
     }
     public void ClickTolSpeciesTreeCycleNext() {
         tolSelectedSpeciesStatsIndex++;
-        if(tolSelectedSpeciesStatsIndex > 3) {
+        if(tolSelectedSpeciesStatsIndex > 14) {
             tolSelectedSpeciesStatsIndex = 0;
         }
         textTolSpeciesStatsName.text = ((SpeciesStatsMode)tolSelectedSpeciesStatsIndex).ToString();

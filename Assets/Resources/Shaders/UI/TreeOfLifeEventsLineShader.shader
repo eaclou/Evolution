@@ -24,14 +24,28 @@
 			#include "Assets/Resources/Shaders/Inc/NoiseShared.cginc"
 			
 			struct TreeOfLifeEventLineData {
-				float xCoord;
-				float eventMagnitude;  // minor major extreme 0, 0.5, 1.0
+				int timeStepActivated;
+				float eventCategory;  // minor major extreme 0, 0.5, 1.0
 				float isActive;
 			};
 
 			StructuredBuffer<float3> quadVerticesCBuffer;
 			//StructuredBuffer<float3> treeOfLifeEventLineDataCBuffer;
 			StructuredBuffer<TreeOfLifeEventLineData> treeOfLifeEventLineDataCBuffer;
+
+			uniform float _CurSimStep;
+
+			uniform float _GraphCoordStatsStart;
+			uniform float _GraphCoordStatsRange;
+			uniform float _GraphCoordSpeciesStart;
+			uniform float _GraphCoordSpeciesRange;
+			uniform float _GraphCoordEventsStart;
+			uniform float _GraphCoordEventsRange;
+
+			uniform float _StatsPanelOn;
+			uniform float _SpeciesPanelOn;
+			uniform float _EventsPanelOn;
+
 
 			//StructuredBuffer<float3> treeOfLifeStemSegmentVerticesCBuffer; //quadVerticesCBuffer;
 			//StructuredBuffer<TreeOfLifeNodeColliderData> treeOfLifeNodeColliderDataCBuffer;
@@ -66,12 +80,12 @@
 				float3 quadData = quadVerticesCBuffer[id];
 				TreeOfLifeEventLineData eventData = treeOfLifeEventLineDataCBuffer[inst];
 				quadData.y += 0.5;
-				quadData.y *= (eventData.eventMagnitude) * 0.667;
+				quadData.y *= (eventData.eventCategory * 0.67 + 0.33) * _GraphCoordEventsRange;
 				quadData.x *= 0.0125;		
 				//quadData.y *= 1;		
 				o.uv = quadVerticesCBuffer[id].xy + 0.5;
 				
-				float3 worldPosition = float3(eventData.xCoord, 0, 0) + quadData * eventData.isActive;
+				float3 worldPosition = float3((float)eventData.timeStepActivated / (float)_CurSimStep, 0, 0) + quadData * eventData.isActive;
 								
 				
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
@@ -80,7 +94,7 @@
 				float3 hueMajor = float3(0.25, 0.55, 1) * 0.8;
 				float3 hueExtreme = float3(1, 0.55, 0.65) * 0.675;
 
-				float mag = saturate(eventData.eventMagnitude - 0.111) * 5;
+				float mag = eventData.eventCategory; //saturate(eventData.eventCategory - 0.5) * 2;
 				float3 hue = lerp(hueMinor, hueMajor, saturate(mag * 2));
 				hue = lerp(hue, hueExtreme, saturate(mag - 0.5) * 2);
 				o.color = float4(hue, 0);

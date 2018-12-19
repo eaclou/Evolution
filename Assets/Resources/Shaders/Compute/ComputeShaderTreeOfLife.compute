@@ -8,6 +8,7 @@
 #pragma kernel CSPinRootNode
 #pragma kernel CSUpdateWorldStatsValues
 #pragma kernel CSUpdateSpeciesTreeData
+#pragma kernel CSUpdateEventValues
 
 #include "Assets/Resources/Shaders/Inc/StructsTreeOfLife.cginc"
 //#include "Assets/Resources/Shaders/Inc/TreeOfLife.cginc"
@@ -20,6 +21,12 @@ struct TreeOfLifeSpeciesKeyData {
 	float isOn;
 	float isExtinct;
 	float isSelected;
+};
+
+struct TreeOfLifeEventLineData {
+    int timeStepActivated;
+    float eventCategory;  // minor major extreme 0, 0.5, 1.0
+    float isActive;
 };
 
 Texture2D<float4> treeOfLifeWorldStatsTex;
@@ -69,6 +76,17 @@ uniform float _SpeciesStatsMax;
 
 uniform int _CurSimStep;
 uniform int _CurSimYear;
+
+uniform float _GraphCoordStatsStart;
+uniform float _GraphCoordStatsRange;
+uniform float _GraphCoordSpeciesStart;
+uniform float _GraphCoordSpeciesRange;
+uniform float _GraphCoordEventsStart;
+uniform float _GraphCoordEventsRange;
+
+uniform float _StatsPanelOn;
+uniform float _SpeciesPanelOn;
+uniform float _EventsPanelOn;
 
 SamplerState _PointClamp;
 SamplerState _LinearClamp;
@@ -183,6 +201,29 @@ void CSPinRootNode (uint3 id : SV_DispatchThreadID)
 }
 
 [numthreads(64,1,1)]
+void CSUpdateEventValues (uint3 id : SV_DispatchThreadID)
+{
+	/*
+	float2 uv = float2((float)id.x / 64.0, 0.0);
+	uv.y = (_SelectedWorldStatsID + 0.5) / 32;
+	
+	float4 texColor = treeOfLifeWorldStatsTex.SampleLevel(_LinearClamp, uv, 0);	
+	float4 keyRangeSample = treeOfLifeWorldStatsKeyTex.SampleLevel(_PointClamp, float2(0.75, uv.y), 0);
+
+	float minVal = keyRangeSample.x;
+	float maxVal = keyRangeSample.y;
+
+	float height = (texColor.x - minVal) / maxVal;
+	
+	height += (sin(_Time * 5.31 + uv.x * 15.67) * 0.0410725) * uv.x;
+
+	height = height * 0.25 + 0.75;
+	// need more than height?
+	treeOfLifeWorldStatsValuesCBuffer[id.x] = lerp(treeOfLifeWorldStatsValuesCBuffer[id.x], height, 0.05);
+	*/
+}
+
+[numthreads(64,1,1)]
 void CSUpdateWorldStatsValues (uint3 id : SV_DispatchThreadID)
 {
 	float2 uv = float2((float)id.x / 64.0, 0.0);
@@ -215,27 +256,32 @@ void CSUpdateSpeciesTreeData (uint3 id : SV_DispatchThreadID)
 	float2 uv = float2(segmentID / 64.0, speciesID / 32.0 + 1.0 / 64.0);
 	
 	float4 texColor = treeOfLifeSpeciesTreeTex.SampleLevel(_LinearClamp, uv, 0);
-
+	
 	float height = (texColor.x - _SpeciesStatsMin) / _SpeciesStatsMax;
 	float noiseOffset = (sin(_Time * 5.31 + uv.x * 15.67 + speciesID * 49.21643) * 0.0710725) * uv.x;
 	height += noiseOffset;
 	
 	
-	float targetHeadHeight = (treeOfLifeSpeciesTreeTex.SampleLevel(_LinearClamp, float2(1.0, uv.y), 0) - _SpeciesStatsMin) / _SpeciesStatsMax;
+	float targetHeadHeight = (treeOfLifeSpeciesTreeTex.SampleLevel(_LinearClamp, float2(1.0, uv.y), 0).x - _SpeciesStatsMin) / _SpeciesStatsMax;
+	//float targetHeadHeight = (500 - _SpeciesStatsMin) / _SpeciesStatsMax;
 	// 0 --> 1
 	targetHeadHeight += noiseOffset;
 
-	targetHeadHeight = targetHeadHeight * 0.44 + 0.28;	
-	float headHeight = lerp(headPos.y, targetHeadHeight, 0.05);
+	targetHeadHeight = targetHeadHeight * _GraphCoordSpeciesRange + _GraphCoordSpeciesStart;	
+	float headHeight = lerp(headPos.y, targetHeadHeight, 0.075);
 	
-	height = height * 0.44 + 0.28;	 // values actually stored in this re-mapped scale, so stay consistent!
-	float segmentHeight = lerp(treeOfLifeSpeciesSegmentsCBuffer[id.x].y, height, 0.05);
+	height = height * _GraphCoordSpeciesRange + _GraphCoordSpeciesStart;	 // values actually stored in this re-mapped scale, so stay consistent!
+	float segmentHeight = lerp(treeOfLifeSpeciesSegmentsCBuffer[id.x].y, height, 0.075);
 		
-	segmentHeight = lerp(segmentHeight, headHeight, saturate(uv.x - 0.75) * 4);
+	segmentHeight = lerp(segmentHeight, headHeight, saturate(uv.x - 0.9) * 10);
 
-	treeOfLifeSpeciesSegmentsCBuffer[id.x] = float3(uv.x, segmentHeight, 0);
+	float creationTimeNormalized = saturate((float)keyData.timeCreated / (float)_CurSimStep - 0.1);
+	float zOffset = 0; //(creationTimeNormalized - 0.2) * uv.x * -0.66;
+
+	treeOfLifeSpeciesSegmentsCBuffer[id.x] = float3(uv.x, segmentHeight, zOffset);
 		
-
-	treeOfLifeSpeciesDataHeadPosCBuffer[speciesID] = float3(1.0, headHeight, 0.0);
+		//	
+	//treeOfLifeSpeciesDataHeadPosCBuffer[speciesID] = float3(0.5, texColor.x * 0.01, 0);
+	treeOfLifeSpeciesDataHeadPosCBuffer[speciesID] = float3(min(1.0, saturate((float)keyData.timeExtinct / (float)_CurSimStep)), headHeight, zOffset);
 
 }

@@ -253,8 +253,8 @@ public class TheRenderKing : MonoBehaviour {
     public ComputeBuffer treeOfLifePortraitCritterSimDataCBuffer;
 
     public struct TreeOfLifeEventLineData {
-        public float xCoord;
-        public float eventMagnitude;  // minor major extreme 0, 0.5, 1.0
+        public int timeStepActivated;
+        public float eventCategory;  // minor major extreme 0, 0.5, 1.0
         public float isActive;
     }
 
@@ -913,12 +913,12 @@ public class TheRenderKing : MonoBehaviour {
         testTreeOfLifePositionCBuffer.SetData(testTreeOfLifePositionArray);
 
         treeOfLifeEventLineDataArray = new TreeOfLifeEventLineData[64];
-        treeOfLifeEventLineDataCBuffer = new ComputeBuffer(treeOfLifeEventLineDataArray.Length, sizeof(float) * 3);
+        treeOfLifeEventLineDataCBuffer = new ComputeBuffer(treeOfLifeEventLineDataArray.Length, sizeof(float) * 2 + sizeof(int));
         for(int i = 0; i < testTreeOfLifePositionArray.Length; i++) {
             TreeOfLifeEventLineData data = new TreeOfLifeEventLineData();
-            data.xCoord = (float)i / 64f;
-            data.eventMagnitude = UnityEngine.Random.Range(0f, 1f);
-            data.isActive = Mathf.Round(UnityEngine.Random.Range(0f, 1f));
+            data.timeStepActivated = 0;
+            data.eventCategory = 0f;
+            data.isActive = 0f;
             treeOfLifeEventLineDataArray[i] = data;
         }
         treeOfLifeEventLineDataCBuffer.SetData(treeOfLifeEventLineDataArray);
@@ -2614,6 +2614,8 @@ public class TheRenderKing : MonoBehaviour {
     }
     public void UpdateTreeOfLifeEventLineData(List<SimEventData> eventDataList) {
 
+        // Move some of this to ComputeShader kernel?
+
         treeOfLifeEventLineDataArray = new TreeOfLifeEventLineData[64]; // hardcoded!! 64 max!!!
         if(treeOfLifeEventLineDataCBuffer != null) {
             treeOfLifeEventLineDataCBuffer.Release();
@@ -2623,8 +2625,10 @@ public class TheRenderKing : MonoBehaviour {
             TreeOfLifeEventLineData data = new TreeOfLifeEventLineData();
 
             if(i < eventDataList.Count) {
-                data.xCoord = (float)eventDataList[i].timeStepActivated / (float)simManager.simAgeTimeSteps;
-                data.eventMagnitude = (float)(eventDataList[i].category + 1) * 0.111f;                
+                data.timeStepActivated = eventDataList[i].timeStepActivated;
+                //data.xCoord = (float)eventDataList[i].timeStepActivated / (float)simManager.simAgeTimeSteps;
+                data.eventCategory = (float)eventDataList[i].category * 0.5f; // 0-->1  
+                //data.eventMagnitude = (float)(eventDataList[i].category + 1) * 0.111f;   
                 data.isActive = 1f;
             }
             
@@ -2637,9 +2641,11 @@ public class TheRenderKing : MonoBehaviour {
         computeShaderTreeOfLife.SetTexture(kernelCSUpdateWorldStatsValues, "treeOfLifeWorldStatsTex", dataTex); // simManager.uiManager.statsTextureLifespan);
         computeShaderTreeOfLife.SetTexture(kernelCSUpdateWorldStatsValues, "treeOfLifeWorldStatsKeyTex", keyTex);  // used for line color, max/min values reference, and other extra info per graph line (32 max)
         computeShaderTreeOfLife.SetBuffer(kernelCSUpdateWorldStatsValues, "treeOfLifeWorldStatsValuesCBuffer", treeOfLifeWorldStatsValuesCBuffer);
-        computeShaderTreeOfLife.SetFloat("_Time", Time.realtimeSinceStartup); // for animation & shit
-        //computeShaderTreeOfLife.SetFloat("_WorldStatsMin", 0f);
-        //computeShaderTreeOfLife.SetFloat("_WorldStatsMax", simManager.uiManager.maxNutrientsValue);  // obsolete?
+        computeShaderTreeOfLife.SetFloat("_Time", Time.realtimeSinceStartup); // for animation & shit        
+        computeShaderTreeOfLife.SetFloat("_GraphCoordStatsStart", 0f);
+        computeShaderTreeOfLife.SetFloat("_GraphCoordStatsRange", 0.25f);
+        computeShaderTreeOfLife.SetInt("_CurSimStep", simManager.simAgeTimeSteps);
+        computeShaderTreeOfLife.SetInt("_CurSimYear", simManager.curSimYear);
         computeShaderTreeOfLife.SetInt("_SelectedWorldStatsID", simManager.uiManager.tolSelectedWorldStatsIndex); // UI control
         computeShaderTreeOfLife.SetInt("_NumTimeSeriesEntries", dataTex.width);
         computeShaderTreeOfLife.Dispatch(kernelCSUpdateWorldStatsValues, 1, 1, 1);  // need 32 * 64 segments? -- not yet - as long as one-at-a-time
@@ -2653,7 +2659,9 @@ public class TheRenderKing : MonoBehaviour {
         computeShaderTreeOfLife.SetBuffer(kernelCSUpdateSpeciesTreeData, "treeOfLifeSpeciesSegmentsCBuffer", treeOfLifeSpeciesSegmentsCBuffer);
         computeShaderTreeOfLife.SetFloat("_Time", Time.realtimeSinceStartup);
         computeShaderTreeOfLife.SetFloat("_SpeciesStatsMin", 0f);
-        computeShaderTreeOfLife.SetFloat("_SpeciesStatsMax", maxVal); // *** REFACTOR TO SUPPORT CYCLING!
+        computeShaderTreeOfLife.SetFloat("_SpeciesStatsMax", maxVal);
+        computeShaderTreeOfLife.SetFloat("_GraphCoordSpeciesStart", 0.28f); // try it this way first
+        computeShaderTreeOfLife.SetFloat("_GraphCoordSpeciesRange", 0.44f);
         computeShaderTreeOfLife.SetInt("_CurSimStep", simManager.simAgeTimeSteps);
         computeShaderTreeOfLife.SetInt("_CurSimYear", simManager.curSimYear);
         computeShaderTreeOfLife.SetInt("_NumTimeSeriesEntries", dataTex.width);
@@ -2867,21 +2875,20 @@ public class TheRenderKing : MonoBehaviour {
         SimTreeOfLife(); // issues with this being on FixedUpdate() cycle vs Update() ?? ***
 
         SimTreeOfLifeWorldStatsData(simManager.uiManager.tolTextureWorldStats, simManager.uiManager.tolTextureWorldStatsKey);
-
-        Texture2D graphTex = simManager.uiManager.statsTextureLifespan;
-        float maxVal = simManager.uiManager.maxLifespanValue;
-        if(simManager.uiManager.tolSelectedSpeciesStatsIndex == 1) {
-            graphTex = simManager.uiManager.statsTextureFoodEaten;
+        //Debug.Log("size: " + simManager.uiManager.tolSelectedSpeciesStatsIndex.ToString());
+        Texture2D graphTex = simManager.uiManager.statsTreeOfLifeSpeciesTexArray[simManager.uiManager.tolSelectedSpeciesStatsIndex];
+        float maxVal = simManager.uiManager.maxValuesStatArray[simManager.uiManager.tolSelectedSpeciesStatsIndex];
+        /*if(simManager.uiManager.tolSelectedSpeciesStatsIndex == 0) {            
             maxVal = simManager.uiManager.maxFoodEatenValue;
         }
-        if(simManager.uiManager.tolSelectedSpeciesStatsIndex == 2) {
+        else if(simManager.uiManager.tolSelectedSpeciesStatsIndex == 1) {
             graphTex = simManager.uiManager.statsTextureBodySizes;
             maxVal = simManager.uiManager.maxBodySizeValue;
         }
-        if(simManager.uiManager.tolSelectedSpeciesStatsIndex > 3) {
+        else if(simManager.uiManager.tolSelectedSpeciesStatsIndex == 2) {
             graphTex = simManager.uiManager.statsTexturePredation;
             maxVal = simManager.uiManager.maxPredationValue;
-        }
+        }*/
         SimTreeOfLifeSpeciesTreeData(graphTex, maxVal); // update this?
         
         
@@ -2965,6 +2972,8 @@ public class TheRenderKing : MonoBehaviour {
         // draw event lines first:
         treeOfLifeEventsLineMat.SetPass(0);
         treeOfLifeEventsLineMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        treeOfLifeEventsLineMat.SetInt("_CurSimStep", simManager.simAgeTimeSteps);
+        treeOfLifeEventsLineMat.SetFloat("_GraphCoordEventsRange", 0.25f);
         treeOfLifeEventsLineMat.SetBuffer("treeOfLifeEventLineDataCBuffer", treeOfLifeEventLineDataCBuffer);
         cmdBufferTreeOfLifeSpeciesTree.DrawProcedural(Matrix4x4.identity, treeOfLifeEventsLineMat, 0, MeshTopology.Triangles, 6, treeOfLifeEventLineDataCBuffer.count);
         
