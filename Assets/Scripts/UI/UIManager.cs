@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Events;
+using UnityEngine.EventSystems;
 
 public class UIManager : MonoBehaviour {
 
@@ -116,8 +118,8 @@ public class UIManager : MonoBehaviour {
     public Text textPlayerScore;
 
     public GameObject panelObserverMode;
-    public Text textCurGen;
-    public Text textAvgLifespan;
+    //public Text textCurGen;
+    //public Text textAvgLifespan;
 
     public GameObject panelPaused;
 
@@ -202,6 +204,7 @@ public class UIManager : MonoBehaviour {
     public Button buttonTolBrainDisplay;
     public Button buttonTolInspect;
     public Text textTolSpeciesTitle;
+    public Text textTolSpeciesIndex;
     public Text textTolDescription;
     public Image imageTolPortraitRender;
     public Image imageTolWorldStatsRender;
@@ -210,9 +213,11 @@ public class UIManager : MonoBehaviour {
     public Button buttonTolCycleWorldStatsPrev;
     public Button buttonTolCycleWorldStatsNext;
     public Text textTolWorldStatsName;
+    public Text textTolWorldStatsValue;
     public Button buttonTolCycleSpeciesStatsPrev;
     public Button buttonTolCycleSpeciesStatsNext;
     public Text textTolSpeciesStatsName;
+    public Text textTolSpeciesStatsValue;
     public Button buttonTolEventsMinorToggle;
     public Button buttonTolEventsMajorToggle;
     public Button buttonTolEventsExtremeToggle;
@@ -231,6 +236,7 @@ public class UIManager : MonoBehaviour {
     public bool tolSpeciesTreeExtinctOn = false;
     public bool tolBrainDisplayOn = false;
     public bool tolInspectOn = false;
+    public bool tolSpeciesDescriptionOn = false;
 
     // VVV OLD BELOW:::
     public GameObject treeOfLifeAnchorGO;     
@@ -294,38 +300,38 @@ public class UIManager : MonoBehaviour {
     }
 
     public enum WorldStatsMode {
-        Decay,
-        Plant,
-        Eggs,
-        Corpse,
-        BrainMutationFreq,
-        BrainMutationAmp,
-        BrainSizeBias,
-        BodyMutationFreq,
-        BodyMutationAmp,
-        BodySensorVariance,
-        WaterCurrents
+        Global_Nutrients,
+        Global_Algae_Levels,
+        Global_Egg_Sack_Volume,
+        Global_Carrion_Volume,
+        Global_Neural_Mutation_Frequency,
+        Global_Neural_Mutation_Amplitude,
+        Global_Brain_Growth_Rate,
+        Global_Body_Mutation_Frequency,
+        Global_Body_Mutation_Amplitude,
+        Global_Sensor_Mutation_Rate,
+        Global_Water_Currents_Velocity
     }
 
     public enum SpeciesStatsMode {
-        Lifespan,
-        ConsumptionDecay,
-        ConsumptionPlant,
-        ConsumptionMeat,
-        BodySize,
-        SpecAttack,
-        SpecDefend,
-        SpecSpeed,
-        SpecUtility,
-        DietSpecDecay,
-        DietSpecPlant,
-        DietSpecMeat,
-        NumNeurons,
-        NumAxons,
-        Experience,
-        Fitness,
-        DamageDealt,
-        DamageTaken
+        Average_Lifespan,
+        Avg_Nutrients_Consumed,
+        Avg_Algae_Consumed,
+        Avg_Meat_Consumed,
+        Avg_Body_Size,
+        Avg_Specialization_Offense,
+        Avg_Specialization_Defense,
+        Avg_Specialization_Speed,
+        Avg_Specialization_Utility,
+        Avg_Diet_Specialization_Nutrients,
+        Avg_Diet_Specialization_Algae,
+        Avg_Diet_Specialization_Meat,
+        Avg_Num_Neurons_In_Brain,
+        Avg_Num_Axons_In_Brain,
+        Avg_Experience_Earned,
+        Avg_Fitness_Score,
+        Avg_Amount_Damage_Inflicted,
+        Avg_Amount_Damage_Taken
     }
 
     public Button buttonGraphLifespan;
@@ -337,6 +343,7 @@ public class UIManager : MonoBehaviour {
 
     public float[] maxValuesStatArray;
 
+    // these obsolete now??
     public float maxLifespanValue = 0.00001f;
     public float maxBodySizeValue = 0.00001f;
     public float maxFoodEatenValue = 0.00001f;
@@ -1073,6 +1080,8 @@ public class UIManager : MonoBehaviour {
         UpdateMutateToolPanelUI();
         UpdateStirToolPanelUI();
 
+        UpdateTreeOfLifeWidget();
+
         UpdateSimEventsUI();
 
         Vector2 curMousePos = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
@@ -1083,6 +1092,65 @@ public class UIManager : MonoBehaviour {
         //smoothedCtrlCursorVel = Vector2.Lerp(smoothedCtrlCursorVel, )
 
         prevMousePos = curMousePos;
+    }
+
+    public void UpdateTreeOfLifeWidget() {
+        if(tolWorldStatsOn) {
+            float displayVal = 0f;
+            displayVal = 0f; // tolWorldStatsValueRangesKeyArray[tolSelectedWorldStatsIndex].y;
+
+            //textTolWorldStatsValue.text = displayVal.ToString();
+            if(tolSelectedWorldStatsIndex == 0) {
+                displayVal = gameManager.simulationManager.foodManager.curGlobalNutrients;
+            }
+            else if(tolSelectedWorldStatsIndex == 1) {
+                displayVal = gameManager.simulationManager.foodManager.curGlobalFoodParticles;
+            }
+            else if(tolSelectedWorldStatsIndex == 2) {
+                displayVal = gameManager.simulationManager.foodManager.curGlobalEggSackVolume;
+            }
+            else if(tolSelectedWorldStatsIndex == 3) {
+                displayVal = gameManager.simulationManager.foodManager.curGlobalCarrionVolume;
+            }
+            else if(tolSelectedWorldStatsIndex == 4) {
+                displayVal = gameManager.simulationManager.settingsManager.curTierBrainMutationFrequency;
+            }
+            else if(tolSelectedWorldStatsIndex == 5) {
+                displayVal = gameManager.simulationManager.settingsManager.curTierBrainMutationAmplitude;
+            }
+            else if(tolSelectedWorldStatsIndex == 6) {
+                displayVal = gameManager.simulationManager.settingsManager.curTierBrainMutationNewHiddenNeuron + gameManager.simulationManager.settingsManager.curTierBrainMutationNewLink;
+            }
+            else if(tolSelectedWorldStatsIndex == 7) {
+                displayVal = gameManager.simulationManager.settingsManager.curTierBodyMutationFrequency;
+            }
+            else if(tolSelectedWorldStatsIndex == 8) {
+                displayVal = gameManager.simulationManager.settingsManager.curTierBodyMutationAmplitude;
+            }
+            else if(tolSelectedWorldStatsIndex == 9) {
+                displayVal = gameManager.simulationManager.settingsManager.curTierBodyMutationModules;
+            }
+            else if(tolSelectedWorldStatsIndex == 10) {
+                displayVal = gameManager.simulationManager.environmentFluidManager.curTierWaterCurrents;
+            }
+            textTolWorldStatsValue.text = displayVal.ToString();
+            /*public enum WorldStatsMode {
+        Global_Nutrients,
+        Global_Algae_Levels,
+        Global_Egg_Sack_Volume,
+        Global_Carrion_Volume,
+        Global_Neural_Mutation_Frequency,
+        Global_Neural_Mutation_Amplitude,
+        Global_Brain_Growth_Rate,
+        Global_Body_Mutation_Frequency,
+        Global_Body_Mutation_Amplitude,
+        Global_Sensor_Mutation_Rate,
+        Global_Water_Currents_Velocity
+    }*/
+        }
+        if(tolEventsTimelineOn) {
+            textTolEventsTimelineName.text = "Year " + gameManager.simulationManager.curSimYear.ToString() + ", CurTimeStep: " + gameManager.simulationManager.simAgeTimeSteps.ToString();
+        }
     }
 
 
@@ -1745,24 +1813,33 @@ public class UIManager : MonoBehaviour {
                             valStat = speciesPool.avgSpecUtilityPerYearList[t];
                         }
                         else if(a == 9) {
-                            valStat = speciesPool.avgNumNeuronsPerYearList[t];
+                            valStat = speciesPool.avgFoodSpecDecayPerYearList[t];
                         }
                         else if(a == 10) {
-                            valStat = speciesPool.avgNumAxonsPerYearList[t];
+                            valStat = speciesPool.avgFoodSpecPlantPerYearList[t];
                         }
                         else if(a == 11) {
-                            valStat = speciesPool.avgExperiencePerYearList[t];
+                            valStat = speciesPool.avgFoodSpecMeatPerYearList[t];
                         }
                         else if(a == 12) {
-                            valStat = speciesPool.avgFitnessScorePerYearList[t];
+                            valStat = speciesPool.avgNumNeuronsPerYearList[t];
                         }
                         else if(a == 13) {
-                            valStat = speciesPool.avgDamageDealtPerYearList[t];
+                            valStat = speciesPool.avgNumAxonsPerYearList[t];
                         }
                         else if(a == 14) {
-                            valStat = speciesPool.avgDamageTakenPerYearList[t];
+                            valStat = speciesPool.avgExperiencePerYearList[t];
                         }
                         else if(a == 15) {
+                            valStat = speciesPool.avgFitnessScorePerYearList[t];
+                        }
+                        else if(a == 16) {
+                            valStat = speciesPool.avgDamageDealtPerYearList[t];
+                        }
+                        else if(a == 17) {
+                            valStat = speciesPool.avgDamageTakenPerYearList[t];
+                        }
+                        else if(a == 18) {
                             valStat = speciesPool.avgLifespanPerYearList[t];
                         }
 
@@ -1822,9 +1899,121 @@ public class UIManager : MonoBehaviour {
         if(cameraManager.targetAgent != null) {
             selectedSpeciesID = cameraManager.targetAgent.speciesIndex;
         }
-        textTolSpeciesTitle.text = "<size=24>Species</size> <size=36> " + selectedSpeciesID.ToString() + "</size>";
+        SpeciesGenomePool selectedPool = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesID];
 
-        textTolDescription.text = "Fun Facts Here";
+        textTolSpeciesTitle.text = "Species";        
+        textTolSpeciesIndex.text = selectedSpeciesID.ToString();
+        string descriptionText = "";
+        // NOT ORDERED:
+        descriptionText += "Year Evolved: " + selectedPool.yearCreated.ToString() + "\n\n";
+
+        descriptionText += "Avg Lifespan: " + selectedPool.avgLifespan.ToString() + "\n";
+        descriptionText += "Avg Body Size: " + selectedPool.avgBodySize.ToString() + "\n";
+        descriptionText += "Avg Neuron Count: " + selectedPool.avgNumNeurons.ToString() + "\n";
+        descriptionText += "Avg Axon Count: " + selectedPool.avgNumAxons.ToString() + "\n\n";
+
+        descriptionText += "Avg Nutrients Consumed: " + selectedPool.avgConsumptionDecay.ToString() + "\n";
+        descriptionText += "Avg Algae Consumed: " + selectedPool.avgConsumptionPlant.ToString() + "\n";
+        descriptionText += "Avg Meat Consumed: " + selectedPool.avgConsumptionMeat.ToString() + "\n\n";        
+        
+        descriptionText += "Avg Diet Spec Nutrients: " + selectedPool.avgFoodSpecDecay.ToString() + "\n";
+        descriptionText += "Avg Diet Spec Algae: " + selectedPool.avgFoodSpecPlant.ToString() + "\n";
+        descriptionText += "Avg Diet Spec Meat: " + selectedPool.avgFoodSpecMeat.ToString() + "\n\n";
+
+        descriptionText += "Avg Spec Offense: " + selectedPool.avgSpecAttack.ToString() + "\n";
+        descriptionText += "Avg Spec Defense: " + selectedPool.avgSpecDefend.ToString() + "\n";
+        descriptionText += "Avg Spec Speed: " + selectedPool.avgSpecSpeed.ToString() + "\n";
+        descriptionText += "Avg Spec Utility: " + selectedPool.avgSpecUtility.ToString() + "\n\n";
+
+        descriptionText += "Avg Damage Inflicted: " + selectedPool.avgDamageDealt.ToString() + "\n";
+        descriptionText += "Avg Damage Taken: " + selectedPool.avgDamageTaken.ToString() + "\n";
+        descriptionText += "Avg Experience Earned: " + selectedPool.avgExperience.ToString() + "\n";
+        descriptionText += "Avg Fitness Score: " + selectedPool.avgFitnessScore.ToString() + "\n\n";
+
+        textTolDescription.text = descriptionText;
+
+        /*
+        Average_Lifespan,
+        Avg_Nutrients_Consumed,
+        Avg_Algae_Consumed,
+        Avg_Meat_Consumed,
+        Avg_Body_Size,
+        Avg_Specialization_Offense,
+        Avg_Specialization_Defense,
+        Avg_Specialization_Speed,
+        Avg_Specialization_Utility,
+        Avg_Diet_Specialization_Nutrients,
+        Avg_Diet_Specialization_Algae,
+        Avg_Diet_Specialization_Meat,
+        Avg_Num_Neurons_In_Brain,
+        Avg_Num_Axons_In_Brain,
+        Avg_Experience_Earned,
+        Avg_Fitness_Score,
+        Avg_Amount_Damage_Inflicted,
+        Avg_Amount_Damage_Taken
+        */
+
+        float curSpeciesStatValue = 0f;
+        
+        if(tolSelectedSpeciesStatsIndex == 0) {
+            curSpeciesStatValue = selectedPool.avgLifespan;
+        }
+        else if(tolSelectedSpeciesStatsIndex == 1) {
+            curSpeciesStatValue = selectedPool.avgConsumptionDecay;
+        }
+        else if(tolSelectedSpeciesStatsIndex == 2) {
+            curSpeciesStatValue = selectedPool.avgConsumptionPlant;
+        }
+        else if(tolSelectedSpeciesStatsIndex == 3) {
+            curSpeciesStatValue = selectedPool.avgConsumptionMeat;
+        }
+        else if(tolSelectedSpeciesStatsIndex == 4) {
+            curSpeciesStatValue = selectedPool.avgBodySize;
+        }
+        else if(tolSelectedSpeciesStatsIndex == 5) {
+            curSpeciesStatValue = selectedPool.avgSpecAttack;
+        }
+        else if(tolSelectedSpeciesStatsIndex == 6) {
+            curSpeciesStatValue = selectedPool.avgSpecDefend;
+        }
+        else if(tolSelectedSpeciesStatsIndex == 7) {
+            curSpeciesStatValue = selectedPool.avgSpecSpeed;
+        }
+        else if(tolSelectedSpeciesStatsIndex == 8) {
+            curSpeciesStatValue = selectedPool.avgSpecUtility;
+        }
+        else if(tolSelectedSpeciesStatsIndex == 9) {
+            curSpeciesStatValue = selectedPool.avgFoodSpecDecay;
+        }
+        else if(tolSelectedSpeciesStatsIndex == 10) {
+            curSpeciesStatValue = selectedPool.avgFoodSpecPlant;
+        }
+        else if(tolSelectedSpeciesStatsIndex == 11) {
+            curSpeciesStatValue = selectedPool.avgFoodSpecMeat;
+        }
+        else if(tolSelectedSpeciesStatsIndex == 12) {
+            curSpeciesStatValue = selectedPool.avgNumNeurons;
+        }
+        else if(tolSelectedSpeciesStatsIndex == 13) {
+            curSpeciesStatValue = selectedPool.avgNumAxons;
+        }
+        else if(tolSelectedSpeciesStatsIndex == 14) {
+            curSpeciesStatValue = selectedPool.avgExperience;
+        }
+        else if(tolSelectedSpeciesStatsIndex == 15) {
+            curSpeciesStatValue = selectedPool.avgFitnessScore;
+        }
+        else if(tolSelectedSpeciesStatsIndex == 16) {
+            curSpeciesStatValue = selectedPool.avgDamageDealt;
+        }
+        else if(tolSelectedSpeciesStatsIndex == 17) {
+            curSpeciesStatValue = selectedPool.avgDamageTaken;
+        }
+        else if(tolSelectedSpeciesStatsIndex == 18) {
+            curSpeciesStatValue = selectedPool.avgLifespan;
+        }
+
+        textTolSpeciesStatsValue.text = curSpeciesStatValue.ToString();
     }
     /*public void UpdaGraphDataTextures(int year) {
         int numActiveSpecies = gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList.Count;
@@ -2560,13 +2749,13 @@ public class UIManager : MonoBehaviour {
     public void ClickTolSpeciesTreeCyclePrev() {
         tolSelectedSpeciesStatsIndex--;
         if(tolSelectedSpeciesStatsIndex < 0) {
-            tolSelectedSpeciesStatsIndex = 14;
+            tolSelectedSpeciesStatsIndex = 15;
         }
         textTolSpeciesStatsName.text = ((SpeciesStatsMode)tolSelectedSpeciesStatsIndex).ToString();
     }
     public void ClickTolSpeciesTreeCycleNext() {
         tolSelectedSpeciesStatsIndex++;
-        if(tolSelectedSpeciesStatsIndex > 14) {
+        if(tolSelectedSpeciesStatsIndex > 15) {
             tolSelectedSpeciesStatsIndex = 0;
         }
         textTolSpeciesStatsName.text = ((SpeciesStatsMode)tolSelectedSpeciesStatsIndex).ToString();
@@ -2632,4 +2821,26 @@ public class UIManager : MonoBehaviour {
         }
     }
 
+    public void ClickShowHideTolSpeciesDescription() {
+        tolSpeciesDescriptionOn = !tolSpeciesDescriptionOn;
+        textTolDescription.gameObject.SetActive(tolSpeciesDescriptionOn);
+    }
+
+    public void ClickTolPrevSpecies() {
+
+    }
+    public void ClickTolNextSpecies() {
+
+    }
+
+    public void ClickOnTolGraphRenderPanel(BaseEventData eventData) {
+        PointerEventData pointerData = (PointerEventData)eventData;
+        //Debug.Log("ClickOnTolGraphRenderPanel " + pointerData.pointerPressRaycast.ToString());
+        Vector2 localPoint = Vector2.zero;
+        RectTransform rectTransform = pointerData.pointerPressRaycast.gameObject.GetComponent<RectTransform>();
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, Input.mousePosition, null, out localPoint);
+
+        Vector2 uvCoord = new Vector2((localPoint.x + 230f) / 460f, (localPoint.y + 160f) / 320f);
+        Debug.Log("ClickOnTolGraphRenderPanel " + uvCoord.ToString());
+    }
 }

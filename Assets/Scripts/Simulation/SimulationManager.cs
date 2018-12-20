@@ -1306,6 +1306,24 @@ public class SimulationManager : MonoBehaviour {
     }
     
     private void ProcessAgentScores(Agent agentRef) {
+
+        float totalEggSackVolume = 0f;
+        float totalCarrionVolume = 0f;
+        
+        for(int i = 0; i < eggSackArray.Length; i++) {
+            if(eggSackArray[i].curLifeStage != EggSack.EggLifeStage.Null) {
+                totalEggSackVolume += eggSackArray[i].foodAmount;
+            }
+        }
+        for(int i = 0; i < agentsArray.Length; i++) {
+            if(agentsArray[i].curLifeStage == Agent.AgentLifeStage.Dead) {
+                totalCarrionVolume += agentsArray[i].currentCorpseFoodAmount;
+            }
+        }
+        
+        //Debug.Log("ProcessAgentScores eggVol: " + foodManager.curGlobalEggSackVolume.ToString() + ", carrion: " + foodManager.curGlobalCarrionVolume.ToString());
+        foodManager.curGlobalEggSackVolume = Mathf.Lerp(foodManager.curGlobalEggSackVolume, totalEggSackVolume, 0.01f);
+        foodManager.curGlobalCarrionVolume = Mathf.Lerp(foodManager.curGlobalCarrionVolume, totalCarrionVolume, 0.01f);
         
         numAgentsProcessed++;
         //get species index:
@@ -1336,8 +1354,10 @@ public class SimulationManager : MonoBehaviour {
         environmentFluidManager.UpdateSimulationClimate();
     }
     private void AddNewHistoricalDataEntry() {
-        // add new entries to historical data lists:        
-        statsNutrientsEachGenerationList.Add(new Vector4(foodManager.curGlobalNutrients, foodManager.curGlobalFoodParticles, 0f, 0f));
+        // add new entries to historical data lists: 
+        Debug.Log("eggVol: " + foodManager.curGlobalEggSackVolume.ToString() + ", carrion: " + foodManager.curGlobalCarrionVolume.ToString());
+        statsNutrientsEachGenerationList.Add(new Vector4(foodManager.curGlobalNutrients, foodManager.curGlobalFoodParticles, foodManager.curGlobalEggSackVolume, foodManager.curGlobalCarrionVolume));
+        // Still used?
         statsHistoryBrainMutationFreqList.Add((float)settingsManager.curTierBrainMutationFrequency);
         statsHistoryBrainMutationAmpList.Add((float)settingsManager.curTierBrainMutationAmplitude);
         statsHistoryBrainSizeBiasList.Add((float)settingsManager.curTierBrainMutationNewLink);
@@ -1350,7 +1370,7 @@ public class SimulationManager : MonoBehaviour {
         masterGenomePool.AddNewYearlySpeciesStats(year);
     }
     private void RefreshLatestHistoricalDataEntry() {
-        statsNutrientsEachGenerationList[statsNutrientsEachGenerationList.Count - 1] = new Vector4(foodManager.curGlobalNutrients, foodManager.curGlobalFoodParticles, 0f, 0f);
+        statsNutrientsEachGenerationList[statsNutrientsEachGenerationList.Count - 1] = new Vector4(foodManager.curGlobalNutrients, foodManager.curGlobalFoodParticles, foodManager.curGlobalEggSackVolume, foodManager.curGlobalCarrionVolume);
         statsHistoryBrainMutationFreqList[statsHistoryBrainMutationFreqList.Count - 1] = settingsManager.curTierBrainMutationFrequency;
         statsHistoryBrainMutationAmpList[statsHistoryBrainMutationAmpList.Count - 1] = settingsManager.curTierBrainMutationAmplitude;
         statsHistoryBrainSizeBiasList[statsHistoryBrainSizeBiasList.Count - 1] = settingsManager.curTierBrainMutationNewLink;

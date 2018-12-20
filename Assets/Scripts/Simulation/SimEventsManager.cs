@@ -519,7 +519,7 @@ public class SimEventsManager {
                 break;
             case SimEventData.SimEventTypeMinor.FoodDecay:
                 if (newEventData.isPositive) {
-                    newEventData.name = "Algae Bloom I";
+                    newEventData.name = "Nutrient Increase I";
                     newEventData.description = "Slightly INCREASE the global levels of basic nutrients";  
                 }
                 else {
@@ -529,11 +529,11 @@ public class SimEventsManager {
                 break;
             case SimEventData.SimEventTypeMinor.FoodPlant:
                 if (newEventData.isPositive) {
-                    newEventData.name = "Blossom I";
+                    newEventData.name = "Algae Bloom I";
                     newEventData.description = "Slightly INCREASE the global levels of plants";  
                 }
                 else {
-                    newEventData.name = "Wilt I"; 
+                    newEventData.name = "Algae Shortage I"; 
                     newEventData.description = "Slightly DECREASE the global levels of plants";   
                 }
                 break;
@@ -712,7 +712,7 @@ public class SimEventsManager {
                 break;
             case SimEventData.SimEventTypeMajor.FoodDecay:
                 if (newEventData.isPositive) {
-                    newEventData.name = "Algae Bloom II";
+                    newEventData.name = "Nutrient Increase II";
                     newEventData.description = "Moderately INCREASE the global levels of basic nutrients";  
                 }
                 else {
@@ -722,11 +722,11 @@ public class SimEventsManager {
                 break;
             case SimEventData.SimEventTypeMajor.FoodPlant:
                 if (newEventData.isPositive) {
-                    newEventData.name = "Blossom II";
+                    newEventData.name = "Algae Bloom II";
                     newEventData.description = "Moderately INCREASE the global levels of plants";  
                 }
                 else {
-                    newEventData.name = "Wilt II"; 
+                    newEventData.name = "Algae Decrease II"; 
                     newEventData.description = "Moderately DECREASE the global levels of plants";   
                 }
                 break;
@@ -938,7 +938,7 @@ public class SimEventsManager {
                 break;
             case SimEventData.SimEventTypeExtreme.FoodDecay:
                 if (newEventData.isPositive) {
-                    newEventData.name = "Algae Bloom III";
+                    newEventData.name = "Nutrient Increase III";
                     newEventData.description = "Greatly INCREASE the global levels of basic nutrients";  
                 }
                 else {
@@ -948,11 +948,11 @@ public class SimEventsManager {
                 break;
             case SimEventData.SimEventTypeExtreme.FoodPlant:
                 if (newEventData.isPositive) {
-                    newEventData.name = "Blossom III";
+                    newEventData.name = "Algae Bloom III";
                     newEventData.description = "Greatly INCREASE the global levels of plants";  
                 }
                 else {
-                    newEventData.name = "Wilt III"; 
+                    newEventData.name = "Algae Decrease III"; 
                     newEventData.description = "Greatly DECREASE the global levels of plants";   
                 }
                 break;

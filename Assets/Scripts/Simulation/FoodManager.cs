@@ -16,6 +16,8 @@ public class FoodManager {
 
     public float curGlobalNutrients = 0f;
     public float curGlobalFoodParticles = 0f;
+    public float curGlobalEggSackVolume = 0f;
+    public float curGlobalCarrionVolume = 0f;
 
     public int nutrientMapResolution = 32;
     public RenderTexture nutrientMapRT1;
