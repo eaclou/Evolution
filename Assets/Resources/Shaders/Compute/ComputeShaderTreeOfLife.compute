@@ -273,7 +273,7 @@ void CSUpdateSpeciesTreeData (uint3 id : SV_DispatchThreadID)
 	height = height * _GraphCoordSpeciesRange + _GraphCoordSpeciesStart;	 // values actually stored in this re-mapped scale, so stay consistent!
 	float segmentHeight = lerp(treeOfLifeSpeciesSegmentsCBuffer[id.x].y, height, 0.075);
 		
-	segmentHeight = lerp(segmentHeight, headHeight, saturate(uv.x - 0.95) * 20);
+	segmentHeight = lerp(segmentHeight, headHeight, saturate(uv.x - 0.9) * 10);
 
 	float creationTimeNormalized = saturate((float)keyData.timeCreated / (float)_CurSimStep - 0.1);
 	float zOffset = 0; //(creationTimeNormalized - 0.2) * uv.x * -0.66;

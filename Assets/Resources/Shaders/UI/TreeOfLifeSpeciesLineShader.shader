@@ -79,7 +79,7 @@
 				float isExtinct = saturate((xCoord - extinctionTimeNormalized) * 1000);
 				isExtant *= (1.0 - isExtinct);
 
-				float zOffset = -keyData.isSelected; //(creationTimeNormalized - 0.2) * xCoord * -0.66;
+				float zOffset = -keyData.isSelected + keyData.isExtinct * 0.5; //(creationTimeNormalized - 0.2) * xCoord * -0.66;
 
 				float2 ownSubCoords = float2(instFloat / 64.0, ownScore);
 				float2 nextSubCoords = float2(saturate((instFloat + 1.0) / 64.0), nextScore);
@@ -91,7 +91,7 @@
 
 				float baseWidthLerpVal = (1.0 - xCoord / extinctionTimeNormalized);
 				float width = 0.94 * lerp(0.0085, 0.027, baseWidthLerpVal * baseWidthLerpVal);
-				width = width * keyData.isOn * isExtant;
+				width = width * max(keyData.isOn * isExtant, keyData.isSelected * 1.33);
 				float2 billboardVertexOffset = right * quadData.x * width + forward * quadData.y * 0.015;
 
 				float lerpVal = o.uv.y;
@@ -104,7 +104,7 @@
 				o.uv.y = xCoord;
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
 				//o.color = float4(keyData.hue * keyData.isSelected, 0);
-				o.color = float4(keyData.hue * (0.5 + keyData.isSelected * 1.0), 0);
+				o.color = float4(keyData.hue * (0.35 + 0.45 * (1.0 - keyData.isExtinct) + keyData.isSelected * 1.0), 0);
 				return o;
 			}
 			
