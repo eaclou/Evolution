@@ -7,12 +7,12 @@ public class TreeOfLifeManager {
     private Vector3 treeOriginPos;
     private GameObject treeOfLifeAnchorGO;
 
-    private float colliderBaseScaleMultiplier = 0.1f;
+    private float colliderBaseScaleMultiplier = 0.125f;
 
     // Instantiated Objects:
     public List<TreeOfLifeNodeRaycastTarget> nodeRaycastTargetsList;
 
-    public int selectedID = -1;
+    public int selectedID = 1;
     public int hoverID = -1;
     public int draggingID = -1;
 

@@ -2642,12 +2642,15 @@ public class TheRenderKing : MonoBehaviour {
         computeShaderTreeOfLife.SetTexture(kernelCSUpdateWorldStatsValues, "treeOfLifeWorldStatsKeyTex", keyTex);  // used for line color, max/min values reference, and other extra info per graph line (32 max)
         computeShaderTreeOfLife.SetBuffer(kernelCSUpdateWorldStatsValues, "treeOfLifeWorldStatsValuesCBuffer", treeOfLifeWorldStatsValuesCBuffer);
         computeShaderTreeOfLife.SetFloat("_Time", Time.realtimeSinceStartup); // for animation & shit        
-        computeShaderTreeOfLife.SetFloat("_GraphCoordStatsStart", 0f);
-        computeShaderTreeOfLife.SetFloat("_GraphCoordStatsRange", 0.25f);
+        computeShaderTreeOfLife.SetFloat("_GraphCoordStatsStart", simManager.uiManager.tolGraphCoordsStatsStart);
+        computeShaderTreeOfLife.SetFloat("_GraphCoordStatsRange", simManager.uiManager.tolGraphCoordsStatsRange);
         computeShaderTreeOfLife.SetInt("_CurSimStep", simManager.simAgeTimeSteps);
         computeShaderTreeOfLife.SetInt("_CurSimYear", simManager.curSimYear);
         computeShaderTreeOfLife.SetInt("_SelectedWorldStatsID", simManager.uiManager.tolSelectedWorldStatsIndex); // UI control
         computeShaderTreeOfLife.SetInt("_NumTimeSeriesEntries", dataTex.width);
+        computeShaderTreeOfLife.SetFloat("_MouseCoordX", simManager.uiManager.tolMouseCoords.x);
+        computeShaderTreeOfLife.SetFloat("_MouseCoordY", simManager.uiManager.tolMouseCoords.y);
+        computeShaderTreeOfLife.SetFloat("_MouseOn", simManager.uiManager.tolMouseOver);
         computeShaderTreeOfLife.Dispatch(kernelCSUpdateWorldStatsValues, 1, 1, 1);  // need 32 * 64 segments? -- not yet - as long as one-at-a-time
 
     }
@@ -2660,11 +2663,14 @@ public class TheRenderKing : MonoBehaviour {
         computeShaderTreeOfLife.SetFloat("_Time", Time.realtimeSinceStartup);
         computeShaderTreeOfLife.SetFloat("_SpeciesStatsMin", 0f);
         computeShaderTreeOfLife.SetFloat("_SpeciesStatsMax", maxVal);
-        computeShaderTreeOfLife.SetFloat("_GraphCoordSpeciesStart", 0.28f); // try it this way first
-        computeShaderTreeOfLife.SetFloat("_GraphCoordSpeciesRange", 0.44f);
+        computeShaderTreeOfLife.SetFloat("_GraphCoordSpeciesStart", simManager.uiManager.tolGraphCoordsSpeciesStart); // try it this way first
+        computeShaderTreeOfLife.SetFloat("_GraphCoordSpeciesRange", simManager.uiManager.tolGraphCoordsSpeciesRange);
         computeShaderTreeOfLife.SetInt("_CurSimStep", simManager.simAgeTimeSteps);
         computeShaderTreeOfLife.SetInt("_CurSimYear", simManager.curSimYear);
         computeShaderTreeOfLife.SetInt("_NumTimeSeriesEntries", dataTex.width);
+        computeShaderTreeOfLife.SetFloat("_MouseCoordX", simManager.uiManager.tolMouseCoords.x);
+        computeShaderTreeOfLife.SetFloat("_MouseCoordY", simManager.uiManager.tolMouseCoords.y);
+        computeShaderTreeOfLife.SetFloat("_MouseOn", simManager.uiManager.tolMouseOver);
         computeShaderTreeOfLife.Dispatch(kernelCSUpdateSpeciesTreeData, 32, 1, 1);  // 32 = num of species displayed * 64 inside shader
 
         treeOfLifeSpeciesDataHeadPosCBuffer.GetData(treeOfLifeSpeciesDataHeadPosArray);
@@ -2963,8 +2969,32 @@ public class TheRenderKing : MonoBehaviour {
         fluidColorRenderCamera.Render();
         // Update this ^^ to use Graphics.ExecuteCommandBuffer()  ****
 
-
         // TREE OF LIFE:
+        // TREE OF LIFE:
+
+        //graphs mouse coords:
+        if(simManager.uiManager.tolMouseOver > 0.5f) {
+            Vector2 localPoint = Vector2.zero;
+            RectTransform rectTransform = simManager.uiManager.imageTolSpeciesTreeRender.gameObject.GetComponent<RectTransform>();
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, Input.mousePosition, null, out localPoint);
+
+            Vector2 uvCoord = new Vector2((localPoint.x + 230f) / 460f, (localPoint.y + 160f) / 320f);
+            simManager.uiManager.tolMouseCoords = uvCoord;
+
+            simManager.uiManager.UpdateTolGraphUI(localPoint);
+
+            simManager.uiManager.textTolSpeciesStatsValue.gameObject.SetActive(true);
+            simManager.uiManager.textTolWorldStatsValue.gameObject.SetActive(true);
+            simManager.uiManager.textTolEventsTimelineName.gameObject.SetActive(true);
+        }
+        else {
+            simManager.uiManager.textTolSpeciesStatsValue.gameObject.SetActive(false);
+            simManager.uiManager.textTolWorldStatsValue.gameObject.SetActive(false);
+            simManager.uiManager.textTolEventsTimelineName.gameObject.SetActive(false);
+        }
+        
+
+
         cmdBufferTreeOfLifeSpeciesTree.Clear();
         cmdBufferTreeOfLifeSpeciesTree.SetRenderTarget(treeOfLifeSpeciesTreeRenderCamera.targetTexture); // needed???
         cmdBufferTreeOfLifeSpeciesTree.ClearRenderTarget(true, true, new Color(0f,0f,0f,0f), 1.0f);  // clear -- needed???
@@ -2973,7 +3003,16 @@ public class TheRenderKing : MonoBehaviour {
         treeOfLifeEventsLineMat.SetPass(0);
         treeOfLifeEventsLineMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         treeOfLifeEventsLineMat.SetInt("_CurSimStep", simManager.simAgeTimeSteps);
-        treeOfLifeEventsLineMat.SetFloat("_GraphCoordEventsRange", 0.25f);
+        treeOfLifeEventsLineMat.SetFloat("_GraphCoordEventsStart", simManager.uiManager.tolGraphCoordsEventsStart);
+        treeOfLifeEventsLineMat.SetFloat("_GraphCoordEventsRange", simManager.uiManager.tolGraphCoordsEventsRange);
+        float panelIsOn = 0f;
+        if(simManager.uiManager.tolEventsTimelineOn) {   // room for code improvement here - only update on UI events rather than every frame conditional
+            panelIsOn = 1f;   
+        }
+        treeOfLifeEventsLineMat.SetFloat("_IsOn", panelIsOn);
+        treeOfLifeEventsLineMat.SetFloat("_MouseCoordX", simManager.uiManager.tolMouseCoords.x);
+        treeOfLifeEventsLineMat.SetFloat("_MouseCoordY", simManager.uiManager.tolMouseCoords.y);
+        treeOfLifeEventsLineMat.SetFloat("_MouseOn", simManager.uiManager.tolMouseOver);
         treeOfLifeEventsLineMat.SetBuffer("treeOfLifeEventLineDataCBuffer", treeOfLifeEventLineDataCBuffer);
         cmdBufferTreeOfLifeSpeciesTree.DrawProcedural(Matrix4x4.identity, treeOfLifeEventsLineMat, 0, MeshTopology.Triangles, 6, treeOfLifeEventLineDataCBuffer.count);
         
@@ -2983,6 +3022,14 @@ public class TheRenderKing : MonoBehaviour {
         treeOfLifeWorldStatsMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         treeOfLifeWorldStatsMat.SetBuffer("treeOfLifeWorldStatsValuesCBuffer", treeOfLifeWorldStatsValuesCBuffer);
         treeOfLifeWorldStatsMat.SetInt("_SelectedWorldStatsID", simManager.uiManager.tolSelectedWorldStatsIndex);
+        panelIsOn = 0f;
+        if(simManager.uiManager.tolWorldStatsOn) {   // room for code improvement here - only update on UI events rather than every frame conditional
+            panelIsOn = 1f;   
+        }
+        treeOfLifeWorldStatsMat.SetFloat("_IsOn", panelIsOn);
+        treeOfLifeWorldStatsMat.SetFloat("_MouseCoordX", simManager.uiManager.tolMouseCoords.x);
+        treeOfLifeWorldStatsMat.SetFloat("_MouseCoordY", simManager.uiManager.tolMouseCoords.y);
+        treeOfLifeWorldStatsMat.SetFloat("_MouseOn", simManager.uiManager.tolMouseOver);
         cmdBufferTreeOfLifeSpeciesTree.DrawProcedural(Matrix4x4.identity, treeOfLifeWorldStatsMat, 0, MeshTopology.Triangles, 6, 64);
 
         treeOfLifeSpeciesLineMat.SetPass(0);
@@ -2992,6 +3039,14 @@ public class TheRenderKing : MonoBehaviour {
         treeOfLifeSpeciesLineMat.SetBuffer("treeOfLifeSpeciesSegmentsCBuffer", treeOfLifeSpeciesSegmentsCBuffer);
         treeOfLifeSpeciesLineMat.SetInt("_CurSimStep", simManager.simAgeTimeSteps);
         treeOfLifeSpeciesLineMat.SetInt("_CurSimYear", simManager.curSimYear);
+        panelIsOn = 0f;
+        if(simManager.uiManager.tolSpeciesTreeOn) {   // room for code improvement here - only update on UI events rather than every frame conditional
+            panelIsOn = 1f;   
+        }
+        treeOfLifeSpeciesLineMat.SetFloat("_IsOn", panelIsOn);
+        treeOfLifeSpeciesLineMat.SetFloat("_MouseCoordX", simManager.uiManager.tolMouseCoords.x);
+        treeOfLifeSpeciesLineMat.SetFloat("_MouseCoordY", simManager.uiManager.tolMouseCoords.y);
+        treeOfLifeSpeciesLineMat.SetFloat("_MouseOn", simManager.uiManager.tolMouseOver);
         cmdBufferTreeOfLifeSpeciesTree.DrawProcedural(Matrix4x4.identity, treeOfLifeSpeciesLineMat, 0, MeshTopology.Triangles, 6, 64 * 32);
 
         // Head Tips!
@@ -3001,6 +3056,10 @@ public class TheRenderKing : MonoBehaviour {
         treeOfLifeSpeciesHeadTipMat.SetBuffer("treeOfLifeSpeciesDataHeadPosCBuffer", treeOfLifeSpeciesDataHeadPosCBuffer);
         treeOfLifeSpeciesHeadTipMat.SetInt("_CurSimStep", simManager.simAgeTimeSteps);
         treeOfLifeSpeciesHeadTipMat.SetInt("_CurSimYear", simManager.curSimYear);
+        treeOfLifeSpeciesHeadTipMat.SetFloat("_IsOn", panelIsOn);
+        treeOfLifeSpeciesHeadTipMat.SetFloat("_MouseCoordX", simManager.uiManager.tolMouseCoords.x);
+        treeOfLifeSpeciesHeadTipMat.SetFloat("_MouseCoordY", simManager.uiManager.tolMouseCoords.y);
+        treeOfLifeSpeciesHeadTipMat.SetFloat("_MouseOn", simManager.uiManager.tolMouseOver);
         cmdBufferTreeOfLifeSpeciesTree.DrawProcedural(Matrix4x4.identity, treeOfLifeSpeciesHeadTipMat, 0, MeshTopology.Triangles, 6, 32);
 
 

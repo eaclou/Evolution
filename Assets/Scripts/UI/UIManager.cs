@@ -223,6 +223,16 @@ public class UIManager : MonoBehaviour {
     public Button buttonTolEventsExtremeToggle;
     public Text textTolEventsTimelineName;
 
+    public Image imageTolBackdropGraphs;
+    public Image imageTolBackdropDescription;
+    public Text textTolYearValue;
+
+    public Image imageTolPortraitBorder;
+    public Image imageTolSpeciesIndex;
+
+    public Vector2 tolMouseCoords;
+    public float tolMouseOver = 0f;
+
     public Texture2D tolTextureWorldStats;
     public Texture2D tolTextureWorldStatsKey;
     public Vector2[] tolWorldStatsValueRangesKeyArray;
@@ -236,7 +246,14 @@ public class UIManager : MonoBehaviour {
     public bool tolSpeciesTreeExtinctOn = false;
     public bool tolBrainDisplayOn = false;
     public bool tolInspectOn = false;
-    public bool tolSpeciesDescriptionOn = false;
+    public bool tolSpeciesDescriptionOn = true;
+
+    public float tolGraphCoordsEventsStart = 0.75f;
+    public float tolGraphCoordsEventsRange = 0.25f;
+    public float tolGraphCoordsStatsStart = 0.5f;
+    public float tolGraphCoordsStatsRange = 0.25f;
+    public float tolGraphCoordsSpeciesStart = 0f;
+    public float tolGraphCoordsSpeciesRange = 0.5f;
 
     // VVV OLD BELOW:::
     public GameObject treeOfLifeAnchorGO;     
@@ -363,7 +380,7 @@ public class UIManager : MonoBehaviour {
     public bool isDraggingMouse = false;
     public bool isDraggingSpeciesNode = false;
 
-    private int selectedAgentID;
+    private int selectedSpeciesID;
 
     private const int maxDisplaySpecies = 32;
 
@@ -372,6 +389,9 @@ public class UIManager : MonoBehaviour {
     public Color buttonEventExtremeColor = new Color(144f / 255f, 54f / 255f, 82f / 255f);
     // Tree of Life:
     //public Image imageTreeOfLifeDisplay;
+
+    private float curSpeciesStatValue;
+    private float curWorldStatValue;
     
 	// Use this for initialization
 	void Start () {
@@ -744,12 +764,12 @@ public class UIManager : MonoBehaviour {
             TreeOfLifeNodeRaycastTarget speciesNodeRayTarget = hit.collider.gameObject.GetComponent<TreeOfLifeNodeRaycastTarget>();
 
             if(speciesNodeRayTarget != null) {
-                selectedAgentID = speciesNodeRayTarget.speciesRef.speciesID;
+                selectedSpeciesID = speciesNodeRayTarget.speciesRef.speciesID;
                 if(clicked) {
-                    ClickOnSpeciesNode(selectedAgentID);                    
+                    ClickOnSpeciesNode(selectedSpeciesID);                    
                 }
                 else {
-                    treeOfLifeManager.HoverOverSpeciesNode(selectedAgentID);
+                    treeOfLifeManager.HoverOverSpeciesNode(selectedSpeciesID);
                 }
             }
             else {
@@ -785,9 +805,11 @@ public class UIManager : MonoBehaviour {
     }
 
     private void ClickOnSpeciesNode(int ID) {
-        Debug.Log("Clicked Species[" + ID.ToString() + "]");                    
+        Debug.Log("Clicked Species[" + ID.ToString() + "]");
+
         treeOfLifeManager.ClickedOnSpeciesNode(ID);
-        if(displaySpeciesIndicesArray != null) {
+
+        if (displaySpeciesIndicesArray != null) {
             int id = 0;
             for(int i = 0; i < displaySpeciesIndicesArray.Length; i++) {
                 if(displaySpeciesIndicesArray[i] == ID) {
@@ -795,13 +817,27 @@ public class UIManager : MonoBehaviour {
                     break;
                 }
             }
-            statsGraphMatLifespan.SetInt("_SelectedSpeciesID", id);  // 
-            statsGraphMatFoodEaten.SetInt("_SelectedSpeciesID", id);
-            statsGraphMatBodySizes.SetInt("_SelectedSpeciesID", id);
-            statsGraphMatPredation.SetInt("_SelectedSpeciesID", id);
+            //statsGraphMatLifespan.SetInt("_SelectedSpeciesID", id);  // 
+            //statsGraphMatFoodEaten.SetInt("_SelectedSpeciesID", id);
+            //statsGraphMatBodySizes.SetInt("_SelectedSpeciesID", id);
+            //statsGraphMatPredation.SetInt("_SelectedSpeciesID", id);
         }
+
+        textTolSpeciesIndex.text = treeOfLifeManager.selectedID.ToString();
+
+        // Update COLORS!!!
+        Vector3 speciesHuePrimary = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[treeOfLifeManager.selectedID].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
+        imageTolPortraitBorder.color = new Color(speciesHuePrimary.x, speciesHuePrimary.y, speciesHuePrimary.z);
+        imageTolSpeciesIndex.color = new Color(speciesHuePrimary.x, speciesHuePrimary.y, speciesHuePrimary.z);
+
+        //RefreshLatestHistoricalDataEntry();
+        //gameManager.simulationManager.RefreshLatestSpeciesDataEntry();
+        UpdateSpeciesTreeDataTextures(gameManager.simulationManager.curSimYear); // shouldn't lengthen!
+        //uiManager.UpdateTolWorldStatsTexture(statsNutrientsEachGenerationList);
+        //theRenderKing.UpdateTreeOfLifeEventLineData(simEventsManager.completeEventHistoryList);
+
         
-        textTreeOfLifeSpeciesID.text = "Species <size=24> " + ID.ToString() + "</size>";
+        /*textTreeOfLifeSpeciesID.text = "Species <size=24> " + ID.ToString() + "</size>";
 
         string speciesInfoTxt = "";
         speciesInfoTxt += "Parent Species: " + gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[ID].parentSpeciesID.ToString() + "\n";
@@ -809,8 +845,9 @@ public class UIManager : MonoBehaviour {
             gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[ID].representativeGenome.bodyGenome.fullsizeBoundingBox.z.ToString("F2") + " }\n";
         speciesInfoTxt += "Avg Fitness: " + gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[ID].avgLifespan.ToString("F2");
         textTreeOfLifeInfoA.text = speciesInfoTxt;
+        */
 
-        isDraggingSpeciesNode = true;
+        isDraggingSpeciesNode = true; // needed?
     }
 	
 	// Update is called once per frame
@@ -1133,7 +1170,8 @@ public class UIManager : MonoBehaviour {
             else if(tolSelectedWorldStatsIndex == 10) {
                 displayVal = gameManager.simulationManager.environmentFluidManager.curTierWaterCurrents;
             }
-            textTolWorldStatsValue.text = displayVal.ToString();
+            //textTolWorldStatsValue.text = displayVal.ToString();
+            curWorldStatValue = displayVal;
             /*public enum WorldStatsMode {
         Global_Nutrients,
         Global_Algae_Levels,
@@ -1149,8 +1187,15 @@ public class UIManager : MonoBehaviour {
     }*/
         }
         if(tolEventsTimelineOn) {
-            textTolEventsTimelineName.text = "Year " + gameManager.simulationManager.curSimYear.ToString() + ", CurTimeStep: " + gameManager.simulationManager.simAgeTimeSteps.ToString();
+            //textTolEventsTimelineName.text = "CurTimeStep: " + gameManager.simulationManager.simAgeTimeSteps.ToString();
+
+            
         }
+
+        textTolYearValue.text = gameManager.simulationManager.curSimYear.ToString();
+
+        imageTolBackdropGraphs.gameObject.SetActive(tolEventsTimelineOn);
+        imageTolBackdropDescription.gameObject.SetActive(tolSpeciesDescriptionOn);
     }
 
 
@@ -1700,10 +1745,8 @@ public class UIManager : MonoBehaviour {
             keyData.hue = hue;
             keyData.isExtinct = pool.isExtinct ? 1f : 0f;
             keyData.isOn = 1f;
-            int selectedID = 1;
-            if(cameraManager.targetAgent != null) {
-                selectedID = cameraManager.targetAgent.speciesIndex;
-            }
+            int selectedID = treeOfLifeManager.selectedID;
+            
             keyData.isSelected = (selectedID == gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList[i]) ? 1f : 0f;
 
             speciesKeyDataArray[i] = keyData;
@@ -1735,10 +1778,8 @@ public class UIManager : MonoBehaviour {
             if(i == 0) {
                 keyData.isOn = 0f;
             }
-            int selectedID = 1;
-            if(cameraManager.targetAgent != null) {
-                selectedID = cameraManager.targetAgent.speciesIndex;
-            }
+            int selectedID = treeOfLifeManager.selectedID;
+            
             keyData.isSelected = selectedID == i ? 1f : 0f;
 
             speciesKeyDataArray[i] = keyData;
@@ -1895,40 +1936,40 @@ public class UIManager : MonoBehaviour {
         maxPredationValue = maxValueDietTypeDecay;
         */
         // *** TEMP!!!!! **********
-        int selectedSpeciesID = 1;
-        if(cameraManager.targetAgent != null) {
-            selectedSpeciesID = cameraManager.targetAgent.speciesIndex;
-        }
+        int selectedSpeciesID = treeOfLifeManager.selectedID;
+        //if(cameraManager.targetAgent != null) {
+        //    selectedSpeciesID = cameraManager.targetAgent.speciesIndex;
+        //}
         SpeciesGenomePool selectedPool = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesID];
 
         textTolSpeciesTitle.text = "Species";        
         textTolSpeciesIndex.text = selectedSpeciesID.ToString();
         string descriptionText = "";
         // NOT ORDERED:
-        descriptionText += "Year Evolved: " + selectedPool.yearCreated.ToString() + "\n\n";
+        descriptionText += "Year Evolved: <b>" + selectedPool.yearCreated.ToString() + "</b>\n\n";
 
-        descriptionText += "Avg Lifespan: " + selectedPool.avgLifespan.ToString() + "\n";
-        descriptionText += "Avg Body Size: " + selectedPool.avgBodySize.ToString() + "\n";
-        descriptionText += "Avg Neuron Count: " + selectedPool.avgNumNeurons.ToString() + "\n";
-        descriptionText += "Avg Axon Count: " + selectedPool.avgNumAxons.ToString() + "\n\n";
+        descriptionText += "Avg Lifespan: <b>" + selectedPool.avgLifespan.ToString("F0") + "</b>\n";
+        descriptionText += "Avg Body Size: <b>" + selectedPool.avgBodySize.ToString("F2") + "</b>\n";
+        descriptionText += "Avg Neuron Count: <b>" + selectedPool.avgNumNeurons.ToString("F0") + "</b>\n";
+        descriptionText += "Avg Axon Count: <b>" + selectedPool.avgNumAxons.ToString("F0") + "</b>\n\n";
 
-        descriptionText += "Avg Nutrients Consumed: " + selectedPool.avgConsumptionDecay.ToString() + "\n";
-        descriptionText += "Avg Algae Consumed: " + selectedPool.avgConsumptionPlant.ToString() + "\n";
-        descriptionText += "Avg Meat Consumed: " + selectedPool.avgConsumptionMeat.ToString() + "\n\n";        
+        descriptionText += "Avg Nutrients Consumed: <b>" + selectedPool.avgConsumptionDecay.ToString("F3") + "</b>\n";
+        descriptionText += "Avg Algae Consumed: <b>" + selectedPool.avgConsumptionPlant.ToString("F3") + "</b>\n";
+        descriptionText += "Avg Meat Consumed: <b>" + selectedPool.avgConsumptionMeat.ToString("F3") + "</b>\n\n";        
         
-        descriptionText += "Avg Diet Spec Nutrients: " + selectedPool.avgFoodSpecDecay.ToString() + "\n";
-        descriptionText += "Avg Diet Spec Algae: " + selectedPool.avgFoodSpecPlant.ToString() + "\n";
-        descriptionText += "Avg Diet Spec Meat: " + selectedPool.avgFoodSpecMeat.ToString() + "\n\n";
+        descriptionText += "Avg Diet Spec Nutrients: <b>" + selectedPool.avgFoodSpecDecay.ToString("F2") + "</b>\n";
+        descriptionText += "Avg Diet Spec Algae: <b>" + selectedPool.avgFoodSpecPlant.ToString("F2") + "</b>\n";
+        descriptionText += "Avg Diet Spec Meat: <b>" + selectedPool.avgFoodSpecMeat.ToString("F2") + "</b>\n\n";
 
-        descriptionText += "Avg Spec Offense: " + selectedPool.avgSpecAttack.ToString() + "\n";
-        descriptionText += "Avg Spec Defense: " + selectedPool.avgSpecDefend.ToString() + "\n";
-        descriptionText += "Avg Spec Speed: " + selectedPool.avgSpecSpeed.ToString() + "\n";
-        descriptionText += "Avg Spec Utility: " + selectedPool.avgSpecUtility.ToString() + "\n\n";
+        descriptionText += "Avg Spec Offense: <b>" + selectedPool.avgSpecAttack.ToString("F2") + "</b>\n";
+        descriptionText += "Avg Spec Defense: <b>" + selectedPool.avgSpecDefend.ToString("F2") + "</b>\n";
+        descriptionText += "Avg Spec Speed: <b>" + selectedPool.avgSpecSpeed.ToString("F2") + "</b>\n";
+        descriptionText += "Avg Spec Utility: <b>" + selectedPool.avgSpecUtility.ToString("F2") + "</b>\n\n";
 
-        descriptionText += "Avg Damage Inflicted: " + selectedPool.avgDamageDealt.ToString() + "\n";
-        descriptionText += "Avg Damage Taken: " + selectedPool.avgDamageTaken.ToString() + "\n";
-        descriptionText += "Avg Experience Earned: " + selectedPool.avgExperience.ToString() + "\n";
-        descriptionText += "Avg Fitness Score: " + selectedPool.avgFitnessScore.ToString() + "\n\n";
+        descriptionText += "Avg Damage Inflicted: <b>" + selectedPool.avgDamageDealt.ToString("F4") + "</b>\n";
+        descriptionText += "Avg Damage Taken: <b>" + selectedPool.avgDamageTaken.ToString("F4") + "</b>\n";
+        descriptionText += "Avg Experience Earned: <b>" + selectedPool.avgExperience.ToString("F1") + "</b>\n";
+        descriptionText += "Avg Fitness Score: <b>" + selectedPool.avgFitnessScore.ToString("F1") + "</b>\n\n";
 
         textTolDescription.text = descriptionText;
 
@@ -1953,7 +1994,7 @@ public class UIManager : MonoBehaviour {
         Avg_Amount_Damage_Taken
         */
 
-        float curSpeciesStatValue = 0f;
+        curSpeciesStatValue = 0f;
         
         if(tolSelectedSpeciesStatsIndex == 0) {
             curSpeciesStatValue = selectedPool.avgLifespan;
@@ -2013,7 +2054,7 @@ public class UIManager : MonoBehaviour {
             curSpeciesStatValue = selectedPool.avgLifespan;
         }
 
-        textTolSpeciesStatsValue.text = curSpeciesStatValue.ToString();
+        //textTolSpeciesStatsValue.text = curSpeciesStatValue.ToString();
     }
     /*public void UpdaGraphDataTextures(int year) {
         int numActiveSpecies = gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList.Count;
@@ -2711,15 +2752,120 @@ public class UIManager : MonoBehaviour {
 
     public void ClickTolWorldStatsOnOff() {
         tolWorldStatsOn = !tolWorldStatsOn;
-        panelTolWorldStats.SetActive(tolWorldStatsOn);
+        panelTolWorldStats.SetActive(tolWorldStatsOn && tolEventsTimelineOn);
+        RecalculateTreeOfLifeGraphPanelSizes();
     }
     public void ClickTolSpeciesTreeOnOff() {
-        tolSpeciesTreeOn = !tolSpeciesTreeOn;
-        panelTolSpeciesTree.SetActive(tolSpeciesTreeOn);
+        //tolSpeciesTreeOn = !tolSpeciesTreeOn;
+        //panelTolSpeciesTree.SetActive(tolSpeciesTreeOn);
+        //RecalculateTreeOfLifeGraphPanelSizes();
     }
     public void ClickTolEventsTimelineOnOff() {
         tolEventsTimelineOn = !tolEventsTimelineOn;
+
+
+        panelTolWorldStats.SetActive(tolWorldStatsOn && tolEventsTimelineOn);
+        panelTolSpeciesTree.SetActive(tolEventsTimelineOn);
         panelTolEventsTimeline.SetActive(tolEventsTimelineOn);
+        // backdrop on/off
+
+        RecalculateTreeOfLifeGraphPanelSizes();
+    }
+
+    private void RecalculateTreeOfLifeGraphPanelSizes() {
+        
+        
+        if(tolSpeciesTreeOn) {
+            
+
+            if (tolEventsTimelineOn) {
+                
+
+                if (tolWorldStatsOn) {  // ALL ON
+                    tolGraphCoordsEventsStart = 0.8f;
+                    tolGraphCoordsEventsRange = 0.2f;
+
+                    tolGraphCoordsStatsStart = 0.55f;
+                    tolGraphCoordsStatsRange = 0.2f;
+
+                    tolGraphCoordsSpeciesStart = 0.025f;
+                    tolGraphCoordsSpeciesRange = 0.525f;
+                }
+                else {  // Species + Events:
+                    tolGraphCoordsEventsStart = 0.8f;
+                    tolGraphCoordsEventsRange = 0.2f;
+
+                    tolGraphCoordsStatsStart = 0.75f;
+                    tolGraphCoordsStatsRange = 0.025f;
+
+                    tolGraphCoordsSpeciesStart = 0.025f;
+                    tolGraphCoordsSpeciesRange = 0.725f;
+                }
+            }
+            else {
+                if (tolWorldStatsOn) {  // species + world Stats
+                    tolGraphCoordsEventsStart = 0.75f;
+                    tolGraphCoordsEventsRange = 0.25f;
+
+                    tolGraphCoordsStatsStart = 0.5f;
+                    tolGraphCoordsStatsRange = 0.25f;
+
+                    tolGraphCoordsSpeciesStart = 0f;
+                    tolGraphCoordsSpeciesRange = 0.75f;
+
+                }
+                else {  // species only
+                    tolGraphCoordsEventsStart = 1f;
+                    tolGraphCoordsEventsRange = 0.025f;
+
+                    tolGraphCoordsStatsStart = 1f;
+                    tolGraphCoordsStatsRange = 0.025f;
+
+                    tolGraphCoordsSpeciesStart = 0f;
+                    tolGraphCoordsSpeciesRange = 0.75f;
+                }
+            }
+        }
+        else {
+            if (tolEventsTimelineOn) {
+                
+
+                if (tolWorldStatsOn) {  // World Stats + TEvents Timeline!
+                    tolGraphCoordsEventsStart = 0.75f;
+                    tolGraphCoordsEventsRange = 0.25f;
+
+                    tolGraphCoordsStatsStart = 0.33f;
+                    tolGraphCoordsStatsRange = 0.333f;
+
+                    tolGraphCoordsSpeciesStart = 0f;
+                    tolGraphCoordsSpeciesRange = 0.75f;
+
+                }
+                else {  // Events Timeline only:
+                    tolGraphCoordsEventsStart = 0.75f;
+                    tolGraphCoordsEventsRange = 0.25f;
+
+                    tolGraphCoordsStatsStart = 0.5f;
+                    tolGraphCoordsStatsRange = 0.025f;
+
+                    tolGraphCoordsSpeciesStart = 0f;
+                    tolGraphCoordsSpeciesRange = 0.75f;
+                }
+            }
+            else {
+                if (tolWorldStatsOn) {  // world Stats only
+                    tolGraphCoordsEventsStart = 0.75f;
+                    tolGraphCoordsEventsRange = 0.25f;
+
+                    tolGraphCoordsStatsStart = 0.7f;
+                    tolGraphCoordsStatsRange = 0.3f;
+
+                    tolGraphCoordsSpeciesStart = 0f;
+                    tolGraphCoordsSpeciesRange = 0.75f;
+
+                }
+            }
+        }
     }
 
     public void ClickTolSpeciesTreeExtinctToggle() {
@@ -2761,13 +2907,13 @@ public class UIManager : MonoBehaviour {
         textTolSpeciesStatsName.text = ((SpeciesStatsMode)tolSelectedSpeciesStatsIndex).ToString();
     }
     public void ClickTolEventsTimelineMinor() {
-
+        Debug.Log("ClickTolEventsTimelineMinor()");
     }
     public void ClickTolEventsTimelineMajor() {
-
+        Debug.Log("ClickTolEventsTimelineMajor()");
     }
     public void ClickTolEventsTimelineExtreme() {
-
+        Debug.Log("ClickTolEventsTimelineExtreme()");
     }
 
     public void ClickEventMinor() {
@@ -2827,10 +2973,40 @@ public class UIManager : MonoBehaviour {
     }
 
     public void ClickTolPrevSpecies() {
+        Debug.Log("ClickTolPrevSpecies()");
+        int curSpeciesIndex = treeOfLifeManager.selectedID;
 
+        int prevSpeciesIndex = curSpeciesIndex - 1;
+        if(prevSpeciesIndex < 1) {
+            prevSpeciesIndex = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList.Count - 1;
+        }
+
+        //treeOfLifeManager.selectedID = prevSpeciesIndex;
+        ClickOnSpeciesNode(prevSpeciesIndex);
+        //textTolSpeciesIndex.text = treeOfLifeManager.selectedID.ToString();
+        
+        // Update COLORS!!!
+        //Vector3 speciesHuePrimary = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[treeOfLifeManager.selectedID].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
+        //imageTolPortraitBorder.color = new Color(speciesHuePrimary.x, speciesHuePrimary.y, speciesHuePrimary.z);
+        //imageTolSpeciesIndex.color = new Color(speciesHuePrimary.x, speciesHuePrimary.y, speciesHuePrimary.z);
     }
     public void ClickTolNextSpecies() {
+        Debug.Log("ClickTolNextSpecies()");
+        int curSpeciesIndex = treeOfLifeManager.selectedID;
+        
+        int nextSpeciesIndex = curSpeciesIndex + 1;
+        if(nextSpeciesIndex > (gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList.Count - 1)) {
+            nextSpeciesIndex = 1;
+        }
 
+        //treeOfLifeManager.selectedID = nextSpeciesIndex;
+        ClickOnSpeciesNode(nextSpeciesIndex);
+        //textTolSpeciesIndex.text = treeOfLifeManager.selectedID.ToString();
+
+        // Update COLORS!!!
+        //Vector3 speciesHuePrimary = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[treeOfLifeManager.selectedID].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
+        //imageTolPortraitBorder.color = new Color(speciesHuePrimary.x, speciesHuePrimary.y, speciesHuePrimary.z);
+        //imageTolSpeciesIndex.color = new Color(speciesHuePrimary.x, speciesHuePrimary.y, speciesHuePrimary.z);
     }
 
     public void ClickOnTolGraphRenderPanel(BaseEventData eventData) {
@@ -2841,6 +3017,86 @@ public class UIManager : MonoBehaviour {
         RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, Input.mousePosition, null, out localPoint);
 
         Vector2 uvCoord = new Vector2((localPoint.x + 230f) / 460f, (localPoint.y + 160f) / 320f);
+        tolMouseCoords = uvCoord;
+        tolMouseOver = 1f;
         Debug.Log("ClickOnTolGraphRenderPanel " + uvCoord.ToString());
+
+        // Raycast Attempt:
+        //Vector3 camPos = cameraManager.gameObject.transform.position;        
+        //float mouseRatioX = Input.mousePosition.x / Screen.width;
+        //float mouseRatioY = Input.mousePosition.y / Screen.height;
+        //Vector3 mousePos = new Vector3(mouseRatioX, mouseRatioY, -1f);
+        Ray ray = new Ray(new Vector3(uvCoord.x, uvCoord.y, -1f), new Vector3(0f, 0f, 1f)); // cameraManager.gameObject.GetComponent<Camera>().ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit = new RaycastHit();
+        //int layerMask = 0;
+        Physics.Raycast(ray, out hit);
+
+        bool clicked = true;
+        
+        if(hit.collider != null) {
+            // How to handle multiple hits? UI Trumps environmental?
+            TreeOfLifeNodeRaycastTarget speciesNodeRayTarget = hit.collider.gameObject.GetComponent<TreeOfLifeNodeRaycastTarget>();
+
+            if(speciesNodeRayTarget != null) {
+                selectedSpeciesID = speciesNodeRayTarget.speciesRef.speciesID;
+                if(clicked) {
+                    ClickOnSpeciesNode(selectedSpeciesID);                    
+                }
+                else {
+                    treeOfLifeManager.HoverOverSpeciesNode(selectedSpeciesID);
+                }
+            }
+            else {
+                treeOfLifeManager.HoverAllOff();
+            }            
+            //Debug.Log("CLICKED ON: [ " + hit.collider.gameObject.name + " ] Ray= " + ray.ToString() + ", hit= " + hit.point.ToString());
+        }
+        else {
+            treeOfLifeManager.HoverAllOff();
+        }
+    }
+    /*
+    public void MouseOverTolGraphRenderPanel(BaseEventData eventData) {
+        PointerEventData pointerData = (PointerEventData)eventData;
+        //Debug.Log("ClickOnTolGraphRenderPanel " + pointerData.pointerPressRaycast.ToString());
+        Vector2 localPoint = Vector2.zero;
+        RectTransform rectTransform = pointerData.pointerPressRaycast.gameObject.GetComponent<RectTransform>();
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, Input.mousePosition, null, out localPoint);
+
+        Vector2 uvCoord = new Vector2((localPoint.x + 230f) / 460f, (localPoint.y + 160f) / 320f);
+        tolMouseCoords = uvCoord;
+        tolMouseOver = 1f;
+        Debug.Log("ClickOnTolGraphRenderPanel " + uvCoord.ToString());
+    }*/
+
+    public void MouseEnterTolGraphRenderPanel(BaseEventData eventData) {        
+        Debug.Log("MouseEnterTolGraphRenderPanel");
+        tolMouseOver = 1f;
+    }
+    public void MouseExitTolGraphRenderPanel(BaseEventData eventData) {        
+        Debug.Log("MouseExitTolGraphRenderPanel");
+        tolMouseOver = 0f;
+    }
+
+    public void UpdateTolGraphUI(Vector2 coords) {
+        // Move Text-boxes to position of vertical mouse line
+        // update text values
+
+        // Find graph values at uv coord???  // query GPU or save info on CPU??
+
+        //turn on/off panel in enter/exit functions
+
+        RectTransform rectSpeciesStats = textTolSpeciesStatsValue.GetComponent<RectTransform>();
+        rectSpeciesStats.localPosition = new Vector3(coords.x + 220f, coords.y + 10f, 0f);
+        textTolSpeciesStatsValue.text = ((SpeciesStatsMode)tolSelectedSpeciesStatsIndex).ToString() + ": " + curSpeciesStatValue.ToString("F3");
+
+        RectTransform rectWorldStats = textTolWorldStatsValue.GetComponent<RectTransform>();
+        rectWorldStats.localPosition = new Vector3(coords.x + 220f, coords.y + 20f, 0f);
+        textTolWorldStatsValue.text = ((WorldStatsMode)tolSelectedWorldStatsIndex).ToString() + ": " + curWorldStatValue.ToString("F3");
+
+        RectTransform rectEventStats = textTolEventsTimelineName.GetComponent<RectTransform>();
+        rectEventStats.localPosition = new Vector3(coords.x + 220f, coords.y + 30f, 0f);
+        textTolEventsTimelineName.text = "EVENT";
+
     }
 }

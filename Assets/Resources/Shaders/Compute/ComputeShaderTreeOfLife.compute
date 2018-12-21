@@ -88,6 +88,10 @@ uniform float _StatsPanelOn;
 uniform float _SpeciesPanelOn;
 uniform float _EventsPanelOn;
 
+uniform float _MouseCoordX;
+uniform float _MouseCoordY;
+uniform float _MouseOn;
+
 SamplerState _PointClamp;
 SamplerState _LinearClamp;
 SamplerState _LinearRepeat;
@@ -239,7 +243,7 @@ void CSUpdateWorldStatsValues (uint3 id : SV_DispatchThreadID)
 	
 	height += (sin(_Time * 5.31 + uv.x * 15.67) * 0.0410725) * uv.x;
 
-	height = height * 0.25 + 0.75;
+	height = height * _GraphCoordStatsRange + _GraphCoordStatsStart;
 	// need more than height?
 	treeOfLifeWorldStatsValuesCBuffer[id.x] = lerp(treeOfLifeWorldStatsValuesCBuffer[id.x], height, 0.05);
 }
@@ -280,7 +284,7 @@ void CSUpdateSpeciesTreeData (uint3 id : SV_DispatchThreadID)
 
 	treeOfLifeSpeciesSegmentsCBuffer[id.x] = float3(uv.x, segmentHeight, zOffset);
 		
-		//	
+		
 	//treeOfLifeSpeciesDataHeadPosCBuffer[speciesID] = float3(0.5, texColor.x * 0.01, 0);
 	treeOfLifeSpeciesDataHeadPosCBuffer[speciesID] = float3(min(1.0, saturate((float)keyData.timeExtinct / (float)_CurSimStep)), headHeight, zOffset);
 

@@ -36,6 +36,12 @@
 			uniform int _CurSimStep;
 			uniform int _CurSimYear;
 
+			uniform float _IsOn;
+
+			uniform float _MouseCoordX;
+			uniform float _MouseCoordY;
+			uniform float _MouseOn;
+
 			struct v2f
 			{
 				float4 pos : SV_POSITION;
@@ -99,12 +105,14 @@
 				float2 vertexCoord = lerp(ownSubCoords, nextSubCoords, lerpVal);
 				vertexCoord += billboardVertexOffset;
 								
-				float3 worldPosition = float3(vertexCoord, zOffset);								
+				float3 worldPosition = float3(vertexCoord, zOffset) * _IsOn;								
 				
 				o.uv.y = xCoord;
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
 				//o.color = float4(keyData.hue * keyData.isSelected, 0);
 				o.color = float4(keyData.hue * (0.35 + 0.45 * (1.0 - keyData.isExtinct) + keyData.isSelected * 1.0), 0);
+				float distToMouse = 1.0 - saturate(abs(xCoord - _MouseCoordX) * 15);
+				o.color.xyz = lerp(o.color.xyz, float3(1, 1, 1), _MouseOn * distToMouse * 1);
 				return o;
 			}
 			

@@ -35,17 +35,22 @@
 
 			uniform float _CurSimStep;
 
-			uniform float _GraphCoordStatsStart;
-			uniform float _GraphCoordStatsRange;
-			uniform float _GraphCoordSpeciesStart;
-			uniform float _GraphCoordSpeciesRange;
-			uniform float _GraphCoordEventsStart;
+			//uniform float _GraphCoordStatsStart;
+			//uniform float _GraphCoordStatsRange;
+			//uniform float _GraphCoordSpeciesStart;
+			//uniform float _GraphCoordSpeciesRange;
+			uniform float _GraphCoordEventsStart;  // needed?
 			uniform float _GraphCoordEventsRange;
 
-			uniform float _StatsPanelOn;
-			uniform float _SpeciesPanelOn;
-			uniform float _EventsPanelOn;
+			//uniform float _StatsPanelOn;
+			//uniform float _SpeciesPanelOn;
+			//uniform float _EventsPanelOn;
 
+			uniform float _IsOn;
+
+			uniform float _MouseCoordX;
+			uniform float _MouseCoordY;
+			uniform float _MouseOn;
 
 			//StructuredBuffer<float3> treeOfLifeStemSegmentVerticesCBuffer; //quadVerticesCBuffer;
 			//StructuredBuffer<TreeOfLifeNodeColliderData> treeOfLifeNodeColliderDataCBuffer;
@@ -78,16 +83,21 @@
 				v2f o;
 
 				float3 quadData = quadVerticesCBuffer[id];
-				TreeOfLifeEventLineData eventData = treeOfLifeEventLineDataCBuffer[inst];
+				TreeOfLifeEventLineData eventData = treeOfLifeEventLineDataCBuffer[inst];				
+				quadData.x *= 0.0125; // bar width
 				quadData.y += 0.5;
-				quadData.y *= (eventData.eventCategory * 0.67 + 0.33) * _GraphCoordEventsRange;
-				quadData.x *= 0.0125;		
-				//quadData.y *= 1;		
+				float barHeight = (eventData.eventCategory * 0.67 + 0.33);
+				//quadData.y += 1.0 - barHeight;
+				quadData.y *= barHeight; // * _GraphCoordEventsRange;
+				quadData.y += (1.0 - barHeight);
+				//quadData.y = 1.0 - quadData.y;		
+				quadData.y = quadData.y * _GraphCoordEventsRange + (1.0 - _GraphCoordEventsRange);	 // INVERT
+				
 				o.uv = quadVerticesCBuffer[id].xy + 0.5;
 				
 				float3 worldPosition = float3((float)eventData.timeStepActivated / (float)_CurSimStep, 0, 0) + quadData * eventData.isActive;
-								
-				
+				//worldPosition.y += _GraphCoordEventsStart;				
+				worldPosition *= _IsOn;
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
 
 				float3 hueMinor = float3(0.55, 1, 0.6) * 0.8;

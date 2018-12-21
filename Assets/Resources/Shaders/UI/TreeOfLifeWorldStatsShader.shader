@@ -40,6 +40,13 @@
 
 			uniform int _SelectedWorldStatsID;
 
+			uniform float _IsOn;
+
+			uniform float _MouseCoordX;
+			uniform float _MouseCoordY;
+			uniform float _MouseOn;
+
+
 			v2f vert (uint id : SV_VertexID, uint inst : SV_InstanceID)
 			{
 				v2f o;
@@ -70,7 +77,7 @@
 				vertexCoord += billboardVertexOffset;
 				//vertexCoord.y += (sin(_Time.y * 4.31 + ownSubCoords.x * 10.67) * 0.10725) * instFloat / 64.0;
 				
-				float3 worldPosition = float3(vertexCoord, 0);								
+				float3 worldPosition = float3(vertexCoord, 0) * _IsOn;								
 				
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
 				o.color = tex2Dlod(_KeyTex, float4(0,((float)_SelectedWorldStatsID + 0.5) / 32.0,0,0));

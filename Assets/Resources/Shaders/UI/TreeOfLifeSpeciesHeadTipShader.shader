@@ -35,6 +35,12 @@
 			uniform int _CurSimStep;
 			uniform int _CurSimYear;
 
+			uniform float _IsOn;
+
+			uniform float _MouseCoordX;
+			uniform float _MouseCoordY;
+			uniform float _MouseOn;
+
 			struct v2f
 			{
 				float4 pos : SV_POSITION;
@@ -59,7 +65,8 @@
 				float width = 0.02 * keyData.isOn * keyData.isExtinct;
 				
 				float3 worldPosition = float3(pos + quadData * 0.025 * (1.0 + keyData.isSelected * 0.5));								
-				
+				worldPosition *= _IsOn;
+				worldPosition.z -= 2;
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
 				o.color = float4(keyData.hue * (0.5 + keyData.isSelected * 1.0), 0);
 				return o;
