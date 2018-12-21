@@ -43,7 +43,7 @@ public class TreeOfLifeManager {
             //Vector4 localPos = new Vector3(dataArray[i].localPos.x, dataArray[i].localPos.y, dataArray[i].localPos.z);
             //Vector3 worldPos = cam.worldSpaceTopLeft + cam.worldSpaceCameraRightDir * camScale - cam.worldSpaceCameraUpDir * camScale * 0.5f + localPos * camScale;
 
-            Vector3 pos = posArray[i];
+            Vector3 pos = posArray[i];55
             nodeRaycastTargetsList[i].transform.position = pos;
         }
     }

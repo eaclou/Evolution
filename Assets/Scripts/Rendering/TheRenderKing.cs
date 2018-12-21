@@ -3200,7 +3200,7 @@ public class TheRenderKing : MonoBehaviour {
     }
     public void TreeOfLifeGetColliderNodePositionData() {
         treeOfLifeNodeColliderDataCBufferA.GetData(treeOfLifeNodeColliderDataArray);
-        simManager.uiManager.treeOfLifeManager.UpdateNodePositionsFromGPU(simManager.uiManager.cameraManager, treeOfLifeSpeciesDataHeadPosArray);        
+        simManager.uiManager.treeOfLifeManager.UpdateNodePositionsFromGPU(simManager.uiManager.cameraManager, treeOfLifeSpeciesDataHeadPosArray);6      // **** Need to cap this at 32 or it breaks!!!  
         
     }
     /*private void Render() {
