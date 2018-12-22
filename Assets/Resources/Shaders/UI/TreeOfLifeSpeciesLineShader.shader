@@ -64,10 +64,12 @@
 				o.uv = quadData.xy + 0.5;
 
 				// calculate positions in computeShader?				
+				//float prevScore = treeOfLifeSpeciesSegmentsCBuffer[speciesID * 64 + max(localSegmentID - 1, 0)].y;
 				float ownScore = treeOfLifeSpeciesSegmentsCBuffer[inst].y;
 				float nextScore = treeOfLifeSpeciesSegmentsCBuffer[nextIndexCapped].y;
-
-
+				//float nextNextScore = treeOfLifeSpeciesSegmentsCBuffer[speciesID * 64 + min(localSegmentID + 2, 63)].y;
+				//ownScore = (ownScore + prevScore + nextScore) / 3;
+				//nextScore = (prevScore + nextScore + nextNextScore) / 3;
 				// *** REMOVE THESE!!! REPLACE
 				//float4 speciesKeyUV = float4((speciesID + 0.5) / 32.0, 0.5, 0, 0);
 				//float4 colorKeySample = tex2Dlod(_KeyTex, speciesKeyUV);
@@ -112,7 +114,7 @@
 				//o.color = float4(keyData.hue * keyData.isSelected, 0);
 				o.color = float4(keyData.hue * (0.35 + 0.45 * (1.0 - keyData.isExtinct) + keyData.isSelected * 1.0), 0);
 				float distToMouse = 1.0 - saturate(abs(xCoord - _MouseCoordX) * 15);
-				o.color.xyz = lerp(o.color.xyz, float3(1, 1, 1), _MouseOn * distToMouse * 1);
+				o.color.xyz = lerp(o.color.xyz, float3(1, 1, 1), _MouseOn * distToMouse * keyData.isSelected);
 				return o;
 			}
 			

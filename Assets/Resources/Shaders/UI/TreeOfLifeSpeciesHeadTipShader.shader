@@ -3,11 +3,12 @@
 	Properties
 	{
 		_KeyTex ("_KeyTex", 2D) = "white" {}
+		_BrushTex ("_BrushTex", 2D) = "white" {}
 	}
 	SubShader
 	{
-		Tags { "RenderType"="Opaque" }
-		
+		Tags { "RenderType"="Transparent" }
+		Blend SrcAlpha OneMinusSrcAlpha
 
 		Pass
 		{
@@ -35,8 +36,10 @@
 			uniform int _CurSimStep;
 			uniform int _CurSimYear;
 
-			uniform float _IsOn;
+			uniform int _HoverIndex;
 
+			uniform float _IsOn;
+			
 			uniform float _MouseCoordX;
 			uniform float _MouseCoordY;
 			uniform float _MouseOn;
@@ -49,6 +52,7 @@
 			};
 
 			sampler2D _KeyTex;
+			sampler2D _BrushTex;
 
 			v2f vert (uint id : SV_VertexID, uint inst : SV_InstanceID)
 			{
@@ -62,19 +66,23 @@
 				TreeOfLifeSpeciesKeyData keyData = treeOfLifeSpeciesDataKeyCBuffer[(int)speciesID];
 				float3 pos = treeOfLifeSpeciesDataHeadPosCBuffer[inst];
 
-				float width = 0.02 * keyData.isOn * keyData.isExtinct;
+				float width = 0.02 * keyData.isOn * keyData.isExtinct ;
+
+				float hoverMask = 1.0 - saturate(abs((float)_HoverIndex - speciesID));
 				
-				float3 worldPosition = float3(pos + quadData * 0.025 * (1.0 + keyData.isSelected * 0.5));								
+				quadData.y *= 1.33;
+				float3 worldPosition = float3(pos + quadData * 0.025 * (1.0 + hoverMask * 0.5) * (1.0 + keyData.isSelected * 0.5));								
 				worldPosition *= _IsOn;
 				worldPosition.z -= 2;
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
-				o.color = float4(keyData.hue * (0.5 + keyData.isSelected * 1.0), 0);
+				o.color = float4(keyData.hue * (0.5 + keyData.isSelected * 1.0) + (hoverMask * 0.5), 0);
 				return o;
 			}
 			
 			fixed4 frag (v2f i) : SV_Target
 			{
-				float4 finalColor = float4(i.color.rgb,1);				
+				float4 brushColor = tex2D(_BrushTex, i.uv);
+				float4 finalColor = float4(i.color.rgb, brushColor.a);				
 				return finalColor;
 			}
 			ENDCG

@@ -46,6 +46,8 @@
 			//uniform float _SpeciesPanelOn;
 			//uniform float _EventsPanelOn;
 
+			uniform int _ClosestEventIndex;
+
 			uniform float _IsOn;
 
 			uniform float _MouseCoordX;
@@ -83,15 +85,23 @@
 				v2f o;
 
 				float3 quadData = quadVerticesCBuffer[id];
-				TreeOfLifeEventLineData eventData = treeOfLifeEventLineDataCBuffer[inst];				
+				TreeOfLifeEventLineData eventData = treeOfLifeEventLineDataCBuffer[inst];	
+				float highlightedMask = _MouseOn * (1.0 - saturate(abs((float)(inst - _ClosestEventIndex))));
+				quadData.x *= (1.0 + highlightedMask);
+				quadData.y *= (1.0 + highlightedMask * 0.67);
+
 				quadData.x *= 0.0125; // bar width
 				quadData.y += 0.5;
-				float barHeight = (eventData.eventCategory * 0.67 + 0.33);
+				
+				float barHeight = (eventData.eventCategory * 0.6 + 0.6);
 				//quadData.y += 1.0 - barHeight;
 				quadData.y *= barHeight; // * _GraphCoordEventsRange;
 				quadData.y += (1.0 - barHeight);
 				//quadData.y = 1.0 - quadData.y;		
 				quadData.y = quadData.y * _GraphCoordEventsRange + (1.0 - _GraphCoordEventsRange);	 // INVERT
+
+				
+				
 				
 				o.uv = quadVerticesCBuffer[id].xy + 0.5;
 				
@@ -107,6 +117,7 @@
 				float mag = eventData.eventCategory; //saturate(eventData.eventCategory - 0.5) * 2;
 				float3 hue = lerp(hueMinor, hueMajor, saturate(mag * 2));
 				hue = lerp(hue, hueExtreme, saturate(mag - 0.5) * 2);
+				hue = lerp(hue, float3(1,1,1), highlightedMask * 0.75 * (1.0 - (quadVerticesCBuffer[id].y + 0.5)));
 				o.color = float4(hue, 0);
 				
 				return o;

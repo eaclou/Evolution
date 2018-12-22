@@ -259,9 +259,11 @@ void CSUpdateSpeciesTreeData (uint3 id : SV_DispatchThreadID)
 
 	float2 uv = float2(segmentID / 64.0, speciesID / 32.0 + 1.0 / 64.0);
 	
+	float4 texColorPrev = treeOfLifeSpeciesTreeTex.SampleLevel(_LinearClamp, float2(saturate(uv.x - 0.025), uv.y), 0);
 	float4 texColor = treeOfLifeSpeciesTreeTex.SampleLevel(_LinearClamp, uv, 0);
+	float4 texColorNext = treeOfLifeSpeciesTreeTex.SampleLevel(_LinearClamp, float2(saturate(uv.x + 0.025), uv.y), 0);
 	
-	float height = (texColor.x - _SpeciesStatsMin) / _SpeciesStatsMax;
+	float height = ((texColorPrev.x + texColor.x + texColorNext.x) / 3 - _SpeciesStatsMin) / _SpeciesStatsMax;
 	float noiseOffset = (sin(_Time * 5.31 + uv.x * 15.67 + speciesID * 49.21643) * 0.0710725) * uv.x;
 	height += noiseOffset;
 	
@@ -269,7 +271,7 @@ void CSUpdateSpeciesTreeData (uint3 id : SV_DispatchThreadID)
 	float targetHeadHeight = (treeOfLifeSpeciesTreeTex.SampleLevel(_LinearClamp, float2(1.0, uv.y), 0).x - _SpeciesStatsMin) / _SpeciesStatsMax;
 	//float targetHeadHeight = (500 - _SpeciesStatsMin) / _SpeciesStatsMax;
 	// 0 --> 1
-	targetHeadHeight += noiseOffset;
+	targetHeadHeight += noiseOffset * 0.2;
 
 	targetHeadHeight = targetHeadHeight * _GraphCoordSpeciesRange + _GraphCoordSpeciesStart;	
 	float headHeight = lerp(headPos.y, targetHeadHeight, 0.075);
@@ -282,10 +284,8 @@ void CSUpdateSpeciesTreeData (uint3 id : SV_DispatchThreadID)
 	float creationTimeNormalized = saturate((float)keyData.timeCreated / (float)_CurSimStep - 0.1);
 	float zOffset = 0; //(creationTimeNormalized - 0.2) * uv.x * -0.66;
 
-	treeOfLifeSpeciesSegmentsCBuffer[id.x] = float3(uv.x, segmentHeight, zOffset);
+	treeOfLifeSpeciesSegmentsCBuffer[id.x] = float3(uv.x * 0.96 + 0.02, segmentHeight, zOffset);
 		
-		
-	//treeOfLifeSpeciesDataHeadPosCBuffer[speciesID] = float3(0.5, texColor.x * 0.01, 0);
-	treeOfLifeSpeciesDataHeadPosCBuffer[speciesID] = float3(min(1.0, saturate((float)keyData.timeExtinct / (float)_CurSimStep)), headHeight, zOffset);
+	treeOfLifeSpeciesDataHeadPosCBuffer[speciesID] = float3(min(1.0, saturate((float)keyData.timeExtinct / (float)_CurSimStep)) * 0.98 + 0.01, headHeight, zOffset);
 
 }

@@ -90,6 +90,7 @@ public class TheRenderKing : MonoBehaviour {
     public Material treeOfLifeSpeciesLineMat;
     public Material treeOfLifeEventsLineMat;
     public Material treeOfLifeSpeciesHeadTipMat;
+    public Material treeOfLifeCursorLineMat;
 
     public ComputeBuffer gizmoStirToolPosCBuffer;
     public ComputeBuffer gizmoFeedToolPosCBuffer;
@@ -257,7 +258,7 @@ public class TheRenderKing : MonoBehaviour {
         public float eventCategory;  // minor major extreme 0, 0.5, 1.0
         public float isActive;
     }
-
+    // Is this still needed??
     public struct TreeOfLifeNodeColliderData {  // only the data that needs to be transferred between CPU & GPU  - minimize!!
         public Vector3 localPos;
         public Vector3 scale;        
@@ -2981,35 +2982,55 @@ public class TheRenderKing : MonoBehaviour {
             Vector2 uvCoord = new Vector2((localPoint.x + 230f) / 460f, (localPoint.y + 160f) / 320f);
             simManager.uiManager.tolMouseCoords = uvCoord;
 
-            simManager.uiManager.UpdateTolGraphUI(localPoint);
+            simManager.uiManager.UpdateTolGraphCursorTimeSelectUI(uvCoord);
 
+            simManager.uiManager.HoverOverTolGraphRenderPanel();
+            /*
             simManager.uiManager.textTolSpeciesStatsValue.gameObject.SetActive(true);
             simManager.uiManager.textTolWorldStatsValue.gameObject.SetActive(true);
             simManager.uiManager.textTolEventsTimelineName.gameObject.SetActive(true);
+            */
         }
         else {
+            /*
             simManager.uiManager.textTolSpeciesStatsValue.gameObject.SetActive(false);
             simManager.uiManager.textTolWorldStatsValue.gameObject.SetActive(false);
             simManager.uiManager.textTolEventsTimelineName.gameObject.SetActive(false);
+            */
         }
         
-
+        // TREE OF LIFE STUFFS:::
 
         cmdBufferTreeOfLifeSpeciesTree.Clear();
         cmdBufferTreeOfLifeSpeciesTree.SetRenderTarget(treeOfLifeSpeciesTreeRenderCamera.targetTexture); // needed???
         cmdBufferTreeOfLifeSpeciesTree.ClearRenderTarget(true, true, new Color(0f,0f,0f,0f), 1.0f);  // clear -- needed???
         cmdBufferTreeOfLifeSpeciesTree.SetViewProjectionMatrices(treeOfLifeSpeciesTreeRenderCamera.worldToCameraMatrix, treeOfLifeSpeciesTreeRenderCamera.projectionMatrix);
-        // draw event lines first:
-        treeOfLifeEventsLineMat.SetPass(0);
-        treeOfLifeEventsLineMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        treeOfLifeEventsLineMat.SetInt("_CurSimStep", simManager.simAgeTimeSteps);
-        treeOfLifeEventsLineMat.SetFloat("_GraphCoordEventsStart", simManager.uiManager.tolGraphCoordsEventsStart);
-        treeOfLifeEventsLineMat.SetFloat("_GraphCoordEventsRange", simManager.uiManager.tolGraphCoordsEventsRange);
+
         float panelIsOn = 0f;
         if(simManager.uiManager.tolEventsTimelineOn) {   // room for code improvement here - only update on UI events rather than every frame conditional
             panelIsOn = 1f;   
         }
+
+        // Cursor line first
+        treeOfLifeCursorLineMat.SetPass(0);
+        treeOfLifeCursorLineMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        treeOfLifeCursorLineMat.SetInt("_CurSimStep", simManager.simAgeTimeSteps);
+        treeOfLifeCursorLineMat.SetFloat("_IsOn", panelIsOn);
+        treeOfLifeCursorLineMat.SetFloat("_MouseCoordX", simManager.uiManager.tolMouseCoords.x);
+        treeOfLifeCursorLineMat.SetFloat("_MouseCoordY", simManager.uiManager.tolMouseCoords.y);
+        treeOfLifeCursorLineMat.SetFloat("_MouseOn", simManager.uiManager.tolMouseOver);
+        treeOfLifeCursorLineMat.SetBuffer("treeOfLifeEventLineDataCBuffer", treeOfLifeEventLineDataCBuffer);
+        cmdBufferTreeOfLifeSpeciesTree.DrawProcedural(Matrix4x4.identity, treeOfLifeCursorLineMat, 0, MeshTopology.Triangles, 6, 1);
+        
+        // draw event lines next:
+        
+        treeOfLifeEventsLineMat.SetPass(0);
+        treeOfLifeEventsLineMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        treeOfLifeEventsLineMat.SetInt("_CurSimStep", simManager.simAgeTimeSteps);
+        treeOfLifeEventsLineMat.SetFloat("_GraphCoordEventsStart", simManager.uiManager.tolGraphCoordsEventsStart);
+        treeOfLifeEventsLineMat.SetFloat("_GraphCoordEventsRange", simManager.uiManager.tolGraphCoordsEventsRange);        
         treeOfLifeEventsLineMat.SetFloat("_IsOn", panelIsOn);
+        treeOfLifeEventsLineMat.SetInt("_ClosestEventIndex", simManager.uiManager.curClosestEventToCursor);
         treeOfLifeEventsLineMat.SetFloat("_MouseCoordX", simManager.uiManager.tolMouseCoords.x);
         treeOfLifeEventsLineMat.SetFloat("_MouseCoordY", simManager.uiManager.tolMouseCoords.y);
         treeOfLifeEventsLineMat.SetFloat("_MouseOn", simManager.uiManager.tolMouseOver);
@@ -3020,6 +3041,7 @@ public class TheRenderKing : MonoBehaviour {
         treeOfLifeWorldStatsMat.SetPass(0);
         treeOfLifeWorldStatsMat.SetTexture("_KeyTex", simManager.uiManager.tolTextureWorldStatsKey);
         treeOfLifeWorldStatsMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        treeOfLifeWorldStatsMat.SetFloat("_GraphCoordStatsStart", simManager.uiManager.tolGraphCoordsStatsStart);
         treeOfLifeWorldStatsMat.SetBuffer("treeOfLifeWorldStatsValuesCBuffer", treeOfLifeWorldStatsValuesCBuffer);
         treeOfLifeWorldStatsMat.SetInt("_SelectedWorldStatsID", simManager.uiManager.tolSelectedWorldStatsIndex);
         panelIsOn = 0f;
@@ -3056,6 +3078,7 @@ public class TheRenderKing : MonoBehaviour {
         treeOfLifeSpeciesHeadTipMat.SetBuffer("treeOfLifeSpeciesDataHeadPosCBuffer", treeOfLifeSpeciesDataHeadPosCBuffer);
         treeOfLifeSpeciesHeadTipMat.SetInt("_CurSimStep", simManager.simAgeTimeSteps);
         treeOfLifeSpeciesHeadTipMat.SetInt("_CurSimYear", simManager.curSimYear);
+        treeOfLifeSpeciesHeadTipMat.SetInt("_HoverIndex", simManager.uiManager.treeOfLifeManager.hoverID);
         treeOfLifeSpeciesHeadTipMat.SetFloat("_IsOn", panelIsOn);
         treeOfLifeSpeciesHeadTipMat.SetFloat("_MouseCoordX", simManager.uiManager.tolMouseCoords.x);
         treeOfLifeSpeciesHeadTipMat.SetFloat("_MouseCoordY", simManager.uiManager.tolMouseCoords.y);
@@ -3199,8 +3222,8 @@ public class TheRenderKing : MonoBehaviour {
         //Debug.Log("UPDATE STEM SEGMENTS: " + newSpeciesID.ToString() + ", depth: " + newSpecies.depthLevel.ToString());
     }
     public void TreeOfLifeGetColliderNodePositionData() {
-        treeOfLifeNodeColliderDataCBufferA.GetData(treeOfLifeNodeColliderDataArray);
-        simManager.uiManager.treeOfLifeManager.UpdateNodePositionsFromGPU(simManager.uiManager.cameraManager, treeOfLifeSpeciesDataHeadPosArray);6      // **** Need to cap this at 32 or it breaks!!!  
+        //treeOfLifeNodeColliderDataCBufferA.GetData(treeOfLifeNodeColliderDataArray);
+        simManager.uiManager.treeOfLifeManager.UpdateNodePositionsFromGPU(simManager.uiManager.cameraManager, treeOfLifeSpeciesDataHeadPosArray);     // **** Need to cap this at 32 or it breaks!!!  
         
     }
     /*private void Render() {

@@ -43,8 +43,10 @@ public class TreeOfLifeManager {
             //Vector4 localPos = new Vector3(dataArray[i].localPos.x, dataArray[i].localPos.y, dataArray[i].localPos.z);
             //Vector3 worldPos = cam.worldSpaceTopLeft + cam.worldSpaceCameraRightDir * camScale - cam.worldSpaceCameraUpDir * camScale * 0.5f + localPos * camScale;
 
-            Vector3 pos = posArray[i];55
-            nodeRaycastTargetsList[i].transform.position = pos;
+            if (i < 32) {  // temp hack: prevent indexOutOfRangeError from posArray capping at 32
+                Vector3 pos = posArray[i]; // SOURCE OF ERROR: posArray doesn't go above 32, but nodeRaycastTargetsList does
+                nodeRaycastTargetsList[i].transform.position = pos;  
+            }            
         }
     }
 
@@ -75,12 +77,15 @@ public class TreeOfLifeManager {
             //nodeRaycastTargetsList[i].gameObject.SetActive(isOn);
             nodeRaycastTargetsList[i].gameObject.transform.localScale = Vector3.one * colliderBaseScaleMultiplier * camScale;
         }
+
+        
     }
 
     public void ClickedOnSpeciesNode(int speciesID) {
         selectedID = speciesID;
     }
     public void HoverOverSpeciesNode(int speciesID) {
+        Debug.Log("HoverOverSpeciesNode [" + speciesID.ToString() + "]");
         hoverID = speciesID;
     }
     public void HoverAllOff() {
