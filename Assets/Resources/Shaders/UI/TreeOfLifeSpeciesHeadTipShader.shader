@@ -23,7 +23,9 @@
 			struct TreeOfLifeSpeciesKeyData {
 				int timeCreated;        
 				int timeExtinct;
-				float3 hue;
+				float3 huePrimary;
+				float3 hueSecondary;
+				float3 parentHue;
 				float isOn;
 				float isExtinct;
 				float isSelected;
@@ -75,7 +77,7 @@
 				worldPosition *= _IsOn;
 				worldPosition.z -= 2;
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
-				o.color = float4(keyData.hue * (0.5 + keyData.isSelected * 1.0) + (hoverMask * 0.5), 0);
+				o.color = float4(keyData.huePrimary * (0.5 + keyData.isSelected * 1.0) + (hoverMask * 0.5), 0);
 				return o;
 			}
 			

@@ -690,11 +690,39 @@ public class SimulationManager : MonoBehaviour {
             uiManager.UpdateSpeciesTreeDataTextures(curSimYear);
             //RefeshGraphData();
             
+            if(curSimYear == 1) {
+                SimEventData newEventData = new SimEventData();
+                newEventData.name = "First Full Year";
+                newEventData.category = SimEventData.SimEventCategories.NPE;
+                newEventData.timeStepActivated = simAgeTimeSteps;
+                simEventsManager.completeEventHistoryList.Add(newEventData);
+            }
+            if(curSimYear == 10) {
+                SimEventData newEventData = new SimEventData();
+                newEventData.name = "Decade";
+                newEventData.category = SimEventData.SimEventCategories.NPE;
+                newEventData.timeStepActivated = simAgeTimeSteps;
+                simEventsManager.completeEventHistoryList.Add(newEventData);
+            }
+            if(curSimYear == 100) {
+                SimEventData newEventData = new SimEventData();
+                newEventData.name = "Century";
+                newEventData.category = SimEventData.SimEventCategories.NPE;
+                newEventData.timeStepActivated = simAgeTimeSteps;
+                simEventsManager.completeEventHistoryList.Add(newEventData);
+            }
+            if(curSimYear == 1000) {
+                SimEventData newEventData = new SimEventData();
+                newEventData.name = "Millenium";
+                newEventData.category = SimEventData.SimEventCategories.NPE;
+                newEventData.timeStepActivated = simAgeTimeSteps;
+                simEventsManager.completeEventHistoryList.Add(newEventData);
+            }
             //theRenderKing.SimTreeOfLifeWorldStatsData(uiManager.statsTextureLifespan); // Revise this!!!
             //environmentFluidManager.RerollForcePoints();
         }
 
-        if(simAgeTimeSteps % 25 == 0) {
+        if(simAgeTimeSteps % 21 == 3) {
             UpdateSimulationClimate();
 
             RefreshLatestHistoricalDataEntry();

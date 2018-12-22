@@ -157,7 +157,7 @@ public class SpeciesGenomePool {
 
     public void ProcessExtinction(int curTimeStep) {
         isExtinct = true;
-        avgLifespan = 0f;
+        /*avgLifespan = 0f;
         avgConsumptionDecay = 0f;
         avgConsumptionPlant = 0f;
         avgConsumptionMeat = 0f;
@@ -175,7 +175,7 @@ public class SpeciesGenomePool {
         avgFitnessScore = 0f;
         avgDamageDealt = 0f;
         avgDamageTaken = 0f;
-
+        */
         timeStepExtinct = curTimeStep;
     }
 

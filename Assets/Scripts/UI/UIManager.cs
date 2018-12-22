@@ -231,6 +231,10 @@ public class UIManager : MonoBehaviour {
     public Image imageTolSpeciesIndex;
     public Image imageTolSpeciesNameBackdrop;
 
+    public Image imageTolEventsReadoutBackdrop;
+    public Image imageTolStatsReadoutBackdrop;
+    public Image imageTolSpeciesReadoutBackdrop;
+
     public Vector2 tolMouseCoords;
     public float tolMouseOver = 0f;
 
@@ -860,6 +864,7 @@ public class UIManager : MonoBehaviour {
         imageTolPortraitBorder.color = new Color(speciesHueSecondary.x, speciesHueSecondary.y, speciesHueSecondary.z);
         imageTolSpeciesIndex.color = new Color(speciesHuePrimary.x, speciesHuePrimary.y, speciesHuePrimary.z);
         imageTolSpeciesNameBackdrop.color = new Color(speciesHuePrimary.x, speciesHuePrimary.y, speciesHuePrimary.z);
+        imageTolSpeciesReadoutBackdrop.color = new Color(speciesHuePrimary.x, speciesHuePrimary.y, speciesHuePrimary.z);
     }
 	
 	// Update is called once per frame
@@ -1068,9 +1073,18 @@ public class UIManager : MonoBehaviour {
         panelMainMenu.SetActive(false);
         panelLoading.SetActive(false);
         panelPlaying.SetActive(true);
-        panelGameOptions.SetActive(false);        
+        panelGameOptions.SetActive(false);
+
+        SimEventData newEventData = new SimEventData();
+        newEventData.name = "New Simulation Start!";
+        newEventData.category = SimEventData.SimEventCategories.NPE;
+        newEventData.timeStepActivated = 0;
+        gameManager.simulationManager.simEventsManager.completeEventHistoryList.Add(newEventData);
+        
         treeOfLifeManager.UpdateVisualUI(treeOfLifePanelOn);
         UpdateTolSpeciesColorUI();
+        RecalculateTreeOfLifeGraphPanelSizes();
+        //UpdateSpeciesTreeDataTextures(gameManager.simulationManager.curSimYear);
     }
     private void UpdateMainMenuUI() {
         
@@ -1758,16 +1772,21 @@ public class UIManager : MonoBehaviour {
          // Get Active ones first:
         for(int i = 0; i < gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList.Count; i++) {
             SpeciesGenomePool pool = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList[i]];
+            SpeciesGenomePool parentPool = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[pool.parentSpeciesID];
 
-            Vector3 hue = pool.representativeGenome.bodyGenome.appearanceGenome.huePrimary;
-            statsSpeciesColorKey.SetPixel(i, 1, new Color(hue.x, hue.y, hue.z));            
+            Vector3 huePrimary = pool.representativeGenome.bodyGenome.appearanceGenome.huePrimary;
+            Vector3 hueSecondary = pool.representativeGenome.bodyGenome.appearanceGenome.hueSecondary;
+            Vector3 parentHue = parentPool.representativeGenome.bodyGenome.appearanceGenome.huePrimary;
+            statsSpeciesColorKey.SetPixel(i, 1, new Color(huePrimary.x, huePrimary.y, huePrimary.z));            
             //Debug.Log("(" + i.ToString() + ", " + gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList[i].ToString());
             displaySpeciesIndicesArray[i] = gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList[i];
 
             TheRenderKing.TreeOfLifeSpeciesKeyData keyData = new TheRenderKing.TreeOfLifeSpeciesKeyData();
             keyData.timeCreated = pool.timeStepCreated;  // Use TimeSteps instead of Years???
             keyData.timeExtinct = pool.timeStepExtinct;
-            keyData.hue = hue;
+            keyData.huePrimary = huePrimary;
+            keyData.hueSecondary = hueSecondary;
+            keyData.parentHue = parentHue;
             keyData.isExtinct = pool.isExtinct ? 1f : 0f;
             keyData.isOn = 1f;
             int selectedID = treeOfLifeManager.selectedID;
@@ -1780,19 +1799,24 @@ public class UIManager : MonoBehaviour {
         // Then fill with most recently extinct:
         for(int i = (numTotalSpecies - 1); i > Mathf.Clamp((numTotalSpecies - maxDisplaySpecies), 0, numTotalSpecies); i--) {
             SpeciesGenomePool pool = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[i];
+            SpeciesGenomePool parentPool = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[pool.parentSpeciesID];
 
-            Vector3 hue = pool.representativeGenome.bodyGenome.appearanceGenome.huePrimary;
+            Vector3 huePrimary = pool.representativeGenome.bodyGenome.appearanceGenome.huePrimary;
+            Vector3 hueSecondary = pool.representativeGenome.bodyGenome.appearanceGenome.hueSecondary;
+            Vector3 parentHue = parentPool.representativeGenome.bodyGenome.appearanceGenome.huePrimary;
             if(gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[i].isExtinct) {
-                hue = Vector3.Lerp(hue, Vector3.one * 0.2f, 0.75f);
+                huePrimary = Vector3.Lerp(huePrimary, Vector3.one * 0.2f, 0.75f);
             }
-            statsSpeciesColorKey.SetPixel(i, 1, new Color(hue.x, hue.y, hue.z));
+            statsSpeciesColorKey.SetPixel(i, 1, new Color(huePrimary.x, huePrimary.y, huePrimary.z));
             
             displaySpeciesIndicesArray[i] = i;
 
             TheRenderKing.TreeOfLifeSpeciesKeyData keyData = new TheRenderKing.TreeOfLifeSpeciesKeyData();
             keyData.timeCreated = pool.timeStepCreated;  // Use TimeSteps instead of Years???
             keyData.timeExtinct = pool.timeStepExtinct;
-            keyData.hue = hue;
+            keyData.huePrimary = huePrimary;
+            keyData.hueSecondary = hueSecondary;
+            keyData.parentHue = parentHue;
             keyData.isExtinct = pool.isExtinct ? 1f : 0f;
             keyData.isOn = 1f;
             if(i >= gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList.Count) {
@@ -1814,29 +1838,12 @@ public class UIManager : MonoBehaviour {
 
         gameManager.simulationManager.theRenderKing.treeOfLifeSpeciesDataKeyCBuffer.SetData(speciesKeyDataArray);
 
-        /*string debugTxt = "";
-        for(int i = 0; i < displaySpeciesIndicesArray.Length; i++) {
-            debugTxt += displaySpeciesIndicesArray[i].ToString() + "  ";
-        }
-        Debug.Log(debugTxt); // **** Check for Duplicate??? *****
-        */
         // ========== data: =========== //
         int years = Mathf.Min(2048, year);  // cap textures at 2k for now?
         // check for resize before doing it?
         for(int i = 0; i < statsTreeOfLifeSpeciesTexArray.Length; i++) {
             statsTreeOfLifeSpeciesTexArray[i].Resize(Mathf.Max(1, years), maxDisplaySpecies);
         }
-        //statsTextureLifespan.Resize(Mathf.Max(1, years), maxDisplaySpecies);
-        //statsTextureFoodEaten.Resize(Mathf.Max(1, years), maxDisplaySpecies);
-        //statsTextureBodySizes.Resize(Mathf.Max(1, years), maxDisplaySpecies);
-        //statsTexturePredation.Resize(Mathf.Max(1, years), maxDisplaySpecies);
-
-        //Debug.Log("tex: " + statsTextureLifespan.width.ToString() + ", " + statsTextureLifespan.height.ToString());
-
-        //float maxValueLifespan = 0.01f;
-        //float maxValueConsumptionDecay = 0.01f;
-        //float maxValueBodySize = 0.01f;
-        //float maxValueDietTypeDecay = 0.01f;
         
         for(int i = 0; i < maxValuesStatArray.Length; i++) {
             maxValuesStatArray[i] = 1f;
@@ -1920,26 +1927,7 @@ public class UIManager : MonoBehaviour {
 
                         //statsTreeOfLifeSpeciesTexArray[a].SetPixel(t, s, new Color(valStat, valStat, valStat, 1f));
                         statsTreeOfLifeSpeciesTexArray[a].SetPixel(t, s, new Color(valStat, valStat, valStat, 1f));
-                    }
-
-                    
-                    
-                    
-                    /*float valLifespan = speciesPool.avgLifespanPerYearList[t];
-                    float valConsumptionDecay = speciesPool.avgConsumptionDecayPerYearList[t];
-                    float valBodySize = speciesPool.avgBodySizePerYearList[t];
-                    float valFoodSpecDecay = speciesPool.avgFoodSpecDecayPerYearList[t];                    
-
-                    maxValueLifespan = Mathf.Max(maxValueLifespan, valLifespan);
-                    maxValueConsumptionDecay = Mathf.Max(maxValueConsumptionDecay, valConsumptionDecay);
-                    maxValueBodySize = Mathf.Max(maxValueBodySize, valBodySize);
-                    maxValueDietTypeDecay = Mathf.Max(maxValueDietTypeDecay, valFoodSpecDecay);
-
-                    statsTextureLifespan.SetPixel(t, s, new Color(valLifespan, valLifespan, valLifespan, valLifespan));  // *** look into ways to use the other 3 channels ***
-                    statsTextureFoodEaten.SetPixel(t, s, new Color(valConsumptionDecay, valConsumptionDecay, valConsumptionDecay, valConsumptionDecay));
-                    statsTextureBodySizes.SetPixel(t, s, new Color(valBodySize, valBodySize, valBodySize, valBodySize));
-                    statsTexturePredation.SetPixel(t, s, new Color(valFoodSpecDecay, valFoodSpecDecay, valFoodSpecDecay, valFoodSpecDecay));
-                    */
+                    }                    
                 }
                 for (int b = 0; b < statsTreeOfLifeSpeciesTexArray.Length; b++) {
                     statsTreeOfLifeSpeciesTexArray[b].Apply();
@@ -1947,37 +1935,19 @@ public class UIManager : MonoBehaviour {
             }
             
         }
-        //statsTextureLifespan.Apply();
-        //statsTextureFoodEaten.Apply();
-        //statsTextureBodySizes.Apply();
-        //statsTexturePredation.Apply();
-
-        // move shader parameter setting here?
-        /*statsGraphMatLifespan.SetFloat("_MaxValue", maxValueLifespan); 
-        statsGraphMatLifespan.SetFloat("_MinValue", 500f);
-        statsGraphMatFoodEaten.SetFloat("_MaxValue", maxValueConsumptionDecay);
-        statsGraphMatFoodEaten.SetFloat("_MinValue", 0f);
-        statsGraphMatBodySizes.SetFloat("_MaxValue", maxValueBodySize);      
-        statsGraphMatBodySizes.SetFloat("_MinValue", 0f);
-        statsGraphMatPredation.SetFloat("_MaxValue", maxValueDietTypeDecay);
-        statsGraphMatPredation.SetFloat("_MinValue", 0f);
         
-        maxLifespanValue = maxValueLifespan;
-        maxFoodEatenValue = maxValueConsumptionDecay;
-        maxBodySizeValue = maxValueBodySize;
-        maxPredationValue = maxValueDietTypeDecay;
-        */
-        // *** TEMP!!!!! **********
         int selectedSpeciesID = treeOfLifeManager.selectedID;
-        //if(cameraManager.targetAgent != null) {
-        //    selectedSpeciesID = cameraManager.targetAgent.speciesIndex;
-        //}
+        
         SpeciesGenomePool selectedPool = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesID];
 
         textTolSpeciesTitle.text = "Species";        
         textTolSpeciesIndex.text = selectedSpeciesID.ToString();
         string descriptionText = "";
         // NOT ORDERED:
+        if(selectedPool.isExtinct) {
+            descriptionText += "<b>Extinct!</b>\n";
+        }
+        descriptionText += "Descended From Species: <b>" + selectedPool.parentSpeciesID.ToString() + "</b>\n";
         descriptionText += "Year Evolved: <b>" + selectedPool.yearCreated.ToString() + "</b>\n\n";
 
         descriptionText += "Avg Lifespan: <b>" + selectedPool.avgLifespan.ToString("F0") + "</b>\n";
@@ -2828,7 +2798,7 @@ public class UIManager : MonoBehaviour {
                     tolGraphCoordsStatsRange = 0.175f;
 
                     tolGraphCoordsSpeciesStart = 0.025f;
-                    tolGraphCoordsSpeciesRange = 0.475f;
+                    tolGraphCoordsSpeciesRange = 0.46f;
                 }
                 else {  // Species + Events:
                     tolGraphCoordsEventsStart = 0.9f;
@@ -2838,7 +2808,7 @@ public class UIManager : MonoBehaviour {
                     tolGraphCoordsStatsRange = 0.025f;
 
                     tolGraphCoordsSpeciesStart = 0.025f;
-                    tolGraphCoordsSpeciesRange = 0.7f;
+                    tolGraphCoordsSpeciesRange = 0.675f;
                 }
             }
             else {
@@ -2922,16 +2892,18 @@ public class UIManager : MonoBehaviour {
         if(tolSelectedWorldStatsIndex < 0) {
             tolSelectedWorldStatsIndex = 10;
         }
+        UpdateTolWorldStatsTextReadout();
         //textTolWorldStatsName.text = ((WorldStatsMode)tolSelectedWorldStatsIndex).ToString();
-        textTolWorldStatsValue.text = ((WorldStatsMode)tolSelectedWorldStatsIndex).ToString() + ": " + curWorldStatValue.ToString("F3");
+        //textTolWorldStatsValue.text = ((WorldStatsMode)tolSelectedWorldStatsIndex).ToString() + ": " + curWorldStatValue.ToString("F3");
     }
     public void ClickTolWorldStatsCycleNext() {
         tolSelectedWorldStatsIndex++;
         if(tolSelectedWorldStatsIndex > 10) {
             tolSelectedWorldStatsIndex = 0;
         }
+        UpdateTolWorldStatsTextReadout();
         //textTolWorldStatsName.text = ((WorldStatsMode)tolSelectedWorldStatsIndex).ToString();
-        textTolWorldStatsValue.text = ((WorldStatsMode)tolSelectedWorldStatsIndex).ToString() + ": " + curWorldStatValue.ToString("F3");
+        //textTolWorldStatsValue.text = ((WorldStatsMode)tolSelectedWorldStatsIndex).ToString() + ": " + curWorldStatValue.ToString("F3");
     }
     public void ClickTolSpeciesTreeCyclePrev() {
         tolSelectedSpeciesStatsIndex--;
@@ -2940,7 +2912,8 @@ public class UIManager : MonoBehaviour {
         }
         //textTolSpeciesStatsName.text = ((SpeciesStatsMode)tolSelectedSpeciesStatsIndex).ToString();
         //UpdateTolSpeciesStatsTextReadout()
-        textTolSpeciesStatsValue.text = ((SpeciesStatsMode)tolSelectedSpeciesStatsIndex).ToString() + ": " + curSpeciesStatValue.ToString("F3");
+        UpdateTolSpeciesStatsTextReadout();
+        //textTolSpeciesStatsValue.text = ((SpeciesStatsMode)tolSelectedSpeciesStatsIndex).ToString() + ": " + curSpeciesStatValue.ToString("F3");
     }
     public void ClickTolSpeciesTreeCycleNext() {
         tolSelectedSpeciesStatsIndex++;
@@ -2948,7 +2921,8 @@ public class UIManager : MonoBehaviour {
             tolSelectedSpeciesStatsIndex = 0;
         }
         //textTolSpeciesStatsName.text = ((SpeciesStatsMode)tolSelectedSpeciesStatsIndex).ToString();
-        textTolSpeciesStatsValue.text = ((SpeciesStatsMode)tolSelectedSpeciesStatsIndex).ToString() + ": " + curSpeciesStatValue.ToString("F3");
+        UpdateTolSpeciesStatsTextReadout();
+        //textTolSpeciesStatsValue.text = ((SpeciesStatsMode)tolSelectedSpeciesStatsIndex).ToString() + ": " + curSpeciesStatValue.ToString("F3");
     }
     public void ClickTolEventsTimelineMinor() {
         Debug.Log("ClickTolEventsTimelineMinor()");

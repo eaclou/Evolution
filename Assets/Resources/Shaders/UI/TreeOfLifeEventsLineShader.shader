@@ -93,7 +93,7 @@
 				quadData.x *= 0.0125; // bar width
 				quadData.y += 0.5;
 				
-				float barHeight = (eventData.eventCategory * 0.6 + 0.6);
+				float barHeight = (saturate(eventData.eventCategory) * 0.6 + 0.6);
 				//quadData.y += 1.0 - barHeight;
 				quadData.y *= barHeight; // * _GraphCoordEventsRange;
 				quadData.y += (1.0 - barHeight);
@@ -113,6 +113,7 @@
 				float3 hueMinor = float3(0.55, 1, 0.6) * 0.8;
 				float3 hueMajor = float3(0.25, 0.55, 1) * 0.8;
 				float3 hueExtreme = float3(1, 0.55, 0.65) * 0.675;
+				float3 hueNPE = float3(0.9, 0.8, 0.65) * 1.1;
 
 				float mag = eventData.eventCategory; //saturate(eventData.eventCategory - 0.5) * 2;
 				float3 hue = lerp(hueMinor, hueMajor, saturate(mag * 2));

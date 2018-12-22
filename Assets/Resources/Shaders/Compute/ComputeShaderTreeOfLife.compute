@@ -17,7 +17,9 @@
 struct TreeOfLifeSpeciesKeyData {
 	int timeCreated;        
 	int timeExtinct;
-	float3 hue;
+	float3 huePrimary;
+    float3 hueSecondary;
+    float3 parentHue;
 	float isOn;
 	float isExtinct;
 	float isSelected;
@@ -265,13 +267,13 @@ void CSUpdateSpeciesTreeData (uint3 id : SV_DispatchThreadID)
 	
 	float height = ((texColorPrev.x + texColor.x + texColorNext.x) / 3 - _SpeciesStatsMin) / _SpeciesStatsMax;
 	float noiseOffset = (sin(_Time * 5.31 + uv.x * 15.67 + speciesID * 49.21643) * 0.0710725) * uv.x;
-	height += noiseOffset;
+	height += noiseOffset * (1.0 - keyData.isExtinct);
 	
 	
-	float targetHeadHeight = (treeOfLifeSpeciesTreeTex.SampleLevel(_LinearClamp, float2(1.0, uv.y), 0).x - _SpeciesStatsMin) / _SpeciesStatsMax;
+	float targetHeadHeight = (treeOfLifeSpeciesTreeTex.SampleLevel(_LinearClamp, float2(1.0, uv.y), 0).x - _SpeciesStatsMin) / _SpeciesStatsMax * (1.0 - keyData.isExtinct * 0.33);
 	//float targetHeadHeight = (500 - _SpeciesStatsMin) / _SpeciesStatsMax;
 	// 0 --> 1
-	targetHeadHeight += noiseOffset * 0.2;
+	targetHeadHeight += noiseOffset * 0.2 * (1.0 - keyData.isExtinct);
 
 	targetHeadHeight = targetHeadHeight * _GraphCoordSpeciesRange + _GraphCoordSpeciesStart;	
 	float headHeight = lerp(headPos.y, targetHeadHeight, 0.075);
@@ -279,7 +281,9 @@ void CSUpdateSpeciesTreeData (uint3 id : SV_DispatchThreadID)
 	height = height * _GraphCoordSpeciesRange + _GraphCoordSpeciesStart;	 // values actually stored in this re-mapped scale, so stay consistent!
 	float segmentHeight = lerp(treeOfLifeSpeciesSegmentsCBuffer[id.x].y, height, 0.075);
 		
-	segmentHeight = lerp(segmentHeight, headHeight, saturate(uv.x - 0.9) * 10);
+	float extinctionTimeNormalized = saturate((float)keyData.timeExtinct / (float)_CurSimStep);
+	float headLerp = saturate(uv.x - 0.9) * 10;
+	segmentHeight = lerp(segmentHeight, headHeight, headLerp);
 
 	float creationTimeNormalized = saturate((float)keyData.timeCreated / (float)_CurSimStep - 0.1);
 	float zOffset = 0; //(creationTimeNormalized - 0.2) * uv.x * -0.66;

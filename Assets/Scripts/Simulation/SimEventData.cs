@@ -21,7 +21,8 @@ public class SimEventData {
     public enum SimEventCategories {
         Minor,
         Major,
-        Extreme
+        Extreme,
+        NPE
     }
 
     /*public enum SimEventType {
