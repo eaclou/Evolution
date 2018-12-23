@@ -74,11 +74,11 @@ public class CritterModuleAppearanceGenome {
         // SIZE IS: (x= size, y= aspectRatio)   aspect = x/y
         //sizeAndAspectRatio = UtilityMutationFunctions.GetMutatedVector2Additive(parentGenome.sizeAndAspectRatio, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, new Vector2(0.8f, 0.6f), new Vector2(2.4f, 1f));
         
-        huePrimary = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.huePrimary, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
-        hueSecondary = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.hueSecondary, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
+        huePrimary = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.huePrimary, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * 0.2f, 0f, 1f);
+        hueSecondary = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.hueSecondary, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * 0.2f, 0f, 1f);
         // ***** v v v Revisit when implementing #BrushTypes!! **** REVISIT!!
-        bodyStrokeBrushTypeX = UtilityMutationFunctions.GetMutatedIntAdditive(parentGenome.bodyStrokeBrushTypeX, settings.defaultBodyMutationChance, 2, 0, 7); // *****
-        bodyStrokeBrushTypeY = UtilityMutationFunctions.GetMutatedIntAdditive(parentGenome.bodyStrokeBrushTypeY, settings.defaultBodyMutationChance, 2, 0, 3);
+        bodyStrokeBrushTypeX = UtilityMutationFunctions.GetMutatedIntAdditive(parentGenome.bodyStrokeBrushTypeX, settings.defaultBodyMutationChance * 0.2f, 2, 0, 7); // *****
+        bodyStrokeBrushTypeY = UtilityMutationFunctions.GetMutatedIntAdditive(parentGenome.bodyStrokeBrushTypeY, settings.defaultBodyMutationChance * 0.2f, 2, 0, 3);
 
         eyeGenome = new EyeGenome();
 

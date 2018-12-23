@@ -1503,8 +1503,11 @@ public class SimulationManager : MonoBehaviour {
 
     public void AddNewSpecies(AgentGenome newGenome, int parentSpeciesID) {
         int newSpeciesID = masterGenomePool.completeSpeciesPoolsList.Count;
-        
+
+        newGenome.ProcessNewSpeciesExtraMutation();
+
         SpeciesGenomePool newSpecies = new SpeciesGenomePool(newSpeciesID, parentSpeciesID, curSimYear, simAgeTimeSteps, settingsManager.mutationSettingsPersistent);
+
         newSpecies.FirstTimeInitialize(newGenome, masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].depthLevel + 1);
         masterGenomePool.currentlyActiveSpeciesIDList.Add(newSpeciesID);
         masterGenomePool.completeSpeciesPoolsList.Add(newSpecies);

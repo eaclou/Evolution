@@ -789,7 +789,9 @@ public class UIManager : MonoBehaviour {
                 if(clicked) {
                     cameraManager.SetTarget(agentRef, agentRef.index);
                     cameraManager.isFollowing = true;
-                                        
+
+                    ClickOnSpeciesNode(agentRef.speciesIndex);
+                    
                     StartFollowing();
                 }
                 else {
@@ -862,7 +864,7 @@ public class UIManager : MonoBehaviour {
         Vector3 speciesHuePrimary = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[treeOfLifeManager.selectedID].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
         Vector3 speciesHueSecondary = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[treeOfLifeManager.selectedID].representativeGenome.bodyGenome.appearanceGenome.hueSecondary;
         imageTolPortraitBorder.color = new Color(speciesHueSecondary.x, speciesHueSecondary.y, speciesHueSecondary.z);
-        imageTolSpeciesIndex.color = new Color(speciesHuePrimary.x, speciesHuePrimary.y, speciesHuePrimary.z);
+        imageTolSpeciesIndex.color = new Color(speciesHueSecondary.x, speciesHueSecondary.y, speciesHueSecondary.z);
         imageTolSpeciesNameBackdrop.color = new Color(speciesHuePrimary.x, speciesHuePrimary.y, speciesHuePrimary.z);
         imageTolSpeciesReadoutBackdrop.color = new Color(speciesHuePrimary.x, speciesHuePrimary.y, speciesHuePrimary.z);
 
@@ -1086,6 +1088,14 @@ public class UIManager : MonoBehaviour {
         treeOfLifeManager.UpdateVisualUI(treeOfLifePanelOn);
         UpdateTolSpeciesColorUI();
         RecalculateTreeOfLifeGraphPanelSizes();
+
+        /*if(treeOfLifePanelOn) {
+            ClickToolButtonInspect();
+        }
+        else {
+            ClickToolButtonStir();
+        }*/
+        
         //UpdateSpeciesTreeDataTextures(gameManager.simulationManager.curSimYear);
     }
     private void UpdateMainMenuUI() {
@@ -2732,18 +2742,40 @@ public class UIManager : MonoBehaviour {
     }
     public void ClickPrevAgent() {
         Debug.Log("ClickPrevAgent");
-        int newIndex = cameraManager.targetCritterIndex - 1;
+        int selectedSpeciesID = treeOfLifeManager.selectedID;
+        int newIndex = cameraManager.targetCritterIndex;
+        for(int i = 1; i < gameManager.simulationManager._NumAgents; i++) {
+            int index = (gameManager.simulationManager._NumAgents + cameraManager.targetCritterIndex - i) % gameManager.simulationManager._NumAgents;
+
+            if (gameManager.simulationManager.agentsArray[index].speciesIndex == selectedSpeciesID) {
+                newIndex = index;
+                break;
+            }
+        }
+        cameraManager.SetTarget(gameManager.simulationManager.agentsArray[newIndex], newIndex);          
+        
+        /*int newIndex = cameraManager.targetCritterIndex - 1;
         if(newIndex < 0) {
             newIndex = gameManager.simulationManager._NumAgents - 1;                    
         }
-        cameraManager.SetTarget(gameManager.simulationManager.agentsArray[newIndex], newIndex);                
+        cameraManager.SetTarget(gameManager.simulationManager.agentsArray[newIndex], newIndex);*/                
     }
     public void ClickNextAgent() {
         Debug.Log("ClickNextAgent");
-        int newIndex = cameraManager.targetCritterIndex + 1;
-        if(newIndex >= gameManager.simulationManager._NumAgents) {
-            newIndex = 0;                      
+        int selectedSpeciesID = treeOfLifeManager.selectedID;
+        int newIndex = cameraManager.targetCritterIndex;
+        for(int i = 1; i < gameManager.simulationManager._NumAgents; i++) {
+            int index = (cameraManager.targetCritterIndex + i) % gameManager.simulationManager._NumAgents;
+
+            if (gameManager.simulationManager.agentsArray[index].speciesIndex == selectedSpeciesID) {
+                newIndex = index;
+                break;
+            }
         }
+        //int newIndex = cameraManager.targetCritterIndex + 1;
+        //if(newIndex >= gameManager.simulationManager._NumAgents) {
+        //    newIndex = 0;                      
+        //}
         cameraManager.SetTarget(gameManager.simulationManager.agentsArray[newIndex], newIndex);                
     }
 
@@ -2756,11 +2788,13 @@ public class UIManager : MonoBehaviour {
             UpdateSpeciesTreeDataTextures(gameManager.simulationManager.curSimYear);
             RecalculateTreeOfLifeGraphPanelSizes();
             UpdateTolSpeciesColorUI();
+            //ClickToolButtonInspect();
             //gfhdf
         }
         else {
-
+            //ClickToolButtonStir();
         }
+        
         //panelTreeOfLifeScaleHideGroup.SetActive(treeOfLifePanelOn);
         panelTolMaster.SetActive(treeOfLifePanelOn);
 
@@ -2892,6 +2926,13 @@ public class UIManager : MonoBehaviour {
     }
     public void ClickTolInspectOnOff() {
         tolInspectOn = !tolInspectOn;
+
+        if(tolInspectOn) {
+            ClickToolButtonStir();
+        }
+        else {
+            ClickToolButtonInspect();
+        }
     }
 
     public void ClickTolWorldStatsCyclePrev() {
@@ -3035,7 +3076,7 @@ public class UIManager : MonoBehaviour {
     }
 
     public void HoverOverTolGraphRenderPanel() {
-        Debug.Log("HoverOverTolGraphRenderPanel " + tolMouseCoords.ToString());
+        //Debug.Log("HoverOverTolGraphRenderPanel " + tolMouseCoords.ToString());
 
         Ray ray = new Ray(new Vector3(tolMouseCoords.x, tolMouseCoords.y, -1f), new Vector3(0f, 0f, 1f)); // cameraManager.gameObject.GetComponent<Camera>().ScreenPointToRay(Input.mousePosition);
         RaycastHit hit = new RaycastHit();

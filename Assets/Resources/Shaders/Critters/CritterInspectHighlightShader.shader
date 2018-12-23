@@ -93,7 +93,7 @@
 				o.pos = pos;
 				o.uv = quadVerticesCBuffer[id] + 0.5; // full texture
 
-				float alpha = 0.2;
+				float alpha = 0.1;
 				alpha *= _IsHighlighted;
 				
 				float4 highlightedColor = float4(0.4, 0.7, 0.96, alpha);
