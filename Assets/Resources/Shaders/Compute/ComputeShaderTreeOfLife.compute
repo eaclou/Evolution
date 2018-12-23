@@ -266,11 +266,11 @@ void CSUpdateSpeciesTreeData (uint3 id : SV_DispatchThreadID)
 	float4 texColorNext = treeOfLifeSpeciesTreeTex.SampleLevel(_LinearClamp, float2(saturate(uv.x + 0.025), uv.y), 0);
 	
 	float height = ((texColorPrev.x + texColor.x + texColorNext.x) / 3 - _SpeciesStatsMin) / _SpeciesStatsMax;
-	float noiseOffset = (sin(_Time * 5.31 + uv.x * 15.67 + speciesID * 49.21643) * 0.0710725) * uv.x;
+	float noiseOffset = (sin(_Time * 1.31 + uv.x * 14.67 + speciesID * 49.21643) * 0.0510725) * uv.x;
 	height += noiseOffset * (1.0 - keyData.isExtinct);
 	
 	
-	float targetHeadHeight = (treeOfLifeSpeciesTreeTex.SampleLevel(_LinearClamp, float2(1.0, uv.y), 0).x - _SpeciesStatsMin) / _SpeciesStatsMax * (1.0 - keyData.isExtinct * 0.33);
+	float targetHeadHeight = (treeOfLifeSpeciesTreeTex.SampleLevel(_LinearClamp, float2(1.0, uv.y), 0).x - _SpeciesStatsMin) / _SpeciesStatsMax;
 	//float targetHeadHeight = (500 - _SpeciesStatsMin) / _SpeciesStatsMax;
 	// 0 --> 1
 	targetHeadHeight += noiseOffset * 0.2 * (1.0 - keyData.isExtinct);
@@ -287,7 +287,7 @@ void CSUpdateSpeciesTreeData (uint3 id : SV_DispatchThreadID)
 
 	float creationTimeNormalized = saturate((float)keyData.timeCreated / (float)_CurSimStep - 0.1);
 	float zOffset = 0; //(creationTimeNormalized - 0.2) * uv.x * -0.66;
-
+		
 	treeOfLifeSpeciesSegmentsCBuffer[id.x] = float3(uv.x * 0.96 + 0.02, segmentHeight, zOffset);
 		
 	treeOfLifeSpeciesDataHeadPosCBuffer[speciesID] = float3(min(1.0, saturate((float)keyData.timeExtinct / (float)_CurSimStep)) * 0.98 + 0.01, headHeight, zOffset);

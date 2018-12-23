@@ -865,6 +865,8 @@ public class UIManager : MonoBehaviour {
         imageTolSpeciesIndex.color = new Color(speciesHuePrimary.x, speciesHuePrimary.y, speciesHuePrimary.z);
         imageTolSpeciesNameBackdrop.color = new Color(speciesHuePrimary.x, speciesHuePrimary.y, speciesHuePrimary.z);
         imageTolSpeciesReadoutBackdrop.color = new Color(speciesHuePrimary.x, speciesHuePrimary.y, speciesHuePrimary.z);
+
+        gameManager.simulationManager.theRenderKing.UpdateCritterPortraitStrokesData(gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[treeOfLifeManager.selectedID].representativeGenome);
     }
 	
 	// Update is called once per frame
@@ -978,10 +980,10 @@ public class UIManager : MonoBehaviour {
         if(maxValuesStatArray.Length == 0) {
             maxValuesStatArray = new float[16];
             for(int i = 0; i < maxValuesStatArray.Length; i++) {
-                maxValuesStatArray[i] = 1f;
+                maxValuesStatArray[i] = 0.01f;
             }
         }
-
+        /*
         if(statsTextureLifespan == null) {
             statsTextureLifespan = new Texture2D(1, 1, TextureFormat.RFloat, true);
             statsTextureLifespan.filterMode = FilterMode.Bilinear;
@@ -1022,7 +1024,7 @@ public class UIManager : MonoBehaviour {
             statsTextureNutrients.wrapMode = TextureWrapMode.Clamp;
         }
         statsGraphMatNutrients.SetTexture("_MainTex", statsTextureNutrients);
-
+        */
         if(tolTextureWorldStats == null) {
             tolTextureWorldStats = new Texture2D(1, 32, TextureFormat.RGBAFloat, true);
             tolTextureWorldStats.filterMode = FilterMode.Bilinear;
@@ -1050,18 +1052,18 @@ public class UIManager : MonoBehaviour {
         
         tolWorldStatsValueRangesKeyArray = new Vector2[32]; // starts not null due to being public variable in inspector???
         for(int i = 0; i < tolWorldStatsValueRangesKeyArray.Length; i++) {
-            tolWorldStatsValueRangesKeyArray[i] = new Vector2(0f, 1f);
+            tolWorldStatsValueRangesKeyArray[i] = new Vector2(0f, 0.1f);
         }
         
         //Debug.Log("created key array! " + tolWorldStatsValueRangesKeyArray.Length.ToString());
-
+        /*
         if (statsTextureMutation == null) {
             statsTextureMutation = new Texture2D(1, 1, TextureFormat.RGBAFloat, true);
             statsTextureMutation.filterMode = FilterMode.Bilinear;
             statsTextureMutation.wrapMode = TextureWrapMode.Clamp;
         }
         statsGraphMatMutation.SetTexture("_MainTex", statsTextureMutation);
-        
+        */
     }
     private void EnterLoadingUI() {
         panelMainMenu.SetActive(false);
@@ -1840,13 +1842,14 @@ public class UIManager : MonoBehaviour {
 
         // ========== data: =========== //
         int years = Mathf.Min(2048, year);  // cap textures at 2k for now?
+        years = Mathf.Max(1, years);
         // check for resize before doing it?
         for(int i = 0; i < statsTreeOfLifeSpeciesTexArray.Length; i++) {
-            statsTreeOfLifeSpeciesTexArray[i].Resize(Mathf.Max(1, years), maxDisplaySpecies);
+            statsTreeOfLifeSpeciesTexArray[i].Resize(years, maxDisplaySpecies);
         }
         
         for(int i = 0; i < maxValuesStatArray.Length; i++) {
-            maxValuesStatArray[i] = 1f;
+            maxValuesStatArray[i] = 0.01f;
         }
         // for each year & each species, create 2D texture with fitness scores:
         for(int s = 0; s < maxDisplaySpecies; s++) {            
@@ -1855,11 +1858,11 @@ public class UIManager : MonoBehaviour {
 
                 SpeciesGenomePool speciesPool = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[displaySpeciesIndicesArray[s]];
                 if(speciesPool == null) {
-                    Debug.LogError("well shit");
+                    Debug.LogError("well, shit");
                 }
                 for(int t = 0; t < years; t++) {
                 
-                    int index = t - speciesPool.yearCreated;
+                    //int index = t - speciesPool.yearCreated;
                     
                     for(int a = 0; a < statsTreeOfLifeSpeciesTexArray.Length; a++) {
                         float valStat = 0f;
@@ -2748,8 +2751,12 @@ public class UIManager : MonoBehaviour {
         treeOfLifePanelOn = !treeOfLifePanelOn;
 
         // Update panel:
-        if(treeOfLifePanelOn) {            
-            // Update treeOfLife colliders & display            
+        if(treeOfLifePanelOn) {
+            // Update treeOfLife colliders & display   
+            UpdateSpeciesTreeDataTextures(gameManager.simulationManager.curSimYear);
+            RecalculateTreeOfLifeGraphPanelSizes();
+            UpdateTolSpeciesColorUI();
+            //gfhdf
         }
         else {
 
@@ -3149,6 +3156,8 @@ public class UIManager : MonoBehaviour {
         int selectedSpeciesID = treeOfLifeManager.selectedID;
         SpeciesGenomePool selectedPool = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesID];
         int sampleYear = Mathf.FloorToInt(coords.x * (float)gameManager.simulationManager.curSimYear);
+        sampleYear = Mathf.Clamp(sampleYear, 0, selectedPool.avgLifespanPerYearList.Count - 1);
+        
         //int index = t - speciesPool.yearCreated;
         //int index = sampleYear;
         float valStat = 0f;

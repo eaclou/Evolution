@@ -114,7 +114,7 @@
 				o.uv.y = xCoord;
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
 				//o.color = float4(keyData.hue * keyData.isSelected, 0);
-				float3 hue = lerp(keyData.huePrimary, keyData.hueSecondary, abs(0.5 - o.uv.y));
+				float3 hue = lerp(keyData.hueSecondary, keyData.huePrimary, 2 * abs(0.5 - o.uv.y));
 				o.color = float4(hue * (0.4 + 0.4 * (1.0 - keyData.isExtinct) + keyData.isSelected * 1.5), 0);
 				float distToMouse = 1.0 - saturate(abs(xCoord - _MouseCoordX) * 15);
 				o.color.xyz = lerp(o.color.xyz, float3(1, 1, 1), _MouseOn * distToMouse * keyData.isSelected);

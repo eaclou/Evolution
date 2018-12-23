@@ -53,7 +53,7 @@
 				CritterInitData critterInitData = critterInitDataCBuffer[agentIndex];
 				CritterSimData critterSimData = critterSimDataCBuffer[agentIndex];
 
-				float3 critterWorldPos = critterSimData.worldPos;
+				float3 critterWorldPos = critterSimData.worldPos + 0.5;
 
 				float3 neighborWorldPos = critterGenericStrokesCBuffer[genericStrokeData.neighborIndex + agentIndex * 1856].worldPos;
 				float3 neighborAlignTangent = neighborWorldPos - genericStrokeData.worldPos;
@@ -71,13 +71,13 @@
 				float3 worldBitangent = cross(worldNormal, worldTangent);
 				
 				float3 quadVertexOffset = quadVerticesCBuffer[id].x * worldBitangent * genericStrokeData.scale.x + quadVerticesCBuffer[id].y * worldTangent * genericStrokeData.scale.y;
-				quadVertexOffset *= (1 - critterSimData.decayPercentage);
+				quadVertexOffset *= (1 - critterSimData.decayPercentage) * 2;
 				// old //float3 vertexWorldPos = critterWorldPos + strokeBindPos + quadVerticesCBuffer[id] * 0.645 * length(genericStrokeData.scale);
 				float3 vertexWorldPos = genericStrokeData.worldPos + quadVertexOffset * 1.25 * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage) * 1;
 
 				// REFRACTION:							
-				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(genericStrokeData.worldPos.xy /  _MapSize, 0, 0)).yzw;
-				float refractionStrength = 1;
+				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4((genericStrokeData.worldPos.xy + 2) * 2.5 /  _MapSize, 0, 0)).yzw;
+				float refractionStrength = 0.66;
 				vertexWorldPos.xy += -surfaceNormal.xy * refractionStrength;				
 				
 				float3 lightDir = float3(-0.52, -0.35, -1);
@@ -88,7 +88,10 @@
 				float specTest = pow(saturate(dot(viewDir, reflectionDir)), 17);
 
 				//vertexWorldPos.z += 1.0;
-				vertexWorldPos = float3(genericStrokeData.scale, 0) + quadVerticesCBuffer[id] * 2.5;
+				// %^$*%^*$^&*$^&*$&*$^7
+				//vertexWorldPos = genericStrokeData.worldPos + quadVerticesCBuffer[id] * 0.15;
+				// %^$*%^*$^&*$^&*$&*$^7
+
 				o.vertex = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(vertexWorldPos, 1.0)));
 				o.uv = quadVerticesCBuffer[id].xy + 0.5;	
 
@@ -102,7 +105,7 @@
 				
 				fixed4 patternTexSample = tex2Dlod(_PatternTex, float4(patternUV, 0, 0));
 								
-				float crudeDiffuse = dot(normalize(worldNormal), lightDir) * 0.75 + 0.25;
+				float crudeDiffuse = 1; //dot(normalize(worldNormal), lightDir) * 0.75 + 0.25;
 				float3 hue = lerp(critterInitData.secondaryHue, critterInitData.primaryHue, patternTexSample.x);
 				
 				hue = lerp(hue, genericStrokeData.color.rgb, genericStrokeData.color.a);
@@ -111,10 +114,12 @@
 				float alpha = saturate((critterSimData.embryoPercentage - 0.995) * 200);
 								
 				o.color = float4(specTest * 0.65 + hue * crudeDiffuse, alpha); //genericStrokeData.bindPos.x * 0.5 + 0.5, genericStrokeData.bindPos.z * 0.33 + 0.5, genericStrokeData.bindPos.y * 0.5 + 0.5, 1);
+				
 				o.color = lerp(o.color, decayColor, saturate(decayAmount + saturate(critterSimData.decayPercentage * 50) * 0.25));
+				
 				o.color.a *= alpha;
 
-				//o.color = float4(1,1,1,1);
+				
 				o.worldPos = float4(vertexWorldPos, 1.0);
 				//o.color.rgb = ;
 				//o.color.rgb *= 0.4;
@@ -132,9 +137,9 @@
 				float3 waterFogColor = float3(0.03,0.4,0.3) * 0.4;
 
 				fixed4 col = tex2D(_MainTex, i.uv) * i.color;
-				col.rgb = lerp(col.rgb, waterFogColor, 0.5 * saturate((i.worldPos.z - 0.75) * 0.5));
+				col.rgb = lerp(col.rgb, waterFogColor, 0); // 0.5 * saturate((i.worldPos.z - 0.75) * 0.5));
 				//fixed4 col = tex2D(_MainTex, i.bodyUV) * i.color;
-				col = float4(1,1,1,1);
+				//col = float4(1,1,1,col.a);
 				return col;
 			}
 			ENDCG
