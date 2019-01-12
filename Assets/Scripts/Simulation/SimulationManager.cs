@@ -1335,6 +1335,8 @@ public class SimulationManager : MonoBehaviour {
     
     private void ProcessAgentScores(Agent agentRef) {
 
+        // Expand this to handle more complex Fitness Functions with more components:
+        
         float totalEggSackVolume = 0f;
         float totalCarrionVolume = 0f;
         
@@ -1409,6 +1411,7 @@ public class SimulationManager : MonoBehaviour {
     }
     private void RefreshLatestSpeciesDataEntry() {
         for(int i = 0; i < masterGenomePool.completeSpeciesPoolsList.Count; i++) {
+            // Combine these into a single stats class/struct?
             masterGenomePool.completeSpeciesPoolsList[i].avgLifespanPerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgLifespanPerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgLifespan;
             masterGenomePool.completeSpeciesPoolsList[i].avgConsumptionDecayPerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgConsumptionDecayPerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgConsumptionDecay;
             masterGenomePool.completeSpeciesPoolsList[i].avgConsumptionPlantPerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgConsumptionPlantPerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgConsumptionPlant;
@@ -1463,7 +1466,7 @@ public class SimulationManager : MonoBehaviour {
         //uiManager.UpdateStatsTextureMutation(statsMutationEachGenerationList);
     }
     */
-    private void ProcessAndRankAgentFitness(int speciesIndex) {
+    /*private void ProcessAndRankAgentFitness(int speciesIndex) {
         // Measure fitness of all current agents (their genomes, actually)  NOT PLAYER!!!!
         for (int i = 0; i < rawFitnessScoresArray.Length; i++) {
             rawFitnessScoresArray[i] = (float)agentsArray[i].masterFitnessScore;
@@ -1500,6 +1503,7 @@ public class SimulationManager : MonoBehaviour {
             }
         }
     }
+    */
 
     public void AddNewSpecies(AgentGenome newGenome, int parentSpeciesID) {
         int newSpeciesID = masterGenomePool.completeSpeciesPoolsList.Count;
@@ -1710,7 +1714,7 @@ public class SimulationManager : MonoBehaviour {
     #endregion
 
     #region Utility Functions // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& UTILITY FUNCTIONS! &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-    public int GetAgentIndexByLottery(float[] rankedFitnessList, int[] rankedIndicesList, int speciesIndex) {
+    /*public int GetAgentIndexByLottery(float[] rankedFitnessList, int[] rankedIndicesList, int speciesIndex) {
         int selectedIndex = 0;
 
         int popSize = (numAgents / numSpecies);
@@ -1734,7 +1738,7 @@ public class SimulationManager : MonoBehaviour {
             currentValue += rankedFitnessList[i]; // add this agent's fitness to current value for next check
         }
         return selectedIndex;
-    }
+    }*/
 
     #endregion
     
