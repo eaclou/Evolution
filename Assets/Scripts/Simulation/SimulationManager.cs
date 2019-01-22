@@ -18,6 +18,7 @@ public class SimulationManager : MonoBehaviour {
     public StartPositionsPresetLists startPositionsPresets;
     public ComputeShader computeShaderNutrientMap;
     public ComputeShader computeShaderFoodParticles;
+    public ComputeShader computeShaderAnimalParticles;
     public MasterGenomePool masterGenomePool;
     public FoodManager foodManager;
     public SimEventsManager simEventsManager;
@@ -290,6 +291,10 @@ public class SimulationManager : MonoBehaviour {
         Debug.Log("LoadingInitializeFoodParticles: " + (Time.realtimeSinceStartup - startTime).ToString());
         Debug.Log("End Total up to LoadingInitializeFoodParticles: " + (Time.realtimeSinceStartup - masterStartTime).ToString());
         yield return null;
+        uiManager.textLoadingTooltips.text = "LoadingInitializeAnimalParticles()";
+        LoadingInitializeAnimalParticles();
+
+        yield return null;
 
         uiManager.textLoadingTooltips.text = "GentlyRouseTheRenderMonarchHisHighnessLordOfPixels()";   
         // Wake up the Render King and prepare him for the day ahead, proudly ruling over Renderland.
@@ -437,128 +442,15 @@ public class SimulationManager : MonoBehaviour {
             agentsArray[i] = newAgent; // Add to stored list of current Agents            
         }
     }
-    /*private void LoadingInitializeAgentsFromGenomes() {        
-        for (int i = 0; i < numAgents; i++) {
-            
-            int speciesIndex = Mathf.FloorToInt((float)i / (float)numAgents * (float)numSpecies);
-            agentsArray[i].InitializeSpawnAgentFromGenome(i, agentGenomePoolArray[i]); //, GetInitialAgentSpawnPosition(speciesIndex));            
-        }
-    }*/
+    
     private void LoadingInitializeFoodParticles() {
-
         foodManager.InitializeFoodParticles(numAgents, computeShaderFoodParticles);
-
-        /*foodParticlesCBuffer = new ComputeBuffer(numFoodParticles, sizeof(float) * 8 + sizeof(int) * 3);
-        foodParticlesCBufferSwap = new ComputeBuffer(numFoodParticles, sizeof(float) * 8 + sizeof(int) * 3);
-        FoodParticleData[] foodParticlesArray = new FoodParticleData[numFoodParticles];
-
-        float minParticleSize = settingsManager.avgFoodParticleRadius / settingsManager.foodParticleRadiusVariance;
-        float maxParticleSize = settingsManager.avgFoodParticleRadius * settingsManager.foodParticleRadiusVariance;
-
-        for(int i = 0; i < foodParticlesCBuffer.count; i++) {
-            FoodParticleData data = new FoodParticleData();
-            data.index = i;            
-            data.worldPos = new Vector2(UnityEngine.Random.Range(0f, mapSize), UnityEngine.Random.Range(0f, mapSize));
-
-            data.radius = UnityEngine.Random.Range(minParticleSize, maxParticleSize);
-            data.foodAmount = data.radius * data.radius * Mathf.PI * settingsManager.foodParticleNutrientDensity;
-            data.active = 1f;
-            data.refactoryAge = 0f;
-            foodParticlesArray[i] = data;
-        }
-
-        foodParticlesCBuffer.SetData(foodParticlesArray);
-        foodParticlesCBufferSwap.SetData(foodParticlesArray);
-
-        foodParticlesNearestCritters1024 = new RenderTexture(numFoodParticles, numAgents, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        foodParticlesNearestCritters1024.wrapMode = TextureWrapMode.Clamp;
-        foodParticlesNearestCritters1024.filterMode = FilterMode.Point;
-        foodParticlesNearestCritters1024.enableRandomWrite = true;        
-        foodParticlesNearestCritters1024.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***    
-
-        foodParticlesNearestCritters32 = new RenderTexture(32, numAgents, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        foodParticlesNearestCritters32.wrapMode = TextureWrapMode.Clamp;
-        foodParticlesNearestCritters32.filterMode = FilterMode.Point;
-        foodParticlesNearestCritters32.enableRandomWrite = true;        
-        foodParticlesNearestCritters32.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***   
-
-        foodParticlesNearestCritters1 = new RenderTexture(1, numAgents, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        foodParticlesNearestCritters1.wrapMode = TextureWrapMode.Clamp;
-        foodParticlesNearestCritters1.filterMode = FilterMode.Point;
-        foodParticlesNearestCritters1.enableRandomWrite = true;        
-        foodParticlesNearestCritters1.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
-
-        closestFoodParticlesDataArray = new FoodParticleData[numAgents];
-        closestFoodParticlesDataCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 8 + sizeof(int) * 3);
-
-        foodParticlesEatAmountsCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 1);
-        foodParticlesEatAmountsArray = new float[numAgents];
-
-        foodParticleMeasurementTotalsData = new FoodParticleData[1];
-        foodParticlesMeasure32 = new ComputeBuffer(32, sizeof(float) * 8 + sizeof(int) * 3);
-        foodParticlesMeasure1 = new ComputeBuffer(1, sizeof(float) * 8 + sizeof(int) * 3);
-        */
+    }
+    private void LoadingInitializeAnimalParticles() {
+        foodManager.InitializeAnimalParticles(numAgents, computeShaderAnimalParticles);
     }
     private void LoadingInitializeFoodGrid() {
-
         foodManager.InitializeNutrientsMap(numAgents, computeShaderNutrientMap);
-
-        /*        
-        nutrientMapRT1 = new RenderTexture(nutrientMapResolution, nutrientMapResolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        nutrientMapRT1.wrapMode = TextureWrapMode.Clamp;
-        nutrientMapRT1.filterMode = FilterMode.Bilinear;
-        nutrientMapRT1.enableRandomWrite = true;
-        //nutrientMapRT1.useMipMap = true;
-        nutrientMapRT1.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***    
-
-        nutrientMapRT2 = new RenderTexture(nutrientMapResolution, nutrientMapResolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        nutrientMapRT2.wrapMode = TextureWrapMode.Clamp;
-        nutrientMapRT2.enableRandomWrite = true;
-        //nutrientMapRT2.useMipMap = true;
-        nutrientMapRT2.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***  
-        
-        nutrientSamplesArray = new Vector4[numAgents];
-        nutrientEatAmountsArray = new Vector4[numAgents];
-
-        int kernelCSInitializeNutrientMap = computeShaderNutrientMap.FindKernel("CSInitializeNutrientMap");
-        computeShaderNutrientMap.SetTexture(kernelCSInitializeNutrientMap, "nutrientMapWrite", nutrientMapRT1);
-        computeShaderNutrientMap.Dispatch(kernelCSInitializeNutrientMap, nutrientMapResolution / 32, nutrientMapResolution / 32, 1);
-        Graphics.Blit(nutrientMapRT1, nutrientMapRT2);
-
-        tempTex16 = new RenderTexture(16, 16, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        tempTex16.wrapMode = TextureWrapMode.Clamp;
-        tempTex16.filterMode = FilterMode.Point;
-        tempTex16.enableRandomWrite = true;
-        tempTex16.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
-
-        tempTex8 = new RenderTexture(8, 8, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        tempTex8.wrapMode = TextureWrapMode.Clamp;
-        tempTex8.filterMode = FilterMode.Point;
-        tempTex8.enableRandomWrite = true;
-        tempTex8.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
-
-        tempTex4 = new RenderTexture(4, 4, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        tempTex4.wrapMode = TextureWrapMode.Clamp;
-        tempTex4.filterMode = FilterMode.Point;
-        tempTex4.enableRandomWrite = true;
-        tempTex4.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
-
-        tempTex2 = new RenderTexture(2, 2, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        tempTex2.wrapMode = TextureWrapMode.Clamp;
-        tempTex2.filterMode = FilterMode.Point;
-        tempTex2.enableRandomWrite = true;
-        tempTex2.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
-
-        tempTex1 = new RenderTexture(1, 1, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        tempTex1.wrapMode = TextureWrapMode.Clamp;
-        tempTex1.filterMode = FilterMode.Point;
-        tempTex1.enableRandomWrite = true;
-        tempTex1.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
-
-        nutrientSamplesCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 4);
-
-        theRenderKing.fluidRenderMat.SetTexture("_DebugTex", nutrientMapRT1);
-        */
     }
     private void LoadingInstantiateEggSacks() {
         // FOOODDDD!!!!
@@ -728,12 +620,9 @@ public class SimulationManager : MonoBehaviour {
             RefreshLatestHistoricalDataEntry();
             RefreshLatestSpeciesDataEntry();
             uiManager.UpdateSpeciesTreeDataTextures(curSimYear); // shouldn't lengthen!
-            //masterGenomePool.UpdateSpeciesStats();
-
+            
             uiManager.UpdateTolWorldStatsTexture(statsNutrientsEachGenerationList);
-
-            //RefreshGraphData();
-
+            
             theRenderKing.UpdateTreeOfLifeEventLineData(simEventsManager.completeEventHistoryList);
         }
 
@@ -749,14 +638,15 @@ public class SimulationManager : MonoBehaviour {
         foodManager.FindClosestFoodParticleToCritters(simStateData);
         foodManager.MeasureTotalFoodParticlesAmount();
 
-        masterGenomePool.Tick(); // keep track of when species created so can't create multiple per frame?
+        foodManager.FindClosestAnimalParticleToCritters(simStateData);
+        foodManager.MeasureTotalAnimalParticlesAmount();
 
+        masterGenomePool.Tick(); // keep track of when species created so can't create multiple per frame?
                 
         // ******** REVISIT CODE ORDERING!!!!  -- Should check for death Before or After agent Tick/PhysX ???
         CheckForDevouredEggSacks();
         CheckForNullAgents();  // Result of this will affect: "simStateData.PopulateSimDataArrays(this)" !!!!!
-        CheckForReadyToSpawnAgents();
-        
+        CheckForReadyToSpawnAgents();        
 
         simStateData.PopulateSimDataArrays(this);  // reads from GameObject Transforms & RigidBodies!!! ++ from FluidSimulationData!!!        
         theRenderKing.RenderSimulationCameras(); // will pass current info to FluidSim before it Ticks()
@@ -791,7 +681,8 @@ public class SimulationManager : MonoBehaviour {
         // Apply External Forces to dynamic objects: (internal PhysX Updates):        
         ApplyFluidForcesToDynamicObjects();
 
-        foodManager.EatSelectedFoodParticles(simStateData); //         
+        foodManager.EatSelectedFoodParticles(simStateData); //       
+        foodManager.EatSelectedAnimalParticles(simStateData);
         foodManager.RemoveEatenNutrients(numAgents, simStateData);
         float spawnNewFoodChance = settingsManager.spawnNewFoodChance;
         float spawnFoodPercentage = UnityEngine.Random.Range(0f, 0.25f);
@@ -816,7 +707,7 @@ public class SimulationManager : MonoBehaviour {
         }
         foodManager.ApplyDiffusionOnNutrientMap(environmentFluidManager);
         foodManager.RespawnFoodParticles(environmentFluidManager, theRenderKing, simStateData);
-
+        foodManager.SimulateAnimalParticles(environmentFluidManager, theRenderKing, simStateData);
 
         // TEMP AUDIO EFFECTS!!!!        
         float volume = agentsArray[0].smoothedThrottle.magnitude * 0.24f;

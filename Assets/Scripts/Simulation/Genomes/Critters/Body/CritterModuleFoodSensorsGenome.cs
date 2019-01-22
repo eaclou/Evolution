@@ -62,24 +62,46 @@ public class CritterModuleFoodSensorsGenome {
             neuronList.Add(foodPosX);
             neuronList.Add(foodPosY);
             neuronList.Add(distance);
+
+            NeuronGenome animalPosX = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 24);
+            NeuronGenome animalPosY = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 25);
+            NeuronGenome animalDistance = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 26);
+            neuronList.Add(animalPosX);
+            neuronList.Add(animalPosY);
+            neuronList.Add(animalDistance);
         }
         if(useVel) {
             NeuronGenome foodVelX = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 7);
             NeuronGenome foodVelY = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 8);
             neuronList.Add(foodVelX);
             neuronList.Add(foodVelY);
+
+            NeuronGenome animalVelX = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 27);
+            NeuronGenome animalVelY = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 28);
+            neuronList.Add(animalVelX);
+            neuronList.Add(animalVelY);
         }
         if(useDir) {
             NeuronGenome foodDirX = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 9);
             NeuronGenome foodDirY = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 10);
             neuronList.Add(foodDirX);
             neuronList.Add(foodDirY);
+
+            NeuronGenome animalDirX = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 29);
+            NeuronGenome animalDirY = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 30);
+            neuronList.Add(animalDirX);
+            neuronList.Add(animalDirY);
         }
         if(useStats) {
             NeuronGenome foodQuality = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 11);
             NeuronGenome foodRelSize = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 12);
             neuronList.Add(foodQuality);
             neuronList.Add(foodRelSize);
+
+            NeuronGenome animalQuality = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 31);
+            NeuronGenome animalRelSize = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 32);
+            neuronList.Add(animalQuality);
+            neuronList.Add(animalRelSize);
         }
         if(useEggs) {
             NeuronGenome distance = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 13);

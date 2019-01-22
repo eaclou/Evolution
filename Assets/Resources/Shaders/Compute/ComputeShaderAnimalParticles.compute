@@ -1,0 +1,266 @@
+﻿#pragma kernel CSMeasureInitCritterDistances
+#pragma kernel CSReduceCritterDistances32
+#pragma kernel CSEatSelectedAnimalParticles
+#pragma kernel CSCopyAnimalParticlesBuffer
+#pragma kernel CSMeasureTotalAnimalParticlesAmount
+#pragma kernel CSSimulateAnimalParticles
+
+#include "Assets/Resources/Shaders/Inc/StructsCritterData.cginc"
+#include "Assets/Resources/Shaders/Inc/StructsAnimalParticles.cginc"
+
+StructuredBuffer<CritterInitData> critterInitDataCBuffer;
+StructuredBuffer<CritterSimData> critterSimDataCBuffer;
+
+StructuredBuffer<AnimalParticleData> animalParticlesRead;
+RWStructuredBuffer<AnimalParticleData> animalParticlesWrite;
+RWTexture2D<float4> animalParticlesNearestCrittersRT;
+
+RWStructuredBuffer<AnimalParticleData> closestParticlesDataCBuffer;
+
+StructuredBuffer<float> animalParticlesEatAmountsRead;
+RWStructuredBuffer<float> animalParticlesEatAmountsCBuffer;
+
+StructuredBuffer<int> selectRespawnAnimalParticleIndicesCBuffer;
+
+Texture2D<float4> critterDistancesRead; // used to reduce animalParticlesNearestCrittersRT down to minimum distancesanimalParticleData
+RWTexture2D<float4> critterDistancesWrite;
+
+Texture2D<float4> obstaclesRead;  // water info
+Texture2D<float4> velocityRead;
+Texture2D<float4> altitudeRead;
+
+Texture2D<float4> _SpawnDensityMap;
+
+uniform float _RespawnAnimalParticles;
+uniform float _Time;
+uniform float _MapSize;
+
+uniform float _MinParticleSize;
+uniform float _MaxParticleSize;
+uniform float _ParticleNutrientDensity; // refactor how nutrient content works
+
+uniform float _AnimalParticleRegrowthRate;
+
+SamplerState _LinearClamp;
+SamplerState _LinearRepeat;
+SamplerState _PointClamp;
+SamplerState _PointRepeat;
+
+float rand(float2 co){   // OUTPUT is in [0,1] RANGE!!!
+	return frac(sin(dot(co.xy ,float2(12.9898,78.233))) * 43758.5453);
+}
+
+[numthreads(1024,1,1)]
+void CSMeasureInitCritterDistances (uint3 id : SV_DispatchThreadID)
+{	
+	int particleIndex = id.x;
+	int critterIndex = id.y;
+
+	AnimalParticleData particleData = animalParticlesRead[particleIndex];
+	CritterInitData critterInitData = critterInitDataCBuffer[critterIndex];
+	CritterSimData critterSimData = critterSimDataCBuffer[critterIndex];
+
+	float mouthRadius = critterInitData.boundingBoxSize.x * critterSimData.growthPercentage; // **** REMEMBER TO *0.5 EVENTUALLY FOR ACCURATE SIZE
+	float2 mouthCenterPos = critterSimData.heading * critterInitData.boundingBoxSize.y * 0.5 * critterSimData.growthPercentage;
+
+	float2 particleToCritter = critterSimData.worldPos.xy + mouthCenterPos * 1.0 - particleData.worldPos.xy;
+
+	float distanceSquared = particleToCritter.x * particleToCritter.x + particleToCritter.y * particleToCritter.y;
+	
+	animalParticlesNearestCrittersRT[int2(particleIndex, critterIndex)] = float4(particleData.index, distanceSquared, particleData.worldPos.xy);
+		
+}
+
+[numthreads(1,1,1)]
+void CSReduceCritterDistances32 (uint3 id : SV_DispatchThreadID)
+{	
+	
+	int critterIndex = id.y;
+
+	CritterSimData critterSimData = critterSimDataCBuffer[critterIndex];
+			
+	float closestParticleIndex = 0;
+	float minSquaredDistance = 50000;
+		
+	for(int i = 0; i < 32; i++) {
+		
+		int particleIndex = id.x * 32 + i;
+		
+		float4 sourceData = critterDistancesRead[int2(particleIndex, critterIndex)];
+		
+		AnimalParticleData particleData = animalParticlesRead[particleIndex];
+
+		if(sourceData.y < minSquaredDistance) {
+			if(particleData.active > 0.5) {
+				minSquaredDistance = sourceData.y;
+				closestParticleIndex = sourceData.x;
+			}				
+		}
+	}
+		
+	AnimalParticleData closestAnimalData = animalParticlesRead[closestParticleIndex];	
+		
+	critterDistancesWrite[int2(id.x, critterIndex)] = float4(closestParticleIndex, minSquaredDistance, 1.0, 1.0);
+	closestParticlesDataCBuffer[critterIndex] = closestAnimalData; // assuming there's only 1 thread at end
+}
+
+
+[numthreads(1,1,1)]
+void CSEatSelectedAnimalParticles (uint3 id : SV_DispatchThreadID)
+{	
+	// Check distance to nearest particle
+	int critterIndex = id.x;
+
+	float4 data = critterDistancesRead[int2(0, id.x)];
+
+	int particleIndex = (int)data.x;
+
+	AnimalParticleData particleData = animalParticlesRead[particleIndex];
+	//particleData.closestCritterDistance = data.y;
+	animalParticlesWrite[particleIndex] = particleData;
+
+	CritterInitData critterInitData = critterInitDataCBuffer[critterIndex];
+	CritterSimData critterSimData = critterSimDataCBuffer[critterIndex];
+
+	float eatenAmount = 0.0;
+
+	float isAlive01 = saturate((critterSimData.embryoPercentage - 0.99) * 10000) * saturate(((1.0 - critterSimData.decayPercentage) - 0.99) * 10000);
+
+	float distanceSquared = data.y;
+	float mouthRadius = critterInitData.boundingBoxSize.x * critterSimData.growthPercentage;  // **** REMEMBER TO *0.5 EVENTUALLY FOR ACCURATE SIZE
+	float particleRadius = particleData.radius;
+	float combinedRadius = (mouthRadius + particleRadius * 0.5) * isAlive01 * critterSimData.consumeOn;
+		
+
+	if(distanceSquared < combinedRadius * combinedRadius) {	
+		
+		if(critterSimData.consumeOn > 0.5) {   // revisit
+			eatenAmount = particleData.nutrientContent; //mouthRadius * mouthRadius * critterInitData.eatEfficiencyMeat * 0.167f; //particleData.nutrientContent;
+			animalParticlesWrite[particleIndex].active = 0;
+			animalParticlesWrite[particleIndex].isSwallowed = 1.0;
+			animalParticlesWrite[particleIndex].critterIndex = critterIndex;		
+			animalParticlesWrite[particleIndex].nutrientContent = 0.0;
+
+			//animalParticlesWrite[particleIndex].nutrientContent = particleData.nutrientContent - eatenAmount;
+			//animalParticlesWrite[particleIndex].closestCritterDistance = 1.0;
+				
+			//if(animalParticlesWrite[particleIndex].nutrientContent <= 0) {
+				//animalParticlesWrite[particleIndex].active = 0;
+				//animalParticlesWrite[particleIndex].isSwallowed = 1.0;
+				//animalParticlesWrite[particleIndex].critterIndex = critterIndex;				
+			//}
+		}	
+	}
+
+	animalParticlesEatAmountsCBuffer[id.x] = eatenAmount;
+}
+
+[numthreads(1024,1,1)]
+void CSCopyAnimalParticlesBuffer (uint3 id : SV_DispatchThreadID)
+{	
+	AnimalParticleData particleData = animalParticlesRead[id.x];
+	
+	animalParticlesWrite[id.x] = particleData;
+}
+
+[numthreads(1,1,1)]
+void CSMeasureTotalAnimalParticlesAmount (uint3 id : SV_DispatchThreadID)
+{	
+	AnimalParticleData copyData = animalParticlesRead[id.x];
+	
+	float totalFoodAmount = 0;
+	
+	for(int i = 0; i < 32; i++) {		
+		int particleIndex = id.x * 32 + i;		
+		AnimalParticleData particleData = animalParticlesRead[particleIndex];				
+		totalFoodAmount += particleData.nutrientContent * particleData.active;
+	}
+
+	copyData.nutrientContent = totalFoodAmount;
+	
+	animalParticlesWrite[id.x] = copyData;
+}
+
+[numthreads(1024,1,1)]
+void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
+{
+	// Check if particle isn't in the water:
+
+	AnimalParticleData animalParticle = animalParticlesRead[id.x];
+
+	int randNeighborIndex = (id.x + round(_Time)) % 1024;
+	AnimalParticleData neighborParticle = animalParticlesRead[randNeighborIndex];
+	
+	float2 uv = animalParticle.worldPos.xy / _MapSize;
+	
+
+	if(animalParticle.active > 0.5) { // poor man's boolean
+	// *** Update this to sample altitude instead.  ** to avoid unreachable food
+		float2 altUV = uv * 0.5 + 0.25;
+
+		float4 terrainSample = altitudeRead.SampleLevel(_LinearClamp, altUV, 1);
+		float altitude = terrainSample.x;
+		
+		CritterSimData critterSimData = critterSimDataCBuffer[id.x % 32];
+		
+		if(altitude > 0.5) {
+			animalParticlesWrite[id.x].active = 0.0;
+			animalParticlesWrite[id.x].refactoryAge = 1.0;
+			// Respawn if on land ^^^:
+		}
+		else {  // Otherwise simulate as normal			
+			
+			float2 vel = velocityRead.SampleLevel(_LinearRepeat, uv, 2).xy;
+			float speedMult = 0.005;				
+			float2 nextPos = uv + vel * speedMult;
+
+			nextPos += critterSimData.velocity * 0.00005;
+
+			float2 defaultNextPos = nextPos * _MapSize;
+			
+			animalParticlesWrite[id.x].age = animalParticle.age + 0.0003;
+			animalParticlesWrite[id.x].worldPos.xy = defaultNextPos;
+		}
+
+		if(animalParticle.digestedAmount > 1.0) {  // Fully Decayed
+			animalParticlesWrite[id.x].active = 0.0;
+			animalParticlesWrite[id.x].refactoryAge = 1.0;
+		}
+	}
+	else {  // INACTIVE:::
+		animalParticlesWrite[id.x].refactoryAge = animalParticle.refactoryAge + _AnimalParticleRegrowthRate;
+	}
+	if(animalParticle.age > 2.0) {
+		animalParticlesWrite[id.x].digestedAmount = animalParticle.digestedAmount + 0.001;  // being used to indicate decayRate
+	}
+
+	if(_RespawnAnimalParticles > 0.5) {		
+		
+		if(animalParticlesRead[id.x].refactoryAge > 1.0) {
+			
+			float rand01 = rand(float2(_Time * 135.79 + (float)animalParticlesRead[id.x].index * 30.17896, _Time * 28.463));
+			float randX = rand(float2((float)id.x, _Time));
+			float randY = rand(float2(randX * 62.39 + _Time, (float)id.x));
+
+			float2 spawnUV = float2(randX, randY);			
+			float4 spawnDensitySample = _SpawnDensityMap.SampleLevel(_LinearClamp, spawnUV, 0);
+
+			float spawnThreshold = 0.001;
+			if(rand01 < 0.025) {  // to prevent mass respawning, overshooting the intended max global food amount ?  // Needed?
+				if(spawnDensitySample.x > spawnThreshold) {
+				
+					animalParticlesWrite[id.x].worldPos.xy = float2(randX * _MapSize, randY * _MapSize);
+
+					float randRadius = rand(float2(randX * 10, randY * -3.37)) * (_MaxParticleSize - _MinParticleSize) + _MinParticleSize;					
+					animalParticlesWrite[id.x].radius = randRadius;
+					animalParticlesWrite[id.x].nutrientContent = randRadius * randRadius * 3.141592 * _ParticleNutrientDensity;
+					animalParticlesWrite[id.x].active = 1.0;
+					animalParticlesWrite[id.x].refactoryAge = 0.0;
+					animalParticlesWrite[id.x].isSwallowed = 0.0;
+					animalParticlesWrite[id.x].digestedAmount = 0.0;
+					animalParticlesWrite[id.x].age = rand(float2(rand01 * 70.158, randX * 13.37));
+				}			
+			}			
+		}		
+	}
+}

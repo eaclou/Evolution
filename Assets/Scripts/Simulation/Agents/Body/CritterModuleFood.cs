@@ -22,6 +22,16 @@ public class CritterModuleFood {
     public float[] foodPlantQuality;
     public float[] foodPlantRelSize;
 
+    public float[] foodAnimalPosX;
+    public float[] foodAnimalPosY;
+    public float[] foodAnimalDistance;
+    public float[] foodAnimalVelX;
+    public float[] foodAnimalVelY;
+    public float[] foodAnimalDirX;
+    public float[] foodAnimalDirY;    
+    public float[] foodAnimalQuality;
+    public float[] foodAnimalRelSize;
+
     public float[] foodEggDistance;
     public float[] foodEggDirX;
     public float[] foodEggDirY;
@@ -37,6 +47,10 @@ public class CritterModuleFood {
     public int nearestFoodParticleIndex = -1;  // debugging ** TEMP
     public Vector2 nearestFoodParticlePos;
     public float nearestFoodParticleAmount;
+
+    public int nearestAnimalParticleIndex = -1;  // debugging ** TEMP
+    public Vector2 nearestAnimalParticlePos;
+    public float nearestAnimalParticleAmount;
 
     public CritterModuleFoodSensorsGenome genome;
 
@@ -69,6 +83,18 @@ public class CritterModuleFood {
             foodPlantQuality = new float[1];
             foodPlantRelSize = new float[1];
         //}
+
+
+        foodAnimalPosX = new float[1];
+        foodAnimalPosY = new float[1];
+        foodAnimalDistance = new float[1];
+        foodAnimalVelX = new float[1];
+        foodAnimalVelY = new float[1];
+        foodAnimalDirX = new float[1];
+        foodAnimalDirY = new float[1];
+        foodAnimalQuality = new float[1];
+        foodAnimalRelSize = new float[1];
+        
 
         foodEggDistance = new float[1];
         foodEggDirX = new float[1];
@@ -198,6 +224,43 @@ public class CritterModuleFood {
                 neuron.currentValue = foodCorpseDirY;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
+
+            if (nid.neuronID == 24) {
+                neuron.currentValue = foodAnimalPosX;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 25) {
+                neuron.currentValue = foodAnimalPosY;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 26) {
+                neuron.currentValue = foodAnimalDistance;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 27) {
+                neuron.currentValue = foodAnimalVelX;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 28) {
+                neuron.currentValue = foodAnimalVelY;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 29) {
+                neuron.currentValue = foodAnimalDirX;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 30) {
+                neuron.currentValue = foodAnimalDirY;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 31) {
+                neuron.currentValue = foodAnimalQuality;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
+            if (nid.neuronID == 32) {
+                neuron.currentValue = foodAnimalRelSize;
+                neuron.neuronType = NeuronGenome.NeuronType.In;
+            }
         }
     }
 
@@ -230,9 +293,6 @@ public class CritterModuleFood {
         Vector2 foodParticleDir = critterToFoodParticle.normalized;
         float nearestFoodParticleDistance = Mathf.Clamp01((sensorRange - critterToFoodParticle.magnitude) / sensorRange); // inverted dist(proximity) 0-1
 
-        //foodPos = new Vector2(Mathf.Clamp(critterToFoodParticle.x / sensorRange, -1f, 1f), Mathf.Clamp(critterToFoodParticle.y / sensorRange, -1f, 1f));
-        //foodDir = foodParticleDir;
-
         foodPlantPosX[0] = Mathf.Clamp(critterToFoodParticle.x / sensorRange, -1f, 1f);
         foodPlantPosY[0] = Mathf.Clamp(critterToFoodParticle.y / sensorRange, -1f, 1f);
         foodPlantDistance[0] = nearestFoodParticleDistance;
@@ -240,6 +300,26 @@ public class CritterModuleFood {
         foodPlantDirY[0] = foodParticleDir.y;
         foodPlantQuality[0] = 1f; // *** temp until particles can decay naturally
         foodPlantRelSize[0] = nearestFoodParticleAmount;
+
+
+        nearestAnimalParticleIndex = simManager.foodManager.closestAnimalParticlesDataArray[agent.index].index;
+        nearestAnimalParticlePos = simManager.foodManager.closestAnimalParticlesDataArray[agent.index].worldPos; // - simManager.agentsArray[agent.index].bodyRigidbody.transform.position; // 
+                                    //new Vector2(simManager.agentsArray[agent.index].bodyRigidbody.transform.position.x,
+                                    //simManager.agentsArray[agent.index].bodyRigidbody.transform.position.y);
+
+        nearestAnimalParticleAmount = simManager.foodManager.closestAnimalParticlesDataArray[agent.index].nutrientContent;
+        Vector2 critterToAnimalParticle = new Vector2(nearestAnimalParticlePos.x, nearestAnimalParticlePos.y) - agent.ownPos;
+        float distToNearestAnimalParticle = critterToAnimalParticle.magnitude;
+        Vector2 animalParticleDir = critterToAnimalParticle.normalized;
+        float nearestAnimalParticleDistance = Mathf.Clamp01((sensorRange - critterToAnimalParticle.magnitude) / sensorRange); // inverted dist(proximity) 0-1
+
+        foodAnimalPosX[0] = Mathf.Clamp(critterToAnimalParticle.x / sensorRange, -1f, 1f);
+        foodAnimalPosY[0] = Mathf.Clamp(critterToAnimalParticle.y / sensorRange, -1f, 1f);
+        foodAnimalDistance[0] = nearestAnimalParticleDistance;
+        foodAnimalDirX[0] = animalParticleDir.x;
+        foodAnimalDirY[0] = animalParticleDir.y;
+        foodAnimalQuality[0] = 1f; // *** temp until particles can decay naturally
+        foodAnimalRelSize[0] = nearestAnimalParticleAmount;
 
         //dist = nearestFoodParticleDistance;
         //quality = 1f;

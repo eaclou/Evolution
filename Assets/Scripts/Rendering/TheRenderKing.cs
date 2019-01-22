@@ -65,6 +65,8 @@ public class TheRenderKing : MonoBehaviour {
     public Material critterFoodDotsMat;
     public Material foodParticleDisplayMat;
     public Material foodParticleShadowDisplayMat;
+    public Material animalParticleDisplayMat;
+    public Material animalParticleShadowDisplayMat;
     public Material critterSkinStrokesDisplayMat;
     public Material critterShadowStrokesDisplayMat;
     public Material eggCoverDisplayMat;
@@ -1203,6 +1205,12 @@ public class TheRenderKing : MonoBehaviour {
 
         foodParticleShadowDisplayMat.SetPass(0);
         foodParticleShadowDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+
+        animalParticleDisplayMat.SetPass(0);
+        animalParticleDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+
+        animalParticleShadowDisplayMat.SetPass(0);
+        animalParticleShadowDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
 
         eggCoverDisplayMat.SetPass(0);
         eggCoverDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -3506,6 +3514,12 @@ public class TheRenderKing : MonoBehaviour {
         foodParticleDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, foodParticleDisplayMat, 0, MeshTopology.Triangles, 6, simManager.foodManager.foodParticlesCBuffer.count);
         
+        // shadows later on
+        animalParticleDisplayMat.SetPass(0);
+        animalParticleDisplayMat.SetBuffer("animalParticleDataCBuffer", simManager.foodManager.animalParticlesCBuffer);
+        animalParticleDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        animalParticleDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+        cmdBufferTest.DrawProcedural(Matrix4x4.identity, animalParticleDisplayMat, 0, MeshTopology.Triangles, 6, simManager.foodManager.animalParticlesCBuffer.count);
         
         
         eggSackStrokeDisplayMat.SetPass(0);
