@@ -2,10 +2,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
 public class CritterModuleFood {
 
 	public int parentID;
     public int inno;
+
+    public int nearestFoodParticleIndex = -1;  // debugging ** TEMP
+    public Vector2 nearestFoodParticlePos;
+    public float nearestFoodParticleAmount;
+
+    public int nearestAnimalParticleIndex = -1;  // debugging ** TEMP
+    public Vector2 nearestAnimalParticlePos;
+    public float nearestAnimalParticleAmount;
 
     // Nearest Edible Object:
     public float[] nutrientDensity;
@@ -43,14 +52,7 @@ public class CritterModuleFood {
     public float sensorRange;
     public float preferredSize;
     //public int[] foodPreferenceOrder;
-
-    public int nearestFoodParticleIndex = -1;  // debugging ** TEMP
-    public Vector2 nearestFoodParticlePos;
-    public float nearestFoodParticleAmount;
-
-    public int nearestAnimalParticleIndex = -1;  // debugging ** TEMP
-    public Vector2 nearestAnimalParticlePos;
-    public float nearestAnimalParticleAmount;
+    
 
     public CritterModuleFoodSensorsGenome genome;
 
@@ -303,12 +305,12 @@ public class CritterModuleFood {
 
 
         nearestAnimalParticleIndex = simManager.foodManager.closestAnimalParticlesDataArray[agent.index].index;
-        nearestAnimalParticlePos = simManager.foodManager.closestAnimalParticlesDataArray[agent.index].worldPos; // - simManager.agentsArray[agent.index].bodyRigidbody.transform.position; // 
+        nearestAnimalParticlePos = simManager.foodManager.closestAnimalParticlesDataArray[agent.index].worldPos - simManager.agentsArray[agent.index].bodyRigidbody.transform.position; // 
                                     //new Vector2(simManager.agentsArray[agent.index].bodyRigidbody.transform.position.x,
                                     //simManager.agentsArray[agent.index].bodyRigidbody.transform.position.y);
 
         nearestAnimalParticleAmount = simManager.foodManager.closestAnimalParticlesDataArray[agent.index].nutrientContent;
-        Vector2 critterToAnimalParticle = new Vector2(nearestAnimalParticlePos.x, nearestAnimalParticlePos.y) - agent.ownPos;
+        Vector2 critterToAnimalParticle = new Vector2(nearestAnimalParticlePos.x, nearestAnimalParticlePos.y); // - agent.ownPos;
         float distToNearestAnimalParticle = critterToAnimalParticle.magnitude;
         Vector2 animalParticleDir = critterToAnimalParticle.normalized;
         float nearestAnimalParticleDistance = Mathf.Clamp01((sensorRange - critterToAnimalParticle.magnitude) / sensorRange); // inverted dist(proximity) 0-1
