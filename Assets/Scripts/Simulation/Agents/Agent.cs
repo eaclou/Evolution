@@ -103,6 +103,8 @@ public class Agent : MonoBehaviour {
     public float centerOfMass = 0f;
     
     //public int ageCounterMature = 0; // only counts when agent is an adult
+
+        // *********  Combine thse stats into a serializable class for cleanliness?  *****
     public int lifeStageTransitionTimeStepCounter = 0; // keeps track of how long agent has been in its current lifeStage
     public int ageCounter = 0;
     public float consumptionScore = 0f;
@@ -118,9 +120,10 @@ public class Agent : MonoBehaviour {
     //public int scoreCounter = 0;
     public int pregnancyRefactoryTimeStepCounter = 0;
 
+    // *** Need resource Overhaul
     public float currentCorpseFoodAmount = 1f;
     
-    private Vector3 prevPos;
+    private Vector3 prevPos;  // use these instead of sampling rigidbody?
     public Vector3 _PrevPos
     {
         get
@@ -152,7 +155,7 @@ public class Agent : MonoBehaviour {
     public bool isSexuallyMature = false;
     public int beingSwallowedFrameCounter = 0;
     public int swallowingPreyFrameCounter = 0;
-    public int swallowDuration = 60;
+    public int swallowDuration = 60; // **** how does this mix with mouseComponent???? ***
     public Agent predatorAgentRef;
     public Agent preyAgentRef;
 
@@ -163,7 +166,7 @@ public class Agent : MonoBehaviour {
     public bool isPregnantAndCarryingEggs = false;
     public int pregnancyRefactoryDuration = 1600;
 
-    public float overflowFoodAmount = 0f;
+    //public float overflowFoodAmount = 0f;
         
     // Use this for initialization
     private void Awake() {        

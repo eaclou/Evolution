@@ -16,12 +16,15 @@ public class SimulationManager : MonoBehaviour {
     public SimulationStateData simStateData;
     public AudioManager audioManager;
     public StartPositionsPresetLists startPositionsPresets;
-    public ComputeShader computeShaderNutrientMap;
-    public ComputeShader computeShaderFoodParticles;
-    public ComputeShader computeShaderAnimalParticles;
-    public MasterGenomePool masterGenomePool;
-    public FoodManager foodManager;
+    public ComputeShader computeShaderNutrientMap; // algae grid
+    public ComputeShader computeShaderFoodParticles;  // algae particles
+    public ComputeShader computeShaderAnimalParticles;  // animal particles
+    public MasterGenomePool masterGenomePool;  // agents
+    public FoodManager foodManager;  // --> becomes PlantManager
     public SimEventsManager simEventsManager;
+
+    // Environmental Resources: 
+    // Decomposers:
 
     public bool isQuickStart = true;
 
@@ -83,13 +86,9 @@ public class SimulationManager : MonoBehaviour {
     }
     
     public Agent[] agentsArray;    
-    //public AgentGenome[] agentGenomePoolArray;  *** OLD
-
-    //private AgentGenome[] savedGenomePoolArray1;
-    //private AgentGenome[] savedGenomePoolArray2;
-    //private AgentGenome[] savedGenomePoolArray3;
+    
     public EggSackGenome[] eggSackGenomePoolArray;
-    //private EggSackGenome foodGenomeAnimalCorpse;
+    
     public EggSack[] eggSackArray;
     private int numEggSacks = 48;
     public int _NumEggSacks {
@@ -103,23 +102,23 @@ public class SimulationManager : MonoBehaviour {
         }
     }    
     
-    public float[] rawFitnessScoresArray;
-    private int[] rankedIndicesList;
-    private float[] rankedFitnessList;
+    //public float[] rawFitnessScoresArray;
+    //private int[] rankedIndicesList;
+    //private float[] rankedFitnessList;
     public int numAgentsBorn = 0;
     public int numAgentsDied = 0;
-    public int currentOldestAgent = 0;
+    //public int currentOldestAgent = 0;
     
         // Species
-    private int numSpecies = 4;
-    public float[] speciesAvgFoodEaten;
-    public Vector2[] speciesAvgSizes;
-    public float[] speciesAvgMouthTypes;
+    //private int numSpecies = 4;
+    //public float[] speciesAvgFoodEaten;
+    //public Vector2[] speciesAvgSizes;
+    //public float[] speciesAvgMouthTypes;
     
-    public int recordBotAge = 0;
-    public Vector4 statsAvgGlobalNutrients;
-    public float statsAvgMutationRate;
-    public float[] rollingAverageAgentScoresArray;
+    //public int recordBotAge = 0;
+    //public Vector4 statsAvgGlobalNutrients;
+    //public float statsAvgMutationRate;
+    //public float[] rollingAverageAgentScoresArray;
     //public List<Vector4> statsLifespanEachGenerationList;
     //public List<Vector4> statsBodySizesEachGenerationList;
     //public List<Vector4> statsFoodEatenEachGenerationList;
@@ -146,7 +145,7 @@ public class SimulationManager : MonoBehaviour {
     //public List<float> statsMutationEachGenerationList;
     //public List<Color> statsSpeciesPrimaryColorsList;
     //public List<Color> statsSpeciesSecondaryColorsList;
-    public float agentAvgRecordScore = 1f;
+    //public float agentAvgRecordScore = 1f;
     public int curApproxGen = 1;
 
     public int numInitialHiddenNeurons = 16;
@@ -367,11 +366,11 @@ public class SimulationManager : MonoBehaviour {
         simEventsManager = new SimEventsManager(this);
 
         //debugScores:
-        rollingAverageAgentScoresArray = new float[numSpecies];
+        //rollingAverageAgentScoresArray = new float[numSpecies];
 
-        speciesAvgFoodEaten = new float[numSpecies];
-        speciesAvgSizes = new Vector2[numSpecies];
-        speciesAvgMouthTypes = new float[numSpecies];
+        //speciesAvgFoodEaten = new float[numSpecies];
+        //speciesAvgSizes = new Vector2[numSpecies];
+        //speciesAvgMouthTypes = new float[numSpecies];
                         
         LoadingInitializePopulationGenomes();
 
@@ -403,13 +402,13 @@ public class SimulationManager : MonoBehaviour {
 
         // THIS WILL BE FORCED TO BE REFACTORED!!! :::::::::
         // Sort Fitness Scores Persistent:
-        rankedIndicesList = new int[numAgents];
+        /*rankedIndicesList = new int[numAgents];
         rankedFitnessList = new float[numAgents];
 
         for (int i = 0; i < rankedIndicesList.Length; i++) {
             rankedIndicesList[i] = i;
             rankedFitnessList[i] = 1f;
-        }
+        }*/
 
         // EGGSACKS:
         eggSackGenomePoolArray = new EggSackGenome[numEggSacks];
@@ -506,7 +505,7 @@ public class SimulationManager : MonoBehaviour {
         HookUpModules();
     }
     private void LoadingSetUpFitnessStorage() {
-        rawFitnessScoresArray = new float[numAgents];
+        //rawFitnessScoresArray = new float[numAgents];
         statsNutrientsEachGenerationList = new List<Vector4>();
         statsNutrientsEachGenerationList.Add(Vector4.one * 0.0001f);
 
@@ -858,8 +857,8 @@ public class SimulationManager : MonoBehaviour {
                 float nearestEnemyAgentSqDistance = float.PositiveInfinity;
                 int closestEggSackIndex = -1; // default to -1??? ***            
                 float nearestFoodDistance = float.PositiveInfinity;
-            
-                int ownSpeciesIndex = Mathf.FloorToInt((float)a / (float)numAgents * (float)numSpecies);
+
+                int ownSpeciesIndex = agentsArray[a].speciesIndex; // Mathf.FloorToInt((float)a / (float)numAgents * (float)numSpecies);
 
                 // **** Only checking its own grid cell!!! Will need to expand to adjacent cells as well!
                 /*int index = -1;
@@ -872,6 +871,7 @@ public class SimulationManager : MonoBehaviour {
                 // **** Only checking its own grid cell!!! Will need to expand to adjacent cells as well!
                 for (int i = 0; i < mapGridCellArray[xCoord][yCoord].agentIndicesList.Count; i++) {
                     int neighborIndex = mapGridCellArray[xCoord][yCoord].agentIndicesList[i];
+                    int neighborSpeciesIndex = agentsArray[neighborIndex].speciesIndex; 
 
                     if(agentsArray[neighborIndex].curLifeStage != Agent.AgentLifeStage.Null && agentsArray[neighborIndex].curLifeStage != Agent.AgentLifeStage.AwaitingRespawn) {
                         // FRIEND:
@@ -879,7 +879,7 @@ public class SimulationManager : MonoBehaviour {
                         float squaredDistNeighbor = (neighborPos - agentPos).sqrMagnitude;
                                 
                         if (squaredDistNeighbor <= nearestFriendSquaredDistance) { // if now the closest so far, update index and dist:
-                            int neighborSpeciesIndex = Mathf.FloorToInt((float)neighborIndex / (float)numAgents * (float)numSpecies);
+                            //int neighborSpeciesIndex = agentsArray[neighborIndex].speciesIndex; // Mathf.FloorToInt((float)neighborIndex / (float)numAgents * (float)numSpecies);
                             if(ownSpeciesIndex == neighborSpeciesIndex) {  // if two agents are of same species - friends
                                 if(a != neighborIndex) {  // make sure it doesn't consider itself:
                                     closestFriendIndex = neighborIndex;
@@ -889,7 +889,7 @@ public class SimulationManager : MonoBehaviour {
                         }
 
                         if (squaredDistNeighbor <= nearestEnemyAgentSqDistance) { // if now the closest so far, update index and dist:
-                            int neighborSpeciesIndex = Mathf.FloorToInt((float)neighborIndex / (float)numAgents * (float)numSpecies);
+                            // Mathf.FloorToInt((float)neighborIndex / (float)numAgents * (float)numSpecies);
                             if(ownSpeciesIndex != neighborSpeciesIndex) {  // if two agents are of different species - enemy
                                 if(a != neighborIndex) {  // make sure it doesn't consider itself:
                                     closestEnemyAgentIndex = neighborIndex;
@@ -1104,31 +1104,19 @@ public class SimulationManager : MonoBehaviour {
     }
     // ********** RE-IMPLEMENT THIS LATER!!!! ******************************************************************************
     private void SpawnAgentFromEggSack(CandidateAgentData sourceCandidate, int agentIndex, int speciesIndex, EggSack parentEggSack) {
-
-        // Refactor this function to work with new GenomePool architecture!!!
-
-        //Debug.Log("SpawnAgentFromEggSack! " + agentIndex.ToString());
+        
         numAgentsBorn++;
-        currentOldestAgent = agentsArray[rankedIndicesList[0]].ageCounter;
+        //currentOldestAgent = agentsArray[rankedIndicesList[0]].ageCounter;
         agentsArray[agentIndex].InitializeSpawnAgentFromEggSack(settingsManager, agentIndex, sourceCandidate, parentEggSack); // Spawn that genome in dead Agent's body and revive it!
         theRenderKing.UpdateCritterGenericStrokesData(agentsArray[agentIndex]); // agentIndex, sourceCandidate.candidateGenome);
-        //theRenderKing.UpdateAgentWidthsTexture(agentsArray[agentIndex]);
-                
-        //agentRespawnCounterArrayOld[speciesIndex] = 0;
-        //agentRespawnCounter = 0;
+        
     }
     private void SpawnAgentImmaculate(CandidateAgentData sourceCandidate, int agentIndex, int speciesIndex) {
-
-        // Refactor this function to work with new GenomePool architecture!!!
         
-
         numAgentsBorn++;
-        currentOldestAgent = agentsArray[rankedIndicesList[0]].ageCounter;
+        //currentOldestAgent = agentsArray[rankedIndicesList[0]].ageCounter;
         agentsArray[agentIndex].InitializeSpawnAgentImmaculate(settingsManager, agentIndex, sourceCandidate, GetRandomFoodSpawnPosition()); // Spawn that genome in dead Agent's body and revive it!
         theRenderKing.UpdateCritterGenericStrokesData(agentsArray[agentIndex]); //agentIndex, sourceCandidate.candidateGenome);
-        //theRenderKing.UpdateAgentWidthsTexture(agentsArray[agentIndex]);
-                
-        //agentRespawnCounterArrayOld[speciesIndex] = 0;
         
     }
     public void ProcessDeadEggSack(int eggSackIndex) {
@@ -1218,11 +1206,11 @@ public class SimulationManager : MonoBehaviour {
         }
         
     }
-    private void CheckForRecordAgentScore(int agentIndex) {
+    /*private void CheckForRecordAgentScore(int agentIndex) {
         if (agentsArray[agentIndex].ageCounter > recordBotAge && agentIndex != 0) {
             recordBotAge = agentsArray[agentIndex].ageCounter;
         }
-    }
+    }*/
     
     private void ProcessAgentScores(Agent agentRef) {
 
@@ -1248,7 +1236,7 @@ public class SimulationManager : MonoBehaviour {
         
         numAgentsProcessed++;
         //get species index:
-        int speciesIndex = agentRef.speciesIndex;
+        //int speciesIndex = agentRef.speciesIndex;
 
         float weightedAvgLerpVal = 1f / 128f;
         weightedAvgLerpVal = Mathf.Max(weightedAvgLerpVal, 1f / (float)(numAgentsProcessed + 1));
@@ -1493,7 +1481,7 @@ public class SimulationManager : MonoBehaviour {
         agentGenomePoolArray[agentIndex].brainGenome = newBrainGenome;         
     }*/
     
-    private StartPositionGenome GetRandomAgentSpawnPosition(int speciesIndex) {
+    /*private StartPositionGenome GetRandomAgentSpawnPosition(int speciesIndex) {
         int numSpawnZones = startPositionsPresets.spawnZonesList.Count;
 
         int randZone = UnityEngine.Random.Range(0, numSpawnZones);
@@ -1526,7 +1514,7 @@ public class SimulationManager : MonoBehaviour {
         Vector3 startPos = Vector3.Lerp(agentStartPos, randStartPos, Mathf.Round(UnityEngine.Random.Range(0f, 1f)));
         StartPositionGenome startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
         return startPosGenome;
-    }
+    }*/
     private StartPositionGenome GetInitialAgentSpawnPosition(int speciesIndex)
     {
         int numSpawnZones = startPositionsPresets.spawnZonesList.Count;

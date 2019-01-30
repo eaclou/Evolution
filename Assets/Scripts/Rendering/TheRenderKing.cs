@@ -35,6 +35,7 @@ public class TheRenderKing : MonoBehaviour {
     public ComputeShader computeShaderTreeOfLife;
     //public ComputeShader computeShaderTerrainGeneration;
 
+        // ORGANIZE AND REMOVE UNUSED!!!!!! *********
     public Material agentEyesDisplayMat;
     public Material curveStrokeDisplayMat;
     public Material trailStrokeDisplayMat;
@@ -3444,6 +3445,7 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, critterShadowStrokesDisplayMat, 0, MeshTopology.Triangles, 6, critterSkinStrokesCBuffer.count);
         */
+
         critterUberStrokeShadowMat.SetPass(0);
         critterUberStrokeShadowMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         critterUberStrokeShadowMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
@@ -3469,6 +3471,7 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferTest.SetGlobalTexture("_RenderedSceneRT", renderedSceneID);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, eggSackShadowDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.eggDataCBuffer.count);
         
+
         /*
         // FOOD PARTICLE SHADOWS::::
         foodParticleShadowDisplayMat.SetPass(0);
@@ -3479,7 +3482,7 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, foodParticleShadowDisplayMat, 0, MeshTopology.Triangles, 6, simManager.foodParticlesCBuffer.count);
         */
 
-        if(!simManager.uiManager.tolInspectOn) {
+        /*if(!simManager.uiManager.tolInspectOn) {
             critterInspectHighlightMat.SetPass(0);
             critterInspectHighlightMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
             critterInspectHighlightMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
@@ -3506,7 +3509,7 @@ public class TheRenderKing : MonoBehaviour {
             critterInspectHighlightMat.SetFloat("_IsLockedOn", isLockedOn);
             critterInspectHighlightMat.SetInt("_SelectedSpecies", simManager.uiManager.treeOfLifeManager.selectedID);
             cmdBufferTest.DrawProcedural(Matrix4x4.identity, critterInspectHighlightMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.critterInitDataCBuffer.count);
-        }
+        }*/
         
         foodParticleDisplayMat.SetPass(0);
         foodParticleDisplayMat.SetBuffer("foodParticleDataCBuffer", simManager.foodManager.foodParticlesCBuffer);
@@ -3514,7 +3517,7 @@ public class TheRenderKing : MonoBehaviour {
         foodParticleDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, foodParticleDisplayMat, 0, MeshTopology.Triangles, 6, simManager.foodManager.foodParticlesCBuffer.count);
         
-        // shadows later on
+        // add shadow pass eventually
         animalParticleDisplayMat.SetPass(0);
         animalParticleDisplayMat.SetBuffer("animalParticleDataCBuffer", simManager.foodManager.animalParticlesCBuffer);
         animalParticleDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -3532,6 +3535,7 @@ public class TheRenderKing : MonoBehaviour {
         eggSackStrokeDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, eggSackStrokeDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.eggDataCBuffer.count);
         
+        // *** Revisit this in future - probably can get away without it, just use one pass for all eggSacks
         eggCoverDisplayMat.SetPass(0);
         eggCoverDisplayMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
         eggCoverDisplayMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
@@ -3556,11 +3560,7 @@ public class TheRenderKing : MonoBehaviour {
 
         //RenderTargetIdentifier waterTargetID = new RenderTargetIdentifier(primaryRT);
         //cmdBufferTest.Blit(waterTargetID, primaryRT);
-
-        
-        
-        
-        
+                
         // WATER DEBRIS BITS:
         /*baronVonWater.waterDebrisBitsDisplayMat.SetPass(0);
         baronVonWater.waterDebrisBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -3635,6 +3635,8 @@ public class TheRenderKing : MonoBehaviour {
         // DEBUG BODY START:
         // Test Debug Critter Body:
         //critterDebugGenericStrokeMat
+
+        // What is this????
         critterDebugGenericStrokeMat.SetPass(0);
         critterDebugGenericStrokeMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         critterDebugGenericStrokeMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
@@ -3645,9 +3647,10 @@ public class TheRenderKing : MonoBehaviour {
         //critterDebugGenericStrokeMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
         critterDebugGenericStrokeMat.SetFloat("_MapSize", SimulationManager._MapSize);            
         cmdBufferTest.DrawProcedural(Matrix4x4.identity, critterDebugGenericStrokeMat, 0, MeshTopology.Triangles, 6, critterGenericStrokesCBuffer.count);
-            
+
 
         // WATER BITS TEMP::::::::::::::^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        // use this as algae grid???
         baronVonWater.waterNutrientsBitsDisplayMat.SetPass(0);
         baronVonWater.waterNutrientsBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         baronVonWater.waterNutrientsBitsDisplayMat.SetBuffer("frameBufferStrokesCBuffer", baronVonWater.waterNutrientsBitsCBuffer);
