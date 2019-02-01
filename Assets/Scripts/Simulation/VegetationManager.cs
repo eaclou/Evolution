@@ -24,7 +24,7 @@ public class VegetationManager {
     public float curGlobalAlgaeReservoirAmount = 0f;  // separate from algaeParticles -- takes place of algaeGrid
     // (AnimalParticles eating from grid is more complicated than necessary for first go around) ***
 
-    public int algaeGridTexResolution = 32;
+    public int algaeGridTexResolution = 32; // Temporarily disabled - replaced by single value (1x1 grid)
     public RenderTexture algaeGridRT1;
     public RenderTexture algaeGridRT2;
     public Vector4[] algaeGridSamplesArray;

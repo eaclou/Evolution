@@ -109,7 +109,7 @@ public class CritterModuleEnvironment {
         float raycastMaxLength = genome.maxRange;        
         //Debug.Log(LayerMask.GetMask("EnvironmentCollision"));
         //Debug.Log(mask.ToString());
-        if(genome.useCardinals) {
+        /*if(genome.useCardinals) {
             // TOP
             
             RaycastHit2D hitTop = Physics2D.Raycast(agent.ownPos, Vector2.up, raycastMaxLength, rayLayer);  // UP
@@ -171,6 +171,6 @@ public class CritterModuleEnvironment {
                 distance = (hitTopLeft.point - agent.ownPos).magnitude;
             }
             distTopLeft[0] = (raycastMaxLength - distance) / raycastMaxLength;  
-        }
+        }*/
     }
 }

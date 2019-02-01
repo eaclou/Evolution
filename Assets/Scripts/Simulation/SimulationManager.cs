@@ -525,89 +525,30 @@ public class SimulationManager : MonoBehaviour {
     public void TickSimulation() {
         simAgeTimeSteps++;
         simAgeYearCounter++;
-        if(simAgeYearCounter >= numStepsInSimYear) {
-            curSimYear++;
-            simEventsManager.curEventBucks += 5; // temporarilly high!
-            simAgeYearCounter = 0;
-
-            // update graphs each "year"
-            if(curSimYear % 2 == 0) {                
-                vegetationManager.MoveRandomNutrientPatches(UnityEngine.Random.Range(0, vegetationManager.nutrientSpawnPatchesArray.Length));
-            }
-
-            AddNewHistoricalDataEntry();
-            AddNewSpeciesDataEntry(curSimYear);
-            uiManager.UpdateSpeciesTreeDataTextures(curSimYear);
-            //RefeshGraphData();
-            
-            if(curSimYear == 1) {
-                SimEventData newEventData = new SimEventData();
-                newEventData.name = "First Full Year";
-                newEventData.category = SimEventData.SimEventCategories.NPE;
-                newEventData.timeStepActivated = simAgeTimeSteps;
-                simEventsManager.completeEventHistoryList.Add(newEventData);
-            }
-            if(curSimYear == 10) {
-                SimEventData newEventData = new SimEventData();
-                newEventData.name = "Decade";
-                newEventData.category = SimEventData.SimEventCategories.NPE;
-                newEventData.timeStepActivated = simAgeTimeSteps;
-                simEventsManager.completeEventHistoryList.Add(newEventData);
-            }
-            if(curSimYear == 100) {
-                SimEventData newEventData = new SimEventData();
-                newEventData.name = "Century";
-                newEventData.category = SimEventData.SimEventCategories.NPE;
-                newEventData.timeStepActivated = simAgeTimeSteps;
-                simEventsManager.completeEventHistoryList.Add(newEventData);
-            }
-            if(curSimYear == 1000) {
-                SimEventData newEventData = new SimEventData();
-                newEventData.name = "Millenium";
-                newEventData.category = SimEventData.SimEventCategories.NPE;
-                newEventData.timeStepActivated = simAgeTimeSteps;
-                simEventsManager.completeEventHistoryList.Add(newEventData);
-            }
-            //theRenderKing.SimTreeOfLifeWorldStatsData(uiManager.statsTextureLifespan); // Revise this!!!
-            //environmentFluidManager.RerollForcePoints();
-        }
-
-        if(simAgeTimeSteps % 21 == 3) {
-            UpdateSimulationClimate();
-
-            RefreshLatestHistoricalDataEntry();
-            RefreshLatestSpeciesDataEntry();
-            uiManager.UpdateSpeciesTreeDataTextures(curSimYear); // shouldn't lengthen!
-            
-            uiManager.UpdateTolWorldStatsTexture(statsNutrientsEachGenerationList);
-            
-            theRenderKing.UpdateTreeOfLifeEventLineData(simEventsManager.completeEventHistoryList);
-        }
-
-        simEventsManager.Tick();
-
-        
+        TickSparseEvents();  // Updates that don't happen every frame        
+        simEventsManager.Tick();  // Cooldown increment                
         eggSackRespawnCounter++;
         agentRespawnCounter++;
+        masterGenomePool.Tick(); // keep track of when species created so can't create multiple per frame?
 
-        //float totalNutrients = vegetationManager.MeasureTotalAlgaeGridAmount();
-        //vegetationManager.GetAlgaeGridValuesAtMouthPositions(simStateData);
-
-        //Find closest critters to foodParticles:
+        // MEASURE GLOBAL RESOURCES:
+        
         vegetationManager.FindClosestFoodParticleToCritters(simStateData);
         vegetationManager.MeasureTotalFoodParticlesAmount();
-
         vegetationManager.FindClosestAnimalParticleToCritters(simStateData);
         vegetationManager.MeasureTotalAnimalParticlesAmount();
 
-        masterGenomePool.Tick(); // keep track of when species created so can't create multiple per frame?
-                
+        
+        // CHECK FOR NULL Objects:        
         // ******** REVISIT CODE ORDERING!!!!  -- Should check for death Before or After agent Tick/PhysX ???
         CheckForDevouredEggSacks();
         CheckForNullAgents();  // Result of this will affect: "simStateData.PopulateSimDataArrays(this)" !!!!!
-        CheckForReadyToSpawnAgents();        
+        CheckForReadyToSpawnAgents();
+        
 
         simStateData.PopulateSimDataArrays(this);  // reads from GameObject Transforms & RigidBodies!!! ++ from FluidSimulationData!!!        
+
+
         theRenderKing.RenderSimulationCameras(); // will pass current info to FluidSim before it Ticks()
         // Reads from CameraRenders, GameObjects, and query GPU for fluidState
         // eventually, if agents get fluid sensors, will want to download FluidSim data from GPU into simStateData!*        
@@ -617,21 +558,11 @@ public class SimulationManager : MonoBehaviour {
 
         HookUpModules(); // Sets nearest-neighbors etc. feed current data into agent Brains
         
-        // &&&&& STEP SIMULATION FORWARD:::: &&&&&&&&&&
-        // &&&&& STEP SIMULATION FORWARD:::: &&&&&&&&&&
         // Load gameState into Agent Brain, process brain function, read out brainResults,
         // Execute Agent Actions -- apply propulsive force to each Agent:
         for (int i = 0; i < agentsArray.Length; i++) {
             // *** FIND FOOD GRID CELL!!!!  ************
             Vector2 agentPos = agentsArray[i].bodyRigidbody.transform.position;
-            /*
-            int foodGridIndexX = Mathf.FloorToInt(agentPos.x / mapSize * (float)foodGridResolution);
-            foodGridIndexX = Mathf.Clamp(foodGridIndexX, 0, foodGridResolution - 1);
-            int foodGridIndexY = Mathf.FloorToInt(agentPos.y / mapSize * (float)foodGridResolution);
-            foodGridIndexY = Mathf.Clamp(foodGridIndexY, 0, foodGridResolution - 1);
-            */
-            //agentsArray[i].Tick(new Vector4(0f,0f,0f,0f), ref nutrientEatAmountsArray);  
-            //agentsArray[i].Tick(this, vegetationManager.algaeGridSamplesArray[i], ref vegetationManager.algaeGridEatAmountsArray, settingsManager);  
             agentsArray[i].Tick(this, settingsManager);  
         }
         for (int i = 0; i < eggSackArray.Length; i++) {
@@ -682,7 +613,63 @@ public class SimulationManager : MonoBehaviour {
         // Or should this be right at beginning of frame????? ***************** revisit...
         environmentFluidManager.Tick(); // ** Clean this up, but generally OK
     }
+    private void TickSparseEvents() {
+        if(simAgeYearCounter >= numStepsInSimYear) {
+            curSimYear++;
+            simEventsManager.curEventBucks += 5; // temporarilly high!
+            simAgeYearCounter = 0;
 
+            // update graphs each "year"
+            //if(curSimYear % 2 == 0) {                
+            //    vegetationManager.MoveRandomNutrientPatches(UnityEngine.Random.Range(0, vegetationManager.nutrientSpawnPatchesArray.Length));
+            //}
+
+            AddNewHistoricalDataEntry();
+            AddNewSpeciesDataEntry(curSimYear);
+            uiManager.UpdateSpeciesTreeDataTextures(curSimYear);
+                        
+            if(curSimYear == 1) {
+                SimEventData newEventData = new SimEventData();
+                newEventData.name = "First Full Year";
+                newEventData.category = SimEventData.SimEventCategories.NPE;
+                newEventData.timeStepActivated = simAgeTimeSteps;
+                simEventsManager.completeEventHistoryList.Add(newEventData);
+            }
+            if(curSimYear == 10) {
+                SimEventData newEventData = new SimEventData();
+                newEventData.name = "Decade";
+                newEventData.category = SimEventData.SimEventCategories.NPE;
+                newEventData.timeStepActivated = simAgeTimeSteps;
+                simEventsManager.completeEventHistoryList.Add(newEventData);
+            }
+            if(curSimYear == 100) {
+                SimEventData newEventData = new SimEventData();
+                newEventData.name = "Century";
+                newEventData.category = SimEventData.SimEventCategories.NPE;
+                newEventData.timeStepActivated = simAgeTimeSteps;
+                simEventsManager.completeEventHistoryList.Add(newEventData);
+            }
+            if(curSimYear == 1000) {
+                SimEventData newEventData = new SimEventData();
+                newEventData.name = "Millenium";
+                newEventData.category = SimEventData.SimEventCategories.NPE;
+                newEventData.timeStepActivated = simAgeTimeSteps;
+                simEventsManager.completeEventHistoryList.Add(newEventData);
+            }
+        }
+
+        if(simAgeTimeSteps % 21 == 3) {
+            UpdateSimulationClimate();
+
+            RefreshLatestHistoricalDataEntry();
+            RefreshLatestSpeciesDataEntry();
+            uiManager.UpdateSpeciesTreeDataTextures(curSimYear); // shouldn't lengthen!
+            
+            uiManager.UpdateTolWorldStatsTexture(statsNutrientsEachGenerationList);
+            
+            theRenderKing.UpdateTreeOfLifeEventLineData(simEventsManager.completeEventHistoryList);
+        }
+    }
     private void ApplyFluidForcesToDynamicObjects() {
         // ********** REVISIT CONVERSION btw fluid/scene coords and Force Amounts !!!! *************
         for (int i = 0; i < agentsArray.Length; i++) {
@@ -1172,12 +1159,7 @@ public class SimulationManager : MonoBehaviour {
         }
         
     }
-    /*private void CheckForRecordAgentScore(int agentIndex) {
-        if (agentsArray[agentIndex].ageCounter > recordBotAge && agentIndex != 0) {
-            recordBotAge = agentsArray[agentIndex].ageCounter;
-        }
-    }*/
-    
+        
     private void ProcessAgentScores(Agent agentRef) {
 
         // Expand this to handle more complex Fitness Functions with more components:
@@ -1279,77 +1261,7 @@ public class SimulationManager : MonoBehaviour {
         //avgLifespanPerYearList[avgLifespanPerYearList.Count - 1] = avgLifespan;
         
     }
-    /*private void RefreshGraphData() {
-        
-        // Pack stats data into textures for GPU:
-        // NEW:
-        uiManager.UpdateTolWorldStatsTexture(statsNutrientsEachGenerationList);        
-        
-        // OLD:::
-        uiManager.UpdateGraphDataTextures(curSimYear);
-        uiManager.UpdateStatsTextureNutrients(statsNutrientsEachGenerationList);
-
-
-    }*/
-    /*private void RefreshGraphTextureLifespan() {
-        Debug.Log("Happy New Years! (refreshing graph) " + curSimYear.ToString());
-        uiManager.UpdateStatsTextureLifespan(curSimYear);
-    }
-    private void RefreshGraphTextureBodySizes() {
-        //uiManager.UpdateStatsTextureBodySizes(statsBodySizesEachGenerationList);
-    }
-    private void RefreshGraphTextureFoodEaten() {
-        //uiManager.UpdateStatsTextureFoodEaten(statsFoodEatenEachGenerationList);
-    }
-    private void RefreshGraphTexturePredation() {
-        //uiManager.UpdateStatsTexturePredation(statsPredationEachGenerationList);
-    }
-    private void RefreshGraphTextureNutrients() {
-        uiManager.UpdateStatsTextureNutrients(statsNutrientsEachGenerationList);
-    }
-    private void RefreshGraphTextureMutation() {
-        //uiManager.UpdateStatsTextureMutation(statsMutationEachGenerationList);
-    }
-    */
-    /*private void ProcessAndRankAgentFitness(int speciesIndex) {
-        // Measure fitness of all current agents (their genomes, actually)  NOT PLAYER!!!!
-        for (int i = 0; i < rawFitnessScoresArray.Length; i++) {
-            rawFitnessScoresArray[i] = (float)agentsArray[i].masterFitnessScore;
-        }
-
-        int popSize = (numAgents / numSpecies);
-        int startIndex = popSize * speciesIndex;
-        int endIndex = popSize * (speciesIndex + 1);
-
-        // populate arrays:
-        for (int i = startIndex; i < endIndex; i++) {
-            try {
-                rankedIndicesList[i] = i; // i+1;
-            }
-            catch {
-                Debug.Log("Error! i = " + i.ToString() + ", arrayLength: " + rankedIndicesList.Length.ToString() + ", popSize: " + popSize.ToString() + "si: " + speciesIndex.ToString());
-            }
-            
-            rankedFitnessList[i] = rawFitnessScoresArray[i]; //rawFitnessScoresArray[i+1];
-        } // Sort By Fitness
-        for (int i = startIndex; i < endIndex - 1; i++) {
-            for (int j = startIndex; j < endIndex - 1; j++) {
-                float swapFitA = rankedFitnessList[j];
-                float swapFitB = rankedFitnessList[j + 1];
-                int swapIdA = rankedIndicesList[j];
-                int swapIdB = rankedIndicesList[j + 1];
-
-                if (swapFitA < swapFitB) {  // bigger is better now after inversion
-                    rankedFitnessList[j] = swapFitB;
-                    rankedFitnessList[j + 1] = swapFitA;
-                    rankedIndicesList[j] = swapIdB;
-                    rankedIndicesList[j + 1] = swapIdA;
-                }
-            }
-        }
-    }
-    */
-
+    
     public void AddNewSpecies(AgentGenome newGenome, int parentSpeciesID) {
         int newSpeciesID = masterGenomePool.completeSpeciesPoolsList.Count;
 
@@ -1432,55 +1344,6 @@ public class SimulationManager : MonoBehaviour {
         //Debug.Log("New Species Created!!! (" + newSpeciesID.ToString() + "] score: " + closestDistance.ToString());
     }
     
-    /*private void SetAgentGenomeToMutatedCopyOfParentGenome(int agentIndex, AgentGenome parentGenome) {
-
-        BodyGenome newBodyGenome = new BodyGenome();
-        BrainGenome newBrainGenome = new BrainGenome();
-
-        BodyGenome parentBodyGenome = parentGenome.bodyGenome;
-        BrainGenome parentBrainGenome = parentGenome.brainGenome;
-
-        newBodyGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome, settingsManager.mutationSettingsPersistent);
-        newBrainGenome.SetToMutatedCopyOfParentGenome(parentBrainGenome, settingsManager.mutationSettingsPersistent);
-        
-        agentGenomePoolArray[agentIndex].bodyGenome = newBodyGenome; 
-        agentGenomePoolArray[agentIndex].brainGenome = newBrainGenome;         
-    }*/
-    
-    /*private StartPositionGenome GetRandomAgentSpawnPosition(int speciesIndex) {
-        int numSpawnZones = startPositionsPresets.spawnZonesList.Count;
-
-        int randZone = UnityEngine.Random.Range(0, numSpawnZones);
-
-        int numPotentialParents = numEggSacks / numSpecies;
-        int lowIndex = numPotentialParents * speciesIndex;
-        int highIndex = (numPotentialParents + 1) * speciesIndex;
-
-        int randParentIndex = UnityEngine.Random.Range(lowIndex, highIndex);
-
-
-        float randRadius = startPositionsPresets.spawnZonesList[randZone].radius;
-
-        Vector2 randOffset = UnityEngine.Random.insideUnitCircle * randRadius;
-
-        if(randParentIndex >= eggSackArray.Length)
-        {
-            Debug.Log("ERROR!: " + randParentIndex.ToString() + ", " + numEggSacks.ToString());
-        }
-        Vector3 parentEggPos = eggSackArray[randParentIndex].transform.position;
-
-        Vector3 agentStartPos = new Vector3(parentEggPos.x + randOffset.x,
-                               parentEggPos.y + randOffset.y,
-                               0f);
-
-        Vector3 randStartPos = new Vector3(startPositionsPresets.spawnZonesList[randZone].transform.position.x + randOffset.x, 
-                               startPositionsPresets.spawnZonesList[randZone].transform.position.y + randOffset.y, 
-                               0f);
-
-        Vector3 startPos = Vector3.Lerp(agentStartPos, randStartPos, Mathf.Round(UnityEngine.Random.Range(0f, 1f)));
-        StartPositionGenome startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
-        return startPosGenome;
-    }*/
     private StartPositionGenome GetInitialAgentSpawnPosition(int speciesIndex)
     {
         int numSpawnZones = startPositionsPresets.spawnZonesList.Count;

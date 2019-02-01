@@ -21,7 +21,7 @@ public class CritterModuleCore {
 
     public float stomachContentsNorm = 0f;  // 0-1 normalized
     public float stomachCapacity = 0.5f;  // absolute value in units of (area?)
-    public float stomachContentsDecay = 0f;
+    //public float stomachContentsDecay = 0f;
     public float stomachContentsPlant = 0f;
     public float stomachContentsMeat = 0f;
 
