@@ -1,9 +1,9 @@
-﻿#pragma kernel CSGetNutrientSamples
-#pragma kernel CSUpdateNutrientMap
-#pragma kernel CSInitializeNutrientMap
-#pragma kernel CSRemoveNutrientsAtLocations
-#pragma kernel CSMeasureTotalNutrients
-#pragma kernel CSAddNutrientsAtCoords
+﻿#pragma kernel CSGetAlgaeGridSamples
+#pragma kernel CSUpdateAlgaeGrid
+#pragma kernel CSInitializeAlgaeGrid
+#pragma kernel CSRemoveAlgaeAtLocations
+#pragma kernel CSMeasureTotalAlgae
+#pragma kernel CSAddAlgaeAtCoords
 
 
 #include "Assets/Resources/Shaders/Inc/StructsCritterData.cginc"
@@ -13,14 +13,14 @@ StructuredBuffer<CritterSimData> critterSimDataCBuffer;
 
 Texture2D<float4> ObstaclesRead;
 
-RWStructuredBuffer<float4> nutrientSamplesCBuffer;
-StructuredBuffer<float4> nutrientEatAmountsCBuffer;
+RWStructuredBuffer<float4> algaeGridSamplesCBuffer;
+StructuredBuffer<float4> algaeGridEatAmountsCBuffer;
 
-Texture2D<float4> nutrientMapRead;
-RWTexture2D<float4> nutrientMapWrite;
+Texture2D<float4> algaeGridRead;
+RWTexture2D<float4> algaeGridWrite;
 
 RWStructuredBuffer<float4> outputValuesCBuffer;
-StructuredBuffer<float4> addNutrientsCBuffer;
+StructuredBuffer<float4> addAlgaeCBuffer;
 Texture2D<float4> measureValuesTex;
 RWTexture2D<float4> pooledResultTex;
 
@@ -29,34 +29,34 @@ SamplerState _LinearRepeat;
 SamplerState _PointClamp;
 SamplerState _PointRepeat;
 
-uniform float _NutrientDiffusion;
+uniform float _AlgaeGridDiffusion;
 uniform float _MapSize;
 
 [numthreads(1,1,1)]
-void CSGetNutrientSamples (uint3 id : SV_DispatchThreadID)
+void CSGetAlgaeGridSamples (uint3 id : SV_DispatchThreadID)
 {	
 	CritterSimData critterSimData = critterSimDataCBuffer[id.x];
 
 	float2 uv = critterSimData.worldPos.xy / _MapSize;
-	float4 nutrientAmount = nutrientMapRead.SampleLevel(_PointClamp, uv, 0);
+	float4 algaeGridAmount = algaeGridRead.SampleLevel(_PointClamp, uv, 0);
 
 	// want gradient! -- pack into .yz channels :::
 	// calculate gradient each step and store value
 
-	nutrientSamplesCBuffer[id.x] = nutrientAmount;
+	algaeGridSamplesCBuffer[id.x] = algaeGridAmount;
 }
 
 [numthreads(32,32,1)]
-void CSUpdateNutrientMap (uint3 id : SV_DispatchThreadID)
+void CSUpdateAlgaeGrid (uint3 id : SV_DispatchThreadID)
 {	
 	// Diffusion - food blurs and spreads out
 	// Store Gradient of increasing food density
 			
-    float amountRight = nutrientMapRead[int2(id.x + 1, id.y)].x;
-    float amountLeft = nutrientMapRead[int2(id.x - 1, id.y)].x;
-    float amountUp = nutrientMapRead[int2(id.x, id.y + 1)].x;
-    float amountDown = nutrientMapRead[int2(id.x, id.y - 1)].x;
-    float amountCenter = nutrientMapRead[id.xy].x;
+    float amountRight = algaeGridRead[int2(id.x + 1, id.y)].x;
+    float amountLeft = algaeGridRead[int2(id.x - 1, id.y)].x;
+    float amountUp = algaeGridRead[int2(id.x, id.y + 1)].x;
+    float amountDown = algaeGridRead[int2(id.x, id.y - 1)].x;
+    float amountCenter = algaeGridRead[id.xy].x;
 
 	// Check vs obstacles??
 	float xCoord = ((float)id.x + 0.5)  / 32;  // ** Bad hardcoded!!!!!
@@ -85,60 +85,61 @@ void CSUpdateNutrientMap (uint3 id : SV_DispatchThreadID)
 	if(abs(deltaX) > 0.000001 || abs(deltaY) > 0.000001) {
 		grad = normalize(float2(deltaX, deltaY));
 	}
-    //float2 grad = normalize(float2(deltaX, deltaY));
+    
+	//float2 grad = normalize(float2(deltaX, deltaY));
 	// Make sure this doesn't return null/undefined!!!!! ******  ***  (I didn't) ****
 	
-	float newAmount = lerp(amountCenter, (amountCenter + amountRight + amountLeft + amountUp + amountDown) / 5, _NutrientDiffusion);
+	float newAmount = lerp(amountCenter, (amountCenter + amountRight + amountLeft + amountUp + amountDown) / 5, _AlgaeGridDiffusion);
 
-	nutrientMapWrite[id.xy] = float4(newAmount, grad, 1.0);
+	algaeGridWrite[id.xy] = float4(newAmount, grad, 1.0);
 }
 
 [numthreads(32,32,1)]
-void CSInitializeNutrientMap (uint3 id : SV_DispatchThreadID)
+void CSInitializeAlgaeGrid (uint3 id : SV_DispatchThreadID)
 {	
-	nutrientMapWrite[id.xy] = float4(0.033, 0, 0, 1);
+	algaeGridWrite[id.xy] = float4(0.033, 0, 0, 1);
 }
 
 [numthreads(1,1,1)]
-void CSRemoveNutrientsAtLocations (uint3 id : SV_DispatchThreadID)
+void CSRemoveAlgaeAtLocations (uint3 id : SV_DispatchThreadID)
 {	
 	// takes a list of info:
 	// --cell index x,y
 	// --amount of food to remove / mouth stats
 	// buffer of floats per Critter?
 
-	uint xIndex = floor(critterSimDataCBuffer[id.x].worldPos.x / _MapSize * 32);
+	uint xIndex = floor(critterSimDataCBuffer[id.x].worldPos.x / _MapSize * 32);  // 32 = hardcoded resolution ****
 	uint yIndex = floor(critterSimDataCBuffer[id.x].worldPos.y / _MapSize * 32);
 
 	uint2 cellIndex = uint2(xIndex, yIndex);
 
-	float4 currentAmount = nutrientMapRead[cellIndex];
-	float amountToRemove = nutrientEatAmountsCBuffer[id.x].x;
+	float4 currentAmount = algaeGridRead[cellIndex];
+	float amountToRemove = algaeGridEatAmountsCBuffer[id.x].x;
 
 	currentAmount.x = max(0.0, currentAmount.x - amountToRemove);
 
-	nutrientMapWrite[cellIndex] = currentAmount;
+	algaeGridWrite[cellIndex] = currentAmount;
 
 	// WHY SO SLOW????
 }
 
 [numthreads(1,1,1)]
-void CSMeasureTotalNutrients (uint3 id : SV_DispatchThreadID)
+void CSMeasureTotalAlgae (uint3 id : SV_DispatchThreadID)
 {	
 	// for each output pixel, loop through original 2x2 pixels and sum them together
 
-	float totalNutrients = 0.0;
+	float totalAlgae = 0.0;
 
 	for(int x = 0; x < 2; x++) {
 		for(int y = 0; y < 2; y++) {
 			int xIndex = id.x * 2 + x;
 			int yIndex = id.y * 2 + y;
 
-			totalNutrients += measureValuesTex[int2(xIndex, yIndex)].x;
+			totalAlgae += measureValuesTex[int2(xIndex, yIndex)].x;
 		}
 	}
 
-	float4 pixValue = float4(totalNutrients,9,1,1);
+	float4 pixValue = float4(totalAlgae,9,1,1); // *** ?????
 
 	pooledResultTex[id.xy] = pixValue;
 
@@ -146,18 +147,18 @@ void CSMeasureTotalNutrients (uint3 id : SV_DispatchThreadID)
 }
 
 [numthreads(1,1,1)]
-void CSAddNutrientsAtCoords (uint3 id : SV_DispatchThreadID)
+void CSAddAlgaeAtCoords (uint3 id : SV_DispatchThreadID)
 {	
-	float4 data = addNutrientsCBuffer[id.x];
+	float4 data = addAlgaeCBuffer[id.x];
 	
 	float amount = data.x;
 	int xIndex = floor(data.y * 32.0);
 	int yIndex = floor(data.z * 32.0);
 	int2 index = int2(xIndex, yIndex);
 
-	float4 currentNutrients = nutrientMapRead[index];
+	float4 currentAlgaeGrid = algaeGridRead[index];
 
-	currentNutrients.x += amount;
+	currentAlgaeGrid.x += amount;
 
-	nutrientMapWrite[index] = currentNutrients;
+	algaeGridWrite[index] = currentAlgaeGrid;
 }

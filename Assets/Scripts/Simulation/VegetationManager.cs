@@ -7,47 +7,50 @@ using UnityEngine;
 /// <summary>
 ///  Move Food-related stuff from SimulationManager into here to de-clutter simManager:
 /// </summary>
-public class FoodManager {
+public class VegetationManager {
 
     public SettingsManager settingsRef;
 
-    private ComputeShader computeShaderNutrientMap;
-    private ComputeShader computeShaderFoodParticles;
+    private ComputeShader computeShaderAlgaeGrid;
+    private ComputeShader computeShaderAlgaeParticles;
     private ComputeShader computeShaderAnimalParticles;
 
-    public float curGlobalNutrients = 0f;
-    public float curGlobalFoodParticles = 0f;
+    public float curGlobalAlgaeGrid = 0f;
+    public float curGlobalAlgaeParticles = 0f;
     public float curGlobalAnimalParticles = 0f;
     public float curGlobalEggSackVolume = 0f;
     public float curGlobalCarrionVolume = 0f;
 
-    public int nutrientMapResolution = 32;
-    public RenderTexture nutrientMapRT1;
-    public RenderTexture nutrientMapRT2;
-    public Vector4[] nutrientSamplesArray;
-    public Vector4[] nutrientEatAmountsArray;
+    public float curGlobalAlgaeReservoirAmount = 0f;  // separate from algaeParticles -- takes place of algaeGrid
+    // (AnimalParticles eating from grid is more complicated than necessary for first go around) ***
+
+    public int algaeGridTexResolution = 32;
+    public RenderTexture algaeGridRT1;
+    public RenderTexture algaeGridRT2;
+    public Vector4[] algaeGridSamplesArray;
+    public Vector4[] algaeGridEatAmountsArray;
 
     private RenderTexture tempTex16;
-    private RenderTexture tempTex8;
+    private RenderTexture tempTex8;  // <-- remove these and make function compress 4x
     private RenderTexture tempTex4;
-    private RenderTexture tempTex2;
+    private RenderTexture tempTex2;  // <-- remove these and make function compress 4x
     private RenderTexture tempTex1;
     
-    private ComputeBuffer nutrientSamplesCBuffer;
+    private ComputeBuffer algaeGridSamplesCBuffer;
 
-    private const int numFoodParticles = 1024;  // *** 
-    public ComputeBuffer foodParticlesCBuffer;
-    private ComputeBuffer foodParticlesCBufferSwap;    
-    private RenderTexture foodParticlesNearestCritters1024;
-    private RenderTexture foodParticlesNearestCritters32;
-    private RenderTexture foodParticlesNearestCritters1;
-    private ComputeBuffer closestFoodParticlesDataCBuffer;
-    public FoodParticleData[] closestFoodParticlesDataArray;
-    private ComputeBuffer foodParticlesEatAmountsCBuffer;
-    public float[] foodParticlesEatAmountsArray;
-    private ComputeBuffer foodParticlesMeasure32;
-    private ComputeBuffer foodParticlesMeasure1;
-    private FoodParticleData[] foodParticleMeasurementTotalsData;
+    private const int numAlgaeParticles = 1024;  // *** 
+    public ComputeBuffer algaeParticlesCBuffer;
+    private ComputeBuffer algaeParticlesCBufferSwap;    
+    private RenderTexture algaeParticlesNearestCritters1024;
+    private RenderTexture algaeParticlesNearestCritters32;
+    private RenderTexture algaeParticlesNearestCritters1;
+    private ComputeBuffer closestAlgaeParticlesDataCBuffer;
+    public AlgaeParticleData[] closestAlgaeParticlesDataArray;
+    private ComputeBuffer algaeParticlesEatAmountsCBuffer;
+    public float[] algaeParticlesEatAmountsArray;
+    private ComputeBuffer algaeParticlesMeasure32;
+    private ComputeBuffer algaeParticlesMeasure1;
+    private AlgaeParticleData[] algaeParticleMeasurementTotalsData;
 
     private const int numAnimalParticles = 1024;  // *** 
     public ComputeBuffer animalParticlesCBuffer;
@@ -64,10 +67,10 @@ public class FoodManager {
     private AnimalParticleData[] animalParticleMeasurementTotalsData;
 
 
-    public Vector2[] nutrientPatchesArray;
+    public Vector2[] nutrientSpawnPatchesArray;
 
     
-    public struct FoodParticleData {
+    public struct AlgaeParticleData {
         public int index;
         public int critterIndex;
         public int nearestCritterIndex;
@@ -96,7 +99,7 @@ public class FoodManager {
 	    public float speed;
     }
     
-    private int GetFoodParticleDataSize() {
+    private int GetAlgaeParticleDataSize() {
         int bitSize = sizeof(float) * 9 + sizeof(int) * 3;
         return bitSize;
     }
@@ -107,76 +110,76 @@ public class FoodManager {
     }
 
     public void MoveRandomNutrientPatches(int index) {
-        nutrientPatchesArray[index] = new Vector2(UnityEngine.Random.Range(0.1f, 0.9f), UnityEngine.Random.Range(0.1f, 0.9f)); // (UnityEngine.Random.insideUnitCircle + Vector2.one) * 0.5f;
-        Debug.Log("Moved Nutrient Patch! [" + index.ToString() + "], " + nutrientPatchesArray[index].ToString());
+        nutrientSpawnPatchesArray[index] = new Vector2(UnityEngine.Random.Range(0.1f, 0.9f), UnityEngine.Random.Range(0.1f, 0.9f)); // (UnityEngine.Random.insideUnitCircle + Vector2.one) * 0.5f;
+        Debug.Log("Moved Nutrient Patch! [" + index.ToString() + "], " + nutrientSpawnPatchesArray[index].ToString());
     }
 	
-    public FoodManager(SettingsManager settings) {
+    public VegetationManager(SettingsManager settings) {
         settingsRef = settings;
 
-        nutrientPatchesArray = new Vector2[4];
-        for(int i = 0; i < nutrientPatchesArray.Length; i++) {
-            nutrientPatchesArray[i] = new Vector2(UnityEngine.Random.Range(0.1f, 0.9f), UnityEngine.Random.Range(0.1f, 0.9f)); // (UnityEngine.Random.insideUnitCircle + Vector2.one) * 0.5f;
+        nutrientSpawnPatchesArray = new Vector2[4]; // *** Refactor this!!! ***
+        for(int i = 0; i < nutrientSpawnPatchesArray.Length; i++) {
+            nutrientSpawnPatchesArray[i] = new Vector2(UnityEngine.Random.Range(0.1f, 0.9f), UnityEngine.Random.Range(0.1f, 0.9f)); // (UnityEngine.Random.insideUnitCircle + Vector2.one) * 0.5f;
         }
     }
     
-    public void InitializeFoodParticles(int numAgents, ComputeShader computeShader) {
+    public void InitializeAlgaeParticles(int numAgents, ComputeShader computeShader) {
         //float startTime = Time.realtimeSinceStartup;
         //Debug.Log((Time.realtimeSinceStartup - startTime).ToString());
-        computeShaderFoodParticles = computeShader;
+        computeShaderAlgaeParticles = computeShader;
         
-        foodParticlesCBuffer = new ComputeBuffer(numFoodParticles, GetFoodParticleDataSize());
-        foodParticlesCBufferSwap = new ComputeBuffer(numFoodParticles, GetFoodParticleDataSize());
-        FoodParticleData[] foodParticlesArray = new FoodParticleData[numFoodParticles];
+        algaeParticlesCBuffer = new ComputeBuffer(numAlgaeParticles, GetAlgaeParticleDataSize());
+        algaeParticlesCBufferSwap = new ComputeBuffer(numAlgaeParticles, GetAlgaeParticleDataSize());
+        AlgaeParticleData[] algaeParticlesArray = new AlgaeParticleData[numAlgaeParticles];
 
-        float minParticleSize = settingsRef.avgFoodParticleRadius / settingsRef.foodParticleRadiusVariance;
-        float maxParticleSize = settingsRef.avgFoodParticleRadius * settingsRef.foodParticleRadiusVariance;
+        float minParticleSize = settingsRef.avgAlgaeParticleRadius / settingsRef.algaeParticleRadiusVariance;
+        float maxParticleSize = settingsRef.avgAlgaeParticleRadius * settingsRef.algaeParticleRadiusVariance;
 
-        for(int i = 0; i < foodParticlesCBuffer.count; i++) {
-            FoodParticleData data = new FoodParticleData();
+        for(int i = 0; i < algaeParticlesCBuffer.count; i++) {
+            AlgaeParticleData data = new AlgaeParticleData();
             data.index = i;            
             data.worldPos = new Vector2(UnityEngine.Random.Range(0f, SimulationManager._MapSize), UnityEngine.Random.Range(0f, SimulationManager._MapSize));
 
             data.radius = UnityEngine.Random.Range(minParticleSize, maxParticleSize);
-            data.foodAmount = data.radius * data.radius * Mathf.PI * settingsRef.foodParticleNutrientDensity;
+            data.foodAmount = data.radius * data.radius * Mathf.PI * settingsRef.algaeParticleNutrientDensity;
             data.active = 1f;
             data.refactoryAge = 0f;
             data.age = UnityEngine.Random.Range(0f, 1f);
-            foodParticlesArray[i] = data;
+            algaeParticlesArray[i] = data;
         }
         //Debug.Log("Fill Initial Particle Array Data CPU: " + (Time.realtimeSinceStartup - startTime).ToString());
 
-        foodParticlesCBuffer.SetData(foodParticlesArray);
-        foodParticlesCBufferSwap.SetData(foodParticlesArray);
+        algaeParticlesCBuffer.SetData(algaeParticlesArray);
+        algaeParticlesCBufferSwap.SetData(algaeParticlesArray);
         //Debug.Log("Set Data GPU: " + (Time.realtimeSinceStartup - startTime).ToString());
 
-        foodParticlesNearestCritters1024 = new RenderTexture(numFoodParticles, numAgents, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        foodParticlesNearestCritters1024.wrapMode = TextureWrapMode.Clamp;
-        foodParticlesNearestCritters1024.filterMode = FilterMode.Point;
-        foodParticlesNearestCritters1024.enableRandomWrite = true;        
-        foodParticlesNearestCritters1024.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***    
+        algaeParticlesNearestCritters1024 = new RenderTexture(numAlgaeParticles, numAgents, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+        algaeParticlesNearestCritters1024.wrapMode = TextureWrapMode.Clamp;
+        algaeParticlesNearestCritters1024.filterMode = FilterMode.Point;
+        algaeParticlesNearestCritters1024.enableRandomWrite = true;        
+        algaeParticlesNearestCritters1024.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***    
         //Debug.Log("Create RT 1024: " + (Time.realtimeSinceStartup - startTime).ToString());
-        foodParticlesNearestCritters32 = new RenderTexture(32, numAgents, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        foodParticlesNearestCritters32.wrapMode = TextureWrapMode.Clamp;
-        foodParticlesNearestCritters32.filterMode = FilterMode.Point;
-        foodParticlesNearestCritters32.enableRandomWrite = true;        
-        foodParticlesNearestCritters32.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***   
+        algaeParticlesNearestCritters32 = new RenderTexture(32, numAgents, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+        algaeParticlesNearestCritters32.wrapMode = TextureWrapMode.Clamp;
+        algaeParticlesNearestCritters32.filterMode = FilterMode.Point;
+        algaeParticlesNearestCritters32.enableRandomWrite = true;        
+        algaeParticlesNearestCritters32.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***   
         //Debug.Log("Create RT 32: " + (Time.realtimeSinceStartup - startTime).ToString());
-        foodParticlesNearestCritters1 = new RenderTexture(1, numAgents, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        foodParticlesNearestCritters1.wrapMode = TextureWrapMode.Clamp;
-        foodParticlesNearestCritters1.filterMode = FilterMode.Point;
-        foodParticlesNearestCritters1.enableRandomWrite = true;        
-        foodParticlesNearestCritters1.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
+        algaeParticlesNearestCritters1 = new RenderTexture(1, numAgents, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+        algaeParticlesNearestCritters1.wrapMode = TextureWrapMode.Clamp;
+        algaeParticlesNearestCritters1.filterMode = FilterMode.Point;
+        algaeParticlesNearestCritters1.enableRandomWrite = true;        
+        algaeParticlesNearestCritters1.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
         //Debug.Log("Pre Buffer Creation: " + (Time.realtimeSinceStartup - startTime).ToString());
-        closestFoodParticlesDataArray = new FoodParticleData[numAgents];
-        closestFoodParticlesDataCBuffer = new ComputeBuffer(numAgents, GetFoodParticleDataSize());
+        closestAlgaeParticlesDataArray = new AlgaeParticleData[numAgents];
+        closestAlgaeParticlesDataCBuffer = new ComputeBuffer(numAgents, GetAlgaeParticleDataSize());
 
-        foodParticlesEatAmountsCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 1);
-        foodParticlesEatAmountsArray = new float[numAgents];
+        algaeParticlesEatAmountsCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 1);
+        algaeParticlesEatAmountsArray = new float[numAgents];
 
-        foodParticleMeasurementTotalsData = new FoodParticleData[1];
-        foodParticlesMeasure32 = new ComputeBuffer(32, GetFoodParticleDataSize());
-        foodParticlesMeasure1 = new ComputeBuffer(1, GetFoodParticleDataSize());
+        algaeParticleMeasurementTotalsData = new AlgaeParticleData[1];
+        algaeParticlesMeasure32 = new ComputeBuffer(32, GetAlgaeParticleDataSize());
+        algaeParticlesMeasure1 = new ComputeBuffer(1, GetAlgaeParticleDataSize());
         //Debug.Log("End: " + (Time.realtimeSinceStartup - startTime).ToString());
     }
 
@@ -240,30 +243,30 @@ public class FoodManager {
         //Debug.Log("End: " + (Time.realtimeSinceStartup - startTime).ToString());
     }
 
-    public void InitializeNutrientsMap(int numAgents, ComputeShader computeShader) {
+    public void InitializeAlgaeGrid(int numAgents, ComputeShader computeShader) {
 
-        computeShaderNutrientMap = computeShader;
+        computeShaderAlgaeGrid = computeShader;
               
-        nutrientMapRT1 = new RenderTexture(nutrientMapResolution, nutrientMapResolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        nutrientMapRT1.wrapMode = TextureWrapMode.Clamp;
-        nutrientMapRT1.filterMode = FilterMode.Bilinear;
-        nutrientMapRT1.enableRandomWrite = true;
+        algaeGridRT1 = new RenderTexture(algaeGridTexResolution, algaeGridTexResolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+        algaeGridRT1.wrapMode = TextureWrapMode.Clamp;
+        algaeGridRT1.filterMode = FilterMode.Bilinear;
+        algaeGridRT1.enableRandomWrite = true;
         //nutrientMapRT1.useMipMap = true;
-        nutrientMapRT1.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***    
+        algaeGridRT1.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***    
 
-        nutrientMapRT2 = new RenderTexture(nutrientMapResolution, nutrientMapResolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        nutrientMapRT2.wrapMode = TextureWrapMode.Clamp;
-        nutrientMapRT2.enableRandomWrite = true;
+        algaeGridRT2 = new RenderTexture(algaeGridTexResolution, algaeGridTexResolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+        algaeGridRT2.wrapMode = TextureWrapMode.Clamp;
+        algaeGridRT2.enableRandomWrite = true;
         //nutrientMapRT2.useMipMap = true;
-        nutrientMapRT2.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***  
+        algaeGridRT2.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***  
         
-        nutrientSamplesArray = new Vector4[numAgents];
-        nutrientEatAmountsArray = new Vector4[numAgents];
+        algaeGridSamplesArray = new Vector4[numAgents];
+        algaeGridEatAmountsArray = new Vector4[numAgents];
 
-        int kernelCSInitializeNutrientMap = computeShaderNutrientMap.FindKernel("CSInitializeNutrientMap");
-        computeShaderNutrientMap.SetTexture(kernelCSInitializeNutrientMap, "nutrientMapWrite", nutrientMapRT1);
-        computeShaderNutrientMap.Dispatch(kernelCSInitializeNutrientMap, nutrientMapResolution / 32, nutrientMapResolution / 32, 1);
-        Graphics.Blit(nutrientMapRT1, nutrientMapRT2);
+        int kernelCSInitializeAlgaeGrid = computeShaderAlgaeGrid.FindKernel("CSInitializeAlgaeGrid");
+        computeShaderAlgaeGrid.SetTexture(kernelCSInitializeAlgaeGrid, "algaeGridWrite", algaeGridRT1);
+        computeShaderAlgaeGrid.Dispatch(kernelCSInitializeAlgaeGrid, algaeGridTexResolution / 32, algaeGridTexResolution / 32, 1);
+        Graphics.Blit(algaeGridRT1, algaeGridRT2);
 
         tempTex16 = new RenderTexture(16, 16, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
         tempTex16.wrapMode = TextureWrapMode.Clamp;
@@ -295,78 +298,77 @@ public class FoodManager {
         tempTex1.enableRandomWrite = true;
         tempTex1.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
 
-        nutrientSamplesCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 4);
+        algaeGridSamplesCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 4);
 
         //theRenderKing.fluidRenderMat.SetTexture("_DebugTex", nutrientMapRT1);
         
     }
 
-    public void ApplyDiffusionOnNutrientMap(EnvironmentFluidManager fluidManagerRef) {
-        int kernelCSUpdateNutrientMap = computeShaderNutrientMap.FindKernel("CSUpdateNutrientMap");
-        computeShaderNutrientMap.SetFloat("_NutrientDiffusion", settingsRef.foodDiffusionRate);
-        computeShaderNutrientMap.SetTexture(kernelCSUpdateNutrientMap, "ObstaclesRead", fluidManagerRef._ObstaclesRT);
-        computeShaderNutrientMap.SetTexture(kernelCSUpdateNutrientMap, "nutrientMapRead", nutrientMapRT1);
-        computeShaderNutrientMap.SetTexture(kernelCSUpdateNutrientMap, "nutrientMapWrite", nutrientMapRT2);
-        computeShaderNutrientMap.Dispatch(kernelCSUpdateNutrientMap, nutrientMapResolution / 32, nutrientMapResolution / 32, 1);
+    public void ApplyDiffusionOnAlgaeGrid(EnvironmentFluidManager fluidManagerRef) {
+        int kernelCSUpdateAlgaeGrid = computeShaderAlgaeGrid.FindKernel("CSUpdateAlgaeGrid");
+        computeShaderAlgaeGrid.SetFloat("_AlgaeGridDiffusion", settingsRef.foodDiffusionRate);
+        computeShaderAlgaeGrid.SetTexture(kernelCSUpdateAlgaeGrid, "ObstaclesRead", fluidManagerRef._ObstaclesRT);
+        computeShaderAlgaeGrid.SetTexture(kernelCSUpdateAlgaeGrid, "algaeGridRead", algaeGridRT1);
+        computeShaderAlgaeGrid.SetTexture(kernelCSUpdateAlgaeGrid, "algaeGridWrite", algaeGridRT2);
+        computeShaderAlgaeGrid.Dispatch(kernelCSUpdateAlgaeGrid, algaeGridTexResolution / 32, algaeGridTexResolution / 32, 1);
 
-        Graphics.Blit(nutrientMapRT2, nutrientMapRT1);
+        Graphics.Blit(algaeGridRT2, algaeGridRT1);
         
     }
-    public void GetNutrientValuesAtMouthPositions(SimulationStateData simStateDataRef) {
+    public void GetAlgaeGridValuesAtMouthPositions(SimulationStateData simStateDataRef) {
         // Doing it this way to avoid resetting ALL agents whenever ONE is respawned!
         //ComputeBuffer nutrientSamplesCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 4);
         
-        int kernelCSGetNutrientSamples = computeShaderNutrientMap.FindKernel("CSGetNutrientSamples");   
-        //computeShaderNutrientMap.SetBuffer(kernelCSGetNutrientSamples, "critterInitDataCBuffer", simStateData.critterInitDataCBuffer);
-        computeShaderNutrientMap.SetBuffer(kernelCSGetNutrientSamples, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
-        computeShaderNutrientMap.SetBuffer(kernelCSGetNutrientSamples, "nutrientSamplesCBuffer", nutrientSamplesCBuffer);
-        computeShaderNutrientMap.SetTexture(kernelCSGetNutrientSamples, "nutrientMapRead", nutrientMapRT1);
-        computeShaderNutrientMap.SetFloat("_MapSize", SimulationManager._MapSize);
-        computeShaderNutrientMap.Dispatch(kernelCSGetNutrientSamples, nutrientSamplesCBuffer.count, 1, 1);
+        int kernelCSGetAlgaeGridSamples = computeShaderAlgaeGrid.FindKernel("CSGetAlgaeGridSamples");        
+        computeShaderAlgaeGrid.SetBuffer(kernelCSGetAlgaeGridSamples, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
+        computeShaderAlgaeGrid.SetBuffer(kernelCSGetAlgaeGridSamples, "algaeGridSamplesCBuffer", algaeGridSamplesCBuffer);
+        computeShaderAlgaeGrid.SetTexture(kernelCSGetAlgaeGridSamples, "algaeGridRead", algaeGridRT1);
+        computeShaderAlgaeGrid.SetFloat("_MapSize", SimulationManager._MapSize);
+        computeShaderAlgaeGrid.Dispatch(kernelCSGetAlgaeGridSamples, algaeGridSamplesCBuffer.count, 1, 1);
 
         //Vector4[] outArray = new Vector4[_NumAgents];
-        nutrientSamplesCBuffer.GetData(nutrientSamplesArray); // Disappearing body strokes due to this !?!?!?!?!?
+        algaeGridSamplesCBuffer.GetData(algaeGridSamplesArray); // Disappearing body strokes due to this !?!?!?!?!?
 
         //Debug.Log("Food: " + nutrientSamplesArray[0].x.ToString());
         //nutrientSamplesCBuffer.Release();
         
         // Read out sample values::::
     }
-    public float MeasureTotalNutrients() {
+    public float MeasureTotalAlgaeGridAmount() {
 
         ComputeBuffer outputValuesCBuffer = new ComputeBuffer(1, sizeof(float) * 4);  // holds the result of measurement: total sum of pix colors in texture
         Vector4[] outputValuesArray = new Vector4[1];
 
         // 32 --> 16:
-        int kernelCSMeasureTotalNutrients = computeShaderNutrientMap.FindKernel("CSMeasureTotalNutrients");   
-        computeShaderNutrientMap.SetBuffer(kernelCSMeasureTotalNutrients, "outputValuesCBuffer", outputValuesCBuffer);
-        computeShaderNutrientMap.SetTexture(kernelCSMeasureTotalNutrients, "measureValuesTex", nutrientMapRT1);
-        computeShaderNutrientMap.SetTexture(kernelCSMeasureTotalNutrients, "pooledResultTex", tempTex16);
-        computeShaderNutrientMap.Dispatch(kernelCSMeasureTotalNutrients, 16, 16, 1);
+        int kernelCSMeasureTotalAlgae = computeShaderAlgaeGrid.FindKernel("CSMeasureTotalAlgae");   
+        computeShaderAlgaeGrid.SetBuffer(kernelCSMeasureTotalAlgae, "outputValuesCBuffer", outputValuesCBuffer);
+        computeShaderAlgaeGrid.SetTexture(kernelCSMeasureTotalAlgae, "measureValuesTex", algaeGridRT1);
+        computeShaderAlgaeGrid.SetTexture(kernelCSMeasureTotalAlgae, "pooledResultTex", tempTex16);
+        computeShaderAlgaeGrid.Dispatch(kernelCSMeasureTotalAlgae, 16, 16, 1);
         // 16 --> 8:
-        computeShaderNutrientMap.SetBuffer(kernelCSMeasureTotalNutrients, "outputValuesCBuffer", outputValuesCBuffer);
-        computeShaderNutrientMap.SetTexture(kernelCSMeasureTotalNutrients, "measureValuesTex", tempTex16);
-        computeShaderNutrientMap.SetTexture(kernelCSMeasureTotalNutrients, "pooledResultTex", tempTex8);
-        computeShaderNutrientMap.Dispatch(kernelCSMeasureTotalNutrients, 8, 8, 1);
+        computeShaderAlgaeGrid.SetBuffer(kernelCSMeasureTotalAlgae, "outputValuesCBuffer", outputValuesCBuffer);
+        computeShaderAlgaeGrid.SetTexture(kernelCSMeasureTotalAlgae, "measureValuesTex", tempTex16);
+        computeShaderAlgaeGrid.SetTexture(kernelCSMeasureTotalAlgae, "pooledResultTex", tempTex8);
+        computeShaderAlgaeGrid.Dispatch(kernelCSMeasureTotalAlgae, 8, 8, 1);
         // 8 --> 4:
-        computeShaderNutrientMap.SetBuffer(kernelCSMeasureTotalNutrients, "outputValuesCBuffer", outputValuesCBuffer);
-        computeShaderNutrientMap.SetTexture(kernelCSMeasureTotalNutrients, "measureValuesTex", tempTex8);
-        computeShaderNutrientMap.SetTexture(kernelCSMeasureTotalNutrients, "pooledResultTex", tempTex4);
-        computeShaderNutrientMap.Dispatch(kernelCSMeasureTotalNutrients, 4, 4, 1);        
+        computeShaderAlgaeGrid.SetBuffer(kernelCSMeasureTotalAlgae, "outputValuesCBuffer", outputValuesCBuffer);
+        computeShaderAlgaeGrid.SetTexture(kernelCSMeasureTotalAlgae, "measureValuesTex", tempTex8);
+        computeShaderAlgaeGrid.SetTexture(kernelCSMeasureTotalAlgae, "pooledResultTex", tempTex4);
+        computeShaderAlgaeGrid.Dispatch(kernelCSMeasureTotalAlgae, 4, 4, 1);        
         // 4 --> 2:
-        computeShaderNutrientMap.SetBuffer(kernelCSMeasureTotalNutrients, "outputValuesCBuffer", outputValuesCBuffer);
-        computeShaderNutrientMap.SetTexture(kernelCSMeasureTotalNutrients, "measureValuesTex", tempTex4);
-        computeShaderNutrientMap.SetTexture(kernelCSMeasureTotalNutrients, "pooledResultTex", tempTex2);
-        computeShaderNutrientMap.Dispatch(kernelCSMeasureTotalNutrients, 2, 2, 1);
+        computeShaderAlgaeGrid.SetBuffer(kernelCSMeasureTotalAlgae, "outputValuesCBuffer", outputValuesCBuffer);
+        computeShaderAlgaeGrid.SetTexture(kernelCSMeasureTotalAlgae, "measureValuesTex", tempTex4);
+        computeShaderAlgaeGrid.SetTexture(kernelCSMeasureTotalAlgae, "pooledResultTex", tempTex2);
+        computeShaderAlgaeGrid.Dispatch(kernelCSMeasureTotalAlgae, 2, 2, 1);
         // 2 --> 1:
-        computeShaderNutrientMap.SetBuffer(kernelCSMeasureTotalNutrients, "outputValuesCBuffer", outputValuesCBuffer);
-        computeShaderNutrientMap.SetTexture(kernelCSMeasureTotalNutrients, "measureValuesTex", tempTex2);
-        computeShaderNutrientMap.SetTexture(kernelCSMeasureTotalNutrients, "pooledResultTex", tempTex1);
-        computeShaderNutrientMap.Dispatch(kernelCSMeasureTotalNutrients, 1, 1, 1);
+        computeShaderAlgaeGrid.SetBuffer(kernelCSMeasureTotalAlgae, "outputValuesCBuffer", outputValuesCBuffer);
+        computeShaderAlgaeGrid.SetTexture(kernelCSMeasureTotalAlgae, "measureValuesTex", tempTex2);
+        computeShaderAlgaeGrid.SetTexture(kernelCSMeasureTotalAlgae, "pooledResultTex", tempTex1);
+        computeShaderAlgaeGrid.Dispatch(kernelCSMeasureTotalAlgae, 1, 1, 1);
         
         outputValuesCBuffer.GetData(outputValuesArray);
 
-        curGlobalNutrients = outputValuesArray[0].x;
+        curGlobalAlgaeGrid = outputValuesArray[0].x;
 
         outputValuesCBuffer.Release();
 
@@ -374,22 +376,22 @@ public class FoodManager {
 
         return outputValuesArray[0].x;
     }     
-    public void AddNutrientsAtCoords(float amount, int x, int y) {
-        if(curGlobalNutrients < 128f) {
-            ComputeBuffer addNutrientsCBuffer = new ComputeBuffer(1, sizeof(float) * 4);
-            Vector4[] addNutrientsArray = new Vector4[1];
-            addNutrientsArray[0] = new Vector4(amount, (float)x / 32f, (float)y / 32f, 1f);
-            addNutrientsCBuffer.SetData(addNutrientsArray);
+    public void AddAlgaeAtCoords(float amount, int x, int y) {
+        if(curGlobalAlgaeGrid < 128f) {
+            ComputeBuffer addAlgaeCBuffer = new ComputeBuffer(1, sizeof(float) * 4);
+            Vector4[] addAlgaeArray = new Vector4[1];
+            addAlgaeArray[0] = new Vector4(amount, (float)x / 32f, (float)y / 32f, 1f);
+            addAlgaeCBuffer.SetData(addAlgaeArray);
 
-            int kernelCSAddNutrientsAtCoords = computeShaderNutrientMap.FindKernel("CSAddNutrientsAtCoords");
-            computeShaderNutrientMap.SetBuffer(kernelCSAddNutrientsAtCoords, "addNutrientsCBuffer", addNutrientsCBuffer);        
-            computeShaderNutrientMap.SetTexture(kernelCSAddNutrientsAtCoords, "nutrientMapRead", nutrientMapRT1);
-            computeShaderNutrientMap.SetTexture(kernelCSAddNutrientsAtCoords, "nutrientMapWrite", nutrientMapRT2);
-            computeShaderNutrientMap.Dispatch(kernelCSAddNutrientsAtCoords, addNutrientsCBuffer.count, 1, 1);
+            int kernelCSAddAlgaeAtCoords = computeShaderAlgaeGrid.FindKernel("CSAddAlgaeAtCoords");
+            computeShaderAlgaeGrid.SetBuffer(kernelCSAddAlgaeAtCoords, "addAlgaeCBuffer", addAlgaeCBuffer);        
+            computeShaderAlgaeGrid.SetTexture(kernelCSAddAlgaeAtCoords, "algaeGridRead", algaeGridRT1);
+            computeShaderAlgaeGrid.SetTexture(kernelCSAddAlgaeAtCoords, "algaeGridWrite", algaeGridRT2);
+            computeShaderAlgaeGrid.Dispatch(kernelCSAddAlgaeAtCoords, addAlgaeCBuffer.count, 1, 1);
         
-            Graphics.Blit(nutrientMapRT2, nutrientMapRT1);
+            Graphics.Blit(algaeGridRT2, algaeGridRT1);
 
-            addNutrientsCBuffer.Release();
+            addAlgaeCBuffer.Release();
         }
         else {
             Debug.Log("Can't add nutrients, exceeds max level");
@@ -397,20 +399,20 @@ public class FoodManager {
 
         
     }
-    public void RemoveEatenNutrients(int numAgents, SimulationStateData simStateDataRef) {
+    public void RemoveEatenAlgaeGrid(int numAgents, SimulationStateData simStateDataRef) {
         ComputeBuffer eatAmountsCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 4);
                 
-        eatAmountsCBuffer.SetData(nutrientEatAmountsArray);
+        eatAmountsCBuffer.SetData(algaeGridEatAmountsArray);
 
-        int kernelCSRemoveNutrientsAtLocations = computeShaderNutrientMap.FindKernel("CSRemoveNutrientsAtLocations");
-        computeShaderNutrientMap.SetBuffer(kernelCSRemoveNutrientsAtLocations, "nutrientEatAmountsCBuffer", eatAmountsCBuffer);
-        computeShaderNutrientMap.SetBuffer(kernelCSRemoveNutrientsAtLocations, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
-        computeShaderNutrientMap.SetTexture(kernelCSRemoveNutrientsAtLocations, "nutrientMapRead", nutrientMapRT1);
-        computeShaderNutrientMap.SetTexture(kernelCSRemoveNutrientsAtLocations, "nutrientMapWrite", nutrientMapRT2);
-        computeShaderNutrientMap.SetFloat("_MapSize", SimulationManager._MapSize);
-        computeShaderNutrientMap.Dispatch(kernelCSRemoveNutrientsAtLocations, eatAmountsCBuffer.count, 1, 1);
+        int kernelCSRemoveAlgaeAtLocations = computeShaderAlgaeGrid.FindKernel("CSRemoveAlgaeAtLocations");
+        computeShaderAlgaeGrid.SetBuffer(kernelCSRemoveAlgaeAtLocations, "nutrientEatAmountsCBuffer", eatAmountsCBuffer);
+        computeShaderAlgaeGrid.SetBuffer(kernelCSRemoveAlgaeAtLocations, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
+        computeShaderAlgaeGrid.SetTexture(kernelCSRemoveAlgaeAtLocations, "algaeGridRead", algaeGridRT1);
+        computeShaderAlgaeGrid.SetTexture(kernelCSRemoveAlgaeAtLocations, "algaeGridWrite", algaeGridRT2);
+        computeShaderAlgaeGrid.SetFloat("_MapSize", SimulationManager._MapSize);
+        computeShaderAlgaeGrid.Dispatch(kernelCSRemoveAlgaeAtLocations, eatAmountsCBuffer.count, 1, 1);
 
-        Graphics.Blit(nutrientMapRT2, nutrientMapRT1);
+        Graphics.Blit(algaeGridRT2, algaeGridRT1);
         
         eatAmountsCBuffer.Release();
     }
@@ -420,18 +422,17 @@ public class FoodManager {
 
         ComputeBuffer selectRespawnFoodParticleIndicesCBuffer = new ComputeBuffer(indicesArray.Length, sizeof(int));
         selectRespawnFoodParticleIndicesCBuffer.SetData(indicesArray);
-        //selectRespawnFoodParticleIndicesCBuffer
-
-        int kernelCSReviveSelectFoodParticles = computeShaderFoodParticles.FindKernel("CSReviveSelectFoodParticles");
-        computeShaderFoodParticles.SetBuffer(kernelCSReviveSelectFoodParticles, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
-        computeShaderFoodParticles.SetBuffer(kernelCSReviveSelectFoodParticles, "selectRespawnFoodParticleIndicesCBuffer", selectRespawnFoodParticleIndicesCBuffer);
         
-        computeShaderFoodParticles.SetFloat("_MapSize", SimulationManager._MapSize);
-        computeShaderFoodParticles.SetFloat("_Time", Time.realtimeSinceStartup);
-        computeShaderFoodParticles.SetVector("_FoodSprinklePos", spawnCoords);
-        computeShaderFoodParticles.SetFloat("_FoodSprinkleRadius", radius);
-        computeShaderFoodParticles.SetBuffer(kernelCSReviveSelectFoodParticles, "foodParticlesWrite", foodParticlesCBufferSwap);
-        computeShaderFoodParticles.Dispatch(kernelCSReviveSelectFoodParticles, indicesArray.Length, 1, 1);
+        int kernelCSReviveSelectFoodParticles = computeShaderAlgaeParticles.FindKernel("CSReviveSelectFoodParticles");
+        computeShaderAlgaeParticles.SetBuffer(kernelCSReviveSelectFoodParticles, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
+        computeShaderAlgaeParticles.SetBuffer(kernelCSReviveSelectFoodParticles, "selectRespawnFoodParticleIndicesCBuffer", selectRespawnFoodParticleIndicesCBuffer);
+        
+        computeShaderAlgaeParticles.SetFloat("_MapSize", SimulationManager._MapSize);
+        computeShaderAlgaeParticles.SetFloat("_Time", Time.realtimeSinceStartup);
+        computeShaderAlgaeParticles.SetVector("_FoodSprinklePos", spawnCoords);
+        computeShaderAlgaeParticles.SetFloat("_FoodSprinkleRadius", radius);
+        computeShaderAlgaeParticles.SetBuffer(kernelCSReviveSelectFoodParticles, "foodParticlesWrite", algaeParticlesCBufferSwap);
+        computeShaderAlgaeParticles.Dispatch(kernelCSReviveSelectFoodParticles, indicesArray.Length, 1, 1);
 
         selectRespawnFoodParticleIndicesCBuffer.Release();
     }  // NOT USED ANY MORE????
@@ -442,40 +443,40 @@ public class FoodManager {
 
         float maxFoodParticleTotal = settingsRef.maxFoodParticleTotalAmount;
 
-        int kernelCSRespawnFoodParticles = computeShaderFoodParticles.FindKernel("CSRespawnFoodParticles");
-        computeShaderFoodParticles.SetBuffer(kernelCSRespawnFoodParticles, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
-        computeShaderFoodParticles.SetBuffer(kernelCSRespawnFoodParticles, "foodParticlesRead", foodParticlesCBuffer);
-        computeShaderFoodParticles.SetBuffer(kernelCSRespawnFoodParticles, "foodParticlesWrite", foodParticlesCBufferSwap);
-        computeShaderFoodParticles.SetTexture(kernelCSRespawnFoodParticles, "velocityRead", fluidManagerRef._VelocityA);        
-        computeShaderFoodParticles.SetTexture(kernelCSRespawnFoodParticles, "altitudeRead", renderKingRef.baronVonTerrain.terrainHeightMap);
-        computeShaderFoodParticles.SetTexture(kernelCSRespawnFoodParticles, "_SpawnDensityMap", nutrientMapRT1);
-        computeShaderFoodParticles.SetFloat("_MapSize", SimulationManager._MapSize);
+        int kernelCSRespawnFoodParticles = computeShaderAlgaeParticles.FindKernel("CSRespawnFoodParticles");
+        computeShaderAlgaeParticles.SetBuffer(kernelCSRespawnFoodParticles, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
+        computeShaderAlgaeParticles.SetBuffer(kernelCSRespawnFoodParticles, "foodParticlesRead", algaeParticlesCBuffer);
+        computeShaderAlgaeParticles.SetBuffer(kernelCSRespawnFoodParticles, "foodParticlesWrite", algaeParticlesCBufferSwap);
+        computeShaderAlgaeParticles.SetTexture(kernelCSRespawnFoodParticles, "velocityRead", fluidManagerRef._VelocityA);        
+        computeShaderAlgaeParticles.SetTexture(kernelCSRespawnFoodParticles, "altitudeRead", renderKingRef.baronVonTerrain.terrainHeightMap);
+        computeShaderAlgaeParticles.SetTexture(kernelCSRespawnFoodParticles, "_SpawnDensityMap", algaeGridRT1);
+        computeShaderAlgaeParticles.SetFloat("_MapSize", SimulationManager._MapSize);
             
         //computeShaderFoodParticles.SetFloat("_RespawnFoodParticles", 1f);
-        computeShaderFoodParticles.SetFloat("_Time", Time.realtimeSinceStartup);
+        computeShaderAlgaeParticles.SetFloat("_Time", Time.realtimeSinceStartup);
 
-        if(foodParticleMeasurementTotalsData[0].foodAmount < maxFoodParticleTotal) {
-            computeShaderFoodParticles.SetFloat("_RespawnFoodParticles", 1f);                       
+        if(algaeParticleMeasurementTotalsData[0].foodAmount < maxFoodParticleTotal) {
+            computeShaderAlgaeParticles.SetFloat("_RespawnFoodParticles", 1f);                       
         }
         else {
-            computeShaderFoodParticles.SetFloat("_RespawnFoodParticles", 0f);      
+            computeShaderAlgaeParticles.SetFloat("_RespawnFoodParticles", 0f);      
         }
 
-        float minParticleSize = settingsRef.avgFoodParticleRadius / settingsRef.foodParticleRadiusVariance;
-        float maxParticleSize = settingsRef.avgFoodParticleRadius * settingsRef.foodParticleRadiusVariance;
+        float minParticleSize = settingsRef.avgAlgaeParticleRadius / settingsRef.algaeParticleRadiusVariance;
+        float maxParticleSize = settingsRef.avgAlgaeParticleRadius * settingsRef.algaeParticleRadiusVariance;
 
-        computeShaderFoodParticles.SetFloat("_MinParticleSize", minParticleSize);   
-        computeShaderFoodParticles.SetFloat("_MaxParticleSize", maxParticleSize);      
-        computeShaderFoodParticles.SetFloat("_ParticleNutrientDensity", settingsRef.foodParticleNutrientDensity);
-        computeShaderFoodParticles.SetFloat("_FoodParticleRegrowthRate", settingsRef.foodParticleRegrowthRate);
+        computeShaderAlgaeParticles.SetFloat("_MinParticleSize", minParticleSize);   
+        computeShaderAlgaeParticles.SetFloat("_MaxParticleSize", maxParticleSize);      
+        computeShaderAlgaeParticles.SetFloat("_ParticleNutrientDensity", settingsRef.algaeParticleNutrientDensity);
+        computeShaderAlgaeParticles.SetFloat("_FoodParticleRegrowthRate", settingsRef.foodParticleRegrowthRate);
 
-        computeShaderFoodParticles.Dispatch(kernelCSRespawnFoodParticles, 1, 1, 1);                
+        computeShaderAlgaeParticles.Dispatch(kernelCSRespawnFoodParticles, 1, 1, 1);                
 
         // Copy/Swap Food Particle Buffer:
-        int kernelCSCopyFoodParticlesBuffer = computeShaderFoodParticles.FindKernel("CSCopyFoodParticlesBuffer");
-        computeShaderFoodParticles.SetBuffer(kernelCSCopyFoodParticlesBuffer, "foodParticlesRead", foodParticlesCBufferSwap);
-        computeShaderFoodParticles.SetBuffer(kernelCSCopyFoodParticlesBuffer, "foodParticlesWrite", foodParticlesCBuffer);        
-        computeShaderFoodParticles.Dispatch(kernelCSCopyFoodParticlesBuffer, 1, 1, 1);        
+        int kernelCSCopyFoodParticlesBuffer = computeShaderAlgaeParticles.FindKernel("CSCopyFoodParticlesBuffer");
+        computeShaderAlgaeParticles.SetBuffer(kernelCSCopyFoodParticlesBuffer, "foodParticlesRead", algaeParticlesCBufferSwap);
+        computeShaderAlgaeParticles.SetBuffer(kernelCSCopyFoodParticlesBuffer, "foodParticlesWrite", algaeParticlesCBuffer);        
+        computeShaderAlgaeParticles.Dispatch(kernelCSCopyFoodParticlesBuffer, 1, 1, 1);        
         
     }
     public void EatSelectedFoodParticles(SimulationStateData simStateDataRef) {  // removes gpu particle & sends consumption data back to CPU
@@ -487,52 +488,52 @@ public class FoodManager {
 
         // Record how much food successfully eaten per Critter
 
-        int kernelCSEatSelectedFoodParticles = computeShaderFoodParticles.FindKernel("CSEatSelectedFoodParticles");
-        computeShaderFoodParticles.SetBuffer(kernelCSEatSelectedFoodParticles, "critterInitDataCBuffer", simStateDataRef.critterInitDataCBuffer);
-        computeShaderFoodParticles.SetBuffer(kernelCSEatSelectedFoodParticles, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
-        computeShaderFoodParticles.SetBuffer(kernelCSEatSelectedFoodParticles, "foodParticlesRead", foodParticlesCBuffer);
-        computeShaderFoodParticles.SetBuffer(kernelCSEatSelectedFoodParticles, "foodParticlesWrite", foodParticlesCBufferSwap);
-        computeShaderFoodParticles.SetBuffer(kernelCSEatSelectedFoodParticles, "foodParticlesEatAmountsCBuffer", foodParticlesEatAmountsCBuffer);        
-        computeShaderFoodParticles.SetBuffer(kernelCSEatSelectedFoodParticles, "closestParticlesDataCBuffer", closestFoodParticlesDataCBuffer);  
-        computeShaderFoodParticles.SetTexture(kernelCSEatSelectedFoodParticles, "critterDistancesRead", foodParticlesNearestCritters1);
-        computeShaderFoodParticles.Dispatch(kernelCSEatSelectedFoodParticles, simStateDataRef.critterSimDataCBuffer.count, 1, 1);
+        int kernelCSEatSelectedFoodParticles = computeShaderAlgaeParticles.FindKernel("CSEatSelectedFoodParticles");
+        computeShaderAlgaeParticles.SetBuffer(kernelCSEatSelectedFoodParticles, "critterInitDataCBuffer", simStateDataRef.critterInitDataCBuffer);
+        computeShaderAlgaeParticles.SetBuffer(kernelCSEatSelectedFoodParticles, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
+        computeShaderAlgaeParticles.SetBuffer(kernelCSEatSelectedFoodParticles, "foodParticlesRead", algaeParticlesCBuffer);
+        computeShaderAlgaeParticles.SetBuffer(kernelCSEatSelectedFoodParticles, "foodParticlesWrite", algaeParticlesCBufferSwap);
+        computeShaderAlgaeParticles.SetBuffer(kernelCSEatSelectedFoodParticles, "foodParticlesEatAmountsCBuffer", algaeParticlesEatAmountsCBuffer);        
+        computeShaderAlgaeParticles.SetBuffer(kernelCSEatSelectedFoodParticles, "closestParticlesDataCBuffer", closestAlgaeParticlesDataCBuffer);  
+        computeShaderAlgaeParticles.SetTexture(kernelCSEatSelectedFoodParticles, "critterDistancesRead", algaeParticlesNearestCritters1);
+        computeShaderAlgaeParticles.Dispatch(kernelCSEatSelectedFoodParticles, simStateDataRef.critterSimDataCBuffer.count, 1, 1);
 
-        foodParticlesEatAmountsCBuffer.GetData(foodParticlesEatAmountsArray);
+        algaeParticlesEatAmountsCBuffer.GetData(algaeParticlesEatAmountsArray);
 
         float totalFoodEaten = 0f;
-        for(int i = 0; i < foodParticlesEatAmountsCBuffer.count; i++) {
-            totalFoodEaten += foodParticlesEatAmountsArray[i];
+        for(int i = 0; i < algaeParticlesEatAmountsCBuffer.count; i++) {
+            totalFoodEaten += algaeParticlesEatAmountsArray[i];
         }
         // Copy/Swap Food PArticle Buffer:
-        int kernelCSCopyFoodParticlesBuffer = computeShaderFoodParticles.FindKernel("CSCopyFoodParticlesBuffer");
-        computeShaderFoodParticles.SetBuffer(kernelCSCopyFoodParticlesBuffer, "foodParticlesRead", foodParticlesCBufferSwap);
-        computeShaderFoodParticles.SetBuffer(kernelCSCopyFoodParticlesBuffer, "foodParticlesWrite", foodParticlesCBuffer);
-        computeShaderFoodParticles.Dispatch(kernelCSCopyFoodParticlesBuffer, 1, 1, 1);
+        int kernelCSCopyFoodParticlesBuffer = computeShaderAlgaeParticles.FindKernel("CSCopyFoodParticlesBuffer");
+        computeShaderAlgaeParticles.SetBuffer(kernelCSCopyFoodParticlesBuffer, "foodParticlesRead", algaeParticlesCBufferSwap);
+        computeShaderAlgaeParticles.SetBuffer(kernelCSCopyFoodParticlesBuffer, "foodParticlesWrite", algaeParticlesCBuffer);
+        computeShaderAlgaeParticles.Dispatch(kernelCSCopyFoodParticlesBuffer, 1, 1, 1);
     }
     public void FindClosestFoodParticleToCritters(SimulationStateData simStateDataRef) {  // need to send info on closest particle pos/dir/amt back to CPU also
         
         // Populate main RenderTexture with distances for each foodParticle to each Critter:
 
-        int kernelCSMeasureInitCritterDistances = computeShaderFoodParticles.FindKernel("CSMeasureInitCritterDistances");
-        computeShaderFoodParticles.SetBuffer(kernelCSMeasureInitCritterDistances, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
-        computeShaderFoodParticles.SetBuffer(kernelCSMeasureInitCritterDistances, "critterInitDataCBuffer", simStateDataRef.critterInitDataCBuffer);
-        computeShaderFoodParticles.SetBuffer(kernelCSMeasureInitCritterDistances, "foodParticlesRead", foodParticlesCBuffer);        
-        computeShaderFoodParticles.SetTexture(kernelCSMeasureInitCritterDistances, "foodParticlesNearestCrittersRT", foodParticlesNearestCritters1024);        
-        computeShaderFoodParticles.Dispatch(kernelCSMeasureInitCritterDistances, foodParticlesCBuffer.count / 1024, simStateDataRef.critterSimDataCBuffer.count, 1);
+        int kernelCSMeasureInitCritterDistances = computeShaderAlgaeParticles.FindKernel("CSMeasureInitCritterDistances");
+        computeShaderAlgaeParticles.SetBuffer(kernelCSMeasureInitCritterDistances, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
+        computeShaderAlgaeParticles.SetBuffer(kernelCSMeasureInitCritterDistances, "critterInitDataCBuffer", simStateDataRef.critterInitDataCBuffer);
+        computeShaderAlgaeParticles.SetBuffer(kernelCSMeasureInitCritterDistances, "foodParticlesRead", algaeParticlesCBuffer);        
+        computeShaderAlgaeParticles.SetTexture(kernelCSMeasureInitCritterDistances, "foodParticlesNearestCrittersRT", algaeParticlesNearestCritters1024);        
+        computeShaderAlgaeParticles.Dispatch(kernelCSMeasureInitCritterDistances, algaeParticlesCBuffer.count / 1024, simStateDataRef.critterSimDataCBuffer.count, 1);
         
         // Reduce from 1024 --> 32 particles per critter:
-        int kernelCSReduceCritterDistances32 = computeShaderFoodParticles.FindKernel("CSReduceCritterDistances32");
-        computeShaderFoodParticles.SetTexture(kernelCSReduceCritterDistances32, "critterDistancesRead", foodParticlesNearestCritters1024);
-        computeShaderFoodParticles.SetTexture(kernelCSReduceCritterDistances32, "critterDistancesWrite", foodParticlesNearestCritters32);
-        computeShaderFoodParticles.SetBuffer(kernelCSReduceCritterDistances32, "foodParticlesRead", foodParticlesCBuffer);        
-        computeShaderFoodParticles.Dispatch(kernelCSReduceCritterDistances32, 32, simStateDataRef.critterSimDataCBuffer.count, 1);
+        int kernelCSReduceCritterDistances32 = computeShaderAlgaeParticles.FindKernel("CSReduceCritterDistances32");
+        computeShaderAlgaeParticles.SetTexture(kernelCSReduceCritterDistances32, "critterDistancesRead", algaeParticlesNearestCritters1024);
+        computeShaderAlgaeParticles.SetTexture(kernelCSReduceCritterDistances32, "critterDistancesWrite", algaeParticlesNearestCritters32);
+        computeShaderAlgaeParticles.SetBuffer(kernelCSReduceCritterDistances32, "foodParticlesRead", algaeParticlesCBuffer);        
+        computeShaderAlgaeParticles.Dispatch(kernelCSReduceCritterDistances32, 32, simStateDataRef.critterSimDataCBuffer.count, 1);
         
         // Reduce from 32 --> 1 particles per critter:
-        computeShaderFoodParticles.SetTexture(kernelCSReduceCritterDistances32, "critterDistancesRead", foodParticlesNearestCritters32);
-        computeShaderFoodParticles.SetTexture(kernelCSReduceCritterDistances32, "critterDistancesWrite", foodParticlesNearestCritters1);
-        computeShaderFoodParticles.SetBuffer(kernelCSReduceCritterDistances32, "foodParticlesRead", foodParticlesCBuffer);
-        computeShaderFoodParticles.SetBuffer(kernelCSReduceCritterDistances32, "closestParticlesDataCBuffer", closestFoodParticlesDataCBuffer);
-        computeShaderFoodParticles.Dispatch(kernelCSReduceCritterDistances32, 1, simStateDataRef.critterSimDataCBuffer.count, 1);
+        computeShaderAlgaeParticles.SetTexture(kernelCSReduceCritterDistances32, "critterDistancesRead", algaeParticlesNearestCritters32);
+        computeShaderAlgaeParticles.SetTexture(kernelCSReduceCritterDistances32, "critterDistancesWrite", algaeParticlesNearestCritters1);
+        computeShaderAlgaeParticles.SetBuffer(kernelCSReduceCritterDistances32, "foodParticlesRead", algaeParticlesCBuffer);
+        computeShaderAlgaeParticles.SetBuffer(kernelCSReduceCritterDistances32, "closestParticlesDataCBuffer", closestAlgaeParticlesDataCBuffer);
+        computeShaderAlgaeParticles.Dispatch(kernelCSReduceCritterDistances32, 1, simStateDataRef.critterSimDataCBuffer.count, 1);
 
         // Copy/Swap Food PArticle Buffer:
         //int kernelCSCopyFoodParticlesBuffer = computeShaderFoodParticles.FindKernel("CSCopyFoodParticlesBuffer");
@@ -540,25 +541,25 @@ public class FoodManager {
         //computeShaderFoodParticles.SetBuffer(kernelCSCopyFoodParticlesBuffer, "foodParticlesWrite", foodParticlesCBuffer);
         //computeShaderFoodParticles.Dispatch(kernelCSCopyFoodParticlesBuffer, 1, 1, 1);
 
-        closestFoodParticlesDataCBuffer.GetData(closestFoodParticlesDataArray);
+        closestAlgaeParticlesDataCBuffer.GetData(closestAlgaeParticlesDataArray);
 
         //Debug.Log("ClosestFoodParticle: " + closestFoodParticlesDataArray[0].index.ToString() + ", " + closestFoodParticlesDataArray[0].worldPos.ToString() + ", amt: " + closestFoodParticlesDataArray[0].foodAmount.ToString());
     }
     public void MeasureTotalFoodParticlesAmount() {
         
-        int kernelCSMeasureTotalFoodParticlesAmount = computeShaderFoodParticles.FindKernel("CSMeasureTotalFoodParticlesAmount");
-        computeShaderFoodParticles.SetBuffer(kernelCSMeasureTotalFoodParticlesAmount, "foodParticlesRead", foodParticlesCBuffer);
-        computeShaderFoodParticles.SetBuffer(kernelCSMeasureTotalFoodParticlesAmount, "foodParticlesWrite", foodParticlesMeasure32);
+        int kernelCSMeasureTotalFoodParticlesAmount = computeShaderAlgaeParticles.FindKernel("CSMeasureTotalFoodParticlesAmount");
+        computeShaderAlgaeParticles.SetBuffer(kernelCSMeasureTotalFoodParticlesAmount, "foodParticlesRead", algaeParticlesCBuffer);
+        computeShaderAlgaeParticles.SetBuffer(kernelCSMeasureTotalFoodParticlesAmount, "foodParticlesWrite", algaeParticlesMeasure32);
          
         // DISPATCH !!!
-        computeShaderFoodParticles.Dispatch(kernelCSMeasureTotalFoodParticlesAmount, 32, 1, 1);
+        computeShaderAlgaeParticles.Dispatch(kernelCSMeasureTotalFoodParticlesAmount, 32, 1, 1);
         
-        computeShaderFoodParticles.SetBuffer(kernelCSMeasureTotalFoodParticlesAmount, "foodParticlesRead", foodParticlesMeasure32);
-        computeShaderFoodParticles.SetBuffer(kernelCSMeasureTotalFoodParticlesAmount, "foodParticlesWrite", foodParticlesMeasure1);
-        computeShaderFoodParticles.Dispatch(kernelCSMeasureTotalFoodParticlesAmount, 1, 1, 1);
+        computeShaderAlgaeParticles.SetBuffer(kernelCSMeasureTotalFoodParticlesAmount, "foodParticlesRead", algaeParticlesMeasure32);
+        computeShaderAlgaeParticles.SetBuffer(kernelCSMeasureTotalFoodParticlesAmount, "foodParticlesWrite", algaeParticlesMeasure1);
+        computeShaderAlgaeParticles.Dispatch(kernelCSMeasureTotalFoodParticlesAmount, 1, 1, 1);
         
-        foodParticlesMeasure1.GetData(foodParticleMeasurementTotalsData);
-        curGlobalFoodParticles = foodParticleMeasurementTotalsData[0].foodAmount;        
+        algaeParticlesMeasure1.GetData(algaeParticleMeasurementTotalsData);
+        curGlobalAlgaeParticles = algaeParticleMeasurementTotalsData[0].foodAmount;        
     }
 
 
@@ -593,7 +594,7 @@ public class FoodManager {
         computeShaderAnimalParticles.SetBuffer(kernelCSSimulateAnimalParticles, "animalParticlesWrite", animalParticlesCBufferSwap);
         computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "velocityRead", fluidManagerRef._VelocityA);        
         computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "altitudeRead", renderKingRef.baronVonTerrain.terrainHeightMap);
-        computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "_SpawnDensityMap", nutrientMapRT1);
+        computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "_SpawnDensityMap", algaeGridRT1);
         //computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "animalParticlesNearestCrittersRT", animalParticlesNearestCritters1);
         computeShaderAnimalParticles.SetFloat("_MapSize", SimulationManager._MapSize);
         
@@ -701,32 +702,32 @@ public class FoodManager {
             tempTex8.Release();
             tempTex16.Release();
         }
-        if(nutrientSamplesCBuffer != null) {
-            nutrientSamplesCBuffer.Release();
+        if(algaeGridSamplesCBuffer != null) {
+            algaeGridSamplesCBuffer.Release();
         }
 
-        if (foodParticlesNearestCritters1 != null) {
-            foodParticlesNearestCritters1.Release();
-            foodParticlesNearestCritters32.Release();
-            foodParticlesNearestCritters1024.Release();
+        if (algaeParticlesNearestCritters1 != null) {
+            algaeParticlesNearestCritters1.Release();
+            algaeParticlesNearestCritters32.Release();
+            algaeParticlesNearestCritters1024.Release();
         }        
-        if(foodParticlesCBuffer != null) {
-            foodParticlesCBuffer.Release();
+        if(algaeParticlesCBuffer != null) {
+            algaeParticlesCBuffer.Release();
         }  
-        if(foodParticlesCBufferSwap != null) {
-            foodParticlesCBufferSwap.Release();
+        if(algaeParticlesCBufferSwap != null) {
+            algaeParticlesCBufferSwap.Release();
         } 
-        if(closestFoodParticlesDataCBuffer != null) {
-            closestFoodParticlesDataCBuffer.Release();
+        if(closestAlgaeParticlesDataCBuffer != null) {
+            closestAlgaeParticlesDataCBuffer.Release();
         }
-        if(foodParticlesEatAmountsCBuffer != null) {
-            foodParticlesEatAmountsCBuffer.Release();
+        if(algaeParticlesEatAmountsCBuffer != null) {
+            algaeParticlesEatAmountsCBuffer.Release();
         }
-        if(foodParticlesMeasure32 != null) {
-            foodParticlesMeasure32.Release();
+        if(algaeParticlesMeasure32 != null) {
+            algaeParticlesMeasure32.Release();
         }
-        if(foodParticlesMeasure1 != null) {
-            foodParticlesMeasure1.Release();
+        if(algaeParticlesMeasure1 != null) {
+            algaeParticlesMeasure1.Release();
         }
 
         if(animalParticlesNearestCritters1 != null) {

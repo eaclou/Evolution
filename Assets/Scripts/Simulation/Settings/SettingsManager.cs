@@ -22,9 +22,9 @@ public class SettingsManager : MonoBehaviour {
     public float maxSizeFeedingEfficiencyMeat = 1f;
 
     public float maxFoodParticleTotalAmount = 512f;
-    public float avgFoodParticleRadius = 0.25f;
-    public float foodParticleRadiusVariance = 4f;
-    public float foodParticleNutrientDensity = 1f;
+    public float avgAlgaeParticleRadius = 0.25f;
+    public float algaeParticleRadiusVariance = 4f;
+    public float algaeParticleNutrientDensity = 1f;
     public float foodParticleRegrowthRate = 0.0001f;
     public float efficiencyFalloff = 0f;  // how much less food rewarded from particles that are further from optimal size for the consuming Critter
 
@@ -107,8 +107,8 @@ public class SettingsManager : MonoBehaviour {
         curTierFoodPlant = Mathf.Clamp(curTierFoodPlant + delta, 0, 10);
         float lerp = (float)curTierFoodPlant / 10f;
         foodParticleRegrowthRate = Mathf.Lerp(0.001f, 0.05f, lerp * lerp);
-        avgFoodParticleRadius = Mathf.Lerp(1f, 1.75f, lerp);
-        foodParticleNutrientDensity = Mathf.Lerp(.02f, 0.06f, lerp);
+        avgAlgaeParticleRadius = Mathf.Lerp(1f, 1.75f, lerp);
+        algaeParticleNutrientDensity = Mathf.Lerp(.02f, 0.06f, lerp);
         maxFoodParticleTotalAmount = Mathf.Pow(2f, (float)(curTierFoodPlant + 2)); // 1 - 1024 
     }
     public void ChangeTierFoodEgg(int delta) {

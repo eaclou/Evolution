@@ -1177,16 +1177,16 @@ public class UIManager : MonoBehaviour {
 
             //textTolWorldStatsValue.text = displayVal.ToString();
             if(tolSelectedWorldStatsIndex == 0) {
-                displayVal = gameManager.simulationManager.foodManager.curGlobalNutrients;
+                displayVal = gameManager.simulationManager.vegetationManager.curGlobalAlgaeGrid;
             }
             else if(tolSelectedWorldStatsIndex == 1) {
-                displayVal = gameManager.simulationManager.foodManager.curGlobalFoodParticles;
+                displayVal = gameManager.simulationManager.vegetationManager.curGlobalAlgaeParticles;
             }
             else if(tolSelectedWorldStatsIndex == 2) {
-                displayVal = gameManager.simulationManager.foodManager.curGlobalEggSackVolume;
+                displayVal = gameManager.simulationManager.vegetationManager.curGlobalEggSackVolume;
             }
             else if(tolSelectedWorldStatsIndex == 3) {
-                displayVal = gameManager.simulationManager.foodManager.curGlobalCarrionVolume;
+                displayVal = gameManager.simulationManager.vegetationManager.curGlobalCarrionVolume;
             }
             else if(tolSelectedWorldStatsIndex == 4) {
                 displayVal = gameManager.simulationManager.settingsManager.curTierBrainMutationFrequency;
@@ -1470,7 +1470,7 @@ public class UIManager : MonoBehaviour {
                         "\n";
             debugTxtAgent += "\nNutrients: " + agentRef.foodModule.nutrientDensity[0].ToString("F4") + ", Stamina: " + agentRef.coreModule.stamina[0].ToString("F3") + "\n";
             debugTxtAgent += "Gradient Dir: (" + agentRef.foodModule.nutrientGradX[0].ToString("F2") + ", " + agentRef.foodModule.nutrientGradY[0].ToString("F2") + ")\n";
-            debugTxtAgent += "Total Food Eaten -- Decay: " + agentRef.totalFoodEatenDecay.ToString("F3") + ", Plant: " + agentRef.totalFoodEatenPlant.ToString("F2") + ", Meat: " + agentRef.totalFoodEatenMeat.ToString("F2") + "\nFood Stored: " + agentRef.coreModule.foodStored[0].ToString() + ", Corpse Food Amount: " + agentRef.currentCorpseFoodAmount.ToString("F3") + "\n";
+            debugTxtAgent += "Total Food Eaten -- Decay: n/a, Plant: " + agentRef.totalFoodEatenPlant.ToString("F2") + ", Meat: " + agentRef.totalFoodEatenMeat.ToString("F2") + "\nFood Stored: " + agentRef.coreModule.foodStored[0].ToString() + ", Corpse Food Amount: " + agentRef.currentCorpseFoodAmount.ToString("F3") + "\n";
 
             //debugTxtAgent += "\nFullSize: " + agentRef.fullSizeBoundingBox.ToString() + ", Volume: " + agentRef.fullSizeBodyVolume.ToString() + "\n";
             //debugTxtAgent += "( " + (agentRef.sizePercentage * 100f).ToString("F0") + "% )\n";
@@ -2721,6 +2721,7 @@ public class UIManager : MonoBehaviour {
     }
     public void ClickButtonToggleDebug() {
         isActiveDebug = !isActiveDebug;
+        gameManager.theRenderKing.isDebugRender = isActiveDebug;
         panelDebug.SetActive(isActiveDebug);
     }
 

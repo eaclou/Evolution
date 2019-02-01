@@ -20,11 +20,10 @@ public class SimulationManager : MonoBehaviour {
     public ComputeShader computeShaderFoodParticles;  // algae particles
     public ComputeShader computeShaderAnimalParticles;  // animal particles
     public MasterGenomePool masterGenomePool;  // agents
-    public FoodManager foodManager;  // --> becomes PlantManager
+    public VegetationManager vegetationManager;  // --> becomes PlantManager
     public SimEventsManager simEventsManager;
-
-    // Environmental Resources: 
-    // Decomposers:
+    public SimResourceManager simResourceManager;
+       
 
     public bool isQuickStart = true;
 
@@ -102,27 +101,9 @@ public class SimulationManager : MonoBehaviour {
         }
     }    
     
-    //public float[] rawFitnessScoresArray;
-    //private int[] rankedIndicesList;
-    //private float[] rankedFitnessList;
     public int numAgentsBorn = 0;
     public int numAgentsDied = 0;
-    //public int currentOldestAgent = 0;
     
-        // Species
-    //private int numSpecies = 4;
-    //public float[] speciesAvgFoodEaten;
-    //public Vector2[] speciesAvgSizes;
-    //public float[] speciesAvgMouthTypes;
-    
-    //public int recordBotAge = 0;
-    //public Vector4 statsAvgGlobalNutrients;
-    //public float statsAvgMutationRate;
-    //public float[] rollingAverageAgentScoresArray;
-    //public List<Vector4> statsLifespanEachGenerationList;
-    //public List<Vector4> statsBodySizesEachGenerationList;
-    //public List<Vector4> statsFoodEatenEachGenerationList;
-    //public List<Vector4> statsPredationEachGenerationList;
         // 0 == decay nutrients  .x
         // 1 == plant food  .y
         // 2 == eggs food  .z
@@ -142,10 +123,6 @@ public class SimulationManager : MonoBehaviour {
     public List<float> statsHistoryBodyMutationAmpList;
     public List<float> statsHistoryBodySensorVarianceList;
     public List<float> statsHistoryWaterCurrentsList;
-    //public List<float> statsMutationEachGenerationList;
-    //public List<Color> statsSpeciesPrimaryColorsList;
-    //public List<Color> statsSpeciesSecondaryColorsList;
-    //public float agentAvgRecordScore = 1f;
     public int curApproxGen = 1;
 
     public int numInitialHiddenNeurons = 16;
@@ -161,9 +138,7 @@ public class SimulationManager : MonoBehaviour {
     private int numStepsInSimYear = 2000;
     private int simAgeYearCounter = 0;
     public int curSimYear = 0;
-
-    //public int curEventBucks = 1;
-
+    
 
     #region loading   // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& LOADING LOADING LOADING &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
     public void TickLoading() {
@@ -185,13 +160,7 @@ public class SimulationManager : MonoBehaviour {
                 audioManager.TurnOffMenuAudioGroup();
 
                 cameraManager.SetTarget(agentsArray[0], 0);  // otherwise it's null and a giant mess
-
-                // Populate renderKingBuffers:
-                //for(int i = 0; i < numAgents; i++) {
-                //    theRenderKing.UpdateAgentBodyStrokesBuffer(i); // hacky fix but seems to work...
-                //}
-
-                //RespawnPlayer(); // Needed???? *****                
+             
             }
             else {
                 //Debug.Log("WarmUp Step " + currentWarmUpTimeStep.ToString());
@@ -362,16 +331,10 @@ public class SimulationManager : MonoBehaviour {
         // allocate memory and initialize data structures, classes, arrays, etc.
 
         settingsManager.Initialize();
-        foodManager = new FoodManager(settingsManager);
+        vegetationManager = new VegetationManager(settingsManager);
         simEventsManager = new SimEventsManager(this);
-
-        //debugScores:
-        //rollingAverageAgentScoresArray = new float[numSpecies];
-
-        //speciesAvgFoodEaten = new float[numSpecies];
-        //speciesAvgSizes = new Vector2[numSpecies];
-        //speciesAvgMouthTypes = new float[numSpecies];
-                        
+        simResourceManager = new SimResourceManager();
+         
         LoadingInitializePopulationGenomes();
 
         if(isQuickStart) {
@@ -380,11 +343,7 @@ public class SimulationManager : MonoBehaviour {
         }
 
         simStateData = new SimulationStateData(this);
-
-        //uiManager.treeOfLifeManager = new TreeOfLifeManager(uiManager.treeOfLifeAnchorGO, uiManager);  // Moved inside MasterGenome Init!!! ***
-        //uiManager.treeOfLifeManager.FirstTimeInitialize(masterGenomePool);
-
-        //yield return null;
+        
     }
     private void LoadingInitializePopulationGenomes() {
         masterGenomePool = new MasterGenomePool();
@@ -443,13 +402,13 @@ public class SimulationManager : MonoBehaviour {
     }
     
     private void LoadingInitializeFoodParticles() {
-        foodManager.InitializeFoodParticles(numAgents, computeShaderFoodParticles);
+        vegetationManager.InitializeAlgaeParticles(numAgents, computeShaderFoodParticles);
     }
     private void LoadingInitializeAnimalParticles() {
-        foodManager.InitializeAnimalParticles(numAgents, computeShaderAnimalParticles);
+        vegetationManager.InitializeAnimalParticles(numAgents, computeShaderAnimalParticles);
     }
     private void LoadingInitializeFoodGrid() {
-        foodManager.InitializeNutrientsMap(numAgents, computeShaderNutrientMap);
+        vegetationManager.InitializeAlgaeGrid(numAgents, computeShaderNutrientMap);
     }
     private void LoadingInstantiateEggSacks() {
         // FOOODDDD!!!!
@@ -573,7 +532,7 @@ public class SimulationManager : MonoBehaviour {
 
             // update graphs each "year"
             if(curSimYear % 2 == 0) {                
-                foodManager.MoveRandomNutrientPatches(UnityEngine.Random.Range(0, foodManager.nutrientPatchesArray.Length));
+                vegetationManager.MoveRandomNutrientPatches(UnityEngine.Random.Range(0, vegetationManager.nutrientSpawnPatchesArray.Length));
             }
 
             AddNewHistoricalDataEntry();
@@ -631,14 +590,15 @@ public class SimulationManager : MonoBehaviour {
         eggSackRespawnCounter++;
         agentRespawnCounter++;
 
-        float totalNutrients = foodManager.MeasureTotalNutrients();
-        foodManager.GetNutrientValuesAtMouthPositions(simStateData);
-        //Find closest critters to foodParticles:
-        foodManager.FindClosestFoodParticleToCritters(simStateData);
-        foodManager.MeasureTotalFoodParticlesAmount();
+        //float totalNutrients = vegetationManager.MeasureTotalAlgaeGridAmount();
+        //vegetationManager.GetAlgaeGridValuesAtMouthPositions(simStateData);
 
-        foodManager.FindClosestAnimalParticleToCritters(simStateData);
-        foodManager.MeasureTotalAnimalParticlesAmount();
+        //Find closest critters to foodParticles:
+        vegetationManager.FindClosestFoodParticleToCritters(simStateData);
+        vegetationManager.MeasureTotalFoodParticlesAmount();
+
+        vegetationManager.FindClosestAnimalParticleToCritters(simStateData);
+        vegetationManager.MeasureTotalAnimalParticlesAmount();
 
         masterGenomePool.Tick(); // keep track of when species created so can't create multiple per frame?
                 
@@ -671,7 +631,8 @@ public class SimulationManager : MonoBehaviour {
             foodGridIndexY = Mathf.Clamp(foodGridIndexY, 0, foodGridResolution - 1);
             */
             //agentsArray[i].Tick(new Vector4(0f,0f,0f,0f), ref nutrientEatAmountsArray);  
-            agentsArray[i].Tick(this, foodManager.nutrientSamplesArray[i], ref foodManager.nutrientEatAmountsArray, settingsManager);  
+            //agentsArray[i].Tick(this, vegetationManager.algaeGridSamplesArray[i], ref vegetationManager.algaeGridEatAmountsArray, settingsManager);  
+            agentsArray[i].Tick(this, settingsManager);  
         }
         for (int i = 0; i < eggSackArray.Length; i++) {
             eggSackArray[i].Tick();
@@ -680,9 +641,12 @@ public class SimulationManager : MonoBehaviour {
         // Apply External Forces to dynamic objects: (internal PhysX Updates):        
         ApplyFluidForcesToDynamicObjects();
 
-        foodManager.EatSelectedFoodParticles(simStateData); //       
-        foodManager.EatSelectedAnimalParticles(simStateData);
-        foodManager.RemoveEatenNutrients(numAgents, simStateData);
+        vegetationManager.EatSelectedFoodParticles(simStateData); //       
+        vegetationManager.EatSelectedAnimalParticles(simStateData);
+
+        // OLD ALGAE GRID:
+        /*
+        vegetationManager.RemoveEatenAlgaeGrid(numAgents, simStateData);
         float spawnNewFoodChance = settingsManager.spawnNewFoodChance;
         float spawnFoodPercentage = UnityEngine.Random.Range(0f, 0.25f);
         float maxGlobalFood = settingsManager.maxGlobalNutrients;
@@ -691,9 +655,9 @@ public class SimulationManager : MonoBehaviour {
             float randRoll = UnityEngine.Random.Range(0f, 1f);
             if(randRoll < spawnNewFoodChance) {
                 // pick random cell:
-                int nutrientPatchRandID = UnityEngine.Random.Range(0, foodManager.nutrientPatchesArray.Length);
-                int indexX = Mathf.FloorToInt(foodManager.nutrientMapResolution * foodManager.nutrientPatchesArray[nutrientPatchRandID].x);
-                int indexY = Mathf.FloorToInt(foodManager.nutrientMapResolution * foodManager.nutrientPatchesArray[nutrientPatchRandID].y);
+                int nutrientPatchRandID = UnityEngine.Random.Range(0, vegetationManager.nutrientSpawnPatchesArray.Length);
+                int indexX = Mathf.FloorToInt(vegetationManager.algaeGridTexResolution * vegetationManager.nutrientSpawnPatchesArray[nutrientPatchRandID].x);
+                int indexY = Mathf.FloorToInt(vegetationManager.algaeGridTexResolution * vegetationManager.nutrientSpawnPatchesArray[nutrientPatchRandID].y);
 
                 float foodAvailable = maxGlobalFood - totalNutrients;
 
@@ -701,12 +665,14 @@ public class SimulationManager : MonoBehaviour {
 
                 // ADD FOOD HERE::
                 
-                foodManager.AddNutrientsAtCoords(newFoodAmount, indexX, indexY);                
+                vegetationManager.AddAlgaeAtCoords(newFoodAmount, indexX, indexY);                
             }
         }
-        foodManager.ApplyDiffusionOnNutrientMap(environmentFluidManager);
-        foodManager.RespawnFoodParticles(environmentFluidManager, theRenderKing, simStateData);
-        foodManager.SimulateAnimalParticles(environmentFluidManager, theRenderKing, simStateData);
+        vegetationManager.ApplyDiffusionOnAlgaeGrid(environmentFluidManager);
+        */
+
+        vegetationManager.RespawnFoodParticles(environmentFluidManager, theRenderKing, simStateData);
+        vegetationManager.SimulateAnimalParticles(environmentFluidManager, theRenderKing, simStateData);
 
         // TEMP AUDIO EFFECTS!!!!        
         float volume = agentsArray[0].smoothedThrottle.magnitude * 0.24f;
@@ -768,21 +734,21 @@ public class SimulationManager : MonoBehaviour {
         for(int i = 0; i < respawnIndices.Length; i++) {
             respawnIndices[i] = UnityEngine.Random.Range(0, 1024);
         }
-        foodManager.ReviveSelectFoodParticles(respawnIndices, 1.25f, new Vector4(pos.x / _MapSize, pos.y / _MapSize, 0f, 0f), simStateData);
+        vegetationManager.ReviveSelectFoodParticles(respawnIndices, 1.25f, new Vector4(pos.x / _MapSize, pos.y / _MapSize, 0f, 0f), simStateData);
     }
     public void PlayerFeedToolPour(Vector3 pos) {        
-        int xCoord = Mathf.RoundToInt(pos.x / 256f * foodManager.nutrientMapResolution);
-        int yCoord = Mathf.RoundToInt(pos.y / 256f * foodManager.nutrientMapResolution);
+        int xCoord = Mathf.RoundToInt(pos.x / 256f * vegetationManager.algaeGridTexResolution);
+        int yCoord = Mathf.RoundToInt(pos.y / 256f * vegetationManager.algaeGridTexResolution);
 
         Debug.Log("PlayerFeedToolPour pos: " + xCoord.ToString() + ", " + yCoord.ToString());
 
-        foodManager.AddNutrientsAtCoords(5f, xCoord, yCoord);
+        vegetationManager.AddAlgaeAtCoords(5f, xCoord, yCoord);
 
         int[] respawnIndices = new int[32];
         for(int i = 0; i < respawnIndices.Length; i++) {
             respawnIndices[i] = UnityEngine.Random.Range(0, 1024);
         }
-        foodManager.ReviveSelectFoodParticles(respawnIndices, 6f, new Vector4(pos.x / _MapSize, pos.y / _MapSize, 0f, 0f), simStateData);
+        vegetationManager.ReviveSelectFoodParticles(respawnIndices, 6f, new Vector4(pos.x / _MapSize, pos.y / _MapSize, 0f, 0f), simStateData);
     }
     //public void ChangeGlobalMutationRate(float normalizedVal) {
     //    settingsManager.SetGlobalMutationRate(normalizedVal);
@@ -1047,7 +1013,7 @@ public class SimulationManager : MonoBehaviour {
             float lerpAmount = Mathf.Max(0.01f, 1f / (float)speciesPool.numAgentsEvaluated);
 
             masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgLifespan = Mathf.Lerp(speciesPool.avgLifespan, (float)agentRef.ageCounter, lerpAmount);
-            masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgConsumptionDecay = Mathf.Lerp(speciesPool.avgConsumptionDecay, agentRef.totalFoodEatenDecay, lerpAmount);
+            masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgConsumptionDecay = 0f; // Mathf.Lerp(speciesPool.avgConsumptionDecay, agentRef.totalFoodEatenDecay, lerpAmount);
             masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgConsumptionPlant = Mathf.Lerp(speciesPool.avgConsumptionPlant, agentRef.totalFoodEatenPlant, lerpAmount);
             masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgConsumptionMeat = Mathf.Lerp(speciesPool.avgConsumptionMeat, agentRef.totalFoodEatenMeat, lerpAmount);
             masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].avgBodySize = Mathf.Lerp(speciesPool.avgBodySize, agentRef.fullSizeBodyVolume, lerpAmount);
@@ -1231,8 +1197,8 @@ public class SimulationManager : MonoBehaviour {
         }
         
         //Debug.Log("ProcessAgentScores eggVol: " + foodManager.curGlobalEggSackVolume.ToString() + ", carrion: " + foodManager.curGlobalCarrionVolume.ToString());
-        foodManager.curGlobalEggSackVolume = Mathf.Lerp(foodManager.curGlobalEggSackVolume, totalEggSackVolume, 0.01f);
-        foodManager.curGlobalCarrionVolume = Mathf.Lerp(foodManager.curGlobalCarrionVolume, totalCarrionVolume, 0.01f);
+        vegetationManager.curGlobalEggSackVolume = Mathf.Lerp(vegetationManager.curGlobalEggSackVolume, totalEggSackVolume, 0.01f);
+        vegetationManager.curGlobalCarrionVolume = Mathf.Lerp(vegetationManager.curGlobalCarrionVolume, totalCarrionVolume, 0.01f);
         
         numAgentsProcessed++;
         //get species index:
@@ -1264,8 +1230,8 @@ public class SimulationManager : MonoBehaviour {
     }
     private void AddNewHistoricalDataEntry() {
         // add new entries to historical data lists: 
-        Debug.Log("eggVol: " + foodManager.curGlobalEggSackVolume.ToString() + ", carrion: " + foodManager.curGlobalCarrionVolume.ToString());
-        statsNutrientsEachGenerationList.Add(new Vector4(foodManager.curGlobalNutrients, foodManager.curGlobalFoodParticles, foodManager.curGlobalEggSackVolume, foodManager.curGlobalCarrionVolume));
+        Debug.Log("eggVol: " + vegetationManager.curGlobalEggSackVolume.ToString() + ", carrion: " + vegetationManager.curGlobalCarrionVolume.ToString());
+        statsNutrientsEachGenerationList.Add(new Vector4(vegetationManager.curGlobalAlgaeGrid, vegetationManager.curGlobalAlgaeParticles, vegetationManager.curGlobalEggSackVolume, vegetationManager.curGlobalCarrionVolume));
         // Still used?
         statsHistoryBrainMutationFreqList.Add((float)settingsManager.curTierBrainMutationFrequency);
         statsHistoryBrainMutationAmpList.Add((float)settingsManager.curTierBrainMutationAmplitude);
@@ -1279,7 +1245,7 @@ public class SimulationManager : MonoBehaviour {
         masterGenomePool.AddNewYearlySpeciesStats(year);
     }
     private void RefreshLatestHistoricalDataEntry() {
-        statsNutrientsEachGenerationList[statsNutrientsEachGenerationList.Count - 1] = new Vector4(foodManager.curGlobalNutrients, foodManager.curGlobalFoodParticles, foodManager.curGlobalEggSackVolume, foodManager.curGlobalCarrionVolume);
+        statsNutrientsEachGenerationList[statsNutrientsEachGenerationList.Count - 1] = new Vector4(vegetationManager.curGlobalAlgaeGrid, vegetationManager.curGlobalAlgaeParticles, vegetationManager.curGlobalEggSackVolume, vegetationManager.curGlobalCarrionVolume);
         statsHistoryBrainMutationFreqList[statsHistoryBrainMutationFreqList.Count - 1] = settingsManager.curTierBrainMutationFrequency;
         statsHistoryBrainMutationAmpList[statsHistoryBrainMutationAmpList.Count - 1] = settingsManager.curTierBrainMutationAmplitude;
         statsHistoryBrainSizeBiasList[statsHistoryBrainSizeBiasList.Count - 1] = settingsManager.curTierBrainMutationNewLink;
@@ -1655,8 +1621,8 @@ public class SimulationManager : MonoBehaviour {
             }
         }
 
-        if(foodManager != null) {
-            foodManager.ClearBuffers();
+        if(vegetationManager != null) {
+            vegetationManager.ClearBuffers();
         }
     }
 

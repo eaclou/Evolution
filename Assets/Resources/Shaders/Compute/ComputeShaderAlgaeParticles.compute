@@ -8,29 +8,16 @@
 //#pragma kernel CSReviveSelectFoodParticles
 
 #include "Assets/Resources/Shaders/Inc/StructsCritterData.cginc"
-
-struct FoodParticleData {
-    int index;
-	int critterIndex; // index of creature which swallowed this foodParticle
-	int nearestCritterIndex;
-    float isSwallowed;   // 0 = normal, 1 = in critter's belly
-    float digestedAmount;  // 0 = freshly eaten, 1 = fully dissolved/shrunk        
-    float2 worldPos;
-    float radius;
-    float foodAmount;
-    float active;
-	float refactoryAge;
-	float age;
-};
+#include "Assets/Resources/Shaders/Inc/StructsAlgaeParticles.cginc"
 
 StructuredBuffer<CritterInitData> critterInitDataCBuffer;
 StructuredBuffer<CritterSimData> critterSimDataCBuffer;
 
-StructuredBuffer<FoodParticleData> foodParticlesRead;
-RWStructuredBuffer<FoodParticleData> foodParticlesWrite;
+StructuredBuffer<AlgaeParticleData> foodParticlesRead;
+RWStructuredBuffer<AlgaeParticleData> foodParticlesWrite;
 RWTexture2D<float4> foodParticlesNearestCrittersRT;
 
-RWStructuredBuffer<FoodParticleData> closestParticlesDataCBuffer;
+RWStructuredBuffer<AlgaeParticleData> closestParticlesDataCBuffer;
 
 StructuredBuffer<float> foodParticlesEatAmountsRead;
 RWStructuredBuffer<float> foodParticlesEatAmountsCBuffer;
@@ -74,7 +61,7 @@ void CSMeasureInitCritterDistances (uint3 id : SV_DispatchThreadID)
 	int particleIndex = id.x;
 	int critterIndex = id.y;
 
-	FoodParticleData particleData = foodParticlesRead[particleIndex];
+	AlgaeParticleData particleData = foodParticlesRead[particleIndex];
 	CritterInitData critterInitData = critterInitDataCBuffer[critterIndex];
 	CritterSimData critterSimData = critterSimDataCBuffer[critterIndex];
 
@@ -107,7 +94,7 @@ void CSReduceCritterDistances32 (uint3 id : SV_DispatchThreadID)
 		
 		float4 sourceData = critterDistancesRead[int2(particleIndex, critterIndex)];
 		
-		FoodParticleData particleData = foodParticlesRead[particleIndex];
+		AlgaeParticleData particleData = foodParticlesRead[particleIndex];
 
 		if(sourceData.y < minSquaredDistance) {
 			if(particleData.active > 0.5) {
@@ -117,7 +104,7 @@ void CSReduceCritterDistances32 (uint3 id : SV_DispatchThreadID)
 		}
 	}
 		
-	FoodParticleData closestFoodData = foodParticlesRead[closestParticleIndex];	
+	AlgaeParticleData closestFoodData = foodParticlesRead[closestParticleIndex];	
 		
 	critterDistancesWrite[int2(id.x, critterIndex)] = float4(closestParticleIndex, minSquaredDistance, 1.0, 1.0);
 	closestParticlesDataCBuffer[critterIndex] = closestFoodData; // assuming there's only 1 thread at end
@@ -134,8 +121,8 @@ void CSEatSelectedFoodParticles (uint3 id : SV_DispatchThreadID)
 
 	int particleIndex = (int)data.x;
 
-	FoodParticleData particleData = foodParticlesRead[particleIndex];
-	//particleData.closestCritterDistance = data.y;
+	AlgaeParticleData particleData = foodParticlesRead[particleIndex];
+	
 	foodParticlesWrite[particleIndex] = particleData;
 
 	CritterInitData critterInitData = critterInitDataCBuffer[critterIndex];
@@ -172,7 +159,7 @@ void CSEatSelectedFoodParticles (uint3 id : SV_DispatchThreadID)
 [numthreads(1024,1,1)]
 void CSCopyFoodParticlesBuffer (uint3 id : SV_DispatchThreadID)
 {	
-	FoodParticleData particleData = foodParticlesRead[id.x];
+	AlgaeParticleData particleData = foodParticlesRead[id.x];
 	
 	foodParticlesWrite[id.x] = particleData;
 }
@@ -180,13 +167,13 @@ void CSCopyFoodParticlesBuffer (uint3 id : SV_DispatchThreadID)
 [numthreads(1,1,1)]
 void CSMeasureTotalFoodParticlesAmount (uint3 id : SV_DispatchThreadID)
 {	
-	FoodParticleData copyData = foodParticlesRead[id.x];
+	AlgaeParticleData copyData = foodParticlesRead[id.x];
 	
 	float totalFoodAmount = 0;
 	
 	for(int i = 0; i < 32; i++) {		
 		int particleIndex = id.x * 32 + i;		
-		FoodParticleData particleData = foodParticlesRead[particleIndex];				
+		AlgaeParticleData particleData = foodParticlesRead[particleIndex];				
 		totalFoodAmount += particleData.foodAmount * particleData.active;
 	}
 
@@ -200,7 +187,7 @@ void CSRespawnFoodParticles (uint3 id : SV_DispatchThreadID)
 {
 	// Check if particle isn't in the water:
 
-	FoodParticleData foodParticle = foodParticlesRead[id.x];
+	AlgaeParticleData foodParticle = foodParticlesRead[id.x];
 	
 	float2 uv = foodParticle.worldPos / _MapSize;
 	

@@ -1,9 +1,9 @@
-﻿Shader "Brushstrokes/FoodParticleDisplayShader"
+﻿Shader "DebugVis/DebugVisAlgaeParticlesShader"
 {
 	Properties
 	{
 		_MainTex ("Main Texture", 2D) = "white" {}  // stem texture sheet		
-		_WaterSurfaceTex ("_WaterSurfaceTex", 2D) = "black" {}
+		//_WaterSurfaceTex ("_WaterSurfaceTex", 2D) = "black" {}
 		//_Tint("Color", Color) = (1,1,1,1)
 		//_Size("Size", vector) = (1,1,1,1)
 	}
@@ -26,7 +26,7 @@
 			#include "Assets/Resources/Shaders/Inc/StructsAlgaeParticles.cginc"
 
 			sampler2D _MainTex;
-			sampler2D _WaterSurfaceTex;
+			//sampler2D _WaterSurfaceTex;
 			
 			//float4 _MainTex_ST;
 			//float4 _Tint;
@@ -62,9 +62,9 @@
 				worldPosition = worldPosition + quadPoint * particleData.active;
 
 				// REFRACTION:
-				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / 256, 0, 0)).yzw;				
-				float refractionStrength = 2.5;
-				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
+				//float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / 256, 0, 0)).yzw;				
+				//float refractionStrength = 2.5;
+				//worldPosition.xy += -surfaceNormal.xy * refractionStrength;
 
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));

@@ -266,13 +266,13 @@ public class CritterModuleFood {
         }
     }
 
-    public void Tick(SimulationManager simManager, Vector4 nutrientCellInfo, Agent agent) {
+    public void Tick(SimulationManager simManager, Agent agent) {
         
-        if(genome.useNutrients) {
+        /*if(genome.useNutrients) {
             nutrientDensity[0] = nutrientCellInfo.x;
             nutrientGradX[0] = nutrientCellInfo.y;
             nutrientGradY[0] = nutrientCellInfo.z;
-        }
+        }*/
 
         ////Vector2 foodPos = Vector2.zero;
         //Vector2 foodDir = Vector2.zero;
@@ -284,13 +284,13 @@ public class CritterModuleFood {
         // eventually, if none of first preference are in range of sensor, use next in line: *****
         //foodPreferenceOrder[0] = 0;
         //if(foodPreferenceOrder[0] == 0) {  // particle
-        nearestFoodParticleIndex = simManager.foodManager.closestFoodParticlesDataArray[agent.index].index;
-        nearestFoodParticlePos = simManager.foodManager.closestFoodParticlesDataArray[agent.index].worldPos - 
+        nearestFoodParticleIndex = simManager.vegetationManager.closestAlgaeParticlesDataArray[agent.index].index;
+        nearestFoodParticlePos = simManager.vegetationManager.closestAlgaeParticlesDataArray[agent.index].worldPos - 
                                     new Vector2(simManager.agentsArray[agent.index].bodyRigidbody.transform.position.x,
                                     simManager.agentsArray[agent.index].bodyRigidbody.transform.position.y);
 
-        nearestFoodParticleAmount = simManager.foodManager.closestFoodParticlesDataArray[agent.index].foodAmount;
-        Vector2 critterToFoodParticle = simManager.foodManager.closestFoodParticlesDataArray[agent.index].worldPos - agent.ownPos;
+        nearestFoodParticleAmount = simManager.vegetationManager.closestAlgaeParticlesDataArray[agent.index].foodAmount;
+        Vector2 critterToFoodParticle = simManager.vegetationManager.closestAlgaeParticlesDataArray[agent.index].worldPos - agent.ownPos;
         float distToNearestFoodParticle = critterToFoodParticle.magnitude;
         Vector2 foodParticleDir = critterToFoodParticle.normalized;
         float nearestFoodParticleDistance = Mathf.Clamp01((sensorRange - critterToFoodParticle.magnitude) / sensorRange); // inverted dist(proximity) 0-1
@@ -304,12 +304,12 @@ public class CritterModuleFood {
         foodPlantRelSize[0] = nearestFoodParticleAmount;
 
 
-        nearestAnimalParticleIndex = simManager.foodManager.closestAnimalParticlesDataArray[agent.index].index;
-        nearestAnimalParticlePos = simManager.foodManager.closestAnimalParticlesDataArray[agent.index].worldPos - simManager.agentsArray[agent.index].bodyRigidbody.transform.position; // 
+        nearestAnimalParticleIndex = simManager.vegetationManager.closestAnimalParticlesDataArray[agent.index].index;
+        nearestAnimalParticlePos = simManager.vegetationManager.closestAnimalParticlesDataArray[agent.index].worldPos - simManager.agentsArray[agent.index].bodyRigidbody.transform.position; // 
                                     //new Vector2(simManager.agentsArray[agent.index].bodyRigidbody.transform.position.x,
                                     //simManager.agentsArray[agent.index].bodyRigidbody.transform.position.y);
 
-        nearestAnimalParticleAmount = simManager.foodManager.closestAnimalParticlesDataArray[agent.index].nutrientContent;
+        nearestAnimalParticleAmount = simManager.vegetationManager.closestAnimalParticlesDataArray[agent.index].nutrientContent;
         Vector2 critterToAnimalParticle = new Vector2(nearestAnimalParticlePos.x, nearestAnimalParticlePos.y); // - agent.ownPos;
         float distToNearestAnimalParticle = critterToAnimalParticle.magnitude;
         Vector2 animalParticleDir = critterToAnimalParticle.normalized;

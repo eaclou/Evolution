@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Agent : MonoBehaviour {
 
-    public float totalFoodEatenDecay = 0f;
+    //public float totalFoodEatenDecay = 0f;
     public float totalFoodEatenPlant = 0f;
     public float totalFoodEatenMeat = 0f;
     public float totalDamageDealt = 0f;
@@ -210,12 +210,12 @@ public class Agent : MonoBehaviour {
         preyAgentRef = preyAgent;
     }
 
-    private int GetNumInputs() {
-        return 44;  // make more robust later!
-    } // *** UPGRADE!!!!
-    private int GetNumOutputs() {
-        return 7;  // make more robust later!
-    } // *** UPGRADE!!!!
+    //private int GetNumInputs() {
+        //return 44;  // make more robust later!
+    //} // *** UPGRADE!!!!
+    //private int GetNumOutputs() {
+    //    return 7;  // make more robust later!
+    //} // *** UPGRADE!!!!
     /*public DataSample RecordData() {
         DataSample sample = new DataSample(GetNumInputs(), GetNumOutputs());
         
@@ -379,7 +379,7 @@ public class Agent : MonoBehaviour {
     public void TickBrain() {
         brain.BrainMasterFunction();
     }
-    public void TickModules(SimulationManager simManager, Vector4 nutrientCellInfo) { // Updates internal state of body - i.e health, energy etc. -- updates input Neuron values!!!
+    public void TickModules(SimulationManager simManager) { // Updates internal state of body - i.e health, energy etc. -- updates input Neuron values!!!
                                 // Update Stocks & Flows ::: new health, energy, stamina
                                 // This should have happened during last frame's Internal PhysX Update
 
@@ -398,7 +398,7 @@ public class Agent : MonoBehaviour {
         coreModule.Tick();
         communicationModule.Tick(this);
         environmentModule.Tick(this);
-        foodModule.Tick(simManager, nutrientCellInfo, this);
+        foodModule.Tick(simManager, this);
         friendModule.Tick(this);
         movementModule.Tick(this, ownVel);
         threatsModule.Tick(this);
@@ -537,7 +537,7 @@ public class Agent : MonoBehaviour {
         }
     }
 
-    public void EatFoodDecay(float amount) {
+    /*public void EatFoodDecay(float amount) {
         totalFoodEatenDecay += amount;
         float stomachSpace = coreModule.stomachCapacity - coreModule.stomachContentsDecay - coreModule.stomachContentsPlant - coreModule.stomachContentsMeat;
         if(amount > stomachSpace) {
@@ -555,10 +555,10 @@ public class Agent : MonoBehaviour {
             coreModule.stomachContentsDecay += amount;
         }
         GainExperience((amount / coreModule.stomachCapacity) * coreModule.foodEfficiencyDecay * 1f); // Exp for appropriate food
-    }
+    }*/
     public void EatFoodPlant(float amount) {
         totalFoodEatenPlant += amount;  
-        float stomachSpace = coreModule.stomachCapacity - coreModule.stomachContentsDecay - coreModule.stomachContentsPlant - coreModule.stomachContentsMeat;
+        float stomachSpace = coreModule.stomachCapacity - coreModule.stomachContentsPlant - coreModule.stomachContentsMeat;
         if(amount > stomachSpace) {
             amount = stomachSpace; // ??
         }
@@ -577,7 +577,7 @@ public class Agent : MonoBehaviour {
     }
     public void EatFoodMeat(float amount) {
         totalFoodEatenMeat += amount; 
-        float stomachSpace = coreModule.stomachCapacity - coreModule.stomachContentsDecay - coreModule.stomachContentsPlant - coreModule.stomachContentsMeat;
+        float stomachSpace = coreModule.stomachCapacity - coreModule.stomachContentsPlant - coreModule.stomachContentsMeat;
         if(amount > stomachSpace) {
             amount = stomachSpace; // ??
         }
@@ -668,7 +668,7 @@ public class Agent : MonoBehaviour {
         
     }
 
-    public void Tick(SimulationManager simManager, Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray, SettingsManager settings) {
+    public void Tick(SimulationManager simManager, SettingsManager settings) {
         
         if(isBeingSwallowed)
         {
@@ -713,7 +713,7 @@ public class Agent : MonoBehaviour {
             //    break;
             case AgentLifeStage.Mature:
                 //
-                TickMature(simManager, nutrientCellInfo, ref eatAmountsArray, settings);
+                TickMature(simManager, settings);
                 break;
             case AgentLifeStage.Dead:
                 //
@@ -856,7 +856,7 @@ public class Agent : MonoBehaviour {
             springJoint.connectedBody = null;
         }
     }*/
-    private void TickMature(SimulationManager simManager, Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray, SettingsManager settings) {
+    private void TickMature(SimulationManager simManager, SettingsManager settings) {
 
         //ProcessSwallowing();
 
@@ -872,9 +872,9 @@ public class Agent : MonoBehaviour {
         }
         ScaleBody(sizePercentage, resizeFrame);  
 
-        TickModules(simManager, nutrientCellInfo); // update inputs for Brain        
+        TickModules(simManager); // update inputs for Brain        
         TickBrain(); // Tick Brain
-        TickActions(simManager, nutrientCellInfo, ref eatAmountsArray, settings); // Execute Actions  -- Also Updates Resources!!! ***
+        TickActions(simManager, settings); // Execute Actions  -- Also Updates Resources!!! ***
 
         lifeStageTransitionTimeStepCounter++;
         ageCounter++;
@@ -939,7 +939,7 @@ public class Agent : MonoBehaviour {
         }               
     }
 
-    public void TickActions(SimulationManager simManager, Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray, SettingsManager settings) {
+    public void TickActions(SimulationManager simManager, SettingsManager settings) {
        
         float horizontalMovementInput = movementModule.throttleX[0];; // Mathf.Lerp(horAI, horHuman, humanControlLerp);
         float verticalMovementInput = movementModule.throttleY[0]; // Mathf.Lerp(verAI, verHuman, humanControlLerp);
@@ -954,27 +954,27 @@ public class Agent : MonoBehaviour {
         float maxDigestionRate = 0.003f;
         float foodToEnergyBaseConversion = 2f;
         
-        Vector3 foodProportionsVec = new Vector3(coreModule.stomachContentsDecay, coreModule.stomachContentsPlant, coreModule.stomachContentsMeat) / (coreModule.stomachContentsDecay + coreModule.stomachContentsPlant + coreModule.stomachContentsMeat + 0.0001f);
-        float totalStomachContentsNorm = (coreModule.stomachContentsDecay + coreModule.stomachContentsPlant + coreModule.stomachContentsMeat) / coreModule.stomachCapacity;
+        Vector2 foodProportionsVec = new Vector2(coreModule.stomachContentsPlant, coreModule.stomachContentsMeat) / (coreModule.stomachContentsPlant + coreModule.stomachContentsMeat + 0.0001f);
+        float totalStomachContentsNorm = (coreModule.stomachContentsPlant + coreModule.stomachContentsMeat) / coreModule.stomachCapacity;
         coreModule.stomachContentsNorm = totalStomachContentsNorm; // ** we'll see.... ***
         float digestedAmountTotal = Mathf.Min(totalStomachContentsNorm, maxDigestionRate);
         float digestedProportionOfTotalContents = digestedAmountTotal / (totalStomachContentsNorm + 0.0001f);
 
-        float decayToEnergyAmount = digestedAmountTotal * foodProportionsVec.x * foodToEnergyBaseConversion * coreModule.foodEfficiencyDecay;
-        float plantToEnergyAmount = digestedAmountTotal * foodProportionsVec.y * foodToEnergyBaseConversion * coreModule.foodEfficiencyPlant;
-        float meatToEnergyAmount = digestedAmountTotal * foodProportionsVec.z * foodToEnergyBaseConversion * coreModule.foodEfficiencyMeat;        
+        //float decayToEnergyAmount = digestedAmountTotal * foodProportionsVec.x * foodToEnergyBaseConversion * coreModule.foodEfficiencyDecay;
+        float plantToEnergyAmount = digestedAmountTotal * foodProportionsVec.x * foodToEnergyBaseConversion * coreModule.foodEfficiencyPlant;
+        float meatToEnergyAmount = digestedAmountTotal * foodProportionsVec.y * foodToEnergyBaseConversion * coreModule.foodEfficiencyMeat;        
         
-        float createdEnergyTotal = decayToEnergyAmount + plantToEnergyAmount + meatToEnergyAmount; // digestionAmount * foodToEnergyConversion;
+        float createdEnergyTotal = plantToEnergyAmount + meatToEnergyAmount; // digestionAmount * foodToEnergyConversion;
         
-        coreModule.stomachContentsDecay -= digestedAmountTotal * foodProportionsVec.x;
+        /*coreModule.stomachContentsDecay -= digestedAmountTotal * foodProportionsVec.x;
         if(coreModule.stomachContentsDecay < 0f) {
             coreModule.stomachContentsDecay = 0f;
-        }
-        coreModule.stomachContentsPlant -= digestedAmountTotal * foodProportionsVec.y;
+        }*/
+        coreModule.stomachContentsPlant -= digestedAmountTotal * foodProportionsVec.x;
         if(coreModule.stomachContentsPlant < 0f) {
             coreModule.stomachContentsPlant = 0f;
         }
-        coreModule.stomachContentsMeat -= digestedAmountTotal * foodProportionsVec.z;
+        coreModule.stomachContentsMeat -= digestedAmountTotal * foodProportionsVec.y;
         if(coreModule.stomachContentsMeat < 0f) {
             coreModule.stomachContentsMeat = 0f;
         }
@@ -1022,7 +1022,7 @@ public class Agent : MonoBehaviour {
             coreModule.energy = 0f;
         }
 
-        eatAmountsArray[index].x = 0f;
+        //eatAmountsArray[index].x = 0f;
 
         float sizeValue = BodyGenome.GetBodySizeScore01(candidateRef.candidateGenome.bodyGenome);
 
@@ -1034,7 +1034,7 @@ public class Agent : MonoBehaviour {
             // Food calc before energy/healing/etc? **************
             
             // FOOD PARTICLES: Either mouth type for now:
-            float foodParticleEatAmount = simManager.foodManager.foodParticlesEatAmountsArray[index];
+            float foodParticleEatAmount = simManager.vegetationManager.algaeParticlesEatAmountsArray[index];
             if(foodParticleEatAmount > 0f) {
                 //mouthRef.InitiatePassiveBite();
 
@@ -1043,7 +1043,7 @@ public class Agent : MonoBehaviour {
                 EatFoodPlant(foodParticleEatAmount * sizeEfficiencyPlant);                
             }
 
-            float animalParticleEatAmount = simManager.foodManager.animalParticlesEatAmountsArray[index];
+            float animalParticleEatAmount = simManager.vegetationManager.animalParticlesEatAmountsArray[index];
             if(animalParticleEatAmount > 0f) {
                 //float sizeEfficiencyPlant = Mathf.Lerp(settings.minSizeFeedingEfficiencyDecay, settings.maxSizeFeedingEfficiencyDecay, sizeValue);
                 EatFoodMeat(animalParticleEatAmount); // * sizeEfficiencyPlant);                
@@ -1051,7 +1051,7 @@ public class Agent : MonoBehaviour {
 
 
             // DECAY NUTRIENTS:
-            if(mouthRef.GetIsFeeding() > 0.5f) {
+            /*if(mouthRef.GetIsFeeding() > 0.5f) {
                 //mouthRef.Enable();
                                         
                 float ambientFoodDensity = nutrientCellInfo.x;
@@ -1072,8 +1072,9 @@ public class Agent : MonoBehaviour {
             }  
             else {
                 //mouthRef.Disable();
-            }
+            }*/
 
+            // *** REFACTOR THIS GARBAGE!!!!! ********
             float mostActiveEffectorVal = 0f;
             mostActiveEffectorVal = Mathf.Max(mostActiveEffectorVal, coreModule.mouthFeedEffector[0]);
             mostActiveEffectorVal = Mathf.Max(mostActiveEffectorVal, coreModule.mouthAttackEffector[0]);
@@ -1107,18 +1108,9 @@ public class Agent : MonoBehaviour {
                     //coreModule.stamina[0] -= 0.1f;
                 }                
             }
-            
-            /*if(mouthRef.isPassive) {
-
-                            
-            }
-            else {
-                if(coreModule.mouthEffector[0] > 0f) {                    
-                    //mouthRef.InitiateActiveBite();      // ** do I need this still somewhere?               
-                }
-            } */          
+                     
         }
-        coreModule.debugFoodValue = nutrientCellInfo.x;
+        //coreModule.debugFoodValue = nutrientCellInfo.x;
 
         ApplyPhysicsForces(smoothedThrottle);
 
@@ -1462,7 +1454,7 @@ public class Agent : MonoBehaviour {
         experienceForNextLevel = 2f; // 2, 4, 8, 16, 32, 64, 128, 256?
         curLevel = 0;
         //scoreCounter = 0;
-        totalFoodEatenDecay = 0f;
+        //totalFoodEatenDecay = 0f;
         totalFoodEatenPlant = 0f;
         totalFoodEatenMeat = 0f;
         totalDamageDealt = 0f;
