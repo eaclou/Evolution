@@ -556,24 +556,46 @@ public class SimulationManager : MonoBehaviour {
         // **** Figure out proper Execution Order / in which Class to Run RenderOps while being synced w/ results of physX sim!!!        
         theRenderKing.Tick(); // updates all renderData, buffers, brushStrokes etc.
 
+        // Simulate timestep of fluid Sim - update density/velocity maps:
+        // Or should this be right at beginning of frame????? ***************** revisit...
+        environmentFluidManager.Tick(); // ** Clean this up, but generally OK
+
+        vegetationManager.EatSelectedFoodParticles(simStateData); //       
+        vegetationManager.EatSelectedAnimalParticles(simStateData);
+
+        // How much light/nutrients available?
+        vegetationManager.RespawnFoodParticles(environmentFluidManager, theRenderKing, simStateData);
+        // Send back information about how much growth/photosynthesis there was?
+
+        vegetationManager.SimulateAnimalParticles(environmentFluidManager, theRenderKing, simStateData);
+        // how much oxygen used? How much eaten? How much growth? How much waste/detritus?
+
+        // Decomposers:
+        //simResourceManager.dissolvedOxygenAmount
+
         HookUpModules(); // Sets nearest-neighbors etc. feed current data into agent Brains
         
         // Load gameState into Agent Brain, process brain function, read out brainResults,
         // Execute Agent Actions -- apply propulsive force to each Agent:
         for (int i = 0; i < agentsArray.Length; i++) {
             // *** FIND FOOD GRID CELL!!!!  ************
-            Vector2 agentPos = agentsArray[i].bodyRigidbody.transform.position;
+            //Vector2 agentPos = agentsArray[i].bodyRigidbody.transform.position;
             agentsArray[i].Tick(this, settingsManager);  
         }
         for (int i = 0; i < eggSackArray.Length; i++) {
             eggSackArray[i].Tick();
         }
+
+        // Animal resource conversions: Oxygen used, waste added:
         
         // Apply External Forces to dynamic objects: (internal PhysX Updates):        
         ApplyFluidForcesToDynamicObjects();
 
-        vegetationManager.EatSelectedFoodParticles(simStateData); //       
-        vegetationManager.EatSelectedAnimalParticles(simStateData);
+        // TEMP AUDIO EFFECTS!!!!        
+        float volume = agentsArray[0].smoothedThrottle.magnitude * 0.24f;
+        audioManager.SetPlayerSwimLoopVolume(volume);      
+
+
 
         // OLD ALGAE GRID:
         /*
@@ -601,17 +623,7 @@ public class SimulationManager : MonoBehaviour {
         }
         vegetationManager.ApplyDiffusionOnAlgaeGrid(environmentFluidManager);
         */
-
-        vegetationManager.RespawnFoodParticles(environmentFluidManager, theRenderKing, simStateData);
-        vegetationManager.SimulateAnimalParticles(environmentFluidManager, theRenderKing, simStateData);
-
-        // TEMP AUDIO EFFECTS!!!!        
-        float volume = agentsArray[0].smoothedThrottle.magnitude * 0.24f;
-        audioManager.SetPlayerSwimLoopVolume(volume);              
-                
-        // Simulate timestep of fluid Sim - update density/velocity maps:
-        // Or should this be right at beginning of frame????? ***************** revisit...
-        environmentFluidManager.Tick(); // ** Clean this up, but generally OK
+        
     }
     private void TickSparseEvents() {
         if(simAgeYearCounter >= numStepsInSimYear) {
