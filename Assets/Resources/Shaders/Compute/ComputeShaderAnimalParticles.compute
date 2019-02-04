@@ -188,7 +188,7 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 
 	AnimalParticleData animalParticle = animalParticlesRead[id.x];
 
-	int randNeighborIndex = (id.x + round(_Time)) % 1024;
+	int randNeighborIndex = (id.x + round(_Time * 1)) % 1024;
 	AnimalParticleData neighborParticle = animalParticlesRead[randNeighborIndex];
 	
 	float2 uv = animalParticle.worldPos.xy / _MapSize;
@@ -202,6 +202,8 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 		float altitude = terrainSample.x;
 		
 		CritterSimData critterSimData = critterSimDataCBuffer[id.x % 32];
+
+		//int neighborIndex = round(_Time * 10) % 1024;
 		
 		if(altitude > 0.5) {
 			animalParticlesWrite[id.x].active = 0.0;
@@ -210,14 +212,19 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 		}
 		else {  // Otherwise simulate as normal			
 			
-			float2 vel = velocityRead.SampleLevel(_LinearRepeat, uv, 2).xy;
+			float2 vel = velocityRead.SampleLevel(_LinearRepeat, uv, 2).xy;  // water velocity
 			float speedMult = 0.005;				
-			float2 nextPos = uv + vel * speedMult;
+			float2 nextPos = uv + vel * speedMult;  // carried by water
 
-			nextPos += critterSimData.velocity * 0.00005;
+			float2 neighborPos = neighborParticle.worldPos.xy;
+			float2 dirToNeighbor = neighborPos - animalParticle.worldPos.xy;
+
+			nextPos += critterSimData.velocity * 0.00001;
+			nextPos += neighborParticle.velocity * 0.0033 * saturate((1 - saturate(length(dirToNeighbor) * 0.005)) * 50);
 
 			float2 defaultNextPos = nextPos * _MapSize;
 			
+			animalParticlesWrite[id.x].velocity = defaultNextPos - animalParticle.worldPos.xy;
 			animalParticlesWrite[id.x].age = animalParticle.age + 0.0003;
 			animalParticlesWrite[id.x].worldPos.xy = defaultNextPos;
 		}

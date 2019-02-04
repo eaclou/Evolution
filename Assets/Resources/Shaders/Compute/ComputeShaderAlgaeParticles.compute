@@ -190,14 +190,17 @@ void CSRespawnFoodParticles (uint3 id : SV_DispatchThreadID)
 	AlgaeParticleData foodParticle = foodParticlesRead[id.x];
 	
 	float2 uv = foodParticle.worldPos / _MapSize;
+	// *** Update this to sample altitude instead.  ** to avoid unreachable food
+	float2 altUV = uv * 0.5 + 0.25;
+	float4 altitudeTexSample = altitudeRead.SampleLevel(_LinearClamp, altUV, 0);
+	float altitudeRaw = altitudeTexSample.x;
+	
 	
 
 	if(foodParticle.active > 0.5) { // poor man's boolean
-	// *** Update this to sample altitude instead.  ** to avoid unreachable food
-		float2 altUV = uv * 0.5 + 0.25;
-		float altitude = altitudeRead.SampleLevel(_LinearClamp, altUV, 1).x;
+	
 		
-		if(altitude > 0.5) {
+		if(altitudeRaw > 0.5) {
 			foodParticlesWrite[id.x].active = 0.0;
 			foodParticlesWrite[id.x].refactoryAge = 1.0;
 			// Respawn if on land ^^^:
@@ -234,12 +237,15 @@ void CSRespawnFoodParticles (uint3 id : SV_DispatchThreadID)
 			float randX = rand(float2((float)id.x, _Time));
 			float randY = rand(float2(randX * 62.39 + _Time, (float)id.x));
 
-			float2 spawnUV = float2(randX, randY);			
-			float4 spawnDensitySample = _SpawnDensityMap.SampleLevel(_LinearClamp, spawnUV, 0);
+			float2 spawnUV = float2(randX, randY) * 0.5 + 0.25;;			
+			//float4 spawnDensitySample = _SpawnDensityMap.SampleLevel(_LinearClamp, spawnUV, 0);
 
-			float spawnThreshold = 0.001;
-			if(rand01 < 0.025) {  // to prevent mass respawning, overshooting the intended max global food amount ?  // Needed?
-				if(spawnDensitySample.x > spawnThreshold) {
+			float4 spawnDensitySample = altitudeRead.SampleLevel(_LinearClamp, spawnUV, 0);
+			float spawnDensity = 2 * saturate(-spawnDensitySample.x + 0.5);
+
+			float spawnThreshold = 0.775;
+			if(rand01 < 0.05) {  // to prevent mass respawning, overshooting the intended max global food amount ?  // Needed?
+				if(spawnDensity < spawnThreshold) {
 				
 					foodParticlesWrite[id.x].worldPos = float2(randX * _MapSize, randY * _MapSize);
 

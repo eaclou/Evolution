@@ -91,6 +91,7 @@ public class VegetationManager {
         public float isSwallowed;   // 0 = normal, 1 = in critter's belly
         public float digestedAmount;  // 0 = freshly eaten, 1 = fully dissolved/shrunk        
         public Vector3 worldPos;
+        public Vector2 velocity;
         public float radius;
         public float nutrientContent; // essentially size?
         public float active;
@@ -105,7 +106,7 @@ public class VegetationManager {
     }
 
     private int GetAnimalParticleDataSize() {
-        int bitSize = sizeof(float) * 11 + sizeof(int) * 3;
+        int bitSize = sizeof(float) * 13 + sizeof(int) * 3;
         return bitSize;
     }
 
