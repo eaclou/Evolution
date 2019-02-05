@@ -188,7 +188,7 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 
 	AnimalParticleData animalParticle = animalParticlesRead[id.x];
 
-	int randNeighborIndex = (id.x + round(_Time * 1)) % 1024;
+	int randNeighborIndex = (id.x + round(_Time * 33)) % 1024;
 	AnimalParticleData neighborParticle = animalParticlesRead[randNeighborIndex];
 	
 	float2 uv = animalParticle.worldPos.xy / _MapSize;
@@ -202,10 +202,10 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 		float altitude = terrainSample.x;
 		
 		CritterSimData critterSimData = critterSimDataCBuffer[id.x % 32];
+				
+		if(altitude > 0.40) {
+			//animalParticlesWrite[id.x].velocity = float2(0,0);
 
-		//int neighborIndex = round(_Time * 10) % 1024;
-		
-		if(altitude > 0.5) {
 			animalParticlesWrite[id.x].active = 0.0;
 			animalParticlesWrite[id.x].refactoryAge = 1.0;
 			// Respawn if on land ^^^:
@@ -218,9 +218,27 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 
 			float2 neighborPos = neighborParticle.worldPos.xy;
 			float2 dirToNeighbor = neighborPos - animalParticle.worldPos.xy;
+			float distToNeighborSquared = dirToNeighbor.x * dirToNeighbor.x + dirToNeighbor.y * dirToNeighbor.y;
 
-			nextPos += critterSimData.velocity * 0.00001;
-			nextPos += neighborParticle.velocity * 0.0033 * saturate((1 - saturate(length(dirToNeighbor) * 0.005)) * 50);
+			float distanceMask = 1.0 - saturate(distToNeighborSquared * 0.0025 - 0.25);
+
+			float2 targetFacingDir = lerp(animalParticle.velocity, neighborParticle.velocity, 0.05 * distanceMask);
+			float facingDirSqrMag = targetFacingDir.x * targetFacingDir.x + targetFacingDir.y * targetFacingDir.y;
+			float speed = 0.00005;
+			
+			if(facingDirSqrMag > 0.0) {
+				targetFacingDir = normalize(targetFacingDir);
+			}
+			else {
+				targetFacingDir = float2(0,1);
+				speed *= 0.33;
+			}
+
+			nextPos += targetFacingDir * speed;
+			
+
+			//nextPos += critterSimData.velocity * 0.00001;
+			//nextPos += neighborParticle.velocity * 0.0033 * saturate((1 - saturate(length(dirToNeighbor) * 0.005)) * 50);
 
 			float2 defaultNextPos = nextPos * _MapSize;
 			
