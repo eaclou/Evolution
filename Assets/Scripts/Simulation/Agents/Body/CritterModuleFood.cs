@@ -309,7 +309,7 @@ public class CritterModuleFood {
                                     //new Vector2(simManager.agentsArray[agent.index].bodyRigidbody.transform.position.x,
                                     //simManager.agentsArray[agent.index].bodyRigidbody.transform.position.y);
 
-        nearestAnimalParticleAmount = simManager.vegetationManager.closestAnimalParticlesDataArray[agent.index].nutrientContent;
+        nearestAnimalParticleAmount = simManager.vegetationManager.closestAnimalParticlesDataArray[agent.index].biomass;
         Vector2 critterToAnimalParticle = new Vector2(nearestAnimalParticlePos.x, nearestAnimalParticlePos.y); // - agent.ownPos;
         float distToNearestAnimalParticle = critterToAnimalParticle.magnitude;
         Vector2 animalParticleDir = critterToAnimalParticle.normalized;

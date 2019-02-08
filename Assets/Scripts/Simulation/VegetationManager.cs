@@ -21,7 +21,11 @@ public class VegetationManager {
     public float curGlobalEggSackVolume = 0f;
     public float curGlobalCarrionVolume = 0f;
 
-    public float curGlobalAlgaeReservoirAmount = 0f;  // separate from algaeParticles -- takes place of algaeGrid
+    public float oxygenUsedByAnimalParticlesLastFrame = 0f;
+    public float wasteProducedByAnimalParticlesLastFrame = 0f;
+    public float algaeConsumedByAnimalParticlesLastFrame = 0f;
+
+    public float curGlobalAlgaeReservoirAmount = 1f;  // separate from algaeParticles -- takes place of algaeGrid
     // (AnimalParticles eating from grid is more complicated than necessary for first go around) ***
 
     public int algaeGridTexResolution = 32; // Temporarily disabled - replaced by single value (1x1 grid)
@@ -93,7 +97,11 @@ public class VegetationManager {
         public Vector3 worldPos;
         public Vector2 velocity;
         public float radius;
-        public float nutrientContent; // essentially size?
+        public float oxygenUsed;
+	    public float wasteProduced;
+	    public float algaeConsumed;
+        public float biomass; // essentially size?
+        //public float nutrientContent; // essentially size?
         public float active;
 	    public float refactoryAge;
 	    public float age;
@@ -106,7 +114,7 @@ public class VegetationManager {
     }
 
     private int GetAnimalParticleDataSize() {
-        int bitSize = sizeof(float) * 13 + sizeof(int) * 3;
+        int bitSize = sizeof(float) * 16 + sizeof(int) * 3;
         return bitSize;
     }
 
@@ -202,7 +210,7 @@ public class VegetationManager {
             data.worldPos = new Vector3(UnityEngine.Random.Range(0f, SimulationManager._MapSize), UnityEngine.Random.Range(0f, SimulationManager._MapSize), 0f);
 
             data.radius = UnityEngine.Random.Range(minParticleSize, maxParticleSize);
-            data.nutrientContent = data.radius * data.radius * Mathf.PI; // * settingsRef.animalParticleNutrientDensity;
+            data.biomass = data.radius * data.radius * Mathf.PI; // * settingsRef.animalParticleNutrientDensity;
             data.active = 1f;
             data.refactoryAge = 0f;
             data.age = UnityEngine.Random.Range(0f, 1f);
@@ -560,7 +568,9 @@ public class VegetationManager {
         computeShaderAlgaeParticles.Dispatch(kernelCSMeasureTotalFoodParticlesAmount, 1, 1, 1);
         
         algaeParticlesMeasure1.GetData(algaeParticleMeasurementTotalsData);
-        curGlobalAlgaeParticles = algaeParticleMeasurementTotalsData[0].foodAmount;        
+        curGlobalAlgaeParticles = algaeParticleMeasurementTotalsData[0].foodAmount;  
+        
+        
     }
 
 
@@ -596,12 +606,16 @@ public class VegetationManager {
         computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "velocityRead", fluidManagerRef._VelocityA);        
         computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "altitudeRead", renderKingRef.baronVonTerrain.terrainHeightMap);
         computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "_SpawnDensityMap", algaeGridRT1);
+        computeShaderAnimalParticles.SetFloat("_SpawnPosX", 0.6f); // UPDATE THIS!!! ****
+        computeShaderAnimalParticles.SetFloat("_SpawnPosY", 0.6f);
+        computeShaderAnimalParticles.SetFloat("_GlobalOxygenLevel", 1f); // needed?
+        computeShaderAnimalParticles.SetFloat("_GlobalAlgaeLevel", curGlobalAlgaeReservoirAmount);
         //computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "animalParticlesNearestCrittersRT", animalParticlesNearestCritters1);
         computeShaderAnimalParticles.SetFloat("_MapSize", SimulationManager._MapSize);
         
         computeShaderAnimalParticles.SetFloat("_Time", Time.realtimeSinceStartup);
 
-        if(animalParticleMeasurementTotalsData[0].nutrientContent < maxAnimalParticleTotal) {
+        if(animalParticleMeasurementTotalsData[0].biomass < maxAnimalParticleTotal) {
             computeShaderAnimalParticles.SetFloat("_RespawnAnimalParticles", 1f);                       
         }
         else {
@@ -691,7 +705,18 @@ public class VegetationManager {
         computeShaderAnimalParticles.Dispatch(kernelCSMeasureTotalAnimalParticlesAmount, 1, 1, 1);
         
         animalParticlesMeasure1.GetData(animalParticleMeasurementTotalsData);
-        curGlobalAnimalParticles = animalParticleMeasurementTotalsData[0].nutrientContent;        
+        curGlobalAnimalParticles = animalParticleMeasurementTotalsData[0].biomass;
+        oxygenUsedByAnimalParticlesLastFrame = animalParticleMeasurementTotalsData[0].oxygenUsed;
+        wasteProducedByAnimalParticlesLastFrame = animalParticleMeasurementTotalsData[0].wasteProduced;
+        algaeConsumedByAnimalParticlesLastFrame = animalParticleMeasurementTotalsData[0].algaeConsumed;
+
+        /*if(UnityEngine.Random.Range(0f, 1f) < 0.01f) {
+            Debug.Log("curGlobalAnimalParticles: " + curGlobalAnimalParticles.ToString() + "\n" +
+            "OxygenUsedByAnimalParticlesLastFrame: " + oxygenUsedByAnimalParticlesLastFrame.ToString() + "\n" +
+            "WasteProducedByAnimalParticlesLastFrame: " + wasteProducedByAnimalParticlesLastFrame.ToString() + "\n" +
+            "AlgaeConsumedByAnimalParticlesLastFrame: " + algaeConsumedByAnimalParticlesLastFrame.ToString() + "\n");
+        }*/
+        
     }
 
     public void ClearBuffers() {

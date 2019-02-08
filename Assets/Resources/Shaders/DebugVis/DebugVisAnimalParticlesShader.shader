@@ -66,7 +66,7 @@
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));			
 				o.uv = quadVerticesCBuffer[id].xy + 0.5f;	
 
-				o.color = float4(particleData.active, saturate(particleData.nutrientContent), saturate(particleData.digestedAmount), saturate(particleData.age * 0.5));
+				o.color = float4(particleData.active, saturate(particleData.biomass), saturate(particleData.digestedAmount), saturate(particleData.age * 0.5));
 				
 				return o;
 			}

@@ -1487,9 +1487,21 @@ public class UIManager : MonoBehaviour {
             
             
 
-            string debugTxtSpecies = "";
-            int selectedSpeciesIndex = agentRef.speciesIndex;
-            debugTxtSpecies += "SPECIES# " + selectedSpeciesIndex.ToString();
+            string debugTxtResources = "";
+            //int selectedSpeciesIndex = agentRef.speciesIndex;
+            debugTxtResources += "GLOBAL RESOURCES:\n";
+            debugTxtResources += "\nSunlight: " + simManager.simResourceManager.baseSolarEnergy.ToString();
+            debugTxtResources += "\nOxygen: " + simManager.simResourceManager.dissolvedOxygenAmount.ToString();
+            debugTxtResources += "\nNutrients: " + simManager.simResourceManager.dissolvedNutrientsAmount.ToString();
+            debugTxtResources += "\nDetritus: " + simManager.simResourceManager.availableDetritusAmount.ToString();
+            debugTxtResources += "\nDecomposers: " + simManager.simResourceManager.currentDecomposersAmount.ToString();
+            debugTxtResources += "\nAlgae (Reservoir): " + simManager.vegetationManager.curGlobalAlgaeReservoirAmount.ToString();
+            debugTxtResources += "\nAlgae (Particles): " + simManager.vegetationManager.curGlobalAlgaeParticles.ToString();
+            debugTxtResources += "\nZooplankton: " + simManager.vegetationManager.curGlobalAnimalParticles.ToString();
+            // Agent biomass
+            // Eggsack biomass (+ animal particles?)
+            // agent corpse biomass
+            
             //debugTxtSpecies += "THE BRAIN !!!\n\n"; // + agentRef.coreModule.coreWidth.ToString() + "\n";
             //debugTxt2 += "# Neurons: " + cameraManager.targetAgent.brain.neuronList.Count.ToString() + ", # Axons: " + cameraManager.targetAgent.brain.axonList.Count.ToString() + "\n\n";
            
@@ -1540,7 +1552,7 @@ public class UIManager : MonoBehaviour {
             }*/
             
             textDebugTrainingInfo1.text = debugTxtAgent;
-            textDebugTrainingInfo2.text = debugTxtSpecies;
+            textDebugTrainingInfo2.text = debugTxtResources;
             textDebugTrainingInfo3.text = debugTxtGlobalSim;
             
         }        

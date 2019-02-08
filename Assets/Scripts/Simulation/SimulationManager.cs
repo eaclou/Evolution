@@ -537,7 +537,34 @@ public class SimulationManager : MonoBehaviour {
         vegetationManager.MeasureTotalFoodParticlesAmount();
         vegetationManager.FindClosestAnimalParticleToCritters(simStateData);
         vegetationManager.MeasureTotalAnimalParticlesAmount();
+        // Actually measuring results of last frame's execution?
 
+        // Global Resources Here????
+        // Algae Reservoir Growth:
+        vegetationManager.curGlobalAlgaeReservoirAmount += 1f;  // Do this Properly!!!
+        // Growth depends on: Light + Nutrients + Current Biomass
+
+        // Animal Particles Consume Algae Reservoir (single global value):
+        // Depends on: GlobalAlgaeConcentration + Current Biomass
+        vegetationManager.curGlobalAlgaeReservoirAmount -= vegetationManager.algaeConsumedByAnimalParticlesLastFrame;
+
+        simResourceManager.dissolvedOxygenAmount -= vegetationManager.oxygenUsedByAnimalParticlesLastFrame;
+        simResourceManager.availableDetritusAmount += vegetationManager.wasteProducedByAnimalParticlesLastFrame;
+
+        // Decomposers:
+        float nutrientsProduced = simResourceManager.currentDecomposersAmount * simResourceManager.availableDetritusAmount * 0.001f;
+        float wasteRemoved = simResourceManager.currentDecomposersAmount * 0.01f;
+        simResourceManager.dissolvedNutrientsAmount += nutrientsProduced;
+        simResourceManager.availableDetritusAmount -= wasteRemoved;
+
+        // figure out decent formulae for how this should all work!!! Then implement tomorrow!
+
+        /*if (UnityEngine.Random.Range(0f, 1f) < 0.01f) {
+            Debug.Log("curGlobalAlgaeReservoirAmount: " + vegetationManager.curGlobalAlgaeReservoirAmount.ToString() + "\n" +
+            "dissolvedOxygenAmount: " + simResourceManager.dissolvedOxygenAmount.ToString() + "\n" +
+            "availableDetritusAmount: " + simResourceManager.availableDetritusAmount.ToString() + "\n" +
+            "vegetationManager.algaeConsumedByAnimalParticlesLastFrame: " + vegetationManager.algaeConsumedByAnimalParticlesLastFrame.ToString() + "\n");
+        }*/
         
         // CHECK FOR NULL Objects:        
         // ******** REVISIT CODE ORDERING!!!!  -- Should check for death Before or After agent Tick/PhysX ???
@@ -569,6 +596,8 @@ public class SimulationManager : MonoBehaviour {
 
         vegetationManager.SimulateAnimalParticles(environmentFluidManager, theRenderKing, simStateData);
         // how much oxygen used? How much eaten? How much growth? How much waste/detritus?
+
+        //
 
         // Decomposers:
         //simResourceManager.dissolvedOxygenAmount
