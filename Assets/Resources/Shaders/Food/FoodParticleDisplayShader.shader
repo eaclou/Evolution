@@ -86,6 +86,7 @@
 				
 				float4 finalColor = float4(float3(i.color.z * 1.2, 0.85, (1.0 - i.color.w) * 0.2) + i.color.y, texColor.a * i.color.x * 0.33 * (1 - i.color.z));
 				//finalColor = float4(0.25, 1, 0.36, texColor.a * 0.05);
+				finalColor.a *= 0.1;
 				return finalColor;
 			}
 		ENDCG

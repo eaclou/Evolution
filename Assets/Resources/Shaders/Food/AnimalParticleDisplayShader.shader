@@ -54,13 +54,21 @@
 				AnimalParticleData particleData = animalParticleDataCBuffer[inst];
 
 				float3 worldPosition = float3(particleData.worldPos.xy, 1.0);
+				quadPoint.y = (quadPoint.y - 0.35) * 4.20 * 0.65;
+				quadPoint = quadPoint * particleData.radius * 0.28241; // * particleData.active; // *** remove * 3 after!!!
 				
-				quadPoint = quadPoint * particleData.radius * 1; // * particleData.active; // *** remove * 3 after!!!
-				worldPosition = worldPosition + quadPoint; // * particleData.active;
+				
+				// Figure out final facing Vectors!!!
+				float2 forward0 = normalize(particleData.velocity);
+				float2 right0 = float2(forward0.y, -forward0.x); // perpendicular to forward vector
+				float3 rotatedPoint0 = float3(quadPoint.x * right0 + quadPoint.y * forward0,
+											 quadPoint.z);
+				
+				worldPosition = worldPosition + rotatedPoint0; // * particleData.active;
 
 				// REFRACTION:
 				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / 256, 0, 0)).yzw;				
-				float refractionStrength = 2.5;
+				float refractionStrength = 0.15;
 				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
 				
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));			
@@ -79,7 +87,7 @@
 				float val = i.color.a;
 				
 				float4 finalColor = float4(i.color.rgb,1); // float4(float3(i.color.z * 1.2, 0.85, (1.0 - i.color.w) * 0.2) + i.color.y, texColor.a * i.color.x * 0.33 * (1 - i.color.z));
-				
+				finalColor.a *= 0.5;
 				return finalColor;
 			}
 		ENDCG

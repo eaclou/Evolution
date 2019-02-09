@@ -230,15 +230,17 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 		float fluidSpeedMult = 0.0065;				
 		float2 nextPos = uv + fluidVel * fluidSpeedMult;  // carried by water
 
+		float masterSpeed = 0.35;
+
 		float2 neighborPos = neighborParticle.worldPos.xy;
 		float2 dirToNeighbor = neighborPos - animalParticle.worldPos.xy;
 		float distToNeighborSquared = dirToNeighbor.x * dirToNeighbor.x + dirToNeighbor.y * dirToNeighbor.y;
 
-		float distanceMask = 1.0 - saturate(distToNeighborSquared * 0.00035 - 0.33);
+		float distanceMask = 1.0 - saturate(distToNeighborSquared * 0.025 - 0.833);
 
 		float2 targetFacingDir = lerp(animalParticle.velocity, neighborParticle.velocity, 0.1 * distanceMask);
 		float facingDirSqrMag = targetFacingDir.x * targetFacingDir.x + targetFacingDir.y * targetFacingDir.y;
-		float speed = 0.00005;
+		float speed = 0.00045;
 			
 		if(facingDirSqrMag > 0.0) {
 			targetFacingDir = normalize(targetFacingDir);
@@ -249,26 +251,27 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 		}
 
 		// Match orientation with nearest neighbor
-		nextPos += targetFacingDir * speed;
+		nextPos += targetFacingDir * speed * masterSpeed;
 		
 		// move towards/away from nearest neighbor:
-		float attractMag = 0.0000045;
-		float attractDistanceMask = 1.0 - saturate(distToNeighborSquared * 0.0004 - 0.33);
+		float attractMag = 0.000027;
+		float attractDistanceMask = 1.0 - saturate(distToNeighborSquared * 0.0056 - 0.33);
 		float2 attractVel = float2(saturate(dirToNeighbor.x), saturate(dirToNeighbor.y)) * attractDistanceMask;
-		nextPos += attractVel * attractMag;
+		nextPos += attractVel * attractMag * masterSpeed;
 		
 		//random noisy movement:
-		float noiseMag = 0.000041;
+		float noiseMag = 0.00000046;
 		float noiseFreq = 0.00002 + 0.0002 * ((float)id.x / 1024);
 		float2 noiseVel = float2(rand(float2(id.x, _Time * noiseFreq)), rand(float2(_Time * noiseFreq * 1.347, id.x % 32))) * 2.0 - 1.0;  // get into -1 to 1 range		
-		nextPos += noiseVel * noiseMag;
+		nextPos += noiseVel * noiseMag * masterSpeed;
 
 		// Shoreline "Collision"
 		float2 slope = float2(terrainSampleRight.x - terrainSampleCenter.x, terrainSampleTop.x - terrainSampleCenter.x);
 		float aboveWaterMask = saturate((altitude - 0.15) * 3.5);
-		float landCollisionMag = 0.0035;
+		float landCollisionMag = 0.0055;
 		float2 landCollisionVel = -slope * aboveWaterMask * landCollisionMag;
-		nextPos += landCollisionVel;
+		nextPos += landCollisionVel * masterSpeed;
+		
 		
 		float2 defaultNextPos = nextPos * _MapSize;
 			
