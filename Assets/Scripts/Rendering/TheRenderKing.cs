@@ -3529,9 +3529,9 @@ public class TheRenderKing : MonoBehaviour {
             // add shadow pass eventually
             animalParticleDisplayMat.SetPass(0);
             animalParticleDisplayMat.SetBuffer("animalParticleDataCBuffer", simManager.vegetationManager.animalParticlesCBuffer);
-            animalParticleDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+            animalParticleDisplayMat.SetBuffer("quadVerticesCBuffer", curveRibbonVerticesCBuffer);
             animalParticleDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-            cmdBufferMain.DrawProcedural(Matrix4x4.identity, animalParticleDisplayMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.animalParticlesCBuffer.count);
+            cmdBufferMain.DrawProcedural(Matrix4x4.identity, animalParticleDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, simManager.vegetationManager.animalParticlesCBuffer.count);
         
         
             eggSackStrokeDisplayMat.SetPass(0);

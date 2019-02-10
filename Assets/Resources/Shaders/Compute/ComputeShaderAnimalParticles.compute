@@ -47,6 +47,21 @@ uniform float _SpawnPosY;
 uniform float _GlobalOxygenLevel;
 uniform float _GlobalAlgaeLevel;
 
+uniform float _MasterSwimSpeed; // = 0.35;
+uniform float _AlignMaskRange; // = 0.025;
+uniform float _AlignMaskOffset; // = 0.0833;
+uniform float _AlignSpeedMult; // = 0.00015;
+uniform float _AttractMag; // = 0.0000137;
+uniform float _AttractMaskMaxDistance; // = 0.0036;
+uniform float _AttractMaskOffset; // = 0.5;
+uniform float _SwimNoiseMag; // = 0.000086;
+uniform float _SwimNoiseFreqMin; // = 0.00002
+uniform float _SwimNoiseFreqRange; // = 0.0002
+uniform float _SwimNoiseOnOffFreq; //  = 0.0001
+uniform float _ShoreCollisionMag; // = 0.0065;
+uniform float _ShoreCollisionDistOffset; // = 0.15;
+uniform float _ShoreCollisionDistSlope; // = 3.5;
+
 SamplerState _LinearClamp;
 SamplerState _LinearRepeat;
 SamplerState _PointClamp;
@@ -205,10 +220,7 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 	// Check if particle isn't in the water:
 
 	AnimalParticleData animalParticle = animalParticlesRead[id.x];
-
-	int randNeighborIndex = (id.x + round(_Time * 33)) % 1024;
-	AnimalParticleData neighborParticle = animalParticlesRead[randNeighborIndex];
-	
+		
 	float2 uv = animalParticle.worldPos.xy / _MapSize;
 	
 
@@ -216,68 +228,87 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 	// *** Update this to sample altitude instead.  ** to avoid unreachable food
 		float2 altUV = uv * 0.5 + 0.25;
 
+		// ** Pre-compute this in future:::: *****
 		float4 terrainSampleCenter = altitudeRead.SampleLevel(_LinearClamp, altUV, 1);
 		float4 terrainSampleRight = altitudeRead.SampleLevel(_LinearClamp, altUV + float2(0.001, 0), 1);
 		float4 terrainSampleTop = altitudeRead.SampleLevel(_LinearClamp, altUV + float2(0, 0.001), 1);
 
-		float altitude = terrainSampleCenter.x;
-			
+		float altitude = terrainSampleCenter.x;			
 		
-		CritterSimData critterSimData = critterSimDataCBuffer[id.x % 32];
-					
+		CritterSimData critterSimData = critterSimDataCBuffer[id.x % 32];					
 
 		float2 fluidVel = velocityRead.SampleLevel(_LinearRepeat, uv, 2).xy;  // water velocity
-		float fluidSpeedMult = 0.0065;				
+		float fluidSpeedMult = 0.0045;				
 		float2 nextPos = uv + fluidVel * fluidSpeedMult;  // carried by water
 
-		float masterSpeed = 0.35;
-
-		float2 neighborPos = neighborParticle.worldPos.xy;
-		float2 dirToNeighbor = neighborPos - animalParticle.worldPos.xy;
-		float distToNeighborSquared = dirToNeighbor.x * dirToNeighbor.x + dirToNeighbor.y * dirToNeighbor.y;
-
-		float distanceMask = 1.0 - saturate(distToNeighborSquared * 0.025 - 0.833);
-
-		float2 targetFacingDir = lerp(animalParticle.velocity, neighborParticle.velocity, 0.1 * distanceMask);
-		float facingDirSqrMag = targetFacingDir.x * targetFacingDir.x + targetFacingDir.y * targetFacingDir.y;
-		float speed = 0.00045;
+		for(int i = 0; i < 4; i++) {
+			int neighborIndex = (id.x + round(_Time * 33) + i * 256) % 1024;
 			
-		if(facingDirSqrMag > 0.0) {
-			targetFacingDir = normalize(targetFacingDir);
-		}
-		else {
-			//targetFacingDir = float2(0,1);
-			speed *= 0.33;
-		}
+			AnimalParticleData neighborParticle = animalParticlesRead[neighborIndex];
+			float2 neighborPos = neighborParticle.worldPos.xy;
+			float2 dirToNeighbor = neighborPos - animalParticle.worldPos.xy;
+			float distToNeighborSquared = dirToNeighbor.x * dirToNeighbor.x + dirToNeighbor.y * dirToNeighbor.y;		
+			
+			float distanceMask = 1.0 - saturate(distToNeighborSquared * _AlignMaskRange - _AlignMaskOffset);
 
-		// Match orientation with nearest neighbor
-		nextPos += targetFacingDir * speed * masterSpeed;
+			float2 targetFacingDir = lerp(animalParticle.velocity, neighborParticle.velocity, 0.1 * distanceMask);
+			float facingDirSqrMag = targetFacingDir.x * targetFacingDir.x + targetFacingDir.y * targetFacingDir.y;
+						
+			if(facingDirSqrMag > 0.0) {
+				targetFacingDir = normalize(targetFacingDir);
+			}
+			else {				
+				//speed *= 0.033; // needed?
+			}
+
+			// Match orientation with nearest neighbor
+			nextPos += targetFacingDir * _AlignSpeedMult * _MasterSwimSpeed;
 		
-		// move towards/away from nearest neighbor:
-		float attractMag = 0.000027;
-		float attractDistanceMask = 1.0 - saturate(distToNeighborSquared * 0.0056 - 0.33);
-		float2 attractVel = float2(saturate(dirToNeighbor.x), saturate(dirToNeighbor.y)) * attractDistanceMask;
-		nextPos += attractVel * attractMag * masterSpeed;
+			// move towards/away from nearest neighbor:			
+			float attractDistanceMask = 1.0 - saturate(distToNeighborSquared * _AttractMaskMaxDistance - _AttractMaskOffset);
+			float2 attractVel = float2(saturate(dirToNeighbor.x), saturate(dirToNeighbor.y)) * attractDistanceMask;
+			nextPos += attractVel * _AttractMag * _MasterSwimSpeed;
+		}
 		
-		//random noisy movement:
-		float noiseMag = 0.00000046;
-		float noiseFreq = 0.00002 + 0.0002 * ((float)id.x / 1024);
+		//random noisy movement:		
+		float noiseFreq = (_SwimNoiseFreqMin + _SwimNoiseFreqRange * ((float)id.x / 1024));
+		float noiseOnOff = saturate(rand(float2(id.x, _Time * _SwimNoiseOnOffFreq)));
 		float2 noiseVel = float2(rand(float2(id.x, _Time * noiseFreq)), rand(float2(_Time * noiseFreq * 1.347, id.x % 32))) * 2.0 - 1.0;  // get into -1 to 1 range		
-		nextPos += noiseVel * noiseMag * masterSpeed;
+		nextPos += noiseVel * _SwimNoiseMag * _MasterSwimSpeed * noiseOnOff;
 
-		// Shoreline "Collision"
+		// Shoreline "Collision"		
 		float2 slope = float2(terrainSampleRight.x - terrainSampleCenter.x, terrainSampleTop.x - terrainSampleCenter.x);
-		float aboveWaterMask = saturate((altitude - 0.15) * 3.5);
-		float landCollisionMag = 0.0055;
-		float2 landCollisionVel = -slope * aboveWaterMask * landCollisionMag;
-		nextPos += landCollisionVel * masterSpeed;
-		
+		float aboveWaterMask = saturate((altitude - _ShoreCollisionDistOffset) * _ShoreCollisionDistSlope);		
+		float2 landCollisionVel = -slope * aboveWaterMask * _ShoreCollisionMag;
+		nextPos += landCollisionVel * _MasterSwimSpeed;		
 		
 		float2 defaultNextPos = nextPos * _MapSize;
 			
 		animalParticlesWrite[id.x].velocity = defaultNextPos - animalParticle.worldPos.xy;
 		animalParticlesWrite[id.x].age = animalParticle.age + 0.0003;
 		animalParticlesWrite[id.x].worldPos.xy = defaultNextPos;
+		
+		// SPLINE::::::
+		float restDistance = 0.2;
+		float lerpStrength = 0.88;
+
+		float2 p0 = animalParticlesWrite[id.x].worldPos.xy;
+	
+		float2 p1 = animalParticle.p1;
+		float2 vec0to1 = p1 - p0; // after p0 has been moved, vector from old P1 to new P0	
+		p1 = lerp(p1, p0 + normalize(vec0to1) * restDistance, lerpStrength * 1);
+
+		float2 p2 = animalParticle.p2;
+		float2 vec1to2 = p2 - p1;
+		p2 = lerp(p2, p1 + normalize(vec1to2) * restDistance, lerpStrength * 1);
+
+		float2 p3 = animalParticle.p3;
+		float2 vec2to3 = p3 - p2;
+		p3 = lerp(p3, p2 + normalize(vec2to3) * restDistance, lerpStrength * 1);
+				
+		animalParticlesWrite[id.x].p1 = p1;
+		animalParticlesWrite[id.x].p2 = p2;
+		animalParticlesWrite[id.x].p3 = p3;
 
 		// Resource Conversions:::::
 		animalParticlesWrite[id.x].oxygenUsed = 0.1 * _GlobalOxygenLevel * animalParticle.biomass;
@@ -313,16 +344,21 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 			//if(rand01 < 0.5) {  // to prevent mass respawning, overshooting the intended max global food amount ?  // Needed?
 				//if(spawnDensitySample.x > spawnThreshold) {
 				
-				animalParticlesWrite[id.x].worldPos.xy = float2(spawnUV.x * _MapSize, spawnUV.y * _MapSize);
+			float2 worldPos = float2(spawnUV.x * _MapSize, spawnUV.y * _MapSize);
+			animalParticlesWrite[id.x].worldPos.xy = worldPos;
+			animalParticlesWrite[id.x].p1 = worldPos - float2(0, 0.1);
+			animalParticlesWrite[id.x].p2 = worldPos - float2(0, 0.2);
+			animalParticlesWrite[id.x].p3 = worldPos - float2(0, 0.3);
 
-				float randRadius = rand(float2(randX * 10, randY * -3.37)) * (_MaxParticleSize - _MinParticleSize) + _MinParticleSize;					
-				animalParticlesWrite[id.x].radius = randRadius;
-				animalParticlesWrite[id.x].biomass = randRadius * randRadius * 3.141592 * _ParticleNutrientDensity;
-				animalParticlesWrite[id.x].active = 1.0;
-				animalParticlesWrite[id.x].refactoryAge = 0.0;
-				animalParticlesWrite[id.x].isSwallowed = 0.0;
-				animalParticlesWrite[id.x].digestedAmount = 0.0;
-				animalParticlesWrite[id.x].age = rand(float2(rand01 * 70.158, randX * 13.37));
+			float randRadius = rand(float2(randX * 10, randY * -3.37)) * (_MaxParticleSize - _MinParticleSize) + _MinParticleSize;					
+			animalParticlesWrite[id.x].radius = randRadius;
+			animalParticlesWrite[id.x].biomass = randRadius * randRadius * 3.141592 * _ParticleNutrientDensity;
+			animalParticlesWrite[id.x].active = 1.0;
+			animalParticlesWrite[id.x].refactoryAge = 0.0;
+			animalParticlesWrite[id.x].isSwallowed = 0.0;
+			animalParticlesWrite[id.x].digestedAmount = 0.0;
+			animalParticlesWrite[id.x].age = rand(float2(rand01 * 70.158, randX * 13.37));
+
 				//}			
 			//}			
 		}		

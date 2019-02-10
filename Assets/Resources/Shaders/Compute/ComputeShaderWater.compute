@@ -109,7 +109,7 @@ void CSSimSurfaceBitsData (uint3 id : SV_DispatchThreadID)
 	float2 uv = waterQuadData.worldPos.xy / _MapSize;
 	float2 altitudeUV = uv * 0.5 + 0.25;
 	float2 vel = VelocityRead.SampleLevel(_LinearRepeat, uv, 1).xy;
-	float speedMult = 0.0075;
+	float speedMult = 0.0015;
 
 	waterQuadData.speed = length(vel);
 	

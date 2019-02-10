@@ -7,10 +7,11 @@ using UnityEngine;
 /// <summary>
 ///  Move Food-related stuff from SimulationManager into here to de-clutter simManager:
 /// </summary>
+
 public class VegetationManager {
 
     public SettingsManager settingsRef;
-
+    
     private ComputeShader computeShaderAlgaeGrid;
     private ComputeShader computeShaderAlgaeParticles;
     private ComputeShader computeShaderAnimalParticles;
@@ -95,6 +96,9 @@ public class VegetationManager {
         public float isSwallowed;   // 0 = normal, 1 = in critter's belly
         public float digestedAmount;  // 0 = freshly eaten, 1 = fully dissolved/shrunk        
         public Vector3 worldPos;
+        public Vector2 p1;  // spline points:
+	    public Vector2 p2;
+	    public Vector2 p3;
         public Vector2 velocity;
         public float radius;
         public float oxygenUsed;
@@ -114,7 +118,7 @@ public class VegetationManager {
     }
 
     private int GetAnimalParticleDataSize() {
-        int bitSize = sizeof(float) * 16 + sizeof(int) * 3;
+        int bitSize = sizeof(float) * 22 + sizeof(int) * 3;
         return bitSize;
     }
 
@@ -592,7 +596,7 @@ public class VegetationManager {
 
         selectRespawnAnimalParticleIndicesCBuffer.Release();
     }*/
-    public void SimulateAnimalParticles(EnvironmentFluidManager fluidManagerRef, TheRenderKing renderKingRef, SimulationStateData simStateDataRef) { // Sim
+    public void SimulateAnimalParticles(EnvironmentFluidManager fluidManagerRef, TheRenderKing renderKingRef, SimulationStateData simStateDataRef, SettingsZooplankton settingsZooplankton) { // Sim
         // Go through animalParticleData and check for inactive
         // determined by current total animal -- done!
         // if flag on shader for Respawn is on, set to active and initialize
@@ -610,6 +614,23 @@ public class VegetationManager {
         computeShaderAnimalParticles.SetFloat("_SpawnPosY", 0.6f);
         computeShaderAnimalParticles.SetFloat("_GlobalOxygenLevel", 1f); // needed?
         computeShaderAnimalParticles.SetFloat("_GlobalAlgaeLevel", curGlobalAlgaeReservoirAmount);
+        
+        // Movement Params:
+        computeShaderAnimalParticles.SetFloat("_MasterSwimSpeed", settingsZooplankton._MasterSwimSpeed); // = 0.35;
+        computeShaderAnimalParticles.SetFloat("_AlignMaskRange", settingsZooplankton._AlignMaskRange); // = 0.025;
+        computeShaderAnimalParticles.SetFloat("_AlignMaskOffset", settingsZooplankton._AlignMaskOffset); // = 0.0833;
+        computeShaderAnimalParticles.SetFloat("_AlignSpeedMult", settingsZooplankton._AlignSpeedMult); // = 0.00015;
+        computeShaderAnimalParticles.SetFloat("_AttractMag", settingsZooplankton._AttractMag); // = 0.0000137;
+        computeShaderAnimalParticles.SetFloat("_AttractMaskMaxDistance", settingsZooplankton._AttractMaskMaxDistance); // = 0.0036;
+        computeShaderAnimalParticles.SetFloat("_AttractMaskOffset", settingsZooplankton._AttractMaskOffset); // = 0.5;
+        computeShaderAnimalParticles.SetFloat("_SwimNoiseMag", settingsZooplankton._SwimNoiseMag); // = 0.000086;
+        computeShaderAnimalParticles.SetFloat("_SwimNoiseFreqMin", settingsZooplankton._SwimNoiseFreqMin); // = 0.00002
+        computeShaderAnimalParticles.SetFloat("_SwimNoiseFreqRange", settingsZooplankton._SwimNoiseFreqRange); // = 0.0002
+        computeShaderAnimalParticles.SetFloat("_SwimNoiseOnOffFreq", settingsZooplankton._SwimNoiseOnOffFreq); //  = 0.0001
+        computeShaderAnimalParticles.SetFloat("_ShoreCollisionMag", settingsZooplankton._ShoreCollisionMag); // = 0.0065;
+        computeShaderAnimalParticles.SetFloat("_ShoreCollisionDistOffset", settingsZooplankton._ShoreCollisionDistOffset); // = 0.15;
+        computeShaderAnimalParticles.SetFloat("_ShoreCollisionDistSlope", settingsZooplankton._ShoreCollisionDistSlope); // = 3.5;
+
         //computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "animalParticlesNearestCrittersRT", animalParticlesNearestCritters1);
         computeShaderAnimalParticles.SetFloat("_MapSize", SimulationManager._MapSize);
         

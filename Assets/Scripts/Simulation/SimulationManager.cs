@@ -23,7 +23,8 @@ public class SimulationManager : MonoBehaviour {
     public VegetationManager vegetationManager;  // --> becomes PlantManager
     public SimEventsManager simEventsManager;
     public SimResourceManager simResourceManager;
-       
+
+    public SettingsZooplankton settingsZooplanktonRef;
 
     public bool isQuickStart = true;
 
@@ -594,7 +595,7 @@ public class SimulationManager : MonoBehaviour {
         vegetationManager.RespawnFoodParticles(environmentFluidManager, theRenderKing, simStateData);
         // Send back information about how much growth/photosynthesis there was?
 
-        vegetationManager.SimulateAnimalParticles(environmentFluidManager, theRenderKing, simStateData);
+        vegetationManager.SimulateAnimalParticles(environmentFluidManager, theRenderKing, simStateData, settingsZooplanktonRef);
         // how much oxygen used? How much eaten? How much growth? How much waste/detritus?
 
         //
