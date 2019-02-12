@@ -322,16 +322,16 @@ public class UIManager : MonoBehaviour {
     }
 
     public enum WorldStatsMode {
+        Global_Oxygen,
         Global_Nutrients,
-        Global_Algae_Levels,
-        Global_Egg_Sack_Volume,
-        Global_Carrion_Volume,
-        Global_Neural_Mutation_Frequency,
-        Global_Neural_Mutation_Amplitude,
-        Global_Brain_Growth_Rate,
-        Global_Body_Mutation_Frequency,
-        Global_Body_Mutation_Amplitude,
-        Global_Sensor_Mutation_Rate,
+        Global_Detritus,
+        Global_Decomposers,
+        Global_Algae_Grid,
+        Global_Algae_Particles,
+        Global_Zooplankton,
+        Global_Live_Agents,
+        Global_Dead_Agents,
+        Global_Eggsacks,
         Global_Water_Currents_Velocity
     }
 
@@ -1177,34 +1177,34 @@ public class UIManager : MonoBehaviour {
 
             //textTolWorldStatsValue.text = displayVal.ToString();
             if(tolSelectedWorldStatsIndex == 0) {
-                displayVal = gameManager.simulationManager.vegetationManager.curGlobalAlgaeGrid;
+                displayVal = gameManager.simulationManager.simResourceManager.dissolvedOxygenAmount;
             }
             else if(tolSelectedWorldStatsIndex == 1) {
-                displayVal = gameManager.simulationManager.vegetationManager.curGlobalAlgaeParticles;
+                displayVal = gameManager.simulationManager.simResourceManager.dissolvedNutrientsAmount;
             }
             else if(tolSelectedWorldStatsIndex == 2) {
-                displayVal = gameManager.simulationManager.vegetationManager.curGlobalEggSackVolume;
+                displayVal = gameManager.simulationManager.simResourceManager.availableDetritusAmount;
             }
             else if(tolSelectedWorldStatsIndex == 3) {
-                displayVal = gameManager.simulationManager.vegetationManager.curGlobalCarrionVolume;
+                displayVal = gameManager.simulationManager.simResourceManager.currentDecomposersAmount;
             }
             else if(tolSelectedWorldStatsIndex == 4) {
-                displayVal = gameManager.simulationManager.settingsManager.curTierBrainMutationFrequency;
+                displayVal = gameManager.simulationManager.vegetationManager.curGlobalAlgaeReservoirAmount;
             }
             else if(tolSelectedWorldStatsIndex == 5) {
-                displayVal = gameManager.simulationManager.settingsManager.curTierBrainMutationAmplitude;
+                displayVal = gameManager.simulationManager.vegetationManager.curGlobalAlgaeParticles;
             }
             else if(tolSelectedWorldStatsIndex == 6) {
-                displayVal = gameManager.simulationManager.settingsManager.curTierBrainMutationNewHiddenNeuron + gameManager.simulationManager.settingsManager.curTierBrainMutationNewLink;
+                displayVal = gameManager.simulationManager.vegetationManager.curGlobalAnimalParticles;
             }
             else if(tolSelectedWorldStatsIndex == 7) {
-                displayVal = gameManager.simulationManager.settingsManager.curTierBodyMutationFrequency;
+                displayVal = 0.33f; // gameManager.simulationManager.settingsManager.curTierBodyMutationFrequency;
             }
             else if(tolSelectedWorldStatsIndex == 8) {
-                displayVal = gameManager.simulationManager.settingsManager.curTierBodyMutationAmplitude;
+                displayVal = gameManager.simulationManager.vegetationManager.curGlobalCarrionVolume;
             }
             else if(tolSelectedWorldStatsIndex == 9) {
-                displayVal = gameManager.simulationManager.settingsManager.curTierBodyMutationModules;
+                displayVal = gameManager.simulationManager.vegetationManager.curGlobalEggSackVolume;
             }
             else if(tolSelectedWorldStatsIndex == 10) {
                 displayVal = gameManager.simulationManager.environmentFluidManager.curTierWaterCurrents;
@@ -2299,7 +2299,7 @@ public class UIManager : MonoBehaviour {
             //Debug.LogError("data: " + nutrientData[i].x.ToString());
             //Debug.LogError("key: " + tolWorldStatsValueRangesKeyArray[0].x.ToString());
             // Decay:
-            tolWorldStatsValueRangesKeyArray[0].x = Mathf.Min(tolWorldStatsValueRangesKeyArray[0].x, nutrientData[i].x);
+            /*tolWorldStatsValueRangesKeyArray[0].x = Mathf.Min(tolWorldStatsValueRangesKeyArray[0].x, nutrientData[i].x);
             tolWorldStatsValueRangesKeyArray[0].y = Mathf.Max(tolWorldStatsValueRangesKeyArray[0].y, nutrientData[i].x);
             tolTextureWorldStats.SetPixel(i, 0, new Color(nutrientData[i].x, 0f, 0f));            
             // Plants:
@@ -2346,9 +2346,61 @@ public class UIManager : MonoBehaviour {
             tolWorldStatsValueRangesKeyArray[9].x = 0f; // Mathf.Min(tolWorldStatsValueRangesKeyArray[9].x, value);
             tolWorldStatsValueRangesKeyArray[9].y = 10f; // Mathf.Max(tolWorldStatsValueRangesKeyArray[9].y, value);
             tolTextureWorldStats.SetPixel(i, 9, new Color(value, 0f, 0f));
+            */
+            // NEW:
+            float value = gameManager.simulationManager.statsHistoryOxygenList[i];
+            tolWorldStatsValueRangesKeyArray[0].x = Mathf.Min(tolWorldStatsValueRangesKeyArray[0].x, value);
+            tolWorldStatsValueRangesKeyArray[0].y = Mathf.Max(tolWorldStatsValueRangesKeyArray[0].y, value);
+            tolTextureWorldStats.SetPixel(i, 0, new Color(value, 0f, 0f));
+
+            value = gameManager.simulationManager.statsHistoryNutrientsList[i];
+            tolWorldStatsValueRangesKeyArray[1].x = Mathf.Min(tolWorldStatsValueRangesKeyArray[1].x, value);
+            tolWorldStatsValueRangesKeyArray[1].y = Mathf.Max(tolWorldStatsValueRangesKeyArray[1].y, value);
+            tolTextureWorldStats.SetPixel(i, 1, new Color(value, 0f, 0f));
+
+            value = gameManager.simulationManager.statsHistoryDetritusList[i];
+            tolWorldStatsValueRangesKeyArray[2].x = Mathf.Min(tolWorldStatsValueRangesKeyArray[2].x, value);
+            tolWorldStatsValueRangesKeyArray[2].y = Mathf.Max(tolWorldStatsValueRangesKeyArray[2].y, value);
+            tolTextureWorldStats.SetPixel(i, 2, new Color(value, 0f, 0f));
+
+            value = gameManager.simulationManager.statsHistoryDecomposersList[i];
+            tolWorldStatsValueRangesKeyArray[3].x = Mathf.Min(tolWorldStatsValueRangesKeyArray[3].x, value);
+            tolWorldStatsValueRangesKeyArray[3].y = Mathf.Max(tolWorldStatsValueRangesKeyArray[3].y, value);
+            tolTextureWorldStats.SetPixel(i, 3, new Color(value, 0f, 0f));
+
+            value = gameManager.simulationManager.statsHistoryAlgaeSingleList[i];
+            tolWorldStatsValueRangesKeyArray[4].x = Mathf.Min(tolWorldStatsValueRangesKeyArray[4].x, value);
+            tolWorldStatsValueRangesKeyArray[4].y = Mathf.Max(tolWorldStatsValueRangesKeyArray[4].y, value);
+            tolTextureWorldStats.SetPixel(i, 4, new Color(value, 0f, 0f));
+
+            value = gameManager.simulationManager.statsHistoryAlgaeParticleList[i];
+            tolWorldStatsValueRangesKeyArray[5].x = Mathf.Min(tolWorldStatsValueRangesKeyArray[5].x, value);
+            tolWorldStatsValueRangesKeyArray[5].y = Mathf.Max(tolWorldStatsValueRangesKeyArray[5].y, value);
+            tolTextureWorldStats.SetPixel(i, 5, new Color(value, 0f, 0f));
+
+            value = gameManager.simulationManager.statsHistoryZooplanktonList[i];
+            tolWorldStatsValueRangesKeyArray[6].x = Mathf.Min(tolWorldStatsValueRangesKeyArray[6].x, value);
+            tolWorldStatsValueRangesKeyArray[6].y = Mathf.Max(tolWorldStatsValueRangesKeyArray[6].y, value);
+            tolTextureWorldStats.SetPixel(i, 6, new Color(value, 0f, 0f));
+
+            value = gameManager.simulationManager.statsHistoryLivingAgentsList[i];
+            tolWorldStatsValueRangesKeyArray[7].x = Mathf.Min(tolWorldStatsValueRangesKeyArray[7].x, value);
+            tolWorldStatsValueRangesKeyArray[7].y = Mathf.Max(tolWorldStatsValueRangesKeyArray[7].y, value);
+            tolTextureWorldStats.SetPixel(i, 7, new Color(value, 0f, 0f));
+
+            value = gameManager.simulationManager.statsHistoryDeadAgentsList[i];
+            tolWorldStatsValueRangesKeyArray[8].x = Mathf.Min(tolWorldStatsValueRangesKeyArray[8].x, value);
+            tolWorldStatsValueRangesKeyArray[8].y = Mathf.Max(tolWorldStatsValueRangesKeyArray[8].y, value);
+            tolTextureWorldStats.SetPixel(i, 8, new Color(value, 0f, 0f));
+
+            value = gameManager.simulationManager.statsHistoryEggSacksList[i];
+            tolWorldStatsValueRangesKeyArray[9].x = Mathf.Min(tolWorldStatsValueRangesKeyArray[9].x, value);
+            tolWorldStatsValueRangesKeyArray[9].y = Mathf.Max(tolWorldStatsValueRangesKeyArray[9].y, value);
+            tolTextureWorldStats.SetPixel(i, 9, new Color(value, 0f, 0f));
 
             // WATER / WEATHER STATS:
             //
+
             value = gameManager.simulationManager.statsHistoryWaterCurrentsList[i];
             tolWorldStatsValueRangesKeyArray[10].x = 0f; // Mathf.Min(tolWorldStatsValueRangesKeyArray[10].x, value);
             tolWorldStatsValueRangesKeyArray[10].y = Mathf.Max(tolWorldStatsValueRangesKeyArray[10].y, value);
@@ -2733,7 +2785,7 @@ public class UIManager : MonoBehaviour {
     }
     public void ClickButtonToggleDebug() {
         isActiveDebug = !isActiveDebug;
-        gameManager.theRenderKing.isDebugRender = isActiveDebug;
+        //gameManager.theRenderKing.isDebugRender = isActiveDebug;
         panelDebug.SetActive(isActiveDebug);
     }
 

@@ -13,8 +13,10 @@ public class SimResourceManager {
     
 	public SimResourceManager() {
         // constructor
-
-
+        dissolvedOxygenAmount = 100f;
+        dissolvedNutrientsAmount = 100f;
+        currentDecomposersAmount = 10f;
+        availableDetritusAmount = 100f;
     }
 
 

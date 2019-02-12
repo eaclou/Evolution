@@ -124,6 +124,18 @@ public class SimulationManager : MonoBehaviour {
     public List<float> statsHistoryBodyMutationAmpList;
     public List<float> statsHistoryBodySensorVarianceList;
     public List<float> statsHistoryWaterCurrentsList;
+
+    public List<float> statsHistoryOxygenList;
+    public List<float> statsHistoryNutrientsList;
+    public List<float> statsHistoryDetritusList;
+    public List<float> statsHistoryDecomposersList;
+    public List<float> statsHistoryAlgaeSingleList;
+    public List<float> statsHistoryAlgaeParticleList;
+    public List<float> statsHistoryZooplanktonList;
+    public List<float> statsHistoryLivingAgentsList;
+    public List<float> statsHistoryDeadAgentsList;
+    public List<float> statsHistoryEggSacksList;
+
     public int curApproxGen = 1;
 
     public int numInitialHiddenNeurons = 16;
@@ -483,6 +495,27 @@ public class SimulationManager : MonoBehaviour {
         statsHistoryBodySensorVarianceList.Add(0f);
         statsHistoryWaterCurrentsList = new List<float>();
         statsHistoryWaterCurrentsList.Add(0f);
+
+        statsHistoryOxygenList = new List<float>();
+        statsHistoryOxygenList.Add(0f);
+        statsHistoryNutrientsList = new List<float>();
+        statsHistoryNutrientsList.Add(0f);
+        statsHistoryDetritusList = new List<float>();
+        statsHistoryDetritusList.Add(0f);
+        statsHistoryDecomposersList = new List<float>();
+        statsHistoryDecomposersList.Add(0f);
+        statsHistoryAlgaeSingleList = new List<float>();
+        statsHistoryAlgaeSingleList.Add(0f);
+        statsHistoryAlgaeParticleList = new List<float>();
+        statsHistoryAlgaeParticleList.Add(0f);
+        statsHistoryZooplanktonList = new List<float>();
+        statsHistoryZooplanktonList.Add(0f);
+        statsHistoryLivingAgentsList = new List<float>();
+        statsHistoryLivingAgentsList.Add(0f);
+        statsHistoryDeadAgentsList = new List<float>();
+        statsHistoryDeadAgentsList.Add(0f);
+        statsHistoryEggSacksList = new List<float>();
+        statsHistoryEggSacksList.Add(0f);
         
         /*
         statsLifespanEachGenerationList = new List<Vector4>(); // 
@@ -534,30 +567,53 @@ public class SimulationManager : MonoBehaviour {
 
         // MEASURE GLOBAL RESOURCES:
         
-        vegetationManager.FindClosestFoodParticleToCritters(simStateData);
-        vegetationManager.MeasureTotalFoodParticlesAmount();
+        vegetationManager.FindClosestAlgaeParticleToCritters(simStateData);
+        vegetationManager.MeasureTotalAlgaeParticlesAmount();
         vegetationManager.FindClosestAnimalParticleToCritters(simStateData);
         vegetationManager.MeasureTotalAnimalParticlesAmount();
         // Actually measuring results of last frame's execution?
 
         // Global Resources Here????
-        // Algae Reservoir Growth:
-        vegetationManager.curGlobalAlgaeReservoirAmount += 1f;  // Do this Properly!!!
-        // Growth depends on: Light + Nutrients + Current Biomass
 
+        // Algae Reservoir Growth:
+        float algaeReservoirGrowth = simResourceManager.baseSolarEnergy * 0.1f;
+        vegetationManager.curGlobalAlgaeReservoirAmount += algaeReservoirGrowth;  // Do this Properly!!!
+        // Growth depends on: Light + Nutrients + Current Biomass
         // Animal Particles Consume Algae Reservoir (single global value):
         // Depends on: GlobalAlgaeConcentration + Current Biomass
-        vegetationManager.curGlobalAlgaeReservoirAmount -= vegetationManager.algaeConsumedByAnimalParticlesLastFrame;
+        vegetationManager.curGlobalAlgaeReservoirAmount -= vegetationManager.algaeConsumedByAnimalParticlesLastFrame;        
+        // Cap:
+        vegetationManager.curGlobalAlgaeReservoirAmount = Mathf.Max(0f, vegetationManager.curGlobalAlgaeReservoirAmount);
+        vegetationManager.curGlobalAlgaeReservoirAmount = Mathf.Min(vegetationManager.curGlobalAlgaeReservoirAmount, 1000f);
 
+        // OXYGEN:
         simResourceManager.dissolvedOxygenAmount -= vegetationManager.oxygenUsedByAnimalParticlesLastFrame;
+        float algaeReservoirOxygenProductionEfficiency = 0.001f;
+        simResourceManager.dissolvedOxygenAmount += vegetationManager.curGlobalAlgaeReservoirAmount* algaeReservoirOxygenProductionEfficiency; // *** Combined Addition of Oxygen produced by plants ***  REFACTOR!!!
+        // also add algaeParticle Oxygen production:        
+        simResourceManager.dissolvedOxygenAmount += vegetationManager.oxygenProducedByAlgaeParticlesLastFrame;
+        // Constrain:
+        simResourceManager.dissolvedOxygenAmount = Mathf.Max(0f, simResourceManager.dissolvedOxygenAmount);
+        simResourceManager.dissolvedOxygenAmount = Mathf.Min(simResourceManager.dissolvedOxygenAmount, 1000f);
+
+        // DETRITUS:
         simResourceManager.availableDetritusAmount += vegetationManager.wasteProducedByAnimalParticlesLastFrame;
-
-        // Decomposers:
-        float nutrientsProduced = simResourceManager.currentDecomposersAmount * simResourceManager.availableDetritusAmount * 0.001f;
-        float wasteRemoved = simResourceManager.currentDecomposersAmount * 0.01f;
-        simResourceManager.dissolvedNutrientsAmount += nutrientsProduced;
+        //simResourceManager.availableDetritusAmount += // Agents, Dead Algae, Eggs, Etc.
+        // Decomposers:        
+        float wasteRemoved = simResourceManager.currentDecomposersAmount * 0.00025f;
         simResourceManager.availableDetritusAmount -= wasteRemoved;
-
+        simResourceManager.availableDetritusAmount = Mathf.Max(0f, simResourceManager.availableDetritusAmount); // cap at 0f
+        simResourceManager.availableDetritusAmount = Mathf.Min(simResourceManager.availableDetritusAmount, 1000f);
+        
+        // NUTRIENTS:
+        float nutrientsProduced = simResourceManager.currentDecomposersAmount * simResourceManager.availableDetritusAmount * 0.0001f;
+        simResourceManager.dissolvedNutrientsAmount += nutrientsProduced;
+        simResourceManager.dissolvedNutrientsAmount -= algaeReservoirGrowth;
+        // - algaeParticleGrowth
+        simResourceManager.dissolvedNutrientsAmount = Mathf.Max(0f, simResourceManager.dissolvedNutrientsAmount); // cap at 0f
+        simResourceManager.dissolvedNutrientsAmount = Mathf.Min(simResourceManager.dissolvedNutrientsAmount, 1000f);
+        
+        // ^^^ This will result in some possible leakage?         
         // figure out decent formulae for how this should all work!!! Then implement tomorrow!
 
         /*if (UnityEngine.Random.Range(0f, 1f) < 0.01f) {
@@ -592,10 +648,10 @@ public class SimulationManager : MonoBehaviour {
         vegetationManager.EatSelectedAnimalParticles(simStateData);
 
         // How much light/nutrients available?
-        vegetationManager.RespawnFoodParticles(environmentFluidManager, theRenderKing, simStateData);
+        vegetationManager.SimulateAlgaeParticles(environmentFluidManager, theRenderKing, simStateData, simResourceManager);
         // Send back information about how much growth/photosynthesis there was?
 
-        vegetationManager.SimulateAnimalParticles(environmentFluidManager, theRenderKing, simStateData, settingsZooplanktonRef);
+        vegetationManager.SimulateAnimalParticles(environmentFluidManager, theRenderKing, simStateData, settingsZooplanktonRef, simResourceManager);
         // how much oxygen used? How much eaten? How much growth? How much waste/detritus?
 
         //
@@ -763,7 +819,7 @@ public class SimulationManager : MonoBehaviour {
         for(int i = 0; i < respawnIndices.Length; i++) {
             respawnIndices[i] = UnityEngine.Random.Range(0, 1024);
         }
-        vegetationManager.ReviveSelectFoodParticles(respawnIndices, 1.25f, new Vector4(pos.x / _MapSize, pos.y / _MapSize, 0f, 0f), simStateData);
+        //vegetationManager.ReviveSelectFoodParticles(respawnIndices, 1.25f, new Vector4(pos.x / _MapSize, pos.y / _MapSize, 0f, 0f), simStateData);
     }
     public void PlayerFeedToolPour(Vector3 pos) {        
         int xCoord = Mathf.RoundToInt(pos.x / 256f * vegetationManager.algaeGridTexResolution);
@@ -777,7 +833,7 @@ public class SimulationManager : MonoBehaviour {
         for(int i = 0; i < respawnIndices.Length; i++) {
             respawnIndices[i] = UnityEngine.Random.Range(0, 1024);
         }
-        vegetationManager.ReviveSelectFoodParticles(respawnIndices, 6f, new Vector4(pos.x / _MapSize, pos.y / _MapSize, 0f, 0f), simStateData);
+        //vegetationManager.ReviveSelectFoodParticles(respawnIndices, 6f, new Vector4(pos.x / _MapSize, pos.y / _MapSize, 0f, 0f), simStateData);
     }
     //public void ChangeGlobalMutationRate(float normalizedVal) {
     //    settingsManager.SetGlobalMutationRate(normalizedVal);
@@ -1264,6 +1320,17 @@ public class SimulationManager : MonoBehaviour {
         statsHistoryBodyMutationAmpList.Add((float)settingsManager.curTierBodyMutationAmplitude);
         statsHistoryBodySensorVarianceList.Add((float)settingsManager.curTierBodyMutationModules);
         statsHistoryWaterCurrentsList.Add((float)environmentFluidManager.curTierWaterCurrents);
+
+        statsHistoryOxygenList.Add(simResourceManager.dissolvedOxygenAmount);
+        statsHistoryNutrientsList.Add(simResourceManager.dissolvedNutrientsAmount);
+        statsHistoryDetritusList.Add(simResourceManager.availableDetritusAmount);
+        statsHistoryDecomposersList.Add(simResourceManager.currentDecomposersAmount);
+        statsHistoryAlgaeSingleList.Add(vegetationManager.curGlobalAlgaeReservoirAmount);
+        statsHistoryAlgaeParticleList.Add(vegetationManager.curGlobalAlgaeParticles);
+        statsHistoryZooplanktonList.Add(vegetationManager.curGlobalAnimalParticles);
+        statsHistoryLivingAgentsList.Add(0.1f);
+        statsHistoryDeadAgentsList.Add(vegetationManager.curGlobalCarrionVolume);
+        statsHistoryEggSacksList.Add(vegetationManager.curGlobalEggSackVolume);
     }
     private void AddNewSpeciesDataEntry(int year) {
         masterGenomePool.AddNewYearlySpeciesStats(year);
@@ -1277,6 +1344,17 @@ public class SimulationManager : MonoBehaviour {
         statsHistoryBodyMutationAmpList[statsHistoryBodyMutationAmpList.Count - 1] = settingsManager.curTierBodyMutationAmplitude;
         statsHistoryBodySensorVarianceList[statsHistoryBodySensorVarianceList.Count - 1] = settingsManager.curTierBodyMutationModules;
         statsHistoryWaterCurrentsList[statsHistoryWaterCurrentsList.Count - 1] = environmentFluidManager.curTierWaterCurrents;
+
+        statsHistoryOxygenList[statsHistoryOxygenList.Count - 1] = simResourceManager.dissolvedOxygenAmount;
+        statsHistoryNutrientsList[statsHistoryOxygenList.Count - 1] = simResourceManager.dissolvedNutrientsAmount;
+        statsHistoryDetritusList[statsHistoryOxygenList.Count - 1] = simResourceManager.availableDetritusAmount;
+        statsHistoryDecomposersList[statsHistoryOxygenList.Count - 1] = simResourceManager.currentDecomposersAmount;
+        statsHistoryAlgaeSingleList[statsHistoryOxygenList.Count - 1] = vegetationManager.curGlobalAlgaeReservoirAmount;
+        statsHistoryAlgaeParticleList[statsHistoryOxygenList.Count - 1] = vegetationManager.curGlobalAlgaeParticles;
+        statsHistoryZooplanktonList[statsHistoryOxygenList.Count - 1] = vegetationManager.curGlobalAnimalParticles;
+        statsHistoryLivingAgentsList[statsHistoryOxygenList.Count - 1] = 0.1f;
+        statsHistoryDeadAgentsList[statsHistoryOxygenList.Count - 1] = vegetationManager.curGlobalCarrionVolume;
+        statsHistoryEggSacksList[statsHistoryOxygenList.Count - 1] = vegetationManager.curGlobalEggSackVolume;
     }
     private void RefreshLatestSpeciesDataEntry() {
         for(int i = 0; i < masterGenomePool.completeSpeciesPoolsList.Count; i++) {

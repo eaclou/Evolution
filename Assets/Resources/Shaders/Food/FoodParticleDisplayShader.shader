@@ -59,7 +59,7 @@
 				float3 worldPosition = float3(particleData.worldPos, 1.0);    //float3(rawData.worldPos, -random2);
 				
 				quadPoint = quadPoint * particleData.radius * 0.7; // * particleData.active; // *** remove * 3 after!!!
-				worldPosition = worldPosition + quadPoint * particleData.active;
+				worldPosition = worldPosition + quadPoint * particleData.isActive;
 
 				// REFRACTION:
 				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / 256, 0, 0)).yzw;				
@@ -72,7 +72,7 @@
 				o.uv = quadVerticesCBuffer[id].xy + 0.5f;	
 
 				//o.color = float4();
-				o.color = float4(particleData.active, saturate(particleData.foodAmount), saturate(particleData.digestedAmount), saturate(particleData.age * 0.5));
+				o.color = float4(saturate(particleData.isDecaying), saturate(particleData.biomass * 5), 0, 1 - saturate(particleData.isDecaying));
 				
 				return o;
 			}
@@ -84,9 +84,9 @@
 				
 				float val = i.color.a;
 				
-				float4 finalColor = float4(float3(i.color.z * 1.2, 0.85, (1.0 - i.color.w) * 0.2) + i.color.y, texColor.a * i.color.x * 0.33 * (1 - i.color.z));
-				//finalColor = float4(0.25, 1, 0.36, texColor.a * 0.05);
-				finalColor.a *= 0.1;
+				float4 finalColor = i.color; // float4(float3(i.color.z * 1.2, 0.85, (1.0 - i.color.w) * 0.2) + i.color.y, texColor.a * i.color.x * 0.33 * (1 - i.color.z));
+				finalColor.rgb = lerp(finalColor.rgb, float3(0.25, 1, 0.36), 0.15);
+				finalColor.a *= texColor.a * 0.25;
 				return finalColor;
 			}
 		ENDCG

@@ -98,7 +98,8 @@
 				//float testNewVignetteMask = saturate((randThreshold + 1.15 - vignetteRadius) * 1.3);
 				//o.vignetteLerp = float4(testNewVignetteMask,sampleUV,vignetteRadius);
 
-				float width = particleData.radius * 0.468241 * (1 - 2 * abs(0.75 - uv.y)); //GetPoint1D(waterCurveData.widths.x, waterCurveData.widths.y, waterCurveData.widths.z, waterCurveData.widths.w, t) * 0.75 * (1 - saturate(testNewVignetteMask));
+				//float width = 
+				float width = sqrt(particleData.biomass) * 0.6 * (1 - 2 * abs(0.75 - uv.y)); //GetPoint1D(waterCurveData.widths.x, waterCurveData.widths.y, waterCurveData.widths.z, waterCurveData.widths.w, t) * 0.75 * (1 - saturate(testNewVignetteMask));
 				float2 offset = curveBitangent * -quadPoint.x * width; // * randomWidth; // *** support full vec4 widths!!!
 				
 				//float fadeDuration = 0.1;
@@ -129,7 +130,7 @@
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));			
 				o.uv = uv; //quadVerticesCBuffer[id].xy + 0.5f;	
 
-				o.color = float4(particleData.active, saturate(particleData.biomass), saturate(particleData.digestedAmount), saturate(particleData.age * 0.5));
+				o.color = float4(saturate(particleData.isDecaying), saturate(particleData.biomass * 5), saturate(particleData.age * 0.5), 1);
 				
 				return o;
 			}
@@ -143,7 +144,7 @@
 				
 				float4 finalColor = float4(i.color.rgb, i.uv.y); // float4(float3(i.color.z * 1.2, 0.85, (1.0 - i.color.w) * 0.2) + i.color.y, texColor.a * i.color.x * 0.33 * (1 - i.color.z));
 				finalColor.a *= 1.0;
-				finalColor.rgb *= 1.0;
+				finalColor.rgb *= 5.0;
 				return finalColor;
 			}
 		ENDCG

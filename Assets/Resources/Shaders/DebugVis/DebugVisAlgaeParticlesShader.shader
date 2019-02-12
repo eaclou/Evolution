@@ -59,7 +59,7 @@
 				float3 worldPosition = float3(particleData.worldPos, 1.0);    //float3(rawData.worldPos, -random2);
 				
 				quadPoint = quadPoint * particleData.radius * 0.7; // * particleData.active; // *** remove * 3 after!!!
-				worldPosition = worldPosition + quadPoint * particleData.active;
+				worldPosition = worldPosition + quadPoint * particleData.isActive;
 
 				// REFRACTION:
 				//float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / 256, 0, 0)).yzw;				
@@ -72,7 +72,7 @@
 				o.uv = quadVerticesCBuffer[id].xy + 0.5f;	
 
 				//o.color = float4();
-				o.color = float4(particleData.active, saturate(particleData.foodAmount), saturate(particleData.digestedAmount), saturate(particleData.age * 0.5));
+				o.color = float4(particleData.isActive, saturate(particleData.biomass), saturate(particleData.digestedAmount), saturate(particleData.age * 0.5));
 				
 				return o;
 			}

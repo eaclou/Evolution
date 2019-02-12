@@ -6,8 +6,11 @@ struct AlgaeParticleData {
 	float digestedAmount;  // 0 = freshly eaten, 1 = fully dissolved/shrunk      
 	float2 worldPos;
 	float radius;
-	float foodAmount;
-	float active;
-	float refactoryAge;
+	float biomass;
+	float isActive;
+	float isDecaying;
 	float age;
+	float oxygenProduced;
+    float nutrientsUsed;
+    float wasteProduced;
 };

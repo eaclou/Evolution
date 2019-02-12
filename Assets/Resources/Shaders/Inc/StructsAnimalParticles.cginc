@@ -8,14 +8,14 @@ struct AnimalParticleData {
 	float2 p1;  // spline points:
 	float2 p2;
 	float2 p3;
-	float2 velocity;
+	float2 velocity;  // facingDir?
     float radius; // displaySize?
 	float oxygenUsed;
 	float wasteProduced;
 	float algaeConsumed;
     float biomass; // essentially size?
-    float active;
-	float refactoryAge;
-	float age;
+    float isActive;  // is being simulated?
+	float isDecaying;
+	float age;  // 
 	float speed;
 };

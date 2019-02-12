@@ -112,7 +112,7 @@ void CSReduceCritterDistances32 (uint3 id : SV_DispatchThreadID)
 		AnimalParticleData particleData = animalParticlesRead[particleIndex];
 
 		if(sourceData.y < minSquaredDistance) {
-			if(particleData.active > 0.5) {
+			if(particleData.isActive > 0.5) {
 				minSquaredDistance = sourceData.y;
 				closestParticleIndex = sourceData.x;
 			}				
@@ -137,7 +137,7 @@ void CSEatSelectedAnimalParticles (uint3 id : SV_DispatchThreadID)
 	int particleIndex = (int)data.x;
 
 	AnimalParticleData particleData = animalParticlesRead[particleIndex];
-	//particleData.closestCritterDistance = data.y;
+	
 	animalParticlesWrite[particleIndex] = particleData;
 
 	CritterInitData critterInitData = critterInitDataCBuffer[critterIndex];
@@ -156,20 +156,12 @@ void CSEatSelectedAnimalParticles (uint3 id : SV_DispatchThreadID)
 	if(distanceSquared < combinedRadius * combinedRadius) {	
 		
 		if(critterSimData.consumeOn > 0.5) {   // revisit
-			eatenAmount = particleData.biomass; //mouthRadius * mouthRadius * critterInitData.eatEfficiencyMeat * 0.167f; //particleData.nutrientContent;
-			animalParticlesWrite[particleIndex].active = 0;
+			eatenAmount = particleData.biomass * critterInitData.eatEfficiencyMeat + 10; //mouthRadius * mouthRadius * critterInitData.eatEfficiencyMeat * 0.167f; //particleData.nutrientContent;
+			animalParticlesWrite[particleIndex].isActive = 0;
 			animalParticlesWrite[particleIndex].isSwallowed = 1.0;
 			animalParticlesWrite[particleIndex].critterIndex = critterIndex;		
 			animalParticlesWrite[particleIndex].biomass = 0.0; // ?????   *****
 
-			//animalParticlesWrite[particleIndex].nutrientContent = particleData.nutrientContent - eatenAmount;
-			//animalParticlesWrite[particleIndex].closestCritterDistance = 1.0;
-				
-			//if(animalParticlesWrite[particleIndex].nutrientContent <= 0) {
-				//animalParticlesWrite[particleIndex].active = 0;
-				//animalParticlesWrite[particleIndex].isSwallowed = 1.0;
-				//animalParticlesWrite[particleIndex].critterIndex = critterIndex;				
-			//}
 		}	
 	}
 
@@ -200,7 +192,7 @@ void CSMeasureTotalAnimalParticlesAmount (uint3 id : SV_DispatchThreadID)
 	for(int i = 0; i < 32; i++) {		
 		int particleIndex = id.x * 32 + i;		
 		AnimalParticleData particleData = animalParticlesRead[particleIndex];				
-		totalBiomassAmount += particleData.biomass * particleData.active;
+		totalBiomassAmount += particleData.biomass * particleData.isActive;
 		totalOxygenUsed += particleData.oxygenUsed;
 		totalWasteProduced += particleData.wasteProduced;
 		totalAlgaeConsumed += particleData.algaeConsumed;
@@ -217,15 +209,12 @@ void CSMeasureTotalAnimalParticlesAmount (uint3 id : SV_DispatchThreadID)
 [numthreads(1024,1,1)]
 void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 {
-	// Check if particle isn't in the water:
-
 	AnimalParticleData animalParticle = animalParticlesRead[id.x];
 		
-	float2 uv = animalParticle.worldPos.xy / _MapSize;
-	
-
-	if(animalParticle.active > 0.5) { // poor man's boolean
-	// *** Update this to sample altitude instead.  ** to avoid unreachable food
+	if(animalParticle.isActive > 0.5) { // poor man's boolean  // Is being simulated / ready for respawn?
+			
+		float2 uv = animalParticle.worldPos.xy / _MapSize;
+		// *** Update this to sample altitude instead.  ** to avoid unreachable food
 		float2 altUV = uv * 0.5 + 0.25;
 
 		// ** Pre-compute this in future:::: *****
@@ -235,64 +224,116 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 
 		float altitude = terrainSampleCenter.x;			
 		
-		CritterSimData critterSimData = critterSimDataCBuffer[id.x % 32];					
+		float2 posOffset = float2(0,0);
 
-		float2 fluidVel = velocityRead.SampleLevel(_LinearRepeat, uv, 2).xy;  // water velocity
-		float fluidSpeedMult = 0.0045;				
-		float2 nextPos = uv + fluidVel * fluidSpeedMult;  // carried by water
 
-		for(int i = 0; i < 4; i++) {
-			int neighborIndex = (id.x + round(_Time * 33) + i * 256) % 1024;
-			
-			AnimalParticleData neighborParticle = animalParticlesRead[neighborIndex];
-			float2 neighborPos = neighborParticle.worldPos.xy;
-			float2 dirToNeighbor = neighborPos - animalParticle.worldPos.xy;
-			float distToNeighborSquared = dirToNeighbor.x * dirToNeighbor.x + dirToNeighbor.y * dirToNeighbor.y;		
-			
-			float distanceMask = 1.0 - saturate(distToNeighborSquared * _AlignMaskRange - _AlignMaskOffset);
+		float bodyMass = animalParticle.biomass;  // multiplier on resource use?
+		float wasteMass = 0;				
 
-			float2 targetFacingDir = lerp(animalParticle.velocity, neighborParticle.velocity, 0.1 * distanceMask);
-			float facingDirSqrMag = targetFacingDir.x * targetFacingDir.x + targetFacingDir.y * targetFacingDir.y;
+		if(animalParticle.isDecaying > 0.5) { // ***** DEAD !!! ***** // Is Dead/Decaying
+			// Some resource conversions still occur,
+			// Still moved by water currents
+
+			float decayEfficiency = 1.0;
+			float decayRate = 0.0001;
+			float decayMass = decayRate * decayEfficiency;
 						
-			if(facingDirSqrMag > 0.0) {
-				targetFacingDir = normalize(targetFacingDir);
+			bodyMass -= decayMass;
+			wasteMass += decayMass;
+			
+			if(bodyMass <= 0.0) {  // fully decayed:
+				animalParticlesWrite[id.x].isActive = 0.0;
+				animalParticlesWrite[id.x].isDecaying = 0.0;
+				bodyMass = 0;
 			}
-			else {				
-				//speed *= 0.033; // needed?
-			}
-
-			// Match orientation with nearest neighbor
-			nextPos += targetFacingDir * _AlignSpeedMult * _MasterSwimSpeed;
-		
-			// move towards/away from nearest neighbor:			
-			float attractDistanceMask = 1.0 - saturate(distToNeighborSquared * _AttractMaskMaxDistance - _AttractMaskOffset);
-			float2 attractVel = float2(saturate(dirToNeighbor.x), saturate(dirToNeighbor.y)) * attractDistanceMask;
-			nextPos += attractVel * _AttractMag * _MasterSwimSpeed;
 		}
+		else {   // ***** ALIVE !!! *****
+			// Normal simulation of Live animals:
+			if(animalParticle.age > 2.0) {  // DEATH FROM OLD-AGE:
+				animalParticlesWrite[id.x].isDecaying = 1.0;
+			}
+			else {   // ALIVE AND YOUNG:::
+				const int numSamples = 8;
+				int gapLength = 1024 / numSamples;
+				
+				for(int i = 0; i < numSamples; i++) {
+					int neighborIndex = (id.x + round(_Time * 33) + i * gapLength) % 1024;
+			
+					AnimalParticleData neighborParticle = animalParticlesRead[neighborIndex];
+					float aliveMask = (1.0 - neighborParticle.isDecaying) * neighborParticle.isActive;
+
+					float2 neighborPos = neighborParticle.worldPos.xy;
+					float2 dirToNeighbor = neighborPos - animalParticle.worldPos.xy;
+					float distToNeighborSquared = dirToNeighbor.x * dirToNeighbor.x + dirToNeighbor.y * dirToNeighbor.y;		
+			
+					float distanceMask = 1.0 - saturate(distToNeighborSquared * _AlignMaskRange - _AlignMaskOffset);
+
+					float2 targetFacingDir = lerp(animalParticle.velocity, neighborParticle.velocity, 0.33 * distanceMask);
+					float facingDirSqrMag = targetFacingDir.x * targetFacingDir.x + targetFacingDir.y * targetFacingDir.y;
+						
+					if(facingDirSqrMag > 0.0) {
+						targetFacingDir = normalize(targetFacingDir);
+					}
+
+					// Match orientation with nearest neighbor
+					posOffset += targetFacingDir * _AlignSpeedMult * _MasterSwimSpeed / (float)numSamples * aliveMask;
 		
-		//random noisy movement:		
-		float noiseFreq = (_SwimNoiseFreqMin + _SwimNoiseFreqRange * ((float)id.x / 1024));
-		float noiseOnOff = saturate(rand(float2(id.x, _Time * _SwimNoiseOnOffFreq)));
-		float2 noiseVel = float2(rand(float2(id.x, _Time * noiseFreq)), rand(float2(_Time * noiseFreq * 1.347, id.x % 32))) * 2.0 - 1.0;  // get into -1 to 1 range		
-		nextPos += noiseVel * _SwimNoiseMag * _MasterSwimSpeed * noiseOnOff;
+					// move towards/away from nearest neighbor:			
+					float attractDistanceMask = 1.0 - saturate(distToNeighborSquared * _AttractMaskMaxDistance - _AttractMaskOffset);
+					float2 attractVel = float2(saturate(dirToNeighbor.x), saturate(dirToNeighbor.y)) * attractDistanceMask;
+					posOffset += attractVel * _AttractMag * _MasterSwimSpeed * aliveMask;
+				}
+		
+				//random noisy movement:		
+				float noiseFreq = (_SwimNoiseFreqMin + _SwimNoiseFreqRange * ((float)id.x / 1024));
+				float noiseOnOff = saturate(rand(float2(id.x, _Time * _SwimNoiseOnOffFreq)));
+				float2 noiseVel = float2(rand(float2(id.x, _Time * noiseFreq)), rand(float2(_Time * noiseFreq * 1.347, id.x % 32))) * 2.0 - 1.0;  // get into -1 to 1 range		
+				posOffset += noiseVel * _SwimNoiseMag * _MasterSwimSpeed * noiseOnOff;
+			
+				float maxAlgaeConsumptionRate = 0.001;  // one-thousandth of biomass per tick = bodyweight consumed per 1000 ticks
+				float algaeConsumptionMask = saturate(_GlobalAlgaeLevel * 0.01);   //  if global levels are too low it reduces consumption?
+
+				float maxOxygenConsumptionRate = 0.001; // relative to biomass?
+				float oxygenConsumptionMask = saturate(_GlobalOxygenLevel * 0.01);
+
+				float algaeConsumed = bodyMass * maxAlgaeConsumptionRate * algaeConsumptionMask;
+				float oxygenUsed = bodyMass * maxOxygenConsumptionRate * oxygenConsumptionMask;
+		
+				float growthEfficiency = 0.15; //
+				float wasteEfficiency = 0.1;
+				float growthMass = algaeConsumed * growthEfficiency * oxygenConsumptionMask; // Also limited by OXYGEN!!!
+					// Maximum growth needs an explicit cap? or should it simply be determined by max algaeConsumption Rate + maxAge?
+				wasteMass += algaeConsumed * wasteEfficiency;		
+					// (The rest of energy is lost as heat)
+
+				bodyMass += growthMass;
+
+				animalParticlesWrite[id.x].algaeConsumed = algaeConsumed;
+				animalParticlesWrite[id.x].oxygenUsed = oxygenUsed;
+			}		
+		}
+
+		// WATER CURRENTS *********  (happens regardless of dead/alive)
+		float2 fluidVel = velocityRead.SampleLevel(_LinearRepeat, uv, 2).xy;  // water velocity
+		float fluidSpeedMult = 0.0045;
+		posOffset += fluidVel * fluidSpeedMult * _MapSize;  // carried by water
 
 		// Shoreline "Collision"		
 		float2 slope = float2(terrainSampleRight.x - terrainSampleCenter.x, terrainSampleTop.x - terrainSampleCenter.x);
 		float aboveWaterMask = saturate((altitude - _ShoreCollisionDistOffset) * _ShoreCollisionDistSlope);		
 		float2 landCollisionVel = -slope * aboveWaterMask * _ShoreCollisionMag;
-		nextPos += landCollisionVel * _MasterSwimSpeed;		
+		posOffset += landCollisionVel * _MasterSwimSpeed;	// Independent of Map size?!?!?
 		
-		float2 defaultNextPos = nextPos * _MapSize;
-			
-		animalParticlesWrite[id.x].velocity = defaultNextPos - animalParticle.worldPos.xy;
-		animalParticlesWrite[id.x].age = animalParticle.age + 0.0003;
-		animalParticlesWrite[id.x].worldPos.xy = defaultNextPos;
+		// **** UPDATE POSITION !!!! ****
+		float2 newWorldPos = animalParticle.worldPos.xy + posOffset;
+		animalParticlesWrite[id.x].worldPos.xy = newWorldPos;
+		animalParticlesWrite[id.x].velocity = posOffset;
 		
 		// SPLINE::::::
-		float restDistance = 0.2;
-		float lerpStrength = 0.88;
+		float restDistance = 1 * sqrt(animalParticle.biomass); // creature length
+		float lerpStrength = 0.75;
 
-		float2 p0 = animalParticlesWrite[id.x].worldPos.xy;
+		float2 p0 = newWorldPos;
 	
 		float2 p1 = animalParticle.p1;
 		float2 vec0to1 = p1 - p0; // after p0 has been moved, vector from old P1 to new P0	
@@ -310,57 +351,52 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 		animalParticlesWrite[id.x].p2 = p2;
 		animalParticlesWrite[id.x].p3 = p3;
 
-		// Resource Conversions:::::
-		animalParticlesWrite[id.x].oxygenUsed = 0.1 * _GlobalOxygenLevel * animalParticle.biomass;
-		animalParticlesWrite[id.x].wasteProduced = 0.1345 * animalParticle.biomass;
-		animalParticlesWrite[id.x].algaeConsumed = 0.001 * _GlobalAlgaeLevel * animalParticle.biomass;
-		
-		if(animalParticle.digestedAmount > 1.0) {  // Fully Decayed
-			animalParticlesWrite[id.x].active = 0.0;
-			animalParticlesWrite[id.x].refactoryAge = 1.0;
-		}
-	}
-	else {  // INACTIVE:::
-		animalParticlesWrite[id.x].refactoryAge = animalParticle.refactoryAge + _AnimalParticleRegrowthRate;
-	}
-	if(animalParticle.age > 2.0) {
-		animalParticlesWrite[id.x].digestedAmount = animalParticle.digestedAmount + 0.001;  // being used to indicate decayRate
-	}
+		animalParticlesWrite[id.x].biomass = bodyMass;
+		// AGING:
+		animalParticlesWrite[id.x].age = animalParticle.age + 0.000125;
 
-	if(_RespawnAnimalParticles > 0.5) {		
+		// Resource Conversions:::::		
+		animalParticlesWrite[id.x].wasteProduced = wasteMass;	// Combined Poop & Decomposing	
 		
-		if(animalParticlesRead[id.x].refactoryAge > 1.0) {
+	}
+	else {  // INACTIVE::: // Ready For Respawn
+		
+		// &&&& RESPAWN!!! &&&& ==========================================================================================================
+		if(_RespawnAnimalParticles > 0.5) {		 // CPU master control
 			
 			float rand01 = rand(float2(_Time * 135.79 + (float)animalParticlesRead[id.x].index * 30.17896, _Time * 28.463));
+			
 			float randX = rand(float2((float)id.x, _Time));
 			float randY = rand(float2(randX * 62.39 + _Time, (float)id.x));
 
 			float2 spawnOriginUV = float2(_SpawnPosX, _SpawnPosY);
 
-			float2 spawnUV = spawnOriginUV + float2(randX, randY) * 0.003;			
-			float4 spawnDensitySample = _SpawnDensityMap.SampleLevel(_LinearClamp, spawnUV, 0);
-
-			//float spawnThreshold = 0.001;
-			//if(rand01 < 0.5) {  // to prevent mass respawning, overshooting the intended max global food amount ?  // Needed?
-				//if(spawnDensitySample.x > spawnThreshold) {
-				
+			float spawnRadius = 0.002;
+			float2 spawnUV = spawnOriginUV + float2(randX, randY) * spawnRadius;			
+			
 			float2 worldPos = float2(spawnUV.x * _MapSize, spawnUV.y * _MapSize);
 			animalParticlesWrite[id.x].worldPos.xy = worldPos;
-			animalParticlesWrite[id.x].p1 = worldPos - float2(0, 0.1);
-			animalParticlesWrite[id.x].p2 = worldPos - float2(0, 0.2);
-			animalParticlesWrite[id.x].p3 = worldPos - float2(0, 0.3);
+			animalParticlesWrite[id.x].p1 = worldPos - float2(0, 0.01);
+			animalParticlesWrite[id.x].p2 = worldPos - float2(0, 0.02);
+			animalParticlesWrite[id.x].p3 = worldPos - float2(0, 0.03);
 
 			float randRadius = rand(float2(randX * 10, randY * -3.37)) * (_MaxParticleSize - _MinParticleSize) + _MinParticleSize;					
-			animalParticlesWrite[id.x].radius = randRadius;
-			animalParticlesWrite[id.x].biomass = randRadius * randRadius * 3.141592 * _ParticleNutrientDensity;
-			animalParticlesWrite[id.x].active = 1.0;
-			animalParticlesWrite[id.x].refactoryAge = 0.0;
-			animalParticlesWrite[id.x].isSwallowed = 0.0;
-			animalParticlesWrite[id.x].digestedAmount = 0.0;
-			animalParticlesWrite[id.x].age = rand(float2(rand01 * 70.158, randX * 13.37));
+			
+			// StartSize?
+			float startingMass = 0.033;
+			float startingRadius = sqrt(startingMass);
+			animalParticlesWrite[id.x].radius = startingRadius;  // Obsolete? 
+			animalParticlesWrite[id.x].biomass = startingMass;         //randRadius * randRadius * 3.141592 * _ParticleNutrientDensity;
+			animalParticlesWrite[id.x].isActive = 1.0;
+			animalParticlesWrite[id.x].isDecaying = 0.0; // might be obsolete
+			animalParticlesWrite[id.x].isSwallowed = 0.0;  // 
+			animalParticlesWrite[id.x].digestedAmount = 0.0; // to become decay?
+			animalParticlesWrite[id.x].age = rand(float2(rand01 * 70.158, randX * 13.37));  // 0-1, death at 2
 
-				//}			
-			//}			
-		}		
+			// subtract startingMass from algae?  or ignore for now?
+		}
+
+		// OLD:
+		//animalParticlesWrite[id.x].refactoryAge = animalParticle.refactoryAge + _AnimalParticleRegrowthRate;
 	}
 }

@@ -2,10 +2,8 @@
 #pragma kernel CSReduceCritterDistances32
 #pragma kernel CSEatSelectedFoodParticles
 #pragma kernel CSCopyFoodParticlesBuffer
-//#pragma kernel CSSimFoodParticlesBuffer
 #pragma kernel CSMeasureTotalFoodParticlesAmount
-#pragma kernel CSRespawnFoodParticles
-//#pragma kernel CSReviveSelectFoodParticles
+#pragma kernel CSSimulateAlgaeParticles
 
 #include "Assets/Resources/Shaders/Inc/StructsCritterData.cginc"
 #include "Assets/Resources/Shaders/Inc/StructsAlgaeParticles.cginc"
@@ -45,6 +43,9 @@ uniform float _FoodParticleRegrowthRate;
 
 uniform float4 _FoodSprinklePos;
 uniform float _FoodSprinkleRadius;
+
+uniform float _GlobalNutrients;
+uniform float _SolarEnergy;
 
 SamplerState _LinearClamp;
 SamplerState _LinearRepeat;
@@ -97,7 +98,7 @@ void CSReduceCritterDistances32 (uint3 id : SV_DispatchThreadID)
 		AlgaeParticleData particleData = foodParticlesRead[particleIndex];
 
 		if(sourceData.y < minSquaredDistance) {
-			if(particleData.active > 0.5) {
+			if(particleData.isActive > 0.5) {
 				minSquaredDistance = sourceData.y;
 				closestParticleIndex = sourceData.x;
 			}				
@@ -140,13 +141,13 @@ void CSEatSelectedFoodParticles (uint3 id : SV_DispatchThreadID)
 	if(distanceSquared < combinedRadius * combinedRadius) {	
 		
 		if(critterSimData.consumeOn > 0.5) {   // revisit
-			eatenAmount = mouthRadius * mouthRadius * critterInitData.eatEfficiencyPlant * 0.167f; //particleData.foodAmount;				
+			eatenAmount = mouthRadius * mouthRadius * critterInitData.eatEfficiencyPlant * 0.05f;		
 			
-			foodParticlesWrite[particleIndex].foodAmount = particleData.foodAmount - eatenAmount;
-			//foodParticlesWrite[particleIndex].closestCritterDistance = 1.0;
+			foodParticlesWrite[particleIndex].biomass = particleData.biomass - eatenAmount;
+			
 				
-			if(foodParticlesWrite[particleIndex].foodAmount <= 0) {
-				foodParticlesWrite[particleIndex].active = 0;
+			if(foodParticlesWrite[particleIndex].biomass <= 0) {
+				foodParticlesWrite[particleIndex].isActive = 0;
 				foodParticlesWrite[particleIndex].isSwallowed = 1.0;
 				foodParticlesWrite[particleIndex].critterIndex = critterIndex;				
 			}
@@ -174,91 +175,104 @@ void CSMeasureTotalFoodParticlesAmount (uint3 id : SV_DispatchThreadID)
 	for(int i = 0; i < 32; i++) {		
 		int particleIndex = id.x * 32 + i;		
 		AlgaeParticleData particleData = foodParticlesRead[particleIndex];				
-		totalFoodAmount += particleData.foodAmount * particleData.active;
+		totalFoodAmount += particleData.biomass * particleData.isActive;
 	}
 
-	copyData.foodAmount = totalFoodAmount;
+	copyData.biomass = totalFoodAmount;
 	
 	foodParticlesWrite[id.x] = copyData;
 }
 
 [numthreads(1024,1,1)]
-void CSRespawnFoodParticles (uint3 id : SV_DispatchThreadID)
+void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 {
 	// Check if particle isn't in the water:
 
 	AlgaeParticleData foodParticle = foodParticlesRead[id.x];
 	
-	float2 uv = foodParticle.worldPos / _MapSize;
-	// *** Update this to sample altitude instead.  ** to avoid unreachable food
-	float2 altUV = uv * 0.5 + 0.25;
-	float4 altitudeTexSample = altitudeRead.SampleLevel(_LinearClamp, altUV, 0);
-	float altitudeRaw = altitudeTexSample.x;
-	
-	
-
-	if(foodParticle.active > 0.5) { // poor man's boolean
-	
+	if(foodParticle.isActive > 0.5) { // poor man's boolean -- Being Simulated
 		
-		if(altitudeRaw > 0.5) {
-			foodParticlesWrite[id.x].active = 0.0;
-			foodParticlesWrite[id.x].refactoryAge = 1.0;
-			// Respawn if on land ^^^:
-		}
-		else {  // Otherwise simulate as normal			
-			
-			float2 vel = velocityRead.SampleLevel(_LinearRepeat, uv, 2).xy;
-			float speedMult = 0.005;				
-			float2 nextPos = uv + vel * speedMult;
+		float2 uv = foodParticle.worldPos / _MapSize;
+		float2 altUV = uv * 0.5 + 0.25;
+		float4 altitudeTexSample = altitudeRead.SampleLevel(_LinearClamp, altUV, 0);
+		float altitudeRaw = altitudeTexSample.x;
 
-			float2 defaultNextPos = nextPos * _MapSize;
+		float2 posOffset = float2(0,0);
+
+		float bodyMass = foodParticle.biomass;
+		float wasteMass = 0;
+
+		float2 vel = velocityRead.SampleLevel(_LinearRepeat, uv, 2).xy;
+		float speedMult = 0.005;				
+		
+		posOffset += vel * speedMult * _MapSize;
+
+		if(foodParticle.isDecaying < 0.5) {  // ALIVE !!!!!
+		
+			// Growth: // sample nutrients & light?
+			float nutrientsGrowthMask = saturate(_GlobalNutrients * 0.01);
+			float lightGrowthMask = saturate((altitudeRaw - 0.25) * 4.0 + 0.25);
+			float maxGrowthRate = 0.0002;
+			float growthMass = maxGrowthRate * nutrientsGrowthMask * lightGrowthMask * _SolarEnergy;
+
+			bodyMass += growthMass;
+
+			foodParticlesWrite[id.x].age = foodParticle.age + 0.0001; // + 0.001 * (1.0 - lightGrowthMask);
+
+			foodParticlesWrite[id.x].isDecaying = foodParticle.isDecaying + (1.0 - saturate((altitudeRaw - 0.1) * 100)) * 0.01;
+
+			if(foodParticle.age > 2.0) {  // Dies of old age:
+				foodParticlesWrite[id.x].isDecaying = 1.0;
+			}
+		}
+		else {  // DEAD !!!!!
+			// if is fully decayed:
+			float decayEfficiency = 1.0;
+			float decayRate = 0.0001;
+			float decayMass = decayRate * decayEfficiency;
+						
+			bodyMass -= decayMass;
+			wasteMass += decayMass;
 			
-			foodParticlesWrite[id.x].age = foodParticle.age + 0.0003;
-			foodParticlesWrite[id.x].worldPos = defaultNextPos;
+			if(bodyMass <= 0.0) {  // fully decayed:
+				foodParticlesWrite[id.x].isActive = 0.0;
+				foodParticlesWrite[id.x].isDecaying = 0.0;
+				bodyMass = 0;
+			}
 		}
 
-		if(foodParticle.digestedAmount > 1.0) {  // Fully Decayed
-			foodParticlesWrite[id.x].active = 0.0;
-			foodParticlesWrite[id.x].refactoryAge = 1.0;
-		}
+		foodParticlesWrite[id.x].worldPos = foodParticle.worldPos + posOffset;
+		foodParticlesWrite[id.x].biomass = bodyMass;
+		foodParticlesWrite[id.x].wasteProduced = wasteMass;
 	}
 	else {  // INACTIVE:::
-		foodParticlesWrite[id.x].refactoryAge = foodParticle.refactoryAge + _FoodParticleRegrowthRate;
-	}
-	if(foodParticle.age > 2.0) {
-		foodParticlesWrite[id.x].digestedAmount = foodParticle.digestedAmount + 0.001;  // being used to indicate decayRate
-	}
-
-	if(_RespawnFoodParticles > 0.5) {		
 		
-		if(foodParticlesRead[id.x].refactoryAge > 1.0) {
-			
+		if(_RespawnFoodParticles > 0.5) {	
+		
 			float rand01 = rand(float2(_Time * 135.79 + (float)foodParticlesRead[id.x].index * 30.17896, _Time * 28.463));
 			float randX = rand(float2((float)id.x, _Time));
 			float randY = rand(float2(randX * 62.39 + _Time, (float)id.x));
 
 			float2 spawnUV = float2(randX, randY) * 0.5 + 0.25;;			
-			//float4 spawnDensitySample = _SpawnDensityMap.SampleLevel(_LinearClamp, spawnUV, 0);
-
-			float4 spawnDensitySample = altitudeRead.SampleLevel(_LinearClamp, spawnUV, 0);
-			float spawnDensity = 2 * saturate(-spawnDensitySample.x + 0.5);
-
-			float spawnThreshold = 0.775;
-			if(rand01 < 0.05) {  // to prevent mass respawning, overshooting the intended max global food amount ?  // Needed?
-				if(spawnDensity < spawnThreshold) {
+			
+			float4 spawnAltitudeSample = altitudeRead.SampleLevel(_LinearClamp, spawnUV, 0);
+			
+			if(rand01 < 0.25) {  // to prevent mass respawning, overshooting the intended max global food amount ?  // Needed?
+				if(spawnAltitudeSample.x < 0.5) {  // in water only? // for now...
 				
 					foodParticlesWrite[id.x].worldPos = float2(randX * _MapSize, randY * _MapSize);
 
 					float randRadius = rand(float2(randX * 10, randY * -3.37)) * (_MaxParticleSize - _MinParticleSize) + _MinParticleSize;					
+					float initMass = 0.01;
 					foodParticlesWrite[id.x].radius = randRadius;
-					foodParticlesWrite[id.x].foodAmount = randRadius * randRadius * 3.141592 * _ParticleNutrientDensity;
-					foodParticlesWrite[id.x].active = 1.0;
-					foodParticlesWrite[id.x].refactoryAge = 0.0;
+					foodParticlesWrite[id.x].biomass = initMass;
+					foodParticlesWrite[id.x].isActive = 1.0;
+					foodParticlesWrite[id.x].isDecaying = 0.0;
 					foodParticlesWrite[id.x].isSwallowed = 0.0;
 					foodParticlesWrite[id.x].digestedAmount = 0.0;
-					foodParticlesWrite[id.x].age = rand(float2(rand01 * 70.158, randX * 13.37));
+					foodParticlesWrite[id.x].age = rand(float2(rand01 * 70.158, randX * 13.37)) * 0.5;
 				}			
 			}			
-		}		
+		}
 	}
 }
