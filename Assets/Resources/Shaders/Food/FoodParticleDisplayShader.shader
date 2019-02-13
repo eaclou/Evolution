@@ -28,10 +28,6 @@
 			sampler2D _MainTex;
 			sampler2D _WaterSurfaceTex;
 			
-			//float4 _MainTex_ST;
-			//float4 _Tint;
-			//float4 _Size;
-			
 			StructuredBuffer<AlgaeParticleData> foodParticleDataCBuffer;			
 			StructuredBuffer<float3> quadVerticesCBuffer;
 			
@@ -58,20 +54,20 @@
 
 				float3 worldPosition = float3(particleData.worldPos, 1.0);    //float3(rawData.worldPos, -random2);
 				
-				quadPoint = quadPoint * particleData.radius * 0.7; // * particleData.active; // *** remove * 3 after!!!
+				float radius = sqrt(particleData.biomass) * 2 + 0.25;
+				quadPoint = quadPoint * radius; // * particleData.active; // *** remove * 3 after!!!
 				worldPosition = worldPosition + quadPoint * particleData.isActive;
 
 				// REFRACTION:
 				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / 256, 0, 0)).yzw;				
-				float refractionStrength = 2.5;
+				float refractionStrength = 0.5;
 				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
 
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
 				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(quadPoint, 0.0f));				
 				o.uv = quadVerticesCBuffer[id].xy + 0.5f;	
-
-				//o.color = float4();
+								
 				o.color = float4(saturate(particleData.isDecaying), saturate(particleData.biomass * 5), 0, 1 - saturate(particleData.isDecaying));
 				
 				return o;

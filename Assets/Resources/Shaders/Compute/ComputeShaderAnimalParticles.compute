@@ -156,7 +156,7 @@ void CSEatSelectedAnimalParticles (uint3 id : SV_DispatchThreadID)
 	if(distanceSquared < combinedRadius * combinedRadius) {	
 		
 		if(critterSimData.consumeOn > 0.5) {   // revisit
-			eatenAmount = particleData.biomass * critterInitData.eatEfficiencyMeat + 10; //mouthRadius * mouthRadius * critterInitData.eatEfficiencyMeat * 0.167f; //particleData.nutrientContent;
+			eatenAmount = particleData.biomass; // * critterInitData.eatEfficiencyMeat + 10; //mouthRadius * mouthRadius * critterInitData.eatEfficiencyMeat * 0.167f; //particleData.nutrientContent;
 			animalParticlesWrite[particleIndex].isActive = 0;
 			animalParticlesWrite[particleIndex].isSwallowed = 1.0;
 			animalParticlesWrite[particleIndex].critterIndex = critterIndex;		
@@ -192,7 +192,7 @@ void CSMeasureTotalAnimalParticlesAmount (uint3 id : SV_DispatchThreadID)
 	for(int i = 0; i < 32; i++) {		
 		int particleIndex = id.x * 32 + i;		
 		AnimalParticleData particleData = animalParticlesRead[particleIndex];				
-		totalBiomassAmount += particleData.biomass * particleData.isActive;
+		totalBiomassAmount += particleData.biomass;
 		totalOxygenUsed += particleData.oxygenUsed;
 		totalWasteProduced += particleData.wasteProduced;
 		totalAlgaeConsumed += particleData.algaeConsumed;
@@ -361,6 +361,11 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 	}
 	else {  // INACTIVE::: // Ready For Respawn
 		
+		animalParticlesWrite[id.x].biomass = 0;
+		animalParticlesWrite[id.x].oxygenUsed = 0;
+		animalParticlesWrite[id.x].wasteProduced = 0;
+		animalParticlesWrite[id.x].algaeConsumed = 0;
+
 		// &&&& RESPAWN!!! &&&& ==========================================================================================================
 		if(_RespawnAnimalParticles > 0.5) {		 // CPU master control
 			
@@ -383,7 +388,7 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 			float randRadius = rand(float2(randX * 10, randY * -3.37)) * (_MaxParticleSize - _MinParticleSize) + _MinParticleSize;					
 			
 			// StartSize?
-			float startingMass = 0.033;
+			float startingMass = 0.01;
 			float startingRadius = sqrt(startingMass);
 			animalParticlesWrite[id.x].radius = startingRadius;  // Obsolete? 
 			animalParticlesWrite[id.x].biomass = startingMass;         //randRadius * randRadius * 3.141592 * _ParticleNutrientDensity;
@@ -394,6 +399,7 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 			animalParticlesWrite[id.x].age = rand(float2(rand01 * 70.158, randX * 13.37));  // 0-1, death at 2
 
 			// subtract startingMass from algae?  or ignore for now?
+			//animalParticlesWrite[id.x]
 		}
 
 		// OLD:

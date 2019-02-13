@@ -19,7 +19,7 @@ public class Agent : MonoBehaviour {
     public float spawnStartingScale = 0.1f; // *** REFACTOR!!! SYNC WITH EGGS!!!
 
     public bool isInert = true;  // when inert, colliders disabled
-
+    // Refactor??
     public bool isActing = false;  // biting, defending, dashing, etc -- exclusive actions
     public bool isResting = false;
 
@@ -30,7 +30,7 @@ public class Agent : MonoBehaviour {
     public AgentLifeStage curLifeStage;
     public enum AgentLifeStage {
         AwaitingRespawn,
-        Egg,
+        Egg, // might be able to remove this eventually?
         Mature,
         Dead,
         Null
@@ -102,8 +102,6 @@ public class Agent : MonoBehaviour {
     public float fullSizeBodyVolume = 1f;
     public float centerOfMass = 0f;
     
-    //public int ageCounterMature = 0; // only counts when agent is an adult
-
         // *********  Combine thse stats into a serializable class for cleanliness?  *****
     public int lifeStageTransitionTimeStepCounter = 0; // keeps track of how long agent has been in its current lifeStage
     public int ageCounter = 0;
@@ -117,11 +115,13 @@ public class Agent : MonoBehaviour {
     public float totalExperience = 0f;
     public float experienceForNextLevel = 2f; // 2, 4, 8, 16, 32, 64, 128, 256?
     public int curLevel = 0;
-    //public int scoreCounter = 0;
+    
     public int pregnancyRefactoryTimeStepCounter = 0;
 
     // *** Need resource Overhaul
-    public float currentCorpseFoodAmount = 1f;
+    public float currentBiomass = 1f;
+    public float wasteProducedLastFrame = 0f;
+    public float oxygenUsedLastFrame = 0f;
     
     private Vector3 prevPos;  // use these instead of sampling rigidbody?
     public Vector3 _PrevPos
@@ -455,8 +455,9 @@ public class Agent : MonoBehaviour {
 
     private void InitializeDeath()   // THIS CAN BE A LOT CLEANER!!!!! *****
     {
-        currentCorpseFoodAmount = currentBoundingBoxSize.x * currentBoundingBoxSize.y;
-        
+        //float currentBodyVolume = currentBoundingBoxSize.y * (currentBoundingBoxSize.x + currentBoundingBoxSize.z) * 0.5f; // coreModule.currentBodySize.x * coreModule.currentBodySize.y;
+        //currentBiomass = currentBodyVolume;
+                
         if(isPregnantAndCarryingEggs) {
             AbortPregnancy();
         }
@@ -626,11 +627,11 @@ public class Agent : MonoBehaviour {
         // if this agent is dead, it acts as food.
         // it was just bitten by another creature and removed material -- 
 
-        currentCorpseFoodAmount -= amount;
+        currentBiomass -= amount;
 
-        if (currentCorpseFoodAmount < 0f)
+        if (currentBiomass < 0f)
         {
-            currentCorpseFoodAmount = 0f;
+            currentBiomass = 0f;
 
             coreModule.healthBody = 0f;
             coreModule.healthHead = 0f;
@@ -796,7 +797,8 @@ public class Agent : MonoBehaviour {
                 
         colliderBody.enabled = true;
 
-        coreModule.energy = 1f;
+        coreModule.energy = 1f;  // should be proportional to body size?
+        currentBiomass = 0.05f; // REVISIT THIS!!! ****
 
         mouthRef.Enable();
         //coreModule.energyRaw = coreModule.maxEnergyStorage;
@@ -870,7 +872,7 @@ public class Agent : MonoBehaviour {
             resizeFrame = true;
             GainExperience(0.025f); // Auto Exp for staying alive
         }
-        ScaleBody(sizePercentage, resizeFrame);  
+        ScaleBody(sizePercentage, resizeFrame);  // change how growth works?
 
         TickModules(simManager); // update inputs for Brain        
         TickBrain(); // Tick Brain
@@ -920,7 +922,10 @@ public class Agent : MonoBehaviour {
         float scale = Mathf.Lerp(minScale, 1f, sizePercentage); // Minimum size = 0.1 ???  // SYNC WITH EGG SIZE!!!
         currentBoundingBoxSize = fullSizeBoundingBox * scale;
         float currentBodyVolume = currentBoundingBoxSize.y * (currentBoundingBoxSize.x + currentBoundingBoxSize.z) * 0.5f; // coreModule.currentBodySize.x * coreModule.currentBodySize.y;
-                
+        
+        // REvisit this::::
+        //currentBiomass = currentBodyVolume;  // ??? **** DOESN'T LOOK CORRECT -- FIX!!
+
         coreModule.stomachCapacity = currentBodyVolume;
         
         if(resizeColliders) {
@@ -932,16 +937,19 @@ public class Agent : MonoBehaviour {
             mouthRef.triggerCollider.offset = new Vector2(0f, currentBoundingBoxSize.y * 0.5f);
         
             // THIS IS HOT GARBAGE !!! RE-FACTOR!! *****
-            mouseClickCollider.radius = currentBoundingBoxSize.x * 0.5f;        
-            mouseClickCollider.height = currentBoundingBoxSize.y;
-            mouseClickCollider.radius += 2f; // ** TEMP -- should be based on camera distance also
-            mouseClickCollider.height += 2f;
+            mouseClickCollider.radius = currentBoundingBoxSize.x * 0.5f + 2f;        
+            mouseClickCollider.height = currentBoundingBoxSize.y + 2f;
+            //mouseClickCollider.radius += 2f; // ** TEMP -- should be based on camera distance also
+            //mouseClickCollider.height += 2f;
         }               
     }
 
     public void TickActions(SimulationManager simManager, SettingsManager settings) {
        
-        float horizontalMovementInput = movementModule.throttleX[0];; // Mathf.Lerp(horAI, horHuman, humanControlLerp);
+        wasteProducedLastFrame = 0f;
+        oxygenUsedLastFrame = 0f;
+
+        float horizontalMovementInput = movementModule.throttleX[0]; // Mathf.Lerp(horAI, horHuman, humanControlLerp);
         float verticalMovementInput = movementModule.throttleY[0]; // Mathf.Lerp(verAI, verHuman, humanControlLerp);
         
         // Facing Direction:
@@ -951,41 +959,53 @@ public class Agent : MonoBehaviour {
         
         // ENERGY!!!!
         // Digestion:
-        float maxDigestionRate = 0.003f;
-        float foodToEnergyBaseConversion = 2f;
-        
-        Vector2 foodProportionsVec = new Vector2(coreModule.stomachContentsPlant, coreModule.stomachContentsMeat) / (coreModule.stomachContentsPlant + coreModule.stomachContentsMeat + 0.0001f);
+        float maxDigestionRate = 0.005f * currentBiomass; // proportional to biomass?
+        float foodToEnergyBaseConversion = 1f; // what should this be?
+        float totalStomachContents = (coreModule.stomachContentsPlant + coreModule.stomachContentsMeat);
+        Vector2 foodProportionsVec = new Vector2(coreModule.stomachContentsPlant, coreModule.stomachContentsMeat) / (totalStomachContents + 0.000001f);
+
+        float digestedAmountTotal = Mathf.Min(totalStomachContents, maxDigestionRate);
+
         float totalStomachContentsNorm = (coreModule.stomachContentsPlant + coreModule.stomachContentsMeat) / coreModule.stomachCapacity;
         coreModule.stomachContentsNorm = totalStomachContentsNorm; // ** we'll see.... ***
-        float digestedAmountTotal = Mathf.Min(totalStomachContentsNorm, maxDigestionRate);
-        float digestedProportionOfTotalContents = digestedAmountTotal / (totalStomachContentsNorm + 0.0001f);
+                                                                   //float digestedAmountTotal = Mathf.Min(totalStomachContentsNorm, maxDigestionRate);
+                                                                   //float digestedProportionOfTotalContents = digestedAmountTotal / (totalStomachContentsNorm + 0.000001f);
 
         //float decayToEnergyAmount = digestedAmountTotal * foodProportionsVec.x * foodToEnergyBaseConversion * coreModule.foodEfficiencyDecay;
-        float plantToEnergyAmount = digestedAmountTotal * foodProportionsVec.x * foodToEnergyBaseConversion * coreModule.foodEfficiencyPlant;
-        float meatToEnergyAmount = digestedAmountTotal * foodProportionsVec.y * foodToEnergyBaseConversion * coreModule.foodEfficiencyMeat;        
+
+        // *** Remember to Re-Implement dietary specialization!!! ****
+        float digestedPlantMass = digestedAmountTotal * foodProportionsVec.x;
+        float plantToEnergyAmount = digestedPlantMass * foodToEnergyBaseConversion; // * coreModule.foodEfficiencyPlant;
+        float digestedMeatMass = digestedAmountTotal * foodProportionsVec.y;
+        float meatToEnergyAmount = digestedMeatMass * foodToEnergyBaseConversion; // * coreModule.foodEfficiencyMeat;        
         
         float createdEnergyTotal = plantToEnergyAmount + meatToEnergyAmount; // digestionAmount * foodToEnergyConversion;
         
+        wasteProducedLastFrame += digestedAmountTotal * 0.25f;
+        oxygenUsedLastFrame = currentBiomass * 0.001f;
+
+        currentBiomass += digestedAmountTotal * 0.25f;  // **** <-- Reconsider
+
         /*coreModule.stomachContentsDecay -= digestedAmountTotal * foodProportionsVec.x;
         if(coreModule.stomachContentsDecay < 0f) {
             coreModule.stomachContentsDecay = 0f;
         }*/
-        coreModule.stomachContentsPlant -= digestedAmountTotal * foodProportionsVec.x;
+        coreModule.stomachContentsPlant -= digestedPlantMass;
         if(coreModule.stomachContentsPlant < 0f) {
             coreModule.stomachContentsPlant = 0f;
         }
-        coreModule.stomachContentsMeat -= digestedAmountTotal * foodProportionsVec.y;
+        coreModule.stomachContentsMeat -= digestedMeatMass;
         if(coreModule.stomachContentsMeat < 0f) {
             coreModule.stomachContentsMeat = 0f;
         }
-        coreModule.energy += createdEnergyTotal;
-                
-        if(coreModule.energy > 1f) {
-            coreModule.energy = 1f;
-        }
+        coreModule.energy += createdEnergyTotal * 15f;
 
-        // Heal:
-        float healRate = 0.0005f;
+        //if(coreModule.energy > 1f) {
+        //    coreModule.energy = 1f;
+        //}
+
+        // Heal:  // *** Re-Implement !!! ***************
+        /*float healRate = 0.0005f;
         float energyToHealthConversionRate = 5f * coreModule.healthBonus;
         if(coreModule.healthBody < 1f) {
             coreModule.healthBody += healRate;
@@ -993,11 +1013,15 @@ public class Agent : MonoBehaviour {
             coreModule.healthExternal += healRate;
 
             coreModule.energy -= healRate / energyToHealthConversionRate;
-        }
+        }*/
 
+        /* STAMINA:
         float staminaRefillRate = 0.0005f;
         float energyToStaminaConversionRate = 5f; // * coreModule.healthBonus;
-        if(coreModule.stamina[0] < 0.25f) {
+        coreModule.stamina[0] += staminaRefillRate * energyToStaminaConversionRate;
+        coreModule.energy -= staminaRefillRate; // / energyToStaminaConversionRate;
+        */
+        /*if(coreModule.stamina[0] < 0.25f) {
             staminaRefillRate *= 0.25f;
         }
         if(coreModule.stamina[0] > 0.75f) {
@@ -1009,10 +1033,10 @@ public class Agent : MonoBehaviour {
         if(coreModule.stamina[0] < 1f) {
             coreModule.stamina[0] += staminaRefillRate;
             coreModule.energy -= staminaRefillRate / energyToStaminaConversionRate;
-        }
+        }*/
 
         //ENERGY:
-        float energyCost = 0.00125f * settings.energyDrainMultiplier / coreModule.energyBonus;
+        float energyCost = 0.005f * currentBiomass * settings.energyDrainMultiplier; // / coreModule.energyBonus;
         
         float throttleMag = smoothedThrottle.magnitude;
         
@@ -1022,17 +1046,17 @@ public class Agent : MonoBehaviour {
             coreModule.energy = 0f;
         }
 
-        //eatAmountsArray[index].x = 0f;
-
-        float sizeValue = BodyGenome.GetBodySizeScore01(candidateRef.candidateGenome.bodyGenome);
-
+        //if(coreModule.stamina[0] <= 0f) {
+//
+        //}
+        
         if(curLifeStage == AgentLifeStage.Dead || curLifeStage == AgentLifeStage.Egg) {
             throttle = Vector2.zero;
             smoothedThrottle = Vector2.zero;
         }
         else {
             // Food calc before energy/healing/etc? **************
-            
+            float sizeValue = BodyGenome.GetBodySizeScore01(candidateRef.candidateGenome.bodyGenome);
             // FOOD PARTICLES: Either mouth type for now:
             float foodParticleEatAmount = simManager.vegetationManager.algaeParticlesEatAmountsArray[index];
             if(foodParticleEatAmount > 0f) {

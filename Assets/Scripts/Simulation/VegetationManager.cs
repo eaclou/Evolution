@@ -16,20 +16,25 @@ public class VegetationManager {
     private ComputeShader computeShaderAlgaeParticles;
     private ComputeShader computeShaderAnimalParticles;
 
-    public float curGlobalAlgaeGrid = 0f;
+    //public float curGlobalAlgaeGrid = 0f;  // not using this currently
+    public float curGlobalAlgaeReservoirAmount = 1f;  // separate from algaeParticles -- takes place of algaeGrid
     public float curGlobalAlgaeParticles = 0f;
     public float curGlobalAnimalParticles = 0f;
     public float curGlobalEggSackVolume = 0f;
     public float curGlobalCarrionVolume = 0f;
+    public float curGlobalAgentBiomass = 0f;
 
     public float oxygenUsedByAnimalParticlesLastFrame = 0f;
     public float wasteProducedByAnimalParticlesLastFrame = 0f;
     public float algaeConsumedByAnimalParticlesLastFrame = 0f;
 
-    public float curGlobalAlgaeReservoirAmount = 1f;  // separate from algaeParticles -- takes place of algaeGrid
-    // (AnimalParticles eating from grid is more complicated than necessary for first go around) ***
-
+    public float oxygenUsedByAgentsLastFrame = 0f;
+    public float wasteProducedByAgentsLastFrame = 0f;
+    
     public float oxygenProducedByAlgaeParticlesLastFrame = 0f;
+    public float wasteProducedByAlgaeParticlesLastFrame = 0f;
+    public float nutrientsUsedByAlgaeParticlesLastFrame = 0f;
+        
 
     public int algaeGridTexResolution = 32; // Temporarily disabled - replaced by single value (1x1 grid)
     public RenderTexture algaeGridRT1;
@@ -352,7 +357,7 @@ public class VegetationManager {
         
         // Read out sample values::::
     }
-    public float MeasureTotalAlgaeGridAmount() {
+    /*public float MeasureTotalAlgaeGridAmount() {
 
         ComputeBuffer outputValuesCBuffer = new ComputeBuffer(1, sizeof(float) * 4);  // holds the result of measurement: total sum of pix colors in texture
         Vector4[] outputValuesArray = new Vector4[1];
@@ -393,8 +398,8 @@ public class VegetationManager {
         //Debug.Log("TotalNutrients: " + outputValuesArray[0].x.ToString() + ", " + outputValuesArray[0].y.ToString());
 
         return outputValuesArray[0].x;
-    }     
-    public void AddAlgaeAtCoords(float amount, int x, int y) {
+    }*/    
+    /*public void AddAlgaeAtCoords(float amount, int x, int y) {
         if(curGlobalAlgaeGrid < 128f) {
             ComputeBuffer addAlgaeCBuffer = new ComputeBuffer(1, sizeof(float) * 4);
             Vector4[] addAlgaeArray = new Vector4[1];
@@ -416,7 +421,7 @@ public class VegetationManager {
         }
 
         
-    }
+    }*/
     public void RemoveEatenAlgaeGrid(int numAgents, SimulationStateData simStateDataRef) {
         ComputeBuffer eatAmountsCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 4);
                 
@@ -580,8 +585,17 @@ public class VegetationManager {
         computeShaderAlgaeParticles.Dispatch(kernelCSMeasureTotalFoodParticlesAmount, 1, 1, 1);
         
         algaeParticlesMeasure1.GetData(algaeParticleMeasurementTotalsData);
-        curGlobalAlgaeParticles = algaeParticleMeasurementTotalsData[0].biomass;  
-        
+        curGlobalAlgaeParticles = algaeParticleMeasurementTotalsData[0].biomass;
+        oxygenProducedByAlgaeParticlesLastFrame = algaeParticleMeasurementTotalsData[0].oxygenProduced;
+        wasteProducedByAlgaeParticlesLastFrame = algaeParticleMeasurementTotalsData[0].wasteProduced;
+        nutrientsUsedByAlgaeParticlesLastFrame = algaeParticleMeasurementTotalsData[0].nutrientsUsed;
+
+        /*animalParticlesMeasure1.GetData(animalParticleMeasurementTotalsData);
+        curGlobalAnimalParticles = animalParticleMeasurementTotalsData[0].biomass;
+        oxygenUsedByAnimalParticlesLastFrame = animalParticleMeasurementTotalsData[0].oxygenUsed;
+        wasteProducedByAnimalParticlesLastFrame = animalParticleMeasurementTotalsData[0].wasteProduced;
+        algaeConsumedByAnimalParticlesLastFrame = animalParticleMeasurementTotalsData[0].algaeConsumed;
+        */
         
     }
 

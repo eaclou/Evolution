@@ -430,7 +430,7 @@ public class CritterMouthComponent : MonoBehaviour {
         //Debug.Log("BiteCorpseFood [" + agentRef.index.ToString() + "] ---> [" + corpseAgent.index.ToString() + "]");
         float flow = ownBiteArea * 1f; // / colliderCount;
 
-        float flowR = Mathf.Min(corpseAgent.currentCorpseFoodAmount, flow);
+        float flowR = Mathf.Min(corpseAgent.currentBiomass, flow);
         
         agentRef.EatFoodMeat(flowR * 1f); // assumes all foodAmounts are equal !! *****
 

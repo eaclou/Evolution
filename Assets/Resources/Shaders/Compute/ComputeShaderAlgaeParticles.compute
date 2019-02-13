@@ -141,7 +141,7 @@ void CSEatSelectedFoodParticles (uint3 id : SV_DispatchThreadID)
 	if(distanceSquared < combinedRadius * combinedRadius) {	
 		
 		if(critterSimData.consumeOn > 0.5) {   // revisit
-			eatenAmount = mouthRadius * mouthRadius * critterInitData.eatEfficiencyPlant * 0.05f;		
+			eatenAmount = mouthRadius * mouthRadius * 0.1; // * critterInitData.eatEfficiencyPlant * 0.05f;		
 			
 			foodParticlesWrite[particleIndex].biomass = particleData.biomass - eatenAmount;
 			
@@ -165,20 +165,51 @@ void CSCopyFoodParticlesBuffer (uint3 id : SV_DispatchThreadID)
 	foodParticlesWrite[id.x] = particleData;
 }
 
+/*
+float totalBiomassAmount = 0.0;
+	float totalOxygenUsed = 0.0;
+	float totalWasteProduced = 0.0;
+	float totalAlgaeConsumed = 0.0;
+	
+	for(int i = 0; i < 32; i++) {		
+		int particleIndex = id.x * 32 + i;		
+		AnimalParticleData particleData = animalParticlesRead[particleIndex];				
+		totalBiomassAmount += particleData.biomass * particleData.isActive;
+		totalOxygenUsed += particleData.oxygenUsed;
+		totalWasteProduced += particleData.wasteProduced;
+		totalAlgaeConsumed += particleData.algaeConsumed;
+	}
+
+	copyData.biomass = totalBiomassAmount;
+	copyData.oxygenUsed = totalOxygenUsed;
+	copyData.wasteProduced = totalWasteProduced;
+	copyData.algaeConsumed = totalAlgaeConsumed;
+*/
+
 [numthreads(1,1,1)]
 void CSMeasureTotalFoodParticlesAmount (uint3 id : SV_DispatchThreadID)
 {	
 	AlgaeParticleData copyData = foodParticlesRead[id.x];
 	
-	float totalFoodAmount = 0;
+	float totalBiomassAmount = 0;
+	float totalOxygenProduced = 0.0;
+	float totalWasteProduced = 0.0;
+	float totalNutrientsUsed = 0.0;
 	
 	for(int i = 0; i < 32; i++) {		
 		int particleIndex = id.x * 32 + i;		
 		AlgaeParticleData particleData = foodParticlesRead[particleIndex];				
-		totalFoodAmount += particleData.biomass * particleData.isActive;
+		
+		totalBiomassAmount += particleData.biomass;
+		totalOxygenProduced += particleData.oxygenProduced;
+		totalWasteProduced += particleData.wasteProduced;
+		totalNutrientsUsed += particleData.nutrientsUsed;
 	}
 
-	copyData.biomass = totalFoodAmount;
+	copyData.biomass = totalBiomassAmount;
+	copyData.oxygenProduced = totalOxygenProduced;
+	copyData.wasteProduced = totalWasteProduced;
+	copyData.nutrientsUsed = totalNutrientsUsed;
 	
 	foodParticlesWrite[id.x] = copyData;
 }
@@ -201,6 +232,8 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 
 		float bodyMass = foodParticle.biomass;
 		float wasteMass = 0;
+		float oxygenProduced = 0;
+		float nutrientsUsed = 0;
 
 		float2 vel = velocityRead.SampleLevel(_LinearRepeat, uv, 2).xy;
 		float speedMult = 0.005;				
@@ -214,6 +247,9 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 			float lightGrowthMask = saturate((altitudeRaw - 0.25) * 4.0 + 0.25);
 			float maxGrowthRate = 0.0002;
 			float growthMass = maxGrowthRate * nutrientsGrowthMask * lightGrowthMask * _SolarEnergy;
+
+			nutrientsUsed = growthMass;
+			oxygenProduced = growthMass * 1.0;
 
 			bodyMass += growthMass;
 
@@ -244,21 +280,28 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 		foodParticlesWrite[id.x].worldPos = foodParticle.worldPos + posOffset;
 		foodParticlesWrite[id.x].biomass = bodyMass;
 		foodParticlesWrite[id.x].wasteProduced = wasteMass;
+		foodParticlesWrite[id.x].oxygenProduced = oxygenProduced;
+		foodParticlesWrite[id.x].nutrientsUsed = nutrientsUsed;
 	}
 	else {  // INACTIVE:::
 		
+		foodParticlesWrite[id.x].biomass = 0;
+		foodParticlesWrite[id.x].oxygenProduced = 0;
+		foodParticlesWrite[id.x].wasteProduced = 0;
+		foodParticlesWrite[id.x].nutrientsUsed = 0;
+
 		if(_RespawnFoodParticles > 0.5) {	
 		
 			float rand01 = rand(float2(_Time * 135.79 + (float)foodParticlesRead[id.x].index * 30.17896, _Time * 28.463));
 			float randX = rand(float2((float)id.x, _Time));
 			float randY = rand(float2(randX * 62.39 + _Time, (float)id.x));
 
-			float2 spawnUV = float2(randX, randY) * 0.5 + 0.25;;			
+			float2 spawnUV = float2(randX, randY) * 0.5 + 0.25;			
 			
 			float4 spawnAltitudeSample = altitudeRead.SampleLevel(_LinearClamp, spawnUV, 0);
 			
 			if(rand01 < 0.25) {  // to prevent mass respawning, overshooting the intended max global food amount ?  // Needed?
-				if(spawnAltitudeSample.x < 0.5) {  // in water only? // for now...
+				if(spawnAltitudeSample.x < 0.45) {  // in water only? // for now...
 				
 					foodParticlesWrite[id.x].worldPos = float2(randX * _MapSize, randY * _MapSize);
 

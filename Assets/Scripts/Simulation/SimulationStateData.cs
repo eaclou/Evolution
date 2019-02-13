@@ -317,7 +317,7 @@ public class SimulationStateData {
                 critterSimDataArray[i].energy = simManager.agentsArray[i].coreModule.energy; // Raw / simManager.agentsArray[i].coreModule.maxEnergyStorage;
                 critterSimDataArray[i].health = simManager.agentsArray[i].coreModule.healthHead;
                 critterSimDataArray[i].stamina = simManager.agentsArray[i].coreModule.stamina[0];
-                critterSimDataArray[i].consumeOn = simManager.agentsArray[i].mouthRef.GetIsFeeding();    // Flag for intention to eat gpu food particle (plant-type)         
+                critterSimDataArray[i].consumeOn = 1f; // simManager.agentsArray[i].mouthRef.GetIsFeeding();    // Flag for intention to eat gpu food particle (plant-type)         
 
                 critterSimDataArray[i].biteAnimCycle = 0f;
                 if(simManager.agentsArray[i].mouthRef.isFeeding) {
