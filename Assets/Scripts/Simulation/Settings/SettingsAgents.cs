@@ -2,8 +2,8 @@
 //using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "ZooplanktonSettings", menuName = "ScriptableObjects/ZooplanktonSettings", order = 1)]
-public class SettingsZooplankton : ScriptableObject {
+[CreateAssetMenu(fileName = "AgentSettings", menuName = "ScriptableObjects/AgentSettings", order = 1)]
+public class SettingsAgents : ScriptableObject {
 
 	public float _MasterSwimSpeed = 0.35f;
     public float _AlignMaskRange = 0.025f;

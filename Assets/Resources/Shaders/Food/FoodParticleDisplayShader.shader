@@ -54,7 +54,7 @@
 
 				float3 worldPosition = float3(particleData.worldPos, 1.0);    //float3(rawData.worldPos, -random2);
 				
-				float radius = sqrt(particleData.biomass) * 2 + 0.25;
+				float radius = 1; //sqrt(particleData.biomass) * 2 + 0.5;
 				quadPoint = quadPoint * radius; // * particleData.active; // *** remove * 3 after!!!
 				worldPosition = worldPosition + quadPoint * particleData.isActive;
 
@@ -82,7 +82,8 @@
 				
 				float4 finalColor = i.color; // float4(float3(i.color.z * 1.2, 0.85, (1.0 - i.color.w) * 0.2) + i.color.y, texColor.a * i.color.x * 0.33 * (1 - i.color.z));
 				finalColor.rgb = lerp(finalColor.rgb, float3(0.25, 1, 0.36), 0.15);
-				finalColor.a *= texColor.a * 0.25;
+				finalColor.rgb += 0.25;
+				finalColor.a = texColor.a; // * 0.25;
 				return finalColor;
 			}
 		ENDCG

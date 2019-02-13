@@ -5,13 +5,17 @@ using UnityEngine;
 public class SettingsManager : MonoBehaviour {
 
     //public MutationSettings mutationSettingsSupervised;
-    public MutationSettings mutationSettingsPersistent;
+    public MutationSettings mutationSettingsAgents;
 
-    //public MutationSettings mutationSettingsRandomBody;
+    public SettingsEnvironment environmentSettings;
+    public SettingsAlgaeParticles algaeSettings;
+    public SettingsZooplankton zooplanktonSettings;
+    public SettingsAgents agentSettings;
+    
 
     public float maxGlobalNutrients = 5f;
     public float eatRateMultiplier = 1f;
-    public float energyDrainMultiplier = 0.2f;
+    public float energyDrainMultiplier = 1f;
     public float spawnNewFoodChance = 0.01f;
     public float foodDiffusionRate = 0.0125f;
     public float minSizeFeedingEfficiencyDecay = 1f;
@@ -49,7 +53,7 @@ public class SettingsManager : MonoBehaviour {
     public int curTierBrainMutationNewHiddenNeuron = 4;
     public int curTierBrainMutationWeightDecay = 8;
     
-    public int curTierFoodDecay = 5;
+    public int curTierFoodDecay = 5;  // these will need to be replacedwith new system
     public int curTierFoodPlant = 5;
     public int curTierFoodEgg = 6;
     public int curTierFoodCorpse = 6;
@@ -58,43 +62,43 @@ public class SettingsManager : MonoBehaviour {
     public void ChangeTierBrainMutationAmplitude(int delta) {
         curTierBrainMutationAmplitude = Mathf.Clamp(curTierBrainMutationAmplitude + delta, 0, 10);
         float tierLerp = (float)curTierBrainMutationAmplitude / 10f;        
-        mutationSettingsPersistent.mutationStepSize = Mathf.Lerp(0.001f, 1.5f, tierLerp * tierLerp);
+        mutationSettingsAgents.mutationStepSize = Mathf.Lerp(0.001f, 1.5f, tierLerp * tierLerp);
     }
     public void ChangeTierBrainMutationFrequency(int delta) {
         curTierBrainMutationFrequency = Mathf.Clamp(curTierBrainMutationFrequency + delta, 0, 10);
         float tierLerp = (float)curTierBrainMutationFrequency / 10f;
-        mutationSettingsPersistent.mutationChance = Mathf.Lerp(0.001f, 0.33f, tierLerp * tierLerp * tierLerp);
+        mutationSettingsAgents.mutationChance = Mathf.Lerp(0.001f, 0.33f, tierLerp * tierLerp * tierLerp);
     }
     public void ChangeTierBrainMutationNewLink(int delta) {
         curTierBrainMutationNewLink = Mathf.Clamp(curTierBrainMutationNewLink + delta, 0, 10);
         float tierLerp = (float)curTierBrainMutationNewLink / 10f;
-        mutationSettingsPersistent.newLinkChance = Mathf.Lerp(0.001f, 1.0f, tierLerp * tierLerp);
+        mutationSettingsAgents.newLinkChance = Mathf.Lerp(0.001f, 1.0f, tierLerp * tierLerp);
     }
     public void ChangeTierBrainMutationNewHiddenNeuron(int delta) {
         curTierBrainMutationNewHiddenNeuron = Mathf.Clamp(curTierBrainMutationNewHiddenNeuron + delta, 0, 10);
         float tierLerp = (float)curTierBrainMutationNewHiddenNeuron / 10f;
-        mutationSettingsPersistent.newHiddenNodeChance = Mathf.Lerp(0f, 0.33f, tierLerp * tierLerp);
+        mutationSettingsAgents.newHiddenNodeChance = Mathf.Lerp(0f, 0.33f, tierLerp * tierLerp);
     }
     public void ChangeTierBrainMutationWeightDecay(int delta) {
         curTierBrainMutationWeightDecay = Mathf.Clamp(curTierBrainMutationWeightDecay + delta, 0, 10);
         float tierLerp = (float)curTierBrainMutationWeightDecay / 10f;
-        mutationSettingsPersistent.weightDecayAmount = Mathf.Lerp(0.98f, 1f, tierLerp);
+        mutationSettingsAgents.weightDecayAmount = Mathf.Lerp(0.98f, 1f, tierLerp);
     }
 
     public void ChangeTierBodyMutationAmplitude(int delta) {
         curTierBodyMutationAmplitude = Mathf.Clamp(curTierBodyMutationAmplitude + delta, 0, 10);
         float tierLerp = (float)curTierBodyMutationAmplitude / 10f;        
-        mutationSettingsPersistent.defaultBodyMutationStepSize = Mathf.Lerp(0.01f, 0.8f, tierLerp * tierLerp);
+        mutationSettingsAgents.defaultBodyMutationStepSize = Mathf.Lerp(0.01f, 0.8f, tierLerp * tierLerp);
     }
     public void ChangeTierBodyMutationFrequency(int delta) {
         curTierBodyMutationFrequency = Mathf.Clamp(curTierBodyMutationFrequency + delta, 0, 10);
         float tierLerp = (float)curTierBodyMutationFrequency / 10f;
-        mutationSettingsPersistent.defaultBodyMutationChance = Mathf.Lerp(0.001f, 0.75f, tierLerp * tierLerp);
+        mutationSettingsAgents.defaultBodyMutationChance = Mathf.Lerp(0.001f, 0.75f, tierLerp * tierLerp);
     }
     public void ChangeTierBodyMutationModules(int delta) {
         curTierBodyMutationModules = Mathf.Clamp(curTierBodyMutationModules + delta, 0, 10);
         float tierLerp = (float)curTierBodyMutationModules / 10f;
-        mutationSettingsPersistent.bodyModuleMutationChance = Mathf.Lerp(0.001f, 0.1f, tierLerp * tierLerp * tierLerp);
+        mutationSettingsAgents.bodyModuleMutationChance = Mathf.Lerp(0.001f, 0.1f, tierLerp * tierLerp * tierLerp);
     }
 
     public void ChangeTierFoodDecay(int delta) {
@@ -126,7 +130,7 @@ public class SettingsManager : MonoBehaviour {
 
     public void Initialize() {
         //mutationSettingsSupervised = new MutationSettings(0.5f, 0.015f, 1f, 0.005f, 1f, 0.1f, 0.001f);
-        mutationSettingsPersistent = new MutationSettings(0.25f, 0.025f, 1f, 0.01f, 0.997f, 0.6f, 0.01f);
+        mutationSettingsAgents = new MutationSettings(0.25f, 0.025f, 1f, 0.01f, 0.997f, 0.6f, 0.01f);
 
         ChangeTierFoodDecay(0);
         ChangeTierFoodPlant(0);

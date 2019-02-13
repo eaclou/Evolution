@@ -11,31 +11,14 @@ using UnityEngine;
 public class VegetationManager {
 
     public SettingsManager settingsRef;
+    public SimResourceManager resourceManagerRef;
     
     private ComputeShader computeShaderAlgaeGrid;
     private ComputeShader computeShaderAlgaeParticles;
     private ComputeShader computeShaderAnimalParticles;
 
     //public float curGlobalAlgaeGrid = 0f;  // not using this currently
-    public float curGlobalAlgaeReservoirAmount = 1f;  // separate from algaeParticles -- takes place of algaeGrid
-    public float curGlobalAlgaeParticles = 0f;
-    public float curGlobalAnimalParticles = 0f;
-    public float curGlobalEggSackVolume = 0f;
-    public float curGlobalCarrionVolume = 0f;
-    public float curGlobalAgentBiomass = 0f;
-
-    public float oxygenUsedByAnimalParticlesLastFrame = 0f;
-    public float wasteProducedByAnimalParticlesLastFrame = 0f;
-    public float algaeConsumedByAnimalParticlesLastFrame = 0f;
-
-    public float oxygenUsedByAgentsLastFrame = 0f;
-    public float wasteProducedByAgentsLastFrame = 0f;
     
-    public float oxygenProducedByAlgaeParticlesLastFrame = 0f;
-    public float wasteProducedByAlgaeParticlesLastFrame = 0f;
-    public float nutrientsUsedByAlgaeParticlesLastFrame = 0f;
-        
-
     public int algaeGridTexResolution = 32; // Temporarily disabled - replaced by single value (1x1 grid)
     public RenderTexture algaeGridRT1;
     public RenderTexture algaeGridRT2;
@@ -137,8 +120,9 @@ public class VegetationManager {
         Debug.Log("Moved Nutrient Patch! [" + index.ToString() + "], " + nutrientSpawnPatchesArray[index].ToString());
     }
 	
-    public VegetationManager(SettingsManager settings) {
+    public VegetationManager(SettingsManager settings, SimResourceManager resourcesRef) {
         settingsRef = settings;
+        resourceManagerRef = resourcesRef;
 
         nutrientSpawnPatchesArray = new Vector2[4]; // *** Refactor this!!! ***
         for(int i = 0; i < nutrientSpawnPatchesArray.Length; i++) {
@@ -493,8 +477,16 @@ public class VegetationManager {
         computeShaderAlgaeParticles.SetFloat("_ParticleNutrientDensity", settingsRef.algaeParticleNutrientDensity);
         computeShaderAlgaeParticles.SetFloat("_FoodParticleRegrowthRate", settingsRef.foodParticleRegrowthRate);
 
-        computeShaderAlgaeParticles.SetFloat("_GlobalNutrients", resourcesManager.dissolvedNutrientsAmount);
-        computeShaderAlgaeParticles.SetFloat("_SolarEnergy", resourcesManager.baseSolarEnergy);
+        computeShaderAlgaeParticles.SetFloat("_GlobalNutrients", resourcesManager.curGlobalNutrients);
+        computeShaderAlgaeParticles.SetFloat("_SolarEnergy", settingsRef.environmentSettings._BaseSolarEnergy);
+        computeShaderAlgaeParticles.SetFloat("_AlgaeGrowthNutrientsMask", settingsRef.algaeSettings._AlgaeGrowthNutrientsMask);
+        computeShaderAlgaeParticles.SetFloat("_AlgaeBaseGrowthRate", settingsRef.algaeSettings._AlgaeBaseGrowthRate);
+        computeShaderAlgaeParticles.SetFloat("_AlgaeGrowthNutrientUsage", settingsRef.algaeSettings._AlgaeGrowthNutrientUsage);
+        computeShaderAlgaeParticles.SetFloat("_AlgaeGrowthOxygenProduction", settingsRef.algaeSettings._AlgaeGrowthOxygenProduction);
+        computeShaderAlgaeParticles.SetFloat("_AlgaeAgingRate", settingsRef.algaeSettings._AlgaeAgingRate);
+        computeShaderAlgaeParticles.SetFloat("_AlgaeDecayRate", settingsRef.algaeSettings._AlgaeDecayRate);
+        computeShaderAlgaeParticles.SetFloat("_AlgaeSpawnMaxAltitude", settingsRef.algaeSettings._AlgaeSpawnMaxAltitude);
+        computeShaderAlgaeParticles.SetFloat("_AlgaeParticleInitMass", settingsRef.algaeSettings._AlgaeParticleInitMass);
 
         computeShaderAlgaeParticles.Dispatch(kernelCSSimulateAlgaeParticles, 1, 1, 1);                
 
@@ -585,10 +577,10 @@ public class VegetationManager {
         computeShaderAlgaeParticles.Dispatch(kernelCSMeasureTotalFoodParticlesAmount, 1, 1, 1);
         
         algaeParticlesMeasure1.GetData(algaeParticleMeasurementTotalsData);
-        curGlobalAlgaeParticles = algaeParticleMeasurementTotalsData[0].biomass;
-        oxygenProducedByAlgaeParticlesLastFrame = algaeParticleMeasurementTotalsData[0].oxygenProduced;
-        wasteProducedByAlgaeParticlesLastFrame = algaeParticleMeasurementTotalsData[0].wasteProduced;
-        nutrientsUsedByAlgaeParticlesLastFrame = algaeParticleMeasurementTotalsData[0].nutrientsUsed;
+        resourceManagerRef.curGlobalAlgaeParticles = algaeParticleMeasurementTotalsData[0].biomass;
+        resourceManagerRef.oxygenProducedByAlgaeParticlesLastFrame = algaeParticleMeasurementTotalsData[0].oxygenProduced;
+        resourceManagerRef.wasteProducedByAlgaeParticlesLastFrame = algaeParticleMeasurementTotalsData[0].wasteProduced;
+        resourceManagerRef.nutrientsUsedByAlgaeParticlesLastFrame = algaeParticleMeasurementTotalsData[0].nutrientsUsed;
 
         /*animalParticlesMeasure1.GetData(animalParticleMeasurementTotalsData);
         curGlobalAnimalParticles = animalParticleMeasurementTotalsData[0].biomass;
@@ -618,7 +610,7 @@ public class VegetationManager {
 
         selectRespawnAnimalParticleIndicesCBuffer.Release();
     }*/
-    public void SimulateAnimalParticles(EnvironmentFluidManager fluidManagerRef, TheRenderKing renderKingRef, SimulationStateData simStateDataRef, SettingsZooplankton settingsZooplankton, SimResourceManager resourcesManager) { // Sim
+    public void SimulateAnimalParticles(EnvironmentFluidManager fluidManagerRef, TheRenderKing renderKingRef, SimulationStateData simStateDataRef, SimResourceManager resourcesManager) { // Sim
         // Go through animalParticleData and check for inactive
         // determined by current total animal -- done!
         // if flag on shader for Respawn is on, set to active and initialize
@@ -632,24 +624,24 @@ public class VegetationManager {
         computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "velocityRead", fluidManagerRef._VelocityA);        
         computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "altitudeRead", renderKingRef.baronVonTerrain.terrainHeightMap);
         computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "_SpawnDensityMap", algaeGridRT1);        
-        computeShaderAnimalParticles.SetFloat("_GlobalOxygenLevel", resourcesManager.dissolvedOxygenAmount); // needed?
-        computeShaderAnimalParticles.SetFloat("_GlobalAlgaeLevel", curGlobalAlgaeReservoirAmount);
+        computeShaderAnimalParticles.SetFloat("_GlobalOxygenLevel", resourcesManager.curGlobalOxygen); // needed?
+        computeShaderAnimalParticles.SetFloat("_GlobalAlgaeLevel", resourceManagerRef.curGlobalAlgaeReservoir);
         
         // Movement Params:
-        computeShaderAnimalParticles.SetFloat("_MasterSwimSpeed", settingsZooplankton._MasterSwimSpeed); // = 0.35;
-        computeShaderAnimalParticles.SetFloat("_AlignMaskRange", settingsZooplankton._AlignMaskRange); // = 0.025;
-        computeShaderAnimalParticles.SetFloat("_AlignMaskOffset", settingsZooplankton._AlignMaskOffset); // = 0.0833;
-        computeShaderAnimalParticles.SetFloat("_AlignSpeedMult", settingsZooplankton._AlignSpeedMult); // = 0.00015;
-        computeShaderAnimalParticles.SetFloat("_AttractMag", settingsZooplankton._AttractMag); // = 0.0000137;
-        computeShaderAnimalParticles.SetFloat("_AttractMaskMaxDistance", settingsZooplankton._AttractMaskMaxDistance); // = 0.0036;
-        computeShaderAnimalParticles.SetFloat("_AttractMaskOffset", settingsZooplankton._AttractMaskOffset); // = 0.5;
-        computeShaderAnimalParticles.SetFloat("_SwimNoiseMag", settingsZooplankton._SwimNoiseMag); // = 0.000086;
-        computeShaderAnimalParticles.SetFloat("_SwimNoiseFreqMin", settingsZooplankton._SwimNoiseFreqMin); // = 0.00002
-        computeShaderAnimalParticles.SetFloat("_SwimNoiseFreqRange", settingsZooplankton._SwimNoiseFreqRange); // = 0.0002
-        computeShaderAnimalParticles.SetFloat("_SwimNoiseOnOffFreq", settingsZooplankton._SwimNoiseOnOffFreq); //  = 0.0001
-        computeShaderAnimalParticles.SetFloat("_ShoreCollisionMag", settingsZooplankton._ShoreCollisionMag); // = 0.0065;
-        computeShaderAnimalParticles.SetFloat("_ShoreCollisionDistOffset", settingsZooplankton._ShoreCollisionDistOffset); // = 0.15;
-        computeShaderAnimalParticles.SetFloat("_ShoreCollisionDistSlope", settingsZooplankton._ShoreCollisionDistSlope); // = 3.5;
+        computeShaderAnimalParticles.SetFloat("_MasterSwimSpeed", settingsRef.zooplanktonSettings._MasterSwimSpeed); // = 0.35;
+        computeShaderAnimalParticles.SetFloat("_AlignMaskRange", settingsRef.zooplanktonSettings._AlignMaskRange); // = 0.025;
+        computeShaderAnimalParticles.SetFloat("_AlignMaskOffset", settingsRef.zooplanktonSettings._AlignMaskOffset); // = 0.0833;
+        computeShaderAnimalParticles.SetFloat("_AlignSpeedMult", settingsRef.zooplanktonSettings._AlignSpeedMult); // = 0.00015;
+        computeShaderAnimalParticles.SetFloat("_AttractMag", settingsRef.zooplanktonSettings._AttractMag); // = 0.0000137;
+        computeShaderAnimalParticles.SetFloat("_AttractMaskMaxDistance", settingsRef.zooplanktonSettings._AttractMaskMaxDistance); // = 0.0036;
+        computeShaderAnimalParticles.SetFloat("_AttractMaskOffset", settingsRef.zooplanktonSettings._AttractMaskOffset); // = 0.5;
+        computeShaderAnimalParticles.SetFloat("_SwimNoiseMag", settingsRef.zooplanktonSettings._SwimNoiseMag); // = 0.000086;
+        computeShaderAnimalParticles.SetFloat("_SwimNoiseFreqMin", settingsRef.zooplanktonSettings._SwimNoiseFreqMin); // = 0.00002
+        computeShaderAnimalParticles.SetFloat("_SwimNoiseFreqRange", settingsRef.zooplanktonSettings._SwimNoiseFreqRange); // = 0.0002
+        computeShaderAnimalParticles.SetFloat("_SwimNoiseOnOffFreq", settingsRef.zooplanktonSettings._SwimNoiseOnOffFreq); //  = 0.0001
+        computeShaderAnimalParticles.SetFloat("_ShoreCollisionMag", settingsRef.zooplanktonSettings._ShoreCollisionMag); // = 0.0065;
+        computeShaderAnimalParticles.SetFloat("_ShoreCollisionDistOffset", settingsRef.zooplanktonSettings._ShoreCollisionDistOffset); // = 0.15;
+        computeShaderAnimalParticles.SetFloat("_ShoreCollisionDistSlope", settingsRef.zooplanktonSettings._ShoreCollisionDistSlope); // = 3.5;
 
         //computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "animalParticlesNearestCrittersRT", animalParticlesNearestCritters1);
         computeShaderAnimalParticles.SetFloat("_MapSize", SimulationManager._MapSize);
@@ -753,10 +745,10 @@ public class VegetationManager {
         computeShaderAnimalParticles.Dispatch(kernelCSMeasureTotalAnimalParticlesAmount, 1, 1, 1);
         
         animalParticlesMeasure1.GetData(animalParticleMeasurementTotalsData);
-        curGlobalAnimalParticles = animalParticleMeasurementTotalsData[0].biomass;
-        oxygenUsedByAnimalParticlesLastFrame = animalParticleMeasurementTotalsData[0].oxygenUsed;
-        wasteProducedByAnimalParticlesLastFrame = animalParticleMeasurementTotalsData[0].wasteProduced;
-        algaeConsumedByAnimalParticlesLastFrame = animalParticleMeasurementTotalsData[0].algaeConsumed;
+        resourceManagerRef.curGlobalAnimalParticles = animalParticleMeasurementTotalsData[0].biomass;
+        resourceManagerRef.oxygenUsedByAnimalParticlesLastFrame = animalParticleMeasurementTotalsData[0].oxygenUsed;
+        resourceManagerRef.wasteProducedByAnimalParticlesLastFrame = animalParticleMeasurementTotalsData[0].wasteProduced;
+        resourceManagerRef.algaeConsumedByAnimalParticlesLastFrame = animalParticleMeasurementTotalsData[0].algaeConsumed;
 
         /*if(UnityEngine.Random.Range(0f, 1f) < 0.01f) {
             Debug.Log("curGlobalAnimalParticles: " + curGlobalAnimalParticles.ToString() + "\n" +

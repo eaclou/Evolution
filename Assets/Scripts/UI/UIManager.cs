@@ -1177,34 +1177,34 @@ public class UIManager : MonoBehaviour {
 
             //textTolWorldStatsValue.text = displayVal.ToString();
             if(tolSelectedWorldStatsIndex == 0) {
-                displayVal = gameManager.simulationManager.simResourceManager.dissolvedOxygenAmount;
+                displayVal = gameManager.simulationManager.simResourceManager.curGlobalOxygen;
             }
             else if(tolSelectedWorldStatsIndex == 1) {
-                displayVal = gameManager.simulationManager.simResourceManager.dissolvedNutrientsAmount;
+                displayVal = gameManager.simulationManager.simResourceManager.curGlobalNutrients;
             }
             else if(tolSelectedWorldStatsIndex == 2) {
-                displayVal = gameManager.simulationManager.simResourceManager.availableDetritusAmount;
+                displayVal = gameManager.simulationManager.simResourceManager.curGlobalDetritus;
             }
             else if(tolSelectedWorldStatsIndex == 3) {
-                displayVal = gameManager.simulationManager.simResourceManager.currentDecomposersAmount;
+                displayVal = gameManager.simulationManager.simResourceManager.curGlobalDecomposers;
             }
             else if(tolSelectedWorldStatsIndex == 4) {
-                displayVal = gameManager.simulationManager.vegetationManager.curGlobalAlgaeReservoirAmount;
+                displayVal = gameManager.simulationManager.simResourceManager.curGlobalAlgaeReservoir;
             }
             else if(tolSelectedWorldStatsIndex == 5) {
-                displayVal = gameManager.simulationManager.vegetationManager.curGlobalAlgaeParticles;
+                displayVal = gameManager.simulationManager.simResourceManager.curGlobalAlgaeParticles;
             }
             else if(tolSelectedWorldStatsIndex == 6) {
-                displayVal = gameManager.simulationManager.vegetationManager.curGlobalAnimalParticles;
+                displayVal = gameManager.simulationManager.simResourceManager.curGlobalAnimalParticles;
             }
             else if(tolSelectedWorldStatsIndex == 7) {
-                displayVal = gameManager.simulationManager.vegetationManager.curGlobalAgentBiomass; // gameManager.simulationManager.settingsManager.curTierBodyMutationFrequency;
+                displayVal = gameManager.simulationManager.simResourceManager.curGlobalAgentBiomass; // gameManager.simulationManager.settingsManager.curTierBodyMutationFrequency;
             }
             else if(tolSelectedWorldStatsIndex == 8) {
-                displayVal = gameManager.simulationManager.vegetationManager.curGlobalCarrionVolume;
+                displayVal = gameManager.simulationManager.simResourceManager.curGlobalCarrionVolume;
             }
             else if(tolSelectedWorldStatsIndex == 9) {
-                displayVal = gameManager.simulationManager.vegetationManager.curGlobalEggSackVolume;
+                displayVal = gameManager.simulationManager.simResourceManager.curGlobalEggSackVolume;
             }
             else if(tolSelectedWorldStatsIndex == 10) {
                 displayVal = gameManager.simulationManager.environmentFluidManager.curTierWaterCurrents;
@@ -1490,17 +1490,30 @@ public class UIManager : MonoBehaviour {
             string debugTxtResources = "";
             //int selectedSpeciesIndex = agentRef.speciesIndex;
             debugTxtResources += "GLOBAL RESOURCES:\n";
-            debugTxtResources += "\nSunlight: " + simManager.simResourceManager.baseSolarEnergy.ToString();
-            debugTxtResources += "\nOxygen: " + simManager.simResourceManager.dissolvedOxygenAmount.ToString();
-            debugTxtResources += "\nNutrients: " + simManager.simResourceManager.dissolvedNutrientsAmount.ToString();
-            debugTxtResources += "\nDetritus: " + simManager.simResourceManager.availableDetritusAmount.ToString();
-            debugTxtResources += "\nDecomposers: " + simManager.simResourceManager.currentDecomposersAmount.ToString();
-            debugTxtResources += "\nAlgae (Reservoir): " + simManager.vegetationManager.curGlobalAlgaeReservoirAmount.ToString();
-            debugTxtResources += "\nAlgae (Particles): " + simManager.vegetationManager.curGlobalAlgaeParticles.ToString();
-            debugTxtResources += "\nZooplankton: " + simManager.vegetationManager.curGlobalAnimalParticles.ToString();
-            debugTxtResources += "\nLive Agents: " + simManager.vegetationManager.curGlobalAgentBiomass.ToString();
-            debugTxtResources += "\nDead Agents: " + simManager.vegetationManager.curGlobalCarrionVolume.ToString();
-            debugTxtResources += "\nEggSacks: " + simManager.vegetationManager.curGlobalEggSackVolume.ToString();
+            debugTxtResources += "\nSunlight: " + simManager.settingsManager.environmentSettings._BaseSolarEnergy.ToString();
+            debugTxtResources += "\nOxygen: " + simManager.simResourceManager.curGlobalOxygen.ToString();
+            debugTxtResources += "\n     + " + simManager.simResourceManager.oxygenProducedByAlgaeReservoirLastFrame.ToString() + " ( algae reservoir )";
+            debugTxtResources += "\n     + " + simManager.simResourceManager.oxygenProducedByAlgaeParticlesLastFrame.ToString() + " ( algae particles )";
+            debugTxtResources += "\n     - " + simManager.simResourceManager.oxygenUsedByDecomposersLastFrame.ToString() + " ( decomposers )";
+            debugTxtResources += "\n     - " + simManager.simResourceManager.oxygenUsedByAnimalParticlesLastFrame.ToString() + " ( zooplankton )";
+            debugTxtResources += "\n     - " + simManager.simResourceManager.oxygenUsedByAgentsLastFrame.ToString() + " ( agents )";
+            debugTxtResources += "\nNutrients: " + simManager.simResourceManager.curGlobalNutrients.ToString();
+            debugTxtResources += "\n     + " + simManager.simResourceManager.nutrientsProducedByDecomposersLastFrame.ToString() + " ( decomposers )";
+            debugTxtResources += "\n     - " + simManager.simResourceManager.nutrientsUsedByAlgaeReservoirLastFrame.ToString() + " ( algae reservoir )";
+            debugTxtResources += "\n     - " + simManager.simResourceManager.nutrientsUsedByAlgaeParticlesLastFrame.ToString() + " ( algae particles )";
+            debugTxtResources += "\nDetritus: " + simManager.simResourceManager.curGlobalDetritus.ToString();
+            debugTxtResources += "\n     + " + simManager.simResourceManager.wasteProducedByAlgaeReservoirLastFrame.ToString() + " ( algae reservoir )";
+            debugTxtResources += "\n     + " + simManager.simResourceManager.wasteProducedByAlgaeParticlesLastFrame.ToString() + " ( algae particles )";
+            debugTxtResources += "\n     + " + simManager.simResourceManager.wasteProducedByAnimalParticlesLastFrame.ToString() + " ( zooplankton )";
+            debugTxtResources += "\n     + " + simManager.simResourceManager.wasteProducedByAgentsLastFrame.ToString() + " ( agents )";
+            debugTxtResources += "\n     - " + simManager.simResourceManager.detritusRemovedByDecomposersLastFrame.ToString() + " ( decomposers )";
+            debugTxtResources += "\nDecomposers: " + simManager.simResourceManager.curGlobalDecomposers.ToString();
+            debugTxtResources += "\nAlgae (Reservoir): " + simManager.simResourceManager.curGlobalAlgaeReservoir.ToString();
+            debugTxtResources += "\nAlgae (Particles): " + simManager.simResourceManager.curGlobalAlgaeParticles.ToString();
+            debugTxtResources += "\nZooplankton: " + simManager.simResourceManager.curGlobalAnimalParticles.ToString();
+            debugTxtResources += "\nLive Agents: " + simManager.simResourceManager.curGlobalAgentBiomass.ToString();
+            debugTxtResources += "\nDead Agents: " + simManager.simResourceManager.curGlobalCarrionVolume.ToString();
+            debugTxtResources += "\nEggSacks: " + simManager.simResourceManager.curGlobalEggSackVolume.ToString();
             // Agent biomass
             // Eggsack biomass (+ animal particles?)
             // agent corpse biomass

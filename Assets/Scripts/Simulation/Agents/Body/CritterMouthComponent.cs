@@ -201,7 +201,7 @@ public class CritterMouthComponent : MonoBehaviour {
                 isFeeding = true;
                 triggerCollider.enabled = true;
                 feedingFrameCounter = 0;
-                agentRef.coreModule.stamina[0] -= 0.05f;
+                //agentRef.coreModule.stamina[0] -= 0.05f;
                 //Debug.Log("FEED!");
             }           
         }
@@ -227,7 +227,7 @@ public class CritterMouthComponent : MonoBehaviour {
                 isAttacking = true;
                 triggerCollider.enabled = true;
                 attackingFrameCounter = 0;
-                agentRef.coreModule.stamina[0] -= 0.25f;
+                //agentRef.coreModule.stamina[0] -= 0.25f;
                 //Debug.Log("ATTACK!");
             }                                  
         }

@@ -47,6 +47,15 @@ uniform float _FoodSprinkleRadius;
 uniform float _GlobalNutrients;
 uniform float _SolarEnergy;
 
+uniform float _AlgaeGrowthNutrientsMask;
+uniform float _AlgaeBaseGrowthRate;
+uniform float _AlgaeGrowthNutrientUsage;
+uniform float _AlgaeGrowthOxygenProduction;
+uniform float _AlgaeAgingRate;
+uniform float _AlgaeDecayRate;
+uniform float _AlgaeSpawnMaxAltitude;
+uniform float _AlgaeParticleInitMass;
+
 SamplerState _LinearClamp;
 SamplerState _LinearRepeat;
 SamplerState _PointClamp;
@@ -136,12 +145,12 @@ void CSEatSelectedFoodParticles (uint3 id : SV_DispatchThreadID)
 	float distanceSquared = data.y;
 	float mouthRadius = critterInitData.boundingBoxSize.x * critterSimData.growthPercentage;  // **** REMEMBER TO *0.5 EVENTUALLY FOR ACCURATE SIZE
 	float particleRadius = particleData.radius;
-	float combinedRadius = (mouthRadius + particleRadius * 0.5) * isAlive01 * critterSimData.consumeOn;
+	float combinedRadius = (mouthRadius * 0.5 + particleRadius * 0.5) * isAlive01 * critterSimData.consumeOn;
 	
 	if(distanceSquared < combinedRadius * combinedRadius) {	
 		
 		if(critterSimData.consumeOn > 0.5) {   // revisit
-			eatenAmount = mouthRadius * mouthRadius * 0.1; // * critterInitData.eatEfficiencyPlant * 0.05f;		
+			eatenAmount = mouthRadius * mouthRadius * 0.005; // * critterInitData.eatEfficiencyPlant * 0.05f;		
 			
 			foodParticlesWrite[particleIndex].biomass = particleData.biomass - eatenAmount;
 			
@@ -243,17 +252,17 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 		if(foodParticle.isDecaying < 0.5) {  // ALIVE !!!!!
 		
 			// Growth: // sample nutrients & light?
-			float nutrientsGrowthMask = saturate(_GlobalNutrients * 0.01);
+			float nutrientsGrowthMask = saturate(_GlobalNutrients * _AlgaeGrowthNutrientsMask);
 			float lightGrowthMask = saturate((altitudeRaw - 0.25) * 4.0 + 0.25);
-			float maxGrowthRate = 0.0002;
-			float growthMass = maxGrowthRate * nutrientsGrowthMask * lightGrowthMask * _SolarEnergy;
+			
+			float growthMass = _AlgaeBaseGrowthRate * nutrientsGrowthMask * lightGrowthMask * _SolarEnergy;
 
-			nutrientsUsed = growthMass;
-			oxygenProduced = growthMass * 1.0;
+			nutrientsUsed = growthMass * _AlgaeGrowthNutrientUsage;
+			oxygenProduced = growthMass * _AlgaeGrowthOxygenProduction;
 
 			bodyMass += growthMass;
 
-			foodParticlesWrite[id.x].age = foodParticle.age + 0.0001; // + 0.001 * (1.0 - lightGrowthMask);
+			foodParticlesWrite[id.x].age = foodParticle.age + _AlgaeAgingRate; 
 
 			foodParticlesWrite[id.x].isDecaying = foodParticle.isDecaying + (1.0 - saturate((altitudeRaw - 0.1) * 100)) * 0.01;
 
@@ -264,7 +273,7 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 		else {  // DEAD !!!!!
 			// if is fully decayed:
 			float decayEfficiency = 1.0;
-			float decayRate = 0.0001;
+			float decayRate = _AlgaeDecayRate;
 			float decayMass = decayRate * decayEfficiency;
 						
 			bodyMass -= decayMass;
@@ -301,14 +310,14 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 			float4 spawnAltitudeSample = altitudeRead.SampleLevel(_LinearClamp, spawnUV, 0);
 			
 			if(rand01 < 0.25) {  // to prevent mass respawning, overshooting the intended max global food amount ?  // Needed?
-				if(spawnAltitudeSample.x < 0.45) {  // in water only? // for now...
+				if(spawnAltitudeSample.x < _AlgaeSpawnMaxAltitude) {  // in water only? // for now...
 				
 					foodParticlesWrite[id.x].worldPos = float2(randX * _MapSize, randY * _MapSize);
 
 					float randRadius = rand(float2(randX * 10, randY * -3.37)) * (_MaxParticleSize - _MinParticleSize) + _MinParticleSize;					
-					float initMass = 0.01;
-					foodParticlesWrite[id.x].radius = randRadius;
-					foodParticlesWrite[id.x].biomass = initMass;
+					
+					foodParticlesWrite[id.x].radius = 1.0; //randRadius;
+					foodParticlesWrite[id.x].biomass = _AlgaeParticleInitMass;
 					foodParticlesWrite[id.x].isActive = 1.0;
 					foodParticlesWrite[id.x].isDecaying = 0.0;
 					foodParticlesWrite[id.x].isSwallowed = 0.0;

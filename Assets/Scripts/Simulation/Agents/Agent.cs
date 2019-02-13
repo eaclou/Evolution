@@ -930,7 +930,7 @@ public class Agent : MonoBehaviour {
         
         if(resizeColliders) {
             colliderBody.size = new Vector2(currentBoundingBoxSize.x, currentBoundingBoxSize.y); // coreModule.currentBodySize;
-            bodyRigidbody.mass = currentBodyVolume;
+            bodyRigidbody.mass = currentBodyVolume; 
 
             // MOUTH:
             mouthRef.triggerCollider.radius = currentBoundingBoxSize.x * 0.5f;  // ***** REVISIT THIS!!! USE GENOME FOR MOUTH!!! *****
@@ -983,7 +983,6 @@ public class Agent : MonoBehaviour {
         
         wasteProducedLastFrame += digestedAmountTotal * 0.25f;
         oxygenUsedLastFrame = currentBiomass * 0.001f;
-
         currentBiomass += digestedAmountTotal * 0.25f;  // **** <-- Reconsider
 
         /*coreModule.stomachContentsDecay -= digestedAmountTotal * foodProportionsVec.x;
@@ -998,7 +997,7 @@ public class Agent : MonoBehaviour {
         if(coreModule.stomachContentsMeat < 0f) {
             coreModule.stomachContentsMeat = 0f;
         }
-        coreModule.energy += createdEnergyTotal * 15f;
+        coreModule.energy += createdEnergyTotal * 15f; // expose this multiplier to settings
 
         //if(coreModule.energy > 1f) {
         //    coreModule.energy = 1f;
@@ -1036,7 +1035,7 @@ public class Agent : MonoBehaviour {
         }*/
 
         //ENERGY:
-        float energyCost = 0.005f * currentBiomass * settings.energyDrainMultiplier; // / coreModule.energyBonus;
+        float energyCost = 0.02f * currentBiomass * settings.energyDrainMultiplier; // / coreModule.energyBonus;
         
         float throttleMag = smoothedThrottle.magnitude;
         
@@ -1061,10 +1060,9 @@ public class Agent : MonoBehaviour {
             float foodParticleEatAmount = simManager.vegetationManager.algaeParticlesEatAmountsArray[index];
             if(foodParticleEatAmount > 0f) {
                 //mouthRef.InitiatePassiveBite();
+                //float sizeEfficiencyPlant = Mathf.Lerp(settings.minSizeFeedingEfficiencyDecay, settings.maxSizeFeedingEfficiencyDecay, sizeValue);
 
-                float sizeEfficiencyPlant = Mathf.Lerp(settings.minSizeFeedingEfficiencyDecay, settings.maxSizeFeedingEfficiencyDecay, sizeValue);
-
-                EatFoodPlant(foodParticleEatAmount * sizeEfficiencyPlant);                
+                EatFoodPlant(foodParticleEatAmount);                
             }
 
             float animalParticleEatAmount = simManager.vegetationManager.animalParticlesEatAmountsArray[index];
@@ -1115,13 +1113,13 @@ public class Agent : MonoBehaviour {
             if(coreModule.dashEffector[0] >= mostActiveEffectorVal) {
                 if(!coreModule.isDashing && coreModule.stamina[0] > 0.1f) {
                     coreModule.isDashing = true;
-                    coreModule.stamina[0] -= 0.1f;
+                    //coreModule.stamina[0] -= 0.1f;
                 }
             }
             if(coreModule.defendEffector[0] >= mostActiveEffectorVal) {
                 if(!coreModule.isDefending && coreModule.stamina[0] > 0.1f) {
                     coreModule.isDefending = true;
-                    coreModule.stamina[0] -= 0.1f;
+                    //coreModule.stamina[0] -= 0.1f;
                 }
             }
             
@@ -1204,7 +1202,7 @@ public class Agent : MonoBehaviour {
                     dashBonus = 2f;
                 }
                 else {
-                    dashBonus = 0.7f; // cooldown penalty
+                    dashBonus = 0.5f; // cooldown penalty
                 }
             }
             speed = swimSpeed * movementModule.speedBonus * dashBonus * aspectSpeedPenalty;
