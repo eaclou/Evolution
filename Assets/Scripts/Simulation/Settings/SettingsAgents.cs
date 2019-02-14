@@ -5,20 +5,14 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "AgentSettings", menuName = "ScriptableObjects/AgentSettings", order = 1)]
 public class SettingsAgents : ScriptableObject {
 
-	public float _MasterSwimSpeed = 0.35f;
-    public float _AlignMaskRange = 0.025f;
-    public float _AlignMaskOffset = 0.0833f;
-    public float _AlignSpeedMult = 0.00015f;
-    public float _AttractMag = 0.0000137f;
-    public float _AttractMaskMaxDistance = 0.0036f;
-    public float _AttractMaskOffset = 0.5f;
-    public float _SwimNoiseMag = 0.000086f;
-    public float _SwimNoiseFreqMin = 0.00002f;
-    public float _SwimNoiseFreqRange = 0.0002f;
-    public float _SwimNoiseOnOffFreq = 0.0001f;
-    public float _ShoreCollisionMag = 0.0065f;
-    public float _ShoreCollisionDistOffset = 0.15f;
-    public float _ShoreCollisionDistSlope = 3.5f;
-
-
+    public float _BaseOxygenUsage = 0.004f;
+    public float _DigestionWasteEfficiency = 0.25f;  // what proportion of input food mass converted to waste?
+    public float _GrowthEfficiency = 0.2f;  // what proportion of consumed food --> biomass growth?
+    public float _DigestionEnergyEfficiency = 15f;  // 1 unit food = X units energy
+    public float _BaseEnergyCost = 0.02f;
+    public float _BaseDecompositionRate = 0.0005f;
+    public float _BaseDigestionRate = 0.0025f;
+    public float _BaseInitMass = 0.05f;
+    public float _MaxPregnancyProportion = 0.2f;  // egg sack can't be more than x% of body mass
+    public float _MinPregnancyFactor = 5f;  // egg sack must be able to spawn x hatchings (init mass)
 }

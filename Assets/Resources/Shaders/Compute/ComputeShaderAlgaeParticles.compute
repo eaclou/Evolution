@@ -174,27 +174,6 @@ void CSCopyFoodParticlesBuffer (uint3 id : SV_DispatchThreadID)
 	foodParticlesWrite[id.x] = particleData;
 }
 
-/*
-float totalBiomassAmount = 0.0;
-	float totalOxygenUsed = 0.0;
-	float totalWasteProduced = 0.0;
-	float totalAlgaeConsumed = 0.0;
-	
-	for(int i = 0; i < 32; i++) {		
-		int particleIndex = id.x * 32 + i;		
-		AnimalParticleData particleData = animalParticlesRead[particleIndex];				
-		totalBiomassAmount += particleData.biomass * particleData.isActive;
-		totalOxygenUsed += particleData.oxygenUsed;
-		totalWasteProduced += particleData.wasteProduced;
-		totalAlgaeConsumed += particleData.algaeConsumed;
-	}
-
-	copyData.biomass = totalBiomassAmount;
-	copyData.oxygenUsed = totalOxygenUsed;
-	copyData.wasteProduced = totalWasteProduced;
-	copyData.algaeConsumed = totalAlgaeConsumed;
-*/
-
 [numthreads(1,1,1)]
 void CSMeasureTotalFoodParticlesAmount (uint3 id : SV_DispatchThreadID)
 {	

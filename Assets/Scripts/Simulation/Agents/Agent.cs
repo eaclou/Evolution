@@ -119,9 +119,10 @@ public class Agent : MonoBehaviour {
     public int pregnancyRefactoryTimeStepCounter = 0;
 
     // *** Need resource Overhaul
-    public float currentBiomass = 1f;
+    public float currentBiomass = 0f;
     public float wasteProducedLastFrame = 0f;
     public float oxygenUsedLastFrame = 0f;
+    //public float currentReproductiveStockpile = 0f;
     
     private Vector3 prevPos;  // use these instead of sampling rigidbody?
     public Vector3 _PrevPos
@@ -454,10 +455,7 @@ public class Agent : MonoBehaviour {
     }
 
     private void InitializeDeath()   // THIS CAN BE A LOT CLEANER!!!!! *****
-    {
-        //float currentBodyVolume = currentBoundingBoxSize.y * (currentBoundingBoxSize.x + currentBoundingBoxSize.z) * 0.5f; // coreModule.currentBodySize.x * coreModule.currentBodySize.y;
-        //currentBiomass = currentBodyVolume;
-                
+    {    
         if(isPregnantAndCarryingEggs) {
             AbortPregnancy();
         }
@@ -467,10 +465,7 @@ public class Agent : MonoBehaviour {
         swallowingPreyFrameCounter = 0;
 
         masterFitnessScore = totalExperience; // update this???
-
-        //parentEggSackRef;  // instead of using own fixed embry development duration - look up parentEggSack and use its counter?
-        //isAttachedToParentEggSack = false;
-
+        
         mouthRef.Disable();
     }
     private void CheckForLifeStageTransition() {
@@ -484,20 +479,6 @@ public class Agent : MonoBehaviour {
                     BeginHatching();
                 }
                 break;
-            /*case AgentLifeStage.Young:
-                //
-                if(lifeStageTransitionTimeStepCounter >= youngDurationTimeSteps) {
-                    curLifeStage = AgentLifeStage.Mature;
-                    
-                    lifeStageTransitionTimeStepCounter = 0;
-
-                    //growthPercentage = 1f; // FULLY GROWN!!!                    
-                }
-
-                CheckForDeathStarvation();
-                CheckForDeathHealth();
-                CheckForDeathOldAge();
-                break;*/
             case AgentLifeStage.Mature:
                 
                 // Check for Death:
@@ -507,12 +488,17 @@ public class Agent : MonoBehaviour {
                 
                 break;
             case AgentLifeStage.Dead:
-                
-                if(lifeStageTransitionTimeStepCounter >= decayDurationTimeSteps) { //  Corpse naturally decayed without being fully consumed:
+                if(currentBiomass <= 0f) {  // Fully decayed
                     curLifeStage = AgentLifeStage.Null;                    
                     lifeStageTransitionTimeStepCounter = 0;
                     isInert = true;
                 }
+
+                // OLD::::
+                /*
+                if(lifeStageTransitionTimeStepCounter >= decayDurationTimeSteps) { //  Corpse naturally decayed without being fully consumed:
+                    
+                }*/
                 break;
             case AgentLifeStage.Null:
                 isInert = true;
@@ -537,26 +523,7 @@ public class Agent : MonoBehaviour {
                 break;
         }
     }
-
-    /*public void EatFoodDecay(float amount) {
-        totalFoodEatenDecay += amount;
-        float stomachSpace = coreModule.stomachCapacity - coreModule.stomachContentsDecay - coreModule.stomachContentsPlant - coreModule.stomachContentsMeat;
-        if(amount > stomachSpace) {
-            amount = stomachSpace; // ??
-        }
-        //amount *= coreModule.foodEfficiencyDecay; // move this to energy calculation?
-        coreModule.stomachContentsNorm += (amount / coreModule.stomachCapacity);
-        
-        if(coreModule.stomachContentsNorm > 1f) {
-            float overStuffAmount = coreModule.stomachContentsNorm - 1f;
-            //ProcessDamageReceived(overStuffAmount);
-            coreModule.stomachContentsNorm = 1f;
-        }             
-        else {
-            coreModule.stomachContentsDecay += amount;
-        }
-        GainExperience((amount / coreModule.stomachCapacity) * coreModule.foodEfficiencyDecay * 1f); // Exp for appropriate food
-    }*/
+    
     public void EatFoodPlant(float amount) {
         totalFoodEatenPlant += amount;  
         float stomachSpace = coreModule.stomachCapacity - coreModule.stomachContentsPlant - coreModule.stomachContentsMeat;
@@ -671,6 +638,11 @@ public class Agent : MonoBehaviour {
 
     public void Tick(SimulationManager simManager, SettingsManager settings) {
         
+        // Resources:
+        wasteProducedLastFrame = 0f;
+        oxygenUsedLastFrame = 0f;
+
+
         if(isBeingSwallowed)
         {
             beingSwallowedFrameCounter++;
@@ -708,17 +680,14 @@ public class Agent : MonoBehaviour {
             case AgentLifeStage.Egg:
                 //
                 TickEgg();
-                break;
-            //case AgentLifeStage.Young:
-            //    TickYoung(simManager, nutrientCellInfo, ref eatAmountsArray, settings);
-            //    break;
+                break;            
             case AgentLifeStage.Mature:
                 //
                 TickMature(simManager, settings);
                 break;
             case AgentLifeStage.Dead:
                 //
-                TickDead();
+                TickDead(settings);
                 break;
             case AgentLifeStage.Null:
                 //
@@ -744,8 +713,6 @@ public class Agent : MonoBehaviour {
     // *** Condense these into ONE?
     private void TickEgg() {        
         lifeStageTransitionTimeStepCounter++;
-
-        //coreModule.energyStored[0] = 1f;
 
         sizePercentage = Mathf.Clamp01(((float)lifeStageTransitionTimeStepCounter / (float)gestationDurationTimeSteps) * spawnStartingScale);
 
@@ -796,73 +763,20 @@ public class Agent : MonoBehaviour {
         isAttachedToParentEggSack = false;        
                 
         colliderBody.enabled = true;
-
-        coreModule.energy = 1f;  // should be proportional to body size?
-        currentBiomass = 0.05f; // REVISIT THIS!!! ****
+        
+        currentBiomass = 0.05f; // REVISIT THIS!!! **** *****
+        coreModule.energy = currentBiomass * 20f;  // should be proportional to body size?
 
         mouthRef.Enable();
-        //coreModule.energyRaw = coreModule.maxEnergyStorage;
-
-        //turn mouth on
-        //mouthRef.Enable();
+        
     }
-    /*private void TickYoung(SimulationManager simManager, Vector4 nutrientCellInfo, ref Vector4[] eatAmountsArray, SettingsManager settings) {
-        //ProcessSwallowing();
-
-        sizePercentage = Mathf.Clamp01(((float)scoreCounter / (float)maxGrowthPeriod) * (1.0f - spawnStartingScale) + spawnStartingScale);
-
-        // Scaling Test:
-        int frameNum = lifeStageTransitionTimeStepCounter % growthScalingSkipFrames;
-        bool resizeFrame = false;
-        if(frameNum == 2) {
-            resizeFrame = true;            
-        }
-        ScaleBody(sizePercentage, resizeFrame);  
-
-        TickModules(simManager, nutrientCellInfo); // update inputs for Brain        
-        TickBrain(); // Tick Brain
-        TickActions(simManager, nutrientCellInfo, ref eatAmountsArray, settings); // Execute Actions  -- Also Updates Resources!!! ***
-        lifeStageTransitionTimeStepCounter++;
-        scoreCounter++;
-    }*/
-    /*private void ProcessSwallowing() {
-        if(isSwallowingPrey)
-        {
-            swallowingPreyFrameCounter++;
-
-            if (swallowingPreyFrameCounter >= swallowDuration)
-            {
-                //Debug.Log("isSwallowingPrey + swallow Complete!");
-
-                swallowingPreyFrameCounter = 0;
-                isSwallowingPrey = false;
-
-                //colliderBody.enabled = true;
-                //springJoint.enabled = false;
-                //springJoint.connectedBody = null;
-            }
-            else
-            {
-
-                
-            }
-        }
-        else
-        {
-            swallowingPreyFrameCounter = 0;
-            isSwallowingPrey = false;
-
-            colliderBody.enabled = true;
-
-            springJoint.enabled = false;
-            springJoint.connectedBody = null;
-        }
-    }*/
+    
     private void TickMature(SimulationManager simManager, SettingsManager settings) {
-
+        
         //ProcessSwallowing();
 
         // Check for death & stuff? Or is this handled inside OnCollisionEnter() events?
+        // Refactor this eventually!!!!
         sizePercentage = Mathf.Clamp01(((float)ageCounter / (float)maxGrowthPeriod) * (1.0f - spawnStartingScale) + spawnStartingScale);  // *** Revisit this::: ***
 
         // Scaling Test:
@@ -880,8 +794,7 @@ public class Agent : MonoBehaviour {
 
         lifeStageTransitionTimeStepCounter++;
         ageCounter++;
-        
-        //scoreCounter++;
+                
         if(!isPregnantAndCarryingEggs) {
             pregnancyRefactoryTimeStepCounter++;
         }
@@ -892,6 +805,7 @@ public class Agent : MonoBehaviour {
         isPregnantAndCarryingEggs = true;
         childEggSackRef = developingEggSackRef;
         
+        // energy transfer within EggSack class
     }
     public void AbortPregnancy() {
         //childEggSackRef
@@ -909,11 +823,21 @@ public class Agent : MonoBehaviour {
         isPregnantAndCarryingEggs = false;
         pregnancyRefactoryTimeStepCounter = 0;
     }
-    private void TickDead() {
+    private void TickDead(SettingsManager settings) {
         lifeStageTransitionTimeStepCounter++;
-        
+
         // DECAY HERE!
         // Should shrink as well as lose foodContent
+        float decayAmount = settings.agentSettings._BaseDecompositionRate;
+
+        // include reproductive stockpile energy???
+
+        currentBiomass -= decayAmount;
+        wasteProducedLastFrame += decayAmount;
+
+        if(currentBiomass <= 0f) {
+            currentBiomass = 0f;
+        }
     }
 
     private void ScaleBody(float sizePercentage, bool resizeColliders) {
@@ -946,9 +870,7 @@ public class Agent : MonoBehaviour {
 
     public void TickActions(SimulationManager simManager, SettingsManager settings) {
        
-        wasteProducedLastFrame = 0f;
-        oxygenUsedLastFrame = 0f;
-
+        
         float horizontalMovementInput = movementModule.throttleX[0]; // Mathf.Lerp(horAI, horHuman, humanControlLerp);
         float verticalMovementInput = movementModule.throttleY[0]; // Mathf.Lerp(verAI, verHuman, humanControlLerp);
         
@@ -959,8 +881,8 @@ public class Agent : MonoBehaviour {
         
         // ENERGY!!!!
         // Digestion:
-        float maxDigestionRate = 0.005f * currentBiomass; // proportional to biomass?
-        float foodToEnergyBaseConversion = 1f; // what should this be?
+        float maxDigestionRate = settings.agentSettings._BaseDigestionRate * currentBiomass; // proportional to biomass?
+        //float foodToEnergyBaseConversion = 1f; // what should this be?
         float totalStomachContents = (coreModule.stomachContentsPlant + coreModule.stomachContentsMeat);
         Vector2 foodProportionsVec = new Vector2(coreModule.stomachContentsPlant, coreModule.stomachContentsMeat) / (totalStomachContents + 0.000001f);
 
@@ -975,20 +897,16 @@ public class Agent : MonoBehaviour {
 
         // *** Remember to Re-Implement dietary specialization!!! ****
         float digestedPlantMass = digestedAmountTotal * foodProportionsVec.x;
-        float plantToEnergyAmount = digestedPlantMass * foodToEnergyBaseConversion; // * coreModule.foodEfficiencyPlant;
+        float plantToEnergyAmount = digestedPlantMass; // * coreModule.foodEfficiencyPlant;
         float digestedMeatMass = digestedAmountTotal * foodProportionsVec.y;
-        float meatToEnergyAmount = digestedMeatMass * foodToEnergyBaseConversion; // * coreModule.foodEfficiencyMeat;        
+        float meatToEnergyAmount = digestedMeatMass; // * coreModule.foodEfficiencyMeat;        
         
-        float createdEnergyTotal = plantToEnergyAmount + meatToEnergyAmount; // digestionAmount * foodToEnergyConversion;
+        float createdEnergyTotal = plantToEnergyAmount + meatToEnergyAmount;
         
-        wasteProducedLastFrame += digestedAmountTotal * 0.25f;
-        oxygenUsedLastFrame = currentBiomass * 0.001f;
-        currentBiomass += digestedAmountTotal * 0.25f;  // **** <-- Reconsider
-
-        /*coreModule.stomachContentsDecay -= digestedAmountTotal * foodProportionsVec.x;
-        if(coreModule.stomachContentsDecay < 0f) {
-            coreModule.stomachContentsDecay = 0f;
-        }*/
+        wasteProducedLastFrame += digestedAmountTotal * settings.agentSettings._DigestionWasteEfficiency;
+        oxygenUsedLastFrame = currentBiomass * settings.agentSettings._BaseOxygenUsage;
+        currentBiomass += digestedAmountTotal * settings.agentSettings._GrowthEfficiency;  // **** <-- Reconsider
+                
         coreModule.stomachContentsPlant -= digestedPlantMass;
         if(coreModule.stomachContentsPlant < 0f) {
             coreModule.stomachContentsPlant = 0f;
@@ -997,7 +915,8 @@ public class Agent : MonoBehaviour {
         if(coreModule.stomachContentsMeat < 0f) {
             coreModule.stomachContentsMeat = 0f;
         }
-        coreModule.energy += createdEnergyTotal * 15f; // expose this multiplier to settings
+        
+        coreModule.energy += createdEnergyTotal * settings.agentSettings._DigestionEnergyEfficiency; 
 
         //if(coreModule.energy > 1f) {
         //    coreModule.energy = 1f;
@@ -1035,7 +954,7 @@ public class Agent : MonoBehaviour {
         }*/
 
         //ENERGY:
-        float energyCost = 0.02f * currentBiomass * settings.energyDrainMultiplier; // / coreModule.energyBonus;
+        float energyCost = currentBiomass * settings.agentSettings._BaseEnergyCost; // / coreModule.energyBonus;
         
         float throttleMag = smoothedThrottle.magnitude;
         

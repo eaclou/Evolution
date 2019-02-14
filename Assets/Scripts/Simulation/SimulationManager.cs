@@ -1147,8 +1147,11 @@ public class SimulationManager : MonoBehaviour {
                         else {
                             if(agentsArray[i].pregnancyRefactoryTimeStepCounter > agentsArray[i].pregnancyRefactoryDuration) {
                                 // Able to grow eggs
-                                totalSuitableParentAgents++;
-                                suitableParentAgentsList.Add(i);
+                                if (agentsArray[i].currentReproductiveStockpile >= 0.05f) {
+                                    totalSuitableParentAgents++;
+                                    suitableParentAgentsList.Add(i);
+
+                                }
                             }
                         }
                     }
@@ -1167,10 +1170,12 @@ public class SimulationManager : MonoBehaviour {
                 newEggSackGenome.SetToMutatedCopyOfParentGenome(eggSackGenomePoolArray[eggSackIndex], settingsManager.mutationSettingsAgents);
                 eggSackGenomePoolArray[eggSackIndex] = newEggSackGenome;
 
-                //Debug.Log("BeginPregnancy! Egg[" + eggSackIndex.ToString() + "]  Agent[" + randParentAgentIndex.ToString() + "]");
+                Debug.Log("BeginPregnancy! Egg[" + eggSackIndex.ToString() + "]  Agent[" + randParentAgentIndex.ToString() + "]");
                 if(agentsArray[randParentAgentIndex].childEggSackRef != null && agentsArray[randParentAgentIndex].isPregnantAndCarryingEggs) {
                     Debug.Log("DOUBLE PREGNANT!! egg[" + agentsArray[randParentAgentIndex].childEggSackRef.index.ToString() + "]  Agent[" + randParentAgentIndex.ToString() + "]");
                 }
+
+                // Transfer Energy from ParentAgent to childEggSack!!! ******
 
                 eggSackArray[eggSackIndex].InitializeEggSackFromGenome(eggSackIndex, agentsArray[randParentAgentIndex].candidateRef.candidateGenome, agentsArray[randParentAgentIndex], GetRandomFoodSpawnPosition().startPosition);
             
@@ -1180,9 +1185,8 @@ public class SimulationManager : MonoBehaviour {
             }
             else {
                 // Wait? SpawnImmaculate?
-                //if(curApproxGen < 2) {
                 
-                int respawnCooldown = 37;
+                int respawnCooldown = 71;
                 
                 if(eggSackRespawnCounter > respawnCooldown) {  // try to encourage more pregnancies?
                    
@@ -1216,11 +1220,11 @@ public class SimulationManager : MonoBehaviour {
     private void ProcessAgentScores(Agent agentRef) {
 
         numAgentsProcessed++;      
-        float weightedAvgLerpVal = 1f / 128f;
-        weightedAvgLerpVal = Mathf.Max(weightedAvgLerpVal, 1f / (float)(numAgentsProcessed + 1));
+        //float weightedAvgLerpVal = 1f / 128f;
+        //weightedAvgLerpVal = Mathf.Max(weightedAvgLerpVal, 1f / (float)(numAgentsProcessed + 1));
         // Expand this to handle more complex Fitness Functions with more components:
         
-        float totalEggSackVolume = 0f;
+        /*float totalEggSackVolume = 0f;
         float totalCarrionVolume = 0f;
         float totalAgentBiomass = 0f;
         
@@ -1237,11 +1241,11 @@ public class SimulationManager : MonoBehaviour {
                 totalAgentBiomass += agentsArray[i].currentBiomass;
             }
         }
-        
+        */
         //Debug.Log("ProcessAgentScores eggVol: " + foodManager.curGlobalEggSackVolume.ToString() + ", carrion: " + foodManager.curGlobalCarrionVolume.ToString());
-        simResourceManager.curGlobalEggSackVolume = Mathf.Lerp(simResourceManager.curGlobalEggSackVolume, totalEggSackVolume, weightedAvgLerpVal);
-        simResourceManager.curGlobalCarrionVolume = Mathf.Lerp(simResourceManager.curGlobalCarrionVolume, totalCarrionVolume, weightedAvgLerpVal);
-        simResourceManager.curGlobalAgentBiomass = Mathf.Lerp(simResourceManager.curGlobalAgentBiomass, totalAgentBiomass, weightedAvgLerpVal);
+        //simResourceManager.curGlobalEggSackVolume = Mathf.Lerp(simResourceManager.curGlobalEggSackVolume, totalEggSackVolume, weightedAvgLerpVal);
+        //simResourceManager.curGlobalCarrionVolume = Mathf.Lerp(simResourceManager.curGlobalCarrionVolume, totalCarrionVolume, weightedAvgLerpVal);
+        //simResourceManager.curGlobalAgentBiomass = Mathf.Lerp(simResourceManager.curGlobalAgentBiomass, totalAgentBiomass, weightedAvgLerpVal);
                 
         
         float approxGen = (float)numAgentsBorn / (float)(numAgents - 1);

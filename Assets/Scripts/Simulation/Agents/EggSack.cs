@@ -118,12 +118,13 @@ public class EggSack : MonoBehaviour {
     public bool isBeingBorn = false;    
     public int birthTimeStepsCounter = 0;
 
-    //public float debugFluidVel = 0f;
-    //public float debugDepth = 0f;
+    public float currentBiomass = 0f;
+    public float currentStoredEnergy = 0f;
+    
 
     // Use this for initialization
     void Start() {
-        //Respawn();
+        
     }
 
     // Update is called once per frame
@@ -179,8 +180,7 @@ public class EggSack : MonoBehaviour {
         
         this.index = index;        
         this.fullSize = Vector2.one * (agentGenome.bodyGenome.fullsizeBoundingBox.x + agentGenome.bodyGenome.fullsizeBoundingBox.y) * 0.5f; // new Vector2(agentGenome.bodyGenome.fullsizeBoundingBox.x, agentGenome.bodyGenome.fullsizeBoundingBox.y) * 1f;
-        //foodAmount = this.fullSize.x * this.fullSize.y;
-       
+               
         BeginLifeStageGrowing(parentAgent, agentGenome, startPos);
     }
     /*public void InitializeEggSackFromGenomeImmaculate(int eggSackIndex, AgentGenome genome, StartPositionGenome startPos) {
@@ -237,13 +237,12 @@ public class EggSack : MonoBehaviour {
         lifeStageTransitionTimeStepCounter = 0;
         this.parentAgentRef = parentAgentRef;
         birthTimeStepsCounter = 0;
-
+        
         curNumEggs = maxNumEggs;
         developmentProgress = 0f;
         growthScaleNormalized = 0.01f;
         decayStatus = 0f;
-
-        //rigidbodyRef.MovePosition(parentAgent.bodyRigidbody.position);
+                
         rigidbodyRef.mass = 5f;
         rigidbodyRef.velocity = Vector2.zero;
         rigidbodyRef.angularVelocity = 0f;
@@ -251,26 +250,23 @@ public class EggSack : MonoBehaviour {
         rigidbodyRef.angularDrag = 1.5f;
 
         if(parentAgentRef == null) {
-            //curLifeStage = EggLifeStage.GrowingIndependent;
+            
             isProtectedByParent = false;
             isAttachedBySpring = false;
-
-            //parentAgentIndex = -1;
-
+            
             this.transform.localPosition = startPos;  
             
-            //index = eggSackIndex;
             // REVISIT THIS:
             float parentScale = (parentGenomeRef.bodyGenome.fullsizeBoundingBox.x + parentGenomeRef.bodyGenome.fullsizeBoundingBox.y) * 0.5f;
             this.fullSize.x = parentScale * 1f;  // golden ratio? // easter egg for math nerds?
             this.fullSize.y = parentScale * 1f;            
-            //foodAmount = this.fullSize.x * this.fullSize.y;
-            //this.fullSize *= 1.2f;
-            //*******        
-              
+            
             mainCollider.enabled = true;
         }
         else {
+            currentBiomass = 0.05f;
+            parentAgentRef.currentReproductiveStockpile -= 0.05f;
+
             isProtectedByParent = true;
             isAttachedBySpring = true;
 
@@ -370,10 +366,8 @@ public class EggSack : MonoBehaviour {
 
                 if(!isProtectedByParent && isAttachedBySpring) {
                     float distToParent = (parentAgentRef.bodyRigidbody.transform.position - rigidbodyRef.transform.position).magnitude;
-                    //if(distToParent > (fullSize.magnitude + parentAgentRef.fullSizeBoundingBox.magnitude) * 1.5f) {
-                        // Can also use an OnTriggerExit?
-                        SeverJointAttachment();
-                    //}
+                    
+                    SeverJointAttachment();                    
                 }
                 
                 break;
