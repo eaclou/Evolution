@@ -1147,9 +1147,17 @@ public class SimulationManager : MonoBehaviour {
                         else {
                             if(agentsArray[i].pregnancyRefactoryTimeStepCounter > agentsArray[i].pregnancyRefactoryDuration) {
                                 // Able to grow eggs
-                                if (agentsArray[i].currentReproductiveStockpile >= 0.05f) {
+                                // figure out if agent has enough biomass;
+                                float reqMass = settingsManager.agentSettings._BaseInitMass * settingsManager.agentSettings._MinPregnancyFactor;
+
+                                if(reqMass < agentsArray[i].currentBiomass * settingsManager.agentSettings._MaxPregnancyProportion) {
+                                    Debug.Log("RequiredMass met! " + reqMass.ToString() + " biomass: " + agentsArray[i].currentBiomass.ToString() + ", spent: ");
                                     totalSuitableParentAgents++;
                                     suitableParentAgentsList.Add(i);
+                                }
+                                
+                                if (agentsArray[i].currentBiomass >= reqMass) {
+                                   
 
                                 }
                             }

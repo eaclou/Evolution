@@ -265,7 +265,7 @@ public class EggSack : MonoBehaviour {
         }
         else {
             currentBiomass = 0.05f;
-            parentAgentRef.currentReproductiveStockpile -= 0.05f;
+            parentAgentRef.currentBiomass -= 0.05f;
 
             isProtectedByParent = true;
             isAttachedBySpring = true;
