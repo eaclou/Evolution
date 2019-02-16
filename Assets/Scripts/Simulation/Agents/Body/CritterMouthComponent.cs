@@ -395,35 +395,30 @@ public class CritterMouthComponent : MonoBehaviour {
         int numEggsEaten = Mathf.FloorToInt(ownArea / sizeOfEachEgg);
         numEggsEaten = Mathf.Min(numEggsEaten, eggSack.curNumEggs);  // prevent overdraw
 
+        float massProportionEaten = (float)numEggsEaten / (float)eggSack.curNumEggs;
+
+        float massConsumed = eggSack.currentBiomass * massProportionEaten;
+
         eggSack.curNumEggs -= numEggsEaten;
         if(eggSack.curNumEggs <= 0) {
-            eggSack.curNumEggs = 0;
-            
+            eggSack.curNumEggs = 0;            
             eggSack.ConsumedByPredatorAgent();
         }
+
+        eggSack.currentBiomass -= massConsumed;
+        
+        // Deprecate this:::
         eggSack.foodAmount = (float)eggSack.curNumEggs / (float)eggSack.maxNumEggs * eggSack.curSize.x * eggSack.curSize.y;
-        //Debug.Log("BiteDamageFood");
-        //Debug.Log("BiteFood");
         
         // CONSUME FOOD!
         float flowR = 0f;
         if(numEggsEaten > 0) {
-            float flow = ownArea * 1f; // bonus for predators?
-            flowR = Mathf.Min(eggSack.foodAmount, flow);
+            float flow = ownArea * 1f; // bonus for predators? // maximum bite intake
+            flowR = Mathf.Min(massConsumed, flow);
         }        
         
         agentRef.EatFoodMeat(flowR * 1f); // assumes all foodAmounts are equal !! *****
     
-        //if(agentRef.coreModule.foodEfficiencyMeat > 0.5f) { // ** // damage bonus -- provided has the required specialization level:::::
-        //    agentRef.GainExperience((flowR / agentRef.coreModule.stomachCapacity) * 0.5f);  
-        //}
-        /*eggSack.foodAmount -= flowR;
-        if (eggSack.foodAmount < 0f) {
-            eggSack.foodAmount = 0f;
-        }*/
-
-        //Debug.Log("BiteDamageEggSack:    Agent [" + agentRef.index.ToString() + "] ---> EggSack [" + eggSack.index.ToString() + "] ownArea: " + ownArea.ToString() + ", flow: " + flowR.ToString() + ", numEggs: " + eggSack.curNumEggs.ToString() + ", foodAmount: " + eggSack.foodAmount.ToString());
-       
     }
     private void BiteCorpseFood(Agent corpseAgent, float ownBiteArea, float targetArea)
     {  

@@ -1,7 +1,9 @@
 ﻿using UnityEngine;
 
 public class EggSack : MonoBehaviour {
-        
+    
+    SettingsManager settingsRef;
+
     public int index;    
     public int speciesIndex; // temp - based on static species    
 
@@ -120,6 +122,8 @@ public class EggSack : MonoBehaviour {
 
     public float currentBiomass = 0f;
     public float currentStoredEnergy = 0f;
+    public float wasteProducedLastFrame = 0f;
+    public float oxygenUsedLastFrame = 0f;
     
 
     // Use this for initialization
@@ -132,7 +136,9 @@ public class EggSack : MonoBehaviour {
 		
 	}
 
-    public void FirstTimeInitialize() {        
+    public void FirstTimeInitialize(SettingsManager settings) {
+        settingsRef = settings;
+
         if(rigidbodyRef == null) {
             
             rigidbodyRef = this.gameObject.AddComponent<Rigidbody2D>();
@@ -171,7 +177,9 @@ public class EggSack : MonoBehaviour {
     }
 
     public void InitializeEggSackFromGenome(int index, AgentGenome agentGenome, Agent parentAgent, Vector3 startPos) {
-        if(parentAgent == null) {  // Immaculate Conception:
+        //currentBiomass = 0.01f; // immaculate eggsacks given free mass?
+
+        if (parentAgent == null) {  // Immaculate Conception:
 
         }
         else {
@@ -264,8 +272,8 @@ public class EggSack : MonoBehaviour {
             mainCollider.enabled = true;
         }
         else {
-            currentBiomass = 0.05f;
-            parentAgentRef.currentBiomass -= 0.05f;
+            //currentBiomass = 0.05f;
+            //parentAgentRef.currentBiomass -= 0.05f; // *** Handled within agent initPregnancy
 
             isProtectedByParent = true;
             isAttachedBySpring = true;
@@ -336,6 +344,8 @@ public class EggSack : MonoBehaviour {
         growthScaleNormalized = 0.01f;
         UpdateEggSackSize(growthScaleNormalized, false);
 
+        currentBiomass = 0f;
+
         fixedJoint.enabled = false;
         isAttachedBySpring = false;
         isProtectedByParent = false;
@@ -384,15 +394,23 @@ public class EggSack : MonoBehaviour {
                 }
                 break;
             case EggLifeStage.Decaying:
-                //
-                if(lifeStageTransitionTimeStepCounter >= decayDurationTimeSteps) {
+                if(currentBiomass <= 0f) {
+                    //Decay fully!
+                    currentBiomass = 0f;
+                    curLifeStage = EggLifeStage.Null;
+                    lifeStageTransitionTimeStepCounter = 0;
+                    isDepleted = true;  // flagged for respawn
+                    mainCollider.enabled = false;
+                }
+                // OLD:::
+                /*if(lifeStageTransitionTimeStepCounter >= decayDurationTimeSteps) {
                     curLifeStage = EggLifeStage.Null;
                     //Debug.Log("FOOD NO LONGER EXISTS!");
                     lifeStageTransitionTimeStepCounter = 0;
                     isDepleted = true;  // flagged for respawn
                     mainCollider.enabled = false;
 
-                }
+                }*/
                 break;
             case EggLifeStage.Null:
                 //
@@ -405,6 +423,8 @@ public class EggSack : MonoBehaviour {
         }
     }
     public void Tick() {
+        wasteProducedLastFrame = 0f;
+        oxygenUsedLastFrame = 0f;
         //facingDirection = new Vector2(Mathf.Cos(Mathf.Deg2Rad * transform.localEulerAngles.z + Mathf.PI * 0.5f), Mathf.Sin(Mathf.Deg2Rad * transform.localEulerAngles.z + Mathf.PI * 0.5f));
 
         float rotationInRadians = (rigidbodyRef.transform.localRotation.eulerAngles.z + 90f) * Mathf.Deg2Rad;
@@ -481,19 +501,27 @@ public class EggSack : MonoBehaviour {
         isDepleted = CheckIfDepleted();      
     }
     private void TickDecaying() {
+        
+        float decayAmount = settingsRef.agentSettings._BaseDecompositionRate;
+        currentBiomass -= decayAmount;
+        wasteProducedLastFrame += decayAmount;
+
+        if(currentBiomass <= 0f) {
+            currentBiomass = 0f;
+        }
+
+        // OLD:::
         float decayPercentage = (float)lifeStageTransitionTimeStepCounter / (float)decayDurationTimeSteps;
         decayStatus = decayPercentage;
-        //curSize = Vector2.Lerp(fullSize * 0.4f, new Vector3(0.0f, 0.0f), Mathf.Clamp01(decayStatus * 6f));
-        //transform.localScale = new Vector3(curSize.x, curSize.y, 1f);
         lifeStageTransitionTimeStepCounter++;
     }
     
     private bool CheckIfDepleted() {
         bool depleted = true;
-        if (foodAmount > 0f)
+        //if (foodAmount > 0f)
+            //depleted = false;
+        if (currentBiomass > 0f)
             depleted = false;
-        //if (amountG > 0f)
-        //    depleted = false;
         //if (amountB > 0f)
         //    depleted = false;
         // If any of the the 3 types

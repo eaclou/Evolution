@@ -243,7 +243,7 @@ public class SimulationManager : MonoBehaviour {
             GameObject agentGO = new GameObject("Agent" + i.ToString());
             Agent newAgent = agentGO.AddComponent<Agent>();
             //newAgent.speciesIndex = Mathf.FloorToInt((float)i / (float)numAgents * (float)numSpecies);
-            newAgent.FirstTimeInitialize(); // agentGenomePoolArray[i]);
+            newAgent.FirstTimeInitialize(settingsManager); // agentGenomePoolArray[i]);
             agentsArray[i] = newAgent; // Add to stored list of current Agents 
             yield return null;
         }
@@ -409,7 +409,7 @@ public class SimulationManager : MonoBehaviour {
             GameObject agentGO = new GameObject("Agent" + i.ToString());
             Agent newAgent = agentGO.AddComponent<Agent>();
             //newAgent.speciesIndex = Mathf.FloorToInt((float)i / (float)numAgents * (float)numSpecies);
-            newAgent.FirstTimeInitialize(); // agentGenomePoolArray[i]);
+            newAgent.FirstTimeInitialize(settingsManager); // agentGenomePoolArray[i]);
             agentsArray[i] = newAgent; // Add to stored list of current Agents            
         }
     }
@@ -433,7 +433,7 @@ public class SimulationManager : MonoBehaviour {
             //eggSackGO.name = "EggSack" + i.ToString();
             EggSack newEggSack = eggSackGO.AddComponent<EggSack>();
             newEggSack.speciesIndex = masterGenomePool.currentlyActiveSpeciesIDList[0]; // Mathf.FloorToInt((float)i / (float)numEggSacks * (float)numSpecies);
-            newEggSack.FirstTimeInitialize();
+            newEggSack.FirstTimeInitialize(settingsManager);
             eggSackArray[i] = newEggSack; // Add to stored list of current Food objects                     
         }
     }
@@ -1155,11 +1155,6 @@ public class SimulationManager : MonoBehaviour {
                                     totalSuitableParentAgents++;
                                     suitableParentAgentsList.Add(i);
                                 }
-                                
-                                if (agentsArray[i].currentBiomass >= reqMass) {
-                                   
-
-                                }
                             }
                         }
                     }
@@ -1194,7 +1189,7 @@ public class SimulationManager : MonoBehaviour {
             else {
                 // Wait? SpawnImmaculate?
                 
-                int respawnCooldown = 71;
+                int respawnCooldown = 83;
                 
                 if(eggSackRespawnCounter > respawnCooldown) {  // try to encourage more pregnancies?
                    
@@ -1214,6 +1209,9 @@ public class SimulationManager : MonoBehaviour {
                         eggSackArray[eggSackIndex].parentAgentIndex = agentIndex;
                         eggSackArray[eggSackIndex].InitializeEggSackFromGenome(eggSackIndex, agentsArray[agentIndex].candidateRef.candidateGenome, null, GetRandomFoodSpawnPosition().startPosition);
 
+                        // TEMP::: TESTING!!!
+                        eggSackArray[eggSackIndex].currentBiomass = settingsManager.agentSettings._BaseInitMass; // *** TEMP!!! ***
+                        
                         eggSackRespawnCounter = 0;       
                     }         
                 }             
@@ -1228,17 +1226,17 @@ public class SimulationManager : MonoBehaviour {
     private void ProcessAgentScores(Agent agentRef) {
 
         numAgentsProcessed++;      
-        //float weightedAvgLerpVal = 1f / 128f;
-        //weightedAvgLerpVal = Mathf.Max(weightedAvgLerpVal, 1f / (float)(numAgentsProcessed + 1));
+        float weightedAvgLerpVal = 1f / 64f;
+        weightedAvgLerpVal = Mathf.Max(weightedAvgLerpVal, 1f / (float)(numAgentsProcessed + 1));
         // Expand this to handle more complex Fitness Functions with more components:
         
-        /*float totalEggSackVolume = 0f;
+        float totalEggSackVolume = 0f;
         float totalCarrionVolume = 0f;
         float totalAgentBiomass = 0f;
         
         for(int i = 0; i < eggSackArray.Length; i++) {
             if(eggSackArray[i].curLifeStage != EggSack.EggLifeStage.Null) {
-                totalEggSackVolume += eggSackArray[i].foodAmount;
+                totalEggSackVolume += eggSackArray[i].currentBiomass;
             }
         }
         for(int i = 0; i < agentsArray.Length; i++) {
@@ -1249,11 +1247,11 @@ public class SimulationManager : MonoBehaviour {
                 totalAgentBiomass += agentsArray[i].currentBiomass;
             }
         }
-        */
+
         //Debug.Log("ProcessAgentScores eggVol: " + foodManager.curGlobalEggSackVolume.ToString() + ", carrion: " + foodManager.curGlobalCarrionVolume.ToString());
-        //simResourceManager.curGlobalEggSackVolume = Mathf.Lerp(simResourceManager.curGlobalEggSackVolume, totalEggSackVolume, weightedAvgLerpVal);
-        //simResourceManager.curGlobalCarrionVolume = Mathf.Lerp(simResourceManager.curGlobalCarrionVolume, totalCarrionVolume, weightedAvgLerpVal);
-        //simResourceManager.curGlobalAgentBiomass = Mathf.Lerp(simResourceManager.curGlobalAgentBiomass, totalAgentBiomass, weightedAvgLerpVal);
+        simResourceManager.curGlobalEggSackVolume = Mathf.Lerp(simResourceManager.curGlobalEggSackVolume, totalEggSackVolume, weightedAvgLerpVal);
+        simResourceManager.curGlobalCarrionVolume = Mathf.Lerp(simResourceManager.curGlobalCarrionVolume, totalCarrionVolume, weightedAvgLerpVal);
+        simResourceManager.curGlobalAgentBiomass = Mathf.Lerp(simResourceManager.curGlobalAgentBiomass, totalAgentBiomass, weightedAvgLerpVal);
                 
         
         float approxGen = (float)numAgentsBorn / (float)(numAgents - 1);

@@ -330,7 +330,7 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 		animalParticlesWrite[id.x].velocity = posOffset;
 		
 		// SPLINE::::::
-		float restDistance = 1 * sqrt(animalParticle.biomass); // creature length
+		float restDistance = 0.75 * sqrt(animalParticle.biomass); // creature length
 		float lerpStrength = 0.75;
 
 		float2 p0 = newWorldPos;

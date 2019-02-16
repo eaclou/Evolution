@@ -99,7 +99,7 @@
 				//o.vignetteLerp = float4(testNewVignetteMask,sampleUV,vignetteRadius);
 
 				//float width = 
-				float width = sqrt(particleData.biomass) * 0.6 * (1 - 2 * abs(0.75 - uv.y)); //GetPoint1D(waterCurveData.widths.x, waterCurveData.widths.y, waterCurveData.widths.z, waterCurveData.widths.w, t) * 0.75 * (1 - saturate(testNewVignetteMask));
+				float width = sqrt(particleData.biomass) * 0.42 * (1 - 2 * abs(0.75 - uv.y)); //GetPoint1D(waterCurveData.widths.x, waterCurveData.widths.y, waterCurveData.widths.z, waterCurveData.widths.w, t) * 0.75 * (1 - saturate(testNewVignetteMask));
 				float2 offset = curveBitangent * -quadPoint.x * width; // * randomWidth; // *** support full vec4 widths!!!
 				
 				//float fadeDuration = 0.1;

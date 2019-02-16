@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Agent : MonoBehaviour {
 
+    SettingsManager settingsRef;
     //public float totalFoodEatenDecay = 0f;
     public float totalFoodEatenPlant = 0f;
     public float totalFoodEatenMeat = 0f;
@@ -16,7 +17,7 @@ public class Agent : MonoBehaviour {
     public float turningAmount = 0f;
     public float swimAnimationCycleSpeed = 0.025f;
 
-    public float spawnStartingScale = 0.1f; // *** REFACTOR!!! SYNC WITH EGGS!!!
+    public float spawnStartingScale = 0.2f; // *** REFACTOR!!! SYNC WITH EGGS!!!
 
     public bool isInert = true;  // when inert, colliders disabled
     // Refactor??
@@ -123,6 +124,7 @@ public class Agent : MonoBehaviour {
     public float wasteProducedLastFrame = 0f;
     public float oxygenUsedLastFrame = 0f;
     //public float currentReproductiveStockpile = 0f;
+    private float fullsizeBiomass = 1f;
     
     private Vector3 prevPos;  // use these instead of sampling rigidbody?
     public Vector3 _PrevPos
@@ -683,7 +685,7 @@ public class Agent : MonoBehaviour {
                 break;            
             case AgentLifeStage.Mature:
                 //
-                TickMature(simManager, settings);
+                TickMature(simManager);
                 break;
             case AgentLifeStage.Dead:
                 //
@@ -763,21 +765,23 @@ public class Agent : MonoBehaviour {
         isAttachedToParentEggSack = false;        
                 
         colliderBody.enabled = true;
-        
-        currentBiomass = 0.05f; // REVISIT THIS!!! **** *****
-        coreModule.energy = currentBiomass * 20f;  // should be proportional to body size?
+
+        currentBiomass = settingsRef.agentSettings._BaseInitMass;
+        fullsizeBiomass = currentBiomass * 10f;
+        coreModule.energy = currentBiomass * 20f;  // should be proportional to body size??
 
         mouthRef.Enable();
         
     }
     
-    private void TickMature(SimulationManager simManager, SettingsManager settings) {
-        
+    private void TickMature(SimulationManager simManager) {
+
         //ProcessSwallowing();
 
         // Check for death & stuff? Or is this handled inside OnCollisionEnter() events?
         // Refactor this eventually!!!!
-        sizePercentage = Mathf.Clamp01(((float)ageCounter / (float)maxGrowthPeriod) * (1.0f - spawnStartingScale) + spawnStartingScale);  // *** Revisit this::: ***
+        //sizePercentage = Mathf.Clamp01(((float)ageCounter / (float)maxGrowthPeriod) * (1.0f - spawnStartingScale) + spawnStartingScale);  // *** Revisit this::: ***
+        sizePercentage = Mathf.Clamp01(((currentBiomass - settingsRef.agentSettings._BaseInitMass) / fullsizeBiomass) * (1.0f - spawnStartingScale) + spawnStartingScale);
 
         // Scaling Test:
         int frameNum = ageCounter % growthScalingSkipFrames;
@@ -790,7 +794,7 @@ public class Agent : MonoBehaviour {
 
         TickModules(simManager); // update inputs for Brain        
         TickBrain(); // Tick Brain
-        TickActions(simManager, settings); // Execute Actions  -- Also Updates Resources!!! ***
+        TickActions(simManager); // Execute Actions  -- Also Updates Resources!!! ***
 
         lifeStageTransitionTimeStepCounter++;
         ageCounter++;
@@ -804,8 +808,19 @@ public class Agent : MonoBehaviour {
         //Debug.Log("BeginPregnancy! [" + developingEggSackRef.index.ToString() + "]");
         isPregnantAndCarryingEggs = true;
         childEggSackRef = developingEggSackRef;
-        
+
         // energy transfer within EggSack class
+        float starterMass = settingsRef.agentSettings._BaseInitMass * settingsRef.agentSettings._MinPregnancyFactor;
+        float curProportion = currentBiomass * settingsRef.agentSettings._MaxPregnancyProportion;
+        // probably 0.05 * 2 = 0.1   for now
+        if(curProportion > starterMass) { // Good to go!
+            Debug.Log("Pregnancy! " + " curMass: " + currentBiomass.ToString() + ", reqMass: " + starterMass.ToString() + ", curProp: " + curProportion.ToString());
+            currentBiomass -= starterMass;
+            childEggSackRef.currentBiomass = starterMass;            
+        }
+        else {
+            Debug.LogError("Something went wrong!! " + " curMass: " + currentBiomass.ToString() + ", reqMass: " + starterMass.ToString() + ", curProp: " + curProportion.ToString() );
+        }
     }
     public void AbortPregnancy() {
         //childEggSackRef
@@ -846,11 +861,11 @@ public class Agent : MonoBehaviour {
         float scale = Mathf.Lerp(minScale, 1f, sizePercentage); // Minimum size = 0.1 ???  // SYNC WITH EGG SIZE!!!
         currentBoundingBoxSize = fullSizeBoundingBox * scale;
         float currentBodyVolume = currentBoundingBoxSize.y * (currentBoundingBoxSize.x + currentBoundingBoxSize.z) * 0.5f; // coreModule.currentBodySize.x * coreModule.currentBodySize.y;
-        
+
         // REvisit this::::
         //currentBiomass = currentBodyVolume;  // ??? **** DOESN'T LOOK CORRECT -- FIX!!
 
-        coreModule.stomachCapacity = currentBodyVolume;
+        coreModule.stomachCapacity = 1f; // currentBodyVolume;
         
         if(resizeColliders) {
             colliderBody.size = new Vector2(currentBoundingBoxSize.x, currentBoundingBoxSize.y); // coreModule.currentBodySize;
@@ -868,7 +883,7 @@ public class Agent : MonoBehaviour {
         }               
     }
 
-    public void TickActions(SimulationManager simManager, SettingsManager settings) {
+    public void TickActions(SimulationManager simManager) {
        
         
         float horizontalMovementInput = movementModule.throttleX[0]; // Mathf.Lerp(horAI, horHuman, humanControlLerp);
@@ -881,7 +896,7 @@ public class Agent : MonoBehaviour {
         
         // ENERGY!!!!
         // Digestion:
-        float maxDigestionRate = settings.agentSettings._BaseDigestionRate * currentBiomass; // proportional to biomass?
+        float maxDigestionRate = settingsRef.agentSettings._BaseDigestionRate * currentBiomass; // proportional to biomass?
         //float foodToEnergyBaseConversion = 1f; // what should this be?
         float totalStomachContents = (coreModule.stomachContentsPlant + coreModule.stomachContentsMeat);
         Vector2 foodProportionsVec = new Vector2(coreModule.stomachContentsPlant, coreModule.stomachContentsMeat) / (totalStomachContents + 0.000001f);
@@ -893,8 +908,7 @@ public class Agent : MonoBehaviour {
                                                                    //float digestedAmountTotal = Mathf.Min(totalStomachContentsNorm, maxDigestionRate);
                                                                    //float digestedProportionOfTotalContents = digestedAmountTotal / (totalStomachContentsNorm + 0.000001f);
 
-        //float decayToEnergyAmount = digestedAmountTotal * foodProportionsVec.x * foodToEnergyBaseConversion * coreModule.foodEfficiencyDecay;
-
+        
         // *** Remember to Re-Implement dietary specialization!!! ****
         float digestedPlantMass = digestedAmountTotal * foodProportionsVec.x;
         float plantToEnergyAmount = digestedPlantMass; // * coreModule.foodEfficiencyPlant;
@@ -903,9 +917,9 @@ public class Agent : MonoBehaviour {
         
         float createdEnergyTotal = plantToEnergyAmount + meatToEnergyAmount;
         
-        wasteProducedLastFrame += digestedAmountTotal * settings.agentSettings._DigestionWasteEfficiency;
-        oxygenUsedLastFrame = currentBiomass * settings.agentSettings._BaseOxygenUsage;
-        currentBiomass += digestedAmountTotal * settings.agentSettings._GrowthEfficiency;  // **** <-- Reconsider
+        wasteProducedLastFrame += digestedAmountTotal * settingsRef.agentSettings._DigestionWasteEfficiency;
+        oxygenUsedLastFrame = currentBiomass * settingsRef.agentSettings._BaseOxygenUsage;
+        currentBiomass += digestedAmountTotal * settingsRef.agentSettings._GrowthEfficiency;  // **** <-- Reconsider
                 
         coreModule.stomachContentsPlant -= digestedPlantMass;
         if(coreModule.stomachContentsPlant < 0f) {
@@ -915,8 +929,10 @@ public class Agent : MonoBehaviour {
         if(coreModule.stomachContentsMeat < 0f) {
             coreModule.stomachContentsMeat = 0f;
         }
+
+        float oxygenMask = Mathf.Clamp01(simManager.simResourceManager.curGlobalOxygen * settingsRef.agentSettings._OxygenEnergyMask);
         
-        coreModule.energy += createdEnergyTotal * settings.agentSettings._DigestionEnergyEfficiency; 
+        coreModule.energy += createdEnergyTotal * settingsRef.agentSettings._DigestionEnergyEfficiency * oxygenMask; 
 
         //if(coreModule.energy > 1f) {
         //    coreModule.energy = 1f;
@@ -954,7 +970,7 @@ public class Agent : MonoBehaviour {
         }*/
 
         //ENERGY:
-        float energyCost = currentBiomass * settings.agentSettings._BaseEnergyCost; // / coreModule.energyBonus;
+        float energyCost = currentBiomass * settingsRef.agentSettings._BaseEnergyCost; // / coreModule.energyBonus;
         
         float throttleMag = smoothedThrottle.magnitude;
         
@@ -991,7 +1007,7 @@ public class Agent : MonoBehaviour {
             }
 
 
-            // DECAY NUTRIENTS:
+            // DECAY NUTRIENTS: // Grid:
             /*if(mouthRef.GetIsFeeding() > 0.5f) {
                 //mouthRef.Enable();
                                         
@@ -1116,14 +1132,14 @@ public class Agent : MonoBehaviour {
             float swimSpeed = Mathf.Lerp(movementModule.smallestCreatureBaseSpeed, movementModule.largestCreatureBaseSpeed, sizeValue);
             float turnRate = Mathf.Lerp(movementModule.smallestCreatureBaseTurnRate, movementModule.largestCreatureBaseTurnRate, sizeValue);
             float dashBonus = 1f;
-            if(coreModule.isDashing) {
+            /*if(coreModule.isDashing) {
                 if(coreModule.dashFrameCounter < coreModule.dashDuration) {
                     dashBonus = 2f;
                 }
                 else {
                     dashBonus = 0.5f; // cooldown penalty
                 }
-            }
+            }*/
             speed = swimSpeed * movementModule.speedBonus * dashBonus * aspectSpeedPenalty;
             // Forward Slide
             //for(int k = 0; k < numSegments; k++) {
@@ -1209,7 +1225,8 @@ public class Agent : MonoBehaviour {
         threatsModule.Initialize(genome.bodyGenome.threatGenome, this);
     }
     
-    public void FirstTimeInitialize() {//AgentGenome genome) {  // ** See if I can get away with init sans Genome
+    public void FirstTimeInitialize(SettingsManager settings) {  //AgentGenome genome) {  // ** See if I can get away with init sans Genome
+        this.settingsRef = settings;
         curLifeStage = AgentLifeStage.AwaitingRespawn;
         //InitializeAgentWidths(genome);
         InitializeGameObjectsAndComponents();
@@ -1405,6 +1422,10 @@ public class Agent : MonoBehaviour {
         throttle = Vector2.zero;
         smoothedThrottle = new Vector2(0f, 0.01f); 
     }
+
+    //  When should biomass be transferred from EggSack?
+    // If spawnImmaculate, where does the biomass come from? -- should it be free?
+    //  
 
     public void InitializeSpawnAgentImmaculate(SettingsManager settings, int agentIndex, CandidateAgentData candidateData, StartPositionGenome startPos) {        
         index = agentIndex;
