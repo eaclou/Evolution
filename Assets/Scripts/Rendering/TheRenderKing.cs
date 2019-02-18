@@ -3523,8 +3523,9 @@ public class TheRenderKing : MonoBehaviour {
             foodParticleDisplayMat.SetPass(0);
             foodParticleDisplayMat.SetBuffer("foodParticleDataCBuffer", simManager.vegetationManager.algaeParticlesCBuffer);
             foodParticleDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+            foodParticleDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
             foodParticleDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-            cmdBufferMain.DrawProcedural(Matrix4x4.identity, foodParticleDisplayMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.algaeParticlesCBuffer.count);
+            cmdBufferMain.DrawProcedural(Matrix4x4.identity, foodParticleDisplayMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.algaeParticlesCBuffer.count * 128);
         
             // add shadow pass eventually
             animalParticleDisplayMat.SetPass(0);

@@ -150,7 +150,7 @@ void CSEatSelectedFoodParticles (uint3 id : SV_DispatchThreadID)
 	if(distanceSquared < combinedRadius * combinedRadius) {	
 		
 		if(critterSimData.consumeOn > 0.5) {   // revisit
-			eatenAmount = mouthRadius * mouthRadius * 0.1; // * critterInitData.eatEfficiencyPlant * 0.05f;		
+			eatenAmount = mouthRadius * mouthRadius * 0.025; // * critterInitData.eatEfficiencyPlant * 0.05f;		
 			
 			foodParticlesWrite[particleIndex].biomass = particleData.biomass - eatenAmount;
 			
@@ -224,7 +224,7 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 		float nutrientsUsed = 0;
 
 		float2 vel = velocityRead.SampleLevel(_LinearRepeat, uv, 2).xy;
-		float speedMult = 0.005;				
+		float speedMult = 0.0075;				
 		
 		posOffset += vel * speedMult * _MapSize;
 
