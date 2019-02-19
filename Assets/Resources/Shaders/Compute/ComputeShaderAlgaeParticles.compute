@@ -146,11 +146,11 @@ void CSEatSelectedFoodParticles (uint3 id : SV_DispatchThreadID)
 	float mouthRadius = critterInitData.boundingBoxSize.x * critterSimData.growthPercentage;  // **** REMEMBER TO *0.5 EVENTUALLY FOR ACCURATE SIZE
 	float particleRadius = particleData.radius;
 	float combinedRadius = (mouthRadius * 0.5 + particleRadius * 0.5) * isAlive01 * critterSimData.consumeOn;
-	
+	float mass = critterSimData.currentBiomass;
 	if(distanceSquared < combinedRadius * combinedRadius) {	
 		
 		if(critterSimData.consumeOn > 0.5) {   // revisit
-			eatenAmount = mouthRadius * mouthRadius * 0.025; // * critterInitData.eatEfficiencyPlant * 0.05f;		
+			eatenAmount = mass * 0.025; // mouthRadius * mouthRadius * 0.025; // * critterInitData.eatEfficiencyPlant * 0.05f;		
 			
 			foodParticlesWrite[particleIndex].biomass = particleData.biomass - eatenAmount;
 			
@@ -223,10 +223,10 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 		float oxygenProduced = 0;
 		float nutrientsUsed = 0;
 
-		float2 vel = velocityRead.SampleLevel(_LinearRepeat, uv, 2).xy;
-		float speedMult = 0.0075;				
+		//float2 vel = velocityRead.SampleLevel(_LinearRepeat, uv, 2).xy;
+		//float speedMult = 0.0075;				
 		
-		posOffset += vel * speedMult * _MapSize;
+		//posOffset += vel * speedMult * _MapSize;
 
 		if(foodParticle.isDecaying < 0.5) {  // ALIVE !!!!!
 		

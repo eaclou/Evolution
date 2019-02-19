@@ -125,6 +125,7 @@ public class Agent : MonoBehaviour {
     public float oxygenUsedLastFrame = 0f;
     //public float currentReproductiveStockpile = 0f;
     private float fullsizeBiomass = 1f;
+    private float biomassAtDeath = 1f;
     
     private Vector3 prevPos;  // use these instead of sampling rigidbody?
     public Vector3 _PrevPos
@@ -989,6 +990,7 @@ public class Agent : MonoBehaviour {
             smoothedThrottle = Vector2.zero;
         }
         else {
+            bool startBite = false;
             // Food calc before energy/healing/etc? **************
             float sizeValue = BodyGenome.GetBodySizeScore01(candidateRef.candidateGenome.bodyGenome);
             // FOOD PARTICLES: Either mouth type for now:
@@ -996,16 +998,21 @@ public class Agent : MonoBehaviour {
             if(foodParticleEatAmount > 0f) {
                 //mouthRef.InitiatePassiveBite();
                 //float sizeEfficiencyPlant = Mathf.Lerp(settings.minSizeFeedingEfficiencyDecay, settings.maxSizeFeedingEfficiencyDecay, sizeValue);
-
+                startBite = true;
                 EatFoodPlant(foodParticleEatAmount);                
             }
 
             float animalParticleEatAmount = simManager.vegetationManager.animalParticlesEatAmountsArray[index];
             if(animalParticleEatAmount > 0f) {
                 //float sizeEfficiencyPlant = Mathf.Lerp(settings.minSizeFeedingEfficiencyDecay, settings.maxSizeFeedingEfficiencyDecay, sizeValue);
-                EatFoodMeat(animalParticleEatAmount); // * sizeEfficiencyPlant);                
+                EatFoodMeat(animalParticleEatAmount); // * sizeEfficiencyPlant);    
+                startBite = true;
             }
 
+            if(startBite) {
+                mouthRef.AttemptInitiateActiveFeedBite(); 
+            }
+            
 
             // DECAY NUTRIENTS: // Grid:
             /*if(mouthRef.GetIsFeeding() > 0.5f) {
@@ -1039,13 +1046,13 @@ public class Agent : MonoBehaviour {
             mostActiveEffectorVal = Mathf.Max(mostActiveEffectorVal, coreModule.dashEffector[0]);
             mostActiveEffectorVal = Mathf.Max(mostActiveEffectorVal, coreModule.healEffector[0]);
 
-            if(coreModule.mouthFeedEffector[0] >= mostActiveEffectorVal) {                
+            /*if(coreModule.mouthFeedEffector[0] >= mostActiveEffectorVal) {                
                 mouthRef.AttemptInitiateActiveFeedBite();                
-            }
-            if(coreModule.mouthAttackEffector[0] >= mostActiveEffectorVal) {                
+            }*/
+            /*if(coreModule.mouthAttackEffector[0] >= mostActiveEffectorVal) {                
                 mouthRef.AttemptInitiateActiveAttackBite();                
-            }
-            if(coreModule.dashEffector[0] >= mostActiveEffectorVal) {
+            }*/
+            /*if(coreModule.dashEffector[0] >= mostActiveEffectorVal) {
                 if(!coreModule.isDashing && coreModule.stamina[0] > 0.1f) {
                     coreModule.isDashing = true;
                     //coreModule.stamina[0] -= 0.1f;
@@ -1064,7 +1071,7 @@ public class Agent : MonoBehaviour {
                     isResting = true;
                     //coreModule.stamina[0] -= 0.1f;
                 }                
-            }
+            }*/
                      
         }
         //coreModule.debugFoodValue = nutrientCellInfo.x;

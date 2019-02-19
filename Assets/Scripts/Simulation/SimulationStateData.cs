@@ -48,6 +48,7 @@ public class SimulationStateData {
         public Vector3 worldPos;
         public Vector2 velocity;
         public Vector2 heading;
+        public float currentBiomass;
         public float embryoPercentage;
         public float growthPercentage;
         public float decayPercentage;
@@ -193,7 +194,7 @@ public class SimulationStateData {
         for(int i = 0; i < critterSimDataArray.Length; i++) {
             critterSimDataArray[i] = new CritterSimData();
         }
-        critterSimDataCBuffer = new ComputeBuffer(critterSimDataArray.Length, sizeof(float) * 20);
+        critterSimDataCBuffer = new ComputeBuffer(critterSimDataArray.Length, sizeof(float) * 21);
         /*
         debugBodyResourcesArray = new DebugBodyResourcesData[simManager._NumAgents];
         for(int i = 0; i < debugBodyResourcesArray.Length; i++) {
@@ -297,6 +298,7 @@ public class SimulationStateData {
                     embryo = (float)simManager.agentsArray[i].lifeStageTransitionTimeStepCounter / (float)simManager.agentsArray[i]._GestationDurationTimeSteps;
                     embryo = Mathf.Clamp01(embryo);
                 }
+                critterSimDataArray[i].currentBiomass = simManager.agentsArray[i].currentBiomass;
                 critterSimDataArray[i].embryoPercentage = embryo;
                 critterSimDataArray[i].growthPercentage = Mathf.Clamp01(simManager.agentsArray[i].sizePercentage);
                 float decay = 0f;
@@ -317,15 +319,16 @@ public class SimulationStateData {
                 critterSimDataArray[i].energy = simManager.agentsArray[i].coreModule.energy; // Raw / simManager.agentsArray[i].coreModule.maxEnergyStorage;
                 critterSimDataArray[i].health = simManager.agentsArray[i].coreModule.healthHead;
                 critterSimDataArray[i].stamina = simManager.agentsArray[i].coreModule.stamina[0];
-                critterSimDataArray[i].consumeOn = 1f; // simManager.agentsArray[i].mouthRef.GetIsFeeding();    // Flag for intention to eat gpu food particle (plant-type)         
+
+                critterSimDataArray[i].consumeOn = simManager.agentsArray[i].mouthRef.GetIsFeeding();    // Flag for intention to eat gpu food particle (plant-type)         
 
                 critterSimDataArray[i].biteAnimCycle = 0f;
                 if(simManager.agentsArray[i].mouthRef.isFeeding) {
                     critterSimDataArray[i].biteAnimCycle = Mathf.Clamp01((float)simManager.agentsArray[i].mouthRef.feedingFrameCounter / (float)simManager.agentsArray[i].mouthRef.feedAnimDuration);
                 }
-                if(simManager.agentsArray[i].mouthRef.isAttacking) {
+                /*if(simManager.agentsArray[i].mouthRef.isAttacking) {
                     critterSimDataArray[i].biteAnimCycle = Mathf.Clamp01((float)simManager.agentsArray[i].mouthRef.attackingFrameCounter / (float)simManager.agentsArray[i].mouthRef.attackAnimDuration);
-                }
+                }*/
 
                 if (simManager.agentsArray[i].sizePercentage > 0.025f)
                 {

@@ -49,13 +49,41 @@
 				v2f o;
 
 				float3 quadPoint = quadVerticesCBuffer[id];
-							
-				AlgaeParticleData particleData = foodParticleDataCBuffer[inst];
+				
+				int particleIndex = floor((float)inst / 32.0);
+
+				AlgaeParticleData particleData = foodParticleDataCBuffer[particleIndex];
+
+				
 
 				float3 worldPosition = float3(particleData.worldPos, 1.0);    //float3(rawData.worldPos, -random2);
+
+				float rand0 = rand(float2(inst, inst) * 10);
+				float rand1 = rand(float2(rand0, rand0) * 10);
+				float rand2 = rand(float2(rand1, rand1) * 10);	
+				float rand3 = rand(float2(rand2, rand2) * 10);		
 				
-				float radius = 1; //sqrt(particleData.biomass) * 2 + 0.5;
+				float3 offsetRaw = (float3(rand0, rand1, rand2) * 2 - 1);				
+				//float2 offset = offsetRaw * (16 * particleData.biomass + 0.2);
+				worldPosition.xyz += offsetRaw * 0.5;
+				
+				float threshold = particleData.biomass * 4.5 + 0.033;
+				float isOn = saturate((threshold - length(offsetRaw)) * 100);
+
+				float masterFreq = 3;
+				float spatialFreq = 0.55285;
+				float timeMult = 0.06;
+				float4 noiseSample = Value3D(worldPosition * spatialFreq + _Time * timeMult, masterFreq); //float3(0, 0, _Time * timeMult) + 
+				float noiseMag = 0.15;
+				float3 noiseOffset = noiseSample.yzw * noiseMag;
+
+				worldPosition.xyz += noiseOffset;
+
+
+				float radius = particleData.radius * 0.15 * isOn; // 1; //sqrt(particleData.biomass) * 2 + 0.5;
 				quadPoint = quadPoint * radius; // * particleData.active; // *** remove * 3 after!!!
+				
+				
 				worldPosition = worldPosition + quadPoint * particleData.isActive;
 
 				// REFRACTION:
@@ -81,9 +109,9 @@
 				float val = i.color.a;
 				
 				float4 finalColor = i.color; // float4(float3(i.color.z * 1.2, 0.85, (1.0 - i.color.w) * 0.2) + i.color.y, texColor.a * i.color.x * 0.33 * (1 - i.color.z));
-				finalColor.rgb = lerp(finalColor.rgb, float3(0.25, 1, 0.36), 0.15);
+				finalColor.rgb = lerp(finalColor.rgb, float3(0.25, 1, 0.36), 1);
 				finalColor.rgb += 0.25;
-				finalColor.a = texColor.a; // * 0.25;
+				finalColor.a = texColor.a * 0.9; // * 0.25;
 				return finalColor;
 			}
 		ENDCG

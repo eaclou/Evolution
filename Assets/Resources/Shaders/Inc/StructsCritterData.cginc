@@ -26,6 +26,7 @@ struct CritterSimData {
 	float3 worldPos;
 	float2 velocity;
 	float2 heading;
+	float currentBiomass;
 	float embryoPercentage;
 	float growthPercentage;
 	float decayPercentage;

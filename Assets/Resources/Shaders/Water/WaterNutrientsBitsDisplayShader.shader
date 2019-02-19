@@ -36,6 +36,8 @@
 			
 			uniform float _MapSize;
 
+			uniform float _AlgaeReservoir;
+
 			struct FrameBufferStrokeData {
 				float3 worldPos;
 				float2 scale;
@@ -86,7 +88,7 @@
 				float2 uv = (worldPosition.xy + 128) / 512;
 				o.altitudeUV = uv;
 								
-				float2 scale = waterQuadData.localScale * 2.25;
+				float2 scale = waterQuadData.localScale * 0.55;
 				scale.x *= 0.8;
 				scale.y = scale.y * (1 + saturate(waterQuadData.speed * 64));
 				

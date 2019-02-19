@@ -28,10 +28,9 @@
 			sampler2D _MainTex;
 			sampler2D _WaterSurfaceTex;
 			
-
 			StructuredBuffer<AnimalParticleData> animalParticleDataCBuffer;			
 			StructuredBuffer<float3> quadVerticesCBuffer;
-			//baronVonWater.waterCurveVerticesCBuffer
+			
 			
 			struct v2f
 			{
@@ -144,7 +143,7 @@
 				
 				float4 finalColor = float4(i.color.rgb, i.uv.y); // float4(float3(i.color.z * 1.2, 0.85, (1.0 - i.color.w) * 0.2) + i.color.y, texColor.a * i.color.x * 0.33 * (1 - i.color.z));
 				finalColor.a *= 1.0;
-				finalColor.rgb *= 5.0;
+				finalColor.rgb = float3(0.45, 0.55, 1.295) * 1.25;
 				return finalColor;
 			}
 		ENDCG

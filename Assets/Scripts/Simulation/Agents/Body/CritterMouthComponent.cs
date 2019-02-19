@@ -93,7 +93,12 @@ public class CritterMouthComponent : MonoBehaviour {
     }
 
     public float GetIsFeeding() {
-        float isConsuming = 0f;
+        float isConsuming = 1f;
+        if(isCooldown) {            
+            isConsuming = 0f;            
+        }
+
+        /*float isConsuming = 0f;
         if(isFeeding) {
             if(feedingFrameCounter <= feedAnimDuration) {
                 isConsuming = 1f;
@@ -101,7 +106,7 @@ public class CritterMouthComponent : MonoBehaviour {
         }
         else {
 
-        }
+        }*/
         return isConsuming;
     }
     public float GetIsAttacking() {
@@ -139,12 +144,12 @@ public class CritterMouthComponent : MonoBehaviour {
         // Set Values from Genome:
 
         //mouthTriggerSize;
-        float baseFeedDuration = 12f;
+        float baseFeedDuration = 16f;
         float baseFeedCooldown = 24f;
         float baseAttackDuration = 16f;
         float baseAttackCooldown = 64f;
 
-        if(agent.coreModule.dietSpecDecayNorm > 0.5f) {
+        /*if(agent.coreModule.dietSpecDecayNorm > 0.5f) {
             baseFeedDuration = Mathf.RoundToInt((float)baseFeedDuration * 2f);
             baseFeedCooldown = Mathf.RoundToInt((float)baseFeedCooldown * 0.75f);
 
@@ -171,7 +176,7 @@ public class CritterMouthComponent : MonoBehaviour {
                 baseAttackDuration = Mathf.RoundToInt((float)baseAttackDuration * 0.75f);  // Make this dependent on Attack Specialization rather than diet?
                 baseAttackCooldown = Mathf.RoundToInt((float)baseAttackCooldown * 0.4f);
             }
-        }
+        }*/
 
         feedAnimDuration = Mathf.RoundToInt(baseFeedDuration * genome.mouthFeedFrequency);
         feedAnimCooldown = Mathf.RoundToInt(baseFeedCooldown * genome.mouthFeedFrequency);
@@ -188,9 +193,9 @@ public class CritterMouthComponent : MonoBehaviour {
             // Check if able to bite:
             bool biteReqsMet = true;
 
-            if(agentRef.coreModule.stamina[0] <= 0.05f) {
+            /*if(agentRef.coreModule.stamina[0] <= 0.05f) {
                 biteReqsMet = false;
-            }
+            }*/
             if(isAttacking) {
                 biteReqsMet = false;
             }

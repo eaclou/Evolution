@@ -67,6 +67,7 @@ public class TheRenderKing : MonoBehaviour {
     
     public Material critterEnergyDotsMat;
     public Material critterFoodDotsMat;
+    public Material algaeParticleDisplayMat;
     public Material foodParticleDisplayMat;
     public Material foodParticleShadowDisplayMat;
     public Material animalParticleDisplayMat;
@@ -1202,6 +1203,9 @@ public class TheRenderKing : MonoBehaviour {
 
         critterFoodDotsMat.SetPass(0);
         critterFoodDotsMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+                
+        algaeParticleDisplayMat.SetPass(0);
+        algaeParticleDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
 
         foodParticleDisplayMat.SetPass(0);
         foodParticleDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -2829,7 +2833,7 @@ public class TheRenderKing : MonoBehaviour {
         if(treeOfLifePortraitCritterSimDataCBuffer != null) {
             treeOfLifePortraitCritterSimDataCBuffer.Release();
         }
-        treeOfLifePortraitCritterSimDataCBuffer = new ComputeBuffer(1, sizeof(float) * 20);
+        treeOfLifePortraitCritterSimDataCBuffer = new ComputeBuffer(1, sizeof(float) * 21);
         treeOfLifePortraitCritterSimDataCBuffer.SetData(treeOfLifePortraitCritterSimDataArray);
         // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -3426,7 +3430,16 @@ public class TheRenderKing : MonoBehaviour {
             baronVonTerrain.groundBitsDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
             cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.groundBitsCBuffer.count);
-
+            
+            
+            // Algae Carpet!
+            algaeParticleDisplayMat.SetPass(0);
+            algaeParticleDisplayMat.SetBuffer("foodParticleDataCBuffer", simManager.vegetationManager.algaeParticlesCBuffer);
+            algaeParticleDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+            algaeParticleDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+            algaeParticleDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+            cmdBufferMain.DrawProcedural(Matrix4x4.identity, algaeParticleDisplayMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.algaeParticlesCBuffer.count * 128);
+        
             // CARPET BITS:: (microbial mats, algae?)
             baronVonTerrain.carpetBitsDisplayMat.SetPass(0);
             baronVonTerrain.carpetBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -3519,14 +3532,42 @@ public class TheRenderKing : MonoBehaviour {
                 critterInspectHighlightMat.SetInt("_SelectedSpecies", simManager.uiManager.treeOfLifeManager.selectedID);
                 cmdBufferTest.DrawProcedural(Matrix4x4.identity, critterInspectHighlightMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.critterInitDataCBuffer.count);
             }*/
+
+            animalParticleShadowDisplayMat.SetPass(0);
+            animalParticleShadowDisplayMat.SetBuffer("animalParticleDataCBuffer", simManager.vegetationManager.animalParticlesCBuffer);
+            animalParticleShadowDisplayMat.SetBuffer("quadVerticesCBuffer", curveRibbonVerticesCBuffer);
+            animalParticleShadowDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+            animalParticleShadowDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+            cmdBufferMain.DrawProcedural(Matrix4x4.identity, animalParticleShadowDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, simManager.vegetationManager.animalParticlesCBuffer.count);
+        
+
+            // suspended particle bits:
+            baronVonWater.waterNutrientsBitsDisplayMat.SetPass(0);
+            baronVonWater.waterNutrientsBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+            baronVonWater.waterNutrientsBitsDisplayMat.SetBuffer("frameBufferStrokesCBuffer", baronVonWater.waterNutrientsBitsCBuffer);
+            baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+            baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
+            baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+            baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_NutrientTex", simManager.vegetationManager.algaeGridRT1);
+            baronVonWater.waterNutrientsBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+            cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
+            cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonWater.waterNutrientsBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterNutrientsBitsCBuffer.count);
+
+            foodParticleShadowDisplayMat.SetPass(0);
+            foodParticleShadowDisplayMat.SetBuffer("foodParticleDataCBuffer", simManager.vegetationManager.algaeParticlesCBuffer);
+            foodParticleShadowDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+            foodParticleShadowDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+            foodParticleShadowDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+            cmdBufferMain.DrawProcedural(Matrix4x4.identity, foodParticleShadowDisplayMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.algaeParticlesCBuffer.count * 32);
         
             foodParticleDisplayMat.SetPass(0);
             foodParticleDisplayMat.SetBuffer("foodParticleDataCBuffer", simManager.vegetationManager.algaeParticlesCBuffer);
             foodParticleDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
             foodParticleDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
             foodParticleDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-            cmdBufferMain.DrawProcedural(Matrix4x4.identity, foodParticleDisplayMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.algaeParticlesCBuffer.count * 128);
+            cmdBufferMain.DrawProcedural(Matrix4x4.identity, foodParticleDisplayMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.algaeParticlesCBuffer.count * 32);
         
+            
             // add shadow pass eventually
             animalParticleDisplayMat.SetPass(0);
             animalParticleDisplayMat.SetBuffer("animalParticleDataCBuffer", simManager.vegetationManager.animalParticlesCBuffer);
@@ -3661,19 +3702,7 @@ public class TheRenderKing : MonoBehaviour {
 
             // WATER BITS TEMP::::::::::::::^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
             // use this as algae grid???
-            baronVonWater.waterNutrientsBitsDisplayMat.SetPass(0);
-            baronVonWater.waterNutrientsBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-            baronVonWater.waterNutrientsBitsDisplayMat.SetBuffer("frameBufferStrokesCBuffer", baronVonWater.waterNutrientsBitsCBuffer);
-            baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
-            baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
-            baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-            baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_NutrientTex", simManager.vegetationManager.algaeGridRT1);
-            baronVonWater.waterNutrientsBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
-
-            cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
-            cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonWater.waterNutrientsBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterNutrientsBitsCBuffer.count);
-
-        
+            
             float yOffset = Mathf.Sin(simManager.cameraManager.curTiltAngleDegrees * Mathf.Deg2Rad) * simManager.cameraManager.curCameraPos.z;
             Vector4 camFocusPos = new Vector4(simManager.cameraManager.curCameraPos.x, simManager.cameraManager.curCameraPos.y + yOffset, 0f, 0f);
         

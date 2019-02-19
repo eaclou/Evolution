@@ -24,25 +24,15 @@
 			#pragma target 5.0
 			#include "UnityCG.cginc"
 			#include "Assets/Resources/Shaders/Inc/NoiseShared.cginc"
+			#include "Assets/Resources/Shaders/Inc/StructsAlgaeParticles.cginc"
 
 			sampler2D _MainTex;
 			sampler2D _AltitudeTex;	
 			sampler2D _WaterSurfaceTex;
 			uniform float _MapSize;
 
-			struct FoodParticleData {
-				int index;
-				int critterIndex; // index of creature which swallowed this foodParticle
-				float isSwallowed;   // 0 = normal, 1 = in critter's belly
-				float digestedAmount;  // 0 = freshly eaten, 1 = fully dissolved/shrunk      
-				float2 worldPos;
-				float radius;
-				float foodAmount;
-				float active;
-				float refactoryAge;
-			};
 
-			StructuredBuffer<FoodParticleData> foodParticleDataCBuffer;			
+			StructuredBuffer<AlgaeParticleData> foodParticleDataCBuffer;			
 			StructuredBuffer<float3> quadVerticesCBuffer;
 			
 			struct v2f
@@ -62,24 +52,53 @@
 				v2f o;
 
 				float3 quadPoint = quadVerticesCBuffer[id];
+
+				int particleIndex = floor((float)inst / 32.0);
 							
-				FoodParticleData particleData = foodParticleDataCBuffer[inst];
+				AlgaeParticleData particleData = foodParticleDataCBuffer[particleIndex];
+
+				//float threshold = 
 
 				float3 worldPosition = float3(particleData.worldPos, 5);    //float3(rawData.worldPos, -random2);
-				
+				float rand0 = rand(float2(inst, inst) * 10);
+				float rand1 = rand(float2(rand0, rand0) * 10);
+				float rand2 = rand(float2(rand1, rand1) * 10);
+				float2 offsetRaw = (float2(rand0, rand1) * 2 - 1);				
+				worldPosition.xy += offsetRaw * 0.5;
+
+				float threshold = particleData.biomass * 4.5 + 0.033;
+				float isOn = saturate((threshold - length(offsetRaw)) * 100);
+
+				float masterFreq = 3;
+				float spatialFreq = 0.55285;
+				float timeMult = 0.06;
+				float4 noiseSample = Value3D(worldPosition * spatialFreq + _Time * timeMult, masterFreq); //float3(0, 0, _Time * timeMult) + 
+				float noiseMag = 0.15;
+				float3 noiseOffset = noiseSample.yzw * noiseMag;
+
+				worldPosition.xyz += noiseOffset;
+
+
 				//quadPoint = quadPoint * particleData.radius * particleData.active;
-				quadPoint = quadPoint * particleData.radius * (1.0 - particleData.digestedAmount) * 4 * particleData.active;
+				quadPoint = quadPoint * particleData.radius * 0.2 * isOn; // * (1.0 - particleData.digestedAmount) * 4 * particleData.isActive;
 
 				worldPosition = worldPosition + quadPoint;
 				// REFRACTION:
+				float2 altUV = (worldPosition.xy + 128) / 512;
+
+				float altitudeRaw = tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 2)).x;
+
 				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / 256, 0, 0)).yzw;
-				float refractionStrength = 2.5;
+				float depth = saturate(-altitudeRaw + 0.5);
+				float refractionStrength = depth * 5.5;
+
+				//float refractionStrength = 2.5;
 				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
 				
-				float2 altUV = (worldPosition.xy + 128) / 512;
+				
 				//o.altitudeUV = altUV;
 				
-				worldPosition.z = -(tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 2)).x * 2 - 1) * 10;
+				worldPosition.z = -(altitudeRaw * 2 - 1) * 10;
 				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
 				//o.worldPos = worldPosition;
 
@@ -98,8 +117,8 @@
 				float4 texColor = tex2D(_MainTex, i.uv);	
 				float3 waterFogColor = float3(0.03,0.4,0.3) * 0.4;
 				texColor.rgb = waterFogColor;  // shadow
-
-
+				texColor.a *= 0.3;
+				//texColor = float4(1,1,1,1);
 				return texColor;
 				//return float4(0.7,1,0.1,texColor.a * 0.75);
 			}
