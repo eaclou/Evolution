@@ -30,8 +30,8 @@ public class Agent : MonoBehaviour {
     
     public AgentLifeStage curLifeStage;
     public enum AgentLifeStage {
-        AwaitingRespawn,
-        Egg, // might be able to remove this eventually?
+        AwaitingRespawn,  // can i merge this in with null?
+        Egg,
         Mature,
         Dead,
         Null
@@ -48,7 +48,7 @@ public class Agent : MonoBehaviour {
 
         }
     }
-    private int youngDurationTimeSteps = 480;
+    /*private int youngDurationTimeSteps = 480;
     public int _YoungDurationTimeSteps
     {
         get
@@ -59,7 +59,7 @@ public class Agent : MonoBehaviour {
         {
 
         }
-    }
+    }*/
     public int maxAgeTimeSteps = 10000;
     private int decayDurationTimeSteps = 1600;
     public int _DecayDurationTimeSteps
@@ -101,7 +101,7 @@ public class Agent : MonoBehaviour {
     public Vector3 fullSizeBoundingBox;  // ASSUMES Z=LENGTH, Y=HEIGHT, X=WIDTH
     public Vector3 currentBoundingBoxSize;
     public float fullSizeBodyVolume = 1f;
-    public float centerOfMass = 0f;
+    //public float centerOfMass = 0f;
     
         // *********  Combine thse stats into a serializable class for cleanliness?  *****
     public int lifeStageTransitionTimeStepCounter = 0; // keeps track of how long agent has been in its current lifeStage
@@ -921,6 +921,10 @@ public class Agent : MonoBehaviour {
         wasteProducedLastFrame += digestedAmountTotal * settingsRef.agentSettings._DigestionWasteEfficiency;
         oxygenUsedLastFrame = currentBiomass * settingsRef.agentSettings._BaseOxygenUsage;
         currentBiomass += digestedAmountTotal * settingsRef.agentSettings._GrowthEfficiency;  // **** <-- Reconsider
+        if(currentBiomass > fullsizeBiomass) {
+            wasteProducedLastFrame += (currentBiomass - fullsizeBiomass);
+            currentBiomass = fullsizeBiomass;
+        }
                 
         coreModule.stomachContentsPlant -= digestedPlantMass;
         if(coreModule.stomachContentsPlant < 0f) {

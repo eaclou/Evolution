@@ -80,6 +80,8 @@ public class TheRenderKing : MonoBehaviour {
     
     public Material critterInspectHighlightMat;
 
+    public Material critterHighlightTrailMat;
+
     public Material gizmoStirToolMat;
     public Material gizmoFeedToolMat;
 
@@ -178,6 +180,8 @@ public class TheRenderKing : MonoBehaviour {
     private ComputeBuffer critterEnergyDotsCBuffer;
     private int numFoodDotsPerCritter = 32;
     private ComputeBuffer critterFoodDotsCBuffer;
+
+    private ComputeBuffer critterHighlightTrailCBuffer;
 
     private BasicStrokeData[] playerGlowInitPos;
     private ComputeBuffer playerGlowCBuffer;
@@ -837,6 +841,10 @@ public class TheRenderKing : MonoBehaviour {
             }
         }        
         critterFoodDotsCBuffer.SetData(foodDotsArray);
+
+        // Highlight trail:
+        critterHighlightTrailCBuffer = new ComputeBuffer(simManager._NumAgents * 256, sizeof(float) * 2);
+
     }
     /*public void InitializeAgentSmearStrokesBuffer() {
         // **** Just Curves to start!!!! ********        
@@ -1142,6 +1150,9 @@ public class TheRenderKing : MonoBehaviour {
 
         critterShadowStrokesDisplayMat.SetPass(0);
         critterShadowStrokesDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+
+        critterHighlightTrailMat.SetPass(0);
+        critterHighlightTrailMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
                 
         curveStrokeDisplayMat.SetPass(0);
         curveStrokeDisplayMat.SetBuffer("curveRibbonVerticesCBuffer", curveRibbonVerticesCBuffer);
@@ -2542,6 +2553,19 @@ public class TheRenderKing : MonoBehaviour {
         fluidManager.computeShaderFluidSim.SetTexture(kernelSimPlayerGlowyBits, "VelocityRead", fluidManager._VelocityA);        
         fluidManager.computeShaderFluidSim.Dispatch(kernelSimPlayerGlowyBits, playerGlowyBitsCBuffer.count / 1024, 1, 1);
     }*/
+    private void SimHighlightTrails() {
+        int kernelCSSimulateHighlightTrail = computeShaderCritters.FindKernel("CSSimulateHighlightTrail");
+
+        //computeShaderCritters.SetFloat("_TextureResolution", (float)fluidManager.resolution);
+        //computeShaderCritters.SetFloat("_DeltaTime", fluidManager.deltaTime);
+        //computeShaderCritters.SetFloat("_InvGridScale", fluidManager.invGridScale);
+        //computeShaderCritters.SetVector("_PlayerPos", new Vector4(simManager.agentsArray[0].bodyRigidbody.transform.position.x / SimulationManager._MapSize, simManager.agentsArray[0].bodyRigidbody.transform.position.y / SimulationManager._MapSize, 0f, 0f));
+        computeShaderCritters.SetFloat("_Time", Time.realtimeSinceStartup);
+        computeShaderCritters.SetTexture(kernelCSSimulateHighlightTrail, "velocityRead", fluidManager._VelocityA); 
+        computeShaderCritters.SetBuffer(kernelCSSimulateHighlightTrail, "highlightTrailDataCBuffer", critterHighlightTrailCBuffer);
+        computeShaderCritters.SetBuffer(kernelCSSimulateHighlightTrail, "critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);        
+        computeShaderCritters.Dispatch(kernelCSSimulateHighlightTrail, critterHighlightTrailCBuffer.count / 256, 1, 1);
+    }
     public void SimFloatyBits() {
         int kernelSimFloatyBits = fluidManager.computeShaderFluidSim.FindKernel("SimFloatyBits");
 
@@ -2955,6 +2979,7 @@ public class TheRenderKing : MonoBehaviour {
         //SimAgentSmearStrokes(); // start with this one?
         //IterateTrailStrokesData();
         //SimPlayerGlowyBits();
+        SimHighlightTrails();
         //SimFloatyBits();
         //SimRipples();
         SimEggSacks();
@@ -3455,6 +3480,7 @@ public class TheRenderKing : MonoBehaviour {
             //cmdBufferTest.GetTemporaryRT(renderedSceneID, -1, -1, 0, FilterMode.Bilinear);  // save contents of Standard Rendering Pipeline
             //cmdBufferTest.Blit(BuiltinRenderTextureType.CameraTarget, renderedSceneID);  // save contents of Standard Rendering Pipeline
 
+            // SHADOWS:
         
             // Surface Bits Shadows:
             baronVonWater.waterSurfaceBitsShadowsDisplayMat.SetPass(0);
@@ -3540,6 +3566,14 @@ public class TheRenderKing : MonoBehaviour {
             animalParticleShadowDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, animalParticleShadowDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, simManager.vegetationManager.animalParticlesCBuffer.count);
         
+            // algae shadows:
+            foodParticleShadowDisplayMat.SetPass(0);
+            foodParticleShadowDisplayMat.SetBuffer("foodParticleDataCBuffer", simManager.vegetationManager.algaeParticlesCBuffer);
+            foodParticleShadowDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+            foodParticleShadowDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+            foodParticleShadowDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+            cmdBufferMain.DrawProcedural(Matrix4x4.identity, foodParticleShadowDisplayMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.algaeParticlesCBuffer.count * 32);
+        
 
             // suspended particle bits:
             baronVonWater.waterNutrientsBitsDisplayMat.SetPass(0);
@@ -3553,13 +3587,7 @@ public class TheRenderKing : MonoBehaviour {
             cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonWater.waterNutrientsBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterNutrientsBitsCBuffer.count);
 
-            foodParticleShadowDisplayMat.SetPass(0);
-            foodParticleShadowDisplayMat.SetBuffer("foodParticleDataCBuffer", simManager.vegetationManager.algaeParticlesCBuffer);
-            foodParticleShadowDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-            foodParticleShadowDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
-            foodParticleShadowDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-            cmdBufferMain.DrawProcedural(Matrix4x4.identity, foodParticleShadowDisplayMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.algaeParticlesCBuffer.count * 32);
-        
+            
             foodParticleDisplayMat.SetPass(0);
             foodParticleDisplayMat.SetBuffer("foodParticleDataCBuffer", simManager.vegetationManager.algaeParticlesCBuffer);
             foodParticleDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -3595,6 +3623,14 @@ public class TheRenderKing : MonoBehaviour {
             eggCoverDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
             eggCoverDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, eggCoverDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.critterInitDataCBuffer.count);
+
+            // Highlight trail:
+            critterHighlightTrailMat.SetPass(0);
+            critterHighlightTrailMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
+            critterHighlightTrailMat.SetBuffer("highlightTrailDataCBuffer", critterHighlightTrailCBuffer);
+            critterHighlightTrailMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+            critterHighlightTrailMat.SetFloat("_MapSize", SimulationManager._MapSize);
+            cmdBufferMain.DrawProcedural(Matrix4x4.identity, critterHighlightTrailMat, 0, MeshTopology.Triangles, 6, critterHighlightTrailCBuffer.count * 256);
 
             // CRITTER BODY:
 
@@ -4212,7 +4248,9 @@ public class TheRenderKing : MonoBehaviour {
         if(critterFoodDotsCBuffer != null) {
             critterFoodDotsCBuffer.Release();
         }
-
+        if(critterHighlightTrailCBuffer != null) {
+            critterHighlightTrailCBuffer.Release();
+        }
         if(gizmoStirToolPosCBuffer != null) {
             gizmoStirToolPosCBuffer.Release();
         }

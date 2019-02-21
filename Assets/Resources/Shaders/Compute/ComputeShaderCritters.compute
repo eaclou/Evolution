@@ -2,6 +2,7 @@
 #pragma kernel CSUpdateCritterGenericStrokes
 #pragma kernel CSSimulateCritterGenericStrokes
 #pragma kernel CSSimulateCritterPortraitStrokes
+#pragma kernel CSSimulateHighlightTrail
 
 #include "Assets/Resources/Shaders/Inc/CritterBodyAnimation.cginc"
 #include "Assets/Resources/Shaders/Inc/NoiseShared.cginc"
@@ -9,6 +10,8 @@
 StructuredBuffer<CritterInitData> critterInitDataCBuffer;
 StructuredBuffer<CritterSimData> critterSimDataCBuffer;
 RWStructuredBuffer<CritterSkinStrokeData> critterSkinStrokesWriteCBuffer;
+
+RWStructuredBuffer<float2> highlightTrailDataCBuffer;
 
 StructuredBuffer<CritterGenericStrokeData> critterGenericStrokesUpdateCBuffer;
 RWStructuredBuffer<CritterGenericStrokeData> critterGenericStrokesWriteCBuffer;
@@ -18,6 +21,8 @@ Texture2D<float4> terrainHeightTex;
 Texture2D<float4> velocityRead;
 
 uniform float _MapSize;
+
+uniform float _Time;
 
 uniform int _UpdateBufferStartIndex;
 
@@ -185,6 +190,29 @@ void CSSimulateCritterPortraitStrokes (uint3 id : SV_DispatchThreadID)
 	strokeData.worldNormal = worldNormal;
 	strokeData.worldTangent = worldTangent;
 	critterGenericStrokesWriteCBuffer[id.x] = strokeData;
+}
+
+[numthreads(256,1,1)]
+void CSSimulateHighlightTrail (uint3 id : SV_DispatchThreadID)
+{
+	int critterIndex = id.x / 256;
+	int particleIndex = id.x;
+	
+	CritterSimData critterSimData = critterSimDataCBuffer[critterIndex];
+
+	float timeMask = 1.0 - saturate(abs((round(_Time * 10) % 256) - (id.x % 256)));
+
+	float2 curPos = highlightTrailDataCBuffer[particleIndex];
+	
+	float2 nextPos = lerp(curPos, critterSimData.worldPos.xy, timeMask);
+
+	// FLUID FLOW:
+	float2 uv = nextPos / _MapSize;
+	float2 fluidVel = velocityRead.SampleLevel(_LinearRepeat, uv, 2).xy;
+	float speedMult = 0.0055 * _MapSize;
+	nextPos = nextPos + fluidVel * speedMult;
+
+	highlightTrailDataCBuffer[particleIndex] = nextPos;
 }
 
 /*   OLD:::::
