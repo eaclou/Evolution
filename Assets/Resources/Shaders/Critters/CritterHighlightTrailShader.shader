@@ -74,7 +74,7 @@
 				//float3 rotatedPoint = float3(quadPoint.x * right + quadPoint.y * forward, quadPoint.z);  // Rotate localRotation by AgentRotation
 				
 				
-				worldPosition = worldPosition + quadPoint * 0.2; // rotatedPoint * particleData.isActive;
+				worldPosition = worldPosition + quadPoint * 0.22; // rotatedPoint * particleData.isActive;
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));				
 					
@@ -85,7 +85,8 @@
 			fixed4 frag(v2f i) : SV_Target
 			{				
 				float4 texColor = tex2D(_MainTex, i.uv);	
-				texColor.a *= 0.25;
+				texColor.rgb = lerp(texColor.rgb, float3(1,1,0), 0.5);
+				texColor.a *= 0.15;
 				return texColor;
 			}
 

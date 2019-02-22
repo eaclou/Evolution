@@ -200,7 +200,7 @@ void CSSimulateHighlightTrail (uint3 id : SV_DispatchThreadID)
 	
 	CritterSimData critterSimData = critterSimDataCBuffer[critterIndex];
 
-	float timeMask = 1.0 - saturate(abs((round(_Time * 10) % 256) - (id.x % 256)));
+	float timeMask = 1.0 - saturate(abs((round(_Time * 30) % 256) - (id.x % 256)));
 
 	float2 curPos = highlightTrailDataCBuffer[particleIndex];
 	
@@ -211,6 +211,11 @@ void CSSimulateHighlightTrail (uint3 id : SV_DispatchThreadID)
 	float2 fluidVel = velocityRead.SampleLevel(_LinearRepeat, uv, 2).xy;
 	float speedMult = 0.0055 * _MapSize;
 	nextPos = nextPos + fluidVel * speedMult;
+
+	// NOISE:
+	float2 noiseVel = Value3D(float3(nextPos * 1, _Time * 05), 2).yz;
+	nextPos += noiseVel * 0.003;
+	
 
 	highlightTrailDataCBuffer[particleIndex] = nextPos;
 }
