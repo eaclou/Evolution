@@ -306,6 +306,14 @@ public class TheRenderKing : MonoBehaviour {
 		public float age;
 	}
 
+    public struct HighlightTrailData {
+		public Vector2 worldPos;
+		public Vector2 vel;
+        public Vector2 heading;
+		public float age;
+        public float strength;
+	}
+
     public struct FloatyBitData {
 		public Vector2 coords;
 		public Vector2 vel;
@@ -843,7 +851,16 @@ public class TheRenderKing : MonoBehaviour {
         critterFoodDotsCBuffer.SetData(foodDotsArray);
 
         // Highlight trail:
-        critterHighlightTrailCBuffer = new ComputeBuffer(simManager._NumAgents * 256, sizeof(float) * 2);
+        critterHighlightTrailCBuffer = new ComputeBuffer(simManager._NumAgents * 256, sizeof(float) * 8);
+        HighlightTrailData[] highlightTrailDataArray = new HighlightTrailData[critterHighlightTrailCBuffer.count];
+        for (int i = 0; i < highlightTrailDataArray.Length; i++) {
+            
+            HighlightTrailData data = new HighlightTrailData();
+            data.age = UnityEngine.Random.Range(0f, 1f);                
+
+            highlightTrailDataArray[i] = data;            
+        }        
+        critterHighlightTrailCBuffer.SetData(highlightTrailDataArray);
 
     }
     /*public void InitializeAgentSmearStrokesBuffer() {

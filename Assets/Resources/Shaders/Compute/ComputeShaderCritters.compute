@@ -7,11 +7,19 @@
 #include "Assets/Resources/Shaders/Inc/CritterBodyAnimation.cginc"
 #include "Assets/Resources/Shaders/Inc/NoiseShared.cginc"
 
+struct HighlightTrailData {
+	float2 worldPos;
+	float2 vel;
+    float2 heading;
+	float age;
+    float strength;
+};
+
 StructuredBuffer<CritterInitData> critterInitDataCBuffer;
 StructuredBuffer<CritterSimData> critterSimDataCBuffer;
 RWStructuredBuffer<CritterSkinStrokeData> critterSkinStrokesWriteCBuffer;
 
-RWStructuredBuffer<float2> highlightTrailDataCBuffer;
+RWStructuredBuffer<HighlightTrailData> highlightTrailDataCBuffer;
 
 StructuredBuffer<CritterGenericStrokeData> critterGenericStrokesUpdateCBuffer;
 RWStructuredBuffer<CritterGenericStrokeData> critterGenericStrokesWriteCBuffer;
@@ -200,11 +208,18 @@ void CSSimulateHighlightTrail (uint3 id : SV_DispatchThreadID)
 	
 	CritterSimData critterSimData = critterSimDataCBuffer[critterIndex];
 
-	float timeMask = 1.0 - saturate(abs((round(_Time * 30) % 256) - (id.x % 256)));
+	//float timeMask = 1.0 - saturate(abs((round(_Time * 30) % 256) - (id.x % 256)));
+	float age = highlightTrailDataCBuffer[particleIndex].age;
+	float timeMask = saturate(floor(age));
+	age = age % 1.0;
 
-	float2 curPos = highlightTrailDataCBuffer[particleIndex];
+	float spawnRadius = 0.04;
+	float2 randOffset = (float2(rand(float2((float)id.x, age)), rand(float2(age, (float)id.x))) * 2.0 - 1.0) * spawnRadius;
+	float2 spawnPos = critterSimData.worldPos.xy + randOffset;
+
+	float2 curPos = highlightTrailDataCBuffer[particleIndex].worldPos;
 	
-	float2 nextPos = lerp(curPos, critterSimData.worldPos.xy, timeMask);
+	float2 nextPos = lerp(curPos, spawnPos, timeMask);
 
 	// FLUID FLOW:
 	float2 uv = nextPos / _MapSize;
@@ -213,11 +228,12 @@ void CSSimulateHighlightTrail (uint3 id : SV_DispatchThreadID)
 	nextPos = nextPos + fluidVel * speedMult;
 
 	// NOISE:
-	float2 noiseVel = Value3D(float3(nextPos * 1, _Time * 05), 2).yz;
-	nextPos += noiseVel * 0.003;
+	float2 noiseVel = Value3D(float3(nextPos * 1, _Time * 05), 0.87).yz;
+	nextPos += noiseVel * 0.006;
 	
 
-	highlightTrailDataCBuffer[particleIndex] = nextPos;
+	highlightTrailDataCBuffer[particleIndex].worldPos = nextPos;
+	highlightTrailDataCBuffer[particleIndex].age = age + 0.0047;
 }
 
 /*   OLD:::::

@@ -22,16 +22,25 @@
 			#include "Assets/Resources/Shaders/Inc/NoiseShared.cginc"
 			#include "Assets/Resources/Shaders/Inc/StructsCritterData.cginc"
 
+			struct HighlightTrailData {
+				float2 worldPos;
+				float2 vel;
+				float2 heading;
+				float age;
+				float strength;
+			};
+
 			sampler2D _MainTex;
 
-			StructuredBuffer<float2> highlightTrailDataCBuffer;			
+			StructuredBuffer<HighlightTrailData> highlightTrailDataCBuffer;			
 			StructuredBuffer<float3> quadVerticesCBuffer;
-			
+						
 
 			struct v2f
 			{
 				float4 pos : SV_POSITION;
-				float2 uv : TEXCOORD0;				
+				float2 uv : TEXCOORD0;	
+				float4 color : COLOR;
 			};
 
 			float rand(float2 co) {   // OUTPUT is in [0,1] RANGE!!!
@@ -55,7 +64,8 @@
 							
 				//AlgaeParticleData particleData = foodParticleDataCBuffer[particleIndex];
 
-				float3 worldPosition = float3(highlightTrailDataCBuffer[inst], 1.0);    //float3(rawData.worldPos, -random2);
+				HighlightTrailData data = highlightTrailDataCBuffer[inst];
+				float3 worldPosition = float3(data.worldPos, 1.0);    //float3(rawData.worldPos, -random2);
 				
 				/*float2 offsetRaw = (float2(rand0, rand1) * 2 - 1);				
 				float2 offset = offsetRaw * (16 * particleData.biomass + 0.2) * 0.66;
@@ -74,10 +84,10 @@
 				//float3 rotatedPoint = float3(quadPoint.x * right + quadPoint.y * forward, quadPoint.z);  // Rotate localRotation by AgentRotation
 				
 				
-				worldPosition = worldPosition + quadPoint * 0.22; // rotatedPoint * particleData.isActive;
+				worldPosition = worldPosition + quadPoint * lerp(0.35, 0.55, data.age); // rotatedPoint * particleData.isActive;
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));				
-					
+				o.color = float4(1,1,1, data.age);	
 				
 				return o;
 			}
@@ -85,8 +95,9 @@
 			fixed4 frag(v2f i) : SV_Target
 			{				
 				float4 texColor = tex2D(_MainTex, i.uv);	
-				texColor.rgb = lerp(texColor.rgb, float3(1,1,0), 0.5);
-				texColor.a *= 0.15;
+				texColor.rgb = lerp(texColor.rgb, float3(1,1,0), 0.35);
+				texColor.a *= 0.1;
+				texColor.a *= 1.0 - i.color.a;
 				return texColor;
 			}
 
