@@ -233,7 +233,7 @@ void CSSimulateHighlightTrail (uint3 id : SV_DispatchThreadID)
 	
 
 	highlightTrailDataCBuffer[particleIndex].worldPos = nextPos;
-	highlightTrailDataCBuffer[particleIndex].age = age + 0.0047;
+	highlightTrailDataCBuffer[particleIndex].age = age + 0.0057;
 }
 
 /*   OLD:::::

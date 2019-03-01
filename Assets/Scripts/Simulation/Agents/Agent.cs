@@ -1006,7 +1006,7 @@ public class Agent : MonoBehaviour {
                 EatFoodPlant(foodParticleEatAmount);                
             }
 
-            float animalParticleEatAmount = simManager.vegetationManager.animalParticlesEatAmountsArray[index];
+            float animalParticleEatAmount = simManager.zooplanktonManager.animalParticlesEatAmountsArray[index];
             if(animalParticleEatAmount > 0f) {
                 //float sizeEfficiencyPlant = Mathf.Lerp(settings.minSizeFeedingEfficiencyDecay, settings.maxSizeFeedingEfficiencyDecay, sizeValue);
                 EatFoodMeat(animalParticleEatAmount); // * sizeEfficiencyPlant);    

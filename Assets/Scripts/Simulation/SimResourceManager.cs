@@ -9,7 +9,7 @@ public class SimResourceManager {
     public float curGlobalNutrients = 1f;
     public float curGlobalDetritus = 1f;
     public float curGlobalDecomposers = 1f;
-    public float curGlobalAlgaeReservoir = 1f;  // separate from algaeParticles -- takes place of algaeGrid
+    public float curGlobalAlgaeReservoir = 0f;  // separate from algaeParticles -- takes place of algaeGrid
     public float curGlobalAlgaeParticles = 0f;
     public float curGlobalAnimalParticles = 0f;
     public float curGlobalEggSackVolume = 0f;    
@@ -46,54 +46,74 @@ public class SimResourceManager {
         // TEMP:::::
         curGlobalOxygen = 100f;
         curGlobalNutrients = 100f;
-        curGlobalDecomposers = 10f;
-        curGlobalDetritus = 100f;
+        curGlobalDecomposers = 0f;
+        curGlobalDetritus = 0f;
     }
 
-    public void Tick(SettingsManager settings) {
+    public void Tick(SettingsManager settings, TrophicLayersManager trophicLayersManager) {
         
         // Algae Reservoir Growth:
         //float algaeGrowthEfficiency = 0.1f;
         float algaeGrowthNutrientMask = Mathf.Clamp01(curGlobalNutrients * settings.algaeSettings._AlgaeGrowthNutrientsMask);
-        float algaeReservoirGrowth = settings.environmentSettings._BaseSolarEnergy * algaeGrowthNutrientMask * settings.algaeSettings._AlgaeGrowthEfficiency;
+        float algaeReservoirGrowth = 0f;
+        float wasteProducedByAlgaeReservoirLastFrame = 0f;
+        if(trophicLayersManager.algaeOn) {
+            algaeReservoirGrowth = settings.environmentSettings._BaseSolarEnergy * algaeGrowthNutrientMask * settings.algaeSettings._AlgaeGrowthEfficiency;
+
+            curGlobalAlgaeReservoir += algaeReservoirGrowth;  // Do this Properly!!!
+
+            //wasteProducedByAlgaeReservoirLastFrame = curGlobalAlgaeReservoir * 0.0005f;
+            //curGlobalAlgaeReservoir -= wasteProducedByAlgaeReservoirLastFrame;
+
+            // Growth depends on: Light + Nutrients + Current Biomass
+            // Animal Particles Consume Algae Reservoir (single global value):
+            // Depends on: GlobalAlgaeConcentration + Current Biomass
+            curGlobalAlgaeReservoir -= algaeConsumedByAnimalParticlesLastFrame;        
+            // Cap:
+            curGlobalAlgaeReservoir = Mathf.Max(0f, curGlobalAlgaeReservoir);
+            curGlobalAlgaeReservoir = Mathf.Min(curGlobalAlgaeReservoir, 1000f);   
+            
+        }
         
-        curGlobalAlgaeReservoir += algaeReservoirGrowth;  // Do this Properly!!!
-        // Growth depends on: Light + Nutrients + Current Biomass
-        // Animal Particles Consume Algae Reservoir (single global value):
-        // Depends on: GlobalAlgaeConcentration + Current Biomass
-        curGlobalAlgaeReservoir -= algaeConsumedByAnimalParticlesLastFrame;        
-        // Cap:
-        curGlobalAlgaeReservoir = Mathf.Max(0f, curGlobalAlgaeReservoir);
-        curGlobalAlgaeReservoir = Mathf.Min(curGlobalAlgaeReservoir, 1000f);
 
         // OXYGEN:
         curGlobalOxygen -= oxygenUsedByAnimalParticlesLastFrame;
         curGlobalOxygen -= oxygenUsedByAgentsLastFrame;
         //float algaeReservoirOxygenProductionEfficiency = 0.001f;
-        // Revisit how this works? producing oxygen solely proportionally to current mass == leaky  -- tied to growth instead???
-        oxygenProducedByAlgaeReservoirLastFrame = curGlobalAlgaeReservoir * settings.algaeSettings._AlgaeReservoirOxygenProductionEfficiency;
-        curGlobalOxygen += oxygenProducedByAlgaeReservoirLastFrame; // *** Combined Addition of Oxygen produced by plants ***  REFACTOR!!!
-        // also add algaeParticle Oxygen production:        
-        curGlobalOxygen += oxygenProducedByAlgaeParticlesLastFrame;
         
-        float decomposersOxygenMask = Mathf.Clamp01(curGlobalOxygen * settings.environmentSettings._DecomposersOxygenMask);
-        float decomposersDetritusMask = Mathf.Clamp01(curGlobalDetritus * settings.environmentSettings._DecomposersDetritusMask);
-        //float maxDecompositionRate = 0.00075f;
-        float decomposersTotalProductivity = curGlobalDecomposers * settings.environmentSettings._BaseDecompositionRate * decomposersOxygenMask * decomposersDetritusMask;
-                
-        curGlobalDecomposers = Mathf.Lerp(curGlobalDecomposers, curGlobalDetritus, 0.0005f); // *** TEMP:: Scale decomposers with detritus amount
+        if(trophicLayersManager.algaeOn) {
+            // Revisit how this works? producing oxygen solely proportionally to current mass == leaky  -- tied to growth instead???
+            oxygenProducedByAlgaeReservoirLastFrame = curGlobalAlgaeReservoir * settings.algaeSettings._AlgaeReservoirOxygenProductionEfficiency;
+            curGlobalOxygen += oxygenProducedByAlgaeReservoirLastFrame; // *** Combined Addition of Oxygen produced by plants ***  REFACTOR!!!
+            // also add algaeParticle Oxygen production:        
+            curGlobalOxygen += oxygenProducedByAlgaeParticlesLastFrame;
+        }
 
-        detritusRemovedByDecomposersLastFrame = decomposersTotalProductivity;
-        curGlobalDetritus -= decomposersTotalProductivity;
+        float nutrientsProduced = 0f;
+        float decomposersTotalProductivity = 0f;
+        if(trophicLayersManager.decomposersOn) {
+            float decomposersOxygenMask = Mathf.Clamp01(curGlobalOxygen * settings.environmentSettings._DecomposersOxygenMask);
+            float decomposersDetritusMask = Mathf.Clamp01(curGlobalDetritus * settings.environmentSettings._DecomposersDetritusMask);
+            decomposersTotalProductivity = curGlobalDecomposers * settings.environmentSettings._BaseDecompositionRate * decomposersOxygenMask * decomposersDetritusMask;
+                
+            curGlobalDecomposers = Mathf.Lerp(curGlobalDecomposers, curGlobalDetritus, 0.0005f); // *** TEMP:: Scale decomposers with detritus amount
+
+            detritusRemovedByDecomposersLastFrame = decomposersTotalProductivity;
+            curGlobalDetritus -= decomposersTotalProductivity;
+
+            nutrientsProduced = decomposersTotalProductivity * settings.environmentSettings._DetritusToNutrientsEfficiency;
+            nutrientsProducedByDecomposersLastFrame = nutrientsProduced;
+        }
+
         // waste from algaeReservoir???
+        //curGlobalDetritus += wasteProducedByAlgaeReservoirLastFrame;
         curGlobalDetritus += wasteProducedByAnimalParticlesLastFrame; 
         curGlobalDetritus += wasteProducedByAlgaeParticlesLastFrame;
         curGlobalDetritus += wasteProducedByAgentsLastFrame;
         curGlobalDetritus = Mathf.Max(0f, curGlobalDetritus); // cap at 0f
         curGlobalDetritus = Mathf.Min(curGlobalDetritus, 1000f);
                    
-        float nutrientsProduced = decomposersTotalProductivity * settings.environmentSettings._DetritusToNutrientsEfficiency;
-        nutrientsProducedByDecomposersLastFrame = nutrientsProduced;
+        
         nutrientsUsedByAlgaeReservoirLastFrame = algaeReservoirGrowth;
 
         curGlobalNutrients += nutrientsProduced;
@@ -101,11 +121,12 @@ public class SimResourceManager {
         curGlobalNutrients -= nutrientsUsedByAlgaeParticlesLastFrame;
         curGlobalNutrients = Mathf.Max(0f, curGlobalNutrients); // cap at 0f
         curGlobalNutrients = Mathf.Min(curGlobalNutrients, 1000f);
-                
-        oxygenUsedByDecomposersLastFrame = decomposersTotalProductivity * settings.environmentSettings._DecompositionOxygenUsage;
-        curGlobalOxygen -= oxygenUsedByDecomposersLastFrame;
-        curGlobalOxygen = Mathf.Max(0f, curGlobalOxygen);
-        curGlobalOxygen = Mathf.Min(curGlobalOxygen, 1000f);
         
+        if(trophicLayersManager.decomposersOn) {
+            oxygenUsedByDecomposersLastFrame = decomposersTotalProductivity * settings.environmentSettings._DecompositionOxygenUsage;
+            curGlobalOxygen -= oxygenUsedByDecomposersLastFrame;
+            curGlobalOxygen = Mathf.Max(0f, curGlobalOxygen);
+            curGlobalOxygen = Mathf.Min(curGlobalOxygen, 1000f);
+        }
     }
 }

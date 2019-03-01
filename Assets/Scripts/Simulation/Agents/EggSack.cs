@@ -146,14 +146,9 @@ public class EggSack : MonoBehaviour {
             rigidbodyRef.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
             mainCollider.enabled = false;
 
-
             fixedJoint = this.gameObject.AddComponent<FixedJoint2D>();
             fixedJoint.enabled = false;
-            fixedJoint.enableCollision = false;
-            //fixedJoint.autoConfigureConnectedAnchor = false;
-            //fixedJoint.anchor = new Vector2(0f, 0.05f);
-            //fixedJoint.autoConfigureDistance = false;
-            //fixedJoint.distance = 0.1f;
+            fixedJoint.enableCollision = false;            
             fixedJoint.dampingRatio = 0.25f;
             fixedJoint.frequency = springJointMaxStrength;
 

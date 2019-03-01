@@ -84,7 +84,7 @@
 				//float3 rotatedPoint = float3(quadPoint.x * right + quadPoint.y * forward, quadPoint.z);  // Rotate localRotation by AgentRotation
 				
 				
-				worldPosition = worldPosition + quadPoint * lerp(0.35, 0.55, data.age); // rotatedPoint * particleData.isActive;
+				worldPosition = worldPosition + quadPoint * lerp(0.55, 0.85, data.age) * 0.52; // rotatedPoint * particleData.isActive;
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));				
 				o.color = float4(1,1,1, data.age);	
@@ -98,6 +98,7 @@
 				texColor.rgb = lerp(texColor.rgb, float3(1,1,0), 0.35);
 				texColor.a *= 0.1;
 				texColor.a *= 1.0 - i.color.a;
+				texColor *= 1.3;
 				return texColor;
 			}
 

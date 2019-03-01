@@ -52,6 +52,35 @@ public class UIManager : MonoBehaviour {
     private Vector3 prevMousePositionOnWaterPlane;
     public Vector3 curMousePositionOnWaterPlane;
 
+    // &&& INFO PANEL &&& !!!! ==============================================
+    public bool isActiveInfoPanel = false;
+    public Text textCurYear;
+    public Material infoMeterOxygenMat;
+    public Material infoMeterNutrientsMat;
+    public Material infoMeterDetritusMat;
+    public Material infoMeterDecomposersMat;
+    public Material infoMeterPlantsMat;
+    public Material infoMeterAnimalsMat;
+    public Text textMeterOxygen;
+    public Text textMeterNutrients;
+    public Text textMeterDetritus;
+    public Text textMeterDecomposers;
+    public Text textMeterPlants;
+    public Text textMeterAnimals;
+    // Info Expanded: Resources Overview:
+    public Texture2D infoOxygenDataTexture;
+    public Texture2D infoNutrientsDataTexture;
+    public Texture2D infoDetritusDataTexture;
+    public Texture2D infoDecomposersDataTexture;
+    public Texture2D infoPlantsDataTexture;
+    public Texture2D infoAnimalsDataTexture;
+    public Material infoGraphOxygenMat;
+    public Material infoGraphNutrientsMat;
+    public Material infoGraphDetritusMat;
+    public Material infoGraphDecomposersMat;
+    public Material infoGraphPlantsMat;
+    public Material infoGraphAnimalsMat;
+
     public bool isActiveInspectPanel = false;
     public Material inspectWidgetDietMat;
     public Material inspectWidgetStomachFoodMat;
@@ -1027,6 +1056,52 @@ public class UIManager : MonoBehaviour {
         }
         statsGraphMatNutrients.SetTexture("_MainTex", statsTextureNutrients);
         */
+
+        // &&&& INFO PANEL GRAPHS::::
+        if(infoOxygenDataTexture == null) {
+            infoOxygenDataTexture = new Texture2D(1, 1, TextureFormat.RGBAFloat, false);
+            infoOxygenDataTexture.filterMode = FilterMode.Bilinear;
+            infoOxygenDataTexture.wrapMode = TextureWrapMode.Clamp;
+        }
+        if(infoNutrientsDataTexture == null) {
+            infoNutrientsDataTexture = new Texture2D(1, 1, TextureFormat.RGBAFloat, false);
+            infoNutrientsDataTexture.filterMode = FilterMode.Bilinear;
+            infoNutrientsDataTexture.wrapMode = TextureWrapMode.Clamp;
+        }
+        if(infoDetritusDataTexture == null) {
+            infoDetritusDataTexture = new Texture2D(1, 1, TextureFormat.RGBAFloat, false);
+            infoDetritusDataTexture.filterMode = FilterMode.Bilinear;
+            infoDetritusDataTexture.wrapMode = TextureWrapMode.Clamp;
+        }
+        if(infoDecomposersDataTexture == null) {
+            infoDecomposersDataTexture = new Texture2D(1, 1, TextureFormat.RGBAFloat, false);
+            infoDecomposersDataTexture.filterMode = FilterMode.Bilinear;
+            infoDecomposersDataTexture.wrapMode = TextureWrapMode.Clamp;
+        }
+        if(infoPlantsDataTexture == null) {
+            infoPlantsDataTexture = new Texture2D(1, 1, TextureFormat.RGBAFloat, false);
+            infoPlantsDataTexture.filterMode = FilterMode.Bilinear;
+            infoPlantsDataTexture.wrapMode = TextureWrapMode.Clamp;
+        }
+        if(infoAnimalsDataTexture == null) {
+            infoAnimalsDataTexture = new Texture2D(1, 1, TextureFormat.RGBAFloat, false);
+            infoAnimalsDataTexture.filterMode = FilterMode.Bilinear;
+            infoAnimalsDataTexture.wrapMode = TextureWrapMode.Clamp;
+        }
+        infoGraphOxygenMat.SetTexture("_DataTex", infoOxygenDataTexture);
+        infoGraphOxygenMat.SetFloat("_MaxValue", 1000f);
+        infoGraphNutrientsMat.SetTexture("_DataTex", infoNutrientsDataTexture);
+        infoGraphNutrientsMat.SetFloat("_MaxValue", 1000f);
+        infoGraphDetritusMat.SetTexture("_DataTex", infoDetritusDataTexture);
+        infoGraphDetritusMat.SetFloat("_MaxValue", 1000f);
+        infoGraphDecomposersMat.SetTexture("_DataTex", infoDecomposersDataTexture);
+        infoGraphDecomposersMat.SetFloat("_MaxValue", 1000f);
+        infoGraphPlantsMat.SetTexture("_DataTex", infoPlantsDataTexture);
+        infoGraphPlantsMat.SetFloat("_MaxValue", 1000f);
+        infoGraphAnimalsMat.SetTexture("_DataTex", infoAnimalsDataTexture);
+        infoGraphAnimalsMat.SetFloat("_MaxValue", 100f);
+
+        // OLD Tree of Life:
         if(tolTextureWorldStats == null) {
             tolTextureWorldStats = new Texture2D(1, 32, TextureFormat.RGBAFloat, true);
             tolTextureWorldStats.filterMode = FilterMode.Bilinear;
@@ -1150,6 +1225,7 @@ public class UIManager : MonoBehaviour {
         //UpdateDeathScreenUI();
         UpdatePausedUI();
 
+        UpdateInfoPanelUI();
         UpdateStatsPanelUI();
         UpdateInspectPanelUI();
         UpdateFeedToolPanelUI();
@@ -1249,7 +1325,30 @@ public class UIManager : MonoBehaviour {
         imageTolBackdropDescription.gameObject.SetActive(tolSpeciesDescriptionOn);
     }
 
+    public void UpdateInfoPanelUI() {
+        textCurYear.text = gameManager.simulationManager.curSimYear.ToString();
 
+        SimResourceManager resourcesRef = gameManager.simulationManager.simResourceManager;
+        textMeterOxygen.text = resourcesRef.curGlobalOxygen.ToString("F0");
+        textMeterNutrients.text = resourcesRef.curGlobalNutrients.ToString("F0");
+        textMeterDetritus.text = resourcesRef.curGlobalDetritus.ToString("F0");
+        textMeterDecomposers.text = resourcesRef.curGlobalDecomposers.ToString("F0");
+        textMeterPlants.text = (resourcesRef.curGlobalAlgaeParticles + resourcesRef.curGlobalAlgaeReservoir).ToString("F0");
+        textMeterAnimals.text = (resourcesRef.curGlobalAgentBiomass + resourcesRef.curGlobalAnimalParticles).ToString("F0");
+
+        float percentageOxygen = resourcesRef.curGlobalOxygen / 1000f;
+        infoMeterOxygenMat.SetFloat("_FillPercentage", Mathf.Sqrt(percentageOxygen));
+        float percentageNutrients = resourcesRef.curGlobalNutrients / 1000f;
+        infoMeterNutrientsMat.SetFloat("_FillPercentage", Mathf.Sqrt(percentageNutrients));
+        float percentageDetritus = resourcesRef.curGlobalDetritus / 1000f;
+        infoMeterDetritusMat.SetFloat("_FillPercentage", Mathf.Sqrt(percentageDetritus));
+        float percentageDecomposers = resourcesRef.curGlobalDecomposers / 1000f;
+        infoMeterDecomposersMat.SetFloat("_FillPercentage", Mathf.Sqrt(percentageDecomposers));
+        float percentagePlants = (resourcesRef.curGlobalAlgaeParticles + resourcesRef.curGlobalAlgaeReservoir) / 1000f;
+        infoMeterPlantsMat.SetFloat("_FillPercentage", Mathf.Sqrt(percentagePlants));
+        float percentageAnimals = (resourcesRef.curGlobalAgentBiomass + resourcesRef.curGlobalAnimalParticles) / 100f;
+        infoMeterAnimalsMat.SetFloat("_FillPercentage", Mathf.Sqrt(percentageAnimals));
+    }
     public void UpdateSimEventsUI() {
         SimEventsManager eventsManager = gameManager.simulationManager.simEventsManager;
         
@@ -1487,33 +1586,7 @@ public class UIManager : MonoBehaviour {
             
             
 
-            string debugTxtResources = "";
-            //int selectedSpeciesIndex = agentRef.speciesIndex;
-            debugTxtResources += "GLOBAL RESOURCES:\n";
-            debugTxtResources += "\nSunlight: " + simManager.settingsManager.environmentSettings._BaseSolarEnergy.ToString();
-            debugTxtResources += "\nOxygen: " + simManager.simResourceManager.curGlobalOxygen.ToString();
-            debugTxtResources += "\n     + " + simManager.simResourceManager.oxygenProducedByAlgaeReservoirLastFrame.ToString() + " ( algae reservoir )";
-            debugTxtResources += "\n     + " + simManager.simResourceManager.oxygenProducedByAlgaeParticlesLastFrame.ToString() + " ( algae particles )";
-            debugTxtResources += "\n     - " + simManager.simResourceManager.oxygenUsedByDecomposersLastFrame.ToString() + " ( decomposers )";
-            debugTxtResources += "\n     - " + simManager.simResourceManager.oxygenUsedByAnimalParticlesLastFrame.ToString() + " ( zooplankton )";
-            debugTxtResources += "\n     - " + simManager.simResourceManager.oxygenUsedByAgentsLastFrame.ToString() + " ( agents )";
-            debugTxtResources += "\nNutrients: " + simManager.simResourceManager.curGlobalNutrients.ToString();
-            debugTxtResources += "\n     + " + simManager.simResourceManager.nutrientsProducedByDecomposersLastFrame.ToString() + " ( decomposers )";
-            debugTxtResources += "\n     - " + simManager.simResourceManager.nutrientsUsedByAlgaeReservoirLastFrame.ToString() + " ( algae reservoir )";
-            debugTxtResources += "\n     - " + simManager.simResourceManager.nutrientsUsedByAlgaeParticlesLastFrame.ToString() + " ( algae particles )";
-            debugTxtResources += "\nDetritus: " + simManager.simResourceManager.curGlobalDetritus.ToString();
-            debugTxtResources += "\n     + " + simManager.simResourceManager.wasteProducedByAlgaeReservoirLastFrame.ToString() + " ( algae reservoir )";
-            debugTxtResources += "\n     + " + simManager.simResourceManager.wasteProducedByAlgaeParticlesLastFrame.ToString() + " ( algae particles )";
-            debugTxtResources += "\n     + " + simManager.simResourceManager.wasteProducedByAnimalParticlesLastFrame.ToString() + " ( zooplankton )";
-            debugTxtResources += "\n     + " + simManager.simResourceManager.wasteProducedByAgentsLastFrame.ToString() + " ( agents )";
-            debugTxtResources += "\n     - " + simManager.simResourceManager.detritusRemovedByDecomposersLastFrame.ToString() + " ( decomposers )";
-            debugTxtResources += "\nDecomposers: " + simManager.simResourceManager.curGlobalDecomposers.ToString();
-            debugTxtResources += "\nAlgae (Reservoir): " + simManager.simResourceManager.curGlobalAlgaeReservoir.ToString();
-            debugTxtResources += "\nAlgae (Particles): " + simManager.simResourceManager.curGlobalAlgaeParticles.ToString();
-            debugTxtResources += "\nZooplankton: " + simManager.simResourceManager.curGlobalAnimalParticles.ToString();
-            debugTxtResources += "\nLive Agents: " + simManager.simResourceManager.curGlobalAgentBiomass.ToString();
-            debugTxtResources += "\nDead Agents: " + simManager.simResourceManager.curGlobalCarrionVolume.ToString();
-            debugTxtResources += "\nEggSacks: " + simManager.simResourceManager.curGlobalEggSackVolume.ToString();
+            
             // Agent biomass
             // Eggsack biomass (+ animal particles?)
             // agent corpse biomass
@@ -1558,6 +1631,8 @@ public class UIManager : MonoBehaviour {
                              ", avgFitness: " + simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgFitnessScore.ToString("F2") +
                              ", avgExp: " + simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgExperience.ToString() + "\n\n";
             }
+
+            
             /*debugTxtGlobalSim += "\n\nAll-Time Species List:\n";
             for (int p = 0; p < simManager.masterGenomePool.completeSpeciesPoolsList.Count; p++) {
                 string extString = "Active!";
@@ -1568,10 +1643,39 @@ public class UIManager : MonoBehaviour {
             }*/
             
             textDebugTrainingInfo1.text = debugTxtAgent;
-            textDebugTrainingInfo2.text = debugTxtResources;
+            
             textDebugTrainingInfo3.text = debugTxtGlobalSim;
             
-        }        
+        } 
+        
+        string debugTxtResources = "";
+        debugTxtResources += "GLOBAL RESOURCES:\n";
+        debugTxtResources += "\nSunlight: " + simManager.settingsManager.environmentSettings._BaseSolarEnergy.ToString();
+        debugTxtResources += "\nOxygen: " + simManager.simResourceManager.curGlobalOxygen.ToString();
+        debugTxtResources += "\n     + " + simManager.simResourceManager.oxygenProducedByAlgaeReservoirLastFrame.ToString() + " ( algae reservoir )";
+        debugTxtResources += "\n     + " + simManager.simResourceManager.oxygenProducedByAlgaeParticlesLastFrame.ToString() + " ( algae particles )";
+        debugTxtResources += "\n     - " + simManager.simResourceManager.oxygenUsedByDecomposersLastFrame.ToString() + " ( decomposers )";
+        debugTxtResources += "\n     - " + simManager.simResourceManager.oxygenUsedByAnimalParticlesLastFrame.ToString() + " ( zooplankton )";
+        debugTxtResources += "\n     - " + simManager.simResourceManager.oxygenUsedByAgentsLastFrame.ToString() + " ( agents )";
+        debugTxtResources += "\nNutrients: " + simManager.simResourceManager.curGlobalNutrients.ToString();
+        debugTxtResources += "\n     + " + simManager.simResourceManager.nutrientsProducedByDecomposersLastFrame.ToString() + " ( decomposers )";
+        debugTxtResources += "\n     - " + simManager.simResourceManager.nutrientsUsedByAlgaeReservoirLastFrame.ToString() + " ( algae reservoir )";
+        debugTxtResources += "\n     - " + simManager.simResourceManager.nutrientsUsedByAlgaeParticlesLastFrame.ToString() + " ( algae particles )";
+        debugTxtResources += "\nDetritus: " + simManager.simResourceManager.curGlobalDetritus.ToString();
+        debugTxtResources += "\n     + " + simManager.simResourceManager.wasteProducedByAlgaeReservoirLastFrame.ToString() + " ( algae reservoir )";
+        debugTxtResources += "\n     + " + simManager.simResourceManager.wasteProducedByAlgaeParticlesLastFrame.ToString() + " ( algae particles )";
+        debugTxtResources += "\n     + " + simManager.simResourceManager.wasteProducedByAnimalParticlesLastFrame.ToString() + " ( zooplankton )";
+        debugTxtResources += "\n     + " + simManager.simResourceManager.wasteProducedByAgentsLastFrame.ToString() + " ( agents )";
+        debugTxtResources += "\n     - " + simManager.simResourceManager.detritusRemovedByDecomposersLastFrame.ToString() + " ( decomposers )";
+        debugTxtResources += "\nDecomposers: " + simManager.simResourceManager.curGlobalDecomposers.ToString();
+        debugTxtResources += "\nAlgae (Reservoir): " + simManager.simResourceManager.curGlobalAlgaeReservoir.ToString();
+        debugTxtResources += "\nAlgae (Particles): " + simManager.simResourceManager.curGlobalAlgaeParticles.ToString();
+        debugTxtResources += "\nZooplankton: " + simManager.simResourceManager.curGlobalAnimalParticles.ToString();
+        debugTxtResources += "\nLive Agents: " + simManager.simResourceManager.curGlobalAgentBiomass.ToString();
+        debugTxtResources += "\nDead Agents: " + simManager.simResourceManager.curGlobalCarrionVolume.ToString();
+        debugTxtResources += "\nEggSacks: " + simManager.simResourceManager.curGlobalEggSackVolume.ToString();
+
+        textDebugTrainingInfo2.text = debugTxtResources;
     }
     public void UpdateHUDUI() {
         if(isObserverMode) {
@@ -2294,6 +2398,15 @@ public class UIManager : MonoBehaviour {
             tolTextureWorldStats.Resize(numDataPoints, 32);  // 32 max values? should be more than enough
         }
 
+        if(numDataPoints != infoOxygenDataTexture.width) {
+            infoOxygenDataTexture.Resize(numDataPoints, 1);
+            infoNutrientsDataTexture.Resize(numDataPoints, 1);
+            infoDetritusDataTexture.Resize(numDataPoints, 1);
+            infoDecomposersDataTexture.Resize(numDataPoints, 1);
+            infoPlantsDataTexture.Resize(numDataPoints, 1);
+            infoAnimalsDataTexture.Resize(numDataPoints, 1);
+        }
+
         // INDEX KEY:
         // 0 == decay nutrients
         // 1 == plant food
@@ -2309,6 +2422,14 @@ public class UIManager : MonoBehaviour {
         
         // NUTRIENTS / FOOD TYPES:          
         for(int i = 0; i < numDataPoints; i++) {   
+            
+            infoOxygenDataTexture.SetPixel(i, 0, new Color(gameManager.simulationManager.statsHistoryOxygenList[i], 0f, 0f));
+            infoNutrientsDataTexture.SetPixel(i, 0, new Color(gameManager.simulationManager.statsHistoryNutrientsList[i], 0f, 0f));
+            infoDetritusDataTexture.SetPixel(i, 0, new Color(gameManager.simulationManager.statsHistoryDetritusList[i], 0f, 0f));
+            infoDecomposersDataTexture.SetPixel(i, 0, new Color(gameManager.simulationManager.statsHistoryDecomposersList[i], 0f, 0f));
+            infoPlantsDataTexture.SetPixel(i, 0, new Color(gameManager.simulationManager.statsHistoryAlgaeParticleList[i] + gameManager.simulationManager.statsHistoryAlgaeSingleList[i], 0f, 0f));
+            infoAnimalsDataTexture.SetPixel(i, 0, new Color(gameManager.simulationManager.statsHistoryZooplanktonList[i] + gameManager.simulationManager.statsHistoryLivingAgentsList[i], 0f, 0f));
+            
             // valRangeKey, x = min, y = max
             // nutrientData, x = decay, y = plant, z = egg, w = corpse
             //Debug.LogError(i.ToString() + ", count: " + nutrientData.Count.ToString());
@@ -2429,7 +2550,15 @@ public class UIManager : MonoBehaviour {
         }
 
         tolTextureWorldStats.Apply();
-        tolTextureWorldStatsKey.Apply();        
+        tolTextureWorldStatsKey.Apply();
+
+
+        infoOxygenDataTexture.Apply();
+        infoNutrientsDataTexture.Apply();
+        infoDetritusDataTexture.Apply();
+        infoDecomposersDataTexture.Apply();
+        infoPlantsDataTexture.Apply();
+        infoAnimalsDataTexture.Apply();
     }
     public void UpdateStatsTextureNutrients(List<Vector4> data) {
         statsTextureNutrients.Resize(Mathf.Max(1, data.Count), 1);

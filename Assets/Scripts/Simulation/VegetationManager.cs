@@ -2,12 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-
-
-/// <summary>
-///  Move Food-related stuff from SimulationManager into here to de-clutter simManager:
-/// </summary>
-
 public class VegetationManager {
 
     public SettingsManager settingsRef;
@@ -15,7 +9,6 @@ public class VegetationManager {
     
     private ComputeShader computeShaderAlgaeGrid;
     private ComputeShader computeShaderAlgaeParticles;
-    private ComputeShader computeShaderAnimalParticles;
 
     //public float curGlobalAlgaeGrid = 0f;  // not using this currently
     
@@ -46,25 +39,9 @@ public class VegetationManager {
     private ComputeBuffer algaeParticlesMeasure32;
     private ComputeBuffer algaeParticlesMeasure1;
     private AlgaeParticleData[] algaeParticleMeasurementTotalsData;
-
-    private const int numAnimalParticles = 1024;  // *** 
-    public ComputeBuffer animalParticlesCBuffer;
-    private ComputeBuffer animalParticlesCBufferSwap;    
-    private RenderTexture animalParticlesNearestCritters1024;
-    private RenderTexture animalParticlesNearestCritters32;
-    private RenderTexture animalParticlesNearestCritters1;
-    private ComputeBuffer closestAnimalParticlesDataCBuffer;
-    public AnimalParticleData[] closestAnimalParticlesDataArray;
-    private ComputeBuffer animalParticlesEatAmountsCBuffer;
-    public float[] animalParticlesEatAmountsArray;
-    private ComputeBuffer animalParticlesMeasure32;
-    private ComputeBuffer animalParticlesMeasure1;
-    private AnimalParticleData[] animalParticleMeasurementTotalsData;
-
-
-    public Vector2[] nutrientSpawnPatchesArray;
-
     
+    public Vector2[] nutrientSpawnPatchesArray;
+        
     public struct AlgaeParticleData {
         public int index;
         public int critterIndex;
@@ -81,37 +58,9 @@ public class VegetationManager {
         public float nutrientsUsed;
         public float wasteProduced;
     }
-
-    public struct AnimalParticleData {
-        public int index;
-	    public int critterIndex; // index of creature which swallowed this foodParticle
-	    public int nearestCritterIndex;
-        public float isSwallowed;   // 0 = normal, 1 = in critter's belly
-        public float digestedAmount;  // 0 = freshly eaten, 1 = fully dissolved/shrunk        
-        public Vector3 worldPos;
-        public Vector2 p1;  // spline points:
-	    public Vector2 p2;
-	    public Vector2 p3;
-        public Vector2 velocity;
-        public float radius;
-        public float oxygenUsed;
-	    public float wasteProduced;
-	    public float algaeConsumed;
-        public float biomass; // essentially size?
-        //public float nutrientContent; // essentially size?
-        public float isActive;
-	    public float isDecaying;
-	    public float age;
-	    public float speed;
-    }
     
     private int GetAlgaeParticleDataSize() {
         int bitSize = sizeof(float) * 12 + sizeof(int) * 3;
-        return bitSize;
-    }
-
-    private int GetAnimalParticleDataSize() {
-        int bitSize = sizeof(float) * 22 + sizeof(int) * 3;
         return bitSize;
     }
 
@@ -189,67 +138,7 @@ public class VegetationManager {
         algaeParticlesMeasure1 = new ComputeBuffer(1, GetAlgaeParticleDataSize());
         //Debug.Log("End: " + (Time.realtimeSinceStartup - startTime).ToString());
     }
-
-    public void InitializeAnimalParticles(int numAgents, ComputeShader computeShader) {
-        //float startTime = Time.realtimeSinceStartup;
-        //Debug.Log((Time.realtimeSinceStartup - startTime).ToString());
-        computeShaderAnimalParticles = computeShader;
         
-        animalParticlesCBuffer = new ComputeBuffer(numAnimalParticles, GetAnimalParticleDataSize());
-        animalParticlesCBufferSwap = new ComputeBuffer(numAnimalParticles, GetAnimalParticleDataSize());
-        AnimalParticleData[] animalParticlesArray = new AnimalParticleData[numAnimalParticles];
-
-        float minParticleSize = 0.1f; // settingsRef.avgAnimalParticleRadius / settingsRef.animalParticleRadiusVariance;
-        float maxParticleSize = 0.2f; // settingsRef.avgAnimalParticleRadius * settingsRef.animalParticleRadiusVariance;
-
-        for(int i = 0; i < animalParticlesCBuffer.count; i++) {
-            AnimalParticleData data = new AnimalParticleData();
-            data.index = i;            
-            data.worldPos = new Vector3(UnityEngine.Random.Range(0f, SimulationManager._MapSize), UnityEngine.Random.Range(0f, SimulationManager._MapSize), 0f);
-
-            data.radius = UnityEngine.Random.Range(minParticleSize, maxParticleSize); // obsolete!
-            data.biomass = 0.01f; // data.radius * data.radius * Mathf.PI; // * settingsRef.animalParticleNutrientDensity;
-            data.isActive = 1f;
-            data.isDecaying = 0f;
-            data.age = UnityEngine.Random.Range(1f, 2f);
-            animalParticlesArray[i] = data;
-        }
-        //Debug.Log("Fill Initial Particle Array Data CPU: " + (Time.realtimeSinceStartup - startTime).ToString());
-
-        animalParticlesCBuffer.SetData(animalParticlesArray);
-        animalParticlesCBufferSwap.SetData(animalParticlesArray);
-        //Debug.Log("Set Data GPU: " + (Time.realtimeSinceStartup - startTime).ToString());
-
-        animalParticlesNearestCritters1024 = new RenderTexture(numAnimalParticles, numAgents, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        animalParticlesNearestCritters1024.wrapMode = TextureWrapMode.Clamp;
-        animalParticlesNearestCritters1024.filterMode = FilterMode.Point;
-        animalParticlesNearestCritters1024.enableRandomWrite = true;        
-        animalParticlesNearestCritters1024.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***    
-        //Debug.Log("Create RT 1024: " + (Time.realtimeSinceStartup - startTime).ToString());
-        animalParticlesNearestCritters32 = new RenderTexture(32, numAgents, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        animalParticlesNearestCritters32.wrapMode = TextureWrapMode.Clamp;
-        animalParticlesNearestCritters32.filterMode = FilterMode.Point;
-        animalParticlesNearestCritters32.enableRandomWrite = true;        
-        animalParticlesNearestCritters32.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***   
-        //Debug.Log("Create RT 32: " + (Time.realtimeSinceStartup - startTime).ToString());
-        animalParticlesNearestCritters1 = new RenderTexture(1, numAgents, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        animalParticlesNearestCritters1.wrapMode = TextureWrapMode.Clamp;
-        animalParticlesNearestCritters1.filterMode = FilterMode.Point;
-        animalParticlesNearestCritters1.enableRandomWrite = true;        
-        animalParticlesNearestCritters1.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
-        //Debug.Log("Pre Buffer Creation: " + (Time.realtimeSinceStartup - startTime).ToString());
-        closestAnimalParticlesDataArray = new AnimalParticleData[numAgents];
-        closestAnimalParticlesDataCBuffer = new ComputeBuffer(numAgents, GetAnimalParticleDataSize());
-
-        animalParticlesEatAmountsCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 1);
-        animalParticlesEatAmountsArray = new float[numAgents];
-
-        animalParticleMeasurementTotalsData = new AnimalParticleData[1];
-        animalParticlesMeasure32 = new ComputeBuffer(32, GetAnimalParticleDataSize());
-        animalParticlesMeasure1 = new ComputeBuffer(1, GetAnimalParticleDataSize());
-        //Debug.Log("End: " + (Time.realtimeSinceStartup - startTime).ToString());
-    }
-
     public void InitializeAlgaeGrid(int numAgents, ComputeShader computeShader) {
 
         computeShaderAlgaeGrid = computeShader;
@@ -590,175 +479,7 @@ public class VegetationManager {
         */
         
     }
-
-
-    /*public void ReviveSelectAnimalParticles(int[] indicesArray, float radius, Vector4 spawnCoords, SimulationStateData simStateDataRef) {  // Not used????
-
-        ComputeBuffer selectRespawnAnimalParticleIndicesCBuffer = new ComputeBuffer(indicesArray.Length, sizeof(int));
-        selectRespawnAnimalParticleIndicesCBuffer.SetData(indicesArray);  // manually revive specified indices
-        
-        int kernelCSReviveSelectAnimalParticles = computeShaderAnimalParticles.FindKernel("CSReviveSelectAnimalParticles");
-        computeShaderAnimalParticles.SetBuffer(kernelCSReviveSelectAnimalParticles, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
-        computeShaderAnimalParticles.SetBuffer(kernelCSReviveSelectAnimalParticles, "selectRespawnAnimalParticleIndicesCBuffer", selectRespawnAnimalParticleIndicesCBuffer);
-        
-        computeShaderAnimalParticles.SetFloat("_MapSize", SimulationManager._MapSize);
-        computeShaderAnimalParticles.SetFloat("_Time", Time.realtimeSinceStartup);
-        //computeShaderAnimalParticles.SetVector("_AnimalSprinklePos", spawnCoords);
-        //computeShaderAnimalParticles.SetFloat("_AnimalSprinkleRadius", radius);
-        computeShaderAnimalParticles.SetBuffer(kernelCSReviveSelectAnimalParticles, "animalParticlesWrite", animalParticlesCBufferSwap);
-        computeShaderAnimalParticles.Dispatch(kernelCSReviveSelectAnimalParticles, indicesArray.Length, 1, 1);
-
-        selectRespawnAnimalParticleIndicesCBuffer.Release();
-    }*/
-    public void SimulateAnimalParticles(EnvironmentFluidManager fluidManagerRef, TheRenderKing renderKingRef, SimulationStateData simStateDataRef, SimResourceManager resourcesManager) { // Sim
-        // Go through animalParticleData and check for inactive
-        // determined by current total animal -- done!
-        // if flag on shader for Respawn is on, set to active and initialize
-
-        float maxAnimalParticleTotal = 2048f; // *** Revisit this! Arbitrary! // settingsRef.maxAnimalParticleTotalAmount;
-
-        int kernelCSSimulateAnimalParticles = computeShaderAnimalParticles.FindKernel("CSSimulateAnimalParticles");
-        computeShaderAnimalParticles.SetBuffer(kernelCSSimulateAnimalParticles, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
-        computeShaderAnimalParticles.SetBuffer(kernelCSSimulateAnimalParticles, "animalParticlesRead", animalParticlesCBuffer);
-        computeShaderAnimalParticles.SetBuffer(kernelCSSimulateAnimalParticles, "animalParticlesWrite", animalParticlesCBufferSwap);
-        computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "velocityRead", fluidManagerRef._VelocityA);        
-        computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "altitudeRead", renderKingRef.baronVonTerrain.terrainHeightMap);
-        computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "_SpawnDensityMap", algaeGridRT1);        
-        computeShaderAnimalParticles.SetFloat("_GlobalOxygenLevel", resourcesManager.curGlobalOxygen); // needed?
-        computeShaderAnimalParticles.SetFloat("_GlobalAlgaeLevel", resourceManagerRef.curGlobalAlgaeReservoir);
-        
-        // Movement Params:
-        computeShaderAnimalParticles.SetFloat("_MasterSwimSpeed", settingsRef.zooplanktonSettings._MasterSwimSpeed); // = 0.35;
-        computeShaderAnimalParticles.SetFloat("_AlignMaskRange", settingsRef.zooplanktonSettings._AlignMaskRange); // = 0.025;
-        computeShaderAnimalParticles.SetFloat("_AlignMaskOffset", settingsRef.zooplanktonSettings._AlignMaskOffset); // = 0.0833;
-        computeShaderAnimalParticles.SetFloat("_AlignSpeedMult", settingsRef.zooplanktonSettings._AlignSpeedMult); // = 0.00015;
-        computeShaderAnimalParticles.SetFloat("_AttractMag", settingsRef.zooplanktonSettings._AttractMag); // = 0.0000137;
-        computeShaderAnimalParticles.SetFloat("_AttractMaskMaxDistance", settingsRef.zooplanktonSettings._AttractMaskMaxDistance); // = 0.0036;
-        computeShaderAnimalParticles.SetFloat("_AttractMaskOffset", settingsRef.zooplanktonSettings._AttractMaskOffset); // = 0.5;
-        computeShaderAnimalParticles.SetFloat("_SwimNoiseMag", settingsRef.zooplanktonSettings._SwimNoiseMag); // = 0.000086;
-        computeShaderAnimalParticles.SetFloat("_SwimNoiseFreqMin", settingsRef.zooplanktonSettings._SwimNoiseFreqMin); // = 0.00002
-        computeShaderAnimalParticles.SetFloat("_SwimNoiseFreqRange", settingsRef.zooplanktonSettings._SwimNoiseFreqRange); // = 0.0002
-        computeShaderAnimalParticles.SetFloat("_SwimNoiseOnOffFreq", settingsRef.zooplanktonSettings._SwimNoiseOnOffFreq); //  = 0.0001
-        computeShaderAnimalParticles.SetFloat("_ShoreCollisionMag", settingsRef.zooplanktonSettings._ShoreCollisionMag); // = 0.0065;
-        computeShaderAnimalParticles.SetFloat("_ShoreCollisionDistOffset", settingsRef.zooplanktonSettings._ShoreCollisionDistOffset); // = 0.15;
-        computeShaderAnimalParticles.SetFloat("_ShoreCollisionDistSlope", settingsRef.zooplanktonSettings._ShoreCollisionDistSlope); // = 3.5;
-
-        //computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "animalParticlesNearestCrittersRT", animalParticlesNearestCritters1);
-        computeShaderAnimalParticles.SetFloat("_MapSize", SimulationManager._MapSize);
-        
-        computeShaderAnimalParticles.SetFloat("_Time", Time.realtimeSinceStartup);
-
-        // *** SPAWNING ***
-        int eggSackIndex = Mathf.FloorToInt(Time.realtimeSinceStartup * 0.1f) % simStateDataRef.eggSackSimDataArray.Length;
-
-        if(animalParticleMeasurementTotalsData[0].biomass < maxAnimalParticleTotal) {
-            computeShaderAnimalParticles.SetFloat("_RespawnAnimalParticles", 1f);                       
-        }
-        else {
-            computeShaderAnimalParticles.SetFloat("_RespawnAnimalParticles", 0f);      
-        }
-        // Need to compute when they should be allowed to spawn, how to keep track of resources used/transferred??
-        computeShaderAnimalParticles.SetFloat("_SpawnPosX", UnityEngine.Random.Range(0.1f, 0.9f)); // UPDATE THIS!!! ****
-        computeShaderAnimalParticles.SetFloat("_SpawnPosY", UnityEngine.Random.Range(0.1f, 0.9f));
-
-        float minParticleSize = 0.1f; // settingsRef.avgAnimalParticleRadius / settingsRef.animalParticleRadiusVariance;
-        float maxParticleSize = 0.2f; // settingsRef.avgAnimalParticleRadius * settingsRef.animalParticleRadiusVariance;
-
-        computeShaderAnimalParticles.SetFloat("_MinParticleSize", minParticleSize);   
-        computeShaderAnimalParticles.SetFloat("_MaxParticleSize", maxParticleSize);
-        // Revisit::::
-        computeShaderAnimalParticles.SetFloat("_ParticleNutrientDensity", 10f); // settingsRef.animalParticleNutrientDensity);
-        computeShaderAnimalParticles.SetFloat("_AnimalParticleRegrowthRate", 0.01f); // settingsRef.animalParticleRegrowthRate);  // ************  HARD-CODED!!!!
-
-        computeShaderAnimalParticles.Dispatch(kernelCSSimulateAnimalParticles, 1, 1, 1);                
-
-        // Copy/Swap Animal Particle Buffer:
-        int kernelCSCopyAnimalParticlesBuffer = computeShaderAnimalParticles.FindKernel("CSCopyAnimalParticlesBuffer");
-        computeShaderAnimalParticles.SetBuffer(kernelCSCopyAnimalParticlesBuffer, "animalParticlesRead", animalParticlesCBufferSwap);
-        computeShaderAnimalParticles.SetBuffer(kernelCSCopyAnimalParticlesBuffer, "animalParticlesWrite", animalParticlesCBuffer);        
-        computeShaderAnimalParticles.Dispatch(kernelCSCopyAnimalParticlesBuffer, 1, 1, 1);        
-        
-    }
-    public void EatSelectedAnimalParticles(SimulationStateData simStateDataRef) {  // removes gpu particle & sends consumption data back to CPU
-        // Use CritterSimData to determine critter mouth locations
-        // run through all animalParticles, check against each critter position, then measure min value with recursive reduction:
-        // Need to update CritterSim&InitData structs to have more mouth/bite info
-        // Record how much animal successfully eaten per Critter
-        int kernelCSEatSelectedAnimalParticles = computeShaderAnimalParticles.FindKernel("CSEatSelectedAnimalParticles");
-        computeShaderAnimalParticles.SetBuffer(kernelCSEatSelectedAnimalParticles, "critterInitDataCBuffer", simStateDataRef.critterInitDataCBuffer);
-        computeShaderAnimalParticles.SetBuffer(kernelCSEatSelectedAnimalParticles, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
-        computeShaderAnimalParticles.SetBuffer(kernelCSEatSelectedAnimalParticles, "animalParticlesRead", animalParticlesCBuffer);
-        computeShaderAnimalParticles.SetBuffer(kernelCSEatSelectedAnimalParticles, "animalParticlesWrite", animalParticlesCBufferSwap);
-        computeShaderAnimalParticles.SetBuffer(kernelCSEatSelectedAnimalParticles, "animalParticlesEatAmountsCBuffer", animalParticlesEatAmountsCBuffer);        
-        computeShaderAnimalParticles.SetBuffer(kernelCSEatSelectedAnimalParticles, "closestParticlesDataCBuffer", closestAnimalParticlesDataCBuffer);  
-        computeShaderAnimalParticles.SetTexture(kernelCSEatSelectedAnimalParticles, "critterDistancesRead", animalParticlesNearestCritters1);
-        computeShaderAnimalParticles.Dispatch(kernelCSEatSelectedAnimalParticles, simStateDataRef.critterSimDataCBuffer.count, 1, 1);
-
-        animalParticlesEatAmountsCBuffer.GetData(animalParticlesEatAmountsArray);
-
-        float totalAnimalEaten = 0f;
-        for(int i = 0; i < animalParticlesEatAmountsCBuffer.count; i++) {
-            totalAnimalEaten += animalParticlesEatAmountsArray[i];
-        }
-        // Copy/Swap Animal PArticle Buffer:
-        int kernelCSCopyAnimalParticlesBuffer = computeShaderAnimalParticles.FindKernel("CSCopyAnimalParticlesBuffer");
-        computeShaderAnimalParticles.SetBuffer(kernelCSCopyAnimalParticlesBuffer, "animalParticlesRead", animalParticlesCBufferSwap);
-        computeShaderAnimalParticles.SetBuffer(kernelCSCopyAnimalParticlesBuffer, "animalParticlesWrite", animalParticlesCBuffer);
-        computeShaderAnimalParticles.Dispatch(kernelCSCopyAnimalParticlesBuffer, 1, 1, 1);
-    }
-    public void FindClosestAnimalParticleToCritters(SimulationStateData simStateDataRef) {  // need to send info on closest particle pos/dir/amt back to CPU also        
-        // Populate main RenderTexture with distances for each animalParticle to each Critter:
-        int kernelCSMeasureInitCritterDistances = computeShaderAnimalParticles.FindKernel("CSMeasureInitCritterDistances");
-        computeShaderAnimalParticles.SetBuffer(kernelCSMeasureInitCritterDistances, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
-        computeShaderAnimalParticles.SetBuffer(kernelCSMeasureInitCritterDistances, "critterInitDataCBuffer", simStateDataRef.critterInitDataCBuffer);
-        computeShaderAnimalParticles.SetBuffer(kernelCSMeasureInitCritterDistances, "animalParticlesRead", animalParticlesCBuffer);        
-        computeShaderAnimalParticles.SetTexture(kernelCSMeasureInitCritterDistances, "animalParticlesNearestCrittersRT", animalParticlesNearestCritters1024);        
-        computeShaderAnimalParticles.Dispatch(kernelCSMeasureInitCritterDistances, animalParticlesCBuffer.count / 1024, simStateDataRef.critterSimDataCBuffer.count, 1);
-        
-        // Reduce from 1024 --> 32 particles per critter:
-        int kernelCSReduceCritterDistances32 = computeShaderAnimalParticles.FindKernel("CSReduceCritterDistances32");
-        computeShaderAnimalParticles.SetTexture(kernelCSReduceCritterDistances32, "critterDistancesRead", animalParticlesNearestCritters1024);
-        computeShaderAnimalParticles.SetTexture(kernelCSReduceCritterDistances32, "critterDistancesWrite", animalParticlesNearestCritters32);
-        computeShaderAnimalParticles.SetBuffer(kernelCSReduceCritterDistances32, "animalParticlesRead", animalParticlesCBuffer);        
-        computeShaderAnimalParticles.Dispatch(kernelCSReduceCritterDistances32, 32, simStateDataRef.critterSimDataCBuffer.count, 1);
-        
-        // Reduce from 32 --> 1 particles per critter:
-        computeShaderAnimalParticles.SetTexture(kernelCSReduceCritterDistances32, "critterDistancesRead", animalParticlesNearestCritters32);
-        computeShaderAnimalParticles.SetTexture(kernelCSReduceCritterDistances32, "critterDistancesWrite", animalParticlesNearestCritters1);
-        computeShaderAnimalParticles.SetBuffer(kernelCSReduceCritterDistances32, "animalParticlesRead", animalParticlesCBuffer);
-        computeShaderAnimalParticles.SetBuffer(kernelCSReduceCritterDistances32, "closestParticlesDataCBuffer", closestAnimalParticlesDataCBuffer);
-        computeShaderAnimalParticles.Dispatch(kernelCSReduceCritterDistances32, 1, simStateDataRef.critterSimDataCBuffer.count, 1);
-
-        closestAnimalParticlesDataCBuffer.GetData(closestAnimalParticlesDataArray);
-    }
-    public void MeasureTotalAnimalParticlesAmount() {
-        
-        int kernelCSMeasureTotalAnimalParticlesAmount = computeShaderAnimalParticles.FindKernel("CSMeasureTotalAnimalParticlesAmount");
-        computeShaderAnimalParticles.SetBuffer(kernelCSMeasureTotalAnimalParticlesAmount, "animalParticlesRead", animalParticlesCBuffer);
-        computeShaderAnimalParticles.SetBuffer(kernelCSMeasureTotalAnimalParticlesAmount, "animalParticlesWrite", animalParticlesMeasure32);
-         
-        // DISPATCH !!!
-        computeShaderAnimalParticles.Dispatch(kernelCSMeasureTotalAnimalParticlesAmount, 32, 1, 1);
-        
-        computeShaderAnimalParticles.SetBuffer(kernelCSMeasureTotalAnimalParticlesAmount, "animalParticlesRead", animalParticlesMeasure32);
-        computeShaderAnimalParticles.SetBuffer(kernelCSMeasureTotalAnimalParticlesAmount, "animalParticlesWrite", animalParticlesMeasure1);
-        computeShaderAnimalParticles.Dispatch(kernelCSMeasureTotalAnimalParticlesAmount, 1, 1, 1);
-        
-        animalParticlesMeasure1.GetData(animalParticleMeasurementTotalsData);
-        resourceManagerRef.curGlobalAnimalParticles = animalParticleMeasurementTotalsData[0].biomass;
-        resourceManagerRef.oxygenUsedByAnimalParticlesLastFrame = animalParticleMeasurementTotalsData[0].oxygenUsed;
-        resourceManagerRef.wasteProducedByAnimalParticlesLastFrame = animalParticleMeasurementTotalsData[0].wasteProduced;
-        resourceManagerRef.algaeConsumedByAnimalParticlesLastFrame = animalParticleMeasurementTotalsData[0].algaeConsumed;
-
-        /*if(UnityEngine.Random.Range(0f, 1f) < 0.01f) {
-            Debug.Log("curGlobalAnimalParticles: " + curGlobalAnimalParticles.ToString() + "\n" +
-            "OxygenUsedByAnimalParticlesLastFrame: " + oxygenUsedByAnimalParticlesLastFrame.ToString() + "\n" +
-            "WasteProducedByAnimalParticlesLastFrame: " + wasteProducedByAnimalParticlesLastFrame.ToString() + "\n" +
-            "AlgaeConsumedByAnimalParticlesLastFrame: " + algaeConsumedByAnimalParticlesLastFrame.ToString() + "\n");
-        }*/
-        
-    }
-
+    
     public void ClearBuffers() {
 
         if (tempTex1 != null) {
@@ -794,30 +515,6 @@ public class VegetationManager {
         }
         if(algaeParticlesMeasure1 != null) {
             algaeParticlesMeasure1.Release();
-        }
-
-        if(animalParticlesNearestCritters1 != null) {
-            animalParticlesNearestCritters1.Release();
-            animalParticlesNearestCritters32.Release();
-            animalParticlesNearestCritters1024.Release();
         }        
-        if(animalParticlesCBuffer != null) {
-            animalParticlesCBuffer.Release();
-        }  
-        if(animalParticlesCBufferSwap != null) {
-            animalParticlesCBufferSwap.Release();
-        } 
-        if(closestAnimalParticlesDataCBuffer != null) {
-            closestAnimalParticlesDataCBuffer.Release();
-        }
-        if(animalParticlesEatAmountsCBuffer != null) {
-            animalParticlesEatAmountsCBuffer.Release();
-        }
-        if(animalParticlesMeasure32 != null) {
-            animalParticlesMeasure32.Release();
-        }
-        if(animalParticlesMeasure1 != null) {
-            animalParticlesMeasure1.Release();
-        }
     }
 }

@@ -7,7 +7,7 @@
 	}
 	SubShader
 	{
-		Tags { "RenderType"="Transparent" }
+		Tags { "RenderQueue"="Transparent" }
 		ZWrite Off
 		Cull Off
 		Blend SrcAlpha OneMinusSrcAlpha

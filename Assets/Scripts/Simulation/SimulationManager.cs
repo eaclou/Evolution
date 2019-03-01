@@ -20,11 +20,15 @@ public class SimulationManager : MonoBehaviour {
     public ComputeShader computeShaderFoodParticles;  // algae particles
     public ComputeShader computeShaderAnimalParticles;  // animal particles
     public MasterGenomePool masterGenomePool;  // agents
-    public VegetationManager vegetationManager;  // --> becomes PlantManager
+
+    public TrophicLayersManager trophicLayersManager;
+    public VegetationManager vegetationManager;
+    public ZooplanktonManager zooplanktonManager;
+    public AgentsManager agentsManager;
+
     public SimEventsManager simEventsManager;
     public SimResourceManager simResourceManager;
-
-    //public SettingsZooplankton settingsZooplanktonRef;
+        
 
     public bool isQuickStart = true;
 
@@ -151,6 +155,7 @@ public class SimulationManager : MonoBehaviour {
     private int numStepsInSimYear = 2000;
     private int simAgeYearCounter = 0;
     public int curSimYear = 0;
+        
     
 
     #region loading   // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& LOADING LOADING LOADING &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
@@ -226,6 +231,7 @@ public class SimulationManager : MonoBehaviour {
         LoadingInstantiateEggSacks();
         Debug.Log("LoadingInstantiateEggSacks: " + (Time.realtimeSinceStartup - startTime).ToString());
         yield return null;
+        // ******  Combine this with ^ ^ ^ function ??? **************
         startTime = Time.realtimeSinceStartup;
         uiManager.textLoadingTooltips.text = "LoadingInitializeEggSacksFirstTime()";
         LoadingInitializeEggSacksFirstTime();
@@ -253,8 +259,6 @@ public class SimulationManager : MonoBehaviour {
         Debug.Log("End Total up to LoadingInstantiateAgents: " + (Time.realtimeSinceStartup - masterStartTime).ToString());
         yield return null;
         
-        
-
         // Load pre-saved genomes:
         //LoadingLoadGenepoolFiles();       
         //yield return null;
@@ -281,18 +285,13 @@ public class SimulationManager : MonoBehaviour {
         // Wake up the Render King and prepare him for the day ahead, proudly ruling over Renderland.
         GentlyRouseTheRenderMonarchHisHighnessLordOfPixels();
 
-        // TreeOfLife Render buffers here ???
+        // TreeOfLife Render buffers here ???              ///////// **********************   THIS NEEDS REFACTOR!!!!! **********
         // Tree Of LIFE UI collider & RenderKing updates:
-        //uiManager.treeOfLifeManager.AddNewSpecies(masterGenomePool, 0);
         theRenderKing.TreeOfLifeAddNewSpecies(masterGenomePool, 0);
         theRenderKing.TreeOfLifeAddNewSpecies(masterGenomePool, 1);
         masterGenomePool.completeSpeciesPoolsList[0].isFlaggedForExtinction = true;
         masterGenomePool.ExtinctifySpecies(this, masterGenomePool.currentlyActiveSpeciesIDList[0]);
-
-        // TEMP!!! ****
-        /*for(int i = 0; i < numAgents; i++) {
-            theRenderKing.UpdateAgentWidthsTexture(agentsArray[i]);
-        }*/
+                
         Debug.Log("End Total up to GentlyRouseTheRenderMonarchHisHighnessLordOfPixels: " + (Time.realtimeSinceStartup - masterStartTime).ToString());
 
         yield return null;
@@ -305,15 +304,7 @@ public class SimulationManager : MonoBehaviour {
 
         uiManager.textLoadingTooltips.text = "LoadingHookUpFluidAndRenderKing()";        
         LoadingHookUpFluidAndRenderKing();  // fluid needs refs to RK's obstacle/color cameras' RenderTextures!
-        // ***** ^^^^^ Might need to call this every frame???
-
-        // Hook up Camera to data -- fill out CameraManager class
-        //cameraManager.SetTarget(cameraManager.targetAgent, cameraManager.targetCritterIndex);
-        //cameraManager.targetTransform = agentsArray[cameraManager.targetCritterIndex].bodyGO.transform;
-        // ***** Hook up UI to proper data or find a way to handle that ****
-        // possibly just top-down let cameraManager read simulation data
-        //LoadingHookUpUIManager();
-        // Separate class to hold all simulation State Data?
+        
         Debug.Log("End Total up to LoadingHookUpFluidAndRenderKing: " + (Time.realtimeSinceStartup - masterStartTime).ToString());
         yield return null;
         
@@ -323,13 +314,7 @@ public class SimulationManager : MonoBehaviour {
         // Populates GridCells with their contents (agents/food/preds)
         LoadingFillGridCells();
         LoadingHookUpModules();
-        //simStateData.PopulateSimDataArrays(this); // might be able to just call everytime in Tick()
-
-        //elapsedTime = Time.realtimeSinceStartup - startTime;
-        //if(elapsedTime > maxComputeTimePerFrame) {
-        //    yield return null;
-        //}
-
+        
         //yield return new WaitForSeconds(5f); // TEMP!!!
         Debug.Log("End Total: " + (Time.realtimeSinceStartup - masterStartTime).ToString());
         environmentFluidManager.UpdateSimulationClimate();
@@ -343,12 +328,15 @@ public class SimulationManager : MonoBehaviour {
     private void LoadingInitializeCoreSimulationState() {
         // allocate memory and initialize data structures, classes, arrays, etc.
 
-        settingsManager.Initialize();        
+        settingsManager.Initialize();
+        trophicLayersManager = new TrophicLayersManager();
         simEventsManager = new SimEventsManager(this);
         simResourceManager = new SimResourceManager();
+        agentsManager = new AgentsManager();
         vegetationManager = new VegetationManager(settingsManager, simResourceManager);
+        zooplanktonManager = new ZooplanktonManager(settingsManager, simResourceManager);
          
-        LoadingInitializePopulationGenomes();
+        LoadingInitializePopulationGenomes();  // **** Maybe change this up ? ** depending on time of first Agent Creation?
 
         if(isQuickStart) {
             Debug.Log("QUICK START! Loading Pre-Trained Genomes!");
@@ -361,26 +349,7 @@ public class SimulationManager : MonoBehaviour {
     private void LoadingInitializePopulationGenomes() {
         masterGenomePool = new MasterGenomePool();
         masterGenomePool.FirstTimeInitialize(numAgents, settingsManager.mutationSettingsAgents, uiManager);
-               
-
-        /*agentGenomePoolArray = new AgentGenome[numAgents];
-        for (int i = 0; i < agentGenomePoolArray.Length; i++) {   // Create initial Population Supervised Learners
-            AgentGenome agentGenome = new AgentGenome(i);
-            agentGenome.GenerateInitialRandomBodyGenome();
-            //agentGenome.InitializeBodyGenomeFromTemplate(bodyGenomeTemplate);  // OLD
-            agentGenome.InitializeRandomBrainFromCurrentBody(settingsManager.mutationSettingsPersistent.initialConnectionChance, numInitialHiddenNeurons);
-            agentGenomePoolArray[i] = agentGenome;
-        }*/
-
-        // THIS WILL BE FORCED TO BE REFACTORED!!! :::::::::
-        // Sort Fitness Scores Persistent:
-        /*rankedIndicesList = new int[numAgents];
-        rankedFitnessList = new float[numAgents];
-
-        for (int i = 0; i < rankedIndicesList.Length; i++) {
-            rankedIndicesList[i] = i;
-            rankedFitnessList[i] = 1f;
-        }*/
+        
 
         // EGGSACKS:
         eggSackGenomePoolArray = new EggSackGenome[numEggSacks];
@@ -416,12 +385,12 @@ public class SimulationManager : MonoBehaviour {
     
     private void LoadingInitializeFoodParticles() {
         vegetationManager.InitializeAlgaeParticles(numAgents, computeShaderFoodParticles);
-    }
-    private void LoadingInitializeAnimalParticles() {
-        vegetationManager.InitializeAnimalParticles(numAgents, computeShaderAnimalParticles);
-    }
+    }    
     private void LoadingInitializeFoodGrid() {
         vegetationManager.InitializeAlgaeGrid(numAgents, computeShaderNutrientMap);
+    }
+    private void LoadingInitializeAnimalParticles() {
+        zooplanktonManager.InitializeAnimalParticles(numAgents, computeShaderAnimalParticles);
     }
     private void LoadingInstantiateEggSacks() {
         // FOOODDDD!!!!
@@ -565,78 +534,94 @@ public class SimulationManager : MonoBehaviour {
         agentRespawnCounter++;
         masterGenomePool.Tick(); // keep track of when species created so can't create multiple per frame?
 
-        // MEASURE GLOBAL RESOURCES:        
-        vegetationManager.FindClosestAlgaeParticleToCritters(simStateData);
-        vegetationManager.MeasureTotalAlgaeParticlesAmount();
-        vegetationManager.FindClosestAnimalParticleToCritters(simStateData);
-        vegetationManager.MeasureTotalAnimalParticlesAmount();
-        // Actually measuring results of last frame's execution?
+        // Go through each Trophic Layer:
+            // Measure resources used/produced
+            // send current data to GPU
 
+        // simulation ticks per layer
+
+
+        // MEASURE GLOBAL RESOURCES:
+        if(trophicLayersManager.algaeOn) {
+            vegetationManager.FindClosestAlgaeParticleToCritters(simStateData);
+            vegetationManager.MeasureTotalAlgaeParticlesAmount();
+        }
+        if(trophicLayersManager.zooplanktonOn) {
+            zooplanktonManager.FindClosestAnimalParticleToCritters(simStateData);
+            zooplanktonManager.MeasureTotalAnimalParticlesAmount();
+        }
+        
+        
+        // Actually measuring results of last frame's execution?
         float totalOxygenUsedByAgents = 0f;
         float totalWasteProducedByAgents = 0f;
-        for (int i = 0; i < agentsArray.Length; i++) {
-            totalOxygenUsedByAgents += agentsArray[i].oxygenUsedLastFrame;
-            totalWasteProducedByAgents += agentsArray[i].wasteProducedLastFrame;          
-        }
-        for (int i = 0; i < eggSackArray.Length; i++) {
+        if(trophicLayersManager.agentsOn) {
+            for (int i = 0; i < agentsArray.Length; i++) {
+                totalOxygenUsedByAgents += agentsArray[i].oxygenUsedLastFrame;
+                totalWasteProducedByAgents += agentsArray[i].wasteProducedLastFrame;          
+            }
+            for (int i = 0; i < eggSackArray.Length; i++) {
             
-        }
+            }
+        }        
         simResourceManager.oxygenUsedByAgentsLastFrame = totalOxygenUsedByAgents;
         simResourceManager.wasteProducedByAgentsLastFrame = totalWasteProducedByAgents;
 
         // Global Resources Here????
         // Try to make sure AlgaeReservoir and AlgaeParticles share same mechanics!!! *********************************************
-        simResourceManager.Tick(settingsManager);  // Resource Flows Here
+        simResourceManager.Tick(settingsManager, trophicLayersManager);  // Resource Flows Here
         
                 
         // CHECK FOR NULL Objects:        
         // ******** REVISIT CODE ORDERING!!!!  -- Should check for death Before or After agent Tick/PhysX ???
-        CheckForDevouredEggSacks();
-        CheckForNullAgents();  // Result of this will affect: "simStateData.PopulateSimDataArrays(this)" !!!!!
-        CheckForReadyToSpawnAgents();
+        if(trophicLayersManager.agentsOn) {
+            CheckForDevouredEggSacks();
+            CheckForNullAgents();  // Result of this will affect: "simStateData.PopulateSimDataArrays(this)" !!!!!
+            CheckForReadyToSpawnAgents();
+        }        
         
-        simStateData.PopulateSimDataArrays(this);  // reads from GameObject Transforms & RigidBodies!!! ++ from FluidSimulationData!!!        
-        
+        simStateData.PopulateSimDataArrays(this);  // reads from GameObject Transforms & RigidBodies!!! ++ from FluidSimulationData!!!
         theRenderKing.RenderSimulationCameras(); // will pass current info to FluidSim before it Ticks()
         // Reads from CameraRenders, GameObjects, and query GPU for fluidState
-        // eventually, if agents get fluid sensors, will want to download FluidSim data from GPU into simStateData!*        
-              
+        // eventually, if agents get fluid sensors, will want to download FluidSim data from GPU into simStateData!*
         // **** Figure out proper Execution Order / in which Class to Run RenderOps while being synced w/ results of physX sim!!!        
         theRenderKing.Tick(); // updates all renderData, buffers, brushStrokes etc.
-
         // Simulate timestep of fluid Sim - update density/velocity maps:
         // Or should this be right at beginning of frame????? ***************** revisit...
         environmentFluidManager.Tick(); // ** Clean this up, but generally OK
 
-        vegetationManager.EatSelectedFoodParticles(simStateData); //       
-        vegetationManager.EatSelectedAnimalParticles(simStateData);
 
-        // How much light/nutrients available?
-        vegetationManager.SimulateAlgaeParticles(environmentFluidManager, theRenderKing, simStateData, simResourceManager);
-        // Send back information about how much growth/photosynthesis there was?
-
-        vegetationManager.SimulateAnimalParticles(environmentFluidManager, theRenderKing, simStateData, simResourceManager);
-        // how much oxygen used? How much eaten? How much growth? How much waste/detritus?
-
-        HookUpModules(); // Sets nearest-neighbors etc. feed current data into agent Brains
-
-        // Load gameState into Agent Brain, process brain function, read out brainResults,
-        // Execute Agent Actions -- apply propulsive force to each Agent:        
-        for (int i = 0; i < agentsArray.Length; i++) {
-            agentsArray[i].Tick(this, settingsManager);            
+        if(trophicLayersManager.algaeOn) {
+            vegetationManager.EatSelectedFoodParticles(simStateData); // 
+            // How much light/nutrients available?
+            vegetationManager.SimulateAlgaeParticles(environmentFluidManager, theRenderKing, simStateData, simResourceManager);
         }
-        for (int i = 0; i < eggSackArray.Length; i++) {
-            eggSackArray[i].Tick();
+        if(trophicLayersManager.zooplanktonOn) {
+            zooplanktonManager.EatSelectedAnimalParticles(simStateData);        
+            // Send back information about how much growth/photosynthesis there was?
+            zooplanktonManager.SimulateAnimalParticles(environmentFluidManager, theRenderKing, simStateData, simResourceManager);
+            // how much oxygen used? How much eaten? How much growth? How much waste/detritus?
         }
-                
-        // Apply External Forces to dynamic objects: (internal PhysX Updates):        
-        ApplyFluidForcesToDynamicObjects();
+              
+        
+        if(trophicLayersManager.agentsOn) {
+            HookUpModules(); // Sets nearest-neighbors etc. feed current data into agent Brains
+            // Load gameState into Agent Brain, process brain function, read out brainResults,
+            // Execute Agent Actions -- apply propulsive force to each Agent:        
+            for (int i = 0; i < agentsArray.Length; i++) {
+                agentsArray[i].Tick(this, settingsManager);            
+            }
+            for (int i = 0; i < eggSackArray.Length; i++) {
+                eggSackArray[i].Tick();
+            }                
+            // Apply External Forces to dynamic objects: (internal PhysX Updates):        
+            ApplyFluidForcesToDynamicObjects();
+        }        
 
         // TEMP AUDIO EFFECTS!!!!        
         float volume = agentsArray[0].smoothedThrottle.magnitude * 0.24f;
         audioManager.SetPlayerSwimLoopVolume(volume);      
-
-
+        
 
         // OLD ALGAE GRID:
         /*
@@ -669,14 +654,9 @@ public class SimulationManager : MonoBehaviour {
     private void TickSparseEvents() {
         if(simAgeYearCounter >= numStepsInSimYear) {
             curSimYear++;
-            simEventsManager.curEventBucks += 5; // temporarilly high!
+            simEventsManager.curEventBucks += 5; // temporarily high!
             simAgeYearCounter = 0;
-
-            // update graphs each "year"
-            //if(curSimYear % 2 == 0) {                
-            //    vegetationManager.MoveRandomNutrientPatches(UnityEngine.Random.Range(0, vegetationManager.nutrientSpawnPatchesArray.Length));
-            //}
-
+            
             AddNewHistoricalDataEntry();
             AddNewSpeciesDataEntry(curSimYear);
             uiManager.UpdateSpeciesTreeDataTextures(curSimYear);
@@ -1573,6 +1553,9 @@ public class SimulationManager : MonoBehaviour {
 
         if(vegetationManager != null) {
             vegetationManager.ClearBuffers();
+        }
+        if(zooplanktonManager != null) {
+            zooplanktonManager.ClearBuffers();
         }
     }
 
