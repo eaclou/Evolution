@@ -213,7 +213,7 @@ void CSSimulateHighlightTrail (uint3 id : SV_DispatchThreadID)
 	float timeMask = saturate(floor(age));
 	age = age % 1.0;
 
-	float spawnRadius = 0.04;
+	float spawnRadius = 0.0004;
 	float2 randOffset = (float2(rand(float2((float)id.x, age)), rand(float2(age, (float)id.x))) * 2.0 - 1.0) * spawnRadius;
 	float2 spawnPos = critterSimData.worldPos.xy + randOffset;
 

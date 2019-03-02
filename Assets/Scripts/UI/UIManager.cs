@@ -37,12 +37,13 @@ public class UIManager : MonoBehaviour {
     public bool isActiveStatsPanel = false;
 
     public ToolType curActiveTool;
-    public enum ToolType {
+    public enum ToolType {  
         None,
-        Stir,
         Inspect,
-        Feed,
-        Mutate
+        Nutrients,
+        Stir,
+        Mutate,
+        Remove
     }
 
     public Color buttonActiveColor = new Color(1f, 1f, 1f, 1f);
@@ -54,6 +55,11 @@ public class UIManager : MonoBehaviour {
 
     // &&& INFO PANEL &&& !!!! ==============================================
     public bool isActiveInfoPanel = false;
+    public bool isActiveInfoResourcesTab = true;  // toggle between resources tab and species tab
+    public GameObject panelInfoExpanded;
+    public Button buttonInfoExpand;
+    public Button buttonTabResourcesOverview;
+    public Button buttonTabSpeciesOverview;
     public Text textCurYear;
     public Material infoMeterOxygenMat;
     public Material infoMeterNutrientsMat;
@@ -68,18 +74,65 @@ public class UIManager : MonoBehaviour {
     public Text textMeterPlants;
     public Text textMeterAnimals;
     // Info Expanded: Resources Overview:
-    public Texture2D infoOxygenDataTexture;
-    public Texture2D infoNutrientsDataTexture;
-    public Texture2D infoDetritusDataTexture;
-    public Texture2D infoDecomposersDataTexture;
-    public Texture2D infoPlantsDataTexture;
-    public Texture2D infoAnimalsDataTexture;
+    public GameObject panelInfoResourcesOverview;
+    private Texture2D infoOxygenDataTexture;
+    private Texture2D infoNutrientsDataTexture;
+    private Texture2D infoDetritusDataTexture;
+    private Texture2D infoDecomposersDataTexture;
+    private Texture2D infoPlantsDataTexture;
+    private Texture2D infoAnimalsDataTexture;
     public Material infoGraphOxygenMat;
     public Material infoGraphNutrientsMat;
     public Material infoGraphDetritusMat;
     public Material infoGraphDecomposersMat;
     public Material infoGraphPlantsMat;
     public Material infoGraphAnimalsMat;
+    // Info Expanded: Species Overview:
+    public GameObject panelInfoSpeciesOverview;
+    //private Texture2D infoSpeciesDecomposersDataTexture;
+    //private Texture2D infoSpeciesPlantsDataTexture;
+    //private Texture2D infoSpeciesAnimalsDataTexture;
+    public Button buttonInfoSpeciesDecomposers;
+    public Button buttonInfoSpeciesAlgae;
+    public Button buttonInfoSpeciesPlant1;
+    public Button buttonInfoSpeciesPlant2;
+    public Button buttonInfoSpeciesZooplankton;
+    public Button buttonInfoSpeciesAnimal1;
+    public Button buttonInfoSpeciesAnimal2;
+    public Button buttonInfoSpeciesAnimal3;
+    public Button buttonInfoSpeciesAnimal4;
+    public Text textInfoSpeciesName;
+    public Text textInfoSpeciesStats;
+
+    // &&& PLAYER TOOLBAR &&& !!!! ==============================================
+    public float toolbarInfluencePoints = 0.5f;
+    public Text textInfluencePointsValue;
+    public Material infoMeterInfluencePointsMat;
+    private float addSpeciesInfluenceCost = 0.33f;
+    public Button buttonToolbarInspect;
+    public Button buttonToolbarNutrients;
+    public Button buttonToolbarStir;
+    public Button buttonToolbarMutate;
+    public Button buttonToolbarRemove;
+    //
+    //public Button buttonToolbarAddDecomposer;
+    public Button buttonToolbarRemoveDecomposer;
+    public Button buttonToolbarDecomposers;
+    //
+    //public Button buttonToolbarAddPlant;
+    public Button buttonToolbarRemovePlant;
+    public Button buttonToolbarAlgae;
+    public Button buttonToolbarPlant1;
+    public Button buttonToolbarPlant2;
+    //
+    //public Button buttonToolbarAddAnimal;
+    public Button buttonToolbarRemoveAnimal;
+    public Button buttonToolbarZooplankton;
+    public Button buttonToolbarAnimal1;
+    public Button buttonToolbarAnimal2;
+    public Button buttonToolbarAnimal3;
+    public Button buttonToolbarAnimal4;
+
 
     public bool isActiveInspectPanel = false;
     public Material inspectWidgetDietMat;
@@ -190,7 +243,7 @@ public class UIManager : MonoBehaviour {
     public GameObject panelLoading;
     public GameObject panelPlaying;
 
-    // EVENTS TOOL SECTION:
+    // EVENTS TOOL SECTION:    
     public bool isActiveEventSelectionScreen = false;
     public bool isActiveEventsMinor = false;
     public bool isActiveEventsMajor = false;
@@ -640,8 +693,12 @@ public class UIManager : MonoBehaviour {
                 //gameManager.theRenderKing.gizmoStirToolPosCBuffer.SetData(dataArray);
                 gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_IsVisible", 1f);
                 float isActing = 0f;
-                if (isDraggingMouse)
+                if (isDraggingMouse) {
                     isActing = 1f;
+                    toolbarInfluencePoints -= 0.001f;
+                    toolbarInfluencePoints = Mathf.Clamp01(toolbarInfluencePoints);
+                }
+                    
                 gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_IsStirring", isActing);
                 gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_Radius", 4f);
             }
@@ -650,7 +707,7 @@ public class UIManager : MonoBehaviour {
                     gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_IsVisible", 0f);
                 }                
             }
-            if(curActiveTool == ToolType.Feed) {                    
+            if(curActiveTool == ToolType.Nutrients) {                    
                 mouseRaycastWaterPlane.SetActive(true);
                 MouseRaycastWaterPlane(leftClickThisFrame, false, false, Input.mousePosition, smoothedMouseVel);
                 
@@ -669,7 +726,7 @@ public class UIManager : MonoBehaviour {
                 gameManager.theRenderKing.gizmoFeedToolMat.SetFloat("_IsVisible", 0f);
             }
 
-            if(curActiveTool != ToolType.Feed && curActiveTool != ToolType.Stir) {
+            if(curActiveTool != ToolType.Nutrients && curActiveTool != ToolType.Stir) {
                 mouseRaycastWaterPlane.SetActive(false);
             }
             
@@ -743,7 +800,7 @@ public class UIManager : MonoBehaviour {
             
             if (clicked) {
                 //Debug.Log("CLICK Hit Water Plane! Coords: " + hit.point.ToString());                
-                if(curActiveTool == ToolType.Feed) {
+                if(curActiveTool == ToolType.Nutrients) {
                     if(foodToolSprinkleOn) {
                         gameManager.simulationManager.PlayerFeedToolSprinkle(hit.point);
                     }
@@ -1226,15 +1283,17 @@ public class UIManager : MonoBehaviour {
         UpdatePausedUI();
 
         UpdateInfoPanelUI();
-        UpdateStatsPanelUI();
-        UpdateInspectPanelUI();
-        UpdateFeedToolPanelUI();
-        UpdateMutateToolPanelUI();
-        UpdateStirToolPanelUI();
+        UpdateToolbarPanelUI();
 
-        UpdateTreeOfLifeWidget();
+        UpdateStatsPanelUI(); // needed?
+        UpdateInspectPanelUI();  // needed?
+        //UpdateFeedToolPanelUI();
+        //UpdateMutateToolPanelUI();
+        //UpdateStirToolPanelUI();
 
-        UpdateSimEventsUI();
+        //UpdateTreeOfLifeWidget();
+
+        //UpdateSimEventsUI();
 
         Vector2 curMousePos = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
 
@@ -1324,7 +1383,136 @@ public class UIManager : MonoBehaviour {
         imageTolBackdropGraphs.gameObject.SetActive(tolEventsTimelineOn);
         imageTolBackdropDescription.gameObject.SetActive(tolSpeciesDescriptionOn);
     }
+    public void UpdateToolbarPanelUI() {
+        
 
+        buttonToolbarInspect.GetComponent<Image>().color = buttonDisabledColor;
+        buttonToolbarStir.GetComponent<Image>().color = buttonDisabledColor;
+        buttonToolbarNutrients.GetComponent<Image>().color = buttonDisabledColor;
+        buttonToolbarMutate.GetComponent<Image>().color = buttonDisabledColor;
+        buttonToolbarRemove.GetComponent<Image>().color = buttonDisabledColor;
+
+        switch(curActiveTool) {
+            case ToolType.Inspect:
+                buttonToolbarInspect.GetComponent<Image>().color = buttonActiveColor;
+                break;
+            case ToolType.Mutate:
+                buttonToolbarMutate.GetComponent<Image>().color = buttonActiveColor;
+                break;
+            case ToolType.Nutrients:
+                buttonToolbarNutrients.GetComponent<Image>().color = buttonActiveColor;
+                break;
+            case ToolType.Remove:
+                buttonToolbarRemove.GetComponent<Image>().color = buttonActiveColor;
+                break;
+            case ToolType.Stir:
+                buttonToolbarStir.GetComponent<Image>().color = buttonActiveColor;
+                break;
+            default:
+                break;
+
+        }
+
+        // Influence points meter:     
+        toolbarInfluencePoints += 0.00025f;
+        toolbarInfluencePoints = Mathf.Clamp01(toolbarInfluencePoints);
+        infoMeterInfluencePointsMat.SetFloat("_FillPercentage", toolbarInfluencePoints);
+        textInfluencePointsValue.text = "Influence: \n" + (toolbarInfluencePoints * 100f).ToString("F0") + "%";
+        // Species Slots visuals:
+        TrophicLayersManager layerManager = gameManager.simulationManager.trophicLayersManager;
+        if(layerManager.agentsOn) {
+            buttonToolbarAnimal1.GetComponentInChildren<Text>().text = "On";
+            buttonToolbarAnimal2.GetComponentInChildren<Text>().text = "On";
+            buttonToolbarAnimal3.GetComponentInChildren<Text>().text = "On";
+            buttonToolbarAnimal4.GetComponentInChildren<Text>().text = "On";
+        }
+        else {
+            if(layerManager.zooplanktonOn) {
+                buttonToolbarAnimal1.interactable = true;
+                buttonToolbarAnimal2.interactable = true;
+                buttonToolbarAnimal3.interactable = true;
+                buttonToolbarAnimal4.interactable = true;                
+                buttonToolbarAnimal1.GetComponentInChildren<Text>().text = "+";
+                buttonToolbarAnimal2.GetComponentInChildren<Text>().text = "+";
+                buttonToolbarAnimal3.GetComponentInChildren<Text>().text = "+";
+                buttonToolbarAnimal4.GetComponentInChildren<Text>().text = "+";
+
+                if(toolbarInfluencePoints <= addSpeciesInfluenceCost) {
+                    buttonToolbarAnimal1.interactable = false;
+                    buttonToolbarAnimal2.interactable = false;
+                    buttonToolbarAnimal3.interactable = false;
+                    buttonToolbarAnimal4.interactable = false;
+                    buttonToolbarAnimal1.GetComponentInChildren<Text>().text = "-";
+                    buttonToolbarAnimal2.GetComponentInChildren<Text>().text = "-";
+                    buttonToolbarAnimal3.GetComponentInChildren<Text>().text = "-";
+                    buttonToolbarAnimal4.GetComponentInChildren<Text>().text = "-";
+                }
+                
+            }
+            else {
+                //buttonToolbarAnimal1.interactable = true;
+                //buttonToolbarAnimal2.interactable = true;
+                //buttonToolbarAnimal3.interactable = true;
+                //buttonToolbarAnimal4.interactable = true;
+                buttonToolbarAnimal1.GetComponentInChildren<Text>().text = "-";
+                buttonToolbarAnimal2.GetComponentInChildren<Text>().text = "-";
+                buttonToolbarAnimal3.GetComponentInChildren<Text>().text = "-";
+                buttonToolbarAnimal4.GetComponentInChildren<Text>().text = "-";
+            }
+            
+        }
+
+        if(layerManager.zooplanktonOn) {
+            //buttonToolbarZooplankton.GetComponent<Image>().color = buttonActiveColor;
+            buttonToolbarZooplankton.GetComponentInChildren<Text>().text = "On";
+            buttonToolbarAnimal1.interactable = true;
+            buttonToolbarAnimal2.interactable = true;
+            buttonToolbarAnimal3.interactable = true;
+            buttonToolbarAnimal4.interactable = true;
+        }
+        else {
+            buttonToolbarZooplankton.interactable = true;
+            buttonToolbarZooplankton.GetComponentInChildren<Text>().text = "+";
+            if(toolbarInfluencePoints <= addSpeciesInfluenceCost) {
+                buttonToolbarZooplankton.interactable = false;
+                buttonToolbarZooplankton.GetComponentInChildren<Text>().text = "-";
+            }
+            buttonToolbarAnimal1.interactable = false;
+            buttonToolbarAnimal2.interactable = false;
+            buttonToolbarAnimal3.interactable = false;
+            buttonToolbarAnimal4.interactable = false;
+            buttonToolbarAnimal1.GetComponentInChildren<Text>().text = "-";
+            buttonToolbarAnimal2.GetComponentInChildren<Text>().text = "-";
+            buttonToolbarAnimal3.GetComponentInChildren<Text>().text = "-";
+            buttonToolbarAnimal4.GetComponentInChildren<Text>().text = "-";
+        }
+
+        if(layerManager.algaeOn) {
+            buttonToolbarAlgae.GetComponentInChildren<Text>().text = "On";
+        }
+        else {
+            buttonToolbarAlgae.interactable = true;
+            buttonToolbarAlgae.GetComponentInChildren<Text>().text = "+";
+            if(toolbarInfluencePoints <= addSpeciesInfluenceCost) {
+                buttonToolbarAlgae.interactable = false;
+                buttonToolbarAlgae.GetComponentInChildren<Text>().text = "-";
+            }
+        }
+        buttonToolbarPlant1.GetComponentInChildren<Text>().text = "-";
+        buttonToolbarPlant2.GetComponentInChildren<Text>().text = "-";
+
+        if(layerManager.decomposersOn) {
+            buttonToolbarDecomposers.GetComponentInChildren<Text>().text = "On";
+        }
+        else {
+            buttonToolbarDecomposers.interactable = true;
+            buttonToolbarDecomposers.GetComponentInChildren<Text>().text = "+";
+            if(toolbarInfluencePoints <= addSpeciesInfluenceCost) {
+                buttonToolbarDecomposers.interactable = false;
+                buttonToolbarDecomposers.GetComponentInChildren<Text>().text = "-";
+            }
+        }
+    }
     public void UpdateInfoPanelUI() {
         textCurYear.text = gameManager.simulationManager.curSimYear.ToString();
 
@@ -1348,6 +1536,22 @@ public class UIManager : MonoBehaviour {
         infoMeterPlantsMat.SetFloat("_FillPercentage", Mathf.Sqrt(percentagePlants));
         float percentageAnimals = (resourcesRef.curGlobalAgentBiomass + resourcesRef.curGlobalAnimalParticles) / 100f;
         infoMeterAnimalsMat.SetFloat("_FillPercentage", Mathf.Sqrt(percentageAnimals));
+
+        if(isActiveInfoPanel) {
+            panelInfoExpanded.SetActive(true);
+
+            if(isActiveInfoResourcesTab) {
+                panelInfoResourcesOverview.SetActive(true);
+                panelInfoSpeciesOverview.SetActive(false);
+            }
+            else {
+                panelInfoResourcesOverview.SetActive(false);
+                panelInfoSpeciesOverview.SetActive(true);
+            }
+        }
+        else {
+            panelInfoExpanded.SetActive(false);
+        }
     }
     public void UpdateSimEventsUI() {
         SimEventsManager eventsManager = gameManager.simulationManager.simEventsManager;
@@ -2675,57 +2879,81 @@ public class UIManager : MonoBehaviour {
     
     public void ClickToolButtonStir() {
 
-        if(curActiveTool != ToolType.Stir) {
+        //if(curActiveTool != ToolType.Stir) {
             curActiveTool = ToolType.Stir;
              
             isActiveStirToolPanel = true;    
-            animatorStirToolPanel.enabled = true;
-            animatorStirToolPanel.Play("SlideOnPanelStirTool"); 
-            buttonToolStir.GetComponent<Image>().color = buttonActiveColor; 
+            //animatorStirToolPanel.enabled = true;
+            //animatorStirToolPanel.Play("SlideOnPanelStirTool"); 
+            buttonToolbarStir.GetComponent<Image>().color = buttonActiveColor; 
 
             TurnOffInspectTool();  
-            TurnOffFeedTool();
+            TurnOffNutrientsTool();
             TurnOffMutateTool();
-        }
-        else {
+            TurnOffRemoveTool();
+        //}
+        /*else {
             curActiveTool = ToolType.None;
             TurnOffStirTool();
-        }        
+        } */       
     }
     public void ClickToolButtonInspect() {
 
-        if(curActiveTool != ToolType.Inspect) {
+        //if(curActiveTool != ToolType.Inspect) {
             curActiveTool = ToolType.Inspect;
 
             TurnOnInspectTool();
             TurnOffStirTool();  
-            TurnOffFeedTool();
+            TurnOffNutrientsTool();
             TurnOffMutateTool();
-        } 
-        else {
+            TurnOffRemoveTool();
+        //} 
+        /*else {
             curActiveTool = ToolType.None;
             TurnOffInspectTool();
-        } 
+        } */
     }
-    public void ClickToolButtonFeed() {
+    public void ClickToolButtonNutrients() {
 
-        if(curActiveTool != ToolType.Feed) {
-            curActiveTool = ToolType.Feed;
+        //if(curActiveTool != ToolType.Nutrients) {
+            curActiveTool = ToolType.Nutrients;
 
             isActiveFeedToolPanel = true;    
-            animatorFeedToolPanel.enabled = true;
-            animatorFeedToolPanel.Play("SlideOnPanelFeedTool"); 
-            buttonToolFeed.GetComponent<Image>().color = buttonActiveColor;
+            //animatorFeedToolPanel.enabled = true;
+            //animatorFeedToolPanel.Play("SlideOnPanelFeedTool"); 
+            buttonToolbarNutrients.GetComponent<Image>().color = buttonActiveColor;
 
             TurnOffInspectTool();
             TurnOffStirTool();
             TurnOffMutateTool();
-        }  
-        else {
+            TurnOffRemoveTool();
+        //}  
+        /*else {
             curActiveTool = ToolType.None;
-            TurnOffFeedTool();
-        } 
+            TurnOffNutrientsTool();
+        } */
     }
+    public void ClickToolButtonRemove() {
+
+        //if(curActiveTool != ToolType.Remove) {
+            curActiveTool = ToolType.Remove;
+
+            isActiveFeedToolPanel = true;    
+            //animatorFeedToolPanel.enabled = true;
+            //animatorFeedToolPanel.Play("SlideOnPanelFeedTool"); 
+            buttonToolbarRemove.GetComponent<Image>().color = buttonActiveColor;
+
+            TurnOffInspectTool();
+            TurnOffStirTool();
+            TurnOffMutateTool();
+            TurnOffNutrientsTool();
+        //}  
+        /*else {
+            curActiveTool = ToolType.None;
+            TurnOffRemoveTool();
+        } */
+    }
+
     public void ClickFeedToolSprinkle() {
         
         if(foodToolSprinkleOn) {
@@ -2760,67 +2988,132 @@ public class UIManager : MonoBehaviour {
     }
     public void ClickToolButtonMutate() {
 
-        if(curActiveTool != ToolType.Mutate) {
+        //if(curActiveTool != ToolType.Mutate) {
             curActiveTool = ToolType.Mutate;
 
             isActiveMutateToolPanel = true;    
-            animatorMutateToolPanel.enabled = true;
-            animatorMutateToolPanel.Play("SlideOnPanelMutateTool"); 
-            buttonToolMutate.GetComponent<Image>().color = buttonActiveColor; 
+            //animatorMutateToolPanel.enabled = true;
+            //animatorMutateToolPanel.Play("SlideOnPanelMutateTool"); 
+            buttonToolbarMutate.GetComponent<Image>().color = buttonActiveColor; 
                         
             TurnOffInspectTool();
             TurnOffStirTool();
-            TurnOffFeedTool();
+            TurnOffNutrientsTool();
+            TurnOffRemoveTool();
             // *** make these their own private functions for reuse: OLD:::
             //buttonToolStir.GetComponent<Image>().color = buttonDisabledColor;  
             //buttonToolFeed.GetComponent<Image>().color = buttonDisabledColor;
-        }
-        else {
+        //}
+        /*else {
             curActiveTool = ToolType.None;
             TurnOffMutateTool();
-        }        
+        }  */      
     }
 
     private void TurnOnInspectTool() {
-        buttonToolInspect.GetComponent<Image>().color = buttonActiveColor;            
+        buttonToolbarInspect.GetComponent<Image>().color = buttonActiveColor;            
     }    
     private void TurnOffInspectTool() {
                 
-        buttonToolInspect.GetComponent<Image>().color = buttonDisabledColor;  
-        if(isActiveInspectPanel) {
-            animatorInspectPanel.enabled = true;
-            animatorInspectPanel.Play("SlideOffPanelInspect");
-        }        
+        buttonToolbarInspect.GetComponent<Image>().color = buttonDisabledColor;  
+        //if(isActiveInspectPanel) {
+        //    animatorInspectPanel.enabled = true;
+        //    animatorInspectPanel.Play("SlideOffPanelInspect");
+        //}        
         isActiveInspectPanel = false;
         StopFollowing();
     }
-    private void TurnOffFeedTool() {
-        buttonToolFeed.GetComponent<Image>().color = buttonDisabledColor;
+    private void TurnOffNutrientsTool() {
+        buttonToolbarNutrients.GetComponent<Image>().color = buttonDisabledColor;
 
-        if(isActiveFeedToolPanel) {
-            animatorFeedToolPanel.enabled = true;
-            animatorFeedToolPanel.Play("SlideOffPanelFeedTool");
-        }        
+        //if(isActiveFeedToolPanel) {
+        //    animatorFeedToolPanel.enabled = true;
+        //    animatorFeedToolPanel.Play("SlideOffPanelFeedTool");
+        //}        
         isActiveFeedToolPanel = false;
     }
     private void TurnOffMutateTool() {
-        buttonToolMutate.GetComponent<Image>().color = buttonDisabledColor;
+        buttonToolbarMutate.GetComponent<Image>().color = buttonDisabledColor;
 
-        if(isActiveMutateToolPanel) {
-            animatorMutateToolPanel.enabled = true;
-            animatorMutateToolPanel.Play("SlideOffPanelMutateTool");
-        }        
+        //if(isActiveMutateToolPanel) {
+        //    animatorMutateToolPanel.enabled = true;
+        //    animatorMutateToolPanel.Play("SlideOffPanelMutateTool");
+        //}        
         isActiveMutateToolPanel = false;
     }
     private void TurnOffStirTool() {
-        buttonToolStir.GetComponent<Image>().color = buttonDisabledColor;
-
-        if(isActiveStirToolPanel) {
-            animatorStirToolPanel.enabled = true;
-            animatorStirToolPanel.Play("SlideOffPanelStirTool");
-        }        
+        buttonToolbarStir.GetComponent<Image>().color = buttonDisabledColor;
+        //if(isActiveStirToolPanel) {
+        //    animatorStirToolPanel.enabled = true;
+        //    animatorStirToolPanel.Play("SlideOffPanelStirTool");
+        //}        
         isActiveStirToolPanel = false;
     }
+    private void TurnOffRemoveTool() {
+        buttonToolbarRemove.GetComponent<Image>().color = buttonDisabledColor;
+        //if(isActiveStirToolPanel) {
+        //    animatorStirToolPanel.enabled = true;
+        //    animatorStirToolPanel.Play("SlideOffPanelStirTool");
+        //}        
+        //isActiveStirToolPanel = false;
+    }
+    public void ClickButtonToolbarDecomposers() {
+        if(gameManager.simulationManager.trophicLayersManager.decomposersOn) {
+
+        }
+        else {
+            if(toolbarInfluencePoints > addSpeciesInfluenceCost) {
+                gameManager.simulationManager.trophicLayersManager.decomposersOn = true;
+                toolbarInfluencePoints -= addSpeciesInfluenceCost;
+            }
+            else {
+
+            }
+        }
+    }
+    public void ClickButtonToolbarAlgae() {
+        if(gameManager.simulationManager.trophicLayersManager.algaeOn) {
+
+        }
+        else {
+            if(toolbarInfluencePoints > addSpeciesInfluenceCost) {
+                gameManager.simulationManager.trophicLayersManager.algaeOn = true;
+                toolbarInfluencePoints -= addSpeciesInfluenceCost;
+            }
+            else {
+
+            }
+        }
+    }
+    public void ClickButtonToolbarZooplankton() {
+        if(gameManager.simulationManager.trophicLayersManager.zooplanktonOn) {
+
+        }
+        else {
+            if(toolbarInfluencePoints > addSpeciesInfluenceCost) {
+                gameManager.simulationManager.trophicLayersManager.zooplanktonOn = true;
+                toolbarInfluencePoints -= addSpeciesInfluenceCost;
+            }
+            else {
+
+            }
+        }
+    }
+    public void ClickButtonToolbarAgent(int index) {
+        if(gameManager.simulationManager.trophicLayersManager.agentsOn) {
+
+        }
+        else {
+            if(toolbarInfluencePoints > addSpeciesInfluenceCost) {
+                gameManager.simulationManager.trophicLayersManager.agentsOn = true;
+                toolbarInfluencePoints -= addSpeciesInfluenceCost;
+            }
+            else {
+
+            }            
+        }
+    }
+
 
     public void ClickControlsMenu() {
         controlsMenuOn = true;
@@ -2897,6 +3190,9 @@ public class UIManager : MonoBehaviour {
     public void ClickButtonQuit() {
         Debug.Log("Quit!");
         Application.Quit();
+    }
+    public void ClickButtonMainMenu() {
+        gameManager.EscapeToMainMenu();
     }
 
     public void ClickButtonPause() {
@@ -3502,5 +3798,17 @@ public class UIManager : MonoBehaviour {
         rectEventStats.localPosition = new Vector3(coords.x + 220f, coords.y + 30f, 0f);
         textTolEventsTimelineName.text = "EVENT";
         */
+    }
+
+    public void ClickInfoPanelExpand() {
+        isActiveInfoPanel = !isActiveInfoPanel;
+
+        //panelInfoExpanded.SetActive(isActiveInfoPanel);
+    }
+    public void ClickInfoTabResources() {
+        isActiveInfoResourcesTab = true;        
+    }
+    public void ClickInfoTabSpecies() {
+        isActiveInfoResourcesTab = false;     
     }
 }

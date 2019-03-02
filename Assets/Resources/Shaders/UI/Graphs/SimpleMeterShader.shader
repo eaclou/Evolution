@@ -42,14 +42,14 @@
 			{
 				v2f o;
 				o.vertex = UnityObjectToClipPos(v.vertex);
-				o.uv = TRANSFORM_TEX(v.uv, _MainTex);
+				o.uv = v.uv; // TRANSFORM_TEX(v.uv, _MainTex);
 				return o;
 			}
 			
 			fixed4 frag (v2f i) : SV_Target
 			{
 				// sample the texture
-				float mask = saturate((_FillPercentage - i.uv.y) * 1000);
+				float mask = saturate(saturate(_FillPercentage - i.uv.y) * 10000);
 
 				fixed4 col = lerp(float4(0,0,0,0.33), _Tint, mask); //tex2D(_MainTex, i.uv);
 				
