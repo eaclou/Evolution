@@ -542,11 +542,11 @@ public class SimulationManager : MonoBehaviour {
 
 
         // MEASURE GLOBAL RESOURCES:
-        if(trophicLayersManager.algaeOn) {
+        if(trophicLayersManager.GetAlgaeOnOff()) {
             vegetationManager.FindClosestAlgaeParticleToCritters(simStateData);
             vegetationManager.MeasureTotalAlgaeParticlesAmount();
         }
-        if(trophicLayersManager.zooplanktonOn) {
+        if(trophicLayersManager.GetZooplanktonOnOff()) {
             zooplanktonManager.FindClosestAnimalParticleToCritters(simStateData);
             zooplanktonManager.MeasureTotalAnimalParticlesAmount();
         }
@@ -555,7 +555,7 @@ public class SimulationManager : MonoBehaviour {
         // Actually measuring results of last frame's execution?
         float totalOxygenUsedByAgents = 0f;
         float totalWasteProducedByAgents = 0f;
-        if(trophicLayersManager.agentsOn) {
+        if(trophicLayersManager.GetAgentsOnOff()) {
             for (int i = 0; i < agentsArray.Length; i++) {
                 totalOxygenUsedByAgents += agentsArray[i].oxygenUsedLastFrame;
                 totalWasteProducedByAgents += agentsArray[i].wasteProducedLastFrame;          
@@ -574,7 +574,7 @@ public class SimulationManager : MonoBehaviour {
                 
         // CHECK FOR NULL Objects:        
         // ******** REVISIT CODE ORDERING!!!!  -- Should check for death Before or After agent Tick/PhysX ???
-        if(trophicLayersManager.agentsOn) {
+        if(trophicLayersManager.GetAgentsOnOff()) {
             CheckForDevouredEggSacks();
             CheckForNullAgents();  // Result of this will affect: "simStateData.PopulateSimDataArrays(this)" !!!!!
             CheckForReadyToSpawnAgents();
@@ -591,12 +591,12 @@ public class SimulationManager : MonoBehaviour {
         environmentFluidManager.Tick(); // ** Clean this up, but generally OK
 
 
-        if(trophicLayersManager.algaeOn) {
+        if(trophicLayersManager.GetAlgaeOnOff()) {
             vegetationManager.EatSelectedFoodParticles(simStateData); // 
             // How much light/nutrients available?
             vegetationManager.SimulateAlgaeParticles(environmentFluidManager, theRenderKing, simStateData, simResourceManager);
         }
-        if(trophicLayersManager.zooplanktonOn) {
+        if(trophicLayersManager.GetZooplanktonOnOff()) {
             zooplanktonManager.EatSelectedAnimalParticles(simStateData);        
             // Send back information about how much growth/photosynthesis there was?
             zooplanktonManager.SimulateAnimalParticles(environmentFluidManager, theRenderKing, simStateData, simResourceManager);
@@ -604,7 +604,7 @@ public class SimulationManager : MonoBehaviour {
         }
               
         
-        if(trophicLayersManager.agentsOn) {
+        if(trophicLayersManager.GetAgentsOnOff()) {
             HookUpModules(); // Sets nearest-neighbors etc. feed current data into agent Brains
             // Load gameState into Agent Brain, process brain function, read out brainResults,
             // Execute Agent Actions -- apply propulsive force to each Agent:        
@@ -1003,6 +1003,12 @@ public class SimulationManager : MonoBehaviour {
 
     #region Process Events // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& PROCESS EVENTS! &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
     
+    public void CreateAgentSpecies(Vector3 spawnPos) {
+        eggSackArray[0].parentAgentIndex = 0;
+        eggSackArray[0].InitializeEggSackFromGenome(0, masterGenomePool.completeSpeciesPoolsList[0].representativeGenome, null, spawnPos);
+        eggSackArray[0].currentBiomass = settingsManager.agentSettings._BaseInitMass; // *** TEMP!!! ***                        
+        eggSackRespawnCounter = 0;       
+    }
     public void ExecuteSimEvent(SimEventData eventData) {
 
         simEventsManager.ExecuteEvent(this, eventData);

@@ -77,13 +77,15 @@
 
 				worldPosition.xy += quadPoint.xy;
 				
+				//temp:
+				worldPosition = float3(quadVerticesCBuffer[id].xy * 10 + toolData.xy, 0);
 				float4 pos = mul(UNITY_MATRIX_VP, float4(worldPosition, 1.0)); // *** Revisit to better understand!!!! ***
 				
 				o.worldPos = worldPosition;
 				o.pos = pos;
 				o.uv = quadVerticesCBuffer[id] + 0.5; // full texture
 
-				float alpha = 0.25;
+				float alpha = 0.75;
 				alpha *= _IsVisible;
 				alpha *= (1.0 + _IsStirring);
 				
@@ -107,6 +109,7 @@
 				texColor.a = texColor.a * texColor.a;
 				finalColor = finalColor * i.color * texColor;
 				
+				//return texColor; // temp debug
 				return finalColor;
 
 			}

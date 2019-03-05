@@ -101,7 +101,7 @@ public class TheRenderKing : MonoBehaviour {
     public Material treeOfLifeCursorLineMat;
     public Material treeOfLifeCritterPortraitMat;
 
-    public ComputeBuffer gizmoStirToolPosCBuffer;
+    public ComputeBuffer gizmoCursorPosCBuffer;
     public ComputeBuffer gizmoFeedToolPosCBuffer;
     //public Material critterEyeStrokesDisplayMat;
 
@@ -935,8 +935,8 @@ public class TheRenderKing : MonoBehaviour {
         Vector4[] dataArray = new Vector4[1];
         Vector4 gizmoPos = new Vector4(128f, 128f, 0f, 0f);
         dataArray[0] = gizmoPos;
-        gizmoStirToolPosCBuffer = new ComputeBuffer(1, sizeof(float) * 4);
-        gizmoStirToolPosCBuffer.SetData(dataArray);
+        gizmoCursorPosCBuffer = new ComputeBuffer(1, sizeof(float) * 4);
+        gizmoCursorPosCBuffer.SetData(dataArray);
     }
     private void InitializeTreeOfLifeBuffers() {
 
@@ -3473,7 +3473,7 @@ public class TheRenderKing : MonoBehaviour {
             cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.groundBitsCBuffer.count);
             
-            if(simManager.trophicLayersManager.algaeOn) {
+            if(simManager.trophicLayersManager.GetAlgaeOnOff()) {
                 // Algae Carpet!
                 algaeParticleDisplayMat.SetPass(0);
                 algaeParticleDisplayMat.SetBuffer("foodParticleDataCBuffer", simManager.vegetationManager.algaeParticlesCBuffer);
@@ -3578,7 +3578,7 @@ public class TheRenderKing : MonoBehaviour {
                 cmdBufferTest.DrawProcedural(Matrix4x4.identity, critterInspectHighlightMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.critterInitDataCBuffer.count);
             }*/
 
-            if(simManager.trophicLayersManager.zooplanktonOn) {
+            if(simManager.trophicLayersManager.GetZooplanktonOnOff()) {
                 animalParticleShadowDisplayMat.SetPass(0);
                 animalParticleShadowDisplayMat.SetBuffer("animalParticleDataCBuffer", simManager.zooplanktonManager.animalParticlesCBuffer);
                 animalParticleShadowDisplayMat.SetBuffer("quadVerticesCBuffer", curveRibbonVerticesCBuffer);
@@ -3588,7 +3588,7 @@ public class TheRenderKing : MonoBehaviour {
         
             }
             
-            if(simManager.trophicLayersManager.algaeOn) {
+            if(simManager.trophicLayersManager.GetAlgaeOnOff()) {
                 // algae shadows:
                 foodParticleShadowDisplayMat.SetPass(0);
                 foodParticleShadowDisplayMat.SetBuffer("foodParticleDataCBuffer", simManager.vegetationManager.algaeParticlesCBuffer);
@@ -3612,7 +3612,7 @@ public class TheRenderKing : MonoBehaviour {
             cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonWater.waterNutrientsBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterNutrientsBitsCBuffer.count);
 
-            if(simManager.trophicLayersManager.algaeOn) {
+            if(simManager.trophicLayersManager.GetAlgaeOnOff()) {
                 foodParticleDisplayMat.SetPass(0);
                 foodParticleDisplayMat.SetBuffer("foodParticleDataCBuffer", simManager.vegetationManager.algaeParticlesCBuffer);
                 foodParticleDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -3622,7 +3622,7 @@ public class TheRenderKing : MonoBehaviour {
         
             }
             
-            if(simManager.trophicLayersManager.zooplanktonOn) {
+            if(simManager.trophicLayersManager.GetZooplanktonOnOff()) {
                 // add shadow pass eventually
                 animalParticleDisplayMat.SetPass(0);
                 animalParticleDisplayMat.SetBuffer("animalParticleDataCBuffer", simManager.zooplanktonManager.animalParticlesCBuffer);
@@ -3825,16 +3825,15 @@ public class TheRenderKing : MonoBehaviour {
 
         
 
-            if(simManager.uiManager.tolInspectOn) {
-                gizmoStirToolMat.SetPass(0);
-                gizmoStirToolMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-                gizmoStirToolMat.SetBuffer("gizmoStirToolPosCBuffer", gizmoStirToolPosCBuffer);
-                gizmoStirToolMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
-                gizmoStirToolMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-                gizmoStirToolMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
-                cmdBufferMain.DrawProcedural(Matrix4x4.identity, gizmoStirToolMat, 0, MeshTopology.Triangles, 6, 1);
-
-            }
+            //if(simManager.uiManager.tolInspectOn) {
+            //}
+            gizmoStirToolMat.SetPass(0);
+            gizmoStirToolMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+            gizmoStirToolMat.SetBuffer("gizmoStirToolPosCBuffer", gizmoCursorPosCBuffer);
+            gizmoStirToolMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+            gizmoStirToolMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+            gizmoStirToolMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
+            cmdBufferMain.DrawProcedural(Matrix4x4.identity, gizmoStirToolMat, 0, MeshTopology.Triangles, 6, 1);
         
         }
         
@@ -4280,8 +4279,8 @@ public class TheRenderKing : MonoBehaviour {
         if(critterHighlightTrailCBuffer != null) {
             critterHighlightTrailCBuffer.Release();
         }
-        if(gizmoStirToolPosCBuffer != null) {
-            gizmoStirToolPosCBuffer.Release();
+        if(gizmoCursorPosCBuffer != null) {
+            gizmoCursorPosCBuffer.Release();
         }
         if(gizmoFeedToolPosCBuffer != null) {
             gizmoFeedToolPosCBuffer.Release();

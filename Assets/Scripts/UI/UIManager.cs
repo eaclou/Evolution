@@ -108,12 +108,14 @@ public class UIManager : MonoBehaviour {
     public float toolbarInfluencePoints = 0.5f;
     public Text textInfluencePointsValue;
     public Material infoMeterInfluencePointsMat;
-    private float addSpeciesInfluenceCost = 0.33f;
+    private float addSpeciesInfluenceCost = 0.33f;    
     public Button buttonToolbarInspect;
     public Button buttonToolbarNutrients;
     public Button buttonToolbarStir;
     public Button buttonToolbarMutate;
     public Button buttonToolbarRemove;
+
+    public GameObject panelPendingClickPrompt;
     //
     //public Button buttonToolbarAddDecomposer;
     public Button buttonToolbarRemoveDecomposer;
@@ -501,28 +503,30 @@ public class UIManager : MonoBehaviour {
         simEventComponentsArray[1] = simEvent1;
         simEventComponentsArray[2] = simEvent2;
         simEventComponentsArray[3] = simEvent3;
+
+        ClickToolButtonInspect();
     }
 
     
     public void UpdateObserverModeUI() {
-        if(isObserverMode) {
+        if (isObserverMode) {
             panelObserverMode.SetActive(true);
 
             //textCurGen.text = "Generation: " + gameManager.simulationManager.curApproxGen.ToString("F0");
             //textAvgLifespan.text = "Average Lifespan: " + Mathf.RoundToInt(gameManager.simulationManager.rollingAverageAgentScoresArray[0]).ToString();
-            
+
             Vector2 moveDir = Vector2.zero;
             bool isKeyboardInput = false;
             // CONTROLLER:
-            float controllerHorizontal = Input.GetAxis ("Horizontal"); 
-            float controllerVertical = Input.GetAxis ("Vertical");
+            float controllerHorizontal = Input.GetAxis("Horizontal");
+            float controllerVertical = Input.GetAxis("Vertical");
             moveDir.x = controllerHorizontal;
             moveDir.y = controllerVertical;
-            
+
             Vector2 rightStickInput = new Vector2(Input.GetAxis("RightStickHorizontal"), Input.GetAxis("RightStickVertical"));
-            
-            float leftTrigger = Input.GetAxis ("LeftTrigger");
-            float rightTrigger = Input.GetAxis ("RightTrigger");
+
+            float leftTrigger = Input.GetAxis("LeftTrigger");
+            float rightTrigger = Input.GetAxis("RightTrigger");
             //float buttonA = Input.GetAxis("ButtonA");
             //float buttonB = Input.GetAxis("ButtonB");
             //float buttonX = Input.GetAxis("ButtonX");
@@ -534,42 +538,40 @@ public class UIManager : MonoBehaviour {
                 buttonA.ToString() + ", B: " + buttonB.ToString() + ", X: " + buttonX.ToString() + ", Y: " + buttonY.ToString());
 
             }*/
-            
-            if(Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W)) {  // UP !!!!
+
+            if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W)) {  // UP !!!!
                 moveDir.y = 1f;
                 isKeyboardInput = true;
                 //cameraManager.targetCamPos.y += camPanSpeed;
                 //StopFollowing();                
             }
-            if(Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S)) {  // DOWN !!!!                
+            if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S)) {  // DOWN !!!!                
                 moveDir.y = -1f;
                 isKeyboardInput = true;
-            }            
-            if(Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D)) {  // RIGHT !!!!
+            }
+            if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D)) {  // RIGHT !!!!
                 moveDir.x = 1f;
                 isKeyboardInput = true;
             }
-            if(Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A)) {  // LEFT !!!!!                
+            if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A)) {  // LEFT !!!!!                
                 moveDir.x = -1f;
                 isKeyboardInput = true;
             }
-            
-            if(isKeyboardInput) {   
+
+            if (isKeyboardInput) {
                 moveDir = moveDir.normalized;
                 StopFollowing();
             }
-            if(moveDir.sqrMagnitude > 0.001f) {                
+            if (moveDir.sqrMagnitude > 0.001f) {
                 StopFollowing();
             }
             cameraManager.MoveCamera(moveDir);
 
-            if (Input.GetKey(KeyCode.R)) 
-            {
+            if (Input.GetKey(KeyCode.R)) {
                 cameraManager.TiltCamera(-1f);
                 //cameraManager.masterTargetTiltAngle -= cameraManager.masterTiltSpeed * tiltSpeedMult * Time.deltaTime;
             }
-            if (Input.GetKey(KeyCode.F)) 
-            {
+            if (Input.GetKey(KeyCode.F)) {
                 cameraManager.TiltCamera(1f);
                 //cameraManager.masterTargetTiltAngle += cameraManager.masterTiltSpeed * tiltSpeedMult * Time.deltaTime;
             }
@@ -583,15 +585,13 @@ public class UIManager : MonoBehaviour {
                 Debug.Log("Pressed Tab!");
                 ClickButtonToggleDebug();
             }
-            if(Input.GetKeyDown(KeyCode.Space)) {
+            if (Input.GetKeyDown(KeyCode.Space)) {
                 Debug.Log("Pressed Spacebar!");
                 isPaused = !isPaused;
-                if (isPaused)
-                {
+                if (isPaused) {
                     ClickButtonPause();
                 }
-                else
-                {
+                else {
                     ClickButtonPlayNormal();
                 }
             }
@@ -601,23 +601,23 @@ public class UIManager : MonoBehaviour {
                 //ClickButtonQuit();
             }
             if (Input.GetKeyDown("joystick button 0")) {
-                Debug.Log("Pressed ButtonA!");                
+                Debug.Log("Pressed ButtonA!");
                 //ClickStatsButton();
             }
             if (Input.GetKeyDown("joystick button 1")) {
-                Debug.Log("Pressed ButtonB!");                
+                Debug.Log("Pressed ButtonB!");
                 //ClickStatsButton();
             }
             if (Input.GetKeyDown("joystick button 2")) {
-                Debug.Log("Pressed ButtonX!");                
+                Debug.Log("Pressed ButtonX!");
                 //ClickStatsButton();
             }
             if (Input.GetKeyDown("joystick button 3")) {
-                Debug.Log("Pressed ButtonY!");                
+                Debug.Log("Pressed ButtonY!");
                 ClickStatsButton();
             }
             if (Input.GetAxis("RightTrigger") > 0.01f) {
-                Debug.Log("Pressed RightTrigger: " + Input.GetAxis("RightTrigger").ToString());                
+                Debug.Log("Pressed RightTrigger: " + Input.GetAxis("RightTrigger").ToString());
                 //ClickStatsButton();
             }
 
@@ -630,15 +630,106 @@ public class UIManager : MonoBehaviour {
                 isDraggingMouse = false;
                 isDraggingSpeciesNode = false;
             }
+
+            MouseRaycastCheckAgents(leftClickThisFrame);
             
+            
+            // Get position of mouse on water plane:
+            MouseRaycastWaterPlane(Input.mousePosition); 
+            Vector4[] dataArray = new Vector4[1];
+            Vector4 gizmoPos = new Vector4(curMousePositionOnWaterPlane.x, curMousePositionOnWaterPlane.y, 0f, 0f);
+            dataArray[0] = gizmoPos;
+            gameManager.theRenderKing.gizmoCursorPosCBuffer.SetData(dataArray);
+
+            bool mouseCursorVisible = false;
+            panelPendingClickPrompt.SetActive(false);
+            if(gameManager.simulationManager.trophicLayersManager.pendingTrophicSlot) {
+                panelPendingClickPrompt.SetActive(true);
+                mouseCursorVisible = true;
+
+                if (leftClickThisFrame) {
+                    gameManager.simulationManager.trophicLayersManager.ClickedPendingTrophicSlot();                    
+                    toolbarInfluencePoints -= addSpeciesInfluenceCost;
+                    treeOfLifeManager.ClickedOnSpeciesNode(1);
+                    UpdateTolSpeciesColorUI();
+                    if(gameManager.simulationManager.trophicLayersManager.pendingTrophicSlotRef.kingdomID == 2) {
+                        if(gameManager.simulationManager.trophicLayersManager.pendingTrophicSlotRef.tierID == 1) {
+                            gameManager.simulationManager.CreateAgentSpecies(new Vector3(curMousePositionOnWaterPlane.x, curMousePositionOnWaterPlane.y, 0f));
+                        }
+                    }
+                }
+                else {                    
+                }
+            }
+            
+            if (curActiveTool == ToolType.Inspect || curActiveTool == ToolType.None) {                    
+                //gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_IsVisible", 0f);
+            }
+            else {
+                mouseCursorVisible = true;
+                //gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_IsVisible", 1f);
+            }
+            
+            if (curActiveTool == ToolType.Stir) {                    
+                
+                float isActing = 0f;
+                if (isDraggingMouse) {
+                    isActing = 1f;
+                    toolbarInfluencePoints -= 0.00275f;
+                    toolbarInfluencePoints = Mathf.Clamp01(toolbarInfluencePoints);
+
+                    float mag = smoothedMouseVel.magnitude;
+                    float radiusMult = (0.75f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.5f);
+
+                    if(mag > 0f && toolbarInfluencePoints > 0.01f) {
+                        gameManager.simulationManager.PlayerToolStirOn(curMousePositionOnWaterPlane, smoothedMouseVel * (0.75f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.25f), radiusMult);
+                    }
+                    else {
+                        gameManager.simulationManager.PlayerToolStirOff();
+                    }
+                }
+                else {
+                    gameManager.simulationManager.PlayerToolStirOff();
+                }
+                    
+                gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_IsStirring", isActing);
+                gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_Radius", 4f);
+            }
+
+            if(curActiveTool == ToolType.Nutrients) {
+                if(leftClickThisFrame && toolbarInfluencePoints >= 0.1f) {
+                    toolbarInfluencePoints = Mathf.Clamp01(toolbarInfluencePoints - 0.1f);
+                    gameManager.simulationManager.simResourceManager.curGlobalNutrients += 10f;
+                    gameManager.simulationManager.simResourceManager.curGlobalDetritus += 10f;
+                    //gameManager.simulationManager.PlayerFeedToolPour(hit.point);
+                }                
+            }
+            if(curActiveTool == ToolType.Remove) {
+                if(leftClickThisFrame && toolbarInfluencePoints >= 0.1f) {
+                    toolbarInfluencePoints = Mathf.Clamp01(toolbarInfluencePoints - 0.1f);
+                    gameManager.simulationManager.simResourceManager.curGlobalOxygen -= 10f;
+                    gameManager.simulationManager.simResourceManager.curGlobalNutrients -= 10f;
+                    //gameManager.simulationManager.simResourceManager.curGlobalDetritus += 10f;
+                    //gameManager.simulationManager.PlayerFeedToolPour(hit.point);
+                }                
+            }
+
+            if(mouseCursorVisible) {
+                gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_IsVisible", 1f);
+            }         
+            else {
+                gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_IsVisible", 0f);
+            }
+
+            // OLD SHIT BELOW:::: ================================================================================
+
             //bool isDragging = Input.GetMouseButton(0);
             
             //if(curActiveTool == ToolType.Inspect) {
             //    MouseRaycastInspect(leftClickThisFrame);
             //}
-            MouseRaycastCheck(leftClickThisFrame);
 
-            bool rightTriggerDownThisFrame = false;
+            /*bool rightTriggerDownThisFrame = false;
             float rightTriggerVal = Input.GetAxis("RightTrigger");
             bool ctrlCursorDragging = false;
             if(rightTriggerVal > 0.01f) {
@@ -663,7 +754,9 @@ public class UIManager : MonoBehaviour {
 
             Vector4[] dataArray = new Vector4[1];
             Vector4 gizmoPos = new Vector4(curMousePositionOnWaterPlane.x, curMousePositionOnWaterPlane.y, 0f, 0f);
-
+            */
+            // Disabling controller support temporarily:
+            /*
             if(rightTriggerOn) {                    
                 mouseRaycastWaterPlane.SetActive(true);
                 MouseRaycastWaterPlane(false, ctrlCursorDragging, true, new Vector3((rightStickInput.x * 0.5f + 0.5f) * 1920f, (-rightStickInput.y * 0.5f + 0.5f) * 1080f, 0f), smoothedCtrlCursorVel * 512f); // smoothedCtrlCursorVel); 
@@ -681,12 +774,15 @@ public class UIManager : MonoBehaviour {
             else {
                 gameManager.simulationManager.PlayerToolStirOff();
                 gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_IsVisible", 0f);
-            }
+            }*/
 
-            dataArray[0] = gizmoPos;
-            gameManager.theRenderKing.gizmoStirToolPosCBuffer.SetData(dataArray);
+            //dataArray[0] = gizmoPos;
+            //gameManager.theRenderKing.gizmoStirToolPosCBuffer.SetData(dataArray);
 
-            if(curActiveTool == ToolType.Stir) {                    
+
+            // #$^$%^#$% OLD OLD OLD OLD OLD OLD!!!! %^&*$&* :
+            /*
+            if (curActiveTool == ToolType.Stir) {                    
                 mouseRaycastWaterPlane.SetActive(true);
                 MouseRaycastWaterPlane(false, isDraggingMouse, true, Input.mousePosition, smoothedMouseVel); 
                 
@@ -728,7 +824,7 @@ public class UIManager : MonoBehaviour {
 
             if(curActiveTool != ToolType.Nutrients && curActiveTool != ToolType.Stir) {
                 mouseRaycastWaterPlane.SetActive(false);
-            }
+            }*/
             
             if (Input.GetMouseButtonDown(1)) {
                 Debug.Log("RIGHT CLICKETY-CLICK!");
@@ -786,9 +882,25 @@ public class UIManager : MonoBehaviour {
         animatorInspectPanel.Play("SlideOnPanelInspect");        
     }
     
-    private void MouseRaycastWaterPlane(bool clicked, bool heldDown, bool stirOn, Vector3 screenPos, Vector2 smoothedVel) {
+    private void MouseRaycastWaterPlane(Vector3 screenPos) {
+        mouseRaycastWaterPlane.SetActive(true);
+        //Vector3 camPos = cameraManager.gameObject.transform.position;                
+        Ray ray = cameraManager.gameObject.GetComponent<Camera>().ScreenPointToRay(screenPos);
+        RaycastHit hit = new RaycastHit();
+        int layerMask = 1 << 12;
+        Physics.Raycast(ray, out hit, layerMask);
+
+        if (hit.collider != null) {
+            curMousePositionOnWaterPlane = hit.point;  
+            // Z = -0.5f ???? Look into that if it's causing a problem:
+            prevMousePositionOnWaterPlane = curMousePositionOnWaterPlane;
+            //Debug.Log("curMousePositionOnWaterPlane:" + curMousePositionOnWaterPlane.ToString());
+        }
+    }
+    // old:
+    /*private void MouseRaycastWaterPlane(bool clicked, bool heldDown, bool stirOn, Vector3 screenPos, Vector2 smoothedVel) {
         
-        Vector3 camPos = cameraManager.gameObject.transform.position;                
+        //Vector3 camPos = cameraManager.gameObject.transform.position;                
         Ray ray = cameraManager.gameObject.GetComponent<Camera>().ScreenPointToRay(screenPos);
         RaycastHit hit = new RaycastHit();
         int layerMask = 1 << 12;
@@ -796,7 +908,9 @@ public class UIManager : MonoBehaviour {
 
         if(hit.collider != null) {
             curMousePositionOnWaterPlane = hit.point;
-            curCtrlCursorPositionOnWaterPlane = hit.point;
+            //curCtrlCursorPositionOnWaterPlane = hit.point;
+            
+            // OLD CRAP:::
             
             if (clicked) {
                 //Debug.Log("CLICK Hit Water Plane! Coords: " + hit.point.ToString());                
@@ -827,26 +941,25 @@ public class UIManager : MonoBehaviour {
             
 
             prevMousePositionOnWaterPlane = curMousePositionOnWaterPlane;
-            prevCtrlCursorPositionOnWaterPlane = curCtrlCursorPositionOnWaterPlane;
+            //prevCtrlCursorPositionOnWaterPlane = curCtrlCursorPositionOnWaterPlane;
         }
-    }
-    private void MouseRaycastCheck(bool clicked) {
+    }*/
+    private void MouseRaycastCheckAgents(bool clicked) {
         
         Vector3 camPos = cameraManager.gameObject.transform.position;
         
-        float mouseRatioX = Input.mousePosition.x / Screen.width;
-        float mouseRatioY = Input.mousePosition.y / Screen.height;
-        Vector3 mousePos = new Vector3(mouseRatioX, mouseRatioY, -1f);
+        //float mouseRatioX = Input.mousePosition.x / Screen.width;
+        //float mouseRatioY = Input.mousePosition.y / Screen.height;
+        //Vector3 mousePos = new Vector3(mouseRatioX, mouseRatioY, -1f);
         Ray ray = cameraManager.gameObject.GetComponent<Camera>().ScreenPointToRay(Input.mousePosition);
         RaycastHit hit = new RaycastHit();
         //int layerMask = 0;
-        Physics.Raycast(ray, out hit);
+        Physics.Raycast(ray, out hit);  // *** USE DEDICATED LAYER FOR THIS CHECK!!!! *********
 
         //if(clicked) {
         //    Debug.Log((mousePos * 0.5f).x.ToString() + ", " + (mousePos * 0.5f).y.ToString());
         //}
         
-
         cameraManager.isMouseHoverAgent = false;
         cameraManager.mouseHoverAgentIndex = 0;
         cameraManager.mouseHoverAgentRef = null;
@@ -1383,8 +1496,42 @@ public class UIManager : MonoBehaviour {
         imageTolBackdropGraphs.gameObject.SetActive(tolEventsTimelineOn);
         imageTolBackdropDescription.gameObject.SetActive(tolSpeciesDescriptionOn);
     }
+    private void SetToolbarButtonStateUI(ref Button button, TrophicSlot.SlotStatus slotStatus) {
+
+        button.gameObject.SetActive(true);
+        switch(slotStatus) {
+            case TrophicSlot.SlotStatus.Off:
+                button.gameObject.SetActive(false);                
+                break;
+            case TrophicSlot.SlotStatus.Locked:
+                button.interactable = false;                
+                button.GetComponentInChildren<Text>().text = "-";
+                break;
+            case TrophicSlot.SlotStatus.Empty:
+                button.interactable = true;                
+                button.GetComponentInChildren<Text>().text = "+";
+                break;
+            case TrophicSlot.SlotStatus.Pending:
+                button.interactable = false;
+                button.GetComponentInChildren<Text>().text = "%";
+                break;
+            case TrophicSlot.SlotStatus.On:
+                button.interactable = true;
+                button.GetComponentInChildren<Text>().text = "On";
+                break;
+            case TrophicSlot.SlotStatus.Selected:
+                button.interactable = false;
+                button.GetComponentInChildren<Text>().text = "**";
+                break;
+            default:
+                break;
+        }
+    }
     public void UpdateToolbarPanelUI() {
-        
+
+        buttonToolbarRemoveDecomposer.gameObject.SetActive(false);
+        buttonToolbarRemovePlant.gameObject.SetActive(false);
+        buttonToolbarRemoveAnimal.gameObject.SetActive(false);
 
         buttonToolbarInspect.GetComponent<Image>().color = buttonDisabledColor;
         buttonToolbarStir.GetComponent<Image>().color = buttonDisabledColor;
@@ -1393,6 +1540,10 @@ public class UIManager : MonoBehaviour {
         buttonToolbarRemove.GetComponent<Image>().color = buttonDisabledColor;
 
         switch(curActiveTool) {
+            case ToolType.None:
+                //buttonToolbarInspect.GetComponent<Image>().color = buttonDisabledColor;
+
+                break;
             case ToolType.Inspect:
                 buttonToolbarInspect.GetComponent<Image>().color = buttonActiveColor;
                 break;
@@ -1414,104 +1565,113 @@ public class UIManager : MonoBehaviour {
         }
 
         // Influence points meter:     
-        toolbarInfluencePoints += 0.00025f;
+        toolbarInfluencePoints += 0.00225f; // x10 while debugging
         toolbarInfluencePoints = Mathf.Clamp01(toolbarInfluencePoints);
         infoMeterInfluencePointsMat.SetFloat("_FillPercentage", toolbarInfluencePoints);
         textInfluencePointsValue.text = "Influence: \n" + (toolbarInfluencePoints * 100f).ToString("F0") + "%";
-        // Species Slots visuals:
-        TrophicLayersManager layerManager = gameManager.simulationManager.trophicLayersManager;
-        if(layerManager.agentsOn) {
-            buttonToolbarAnimal1.GetComponentInChildren<Text>().text = "On";
-            buttonToolbarAnimal2.GetComponentInChildren<Text>().text = "On";
-            buttonToolbarAnimal3.GetComponentInChildren<Text>().text = "On";
-            buttonToolbarAnimal4.GetComponentInChildren<Text>().text = "On";
-        }
-        else {
-            if(layerManager.zooplanktonOn) {
-                buttonToolbarAnimal1.interactable = true;
-                buttonToolbarAnimal2.interactable = true;
-                buttonToolbarAnimal3.interactable = true;
-                buttonToolbarAnimal4.interactable = true;                
-                buttonToolbarAnimal1.GetComponentInChildren<Text>().text = "+";
-                buttonToolbarAnimal2.GetComponentInChildren<Text>().text = "+";
-                buttonToolbarAnimal3.GetComponentInChildren<Text>().text = "+";
-                buttonToolbarAnimal4.GetComponentInChildren<Text>().text = "+";
-
-                if(toolbarInfluencePoints <= addSpeciesInfluenceCost) {
-                    buttonToolbarAnimal1.interactable = false;
-                    buttonToolbarAnimal2.interactable = false;
-                    buttonToolbarAnimal3.interactable = false;
-                    buttonToolbarAnimal4.interactable = false;
-                    buttonToolbarAnimal1.GetComponentInChildren<Text>().text = "-";
-                    buttonToolbarAnimal2.GetComponentInChildren<Text>().text = "-";
-                    buttonToolbarAnimal3.GetComponentInChildren<Text>().text = "-";
-                    buttonToolbarAnimal4.GetComponentInChildren<Text>().text = "-";
-                }
-                
+        
+        
+        // Species Slots visuals:  ================================================================================
+        TrophicLayersManager layerManager = gameManager.simulationManager.trophicLayersManager;   
+        /*if(layerManager.selectedTrophicSlot) {
+            if(layerManager.selectedTrophicSlotRef.kingdomID == 2) {
+                buttonToolbarRemoveAnimal.gameObject.SetActive(true);
             }
             else {
-                //buttonToolbarAnimal1.interactable = true;
-                //buttonToolbarAnimal2.interactable = true;
-                //buttonToolbarAnimal3.interactable = true;
-                //buttonToolbarAnimal4.interactable = true;
-                buttonToolbarAnimal1.GetComponentInChildren<Text>().text = "-";
-                buttonToolbarAnimal2.GetComponentInChildren<Text>().text = "-";
-                buttonToolbarAnimal3.GetComponentInChildren<Text>().text = "-";
-                buttonToolbarAnimal4.GetComponentInChildren<Text>().text = "-";
+                buttonToolbarRemoveAnimal.gameObject.SetActive(false);
             }
+        }*/
+        // KINGDOM DECOMPOSERS:
+        //SetToolbarButtonStateUI(ref buttonToolbarDecomposers, gameManager.simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status);
+        if (layerManager.GetDecomposersOnOff()) {
+            SetToolbarButtonStateUI(ref buttonToolbarDecomposers, TrophicSlot.SlotStatus.On);
+        }
+        else {
             
-        }
-
-        if(layerManager.zooplanktonOn) {
-            //buttonToolbarZooplankton.GetComponent<Image>().color = buttonActiveColor;
-            buttonToolbarZooplankton.GetComponentInChildren<Text>().text = "On";
-            buttonToolbarAnimal1.interactable = true;
-            buttonToolbarAnimal2.interactable = true;
-            buttonToolbarAnimal3.interactable = true;
-            buttonToolbarAnimal4.interactable = true;
-        }
-        else {
-            buttonToolbarZooplankton.interactable = true;
-            buttonToolbarZooplankton.GetComponentInChildren<Text>().text = "+";
+            bool unlocked = true;
             if(toolbarInfluencePoints <= addSpeciesInfluenceCost) {
-                buttonToolbarZooplankton.interactable = false;
-                buttonToolbarZooplankton.GetComponentInChildren<Text>().text = "-";
+                unlocked = false;
             }
-            buttonToolbarAnimal1.interactable = false;
-            buttonToolbarAnimal2.interactable = false;
-            buttonToolbarAnimal3.interactable = false;
-            buttonToolbarAnimal4.interactable = false;
-            buttonToolbarAnimal1.GetComponentInChildren<Text>().text = "-";
-            buttonToolbarAnimal2.GetComponentInChildren<Text>().text = "-";
-            buttonToolbarAnimal3.GetComponentInChildren<Text>().text = "-";
-            buttonToolbarAnimal4.GetComponentInChildren<Text>().text = "-";
-        }
+            if(!layerManager.GetAlgaeOnOff()) {
+                unlocked = false;
+            }
 
-        if(layerManager.algaeOn) {
-            buttonToolbarAlgae.GetComponentInChildren<Text>().text = "On";
-        }
-        else {
-            buttonToolbarAlgae.interactable = true;
-            buttonToolbarAlgae.GetComponentInChildren<Text>().text = "+";
-            if(toolbarInfluencePoints <= addSpeciesInfluenceCost) {
-                buttonToolbarAlgae.interactable = false;
-                buttonToolbarAlgae.GetComponentInChildren<Text>().text = "-";
+            if(unlocked) {
+                SetToolbarButtonStateUI(ref buttonToolbarDecomposers, TrophicSlot.SlotStatus.Empty);                
+            }
+            else {
+                SetToolbarButtonStateUI(ref buttonToolbarDecomposers, TrophicSlot.SlotStatus.Locked);
             }
         }
-        buttonToolbarPlant1.GetComponentInChildren<Text>().text = "-";
-        buttonToolbarPlant2.GetComponentInChildren<Text>().text = "-";
-
-        if(layerManager.decomposersOn) {
-            buttonToolbarDecomposers.GetComponentInChildren<Text>().text = "On";
+        // KINGDOM PLANTS:
+        if(layerManager.GetAlgaeOnOff()) {
+            SetToolbarButtonStateUI(ref buttonToolbarAlgae, TrophicSlot.SlotStatus.On);
         }
         else {
-            buttonToolbarDecomposers.interactable = true;
-            buttonToolbarDecomposers.GetComponentInChildren<Text>().text = "+";
+            SetToolbarButtonStateUI(ref buttonToolbarAlgae, TrophicSlot.SlotStatus.Empty);
             if(toolbarInfluencePoints <= addSpeciesInfluenceCost) {
-                buttonToolbarDecomposers.interactable = false;
-                buttonToolbarDecomposers.GetComponentInChildren<Text>().text = "-";
+                SetToolbarButtonStateUI(ref buttonToolbarAlgae, TrophicSlot.SlotStatus.Locked);
             }
         }
+        SetToolbarButtonStateUI(ref buttonToolbarPlant1, TrophicSlot.SlotStatus.Locked);
+        SetToolbarButtonStateUI(ref buttonToolbarPlant2, TrophicSlot.SlotStatus.Locked);
+        // KINGDOM ANIMALS:
+        //Zooplankton:
+        if(layerManager.GetZooplanktonOnOff()) {
+            SetToolbarButtonStateUI(ref buttonToolbarZooplankton, TrophicSlot.SlotStatus.On);
+        }
+        else {
+            
+            bool unlocked = true;
+            if(toolbarInfluencePoints <= addSpeciesInfluenceCost) {
+                unlocked = false;
+            }
+            if(!layerManager.GetAlgaeOnOff()) {
+                unlocked = false;
+            }
+            if(!layerManager.GetDecomposersOnOff()) {
+                unlocked = false;
+            }
+
+            if(unlocked) {
+                SetToolbarButtonStateUI(ref buttonToolbarZooplankton, TrophicSlot.SlotStatus.Empty);                
+            }
+            else {
+                SetToolbarButtonStateUI(ref buttonToolbarZooplankton, TrophicSlot.SlotStatus.Locked);
+            }
+        }
+        // AGENTS:
+        // *************************************************************************************
+        if (layerManager.GetAgentsOnOff()) {
+            SetToolbarButtonStateUI(ref buttonToolbarAnimal1, layerManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0].status);
+            SetToolbarButtonStateUI(ref buttonToolbarAnimal2, layerManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1].status);
+            SetToolbarButtonStateUI(ref buttonToolbarAnimal3, layerManager.kingdomAnimals.trophicTiersList[1].trophicSlots[2].status);
+            SetToolbarButtonStateUI(ref buttonToolbarAnimal4, layerManager.kingdomAnimals.trophicTiersList[1].trophicSlots[3].status);
+        }
+        else {
+            SetToolbarButtonStateUI(ref buttonToolbarAnimal1, TrophicSlot.SlotStatus.Locked);
+            SetToolbarButtonStateUI(ref buttonToolbarAnimal2, TrophicSlot.SlotStatus.Locked);
+            SetToolbarButtonStateUI(ref buttonToolbarAnimal3, TrophicSlot.SlotStatus.Locked);
+            SetToolbarButtonStateUI(ref buttonToolbarAnimal4, TrophicSlot.SlotStatus.Locked);
+            if(layerManager.GetZooplanktonOnOff()) { // is unlocked?
+                SetToolbarButtonStateUI(ref buttonToolbarAnimal1, layerManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0].status);
+                SetToolbarButtonStateUI(ref buttonToolbarAnimal2, layerManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1].status);
+                SetToolbarButtonStateUI(ref buttonToolbarAnimal3, layerManager.kingdomAnimals.trophicTiersList[1].trophicSlots[2].status);
+                SetToolbarButtonStateUI(ref buttonToolbarAnimal4, layerManager.kingdomAnimals.trophicTiersList[1].trophicSlots[3].status);
+                if(toolbarInfluencePoints <= addSpeciesInfluenceCost) {
+                    SetToolbarButtonStateUI(ref buttonToolbarAnimal1, TrophicSlot.SlotStatus.Locked);
+                    SetToolbarButtonStateUI(ref buttonToolbarAnimal2, TrophicSlot.SlotStatus.Locked);
+                    SetToolbarButtonStateUI(ref buttonToolbarAnimal3, TrophicSlot.SlotStatus.Locked);
+                    SetToolbarButtonStateUI(ref buttonToolbarAnimal4, TrophicSlot.SlotStatus.Locked);
+                }
+            }           
+        }
+
+        
+
+        
+
+        
     }
     public void UpdateInfoPanelUI() {
         textCurYear.text = gameManager.simulationManager.curSimYear.ToString();
@@ -2878,7 +3038,7 @@ public class UIManager : MonoBehaviour {
     }
     
     public void ClickToolButtonStir() {
-
+        gameManager.simulationManager.trophicLayersManager.ResetSelectedAgentSlots();
         //if(curActiveTool != ToolType.Stir) {
             curActiveTool = ToolType.Stir;
              
@@ -2898,7 +3058,7 @@ public class UIManager : MonoBehaviour {
         } */       
     }
     public void ClickToolButtonInspect() {
-
+        //gameManager.simulationManager.trophicLayersManager.ResetSelectedAgentSlots();
         //if(curActiveTool != ToolType.Inspect) {
             curActiveTool = ToolType.Inspect;
 
@@ -2914,7 +3074,7 @@ public class UIManager : MonoBehaviour {
         } */
     }
     public void ClickToolButtonNutrients() {
-
+        gameManager.simulationManager.trophicLayersManager.ResetSelectedAgentSlots();
         //if(curActiveTool != ToolType.Nutrients) {
             curActiveTool = ToolType.Nutrients;
 
@@ -2934,7 +3094,7 @@ public class UIManager : MonoBehaviour {
         } */
     }
     public void ClickToolButtonRemove() {
-
+        gameManager.simulationManager.trophicLayersManager.ResetSelectedAgentSlots();
         //if(curActiveTool != ToolType.Remove) {
             curActiveTool = ToolType.Remove;
 
@@ -2987,7 +3147,7 @@ public class UIManager : MonoBehaviour {
         //gameManager.simulationManager.ChangeGlobalMutationRate(val); // normalizedVal);
     }
     public void ClickToolButtonMutate() {
-
+            gameManager.simulationManager.trophicLayersManager.ResetSelectedAgentSlots();
         //if(curActiveTool != ToolType.Mutate) {
             curActiveTool = ToolType.Mutate;
 
@@ -3058,62 +3218,92 @@ public class UIManager : MonoBehaviour {
         //isActiveStirToolPanel = false;
     }
     public void ClickButtonToolbarDecomposers() {
-        if(gameManager.simulationManager.trophicLayersManager.decomposersOn) {
-
+        if(gameManager.simulationManager.trophicLayersManager.GetDecomposersOnOff()) {
+            gameManager.simulationManager.trophicLayersManager.ResetSelectedAgentSlots();
         }
         else {
             if(toolbarInfluencePoints > addSpeciesInfluenceCost) {
-                gameManager.simulationManager.trophicLayersManager.decomposersOn = true;
-                toolbarInfluencePoints -= addSpeciesInfluenceCost;
+                gameManager.simulationManager.trophicLayersManager.PendingDecomposers();
+                // wait on click
+                //pendingTrophicLayerAdd = true;
+                //toolbarInfluencePoints -= addSpeciesInfluenceCost;
             }
             else {
 
             }
         }
+        curActiveTool = ToolType.None;
     }
     public void ClickButtonToolbarAlgae() {
-        if(gameManager.simulationManager.trophicLayersManager.algaeOn) {
-
+        if(gameManager.simulationManager.trophicLayersManager.GetAlgaeOnOff()) {
+            // if already on:
+            // Selected!!!
+            gameManager.simulationManager.trophicLayersManager.ResetSelectedAgentSlots();
         }
         else {
             if(toolbarInfluencePoints > addSpeciesInfluenceCost) {
-                gameManager.simulationManager.trophicLayersManager.algaeOn = true;
-                toolbarInfluencePoints -= addSpeciesInfluenceCost;
+                gameManager.simulationManager.trophicLayersManager.PendingAlgae();
+                //toolbarInfluencePoints -= addSpeciesInfluenceCost;
             }
             else {
 
             }
         }
+        curActiveTool = ToolType.None;
     }
     public void ClickButtonToolbarZooplankton() {
-        if(gameManager.simulationManager.trophicLayersManager.zooplanktonOn) {
-
+        if(gameManager.simulationManager.trophicLayersManager.GetZooplanktonOnOff()) {
+            gameManager.simulationManager.trophicLayersManager.ResetSelectedAgentSlots();
         }
         else {
             if(toolbarInfluencePoints > addSpeciesInfluenceCost) {
-                gameManager.simulationManager.trophicLayersManager.zooplanktonOn = true;
-                toolbarInfluencePoints -= addSpeciesInfluenceCost;
+                gameManager.simulationManager.trophicLayersManager.PendingZooplankton();
+                //toolbarInfluencePoints -= addSpeciesInfluenceCost;
             }
             else {
 
             }
         }
+        curActiveTool = ToolType.None;
     }
+
     public void ClickButtonToolbarAgent(int index) {
-        if(gameManager.simulationManager.trophicLayersManager.agentsOn) {
+        if (gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[index].status == TrophicSlot.SlotStatus.On) {
+
+            //gameManager.simulationManager.trophicLayersManager.ResetSelectedAgentSlots();
+
+            //gameManager.simulationManager.trophicLayersManager.selectedTrophicSlot = true;
+            //gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[index].status = TrophicSlot.SlotStatus.Selected;
+            //gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[index];
+            
+        }
+        else {
+            if(toolbarInfluencePoints > addSpeciesInfluenceCost) {
+                gameManager.simulationManager.trophicLayersManager.PendingAgents(index);
+                //toolbarInfluencePoints -= addSpeciesInfluenceCost;
+            }
+            else {
+
+            }  
+        }
+        curActiveTool = ToolType.None;
+        /*if (gameManager.simulationManager.trophicLayersManager.GetAgentsOnOff()) {
 
         }
         else {
             if(toolbarInfluencePoints > addSpeciesInfluenceCost) {
-                gameManager.simulationManager.trophicLayersManager.agentsOn = true;
-                toolbarInfluencePoints -= addSpeciesInfluenceCost;
+                gameManager.simulationManager.trophicLayersManager.PendingAgents(index);
+                //toolbarInfluencePoints -= addSpeciesInfluenceCost;
             }
             else {
 
             }            
-        }
+        }*/
     }
 
+    public void ClickToolbarRemoveAgent() {
+        Debug.Log("Remove Agent! " + gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.slotID.ToString());
+    }
 
     public void ClickControlsMenu() {
         controlsMenuOn = true;
