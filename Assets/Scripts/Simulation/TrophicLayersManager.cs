@@ -73,15 +73,15 @@ public class TrophicLayersManager {
             if (pendingTrophicSlotRef.tierID == 0) { // Animals:
                 TurnOnZooplankton();
                 kingdomAnimals.trophicTiersList[1].trophicSlots[0].status = TrophicSlot.SlotStatus.Empty;
-                kingdomAnimals.trophicTiersList[1].trophicSlots[1].status = TrophicSlot.SlotStatus.Locked;
-                kingdomAnimals.trophicTiersList[1].trophicSlots[2].status = TrophicSlot.SlotStatus.Locked;
-                kingdomAnimals.trophicTiersList[1].trophicSlots[3].status = TrophicSlot.SlotStatus.Locked;
+                kingdomAnimals.trophicTiersList[1].trophicSlots[1].status = TrophicSlot.SlotStatus.Empty;
+                kingdomAnimals.trophicTiersList[1].trophicSlots[2].status = TrophicSlot.SlotStatus.Empty;
+                kingdomAnimals.trophicTiersList[1].trophicSlots[3].status = TrophicSlot.SlotStatus.Empty;
             }
             if(pendingTrophicSlotRef.tierID == 1) {
                 TurnOnAgents();
 
                 if(pendingTrophicSlotRef.slotID < 3) {
-                    kingdomAnimals.trophicTiersList[1].trophicSlots[pendingTrophicSlotRef.slotID + 1].status = TrophicSlot.SlotStatus.Empty;
+                    //kingdomAnimals.trophicTiersList[1].trophicSlots[pendingTrophicSlotRef.slotID + 1].status = TrophicSlot.SlotStatus.Empty;
                     //SetToolbarButtonStateUI(ref pendingTrophicSlotRef, TrophicSlot.SlotStatus.On);
                 }
 
@@ -96,7 +96,7 @@ public class TrophicLayersManager {
     public void ClickedSelectedTrophicSlot() {
         // reset things, figure out which slot was created:
         selectedTrophicSlot = false;
-        selectedTrophicSlotRef.status = TrophicSlot.SlotStatus.On;
+        selectedTrophicSlotRef.status = TrophicSlot.SlotStatus.On;  // Deselects
         
         if (pendingTrophicSlotRef.kingdomID == 2) { // Animals:
             

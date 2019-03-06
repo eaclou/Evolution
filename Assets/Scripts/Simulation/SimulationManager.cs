@@ -1003,11 +1003,22 @@ public class SimulationManager : MonoBehaviour {
 
     #region Process Events // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& PROCESS EVENTS! &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
     
+    public void RemoveSelectedAgentSpecies(int slotIndex) {
+        Debug.Log("pressedRemoveSpecies! " + trophicLayersManager.selectedTrophicSlotRef.slotID.ToString());
+
+        // need to connect UI slotID to speciesID
+        if(masterGenomePool.currentlyActiveSpeciesIDList.Count > 1) {
+            masterGenomePool.ExtinctifySpecies(this, masterGenomePool.currentlyActiveSpeciesIDList[0]);
+        }
+        
+    }
     public void CreateAgentSpecies(Vector3 spawnPos) {
         eggSackArray[0].parentAgentIndex = 0;
         eggSackArray[0].InitializeEggSackFromGenome(0, masterGenomePool.completeSpeciesPoolsList[0].representativeGenome, null, spawnPos);
         eggSackArray[0].currentBiomass = settingsManager.agentSettings._BaseInitMass; // *** TEMP!!! ***                        
-        eggSackRespawnCounter = 0;       
+        eggSackRespawnCounter = 0;   
+        
+        AddNewSpecies(masterGenomePool.completeSpeciesPoolsList[0].representativeGenome, 0);
     }
     public void ExecuteSimEvent(SimEventData eventData) {
 

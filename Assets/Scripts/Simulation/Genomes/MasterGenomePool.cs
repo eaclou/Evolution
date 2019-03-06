@@ -237,8 +237,11 @@ public class MasterGenomePool {
             }            
         }
 
+        // *********** AUTO SPECIES CREATION DISABLED FOR NOW!!! *****************************
         // CHECK IF NEW SPECIES CREATED:
+
         bool assignedToNewSpecies = false;
+            /*
         if(closestDistance > speciesSimilarityDistanceThreshold) {
             if(!speciesCreatedOrDestroyedThisFrame) {
                 if(currentlyActiveSpeciesIDList.Count < maxNumActiveSpecies) {
@@ -259,6 +262,7 @@ public class MasterGenomePool {
         else {
             //Debug.Log("closestDistanceSpeciesID: " + closestSpeciesID.ToString() + ", score: " + closestDistance.ToString());
         }
+        */
 
         if(!assignedToNewSpecies) {
             // *** maybe something fishy here??
