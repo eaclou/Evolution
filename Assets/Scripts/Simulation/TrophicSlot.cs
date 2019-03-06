@@ -9,9 +9,7 @@ public class TrophicSlot {
         Off,  // doesn't exist
         Locked,  // exists but unavailable
         Empty,  // ready to be added
-        Pending,   // during placement prompt - still cancellable
         On,  // active, occupied
-        Selected  // selected, placement active?
     }
     public int kingdomID;
     public int tierID;
@@ -19,7 +17,7 @@ public class TrophicSlot {
     public int linkedSpeciesID;
 
     public TrophicSlot() {
-        status = SlotStatus.Off;  // default off
+        status = SlotStatus.Off;  // default off (hidden)
     }
 
     public void Initialize(SlotStatus status, int kingdomID, int tierID, int slotID) {

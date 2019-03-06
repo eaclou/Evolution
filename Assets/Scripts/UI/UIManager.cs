@@ -108,7 +108,10 @@ public class UIManager : MonoBehaviour {
     public float toolbarInfluencePoints = 0.5f;
     public Text textInfluencePointsValue;
     public Material infoMeterInfluencePointsMat;
-    private float addSpeciesInfluenceCost = 0.33f;  
+    private float addSpeciesInfluenceCost = 0.33f;
+
+    private Button buttonPendingTrophicSlot;  // 
+    private Button buttonSelectedTrophicSlot;
     
     public Button buttonToolbarInspect;
     public Button buttonToolbarNutrients;
@@ -567,7 +570,8 @@ public class UIManager : MonoBehaviour {
             if (moveDir.sqrMagnitude > 0.001f) {
                 StopFollowing();
             }
-            cameraManager.MoveCamera(moveDir);
+
+            cameraManager.MoveCamera(moveDir); // ********************
 
             if (Input.GetKey(KeyCode.R)) {
                 cameraManager.TiltCamera(-1f);
@@ -649,12 +653,16 @@ public class UIManager : MonoBehaviour {
                 panelPendingClickPrompt.SetActive(true);
             }
 
-            if(pressedRemoveSpecies) {
+            // This Update() loop all happens before the Event System button click calls,
+            // ... so if you disable a button now it will prevent clicking by hiding button UI
+
+            if(pressedRemoveSpecies) { // flag that the remove button was pressed
                 //if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlot) {
                     //Debug.Log("pressedRemoveSpecies!");
                     //pressedRemoveSpecies = false;
                 //}
-                
+                RemoveSpeciesSlot();
+                gameManager.simulationManager.trophicLayersManager.pendingTrophicSlot = false;
             }
 
             if (EventSystem.current.IsPointerOverGameObject()) {
@@ -670,6 +678,7 @@ public class UIManager : MonoBehaviour {
                         if(gameManager.simulationManager.trophicLayersManager.GetAgentsOnOff()) {
                             createSpecies = true;
                         }
+                        //buttonSelectedTrophicSlot.GetComponentInChildren<Text>().color = Color.white;
                         gameManager.simulationManager.trophicLayersManager.ClickedPendingTrophicSlot();                    
                         toolbarInfluencePoints -= addSpeciesInfluenceCost;
                         treeOfLifeManager.ClickedOnSpeciesNode(1);
@@ -775,25 +784,7 @@ public class UIManager : MonoBehaviour {
                         }
                     }
                     else {
-                        gameManager.simulationManager.RemoveSelectedAgentSpecies(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.slotID);
-
-                        // REMOVE!!!
-                        // which slot was deleted? selectedID
-                        //layerManager.selectedTrophicSlotRef.kingdomID;
-                        //remove from simulation -- need function for this!
-                        // update trophic layers?
-                        //deselect
-                        //SetToolbarButtonStateUI()
-                        //buttonToolbarRemoveAnimal.gameObject.SetActive(false);
-
-                        gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.slotID].status = TrophicSlot.SlotStatus.Empty;
-                        gameManager.simulationManager.trophicLayersManager.ResetSelectedAgentSlots();
-                        
-                        pressedRemoveSpecies = false;
-
-                        buttonToolbarRemoveDecomposer.gameObject.SetActive(false);
-                        buttonToolbarRemovePlant.gameObject.SetActive(false);
-                        buttonToolbarRemoveAnimal.gameObject.SetActive(false);
+                        //RemoveAgentSpecies();
                     }                             
                     
                 }
@@ -955,6 +946,55 @@ public class UIManager : MonoBehaviour {
         else {
             panelObserverMode.SetActive(false);
         }
+    }
+    private void RemoveSpeciesSlot() {
+        TrophicSlot slot = gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef;
+        Debug.Log("RemoveSpeciesSlot( " + slot.slotID.ToString() + " ), k= " + slot.slotID.ToString());
+
+        if(slot.kingdomID == 0) {
+            Debug.Log("Remove Decomposers");
+            gameManager.simulationManager.trophicLayersManager.TurnOffDecomposers();
+        }
+        else if(slot.kingdomID == 1) {  // plant
+            Debug.Log("Remove Algae");
+            gameManager.simulationManager.trophicLayersManager.TurnOffAlgae();
+            gameManager.simulationManager.TurnOffAlgae();
+        }
+        else {  // animals
+            if(slot.tierID == 0) {
+                Debug.Log("Remove Zooplankton");
+                gameManager.simulationManager.trophicLayersManager.TurnOffZooplankton();
+
+            }
+            else {  // tier 1
+                Debug.Log("Remove AGENT");
+                gameManager.simulationManager.RemoveSelectedAgentSpecies(slot.slotID);
+            }
+        }
+
+        slot.status = TrophicSlot.SlotStatus.Empty;
+        gameManager.simulationManager.trophicLayersManager.selectedTrophicSlot = false;
+
+        pressedRemoveSpecies = false;
+        buttonToolbarRemoveDecomposer.gameObject.SetActive(false);
+        buttonToolbarRemovePlant.gameObject.SetActive(false);
+        buttonToolbarRemoveAnimal.gameObject.SetActive(false);
+
+
+        // REMOVE!!!
+        // which slot was deleted? selectedID
+        //layerManager.selectedTrophicSlotRef.kingdomID;
+        //remove from simulation -- need function for this!
+        // update trophic layers?
+        //deselect
+        //SetToolbarButtonStateUI()
+        //buttonToolbarRemoveAnimal.gameObject.SetActive(false);
+
+        
+        //gameManager.simulationManager.trophicLayersManager.ResetSelectedAgentSlots();
+                        
+
+        
     }
     public void StopFollowing() {
         cameraManager.isFollowing = false;
@@ -1482,7 +1522,7 @@ public class UIManager : MonoBehaviour {
 
         UpdateDebugUI();
         UpdateHUDUI();
-        UpdateObserverModeUI();
+        UpdateObserverModeUI();  // <== this is the big one
         //UpdateDeathScreenUI();
         UpdatePausedUI();
 
@@ -1602,28 +1642,24 @@ public class UIManager : MonoBehaviour {
                 button.interactable = true;                
                 button.GetComponentInChildren<Text>().text = "+";
                 break;
-            case TrophicSlot.SlotStatus.Pending:
-                button.interactable = false;
-                button.GetComponentInChildren<Text>().text = "%";
-                break;
+            //case TrophicSlot.SlotStatus.Pending:
+            //    button.interactable = false;
+            //    button.GetComponentInChildren<Text>().text = "%";
+            //    break;
             case TrophicSlot.SlotStatus.On:
                 button.interactable = true;
                 button.GetComponentInChildren<Text>().text = "On";
                 break;
-            case TrophicSlot.SlotStatus.Selected:
-                button.interactable = false;
-                button.GetComponentInChildren<Text>().text = "**";
-                break;
+            //case TrophicSlot.SlotStatus.Selected:
+            //    button.interactable = false;
+            //    button.GetComponentInChildren<Text>().text = "**";
+            //    break;
             default:
                 break;
         }
     }
     public void UpdateToolbarPanelUI() {
-
-        //buttonToolbarRemoveDecomposer.gameObject.SetActive(false);
-        //buttonToolbarRemovePlant.gameObject.SetActive(false);
-        //buttonToolbarRemoveAnimal.gameObject.SetActive(false);
-
+        
         buttonToolbarInspect.GetComponent<Image>().color = buttonDisabledColor;
         buttonToolbarStir.GetComponent<Image>().color = buttonDisabledColor;
         buttonToolbarNutrients.GetComponent<Image>().color = buttonDisabledColor;
@@ -1663,7 +1699,32 @@ public class UIManager : MonoBehaviour {
         
         
         // Species Slots visuals:  ================================================================================
-        TrophicLayersManager layerManager = gameManager.simulationManager.trophicLayersManager;   
+        TrophicLayersManager layerManager = gameManager.simulationManager.trophicLayersManager;  
+        //buttonToolbarRemoveDecomposer.gameObject.SetActive(false);
+        //buttonToolbarRemovePlant.gameObject.SetActive(false);
+        //buttonToolbarRemoveAnimal.gameObject.SetActive(false);
+        if(layerManager.selectedTrophicSlot) {
+            if(layerManager.selectedTrophicSlotRef.kingdomID == 0) {
+                buttonToolbarRemoveDecomposer.gameObject.SetActive(true);
+            }
+            else if(layerManager.selectedTrophicSlotRef.kingdomID == 1) {
+                buttonToolbarRemovePlant.gameObject.SetActive(true);
+            }
+            else {
+                buttonToolbarRemoveAnimal.gameObject.SetActive(true);
+            }
+        }
+        if(layerManager.pendingTrophicSlot) {
+            if(layerManager.pendingTrophicSlotRef.kingdomID == 0) {
+                buttonToolbarRemoveDecomposer.gameObject.SetActive(true);
+            }
+            else if(layerManager.pendingTrophicSlotRef.kingdomID == 1) {
+                buttonToolbarRemovePlant.gameObject.SetActive(true);
+            }
+            else {
+                buttonToolbarRemoveAnimal.gameObject.SetActive(true);
+            }
+        }
         /*if(layerManager.selectedTrophicSlot) {
             if(layerManager.selectedTrophicSlotRef.kingdomID == 2) {
                 buttonToolbarRemoveAnimal.gameObject.SetActive(true);
@@ -1681,7 +1742,7 @@ public class UIManager : MonoBehaviour {
             
             bool unlocked = true;
             if(toolbarInfluencePoints <= addSpeciesInfluenceCost) {
-                unlocked = false;
+                //unlocked = false;
             }
             if(!layerManager.GetAlgaeOnOff()) {
                 unlocked = false;
@@ -1715,7 +1776,7 @@ public class UIManager : MonoBehaviour {
             
             bool unlocked = true;
             if(toolbarInfluencePoints <= addSpeciesInfluenceCost) {
-                unlocked = false;
+                //unlocked = false;
             }
             if(!layerManager.GetAlgaeOnOff()) {
                 unlocked = false;
@@ -1733,7 +1794,7 @@ public class UIManager : MonoBehaviour {
         }
         // AGENTS:
         // *************************************************************************************
-        if (layerManager.GetAgentsOnOff()) {
+        if (layerManager.GetAgentsOnOff()) {                        
             SetToolbarButtonStateUI(ref buttonToolbarAnimal1, layerManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0].status);
             SetToolbarButtonStateUI(ref buttonToolbarAnimal2, layerManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1].status);
             SetToolbarButtonStateUI(ref buttonToolbarAnimal3, layerManager.kingdomAnimals.trophicTiersList[1].trophicSlots[2].status);
@@ -1761,8 +1822,24 @@ public class UIManager : MonoBehaviour {
         
 
         
-
-        
+        if(layerManager.pendingTrophicSlot) {
+            buttonPendingTrophicSlot.GetComponentInChildren<Text>().text = "*";
+            buttonPendingTrophicSlot.GetComponentInChildren<Text>().color = Color.yellow;
+        }
+        else {
+            if(buttonPendingTrophicSlot != null) {
+                buttonPendingTrophicSlot.GetComponentInChildren<Text>().color = Color.white;
+            }            
+        }
+        if(layerManager.selectedTrophicSlot) {
+            buttonSelectedTrophicSlot.GetComponentInChildren<Text>().text = "**";
+            buttonSelectedTrophicSlot.GetComponentInChildren<Text>().color = Color.yellow;
+        }
+        else {
+            if(buttonSelectedTrophicSlot != null) {
+                buttonSelectedTrophicSlot.GetComponentInChildren<Text>().color = Color.white;
+            } 
+        }
     }
     public void UpdateInfoPanelUI() {
         textCurYear.text = gameManager.simulationManager.curSimYear.ToString();
@@ -3129,7 +3206,7 @@ public class UIManager : MonoBehaviour {
     }
     
     public void ClickToolButtonStir() {
-        gameManager.simulationManager.trophicLayersManager.ResetSelectedAgentSlots();
+        //gameManager.simulationManager.trophicLayersManager.ResetSelectedAgentSlots();
         //if(curActiveTool != ToolType.Stir) {
             curActiveTool = ToolType.Stir;
              
@@ -3165,7 +3242,7 @@ public class UIManager : MonoBehaviour {
         } */
     }
     public void ClickToolButtonNutrients() {
-        gameManager.simulationManager.trophicLayersManager.ResetSelectedAgentSlots();
+        //gameManager.simulationManager.trophicLayersManager.ResetSelectedAgentSlots();
         //if(curActiveTool != ToolType.Nutrients) {
             curActiveTool = ToolType.Nutrients;
 
@@ -3185,7 +3262,7 @@ public class UIManager : MonoBehaviour {
         } */
     }
     public void ClickToolButtonRemove() {
-        gameManager.simulationManager.trophicLayersManager.ResetSelectedAgentSlots();
+        //gameManager.simulationManager.trophicLayersManager.ResetSelectedAgentSlots();
         //if(curActiveTool != ToolType.Remove) {
             curActiveTool = ToolType.Remove;
 
@@ -3238,7 +3315,7 @@ public class UIManager : MonoBehaviour {
         //gameManager.simulationManager.ChangeGlobalMutationRate(val); // normalizedVal);
     }
     public void ClickToolButtonMutate() {
-            gameManager.simulationManager.trophicLayersManager.ResetSelectedAgentSlots();
+            //gameManager.simulationManager.trophicLayersManager.ResetSelectedAgentSlots();
         //if(curActiveTool != ToolType.Mutate) {
             curActiveTool = ToolType.Mutate;
 
@@ -3309,13 +3386,19 @@ public class UIManager : MonoBehaviour {
         //isActiveStirToolPanel = false;
     }
     public void ClickButtonToolbarDecomposers() {
-        gameManager.simulationManager.trophicLayersManager.ResetSelectedAgentSlots();
+        TrophicSlot slot = gameManager.simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0];
+
         if(gameManager.simulationManager.trophicLayersManager.GetDecomposersOnOff()) {
-            gameManager.simulationManager.trophicLayersManager.ResetSelectedAgentSlots();
+            if (slot.status == TrophicSlot.SlotStatus.On) {            
+                gameManager.simulationManager.trophicLayersManager.selectedTrophicSlot = true;
+                gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = slot;  
+                buttonSelectedTrophicSlot = buttonToolbarDecomposers;
+            }
         }
         else {
             if(toolbarInfluencePoints > addSpeciesInfluenceCost) {
                 gameManager.simulationManager.trophicLayersManager.PendingDecomposers();
+                buttonPendingTrophicSlot = buttonToolbarDecomposers;
                 // wait on click
                 //pendingTrophicLayerAdd = true;
                 //toolbarInfluencePoints -= addSpeciesInfluenceCost;
@@ -3327,15 +3410,21 @@ public class UIManager : MonoBehaviour {
         curActiveTool = ToolType.None;
     }
     public void ClickButtonToolbarAlgae() {
-        gameManager.simulationManager.trophicLayersManager.ResetSelectedAgentSlots();
+        TrophicSlot slot = gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];
+
         if(gameManager.simulationManager.trophicLayersManager.GetAlgaeOnOff()) {
             // if already on:
             // Selected!!!
-            gameManager.simulationManager.trophicLayersManager.ResetSelectedAgentSlots();
+            if (slot.status == TrophicSlot.SlotStatus.On) {            
+                gameManager.simulationManager.trophicLayersManager.selectedTrophicSlot = true;
+                gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = slot; 
+                buttonSelectedTrophicSlot = buttonToolbarAlgae;
+            }
         }
         else {
             if(toolbarInfluencePoints > addSpeciesInfluenceCost) {
                 gameManager.simulationManager.trophicLayersManager.PendingAlgae();
+                buttonPendingTrophicSlot = buttonToolbarAlgae;
                 //toolbarInfluencePoints -= addSpeciesInfluenceCost;
             }
             else {
@@ -3345,14 +3434,20 @@ public class UIManager : MonoBehaviour {
         curActiveTool = ToolType.None;
     }
     public void ClickButtonToolbarZooplankton() {
-        gameManager.simulationManager.trophicLayersManager.ResetSelectedAgentSlots();
+        TrophicSlot slot = gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0];
+               
+        
         if(gameManager.simulationManager.trophicLayersManager.GetZooplanktonOnOff()) {
-            gameManager.simulationManager.trophicLayersManager.ResetSelectedAgentSlots();
+            if (slot.status == TrophicSlot.SlotStatus.On) {            
+                gameManager.simulationManager.trophicLayersManager.selectedTrophicSlot = true;
+                gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = slot; 
+                buttonSelectedTrophicSlot = buttonToolbarZooplankton;
+            } 
         }
         else {
             if(toolbarInfluencePoints > addSpeciesInfluenceCost) {
                 gameManager.simulationManager.trophicLayersManager.PendingZooplankton();
-                //toolbarInfluencePoints -= addSpeciesInfluenceCost;
+                buttonPendingTrophicSlot = buttonToolbarZooplankton;
             }
             else {
 
@@ -3363,17 +3458,39 @@ public class UIManager : MonoBehaviour {
 
     public void ClickButtonToolbarAgent(int index) {
         if (gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[index].status == TrophicSlot.SlotStatus.On) {
+                                   
 
-            gameManager.simulationManager.trophicLayersManager.ResetSelectedAgentSlots();
-
-            gameManager.simulationManager.trophicLayersManager.selectedTrophicSlot = true;
-            gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[index].status = TrophicSlot.SlotStatus.Selected;
+            gameManager.simulationManager.trophicLayersManager.selectedTrophicSlot = true;            
             gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[index];
+            if(index == 0) {
+                buttonSelectedTrophicSlot = buttonToolbarAnimal1;
+            }
+            else if(index == 1) {
+                buttonSelectedTrophicSlot = buttonToolbarAnimal2;
+            }
+            else if(index == 2) {
+                buttonSelectedTrophicSlot = buttonToolbarAnimal3;
+            }
+            else {
+                buttonSelectedTrophicSlot = buttonToolbarAnimal4;
+            }
             
         }
         else {
             if(toolbarInfluencePoints > addSpeciesInfluenceCost) {
                 gameManager.simulationManager.trophicLayersManager.PendingAgents(index);
+                if(index == 0) {
+                    buttonPendingTrophicSlot = buttonToolbarAnimal1;
+                }
+                else if(index == 1) {
+                    buttonPendingTrophicSlot = buttonToolbarAnimal2;
+                }
+                else if(index == 2) {
+                    buttonPendingTrophicSlot = buttonToolbarAnimal3;
+                }
+                else {
+                    buttonPendingTrophicSlot = buttonToolbarAnimal4;
+                }
                 //toolbarInfluencePoints -= addSpeciesInfluenceCost;
             }
             else {
@@ -3395,13 +3512,8 @@ public class UIManager : MonoBehaviour {
         }*/
     }
 
-    public void ClickToolbarRemoveAgent() {
-        //TrophicLayersManager layerManager = gameManager.simulationManager.trophicLayersManager;
-        pressedRemoveSpecies = true;
-        //if(layerManager.selectedTrophicSlot) {
-        //    Debug.Log("Remove Agent! " + layerManager.selectedTrophicSlotRef.slotID.ToString());
-        //}
-        //Debug.Log("Fail");        
+    public void ClickToolbarRemoveSpeciesSlot() {
+        pressedRemoveSpecies = true;  // Sets remove flag for update loop:       
     }
 
     public void ClickControlsMenu() {

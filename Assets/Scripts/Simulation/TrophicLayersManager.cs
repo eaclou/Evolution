@@ -72,6 +72,8 @@ public class TrophicLayersManager {
         if (pendingTrophicSlotRef.kingdomID == 2) { // Animals:
             if (pendingTrophicSlotRef.tierID == 0) { // Animals:
                 TurnOnZooplankton();
+                // Unlock Slots:
+                kingdomAnimals.trophicTiersList[1].unlocked = true;
                 kingdomAnimals.trophicTiersList[1].trophicSlots[0].status = TrophicSlot.SlotStatus.Empty;
                 kingdomAnimals.trophicTiersList[1].trophicSlots[1].status = TrophicSlot.SlotStatus.Empty;
                 kingdomAnimals.trophicTiersList[1].trophicSlots[2].status = TrophicSlot.SlotStatus.Empty;
@@ -96,7 +98,7 @@ public class TrophicLayersManager {
     public void ClickedSelectedTrophicSlot() {
         // reset things, figure out which slot was created:
         selectedTrophicSlot = false;
-        selectedTrophicSlotRef.status = TrophicSlot.SlotStatus.On;  // Deselects
+        //selectedTrophicSlotRef.status = TrophicSlot.SlotStatus.On;  // Deselects // won't be necessary
         
         if (pendingTrophicSlotRef.kingdomID == 2) { // Animals:
             
@@ -108,34 +110,35 @@ public class TrophicLayersManager {
         }
     }
 
-    public void ResetSelectedAgentSlots() {
+    /*public void ResetSelectedAgentSlots() {
         for(int i = 0; i < 4; i++) {  // if others were selected: revert to on:
             if (kingdomAnimals.trophicTiersList[1].trophicSlots[i].status == TrophicSlot.SlotStatus.Selected) {
                 kingdomAnimals.trophicTiersList[1].trophicSlots[i].status = TrophicSlot.SlotStatus.On;
             }
         }
-    }
+    }*/
 
     public void PendingDecomposers() {
         pendingTrophicSlot = true;
         pendingTrophicSlotRef = kingdomDecomposers.trophicTiersList[0].trophicSlots[0];
-        pendingTrophicSlotRef.status = TrophicSlot.SlotStatus.Pending;
+        
+        //pendingTrophicSlotRef.status = TrophicSlot.SlotStatus.Pending;
         // waiting on click!
     }
     public void PendingAlgae() {
         pendingTrophicSlot = true;
         pendingTrophicSlotRef = kingdomPlants.trophicTiersList[0].trophicSlots[0];
-        pendingTrophicSlotRef.status = TrophicSlot.SlotStatus.Pending;
+        //pendingTrophicSlotRef.status = TrophicSlot.SlotStatus.Pending;
     }
     public void PendingZooplankton() {
         pendingTrophicSlot = true;
         pendingTrophicSlotRef = kingdomAnimals.trophicTiersList[0].trophicSlots[0];
-        pendingTrophicSlotRef.status = TrophicSlot.SlotStatus.Pending;
+        //pendingTrophicSlotRef.status = TrophicSlot.SlotStatus.Pending;
     }
     public void PendingAgents(int index) {
         pendingTrophicSlot = true;
         pendingTrophicSlotRef = kingdomAnimals.trophicTiersList[1].trophicSlots[index];
-        pendingTrophicSlotRef.status = TrophicSlot.SlotStatus.Pending;
+        //pendingTrophicSlotRef.status = TrophicSlot.SlotStatus.Pending;
     }
     public void TurnOnDecomposers() {
         decomposersOn = true;
@@ -145,9 +148,23 @@ public class TrophicLayersManager {
     }
     public void TurnOnZooplankton() {
         zooplanktonOn = true;
+        
     }
     public void TurnOnAgents() {
         agentsOn = true;
+    }
+
+    public void TurnOffDecomposers() {
+        decomposersOn = false;
+    }
+    public void TurnOffAlgae() {
+        algaeOn = false;
+    }
+    public void TurnOffZooplankton() {
+        zooplanktonOn = false;        
+    }
+    public void TurnOffAgents() {
+        agentsOn = false;
     }
 
 

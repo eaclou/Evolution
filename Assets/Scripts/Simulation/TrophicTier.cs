@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class TrophicTier {
 
-    public bool nextTierUnlocked = false;
+    public bool unlocked = false;
     public TrophicSlot[] trophicSlots;
 
 	public TrophicTier() {
