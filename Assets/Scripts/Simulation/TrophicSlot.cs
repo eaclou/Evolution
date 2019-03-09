@@ -15,6 +15,7 @@ public class TrophicSlot {
     public int tierID;
     public int slotID;
     public int linkedSpeciesID;
+    public string speciesName;
 
     public TrophicSlot() {
         status = SlotStatus.Off;  // default off (hidden)

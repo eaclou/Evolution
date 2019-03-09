@@ -53,8 +53,8 @@ public class CritterModuleAppearanceGenome {
 
         //sizeAndAspectRatio = new Vector2(1f, 1f);
 
-        huePrimary = new Vector3(UnityEngine.Random.Range(0.4f, 0.6f), UnityEngine.Random.Range(0.4f, 0.6f), UnityEngine.Random.Range(0.4f, 0.6f));
-        hueSecondary = new Vector3(UnityEngine.Random.Range(0.4f, 0.6f), UnityEngine.Random.Range(0.4f, 0.6f), UnityEngine.Random.Range(0.4f, 0.6f));
+        huePrimary = new Vector3(UnityEngine.Random.Range(0.2f, 0.8f), UnityEngine.Random.Range(0.2f, 0.8f), UnityEngine.Random.Range(0.2f, 0.8f));
+        hueSecondary = new Vector3(UnityEngine.Random.Range(0.2f, 0.8f), UnityEngine.Random.Range(0.2f, 0.8f), UnityEngine.Random.Range(0.2f, 0.8f));
         bodyStrokeBrushTypeX = UnityEngine.Random.Range(0, 8);
         bodyStrokeBrushTypeY = UnityEngine.Random.Range(0, 8);
         

@@ -254,12 +254,7 @@ public class CritterModuleCoreGenome {
 
         shapeModifiersList = new List<ShapeModifierData>();  // empty
         masksList = new List<MaskData>();
-
-        //modifierCoordinateDataList = new List<ModifierCoordinateData>();
-        //maskDataListGeneric = new List<CritterGenomeInterpretor.FalloffMaskDataGeneric>();
-        //maskListSin = new List<CritterGenomeInterpretor.MaskDataSin>();
-        //maskListLinearFalloff = new List<CritterGenomeInterpretor.MaskDataLinearFalloff>();
-
+        
         // TEMP HARDCODED:
         ShapeModifierData initModifier = new ShapeModifierData();
         initModifier.modifierTypeID = ShapeModifierType.Extrude;
@@ -284,7 +279,7 @@ public class CritterModuleCoreGenome {
         shapeModifiersList.Add(initModifier);
 
         creatureBaseLength = UnityEngine.Random.Range(0.2f, 0.3f);
-        creatureAspectRatio = UnityEngine.Random.Range(0.35f, 0.55f);
+        creatureAspectRatio = UnityEngine.Random.Range(0.15f, 0.525f);
 
         //creatureComplexShapeLerp = 0f;
         // Or start with deformed sphere???? *****
@@ -377,24 +372,7 @@ public class CritterModuleCoreGenome {
 
         mouthFeedFrequency = 1f;
         mouthAttackAmplitude = 1f;
-
-        //numSegments = 1;
-        /*
-        fullBodyWidth = UnityEngine.Random.Range(0.33f, 0.5f);
-        fullBodyLength = fullBodyWidth * UnityEngine.Random.Range(1.25f, 2f);
-
-        relWidthSnout = UnityEngine.Random.Range(0.25f, 1f);
-        relWidthHead = UnityEngine.Random.Range(0.5f, 2f);
-        relWidthTorso = UnityEngine.Random.Range(0.5f, 2f);
-        relWidthTail = UnityEngine.Random.Range(0.1f, 1f);
-        relLengthSnout = UnityEngine.Random.Range(0.5f, 2f);
-        relLengthHead = UnityEngine.Random.Range(0.5f, 2f);
-        relLengthTorso = UnityEngine.Random.Range(0.5f, 2f);
-        relLengthTail = UnityEngine.Random.Range(0.5f, 2f);
-
-        snoutTaper = UnityEngine.Random.Range(0f, 1f);
-        tailTaper = UnityEngine.Random.Range(0f, 1f);
-        */
+        
     }
 
     public void AppendModuleNeuronsToMasterList(ref List<NeuronGenome> neuronList) {

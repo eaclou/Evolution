@@ -109,6 +109,7 @@ public class UIManager : MonoBehaviour {
     public Text textInfoSpeciesStats;
 
     // &&& PLAYER TOOLBAR &&& !!!! ==============================================
+    public int curToolUnlockLevel = 0;
     public float toolbarInfluencePoints = 0.5f;
     public Text textInfluencePointsValue;
     public Material infoMeterInfluencePointsMat;
@@ -1674,11 +1675,11 @@ public class UIManager : MonoBehaviour {
                 break;
             case TrophicSlot.SlotStatus.Empty:
                 button.interactable = false;                
-                button.GetComponentInChildren<Text>().text = "+";
+                button.GetComponentInChildren<Text>().text = "-";
                 break;
             case TrophicSlot.SlotStatus.On:
                 button.interactable = true;
-                button.GetComponentInChildren<Text>().text = "On";
+                button.GetComponentInChildren<Text>().text = "0";
                 break;
             default:
                 break;
@@ -1920,6 +1921,29 @@ public class UIManager : MonoBehaviour {
                 SetInfoSpeciesButtonStateUI(ref buttonInfoSpeciesAnimal2, layerManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1].status);
                 SetInfoSpeciesButtonStateUI(ref buttonInfoSpeciesAnimal3, layerManager.kingdomAnimals.trophicTiersList[1].trophicSlots[2].status);
                 SetInfoSpeciesButtonStateUI(ref buttonInfoSpeciesAnimal4, layerManager.kingdomAnimals.trophicTiersList[1].trophicSlots[3].status);
+
+                if(infoSpeciesSelectedKingdom == 0) {
+                    textInfoSpeciesName.text = "Decomposers";
+                    textInfoSpeciesStats.text = "stats stats stats!";
+                }
+                else if(infoSpeciesSelectedKingdom == 1) {
+                    textInfoSpeciesName.text = "Algae";
+                    textInfoSpeciesStats.text = "stats stats stats!";
+                }
+                else {  // Animals
+                    if(infoSpeciesSelectedTier == 0) {
+                        //zooplankton
+                        textInfoSpeciesName.text = "Zooplankton";
+                        textInfoSpeciesStats.text = "stats stats stats!";
+                    }
+                    else {
+                        // Agents:
+                        textInfoSpeciesName.text = "Creature " + infoSpeciesSelectedSlot.ToString();
+                        textInfoSpeciesStats.text = "stats stats stats!";
+                    }
+                }
+                //textInfoSpeciesName.text = "SpeciesName";
+                //textInfoSpeciesStats.text = "stats stats stats!";
             }
         }
         else {
