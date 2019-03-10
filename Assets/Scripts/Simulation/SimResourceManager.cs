@@ -59,7 +59,7 @@ public class SimResourceManager {
         float wasteProducedByAlgaeReservoirLastFrame = 0f;
         if(trophicLayersManager.GetAlgaeOnOff()) {
             // NEW::  Mirrors AlgaeParticles:
-            curGlobalAlgaeReservoir = curGlobalAlgaeParticles;
+            //curGlobalAlgaeReservoir = curGlobalAlgaeParticles;
 
             /*
             algaeReservoirGrowth = settings.environmentSettings._BaseSolarEnergy * algaeGrowthNutrientMask * settings.algaeSettings._AlgaeGrowthEfficiency;
@@ -84,8 +84,8 @@ public class SimResourceManager {
         
         if(trophicLayersManager.GetAlgaeOnOff()) {
             // Revisit how this works? producing oxygen solely proportionally to current mass == leaky  -- tied to growth instead???
-            oxygenProducedByAlgaeReservoirLastFrame = curGlobalAlgaeReservoir * settings.algaeSettings._AlgaeReservoirOxygenProductionEfficiency;
-            curGlobalOxygen += oxygenProducedByAlgaeReservoirLastFrame; // *** Combined Addition of Oxygen produced by plants ***  REFACTOR!!!
+            //oxygenProducedByAlgaeReservoirLastFrame = curGlobalAlgaeReservoir * settings.algaeSettings._AlgaeReservoirOxygenProductionEfficiency;
+            //curGlobalOxygen += oxygenProducedByAlgaeReservoirLastFrame; // *** Combined Addition of Oxygen produced by plants ***  REFACTOR!!!
             // also add algaeParticle Oxygen production:        
             curGlobalOxygen += oxygenProducedByAlgaeParticlesLastFrame;
         }
@@ -115,10 +115,10 @@ public class SimResourceManager {
         curGlobalDetritus = Mathf.Min(curGlobalDetritus, 1000f);
                    
         
-        nutrientsUsedByAlgaeReservoirLastFrame = algaeReservoirGrowth;
+        //nutrientsUsedByAlgaeReservoirLastFrame = algaeReservoirGrowth;
 
         curGlobalNutrients += nutrientsProduced;
-        curGlobalNutrients -= algaeReservoirGrowth;
+        //curGlobalNutrients -= algaeReservoirGrowth;
         curGlobalNutrients -= nutrientsUsedByAlgaeParticlesLastFrame;
         curGlobalNutrients = Mathf.Max(0f, curGlobalNutrients); // cap at 0f
         curGlobalNutrients = Mathf.Min(curGlobalNutrients, 1000f);

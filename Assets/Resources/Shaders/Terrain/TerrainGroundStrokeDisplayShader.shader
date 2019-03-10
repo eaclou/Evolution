@@ -5,6 +5,7 @@
 		_MainTex ("Main Texture", 2D) = "white" {}
 		_AltitudeTex ("_AltitudeTex", 2D) = "gray" {}
 		_WaterSurfaceTex ("_WaterSurfaceTex", 2D) = "black" {}
+		_WaterColorTex ("_WaterColorTex", 2D) = "black" {}
 		//_NutrientTex ("_NutrientTex", 2D) = "black" {}
 		
 	}
@@ -70,7 +71,7 @@
 				float altitude = tex2Dlod(_AltitudeTex, float4(altUV, 0, 0)).x; //i.worldPos.z / 10; // [-1,1] range
 				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(((altUV - 0.25) * 2), 0, 0)).yzw;
 				float depth = saturate(-altitude + 0.5);
-				float refractionStrength = depth * 8.5;
+				float refractionStrength = depth * 7.5;
 				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
 				//float diffuse = dot(surfaceNormal, _WorldSpaceLightPos0.xyz);
 				//finalColor.rgb = float3(diffuse, diffuse, diffuse);
@@ -79,7 +80,7 @@
 				float random2 = rand(float2(random1, random1));
 				float randomAspect = lerp(0.75, 1.33, random1);
 				
-				float2 scale = strokeData.scale * randomAspect * 1;
+				float2 scale = strokeData.scale * randomAspect * 0.91;
 				quadPoint *= float3(scale, 1.0);
 
 				// &&&& Screen-space UV of center of brushstroke:
@@ -117,7 +118,7 @@
 				// 0-1 range --> -1 to 1
 				altitude = (altitude * 2 - 1) * -1;
 				float isUnderwater = saturate(altitude * 10000);
-				float3 waterFogColor = float3(0.03,0.4,0.3) * 0.4; //lerp(float3(0.03,0.3,0.4) * 0.4, float3(0.06,0.44,0.31) * 0.4, tex2D(_NutrientTex, float4((i.altitudeUV - 0.25) * 2, 0, 2)).x); //float3(0.03,0.4,0.3) * 0.4;
+				float3 waterFogColor = float3(0.03,0.4,0.24) * 0.4; //lerp(float3(0.03,0.3,0.4) * 0.4, float3(0.06,0.44,0.31) * 0.4, tex2D(_NutrientTex, float4((i.altitudeUV - 0.25) * 2, 0, 2)).x); //float3(0.03,0.4,0.3) * 0.4;
 				float strataColorMultiplier = (sin(altitude * (1.0 + i.worldPos.x * 0.01 - i.worldPos.y * -0.01) + i.worldPos.x * 0.01 - i.worldPos.y * 0.01) * 0.5 + 0.5) * 0.5 + 0.5;
 				finalColor.rgb *= strataColorMultiplier;				
 				
@@ -142,7 +143,7 @@
 
 
 				// FOG:
-				finalColor.rgb = lerp(finalColor.rgb, waterFogColor, 1 * (saturate(altitude * 0.8)) + 0.25 * isUnderwater);
+				finalColor.rgb = lerp(finalColor.rgb, waterFogColor, 1 * saturate(1 * (saturate(altitude * 0.8)) + 0.25 * isUnderwater));
 
 				//return float4(dotLight, dotLight, dotLight, 1);
 
@@ -155,7 +156,7 @@
 				//float3 surfaceNormal = tex2D(_WaterSurfaceTex, (i.altitudeUV - 0.25) * 2).yzw;
 				//float diffuse = dot(surfaceNormal, _WorldSpaceLightPos0.xyz);
 				//finalColor.rgb = float3(diffuse, diffuse, diffuse);
-
+				//finalColor.rgb *= 0.89;
 				return finalColor;
 				
 			}

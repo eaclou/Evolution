@@ -128,6 +128,15 @@ public class SpeciesGenomePool {
         for (int i = 0; i < numGenomes; i++) {
             AgentGenome agentGenome = new AgentGenome();
             agentGenome.GenerateInitialRandomBodyGenome();
+            BodyGenome newBodyGenome = new BodyGenome();
+            newBodyGenome.SetToMutatedCopyOfParentGenome(agentGenome.bodyGenome, mutationSettingsRef);
+            agentGenome.bodyGenome = newBodyGenome;
+            
+            //agentGenome.bodyGenome.SetToMutatedCopyOfParentGenome(agentGenome.bodyGenome, mutationSettingsRef);
+            //agentGenome.bodyGenome.SetToMutatedCopyOfParentGenome(agentGenome.bodyGenome, mutationSettingsRef);
+            //agentGenome.bodyGenome.SetToMutatedCopyOfParentGenome(agentGenome.bodyGenome, mutationSettingsRef);
+            //agentGenome.bodyGenome.SetToMutatedCopyOfParentGenome(agentGenome.bodyGenome, mutationSettingsRef);
+            //agentGenome.
             int tempNumHiddenNeurons = 0;
             agentGenome.InitializeRandomBrainFromCurrentBody(mutationSettingsRef.initialConnectionChance, tempNumHiddenNeurons);
 

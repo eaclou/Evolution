@@ -297,7 +297,7 @@ public class MasterGenomePool {
             speciesSimilarityDistanceThreshold = Mathf.Min(speciesSimilarityDistanceThreshold, 10f); // cap
         }
 
-        CheckForExtinction(simManagerRef);
+        //CheckForExtinction(simManagerRef);  *** TEMPORARILLY DISABLED!!!!! *************
     }
 
     public void GlobalFindCandidateID(int ID) {
