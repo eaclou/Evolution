@@ -41,7 +41,7 @@ public class BaronVonTerrain : RenderBaron {
     private ComputeBuffer frameBufferStrokesCBuffer;
     private int numGroundStrokesLrg = 64;
     private int numGroundStrokesMed = 128;
-    private int numGroundStrokesSml = 256;
+    private int numGroundStrokesSml = 512;
     public ComputeBuffer groundStrokesLrgCBuffer;
     public ComputeBuffer groundStrokesMedCBuffer;
     public ComputeBuffer groundStrokesSmlCBuffer;

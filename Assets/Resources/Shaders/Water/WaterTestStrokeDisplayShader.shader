@@ -191,6 +191,7 @@
 				finalColor.rgb = lerp(finalColor.rgb, waterFogColor, 1 * (saturate(altitude * 0.8)) + 0.25 * isUnderwater);				
 				//finalColor.rgb += 0.006;
 
+
 				float3 cameraToVertex = i.worldPos - _WorldSpaceCameraPos;
                 float3 cameraToVertexDir = normalize(cameraToVertex);
 				float3 reflectedViewDir = cameraToVertexDir + 2 * surfaceNormal * 0.05;
@@ -214,6 +215,7 @@
 				//float debugVal = saturate(viewDotRemapped);
 				//finalColor.rgb = float3(debugVal, debugVal, debugVal);
 
+				return float4(1,1,1,1);
 				return finalColor;
 
 				/*

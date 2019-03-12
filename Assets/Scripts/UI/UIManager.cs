@@ -1721,7 +1721,7 @@ public class UIManager : MonoBehaviour {
         }
 
         // Influence points meter:     
-        toolbarInfluencePoints += 0.00225f; // x10 while debugging
+        toolbarInfluencePoints += 0.0005225f; // x10 while debugging
         toolbarInfluencePoints = Mathf.Clamp01(toolbarInfluencePoints);
         infoMeterInfluencePointsMat.SetFloat("_FillPercentage", toolbarInfluencePoints);
         textInfluencePointsValue.text = "Influence: \n" + (toolbarInfluencePoints * 100f).ToString("F0") + "%";

@@ -8,6 +8,7 @@
 		_SkyTex ("_SkyTex", 2D) = "white" {}
 		_WaterSurfaceTex ("_WaterSurfaceTex", 2D) = "black" {}
 		_NutrientTex ("_NutrientTex", 2D) = "black" {}
+		_WaterColorTex ("_WaterColorTex", 2D) = "black" {}
 	}
 	SubShader
 	{		
@@ -24,6 +25,7 @@
 			#pragma target 5.0
 			#include "UnityCG.cginc"
 			#include "Assets/Resources/Shaders/Inc/NoiseShared.cginc"
+			#include "Assets/Resources/Shaders/Inc/TerrainShared.cginc"
 
 			sampler2D _MainTex;
 			sampler2D _AltitudeTex;			
@@ -31,6 +33,7 @@
 			sampler2D _SkyTex;
 			sampler2D _WaterSurfaceTex;
 			sampler2D _NutrientTex;
+			sampler2D _WaterColorTex;
 			
 			sampler2D _RenderedSceneRT;  // Provided by CommandBuffer -- global tex??? seems confusing... ** revisit this
 			
@@ -157,35 +160,14 @@
 
 				//float distFromScreenCenter = length(screenUV * 2 - 1);
 				
-				float4 finalColor = frameBufferColor;
+				float4 altitudeTex = tex2D(_AltitudeTex, i.altitudeUV); //i.worldPos.z / 10; // [-1,1] range
+				float4 waterSurfaceTex = tex2D(_WaterSurfaceTex, (i.altitudeUV - 0.25) * 2);
+				float4 waterColorTex = tex2D(_WaterColorTex, (i.altitudeUV - 0.25) * 2);
+
+				float4 finalColor = GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, waterColorTex);
 				finalColor.a = brushColor.a;
-				
-				float altitude = tex2D(_AltitudeTex, i.altitudeUV); //i.worldPos.z / 10; // [-1,1] range
-				// 0-1 range --> -1 to 1
-				altitude = (altitude * 2 - 1) * -1;
-				float isUnderwater = saturate(altitude * 10000);
-				float3 waterFogColor = float3(0.03,0.4,0.3) * 0.4;
-				float strataColorMultiplier = (sin(altitude * (1.0 + i.worldPos.x * 0.01 - i.worldPos.y * -0.01) + i.worldPos.x * 0.01 - i.worldPos.y * 0.01) * 0.5 + 0.5) * 0.5 + 0.5;
-				finalColor.rgb *= strataColorMultiplier;	
 
-				float snowAmount = saturate((-altitude - 0.6) * 2 +
-								   ((sin(i.worldPos.x * 0.0785 + i.worldPos.y * 0.02843) * 0.5 + 0.5) * 1 - 
-								   (cos(i.worldPos.x * 0.012685 + i.worldPos.y * -0.01843) * 0.5 + 0.5) * 0.9 +
-								   (sin(i.worldPos.x * 0.2685 + i.worldPos.y * -0.1843) * 0.5 + 0.5) * 0.45 - 
-								   (cos(i.worldPos.x * -0.2843 + i.worldPos.y * 0.01143) * 0.5 + 0.5) * 0.45 +
-								   (sin(i.worldPos.x * 0.1685 + i.worldPos.y * -0.03843) * 0.5 + 0.5) * 0.3 - 
-								   (cos(i.worldPos.x * -0.1843 + i.worldPos.y * 0.243) * 0.5 + 0.5) * 0.3) * 0.5);
-				
-				finalColor.rgb = lerp(finalColor.rgb, float3(0.56, 1, 0.34) * 0.6, snowAmount * 1);
-				// FAKE CAUSTICS:::
-				float3 surfaceNormal = tex2D(_WaterSurfaceTex, (i.altitudeUV - 0.25) * 2).yzw;
-				float dotLight = dot(surfaceNormal, _WorldSpaceLightPos0.xyz);
-				dotLight = dotLight * dotLight;
-
-				finalColor.rgb = lerp(finalColor.rgb, finalColor.rgb * (dotLight * 0.33 + 0.67) + dotLight * 0.75, isUnderwater * (1.0 - altitude)); //dotLight * 1.0;
-				// FOG:
-				finalColor.rgb = lerp(finalColor.rgb, waterFogColor, 1 * (saturate(altitude * 0.8)) + 0.25 * isUnderwater);				
-				
+				float3 surfaceNormal = waterSurfaceTex.yzw;
 				float3 cameraToVertex = i.worldPos - _WorldSpaceCameraPos;
                 float3 cameraToVertexDir = normalize(cameraToVertex);
 				float3 reflectedViewDir = cameraToVertexDir + 2 * surfaceNormal * 0.05;
@@ -195,10 +177,11 @@
 
 				float4 reflectedColor = float4(tex2Dlod(_SkyTex, float4((skyCoords) - _Time.y * 0.015, 0, 1)).rgb, finalColor.a); //col;
 								
-				float reflectLerp = i.vignetteLerp.x;
+				float reflectLerp = saturate(i.vignetteLerp.x * 2);
 				finalColor = lerp(finalColor, reflectedColor, reflectLerp);
-				finalColor.a *= saturate(reflectLerp * 8);
+				finalColor.a *= saturate(reflectLerp * 6) * 0.7;
 				
+				//return float4(1,1,0,1);
 				return finalColor;
 
 			}

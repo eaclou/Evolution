@@ -28,7 +28,9 @@ public class SimulationManager : MonoBehaviour {
 
     public SimEventsManager simEventsManager;
     public SimResourceManager simResourceManager;
-        
+
+    public float fogAmount = 0.25f;
+    public Vector4 fogColor; 
 
     public bool isQuickStart = true;
 
@@ -578,8 +580,11 @@ public class SimulationManager : MonoBehaviour {
             CheckForDevouredEggSacks();
             CheckForNullAgents();  // Result of this will affect: "simStateData.PopulateSimDataArrays(this)" !!!!!
             CheckForReadyToSpawnAgents();
-        }        
-        
+        }
+
+        fogColor = Color.Lerp(new Color(0.15f, 0.25f, 0.52f), new Color(0.07f, 0.27f, 0.157f), Mathf.Clamp01(simResourceManager.curGlobalAlgaeParticles * 0.05f));
+        fogAmount = Mathf.Lerp(0.025f, 1f, Mathf.Clamp01(simResourceManager.curGlobalAlgaeParticles * 0.005f));
+
         simStateData.PopulateSimDataArrays(this);  // reads from GameObject Transforms & RigidBodies!!! ++ from FluidSimulationData!!!
         theRenderKing.RenderSimulationCameras(); // will pass current info to FluidSim before it Ticks()
         // Reads from CameraRenders, GameObjects, and query GPU for fluidState
