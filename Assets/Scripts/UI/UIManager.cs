@@ -691,6 +691,7 @@ public class UIManager : MonoBehaviour {
                             if(gameManager.simulationManager.trophicLayersManager.pendingTrophicSlotRef.tierID == 1) {
                                 if(createSpecies) {
                                     gameManager.simulationManager.CreateAgentSpecies(new Vector3(curMousePositionOnWaterPlane.x, curMousePositionOnWaterPlane.y, 0f));
+                                    gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[gameManager.simulationManager.trophicLayersManager.pendingTrophicSlotRef.slotID].linkedSpeciesID = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList.Count - 1].speciesID;
                                 }
                                 
                             }
@@ -1194,6 +1195,7 @@ public class UIManager : MonoBehaviour {
     }
 
     private void UpdateTolSpeciesColorUI() {
+        Debug.Log("UpdateTolSpeciesColorUI " + treeOfLifeManager.selectedID.ToString());
         //imageTolSpeciesNameBackdrop
         Vector3 speciesHuePrimary = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[treeOfLifeManager.selectedID].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
         Vector3 speciesHueSecondary = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[treeOfLifeManager.selectedID].representativeGenome.bodyGenome.appearanceGenome.hueSecondary;
@@ -1938,8 +1940,9 @@ public class UIManager : MonoBehaviour {
                     }
                     else {
                         // Agents:
-                        textInfoSpeciesName.text = "Creature " + infoSpeciesSelectedSlot.ToString();
+                        textInfoSpeciesName.text = "Creature " + infoSpeciesSelectedSlot.ToString() + ", " + gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[infoSpeciesSelectedSlot].linkedSpeciesID.ToString();
                         textInfoSpeciesStats.text = "stats stats stats!";
+
                     }
                 }
                 //textInfoSpeciesName.text = "SpeciesName";
@@ -4314,7 +4317,7 @@ public class UIManager : MonoBehaviour {
 
         textInfoSpeciesName.text = "Animal " + slotID.ToString();
 
-        treeOfLifeManager.ClickedOnSpeciesNode(slotID); // find proper ID
+        treeOfLifeManager.ClickedOnSpeciesNode(gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[slotID].linkedSpeciesID); //slotID); // find proper ID
         UpdateTolSpeciesColorUI();
     }
 }

@@ -237,7 +237,7 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 			float growthMass = _AlgaeBaseGrowthRate * nutrientsGrowthMask * lightGrowthMask * _SolarEnergy;
 
 			nutrientsUsed = growthMass * _AlgaeGrowthNutrientUsage;
-			oxygenProduced = (growthMass + bodyMass * 0.0001) * _AlgaeGrowthOxygenProduction;
+			oxygenProduced = (growthMass + bodyMass * 0.0005) * _AlgaeGrowthOxygenProduction;
 
 			bodyMass += growthMass;
 

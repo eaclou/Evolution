@@ -1864,7 +1864,7 @@ public class TheRenderKing : MonoBehaviour {
         float sizeNormalized = Mathf.Clamp01((size - 0.1f) / 10f);
         speciesPortraitRenderCamera.GetComponent<CritterPortraitCameraManager>().UpdateCameraTargetValues(sizeNormalized);
 
-        //Debug.Log("UpdateCritterPortraitStrokesData: " + sizeNormalized.ToString());
+        Debug.Log("UpdateCritterPortraitStrokesData: " + genome.bodyGenome.appearanceGenome.huePrimary.ToString());
     }
 
     private void GenerateCritterBodyBrushstrokes(ref CritterUberStrokeData[] strokesArray, CritterGenomeInterpretor.BrushPoint[] brushPointArray, AgentGenome agentGenome, int agentIndex) {
