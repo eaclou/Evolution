@@ -5,7 +5,7 @@
 		_MainTex ("Main Texture", 2D) = "white" {}
 		_AltitudeTex ("_AltitudeTex", 2D) = "gray" {}
 		_WaterSurfaceTex ("_WaterSurfaceTex", 2D) = "black" {}
-		_WaterColorTex ("_WaterColorTex", 2D) = "black" {}
+		_ResourceTex ("_ResourceTex", 2D) = "black" {}
 		
 	}
 	SubShader
@@ -27,7 +27,7 @@
 			sampler2D _MainTex;
 			sampler2D _AltitudeTex;
 			sampler2D _WaterSurfaceTex;
-			sampler2D _WaterColorTex;
+			sampler2D _ResourceTex;
 			
 			sampler2D _RenderedSceneRT;  // Provided by CommandBuffer -- global tex??? seems confusing... ** revisit this
 			
@@ -110,9 +110,9 @@
 				float4 frameBufferColor = tex2D(_RenderedSceneRT, screenUV);  //  Color of brushtroke source					
 				float4 altitudeTex = tex2D(_AltitudeTex, i.altitudeUV); //i.worldPos.z / 10; // [-1,1] range
 				float4 waterSurfaceTex = tex2D(_WaterSurfaceTex, (i.altitudeUV - 0.25) * 2);
-				float4 waterColorTex = tex2D(_WaterColorTex, (i.altitudeUV - 0.25) * 2);
+				float4 resourceTex = tex2D(_ResourceTex, (i.altitudeUV - 0.25) * 2);
 				
-				float4 finalColor = GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, waterColorTex);
+				float4 finalColor = GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, resourceTex);
 				finalColor.a = brushColor.a;
 
 				//finalColor.rgb = tex2D(_WaterColorTex, (i.altitudeUV - 0.25) * 2).rgb;	

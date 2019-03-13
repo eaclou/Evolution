@@ -1,20 +1,26 @@
 ﻿#pragma kernel CSGetAlgaeGridSamples
 #pragma kernel CSUpdateAlgaeGrid
+#pragma kernel CSAdvectResourceGrid
 #pragma kernel CSInitializeAlgaeGrid
 #pragma kernel CSRemoveAlgaeAtLocations
 #pragma kernel CSMeasureTotalAlgae
-#pragma kernel CSAddAlgaeAtCoords
+#pragma kernel CSAddResourcesAtCoords
 
 
 #include "Assets/Resources/Shaders/Inc/StructsCritterData.cginc"
+#include "Assets/Resources/Shaders/Inc/StructsAlgaeParticles.cginc"
 
 StructuredBuffer<CritterInitData> critterInitDataCBuffer;
 StructuredBuffer<CritterSimData> critterSimDataCBuffer;
 
 Texture2D<float4> ObstaclesRead;
 
+StructuredBuffer<AlgaeParticleData> algaeParticlesRead;
+
 RWStructuredBuffer<float4> algaeGridSamplesCBuffer;
 StructuredBuffer<float4> algaeGridEatAmountsCBuffer;
+
+Texture2D<float4> VelocityRead;
 
 Texture2D<float4> algaeGridRead;
 RWTexture2D<float4> algaeGridWrite;
@@ -30,7 +36,15 @@ SamplerState _PointClamp;
 SamplerState _PointRepeat;
 
 uniform float _AlgaeGridDiffusion;
+uniform float _TextureResolution;
+uniform float _DeltaTime;
+uniform float _InvGridScale;
 uniform float _MapSize;
+
+uniform float _CoordX;
+uniform float _CoordY;
+
+uniform float _Time;
 
 [numthreads(1,1,1)]
 void CSGetAlgaeGridSamples (uint3 id : SV_DispatchThreadID)
@@ -52,11 +66,11 @@ void CSUpdateAlgaeGrid (uint3 id : SV_DispatchThreadID)
 	// Diffusion - food blurs and spreads out
 	// Store Gradient of increasing food density
 			
-    float amountRight = algaeGridRead[int2(id.x + 1, id.y)].x;
-    float amountLeft = algaeGridRead[int2(id.x - 1, id.y)].x;
-    float amountUp = algaeGridRead[int2(id.x, id.y + 1)].x;
-    float amountDown = algaeGridRead[int2(id.x, id.y - 1)].x;
-    float amountCenter = algaeGridRead[id.xy].x;
+    float4 amountRight = algaeGridRead[int2(id.x + 1, id.y)];
+    float4 amountLeft = algaeGridRead[int2(id.x - 1, id.y)];
+    float4 amountUp = algaeGridRead[int2(id.x, id.y + 1)];
+    float4 amountDown = algaeGridRead[int2(id.x, id.y - 1)];
+    float4 amountCenter = algaeGridRead[id.xy];
 
 	// Check vs obstacles??
 	float xCoord = ((float)id.x + 0.5)  / 32;  // ** Bad hardcoded!!!!!
@@ -78,26 +92,54 @@ void CSUpdateAlgaeGrid (uint3 id : SV_DispatchThreadID)
 	if(bottomObstacle.b > 0.5) amountDown = amountCenter;
 		
 
-    float deltaX = amountRight - amountLeft;
-    float deltaY = amountUp - amountDown;
+    //float deltaX = amountRight.x - amountLeft.x;
+    //float deltaY = amountUp.x - amountDown.x;
 
-	float2 grad = float2(0,0);
-	if(abs(deltaX) > 0.000001 || abs(deltaY) > 0.000001) {
-		grad = normalize(float2(deltaX, deltaY));
-	}
+	//float2 grad = float2(0,0);
+	//if(abs(deltaX) > 0.000001 || abs(deltaY) > 0.000001) {
+	//	grad = normalize(float2(deltaX, deltaY));
+	//}
     
 	//float2 grad = normalize(float2(deltaX, deltaY));
 	// Make sure this doesn't return null/undefined!!!!! ******  ***  (I didn't) ****
 	
-	float newAmount = lerp(amountCenter, (amountCenter + amountRight + amountLeft + amountUp + amountDown) / 5, _AlgaeGridDiffusion);
+	float4 newAmount = lerp(amountCenter, (amountCenter + amountRight + amountLeft + amountUp + amountDown) / 5, _AlgaeGridDiffusion);
 
-	algaeGridWrite[id.xy] = float4(newAmount, grad, 1.0);
+	algaeGridWrite[id.xy] = newAmount; //float4(newAmount, grad, 1.0);
+}
+
+[numthreads(32,32,1)]
+void CSAdvectResourceGrid (uint3 id : SV_DispatchThreadID)
+{
+
+	float xCoord = ((float)id.x + 0.5) / 32.0;
+	float yCoord = ((float)id.y + 0.5) / 32.0;
+	float2 uvOrigin = float2(xCoord, yCoord);
+
+	float isSolid = ObstaclesRead.SampleLevel(_LinearClamp, uvOrigin, 0).b;	
+	float2 uvSample = uvOrigin - _DeltaTime * _InvGridScale * VelocityRead.SampleLevel(_LinearRepeat, uvOrigin, 0).xy;
+	float4 newDensity = algaeGridRead.SampleLevel(_LinearRepeat, uvSample, 0);
+	
+	AlgaeParticleData particleData = algaeParticlesRead[(id.x * 32 + id.y + round(_Time * 75.4837)) % 1024];
+	float2 particleCoords = particleData.worldPos / _MapSize;
+	float dist = length(uvOrigin - particleCoords);
+	float distMask = saturate(1.0 - dist * 7);
+	
+	newDensity.y += saturate(particleData.biomass * 6) / 26 * distMask - 0.0006;
+
+	/*if(isSolid > 0.5) {
+		algaeGridWrite[id.xy] = 0; //newDensity;
+
+		return;
+	}*/
+			
+	algaeGridWrite[id.xy] = saturate(newDensity);
 }
 
 [numthreads(32,32,1)]
 void CSInitializeAlgaeGrid (uint3 id : SV_DispatchThreadID)
 {	
-	algaeGridWrite[id.xy] = float4(0.033, 0, 0, 1);
+	algaeGridWrite[id.xy] = float4(0,0,0,0); // float4(saturate(sin((float2)id.xy / 2)) * 0.25, 0.11, 0.3);  // x= nutrients, y= algae, z= decomposers, w= detritus
 }
 
 [numthreads(1,1,1)]
@@ -147,18 +189,17 @@ void CSMeasureTotalAlgae (uint3 id : SV_DispatchThreadID)
 }
 
 [numthreads(1,1,1)]
-void CSAddAlgaeAtCoords (uint3 id : SV_DispatchThreadID)
+void CSAddResourcesAtCoords (uint3 id : SV_DispatchThreadID)
 {	
 	float4 data = addAlgaeCBuffer[id.x];
 	
-	float amount = data.x;
-	int xIndex = floor(data.y * 32.0);
-	int yIndex = floor(data.z * 32.0);
+	int xIndex = floor(_CoordX * 32.0);  // *** hardcoded resolution!!!!
+	int yIndex = floor(_CoordY * 32.0);
 	int2 index = int2(xIndex, yIndex);
 
 	float4 currentAlgaeGrid = algaeGridRead[index];
 
-	currentAlgaeGrid.x += amount;
+	currentAlgaeGrid += data;
 
-	algaeGridWrite[index] = currentAlgaeGrid;
+	algaeGridWrite[index] = saturate(currentAlgaeGrid);
 }

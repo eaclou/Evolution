@@ -16,7 +16,7 @@ public class SimulationManager : MonoBehaviour {
     public SimulationStateData simStateData;
     public AudioManager audioManager;
     public StartPositionsPresetLists startPositionsPresets;
-    public ComputeShader computeShaderNutrientMap; // algae grid
+    public ComputeShader computeShaderResourceGrid; // algae grid
     public ComputeShader computeShaderFoodParticles;  // algae particles
     public ComputeShader computeShaderAnimalParticles;  // animal particles
     public MasterGenomePool masterGenomePool;  // agents
@@ -299,7 +299,7 @@ public class SimulationManager : MonoBehaviour {
         yield return null;
         startTime = Time.realtimeSinceStartup;
         uiManager.textLoadingTooltips.text = "LoadingInitializeFoodGrid()";
-        LoadingInitializeFoodGrid();
+        LoadingInitializeResourceGrid();
         Debug.Log("LoadingInitializeFoodGrid: " + (Time.realtimeSinceStartup - startTime).ToString());
         Debug.Log("End Total up to LoadingInitializeFoodGrid: " + (Time.realtimeSinceStartup - masterStartTime).ToString());
         yield return null;
@@ -388,8 +388,8 @@ public class SimulationManager : MonoBehaviour {
     private void LoadingInitializeFoodParticles() {
         vegetationManager.InitializeAlgaeParticles(numAgents, computeShaderFoodParticles);
     }    
-    private void LoadingInitializeFoodGrid() {
-        vegetationManager.InitializeAlgaeGrid(numAgents, computeShaderNutrientMap);
+    private void LoadingInitializeResourceGrid() {
+        vegetationManager.InitializeAlgaeGrid(numAgents, computeShaderResourceGrid); 
     }
     private void LoadingInitializeAnimalParticles() {
         zooplanktonManager.InitializeAnimalParticles(numAgents, computeShaderAnimalParticles);
@@ -595,6 +595,8 @@ public class SimulationManager : MonoBehaviour {
         // Or should this be right at beginning of frame????? ***************** revisit...
         environmentFluidManager.Tick(); // ** Clean this up, but generally OK
 
+        vegetationManager.ApplyDiffusionOnResourceGrid(environmentFluidManager);
+        vegetationManager.AdvectResourceGrid(environmentFluidManager);
 
         if(trophicLayersManager.GetAlgaeOnOff()) {
             vegetationManager.EatSelectedFoodParticles(simStateData); // 
@@ -762,8 +764,8 @@ public class SimulationManager : MonoBehaviour {
         //vegetationManager.ReviveSelectFoodParticles(respawnIndices, 1.25f, new Vector4(pos.x / _MapSize, pos.y / _MapSize, 0f, 0f), simStateData);
     }
     public void PlayerFeedToolPour(Vector3 pos) {        
-        int xCoord = Mathf.RoundToInt(pos.x / 256f * vegetationManager.algaeGridTexResolution);
-        int yCoord = Mathf.RoundToInt(pos.y / 256f * vegetationManager.algaeGridTexResolution);
+        int xCoord = Mathf.RoundToInt(pos.x / 256f * vegetationManager.resourceGridTexResolution);
+        int yCoord = Mathf.RoundToInt(pos.y / 256f * vegetationManager.resourceGridTexResolution);
 
         Debug.Log("PlayerFeedToolPour pos: " + xCoord.ToString() + ", " + yCoord.ToString());
 

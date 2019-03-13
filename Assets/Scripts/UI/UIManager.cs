@@ -683,8 +683,9 @@ public class UIManager : MonoBehaviour {
                         if(gameManager.simulationManager.trophicLayersManager.GetAgentsOnOff()) {
                             createSpecies = true;
                         }
-                        //buttonSelectedTrophicSlot.GetComponentInChildren<Text>().color = Color.white;
-                        gameManager.simulationManager.trophicLayersManager.ClickedPendingTrophicSlot();                    
+                        // **** CREATE SPECIES HERE:::::: ****
+                        gameManager.simulationManager.trophicLayersManager.ClickedPendingTrophicSlot(gameManager.simulationManager, gizmoPos);     
+                        
                         toolbarInfluencePoints -= addSpeciesInfluenceCost;
                         
                         if(gameManager.simulationManager.trophicLayersManager.pendingTrophicSlotRef.kingdomID == 2) {
@@ -738,10 +739,11 @@ public class UIManager : MonoBehaviour {
                 }
 
                 if(curActiveTool == ToolType.Nutrients) {
-                    if(leftClickThisFrame && toolbarInfluencePoints >= 0.1f) {
-                        toolbarInfluencePoints = Mathf.Clamp01(toolbarInfluencePoints - 0.1f);
-                        gameManager.simulationManager.simResourceManager.curGlobalNutrients += 10f;
-                        gameManager.simulationManager.simResourceManager.curGlobalDetritus += 10f;
+                    if(isDraggingMouse && toolbarInfluencePoints >= 0.01f) {
+                        toolbarInfluencePoints = Mathf.Clamp01(toolbarInfluencePoints - 0.0025f);
+                        gameManager.simulationManager.simResourceManager.curGlobalNutrients += 0.25f;
+                        gameManager.simulationManager.simResourceManager.curGlobalDetritus += 0.15f;
+                        gameManager.simulationManager.vegetationManager.AddResourcesAtCoords(new Vector4(0.1f, 0f, 0f, 0f), curMousePositionOnWaterPlane.x / SimulationManager._MapSize, curMousePositionOnWaterPlane.y / SimulationManager._MapSize);
                         //gameManager.simulationManager.PlayerFeedToolPour(hit.point);
                     }                
                 }

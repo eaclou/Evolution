@@ -56,7 +56,7 @@ public class TrophicLayersManager {
         kingdomAnimals.trophicTiersList.Add(animalsTier1);
 
     }
-    public void ClickedPendingTrophicSlot() {
+    public void ClickedPendingTrophicSlot(SimulationManager simManagerRef, Vector2 spawnPos) {
         // reset things, figure out which slot was created:
         pendingTrophicSlot = false;
         pendingTrophicSlotRef.status = TrophicSlot.SlotStatus.On;
@@ -67,6 +67,7 @@ public class TrophicLayersManager {
         if (pendingTrophicSlotRef.kingdomID == 1) { // plants!:
             if (pendingTrophicSlotRef.tierID == 0) { // plants!:
                 TurnOnAlgae();
+                simManagerRef.vegetationManager.SpawnInitialAlgaeParticles(5f, new Vector4(spawnPos.x, spawnPos.y, 0f, 0f));
             }
         }
         if (pendingTrophicSlotRef.kingdomID == 2) { // Animals:

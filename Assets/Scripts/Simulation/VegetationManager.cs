@@ -7,16 +7,16 @@ public class VegetationManager {
     public SettingsManager settingsRef;
     public SimResourceManager resourceManagerRef;
     
-    private ComputeShader computeShaderAlgaeGrid;
+    private ComputeShader computeShaderResourceGrid;
     private ComputeShader computeShaderAlgaeParticles;
 
     //public float curGlobalAlgaeGrid = 0f;  // not using this currently
     
-    public int algaeGridTexResolution = 32; // Temporarily disabled - replaced by single value (1x1 grid)
-    public RenderTexture algaeGridRT1;
-    public RenderTexture algaeGridRT2;
-    public Vector4[] algaeGridSamplesArray;
-    public Vector4[] algaeGridEatAmountsArray;
+    public int resourceGridTexResolution = 32; // Temporarily disabled - replaced by single value (1x1 grid)
+    public RenderTexture resourceGridRT1;
+    public RenderTexture resourceGridRT2;
+    public Vector4[] resourceGridSamplesArray;
+    public Vector4[] resourceGridEatAmountsArray;
 
     private RenderTexture tempTex16;
     private RenderTexture tempTex8;  // <-- remove these and make function compress 4x
@@ -24,7 +24,7 @@ public class VegetationManager {
     private RenderTexture tempTex2;  // <-- remove these and make function compress 4x
     private RenderTexture tempTex1;
     
-    private ComputeBuffer algaeGridSamplesCBuffer;
+    private ComputeBuffer resourceGridAgentSamplesCBuffer;
 
     private const int numAlgaeParticles = 1024;  // *** 
     public ComputeBuffer algaeParticlesCBuffer;
@@ -40,7 +40,7 @@ public class VegetationManager {
     private ComputeBuffer algaeParticlesMeasure1;
     private AlgaeParticleData[] algaeParticleMeasurementTotalsData;
     
-    public Vector2[] nutrientSpawnPatchesArray;
+    public Vector2[] resourceGridSpawnPatchesArray;
         
     public struct AlgaeParticleData {
         public int index;
@@ -57,25 +57,26 @@ public class VegetationManager {
         public float oxygenProduced;
         public float nutrientsUsed;
         public float wasteProduced;
+        public Vector3 color;
     }
     
     private int GetAlgaeParticleDataSize() {
-        int bitSize = sizeof(float) * 12 + sizeof(int) * 3;
+        int bitSize = sizeof(float) * 15 + sizeof(int) * 3;
         return bitSize;
     }
 
-    public void MoveRandomNutrientPatches(int index) {
-        nutrientSpawnPatchesArray[index] = new Vector2(UnityEngine.Random.Range(0.1f, 0.9f), UnityEngine.Random.Range(0.1f, 0.9f)); // (UnityEngine.Random.insideUnitCircle + Vector2.one) * 0.5f;
-        Debug.Log("Moved Nutrient Patch! [" + index.ToString() + "], " + nutrientSpawnPatchesArray[index].ToString());
+    public void MoveRandomResourceGridPatches(int index) {
+        resourceGridSpawnPatchesArray[index] = new Vector2(UnityEngine.Random.Range(0.1f, 0.9f), UnityEngine.Random.Range(0.1f, 0.9f)); // (UnityEngine.Random.insideUnitCircle + Vector2.one) * 0.5f;
+        Debug.Log("Moved Resource Patch! [" + index.ToString() + "], " + resourceGridSpawnPatchesArray[index].ToString());
     }
 	
     public VegetationManager(SettingsManager settings, SimResourceManager resourcesRef) {
         settingsRef = settings;
         resourceManagerRef = resourcesRef;
 
-        nutrientSpawnPatchesArray = new Vector2[4]; // *** Refactor this!!! ***
-        for(int i = 0; i < nutrientSpawnPatchesArray.Length; i++) {
-            nutrientSpawnPatchesArray[i] = new Vector2(UnityEngine.Random.Range(0.1f, 0.9f), UnityEngine.Random.Range(0.1f, 0.9f)); // (UnityEngine.Random.insideUnitCircle + Vector2.one) * 0.5f;
+        resourceGridSpawnPatchesArray = new Vector2[4]; // *** Refactor this!!! ***
+        for(int i = 0; i < resourceGridSpawnPatchesArray.Length; i++) {
+            resourceGridSpawnPatchesArray[i] = new Vector2(UnityEngine.Random.Range(0.1f, 0.9f), UnityEngine.Random.Range(0.1f, 0.9f)); // (UnityEngine.Random.insideUnitCircle + Vector2.one) * 0.5f;
         }
     }
     
@@ -101,6 +102,7 @@ public class VegetationManager {
             data.isActive = 0f;
             data.isDecaying = 0f;
             data.age = UnityEngine.Random.Range(1f, 2f);
+            data.color = new Vector3(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f));
             algaeParticlesArray[i] = data;
         }
         //Debug.Log("Fill Initial Particle Array Data CPU: " + (Time.realtimeSinceStartup - startTime).ToString());
@@ -141,28 +143,28 @@ public class VegetationManager {
         
     public void InitializeAlgaeGrid(int numAgents, ComputeShader computeShader) {
 
-        computeShaderAlgaeGrid = computeShader;
+        computeShaderResourceGrid = computeShader;
               
-        algaeGridRT1 = new RenderTexture(algaeGridTexResolution, algaeGridTexResolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        algaeGridRT1.wrapMode = TextureWrapMode.Clamp;
-        algaeGridRT1.filterMode = FilterMode.Bilinear;
-        algaeGridRT1.enableRandomWrite = true;
+        resourceGridRT1 = new RenderTexture(resourceGridTexResolution, resourceGridTexResolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+        resourceGridRT1.wrapMode = TextureWrapMode.Clamp;
+        resourceGridRT1.filterMode = FilterMode.Bilinear;
+        resourceGridRT1.enableRandomWrite = true;
         //nutrientMapRT1.useMipMap = true;
-        algaeGridRT1.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***    
+        resourceGridRT1.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***    
 
-        algaeGridRT2 = new RenderTexture(algaeGridTexResolution, algaeGridTexResolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        algaeGridRT2.wrapMode = TextureWrapMode.Clamp;
-        algaeGridRT2.enableRandomWrite = true;
+        resourceGridRT2 = new RenderTexture(resourceGridTexResolution, resourceGridTexResolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+        resourceGridRT2.wrapMode = TextureWrapMode.Clamp;
+        resourceGridRT2.enableRandomWrite = true;
         //nutrientMapRT2.useMipMap = true;
-        algaeGridRT2.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***  
+        resourceGridRT2.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***  
         
-        algaeGridSamplesArray = new Vector4[numAgents];
-        algaeGridEatAmountsArray = new Vector4[numAgents];
+        resourceGridSamplesArray = new Vector4[numAgents];
+        resourceGridEatAmountsArray = new Vector4[numAgents];
 
-        int kernelCSInitializeAlgaeGrid = computeShaderAlgaeGrid.FindKernel("CSInitializeAlgaeGrid");
-        computeShaderAlgaeGrid.SetTexture(kernelCSInitializeAlgaeGrid, "algaeGridWrite", algaeGridRT1);
-        computeShaderAlgaeGrid.Dispatch(kernelCSInitializeAlgaeGrid, algaeGridTexResolution / 32, algaeGridTexResolution / 32, 1);
-        Graphics.Blit(algaeGridRT1, algaeGridRT2);
+        int kernelCSInitializeAlgaeGrid = computeShaderResourceGrid.FindKernel("CSInitializeAlgaeGrid");
+        computeShaderResourceGrid.SetTexture(kernelCSInitializeAlgaeGrid, "algaeGridWrite", resourceGridRT1);
+        computeShaderResourceGrid.Dispatch(kernelCSInitializeAlgaeGrid, resourceGridTexResolution / 32, resourceGridTexResolution / 32, 1);
+        Graphics.Blit(resourceGridRT1, resourceGridRT2);
 
         tempTex16 = new RenderTexture(16, 16, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
         tempTex16.wrapMode = TextureWrapMode.Clamp;
@@ -194,36 +196,50 @@ public class VegetationManager {
         tempTex1.enableRandomWrite = true;
         tempTex1.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
 
-        algaeGridSamplesCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 4);
+        resourceGridAgentSamplesCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 4);
 
         //theRenderKing.fluidRenderMat.SetTexture("_DebugTex", nutrientMapRT1);
         
     }
 
-    public void ApplyDiffusionOnAlgaeGrid(EnvironmentFluidManager fluidManagerRef) {
-        int kernelCSUpdateAlgaeGrid = computeShaderAlgaeGrid.FindKernel("CSUpdateAlgaeGrid");
-        computeShaderAlgaeGrid.SetFloat("_AlgaeGridDiffusion", settingsRef.foodDiffusionRate);
-        computeShaderAlgaeGrid.SetTexture(kernelCSUpdateAlgaeGrid, "ObstaclesRead", fluidManagerRef._ObstaclesRT);
-        computeShaderAlgaeGrid.SetTexture(kernelCSUpdateAlgaeGrid, "algaeGridRead", algaeGridRT1);
-        computeShaderAlgaeGrid.SetTexture(kernelCSUpdateAlgaeGrid, "algaeGridWrite", algaeGridRT2);
-        computeShaderAlgaeGrid.Dispatch(kernelCSUpdateAlgaeGrid, algaeGridTexResolution / 32, algaeGridTexResolution / 32, 1);
+    public void ApplyDiffusionOnResourceGrid(EnvironmentFluidManager fluidManagerRef) {
+        int kernelCSUpdateAlgaeGrid = computeShaderResourceGrid.FindKernel("CSUpdateAlgaeGrid");
+        computeShaderResourceGrid.SetFloat("_AlgaeGridDiffusion", settingsRef.nutrientDiffusionRate);
+        computeShaderResourceGrid.SetTexture(kernelCSUpdateAlgaeGrid, "ObstaclesRead", fluidManagerRef._ObstaclesRT);
+        computeShaderResourceGrid.SetTexture(kernelCSUpdateAlgaeGrid, "algaeGridRead", resourceGridRT1);
+        computeShaderResourceGrid.SetTexture(kernelCSUpdateAlgaeGrid, "algaeGridWrite", resourceGridRT2);
+        computeShaderResourceGrid.Dispatch(kernelCSUpdateAlgaeGrid, resourceGridTexResolution / 32, resourceGridTexResolution / 32, 1);
 
-        Graphics.Blit(algaeGridRT2, algaeGridRT1);
+        //Graphics.Blit(resourceGridRT2, resourceGridRT1);
         
     }
-    public void GetAlgaeGridValuesAtMouthPositions(SimulationStateData simStateDataRef) {
+    public void AdvectResourceGrid(EnvironmentFluidManager fluidManagerRef) {
+        int kernelAdvectResourceGrid = computeShaderResourceGrid.FindKernel("CSAdvectResourceGrid");
+        computeShaderResourceGrid.SetBuffer(kernelAdvectResourceGrid, "algaeParticlesRead", algaeParticlesCBuffer);
+        computeShaderResourceGrid.SetFloat("_TextureResolution", 32f); // (float)resolution);
+        computeShaderResourceGrid.SetFloat("_DeltaTime", fluidManagerRef.deltaTime);
+        computeShaderResourceGrid.SetFloat("_InvGridScale", fluidManagerRef.invGridScale);
+        computeShaderResourceGrid.SetFloat("_MapSize", SimulationManager._MapSize);
+        computeShaderResourceGrid.SetFloat("_Time", Time.realtimeSinceStartup);
+        computeShaderResourceGrid.SetTexture(kernelAdvectResourceGrid, "ObstaclesRead", fluidManagerRef._ObstaclesRT);
+        computeShaderResourceGrid.SetTexture(kernelAdvectResourceGrid, "VelocityRead", fluidManagerRef._VelocityA);
+        computeShaderResourceGrid.SetTexture(kernelAdvectResourceGrid, "algaeGridRead", resourceGridRT2);
+        computeShaderResourceGrid.SetTexture(kernelAdvectResourceGrid, "algaeGridWrite", resourceGridRT1);
+        computeShaderResourceGrid.Dispatch(kernelAdvectResourceGrid, 1, 1, 1);
+    }
+    public void GetResourceGridValuesAtMouthPositions(SimulationStateData simStateDataRef) {
         // Doing it this way to avoid resetting ALL agents whenever ONE is respawned!
         //ComputeBuffer nutrientSamplesCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 4);
         
-        int kernelCSGetAlgaeGridSamples = computeShaderAlgaeGrid.FindKernel("CSGetAlgaeGridSamples");        
-        computeShaderAlgaeGrid.SetBuffer(kernelCSGetAlgaeGridSamples, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
-        computeShaderAlgaeGrid.SetBuffer(kernelCSGetAlgaeGridSamples, "algaeGridSamplesCBuffer", algaeGridSamplesCBuffer);
-        computeShaderAlgaeGrid.SetTexture(kernelCSGetAlgaeGridSamples, "algaeGridRead", algaeGridRT1);
-        computeShaderAlgaeGrid.SetFloat("_MapSize", SimulationManager._MapSize);
-        computeShaderAlgaeGrid.Dispatch(kernelCSGetAlgaeGridSamples, algaeGridSamplesCBuffer.count, 1, 1);
+        int kernelCSGetAlgaeGridSamples = computeShaderResourceGrid.FindKernel("CSGetAlgaeGridSamples");        
+        computeShaderResourceGrid.SetBuffer(kernelCSGetAlgaeGridSamples, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
+        computeShaderResourceGrid.SetBuffer(kernelCSGetAlgaeGridSamples, "algaeGridSamplesCBuffer", resourceGridAgentSamplesCBuffer);
+        computeShaderResourceGrid.SetTexture(kernelCSGetAlgaeGridSamples, "algaeGridRead", resourceGridRT1);
+        computeShaderResourceGrid.SetFloat("_MapSize", SimulationManager._MapSize);
+        computeShaderResourceGrid.Dispatch(kernelCSGetAlgaeGridSamples, resourceGridAgentSamplesCBuffer.count, 1, 1);
 
         //Vector4[] outArray = new Vector4[_NumAgents];
-        algaeGridSamplesCBuffer.GetData(algaeGridSamplesArray); // Disappearing body strokes due to this !?!?!?!?!?
+        resourceGridAgentSamplesCBuffer.GetData(resourceGridSamplesArray); // Disappearing body strokes due to this !?!?!?!?!?
 
         //Debug.Log("Food: " + nutrientSamplesArray[0].x.ToString());
         //nutrientSamplesCBuffer.Release();
@@ -272,43 +288,41 @@ public class VegetationManager {
 
         return outputValuesArray[0].x;
     }*/    
-    /*public void AddAlgaeAtCoords(float amount, int x, int y) {
-        if(curGlobalAlgaeGrid < 128f) {
-            ComputeBuffer addAlgaeCBuffer = new ComputeBuffer(1, sizeof(float) * 4);
-            Vector4[] addAlgaeArray = new Vector4[1];
-            addAlgaeArray[0] = new Vector4(amount, (float)x / 32f, (float)y / 32f, 1f);
-            addAlgaeCBuffer.SetData(addAlgaeArray);
-
-            int kernelCSAddAlgaeAtCoords = computeShaderAlgaeGrid.FindKernel("CSAddAlgaeAtCoords");
-            computeShaderAlgaeGrid.SetBuffer(kernelCSAddAlgaeAtCoords, "addAlgaeCBuffer", addAlgaeCBuffer);        
-            computeShaderAlgaeGrid.SetTexture(kernelCSAddAlgaeAtCoords, "algaeGridRead", algaeGridRT1);
-            computeShaderAlgaeGrid.SetTexture(kernelCSAddAlgaeAtCoords, "algaeGridWrite", algaeGridRT2);
-            computeShaderAlgaeGrid.Dispatch(kernelCSAddAlgaeAtCoords, addAlgaeCBuffer.count, 1, 1);
+    public void AddResourcesAtCoords(Vector4 amount, float x, float y) {  // 0-1 normalized map coords
         
-            Graphics.Blit(algaeGridRT2, algaeGridRT1);
+        ComputeBuffer addAlgaeCBuffer = new ComputeBuffer(1, sizeof(float) * 4);
+        Vector4[] addAlgaeArray = new Vector4[1];
 
-            addAlgaeCBuffer.Release();
-        }
-        else {
-            Debug.Log("Can't add nutrients, exceeds max level");
-        }
+        addAlgaeArray[0] = amount;
+        addAlgaeCBuffer.SetData(addAlgaeArray);
 
+        int kernelCSAddAlgaeAtCoords = computeShaderResourceGrid.FindKernel("CSAddResourcesAtCoords");
+        computeShaderResourceGrid.SetBuffer(kernelCSAddAlgaeAtCoords, "addAlgaeCBuffer", addAlgaeCBuffer);        
+        computeShaderResourceGrid.SetTexture(kernelCSAddAlgaeAtCoords, "algaeGridRead", resourceGridRT1);
+        computeShaderResourceGrid.SetTexture(kernelCSAddAlgaeAtCoords, "algaeGridWrite", resourceGridRT2);
+        computeShaderResourceGrid.SetFloat("_CoordX", x);
+        computeShaderResourceGrid.SetFloat("_CoordY", y);
+        computeShaderResourceGrid.Dispatch(kernelCSAddAlgaeAtCoords, 1, 1, 1);  // one-at-a-time for now, until re-factor (separate location buffers to resourceAmounts) ****
         
-    }*/
+        Graphics.Blit(resourceGridRT2, resourceGridRT1);
+
+        addAlgaeCBuffer.Release();
+        
+    }
     public void RemoveEatenAlgaeGrid(int numAgents, SimulationStateData simStateDataRef) {
         ComputeBuffer eatAmountsCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 4);
                 
-        eatAmountsCBuffer.SetData(algaeGridEatAmountsArray);
+        eatAmountsCBuffer.SetData(resourceGridEatAmountsArray);
 
-        int kernelCSRemoveAlgaeAtLocations = computeShaderAlgaeGrid.FindKernel("CSRemoveAlgaeAtLocations");
-        computeShaderAlgaeGrid.SetBuffer(kernelCSRemoveAlgaeAtLocations, "nutrientEatAmountsCBuffer", eatAmountsCBuffer);
-        computeShaderAlgaeGrid.SetBuffer(kernelCSRemoveAlgaeAtLocations, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
-        computeShaderAlgaeGrid.SetTexture(kernelCSRemoveAlgaeAtLocations, "algaeGridRead", algaeGridRT1);
-        computeShaderAlgaeGrid.SetTexture(kernelCSRemoveAlgaeAtLocations, "algaeGridWrite", algaeGridRT2);
-        computeShaderAlgaeGrid.SetFloat("_MapSize", SimulationManager._MapSize);
-        computeShaderAlgaeGrid.Dispatch(kernelCSRemoveAlgaeAtLocations, eatAmountsCBuffer.count, 1, 1);
+        int kernelCSRemoveAlgaeAtLocations = computeShaderResourceGrid.FindKernel("CSRemoveAlgaeAtLocations");
+        computeShaderResourceGrid.SetBuffer(kernelCSRemoveAlgaeAtLocations, "nutrientEatAmountsCBuffer", eatAmountsCBuffer);
+        computeShaderResourceGrid.SetBuffer(kernelCSRemoveAlgaeAtLocations, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
+        computeShaderResourceGrid.SetTexture(kernelCSRemoveAlgaeAtLocations, "algaeGridRead", resourceGridRT1);
+        computeShaderResourceGrid.SetTexture(kernelCSRemoveAlgaeAtLocations, "algaeGridWrite", resourceGridRT2);
+        computeShaderResourceGrid.SetFloat("_MapSize", SimulationManager._MapSize);
+        computeShaderResourceGrid.Dispatch(kernelCSRemoveAlgaeAtLocations, eatAmountsCBuffer.count, 1, 1);
 
-        Graphics.Blit(algaeGridRT2, algaeGridRT1);
+        Graphics.Blit(resourceGridRT2, resourceGridRT1);
         
         eatAmountsCBuffer.Release();
     }
@@ -332,6 +346,15 @@ public class VegetationManager {
 
         selectRespawnFoodParticleIndicesCBuffer.Release();
     }*/  // NOT USED ANY MORE????
+    public void SpawnInitialAlgaeParticles(float radius, Vector4 spawnCoords) {
+        int kernelCSSpawnInitialAlgaeParticles = computeShaderAlgaeParticles.FindKernel("CSSpawnInitialAlgaeParticles");        
+        computeShaderAlgaeParticles.SetFloat("_MapSize", SimulationManager._MapSize);
+        computeShaderAlgaeParticles.SetFloat("_Time", Time.realtimeSinceStartup);
+        computeShaderAlgaeParticles.SetVector("_FoodSprinklePos", spawnCoords);
+        computeShaderAlgaeParticles.SetFloat("_FoodSprinkleRadius", radius);
+        computeShaderAlgaeParticles.SetBuffer(kernelCSSpawnInitialAlgaeParticles, "foodParticlesWrite", algaeParticlesCBuffer);
+        computeShaderAlgaeParticles.Dispatch(kernelCSSpawnInitialAlgaeParticles, 1, 1, 1);
+    }
     public void SimulateAlgaeParticles(EnvironmentFluidManager fluidManagerRef, TheRenderKing renderKingRef, SimulationStateData simStateDataRef, SimResourceManager resourcesManager) { // Sim
         // Go through foodParticleData and check for inactive
         // determined by current total food -- done!
@@ -345,7 +368,7 @@ public class VegetationManager {
         computeShaderAlgaeParticles.SetBuffer(kernelCSSimulateAlgaeParticles, "foodParticlesWrite", algaeParticlesCBufferSwap);
         computeShaderAlgaeParticles.SetTexture(kernelCSSimulateAlgaeParticles, "velocityRead", fluidManagerRef._VelocityA);        
         computeShaderAlgaeParticles.SetTexture(kernelCSSimulateAlgaeParticles, "altitudeRead", renderKingRef.baronVonTerrain.terrainHeightMap);
-        computeShaderAlgaeParticles.SetTexture(kernelCSSimulateAlgaeParticles, "_SpawnDensityMap", algaeGridRT1);
+        computeShaderAlgaeParticles.SetTexture(kernelCSSimulateAlgaeParticles, "_SpawnDensityMap", resourceGridRT1);
         computeShaderAlgaeParticles.SetFloat("_MapSize", SimulationManager._MapSize);
             
         //computeShaderFoodParticles.SetFloat("_RespawnFoodParticles", 1f);
@@ -489,8 +512,8 @@ public class VegetationManager {
             tempTex8.Release();
             tempTex16.Release();
         }
-        if(algaeGridSamplesCBuffer != null) {
-            algaeGridSamplesCBuffer.Release();
+        if(resourceGridAgentSamplesCBuffer != null) {
+            resourceGridAgentSamplesCBuffer.Release();
         }
 
         if (algaeParticlesNearestCritters1 != null) {

@@ -13,4 +13,5 @@ struct AlgaeParticleData {
 	float oxygenProduced;
     float nutrientsUsed;
     float wasteProduced;
+	float3 color;
 };

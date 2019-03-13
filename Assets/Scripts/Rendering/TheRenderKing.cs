@@ -3381,7 +3381,7 @@ public class TheRenderKing : MonoBehaviour {
             cmdBufferDebugVis.ClearRenderTarget(true, true, Color.blue, 1.0f);  // clear -- needed???
 
             debugVisModeMat.SetPass(0);
-            debugVisModeMat.SetTexture("_MainTex", simManager.vegetationManager.algaeGridRT1);
+            debugVisModeMat.SetTexture("_MainTex", simManager.vegetationManager.resourceGridRT1);
             debugVisModeMat.SetFloat("_ColorMagnitude", 1f);
             cmdBufferDebugVis.DrawMesh(fluidRenderMesh, Matrix4x4.identity, debugVisModeMat);  //baronVonTerrain.terrainMesh
 
@@ -3437,7 +3437,7 @@ public class TheRenderKing : MonoBehaviour {
             baronVonTerrain.groundStrokesLrgDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
             baronVonTerrain.groundStrokesLrgDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
             baronVonTerrain.groundStrokesLrgDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-            baronVonTerrain.groundStrokesLrgDisplayMat.SetTexture("_WaterColorTex", simManager.environmentFluidManager._DensityA);
+            baronVonTerrain.groundStrokesLrgDisplayMat.SetTexture("_ResourceTex", simManager.vegetationManager.resourceGridRT1);
             baronVonTerrain.groundStrokesLrgDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);            
             baronVonTerrain.groundStrokesLrgDisplayMat.SetVector("_FogColor", simManager.fogColor);
             //baronVonTerrain.groundStrokesLrgDisplayMat.SetTexture("_NutrientTex", simManager.foodManager.nutrientMapRT1);
@@ -3451,7 +3451,7 @@ public class TheRenderKing : MonoBehaviour {
             baronVonTerrain.groundStrokesMedDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
             baronVonTerrain.groundStrokesMedDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
             baronVonTerrain.groundStrokesMedDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-            baronVonTerrain.groundStrokesMedDisplayMat.SetTexture("_WaterColorTex", simManager.environmentFluidManager._DensityA);
+            baronVonTerrain.groundStrokesMedDisplayMat.SetTexture("_ResourceTex", simManager.vegetationManager.resourceGridRT1);
             baronVonTerrain.groundStrokesMedDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);            
             baronVonTerrain.groundStrokesMedDisplayMat.SetVector("_FogColor", simManager.fogColor);
             //baronVonTerrain.groundStrokesMedDisplayMat.SetTexture("_NutrientTex", simManager.foodManager.nutrientMapRT1);
@@ -3465,7 +3465,7 @@ public class TheRenderKing : MonoBehaviour {
             baronVonTerrain.groundStrokesSmlDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
             baronVonTerrain.groundStrokesSmlDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
             baronVonTerrain.groundStrokesSmlDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-            baronVonTerrain.groundStrokesSmlDisplayMat.SetTexture("_WaterColorTex", simManager.environmentFluidManager._DensityA);
+            baronVonTerrain.groundStrokesSmlDisplayMat.SetTexture("_ResourceTex", simManager.vegetationManager.resourceGridRT1);
             baronVonTerrain.groundStrokesSmlDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);            
             baronVonTerrain.groundStrokesSmlDisplayMat.SetVector("_FogColor", simManager.fogColor);
             //baronVonTerrain.groundStrokesSmlDisplayMat.SetTexture("_NutrientTex", simManager.foodManager.nutrientMapRT1);
@@ -3616,7 +3616,7 @@ public class TheRenderKing : MonoBehaviour {
             baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
             baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
             baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-            baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_NutrientTex", simManager.vegetationManager.algaeGridRT1);
+            baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_NutrientTex", simManager.vegetationManager.resourceGridRT1);
             baronVonWater.waterNutrientsBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
             cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonWater.waterNutrientsBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterNutrientsBitsCBuffer.count);
@@ -3787,7 +3787,7 @@ public class TheRenderKing : MonoBehaviour {
             baronVonWater.waterQuadStrokesLrgDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
             baronVonWater.waterQuadStrokesLrgDisplayMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
             baronVonWater.waterQuadStrokesLrgDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-            baronVonWater.waterQuadStrokesLrgDisplayMat.SetTexture("_NutrientTex", simManager.vegetationManager.algaeGridRT1);
+            baronVonWater.waterQuadStrokesLrgDisplayMat.SetTexture("_ResourceTex", simManager.vegetationManager.resourceGridRT1);
             baronVonWater.waterQuadStrokesLrgDisplayMat.SetTexture("_WaterColorTex", simManager.environmentFluidManager._DensityA);
             baronVonWater.waterQuadStrokesLrgDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
             baronVonWater.waterQuadStrokesLrgDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized); // Mathf.Lerp(0f, 1f, Mathf.Clamp01((simManager.cameraManager.gameObject.transform.position.z * -1f) / 100f)));
@@ -3804,7 +3804,7 @@ public class TheRenderKing : MonoBehaviour {
             baronVonWater.waterQuadStrokesSmlDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
             baronVonWater.waterQuadStrokesSmlDisplayMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
             baronVonWater.waterQuadStrokesSmlDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-            baronVonWater.waterQuadStrokesSmlDisplayMat.SetTexture("_NutrientTex", simManager.vegetationManager.algaeGridRT1);
+            baronVonWater.waterQuadStrokesSmlDisplayMat.SetTexture("_ResourceTex", simManager.vegetationManager.resourceGridRT1);
             baronVonWater.waterQuadStrokesSmlDisplayMat.SetTexture("_WaterColorTex", simManager.environmentFluidManager._DensityA);
             baronVonWater.waterQuadStrokesSmlDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
             baronVonWater.waterQuadStrokesSmlDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized); // Mathf.Lerp(0f, 1f, Mathf.Clamp01((simManager.cameraManager.gameObject.transform.position.z * -1f) / 100f)));
@@ -3835,7 +3835,7 @@ public class TheRenderKing : MonoBehaviour {
             baronVonTerrain.groundDryLandDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
             baronVonTerrain.groundDryLandDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
             baronVonTerrain.groundDryLandDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-            baronVonTerrain.groundDryLandDisplayMat.SetTexture("_WaterColorTex", simManager.environmentFluidManager._DensityA);
+            baronVonTerrain.groundDryLandDisplayMat.SetTexture("_ResourceTex", simManager.vegetationManager.resourceGridRT1);
             baronVonTerrain.groundDryLandDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);            
             baronVonTerrain.groundDryLandDisplayMat.SetVector("_FogColor", simManager.fogColor);
             cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be

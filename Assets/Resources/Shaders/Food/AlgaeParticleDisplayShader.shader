@@ -40,7 +40,7 @@
 				float3 moundUV : TEXCOORD1;
 				float2 altitudeUV : TEXCOORD2;
 				float4 color : COLOR;
-				
+				float4 hue : TEXCOORD3;
 			};
 
 			float rand(float2 co) {   // OUTPUT is in [0,1] RANGE!!!
@@ -124,7 +124,7 @@
 				o.uv = quadVerticesCBuffer[id].xy + 0.5f;	
 								
 				o.color = float4(saturate(particleData.isDecaying), altitudeRaw, rand2, 1 - saturate(particleData.isDecaying));
-				
+				o.hue = float4(particleData.color, 1);
 				return o;
 			}
 
@@ -162,7 +162,7 @@
 				finalColor.rgb = lerp(finalColor.rgb, finalColor.rgb * 0.9, isUnderwater);
 				finalColor.rgb = lerp(finalColor.rgb, waterFogColor, 1 * (saturate(altitude * 0.8)) + 0.25 * isUnderwater);
 
-
+				//finalColor.rgb = float3(1,1,1); //i.hue;
 
 				return finalColor;
 			}

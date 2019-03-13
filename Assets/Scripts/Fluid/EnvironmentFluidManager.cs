@@ -427,7 +427,6 @@ public class EnvironmentFluidManager : MonoBehaviour {
     private void Advection() {
 
         int kernelAdvection = computeShaderFluidSim.FindKernel("Advection");
-
         computeShaderFluidSim.SetFloat("_TextureResolution", (float)resolution);
         computeShaderFluidSim.SetFloat("_DeltaTime", deltaTime);
         computeShaderFluidSim.SetFloat("_InvGridScale", invGridScale);
