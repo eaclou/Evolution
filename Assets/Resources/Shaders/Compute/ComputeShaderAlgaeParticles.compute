@@ -247,28 +247,31 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 		float nutrientsUsed = 0;
 
 		float2 vel = velocityRead.SampleLevel(_LinearRepeat, uv, 2).xy;
-		float speedMult = 0.005;				
+		float speedMult = 0.02;				
 		
 		posOffset += vel * speedMult * _MapSize;
 
 		
-		int neighborIndex = (id.x + round(_Time * 33) + 512) % 1024;
+		int neighborIndex = (id.x + round(_Time * 11) + 512) % 1024;
 			
 		AlgaeParticleData neighborParticle = foodParticlesRead[neighborIndex];
-		float aliveMask = neighborParticle.isActive; //    (1.0 - neighborParticle.isDecaying) * neighborParticle.isActive;
+		float neighborAliveMask = neighborParticle.isActive; //    (1.0 - neighborParticle.isDecaying) * neighborParticle.isActive;
 
 		float2 neighborPos = neighborParticle.worldPos;
 		float2 dirToNeighbor = neighborPos - foodParticle.worldPos;
 		float distToNeighborSquared = dirToNeighbor.x * dirToNeighbor.x + dirToNeighbor.y * dirToNeighbor.y;		
 			
-		float repelMaskRange = 0.0025;
-		float repelMaskOffset = 0.4;
-		//float distanceMask = 1.0 - saturate(distToNeighborSquared * repelMaskRange - repelMaskOffset);
+		float repelMaskRange = 0.004;
+		float repelMaskOffset = 0.0;
+		float repelDistanceMask = 1.0 - saturate(distToNeighborSquared * repelMaskRange - repelMaskOffset);
+		float2 repelVel = -dirToNeighbor * repelDistanceMask * neighborAliveMask;
+		float repelMag = 0.005;
+		posOffset += repelVel * repelMag;
 
 		// move towards/away from nearest neighbor:			
-		float attractDistanceMask = 1.0 - saturate(distToNeighborSquared * repelMaskRange - repelMaskOffset);
-		float2 attractVel = float2(saturate(dirToNeighbor.x), saturate(dirToNeighbor.y)) * attractDistanceMask;
-		posOffset -= attractVel * 0.075 * aliveMask;
+		//float attractDistanceMask = 1.0 - saturate(distToNeighborSquared * repelMaskRange - repelMaskOffset);
+		//float2 attractVel = float2(saturate(dirToNeighbor.x), saturate(dirToNeighbor.y)) * attractDistanceMask;
+		//posOffset -= attractVel * 0.075 * aliveMask;
 
 
 		if(foodParticle.isDecaying < 0.5) {  // ALIVE !!!!!
@@ -284,7 +287,8 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 
 			bodyMass += growthMass;
 
-			foodParticlesWrite[id.x].age = foodParticle.age + _AlgaeAgingRate; 
+			float onLandMask = saturate((altitudeRaw - 0.5) * 100);
+			foodParticlesWrite[id.x].age = foodParticle.age + _AlgaeAgingRate + onLandMask * 0.05; 
 
 			foodParticlesWrite[id.x].isDecaying = foodParticle.isDecaying;
 
@@ -328,7 +332,7 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 			float randY = rand(float2(randX * 62.39 + _Time, (float)id.x));
 			float randZ = rand(float2((float)id.x, randY * -62.39 - _Time));			
 			
-			int parentIndex = (id.x + round(_Time * 54) + 256) % 1024;			
+			int parentIndex = (id.x + round(_Time * 0.25) + 256) % 1024;			
 			AlgaeParticleData parentParticle = foodParticlesRead[parentIndex];
 			float aliveMask = (1.0 - parentParticle.isDecaying) * parentParticle.isActive;
 			float2 parentPos = parentParticle.worldPos;
@@ -337,10 +341,10 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 						
 			float4 spawnAltitudeSample = altitudeRead.SampleLevel(_LinearClamp, spawnUV, 0);
 			
-			if(aliveMask > 0.5 && rand01 < 0.01) {  // to prevent mass respawning, overshooting the intended max global food amount ?  // Needed?
+			if(aliveMask > 0.5 && rand01 < 0.05) {  // to prevent mass respawning, overshooting the intended max global food amount ?  // Needed?
 				if(spawnAltitudeSample.x < _AlgaeSpawnMaxAltitude) {  // in water only? // for now...
 				
-					foodParticlesWrite[id.x].worldPos = parentPos + float2(randX, randY) * 2;
+					foodParticlesWrite[id.x].worldPos = parentPos + (float2(randZ, randX) - 0.5) * 2.5;
 
 					float randRadius = rand(float2(randX * 10, randY * -3.37)) * (_MaxParticleSize - _MinParticleSize) + _MinParticleSize;					
 					
@@ -351,7 +355,7 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 					foodParticlesWrite[id.x].isSwallowed = 0.0;
 					foodParticlesWrite[id.x].digestedAmount = 0.0;
 					foodParticlesWrite[id.x].age = rand(float2(rand01 * 70.158, randX * 13.37)) * 1;
-					foodParticlesWrite[id.x].color = saturate(parentParticle.color + (float3(randY, randX, randZ) - 0.5) * 0.15);
+					foodParticlesWrite[id.x].color = saturate(parentParticle.color + (float3(randY, randX, randZ) - 0.5) * 0.1);
 				}			
 			}			
 		}

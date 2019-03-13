@@ -374,12 +374,14 @@ public class VegetationManager {
         //computeShaderFoodParticles.SetFloat("_RespawnFoodParticles", 1f);
         computeShaderAlgaeParticles.SetFloat("_Time", Time.realtimeSinceStartup);
 
-        if(algaeParticleMeasurementTotalsData[0].biomass < maxFoodParticleTotal) {
+        //float randRoll = UnityEngine.Random.Range(0f, 1f);
+        computeShaderAlgaeParticles.SetFloat("_RespawnFoodParticles", 1f); 
+        /*if(algaeParticleMeasurementTotalsData[0].biomass < maxFoodParticleTotal) {
             computeShaderAlgaeParticles.SetFloat("_RespawnFoodParticles", 1f);                       
         }
         else {
             computeShaderAlgaeParticles.SetFloat("_RespawnFoodParticles", 0f);      
-        }
+        }*/
 
         float minParticleSize = settingsRef.avgAlgaeParticleRadius / settingsRef.algaeParticleRadiusVariance;
         float maxParticleSize = settingsRef.avgAlgaeParticleRadius * settingsRef.algaeParticleRadiusVariance;

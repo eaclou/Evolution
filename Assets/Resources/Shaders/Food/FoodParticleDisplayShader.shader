@@ -77,7 +77,7 @@
 				float noiseMag = 0.15;
 				float3 noiseOffset = noiseSample.yzw * noiseMag;
 
-				worldPosition.xyz += noiseOffset;
+				//worldPosition.xyz += noiseOffset;
 
 
 				float radius = particleData.radius * 0.10915 * isOn; // 1; //sqrt(particleData.biomass) * 2 + 0.5;
@@ -89,7 +89,7 @@
 				// REFRACTION:
 				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / 256, 0, 0)).yzw;				
 				float refractionStrength = 0.5;
-				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
+				//worldPosition.xy += -surfaceNormal.xy * refractionStrength;
 
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
@@ -113,7 +113,7 @@
 				finalColor.rgb += 0.25;
 				finalColor.a = texColor.a * 0.9; // * 0.25;
 				
-				finalColor.rgb = lerp(finalColor, i.hue, 1);
+				finalColor.rgb = lerp(finalColor, i.hue, 0.5);
 				//finalColor.rgb = 1;
 				return finalColor;
 			}

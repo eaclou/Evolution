@@ -79,8 +79,9 @@ public class TheRenderKing : MonoBehaviour {
     public Material critterUberStrokeShadowMat;
     
     public Material critterInspectHighlightMat;
-
     public Material critterHighlightTrailMat;
+
+    public Material algaeParticleColorInjectMat;
 
     public Material gizmoStirToolMat;
     public Material gizmoFeedToolMat;
@@ -1255,6 +1256,9 @@ public class TheRenderKing : MonoBehaviour {
 
         critterInspectHighlightMat.SetPass(0);
         critterInspectHighlightMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+
+        algaeParticleColorInjectMat.SetPass(0);
+        algaeParticleColorInjectMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
 
         gizmoStirToolMat.SetPass(0);
         gizmoStirToolMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -3071,16 +3075,25 @@ public class TheRenderKing : MonoBehaviour {
         //cmdBufferFluidColor.Blit(fluidManager.initialDensityTex, fluidManager._SourceColorRT);
         //cmdBufferFluidColor.DrawMesh(fluidRenderMesh, Matrix4x4.identity, fluidBackgroundColorMat); // Simple unlit Texture shader -- wysiwyg
 
-        basicStrokeDisplayMat.SetPass(0);
-        basicStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        basicStrokeDisplayMat.SetBuffer("basicStrokesCBuffer", colorInjectionStrokesCBuffer);
-        cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, basicStrokeDisplayMat, 0, MeshTopology.Triangles, 6, colorInjectionStrokesCBuffer.count);
+        algaeParticleColorInjectMat.SetPass(0);
+        algaeParticleColorInjectMat.SetBuffer("foodParticleDataCBuffer", simManager.vegetationManager.algaeParticlesCBuffer);
+        algaeParticleColorInjectMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        algaeParticleColorInjectMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+        algaeParticleColorInjectMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+        cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, algaeParticleColorInjectMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.algaeParticlesCBuffer.count);
+        
+        // Creatures + EggSacks:
+        //basicStrokeDisplayMat.SetPass(0);
+        //basicStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        //basicStrokeDisplayMat.SetBuffer("basicStrokesCBuffer", colorInjectionStrokesCBuffer);
+        //cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, basicStrokeDisplayMat, 0, MeshTopology.Triangles, 6, colorInjectionStrokesCBuffer.count);
         // Render Agent/Food/Pred colors here!!!
         // just use their display renders?
 
         Graphics.ExecuteCommandBuffer(cmdBufferFluidColor);
 
         fluidColorRenderCamera.Render();
+        //simManager.environmentFluidManager.densityA.GenerateMips();
         // Update this ^^ to use Graphics.ExecuteCommandBuffer()  ****
 
         // TREE OF LIFE:
@@ -3523,6 +3536,18 @@ public class TheRenderKing : MonoBehaviour {
             cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonWater.waterSurfaceBitsShadowsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterSurfaceBitsCBuffer.count);
         */
+
+            // FLUID ITSELF:
+            fluidRenderMat.SetPass(0);
+            fluidRenderMat.SetTexture("_DensityTex", fluidManager._DensityA);
+            fluidRenderMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
+            fluidRenderMat.SetTexture("_PressureTex", fluidManager._PressureA);
+            fluidRenderMat.SetTexture("_DivergenceTex", fluidManager._Divergence);
+            fluidRenderMat.SetTexture("_ObstaclesTex", fluidManager._ObstaclesRT);
+            fluidRenderMat.SetTexture("_TerrainHeightTex", baronVonTerrain.terrainHeightMap);
+            cmdBufferMain.DrawMesh(fluidRenderMesh, Matrix4x4.identity, fluidRenderMat);
+        
+
             critterUberStrokeShadowMat.SetPass(0);
             critterUberStrokeShadowMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
             critterUberStrokeShadowMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
@@ -3855,7 +3880,6 @@ public class TheRenderKing : MonoBehaviour {
         
         }
         
-
         
         /*if(isDebugRenderOn) {
             
@@ -3944,15 +3968,7 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferMainRender.ClearRenderTarget(true, true, Color.black, 1.0f);  // clear -- needed???
         //cmdBufferMainRender.ClearRenderTarget(true, true, new Color(225f / 255f, 217f / 255f, 200f / 255f), 1.0f);  // clear -- needed???
                 
-        // FLUID ITSELF:
-        fluidRenderMat.SetPass(0);
-        fluidRenderMat.SetTexture("_DensityTex", fluidManager._DensityA);
-        fluidRenderMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
-        fluidRenderMat.SetTexture("_PressureTex", fluidManager._PressureA);
-        fluidRenderMat.SetTexture("_DivergenceTex", fluidManager._Divergence);
-        fluidRenderMat.SetTexture("_ObstaclesTex", fluidManager._ObstaclesRT);
-        fluidRenderMat.SetTexture("_TerrainHeightTex", terrainHeightMap);
-        //cmdBufferMainRender.DrawMesh(fluidRenderMesh, Matrix4x4.identity, fluidRenderMat);
+        
 
         // Fluid Render Article:
         // http://blog.camposanto.com/post/171934927979/hi-im-matt-wilde-an-old-man-from-the-north-of/amp?__twitter_impression=true

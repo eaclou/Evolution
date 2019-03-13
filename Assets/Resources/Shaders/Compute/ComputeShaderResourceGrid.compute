@@ -125,7 +125,7 @@ void CSAdvectResourceGrid (uint3 id : SV_DispatchThreadID)
 	float dist = length(uvOrigin - particleCoords);
 	float distMask = saturate(1.0 - dist * 7);
 	
-	newDensity.y += saturate(particleData.biomass * 6) / 26 * distMask - 0.0006;
+	newDensity.y += saturate(particleData.biomass * 6) / 46 * distMask - 0.0006;
 
 	/*if(isSolid > 0.5) {
 		algaeGridWrite[id.xy] = 0; //newDensity;

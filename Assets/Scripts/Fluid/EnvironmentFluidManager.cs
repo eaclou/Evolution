@@ -243,6 +243,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
         SubtractGradient();
         Graphics.Blit(velocityB, velocityA); // TEMP! slow...  
 
+        
         //SimFloatyBits();
 
         //SimRipples();
@@ -360,6 +361,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
         densityA = new RenderTexture(resolution, resolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
         densityA.wrapMode = TextureWrapMode.Repeat;
         densityA.enableRandomWrite = true;
+        densityA.useMipMap = true;
         densityA.Create();
 
         densityB = new RenderTexture(resolution, resolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
@@ -423,6 +425,8 @@ public class EnvironmentFluidManager : MonoBehaviour {
         computeShaderFluidSim.SetTexture(kernelRefreshColor, "DensityRead", densityB);
         computeShaderFluidSim.SetTexture(kernelRefreshColor, "DensityWrite", densityA);
         computeShaderFluidSim.Dispatch(kernelRefreshColor, resolution / 16, resolution / 16, 1);
+
+        
     }
     private void Advection() {
 

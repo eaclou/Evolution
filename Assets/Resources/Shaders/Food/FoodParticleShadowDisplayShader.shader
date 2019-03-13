@@ -117,7 +117,7 @@
 				float4 texColor = tex2D(_MainTex, i.uv);	
 				float3 waterFogColor = float3(0.03,0.4,0.3) * 0.4;
 				texColor.rgb = waterFogColor;  // shadow
-				texColor.a *= 0.03;
+				texColor.a *= 0.005;
 				//texColor = float4(1,1,1,1);
 				return texColor;
 				//return float4(0.7,1,0.1,texColor.a * 0.75);
