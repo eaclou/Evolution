@@ -80,7 +80,7 @@
 				worldPosition.xyz += noiseOffset;
 
 
-				float radius = particleData.radius * 0.15 * isOn; // 1; //sqrt(particleData.biomass) * 2 + 0.5;
+				float radius = particleData.radius * 0.10915 * isOn; // 1; //sqrt(particleData.biomass) * 2 + 0.5;
 				quadPoint = quadPoint * radius; // * particleData.active; // *** remove * 3 after!!!
 				
 				
