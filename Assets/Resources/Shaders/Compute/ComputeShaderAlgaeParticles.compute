@@ -247,7 +247,7 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 		float nutrientsUsed = 0;
 
 		float2 vel = velocityRead.SampleLevel(_LinearRepeat, uv, 2).xy;
-		float speedMult = 0.02;				
+		float speedMult = 0.0167;				
 		
 		posOffset += vel * speedMult * _MapSize;
 

@@ -319,7 +319,7 @@ public class SimulationManager : MonoBehaviour {
         
         //yield return new WaitForSeconds(5f); // TEMP!!!
         Debug.Log("End Total: " + (Time.realtimeSinceStartup - masterStartTime).ToString());
-        environmentFluidManager.UpdateSimulationClimate();
+        //environmentFluidManager.UpdateSimulationClimate();
         
         // Done - will be detected by GameManager next frame
         loadingComplete = true;
@@ -699,7 +699,7 @@ public class SimulationManager : MonoBehaviour {
         }
 
         if(simAgeTimeSteps % 21 == 3) {
-            UpdateSimulationClimate();
+            //UpdateSimulationClimate();
 
             RefreshLatestHistoricalDataEntry();
             RefreshLatestSpeciesDataEntry();
@@ -1277,7 +1277,7 @@ public class SimulationManager : MonoBehaviour {
     private void UpdateSimulationClimate() {
         // Change force of turbulence, damping, other fluidSim parameters,
         // Inject pre-trained critters
-        environmentFluidManager.UpdateSimulationClimate();
+        //environmentFluidManager.UpdateSimulationClimate();
     }
     private void AddNewHistoricalDataEntry() {
         // add new entries to historical data lists: 

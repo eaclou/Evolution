@@ -128,9 +128,10 @@
 
 			fixed4 frag(v2f i) : SV_Target
 			{
-				return float4(0.25,0.9,0.2, 1);
-				float4 texColor = tex2D(_MainTex, i.uv);
 				
+				float4 texColor = tex2D(_MainTex, i.uv);
+				return float4(0.25,0.9,0.2, texColor.a);
+
 				float val = i.color.a;
 				//float3 waterFogColor = float3(0.03,0.4,0.3) * 0.4;
 				float4 finalColor = i.color; // float4(float3(i.color.z * 1.2, 0.85, (1.0 - i.color.w) * 0.2) + i.color.y, texColor.a * i.color.x * 0.33 * (1 - i.color.z));

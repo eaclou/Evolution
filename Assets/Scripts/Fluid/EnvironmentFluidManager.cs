@@ -180,9 +180,9 @@ public class EnvironmentFluidManager : MonoBehaviour {
 
         //displayMat = GetComponent<MeshRenderer>().material;                
         
-        Graphics.Blit(firstTimeRelaxedColorTex, densityA);
-        Graphics.Blit(firstTimeRelaxedColorTex, densityB);
-        Graphics.Blit(firstTimeRelaxedColorTex, sourceColorRT);
+        //Graphics.Blit(firstTimeRelaxedColorTex, densityA);
+        //Graphics.Blit(firstTimeRelaxedColorTex, densityB);
+        //Graphics.Blit(firstTimeRelaxedColorTex, sourceColorRT);
         //InitializeVelocity();
         
         forcePointsCBuffer = new ComputeBuffer(maxNumForcePoints, sizeof(float) * 5);
@@ -273,8 +273,8 @@ public class EnvironmentFluidManager : MonoBehaviour {
         float lerpAmount = 0.06f;
         viscosity = Mathf.Lerp(viscosity, 0.0002f, lerpAmount);
         damping = Mathf.Lerp(damping, 0.004f, lerpAmount);
-        colorRefreshBackgroundMultiplier = Mathf.Lerp(colorRefreshBackgroundMultiplier, 0.001f, lerpAmount);
-        colorRefreshDynamicMultiplier = Mathf.Lerp(colorRefreshDynamicMultiplier, 0.0075f, lerpAmount);
+        //colorRefreshBackgroundMultiplier = Mathf.Lerp(colorRefreshBackgroundMultiplier, 0.001f, lerpAmount);
+        //colorRefreshDynamicMultiplier = Mathf.Lerp(colorRefreshDynamicMultiplier, 0.0075f, lerpAmount);
 
         float baseTierLerp = Mathf.Clamp01((float)curTierWaterCurrents / 10f);
         float targetSpeed = Mathf.Lerp(0f, 15f, baseTierLerp * baseTierLerp * baseTierLerp);
@@ -288,8 +288,8 @@ public class EnvironmentFluidManager : MonoBehaviour {
 
         viscosity = Mathf.Lerp(viscosity, 0.0002f, lerpAmount);
         damping = Mathf.Lerp(damping, 0.004f, lerpAmount);
-        colorRefreshBackgroundMultiplier = Mathf.Lerp(colorRefreshBackgroundMultiplier, 0.001f, lerpAmount);
-        colorRefreshDynamicMultiplier = Mathf.Lerp(colorRefreshDynamicMultiplier, 0.0075f, lerpAmount);
+        //colorRefreshBackgroundMultiplier = Mathf.Lerp(colorRefreshBackgroundMultiplier, 0.001f, lerpAmount);
+        //colorRefreshDynamicMultiplier = Mathf.Lerp(colorRefreshDynamicMultiplier, 0.0075f, lerpAmount);
 
         forceMultiplier = Mathf.Lerp(forceMultiplier, 4.20f, lerpAmount);
     }
@@ -300,8 +300,8 @@ public class EnvironmentFluidManager : MonoBehaviour {
 
         viscosity = Mathf.Lerp(viscosity, 0.0002f, lerpAmount);
         damping = Mathf.Lerp(damping, 0.003f, lerpAmount);
-        colorRefreshBackgroundMultiplier = Mathf.Lerp(colorRefreshBackgroundMultiplier, 0.0025f, lerpAmount);
-        colorRefreshDynamicMultiplier = Mathf.Lerp(colorRefreshDynamicMultiplier, 0.01f, lerpAmount);
+        //colorRefreshBackgroundMultiplier = Mathf.Lerp(colorRefreshBackgroundMultiplier, 0.0025f, lerpAmount);
+        //colorRefreshDynamicMultiplier = Mathf.Lerp(colorRefreshDynamicMultiplier, 0.01f, lerpAmount);
 
         //forceMultiplier = Mathf.Lerp(forceMultiplier, 2.5f, lerpAmount);
         forceMultiplier = Mathf.Lerp(forceMultiplier, 14f, lerpAmount);
@@ -312,8 +312,8 @@ public class EnvironmentFluidManager : MonoBehaviour {
 
         viscosity = Mathf.Lerp(viscosity, 0.02f, lerpAmount);
         damping = Mathf.Lerp(damping, 0.06f, lerpAmount);
-        colorRefreshBackgroundMultiplier = Mathf.Lerp(colorRefreshBackgroundMultiplier, 0.00005f, lerpAmount);
-        colorRefreshDynamicMultiplier = Mathf.Lerp(colorRefreshDynamicMultiplier, 0.001f, lerpAmount);
+        //colorRefreshBackgroundMultiplier = Mathf.Lerp(colorRefreshBackgroundMultiplier, 0.00005f, lerpAmount);
+        //colorRefreshDynamicMultiplier = Mathf.Lerp(colorRefreshDynamicMultiplier, 0.001f, lerpAmount);
 
         //forceMultiplier = Mathf.Lerp(forceMultiplier, 2.5f, lerpAmount);
         forceMultiplier = Mathf.Lerp(forceMultiplier, 4.5f, lerpAmount);
