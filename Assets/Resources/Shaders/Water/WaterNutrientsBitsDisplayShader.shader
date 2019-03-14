@@ -88,7 +88,7 @@
 				float2 uv = (worldPosition.xy + 128) / 512;
 				o.altitudeUV = uv;
 								
-				float2 scale = waterQuadData.localScale * 0.55;
+				float2 scale = waterQuadData.localScale * 1.55;
 				scale.x *= 0.8;
 				scale.y = scale.y * (1 + saturate(waterQuadData.speed * 64));
 				

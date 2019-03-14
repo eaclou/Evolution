@@ -438,17 +438,35 @@ void RefreshColor (uint3 id : SV_DispatchThreadID)
 	float xCoord = ((float)id.x + 0.5)  / _TextureResolution;
 	float yCoord = ((float)id.y + 0.5)  / _TextureResolution;
 	float2 uvOrigin = float2(xCoord, yCoord);
+
+	float diffusionAmount = 0.015;
+	// Diffusion
+	float4 amountRight = DensityRead[int2(id.x + 1, id.y)];
+    float4 amountLeft = DensityRead[int2(id.x - 1, id.y)];
+    float4 amountUp = DensityRead[int2(id.x, id.y + 1)];
+    float4 amountDown = DensityRead[int2(id.x, id.y - 1)];
+    float4 amountCenter = DensityRead[id.xy];
+	float4 currentColor = lerp(amountCenter, (amountCenter + amountRight + amountLeft + amountUp + amountDown) / 5, diffusionAmount);
 	
-	float4 sourceColorBackground = float4(0,0,0,1); //lerp(float4(0.012, 0.16, 0.12, 1), fluidBackgroundColorTex.SampleLevel(_LinearRepeat, uvOrigin, 0), 0.04);
 	float4 sourceColorDynamic = colorInjectionRenderTex.SampleLevel(_LinearRepeat, uvOrigin, 0);
+	float4 newColor = currentColor; // lerp(currentColor.rgb, float4(0,0,0,0), _ColorRefreshAmount);
+	float stampAlpha = saturate(_ColorRefreshDynamicMultiplier * sourceColorDynamic.a);
+	//newColor.a = lerp(newColor.a, 0, _ColorRefreshAmount);
+	newColor.rgb = lerp(newColor.rgb, sourceColorDynamic.rgb, stampAlpha); //saturate(_ColorRefreshDynamicMultiplier * sourceColorDynamic.a));
+	newColor.a = lerp(newColor.a, 1, stampAlpha);
+	DensityWrite[id.xy] = saturate(newColor); //float4(newColor, 1); //lerp(currentColor, sourceColorDynamic, _ColorRefreshAmount);
+
+
+	//OLD:
+	//float4 sourceColorBackground = float4(0,0,0,1); //lerp(float4(0.012, 0.16, 0.12, 1), fluidBackgroundColorTex.SampleLevel(_LinearRepeat, uvOrigin, 0), 0.04);
+	//float4 sourceColorDynamic = colorInjectionRenderTex.SampleLevel(_LinearRepeat, uvOrigin, 0);
 	//sourceColor.a = saturate(sourceColor.a);
-	float4 currentColor = DensityRead[id.xy];
+	//float4 currentColor = DensityRead[id.xy];
 
-
-	float3 newColor = lerp(currentColor.rgb, sourceColorBackground.rgb, _ColorRefreshAmount);
-	newColor = lerp(newColor, sourceColorDynamic.rgb, _ColorRefreshDynamicMultiplier * sourceColorDynamic.a);
+	//float3 newColor = lerp(currentColor.rgb, sourceColorBackground.rgb, _ColorRefreshAmount);
+	//newColor = lerp(newColor, sourceColorDynamic.rgb, _ColorRefreshDynamicMultiplier * sourceColorDynamic.a);
 	
-	DensityWrite[id.xy] = float4(newColor, 1); //lerp(currentColor, sourceColorDynamic, _ColorRefreshAmount);
+	//DensityWrite[id.xy] = float4(newColor, 1); //lerp(currentColor, sourceColorDynamic, _ColorRefreshAmount);
 }
 
 [numthreads(16,16,1)]

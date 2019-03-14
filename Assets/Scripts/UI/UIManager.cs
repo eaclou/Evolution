@@ -738,13 +738,15 @@ public class UIManager : MonoBehaviour {
                     gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_Radius", 4f);
                 }
 
+                gameManager.theRenderKing.nutrientToolOn = false;
                 if(curActiveTool == ToolType.Nutrients) {
                     if(isDraggingMouse && toolbarInfluencePoints >= 0.01f) {
                         toolbarInfluencePoints = Mathf.Clamp01(toolbarInfluencePoints - 0.0025f);
                         gameManager.simulationManager.simResourceManager.curGlobalNutrients += 0.25f;
                         gameManager.simulationManager.simResourceManager.curGlobalDetritus += 0.15f;
                         gameManager.simulationManager.vegetationManager.AddResourcesAtCoords(new Vector4(0.1f, 0f, 0f, 0f), curMousePositionOnWaterPlane.x / SimulationManager._MapSize, curMousePositionOnWaterPlane.y / SimulationManager._MapSize);
-                        //gameManager.simulationManager.PlayerFeedToolPour(hit.point);
+                        
+                        gameManager.theRenderKing.nutrientToolOn = true;
                     }                
                 }
                 if(curActiveTool == ToolType.Remove) {

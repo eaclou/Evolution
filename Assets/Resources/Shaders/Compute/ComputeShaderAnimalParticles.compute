@@ -315,7 +315,7 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 
 		// WATER CURRENTS *********  (happens regardless of dead/alive)
 		float2 fluidVel = velocityRead.SampleLevel(_LinearRepeat, uv, 2).xy;  // water velocity
-		float fluidSpeedMult = 0.0045;
+		float fluidSpeedMult = 0.0167;
 		posOffset += fluidVel * fluidSpeedMult * _MapSize;  // carried by water
 
 		// Shoreline "Collision"		

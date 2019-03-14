@@ -65,7 +65,7 @@
 
 				fixed4 finalColor = float4(0,0,0,1);
 				finalColor.xyz = density.xyz;
-				finalColor.a = 1;
+				finalColor.a = density.y * 0.5;
 				return finalColor;
 
 				float posterizeLevels = 64;

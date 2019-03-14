@@ -82,6 +82,7 @@ public class TheRenderKing : MonoBehaviour {
     public Material critterHighlightTrailMat;
 
     public Material algaeParticleColorInjectMat;
+    public Material playerBrushColorInjectMat;
 
     public Material gizmoStirToolMat;
     public Material gizmoFeedToolMat;
@@ -117,8 +118,10 @@ public class TheRenderKing : MonoBehaviour {
     private bool isInitialized = false;
 
     private const float velScale = 0.390f; // Conversion for rigidBody Vel --> fluid vel units ----  // approx guess for now
-    
-    
+
+    public bool nutrientToolOn = false;
+    public bool mutateToolOn = false;
+    public bool removeToolOn = false;
     /*public GameObject terrainGO;
     public Material terrainObstaclesHeightMaskMat;
     public Texture2D terrainHeightMap;         
@@ -577,10 +580,10 @@ public class TheRenderKing : MonoBehaviour {
     private void InitializeFluidRenderMesh() {
         fluidRenderMesh = new Mesh();
         Vector3[] vertices = new Vector3[4];
-        vertices[0] = new Vector3(0f, 0f, 0f);
-        vertices[1] = new Vector3(SimulationManager._MapSize, 0f, 0f);
-        vertices[2] = new Vector3(0f, SimulationManager._MapSize, 0f);
-        vertices[3] = new Vector3(SimulationManager._MapSize, SimulationManager._MapSize, 0f);
+        vertices[0] = new Vector3(0f, 0f, 1f);
+        vertices[1] = new Vector3(SimulationManager._MapSize, 0f, 1f);
+        vertices[2] = new Vector3(0f, SimulationManager._MapSize, 1f);
+        vertices[3] = new Vector3(SimulationManager._MapSize, SimulationManager._MapSize, 1f);
 
         Vector2[] uvs = new Vector2[4] {
             new Vector2(0f, 0f),
@@ -3081,7 +3084,18 @@ public class TheRenderKing : MonoBehaviour {
         algaeParticleColorInjectMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
         algaeParticleColorInjectMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
         cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, algaeParticleColorInjectMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.algaeParticlesCBuffer.count);
-        
+
+        Vector4 cursorPos = new Vector4(simManager.uiManager.curMousePositionOnWaterPlane.x, simManager.uiManager.curMousePositionOnWaterPlane.y, 0f, 0f);
+        if(nutrientToolOn) {            // Particle-based instead?
+            playerBrushColorInjectMat.SetPass(0);
+            playerBrushColorInjectMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+            playerBrushColorInjectMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+            //playerBrushColorInjectMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+            playerBrushColorInjectMat.SetVector("_CursorPos", cursorPos);
+            playerBrushColorInjectMat.SetFloat("_CursorRadius", 10f);
+            playerBrushColorInjectMat.SetVector("_BrushColor", new Vector4(1f, 0.75f, 0.05f, 1f));
+            cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, playerBrushColorInjectMat, 0, MeshTopology.Triangles, 6, 1);        
+        }
         // Creatures + EggSacks:
         //basicStrokeDisplayMat.SetPass(0);
         //basicStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
