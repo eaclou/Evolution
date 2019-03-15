@@ -44,6 +44,9 @@ public class VegetationManager {
     private AlgaeParticleData[] algaeParticleMeasurementTotalsData;
     
     public Vector2[] resourceGridSpawnPatchesArray;
+
+    //public Vector2 algaeOriginPos;
+    //public float algaeOnLerp01;
         
     public struct AlgaeParticleData {
         public int index;
@@ -395,8 +398,9 @@ public class VegetationManager {
         // Go through foodParticleData and check for inactive
         // determined by current total food -- done!
         // if flag on shader for Respawn is on, set to active and initialize
-
         float maxFoodParticleTotal = settingsRef.maxFoodParticleTotalAmount;
+
+        
 
         int kernelCSSimulateAlgaeParticles = computeShaderAlgaeParticles.FindKernel("CSSimulateAlgaeParticles");
         computeShaderAlgaeParticles.SetBuffer(kernelCSSimulateAlgaeParticles, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
@@ -405,13 +409,20 @@ public class VegetationManager {
         computeShaderAlgaeParticles.SetTexture(kernelCSSimulateAlgaeParticles, "velocityRead", fluidManagerRef._VelocityA);        
         computeShaderAlgaeParticles.SetTexture(kernelCSSimulateAlgaeParticles, "altitudeRead", renderKingRef.baronVonTerrain.terrainHeightMap);
         computeShaderAlgaeParticles.SetTexture(kernelCSSimulateAlgaeParticles, "_SpawnDensityMap", resourceGridRT1);
-        computeShaderAlgaeParticles.SetFloat("_MapSize", SimulationManager._MapSize);
-            
+        computeShaderAlgaeParticles.SetFloat("_MapSize", SimulationManager._MapSize);            
         //computeShaderFoodParticles.SetFloat("_RespawnFoodParticles", 1f);
         computeShaderAlgaeParticles.SetFloat("_Time", Time.realtimeSinceStartup);
+        float randRoll = UnityEngine.Random.Range(0f, 1f);
+        computeShaderAlgaeParticles.SetFloat("_RespawnFoodParticles", randRoll); 
 
-        //float randRoll = UnityEngine.Random.Range(0f, 1f);
-        computeShaderAlgaeParticles.SetFloat("_RespawnFoodParticles", 1f); 
+        //_FoodSprinklePos;
+//_FoodSprinkleRadius;
+        float spawnLerp = renderKingRef.simManager.trophicLayersManager.GetAlgaeOnLerp(renderKingRef.simManager.simAgeTimeSteps);
+        float spawnRadius = Mathf.Lerp(1f, SimulationManager._MapSize, spawnLerp);
+        Vector4 spawnPos = new Vector4(renderKingRef.simManager.trophicLayersManager.algaeOriginPos.x, renderKingRef.simManager.trophicLayersManager.algaeOriginPos.y, 0f, 0f);
+        computeShaderAlgaeParticles.SetFloat("_FoodSprinkleRadius", spawnRadius);
+        computeShaderAlgaeParticles.SetVector("_FoodSprinklePos", spawnPos);
+        
         /*if(algaeParticleMeasurementTotalsData[0].biomass < maxFoodParticleTotal) {
             computeShaderAlgaeParticles.SetFloat("_RespawnFoodParticles", 1f);                       
         }
@@ -430,7 +441,7 @@ public class VegetationManager {
         computeShaderAlgaeParticles.SetFloat("_GlobalNutrients", resourcesManager.curGlobalNutrients);
         computeShaderAlgaeParticles.SetFloat("_SolarEnergy", settingsRef.environmentSettings._BaseSolarEnergy);
         computeShaderAlgaeParticles.SetFloat("_AlgaeGrowthNutrientsMask", settingsRef.algaeSettings._AlgaeGrowthNutrientsMask);
-        computeShaderAlgaeParticles.SetFloat("_AlgaeBaseGrowthRate", settingsRef.algaeSettings._AlgaeBaseGrowthRate);
+        computeShaderAlgaeParticles.SetFloat("_AlgaeBaseGrowthRate", settingsRef.algaeSettings._AlgaeBaseGrowthRate * (2.0f - spawnLerp));
         computeShaderAlgaeParticles.SetFloat("_AlgaeGrowthNutrientUsage", settingsRef.algaeSettings._AlgaeGrowthNutrientUsage);
         computeShaderAlgaeParticles.SetFloat("_AlgaeGrowthOxygenProduction", settingsRef.algaeSettings._AlgaeGrowthOxygenProduction);
         computeShaderAlgaeParticles.SetFloat("_AlgaeAgingRate", settingsRef.algaeSettings._AlgaeAgingRate);

@@ -320,7 +320,7 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 		foodParticlesWrite[id.x].wasteProduced = 0;
 		foodParticlesWrite[id.x].nutrientsUsed = 0;
 
-		if(_RespawnFoodParticles > 0.5) {	
+		if(_RespawnFoodParticles > 0.95) {	
 		
 			float rand01 = rand(float2(_Time * 135.79 + (float)foodParticlesRead[id.x].index * 30.17896, _Time * 28.463));
 			float randX = rand(float2((float)id.x, _Time));
@@ -336,7 +336,10 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 						
 			float4 spawnAltitudeSample = altitudeRead.SampleLevel(_LinearClamp, spawnUV * 0.5 + 0.25, 0);
 			
-			if(rand01 < 0.05) {  // to prevent mass respawning, overshooting the intended max global food amount ?  // Needed?
+			float distToOrigin = length(_FoodSprinklePos.xy - (spawnUV * _MapSize));
+			//_FoodSprinkleRadius
+
+			if(distToOrigin < _FoodSprinkleRadius * rand01 * rand01) {  // to prevent mass respawning, overshooting the intended max global food amount ?  // Needed?
 				if(spawnAltitudeSample.x < _AlgaeSpawnMaxAltitude) {  // in water only? // for now...
 				
 					foodParticlesWrite[id.x].worldPos = spawnUV * _MapSize;

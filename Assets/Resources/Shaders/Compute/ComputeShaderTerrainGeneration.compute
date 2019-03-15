@@ -20,6 +20,7 @@ struct GroundBitsData
 	float age;
 	float speed;
 	float noiseVal;
+	float isActive;
 	int brushType;
 };
 
@@ -58,6 +59,9 @@ uniform float _MapSize;
 
 uniform float _Time;
 
+uniform float4 _SpawnPos;
+uniform float _SpawnRadius;
+
 SamplerState _LinearClamp;
 SamplerState _LinearRepeat;
 SamplerState _PointClamp;
@@ -93,23 +97,50 @@ void CSSimGroundBitsData (uint3 id : SV_DispatchThreadID)
 {	
 	GroundBitsData groundBitData = groundBitsCBuffer[id.x];
 
-	// ***** Move Head Point0: //
-
-	float2 uv = groundBitData.worldPos.xy / _MapSize;
-	float2 altitudeUV = uv * 0.5 + 0.25;
-	float2 vel = VelocityRead.SampleLevel(_LinearRepeat, uv, 1).xy;
-	float speedMult = 0.0075;
-
-	groundBitData.speed = length(vel);
-	
-	float2 nextPos = uv + vel * speedMult;
-
-	float altitude = AltitudeRead.SampleLevel(_LinearRepeat, altitudeUV, 0).x;
-
-	groundBitData.age = groundBitData.age + 0.0025;  // ? frame lifespan
-	if(groundBitData.age > 1.0 || altitude > 0.5 ) {
+	if(groundBitData.isActive > 0.5) {  // ALIVE!
 		
-		float2 spawnPos = float2(rand(float2(id.x, uv.x + _Time * 120)), rand(float2(uv.y - _Time, id.x + _Time * 89.913)));		
+		float2 uv = groundBitData.worldPos.xy / _MapSize;
+		float2 altitudeUV = uv * 0.5 + 0.25;
+		float altitude = AltitudeRead.SampleLevel(_LinearRepeat, altitudeUV, 0).x;
+		
+		groundBitData.age = groundBitData.age + 0.0025;  // ? frame lifespan
+
+		// if should be killed:
+		if(groundBitData.age > 1.0 || altitude > 0.5 ) {
+			groundBitData.isActive = 0;
+				
+		}
+		else {
+			
+			float2 vel = VelocityRead.SampleLevel(_LinearRepeat, uv, 1).xy;
+			float speedMult = 0.0075;
+
+			groundBitData.speed = length(vel);
+	
+			float2 nextPos = uv + vel * speedMult;
+			
+			float pixelOffset = 1.0 / 256;  // resolution
+
+			float altitudeCenter = AltitudeRead.SampleLevel(_LinearClamp, altitudeUV, 2).x;
+			float altitudeNorth = AltitudeRead.SampleLevel(_LinearClamp, altitudeUV + float2(0, pixelOffset), 2).x;
+			float altitudeEast = AltitudeRead.SampleLevel(_LinearClamp, altitudeUV + float2(pixelOffset, 0), 2).x;
+			float altitudeSouth = AltitudeRead.SampleLevel(_LinearClamp, altitudeUV + float2(0, -pixelOffset), 2).x;
+			float altitudeWest = AltitudeRead.SampleLevel(_LinearClamp, altitudeUV + float2(-pixelOffset, 0), 2).x;
+
+			float dX = altitudeEast - altitudeWest;
+			float dY = altitudeNorth - altitudeSouth;
+
+			float2 grad = float2(0,1);
+			if(dX != 0 && dY != 0) {
+				grad = normalize(lerp(float2(dX, dY), float2(0,1), 0.5));
+			}
+		
+			groundBitData.heading = grad;
+			groundBitData.worldPos = float3(nextPos * _MapSize, 0);		
+		}
+	}
+	else { // DEAD / INACTIVE:::
+		float2 spawnPos = float2(rand(float2(id.x, _Time * 120)), rand(float2(-_Time, id.x + _Time * 89.913)));		
 		float2 spawnBoxSize = float2(_SpawnBoundsCameraDetails.z - _SpawnBoundsCameraDetails.x, _SpawnBoundsCameraDetails.w - _SpawnBoundsCameraDetails.y);
 		spawnPos = spawnPos * spawnBoxSize + _SpawnBoundsCameraDetails.xy;
 
@@ -121,41 +152,22 @@ void CSSimGroundBitsData (uint3 id : SV_DispatchThreadID)
 		float spawnNoise3 = saturate(Value2D(spawnPos + 349.7, 2.4579).x * 2.5);
 		float altitudeMask = (1.0 - saturate(-1.0 * (spawnAltitude * 2.0 - 1.0)));
 		
+		// Try respawning:
 		float4 decomposersMask = decomposersRead.SampleLevel(_LinearRepeat, spawnUV * 3.14159, 0);
 		float spawnRating = decomposersMask.y; // spawnNoise2 * spawnNoise3 * altitudeMask; // * spawnNoise * spawnNoise * altitudeMask * altitudeMask;
 
-		if(spawnRating > 0.33) { // (float)id.x / 1024.0 / 8.0) {
-			groundBitData.worldPos = float3(spawnPos, 0);
-			groundBitData.age -= 1;
-
-			// find uv for sampling terrainHeightMap
-			float2 uv = spawnPos.xy / _MapSize * 0.5 + 0.25;
-			float pixelOffset = 1.0 / 256;  // resolution
-
-			float altitudeCenter = AltitudeRead.SampleLevel(_LinearClamp, uv, 2).x;
-			float altitudeNorth = AltitudeRead.SampleLevel(_LinearClamp, uv + float2(0, pixelOffset), 2).x;
-			float altitudeEast = AltitudeRead.SampleLevel(_LinearClamp, uv + float2(pixelOffset, 0), 2).x;
-			float altitudeSouth = AltitudeRead.SampleLevel(_LinearClamp, uv + float2(0, -pixelOffset), 2).x;
-			float altitudeWest = AltitudeRead.SampleLevel(_LinearClamp, uv + float2(-pixelOffset, 0), 2).x;
-
-			float dX = altitudeEast - altitudeWest;
-			float dY = altitudeNorth - altitudeSouth;
-
-			float2 grad = float2(0,1);
-			if(dX != 0 && dY != 0) {
-				grad = normalize(lerp(float2(dX, dY), float2(0,1), 0.5));
+		float distToOrigin = length(_SpawnPos.xy - (spawnUV * _MapSize));
+			//_FoodSprinkleRadius
+		if(distToOrigin < _SpawnRadius) {
+			if(spawnRating > 0.33) { // (float)id.x / 1024.0 / 8.0) {
+						
+				groundBitData.worldPos = float3(spawnPos, 0);
+				groundBitData.age = groundBitData.age % 1.0;
+				groundBitData.isActive = 1.0;
+			
 			}
-			//grad = float2(grad.y, -grad.x);
-
-			groundBitData.heading = grad;
-		}
+		}		
 	}
-	else {
-		groundBitData.worldPos = float3(nextPos * _MapSize, 0);		
-	}
-
-	//float2 forwardDir = normalize(vel);
-	//decomposersRead
 	
 	groundBitsCBuffer[id.x] = groundBitData;
 	

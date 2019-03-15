@@ -215,7 +215,7 @@ void CSInitRD (uint3 id : SV_DispatchThreadID)
 {	
 	float2 uv = ((float2)id.xy + 0.5) / 128;
 
-	float dist = 1.0 - saturate(length(uv - 0.5) * 10);
+	float dist = 1.0 - saturate(length((uv * 2.17 % 1) - 0.5) * 10);
 	float val = dist;
 	rdWrite[id.xy] = float4(1 - val, val, 0, 1);
 	

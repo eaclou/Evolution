@@ -23,9 +23,9 @@ public class BaronVonWater : RenderBaron {
 
     public ComputeBuffer quadVerticesCBuffer;  // quad mesh
 
-    private int numWaterQuadStrokesPerDimensionLrg = 256;
+    private int numWaterQuadStrokesPerDimensionLrg = 128;
     public ComputeBuffer waterQuadStrokesCBufferLrg;
-    private int numWaterQuadStrokesPerDimensionSml = 256;
+    private int numWaterQuadStrokesPerDimensionSml = 128;
     public ComputeBuffer waterQuadStrokesCBufferSml;
 
     public Texture2D altitudeMapRef;
@@ -44,7 +44,7 @@ public class BaronVonWater : RenderBaron {
     public ComputeBuffer waterChains0CBuffer;
     public ComputeBuffer waterChains1CBuffer;
 
-    private int numNutrientsBits = 1024 * 64;
+    private int numNutrientsBits = 1024 * 32;
     private int numSurfaceBits = 1024 * 8;
     private int numDebrisBits = 1024 * 4;
     public ComputeBuffer waterNutrientsBitsCBuffer;

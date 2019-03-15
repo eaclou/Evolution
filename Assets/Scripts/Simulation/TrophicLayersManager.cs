@@ -18,6 +18,14 @@ public class TrophicLayersManager {
     public TrophicKingdom kingdomPlants;
     public TrophicKingdom kingdomAnimals;
 
+    public Vector2 decomposerOriginPos;
+    public Vector2 algaeOriginPos;
+    public Vector2 zooplanktonOriginPos;
+    public int timeStepAlgaeOn = 0;
+    public int timeStepDecomposersOn = 0;
+    public int timeStepZooplanktonOn = 0;
+    private int timeStepsLayerGrowthDuration = 1200;
+
 	public TrophicLayersManager() {  // constructor
         decomposersOn = false;  // first pass -- temporary?
         algaeOn = false;
@@ -56,23 +64,23 @@ public class TrophicLayersManager {
         kingdomAnimals.trophicTiersList.Add(animalsTier1);
 
     }
-    public void ClickedPendingTrophicSlot(SimulationManager simManagerRef, Vector2 spawnPos) {
+    public void ClickedPendingTrophicSlot(SimulationManager simManagerRef, Vector2 spawnPos, int timeStep) {
         // reset things, figure out which slot was created:
         pendingTrophicSlot = false;
         pendingTrophicSlotRef.status = TrophicSlot.SlotStatus.On;
 
         if (pendingTrophicSlotRef.kingdomID == 0) { // decomposers:
-            TurnOnDecomposers();
+            TurnOnDecomposers(spawnPos, timeStep);
         }
         if (pendingTrophicSlotRef.kingdomID == 1) { // plants!:
             if (pendingTrophicSlotRef.tierID == 0) { // plants!:
-                TurnOnAlgae();
+                TurnOnAlgae(spawnPos, timeStep);
                 simManagerRef.vegetationManager.SpawnInitialAlgaeParticles(5f, new Vector4(spawnPos.x, spawnPos.y, 0f, 0f));
             }
         }
         if (pendingTrophicSlotRef.kingdomID == 2) { // Animals:
             if (pendingTrophicSlotRef.tierID == 0) { // Animals:
-                TurnOnZooplankton();
+                TurnOnZooplankton(spawnPos, timeStep);
                 // Unlock Slots:
                 kingdomAnimals.trophicTiersList[1].unlocked = true;
                 kingdomAnimals.trophicTiersList[1].trophicSlots[0].status = TrophicSlot.SlotStatus.Empty;
@@ -141,15 +149,20 @@ public class TrophicLayersManager {
         pendingTrophicSlotRef = kingdomAnimals.trophicTiersList[1].trophicSlots[index];
         //pendingTrophicSlotRef.status = TrophicSlot.SlotStatus.Pending;
     }
-    public void TurnOnDecomposers() {
+    public void TurnOnDecomposers(Vector2 spawnPos, int timeStep) {
+        decomposerOriginPos = spawnPos;
+        timeStepDecomposersOn = timeStep;
         decomposersOn = true;
     }
-    public void TurnOnAlgae() {
+    public void TurnOnAlgae(Vector2 spawnPos, int timeStep) {
+        algaeOriginPos = spawnPos;
+        timeStepAlgaeOn = timeStep;
         algaeOn = true;
     }
-    public void TurnOnZooplankton() {
+    public void TurnOnZooplankton(Vector2 spawnPos, int timeStep) {
+        zooplanktonOriginPos = spawnPos;
+        timeStepZooplanktonOn = timeStep;
         zooplanktonOn = true;
-        
     }
     public void TurnOnAgents() {
         agentsOn = true;
@@ -166,6 +179,21 @@ public class TrophicLayersManager {
     }
     public void TurnOffAgents() {
         agentsOn = false;
+    }
+
+    public float GetDecomposersOnLerp(int curTimeStep) {
+        float lerp = 0f;
+        if(decomposersOn) {
+            lerp = Mathf.Clamp01((float)(curTimeStep - timeStepDecomposersOn) / (float)timeStepsLayerGrowthDuration);
+        }
+        return lerp;
+    }
+    public float GetAlgaeOnLerp(int curTimeStep) {
+        float lerp = 0f;
+        if(algaeOn) {
+            lerp = Mathf.Clamp01((float)(curTimeStep - timeStepAlgaeOn) / (float)timeStepsLayerGrowthDuration);
+        }
+        return lerp;
     }
 
 

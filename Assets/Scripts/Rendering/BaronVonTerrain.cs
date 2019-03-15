@@ -69,6 +69,7 @@ public class BaronVonTerrain : RenderBaron {
         public float age;
         public float speed;
         public float noiseVal;
+        public float isActive;
         public int brushType;
     };
 
@@ -90,7 +91,7 @@ public class BaronVonTerrain : RenderBaron {
 
     private void InitializeGroundBits()
     {
-        groundBitsCBuffer = new ComputeBuffer(numGroundBits, sizeof(float) * 10 + sizeof(int) * 2);
+        groundBitsCBuffer = new ComputeBuffer(numGroundBits, sizeof(float) * 11 + sizeof(int) * 2);
         GroundBitsData[] groundBitsArray = new GroundBitsData[groundBitsCBuffer.count];
         float boundsLrg = 256f;
         for (int x = 0; x < numGroundBits; x++)
@@ -114,7 +115,7 @@ public class BaronVonTerrain : RenderBaron {
 }
     private void InitializeCarpetBits()
     {
-        carpetBitsCBuffer = new ComputeBuffer(numCarpetBits, sizeof(float) * 10 + sizeof(int) * 2);
+        carpetBitsCBuffer = new ComputeBuffer(numCarpetBits, sizeof(float) * 11 + sizeof(int) * 2);
         GroundBitsData[] carpetBitsArray = new GroundBitsData[carpetBitsCBuffer.count];
         float boundsLrg = 256f;
         for (int x = 0; x < numCarpetBits; x++)
@@ -419,6 +420,13 @@ public class BaronVonTerrain : RenderBaron {
         computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
         computeShaderTerrainGeneration.SetFloat("_Time", Time.realtimeSinceStartup);
         computeShaderTerrainGeneration.SetVector("_SpawnBoundsCameraDetails", spawnBoundsCameraDetails);
+
+        /*float spawnLerp = simManager.trophicLayersManager.GetAlgaeOnLerp(simManager.simAgeTimeSteps);
+        float spawnRadius = Mathf.Lerp(1f, SimulationManager._MapSize, spawnLerp);
+        Vector4 spawnPos = new Vector4(simManager.trophicLayersManager.algaeOriginPos.x, simManager.trophicLayersManager.algaeOriginPos.y, 0f, 0f);
+        computeShaderAlgaeParticles.SetFloat("_FoodSprinkleRadius", spawnRadius);
+        computeShaderAlgaeParticles.SetVector("_FoodSprinklePos", spawnPos);
+        */
         computeShaderTerrainGeneration.Dispatch(kernelSimGroundBits, groundBitsCBuffer.count / 1024, 1, 1);
 
         int kernelSimCarpetBits = computeShaderTerrainGeneration.FindKernel("CSSimCarpetBitsData");

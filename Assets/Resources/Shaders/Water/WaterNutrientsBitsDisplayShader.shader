@@ -37,6 +37,7 @@
 			uniform float _MapSize;
 
 			uniform float _AlgaeReservoir;
+			uniform float _NutrientDensity;
 
 			struct FrameBufferStrokeData {
 				float3 worldPos;
@@ -83,21 +84,24 @@
 				float3 worldPosition = waterQuadData.worldPos;
 				float3 quadPoint = quadVerticesCBuffer[id];
 
+				float rand0 = rand(float2(inst, 0));	
+				float densityMask = saturate((_NutrientDensity - rand0) * 100);
+				
+
 				o.quadUV = quadPoint + 0.5;
 				o.worldPos = worldPosition;
 				float2 uv = (worldPosition.xy + 128) / 512;
 				o.altitudeUV = uv;
 								
-				float2 scale = waterQuadData.localScale * 1.55;
-				scale.x *= 0.8;
+				float2 scale = waterQuadData.localScale * 2.5;
+				scale.x *= 1;
 				scale.y = scale.y * (1 + saturate(waterQuadData.speed * 64));
 				
 				//float4 nutrientGridSample = tex2Dlod(_NutrientTex, float4((o.altitudeUV - 0.25) * 2.0, 0, 0));
-				//scale *= (nutrientGridSample.x * 0.4 + 0.6) * 1;
-				
+				//scale *= (nutrientGridSample.x * 0.4 + 0.6) * 1;				
 				//scale = float2(1,1) * 0.033;
 				
-				quadPoint *= float3(scale, 1.0);
+				quadPoint *= float3(scale, 1.0) * (0.4 + _NutrientDensity * 0.6);
 				
 				float4 fluidVelocity = tex2Dlod(_VelocityTex, float4(worldPosition.xy / 256, 0, 2));
 				float2 fluidDir = float2(0,1); //normalize(fluidVelocity.xy);
@@ -111,16 +115,15 @@
 				float dotLight = dot(waterSurfaceData.yzw, _WorldSpaceLightPos0.xyz);
 				dotLight = dotLight * dotLight;
 				float waveHeight = waterSurfaceData.x;
-
-
-				float rand0 = rand(float2(inst, 0));
-				worldPosition.z -= waveHeight * 1 - rand0 * 2; // - 1;
+				
+							
+				//worldPosition.z -= waveHeight * 1 - rand0 * 2; // - 1;
 
 				// REFRACTION:
 				//float3 offset = worldPosition;				
 				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / 256, 0, 0)).yzw;
 				float refractionStrength = 1.5 * (rand0 * 0.5 + 0.5);
-				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
+				//worldPosition.xy += -surfaceNormal.xy * refractionStrength;
 
 
 				// Figure out final facing Vectors!!!
@@ -138,6 +141,7 @@
 
 				o.skyUV = worldPosition.xy / _MapSize;
 
+				//remnants from water surface bits?
 				//float2 rand = Value2D(float2((float)inst, (float)inst + 30), 100);
 				float randNoise1 = Value3D(float3(worldPosition.x - _Time.y * 5.34, worldPosition.y + _Time.y * 7.1, _Time.y * 15), 0.1).x * 0.5 + 0.5; //				
 				float randNoise2 = Value3D(float3(worldPosition.x + _Time.y * 7.34, worldPosition.y - _Time.y * 6.1, _Time.y * -10), 0.25).x * 0.5 + 0.5;
@@ -159,6 +163,8 @@
 							
 				float alpha = fadeIn * fadeOut;
 
+				alpha *= densityMask;
+
 				o.color = float4(rand(float2(-0.347 * inst, inst)),1,1,alpha);
 				
 				return o;
@@ -166,6 +172,13 @@
 
 			fixed4 frag(v2f i) : SV_Target
 			{
+				float4 finalColor = tex2D(_MainTex, i.quadUV);
+				//i.color.r = random 0-1
+				finalColor.rgb = lerp(float3(0.05,0.04,0.015), float3(0.9,1,0.7) * 0.5, i.color.r); //rand()); //saturate(nutrientGridSample.x * 10 + 0.033));
+				finalColor.rgb = float3(1, 0.75, 0.2) * 1.25;
+				finalColor.a *= i.color.a;				
+				return finalColor;
+
 				//return float4(1,1,1,1);
 				/*
 				float2 screenUV = i.screenUV.xy / i.screenUV.w;
@@ -281,13 +294,7 @@
 				//finalColor.a = 1;
 				//float foodAmt = nutrientGridSample.x * 2;
 				//finalColor.rgb = float3(foodAmt, foodAmt, foodAmt);
-				float4 finalColor = tex2D(_MainTex, i.quadUV);
-				finalColor.rgb = lerp(float3(0.05,0.04,0.015), float3(0.9,1,0.7) * 0.5, i.color.r); //rand()); //saturate(nutrientGridSample.x * 10 + 0.033));
-				finalColor.a *= i.color.a;
-				//return float4(1,1,1,1);
-				//return float4(0.2,1,0.2,1);
-
-				return finalColor;
+				
 				
 			}
 		ENDCG

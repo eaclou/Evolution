@@ -165,7 +165,7 @@ void CSSimDetailBitsData (uint3 id : SV_DispatchThreadID)
 	float2 uv = waterQuadData.worldPos.xy / _MapSize;
 	float2 altitudeUV = uv * 0.5 + 0.25;
 	float2 vel = VelocityRead.SampleLevel(_LinearRepeat, uv, 1).xy;
-	float speedMult = 0.0068;
+	float speedMult = 0.0167;
 
 	waterQuadData.speed = length(vel);
 	
@@ -173,9 +173,16 @@ void CSSimDetailBitsData (uint3 id : SV_DispatchThreadID)
 
 	float altitude = AltitudeRead.SampleLevel(_LinearRepeat, altitudeUV, 1).x;
 
-	waterQuadData.age = waterQuadData.age + 0.0025;  // ? frame lifespan
-	if(waterQuadData.age > 1.0 || altitude > 0.5 ) {
+	waterQuadData.age = waterQuadData.age + 0.005;  // ? frame lifespan
 		
+	float respawnFromAge = saturate((waterQuadData.age - 1.0) * 1000); // 0 = fine, 1 == TOO OLD!!!
+	float respawnFromAltitude = saturate((altitude - 0.5) * 100);  // 0 if in water, 1 if on land
+	float respawnMask = respawnFromAge + respawnFromAltitude;  // equivalent to OR
+
+	if(respawnMask > 0.5 ) {
+		
+		// Respawn!!!
+
 		float2 spawnPos = float2(rand(float2(id.x, uv.x)), rand(float2(uv.y, id.x)));
 		
 		float2 spawnBoxSize = float2(_SpawnBoundsCameraDetails.z - _SpawnBoundsCameraDetails.x, _SpawnBoundsCameraDetails.w - _SpawnBoundsCameraDetails.y);

@@ -41,6 +41,8 @@
 
 			uniform float _CamDistNormalized;
 
+			uniform float _Density;
+
 			struct GroundBitsData
 			{
 				int index;
@@ -50,6 +52,7 @@
 				float age;
 				float speed;
 				float noiseVal;
+				float isActive;
 				int brushType;
 			};
 
@@ -103,7 +106,7 @@
 				
 				float2 scale = groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25);
 			
-				quadPoint *= float3(scale, 1.0);
+				quadPoint *= float3(scale, 1.0) * _Density;
 				quadPoint.x *= 0.7;
 				
 				float4 fluidVelocity = tex2Dlod(_VelocityTex, float4(worldPosition.xy / 256, 0, 2));
@@ -169,12 +172,14 @@
 				float4 waterSurfaceTex = tex2D(_WaterSurfaceTex, (i.altitudeUV - 0.25) * 2);
 				float4 waterColorTex = tex2D(_WaterColorTex, (i.altitudeUV - 0.25) * 2);
 
-				frameBufferColor.rgb = lerp(frameBufferColor.rgb, float3(1,0.5,0), saturate(1.0 - i.color.y * 2));
-				float4 finalColor = GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, waterColorTex);
+				//frameBufferColor = float4(1,1,1,1);
+				float3 particleColor = lerp(float3(1,0.5,0) * 0.5, float3(1,0.5,0.06) * 1.2, saturate(1.0 - i.color.y * 2));
+				frameBufferColor.rgb = lerp(frameBufferColor.rgb, particleColor, 0.67);
+				float4 finalColor = GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, float4(1,1,1,1));
 				finalColor.a = brushColor.a;
 				
 				//finalColor.rgb = lerp(finalColor.rgb, float3(1,0.5,0), 0.5);
-				
+				//return float4(1,1,1,1);
 				return finalColor;
 				
 			}

@@ -39,15 +39,15 @@ public class SimResourceManager {
     public float oxygenUsedByDecomposersLastFrame = 0f;
     public float nutrientsProducedByDecomposersLastFrame = 0f;
     public float detritusRemovedByDecomposersLastFrame = 0f;
-
+    
     
 	public SimResourceManager() {
         // constructor
         // TEMP:::::
         curGlobalOxygen = 100f;
-        curGlobalNutrients = 100f;
+        curGlobalNutrients = 200f;
         curGlobalDecomposers = 0f;
-        curGlobalDetritus = 0f;
+        curGlobalDetritus = 50f;
     }
 
     public void Tick(SettingsManager settings, TrophicLayersManager trophicLayersManager) {

@@ -115,8 +115,9 @@
 				float4 waterSurfaceTex = tex2D(_WaterSurfaceTex, (i.altitudeUV - 0.25) * 2);
 				float4 resourceTex = tex2D(_ResourceTex, (i.altitudeUV - 0.25) * 2);	
 				
-				float4 finalColor = GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, resourceTex);
+				float4 finalColor = GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, float4(1,1,1,1));
 				finalColor.a = brushColor.a;
+				
 				
 				return finalColor;
 				

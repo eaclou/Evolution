@@ -684,7 +684,7 @@ public class UIManager : MonoBehaviour {
                             createSpecies = true;
                         }
                         // **** CREATE SPECIES HERE:::::: ****
-                        gameManager.simulationManager.trophicLayersManager.ClickedPendingTrophicSlot(gameManager.simulationManager, gizmoPos);     
+                        gameManager.simulationManager.trophicLayersManager.ClickedPendingTrophicSlot(gameManager.simulationManager, gizmoPos, gameManager.simulationManager.simAgeTimeSteps);     
                         
                         toolbarInfluencePoints -= addSpeciesInfluenceCost;
                         
