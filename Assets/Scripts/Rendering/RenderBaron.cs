@@ -9,7 +9,7 @@ public class RenderBaron : MonoBehaviour {
 
     }
 
-    public virtual void Tick() {
+    public virtual void Tick(RenderTexture maskTex) {
 
     }
 

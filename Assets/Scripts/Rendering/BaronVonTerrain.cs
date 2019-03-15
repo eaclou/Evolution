@@ -46,7 +46,7 @@ public class BaronVonTerrain : RenderBaron {
     public ComputeBuffer groundStrokesMedCBuffer;
     public ComputeBuffer groundStrokesSmlCBuffer;
 
-    private int numGroundBits = 1024 * 16;
+    private int numGroundBits = 1024 * 32;
     public ComputeBuffer groundBitsCBuffer;
     private int numCarpetBits = 1024 * 8;
     public ComputeBuffer carpetBitsCBuffer;
@@ -405,17 +405,19 @@ public class BaronVonTerrain : RenderBaron {
 
     }
 
-    public override void Tick() {
-        SimTerrainBits();
+    public override void Tick(RenderTexture maskTex) {
+        SimTerrainBits(maskTex);
     }
 
-    private void SimTerrainBits()
+    private void SimTerrainBits(RenderTexture maskTex)
     {
         
         int kernelSimGroundBits = computeShaderTerrainGeneration.FindKernel("CSSimGroundBitsData");
         computeShaderTerrainGeneration.SetBuffer(kernelSimGroundBits, "groundBitsCBuffer", groundBitsCBuffer);
         computeShaderTerrainGeneration.SetTexture(kernelSimGroundBits, "AltitudeRead", terrainHeightMap);
+        computeShaderTerrainGeneration.SetTexture(kernelSimGroundBits, "decomposersRead", maskTex);
         computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
+        computeShaderTerrainGeneration.SetFloat("_Time", Time.realtimeSinceStartup);
         computeShaderTerrainGeneration.SetVector("_SpawnBoundsCameraDetails", spawnBoundsCameraDetails);
         computeShaderTerrainGeneration.Dispatch(kernelSimGroundBits, groundBitsCBuffer.count / 1024, 1, 1);
 

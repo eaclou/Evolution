@@ -18,6 +18,9 @@ public class VegetationManager {
     public Vector4[] resourceGridSamplesArray;
     public Vector4[] resourceGridEatAmountsArray;
 
+    public RenderTexture rdRT1;
+    public RenderTexture rdRT2;
+
     private RenderTexture tempTex16;
     private RenderTexture tempTex8;  // <-- remove these and make function compress 4x
     private RenderTexture tempTex4;
@@ -198,8 +201,41 @@ public class VegetationManager {
 
         resourceGridAgentSamplesCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 4);
 
+        
+        rdRT1 = new RenderTexture(128, 128, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+        rdRT1.wrapMode = TextureWrapMode.Repeat;
+        rdRT1.filterMode = FilterMode.Bilinear;
+        rdRT1.enableRandomWrite = true;
+        rdRT1.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
+
+        rdRT2 = new RenderTexture(128, 128, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+        rdRT2.wrapMode = TextureWrapMode.Repeat;
+        rdRT2.filterMode = FilterMode.Bilinear;
+        rdRT2.enableRandomWrite = true;
+        rdRT2.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
+
         //theRenderKing.fluidRenderMat.SetTexture("_DebugTex", nutrientMapRT1);
         
+    }
+
+    public void InitializeReactionDiffusionGrid() {
+        int kernelCSInitRD = computeShaderResourceGrid.FindKernel("CSInitRD"); 
+        //computeShaderResourceGrid.SetTexture(kernelCSUpdateAlgaeGrid, "rdRead", rdRT1);
+        computeShaderResourceGrid.SetTexture(kernelCSInitRD, "rdWrite", rdRT1);
+        computeShaderResourceGrid.Dispatch(kernelCSInitRD, 128 / 32, 128 / 32, 1);
+
+    }
+
+    public void SimReactionDiffusionGrid() {
+        int kernelCSInitRD = computeShaderResourceGrid.FindKernel("CSSimRD"); 
+        computeShaderResourceGrid.SetTexture(kernelCSInitRD, "rdRead", rdRT1);
+        computeShaderResourceGrid.SetTexture(kernelCSInitRD, "rdWrite", rdRT2);
+        computeShaderResourceGrid.Dispatch(kernelCSInitRD, 128 / 32, 128 / 32, 1);
+        // write into 2
+        computeShaderResourceGrid.SetTexture(kernelCSInitRD, "rdRead", rdRT2);
+        computeShaderResourceGrid.SetTexture(kernelCSInitRD, "rdWrite", rdRT1);
+        computeShaderResourceGrid.Dispatch(kernelCSInitRD, 128 / 32, 128 / 32, 1);
+        //back into 1
     }
 
     public void ApplyDiffusionOnResourceGrid(EnvironmentFluidManager fluidManagerRef) {

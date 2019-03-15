@@ -93,7 +93,7 @@
 
 				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
 
-				worldPosition.z = -altitude * 20 + 10;
+				worldPosition.z = -altitude * 20 + 10 + groundBitData.age;
 ;
 
 				float fadeDuration = 0.1;
@@ -104,6 +104,7 @@
 				float2 scale = groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25);
 			
 				quadPoint *= float3(scale, 1.0);
+				quadPoint.x *= 0.7;
 				
 				float4 fluidVelocity = tex2Dlod(_VelocityTex, float4(worldPosition.xy / 256, 0, 2));
 				float2 fluidDir = float2(0,1); //normalize(fluidVelocity.xy);
@@ -152,13 +153,14 @@
 
 				
 				float rand = Value2D(float2((float)inst, (float)inst + 30), 100).x;
-				o.color = float4(rand,1,1,alpha);
+				o.color = float4(rand,groundBitData.age,1,alpha);
 				
 				return o;
 			}
 
 			fixed4 frag(v2f i) : SV_Target
 			{
+				//return float4(1,1,1,1);
 				float4 brushColor = tex2D(_MainTex, i.quadUV);	
 				
 				float2 screenUV = i.screenUV.xy / i.screenUV.w;
@@ -167,8 +169,12 @@
 				float4 waterSurfaceTex = tex2D(_WaterSurfaceTex, (i.altitudeUV - 0.25) * 2);
 				float4 waterColorTex = tex2D(_WaterColorTex, (i.altitudeUV - 0.25) * 2);
 
+				frameBufferColor.rgb = lerp(frameBufferColor.rgb, float3(1,0.5,0), saturate(1.0 - i.color.y * 2));
 				float4 finalColor = GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, waterColorTex);
 				finalColor.a = brushColor.a;
+				
+				//finalColor.rgb = lerp(finalColor.rgb, float3(1,0.5,0), 0.5);
+				
 				return finalColor;
 				
 			}

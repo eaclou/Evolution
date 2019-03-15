@@ -3036,8 +3036,8 @@ public class TheRenderKing : MonoBehaviour {
 
         baronVonTerrain.spawnBoundsCameraDetails = baronVonWater.spawnBoundsCameraDetails;
 
-        baronVonTerrain.Tick();
-        baronVonWater.Tick();  // <-- SimWaterCurves/Chains/Water surface
+        baronVonTerrain.Tick(simManager.vegetationManager.rdRT1);
+        baronVonWater.Tick(null);  // <-- SimWaterCurves/Chains/Water surface
         
     }
 
@@ -3495,20 +3495,23 @@ public class TheRenderKing : MonoBehaviour {
             baronVonTerrain.groundStrokesSmlDisplayMat.SetTexture("_ResourceTex", simManager.vegetationManager.resourceGridRT1);
             baronVonTerrain.groundStrokesSmlDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);            
             baronVonTerrain.groundStrokesSmlDisplayMat.SetVector("_FogColor", simManager.fogColor);
-            //baronVonTerrain.groundStrokesSmlDisplayMat.SetTexture("_NutrientTex", simManager.foodManager.nutrientMapRT1);
+            //baronVonTerrain.groundStrokesSmlDisplayMat.SetTexture("_NutrientTex", simManager.foodManager.nutrientMapRT1);simManager.vegetationManager.rdRT1);// 
             cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundStrokesSmlDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.groundStrokesSmlCBuffer.count);
 
-            /*// GROUND BITS:::
-            baronVonTerrain.groundBitsDisplayMat.SetPass(0);
-            baronVonTerrain.groundBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-            baronVonTerrain.groundBitsDisplayMat.SetBuffer("groundBitsCBuffer", baronVonTerrain.groundBitsCBuffer);
-            baronVonTerrain.groundBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
-            baronVonTerrain.groundBitsDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
-            baronVonTerrain.groundBitsDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-            cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
-            cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.groundBitsCBuffer.count);
-            */
+            // GROUND BITS:::
+            if(simManager.trophicLayersManager.GetDecomposersOnOff()) {
+                baronVonTerrain.groundBitsDisplayMat.SetPass(0);
+                baronVonTerrain.groundBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+                baronVonTerrain.groundBitsDisplayMat.SetBuffer("groundBitsCBuffer", baronVonTerrain.groundBitsCBuffer);
+                baronVonTerrain.groundBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+                baronVonTerrain.groundBitsDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+                baronVonTerrain.groundBitsDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+                cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
+                cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.groundBitsCBuffer.count);
+            
+            }
+            
             /*if(simManager.trophicLayersManager.GetAlgaeOnOff()) {
                 // Algae Carpet!
                 algaeParticleDisplayMat.SetPass(0);

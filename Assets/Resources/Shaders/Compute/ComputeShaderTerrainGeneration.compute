@@ -40,6 +40,8 @@ RWStructuredBuffer<GroundBitsData> groundBitsCBuffer;
 Texture2D<float4> VelocityRead;
 Texture2D<float4> AltitudeRead;
 
+Texture2D<float4> decomposersRead;
+
 int resolutionX = 16;
 int resolutionZ = 16;
 
@@ -107,7 +109,7 @@ void CSSimGroundBitsData (uint3 id : SV_DispatchThreadID)
 	groundBitData.age = groundBitData.age + 0.0025;  // ? frame lifespan
 	if(groundBitData.age > 1.0 || altitude > 0.5 ) {
 		
-		float2 spawnPos = float2(rand(float2(id.x, uv.x + _Time)), rand(float2(uv.y - _Time, id.x + _Time * 8.913)));		
+		float2 spawnPos = float2(rand(float2(id.x, uv.x + _Time * 120)), rand(float2(uv.y - _Time, id.x + _Time * 89.913)));		
 		float2 spawnBoxSize = float2(_SpawnBoundsCameraDetails.z - _SpawnBoundsCameraDetails.x, _SpawnBoundsCameraDetails.w - _SpawnBoundsCameraDetails.y);
 		spawnPos = spawnPos * spawnBoxSize + _SpawnBoundsCameraDetails.xy;
 
@@ -119,9 +121,10 @@ void CSSimGroundBitsData (uint3 id : SV_DispatchThreadID)
 		float spawnNoise3 = saturate(Value2D(spawnPos + 349.7, 2.4579).x * 2.5);
 		float altitudeMask = (1.0 - saturate(-1.0 * (spawnAltitude * 2.0 - 1.0)));
 		
-		float spawnRating = spawnNoise2 * spawnNoise3 * altitudeMask; // * spawnNoise * spawnNoise * altitudeMask * altitudeMask;
+		float4 decomposersMask = decomposersRead.SampleLevel(_LinearRepeat, spawnUV * 3.14159, 0);
+		float spawnRating = decomposersMask.y; // spawnNoise2 * spawnNoise3 * altitudeMask; // * spawnNoise * spawnNoise * altitudeMask * altitudeMask;
 
-		if(spawnRating > (float)id.x / 1024.0 / 8.0) {
+		if(spawnRating > 0.33) { // (float)id.x / 1024.0 / 8.0) {
 			groundBitData.worldPos = float3(spawnPos, 0);
 			groundBitData.age -= 1;
 
@@ -140,11 +143,11 @@ void CSSimGroundBitsData (uint3 id : SV_DispatchThreadID)
 
 			float2 grad = float2(0,1);
 			if(dX != 0 && dY != 0) {
-				grad = normalize(float2(dX, dY));
+				grad = normalize(lerp(float2(dX, dY), float2(0,1), 0.5));
 			}
 			//grad = float2(grad.y, -grad.x);
 
-			groundBitData.heading = -grad;
+			groundBitData.heading = grad;
 		}
 	}
 	else {
@@ -152,7 +155,7 @@ void CSSimGroundBitsData (uint3 id : SV_DispatchThreadID)
 	}
 
 	//float2 forwardDir = normalize(vel);
-	
+	//decomposersRead
 	
 	groundBitsCBuffer[id.x] = groundBitData;
 	

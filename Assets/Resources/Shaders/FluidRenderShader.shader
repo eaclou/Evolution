@@ -62,7 +62,10 @@
 				fixed4 pressure = tex2D(_PressureTex, i.uv);
 				fixed4 divergence = tex2D(_DivergenceTex, i.uv);
 				fixed4 obstacles = tex2D(_ObstaclesTex, i.uv);
-
+				//float val = density.y * 2;
+				//float dist = 1.0 - saturate(abs(0.3 - val) * 4.2);
+				//return float4(val, val, val, 1);
+				//return density; // + density2 * 0.25;
 				fixed4 finalColor = float4(0,0,0,1);
 				finalColor.xyz = density.xyz;
 				finalColor.a = density.y * 0.5;

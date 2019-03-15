@@ -5,6 +5,8 @@
 #pragma kernel CSRemoveAlgaeAtLocations
 #pragma kernel CSMeasureTotalAlgae
 #pragma kernel CSAddResourcesAtCoords
+#pragma kernel CSInitRD
+#pragma kernel CSSimRD
 
 
 #include "Assets/Resources/Shaders/Inc/StructsCritterData.cginc"
@@ -24,6 +26,9 @@ Texture2D<float4> VelocityRead;
 
 Texture2D<float4> algaeGridRead;
 RWTexture2D<float4> algaeGridWrite;
+
+Texture2D<float4> rdRead;
+RWTexture2D<float4> rdWrite;
 
 RWStructuredBuffer<float4> outputValuesCBuffer;
 StructuredBuffer<float4> addAlgaeCBuffer;
@@ -202,4 +207,68 @@ void CSAddResourcesAtCoords (uint3 id : SV_DispatchThreadID)
 	currentAlgaeGrid += data;
 
 	algaeGridWrite[index] = saturate(currentAlgaeGrid);
+}
+
+
+[numthreads(32,32,1)]
+void CSInitRD (uint3 id : SV_DispatchThreadID)
+{	
+	float2 uv = ((float2)id.xy + 0.5) / 128;
+
+	float dist = 1.0 - saturate(length(uv - 0.5) * 10);
+	float val = dist;
+	rdWrite[id.xy] = float4(1 - val, val, 0, 1);
+	
+}
+
+[numthreads(32,32,1)]
+void CSSimRD (uint3 id : SV_DispatchThreadID)
+{	
+	float s = 1 / 128.0;
+	float deltaTime = 1.0;
+
+	float2 uv = float2((float2)id.xy + 0.5) / 128.0;
+
+	// Neighbour cells
+	//algaeGridRead.SampleLevel(_LinearRepeat, uvSample, 0);
+	float4 bl = rdRead.SampleLevel(_PointRepeat, uv + float2(-s, +s), 0);	// F[x-1, y+1]: Bottom Left
+	float4 cl = rdRead.SampleLevel(_PointRepeat, uv + float2(-s,  0), 0);	// F[x-1, y  ]: Centre Left
+	float4 tl = rdRead.SampleLevel(_PointRepeat, uv + float2(-s, -s), 0); // F[x-1, y-1]: Top Left
+	float4 tc = rdRead.SampleLevel(_PointRepeat, uv + float2( 0, -s), 0);	// F[x,   y-1]: Top Centre
+	float4 tr = rdRead.SampleLevel(_PointRepeat, uv + float2(+s, -s), 0);	// F[x,   y-1]: Top Right
+	float4 cc = rdRead.SampleLevel(_PointRepeat, uv + float2( 0,  0), 0);	// F[x,   y  ]: Centre Centre
+	float4 br = rdRead.SampleLevel(_PointRepeat, uv + float2(+s, +s), 0);	// F[x+1, y+1]: Bottom Right
+	float4 bc = rdRead.SampleLevel(_PointRepeat, uv + float2( 0, +s), 0);	// F[x,   y+1]: Bottom Centre
+	float4 cr = rdRead.SampleLevel(_PointRepeat, uv + float2(+s,  0), 0);	// F[x+1, y  ]: Centre Right
+
+	//float killRate = lerp(_MinKillRate, _MaxKillRate, i.uv.x);
+	//float feedRate = lerp(_MinFeedRate, _MaxFeedRate, i.uv.y);
+	//float killRate = lerp(_MinKillRate, _MaxKillRate, sin(_Time.y * 0.3437 - 2.5 + i.uv.x * 0.467 + i.uv.y * 5.312) * 0.5 + 0.5);
+	//float feedRate = lerp(_MinFeedRate, _MaxFeedRate, cos(_Time.y * 0.52 + 1.1983 + i.uv.y * 0.35 - i.uv.x * 1.197) * 0.5 + 0.5);
+	
+	float killRate = lerp(0.06, 0.067, sin(uv.x * 6.28 - _Time * 0.2872) * 0.5 + 0.5); // 0.062;
+	float feedRate = lerp(0.05, 0.06, cos(uv.y * 6.28 + _Time * 0.413) * 0.5 + 0.5); //0.055;
+	float diffusionRateA = 1;
+    float diffusionRateB = 0.33;
+		
+	float coCenter = -1;
+	float coAdjacent = 0.2;
+	float coDiagonal = 0.05;
+
+	float laplaceA = cc.x * coCenter +
+						(cl.x + tc.x + cr.x + bc.x) * coAdjacent +
+						(bl.x + tl.x + tr.x + br.x) * coDiagonal;
+	float laplaceB = cc.y * coCenter +
+						(cl.y + tc.y + cr.y + bc.y) * coAdjacent +
+						(bl.y + tl.y + tr.y + br.y) * coDiagonal;
+				
+	float abb = cc.x * cc.y * cc.y;
+
+	float valA = cc.x + (diffusionRateA * laplaceA - abb + feedRate * (1 - cc.x)) * deltaTime;
+	float valB = cc.y + (diffusionRateB * laplaceB + abb - (killRate + feedRate) * cc.y) * deltaTime;
+
+	float4 col = float4(saturate(valA), saturate(valB), 0, 1); 
+	
+	rdWrite[id.xy] = col;
+	
 }

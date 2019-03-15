@@ -510,7 +510,7 @@ public class BaronVonWater : RenderBaron {
         
     }
 
-    public override void Tick() {
+    public override void Tick(RenderTexture maskTex) {
 
         SimWaterQuads();
         SimWaterCurves();

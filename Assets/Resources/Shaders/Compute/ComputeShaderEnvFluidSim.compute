@@ -449,7 +449,7 @@ void RefreshColor (uint3 id : SV_DispatchThreadID)
 	float4 currentColor = lerp(amountCenter, (amountCenter + amountRight + amountLeft + amountUp + amountDown) / 5, diffusionAmount);
 	
 	float4 sourceColorDynamic = colorInjectionRenderTex.SampleLevel(_LinearRepeat, uvOrigin, 0);
-	float4 newColor = currentColor; // lerp(currentColor.rgb, float4(0,0,0,0), _ColorRefreshAmount);
+	float4 newColor = lerp(currentColor, float4(0,0,0,0), _ColorRefreshAmount);
 	float stampAlpha = saturate(_ColorRefreshDynamicMultiplier * sourceColorDynamic.a);
 	//newColor.a = lerp(newColor.a, 0, _ColorRefreshAmount);
 	newColor.rgb = lerp(newColor.rgb, sourceColorDynamic.rgb, stampAlpha); //saturate(_ColorRefreshDynamicMultiplier * sourceColorDynamic.a));

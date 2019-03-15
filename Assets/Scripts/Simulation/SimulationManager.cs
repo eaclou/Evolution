@@ -388,8 +388,9 @@ public class SimulationManager : MonoBehaviour {
     private void LoadingInitializeFoodParticles() {
         vegetationManager.InitializeAlgaeParticles(numAgents, computeShaderFoodParticles);
     }    
-    private void LoadingInitializeResourceGrid() {
+    private void LoadingInitializeResourceGrid() {        
         vegetationManager.InitializeAlgaeGrid(numAgents, computeShaderResourceGrid); 
+        vegetationManager.InitializeReactionDiffusionGrid();
     }
     private void LoadingInitializeAnimalParticles() {
         zooplanktonManager.InitializeAnimalParticles(numAgents, computeShaderAnimalParticles);
@@ -595,8 +596,9 @@ public class SimulationManager : MonoBehaviour {
         // Or should this be right at beginning of frame????? ***************** revisit...
         environmentFluidManager.Tick(); // ** Clean this up, but generally OK
 
-        vegetationManager.ApplyDiffusionOnResourceGrid(environmentFluidManager);
-        vegetationManager.AdvectResourceGrid(environmentFluidManager);
+        //vegetationManager.ApplyDiffusionOnResourceGrid(environmentFluidManager);
+        //vegetationManager.AdvectResourceGrid(environmentFluidManager);
+        vegetationManager.SimReactionDiffusionGrid();
 
         if(trophicLayersManager.GetAlgaeOnOff()) {
             vegetationManager.EatSelectedFoodParticles(simStateData); // 
