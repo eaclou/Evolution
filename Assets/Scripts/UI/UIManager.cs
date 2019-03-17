@@ -684,8 +684,10 @@ public class UIManager : MonoBehaviour {
                             createSpecies = true;
                         }
                         // **** CREATE SPECIES HERE:::::: ****
-                        gameManager.simulationManager.trophicLayersManager.ClickedPendingTrophicSlot(gameManager.simulationManager, gizmoPos, gameManager.simulationManager.simAgeTimeSteps);     
-                        
+                        gameManager.simulationManager.trophicLayersManager.ClickedPendingTrophicSlot(gameManager.simulationManager, gizmoPos, gameManager.simulationManager.simAgeTimeSteps);
+
+                        gameManager.theRenderKing.baronVonWater.StartCursorClick(gizmoPos);
+
                         toolbarInfluencePoints -= addSpeciesInfluenceCost;
                         
                         if(gameManager.simulationManager.trophicLayersManager.pendingTrophicSlotRef.kingdomID == 2) {

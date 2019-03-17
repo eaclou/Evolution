@@ -48,7 +48,7 @@ public class BaronVonTerrain : RenderBaron {
 
     private int numGroundBits = 1024 * 32;
     public ComputeBuffer groundBitsCBuffer;
-    private int numCarpetBits = 1024 * 8;
+    private int numCarpetBits = 1024 * 16;
     public ComputeBuffer carpetBitsCBuffer;
 
     public Vector4 spawnBoundsCameraDetails;
@@ -128,7 +128,7 @@ public class BaronVonTerrain : RenderBaron {
             Vector3 pos = new Vector3(xPos + offset.x, yPos + offset.y, 0f);
             carpetBitsArray[x].worldPos = pos;
             carpetBitsArray[x].heading = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)).normalized;
-            carpetBitsArray[x].localScale = new Vector2(UnityEngine.Random.Range(0.4f, 0.8f), UnityEngine.Random.Range(1.5f, 4.5f)) * UnityEngine.Random.Range(0.25f, 1f); // Y is forward, along stroke
+            carpetBitsArray[x].localScale = new Vector2(UnityEngine.Random.Range(0.5f, 1.5f), UnityEngine.Random.Range(0.5f, 1.5f)) * UnityEngine.Random.Range(0.5f, 1f); // Y is forward, along stroke
             carpetBitsArray[x].age = UnityEngine.Random.Range(1f, 2f);
             carpetBitsArray[x].speed = 0f;
             carpetBitsArray[x].noiseVal = 1f;

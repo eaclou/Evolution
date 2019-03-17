@@ -53,6 +53,10 @@ public class BaronVonWater : RenderBaron {
     public ComputeBuffer waterDebrisBitsCBuffer;
     public ComputeBuffer waterDebrisBitsShadowsCBuffer;
 
+    private float cursorClickWaveOn = 0f;
+    private int cursorClickWaveDuration = 240;
+    private int cursorClickWaveTimeStepCounter = 0;
+    private Vector4 cursorClickWorldPos;
 
     public Vector4 spawnBoundsCameraDetails;
 
@@ -490,13 +494,25 @@ public class BaronVonWater : RenderBaron {
 
         debugFrameCounter++;
     }
+    public void StartCursorClick(Vector4 clickPos) {
+        cursorClickWorldPos = clickPos;
+        cursorClickWaveOn = 1f;
+        cursorClickWaveTimeStepCounter = 0; // might be redundant, but just to be safe
+        //cursorClickWaveOn = 0f;
+    //private int cursorClickWaveDuration;
+    //private int cursorClickWaveTimeStepCounter = 0;
+    }
     private void SimWaterSurface()
     {
         int kernelCSUpdateWaterSurface = computeShaderWaterRender.FindKernel("CSUpdateWaterSurface");
         computeShaderWaterRender.SetTexture(kernelCSUpdateWaterSurface, "waterSurfaceDataWriteRT", waterSurfaceDataRT0);
+        computeShaderWaterRender.SetFloat("_TextureResolution", waterSurfaceDataRT0.width);
         computeShaderWaterRender.SetFloat("_Time", Time.realtimeSinceStartup);
         computeShaderWaterRender.SetFloat("_MapSize", SimulationManager._MapSize);
         computeShaderWaterRender.SetFloat("_CamDistNormalized", camDistNormalized);
+        computeShaderWaterRender.SetVector("_CursorClickWorldPos", cursorClickWorldPos);
+        computeShaderWaterRender.SetFloat("_CursorClickTimeLerp", Mathf.Clamp01((float)cursorClickWaveTimeStepCounter / (float)cursorClickWaveDuration));
+        computeShaderWaterRender.SetFloat("_CursorClickWaveOn", cursorClickWaveOn);
         computeShaderWaterRender.Dispatch(kernelCSUpdateWaterSurface, waterSurfaceMapResolution / 32, waterSurfaceMapResolution / 32, 1);
 
         
@@ -512,9 +528,19 @@ public class BaronVonWater : RenderBaron {
 
     public override void Tick(RenderTexture maskTex) {
 
+        if(cursorClickWaveOn > 0.5f) {
+            cursorClickWaveTimeStepCounter++;
+
+            //Debug.Log("ON! " + cursorClickWorldPos.ToString());
+
+            if(cursorClickWaveTimeStepCounter > cursorClickWaveDuration) {
+                cursorClickWaveTimeStepCounter = 0;
+                cursorClickWaveOn = 0f;
+            }
+        }
+
         SimWaterQuads();
         SimWaterCurves();
-        //SimWaterChains();
 
         SimWaterSurface();
     }

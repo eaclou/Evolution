@@ -77,12 +77,12 @@ public class ZooplanktonManager {
 
         for(int i = 0; i < animalParticlesCBuffer.count; i++) {
             AnimalParticleData data = new AnimalParticleData();
-            data.index = i;            
-            data.worldPos = new Vector3(UnityEngine.Random.Range(0f, SimulationManager._MapSize), UnityEngine.Random.Range(0f, SimulationManager._MapSize), 0f);
+            data.index = i;
+            data.worldPos = Vector3.zero; // new Vector3(UnityEngine.Random.Range(0f, SimulationManager._MapSize), UnityEngine.Random.Range(0f, SimulationManager._MapSize), 0f);
 
             data.radius = UnityEngine.Random.Range(minParticleSize, maxParticleSize); // obsolete!
             data.biomass = 0.01f; // data.radius * data.radius * Mathf.PI; // * settingsRef.animalParticleNutrientDensity;
-            data.isActive = 1f;
+            data.isActive = 0f;
             data.isDecaying = 0f;
             data.age = UnityEngine.Random.Range(1f, 2f);
             animalParticlesArray[i] = data;
@@ -182,15 +182,22 @@ public class ZooplanktonManager {
         // *** SPAWNING ***
         int eggSackIndex = Mathf.FloorToInt(Time.realtimeSinceStartup * 0.1f) % simStateDataRef.eggSackSimDataArray.Length;
 
-        if(animalParticleMeasurementTotalsData[0].biomass < maxAnimalParticleTotal) {
-            computeShaderAnimalParticles.SetFloat("_RespawnAnimalParticles", 1f);                       
-        }
-        else {
-            computeShaderAnimalParticles.SetFloat("_RespawnAnimalParticles", 0f);      
-        }
+        //if(animalParticleMeasurementTotalsData[0].biomass < maxAnimalParticleTotal) {
+        float randRoll = UnityEngine.Random.Range(0f, 1f);
+        computeShaderAnimalParticles.SetFloat("_RespawnAnimalParticles", randRoll);                       
+        //}
+        //else {
+        //    computeShaderAnimalParticles.SetFloat("_RespawnAnimalParticles", 0f);      
+        //}
         // Need to compute when they should be allowed to spawn, how to keep track of resources used/transferred??
         computeShaderAnimalParticles.SetFloat("_SpawnPosX", UnityEngine.Random.Range(0.1f, 0.9f)); // UPDATE THIS!!! ****
         computeShaderAnimalParticles.SetFloat("_SpawnPosY", UnityEngine.Random.Range(0.1f, 0.9f));
+
+        float spawnLerp = renderKingRef.simManager.trophicLayersManager.GetZooplanktonOnLerp(renderKingRef.simManager.simAgeTimeSteps);
+        float spawnRadius = Mathf.Lerp(1f, SimulationManager._MapSize, spawnLerp);
+        Vector4 spawnPos = new Vector4(renderKingRef.simManager.trophicLayersManager.zooplanktonOriginPos.x, renderKingRef.simManager.trophicLayersManager.zooplanktonOriginPos.y, 0f, 0f);
+        computeShaderAnimalParticles.SetFloat("_SpawnRadius", spawnRadius);
+        computeShaderAnimalParticles.SetVector("_SpawnPos", spawnPos);
 
         float minParticleSize = 0.1f; // settingsRef.avgAnimalParticleRadius / settingsRef.animalParticleRadiusVariance;
         float maxParticleSize = 0.2f; // settingsRef.avgAnimalParticleRadius * settingsRef.animalParticleRadiusVariance;

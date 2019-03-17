@@ -224,7 +224,7 @@ void CSSimulateHighlightTrail (uint3 id : SV_DispatchThreadID)
 	// FLUID FLOW:
 	float2 uv = nextPos / _MapSize;
 	float2 fluidVel = velocityRead.SampleLevel(_LinearRepeat, uv, 2).xy;
-	float speedMult = 0.0055 * _MapSize;
+	float speedMult = 0.0167 * _MapSize;
 	nextPos = nextPos + fluidVel * speedMult;
 
 	// NOISE:

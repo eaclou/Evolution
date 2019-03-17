@@ -195,7 +195,13 @@ public class TrophicLayersManager {
         }
         return lerp;
     }
-
+    public float GetZooplanktonOnLerp(int curTimeStep) {
+        float lerp = 0f;
+        if(algaeOn) {
+            lerp = Mathf.Clamp01((float)(curTimeStep - timeStepZooplanktonOn) / (float)timeStepsLayerGrowthDuration);
+        }
+        return lerp;
+    }
 
     public bool GetDecomposersOnOff() {
         return decomposersOn;

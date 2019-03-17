@@ -74,10 +74,10 @@
 				float spatialFreq = 0.55285;
 				float timeMult = 0.06;
 				float4 noiseSample = Value3D(worldPosition * spatialFreq + _Time * timeMult, masterFreq); //float3(0, 0, _Time * timeMult) + 
-				float noiseMag = 0.15;
+				float noiseMag = 0.015;
 				float3 noiseOffset = noiseSample.yzw * noiseMag;
 
-				//worldPosition.xyz += noiseOffset;
+				worldPosition.xyz += noiseOffset;
 
 
 				float radius = particleData.radius * 0.10915 * isOn; // 1; //sqrt(particleData.biomass) * 2 + 0.5;

@@ -68,7 +68,8 @@
 				//return density; // + density2 * 0.25;
 				fixed4 finalColor = float4(0,0,0,1);
 				finalColor.xyz = density.xyz;
-				finalColor.a = density.y * 0.5;
+				finalColor.a = smoothstep(0.15, 0.3, density.y) * 0.15;
+				
 				return finalColor;
 
 				float posterizeLevels = 64;

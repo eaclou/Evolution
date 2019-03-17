@@ -343,7 +343,7 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 				if(spawnAltitudeSample.x < _AlgaeSpawnMaxAltitude) {  // in water only? // for now...
 				
 					foodParticlesWrite[id.x].worldPos = spawnUV * _MapSize;
-					//foodParticlesWrite[id.x].worldPos = parentPos + (float2(randZ, randX) - 0.5) * 2.5;
+					
 
 					float randRadius = rand(float2(randX * 10, randY * -3.37)) * (_MaxParticleSize - _MinParticleSize) + _MinParticleSize;					
 					

@@ -91,6 +91,10 @@ uniform float4 _PlayerPos;
 uniform float _CamDistNormalized;
 uniform float4 _SpawnBoundsCameraDetails;
 
+uniform float4 _CursorClickWorldPos;
+uniform float _CursorClickTimeLerp; // 0-1
+uniform float _CursorClickWaveOn;
+
 uniform int _BufferLength;
 
 
@@ -413,8 +417,22 @@ void CSUpdateWaterSurface (uint3 id : SV_DispatchThreadID)
 					(1.0 - abs(noiseSample1.x)) * 0.65 * distWeight1 + 
 					(1.0 - abs(noiseSample2.x)) * 0.15 * distWeight2 + 
 					(1.0 - abs(noiseSample3.x)) * 0.04 * distWeight3;
+
+	// CLICK WAVE!!!
+	float2 pixelWorldPos = (((float2)id.xy + 0.5) / (float)_TextureResolution) * _MapSize;
+	float2 waveOrigin = _CursorClickWorldPos.xy;
+	float distToOrigin = length(waveOrigin - pixelWorldPos);
+
+	float falloffDist = 128;
+	float peakDist = _CursorClickTimeLerp * falloffDist;
+	float distMask = 1.0 - saturate(abs(distToOrigin - peakDist) * 0.1);
+	float falloffMask = 1.0 - saturate(distToOrigin / falloffDist);
+	float waveAmp = 0.85;
+	float waveFreq = 0.25;
+	float waveHeight = waveAmp * _CursorClickWaveOn * distMask * falloffMask; // sin(distToOrigin * waveFreq) * waveAmp * _CursorClickWaveOn * (1.0 - _CursorClickTimeLerp);
 	
-	waterSurfaceDataWriteRT[id.xy] = float4(height * 0.4, 0, 0, 1);
+	
+	waterSurfaceDataWriteRT[id.xy] = float4(height * 0.4 + waveHeight, 0, 0, 1);
 }
 
 [numthreads(32,32,1)]

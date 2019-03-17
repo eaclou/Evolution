@@ -41,6 +41,9 @@ uniform float _ParticleNutrientDensity; // refactor how nutrient content works
 
 uniform float _AnimalParticleRegrowthRate;
 
+uniform float4 _SpawnPos;
+uniform float _SpawnRadius;
+
 uniform float _SpawnPosX;
 uniform float _SpawnPosY;
 
@@ -367,39 +370,50 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 		animalParticlesWrite[id.x].algaeConsumed = 0;
 
 		// &&&& RESPAWN!!! &&&& ==========================================================================================================
-		if(_RespawnAnimalParticles > 0.5) {		 // CPU master control
+		if(_RespawnAnimalParticles > 0.75) {		 // CPU master control
 			
 			float rand01 = rand(float2(_Time * 135.79 + (float)animalParticlesRead[id.x].index * 30.17896, _Time * 28.463));
 			
 			float randX = rand(float2((float)id.x, _Time));
 			float randY = rand(float2(randX * 62.39 + _Time, (float)id.x));
 
-			float2 spawnOriginUV = float2(_SpawnPosX, _SpawnPosY);
+			//float2 spawnOriginUV = float2(_SpawnPosX, _SpawnPosY);
 
-			float spawnRadius = 0.002;
-			float2 spawnUV = spawnOriginUV + float2(randX, randY) * spawnRadius;			
+			//float spawnRadius = 0.002;
+			//float2 spawnUV = spawnOriginUV + float2(randX, randY) * spawnRadius;			
 			
-			float2 worldPos = float2(spawnUV.x * _MapSize, spawnUV.y * _MapSize);
-			animalParticlesWrite[id.x].worldPos.xy = worldPos;
-			animalParticlesWrite[id.x].p1 = worldPos - float2(0, 0.01);
-			animalParticlesWrite[id.x].p2 = worldPos - float2(0, 0.02);
-			animalParticlesWrite[id.x].p3 = worldPos - float2(0, 0.03);
+			float2 spawnUV = float2(randX, randY); // (parentPos / _MapSize) * 0.5 + 0.25 + float2(randX, randY) * 0.001;							
+			float4 spawnAltitudeSample = altitudeRead.SampleLevel(_LinearClamp, spawnUV * 0.5 + 0.25, 0);			
+			float distToOrigin = length(_SpawnPos.xy - (spawnUV * _MapSize));
+			//_FoodSprinkleRadius
+			if(distToOrigin < _SpawnRadius) {  // to prevent mass respawning, overshooting the intended max global food amount ?  // Needed?
+				if(spawnAltitudeSample.x < 0.5) {  // in water only? // for now...
+					float2 worldPos = float2(spawnUV.x * _MapSize, spawnUV.y * _MapSize);
+					animalParticlesWrite[id.x].worldPos.xy = worldPos;
+					animalParticlesWrite[id.x].p1 = worldPos.xy - float2(0, 0.01);
+					animalParticlesWrite[id.x].p2 = worldPos.xy - float2(0, 0.02);
+					animalParticlesWrite[id.x].p3 = worldPos.xy - float2(0, 0.03);
 
-			float randRadius = rand(float2(randX * 10, randY * -3.37)) * (_MaxParticleSize - _MinParticleSize) + _MinParticleSize;					
+					float randRadius = rand(float2(randX * 10, randY * -3.37)) * (_MaxParticleSize - _MinParticleSize) + _MinParticleSize;					
 			
-			// StartSize?
-			float startingMass = 0.01;
-			float startingRadius = sqrt(startingMass);
-			animalParticlesWrite[id.x].radius = startingRadius;  // Obsolete? 
-			animalParticlesWrite[id.x].biomass = startingMass;         //randRadius * randRadius * 3.141592 * _ParticleNutrientDensity;
-			animalParticlesWrite[id.x].isActive = 1.0;
-			animalParticlesWrite[id.x].isDecaying = 0.0; // might be obsolete
-			animalParticlesWrite[id.x].isSwallowed = 0.0;  // 
-			animalParticlesWrite[id.x].digestedAmount = 0.0; // to become decay?
-			animalParticlesWrite[id.x].age = rand(float2(rand01 * 70.158, randX * 13.37));  // 0-1, death at 2
+					// StartSize?
+					float startingMass = 0.01;
+					float startingRadius = sqrt(startingMass);
+					animalParticlesWrite[id.x].radius = startingRadius;  // Obsolete? 
+					animalParticlesWrite[id.x].biomass = startingMass;         //randRadius * randRadius * 3.141592 * _ParticleNutrientDensity;
+					animalParticlesWrite[id.x].isActive = 1.0;
+					animalParticlesWrite[id.x].isDecaying = 0.0; // might be obsolete
+					animalParticlesWrite[id.x].isSwallowed = 0.0;  // 
+					animalParticlesWrite[id.x].digestedAmount = 0.0; // to become decay?
+					animalParticlesWrite[id.x].age = rand(float2(rand01 * 70.158, randX * 13.37));  // 0-1, death at 2
 
-			// subtract startingMass from algae?  or ignore for now?
-			//animalParticlesWrite[id.x]
+					// subtract startingMass from algae?  or ignore for now?
+					//animalParticlesWrite[id.x]
+					
+				}			
+			}
+
+			
 		}
 
 		// OLD:

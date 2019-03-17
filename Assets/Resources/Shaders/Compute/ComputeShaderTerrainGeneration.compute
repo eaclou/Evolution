@@ -61,6 +61,7 @@ uniform float _Time;
 
 uniform float4 _SpawnPos;
 uniform float _SpawnRadius;
+uniform float _DecomposerDensityLerp;
 
 SamplerState _LinearClamp;
 SamplerState _LinearRepeat;
@@ -143,12 +144,16 @@ void CSSimGroundBitsData (uint3 id : SV_DispatchThreadID)
 		float2 spawnPos = float2(rand(float2(id.x, _Time * 120)), rand(float2(-_Time, id.x + _Time * 89.913)));		
 		float2 spawnBoxSize = float2(_SpawnBoundsCameraDetails.z - _SpawnBoundsCameraDetails.x, _SpawnBoundsCameraDetails.w - _SpawnBoundsCameraDetails.y);
 		spawnPos = spawnPos * spawnBoxSize + _SpawnBoundsCameraDetails.xy;
-
+		float noiseFreq = 3.2;
+		float spawnNoise1 = Value2D(spawnPos + 5, noiseFreq * 0.255).x;
+		float spawnNoise2 = Value2D(spawnPos - 33, noiseFreq * 0.35).x;
+		
 		// check potential spawn location:
 		float2 spawnUV = spawnPos / _MapSize;
+		
+		
 		float spawnAltitude = AltitudeRead.SampleLevel(_LinearRepeat, spawnUV * 0.5 + 0.25, 0).x;
-		float spawnNoise1 = saturate(Value2D(spawnPos + 5, 0.255).x * 10);
-		float spawnNoise2 = saturate(Value2D(spawnPos - 33, 0.65).x * 6.5);
+		
 		float spawnNoise3 = saturate(Value2D(spawnPos + 349.7, 2.4579).x * 2.5);
 		float altitudeMask = (1.0 - saturate(-1.0 * (spawnAltitude * 2.0 - 1.0)));
 		
@@ -159,8 +164,8 @@ void CSSimGroundBitsData (uint3 id : SV_DispatchThreadID)
 		float distToOrigin = length(_SpawnPos.xy - (spawnUV * _MapSize));
 			//_FoodSprinkleRadius
 		if(distToOrigin < _SpawnRadius) {
-			if(spawnRating > 0.33) { // (float)id.x / 1024.0 / 8.0) {
-						
+			if(spawnRating > 0.4 * ((1.0 - _DecomposerDensityLerp) * 0.8 + 0.2)) { // (float)id.x / 1024.0 / 8.0) {
+				spawnPos += float2(spawnNoise1, spawnNoise2) * 1.3416;		
 				groundBitData.worldPos = float3(spawnPos, 0);
 				groundBitData.age = groundBitData.age % 1.0;
 				groundBitData.isActive = 1.0;
@@ -183,7 +188,7 @@ void CSSimCarpetBitsData (uint3 id : SV_DispatchThreadID)
 	float2 uv = groundBitData.worldPos.xy / _MapSize;
 	float2 altitudeUV = uv * 0.5 + 0.25;
 	float2 vel = VelocityRead.SampleLevel(_LinearRepeat, uv, 1).xy;
-	float speedMult = 0.0075;
+	float speedMult = 0.0;
 
 	groundBitData.speed = length(vel);
 	
@@ -206,12 +211,12 @@ void CSSimCarpetBitsData (uint3 id : SV_DispatchThreadID)
 		float spawnNoise3 = saturate(Value2D(spawnPos + 349.7, 0.4579).x * 10);
 		float altitudeMask = (1.0 - saturate(-1.0 * (spawnAltitude * 2.0 - 1.0)));
 		
-		float spawnRating = spawnNoise1 * spawnNoise3 * altitudeMask; // * spawnNoise * spawnNoise * altitudeMask * altitudeMask;
+		float spawnRating = altitudeMask; // * spawnNoise * spawnNoise * altitudeMask * altitudeMask;
 
-		if(spawnRating > (float)id.x / 1024.0 / 8.0) {
+		//if(spawnRating > (float)id.x / 1024.0 / 8.0) {
 			groundBitData.worldPos = float3(spawnPos, 0);
 			groundBitData.age -= 1;
-		}		
+		//}		
 	}
 	else {
 		groundBitData.worldPos = float3(nextPos * _MapSize, 0);		

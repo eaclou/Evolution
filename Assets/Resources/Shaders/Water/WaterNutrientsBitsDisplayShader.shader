@@ -101,7 +101,7 @@
 				//scale *= (nutrientGridSample.x * 0.4 + 0.6) * 1;				
 				//scale = float2(1,1) * 0.033;
 				
-				quadPoint *= float3(scale, 1.0) * (0.4 + _NutrientDensity * 0.6);
+				quadPoint *= float3(scale, 1.0) * (0.3 + _NutrientDensity * 0.2);
 				
 				float4 fluidVelocity = tex2Dlod(_VelocityTex, float4(worldPosition.xy / 256, 0, 2));
 				float2 fluidDir = float2(0,1); //normalize(fluidVelocity.xy);
