@@ -200,22 +200,27 @@ void CSSimulateCritterPortraitStrokes (uint3 id : SV_DispatchThreadID)
 	critterGenericStrokesWriteCBuffer[id.x] = strokeData;
 }
 
-[numthreads(256,1,1)]
+[numthreads(1024,1,1)]
 void CSSimulateHighlightTrail (uint3 id : SV_DispatchThreadID)
 {
-	int critterIndex = id.x / 256;
+	int numParticles = 1024;
+	int critterIndex = id.x / numParticles;
 	int particleIndex = id.x;
 	
+	CritterInitData critterInitData = critterInitDataCBuffer[critterIndex];
 	CritterSimData critterSimData = critterSimDataCBuffer[critterIndex];
 
-	//float timeMask = 1.0 - saturate(abs((round(_Time * 30) % 256) - (id.x % 256)));
+	//float timeMask = 1.0 - saturate(abs((round(_Time * 30) % numParticles) - (id.x % numParticles)));
 	float age = highlightTrailDataCBuffer[particleIndex].age;
 	float timeMask = saturate(floor(age));
 	age = age % 1.0;
 
-	float spawnRadius = 0.0004;
+	float spawnRadius = 4.20 * 2.5;
+	float randomAngle = 6.28 * rand(float2(id.x,critterIndex));
+	float randRadius = rand(float2(critterIndex,id.x));
 	float2 randOffset = (float2(rand(float2((float)id.x, age)), rand(float2(age, (float)id.x))) * 2.0 - 1.0) * spawnRadius;
-	float2 spawnPos = critterSimData.worldPos.xy + randOffset;
+	randOffset = float2(cos(randomAngle) * randRadius * spawnRadius, sin(randomAngle) * randRadius * spawnRadius);
+	float2 spawnPos = critterSimData.worldPos.xy + randOffset - critterSimData.heading * critterInitData.boundingBoxSize.z * critterInitData.spawnSizePercentage;
 
 	float2 curPos = highlightTrailDataCBuffer[particleIndex].worldPos;
 	
@@ -229,9 +234,9 @@ void CSSimulateHighlightTrail (uint3 id : SV_DispatchThreadID)
 
 	// NOISE:
 	float2 noiseVel = Value3D(float3(nextPos * 1, _Time * 05), 0.87).yz;
-	nextPos += noiseVel * 0.006;
+	//nextPos += noiseVel * 0.006;
 	
-
+	highlightTrailDataCBuffer[particleIndex].vel = fluidVel * speedMult;// + noiseVel * 0.006;
 	highlightTrailDataCBuffer[particleIndex].worldPos = nextPos;
 	highlightTrailDataCBuffer[particleIndex].age = age + 0.0057;
 }

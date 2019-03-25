@@ -855,7 +855,7 @@ public class TheRenderKing : MonoBehaviour {
         critterFoodDotsCBuffer.SetData(foodDotsArray);
 
         // Highlight trail:
-        critterHighlightTrailCBuffer = new ComputeBuffer(simManager._NumAgents * 256, sizeof(float) * 8);
+        critterHighlightTrailCBuffer = new ComputeBuffer(simManager._NumAgents * 1024, sizeof(float) * 8);
         HighlightTrailData[] highlightTrailDataArray = new HighlightTrailData[critterHighlightTrailCBuffer.count];
         for (int i = 0; i < highlightTrailDataArray.Length; i++) {
             
@@ -2587,8 +2587,9 @@ public class TheRenderKing : MonoBehaviour {
         computeShaderCritters.SetFloat("_Time", Time.realtimeSinceStartup);
         computeShaderCritters.SetTexture(kernelCSSimulateHighlightTrail, "velocityRead", fluidManager._VelocityA); 
         computeShaderCritters.SetBuffer(kernelCSSimulateHighlightTrail, "highlightTrailDataCBuffer", critterHighlightTrailCBuffer);
+        computeShaderCritters.SetBuffer(kernelCSSimulateHighlightTrail, "critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer); 
         computeShaderCritters.SetBuffer(kernelCSSimulateHighlightTrail, "critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);        
-        computeShaderCritters.Dispatch(kernelCSSimulateHighlightTrail, critterHighlightTrailCBuffer.count / 256, 1, 1);
+        computeShaderCritters.Dispatch(kernelCSSimulateHighlightTrail, critterHighlightTrailCBuffer.count / 1024, 1, 1);
     }
     public void SimFloatyBits() {
         int kernelSimFloatyBits = fluidManager.computeShaderFluidSim.FindKernel("SimFloatyBits");
@@ -3730,6 +3731,14 @@ public class TheRenderKing : MonoBehaviour {
         
             }
             
+            // Highlight trail:
+            critterHighlightTrailMat.SetPass(0);
+            critterHighlightTrailMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
+            critterHighlightTrailMat.SetBuffer("highlightTrailDataCBuffer", critterHighlightTrailCBuffer);
+            critterHighlightTrailMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+            critterHighlightTrailMat.SetFloat("_MapSize", SimulationManager._MapSize);
+            cmdBufferMain.DrawProcedural(Matrix4x4.identity, critterHighlightTrailMat, 0, MeshTopology.Triangles, 6, critterHighlightTrailCBuffer.count * 256);
+
         
             eggSackStrokeDisplayMat.SetPass(0);
             eggSackStrokeDisplayMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
@@ -3751,14 +3760,7 @@ public class TheRenderKing : MonoBehaviour {
             eggCoverDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, eggCoverDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.critterInitDataCBuffer.count);
 
-            // Highlight trail:
-            critterHighlightTrailMat.SetPass(0);
-            critterHighlightTrailMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
-            critterHighlightTrailMat.SetBuffer("highlightTrailDataCBuffer", critterHighlightTrailCBuffer);
-            critterHighlightTrailMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-            critterHighlightTrailMat.SetFloat("_MapSize", SimulationManager._MapSize);
-            cmdBufferMain.DrawProcedural(Matrix4x4.identity, critterHighlightTrailMat, 0, MeshTopology.Triangles, 6, critterHighlightTrailCBuffer.count * 256);
-
+            
             // CRITTER BODY:
 
 

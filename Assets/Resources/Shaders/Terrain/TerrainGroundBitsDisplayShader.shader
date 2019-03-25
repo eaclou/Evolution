@@ -173,7 +173,7 @@
 				float4 waterColorTex = tex2D(_WaterColorTex, (i.altitudeUV - 0.25) * 2);
 
 				//frameBufferColor = float4(1,1,1,1);
-				float3 baseHue = float3(1,0.25,0.1);
+				float3 baseHue = float3(1,0.37,0.1);
 				float3 particleColor = lerp(baseHue * 0.7, baseHue * 1.3, saturate(1.0 - i.color.y * 2));
 				frameBufferColor.rgb = lerp(frameBufferColor.rgb, particleColor, 0.5 * _Density + 0.5);
 				float4 finalColor = GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, float4(1,1,1,1));
