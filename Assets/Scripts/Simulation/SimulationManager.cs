@@ -598,9 +598,9 @@ public class SimulationManager : MonoBehaviour {
 
         //vegetationManager.ApplyDiffusionOnResourceGrid(environmentFluidManager);
         //vegetationManager.AdvectResourceGrid(environmentFluidManager);
-        if(curSimYear < 2) {  // stop simulating after certain point !! TEMPORARY!!!
-            vegetationManager.SimReactionDiffusionGrid();
-        }
+        //if(curSimYear < 2) {  // stop simulating after certain point !! TEMPORARY!!!
+        vegetationManager.SimReactionDiffusionGrid();
+        //}
         
 
         if(trophicLayersManager.GetAlgaeOnOff()) {
@@ -1430,8 +1430,8 @@ public class SimulationManager : MonoBehaviour {
         newSpecies.avgDamageTaken = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgDamageTakenPerYearList[lastIndex];
 
         // Tree Of LIFE UI collider & RenderKing updates:
-        uiManager.treeOfLifeManager.AddNewSpecies(masterGenomePool, newSpeciesID);
-        theRenderKing.TreeOfLifeAddNewSpecies(masterGenomePool, newSpeciesID);
+        //uiManager.treeOfLifeManager.AddNewSpecies(masterGenomePool, newSpeciesID);
+        //theRenderKing.TreeOfLifeAddNewSpecies(masterGenomePool, newSpeciesID);
         // WRAP THIS IN A FUNCTION!!! &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
         if(newSpecies.depthLevel > masterGenomePool.currentHighestDepth) {

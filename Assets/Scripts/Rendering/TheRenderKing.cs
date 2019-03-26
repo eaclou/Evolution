@@ -2750,7 +2750,7 @@ public class TheRenderKing : MonoBehaviour {
         }
         treeOfLifeEventLineDataCBuffer.SetData(treeOfLifeEventLineDataArray);
     }
-    public void SimTreeOfLifeWorldStatsData(Texture2D dataTex, Texture2D keyTex) {
+    /*public void SimTreeOfLifeWorldStatsData(Texture2D dataTex, Texture2D keyTex) {
         int kernelCSUpdateWorldStatsValues = computeShaderTreeOfLife.FindKernel("CSUpdateWorldStatsValues");
         computeShaderTreeOfLife.SetTexture(kernelCSUpdateWorldStatsValues, "treeOfLifeWorldStatsTex", dataTex); // simManager.uiManager.statsTextureLifespan);
         computeShaderTreeOfLife.SetTexture(kernelCSUpdateWorldStatsValues, "treeOfLifeWorldStatsKeyTex", keyTex);  // used for line color, max/min values reference, and other extra info per graph line (32 max)
@@ -2767,7 +2767,8 @@ public class TheRenderKing : MonoBehaviour {
         computeShaderTreeOfLife.SetFloat("_MouseOn", simManager.uiManager.tolMouseOver);
         computeShaderTreeOfLife.Dispatch(kernelCSUpdateWorldStatsValues, 1, 1, 1);  // need 32 * 64 segments? -- not yet - as long as one-at-a-time
 
-    }
+    }*/
+    /*
     public void SimTreeOfLifeSpeciesTreeData(Texture2D dataTex, float maxVal) {
         int kernelCSUpdateSpeciesTreeData = computeShaderTreeOfLife.FindKernel("CSUpdateSpeciesTreeData");
         computeShaderTreeOfLife.SetTexture(kernelCSUpdateSpeciesTreeData, "treeOfLifeSpeciesTreeTex", dataTex); // simManager.uiManager.statsTextureLifespan);
@@ -2788,14 +2789,13 @@ public class TheRenderKing : MonoBehaviour {
         computeShaderTreeOfLife.Dispatch(kernelCSUpdateSpeciesTreeData, 32, 1, 1);  // 32 = num of species displayed * 64 inside shader
 
         treeOfLifeSpeciesDataHeadPosCBuffer.GetData(treeOfLifeSpeciesDataHeadPosArray);
-    }
+    }*/
     private void SimTreeOfLife() {
-                
-        
+                        
         SimulationStateData.CritterInitData[] treeOfLifePortraitCritterInitDataArray = new SimulationStateData.CritterInitData[1];
         SimulationStateData.CritterInitData initData  = new SimulationStateData.CritterInitData();
 
-        int selectedSpeciesID = simManager.uiManager.treeOfLifeManager.selectedID;
+        int selectedSpeciesID = simManager.uiManager.selectedSpeciesID;
         if(selectedSpeciesID < 0) {
             selectedSpeciesID = 0;  // Temporary catch
         }
@@ -2886,9 +2886,45 @@ public class TheRenderKing : MonoBehaviour {
         treeOfLifePortraitCritterSimDataCBuffer.SetData(treeOfLifePortraitCritterSimDataArray);
         // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+        // Portrait Eyes:
+        if(treeOfLifePortraitEyeDataCBuffer != null) {
+            treeOfLifePortraitEyeDataCBuffer.Release();
+        }
+        treeOfLifePortraitEyeDataCBuffer = new ComputeBuffer(2, sizeof(float) * 13 + sizeof(int) * 2);
+        AgentEyeStrokeData[] singleAgentEyeStrokeArray = new AgentEyeStrokeData[treeOfLifePortraitEyeDataCBuffer.count];        
+        
+        AgentEyeStrokeData dataLeftEye = new AgentEyeStrokeData();
+        dataLeftEye.parentIndex = 0;
+        dataLeftEye.localPos = genome.bodyGenome.appearanceGenome.eyeGenome.localPos;
+        dataLeftEye.localPos.x *= -1f; // LEFT SIDE!
+        float width = 1f; // genome.bodyGenome.appearanceGenome.eyeGenome.localScale.x; // simManager.agentsArray[agentIndex].agentWidthsArray[Mathf.RoundToInt((dataLeftEye.localPos.y * 0.5f + 0.5f) * 15f)];
+        dataLeftEye.localPos.x *= width * 0.5f;
+        dataLeftEye.localDir = new Vector2(0f, 1f);
+        dataLeftEye.localScale = genome.bodyGenome.appearanceGenome.eyeGenome.localScale;
+        dataLeftEye.irisHue = genome.bodyGenome.appearanceGenome.eyeGenome.irisHue;
+        dataLeftEye.pupilHue = genome.bodyGenome.appearanceGenome.eyeGenome.pupilHue;
+        dataLeftEye.strength = 1f;
+        dataLeftEye.brushType = genome.bodyGenome.appearanceGenome.eyeGenome.eyeBrushType;
+
+        AgentEyeStrokeData dataRightEye = new AgentEyeStrokeData();
+        dataRightEye.parentIndex = 0;
+        dataRightEye.localPos = genome.bodyGenome.appearanceGenome.eyeGenome.localPos;
+        width = 1f; //genome.bodyGenome.appearanceGenome.eyeGenome.localScale.x;
+        dataRightEye.localPos.x *= width * 0.5f;
+        dataRightEye.localDir = new Vector2(0f, 1f);
+        dataRightEye.localScale = genome.bodyGenome.appearanceGenome.eyeGenome.localScale;
+        dataRightEye.irisHue = genome.bodyGenome.appearanceGenome.eyeGenome.irisHue;
+        dataRightEye.pupilHue = genome.bodyGenome.appearanceGenome.eyeGenome.pupilHue;
+        dataRightEye.strength = 1f;
+        dataRightEye.brushType = genome.bodyGenome.appearanceGenome.eyeGenome.eyeBrushType;
+            
+        singleAgentEyeStrokeArray[0] = dataLeftEye;
+        singleAgentEyeStrokeArray[1] = dataRightEye;
+        
+        treeOfLifePortraitEyeDataCBuffer.SetData(singleAgentEyeStrokeArray);
 
         // needed???
-        int kernelCSTick = computeShaderTreeOfLife.FindKernel("CSTick");        
+        /*int kernelCSTick = computeShaderTreeOfLife.FindKernel("CSTick");        
         computeShaderTreeOfLife.SetBuffer(kernelCSTick, "treeOfLifeStemSegmentDataCBuffer", treeOfLifeStemSegmentDataCBuffer);
         computeShaderTreeOfLife.SetBuffer(kernelCSTick, "treeOfLifeNodeColliderDataCBufferRead", treeOfLifeNodeColliderDataCBufferA);
         computeShaderTreeOfLife.SetBuffer(kernelCSTick, "treeOfLifeNodeColliderDataCBufferWrite", treeOfLifeNodeColliderDataCBufferB);
@@ -2932,45 +2968,7 @@ public class TheRenderKing : MonoBehaviour {
         computeShaderTreeOfLife.Dispatch(kernelCSPinRootNode, 1, 1, 1);
 
         TreeOfLifeGetColliderNodePositionData(); // timing before or after?
-
-
-        // Portrait Eyes:
-        if(treeOfLifePortraitEyeDataCBuffer != null) {
-            treeOfLifePortraitEyeDataCBuffer.Release();
-        }
-        treeOfLifePortraitEyeDataCBuffer = new ComputeBuffer(2, sizeof(float) * 13 + sizeof(int) * 2);
-        AgentEyeStrokeData[] singleAgentEyeStrokeArray = new AgentEyeStrokeData[treeOfLifePortraitEyeDataCBuffer.count];        
-        
-        AgentEyeStrokeData dataLeftEye = new AgentEyeStrokeData();
-        dataLeftEye.parentIndex = 0;
-        dataLeftEye.localPos = genome.bodyGenome.appearanceGenome.eyeGenome.localPos;
-        dataLeftEye.localPos.x *= -1f; // LEFT SIDE!
-        float width = 1f; // genome.bodyGenome.appearanceGenome.eyeGenome.localScale.x; // simManager.agentsArray[agentIndex].agentWidthsArray[Mathf.RoundToInt((dataLeftEye.localPos.y * 0.5f + 0.5f) * 15f)];
-        dataLeftEye.localPos.x *= width * 0.5f;
-        dataLeftEye.localDir = new Vector2(0f, 1f);
-        dataLeftEye.localScale = genome.bodyGenome.appearanceGenome.eyeGenome.localScale;
-        dataLeftEye.irisHue = genome.bodyGenome.appearanceGenome.eyeGenome.irisHue;
-        dataLeftEye.pupilHue = genome.bodyGenome.appearanceGenome.eyeGenome.pupilHue;
-        dataLeftEye.strength = 1f;
-        dataLeftEye.brushType = genome.bodyGenome.appearanceGenome.eyeGenome.eyeBrushType;
-
-        AgentEyeStrokeData dataRightEye = new AgentEyeStrokeData();
-        dataRightEye.parentIndex = 0;
-        dataRightEye.localPos = genome.bodyGenome.appearanceGenome.eyeGenome.localPos;
-        width = 1f; //genome.bodyGenome.appearanceGenome.eyeGenome.localScale.x;
-        dataRightEye.localPos.x *= width * 0.5f;
-        dataRightEye.localDir = new Vector2(0f, 1f);
-        dataRightEye.localScale = genome.bodyGenome.appearanceGenome.eyeGenome.localScale;
-        dataRightEye.irisHue = genome.bodyGenome.appearanceGenome.eyeGenome.irisHue;
-        dataRightEye.pupilHue = genome.bodyGenome.appearanceGenome.eyeGenome.pupilHue;
-        dataRightEye.strength = 1f;
-        dataRightEye.brushType = genome.bodyGenome.appearanceGenome.eyeGenome.eyeBrushType;
-            
-        singleAgentEyeStrokeArray[0] = dataLeftEye;
-        singleAgentEyeStrokeArray[1] = dataRightEye;
-        
-        treeOfLifePortraitEyeDataCBuffer.SetData(singleAgentEyeStrokeArray);
-        
+        */
         
     }
     /*private void UpdateAgentHighlightData() {
@@ -3013,12 +3011,12 @@ public class TheRenderKing : MonoBehaviour {
 
         SimTreeOfLife(); // issues with this being on FixedUpdate() cycle vs Update() ?? ***
 
-        SimTreeOfLifeWorldStatsData(simManager.uiManager.tolTextureWorldStats, simManager.uiManager.tolTextureWorldStatsKey);
+        //SimTreeOfLifeWorldStatsData(simManager.uiManager.textureWorldStats, simManager.uiManager.textureWorldStatsKey);
         //Debug.Log("size: " + simManager.uiManager.tolSelectedSpeciesStatsIndex.ToString());
-        Texture2D graphTex = simManager.uiManager.statsTreeOfLifeSpeciesTexArray[simManager.uiManager.tolSelectedSpeciesStatsIndex];
-        float maxVal = simManager.uiManager.maxValuesStatArray[simManager.uiManager.tolSelectedSpeciesStatsIndex];
+        Texture2D graphTex = simManager.uiManager.statsTreeOfLifeSpeciesTexArray[simManager.uiManager.selectedSpeciesStatsIndex];
+        float maxVal = simManager.uiManager.maxValuesStatArray[simManager.uiManager.selectedSpeciesStatsIndex];
         
-        SimTreeOfLifeSpeciesTreeData(graphTex, maxVal); // update this?
+        //SimTreeOfLifeSpeciesTreeData(graphTex, maxVal); // update this?
                 
         //UpdateAgentHighlightData();
 
@@ -3140,7 +3138,7 @@ public class TheRenderKing : MonoBehaviour {
         // TREE OF LIFE:
 
         //graphs mouse coords:
-        if(simManager.uiManager.tolMouseOver > 0.5f) {
+        /*if(simManager.uiManager.tolMouseOver > 0.5f) {
             Vector2 localPoint = Vector2.zero;
             RectTransform rectTransform = simManager.uiManager.imageTolSpeciesTreeRender.gameObject.GetComponent<RectTransform>();
             RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, Input.mousePosition, null, out localPoint);
@@ -3151,22 +3149,14 @@ public class TheRenderKing : MonoBehaviour {
             simManager.uiManager.UpdateTolGraphCursorTimeSelectUI(uvCoord);
 
             simManager.uiManager.HoverOverTolGraphRenderPanel();
-            /*
-            simManager.uiManager.textTolSpeciesStatsValue.gameObject.SetActive(true);
-            simManager.uiManager.textTolWorldStatsValue.gameObject.SetActive(true);
-            simManager.uiManager.textTolEventsTimelineName.gameObject.SetActive(true);
-            */
+            
         }
         else {
-            /*
-            simManager.uiManager.textTolSpeciesStatsValue.gameObject.SetActive(false);
-            simManager.uiManager.textTolWorldStatsValue.gameObject.SetActive(false);
-            simManager.uiManager.textTolEventsTimelineName.gameObject.SetActive(false);
-            */
-        }
+            
+        }*/
         
         // TREE OF LIFE STUFFS:::
-
+        /*
         cmdBufferTreeOfLifeSpeciesTree.Clear();
         cmdBufferTreeOfLifeSpeciesTree.SetRenderTarget(treeOfLifeSpeciesTreeRenderCamera.targetTexture); // needed???
         cmdBufferTreeOfLifeSpeciesTree.ClearRenderTarget(true, true, new Color(0f,0f,0f,0f), 1.0f);  // clear -- needed???
@@ -3205,7 +3195,7 @@ public class TheRenderKing : MonoBehaviour {
         
         // World Stats graph lines:
         treeOfLifeWorldStatsMat.SetPass(0);
-        treeOfLifeWorldStatsMat.SetTexture("_KeyTex", simManager.uiManager.tolTextureWorldStatsKey);
+        treeOfLifeWorldStatsMat.SetTexture("_KeyTex", simManager.uiManager.textureWorldStatsKey);
         treeOfLifeWorldStatsMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         treeOfLifeWorldStatsMat.SetFloat("_GraphCoordStatsStart", simManager.uiManager.tolGraphCoordsStatsStart);
         treeOfLifeWorldStatsMat.SetBuffer("treeOfLifeWorldStatsValuesCBuffer", treeOfLifeWorldStatsValuesCBuffer);
@@ -3254,7 +3244,7 @@ public class TheRenderKing : MonoBehaviour {
 
         Graphics.ExecuteCommandBuffer(cmdBufferTreeOfLifeSpeciesTree);
         treeOfLifeSpeciesTreeRenderCamera.Render();
-
+        */
 
 
 
@@ -3409,8 +3399,8 @@ public class TheRenderKing : MonoBehaviour {
         //Debug.Log("UPDATE STEM SEGMENTS: " + newSpeciesID.ToString() + ", depth: " + newSpecies.depthLevel.ToString());
     }
     public void TreeOfLifeGetColliderNodePositionData() {
-        //treeOfLifeNodeColliderDataCBufferA.GetData(treeOfLifeNodeColliderDataArray);
-        simManager.uiManager.treeOfLifeManager.UpdateNodePositionsFromGPU(simManager.uiManager.cameraManager, treeOfLifeSpeciesDataHeadPosArray);     // **** Need to cap this at 32 or it breaks!!!  
+        
+        //simManager.uiManager.treeOfLifeManager.UpdateNodePositionsFromGPU(simManager.uiManager.cameraManager, treeOfLifeSpeciesDataHeadPosArray);     // **** Need to cap this at 32 or it breaks!!!  
         
     }
     /*private void Render() {

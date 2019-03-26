@@ -54,8 +54,8 @@ public class MasterGenomePool {
         currentlyActiveSpeciesIDList.Add(1);
         completeSpeciesPoolsList.Add(firstSpecies);
         
-        uiManagerRef.treeOfLifeManager = new TreeOfLifeManager(uiManagerRef.treeOfLifeAnchorGO, uiManagerRef);
-        uiManagerRef.treeOfLifeManager.FirstTimeInitialize(this);
+        //uiManagerRef.treeOfLifeManager = new TreeOfLifeManager(uiManagerRef.treeOfLifeAnchorGO, uiManagerRef);
+        //uiManagerRef.treeOfLifeManager.FirstTimeInitialize(this);
 
         //yield return null;
     }
@@ -127,8 +127,8 @@ public class MasterGenomePool {
         completeSpeciesPoolsList[speciesID].ProcessExtinction(simManagerRef.simAgeTimeSteps);
 
         //Signal RenderKing/TreeOfLifeManager to update:
-        simManagerRef.uiManager.treeOfLifeManager.RemoveExtinctSpecies(speciesID);
-        simManagerRef.theRenderKing.TreeOfLifeExtinctSpecies(speciesID);
+        //simManagerRef.uiManager.treeOfLifeManager.RemoveExtinctSpecies(speciesID);
+        //simManagerRef.theRenderKing.TreeOfLifeExtinctSpecies(speciesID);
     }
 
     public SpeciesGenomePool SelectNewGenomeSourceSpecies(bool weighted, float weightedAmount) {

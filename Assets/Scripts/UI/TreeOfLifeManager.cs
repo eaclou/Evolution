@@ -81,9 +81,9 @@ public class TreeOfLifeManager {
         
     }
 
-    public void ClickedOnSpeciesNode(int speciesID) {
+    /*public void ClickedOnSpeciesNode(int speciesID) {
         selectedID = speciesID;
-    }
+    }*/
     public void HoverOverSpeciesNode(int speciesID) {
         Debug.Log("HoverOverSpeciesNode [" + speciesID.ToString() + "]");
         hoverID = speciesID;

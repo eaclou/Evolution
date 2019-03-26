@@ -20,28 +20,27 @@ public class SimEventComponent : MonoBehaviour {
         textEventName.text = data.name;
         textEventCost.text = "$" + data.cost.ToString();
 
-        // set background color?
+        /*// set background color?
         Color bgColor = uiManager.buttonEventMinorColor;
         if(data.category == SimEventData.SimEventCategories.Major) {
             bgColor = uiManager.buttonEventMajorColor;
         }
         if(data.category == SimEventData.SimEventCategories.Extreme) {
             bgColor = uiManager.buttonEventExtremeColor;
-        }
+        }*/
 
         if(isSelected) {
-            bgColor *= 2f;
+            //bgColor *= 2f;
             //imageBG.color = new Color(0.6f, 0.6f, 0.6f);
         }
         //else {
         //    imageBG.color = new Color(0.3f, 0.3f, 0.3f);
         //}
-        imageBG.color = bgColor;
+        //imageBG.color = bgColor;
     }
 
     public void ClickedOnThisEvent() {
-        uiManagerRef.ClickedOnEvent(this);
-        //imageBG.color = new Color(0.6f, 0.6f, 0.6f);
-        //Debug.Log("ClickedOnThisEvent()");
+        //uiManagerRef.ClickedOnEvent(this);
+        
     }
 }
