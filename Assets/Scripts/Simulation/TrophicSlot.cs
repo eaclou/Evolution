@@ -21,7 +21,8 @@ public class TrophicSlot {
         status = SlotStatus.Off;  // default off (hidden)
     }
 
-    public void Initialize(SlotStatus status, int kingdomID, int tierID, int slotID) {
+    public void Initialize(string name, SlotStatus status, int kingdomID, int tierID, int slotID) {
+        speciesName = name;
         this.status = status;
         this.kingdomID = kingdomID;
         this.tierID = tierID;
