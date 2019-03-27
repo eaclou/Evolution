@@ -175,6 +175,9 @@ public class UIManager : MonoBehaviour {
     //public Vector2[] tolWorldStatsValueRangesKeyArray;
     //public int tolSelectedWorldStatsIndex = 0;
     //public int tolSelectedSpeciesStatsIndex = 0;
+    public Sprite spriteAlgaePortrait;
+    public Sprite spriteDecomposerPortrait;
+    public Sprite spriteZooplanktonPortrait;
 
 
     public bool isActiveInspectPanel = false;
@@ -943,7 +946,7 @@ public class UIManager : MonoBehaviour {
                         //toolbarInfluencePoints = Mathf.Clamp01(toolbarInfluencePoints);
 
                         float mag = smoothedMouseVel.magnitude;
-                        float radiusMult = (0.75f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.5f);
+                        float radiusMult = 1f; // (1f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.5f);
 
                         if(mag > 0f) {
                             gameManager.simulationManager.PlayerToolStirOn(curMousePositionOnWaterPlane, smoothedMouseVel * (0.75f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.25f), radiusMult);
@@ -957,7 +960,7 @@ public class UIManager : MonoBehaviour {
                     }
                     
                     gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_IsStirring", isActing);
-                    gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_Radius", 8f);  // **** Make radius variable! (possibly texture based?)
+                    gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_Radius", 4f);  // **** Make radius variable! (possibly texture based?)
                 }
 
                 gameManager.theRenderKing.nutrientToolOn = false;
@@ -1223,62 +1226,67 @@ public class UIManager : MonoBehaviour {
                 textToolbarWingSpeciesSummary.gameObject.SetActive(true);
 
                 textSelectedSpeciesTitle.text = layerManager.selectedTrophicSlotRef.speciesName;
-                
+
+                textToolbarWingSpeciesSummary.text = layerManager.GetSpeciesPreviewDescriptionString();
 
                 //Debug.Log("layerManager.selectedTrophicSlotRef.status: " + layerManager.selectedTrophicSlotRef.status.ToString());
                 if(layerManager.selectedTrophicSlotRef.status == TrophicSlot.SlotStatus.Empty) {
                     buttonToolbarWingCreateSpecies.gameObject.SetActive(true);
-
+                    
                     buttonToolbarWingDeleteSpecies.gameObject.SetActive(false);
                     buttonToolbarWingStats.gameObject.SetActive(false);   
                     buttonToolbarWingMutation.gameObject.SetActive(false);
-                    textToolbarWingSpeciesSummary.text = "huh? " + layerManager.selectedTrophicSlotRef.kingdomID;
+
+                    //textSelectedSpeciesTitle.text = "Algae (Empty)";
+                    //textToolbarWingSpeciesSummary.text = "huh? " + layerManager.selectedTrophicSlotRef.kingdomID;
                 }
                 else {
                     buttonToolbarWingCreateSpecies.gameObject.SetActive(false);
                     buttonToolbarWingDeleteSpecies.gameObject.SetActive(true); 
-                    textToolbarWingSpeciesSummary.text = "This species has a description and it is this";
+                    //textToolbarWingSpeciesSummary.text = "This species has a description and it is this";
 
-                    if (layerManager.selectedTrophicSlotRef.kingdomID == 2 && layerManager.selectedTrophicSlotRef.tierID == 1) {
-                        buttonToolbarWingStats.gameObject.SetActive(true);   
-                        buttonToolbarWingMutation.gameObject.SetActive(true);
-
-                        if(isToolbarWingStatsOn) {
-                            panelToolbarWingStats.SetActive(true);
-                            textToolbarWingSpeciesSummary.gameObject.SetActive(false);
-                        }
-                        if(isToolbarWingMutationOn) {
-                            panelToolbarWingMutation.SetActive(true);
-                            textToolbarWingSpeciesSummary.gameObject.SetActive(false);
-                        }
+                    if (layerManager.selectedTrophicSlotRef.kingdomID == 0) {
+                        imageToolbarSpeciesPortraitRender.sprite = spriteDecomposerPortrait;
+                    }
+                    else if (layerManager.selectedTrophicSlotRef.kingdomID == 1) {
+                        imageToolbarSpeciesPortraitRender.sprite = spriteAlgaePortrait;
                     }
                     else {
-                        buttonToolbarWingStats.gameObject.SetActive(false);   
-                        buttonToolbarWingMutation.gameObject.SetActive(false);
-                        panelToolbarWingStats.SetActive(false);
-                        panelToolbarWingMutation.SetActive(false);
 
-                        
+                        if (layerManager.selectedTrophicSlotRef.tierID == 1) {
+                            buttonToolbarWingStats.gameObject.SetActive(true);   
+                            buttonToolbarWingMutation.gameObject.SetActive(true);
+
+                            if(isToolbarWingStatsOn) {
+                                panelToolbarWingStats.SetActive(true);
+                                textToolbarWingSpeciesSummary.gameObject.SetActive(false);
+                            }
+                            if(isToolbarWingMutationOn) {
+                                panelToolbarWingMutation.SetActive(true);
+                                textToolbarWingSpeciesSummary.gameObject.SetActive(false);
+                            }
+                        }
+                        else {   // ZOOPLANKTON
+                            buttonToolbarWingStats.gameObject.SetActive(false);   
+                            buttonToolbarWingMutation.gameObject.SetActive(false);
+                            panelToolbarWingStats.SetActive(false);
+                            panelToolbarWingMutation.SetActive(false);
+
+                            imageToolbarSpeciesPortraitRender.sprite = spriteZooplanktonPortrait;
+
+                            // TEMP!!!
+                            buttonToolbarWingDeleteSpecies.gameObject.SetActive(false); // **** only while deleting algae is unsupported
+                        }
                     }
+
+                    
                     
                     
                     if(isToolbarDeletePromptOn) {
                         panelToolbarWingDeletePrompt.SetActive(true);
                         textToolbarWingSpeciesSummary.gameObject.SetActive(false);
                     }
-                }
-                
-
-                /*
-                public GameObject panelToolbarWing;
-    public GameObject panelToolbarWingStats;
-    public GameObject panelToolbarWingMutation;
-    public GameObject panelToolbarWingDeletePrompt;
-    public Button buttonToolbarWingDeleteSpecies;
-    public Button buttonToolbarWingStats;
-    public Button buttonToolbarWingMutation;
-    public Button buttonToolbarWingCreateSpecies;
-            */
+                }                
             }
         }
         else {

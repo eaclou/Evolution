@@ -121,6 +121,27 @@ public class TrophicLayersManager {
             }
         }
     }
+
+    public string GetSpeciesPreviewDescriptionString() {
+        string str = "";
+
+        if(selectedTrophicSlotRef.kingdomID == 0) {
+            str = "Bacterial and fungal organisms that recycle vital nutrients.\n\nUses: Waste, Oxygen\n\nProduces: Nutrients";
+        }
+        else if(selectedTrophicSlotRef.kingdomID == 1) {
+            str = "Tiny plants that form the foundation of the ecosystem.\n\nUses: Nutrients\n\nProduces: Oxygen";
+        }
+        else {
+            if(selectedTrophicSlotRef.tierID == 0) {
+                str = "Tiny animals that feed on Algae.\n\nUses: Oxygen\n\nProduces: Waste";
+            }
+            else {
+                str = "animals";
+            }            
+        }
+
+        return str;
+    }
     
     /*public void ResetSelectedAgentSlots() {
         for(int i = 0; i < 4; i++) {  // if others were selected: revert to on:
