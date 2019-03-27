@@ -537,6 +537,9 @@ public class SimulationManager : MonoBehaviour {
         agentRespawnCounter++;
         masterGenomePool.Tick(); // keep track of when species created so can't create multiple per frame?
 
+        trophicLayersManager.Tick(this);
+
+
         // Go through each Trophic Layer:
             // Measure resources used/produced
             // send current data to GPU

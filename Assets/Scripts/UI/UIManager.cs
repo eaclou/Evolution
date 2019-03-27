@@ -164,7 +164,7 @@ public class UIManager : MonoBehaviour {
     public Button buttonToolbarWingStats;
     public Button buttonToolbarWingMutation;
     public Button buttonToolbarWingCreateSpecies;
-    //public Button buttonToolbarWingClose;
+    public Text textToolbarWingSpeciesSummary;
     public Text textSelectedSpeciesTitle;
     public Text textSelectedSpeciesIndex;
     public Image imageToolbarSpeciesPortraitRender;
@@ -173,8 +173,8 @@ public class UIManager : MonoBehaviour {
     //public Texture2D textureWorldStats;
     //public Texture2D textureWorldStatsKey;
     //public Vector2[] tolWorldStatsValueRangesKeyArray;
-    public int tolSelectedWorldStatsIndex = 0;
-    public int tolSelectedSpeciesStatsIndex = 0;
+    //public int tolSelectedWorldStatsIndex = 0;
+    //public int tolSelectedSpeciesStatsIndex = 0;
 
 
     public bool isActiveInspectPanel = false;
@@ -1220,8 +1220,10 @@ public class UIManager : MonoBehaviour {
                 panelToolbarWingStats.SetActive(false);
                 panelToolbarWingMutation.SetActive(false);
                 panelToolbarWingDeletePrompt.SetActive(false);
+                textToolbarWingSpeciesSummary.gameObject.SetActive(true);
 
                 textSelectedSpeciesTitle.text = layerManager.selectedTrophicSlotRef.speciesName;
+                
 
                 //Debug.Log("layerManager.selectedTrophicSlotRef.status: " + layerManager.selectedTrophicSlotRef.status.ToString());
                 if(layerManager.selectedTrophicSlotRef.status == TrophicSlot.SlotStatus.Empty) {
@@ -1230,11 +1232,12 @@ public class UIManager : MonoBehaviour {
                     buttonToolbarWingDeleteSpecies.gameObject.SetActive(false);
                     buttonToolbarWingStats.gameObject.SetActive(false);   
                     buttonToolbarWingMutation.gameObject.SetActive(false);
-
+                    textToolbarWingSpeciesSummary.text = "huh? " + layerManager.selectedTrophicSlotRef.kingdomID;
                 }
                 else {
                     buttonToolbarWingCreateSpecies.gameObject.SetActive(false);
-                    buttonToolbarWingDeleteSpecies.gameObject.SetActive(true);                    
+                    buttonToolbarWingDeleteSpecies.gameObject.SetActive(true); 
+                    textToolbarWingSpeciesSummary.text = "This species has a description and it is this";
 
                     if (layerManager.selectedTrophicSlotRef.kingdomID == 2 && layerManager.selectedTrophicSlotRef.tierID == 1) {
                         buttonToolbarWingStats.gameObject.SetActive(true);   
@@ -1242,9 +1245,11 @@ public class UIManager : MonoBehaviour {
 
                         if(isToolbarWingStatsOn) {
                             panelToolbarWingStats.SetActive(true);
+                            textToolbarWingSpeciesSummary.gameObject.SetActive(false);
                         }
                         if(isToolbarWingMutationOn) {
                             panelToolbarWingMutation.SetActive(true);
+                            textToolbarWingSpeciesSummary.gameObject.SetActive(false);
                         }
                     }
                     else {
@@ -1252,11 +1257,14 @@ public class UIManager : MonoBehaviour {
                         buttonToolbarWingMutation.gameObject.SetActive(false);
                         panelToolbarWingStats.SetActive(false);
                         panelToolbarWingMutation.SetActive(false);
+
+                        
                     }
                     
                     
                     if(isToolbarDeletePromptOn) {
                         panelToolbarWingDeletePrompt.SetActive(true);
+                        textToolbarWingSpeciesSummary.gameObject.SetActive(false);
                     }
                 }
                 
@@ -2174,7 +2182,7 @@ public class UIManager : MonoBehaviour {
         
 
         
-        /*TrophicSlot slot = gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef;
+        TrophicSlot slot = gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef;
         //Debug.Log("RemoveSpeciesSlot( " + slot.slotID.ToString() + " ), k= " + slot.slotID.ToString());
 
         if(slot.kingdomID == 0) {
@@ -2199,13 +2207,13 @@ public class UIManager : MonoBehaviour {
         }
 
         slot.status = TrophicSlot.SlotStatus.Empty;
-        gameManager.simulationManager.trophicLayersManager.selectedTrophicSlot = false;
+        gameManager.simulationManager.trophicLayersManager.isSelectedTrophicSlot = false;
 
-        pressedRemoveSpecies = false;
-        buttonToolbarRemoveDecomposer.gameObject.SetActive(false);
-        buttonToolbarRemovePlant.gameObject.SetActive(false);
-        buttonToolbarRemoveAnimal.gameObject.SetActive(false);
-*/
+        //pressedRemoveSpecies = false;
+        //buttonToolbarRemoveDecomposer.gameObject.SetActive(false);
+        //buttonToolbarRemovePlant.gameObject.SetActive(false);
+        //buttonToolbarRemoveAnimal.gameObject.SetActive(false);
+
 
         // REMOVE!!!
         // which slot was deleted? selectedID
@@ -2658,10 +2666,13 @@ public class UIManager : MonoBehaviour {
         isToolbarWingStatsOn = false;        
     }
     public void ClickToolbarWingDeleteCancel() {
-
+        isToolbarDeletePromptOn = false;
+        // or summary?
     }
     public void ClickToolbarWingDeleteConfirm() {
+        isToolbarDeletePromptOn = false;
 
+        RemoveSpeciesSlot();
     }
 
     public void ClickButtonQuit() {

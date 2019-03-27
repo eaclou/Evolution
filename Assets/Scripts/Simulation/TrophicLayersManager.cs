@@ -97,6 +97,30 @@ public class TrophicLayersManager {
             }
         }
     }
+
+    public void Tick(SimulationManager simManager) {
+        //check for unlocks:
+        if(kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
+            if(simManager.simResourceManager.curGlobalAlgaeParticles > 100f) {
+                kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.Empty;
+                Debug.Log("DECOMPOSERS UNLOCKED!!!");
+            }
+        }
+        
+        if(kingdomAnimals.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
+            if(simManager.simResourceManager.curGlobalOxygen > 500f) {
+                kingdomAnimals.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.Empty;
+                Debug.Log("ZOOPLANKTON UNLOCKED!!!");
+            }
+        }
+
+        if(kingdomAnimals.trophicTiersList[1].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
+            if(simManager.simResourceManager.curGlobalAnimalParticles > 15f) {
+                kingdomAnimals.trophicTiersList[1].trophicSlots[0].status = TrophicSlot.SlotStatus.Empty;
+                Debug.Log("CREATURES UNLOCKED!!!");
+            }
+        }
+    }
     
     /*public void ResetSelectedAgentSlots() {
         for(int i = 0; i < 4; i++) {  // if others were selected: revert to on:
