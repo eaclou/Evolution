@@ -61,7 +61,7 @@ public class Agent : MonoBehaviour {
         }
     }*/
     public int maxAgeTimeSteps = 10000;
-    private int decayDurationTimeSteps = 1600;
+    private int decayDurationTimeSteps = 480;
     public int _DecayDurationTimeSteps
     {
         get
@@ -1337,7 +1337,7 @@ public class Agent : MonoBehaviour {
     
     public void ReconstructAgentGameObjects(SettingsManager settings, AgentGenome genome, EggSack parentEggSack, Vector3 startPos, bool isImmaculate) {
         float corpseLerp = (float)settings.curTierFoodCorpse / 10f;
-        decayDurationTimeSteps = Mathf.RoundToInt(Mathf.Lerp(360f, 3600f, corpseLerp));
+        decayDurationTimeSteps = 480; // Mathf.RoundToInt(Mathf.Lerp(360f, 3600f, corpseLerp));
         float eggLerp = (float)settings.curTierFoodEgg / 10f;
         gestationDurationTimeSteps = Mathf.RoundToInt(Mathf.Lerp(360f, 1080f, eggLerp));
         pregnancyRefactoryDuration = Mathf.RoundToInt(Mathf.Lerp(3600f, 800f, eggLerp));

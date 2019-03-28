@@ -1239,6 +1239,8 @@ public class UIManager : MonoBehaviour {
                             buttonToolbarWingStats.gameObject.SetActive(true);   
                             buttonToolbarWingMutation.gameObject.SetActive(true);
 
+                            imageToolbarSpeciesPortraitRender.sprite = null;
+
                             if(isToolbarWingStatsOn) {
                                 panelToolbarWingStats.SetActive(true);
                                 textToolbarWingSpeciesSummary.gameObject.SetActive(false);
@@ -1260,8 +1262,7 @@ public class UIManager : MonoBehaviour {
                             buttonToolbarWingDeleteSpecies.gameObject.SetActive(false); // **** only while deleting algae is unsupported
                         }
                     }
-
-                    
+                                        
                     
                     
                     if(isToolbarDeletePromptOn) {
@@ -1838,7 +1839,7 @@ public class UIManager : MonoBehaviour {
         descriptionText += "Avg Neuron Count: <b>" + selectedPool.avgNumNeurons.ToString("F0") + "</b>\n";
         descriptionText += "Avg Axon Count: <b>" + selectedPool.avgNumAxons.ToString("F0") + "</b>\n\n";
 
-        descriptionText += "Avg Nutrients Consumed: <b>" + selectedPool.avgConsumptionDecay.ToString("F3") + "</b>\n";
+        //descriptionText += "Avg Nutrients Consumed: <b>" + selectedPool.avgConsumptionDecay.ToString("F3") + "</b>\n";
         descriptionText += "Avg Algae Consumed: <b>" + selectedPool.avgConsumptionPlant.ToString("F3") + "</b>\n";
         descriptionText += "Avg Meat Consumed: <b>" + selectedPool.avgConsumptionMeat.ToString("F3") + "</b>\n\n";        
         /*
@@ -1855,7 +1856,7 @@ public class UIManager : MonoBehaviour {
         descriptionText += "Avg Damage Taken: <b>" + selectedPool.avgDamageTaken.ToString("F4") + "</b>\n";
         descriptionText += "Avg Experience Earned: <b>" + selectedPool.avgExperience.ToString("F1") + "</b>\n";
         */
-        descriptionText += "Avg Fitness Score: <b>" + selectedPool.avgFitnessScore.ToString("F1") + "</b>\n\n";
+        //descriptionText += "Avg Fitness Score: <b>" + selectedPool.avgFitnessScore.ToString("F1") + "</b>\n\n";
 
         textSelectedSpeciesDescription.text = descriptionText;
 
@@ -1922,12 +1923,12 @@ public class UIManager : MonoBehaviour {
         //textTolSpeciesStatsValue.text = curSpeciesStatValue.ToString();
         UpdateTolSpeciesStatsTextReadout();
     }
-    private void UpdateSelectedSpeciesColorUI() {
+    private void UpdateSelectedSpeciesColorUI() { // ** should be called AFTER new species actually created?? something is fucked here
         Debug.Log("UpdateTolSpeciesColorUI " + selectedSpeciesID.ToString());
         
-        Vector3 speciesHuePrimary = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesID].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
-        Vector3 speciesHueSecondary = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesID].representativeGenome.bodyGenome.appearanceGenome.hueSecondary;
-        imageToolbarSpeciesPortraitRender.color = new Color(speciesHueSecondary.x, speciesHueSecondary.y, speciesHueSecondary.z);
+        //Vector3 speciesHuePrimary = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesID].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
+        //Vector3 speciesHueSecondary = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesID].representativeGenome.bodyGenome.appearanceGenome.hueSecondary;
+        //imageToolbarSpeciesPortraitRender.color = new Color(speciesHueSecondary.x, speciesHueSecondary.y, speciesHueSecondary.z);
         //imageTolSpeciesIndex.color = new Color(speciesHueSecondary.x, speciesHueSecondary.y, speciesHueSecondary.z);
         //imageTolSpeciesNameBackdrop.color = new Color(speciesHuePrimary.x, speciesHuePrimary.y, speciesHuePrimary.z);
         //imageTolSpeciesReadoutBackdrop.color = new Color(speciesHuePrimary.x, speciesHuePrimary.y, speciesHuePrimary.z);
@@ -2188,9 +2189,7 @@ public class UIManager : MonoBehaviour {
     #region UTILITY & EVENT FUNCTIONS
 
     private void RemoveSpeciesSlot() {
-        
-
-        
+                
         TrophicSlot slot = gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef;
         //Debug.Log("RemoveSpeciesSlot( " + slot.slotID.ToString() + " ), k= " + slot.slotID.ToString());
 
@@ -2222,8 +2221,7 @@ public class UIManager : MonoBehaviour {
         //buttonToolbarRemoveDecomposer.gameObject.SetActive(false);
         //buttonToolbarRemovePlant.gameObject.SetActive(false);
         //buttonToolbarRemoveAnimal.gameObject.SetActive(false);
-
-
+        
         // REMOVE!!!
         // which slot was deleted? selectedID
         //layerManager.selectedTrophicSlotRef.kingdomID;
@@ -2232,12 +2230,9 @@ public class UIManager : MonoBehaviour {
         //deselect
         //SetToolbarButtonStateUI()
         //buttonToolbarRemoveAnimal.gameObject.SetActive(false);
-
-        
+                
         //gameManager.simulationManager.trophicLayersManager.ResetSelectedAgentSlots();
-                        
-
-        
+          
     }
 
     public void StopFollowing() {
@@ -2601,44 +2596,12 @@ public class UIManager : MonoBehaviour {
         gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = slot;
         isToolbarWingOn = true;
 
-        if (gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[index].status == TrophicSlot.SlotStatus.On) {
-                                   
-            /*
-            gameManager.simulationManager.trophicLayersManager.selectedTrophicSlot = true;            
-            gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[index];
-            if(index == 0) {
-                buttonSelectedTrophicSlot = buttonToolbarAnimal1;
-            }
-            else if(index == 1) {
-                buttonSelectedTrophicSlot = buttonToolbarAnimal2;
-            }
-            else if(index == 2) {
-                buttonSelectedTrophicSlot = buttonToolbarAnimal3;
-            }
-            else {
-                buttonSelectedTrophicSlot = buttonToolbarAnimal4;
-            }
-            */
-        }
-        else {
-            
-            /*gameManager.simulationManager.trophicLayersManager.PendingAgents(index);
-            if(index == 0) {
-                buttonPendingTrophicSlot = buttonToolbarAnimal1;
-            }
-            else if(index == 1) {
-                buttonPendingTrophicSlot = buttonToolbarAnimal2;
-            }
-            else if(index == 2) {
-                buttonPendingTrophicSlot = buttonToolbarAnimal3;
-            }
-            else {
-                buttonPendingTrophicSlot = buttonToolbarAnimal4;
-            }*/
-              
-        }
+        selectedSpeciesID = slot.linkedSpeciesID;
+
         curActiveTool = ToolType.None;
-        
+
+        UpdateSelectedSpeciesColorUI(); // ***
+        // Why do I have to click this twice before portrait shows up properly??????
     }
 
     public void ClickToolbarRemoveSpeciesSlot() {
@@ -2658,6 +2621,20 @@ public class UIManager : MonoBehaviour {
     }
     public void ClickToolbarCreateNewSpecies() {
         gameManager.simulationManager.trophicLayersManager.CreateTrophicSlotSpecies(gameManager.simulationManager, cameraManager.curCameraFocusPivotPos, gameManager.simulationManager.simAgeTimeSteps);
+                
+        gameManager.theRenderKing.baronVonWater.StartCursorClick(cameraManager.curCameraFocusPivotPos);
+        
+        if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2) {
+            if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 1) {
+                //if(createSpecies) {
+                gameManager.simulationManager.CreateAgentSpecies(new Vector3(curMousePositionOnWaterPlane.x, curMousePositionOnWaterPlane.y, 0f));
+                gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.slotID].linkedSpeciesID = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList.Count - 1].speciesID;
+                //}
+                                
+            }
+        }
+
+        //UpdateSelectedSpeciesColorUI();
     }
     public void ClickToolbarWingStats() {
         isToolbarWingStatsOn = true;

@@ -10,7 +10,7 @@
 	{
 		Tags{ "RenderType" = "Transparent" }
 		ZWrite Off
-		//Cull Off
+		Cull Off
 		Blend SrcAlpha OneMinusSrcAlpha
 
 		Pass
@@ -71,7 +71,7 @@
 				float3 worldBitangent = cross(worldNormal, worldTangent);
 				
 				float3 quadVertexOffset = quadVerticesCBuffer[id].x * worldBitangent * genericStrokeData.scale.x + quadVerticesCBuffer[id].y * worldTangent * genericStrokeData.scale.y;
-				quadVertexOffset *= (1 - critterSimData.decayPercentage) * 1;
+				//quadVertexOffset *= (1 - critterSimData.decayPercentage) * 1;
 				// old //float3 vertexWorldPos = critterWorldPos + strokeBindPos + quadVerticesCBuffer[id] * 0.645 * length(genericStrokeData.scale);
 				float3 vertexWorldPos = genericStrokeData.worldPos + quadVertexOffset * 1.25 * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage) * 1;
 
@@ -92,6 +92,8 @@
 				//vertexWorldPos = genericStrokeData.worldPos + quadVerticesCBuffer[id] * 0.15;
 				// %^$*%^*$^&*$^&*$&*$^7
 
+				//float3 testPos = quadVerticesCBuffer[id].x * float3(1,0,0) * genericStrokeData.scale.x + quadVerticesCBuffer[id].y * float3(0,1,0) * genericStrokeData.scale.y;
+				//o.vertex = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(testPos * 0.2 + genericStrokeData.worldPos * 1, 1.0)));
 				o.vertex = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(vertexWorldPos, 1.0)));
 				o.uv = quadVerticesCBuffer[id].xy + 0.5;	
 
@@ -119,7 +121,7 @@
 				
 				o.color.a *= alpha;
 
-				
+				//o.worldPos = float4(quadVerticesCBuffer[id].xyz, 1.0);
 				o.worldPos = float4(vertexWorldPos, 1.0);
 				//o.color.rgb = ;
 				//o.color.rgb *= 0.4;
@@ -132,6 +134,7 @@
 			
 			fixed4 frag (v2f i) : SV_Target
 			{
+				//return float4(1,0.75,0.5,1);
 				//return i.color;
 				// sample the texture
 				float3 waterFogColor = float3(0.03,0.4,0.3) * 0.4;
