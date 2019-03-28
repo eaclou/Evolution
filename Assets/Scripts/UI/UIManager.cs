@@ -155,6 +155,10 @@ public class UIManager : MonoBehaviour {
     public Button buttonToolbarAnimal2;
     public Button buttonToolbarAnimal3;
     public Button buttonToolbarAnimal4;
+    //
+    public Sprite spriteSpeciesSlotRing;
+    public Sprite spriteSpeciesSlotFull;
+    public Sprite spriteSpeciesSlotSelected;
     // // WING:::::
     public GameObject panelToolbarWing;
     public GameObject panelToolbarWingStats;
@@ -1133,90 +1137,66 @@ public class UIManager : MonoBehaviour {
                 buttonToolbarNutrients.interactable = false;
                 buttonToolbarRemove.interactable = false;
             }
-        
-            // KINGDOM DECOMPOSERS:
-            SetToolbarButtonStateUI(ref buttonToolbarDecomposers, layerManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status);
-            /*if (layerManager.GetDecomposersOnOff()) {
-                SetToolbarButtonStateUI(ref buttonToolbarDecomposers, TrophicSlot.SlotStatus.On);
-            }
-            else {
-            
-                bool unlocked = true;
-                
-                if(!layerManager.GetAlgaeOnOff()) {
-                    unlocked = false;
-                }
 
-                if(unlocked) {
-                    SetToolbarButtonStateUI(ref buttonToolbarDecomposers, TrophicSlot.SlotStatus.Empty);                
+            // KINGDOM DECOMPOSERS:
+            bool isSelected = false;
+            
+            if(layerManager.isSelectedTrophicSlot) {
+                if(layerManager.selectedTrophicSlotRef.kingdomID == 0 && layerManager.selectedTrophicSlotRef.tierID == 0) {
+                    isSelected = true; 
                 }
-                else {
-                    SetToolbarButtonStateUI(ref buttonToolbarDecomposers, TrophicSlot.SlotStatus.Locked);
-                }
-            }*/
-            // KINGDOM PLANTS:
-            SetToolbarButtonStateUI(ref buttonToolbarAlgae, layerManager.kingdomPlants.trophicTiersList[0].trophicSlots[0].status);
-            /*if(layerManager.GetAlgaeOnOff()) {
-                SetToolbarButtonStateUI(ref buttonToolbarAlgae, layerManager.kingdomPlants.trophicTiersList[0].trophicSlots[0].status);
             }
-            else {
-                SetToolbarButtonStateUI(ref buttonToolbarAlgae, TrophicSlot.SlotStatus.Empty);
-                
-            }*/
-            SetToolbarButtonStateUI(ref buttonToolbarPlant1, TrophicSlot.SlotStatus.Locked);
-            SetToolbarButtonStateUI(ref buttonToolbarPlant2, TrophicSlot.SlotStatus.Locked);
+            SetToolbarButtonStateUI(ref buttonToolbarDecomposers, layerManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status, isSelected);
+            
+            // KINGDOM PLANTS:
+            isSelected = false;            
+            if(layerManager.isSelectedTrophicSlot) {
+                if(layerManager.selectedTrophicSlotRef.kingdomID == 1 && layerManager.selectedTrophicSlotRef.tierID == 0) {
+                    isSelected = true; 
+                }
+            }
+            SetToolbarButtonStateUI(ref buttonToolbarAlgae, layerManager.kingdomPlants.trophicTiersList[0].trophicSlots[0].status, isSelected);
+            
+            SetToolbarButtonStateUI(ref buttonToolbarPlant1, TrophicSlot.SlotStatus.Locked, false);
+            SetToolbarButtonStateUI(ref buttonToolbarPlant2, TrophicSlot.SlotStatus.Locked, false);
             // KINGDOM ANIMALS:
             //Zooplankton:
-            SetToolbarButtonStateUI(ref buttonToolbarZooplankton, layerManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0].status);
-            /*if(layerManager.GetZooplanktonOnOff()) {
-                SetToolbarButtonStateUI(ref buttonToolbarZooplankton, TrophicSlot.SlotStatus.On);
+            isSelected = false;            
+            if(layerManager.isSelectedTrophicSlot) {
+                if(layerManager.selectedTrophicSlotRef.kingdomID == 2 && layerManager.selectedTrophicSlotRef.tierID == 0) {
+                    isSelected = true; 
+                }
             }
-            else {
+            SetToolbarButtonStateUI(ref buttonToolbarZooplankton, layerManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0].status, isSelected);
             
-                bool unlocked = true;
-                
-                if(!layerManager.GetAlgaeOnOff()) {
-                    unlocked = false;
-                }
-                if(!layerManager.GetDecomposersOnOff()) {
-                    unlocked = false;
-                }
-
-                if(unlocked) {
-                    SetToolbarButtonStateUI(ref buttonToolbarZooplankton, TrophicSlot.SlotStatus.Empty);                
-                }
-                else {
-                    SetToolbarButtonStateUI(ref buttonToolbarZooplankton, TrophicSlot.SlotStatus.Locked);
-                }
-            }*/
             // AGENTS:
             // *************************************************************************************
-            SetToolbarButtonStateUI(ref buttonToolbarAnimal1, layerManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0].status);
-            SetToolbarButtonStateUI(ref buttonToolbarAnimal2, layerManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1].status);
-            SetToolbarButtonStateUI(ref buttonToolbarAnimal3, layerManager.kingdomAnimals.trophicTiersList[1].trophicSlots[2].status);
-            SetToolbarButtonStateUI(ref buttonToolbarAnimal4, layerManager.kingdomAnimals.trophicTiersList[1].trophicSlots[3].status);
-                
-
-        
-            /*if(layerManager.pendingTrophicSlot) {
-                buttonPendingTrophicSlot.GetComponentInChildren<Text>().text = "*";
-                buttonPendingTrophicSlot.GetComponentInChildren<Text>().color = Color.yellow;
-            }
-            else {
-                if(buttonPendingTrophicSlot != null) {
-                    buttonPendingTrophicSlot.GetComponentInChildren<Text>().color = Color.white;
-                }            
-            }*/
+            bool isSelected0 = false;
+            bool isSelected1 = false;
+            bool isSelected2 = false;
+            bool isSelected3 = false;
             if(layerManager.isSelectedTrophicSlot) {
-                //buttonSelectedTrophicSlot.GetComponentInChildren<Text>().text = "**";
-                //buttonSelectedTrophicSlot.GetComponentInChildren<Text>().color = Color.yellow;
-            }
-            else {
-                if(buttonSelectedTrophicSlot != null) {
-                    //buttonSelectedTrophicSlot.GetComponentInChildren<Text>().color = Color.white;
-                } 
-            }
+                if (layerManager.selectedTrophicSlotRef.kingdomID == 2 && layerManager.selectedTrophicSlotRef.tierID == 1) {
+                    if (layerManager.selectedTrophicSlotRef.slotID == 0) {
+                        isSelected0 = true;
+                    }
+                    if (layerManager.selectedTrophicSlotRef.slotID == 1) {
+                        isSelected1 = true;
+                    }
+                    if (layerManager.selectedTrophicSlotRef.slotID == 2) {
+                        isSelected2 = true;
+                    }
+                    if (layerManager.selectedTrophicSlotRef.slotID == 3) {
+                        isSelected3 = true;
+                    }
+                }
+            }            
 
+            SetToolbarButtonStateUI(ref buttonToolbarAnimal1, layerManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0].status, isSelected0);
+            SetToolbarButtonStateUI(ref buttonToolbarAnimal2, layerManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1].status, isSelected1);
+            SetToolbarButtonStateUI(ref buttonToolbarAnimal3, layerManager.kingdomAnimals.trophicTiersList[1].trophicSlots[2].status, isSelected2);
+            SetToolbarButtonStateUI(ref buttonToolbarAnimal4, layerManager.kingdomAnimals.trophicTiersList[1].trophicSlots[3].status, isSelected3);
+            
 
             if (isToolbarWingOn) {
                 //
@@ -1247,9 +1227,11 @@ public class UIManager : MonoBehaviour {
 
                     if (layerManager.selectedTrophicSlotRef.kingdomID == 0) {
                         imageToolbarSpeciesPortraitRender.sprite = spriteDecomposerPortrait;
+                        buttonToolbarWingDeleteSpecies.gameObject.SetActive(false);
                     }
                     else if (layerManager.selectedTrophicSlotRef.kingdomID == 1) {
                         imageToolbarSpeciesPortraitRender.sprite = spriteAlgaePortrait;
+                        buttonToolbarWingDeleteSpecies.gameObject.SetActive(false);
                     }
                     else {
 
@@ -1953,20 +1935,23 @@ public class UIManager : MonoBehaviour {
         gameManager.simulationManager.theRenderKing.UpdateCritterPortraitStrokesData(gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesID].representativeGenome);
     }
 
-    private void SetToolbarButtonStateUI(ref Button button, TrophicSlot.SlotStatus slotStatus) {
+    private void SetToolbarButtonStateUI(ref Button button, TrophicSlot.SlotStatus slotStatus, bool isSelected) {
 
         button.gameObject.SetActive(true);
         switch(slotStatus) {
             case TrophicSlot.SlotStatus.Off:
-                button.gameObject.SetActive(false);                
+                button.gameObject.SetActive(false); 
+                //button.gameObject.transform.localScale = Vector3.one;
                 break;
             case TrophicSlot.SlotStatus.Locked:
                 button.interactable = false;                
-                button.GetComponentInChildren<Text>().text = "-";
+                button.GetComponentInChildren<Text>().text = "";
+                //button.gameObject.transform.localScale = Vector3.one;
                 break;
             case TrophicSlot.SlotStatus.Empty:
                 button.interactable = true;                
-                button.GetComponentInChildren<Text>().text = "+";
+                button.GetComponentInChildren<Text>().text = "";
+                button.GetComponent<Image>().sprite = spriteSpeciesSlotRing;
                 break;
             //case TrophicSlot.SlotStatus.Pending:
             //    button.interactable = false;
@@ -1974,7 +1959,9 @@ public class UIManager : MonoBehaviour {
             //    break;
             case TrophicSlot.SlotStatus.On:
                 button.interactable = true;
-                button.GetComponentInChildren<Text>().text = "On";
+                button.GetComponentInChildren<Text>().text = "";
+                button.GetComponent<Image>().sprite = spriteSpeciesSlotFull;
+                //
                 break;
             //case TrophicSlot.SlotStatus.Selected:
             //    button.interactable = false;
@@ -1982,6 +1969,20 @@ public class UIManager : MonoBehaviour {
             //    break;
             default:
                 break;
+        }
+
+        if(isSelected) {
+            button.gameObject.transform.localScale = Vector3.one * 1.5f;
+            ColorBlock colorBlock = button.colors;
+            colorBlock.colorMultiplier = 1.4f;
+            button.colors = colorBlock;
+            //button.GetComponent<Image>().sprite = spriteSpeciesSlotSelected;
+        }
+        else {
+            button.gameObject.transform.localScale = Vector3.one;
+            ColorBlock colorBlock = button.colors;
+            colorBlock.colorMultiplier = 0.9f;
+            button.colors = colorBlock;
         }
     }
     /*private void SetInfoSpeciesButtonStateUI(ref Button button, TrophicSlot.SlotStatus slotStatus) {

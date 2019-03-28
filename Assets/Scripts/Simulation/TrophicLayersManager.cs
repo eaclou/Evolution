@@ -67,7 +67,7 @@ public class TrophicLayersManager {
     public void CreateTrophicSlotSpecies(SimulationManager simManagerRef, Vector2 spawnPos, int timeStep) {
         
         // reset things, figure out which slot was created:
-        isSelectedTrophicSlot = false;
+        //isSelectedTrophicSlot = false;
         selectedTrophicSlotRef.status = TrophicSlot.SlotStatus.On;
 
         if (selectedTrophicSlotRef.kingdomID == 0) { // decomposers:
