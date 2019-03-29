@@ -46,7 +46,14 @@ public class UIManager : MonoBehaviour {
     }
 
     public Color buttonActiveColor = new Color(1f, 1f, 1f, 1f);
-    public Color buttonDisabledColor = new Color(0.5f, 0.5f, 0.5f, 1f);
+    public Color buttonDisabledColor = new Color(0.75f, 0.75f, 0.75f, 1f);
+
+    public Color colorDecomposersLight;
+    public Color colorDecomposersDark;
+    public Color colorPlantsLight;
+    public Color colorPlantsDark;
+    public Color colorAnimalsLight;
+    public Color colorAnimalsDark;
 
     public GameObject mouseRaycastWaterPlane;
     private Vector3 prevMousePositionOnWaterPlane;
@@ -1939,6 +1946,7 @@ public class UIManager : MonoBehaviour {
     private void SetToolbarButtonStateUI(ref Button button, TrophicSlot.SlotStatus slotStatus, bool isSelected) {
 
         button.gameObject.SetActive(true);
+        Vector3 scale = Vector3.one;
         switch(slotStatus) {
             case TrophicSlot.SlotStatus.Off:
                 button.gameObject.SetActive(false); 
@@ -1953,6 +1961,7 @@ public class UIManager : MonoBehaviour {
                 button.interactable = true;                
                 button.GetComponentInChildren<Text>().text = "";
                 button.GetComponent<Image>().sprite = spriteSpeciesSlotRing;
+                scale = Vector3.one * 0.75f;
                 break;
             //case TrophicSlot.SlotStatus.Pending:
             //    button.interactable = false;
@@ -1973,18 +1982,19 @@ public class UIManager : MonoBehaviour {
         }
 
         if(isSelected) {
-            button.gameObject.transform.localScale = Vector3.one * 1.5f;
+            scale = Vector3.one * 1.33f;
             ColorBlock colorBlock = button.colors;
             colorBlock.colorMultiplier = 1.4f;
             button.colors = colorBlock;
             //button.GetComponent<Image>().sprite = spriteSpeciesSlotSelected;
         }
-        else {
-            button.gameObject.transform.localScale = Vector3.one;
+        else {            
             ColorBlock colorBlock = button.colors;
             colorBlock.colorMultiplier = 0.9f;
             button.colors = colorBlock;
         }
+
+        button.gameObject.transform.localScale = scale;
     }
     /*private void SetInfoSpeciesButtonStateUI(ref Button button, TrophicSlot.SlotStatus slotStatus) {
 
