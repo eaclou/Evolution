@@ -25,6 +25,7 @@
 			#pragma fragment frag
 			
 			#include "UnityCG.cginc"
+			#include "Assets/Resources/Shaders/Inc/NoiseShared.cginc"
 
 			struct appdata
 			{
@@ -56,6 +57,8 @@
 			
 			fixed4 frag (v2f i) : SV_Target
 			{
+				
+				
 				// sample the texture
 				fixed4 density = tex2D(_DensityTex, i.uv);
 				fixed4 velocity = tex2D(_VelocityTex, i.uv);
@@ -70,7 +73,29 @@
 				finalColor.xyz = density.xyz;
 				finalColor.a = smoothstep(0.15, 0.3, density.y) * 0.15;
 				
+				//float3 Value2D(float2 p, float frequency)
+				float noiseMag01 = (Value3D(float3(-_Time.y * 0.25, -i.uv), 53).x * 0.5 + 0.5);
+				float noiseMag02 = (Value3D(float3(_Time.y * 0.2, i.uv), 78).x * 0.5 + 0.5);				
+				float noiseMag03 = (Value3D(float3(_Time.y * 0.15, -i.uv), 104).x * 0.5 + 0.5);
+				float noiseMag04 = (Value3D(float3(-_Time.y * 0.1, -i.uv), 132.331).x * 0.5 + 0.5);
+
+				float noiseMag = saturate(noiseMag01 * noiseMag02 * noiseMag03 * noiseMag04 * 0.75) + 0.25; // * noiseMag01;
+
+				float pressureAmount = saturate(pressure.y * 3);
+				finalColor.a += pressureAmount * 0.15 * noiseMag;
+				finalColor.rgb += pressureAmount * 0.65 * noiseMag;
+
+				float velocityGlow = saturate((length(velocity) - 0.025) * 3.3);
+				finalColor.a += velocityGlow * 0.25 * noiseMag;
+				finalColor.rgb += velocityGlow * 0.65 * noiseMag;
+				//finalColor.rgb = lerp(finalColor.rgb, float3(1,1,0), velocityGlow);
+
+				
+				//finalColor.a *= (0.15 + noiseMag * 0.85);
+				//finalColor.rgb = float3(1,1,1) * 0.5;
 				return finalColor;
+
+				
 
 				float posterizeLevels = 64;
 

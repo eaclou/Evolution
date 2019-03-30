@@ -2585,6 +2585,7 @@ public class TheRenderKing : MonoBehaviour {
         //computeShaderCritters.SetFloat("_InvGridScale", fluidManager.invGridScale);
         //computeShaderCritters.SetVector("_PlayerPos", new Vector4(simManager.agentsArray[0].bodyRigidbody.transform.position.x / SimulationManager._MapSize, simManager.agentsArray[0].bodyRigidbody.transform.position.y / SimulationManager._MapSize, 0f, 0f));
         computeShaderCritters.SetFloat("_Time", Time.realtimeSinceStartup);
+        computeShaderCritters.SetVector("_CursorCoords", new Vector4(simManager.uiManager.curMousePositionOnWaterPlane.x, simManager.uiManager.curMousePositionOnWaterPlane.y, 0f, 0f));
         computeShaderCritters.SetTexture(kernelCSSimulateHighlightTrail, "velocityRead", fluidManager._VelocityA); 
         computeShaderCritters.SetBuffer(kernelCSSimulateHighlightTrail, "highlightTrailDataCBuffer", critterHighlightTrailCBuffer);
         computeShaderCritters.SetBuffer(kernelCSSimulateHighlightTrail, "critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer); 
@@ -3822,6 +3823,12 @@ public class TheRenderKing : MonoBehaviour {
                 critterHighlightTrailMat.SetBuffer("highlightTrailDataCBuffer", critterHighlightTrailCBuffer);
                 critterHighlightTrailMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
                 critterHighlightTrailMat.SetFloat("_MapSize", SimulationManager._MapSize);
+                float highlightOn = 0f;
+                if(simManager.uiManager.curActiveTool == UIManager.ToolType.Inspect) {
+                    highlightOn = 1f;
+                }
+                critterHighlightTrailMat.SetFloat("_HighlightOn", highlightOn);
+                critterHighlightTrailMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
                 cmdBufferMain.DrawProcedural(Matrix4x4.identity, critterHighlightTrailMat, 0, MeshTopology.Triangles, 6, critterHighlightTrailCBuffer.count);
             
         

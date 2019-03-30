@@ -126,6 +126,8 @@ public class UIManager : MonoBehaviour {
     public bool isToolbarWingStatsOn = true;
     public bool isToolbarWingMutationOn = false;  // < < <  there's a better way to handle this, but this is simple and works for now
     public bool isToolbarDeletePromptOn = false;
+    public int timerAnnouncementTextCounter = 0;
+    public bool isAnnouncementTextOn = false;
     // portrait
     public int curToolUnlockLevel = 0;
     public float toolbarInfluencePoints = 0.5f;
@@ -174,6 +176,7 @@ public class UIManager : MonoBehaviour {
     public Button buttonToolbarWingDeleteSpecies;
     public Button buttonToolbarWingStats;
     public Button buttonToolbarWingMutation;
+    public Image imageToolbarButtonBarBackground;
     public Button buttonToolbarWingCreateSpecies;
     public Text textToolbarWingSpeciesSummary;
     public Text textSelectedSpeciesTitle;
@@ -887,7 +890,20 @@ public class UIManager : MonoBehaviour {
             gameManager.theRenderKing.gizmoCursorPosCBuffer.SetData(dataArray);
 
             bool mouseCursorVisible = false;
-            panelPendingClickPrompt.SetActive(false);
+
+            if(isAnnouncementTextOn) {
+                panelPendingClickPrompt.SetActive(true);
+                timerAnnouncementTextCounter++;
+
+                if(timerAnnouncementTextCounter > 240) {
+                    isAnnouncementTextOn = false;
+                    timerAnnouncementTextCounter = 0;
+                }
+            }
+            else {
+                panelPendingClickPrompt.SetActive(false);
+            }
+            //
 
             //if (gameManager.simulationManager.trophicLayersManager.pendingTrophicSlot) {
             //    panelPendingClickPrompt.SetActive(true);
@@ -1231,6 +1247,7 @@ public class UIManager : MonoBehaviour {
                 imageToolbarSpeciesPortraitRender.color = speciesColorLight;
                 textSelectedSpeciesTitle.color = speciesColorLight;
                 imageToolbarSpeciesPortraitBorder.color = speciesColorLight;
+                imageToolbarButtonBarBackground.color = speciesColorDark;
 
                 textSelectedSpeciesTitle.text = layerManager.selectedTrophicSlotRef.speciesName;
                 textToolbarWingSpeciesSummary.text = layerManager.GetSpeciesPreviewDescriptionString();
@@ -2667,6 +2684,8 @@ public class UIManager : MonoBehaviour {
                                 
             }
         }
+
+        isAnnouncementTextOn = true;
 
         //UpdateSelectedSpeciesColorUI();
     }
