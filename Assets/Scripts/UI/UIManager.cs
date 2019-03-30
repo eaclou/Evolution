@@ -179,6 +179,7 @@ public class UIManager : MonoBehaviour {
     public Text textSelectedSpeciesTitle;
     public Text textSelectedSpeciesIndex;
     public Image imageToolbarSpeciesPortraitRender;
+    public Image imageToolbarSpeciesPortraitBorder;
     public Text textSelectedSpeciesDescription;
     public int selectedSpeciesStatsIndex;
     //public Texture2D textureWorldStats;
@@ -1212,13 +1213,33 @@ public class UIManager : MonoBehaviour {
                 panelToolbarWingDeletePrompt.SetActive(false);
                 textToolbarWingSpeciesSummary.gameObject.SetActive(true);
 
-                textSelectedSpeciesTitle.text = layerManager.selectedTrophicSlotRef.speciesName;
+                Color speciesColorLight = Color.white;
+                Color speciesColorDark = Color.black;
+                if (layerManager.selectedTrophicSlotRef.kingdomID == 0) {
+                    speciesColorLight = colorDecomposersLight;
+                    speciesColorDark = colorDecomposersDark;
+                }
+                else if (layerManager.selectedTrophicSlotRef.kingdomID == 1) {
+                    speciesColorLight = colorPlantsLight;
+                    speciesColorDark = colorPlantsDark;
+                }
+                else {
+                    speciesColorLight = colorAnimalsLight;
+                    speciesColorDark = colorAnimalsDark;
+                }
+                buttonToolbarWingCreateSpecies.GetComponent<Image>().color = speciesColorDark;
+                imageToolbarSpeciesPortraitRender.color = speciesColorLight;
+                textSelectedSpeciesTitle.color = speciesColorLight;
+                imageToolbarSpeciesPortraitBorder.color = speciesColorLight;
 
+                textSelectedSpeciesTitle.text = layerManager.selectedTrophicSlotRef.speciesName;
                 textToolbarWingSpeciesSummary.text = layerManager.GetSpeciesPreviewDescriptionString();
 
                 //Debug.Log("layerManager.selectedTrophicSlotRef.status: " + layerManager.selectedTrophicSlotRef.status.ToString());
                 if(layerManager.selectedTrophicSlotRef.status == TrophicSlot.SlotStatus.Empty) {
                     buttonToolbarWingCreateSpecies.gameObject.SetActive(true);
+                    imageToolbarSpeciesPortraitRender.color = new Color(0f, 0f, 0f, 0f);
+                    imageToolbarSpeciesPortraitRender.sprite = null;
                     
                     buttonToolbarWingDeleteSpecies.gameObject.SetActive(false);
                     buttonToolbarWingStats.gameObject.SetActive(false);   
@@ -1234,6 +1255,7 @@ public class UIManager : MonoBehaviour {
 
                     if (layerManager.selectedTrophicSlotRef.kingdomID == 0) {
                         imageToolbarSpeciesPortraitRender.sprite = spriteDecomposerPortrait;
+
                         buttonToolbarWingDeleteSpecies.gameObject.SetActive(false);
                     }
                     else if (layerManager.selectedTrophicSlotRef.kingdomID == 1) {
@@ -1247,6 +1269,7 @@ public class UIManager : MonoBehaviour {
                             buttonToolbarWingMutation.gameObject.SetActive(true);
 
                             imageToolbarSpeciesPortraitRender.sprite = null;
+                            imageToolbarSpeciesPortraitRender.color = Color.white;
 
                             if(isToolbarWingStatsOn) {
                                 panelToolbarWingStats.SetActive(true);
@@ -1267,6 +1290,7 @@ public class UIManager : MonoBehaviour {
 
                             // TEMP!!!
                             buttonToolbarWingDeleteSpecies.gameObject.SetActive(false); // **** only while deleting algae is unsupported
+
                         }
                     }
                                         
