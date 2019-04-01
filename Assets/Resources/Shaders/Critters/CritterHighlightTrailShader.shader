@@ -87,16 +87,17 @@
 
 				worldPosition.xyz += noiseOffset;
 				*/
-				quadPoint.y *= 1 + data.vel * 10;
-				float2 forward = normalize(data.vel);
+				
+				//quadPoint.y *= 1 + data.vel * 10;
+				float2 forward = float2(0,1); //normalize(data.vel);
 				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
 				float3 rotatedPoint = float3(quadPoint.x * right + quadPoint.y * forward, 0);  // Rotate localRotation by AgentRotation
 				
 				
-				worldPosition = worldPosition + rotatedPoint * 0.25 * (_CamDistNormalized * 0.9 + 0.1) * (data.strength * _HighlightOn * 0.75 + 0.25); // * lerp(0.55, 0.85, data.age) * 0.12; // rotatedPoint * particleData.isActive;
+				worldPosition = worldPosition + rotatedPoint * 0.34 * (_CamDistNormalized * 0.9 + 0.1) * (data.strength * _HighlightOn * 0.25 + 0.75); // * lerp(0.55, 0.85, data.age) * 0.12; // rotatedPoint * particleData.isActive;
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));				
-				o.color = float4(rand0 * 0.3 + 0.5,data.strength * _HighlightOn,1, fadeMask);	
+				o.color = float4(rand0 * 0.3 + 0.5, data.strength * _HighlightOn, 1, fadeMask);	
 				
 				return o;
 			}
@@ -106,9 +107,9 @@
 				float4 texColor = tex2D(_MainTex, i.uv);	
 				texColor.rgb = lerp(texColor.rgb, float3(0.6,1,0.45), 0.9);
 				texColor.rgb *= i.color.r;
-				texColor.a *= 0.0412555 * i.color.a;
+				texColor.a *= 0.0312555 * i.color.a;
 
-				texColor.rgb = lerp(texColor.rgb, float3(1,1,1), i.color.y);
+				texColor.rgb = lerp(texColor.rgb, float3(0.5,0.5,0.5), i.color.y * 0.5 + 0.5);
 
 				//texColor.a *= 1.0 - i.color.a;
 				texColor *= 1.0;

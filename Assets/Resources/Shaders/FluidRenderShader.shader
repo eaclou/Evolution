@@ -82,12 +82,12 @@
 				float noiseMag = saturate(noiseMag01 * noiseMag02 * noiseMag03 * noiseMag04 * 0.75) + 0.25; // * noiseMag01;
 
 				float pressureAmount = saturate(pressure.y * 3);
-				finalColor.a += pressureAmount * 0.15 * noiseMag;
-				finalColor.rgb += pressureAmount * 0.65 * noiseMag;
+				finalColor.a += pressureAmount * 0.65 * noiseMag;
+				finalColor.rgb += pressureAmount * 0.25 * noiseMag;
 
 				float velocityGlow = saturate((length(velocity) - 0.025) * 3.3);
-				finalColor.a += velocityGlow * 0.25 * noiseMag;
-				finalColor.rgb += velocityGlow * 0.65 * noiseMag;
+				finalColor.a += velocityGlow * 0.65 * noiseMag;
+				//finalColor.rgb += velocityGlow * 0.65 * noiseMag;
 				//finalColor.rgb = lerp(finalColor.rgb, float3(1,1,0), velocityGlow);
 
 				

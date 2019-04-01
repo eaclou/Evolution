@@ -57,10 +57,10 @@ public class TrophicLayersManager {
         animalsTier0.trophicSlots[0].Initialize("Zooplankton", TrophicSlot.SlotStatus.Locked, 2, 0, 0);
         kingdomAnimals.trophicTiersList.Add(animalsTier0);
         TrophicTier animalsTier1 = new TrophicTier();  // full Agents
-        animalsTier1.trophicSlots[0].Initialize("Herbivore", TrophicSlot.SlotStatus.Locked, 2, 1, 0);
-        animalsTier1.trophicSlots[1].Initialize("Herbivore", TrophicSlot.SlotStatus.Locked, 2, 1, 1);
-        animalsTier1.trophicSlots[2].Initialize("Herbivore", TrophicSlot.SlotStatus.Locked, 2, 1, 2);
-        animalsTier1.trophicSlots[3].Initialize("Herbivore", TrophicSlot.SlotStatus.Locked, 2, 1, 3);
+        animalsTier1.trophicSlots[0].Initialize("Vertebrate 1", TrophicSlot.SlotStatus.Locked, 2, 1, 0);
+        animalsTier1.trophicSlots[1].Initialize("Vertebrate 2", TrophicSlot.SlotStatus.Locked, 2, 1, 1);
+        animalsTier1.trophicSlots[2].Initialize("Vertebrate 3", TrophicSlot.SlotStatus.Locked, 2, 1, 2);
+        animalsTier1.trophicSlots[3].Initialize("Vertebrate 4", TrophicSlot.SlotStatus.Locked, 2, 1, 3);
         kingdomAnimals.trophicTiersList.Add(animalsTier1);
 
     }
@@ -126,17 +126,17 @@ public class TrophicLayersManager {
         string str = "";
 
         if(selectedTrophicSlotRef.kingdomID == 0) {
-            str = "Bacterial and fungal organisms that recycle vital nutrients.\n\nUses: Waste, Oxygen\n\nProduces: Nutrients";
+            str = "Bacterial and fungal organisms that recycle vital nutrients.\n\nUses: <b><color=#A97860FF>Waste</color></b>, <b><color=#8EDEEEFF>Oxygen</color></b>\n\nProduces: <b><color=#FBC653FF>Nutrients</color></b>";
         }
         else if(selectedTrophicSlotRef.kingdomID == 1) {
-            str = "Tiny plants that form the foundation of the ecosystem.\n\nUses: Nutrients\n\nProduces: Oxygen";
+            str = "Tiny plants that form the foundation of the ecosystem.\n\nUses: <b><color=#FBC653FF>Nutrients</color></b>\n\nProduces: <b><color=#8EDEEEFF>Oxygen</color></b>";
         }
         else {
             if(selectedTrophicSlotRef.tierID == 0) {
-                str = "Tiny animals that feed on Algae.\n\nUses: Oxygen\n\nProduces: Waste";
+                str = "Tiny animals that feed on Algae.\n\nUses: <b><color=#8EDEEEFF>Oxygen</color></b>\n\nProduces: <b><color=#A97860FF>Waste</color></b>";
             }
             else {
-                str = "animals";
+                str = "Simple Vertebrate that feeds on Algae and Zooplankton.\n\nUses: <b><color=#8EDEEEFF>Oxygen</color></b>\n\nProduces: <b><color=#A97860FF>Waste</color></b>";
             }            
         }
 

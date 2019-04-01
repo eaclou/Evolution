@@ -127,6 +127,9 @@
 				//  For values of x between min and max , returns a smoothly varying value that ranges from 0 at x = min to 1 at x = max .
 				//  x is clamped to the range [ min , max ] and then the interpolation formula is evaluated:
 				
+				float isSolidMask = saturate((fitnessScores.x - finalCoords.y) * 100);
+				pixColor.rgb = lerp(pixColor.rgb, _Tint.rgb, 0.5 * isSolidMask);
+
 				if(distR < (lineWidth + lineFadeWidth)) {
 					float smoothDist = smoothstep(0.0, lineFadeWidth, distR - lineWidth);
 					pixColor = lerp(_Tint, pixColor, smoothDist) * 1;

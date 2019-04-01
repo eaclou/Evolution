@@ -80,7 +80,7 @@
 				worldPosition.xyz += noiseOffset;
 
 
-				float radius = particleData.radius * 0.10915 * isOn; // 1; //sqrt(particleData.biomass) * 2 + 0.5;
+				float radius = particleData.radius * 0.075 * isOn; // 1; //sqrt(particleData.biomass) * 2 + 0.5;
 				quadPoint = quadPoint * radius; // * particleData.active; // *** remove * 3 after!!!
 				
 				
@@ -111,7 +111,7 @@
 				float4 finalColor = i.color; // float4(float3(i.color.z * 1.2, 0.85, (1.0 - i.color.w) * 0.2) + i.color.y, texColor.a * i.color.x * 0.33 * (1 - i.color.z));
 				finalColor.rgb = lerp(finalColor.rgb, float3(0.25, 1, 0.36), 1);
 				finalColor.rgb += 0.25;
-				finalColor.a = texColor.a * 0.9; // * 0.25;
+				finalColor.a = texColor.a * 0.4; // * 0.25;
 				
 				finalColor.rgb = lerp(finalColor, i.hue, 0.5);
 				//finalColor.rgb = 1;
