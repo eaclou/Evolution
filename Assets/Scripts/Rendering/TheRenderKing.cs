@@ -3770,17 +3770,16 @@ public class TheRenderKing : MonoBehaviour {
                 cmdBufferMain.DrawProcedural(Matrix4x4.identity, foodParticleShadowDisplayMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.algaeParticlesCBuffer.count * 32);
         
             }
-            
-            // FLUID ITSELF:
-            fluidRenderMat.SetPass(0);
-            fluidRenderMat.SetTexture("_DensityTex", fluidManager._DensityA);
-            fluidRenderMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
-            fluidRenderMat.SetTexture("_PressureTex", fluidManager._PressureA);
-            fluidRenderMat.SetTexture("_DivergenceTex", fluidManager._Divergence);
-            fluidRenderMat.SetTexture("_ObstaclesTex", fluidManager._ObstaclesRT);
-            fluidRenderMat.SetTexture("_TerrainHeightTex", baronVonTerrain.terrainHeightMap);
-            cmdBufferMain.DrawMesh(fluidRenderMesh, Matrix4x4.identity, fluidRenderMat);
+
+            if(simManager.trophicLayersManager.GetZooplanktonOnOff()) {
+                // add shadow pass eventually
+                animalParticleDisplayMat.SetPass(0);
+                animalParticleDisplayMat.SetBuffer("animalParticleDataCBuffer", simManager.zooplanktonManager.animalParticlesCBuffer);
+                animalParticleDisplayMat.SetBuffer("quadVerticesCBuffer", curveRibbonVerticesCBuffer);
+                animalParticleDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+                cmdBufferMain.DrawProcedural(Matrix4x4.identity, animalParticleDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, simManager.zooplanktonManager.animalParticlesCBuffer.count);
         
+            }
             
             
             // suspended particle bits:
@@ -3796,6 +3795,8 @@ public class TheRenderKing : MonoBehaviour {
             cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonWater.waterNutrientsBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterNutrientsBitsCBuffer.count);
             
+            
+
             if(simManager.trophicLayersManager.GetAlgaeOnOff()) {
                 foodParticleDisplayMat.SetPass(0);
                 foodParticleDisplayMat.SetBuffer("foodParticleDataCBuffer", simManager.vegetationManager.algaeParticlesCBuffer);
@@ -3806,15 +3807,7 @@ public class TheRenderKing : MonoBehaviour {
         
             }
             
-            if(simManager.trophicLayersManager.GetZooplanktonOnOff()) {
-                // add shadow pass eventually
-                animalParticleDisplayMat.SetPass(0);
-                animalParticleDisplayMat.SetBuffer("animalParticleDataCBuffer", simManager.zooplanktonManager.animalParticlesCBuffer);
-                animalParticleDisplayMat.SetBuffer("quadVerticesCBuffer", curveRibbonVerticesCBuffer);
-                animalParticleDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-                cmdBufferMain.DrawProcedural(Matrix4x4.identity, animalParticleDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, simManager.zooplanktonManager.animalParticlesCBuffer.count);
-        
-            }
+            
             
             if(simManager.trophicLayersManager.GetAgentsOnOff()) {
                 // Highlight trail:
@@ -3856,6 +3849,16 @@ public class TheRenderKing : MonoBehaviour {
             }
             
             
+            // FLUID ITSELF:
+            fluidRenderMat.SetPass(0);
+            fluidRenderMat.SetTexture("_DensityTex", fluidManager._DensityA);
+            fluidRenderMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
+            fluidRenderMat.SetTexture("_PressureTex", fluidManager._PressureA);
+            fluidRenderMat.SetTexture("_DivergenceTex", fluidManager._Divergence);
+            fluidRenderMat.SetTexture("_ObstaclesTex", fluidManager._ObstaclesRT);
+            fluidRenderMat.SetTexture("_TerrainHeightTex", baronVonTerrain.terrainHeightMap);
+            cmdBufferMain.DrawMesh(fluidRenderMesh, Matrix4x4.identity, fluidRenderMat);
+        
             
             // CRITTER BODY:
 

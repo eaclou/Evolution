@@ -50,10 +50,11 @@ public class ZooplanktonManager {
 	    public float isDecaying;
 	    public float age;
 	    public float speed;
+        public Vector4 genome;
     }
    
     private int GetAnimalParticleDataSize() {
-        int bitSize = sizeof(float) * 22 + sizeof(int) * 3;
+        int bitSize = sizeof(float) * 26 + sizeof(int) * 3;
         return bitSize;
     }
     

@@ -134,7 +134,7 @@
 				//float3 particleColor = lerp(baseHue * 0.7, baseHue * 1.3, saturate(1.0 - i.color.y * 2));
 				frameBufferColor.rgb *= 0.75; // = lerp(frameBufferColor.rgb, particleColor, 0.25);
 				float4 finalColor = GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, float4(1,1,1,1));
-				finalColor.a = brushColor.a * 0.5;
+				finalColor.a = brushColor.a * 0.2;
 
 				return finalColor;
 			}

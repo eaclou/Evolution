@@ -229,7 +229,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
 
         // PRESSURE JACOBI:::::
         //InitializePressure();  // zeroes out initial pressure guess // doesn't seem to produce great results
-        int numPressureJacobiIter = 42;
+        int numPressureJacobiIter = 64;
         for (int i = 0; i < numPressureJacobiIter; i++) {
             if (i % 2 == 0) {
                 PressureJacobi(pressureA, pressureB);

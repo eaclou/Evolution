@@ -154,7 +154,7 @@ public class SimulationManager : MonoBehaviour {
     private int numAgentEvaluationsPerGenome = 1;
 
     public int simAgeTimeSteps = 0;
-    private int numStepsInSimYear = 2000;
+    private int numStepsInSimYear = 720;
     private int simAgeYearCounter = 0;
     public int curSimYear = 0;
         
@@ -706,7 +706,7 @@ public class SimulationManager : MonoBehaviour {
             }
         }
 
-        if(simAgeTimeSteps % 21 == 3) {
+        if(simAgeTimeSteps % 79 == 3) {
             UpdateSimulationClimate();
 
             RefreshLatestHistoricalDataEntry();
@@ -715,7 +715,7 @@ public class SimulationManager : MonoBehaviour {
             
             uiManager.UpdateTolWorldStatsTexture(statsNutrientsEachGenerationList);
             
-            theRenderKing.UpdateTreeOfLifeEventLineData(simEventsManager.completeEventHistoryList);
+            //theRenderKing.UpdateTreeOfLifeEventLineData(simEventsManager.completeEventHistoryList);
         }
     }
     private void ApplyFluidForcesToDynamicObjects() {

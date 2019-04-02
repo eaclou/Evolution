@@ -18,4 +18,5 @@ struct AnimalParticleData {
 	float isDecaying;
 	float age;  // 
 	float speed;
+	float4 genome;
 };

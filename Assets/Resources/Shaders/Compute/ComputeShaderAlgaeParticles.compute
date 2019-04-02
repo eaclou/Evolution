@@ -354,7 +354,7 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 					foodParticlesWrite[id.x].isSwallowed = 0.0;
 					foodParticlesWrite[id.x].digestedAmount = 0.0;
 					foodParticlesWrite[id.x].age = rand(float2(rand01 * 70.158, randX * 13.37)) * 1;
-					foodParticlesWrite[id.x].color = float3(0,0,0); //saturate(parentParticle.color + (float3(randY, randX, randZ) - 0.5) * 0.1);
+					foodParticlesWrite[id.x].color = float3(randY, randX, randZ); //float3(0,0,0); //saturate(parentParticle.color + (float3(randY, randX, randZ) - 0.5) * 0.1);
 				}			
 			}			
 		}

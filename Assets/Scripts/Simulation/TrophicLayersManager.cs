@@ -57,10 +57,10 @@ public class TrophicLayersManager {
         animalsTier0.trophicSlots[0].Initialize("Zooplankton", TrophicSlot.SlotStatus.Locked, 2, 0, 0);
         kingdomAnimals.trophicTiersList.Add(animalsTier0);
         TrophicTier animalsTier1 = new TrophicTier();  // full Agents
-        animalsTier1.trophicSlots[0].Initialize("Vertebrate 1", TrophicSlot.SlotStatus.Locked, 2, 1, 0);
-        animalsTier1.trophicSlots[1].Initialize("Vertebrate 2", TrophicSlot.SlotStatus.Locked, 2, 1, 1);
-        animalsTier1.trophicSlots[2].Initialize("Vertebrate 3", TrophicSlot.SlotStatus.Locked, 2, 1, 2);
-        animalsTier1.trophicSlots[3].Initialize("Vertebrate 4", TrophicSlot.SlotStatus.Locked, 2, 1, 3);
+        animalsTier1.trophicSlots[0].Initialize("Vertebrate", TrophicSlot.SlotStatus.Locked, 2, 1, 0);
+        animalsTier1.trophicSlots[1].Initialize("Vertebrate", TrophicSlot.SlotStatus.Locked, 2, 1, 1);
+        animalsTier1.trophicSlots[2].Initialize("Vertebrate", TrophicSlot.SlotStatus.Locked, 2, 1, 2);
+        animalsTier1.trophicSlots[3].Initialize("Vertebrate", TrophicSlot.SlotStatus.Locked, 2, 1, 3);
         kingdomAnimals.trophicTiersList.Add(animalsTier1);
 
     }
@@ -83,11 +83,11 @@ public class TrophicLayersManager {
             if (selectedTrophicSlotRef.tierID == 0) { // Animals:
                 TurnOnZooplankton(spawnPos, timeStep);
                 // Unlock Slots:
-                kingdomAnimals.trophicTiersList[1].unlocked = true;
-                kingdomAnimals.trophicTiersList[1].trophicSlots[0].status = TrophicSlot.SlotStatus.Empty;
-                kingdomAnimals.trophicTiersList[1].trophicSlots[1].status = TrophicSlot.SlotStatus.Empty;
-                kingdomAnimals.trophicTiersList[1].trophicSlots[2].status = TrophicSlot.SlotStatus.Empty;
-                kingdomAnimals.trophicTiersList[1].trophicSlots[3].status = TrophicSlot.SlotStatus.Empty;
+                //kingdomAnimals.trophicTiersList[1].unlocked = true;
+                //kingdomAnimals.trophicTiersList[1].trophicSlots[0].status = TrophicSlot.SlotStatus.Empty;
+                //kingdomAnimals.trophicTiersList[1].trophicSlots[1].status = TrophicSlot.SlotStatus.Empty;
+                //kingdomAnimals.trophicTiersList[1].trophicSlots[2].status = TrophicSlot.SlotStatus.Empty;
+                //kingdomAnimals.trophicTiersList[1].trophicSlots[3].status = TrophicSlot.SlotStatus.Empty;
             }
             if(selectedTrophicSlotRef.tierID == 1) {
                 TurnOnAgents();
@@ -101,23 +101,37 @@ public class TrophicLayersManager {
     public void Tick(SimulationManager simManager) {
         //check for unlocks:
         if(kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
-            if(simManager.simResourceManager.curGlobalAlgaeParticles > 100f) {
+            if(simManager.simResourceManager.curGlobalAlgaeParticles > 200f || simManager.simResourceManager.curGlobalDetritus > 150f) {
                 kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.Empty;
-                Debug.Log("DECOMPOSERS UNLOCKED!!!");
+                Debug.Log("DECOMPOSERS UNLOCKED!!! " + simManager.uiManager.unlockCooldownCounter.ToString());
+
+                simManager.uiManager.AnnounceUnlockDecomposers();
+                simManager.uiManager.isUnlockCooldown = true;
             }
         }
         
         if(kingdomAnimals.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
-            if(simManager.simResourceManager.curGlobalOxygen > 500f) {
+            if(simManager.simResourceManager.curGlobalOxygen > 250f && simManager.simResourceManager.curGlobalDecomposers > 25f && !simManager.uiManager.isUnlockCooldown) {
                 kingdomAnimals.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.Empty;
-                Debug.Log("ZOOPLANKTON UNLOCKED!!!");
+                Debug.Log("ZOOPLANKTON UNLOCKED!!! " + simManager.uiManager.unlockCooldownCounter.ToString());
+                simManager.uiManager.AnnounceUnlockZooplankton();
+                simManager.uiManager.isUnlockCooldown = true;
             }
         }
 
         if(kingdomAnimals.trophicTiersList[1].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
-            if(simManager.simResourceManager.curGlobalAnimalParticles > 15f) {
+            if(simManager.simResourceManager.curGlobalAnimalParticles > 10f && !simManager.uiManager.isUnlockCooldown) {
                 kingdomAnimals.trophicTiersList[1].trophicSlots[0].status = TrophicSlot.SlotStatus.Empty;
-                Debug.Log("CREATURES UNLOCKED!!!");
+
+                kingdomAnimals.trophicTiersList[1].unlocked = true;
+                kingdomAnimals.trophicTiersList[1].trophicSlots[0].status = TrophicSlot.SlotStatus.Empty;
+                kingdomAnimals.trophicTiersList[1].trophicSlots[1].status = TrophicSlot.SlotStatus.Empty;
+                kingdomAnimals.trophicTiersList[1].trophicSlots[2].status = TrophicSlot.SlotStatus.Empty;
+                kingdomAnimals.trophicTiersList[1].trophicSlots[3].status = TrophicSlot.SlotStatus.Empty;
+
+                Debug.Log("CREATURES UNLOCKED!!! " + simManager.uiManager.unlockCooldownCounter.ToString());
+                simManager.uiManager.AnnounceUnlockVertebrates();
+                simManager.uiManager.isUnlockCooldown = true;
             }
         }
     }
@@ -126,17 +140,17 @@ public class TrophicLayersManager {
         string str = "";
 
         if(selectedTrophicSlotRef.kingdomID == 0) {
-            str = "Bacterial and fungal organisms that recycle vital nutrients.\n\nUses: <b><color=#A97860FF>Waste</color></b>, <b><color=#8EDEEEFF>Oxygen</color></b>\n\nProduces: <b><color=#FBC653FF>Nutrients</color></b>";
+            str = "Bacterial and Fungal organisms that recycle vital nutrients.\n\nUses: <b><color=#A97860FF>Waste</color></b>, <b><color=#8EDEEEFF>Oxygen</color></b>\n\nProduces: <b><color=#FBC653FF>Nutrients</color></b>";
         }
         else if(selectedTrophicSlotRef.kingdomID == 1) {
-            str = "Tiny plants that form the foundation of the ecosystem.\n\nUses: <b><color=#FBC653FF>Nutrients</color></b>\n\nProduces: <b><color=#8EDEEEFF>Oxygen</color></b>";
+            str = "Tiny Plants that form the foundation of the ecosystem.\n\nUses: <b><color=#FBC653FF>Nutrients</color></b>\n\nProduces: <b><color=#8EDEEEFF>Oxygen</color></b>";
         }
         else {
             if(selectedTrophicSlotRef.tierID == 0) {
-                str = "Tiny animals that feed on Algae.\n\nUses: <b><color=#8EDEEEFF>Oxygen</color></b>\n\nProduces: <b><color=#A97860FF>Waste</color></b>";
+                str = "Tiny Animals that feed on Algae.\n\nUses: <b><color=#8EDEEEFF>Oxygen</color></b>\n\nProduces: <b><color=#A97860FF>Waste</color></b>";
             }
             else {
-                str = "Simple Vertebrate that feeds on Algae and Zooplankton.\n\nUses: <b><color=#8EDEEEFF>Oxygen</color></b>\n\nProduces: <b><color=#A97860FF>Waste</color></b>";
+                str = "Simple Animal that feeds on Algae and Zooplankton.\n\nUses: <b><color=#8EDEEEFF>Oxygen</color></b>\n\nProduces: <b><color=#A97860FF>Waste</color></b>";
             }            
         }
 
