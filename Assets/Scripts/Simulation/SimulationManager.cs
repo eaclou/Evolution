@@ -1028,12 +1028,12 @@ public class SimulationManager : MonoBehaviour {
         
     }
     public void CreateAgentSpecies(Vector3 spawnPos) {
-        eggSackArray[0].parentAgentIndex = 0;
-        eggSackArray[0].InitializeEggSackFromGenome(0, masterGenomePool.completeSpeciesPoolsList[0].representativeGenome, null, spawnPos);
-        eggSackArray[0].currentBiomass = settingsManager.agentSettings._BaseInitMass; // *** TEMP!!! ***                        
-        eggSackRespawnCounter = 0;   
+        //eggSackArray[0].parentAgentIndex = 0;
+        //eggSackArray[0].InitializeEggSackFromGenome(0, masterGenomePool.completeSpeciesPoolsList[0].representativeGenome, null, spawnPos);
+        //eggSackArray[0].currentBiomass = settingsManager.agentSettings._BaseInitMass; // *** TEMP!!! ***                        
+        //eggSackRespawnCounter = 0;   
         
-        AddNewSpecies(masterGenomePool.completeSpeciesPoolsList[0].representativeGenome, 0);
+        AddNewSpecies(masterGenomePool.completeSpeciesPoolsList[masterGenomePool.completeSpeciesPoolsList.Count - 1].leaderboardGenomesList[0].candidateGenome, 0);
     }
     public void ExecuteSimEvent(SimEventData eventData) {
 
@@ -1366,9 +1366,11 @@ public class SimulationManager : MonoBehaviour {
 
         int newSpeciesID = masterGenomePool.completeSpeciesPoolsList.Count;
 
-        newGenome.ProcessNewSpeciesExtraMutation();
-
+        
         SpeciesGenomePool newSpecies = new SpeciesGenomePool(newSpeciesID, parentSpeciesID, curSimYear, simAgeTimeSteps, settingsManager.mutationSettingsAgents);
+
+        newGenome.ProcessNewSpeciesExtraMutation();
+        AgentGenome agentGenome = newSpecies.Mutate(newGenome, true, true);
 
         newSpecies.FirstTimeInitialize(newGenome, masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].depthLevel + 1);
         masterGenomePool.currentlyActiveSpeciesIDList.Add(newSpeciesID);

@@ -101,7 +101,7 @@ public class TheRenderKing : MonoBehaviour {
     public Material treeOfLifeEventsLineMat;
     public Material treeOfLifeSpeciesHeadTipMat;
     public Material treeOfLifeCursorLineMat;
-    public Material treeOfLifeCritterPortraitMat;
+    public Material toolbarSpeciesPortraitStrokesMat;
 
     public ComputeBuffer gizmoCursorPosCBuffer;
     public ComputeBuffer gizmoFeedToolPosCBuffer;
@@ -175,7 +175,10 @@ public class TheRenderKing : MonoBehaviour {
     private int numStrokesPerCritterTailFin = 128;
     private int numStrokesPerCritterSkinDetail = 128;
     private ComputeBuffer critterGenericStrokesCBuffer;
-    private ComputeBuffer critterPortraitStrokesCBuffer;
+    // PORTRAIT!!!!
+    public ComputeBuffer toolbarPortraitCritterInitDataCBuffer;
+    public ComputeBuffer toolbarPortraitCritterSimDataCBuffer;
+    private ComputeBuffer toolbarCritterPortraitStrokesCBuffer;
 
     //private int numStrokesPerCritterShadow = 4;
     //private ComputeBuffer critterShadowStrokesCBuffer;
@@ -186,6 +189,8 @@ public class TheRenderKing : MonoBehaviour {
     private ComputeBuffer critterFoodDotsCBuffer;
 
     private ComputeBuffer critterHighlightTrailCBuffer;
+
+    
 
     private BasicStrokeData[] playerGlowInitPos;
     private ComputeBuffer playerGlowCBuffer;
@@ -268,9 +273,7 @@ public class TheRenderKing : MonoBehaviour {
     public ComputeBuffer treeOfLifePortraitBorderDataCBuffer;
     public ComputeBuffer treeOflifePortraitDataCBuffer;
     public ComputeBuffer treeOfLifePortraitEyeDataCBuffer;
-    public ComputeBuffer treeOfLifePortraitCritterInitDataCBuffer;
-    public ComputeBuffer treeOfLifePortraitCritterSimDataCBuffer;
-
+    
     public struct TreeOfLifeEventLineData {
         public int timeStepActivated;
         public float eventCategory;  // minor major extreme 0, 0.5, 1.0
@@ -426,6 +429,8 @@ public class TheRenderKing : MonoBehaviour {
     }  */  
 
     private int debugFrameCounter = 0;
+
+    public bool isToolbarCritterPortraitEnabled = false;
     
     /* $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  RENDER PIPELINE PSEUDOCODE!!!  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
     1) Standard main camera beauty pass finishes -- Renders Environment & Background objects -- store result in RT to be sampled later by brushstroke shaders
@@ -499,6 +504,13 @@ public class TheRenderKing : MonoBehaviour {
         InitializeTreeOfLifeBuffers();
         //InitializeDebugBuffers(); 
 
+
+        // INIT:: ugly :(
+        if(toolbarPortraitCritterInitDataCBuffer != null) {
+            toolbarPortraitCritterInitDataCBuffer.Release();
+        }
+        toolbarPortraitCritterInitDataCBuffer = new ComputeBuffer(1, sizeof(float) * 25 + sizeof(int) * 3);
+
     }
 
     private int GetNumUberStrokesPerCritter() {
@@ -517,7 +529,7 @@ public class TheRenderKing : MonoBehaviour {
         // Most of this will be populated piece-meal later as critters are generated:
         int bufferLength = simManager._NumAgents * GetNumUberStrokesPerCritter();
         critterGenericStrokesCBuffer = new ComputeBuffer(bufferLength, GetMemorySizeCritterUberStrokeData());
-        critterPortraitStrokesCBuffer = new ComputeBuffer(GetNumUberStrokesPerCritter(), GetMemorySizeCritterUberStrokeData());
+        toolbarCritterPortraitStrokesCBuffer = new ComputeBuffer(GetNumUberStrokesPerCritter(), GetMemorySizeCritterUberStrokeData());
     }
     private int GetMemorySizeCritterUberStrokeData() {
         int numBytes = sizeof(int) * 3 + sizeof(float) * 32;
@@ -1840,11 +1852,11 @@ public class TheRenderKing : MonoBehaviour {
         computeShaderCritters.Dispatch(kernelCSUpdateCritterGenericStrokes, singleCritterGenericStrokesCBuffer.count, 1, 1);        
         singleCritterGenericStrokesCBuffer.Release(); 
     }
-    public void UpdateCritterPortraitStrokesData(AgentGenome genome) {
+    public void GenerateCritterPortraitStrokesData(AgentGenome genome) {
         //ComputeBuffer singleCritterGenericStrokesCBuffer = new ComputeBuffer(GetNumUberStrokesPerCritter(), GetMemorySizeCritterUberStrokeData());
-        CritterUberStrokeData[] singleCritterGenericStrokesArray = new CritterUberStrokeData[critterPortraitStrokesCBuffer.count];  // optimize this later?? ***
-        CritterGenomeInterpretor.BrushPoint[] brushPointArray = new CritterGenomeInterpretor.BrushPoint[GetNumUberStrokesPerCritter()];
-        
+        CritterUberStrokeData[] singleCritterGenericStrokesArray = new CritterUberStrokeData[toolbarCritterPortraitStrokesCBuffer.count];  // optimize this later?? ***
+
+        CritterGenomeInterpretor.BrushPoint[] brushPointArray = new CritterGenomeInterpretor.BrushPoint[GetNumUberStrokesPerCritter()];        
         // Generate main body strokes:
         GenerateCritterBodyBrushstrokes(ref singleCritterGenericStrokesArray, brushPointArray, genome, 0);         
         // Loop through all points again and calculate normals/tangents/other things:
@@ -1865,13 +1877,14 @@ public class TheRenderKing : MonoBehaviour {
         // SORT BRUSHSTROKES:::
         SortCritterBrushstrokes(ref singleCritterGenericStrokesArray, 0);
         
-        critterPortraitStrokesCBuffer.SetData(singleCritterGenericStrokesArray);
+        toolbarCritterPortraitStrokesCBuffer.SetData(singleCritterGenericStrokesArray);
 
+        
         float size = (genome.bodyGenome.fullsizeBoundingBox.x + genome.bodyGenome.fullsizeBoundingBox.y) * 0.5f;
         float sizeNormalized = Mathf.Clamp01((size - 0.1f) / 10f);
-        speciesPortraitRenderCamera.GetComponent<CritterPortraitCameraManager>().UpdateCameraTargetValues(Mathf.Clamp(sizeNormalized, 0.1f, 0.5f));
-
-        Debug.Log("UpdateCritterPortraitStrokesData: " + genome.bodyGenome.appearanceGenome.huePrimary.ToString());
+        speciesPortraitRenderCamera.GetComponent<CritterPortraitCameraManager>().UpdateCameraTargetValues(Mathf.Clamp(sizeNormalized, 0.16f, 0.5f));
+        
+        Debug.Log("GenerateCritterPortraitStrokesData: " + genome.bodyGenome.appearanceGenome.huePrimary.ToString());
     }
 
     private void GenerateCritterBodyBrushstrokes(ref CritterUberStrokeData[] strokesArray, CritterGenomeInterpretor.BrushPoint[] brushPointArray, AgentGenome agentGenome, int agentIndex) {
@@ -2718,16 +2731,19 @@ public class TheRenderKing : MonoBehaviour {
         computeShaderCritters.SetBuffer(kernelCSSimulateCritterGenericStrokes, "critterGenericStrokesWriteCBuffer", critterGenericStrokesCBuffer);
         computeShaderCritters.SetFloat("_MapSize", SimulationManager._MapSize);
         computeShaderCritters.Dispatch(kernelCSSimulateCritterGenericStrokes, critterGenericStrokesCBuffer.count / 16, 1, 1);
-
+                
+    }
+    private void SimUIToolbarCritterPortraitStrokes() {
         int kernelCSSimulateCritterPortraitStrokes = computeShaderCritters.FindKernel("CSSimulateCritterPortraitStrokes");        
         computeShaderCritters.SetTexture(kernelCSSimulateCritterPortraitStrokes, "velocityRead", fluidManager._VelocityA);
-        computeShaderCritters.SetBuffer(kernelCSSimulateCritterPortraitStrokes, "critterInitDataCBuffer", treeOfLifePortraitCritterInitDataCBuffer);
-        computeShaderCritters.SetBuffer(kernelCSSimulateCritterPortraitStrokes, "critterSimDataCBuffer", treeOfLifePortraitCritterSimDataCBuffer);
-        computeShaderCritters.SetBuffer(kernelCSSimulateCritterPortraitStrokes, "critterGenericStrokesWriteCBuffer", critterPortraitStrokesCBuffer);
+        computeShaderCritters.SetBuffer(kernelCSSimulateCritterPortraitStrokes, "critterInitDataCBuffer", toolbarPortraitCritterInitDataCBuffer);
+        computeShaderCritters.SetBuffer(kernelCSSimulateCritterPortraitStrokes, "critterSimDataCBuffer", toolbarPortraitCritterSimDataCBuffer);
+        computeShaderCritters.SetBuffer(kernelCSSimulateCritterPortraitStrokes, "critterGenericStrokesWriteCBuffer", toolbarCritterPortraitStrokesCBuffer);
         computeShaderCritters.SetFloat("_MapSize", SimulationManager._MapSize);
-        computeShaderCritters.Dispatch(kernelCSSimulateCritterPortraitStrokes, critterPortraitStrokesCBuffer.count / 16, 1, 1);
+        computeShaderCritters.Dispatch(kernelCSSimulateCritterPortraitStrokes, toolbarCritterPortraitStrokesCBuffer.count / 16, 1, 1);
     }
-    public void UpdateTreeOfLifeEventLineData(List<SimEventData> eventDataList) {
+
+    /*public void UpdateTreeOfLifeEventLineData(List<SimEventData> eventDataList) {
 
         // Move some of this to ComputeShader kernel?
 
@@ -2751,6 +2767,7 @@ public class TheRenderKing : MonoBehaviour {
         }
         treeOfLifeEventLineDataCBuffer.SetData(treeOfLifeEventLineDataArray);
     }
+    */
     /*public void SimTreeOfLifeWorldStatsData(Texture2D dataTex, Texture2D keyTex) {
         int kernelCSUpdateWorldStatsValues = computeShaderTreeOfLife.FindKernel("CSUpdateWorldStatsValues");
         computeShaderTreeOfLife.SetTexture(kernelCSUpdateWorldStatsValues, "treeOfLifeWorldStatsTex", dataTex); // simManager.uiManager.statsTextureLifespan);
@@ -2791,20 +2808,25 @@ public class TheRenderKing : MonoBehaviour {
 
         treeOfLifeSpeciesDataHeadPosCBuffer.GetData(treeOfLifeSpeciesDataHeadPosArray);
     }*/
-    private void SimCritterPortrait() {
-        SimulationStateData.CritterInitData[] treeOfLifePortraitCritterInitDataArray = new SimulationStateData.CritterInitData[1];
-        SimulationStateData.CritterInitData initData  = new SimulationStateData.CritterInitData();
 
-        int selectedSpeciesID = simManager.uiManager.selectedSpeciesID;
-        if(selectedSpeciesID < 0) {
-            selectedSpeciesID = 0;  // Temporary catch
-        }
-        SpeciesGenomePool speciesPool = simManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesID];
-        AgentGenome genome = speciesPool.representativeGenome;
+
+    
+    public void InitializeNewCritterPortraitGenome(AgentGenome genome) {
+        SetToolbarPortraitCritterInitData(genome);
+        // ^^ genome data for critter
+
+        GenerateCritterPortraitStrokesData(genome);
+        // ^^ skin stroke data
+    }
+    private void SetToolbarPortraitCritterInitData(AgentGenome genome) {
 
         // NOT the best place for this:::: ***        
         treeOfLifeBackdropPortraitBorderMat.SetColor("_TintPri", new Color(genome.bodyGenome.appearanceGenome.huePrimary.x, genome.bodyGenome.appearanceGenome.huePrimary.y, genome.bodyGenome.appearanceGenome.huePrimary.z));
         treeOfLifeBackdropPortraitBorderMat.SetColor("_TintSec", new Color(genome.bodyGenome.appearanceGenome.hueSecondary.x, genome.bodyGenome.appearanceGenome.hueSecondary.y, genome.bodyGenome.appearanceGenome.hueSecondary.z));
+        
+
+        SimulationStateData.CritterInitData[] toolbarPortraitCritterInitDataArray = new SimulationStateData.CritterInitData[1];
+        SimulationStateData.CritterInitData initData  = new SimulationStateData.CritterInitData();
 
         // set values
         initData.boundingBoxSize = genome.bodyGenome.fullsizeBoundingBox; // new Vector3(genome.bodyGenome.coreGenome.fullBodyWidth, genome.bodyGenome.coreGenome.fullBodyLength, genome.bodyGenome.coreGenome.fullBodyWidth);
@@ -2832,7 +2854,7 @@ public class TheRenderKing : MonoBehaviour {
 	    initData.headCoord = (genome.bodyGenome.coreGenome.tailLength + genome.bodyGenome.coreGenome.bodyLength) / critterFullsizeLength;
         initData.mouthCoord = (genome.bodyGenome.coreGenome.tailLength + genome.bodyGenome.coreGenome.bodyLength + genome.bodyGenome.coreGenome.headLength) / critterFullsizeLength;
         initData.bendiness = flexibilityScore;
-        initData.speciesID = selectedSpeciesID;
+        initData.speciesID = 0; // selectedSpeciesID;
 
         //initData.mouthIsActive = 0.25f;
         //if(simManager.agentsArray[i].mouthRef.isPassive) {
@@ -2841,21 +2863,23 @@ public class TheRenderKing : MonoBehaviour {
         initData.bodyPatternX = genome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeX;
         initData.bodyPatternY = genome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeY;  // what grid cell of texture sheet to use
         
-        treeOfLifePortraitCritterInitDataArray[0] = initData;
-        if(treeOfLifePortraitCritterInitDataCBuffer != null) {
-            treeOfLifePortraitCritterInitDataCBuffer.Release();
+        toolbarPortraitCritterInitDataArray[0] = initData;
+        if(toolbarPortraitCritterInitDataCBuffer != null) {
+            toolbarPortraitCritterInitDataCBuffer.Release();
         }
-        treeOfLifePortraitCritterInitDataCBuffer = new ComputeBuffer(1, sizeof(float) * 25 + sizeof(int) * 3);
-        treeOfLifePortraitCritterInitDataCBuffer.SetData(treeOfLifePortraitCritterInitDataArray);
+        toolbarPortraitCritterInitDataCBuffer = new ComputeBuffer(1, sizeof(float) * 25 + sizeof(int) * 3);
+        toolbarPortraitCritterInitDataCBuffer.SetData(toolbarPortraitCritterInitDataArray);
         
-
-        SimulationStateData.CritterSimData[] treeOfLifePortraitCritterSimDataArray = new SimulationStateData.CritterSimData[1];
+    }
+    private void SetToolbarPortraitCritterSimData() {
+        
+        SimulationStateData.CritterSimData[] toolbarPortraitCritterSimDataArray = new SimulationStateData.CritterSimData[1];
         SimulationStateData.CritterSimData simData = new SimulationStateData.CritterSimData();
         // SIMDATA ::===========================================================================================================================================================================
         Vector3 agentPos = new Vector3(0f, 0f, 0f); // simManager.agentsArray[i].bodyRigidbody.position;
         simData.worldPos = new Vector3(agentPos.x, agentPos.y, 0f);
-        float angle = Mathf.Cos(Time.realtimeSinceStartup * 0.67f);
-        float angle2 = angle + (float)selectedSpeciesID; // + Time.realtimeSinceStartup * 0.1f; // + (Mathf.PI * 0.5f);
+        float angle = Mathf.Cos(Time.realtimeSinceStartup * 0.67f) * 2f;
+        float angle2 = angle; // + (float)selectedSpeciesID; // + Time.realtimeSinceStartup * 0.1f; // + (Mathf.PI * 0.5f);
         Vector2 facingDir = new Vector2(Mathf.Cos(angle2 + (Mathf.PI * 0.75f)), Mathf.Sin(angle2 + (Mathf.PI * 0.75f)));
         //new Vector2(0f, 1f); // facingDir.normalized;
         simData.heading = facingDir.normalized; //new Vector2(0f, 1f); //     facingDir.normalized;        //new Vector2(0f, 1f); //     
@@ -2875,15 +2899,16 @@ public class TheRenderKing : MonoBehaviour {
         simData.accel = (Mathf.Sin(Time.realtimeSinceStartup * 0.79f) * 0.5f + 0.5f) * 0.081f; // Mathf.Clamp01(simManager.agentsArray[i].curAccel) * 1f; // ** RE-FACTOR!!!!
 		simData.smoothedThrottle = (Mathf.Sin(Time.realtimeSinceStartup * 3.97f + 0.4f) * 0.5f + 0.5f) * 0.85f;
         simData.velocity = facingDir.normalized * (simData.accel + simData.smoothedThrottle); 
-        treeOfLifePortraitCritterSimDataArray[0] = simData;     
-        if(treeOfLifePortraitCritterSimDataCBuffer != null) {
-            treeOfLifePortraitCritterSimDataCBuffer.Release();
+        toolbarPortraitCritterSimDataArray[0] = simData;     
+        if(toolbarPortraitCritterSimDataCBuffer != null) {
+            toolbarPortraitCritterSimDataCBuffer.Release();
         }
-        treeOfLifePortraitCritterSimDataCBuffer = new ComputeBuffer(1, sizeof(float) * 21);
-        treeOfLifePortraitCritterSimDataCBuffer.SetData(treeOfLifePortraitCritterSimDataArray);
+        toolbarPortraitCritterSimDataCBuffer = new ComputeBuffer(1, sizeof(float) * 21);
+        toolbarPortraitCritterSimDataCBuffer.SetData(toolbarPortraitCritterSimDataArray);
         // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     }
-    private void SimTreeOfLife() {
+
+    /*private void SimTreeOfLife() {
                         
         SimulationStateData.CritterInitData[] treeOfLifePortraitCritterInitDataArray = new SimulationStateData.CritterInitData[1];
         SimulationStateData.CritterInitData initData  = new SimulationStateData.CritterInitData();
@@ -3015,55 +3040,9 @@ public class TheRenderKing : MonoBehaviour {
         singleAgentEyeStrokeArray[1] = dataRightEye;
         
         treeOfLifePortraitEyeDataCBuffer.SetData(singleAgentEyeStrokeArray);
-
-        // needed???
-        /*int kernelCSTick = computeShaderTreeOfLife.FindKernel("CSTick");        
-        computeShaderTreeOfLife.SetBuffer(kernelCSTick, "treeOfLifeStemSegmentDataCBuffer", treeOfLifeStemSegmentDataCBuffer);
-        computeShaderTreeOfLife.SetBuffer(kernelCSTick, "treeOfLifeNodeColliderDataCBufferRead", treeOfLifeNodeColliderDataCBufferA);
-        computeShaderTreeOfLife.SetBuffer(kernelCSTick, "treeOfLifeNodeColliderDataCBufferWrite", treeOfLifeNodeColliderDataCBufferB);
-        computeShaderTreeOfLife.SetBuffer(kernelCSTick, "treeOfLifeLeafNodeDataCBuffer", treeOfLifeLeafNodeDataCBuffer);        
-        computeShaderTreeOfLife.SetVector("_TopLeftCornerWorldPos", simManager.cameraManager.worldSpaceTopLeft);
-        computeShaderTreeOfLife.SetVector("_CamRightDir", simManager.cameraManager.worldSpaceCameraRightDir);
-        computeShaderTreeOfLife.SetVector("_CamUpDir", simManager.cameraManager.worldSpaceCameraUpDir);
-        computeShaderTreeOfLife.SetFloat("_CamScale", simManager.uiManager.treeOfLifeManager.camScale);  
-        computeShaderTreeOfLife.SetInt("_HoverID", simManager.uiManager.treeOfLifeManager.hoverID);
-        computeShaderTreeOfLife.SetInt("_SelectedID", simManager.uiManager.treeOfLifeManager.selectedID);
-        float isDraggingNode = 0f;
-        if(simManager.uiManager.isDraggingSpeciesNode) {
-            isDraggingNode = 1f;
-        }
-        computeShaderTreeOfLife.SetFloat("_IsDragging", isDraggingNode);
-        computeShaderTreeOfLife.SetVector("_DraggingForceVector", new Vector4(simManager.uiManager.smoothedMouseVel.x, simManager.uiManager.smoothedMouseVel.y, 0f, 0f));        
-        computeShaderTreeOfLife.SetInt("_CurDeepestGraphDepth", simManager.masterGenomePool.currentHighestDepth);
-        computeShaderTreeOfLife.SetFloat("_Time", Time.realtimeSinceStartup);        
-        computeShaderTreeOfLife.Dispatch(kernelCSTick, treeOfLifeNodeColliderDataCBufferA.count / 512, 1, 1);
-
-        // SWAP BACK TO BUFFER A::::
-        computeShaderTreeOfLife.SetBuffer(kernelCSTick, "treeOfLifeStemSegmentDataCBuffer", treeOfLifeStemSegmentDataCBuffer);
-        computeShaderTreeOfLife.SetBuffer(kernelCSTick, "treeOfLifeNodeColliderDataCBufferRead", treeOfLifeNodeColliderDataCBufferB);
-        computeShaderTreeOfLife.SetBuffer(kernelCSTick, "treeOfLifeNodeColliderDataCBufferWrite", treeOfLifeNodeColliderDataCBufferA);
-        computeShaderTreeOfLife.SetBuffer(kernelCSTick, "treeOfLifeLeafNodeDataCBuffer", treeOfLifeLeafNodeDataCBuffer);
-        computeShaderTreeOfLife.SetVector("_TopLeftCornerWorldPos", simManager.cameraManager.worldSpaceTopLeft);
-        computeShaderTreeOfLife.SetVector("_CamRightDir", simManager.cameraManager.worldSpaceCameraRightDir);
-        computeShaderTreeOfLife.SetVector("_CamUpDir", simManager.cameraManager.worldSpaceCameraUpDir);
-        computeShaderTreeOfLife.SetFloat("_CamScale", simManager.uiManager.treeOfLifeManager.camScale);  
-        computeShaderTreeOfLife.SetInt("_HoverID", simManager.uiManager.treeOfLifeManager.hoverID);
-        computeShaderTreeOfLife.SetInt("_SelectedID", simManager.uiManager.treeOfLifeManager.selectedID);
-        computeShaderTreeOfLife.SetFloat("_IsDragging", isDraggingNode);
-        computeShaderTreeOfLife.SetVector("_DraggingForceVector", new Vector4(simManager.uiManager.smoothedMouseVel.x, simManager.uiManager.smoothedMouseVel.y, 0f, 0f));        
-        computeShaderTreeOfLife.SetInt("_CurDeepestGraphDepth", simManager.masterGenomePool.currentHighestDepth);
-        computeShaderTreeOfLife.SetFloat("_Time", Time.realtimeSinceStartup);
-        computeShaderTreeOfLife.Dispatch(kernelCSTick, treeOfLifeNodeColliderDataCBufferB.count / 512, 1, 1);
-
-        // Pin Root Node:
-        int kernelCSPinRootNode = computeShaderTreeOfLife.FindKernel("CSPinRootNode");
-        computeShaderTreeOfLife.SetBuffer(kernelCSPinRootNode, "treeOfLifeNodeColliderDataCBufferWrite", treeOfLifeNodeColliderDataCBufferA);
-        computeShaderTreeOfLife.Dispatch(kernelCSPinRootNode, 1, 1, 1);
-
-        TreeOfLifeGetColliderNodePositionData(); // timing before or after?
-        */
         
     }
+    */
     /*private void UpdateAgentHighlightData() {
         //agentHoverHighlightCBuffer = new ComputeBuffer(1, sizeof(float) * 4);
         
@@ -3102,20 +3081,32 @@ public class TheRenderKing : MonoBehaviour {
         //SimWaterSplines();
         //SimWaterChains();
 
-        
+
         //SimTreeOfLife(); // issues with this being on FixedUpdate() cycle vs Update() ?? ***
 
         //SimTreeOfLifeWorldStatsData(simManager.uiManager.textureWorldStats, simManager.uiManager.textureWorldStatsKey);
         //Debug.Log("size: " + simManager.uiManager.tolSelectedSpeciesStatsIndex.ToString());
         //Texture2D graphTex = simManager.uiManager.statsTreeOfLifeSpeciesTexArray[simManager.uiManager.selectedSpeciesStatsIndex];
         //float maxVal = simManager.uiManager.maxValuesStatArray[simManager.uiManager.selectedSpeciesStatsIndex];
-        
+
         //SimTreeOfLifeSpeciesTreeData(graphTex, maxVal); // update this?                
         //UpdateAgentHighlightData();
 
         //SimCritterSkinStrokes();
-        SimCritterPortrait();
+
+        // PORTRAIT
+        if(isToolbarCritterPortraitEnabled) {
+            //SimCritterPortrait();
+            SetToolbarPortraitCritterSimData();
+            SimUIToolbarCritterPortraitStrokes();
+        }
+        
+
+        // PRIMARY CRITTERS
         SimCritterGenericStrokes();
+
+        
+
 
         baronVonWater.altitudeMapRef = baronVonTerrain.terrainHeightMap;
         float camDist = Mathf.Clamp01(-1f * simManager.cameraManager.gameObject.transform.position.z / (210f - 10f));
@@ -3232,17 +3223,17 @@ public class TheRenderKing : MonoBehaviour {
         // Species PORTRAIT:
         cmdBufferSpeciesPortraitDisplay.Clear();
         cmdBufferSpeciesPortraitDisplay.SetRenderTarget(speciesPortraitRenderCamera.targetTexture); // needed???
-        cmdBufferSpeciesPortraitDisplay.ClearRenderTarget(true, true, new Color(1f,1f,1f,0f), 1.0f);  // clear -- needed???
+        cmdBufferSpeciesPortraitDisplay.ClearRenderTarget(true, true, new Color(0f,0f,0f,0f), 1.0f);  // clear -- needed???
         cmdBufferSpeciesPortraitDisplay.SetViewProjectionMatrices(speciesPortraitRenderCamera.worldToCameraMatrix, speciesPortraitRenderCamera.projectionMatrix);
 
-        treeOfLifeCritterPortraitMat.SetPass(0);
-        treeOfLifeCritterPortraitMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        treeOfLifeCritterPortraitMat.SetBuffer("critterInitDataCBuffer", treeOfLifePortraitCritterInitDataCBuffer);
-        treeOfLifeCritterPortraitMat.SetBuffer("critterSimDataCBuffer", treeOfLifePortraitCritterSimDataCBuffer);
-        treeOfLifeCritterPortraitMat.SetBuffer("critterGenericStrokesCBuffer", critterPortraitStrokesCBuffer);    
-        treeOfLifeCritterPortraitMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-        treeOfLifeCritterPortraitMat.SetFloat("_MapSize", SimulationManager._MapSize);          
-        cmdBufferSpeciesPortraitDisplay.DrawProcedural(Matrix4x4.identity, treeOfLifeCritterPortraitMat, 0, MeshTopology.Triangles, 6, critterPortraitStrokesCBuffer.count);
+        toolbarSpeciesPortraitStrokesMat.SetPass(0);
+        toolbarSpeciesPortraitStrokesMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        toolbarSpeciesPortraitStrokesMat.SetBuffer("critterInitDataCBuffer", toolbarPortraitCritterInitDataCBuffer);
+        toolbarSpeciesPortraitStrokesMat.SetBuffer("critterSimDataCBuffer", toolbarPortraitCritterSimDataCBuffer);
+        toolbarSpeciesPortraitStrokesMat.SetBuffer("critterGenericStrokesCBuffer", toolbarCritterPortraitStrokesCBuffer);    
+        toolbarSpeciesPortraitStrokesMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+        toolbarSpeciesPortraitStrokesMat.SetFloat("_MapSize", SimulationManager._MapSize);          
+        cmdBufferSpeciesPortraitDisplay.DrawProcedural(Matrix4x4.identity, toolbarSpeciesPortraitStrokesMat, 0, MeshTopology.Triangles, 6, toolbarCritterPortraitStrokesCBuffer.count);
         
         Graphics.ExecuteCommandBuffer(cmdBufferSpeciesPortraitDisplay);
         speciesPortraitRenderCamera.Render();
@@ -4517,8 +4508,8 @@ public class TheRenderKing : MonoBehaviour {
             treeOfLifeStemSegmentDataCBuffer.Release();
         }
 
-        if(critterPortraitStrokesCBuffer != null) {
-            critterPortraitStrokesCBuffer.Release();
+        if(toolbarCritterPortraitStrokesCBuffer != null) {
+            toolbarCritterPortraitStrokesCBuffer.Release();
         }
         
         if(treeOfLifeStemSegmentVerticesCBuffer != null) {
@@ -4536,11 +4527,11 @@ public class TheRenderKing : MonoBehaviour {
         if(treeOfLifePortraitEyeDataCBuffer != null) {
             treeOfLifePortraitEyeDataCBuffer.Release();
         }
-        if(treeOfLifePortraitCritterInitDataCBuffer != null) {
-            treeOfLifePortraitCritterInitDataCBuffer.Release();
+        if(toolbarPortraitCritterInitDataCBuffer != null) {
+            toolbarPortraitCritterInitDataCBuffer.Release();
         }
-        if(treeOfLifePortraitCritterSimDataCBuffer != null) {
-            treeOfLifePortraitCritterSimDataCBuffer.Release();
+        if(toolbarPortraitCritterSimDataCBuffer != null) {
+            toolbarPortraitCritterSimDataCBuffer.Release();
         }
         
         /*if(agentHoverHighlightCBuffer != null) {

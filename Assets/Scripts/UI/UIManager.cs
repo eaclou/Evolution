@@ -923,7 +923,7 @@ private bool treeOfLifeInfoOnC = false;
     //private int unlockCooldownCounter = 0;
             if(isUnlockCooldown) {
                 unlockCooldownCounter++;
-                if(unlockCooldownCounter > 4200) {
+                if(unlockCooldownCounter > 420) {
                     isUnlockCooldown = false;
                     unlockCooldownCounter = 0;
                 }
@@ -1343,7 +1343,7 @@ private bool treeOfLifeInfoOnC = false;
 
                     buttonToolbarWingCreateSpecies.gameObject.SetActive(true);
                     imageToolbarSpeciesPortraitRender.gameObject.SetActive(false);
-                                        
+                            
                 }
                 else {
                     buttonToolbarWingCreateSpecies.gameObject.SetActive(false);
@@ -1369,6 +1369,9 @@ private bool treeOfLifeInfoOnC = false;
                                                         
                             imageToolbarSpeciesPortraitRender.sprite = null;
                             imageToolbarSpeciesPortraitRender.color = Color.white;
+                            // BORDER:
+                            Vector3 hue = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[layerManager.selectedTrophicSlotRef.linkedSpeciesID].representativeGenome.bodyGenome.appearanceGenome.hueSecondary;
+                            imageToolbarSpeciesPortraitBorder.color = new Color(hue.x, hue.y, hue.z); 
                                                         
                         }
                         else {   // ZOOPLANKTON                            
@@ -1446,6 +1449,11 @@ private bool treeOfLifeInfoOnC = false;
         else {
             
         }
+
+        // DEBUG TEMP!
+        //imageToolbarSpeciesPortraitRender.sprite = null;
+        //imageToolbarSpeciesPortraitRender.color = Color.white;
+        //imageToolbarSpeciesPortraitRender.gameObject.SetActive(true);
         
     }
     public void UpdateInfoPanelUI() {
@@ -2111,9 +2119,20 @@ private bool treeOfLifeInfoOnC = false;
         textSelectedSpeciesDescription.text = descriptionText;
     }
 
-    private void UpdateSelectedSpeciesColorUI() { // ** should be called AFTER new species actually created?? something is fucked here
-        Debug.Log("UpdateTolSpeciesColorUI " + selectedSpeciesID.ToString());
-        
+    private void InitToolbarPortraitCritterData(TrophicSlot slot) { // ** should be called AFTER new species actually created?? something is fucked here
+        Debug.Log("InitToolbarPortraitCritterData.. selectedSpeciesID: " + selectedSpeciesID.ToString() + " , slotLinkedID: " + slot.linkedSpeciesID.ToString());
+
+        //int selectedSpeciesID = 0; // simManager.uiManager.selectedSpeciesID;
+        /*
+        if (selectedSpeciesID < 0) {
+            selectedSpeciesID = 0;  // Temporary catch
+        }
+        */
+
+        SpeciesGenomePool speciesPool = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesID];        
+        gameManager.theRenderKing.InitializeNewCritterPortraitGenome(speciesPool.representativeGenome);
+        gameManager.theRenderKing.isToolbarCritterPortraitEnabled = true;
+                
         //Vector3 speciesHuePrimary = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesID].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
         //Vector3 speciesHueSecondary = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesID].representativeGenome.bodyGenome.appearanceGenome.hueSecondary;
         //imageToolbarSpeciesPortraitRender.color = new Color(speciesHueSecondary.x, speciesHueSecondary.y, speciesHueSecondary.z);
@@ -2121,7 +2140,7 @@ private bool treeOfLifeInfoOnC = false;
         //imageTolSpeciesNameBackdrop.color = new Color(speciesHuePrimary.x, speciesHuePrimary.y, speciesHuePrimary.z);
         //imageTolSpeciesReadoutBackdrop.color = new Color(speciesHuePrimary.x, speciesHuePrimary.y, speciesHuePrimary.z);
 
-        gameManager.simulationManager.theRenderKing.UpdateCritterPortraitStrokesData(gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesID].representativeGenome);
+        //gameManager.simulationManager.theRenderKing.UpdateCritterPortraitStrokesData(gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesID].representativeGenome);
     }
 
     private void SetToolbarButtonStateUI(ref Button button, TrophicSlot.SlotStatus slotStatus, bool isSelected) {
@@ -2787,11 +2806,15 @@ private bool treeOfLifeInfoOnC = false;
         gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = slot;
         isToolbarWingOn = true;
 
-        selectedSpeciesID = slot.linkedSpeciesID;
+        selectedSpeciesID = slot.linkedSpeciesID; // update this next
 
-        curActiveTool = ToolType.None;
+        //curActiveTool = ToolType.None;
 
-        UpdateSelectedSpeciesColorUI(); // ***
+
+        if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.status != TrophicSlot.SlotStatus.Empty) {
+            InitToolbarPortraitCritterData(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef); // ***
+        }
+        
         // Why do I have to click this twice before portrait shows up properly??????
     }
 
@@ -2841,12 +2864,28 @@ private bool treeOfLifeInfoOnC = false;
         else {
             if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 1) {
                 //if(createSpecies) {
+                // v v v Actually creates new speciesPool here:::
+                TrophicSlot slot = gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef;
+                slot.speciesName = "Vertebrate " + (slot.slotID + 1).ToString();
                 gameManager.simulationManager.CreateAgentSpecies(new Vector3(curMousePositionOnWaterPlane.x, curMousePositionOnWaterPlane.y, 0f));
+                
                 gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.slotID].linkedSpeciesID = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList.Count - 1].speciesID;
-                //}
+
+                // duplicated code shared with clickAgentButton :(   bad 
+                //
+                //gameManager.simulationManager.trophicLayersManager.isSelectedTrophicSlot = true;
+                //gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = slot;
+                //isToolbarWingOn = true;
+                //selectedSpeciesID = slot.linkedSpeciesID; // update this next
+                                
+                selectedSpeciesID = slot.linkedSpeciesID; // ???
+                InitToolbarPortraitCritterData(slot);
+                
                 
                 panelPendingClickPrompt.GetComponentInChildren<Text>().text = "A new species of Vertebrate added!";
                 panelPendingClickPrompt.GetComponentInChildren<Text>().color = colorAnimalsLight;
+
+                
             }
             else {
                 panelPendingClickPrompt.GetComponentInChildren<Text>().text = "A new species of Zooplankton added!";

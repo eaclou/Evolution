@@ -109,8 +109,8 @@ public class SimEventsManager {
                 //simManager.environmentFluidManager.RerollForcePoints();
                 break;
             case SimEventData.SimEventTypeMinor.CreateSpecies:   
-                AgentGenome newGenome = simManager.masterGenomePool.completeSpeciesPoolsList[randomSpeciesID].GetNewMutatedGenome();
-                simManager.AddNewSpecies(newGenome, randomSpeciesID);
+                //AgentGenome newGenome = simManager.masterGenomePool.completeSpeciesPoolsList[randomSpeciesID].GetNewMutatedGenome();
+                //simManager.AddNewSpecies(newGenome, randomSpeciesID);
                 //simManager.AddNewSpecies(simManager.masterGenomePool.completeSpeciesPoolsList[randomSpeciesID].leaderboardGenomesList[0].candidateGenome, randomSpeciesID);
                 break;
             case SimEventData.SimEventTypeMinor.FoodCorpse:
@@ -186,8 +186,8 @@ public class SimEventsManager {
                 break;
             case SimEventData.SimEventTypeMajor.CreateSpecies:                
                 //int speciesIndex = GetEventSpeciesID(simManager, data);    
-                AgentGenome newGenome = simManager.masterGenomePool.completeSpeciesPoolsList[speciesIndex].GetNewMutatedGenome();
-                simManager.AddNewSpecies(newGenome, speciesIndex);
+                //AgentGenome newGenome = simManager.masterGenomePool.completeSpeciesPoolsList[speciesIndex].GetNewMutatedGenome();
+                //simManager.AddNewSpecies(newGenome, speciesIndex);
                 //simManager.AddNewSpecies(simManager.masterGenomePool.completeSpeciesPoolsList[speciesIndex].leaderboardGenomesList[0].candidateGenome, speciesIndex);
                 break;
             case SimEventData.SimEventTypeMajor.FoodCorpse:
@@ -266,8 +266,8 @@ public class SimEventsManager {
                     //int candID = UnityEngine.Random.Range(0, simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].leaderboardGenomesList.Count);
                     // Get mutated version first?
                     //simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].leaderboardGenomesList[candID].candidateGenome
-                    AgentGenome newGenome = simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].GetNewMutatedGenome();
-                    simManager.AddNewSpecies(newGenome, speciesID);
+                    //AgentGenome newGenome = simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].GetNewMutatedGenome();
+                    //simManager.AddNewSpecies(newGenome, speciesID);
                 }                
                 break;
             case SimEventData.SimEventTypeExtreme.FoodCorpse:

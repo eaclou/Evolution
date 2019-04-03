@@ -10,7 +10,7 @@
 	{
 		Tags{ "RenderType" = "Transparent" }
 		ZWrite Off
-		Cull Off
+		//Cull Off
 		Blend SrcAlpha OneMinusSrcAlpha
 
 		Pass
@@ -77,23 +77,16 @@
 
 				// REFRACTION:							
 				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4((genericStrokeData.worldPos.xy + 40) * 2.5 /  _MapSize, 0, 0)).yzw;
-				float refractionStrength = 0.66;
+				float refractionStrength = 0.33;
 				vertexWorldPos.xy += -surfaceNormal.xy * refractionStrength;				
 				
 				float3 lightDir = float3(-0.52, -0.35, -1);
 				lightDir.xy += -surfaceNormal.xy * 2.25;
 				lightDir = normalize(lightDir);
-				float3 viewDir = normalize(_WorldSpaceCameraPos - genericStrokeData.worldPos);
+				float3 viewDir = normalize(float3(0,-6,-10) - genericStrokeData.worldPos);
 				float3 reflectionDir = reflect(-lightDir, worldNormal);
 				float specTest = pow(saturate(dot(viewDir, reflectionDir)), 17);
-
-				//vertexWorldPos.z += 1.0;
-				// %^$*%^*$^&*$^&*$&*$^7
-				//vertexWorldPos = genericStrokeData.worldPos + quadVerticesCBuffer[id] * 0.15;
-				// %^$*%^*$^&*$^&*$&*$^7
-
-				//float3 testPos = quadVerticesCBuffer[id].x * float3(1,0,0) * genericStrokeData.scale.x + quadVerticesCBuffer[id].y * float3(0,1,0) * genericStrokeData.scale.y;
-				//o.vertex = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(testPos * 0.2 + genericStrokeData.worldPos * 1, 1.0)));
+								
 				o.vertex = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(vertexWorldPos, 1.0)));
 				o.uv = quadVerticesCBuffer[id].xy + 0.5;	
 
@@ -116,9 +109,7 @@
 				float alpha = saturate((critterSimData.embryoPercentage - 0.995) * 200);
 								
 				o.color = float4(specTest * 0.65 + hue * crudeDiffuse, alpha); //genericStrokeData.bindPos.x * 0.5 + 0.5, genericStrokeData.bindPos.z * 0.33 + 0.5, genericStrokeData.bindPos.y * 0.5 + 0.5, 1);
-				
-				o.color = lerp(o.color, decayColor, saturate(decayAmount + saturate(critterSimData.decayPercentage * 50) * 0.25));
-				
+				o.color = lerp(o.color, decayColor, saturate(decayAmount + saturate(critterSimData.decayPercentage * 50) * 0.25));				
 				o.color.a *= alpha;
 
 				//o.worldPos = float4(quadVerticesCBuffer[id].xyz, 1.0);
@@ -129,21 +120,38 @@
 				//float debugColorVal = detachAmount;
 				//o.color.rgb = float3(debugColorVal, debugColorVal, debugColorVal);
 
+				//vertexWorldPos.z += 1.0;
+				// %^$*%^*$^&*$^&*$&*$^7
+				//vertexWorldPos = genericStrokeData.worldPos + quadVerticesCBuffer[id] * 0.15;
+				// %^$*%^*$^&*$^&*$&*$^7
+
+				//float2 testScale = float2(1,1) * 0.05; // * genericStrokeData.scale;
+				//float3 testPos = quadVerticesCBuffer[id].x * float3(1,0,0) * testScale.x + quadVerticesCBuffer[id].y * float3(0,1,0) * testScale.y;
+				//testPos = testPos + genericStrokeData.worldPos;
+				//testPos = float3(quadVerticesCBuffer[id].xy, 0);
+				//o.vertex = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(testPos, 1.0)));
+				//o.color = float4(critterInitData.primaryHue, 1); //genericStrokeData.scale.xy, 1, 1);
+
 				return o;
 			}
 			
 			fixed4 frag (v2f i) : SV_Target
 			{
+				//return float4(i.color.rgb,1);
+				
 				//return float4(1,0.75,0.5,1);
 				//return i.color;
 				// sample the texture
 				float3 waterFogColor = float3(0.03,0.4,0.3) * 0.4;
 
-				fixed4 col = tex2D(_MainTex, i.uv) * i.color;
-				col.rgb = lerp(col.rgb, waterFogColor, 0.1); // 0.5 * saturate((i.worldPos.z - 0.75) * 0.5));
+				fixed4 brushColor = tex2D(_MainTex, i.uv);
+				float4 finalColor = brushColor * i.color;
+				finalColor.rgb = lerp(finalColor.rgb, waterFogColor, 0.2); // 0.5 * saturate((i.worldPos.z - 0.75) * 0.5));
 				//fixed4 col = tex2D(_MainTex, i.bodyUV) * i.color;
 				//col.a = 1;
-				return col;
+				//finalColor.a = 0.0; //brushColor.a;
+
+				return finalColor;
 			}
 			ENDCG
 		}

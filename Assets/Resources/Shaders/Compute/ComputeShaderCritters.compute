@@ -176,7 +176,10 @@ void CSSimulateCritterPortraitStrokes (uint3 id : SV_DispatchThreadID)
 		
 	float3 worldNormal = GetAnimatedDirNew(strokeData.bindNormal, float3(0,0,0), critterInitData, critterSimData, strokeData.t);
 	float3 worldTangent = GetAnimatedDirNew(strokeData.bindTangent, float3(0,0,0), critterInitData, critterSimData, strokeData.t);
-		
+	
+
+	// MUST HAVE BEEN SOME SORT OF NAN ERROR HERE ????  maybe 0 velocity?
+	/*
 	float3 newWorldPos = critterWorldPos + spriteWorldOffset;
 	float3 curWorldPos = strokeData.worldPos;
 		
@@ -196,8 +199,10 @@ void CSSimulateCritterPortraitStrokes (uint3 id : SV_DispatchThreadID)
 	pinnedAmount = saturate((1 - detachAmount) - strokeData.passiveFollow); // - (1 - strokeData.t) * 0.45;
 	
 	float3 worldPosition = lerp(curWorldPos, newWorldPos, pinnedAmount);
-				
-	strokeData.worldPos = worldPosition;
+	*/
+	
+
+	strokeData.worldPos = spriteWorldOffset; //strokeData.bindPos; //worldPosition;
 	strokeData.worldNormal = worldNormal;
 	strokeData.worldTangent = worldTangent;
 	critterGenericStrokesWriteCBuffer[id.x] = strokeData;
