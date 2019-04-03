@@ -293,17 +293,17 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 				float2 noiseVel = float2(rand(float2(id.x, _Time * noiseFreq)), rand(float2(_Time * noiseFreq * 1.347, id.x % 32))) * 2.0 - 1.0;  // get into -1 to 1 range		
 				posOffset += noiseVel * _SwimNoiseMag * _MasterSwimSpeed * noiseOnOff;
 			
-				float maxAlgaeConsumptionRate = 0.001;  // one-thousandth of biomass per tick = bodyweight consumed per 1000 ticks
+				float maxAlgaeConsumptionRate = 0.0042;  // one-thousandth of biomass per tick = bodyweight consumed per 1000 ticks
 				float algaeConsumptionMask = saturate(_GlobalAlgaeLevel * 0.01);   //  if global levels are too low it reduces consumption?
 
-				float maxOxygenConsumptionRate = 0.001; // relative to biomass?
+				float maxOxygenConsumptionRate = 0.0075; // relative to biomass?
 				float oxygenConsumptionMask = saturate(_GlobalOxygenLevel * 0.01);
 
 				float algaeConsumed = bodyMass * maxAlgaeConsumptionRate * algaeConsumptionMask;
 				float oxygenUsed = bodyMass * maxOxygenConsumptionRate * oxygenConsumptionMask;
 		
-				float growthEfficiency = 0.1; //
-				float wasteEfficiency = 0.1;
+				float growthEfficiency = 0.1375; //
+				float wasteEfficiency = 0.0167;
 				float growthMass = algaeConsumed * growthEfficiency * oxygenConsumptionMask; // Also limited by OXYGEN!!!
 					// Maximum growth needs an explicit cap? or should it simply be determined by max algaeConsumption Rate + maxAge?
 				wasteMass += algaeConsumed * wasteEfficiency;		
@@ -333,7 +333,7 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 		animalParticlesWrite[id.x].velocity = posOffset;
 		
 		// SPLINE::::::
-		float restDistance = 1 * sqrt(animalParticle.biomass); // creature length
+		float restDistance = 0.8 * sqrt(animalParticle.biomass); // creature length
 		float lerpStrength = 0.75;
 
 		float2 p0 = newWorldPos;
@@ -356,7 +356,7 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 
 		animalParticlesWrite[id.x].biomass = bodyMass;
 		// AGING:
-		animalParticlesWrite[id.x].age = animalParticle.age + 0.000125;
+		animalParticlesWrite[id.x].age = animalParticle.age + 0.00029;
 
 		// Resource Conversions:::::		
 		animalParticlesWrite[id.x].wasteProduced = wasteMass;	// Combined Poop & Decomposing	
@@ -393,7 +393,7 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 					float randRadius = rand(float2(randX * 10, randY * -3.37)) * (_MaxParticleSize - _MinParticleSize) + _MinParticleSize;					
 			
 					// StartSize?
-					float startingMass = 0.01;
+					float startingMass = 0.0025;
 					float startingRadius = sqrt(startingMass);
 					animalParticlesWrite[id.x].radius = startingRadius;  // Obsolete? 
 					animalParticlesWrite[id.x].biomass = startingMass;         //randRadius * randRadius * 3.141592 * _ParticleNutrientDensity;

@@ -289,8 +289,8 @@ public class SimulationManager : MonoBehaviour {
 
         // TreeOfLife Render buffers here ???              ///////// **********************   THIS NEEDS REFACTOR!!!!! **********
         // Tree Of LIFE UI collider & RenderKing updates:
-        theRenderKing.TreeOfLifeAddNewSpecies(masterGenomePool, 0);
-        theRenderKing.TreeOfLifeAddNewSpecies(masterGenomePool, 1);
+        //wtheRenderKing.TreeOfLifeAddNewSpecies(masterGenomePool, 0);
+        //theRenderKing.TreeOfLifeAddNewSpecies(masterGenomePool, 1);
         masterGenomePool.completeSpeciesPoolsList[0].isFlaggedForExtinction = true;
         masterGenomePool.ExtinctifySpecies(this, masterGenomePool.currentlyActiveSpeciesIDList[0]);
                 
@@ -763,7 +763,7 @@ public class SimulationManager : MonoBehaviour {
     public void PlayerToolStirOff() {        
         environmentFluidManager.StirWaterOff();
     }
-    public void PlayerFeedToolSprinkle(Vector3 pos) {
+    /*public void PlayerFeedToolSprinkle(Vector3 pos) {
         Debug.Log("PlayerFeedToolSprinkle pos: " + pos.ToString());
         int[] respawnIndices = new int[4];
         for(int i = 0; i < respawnIndices.Length; i++) {
@@ -784,7 +784,7 @@ public class SimulationManager : MonoBehaviour {
             respawnIndices[i] = UnityEngine.Random.Range(0, 1024);
         }
         //vegetationManager.ReviveSelectFoodParticles(respawnIndices, 6f, new Vector4(pos.x / _MapSize, pos.y / _MapSize, 0f, 0f), simStateData);
-    }
+    }*/
     //public void ChangeGlobalMutationRate(float normalizedVal) {
     //    settingsManager.SetGlobalMutationRate(normalizedVal);
     //}
@@ -1093,9 +1093,16 @@ public class SimulationManager : MonoBehaviour {
 
         // &&&&& *****  HERE!!!! **** &&&&&&   --- Select a species first to serve as parentGenome !! ***** &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
         // Can be random selection (unbiased), or proportional to species avg Fitnesses?
-        SpeciesGenomePool sourceSpeciesPool = masterGenomePool.SelectNewGenomeSourceSpecies(false, 0.33f);
+
+
+        SpeciesGenomePool sourceSpeciesPool = masterGenomePool.SelectNewGenomeSourceSpecies(false, 0.33f); // select at random
+                
+        
         // -- Select a ParentGenome from the leaderboardList and create a mutated copy (childGenome):
-        AgentGenome newGenome = sourceSpeciesPool.GetNewMutatedGenome();
+        //AgentGenome newGenome = sourceSpeciesPool.GetNewMutatedGenome();
+        AgentGenome newGenome = sourceSpeciesPool.GetGenomeFromFitnessLottery();
+        newGenome = sourceSpeciesPool.Mutate(newGenome, true, true);
+
         // -- Check which species this new childGenome should belong to (most likely its parent, but maybe it creates a new species or better fits in with a diff existing species)        
         masterGenomePool.AssignNewMutatedGenomeToSpecies(newGenome, sourceSpeciesPool.speciesID, this); // Checks which species this new genome should belong to and adds it to queue / does necessary processing   
                 
@@ -1103,22 +1110,10 @@ public class SimulationManager : MonoBehaviour {
             // i.e. Set curLifecycle to .AwaitingRespawn ^
             // then new Agents should use the next available genome from the updated ToBeEvaluated pool      
         
-        agentRef.SetToAwaitingRespawn();    
+        agentRef.SetToAwaitingRespawn(); 
 
         ProcessAgentScores(agentRef);  // *** CLEAN THIS UP!!! ***
-
-        // &&&&&& OLD OLD OLD &&&&&&&&&&&& OLD OLD &&&&&&&&&&&&&&&&& OLD &&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-        /*
-        CheckForRecordAgentScore(agentIndex);
-        ProcessAgentScores(agentIndex);
-        // Updates rankedIndicesArray[] so agents are ordered by score:
-        int speciesIndex = Mathf.FloorToInt((float)agentIndex / (float)numAgents * (float)numSpecies);
-        ProcessAndRankAgentFitness(speciesIndex);
-        int parentGenomeIndex = GetAgentIndexByLottery(rankedFitnessList, rankedIndicesList, speciesIndex);
-        SetAgentGenomeToMutatedCopyOfParentGenome(agentIndex, agentGenomePoolArray[parentGenomeIndex]);
         
-        agentsArray[agentIndex].SetToAwaitingRespawn();
-        */
     }
     // ********** RE-IMPLEMENT THIS LATER!!!! ******************************************************************************
     private void SpawnAgentFromEggSack(CandidateAgentData sourceCandidate, int agentIndex, int speciesIndex, EggSack parentEggSack) {
@@ -1362,6 +1357,13 @@ public class SimulationManager : MonoBehaviour {
     }
     
     public void AddNewSpecies(AgentGenome newGenome, int parentSpeciesID) {
+        /*
+        //SpeciesGenomePool firstSpecies = new SpeciesGenomePool(1, 0, 0, 1, mutationSettingsRef);
+        //firstSpecies.FirstTimeInitialize(numAgentGenomes, 1);
+        //currentlyActiveSpeciesIDList.Add(1);
+        //completeSpeciesPoolsList.Add(firstSpecies);
+        */
+
         int newSpeciesID = masterGenomePool.completeSpeciesPoolsList.Count;
 
         newGenome.ProcessNewSpeciesExtraMutation();

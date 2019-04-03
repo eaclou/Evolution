@@ -84,10 +84,11 @@
 				float2 curveTangent = normalize(GetFirstDerivative(particleData.worldPos.xy, particleData.p1, particleData.p2, particleData.p3, t));
 				float2 curveBitangent = float2(curveTangent.y, -curveTangent.x);
 						
-				float width = sqrt(particleData.biomass) * 0.45 * (1 - 2 * abs(0.75 - uv.y)); //GetPoint1D(waterCurveData.widths.x, waterCurveData.widths.y, waterCurveData.widths.z, waterCurveData.widths.w, t) * 0.75 * (1 - saturate(testNewVignetteMask));
+				float width = sqrt(particleData.biomass) * 0.4 * (1 - 2 * abs(0.75 - uv.y)); //GetPoint1D(waterCurveData.widths.x, waterCurveData.widths.y, waterCurveData.widths.z, waterCurveData.widths.w, t) * 0.75 * (1 - saturate(testNewVignetteMask));
 				
 				float swimAnimOffset = sin(_Time.y * 40 - t * 10 + inst) * 5;
-				float swimAnimMask = t; //saturate(1.0 - uv.y); //saturate(1.0 - t);
+				float swimAnimMask = t * saturate(1.0 - particleData.isDecaying); //saturate(1.0 - uv.y); //saturate(1.0 - t);
+				
 				float2 offset = curveBitangent * -(quadPoint.x + swimAnimOffset * swimAnimMask) * width; // * randomWidth; // *** support full vec4 widths!!!
 				
 
@@ -109,6 +110,7 @@
 				o.uv = uv; //quadVerticesCBuffer[id].xy + 0.5f;	
 
 				o.color = particleData.genome;
+				o.color.a = particleData.isDecaying;
 				//o.color = float4(saturate(particleData.isDecaying), saturate(particleData.biomass * 5), saturate(particleData.age * 0.5), 1);
 				
 				return o;
@@ -122,6 +124,7 @@
 				float val = i.color.a;
 				
 				float4 finalColor = float4(lerp(i.color.rgb, float3(0.75, 0.75, 1.0), 0.5) * 1.25, i.uv.y); // float4(float3(i.color.z * 1.2, 0.85, (1.0 - i.color.w) * 0.2) + i.color.y, texColor.a * i.color.x * 0.33 * (1 - i.color.z));
+				finalColor.rgb = lerp(finalColor.rgb, float3(0.4, 0.4, 0.4), val);
 				finalColor.a *= 1.0;
 				//finalColor.rgb = float3(0.45, 0.55, 1.295) * 1.25;
 				return finalColor;

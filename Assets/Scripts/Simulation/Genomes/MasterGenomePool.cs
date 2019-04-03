@@ -48,12 +48,13 @@ public class MasterGenomePool {
         // When do I create nodeCollider & shit?
 
         // Create foundational Species:
-        SpeciesGenomePool firstSpecies = new SpeciesGenomePool(1, 0, 0, 1, mutationSettingsRef);
-        firstSpecies.FirstTimeInitialize(numAgentGenomes, 1);
-
-        currentlyActiveSpeciesIDList.Add(1);
-        completeSpeciesPoolsList.Add(firstSpecies);
+        //SpeciesGenomePool firstSpecies = new SpeciesGenomePool(1, 0, 0, 1, mutationSettingsRef);
+        //firstSpecies.FirstTimeInitialize(numAgentGenomes, 1);
+        //currentlyActiveSpeciesIDList.Add(1);
+        //completeSpeciesPoolsList.Add(firstSpecies);
         
+
+
         //uiManagerRef.treeOfLifeManager = new TreeOfLifeManager(uiManagerRef.treeOfLifeAnchorGO, uiManagerRef);
         //uiManagerRef.treeOfLifeManager.FirstTimeInitialize(this);
 

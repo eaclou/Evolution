@@ -155,11 +155,27 @@ public class SpeciesGenomePool {
     public void FirstTimeInitialize(AgentGenome foundingGenome, int depth) {
         InitShared();
         depthLevel = depth;
-        
-        CandidateAgentData candidate = new CandidateAgentData(foundingGenome, speciesID);
 
-        candidateGenomesList.Add(candidate);
-        leaderboardGenomesList.Add(candidate);
+        for (int i = 0; i < 32; i++) {
+            /*AgentGenome agentGenome = new AgentGenome();
+            agentGenome.GenerateInitialRandomBodyGenome();            
+            int tempNumHiddenNeurons = 0;
+            agentGenome.InitializeRandomBrainFromCurrentBody(mutationSettingsRef.initialConnectionChance, tempNumHiddenNeurons);
+
+            CandidateAgentData candidate = new CandidateAgentData(agentGenome, speciesID);
+            if(i < maxLeaderboardGenomePoolSize) {
+                leaderboardGenomesList.Add(candidate);
+            }
+            candidateGenomesList.Add(candidate);
+            */
+
+            AgentGenome agentGenome = Mutate(foundingGenome, true, true);
+            CandidateAgentData candidate = new CandidateAgentData(agentGenome, speciesID);
+            candidateGenomesList.Add(candidate);
+            leaderboardGenomesList.Add(candidate);
+        }
+        
+        
         
         representativeGenome = foundingGenome;
     }
@@ -302,6 +318,78 @@ public class SpeciesGenomePool {
         candidateGenomesList.Add(newCandidateData);
     }
 
+    
+    public AgentGenome GetGenomeFromFitnessLottery() {
+        int numCandidates = leaderboardGenomesList.Count;
+        float[] rankedFitnessScoresArray = new float[numCandidates];
+        int[] rankedIndicesList = new int[numCandidates];
+        float totalFitness = 0f;
+
+        // Rank current leaderBoard list based on score
+        for (int i = 0; i < numCandidates; i++) {
+            float fitnessScore = 0f;
+            for(int j = 0; j < leaderboardGenomesList[i].evaluationScoresList.Count; j++) {
+                fitnessScore += (float)leaderboardGenomesList[i].evaluationScoresList[j];
+            }
+            rankedFitnessScoresArray[i] = fitnessScore;
+            rankedIndicesList[i] = i;
+            totalFitness += fitnessScore;
+        }
+        
+        // Sort By Fitness
+        for (int i = 0; i < numCandidates - 1; i++) {
+            for (int j = 0; j < numCandidates - 1; j++) {
+                float swapFitA = rankedFitnessScoresArray[j];
+                float swapFitB = rankedFitnessScoresArray[j + 1];
+                int swapIdA = rankedIndicesList[j];
+                int swapIdB = rankedIndicesList[j + 1];
+
+                if (swapFitA < swapFitB) {  // bigger is better now after inversion
+                    rankedFitnessScoresArray[j] = swapFitB;
+                    rankedFitnessScoresArray[j + 1] = swapFitA;
+                    rankedIndicesList[j] = swapIdB;
+                    rankedIndicesList[j + 1] = swapIdA;
+                }
+            }
+        }
+
+        int selectedIndex = 0;
+        
+        // generate random lottery value between 0f and totalFitness:
+        float lotteryValue = UnityEngine.Random.Range(0f, totalFitness);
+        float currentValue = 0f;
+        for (int i = 0; i < numCandidates; i++) {
+            if (lotteryValue >= currentValue && lotteryValue < (currentValue + rankedFitnessScoresArray[i])) {
+                // Jackpot!
+                selectedIndex = rankedIndicesList[i];
+                //Debug.Log("Selected: " + selectedIndex.ToString() + "! (" + i.ToString() + ") fit= " + currentValue.ToString() + "--" + (currentValue + (1f - rankedFitnessList[i])).ToString() + " / " + totalFitness.ToString() + ", lotto# " + lotteryValue.ToString() + ", fit= " + (1f - rankedFitnessList[i]).ToString());
+            }
+            currentValue += rankedFitnessScoresArray[i]; // add this agent's fitness to current value for next check
+        }
+        //return selectedIndex;
+        // choose genome by lottery
+        AgentGenome parentGenome = leaderboardGenomesList[selectedIndex].candidateGenome;
+
+        return parentGenome;
+    }
+    public AgentGenome Mutate(AgentGenome parentGenome, bool bodySettings, bool brainSettings) {
+        //AgentGenome parentGenome = leaderboardGenomesList[selectedIndex].candidateGenome;
+        AgentGenome childGenome = new AgentGenome();
+        
+        BodyGenome newBodyGenome = new BodyGenome();
+        BrainGenome newBrainGenome = new BrainGenome();
+
+        BodyGenome parentBodyGenome = parentGenome.bodyGenome;
+        BrainGenome parentBrainGenome = parentGenome.brainGenome;
+        
+        newBodyGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome, mutationSettingsRef);
+        newBrainGenome.SetToMutatedCopyOfParentGenome(parentBrainGenome, newBodyGenome, mutationSettingsRef);
+        
+        childGenome.bodyGenome = newBodyGenome; 
+        childGenome.brainGenome = newBrainGenome; 
+
+        return childGenome;
+    }
     public AgentGenome GetNewMutatedGenome() {
 
         int numCandidates = leaderboardGenomesList.Count;
