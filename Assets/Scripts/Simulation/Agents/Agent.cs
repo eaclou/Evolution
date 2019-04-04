@@ -15,7 +15,7 @@ public class Agent : MonoBehaviour {
     public float smoothedThrottleLerp = 0.2f;
     public float animationCycle = 0f;
     public float turningAmount = 0f;
-    public float swimAnimationCycleSpeed = 0.025f;
+    public float swimAnimationCycleSpeed = 0.1f;
 
     public float spawnStartingScale = 0.2f; // *** REFACTOR!!! SYNC WITH EGGS!!!
 
@@ -36,7 +36,7 @@ public class Agent : MonoBehaviour {
         Dead,
         Null
     }
-    private int gestationDurationTimeSteps = 540;
+    private int gestationDurationTimeSteps = 240;
     public int _GestationDurationTimeSteps
     {
         get
@@ -60,8 +60,8 @@ public class Agent : MonoBehaviour {
 
         }
     }*/
-    public int maxAgeTimeSteps = 10000;
-    private int decayDurationTimeSteps = 480;
+    public int maxAgeTimeSteps = 20000;
+    private int decayDurationTimeSteps = 360;
     public int _DecayDurationTimeSteps
     {
         get
@@ -491,11 +491,13 @@ public class Agent : MonoBehaviour {
                 
                 break;
             case AgentLifeStage.Dead:
-                if(currentBiomass <= 0f) {  // Fully decayed
+                if(currentBiomass <= 0f && lifeStageTransitionTimeStepCounter >= decayDurationTimeSteps) {  // Fully decayed
                     curLifeStage = AgentLifeStage.Null;                    
                     lifeStageTransitionTimeStepCounter = 0;
                     isInert = true;
                 }
+
+                // REFACTOR THIS!!!! ******  SYNC actual biomass decay with visual percentage?!??
 
                 // OLD::::
                 /*
@@ -1115,7 +1117,7 @@ public class Agent : MonoBehaviour {
 
         turningAmount = Mathf.Lerp(turningAmount, this.bodyRigidbody.angularVelocity * Mathf.Deg2Rad * 0.1f, 0.28f);
 
-        animationCycle += smoothedThrottle.magnitude * swimAnimationCycleSpeed / (Mathf.Lerp(fullSizeBoundingBox.y, 1f, 1f) * (sizePercentage * 0.5f + 0.5f)) * fatigueMultiplier;
+        animationCycle += smoothedThrottle.magnitude * swimAnimationCycleSpeed * (sizePercentage * 0.25f + 0.75f) * fatigueMultiplier; // (Mathf.Lerp(fullSizeBoundingBox.y, 1f, 1f)
 
         if (throttle.sqrMagnitude > 0.000001f) {  // Throttle is NOT == ZERO
             
@@ -1337,10 +1339,10 @@ public class Agent : MonoBehaviour {
     
     public void ReconstructAgentGameObjects(SettingsManager settings, AgentGenome genome, EggSack parentEggSack, Vector3 startPos, bool isImmaculate) {
         float corpseLerp = (float)settings.curTierFoodCorpse / 10f;
-        decayDurationTimeSteps = 480; // Mathf.RoundToInt(Mathf.Lerp(360f, 3600f, corpseLerp));
+        //decayDurationTimeSteps = 480; // Mathf.RoundToInt(Mathf.Lerp(360f, 3600f, corpseLerp));
         float eggLerp = (float)settings.curTierFoodEgg / 10f;
-        gestationDurationTimeSteps = Mathf.RoundToInt(Mathf.Lerp(360f, 1080f, eggLerp));
-        pregnancyRefactoryDuration = Mathf.RoundToInt(Mathf.Lerp(3600f, 800f, eggLerp));
+        //gestationDurationTimeSteps = Mathf.RoundToInt(Mathf.Lerp(360f, 1080f, eggLerp));
+        //pregnancyRefactoryDuration = Mathf.RoundToInt(Mathf.Lerp(3600f, 800f, eggLerp));
 
         //InitializeAgentWidths(genome);
         InitializeGameObjectsAndComponents();  // Not needed??? ***
@@ -1438,7 +1440,7 @@ public class Agent : MonoBehaviour {
     // If spawnImmaculate, where does the biomass come from? -- should it be free?
     //  
 
-    public void InitializeSpawnAgentImmaculate(SettingsManager settings, int agentIndex, CandidateAgentData candidateData, StartPositionGenome startPos) {        
+    public void InitializeSpawnAgentImmaculate(SettingsManager settings, int agentIndex, CandidateAgentData candidateData, Vector3 spawnWorldPos) {        
         index = agentIndex;
         speciesIndex = candidateData.speciesID;
         candidateRef = candidateData;
@@ -1453,7 +1455,7 @@ public class Agent : MonoBehaviour {
         InitializeModules(genome);      // Modules need to be created first so that Brain can map its neurons to existing modules  
         
         // Upgrade this to proper Pooling!!!!
-        ReconstructAgentGameObjects(settings, genome, null, startPos.startPosition, true);
+        ReconstructAgentGameObjects(settings, genome, null, spawnWorldPos, true);
 
         brain = new Brain(genome.brainGenome, this); 
         

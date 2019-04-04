@@ -12,6 +12,11 @@ public class TheRenderKing : MonoBehaviour {
     public BaronVonTerrain baronVonTerrain;
     public BaronVonWater baronVonWater;
 
+    public float tempSwimMag = 1f;
+    public float tempSwimFreq = 1f;
+    public float tempSwimSpeed = 1f;
+    public float tempAccelMult = 1f;
+
     public Camera mainRenderCam;
     public Camera fluidObstaclesRenderCamera;
     public Camera fluidColorRenderCamera;
@@ -1880,9 +1885,11 @@ public class TheRenderKing : MonoBehaviour {
         toolbarCritterPortraitStrokesCBuffer.SetData(singleCritterGenericStrokesArray);
 
         
-        float size = (genome.bodyGenome.fullsizeBoundingBox.x + genome.bodyGenome.fullsizeBoundingBox.y) * 0.5f;
-        float sizeNormalized = Mathf.Clamp01((size - 0.1f) / 10f);
-        speciesPortraitRenderCamera.GetComponent<CritterPortraitCameraManager>().UpdateCameraTargetValues(Mathf.Clamp(sizeNormalized, 0.16f, 0.5f));
+        //float size = (genome.bodyGenome.fullsizeBoundingBox.x + genome.bodyGenome.fullsizeBoundingBox.y) * 5f;        
+        //float sizeNormalized = Mathf.Clamp01((size - 0.1f) / 1f);
+        float sizeNormalized = Mathf.Clamp01((genome.bodyGenome.coreGenome.creatureBaseLength - 0.6f) / 0.6f);
+        //sizeNormalized = 1f;
+        speciesPortraitRenderCamera.GetComponent<CritterPortraitCameraManager>().UpdateCameraTargetValues(Mathf.Lerp(0.2f, 0.7f, sizeNormalized));
         
         Debug.Log("GenerateCritterPortraitStrokesData: " + genome.bodyGenome.appearanceGenome.huePrimary.ToString());
     }
@@ -2843,17 +2850,31 @@ public class TheRenderKing : MonoBehaviour {
         initData.eatEfficiencyMeat = 1f;
         
         float critterFullsizeLength = genome.bodyGenome.coreGenome.tailLength + genome.bodyGenome.coreGenome.bodyLength + genome.bodyGenome.coreGenome.headLength + genome.bodyGenome.coreGenome.mouthLength;
-        float flexibilityScore = Mathf.Min((1f / genome.bodyGenome.coreGenome.creatureAspectRatio - 1f) * 0.6f, 6f);
+        float flexibilityScore = 1f; // Mathf.Min((1f / genome.bodyGenome.coreGenome.creatureAspectRatio - 1f) * 0.6f, 6f);
         //float mouthLengthNormalized = genome.bodyGenome.coreGenome.mouthLength / critterFullsizeLength;
         float approxRadius = genome.bodyGenome.coreGenome.creatureBaseLength * genome.bodyGenome.coreGenome.creatureAspectRatio;
-        float approxSize = approxRadius * genome.bodyGenome.coreGenome.creatureBaseLength;
-        initData.swimMagnitude = 0.75f * (1f - flexibilityScore * 0.2f);
-        initData.swimFrequency = flexibilityScore * 2f;
-	    initData.swimAnimSpeed = 12f * (1f - approxSize * 0.25f);
+        float approxSize = 1f; // approxRadius * genome.bodyGenome.coreGenome.creatureBaseLength;
+
+        //tempSwimMag = 1f;
+        //tempSwimFreq = 1f;
+        //tempSwimSpeed = 1f;
+        //tempAccelMult = 1f;
+
+        float swimLerp = Mathf.Clamp01((genome.bodyGenome.coreGenome.creatureAspectRatio - 0.175f) / 0.35f);  // 0 = longest, 1 = shortest
+                
+                // Mag range: 2 --> 0.5
+                //freq range: 1 --> 2
+        initData.swimMagnitude = Mathf.Lerp(0.225f, 1.1f, swimLerp); // 1f * (1f - flexibilityScore * 0.2f);
+        initData.swimFrequency = Mathf.Lerp(2f, 0.8f, swimLerp);   //flexibilityScore * 1.05f;
+        initData.swimAnimSpeed = 12f;    // 12f * (1f - approxSize * 0.25f);
+
+        //initData.swimMagnitude = tempSwimMag; // 0.75f * (1f - flexibilityScore * 0.2f);
+        //initData.swimFrequency = tempSwimFreq; // flexibilityScore * 2f;
+        //initData.swimAnimSpeed = tempSwimSpeed; // 12f * (1f - approxSize * 0.25f);
         initData.bodyCoord = genome.bodyGenome.coreGenome.tailLength / critterFullsizeLength;
 	    initData.headCoord = (genome.bodyGenome.coreGenome.tailLength + genome.bodyGenome.coreGenome.bodyLength) / critterFullsizeLength;
         initData.mouthCoord = (genome.bodyGenome.coreGenome.tailLength + genome.bodyGenome.coreGenome.bodyLength + genome.bodyGenome.coreGenome.headLength) / critterFullsizeLength;
-        initData.bendiness = flexibilityScore;
+        initData.bendiness = 1f; // tempAccelMult;
         initData.speciesID = 0; // selectedSpeciesID;
 
         //initData.mouthIsActive = 0.25f;

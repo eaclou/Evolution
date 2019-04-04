@@ -170,6 +170,8 @@ public class SpeciesGenomePool {
             */
 
             AgentGenome agentGenome = Mutate(foundingGenome, true, true);
+            int tempNumHiddenNeurons = 4;
+            agentGenome.InitializeRandomBrainFromCurrentBody(mutationSettingsRef.initialConnectionChance, tempNumHiddenNeurons);
             CandidateAgentData candidate = new CandidateAgentData(agentGenome, speciesID);
             candidateGenomesList.Add(candidate);
             leaderboardGenomesList.Add(candidate);
@@ -372,6 +374,8 @@ public class SpeciesGenomePool {
 
         return parentGenome;
     }
+
+
     public AgentGenome Mutate(AgentGenome parentGenome, bool bodySettings, bool brainSettings) {
         //AgentGenome parentGenome = leaderboardGenomesList[selectedIndex].candidateGenome;
         AgentGenome childGenome = new AgentGenome();
@@ -390,6 +394,8 @@ public class SpeciesGenomePool {
 
         return childGenome;
     }
+
+    /*
     public AgentGenome GetNewMutatedGenome() {
 
         int numCandidates = leaderboardGenomesList.Count;
@@ -470,4 +476,5 @@ public class SpeciesGenomePool {
 
         return childGenome;
     }
+    */
 }

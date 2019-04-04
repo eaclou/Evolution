@@ -53,10 +53,10 @@ public class CritterModuleAppearanceGenome {
 
         //sizeAndAspectRatio = new Vector2(1f, 1f);
 
-        huePrimary = new Vector3(UnityEngine.Random.Range(0.2f, 0.8f), UnityEngine.Random.Range(0.2f, 0.8f), UnityEngine.Random.Range(0.2f, 0.8f));
-        hueSecondary = new Vector3(UnityEngine.Random.Range(0.2f, 0.8f), UnityEngine.Random.Range(0.2f, 0.8f), UnityEngine.Random.Range(0.2f, 0.8f));
+        huePrimary = new Vector3(UnityEngine.Random.Range(0.1f, 1f), UnityEngine.Random.Range(0.1f, 1f), UnityEngine.Random.Range(0.1f, 1f));
+        hueSecondary = new Vector3(UnityEngine.Random.Range(0.1f, 1f), UnityEngine.Random.Range(0.1f, 1f), UnityEngine.Random.Range(0.1f, 1f));
         bodyStrokeBrushTypeX = UnityEngine.Random.Range(0, 8);
-        bodyStrokeBrushTypeY = UnityEngine.Random.Range(0, 8);
+        bodyStrokeBrushTypeY = UnityEngine.Random.Range(0, 4);
         
         eyeGenome = new EyeGenome();
         eyeGenome.localPos = new Vector2(UnityEngine.Random.Range(0.45f, 1f), UnityEngine.Random.Range(0.4f, 1f));
@@ -68,12 +68,6 @@ public class CritterModuleAppearanceGenome {
 
     public void SetToMutatedCopyOfParentGenome(CritterModuleAppearanceGenome parentGenome, MutationSettings settings) {
 
-        //testModuleGenome = new TestModuleGenome(0, 0); // for now.. **** Revisit if updating Modules/Abilites!!!
-        
-        // Set equal to parent at first, then check for possible mutation of that value:
-        // SIZE IS: (x= size, y= aspectRatio)   aspect = x/y
-        //sizeAndAspectRatio = UtilityMutationFunctions.GetMutatedVector2Additive(parentGenome.sizeAndAspectRatio, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, new Vector2(0.8f, 0.6f), new Vector2(2.4f, 1f));
-        
         huePrimary = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.huePrimary, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * 0.2f, 0f, 1f);
         hueSecondary = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.hueSecondary, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * 0.2f, 0f, 1f);
         // ***** v v v Revisit when implementing #BrushTypes!! **** REVISIT!!

@@ -259,104 +259,104 @@ public class CritterModuleCoreGenome {
         ShapeModifierData initModifier = new ShapeModifierData();
         initModifier.modifierTypeID = ShapeModifierType.Extrude;
         initModifier.maskIndicesList = new List<int>();
-        initModifier.amplitude = 0.05f;
+        initModifier.amplitude = UnityEngine.Random.Range(0f, 1f);
         initModifier.taperDistance = 1f;
 
         // Masks for this modifier:
         MaskData maskData = new MaskData();
         maskData.coordinateTypeID = MaskCoordinateType.Polygonize;
         maskData.functionTypeID = MaskFunctionType.Cos;
-        maskData.origin = 0.5f; // normalized along length of creature
-        maskData.amplitude = 0.5f;
-        maskData.cycleDistance = 0.5f;
-        maskData.phase = 0f;
-        maskData.numPolyEdges = 1;
-        maskData.axisDir = new Vector2(0f, 1f);
+        maskData.origin = UnityEngine.Random.Range(0f, 1f); //0.5f; // normalized along length of creature
+        maskData.amplitude = UnityEngine.Random.Range(0f, 1f); //0.5f;
+        maskData.cycleDistance = UnityEngine.Random.Range(0f, 1f); //0.5f;
+        maskData.phase = UnityEngine.Random.Range(0f, 1f); //0f;
+        maskData.numPolyEdges = UnityEngine.Random.Range(1, 7); // 1;
+        maskData.axisDir = new Vector2(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f));
         maskData.repeat = true;
 
         masksList.Add(maskData);
         initModifier.maskIndicesList.Add(masksList.Count - 1); // reference mask by index to allow re-use by other shape modifiers    
         shapeModifiersList.Add(initModifier);
 
-        creatureBaseLength = UnityEngine.Random.Range(0.33f, 0.6f);
-        creatureAspectRatio = UnityEngine.Random.Range(0.15f, 0.525f);
+        creatureBaseLength = UnityEngine.Random.Range(0.6f, 1.2f);
+        creatureAspectRatio = UnityEngine.Random.Range(0.175f, 0.48f);
 
         //creatureComplexShapeLerp = 0f;
         // Or start with deformed sphere???? *****
         // Mouth/Snout:
-        creatureFrontTaperSize = 0.33f;
-        creatureBackTaperSize = 0.33f;
+        creatureFrontTaperSize = 0.3f;
+        creatureBackTaperSize = 0.4f;
 
         //mouthComplexShapeLerp = 0f;
-        mouthLength = 1f;
-        mouthFrontWidth = 1f;  // width of snout at front of critter
-        mouthFrontHeight = 1f; // height of snout at front of critter
-        mouthFrontVerticalOffset = 0f; // shift up/down pivot/cylinder center
-        mouthBackWidth = 1f; 
-        mouthBackHeight = 1f;
-        mouthBackVerticalOffset = 0f;        
+        mouthLength = UnityEngine.Random.Range(0.5f, 1.5f);  //1f;
+        mouthFrontWidth = UnityEngine.Random.Range(0.5f, 1.5f);  // width of snout at front of critter
+        mouthFrontHeight = UnityEngine.Random.Range(0.5f, 1.5f); // height of snout at front of critter
+        mouthFrontVerticalOffset = UnityEngine.Random.Range(-0.5f, 0.5f); //0f; // shift up/down pivot/cylinder center
+        mouthBackWidth = UnityEngine.Random.Range(0.5f, 1.5f); //1f; 
+        mouthBackHeight = UnityEngine.Random.Range(0.5f, 1.5f); //1f;
+        mouthBackVerticalOffset = UnityEngine.Random.Range(-0.5f, 0.5f); //0f;        
 
-        mouthToHeadTransitionSize = 0.5f;  // 0-1 normalized
+        mouthToHeadTransitionSize = UnityEngine.Random.Range(0.25f, 0.75f); //0.5f;  // 0-1 normalized
         // Head
         //headComplexShapeLerp = 0f;
-        headLength = 1f;
-        headFrontWidth = 1f;
-        headFrontHeight = 1f;
-        headFrontVerticalOffset = 0f;
-        headBackWidth = 1f; 
-        headBackHeight = 1f;
-        headBackVerticalOffset = 0f;
+        headLength = UnityEngine.Random.Range(0.5f, 1.5f);  //1f;
+        headFrontWidth = UnityEngine.Random.Range(0.5f, 1.5f);  //1f;
+        headFrontHeight = UnityEngine.Random.Range(0.5f, 1.5f);  //1f;
+        headFrontVerticalOffset = UnityEngine.Random.Range(-0.5f, 0.5f); //0f;
+        headBackWidth = UnityEngine.Random.Range(0.5f, 1.5f);  //1f; 
+        headBackHeight = UnityEngine.Random.Range(0.5f, 1.5f);  //1f;
+        headBackVerticalOffset = UnityEngine.Random.Range(-0.5f, 0.5f); //0f;
 
-        headToBodyTransitionSize = 0.5f;  // 0-1 normalized
+        headToBodyTransitionSize = UnityEngine.Random.Range(0.25f, 0.75f); //0.5f;  // 0-1 normalized
         // Body:
         //bodyComplexShapeLerp = 0f;
-        bodyLength = 1f;
-        bodyFrontWidth = 1f;  // width of snout at front of critter
-        bodyFrontHeight = 1f; // height of snout at front of critter
-        bodyFrontVerticalOffset = 0f; // shift up/down pivot/cylinder center
-        bodyBackWidth = 1f; 
-        bodyBackHeight = 1f;
-        bodyBackVerticalOffset = 0f;
+        bodyLength = UnityEngine.Random.Range(0.5f, 1.5f);  //1f;
+        bodyFrontWidth = UnityEngine.Random.Range(0.5f, 1.5f);  //1f;  // width of snout at front of critter
+        bodyFrontHeight = UnityEngine.Random.Range(0.5f, 1.5f);  //1f; // height of snout at front of critter
+        bodyFrontVerticalOffset = UnityEngine.Random.Range(-0.5f, 0.5f); //0f; // shift up/down pivot/cylinder center
+        bodyBackWidth = UnityEngine.Random.Range(0.5f, 1.5f);  //1f; 
+        bodyBackHeight = UnityEngine.Random.Range(0.5f, 1.5f);  //1f;
+        bodyBackVerticalOffset = UnityEngine.Random.Range(-0.5f, 0.5f); //0f;
 
-        bodyToTailTransitionSize = 0.5f;  // 0-1 normalized
+        bodyToTailTransitionSize = UnityEngine.Random.Range(0.25f, 0.75f); //0.5f;  // 0-1 normalized
         //Tail:
         //tailComplexShapeLerp = 0f;
-        tailLength = 1f;
-        tailFrontWidth = 1f;  // width of snout at front of critter
-        tailFrontHeight = 1f; // height of snout at front of critter
-        tailFrontVerticalOffset = 0f; // shift up/down pivot/cylinder center
-        tailBackWidth = 1f; 
-        tailBackHeight = 1f;
-        tailBackVerticalOffset = 0f;
+        tailLength = UnityEngine.Random.Range(0.5f, 1.5f);  //1f;
+        tailFrontWidth = UnityEngine.Random.Range(0.5f, 1.5f);  //1f;  // width of snout at front of critter
+        tailFrontHeight = UnityEngine.Random.Range(0.5f, 1.5f);  //1f; // height of snout at front of critter
+        tailFrontVerticalOffset = UnityEngine.Random.Range(-0.5f, 0.5f); //0f; // shift up/down pivot/cylinder center
+        tailBackWidth = UnityEngine.Random.Range(0.5f, 1.5f);  //1f; 
+        tailBackHeight = UnityEngine.Random.Range(0.5f, 1.5f);  //1f;
+        tailBackVerticalOffset = UnityEngine.Random.Range(-0.5f, 0.5f); //0f;
 
         //tailEndCapTaperSize = 0.5f;
 
-        numEyes = 2;
-        eyePosSpread = 1f;  // 1f == full hemisphere coverage, 0 == top
-        eyeLocAmplitude = 0.5f;
-        eyeLocFrequency = 1f;
-        eyeLocOffset = 0f;        
-        socketRadius = 1f;  // relative to body size?
-        socketHeight = 0.25f; 
-        socketBulge = 0f;
-        eyeballRadius = 1f;
-        eyeBulge = 0.33f;
-        irisWidthFraction = 0.9f;        
-        pupilWidthFraction = 0.5f;  // percentage of iris size
-        pupilHeightFraction = 1f;
+        numEyes = UnityEngine.Random.Range(1,4);
+        eyePosSpread = UnityEngine.Random.Range(0.33f, 1f);  // 1f == full hemisphere coverage, 0 == top
+        eyeLocAmplitude = UnityEngine.Random.Range(0.4f, 0.6f);
+        eyeLocFrequency = UnityEngine.Random.Range(0.75f, 1.5f);
+        eyeLocOffset = UnityEngine.Random.Range(0f, 0.1f);       
+        socketRadius = UnityEngine.Random.Range(0.65f, 1.15f);  // relative to body size?
+        socketHeight = UnityEngine.Random.Range(0.15f, 0.4f);
+        socketBulge = UnityEngine.Random.Range(0f, 1f);
+        eyeballRadius = UnityEngine.Random.Range(0.8f, 1.2f);
+        eyeBulge = UnityEngine.Random.Range(0.25f, 0.5f);
+        irisWidthFraction = UnityEngine.Random.Range(0.7f, 0.95f);       
+        pupilWidthFraction = UnityEngine.Random.Range(0.2f, 0.5f);  // percentage of iris size
+        pupilHeightFraction = UnityEngine.Random.Range(0.75f, 1f);
         eyeballHue = Vector3.one;
-        irisHue = new Vector3(0.25f, 0.5f, 0.5f);
+        irisHue = new Vector3(UnityEngine.Random.Range(0.25f, 0.75f), UnityEngine.Random.Range(0.25f, 0.75f), UnityEngine.Random.Range(0.25f, 0.75f));
         
 
         // Dorsal Fin:
-        dorsalFinStartCoordY = 0.2f;
-        dorsalFinEndCoordY = 0.7f;
-        dorsalFinSlantAmount = 0.35f;
-        dorsalFinBaseHeight = 0f;
+        dorsalFinStartCoordY = UnityEngine.Random.Range(0f, 0.4f);
+        dorsalFinEndCoordY = UnityEngine.Random.Range(0.6f, 0.8f);
+        dorsalFinSlantAmount = UnityEngine.Random.Range(0.25f, 0.4f);
+        dorsalFinBaseHeight = UnityEngine.Random.Range(0f, 2.5f);
 
         // Tail Fin:
-        tailFinSpreadAngle = 0.3f;
-        tailFinBaseLength = 0f;
+        tailFinSpreadAngle = UnityEngine.Random.Range(0.1f, 0.5f);
+        tailFinBaseLength = UnityEngine.Random.Range(0f, 1f);
         tailFinFrequencies = Vector3.one;
         tailFinAmplitudes = Vector3.one;
         tailFinOffsets = Vector3.zero;
@@ -551,7 +551,7 @@ public class CritterModuleCoreGenome {
         //tailEndCapTaperSize = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.tailEndCapTaperSize, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.5f, 1f);
 
         // EYES EYES EYES EYES:::
-        numEyes = 2; // UtilityMutationFunctions.GetMutatedIntAdditive(parentGenome.numEyes, settings.defaultBodyMutationChance, 1, 1, 3);
+        numEyes = UtilityMutationFunctions.GetMutatedIntAdditive(parentGenome.numEyes, settings.defaultBodyMutationChance, 1, 1, 3);
         eyePosSpread = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.eyePosSpread, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.5f, 1f);  // 1f == full hemisphere coverage, 0 == top
         eyeLocAmplitude = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.eyeLocAmplitude, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
         eyeLocFrequency = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.eyeLocFrequency, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.25f, 6f);
@@ -591,28 +591,6 @@ public class CritterModuleCoreGenome {
         
         mouthFeedFrequency = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.mouthFeedFrequency, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.25f, 4f);
         mouthAttackAmplitude = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.mouthAttackAmplitude, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.25f, 4f);
-
-        /*fullBodyWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.fullBodyWidth, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.1f, 4.5f);
-        fullBodyLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.fullBodyLength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, fullBodyWidth * 1.25f, fullBodyWidth * 4f);
-        if(fullBodyLength < fullBodyWidth * 1.25f) {
-            fullBodyLength = fullBodyWidth * 1.25f;
-        }
-
-        //numSegments = parentGenome.numSegments;
-        //numSegments = 1; // UtilityMutationFunctions.GetMutatedIntAdditive(parentGenome.numSegments, settings.defaultBodyMutationChance, 3, 1, 12);
         
-        relWidthSnout = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.relWidthSnout, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.25f, 1f);
-        relWidthHead = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.relWidthHead, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.5f, 2f);
-        relWidthTorso = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.relWidthTorso, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.5f, 2f);
-        relWidthTail = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.relWidthTail, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.1f, 1f);
-
-        relLengthSnout = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.relLengthSnout, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.5f, 2f);
-        relLengthHead = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.relLengthHead, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.5f, 2f);
-        relLengthTorso = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.relLengthTorso, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.5f, 2f);
-        relLengthTail = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.relLengthTail, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.5f, 2f);
-
-        snoutTaper = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.snoutTaper, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
-        tailTaper = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.tailTaper, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
-        */
     }
 }

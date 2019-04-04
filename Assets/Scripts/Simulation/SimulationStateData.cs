@@ -270,13 +270,17 @@ public class SimulationStateData {
                 //    critterInitDataArray[i].mouthIsActive = 0f;
                 //}
                 float critterFullsizeLength = genome.bodyGenome.coreGenome.tailLength + genome.bodyGenome.coreGenome.bodyLength + genome.bodyGenome.coreGenome.headLength + genome.bodyGenome.coreGenome.mouthLength;
-                float flexibilityScore = Mathf.Min((1f / genome.bodyGenome.coreGenome.creatureAspectRatio - 1f) * 0.6f, 6f);
+                //0.175f, 0.525f
+                float swimLerp = Mathf.Clamp01((genome.bodyGenome.coreGenome.creatureAspectRatio - 0.175f) / 0.35f);  // 0 = longest, 1 = shortest
+                float flexibilityScore = 1f; // Mathf.Min((1f / genome.bodyGenome.coreGenome.creatureAspectRatio - 1f) * 0.6f, 6f);
                 //float mouthLengthNormalized = genome.bodyGenome.coreGenome.mouthLength / critterFullsizeLength;
-                float approxRadius = genome.bodyGenome.coreGenome.creatureBaseLength * genome.bodyGenome.coreGenome.creatureAspectRatio;
-                float approxSize = approxRadius * genome.bodyGenome.coreGenome.creatureBaseLength;
-                critterInitDataArray[i].swimMagnitude = 0.75f * (1f - flexibilityScore * 0.2f);
-                critterInitDataArray[i].swimFrequency = flexibilityScore * 1.5f;
-	            critterInitDataArray[i].swimAnimSpeed = 12f * (1f - approxSize * 0.25f);
+                //float approxRadius = genome.bodyGenome.coreGenome.creatureBaseLength * genome.bodyGenome.coreGenome.creatureAspectRatio;
+                //float approxSize = 1f; // approxRadius * genome.bodyGenome.coreGenome.creatureBaseLength;
+                // Mag range: 2 --> 0.5
+                //freq range: 1 --> 2
+                critterInitDataArray[i].swimMagnitude = Mathf.Lerp(0.33f, 1.5f, swimLerp); // 1f * (1f - flexibilityScore * 0.2f);
+                critterInitDataArray[i].swimFrequency = Mathf.Lerp(2f, 0.8f, swimLerp);   //flexibilityScore * 1.05f;
+                critterInitDataArray[i].swimAnimSpeed = 12f;    // 12f * (1f - approxSize * 0.25f);
                 critterInitDataArray[i].bodyCoord = genome.bodyGenome.coreGenome.tailLength / critterFullsizeLength;
 	            critterInitDataArray[i].headCoord = (genome.bodyGenome.coreGenome.tailLength + genome.bodyGenome.coreGenome.bodyLength) / critterFullsizeLength;
                 critterInitDataArray[i].mouthCoord = (genome.bodyGenome.coreGenome.tailLength + genome.bodyGenome.coreGenome.bodyLength + genome.bodyGenome.coreGenome.headLength) / critterFullsizeLength;
@@ -373,7 +377,7 @@ public class SimulationStateData {
 
                 critterSimDataArray[i].moveAnimCycle = simManager.agentsArray[i].animationCycle;
                 critterSimDataArray[i].turnAmount = simManager.agentsArray[i].turningAmount;
-                critterSimDataArray[i].accel += Mathf.Clamp01(simManager.agentsArray[i].curAccel) * 1f; // ** RE-FACTOR!!!!
+                critterSimDataArray[i].accel += Mathf.Clamp01(simManager.agentsArray[i].curAccel) * 0.8f; // ** RE-FACTOR!!!!
 		        critterSimDataArray[i].smoothedThrottle = simManager.agentsArray[i].smoothedThrottle.magnitude;
 
                 // Z & W coords represents agent's x/y Radii (in FluidCoords)

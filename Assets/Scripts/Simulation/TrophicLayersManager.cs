@@ -101,7 +101,7 @@ public class TrophicLayersManager {
     public void Tick(SimulationManager simManager) {
         //check for unlocks:
         if(kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
-            if(simManager.simResourceManager.curGlobalAlgaeParticles > 200f || simManager.simResourceManager.curGlobalDetritus > 150f) {
+            if(simManager.simResourceManager.curGlobalAlgaeParticles > 200f) { // || simManager.simResourceManager.curGlobalDetritus > 150f) {
                 kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.Empty;
                 Debug.Log("DECOMPOSERS UNLOCKED!!! " + simManager.uiManager.unlockCooldownCounter.ToString());
 
@@ -111,7 +111,7 @@ public class TrophicLayersManager {
         }
         
         if(kingdomAnimals.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
-            if(simManager.simResourceManager.curGlobalOxygen > 250f && simManager.simResourceManager.curGlobalDecomposers > 25f && !simManager.uiManager.isUnlockCooldown) {
+            if(simManager.simResourceManager.curGlobalDecomposers > 40f) { // && !simManager.uiManager.isUnlockCooldown) {
                 kingdomAnimals.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.Empty;
                 Debug.Log("ZOOPLANKTON UNLOCKED!!! " + simManager.uiManager.unlockCooldownCounter.ToString());
                 simManager.uiManager.AnnounceUnlockZooplankton();
@@ -120,8 +120,8 @@ public class TrophicLayersManager {
         }
 
         if(kingdomAnimals.trophicTiersList[1].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
-            if(simManager.simResourceManager.curGlobalAnimalParticles > 10f && !simManager.uiManager.isUnlockCooldown) {
-                kingdomAnimals.trophicTiersList[1].trophicSlots[0].status = TrophicSlot.SlotStatus.Empty;
+            if(simManager.simResourceManager.curGlobalAnimalParticles > 20f) {     // && !simManager.uiManager.isUnlockCooldown) {
+                
 
                 kingdomAnimals.trophicTiersList[1].unlocked = true;
                 kingdomAnimals.trophicTiersList[1].trophicSlots[0].status = TrophicSlot.SlotStatus.Empty;

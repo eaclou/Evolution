@@ -34,7 +34,7 @@ public class SimulationManager : MonoBehaviour {
 
     public bool isQuickStart = true;
 
-    public float curPlayerMutationRate = 0.75f;  // UI-based value, giving player control over mutation frequency with one parameter
+    //public float curPlayerMutationRate = 0.75f;  // UI-based value, giving player control over mutation frequency with one parameter
 
     private bool isLoading = false;
     private bool loadingComplete = false;
@@ -157,7 +157,11 @@ public class SimulationManager : MonoBehaviour {
     private int numStepsInSimYear = 720;
     private int simAgeYearCounter = 0;
     public int curSimYear = 0;
-        
+
+    private bool recentlyAddedSpeciesOn = false;// = true;
+    private Vector2 recentlyAddedSpeciesWorldPos; // = new Vector2(spawnPos.x, spawnPos.y);
+    private int recentlyAddedSpeciesID; // = masterGenomePool.completeSpeciesPoolsList.Count - 1;
+    private int recentlyAddedSpeciesTimeCounter = 0;
     
 
     #region loading   // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& LOADING LOADING LOADING &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
@@ -539,6 +543,21 @@ public class SimulationManager : MonoBehaviour {
 
         trophicLayersManager.Tick(this);
 
+        /*private bool recentlyAddedSpeciesOn = false;// = true;
+        private Vector2 recentlyAddedSpeciesWorldPos; // = new Vector2(spawnPos.x, spawnPos.y);
+        private int recentlyAddedSpeciesID; // = masterGenomePool.completeSpeciesPoolsList.Count - 1;
+        private int recentlyAddedSpeciesTimeCounter = 0;*/
+
+        if(recentlyAddedSpeciesOn) {
+            recentlyAddedSpeciesTimeCounter++;
+
+            if(recentlyAddedSpeciesTimeCounter > 300) {
+                recentlyAddedSpeciesOn = false;
+                recentlyAddedSpeciesTimeCounter = 0;
+
+                Debug.Log("recentlyAddedSpeciesOn  TIMED OUT!!!");
+            }
+        }
 
         // Go through each Trophic Layer:
             // Measure resources used/produced
@@ -943,7 +962,12 @@ public class SimulationManager : MonoBehaviour {
         // CHECK FOR DEAD FOOD!!! :::::::
         for (int f = 0; f < eggSackArray.Length; f++) {
             if (eggSackArray[f].isDepleted) {
-                ProcessDeadEggSack(f);
+                if(recentlyAddedSpeciesOn) {
+
+                }
+                else {
+                    ProcessDeadEggSack(f);
+                }                
             }
         }
     }
@@ -956,7 +980,7 @@ public class SimulationManager : MonoBehaviour {
     }  // *** revisit
     private void CheckForReadyToSpawnAgents() {        
         for (int a = 0; a < agentsArray.Length; a++) {
-            if(agentRespawnCounter > 3) {
+            if(agentRespawnCounter > 4) {
                 if (agentsArray[a].curLifeStage == Agent.AgentLifeStage.AwaitingRespawn) {
                     //Debug.Log("AttemptToSpawnAgent(" + a.ToString() + ")");
                     AttemptToSpawnAgent(a);
@@ -1006,10 +1030,10 @@ public class SimulationManager : MonoBehaviour {
                 candidateData.isBeingEvaluated = true;
             }
             else { // No eggSack found:
-                if(agentIndex == 0) {  // temp hack to avoid null reference exceptions:
-                    SpawnAgentImmaculate(candidateData, agentIndex, speciesIndex);
-                    candidateData.isBeingEvaluated = true;
-                }                
+                //if(agentIndex == 0) {  // temp hack to avoid null reference exceptions:
+                SpawnAgentImmaculate(candidateData, agentIndex, speciesIndex);
+                candidateData.isBeingEvaluated = true;
+                //}                
             }
         }       
     }
@@ -1031,9 +1055,16 @@ public class SimulationManager : MonoBehaviour {
         //eggSackArray[0].parentAgentIndex = 0;
         //eggSackArray[0].InitializeEggSackFromGenome(0, masterGenomePool.completeSpeciesPoolsList[0].representativeGenome, null, spawnPos);
         //eggSackArray[0].currentBiomass = settingsManager.agentSettings._BaseInitMass; // *** TEMP!!! ***                        
-        //eggSackRespawnCounter = 0;   
-        
+        //eggSackRespawnCounter = 0;
+                
         AddNewSpecies(masterGenomePool.completeSpeciesPoolsList[masterGenomePool.completeSpeciesPoolsList.Count - 1].leaderboardGenomesList[0].candidateGenome, 0);
+
+        recentlyAddedSpeciesOn = true;
+        recentlyAddedSpeciesWorldPos = new Vector2(spawnPos.x, spawnPos.y);
+        recentlyAddedSpeciesID = masterGenomePool.completeSpeciesPoolsList.Count - 1;
+        recentlyAddedSpeciesTimeCounter = 0;
+
+        Debug.Log("CREATE CreateAgentSpecies pos: " + spawnPos.ToString());
     }
     public void ExecuteSimEvent(SimEventData eventData) {
 
@@ -1126,10 +1157,29 @@ public class SimulationManager : MonoBehaviour {
     }
     private void SpawnAgentImmaculate(CandidateAgentData sourceCandidate, int agentIndex, int speciesIndex) {
         
-        numAgentsBorn++;
-        //currentOldestAgent = agentsArray[rankedIndicesList[0]].ageCounter;
-        agentsArray[agentIndex].InitializeSpawnAgentImmaculate(settingsManager, agentIndex, sourceCandidate, GetRandomFoodSpawnPosition()); // Spawn that genome in dead Agent's body and revive it!
-        theRenderKing.UpdateCritterGenericStrokesData(agentsArray[agentIndex]); //agentIndex, sourceCandidate.candidateGenome);
+        bool spawnOn = false;
+
+        Vector3 spawnWorldPos = GetRandomFoodSpawnPosition().startPosition;
+        if(recentlyAddedSpeciesOn) {
+
+            if(speciesIndex == recentlyAddedSpeciesID) {
+                spawnOn = true;
+                spawnWorldPos = new Vector3(recentlyAddedSpeciesWorldPos.x, recentlyAddedSpeciesWorldPos.y, 0f);
+            }
+            else {
+                Debug.Log("ERROR! couldn't spqawn correct speciesID!!!");
+            }
+        }
+        else {
+            spawnOn = true;
+        }
+
+        if(spawnOn) {
+            agentsArray[agentIndex].InitializeSpawnAgentImmaculate(settingsManager, agentIndex, sourceCandidate, spawnWorldPos); // Spawn that genome in dead Agent's body and revive it!
+            theRenderKing.UpdateCritterGenericStrokesData(agentsArray[agentIndex]); //agentIndex, sourceCandidate.candidateGenome);
+            numAgentsBorn++;
+            //Debug.Log("%%%%%%%% SpawnAgentImmaculates pos: " + spawnWorldPos.ToString());
+        }
         
     }
     public void ProcessDeadEggSack(int eggSackIndex) {
@@ -1195,7 +1245,7 @@ public class SimulationManager : MonoBehaviour {
             }
             else {
                 // Wait? SpawnImmaculate?
-                
+                /*
                 int respawnCooldown = 83;
                 
                 if(eggSackRespawnCounter > respawnCooldown) {  // try to encourage more pregnancies?
@@ -1221,7 +1271,7 @@ public class SimulationManager : MonoBehaviour {
                         
                         eggSackRespawnCounter = 0;       
                     }         
-                }             
+                }  */           
             }
         }
         else {
@@ -1357,22 +1407,21 @@ public class SimulationManager : MonoBehaviour {
     }
     
     public void AddNewSpecies(AgentGenome newGenome, int parentSpeciesID) {
-        /*
-        //SpeciesGenomePool firstSpecies = new SpeciesGenomePool(1, 0, 0, 1, mutationSettingsRef);
-        //firstSpecies.FirstTimeInitialize(numAgentGenomes, 1);
-        //currentlyActiveSpeciesIDList.Add(1);
-        //completeSpeciesPoolsList.Add(firstSpecies);
-        */
-
+        
         int newSpeciesID = masterGenomePool.completeSpeciesPoolsList.Count;
-
+               
         
         SpeciesGenomePool newSpecies = new SpeciesGenomePool(newSpeciesID, parentSpeciesID, curSimYear, simAgeTimeSteps, settingsManager.mutationSettingsAgents);
 
+        // Random Body?
         newGenome.ProcessNewSpeciesExtraMutation();
-        AgentGenome agentGenome = newSpecies.Mutate(newGenome, true, true);
+        newGenome.GenerateInitialRandomBodyGenome(); // might break?
+        AgentGenome agentGenome = newSpecies.Mutate(newGenome, true, true); //
+        
+        // **** I want to just change the APPEARANCE of body genome, but keep the brain? ... area to revisit later
+        // Maybe just do a fresh restart for now -- fully random init
 
-        newSpecies.FirstTimeInitialize(newGenome, masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].depthLevel + 1);
+        newSpecies.FirstTimeInitialize(agentGenome, masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].depthLevel + 1);
         masterGenomePool.currentlyActiveSpeciesIDList.Add(newSpeciesID);
         masterGenomePool.completeSpeciesPoolsList.Add(newSpecies);
         masterGenomePool.speciesCreatedOrDestroyedThisFrame = true;
@@ -1436,11 +1485,7 @@ public class SimulationManager : MonoBehaviour {
         newSpecies.avgDamageDealt = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgDamageDealtPerYearList[lastIndex];
         newSpecies.avgDamageTaken = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgDamageTakenPerYearList[lastIndex];
 
-        // Tree Of LIFE UI collider & RenderKing updates:
-        //uiManager.treeOfLifeManager.AddNewSpecies(masterGenomePool, newSpeciesID);
-        //theRenderKing.TreeOfLifeAddNewSpecies(masterGenomePool, newSpeciesID);
-        // WRAP THIS IN A FUNCTION!!! &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-
+        
         if(newSpecies.depthLevel > masterGenomePool.currentHighestDepth) {
             masterGenomePool.currentHighestDepth = newSpecies.depthLevel;
         }
