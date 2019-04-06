@@ -3792,6 +3792,58 @@ public class TheRenderKing : MonoBehaviour {
                 cmdBufferMain.DrawProcedural(Matrix4x4.identity, animalParticleDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, simManager.zooplanktonManager.animalParticlesCBuffer.count);
         
             }
+
+            if(simManager.trophicLayersManager.GetAgentsOnOff()) {
+                // Highlight trail:
+                critterHighlightTrailMat.SetPass(0);
+                critterHighlightTrailMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
+                critterHighlightTrailMat.SetBuffer("highlightTrailDataCBuffer", critterHighlightTrailCBuffer);
+                critterHighlightTrailMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+                critterHighlightTrailMat.SetFloat("_MapSize", SimulationManager._MapSize);
+                float highlightOn = 0f;
+                if(simManager.uiManager.curActiveTool == UIManager.ToolType.Inspect) {
+                    highlightOn = 1f;
+                }
+                critterHighlightTrailMat.SetFloat("_HighlightOn", highlightOn);
+                critterHighlightTrailMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
+                cmdBufferMain.DrawProcedural(Matrix4x4.identity, critterHighlightTrailMat, 0, MeshTopology.Triangles, 6, critterHighlightTrailCBuffer.count);
+            
+        
+                eggSackStrokeDisplayMat.SetPass(0);
+                eggSackStrokeDisplayMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
+                eggSackStrokeDisplayMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
+                eggSackStrokeDisplayMat.SetBuffer("eggDataCBuffer", simManager.simStateData.eggDataCBuffer);
+                eggSackStrokeDisplayMat.SetBuffer("eggSackSimDataCBuffer", simManager.simStateData.eggSackSimDataCBuffer);
+                eggSackStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+                eggSackStrokeDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+                eggSackStrokeDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+                cmdBufferMain.DrawProcedural(Matrix4x4.identity, eggSackStrokeDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.eggDataCBuffer.count);
+        
+                // What is this????
+                critterDebugGenericStrokeMat.SetPass(0);
+                critterDebugGenericStrokeMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+                critterDebugGenericStrokeMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
+                critterDebugGenericStrokeMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
+                critterDebugGenericStrokeMat.SetBuffer("critterGenericStrokesCBuffer", critterGenericStrokesCBuffer);    
+                critterDebugGenericStrokeMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+                //critterDebugGenericStrokeMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+                //critterDebugGenericStrokeMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
+                critterDebugGenericStrokeMat.SetFloat("_MapSize", SimulationManager._MapSize);            
+                cmdBufferMain.DrawProcedural(Matrix4x4.identity, critterDebugGenericStrokeMat, 0, MeshTopology.Triangles, 6, critterGenericStrokesCBuffer.count);
+
+                // *** Revisit this in future - probably can get away without it, just use one pass for all eggSacks
+                eggCoverDisplayMat.SetPass(0);
+                eggCoverDisplayMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
+                eggCoverDisplayMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
+                eggCoverDisplayMat.SetBuffer("eggSackSimDataCBuffer", simManager.simStateData.eggSackSimDataCBuffer);
+                eggCoverDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+                eggCoverDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+                eggCoverDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+                cmdBufferMain.DrawProcedural(Matrix4x4.identity, eggCoverDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.critterInitDataCBuffer.count);
+            
+
+            }
+            
             
             
             // suspended particle bits:
@@ -3821,44 +3873,7 @@ public class TheRenderKing : MonoBehaviour {
             
             
             
-            if(simManager.trophicLayersManager.GetAgentsOnOff()) {
-                // Highlight trail:
-                critterHighlightTrailMat.SetPass(0);
-                critterHighlightTrailMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
-                critterHighlightTrailMat.SetBuffer("highlightTrailDataCBuffer", critterHighlightTrailCBuffer);
-                critterHighlightTrailMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-                critterHighlightTrailMat.SetFloat("_MapSize", SimulationManager._MapSize);
-                float highlightOn = 0f;
-                if(simManager.uiManager.curActiveTool == UIManager.ToolType.Inspect) {
-                    highlightOn = 1f;
-                }
-                critterHighlightTrailMat.SetFloat("_HighlightOn", highlightOn);
-                critterHighlightTrailMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
-                cmdBufferMain.DrawProcedural(Matrix4x4.identity, critterHighlightTrailMat, 0, MeshTopology.Triangles, 6, critterHighlightTrailCBuffer.count);
             
-        
-                eggSackStrokeDisplayMat.SetPass(0);
-                eggSackStrokeDisplayMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
-                eggSackStrokeDisplayMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
-                eggSackStrokeDisplayMat.SetBuffer("eggDataCBuffer", simManager.simStateData.eggDataCBuffer);
-                eggSackStrokeDisplayMat.SetBuffer("eggSackSimDataCBuffer", simManager.simStateData.eggSackSimDataCBuffer);
-                eggSackStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-                eggSackStrokeDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
-                eggSackStrokeDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-                cmdBufferMain.DrawProcedural(Matrix4x4.identity, eggSackStrokeDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.eggDataCBuffer.count);
-        
-                // *** Revisit this in future - probably can get away without it, just use one pass for all eggSacks
-                eggCoverDisplayMat.SetPass(0);
-                eggCoverDisplayMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
-                eggCoverDisplayMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
-                eggCoverDisplayMat.SetBuffer("eggSackSimDataCBuffer", simManager.simStateData.eggSackSimDataCBuffer);
-                eggCoverDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-                eggCoverDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
-                eggCoverDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-                cmdBufferMain.DrawProcedural(Matrix4x4.identity, eggCoverDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.critterInitDataCBuffer.count);
-            
-
-            }
             
             
             // FLUID ITSELF:
@@ -3963,18 +3978,7 @@ public class TheRenderKing : MonoBehaviour {
             // Test Debug Critter Body:
             //critterDebugGenericStrokeMat
 
-            // What is this????
-            critterDebugGenericStrokeMat.SetPass(0);
-            critterDebugGenericStrokeMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-            critterDebugGenericStrokeMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
-            critterDebugGenericStrokeMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
-            critterDebugGenericStrokeMat.SetBuffer("critterGenericStrokesCBuffer", critterGenericStrokesCBuffer);    
-            critterDebugGenericStrokeMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-            //critterDebugGenericStrokeMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
-            //critterDebugGenericStrokeMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
-            critterDebugGenericStrokeMat.SetFloat("_MapSize", SimulationManager._MapSize);            
-            cmdBufferMain.DrawProcedural(Matrix4x4.identity, critterDebugGenericStrokeMat, 0, MeshTopology.Triangles, 6, critterGenericStrokesCBuffer.count);
-
+            
 
             // WATER BITS TEMP::::::::::::::^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
             // use this as algae grid???

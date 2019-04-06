@@ -980,7 +980,7 @@ public class SimulationManager : MonoBehaviour {
     }  // *** revisit
     private void CheckForReadyToSpawnAgents() {        
         for (int a = 0; a < agentsArray.Length; a++) {
-            if(agentRespawnCounter > 4) {
+            if(agentRespawnCounter > 6) {
                 if (agentsArray[a].curLifeStage == Agent.AgentLifeStage.AwaitingRespawn) {
                     //Debug.Log("AttemptToSpawnAgent(" + a.ToString() + ")");
                     AttemptToSpawnAgent(a);

@@ -59,6 +59,8 @@ public class UIManager : MonoBehaviour {
     private Vector3 prevMousePositionOnWaterPlane;
     public Vector3 curMousePositionOnWaterPlane;
 
+    public Image imageHighlightNewUI;
+
     // &&& INFO PANEL &&& !!!! ==============================================
     public bool isActiveInfoPanel = false;
     public bool isActiveInfoResourcesTab = true;  // toggle between resources tab and species tab
@@ -195,8 +197,10 @@ public class UIManager : MonoBehaviour {
     public Image imageUnlockMeter;
     public Material matUnlockMeter;
     public Image imageToolbarButtonBarBackground;
+    public Image imageToolbarWingLine;
     public Button buttonToolbarWingCreateSpecies;
     public Text textToolbarWingSpeciesSummary;
+    public Text textToolbarWingPanelName;
     public Text textSelectedSpeciesTitle;
     public Text textSelectedSpeciesIndex;
     public Image imageToolbarSpeciesPortraitRender;
@@ -925,13 +929,13 @@ private bool treeOfLifeInfoOnC = false;
             }
             //isUnlockCooldown = false;
     //private int unlockCooldownCounter = 0;
-            if(isUnlockCooldown) {
+            /*if(isUnlockCooldown) {
                 unlockCooldownCounter++;
                 if(unlockCooldownCounter > 420) {
                     isUnlockCooldown = false;
                     unlockCooldownCounter = 0;
                 }
-            }
+            }*/
             //
 
             //if (gameManager.simulationManager.trophicLayersManager.pendingTrophicSlot) {
@@ -1308,6 +1312,7 @@ private bool treeOfLifeInfoOnC = false;
             
 
             if (isToolbarWingOn) {  // a species is selected
+                
                 //
                 //panelToolbarWingStats.SetActive(false);
                 //panelToolbarWingMutation.SetActive(false);
@@ -1334,6 +1339,7 @@ private bool treeOfLifeInfoOnC = false;
                 textSelectedSpeciesTitle.color = speciesColorLight;
                 imageToolbarSpeciesPortraitBorder.color = speciesColorDark;
                 imageToolbarButtonBarBackground.color = speciesColorDark;
+                imageToolbarWingLine.color = speciesColorDark;
 
                 textSelectedSpeciesTitle.text = layerManager.selectedTrophicSlotRef.speciesName;
                 
@@ -1394,44 +1400,6 @@ private bool treeOfLifeInfoOnC = false;
                     curToolbarWingPanelSelectID = 0;
                 }
 
-                if(curToolbarWingPanelSelectID == 0) {
-                    buttonToolbarWingDescription.transform.localScale = Vector3.one * 1.5f;
-                    if(!isToolbarDeletePromptOn) {
-                        textToolbarWingSpeciesSummary.gameObject.SetActive(true);
-                        textToolbarWingSpeciesSummary.text = layerManager.GetSpeciesPreviewDescriptionString();
-                    }                    
-                }
-                else {
-                    buttonToolbarWingDescription.transform.localScale = Vector3.one;
-                    textToolbarWingSpeciesSummary.gameObject.SetActive(false);
-                }
-                if(curToolbarWingPanelSelectID == 1) {
-                    buttonToolbarWingStats.transform.localScale = Vector3.one * 1.5f;
-
-                    if (!isToolbarDeletePromptOn) {
-                        panelToolbarWingStats.SetActive(true);
-                        UpdateToolbarWingStatsPanel();
-                    }
-                }
-                else {
-                    buttonToolbarWingStats.transform.localScale = Vector3.one;
-                    panelToolbarWingStats.SetActive(false);
-                }
-                if(curToolbarWingPanelSelectID == 2) {
-                    buttonToolbarWingMutation.transform.localScale = Vector3.one * 1.5f;
-
-                    if (!isToolbarDeletePromptOn) {
-                        panelToolbarWingMutation.SetActive(true); 
-                        // Update mutation/upgrade panel
-                    }                
-                }
-                else {
-                    buttonToolbarWingMutation.transform.localScale = Vector3.one;
-                    panelToolbarWingMutation.SetActive(false);
-                }
-                 
-                
-
                 // Panel Buttons!!!
                 buttonToolbarWingDescription.interactable = false;
                 //buttonToolbarWingDeleteSpecies.interactable = false;
@@ -1445,9 +1413,55 @@ private bool treeOfLifeInfoOnC = false;
                     buttonToolbarWingStats.interactable = true;   
                 }
                 if(panelTier >= 2) {
-                    buttonToolbarWingMutation.interactable = true;
+                    //buttonToolbarWingMutation.interactable = true;                    
                     //buttonToolbarWingDeleteSpecies.interactable = true;
                 }
+
+                if(curToolbarWingPanelSelectID == 0) {
+                    buttonToolbarWingDescription.transform.localScale = Vector3.one * 1.5f;
+                    //buttonToolbarWingDescription.interactable = false;
+                    if(!isToolbarDeletePromptOn) {
+                        textToolbarWingSpeciesSummary.gameObject.SetActive(true);
+                        textToolbarWingSpeciesSummary.text = layerManager.GetSpeciesPreviewDescriptionString();
+                        textToolbarWingPanelName.text = "Overview:";
+                        textToolbarWingPanelName.color = new Color(0.9f, 0.9f, 0.9f); //new Color(0.7f, 0.94f, 1f);
+                    }                    
+                }
+                else {
+                    buttonToolbarWingDescription.transform.localScale = Vector3.one;
+                    buttonToolbarWingDescription.interactable = true;
+                    textToolbarWingSpeciesSummary.gameObject.SetActive(false);
+                }
+                if(curToolbarWingPanelSelectID == 1) {
+                    buttonToolbarWingStats.transform.localScale = Vector3.one * 1.5f;
+                    //buttonToolbarWingStats.interactable = false;
+
+                    if (!isToolbarDeletePromptOn) {
+                        panelToolbarWingStats.SetActive(true);
+                        textToolbarWingPanelName.text = "Statistics:";
+                        textToolbarWingPanelName.color = new Color(0.9f, 0.9f, 0.9f); //new Color(0.99f, 0.94f, 0.57f);
+                        UpdateToolbarWingStatsPanel();
+                    }
+                }
+                else {
+                    buttonToolbarWingStats.transform.localScale = Vector3.one;
+                    panelToolbarWingStats.SetActive(false);
+                    //buttonToolbarWingStats.interactable = true;
+                }
+                if(curToolbarWingPanelSelectID == 2) {
+                    buttonToolbarWingMutation.transform.localScale = Vector3.one * 1.5f;
+
+                    if (!isToolbarDeletePromptOn) {
+                        textToolbarWingPanelName.text = "Upgrades:";
+                        panelToolbarWingMutation.SetActive(true); 
+                        // Update mutation/upgrade panel
+                    }                
+                }
+                else {
+                    buttonToolbarWingMutation.transform.localScale = Vector3.one;
+                    panelToolbarWingMutation.SetActive(false);
+                }
+                                
             }
         }
         else {
@@ -2072,6 +2086,7 @@ private bool treeOfLifeInfoOnC = false;
 
     private void UpdateToolbarWingStatsPanel() {
         
+
         TrophicSlot slot = gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef;
 
         string descriptionText = "";
@@ -2134,8 +2149,8 @@ private bool treeOfLifeInfoOnC = false;
                 descriptionText += "<color=#A97860FF>Waste Generated: <b>" + gameManager.simulationManager.simResourceManager.wasteProducedByAnimalParticlesLastFrame.ToString("F3") + "</b></color>\n";
 
                 if(gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
-                    textToolbarWingStatsUnlockStatus.text = "<b>Next Unlock:</b>\nReach <b><i>10</i></b> Total Biomass";
-                    float unlockProgressLerp = Mathf.Clamp01(gameManager.simulationManager.simResourceManager.curGlobalAnimalParticles / 10f);
+                    textToolbarWingStatsUnlockStatus.text = "<b>Next Unlock:</b>\nReach <b><i>15</i></b> Total Biomass";
+                    float unlockProgressLerp = Mathf.Clamp01(gameManager.simulationManager.simResourceManager.curGlobalAnimalParticles / 15f);
                     textToolbarWingStatsUnlockPercentage.text = (unlockProgressLerp * 100f).ToString("F0") + "%";
                     //imageUnlockMeter;
                     matUnlockMeter.SetFloat("_FillPercentage", unlockProgressLerp);
@@ -2153,7 +2168,7 @@ private bool treeOfLifeInfoOnC = false;
             else {  // AGENTS
                 SpeciesGenomePool selectedPool = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesID];
                 
-                descriptionText += "Total Biomass: <b>" + gameManager.simulationManager.simResourceManager.curGlobalAgentBiomass.ToString("F1") + "</b>\n\n";
+                descriptionText += "Total Vertebrate Biomass: <b>" + gameManager.simulationManager.simResourceManager.curGlobalAgentBiomass.ToString("F1") + "</b>\n\n";
 
                 descriptionText += "<color=#8EDEEEFF>Oxygen Usage: <b>" + gameManager.simulationManager.simResourceManager.oxygenUsedByAgentsLastFrame.ToString("F3") + "</b></color>\n";
                 descriptionText += "<color=#A97860FF>Waste Generated: <b>" + gameManager.simulationManager.simResourceManager.wasteProducedByAgentsLastFrame.ToString("F3") + "</b></color>\n\n";
@@ -2170,7 +2185,58 @@ private bool treeOfLifeInfoOnC = false;
                 descriptionText += "Avg Brain Size: <b>" + ((selectedPool.avgNumNeurons + selectedPool.avgNumAxons) * 0.1f).ToString("F1") + "</b>\n";
                 //descriptionText += "Avg Axon Count: <b>" + selectedPool.avgNumAxons.ToString("F0") + "</b>\n\n";
         
-                 
+                // TEMP UNLOCK TEXT:
+                // Slot 4/4:
+                if(gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[3].status == TrophicSlot.SlotStatus.Locked) {
+                    textToolbarWingStatsUnlockStatus.text = "<b>Next Unlock:</b>\nReach <b><i>10</i></b> Total Biomass";
+                    float unlockProgressLerp = Mathf.Clamp01(gameManager.simulationManager.simResourceManager.curGlobalAgentBiomass / 10f);
+                    textToolbarWingStatsUnlockPercentage.text = (unlockProgressLerp * 100f).ToString("F0") + "%";
+                    //imageUnlockMeter;
+                    matUnlockMeter.SetFloat("_FillPercentage", unlockProgressLerp);
+
+                    textToolbarWingStatsUnlockStatus.gameObject.SetActive(true);
+                    textToolbarWingStatsUnlockPercentage.gameObject.SetActive(true);
+                    imageUnlockMeter.gameObject.SetActive(true);
+                }
+                else {
+                    textToolbarWingStatsUnlockStatus.gameObject.SetActive(false);
+                    textToolbarWingStatsUnlockPercentage.gameObject.SetActive(false);
+                    imageUnlockMeter.gameObject.SetActive(false);
+                }
+                // Slot 3/4:
+                if(gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[2].status == TrophicSlot.SlotStatus.Locked) {
+                    textToolbarWingStatsUnlockStatus.text = "<b>Next Unlock:</b>\nReach <b><i>5</i></b> Total Biomass";
+                    float unlockProgressLerp = Mathf.Clamp01(gameManager.simulationManager.simResourceManager.curGlobalAgentBiomass / 5f);
+                    textToolbarWingStatsUnlockPercentage.text = (unlockProgressLerp * 100f).ToString("F0") + "%";
+                    //imageUnlockMeter;
+                    matUnlockMeter.SetFloat("_FillPercentage", unlockProgressLerp);
+
+                    textToolbarWingStatsUnlockStatus.gameObject.SetActive(true);
+                    textToolbarWingStatsUnlockPercentage.gameObject.SetActive(true);
+                    imageUnlockMeter.gameObject.SetActive(true);
+                }
+                else {
+                    //textToolbarWingStatsUnlockStatus.gameObject.SetActive(false);
+                    //textToolbarWingStatsUnlockPercentage.gameObject.SetActive(false);
+                    //imageUnlockMeter.gameObject.SetActive(false);
+                }
+                // Slot 2/4:
+                if(gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1].status == TrophicSlot.SlotStatus.Locked) {
+                    textToolbarWingStatsUnlockStatus.text = "<b>Next Unlock:</b>\nReach <b><i>2</i></b> Total Biomass";
+                    float unlockProgressLerp = Mathf.Clamp01(gameManager.simulationManager.simResourceManager.curGlobalAgentBiomass / 2f);
+                    textToolbarWingStatsUnlockPercentage.text = (unlockProgressLerp * 100f).ToString("F0") + "%";
+                    //imageUnlockMeter;
+                    matUnlockMeter.SetFloat("_FillPercentage", unlockProgressLerp);
+
+                    textToolbarWingStatsUnlockStatus.gameObject.SetActive(true);
+                    textToolbarWingStatsUnlockPercentage.gameObject.SetActive(true);
+                    imageUnlockMeter.gameObject.SetActive(true);
+                }
+                else {
+                    //textToolbarWingStatsUnlockStatus.gameObject.SetActive(false);
+                    //textToolbarWingStatsUnlockPercentage.gameObject.SetActive(false);
+                    //imageUnlockMeter.gameObject.SetActive(false);
+                }
             }
         }             
         
@@ -2204,6 +2270,7 @@ private bool treeOfLifeInfoOnC = false;
     private void SetToolbarButtonStateUI(ref Button button, TrophicSlot.SlotStatus slotStatus, bool isSelected) {
 
         button.gameObject.SetActive(true);
+        Animation anim = button.GetComponent<Animation>();
         Vector3 scale = Vector3.one;
         switch(slotStatus) {
             case TrophicSlot.SlotStatus.Off:
@@ -2219,7 +2286,8 @@ private bool treeOfLifeInfoOnC = false;
                 button.interactable = true;                
                 button.GetComponentInChildren<Text>().text = "";
                 button.GetComponent<Image>().sprite = spriteSpeciesSlotRing;
-                scale = Vector3.one * 0.75f;
+                anim.Play();
+                scale = Vector3.one * 1f;
                 break;
             //case TrophicSlot.SlotStatus.Pending:
             //    button.interactable = false;
@@ -2229,6 +2297,9 @@ private bool treeOfLifeInfoOnC = false;
                 button.interactable = true;
                 button.GetComponentInChildren<Text>().text = "";
                 button.GetComponent<Image>().sprite = spriteSpeciesSlotFull;
+                anim.Rewind();
+                anim.Stop();
+                
                 //
                 break;
             //case TrophicSlot.SlotStatus.Selected:
@@ -2881,6 +2952,9 @@ private bool treeOfLifeInfoOnC = false;
     }
     public void ClickToolbarExpandOn() {
         isToolbarExpandOn = true;
+        imageHighlightNewUI.gameObject.SetActive(false);
+        //buttonToolbarExpandOn.GetComponent<Animation>().Stop();
+        buttonToolbarExpandOn.GetComponent<Animator>().StopPlayback();
     }
     public void ClickToolbarExpandOff() {
         isToolbarExpandOn = false;

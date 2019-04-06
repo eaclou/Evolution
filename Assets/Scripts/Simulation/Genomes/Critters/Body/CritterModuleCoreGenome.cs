@@ -331,13 +331,13 @@ public class CritterModuleCoreGenome {
 
         //tailEndCapTaperSize = 0.5f;
 
-        numEyes = UnityEngine.Random.Range(1,4);
-        eyePosSpread = UnityEngine.Random.Range(0.33f, 1f);  // 1f == full hemisphere coverage, 0 == top
+        numEyes = 2; // UnityEngine.Random.Range(2,4);
+        eyePosSpread = UnityEngine.Random.Range(0.1f, 0.9f);  // 1f == full hemisphere coverage, 0 == top
         eyeLocAmplitude = UnityEngine.Random.Range(0.4f, 0.6f);
         eyeLocFrequency = UnityEngine.Random.Range(0.75f, 1.5f);
         eyeLocOffset = UnityEngine.Random.Range(0f, 0.1f);       
-        socketRadius = UnityEngine.Random.Range(0.65f, 1.15f);  // relative to body size?
-        socketHeight = UnityEngine.Random.Range(0.15f, 0.4f);
+        socketRadius = UnityEngine.Random.Range(0.65f, 1f);  // relative to body size?
+        socketHeight = UnityEngine.Random.Range(0.15f, 1f);
         socketBulge = UnityEngine.Random.Range(0f, 1f);
         eyeballRadius = UnityEngine.Random.Range(0.8f, 1.2f);
         eyeBulge = UnityEngine.Random.Range(0.25f, 0.5f);
@@ -551,7 +551,7 @@ public class CritterModuleCoreGenome {
         //tailEndCapTaperSize = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.tailEndCapTaperSize, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.5f, 1f);
 
         // EYES EYES EYES EYES:::
-        numEyes = UtilityMutationFunctions.GetMutatedIntAdditive(parentGenome.numEyes, settings.defaultBodyMutationChance, 1, 1, 3);
+        numEyes = UtilityMutationFunctions.GetMutatedIntAdditive(parentGenome.numEyes, settings.defaultBodyMutationChance, 1, 1, 6);
         eyePosSpread = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.eyePosSpread, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.5f, 1f);  // 1f == full hemisphere coverage, 0 == top
         eyeLocAmplitude = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.eyeLocAmplitude, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
         eyeLocFrequency = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.eyeLocFrequency, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.25f, 6f);

@@ -83,8 +83,8 @@ public class CameraManager : MonoBehaviour {
         masterTargetCamPosition.z -= offsetZ;  // camera is towards the negative Z axis.... a bit awkward.
 
         // Lerp towards Target Transform Position & Orientation:
-        float minDistance = 6f;
-        float maxDistance = 280f;
+        float minDistance = 10f;
+        float maxDistance = 256f;
         float relSize = (masterTargetDistance - minDistance) / (minDistance + maxDistance);
 
         float minSizeLerpSpeed = 12f;

@@ -302,8 +302,8 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 				float algaeConsumed = bodyMass * maxAlgaeConsumptionRate * algaeConsumptionMask;
 				float oxygenUsed = bodyMass * maxOxygenConsumptionRate * oxygenConsumptionMask;
 		
-				float growthEfficiency = 0.1375; //
-				float wasteEfficiency = 0.0167;
+				float growthEfficiency = 0.14; //
+				float wasteEfficiency = 0.01;
 				float growthMass = algaeConsumed * growthEfficiency * oxygenConsumptionMask; // Also limited by OXYGEN!!!
 					// Maximum growth needs an explicit cap? or should it simply be determined by max algaeConsumption Rate + maxAge?
 				wasteMass += algaeConsumed * wasteEfficiency;		
