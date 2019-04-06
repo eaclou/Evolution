@@ -1889,7 +1889,7 @@ public class TheRenderKing : MonoBehaviour {
         //float sizeNormalized = Mathf.Clamp01((size - 0.1f) / 1f);
         float sizeNormalized = Mathf.Clamp01((genome.bodyGenome.coreGenome.creatureBaseLength - 0.6f) / 0.6f);
         //sizeNormalized = 1f;
-        speciesPortraitRenderCamera.GetComponent<CritterPortraitCameraManager>().UpdateCameraTargetValues(Mathf.Lerp(0.2f, 0.7f, sizeNormalized));
+        speciesPortraitRenderCamera.GetComponent<CritterPortraitCameraManager>().UpdateCameraTargetValues(Mathf.Lerp(0.18f, 0.56f, sizeNormalized));
         
         Debug.Log("GenerateCritterPortraitStrokesData: " + genome.bodyGenome.appearanceGenome.huePrimary.ToString());
     }

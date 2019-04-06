@@ -27,6 +27,8 @@ public class Agent : MonoBehaviour {
     public int index;    
     public int speciesIndex = -1;  // ********************** NEED to set these at birth!
     public CandidateAgentData candidateRef;
+
+    public string stringCauseOfDeath = "";
     
     public AgentLifeStage curLifeStage;
     public enum AgentLifeStage {
@@ -417,7 +419,7 @@ public class Agent : MonoBehaviour {
         if (coreModule.energy <= 0f) {
             curLifeStage = AgentLifeStage.Dead;
             lifeStageTransitionTimeStepCounter = 0;
-
+            stringCauseOfDeath = "Starved!";
             InitializeDeath();
         }
     }
@@ -918,7 +920,7 @@ public class Agent : MonoBehaviour {
         float digestedMeatMass = digestedAmountTotal * foodProportionsVec.y;
         float meatToEnergyAmount = digestedMeatMass; // * coreModule.foodEfficiencyMeat;        
         
-        float createdEnergyTotal = plantToEnergyAmount + meatToEnergyAmount;
+        float createdEnergyTotal = (plantToEnergyAmount + meatToEnergyAmount) * SimulationManager.energyDifficultyMultiplier;
         
         wasteProducedLastFrame += digestedAmountTotal * settingsRef.agentSettings._DigestionWasteEfficiency;
         oxygenUsedLastFrame = currentBiomass * settingsRef.agentSettings._BaseOxygenUsage;
@@ -977,7 +979,7 @@ public class Agent : MonoBehaviour {
         }*/
 
         //ENERGY:
-        float energyCost = currentBiomass * settingsRef.agentSettings._BaseEnergyCost; // / coreModule.energyBonus;
+        float energyCost = currentBiomass * settingsRef.agentSettings._BaseEnergyCost * SimulationManager.energyDifficultyMultiplier; // / coreModule.energyBonus;
         
         float throttleMag = smoothedThrottle.magnitude;
         

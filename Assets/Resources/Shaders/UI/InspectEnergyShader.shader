@@ -53,7 +53,16 @@
 				float fillMask = saturate(_FillPercentage - i.uv.y) * 20;
 
 				float4 emptyColor = float4(0.5, 0.5, 0.5, alpha * (saturate(distToOrigin)));
-				float4 liquidColor = float4(_Tint.rgb, alpha);
+				
+				float3 fullHue = float3(0.75, 1.1, 0.9);
+				float3 emptyHue = float3(1, 0.3, 0.1);
+				float3 finalHue = float3(0.25, 0.35, 1) * 0.75; //_Tint.rgb;
+				float fullHueLerp = saturate((_FillPercentage - 0.5) * 4);
+				float emptyHueLerp = saturate(((1.0 - _FillPercentage) - 0.5) * 4);
+				finalHue = lerp(finalHue, fullHue, fullHueLerp);
+				finalHue = lerp(finalHue, emptyHue, emptyHueLerp);
+
+				float4 liquidColor = float4(finalHue, alpha);
 
 				alpha *= (saturate(distToOrigin));
 

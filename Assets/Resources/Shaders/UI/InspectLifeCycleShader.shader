@@ -107,7 +107,7 @@
 					}
 				}
 
-				float fillMask = saturate(curRevolutionPercent - pixelRotationPercent) * 50;
+				float fillMask = 1; //saturate(curRevolutionPercent - pixelRotationPercent) * 50;
 
 				float3 centerHue = float3(0.5, 0.5, 0.5);
 				

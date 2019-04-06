@@ -155,7 +155,7 @@ void CSSimGroundBitsData (uint3 id : SV_DispatchThreadID)
 		float spawnAltitude = AltitudeRead.SampleLevel(_LinearRepeat, spawnUV * 0.5 + 0.25, 0).x;
 		
 		float spawnNoise3 = saturate(Value2D(spawnPos + 349.7, 2.4579).x * 2.5);
-		float altitudeMask = saturate((0.55 - spawnAltitude) * 4);
+		float altitudeMask = saturate((0.7 - spawnAltitude) * 4);
 		
 		// Try respawning:
 		float4 decomposersMask = decomposersRead.SampleLevel(_LinearRepeat, spawnUV * 3.14159, 0);
@@ -169,6 +169,8 @@ void CSSimGroundBitsData (uint3 id : SV_DispatchThreadID)
 				groundBitData.worldPos = float3(spawnPos, 0);
 				groundBitData.age = groundBitData.age % 1.0;
 				groundBitData.isActive = 1.0;
+
+				//groundBitData.localScale
 			
 			}
 		}		

@@ -106,8 +106,9 @@
 				
 				float2 scale = groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25);
 			
-				quadPoint *= float3(scale, 1.0) * _Density;
-				quadPoint.x *= 0.7;
+				float sizeFadeMask = saturate((1.0 - altitude) * 4 - 2);
+				quadPoint *= float3(scale, 1.0) * (_Density * 0.5 + 0.5) * sizeFadeMask;
+				quadPoint.x *= 0.75;
 				
 				float4 fluidVelocity = tex2Dlod(_VelocityTex, float4(worldPosition.xy / 256, 0, 2));
 				float2 fluidDir = float2(0,1); //normalize(fluidVelocity.xy);

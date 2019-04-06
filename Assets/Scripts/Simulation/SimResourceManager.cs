@@ -98,6 +98,9 @@ public class SimResourceManager {
             decomposersTotalProductivity = curGlobalDecomposers * settings.environmentSettings._BaseDecompositionRate * decomposersOxygenMask * decomposersDetritusMask;
                 
             curGlobalDecomposers = Mathf.Lerp(curGlobalDecomposers, curGlobalDetritus, 0.0005f); // *** TEMP:: Scale decomposers with detritus amount
+            if(curGlobalDecomposers > 150f) {
+                curGlobalDecomposers = 150f;  // try capping?
+            }
 
             detritusRemovedByDecomposersLastFrame = decomposersTotalProductivity;
             curGlobalDetritus -= decomposersTotalProductivity;

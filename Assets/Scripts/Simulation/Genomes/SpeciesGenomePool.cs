@@ -156,7 +156,7 @@ public class SpeciesGenomePool {
         InitShared();
         depthLevel = depth;
 
-        for (int i = 0; i < 32; i++) {
+        for (int i = 0; i < 36; i++) {
             /*AgentGenome agentGenome = new AgentGenome();
             agentGenome.GenerateInitialRandomBodyGenome();            
             int tempNumHiddenNeurons = 0;
@@ -170,7 +170,7 @@ public class SpeciesGenomePool {
             */
 
             AgentGenome agentGenome = Mutate(foundingGenome, true, true);
-            int tempNumHiddenNeurons = 4;
+            int tempNumHiddenNeurons = 0;
             agentGenome.InitializeRandomBrainFromCurrentBody(mutationSettingsRef.initialConnectionChance, tempNumHiddenNeurons);
             CandidateAgentData candidate = new CandidateAgentData(agentGenome, speciesID);
             candidateGenomesList.Add(candidate);

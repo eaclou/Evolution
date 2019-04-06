@@ -154,7 +154,7 @@ public class SimulationManager : MonoBehaviour {
     private int numAgentEvaluationsPerGenome = 1;
 
     public int simAgeTimeSteps = 0;
-    private int numStepsInSimYear = 900;
+    private int numStepsInSimYear = 1500;
     private int simAgeYearCounter = 0;
     public int curSimYear = 0;
 
@@ -162,6 +162,8 @@ public class SimulationManager : MonoBehaviour {
     private Vector2 recentlyAddedSpeciesWorldPos; // = new Vector2(spawnPos.x, spawnPos.y);
     private int recentlyAddedSpeciesID; // = masterGenomePool.completeSpeciesPoolsList.Count - 1;
     private int recentlyAddedSpeciesTimeCounter = 0;
+
+    public static float energyDifficultyMultiplier = 1f;
     
 
     #region loading   // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& LOADING LOADING LOADING &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
@@ -602,7 +604,9 @@ public class SimulationManager : MonoBehaviour {
         if(trophicLayersManager.GetAgentsOnOff()) {
             CheckForDevouredEggSacks();
             CheckForNullAgents();  // Result of this will affect: "simStateData.PopulateSimDataArrays(this)" !!!!!
-            CheckForReadyToSpawnAgents();
+            if(simResourceManager.curGlobalOxygen > 10f) {
+                CheckForReadyToSpawnAgents();
+            }            
         }
 
         fogColor = Color.Lerp(new Color(0.15f, 0.25f, 0.52f), new Color(0.07f, 0.27f, 0.157f), Mathf.Clamp01(simResourceManager.curGlobalAlgaeParticles * 0.05f));
@@ -690,6 +694,9 @@ public class SimulationManager : MonoBehaviour {
             curSimYear++;
             simEventsManager.curEventBucks += 5; // temporarily high!
             simAgeYearCounter = 0;
+
+            energyDifficultyMultiplier = Mathf.Lerp(3f, 1f, (float)curSimYear / 100f);
+            Debug.Log("energyDifficultyMultiplier: " + energyDifficultyMultiplier.ToString());
             
             AddNewHistoricalDataEntry();
             AddNewSpeciesDataEntry(curSimYear);
@@ -980,7 +987,7 @@ public class SimulationManager : MonoBehaviour {
     }  // *** revisit
     private void CheckForReadyToSpawnAgents() {        
         for (int a = 0; a < agentsArray.Length; a++) {
-            if(agentRespawnCounter > 6) {
+            if(agentRespawnCounter > 11) {
                 if (agentsArray[a].curLifeStage == Agent.AgentLifeStage.AwaitingRespawn) {
                     //Debug.Log("AttemptToSpawnAgent(" + a.ToString() + ")");
                     AttemptToSpawnAgent(a);
@@ -1164,7 +1171,7 @@ public class SimulationManager : MonoBehaviour {
 
             if(speciesIndex == recentlyAddedSpeciesID) {
                 spawnOn = true;
-                spawnWorldPos = new Vector3(recentlyAddedSpeciesWorldPos.x, recentlyAddedSpeciesWorldPos.y, 0f);
+                spawnWorldPos = new Vector3(recentlyAddedSpeciesWorldPos.x + UnityEngine.Random.Range(0f, 1f), recentlyAddedSpeciesWorldPos.y + UnityEngine.Random.Range(0f, 1f), 0f);
             }
             else {
                 Debug.Log("ERROR! couldn't spqawn correct speciesID!!!");
