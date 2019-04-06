@@ -154,7 +154,7 @@ public class SimulationManager : MonoBehaviour {
     private int numAgentEvaluationsPerGenome = 1;
 
     public int simAgeTimeSteps = 0;
-    private int numStepsInSimYear = 720;
+    private int numStepsInSimYear = 900;
     private int simAgeYearCounter = 0;
     public int curSimYear = 0;
 

@@ -62,26 +62,26 @@ public class GameManager : MonoBehaviour {
             case 0:
                 // Low quality
                 simulationManager._NumAgents = 40;
-                simulationManager._NumEggSacks = 40;
+                simulationManager._NumEggSacks = 16;
                 //simulationManager._NumPredators = 2;
                 simulationManager.numInitialHiddenNeurons = 4;
                 break;
             case 1:
                 // Medium
                 simulationManager._NumAgents = 64;
-                simulationManager._NumEggSacks = 48;
+                simulationManager._NumEggSacks = 16;
                 simulationManager.numInitialHiddenNeurons = 6;
                 break;
             case 2:
                 // High
                 simulationManager._NumAgents = 96;
-                simulationManager._NumEggSacks = 48;
+                simulationManager._NumEggSacks = 24;
                 simulationManager.numInitialHiddenNeurons = 8;
                 break;
             case 3:
                 // EXTREME
                 simulationManager._NumAgents = 128;
-                simulationManager._NumEggSacks = 48;
+                simulationManager._NumEggSacks = 24;
                 simulationManager.numInitialHiddenNeurons = 10;
                 break;
             default:
