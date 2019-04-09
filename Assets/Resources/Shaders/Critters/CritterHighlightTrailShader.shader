@@ -82,8 +82,8 @@
 				HighlightTrailData data = highlightTrailDataCBuffer[inst];
 				float3 worldPosition = float3(data.worldPos, 1.0);    //float3(rawData.worldPos, -random2);
 				
-				float fadeInTime = 0.33;
-				float fadeOutTime = 0.33;
+				float fadeInTime = 0.2;
+				float fadeOutTime = 0.3;
 				float fadeMask = saturate(data.age) * (1.0 / fadeInTime);
 				fadeMask *= saturate(1.0 - data.age) * (1.0 / fadeOutTime);
 				/*float2 offsetRaw = (float2(rand0, rand1) * 2 - 1);				
@@ -105,7 +105,7 @@
 				float3 rotatedPoint = float3(quadPoint.x * right + quadPoint.y * forward, 0);  // Rotate localRotation by AgentRotation
 				
 				
-				worldPosition = worldPosition + _HighlightOn * rotatedPoint * 0.25 * critterSimData.embryoPercentage * (_CamDistNormalized * 0.9 + 0.1); // * (_CamDistNormalized * 0.9 + 0.1) * (data.strength * _HighlightOn * 0.25 + 0.75); // * lerp(0.55, 0.85, data.age) * 0.12; // rotatedPoint * particleData.isActive;
+				worldPosition = worldPosition + _HighlightOn * rotatedPoint * 0.33 * critterSimData.embryoPercentage * (_CamDistNormalized * 0.9 + 0.1); // * (_CamDistNormalized * 0.9 + 0.1) * (data.strength * _HighlightOn * 0.25 + 0.75); // * lerp(0.55, 0.85, data.age) * 0.12; // rotatedPoint * particleData.isActive;
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));				
 				o.color = float4(critterSimData.embryoPercentage, (1.0 - saturate(critterSimData.decayPercentage)),saturate(critterSimData.growthPercentage * 2.5),(1.0 - critterSimData.decayPercentage) * critterSimData.embryoPercentage); //float4(rand0 * 0.3 + 0.5, data.strength * _HighlightOn, hoverMask * _IsHover, selectedMask * _IsSelected);	

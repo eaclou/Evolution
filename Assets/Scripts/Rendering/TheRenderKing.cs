@@ -42,6 +42,9 @@ public class TheRenderKing : MonoBehaviour {
     public ComputeShader computeShaderTreeOfLife;
 
     public Mesh meshStirStickA;
+    public Mesh meshStirStickSml;
+    public Mesh meshStirStickMed;
+    public Mesh meshStirStickLrg;
     public Material gizmoStirStickAMat;
 
     // ORGANIZE AND REMOVE UNUSED!!!!!! *********
@@ -1501,13 +1504,15 @@ public class TheRenderKing : MonoBehaviour {
             Vector3 agentPos = simManager.agentsArray[i].bodyRigidbody.transform.position;
             obstacleStrokeDataArray[baseIndex + i].worldPos = new Vector2(agentPos.x, agentPos.y);
             obstacleStrokeDataArray[baseIndex + i].localDir = simManager.agentsArray[i].facingDirection;
-            obstacleStrokeDataArray[baseIndex + i].scale = new Vector2(simManager.agentsArray[i].currentBoundingBoxSize.x, simManager.agentsArray[i].currentBoundingBoxSize.y) * 1f; // Vector2.one * 5.5f * simManager.agentsArray[i].sizePercentage; // new Vector2(simManager.agentsArray[i].transform.localScale.x, simManager.agentsArray[i].transform.localScale.y) * 2.9f; // ** revisit this later // should leave room for velSampling around Agent *** weird popping when * 0.9f
+            float deadMult = 1f;
+            if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Dead) {
+                deadMult = 0f;
+            }
+            obstacleStrokeDataArray[baseIndex + i].scale = new Vector2(simManager.agentsArray[i].currentBoundingBoxSize.x, simManager.agentsArray[i].currentBoundingBoxSize.y) * deadMult; // Vector2.one * 5.5f * simManager.agentsArray[i].sizePercentage; // new Vector2(simManager.agentsArray[i].transform.localScale.x, simManager.agentsArray[i].transform.localScale.y) * 2.9f; // ** revisit this later // should leave room for velSampling around Agent *** weird popping when * 0.9f
 
             float velX = Mathf.Clamp(simManager.agentsArray[i].ownVel.x, -100f, 100f) * velScale * 0.015f; // agentPos.x - simManager.agentsArray[i]._PrevPos.x * velScale;
             float velY = Mathf.Clamp(simManager.agentsArray[i].ownVel.y, -100f, 100f) * velScale * 0.015f;
-            // OLD: not sure why this was Clamp01'ed?
-            //float velX = Mathf.Clamp01(agentPos.x - simManager.agentsArray[i]._PrevPos.x) * velScale;
-            //float velY = Mathf.Clamp01(agentPos.y - simManager.agentsArray[i]._PrevPos.y) * velScale;
+            
 
             obstacleStrokeDataArray[baseIndex + i].color = new Vector4(velX, velY, 1f, 1f);
         }
@@ -3787,16 +3792,24 @@ public class TheRenderKing : MonoBehaviour {
             }
 
             // STIR STICK!!!!
-            //gizmoStirStickAMat.SetPass(0);
-            //simManager.uiManager.smoothedCtrlCursorVel
-            Quaternion rot = Quaternion.Euler(new Vector3(Mathf.Clamp(simManager.uiManager.smoothedMouseVel.y * 2.5f + 10f, -45f, 45f), Mathf.Clamp(simManager.uiManager.smoothedMouseVel.x * -1.5f, -45f, 45f), 0f));
-            gizmoStirStickAMat.SetFloat("_MinFog", 0.0625f);  
-            gizmoStirStickAMat.SetVector("_FogColor", simManager.fogColor);
-            gizmoStirStickAMat.SetFloat("_Turbidity", simManager.fogAmount); 
-            float scale = Mathf.Lerp(0.5f, 1.5f, baronVonWater.camDistNormalized);
-            Matrix4x4 stirStickTransformMatrix = Matrix4x4.TRS(new Vector3(simManager.uiManager.curMousePositionOnWaterPlane.x, simManager.uiManager.curMousePositionOnWaterPlane.y, simManager.uiManager.stirStickDepth), rot, Vector3.one * scale);
-            cmdBufferMain.DrawMesh(meshStirStickA, stirStickTransformMatrix, gizmoStirStickAMat);
-            
+            if(simManager.uiManager.curActiveTool == UIManager.ToolType.Stir) {
+                //gizmoStirStickAMat.SetPass(0);
+                //simManager.uiManager.smoothedCtrlCursorVel
+                Quaternion rot = Quaternion.Euler(new Vector3(Mathf.Clamp(simManager.uiManager.smoothedMouseVel.y * 2.5f + 10f, -45f, 45f), Mathf.Clamp(simManager.uiManager.smoothedMouseVel.x * -1.5f, -45f, 45f), 0f));
+                gizmoStirStickAMat.SetFloat("_MinFog", 0.0625f);  
+                gizmoStirStickAMat.SetVector("_FogColor", simManager.fogColor);
+                gizmoStirStickAMat.SetFloat("_Turbidity", simManager.fogAmount); 
+                float scale = Mathf.Lerp(0.35f, 1.75f, baronVonWater.camDistNormalized);
+                Matrix4x4 stirStickTransformMatrix = Matrix4x4.TRS(new Vector3(simManager.uiManager.curMousePositionOnWaterPlane.x, simManager.uiManager.curMousePositionOnWaterPlane.y, simManager.uiManager.stirStickDepth), rot, Vector3.one * scale);
+                Mesh stickMesh = meshStirStickMed;
+                if(baronVonWater.camDistNormalized > 0.67f) {
+                    stickMesh = meshStirStickLrg;
+                }
+                if(baronVonWater.camDistNormalized < 0.24f) {
+                    stickMesh = meshStirStickSml;
+                }
+                cmdBufferMain.DrawMesh(stickMesh, stirStickTransformMatrix, gizmoStirStickAMat);
+            }
 
             if(simManager.trophicLayersManager.GetZooplanktonOnOff()) {
                 // add shadow pass eventually
@@ -3852,6 +3865,16 @@ public class TheRenderKing : MonoBehaviour {
                 critterDebugGenericStrokeMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
                 //critterDebugGenericStrokeMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
                 //critterDebugGenericStrokeMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
+                highlightOn = 0f;
+                if(simManager.uiManager.curActiveTool == UIManager.ToolType.Inspect) {
+                    highlightOn = 1f;
+                }
+                critterDebugGenericStrokeMat.SetFloat("_HighlightOn", highlightOn);                
+                critterDebugGenericStrokeMat.SetInt("_HoverID", simManager.uiManager.cameraManager.mouseHoverAgentIndex);
+                critterDebugGenericStrokeMat.SetInt("_SelectedID", simManager.uiManager.cameraManager.targetCritterIndex);
+                critterDebugGenericStrokeMat.SetFloat("_IsHover", simManager.uiManager.cameraManager.isMouseHoverAgent ? 1f : 0f);
+                critterDebugGenericStrokeMat.SetFloat("_IsSelected", simManager.uiManager.cameraManager.isFollowing ? 1f : 0f);
+
                 critterDebugGenericStrokeMat.SetFloat("_MapSize", SimulationManager._MapSize);            
                 cmdBufferMain.DrawProcedural(Matrix4x4.identity, critterDebugGenericStrokeMat, 0, MeshTopology.Triangles, 6, critterGenericStrokesCBuffer.count);
 
@@ -3895,11 +3918,7 @@ public class TheRenderKing : MonoBehaviour {
                 cmdBufferMain.DrawProcedural(Matrix4x4.identity, foodParticleDisplayMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.algaeParticlesCBuffer.count * 32);
         
             }
-            
-            
-            
-            
-            
+                                    
             
             // FLUID ITSELF:
             fluidRenderMat.SetPass(0);
@@ -3911,11 +3930,7 @@ public class TheRenderKing : MonoBehaviour {
             fluidRenderMat.SetTexture("_TerrainHeightTex", baronVonTerrain.terrainHeightMap);
             cmdBufferMain.DrawMesh(fluidRenderMesh, Matrix4x4.identity, fluidRenderMat);
 
-
             
-            // CRITTER BODY:
-
-
             // WATER :::::
             //baronVonWater.RenderCommands(ref cmdBufferTest, renderedSceneID);
             // Re-capture FrameBuffer to match backgroundColor

@@ -29,6 +29,7 @@
 				float4 vertex : SV_POSITION;
 				float4 color : COLOR;
 				float4 worldPos : TEXCOORD1;
+				float4 highlight : TEXCOORD2;
 				//float2 bodyUV : TEXCOORD1;
 			};
 
@@ -38,6 +39,13 @@
 			sampler2D _WaterSurfaceTex;
 
 			uniform float _MapSize;
+
+			uniform float _HighlightOn;
+
+			uniform int _HoverID;
+			uniform int _SelectedID;
+			uniform float _IsHover;			
+			uniform float _IsSelected;
 
 			StructuredBuffer<float3> quadVerticesCBuffer;			
 			StructuredBuffer<CritterInitData> critterInitDataCBuffer;
@@ -129,6 +137,10 @@
 								
 				//float debugColorVal = detachAmount;
 				//o.color.rgb = float3(debugColorVal, debugColorVal, debugColorVal);
+				float hoverMask = 1.0 - saturate(abs(agentIndex - _HoverID));
+				float selectedMask = 1.0 - saturate(abs(agentIndex - _SelectedID));
+
+				o.highlight = float4(hoverMask, selectedMask, 0, 0);
 
 				return o;
 			}
@@ -141,6 +153,10 @@
 
 				fixed4 col = tex2D(_MainTex, i.uv) * i.color;
 				col.rgb = lerp(col.rgb, waterFogColor, 0.5 * saturate((i.worldPos.z - 0.75) * 0.5));
+
+				float highlightBoost = saturate(i.highlight.x * _IsHover + i.highlight.y * _IsSelected * 0.25) * _HighlightOn;
+				col.rgb = col.rgb * (1 + highlightBoost) + highlightBoost * 0.1;
+
 				//fixed4 col = tex2D(_MainTex, i.bodyUV) * i.color;
 				return col;
 			}

@@ -279,7 +279,7 @@ public class CritterModuleCoreGenome {
         shapeModifiersList.Add(initModifier);
 
         creatureBaseLength = UnityEngine.Random.Range(0.6f, 1.2f);
-        creatureAspectRatio = UnityEngine.Random.Range(0.175f, 0.48f);
+        creatureAspectRatio = UnityEngine.Random.Range(0.175f, 0.4f);
 
         //creatureComplexShapeLerp = 0f;
         // Or start with deformed sphere???? *****
@@ -502,8 +502,8 @@ public class CritterModuleCoreGenome {
         }        
         
         // Or start with deformed sphere???? *****
-        creatureBaseLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.creatureBaseLength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.05f, 2.25f);
-        creatureAspectRatio = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.creatureAspectRatio, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.1f, 0.5f);
+        creatureBaseLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.creatureBaseLength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.3f, 1.8f);
+        creatureAspectRatio = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.creatureAspectRatio, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.12f, 0.45f);
         
         //creatureComplexShapeLerp = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.creatureComplexShapeLerp, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
         // Mouth/Snout:

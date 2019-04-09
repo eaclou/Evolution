@@ -124,7 +124,7 @@
 				float3 cameraToVertex = worldPosition - _WorldSpaceCameraPos;
                 float3 cameraToVertexDir = normalize(cameraToVertex);				
 				float viewDot = dot(-cameraToVertexDir, surfaceNormal);
-				float reflectLerp = GetReflectionLerpLrg(worldPosition, surfaceNormal, viewDot, _CamDistNormalized * 0.2 + 0.2, _CamFocusPosition, vignetteRadius);
+				float reflectLerp = GetReflectionLerpLrg(worldPosition, surfaceNormal, viewDot, _CamDistNormalized * 0.25 + 0.2, _CamFocusPosition, vignetteRadius);
 				
 				o.skyUV = worldPosition.xy / _MapSize;
 				

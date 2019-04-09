@@ -2345,7 +2345,8 @@ private bool treeOfLifeInfoOnC = false;
         */
 
         SpeciesGenomePool speciesPool = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesID];        
-        gameManager.theRenderKing.InitializeNewCritterPortraitGenome(speciesPool.representativeGenome);
+        //gameManager.theRenderKing.InitializeNewCritterPortraitGenome(speciesPool.representativeGenome);
+        gameManager.theRenderKing.InitializeNewCritterPortraitGenome(speciesPool.leaderboardGenomesList[0].candidateGenome);
         gameManager.theRenderKing.isToolbarCritterPortraitEnabled = true;
                 
         //Vector3 speciesHuePrimary = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesID].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
@@ -2949,6 +2950,7 @@ private bool treeOfLifeInfoOnC = false;
         //    animatorStirToolPanel.Play("SlideOffPanelStirTool");
         //}        
         isActiveStirToolPanel = false;
+        gameManager.simulationManager.PlayerToolStirOff();
     }
     private void TurnOffRemoveTool() {
         buttonToolbarRemove.GetComponent<Image>().color = buttonDisabledColor;
@@ -3067,7 +3069,7 @@ private bool treeOfLifeInfoOnC = false;
     }
     public void AnnounceUnlockInspect() {
         
-        //buttonToolbarInspect.GetComponent<Animator>().enabled = true;
+        buttonToolbarInspect.GetComponent<Animator>().enabled = true;
 
         panelPendingClickPrompt.GetComponentInChildren<Text>().text = "Inspect Tool Unlocked!";
         panelPendingClickPrompt.GetComponentInChildren<Text>().color = new Color(0.75f, 0.75f, 0.75f);
@@ -3076,7 +3078,7 @@ private bool treeOfLifeInfoOnC = false;
 
         buttonToolbarInspect.interactable = true;
         buttonToolbarInspect.image.sprite = spriteToolbarInspectButton;
-        ClickToolButtonInspect();
+        //ClickToolButtonInspect();
 
         //if(isToolbarExpandOn) {
         //    ClickToolbarExpandOff();
@@ -3267,6 +3269,8 @@ private bool treeOfLifeInfoOnC = false;
 
         //if blah -- which species unlocked?
         //is toolbar on?
+
+        
 
         if(!isToolbarExpandOn) {
             ClickToolbarExpandOn();

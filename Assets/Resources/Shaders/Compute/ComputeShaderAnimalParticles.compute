@@ -238,7 +238,7 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 			// Still moved by water currents
 
 			float decayEfficiency = 1.0;
-			float decayRate = 0.0001;
+			float decayRate = 0.00025;
 			float decayMass = decayRate * decayEfficiency;
 						
 			bodyMass -= decayMass;

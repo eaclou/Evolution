@@ -142,7 +142,7 @@
 				finalColor.rgb = lerp(finalColor.rgb, backgroundColor, i.color.a);
 				
 				finalColor.rgb = lerp(finalColor.rgb, waterFogColor, fogAmount);
-				finalColor.a *= 0.1;
+				finalColor.a *= 0.05;
 				
 				//finalColor.a *= (1.0 - i.color.a);
 				//return float4(0,0,0,1);
