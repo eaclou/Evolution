@@ -101,13 +101,15 @@ public class TrophicLayersManager {
     public void Tick(SimulationManager simManager) {
         // ALGAE
         if(kingdomPlants.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
-            if(simManager.curSimYear > 0) {
+            if(simManager.simAgeTimeSteps > 900) {
                 kingdomPlants.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.Empty;
                 Debug.Log("ALGAE UNLOCKED!!! " + simManager.uiManager.unlockCooldownCounter.ToString());
 
                 simManager.uiManager.AnnounceUnlockAlgae();
                 simManager.uiManager.isUnlockCooldown = true;
                 simManager.uiManager.unlockedAnnouncementSlotRef = kingdomPlants.trophicTiersList[0].trophicSlots[0];
+                simManager.uiManager.buttonToolbarExpandOn.GetComponent<Animator>().enabled = true;
+                simManager.uiManager.buttonToolbarExpandOn.interactable = true;
             }
         }
         
@@ -120,6 +122,7 @@ public class TrophicLayersManager {
                 simManager.uiManager.AnnounceUnlockDecomposers();
                 simManager.uiManager.isUnlockCooldown = true;
                 simManager.uiManager.unlockedAnnouncementSlotRef = kingdomDecomposers.trophicTiersList[0].trophicSlots[0];
+                simManager.uiManager.buttonToolbarExpandOn.GetComponent<Animator>().enabled = true;
             }
         }
         
@@ -130,6 +133,7 @@ public class TrophicLayersManager {
                 simManager.uiManager.AnnounceUnlockZooplankton();
                 simManager.uiManager.isUnlockCooldown = true;
                 simManager.uiManager.unlockedAnnouncementSlotRef = kingdomAnimals.trophicTiersList[0].trophicSlots[0];
+                simManager.uiManager.buttonToolbarExpandOn.GetComponent<Animator>().enabled = true;
             }
         }
 
@@ -147,6 +151,7 @@ public class TrophicLayersManager {
                 simManager.uiManager.isUnlockCooldown = true;
 
                 simManager.uiManager.unlockedAnnouncementSlotRef = kingdomAnimals.trophicTiersList[1].trophicSlots[0];
+                simManager.uiManager.buttonToolbarExpandOn.GetComponent<Animator>().enabled = true;
             }
         }
 
@@ -157,6 +162,7 @@ public class TrophicLayersManager {
                 simManager.uiManager.AnnounceUnlockVertebrates();
                 simManager.uiManager.isUnlockCooldown = true;
                 simManager.uiManager.unlockedAnnouncementSlotRef = kingdomAnimals.trophicTiersList[1].trophicSlots[1];
+                simManager.uiManager.buttonToolbarExpandOn.GetComponent<Animator>().enabled = true;
             }
         }
         if(kingdomAnimals.trophicTiersList[1].trophicSlots[2].status == TrophicSlot.SlotStatus.Locked) {
@@ -166,6 +172,7 @@ public class TrophicLayersManager {
                 simManager.uiManager.AnnounceUnlockVertebrates();
                 simManager.uiManager.isUnlockCooldown = true;
                 simManager.uiManager.unlockedAnnouncementSlotRef = kingdomAnimals.trophicTiersList[1].trophicSlots[2];
+                simManager.uiManager.buttonToolbarExpandOn.GetComponent<Animator>().enabled = true;
             }
         }
         if(kingdomAnimals.trophicTiersList[1].trophicSlots[3].status == TrophicSlot.SlotStatus.Locked) {
@@ -175,6 +182,7 @@ public class TrophicLayersManager {
                 simManager.uiManager.AnnounceUnlockVertebrates();
                 simManager.uiManager.isUnlockCooldown = true;
                 simManager.uiManager.unlockedAnnouncementSlotRef = kingdomAnimals.trophicTiersList[1].trophicSlots[3];
+                simManager.uiManager.buttonToolbarExpandOn.GetComponent<Animator>().enabled = true;
             }
         }
     }

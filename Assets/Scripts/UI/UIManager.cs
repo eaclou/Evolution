@@ -144,6 +144,8 @@ public class UIManager : MonoBehaviour {
     public bool isAnnouncementTextOn = false;
     public bool isUnlockCooldown = false;
     public int unlockCooldownCounter = 0;
+    public bool recentlyCreatedSpecies = false;
+    public int recentlyCreatedSpeciesTimeStepCounter = 0;
     // portrait
     //public int curToolUnlockLevel = 0;
     public float toolbarInfluencePoints = 0.5f;
@@ -158,7 +160,10 @@ public class UIManager : MonoBehaviour {
     public Button buttonToolbarExpandOn;
     public Button buttonToolbarExpandOff;
 
+    private bool inspectToolUnlocked = false;
+
     public Button buttonToolbarInspect;
+    public Sprite spriteToolbarInspectButton;
     public Button buttonToolbarNutrients;
     public Button buttonToolbarStir;
     public Button buttonToolbarMutate;
@@ -529,6 +534,8 @@ private bool treeOfLifeInfoOnC = false;
     */
     public float[] maxValuesStatArray;
 
+    public float stirStickDepth = 0f;
+
     public Vector2 smoothedMouseVel;
     private Vector2 prevMousePos;
 
@@ -542,6 +549,7 @@ private bool treeOfLifeInfoOnC = false;
     public bool isDraggingSpeciesNode = false;
 
     public int selectedSpeciesID;
+    public int hoverAgentID;
 
     private const int maxDisplaySpecies = 32;
 
@@ -583,6 +591,9 @@ private bool treeOfLifeInfoOnC = false;
         simEventComponentsArray[3] = simEvent3;
         */
         ClickToolButtonStir();
+        //buttonToolbarExpandOn.GetComponent<Animator>().StopPlayback();
+        buttonToolbarExpandOn.GetComponent<Animator>().enabled = false;
+        buttonToolbarInspect.GetComponent<Animator>().enabled = false;
         //ClickToolButtonInspect();  // **** Clean this up! don't mix UI click function with underlying code for initialization
     }
     public void EnterObserverMode() {
@@ -725,7 +736,7 @@ private bool treeOfLifeInfoOnC = false;
         }
     }
     private void UpdateMainMenuUI() {
-
+        Cursor.visible = true;
         if (firstTimeStartup) {
             buttonQuickStartResume.GetComponentInChildren<Text>().text = "QUICK START";
         }
@@ -752,6 +763,7 @@ private bool treeOfLifeInfoOnC = false;
         panelDebug.SetActive(isActiveDebug);
     }
     private void UpdateLoadingUI() {
+        Cursor.visible = true;
         if (loadingProgress < 1f) {
             textLoadingTooltips.text = "( Calculating Enjoyment Coefficients )";
         }
@@ -786,7 +798,7 @@ private bool treeOfLifeInfoOnC = false;
 
         Vector2 instantMouseVel = curMousePos - prevMousePos;
 
-        smoothedMouseVel = Vector2.Lerp(smoothedMouseVel, instantMouseVel, 0.2f);
+        smoothedMouseVel = Vector2.Lerp(smoothedMouseVel, instantMouseVel, 0.16f);
 
         prevMousePos = curMousePos;
     }
@@ -917,7 +929,7 @@ private bool treeOfLifeInfoOnC = false;
             dataArray[0] = gizmoPos;
             gameManager.theRenderKing.gizmoCursorPosCBuffer.SetData(dataArray);
 
-            bool mouseCursorVisible = false;
+            bool stirGizmoVisible = false;
 
             if (isAnnouncementTextOn) {
                 panelPendingClickPrompt.SetActive(true);
@@ -931,6 +943,15 @@ private bool treeOfLifeInfoOnC = false;
             else {
                 panelPendingClickPrompt.SetActive(false);
             }
+
+            if (recentlyCreatedSpecies) {
+                recentlyCreatedSpeciesTimeStepCounter++;
+                if(recentlyCreatedSpeciesTimeStepCounter > 360) {
+                    recentlyCreatedSpecies = false;
+                    recentlyCreatedSpeciesTimeStepCounter = 0;
+                }
+            }
+            //public int recentlyCreatedSpeciesTimeStepCounter = 0;
             //isUnlockCooldown = false;
     //private int unlockCooldownCounter = 0;
             /*if(isUnlockCooldown) {
@@ -998,23 +1019,26 @@ private bool treeOfLifeInfoOnC = false;
                     //gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_IsVisible", 0f);
                 }
                 else {
-                    mouseCursorVisible = true;
+                    stirGizmoVisible = true;
                     //gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_IsVisible", 1f);
                 }
             
                 if (curActiveTool == ToolType.Stir) {                    
                 
                     float isActing = 0f;
+                    
                     if (isDraggingMouse) {
                         isActing = 1f;
+                        
                         //toolbarInfluencePoints -= 0.00275f;
                         //toolbarInfluencePoints = Mathf.Clamp01(toolbarInfluencePoints);
 
                         float mag = smoothedMouseVel.magnitude;
-                        float radiusMult = 0.62379f; // (1f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.5f);
+                        float radiusMult = Mathf.Lerp(0.075f, 1.25f, Mathf.Clamp01(gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.5f)); // 0.62379f; // (1f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.5f);
 
                         if(mag > 0f) {
-                            gameManager.simulationManager.PlayerToolStirOn(curMousePositionOnWaterPlane, smoothedMouseVel * (0.75f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.25f), radiusMult);
+                            gameManager.simulationManager.PlayerToolStirOn(curMousePositionOnWaterPlane, smoothedMouseVel * (0.33f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 0.9f), radiusMult);
+                            
                         }
                         else {
                             gameManager.simulationManager.PlayerToolStirOff();
@@ -1023,9 +1047,18 @@ private bool treeOfLifeInfoOnC = false;
                     else {
                         gameManager.simulationManager.PlayerToolStirOff();
                     }
+
+                    if(isActing > 0.5f) {
+                        stirStickDepth = Mathf.Lerp(stirStickDepth, 1f, 0.2f);
+                    }
+                    else {
+                        stirStickDepth = Mathf.Lerp(stirStickDepth, -4f, 0.2f);
+                    }
                     
                     gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_IsStirring", isActing);
-                    gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_Radius", 2f);  // **** Make radius variable! (possibly texture based?)
+                    gameManager.theRenderKing.gizmoStirStickAMat.SetFloat("_IsStirring", isActing);
+                    //gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_Radius", Mathf.Lerp(0.05f, 2.5f, gameManager.theRenderKing.baronVonWater.camDistNormalized));  // **** Make radius variable! (possibly texture based?)
+                    gameManager.theRenderKing.gizmoStirStickAMat.SetFloat("_Radius", 2f);
                 }
 
                 gameManager.theRenderKing.nutrientToolOn = false;
@@ -1093,11 +1126,15 @@ private bool treeOfLifeInfoOnC = false;
                 
             }
             */
-            if(mouseCursorVisible) {
+            if(stirGizmoVisible) {
                 gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_IsVisible", 1f);
+                gameManager.theRenderKing.gizmoStirStickAMat.SetFloat("_IsVisible", 1f);
+                Cursor.visible = false;
             }         
             else {
                 gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_IsVisible", 0f);
+                gameManager.theRenderKing.gizmoStirStickAMat.SetFloat("_IsVisible", 0f);
+                Cursor.visible = true;
             }
 
             if (Input.GetMouseButtonDown(1)) {
@@ -1185,9 +1222,25 @@ private bool treeOfLifeInfoOnC = false;
             }
         }*/
     }
-        
+
     public void UpdateToolbarPanelUI() {
 
+        //if (true) { }
+            /*simManager.uiManager.AnnounceUnlockAlgae();
+                simManager.uiManager.isUnlockCooldown = true;
+                simManager.uiManager.unlockedAnnouncementSlotRef = kingdomPlants.trophicTiersList[0].trophicSlots[0];
+                simManager.uiManager.buttonToolbarExpandOn.GetComponent<Animator>().enabled = true;
+                simManager.uiManager.buttonToolbarExpandOn.interactable = true;)
+                */
+        if(!inspectToolUnlocked) {
+            if(gameManager.simulationManager.simResourceManager.curGlobalAgentBiomass > 0.8f) {
+                // Unlock!!!!
+                AnnounceUnlockInspect();
+                inspectToolUnlocked = true;
+                
+            }
+        }
+        
         // Check for Announcements:
         CheckForAnnouncements();
         
@@ -2664,7 +2717,7 @@ private bool treeOfLifeInfoOnC = false;
             if(agentRef != null) {
                 //Debug.Log("AGENT: [ " + agentRef.gameObject.name + " ] #" + agentRef.index.ToString());
                     
-                if(clicked) {
+                if(clicked && curActiveTool == ToolType.Inspect) {
                     cameraManager.SetTarget(agentRef, agentRef.index);
                     cameraManager.isFollowing = true;
 
@@ -2674,7 +2727,8 @@ private bool treeOfLifeInfoOnC = false;
                 }
                 else {
                     // HOVER:
-                    Debug.Log("HOVER AGENT: " + agentRef.index.ToString() + ", species: " + agentRef.speciesIndex.ToString());
+                    //hoverAgentID = agentRef.index;
+                    //Debug.Log("HOVER AGENT: " + agentRef.index.ToString() + ", species: " + agentRef.speciesIndex.ToString());
                 }
 
                 cameraManager.isMouseHoverAgent = true;
@@ -2787,7 +2841,8 @@ private bool treeOfLifeInfoOnC = false;
         
         curActiveTool = ToolType.Stir;
              
-        isActiveStirToolPanel = true;    
+        isActiveStirToolPanel = true;  
+        StopFollowing();
         //animatorStirToolPanel.enabled = true;
         //animatorStirToolPanel.Play("SlideOnPanelStirTool"); 
         buttonToolbarStir.GetComponent<Image>().color = buttonActiveColor; 
@@ -2802,12 +2857,15 @@ private bool treeOfLifeInfoOnC = false;
         //gameManager.simulationManager.trophicLayersManager.ResetSelectedAgentSlots();
         //if(curActiveTool != ToolType.Inspect) {
             curActiveTool = ToolType.Inspect;
-
+            
             TurnOnInspectTool();
             TurnOffStirTool();  
             TurnOffNutrientsTool();
             TurnOffMutateTool();
             TurnOffRemoveTool();
+
+            buttonToolbarInspect.GetComponent<Animator>().StopPlayback();
+            buttonToolbarInspect.GetComponent<Animator>().enabled = false;    
         //} 
         /*else {
             curActiveTool = ToolType.None;
@@ -2856,12 +2914,13 @@ private bool treeOfLifeInfoOnC = false;
     }
 
     private void TurnOnInspectTool() {
-        buttonToolbarInspect.GetComponent<Image>().color = buttonActiveColor;            
+        buttonToolbarInspect.GetComponent<Image>().color = buttonActiveColor;  
+        //buttonToolbarInspect.GetComponent<Animator>().enabled = false;    
     }    
     private void TurnOffInspectTool() {
                 
         buttonToolbarInspect.GetComponent<Image>().color = buttonDisabledColor;  
-               
+        //buttonToolbarInspect.GetComponent<Animator>().enabled = false;       
         isActiveInspectPanel = false;
         //StopFollowing();
     }
@@ -2993,16 +3052,35 @@ private bool treeOfLifeInfoOnC = false;
         isToolbarExpandOn = true;
         imageHighlightNewUI.gameObject.SetActive(false);
         //buttonToolbarExpandOn.GetComponent<Animation>().Stop();
-        buttonToolbarExpandOn.GetComponent<Animator>().StopPlayback();
+        //buttonToolbarExpandOn.GetComponent<Animator>().StopPlayback();
+        buttonToolbarExpandOn.GetComponent<Animator>().enabled = false;
     }
     public void ClickToolbarExpandOff() {
         isToolbarExpandOn = false;
+        buttonToolbarExpandOn.GetComponent<Animator>().enabled = false;
     }
 
     public void ClickToolbarWingClose() {
         isToolbarWingOn = false;
         gameManager.simulationManager.trophicLayersManager.isSelectedTrophicSlot = false;
         
+    }
+    public void AnnounceUnlockInspect() {
+        
+        //buttonToolbarInspect.GetComponent<Animator>().enabled = true;
+
+        panelPendingClickPrompt.GetComponentInChildren<Text>().text = "Inspect Tool Unlocked!";
+        panelPendingClickPrompt.GetComponentInChildren<Text>().color = new Color(0.75f, 0.75f, 0.75f);
+        //panelPendingClickPrompt.GetComponent<Image>().raycastTarget = true;
+        isAnnouncementTextOn = true;
+
+        buttonToolbarInspect.interactable = true;
+        buttonToolbarInspect.image.sprite = spriteToolbarInspectButton;
+        ClickToolButtonInspect();
+
+        //if(isToolbarExpandOn) {
+        //    ClickToolbarExpandOff();
+        //}
     }
     public void AnnounceUnlockAlgae() {
         panelPendingClickPrompt.GetComponentInChildren<Text>().text = "Algae Species Unlocked!";
@@ -3064,6 +3142,9 @@ private bool treeOfLifeInfoOnC = false;
                 
                 panelPendingClickPrompt.GetComponentInChildren<Text>().text = "A new species of Vertebrate added!";
                 panelPendingClickPrompt.GetComponentInChildren<Text>().color = colorAnimalsLight;
+
+                
+                //ClickToolButtonInspect();
                 
             }
             else {
@@ -3075,7 +3156,9 @@ private bool treeOfLifeInfoOnC = false;
         curToolbarWingPanelSelectID = 1;
 
         isAnnouncementTextOn = true;
-
+        timerAnnouncementTextCounter = 0;
+        recentlyCreatedSpecies = true;
+        recentlyCreatedSpeciesTimeStepCounter = 0;
         //UpdateSelectedSpeciesColorUI();
     }
     public void ClickToolbarWingDescription() {

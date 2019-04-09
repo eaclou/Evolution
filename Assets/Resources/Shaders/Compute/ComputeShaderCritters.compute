@@ -222,15 +222,20 @@ void CSSimulateHighlightTrail (uint3 id : SV_DispatchThreadID)
 
 	//float timeMask = 1.0 - saturate(abs((round(_Time * 30) % numParticles) - (id.x % numParticles)));
 	float age = highlightTrailDataCBuffer[particleIndex].age;
-	float timeMask = saturate(floor(age));
+	float timeMask = saturate(floor(age));	
 	age = age % 1.0;
-
-	float spawnRadius = 4.20 * 2.5;
-	float randomAngle = 6.28 * rand(float2(id.x,critterIndex));
-	float randRadius = rand(float2(critterIndex,id.x));
-	float2 randOffset = (float2(rand(float2((float)id.x, age)), rand(float2(age, (float)id.x))) * 2.0 - 1.0) * spawnRadius;
+	float spawnRadius = 1.20 * 1;
+	float randomAngle = 6.28 * rand(float2(id.x * 3.1415,critterIndex));
+	float randRadius = rand(float2(critterIndex * -13.2,id.x));
+	float2 randOffset = (float2(rand(float2((float)id.x * 0.12337, age)), rand(float2(age * 123.79 + critterIndex, (float)id.x * -891))) * 2.0 - 1.0) * spawnRadius;
 	randOffset = float2(cos(randomAngle) * randRadius * spawnRadius, sin(randomAngle) * randRadius * spawnRadius);
 	float2 spawnPos = critterSimData.worldPos.xy + randOffset - critterSimData.heading * critterInitData.boundingBoxSize.z * critterInitData.spawnSizePercentage;
+
+	//if(age > 1.0) {
+		
+	//}
+	highlightTrailDataCBuffer[particleIndex].strength = 1.0; //1.0 - saturate(randRadius / spawnRadius);
+	
 
 	float2 curPos = highlightTrailDataCBuffer[particleIndex].worldPos;
 	
@@ -239,7 +244,7 @@ void CSSimulateHighlightTrail (uint3 id : SV_DispatchThreadID)
 	// FLUID FLOW:
 	float2 uv = nextPos / _MapSize;
 	float2 fluidVel = velocityRead.SampleLevel(_LinearRepeat, uv, 2).xy;
-	float speedMult = 0.0167 * _MapSize;
+	float speedMult = 0.0167 * _MapSize * saturate(age * 4);
 	nextPos = nextPos + fluidVel * speedMult;
 
 	// NOISE:
@@ -252,8 +257,9 @@ void CSSimulateHighlightTrail (uint3 id : SV_DispatchThreadID)
 	
 	highlightTrailDataCBuffer[particleIndex].vel = fluidVel * speedMult;// + noiseVel * 0.006;
 	highlightTrailDataCBuffer[particleIndex].worldPos = nextPos;
-	highlightTrailDataCBuffer[particleIndex].age = age + 0.0157;
-	highlightTrailDataCBuffer[particleIndex].strength = cursorStr;
+	highlightTrailDataCBuffer[particleIndex].age = age + 0.004157;
+
+	
 }
 
 /*   OLD:::::

@@ -79,14 +79,14 @@
 				float noiseMag03 = (Value3D(float3(_Time.y * 0.15, -i.uv), 104).x * 0.5 + 0.5);
 				float noiseMag04 = (Value3D(float3(-_Time.y * 0.1, -i.uv), 132.331).x * 0.5 + 0.5);
 
-				float noiseMag = saturate(noiseMag01 * noiseMag02 * noiseMag03 * noiseMag04 * 0.75) + 0.25; // * noiseMag01;
+				float noiseMag = saturate(noiseMag01 * noiseMag02 * noiseMag03 * noiseMag04 * 0.4) + 0.4; // * noiseMag01;
 
-				float pressureAmount = saturate(pressure.y * 3);
-				finalColor.a += pressureAmount * 0.5 * noiseMag;
-				finalColor.rgb += pressureAmount * 0.25 * noiseMag;
+				float pressureAmount = saturate((pressure.y - 0.2) * 3);
+				finalColor.a += pressureAmount * 0.4 * noiseMag;
+				finalColor.rgb += pressureAmount * 0.2 * noiseMag;
 
 				float velocityGlow = saturate((length(velocity) - 0.025) * 3.3);
-				finalColor.a += velocityGlow * 0.5 * noiseMag;
+				finalColor.a += velocityGlow * 0.4 * noiseMag;
 				//finalColor.rgb += velocityGlow * 0.65 * noiseMag;
 				//finalColor.rgb = lerp(finalColor.rgb, float3(1,1,0), velocityGlow);
 

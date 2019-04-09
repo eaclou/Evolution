@@ -35,6 +35,7 @@
 			sampler2D _RenderedSceneRT;  // Provided by CommandBuffer -- global tex??? seems confusing... ** revisit this
 			
 			uniform float _MapSize;
+			uniform float _CamDistNormalized;
 
 			uniform float _AlgaeReservoir;
 			uniform float _NutrientDensity;
@@ -93,7 +94,7 @@
 				float2 uv = (worldPosition.xy + 128) / 512;
 				o.altitudeUV = uv;
 								
-				float2 scale = waterQuadData.localScale * 2.5;
+				float2 scale = waterQuadData.localScale * 12;
 				scale.x *= 1;
 				scale.y = scale.y * (1 + saturate(waterQuadData.speed * 64));
 				
@@ -101,7 +102,7 @@
 				//scale *= (nutrientGridSample.x * 0.4 + 0.6) * 1;				
 				//scale = float2(1,1) * 0.033;
 				
-				quadPoint *= float3(scale, 1.0) * (0.3 + _NutrientDensity * 0.2);
+				quadPoint *= float3(scale, 1.0) * (0.2 + _NutrientDensity * 0.175) * (_CamDistNormalized * 0.85 + 0.15);
 				
 				float4 fluidVelocity = tex2Dlod(_VelocityTex, float4(worldPosition.xy / 256, 0, 2));
 				float2 fluidDir = float2(0,1); //normalize(fluidVelocity.xy);
@@ -165,7 +166,7 @@
 
 				alpha *= densityMask;
 
-				o.color = float4(rand(float2(-0.347 * inst, inst)),1,1,alpha);
+				o.color = float4(rand(float2(-0.347 * inst, inst)),(saturate(_NutrientDensity * 1)),1,alpha);
 				
 				return o;
 			}
@@ -175,7 +176,8 @@
 				float4 finalColor = tex2D(_MainTex, i.quadUV);
 				//i.color.r = random 0-1
 				finalColor.rgb = lerp(float3(0.05,0.04,0.015), float3(0.9,1,0.7) * 0.5, i.color.r); //rand()); //saturate(nutrientGridSample.x * 10 + 0.033));
-				finalColor.rgb = float3(1, 0.75, 0.2) * 1.25;
+				finalColor.rgb = float3(1, 0.85, 0.2) * 1.25;
+				//finalColor.rgb *= i.color.y;
 				finalColor.a *= i.color.a;				
 				return finalColor;
 

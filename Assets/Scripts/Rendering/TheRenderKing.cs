@@ -41,6 +41,9 @@ public class TheRenderKing : MonoBehaviour {
     public ComputeShader computeShaderEggSacks;
     public ComputeShader computeShaderTreeOfLife;
 
+    public Mesh meshStirStickA;
+    public Material gizmoStirStickAMat;
+
     // ORGANIZE AND REMOVE UNUSED!!!!!! *********
     public Material debugVisModeMat;
     public Material debugVisAlgaeParticlesMat;
@@ -3783,6 +3786,18 @@ public class TheRenderKing : MonoBehaviour {
         
             }
 
+            // STIR STICK!!!!
+            //gizmoStirStickAMat.SetPass(0);
+            //simManager.uiManager.smoothedCtrlCursorVel
+            Quaternion rot = Quaternion.Euler(new Vector3(Mathf.Clamp(simManager.uiManager.smoothedMouseVel.y * 2.5f + 10f, -45f, 45f), Mathf.Clamp(simManager.uiManager.smoothedMouseVel.x * -1.5f, -45f, 45f), 0f));
+            gizmoStirStickAMat.SetFloat("_MinFog", 0.0625f);  
+            gizmoStirStickAMat.SetVector("_FogColor", simManager.fogColor);
+            gizmoStirStickAMat.SetFloat("_Turbidity", simManager.fogAmount); 
+            float scale = Mathf.Lerp(0.5f, 1.5f, baronVonWater.camDistNormalized);
+            Matrix4x4 stirStickTransformMatrix = Matrix4x4.TRS(new Vector3(simManager.uiManager.curMousePositionOnWaterPlane.x, simManager.uiManager.curMousePositionOnWaterPlane.y, simManager.uiManager.stirStickDepth), rot, Vector3.one * scale);
+            cmdBufferMain.DrawMesh(meshStirStickA, stirStickTransformMatrix, gizmoStirStickAMat);
+            
+
             if(simManager.trophicLayersManager.GetZooplanktonOnOff()) {
                 // add shadow pass eventually
                 animalParticleDisplayMat.SetPass(0);
@@ -3796,6 +3811,7 @@ public class TheRenderKing : MonoBehaviour {
             if(simManager.trophicLayersManager.GetAgentsOnOff()) {
                 // Highlight trail:
                 critterHighlightTrailMat.SetPass(0);
+                critterHighlightTrailMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
                 critterHighlightTrailMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
                 critterHighlightTrailMat.SetBuffer("highlightTrailDataCBuffer", critterHighlightTrailCBuffer);
                 critterHighlightTrailMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -3805,6 +3821,14 @@ public class TheRenderKing : MonoBehaviour {
                     highlightOn = 1f;
                 }
                 critterHighlightTrailMat.SetFloat("_HighlightOn", highlightOn);
+                //public int mouseHoverAgentIndex = 0;
+                //public bool isMouseHoverAgent = false;
+                //uniform float _HoverID;
+			    //uniform float _SelectedID;
+                critterHighlightTrailMat.SetInt("_HoverID", simManager.uiManager.cameraManager.mouseHoverAgentIndex);
+                critterHighlightTrailMat.SetInt("_SelectedID", simManager.uiManager.cameraManager.targetCritterIndex);
+                critterHighlightTrailMat.SetFloat("_IsHover", simManager.uiManager.cameraManager.isMouseHoverAgent ? 1f : 0f);
+                critterHighlightTrailMat.SetFloat("_IsSelected", simManager.uiManager.cameraManager.isFollowing ? 1f : 0f);
                 critterHighlightTrailMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
                 cmdBufferMain.DrawProcedural(Matrix4x4.identity, critterHighlightTrailMat, 0, MeshTopology.Triangles, 6, critterHighlightTrailCBuffer.count);
             
@@ -3855,6 +3879,7 @@ public class TheRenderKing : MonoBehaviour {
             baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
             baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_NutrientTex", simManager.vegetationManager.resourceGridRT1);
             baronVonWater.waterNutrientsBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+            baronVonWater.waterNutrientsBitsDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
             baronVonWater.waterNutrientsBitsDisplayMat.SetFloat("_NutrientDensity", Mathf.Clamp01(simManager.simResourceManager.curGlobalNutrients / 300f));
             cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonWater.waterNutrientsBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterNutrientsBitsCBuffer.count);
@@ -3885,7 +3910,8 @@ public class TheRenderKing : MonoBehaviour {
             fluidRenderMat.SetTexture("_ObstaclesTex", fluidManager._ObstaclesRT);
             fluidRenderMat.SetTexture("_TerrainHeightTex", baronVonTerrain.terrainHeightMap);
             cmdBufferMain.DrawMesh(fluidRenderMesh, Matrix4x4.identity, fluidRenderMat);
-        
+
+
             
             // CRITTER BODY:
 
@@ -4057,6 +4083,7 @@ public class TheRenderKing : MonoBehaviour {
             gizmoStirToolMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
             gizmoStirToolMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
             gizmoStirToolMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
+            gizmoStirToolMat.SetFloat("_Radius", Mathf.Lerp(0.025f, 2f, baronVonWater.camDistNormalized));  // **** Make radius variable! (possibly texture based?)
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, gizmoStirToolMat, 0, MeshTopology.Triangles, 6, 1);
         
         }

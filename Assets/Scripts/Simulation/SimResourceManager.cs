@@ -102,6 +102,10 @@ public class SimResourceManager {
                 curGlobalDecomposers = 150f;  // try capping?
             }
 
+            if(curGlobalOxygen < 50f) {
+                curGlobalDecomposers = Mathf.Lerp(curGlobalDecomposers, 0f, 0.001f);  // die off if no oxygen
+            }
+
             detritusRemovedByDecomposersLastFrame = decomposersTotalProductivity;
             curGlobalDetritus -= decomposersTotalProductivity;
 

@@ -417,9 +417,15 @@ public class Agent : MonoBehaviour {
     private void CheckForDeathStarvation() {
         // STARVATION::
         if (coreModule.energy <= 0f) {
+            if(coreModule.stomachContentsNorm > 0.01f) {
+                stringCauseOfDeath = "Suffocated!";
+            }
+            else {
+                stringCauseOfDeath = "Starved!";
+            }
             curLifeStage = AgentLifeStage.Dead;
             lifeStageTransitionTimeStepCounter = 0;
-            stringCauseOfDeath = "Starved!";
+            
             InitializeDeath();
         }
     }
@@ -435,6 +441,7 @@ public class Agent : MonoBehaviour {
             coreModule.healthBody = 0f;
             coreModule.healthExternal = 0f;
 
+            stringCauseOfDeath = "Killed!";
             InitializeDeath();
         }
         /*if (coreModule.healthBody <= 0f) {
@@ -455,6 +462,7 @@ public class Agent : MonoBehaviour {
             lifeStageTransitionTimeStepCounter = 0;
 
             //Debug.Log("Died of old age!");
+            stringCauseOfDeath = "Old Age!";
             InitializeDeath();
         }
     }
@@ -1404,7 +1412,7 @@ public class Agent : MonoBehaviour {
 
         //mouseclickcollider MCC
         mouseClickCollider.direction = 1; // Y-Axis ???
-        mouseClickCollider.center = Vector3.zero;
+        mouseClickCollider.center = new Vector3(0f, -0.5f, 0f); //Vector3.zero; // new Vector3(0f, 0f, 1f);
         mouseClickCollider.radius = fullSizeBoundingBox.x / 2f * sizePercentage;
         mouseClickCollider.radius *= 1.25f; // ** TEMP
         mouseClickCollider.height = fullSizeBoundingBox.y / 2f * sizePercentage;
