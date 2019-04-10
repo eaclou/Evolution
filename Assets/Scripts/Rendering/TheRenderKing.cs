@@ -1510,8 +1510,8 @@ public class TheRenderKing : MonoBehaviour {
             }
             obstacleStrokeDataArray[baseIndex + i].scale = new Vector2(simManager.agentsArray[i].currentBoundingBoxSize.x, simManager.agentsArray[i].currentBoundingBoxSize.y) * deadMult; // Vector2.one * 5.5f * simManager.agentsArray[i].sizePercentage; // new Vector2(simManager.agentsArray[i].transform.localScale.x, simManager.agentsArray[i].transform.localScale.y) * 2.9f; // ** revisit this later // should leave room for velSampling around Agent *** weird popping when * 0.9f
 
-            float velX = Mathf.Clamp(simManager.agentsArray[i].ownVel.x, -100f, 100f) * velScale * 0.015f; // agentPos.x - simManager.agentsArray[i]._PrevPos.x * velScale;
-            float velY = Mathf.Clamp(simManager.agentsArray[i].ownVel.y, -100f, 100f) * velScale * 0.015f;
+            float velX = Mathf.Clamp(simManager.agentsArray[i].ownVel.x, -100f, 100f) * velScale * 0.01f; // agentPos.x - simManager.agentsArray[i]._PrevPos.x * velScale;
+            float velY = Mathf.Clamp(simManager.agentsArray[i].ownVel.y, -100f, 100f) * velScale * 0.01f;
             
 
             obstacleStrokeDataArray[baseIndex + i].color = new Vector4(velX, velY, 1f, 1f);
@@ -3224,7 +3224,7 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, algaeParticleColorInjectMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.algaeParticlesCBuffer.count);
 
         Vector4 cursorPos = new Vector4(simManager.uiManager.curMousePositionOnWaterPlane.x, simManager.uiManager.curMousePositionOnWaterPlane.y, 0f, 0f);
-        if(nutrientToolOn) {            // Particle-based instead?
+        if(nutrientToolOn) {            // Particle-based instead? // hijack and use for stir tool
             playerBrushColorInjectMat.SetPass(0);
             playerBrushColorInjectMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
             playerBrushColorInjectMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);

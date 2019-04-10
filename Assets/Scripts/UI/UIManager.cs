@@ -2190,8 +2190,8 @@ private bool treeOfLifeInfoOnC = false;
             descriptionText += "<color=#A97860FF>Waste Processed: <b>" + gameManager.simulationManager.simResourceManager.detritusRemovedByDecomposersLastFrame.ToString("F3") + "</b></color>\n";
 
             if(gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
-                textToolbarWingStatsUnlockStatus.text = "<b>Next Unlock:</b>\nReach <b><i>40</i></b> Total Biomass";
-                float unlockProgressLerp = Mathf.Clamp01(gameManager.simulationManager.simResourceManager.curGlobalDecomposers / 40f);
+                textToolbarWingStatsUnlockStatus.text = "<b>Next Unlock:</b>\nReach <b><i>20</i></b> Total Biomass";
+                float unlockProgressLerp = Mathf.Clamp01(gameManager.simulationManager.simResourceManager.curGlobalDecomposers / 20f);
                 textToolbarWingStatsUnlockPercentage.text = (unlockProgressLerp * 100f).ToString("F0") + "%";
                 //imageUnlockMeter;
                 matUnlockMeter.SetFloat("_FillPercentage", unlockProgressLerp);
@@ -2215,8 +2215,8 @@ private bool treeOfLifeInfoOnC = false;
 
             // *************** GROSS CODE ALERT!!!!   temp hack!!!! *****************
             if(gameManager.simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
-                textToolbarWingStatsUnlockStatus.text = "<b>Next Unlock:</b>\nReach <b><i>200</i></b> Total Biomass";
-                float unlockProgressLerp = Mathf.Clamp01(gameManager.simulationManager.simResourceManager.curGlobalAlgaeParticles / 200f);
+                textToolbarWingStatsUnlockStatus.text = "<b>Next Unlock:</b>\nReach <b><i>150</i></b> Total Biomass";
+                float unlockProgressLerp = Mathf.Clamp01(gameManager.simulationManager.simResourceManager.curGlobalAlgaeParticles / 150f);
                 textToolbarWingStatsUnlockPercentage.text = (unlockProgressLerp * 100f).ToString("F0") + "%";
                 //imageUnlockMeter;
                 matUnlockMeter.SetFloat("_FillPercentage", unlockProgressLerp);
@@ -2240,8 +2240,8 @@ private bool treeOfLifeInfoOnC = false;
                 descriptionText += "<color=#A97860FF>Waste Generated: <b>" + gameManager.simulationManager.simResourceManager.wasteProducedByAnimalParticlesLastFrame.ToString("F3") + "</b></color>\n";
 
                 if(gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
-                    textToolbarWingStatsUnlockStatus.text = "<b>Next Unlock:</b>\nReach <b><i>15</i></b> Total Biomass";
-                    float unlockProgressLerp = Mathf.Clamp01(gameManager.simulationManager.simResourceManager.curGlobalAnimalParticles / 15f);
+                    textToolbarWingStatsUnlockStatus.text = "<b>Next Unlock:</b>\nReach <b><i>10</i></b> Total Biomass";
+                    float unlockProgressLerp = Mathf.Clamp01(gameManager.simulationManager.simResourceManager.curGlobalAnimalParticles / 10f);
                     textToolbarWingStatsUnlockPercentage.text = (unlockProgressLerp * 100f).ToString("F0") + "%";
                     //imageUnlockMeter;
                     matUnlockMeter.SetFloat("_FillPercentage", unlockProgressLerp);

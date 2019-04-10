@@ -88,7 +88,7 @@ public class CameraManager : MonoBehaviour {
         float relSize = (masterTargetDistance - minDistance) / (minDistance + maxDistance);
 
         float minSizeLerpSpeed = 12f;
-        float maxSizeLerpSpeed = 0.5f;
+        float maxSizeLerpSpeed = 3f;
         masterLerpSpeed = Mathf.Lerp(minSizeLerpSpeed, maxSizeLerpSpeed, relSize);
         masterLerpSpeed = Mathf.Max(masterLerpSpeed, 2.647f);  // cap
 

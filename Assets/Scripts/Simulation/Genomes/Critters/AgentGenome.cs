@@ -41,8 +41,8 @@ public class AgentGenome {
         //bodyGenome.coreGenome.
     }
 
-    public void InitializeRandomBrainFromCurrentBody(float initialWeightsMultiplier, int numInitHiddenNeurons) {
-        brainGenome.InitializeRandomBrainGenome(bodyGenome, initialWeightsMultiplier, numInitHiddenNeurons);
+    public void InitializeRandomBrainFromCurrentBody(float initialWeightsMultiplier, float initialConnectionDensity, int numInitHiddenNeurons) {
+        brainGenome.InitializeRandomBrainGenome(bodyGenome, initialWeightsMultiplier, initialConnectionDensity, numInitHiddenNeurons);
     }
 
     public void PrintBrainGenome() {

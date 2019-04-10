@@ -30,10 +30,10 @@ public class BrainGenome {
         InitializeBodyNeurons(templateBody);
     }
 
-    public void InitializeRandomBrainGenome(BodyGenome bodyGenome, float initialWeightMultiplier, int numInitHiddenNeurons) {
+    public void InitializeRandomBrainGenome(BodyGenome bodyGenome, float initialWeightMultiplier, float initialConnectionDensity, int numInitHiddenNeurons) {
         InitializeNewBrainGenomeLists();
         InitializeBodyNeurons(bodyGenome);
-        InitializeAxons(initialWeightMultiplier, 0.2f, numInitHiddenNeurons);
+        InitializeAxons(initialWeightMultiplier, initialConnectionDensity, numInitHiddenNeurons);
     }
 
     public void InitializeBodyNeurons(BodyGenome bodyGenome) {

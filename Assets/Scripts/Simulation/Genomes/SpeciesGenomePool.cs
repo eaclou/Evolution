@@ -138,7 +138,7 @@ public class SpeciesGenomePool {
             //agentGenome.bodyGenome.SetToMutatedCopyOfParentGenome(agentGenome.bodyGenome, mutationSettingsRef);
             //agentGenome.
             int tempNumHiddenNeurons = 0;
-            agentGenome.InitializeRandomBrainFromCurrentBody(mutationSettingsRef.initialConnectionChance, tempNumHiddenNeurons);
+            agentGenome.InitializeRandomBrainFromCurrentBody(0.75f, mutationSettingsRef.initialConnectionChance, tempNumHiddenNeurons);
 
             CandidateAgentData candidate = new CandidateAgentData(agentGenome, speciesID);
 
@@ -171,7 +171,7 @@ public class SpeciesGenomePool {
 
             AgentGenome agentGenome = Mutate(foundingGenome, true, true);
             int tempNumHiddenNeurons = 0;
-            agentGenome.InitializeRandomBrainFromCurrentBody(mutationSettingsRef.initialConnectionChance, tempNumHiddenNeurons);
+            agentGenome.InitializeRandomBrainFromCurrentBody(0.75f, mutationSettingsRef.initialConnectionChance, tempNumHiddenNeurons);
             CandidateAgentData candidate = new CandidateAgentData(agentGenome, speciesID);
             candidateGenomesList.Add(candidate);
             leaderboardGenomesList.Add(candidate);

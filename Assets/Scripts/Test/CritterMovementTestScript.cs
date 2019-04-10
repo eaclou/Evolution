@@ -62,7 +62,7 @@ public class CritterMovementTestScript : MonoBehaviour {
         // Create dummy genome
         testAgentGenome = new AgentGenome();
         testAgentGenome.GenerateInitialRandomBodyGenome();
-        testAgentGenome.InitializeRandomBrainFromCurrentBody(0f, 0);
+        testAgentGenome.InitializeRandomBrainFromCurrentBody(1f, 0f, 0);
         
         // Create container Agent:
         GameObject agentGO = new GameObject("Agent" + 0.ToString());
