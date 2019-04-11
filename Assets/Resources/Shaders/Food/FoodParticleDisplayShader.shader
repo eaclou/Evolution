@@ -109,7 +109,7 @@
 				float val = i.color.a;
 				
 				float4 finalColor = i.hue; // float4(float3(i.color.z * 1.2, 0.85, (1.0 - i.color.w) * 0.2) + i.color.y, texColor.a * i.color.x * 0.33 * (1 - i.color.z));
-				finalColor.rgb = lerp(finalColor.rgb, float3(0.25, 1, 0.36), 0.8);
+				finalColor.rgb = lerp(finalColor.rgb, float3(0.35, 0.95, 0.45), 0.7);
 				//finalColor.rgb += 0.25;
 				finalColor.a = texColor.a; // * 0.25;
 				

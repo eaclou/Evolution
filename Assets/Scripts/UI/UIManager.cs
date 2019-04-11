@@ -200,6 +200,8 @@ public class UIManager : MonoBehaviour {
     public Button buttonToolbarWingDescription;
     public Button buttonToolbarWingStats;
     public Button buttonToolbarWingMutation;
+    public Material toolbarSpeciesStatsGraphMat;
+    public Image imageToolbarSpeciesStatsGraph;
     public Text textToolbarWingStatsUnlockStatus;
     public Text textToolbarWingStatsUnlockPercentage;
     public Image imageUnlockMeter;
@@ -640,7 +642,7 @@ private bool treeOfLifeInfoOnC = false;
 
             for (int i = 0; i < statsTreeOfLifeSpeciesTexArray.Length; i++) {
                 Texture2D statsTexture = new Texture2D(maxDisplaySpecies, 1, TextureFormat.RGBAFloat, false);
-                statsSpeciesColorKey.filterMode = FilterMode.Bilinear;
+                statsSpeciesColorKey.filterMode = FilterMode.Point;
                 statsSpeciesColorKey.wrapMode = TextureWrapMode.Clamp;
 
                 statsTreeOfLifeSpeciesTexArray[i] = statsTexture;
@@ -775,17 +777,18 @@ private bool treeOfLifeInfoOnC = false;
     private void UpdateLoadingUI() {
         Cursor.visible = true;
         if (loadingProgress < 1f) {
-            textLoadingTooltips.text = "( Calculating Enjoyment Coefficients )";
+            //textLoadingTooltips.text = "( Calculating Enjoyment Coefficients )";
+            textLoadingTooltips.text = "( Reticulating Splines )";
         }
-        if (loadingProgress < 0.65f) {
+        if (loadingProgress < 0.5f) {
             textLoadingTooltips.text = "( Warming Up Simulation Cubes )";
         }
-        if (loadingProgress < 0.4f) {
-            textLoadingTooltips.text = "( Feeding Hamsters )";
+        /*if (loadingProgress < 0.4f) {
+            //textLoadingTooltips.text = "( Feeding Hamsters )";
         }
         if (loadingProgress < 0.1f) {
             textLoadingTooltips.text = "( Reticulating Splines )";
-        }
+        }*/
     }
     private void UpdateSimulationUI() {
         //UpdateScoreText(Mathf.RoundToInt(gameManager.simulationManager.agentsArray[0].masterFitnessScore));
@@ -2192,7 +2195,7 @@ private bool treeOfLifeInfoOnC = false;
     }
 
     private void UpdateToolbarWingStatsPanel() {
-        
+        imageToolbarSpeciesStatsGraph.gameObject.SetActive(false);
 
         TrophicSlot slot = gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef;
 
@@ -2273,6 +2276,8 @@ private bool treeOfLifeInfoOnC = false;
                 }
             }
             else {  // AGENTS
+                imageToolbarSpeciesStatsGraph.gameObject.SetActive(true);
+
                 SpeciesGenomePool selectedPool = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesID];
                 
                 descriptionText += "<size=13><b>Total Biomass: " + gameManager.simulationManager.simResourceManager.curGlobalAgentBiomass.ToString("F1") + "</b></size>\n\n";
@@ -2284,13 +2289,20 @@ private bool treeOfLifeInfoOnC = false;
                 //descriptionText += "Avg Meat Consumed: <b>" + selectedPool.avgConsumptionMeat.ToString("F3") + "</b>\n\n";  
                 //descriptionText += "Descended From Species: <b>" + selectedPool.parentSpeciesID.ToString() + "</b>\n";
                 //descriptionText += "Year Evolved: <b>" + selectedPool.yearCreated.ToString() + "</b>\n\n";
-                descriptionText += "\nAvg Lifespan: <b>" + selectedPool.avgLifespan.ToString("F0") + "</b>\n\n";
+                descriptionText += "\n\n\nAvg Lifespan: <b>" + (selectedPool.avgLifespan / 1500f).ToString("F1") + " Years</b>\n\n";
 
+                selectedPool.representativeGenome.bodyGenome.CalculateFullsizeBoundingBox();
                 descriptionText += "Avg Body Size: <b>" + ((selectedPool.representativeGenome.bodyGenome.fullsizeBoundingBox.x + selectedPool.representativeGenome.bodyGenome.fullsizeBoundingBox.y) * 0.5f * selectedPool.representativeGenome.bodyGenome.fullsizeBoundingBox.z).ToString("F2") + "</b>\n";
                                                         //+ selectedPool.avgBodySize.ToString("F2") + "</b>\n";
                 descriptionText += "Avg Brain Size: <b>" + ((selectedPool.avgNumNeurons + selectedPool.avgNumAxons) * 0.1f).ToString("F1") + "</b>\n";
                 //descriptionText += "Avg Axon Count: <b>" + selectedPool.avgNumAxons.ToString("F0") + "</b>\n\n";
         
+                toolbarSpeciesStatsGraphMat.SetTexture("_MainTex", statsTreeOfLifeSpeciesTexArray[0]); // statsTreeOfLifeSpeciesTexArray[0]);
+                toolbarSpeciesStatsGraphMat.SetTexture("_ColorKeyTex", statsSpeciesColorKey); // statsTreeOfLifeSpeciesTexArray[0]);
+                toolbarSpeciesStatsGraphMat.SetFloat("_MinValue", 0f);
+                toolbarSpeciesStatsGraphMat.SetFloat("_MaxValue", maxValuesStatArray[0]);
+                toolbarSpeciesStatsGraphMat.SetFloat("_SelectedSpeciesID", slot.slotID);
+
                 // TEMP UNLOCK TEXT:
                 // Slot 4/4:
                 if(gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[3].status == TrophicSlot.SlotStatus.Locked) {
@@ -3097,9 +3109,9 @@ private bool treeOfLifeInfoOnC = false;
         inspectToolUnlockedAnnounce = true;
         //ClickToolButtonInspect();
 
-        if(isToolbarExpandOn) {
-            ClickToolbarExpandOff();
-        }
+        //if(isToolbarExpandOn) {
+        //    ClickToolbarExpandOff();
+        //}
     }
     public void AnnounceUnlockAlgae() {
         panelPendingClickPrompt.GetComponentInChildren<Text>().text = "Algae Species Unlocked!";
@@ -3165,6 +3177,9 @@ private bool treeOfLifeInfoOnC = false;
                 panelPendingClickPrompt.GetComponentInChildren<Text>().color = colorAnimalsLight;
                 panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
                 
+                if(slot.slotID == 0) {
+                    panelPendingClickPrompt.GetComponentInChildren<Text>().text = "A new species of Vertebrate added!\n\nCreatures start with randomly-generated brains\n and must learn how to survive through evolution.";
+                }
                 //ClickToolButtonInspect();
                 
             }

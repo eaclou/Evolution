@@ -65,7 +65,7 @@
 				AlgaeParticleData particleData = foodParticleDataCBuffer[particleIndex];
 
 				float3 worldPosition = float3(particleData.worldPos, 1.0);    //float3(rawData.worldPos, -random2);
-				float radius = (0.1 + saturate(particleData.biomass * 2.0) + rand2 * 0.2) * particleData.isActive * 2.2;
+				float radius = (0.1 + saturate(particleData.biomass * 2.2) + rand2 * 0.4) * particleData.isActive * 2.8;
 				worldPosition.xy += quadPoint.xy * radius;
 				//float2 offsetRaw = (float2(rand0, rand1) * 2 - 1);
 				//o.moundUV = normalize(float3(offsetRaw, -1));
@@ -131,7 +131,7 @@
 				
 				float4 texColor = tex2D(_MainTex, i.uv);
 				//float lerp = 
-				return float4(0.6,0.8,0.5, texColor.a * 0.8);
+				return float4(0.6,0.8,0.5, texColor.a);
 
 				/*
 				float val = i.color.a;

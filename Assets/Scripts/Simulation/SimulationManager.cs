@@ -61,7 +61,7 @@ public class SimulationManager : MonoBehaviour {
 
         }
     }
-    private int numWarmUpTimeSteps = 60;
+    private int numWarmUpTimeSteps = 30;
     private int currentWarmUpTimeStep = 0;
 
     private static float mapSize = 256f;  // This determines scale of environment, size of FluidSim plane!!! Important!
@@ -224,7 +224,7 @@ public class SimulationManager : MonoBehaviour {
         float masterStartTime = Time.realtimeSinceStartup;
         //Debug.Log("Start: " + (Time.realtimeSinceStartup - startTime).ToString());
         //float elapsedTime;
-        uiManager.textLoadingTooltips.text = "LoadingInitializeCoreSimulationState()";
+        //uiManager.textLoadingTooltips.text = "LoadingInitializeCoreSimulationState()";
         // Do some stuff:: LOAD!
         LoadingInitializeCoreSimulationState();  // creates arrays and stuff for the (hopefully)only time
         Debug.Log("LoadingInitializeCoreSimulationState: " + (Time.realtimeSinceStartup - startTime).ToString());
@@ -234,21 +234,21 @@ public class SimulationManager : MonoBehaviour {
         Debug.Log("LoadingSetUpFitnessStorage: " + (Time.realtimeSinceStartup - startTime).ToString());
         yield return null;
         startTime = Time.realtimeSinceStartup;
-        uiManager.textLoadingTooltips.text = "LoadingInstantiateEggSacks()";
+        //uiManager.textLoadingTooltips.text = "LoadingInstantiateEggSacks()";
         // create first EggSacks:
         LoadingInstantiateEggSacks();
         Debug.Log("LoadingInstantiateEggSacks: " + (Time.realtimeSinceStartup - startTime).ToString());
         yield return null;
         // ******  Combine this with ^ ^ ^ function ??? **************
         startTime = Time.realtimeSinceStartup;
-        uiManager.textLoadingTooltips.text = "LoadingInitializeEggSacksFirstTime()";
+        //uiManager.textLoadingTooltips.text = "LoadingInitializeEggSacksFirstTime()";
         LoadingInitializeEggSacksFirstTime();
         Debug.Log("LoadingInitializeEggSacksFirstTime: " + (Time.realtimeSinceStartup - startTime).ToString());
         yield return null;
         startTime = Time.realtimeSinceStartup;
         // Can I create Egg Sacks and then immediately sapwn agents on them
         // Initialize Agents:
-        uiManager.textLoadingTooltips.text = "LoadingInstantiateAgents()";
+        //uiManager.textLoadingTooltips.text = "LoadingInstantiateAgents()";
         //LoadingInstantiateAgents();  // Fills the AgentsArray, Instantiates Agent Objects (MonoBehaviors + GameObjects)
         // TEMP BREAKOUT!!!
         // Instantiate AI Agents
@@ -270,7 +270,7 @@ public class SimulationManager : MonoBehaviour {
         // Load pre-saved genomes:
         //LoadingLoadGenepoolFiles();       
         //yield return null;
-        uiManager.textLoadingTooltips.text = "LoadingInitializeFluidSim()";
+        //uiManager.textLoadingTooltips.text = "LoadingInitializeFluidSim()";
         // **** How to handle sharing simulation data between different Managers???
         // Once Agents, Food, etc. are established, Initialize the Fluid:
         LoadingInitializeFluidSim();
@@ -279,17 +279,17 @@ public class SimulationManager : MonoBehaviour {
         yield return null;
         startTime = Time.realtimeSinceStartup;
         // Initialize Food:
-        uiManager.textLoadingTooltips.text = "LoadingInitializeFoodParticles()";
+        //uiManager.textLoadingTooltips.text = "LoadingInitializeFoodParticles()";
         LoadingInitializeFoodParticles();
         Debug.Log("LoadingInitializeFoodParticles: " + (Time.realtimeSinceStartup - startTime).ToString());
         Debug.Log("End Total up to LoadingInitializeFoodParticles: " + (Time.realtimeSinceStartup - masterStartTime).ToString());
         yield return null;
-        uiManager.textLoadingTooltips.text = "LoadingInitializeAnimalParticles()";
+        //uiManager.textLoadingTooltips.text = "LoadingInitializeAnimalParticles()";
         LoadingInitializeAnimalParticles();
 
         yield return null;
 
-        uiManager.textLoadingTooltips.text = "GentlyRouseTheRenderMonarchHisHighnessLordOfPixels()";   
+        //uiManager.textLoadingTooltips.text = "GentlyRouseTheRenderMonarchHisHighnessLordOfPixels()";   
         // Wake up the Render King and prepare him for the day ahead, proudly ruling over Renderland.
         GentlyRouseTheRenderMonarchHisHighnessLordOfPixels();
 
@@ -304,20 +304,20 @@ public class SimulationManager : MonoBehaviour {
 
         yield return null;
         startTime = Time.realtimeSinceStartup;
-        uiManager.textLoadingTooltips.text = "LoadingInitializeFoodGrid()";
+        //uiManager.textLoadingTooltips.text = "LoadingInitializeFoodGrid()";
         LoadingInitializeResourceGrid();
         Debug.Log("LoadingInitializeFoodGrid: " + (Time.realtimeSinceStartup - startTime).ToString());
         Debug.Log("End Total up to LoadingInitializeFoodGrid: " + (Time.realtimeSinceStartup - masterStartTime).ToString());
         yield return null;
 
-        uiManager.textLoadingTooltips.text = "LoadingHookUpFluidAndRenderKing()";        
+        //uiManager.textLoadingTooltips.text = "LoadingHookUpFluidAndRenderKing()";        
         LoadingHookUpFluidAndRenderKing();  // fluid needs refs to RK's obstacle/color cameras' RenderTextures!
         
         Debug.Log("End Total up to LoadingHookUpFluidAndRenderKing: " + (Time.realtimeSinceStartup - masterStartTime).ToString());
         yield return null;
         
 
-        uiManager.textLoadingTooltips.text = "LoadingInitializeGridCells()";
+        //uiManager.textLoadingTooltips.text = "LoadingInitializeGridCells()";
         LoadingInitializeGridCells();
         // Populates GridCells with their contents (agents/food/preds)
         LoadingFillGridCells();
