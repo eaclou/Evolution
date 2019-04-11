@@ -65,7 +65,7 @@ public class CameraManager : MonoBehaviour {
             curCameraFocusPivotPos.z = 1.0f; // *** for now this is where creatures are for now           
         }
 
-        curTiltAngleDegrees = Mathf.Lerp(curTiltAngleDegrees, -masterTargetTiltAngle, 3.5f * Time.deltaTime);        
+        curTiltAngleDegrees = Mathf.Lerp(curTiltAngleDegrees, -masterTargetTiltAngle, 12f * Time.deltaTime);        
         // Calculate Target cam pos:
         //float rotateX = curTiltAngleDegrees;
         //this.transform.localEulerAngles = new Vector3(rotateX, 0f, 0f);
@@ -87,10 +87,10 @@ public class CameraManager : MonoBehaviour {
         float maxDistance = 256f;
         float relSize = (masterTargetDistance - minDistance) / (minDistance + maxDistance);
 
-        float minSizeLerpSpeed = 12f;
-        float maxSizeLerpSpeed = 3f;
+        float minSizeLerpSpeed = 15f;
+        float maxSizeLerpSpeed = 5f;
         masterLerpSpeed = Mathf.Lerp(minSizeLerpSpeed, maxSizeLerpSpeed, relSize);
-        masterLerpSpeed = Mathf.Max(masterLerpSpeed, 2.647f);  // cap
+        masterLerpSpeed = Mathf.Max(masterLerpSpeed, 5f);  // cap
 
         masterTargetDistance = Mathf.Min(masterTargetDistance, maxDistance);
         masterTargetDistance = Mathf.Max(masterTargetDistance, minDistance);

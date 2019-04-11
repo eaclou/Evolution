@@ -95,7 +95,7 @@
 
 				// REFRACTION:							
 				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(genericStrokeData.worldPos.xy /  _MapSize, 0, 0)).yzw;
-				float refractionStrength = 1;
+				float refractionStrength = 0.4;
 				vertexWorldPos.xy += -surfaceNormal.xy * refractionStrength;				
 				
 				float3 lightDir = float3(-0.52, -0.35, -1);

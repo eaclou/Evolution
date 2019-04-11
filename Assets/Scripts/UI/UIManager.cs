@@ -146,6 +146,7 @@ public class UIManager : MonoBehaviour {
     public int unlockCooldownCounter = 0;
     public bool recentlyCreatedSpecies = false;
     public int recentlyCreatedSpeciesTimeStepCounter = 0;
+    private bool inspectToolUnlockedAnnounce = false;
     // portrait
     //public int curToolUnlockLevel = 0;
     public float toolbarInfluencePoints = 0.5f;
@@ -224,6 +225,7 @@ public class UIManager : MonoBehaviour {
     public Sprite spriteZooplanktonPortrait;
 
 
+    //Inspect!!!
     public bool isActiveInspectPanel = false;
     public Material inspectWidgetDietMat;
     public Material inspectWidgetStomachFoodMat;
@@ -248,6 +250,7 @@ public class UIManager : MonoBehaviour {
     public Text textLifeCycle;
     public GameObject panelInspectHUD;
     public Animator animatorInspectPanel;
+    public Text textInspectData;
 
     /*public bool isActiveFeedToolPanel = false;
     public GameObject panelFeedToolHUD;
@@ -594,6 +597,8 @@ private bool treeOfLifeInfoOnC = false;
         //buttonToolbarExpandOn.GetComponent<Animator>().StopPlayback();
         buttonToolbarExpandOn.GetComponent<Animator>().enabled = false;
         buttonToolbarInspect.GetComponent<Animator>().enabled = false;
+
+
         //ClickToolButtonInspect();  // **** Clean this up! don't mix UI click function with underlying code for initialization
     }
     public void EnterObserverMode() {
@@ -712,6 +717,11 @@ private bool treeOfLifeInfoOnC = false;
         newEventData.timeStepActivated = 0;
         gameManager.simulationManager.simEventsManager.completeEventHistoryList.Add(newEventData);
 
+        //panelPendingClickPrompt.GetComponentInChildren<Text>().text = "Welcome! This Pond is devoid of life...\nIt's up to you to change that!";
+        //panelPendingClickPrompt.GetComponentInChildren<Text>().color = new Color(0.75f, 0.75f, 0.75f);
+        //panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
+        //isAnnouncementTextOn = true;
+        //timerAnnouncementTextCounter = 0;
     }
     #endregion
 
@@ -938,6 +948,8 @@ private bool treeOfLifeInfoOnC = false;
                 if (timerAnnouncementTextCounter > 640) {
                     isAnnouncementTextOn = false;
                     timerAnnouncementTextCounter = 0;
+
+                    inspectToolUnlockedAnnounce = false;
                 }
             }
             else {
@@ -1034,10 +1046,10 @@ private bool treeOfLifeInfoOnC = false;
                         //toolbarInfluencePoints = Mathf.Clamp01(toolbarInfluencePoints);
 
                         float mag = smoothedMouseVel.magnitude;
-                        float radiusMult = Mathf.Lerp(0.075f, 1.25f, Mathf.Clamp01(gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.5f)); // 0.62379f; // (1f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.5f);
+                        float radiusMult = Mathf.Lerp(0.075f, 1.33f, Mathf.Clamp01(gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.4f)); // 0.62379f; // (1f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.5f);
 
                         if(mag > 0f) {
-                            gameManager.simulationManager.PlayerToolStirOn(curMousePositionOnWaterPlane, smoothedMouseVel * (0.33f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 0.9f), radiusMult);
+                            gameManager.simulationManager.PlayerToolStirOn(curMousePositionOnWaterPlane, smoothedMouseVel * (0.25f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.2f), radiusMult);
                             
                         }
                         else {
@@ -1054,7 +1066,7 @@ private bool treeOfLifeInfoOnC = false;
                     else {
                         stirStickDepth = Mathf.Lerp(stirStickDepth, -4f, 0.2f);
                     }
-                    
+                    gameManager.theRenderKing.isStirring = isDraggingMouse;
                     gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_IsStirring", isActing);
                     gameManager.theRenderKing.gizmoStirStickAMat.SetFloat("_IsStirring", isActing);
                     //gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_Radius", Mathf.Lerp(0.05f, 2.5f, gameManager.theRenderKing.baronVonWater.camDistNormalized));  // **** Make radius variable! (possibly texture based?)
@@ -1789,6 +1801,7 @@ private bool treeOfLifeInfoOnC = false;
     }    
     private void UpdateInspectPanelUI() {
         int critterIndex = cameraManager.targetCritterIndex;
+        Agent agent = gameManager.simulationManager.agentsArray[critterIndex];
 
         // DIET:
         string txt = "Diet:\nHerbivore";
@@ -1871,8 +1884,11 @@ private bool treeOfLifeInfoOnC = false;
         inspectWidgetLifeCycleMat.SetFloat("_FillPercentage", percentage);
         inspectWidgetLifeCycleMat.SetInt("_CurLifeStage", (int)gameManager.simulationManager.agentsArray[critterIndex].curLifeStage);
         //textLifeCycle.text = "Life Stage:\n" + gameManager.simulationManager.agentsArray[critterIndex].curLifeStage.ToString() + "\n" + gameManager.simulationManager.agentsArray[critterIndex].ageCounter.ToString();
-        
-        
+
+
+        textInspectData.text = "Species: " + agent.speciesIndex.ToString() +
+                                "\nSize: " + agent.fullSizeBodyVolume.ToString() + " (" + agent.sizePercentage.ToString() + ")" +
+                                "\nBrain: "; 
 
         // Dimensions
         inspectWidgetDimensionsMat.SetPass(0);
@@ -2183,15 +2199,15 @@ private bool treeOfLifeInfoOnC = false;
         string descriptionText = "";
         
         if(slot.kingdomID == 0) {
-            descriptionText += "Total Biomass: <b>" + gameManager.simulationManager.simResourceManager.curGlobalDecomposers.ToString("F1") + "</b>\n\n";
+            descriptionText += "<size=13><b>Total Biomass: " + gameManager.simulationManager.simResourceManager.curGlobalDecomposers.ToString("F1") + "</b></size>\n\n";
 
             descriptionText += "<color=#FBC653FF>Nutrient Production: <b>" + gameManager.simulationManager.simResourceManager.nutrientsProducedByDecomposersLastFrame.ToString("F3") + "</b></color>\n";
             descriptionText += "<color=#8EDEEEFF>Oxygen Usage: <b>" + gameManager.simulationManager.simResourceManager.oxygenUsedByDecomposersLastFrame.ToString("F3") + "</b></color>\n";
             descriptionText += "<color=#A97860FF>Waste Processed: <b>" + gameManager.simulationManager.simResourceManager.detritusRemovedByDecomposersLastFrame.ToString("F3") + "</b></color>\n";
 
             if(gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
-                textToolbarWingStatsUnlockStatus.text = "<b>Next Unlock:</b>\nReach <b><i>20</i></b> Total Biomass";
-                float unlockProgressLerp = Mathf.Clamp01(gameManager.simulationManager.simResourceManager.curGlobalDecomposers / 20f);
+                textToolbarWingStatsUnlockStatus.text = "<b>Next Unlock:</b>\nReach <b><i>10</i></b> Total Biomass";
+                float unlockProgressLerp = Mathf.Clamp01(gameManager.simulationManager.simResourceManager.curGlobalDecomposers / 10f);
                 textToolbarWingStatsUnlockPercentage.text = (unlockProgressLerp * 100f).ToString("F0") + "%";
                 //imageUnlockMeter;
                 matUnlockMeter.SetFloat("_FillPercentage", unlockProgressLerp);
@@ -2207,7 +2223,7 @@ private bool treeOfLifeInfoOnC = false;
             }
         }
         else if(slot.kingdomID == 1) {
-            descriptionText += "Total Biomass: <b>" + gameManager.simulationManager.simResourceManager.curGlobalAlgaeParticles.ToString("F1") + "</b>\n\n";
+            descriptionText += "<size=13><b>Total Biomass: " + gameManager.simulationManager.simResourceManager.curGlobalAlgaeParticles.ToString("F1") + "</b></size>\n\n";
 
             descriptionText += "<color=#8EDEEEFF>Oxygen Production: <b>" + gameManager.simulationManager.simResourceManager.oxygenProducedByAlgaeParticlesLastFrame.ToString("F3") + "</b></color>\n";
             descriptionText += "<color=#FBC653FF>Nutrient Usage: <b>" + gameManager.simulationManager.simResourceManager.nutrientsUsedByAlgaeParticlesLastFrame.ToString("F3") + "</b></color>\n";
@@ -2233,15 +2249,15 @@ private bool treeOfLifeInfoOnC = false;
         }
         else {
             if(slot.tierID == 0) {  // ZOOPLANKTON
-                descriptionText += "Total Biomass: <b>" + gameManager.simulationManager.simResourceManager.curGlobalAnimalParticles.ToString("F1") + "</b>\n\n";
+                descriptionText += "<size=13><b>Total Biomass: " + gameManager.simulationManager.simResourceManager.curGlobalAnimalParticles.ToString("F1") + "</b></size>\n\n";
 
                 descriptionText += "<color=#8EDEEEFF>Oxygen Usage: <b>" + gameManager.simulationManager.simResourceManager.oxygenUsedByAnimalParticlesLastFrame.ToString("F3") + "</b></color>\n";
                 //descriptionText += "<color=#FBC653FF>Nutrient Usage: <b>" + gameManager.simulationManager.simResourceManager.nutrientsUsedByAlgaeParticlesLastFrame.ToString("F3") + "</b></color>\n";
                 descriptionText += "<color=#A97860FF>Waste Generated: <b>" + gameManager.simulationManager.simResourceManager.wasteProducedByAnimalParticlesLastFrame.ToString("F3") + "</b></color>\n";
 
                 if(gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
-                    textToolbarWingStatsUnlockStatus.text = "<b>Next Unlock:</b>\nReach <b><i>10</i></b> Total Biomass";
-                    float unlockProgressLerp = Mathf.Clamp01(gameManager.simulationManager.simResourceManager.curGlobalAnimalParticles / 10f);
+                    textToolbarWingStatsUnlockStatus.text = "<b>Next Unlock:</b>\nReach <b><i>6</i></b> Total Biomass";
+                    float unlockProgressLerp = Mathf.Clamp01(gameManager.simulationManager.simResourceManager.curGlobalAnimalParticles / 6f);
                     textToolbarWingStatsUnlockPercentage.text = (unlockProgressLerp * 100f).ToString("F0") + "%";
                     //imageUnlockMeter;
                     matUnlockMeter.SetFloat("_FillPercentage", unlockProgressLerp);
@@ -2259,19 +2275,18 @@ private bool treeOfLifeInfoOnC = false;
             else {  // AGENTS
                 SpeciesGenomePool selectedPool = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesID];
                 
-                descriptionText += "Total Vertebrate Biomass: <b>" + gameManager.simulationManager.simResourceManager.curGlobalAgentBiomass.ToString("F1") + "</b>\n\n";
+                descriptionText += "<size=13><b>Total Biomass: " + gameManager.simulationManager.simResourceManager.curGlobalAgentBiomass.ToString("F1") + "</b></size>\n\n";
 
                 descriptionText += "<color=#8EDEEEFF>Oxygen Usage: <b>" + gameManager.simulationManager.simResourceManager.oxygenUsedByAgentsLastFrame.ToString("F3") + "</b></color>\n";
-                descriptionText += "<color=#A97860FF>Waste Generated: <b>" + gameManager.simulationManager.simResourceManager.wasteProducedByAgentsLastFrame.ToString("F3") + "</b></color>\n\n";
+                descriptionText += "<color=#A97860FF>Waste Generated: <b>" + gameManager.simulationManager.simResourceManager.wasteProducedByAgentsLastFrame.ToString("F3") + "</b></color>\n";
 
-                descriptionText += "Avg Algae Consumed: <b>" + selectedPool.avgConsumptionPlant.ToString("F3") + "</b>\n";
-                descriptionText += "Avg Meat Consumed: <b>" + selectedPool.avgConsumptionMeat.ToString("F3") + "</b>\n\n";  
+                descriptionText += "<color=#8BD06AFF>Avg Food Consumed: <b>" + (selectedPool.avgConsumptionPlant + selectedPool.avgConsumptionMeat).ToString("F3") + "</b></color>\n";
+                //descriptionText += "Avg Meat Consumed: <b>" + selectedPool.avgConsumptionMeat.ToString("F3") + "</b>\n\n";  
                 //descriptionText += "Descended From Species: <b>" + selectedPool.parentSpeciesID.ToString() + "</b>\n";
                 //descriptionText += "Year Evolved: <b>" + selectedPool.yearCreated.ToString() + "</b>\n\n";
-                descriptionText += "Avg Lifespan: <b>" + selectedPool.avgLifespan.ToString("F0") + "</b>\n";
+                descriptionText += "\nAvg Lifespan: <b>" + selectedPool.avgLifespan.ToString("F0") + "</b>\n\n";
 
-                descriptionText += "Avg Body Size: <b>(" + selectedPool.representativeGenome.bodyGenome.coreGenome.creatureBaseLength.ToString("F2")
-                                                        + ", " + selectedPool.representativeGenome.bodyGenome.coreGenome.creatureAspectRatio.ToString("F2") + ")</b>\n";
+                descriptionText += "Avg Body Size: <b>" + ((selectedPool.representativeGenome.bodyGenome.fullsizeBoundingBox.x + selectedPool.representativeGenome.bodyGenome.fullsizeBoundingBox.y) * 0.5f * selectedPool.representativeGenome.bodyGenome.fullsizeBoundingBox.z).ToString("F2") + "</b>\n";
                                                         //+ selectedPool.avgBodySize.ToString("F2") + "</b>\n";
                 descriptionText += "Avg Brain Size: <b>" + ((selectedPool.avgNumNeurons + selectedPool.avgNumAxons) * 0.1f).ToString("F1") + "</b>\n";
                 //descriptionText += "Avg Axon Count: <b>" + selectedPool.avgNumAxons.ToString("F0") + "</b>\n\n";
@@ -3073,16 +3088,18 @@ private bool treeOfLifeInfoOnC = false;
 
         panelPendingClickPrompt.GetComponentInChildren<Text>().text = "Inspect Tool Unlocked!";
         panelPendingClickPrompt.GetComponentInChildren<Text>().color = new Color(0.75f, 0.75f, 0.75f);
-        //panelPendingClickPrompt.GetComponent<Image>().raycastTarget = true;
+        panelPendingClickPrompt.GetComponent<Image>().raycastTarget = true;
         isAnnouncementTextOn = true;
 
         buttonToolbarInspect.interactable = true;
         buttonToolbarInspect.image.sprite = spriteToolbarInspectButton;
+
+        inspectToolUnlockedAnnounce = true;
         //ClickToolButtonInspect();
 
-        //if(isToolbarExpandOn) {
-        //    ClickToolbarExpandOff();
-        //}
+        if(isToolbarExpandOn) {
+            ClickToolbarExpandOff();
+        }
     }
     public void AnnounceUnlockAlgae() {
         panelPendingClickPrompt.GetComponentInChildren<Text>().text = "Algae Species Unlocked!";
@@ -3117,10 +3134,12 @@ private bool treeOfLifeInfoOnC = false;
         if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 0) {
             panelPendingClickPrompt.GetComponentInChildren<Text>().text = "A new species of Decomposer added!";
             panelPendingClickPrompt.GetComponentInChildren<Text>().color = colorDecomposersLight;
+            panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
         }
         else if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 1) {
             panelPendingClickPrompt.GetComponentInChildren<Text>().text = "A new species of Algae added!";
             panelPendingClickPrompt.GetComponentInChildren<Text>().color = colorPlantsLight;
+            panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
         }
         else {
             if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 1) {
@@ -3144,7 +3163,7 @@ private bool treeOfLifeInfoOnC = false;
                 
                 panelPendingClickPrompt.GetComponentInChildren<Text>().text = "A new species of Vertebrate added!";
                 panelPendingClickPrompt.GetComponentInChildren<Text>().color = colorAnimalsLight;
-
+                panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
                 
                 //ClickToolButtonInspect();
                 
@@ -3152,6 +3171,7 @@ private bool treeOfLifeInfoOnC = false;
             else {
                 panelPendingClickPrompt.GetComponentInChildren<Text>().text = "A new species of Zooplankton added!";
                 panelPendingClickPrompt.GetComponentInChildren<Text>().color = colorAnimalsLight;
+                panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
             }
         }
 
@@ -3269,27 +3289,32 @@ private bool treeOfLifeInfoOnC = false;
 
         //if blah -- which species unlocked?
         //is toolbar on?
+                
+        if(inspectToolUnlockedAnnounce) { // *** GROSS HACK!!!
 
-        
-
-        if(!isToolbarExpandOn) {
-            ClickToolbarExpandOn();
-        }
-
-        if(unlockedAnnouncementSlotRef.kingdomID == 0) {
-            ClickButtonToolbarDecomposers();
-        }
-        else if(unlockedAnnouncementSlotRef.kingdomID == 1) {
-            ClickButtonToolbarAlgae();
+            ClickToolButtonInspect();
+            inspectToolUnlockedAnnounce = false;
         }
         else {
-            if(unlockedAnnouncementSlotRef.tierID == 0) {
-                ClickButtonToolbarZooplankton();
+            if(!isToolbarExpandOn) {
+                ClickToolbarExpandOn();
+            }
+
+            if(unlockedAnnouncementSlotRef.kingdomID == 0) {
+                ClickButtonToolbarDecomposers();
+            }
+            else if(unlockedAnnouncementSlotRef.kingdomID == 1) {
+                ClickButtonToolbarAlgae();
             }
             else {
-                ClickButtonToolbarAgent(unlockedAnnouncementSlotRef.slotID);
-            }
-        }        
+                if(unlockedAnnouncementSlotRef.tierID == 0) {
+                    ClickButtonToolbarZooplankton();
+                }
+                else {
+                    ClickButtonToolbarAgent(unlockedAnnouncementSlotRef.slotID);
+                }
+            } 
+        }
     }
 
     #endregion

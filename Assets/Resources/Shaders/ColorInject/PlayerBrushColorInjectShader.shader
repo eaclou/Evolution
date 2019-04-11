@@ -68,7 +68,7 @@
 				float4 texColor = tex2D(_MainTex, i.uv);
 				float4 finalColor = texColor;
 				finalColor.rgb = _BrushColor.rgb;
-				finalColor.a *= 2.5;
+				finalColor.a *= 0.6 * _BrushColor.a;
 				//return float4(1,1,1,2);
 				return finalColor;
 

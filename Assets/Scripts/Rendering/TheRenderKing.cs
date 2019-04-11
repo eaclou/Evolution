@@ -46,6 +46,7 @@ public class TheRenderKing : MonoBehaviour {
     public Mesh meshStirStickMed;
     public Mesh meshStirStickLrg;
     public Material gizmoStirStickAMat;
+    public Material gizmoStirStickShadowMat;
 
     // ORGANIZE AND REMOVE UNUSED!!!!!! *********
     public Material debugVisModeMat;
@@ -133,6 +134,7 @@ public class TheRenderKing : MonoBehaviour {
     public bool nutrientToolOn = false;
     public bool mutateToolOn = false;
     public bool removeToolOn = false;
+    public bool isStirring = false;
     /*public GameObject terrainGO;
     public Material terrainObstaclesHeightMaskMat;
     public Texture2D terrainHeightMap;         
@@ -1553,7 +1555,7 @@ public class TheRenderKing : MonoBehaviour {
             Vector3 agentPos = simManager.agentsArray[i].bodyRigidbody.position;
             colorInjectionStrokeDataArray[baseIndex + i].worldPos = new Vector2(agentPos.x, agentPos.y);
             colorInjectionStrokeDataArray[baseIndex + i].localDir = simManager.agentsArray[i].facingDirection;
-            colorInjectionStrokeDataArray[baseIndex + i].scale = simManager.agentsArray[i].fullSizeBoundingBox * 2f;
+            colorInjectionStrokeDataArray[baseIndex + i].scale = simManager.agentsArray[i].fullSizeBoundingBox * 1.55f; // * simManager.agentsArray[i].sizePercentage;
             
             float agentAlpha = 0.024f;
             if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Mature) {
@@ -1566,7 +1568,10 @@ public class TheRenderKing : MonoBehaviour {
             Color drawColor = new Color(1f, 1f, 1f, 3f);
             if(simManager.agentsArray[i].candidateRef != null) {
                 Vector3 rgb = simManager.agentsArray[i].candidateRef.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
-                drawColor = new Color(rgb.x, rgb.y, rgb.z, 0.5f); // agentAlpha);
+                if(i % 2 == 0) {
+                    rgb = simManager.agentsArray[i].candidateRef.candidateGenome.bodyGenome.appearanceGenome.hueSecondary;
+                }
+                drawColor = new Color(rgb.x, rgb.y, rgb.z, 1.1f); // agentAlpha);
             }
             
             
@@ -3223,22 +3228,22 @@ public class TheRenderKing : MonoBehaviour {
         algaeParticleColorInjectMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
         cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, algaeParticleColorInjectMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.algaeParticlesCBuffer.count);
 
-        Vector4 cursorPos = new Vector4(simManager.uiManager.curMousePositionOnWaterPlane.x, simManager.uiManager.curMousePositionOnWaterPlane.y, 0f, 0f);
-        if(nutrientToolOn) {            // Particle-based instead? // hijack and use for stir tool
+        /*Vector4 cursorPos = new Vector4(simManager.uiManager.curMousePositionOnWaterPlane.x, simManager.uiManager.curMousePositionOnWaterPlane.y, 0f, 0f);
+        if(isStirring) {            // Particle-based instead? // hijack and use for stir tool
             playerBrushColorInjectMat.SetPass(0);
             playerBrushColorInjectMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
             playerBrushColorInjectMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
             //playerBrushColorInjectMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
             playerBrushColorInjectMat.SetVector("_CursorPos", cursorPos);
-            playerBrushColorInjectMat.SetFloat("_CursorRadius", 10f);
-            playerBrushColorInjectMat.SetVector("_BrushColor", new Vector4(1f, 0.5f, 0.2f, 1f));
+            playerBrushColorInjectMat.SetFloat("_CursorRadius", Mathf.Lerp(0.5f, 1.5f, baronVonWater.camDistNormalized));
+            playerBrushColorInjectMat.SetVector("_BrushColor", new Vector4(0.7f, 0.8f, 1f, Mathf.Clamp(simManager.uiManager.smoothedMouseVel.magnitude * 0.5f, 0f, 10f)));
             cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, playerBrushColorInjectMat, 0, MeshTopology.Triangles, 6, 1);        
-        }
+        }*/
         // Creatures + EggSacks:
-        //basicStrokeDisplayMat.SetPass(0);
-        //basicStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        //basicStrokeDisplayMat.SetBuffer("basicStrokesCBuffer", colorInjectionStrokesCBuffer);
-        //cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, basicStrokeDisplayMat, 0, MeshTopology.Triangles, 6, colorInjectionStrokesCBuffer.count);
+        basicStrokeDisplayMat.SetPass(0);
+        basicStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        basicStrokeDisplayMat.SetBuffer("basicStrokesCBuffer", colorInjectionStrokesCBuffer);
+        cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, basicStrokeDisplayMat, 0, MeshTopology.Triangles, 6, colorInjectionStrokesCBuffer.count);
         // Render Agent/Food/Pred colors here!!!
         // just use their display renders?
 
@@ -3652,10 +3657,27 @@ public class TheRenderKing : MonoBehaviour {
 
             // GROUND BITS:::   DECOMPOSERS
             if(simManager.trophicLayersManager.GetDecomposersOnOff()) {
+                baronVonTerrain.groundBitsShadowDisplayMat.SetPass(0);
+                baronVonTerrain.groundBitsShadowDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+                baronVonTerrain.groundBitsShadowDisplayMat.SetBuffer("groundBitsCBuffer", baronVonTerrain.groundBitsCBuffer);                
+                baronVonTerrain.groundBitsShadowDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+                baronVonTerrain.groundBitsShadowDisplayMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
+                baronVonTerrain.groundBitsShadowDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+                baronVonTerrain.groundBitsShadowDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+                baronVonTerrain.groundBitsShadowDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);     
+                baronVonTerrain.groundBitsShadowDisplayMat.SetFloat("_MinFog", 0.0625f);  
+                baronVonTerrain.groundBitsShadowDisplayMat.SetFloat("_Density", Mathf.Lerp(0.15f, 1f, Mathf.Clamp01(simManager.simResourceManager.curGlobalDecomposers / 100f)));  
+                baronVonTerrain.groundBitsShadowDisplayMat.SetVector("_FogColor", simManager.fogColor);                
+                cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
+                cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundBitsShadowDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.groundBitsCBuffer.count);
+            
+                
+
                 baronVonTerrain.groundBitsDisplayMat.SetPass(0);
                 baronVonTerrain.groundBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
                 baronVonTerrain.groundBitsDisplayMat.SetBuffer("groundBitsCBuffer", baronVonTerrain.groundBitsCBuffer);                
                 baronVonTerrain.groundBitsDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+                baronVonTerrain.groundBitsDisplayMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
                 baronVonTerrain.groundBitsDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
                 baronVonTerrain.groundBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
                 baronVonTerrain.groundBitsDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);     
@@ -3710,6 +3732,10 @@ public class TheRenderKing : MonoBehaviour {
             //critterUberStrokeShadowMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
             critterUberStrokeShadowMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
             critterUberStrokeShadowMat.SetFloat("_MapSize", SimulationManager._MapSize);
+            critterUberStrokeShadowMat.SetFloat("_Turbidity", simManager.fogAmount);     
+            critterUberStrokeShadowMat.SetFloat("_MinFog", 0.0625f);  
+            critterUberStrokeShadowMat.SetFloat("_Density", Mathf.Lerp(0.15f, 1f, Mathf.Clamp01(simManager.simResourceManager.curGlobalDecomposers / 100f)));  
+            critterUberStrokeShadowMat.SetVector("_FogColor", simManager.fogColor);     
             cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID);
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, critterUberStrokeShadowMat, 0, MeshTopology.Triangles, 6, critterGenericStrokesCBuffer.count);
         
@@ -3796,9 +3822,6 @@ public class TheRenderKing : MonoBehaviour {
                 //gizmoStirStickAMat.SetPass(0);
                 //simManager.uiManager.smoothedCtrlCursorVel
                 Quaternion rot = Quaternion.Euler(new Vector3(Mathf.Clamp(simManager.uiManager.smoothedMouseVel.y * 2.5f + 10f, -45f, 45f), Mathf.Clamp(simManager.uiManager.smoothedMouseVel.x * -1.5f, -45f, 45f), 0f));
-                gizmoStirStickAMat.SetFloat("_MinFog", 0.0625f);  
-                gizmoStirStickAMat.SetVector("_FogColor", simManager.fogColor);
-                gizmoStirStickAMat.SetFloat("_Turbidity", simManager.fogAmount); 
                 float scale = Mathf.Lerp(0.35f, 1.75f, baronVonWater.camDistNormalized);
                 Matrix4x4 stirStickTransformMatrix = Matrix4x4.TRS(new Vector3(simManager.uiManager.curMousePositionOnWaterPlane.x, simManager.uiManager.curMousePositionOnWaterPlane.y, simManager.uiManager.stirStickDepth), rot, Vector3.one * scale);
                 Mesh stickMesh = meshStirStickMed;
@@ -3808,6 +3831,19 @@ public class TheRenderKing : MonoBehaviour {
                 if(baronVonWater.camDistNormalized < 0.24f) {
                     stickMesh = meshStirStickSml;
                 }
+
+                gizmoStirStickShadowMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+                gizmoStirStickShadowMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+                gizmoStirStickShadowMat.SetFloat("_MapSize", SimulationManager._MapSize);
+                gizmoStirStickShadowMat.SetFloat("_MinFog", 0.0625f);  
+                gizmoStirStickShadowMat.SetVector("_FogColor", simManager.fogColor);
+                gizmoStirStickShadowMat.SetFloat("_Turbidity", simManager.fogAmount); 
+                cmdBufferMain.DrawMesh(stickMesh, stirStickTransformMatrix, gizmoStirStickShadowMat);
+
+                gizmoStirStickAMat.SetFloat("_MinFog", 0.0625f);  
+                gizmoStirStickAMat.SetVector("_FogColor", simManager.fogColor);
+                gizmoStirStickAMat.SetFloat("_Turbidity", simManager.fogAmount);
+                gizmoStirStickAMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
                 cmdBufferMain.DrawMesh(stickMesh, stirStickTransformMatrix, gizmoStirStickAMat);
             }
 

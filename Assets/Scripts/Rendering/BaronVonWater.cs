@@ -506,6 +506,7 @@ public class BaronVonWater : RenderBaron {
     {
         int kernelCSUpdateWaterSurface = computeShaderWaterRender.FindKernel("CSUpdateWaterSurface");
         computeShaderWaterRender.SetTexture(kernelCSUpdateWaterSurface, "waterSurfaceDataWriteRT", waterSurfaceDataRT0);
+        computeShaderWaterRender.SetTexture(kernelCSUpdateWaterSurface, "PressureRead", fluidManagerRef._PressureA);
         computeShaderWaterRender.SetFloat("_TextureResolution", waterSurfaceDataRT0.width);
         computeShaderWaterRender.SetFloat("_Time", Time.realtimeSinceStartup);
         computeShaderWaterRender.SetFloat("_MapSize", SimulationManager._MapSize);

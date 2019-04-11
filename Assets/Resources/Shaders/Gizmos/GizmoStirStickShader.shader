@@ -3,6 +3,7 @@
 	Properties
 	{
 		_MainTex ("Texture", 2D) = "white" {}
+		_WaterSurfaceTex ("Texture", 2D) = "white" {}
 	}
 	SubShader
 	{
@@ -35,6 +36,7 @@
 
 			sampler2D _MainTex;
 			fixed4 _MainTex_ST;
+			sampler2D _WaterSurfaceTex;
 
 			uniform float _IsVisible;
 			uniform float _IsStirring;
@@ -74,7 +76,8 @@
 				float wetMask = 1.0 - saturate((i.objectPos.z + 1) * 1);
 				col.rgb *= wetMask * 0.2 + 0.8;
 
-				float depth = i.worldPos.z;
+				float4 waveHeight = tex2D(_WaterSurfaceTex, i.worldPos.xy / 256);
+				float depth = i.worldPos.z + waveHeight.x * 0.5;
 				float isUnderwater = 1.0 - saturate(depth * 25);
 				col.rgb *= isUnderwater * 0.33 + 0.67;
 

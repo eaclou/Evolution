@@ -63,24 +63,24 @@
 				float rand2 = rand(float2(rand1, rand1) * 10);	
 				float rand3 = rand(float2(rand2, rand2) * 10);		
 				
-				float3 offsetRaw = (float3(rand0, rand1, rand2) * 2 - 1);				
+				float3 offsetRaw = (float3(rand0, rand1, rand2) * 2 - 1) * rand3;				
 				//float2 offset = offsetRaw * (16 * particleData.biomass + 0.2);
-				worldPosition.xyz += offsetRaw * 0.5;
+				worldPosition.xyz += offsetRaw * 1.6;
 				
-				float threshold = particleData.biomass * 4.5 + 0.033;
-				float isOn = saturate((threshold - length(offsetRaw)) * 100);
+				float threshold = particleData.biomass * 1.5 + 0.06;
+				float isOn = saturate((threshold - length(offsetRaw)) * 10);
 
-				float masterFreq = 3;
-				float spatialFreq = 0.55285;
+				float masterFreq = 5;
+				float spatialFreq = 0.25285;
 				float timeMult = 0.06;
-				float4 noiseSample = Value3D(worldPosition * spatialFreq + _Time * timeMult, masterFreq); //float3(0, 0, _Time * timeMult) + 
-				float noiseMag = 0.015;
+				float4 noiseSample = Value3D(worldPosition * spatialFreq + offsetRaw + _Time * timeMult, masterFreq); //float3(0, 0, _Time * timeMult) + 
+				float noiseMag = 0.03;
 				float3 noiseOffset = noiseSample.yzw * noiseMag;
 
 				worldPosition.xyz += noiseOffset;
 
 
-				float radius = particleData.radius * 0.06 * isOn; // 1; //sqrt(particleData.biomass) * 2 + 0.5;
+				float radius = particleData.radius * 0.1 * isOn; // 1; //sqrt(particleData.biomass) * 2 + 0.5;
 				quadPoint = quadPoint * radius; // * particleData.active; // *** remove * 3 after!!!
 				
 				
@@ -89,14 +89,14 @@
 				// REFRACTION:
 				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / 256, 0, 0)).yzw;				
 				float refractionStrength = 0.5;
-				//worldPosition.xy += -surfaceNormal.xy * refractionStrength;
+				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
 
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
 				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(quadPoint, 0.0f));				
 				o.uv = quadVerticesCBuffer[id].xy + 0.5f;	
 								
-				o.color = float4(saturate(particleData.isDecaying), saturate(particleData.biomass * 5), 0, 1 - saturate(particleData.isDecaying));
+				o.color = float4(saturate(particleData.isDecaying), saturate(particleData.biomass * 5), 1 - rand2, 1 - saturate(particleData.isDecaying));
 				o.hue = float4(particleData.color, 1);
 				return o;
 			}
@@ -108,12 +108,13 @@
 				
 				float val = i.color.a;
 				
-				float4 finalColor = i.color; // float4(float3(i.color.z * 1.2, 0.85, (1.0 - i.color.w) * 0.2) + i.color.y, texColor.a * i.color.x * 0.33 * (1 - i.color.z));
-				finalColor.rgb = lerp(finalColor.rgb, float3(0.25, 1, 0.36), 1);
+				float4 finalColor = i.hue; // float4(float3(i.color.z * 1.2, 0.85, (1.0 - i.color.w) * 0.2) + i.color.y, texColor.a * i.color.x * 0.33 * (1 - i.color.z));
+				finalColor.rgb = lerp(finalColor.rgb, float3(0.25, 1, 0.36), 0.8);
 				//finalColor.rgb += 0.25;
 				finalColor.a = texColor.a; // * 0.25;
 				
-				finalColor.rgb = lerp(finalColor, lerp(i.hue, float3(0.25, 1, 0.36), 0.25), 0.75);
+				finalColor.rgb = lerp(finalColor, float3(1, 0.9, 0.5) * 0.6, i.color.x);
+				finalColor.rgb *= i.color.z * 0.3 + 0.7;
 				//finalColor.rgb = 1;
 				return finalColor;
 			}

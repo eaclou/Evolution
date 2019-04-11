@@ -21,7 +21,7 @@
 			#pragma target 5.0
 			#include "UnityCG.cginc"
 			#include "Assets/Resources/Shaders/Inc/CritterBodyAnimation.cginc"
-			
+			#include "Assets/Resources/Shaders/Inc/TerrainShared.cginc"
 
 			struct v2f
 			{
@@ -103,7 +103,7 @@
 			
 			fixed4 frag (v2f i) : SV_Target
 			{
-				float4 finalColor = float4(1,1,1,1);
+				/*float4 finalColor = float4(1,1,1,1);
 
 				float2 screenUV = i.screenUV.xy / i.screenUV.w;
 				float4 frameBufferColor = tex2D(_RenderedSceneRT, screenUV);  //  Color of brushtroke source	
@@ -146,6 +146,19 @@
 				
 				//finalColor.a *= (1.0 - i.color.a);
 				//return float4(0,0,0,1);
+				*/
+
+				float4 brushColor = tex2D(_MainTex, i.uv);	
+				
+				float2 screenUV = i.screenUV.xy / i.screenUV.w;
+				float4 frameBufferColor = tex2D(_RenderedSceneRT, screenUV);  //  Color of brushtroke source					
+				float4 altitudeTex = tex2D(_AltitudeTex, i.altitudeUV); //i.worldPos.z / 10; // [-1,1] range
+				float4 waterSurfaceTex = tex2D(_WaterSurfaceTex, (i.altitudeUV - 0.25) * 2);
+
+				frameBufferColor.rgb *= 0.75; // = lerp(frameBufferColor.rgb, particleColor, 0.25);
+				float4 finalColor = GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, float4(1,1,1,1));
+				finalColor.a = brushColor.a * 0.5;
+
 				return finalColor;
 			}
 			ENDCG

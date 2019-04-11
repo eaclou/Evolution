@@ -1,4 +1,4 @@
-﻿Shader "Terrain/TerrainGroundBitsDisplayShader"
+﻿Shader "Terrain/TerrainGroundBitsShadowDisplayShader"
 {
 	Properties
 	{
@@ -102,7 +102,8 @@
 
 				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
 
-				worldPosition.z = -altitude * 20 + 10 + groundBitData.age;
+				worldPosition.z = -altitude * 20 + 10 + 1;
+				worldPosition.x += 0.25 * groundBitData.age;
 ;
 
 				float fadeDuration = 0.1;
@@ -133,7 +134,7 @@
 
 
 				// Figure out final facing Vectors!!!
-				float2 forward = lerp(groundBitData.heading, fluidDir, saturate(fluidSpeed * 5)); //groundBitData.heading;
+				float2 forward = float2(1, 0); // lerp(groundBitData.heading, fluidDir, saturate(fluidSpeed * 3.6)); //groundBitData.heading;
 				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
 				float2 rotatedPoint = float2(quadPoint.x * right + quadPoint.y * forward);  // Rotate localRotation by AgentRotation
 
@@ -183,10 +184,15 @@
 				//frameBufferColor = float4(1,1,1,1);
 				float3 baseHue = float3(1,0.37,0.1);
 				float3 particleColor = lerp(baseHue * 0.7, baseHue * 1.3, saturate(1.0 - i.color.y * 2));
-				frameBufferColor.rgb = lerp(frameBufferColor.rgb, particleColor, 0.5 * _Density + 0.5);
+				frameBufferColor.rgb *= 0.75;
+				//frameBufferColor.rgb = lerp(frameBufferColor.rgb, particleColor, 0.5 * _Density + 0.5);
 				float4 finalColor = GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, float4(1,1,1,1));
 				finalColor.a = brushColor.a;
 				
+				//frameBufferColor.rgb *= 0.75; // = lerp(frameBufferColor.rgb, particleColor, 0.25);
+				//float4 finalColor = GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, float4(1,1,1,1));
+				//finalColor.a = col.a * 0.5;
+
 				//finalColor.rgb = lerp(finalColor.rgb, float3(1,0.5,0), 0.5);
 				//return float4(1,1,1,1);
 				return finalColor;

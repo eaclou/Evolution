@@ -610,7 +610,7 @@ public class SimulationManager : MonoBehaviour {
         }
 
         fogColor = Color.Lerp(new Color(0.15f, 0.25f, 0.52f), new Color(0.07f, 0.27f, 0.157f), Mathf.Clamp01(simResourceManager.curGlobalAlgaeParticles * 0.05f));
-        fogAmount = Mathf.Lerp(0.025f, 1f, Mathf.Clamp01(simResourceManager.curGlobalAlgaeParticles * 0.005f));
+        fogAmount = Mathf.Lerp(0.16f, 1f, Mathf.Clamp01(simResourceManager.curGlobalAlgaeParticles * 0.004f));
 
         simStateData.PopulateSimDataArrays(this);  // reads from GameObject Transforms & RigidBodies!!! ++ from FluidSimulationData!!!
         theRenderKing.RenderSimulationCameras(); // will pass current info to FluidSim before it Ticks()
@@ -624,9 +624,9 @@ public class SimulationManager : MonoBehaviour {
 
         //vegetationManager.ApplyDiffusionOnResourceGrid(environmentFluidManager);
         //vegetationManager.AdvectResourceGrid(environmentFluidManager);
-        //if(curSimYear < 2) {  // stop simulating after certain point !! TEMPORARY!!!
-        vegetationManager.SimReactionDiffusionGrid();
-        //}
+        if(curSimYear < 4) {  // stop simulating after certain point !! TEMPORARY!!!
+            vegetationManager.SimReactionDiffusionGrid();
+        }
         
 
         if(trophicLayersManager.GetAlgaeOnOff()) {
@@ -757,7 +757,7 @@ public class SimulationManager : MonoBehaviour {
                 agentsArray[i].bodyRigidbody.AddForce(new Vector2(depthSample.y, depthSample.z).normalized * 24f * agentsArray[i].bodyRigidbody.mass * wallForce, ForceMode2D.Impulse);
             }
             
-            agentsArray[i].bodyRigidbody.AddForce(simStateData.fluidVelocitiesAtAgentPositionsArray[i] * 36f * agentsArray[i].bodyRigidbody.mass, ForceMode2D.Impulse);
+            agentsArray[i].bodyRigidbody.AddForce(simStateData.fluidVelocitiesAtAgentPositionsArray[i] * 48f * agentsArray[i].bodyRigidbody.mass, ForceMode2D.Impulse);
 
             agentsArray[i].avgFluidVel = Vector2.Lerp(agentsArray[i].avgFluidVel, simStateData.fluidVelocitiesAtAgentPositionsArray[i], 0.25f);
 
@@ -775,7 +775,7 @@ public class SimulationManager : MonoBehaviour {
         if(magnitude == 0f) {
             Debug.Log("ERROR null vector!");
         }
-        magnitude *= 0.0133f;
+        magnitude *= 0.015f;
         float maxMag = 0.9f;
         if(magnitude > maxMag) {
             magnitude = maxMag;            

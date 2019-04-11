@@ -43,6 +43,7 @@
 				float2 altitudeUV : TEXCOORD1;
 				float4 screenUV : TEXCOORD2;
 				float3 worldPos : TEXCOORD3;
+				//float4 color : COLOR;
 			};
 
 			float rand(float2 co) {   // OUTPUT is in [0,1] RANGE!!!
@@ -66,11 +67,14 @@
 				float rand0 = rand(float2(inst, inst) * 10);
 				float rand1 = rand(float2(rand0, rand0) * 10);
 				float rand2 = rand(float2(rand1, rand1) * 10);
-				float2 offsetRaw = (float2(rand0, rand1) * 2 - 1);				
+				float rand3 = rand(float2(rand2, rand2) * 10);	
+
+				float2 offsetRaw = (float2(rand0, rand1) * 2 - 1) * rand3;	
+				
 				worldPosition.xy += offsetRaw * 0.5;
 
 				float threshold = particleData.biomass * 4.5 + 0.033;
-				float isOn = saturate((threshold - length(offsetRaw)) * 100);
+				float isOn = saturate((threshold - length(offsetRaw)) * 10);
 
 				float masterFreq = 3;
 				float spatialFreq = 0.55285;

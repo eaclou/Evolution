@@ -293,10 +293,10 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 				float2 noiseVel = float2(rand(float2(id.x, _Time * noiseFreq)), rand(float2(_Time * noiseFreq * 1.347, id.x % 32))) * 2.0 - 1.0;  // get into -1 to 1 range		
 				posOffset += noiseVel * _SwimNoiseMag * _MasterSwimSpeed * noiseOnOff;
 			
-				float maxAlgaeConsumptionRate = 0.0042;  // one-thousandth of biomass per tick = bodyweight consumed per 1000 ticks
+				float maxAlgaeConsumptionRate = 0.0035;  // one-thousandth of biomass per tick = bodyweight consumed per 1000 ticks
 				float algaeConsumptionMask = saturate(_GlobalAlgaeLevel * 0.01);   //  if global levels are too low it reduces consumption?
 
-				float maxOxygenConsumptionRate = 0.0075; // relative to biomass?
+				float maxOxygenConsumptionRate = 0.0085; // relative to biomass?
 				float oxygenConsumptionMask = saturate(_GlobalOxygenLevel * 0.01);
 
 				float algaeConsumed = bodyMass * maxAlgaeConsumptionRate * algaeConsumptionMask;

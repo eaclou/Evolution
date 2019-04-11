@@ -82,8 +82,8 @@
 				HighlightTrailData data = highlightTrailDataCBuffer[inst];
 				float3 worldPosition = float3(data.worldPos, 1.0);    //float3(rawData.worldPos, -random2);
 				
-				float fadeInTime = 0.2;
-				float fadeOutTime = 0.3;
+				float fadeInTime = 0.1;
+				float fadeOutTime = 0.1;
 				float fadeMask = saturate(data.age) * (1.0 / fadeInTime);
 				fadeMask *= saturate(1.0 - data.age) * (1.0 / fadeOutTime);
 				/*float2 offsetRaw = (float2(rand0, rand1) * 2 - 1);				
@@ -105,11 +105,12 @@
 				float3 rotatedPoint = float3(quadPoint.x * right + quadPoint.y * forward, 0);  // Rotate localRotation by AgentRotation
 				
 				
-				worldPosition = worldPosition + _HighlightOn * rotatedPoint * 0.33 * critterSimData.embryoPercentage * (_CamDistNormalized * 0.9 + 0.1); // * (_CamDistNormalized * 0.9 + 0.1) * (data.strength * _HighlightOn * 0.25 + 0.75); // * lerp(0.55, 0.85, data.age) * 0.12; // rotatedPoint * particleData.isActive;
+				worldPosition = worldPosition + _HighlightOn * rotatedPoint * 0.37 * critterSimData.embryoPercentage * (_CamDistNormalized * 1.33 + 0.05); // * (_CamDistNormalized * 0.9 + 0.1) * (data.strength * _HighlightOn * 0.25 + 0.75); // * lerp(0.55, 0.85, data.age) * 0.12; // rotatedPoint * particleData.isActive;
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));				
-				o.color = float4(critterSimData.embryoPercentage, (1.0 - saturate(critterSimData.decayPercentage)),saturate(critterSimData.growthPercentage * 2.5),(1.0 - critterSimData.decayPercentage) * critterSimData.embryoPercentage); //float4(rand0 * 0.3 + 0.5, data.strength * _HighlightOn, hoverMask * _IsHover, selectedMask * _IsSelected);	
-				o.highlight = float4(data.strength, saturate(hoverMask * _IsHover), selectedMask * _IsSelected, saturate(fadeMask));
+				o.color = float4(critterSimData.embryoPercentage, (1.0 - saturate(critterSimData.decayPercentage)),saturate(critterSimData.growthPercentage * 2.5),(1.0 - saturate(critterSimData.decayPercentage * 6)) * critterSimData.embryoPercentage); //float4(rand0 * 0.3 + 0.5, data.strength * _HighlightOn, hoverMask * _IsHover, selectedMask * _IsSelected);	
+				float sparkleMask = sin(_Time.y * 1 - data.age * 31 + inst * 71.32974) * 0.5 + 0.5;
+				o.highlight = float4(data.strength, saturate(hoverMask * _IsHover), selectedMask * _IsSelected, sparkleMask * saturate(2.0 - data.age * 2)); //saturate(fadeMask));
 				o.hue = critterInitDataCBuffer[critterIndex].primaryHue;
 				return o;
 			}
@@ -118,17 +119,19 @@
 			{				
 				float4 texColor = tex2D(_MainTex, i.uv);
 				float4 finalColor = float4(1, 1, 1, 1); //texColor.a); //texColor.a);
-				float brightnessLerp = i.highlight.x * saturate(i.highlight.y * 0.75 + i.highlight.z) * i.highlight.w;
+				float brightnessLerp = i.highlight.x * saturate(i.highlight.y * 0.75 + i.highlight.z); // * i.highlight.w;
 
+				
 				finalColor.rgb = saturate(brightnessLerp);
 				finalColor.rgb = lerp(finalColor.rgb, i.hue, 0.75);
 				finalColor.a *= i.highlight.w;
-				finalColor.a += i.highlight.y * 0.2;
+				finalColor.a += i.highlight.y * 0.33;
 				finalColor.a = finalColor.a * (saturate(i.highlight.y * 1 + i.highlight.z) * 0.5 + 0.5);
+				finalColor.a *= i.color.x * i.color.y * i.color.z;				
+				finalColor.a *= texColor.a * 1;
 
-				finalColor.a *= i.color.x * i.color.y * i.color.z;
-				
-				finalColor.a *= texColor.a;
+				finalColor *= i.highlight.w;
+
 				//texColor.rgb = lerp(texColor.rgb, float3(0.6,1,0.45), 0.9);
 				//texColor.rgb *= i.color.r;
 				//texColor.a *= 0.212555 * i.color.a * (i.color.z * 0.75 + 0.25);
@@ -141,6 +144,8 @@
 				//texColor.a = 0.05;
 				//texColor.rgb = float3( i.color.z;
 				//texColor.rgb += _SelectedID;
+				//finalColor.rgb = float3(1,1,1) * i.highlight.w;
+				//finalColor.a = i.highlight.w;
 				return finalColor;
 			}
 

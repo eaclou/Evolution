@@ -47,6 +47,7 @@ struct WaterCurveData {   // 2 ints, 17 floats
 Texture2D<float4> InputVelocityTex;
 Texture2D<float4> VelocityRead;
 Texture2D<float4> AltitudeRead;
+Texture2D<float4> PressureRead;
 
 //Texture2D<float4> ObstaclesRead;
 
@@ -431,8 +432,11 @@ void CSUpdateWaterSurface (uint3 id : SV_DispatchThreadID)
 	float waveFreq = 0.25;
 	float waveHeight = waveAmp * _CursorClickWaveOn * distMask * falloffMask; // sin(distToOrigin * waveFreq) * waveAmp * _CursorClickWaveOn * (1.0 - _CursorClickTimeLerp);
 	
+	// UNDER PRESSURE!!! (do do doo d d doo do)
+	float2 uv = (((float2)id.xy + 0.5) / (float)_TextureResolution);
+	float4 pressureSample = PressureRead.SampleLevel(_LinearClamp, uv, 0);
 	
-	waterSurfaceDataWriteRT[id.xy] = float4(height * 0.4 + waveHeight, 0, 0, 1);
+	waterSurfaceDataWriteRT[id.xy] = float4(saturate(-0.2 + height * 0.35 + waveHeight * 0.75 + pressureSample.x * 1.0), 0, 0, 1);
 }
 
 [numthreads(32,32,1)]

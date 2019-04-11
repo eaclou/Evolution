@@ -82,7 +82,7 @@ public class ZooplanktonManager {
             data.worldPos = Vector3.zero; // new Vector3(UnityEngine.Random.Range(0f, SimulationManager._MapSize), UnityEngine.Random.Range(0f, SimulationManager._MapSize), 0f);
 
             data.radius = UnityEngine.Random.Range(minParticleSize, maxParticleSize); // obsolete!
-            data.biomass = 0.01f; // data.radius * data.radius * Mathf.PI; // * settingsRef.animalParticleNutrientDensity;
+            data.biomass = 0.001f; // data.radius * data.radius * Mathf.PI; // * settingsRef.animalParticleNutrientDensity;
             data.isActive = 0f;
             data.isDecaying = 0f;
             data.age = UnityEngine.Random.Range(1f, 2f);

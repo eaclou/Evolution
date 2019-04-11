@@ -13,6 +13,7 @@ public class BaronVonTerrain : RenderBaron {
     public Material groundStrokesMedDisplayMat;
     public Material groundStrokesSmlDisplayMat;
     public Material groundBitsDisplayMat;
+    public Material groundBitsShadowDisplayMat;
     public Material carpetBitsDisplayMat;
     public Material groundDryLandDisplayMat;
 
@@ -46,7 +47,7 @@ public class BaronVonTerrain : RenderBaron {
     public ComputeBuffer groundStrokesMedCBuffer;
     public ComputeBuffer groundStrokesSmlCBuffer;
 
-    private int numGroundBits = 1024 * 32;
+    private int numGroundBits = 1024 * 16;
     public ComputeBuffer groundBitsCBuffer;
     private int numCarpetBits = 1024 * 16;
     public ComputeBuffer carpetBitsCBuffer;
@@ -257,6 +258,12 @@ public class BaronVonTerrain : RenderBaron {
         groundBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
         groundBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         groundBitsDisplayMat.SetBuffer("groundBitsCBuffer", groundBitsCBuffer);
+
+        groundBitsShadowDisplayMat.SetPass(0);
+        groundBitsShadowDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        groundBitsShadowDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        groundBitsShadowDisplayMat.SetBuffer("groundBitsCBuffer", groundBitsCBuffer);
+        
 
         carpetBitsDisplayMat.SetPass(0);
         carpetBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
