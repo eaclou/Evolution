@@ -610,7 +610,7 @@ public class SimulationManager : MonoBehaviour {
         }
 
         fogColor = Color.Lerp(new Color(0.15f, 0.25f, 0.52f), new Color(0.07f, 0.27f, 0.157f), Mathf.Clamp01(simResourceManager.curGlobalAlgaeParticles * 0.05f));
-        fogAmount = Mathf.Lerp(0.16f, 1f, Mathf.Clamp01(simResourceManager.curGlobalAlgaeParticles * 0.004f));
+        fogAmount = Mathf.Lerp(0.167f, 0.99f, Mathf.Clamp01(simResourceManager.curGlobalAlgaeParticles * 0.0036f));
 
         simStateData.PopulateSimDataArrays(this);  // reads from GameObject Transforms & RigidBodies!!! ++ from FluidSimulationData!!!
         theRenderKing.RenderSimulationCameras(); // will pass current info to FluidSim before it Ticks()

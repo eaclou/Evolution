@@ -4,8 +4,7 @@ Shader "UI/ToolbarSpeciesStatsShader"
 	Properties
 	{
 		_MainTex ("_MainTex", 2D) = "black" {}
-		_ColorKeyTex ("_ColorKeyTex", 2D) = "black" {}
-		_MaxValue ("_MaxValue", Float) = 0.00001		
+		_ColorKeyTex ("_ColorKeyTex", 2D) = "black" {}		
 	}
 
 	SubShader
@@ -68,6 +67,7 @@ Shader "UI/ToolbarSpeciesStatsShader"
 
 			uniform int _SelectedSpeciesID;
 			uniform int _NumDisplayed;
+			uniform float _NumEntries;
 
 			fixed4 frag(v2f IN) : SV_Target
 			{
@@ -102,8 +102,16 @@ Shader "UI/ToolbarSpeciesStatsShader"
 				float gridLineSpacing = 1 / gridDivisions;
 				
 				half2 finalCoords = IN.texcoord;
+
+				//_NumEntries 0-1 = num pixels width of statsTex
+				float halfPixSize = 0.5 / max(1, _NumEntries);  // avoid div0
+				// startCoord = halfPixSize (0 should map to this)
+				//end coord = 1.0 - halfPixSize (1 should map to this)
+				//u range = halfPixSize * 2
+				float uRange = 1.0 - halfPixSize * 2.0;
+				finalCoords.x = finalCoords.x * uRange + halfPixSize;
 				
-				float pivotY = 0.5; //(initialScore + latestScore) / 2;
+				/*float pivotY = 0.5; //(initialScore + latestScore) / 2;
 				if((pivotY + (_ZoomFactorY * 0.5)) > 1) {
 					pivotY = 1 - (_ZoomFactorY * 0.5);
 				}
@@ -112,7 +120,7 @@ Shader "UI/ToolbarSpeciesStatsShader"
 				}
 				finalCoords.x = (finalCoords.x * _ZoomFactorX) + (1 - _ZoomFactorX);
 				finalCoords.y = (finalCoords.y * _ZoomFactorY) + (pivotY - (_ZoomFactorY * 0.5));
-				
+				*/
 				half4 bgColor = half4(0, 0, 0.25, 0.25);
 				half4 onColor = half4(0.24, 0.33, 0.26, 1.0);
 				half4 centerLineColor = half4(0.5, 0.5, 0.5, 1.0);

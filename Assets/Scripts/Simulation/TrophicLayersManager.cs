@@ -156,7 +156,7 @@ public class TrophicLayersManager {
         }
 
         if(kingdomAnimals.trophicTiersList[1].trophicSlots[1].status == TrophicSlot.SlotStatus.Locked) {
-            if(simManager.simResourceManager.curGlobalAgentBiomass > 2f) {     // && !simManager.uiManager.isUnlockCooldown) {                
+            if(simManager.simResourceManager.curGlobalAgentBiomass > 1f) {     // && !simManager.uiManager.isUnlockCooldown) {                
                 kingdomAnimals.trophicTiersList[1].trophicSlots[1].status = TrophicSlot.SlotStatus.Empty;
                 Debug.Log("CREATURE 2 UNLOCKED!!! " + simManager.uiManager.unlockCooldownCounter.ToString());
                 simManager.uiManager.AnnounceUnlockVertebrates();
@@ -166,9 +166,9 @@ public class TrophicLayersManager {
             }
         }
         if(kingdomAnimals.trophicTiersList[1].trophicSlots[2].status == TrophicSlot.SlotStatus.Locked) {
-            if(simManager.simResourceManager.curGlobalAgentBiomass > 5f) {     // && !simManager.uiManager.isUnlockCooldown) {                
+            if(simManager.simResourceManager.curGlobalAgentBiomass > 4f) {     // && !simManager.uiManager.isUnlockCooldown) {                
                 kingdomAnimals.trophicTiersList[1].trophicSlots[2].status = TrophicSlot.SlotStatus.Empty;
-                Debug.Log("CREATURE 2 UNLOCKED!!! " + simManager.uiManager.unlockCooldownCounter.ToString());
+                Debug.Log("CREATURE 3 UNLOCKED!!! " + simManager.uiManager.unlockCooldownCounter.ToString());
                 simManager.uiManager.AnnounceUnlockVertebrates();
                 simManager.uiManager.isUnlockCooldown = true;
                 simManager.uiManager.unlockedAnnouncementSlotRef = kingdomAnimals.trophicTiersList[1].trophicSlots[2];
@@ -176,14 +176,45 @@ public class TrophicLayersManager {
             }
         }
         if(kingdomAnimals.trophicTiersList[1].trophicSlots[3].status == TrophicSlot.SlotStatus.Locked) {
-            if(simManager.simResourceManager.curGlobalAgentBiomass > 10f) {     // && !simManager.uiManager.isUnlockCooldown) {                
+            if(simManager.simResourceManager.curGlobalAgentBiomass > 8f) {     // && !simManager.uiManager.isUnlockCooldown) {                
                 kingdomAnimals.trophicTiersList[1].trophicSlots[3].status = TrophicSlot.SlotStatus.Empty;
-                Debug.Log("CREATURE 2 UNLOCKED!!! " + simManager.uiManager.unlockCooldownCounter.ToString());
+                Debug.Log("CREATURE 4 UNLOCKED!!! " + simManager.uiManager.unlockCooldownCounter.ToString());
                 simManager.uiManager.AnnounceUnlockVertebrates();
                 simManager.uiManager.isUnlockCooldown = true;
                 simManager.uiManager.unlockedAnnouncementSlotRef = kingdomAnimals.trophicTiersList[1].trophicSlots[3];
                 simManager.uiManager.buttonToolbarExpandOn.GetComponent<Animator>().enabled = true;
             }
+        }
+    }
+
+    public void CheatUnlockAll() {
+        // ALGAE
+        if(kingdomPlants.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {            
+            kingdomPlants.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.Empty;
+        }
+        
+        //check for unlocks:
+        if(kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {            
+                kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.Empty;  
+        }
+        
+        if(kingdomAnimals.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {            
+            kingdomAnimals.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.Empty;                
+        }
+
+        if(kingdomAnimals.trophicTiersList[1].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) { 
+            kingdomAnimals.trophicTiersList[1].unlocked = true;
+            kingdomAnimals.trophicTiersList[1].trophicSlots[0].status = TrophicSlot.SlotStatus.Empty; 
+        }
+
+        if(kingdomAnimals.trophicTiersList[1].trophicSlots[1].status == TrophicSlot.SlotStatus.Locked) {                         
+            kingdomAnimals.trophicTiersList[1].trophicSlots[1].status = TrophicSlot.SlotStatus.Empty;                
+        }
+        if(kingdomAnimals.trophicTiersList[1].trophicSlots[2].status == TrophicSlot.SlotStatus.Locked) {                       
+            kingdomAnimals.trophicTiersList[1].trophicSlots[2].status = TrophicSlot.SlotStatus.Empty;                
+        }
+        if(kingdomAnimals.trophicTiersList[1].trophicSlots[3].status == TrophicSlot.SlotStatus.Locked) {                     
+            kingdomAnimals.trophicTiersList[1].trophicSlots[3].status = TrophicSlot.SlotStatus.Empty;                
         }
     }
 

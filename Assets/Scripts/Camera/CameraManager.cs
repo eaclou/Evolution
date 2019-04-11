@@ -23,7 +23,7 @@ public class CameraManager : MonoBehaviour {
     public Agent mouseHoverAgentRef;
 
     public float masterTargetDistance = 50f;
-    public float masterTargetTiltAngle = 25f;
+    public float masterTargetTiltAngle = 33f;
     public float masterLerpSpeed = 2.5f; 
     
     public float masterPanSpeed = 1f;
@@ -147,7 +147,7 @@ public class CameraManager : MonoBehaviour {
 
         masterTargetTiltAngle += tiltAngle * masterTiltSpeed * tiltSpeedMult * Time.deltaTime;
 
-        masterTargetTiltAngle = Mathf.Min(masterTargetTiltAngle, 85f);
+        masterTargetTiltAngle = Mathf.Min(masterTargetTiltAngle, 60f);
         masterTargetTiltAngle = Mathf.Max(masterTargetTiltAngle, 0);
 
         //cameraManager.masterTargetTiltAngle -= cameraManager.masterTiltSpeed * tiltSpeedMult * Time.deltaTime;

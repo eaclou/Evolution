@@ -780,7 +780,7 @@ private bool treeOfLifeInfoOnC = false;
             //textLoadingTooltips.text = "( Calculating Enjoyment Coefficients )";
             textLoadingTooltips.text = "( Reticulating Splines )";
         }
-        if (loadingProgress < 0.5f) {
+        if (loadingProgress < 0.4f) {
             textLoadingTooltips.text = "( Warming Up Simulation Cubes )";
         }
         /*if (loadingProgress < 0.4f) {
@@ -1248,7 +1248,7 @@ private bool treeOfLifeInfoOnC = false;
                 simManager.uiManager.buttonToolbarExpandOn.interactable = true;)
                 */
         if(!inspectToolUnlocked) {
-            if(gameManager.simulationManager.simResourceManager.curGlobalAgentBiomass > 0.8f) {
+            if(gameManager.simulationManager.simResourceManager.curGlobalAgentBiomass > 0.6f) {
                 // Unlock!!!!
                 AnnounceUnlockInspect();
                 inspectToolUnlocked = true;
@@ -1423,7 +1423,13 @@ private bool treeOfLifeInfoOnC = false;
                 // Which panels are available?
                 int panelTier = -1;
                 
-                buttonToolbarWingDeleteSpecies.gameObject.SetActive(false); 
+                if(isActiveDebug) {
+                    buttonToolbarWingDeleteSpecies.gameObject.SetActive(true); 
+                }
+                else {
+                    buttonToolbarWingDeleteSpecies.gameObject.SetActive(false); 
+                }
+                
                 
                 if(layerManager.selectedTrophicSlotRef.status == TrophicSlot.SlotStatus.Empty) {  // waiting to be created!
                     panelTier = 0;
@@ -1552,7 +1558,7 @@ private bool treeOfLifeInfoOnC = false;
         
     }
     public void UpdateInfoPanelUI() {
-        textCurYear.text = gameManager.simulationManager.curSimYear.ToString();
+        textCurYear.text = (gameManager.simulationManager.curSimYear + 1).ToString();
 
         SimResourceManager resourcesRef = gameManager.simulationManager.simResourceManager;
         textMeterOxygen.text = resourcesRef.curGlobalOxygen.ToString("F0");
@@ -2301,13 +2307,14 @@ private bool treeOfLifeInfoOnC = false;
                 toolbarSpeciesStatsGraphMat.SetTexture("_ColorKeyTex", statsSpeciesColorKey); // statsTreeOfLifeSpeciesTexArray[0]);
                 toolbarSpeciesStatsGraphMat.SetFloat("_MinValue", 0f);
                 toolbarSpeciesStatsGraphMat.SetFloat("_MaxValue", maxValuesStatArray[0]);
+                toolbarSpeciesStatsGraphMat.SetFloat("_NumEntries", (float)statsTreeOfLifeSpeciesTexArray[0].width);
                 toolbarSpeciesStatsGraphMat.SetFloat("_SelectedSpeciesID", slot.slotID);
 
                 // TEMP UNLOCK TEXT:
                 // Slot 4/4:
                 if(gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[3].status == TrophicSlot.SlotStatus.Locked) {
-                    textToolbarWingStatsUnlockStatus.text = "<b>Next Unlock:</b>\nReach <b><i>10</i></b> Total Biomass";
-                    float unlockProgressLerp = Mathf.Clamp01(gameManager.simulationManager.simResourceManager.curGlobalAgentBiomass / 10f);
+                    textToolbarWingStatsUnlockStatus.text = "<b>Next Unlock:</b>\nReach <b><i>8</i></b> Total Biomass";
+                    float unlockProgressLerp = Mathf.Clamp01(gameManager.simulationManager.simResourceManager.curGlobalAgentBiomass / 8f);
                     textToolbarWingStatsUnlockPercentage.text = (unlockProgressLerp * 100f).ToString("F0") + "%";
                     //imageUnlockMeter;
                     matUnlockMeter.SetFloat("_FillPercentage", unlockProgressLerp);
@@ -2323,8 +2330,8 @@ private bool treeOfLifeInfoOnC = false;
                 }
                 // Slot 3/4:
                 if(gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[2].status == TrophicSlot.SlotStatus.Locked) {
-                    textToolbarWingStatsUnlockStatus.text = "<b>Next Unlock:</b>\nReach <b><i>5</i></b> Total Biomass";
-                    float unlockProgressLerp = Mathf.Clamp01(gameManager.simulationManager.simResourceManager.curGlobalAgentBiomass / 5f);
+                    textToolbarWingStatsUnlockStatus.text = "<b>Next Unlock:</b>\nReach <b><i>4</i></b> Total Biomass";
+                    float unlockProgressLerp = Mathf.Clamp01(gameManager.simulationManager.simResourceManager.curGlobalAgentBiomass / 4f);
                     textToolbarWingStatsUnlockPercentage.text = (unlockProgressLerp * 100f).ToString("F0") + "%";
                     //imageUnlockMeter;
                     matUnlockMeter.SetFloat("_FillPercentage", unlockProgressLerp);
@@ -2340,8 +2347,8 @@ private bool treeOfLifeInfoOnC = false;
                 }
                 // Slot 2/4:
                 if(gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1].status == TrophicSlot.SlotStatus.Locked) {
-                    textToolbarWingStatsUnlockStatus.text = "<b>Next Unlock:</b>\nReach <b><i>2</i></b> Total Biomass";
-                    float unlockProgressLerp = Mathf.Clamp01(gameManager.simulationManager.simResourceManager.curGlobalAgentBiomass / 2f);
+                    textToolbarWingStatsUnlockStatus.text = "<b>Next Unlock:</b>\nReach <b><i>1</i></b> Total Biomass";
+                    float unlockProgressLerp = Mathf.Clamp01(gameManager.simulationManager.simResourceManager.curGlobalAgentBiomass / 1f);
                     textToolbarWingStatsUnlockPercentage.text = (unlockProgressLerp * 100f).ToString("F0") + "%";
                     //imageUnlockMeter;
                     matUnlockMeter.SetFloat("_FillPercentage", unlockProgressLerp);
@@ -3178,7 +3185,7 @@ private bool treeOfLifeInfoOnC = false;
                 panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
                 
                 if(slot.slotID == 0) {
-                    panelPendingClickPrompt.GetComponentInChildren<Text>().text = "A new species of Vertebrate added!\n\nCreatures start with randomly-generated brains\n and must learn how to survive through evolution.";
+                    panelPendingClickPrompt.GetComponentInChildren<Text>().text = "These creatures start with randomly-generated brains\n and must evolve successful behavior\nthrough survival of the fittest";
                 }
                 //ClickToolButtonInspect();
                 
@@ -3197,6 +3204,11 @@ private bool treeOfLifeInfoOnC = false;
         recentlyCreatedSpecies = true;
         recentlyCreatedSpeciesTimeStepCounter = 0;
         //UpdateSelectedSpeciesColorUI();
+    }
+    public void CheatUnlockAll() {
+        Debug.Log("Cheat!!! Unlocked all species!!!");
+
+        gameManager.simulationManager.trophicLayersManager.CheatUnlockAll();
     }
     public void ClickToolbarWingDescription() {
         curToolbarWingPanelSelectID = 0;
