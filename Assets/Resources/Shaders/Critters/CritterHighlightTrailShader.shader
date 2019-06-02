@@ -105,7 +105,7 @@
 				float3 rotatedPoint = float3(quadPoint.x * right + quadPoint.y * forward, 0);  // Rotate localRotation by AgentRotation
 				
 				
-				worldPosition = worldPosition + _HighlightOn * rotatedPoint * 0.37 * critterSimData.embryoPercentage * (_CamDistNormalized * 1.33 + 0.05); // * (_CamDistNormalized * 0.9 + 0.1) * (data.strength * _HighlightOn * 0.25 + 0.75); // * lerp(0.55, 0.85, data.age) * 0.12; // rotatedPoint * particleData.isActive;
+				worldPosition = worldPosition + _HighlightOn * rotatedPoint * 1.5 * critterSimData.embryoPercentage * (_CamDistNormalized * 1.33 + 0.05); // * (_CamDistNormalized * 0.9 + 0.1) * (data.strength * _HighlightOn * 0.25 + 0.75); // * lerp(0.55, 0.85, data.age) * 0.12; // rotatedPoint * particleData.isActive;
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));				
 				o.color = float4(critterSimData.embryoPercentage, (1.0 - saturate(critterSimData.decayPercentage)),saturate(critterSimData.growthPercentage * 2.5),(1.0 - saturate(critterSimData.decayPercentage * 6)) * critterSimData.embryoPercentage); //float4(rand0 * 0.3 + 0.5, data.strength * _HighlightOn, hoverMask * _IsHover, selectedMask * _IsSelected);	
@@ -126,9 +126,9 @@
 				finalColor.rgb = lerp(finalColor.rgb, i.hue, 0.75);
 				finalColor.a *= i.highlight.w;
 				finalColor.a += i.highlight.y * 0.33;
-				finalColor.a = finalColor.a * (saturate(i.highlight.y * 1 + i.highlight.z) * 0.5 + 0.5);
+				finalColor.a = finalColor.a * (saturate(i.highlight.y * 1 + i.highlight.z) * 0.25 + 0.75);
 				finalColor.a *= i.color.x * i.color.y * i.color.z;				
-				finalColor.a *= texColor.a * 1;
+				finalColor.a *= texColor.a * 0.1;
 
 				finalColor *= i.highlight.w;
 

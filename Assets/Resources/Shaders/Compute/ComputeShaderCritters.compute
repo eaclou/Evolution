@@ -224,7 +224,7 @@ void CSSimulateHighlightTrail (uint3 id : SV_DispatchThreadID)
 	float age = highlightTrailDataCBuffer[particleIndex].age;
 	float timeMask = saturate(floor(age));	
 	age = age % 1.0;
-	float spawnRadius = 0.33 * critterSimData.embryoPercentage;
+	float spawnRadius = 0.033 * critterSimData.embryoPercentage;
 	float randomAngle = 6.28 * rand(float2(id.x * 3.1415,critterIndex));
 	float randRadius = rand(float2(critterIndex * -13.2,id.x));
 	float2 randOffset = (float2(rand(float2((float)id.x * 0.12337, age)), rand(float2(age * 123.79 + critterIndex, (float)id.x * -891))) * 2.0 - 1.0) * spawnRadius;
