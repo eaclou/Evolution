@@ -775,7 +775,7 @@ public class SimulationManager : MonoBehaviour {
         if(magnitude == 0f) {
             Debug.Log("ERROR null vector!");
         }
-        magnitude *= 0.015f;
+        magnitude *= 0.05f;
         float maxMag = 0.9f;
         if(magnitude > maxMag) {
             magnitude = maxMag;            

@@ -66,11 +66,11 @@
 
 				o.worldPos = worldPosition;
 
-				float2 altUV = (worldPosition.xy + 128) / 512;
+				float2 altUV = worldPosition.xy / 256;
 				o.altitudeUV = altUV;
 
 				float altitude = tex2Dlod(_AltitudeTex, float4(altUV, 0, 0)).x; //i.worldPos.z / 10; // [-1,1] range
-				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(((altUV - 0.25) * 2), 0, 0)).yzw;
+				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(altUV, 0, 0)).yzw;
 				float depth = saturate(-altitude + 0.5);
 				float refractionStrength = depth * 7.5;
 				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
@@ -112,8 +112,8 @@
 				float2 screenUV = i.screenUV.xy / i.screenUV.w;
 				float4 frameBufferColor = tex2D(_RenderedSceneRT, screenUV);  //  Color of brushtroke source					
 				float4 altitudeTex = tex2D(_AltitudeTex, i.altitudeUV); //i.worldPos.z / 10; // [-1,1] range
-				float4 waterSurfaceTex = tex2D(_WaterSurfaceTex, (i.altitudeUV - 0.25) * 2);
-				float4 resourceTex = tex2D(_ResourceTex, (i.altitudeUV - 0.25) * 2);	
+				float4 waterSurfaceTex = tex2D(_WaterSurfaceTex, i.altitudeUV);
+				float4 resourceTex = tex2D(_ResourceTex, i.altitudeUV);	
 				
 				float4 finalColor = GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, float4(1,1,1,1));
 				finalColor.a = brushColor.a;

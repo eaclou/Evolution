@@ -20,6 +20,7 @@ public class TheRenderKing : MonoBehaviour {
     public Camera mainRenderCam;
     public Camera fluidObstaclesRenderCamera;
     public Camera fluidColorRenderCamera;
+    public Camera spiritBrushRenderCamera;
     //public Camera treeOfLifeRenderCamera;
     public Camera speciesPortraitRenderCamera;
     public Camera treeOfLifeSpeciesTreeRenderCamera;
@@ -31,6 +32,7 @@ public class TheRenderKing : MonoBehaviour {
     //private CommandBuffer cmdBufferMainRender;
     private CommandBuffer cmdBufferFluidObstacles;
     private CommandBuffer cmdBufferFluidColor;
+    private CommandBuffer cmdBufferSpiritBrush;
     private CommandBuffer cmdBufferTreeOfLifeDisplay;
     private CommandBuffer cmdBufferSpeciesPortraitDisplay;
     private CommandBuffer cmdBufferTreeOfLifeSpeciesTree;
@@ -49,6 +51,7 @@ public class TheRenderKing : MonoBehaviour {
     public Material gizmoStirStickShadowMat;
 
     // ORGANIZE AND REMOVE UNUSED!!!!!! *********
+    public Material rockMat;
     public Material debugVisModeMat;
     public Material debugVisAlgaeParticlesMat;
     public Material debugVisAnimalParticlesMat;
@@ -115,6 +118,8 @@ public class TheRenderKing : MonoBehaviour {
     public Material treeOfLifeCursorLineMat;
     public Material toolbarSpeciesPortraitStrokesMat;
 
+    public Material spiritBrushRenderMat;
+
     public ComputeBuffer gizmoCursorPosCBuffer;
     public ComputeBuffer gizmoFeedToolPosCBuffer;
     //public Material critterEyeStrokesDisplayMat;
@@ -135,6 +140,7 @@ public class TheRenderKing : MonoBehaviour {
     public bool mutateToolOn = false;
     public bool removeToolOn = false;
     public bool isStirring = false;
+    public bool isBrushing = false;
     /*public GameObject terrainGO;
     public Material terrainObstaclesHeightMaskMat;
     public Texture2D terrainHeightMap;         
@@ -242,6 +248,11 @@ public class TheRenderKing : MonoBehaviour {
     public Material debugMaterial;
     public Mesh debugMesh;
     public RenderTexture debugRT; // Used to see texture inside editor (inspector)
+
+    public RenderTexture spiritBrushRT;
+    private int spiritBrushResolution = 128;
+    public RenderTexture terrainBaseColorRT;
+    private int terrainBaseColorResolution = 128;
     
     public Texture2D critterBodyWidthsTex;
 
@@ -455,6 +466,7 @@ public class TheRenderKing : MonoBehaviour {
     private void Awake() {
         fluidObstaclesRenderCamera.enabled = false;
         fluidColorRenderCamera.enabled = false;
+        spiritBrushRenderCamera.enabled = false;
         treeOfLifeSpeciesTreeRenderCamera.enabled = false;  // only render when the King commands it!!!
         //treeOfLifeRenderCamera.enabled = false;
         speciesPortraitRenderCamera.enabled = false;
@@ -480,6 +492,8 @@ public class TheRenderKing : MonoBehaviour {
         }
 
         //TreeOfLifeAddNewSpecies(0); // ** HACKY!!!! ***
+
+        rockMat.SetTexture("_MainTex", simManager.theRenderKing.baronVonTerrain.terrainColorRT0); // terrainBaseColorRT);
 
         isInitialized = true;  // we did it, guys!
     }
@@ -1351,6 +1365,20 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferFluidColor.name = "cmdBufferFluidColor";
         fluidColorRenderCamera.AddCommandBuffer(CameraEvent.BeforeDepthNormalsTexture, cmdBufferFluidColor);
 
+        spiritBrushRT = new RenderTexture(spiritBrushResolution, spiritBrushResolution, 0, RenderTextureFormat.RFloat, RenderTextureReadWrite.Linear);
+        spiritBrushRT.wrapMode = TextureWrapMode.Clamp;
+        spiritBrushRT.enableRandomWrite = true;
+        spiritBrushRT.Create();
+
+        //terrainBaseColorRT = new RenderTexture(terrainBaseColorResolution, terrainBaseColorResolution, 0, RenderTextureFormat.Default, RenderTextureReadWrite.sRGB);
+        //terrainBaseColorRT.wrapMode = TextureWrapMode.Clamp;
+        //terrainBaseColorRT.enableRandomWrite = true;
+        //terrainBaseColorRT.Create();
+
+        cmdBufferSpiritBrush = new CommandBuffer();
+        cmdBufferSpiritBrush.name = "cmdBufferSpiritBrush";
+        spiritBrushRenderCamera.AddCommandBuffer(CameraEvent.BeforeDepthNormalsTexture, cmdBufferSpiritBrush);
+
         cmdBufferTreeOfLifeSpeciesTree = new CommandBuffer();
         cmdBufferTreeOfLifeSpeciesTree.name = "cmdBufferTreeOfLifeSpeciesTree";
         treeOfLifeSpeciesTreeRenderCamera.AddCommandBuffer(CameraEvent.BeforeDepthNormalsTexture, cmdBufferTreeOfLifeSpeciesTree);
@@ -1483,7 +1511,7 @@ public class TheRenderKing : MonoBehaviour {
         int kernelGetObjectDepths = baronVonTerrain.computeShaderTerrainGeneration.FindKernel("CSGetObjectDepths");
         baronVonTerrain.computeShaderTerrainGeneration.SetBuffer(kernelGetObjectDepths, "ObjectPositionsCBuffer", objectDataInFluidCoordsCBuffer);
         baronVonTerrain.computeShaderTerrainGeneration.SetBuffer(kernelGetObjectDepths, "DepthValuesCBuffer", depthValuesCBuffer);
-        baronVonTerrain.computeShaderTerrainGeneration.SetTexture(kernelGetObjectDepths, "AltitudeRead", baronVonTerrain.terrainHeightMap);
+        baronVonTerrain.computeShaderTerrainGeneration.SetTexture(kernelGetObjectDepths, "AltitudeRead", baronVonTerrain.terrainHeightDataRT);
         //computeShaderFluidSim.SetFloat("_MapSize", SimulationManager._MapSize);
         baronVonTerrain.computeShaderTerrainGeneration.Dispatch(kernelGetObjectDepths, positionsArray.Length, 1, 1);
 
@@ -3142,7 +3170,7 @@ public class TheRenderKing : MonoBehaviour {
         
 
 
-        baronVonWater.altitudeMapRef = baronVonTerrain.terrainHeightMap;
+        baronVonWater.altitudeMapRef = baronVonTerrain.terrainHeightDataRT;
         float camDist = Mathf.Clamp01(-1f * simManager.cameraManager.gameObject.transform.position.z / (210f - 10f));
         baronVonWater.camDistNormalized = camDist;
         Vector2 boxSizeHalf = 0.8f * Vector2.Lerp(new Vector2(16f, 12f) * 2, new Vector2(256f, 204f), Mathf.Clamp01(-(simManager.cameraManager.gameObject.transform.position.z) / 150f));
@@ -3158,7 +3186,7 @@ public class TheRenderKing : MonoBehaviour {
         //baronVonTerrain.Tick(simManager.vegetationManager.rdRT1);
         int kernelSimGroundBits = baronVonTerrain.computeShaderTerrainGeneration.FindKernel("CSSimGroundBitsData");
         baronVonTerrain.computeShaderTerrainGeneration.SetBuffer(kernelSimGroundBits, "groundBitsCBuffer", baronVonTerrain.groundBitsCBuffer);
-        baronVonTerrain.computeShaderTerrainGeneration.SetTexture(kernelSimGroundBits, "AltitudeRead", baronVonTerrain.terrainHeightMap);
+        baronVonTerrain.computeShaderTerrainGeneration.SetTexture(kernelSimGroundBits, "AltitudeRead", baronVonTerrain.terrainHeightDataRT);
         baronVonTerrain.computeShaderTerrainGeneration.SetTexture(kernelSimGroundBits, "decomposersRead", simManager.vegetationManager.rdRT1);
         baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
         baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_Time", Time.realtimeSinceStartup);        
@@ -3174,7 +3202,7 @@ public class TheRenderKing : MonoBehaviour {
 
         int kernelSimCarpetBits = baronVonTerrain.computeShaderTerrainGeneration.FindKernel("CSSimCarpetBitsData");
         baronVonTerrain.computeShaderTerrainGeneration.SetBuffer(kernelSimCarpetBits, "groundBitsCBuffer", baronVonTerrain.carpetBitsCBuffer);
-        baronVonTerrain.computeShaderTerrainGeneration.SetTexture(kernelSimCarpetBits, "AltitudeRead", baronVonTerrain.terrainHeightMap);
+        baronVonTerrain.computeShaderTerrainGeneration.SetTexture(kernelSimCarpetBits, "AltitudeRead", baronVonTerrain.terrainHeightDataRT);
         baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
         baronVonTerrain.computeShaderTerrainGeneration.SetVector("_SpawnBoundsCameraDetails", baronVonTerrain.spawnBoundsCameraDetails);
         baronVonTerrain.computeShaderTerrainGeneration.Dispatch(kernelSimCarpetBits, baronVonTerrain.carpetBitsCBuffer.count / 1024, 1, 1);
@@ -3224,7 +3252,7 @@ public class TheRenderKing : MonoBehaviour {
         algaeParticleColorInjectMat.SetPass(0);
         algaeParticleColorInjectMat.SetBuffer("foodParticleDataCBuffer", simManager.vegetationManager.algaeParticlesCBuffer);
         algaeParticleColorInjectMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        algaeParticleColorInjectMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+        algaeParticleColorInjectMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
         algaeParticleColorInjectMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
         cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, algaeParticleColorInjectMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.algaeParticlesCBuffer.count);
 
@@ -3246,12 +3274,34 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, basicStrokeDisplayMat, 0, MeshTopology.Triangles, 6, colorInjectionStrokesCBuffer.count);
         // Render Agent/Food/Pred colors here!!!
         // just use their display renders?
-
         Graphics.ExecuteCommandBuffer(cmdBufferFluidColor);
-
         fluidColorRenderCamera.Render();
         //simManager.environmentFluidManager.densityA.GenerateMips();
         // Update this ^^ to use Graphics.ExecuteCommandBuffer()  ****
+
+
+
+        // SPIRIT BRUSH TEST!
+        cmdBufferSpiritBrush.Clear(); // needed since camera clear flag is set to none
+        if(isBrushing) {
+            cmdBufferSpiritBrush.SetRenderTarget(spiritBrushRT);
+            cmdBufferSpiritBrush.ClearRenderTarget(true, true, Color.black, 1.0f);  // clear -- needed???
+            cmdBufferSpiritBrush.SetViewProjectionMatrices(spiritBrushRenderCamera.worldToCameraMatrix, spiritBrushRenderCamera.projectionMatrix);
+            // Draw Solid Land boundaries:
+            float scale = Mathf.Lerp(0.1f, 8f, baronVonWater.camDistNormalized) * 5f;
+            Matrix4x4 stirStickTransformMatrix = Matrix4x4.TRS(new Vector3(simManager.uiManager.curMousePositionOnWaterPlane.x, simManager.uiManager.curMousePositionOnWaterPlane.y, 0f), Quaternion.identity, Vector3.one * scale);
+            //Debug.Log("mouseCursorPos: " + simManager.uiManager.curMousePositionOnWaterPlane.ToString());
+            cmdBufferSpiritBrush.DrawMesh(meshStirStickLrg, stirStickTransformMatrix, spiritBrushRenderMat); // Masks out areas above the fluid "Sea Level"
+            // Draw dynamic Obstacles:        
+            //basicStrokeDisplayMat.SetPass(0);
+            //basicStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer); // *** Needed? or just set it once in beginning....
+            //basicStrokeDisplayMat.SetBuffer("basicStrokesCBuffer", obstacleStrokesCBuffer);        
+            //cmdBufferSpiritBrush.DrawProcedural(Matrix4x4.identity, basicStrokeDisplayMat, 0, MeshTopology.Triangles, 6, .count);
+            // Disabling for now -- starting with one-way interaction between fluid & objects (fluid pushes objects, they don't push back)
+            Graphics.ExecuteCommandBuffer(cmdBufferSpiritBrush);
+            // Still not sure if this will work correctly... ****
+            spiritBrushRenderCamera.Render();
+        }
 
 
         // Species PORTRAIT:
@@ -3601,7 +3651,7 @@ public class TheRenderKing : MonoBehaviour {
             baronVonTerrain.groundStrokesLrgDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
             baronVonTerrain.groundStrokesLrgDisplayMat.SetBuffer("frameBufferStrokesCBuffer", baronVonTerrain.groundStrokesLrgCBuffer);
             baronVonTerrain.groundStrokesLrgDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
-            baronVonTerrain.groundStrokesLrgDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+            baronVonTerrain.groundStrokesLrgDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
             baronVonTerrain.groundStrokesLrgDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
             baronVonTerrain.groundStrokesLrgDisplayMat.SetTexture("_ResourceTex", simManager.vegetationManager.resourceGridRT1);
             baronVonTerrain.groundStrokesLrgDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);  
@@ -3615,7 +3665,7 @@ public class TheRenderKing : MonoBehaviour {
             baronVonTerrain.groundStrokesMedDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
             baronVonTerrain.groundStrokesMedDisplayMat.SetBuffer("frameBufferStrokesCBuffer", baronVonTerrain.groundStrokesMedCBuffer);
             baronVonTerrain.groundStrokesMedDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
-            baronVonTerrain.groundStrokesMedDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+            baronVonTerrain.groundStrokesMedDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
             baronVonTerrain.groundStrokesMedDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
             baronVonTerrain.groundStrokesMedDisplayMat.SetTexture("_ResourceTex", simManager.vegetationManager.resourceGridRT1);
             baronVonTerrain.groundStrokesMedDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);       
@@ -3629,7 +3679,7 @@ public class TheRenderKing : MonoBehaviour {
             baronVonTerrain.groundStrokesSmlDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
             baronVonTerrain.groundStrokesSmlDisplayMat.SetBuffer("frameBufferStrokesCBuffer", baronVonTerrain.groundStrokesSmlCBuffer);
             baronVonTerrain.groundStrokesSmlDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
-            baronVonTerrain.groundStrokesSmlDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+            baronVonTerrain.groundStrokesSmlDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
             baronVonTerrain.groundStrokesSmlDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
             baronVonTerrain.groundStrokesSmlDisplayMat.SetTexture("_ResourceTex", simManager.vegetationManager.resourceGridRT1);
             baronVonTerrain.groundStrokesSmlDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);     
@@ -3644,7 +3694,7 @@ public class TheRenderKing : MonoBehaviour {
             baronVonTerrain.carpetBitsDisplayMat.SetPass(0);
             baronVonTerrain.carpetBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
             baronVonTerrain.carpetBitsDisplayMat.SetBuffer("groundBitsCBuffer", baronVonTerrain.carpetBitsCBuffer);
-            baronVonTerrain.carpetBitsDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+            baronVonTerrain.carpetBitsDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
             baronVonTerrain.carpetBitsDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
             baronVonTerrain.carpetBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
             baronVonTerrain.carpetBitsDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);     
@@ -3660,7 +3710,7 @@ public class TheRenderKing : MonoBehaviour {
                 baronVonTerrain.groundBitsShadowDisplayMat.SetPass(0);
                 baronVonTerrain.groundBitsShadowDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
                 baronVonTerrain.groundBitsShadowDisplayMat.SetBuffer("groundBitsCBuffer", baronVonTerrain.groundBitsCBuffer);                
-                baronVonTerrain.groundBitsShadowDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+                baronVonTerrain.groundBitsShadowDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
                 baronVonTerrain.groundBitsShadowDisplayMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
                 baronVonTerrain.groundBitsShadowDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
                 baronVonTerrain.groundBitsShadowDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
@@ -3676,7 +3726,7 @@ public class TheRenderKing : MonoBehaviour {
                 baronVonTerrain.groundBitsDisplayMat.SetPass(0);
                 baronVonTerrain.groundBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
                 baronVonTerrain.groundBitsDisplayMat.SetBuffer("groundBitsCBuffer", baronVonTerrain.groundBitsCBuffer);                
-                baronVonTerrain.groundBitsDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+                baronVonTerrain.groundBitsDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
                 baronVonTerrain.groundBitsDisplayMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
                 baronVonTerrain.groundBitsDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
                 baronVonTerrain.groundBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
@@ -3728,7 +3778,7 @@ public class TheRenderKing : MonoBehaviour {
             critterUberStrokeShadowMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
             critterUberStrokeShadowMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
             critterUberStrokeShadowMat.SetBuffer("critterGenericStrokesCBuffer", critterGenericStrokesCBuffer); 
-            critterUberStrokeShadowMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+            critterUberStrokeShadowMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
             //critterUberStrokeShadowMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
             critterUberStrokeShadowMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
             critterUberStrokeShadowMat.SetFloat("_MapSize", SimulationManager._MapSize);
@@ -3746,7 +3796,7 @@ public class TheRenderKing : MonoBehaviour {
             eggSackShadowDisplayMat.SetBuffer("eggSackSimDataCBuffer", simManager.simStateData.eggSackSimDataCBuffer);
             eggSackShadowDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
             eggSackShadowDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
-            eggSackShadowDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+            eggSackShadowDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
             eggSackShadowDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
             cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID);
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, eggSackShadowDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.eggDataCBuffer.count);
@@ -3796,7 +3846,7 @@ public class TheRenderKing : MonoBehaviour {
                 animalParticleShadowDisplayMat.SetBuffer("animalParticleDataCBuffer", simManager.zooplanktonManager.animalParticlesCBuffer);
                 animalParticleShadowDisplayMat.SetBuffer("quadVerticesCBuffer", curveRibbonVerticesCBuffer);
                 animalParticleShadowDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-                animalParticleShadowDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+                animalParticleShadowDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
                 cmdBufferMain.DrawProcedural(Matrix4x4.identity, animalParticleShadowDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, simManager.zooplanktonManager.animalParticlesCBuffer.count);
         
             }
@@ -3806,7 +3856,7 @@ public class TheRenderKing : MonoBehaviour {
                 foodParticleShadowDisplayMat.SetPass(0);
                 foodParticleShadowDisplayMat.SetBuffer("foodParticleDataCBuffer", simManager.vegetationManager.algaeParticlesCBuffer);
                 foodParticleShadowDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-                foodParticleShadowDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+                foodParticleShadowDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
                 foodParticleShadowDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
                 foodParticleShadowDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
                 foodParticleShadowDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);     
@@ -3832,7 +3882,7 @@ public class TheRenderKing : MonoBehaviour {
                     stickMesh = meshStirStickSml;
                 }
 
-                gizmoStirStickShadowMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+                gizmoStirStickShadowMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
                 gizmoStirStickShadowMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
                 gizmoStirStickShadowMat.SetFloat("_MapSize", SimulationManager._MapSize);
                 gizmoStirStickShadowMat.SetFloat("_MinFog", 0.0625f);  
@@ -3933,7 +3983,7 @@ public class TheRenderKing : MonoBehaviour {
             baronVonWater.waterNutrientsBitsDisplayMat.SetPass(0);
             baronVonWater.waterNutrientsBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
             baronVonWater.waterNutrientsBitsDisplayMat.SetBuffer("frameBufferStrokesCBuffer", baronVonWater.waterNutrientsBitsCBuffer);
-            baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+            baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
             baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
             baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
             baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_NutrientTex", simManager.vegetationManager.resourceGridRT1);
@@ -3949,7 +3999,7 @@ public class TheRenderKing : MonoBehaviour {
                 foodParticleDisplayMat.SetPass(0);
                 foodParticleDisplayMat.SetBuffer("foodParticleDataCBuffer", simManager.vegetationManager.algaeParticlesCBuffer);
                 foodParticleDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-                foodParticleDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+                foodParticleDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
                 foodParticleDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
                 cmdBufferMain.DrawProcedural(Matrix4x4.identity, foodParticleDisplayMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.algaeParticlesCBuffer.count * 32);
         
@@ -3963,7 +4013,7 @@ public class TheRenderKing : MonoBehaviour {
             fluidRenderMat.SetTexture("_PressureTex", fluidManager._PressureA);
             fluidRenderMat.SetTexture("_DivergenceTex", fluidManager._Divergence);
             fluidRenderMat.SetTexture("_ObstaclesTex", fluidManager._ObstaclesRT);
-            fluidRenderMat.SetTexture("_TerrainHeightTex", baronVonTerrain.terrainHeightMap);
+            fluidRenderMat.SetTexture("_TerrainHeightTex", baronVonTerrain.terrainHeightDataRT);
             cmdBufferMain.DrawMesh(fluidRenderMesh, Matrix4x4.identity, fluidRenderMat);
 
             
@@ -4067,7 +4117,7 @@ public class TheRenderKing : MonoBehaviour {
             baronVonWater.waterQuadStrokesLrgDisplayMat.SetPass(0);
             baronVonWater.waterQuadStrokesLrgDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
             baronVonWater.waterQuadStrokesLrgDisplayMat.SetBuffer("frameBufferStrokesCBuffer", baronVonWater.waterQuadStrokesCBufferLrg);
-            baronVonWater.waterQuadStrokesLrgDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+            baronVonWater.waterQuadStrokesLrgDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
             baronVonWater.waterQuadStrokesLrgDisplayMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
             baronVonWater.waterQuadStrokesLrgDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
             baronVonWater.waterQuadStrokesLrgDisplayMat.SetTexture("_ResourceTex", simManager.vegetationManager.resourceGridRT1);
@@ -4084,7 +4134,7 @@ public class TheRenderKing : MonoBehaviour {
             baronVonWater.waterQuadStrokesSmlDisplayMat.SetPass(0);
             baronVonWater.waterQuadStrokesSmlDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
             baronVonWater.waterQuadStrokesSmlDisplayMat.SetBuffer("frameBufferStrokesCBuffer", baronVonWater.waterQuadStrokesCBufferSml);
-            baronVonWater.waterQuadStrokesSmlDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+            baronVonWater.waterQuadStrokesSmlDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
             baronVonWater.waterQuadStrokesSmlDisplayMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
             baronVonWater.waterQuadStrokesSmlDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
             baronVonWater.waterQuadStrokesSmlDisplayMat.SetTexture("_ResourceTex", simManager.vegetationManager.resourceGridRT1);
@@ -4116,7 +4166,7 @@ public class TheRenderKing : MonoBehaviour {
             baronVonTerrain.groundDryLandDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
             baronVonTerrain.groundDryLandDisplayMat.SetBuffer("frameBufferStrokesCBuffer", baronVonTerrain.groundStrokesSmlCBuffer);
             baronVonTerrain.groundDryLandDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
-            baronVonTerrain.groundDryLandDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+            baronVonTerrain.groundDryLandDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
             baronVonTerrain.groundDryLandDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
             baronVonTerrain.groundDryLandDisplayMat.SetTexture("_ResourceTex", simManager.vegetationManager.resourceGridRT1);
             baronVonTerrain.groundDryLandDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);            
@@ -4131,7 +4181,7 @@ public class TheRenderKing : MonoBehaviour {
             gizmoStirToolMat.SetPass(0);
             gizmoStirToolMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
             gizmoStirToolMat.SetBuffer("gizmoStirToolPosCBuffer", gizmoCursorPosCBuffer);
-            gizmoStirToolMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightMap);
+            gizmoStirToolMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
             gizmoStirToolMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
             gizmoStirToolMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
             gizmoStirToolMat.SetFloat("_Radius", Mathf.Lerp(0.025f, 2f, baronVonWater.camDistNormalized));  // **** Make radius variable! (possibly texture based?)
@@ -4388,6 +4438,31 @@ public class TheRenderKing : MonoBehaviour {
         //Graphics.DrawProcedural(MeshTopology.Triangles, 6, simManager.simStateData.predatorSimDataCBuffer.count);
     }
 
+    public void ClickTestTerrain() {
+        Debug.Log("CLICKED TEST TERRAIN BUTTON!");
+
+        //terrainBlitMat
+        baronVonTerrain.terrainBlitMat.SetTexture("_DeltaTex", spiritBrushRT);
+        float addSubtract = 1f;
+        if(simManager.uiManager.curActiveTool == UIManager.ToolType.Remove) {
+            addSubtract = -1f;
+        }
+        baronVonTerrain.terrainBlitMat.SetFloat("_AddSubtractSign", addSubtract);
+        Graphics.Blit(baronVonTerrain.terrainHeightRT0, baronVonTerrain.terrainHeightRT1, baronVonTerrain.terrainBlitMat);
+        Graphics.Blit(baronVonTerrain.terrainHeightRT1, baronVonTerrain.terrainHeightRT0); // Copy back -- optimize later! replace with diffusion step?
+
+        baronVonTerrain.terrainGenerateColorBlitMat.SetTexture("_MainTex", baronVonTerrain.terrainHeightRT0);
+        baronVonTerrain.terrainGenerateColorBlitMat.SetTexture("_DeltaTex", spiritBrushRT);
+        baronVonTerrain.terrainGenerateColorBlitMat.SetVector("_Color0", new Vector4(0.5f, 0.4f, 0.3f, 1f));
+        baronVonTerrain.terrainGenerateColorBlitMat.SetVector("_Color1", new Vector4(0.3f, 0.9f, 0.3f, 1f));
+        baronVonTerrain.terrainGenerateColorBlitMat.SetVector("_Color2", new Vector4(0.6f, 0.2f, 0.9f, 1f));
+        baronVonTerrain.terrainGenerateColorBlitMat.SetVector("_Color3", new Vector4(0.7f, 0.4f, 0.2f, 1f));
+        Graphics.Blit(baronVonTerrain.terrainHeightRT0, baronVonTerrain.terrainColorRT0, baronVonTerrain.terrainGenerateColorBlitMat);
+
+        baronVonTerrain.InitializeTerrain();
+        baronVonTerrain.AlignGroundStrokesToTerrain();
+    }
+
     private void OnWillRenderObject() {  // requires MeshRenderer Component to be called
         //Debug.Log("OnWillRenderObject()");
         if (isInitialized) {
@@ -4458,6 +4533,9 @@ public class TheRenderKing : MonoBehaviour {
         }
         if(fluidObstaclesRenderCamera != null) {
             fluidObstaclesRenderCamera.RemoveAllCommandBuffers();
+        }
+        if(spiritBrushRenderCamera != null) {
+            spiritBrushRenderCamera.RemoveAllCommandBuffers();
         }
         if(treeOfLifeSpeciesTreeRenderCamera != null) {
             treeOfLifeSpeciesTreeRenderCamera.RemoveAllCommandBuffers();

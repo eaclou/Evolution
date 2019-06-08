@@ -72,9 +72,9 @@
 
 				
 								
-				float2 altUV = (v.vertex.xy + 128) / 512;  // Find pond floor at this alt
+				float2 altUV = v.vertex.xy / 256;  // Find pond floor at this alt
 				o.altitudeUV = altUV;				
-				float altitudeRaw = tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 1)).x;
+				float altitudeRaw = tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 0)).x;
 				float depth = saturate(-altitudeRaw + 0.5);
 				v.vertex.xyz += (v.normal * 0.15) * depth;
 				v.vertex.xy += lightDir.xy * vertexInitWorldZ * 0.25;
@@ -136,7 +136,7 @@
 				float2 screenUV = i.screenUV.xy / i.screenUV.w;
 				float4 frameBufferColor = tex2D(_RenderedSceneRT, screenUV);  //  Color of brushtroke source					
 				float4 altitudeTex = tex2D(_AltitudeTex, i.altitudeUV); //i.worldPos.z / 10; // [-1,1] range
-				float4 waterSurfaceTex = tex2D(_WaterSurfaceTex, (i.altitudeUV - 0.25) * 2);
+				float4 waterSurfaceTex = tex2D(_WaterSurfaceTex, i.altitudeUV);
 				//float4 resourceTex = tex2D(_ResourceTex, (i.altitudeUV - 0.25) * 2);					
 				//float4 finalColor = GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, float4(1,1,1,1));
 				//finalColor.a = col.a;

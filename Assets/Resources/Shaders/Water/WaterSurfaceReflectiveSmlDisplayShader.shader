@@ -90,7 +90,7 @@
 
 				o.quadUV = quadPoint + 0.5;
 				o.worldPos = worldPosition;
-				float2 uv = (worldPosition.xy + 128) / 512;
+				float2 uv = worldPosition.xy / 256;
 				o.altitudeUV = uv;
 				
 				float2 scale = waterQuadData.localScale * 32;
@@ -161,8 +161,8 @@
 				//float distFromScreenCenter = length(screenUV * 2 - 1);
 				
 				float4 altitudeTex = tex2D(_AltitudeTex, i.altitudeUV); //i.worldPos.z / 10; // [-1,1] range
-				float4 waterSurfaceTex = tex2D(_WaterSurfaceTex, (i.altitudeUV - 0.25) * 2);
-				float4 resourceTex = tex2D(_ResourceTex, (i.altitudeUV - 0.25) * 2);
+				float4 waterSurfaceTex = tex2D(_WaterSurfaceTex, i.altitudeUV);
+				float4 resourceTex = tex2D(_ResourceTex, i.altitudeUV);
 
 				float4 finalColor = GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, resourceTex);
 				finalColor.a = brushColor.a;

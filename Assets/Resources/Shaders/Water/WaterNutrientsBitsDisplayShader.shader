@@ -91,7 +91,7 @@
 
 				o.quadUV = quadPoint + 0.5;
 				o.worldPos = worldPosition;
-				float2 uv = (worldPosition.xy + 128) / 512;
+				float2 uv = worldPosition.xy / 256;
 				o.altitudeUV = uv;
 								
 				float2 scale = waterQuadData.localScale * 12;

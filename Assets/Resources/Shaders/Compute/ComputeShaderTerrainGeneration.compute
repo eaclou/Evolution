@@ -1,4 +1,5 @@
 ﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSUpdateGroundStrokes
 #pragma kernel CSGetObjectDepths
 #pragma kernel CSGenerateMeshData
 #pragma kernel CSGenerateTriangleIndices
@@ -24,12 +25,19 @@ struct GroundBitsData
 	int brushType;
 };
 
+struct FrameBufferStrokeData {
+	float3 worldPos;
+	float2 scale;
+	float2 heading;
+	int brushType;
+};
+
 #include "Assets/Resources/Shaders/Inc/NoiseShared.cginc"
 
 StructuredBuffer<float4> ObjectPositionsCBuffer;
 RWStructuredBuffer<float3> DepthValuesCBuffer;
 
-Texture2D<float4> heightTexture;
+//Texture2D<float4> heightTexture;
 RWStructuredBuffer<float3> terrainVertexCBuffer;
 RWStructuredBuffer<float2> terrainUVCBuffer;
 RWStructuredBuffer<float3> terrainNormalCBuffer;
@@ -38,13 +46,14 @@ RWStructuredBuffer<TriangleIndexData> terrainTriangleCBuffer;
 
 RWStructuredBuffer<GroundBitsData> groundBitsCBuffer;
 
+RWStructuredBuffer<FrameBufferStrokeData> terrainFrameBufferStrokesCBuffer;
+
 Texture2D<float4> VelocityRead;
 Texture2D<float4> AltitudeRead;
 
 Texture2D<float4> decomposersRead;
 
-int resolutionX = 16;
-int resolutionZ = 16;
+int _MeshResolution = 32;
 
 float4 _QuadBounds;  // xy = min, zw = max
 float2 _HeightRange;
@@ -73,18 +82,53 @@ float rand(float2 co){   // OUTPUT is in [0,1] RANGE!!!
 }
 
 [numthreads(1,1,1)]
+void CSUpdateGroundStrokes (uint3 id : SV_DispatchThreadID)
+{
+	FrameBufferStrokeData data = terrainFrameBufferStrokesCBuffer[id.x];
+
+	// find uv for sampling terrainHeightMap
+
+	float2 uv = data.worldPos.xy / _MapSize;
+	float pixelOffset = 1.0 / 128;  // resolution
+
+	float altitudeCenter = AltitudeRead.SampleLevel(_LinearClamp, uv, 0).x;
+	float altitudeNorth = AltitudeRead.SampleLevel(_LinearClamp, uv + float2(0, pixelOffset), 0).x;
+	float altitudeEast = AltitudeRead.SampleLevel(_LinearClamp, uv + float2(pixelOffset, 0), 0).x;
+	float altitudeSouth = AltitudeRead.SampleLevel(_LinearClamp, uv + float2(0, -pixelOffset), 0).x;
+	float altitudeWest = AltitudeRead.SampleLevel(_LinearClamp, uv + float2(-pixelOffset, 0), 0).x;
+
+	float dX = altitudeEast - altitudeWest;
+	float dY = altitudeNorth - altitudeSouth;
+
+	float2 grad = float2(0,1);
+
+	if(dX != 0 && dY != 0) {
+		grad = normalize(float2(dX, dY));
+	}
+
+	if(altitudeCenter < 0.6) {  // if underwater, follow topographical lines rather than steepestGrade:
+		//grad = float2(grad.y, -grad.x);
+	}
+
+	grad = float2(grad.y, -grad.x);
+
+	terrainFrameBufferStrokesCBuffer[id.x].heading = grad;
+	terrainFrameBufferStrokesCBuffer[id.x].worldPos.z = -altitudeCenter * 20 + 10;
+}
+
+[numthreads(1,1,1)]
 void CSGetObjectDepths (uint3 id : SV_DispatchThreadID)
 {				
 	float4 data = ObjectPositionsCBuffer[id.x];
 	
-	float2 uv = data.xy * 0.5 + 0.25;
+	float2 uv = data.xy;
 	float2 uvOffset = data.zw;
 	
-	float depthCenter = AltitudeRead.SampleLevel(_LinearRepeat, uv, 1).x;
-	float depthLeft = AltitudeRead.SampleLevel(_LinearRepeat, uv + float2(-uvOffset.x, 0), 2).x;
-	float depthRight = AltitudeRead.SampleLevel(_LinearRepeat, uv + float2(uvOffset.x, 0), 2).x;
-	float depthUp = AltitudeRead.SampleLevel(_LinearRepeat, uv + float2(0, uvOffset.y), 2).x;
-	float depthDown = AltitudeRead.SampleLevel(_LinearRepeat, uv + float2(0, -uvOffset.y), 2).x;
+	float depthCenter = AltitudeRead.SampleLevel(_LinearRepeat, uv, 0).x;
+	float depthLeft = AltitudeRead.SampleLevel(_LinearRepeat, uv + float2(-uvOffset.x, 0), 0).x;
+	float depthRight = AltitudeRead.SampleLevel(_LinearRepeat, uv + float2(uvOffset.x, 0), 0).x;
+	float depthUp = AltitudeRead.SampleLevel(_LinearRepeat, uv + float2(0, uvOffset.y), 0).x;
+	float depthDown = AltitudeRead.SampleLevel(_LinearRepeat, uv + float2(0, -uvOffset.y), 0).x;
 
 	float2 grad = float2(depthRight - depthLeft, depthUp - depthDown);
 
@@ -100,9 +144,8 @@ void CSSimGroundBitsData (uint3 id : SV_DispatchThreadID)
 
 	if(groundBitData.isActive > 0.5) {  // ALIVE!
 		
-		float2 uv = groundBitData.worldPos.xy / _MapSize;
-		float2 altitudeUV = uv * 0.5 + 0.25;
-		float altitude = AltitudeRead.SampleLevel(_LinearRepeat, altitudeUV, 0).x;
+		float2 uv = groundBitData.worldPos.xy / _MapSize;		
+		float altitude = AltitudeRead.SampleLevel(_LinearClamp, uv, 0).x;
 		
 		groundBitData.age = groundBitData.age + 0.0025;  // ? frame lifespan
 
@@ -113,7 +156,7 @@ void CSSimGroundBitsData (uint3 id : SV_DispatchThreadID)
 		}
 		else {
 			
-			float2 vel = VelocityRead.SampleLevel(_LinearRepeat, uv, 1).xy;
+			float2 vel = VelocityRead.SampleLevel(_LinearRepeat, uv, 0).xy;
 			float speedMult = 0.0075;
 
 			groundBitData.speed = length(vel);
@@ -122,11 +165,11 @@ void CSSimGroundBitsData (uint3 id : SV_DispatchThreadID)
 			
 			float pixelOffset = 1.0 / 256;  // resolution
 
-			float altitudeCenter = AltitudeRead.SampleLevel(_LinearClamp, altitudeUV, 2).x;
-			float altitudeNorth = AltitudeRead.SampleLevel(_LinearClamp, altitudeUV + float2(0, pixelOffset), 2).x;
-			float altitudeEast = AltitudeRead.SampleLevel(_LinearClamp, altitudeUV + float2(pixelOffset, 0), 2).x;
-			float altitudeSouth = AltitudeRead.SampleLevel(_LinearClamp, altitudeUV + float2(0, -pixelOffset), 2).x;
-			float altitudeWest = AltitudeRead.SampleLevel(_LinearClamp, altitudeUV + float2(-pixelOffset, 0), 2).x;
+			float altitudeCenter = AltitudeRead.SampleLevel(_LinearClamp, uv, 0).x;
+			float altitudeNorth = AltitudeRead.SampleLevel(_LinearClamp, uv + float2(0, pixelOffset), 0).x;
+			float altitudeEast = AltitudeRead.SampleLevel(_LinearClamp, uv + float2(pixelOffset, 0), 0).x;
+			float altitudeSouth = AltitudeRead.SampleLevel(_LinearClamp, uv + float2(0, -pixelOffset), 0).x;
+			float altitudeWest = AltitudeRead.SampleLevel(_LinearClamp, uv + float2(-pixelOffset, 0), 0).x;
 
 			float dX = altitudeEast - altitudeWest;
 			float dY = altitudeNorth - altitudeSouth;
@@ -152,17 +195,17 @@ void CSSimGroundBitsData (uint3 id : SV_DispatchThreadID)
 		float2 spawnUV = spawnPos / _MapSize;
 		
 		
-		float spawnAltitude = AltitudeRead.SampleLevel(_LinearRepeat, spawnUV * 0.5 + 0.25, 0).x;
+		float spawnAltitude = AltitudeRead.SampleLevel(_LinearClamp, spawnUV, 0).x;
 		
 		float spawnNoise3 = saturate(Value2D(spawnPos + 349.7, 2.4579).x * 2.5);
 		float altitudeMask = saturate((0.7 - spawnAltitude) * 4);
 		
 		// Try respawning:
 		float4 decomposersMask = decomposersRead.SampleLevel(_LinearRepeat, spawnUV * 3.14159, 0);
-		float spawnRating = decomposersMask.y * altitudeMask; // spawnNoise2 * spawnNoise3 * altitudeMask; // * spawnNoise * spawnNoise * altitudeMask * altitudeMask;
+		float spawnRating = decomposersMask.y * altitudeMask;
 
 		float distToOrigin = length(_SpawnPos.xy - (spawnUV * _MapSize));
-			//_FoodSprinkleRadius
+			
 		if(distToOrigin < _SpawnRadius) {
 			if(spawnRating > 0.4 * ((1.0 - _DecomposerDensityLerp) * 0.2 + 0.8)) { // (float)id.x / 1024.0 / 8.0) {
 				spawnPos += float2(spawnNoise1, spawnNoise2) * 0.93416;		
@@ -170,7 +213,7 @@ void CSSimGroundBitsData (uint3 id : SV_DispatchThreadID)
 				groundBitData.age = groundBitData.age % 1.0;
 				groundBitData.isActive = 1.0;
 
-				//groundBitData.localScale
+				
 			
 			}
 		}		
@@ -187,16 +230,15 @@ void CSSimCarpetBitsData (uint3 id : SV_DispatchThreadID)
 
 	// ***** Move Head Point0: //
 
-	float2 uv = groundBitData.worldPos.xy / _MapSize;
-	float2 altitudeUV = uv * 0.5 + 0.25;
-	float2 vel = VelocityRead.SampleLevel(_LinearRepeat, uv, 1).xy;
+	float2 uv = groundBitData.worldPos.xy / _MapSize;	
+	float2 vel = VelocityRead.SampleLevel(_LinearClamp, uv, 0).xy;
 	float speedMult = 0.0;
 
 	groundBitData.speed = length(vel);
 	
 	float2 nextPos = uv + vel * speedMult;
 
-	float altitude = AltitudeRead.SampleLevel(_LinearRepeat, altitudeUV, 0).x;
+	float altitude = AltitudeRead.SampleLevel(_LinearRepeat, uv, 0).x;
 
 	groundBitData.age = groundBitData.age + 0.0025;  // ? frame lifespan
 	if(groundBitData.age > 1.0 || altitude > 0.5 ) {
@@ -207,24 +249,18 @@ void CSSimCarpetBitsData (uint3 id : SV_DispatchThreadID)
 
 		// check potential spawn location:
 		float2 spawnUV = spawnPos / _MapSize;
-		float spawnAltitude = AltitudeRead.SampleLevel(_LinearRepeat, spawnUV * 0.5 + 0.25, 0).x;
+		float spawnAltitude = AltitudeRead.SampleLevel(_LinearClamp, spawnUV, 0).x;
 		float spawnNoise1 = saturate(Value2D(spawnPos + 5, 0.0255).x * 6);
 		float spawnNoise2 = saturate(Value2D(spawnPos - 33, 0.35).x * 6.5);
 		float spawnNoise3 = saturate(Value2D(spawnPos + 349.7, 0.4579).x * 10);
 		float altitudeMask = (1.0 - saturate(-1.0 * (spawnAltitude * 2.0 - 1.0)));
 		
-		float spawnRating = altitudeMask; // * spawnNoise * spawnNoise * altitudeMask * altitudeMask;
+		float spawnRating = altitudeMask;
 
-		//if(spawnRating > (float)id.x / 1024.0 / 8.0) {
-			groundBitData.worldPos = float3(spawnPos, 0);
-			groundBitData.age -= 1;
-		//}		
 	}
 	else {
 		groundBitData.worldPos = float3(nextPos * _MapSize, 0);		
-	}
-
-	//float2 forwardDir = normalize(vel);
+	}	
 	
 	groundBitsCBuffer[id.x] = groundBitData;
 	
@@ -233,19 +269,18 @@ void CSSimCarpetBitsData (uint3 id : SV_DispatchThreadID)
 [numthreads(1,1,1)]
 void CSGenerateMeshData (uint3 id : SV_DispatchThreadID)
 {
-	int index = id.x * resolutionZ + id.z;
+	int index = id.x * _MeshResolution + id.z;
 
 	float xRange = _QuadBounds.y - _QuadBounds.x;
 	float zRange = _QuadBounds.w - _QuadBounds.z;
-	float xPart = (float)id.x / (float)(resolutionX - 1);
-	float zPart = (float)id.z / (float)(resolutionZ - 1);
+	float xPart = (float)id.x / (float)(_MeshResolution - 1);
+	float zPart = (float)id.z / (float)(_MeshResolution - 1);
 	float x = xPart * xRange + _QuadBounds.x;
 	float z = zPart * zRange + _QuadBounds.z;  // worldCoords
-
-	//float2 globalRange = float2(xRange, zRange);
+		
 	float2 uv = float2(xPart,zPart);
 	
-	float4 textureSample =  heightTexture.SampleLevel(_LinearClamp, uv, 0);
+	float4 textureSample =  AltitudeRead.SampleLevel(_LinearClamp, uv, 0);
 
 	float heightRange = _HeightRange.y - _HeightRange.x;
 	float height = (1.0 - textureSample.x) * heightRange + _HeightRange.x;
@@ -264,13 +299,13 @@ void CSGenerateTriangleIndices (uint3 id : SV_DispatchThreadID)
 	TriangleIndexData triangleIndexData0;
 	TriangleIndexData triangleIndexData1;
 
-	int index0 = (id.x * (resolutionZ - 1) + id.z) * 2;
+	int index0 = (id.x * (_MeshResolution - 1) + id.z) * 2;
 	int index1 = index0 + 1;
 
-	int v00 = id.x * resolutionZ + id.z;
-	int v10 = (id.x + 1) * resolutionZ + id.z;
-	int v01 = id.x * resolutionZ + (id.z + 1);
-	int v11 = (id.x + 1) * resolutionZ + (id.z + 1);
+	int v00 = id.x * _MeshResolution + id.z;
+	int v10 = (id.x + 1) * _MeshResolution + id.z;
+	int v01 = id.x * _MeshResolution + (id.z + 1);
+	int v11 = (id.x + 1) * _MeshResolution + (id.z + 1);
 
 	triangleIndexData0.v1 = v00;
 	triangleIndexData0.v2 = v01;

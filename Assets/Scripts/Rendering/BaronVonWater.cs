@@ -28,7 +28,7 @@ public class BaronVonWater : RenderBaron {
     private int numWaterQuadStrokesPerDimensionSml = 128;
     public ComputeBuffer waterQuadStrokesCBufferSml;
 
-    public Texture2D altitudeMapRef;
+    public RenderTexture altitudeMapRef;
 
     public int waterSurfaceMapResolution = 128;
     public RenderTexture waterSurfaceDataRT0;  // 2 for swapping enabled
@@ -101,6 +101,11 @@ public class BaronVonWater : RenderBaron {
     };
 
 	public override void Initialize() {
+        //altitudeMapRef = new RenderTexture(resolution, resolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+        //altitudeMapRef.wrapMode = TextureWrapMode.Repeat;
+        //altitudeMapRef.enableRandomWrite = true;
+        //altitudeMapRef.Create();
+
         InitializeBuffers();        
         InitializeMaterials();        
     }

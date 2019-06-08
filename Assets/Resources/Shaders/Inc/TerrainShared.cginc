@@ -20,7 +20,7 @@ float3 GetGroundBaseColor(float3 worldPos, float4 frameBufferColor, float4 altit
 	altitude = (altitude * 2 - 1) * -1;
 	float isUnderwater = saturate(altitude * 10000);	
 	float strataColorMultiplier = (sin(altitude * (1.0 + worldPos.x * 0.01 - worldPos.y * -0.01) + worldPos.x * 0.01 - worldPos.y * 0.01) * 0.5 + 0.5) * 0.5 + 0.5;
-	finalColor.rgb *= strataColorMultiplier;				
+	//finalColor.rgb *= strataColorMultiplier;				
 	float snowAmount = saturate((-altitude - 0.6) * 2 +
 						((sin(worldPos.x * 0.0785 + worldPos.y * 0.02843) * 0.5 + 0.5) * 1 - 
 						(cos(worldPos.x * 0.012685 + worldPos.y * -0.01843) * 0.5 + 0.5) * 0.9 +
@@ -29,7 +29,7 @@ float3 GetGroundBaseColor(float3 worldPos, float4 frameBufferColor, float4 altit
 						(sin(worldPos.x * 0.1685 + worldPos.y * -0.03843) * 0.5 + 0.5) * 0.3 - 
 						(cos(worldPos.x * -0.1843 + worldPos.y * 0.243) * 0.5 + 0.5) * 0.3) * 0.5);
 				
-	finalColor.rgb = lerp(finalColor.rgb, float3(0.56, 1, 0.34) * 0.6, snowAmount * 1);	
+	//finalColor.rgb = lerp(finalColor.rgb, float3(0.56, 1, 0.34) * 0.6, snowAmount * 1);	
 	//finalColor.rgb = lerp(finalColor.rgb, float3(1,1,0), resourceTex.w);  // Detritus Discoloration!
 
 	// Wetness darkening:
@@ -103,7 +103,7 @@ float4 GetGroundColor(float3 worldPos, float4 frameBufferColor, float4 altitudeT
 	
 	float strataColorMultiplier = (sin(altitude * (1.0 + worldPos.x * 0.01 - worldPos.y * -0.01) + worldPos.x * 0.01 - worldPos.y * 0.01) * 0.5 + 0.5) * 0.5 + 0.5;
 				
-	finalColor.rgb *= strataColorMultiplier;				
+	//finalColor.rgb *= strataColorMultiplier;				
 				
 	float snowAmount = saturate((-altitude - 0.6) * 2 +
 						((sin(worldPos.x * 0.0785 + worldPos.y * 0.02843) * 0.5 + 0.5) * 1 - 
@@ -113,7 +113,7 @@ float4 GetGroundColor(float3 worldPos, float4 frameBufferColor, float4 altitudeT
 						(sin(worldPos.x * 0.1685 + worldPos.y * -0.03843) * 0.5 + 0.5) * 0.3 - 
 						(cos(worldPos.x * -0.1843 + worldPos.y * 0.243) * 0.5 + 0.5) * 0.3) * 0.5);
 				
-	finalColor.rgb = lerp(finalColor.rgb, float3(0.56, 1, 0.34) * 0.6, snowAmount * 1);
+	//finalColor.rgb = lerp(finalColor.rgb, float3(0.56, 1, 0.34) * 0.6, snowAmount * 1);
 	
 	//finalColor.rgb = lerp(finalColor.rgb, float3(1,1,0), resourceTex.w);  // Detritus Discoloration!
 	

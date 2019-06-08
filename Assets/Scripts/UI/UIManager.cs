@@ -39,7 +39,7 @@ public class UIManager : MonoBehaviour {
     public enum ToolType {
         None,
         Inspect,
-        Nutrients,
+        Add,
         Stir,
         Mutate,
         Remove
@@ -165,9 +165,10 @@ public class UIManager : MonoBehaviour {
 
     public Button buttonToolbarInspect;
     public Sprite spriteToolbarInspectButton;
-    public Button buttonToolbarNutrients;
+    //public Button buttonToolbarNutrients;
     public Button buttonToolbarStir;
     public Button buttonToolbarMutate;
+    public Button buttonToolbarAdd;
     public Button buttonToolbarRemove;
 
     public GameObject panelPendingClickPrompt;
@@ -1043,11 +1044,9 @@ private bool treeOfLifeInfoOnC = false;
                     float isActing = 0f;
                     
                     if (isDraggingMouse) {
+                        
                         isActing = 1f;
                         
-                        //toolbarInfluencePoints -= 0.00275f;
-                        //toolbarInfluencePoints = Mathf.Clamp01(toolbarInfluencePoints);
-
                         float mag = smoothedMouseVel.magnitude;
                         float radiusMult = Mathf.Lerp(0.075f, 1.33f, Mathf.Clamp01(gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.4f)); // 0.62379f; // (1f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.5f);
 
@@ -1060,7 +1059,7 @@ private bool treeOfLifeInfoOnC = false;
                         }
                     }
                     else {
-                        gameManager.simulationManager.PlayerToolStirOff();
+                        gameManager.simulationManager.PlayerToolStirOff();                        
                     }
 
                     if(isActing > 0.5f) {
@@ -1073,25 +1072,36 @@ private bool treeOfLifeInfoOnC = false;
                     gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_IsStirring", isActing);
                     gameManager.theRenderKing.gizmoStirStickAMat.SetFloat("_IsStirring", isActing);
                     //gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_Radius", Mathf.Lerp(0.05f, 2.5f, gameManager.theRenderKing.baronVonWater.camDistNormalized));  // **** Make radius variable! (possibly texture based?)
-                    gameManager.theRenderKing.gizmoStirStickAMat.SetFloat("_Radius", 2f);
+                    gameManager.theRenderKing.gizmoStirStickAMat.SetFloat("_Radius", 6.2f);
                 }
 
+                gameManager.theRenderKing.isBrushing = false;
                 gameManager.theRenderKing.nutrientToolOn = false;
-                if(curActiveTool == ToolType.Nutrients) {
+                if(curActiveTool == ToolType.Add) {
                     if(isDraggingMouse) {
+                        gameManager.simulationManager.theRenderKing.ClickTestTerrain();
+                        gameManager.theRenderKing.isBrushing = true;
                         //toolbarInfluencePoints = Mathf.Clamp01(toolbarInfluencePoints - 0.0025f);
-                        gameManager.simulationManager.simResourceManager.curGlobalNutrients += 0.25f;
-                        gameManager.simulationManager.simResourceManager.curGlobalDetritus += 0.15f;
-                        gameManager.simulationManager.vegetationManager.AddResourcesAtCoords(new Vector4(0.1f, 0f, 0f, 0f), curMousePositionOnWaterPlane.x / SimulationManager._MapSize, curMousePositionOnWaterPlane.y / SimulationManager._MapSize);
+                        //gameManager.simulationManager.simResourceManager.curGlobalNutrients += 0.25f;
+                        //gameManager.simulationManager.simResourceManager.curGlobalDetritus += 0.15f;
+                        //gameManager.simulationManager.vegetationManager.AddResourcesAtCoords(new Vector4(0.1f, 0f, 0f, 0f), curMousePositionOnWaterPlane.x / SimulationManager._MapSize, curMousePositionOnWaterPlane.y / SimulationManager._MapSize);
                         
-                        gameManager.theRenderKing.nutrientToolOn = true;
-                    }                
+                        //gameManager.theRenderKing.nutrientToolOn = true;
+                    }
+                    else {
+                        //gameManager.theRenderKing.isBrushing = false;
+                    }
+                }
+                else {
+                    //gameManager.theRenderKing.isBrushing = false;
                 }
                 if(curActiveTool == ToolType.Remove) {
                     if(isDraggingMouse) {
+                        gameManager.simulationManager.theRenderKing.ClickTestTerrain();
+                        gameManager.theRenderKing.isBrushing = true;
                         //toolbarInfluencePoints = Mathf.Clamp01(toolbarInfluencePoints - 0.0025f);
-                        gameManager.simulationManager.simResourceManager.curGlobalNutrients -= 0.5f;
-                        gameManager.simulationManager.simResourceManager.curGlobalDetritus -= 0.5f;
+                        //gameManager.simulationManager.simResourceManager.curGlobalNutrients -= 0.5f;
+                        //gameManager.simulationManager.simResourceManager.curGlobalDetritus -= 0.5f;
                     }                
                 }
             }
@@ -1263,9 +1273,11 @@ private bool treeOfLifeInfoOnC = false;
         buttonToolbarInspect.gameObject.transform.localScale = Vector3.one;
         buttonToolbarStir.GetComponent<Image>().color = buttonDisabledColor;
         buttonToolbarStir.gameObject.transform.localScale = Vector3.one;
-        buttonToolbarNutrients.GetComponent<Image>().color = buttonDisabledColor;
+        buttonToolbarAdd.GetComponent<Image>().color = buttonDisabledColor;
+        buttonToolbarAdd.gameObject.transform.localScale = Vector3.one;
         buttonToolbarMutate.GetComponent<Image>().color = buttonDisabledColor;
         buttonToolbarRemove.GetComponent<Image>().color = buttonDisabledColor;
+        buttonToolbarRemove.gameObject.transform.localScale = Vector3.one;
 
         switch(curActiveTool) {
             case ToolType.None:
@@ -1279,11 +1291,13 @@ private bool treeOfLifeInfoOnC = false;
             case ToolType.Mutate:
                 buttonToolbarMutate.GetComponent<Image>().color = buttonActiveColor;
                 break;
-            case ToolType.Nutrients:
-                buttonToolbarNutrients.GetComponent<Image>().color = buttonActiveColor;
+            case ToolType.Add:
+                buttonToolbarAdd.GetComponent<Image>().color = buttonActiveColor;
+                buttonToolbarAdd.gameObject.transform.localScale = Vector3.one * 1.25f;
                 break;
             case ToolType.Remove:
                 buttonToolbarRemove.GetComponent<Image>().color = buttonActiveColor;
+                buttonToolbarRemove.gameObject.transform.localScale = Vector3.one * 1.25f;
                 break;
             case ToolType.Stir:
                 buttonToolbarStir.GetComponent<Image>().color = buttonActiveColor;
@@ -2883,7 +2897,7 @@ private bool treeOfLifeInfoOnC = false;
         buttonToolbarStir.GetComponent<Image>().color = buttonActiveColor; 
 
         TurnOffInspectTool();  
-        TurnOffNutrientsTool();
+        TurnOffAddTool();
         TurnOffMutateTool();
         TurnOffRemoveTool();
               
@@ -2895,7 +2909,7 @@ private bool treeOfLifeInfoOnC = false;
             
             TurnOnInspectTool();
             TurnOffStirTool();  
-            TurnOffNutrientsTool();
+            TurnOffAddTool();
             TurnOffMutateTool();
             TurnOffRemoveTool();
 
@@ -2907,15 +2921,15 @@ private bool treeOfLifeInfoOnC = false;
             TurnOffInspectTool();
         } */
     }
-    public void ClickToolButtonNutrients() {
+    public void ClickToolButtonAdd() {
         //gameManager.simulationManager.trophicLayersManager.ResetSelectedAgentSlots();
         //if(curActiveTool != ToolType.Nutrients) {
-            curActiveTool = ToolType.Nutrients;
+            curActiveTool = ToolType.Add;
 
             //isActiveFeedToolPanel = true;    
             //animatorFeedToolPanel.enabled = true;
             //animatorFeedToolPanel.Play("SlideOnPanelFeedTool"); 
-            buttonToolbarNutrients.GetComponent<Image>().color = buttonActiveColor;
+            buttonToolbarAdd.GetComponent<Image>().color = buttonActiveColor;
 
             TurnOffInspectTool();
             TurnOffStirTool();
@@ -2940,7 +2954,7 @@ private bool treeOfLifeInfoOnC = false;
             TurnOffInspectTool();
             TurnOffStirTool();
             TurnOffMutateTool();
-            TurnOffNutrientsTool();
+            TurnOffAddTool();
         //}  
         /*else {
             curActiveTool = ToolType.None;
@@ -2959,8 +2973,8 @@ private bool treeOfLifeInfoOnC = false;
         isActiveInspectPanel = false;
         //StopFollowing();
     }
-    private void TurnOffNutrientsTool() {
-        buttonToolbarNutrients.GetComponent<Image>().color = buttonDisabledColor;
+    private void TurnOffAddTool() {
+        buttonToolbarAdd.GetComponent<Image>().color = buttonDisabledColor;
 
         //if(isActiveFeedToolPanel) {
         //    animatorFeedToolPanel.enabled = true;

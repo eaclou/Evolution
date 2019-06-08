@@ -112,15 +112,15 @@ void CSSimSurfaceBitsData (uint3 id : SV_DispatchThreadID)
 	// ***** Move Head Point0: //
 
 	float2 uv = waterQuadData.worldPos.xy / _MapSize;
-	float2 altitudeUV = uv * 0.5 + 0.25;
-	float2 vel = VelocityRead.SampleLevel(_LinearRepeat, uv, 1).xy;
+	//float2 altitudeUV = uv * 0.5 + 0.25;
+	float2 vel = VelocityRead.SampleLevel(_LinearClamp, uv, 0).xy;
 	float speedMult = 0.0015;
 
 	waterQuadData.speed = length(vel);
 	
 	float2 nextPos = uv + vel * speedMult;
 
-	float altitude = AltitudeRead.SampleLevel(_LinearRepeat, altitudeUV, 0).x;
+	float altitude = AltitudeRead.SampleLevel(_LinearClamp, uv, 0).x;
 
 	waterQuadData.age = waterQuadData.age + 0.0025;  // ? frame lifespan
 	if(waterQuadData.age > 1.0 || altitude > 0.45 ) {
@@ -131,7 +131,7 @@ void CSSimSurfaceBitsData (uint3 id : SV_DispatchThreadID)
 
 		// check potential spawn location:
 		float2 spawnUV = spawnPos / _MapSize;
-		float spawnAltitude = AltitudeRead.SampleLevel(_LinearRepeat, spawnUV * 0.5 + 0.25, 0).x;
+		float spawnAltitude = AltitudeRead.SampleLevel(_LinearClamp, spawnUV, 0).x;
 		float spawnNoise1 = saturate(Value2D(spawnPos + 5, 0.055).x * 16);
 		float spawnNoise2 = saturate(Value2D(spawnPos - 33, 0.15).x * 9.5);
 		float spawnNoise3 = saturate(Value2D(spawnPos + 349.7, 0.4579).x * 4.5);
@@ -168,15 +168,15 @@ void CSSimDetailBitsData (uint3 id : SV_DispatchThreadID)
 	// ***** Move Head Point0: //
 
 	float2 uv = waterQuadData.worldPos.xy / _MapSize;
-	float2 altitudeUV = uv * 0.5 + 0.25;
-	float2 vel = VelocityRead.SampleLevel(_LinearRepeat, uv, 1).xy;
+	
+	float2 vel = VelocityRead.SampleLevel(_LinearClamp, uv, 0).xy;
 	float speedMult = 0.0167;
 
 	waterQuadData.speed = length(vel);
 	
 	float2 nextPos = uv + vel * speedMult;
 
-	float altitude = AltitudeRead.SampleLevel(_LinearRepeat, altitudeUV, 1).x;
+	float altitude = AltitudeRead.SampleLevel(_LinearClamp, uv, 0).x;
 
 	waterQuadData.age = waterQuadData.age + 0.005;  // ? frame lifespan
 		
@@ -218,15 +218,15 @@ void CSSimWaterQuadsData (uint3 id : SV_DispatchThreadID)
 	// ***** Move Head Point0: //
 
 	float2 uv = waterQuadData.worldPos.xy / _MapSize;
-	float2 altitudeUV = uv * 0.5 + 0.25;
-	float2 vel = VelocityRead.SampleLevel(_LinearRepeat, uv, 1).xy;
+	
+	float2 vel = VelocityRead.SampleLevel(_LinearClamp, uv, 0).xy;
 	float speedMult = 0.015;
 
 	waterQuadData.speed = length(vel);
 	
 	float2 nextPos = uv + vel * speedMult;
 
-	float altitude = AltitudeRead.SampleLevel(_LinearRepeat, altitudeUV, 1).x;
+	float altitude = AltitudeRead.SampleLevel(_LinearClamp, uv, 0).x;
 
 	waterQuadData.age = waterQuadData.age + 0.0035;
 	if(waterQuadData.age > 1.0 || altitude > 0.45) {
@@ -237,7 +237,7 @@ void CSSimWaterQuadsData (uint3 id : SV_DispatchThreadID)
 
 		// check potential spawn location:
 		float2 spawnUV = spawnPos / _MapSize;
-		float spawnAltitude = AltitudeRead.SampleLevel(_LinearRepeat, spawnUV * 0.5 + 0.25, 0).x;
+		float spawnAltitude = AltitudeRead.SampleLevel(_LinearClamp, spawnUV, 0).x;
 		float spawnNoise1 = saturate(Value2D(spawnPos + 5, 0.055).x * 10);
 		float spawnNoise2 = saturate(Value2D(spawnPos - 33, 0.15).x * 6.5);
 		float spawnNoise3 = saturate(Value2D(spawnPos + 349.7, 0.4579).x * 2.5);
@@ -269,13 +269,13 @@ void CSSimWaterCurvesData (uint3 id : SV_DispatchThreadID)
 	// ***** Move Head Point0: //
 
 	float2 uv = waterCurveData.p0 / _MapSize;
-	float2 altitudeUV = uv * 0.5 + 0.25;
-	float2 vel = VelocityRead.SampleLevel(_LinearRepeat, uv, 1).xy;
+	
+	float2 vel = VelocityRead.SampleLevel(_LinearClamp, uv, 0).xy;
 	float speedMult = 0.085;
 	
 	float2 nextPos = uv + vel * speedMult;
 
-	float altitude = AltitudeRead.SampleLevel(_LinearRepeat, altitudeUV, 1).x;
+	float altitude = AltitudeRead.SampleLevel(_LinearClamp, uv, 0).x;
 
 	waterCurveData.age = waterCurveData.age + 0.001;  // 1000 frame lifespan
 	if(waterCurveData.age > 1.0 || altitude > 0.5 ) {
@@ -288,7 +288,7 @@ void CSSimWaterCurvesData (uint3 id : SV_DispatchThreadID)
 		waterCurveData.age -= 1;
 
 		float2 sampleUV = waterCurveData.p0 / _MapSize;
-		//float3 fluidDensityColor = DensityRead.SampleLevel(_LinearRepeat, sampleUV, 0).xyz;
+		
 		waterCurveData.hue = float3(1,1,1); //fluidDensityColor;
 	}
 	else {

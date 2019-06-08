@@ -85,7 +85,7 @@
 
 				o.quadUV = quadPoint + 0.5;
 				o.worldPos = worldPosition;
-				float2 uv = (worldPosition.xy + 128) / 512;
+				float2 uv = worldPosition.xy / 256;
 				o.altitudeUV = uv;
 				
 				float2 scale = waterQuadData.localScale * 32;
@@ -182,7 +182,7 @@
 				
 				finalColor.rgb = lerp(finalColor.rgb, float3(0.56, 1, 0.34) * 0.6, snowAmount * 1);
 				// FAKE CAUSTICS:::
-				float3 surfaceNormal = tex2D(_WaterSurfaceTex, (i.altitudeUV - 0.25) * 2).yzw;
+				float3 surfaceNormal = tex2D(_WaterSurfaceTex, i.altitudeUV).yzw;
 				float dotLight = dot(surfaceNormal, _WorldSpaceLightPos0.xyz);
 				dotLight = dotLight * dotLight;
 
