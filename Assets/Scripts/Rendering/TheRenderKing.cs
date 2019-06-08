@@ -4449,7 +4449,7 @@ public class TheRenderKing : MonoBehaviour {
         }
         baronVonTerrain.terrainBlitMat.SetFloat("_AddSubtractSign", addSubtract);
         Graphics.Blit(baronVonTerrain.terrainHeightRT0, baronVonTerrain.terrainHeightRT1, baronVonTerrain.terrainBlitMat);
-        Graphics.Blit(baronVonTerrain.terrainHeightRT1, baronVonTerrain.terrainHeightRT0); // Copy back -- optimize later! replace with diffusion step?
+        Graphics.Blit(baronVonTerrain.terrainHeightRT1, baronVonTerrain.terrainHeightRT0, baronVonTerrain.terrainSimulationBlitMat); // Copy back -- optimize later! replace with diffusion step?
 
         baronVonTerrain.terrainGenerateColorBlitMat.SetTexture("_MainTex", baronVonTerrain.terrainHeightRT0);
         baronVonTerrain.terrainGenerateColorBlitMat.SetTexture("_DeltaTex", spiritBrushRT);

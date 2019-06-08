@@ -34,7 +34,7 @@ float3 GetGroundBaseColor(float3 worldPos, float4 frameBufferColor, float4 altit
 
 	// Wetness darkening:
 	float wetnessMask = saturate(((altitudeTex.x + waterSurfaceTex.x * 0.05) - 0.5) * 8.25);
-	finalColor.rgb *= (0.6 + wetnessMask * 0.4);
+	finalColor.rgb *= (0.2 + wetnessMask * 0.8);
 
 	return finalColor.rgb;
 }

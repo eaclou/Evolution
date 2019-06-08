@@ -18,6 +18,8 @@ public class BaronVonTerrain : RenderBaron {
     public Material groundDryLandDisplayMat;
 
     public Material terrainBlitMat;
+    public Material terrainSimulationBlitMat;
+    public Material testInitTerrainDataBlitMat;
     public Material terrainGenerateColorBlitMat;
 
     //public Material frameBufferStrokeDisplayMat;
@@ -91,7 +93,11 @@ public class BaronVonTerrain : RenderBaron {
         terrainHeightRT0.enableRandomWrite = true;
         terrainHeightRT0.Create();
 
-        Graphics.Blit(terrainInitHeightMap, terrainHeightRT0);
+        
+        Graphics.Blit(terrainInitHeightMap, terrainHeightRT0); //, testInitTerrainDataBlitMat);
+        testInitTerrainDataBlitMat.SetPass(0);
+        testInitTerrainDataBlitMat.SetTexture("_MainTex", terrainInitHeightMap);
+        Graphics.Blit(terrainInitHeightMap, terrainHeightRT0, testInitTerrainDataBlitMat);
 
         terrainHeightRT1 = new RenderTexture(terrainHeightMapResolution, terrainHeightMapResolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
         terrainHeightRT1.wrapMode = TextureWrapMode.Clamp;
@@ -110,6 +116,8 @@ public class BaronVonTerrain : RenderBaron {
         terrainColorRT1.enableRandomWrite = true;
         terrainColorRT1.Create();
 
+        //Graphics.Blit(terrainHeightRT0, terrainColorRT0, testInitTerrainDataBlitMat);
+        //Graphics.Blit(terrainColorRT0, terrainColorRT1);  // maybe not needed?
         //Graphics.Blit(terrainHeightRT0, terrainHeightDataRT);  // maybe not needed?
 
         InitializeBuffers();        
