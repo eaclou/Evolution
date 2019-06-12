@@ -3655,7 +3655,8 @@ public class TheRenderKing : MonoBehaviour {
             cmdBufferMain.Blit(renderTarget, renderedSceneID);  // save contents of Standard Rendering Pipeline
             cmdBufferMain.SetRenderTarget(renderTarget);  // Set render Target
             cmdBufferMain.ClearRenderTarget(true, true, Color.black, 1.0f);  // clear -- needed???
-               
+            
+            
             
             //baronVonTerrain.RenderCommands(ref cmdBufferTest, renderedSceneID);
             // GROUND:
@@ -4185,7 +4186,7 @@ public class TheRenderKing : MonoBehaviour {
             baronVonTerrain.groundDryLandDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);            
             baronVonTerrain.groundDryLandDisplayMat.SetVector("_FogColor", simManager.fogColor);
             cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
-            cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundDryLandDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.groundStrokesSmlCBuffer.count);
+            //cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundDryLandDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.groundStrokesSmlCBuffer.count);
             
         
 
@@ -4197,7 +4198,7 @@ public class TheRenderKing : MonoBehaviour {
             gizmoStirToolMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
             gizmoStirToolMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
             gizmoStirToolMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
-            gizmoStirToolMat.SetFloat("_Radius", Mathf.Lerp(0.025f, 2f, baronVonWater.camDistNormalized));  // **** Make radius variable! (possibly texture based?)
+            gizmoStirToolMat.SetFloat("_Radius", Mathf.Lerp(0.067f, 5f, baronVonWater.camDistNormalized));  // **** Make radius variable! (possibly texture based?)
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, gizmoStirToolMat, 0, MeshTopology.Triangles, 6, 1);
         
         }

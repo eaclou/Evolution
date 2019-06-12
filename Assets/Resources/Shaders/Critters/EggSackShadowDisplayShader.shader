@@ -132,9 +132,9 @@
 				float4 screenUV = ComputeScreenPos(pos);
 				o.screenUV = screenUV;
 
-				float2 altUV = (worldPosition.xy + 128) / 512;	
+				float2 altUV = worldPosition.xy / _MapSize;	
 				o.altitudeUV = altUV;
-				worldPosition.z = -(tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 2)).x * 2 - 1) * 10;
+				worldPosition.z = -(tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 0)).x * 2 - 1) * 10;
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)) + float4(rotatedPoint1, 0.0));
 				o.worldPos = worldPosition;

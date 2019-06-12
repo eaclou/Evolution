@@ -74,8 +74,7 @@
 				float depth = saturate(-altitude + 0.5);
 				float refractionStrength = depth * 7.5;
 				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
-				//float diffuse = dot(surfaceNormal, _WorldSpaceLightPos0.xyz);
-				//finalColor.rgb = float3(diffuse, diffuse, diffuse);
+				
 				
 				float random1 = rand(float2(inst, inst));
 				float random2 = rand(float2(random1, random1));

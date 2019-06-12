@@ -91,9 +91,9 @@
 
 				worldPosition = worldPosition + quadPoint;
 				// REFRACTION:
-				float2 altUV = (worldPosition.xy + 128) / 512;
+				float2 altUV = worldPosition.xy / 256;
 				o.altitudeUV = altUV;
-				float altitudeRaw = tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 2)).x;
+				float altitudeRaw = tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 0)).x;
 
 				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / 256, 0, 0)).yzw;
 				float depth = saturate(-altitudeRaw + 0.5);
@@ -130,7 +130,7 @@
 				float2 screenUV = i.screenUV.xy / i.screenUV.w;
 				float4 frameBufferColor = tex2D(_RenderedSceneRT, screenUV);  //  Color of brushtroke source					
 				float4 altitudeTex = tex2D(_AltitudeTex, i.altitudeUV); //i.worldPos.z / 10; // [-1,1] range
-				float4 waterSurfaceTex = tex2D(_WaterSurfaceTex, (i.altitudeUV - 0.25) * 2);
+				float4 waterSurfaceTex = tex2D(_WaterSurfaceTex, i.altitudeUV);
 				//float4 waterColorTex = tex2D(_WaterColorTex, (i.altitudeUV - 0.25) * 2);
 
 				//frameBufferColor = float4(1,1,1,1);

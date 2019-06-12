@@ -108,7 +108,7 @@
 				float4 texColor = tex2D(_MainTex, i.uv);
 				texColor.a = texColor.a * texColor.a;
 				finalColor = finalColor * i.color * texColor;
-				finalColor.a *= 0.3;
+				finalColor.a *= 0.55;
 				//return texColor; // temp debug
 				return finalColor;
 
