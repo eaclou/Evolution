@@ -99,6 +99,8 @@ public class UIManager : MonoBehaviour {
     public Material infoGraphDecomposersMat;
     public Material infoGraphPlantsMat;
     public Material infoGraphAnimalsMat;
+
+    public Material debugTextureViewerMat;
     // Info Expanded: Species Overview:
     //public GameObject panelInfoSpeciesOverview;
     //private Texture2D infoSpeciesDecomposersDataTexture;
@@ -254,6 +256,33 @@ public class UIManager : MonoBehaviour {
     public GameObject panelInspectHUD;
     public Animator animatorInspectPanel;
     public Text textInspectData;
+
+    private Vector4 _Zoom = new Vector4(1f, 1f, 1f, 1f);
+    private float _Amplitude = 1f;
+    private Vector4 _ChannelMask = new Vector4(1f, 1f, 1f, 1f);
+    private int _ChannelSoloIndex = 0;
+    private float _IsChannelSolo = 0f;
+    private float _Gamma = 1f;
+    private int _DebugTextureIndex = 0;
+    private string _DebugTextureString = "-";
+        
+    public Button buttonDebugTexturePrev;
+    public Button buttonDebugTextureNext;
+    public Slider sliderDebugTextureZoomX;
+    public Slider sliderDebugTextureZoomY;
+    public Slider sliderDebugTextureAmplitude;
+    public Slider sliderDebugTextureSoloChannelIndex;
+    public Toggle toggleDebugTextureIsSolo;
+    public Slider sliderDebugTextureGamma;
+    public Text textDebugTextureName;
+    public Text textDebugTextureZoomX;
+    public Text textDebugTextureZoomY;
+    public Text textDebugTextureAmplitude;
+    public Text textDebugTextureSoloChannelIndex;
+    public Text textDebugTextureGamma;
+    public Image imageDebugTexture;
+
+    private RenderTexture[] debugTextureViewerArray;
 
     /*public bool isActiveFeedToolPanel = false;
     public GameObject panelFeedToolHUD;
@@ -1847,6 +1876,27 @@ private bool treeOfLifeInfoOnC = false;
         debugTxtResources += "\nEggSacks: " + simManager.simResourceManager.curGlobalEggSackVolume.ToString();
 
         textDebugTrainingInfo2.text = debugTxtResources;
+
+        if(debugTextureViewerArray == null) {
+            CreateDebugRenderViewerArray();
+        }
+        debugTextureViewerMat.SetPass(0);
+        debugTextureViewerMat.SetVector("_Zoom", _Zoom);
+        debugTextureViewerMat.SetFloat("_Amplitude", _Amplitude);
+        debugTextureViewerMat.SetVector("_ChannelMask", _ChannelMask);
+        debugTextureViewerMat.SetInt("_ChannelSoloIndex", _ChannelSoloIndex);
+        debugTextureViewerMat.SetFloat("_IsChannelSolo", (float)_IsChannelSolo);
+        debugTextureViewerMat.SetFloat("_Gamma", _Gamma);        
+        //debugTextureViewerMat.
+        if(debugTextureViewerArray[_DebugTextureIndex] != null) {
+            debugTextureViewerMat.SetTexture("_MainTex", debugTextureViewerArray[_DebugTextureIndex]);
+            textDebugTextureName.text = debugTextureViewerArray[_DebugTextureIndex].name;
+        }
+        textDebugTextureZoomX.text = _Zoom.x.ToString();
+        textDebugTextureZoomY.text = _Zoom.y.ToString();
+        textDebugTextureAmplitude.text = _Amplitude.ToString();
+        textDebugTextureSoloChannelIndex.text = _ChannelSoloIndex.ToString();
+        textDebugTextureGamma.text = _Gamma.ToString();
     }    
     public void UpdatePausedUI() {
         if(isPaused) {
@@ -3390,6 +3440,80 @@ private bool treeOfLifeInfoOnC = false;
                 }
             } 
         }
+    }
+
+    private void CreateDebugRenderViewerArray() {
+        debugTextureViewerArray = new RenderTexture[4];
+        debugTextureViewerArray[0] = gameManager.theRenderKing.baronVonTerrain.terrainHeightDataRT;
+        debugTextureViewerArray[0].name = "Terrain Height Data";
+        if(gameManager.theRenderKing.spiritBrushRT != null) {
+            debugTextureViewerArray[1] = gameManager.theRenderKing.spiritBrushRT;
+            debugTextureViewerArray[1].name = "Spirit Brush";
+        }
+        if (gameManager.simulationManager.vegetationManager.resourceGridRT1 != null) {
+            debugTextureViewerArray[2] = gameManager.simulationManager.vegetationManager.resourceGridRT1;
+            debugTextureViewerArray[2].name = "resourceGridRT1";
+        }
+        if(gameManager.simulationManager.environmentFluidManager._DensityA != null) {
+            debugTextureViewerArray[3] = gameManager.simulationManager.environmentFluidManager._DensityA;
+            debugTextureViewerArray[3].name = "Water DensityA";
+        }        
+    }
+    public void ClickDebugTexturePrev() {
+        if(debugTextureViewerArray == null) {
+            CreateDebugRenderViewerArray();
+        }
+
+        _DebugTextureIndex -= 1;
+        if(_DebugTextureIndex < 0) {
+            _DebugTextureIndex = 3;
+        }
+        imageDebugTexture.enabled = false;
+        imageDebugTexture.enabled = true;
+        debugTextureViewerMat.SetTexture("_MainTex", debugTextureViewerArray[_DebugTextureIndex]);
+    }
+    public void ClickDebugTextureNext() {
+        if(debugTextureViewerArray == null) {
+            CreateDebugRenderViewerArray();
+        }
+
+        _DebugTextureIndex += 1;
+        if(_DebugTextureIndex > 3) {
+            _DebugTextureIndex = 0;
+        }
+        imageDebugTexture.enabled = false;
+        imageDebugTexture.enabled = true;
+        debugTextureViewerMat.SetTexture("_MainTex", debugTextureViewerArray[_DebugTextureIndex]);
+    }
+    public void SliderDebugTextureZoomX(float val) {
+        _Zoom.x = val;
+    }
+    public void SliderDebugTextureZoomY(float val) {
+        _Zoom.y = val;
+    }
+    public void SliderDebugTextureAmplitude(float val) {
+        _Amplitude = val;
+    }
+    public void SliderDebugTextureChannelSoloIndex(float val) {
+        _ChannelSoloIndex = Mathf.RoundToInt(val);
+        debugTextureViewerMat.SetInt("_ChannelSoloIndex", _ChannelSoloIndex);
+        imageDebugTexture.enabled = false;
+        imageDebugTexture.enabled = true;
+    }
+    public void ToggleDebugTextureIsSolo(bool val) {
+        if(_IsChannelSolo > 0.5f) {
+            _IsChannelSolo = 0f;
+        }
+        else {
+            _IsChannelSolo = 1f;
+        }
+        debugTextureViewerMat.SetFloat("_IsChannelSolo", (float)_IsChannelSolo);
+        imageDebugTexture.enabled = false;
+        imageDebugTexture.enabled = true;
+
+    }
+    public void SliderDebugTextureGamma(float val) {
+        _Gamma = val;
     }
 
     #endregion
