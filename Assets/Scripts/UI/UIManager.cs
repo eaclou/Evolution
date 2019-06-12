@@ -1040,7 +1040,7 @@ private bool treeOfLifeInfoOnC = false;
                 }
             
                 if (curActiveTool == ToolType.Stir) {                    
-                
+                    gameManager.simulationManager.theRenderKing.ClickTestTerrain(false);
                     float isActing = 0f;
                     
                     if (isDraggingMouse) {
@@ -1077,32 +1077,66 @@ private bool treeOfLifeInfoOnC = false;
 
                 gameManager.theRenderKing.isBrushing = false;
                 gameManager.theRenderKing.nutrientToolOn = false;
-                if(curActiveTool == ToolType.Add) {
-                    if(isDraggingMouse) {
-                        gameManager.simulationManager.theRenderKing.ClickTestTerrain();
+
+                //gameManager.simulationManager.theRenderKing.ClickTestTerrain(true); // *********************** always updates!
+
+                if (curActiveTool == ToolType.Add) {
+                    gameManager.simulationManager.PlayerToolStirOff();
+                    if (isDraggingMouse) {
+                        gameManager.simulationManager.theRenderKing.ClickTestTerrain(true); // *********************** always updates!
                         gameManager.theRenderKing.isBrushing = true;
                         //toolbarInfluencePoints = Mathf.Clamp01(toolbarInfluencePoints - 0.0025f);
                         //gameManager.simulationManager.simResourceManager.curGlobalNutrients += 0.25f;
                         //gameManager.simulationManager.simResourceManager.curGlobalDetritus += 0.15f;
                         //gameManager.simulationManager.vegetationManager.AddResourcesAtCoords(new Vector4(0.1f, 0f, 0f, 0f), curMousePositionOnWaterPlane.x / SimulationManager._MapSize, curMousePositionOnWaterPlane.y / SimulationManager._MapSize);
-                        
+
                         //gameManager.theRenderKing.nutrientToolOn = true;
+
+                        float mag = smoothedMouseVel.magnitude;
+                        float radiusMult = Mathf.Lerp(0.075f, 1.33f, Mathf.Clamp01(gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.4f)); // 0.62379f; // (1f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.5f);
+
+                        if (mag > 0f) {
+                            gameManager.simulationManager.PlayerToolStirOn(curMousePositionOnWaterPlane, smoothedMouseVel * (0.25f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.2f), radiusMult);
+
+                        }
+                        else {
+                            gameManager.simulationManager.PlayerToolStirOff();
+                        }
+                        gameManager.theRenderKing.isStirring = isDraggingMouse;
                     }
                     else {
                         //gameManager.theRenderKing.isBrushing = false;
+                        gameManager.simulationManager.theRenderKing.ClickTestTerrain(false); // *********************** always updates!
                     }
                 }
                 else {
                     //gameManager.theRenderKing.isBrushing = false;
                 }
                 if(curActiveTool == ToolType.Remove) {
+                    gameManager.simulationManager.PlayerToolStirOff();
                     if(isDraggingMouse) {
-                        gameManager.simulationManager.theRenderKing.ClickTestTerrain();
+                        //gameManager.simulationManager.theRenderKing.ClickTestTerrain(true);
+                        gameManager.simulationManager.theRenderKing.ClickTestTerrain(true); // *********************** always updates!
                         gameManager.theRenderKing.isBrushing = true;
                         //toolbarInfluencePoints = Mathf.Clamp01(toolbarInfluencePoints - 0.0025f);
                         //gameManager.simulationManager.simResourceManager.curGlobalNutrients -= 0.5f;
                         //gameManager.simulationManager.simResourceManager.curGlobalDetritus -= 0.5f;
-                    }                
+
+                        float mag = smoothedMouseVel.magnitude;
+                        float radiusMult = Mathf.Lerp(0.075f, 1.33f, Mathf.Clamp01(gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.4f)); // 0.62379f; // (1f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.5f);
+
+                        if (mag > 0f) {
+                            gameManager.simulationManager.PlayerToolStirOn(curMousePositionOnWaterPlane, smoothedMouseVel * (0.25f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.2f), radiusMult);
+
+                        }
+                        else {
+                            
+                        }
+                        gameManager.theRenderKing.isStirring = isDraggingMouse;
+                    } 
+                    else {
+                        gameManager.simulationManager.theRenderKing.ClickTestTerrain(false); // *********************** always updates!
+                    }
                 }
             }
 

@@ -34,7 +34,7 @@ public class GameOptionsManager : MonoBehaviour {
         dropdownVSync.value = gameOptions.vSync;
 
         // Set Defaults:  ** CHANGE LATER WHEN SUPPORTING PERSISTENT OPTIONS!! ***
-        gameOptions.fluidPhysicsQuality = 2;
+        gameOptions.fluidPhysicsQuality = 1;
         dropdownFluidPhysicsQuality.value = gameOptions.fluidPhysicsQuality;
         gameOptions.simulationComplexity = 1; 
         dropdownSimulationComplexity.value = gameOptions.simulationComplexity;

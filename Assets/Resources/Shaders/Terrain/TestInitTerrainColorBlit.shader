@@ -15,8 +15,10 @@
 			CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
+			#pragma target 5.0
 			
 			#include "UnityCG.cginc"
+			#include "Assets/Resources/Shaders/Inc/NoiseShared.cginc"
 
 			struct appdata
 			{
@@ -46,7 +48,25 @@
 			{
 				//return float4(1,1,1,1);
 				fixed4 col = tex2D(_MainTex, i.uv);
-				return float4(col.x,i.uv,sin(i.uv.x * 10));
+				float2 noiseCoords = i.uv * 128;
+				float noise0 = saturate(Value2D(noiseCoords + 572, 0.0255).x);
+				float noise1 = saturate(Value2D(noiseCoords + 5, 0.055).x);
+				float noise2 = saturate(Value2D(noiseCoords - 33, 0.15).x);
+				float noise3 = saturate(Value2D(noiseCoords + 349.7, 0.4579).x);
+
+				float noise10 = saturate(Value2D(noiseCoords + 5.72, 0.0155).x);
+				float noise11 = saturate(Value2D(noiseCoords - 5, 0.035).x);
+				float noise12 = saturate(Value2D(noiseCoords + 22, 0.0915).x);
+				float noise13 = saturate(Value2D(noiseCoords - 349.7, 0.6579).x);
+
+				float initY = saturate(noise0 * 0.6 + noise1 * 0.25 + noise2 * 0.15 + noise3 * 0.15 - 0.4);
+				float initZ = saturate((noise10 * 0.4 + noise11 * 0.45 + noise12 * 0.15 + noise13 * 0.15) - 0.45);
+				float initW = saturate(((1.0 - noise10) * 0.3 + (1.0 - noise1) * 0.5 + (1.0 - noise12) * 0.25 + (1.0 - noise3) * 0.15) - 0.5);
+
+				return float4(col.x, 
+								initY, 
+								initZ, 
+								initW);
 
 
 			}

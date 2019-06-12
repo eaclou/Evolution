@@ -218,7 +218,7 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 			
 		float2 uv = animalParticle.worldPos.xy / _MapSize;
 		// *** Update this to sample altitude instead.  ** to avoid unreachable food
-		float2 altUV = uv * 0.5 + 0.25;
+		float2 altUV = uv;
 
 		// ** Pre-compute this in future:::: *****
 		float4 terrainSampleCenter = altitudeRead.SampleLevel(_LinearClamp, altUV, 1);
@@ -378,8 +378,8 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 			float randY = rand(float2(randX * 62.39 + _Time, (float)id.x));
 
 			
-			float2 spawnUV = float2(randX, randY); // (parentPos / _MapSize) * 0.5 + 0.25 + float2(randX, randY) * 0.001;							
-			float4 spawnAltitudeSample = altitudeRead.SampleLevel(_LinearClamp, spawnUV * 0.5 + 0.25, 0);			
+			float2 spawnUV = float2(randX, randY); 						
+			float4 spawnAltitudeSample = altitudeRead.SampleLevel(_LinearClamp, spawnUV, 0);			
 			float distToOrigin = length(_SpawnPos.xy - (spawnUV * _MapSize));
 			
 			if(distToOrigin < _SpawnRadius) {  // to prevent mass respawning, overshooting the intended max global food amount ?  // Needed?

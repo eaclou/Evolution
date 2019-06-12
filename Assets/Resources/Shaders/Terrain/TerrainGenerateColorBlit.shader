@@ -15,6 +15,7 @@
 			CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
+			#pragma target 5.0
 			
 			#include "UnityCG.cginc"
 
@@ -55,10 +56,10 @@
 				float4 deltaCol = tex2D(_DeltaTex, i.uv); // extra
 				// just invert the colors
 				//col.rgb = saturate(col.rgb + deltaCol.rgb * _AddSubtractSign);
-				float4 finalColor = _Color0;
-				finalColor = lerp(finalColor, _Color1, col.y);
-				finalColor = lerp(finalColor, _Color2, col.z);
-				finalColor = lerp(finalColor, _Color3, col.w);
+				float4 finalColor = saturate(_Color0);
+				finalColor = lerp(finalColor, _Color1, saturate(col.y));
+				finalColor = lerp(finalColor, _Color2, saturate(col.z));
+				finalColor = lerp(finalColor, _Color3, saturate(col.w));
 				//finalColor.rgb = float3(0.37, 0.3, 0.3) * 0.75;
 				//finalColor.rgb *= (col.x * 0.5 + 0.5);
 				

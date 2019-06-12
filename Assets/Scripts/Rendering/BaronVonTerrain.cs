@@ -22,6 +22,11 @@ public class BaronVonTerrain : RenderBaron {
     public Material testInitTerrainDataBlitMat;
     public Material terrainGenerateColorBlitMat;
 
+    public Color terrainColor0;
+    public Color terrainColor1;
+    public Color terrainColor2;
+    public Color terrainColor3;
+
     //public Material frameBufferStrokeDisplayMat;
     private int terrainHeightMapResolution = 256;
     private int terrainColorResolution = 256;
@@ -54,7 +59,7 @@ public class BaronVonTerrain : RenderBaron {
     private ComputeBuffer frameBufferStrokesCBuffer;
     private int numGroundStrokesLrg = 64;
     private int numGroundStrokesMed = 128;
-    private int numGroundStrokesSml = 512;
+    private int numGroundStrokesSml = 256;
     public ComputeBuffer groundStrokesLrgCBuffer;
     public ComputeBuffer groundStrokesMedCBuffer;
     public ComputeBuffer groundStrokesSmlCBuffer;
@@ -390,7 +395,13 @@ public class BaronVonTerrain : RenderBaron {
         }
     }
     private Mesh GenerateTerrainMesh() {
-        Mesh terrainMesh = new Mesh();
+        if(terrainMesh == null) {
+            terrainMesh = new Mesh();
+        }
+        else {
+
+        }
+        
 
         TriangleIndexData[] triangleIndexDataArray = new TriangleIndexData[terrainTriangleCBuffer.count];
         terrainTriangleCBuffer.GetData(triangleIndexDataArray);

@@ -15,7 +15,7 @@
 			CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
-			
+			#pragma target 5.0
 			#include "UnityCG.cginc"
 
 			struct appdata
@@ -58,12 +58,20 @@
 				float4 right = tex2Dlod(_MainTex, float4(i.uv + float2(s, 0), 0, 0));	// F[x-1, y  ]: Centre Left
 				float4 bottom = tex2Dlod(_MainTex, float4(i.uv + float2(0, -s), 0, 0)); // F[x-1, y-1]: Top Left
 				float4 left = tex2Dlod(_MainTex, float4(i.uv + float2( -s, 0), 0, 0));	// F[x,   y-1]: Top Centre
-				//col.x *= 0.999;
-				//float4 deltaCol = tex2D(_DeltaTex, i.uv);
-				// just invert the colors
-				//col.rgb = saturate(col.rgb + deltaCol.rgb * _AddSubtractSign);
+
+				float2 altitudeGradient = float2(right.x - left.x, top.x - bottom.x);
+				float steepness = length(altitudeGradient);
+
+				float steepnessMask = saturate((steepness - 0.1) * 5);
+				
+				float hardness = saturate((center.y + center.z + center.w) * 3);
+
 				float4 col = center;
-				col.x = lerp(center, ((top.x + right.x + bottom.x + left.x) / 4.0), (isUnderwater * 0.025 + 0.01) * 0.5);
+
+				float newAltitude = lerp(center, ((top.x + right.x + bottom.x + left.x) / 4.0), 0.05 * steepnessMask * hardness);
+
+				col.x = newAltitude; // (isUnderwater * 0.025 + 0.01) * 0.2);
+
 				return col;
 			}
 			ENDCG

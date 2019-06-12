@@ -272,7 +272,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
     private void SetCurrentsByTier() {
         float lerpAmount = 0.06f;
         viscosity = Mathf.Lerp(viscosity, 0.0002f, lerpAmount);
-        damping = Mathf.Lerp(damping, 0.004f, lerpAmount);
+        damping = Mathf.Lerp(damping, 0.0002f, lerpAmount);
         //colorRefreshBackgroundMultiplier = Mathf.Lerp(colorRefreshBackgroundMultiplier, 0.001f, lerpAmount);
         //colorRefreshDynamicMultiplier = Mathf.Lerp(colorRefreshDynamicMultiplier, 0.0075f, lerpAmount);
 

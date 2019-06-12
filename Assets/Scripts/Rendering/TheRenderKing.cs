@@ -3171,7 +3171,7 @@ public class TheRenderKing : MonoBehaviour {
 
 
         baronVonWater.altitudeMapRef = baronVonTerrain.terrainHeightDataRT;
-        float camDist = Mathf.Clamp01(-1f * simManager.cameraManager.gameObject.transform.position.z / (210f - 10f));
+        float camDist = Mathf.Clamp01(-1f * simManager.cameraManager.gameObject.transform.position.z / (400f - 10f));
         baronVonWater.camDistNormalized = camDist;
         Vector2 boxSizeHalf = 0.8f * Vector2.Lerp(new Vector2(16f, 12f) * 2, new Vector2(256f, 204f), Mathf.Clamp01(-(simManager.cameraManager.gameObject.transform.position.z) / 150f));
         
@@ -3283,26 +3283,39 @@ public class TheRenderKing : MonoBehaviour {
 
         // SPIRIT BRUSH TEST!
         cmdBufferSpiritBrush.Clear(); // needed since camera clear flag is set to none
+        cmdBufferSpiritBrush.SetRenderTarget(spiritBrushRT);
+        cmdBufferSpiritBrush.ClearRenderTarget(true, true, Color.black, 1.0f);
+        
+            // clear -- needed???
+        cmdBufferSpiritBrush.SetViewProjectionMatrices(spiritBrushRenderCamera.worldToCameraMatrix, spiritBrushRenderCamera.projectionMatrix);
+        // Draw Solid Land boundaries:
+        float scale = Mathf.Lerp(0.4f, 8f, baronVonWater.camDistNormalized) * 6.283f;
+        Matrix4x4 stirStickTransformMatrix = Matrix4x4.TRS(new Vector3(simManager.uiManager.curMousePositionOnWaterPlane.x, simManager.uiManager.curMousePositionOnWaterPlane.y, 0f), Quaternion.identity, Vector3.one * scale);
+        //Debug.Log("mouseCursorPos: " + simManager.uiManager.curMousePositionOnWaterPlane.ToString());
         if(isBrushing) {
-            cmdBufferSpiritBrush.SetRenderTarget(spiritBrushRT);
-            cmdBufferSpiritBrush.ClearRenderTarget(true, true, Color.black, 1.0f);  // clear -- needed???
-            cmdBufferSpiritBrush.SetViewProjectionMatrices(spiritBrushRenderCamera.worldToCameraMatrix, spiritBrushRenderCamera.projectionMatrix);
-            // Draw Solid Land boundaries:
-            float scale = Mathf.Lerp(0.1f, 8f, baronVonWater.camDistNormalized) * 5f;
-            Matrix4x4 stirStickTransformMatrix = Matrix4x4.TRS(new Vector3(simManager.uiManager.curMousePositionOnWaterPlane.x, simManager.uiManager.curMousePositionOnWaterPlane.y, 0f), Quaternion.identity, Vector3.one * scale);
-            //Debug.Log("mouseCursorPos: " + simManager.uiManager.curMousePositionOnWaterPlane.ToString());
-            cmdBufferSpiritBrush.DrawMesh(meshStirStickLrg, stirStickTransformMatrix, spiritBrushRenderMat); // Masks out areas above the fluid "Sea Level"
+            
+            //cmdBufferSpiritBrush.DrawMesh(meshStirStickLrg, stirStickTransformMatrix, spiritBrushRenderMat); // Masks out areas above the fluid "Sea Level"
+            spiritBrushRenderMat.SetPass(0);
+            spiritBrushRenderMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer); // *** Needed? or just set it once in beginning....
+            spiritBrushRenderMat.SetVector("_Position", new Vector4(simManager.uiManager.curMousePositionOnWaterPlane.x, simManager.uiManager.curMousePositionOnWaterPlane.y, 0f, 0f));
+            spiritBrushRenderMat.SetFloat("_Scale", scale);
+            spiritBrushRenderMat.SetFloat("_Strength", baronVonWater.camDistNormalized * 0.75f + 0.25f);
+            //spiritBrushRenderMat.SetBuffer("basicStrokesCBuffer", obstacleStrokesCBuffer); 
+            cmdBufferSpiritBrush.DrawProcedural(Matrix4x4.identity, spiritBrushRenderMat, 0, MeshTopology.Triangles, 6, 1);
             // Draw dynamic Obstacles:        
             //basicStrokeDisplayMat.SetPass(0);
             //basicStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer); // *** Needed? or just set it once in beginning....
             //basicStrokeDisplayMat.SetBuffer("basicStrokesCBuffer", obstacleStrokesCBuffer);        
             //cmdBufferSpiritBrush.DrawProcedural(Matrix4x4.identity, basicStrokeDisplayMat, 0, MeshTopology.Triangles, 6, .count);
             // Disabling for now -- starting with one-way interaction between fluid & objects (fluid pushes objects, they don't push back)
-            Graphics.ExecuteCommandBuffer(cmdBufferSpiritBrush);
-            // Still not sure if this will work correctly... ****
-            spiritBrushRenderCamera.Render();
+            
         }
+        else {
 
+        }
+        Graphics.ExecuteCommandBuffer(cmdBufferSpiritBrush);
+        // Still not sure if this will work correctly... ****
+        spiritBrushRenderCamera.Render();
 
         // Species PORTRAIT:
         cmdBufferSpeciesPortraitDisplay.Clear();
@@ -4438,29 +4451,43 @@ public class TheRenderKing : MonoBehaviour {
         //Graphics.DrawProcedural(MeshTopology.Triangles, 6, simManager.simStateData.predatorSimDataCBuffer.count);
     }
 
-    public void ClickTestTerrain() {
-        Debug.Log("CLICKED TEST TERRAIN BUTTON!");
+    public void ClickTestTerrain(bool on) {
 
-        //terrainBlitMat
+        Debug.Log("CLICKED TEST TERRAIN BUTTON! " + on.ToString());
+        
         baronVonTerrain.terrainBlitMat.SetTexture("_DeltaTex", spiritBrushRT);
+        
         float addSubtract = 1f;
         if(simManager.uiManager.curActiveTool == UIManager.ToolType.Remove) {
             addSubtract = -1f;
         }
-        baronVonTerrain.terrainBlitMat.SetFloat("_AddSubtractSign", addSubtract);
-        Graphics.Blit(baronVonTerrain.terrainHeightRT0, baronVonTerrain.terrainHeightRT1, baronVonTerrain.terrainBlitMat);
-        Graphics.Blit(baronVonTerrain.terrainHeightRT1, baronVonTerrain.terrainHeightRT0, baronVonTerrain.terrainSimulationBlitMat); // Copy back -- optimize later! replace with diffusion step?
+        if(on) {
+            baronVonTerrain.terrainBlitMat.SetFloat("_AddSubtractSign", addSubtract);
+            Graphics.Blit(baronVonTerrain.terrainHeightRT0, baronVonTerrain.terrainHeightRT1, baronVonTerrain.terrainBlitMat);
+            Graphics.Blit(baronVonTerrain.terrainHeightRT1, baronVonTerrain.terrainHeightRT0, baronVonTerrain.terrainSimulationBlitMat); 
+        }
+        else {
+            addSubtract = 0f;
+            baronVonTerrain.terrainBlitMat.SetFloat("_AddSubtractSign", addSubtract);
+            Graphics.Blit(baronVonTerrain.terrainHeightRT0, baronVonTerrain.terrainHeightRT1);
+            Graphics.Blit(baronVonTerrain.terrainHeightRT1, baronVonTerrain.terrainHeightRT0, baronVonTerrain.terrainSimulationBlitMat); 
+        }
+        //baronVonTerrain.terrainBlitMat.SetFloat("_AddSubtractSign", addSubtract);
+        //Graphics.Blit(baronVonTerrain.terrainHeightRT0, baronVonTerrain.terrainHeightRT1, baronVonTerrain.terrainBlitMat);
+        //Graphics.Blit(baronVonTerrain.terrainHeightRT1, baronVonTerrain.terrainHeightRT0, baronVonTerrain.terrainSimulationBlitMat); // Copy back -- optimize later! replace with diffusion step?
 
         baronVonTerrain.terrainGenerateColorBlitMat.SetTexture("_MainTex", baronVonTerrain.terrainHeightRT0);
         baronVonTerrain.terrainGenerateColorBlitMat.SetTexture("_DeltaTex", spiritBrushRT);
-        baronVonTerrain.terrainGenerateColorBlitMat.SetVector("_Color0", new Vector4(0.5f, 0.4f, 0.3f, 1f));
-        baronVonTerrain.terrainGenerateColorBlitMat.SetVector("_Color1", new Vector4(0.3f, 0.9f, 0.3f, 1f));
-        baronVonTerrain.terrainGenerateColorBlitMat.SetVector("_Color2", new Vector4(0.6f, 0.2f, 0.9f, 1f));
-        baronVonTerrain.terrainGenerateColorBlitMat.SetVector("_Color3", new Vector4(0.7f, 0.4f, 0.2f, 1f));
+        baronVonTerrain.terrainGenerateColorBlitMat.SetVector("_Color0", baronVonTerrain.terrainColor0); // new Vector4(0.54f, 0.43f, 0.37f, 1f));
+        baronVonTerrain.terrainGenerateColorBlitMat.SetVector("_Color1", baronVonTerrain.terrainColor1); // new Vector4(0.9f, 0.9f, 0.8f, 1f));
+        baronVonTerrain.terrainGenerateColorBlitMat.SetVector("_Color2", baronVonTerrain.terrainColor2); // new Vector4(0.7f, 0.8f, 0.9f, 1f));
+        baronVonTerrain.terrainGenerateColorBlitMat.SetVector("_Color3", baronVonTerrain.terrainColor3); // new Vector4(0.7f, 0.6f, 0.3f, 1f));
         Graphics.Blit(baronVonTerrain.terrainHeightRT0, baronVonTerrain.terrainColorRT0, baronVonTerrain.terrainGenerateColorBlitMat);
 
         baronVonTerrain.InitializeTerrain();
         baronVonTerrain.AlignGroundStrokesToTerrain();
+        
+        
     }
 
     private void OnWillRenderObject() {  // requires MeshRenderer Component to be called
