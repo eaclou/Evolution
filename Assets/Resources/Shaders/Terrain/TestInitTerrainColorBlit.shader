@@ -59,14 +59,14 @@
 				float noise12 = saturate(Value2D(noiseCoords + 22, 0.0915).x);
 				float noise13 = saturate(Value2D(noiseCoords - 349.7, 0.6579).x);
 
-				float initY = saturate(noise0 * 0.6 + noise1 * 0.25 + noise2 * 0.15 + noise3 * 0.15 - 0.4);
-				float initZ = saturate((noise10 * 0.4 + noise11 * 0.45 + noise12 * 0.15 + noise13 * 0.15) - 0.45);
-				float initW = saturate(((1.0 - noise10) * 0.3 + (1.0 - noise1) * 0.5 + (1.0 - noise12) * 0.25 + (1.0 - noise3) * 0.15) - 0.5);
+				float initY = saturate(noise0 * 0.9 + noise1 * 0.85 + noise2 * 0.65 + noise3 * 0.35 - 0.35);
+				float initZ = saturate((noise10 * 0.8 + noise11 * 0.65 + noise12 * 0.55 + noise13 * 0.55) - 0.55);
+				float initW = saturate(((1.0 - noise10) * 0.75 + (1.0 - noise1) * 0.65 + (1.0 - noise12) * 0.45 - (1.0 - noise3) * 0.25) - 0.75);
 
 				return float4(col.x, 
-								initY, 
-								initZ, 
-								initW);
+								initY * initY, 
+								initZ * initZ, 
+								initW * initW);
 
 
 			}

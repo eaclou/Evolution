@@ -70,7 +70,8 @@
 				float2 altUV = worldPosition.xy / 256;
 				o.altitudeUV = altUV;
 
-				float altitude = tex2Dlod(_AltitudeTex, float4(altUV, 0, 0)).x; //i.worldPos.z / 10; // [-1,1] range
+				float4 altitudeSample = tex2Dlod(_AltitudeTex, float4(altUV, 0, 0)); //i.worldPos.z / 10; // [-1,1] range
+				float altitude = altitudeSample.x;
 				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(altUV, 0, 0)).yzw;
 				float depth = saturate(-altitude + 0.5);
 				float refractionStrength = depth * 7.5;
@@ -81,7 +82,7 @@
 				float random2 = rand(float2(random1, random1));
 				float randomAspect = lerp(0.75, 1.33, random1);
 				
-				float2 scale = strokeData.scale * randomAspect * 1.073;
+				float2 scale = strokeData.scale * randomAspect * 0.73 * (1 + altitudeSample.w * 1) * (1 + rand(float2(inst * 1.79, random1)));
 				quadPoint *= float3(scale, 1.0);
 
 				// &&&& Screen-space UV of center of brushstroke:
@@ -91,7 +92,7 @@
 				o.screenUV = screenUV; //centerUV.xy / centerUV.w;
 
 				// Figure out final facing Vectors!!!
-				float2 forward = strokeData.heading;
+				float2 forward = float2(0,1); // strokeData.heading;
 				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
 				float2 rotatedPoint = float2(quadPoint.x * right + quadPoint.y * forward);  // Rotate localRotation by AgentRotation
 
@@ -117,7 +118,7 @@
 				
 				float4 finalColor = GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, float4(1,1,1,1));
 				finalColor.a = brushColor.a;
-				
+				finalColor = lerp(finalColor, finalColor * i.uv.y * i.uv.y, altitudeTex.w);
 				
 				return finalColor;
 				
