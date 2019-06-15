@@ -174,6 +174,12 @@ public class UIManager : MonoBehaviour {
     public Button buttonToolbarRemove;
 
     public GameObject panelPendingClickPrompt;
+
+    public int selectedToolbarTerrainLayer = 0;
+    public Button buttonToolbarTerrain0;
+    public Button buttonToolbarTerrain1;
+    public Button buttonToolbarTerrain2;
+    public Button buttonToolbarTerrain3;
     //
     public Button buttonToolbarRemoveDecomposer;
     public Button buttonToolbarDecomposers;
@@ -1890,7 +1896,17 @@ private bool treeOfLifeInfoOnC = false;
         //debugTextureViewerMat.
         if(debugTextureViewerArray[_DebugTextureIndex] != null) {
             debugTextureViewerMat.SetTexture("_MainTex", debugTextureViewerArray[_DebugTextureIndex]);
-            textDebugTextureName.text = debugTextureViewerArray[_DebugTextureIndex].name;
+            int channelID = 4;
+            string[] channelLabelTxt = new string[5];            
+            channelLabelTxt[0] = " (X Solo)";
+            channelLabelTxt[1] = " (Y Solo)";
+            channelLabelTxt[2] = " (Z Solo)";
+            channelLabelTxt[3] = " (W Solo)";
+            channelLabelTxt[4] = " (Color)";
+            if(_IsChannelSolo > 0.5f) {
+                channelID = _ChannelSoloIndex;
+            }
+            textDebugTextureName.text = debugTextureViewerArray[_DebugTextureIndex].name + channelLabelTxt[channelID];
         }
         textDebugTextureZoomX.text = _Zoom.x.ToString();
         textDebugTextureZoomY.text = _Zoom.y.ToString();
@@ -3092,6 +3108,11 @@ private bool treeOfLifeInfoOnC = false;
         //}        
         //isActiveStirToolPanel = false;
     }
+    public void ClickButtonToolbarTerrain(int index) {
+        Debug.Log("ClickButtonToolbarTerrain: " + index.ToString());
+
+        selectedToolbarTerrainLayer = index;
+    }
     public void ClickButtonToolbarDecomposers() {
         TrophicSlot slot = gameManager.simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0];
 
@@ -3443,21 +3464,50 @@ private bool treeOfLifeInfoOnC = false;
     }
 
     private void CreateDebugRenderViewerArray() {
-        debugTextureViewerArray = new RenderTexture[4];
+        debugTextureViewerArray = new RenderTexture[12];
         debugTextureViewerArray[0] = gameManager.theRenderKing.baronVonTerrain.terrainHeightDataRT;
         debugTextureViewerArray[0].name = "Terrain Height Data";
-        if(gameManager.theRenderKing.spiritBrushRT != null) {
-            debugTextureViewerArray[1] = gameManager.theRenderKing.spiritBrushRT;
-            debugTextureViewerArray[1].name = "Spirit Brush";
-        }
-        if (gameManager.simulationManager.vegetationManager.resourceGridRT1 != null) {
-            debugTextureViewerArray[2] = gameManager.simulationManager.vegetationManager.resourceGridRT1;
-            debugTextureViewerArray[2].name = "resourceGridRT1";
-        }
-        if(gameManager.simulationManager.environmentFluidManager._DensityA != null) {
-            debugTextureViewerArray[3] = gameManager.simulationManager.environmentFluidManager._DensityA;
-            debugTextureViewerArray[3].name = "Water DensityA";
-        }        
+        //if (gameManager.theRenderKing.baronVonTerrain.terrainColorRT0 != null) {
+        debugTextureViewerArray[1] = gameManager.theRenderKing.baronVonTerrain.terrainColorRT0;
+        debugTextureViewerArray[1].name = "Terrain Color";
+
+        debugTextureViewerArray[2] = gameManager.theRenderKing.baronVonWater.waterSurfaceDataRT0;
+        debugTextureViewerArray[2].name = "Water Surface Data";
+
+        debugTextureViewerArray[3] = gameManager.theRenderKing.fluidManager._DensityA;
+        debugTextureViewerArray[3].name = "Fluid Density";
+
+        debugTextureViewerArray[4] = gameManager.theRenderKing.fluidManager._VelocityA;
+        debugTextureViewerArray[4].name = "Fluid Velocity";
+
+        debugTextureViewerArray[5] = gameManager.theRenderKing.fluidManager._PressureA;
+        debugTextureViewerArray[5].name = "Fluid Pressure";
+
+        debugTextureViewerArray[6] = gameManager.theRenderKing.fluidManager._Divergence;
+        debugTextureViewerArray[6].name = "Fluid Divergence";
+
+        debugTextureViewerArray[7] = gameManager.theRenderKing.fluidManager._ObstaclesRT;
+        debugTextureViewerArray[7].name = "Fluid Obstacles Map";
+
+        debugTextureViewerArray[8] = gameManager.theRenderKing.fluidManager._SourceColorRT;
+        debugTextureViewerArray[8].name = "Fluid Source Color";
+        
+        debugTextureViewerArray[9] = gameManager.simulationManager.vegetationManager.rdRT1;
+        debugTextureViewerArray[9].name = "Reaction Diffusion Decomposers";
+
+        debugTextureViewerArray[10] = gameManager.simulationManager.vegetationManager.resourceGridRT1;
+        debugTextureViewerArray[10].name = "Resources Grid";
+
+        
+        //}
+        //if(gameManager.theRenderKing.spiritBrushRT != null) {
+        debugTextureViewerArray[11] = gameManager.theRenderKing.spiritBrushRT;
+        debugTextureViewerArray[11].name = "Spirit Brush";
+        //}        
+        //if(gameManager.simulationManager.environmentFluidManager._DensityA != null) {
+        //debugTextureViewerArray[3] = gameManager.simulationManager.environmentFluidManager._DensityA;
+        //debugTextureViewerArray[3].name = "Water DensityA";
+        //}        
     }
     public void ClickDebugTexturePrev() {
         if(debugTextureViewerArray == null) {
@@ -3466,7 +3516,7 @@ private bool treeOfLifeInfoOnC = false;
 
         _DebugTextureIndex -= 1;
         if(_DebugTextureIndex < 0) {
-            _DebugTextureIndex = 3;
+            _DebugTextureIndex = 11;
         }
         imageDebugTexture.enabled = false;
         imageDebugTexture.enabled = true;
@@ -3478,7 +3528,7 @@ private bool treeOfLifeInfoOnC = false;
         }
 
         _DebugTextureIndex += 1;
-        if(_DebugTextureIndex > 3) {
+        if(_DebugTextureIndex > 11) {
             _DebugTextureIndex = 0;
         }
         imageDebugTexture.enabled = false;
@@ -3515,6 +3565,8 @@ private bool treeOfLifeInfoOnC = false;
     public void SliderDebugTextureGamma(float val) {
         _Gamma = val;
     }
+
+
 
     #endregion
 }

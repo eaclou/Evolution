@@ -242,7 +242,7 @@ public class BaronVonTerrain : RenderBaron {
                 Vector2 offset = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f) * 0.0f) * 16f;
                 Vector3 pos = new Vector3(xPos + offset.x, yPos + offset.y, 0f);
                 groundStrokesSmlArray[index].worldPos = pos;
-                groundStrokesSmlArray[index].scale = new Vector2(UnityEngine.Random.Range(0.4f, 0.8f), UnityEngine.Random.Range(1.75f, 3f)) * 1.25f; // Y is forward, along stroke
+                groundStrokesSmlArray[index].scale = new Vector2(UnityEngine.Random.Range(0.4f, 0.8f), UnityEngine.Random.Range(1.75f, 3f) * 0.5f) * 1.55f; // Y is forward, along stroke
                 groundStrokesSmlArray[index].heading = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)).normalized;
                 groundStrokesSmlArray[index].brushType = UnityEngine.Random.Range(0,4);
             }
@@ -449,6 +449,7 @@ public class BaronVonTerrain : RenderBaron {
         int kernelCSAlignGroundStrokesLrg = computeShaderTerrainGeneration.FindKernel("CSUpdateGroundStrokes");
         computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
         //computeShaderTerrainGeneration.SetFloat("_GroundStrokeTerrainAlign", 1f);
+        computeShaderTerrainGeneration.SetFloat("_BrushAlignment", 1f);
         computeShaderTerrainGeneration.SetTexture(kernelCSAlignGroundStrokesLrg, "AltitudeRead", terrainHeightDataRT);
         computeShaderTerrainGeneration.SetBuffer(kernelCSAlignGroundStrokesLrg, "terrainFrameBufferStrokesCBuffer", groundStrokesLrgCBuffer);        
         computeShaderTerrainGeneration.Dispatch(kernelCSAlignGroundStrokesLrg, groundStrokesLrgCBuffer.count, 1, 1);
@@ -457,6 +458,7 @@ public class BaronVonTerrain : RenderBaron {
         computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
         //computeShaderTerrainGeneration.SetFloat("_GroundStrokeTerrainAlign", 1f);
         computeShaderTerrainGeneration.SetTexture(kernelCSAlignGroundStrokesMed, "AltitudeRead", terrainHeightDataRT);
+        computeShaderTerrainGeneration.SetFloat("_BrushAlignment", 1f);
         computeShaderTerrainGeneration.SetBuffer(kernelCSAlignGroundStrokesMed, "terrainFrameBufferStrokesCBuffer", groundStrokesMedCBuffer);        
         computeShaderTerrainGeneration.Dispatch(kernelCSAlignGroundStrokesMed, groundStrokesMedCBuffer.count, 1, 1);
 
@@ -464,6 +466,7 @@ public class BaronVonTerrain : RenderBaron {
         computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
         //computeShaderTerrainGeneration.SetFloat("_GroundStrokeTerrainAlign", 1f);
         computeShaderTerrainGeneration.SetTexture(kernelCSAlignGroundStrokesSml, "AltitudeRead", terrainHeightDataRT);
+        computeShaderTerrainGeneration.SetFloat("_BrushAlignment", 0f);
         computeShaderTerrainGeneration.SetBuffer(kernelCSAlignGroundStrokesSml, "terrainFrameBufferStrokesCBuffer", groundStrokesSmlCBuffer);        
         computeShaderTerrainGeneration.Dispatch(kernelCSAlignGroundStrokesSml, groundStrokesSmlCBuffer.count, 1, 1);
 

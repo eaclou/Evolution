@@ -3,6 +3,7 @@
 	Properties
 	{
 		_MainTex ("Texture", 2D) = "white" {}
+		_NoiseTex ("_NoiseTex", 2D) = "white" {}
 	}
 	SubShader
 	{
@@ -29,6 +30,7 @@
 
 			sampler2D _MainTex;
 			float4 _MainTex_ST;
+			sampler2D _NoiseTex;
 
 			uniform float _Scale = 1.0;
 			uniform float _Strength = 1.0;
@@ -65,8 +67,11 @@
 				//return float4(1,1,1,1);
 				// sample the texture
 				fixed4 col = tex2D(_MainTex, i.uv);
-				col.rgb *= 0.025 * _Strength;
+				col.rgb *= 1 * _Strength;
 				col.rgb = saturate(col.rgb);
+
+				float4 noiseTex = tex2D(_NoiseTex, frac(i.uv * 1 + _Time.y * 1024.0));
+				col.rgb *= noiseTex.x * noiseTex.x;
 				// apply fog
 				return col;
 			}

@@ -62,7 +62,7 @@
 				float2 altitudeGradient = float2(right.x - left.x, top.x - bottom.x);
 				float steepness = length(altitudeGradient);
 
-				float steepnessMask = saturate((steepness - 0.1) * 5);
+				float steepnessMask = saturate((steepness - 0.1) * 1);
 				
 				float hardness = saturate((center.y + center.z + center.w) * 3);
 

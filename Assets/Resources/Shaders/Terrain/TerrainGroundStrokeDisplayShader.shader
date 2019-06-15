@@ -31,6 +31,7 @@
 			sampler2D _ResourceTex;
 			
 			sampler2D _RenderedSceneRT;  // Provided by CommandBuffer -- global tex??? seems confusing... ** revisit this
+						
 			
 			struct FrameBufferStrokeData {
 				float3 worldPos;

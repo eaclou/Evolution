@@ -72,6 +72,9 @@ uniform float4 _SpawnPos;
 uniform float _SpawnRadius;
 uniform float _DecomposerDensityLerp;
 
+uniform float _BrushAlignment = 1.0;
+
+
 SamplerState _LinearClamp;
 SamplerState _LinearRepeat;
 SamplerState _PointClamp;
@@ -100,18 +103,16 @@ void CSUpdateGroundStrokes (uint3 id : SV_DispatchThreadID)
 	float dX = altitudeEast - altitudeWest;
 	float dY = altitudeNorth - altitudeSouth;
 
-	float2 grad = float2(0,1);
+	float2 grad = float2(dY,-dX);
 
-	if(dX != 0 && dY != 0) {
-		grad = normalize(float2(dX, dY));
+	float randAngle = Value2D(uv, 1000).x * 6.28;
+
+	grad = lerp(float2(cos(randAngle), sin(randAngle)), grad, _BrushAlignment);
+	
+	if(grad.x != 0 && grad.y != 0) {
+		grad = normalize(grad);
 	}
-
-	if(altitudeCenter < 0.6) {  // if underwater, follow topographical lines rather than steepestGrade:
-		//grad = float2(grad.y, -grad.x);
-	}
-
-	grad = float2(grad.y, -grad.x);
-
+	
 	terrainFrameBufferStrokesCBuffer[id.x].heading = grad;
 	terrainFrameBufferStrokesCBuffer[id.x].worldPos.z = -altitudeCenter * 20 + 10;
 }

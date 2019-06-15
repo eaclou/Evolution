@@ -692,7 +692,8 @@ void PressureJacobi (uint3 id : SV_DispatchThreadID)
 
 	half4 divergence = DivergenceRead.SampleLevel(_LinearRepeat, uvOrigin, 0);
 	float4 newPressure = (leftPressure + rightPressure + topPressure + bottomPressure + divergence * alpha) / beta;
-	PressureWrite[id.xy] = newPressure;
+	float pressureDamping = 0.0025;
+	PressureWrite[id.xy] = newPressure * (1.0 - pressureDamping);
 }
 
 [numthreads(16,16,1)]

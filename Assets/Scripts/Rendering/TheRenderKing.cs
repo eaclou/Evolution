@@ -3289,7 +3289,7 @@ public class TheRenderKing : MonoBehaviour {
             // clear -- needed???
         cmdBufferSpiritBrush.SetViewProjectionMatrices(spiritBrushRenderCamera.worldToCameraMatrix, spiritBrushRenderCamera.projectionMatrix);
         // Draw Solid Land boundaries:
-        float scale = Mathf.Lerp(0.4f, 8f, baronVonWater.camDistNormalized) * 6.283f;
+        float scale = Mathf.Lerp(0.2f, 16f, baronVonWater.camDistNormalized) * 6.283f;
         Matrix4x4 stirStickTransformMatrix = Matrix4x4.TRS(new Vector3(simManager.uiManager.curMousePositionOnWaterPlane.x, simManager.uiManager.curMousePositionOnWaterPlane.y, 0f), Quaternion.identity, Vector3.one * scale);
         //Debug.Log("mouseCursorPos: " + simManager.uiManager.curMousePositionOnWaterPlane.ToString());
         if(isBrushing) {
@@ -3299,7 +3299,14 @@ public class TheRenderKing : MonoBehaviour {
             spiritBrushRenderMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer); // *** Needed? or just set it once in beginning....
             spiritBrushRenderMat.SetVector("_Position", new Vector4(simManager.uiManager.curMousePositionOnWaterPlane.x, simManager.uiManager.curMousePositionOnWaterPlane.y, 0f, 0f));
             spiritBrushRenderMat.SetFloat("_Scale", scale);
-            spiritBrushRenderMat.SetFloat("_Strength", baronVonWater.camDistNormalized * 0.75f + 0.25f);
+            float brushIntensity = 1f;
+            if(simManager.uiManager.selectedToolbarTerrainLayer > 0) {
+                brushIntensity *= 0.2f;
+            }
+            else {
+                brushIntensity = (baronVonWater.camDistNormalized * 0.75f + 0.25f) * 0.05f;
+            }
+            spiritBrushRenderMat.SetFloat("_Strength", brushIntensity);
             //spiritBrushRenderMat.SetBuffer("basicStrokesCBuffer", obstacleStrokesCBuffer); 
             cmdBufferSpiritBrush.DrawProcedural(Matrix4x4.identity, spiritBrushRenderMat, 0, MeshTopology.Triangles, 6, 1);
             // Draw dynamic Obstacles:        
@@ -3669,7 +3676,7 @@ public class TheRenderKing : MonoBehaviour {
             baronVonTerrain.groundStrokesLrgDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
             baronVonTerrain.groundStrokesLrgDisplayMat.SetTexture("_ResourceTex", simManager.vegetationManager.resourceGridRT1);
             baronVonTerrain.groundStrokesLrgDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);  
-            baronVonTerrain.groundStrokesLrgDisplayMat.SetFloat("_MinFog", 0.0625f);  
+            baronVonTerrain.groundStrokesLrgDisplayMat.SetFloat("_MinFog", 0.0625f);
             baronVonTerrain.groundStrokesLrgDisplayMat.SetVector("_FogColor", simManager.fogColor);
             cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundStrokesLrgDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.groundStrokesLrgCBuffer.count);
@@ -3683,7 +3690,7 @@ public class TheRenderKing : MonoBehaviour {
             baronVonTerrain.groundStrokesMedDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
             baronVonTerrain.groundStrokesMedDisplayMat.SetTexture("_ResourceTex", simManager.vegetationManager.resourceGridRT1);
             baronVonTerrain.groundStrokesMedDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);       
-            baronVonTerrain.groundStrokesMedDisplayMat.SetFloat("_MinFog", 0.0625f);  
+            baronVonTerrain.groundStrokesMedDisplayMat.SetFloat("_MinFog", 0.0625f);             
             baronVonTerrain.groundStrokesMedDisplayMat.SetVector("_FogColor", simManager.fogColor);
             cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundStrokesMedDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.groundStrokesMedCBuffer.count);
@@ -3697,7 +3704,7 @@ public class TheRenderKing : MonoBehaviour {
             baronVonTerrain.groundStrokesSmlDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
             baronVonTerrain.groundStrokesSmlDisplayMat.SetTexture("_ResourceTex", simManager.vegetationManager.resourceGridRT1);
             baronVonTerrain.groundStrokesSmlDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);     
-            baronVonTerrain.groundStrokesSmlDisplayMat.SetFloat("_MinFog", 0.0625f);  
+            baronVonTerrain.groundStrokesSmlDisplayMat.SetFloat("_MinFog", 0.0625f);             
             baronVonTerrain.groundStrokesSmlDisplayMat.SetVector("_FogColor", simManager.fogColor);
             
             cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
@@ -3745,7 +3752,7 @@ public class TheRenderKing : MonoBehaviour {
                 baronVonTerrain.groundBitsDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
                 baronVonTerrain.groundBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
                 baronVonTerrain.groundBitsDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);     
-                baronVonTerrain.groundBitsDisplayMat.SetFloat("_MinFog", 0.0625f);  
+                baronVonTerrain.groundBitsDisplayMat.SetFloat("_MinFog", 0.0625f);                
                 baronVonTerrain.groundBitsDisplayMat.SetFloat("_Density", Mathf.Lerp(0.15f, 1f, Mathf.Clamp01(simManager.simResourceManager.curGlobalDecomposers / 100f)));  
                 baronVonTerrain.groundBitsDisplayMat.SetVector("_FogColor", simManager.fogColor);                
                 cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
@@ -4457,6 +4464,7 @@ public class TheRenderKing : MonoBehaviour {
         Debug.Log("CLICKED TEST TERRAIN BUTTON! " + on.ToString());
         
         baronVonTerrain.terrainBlitMat.SetTexture("_DeltaTex", spiritBrushRT);
+        baronVonTerrain.terrainBlitMat.SetInt("_ChannelID", simManager.uiManager.selectedToolbarTerrainLayer);
         
         float addSubtract = 1f;
         if(simManager.uiManager.curActiveTool == UIManager.ToolType.Remove) {
