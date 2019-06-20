@@ -247,10 +247,10 @@ void CSSimRD (uint3 id : SV_DispatchThreadID)
 	//float killRate = lerp(_MinKillRate, _MaxKillRate, sin(_Time.y * 0.3437 - 2.5 + i.uv.x * 0.467 + i.uv.y * 5.312) * 0.5 + 0.5);
 	//float feedRate = lerp(_MinFeedRate, _MaxFeedRate, cos(_Time.y * 0.52 + 1.1983 + i.uv.y * 0.35 - i.uv.x * 1.197) * 0.5 + 0.5);
 	
-	float killRate = lerp(0.06, 0.067, sin(uv.x * 6.28 - _Time * 0.2872) * 0.5 + 0.5); // 0.062;
-	float feedRate = lerp(0.05, 0.06, cos(uv.y * 6.28 + _Time * 0.413) * 0.5 + 0.5); //0.055;
+	float killRate = lerp(0.06, 0.065, sin(uv.x * 6.28 - _Time * 1.2872) * 0.5 + 0.5); // 0.062;
+	float feedRate = lerp(0.02, 0.058, cos(uv.y * 6.28 + _Time * 1.413) * 0.5 + 0.5); //0.055;
 	float diffusionRateA = 1;
-    float diffusionRateB = 0.2;
+    float diffusionRateB = 0.25;
 		
 	float coCenter = -1;
 	float coAdjacent = 0.2;

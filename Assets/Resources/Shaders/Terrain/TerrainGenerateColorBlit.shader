@@ -60,6 +60,8 @@
 				finalColor = lerp(finalColor, _Color1, saturate(col.y));
 				finalColor = lerp(finalColor, _Color2, saturate(col.z));
 				finalColor = lerp(finalColor, _Color3, saturate(col.w));
+				//float shininess = saturate(col.y);
+				//finalColor.a = shininess;
 				//finalColor.rgb = float3(0.37, 0.3, 0.3) * 0.75;
 				//finalColor.rgb *= (col.x * 0.5 + 0.5);
 				
