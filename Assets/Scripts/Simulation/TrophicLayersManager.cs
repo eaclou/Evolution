@@ -17,6 +17,7 @@ public class TrophicLayersManager {
     public TrophicKingdom kingdomDecomposers;
     public TrophicKingdom kingdomPlants;
     public TrophicKingdom kingdomAnimals;
+    public TrophicKingdom kingdomTerrain;
 
     public Vector2 decomposerOriginPos;
     public Vector2 algaeOriginPos;
@@ -63,6 +64,14 @@ public class TrophicLayersManager {
         animalsTier1.trophicSlots[3].Initialize("Vertebrate", TrophicSlot.SlotStatus.Locked, 2, 1, 3);
         kingdomAnimals.trophicTiersList.Add(animalsTier1);
 
+        kingdomTerrain = new TrophicKingdom();
+        kingdomTerrain.name = "Terrain";
+        TrophicTier terrainTier0 = new TrophicTier();
+        terrainTier0.trophicSlots[0].Initialize("Bedrock", TrophicSlot.SlotStatus.On, 3, 0, 0);
+        terrainTier0.trophicSlots[1].Initialize("Stones", TrophicSlot.SlotStatus.On, 3, 0, 1);
+        terrainTier0.trophicSlots[2].Initialize("Pebbles", TrophicSlot.SlotStatus.On, 3, 0, 2);
+        terrainTier0.trophicSlots[3].Initialize("Sand", TrophicSlot.SlotStatus.On, 3, 0, 3);
+        kingdomTerrain.trophicTiersList.Add(terrainTier0);
     }
     public void CreateTrophicSlotSpecies(SimulationManager simManagerRef, Vector2 spawnPos, int timeStep) {
         
@@ -227,13 +236,27 @@ public class TrophicLayersManager {
         else if(selectedTrophicSlotRef.kingdomID == 1) {
             str = "Tiny Plants that form the foundation of the ecosystem.\n\nUses: <b><color=#FBC653FF>Nutrients</color></b>\n\nProduces: <b><color=#8EDEEEFF>Oxygen</color></b>";
         }
-        else {
+        else if(selectedTrophicSlotRef.kingdomID == 2) {
             if(selectedTrophicSlotRef.tierID == 0) {
                 str = "Tiny Animals that feed on Algae.\n\nUses: <b><color=#8EDEEEFF>Oxygen</color></b>\n\nProduces: <b><color=#A97860FF>Waste</color></b>";
             }
             else {
                 str = "Simple Animal that feeds on Algae and Zooplankton.\n\nUses: <b><color=#8EDEEEFF>Oxygen</color></b>\n\nProduces: <b><color=#A97860FF>Waste</color></b>";
             }            
+        }
+        else {
+            if(selectedTrophicSlotRef.slotID == 0) {
+                str = "Solid Bedrock";
+            }
+            else if(selectedTrophicSlotRef.slotID == 1) {
+                str = "Large Boulders";
+            }
+            else if(selectedTrophicSlotRef.slotID == 2) {
+                str = "Pebbles";
+            }
+            else {
+                str = "Fine Sand";
+            }
         }
 
         return str;

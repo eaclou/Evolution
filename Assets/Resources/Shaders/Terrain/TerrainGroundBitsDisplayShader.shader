@@ -110,7 +110,7 @@
 				float fadeOut = saturate((1 - groundBitData.age) / fadeDuration);							
 				float alpha = fadeIn * fadeOut;
 				
-				float2 scale = groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25);
+				float2 scale = groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25) * 2.0;
 			
 				float sizeFadeMask = saturate((1.0 - altitude) * 4 - 2);
 				quadPoint *= float3(scale, 1.0) * (_Density * 0.5 + 0.5) * sizeFadeMask;
@@ -182,7 +182,7 @@
 
 				//frameBufferColor = float4(1,1,1,1);
 				float3 baseHue = float3(1,0.37,0.1);
-				float3 particleColor = lerp(baseHue * 0.7, baseHue * 1.3, saturate(1.0 - i.color.y * 2));
+				float3 particleColor = float3(1.25, 1.25, 1.0); //lerp(baseHue * 0.7, baseHue * 1.3, saturate(1.0 - i.color.y * 2));
 				frameBufferColor.rgb = lerp(frameBufferColor.rgb, particleColor, 0.5 * _Density + 0.5);
 				float4 finalColor = GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, float4(1,1,1,1));
 				finalColor.a = brushColor.a;

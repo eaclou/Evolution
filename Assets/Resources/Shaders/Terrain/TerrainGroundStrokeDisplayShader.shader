@@ -5,7 +5,7 @@
 		_MainTex ("Main Texture", 2D) = "white" {}
 		_AltitudeTex ("_AltitudeTex", 2D) = "gray" {}
 		_WaterSurfaceTex ("_WaterSurfaceTex", 2D) = "black" {}
-		_ResourceTex ("_ResourceTex", 2D) = "black" {}
+		_DecomposerTex ("_DecomposerTex", 2D) = "black" {}
 		//_NutrientTex ("_NutrientTex", 2D) = "black" {}
 		
 	}
@@ -28,7 +28,7 @@
 			sampler2D _MainTex;
 			sampler2D _AltitudeTex;
 			sampler2D _WaterSurfaceTex;
-			sampler2D _ResourceTex;
+			sampler2D _DecomposerTex;
 			
 			sampler2D _RenderedSceneRT;  // Provided by CommandBuffer -- global tex??? seems confusing... ** revisit this
 						
@@ -59,6 +59,9 @@
 			v2f vert(uint id : SV_VertexID, uint inst : SV_InstanceID)
 			{
 				v2f o;
+
+				// New code:
+				// Brushstrokes here vary in:  (size, position, color)
 								
 				FrameBufferStrokeData strokeData = frameBufferStrokesCBuffer[inst];
 
@@ -81,7 +84,7 @@
 				float random2 = rand(float2(random1, random1));
 				float randomAspect = lerp(0.75, 1.33, random1);
 				
-				float2 scale = strokeData.scale * randomAspect * 1.073;
+				float2 scale = strokeData.scale * randomAspect * 1.0;
 				quadPoint *= float3(scale, 1.0);
 
 				// &&&& Screen-space UV of center of brushstroke:
@@ -113,9 +116,9 @@
 				float4 frameBufferColor = tex2D(_RenderedSceneRT, screenUV);  //  Color of brushtroke source					
 				float4 altitudeTex = tex2D(_AltitudeTex, i.altitudeUV); //i.worldPos.z / 10; // [-1,1] range
 				float4 waterSurfaceTex = tex2D(_WaterSurfaceTex, i.altitudeUV);
-				float4 resourceTex = tex2D(_ResourceTex, i.altitudeUV);	
+				float4 resourceTex = tex2D(_DecomposerTex, i.altitudeUV);	
 				
-				float4 finalColor = GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, float4(1,1,1,1));
+				float4 finalColor = GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, resourceTex);
 				finalColor.a = brushColor.a;
 				
 				

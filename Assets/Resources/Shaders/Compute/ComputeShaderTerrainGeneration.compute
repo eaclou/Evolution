@@ -94,26 +94,41 @@ void CSUpdateGroundStrokes (uint3 id : SV_DispatchThreadID)
 	float2 uv = data.worldPos.xy / _MapSize;
 	float pixelOffset = 1.0 / 128;  // resolution
 
-	float altitudeCenter = AltitudeRead.SampleLevel(_LinearClamp, uv, 0).x;
-	float altitudeNorth = AltitudeRead.SampleLevel(_LinearClamp, uv + float2(0, pixelOffset), 0).x;
-	float altitudeEast = AltitudeRead.SampleLevel(_LinearClamp, uv + float2(pixelOffset, 0), 0).x;
-	float altitudeSouth = AltitudeRead.SampleLevel(_LinearClamp, uv + float2(0, -pixelOffset), 0).x;
-	float altitudeWest = AltitudeRead.SampleLevel(_LinearClamp, uv + float2(-pixelOffset, 0), 0).x;
+	float4 altitudeSampleCenter = AltitudeRead.SampleLevel(_LinearClamp, uv, 0);
+	float4 altitudeSampleNorth = AltitudeRead.SampleLevel(_LinearClamp, uv + float2(0, pixelOffset), 0);
+	float4 altitudeSampleEast = AltitudeRead.SampleLevel(_LinearClamp, uv + float2(pixelOffset, 0), 0);
+	float4 altitudeSampleSouth = AltitudeRead.SampleLevel(_LinearClamp, uv + float2(0, -pixelOffset), 0);
+	float4 altitudeSampleWest = AltitudeRead.SampleLevel(_LinearClamp, uv + float2(-pixelOffset, 0), 0);
+
+	float altitudeCenter = altitudeSampleCenter.x;
+	float altitudeNorth = altitudeSampleNorth.x;
+	float altitudeEast = altitudeSampleEast.x;
+	float altitudeSouth = altitudeSampleSouth.x;
+	float altitudeWest = altitudeSampleWest.x;
 
 	float dX = altitudeEast - altitudeWest;
 	float dY = altitudeNorth - altitudeSouth;
 
-	float2 grad = float2(dY,-dX);
-
+	float2 gradDir = float2(dX,dY); 
+	float2 topoDir = float2(dY,-dX);
 	float randAngle = Value2D(uv, 1000).x * 6.28;
+	float2 randDir = float2(cos(randAngle), sin(randAngle));
 
-	grad = lerp(float2(cos(randAngle), sin(randAngle)), grad, _BrushAlignment);
+	float2 heading = lerp(gradDir, randDir, altitudeSampleCenter.y);
+	heading = lerp(heading, randDir, altitudeSampleCenter.z);
+	heading = lerp(heading, topoDir, altitudeSampleCenter.w);
 	
-	if(grad.x != 0 && grad.y != 0) {
-		grad = normalize(grad);
+	if(heading.x != 0 && heading.y != 0) {
+		heading = normalize(heading);
 	}
+	else {
+		heading = normalize(randDir);
+	}
+
+	// New code:
+	// Brushstrokes vary in:  (heading, brush alpha)
 	
-	terrainFrameBufferStrokesCBuffer[id.x].heading = grad;
+	terrainFrameBufferStrokesCBuffer[id.x].heading = heading;
 	terrainFrameBufferStrokesCBuffer[id.x].worldPos.z = -altitudeCenter * 20 + 10;
 }
 
@@ -148,10 +163,10 @@ void CSSimGroundBitsData (uint3 id : SV_DispatchThreadID)
 		float2 uv = groundBitData.worldPos.xy / _MapSize;		
 		float altitude = AltitudeRead.SampleLevel(_LinearClamp, uv, 0).x;
 		
-		groundBitData.age = groundBitData.age + 0.0025;  // ? frame lifespan
+		groundBitData.age = groundBitData.age + 0.01;  // ? frame lifespan
 
 		// if should be killed:
-		if(groundBitData.age > 1.0 || altitude > 0.5 ) {
+		if(groundBitData.age > 1.0 || altitude > 0.55 ) {
 			groundBitData.isActive = 0;
 				
 		}
@@ -199,10 +214,10 @@ void CSSimGroundBitsData (uint3 id : SV_DispatchThreadID)
 		float spawnAltitude = AltitudeRead.SampleLevel(_LinearClamp, spawnUV, 0).x;
 		
 		float spawnNoise3 = saturate(Value2D(spawnPos + 349.7, 2.4579).x * 2.5);
-		float altitudeMask = saturate((0.7 - spawnAltitude) * 4);
+		float altitudeMask = saturate((1 - spawnAltitude) * 4);
 		
 		// Try respawning:
-		float4 decomposersMask = decomposersRead.SampleLevel(_LinearRepeat, spawnUV * 3.14159, 0);
+		float4 decomposersMask = decomposersRead.SampleLevel(_LinearRepeat, spawnUV, 0);
 		float spawnRating = decomposersMask.y * altitudeMask;
 
 		float distToOrigin = length(_SpawnPos.xy - (spawnUV * _MapSize));

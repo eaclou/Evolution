@@ -7,6 +7,7 @@
 #pragma kernel CSAddResourcesAtCoords
 #pragma kernel CSInitRD
 #pragma kernel CSSimRD
+#pragma kernel CSAdvectRD
 
 
 #include "Assets/Resources/Shaders/Inc/StructsCritterData.cginc"
@@ -215,7 +216,7 @@ void CSInitRD (uint3 id : SV_DispatchThreadID)
 {	
 	float2 uv = ((float2)id.xy + 0.5) / 128;
 
-	float dist = 1.0 - saturate(length((uv * 2.17 % 1) - 0.5) * 10);
+	float dist = 1.0 - saturate(length((uv * 1.17 % 1) - 0.5) * 10);
 	float val = dist;
 	rdWrite[id.xy] = float4(1 - val, val, 0, 1);
 	
@@ -249,7 +250,7 @@ void CSSimRD (uint3 id : SV_DispatchThreadID)
 	float killRate = lerp(0.06, 0.067, sin(uv.x * 6.28 - _Time * 0.2872) * 0.5 + 0.5); // 0.062;
 	float feedRate = lerp(0.05, 0.06, cos(uv.y * 6.28 + _Time * 0.413) * 0.5 + 0.5); //0.055;
 	float diffusionRateA = 1;
-    float diffusionRateB = 0.33;
+    float diffusionRateB = 0.2;
 		
 	float coCenter = -1;
 	float coAdjacent = 0.2;
@@ -270,5 +271,20 @@ void CSSimRD (uint3 id : SV_DispatchThreadID)
 	float4 col = float4(saturate(valA), saturate(valB), 0, 1); 
 	
 	rdWrite[id.xy] = col;
+	
+}
+
+[numthreads(32,32,1)]
+void CSAdvectRD (uint3 id : SV_DispatchThreadID)
+{
+
+	float xCoord = ((float)id.x + 0.5)  / _TextureResolution;
+	float yCoord = ((float)id.y + 0.5)  / _TextureResolution;
+	float2 uvOrigin = float2(xCoord, yCoord);
+
+	float2 uvSample = uvOrigin - _DeltaTime * _InvGridScale * VelocityRead.SampleLevel(_LinearClamp, uvOrigin, 0).xy * 0.25;
+	float4 newDensity = rdRead.SampleLevel(_LinearClamp, uvSample, 0);
+			
+	rdWrite[id.xy] = newDensity;
 	
 }

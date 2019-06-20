@@ -70,8 +70,8 @@
 				col.rgb *= 1 * _Strength;
 				col.rgb = saturate(col.rgb);
 
-				float4 noiseTex = tex2D(_NoiseTex, frac(i.uv * 1 + _Time.y * 1024.0));
-				col.rgb *= noiseTex.x * noiseTex.x;
+				float4 noiseTex = tex2D(_NoiseTex, frac(i.uv * 0.5 + _Time.y * 1024.0));
+				col.rgb *= noiseTex.x * noiseTex.x * noiseTex.x * noiseTex.x;
 				// apply fog
 				return col;
 			}

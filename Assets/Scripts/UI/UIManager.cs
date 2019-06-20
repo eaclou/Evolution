@@ -54,6 +54,8 @@ public class UIManager : MonoBehaviour {
     public Color colorPlantsDark;
     public Color colorAnimalsLight;
     public Color colorAnimalsDark;
+    public Color colorTerrainLight;
+    public Color colorTerrainDark;
 
     public GameObject mouseRaycastWaterPlane;
     private Vector3 prevMousePositionOnWaterPlane;
@@ -1395,25 +1397,8 @@ private bool treeOfLifeInfoOnC = false;
             // Species Slots visuals:  ================================================================================
             TrophicLayersManager layerManager = gameManager.simulationManager.trophicLayersManager;  
         
-            if(layerManager.GetAlgaeOnOff()) {
-                //buttonToolbarStir.interactable = true;
-            }
-            else {
-                //buttonToolbarStir.interactable = false;
-            }
-
-            if(layerManager.GetDecomposersOnOff()) {
-                //buttonToolbarNutrients.interactable = true;
-                //buttonToolbarRemove.interactable = true;
-            }
-            else {
-                //buttonToolbarNutrients.interactable = false;
-                //buttonToolbarRemove.interactable = false;
-            }
-
             // KINGDOM DECOMPOSERS:
-            bool isSelected = false;
-            
+            bool isSelected = false;            
             if(layerManager.isSelectedTrophicSlot) {
                 if(layerManager.selectedTrophicSlotRef.kingdomID == 0 && layerManager.selectedTrophicSlotRef.tierID == 0) {
                     isSelected = true; 
@@ -1470,6 +1455,30 @@ private bool treeOfLifeInfoOnC = false;
             SetToolbarButtonStateUI(ref buttonToolbarAnimal3, layerManager.kingdomAnimals.trophicTiersList[1].trophicSlots[2].status, isSelected2);
             SetToolbarButtonStateUI(ref buttonToolbarAnimal4, layerManager.kingdomAnimals.trophicTiersList[1].trophicSlots[3].status, isSelected3);
             
+            isSelected0 = false;
+            isSelected1 = false;
+            isSelected2 = false;
+            isSelected3 = false;
+            if(layerManager.isSelectedTrophicSlot) {
+                if (layerManager.selectedTrophicSlotRef.kingdomID == 3 && layerManager.selectedTrophicSlotRef.tierID == 0) {
+                    if (layerManager.selectedTrophicSlotRef.slotID == 0) {
+                        isSelected0 = true;
+                    }
+                    if (layerManager.selectedTrophicSlotRef.slotID == 1) {
+                        isSelected1 = true;
+                    }
+                    if (layerManager.selectedTrophicSlotRef.slotID == 2) {
+                        isSelected2 = true;
+                    }
+                    if (layerManager.selectedTrophicSlotRef.slotID == 3) {
+                        isSelected3 = true;
+                    }
+                }
+            }  
+            SetToolbarButtonStateUI(ref buttonToolbarTerrain0, layerManager.kingdomTerrain.trophicTiersList[0].trophicSlots[0].status, isSelected0);
+            SetToolbarButtonStateUI(ref buttonToolbarTerrain1, layerManager.kingdomTerrain.trophicTiersList[0].trophicSlots[1].status, isSelected1);
+            SetToolbarButtonStateUI(ref buttonToolbarTerrain2, layerManager.kingdomTerrain.trophicTiersList[0].trophicSlots[2].status, isSelected2);
+            SetToolbarButtonStateUI(ref buttonToolbarTerrain3, layerManager.kingdomTerrain.trophicTiersList[0].trophicSlots[3].status, isSelected3);
 
             if (isToolbarWingOn) {  // a species is selected
                 
@@ -1490,9 +1499,13 @@ private bool treeOfLifeInfoOnC = false;
                     speciesColorLight = colorPlantsLight;
                     speciesColorDark = colorPlantsDark;
                 }
-                else {
+                else if (layerManager.selectedTrophicSlotRef.kingdomID == 2) {
                     speciesColorLight = colorAnimalsLight;
                     speciesColorDark = colorAnimalsDark;
+                }
+                else {
+                    speciesColorLight = colorTerrainLight;
+                    speciesColorDark = colorTerrainDark;
                 }
                 buttonToolbarWingCreateSpecies.GetComponent<Image>().color = speciesColorLight;                
                 imageToolbarSpeciesPortraitRender.color = speciesColorLight;
@@ -1536,7 +1549,7 @@ private bool treeOfLifeInfoOnC = false;
                         imageToolbarSpeciesPortraitRender.sprite = spriteAlgaePortrait;
                         
                     }
-                    else {
+                    else if (layerManager.selectedTrophicSlotRef.kingdomID == 2) {
 
                         if (layerManager.selectedTrophicSlotRef.tierID == 1) {
                             panelTier = 2;
@@ -1554,7 +1567,11 @@ private bool treeOfLifeInfoOnC = false;
                             imageToolbarSpeciesPortraitRender.sprite = spriteZooplanktonPortrait;
                             
                         }
-                    }                    
+                    }   
+                    else {  // Terrain
+                        imageToolbarSpeciesPortraitRender.sprite = null;
+                        panelTier = 0;
+                    }
                 } 
                 
                 if(isToolbarDeletePromptOn) {
@@ -3110,6 +3127,20 @@ private bool treeOfLifeInfoOnC = false;
     }
     public void ClickButtonToolbarTerrain(int index) {
         Debug.Log("ClickButtonToolbarTerrain: " + index.ToString());
+
+        TrophicSlot slot = gameManager.simulationManager.trophicLayersManager.kingdomTerrain.trophicTiersList[0].trophicSlots[index];
+        gameManager.simulationManager.trophicLayersManager.isSelectedTrophicSlot = true;
+        gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = slot;
+        isToolbarWingOn = true;
+
+        selectedSpeciesID = slot.linkedSpeciesID; // update this next
+
+        //curActiveTool = ToolType.None;
+
+
+        /*if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.status != TrophicSlot.SlotStatus.Empty) {
+            InitToolbarPortraitCritterData(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef); // ***
+        }*/
 
         selectedToolbarTerrainLayer = index;
     }

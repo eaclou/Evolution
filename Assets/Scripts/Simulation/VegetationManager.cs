@@ -229,15 +229,22 @@ public class VegetationManager {
 
     }
 
-    public void SimReactionDiffusionGrid() {
+    public void SimReactionDiffusionGrid(ref EnvironmentFluidManager fluidManagerRef) {
         int kernelCSInitRD = computeShaderResourceGrid.FindKernel("CSSimRD"); 
         computeShaderResourceGrid.SetTexture(kernelCSInitRD, "rdRead", rdRT1);
         computeShaderResourceGrid.SetTexture(kernelCSInitRD, "rdWrite", rdRT2);
         computeShaderResourceGrid.Dispatch(kernelCSInitRD, 128 / 32, 128 / 32, 1);
         // write into 2
-        computeShaderResourceGrid.SetTexture(kernelCSInitRD, "rdRead", rdRT2);
-        computeShaderResourceGrid.SetTexture(kernelCSInitRD, "rdWrite", rdRT1);
-        computeShaderResourceGrid.Dispatch(kernelCSInitRD, 128 / 32, 128 / 32, 1);
+        int kernelCSAdvectRD = computeShaderResourceGrid.FindKernel("CSAdvectRD");
+        computeShaderResourceGrid.SetFloat("_TextureResolution", 128f);
+        //computeShaderResourceGrid.SetFloat("_TextureResolution", (float)resolution);
+        computeShaderResourceGrid.SetFloat("_DeltaTime", fluidManagerRef.deltaTime);
+        computeShaderResourceGrid.SetFloat("_InvGridScale", fluidManagerRef.invGridScale);
+        computeShaderResourceGrid.SetFloat("_MapSize", SimulationManager._MapSize);
+        computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "VelocityRead", fluidManagerRef._VelocityA);
+        computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "rdRead", rdRT2);
+        computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "rdWrite", rdRT1);
+        computeShaderResourceGrid.Dispatch(kernelCSAdvectRD, 128 / 32, 128 / 32, 1);
         //back into 1
     }
 

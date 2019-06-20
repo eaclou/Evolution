@@ -46,6 +46,8 @@
 			float _MaxKillRate;
 			sampler2D _MainTex;
 
+			//**************************************  NOT USED ******** (See "ComputeShaderResourceGrid") ***********
+
 			fixed4 frag (v2f i) : SV_Target
 			{				
 				float s = 1 / _Resolution;

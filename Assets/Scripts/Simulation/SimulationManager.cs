@@ -624,9 +624,9 @@ public class SimulationManager : MonoBehaviour {
 
         //vegetationManager.ApplyDiffusionOnResourceGrid(environmentFluidManager);
         //vegetationManager.AdvectResourceGrid(environmentFluidManager);
-        if(curSimYear < 4) {  // stop simulating after certain point !! TEMPORARY!!!
-            vegetationManager.SimReactionDiffusionGrid();
-        }
+        //if(curSimYear < 4) {  // stop simulating after certain point !! TEMPORARY!!!
+        vegetationManager.SimReactionDiffusionGrid(ref environmentFluidManager);
+        //}
         
 
         if(trophicLayersManager.GetAlgaeOnOff()) {

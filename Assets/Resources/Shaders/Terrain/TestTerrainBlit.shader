@@ -54,14 +54,17 @@
 				}
 
 				if(_ChannelID == 1) {
+					col.x = saturate(col.x + deltaCol.x * _AddSubtractSign * 0.2);
 					col.y = saturate(col.y + deltaCol.x * _AddSubtractSign);
 				}
 
 				if(_ChannelID == 2) {
+					col.x = saturate(col.x + deltaCol.x * _AddSubtractSign * 0.12); 
 					col.z = saturate(col.z + deltaCol.x * _AddSubtractSign);
 				}
 
 				if(_ChannelID == 3) {
+					col.x = saturate(col.x + deltaCol.x * _AddSubtractSign * 0.08);
 					col.w = saturate(col.w + deltaCol.x * _AddSubtractSign);
 				}
 				// OLD:
