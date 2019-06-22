@@ -87,7 +87,14 @@ float4 GetGroundColor(float3 worldPos, float4 frameBufferColor, float4 altitudeT
 	float minFog = 0.06125;
 	
 	float4 finalColor = frameBufferColor;
-	finalColor.rgb = saturate((finalColor.rgb * 0.75 + saturate(1.0 - resourceTex.x * 2.5) * 0.33) + saturate(1.0 - resourceTex.x * 2.5) * 0.1);
+	float3 decomposerHue = float3(0.86,1,0.4) * 2.01; // float3(3.5,2.5,1);
+	float decomposerMask = saturate(resourceTex.y * resourceTex.y * resourceTex.y * 4.20);
+	
+	finalColor.rgb += decomposerHue * decomposerMask;
+	//finalColor.rgb = finalColor.rgb - decomposerHue * decomposerMask;
+	//finalColor.rgb = lerp(finalColor.rgb, decomposerHue, decomposerMask); //
+
+	//saturate((finalColor.rgb * 0.75 + saturate(1.0 - resourceTex.x * 2.5) * 0.33) + saturate(1.0 - resourceTex.x * 2.5) * 0.1);
 			
 	float altitude = altitudeTex.x;
 	// 0-1 range --> -1 to 1

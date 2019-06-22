@@ -617,6 +617,8 @@ public class TheRenderKing : MonoBehaviour {
         });
     }
     private void InitializeFluidRenderMesh() {
+        //GameObject plane  = GameObject.CreatePrimitive(PrimitiveType.Plane);
+        //fluidRenderMesh = plane.GetComponent<MeshFilter>().sharedMesh; // 
         fluidRenderMesh = new Mesh();
         Vector3[] vertices = new Vector3[4];
         vertices[0] = new Vector3(0f, 0f, 1f);
@@ -4035,6 +4037,7 @@ public class TheRenderKing : MonoBehaviour {
             fluidRenderMat.SetTexture("_DivergenceTex", fluidManager._Divergence);
             fluidRenderMat.SetTexture("_ObstaclesTex", fluidManager._ObstaclesRT);
             fluidRenderMat.SetTexture("_TerrainHeightTex", baronVonTerrain.terrainHeightDataRT);
+            fluidRenderMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
             cmdBufferMain.DrawMesh(fluidRenderMesh, Matrix4x4.identity, fluidRenderMat);
 
             
@@ -4459,9 +4462,12 @@ public class TheRenderKing : MonoBehaviour {
         //Graphics.DrawProcedural(MeshTopology.Triangles, 6, simManager.simStateData.predatorSimDataCBuffer.count);
     }
 
-    public void ClickTestTerrain(bool on) {
+    public void ClickTestTerrain(bool on) {  // *** RENAME!!! ***********
 
-        Debug.Log("CLICKED TEST TERRAIN BUTTON! " + on.ToString());
+        //Debug.Log("CLICKED TEST TERRAIN BUTTON! " + on.ToString());
+
+        // TEMP!!! ********* DECOMPOSERS!!!!!
+
         
         baronVonTerrain.terrainBlitMat.SetTexture("_DeltaTex", spiritBrushRT);
         baronVonTerrain.terrainBlitMat.SetInt("_ChannelID", simManager.uiManager.selectedToolbarTerrainLayer);
@@ -4474,6 +4480,8 @@ public class TheRenderKing : MonoBehaviour {
             baronVonTerrain.terrainBlitMat.SetFloat("_AddSubtractSign", addSubtract);
             Graphics.Blit(baronVonTerrain.terrainHeightRT0, baronVonTerrain.terrainHeightRT1, baronVonTerrain.terrainBlitMat);
             Graphics.Blit(baronVonTerrain.terrainHeightRT1, baronVonTerrain.terrainHeightRT0, baronVonTerrain.terrainSimulationBlitMat); 
+
+            
         }
         else {
             addSubtract = 0f;

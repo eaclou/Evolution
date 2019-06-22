@@ -25,6 +25,10 @@ StructuredBuffer<float4> algaeGridEatAmountsCBuffer;
 
 Texture2D<float4> VelocityRead;
 
+Texture2D<float4> _AltitudeTex;
+
+Texture2D<float4> _SpiritBrushTex;
+
 Texture2D<float4> algaeGridRead;
 RWTexture2D<float4> algaeGridWrite;
 
@@ -214,9 +218,9 @@ void CSAddResourcesAtCoords (uint3 id : SV_DispatchThreadID)
 [numthreads(32,32,1)]
 void CSInitRD (uint3 id : SV_DispatchThreadID)
 {	
-	float2 uv = ((float2)id.xy + 0.5) / 128;
+	float2 uv = ((float2)id.xy + 0.5) / _TextureResolution;
 
-	float dist = 1.0 - saturate(length((uv * 1.17 % 1) - 0.5) * 10);
+	float dist = 1.0 - saturate(length((uv * 1.17 % 1) - 0.5) * 33);
 	float val = dist;
 	rdWrite[id.xy] = float4(1 - val, val, 0, 1);
 	
@@ -225,32 +229,41 @@ void CSInitRD (uint3 id : SV_DispatchThreadID)
 [numthreads(32,32,1)]
 void CSSimRD (uint3 id : SV_DispatchThreadID)
 {	
-	float s = 1 / 128.0;
+	float s = 1 / _TextureResolution;
 	float deltaTime = 1.0;
 
-	float2 uv = float2((float2)id.xy + 0.5) / 128.0;
+	float2 uv = float2((float2)id.xy + 0.5) / _TextureResolution;
 
 	// Neighbour cells
 	//algaeGridRead.SampleLevel(_LinearRepeat, uvSample, 0);
-	float4 bl = rdRead.SampleLevel(_PointRepeat, uv + float2(-s, +s), 0);	// F[x-1, y+1]: Bottom Left
-	float4 cl = rdRead.SampleLevel(_PointRepeat, uv + float2(-s,  0), 0);	// F[x-1, y  ]: Centre Left
-	float4 tl = rdRead.SampleLevel(_PointRepeat, uv + float2(-s, -s), 0); // F[x-1, y-1]: Top Left
-	float4 tc = rdRead.SampleLevel(_PointRepeat, uv + float2( 0, -s), 0);	// F[x,   y-1]: Top Centre
-	float4 tr = rdRead.SampleLevel(_PointRepeat, uv + float2(+s, -s), 0);	// F[x,   y-1]: Top Right
-	float4 cc = rdRead.SampleLevel(_PointRepeat, uv + float2( 0,  0), 0);	// F[x,   y  ]: Centre Centre
-	float4 br = rdRead.SampleLevel(_PointRepeat, uv + float2(+s, +s), 0);	// F[x+1, y+1]: Bottom Right
-	float4 bc = rdRead.SampleLevel(_PointRepeat, uv + float2( 0, +s), 0);	// F[x,   y+1]: Bottom Centre
-	float4 cr = rdRead.SampleLevel(_PointRepeat, uv + float2(+s,  0), 0);	// F[x+1, y  ]: Centre Right
+	float4 bl = rdRead.SampleLevel(_PointClamp, uv + float2(-s, +s), 0);	// F[x-1, y+1]: Bottom Left
+	float4 cl = rdRead.SampleLevel(_PointClamp, uv + float2(-s,  0), 0);	// F[x-1, y  ]: Centre Left
+	float4 tl = rdRead.SampleLevel(_PointClamp, uv + float2(-s, -s), 0); // F[x-1, y-1]: Top Left
+	float4 tc = rdRead.SampleLevel(_PointClamp, uv + float2( 0, -s), 0);	// F[x,   y-1]: Top Centre
+	float4 tr = rdRead.SampleLevel(_PointClamp, uv + float2(+s, -s), 0);	// F[x,   y-1]: Top Right
+	float4 cc = rdRead.SampleLevel(_PointClamp, uv + float2( 0,  0), 0);	// F[x,   y  ]: Centre Centre
+	float4 br = rdRead.SampleLevel(_PointClamp, uv + float2(+s, +s), 0);	// F[x+1, y+1]: Bottom Right
+	float4 bc = rdRead.SampleLevel(_PointClamp, uv + float2( 0, +s), 0);	// F[x,   y+1]: Bottom Centre
+	float4 cr = rdRead.SampleLevel(_PointClamp, uv + float2(+s,  0), 0);	// F[x+1, y  ]: Centre Right
+
 
 	//float killRate = lerp(_MinKillRate, _MaxKillRate, i.uv.x);
 	//float feedRate = lerp(_MinFeedRate, _MaxFeedRate, i.uv.y);
-	//float killRate = lerp(_MinKillRate, _MaxKillRate, sin(_Time.y * 0.3437 - 2.5 + i.uv.x * 0.467 + i.uv.y * 5.312) * 0.5 + 0.5);
+	//float killRate = lerp(_MinKillRate, _MaxKillRate, sin(_Time.y * 1.3437 - 2.5 + i.uv.x * 0.467 + i.uv.y * 5.312) * 0.5 + 0.5);
 	//float feedRate = lerp(_MinFeedRate, _MaxFeedRate, cos(_Time.y * 0.52 + 1.1983 + i.uv.y * 0.35 - i.uv.x * 1.197) * 0.5 + 0.5);
 	
-	float killRate = lerp(0.06, 0.065, sin(uv.x * 6.28 - _Time * 1.2872) * 0.5 + 0.5); // 0.062;
-	float feedRate = lerp(0.02, 0.058, cos(uv.y * 6.28 + _Time * 1.413) * 0.5 + 0.5); //0.055;
-	float diffusionRateA = 1;
-    float diffusionRateB = 0.25;
+	float4 altitudeSample = _AltitudeTex.SampleLevel(_PointClamp, uv + float2( 0,  0), 0);
+	float altitude01 = altitudeSample.x;
+	float altitudeMask = saturate((altitude01 - 0.5) * 10);
+
+	float killRate = lerp(0.059, 0.069, sin(uv.x * 3.528 - _Time * 0.2872) * 0.5 + 0.5); // 0.062;
+	float feedRate = lerp(0.051, 0.059, cos(uv.y * 1.328 + _Time * 1.0413) * 0.5 + 0.5); //0.055;
+	float diffusionRateA = lerp(0.6, 1, frac(uv.x * 3.331 + _Time * 10));
+    float diffusionRateB = lerp(0.115, 0.46, frac(uv.y * 2.0457 + _Time * 14.23));
+
+	diffusionRateA *= altitudeMask * 0.25 + 0.75;
+	diffusionRateB *= altitudeMask * 0.25 + 0.75;
+	//killRate += saturate((altitude01 - 0.5) * 8) * 0.002;
 		
 	float coCenter = -1;
 	float coAdjacent = 0.2;
@@ -268,6 +281,9 @@ void CSSimRD (uint3 id : SV_DispatchThreadID)
 	float valA = cc.x + (diffusionRateA * laplaceA - abb + feedRate * (1 - cc.x)) * deltaTime;
 	float valB = cc.y + (diffusionRateB * laplaceB + abb - (killRate + feedRate) * cc.y) * deltaTime;
 
+	
+	valB -= altitudeMask;
+
 	float4 col = float4(saturate(valA), saturate(valB), 0, 1); 
 	
 	rdWrite[id.xy] = col;
@@ -282,8 +298,13 @@ void CSAdvectRD (uint3 id : SV_DispatchThreadID)
 	float yCoord = ((float)id.y + 0.5)  / _TextureResolution;
 	float2 uvOrigin = float2(xCoord, yCoord);
 
-	float2 uvSample = uvOrigin - _DeltaTime * _InvGridScale * VelocityRead.SampleLevel(_LinearClamp, uvOrigin, 0).xy * 0.25;
+	float2 uvSample = uvOrigin - _DeltaTime * _InvGridScale * VelocityRead.SampleLevel(_LinearClamp, uvOrigin, 0).xy * 0.1;
 	float4 newDensity = rdRead.SampleLevel(_LinearClamp, uvSample, 0);
+
+	// Handle SpiritBrush Here????
+	float4 spiritBrushSample = _SpiritBrushTex.SampleLevel(_LinearClamp, uvSample, 0);
+
+	newDensity.y = saturate(newDensity.y - spiritBrushSample.x);  // *** TEMPORARY!!! **** Decomposers removed from brushing
 			
 	rdWrite[id.xy] = newDensity;
 	

@@ -8,7 +8,7 @@
 		_DivergenceTex ("_DivergenceTex", 2D) = "white" {}
 		_ObstaclesTex ("_ObstaclesTex", 2D) = "white" {}
 		_TerrainHeightTex ("_TerrainHeightTex", 2D) = "grey" {}
-		_DebugTex ("_DebugTex", 2D) = "black" {}
+		_WaterSurfaceTex ("_WaterSurfaceTex", 2D) = "black" {}
 	}
 	SubShader
 	{
@@ -45,11 +45,12 @@
 			sampler2D _DivergenceTex;
 			sampler2D _ObstaclesTex;
 			sampler2D _TerrainHeightTex;
-			sampler2D _DebugTex;
+			sampler2D _WaterSurfaceTex;
 			
 			v2f vert (appdata v)
 			{
 				v2f o;
+				//v.vertex.z -= tex2Dlod(_WaterSurfaceTex, float4(v.uv,0,0)).x * 5;
 				o.vertex = UnityObjectToClipPos(v.vertex);
 				o.uv = v.uv;
 				return o;
@@ -89,11 +90,18 @@
 				finalColor.a += velocityGlow * 0.4 * noiseMag;
 				//finalColor.rgb += velocityGlow * 0.65 * noiseMag;
 				//finalColor.rgb = lerp(finalColor.rgb, float3(1,1,0), velocityGlow);
-
+				
+				float4 heightTex = tex2D(_TerrainHeightTex, i.uv);
+				float altitude = heightTex.x;  // [-1,1] range
+				float onLandMask = saturate((altitude - 0.48) * 8);
+				float shallowsMask = 1.0 - saturate(((1-altitude) - 0.485) * 2.5);
+				float shorelineGlow = shallowsMask * (1.0 - onLandMask);
+				finalColor.rgb += shorelineGlow * 0.75;
+				finalColor.a += shorelineGlow * 0.25;
 				
 				//finalColor.a *= (0.15 + noiseMag * 0.85);
 				//finalColor.rgb = float3(1,1,1) * 0.5;
-				return finalColor;
+				return saturate(finalColor);
 
 				
 
@@ -115,8 +123,8 @@
 				//finalColor.xyz += divergenceAmplitude;
 				//boost += divergenceAmplitude;
 
-				float4 heightTex = tex2D(_TerrainHeightTex, i.uv * 0.5 + 0.25);
-				float altitude = heightTex.x * 2 - 1;  // [-1,1] range
+				//float4 heightTex = tex2D(_TerrainHeightTex, i.uv * 0.5 + 0.25);
+				//float altitude = heightTex.x * 2 - 1;  // [-1,1] range
 				//altitude *= -1; // *** invert needed for some reason!!! REVISIT THIS!!! ****
 
 				//finalColor.a -= (1.0 - saturate(velocityAmplitude * 12)) * 0.2;
@@ -150,8 +158,8 @@
 				finalColor = lerp(finalColor, float4(0.5, 0.5, 0.5, 1), 0.5);
 				//return float4(0.5, 0.5, 0.5, 1);
 
-				float4 debugTexColor = tex2D(_DebugTex, i.uv);
-				float4 debugColor = float4(debugTexColor.x * 3, debugTexColor.x * 3, 0, 1.0);
+				//float4 debugTexColor = tex2D(_DebugTex, i.uv);
+				//float4 debugColor = float4(debugTexColor.x * 3, debugTexColor.x * 3, 0, 1.0);
 				//debugColor.a = 1;
 				//debugColor.rgb *= 10;
 				//debugColor.rb = 0;
