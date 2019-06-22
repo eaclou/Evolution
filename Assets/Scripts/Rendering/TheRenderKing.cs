@@ -249,6 +249,8 @@ public class TheRenderKing : MonoBehaviour {
     public Mesh debugMesh;
     public RenderTexture debugRT; // Used to see texture inside editor (inspector)
 
+    public bool isSpiritBrushOn = false;
+    public float spiritBrushPosNeg = 1f;
     public RenderTexture spiritBrushRT;
     private int spiritBrushResolution = 128;
     public RenderTexture terrainBaseColorRT;
@@ -4471,11 +4473,11 @@ public class TheRenderKing : MonoBehaviour {
         
         baronVonTerrain.terrainBlitMat.SetTexture("_DeltaTex", spiritBrushRT);
         baronVonTerrain.terrainBlitMat.SetInt("_ChannelID", simManager.uiManager.selectedToolbarTerrainLayer);
-        
-        float addSubtract = 1f;
-        if(simManager.uiManager.curActiveTool == UIManager.ToolType.Remove) {
-            addSubtract = -1f;
-        }
+
+        float addSubtract = spiritBrushPosNeg; // 1f;
+        //if(simManager.uiManager.curActiveTool == UIManager.ToolType.Remove) {
+        //    addSubtract = -1f;
+        //}
         if(on) {
             baronVonTerrain.terrainBlitMat.SetFloat("_AddSubtractSign", addSubtract);
             Graphics.Blit(baronVonTerrain.terrainHeightRT0, baronVonTerrain.terrainHeightRT1, baronVonTerrain.terrainBlitMat);

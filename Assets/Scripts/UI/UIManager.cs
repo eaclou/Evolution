@@ -375,129 +375,7 @@ public class UIManager : MonoBehaviour {
     public GameObject panelMainMenu;
     public GameObject panelLoading;
     public GameObject panelPlaying;
-
-    // EVENTS TOOL SECTION:
-    /*public bool pressedRemoveSpecies = false; // gross hack to get around execution order of button click
-    public bool isActiveEventSelectionScreen = false;
-    public bool isActiveEventsMinor = false;
-    public bool isActiveEventsMajor = false;
-    public bool isActiveEventsExtreme = false;
-    //public int selectedEventCategoryID = 0;  // 0=minor, 1=major, 2=extreme
-    public GameObject panelEventMaster;
-    public Text textEventPointsWallet;
-    public GameObject panelEventSelectionScreen;
-    public Text textEventSelectionTitle;
-    public Image imageEventSelectionTitle;
-    public Text textEventSelectedDescription;
-    public Button buttonConfirmSelectedEvent;
-    public SimEventComponent simEvent0;
-    public SimEventComponent simEvent1;
-    public SimEventComponent simEvent2;
-    public SimEventComponent simEvent3;
-    public SimEventComponent[] simEventComponentsArray;
-    public int selectedMinorEventIndex = 0;
-    public int selectedMajorEventIndex = 0;
-    public int selectedExtremeEventIndex = 0;
-    public Button buttonEventsMinor;
-    public Image imageButtonEventsMinor;
-    public Button buttonEventsMajor;
-    public Image imageButtonEventsMajor;
-    public Button buttonEventsExtreme;
-    public Image imageButtonEventsExtreme;
-    public Text textRecentEvent;
-    */
-    /*
-    // TREE OF LIFE SECTION:
-    public Button buttonShowHideTOL;
-    // VV NEW HERE:::
-    public GameObject panelTolMaster;
-    public GameObject panelTolWorldStats;
-    public GameObject panelTolSpeciesTree;
-    public GameObject panelTolEventsTimeline;
-    public Button buttonTolWorldStats;
-    public Button buttonTolSpeciesTree;
-    public Button buttonTolSpeciesTreeExtinct;
-    public Button buttonTolEventsTimeline;
-    public Button buttonTolBrainDisplay;
-    public Button buttonTolInspect;
-    public Text textTolSpeciesTitle;
-    public Text textTolSpeciesIndex;
-    public Text textTolDescription;
-    public Image imageTolPortraitRender;
-    public Image imageTolWorldStatsRender;
-    public Image imageTolSpeciesTreeRender;
-    public Image imageTolEventsTimelineRender;
-    public Button buttonTolCycleWorldStatsPrev;
-    public Button buttonTolCycleWorldStatsNext;
-    public Text textTolWorldStatsName;
-    public Text textTolWorldStatsValue;
-    public Button buttonTolCycleSpeciesStatsPrev;
-    public Button buttonTolCycleSpeciesStatsNext;
-    public Text textTolSpeciesStatsName;
-    public Text textTolSpeciesStatsValue;
-    public Button buttonTolEventsMinorToggle;
-    public Button buttonTolEventsMajorToggle;
-    public Button buttonTolEventsExtremeToggle;
-    public Text textTolEventsTimelineName;
-
-    public Image imageTolBackdropGraphs;
-    public Image imageTolBackdropDescription;
-    public Text textTolYearValue;
-
-    public Image imageTolPortraitBorder;
-    public Image imageTolSpeciesIndex;
-    public Image imageTolSpeciesNameBackdrop;
-
-    public Image imageTolEventsReadoutBackdrop;
-    public Image imageTolStatsReadoutBackdrop;
-    public Image imageTolSpeciesReadoutBackdrop;
-
-    public Vector2 tolMouseCoords;
-    public float tolMouseOver = 0f;
-
-    public Texture2D tolTextureWorldStats;
-    public Texture2D tolTextureWorldStatsKey;
-    public Vector2[] tolWorldStatsValueRangesKeyArray;
-    public int tolSelectedWorldStatsIndex = 0;
-    public int tolSelectedSpeciesStatsIndex = 0;
     
-    public bool treeOfLifePanelOn = true;
-    public bool tolWorldStatsOn = true;
-    public bool tolSpeciesTreeOn = true;
-    public bool tolEventsTimelineOn = true;
-    public bool tolSpeciesTreeExtinctOn = false;
-    public bool tolBrainDisplayOn = false;
-    public bool tolInspectOn = false;
-    public bool tolSpeciesDescriptionOn = true;
-
-    public float tolGraphCoordsEventsStart = 0.75f;
-    public float tolGraphCoordsEventsRange = 0.25f;
-    public float tolGraphCoordsStatsStart = 0.5f;
-    public float tolGraphCoordsStatsRange = 0.25f;
-    public float tolGraphCoordsSpeciesStart = 0f;
-    public float tolGraphCoordsSpeciesRange = 0.5f;
-    */
-
-    /*// VVV OLD BELOW:::
-public GameObject treeOfLifeAnchorGO;     
-public GameObject panelTreeOfLifeScaleHideGroup;
-public GameObject panelTreeOfLifeInfoBlock;
-public GameObject panelTreeOfLifeInfoA;
-public Text textTreeOfLifeInfoA;
-public GameObject panelTreeOfLifeInfoB;
-public Text textTreeOfLifeInfoB;
-public GameObject panelTreeOfLifeInfoC;
-public Text textTreeOfLifeInfoC;
-public Text textTreeOfLifeSpeciesID;
-public Button buttonInfoA;
-public Button buttonInfoB;
-public Button buttonInfoC;
-
-private bool treeOfLifeInfoOnA = false;
-private bool treeOfLifeInfoOnB = false;
-private bool treeOfLifeInfoOnC = false;
-*/
-
     public float loadingProgress = 0f;
 
     private int[] displaySpeciesIndicesArray;
@@ -518,63 +396,7 @@ private bool treeOfLifeInfoOnC = false;
     public Texture2D statsTexturePredation;
     public Texture2D statsTextureNutrients;
     public Texture2D statsTextureMutation;
-
-    /*public Text statsPanelTextMaxValue;
-    public Text textStatsGraphTitle;
-    public Text textStatsGraphLegend;
-    public Text textStatsCurGen;
-    public GraphMode curStatsGraphMode = GraphMode.Lifespan;
-    public enum GraphMode {
-        Lifespan,
-        BodySizes,
-        Consumption,
-        Predation,
-        Nutrients,
-        Mutation
-    }
-    */
-    /*public enum WorldStatsMode {
-        Global_Oxygen,
-        Global_Nutrients,
-        Global_Detritus,
-        Global_Decomposers,
-        Global_Algae_Grid,
-        Global_Algae_Particles,
-        Global_Zooplankton,
-        Global_Live_Agents,
-        Global_Dead_Agents,
-        Global_Eggsacks,
-        Global_Water_Currents_Velocity
-    }
-
-    public enum SpeciesStatsMode {
-        Average_Lifespan,
-        Avg_Nutrients_Consumed,
-        Avg_Algae_Consumed,
-        Avg_Meat_Consumed,
-        Avg_Body_Size,
-        Avg_Specialization_Offense,
-        Avg_Specialization_Defense,
-        Avg_Specialization_Speed,
-        Avg_Specialization_Utility,
-        Avg_Diet_Specialization_Nutrients,
-        Avg_Diet_Specialization_Algae,
-        Avg_Diet_Specialization_Meat,
-        Avg_Num_Neurons_In_Brain,
-        Avg_Num_Axons_In_Brain,
-        Avg_Experience_Earned,
-        Avg_Fitness_Score,
-        Avg_Amount_Damage_Inflicted,
-        Avg_Amount_Damage_Taken
-    }
-
-    public Button buttonGraphLifespan;
-    public Button buttonGraphBodySizes;
-    public Button buttonGraphConsumption;
-    public Button buttonGraphPredation;
-    public Button buttonGraphNutrients;
-    public Button buttonGraphMutation;
-    */
+    
     public float[] maxValuesStatArray;
 
     public float stirStickDepth = 0f;
@@ -588,7 +410,8 @@ private bool treeOfLifeInfoOnC = false;
     public Vector3 curCtrlCursorPositionOnWaterPlane;
     private bool rightTriggerOn = false;
 
-    public bool isDraggingMouse = false;
+    public bool isDraggingMouseLeft = false;
+    public bool isDraggingMouseRight = false;
     public bool isDraggingSpeciesNode = false;
 
     public int selectedSpeciesID;
@@ -962,12 +785,17 @@ private bool treeOfLifeInfoOnC = false;
 
             // &&&&&&&&&&&&&&&&& MOUSE: &&&&&&&&&&&&&&&
             bool leftClickThisFrame = Input.GetMouseButtonDown(0);
-            bool letGoThisFrame = Input.GetMouseButtonUp(0);
-            isDraggingMouse = Input.GetMouseButton(0);
-
-            if (letGoThisFrame) {
-                isDraggingMouse = false;
+            bool rightClickThisFrame = Input.GetMouseButtonDown(1);
+            bool letGoThisFrameLeft = Input.GetMouseButtonUp(0);
+            bool letGoThisFrameRight = Input.GetMouseButtonUp(1);
+            isDraggingMouseLeft = Input.GetMouseButton(0);
+            isDraggingMouseRight = Input.GetMouseButton(1);
+            if (letGoThisFrameLeft) {
+                isDraggingMouseLeft = false;
                 isDraggingSpeciesNode = false;
+            }
+            if (letGoThisFrameRight) {
+                isDraggingMouseRight = false;
             }
 
             // check for player clicking on an animal in the world
@@ -1004,68 +832,11 @@ private bool treeOfLifeInfoOnC = false;
                     recentlyCreatedSpeciesTimeStepCounter = 0;
                 }
             }
-            //public int recentlyCreatedSpeciesTimeStepCounter = 0;
-            //isUnlockCooldown = false;
-    //private int unlockCooldownCounter = 0;
-            /*if(isUnlockCooldown) {
-                unlockCooldownCounter++;
-                if(unlockCooldownCounter > 420) {
-                    isUnlockCooldown = false;
-                    unlockCooldownCounter = 0;
-                }
-            }*/
-            //
-
-            //if (gameManager.simulationManager.trophicLayersManager.pendingTrophicSlot) {
-            //    panelPendingClickPrompt.SetActive(true);
-            //}
-
-            // This Update() loop all happens before the Event System button click calls,
-            // ... so if you disable a button now it will prevent clicking by hiding button UI
-
-            //if(pressedRemoveSpecies) { // flag that the remove button was pressed
-                //if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlot) {
-                    //Debug.Log("pressedRemoveSpecies!");
-                    //pressedRemoveSpecies = false;
-                //}
-                //CancelSpeciesSlot();
-                //gameManager.simulationManager.trophicLayersManager.pendingTrophicSlot = false;
-            //}
-
+            
             if (EventSystem.current.IsPointerOverGameObject()) {  // if mouse is over ANY unity canvas UI object (with raycast enabled)
                 //Debug.Log("MouseOverUI!!!");
             }
             else {
-                /*if (gameManager.simulationManager.trophicLayersManager.pendingTrophicSlot) {
-                    //panelPendingClickPrompt.SetActive(true);
-                    mouseCursorVisible = true;
-
-                    if (leftClickThisFrame) {
-                        bool createSpecies = false;
-                        if(gameManager.simulationManager.trophicLayersManager.GetAgentsOnOff()) {
-                            createSpecies = true;
-                        }
-                        // **** CREATE SPECIES HERE:::::: ****
-                        gameManager.simulationManager.trophicLayersManager.CreateTrophicSlotSpecies(gameManager.simulationManager, gizmoPos, gameManager.simulationManager.simAgeTimeSteps);
-
-                        gameManager.theRenderKing.baronVonWater.StartCursorClick(gizmoPos);
-
-                        //toolbarInfluencePoints -= addSpeciesInfluenceCost;
-                        
-                        if(gameManager.simulationManager.trophicLayersManager.pendingTrophicSlotRef.kingdomID == 2) {
-                            if(gameManager.simulationManager.trophicLayersManager.pendingTrophicSlotRef.tierID == 1) {
-                                if(createSpecies) {
-                                    gameManager.simulationManager.CreateAgentSpecies(new Vector3(curMousePositionOnWaterPlane.x, curMousePositionOnWaterPlane.y, 0f));
-                                    gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[gameManager.simulationManager.trophicLayersManager.pendingTrophicSlotRef.slotID].linkedSpeciesID = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList.Count - 1].speciesID;
-                                }
-                                
-                            }
-                        }
-                    }
-                    else {                    
-                    }
-                }
-                */
                 
             
                 if (curActiveTool == ToolType.Inspect || curActiveTool == ToolType.None) {                    
@@ -1080,7 +851,7 @@ private bool treeOfLifeInfoOnC = false;
                     gameManager.simulationManager.theRenderKing.ClickTestTerrain(false);
                     float isActing = 0f;
                     
-                    if (isDraggingMouse) {
+                    if (isDraggingMouseLeft) {
                         
                         isActing = 1f;
                         
@@ -1105,7 +876,7 @@ private bool treeOfLifeInfoOnC = false;
                     else {
                         stirStickDepth = Mathf.Lerp(stirStickDepth, -4f, 0.2f);
                     }
-                    gameManager.theRenderKing.isStirring = isDraggingMouse;
+                    gameManager.theRenderKing.isStirring = isDraggingMouseLeft;
                     gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_IsStirring", isActing);
                     gameManager.theRenderKing.gizmoStirStickAMat.SetFloat("_IsStirring", isActing);
                     //gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_Radius", Mathf.Lerp(0.05f, 2.5f, gameManager.theRenderKing.baronVonWater.camDistNormalized));  // **** Make radius variable! (possibly texture based?)
@@ -1113,22 +884,39 @@ private bool treeOfLifeInfoOnC = false;
                 }
 
                 gameManager.theRenderKing.isBrushing = false;
+                gameManager.theRenderKing.isSpiritBrushOn = false;
                 gameManager.theRenderKing.nutrientToolOn = false;
+                gameManager.simulationManager.vegetationManager.isBrushActive = false;
 
                 //gameManager.simulationManager.theRenderKing.ClickTestTerrain(true); // *********************** always updates!
+                if (curActiveTool == ToolType.Add || curActiveTool == ToolType.Remove) {
+                    // What Palette Trophic Layer is selected?
 
-                if (curActiveTool == ToolType.Add) {
+
                     gameManager.simulationManager.PlayerToolStirOff();
-                    if (isDraggingMouse) {
-                        gameManager.simulationManager.theRenderKing.ClickTestTerrain(true); // *********************** always updates!
+
+                    if (isDraggingMouseLeft || isDraggingMouseRight) {
+                        // IF TERRAIN SELECTED::::
+                        if (gameManager.simulationManager.trophicLayersManager.isSelectedTrophicSlot) {
+                            if (gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID > 2) {
+                                gameManager.simulationManager.theRenderKing.ClickTestTerrain(true);
+                            }
+
+                            // DECOMPOSERS::::
+                            if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 0) {
+                                gameManager.simulationManager.vegetationManager.isBrushActive = true;
+                            }
+                        }
+
+                        
                         gameManager.theRenderKing.isBrushing = true;
-                        //toolbarInfluencePoints = Mathf.Clamp01(toolbarInfluencePoints - 0.0025f);
-                        //gameManager.simulationManager.simResourceManager.curGlobalNutrients += 0.25f;
-                        //gameManager.simulationManager.simResourceManager.curGlobalDetritus += 0.15f;
-                        //gameManager.simulationManager.vegetationManager.AddResourcesAtCoords(new Vector4(0.1f, 0f, 0f, 0f), curMousePositionOnWaterPlane.x / SimulationManager._MapSize, curMousePositionOnWaterPlane.y / SimulationManager._MapSize);
+                        gameManager.theRenderKing.isSpiritBrushOn = true;
+                        gameManager.theRenderKing.spiritBrushPosNeg = 1f;
+                        if(isDraggingMouseRight) {  // *** Re-Factor!!!
+                            gameManager.theRenderKing.spiritBrushPosNeg = -1f;
+                        }
 
-                        //gameManager.theRenderKing.nutrientToolOn = true;
-
+                        // Also Stir Water -- secondary effect
                         float mag = smoothedMouseVel.magnitude;
                         float radiusMult = Mathf.Lerp(0.075f, 1.33f, Mathf.Clamp01(gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.4f)); // 0.62379f; // (1f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.5f);
 
@@ -1139,7 +927,58 @@ private bool treeOfLifeInfoOnC = false;
                         else {
                             gameManager.simulationManager.PlayerToolStirOff();
                         }
-                        gameManager.theRenderKing.isStirring = isDraggingMouse;
+                        gameManager.theRenderKing.isStirring = isDraggingMouseLeft || isDraggingMouseRight; // always true
+
+                        /*if (isDraggingMouseRight) {
+
+                        }
+                        else {
+                            gameManager.theRenderKing.isBrushing = true;
+                            gameManager.theRenderKing.isSpiritBrushOn = true;
+                            gameManager.theRenderKing.spiritBrushPosNeg = -1f;
+                            if() {
+                                gameManager.theRenderKing.spiritBrushPosNeg = 1f;
+                            }
+
+                            float mag = smoothedMouseVel.magnitude;
+                            float radiusMult = Mathf.Lerp(0.075f, 1.33f, Mathf.Clamp01(gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.4f)); // 0.62379f; // (1f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.5f);
+
+                            if (mag > 0f) {
+                                gameManager.simulationManager.PlayerToolStirOn(curMousePositionOnWaterPlane, smoothedMouseVel * (0.25f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.2f), radiusMult);
+
+                            }
+                            else {
+                                gameManager.simulationManager.PlayerToolStirOff();
+                            }
+                            gameManager.theRenderKing.isStirring = isDraggingMouseLeft;
+                        }*/
+                    }
+                    else {
+                        gameManager.simulationManager.theRenderKing.ClickTestTerrain(false);
+                    }
+                }
+                else {
+
+                }
+                /*if (curActiveTool == ToolType.Add) {
+                    gameManager.simulationManager.PlayerToolStirOff();
+                    if (isDraggingMouseLeft) {
+                        gameManager.simulationManager.theRenderKing.ClickTestTerrain(true); // *********************** always updates!
+                        gameManager.theRenderKing.isBrushing = true;
+                        gameManager.theRenderKing.isSpiritBrushOn = true;
+                        gameManager.theRenderKing.spiritBrushPosNeg = 1f;
+                        
+                        float mag = smoothedMouseVel.magnitude;
+                        float radiusMult = Mathf.Lerp(0.075f, 1.33f, Mathf.Clamp01(gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.4f)); // 0.62379f; // (1f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.5f);
+
+                        if (mag > 0f) {
+                            gameManager.simulationManager.PlayerToolStirOn(curMousePositionOnWaterPlane, smoothedMouseVel * (0.25f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.2f), radiusMult);
+
+                        }
+                        else {
+                            gameManager.simulationManager.PlayerToolStirOff();
+                        }
+                        gameManager.theRenderKing.isStirring = isDraggingMouseLeft;
                     }
                     else {
                         //gameManager.theRenderKing.isBrushing = false;
@@ -1151,10 +990,12 @@ private bool treeOfLifeInfoOnC = false;
                 }
                 if(curActiveTool == ToolType.Remove) {
                     gameManager.simulationManager.PlayerToolStirOff();
-                    if(isDraggingMouse) {
+                    if(isDraggingMouseLeft) {
                         //gameManager.simulationManager.theRenderKing.ClickTestTerrain(true);
                         gameManager.simulationManager.theRenderKing.ClickTestTerrain(true); // *********************** always updates!
                         gameManager.theRenderKing.isBrushing = true;
+                        gameManager.theRenderKing.isSpiritBrushOn = true;
+                        gameManager.theRenderKing.spiritBrushPosNeg = -1f;
                         //toolbarInfluencePoints = Mathf.Clamp01(toolbarInfluencePoints - 0.0025f);
                         //gameManager.simulationManager.simResourceManager.curGlobalNutrients -= 0.5f;
                         //gameManager.simulationManager.simResourceManager.curGlobalDetritus -= 0.5f;
@@ -1169,12 +1010,12 @@ private bool treeOfLifeInfoOnC = false;
                         else {
                             
                         }
-                        gameManager.theRenderKing.isStirring = isDraggingMouse;
+                        gameManager.theRenderKing.isStirring = isDraggingMouseLeft;
                     } 
                     else {
                         gameManager.simulationManager.theRenderKing.ClickTestTerrain(false); // *********************** always updates!
                     }
-                }
+                }*/
             }
 
             /*if (gameManager.simulationManager.trophicLayersManager.selectedTrophicSlot) {

@@ -8,6 +8,7 @@ public class TrophicLayersManager {
     private bool algaeOn = false;
     private bool zooplanktonOn = false;
     private bool agentsOn = false;
+    private bool terrainOn = true;
 
     //public bool pendingTrophicSlot = false;
     //public TrophicSlot pendingTrophicSlotRef;
@@ -32,6 +33,7 @@ public class TrophicLayersManager {
         algaeOn = false;
         zooplanktonOn = false;
         agentsOn = false;
+        terrainOn = false;
 
         // DECOMPOSERS::::  // hacky manual initialization for now!!!!
         kingdomDecomposers = new TrophicKingdom();
@@ -64,6 +66,7 @@ public class TrophicLayersManager {
         animalsTier1.trophicSlots[3].Initialize("Vertebrate", TrophicSlot.SlotStatus.Locked, 2, 1, 3);
         kingdomAnimals.trophicTiersList.Add(animalsTier1);
 
+        // TERRAIN !!!!::::::
         kingdomTerrain = new TrophicKingdom();
         kingdomTerrain.name = "Terrain";
         TrophicTier terrainTier0 = new TrophicTier();

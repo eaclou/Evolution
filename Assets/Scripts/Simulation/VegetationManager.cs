@@ -46,6 +46,8 @@ public class VegetationManager {
     
     public Vector2[] resourceGridSpawnPatchesArray;
 
+    public bool isBrushActive = false;
+
     //public Vector2 algaeOriginPos;
     //public float algaeOnLerp01;
         
@@ -246,6 +248,12 @@ public class VegetationManager {
         computeShaderResourceGrid.SetFloat("_DeltaTime", fluidManagerRef.deltaTime);
         computeShaderResourceGrid.SetFloat("_InvGridScale", fluidManagerRef.invGridScale);
         computeShaderResourceGrid.SetFloat("_MapSize", SimulationManager._MapSize);
+        float brushOn = 0f;
+        if(isBrushActive) {  // Set from uiManager
+            brushOn = 1f;
+        }
+        computeShaderResourceGrid.SetFloat("_IsSpiritBrushOn", brushOn);
+        computeShaderResourceGrid.SetFloat("_SpiritBrushPosNeg", theRenderKingRef.spiritBrushPosNeg);
         computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "VelocityRead", fluidManagerRef._VelocityA);
         computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "rdRead", rdRT2);
         computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "rdWrite", rdRT1);

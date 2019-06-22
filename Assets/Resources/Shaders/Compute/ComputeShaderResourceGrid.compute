@@ -51,6 +51,9 @@ uniform float _DeltaTime;
 uniform float _InvGridScale;
 uniform float _MapSize;
 
+uniform float _IsSpiritBrushOn;
+uniform float _SpiritBrushPosNeg;
+
 uniform float _CoordX;
 uniform float _CoordY;
 
@@ -298,13 +301,15 @@ void CSAdvectRD (uint3 id : SV_DispatchThreadID)
 	float yCoord = ((float)id.y + 0.5)  / _TextureResolution;
 	float2 uvOrigin = float2(xCoord, yCoord);
 
-	float2 uvSample = uvOrigin - _DeltaTime * _InvGridScale * VelocityRead.SampleLevel(_LinearClamp, uvOrigin, 0).xy * 0.1;
+	float2 uvSample = uvOrigin - _DeltaTime * _InvGridScale * VelocityRead.SampleLevel(_LinearClamp, uvOrigin, 0).xy * 0.45;
 	float4 newDensity = rdRead.SampleLevel(_LinearClamp, uvSample, 0);
 
 	// Handle SpiritBrush Here????
 	float4 spiritBrushSample = _SpiritBrushTex.SampleLevel(_LinearClamp, uvSample, 0);
 
-	newDensity.y = saturate(newDensity.y - spiritBrushSample.x);  // *** TEMPORARY!!! **** Decomposers removed from brushing
+	float brushMagnitude = 4.20;
+	float deltaBrush = _IsSpiritBrushOn * _SpiritBrushPosNeg * spiritBrushSample.x;
+	newDensity.y = saturate(newDensity.y + deltaBrush * brushMagnitude);  // *** TEMPORARY!!! **** Decomposers removed from brushing
 			
 	rdWrite[id.xy] = newDensity;
 	
