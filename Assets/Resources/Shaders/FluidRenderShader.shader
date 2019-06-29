@@ -63,9 +63,8 @@
 				// sample the texture
 				fixed4 density = tex2D(_DensityTex, i.uv);
 				//density.a = 1;
-				density.rgb = lerp(density.rgb, float3(0.64, 1, 0.45) * 0.25, 0.85);
-				density.a = saturate((density.a - 0.065) * 8.5) * 0.93;
-				return density;
+				
+				
 				fixed4 velocity = tex2D(_VelocityTex, i.uv);
 				fixed4 pressure = tex2D(_PressureTex, i.uv);
 				fixed4 divergence = tex2D(_DivergenceTex, i.uv);
@@ -80,12 +79,31 @@
 				//finalColor.a = smoothstep(0.15, 0.3, density.y) * 0.15;
 				
 				//float3 Value2D(float2 p, float frequency)
+				float timeMult = 0.420;
 				float noiseMag01 = (Value3D(float3(-_Time.y * 0.25, -i.uv), 53).x * 0.5 + 0.5);
-				float noiseMag02 = (Value3D(float3(_Time.y * 0.2, i.uv), 78).x * 0.5 + 0.5);				
-				float noiseMag03 = (Value3D(float3(_Time.y * 0.15, -i.uv), 104).x * 0.5 + 0.5);
-				float noiseMag04 = (Value3D(float3(-_Time.y * 0.1, -i.uv), 132.331).x * 0.5 + 0.5);
+				float noiseMag02 = (Value3D(float3(_Time.y * 0.0042 * timeMult, i.uv), 178).x * 0.5 + 0.5);				
+				float noiseMag03 = (Value3D(float3(_Time.y * 0.0195 * timeMult, -i.uv), 304).x * 0.5 + 0.5);
+				float noiseMag04 = (Value3D(float3(-_Time.y * 0.012 * timeMult, -i.uv), 532.331).x * 0.5 + 0.5);
 
-				float noiseMag = saturate(noiseMag01 * noiseMag02 * noiseMag03 * noiseMag04 * 0.4) + 0.4; // * noiseMag01;
+				float noiseMag = saturate((noiseMag04 * 0.4 + noiseMag02 * 0.2 + noiseMag03 * 0.4)); // * noiseMag01;
+				noiseMag = saturate((noiseMag - 0.5) * 2 + 0.5);
+				density.rgb = lerp(density.rgb, float3(0.64, 1, 0.45) * 0.25, 0.85);
+				density.a = saturate((density.a - 0.065) * 8.5) * 0.93;
+
+				//density.a *= (noiseMag * 0.01 + 0.99);
+				//float4 testAlpha = density;
+				//testAlpha.a *= (noiseMag * 0.25 + 0.75);
+				float2 grad = float2(ddx(density.a), ddy(density.a));
+				float2 gradNorm = normalize(grad);
+				float2 lightDir = float2(0,-1);
+				float diffuse = dot(gradNorm, lightDir) * 0.5 + 0.5;
+				float shadow = dot(gradNorm, -lightDir) * 0.5 + 0.5;
+
+				density.rgb += float3(1,1,1) * saturate(diffuse) * 0.1;
+				density.rgb -= float3(1,1,1) * saturate(shadow) * 0.1;
+				density.a *= (noiseMag * 0.95 + 0.05);
+				
+				return saturate(density);
 
 				float pressureAmount = saturate((pressure.y - 0.2) * 3);
 				//finalColor.a += pressureAmount * 0.4 * noiseMag;
