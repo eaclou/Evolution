@@ -456,11 +456,13 @@ public class UIManager : MonoBehaviour {
         simEventComponentsArray[2] = simEvent2;
         simEventComponentsArray[3] = simEvent3;
         */
-        ClickToolButtonStir();
+        ClickToolButtonAdd();
         //buttonToolbarExpandOn.GetComponent<Animator>().StopPlayback();
-        buttonToolbarExpandOn.GetComponent<Animator>().enabled = false;
+        //buttonToolbarExpandOn.GetComponent<Animator>().enabled = false;
         buttonToolbarInspect.GetComponent<Animator>().enabled = false;
 
+        buttonToolbarExpandOn.GetComponent<Animator>().enabled = true;
+        buttonToolbarExpandOn.interactable = true;
 
         //ClickToolButtonInspect();  // **** Clean this up! don't mix UI click function with underlying code for initialization
     }

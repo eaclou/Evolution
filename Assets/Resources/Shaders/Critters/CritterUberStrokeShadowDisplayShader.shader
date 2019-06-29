@@ -112,7 +112,7 @@
 				float4 waterSurfaceTex = tex2D(_WaterSurfaceTex, i.altitudeUV);
 
 				frameBufferColor.rgb *= 0.75; // = lerp(frameBufferColor.rgb, particleColor, 0.25);
-				float4 finalColor = GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, float4(1,1,1,1));
+				float4 finalColor = GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, float4(0,0,0,0));
 				finalColor.a = brushColor.a * 0.5;
 
 				return finalColor;

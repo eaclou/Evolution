@@ -87,8 +87,8 @@ float4 GetGroundColor(float3 worldPos, float4 frameBufferColor, float4 altitudeT
 	float minFog = 0.06125;
 	
 	float4 finalColor = frameBufferColor;
-	float3 decomposerHue = float3(0.86,1,0.4) * 2.01; // float3(3.5,2.5,1);
-	float decomposerMask = saturate(resourceTex.y * resourceTex.y * resourceTex.y * 4.20);
+	float3 decomposerHue = float3(1,0.71,0.14) * 1.11; // float3(3.5,2.5,1);
+	float decomposerMask = saturate(resourceTex.y * resourceTex.y * resourceTex.y * 1.20);
 	
 	finalColor.rgb += decomposerHue * decomposerMask;
 	//finalColor.rgb = finalColor.rgb - decomposerHue * decomposerMask;

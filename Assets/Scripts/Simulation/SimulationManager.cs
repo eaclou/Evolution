@@ -609,8 +609,8 @@ public class SimulationManager : MonoBehaviour {
             }            
         }
 
-        fogColor = Color.Lerp(new Color(0.15f, 0.25f, 0.52f), new Color(0.07f, 0.27f, 0.157f), Mathf.Clamp01(simResourceManager.curGlobalAlgaeParticles * 0.05f));
-        fogAmount = Mathf.Lerp(0.167f, 0.99f, Mathf.Clamp01(simResourceManager.curGlobalAlgaeParticles * 0.0036f));
+        fogColor = Color.Lerp(new Color(0.15f, 0.25f, 0.52f), new Color(0.07f, 0.27f, 0.157f), Mathf.Clamp01(simResourceManager.curGlobalAlgaeParticles * 0.035f));
+        fogAmount = Mathf.Lerp(0.3f, 0.55f, Mathf.Clamp01(simResourceManager.curGlobalAlgaeParticles * 0.0036f));
 
         simStateData.PopulateSimDataArrays(this);  // reads from GameObject Transforms & RigidBodies!!! ++ from FluidSimulationData!!!
         theRenderKing.RenderSimulationCameras(); // will pass current info to FluidSim before it Ticks()
@@ -620,7 +620,7 @@ public class SimulationManager : MonoBehaviour {
         theRenderKing.Tick(); // updates all renderData, buffers, brushStrokes etc.
         // Simulate timestep of fluid Sim - update density/velocity maps:
         // Or should this be right at beginning of frame????? ***************** revisit...
-        environmentFluidManager.Tick(); // ** Clean this up, but generally OK
+        environmentFluidManager.Tick(vegetationManager.rdRT1); // ** Clean this up, but generally OK
 
         //vegetationManager.ApplyDiffusionOnResourceGrid(environmentFluidManager);
         //vegetationManager.AdvectResourceGrid(environmentFluidManager);

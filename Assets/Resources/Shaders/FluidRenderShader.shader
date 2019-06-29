@@ -62,6 +62,10 @@
 				
 				// sample the texture
 				fixed4 density = tex2D(_DensityTex, i.uv);
+				//density.a = 1;
+				density.rgb = lerp(density.rgb, float3(0.64, 1, 0.45) * 0.25, 0.85);
+				density.a = saturate((density.a - 0.065) * 8.5) * 0.93;
+				return density;
 				fixed4 velocity = tex2D(_VelocityTex, i.uv);
 				fixed4 pressure = tex2D(_PressureTex, i.uv);
 				fixed4 divergence = tex2D(_DivergenceTex, i.uv);
@@ -72,7 +76,8 @@
 				//return density; // + density2 * 0.25;
 				fixed4 finalColor = float4(0,0,0,1);
 				finalColor.xyz = density.xyz;
-				finalColor.a = smoothstep(0.15, 0.3, density.y) * 0.15;
+				finalColor.a = density.y;
+				//finalColor.a = smoothstep(0.15, 0.3, density.y) * 0.15;
 				
 				//float3 Value2D(float2 p, float frequency)
 				float noiseMag01 = (Value3D(float3(-_Time.y * 0.25, -i.uv), 53).x * 0.5 + 0.5);
@@ -83,11 +88,11 @@
 				float noiseMag = saturate(noiseMag01 * noiseMag02 * noiseMag03 * noiseMag04 * 0.4) + 0.4; // * noiseMag01;
 
 				float pressureAmount = saturate((pressure.y - 0.2) * 3);
-				finalColor.a += pressureAmount * 0.4 * noiseMag;
+				//finalColor.a += pressureAmount * 0.4 * noiseMag;
 				finalColor.rgb += pressureAmount * 0.2 * noiseMag;
 
 				float velocityGlow = saturate((length(velocity) - 0.025) * 3.3);
-				finalColor.a += velocityGlow * 0.4 * noiseMag;
+				//finalColor.a += velocityGlow * 0.4 * noiseMag;
 				//finalColor.rgb += velocityGlow * 0.65 * noiseMag;
 				//finalColor.rgb = lerp(finalColor.rgb, float3(1,1,0), velocityGlow);
 				
@@ -97,7 +102,7 @@
 				float shallowsMask = 1.0 - saturate(((1-altitude) - 0.485) * 2.5);
 				float shorelineGlow = shallowsMask * (1.0 - onLandMask);
 				finalColor.rgb += shorelineGlow * 0.75;
-				finalColor.a += shorelineGlow * 0.25;
+				//finalColor.a += shorelineGlow * 0.25;
 				
 				//finalColor.a *= (0.15 + noiseMag * 0.85);
 				//finalColor.rgb = float3(1,1,1) * 0.5;

@@ -195,7 +195,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
     public void RerollForcePoints() {
         CreateForcePoints(12f, 120f, 256f);
     }
-    public void Tick() {
+    public void Tick(RenderTexture reactionDiffusionRT) {
         //Debug.Log("Tick!");
         computeShaderFluidSim.SetFloat("_Time", Time.time);
         computeShaderFluidSim.SetFloat("_ForceMagnitude", forceMultiplier);
@@ -205,7 +205,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
         computeShaderFluidSim.SetFloat("_ColorRefreshAmount", colorRefreshBackgroundMultiplier);
 
         // Lerp towards sourceTexture color:
-        RefreshColor();
+        RefreshColor(reactionDiffusionRT);
 
         // ADVECTION:::::
         Advection();
@@ -409,7 +409,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
         
     }
 
-    private void RefreshColor() { 
+    private void RefreshColor(RenderTexture reactionDiffusionRT) { 
         int kernelRefreshColor = computeShaderFluidSim.FindKernel("RefreshColor");
 
         computeShaderFluidSim.SetFloat("_TextureResolution", (float)resolution);
@@ -424,6 +424,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
         computeShaderFluidSim.SetTexture(kernelRefreshColor, "colorInjectionRenderTex", sourceColorRT);
         computeShaderFluidSim.SetTexture(kernelRefreshColor, "DensityRead", densityB);
         computeShaderFluidSim.SetTexture(kernelRefreshColor, "DensityWrite", densityA);
+        computeShaderFluidSim.SetTexture(kernelRefreshColor, "nutrientMapRead", reactionDiffusionRT); 
         computeShaderFluidSim.Dispatch(kernelRefreshColor, resolution / 16, resolution / 16, 1);
 
         
@@ -467,7 +468,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
         
         computeShaderFluidSim.Dispatch(kernelVelocityInjectionPoints, resolution / 16, resolution / 16, 1);
     }
-    private void DensityInjectionPoints() {
+    /*private void DensityInjectionPoints() {
         
         int kernelDensityInjectionPoints = computeShaderFluidSim.FindKernel("DensityInjectionPoints");
         computeShaderFluidSim.SetFloat("_TextureResolution", (float)resolution);
@@ -478,7 +479,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
         computeShaderFluidSim.SetTexture(kernelDensityInjectionPoints, "DensityWrite", densityB);
 
         computeShaderFluidSim.Dispatch(kernelDensityInjectionPoints, resolution / 16, resolution / 16, 1);
-    }    
+    }  */  
     private void VelocityDivergence(RenderTexture readTex) {
         int kernelViscosityDivergence = computeShaderFluidSim.FindKernel("VelocityDivergence");
 

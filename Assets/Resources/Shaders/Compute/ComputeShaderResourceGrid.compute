@@ -221,12 +221,15 @@ void CSAddResourcesAtCoords (uint3 id : SV_DispatchThreadID)
 [numthreads(32,32,1)]
 void CSInitRD (uint3 id : SV_DispatchThreadID)
 {	
+	rdWrite[id.xy] = float4(0, 0, 0, 1);   // Start blank
+	
+	/*
 	float2 uv = ((float2)id.xy + 0.5) / _TextureResolution;
 
 	float dist = 1.0 - saturate(length((uv * 1.17 % 1) - 0.5) * 33);
 	float val = dist;
 	rdWrite[id.xy] = float4(1 - val, val, 0, 1);
-	
+	*/
 }
 
 [numthreads(32,32,1)]
@@ -257,12 +260,12 @@ void CSSimRD (uint3 id : SV_DispatchThreadID)
 	
 	float4 altitudeSample = _AltitudeTex.SampleLevel(_PointClamp, uv + float2( 0,  0), 0);
 	float altitude01 = altitudeSample.x;
-	float altitudeMask = saturate((altitude01 - 0.5) * 10);
+	float altitudeMask = saturate((altitude01 - 0.55) * 10);
 
-	float killRate = lerp(0.059, 0.069, sin(uv.x * 3.528 - _Time * 0.2872) * 0.5 + 0.5); // 0.062;
-	float feedRate = lerp(0.051, 0.059, cos(uv.y * 1.328 + _Time * 1.0413) * 0.5 + 0.5); //0.055;
-	float diffusionRateA = lerp(0.6, 1, frac(uv.x * 3.331 + _Time * 10));
-    float diffusionRateB = lerp(0.115, 0.46, frac(uv.y * 2.0457 + _Time * 14.23));
+	float killRate = lerp(0.060, 0.064, sin(uv.x * 3.528 - _Time * 0.2872) * 0.5 + 0.5); // 0.062;
+	float feedRate = lerp(0.052, 0.058, cos(uv.y * 1.328 + _Time * 1.0413) * 0.5 + 0.5); //0.055;
+	float diffusionRateA = lerp(0.9, 1, frac(uv.x * 3.331 + _Time * 10));
+    float diffusionRateB = lerp(0.26, 0.33, frac(uv.y * 2.0457 + _Time * 14.23));
 
 	diffusionRateA *= altitudeMask * 0.25 + 0.75;
 	diffusionRateB *= altitudeMask * 0.25 + 0.75;
@@ -301,7 +304,7 @@ void CSAdvectRD (uint3 id : SV_DispatchThreadID)
 	float yCoord = ((float)id.y + 0.5)  / _TextureResolution;
 	float2 uvOrigin = float2(xCoord, yCoord);
 
-	float2 uvSample = uvOrigin - _DeltaTime * _InvGridScale * VelocityRead.SampleLevel(_LinearClamp, uvOrigin, 0).xy * 0.45;
+	float2 uvSample = uvOrigin - _DeltaTime * _InvGridScale * VelocityRead.SampleLevel(_LinearClamp, uvOrigin, 0).xy * 0.75;
 	float4 newDensity = rdRead.SampleLevel(_LinearClamp, uvSample, 0);
 
 	// Handle SpiritBrush Here????

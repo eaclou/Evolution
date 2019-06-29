@@ -3294,6 +3294,12 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferSpiritBrush.SetViewProjectionMatrices(spiritBrushRenderCamera.worldToCameraMatrix, spiritBrushRenderCamera.projectionMatrix);
         // Draw Solid Land boundaries:
         float scale = Mathf.Lerp(0.2f, 16f, baronVonWater.camDistNormalized) * 6.283f;
+        if(simManager.trophicLayersManager.isSelectedTrophicSlot) {
+            if(simManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 0) {
+                scale *= 0.5f;
+            }
+        }
+        
         Matrix4x4 stirStickTransformMatrix = Matrix4x4.TRS(new Vector3(simManager.uiManager.curMousePositionOnWaterPlane.x, simManager.uiManager.curMousePositionOnWaterPlane.y, 0f), Quaternion.identity, Vector3.one * scale);
         //Debug.Log("mouseCursorPos: " + simManager.uiManager.curMousePositionOnWaterPlane.ToString());
         if(isBrushing) {
@@ -3729,7 +3735,7 @@ public class TheRenderKing : MonoBehaviour {
             cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.carpetBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.carpetBitsCBuffer.count);
             
-
+            /*
             // GROUND BITS:::   DECOMPOSERS
             if(simManager.trophicLayersManager.GetDecomposersOnOff()) {
                 baronVonTerrain.groundBitsShadowDisplayMat.SetPass(0);
@@ -3763,7 +3769,7 @@ public class TheRenderKing : MonoBehaviour {
                 cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.groundBitsCBuffer.count);
             
             }
-            
+            */
             /*if(simManager.trophicLayersManager.GetAlgaeOnOff()) {
                 // Algae Carpet!
                 algaeParticleDisplayMat.SetPass(0);
@@ -4003,7 +4009,7 @@ public class TheRenderKing : MonoBehaviour {
             }
             
             
-            
+            /*
             // suspended particle bits:
             baronVonWater.waterNutrientsBitsDisplayMat.SetPass(0);
             baronVonWater.waterNutrientsBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -4017,7 +4023,7 @@ public class TheRenderKing : MonoBehaviour {
             baronVonWater.waterNutrientsBitsDisplayMat.SetFloat("_NutrientDensity", Mathf.Clamp01(simManager.simResourceManager.curGlobalNutrients / 300f));
             cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonWater.waterNutrientsBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterNutrientsBitsCBuffer.count);
-            
+            */
             
 
             if(simManager.trophicLayersManager.GetAlgaeOnOff()) {
@@ -4138,7 +4144,7 @@ public class TheRenderKing : MonoBehaviour {
             
             float yOffset = Mathf.Sin(simManager.cameraManager.curTiltAngleDegrees * Mathf.Deg2Rad) * simManager.cameraManager.curCameraPos.z;
             Vector4 camFocusPos = new Vector4(simManager.cameraManager.curCameraPos.x, simManager.cameraManager.curCameraPos.y + yOffset, 0f, 0f);
-        
+        /*
             // Water surface reflective
             baronVonWater.waterQuadStrokesLrgDisplayMat.SetPass(0);
             baronVonWater.waterQuadStrokesLrgDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -4172,7 +4178,7 @@ public class TheRenderKing : MonoBehaviour {
             baronVonWater.waterQuadStrokesSmlDisplayMat.SetVector("_FogColor", simManager.fogColor);
             cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonWater.waterQuadStrokesSmlDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterQuadStrokesCBufferSml.count);
-        
+        */
                 
             /*// SURFACE BITS FLOATY:::::  // LILY PADS
             baronVonWater.waterSurfaceBitsDisplayMat.SetPass(0);

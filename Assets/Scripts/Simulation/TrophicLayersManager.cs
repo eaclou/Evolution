@@ -75,6 +75,10 @@ public class TrophicLayersManager {
         terrainTier0.trophicSlots[2].Initialize("Pebbles", TrophicSlot.SlotStatus.On, 3, 0, 2);
         terrainTier0.trophicSlots[3].Initialize("Sand", TrophicSlot.SlotStatus.On, 3, 0, 3);
         kingdomTerrain.trophicTiersList.Add(terrainTier0);
+                
+        selectedTrophicSlotRef = terrainTier0.trophicSlots[0];
+        //selectedTrophicSlotRef.status = TrophicSlot.SlotStatus.On;
+        isSelectedTrophicSlot = true;
     }
     public void CreateTrophicSlotSpecies(SimulationManager simManagerRef, Vector2 spawnPos, int timeStep) {
         
@@ -119,9 +123,7 @@ public class TrophicLayersManager {
 
                 simManager.uiManager.AnnounceUnlockAlgae();
                 simManager.uiManager.isUnlockCooldown = true;
-                simManager.uiManager.unlockedAnnouncementSlotRef = kingdomPlants.trophicTiersList[0].trophicSlots[0];
-                simManager.uiManager.buttonToolbarExpandOn.GetComponent<Animator>().enabled = true;
-                simManager.uiManager.buttonToolbarExpandOn.interactable = true;
+                simManager.uiManager.unlockedAnnouncementSlotRef = kingdomPlants.trophicTiersList[0].trophicSlots[0];                
             }
         }
         
