@@ -20,7 +20,7 @@ public class UIManager : MonoBehaviour {
     public Button buttonQuickStartResume;
     public Button buttonNewSimulation;
     public Text textMouseOverInfo;
-    public Texture2D healthDisplayTex;
+    //public Texture2D healthDisplayTex;
     public GameObject panelTitleMenu;
     public GameObject panelGameOptions;
 
@@ -47,6 +47,9 @@ public class UIManager : MonoBehaviour {
 
     public Color buttonActiveColor = new Color(1f, 1f, 1f, 1f);
     public Color buttonDisabledColor = new Color(0.75f, 0.75f, 0.75f, 1f);
+
+    public Color colorSpiritBrushLight;
+    public Color colorSpiritBrushDark;
 
     public Color colorDecomposersLight;
     public Color colorDecomposersDark;
@@ -103,30 +106,7 @@ public class UIManager : MonoBehaviour {
     public Material infoGraphAnimalsMat;
 
     public Material debugTextureViewerMat;
-    // Info Expanded: Species Overview:
-    //public GameObject panelInfoSpeciesOverview;
-    //private Texture2D infoSpeciesDecomposersDataTexture;
-    //private Texture2D infoSpeciesPlantsDataTexture;
-    //private Texture2D infoSpeciesAnimalsDataTexture;
-
-
-    /*public bool infoSpeciesSelected = false;
-    public int infoSpeciesSelectedKingdom = 0;
-    public int infoSpeciesSelectedTier = 0;
-    public int infoSpeciesSelectedSlot = 0;
-    public Button buttonInfoSpeciesDecomposers;
-    public Button buttonInfoSpeciesAlgae;
-    public Button buttonInfoSpeciesPlant1;
-    public Button buttonInfoSpeciesPlant2;
-    public Button buttonInfoSpeciesZooplankton;
-    public Button buttonInfoSpeciesAnimal1;
-    public Button buttonInfoSpeciesAnimal2;
-    public Button buttonInfoSpeciesAnimal3;
-    public Button buttonInfoSpeciesAnimal4;
-    public Text textInfoSpeciesName;
-    public Text textInfoSpeciesStats;
-    */
-
+    
     // announcements:
     private bool announceAlgaeCollapsePossible = false;
     private bool announceAlgaeCollapseOccurred = false;
@@ -135,14 +115,13 @@ public class UIManager : MonoBehaviour {
 
     public TrophicSlot unlockedAnnouncementSlotRef;
 
+    public bool isSpiritBrushSelected = true;
     // &&& PLAYER TOOLBAR &&& !!!! ==============================================
     public bool isActiveStirToolPanel = false;
-    public bool isToolbarExpandOn = false;
-    public bool isToolbarWingOn = false;
+    public bool isToolbarPaletteExpandOn = true;
+    public bool isToolbarDetailPanelOn = true;
     public int curToolbarWingPanelSelectID = 0;  // 0 == description, 1 == stats, 2 == mutate/upgrade
-    //public bool isToolbarWingDescriptionOn = false;
-    //public bool isToolbarWingStatsOn = true;
-    //public bool isToolbarWingMutationOn = false;  // < < <  there's a better way to handle this, but this is simple and works for now
+    
     public bool isToolbarDeletePromptOn = false;
     public int timerAnnouncementTextCounter = 0;
     public bool isAnnouncementTextOn = false;
@@ -161,19 +140,26 @@ public class UIManager : MonoBehaviour {
     private Button buttonPendingTrophicSlot;  // 
     private Button buttonSelectedTrophicSlot;
 
-    public GameObject panelToolbarExpand;
-    public Button buttonToolbarExpandOn;
-    public Button buttonToolbarExpandOff;
-
+    public GameObject panelToolbarPaletteExpand;
+    public Button buttonToolbarPaletteExpandOn;
+    
     private bool inspectToolUnlocked = false;
 
     public Button buttonToolbarInspect;
     public Sprite spriteToolbarInspectButton;
     //public Button buttonToolbarNutrients;
+    public Sprite spriteToolbarStirButton;
     public Button buttonToolbarStir;
-    public Button buttonToolbarMutate;
+    //public Button buttonToolbarMutate;
+    public Sprite spriteToolbarAddButton;
     public Button buttonToolbarAdd;
-    public Button buttonToolbarRemove;
+    //public Button buttonToolbarRemove;
+
+    public GameObject wireSpiritBrush;
+    public GameObject wireTerrain;
+    public GameObject wireAnimals;
+    public GameObject wirePlants;
+    public GameObject wireDecomposers;
 
     public GameObject panelPendingClickPrompt;
 
@@ -203,7 +189,7 @@ public class UIManager : MonoBehaviour {
     public Sprite spriteSpeciesSlotSelected;
     // // WING:::::
     public GameObject panelToolbarWing;
-    public GameObject panelToolbarWingDescription;
+    //public GameObject panelToolbarWingDescription;
     public GameObject panelToolbarWingStats;
     public GameObject panelToolbarWingMutation;
     public GameObject panelToolbarWingDeletePrompt;
@@ -228,6 +214,9 @@ public class UIManager : MonoBehaviour {
     public Image imageToolbarSpeciesPortraitBorder;
     public Text textSelectedSpeciesDescription;
     public int selectedSpeciesStatsIndex;
+    public Text textSelectedSpiritBrushName;
+    public Image imageToolbarSpiritBrushThumbnail;
+    public Image imageToolbarSpiritBrushThumbnailBorder;
     //public Texture2D textureWorldStats;
     //public Texture2D textureWorldStatsKey;
     //public Vector2[] tolWorldStatsValueRangesKeyArray;
@@ -236,7 +225,10 @@ public class UIManager : MonoBehaviour {
     public Sprite spriteAlgaePortrait;
     public Sprite spriteDecomposerPortrait;
     public Sprite spriteZooplanktonPortrait;
-
+    public Sprite spriteBedrockPortrait;
+    public Sprite spriteStonesPortrait;
+    public Sprite spritePebblesPortrait;
+    public Sprite spriteSandPortrait;
 
     //Inspect!!!
     public bool isActiveInspectPanel = false;
@@ -292,84 +284,22 @@ public class UIManager : MonoBehaviour {
 
     private RenderTexture[] debugTextureViewerArray;
 
-    /*public bool isActiveFeedToolPanel = false;
-    public GameObject panelFeedToolHUD;
-    public Animator animatorFeedToolPanel;
-    public Button buttonFeedToolSprinkle;
-    public Button buttonFeedToolPour;
-    public Slider sliderNutrientRegrowthRate;
-    private bool foodToolSprinkleOn = true;
-    private bool foodToolPourOn = false;
-
-    public bool isActiveMutateToolPanel = false;
-    public GameObject panelMutateToolHUD;
-    public Animator animatorMutateToolPanel;
-    public Slider sliderMutationRate;
-
-    public bool isActiveStirToolPanel = false;
-    public GameObject panelStirToolHUD;
-    public Animator animatorStirToolPanel;
-    */
-    /*
-        public bool isActiveToolsPanel = false;
-        public Button buttonToolOpenClose;
-        public Button buttonToolStir;
-        public Button buttonToolInspect;
-        public Button buttonToolFeed;
-        public Button buttonToolMutate;
-        public GameObject panelTools;
-        public Animator animatorToolsPanel;
-         */
-
-    /*public GameObject panelHUD;
-    public Image imageFood;
-    public Image imageHitPoints;
-    public Material foodMat;
-    public Material hitPointsMat;
-    public Text textScore;
-
-    public GameObject panelDeathScreen;
-    public Text textRespawnCounter;
-    public Text textCauseOfDeath;
-    public Text textPlayerScore;
-    */
     public GameObject panelObserverMode;
-    //public Text textCurGen;
-    //public Text textAvgLifespan;
-
+    
     public GameObject panelPaused;
 
     public GameObject panelDebug;
-    //public Material fitnessDisplayMat;
-    /*public Button buttonPause;
-    public Button buttonPlaySlow;
-    public Button buttonPlayNormal;
-    public Button buttonPlayFast;
-    public Button buttonModeA;
-    public Button buttonModeB;
-    public Button buttonModeC;
-    */
+    
     public Text textDebugTrainingInfo1;
     public Text textDebugTrainingInfo2;
     public Text textDebugTrainingInfo3;
     public Text textDebugSimSettings;
-    /*public Button buttonToggleRecording;
-    public Button buttonToggleTrainingSupervised;
-    public Button buttonResetGenomes;
-    public Button buttonClearTrainingData;
-    public Button buttonToggleTrainingPersistent;
-    */
+    
 
-
-    // TOP PANEL::::
-    //public GameObject panelTop;
-    //public Button buttonToggleHUD;
-    // public bool isActiveHUD = true;
     public Button buttonToggleDebug;
     public bool isActiveDebug = true;
 
     public bool isObserverMode = false;
-    //public bool deathScreenOn = false;
     public bool isPaused = false;
 
     public GameObject panelMainMenu;
@@ -419,18 +349,8 @@ public class UIManager : MonoBehaviour {
 
     private const int maxDisplaySpecies = 32;
 
-    //private int unlockCooldownTimer = 0;
-
-    /*public Color buttonEventMinorColor = new Color(53f / 255f, 114f / 255f, 97f / 255f);
-    public Color buttonEventMajorColor = new Color(53f / 255f, 67f / 255f, 107f / 255f);
-    public Color buttonEventExtremeColor = new Color(144f / 255f, 54f / 255f, 82f / 255f);
-    */
-    // Tree of Life:
-    //public Image imageTreeOfLifeDisplay;
-
     private float curSpeciesStatValue;
-    //private float curWorldStatValue;
-    //public int curClosestEventToCursor;
+    
     #endregion
 
 
@@ -461,8 +381,8 @@ public class UIManager : MonoBehaviour {
         //buttonToolbarExpandOn.GetComponent<Animator>().enabled = false;
         buttonToolbarInspect.GetComponent<Animator>().enabled = false;
 
-        buttonToolbarExpandOn.GetComponent<Animator>().enabled = true;
-        buttonToolbarExpandOn.interactable = true;
+        //buttonToolbarExpandOn.GetComponent<Animator>().enabled = true;
+        buttonToolbarPaletteExpandOn.interactable = true;
 
         //ClickToolButtonInspect();  // **** Clean this up! don't mix UI click function with underlying code for initialization
     }
@@ -908,6 +828,13 @@ public class UIManager : MonoBehaviour {
                             if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 0) {
                                 gameManager.simulationManager.vegetationManager.isBrushActive = true;
                             }
+                            // ANIMALS::::
+                            if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2) {
+                                if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 1) {  // AGENTS
+                                    gameManager.simulationManager.recentlyAddedSpeciesOn = true;
+                                }
+                            }
+                            
                         }
 
                         
@@ -923,7 +850,7 @@ public class UIManager : MonoBehaviour {
                         float radiusMult = Mathf.Lerp(0.075f, 1.33f, Mathf.Clamp01(gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.4f)); // 0.62379f; // (1f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.5f);
 
                         if (mag > 0f) {
-                            gameManager.simulationManager.PlayerToolStirOn(curMousePositionOnWaterPlane, smoothedMouseVel * (0.25f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.2f), radiusMult);
+                            gameManager.simulationManager.PlayerToolStirOn(curMousePositionOnWaterPlane, smoothedMouseVel * (0.25f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.2f) * 0.33f, radiusMult);
 
                         }
                         else {
@@ -931,140 +858,18 @@ public class UIManager : MonoBehaviour {
                         }
                         gameManager.theRenderKing.isStirring = isDraggingMouseLeft || isDraggingMouseRight; // always true
 
-                        /*if (isDraggingMouseRight) {
-
-                        }
-                        else {
-                            gameManager.theRenderKing.isBrushing = true;
-                            gameManager.theRenderKing.isSpiritBrushOn = true;
-                            gameManager.theRenderKing.spiritBrushPosNeg = -1f;
-                            if() {
-                                gameManager.theRenderKing.spiritBrushPosNeg = 1f;
-                            }
-
-                            float mag = smoothedMouseVel.magnitude;
-                            float radiusMult = Mathf.Lerp(0.075f, 1.33f, Mathf.Clamp01(gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.4f)); // 0.62379f; // (1f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.5f);
-
-                            if (mag > 0f) {
-                                gameManager.simulationManager.PlayerToolStirOn(curMousePositionOnWaterPlane, smoothedMouseVel * (0.25f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.2f), radiusMult);
-
-                            }
-                            else {
-                                gameManager.simulationManager.PlayerToolStirOff();
-                            }
-                            gameManager.theRenderKing.isStirring = isDraggingMouseLeft;
-                        }*/
                     }
                     else {
                         gameManager.simulationManager.theRenderKing.ClickTestTerrain(false);
+                        gameManager.simulationManager.recentlyAddedSpeciesOn = false;
                     }
                 }
                 else {
 
                 }
-                /*if (curActiveTool == ToolType.Add) {
-                    gameManager.simulationManager.PlayerToolStirOff();
-                    if (isDraggingMouseLeft) {
-                        gameManager.simulationManager.theRenderKing.ClickTestTerrain(true); // *********************** always updates!
-                        gameManager.theRenderKing.isBrushing = true;
-                        gameManager.theRenderKing.isSpiritBrushOn = true;
-                        gameManager.theRenderKing.spiritBrushPosNeg = 1f;
-                        
-                        float mag = smoothedMouseVel.magnitude;
-                        float radiusMult = Mathf.Lerp(0.075f, 1.33f, Mathf.Clamp01(gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.4f)); // 0.62379f; // (1f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.5f);
-
-                        if (mag > 0f) {
-                            gameManager.simulationManager.PlayerToolStirOn(curMousePositionOnWaterPlane, smoothedMouseVel * (0.25f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.2f), radiusMult);
-
-                        }
-                        else {
-                            gameManager.simulationManager.PlayerToolStirOff();
-                        }
-                        gameManager.theRenderKing.isStirring = isDraggingMouseLeft;
-                    }
-                    else {
-                        //gameManager.theRenderKing.isBrushing = false;
-                        gameManager.simulationManager.theRenderKing.ClickTestTerrain(false); // *********************** always updates!
-                    }
-                }
-                else {
-                    //gameManager.theRenderKing.isBrushing = false;
-                }
-                if(curActiveTool == ToolType.Remove) {
-                    gameManager.simulationManager.PlayerToolStirOff();
-                    if(isDraggingMouseLeft) {
-                        //gameManager.simulationManager.theRenderKing.ClickTestTerrain(true);
-                        gameManager.simulationManager.theRenderKing.ClickTestTerrain(true); // *********************** always updates!
-                        gameManager.theRenderKing.isBrushing = true;
-                        gameManager.theRenderKing.isSpiritBrushOn = true;
-                        gameManager.theRenderKing.spiritBrushPosNeg = -1f;
-                        //toolbarInfluencePoints = Mathf.Clamp01(toolbarInfluencePoints - 0.0025f);
-                        //gameManager.simulationManager.simResourceManager.curGlobalNutrients -= 0.5f;
-                        //gameManager.simulationManager.simResourceManager.curGlobalDetritus -= 0.5f;
-
-                        float mag = smoothedMouseVel.magnitude;
-                        float radiusMult = Mathf.Lerp(0.075f, 1.33f, Mathf.Clamp01(gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.4f)); // 0.62379f; // (1f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.5f);
-
-                        if (mag > 0f) {
-                            gameManager.simulationManager.PlayerToolStirOn(curMousePositionOnWaterPlane, smoothedMouseVel * (0.25f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.2f), radiusMult);
-
-                        }
-                        else {
-                            
-                        }
-                        gameManager.theRenderKing.isStirring = isDraggingMouseLeft;
-                    } 
-                    else {
-                        gameManager.simulationManager.theRenderKing.ClickTestTerrain(false); // *********************** always updates!
-                    }
-                }*/
-            }
-
-            /*if (gameManager.simulationManager.trophicLayersManager.selectedTrophicSlot) {
-                    
-                panelPendingClickPrompt.SetActive(true); // customized message -- selected vs. pending?
-                //mouseCursorVisible = true;
-                // display remove button
-                if (gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 0) {
-                    buttonToolbarRemoveDecomposer.gameObject.SetActive(true);
-                }
-                else if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 1) {
-                    buttonToolbarRemovePlant.gameObject.SetActive(true);
-                }
-                else if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2) {
-                    buttonToolbarRemoveAnimal.gameObject.SetActive(true);
-                }
-                
-                
-                
-
-                if (leftClickThisFrame) {
-                    if(!pressedRemoveSpecies) {
-                        gameManager.simulationManager.trophicLayersManager.ClickedSelectedTrophicSlot();   
-                        
-                        //toolbarInfluencePoints -= addSpeciesInfluenceCost;
-                        treeOfLifeManager.ClickedOnSpeciesNode(1);  // selected speciesID
-                        UpdateTolSpeciesColorUI(); // updates creature portrait render to selectedID
-                        if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2) {                            
-
-                            if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 1) {
-                                //gameManager.simulationManager.CreateAgentSpecies(new Vector3(curMousePositionOnWaterPlane.x, curMousePositionOnWaterPlane.y, 0f));
-                            }
-                        }
-                    }
-                    else {
-                        //RemoveAgentSpecies();
-                    }                             
-                    
-                }
-                else {
-
-                }
-            }
-            else {
                 
             }
-            */
+            
             if(stirGizmoVisible) {
                 gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_IsVisible", 1f);
                 gameManager.theRenderKing.gizmoStirStickAMat.SetFloat("_IsVisible", 1f);
@@ -1162,6 +967,38 @@ public class UIManager : MonoBehaviour {
         }*/
     }
 
+    private string GetSpiritBrushSummary() {
+        string str = "";
+
+        switch(curActiveTool) {
+            case ToolType.None:
+                //buttonToolbarInspect.GetComponent<Image>().color = buttonDisabledColor;
+
+                break;
+            case ToolType.Inspect:
+                str = "This spirit helps reveal hidden information.\n\nAlt Effect: None";
+                break;
+            case ToolType.Mutate:
+                //buttonToolbarMutate.GetComponent<Image>().color = buttonActiveColor;
+                break;
+            case ToolType.Add:
+                str = "This spirit creates stuff.\n\nAlt Effect: Removes stuff.";
+                break;
+            case ToolType.Remove:
+                //buttonToolbarRemove.GetComponent<Image>().color = buttonActiveColor;
+                //buttonToolbarRemove.gameObject.transform.localScale = Vector3.one * 1.25f;
+                break;
+            case ToolType.Stir:
+                str = "This spirit pushes material around.\n\nAlt Effect: None";
+                break;
+            default:
+                break;
+
+        }
+
+        return str;
+    }
+
     public void UpdateToolbarPanelUI() {
 
         //if (true) { }
@@ -1189,9 +1026,9 @@ public class UIManager : MonoBehaviour {
         buttonToolbarStir.gameObject.transform.localScale = Vector3.one;
         buttonToolbarAdd.GetComponent<Image>().color = buttonDisabledColor;
         buttonToolbarAdd.gameObject.transform.localScale = Vector3.one;
-        buttonToolbarMutate.GetComponent<Image>().color = buttonDisabledColor;
-        buttonToolbarRemove.GetComponent<Image>().color = buttonDisabledColor;
-        buttonToolbarRemove.gameObject.transform.localScale = Vector3.one;
+        //buttonToolbarMutate.GetComponent<Image>().color = buttonDisabledColor;
+        //buttonToolbarRemove.GetComponent<Image>().color = buttonDisabledColor;
+        //buttonToolbarRemove.gameObject.transform.localScale = Vector3.one;
 
         switch(curActiveTool) {
             case ToolType.None:
@@ -1203,15 +1040,15 @@ public class UIManager : MonoBehaviour {
                 buttonToolbarInspect.gameObject.transform.localScale = Vector3.one * 1.25f;
                 break;
             case ToolType.Mutate:
-                buttonToolbarMutate.GetComponent<Image>().color = buttonActiveColor;
+                //buttonToolbarMutate.GetComponent<Image>().color = buttonActiveColor;
                 break;
             case ToolType.Add:
                 buttonToolbarAdd.GetComponent<Image>().color = buttonActiveColor;
                 buttonToolbarAdd.gameObject.transform.localScale = Vector3.one * 1.25f;
                 break;
             case ToolType.Remove:
-                buttonToolbarRemove.GetComponent<Image>().color = buttonActiveColor;
-                buttonToolbarRemove.gameObject.transform.localScale = Vector3.one * 1.25f;
+                //buttonToolbarRemove.GetComponent<Image>().color = buttonActiveColor;
+                //buttonToolbarRemove.gameObject.transform.localScale = Vector3.one * 1.25f;
                 break;
             case ToolType.Stir:
                 buttonToolbarStir.GetComponent<Image>().color = buttonActiveColor;
@@ -1221,7 +1058,7 @@ public class UIManager : MonoBehaviour {
                 break;
 
         }
-                
+
 
         // Influence points meter:     
         //toolbarInfluencePoints += 0.0005225f; // x10 while debugging
@@ -1229,13 +1066,70 @@ public class UIManager : MonoBehaviour {
         //infoMeterInfluencePointsMat.SetFloat("_FillPercentage", toolbarInfluencePoints);
         //textInfluencePointsValue.text = "Influence: \n" + (toolbarInfluencePoints * 100f).ToString("F0") + "%";
 
+        wireSpiritBrush.SetActive(false);
+        wireTerrain.SetActive(false);
+        wireAnimals.SetActive(false);
+        wirePlants.SetActive(false);
+        wireDecomposers.SetActive(false);
+
+        float smallThumbnailSize = 40f;
+        float largeThumbnailSize = 80f;
+        float spiritBrushThumbnailSize = smallThumbnailSize;
+        float paletteSlotThumbnailSize = largeThumbnailSize;
+        wireSpiritBrush.SetActive(true);
+        if(isSpiritBrushSelected) {            
+            spiritBrushThumbnailSize = largeThumbnailSize;
+            paletteSlotThumbnailSize = smallThumbnailSize;
+
+            textSelectedSpeciesTitle.resizeTextMaxSize = 20;
+            textSelectedSpiritBrushName.resizeTextMaxSize = 24;
+
+            textSelectedSpiritBrushName.color = colorSpiritBrushLight;
+
+            
+        }
+        else {
+            textSelectedSpeciesTitle.resizeTextMaxSize = 24;
+            
+            textSelectedSpiritBrushName.resizeTextMaxSize = 20;
+            textSelectedSpiritBrushName.color = colorSpiritBrushDark;
+        }
+        imageToolbarSpiritBrushThumbnail.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, spiritBrushThumbnailSize);
+        imageToolbarSpiritBrushThumbnail.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, spiritBrushThumbnailSize);
+        imageToolbarSpiritBrushThumbnailBorder.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, spiritBrushThumbnailSize);
+        imageToolbarSpiritBrushThumbnailBorder.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, spiritBrushThumbnailSize);
+
+        imageToolbarSpeciesPortraitRender.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, paletteSlotThumbnailSize);
+        imageToolbarSpeciesPortraitRender.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, paletteSlotThumbnailSize);
+        imageToolbarSpeciesPortraitBorder.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, paletteSlotThumbnailSize);
+        imageToolbarSpeciesPortraitBorder.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, paletteSlotThumbnailSize);
+
+        panelToolbarPaletteExpand.SetActive(isToolbarPaletteExpandOn);
+        panelToolbarWing.SetActive(isToolbarDetailPanelOn);
+        buttonToolbarPaletteExpandOn.gameObject.SetActive(true);
+        //buttonToolbarExpandOn.gameObject.SetActive(!isToolbarExpandOn);
+
+        string spiritBrushName = "Minor Creation Spirit";
+        imageToolbarSpiritBrushThumbnail.sprite = spriteToolbarAddButton;
+        if(isDraggingMouseRight) {
+            spiritBrushName = "Minor Decay Spirit";
+        }
+        if(curActiveTool == ToolType.Stir) {
+            spiritBrushName = "Lesser Stir Spirit";      
+            imageToolbarSpiritBrushThumbnail.sprite = spriteToolbarStirButton;
+        }
+        if(curActiveTool == ToolType.Inspect) {
+            spiritBrushName = "Minor Watcher Spirit";
+            imageToolbarSpiritBrushThumbnail.sprite = spriteToolbarInspectButton;
+        }
+
+        textSelectedSpiritBrushName.text = spiritBrushName;
+
+        imageToolbarSpiritBrushThumbnail.color = colorSpiritBrushLight;
+        imageToolbarSpiritBrushThumbnailBorder.color = colorSpiritBrushDark;
 
 
-        panelToolbarExpand.SetActive(isToolbarExpandOn);
-        panelToolbarWing.SetActive(isToolbarWingOn);
-        buttonToolbarExpandOn.gameObject.SetActive(!isToolbarExpandOn);
-
-        if(isToolbarExpandOn) {
+        if(isToolbarPaletteExpandOn) {
             
             // Species Slots visuals:  ================================================================================
             TrophicLayersManager layerManager = gameManager.simulationManager.trophicLayersManager;  
@@ -1245,6 +1139,10 @@ public class UIManager : MonoBehaviour {
             if(layerManager.isSelectedTrophicSlot) {
                 if(layerManager.selectedTrophicSlotRef.kingdomID == 0 && layerManager.selectedTrophicSlotRef.tierID == 0) {
                     isSelected = true; 
+
+                    //if(!isSpiritBrushSelected) {
+                        wireDecomposers.SetActive(true);
+                    //}
                 }
             }
             SetToolbarButtonStateUI(ref buttonToolbarDecomposers, layerManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status, isSelected);
@@ -1254,7 +1152,12 @@ public class UIManager : MonoBehaviour {
             if(layerManager.isSelectedTrophicSlot) {
                 if(layerManager.selectedTrophicSlotRef.kingdomID == 1 && layerManager.selectedTrophicSlotRef.tierID == 0) {
                     isSelected = true; 
+
+                    //if(!isSpiritBrushSelected) {
+                        wirePlants.SetActive(true);
+                    //}
                 }
+
             }
             SetToolbarButtonStateUI(ref buttonToolbarAlgae, layerManager.kingdomPlants.trophicTiersList[0].trophicSlots[0].status, isSelected);
             
@@ -1266,6 +1169,9 @@ public class UIManager : MonoBehaviour {
             if(layerManager.isSelectedTrophicSlot) {
                 if(layerManager.selectedTrophicSlotRef.kingdomID == 2 && layerManager.selectedTrophicSlotRef.tierID == 0) {
                     isSelected = true; 
+                    //if(!isSpiritBrushSelected) {
+                        wireAnimals.SetActive(true);
+                    //}
                 }
             }
             SetToolbarButtonStateUI(ref buttonToolbarZooplankton, layerManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0].status, isSelected);
@@ -1290,6 +1196,10 @@ public class UIManager : MonoBehaviour {
                     if (layerManager.selectedTrophicSlotRef.slotID == 3) {
                         isSelected3 = true;
                     }
+
+                    //if(!isSpiritBrushSelected) {
+                        wireAnimals.SetActive(true);
+                    //}
                 }
             }            
 
@@ -1316,6 +1226,10 @@ public class UIManager : MonoBehaviour {
                     if (layerManager.selectedTrophicSlotRef.slotID == 3) {
                         isSelected3 = true;
                     }
+
+                    //if(!isSpiritBrushSelected) {
+                        wireTerrain.SetActive(true);
+                    //}
                 }
             }  
             SetToolbarButtonStateUI(ref buttonToolbarTerrain0, layerManager.kingdomTerrain.trophicTiersList[0].trophicSlots[0].status, isSelected0);
@@ -1323,98 +1237,115 @@ public class UIManager : MonoBehaviour {
             SetToolbarButtonStateUI(ref buttonToolbarTerrain2, layerManager.kingdomTerrain.trophicTiersList[0].trophicSlots[2].status, isSelected2);
             SetToolbarButtonStateUI(ref buttonToolbarTerrain3, layerManager.kingdomTerrain.trophicTiersList[0].trophicSlots[3].status, isSelected3);
 
-            if (isToolbarWingOn) {  // a species is selected
-                
-                //
-                //panelToolbarWingStats.SetActive(false);
-                //panelToolbarWingMutation.SetActive(false);
-                panelToolbarWingDeletePrompt.SetActive(false);
-                textToolbarWingSpeciesSummary.gameObject.SetActive(true);
+            Color speciesColorLight = Color.white;
+            Color speciesColorDark = Color.black;
+            if (layerManager.selectedTrophicSlotRef.kingdomID == 0) {
+                speciesColorLight = colorDecomposersLight;
+                speciesColorDark = colorDecomposersDark;
+            }
+            else if (layerManager.selectedTrophicSlotRef.kingdomID == 1) {
+                speciesColorLight = colorPlantsLight;
+                speciesColorDark = colorPlantsDark;
+            }
+            else if (layerManager.selectedTrophicSlotRef.kingdomID == 2) {
+                speciesColorLight = colorAnimalsLight;
+                speciesColorDark = colorAnimalsDark;
+            }
+            else {
+                speciesColorLight = colorTerrainLight;
+                speciesColorDark = colorTerrainDark;
+            }
+            buttonToolbarWingCreateSpecies.GetComponent<Image>().color = speciesColorLight;                
+            imageToolbarSpeciesPortraitRender.color = speciesColorLight;
+            textSelectedSpeciesTitle.color = speciesColorLight;
+            imageToolbarSpeciesPortraitBorder.color = speciesColorDark;
+            if(isSpiritBrushSelected) {
+                speciesColorLight = colorSpiritBrushLight;
+                speciesColorDark = colorSpiritBrushDark;
+            }
+            imageToolbarButtonBarBackground.color = speciesColorDark;
+            imageToolbarWingLine.color = speciesColorDark;
+            
+            textSelectedSpeciesTitle.text = layerManager.selectedTrophicSlotRef.speciesName;
 
+            // Test:
+            if(!gameManager.simulationManager.trophicLayersManager.isSelectedTrophicSlot) {
+                textSelectedSpeciesTitle.text = "NONE";
+            }
 
-                Color speciesColorLight = Color.white;
-                Color speciesColorDark = Color.black;
-                if (layerManager.selectedTrophicSlotRef.kingdomID == 0) {
-                    speciesColorLight = colorDecomposersLight;
-                    speciesColorDark = colorDecomposersDark;
-                }
-                else if (layerManager.selectedTrophicSlotRef.kingdomID == 1) {
-                    speciesColorLight = colorPlantsLight;
-                    speciesColorDark = colorPlantsDark;
-                }
-                else if (layerManager.selectedTrophicSlotRef.kingdomID == 2) {
-                    speciesColorLight = colorAnimalsLight;
-                    speciesColorDark = colorAnimalsDark;
-                }
-                else {
-                    speciesColorLight = colorTerrainLight;
-                    speciesColorDark = colorTerrainDark;
-                }
-                buttonToolbarWingCreateSpecies.GetComponent<Image>().color = speciesColorLight;                
-                imageToolbarSpeciesPortraitRender.color = speciesColorLight;
-                textSelectedSpeciesTitle.color = speciesColorLight;
-                imageToolbarSpeciesPortraitBorder.color = speciesColorDark;
-                imageToolbarButtonBarBackground.color = speciesColorDark;
-                imageToolbarWingLine.color = speciesColorDark;
+            panelToolbarWingDeletePrompt.SetActive(false);
+            textToolbarWingSpeciesSummary.gameObject.SetActive(true);
+                                
+            // Which panels are available?
+            int panelTier = -1;
+                
+            buttonToolbarWingDeleteSpecies.gameObject.SetActive(false); 
+            if (layerManager.selectedTrophicSlotRef.kingdomID == 0) {
+                imageToolbarSpeciesPortraitRender.sprite = spriteDecomposerPortrait;
+                buttonToolbarWingDeleteSpecies.gameObject.SetActive(true);     
+            }
+            else if (layerManager.selectedTrophicSlotRef.kingdomID == 1) {
+                imageToolbarSpeciesPortraitRender.sprite = spriteAlgaePortrait;
+                buttonToolbarWingDeleteSpecies.gameObject.SetActive(true); 
+                        
+            }
+            else if (layerManager.selectedTrophicSlotRef.kingdomID == 2) {
+                buttonToolbarWingDeleteSpecies.gameObject.SetActive(true); 
+                if (layerManager.selectedTrophicSlotRef.tierID == 1) {
+                    panelTier = 2;
 
-                textSelectedSpeciesTitle.text = layerManager.selectedTrophicSlotRef.speciesName;
-                
-                // Which panels are available?
-                int panelTier = -1;
-                
-                if(isActiveDebug) {
+                    //buttonToolbarWingDeleteSpecies.gameObject.SetActive(true);
+                                                        
+                    imageToolbarSpeciesPortraitRender.sprite = null;
+                    imageToolbarSpeciesPortraitRender.color = Color.white;
+                    // BORDER:
+                    Vector3 hue = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[layerManager.selectedTrophicSlotRef.linkedSpeciesID].representativeGenome.bodyGenome.appearanceGenome.hueSecondary;
+                    imageToolbarSpeciesPortraitBorder.color = new Color(hue.x, hue.y, hue.z); 
+                        
                     buttonToolbarWingDeleteSpecies.gameObject.SetActive(true); 
                 }
-                else {
-                    buttonToolbarWingDeleteSpecies.gameObject.SetActive(false); 
+                else {   // ZOOPLANKTON                            
+                    imageToolbarSpeciesPortraitRender.sprite = spriteZooplanktonPortrait;
+                            
                 }
-                
-                
+            }   
+            else {  // Terrain
+                //spriteBedrockPortrait
+                if(layerManager.selectedTrophicSlotRef.slotID == 0) {
+                    // bedrock
+                    imageToolbarSpeciesPortraitRender.sprite = spriteBedrockPortrait;
+                }
+                else if(layerManager.selectedTrophicSlotRef.slotID == 1) {
+                    imageToolbarSpeciesPortraitRender.sprite = spriteStonesPortrait;
+                }
+                else if(layerManager.selectedTrophicSlotRef.slotID == 2) {
+                    imageToolbarSpeciesPortraitRender.sprite = spritePebblesPortrait;
+                }
+                else {
+                    imageToolbarSpeciesPortraitRender.sprite = spriteSandPortrait;
+                }
+                //imageToolbarSpeciesPortraitRender.sprite = null;
+                panelTier = 1;
+            }
+
+            if (isToolbarDetailPanelOn) {  // a species is selected
+                                
+                // v v v RE-ASSESS::: *************************
                 if(layerManager.selectedTrophicSlotRef.status == TrophicSlot.SlotStatus.Empty) {  // waiting to be created!
                     panelTier = 0;
 
-                    buttonToolbarWingCreateSpecies.gameObject.SetActive(true);
-                    imageToolbarSpeciesPortraitRender.gameObject.SetActive(false);
+                    //ClickToolbarCreateNewSpecies();
+                    //buttonToolbarWingCreateSpecies.gameObject.SetActive(true);
+                    
+                    //imageToolbarSpeciesPortraitRender.gameObject.SetActive(false);
                             
                 }
                 else {
                     buttonToolbarWingCreateSpecies.gameObject.SetActive(false);
                     imageToolbarSpeciesPortraitRender.gameObject.SetActive(true);
                     
-                    panelTier = 1;
+                    panelTier = 2;
                     
-
-                    if (layerManager.selectedTrophicSlotRef.kingdomID == 0) {
-                        imageToolbarSpeciesPortraitRender.sprite = spriteDecomposerPortrait;
-                        
-                    }
-                    else if (layerManager.selectedTrophicSlotRef.kingdomID == 1) {
-                        imageToolbarSpeciesPortraitRender.sprite = spriteAlgaePortrait;
-                        
-                    }
-                    else if (layerManager.selectedTrophicSlotRef.kingdomID == 2) {
-
-                        if (layerManager.selectedTrophicSlotRef.tierID == 1) {
-                            panelTier = 2;
-
-                            //buttonToolbarWingDeleteSpecies.gameObject.SetActive(true);
-                                                        
-                            imageToolbarSpeciesPortraitRender.sprite = null;
-                            imageToolbarSpeciesPortraitRender.color = Color.white;
-                            // BORDER:
-                            Vector3 hue = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[layerManager.selectedTrophicSlotRef.linkedSpeciesID].representativeGenome.bodyGenome.appearanceGenome.hueSecondary;
-                            imageToolbarSpeciesPortraitBorder.color = new Color(hue.x, hue.y, hue.z); 
-                                                        
-                        }
-                        else {   // ZOOPLANKTON                            
-                            imageToolbarSpeciesPortraitRender.sprite = spriteZooplanktonPortrait;
-                            
-                        }
-                    }   
-                    else {  // Terrain
-                        imageToolbarSpeciesPortraitRender.sprite = null;
-                        panelTier = 0;
-                    }
                 } 
                 
                 if(isToolbarDeletePromptOn) {
@@ -1432,6 +1363,7 @@ public class UIManager : MonoBehaviour {
                 buttonToolbarWingStats.interactable = false;   
                 buttonToolbarWingMutation.interactable = false;
 
+                //curToolbarWingPanelSelectID
                 if(panelTier >= 0) {
                     buttonToolbarWingDescription.interactable = true;
                 }
@@ -1439,7 +1371,7 @@ public class UIManager : MonoBehaviour {
                     buttonToolbarWingStats.interactable = true;   
                 }
                 if(panelTier >= 2) {
-                    //buttonToolbarWingMutation.interactable = true;                    
+                    buttonToolbarWingMutation.interactable = true;                    
                     //buttonToolbarWingDeleteSpecies.interactable = true;
                 }
 
@@ -1448,9 +1380,17 @@ public class UIManager : MonoBehaviour {
                     //buttonToolbarWingDescription.interactable = false;
                     if(!isToolbarDeletePromptOn) {
                         textToolbarWingSpeciesSummary.gameObject.SetActive(true);
-                        textToolbarWingSpeciesSummary.text = layerManager.GetSpeciesPreviewDescriptionString();
+                        string summaryText = layerManager.GetSpeciesPreviewDescriptionString();
+                        if(isSpiritBrushSelected) {
+                            summaryText = GetSpiritBrushSummary();
+                        }
+                        textToolbarWingSpeciesSummary.text = summaryText;
                         textToolbarWingPanelName.text = "Overview:";
                         textToolbarWingPanelName.color = new Color(0.9f, 0.9f, 0.9f); //new Color(0.7f, 0.94f, 1f);
+                        //textToolbarWingSpeciesSummary.gameObject.SetActive(true);
+                        //textToolbarWingSpeciesSummary.text = layerManager.GetSpeciesPreviewDescriptionString();
+                        //textToolbarWingPanelName.text = "Overview:";
+                        //textToolbarWingPanelName.color = new Color(0.9f, 0.9f, 0.9f); //new Color(0.7f, 0.94f, 1f);
                     }                    
                 }
                 else {
@@ -1458,15 +1398,17 @@ public class UIManager : MonoBehaviour {
                     buttonToolbarWingDescription.interactable = true;
                     textToolbarWingSpeciesSummary.gameObject.SetActive(false);
                 }
-                if(curToolbarWingPanelSelectID == 1) {
+                if(curToolbarWingPanelSelectID == 1) {  // Stats panel
                     buttonToolbarWingStats.transform.localScale = Vector3.one * 1.5f;
                     //buttonToolbarWingStats.interactable = false;
 
                     if (!isToolbarDeletePromptOn) {
-                        panelToolbarWingStats.SetActive(true);
-                        textToolbarWingPanelName.text = "Statistics:";
-                        textToolbarWingPanelName.color = new Color(0.9f, 0.9f, 0.9f); //new Color(0.99f, 0.94f, 0.57f);
-                        UpdateToolbarWingStatsPanel();
+                        
+                        // OLD:
+                        //panelToolbarWingStats.SetActive(true);
+                        //textToolbarWingPanelName.text = "Statistics:";
+                        //textToolbarWingPanelName.color = new Color(0.9f, 0.9f, 0.9f); //new Color(0.99f, 0.94f, 0.57f);
+                        //UpdateToolbarWingStatsPanel();
                     }
                 }
                 else {
@@ -1474,7 +1416,7 @@ public class UIManager : MonoBehaviour {
                     panelToolbarWingStats.SetActive(false);
                     //buttonToolbarWingStats.interactable = true;
                 }
-                if(curToolbarWingPanelSelectID == 2) {
+                if(curToolbarWingPanelSelectID == 2) {  // mutation panel
                     buttonToolbarWingMutation.transform.localScale = Vector3.one * 1.5f;
 
                     if (!isToolbarDeletePromptOn) {
@@ -2649,13 +2591,17 @@ public class UIManager : MonoBehaviour {
             }
             else {  // tier 1
                 Debug.Log("Remove AGENT");
+                //slot.status
                 gameManager.simulationManager.RemoveSelectedAgentSpecies(slot.slotID);
             }
         }
 
         slot.status = TrophicSlot.SlotStatus.Empty;
-        gameManager.simulationManager.trophicLayersManager.isSelectedTrophicSlot = false;
+        
+        gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = gameManager.simulationManager.trophicLayersManager.kingdomTerrain.trophicTiersList[0].trophicSlots[0]; // Bedrock
+        //gameManager.simulationManager.trophicLayersManager.isSelectedTrophicSlot = false;
 
+        isToolbarDetailPanelOn = false;
         //pressedRemoveSpecies = false;
         //buttonToolbarRemoveDecomposer.gameObject.SetActive(false);
         //buttonToolbarRemovePlant.gameObject.SetActive(false);
@@ -2860,6 +2806,8 @@ public class UIManager : MonoBehaviour {
         TurnOffAddTool();
         TurnOffMutateTool();
         TurnOffRemoveTool();
+
+        isSpiritBrushSelected = true;
               
     }
     public void ClickToolButtonInspect() {
@@ -2880,21 +2828,24 @@ public class UIManager : MonoBehaviour {
             curActiveTool = ToolType.None;
             TurnOffInspectTool();
         } */
+        isSpiritBrushSelected = true;
     }
     public void ClickToolButtonAdd() {
         //gameManager.simulationManager.trophicLayersManager.ResetSelectedAgentSlots();
         //if(curActiveTool != ToolType.Nutrients) {
-            curActiveTool = ToolType.Add;
+        curActiveTool = ToolType.Add;
 
-            //isActiveFeedToolPanel = true;    
-            //animatorFeedToolPanel.enabled = true;
-            //animatorFeedToolPanel.Play("SlideOnPanelFeedTool"); 
-            buttonToolbarAdd.GetComponent<Image>().color = buttonActiveColor;
+        //isActiveFeedToolPanel = true;    
+        //animatorFeedToolPanel.enabled = true;
+        //animatorFeedToolPanel.Play("SlideOnPanelFeedTool"); 
+        buttonToolbarAdd.GetComponent<Image>().color = buttonActiveColor;
 
-            TurnOffInspectTool();
-            TurnOffStirTool();
-            TurnOffMutateTool();
-            TurnOffRemoveTool();
+        TurnOffInspectTool();
+        TurnOffStirTool();
+        TurnOffMutateTool();
+        TurnOffRemoveTool();
+            
+        isSpiritBrushSelected = true;
         //}  
         /*else {
             curActiveTool = ToolType.None;
@@ -2909,7 +2860,7 @@ public class UIManager : MonoBehaviour {
             //isActiveFeedToolPanel = true;    
             //animatorFeedToolPanel.enabled = true;
             //animatorFeedToolPanel.Play("SlideOnPanelFeedTool"); 
-            buttonToolbarRemove.GetComponent<Image>().color = buttonActiveColor;
+            //buttonToolbarRemove.GetComponent<Image>().color = buttonActiveColor;
 
             TurnOffInspectTool();
             TurnOffStirTool();
@@ -2923,7 +2874,8 @@ public class UIManager : MonoBehaviour {
     }
 
     private void TurnOnInspectTool() {
-        buttonToolbarInspect.GetComponent<Image>().color = buttonActiveColor;  
+        buttonToolbarInspect.GetComponent<Image>().color = buttonActiveColor; 
+        isSpiritBrushSelected = true;
         //buttonToolbarInspect.GetComponent<Animator>().enabled = false;    
     }    
     private void TurnOffInspectTool() {
@@ -2943,7 +2895,7 @@ public class UIManager : MonoBehaviour {
         //isActiveFeedToolPanel = false;
     }
     private void TurnOffMutateTool() {
-        buttonToolbarMutate.GetComponent<Image>().color = buttonDisabledColor;
+        //buttonToolbarMutate.GetComponent<Image>().color = buttonDisabledColor;
 
         //if(isActiveMutateToolPanel) {
         //    animatorMutateToolPanel.enabled = true;
@@ -2961,7 +2913,7 @@ public class UIManager : MonoBehaviour {
         gameManager.simulationManager.PlayerToolStirOff();
     }
     private void TurnOffRemoveTool() {
-        buttonToolbarRemove.GetComponent<Image>().color = buttonDisabledColor;
+        //buttonToolbarRemove.GetComponent<Image>().color = buttonDisabledColor;
         //if(isActiveStirToolPanel) {
         //    animatorStirToolPanel.enabled = true;
         //    animatorStirToolPanel.Play("SlideOffPanelStirTool");
@@ -2974,7 +2926,7 @@ public class UIManager : MonoBehaviour {
         TrophicSlot slot = gameManager.simulationManager.trophicLayersManager.kingdomTerrain.trophicTiersList[0].trophicSlots[index];
         gameManager.simulationManager.trophicLayersManager.isSelectedTrophicSlot = true;
         gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = slot;
-        isToolbarWingOn = true;
+        isToolbarDetailPanelOn = true;
 
         selectedSpeciesID = slot.linkedSpeciesID; // update this next
 
@@ -2986,13 +2938,15 @@ public class UIManager : MonoBehaviour {
         }*/
 
         selectedToolbarTerrainLayer = index;
+
+        isSpiritBrushSelected = false;
     }
     public void ClickButtonToolbarDecomposers() {
         TrophicSlot slot = gameManager.simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0];
 
         gameManager.simulationManager.trophicLayersManager.isSelectedTrophicSlot = true;
         gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = slot;
-        isToolbarWingOn = true;
+        isToolbarDetailPanelOn = true;
 
         if(gameManager.simulationManager.trophicLayersManager.GetDecomposersOnOff()) {
             /*if (slot.status == TrophicSlot.SlotStatus.On) {            
@@ -3007,14 +2961,19 @@ public class UIManager : MonoBehaviour {
             //buttonPendingTrophicSlot = buttonToolbarDecomposers;
             
         }
+
+        if(slot.status == TrophicSlot.SlotStatus.Empty) {
+            ClickToolbarCreateNewSpecies();
+        }
         //curActiveTool = ToolType.None;
+        isSpiritBrushSelected = false;
     }
     public void ClickButtonToolbarAlgae() {  // shouldn't be able to click if LOCKED (interactive = false)
         TrophicSlot slot = gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];
 
         gameManager.simulationManager.trophicLayersManager.isSelectedTrophicSlot = true;
         gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = slot;
-        isToolbarWingOn = true;
+        isToolbarDetailPanelOn = true;
         
         if(gameManager.simulationManager.trophicLayersManager.GetAlgaeOnOff()) {
             // if already on:
@@ -3031,14 +2990,20 @@ public class UIManager : MonoBehaviour {
             //buttonPendingTrophicSlot = buttonToolbarAlgae;
             
         }
+
+        if(slot.status == TrophicSlot.SlotStatus.Empty) {
+            ClickToolbarCreateNewSpecies();
+        }
+
         //curActiveTool = ToolType.None;
+        isSpiritBrushSelected = false;
     }
     public void ClickButtonToolbarZooplankton() {
         TrophicSlot slot = gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0];
         
         gameManager.simulationManager.trophicLayersManager.isSelectedTrophicSlot = true;
         gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = slot;
-        isToolbarWingOn = true;
+        isToolbarDetailPanelOn = true;
         
         if(gameManager.simulationManager.trophicLayersManager.GetZooplanktonOnOff()) {
             /*if (slot.status == TrophicSlot.SlotStatus.On) {            
@@ -3053,24 +3018,33 @@ public class UIManager : MonoBehaviour {
             //buttonPendingTrophicSlot = buttonToolbarZooplankton;
             
         }
+
+        if(slot.status == TrophicSlot.SlotStatus.Empty) {
+            ClickToolbarCreateNewSpecies();
+        }
         //curActiveTool = ToolType.None;
+        isSpiritBrushSelected = false;
     }
 
     public void ClickButtonToolbarAgent(int index) {
         TrophicSlot slot = gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[index];
         gameManager.simulationManager.trophicLayersManager.isSelectedTrophicSlot = true;
         gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = slot;
-        isToolbarWingOn = true;
+        isToolbarDetailPanelOn = true;
 
         selectedSpeciesID = slot.linkedSpeciesID; // update this next
 
+        if(slot.status == TrophicSlot.SlotStatus.Empty) {
+            ClickToolbarCreateNewSpecies();
+        }
         //curActiveTool = ToolType.None;
 
 
         if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.status != TrophicSlot.SlotStatus.Empty) {
             InitToolbarPortraitCritterData(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef); // ***
         }
-        
+
+        isSpiritBrushSelected = false;
         // Why do I have to click this twice before portrait shows up properly??????
     }
 
@@ -3078,20 +3052,30 @@ public class UIManager : MonoBehaviour {
         //pressedRemoveSpecies = true;  // Sets remove flag for update loop:       
     }
     public void ClickToolbarExpandOn() {
-        isToolbarExpandOn = true;
+        isToolbarPaletteExpandOn = true;
         imageHighlightNewUI.gameObject.SetActive(false);
         //buttonToolbarExpandOn.GetComponent<Animation>().Stop();
         //buttonToolbarExpandOn.GetComponent<Animator>().StopPlayback();
-        buttonToolbarExpandOn.GetComponent<Animator>().enabled = false;
+        buttonToolbarPaletteExpandOn.GetComponent<Animator>().enabled = false;
     }
     public void ClickToolbarExpandOff() {
-        isToolbarExpandOn = false;
-        buttonToolbarExpandOn.GetComponent<Animator>().enabled = false;
+        isToolbarPaletteExpandOn = false;
+        buttonToolbarPaletteExpandOn.GetComponent<Animator>().enabled = false;
+    }
+
+    public void ClickSpiritBrushThumbnail() {
+        isToolbarPaletteExpandOn = true;
+        isSpiritBrushSelected = true;
+    }
+
+    public void ClickPaletteSlotThumbnail() {
+        isToolbarPaletteExpandOn = true;
+        isSpiritBrushSelected = false;
     }
 
     public void ClickToolbarWingClose() {
-        isToolbarWingOn = false;
-        gameManager.simulationManager.trophicLayersManager.isSelectedTrophicSlot = false;
+        isToolbarDetailPanelOn = false;
+        //gameManager.simulationManager.trophicLayersManager.isSelectedTrophicSlot = false;
         
     }
     public void AnnounceUnlockInspect() {
@@ -3190,7 +3174,7 @@ public class UIManager : MonoBehaviour {
             }
         }
 
-        curToolbarWingPanelSelectID = 1;
+        //curToolbarWingPanelSelectID = 1;
 
         isAnnouncementTextOn = true;
         timerAnnouncementTextCounter = 0;
@@ -3316,7 +3300,7 @@ public class UIManager : MonoBehaviour {
             inspectToolUnlockedAnnounce = false;
         }
         else {
-            if(!isToolbarExpandOn) {
+            if(!isToolbarPaletteExpandOn) {
                 ClickToolbarExpandOn();
             }
 

@@ -252,6 +252,7 @@ public class VegetationManager {
         if(isBrushActive) {  // Set from uiManager
             brushOn = 1f;
         }
+        computeShaderResourceGrid.SetFloat("_SpiritBrushIntensity", 0.1f); // *** INVESTIGATE THIS -- not used/needed?
         computeShaderResourceGrid.SetFloat("_IsSpiritBrushOn", brushOn);
         computeShaderResourceGrid.SetFloat("_SpiritBrushPosNeg", theRenderKingRef.spiritBrushPosNeg);
         computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "VelocityRead", fluidManagerRef._VelocityA);
@@ -408,6 +409,8 @@ public class VegetationManager {
         selectRespawnFoodParticleIndicesCBuffer.Release();
     }*/  // NOT USED ANY MORE????
     public void SpawnInitialAlgaeParticles(float radius, Vector4 spawnCoords) {
+        Debug.Log("SpawnInitialAlgaeParticles(float radius, Vector4 spawnCoords) DISABLED!~");
+        /*
         int kernelCSSpawnInitialAlgaeParticles = computeShaderAlgaeParticles.FindKernel("CSSpawnInitialAlgaeParticles");        
         computeShaderAlgaeParticles.SetFloat("_MapSize", SimulationManager._MapSize);
         computeShaderAlgaeParticles.SetFloat("_Time", Time.realtimeSinceStartup);
@@ -415,6 +418,7 @@ public class VegetationManager {
         computeShaderAlgaeParticles.SetFloat("_FoodSprinkleRadius", radius);
         computeShaderAlgaeParticles.SetBuffer(kernelCSSpawnInitialAlgaeParticles, "foodParticlesWrite", algaeParticlesCBuffer);
         computeShaderAlgaeParticles.Dispatch(kernelCSSpawnInitialAlgaeParticles, 1, 1, 1);
+        */
     }
     public void SimulateAlgaeParticles(EnvironmentFluidManager fluidManagerRef, TheRenderKing renderKingRef, SimulationStateData simStateDataRef, SimResourceManager resourcesManager) { // Sim
         // Go through foodParticleData and check for inactive
@@ -430,12 +434,21 @@ public class VegetationManager {
         computeShaderAlgaeParticles.SetBuffer(kernelCSSimulateAlgaeParticles, "foodParticlesWrite", algaeParticlesCBufferSwap);
         computeShaderAlgaeParticles.SetTexture(kernelCSSimulateAlgaeParticles, "velocityRead", fluidManagerRef._VelocityA);        
         computeShaderAlgaeParticles.SetTexture(kernelCSSimulateAlgaeParticles, "altitudeRead", renderKingRef.baronVonTerrain.terrainHeightDataRT);
-        computeShaderAlgaeParticles.SetTexture(kernelCSSimulateAlgaeParticles, "_SpawnDensityMap", resourceGridRT1);
-        computeShaderAlgaeParticles.SetFloat("_MapSize", SimulationManager._MapSize);            
+        computeShaderAlgaeParticles.SetTexture(kernelCSSimulateAlgaeParticles, "_SpawnDensityMap", renderKingRef.spiritBrushRT);
+        computeShaderAlgaeParticles.SetFloat("_MapSize", SimulationManager._MapSize);    
+        computeShaderAlgaeParticles.SetFloat("_SpiritBrushPosNeg", renderKingRef.spiritBrushPosNeg);            
         //computeShaderFoodParticles.SetFloat("_RespawnFoodParticles", 1f);
         computeShaderAlgaeParticles.SetFloat("_Time", Time.realtimeSinceStartup);
-        float randRoll = UnityEngine.Random.Range(0f, 1f);
-        computeShaderAlgaeParticles.SetFloat("_RespawnFoodParticles", randRoll); 
+        //float randRoll = UnityEngine.Random.Range(0f, 1f);
+        float brushF = 0f;
+        if(renderKingRef.isSpiritBrushOn) {
+            if(renderKingRef.simManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 1) {  // Plants kingdom selected
+                if(renderKingRef.simManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) {  // Algae selected
+                    brushF = 1f;
+                }
+            }            
+        }
+        computeShaderAlgaeParticles.SetFloat("_IsBrushing", brushF); 
 
         //_FoodSprinklePos;
 //_FoodSprinkleRadius;

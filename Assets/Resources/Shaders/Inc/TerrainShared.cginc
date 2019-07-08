@@ -87,10 +87,11 @@ float4 GetGroundColor(float3 worldPos, float4 frameBufferColor, float4 altitudeT
 	float minFog = 0.06125;
 	
 	float4 finalColor = frameBufferColor;
-	float3 decomposerHue = float3(1,0.71,0.14) * 1.11; // float3(3.5,2.5,1);
-	float decomposerMask = saturate(resourceTex.y * resourceTex.y * resourceTex.y * 1.20);
+	float3 decomposerHue = float3(0.7,0.71,0.74) * 1.11; // float3(3.5,2.5,1);
+	float decomposerMask = saturate(resourceTex.x * resourceTex.x * 1.5);
 	
-	finalColor.rgb += decomposerHue * decomposerMask;
+	finalColor.rgb = lerp(finalColor.rgb, decomposerHue, decomposerMask);
+
 	//finalColor.rgb = finalColor.rgb - decomposerHue * decomposerMask;
 	//finalColor.rgb = lerp(finalColor.rgb, decomposerHue, decomposerMask); //
 
@@ -117,9 +118,13 @@ float4 GetGroundColor(float3 worldPos, float4 frameBufferColor, float4 altitudeT
 	finalColor.rgb *= (0.5 + wetnessMask * 0.5);
 	
 	finalColor.rgb += dotLight * isUnderwater * (1.0 - depthNormalized) * causticsStrength;		
-				
+	
+	
 	// FOG:	
 	finalColor.rgb = lerp(finalColor.rgb, waterFogColor, (saturate(depthNormalized + minFog) * isUnderwater));
+
+	
+	finalColor.rgb += decomposerHue * decomposerMask * 0.025;
 	
 	//return float4(1,1,1,1);
 	return finalColor;

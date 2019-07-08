@@ -31,9 +31,10 @@ Texture2D<float4> velocityRead;
 Texture2D<float4> altitudeRead;
 //Texture2D<float4> _ResourceGridTex
 
-Texture2D<float4> _SpawnDensityMap;
+Texture2D<float4> _SpawnDensityMap;  // spiritBrush?
+uniform float _SpiritBrushPosNeg;
 
-uniform float _RespawnFoodParticles;
+uniform float _IsBrushing;
 uniform float _Time;
 uniform float _MapSize;
 
@@ -235,8 +236,8 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 	if(foodParticle.isActive > 0.5) { // poor man's boolean -- Being Simulated
 		
 		float2 uv = foodParticle.worldPos / _MapSize;
-		float2 altUV = uv;
-		float4 altitudeTexSample = altitudeRead.SampleLevel(_LinearClamp, altUV, 0);
+		
+		float4 altitudeTexSample = altitudeRead.SampleLevel(_LinearClamp, uv, 0);
 		float altitudeRaw = altitudeTexSample.x;
 
 		float2 posOffset = float2(0,0);
@@ -283,8 +284,10 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 			bodyMass += growthMass;
 
 			float onLandMask = saturate((altitudeRaw - 0.5) * 100);
-			foodParticlesWrite[id.x].age = foodParticle.age + _AlgaeAgingRate + onLandMask * 0.05; 
-
+			float rightClickMask01 = saturate(_SpiritBrushPosNeg * -1);
+			float4 spiritBrushTex = _SpawnDensityMap.SampleLevel(_LinearClamp, uv, 0);  // brush mask
+			foodParticlesWrite[id.x].age = foodParticle.age + _AlgaeAgingRate + onLandMask * 0.05 + spiritBrushTex.x * rightClickMask01 * 0.2; 
+			
 			foodParticlesWrite[id.x].isDecaying = foodParticle.isDecaying;
 
 			if(foodParticle.age > 2.0) {  // Dies of old age:
@@ -320,7 +323,11 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 		foodParticlesWrite[id.x].wasteProduced = 0;
 		foodParticlesWrite[id.x].nutrientsUsed = 0;
 
-		if(_RespawnFoodParticles > 0.95) {	
+		float isRightClick = saturate(_SpiritBrushPosNeg * -1.0) * _IsBrushing;
+		float isLeftClick = saturate(_SpiritBrushPosNeg) * _IsBrushing;
+		if(_IsBrushing * isLeftClick > 0.5) {	 // player brushing this
+
+			
 		
 			float rand01 = rand(float2(_Time * 135.79 + (float)foodParticlesRead[id.x].index * 30.17896, _Time * 28.463));
 			float randX = rand(float2((float)id.x, _Time));
@@ -337,9 +344,13 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 			float4 spawnAltitudeSample = altitudeRead.SampleLevel(_LinearClamp, spawnUV, 0);
 			
 			float distToOrigin = length(_FoodSprinklePos.xy - (spawnUV * _MapSize));
-			//_FoodSprinkleRadius
-
-			if(distToOrigin < _FoodSprinkleRadius * rand01 * rand01) {  // to prevent mass respawning, overshooting the intended max global food amount ?  // Needed?
+			
+			//  SPIRIT BRUSH MASK:
+			float4 brushMaskTex = _SpawnDensityMap.SampleLevel(_LinearClamp, spawnUV, 0);			
+			float brushMask = saturate(brushMaskTex.x * 1.33);
+			
+			//if(distToOrigin < _FoodSprinkleRadius * rand01 * rand01) { 	// to prevent mass respawning, overshooting the intended max global food amount ?  // Needed?		
+			if(brushMask * (1.0 - isRightClick) > 0.5) {  
 				if(spawnAltitudeSample.x < _AlgaeSpawnMaxAltitude) {  // in water only? // for now...
 				
 					foodParticlesWrite[id.x].worldPos = spawnUV * _MapSize;

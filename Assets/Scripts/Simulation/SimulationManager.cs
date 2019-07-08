@@ -158,7 +158,7 @@ public class SimulationManager : MonoBehaviour {
     private int simAgeYearCounter = 0;
     public int curSimYear = 0;
 
-    private bool recentlyAddedSpeciesOn = false;// = true;
+    public bool recentlyAddedSpeciesOn = false;// = true;
     private Vector2 recentlyAddedSpeciesWorldPos; // = new Vector2(spawnPos.x, spawnPos.y);
     private int recentlyAddedSpeciesID; // = masterGenomePool.completeSpeciesPoolsList.Count - 1;
     private int recentlyAddedSpeciesTimeCounter = 0;
@@ -1166,7 +1166,7 @@ public class SimulationManager : MonoBehaviour {
         
         bool spawnOn = false;
 
-        Vector3 spawnWorldPos = GetRandomFoodSpawnPosition().startPosition;
+        Vector3 spawnWorldPos = GetRandomFoodSpawnPosition().startPosition; //uiManager.curCtrlCursorPositionOnWaterPlane; // GetRandomFoodSpawnPosition().startPosition;
         if(recentlyAddedSpeciesOn) {
 
             if(speciesIndex == recentlyAddedSpeciesID) {

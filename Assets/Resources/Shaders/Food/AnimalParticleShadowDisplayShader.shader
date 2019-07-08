@@ -38,7 +38,7 @@
 			{
 				float4 pos : SV_POSITION;
 				float2 uv : TEXCOORD0;  // uv of the brushstroke quad itself, particle texture	
-				
+				float4 color : COLOR;
 			};
 
 			float rand(float2 co){   // OUTPUT is in [0,1] RANGE!!!
@@ -80,9 +80,17 @@
 				float2 curvePos = GetPoint2D(particleData.worldPos.xy, particleData.p1, particleData.p2, particleData.p3, t);
 				float2 curveTangent = normalize(GetFirstDerivative(particleData.worldPos.xy, particleData.p1, particleData.p2, particleData.p3, t));
 				float2 curveBitangent = float2(curveTangent.y, -curveTangent.x);
-
-				float width = sqrt(particleData.biomass) * 0.982 * (1 - 2 * abs(0.75 - uv.y)); //GetPoint1D(waterCurveData.widths.x, waterCurveData.widths.y, waterCurveData.widths.z, waterCurveData.widths.w, t) * 0.75 * (1 - saturate(testNewVignetteMask));
-				float2 offset = curveBitangent * -quadPoint.x * width; // * randomWidth; // *** support full vec4 widths!!!
+				
+				float width = sqrt(particleData.biomass) * 0.4 * (1 - 2 * abs(0.75 - uv.y)) + 0.07125; 
+				float freq = 10;
+				float swimAnimOffset = sin(_Time.y * freq - t * 10 + inst) * 5;
+				float swimAnimMask = t * saturate(1.0 - particleData.isDecaying); //saturate(1.0 - uv.y); //saturate(1.0 - t);
+				
+				float2 offset = curveBitangent * -(quadPoint.x * 4 + swimAnimOffset * swimAnimMask) * width; // * randomWidth; // *** support full vec4 widths!!!
+				
+				
+				//float width = sqrt(particleData.biomass) * 0.982 * (1 - 2 * abs(0.75 - uv.y)); //GetPoint1D(waterCurveData.widths.x, waterCurveData.widths.y, waterCurveData.widths.z, waterCurveData.widths.w, t) * 0.75 * (1 - saturate(testNewVignetteMask));
+				//float2 offset = curveBitangent * -quadPoint.x * width; // * randomWidth; // *** support full vec4 widths!!!
 				
 				float3 worldPosition = float3(curvePos,0) + float4(offset, 0.0, 0.0);
 
@@ -97,7 +105,10 @@
 				
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));			
 				o.uv = uv; //quadVerticesCBuffer[id].xy + 0.5f;	
-
+				
+				o.color = float4(0,0,0,0);
+				float oldAgeMask = saturate((particleData.age - 1.0) * 1000);
+				o.color.a = 1.0 - oldAgeMask; 
 				//o.color = float4(saturate(particleData.isDecaying), saturate(particleData.biomass * 5), saturate(particleData.age * 0.5), 1);
 								
 				return o;
@@ -110,7 +121,7 @@
 				float4 texColor = tex2D(_MainTex, i.uv);	
 				float3 waterFogColor = float3(0.03,0.4,0.3) * 0.33;
 				texColor.rgb = waterFogColor;  // shadow
-				texColor.a *= 0.25;
+				texColor.a *= 0.25 * i.color.a;
 				return texColor;
 				//return float4(0.7,1,0.1,texColor.a * 0.75);
 			}

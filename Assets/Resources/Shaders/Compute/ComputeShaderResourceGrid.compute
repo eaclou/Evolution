@@ -53,6 +53,7 @@ uniform float _MapSize;
 
 uniform float _IsSpiritBrushOn;
 uniform float _SpiritBrushPosNeg;
+uniform float _SpiritBrushIntensity;
 
 uniform float _CoordX;
 uniform float _CoordY;
@@ -236,7 +237,7 @@ void CSInitRD (uint3 id : SV_DispatchThreadID)
 void CSSimRD (uint3 id : SV_DispatchThreadID)
 {	
 	float s = 1 / _TextureResolution;
-	float deltaTime = 1.0;
+	float deltaTime = 0.024;
 
 	float2 uv = float2((float2)id.xy + 0.5) / _TextureResolution;
 
@@ -310,7 +311,7 @@ void CSAdvectRD (uint3 id : SV_DispatchThreadID)
 	// Handle SpiritBrush Here????
 	float4 spiritBrushSample = _SpiritBrushTex.SampleLevel(_LinearClamp, uvSample, 0);
 
-	float brushMagnitude = 4.20;
+	float brushMagnitude = _SpiritBrushIntensity;
 	float deltaBrush = _IsSpiritBrushOn * _SpiritBrushPosNeg * spiritBrushSample.x;
 	newDensity.y = saturate(newDensity.y + deltaBrush * brushMagnitude);  // *** TEMPORARY!!! **** Decomposers removed from brushing
 			

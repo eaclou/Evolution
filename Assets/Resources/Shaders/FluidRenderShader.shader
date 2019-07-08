@@ -9,6 +9,7 @@
 		_ObstaclesTex ("_ObstaclesTex", 2D) = "white" {}
 		_TerrainHeightTex ("_TerrainHeightTex", 2D) = "grey" {}
 		_WaterSurfaceTex ("_WaterSurfaceTex", 2D) = "black" {}
+		_SpiritBrushTex ("_SpiritBrushTex", 2D) = "black" {}
 	}
 	SubShader
 	{
@@ -46,6 +47,7 @@
 			sampler2D _ObstaclesTex;
 			sampler2D _TerrainHeightTex;
 			sampler2D _WaterSurfaceTex;
+			sampler2D _SpiritBrushTex;
 			
 			v2f vert (appdata v)
 			{
@@ -62,6 +64,7 @@
 				
 				// sample the texture
 				fixed4 density = tex2D(_DensityTex, i.uv);
+				//return density;
 				//density.a = 1;
 				
 				
@@ -84,11 +87,16 @@
 				float noiseMag02 = (Value3D(float3(_Time.y * 0.0042 * timeMult, i.uv), 178).x * 0.5 + 0.5);				
 				float noiseMag03 = (Value3D(float3(_Time.y * 0.0195 * timeMult, -i.uv), 304).x * 0.5 + 0.5);
 				float noiseMag04 = (Value3D(float3(-_Time.y * 0.012 * timeMult, -i.uv), 532.331).x * 0.5 + 0.5);
+				
+				float noiseMag05 = (Value3D(float3(-_Time.y * 0.0315, i.uv), 256).x * 0.5 + 0.5);
+				float noiseMag06 = (Value3D(float3(_Time.y * 0.00762 * timeMult, i.uv), 328).x * 0.5 + 0.5);				
+				float noiseMag07 = (Value3D(float3(_Time.y * 0.01395 * timeMult, -i.uv), 288.7).x * 0.5 + 0.5);
+				float noiseMag08 = (Value3D(float3(-_Time.y * 0.0142 * timeMult, -i.uv), 492.331).x * 0.5 + 0.5);
 
-				float noiseMag = saturate((noiseMag04 * 0.4 + noiseMag02 * 0.2 + noiseMag03 * 0.4)); // * noiseMag01;
+				float noiseMag = saturate((noiseMag04 * 0.4 + noiseMag02 * 0.2 + noiseMag03 * 0.4) * 0.5 + 0.5 * (noiseMag05 * 0.25 + noiseMag06 * 0.25 + noiseMag07 * 0.25 + noiseMag08 * 0.25)); // * noiseMag01;
 				noiseMag = saturate((noiseMag - 0.5) * 2 + 0.5);
-				density.rgb = lerp(density.rgb, float3(0.64, 1, 0.45) * 0.25, 0.85);
-				density.a = saturate((density.a - 0.065) * 8.5) * 0.93;
+				//density.rgb = lerp(density.rgb, float3(0.64, 1, 0.45) * 0.25, 0.85);
+				//density.a = saturate((density.a - 0.000055) * 3.95) * 1;
 
 				//density.a *= (noiseMag * 0.01 + 0.99);
 				//float4 testAlpha = density;
@@ -99,9 +107,12 @@
 				float diffuse = dot(gradNorm, lightDir) * 0.5 + 0.5;
 				float shadow = dot(gradNorm, -lightDir) * 0.5 + 0.5;
 
-				density.rgb += float3(1,1,1) * saturate(diffuse) * 0.1;
-				density.rgb -= float3(1,1,1) * saturate(shadow) * 0.1;
-				density.a *= (noiseMag * 0.95 + 0.05);
+				density.rgb += float3(1,1,1) * saturate(diffuse) * 0.05;
+				density.rgb -= float3(1,1,1) * saturate(shadow) * 0.05;
+				//density.a *= (noiseMag * 0.95 + 0.05);
+
+				fixed4 brushTex = tex2D(_SpiritBrushTex, i.uv);
+				density.a = saturate(brushTex.x * 0.15 + density.a);
 				
 				return saturate(density);
 

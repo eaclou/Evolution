@@ -457,11 +457,12 @@ void RefreshColor (uint3 id : SV_DispatchThreadID)
 	newColor.a = lerp(newColor.a, 1, stampAlpha);
 	
 	newColor.a = saturate(reactionDiffusionSample.y * 1);
-	newColor.rgb = float3(1,1,1);
+	newColor.rgb = lerp(newColor.rgb, float3(1,0.7,0.2), 0.55);
+	newColor.a *= newColor.a;
 	
-	newColor = reactionDiffusionSample;
-	newColor.rgb = lerp(float3(1,1,1) * 0.875, newColor.rgb, 0.25);
-	newColor.a = saturate(reactionDiffusionSample.y - 0.001 * 3);
+	//newColor = reactionDiffusionSample;
+	//newColor.rgb = lerp(float3(1,1,1) * 0.875, newColor.rgb, 0.25);
+	//newColor.a = saturate(reactionDiffusionSample.y - 0.001 * 1.55);
 	DensityWrite[id.xy] = saturate(newColor); //float4(newColor, 1); //lerp(currentColor, sourceColorDynamic, _ColorRefreshAmount);
 
 	

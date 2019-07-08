@@ -65,22 +65,22 @@
 				
 				float3 offsetRaw = (float3(rand0, rand1, rand2) * 2 - 1) * rand3;				
 				//float2 offset = offsetRaw * (16 * particleData.biomass + 0.2);
-				worldPosition.xyz += offsetRaw * 1.6;
+				worldPosition.xyz += offsetRaw * 5;
 				
 				float threshold = particleData.biomass * 1.5 + 0.06;
 				float isOn = saturate((threshold - length(offsetRaw)) * 10);
 
 				float masterFreq = 5;
-				float spatialFreq = 0.25285;
+				float spatialFreq = 0.125285;
 				float timeMult = 0.06;
 				float4 noiseSample = Value3D(worldPosition * spatialFreq + offsetRaw + _Time * timeMult, masterFreq); //float3(0, 0, _Time * timeMult) + 
-				float noiseMag = 0.03;
+				float noiseMag = 0.13;
 				float3 noiseOffset = noiseSample.yzw * noiseMag;
 
 				worldPosition.xyz += noiseOffset;
 
 
-				float radius = particleData.radius * 0.1 * isOn; // 1; //sqrt(particleData.biomass) * 2 + 0.5;
+				float radius = particleData.radius * 0.3 * isOn; // 1; //sqrt(particleData.biomass) * 2 + 0.5;
 				quadPoint = quadPoint * radius; // * particleData.active; // *** remove * 3 after!!!
 				
 				

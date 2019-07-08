@@ -44,28 +44,34 @@
 			uniform float _AddSubtractSign = 1; 
 			uniform int _ChannelID = 0;
 
+			uniform float _Intensity;
+
+			
+
 			fixed4 frag (v2f i) : SV_Target
 			{
 				fixed4 col = tex2D(_MainTex, i.uv);
 				float4 deltaCol = tex2D(_DeltaTex, i.uv);
+
+
 				
 				if(_ChannelID == 0) {
-					col.x = saturate(col.x + deltaCol.x * _AddSubtractSign);
+					col.x = saturate(col.x + deltaCol.x * _AddSubtractSign * _Intensity);
 				}
 
 				if(_ChannelID == 1) {
-					col.x = saturate(col.x + deltaCol.x * _AddSubtractSign * 0.2);
-					col.y = saturate(col.y + deltaCol.x * _AddSubtractSign);
+					col.x = saturate(col.x + deltaCol.x * _AddSubtractSign * _Intensity);
+					col.y = saturate(col.y + deltaCol.x * _AddSubtractSign * _Intensity);
 				}
 
 				if(_ChannelID == 2) {
-					col.x = saturate(col.x + deltaCol.x * _AddSubtractSign * 0.12); 
-					col.z = saturate(col.z + deltaCol.x * _AddSubtractSign);
+					col.x = saturate(col.x + deltaCol.x * _AddSubtractSign * _Intensity); 
+					col.z = saturate(col.z + deltaCol.x * _AddSubtractSign * _Intensity);
 				}
 
 				if(_ChannelID == 3) {
-					col.x = saturate(col.x + deltaCol.x * _AddSubtractSign * 0.08);
-					col.w = saturate(col.w + deltaCol.x * _AddSubtractSign);
+					col.x = saturate(col.x + deltaCol.x * _AddSubtractSign * _Intensity);
+					col.w = saturate(col.w + deltaCol.x * _AddSubtractSign * _Intensity);
 				}
 				// OLD:
 				//col.rgb = saturate(col.rgb + deltaCol.rgb * _AddSubtractSign);

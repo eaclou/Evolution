@@ -30,6 +30,7 @@ Texture2D<float4> velocityRead;
 Texture2D<float4> altitudeRead;
 
 Texture2D<float4> _SpawnDensityMap;
+uniform float _SpiritBrushPosNeg;
 
 uniform float _RespawnAnimalParticles;
 uniform float _Time;
@@ -333,8 +334,8 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 		animalParticlesWrite[id.x].velocity = posOffset;
 		
 		// SPLINE::::::
-		float restDistance = 0.8 * sqrt(animalParticle.biomass); // creature length
-		float lerpStrength = 0.75;
+		float restDistance = 9.8 * sqrt(animalParticle.biomass); // creature length
+		float lerpStrength = 0.24375;
 
 		float2 p0 = newWorldPos;
 	
@@ -355,8 +356,11 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 		animalParticlesWrite[id.x].p3 = p3;
 
 		animalParticlesWrite[id.x].biomass = bodyMass;
+
+		float4 spiritBrushTex = _SpawnDensityMap.SampleLevel(_LinearClamp, uv, 0);  // brush mask
+		float rightClickMask01 = saturate(_SpiritBrushPosNeg * -1);
 		// AGING:
-		animalParticlesWrite[id.x].age = animalParticle.age + 0.00029;
+		animalParticlesWrite[id.x].age = animalParticle.age + 0.00029 + spiritBrushTex.x * rightClickMask01 * 0.1;
 
 		// Resource Conversions:::::		
 		animalParticlesWrite[id.x].wasteProduced = wasteMass;	// Combined Poop & Decomposing	
@@ -370,46 +374,57 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 		animalParticlesWrite[id.x].algaeConsumed = 0;
 
 		// &&&& RESPAWN!!! &&&& ==========================================================================================================
-		if(_RespawnAnimalParticles > 0.75) {		 // CPU master control
+		if(_RespawnAnimalParticles > 0.5) {		 // CPU master control
 			
-			float rand01 = rand(float2(_Time * 135.79 + (float)animalParticlesRead[id.x].index * 30.17896, _Time * 28.463));
 			
-			float randX = rand(float2((float)id.x, _Time));
-			float randY = rand(float2(randX * 62.39 + _Time, (float)id.x));
+			for(int i = 0; i < 8; i++) {
+				float rand01 = rand(float2(_Time * 135.79 + (float)animalParticlesRead[id.x].index * 30.17896 + i, _Time * 28.463 - i));
+			
+				float randX = rand(float2((float)id.x - i, _Time + i));
+				float randY = rand(float2(randX * 62.39 + i + _Time, (float)id.x - i));
+			
+				float2 spawnUV = float2(randX, randY); 						
+				float4 spawnAltitudeSample = altitudeRead.SampleLevel(_LinearClamp, spawnUV, 0);			
+				float distToOrigin = length(_SpawnPos.xy - (spawnUV * _MapSize));
+			
+				//  SPIRIT BRUSH MASK:
+				float4 brushMaskTex = _SpawnDensityMap.SampleLevel(_LinearClamp, spawnUV, 0);
+				float rightClickMask01 = saturate(_SpiritBrushPosNeg * -1);  
+				float brushMask = saturate(brushMaskTex.x * 1.33);
 
-			
-			float2 spawnUV = float2(randX, randY); 						
-			float4 spawnAltitudeSample = altitudeRead.SampleLevel(_LinearClamp, spawnUV, 0);			
-			float distToOrigin = length(_SpawnPos.xy - (spawnUV * _MapSize));
-			
-			if(distToOrigin < _SpawnRadius) {  // to prevent mass respawning, overshooting the intended max global food amount ?  // Needed?
-				if(spawnAltitudeSample.x < 0.5) {  // in water only? // for now...
-					float2 worldPos = float2(spawnUV.x * _MapSize, spawnUV.y * _MapSize);
-					animalParticlesWrite[id.x].worldPos.xy = worldPos;
-					animalParticlesWrite[id.x].p1 = worldPos.xy - float2(0, 0.01);
-					animalParticlesWrite[id.x].p2 = worldPos.xy - float2(0, 0.02);
-					animalParticlesWrite[id.x].p3 = worldPos.xy - float2(0, 0.03);
+				if(brushMask * (1.0 - rightClickMask01) > 0.5) {  
+					if(spawnAltitudeSample.x < 0.5) {  // in water only? // for now...
+						float2 worldPos = float2(spawnUV.x * _MapSize, spawnUV.y * _MapSize);
+						animalParticlesWrite[id.x].worldPos.xy = worldPos;
+						animalParticlesWrite[id.x].p1 = worldPos.xy - float2(0, 0.01);
+						animalParticlesWrite[id.x].p2 = worldPos.xy - float2(0, 0.02);
+						animalParticlesWrite[id.x].p3 = worldPos.xy - float2(0, 0.03);
 
-					float randRadius = rand(float2(randX * 10, randY * -3.37)) * (_MaxParticleSize - _MinParticleSize) + _MinParticleSize;					
+						float randRadius = rand(float2(randX * 10, randY * -3.37)) * (_MaxParticleSize - _MinParticleSize) + _MinParticleSize;					
 			
-					// StartSize?
-					float startingMass = 0.0025;
-					float startingRadius = sqrt(startingMass);
-					animalParticlesWrite[id.x].radius = startingRadius;  // Obsolete? 
-					animalParticlesWrite[id.x].biomass = startingMass;         //randRadius * randRadius * 3.141592 * _ParticleNutrientDensity;
-					animalParticlesWrite[id.x].isActive = 1.0;
-					animalParticlesWrite[id.x].isDecaying = 0.0; // might be obsolete
-					animalParticlesWrite[id.x].isSwallowed = 0.0;  // 
-					animalParticlesWrite[id.x].digestedAmount = 0.0; // to become decay?
-					animalParticlesWrite[id.x].age = rand(float2(rand01 * 70.158, randX * 13.37));  // 0-1, death at 2
-					animalParticlesWrite[id.x].genome = float4(rand01,randX,randY,1);
+						// StartSize?
+						float startingMass = 0.0025;
+						float startingRadius = sqrt(startingMass);
+						animalParticlesWrite[id.x].radius = startingRadius;  // Obsolete? 
+						animalParticlesWrite[id.x].biomass = startingMass;         //randRadius * randRadius * 3.141592 * _ParticleNutrientDensity;
+						animalParticlesWrite[id.x].isActive = 1.0;
+						animalParticlesWrite[id.x].isDecaying = 0.0; // might be obsolete
+						animalParticlesWrite[id.x].isSwallowed = 0.0;  // 
+						animalParticlesWrite[id.x].digestedAmount = 0.0; // to become decay?
+						animalParticlesWrite[id.x].age = rand(float2(rand01 * 70.158, randX * 13.37));  // 0-1, death at 2
+						animalParticlesWrite[id.x].genome = float4(rand01,randX,randY,1);
 
-					// subtract startingMass from algae?  or ignore for now?
-					//animalParticlesWrite[id.x]
+						// subtract startingMass from algae?  or ignore for now?
+						//animalParticlesWrite[id.x]
 					
-				}			
+						break;
+					}	
+					else {
+						
+					}
+				}
 			}
-
+			
 			
 		}
 

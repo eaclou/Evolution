@@ -67,11 +67,18 @@
 				//return float4(1,1,1,1);
 				// sample the texture
 				fixed4 col = tex2D(_MainTex, i.uv);
-				col.rgb *= 1 * _Strength;
+				col.rgb = 1 * _Strength;
 				col.rgb = saturate(col.rgb);
 
-				float4 noiseTex = tex2D(_NoiseTex, frac(i.uv * 0.5 + _Time.y * 1024.0));
-				col.rgb *= noiseTex.x * noiseTex.x * noiseTex.x * noiseTex.x;
+				float timeScale = 0.2789;
+				float4 noiseTex = tex2D(_NoiseTex, frac(i.uv * 0.12 + _Time.y * 0.935 * timeScale)) * tex2D(_NoiseTex, frac(i.uv * 0.256 - _Time.y * 0.835 * timeScale));
+				
+				float uvDist = length(i.uv - 0.5) * 2;
+				
+				float mask = 1.0 - uvDist;
+
+				float mult = lerp(mask, saturate(((noiseTex.x * noiseTex.x * 1 + 0.05) - uvDist) * 15), 0.5);
+				col.rgb *= mult;
 				// apply fog
 				return col;
 			}

@@ -155,10 +155,11 @@ public class ZooplanktonManager {
         computeShaderAnimalParticles.SetBuffer(kernelCSSimulateAnimalParticles, "animalParticlesWrite", animalParticlesCBufferSwap);
         computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "velocityRead", fluidManagerRef._VelocityA);        
         computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "altitudeRead", renderKingRef.baronVonTerrain.terrainHeightDataRT);
+        computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "_SpawnDensityMap", renderKingRef.spiritBrushRT);
         //computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "_SpawnDensityMap", algaeGridRT1);        
         computeShaderAnimalParticles.SetFloat("_GlobalOxygenLevel", resourcesManager.curGlobalOxygen); // needed?
         computeShaderAnimalParticles.SetFloat("_GlobalAlgaeLevel", resourceManagerRef.curGlobalAlgaeParticles);
-        
+        computeShaderAnimalParticles.SetFloat("_SpiritBrushPosNeg", renderKingRef.spiritBrushPosNeg);
         // Movement Params:
         computeShaderAnimalParticles.SetFloat("_MasterSwimSpeed", settingsRef.zooplanktonSettings._MasterSwimSpeed); // = 0.35;
         computeShaderAnimalParticles.SetFloat("_AlignMaskRange", settingsRef.zooplanktonSettings._AlignMaskRange); // = 0.025;
@@ -184,8 +185,16 @@ public class ZooplanktonManager {
         int eggSackIndex = Mathf.FloorToInt(Time.realtimeSinceStartup * 0.1f) % simStateDataRef.eggSackSimDataArray.Length;
 
         //if(animalParticleMeasurementTotalsData[0].biomass < maxAnimalParticleTotal) {
-        float randRoll = UnityEngine.Random.Range(0f, 1f);
-        computeShaderAnimalParticles.SetFloat("_RespawnAnimalParticles", randRoll);                       
+        float brushF = 0f;
+        if(renderKingRef.isSpiritBrushOn) {
+            if(renderKingRef.simManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2) {  // Animals kingdom selected
+                if(renderKingRef.simManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) {  // Zooplankton slot selected
+                    brushF = 1f;
+                }
+            }            
+        }
+        //float randRoll = UnityEngine.Random.Range(0f, 1f);
+        computeShaderAnimalParticles.SetFloat("_RespawnAnimalParticles", brushF);                       
         //}
         //else {
         //    computeShaderAnimalParticles.SetFloat("_RespawnAnimalParticles", 0f);      
