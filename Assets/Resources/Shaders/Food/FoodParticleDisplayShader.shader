@@ -71,10 +71,10 @@
 				float isOn = saturate((threshold - length(offsetRaw)) * 10);
 
 				float masterFreq = 5;
-				float spatialFreq = 0.125285;
-				float timeMult = 0.06;
+				float spatialFreq = 0.06125285;
+				float timeMult = 0.08;
 				float4 noiseSample = Value3D(worldPosition * spatialFreq + offsetRaw + _Time * timeMult, masterFreq); //float3(0, 0, _Time * timeMult) + 
-				float noiseMag = 0.13;
+				float noiseMag = 0.18;
 				float3 noiseOffset = noiseSample.yzw * noiseMag;
 
 				worldPosition.xyz += noiseOffset;

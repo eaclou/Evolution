@@ -69,19 +69,22 @@
 				float rand2 = rand(float2(rand1, rand1) * 10);
 				float rand3 = rand(float2(rand2, rand2) * 10);	
 
-				float2 offsetRaw = (float2(rand0, rand1) * 2 - 1) * rand3;	
-				
-				worldPosition.xy += offsetRaw * 0.5;
+				float3 offsetRaw = (float3(rand0, rand1, rand2) * 2 - 1) * rand3;
+				worldPosition.xyz += offsetRaw * 5;
+
+				//float2 offsetRaw = (float2(rand0, rand1) * 2 - 1) * rand3;					
+				//worldPosition.xy += offsetRaw * 5;
 
 				float threshold = particleData.biomass * 4.5 + 0.033;
 				float isOn = saturate((threshold - length(offsetRaw)) * 10);
 
-				float masterFreq = 3;
-				float spatialFreq = 0.55285;
-				float timeMult = 0.06;
-				float4 noiseSample = Value3D(worldPosition * spatialFreq + _Time * timeMult, masterFreq); //float3(0, 0, _Time * timeMult) + 
-				float noiseMag = 0.015;
+				float masterFreq = 5;
+				float spatialFreq = 0.06125285;
+				float timeMult = 0.08;
+				float4 noiseSample = Value3D(worldPosition * spatialFreq + offsetRaw + _Time * timeMult, masterFreq); //float3(0, 0, _Time * timeMult) + 
+				float noiseMag = 0.18;
 				float3 noiseOffset = noiseSample.yzw * noiseMag;
+				
 
 				worldPosition.xyz += noiseOffset;
 

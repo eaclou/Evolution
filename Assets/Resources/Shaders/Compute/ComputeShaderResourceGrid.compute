@@ -237,7 +237,7 @@ void CSInitRD (uint3 id : SV_DispatchThreadID)
 void CSSimRD (uint3 id : SV_DispatchThreadID)
 {	
 	float s = 1 / _TextureResolution;
-	float deltaTime = 0.024;
+	float deltaTime = 0.054;
 
 	float2 uv = float2((float2)id.xy + 0.5) / _TextureResolution;
 

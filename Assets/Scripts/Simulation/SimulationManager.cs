@@ -164,6 +164,8 @@ public class SimulationManager : MonoBehaviour {
     private int recentlyAddedSpeciesTimeCounter = 0;
 
     public static float energyDifficultyMultiplier = 1f;
+
+    //public bool isBrushingAgents = false;
     
 
     #region loading   // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& LOADING LOADING LOADING &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
@@ -987,7 +989,7 @@ public class SimulationManager : MonoBehaviour {
     }  // *** revisit
     private void CheckForReadyToSpawnAgents() {        
         for (int a = 0; a < agentsArray.Length; a++) {
-            if(agentRespawnCounter > 11) {
+            if(agentRespawnCounter > 1) {
                 if (agentsArray[a].curLifeStage == Agent.AgentLifeStage.AwaitingRespawn) {
                     //Debug.Log("AttemptToSpawnAgent(" + a.ToString() + ")");
                     AttemptToSpawnAgent(a);
@@ -1008,11 +1010,11 @@ public class SimulationManager : MonoBehaviour {
         // Find next-in-line genome waiting to be evaluated:
         CandidateAgentData candidateData = masterGenomePool.completeSpeciesPoolsList[speciesIndex].GetNextAvailableCandidate();
 
-        //Debug.Log("AttemptToSpawnAgent(" + agentIndex.ToString() + ") speciesIndex: " + speciesIndex.ToString() + " candidates: " + masterGenomePool.completeSpeciesPoolsList[speciesIndex].candidateGenomesList.Count.ToString());
+        
 
         if(candidateData == null) {
             // all candidates are currently being tested, or candidate list is empty?
-            //Debug.Log("AttemptToSpawnAgent(" + agentIndex.ToString() + ") candidateData == null");
+            //Debug.Log("AttemptToSpawnAgent(" + agentIndex.ToString() + ") candidateData == null\n +" +  "   ");
         }
         else {
             // Good to go?
@@ -1033,6 +1035,7 @@ public class SimulationManager : MonoBehaviour {
                 int randIndex = UnityEngine.Random.Range(0, validEggSackIndicesList.Count);
                 //Debug.Log("listLength:" + validEggSackIndicesList.Count.ToString() + ", randIndex = " + randIndex.ToString() + ", p: " + validEggSackIndicesList[randIndex].ToString());
                 parentEggSack = eggSackArray[validEggSackIndicesList[randIndex]];
+                Debug.Log("SpawnAgentFromEggSack:");
                 SpawnAgentFromEggSack(candidateData, agentIndex, speciesIndex, parentEggSack);
                 candidateData.isBeingEvaluated = true;
             }
@@ -1040,7 +1043,8 @@ public class SimulationManager : MonoBehaviour {
                 //if(agentIndex == 0) {  // temp hack to avoid null reference exceptions:
                 SpawnAgentImmaculate(candidateData, agentIndex, speciesIndex);
                 candidateData.isBeingEvaluated = true;
-                //}                
+                //}    
+                Debug.Log("AttemptToSpawnAgent Immaculate (" + agentIndex.ToString() + ") speciesIndex: " + speciesIndex.ToString() + " candidates: " + masterGenomePool.completeSpeciesPoolsList[speciesIndex].candidateGenomesList.Count.ToString());
             }
         }       
     }
@@ -1164,10 +1168,13 @@ public class SimulationManager : MonoBehaviour {
     }
     private void SpawnAgentImmaculate(CandidateAgentData sourceCandidate, int agentIndex, int speciesIndex) {
         
-        bool spawnOn = false;
+        bool spawnOn = true;
 
-        Vector3 spawnWorldPos = GetRandomFoodSpawnPosition().startPosition; //uiManager.curCtrlCursorPositionOnWaterPlane; // GetRandomFoodSpawnPosition().startPosition;
-        if(recentlyAddedSpeciesOn) {
+        Vector3 cursorWorldPos = uiManager.curMousePositionOnWaterPlane;
+        Vector3 spawnWorldPos = Vector3.Lerp(new Vector3(128f + UnityEngine.Random.Range(0f, 1f) * 20f, 128f + UnityEngine.Random.Range(0f, 1f) * 20f, 0f), cursorWorldPos, 0.79f); // uiManager.curCtrlCursorPositionOnWaterPlane; // GetRandomFoodSpawnPosition().startPosition;
+        
+        /*
+        if (recentlyAddedSpeciesOn) {
 
             if(speciesIndex == recentlyAddedSpeciesID) {
                 spawnOn = true;
@@ -1180,12 +1187,20 @@ public class SimulationManager : MonoBehaviour {
         else {
             spawnOn = true;
         }
+        */
+        /*if(isBrushingAgents) {
+            spawnOn = true;
 
+            Debug.Log("*** ON **** SIMMANAGER isBrushingAgents = TRUE!");
+        }
+        else {
+            Debug.Log("*** OFF **** SIMMANAGER isBrushingAgents = FALSE!");
+        }*/
         if(spawnOn) {
             agentsArray[agentIndex].InitializeSpawnAgentImmaculate(settingsManager, agentIndex, sourceCandidate, spawnWorldPos); // Spawn that genome in dead Agent's body and revive it!
             theRenderKing.UpdateCritterGenericStrokesData(agentsArray[agentIndex]); //agentIndex, sourceCandidate.candidateGenome);
             numAgentsBorn++;
-            //Debug.Log("%%%%%%%% SpawnAgentImmaculates pos: " + spawnWorldPos.ToString());
+            Debug.Log("%%%%%%%% SpawnAgentImmaculates pos: " + spawnWorldPos.ToString());
         }
         
     }

@@ -38,7 +38,7 @@ public class Agent : MonoBehaviour {
         Dead,
         Null
     }
-    private int gestationDurationTimeSteps = 240;
+    private int gestationDurationTimeSteps = 42;
     public int _GestationDurationTimeSteps
     {
         get

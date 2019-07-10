@@ -117,7 +117,7 @@ public class TrophicLayersManager {
     public void Tick(SimulationManager simManager) {
         // ALGAE
         if(kingdomPlants.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
-            if(simManager.simAgeTimeSteps > 240) {
+            if(simManager.simAgeTimeSteps > 20) {
                 kingdomPlants.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.Empty;
                 Debug.Log("ALGAE UNLOCKED!!! " + simManager.uiManager.unlockCooldownCounter.ToString());
 
@@ -129,7 +129,7 @@ public class TrophicLayersManager {
         
         //check for unlocks:
         if(kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
-            if(simManager.simResourceManager.curGlobalAlgaeParticles > 150f) { // || simManager.simResourceManager.curGlobalDetritus > 150f) {
+            if(simManager.simResourceManager.curGlobalAlgaeParticles > 15f) { // || simManager.simResourceManager.curGlobalDetritus > 150f) {
                 kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.Empty;
                 Debug.Log("DECOMPOSERS UNLOCKED!!! " + simManager.uiManager.unlockCooldownCounter.ToString());
 
@@ -141,7 +141,7 @@ public class TrophicLayersManager {
         }
         
         if(kingdomAnimals.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
-            if(simManager.simResourceManager.curGlobalDecomposers > 10f) { // && !simManager.uiManager.isUnlockCooldown) {
+            if(simManager.simResourceManager.curGlobalDecomposers > 1f) { // && !simManager.uiManager.isUnlockCooldown) {
                 kingdomAnimals.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.Empty;
                 Debug.Log("ZOOPLANKTON UNLOCKED!!! " + simManager.uiManager.unlockCooldownCounter.ToString());
                 simManager.uiManager.AnnounceUnlockZooplankton();
@@ -152,7 +152,7 @@ public class TrophicLayersManager {
         }
 
         if(kingdomAnimals.trophicTiersList[1].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
-            if(simManager.simResourceManager.curGlobalAnimalParticles > 6f) {     // && !simManager.uiManager.isUnlockCooldown) {
+            if(simManager.simResourceManager.curGlobalAnimalParticles > 1f) {     // && !simManager.uiManager.isUnlockCooldown) {
                 
                 kingdomAnimals.trophicTiersList[1].unlocked = true;
                 kingdomAnimals.trophicTiersList[1].trophicSlots[0].status = TrophicSlot.SlotStatus.Empty;
@@ -170,7 +170,7 @@ public class TrophicLayersManager {
         }
 
         if(kingdomAnimals.trophicTiersList[1].trophicSlots[1].status == TrophicSlot.SlotStatus.Locked) {
-            if(simManager.simResourceManager.curGlobalAgentBiomass > 1f) {     // && !simManager.uiManager.isUnlockCooldown) {                
+            if(simManager.simResourceManager.curGlobalAgentBiomass > 0.1f) {     // && !simManager.uiManager.isUnlockCooldown) {                
                 kingdomAnimals.trophicTiersList[1].trophicSlots[1].status = TrophicSlot.SlotStatus.Empty;
                 Debug.Log("CREATURE 2 UNLOCKED!!! " + simManager.uiManager.unlockCooldownCounter.ToString());
                 simManager.uiManager.AnnounceUnlockVertebrates();
@@ -180,7 +180,7 @@ public class TrophicLayersManager {
             }
         }
         if(kingdomAnimals.trophicTiersList[1].trophicSlots[2].status == TrophicSlot.SlotStatus.Locked) {
-            if(simManager.simResourceManager.curGlobalAgentBiomass > 4f) {     // && !simManager.uiManager.isUnlockCooldown) {                
+            if(simManager.simResourceManager.curGlobalAgentBiomass > 0.4f) {     // && !simManager.uiManager.isUnlockCooldown) {                
                 kingdomAnimals.trophicTiersList[1].trophicSlots[2].status = TrophicSlot.SlotStatus.Empty;
                 Debug.Log("CREATURE 3 UNLOCKED!!! " + simManager.uiManager.unlockCooldownCounter.ToString());
                 simManager.uiManager.AnnounceUnlockVertebrates();
@@ -263,6 +263,7 @@ public class TrophicLayersManager {
                 str = "Fine Sand";
             }
         }
+
 
         return str;
     }

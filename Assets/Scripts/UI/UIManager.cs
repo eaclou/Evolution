@@ -350,6 +350,8 @@ public class UIManager : MonoBehaviour {
     private const int maxDisplaySpecies = 32;
 
     private float curSpeciesStatValue;
+
+    
     
     #endregion
 
@@ -715,10 +717,25 @@ public class UIManager : MonoBehaviour {
             if (letGoThisFrameLeft) {
                 isDraggingMouseLeft = false;
                 isDraggingSpeciesNode = false;
+                //gameManager.simulationManager.isBrushingAgents = false;
             }
             if (letGoThisFrameRight) {
                 isDraggingMouseRight = false;
+                //gameManager.simulationManager.isBrushingAgents = false;
             }
+
+            /*if (leftClickThisFrame) {
+                
+                gameManager.simulationManager.isBrushingAgents = true; // ** TEMP DEBUGGING
+                // ANIMALS::::
+                if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2) {
+                    if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 1) {  // AGENTS
+                        gameManager.simulationManager.isBrushingAgents = true;
+                    }
+                }
+                
+                Debug.Log("Left Click! " + gameManager.simulationManager.isBrushingAgents.ToString());
+            }*/
 
             // check for player clicking on an animal in the world
             MouseRaycastCheckAgents(leftClickThisFrame);
@@ -809,7 +826,7 @@ public class UIManager : MonoBehaviour {
                 gameManager.theRenderKing.isSpiritBrushOn = false;
                 gameManager.theRenderKing.nutrientToolOn = false;
                 gameManager.simulationManager.vegetationManager.isBrushActive = false;
-
+                //isBrushingAgents = false;
                 //gameManager.simulationManager.theRenderKing.ClickTestTerrain(true); // *********************** always updates!
                 if (curActiveTool == ToolType.Add || curActiveTool == ToolType.Remove) {
                     // What Palette Trophic Layer is selected?
@@ -832,6 +849,8 @@ public class UIManager : MonoBehaviour {
                             if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2) {
                                 if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 1) {  // AGENTS
                                     gameManager.simulationManager.recentlyAddedSpeciesOn = true;
+                                    //gameManager.simulationManager.isBrushingAgents = true;
+                                    //Debug.LogError("isBrushingAgents = true;");
                                 }
                             }
                             
