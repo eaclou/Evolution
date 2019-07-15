@@ -253,8 +253,8 @@ public class TheRenderKing : MonoBehaviour {
     public float spiritBrushPosNeg = 1f;
     public RenderTexture spiritBrushRT;
     private int spiritBrushResolution = 128;
-    public RenderTexture terrainBaseColorRT;
-    private int terrainBaseColorResolution = 128;
+    //public RenderTexture terrainBaseColorRT;
+    //private int terrainBaseColorResolution = 128;
     
     public Texture2D critterBodyWidthsTex;
 
@@ -4514,10 +4514,10 @@ public class TheRenderKing : MonoBehaviour {
         
         baronVonTerrain.terrainGenerateColorBlitMat.SetTexture("_MainTex", baronVonTerrain.terrainHeightRT0);
         baronVonTerrain.terrainGenerateColorBlitMat.SetTexture("_DeltaTex", spiritBrushRT);
-        baronVonTerrain.terrainGenerateColorBlitMat.SetVector("_Color0", baronVonTerrain.terrainColor0); // new Vector4(0.54f, 0.43f, 0.37f, 1f));
-        baronVonTerrain.terrainGenerateColorBlitMat.SetVector("_Color1", baronVonTerrain.terrainColor1); // new Vector4(0.9f, 0.9f, 0.8f, 1f));
-        baronVonTerrain.terrainGenerateColorBlitMat.SetVector("_Color2", baronVonTerrain.terrainColor2); // new Vector4(0.7f, 0.8f, 0.9f, 1f));
-        baronVonTerrain.terrainGenerateColorBlitMat.SetVector("_Color3", baronVonTerrain.terrainColor3); // new Vector4(0.7f, 0.6f, 0.3f, 1f));
+        baronVonTerrain.terrainGenerateColorBlitMat.SetVector("_Color0", baronVonTerrain.bedrockSlotGenomeCurrent.color); // new Vector4(0.54f, 0.43f, 0.37f, 1f));
+        baronVonTerrain.terrainGenerateColorBlitMat.SetVector("_Color1", baronVonTerrain.stoneSlotGenomeCurrent.color); // new Vector4(0.9f, 0.9f, 0.8f, 1f));
+        baronVonTerrain.terrainGenerateColorBlitMat.SetVector("_Color2", baronVonTerrain.pebblesSlotGenomeCurrent.color); // new Vector4(0.7f, 0.8f, 0.9f, 1f));
+        baronVonTerrain.terrainGenerateColorBlitMat.SetVector("_Color3", baronVonTerrain.sandSlotGenomeCurrent.color); // new Vector4(0.7f, 0.6f, 0.3f, 1f));
         Graphics.Blit(baronVonTerrain.terrainHeightRT0, baronVonTerrain.terrainColorRT0, baronVonTerrain.terrainGenerateColorBlitMat);
 
         baronVonTerrain.InitializeTerrain();

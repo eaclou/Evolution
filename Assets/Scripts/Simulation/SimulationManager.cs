@@ -24,7 +24,7 @@ public class SimulationManager : MonoBehaviour {
     public TrophicLayersManager trophicLayersManager;
     public VegetationManager vegetationManager;
     public ZooplanktonManager zooplanktonManager;
-    public AgentsManager agentsManager;
+    //public AgentsManager agentsManager;
 
     public SimEventsManager simEventsManager;
     public SimResourceManager simResourceManager;
@@ -342,7 +342,7 @@ public class SimulationManager : MonoBehaviour {
         trophicLayersManager = new TrophicLayersManager();
         simEventsManager = new SimEventsManager(this);
         simResourceManager = new SimResourceManager();
-        agentsManager = new AgentsManager();
+        //agentsManager = new AgentsManager();
         vegetationManager = new VegetationManager(settingsManager, simResourceManager);
         zooplanktonManager = new ZooplanktonManager(settingsManager, simResourceManager);
          
@@ -987,28 +987,68 @@ public class SimulationManager : MonoBehaviour {
             }
         }
     }  // *** revisit
-    private void CheckForReadyToSpawnAgents() {        
+    private void CheckForReadyToSpawnAgents() {    // AUTO-SPAWN     
         for (int a = 0; a < agentsArray.Length; a++) {
-            if(agentRespawnCounter > 1) {
+            if(agentRespawnCounter > 35) {
                 if (agentsArray[a].curLifeStage == Agent.AgentLifeStage.AwaitingRespawn) {
                     //Debug.Log("AttemptToSpawnAgent(" + a.ToString() + ")");
-                    AttemptToSpawnAgent(a);
+                    int randomTableIndex = UnityEngine.Random.Range(0, masterGenomePool.currentlyActiveSpeciesIDList.Count);
+                    int speciesIndex = masterGenomePool.currentlyActiveSpeciesIDList[randomTableIndex];
+                    CandidateAgentData candidateData = masterGenomePool.completeSpeciesPoolsList[speciesIndex].GetNextAvailableCandidate();
+                    AttemptToSpawnAgent(a, speciesIndex, candidateData);
                     agentRespawnCounter = 0;
                 }
             }
         }                
     }
-    private void AttemptToSpawnAgent(int agentIndex) { //, int speciesIndex) {
+    public void AttemptToKillAgent(int speciesID, Vector2 clickPos, float brushRadius) {
+        Debug.Log("AttemptToKillAgent loc: " + clickPos.ToString() + " ,,, species: " + speciesID.ToString() + ", brushRadius: " + brushRadius.ToString());  
+
+        for (int a = 0; a < agentsArray.Length; a++) {            
+            if (agentsArray[a].curLifeStage == Agent.AgentLifeStage.Mature) {
+                if(speciesID == agentsArray[a].speciesIndex) {
+                    float distToBrushCenter = (clickPos - agentsArray[a].ownPos).magnitude;
+
+                    if(distToBrushCenter < brushRadius) {
+                    
+                        Debug.Log("KILL AGENT " + a.ToString() + " ,,, species: " + speciesID.ToString() + ", distToBrushCenter: " + distToBrushCenter.ToString()); 
+                    
+                        agentsArray[a].isMarkedForDeathByUser = true;
+                    }
+                }
+            }
+        }
+    }
+    public void AttemptToBrushSpawnAgent(int speciesIndex) {
+        for (int a = 0; a < agentsArray.Length; a++) {            
+            if (agentsArray[a].curLifeStage == Agent.AgentLifeStage.AwaitingRespawn) {
+                          
+                CandidateAgentData candidateData = masterGenomePool.completeSpeciesPoolsList[speciesIndex].GetNextAvailableCandidate();
+                if(candidateData == null) {
+                    Debug.LogError("GetNextAvailableCandidate(): candidateData NULL!!!!");
+                }
+                else {
+                    Debug.Log("AttemptToBrushSpawnAgent(" + a.ToString() + ") species: " + speciesIndex.ToString() + ", " + candidateData.ToString());      
+                    AttemptToSpawnAgent(a, speciesIndex, candidateData);
+                    //agentRespawnCounter = 0;
+                    break;
+                }
+                
+            }
+            
+        } 
+    }
+    private void AttemptToSpawnAgent(int agentIndex, int speciesIndex, CandidateAgentData candidateData) { //, int speciesIndex) {
 
         // Which Species will the new agent belong to?
         // Random selection? Lottery-Selection among Species? Use this Agent's previous-life's Species?  Global Ranked Selection (across all species w/ modifiers) ?
 
         // Using Random Selection as first naive implementation:
-        int randomTableIndex = UnityEngine.Random.Range(0, masterGenomePool.currentlyActiveSpeciesIDList.Count);
-        int speciesIndex = masterGenomePool.currentlyActiveSpeciesIDList[randomTableIndex];
+        //int randomTableIndex = UnityEngine.Random.Range(0, masterGenomePool.currentlyActiveSpeciesIDList.Count);
+        //int speciesIndex = masterGenomePool.currentlyActiveSpeciesIDList[randomTableIndex];
         
         // Find next-in-line genome waiting to be evaluated:
-        CandidateAgentData candidateData = masterGenomePool.completeSpeciesPoolsList[speciesIndex].GetNextAvailableCandidate();
+        //CandidateAgentData candidateData = masterGenomePool.completeSpeciesPoolsList[speciesIndex].GetNextAvailableCandidate();
 
         
 
@@ -1044,7 +1084,7 @@ public class SimulationManager : MonoBehaviour {
                 SpawnAgentImmaculate(candidateData, agentIndex, speciesIndex);
                 candidateData.isBeingEvaluated = true;
                 //}    
-                Debug.Log("AttemptToSpawnAgent Immaculate (" + agentIndex.ToString() + ") speciesIndex: " + speciesIndex.ToString() + " candidates: " + masterGenomePool.completeSpeciesPoolsList[speciesIndex].candidateGenomesList.Count.ToString());
+                //Debug.Log("AttemptToSpawnAgent Immaculate (" + agentIndex.ToString() + ") speciesIndex: " + speciesIndex.ToString() + " candidates: " + masterGenomePool.completeSpeciesPoolsList[speciesIndex].candidateGenomesList.Count.ToString());
             }
         }       
     }
@@ -1170,8 +1210,15 @@ public class SimulationManager : MonoBehaviour {
         
         bool spawnOn = true;
 
+        float isBrushingLerp = 0f;
+        if(uiManager.isDraggingMouseLeft && trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2) {
+            isBrushingLerp = 1f;
+        }
+
         Vector3 cursorWorldPos = uiManager.curMousePositionOnWaterPlane;
-        Vector3 spawnWorldPos = Vector3.Lerp(new Vector3(128f + UnityEngine.Random.Range(0f, 1f) * 20f, 128f + UnityEngine.Random.Range(0f, 1f) * 20f, 0f), cursorWorldPos, 0.79f); // uiManager.curCtrlCursorPositionOnWaterPlane; // GetRandomFoodSpawnPosition().startPosition;
+        cursorWorldPos.x += UnityEngine.Random.Range(-1f, 1f) * 5f;
+        cursorWorldPos.y += UnityEngine.Random.Range(-1f, 1f) * 5f;
+        Vector3 spawnWorldPos = Vector3.Lerp(GetRandomFoodSpawnPosition().startPosition, cursorWorldPos, isBrushingLerp); // uiManager.curCtrlCursorPositionOnWaterPlane; // GetRandomFoodSpawnPosition().startPosition;
         
         /*
         if (recentlyAddedSpeciesOn) {
@@ -1200,7 +1247,7 @@ public class SimulationManager : MonoBehaviour {
             agentsArray[agentIndex].InitializeSpawnAgentImmaculate(settingsManager, agentIndex, sourceCandidate, spawnWorldPos); // Spawn that genome in dead Agent's body and revive it!
             theRenderKing.UpdateCritterGenericStrokesData(agentsArray[agentIndex]); //agentIndex, sourceCandidate.candidateGenome);
             numAgentsBorn++;
-            Debug.Log("%%%%%%%% SpawnAgentImmaculates pos: " + spawnWorldPos.ToString());
+            //Debug.Log("%%%%%%%% SpawnAgentImmaculates pos: " + spawnWorldPos.ToString());
         }
         
     }

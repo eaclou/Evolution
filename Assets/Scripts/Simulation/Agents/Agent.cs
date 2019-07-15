@@ -24,6 +24,8 @@ public class Agent : MonoBehaviour {
     public bool isActing = false;  // biting, defending, dashing, etc -- exclusive actions
     public bool isResting = false;
 
+    public bool isMarkedForDeathByUser = false;
+
     public int index;    
     public int speciesIndex = -1;  // ********************** NEED to set these at birth!
     public CandidateAgentData candidateRef;
@@ -38,7 +40,7 @@ public class Agent : MonoBehaviour {
         Dead,
         Null
     }
-    private int gestationDurationTimeSteps = 42;
+    private int gestationDurationTimeSteps = 21;
     public int _GestationDurationTimeSteps
     {
         get
@@ -185,6 +187,7 @@ public class Agent : MonoBehaviour {
         curLifeStage = AgentLifeStage.AwaitingRespawn;
 
         isInert = true;
+        isMarkedForDeathByUser = false;
     }
 
     public void InitiateBeingSwallowed(Agent predatorAgent)
@@ -466,7 +469,14 @@ public class Agent : MonoBehaviour {
             InitializeDeath();
         }
     }
-
+    private void CheckForDeathDivineJudgment() {
+        if(isMarkedForDeathByUser) {
+            curLifeStage = Agent.AgentLifeStage.Dead;
+            lifeStageTransitionTimeStepCounter = 0;
+            stringCauseOfDeath = "Divine Judgment!";
+            InitializeDeath();
+        }
+    }
     private void InitializeDeath()   // THIS CAN BE A LOT CLEANER!!!!! *****
     {    
         if(isPregnantAndCarryingEggs) {
@@ -498,7 +508,7 @@ public class Agent : MonoBehaviour {
                 CheckForDeathStarvation();
                 CheckForDeathHealth();
                 CheckForDeathOldAge();
-                
+                CheckForDeathDivineJudgment();
                 break;
             case AgentLifeStage.Dead:
                 if(currentBiomass <= 0f && lifeStageTransitionTimeStepCounter >= decayDurationTimeSteps) {  // Fully decayed

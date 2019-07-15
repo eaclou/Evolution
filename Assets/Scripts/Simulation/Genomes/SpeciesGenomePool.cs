@@ -264,7 +264,9 @@ public class SpeciesGenomePool {
             candidateData = new CandidateAgentData(representativeGenome, speciesID);
         }
         
-        
+        /*if(candidateData == null) {
+            Debug.LogError("GetNextAvailableCandidate(): candidateData NULL!!!!");
+        }*/
         return candidateData;
     }  
     

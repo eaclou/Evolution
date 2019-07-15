@@ -194,7 +194,8 @@ public class ZooplanktonManager {
             }            
         }
         //float randRoll = UnityEngine.Random.Range(0f, 1f);
-        computeShaderAnimalParticles.SetFloat("_RespawnAnimalParticles", brushF);                       
+        computeShaderAnimalParticles.SetFloat("_RespawnAnimalParticles", brushF);      
+        computeShaderAnimalParticles.SetFloat("_IsBrushing", brushF);  
         //}
         //else {
         //    computeShaderAnimalParticles.SetFloat("_RespawnAnimalParticles", 0f);      

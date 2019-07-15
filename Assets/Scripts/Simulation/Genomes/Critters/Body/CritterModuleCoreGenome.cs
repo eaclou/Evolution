@@ -278,7 +278,7 @@ public class CritterModuleCoreGenome {
         initModifier.maskIndicesList.Add(masksList.Count - 1); // reference mask by index to allow re-use by other shape modifiers    
         shapeModifiersList.Add(initModifier);
 
-        creatureBaseLength = UnityEngine.Random.Range(0.6f, 1.2f);
+        creatureBaseLength = UnityEngine.Random.Range(0.6f, 1.2f) * 2f;
         creatureAspectRatio = UnityEngine.Random.Range(0.175f, 0.4f);
 
         //creatureComplexShapeLerp = 0f;
@@ -502,7 +502,7 @@ public class CritterModuleCoreGenome {
         }        
         
         // Or start with deformed sphere???? *****
-        creatureBaseLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.creatureBaseLength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.3f, 1.8f);
+        creatureBaseLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.creatureBaseLength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 1f, 3.14f);
         creatureAspectRatio = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.creatureAspectRatio, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.12f, 0.45f);
         
         //creatureComplexShapeLerp = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.creatureComplexShapeLerp, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);

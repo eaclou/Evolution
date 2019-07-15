@@ -217,6 +217,14 @@ public class UIManager : MonoBehaviour {
     public Text textSelectedSpiritBrushName;
     public Image imageToolbarSpiritBrushThumbnail;
     public Image imageToolbarSpiritBrushThumbnailBorder;
+    // Mutation Panel elements:
+    public Image imageMutationPanelThumbnailA;
+    public Image imageMutationPanelThumbnailB;
+    public Image imageMutationPanelThumbnailC;
+    public Text textMutationPanelOptionA;
+    public Text textMutationPanelOptionB;
+    public Text textMutationPanelOptionC;
+
     //public Texture2D textureWorldStats;
     //public Texture2D textureWorldStatsKey;
     //public Vector2[] tolWorldStatsValueRangesKeyArray;
@@ -351,7 +359,9 @@ public class UIManager : MonoBehaviour {
 
     private float curSpeciesStatValue;
 
-    
+    private bool isBrushAddingAgents = false;
+    private int brushAddAgentCounter = 0;
+    private int framesPerAgentSpawn = 3;
     
     #endregion
 
@@ -825,6 +835,7 @@ public class UIManager : MonoBehaviour {
                 gameManager.theRenderKing.isBrushing = false;
                 gameManager.theRenderKing.isSpiritBrushOn = false;
                 gameManager.theRenderKing.nutrientToolOn = false;
+                isBrushAddingAgents = false;
                 gameManager.simulationManager.vegetationManager.isBrushActive = false;
                 //isBrushingAgents = false;
                 //gameManager.simulationManager.theRenderKing.ClickTestTerrain(true); // *********************** always updates!
@@ -848,9 +859,25 @@ public class UIManager : MonoBehaviour {
                             // ANIMALS::::
                             if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2) {
                                 if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 1) {  // AGENTS
-                                    gameManager.simulationManager.recentlyAddedSpeciesOn = true;
-                                    //gameManager.simulationManager.isBrushingAgents = true;
-                                    //Debug.LogError("isBrushingAgents = true;");
+                                    int speciesIndex = gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.linkedSpeciesID;
+                                    if (isDraggingMouseLeft) {
+                                        gameManager.simulationManager.recentlyAddedSpeciesOn = true; // ** needed?
+                                        isBrushAddingAgents = true;
+                                        //gameManager.simulationManager.isBrushingAgents = true;
+                                        Debug.Log("isBrushAddingAgents = true; speciesID = " + speciesIndex.ToString());
+
+                                        brushAddAgentCounter++;
+
+                                        if(brushAddAgentCounter >= framesPerAgentSpawn) {
+                                            brushAddAgentCounter = 0;
+
+                                            gameManager.simulationManager.AttemptToBrushSpawnAgent(speciesIndex);
+                                        }
+                                    }
+                                    if (isDraggingMouseRight) {
+                                        gameManager.simulationManager.AttemptToKillAgent(speciesIndex, new Vector2(curMousePositionOnWaterPlane.x, curMousePositionOnWaterPlane.y), 15f);
+                                    }
+                                   
                                 }
                             }
                             
@@ -956,11 +983,11 @@ public class UIManager : MonoBehaviour {
             }
         }
         // Enable checking for this announcement happening -- algae collapse requires it to have reached full population at some point
-        if(gameManager.simulationManager.trophicLayersManager.GetAlgaeOnOff()) {
+        /*if(gameManager.simulationManager.trophicLayersManager.GetAlgaeOnOff()) {
             if(gameManager.simulationManager.simResourceManager.curGlobalAlgaeParticles > 100f) {
                 announceAlgaeCollapsePossible = true;
             }
-        }
+        }*/
 
         // AGENTS:
         /*if(!announceAgentCollapseOccurred) {
@@ -1333,15 +1360,19 @@ public class UIManager : MonoBehaviour {
                 if(layerManager.selectedTrophicSlotRef.slotID == 0) {
                     // bedrock
                     imageToolbarSpeciesPortraitRender.sprite = spriteBedrockPortrait;
+                    imageToolbarSpeciesPortraitRender.color = gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeCurrent.color;
                 }
                 else if(layerManager.selectedTrophicSlotRef.slotID == 1) {
                     imageToolbarSpeciesPortraitRender.sprite = spriteStonesPortrait;
+                    imageToolbarSpeciesPortraitRender.color = gameManager.theRenderKing.baronVonTerrain.stoneSlotGenomeCurrent.color;
                 }
                 else if(layerManager.selectedTrophicSlotRef.slotID == 2) {
                     imageToolbarSpeciesPortraitRender.sprite = spritePebblesPortrait;
+                    imageToolbarSpeciesPortraitRender.color = gameManager.theRenderKing.baronVonTerrain.pebblesSlotGenomeCurrent.color;
                 }
                 else {
                     imageToolbarSpeciesPortraitRender.sprite = spriteSandPortrait;
+                    imageToolbarSpeciesPortraitRender.color = gameManager.theRenderKing.baronVonTerrain.sandSlotGenomeCurrent.color;
                 }
                 //imageToolbarSpeciesPortraitRender.sprite = null;
                 panelTier = 1;
@@ -1439,9 +1470,7 @@ public class UIManager : MonoBehaviour {
                     buttonToolbarWingMutation.transform.localScale = Vector3.one * 1.5f;
 
                     if (!isToolbarDeletePromptOn) {
-                        textToolbarWingPanelName.text = "Upgrades:";
-                        panelToolbarWingMutation.SetActive(true); 
-                        // Update mutation/upgrade panel
+                        UpdateToolbarMutationPanel();
                     }                
                 }
                 else {
@@ -1460,6 +1489,107 @@ public class UIManager : MonoBehaviour {
         //imageToolbarSpeciesPortraitRender.color = Color.white;
         //imageToolbarSpeciesPortraitRender.gameObject.SetActive(true);
         
+    }
+    public void ClickMutationOption(int id) { // **** Need better smarter way to detect selected slot and point to corresponding data
+        Debug.Log("ClickMutationOption(" + id.ToString() + ")");
+
+        TrophicSlot slotRef = gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef;
+        if(slotRef.kingdomID == 0) {  // Decomposers
+
+        }
+        else if(slotRef.kingdomID == 1) {  // Plants
+
+        }
+        else if(slotRef.kingdomID == 2) {  // Animals
+
+        }
+        else if(slotRef.kingdomID == 3) { // Terrain
+            if(slotRef.slotID == 0) {
+                //gameManager.theRenderKing.baronVonTerrain.ApplyMutation(id);
+                gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeCurrent = gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[id];
+            }
+            else if(slotRef.slotID == 1) {
+                //gameManager.theRenderKing.baronVonTerrain.ApplyMutation(id);
+                gameManager.theRenderKing.baronVonTerrain.stoneSlotGenomeCurrent = gameManager.theRenderKing.baronVonTerrain.stoneSlotGenomeMutations[id];
+            }
+            else if(slotRef.slotID == 2) {
+                gameManager.theRenderKing.baronVonTerrain.pebblesSlotGenomeCurrent = gameManager.theRenderKing.baronVonTerrain.pebblesSlotGenomeMutations[id];
+            }
+            else if(slotRef.slotID == 3) {
+                gameManager.theRenderKing.baronVonTerrain.sandSlotGenomeCurrent = gameManager.theRenderKing.baronVonTerrain.sandSlotGenomeMutations[id];
+            }
+
+            // if terrain:
+            gameManager.theRenderKing.baronVonTerrain.GenerateTerrainSlotGenomeMutationOptions(slotRef.slotID);
+            gameManager.theRenderKing.ClickTestTerrain(false); // refresh color
+        }
+        
+        
+        
+        
+    }
+    private void UpdateToolbarMutationPanel() {
+        textToolbarWingPanelName.text = "Mutations:";
+        panelToolbarWingMutation.SetActive(true);
+        // Update mutation/upgrade panel
+
+        //imageMutationPanelThumbnailB.color = Color.red;
+        //imageMutationPanelThumbnailB.sprite = null;
+        //imageMutationPanelThumbnailC.color = Color.white;
+        //imageMutationPanelThumbnailC.sprite = null;
+
+        textMutationPanelOptionA.text = "Option A!";
+        textMutationPanelOptionB.text = "Option B!";
+        textMutationPanelOptionC.text = "Option C!";
+
+        TrophicLayersManager layerManager = gameManager.simulationManager.trophicLayersManager;                     
+        if(layerManager.selectedTrophicSlotRef.kingdomID == 3) { // Terrain
+            if (layerManager.selectedTrophicSlotRef.tierID == 0) {
+                Color ColorOptionA = Color.white;
+                Color ColorOptionB = Color.white;
+                Color ColorOptionC = Color.white;
+                if(layerManager.selectedTrophicSlotRef.slotID == 0) {
+                    ColorOptionA = gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[0].color;
+                    ColorOptionB = gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[1].color;
+                    ColorOptionC = gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[2].color;
+                    textMutationPanelOptionA.text = "Minor Bedrock Mutation! Shininess: " + (gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[0].color.a * 100f).ToString("F0") + "%";
+                    textMutationPanelOptionB.text = "Bedrock Mutation! Shininess: " + (gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[1].color.a * 100f).ToString("F0") + "%";
+                    textMutationPanelOptionC.text = "Major Bedrock Mutation! Shininess: " + (gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[2].color.a * 100f).ToString("F0") + "%";
+                }
+                else if(layerManager.selectedTrophicSlotRef.slotID == 1) {
+                    ColorOptionA = gameManager.theRenderKing.baronVonTerrain.stoneSlotGenomeMutations[0].color;
+                    ColorOptionB = gameManager.theRenderKing.baronVonTerrain.stoneSlotGenomeMutations[1].color;
+                    ColorOptionC = gameManager.theRenderKing.baronVonTerrain.stoneSlotGenomeMutations[2].color;
+                    textMutationPanelOptionA.text = "Minor Stones Mutation! Shininess: " + (gameManager.theRenderKing.baronVonTerrain.stoneSlotGenomeMutations[0].color.a * 100f).ToString("FF0") + "%";
+                    textMutationPanelOptionB.text = "Stones Mutation! Shininess: " + (gameManager.theRenderKing.baronVonTerrain.stoneSlotGenomeMutations[1].color.a * 100f).ToString("F0") + "%";
+                    textMutationPanelOptionC.text = "Major Stones Mutation! Shininess: " + (gameManager.theRenderKing.baronVonTerrain.stoneSlotGenomeMutations[2].color.a * 100f).ToString("F0") + "%";
+                }
+                else if(layerManager.selectedTrophicSlotRef.slotID == 2) {
+                    ColorOptionA = gameManager.theRenderKing.baronVonTerrain.pebblesSlotGenomeMutations[0].color;
+                    ColorOptionB = gameManager.theRenderKing.baronVonTerrain.pebblesSlotGenomeMutations[1].color;
+                    ColorOptionC = gameManager.theRenderKing.baronVonTerrain.pebblesSlotGenomeMutations[2].color;
+                    textMutationPanelOptionA.text = "Minor Pebbles Mutation! Elevation: " + (gameManager.theRenderKing.baronVonTerrain.pebblesSlotGenomeMutations[0].elevationChange * 100f).ToString("F0") + "%";
+                    textMutationPanelOptionB.text = "Pebbles Mutation! Elevation: " + (gameManager.theRenderKing.baronVonTerrain.pebblesSlotGenomeMutations[1].elevationChange * 100f).ToString("F0") + "%";
+                    textMutationPanelOptionC.text = "Major Pebbles Mutation! Elevation: " + (gameManager.theRenderKing.baronVonTerrain.pebblesSlotGenomeMutations[2].elevationChange * 100f).ToString("F0") + "%";
+                }
+                else {
+                    ColorOptionA = gameManager.theRenderKing.baronVonTerrain.sandSlotGenomeMutations[0].color;
+                    ColorOptionB = gameManager.theRenderKing.baronVonTerrain.sandSlotGenomeMutations[1].color;
+                    ColorOptionC = gameManager.theRenderKing.baronVonTerrain.sandSlotGenomeMutations[2].color;
+                    textMutationPanelOptionA.text = "Minor Sand Mutation! Elevation: " + (gameManager.theRenderKing.baronVonTerrain.sandSlotGenomeMutations[0].elevationChange * 100f).ToString("F0") + "%";
+                    textMutationPanelOptionB.text = "Sand Mutation! Elevation: " + (gameManager.theRenderKing.baronVonTerrain.sandSlotGenomeMutations[1].elevationChange * 100f).ToString("F0") + "%";
+                    textMutationPanelOptionC.text = "Major Sand Mutation! Elevation: " + (gameManager.theRenderKing.baronVonTerrain.sandSlotGenomeMutations[2].elevationChange * 100f).ToString("F0") + "%";
+                }
+                imageMutationPanelThumbnailA.color = ColorOptionA;
+                imageMutationPanelThumbnailA.sprite = null;
+                imageMutationPanelThumbnailB.color = ColorOptionB;
+                imageMutationPanelThumbnailB.sprite = null;
+                imageMutationPanelThumbnailC.color = ColorOptionC;
+                imageMutationPanelThumbnailC.sprite = null;
+                
+            }
+        }
+         
     }
     public void UpdateInfoPanelUI() {
         textCurYear.text = (gameManager.simulationManager.curSimYear + 1).ToString();
@@ -3146,6 +3276,8 @@ public class UIManager : MonoBehaviour {
                 
         gameManager.theRenderKing.baronVonWater.StartCursorClick(cameraManager.curCameraFocusPivotPos);
         
+        isAnnouncementTextOn = true;
+
         if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 0) {
             panelPendingClickPrompt.GetComponentInChildren<Text>().text = "A new species of Decomposer added!";
             panelPendingClickPrompt.GetComponentInChildren<Text>().color = colorDecomposersLight;
@@ -3156,7 +3288,7 @@ public class UIManager : MonoBehaviour {
             panelPendingClickPrompt.GetComponentInChildren<Text>().color = colorPlantsLight;
             panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
         }
-        else {
+        else if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2) { // ANIMALS
             if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 1) {
                 //if(createSpecies) {
                 // v v v Actually creates new speciesPool here:::
@@ -3181,7 +3313,8 @@ public class UIManager : MonoBehaviour {
                 panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
                 
                 if(slot.slotID == 0) {
-                    panelPendingClickPrompt.GetComponentInChildren<Text>().text = "These creatures start with randomly-generated brains\n and must evolve successful behavior\nthrough survival of the fittest";
+                    //panelPendingClickPrompt.GetComponentInChildren<Text>().text = "These creatures start with randomly-generated brains\n and must evolve successful behavior\nthrough survival of the fittest";
+                    isAnnouncementTextOn = false;  // *** hacky...
                 }
                 //ClickToolButtonInspect();
                 
@@ -3195,7 +3328,7 @@ public class UIManager : MonoBehaviour {
 
         //curToolbarWingPanelSelectID = 1;
 
-        isAnnouncementTextOn = true;
+        
         timerAnnouncementTextCounter = 0;
         recentlyCreatedSpecies = true;
         recentlyCreatedSpeciesTimeStepCounter = 0;

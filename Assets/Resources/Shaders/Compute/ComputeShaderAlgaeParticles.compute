@@ -33,8 +33,8 @@ Texture2D<float4> altitudeRead;
 
 Texture2D<float4> _SpawnDensityMap;  // spiritBrush?
 uniform float _SpiritBrushPosNeg;
-
 uniform float _IsBrushing;
+
 uniform float _Time;
 uniform float _MapSize;
 
@@ -286,7 +286,7 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 			float onLandMask = saturate((altitudeRaw - 0.5) * 100);
 			float rightClickMask01 = saturate(_SpiritBrushPosNeg * -1);
 			float4 spiritBrushTex = _SpawnDensityMap.SampleLevel(_LinearClamp, uv, 0);  // brush mask
-			foodParticlesWrite[id.x].age = foodParticle.age + _AlgaeAgingRate + onLandMask * 0.05 + spiritBrushTex.x * rightClickMask01 * 0.2; 
+			foodParticlesWrite[id.x].age = foodParticle.age + _AlgaeAgingRate + onLandMask * 0.05 + spiritBrushTex.x * rightClickMask01 * 0.2 * _IsBrushing; 
 			
 			foodParticlesWrite[id.x].isDecaying = foodParticle.isDecaying;
 
@@ -368,6 +368,39 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 					foodParticlesWrite[id.x].color = float3(randY, randX, randZ); //float3(0,0,0); //saturate(parentParticle.color + (float3(randY, randX, randZ) - 0.5) * 0.1);
 				}			
 			}			
+		}
+		else {  // Player NOT brushing
+			float rand01 = rand(float2(_Time * 135.79 + (float)foodParticlesRead[id.x].index * 30.17896, _Time * 28.463));
+			float randX = rand(float2((float)id.x, _Time));
+			float randY = rand(float2(randX * 62.39 + _Time, (float)id.x));
+			float randZ = rand(float2((float)id.x, randY * -62.39 - _Time));			
+			
+			int parentIndex = (id.x + round(_Time * 0.25) + 256) % 1024;			
+			AlgaeParticleData parentParticle = foodParticlesRead[parentIndex];
+			float aliveMask = (1.0 - parentParticle.isDecaying) * parentParticle.isActive;
+			float2 parentPos = parentParticle.worldPos;
+
+			float2 spawnUV = lerp(float2(randZ, randX), parentPos / _MapSize, 0.95); 	
+						
+			float4 spawnAltitudeSample = altitudeRead.SampleLevel(_LinearClamp, spawnUV, 0);
+			 
+			if(spawnAltitudeSample.x < _AlgaeSpawnMaxAltitude * aliveMask && rand01 > 0.9975) {  // in water only? // for now...
+				
+				foodParticlesWrite[id.x].worldPos = spawnUV * _MapSize;
+					
+
+				float randRadius = rand(float2(randX * 10, randY * -3.37)) * (_MaxParticleSize - _MinParticleSize) + _MinParticleSize;					
+					
+				foodParticlesWrite[id.x].radius = 1.0; //randRadius;
+				foodParticlesWrite[id.x].biomass = _AlgaeParticleInitMass;
+				foodParticlesWrite[id.x].isActive = 1.0;
+				foodParticlesWrite[id.x].isDecaying = 0.0;
+				foodParticlesWrite[id.x].isSwallowed = 0.0;
+				foodParticlesWrite[id.x].digestedAmount = 0.0;
+				foodParticlesWrite[id.x].age = rand(float2(rand01 * 70.158, randX * 13.37)) * 1;
+				foodParticlesWrite[id.x].color = float3(randY, randX, randZ); //float3(0,0,0); //saturate(parentParticle.color + (float3(randY, randX, randZ) - 0.5) * 0.1);
+			}			
+					
 		}
 	}
 }

@@ -443,12 +443,15 @@ public class VegetationManager {
         float brushF = 0f;
         if(renderKingRef.isSpiritBrushOn) {
             if(renderKingRef.simManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 1) {  // Plants kingdom selected
+                //Debug.Log("brushF: " + brushF.ToString());
                 if(renderKingRef.simManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) {  // Algae selected
                     brushF = 1f;
                 }
             }            
         }
-        computeShaderAlgaeParticles.SetFloat("_IsBrushing", brushF); 
+        computeShaderAlgaeParticles.SetFloat("_IsBrushing", brushF);
+
+        
 
         //_FoodSprinklePos;
 //_FoodSprinkleRadius;
