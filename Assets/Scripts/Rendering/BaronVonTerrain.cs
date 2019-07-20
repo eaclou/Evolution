@@ -26,14 +26,14 @@ public class BaronVonTerrain : RenderBaron {
     public Color terrainColor1;
     public Color terrainColor2;
     public Color terrainColor3;
-    public TerrainSlotGenome bedrockSlotGenomeCurrent;
-    public TerrainSlotGenome[] bedrockSlotGenomeMutations;
-    public TerrainSlotGenome stoneSlotGenomeCurrent;
-    public TerrainSlotGenome[] stoneSlotGenomeMutations;
-    public TerrainSlotGenome pebblesSlotGenomeCurrent;
-    public TerrainSlotGenome[] pebblesSlotGenomeMutations;
-    public TerrainSlotGenome sandSlotGenomeCurrent;
-    public TerrainSlotGenome[] sandSlotGenomeMutations;
+    public WorldLayerTerrainGenome bedrockSlotGenomeCurrent;
+    public WorldLayerTerrainGenome[] bedrockSlotGenomeMutations;
+    public WorldLayerTerrainGenome stoneSlotGenomeCurrent;
+    public WorldLayerTerrainGenome[] stoneSlotGenomeMutations;
+    public WorldLayerTerrainGenome pebblesSlotGenomeCurrent;
+    public WorldLayerTerrainGenome[] pebblesSlotGenomeMutations;
+    public WorldLayerTerrainGenome sandSlotGenomeCurrent;
+    public WorldLayerTerrainGenome[] sandSlotGenomeMutations;
 
     //public Material frameBufferStrokeDisplayMat;
     private int terrainHeightMapResolution = 256;
@@ -79,10 +79,10 @@ public class BaronVonTerrain : RenderBaron {
 
     public Vector4 spawnBoundsCameraDetails;
 
-    public struct TerrainSlotGenome {
+    /*public struct TerrainSlotGenome {
         public Color color;
         public float elevationChange;
-    }
+    }*/
 
     public struct TerrainSimpleBrushData { // background terrain
         public Vector3 worldPos;
@@ -108,21 +108,26 @@ public class BaronVonTerrain : RenderBaron {
 
         // Bedrock data
         int numMutations = 4;
-        bedrockSlotGenomeCurrent = new TerrainSlotGenome();
+        bedrockSlotGenomeCurrent = new WorldLayerTerrainGenome();
         bedrockSlotGenomeCurrent.color = terrainColor0;
-        bedrockSlotGenomeMutations = new TerrainSlotGenome[numMutations];                
+        bedrockSlotGenomeCurrent.name = "Bedrock";
+        bedrockSlotGenomeCurrent.textDescriptionMutation = "Elevation Gain: " + " ??";
+        bedrockSlotGenomeMutations = new WorldLayerTerrainGenome[numMutations];                
         // stones:
-        stoneSlotGenomeCurrent = new TerrainSlotGenome();
+        stoneSlotGenomeCurrent = new WorldLayerTerrainGenome();
         stoneSlotGenomeCurrent.color = terrainColor1;
-        stoneSlotGenomeMutations = new TerrainSlotGenome[numMutations];
+        stoneSlotGenomeCurrent.name = "Stone";
+        stoneSlotGenomeMutations = new WorldLayerTerrainGenome[numMutations];
         // pebbles:
-        pebblesSlotGenomeCurrent = new TerrainSlotGenome();
+        pebblesSlotGenomeCurrent = new WorldLayerTerrainGenome();
         pebblesSlotGenomeCurrent.color = terrainColor2;
-        pebblesSlotGenomeMutations = new TerrainSlotGenome[numMutations];
+        pebblesSlotGenomeCurrent.name = "Pebbles";
+        pebblesSlotGenomeMutations = new WorldLayerTerrainGenome[numMutations];
         // sand:
-        sandSlotGenomeCurrent = new TerrainSlotGenome();
+        sandSlotGenomeCurrent = new WorldLayerTerrainGenome();
         sandSlotGenomeCurrent.color = terrainColor3;
-        sandSlotGenomeMutations = new TerrainSlotGenome[numMutations];
+        sandSlotGenomeCurrent.name = "Sand";
+        sandSlotGenomeMutations = new WorldLayerTerrainGenome[numMutations];
         for(int i = 0; i < 4; i++) { // not needed?
             GenerateTerrainSlotGenomeMutationOptions(i);
         }
@@ -173,10 +178,13 @@ public class BaronVonTerrain : RenderBaron {
     }*/
     public void GenerateTerrainSlotGenomeMutationOptions(int slotID) {
         float mutationSize = 1f;
+        // *** Invert code to bring for() loop to the outside? might be more efficient ***
+       // *** Just save current slot object first then use that as single ref?
         if(slotID == 0) {
             for(int i = 0; i < bedrockSlotGenomeMutations.Length; i++) {
-                float iLerp = ((float)i + 0.2f / (bedrockSlotGenomeMutations.Length - 1f));
-                TerrainSlotGenome mutatedGenome = new TerrainSlotGenome();
+                float iLerp = Mathf.Clamp01((float)i / 3f + 0.015f); // ((float)i + 0.2f / (bedrockSlotGenomeMutations.Length - 1f));
+                iLerp = iLerp * iLerp;
+                WorldLayerTerrainGenome mutatedGenome = new WorldLayerTerrainGenome();
                 Color randColor = UnityEngine.Random.ColorHSV();
                 float randAlpha = UnityEngine.Random.Range(0f, 1f);  // shininess
                 randColor.a = randAlpha;
@@ -185,13 +193,16 @@ public class BaronVonTerrain : RenderBaron {
                 
                 mutatedGenome.elevationChange = Mathf.Lerp(bedrockSlotGenomeCurrent.elevationChange, UnityEngine.Random.Range(0f, 1f), iLerp);
 
+                mutatedGenome.name = bedrockSlotGenomeCurrent.name;
+                mutatedGenome.textDescriptionMutation = "Mutation Amt: " + (iLerp * 100f).ToString("F0") + "%";
                 bedrockSlotGenomeMutations[i] = mutatedGenome;
             }
         }
         else if(slotID == 1) {
             for(int i = 0; i < stoneSlotGenomeMutations.Length; i++) {
-                float iLerp = ((float)i + 0.2f / (stoneSlotGenomeMutations.Length - 1f));
-                TerrainSlotGenome mutatedGenome = new TerrainSlotGenome();
+                float iLerp = Mathf.Clamp01((float)i / 3f + 0.015f); 
+                iLerp = iLerp * iLerp;
+                WorldLayerTerrainGenome mutatedGenome = new WorldLayerTerrainGenome();
                 Color randColor = UnityEngine.Random.ColorHSV();
                 float randAlpha = UnityEngine.Random.Range(0f, 1f);  // shininess
                 randColor.a = randAlpha;
@@ -199,13 +210,16 @@ public class BaronVonTerrain : RenderBaron {
                 mutatedGenome.color = mutatedColor;
                 mutatedGenome.elevationChange = Mathf.Lerp(stoneSlotGenomeCurrent.elevationChange, UnityEngine.Random.Range(0f, 1f), iLerp);
 
+                mutatedGenome.name = stoneSlotGenomeCurrent.name;
+                mutatedGenome.textDescriptionMutation = "Mutation Amt: " + (iLerp * 100f).ToString("F0") + "%";
                 stoneSlotGenomeMutations[i] = mutatedGenome;
             }
         }
         else if(slotID == 2) {
             for(int i = 0; i < pebblesSlotGenomeMutations.Length; i++) {
-                float iLerp = ((float)i + 0.2f / (pebblesSlotGenomeMutations.Length - 1f));
-                TerrainSlotGenome mutatedGenome = new TerrainSlotGenome();
+                float iLerp = Mathf.Clamp01((float)i / 3f + 0.015f); 
+                iLerp = iLerp * iLerp;
+                WorldLayerTerrainGenome mutatedGenome = new WorldLayerTerrainGenome();
                 Color randColor = UnityEngine.Random.ColorHSV();
                 float randAlpha = UnityEngine.Random.Range(0f, 1f);  // shininess
                 randColor.a = randAlpha;
@@ -213,13 +227,16 @@ public class BaronVonTerrain : RenderBaron {
                 mutatedGenome.color = mutatedColor;
                 mutatedGenome.elevationChange = Mathf.Lerp(pebblesSlotGenomeCurrent.elevationChange, UnityEngine.Random.Range(0f, 1f), iLerp);
 
+                mutatedGenome.name = pebblesSlotGenomeCurrent.name;
+                mutatedGenome.textDescriptionMutation = "Mutation Amt: " + (iLerp * 100f).ToString("F0") + "%";
                 pebblesSlotGenomeMutations[i] = mutatedGenome;
             }
         }
         else if(slotID == 3) {
             for(int i = 0; i < sandSlotGenomeMutations.Length; i++) {
-                float iLerp = ((float)i + 0.2f / (sandSlotGenomeMutations.Length - 1f));
-                TerrainSlotGenome mutatedGenome = new TerrainSlotGenome();
+                float iLerp = Mathf.Clamp01((float)i / 3f + 0.015f); 
+                iLerp = iLerp * iLerp;
+                WorldLayerTerrainGenome mutatedGenome = new WorldLayerTerrainGenome();
                 Color randColor = UnityEngine.Random.ColorHSV();
                 float randAlpha = UnityEngine.Random.Range(0f, 1f);  // shininess
                 randColor.a = randAlpha;
@@ -227,6 +244,8 @@ public class BaronVonTerrain : RenderBaron {
                 mutatedGenome.color = mutatedColor;
                 mutatedGenome.elevationChange = Mathf.Lerp(sandSlotGenomeCurrent.elevationChange, UnityEngine.Random.Range(0f, 1f), iLerp);
 
+                mutatedGenome.name = sandSlotGenomeCurrent.name;
+                mutatedGenome.textDescriptionMutation = "Mutation Amt: " + (iLerp * 100f).ToString("F0") + "%";
                 sandSlotGenomeMutations[i] = mutatedGenome;
             }
         }

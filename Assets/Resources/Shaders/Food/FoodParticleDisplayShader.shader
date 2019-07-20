@@ -109,13 +109,13 @@
 				float val = i.color.a;
 				
 				float4 finalColor = i.hue; // float4(float3(i.color.z * 1.2, 0.85, (1.0 - i.color.w) * 0.2) + i.color.y, texColor.a * i.color.x * 0.33 * (1 - i.color.z));
-				finalColor.rgb = lerp(finalColor.rgb, float3(0.35, 0.95, 0.45), 0.7);
+				finalColor.rgb = lerp(finalColor.rgb, float3(0.35, 0.95, 0.45), 0.07);
 				//finalColor.rgb += 0.25;
-				finalColor.a = texColor.a * 0.175;
+				finalColor.a = texColor.a * 0.8175;
 				
-				finalColor.rgb = lerp(finalColor, float3(1, 0.9, 0.5) * 0.6, i.color.x);
+				finalColor.rgb = lerp(finalColor, float3(0.81, 0.79, 0.65) * 0.4, i.color.x);
 				finalColor.rgb *= i.color.z * 0.3 + 0.7;
-				//finalColor.rgb = 1;
+				//finalColor.rgb = i.hue;
 				return finalColor;
 			}
 		ENDCG

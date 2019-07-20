@@ -28,6 +28,11 @@ public class ZooplanktonManager {
     private ComputeBuffer animalParticlesMeasure32;
     private ComputeBuffer animalParticlesMeasure1;
     private AnimalParticleData[] animalParticleMeasurementTotalsData;
+
+    private ComputeBuffer zooplanktonRepresentativeGenomeCBuffer;
+
+    public WorldLayerZooplanktonGenome zooplanktonSlotGenomeCurrent;  // algae particles!  -- likely to be converted into plants eventually ***
+    public WorldLayerZooplanktonGenome[] zooplanktonSlotGenomeMutations;
     
     public struct AnimalParticleData {
         public int index;
@@ -50,7 +55,7 @@ public class ZooplanktonManager {
 	    public float isDecaying;
 	    public float age;
 	    public float speed;
-        public Vector4 genome;
+        public Vector4 color;
     }
    
     private int GetAnimalParticleDataSize() {
@@ -86,6 +91,7 @@ public class ZooplanktonManager {
             data.isActive = 0f;
             data.isDecaying = 0f;
             data.age = UnityEngine.Random.Range(1f, 2f);
+            data.color = UnityEngine.Random.ColorHSV();
             animalParticlesArray[i] = data;
         }
         //Debug.Log("Fill Initial Particle Array Data CPU: " + (Time.realtimeSinceStartup - startTime).ToString());
@@ -122,6 +128,42 @@ public class ZooplanktonManager {
         animalParticlesMeasure32 = new ComputeBuffer(32, GetAnimalParticleDataSize());
         animalParticlesMeasure1 = new ComputeBuffer(1, GetAnimalParticleDataSize());
         //Debug.Log("End: " + (Time.realtimeSinceStartup - startTime).ToString());
+
+        int numMutations = 4;  // don't change this
+        zooplanktonSlotGenomeCurrent = new WorldLayerZooplanktonGenome();
+        zooplanktonSlotGenomeCurrent.representativeData = animalParticlesArray[0];
+        zooplanktonSlotGenomeCurrent.name = "Zooplankton, Bebe!";
+        zooplanktonSlotGenomeMutations = new WorldLayerZooplanktonGenome[numMutations];
+
+        GenerateWorldLayerZooplanktonGenomeMutationOptions();
+
+
+        //////+++++++++
+        
+        zooplanktonRepresentativeGenomeCBuffer = new ComputeBuffer(1, GetAnimalParticleDataSize());
+        AnimalParticleData[] zooplanktonRepresentativeGenomeArray = new AnimalParticleData[1];
+        zooplanktonRepresentativeGenomeArray[0] = zooplanktonSlotGenomeCurrent.representativeData;
+        zooplanktonRepresentativeGenomeCBuffer.SetData(zooplanktonRepresentativeGenomeArray);
+    }
+
+    public void GenerateWorldLayerZooplanktonGenomeMutationOptions() {
+        for(int j = 0; j < zooplanktonSlotGenomeMutations.Length; j++) {
+            float jLerp = Mathf.Clamp01((float)j / 3f + 0.015f); 
+            jLerp = jLerp * jLerp;
+            WorldLayerZooplanktonGenome mutatedGenome = new WorldLayerZooplanktonGenome();
+            Vector4 randColor = UnityEngine.Random.ColorHSV();
+            
+            Vector4 col = zooplanktonSlotGenomeCurrent.representativeData.color;
+            col = Vector4.Lerp(col, randColor, jLerp);
+            mutatedGenome.representativeData = zooplanktonSlotGenomeCurrent.representativeData;
+            mutatedGenome.representativeData.color = col;
+
+            mutatedGenome.name = zooplanktonSlotGenomeCurrent.name;
+            mutatedGenome.textDescriptionMutation = "Mutation Amt: " + (jLerp * 100f).ToString("F0") + "% - " + mutatedGenome.representativeData.color.ToString();
+            
+
+            zooplanktonSlotGenomeMutations[j] = mutatedGenome;
+        }
     }
     
     /*public void ReviveSelectAnimalParticles(int[] indicesArray, float radius, Vector4 spawnCoords, SimulationStateData simStateDataRef) {  // Not used????
@@ -219,6 +261,8 @@ public class ZooplanktonManager {
         computeShaderAnimalParticles.SetFloat("_ParticleNutrientDensity", 10f); // settingsRef.animalParticleNutrientDensity);
         computeShaderAnimalParticles.SetFloat("_AnimalParticleRegrowthRate", 0.01f); // settingsRef.animalParticleRegrowthRate);  // ************  HARD-CODED!!!!
 
+        computeShaderAnimalParticles.SetBuffer(kernelCSSimulateAnimalParticles, "_RepresentativeGenomeCBuffer", zooplanktonRepresentativeGenomeCBuffer);
+
         computeShaderAnimalParticles.Dispatch(kernelCSSimulateAnimalParticles, 1, 1, 1);                
 
         // Copy/Swap Animal Particle Buffer:
@@ -227,6 +271,11 @@ public class ZooplanktonManager {
         computeShaderAnimalParticles.SetBuffer(kernelCSCopyAnimalParticlesBuffer, "animalParticlesWrite", animalParticlesCBuffer);        
         computeShaderAnimalParticles.Dispatch(kernelCSCopyAnimalParticlesBuffer, 1, 1, 1);        
         
+    }
+    public void ProcessSlotMutation() {
+        AnimalParticleData[] zooplanktonRepresentativeGenomeArray = new AnimalParticleData[1];
+        zooplanktonRepresentativeGenomeArray[0] = zooplanktonSlotGenomeCurrent.representativeData;
+        zooplanktonRepresentativeGenomeCBuffer.SetData(zooplanktonRepresentativeGenomeArray);
     }
     public void EatSelectedAnimalParticles(SimulationStateData simStateDataRef) {  // removes gpu particle & sends consumption data back to CPU
         // Use CritterSimData to determine critter mouth locations
@@ -332,6 +381,9 @@ public class ZooplanktonManager {
         }
         if(animalParticlesMeasure1 != null) {
             animalParticlesMeasure1.Release();
+        }
+        if(zooplanktonRepresentativeGenomeCBuffer != null) {
+            zooplanktonRepresentativeGenomeCBuffer.Release();
         }
     }
 }

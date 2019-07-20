@@ -21,6 +21,13 @@ public class VegetationManager {
     public RenderTexture rdRT1;
     public RenderTexture rdRT2;
     private int rdTextureResolution = 256;
+    // decomposer genomes:
+    public WorldLayerDecomposerGenome decomposerSlotGenomeCurrent;
+    public WorldLayerDecomposerGenome[] decomposerSlotGenomeMutations;
+
+    public WorldLayerAlgaeGenome algaeSlotGenomeCurrent;  // algae particles!  -- likely to be converted into plants eventually ***
+    public WorldLayerAlgaeGenome[] algaeSlotGenomeMutations;
+    
 
     private RenderTexture tempTex16;
     private RenderTexture tempTex8;  // <-- remove these and make function compress 4x
@@ -32,6 +39,7 @@ public class VegetationManager {
 
     private const int numAlgaeParticles = 1024;  // *** 
     public ComputeBuffer algaeParticlesCBuffer;
+    private ComputeBuffer algaeParticlesRepresentativeGenomeCBuffer;
     private ComputeBuffer algaeParticlesCBufferSwap;    
     private RenderTexture algaeParticlesNearestCritters1024;
     private RenderTexture algaeParticlesNearestCritters32;
@@ -50,6 +58,8 @@ public class VegetationManager {
 
     //public Vector2 algaeOriginPos;
     //public float algaeOnLerp01;
+
+    //private AlgaeParticleData representativeAlgaeLayerGenome;
         
     public struct AlgaeParticleData {
         public int index;
@@ -66,7 +76,7 @@ public class VegetationManager {
         public float oxygenProduced;
         public float nutrientsUsed;
         public float wasteProduced;
-        public Vector3 color;
+        public Vector3 hue;
     }
     
     private int GetAlgaeParticleDataSize() {
@@ -78,6 +88,63 @@ public class VegetationManager {
         resourceGridSpawnPatchesArray[index] = new Vector2(UnityEngine.Random.Range(0.1f, 0.9f), UnityEngine.Random.Range(0.1f, 0.9f)); // (UnityEngine.Random.insideUnitCircle + Vector2.one) * 0.5f;
         Debug.Log("Moved Resource Patch! [" + index.ToString() + "], " + resourceGridSpawnPatchesArray[index].ToString());
     }
+    //algaeSlotGenomeCurrent
+    public void GenerateWorldLayerAlgaeParticlesGenomeMutationOptions() {
+        for(int j = 0; j < algaeSlotGenomeMutations.Length; j++) {
+            float jLerp = Mathf.Clamp01((float)j / 3f + 0.015f); 
+            jLerp = jLerp * jLerp;
+            WorldLayerAlgaeGenome mutatedGenome = new WorldLayerAlgaeGenome();
+            Vector3 randColor = UnityEngine.Random.insideUnitSphere;
+            //float randAlpha = UnityEngine.Random.Range(0f, 1f);  // shininess
+            //randColor.a = randAlpha;
+
+            Vector3 col = algaeSlotGenomeCurrent.algaeRepData.hue;
+            col = Vector3.Lerp(col, randColor, jLerp);
+            //Color mutatedColor = Color.Lerp(new Color(col.x, col.y, col.z), randColor, jLerp);
+            mutatedGenome.algaeRepData = algaeSlotGenomeCurrent.algaeRepData;
+            float minParticleSize = settingsRef.avgAlgaeParticleRadius / settingsRef.algaeParticleRadiusVariance;
+            float maxParticleSize = settingsRef.avgAlgaeParticleRadius * settingsRef.algaeParticleRadiusVariance;
+            mutatedGenome.algaeRepData.radius = Mathf.Lerp(mutatedGenome.algaeRepData.radius, UnityEngine.Random.Range(minParticleSize, maxParticleSize), 0.1f * jLerp); 
+            mutatedGenome.algaeRepData.hue = col;
+            //mutatedGenome.color = mutatedColor;
+            
+            //mutatedGenome.feedRate = Mathf.Lerp(decomposerSlotGenomeCurrent.feedRate, UnityEngine.Random.Range(0f, 1f), jLerp);
+            //mutatedGenome.killRate = Mathf.Lerp(decomposerSlotGenomeCurrent.killRate, UnityEngine.Random.Range(0f, 1f), jLerp);
+            //mutatedGenome.scale = Mathf.Lerp(decomposerSlotGenomeCurrent.scale, UnityEngine.Random.Range(0f, 1f), jLerp);
+            //mutatedGenome.reactionRate = Mathf.Lerp(decomposerSlotGenomeCurrent.reactionRate, UnityEngine.Random.Range(0f, 1f), jLerp);
+
+            mutatedGenome.name = algaeSlotGenomeCurrent.name;
+            mutatedGenome.textDescriptionMutation = "Mutation Amt: " + (jLerp * 100f).ToString("F0") + "% - " + mutatedGenome.algaeRepData.hue.ToString();
+            // other attributes here
+            //mutatedGenome.elevationChange = Mathf.Lerp(bedrockSlotGenomeCurrent.elevationChange, UnityEngine.Random.Range(0f, 1f), iLerp);
+
+            algaeSlotGenomeMutations[j] = mutatedGenome;
+        }
+    }
+
+    public void GenerateWorldLayerDecomposersGenomeMutationOptions() {
+        for(int j = 0; j < decomposerSlotGenomeMutations.Length; j++) {
+            float jLerp = Mathf.Clamp01((float)j / 3f + 0.015f); 
+            jLerp = jLerp * jLerp;
+            WorldLayerDecomposerGenome mutatedGenome = new WorldLayerDecomposerGenome();
+            Color randColor = UnityEngine.Random.ColorHSV();
+            float randAlpha = UnityEngine.Random.Range(0f, 1f);  // shininess
+            randColor.a = randAlpha;
+            Color mutatedColor = Color.Lerp(decomposerSlotGenomeCurrent.color, randColor, jLerp);
+            mutatedGenome.color = mutatedColor;
+            mutatedGenome.feedRate = Mathf.Lerp(decomposerSlotGenomeCurrent.feedRate, UnityEngine.Random.Range(0f, 1f), jLerp);
+            mutatedGenome.killRate = Mathf.Lerp(decomposerSlotGenomeCurrent.killRate, UnityEngine.Random.Range(0f, 1f), jLerp);
+            mutatedGenome.scale = Mathf.Lerp(decomposerSlotGenomeCurrent.scale, UnityEngine.Random.Range(0f, 1f), jLerp);
+            mutatedGenome.reactionRate = Mathf.Lerp(decomposerSlotGenomeCurrent.reactionRate, UnityEngine.Random.Range(0f, 1f), jLerp);
+
+            mutatedGenome.name = decomposerSlotGenomeCurrent.name;
+            mutatedGenome.textDescriptionMutation = "Mutation Amt: " + (jLerp * 100f).ToString("F0") + "% - " + mutatedGenome.reactionRate.ToString();
+            // other attributes here
+            //mutatedGenome.elevationChange = Mathf.Lerp(bedrockSlotGenomeCurrent.elevationChange, UnityEngine.Random.Range(0f, 1f), iLerp);
+
+            decomposerSlotGenomeMutations[j] = mutatedGenome;
+        }
+    }
 	
     public VegetationManager(SettingsManager settings, SimResourceManager resourcesRef) {
         settingsRef = settings;
@@ -87,7 +154,21 @@ public class VegetationManager {
         for(int i = 0; i < resourceGridSpawnPatchesArray.Length; i++) {
             resourceGridSpawnPatchesArray[i] = new Vector2(UnityEngine.Random.Range(0.1f, 0.9f), UnityEngine.Random.Range(0.1f, 0.9f)); // (UnityEngine.Random.insideUnitCircle + Vector2.one) * 0.5f;
         }
+
+
+        // REFERENCE CODE:::::::::
+        // Decomposers
+        int numMutations = 4;  // don't change this
+        decomposerSlotGenomeCurrent = new WorldLayerDecomposerGenome();
+        decomposerSlotGenomeCurrent.color = new Color(0.5f, 1f, 0.5f);
+        decomposerSlotGenomeCurrent.name = "Decomposers";
+        decomposerSlotGenomeMutations = new WorldLayerDecomposerGenome[numMutations];
+
+        GenerateWorldLayerDecomposersGenomeMutationOptions();
+
+        
     }
+
     
     public void InitializeAlgaeParticles(int numAgents, ComputeShader computeShader) {
         //float startTime = Time.realtimeSinceStartup;
@@ -111,7 +192,7 @@ public class VegetationManager {
             data.isActive = 0f;
             data.isDecaying = 0f;
             data.age = UnityEngine.Random.Range(1f, 2f);
-            data.color = new Vector3(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f));
+            data.hue = new Vector3(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f));
             algaeParticlesArray[i] = data;
         }
         //Debug.Log("Fill Initial Particle Array Data CPU: " + (Time.realtimeSinceStartup - startTime).ToString());
@@ -148,6 +229,37 @@ public class VegetationManager {
         algaeParticlesMeasure32 = new ComputeBuffer(32, GetAlgaeParticleDataSize());
         algaeParticlesMeasure1 = new ComputeBuffer(1, GetAlgaeParticleDataSize());
         //Debug.Log("End: " + (Time.realtimeSinceStartup - startTime).ToString());
+        
+
+        
+        
+        //representativeAlgaeLayerGenome = 
+
+        
+
+        // Plants:
+        algaeSlotGenomeCurrent = new WorldLayerAlgaeGenome();
+        algaeSlotGenomeCurrent.algaeRepData = algaeParticlesArray[0];
+        //algaeSlotGenomeCurrent.color = UnityEngine.Random.ColorHSV();
+        algaeSlotGenomeCurrent.name = "Algae Particles!";
+        // initialized in InitializeAlgaePArticles() method *** missing here
+        algaeSlotGenomeMutations = new WorldLayerAlgaeGenome[4];
+
+        GenerateWorldLayerAlgaeParticlesGenomeMutationOptions();
+
+        algaeParticlesRepresentativeGenomeCBuffer = new ComputeBuffer(1, GetAlgaeParticleDataSize());
+        AlgaeParticleData[] algaeParticlesRepresentativeGenomeArray = new AlgaeParticleData[1];
+        algaeParticlesRepresentativeGenomeArray[0] = algaeSlotGenomeCurrent.algaeRepData;
+        algaeParticlesRepresentativeGenomeCBuffer.SetData(algaeParticlesRepresentativeGenomeArray);
+
+    }
+
+    public void ProcessSlotMutation() {
+        //representativeAlgaeLayerGenome = algaeParticlesArray[0];
+        //algaeParticlesRepresentativeGenomeCBuffer = new ComputeBuffer(1, GetAlgaeParticleDataSize());
+        AlgaeParticleData[] algaeParticlesRepresentativeGenomeArray = new AlgaeParticleData[1];
+        algaeParticlesRepresentativeGenomeArray[0] = algaeSlotGenomeCurrent.algaeRepData;
+        algaeParticlesRepresentativeGenomeCBuffer.SetData(algaeParticlesRepresentativeGenomeArray);
     }
         
     public void InitializeAlgaeGrid(int numAgents, ComputeShader computeShader) {
@@ -255,6 +367,10 @@ public class VegetationManager {
         computeShaderResourceGrid.SetFloat("_SpiritBrushIntensity", 0.1f); // *** INVESTIGATE THIS -- not used/needed?
         computeShaderResourceGrid.SetFloat("_IsSpiritBrushOn", brushOn);
         computeShaderResourceGrid.SetFloat("_SpiritBrushPosNeg", theRenderKingRef.spiritBrushPosNeg);
+        computeShaderResourceGrid.SetFloat("_RD_FeedRate", theRenderKingRef.simManager.vegetationManager.decomposerSlotGenomeCurrent.feedRate);
+        computeShaderResourceGrid.SetFloat("_RD_KillRate", theRenderKingRef.simManager.vegetationManager.decomposerSlotGenomeCurrent.killRate);            
+        computeShaderResourceGrid.SetFloat("_RD_Scale", theRenderKingRef.simManager.vegetationManager.decomposerSlotGenomeCurrent.scale);
+        computeShaderResourceGrid.SetFloat("_RD_Rate", theRenderKingRef.simManager.vegetationManager.decomposerSlotGenomeCurrent.reactionRate);
         computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "VelocityRead", fluidManagerRef._VelocityA);
         computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "rdRead", rdRT2);
         computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "rdWrite", rdRT1);
@@ -487,6 +603,8 @@ public class VegetationManager {
         computeShaderAlgaeParticles.SetFloat("_AlgaeDecayRate", settingsRef.algaeSettings._AlgaeDecayRate);
         computeShaderAlgaeParticles.SetFloat("_AlgaeSpawnMaxAltitude", settingsRef.algaeSettings._AlgaeSpawnMaxAltitude);
         computeShaderAlgaeParticles.SetFloat("_AlgaeParticleInitMass", settingsRef.algaeSettings._AlgaeParticleInitMass);
+        // Representative AlgaePArticle struct data -- new particles spawn as mutations of this genome
+        computeShaderAlgaeParticles.SetBuffer(kernelCSSimulateAlgaeParticles, "_RepresentativeAlgaeParticleGenomeCBuffer", algaeParticlesRepresentativeGenomeCBuffer);
 
         computeShaderAlgaeParticles.Dispatch(kernelCSSimulateAlgaeParticles, 1, 1, 1);                
 
@@ -626,6 +744,10 @@ public class VegetationManager {
         }
         if(algaeParticlesMeasure1 != null) {
             algaeParticlesMeasure1.Release();
-        }        
+        }    
+        
+        if(algaeParticlesRepresentativeGenomeCBuffer != null) {
+            algaeParticlesRepresentativeGenomeCBuffer.Release();
+        }
     }
 }

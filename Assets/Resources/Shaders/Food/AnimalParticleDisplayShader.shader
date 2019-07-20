@@ -136,6 +136,8 @@
 				finalColor.a *= 1.0 - circleMask;
 				finalColor.a *= i.color.a;
 				//finalColor.rgb = float3(0.45, 0.55, 1.295) * 1.25;
+
+				finalColor.rgb = i.color.rgb;
 				return finalColor;
 			}
 		ENDCG

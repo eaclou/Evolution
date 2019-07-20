@@ -622,7 +622,7 @@ public class SimulationManager : MonoBehaviour {
         theRenderKing.Tick(); // updates all renderData, buffers, brushStrokes etc.
         // Simulate timestep of fluid Sim - update density/velocity maps:
         // Or should this be right at beginning of frame????? ***************** revisit...
-        environmentFluidManager.Tick(vegetationManager.rdRT1); // ** Clean this up, but generally OK
+        environmentFluidManager.Tick(vegetationManager); // ** Clean this up, but generally OK
 
         //vegetationManager.ApplyDiffusionOnResourceGrid(environmentFluidManager);
         //vegetationManager.AdvectResourceGrid(environmentFluidManager);

@@ -18,6 +18,8 @@ RWTexture2D<float4> foodParticlesNearestCrittersRT;
 
 RWStructuredBuffer<AlgaeParticleData> closestParticlesDataCBuffer;
 
+StructuredBuffer<AlgaeParticleData> _RepresentativeAlgaeParticleGenomeCBuffer;
+
 StructuredBuffer<float> foodParticlesEatAmountsRead;
 RWStructuredBuffer<float> foodParticlesEatAmountsCBuffer;
 
@@ -355,17 +357,21 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 				
 					foodParticlesWrite[id.x].worldPos = spawnUV * _MapSize;
 					
+					AlgaeParticleData representativeParticle = _RepresentativeAlgaeParticleGenomeCBuffer[0];
+					
 
 					float randRadius = rand(float2(randX * 10, randY * -3.37)) * (_MaxParticleSize - _MinParticleSize) + _MinParticleSize;					
 					
-					foodParticlesWrite[id.x].radius = 1.0; //randRadius;
+					foodParticlesWrite[id.x].radius = representativeParticle.radius * (0.9 + 0.2 * (1.0 - rand01)); // 1.0; //randRadius;
 					foodParticlesWrite[id.x].biomass = _AlgaeParticleInitMass;
 					foodParticlesWrite[id.x].isActive = 1.0;
 					foodParticlesWrite[id.x].isDecaying = 0.0;
 					foodParticlesWrite[id.x].isSwallowed = 0.0;
 					foodParticlesWrite[id.x].digestedAmount = 0.0;
 					foodParticlesWrite[id.x].age = rand(float2(rand01 * 70.158, randX * 13.37)) * 1;
-					foodParticlesWrite[id.x].color = float3(randY, randX, randZ); //float3(0,0,0); //saturate(parentParticle.color + (float3(randY, randX, randZ) - 0.5) * 0.1);
+					float mutationSize = 0.071;
+					foodParticlesWrite[id.x].color = lerp(representativeParticle.color, float3(1.0 - randZ, rand01, randY), mutationSize);
+					//foodParticlesWrite[id.x].color = representativeParticle.color; // float3(1,1,1); // float3(randY, randX, randZ); //float3(0,0,0); //saturate(parentParticle.color + (float3(randY, randX, randZ) - 0.5) * 0.1);
 				}			
 			}			
 		}
@@ -391,14 +397,15 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 
 				float randRadius = rand(float2(randX * 10, randY * -3.37)) * (_MaxParticleSize - _MinParticleSize) + _MinParticleSize;					
 					
-				foodParticlesWrite[id.x].radius = 1.0; //randRadius;
+				foodParticlesWrite[id.x].radius = parentParticle.radius * (0.9 + 0.2 * (1.0 - rand01)); // parentParticle.radius; // 1.0; //randRadius;
 				foodParticlesWrite[id.x].biomass = _AlgaeParticleInitMass;
 				foodParticlesWrite[id.x].isActive = 1.0;
 				foodParticlesWrite[id.x].isDecaying = 0.0;
 				foodParticlesWrite[id.x].isSwallowed = 0.0;
 				foodParticlesWrite[id.x].digestedAmount = 0.0;
 				foodParticlesWrite[id.x].age = rand(float2(rand01 * 70.158, randX * 13.37)) * 1;
-				foodParticlesWrite[id.x].color = float3(randY, randX, randZ); //float3(0,0,0); //saturate(parentParticle.color + (float3(randY, randX, randZ) - 0.5) * 0.1);
+				float mutationSize = 0.071;
+				foodParticlesWrite[id.x].color = lerp(parentParticle.color, float3(1.0 - randZ, rand01, randY), mutationSize); // float3(randY, randX, randZ); //float3(0,0,0); //saturate(parentParticle.color + (float3(randY, randX, randZ) - 0.5) * 0.1);
 			}			
 					
 		}

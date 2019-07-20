@@ -17,6 +17,8 @@ RWTexture2D<float4> animalParticlesNearestCrittersRT;
 
 RWStructuredBuffer<AnimalParticleData> closestParticlesDataCBuffer;
 
+StructuredBuffer<AnimalParticleData> _RepresentativeGenomeCBuffer;
+
 StructuredBuffer<float> animalParticlesEatAmountsRead;
 RWStructuredBuffer<float> animalParticlesEatAmountsCBuffer;
 
@@ -405,6 +407,8 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 
 						float randRadius = rand(float2(randX * 10, randY * -3.37)) * (_MaxParticleSize - _MinParticleSize) + _MinParticleSize;					
 			
+						AnimalParticleData representativeParticle = _RepresentativeGenomeCBuffer[0];
+
 						// StartSize?
 						float startingMass = 0.0025;
 						float startingRadius = sqrt(startingMass);
@@ -415,7 +419,7 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 						animalParticlesWrite[id.x].isSwallowed = 0.0;  // 
 						animalParticlesWrite[id.x].digestedAmount = 0.0; // to become decay?
 						animalParticlesWrite[id.x].age = rand(float2(rand01 * 70.158, randX * 13.37));  // 0-1, death at 2
-						animalParticlesWrite[id.x].genome = float4(rand01,randX,randY,1);
+						animalParticlesWrite[id.x].genome = lerp(representativeParticle.genome, float4(rand01,randX,randY,1), 0.05);
 
 						// subtract startingMass from algae?  or ignore for now?
 						//animalParticlesWrite[id.x]
@@ -444,7 +448,7 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 			float2 spawnUV = (parentPos + (float2(randX, randY) - 0.5) * 2) / _MapSize; 						
 			float4 spawnAltitudeSample = altitudeRead.SampleLevel(_LinearClamp, spawnUV, 0);			
 				
-			if(spawnAltitudeSample.x < 0.5 * aliveMask && rand01 > 0.999) {  // in water only? // for now...
+			if(spawnAltitudeSample.x < 0.5 * aliveMask && rand01 > 0.9975) {  // in water only? // for now...
 				float2 worldPos = float2(spawnUV.x * _MapSize, spawnUV.y * _MapSize);
 				animalParticlesWrite[id.x].worldPos.xy = worldPos;
 				animalParticlesWrite[id.x].p1 = worldPos.xy - float2(0, 0.01);
@@ -463,7 +467,7 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 				animalParticlesWrite[id.x].isSwallowed = 0.0;  // 
 				animalParticlesWrite[id.x].digestedAmount = 0.0; // to become decay?
 				animalParticlesWrite[id.x].age = rand(float2(rand01 * 70.158, randX * 13.37));  // 0-1, death at 2
-				animalParticlesWrite[id.x].genome = float4(rand01,randX,randY,1);
+				animalParticlesWrite[id.x].genome = lerp(parentParticle.genome, float4(rand01,randX,randY,1), 0.05);
 
 			}
 		}

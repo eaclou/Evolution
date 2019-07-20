@@ -162,6 +162,7 @@
 				finalColor.rgb = lerp(finalColor.rgb, finalColor.rgb * 0.9, isUnderwater);
 				finalColor.rgb = lerp(finalColor.rgb, waterFogColor, 1 * (saturate(altitude * 0.8)) + 0.25 * isUnderwater);
 
+				finalColor.rgb = i.hue.rgb;
 				//finalColor.rgb = float3(1,1,1); //i.hue;
 
 				return finalColor;

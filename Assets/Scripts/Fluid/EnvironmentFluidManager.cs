@@ -195,7 +195,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
     public void RerollForcePoints() {
         CreateForcePoints(12f, 120f, 256f);
     }
-    public void Tick(RenderTexture reactionDiffusionRT) {
+    public void Tick(VegetationManager vegetationManagerRef) {
         //Debug.Log("Tick!");
         computeShaderFluidSim.SetFloat("_Time", Time.time);
         computeShaderFluidSim.SetFloat("_ForceMagnitude", forceMultiplier);
@@ -205,7 +205,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
         computeShaderFluidSim.SetFloat("_ColorRefreshAmount", colorRefreshBackgroundMultiplier);
 
         // Lerp towards sourceTexture color:
-        RefreshColor(reactionDiffusionRT);
+        RefreshColor(vegetationManagerRef);
 
         // ADVECTION:::::
         Advection();
@@ -409,9 +409,9 @@ public class EnvironmentFluidManager : MonoBehaviour {
         
     }
 
-    private void RefreshColor(RenderTexture reactionDiffusionRT) { 
+    private void RefreshColor(VegetationManager vegetationManagerRef) { 
         int kernelRefreshColor = computeShaderFluidSim.FindKernel("RefreshColor");
-
+        //RenderTexture reactionDiffusionRT
         computeShaderFluidSim.SetFloat("_TextureResolution", (float)resolution);
         computeShaderFluidSim.SetFloat("_DeltaTime", deltaTime);
         computeShaderFluidSim.SetFloat("_InvGridScale", invGridScale);
@@ -419,12 +419,13 @@ public class EnvironmentFluidManager : MonoBehaviour {
 
         computeShaderFluidSim.SetFloat("_ColorRefreshDynamicMultiplier", colorRefreshDynamicMultiplier);
         computeShaderFluidSim.SetFloat("_ColorRefreshAmount", colorRefreshBackgroundMultiplier);
+        computeShaderFluidSim.SetVector("_DecomposersColor", vegetationManagerRef.decomposerSlotGenomeCurrent.color);
         // break this out into Background texture and Dynamic Render pass (agents/food/preds/FX only) ??? ******
         computeShaderFluidSim.SetTexture(kernelRefreshColor, "fluidBackgroundColorTex", initialDensityTex);
         computeShaderFluidSim.SetTexture(kernelRefreshColor, "colorInjectionRenderTex", sourceColorRT);
         computeShaderFluidSim.SetTexture(kernelRefreshColor, "DensityRead", densityB);
         computeShaderFluidSim.SetTexture(kernelRefreshColor, "DensityWrite", densityA);
-        computeShaderFluidSim.SetTexture(kernelRefreshColor, "nutrientMapRead", reactionDiffusionRT); 
+        computeShaderFluidSim.SetTexture(kernelRefreshColor, "nutrientMapRead", vegetationManagerRef.rdRT1); 
         computeShaderFluidSim.Dispatch(kernelRefreshColor, resolution / 16, resolution / 16, 1);
 
         

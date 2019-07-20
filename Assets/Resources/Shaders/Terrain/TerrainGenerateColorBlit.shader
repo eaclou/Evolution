@@ -46,7 +46,7 @@
 			uniform float4 _Color1;
 			uniform float4 _Color2;
 			uniform float4 _Color3;
-
+			
 			uniform float _AddSubtractSign = 1; 
 
 			fixed4 frag (v2f i) : SV_Target
