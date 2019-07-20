@@ -25,11 +25,13 @@ public class MasterGenomePool {
 
     public List<int> debugRecentlyDeletedCandidateIDsList;
 
+    public WorldLayerVertebrateGenome[] vertebrateSlotsGenomesCurrentArray;  // algae particles!  -- likely to be converted into plants eventually ***
+    public WorldLayerVertebrateGenome[][] vertebrateSlotsGenomesMutationsArray;  // Layer Slots are on outside
+
     //public int curNumSpecies;
     //private int maxNumSpecies = 6;
 
     public MasterGenomePool() {
-        // empty constructor
         
     }
 
@@ -45,20 +47,25 @@ public class MasterGenomePool {
         rootSpecies.FirstTimeInitialize(numAgentGenomes, 0);
         currentlyActiveSpeciesIDList.Add(0);
         completeSpeciesPoolsList.Add(rootSpecies);
-        // When do I create nodeCollider & shit?
-
-        // Create foundational Species:
-        //SpeciesGenomePool firstSpecies = new SpeciesGenomePool(1, 0, 0, 1, mutationSettingsRef);
-        //firstSpecies.FirstTimeInitialize(numAgentGenomes, 1);
-        //currentlyActiveSpeciesIDList.Add(1);
-        //completeSpeciesPoolsList.Add(firstSpecies);
         
 
+        vertebrateSlotsGenomesCurrentArray = new WorldLayerVertebrateGenome[4]; // 4 slots
+        for(int i = 0; i < 4; i++) {
+            WorldLayerVertebrateGenome vertebrateSlotGenome = new WorldLayerVertebrateGenome();
+            vertebrateSlotGenome.name = "Vertebrate " + i.ToString();
+            vertebrateSlotGenome.textDescriptionMutation = "uhhh... " + " ??";
+            vertebrateSlotsGenomesCurrentArray[i] = vertebrateSlotGenome;
+        }
 
-        //uiManagerRef.treeOfLifeManager = new TreeOfLifeManager(uiManagerRef.treeOfLifeAnchorGO, uiManagerRef);
-        //uiManagerRef.treeOfLifeManager.FirstTimeInitialize(this);
-
-        //yield return null;
+        vertebrateSlotsGenomesMutationsArray = new WorldLayerVertebrateGenome[4][];
+        for(int slot = 0; slot < 4; slot++) {
+            vertebrateSlotsGenomesMutationsArray[slot] = new WorldLayerVertebrateGenome[4]; // this 4 is number of mutation variants
+            for(int mutation = 0; mutation < 4; mutation++) {
+                WorldLayerVertebrateGenome vertebrateSlotMutatedGenome = new WorldLayerVertebrateGenome();
+                vertebrateSlotMutatedGenome.name = vertebrateSlotsGenomesCurrentArray[slot].name;
+                vertebrateSlotsGenomesMutationsArray[slot][mutation] = vertebrateSlotMutatedGenome;
+            }
+        }
     }
 
     public void AddNewYearlySpeciesStats(int year) {
@@ -66,11 +73,46 @@ public class MasterGenomePool {
             completeSpeciesPoolsList[i].AddNewYearlyStats(year);
         }
     }
-    /*public void UpdateSpeciesStats() {
-        for(int i = 0; i < completeSpeciesPoolsList.Count; i++) {
-            completeSpeciesPoolsList[i].UpdateSpeciesStats();
+    
+    public void GenerateWorldLayerVertebrateGenomeMutationOptions(int slotID, int speciesIndex) {
+        //int speciesIndex = 
+        Debug.Log("GenerateWorldLayerVertebrateGenomeMutationOptions:  slot[ " + slotID.ToString() + " } __ Species:  " + speciesIndex.ToString());
+        for(int mutationID = 0; mutationID < 4; mutationID++) {
+            float mutationSize = Mathf.Clamp01((float)mutationID / 3f + 0.015f); 
+            mutationSize = mutationSize * mutationSize;
+
+            // need to create mutated copy of representative AgentGenome:
+            
+
+            SpeciesGenomePool sourceSpeciesPool = completeSpeciesPoolsList[speciesIndex];
+            AgentGenome mutatedGenome = sourceSpeciesPool.Mutate(sourceSpeciesPool.representativeGenome, true, true);    
+           // old:
+            //vertebrateSlotsGenomesMutationsArray[slotID][mutationID].representativeGenome = vertebrateSlotsGenomesCurrentArray[slotID].representativeGenome;
+            vertebrateSlotsGenomesMutationsArray[slotID][mutationID].representativeGenome = mutatedGenome;
+        // -- Select a ParentGenome from the leaderboardList and create a mutated copy (childGenome):
+        //AgentGenome newGenome = sourceSpeciesPool.GetNewMutatedGenome();
+        //AgentGenome newGenome = sourceSpeciesPool.GetGenomeFromFitnessLottery();
+        //newGenome = sourceSpeciesPool.Mutate(newGenome, true, true);
+
+
+            vertebrateSlotsGenomesMutationsArray[slotID][mutationID].name = vertebrateSlotsGenomesCurrentArray[slotID].name;
+            vertebrateSlotsGenomesMutationsArray[slotID][mutationID].textDescriptionMutation = "Mutation Amt: " + (mutationSize * 100f).ToString("F1") + "%";
+            
+            
         }
-    }*/
+    }
+    public void ProcessSlotMutation(int slotID, int mutationID, int speciesIndex) {
+        SpeciesGenomePool sourceSpeciesPool = completeSpeciesPoolsList[speciesIndex];
+        vertebrateSlotsGenomesCurrentArray[slotID].representativeGenome = vertebrateSlotsGenomesMutationsArray[slotID][mutationID].representativeGenome;
+        Debug.Log("____ProcessSlotMutation: slot: " + slotID.ToString() + ", mut#: " + mutationID.ToString() + ", speciesID: " + speciesIndex.ToString());
+        // = mutatedGenome;
+
+        //representativeAlgaeLayerGenome = algaeParticlesArray[0];
+        //algaeParticlesRepresentativeGenomeCBuffer = new ComputeBuffer(1, GetAlgaeParticleDataSize());
+        //AlgaeParticleData[] algaeParticlesRepresentativeGenomeArray = new AlgaeParticleData[1];
+        //algaeParticlesRepresentativeGenomeArray[0] = algaeSlotGenomeCurrent.algaeRepData;
+        //algaeParticlesRepresentativeGenomeCBuffer.SetData(algaeParticlesRepresentativeGenomeArray);
+    }
 
     public void Tick() {
         speciesCreatedOrDestroyedThisFrame = false;

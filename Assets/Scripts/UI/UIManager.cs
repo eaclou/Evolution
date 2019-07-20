@@ -1524,7 +1524,9 @@ public class UIManager : MonoBehaviour {
                 gameManager.simulationManager.zooplanktonManager.ProcessSlotMutation();
             }
             else { // vertebrates
-
+                gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[slotRef.slotID] = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotRef.slotID][selectedToolbarMutationID];
+                gameManager.simulationManager.masterGenomePool.GenerateWorldLayerVertebrateGenomeMutationOptions(slotRef.slotID, slotRef.linkedSpeciesID);
+                gameManager.simulationManager.masterGenomePool.ProcessSlotMutation(slotRef.slotID, selectedToolbarMutationID, slotRef.linkedSpeciesID);
             }
         }
         else if(slotRef.kingdomID == 3) { // Terrain
@@ -1696,7 +1698,28 @@ public class UIManager : MonoBehaviour {
                 imageMutationPanelCurPortrait.color = uiColor; 
             }
             else { // vertebrates
+                int slotID = layerManager.selectedTrophicSlotRef.slotID;
+                textMutationPanelOptionA.text = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][0].textDescriptionMutation; 
+                textMutationPanelOptionB.text = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][1].textDescriptionMutation; 
+                textMutationPanelOptionC.text = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][2].textDescriptionMutation; 
+                textMutationPanelOptionD.text = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][3].textDescriptionMutation;
 
+                int speciesID = layerManager.selectedTrophicSlotRef.linkedSpeciesID;
+                Vector3 hue0 = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][0].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
+                imageMutationPanelThumbnailA.color = new Color(hue0.x, hue0.y, hue0.z); 
+                Vector3 hue1 = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][1].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
+                imageMutationPanelThumbnailB.color = new Color(hue1.x, hue1.y, hue1.z); 
+                Vector3 hue2 = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][2].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
+                imageMutationPanelThumbnailC.color = new Color(hue2.x, hue2.y, hue2.z); 
+                Vector3 hue3 = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][3].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
+                imageMutationPanelThumbnailD.color = new Color(hue3.x, hue3.y, hue3.z); 
+                //Vector3 hue0 = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
+
+                Vector3 hueCur = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][0].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
+                imageMutationPanelCurPortrait.color = new Color(hueCur.x, hueCur.y, hueCur.z);
+
+                textMutationPanelCur.text = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[slotID].name; // "Reaction Rate: " + gameManager.simulationManager.vegetationManager.decomposerSlotGenomeCurrent.reactionRate.ToString();
+                textMutationPanelNew.text = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][selectedToolbarMutationID].textDescriptionMutation; // "placeholder";
             }
         }
         else if(layerManager.selectedTrophicSlotRef.kingdomID == 3) { // Terrain
@@ -1789,17 +1812,6 @@ public class UIManager : MonoBehaviour {
 
                 imageMutationPanelCurPortrait.color = colorCur;
                 
-                    //imageMutationPanelNewPortrait.color = colorOptionA;
-                
-
-                /*public Image imageMutationPanelHighlightA;  // changes upon selection
-    public Image imageMutationPanelHighlightB;
-    public Image imageMutationPanelHighlightC;
-    public Image imageMutationPanelCurPortrait;
-    public Image imageMutationPanelNewPortrait;
-    public Text textMutationPanelCur;
-    public Text textMutationPanelNew;
-    public GameObject panelNewMutationPreview;*/
             }
         }
          
@@ -3398,6 +3410,8 @@ public class UIManager : MonoBehaviour {
 
         if(slot.status == TrophicSlot.SlotStatus.Empty) {
             ClickToolbarCreateNewSpecies();
+
+
         }
         //curActiveTool = ToolType.None;
 
@@ -3511,6 +3525,11 @@ public class UIManager : MonoBehaviour {
                 
                 gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.slotID].linkedSpeciesID = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList.Count - 1].speciesID;
 
+                // *** IMPORTANT::::
+                int speciesIndex = slot.linkedSpeciesID;
+                gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[slot.slotID].representativeGenome = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesIndex].representativeGenome;
+                gameManager.simulationManager.masterGenomePool.GenerateWorldLayerVertebrateGenomeMutationOptions(slot.slotID, slot.linkedSpeciesID);
+                
                 // duplicated code shared with clickAgentButton :(   bad 
                 //
                 //gameManager.simulationManager.trophicLayersManager.isSelectedTrophicSlot = true;
