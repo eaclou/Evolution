@@ -92,7 +92,7 @@ public class TrophicLayersManager {
         if (selectedTrophicSlotRef.kingdomID == 1) { // plants!:
             if (selectedTrophicSlotRef.tierID == 0) { // plants!:
                 TurnOnAlgae(spawnPos, timeStep);
-                simManagerRef.vegetationManager.SpawnInitialAlgaeParticles(5f, new Vector4(spawnPos.x, spawnPos.y, 0f, 0f));
+                //simManagerRef.vegetationManager.SpawnInitialAlgaeParticles(5f, new Vector4(spawnPos.x, spawnPos.y, 0f, 0f));
             }
         }
         if (selectedTrophicSlotRef.kingdomID == 2) { // Animals:

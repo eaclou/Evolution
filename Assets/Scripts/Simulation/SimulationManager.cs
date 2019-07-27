@@ -282,7 +282,8 @@ public class SimulationManager : MonoBehaviour {
         startTime = Time.realtimeSinceStartup;
         // Initialize Food:
         //uiManager.textLoadingTooltips.text = "LoadingInitializeFoodParticles()";
-        LoadingInitializeFoodParticles();
+        LoadingInitializeAlgaeGrid();
+        LoadingInitializePlantParticles();
         Debug.Log("LoadingInitializeFoodParticles: " + (Time.realtimeSinceStartup - startTime).ToString());
         Debug.Log("End Total up to LoadingInitializeFoodParticles: " + (Time.realtimeSinceStartup - masterStartTime).ToString());
         yield return null;
@@ -392,13 +393,16 @@ public class SimulationManager : MonoBehaviour {
             agentsArray[i] = newAgent; // Add to stored list of current Agents            
         }
     }
-    
-    private void LoadingInitializeFoodParticles() {
-        vegetationManager.InitializeAlgaeParticles(numAgents, computeShaderFoodParticles);
+    private void LoadingInitializeAlgaeGrid() {
+        vegetationManager.InitializeAlgaeGrid();
+    }
+    private void LoadingInitializePlantParticles() {
+        vegetationManager.InitializePlantParticles(numAgents, computeShaderFoodParticles);
     }    
     private void LoadingInitializeResourceGrid() {        
         vegetationManager.InitializeResourceGrid(numAgents, computeShaderResourceGrid); 
-        vegetationManager.InitializeReactionDiffusionGrid();
+        vegetationManager.InitializeDecomposersGrid();
+        
     }
     private void LoadingInitializeAnimalParticles() {
         zooplanktonManager.InitializeAnimalParticles(numAgents, computeShaderAnimalParticles);
@@ -572,8 +576,8 @@ public class SimulationManager : MonoBehaviour {
 
         // MEASURE GLOBAL RESOURCES:
         if(trophicLayersManager.GetAlgaeOnOff()) {
-            vegetationManager.FindClosestAlgaeParticleToCritters(simStateData);
-            vegetationManager.MeasureTotalAlgaeParticlesAmount();
+            //vegetationManager.FindClosestAlgaeParticleToCritters(simStateData);
+            //vegetationManager.MeasureTotalAlgaeParticlesAmount();
         }
         if(trophicLayersManager.GetZooplanktonOnOff()) {
             zooplanktonManager.FindClosestAnimalParticleToCritters(simStateData);
@@ -632,9 +636,9 @@ public class SimulationManager : MonoBehaviour {
         
 
         if(trophicLayersManager.GetAlgaeOnOff()) {
-            vegetationManager.EatSelectedFoodParticles(simStateData); // 
+            //vegetationManager.EatSelectedFoodParticles(simStateData); // 
             // How much light/nutrients available?
-            vegetationManager.SimulateAlgaeParticles(environmentFluidManager, theRenderKing, simStateData, simResourceManager);
+            //vegetationManager.SimulateAlgaeParticles(environmentFluidManager, theRenderKing, simStateData, simResourceManager);
         }
         if(trophicLayersManager.GetZooplanktonOnOff()) {
             zooplanktonManager.EatSelectedAnimalParticles(simStateData);        

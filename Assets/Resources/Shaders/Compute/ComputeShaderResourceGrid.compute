@@ -53,17 +53,18 @@ uniform float _DeltaTime;
 uniform float _InvGridScale;
 uniform float _MapSize;
 
-uniform float _IsSpiritBrushOn;
+uniform float _IsSpiritBrushDecomposersOn;
+uniform float _IsSpiritBrushAlgaeOn;
 uniform float _SpiritBrushPosNeg;
 uniform float _SpiritBrushIntensity;
 
 uniform float _CoordX;
 uniform float _CoordY;
 
-uniform float _RD_FeedRate;
-uniform float _RD_KillRate;            
-uniform float _RD_Scale;
-uniform float _RD_Rate;
+//uniform float _RD_FeedRate;
+//uniform float _RD_KillRate;            
+//uniform float _RD_Scale;
+//uniform float _RD_Rate;
 
 uniform float _AlgaeUpkeep; // = 0.001;
 uniform	float _AlgaeMaxIntakeRate; // = 0.0025;
@@ -270,7 +271,6 @@ void CSSimRD (uint3 id : SV_DispatchThreadID)
     float4 amountCenter = _ResourceGridRead[id.xy];
 	float diffusionAmount = 0.01;
 	float4 resourceGridRead = lerp(amountCenter, (amountCenter + amountRight + amountLeft + amountUp + amountDown) / 5, diffusionAmount);
-	//_ResourceGridRead.SampleLevel(_LinearClamp, uv, 0);	
 	
 	
 	// =============================== NUTRIENTS ================================
@@ -284,11 +284,7 @@ void CSSimRD (uint3 id : SV_DispatchThreadID)
 	// =============================== ALGAE ================================
 	float algaeMass = cc.z;
 
-	//float algaeUpkeep = 0.001;
-	//float algaeMaxIntakeRate = 0.0025;
-
 	float availableNutrientsMass = min(_AlgaeMaxIntakeRate * algaeMass, nutrientsMass);
-	//float algaeGrowthEfficiency = 1.0;
 
 	float energyCost = algaeMass * _AlgaeUpkeep;
 	float energyCreated = availableNutrientsMass * _AlgaeGrowthEfficiency;
@@ -297,17 +293,14 @@ void CSSimRD (uint3 id : SV_DispatchThreadID)
 	float netEnergy = energyCreated - energyCost;
 
 	float algaeDecayMass = saturate(netEnergy * -1.0);
-	float detritusCreated = algaeDecayMass;
+	float detritusCreated = algaeDecayMass * 1.65;
 
 	float algaeGrowthMass = netEnergy;
 	
 	// =============================== DECOMPOSERS ================================
 	float decomposersMass = cc.y;
 
-	//float decomposerUpkeep = 0.001 * SPEED;
-	//float decomposerMaxIntakeRate = 0.0025 * SPEED;
 	float availableDetritusMass = min(_DecomposerMaxIntakeRate * decomposersMass, detritusMass);
-	//float decomposerEnergyGenerationEfficiency = 1.0;
 
 	float decomposerEnergyCost = decomposersMass * _DecomposerUpkeep;
 	float decomposerEnergyCreated = availableDetritusMass * _DecomposerEnergyGenerationEfficiency;
@@ -327,7 +320,7 @@ void CSSimRD (uint3 id : SV_DispatchThreadID)
 	resourceGridRead.x -= nutrientsUsed; 
 	resourceGridRead.x += nutrientsCreated;
 	resourceGridRead.y -= detritusUsed;
-	resourceGridRead.y += detritusCreated * 1.5;
+	resourceGridRead.y += detritusCreated;  // // *** hacky empirical fix for balancing conservation of energy/mass
 	
 	_ResourceGridWrite[id.xy] = saturate(resourceGridRead);
 	rdWrite[id.xy] = saturate(rdRead);
@@ -402,8 +395,10 @@ void CSAdvectRD (uint3 id : SV_DispatchThreadID)
 	float4 spiritBrushSample = _SpiritBrushTex.SampleLevel(_LinearClamp, uvOrigin, 0);
 
 	float brushMagnitude = _SpiritBrushIntensity;
-	float deltaBrush = _IsSpiritBrushOn * _SpiritBrushPosNeg * spiritBrushSample.x;
-	newDensity.yz = saturate(newDensity.yz + deltaBrush * brushMagnitude);  // *** TEMPORARY!!! **** Decomposers removed from brushing
+	float deltaBrushDecomposer = _IsSpiritBrushDecomposersOn * _SpiritBrushPosNeg * spiritBrushSample.x;
+	float deltaBrushAlgae = _IsSpiritBrushAlgaeOn * _SpiritBrushPosNeg * spiritBrushSample.x;
+	newDensity.y = saturate(newDensityStatic.y + deltaBrushDecomposer * brushMagnitude);  // *** TEMPORARY!!! **** Decomposers removed from brushing
+	newDensity.z = saturate(newDensity.z + deltaBrushAlgae * brushMagnitude);
 	//newDensity.y = newDensityStatic.y;  // static decomposers
 	rdWrite[id.xy] = newDensity;	
 	

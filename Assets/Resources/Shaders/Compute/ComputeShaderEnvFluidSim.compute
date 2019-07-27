@@ -156,6 +156,7 @@ uniform const float _VelConversionConst = 0.033;
 
 uniform float4 _PlayerPos;
 
+uniform float4 _AlgaeColor;
 uniform float4 _DecomposersColor;
 
 float rand(float2 co){   // OUTPUT is in [0,1] RANGE!!!
@@ -461,10 +462,10 @@ void RefreshColor (uint3 id : SV_DispatchThreadID)
 	newColor.a = lerp(newColor.a, 1, stampAlpha);
 	
 	newColor.a = saturate(reactionDiffusionSample.z * 1 + reactionDiffusionSample.y); // saturate(reactionDiffusionSample.y * 1 + reactionDiffusionSample.z + nutrientGridSample.x + nutrientGridSample.y);
-	float3 decomposersHue = float3(1, 0, 0.3);
+	float3 decomposersHue = _DecomposersColor.rgb;
 	//float3 nutrientsHue = float3(1, 1, 0.0);
 	//float3 detritusHue = float3(0.6, 0.1, 0.9);
-	float3 algaeHue = float3(0.5, 1, 0.4);
+	float3 algaeHue = _AlgaeColor.rgb;
 	newColor.rgb = lerp(newColor.rgb, decomposersHue, reactionDiffusionSample.y);
 	newColor.rgb = lerp(newColor.rgb, algaeHue, saturate(reactionDiffusionSample.z * 1));
 	//newColor.rgb = lerp(newColor.rgb, nutrientsHue, nutrientGridSample.x);

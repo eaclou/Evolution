@@ -6,17 +6,13 @@ public class WorldLayerDecomposerGenome {
 
 	public string name;
     public string textDescriptionMutation;
-    public Color color;
-    public float feedRate;
-    public float killRate;
-    public float scale;
-    public float reactionRate;
+    public Color displayColor;
+    public float decomposerUpkeep;
+    public float decomposerIntakeRate;
+    public float decomposerGrowthEfficiency;
 	
     public WorldLayerDecomposerGenome() {   // construction
-        color = Color.white;
-        feedRate = 1f;
-        killRate = 1f;
-        scale = 1f;
-        reactionRate = 1f;
+        displayColor = Color.white;
+        
     }
 }

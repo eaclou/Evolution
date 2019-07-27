@@ -6,8 +6,11 @@ public class WorldLayerAlgaeGenome {
 
     public string name;
     public string textDescriptionMutation;
-    //public Color color;
-    public VegetationManager.AlgaeParticleData algaeRepData;
+    public float algaeUpkeep;
+    public float algaeIntakeRate;
+    public float algaeGrowthEfficiency;
+    public Color displayColor;
+    //public VegetationManager.AlgaeParticleData algaeRepData;
     /*representativeAlgaeLayerGenome = algaeParticlesArray[0];
         algaeParticlesRepresentativeGenomeCBuffer = new ComputeBuffer(1, GetAlgaeParticleDataSize());
         AlgaeParticleData[] algaeParticlesRepresentativeGenomeArray = new AlgaeParticleData[1];
@@ -15,6 +18,6 @@ public class WorldLayerAlgaeGenome {
         algaeParticlesRepresentativeGenomeCBuffer.SetData(algaeParticlesRepresentativeGenomeArray);
 	*/
     public WorldLayerAlgaeGenome() {   // construction
-        //color = Color.white;
+        displayColor = Color.white;
     }
 }
