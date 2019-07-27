@@ -1932,9 +1932,9 @@ public class TheRenderKing : MonoBehaviour {
         
         //float size = (genome.bodyGenome.fullsizeBoundingBox.x + genome.bodyGenome.fullsizeBoundingBox.y) * 5f;        
         //float sizeNormalized = Mathf.Clamp01((size - 0.1f) / 1f);
-        float sizeNormalized = Mathf.Clamp01((genome.bodyGenome.coreGenome.creatureBaseLength - 0.6f) / 0.6f);
+        float sizeNormalized = Mathf.Clamp01((genome.bodyGenome.coreGenome.creatureBaseLength - 0.8f) / 2f);
         //sizeNormalized = 1f;
-        speciesPortraitRenderCamera.GetComponent<CritterPortraitCameraManager>().UpdateCameraTargetValues(Mathf.Lerp(0.18f, 0.56f, sizeNormalized));
+        speciesPortraitRenderCamera.GetComponent<CritterPortraitCameraManager>().UpdateCameraTargetValues(Mathf.Lerp(0.8f, 3.416f, sizeNormalized));
         
         Debug.Log("GenerateCritterPortraitStrokesData: " + genome.bodyGenome.appearanceGenome.huePrimary.ToString());
     }
@@ -4211,7 +4211,7 @@ public class TheRenderKing : MonoBehaviour {
             baronVonTerrain.groundDryLandDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
             baronVonTerrain.groundDryLandDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
             baronVonTerrain.groundDryLandDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-            baronVonTerrain.groundDryLandDisplayMat.SetTexture("_ResourceTex", simManager.vegetationManager.resourceGridRT1);
+            //baronVonTerrain.groundDryLandDisplayMat.SetTexture("_ResourceTex", simManager.vegetationManager.resourceGridRT1);
             baronVonTerrain.groundDryLandDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);            
             baronVonTerrain.groundDryLandDisplayMat.SetVector("_FogColor", simManager.fogColor);
             cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be

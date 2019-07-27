@@ -68,8 +68,8 @@ public class CritterModuleAppearanceGenome {
 
     public void SetToMutatedCopyOfParentGenome(CritterModuleAppearanceGenome parentGenome, MutationSettings settings) {
 
-        huePrimary = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.huePrimary, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * 0.2f, 0f, 1f);
-        hueSecondary = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.hueSecondary, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * 0.2f, 0f, 1f);
+        huePrimary = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.huePrimary, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
+        hueSecondary = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.hueSecondary, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
         // ***** v v v Revisit when implementing #BrushTypes!! **** REVISIT!!
         bodyStrokeBrushTypeX = UtilityMutationFunctions.GetMutatedIntAdditive(parentGenome.bodyStrokeBrushTypeX, settings.defaultBodyMutationChance * 0.2f, 2, 0, 7); // *****
         bodyStrokeBrushTypeY = UtilityMutationFunctions.GetMutatedIntAdditive(parentGenome.bodyStrokeBrushTypeY, settings.defaultBodyMutationChance * 0.2f, 2, 0, 3);

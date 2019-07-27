@@ -232,21 +232,57 @@ public class TrophicLayersManager {
         }
     }
 
-    public string GetSpeciesPreviewDescriptionString() {
+    public string GetSpeciesPreviewDescriptionString(SimulationManager simManager) {
         string str = "";
 
         if(selectedTrophicSlotRef.kingdomID == 0) {
-            str = "Bacterial and Fungal organisms that recycle vital nutrients.\n\nUses: <b><color=#A97860FF>Waste</color></b>, <b><color=#8EDEEEFF>Oxygen</color></b>\n\nProduces: <b><color=#FBC653FF>Nutrients</color></b>";
+            str = "Bacterial and Fungal organisms that recycle vital nutrients."; //   \n\nUses: <b><color=#A97860FF>Waste</color></b>, <b><color=#8EDEEEFF>Oxygen</color></b>\n\nProduces: <b><color=#FBC653FF>Nutrients</color></b>";
+
+            str += "\n\n";
+            str += "<size=13><b>Total Biomass: " + simManager.simResourceManager.curGlobalDecomposers.ToString("F1") + "</b></size>\n\n";
+
+            str += "<color=#FBC653FF>Nutrient Production: <b>" + simManager.simResourceManager.nutrientsProducedByDecomposersLastFrame.ToString("F3") + "</b></color>\n";
+            str += "<color=#8EDEEEFF>Oxygen Usage: <b>" + simManager.simResourceManager.oxygenUsedByDecomposersLastFrame.ToString("F3") + "</b></color>\n";
+            str += "<color=#A97860FF>Waste Processed: <b>" + simManager.simResourceManager.detritusRemovedByDecomposersLastFrame.ToString("F3") + "</b></color>\n";
+
         }
         else if(selectedTrophicSlotRef.kingdomID == 1) {
-            str = "Tiny Plants that form the foundation of the ecosystem.\n\nUses: <b><color=#FBC653FF>Nutrients</color></b>\n\nProduces: <b><color=#8EDEEEFF>Oxygen</color></b>";
+            str = "Tiny Plants that form the foundation of the ecosystem."; //   \n\nUses: <b><color=#FBC653FF>Nutrients</color></b>\n\nProduces: <b><color=#8EDEEEFF>Oxygen</color></b>";
+
+            str += "\n\n";
+            str += "<size=13><b>Total Biomass: " + simManager.simResourceManager.curGlobalAlgaeParticles.ToString("F1") + "</b></size>\n\n";
+
+            str += "<color=#8EDEEEFF>Oxygen Production: <b>" + simManager.simResourceManager.oxygenProducedByAlgaeParticlesLastFrame.ToString("F3") + "</b></color>\n";
+            str += "<color=#FBC653FF>Nutrient Usage: <b>" + simManager.simResourceManager.nutrientsUsedByAlgaeParticlesLastFrame.ToString("F3") + "</b></color>\n";
+            str += "<color=#A97860FF>Waste Generated: <b>" + simManager.simResourceManager.wasteProducedByAlgaeParticlesLastFrame.ToString("F3") + "</b></color>\n";
+
         }
         else if(selectedTrophicSlotRef.kingdomID == 2) {
             if(selectedTrophicSlotRef.tierID == 0) {
-                str = "Tiny Animals that feed on Algae.\n\nUses: <b><color=#8EDEEEFF>Oxygen</color></b>\n\nProduces: <b><color=#A97860FF>Waste</color></b>";
+                str = "Tiny Animals that feed on Algae."; //   \n\nUses: <b><color=#8EDEEEFF>Oxygen</color></b>\n\nProduces: <b><color=#A97860FF>Waste</color></b>";
+                str += "\n\n";
+                str += "<size=13><b>Total Biomass: " + simManager.simResourceManager.curGlobalAnimalParticles.ToString("F1") + "</b></size>\n\n";
+                str += "<color=#8EDEEEFF>Oxygen Usage: <b>" + simManager.simResourceManager.oxygenUsedByAnimalParticlesLastFrame.ToString("F3") + "</b></color>\n";                
+                str += "<color=#A97860FF>Waste Generated: <b>" + simManager.simResourceManager.wasteProducedByAnimalParticlesLastFrame.ToString("F3") + "</b></color>\n";
+
             }
             else {
-                str = "Simple Animal that feeds on Algae and Zooplankton.\n\nUses: <b><color=#8EDEEEFF>Oxygen</color></b>\n\nProduces: <b><color=#A97860FF>Waste</color></b>";
+                str = "Simple Animal that feeds on Algae and Zooplankton.";  //    \n\nUses: <b><color=#8EDEEEFF>Oxygen</color></b>\n\nProduces: <b><color=#A97860FF>Waste</color></b>";
+                str += "\n\n";
+                str += "<size=13><b>Total Biomass: " + simManager.simResourceManager.curGlobalAgentBiomass.ToString("F1") + "</b></size>\n\n";
+
+                str += "<color=#8EDEEEFF>Oxygen Usage: <b>" + simManager.simResourceManager.oxygenUsedByAgentsLastFrame.ToString("F3") + "</b></color>\n";
+                str += "<color=#A97860FF>Waste Generated: <b>" + simManager.simResourceManager.wasteProducedByAgentsLastFrame.ToString("F3") + "</b></color>\n";
+                /*
+                str += "<color=#8BD06AFF>Avg Food Consumed: <b>" + (selectedPool.avgConsumptionPlant + selectedPool.avgConsumptionMeat).ToString("F3") + "</b></color>\n";
+               
+                str += "\n\n\nAvg Lifespan: <b>" + (selectedPool.avgLifespan / 1500f).ToString("F1") + " Years</b>\n\n";
+
+                selectedPool.representativeGenome.bodyGenome.CalculateFullsizeBoundingBox();
+                str += "Avg Body Size: <b>" + ((selectedPool.representativeGenome.bodyGenome.fullsizeBoundingBox.x + selectedPool.representativeGenome.bodyGenome.fullsizeBoundingBox.y) * 0.5f * selectedPool.representativeGenome.bodyGenome.fullsizeBoundingBox.z).ToString("F2") + "</b>\n";
+                                                       
+                str += "Avg Brain Size: <b>" + ((selectedPool.avgNumNeurons + selectedPool.avgNumAxons) * 0.1f).ToString("F1") + "</b>\n";
+                */
             }            
         }
         else {

@@ -235,6 +235,8 @@ public class UIManager : MonoBehaviour {
     public Image imageMutationPanelNewPortrait;
     public Text textMutationPanelCur;
     public Text textMutationPanelNew;
+    public Text textMutationPanelTitleCur;
+    public Text textMutationPanelTitleNew;
     public GameObject panelNewMutationPreview;
     private int selectedToolbarMutationID = 0;
     public Button buttonToolbarMutateConfirm;
@@ -1299,24 +1301,47 @@ public class UIManager : MonoBehaviour {
 
             Color speciesColorLight = Color.white;
             Color speciesColorDark = Color.black;
+            Color worldLayerColor = Color.blue;
             if (layerManager.selectedTrophicSlotRef.kingdomID == 0) {
                 speciesColorLight = colorDecomposersLight;
                 speciesColorDark = colorDecomposersDark;
+
+                worldLayerColor = gameManager.simulationManager.vegetationManager.decomposerSlotGenomeCurrent.color;
             }
             else if (layerManager.selectedTrophicSlotRef.kingdomID == 1) {
                 speciesColorLight = colorPlantsLight;
                 speciesColorDark = colorPlantsDark;
+
+                Vector3 hue = gameManager.simulationManager.vegetationManager.algaeSlotGenomeCurrent.algaeRepData.hue;
+                worldLayerColor = new Color(hue.x, hue.y, hue.z);
             }
             else if (layerManager.selectedTrophicSlotRef.kingdomID == 2) {
                 speciesColorLight = colorAnimalsLight;
                 speciesColorDark = colorAnimalsDark;
+
+                worldLayerColor = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[layerManager.selectedTrophicSlotRef.slotID].displayColor;
             }
-            else {
+            else if (layerManager.selectedTrophicSlotRef.kingdomID == 3) {
                 speciesColorLight = colorTerrainLight;
                 speciesColorDark = colorTerrainDark;
+
+                if (layerManager.selectedTrophicSlotRef.slotID == 0) {
+                    worldLayerColor = gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeCurrent.color;
+                }
+                else if (layerManager.selectedTrophicSlotRef.slotID == 1) {
+                    worldLayerColor = gameManager.theRenderKing.baronVonTerrain.stoneSlotGenomeCurrent.color;
+                }
+                else if (layerManager.selectedTrophicSlotRef.slotID == 2) {
+                    worldLayerColor = gameManager.theRenderKing.baronVonTerrain.pebblesSlotGenomeCurrent.color;
+                }
+                else if (layerManager.selectedTrophicSlotRef.slotID == 3) {
+                    worldLayerColor = gameManager.theRenderKing.baronVonTerrain.sandSlotGenomeCurrent.color;
+                }
+                
             }
+            worldLayerColor.a = 1f;
             buttonToolbarWingCreateSpecies.GetComponent<Image>().color = speciesColorLight;                
-            imageToolbarSpeciesPortraitRender.color = speciesColorLight;
+            imageToolbarSpeciesPortraitRender.color = worldLayerColor; // speciesColorLight;
             textSelectedSpeciesTitle.color = speciesColorLight;
             imageToolbarSpeciesPortraitBorder.color = speciesColorDark;
             if(isSpiritBrushSelected) {
@@ -1342,11 +1367,16 @@ public class UIManager : MonoBehaviour {
             buttonToolbarWingDeleteSpecies.gameObject.SetActive(false); 
             if (layerManager.selectedTrophicSlotRef.kingdomID == 0) {
                 imageToolbarSpeciesPortraitRender.sprite = spriteDecomposerPortrait;
-                buttonToolbarWingDeleteSpecies.gameObject.SetActive(true);     
+                buttonToolbarWingDeleteSpecies.gameObject.SetActive(true); 
+                Color displayCol = gameManager.simulationManager.vegetationManager.decomposerSlotGenomeCurrent.color;
+                displayCol.a = 1f;
+                imageToolbarSpeciesPortraitBorder.color = displayCol;
             }
             else if (layerManager.selectedTrophicSlotRef.kingdomID == 1) {
                 imageToolbarSpeciesPortraitRender.sprite = spriteAlgaePortrait;
-                buttonToolbarWingDeleteSpecies.gameObject.SetActive(true); 
+                buttonToolbarWingDeleteSpecies.gameObject.SetActive(true);
+                Vector3 hue = gameManager.simulationManager.vegetationManager.algaeSlotGenomeCurrent.algaeRepData.hue;
+                imageToolbarSpeciesPortraitBorder.color = new Color(hue.x, hue.y, hue.z);
                         
             }
             else if (layerManager.selectedTrophicSlotRef.kingdomID == 2) {
@@ -1359,8 +1389,10 @@ public class UIManager : MonoBehaviour {
                     imageToolbarSpeciesPortraitRender.sprite = null;
                     imageToolbarSpeciesPortraitRender.color = Color.white;
                     // BORDER:
-                    Vector3 hue = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[layerManager.selectedTrophicSlotRef.linkedSpeciesID].representativeGenome.bodyGenome.appearanceGenome.hueSecondary;
-                    imageToolbarSpeciesPortraitBorder.color = new Color(hue.x, hue.y, hue.z); 
+                    Color hue = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[layerManager.selectedTrophicSlotRef.slotID].displayColor;//    linkedSpeciesID].representativeGenome.bodyGenome.appearanceGenome.hueSecondary;
+                    hue.a = 1f;
+                    //Vector3 hue = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[layerManager.selectedTrophicSlotRef.linkedSpeciesID].representativeGenome.bodyGenome.appearanceGenome.hueSecondary;
+                    imageToolbarSpeciesPortraitBorder.color = hue; // new Color(hue.x, hue.y, hue.z); 
                         
                     buttonToolbarWingDeleteSpecies.gameObject.SetActive(true); 
                 }
@@ -1374,19 +1406,31 @@ public class UIManager : MonoBehaviour {
                 if(layerManager.selectedTrophicSlotRef.slotID == 0) {
                     // bedrock
                     imageToolbarSpeciesPortraitRender.sprite = spriteBedrockPortrait;
-                    imageToolbarSpeciesPortraitRender.color = gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeCurrent.color;
+                    //imageToolbarSpeciesPortraitRender.color = gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeCurrent.color;
+                    Color displayCol = gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeCurrent.color;
+                    displayCol.a = 1f;
+                    imageToolbarSpeciesPortraitBorder.color = displayCol;
                 }
                 else if(layerManager.selectedTrophicSlotRef.slotID == 1) {
                     imageToolbarSpeciesPortraitRender.sprite = spriteStonesPortrait;
-                    imageToolbarSpeciesPortraitRender.color = gameManager.theRenderKing.baronVonTerrain.stoneSlotGenomeCurrent.color;
+
+                    Color displayCol = gameManager.theRenderKing.baronVonTerrain.stoneSlotGenomeCurrent.color;
+                    displayCol.a = 1f;
+                    imageToolbarSpeciesPortraitBorder.color = displayCol;
                 }
                 else if(layerManager.selectedTrophicSlotRef.slotID == 2) {
                     imageToolbarSpeciesPortraitRender.sprite = spritePebblesPortrait;
-                    imageToolbarSpeciesPortraitRender.color = gameManager.theRenderKing.baronVonTerrain.pebblesSlotGenomeCurrent.color;
+
+                    Color displayCol = gameManager.theRenderKing.baronVonTerrain.pebblesSlotGenomeCurrent.color;
+                    displayCol.a = 1f;
+                    imageToolbarSpeciesPortraitBorder.color = displayCol;
                 }
                 else {
                     imageToolbarSpeciesPortraitRender.sprite = spriteSandPortrait;
-                    imageToolbarSpeciesPortraitRender.color = gameManager.theRenderKing.baronVonTerrain.sandSlotGenomeCurrent.color;
+
+                    Color displayCol = gameManager.theRenderKing.baronVonTerrain.sandSlotGenomeCurrent.color;
+                    displayCol.a = 1f;
+                    imageToolbarSpeciesPortraitBorder.color = displayCol;
                 }
                 //imageToolbarSpeciesPortraitRender.sprite = null;
                 panelTier = 1;
@@ -1444,7 +1488,7 @@ public class UIManager : MonoBehaviour {
                     //buttonToolbarWingDescription.interactable = false;
                     if(!isToolbarDeletePromptOn) {
                         textToolbarWingSpeciesSummary.gameObject.SetActive(true);
-                        string summaryText = layerManager.GetSpeciesPreviewDescriptionString();
+                        string summaryText = layerManager.GetSpeciesPreviewDescriptionString(gameManager.simulationManager);
                         if(isSpiritBrushSelected) {
                             summaryText = GetSpiritBrushSummary();
                         }
@@ -1527,6 +1571,7 @@ public class UIManager : MonoBehaviour {
                 gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[slotRef.slotID] = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotRef.slotID][selectedToolbarMutationID];
                 gameManager.simulationManager.masterGenomePool.GenerateWorldLayerVertebrateGenomeMutationOptions(slotRef.slotID, slotRef.linkedSpeciesID);
                 gameManager.simulationManager.masterGenomePool.ProcessSlotMutation(slotRef.slotID, selectedToolbarMutationID, slotRef.linkedSpeciesID);
+                InitToolbarPortraitCritterData(slotRef);
             }
         }
         else if(slotRef.kingdomID == 3) { // Terrain
@@ -1568,9 +1613,18 @@ public class UIManager : MonoBehaviour {
         //imageMutationPanelThumbnailC.color = Color.white;
         //imageMutationPanelThumbnailC.sprite = null;
 
-        textMutationPanelOptionA.text = "Option A!";
-        textMutationPanelOptionB.text = "Option B!";
-        textMutationPanelOptionC.text = "Option C!";
+        textMutationPanelOptionA.text = "Tiny";
+        textMutationPanelOptionB.text = "Small";
+        textMutationPanelOptionC.text = "Large";
+        textMutationPanelOptionD.text = "Huge";
+
+        textMutationPanelTitleCur.text = "CURRENT";
+        string[] titlesTxt = new string[4];
+        titlesTxt[0] = "TINY MUTATION";
+        titlesTxt[1] = "SMALL MUTATION";
+        titlesTxt[2] = "LARGE MUTATION";
+        titlesTxt[3] = "HUGE MUTATION";
+        textMutationPanelTitleNew.text = titlesTxt[selectedToolbarMutationID];
 
         buttonToolbarMutateConfirm.gameObject.SetActive(false);
         if(selectedToolbarMutationID >= 0) {
@@ -1607,10 +1661,10 @@ public class UIManager : MonoBehaviour {
         TrophicLayersManager layerManager = gameManager.simulationManager.trophicLayersManager;   
         if(layerManager.selectedTrophicSlotRef.kingdomID == 0) { // DECOMPOSERS
             // Look up decomposer variants and populate UI elements from them:
-            textMutationPanelOptionA.text = gameManager.simulationManager.vegetationManager.decomposerSlotGenomeMutations[0].textDescriptionMutation; // "Minor Decomposers Mutation!"; //\nShininess: " + (gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[0].color.a * 100f).ToString("F0") + "%";
-            textMutationPanelOptionB.text = gameManager.simulationManager.vegetationManager.decomposerSlotGenomeMutations[1].textDescriptionMutation; // "Minor Decomposers Mutation!"; //\nShininess: " + (gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[1].color.a * 100f).ToString("F0") + "%";
-            textMutationPanelOptionC.text = gameManager.simulationManager.vegetationManager.decomposerSlotGenomeMutations[2].textDescriptionMutation; // "Major Decomposers Mutation!"; //\nShininess: " + (gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[2].color.a * 100f).ToString("F0") + "%";
-            textMutationPanelOptionD.text = gameManager.simulationManager.vegetationManager.decomposerSlotGenomeMutations[3].textDescriptionMutation; // "Major Decomposers Mutation!";
+            //textMutationPanelOptionA.text = gameManager.simulationManager.vegetationManager.decomposerSlotGenomeMutations[0].textDescriptionMutation; // "Minor Decomposers Mutation!"; //\nShininess: " + (gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[0].color.a * 100f).ToString("F0") + "%";
+            //textMutationPanelOptionB.text = gameManager.simulationManager.vegetationManager.decomposerSlotGenomeMutations[1].textDescriptionMutation; // "Minor Decomposers Mutation!"; //\nShininess: " + (gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[1].color.a * 100f).ToString("F0") + "%";
+            //textMutationPanelOptionC.text = gameManager.simulationManager.vegetationManager.decomposerSlotGenomeMutations[2].textDescriptionMutation; // "Major Decomposers Mutation!"; //\nShininess: " + (gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[2].color.a * 100f).ToString("F0") + "%";
+            //textMutationPanelOptionD.text = gameManager.simulationManager.vegetationManager.decomposerSlotGenomeMutations[3].textDescriptionMutation; // "Major Decomposers Mutation!";
             Color uiColor = gameManager.simulationManager.vegetationManager.decomposerSlotGenomeMutations[0].color;
             uiColor.a = 1f;
             imageMutationPanelThumbnailA.color = uiColor; // UnityEngine.Random.ColorHSV();
@@ -1638,10 +1692,10 @@ public class UIManager : MonoBehaviour {
             // Algae Particles:
             //gameManager.simulationManager.vegetationManager.
 
-            textMutationPanelOptionA.text = gameManager.simulationManager.vegetationManager.algaeSlotGenomeMutations[0].textDescriptionMutation; // "Minor Decomposers Mutation!"; //\nShininess: " + (gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[0].color.a * 100f).ToString("F0") + "%";
-            textMutationPanelOptionB.text = gameManager.simulationManager.vegetationManager.algaeSlotGenomeMutations[1].textDescriptionMutation; // "Minor Decomposers Mutation!"; //\nShininess: " + (gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[1].color.a * 100f).ToString("F0") + "%";
-            textMutationPanelOptionC.text = gameManager.simulationManager.vegetationManager.algaeSlotGenomeMutations[2].textDescriptionMutation; // "Major Decomposers Mutation!"; //\nShininess: " + (gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[2].color.a * 100f).ToString("F0") + "%";
-            textMutationPanelOptionD.text = gameManager.simulationManager.vegetationManager.algaeSlotGenomeMutations[3].textDescriptionMutation; // "Major Decomposers Mutation!";
+            //textMutationPanelOptionA.text = gameManager.simulationManager.vegetationManager.algaeSlotGenomeMutations[0].textDescriptionMutation; // "Minor Decomposers Mutation!"; //\nShininess: " + (gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[0].color.a * 100f).ToString("F0") + "%";
+            //textMutationPanelOptionB.text = gameManager.simulationManager.vegetationManager.algaeSlotGenomeMutations[1].textDescriptionMutation; // "Minor Decomposers Mutation!"; //\nShininess: " + (gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[1].color.a * 100f).ToString("F0") + "%";
+            //textMutationPanelOptionC.text = gameManager.simulationManager.vegetationManager.algaeSlotGenomeMutations[2].textDescriptionMutation; // "Major Decomposers Mutation!"; //\nShininess: " + (gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[2].color.a * 100f).ToString("F0") + "%";
+            //textMutationPanelOptionD.text = gameManager.simulationManager.vegetationManager.algaeSlotGenomeMutations[3].textDescriptionMutation; // "Major Decomposers Mutation!";
             Vector3 hue = gameManager.simulationManager.vegetationManager.algaeSlotGenomeMutations[0].algaeRepData.hue;
             Color uiColor = new Color(hue.x, hue.y, hue.z);
             //uiColor.a = 1f;
@@ -1671,10 +1725,10 @@ public class UIManager : MonoBehaviour {
         }
         else if(layerManager.selectedTrophicSlotRef.kingdomID == 2) { // ANIMALS
             if(layerManager.selectedTrophicSlotRef.tierID == 0) {  // Zooplankton
-                textMutationPanelOptionA.text = gameManager.simulationManager.zooplanktonManager.zooplanktonSlotGenomeMutations[0].textDescriptionMutation; // "Minor Decomposers Mutation!"; //\nShininess: " + (gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[0].color.a * 100f).ToString("F0") + "%";
-                textMutationPanelOptionB.text = gameManager.simulationManager.zooplanktonManager.zooplanktonSlotGenomeMutations[1].textDescriptionMutation; // "Minor Decomposers Mutation!"; //\nShininess: " + (gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[1].color.a * 100f).ToString("F0") + "%";
-                textMutationPanelOptionC.text = gameManager.simulationManager.zooplanktonManager.zooplanktonSlotGenomeMutations[2].textDescriptionMutation; // "Major Decomposers Mutation!"; //\nShininess: " + (gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[2].color.a * 100f).ToString("F0") + "%";
-                textMutationPanelOptionD.text = gameManager.simulationManager.zooplanktonManager.zooplanktonSlotGenomeMutations[3].textDescriptionMutation; // "Major Decomposers Mutation!";
+                //textMutationPanelOptionA.text = gameManager.simulationManager.zooplanktonManager.zooplanktonSlotGenomeMutations[0].textDescriptionMutation; // "Minor Decomposers Mutation!"; //\nShininess: " + (gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[0].color.a * 100f).ToString("F0") + "%";
+                //textMutationPanelOptionB.text = gameManager.simulationManager.zooplanktonManager.zooplanktonSlotGenomeMutations[1].textDescriptionMutation; // "Minor Decomposers Mutation!"; //\nShininess: " + (gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[1].color.a * 100f).ToString("F0") + "%";
+                //textMutationPanelOptionC.text = gameManager.simulationManager.zooplanktonManager.zooplanktonSlotGenomeMutations[2].textDescriptionMutation; // "Major Decomposers Mutation!"; //\nShininess: " + (gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[2].color.a * 100f).ToString("F0") + "%";
+                //textMutationPanelOptionD.text = gameManager.simulationManager.zooplanktonManager.zooplanktonSlotGenomeMutations[3].textDescriptionMutation; // "Major Decomposers Mutation!";
                 Color uiColor = gameManager.simulationManager.zooplanktonManager.zooplanktonSlotGenomeMutations[0].representativeData.color;
                 uiColor.a = 1f;
                 imageMutationPanelThumbnailA.color = uiColor; // UnityEngine.Random.ColorHSV();
@@ -1699,24 +1753,24 @@ public class UIManager : MonoBehaviour {
             }
             else { // vertebrates
                 int slotID = layerManager.selectedTrophicSlotRef.slotID;
-                textMutationPanelOptionA.text = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][0].textDescriptionMutation; 
-                textMutationPanelOptionB.text = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][1].textDescriptionMutation; 
-                textMutationPanelOptionC.text = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][2].textDescriptionMutation; 
-                textMutationPanelOptionD.text = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][3].textDescriptionMutation;
+                //textMutationPanelOptionA.text = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][0].textDescriptionMutation; 
+                //textMutationPanelOptionB.text = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][1].textDescriptionMutation; 
+                //textMutationPanelOptionC.text = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][2].textDescriptionMutation; 
+                //textMutationPanelOptionD.text = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][3].textDescriptionMutation;
 
                 int speciesID = layerManager.selectedTrophicSlotRef.linkedSpeciesID;
-                Vector3 hue0 = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][0].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
-                imageMutationPanelThumbnailA.color = new Color(hue0.x, hue0.y, hue0.z); 
-                Vector3 hue1 = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][1].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
-                imageMutationPanelThumbnailB.color = new Color(hue1.x, hue1.y, hue1.z); 
-                Vector3 hue2 = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][2].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
-                imageMutationPanelThumbnailC.color = new Color(hue2.x, hue2.y, hue2.z); 
-                Vector3 hue3 = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][3].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
-                imageMutationPanelThumbnailD.color = new Color(hue3.x, hue3.y, hue3.z); 
+                //Vector3 hue0 = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][0].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
+                imageMutationPanelThumbnailA.color = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][0].displayColor; // new Color(hue0.x, hue0.y, hue0.z); 
+                //Vector3 hue1 = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][1].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
+                imageMutationPanelThumbnailB.color = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][1].displayColor; //
+                //Vector3 hue2 = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][2].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
+                imageMutationPanelThumbnailC.color = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][2].displayColor; //
+                //Vector3 hue3 = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][3].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
+                imageMutationPanelThumbnailD.color = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][3].displayColor; //
                 //Vector3 hue0 = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
 
                 Vector3 hueCur = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][0].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
-                imageMutationPanelCurPortrait.color = new Color(hueCur.x, hueCur.y, hueCur.z);
+                imageMutationPanelCurPortrait.color = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[slotID].displayColor; // new Color(hueCur.x, hueCur.y, hueCur.z);
 
                 textMutationPanelCur.text = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[slotID].name; // "Reaction Rate: " + gameManager.simulationManager.vegetationManager.decomposerSlotGenomeCurrent.reactionRate.ToString();
                 textMutationPanelNew.text = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][selectedToolbarMutationID].textDescriptionMutation; // "placeholder";
@@ -1744,10 +1798,10 @@ public class UIManager : MonoBehaviour {
                     colorOptionC = gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[2].color;
                     colorOptionD = gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[3].color;
                     // *** make these Text objects into an array:
-                    textMutationPanelOptionA.text = gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[0].textDescriptionMutation; // "Minor Mutation!"; //\nShininess: " + (gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[0].color.a * 100f).ToString("F0") + "%";
-                    textMutationPanelOptionB.text = gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[1].textDescriptionMutation; // "Minor Mutation!"; //\nShininess: " + (gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[1].color.a * 100f).ToString("F0") + "%";
-                    textMutationPanelOptionC.text = gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[2].textDescriptionMutation; // "Major Mutation!"; //\nShininess: " + (gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[2].color.a * 100f).ToString("F0") + "%";
-                    textMutationPanelOptionD.text = gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[3].textDescriptionMutation; // "Major Mutation!";
+                    //textMutationPanelOptionA.text = gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[0].textDescriptionMutation; // "Minor Mutation!"; //\nShininess: " + (gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[0].color.a * 100f).ToString("F0") + "%";
+                    //textMutationPanelOptionB.text = gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[1].textDescriptionMutation; // "Minor Mutation!"; //\nShininess: " + (gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[1].color.a * 100f).ToString("F0") + "%";
+                    //textMutationPanelOptionC.text = gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[2].textDescriptionMutation; // "Major Mutation!"; //\nShininess: " + (gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[2].color.a * 100f).ToString("F0") + "%";
+                    //textMutationPanelOptionD.text = gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[3].textDescriptionMutation; // "Major Mutation!";
                     colorCur = gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeCurrent.color;
                     imageMutationPanelNewPortrait.color = gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[selectedIndex].color;
                     textMutationPanelCur.text = gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeCurrent.name; // "Properties: " + gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeCurrent.elevationChange.ToString();
@@ -1758,10 +1812,10 @@ public class UIManager : MonoBehaviour {
                     colorOptionB = gameManager.theRenderKing.baronVonTerrain.stoneSlotGenomeMutations[1].color;
                     colorOptionC = gameManager.theRenderKing.baronVonTerrain.stoneSlotGenomeMutations[2].color;
                     colorOptionD = gameManager.theRenderKing.baronVonTerrain.stoneSlotGenomeMutations[3].color;
-                    textMutationPanelOptionA.text = gameManager.theRenderKing.baronVonTerrain.stoneSlotGenomeMutations[0].textDescriptionMutation; // "Minor Stones Mutation!"; //\nShininess: " + (gameManager.theRenderKing.baronVonTerrain.stoneSlotGenomeMutations[0].color.a * 100f).ToString("F0") + "%";
-                    textMutationPanelOptionB.text = gameManager.theRenderKing.baronVonTerrain.stoneSlotGenomeMutations[1].textDescriptionMutation; // "Stones Mutation!"; //\nShininess: " + (gameManager.theRenderKing.baronVonTerrain.stoneSlotGenomeMutations[1].color.a * 100f).ToString("F0") + "%";
-                    textMutationPanelOptionC.text = gameManager.theRenderKing.baronVonTerrain.stoneSlotGenomeMutations[2].textDescriptionMutation; // "Major Stones Mutation!"; //\nShininess: " + (gameManager.theRenderKing.baronVonTerrain.stoneSlotGenomeMutations[2].color.a * 100f).ToString("F0") + "%";
-                    textMutationPanelOptionD.text = gameManager.theRenderKing.baronVonTerrain.stoneSlotGenomeMutations[3].textDescriptionMutation; // "Major Stones Mutation!";
+                    //textMutationPanelOptionA.text = gameManager.theRenderKing.baronVonTerrain.stoneSlotGenomeMutations[0].textDescriptionMutation; // "Minor Stones Mutation!"; //\nShininess: " + (gameManager.theRenderKing.baronVonTerrain.stoneSlotGenomeMutations[0].color.a * 100f).ToString("F0") + "%";
+                    //textMutationPanelOptionB.text = gameManager.theRenderKing.baronVonTerrain.stoneSlotGenomeMutations[1].textDescriptionMutation; // "Stones Mutation!"; //\nShininess: " + (gameManager.theRenderKing.baronVonTerrain.stoneSlotGenomeMutations[1].color.a * 100f).ToString("F0") + "%";
+                    //textMutationPanelOptionC.text = gameManager.theRenderKing.baronVonTerrain.stoneSlotGenomeMutations[2].textDescriptionMutation; // "Major Stones Mutation!"; //\nShininess: " + (gameManager.theRenderKing.baronVonTerrain.stoneSlotGenomeMutations[2].color.a * 100f).ToString("F0") + "%";
+                    //textMutationPanelOptionD.text = gameManager.theRenderKing.baronVonTerrain.stoneSlotGenomeMutations[3].textDescriptionMutation; // "Major Stones Mutation!";
                     colorCur = gameManager.theRenderKing.baronVonTerrain.stoneSlotGenomeCurrent.color;
                     imageMutationPanelNewPortrait.color = gameManager.theRenderKing.baronVonTerrain.stoneSlotGenomeMutations[selectedIndex].color;
                     textMutationPanelCur.text = gameManager.theRenderKing.baronVonTerrain.stoneSlotGenomeCurrent.name; // "Properties: " + gameManager.theRenderKing.baronVonTerrain.stoneSlotGenomeCurrent.elevationChange.ToString();
@@ -1772,10 +1826,10 @@ public class UIManager : MonoBehaviour {
                     colorOptionB = gameManager.theRenderKing.baronVonTerrain.pebblesSlotGenomeMutations[1].color;
                     colorOptionC = gameManager.theRenderKing.baronVonTerrain.pebblesSlotGenomeMutations[2].color;
                     colorOptionD = gameManager.theRenderKing.baronVonTerrain.pebblesSlotGenomeMutations[3].color;
-                    textMutationPanelOptionA.text = gameManager.theRenderKing.baronVonTerrain.pebblesSlotGenomeMutations[0].textDescriptionMutation; // "Minor Pebbles Mutation!"; //\nElevation: " + (gameManager.theRenderKing.baronVonTerrain.pebblesSlotGenomeMutations[0].elevationChange * 100f).ToString("F0") + "%";
-                    textMutationPanelOptionB.text = gameManager.theRenderKing.baronVonTerrain.pebblesSlotGenomeMutations[1].textDescriptionMutation; // "Pebbles Mutation!"; //\nElevation: " + (gameManager.theRenderKing.baronVonTerrain.pebblesSlotGenomeMutations[1].elevationChange * 100f).ToString("F0") + "%";
-                    textMutationPanelOptionC.text = gameManager.theRenderKing.baronVonTerrain.pebblesSlotGenomeMutations[2].textDescriptionMutation; // "Major Pebbles Mutation!"; //\nElevation: " + (gameManager.theRenderKing.baronVonTerrain.pebblesSlotGenomeMutations[2].elevationChange * 100f).ToString("F0") + "%";
-                    textMutationPanelOptionD.text = gameManager.theRenderKing.baronVonTerrain.pebblesSlotGenomeMutations[3].textDescriptionMutation; // "Major Pebbles Mutation!"; 
+                    //textMutationPanelOptionA.text = gameManager.theRenderKing.baronVonTerrain.pebblesSlotGenomeMutations[0].textDescriptionMutation; // "Minor Pebbles Mutation!"; //\nElevation: " + (gameManager.theRenderKing.baronVonTerrain.pebblesSlotGenomeMutations[0].elevationChange * 100f).ToString("F0") + "%";
+                    //textMutationPanelOptionB.text = gameManager.theRenderKing.baronVonTerrain.pebblesSlotGenomeMutations[1].textDescriptionMutation; // "Pebbles Mutation!"; //\nElevation: " + (gameManager.theRenderKing.baronVonTerrain.pebblesSlotGenomeMutations[1].elevationChange * 100f).ToString("F0") + "%";
+                    //textMutationPanelOptionC.text = gameManager.theRenderKing.baronVonTerrain.pebblesSlotGenomeMutations[2].textDescriptionMutation; // "Major Pebbles Mutation!"; //\nElevation: " + (gameManager.theRenderKing.baronVonTerrain.pebblesSlotGenomeMutations[2].elevationChange * 100f).ToString("F0") + "%";
+                    //textMutationPanelOptionD.text = gameManager.theRenderKing.baronVonTerrain.pebblesSlotGenomeMutations[3].textDescriptionMutation; // "Major Pebbles Mutation!"; 
                     colorCur = gameManager.theRenderKing.baronVonTerrain.pebblesSlotGenomeCurrent.color;
                     imageMutationPanelNewPortrait.color = gameManager.theRenderKing.baronVonTerrain.pebblesSlotGenomeMutations[selectedIndex].color;
                     textMutationPanelCur.text = gameManager.theRenderKing.baronVonTerrain.pebblesSlotGenomeCurrent.name; // "Properties: " + gameManager.theRenderKing.baronVonTerrain.pebblesSlotGenomeCurrent.elevationChange.ToString();
@@ -1786,10 +1840,10 @@ public class UIManager : MonoBehaviour {
                     colorOptionB = gameManager.theRenderKing.baronVonTerrain.sandSlotGenomeMutations[1].color;
                     colorOptionC = gameManager.theRenderKing.baronVonTerrain.sandSlotGenomeMutations[2].color;
                     colorOptionC = gameManager.theRenderKing.baronVonTerrain.sandSlotGenomeMutations[3].color;
-                    textMutationPanelOptionA.text = gameManager.theRenderKing.baronVonTerrain.sandSlotGenomeMutations[0].textDescriptionMutation; // "Minor Sand Mutation!"; //\nElevation: " + (gameManager.theRenderKing.baronVonTerrain.sandSlotGenomeMutations[0].elevationChange * 100f).ToString("F0") + "%";
-                    textMutationPanelOptionB.text = gameManager.theRenderKing.baronVonTerrain.sandSlotGenomeMutations[1].textDescriptionMutation; // "Sand Mutation!"; //\nElevation: " + (gameManager.theRenderKing.baronVonTerrain.sandSlotGenomeMutations[1].elevationChange * 100f).ToString("F0") + "%";
-                    textMutationPanelOptionC.text = gameManager.theRenderKing.baronVonTerrain.sandSlotGenomeMutations[2].textDescriptionMutation; // "Major Sand Mutation!"; //\nElevation: " + (gameManager.theRenderKing.baronVonTerrain.sandSlotGenomeMutations[2].elevationChange * 100f).ToString("F0") + "%";
-                    textMutationPanelOptionD.text = gameManager.theRenderKing.baronVonTerrain.sandSlotGenomeMutations[3].textDescriptionMutation; // "Major Sand Mutation!";
+                    //textMutationPanelOptionA.text = gameManager.theRenderKing.baronVonTerrain.sandSlotGenomeMutations[0].textDescriptionMutation; // "Minor Sand Mutation!"; //\nElevation: " + (gameManager.theRenderKing.baronVonTerrain.sandSlotGenomeMutations[0].elevationChange * 100f).ToString("F0") + "%";
+                    //textMutationPanelOptionB.text = gameManager.theRenderKing.baronVonTerrain.sandSlotGenomeMutations[1].textDescriptionMutation; // "Sand Mutation!"; //\nElevation: " + (gameManager.theRenderKing.baronVonTerrain.sandSlotGenomeMutations[1].elevationChange * 100f).ToString("F0") + "%";
+                    //textMutationPanelOptionC.text = gameManager.theRenderKing.baronVonTerrain.sandSlotGenomeMutations[2].textDescriptionMutation; // "Major Sand Mutation!"; //\nElevation: " + (gameManager.theRenderKing.baronVonTerrain.sandSlotGenomeMutations[2].elevationChange * 100f).ToString("F0") + "%";
+                    //textMutationPanelOptionD.text = gameManager.theRenderKing.baronVonTerrain.sandSlotGenomeMutations[3].textDescriptionMutation; // "Major Sand Mutation!";
                     colorCur = gameManager.theRenderKing.baronVonTerrain.sandSlotGenomeCurrent.color;    
                     imageMutationPanelNewPortrait.color = gameManager.theRenderKing.baronVonTerrain.sandSlotGenomeMutations[selectedIndex].color;
                     textMutationPanelCur.text = gameManager.theRenderKing.baronVonTerrain.sandSlotGenomeCurrent.name; // "Properties: " + gameManager.theRenderKing.baronVonTerrain.sandSlotGenomeCurrent.elevationChange.ToString();
@@ -1811,7 +1865,7 @@ public class UIManager : MonoBehaviour {
                 imageMutationPanelThumbnailD.sprite = null;
 
                 imageMutationPanelCurPortrait.color = colorCur;
-                
+
             }
         }
          
@@ -2668,9 +2722,9 @@ public class UIManager : MonoBehaviour {
         }
         */
 
-        SpeciesGenomePool speciesPool = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesID];        
+        SpeciesGenomePool speciesPool = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesID];
         //gameManager.theRenderKing.InitializeNewCritterPortraitGenome(speciesPool.representativeGenome);
-        gameManager.theRenderKing.InitializeNewCritterPortraitGenome(speciesPool.leaderboardGenomesList[0].candidateGenome);
+        gameManager.theRenderKing.InitializeNewCritterPortraitGenome(gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[slot.slotID].representativeGenome); // speciesPool.leaderboardGenomesList[0].candidateGenome);
         gameManager.theRenderKing.isToolbarCritterPortraitEnabled = true;
                 
         //Vector3 speciesHuePrimary = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesID].representativeGenome.bodyGenome.appearanceGenome.huePrimary;

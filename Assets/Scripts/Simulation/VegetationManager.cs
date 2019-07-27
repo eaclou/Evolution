@@ -12,7 +12,7 @@ public class VegetationManager {
 
     //public float curGlobalAlgaeGrid = 0f;  // not using this currently
     
-    public int resourceGridTexResolution = 32; // Temporarily disabled - replaced by single value (1x1 grid)
+    public int resourceGridTexResolution = 128; 
     public RenderTexture resourceGridRT1;
     public RenderTexture resourceGridRT2;
     public Vector4[] resourceGridSamplesArray;
@@ -20,7 +20,7 @@ public class VegetationManager {
 
     public RenderTexture rdRT1;
     public RenderTexture rdRT2;
-    private int rdTextureResolution = 256;
+    private int rdTextureResolution = 128;  // decomposers and algae Tex2D's
     // decomposer genomes:
     public WorldLayerDecomposerGenome decomposerSlotGenomeCurrent;
     public WorldLayerDecomposerGenome[] decomposerSlotGenomeMutations;
@@ -84,10 +84,10 @@ public class VegetationManager {
         return bitSize;
     }
 
-    public void MoveRandomResourceGridPatches(int index) {
+    /*public void MoveRandomResourceGridPatches(int index) {
         resourceGridSpawnPatchesArray[index] = new Vector2(UnityEngine.Random.Range(0.1f, 0.9f), UnityEngine.Random.Range(0.1f, 0.9f)); // (UnityEngine.Random.insideUnitCircle + Vector2.one) * 0.5f;
         Debug.Log("Moved Resource Patch! [" + index.ToString() + "], " + resourceGridSpawnPatchesArray[index].ToString());
-    }
+    }*/
     //algaeSlotGenomeCurrent
     public void GenerateWorldLayerAlgaeParticlesGenomeMutationOptions() {
         for(int j = 0; j < algaeSlotGenomeMutations.Length; j++) {
@@ -125,6 +125,9 @@ public class VegetationManager {
     public void GenerateWorldLayerDecomposersGenomeMutationOptions() {
         for(int j = 0; j < decomposerSlotGenomeMutations.Length; j++) {
             float jLerp = Mathf.Clamp01((float)j / 3f + 0.015f); 
+            
+            //int magnitudeIndex = Mathf.FloorToInt(jLerp * 3.99f);
+
             jLerp = jLerp * jLerp;
             WorldLayerDecomposerGenome mutatedGenome = new WorldLayerDecomposerGenome();
             Color randColor = UnityEngine.Random.ColorHSV();
@@ -137,8 +140,15 @@ public class VegetationManager {
             mutatedGenome.scale = Mathf.Lerp(decomposerSlotGenomeCurrent.scale, UnityEngine.Random.Range(0f, 1f), jLerp);
             mutatedGenome.reactionRate = Mathf.Lerp(decomposerSlotGenomeCurrent.reactionRate, UnityEngine.Random.Range(0f, 1f), jLerp);
 
+            
+            string[] magnitudeWordsArray = new string[4];
+            magnitudeWordsArray[0] = "Tiny";
+            magnitudeWordsArray[1] = "Small";
+            magnitudeWordsArray[2] = "Large";
+            magnitudeWordsArray[3] = "Huge";
+
             mutatedGenome.name = decomposerSlotGenomeCurrent.name;
-            mutatedGenome.textDescriptionMutation = "Mutation Amt: " + (jLerp * 100f).ToString("F0") + "% - " + mutatedGenome.reactionRate.ToString();
+            mutatedGenome.textDescriptionMutation = magnitudeWordsArray[j]; // "Mutation Amt: " + (jLerp * 100f).ToString("F0") + "% - " + mutatedGenome.reactionRate.ToString();
             // other attributes here
             //mutatedGenome.elevationChange = Mathf.Lerp(bedrockSlotGenomeCurrent.elevationChange, UnityEngine.Random.Range(0f, 1f), iLerp);
 
@@ -150,10 +160,10 @@ public class VegetationManager {
         settingsRef = settings;
         resourceManagerRef = resourcesRef;
 
-        resourceGridSpawnPatchesArray = new Vector2[4]; // *** Refactor this!!! ***
+        /*resourceGridSpawnPatchesArray = new Vector2[4]; // *** Refactor this!!! ***
         for(int i = 0; i < resourceGridSpawnPatchesArray.Length; i++) {
             resourceGridSpawnPatchesArray[i] = new Vector2(UnityEngine.Random.Range(0.1f, 0.9f), UnityEngine.Random.Range(0.1f, 0.9f)); // (UnityEngine.Random.insideUnitCircle + Vector2.one) * 0.5f;
-        }
+        }*/
 
 
         // REFERENCE CODE:::::::::
@@ -169,7 +179,15 @@ public class VegetationManager {
         
     }
 
-    
+    public void ProcessSlotMutation() {
+        //representativeAlgaeLayerGenome = algaeParticlesArray[0];
+        //algaeParticlesRepresentativeGenomeCBuffer = new ComputeBuffer(1, GetAlgaeParticleDataSize());
+        AlgaeParticleData[] algaeParticlesRepresentativeGenomeArray = new AlgaeParticleData[1];
+        algaeParticlesRepresentativeGenomeArray[0] = algaeSlotGenomeCurrent.algaeRepData;
+        algaeParticlesRepresentativeGenomeCBuffer.SetData(algaeParticlesRepresentativeGenomeArray);
+    }
+
+    // PLANT PARTICLES:::::
     public void InitializeAlgaeParticles(int numAgents, ComputeShader computeShader) {
         //float startTime = Time.realtimeSinceStartup;
         //Debug.Log((Time.realtimeSinceStartup - startTime).ToString());
@@ -252,260 +270,7 @@ public class VegetationManager {
         algaeParticlesRepresentativeGenomeArray[0] = algaeSlotGenomeCurrent.algaeRepData;
         algaeParticlesRepresentativeGenomeCBuffer.SetData(algaeParticlesRepresentativeGenomeArray);
 
-    }
-
-    public void ProcessSlotMutation() {
-        //representativeAlgaeLayerGenome = algaeParticlesArray[0];
-        //algaeParticlesRepresentativeGenomeCBuffer = new ComputeBuffer(1, GetAlgaeParticleDataSize());
-        AlgaeParticleData[] algaeParticlesRepresentativeGenomeArray = new AlgaeParticleData[1];
-        algaeParticlesRepresentativeGenomeArray[0] = algaeSlotGenomeCurrent.algaeRepData;
-        algaeParticlesRepresentativeGenomeCBuffer.SetData(algaeParticlesRepresentativeGenomeArray);
-    }
-        
-    public void InitializeAlgaeGrid(int numAgents, ComputeShader computeShader) {
-
-        computeShaderResourceGrid = computeShader;
-              
-        resourceGridRT1 = new RenderTexture(resourceGridTexResolution, resourceGridTexResolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        resourceGridRT1.wrapMode = TextureWrapMode.Clamp;
-        resourceGridRT1.filterMode = FilterMode.Bilinear;
-        resourceGridRT1.enableRandomWrite = true;
-        //nutrientMapRT1.useMipMap = true;
-        resourceGridRT1.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***    
-
-        resourceGridRT2 = new RenderTexture(resourceGridTexResolution, resourceGridTexResolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        resourceGridRT2.wrapMode = TextureWrapMode.Clamp;
-        resourceGridRT2.enableRandomWrite = true;
-        //nutrientMapRT2.useMipMap = true;
-        resourceGridRT2.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***  
-        
-        resourceGridSamplesArray = new Vector4[numAgents];
-        resourceGridEatAmountsArray = new Vector4[numAgents];
-
-        int kernelCSInitializeAlgaeGrid = computeShaderResourceGrid.FindKernel("CSInitializeAlgaeGrid");
-        computeShaderResourceGrid.SetTexture(kernelCSInitializeAlgaeGrid, "algaeGridWrite", resourceGridRT1);
-        computeShaderResourceGrid.Dispatch(kernelCSInitializeAlgaeGrid, resourceGridTexResolution / 32, resourceGridTexResolution / 32, 1);
-        Graphics.Blit(resourceGridRT1, resourceGridRT2);
-
-        tempTex16 = new RenderTexture(16, 16, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        tempTex16.wrapMode = TextureWrapMode.Clamp;
-        tempTex16.filterMode = FilterMode.Point;
-        tempTex16.enableRandomWrite = true;
-        tempTex16.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
-
-        tempTex8 = new RenderTexture(8, 8, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        tempTex8.wrapMode = TextureWrapMode.Clamp;
-        tempTex8.filterMode = FilterMode.Point;
-        tempTex8.enableRandomWrite = true;
-        tempTex8.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
-
-        tempTex4 = new RenderTexture(4, 4, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        tempTex4.wrapMode = TextureWrapMode.Clamp;
-        tempTex4.filterMode = FilterMode.Point;
-        tempTex4.enableRandomWrite = true;
-        tempTex4.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
-
-        tempTex2 = new RenderTexture(2, 2, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        tempTex2.wrapMode = TextureWrapMode.Clamp;
-        tempTex2.filterMode = FilterMode.Point;
-        tempTex2.enableRandomWrite = true;
-        tempTex2.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
-
-        tempTex1 = new RenderTexture(1, 1, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        tempTex1.wrapMode = TextureWrapMode.Clamp;
-        tempTex1.filterMode = FilterMode.Point;
-        tempTex1.enableRandomWrite = true;
-        tempTex1.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
-
-        resourceGridAgentSamplesCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 4);
-
-        
-        rdRT1 = new RenderTexture(rdTextureResolution, rdTextureResolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        rdRT1.wrapMode = TextureWrapMode.Clamp;
-        rdRT1.filterMode = FilterMode.Bilinear;
-        rdRT1.enableRandomWrite = true;
-        rdRT1.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
-
-        rdRT2 = new RenderTexture(rdTextureResolution, rdTextureResolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        rdRT2.wrapMode = TextureWrapMode.Clamp;
-        rdRT2.filterMode = FilterMode.Bilinear;
-        rdRT2.enableRandomWrite = true;
-        rdRT2.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
-
-        //theRenderKing.fluidRenderMat.SetTexture("_DebugTex", nutrientMapRT1);
-        
-    }
-
-    public void InitializeReactionDiffusionGrid() {
-        int kernelCSInitRD = computeShaderResourceGrid.FindKernel("CSInitRD"); 
-        //computeShaderResourceGrid.SetTexture(kernelCSUpdateAlgaeGrid, "rdRead", rdRT1);
-        computeShaderResourceGrid.SetFloat("_TextureResolution", (float)rdTextureResolution);
-        computeShaderResourceGrid.SetTexture(kernelCSInitRD, "rdWrite", rdRT1);
-        computeShaderResourceGrid.Dispatch(kernelCSInitRD, rdTextureResolution / 32, rdTextureResolution / 32, 1);
-
-    }
-
-    public void SimReactionDiffusionGrid(ref EnvironmentFluidManager fluidManagerRef, ref BaronVonTerrain baronTerrainRef, ref TheRenderKing theRenderKingRef) {
-        int kernelCSInitRD = computeShaderResourceGrid.FindKernel("CSSimRD"); 
-        computeShaderResourceGrid.SetTexture(kernelCSInitRD, "_AltitudeTex", baronTerrainRef.terrainHeightRT0);        
-        computeShaderResourceGrid.SetFloat("_TextureResolution", (float)rdTextureResolution);
-        computeShaderResourceGrid.SetFloat("_Time", Time.realtimeSinceStartup);
-        computeShaderResourceGrid.SetTexture(kernelCSInitRD, "rdRead", rdRT1);
-        computeShaderResourceGrid.SetTexture(kernelCSInitRD, "rdWrite", rdRT2);
-        computeShaderResourceGrid.Dispatch(kernelCSInitRD, rdTextureResolution / 32, rdTextureResolution / 32, 1);
-        // write into 2
-        int kernelCSAdvectRD = computeShaderResourceGrid.FindKernel("CSAdvectRD");
-        computeShaderResourceGrid.SetFloat("_TextureResolution", (float)rdTextureResolution);        
-        computeShaderResourceGrid.SetFloat("_Time", Time.realtimeSinceStartup);
-        computeShaderResourceGrid.SetFloat("_DeltaTime", fluidManagerRef.deltaTime);
-        computeShaderResourceGrid.SetFloat("_InvGridScale", fluidManagerRef.invGridScale);
-        computeShaderResourceGrid.SetFloat("_MapSize", SimulationManager._MapSize);
-        float brushOn = 0f;
-        if(isBrushActive) {  // Set from uiManager
-            brushOn = 1f;
-        }
-        computeShaderResourceGrid.SetFloat("_SpiritBrushIntensity", 0.1f); // *** INVESTIGATE THIS -- not used/needed?
-        computeShaderResourceGrid.SetFloat("_IsSpiritBrushOn", brushOn);
-        computeShaderResourceGrid.SetFloat("_SpiritBrushPosNeg", theRenderKingRef.spiritBrushPosNeg);
-        computeShaderResourceGrid.SetFloat("_RD_FeedRate", theRenderKingRef.simManager.vegetationManager.decomposerSlotGenomeCurrent.feedRate);
-        computeShaderResourceGrid.SetFloat("_RD_KillRate", theRenderKingRef.simManager.vegetationManager.decomposerSlotGenomeCurrent.killRate);            
-        computeShaderResourceGrid.SetFloat("_RD_Scale", theRenderKingRef.simManager.vegetationManager.decomposerSlotGenomeCurrent.scale);
-        computeShaderResourceGrid.SetFloat("_RD_Rate", theRenderKingRef.simManager.vegetationManager.decomposerSlotGenomeCurrent.reactionRate);
-        computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "VelocityRead", fluidManagerRef._VelocityA);
-        computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "rdRead", rdRT2);
-        computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "rdWrite", rdRT1);
-        computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "_SpiritBrushTex", theRenderKingRef.spiritBrushRT);
-        computeShaderResourceGrid.Dispatch(kernelCSAdvectRD, rdTextureResolution / 32, rdTextureResolution / 32, 1);
-        //back into 1
-    }
-
-    public void ApplyDiffusionOnResourceGrid(EnvironmentFluidManager fluidManagerRef) {
-        int kernelCSUpdateAlgaeGrid = computeShaderResourceGrid.FindKernel("CSUpdateAlgaeGrid");
-        computeShaderResourceGrid.SetFloat("_AlgaeGridDiffusion", settingsRef.nutrientDiffusionRate);
-
-        computeShaderResourceGrid.SetTexture(kernelCSUpdateAlgaeGrid, "ObstaclesRead", fluidManagerRef._ObstaclesRT);
-        computeShaderResourceGrid.SetTexture(kernelCSUpdateAlgaeGrid, "algaeGridRead", resourceGridRT1);
-        computeShaderResourceGrid.SetTexture(kernelCSUpdateAlgaeGrid, "algaeGridWrite", resourceGridRT2);
-        computeShaderResourceGrid.Dispatch(kernelCSUpdateAlgaeGrid, resourceGridTexResolution / 32, resourceGridTexResolution / 32, 1);
-
-        //Graphics.Blit(resourceGridRT2, resourceGridRT1);
-        
-    }
-    public void AdvectResourceGrid(EnvironmentFluidManager fluidManagerRef) {
-        int kernelAdvectResourceGrid = computeShaderResourceGrid.FindKernel("CSAdvectResourceGrid");
-        computeShaderResourceGrid.SetBuffer(kernelAdvectResourceGrid, "algaeParticlesRead", algaeParticlesCBuffer);
-        computeShaderResourceGrid.SetFloat("_TextureResolution", 32f); // (float)resolution);
-        computeShaderResourceGrid.SetFloat("_DeltaTime", fluidManagerRef.deltaTime);
-        computeShaderResourceGrid.SetFloat("_InvGridScale", fluidManagerRef.invGridScale);
-        computeShaderResourceGrid.SetFloat("_MapSize", SimulationManager._MapSize);
-        computeShaderResourceGrid.SetFloat("_Time", Time.realtimeSinceStartup);
-        computeShaderResourceGrid.SetTexture(kernelAdvectResourceGrid, "ObstaclesRead", fluidManagerRef._ObstaclesRT);
-        computeShaderResourceGrid.SetTexture(kernelAdvectResourceGrid, "VelocityRead", fluidManagerRef._VelocityA);
-        computeShaderResourceGrid.SetTexture(kernelAdvectResourceGrid, "algaeGridRead", resourceGridRT2);
-        computeShaderResourceGrid.SetTexture(kernelAdvectResourceGrid, "algaeGridWrite", resourceGridRT1);
-        computeShaderResourceGrid.Dispatch(kernelAdvectResourceGrid, 1, 1, 1);
-    }
-    public void GetResourceGridValuesAtMouthPositions(SimulationStateData simStateDataRef) {
-        // Doing it this way to avoid resetting ALL agents whenever ONE is respawned!
-        //ComputeBuffer nutrientSamplesCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 4);
-        
-        int kernelCSGetAlgaeGridSamples = computeShaderResourceGrid.FindKernel("CSGetAlgaeGridSamples");        
-        computeShaderResourceGrid.SetBuffer(kernelCSGetAlgaeGridSamples, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
-        computeShaderResourceGrid.SetBuffer(kernelCSGetAlgaeGridSamples, "algaeGridSamplesCBuffer", resourceGridAgentSamplesCBuffer);
-        computeShaderResourceGrid.SetTexture(kernelCSGetAlgaeGridSamples, "algaeGridRead", resourceGridRT1);
-        computeShaderResourceGrid.SetFloat("_MapSize", SimulationManager._MapSize);
-        computeShaderResourceGrid.Dispatch(kernelCSGetAlgaeGridSamples, resourceGridAgentSamplesCBuffer.count, 1, 1);
-
-        //Vector4[] outArray = new Vector4[_NumAgents];
-        resourceGridAgentSamplesCBuffer.GetData(resourceGridSamplesArray); // Disappearing body strokes due to this !?!?!?!?!?
-
-        //Debug.Log("Food: " + nutrientSamplesArray[0].x.ToString());
-        //nutrientSamplesCBuffer.Release();
-        
-        // Read out sample values::::
-    }
-    /*public float MeasureTotalAlgaeGridAmount() {
-
-        ComputeBuffer outputValuesCBuffer = new ComputeBuffer(1, sizeof(float) * 4);  // holds the result of measurement: total sum of pix colors in texture
-        Vector4[] outputValuesArray = new Vector4[1];
-
-        // 32 --> 16:
-        int kernelCSMeasureTotalAlgae = computeShaderAlgaeGrid.FindKernel("CSMeasureTotalAlgae");   
-        computeShaderAlgaeGrid.SetBuffer(kernelCSMeasureTotalAlgae, "outputValuesCBuffer", outputValuesCBuffer);
-        computeShaderAlgaeGrid.SetTexture(kernelCSMeasureTotalAlgae, "measureValuesTex", algaeGridRT1);
-        computeShaderAlgaeGrid.SetTexture(kernelCSMeasureTotalAlgae, "pooledResultTex", tempTex16);
-        computeShaderAlgaeGrid.Dispatch(kernelCSMeasureTotalAlgae, 16, 16, 1);
-        // 16 --> 8:
-        computeShaderAlgaeGrid.SetBuffer(kernelCSMeasureTotalAlgae, "outputValuesCBuffer", outputValuesCBuffer);
-        computeShaderAlgaeGrid.SetTexture(kernelCSMeasureTotalAlgae, "measureValuesTex", tempTex16);
-        computeShaderAlgaeGrid.SetTexture(kernelCSMeasureTotalAlgae, "pooledResultTex", tempTex8);
-        computeShaderAlgaeGrid.Dispatch(kernelCSMeasureTotalAlgae, 8, 8, 1);
-        // 8 --> 4:
-        computeShaderAlgaeGrid.SetBuffer(kernelCSMeasureTotalAlgae, "outputValuesCBuffer", outputValuesCBuffer);
-        computeShaderAlgaeGrid.SetTexture(kernelCSMeasureTotalAlgae, "measureValuesTex", tempTex8);
-        computeShaderAlgaeGrid.SetTexture(kernelCSMeasureTotalAlgae, "pooledResultTex", tempTex4);
-        computeShaderAlgaeGrid.Dispatch(kernelCSMeasureTotalAlgae, 4, 4, 1);        
-        // 4 --> 2:
-        computeShaderAlgaeGrid.SetBuffer(kernelCSMeasureTotalAlgae, "outputValuesCBuffer", outputValuesCBuffer);
-        computeShaderAlgaeGrid.SetTexture(kernelCSMeasureTotalAlgae, "measureValuesTex", tempTex4);
-        computeShaderAlgaeGrid.SetTexture(kernelCSMeasureTotalAlgae, "pooledResultTex", tempTex2);
-        computeShaderAlgaeGrid.Dispatch(kernelCSMeasureTotalAlgae, 2, 2, 1);
-        // 2 --> 1:
-        computeShaderAlgaeGrid.SetBuffer(kernelCSMeasureTotalAlgae, "outputValuesCBuffer", outputValuesCBuffer);
-        computeShaderAlgaeGrid.SetTexture(kernelCSMeasureTotalAlgae, "measureValuesTex", tempTex2);
-        computeShaderAlgaeGrid.SetTexture(kernelCSMeasureTotalAlgae, "pooledResultTex", tempTex1);
-        computeShaderAlgaeGrid.Dispatch(kernelCSMeasureTotalAlgae, 1, 1, 1);
-        
-        outputValuesCBuffer.GetData(outputValuesArray);
-
-        curGlobalAlgaeGrid = outputValuesArray[0].x;
-
-        outputValuesCBuffer.Release();
-
-        //Debug.Log("TotalNutrients: " + outputValuesArray[0].x.ToString() + ", " + outputValuesArray[0].y.ToString());
-
-        return outputValuesArray[0].x;
-    }*/    
-    public void AddResourcesAtCoords(Vector4 amount, float x, float y) {  // 0-1 normalized map coords
-        
-        ComputeBuffer addAlgaeCBuffer = new ComputeBuffer(1, sizeof(float) * 4);
-        Vector4[] addAlgaeArray = new Vector4[1];
-
-        addAlgaeArray[0] = amount;
-        addAlgaeCBuffer.SetData(addAlgaeArray);
-
-        int kernelCSAddAlgaeAtCoords = computeShaderResourceGrid.FindKernel("CSAddResourcesAtCoords");
-        computeShaderResourceGrid.SetBuffer(kernelCSAddAlgaeAtCoords, "addAlgaeCBuffer", addAlgaeCBuffer);        
-        computeShaderResourceGrid.SetTexture(kernelCSAddAlgaeAtCoords, "algaeGridRead", resourceGridRT1);
-        computeShaderResourceGrid.SetTexture(kernelCSAddAlgaeAtCoords, "algaeGridWrite", resourceGridRT2);
-        computeShaderResourceGrid.SetFloat("_CoordX", x);
-        computeShaderResourceGrid.SetFloat("_CoordY", y);
-        computeShaderResourceGrid.Dispatch(kernelCSAddAlgaeAtCoords, 1, 1, 1);  // one-at-a-time for now, until re-factor (separate location buffers to resourceAmounts) ****
-        
-        Graphics.Blit(resourceGridRT2, resourceGridRT1);
-
-        addAlgaeCBuffer.Release();
-        
-    }
-    public void RemoveEatenAlgaeGrid(int numAgents, SimulationStateData simStateDataRef) {
-        ComputeBuffer eatAmountsCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 4);
-                
-        eatAmountsCBuffer.SetData(resourceGridEatAmountsArray);
-
-        int kernelCSRemoveAlgaeAtLocations = computeShaderResourceGrid.FindKernel("CSRemoveAlgaeAtLocations");
-        computeShaderResourceGrid.SetBuffer(kernelCSRemoveAlgaeAtLocations, "nutrientEatAmountsCBuffer", eatAmountsCBuffer);
-        computeShaderResourceGrid.SetBuffer(kernelCSRemoveAlgaeAtLocations, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
-        computeShaderResourceGrid.SetTexture(kernelCSRemoveAlgaeAtLocations, "algaeGridRead", resourceGridRT1);
-        computeShaderResourceGrid.SetTexture(kernelCSRemoveAlgaeAtLocations, "algaeGridWrite", resourceGridRT2);
-        computeShaderResourceGrid.SetFloat("_MapSize", SimulationManager._MapSize);
-        computeShaderResourceGrid.Dispatch(kernelCSRemoveAlgaeAtLocations, eatAmountsCBuffer.count, 1, 1);
-
-        Graphics.Blit(resourceGridRT2, resourceGridRT1);
-        
-        eatAmountsCBuffer.Release();
-    }
-
-
+    }    
     /*public void ReviveSelectFoodParticles(int[] indicesArray, float radius, Vector4 spawnCoords, SimulationStateData simStateDataRef) {
 
         ComputeBuffer selectRespawnFoodParticleIndicesCBuffer = new ComputeBuffer(indicesArray.Length, sizeof(int));
@@ -708,6 +473,265 @@ public class VegetationManager {
         */
         
     }
+           
+    // RESOURCE GRID:::::
+    public void InitializeResourceGrid(int numAgents, ComputeShader computeShader) {
+
+        computeShaderResourceGrid = computeShader;
+              
+        resourceGridRT1 = new RenderTexture(resourceGridTexResolution, resourceGridTexResolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+        resourceGridRT1.wrapMode = TextureWrapMode.Clamp;
+        resourceGridRT1.filterMode = FilterMode.Bilinear;
+        resourceGridRT1.enableRandomWrite = true;
+        //nutrientMapRT1.useMipMap = true;
+        resourceGridRT1.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***    
+
+        resourceGridRT2 = new RenderTexture(resourceGridTexResolution, resourceGridTexResolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+        resourceGridRT2.wrapMode = TextureWrapMode.Clamp;
+        resourceGridRT2.enableRandomWrite = true;
+        //nutrientMapRT2.useMipMap = true;
+        resourceGridRT2.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***  
+        
+        resourceGridSamplesArray = new Vector4[numAgents];
+        resourceGridEatAmountsArray = new Vector4[numAgents];
+
+        //int kernelCSInitializeResourceGrid = computeShaderResourceGrid.FindKernel("CSInitializeResourceGrid");
+        //computeShaderResourceGrid.SetTexture(kernelCSInitializeResourceGrid, "_ResourceGridWrite", resourceGridRT1);
+        //computeShaderResourceGrid.Dispatch(kernelCSInitializeResourceGrid, resourceGridTexResolution / 32, resourceGridTexResolution / 32, 1);
+        //Graphics.Blit(resourceGridRT1, resourceGridRT2);
+
+        tempTex16 = new RenderTexture(16, 16, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+        tempTex16.wrapMode = TextureWrapMode.Clamp;
+        tempTex16.filterMode = FilterMode.Point;
+        tempTex16.enableRandomWrite = true;
+        tempTex16.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
+
+        tempTex8 = new RenderTexture(8, 8, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+        tempTex8.wrapMode = TextureWrapMode.Clamp;
+        tempTex8.filterMode = FilterMode.Point;
+        tempTex8.enableRandomWrite = true;
+        tempTex8.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
+
+        tempTex4 = new RenderTexture(4, 4, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+        tempTex4.wrapMode = TextureWrapMode.Clamp;
+        tempTex4.filterMode = FilterMode.Point;
+        tempTex4.enableRandomWrite = true;
+        tempTex4.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
+
+        tempTex2 = new RenderTexture(2, 2, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+        tempTex2.wrapMode = TextureWrapMode.Clamp;
+        tempTex2.filterMode = FilterMode.Point;
+        tempTex2.enableRandomWrite = true;
+        tempTex2.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
+
+        tempTex1 = new RenderTexture(1, 1, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+        tempTex1.wrapMode = TextureWrapMode.Clamp;
+        tempTex1.filterMode = FilterMode.Point;
+        tempTex1.enableRandomWrite = true;
+        tempTex1.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
+
+        resourceGridAgentSamplesCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 4);
+
+        
+        // Decomposers and algae grid:
+        rdRT1 = new RenderTexture(rdTextureResolution, rdTextureResolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+        rdRT1.wrapMode = TextureWrapMode.Clamp;
+        rdRT1.filterMode = FilterMode.Bilinear;
+        rdRT1.enableRandomWrite = true;
+        rdRT1.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
+
+        rdRT2 = new RenderTexture(rdTextureResolution, rdTextureResolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+        rdRT2.wrapMode = TextureWrapMode.Clamp;
+        rdRT2.filterMode = FilterMode.Bilinear;
+        rdRT2.enableRandomWrite = true;
+        rdRT2.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
+
+        //theRenderKing.fluidRenderMat.SetTexture("_DebugTex", nutrientMapRT1);
+        
+    }
+    /*public void AdvectResourceGrid(EnvironmentFluidManager fluidManagerRef) {
+        int kernelAdvectResourceGrid = computeShaderResourceGrid.FindKernel("CSAdvectResourceGrid");
+        computeShaderResourceGrid.SetBuffer(kernelAdvectResourceGrid, "algaeParticlesRead", algaeParticlesCBuffer);
+        computeShaderResourceGrid.SetFloat("_TextureResolution", 32f); // (float)resolution);
+        computeShaderResourceGrid.SetFloat("_DeltaTime", fluidManagerRef.deltaTime);
+        computeShaderResourceGrid.SetFloat("_InvGridScale", fluidManagerRef.invGridScale);
+        computeShaderResourceGrid.SetFloat("_MapSize", SimulationManager._MapSize);
+        computeShaderResourceGrid.SetFloat("_Time", Time.realtimeSinceStartup);
+        computeShaderResourceGrid.SetTexture(kernelAdvectResourceGrid, "ObstaclesRead", fluidManagerRef._ObstaclesRT);
+        computeShaderResourceGrid.SetTexture(kernelAdvectResourceGrid, "VelocityRead", fluidManagerRef._VelocityA);
+        computeShaderResourceGrid.SetTexture(kernelAdvectResourceGrid, "_ResourceGridRead", resourceGridRT2);
+        computeShaderResourceGrid.SetTexture(kernelAdvectResourceGrid, "_ResourceGridWrite", resourceGridRT1);
+        computeShaderResourceGrid.Dispatch(kernelAdvectResourceGrid, 1, 1, 1);
+    }
+    */
+    public void GetResourceGridValuesAtMouthPositions(SimulationStateData simStateDataRef) {
+        // Doing it this way to avoid resetting ALL agents whenever ONE is respawned!
+        //ComputeBuffer nutrientSamplesCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 4);
+        
+        int kernelCSGetResourceGridSamples = computeShaderResourceGrid.FindKernel("CSGetResourceGridSamples");        
+        computeShaderResourceGrid.SetBuffer(kernelCSGetResourceGridSamples, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
+        computeShaderResourceGrid.SetBuffer(kernelCSGetResourceGridSamples, "_ResourceGridSamplesCBuffer", resourceGridAgentSamplesCBuffer);
+        computeShaderResourceGrid.SetTexture(kernelCSGetResourceGridSamples, "_ResourceGridRead", resourceGridRT1);
+        computeShaderResourceGrid.SetFloat("_MapSize", SimulationManager._MapSize);
+        computeShaderResourceGrid.Dispatch(kernelCSGetResourceGridSamples, resourceGridAgentSamplesCBuffer.count, 1, 1);
+
+        //Vector4[] outArray = new Vector4[_NumAgents];
+        resourceGridAgentSamplesCBuffer.GetData(resourceGridSamplesArray); // Disappearing body strokes due to this !?!?!?!?!?
+
+        //Debug.Log("Food: " + nutrientSamplesArray[0].x.ToString());
+        //nutrientSamplesCBuffer.Release();
+        
+        // Read out sample values::::
+    }
+    public void ApplyDiffusionOnResourceGrid(EnvironmentFluidManager fluidManagerRef) {
+        int kernelCSUpdateAlgaeGrid = computeShaderResourceGrid.FindKernel("CSUpdateAlgaeGrid");
+        computeShaderResourceGrid.SetFloat("_AlgaeGridDiffusion", settingsRef.nutrientDiffusionRate);
+
+        computeShaderResourceGrid.SetTexture(kernelCSUpdateAlgaeGrid, "ObstaclesRead", fluidManagerRef._ObstaclesRT);
+        computeShaderResourceGrid.SetTexture(kernelCSUpdateAlgaeGrid, "_ResourceGridRead", resourceGridRT1);
+        computeShaderResourceGrid.SetTexture(kernelCSUpdateAlgaeGrid, "_ResourceGridWrite", resourceGridRT2);
+        computeShaderResourceGrid.Dispatch(kernelCSUpdateAlgaeGrid, resourceGridTexResolution / 32, resourceGridTexResolution / 32, 1);
+
+        //Graphics.Blit(resourceGridRT2, resourceGridRT1);
+        
+    }    
+    /*public float MeasureTotalAlgaeGridAmount() {
+
+        ComputeBuffer outputValuesCBuffer = new ComputeBuffer(1, sizeof(float) * 4);  // holds the result of measurement: total sum of pix colors in texture
+        Vector4[] outputValuesArray = new Vector4[1];
+
+        // 32 --> 16:
+        int kernelCSMeasureTotalAlgae = computeShaderAlgaeGrid.FindKernel("CSMeasureTotalAlgae");   
+        computeShaderAlgaeGrid.SetBuffer(kernelCSMeasureTotalAlgae, "outputValuesCBuffer", outputValuesCBuffer);
+        computeShaderAlgaeGrid.SetTexture(kernelCSMeasureTotalAlgae, "measureValuesTex", algaeGridRT1);
+        computeShaderAlgaeGrid.SetTexture(kernelCSMeasureTotalAlgae, "pooledResultTex", tempTex16);
+        computeShaderAlgaeGrid.Dispatch(kernelCSMeasureTotalAlgae, 16, 16, 1);
+        // 16 --> 8:
+        computeShaderAlgaeGrid.SetBuffer(kernelCSMeasureTotalAlgae, "outputValuesCBuffer", outputValuesCBuffer);
+        computeShaderAlgaeGrid.SetTexture(kernelCSMeasureTotalAlgae, "measureValuesTex", tempTex16);
+        computeShaderAlgaeGrid.SetTexture(kernelCSMeasureTotalAlgae, "pooledResultTex", tempTex8);
+        computeShaderAlgaeGrid.Dispatch(kernelCSMeasureTotalAlgae, 8, 8, 1);
+        // 8 --> 4:
+        computeShaderAlgaeGrid.SetBuffer(kernelCSMeasureTotalAlgae, "outputValuesCBuffer", outputValuesCBuffer);
+        computeShaderAlgaeGrid.SetTexture(kernelCSMeasureTotalAlgae, "measureValuesTex", tempTex8);
+        computeShaderAlgaeGrid.SetTexture(kernelCSMeasureTotalAlgae, "pooledResultTex", tempTex4);
+        computeShaderAlgaeGrid.Dispatch(kernelCSMeasureTotalAlgae, 4, 4, 1);        
+        // 4 --> 2:
+        computeShaderAlgaeGrid.SetBuffer(kernelCSMeasureTotalAlgae, "outputValuesCBuffer", outputValuesCBuffer);
+        computeShaderAlgaeGrid.SetTexture(kernelCSMeasureTotalAlgae, "measureValuesTex", tempTex4);
+        computeShaderAlgaeGrid.SetTexture(kernelCSMeasureTotalAlgae, "pooledResultTex", tempTex2);
+        computeShaderAlgaeGrid.Dispatch(kernelCSMeasureTotalAlgae, 2, 2, 1);
+        // 2 --> 1:
+        computeShaderAlgaeGrid.SetBuffer(kernelCSMeasureTotalAlgae, "outputValuesCBuffer", outputValuesCBuffer);
+        computeShaderAlgaeGrid.SetTexture(kernelCSMeasureTotalAlgae, "measureValuesTex", tempTex2);
+        computeShaderAlgaeGrid.SetTexture(kernelCSMeasureTotalAlgae, "pooledResultTex", tempTex1);
+        computeShaderAlgaeGrid.Dispatch(kernelCSMeasureTotalAlgae, 1, 1, 1);
+        
+        outputValuesCBuffer.GetData(outputValuesArray);
+
+        curGlobalAlgaeGrid = outputValuesArray[0].x;
+
+        outputValuesCBuffer.Release();
+
+        //Debug.Log("TotalNutrients: " + outputValuesArray[0].x.ToString() + ", " + outputValuesArray[0].y.ToString());
+
+        return outputValuesArray[0].x;
+    }*/    
+    public void AddResourcesAtCoords(Vector4 amount, float x, float y) {  // 0-1 normalized map coords
+        
+        ComputeBuffer addResourceCBuffer = new ComputeBuffer(1, sizeof(float) * 4);
+        Vector4[] addResourceArray = new Vector4[1];
+
+        addResourceArray[0] = amount;
+        addResourceCBuffer.SetData(addResourceArray);
+
+        int kernelCSAddResourcesAtCoords = computeShaderResourceGrid.FindKernel("CSAddResourcesAtCoords");
+        computeShaderResourceGrid.SetBuffer(kernelCSAddResourcesAtCoords, "_AddResourceCBuffer", addResourceCBuffer);        
+        computeShaderResourceGrid.SetTexture(kernelCSAddResourcesAtCoords, "_ResourceGridRead", resourceGridRT1);
+        computeShaderResourceGrid.SetTexture(kernelCSAddResourcesAtCoords, "_ResourceGridWrite", resourceGridRT2);
+        computeShaderResourceGrid.SetFloat("_CoordX", x);
+        computeShaderResourceGrid.SetFloat("_CoordY", y);
+        computeShaderResourceGrid.Dispatch(kernelCSAddResourcesAtCoords, 1, 1, 1);  // one-at-a-time for now, until re-factor (separate location buffers to resourceAmounts) ****
+        
+        Graphics.Blit(resourceGridRT2, resourceGridRT1);
+
+        addResourceCBuffer.Release();
+        
+    }
+    public void RemoveEatenResourceGrid(int numAgents, SimulationStateData simStateDataRef) { // **** WILL BE MODIFIED!!! *****
+        ComputeBuffer eatAmountsCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 4);
+                
+        eatAmountsCBuffer.SetData(resourceGridEatAmountsArray);
+
+        int kernelCSRemoveAlgaeAtLocations = computeShaderResourceGrid.FindKernel("CSRemoveResourceGridAtLocations");
+        computeShaderResourceGrid.SetBuffer(kernelCSRemoveAlgaeAtLocations, "nutrientEatAmountsCBuffer", eatAmountsCBuffer);
+        computeShaderResourceGrid.SetBuffer(kernelCSRemoveAlgaeAtLocations, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
+        computeShaderResourceGrid.SetTexture(kernelCSRemoveAlgaeAtLocations, "_ResourceGridRead", resourceGridRT1);
+        computeShaderResourceGrid.SetTexture(kernelCSRemoveAlgaeAtLocations, "_ResourceGridWrite", resourceGridRT2);
+        computeShaderResourceGrid.SetFloat("_MapSize", SimulationManager._MapSize);
+        computeShaderResourceGrid.Dispatch(kernelCSRemoveAlgaeAtLocations, eatAmountsCBuffer.count, 1, 1);
+
+        Graphics.Blit(resourceGridRT2, resourceGridRT1);
+        
+        eatAmountsCBuffer.Release();
+    }
+
+    // REACTION DIFFUSION (i.e DECOMPOSERS AND ALGAE GRID) ::::
+    public void InitializeReactionDiffusionGrid() {
+        int kernelCSInitRD = computeShaderResourceGrid.FindKernel("CSInitRD"); 
+        //computeShaderResourceGrid.SetTexture(kernelCSUpdateAlgaeGrid, "rdRead", rdRT1);
+        computeShaderResourceGrid.SetFloat("_TextureResolution", (float)rdTextureResolution);
+        computeShaderResourceGrid.SetTexture(kernelCSInitRD, "rdWrite", rdRT1);
+        computeShaderResourceGrid.SetTexture(kernelCSInitRD, "_ResourceGridWrite", resourceGridRT1);
+        computeShaderResourceGrid.Dispatch(kernelCSInitRD, rdTextureResolution / 32, rdTextureResolution / 32, 1);
+
+    }
+    public void SimReactionDiffusionGrid(ref EnvironmentFluidManager fluidManagerRef, ref BaronVonTerrain baronTerrainRef, ref TheRenderKing theRenderKingRef) {
+        int kernelCSSimRD = computeShaderResourceGrid.FindKernel("CSSimRD"); 
+        computeShaderResourceGrid.SetTexture(kernelCSSimRD, "_AltitudeTex", baronTerrainRef.terrainHeightRT0);        
+        computeShaderResourceGrid.SetFloat("_TextureResolution", (float)rdTextureResolution);
+        computeShaderResourceGrid.SetFloat("_Time", Time.realtimeSinceStartup);
+        computeShaderResourceGrid.SetTexture(kernelCSSimRD, "_ResourceGridRead", resourceGridRT1);
+        computeShaderResourceGrid.SetTexture(kernelCSSimRD, "_ResourceGridWrite", resourceGridRT2);
+        computeShaderResourceGrid.SetTexture(kernelCSSimRD, "rdRead", rdRT1);
+        computeShaderResourceGrid.SetTexture(kernelCSSimRD, "rdWrite", rdRT2);
+        computeShaderResourceGrid.Dispatch(kernelCSSimRD, rdTextureResolution / 32, rdTextureResolution / 32, 1);
+        // write into 2
+        int kernelCSAdvectRD = computeShaderResourceGrid.FindKernel("CSAdvectRD");
+        computeShaderResourceGrid.SetFloat("_TextureResolution", (float)rdTextureResolution);        
+        computeShaderResourceGrid.SetFloat("_Time", Time.realtimeSinceStartup);
+        computeShaderResourceGrid.SetFloat("_DeltaTime", fluidManagerRef.deltaTime);
+        computeShaderResourceGrid.SetFloat("_InvGridScale", fluidManagerRef.invGridScale);
+        computeShaderResourceGrid.SetFloat("_MapSize", SimulationManager._MapSize);
+        float brushOn = 0f;
+        if(isBrushActive) {  // Set from uiManager
+            brushOn = 1f;
+        }
+        computeShaderResourceGrid.SetFloat("_SpiritBrushIntensity", 0.1f); // *** INVESTIGATE THIS -- not used/needed?
+        computeShaderResourceGrid.SetFloat("_IsSpiritBrushOn", brushOn);
+        computeShaderResourceGrid.SetFloat("_SpiritBrushPosNeg", theRenderKingRef.spiritBrushPosNeg);
+        //computeShaderResourceGrid.SetFloat("_RD_FeedRate", theRenderKingRef.simManager.vegetationManager.decomposerSlotGenomeCurrent.feedRate);
+        //computeShaderResourceGrid.SetFloat("_RD_KillRate", theRenderKingRef.simManager.vegetationManager.decomposerSlotGenomeCurrent.killRate);            
+        //computeShaderResourceGrid.SetFloat("_RD_Scale", theRenderKingRef.simManager.vegetationManager.decomposerSlotGenomeCurrent.scale);
+        //computeShaderResourceGrid.SetFloat("_RD_Rate", theRenderKingRef.simManager.vegetationManager.decomposerSlotGenomeCurrent.reactionRate);
+        computeShaderResourceGrid.SetFloat("_AlgaeUpkeep", 0.001f * 0.1f);
+        computeShaderResourceGrid.SetFloat("_AlgaeMaxIntakeRate", 0.0025f * 0.1f);
+        computeShaderResourceGrid.SetFloat("_AlgaeGrowthEfficiency", 1.0f);
+        computeShaderResourceGrid.SetFloat("_DecomposerUpkeep", 0.001f * 0.1f);
+        computeShaderResourceGrid.SetFloat("_DecomposerMaxIntakeRate", 0.0025f * 0.1f);
+        computeShaderResourceGrid.SetFloat("_DecomposerEnergyGenerationEfficiency", 1.0f); 
+        computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "VelocityRead", fluidManagerRef._VelocityA);
+        computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "rdRead", rdRT2);
+        computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "rdWrite", rdRT1);
+        computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "_ResourceGridRead", resourceGridRT2);
+        computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "_ResourceGridWrite", resourceGridRT1);
+        computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "_SpiritBrushTex", theRenderKingRef.spiritBrushRT);
+        computeShaderResourceGrid.Dispatch(kernelCSAdvectRD, rdTextureResolution / 32, rdTextureResolution / 32, 1);
+        //back into 1
+    }
+
+    
+
     
     public void ClearBuffers() {
 

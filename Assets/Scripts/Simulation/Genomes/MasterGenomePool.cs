@@ -85,15 +85,17 @@ public class MasterGenomePool {
             
 
             SpeciesGenomePool sourceSpeciesPool = completeSpeciesPoolsList[speciesIndex];
-            AgentGenome mutatedGenome = sourceSpeciesPool.Mutate(sourceSpeciesPool.representativeGenome, true, true);    
+            AgentGenome mutatedGenome = sourceSpeciesPool.Mutate(sourceSpeciesPool.representativeGenome, true, true);
+            vertebrateSlotsGenomesMutationsArray[slotID][mutationID].SetRepresentativeGenome(mutatedGenome);
            // old:
             //vertebrateSlotsGenomesMutationsArray[slotID][mutationID].representativeGenome = vertebrateSlotsGenomesCurrentArray[slotID].representativeGenome;
-            vertebrateSlotsGenomesMutationsArray[slotID][mutationID].representativeGenome = mutatedGenome;
-        // -- Select a ParentGenome from the leaderboardList and create a mutated copy (childGenome):
-        //AgentGenome newGenome = sourceSpeciesPool.GetNewMutatedGenome();
-        //AgentGenome newGenome = sourceSpeciesPool.GetGenomeFromFitnessLottery();
-        //newGenome = sourceSpeciesPool.Mutate(newGenome, true, true);
-
+            //vertebrateSlotsGenomesMutationsArray[slotID][mutationID].representativeGenome = mutatedGenome;
+           
+            // -- Select a ParentGenome from the leaderboardList and create a mutated copy (childGenome):
+            //AgentGenome newGenome = sourceSpeciesPool.GetNewMutatedGenome();
+            //AgentGenome newGenome = sourceSpeciesPool.GetGenomeFromFitnessLottery();
+            //newGenome = sourceSpeciesPool.Mutate(newGenome, true, true);
+            
 
             vertebrateSlotsGenomesMutationsArray[slotID][mutationID].name = vertebrateSlotsGenomesCurrentArray[slotID].name;
             vertebrateSlotsGenomesMutationsArray[slotID][mutationID].textDescriptionMutation = "Mutation Amt: " + (mutationSize * 100f).ToString("F1") + "%";

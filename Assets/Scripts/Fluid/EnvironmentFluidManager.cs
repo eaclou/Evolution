@@ -425,7 +425,8 @@ public class EnvironmentFluidManager : MonoBehaviour {
         computeShaderFluidSim.SetTexture(kernelRefreshColor, "colorInjectionRenderTex", sourceColorRT);
         computeShaderFluidSim.SetTexture(kernelRefreshColor, "DensityRead", densityB);
         computeShaderFluidSim.SetTexture(kernelRefreshColor, "DensityWrite", densityA);
-        computeShaderFluidSim.SetTexture(kernelRefreshColor, "nutrientMapRead", vegetationManagerRef.rdRT1); 
+        computeShaderFluidSim.SetTexture(kernelRefreshColor, "_AlgaeDecomposerMapRead", vegetationManagerRef.rdRT1); 
+        computeShaderFluidSim.SetTexture(kernelRefreshColor, "_NutrientGridRead", vegetationManagerRef.resourceGridRT1); 
         computeShaderFluidSim.Dispatch(kernelRefreshColor, resolution / 16, resolution / 16, 1);
 
         

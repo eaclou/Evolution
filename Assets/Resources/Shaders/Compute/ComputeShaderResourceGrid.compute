@@ -1,10 +1,11 @@
-﻿#pragma kernel CSGetAlgaeGridSamples
-#pragma kernel CSUpdateAlgaeGrid
+﻿#pragma kernel CSGetResourceGridSamples
+#pragma kernel CSSimResourceGrid
 #pragma kernel CSAdvectResourceGrid
-#pragma kernel CSInitializeAlgaeGrid
-#pragma kernel CSRemoveAlgaeAtLocations
-#pragma kernel CSMeasureTotalAlgae
+//#pragma kernel CSInitializeResourceGrid
+#pragma kernel CSRemoveResourceGridAtLocations
+#pragma kernel CSMeasureTotalResourceGrid
 #pragma kernel CSAddResourcesAtCoords
+
 #pragma kernel CSInitRD
 #pragma kernel CSSimRD
 #pragma kernel CSAdvectRD
@@ -20,8 +21,9 @@ Texture2D<float4> ObstaclesRead;
 
 StructuredBuffer<AlgaeParticleData> algaeParticlesRead;
 
-RWStructuredBuffer<float4> algaeGridSamplesCBuffer;
-StructuredBuffer<float4> algaeGridEatAmountsCBuffer;
+RWStructuredBuffer<float4> _ResourceGridSamplesCBuffer;
+StructuredBuffer<float4> _ResourceGridEatAmountsCBuffer;
+StructuredBuffer<float4> _AddResourceCBuffer;
 
 Texture2D<float4> VelocityRead;
 
@@ -29,14 +31,14 @@ Texture2D<float4> _AltitudeTex;
 
 Texture2D<float4> _SpiritBrushTex;
 
-Texture2D<float4> algaeGridRead;
-RWTexture2D<float4> algaeGridWrite;
+Texture2D<float4> _ResourceGridRead;
+RWTexture2D<float4> _ResourceGridWrite;
 
 Texture2D<float4> rdRead;
 RWTexture2D<float4> rdWrite;
 
 RWStructuredBuffer<float4> outputValuesCBuffer;
-StructuredBuffer<float4> addAlgaeCBuffer;
+
 Texture2D<float4> measureValuesTex;
 RWTexture2D<float4> pooledResultTex;
 
@@ -63,33 +65,40 @@ uniform float _RD_KillRate;
 uniform float _RD_Scale;
 uniform float _RD_Rate;
 
+uniform float _AlgaeUpkeep; // = 0.001;
+uniform	float _AlgaeMaxIntakeRate; // = 0.0025;
+uniform float _AlgaeGrowthEfficiency; // = 1.0;
+uniform float _DecomposerUpkeep; // = 0.001;
+uniform float _DecomposerMaxIntakeRate; // = 0.0025;
+uniform float _DecomposerEnergyGenerationEfficiency; // = 1.0;
+
 uniform float _Time;
 
 [numthreads(1,1,1)]
-void CSGetAlgaeGridSamples (uint3 id : SV_DispatchThreadID)
+void CSGetResourceGridSamples (uint3 id : SV_DispatchThreadID)
 {	
 	CritterSimData critterSimData = critterSimDataCBuffer[id.x];
 
 	float2 uv = critterSimData.worldPos.xy / _MapSize;
-	float4 algaeGridAmount = algaeGridRead.SampleLevel(_PointClamp, uv, 0);
+	float4 algaeGridAmount = _ResourceGridRead.SampleLevel(_PointClamp, uv, 0);
 
 	// want gradient! -- pack into .yz channels :::
 	// calculate gradient each step and store value
 
-	algaeGridSamplesCBuffer[id.x] = algaeGridAmount;
+	_ResourceGridSamplesCBuffer[id.x] = algaeGridAmount;
 }
 
 [numthreads(32,32,1)]
-void CSUpdateAlgaeGrid (uint3 id : SV_DispatchThreadID)
+void CSSimResourceGrid (uint3 id : SV_DispatchThreadID)
 {	
 	// Diffusion - food blurs and spreads out
 	// Store Gradient of increasing food density
 			
-    float4 amountRight = algaeGridRead[int2(id.x + 1, id.y)];
-    float4 amountLeft = algaeGridRead[int2(id.x - 1, id.y)];
-    float4 amountUp = algaeGridRead[int2(id.x, id.y + 1)];
-    float4 amountDown = algaeGridRead[int2(id.x, id.y - 1)];
-    float4 amountCenter = algaeGridRead[id.xy];
+    float4 amountRight = _ResourceGridRead[int2(id.x + 1, id.y)];
+    float4 amountLeft = _ResourceGridRead[int2(id.x - 1, id.y)];
+    float4 amountUp = _ResourceGridRead[int2(id.x, id.y + 1)];
+    float4 amountDown = _ResourceGridRead[int2(id.x, id.y - 1)];
+    float4 amountCenter = _ResourceGridRead[id.xy];
 
 	// Check vs obstacles??
 	float xCoord = ((float)id.x + 0.5)  / 32;  // ** Bad hardcoded!!!!!
@@ -124,7 +133,7 @@ void CSUpdateAlgaeGrid (uint3 id : SV_DispatchThreadID)
 	
 	float4 newAmount = lerp(amountCenter, (amountCenter + amountRight + amountLeft + amountUp + amountDown) / 5, _AlgaeGridDiffusion);
 
-	algaeGridWrite[id.xy] = newAmount; //float4(newAmount, grad, 1.0);
+	_ResourceGridWrite[id.xy] = newAmount; //float4(newAmount, grad, 1.0);
 }
 
 [numthreads(32,32,1)]
@@ -137,7 +146,7 @@ void CSAdvectResourceGrid (uint3 id : SV_DispatchThreadID)
 
 	float isSolid = ObstaclesRead.SampleLevel(_LinearClamp, uvOrigin, 0).b;	
 	float2 uvSample = uvOrigin - _DeltaTime * _InvGridScale * VelocityRead.SampleLevel(_LinearRepeat, uvOrigin, 0).xy;
-	float4 newDensity = algaeGridRead.SampleLevel(_LinearRepeat, uvSample, 0);
+	float4 newDensity = _ResourceGridRead.SampleLevel(_LinearRepeat, uvSample, 0);
 	
 	AlgaeParticleData particleData = algaeParticlesRead[(id.x * 32 + id.y + round(_Time * 75.4837)) % 1024];
 	float2 particleCoords = particleData.worldPos / _MapSize;
@@ -147,22 +156,25 @@ void CSAdvectResourceGrid (uint3 id : SV_DispatchThreadID)
 	newDensity.y += saturate(particleData.biomass * 6) / 46 * distMask - 0.0006;
 
 	/*if(isSolid > 0.5) {
-		algaeGridWrite[id.xy] = 0; //newDensity;
+		_ResourceGridWrite[id.xy] = 0; //newDensity;
 
 		return;
 	}*/
 			
-	algaeGridWrite[id.xy] = saturate(newDensity);
+	_ResourceGridWrite[id.xy] = saturate(newDensity);
 }
-
+/*
 [numthreads(32,32,1)]
-void CSInitializeAlgaeGrid (uint3 id : SV_DispatchThreadID)
+void CSInitializeResourceGrid (uint3 id : SV_DispatchThreadID)
 {	
-	algaeGridWrite[id.xy] = float4(0,0,0,0); // float4(saturate(sin((float2)id.xy / 2)) * 0.25, 0.11, 0.3);  // x= nutrients, y= algae, z= decomposers, w= detritus
+	// CHANNEL X = Nutrients
+	// CHANNEL Y = Detritus
+	// CHANNEL Z = Oxygen?
+	_ResourceGridWrite[id.xy] = float4(saturate(sin((float2)id.xy * 3.57912)),0,0); // float4(saturate(sin((float2)id.xy / 2)) * 0.25, 0.11, 0.3);  
 }
-
+*/
 [numthreads(1,1,1)]
-void CSRemoveAlgaeAtLocations (uint3 id : SV_DispatchThreadID)
+void CSRemoveResourceGridAtLocations (uint3 id : SV_DispatchThreadID)
 {	
 	// takes a list of info:
 	// --cell index x,y
@@ -174,18 +186,18 @@ void CSRemoveAlgaeAtLocations (uint3 id : SV_DispatchThreadID)
 
 	uint2 cellIndex = uint2(xIndex, yIndex);
 
-	float4 currentAmount = algaeGridRead[cellIndex];
-	float amountToRemove = algaeGridEatAmountsCBuffer[id.x].x;
+	float4 currentAmount = _ResourceGridRead[cellIndex];
+	float amountToRemove = _ResourceGridEatAmountsCBuffer[id.x].x;
 
 	currentAmount.x = max(0.0, currentAmount.x - amountToRemove);
 
-	algaeGridWrite[cellIndex] = currentAmount;
+	_ResourceGridWrite[cellIndex] = currentAmount;
 
 	// WHY SO SLOW????
 }
 
 [numthreads(1,1,1)]
-void CSMeasureTotalAlgae (uint3 id : SV_DispatchThreadID)
+void CSMeasureTotalResourceGrid (uint3 id : SV_DispatchThreadID)
 {	
 	// for each output pixel, loop through original 2x2 pixels and sum them together
 
@@ -210,44 +222,210 @@ void CSMeasureTotalAlgae (uint3 id : SV_DispatchThreadID)
 [numthreads(1,1,1)]
 void CSAddResourcesAtCoords (uint3 id : SV_DispatchThreadID)
 {	
-	float4 data = addAlgaeCBuffer[id.x];
+	float4 data = _AddResourceCBuffer[id.x];
 	
 	int xIndex = floor(_CoordX * 32.0);  // *** hardcoded resolution!!!!
 	int yIndex = floor(_CoordY * 32.0);
 	int2 index = int2(xIndex, yIndex);
 
-	float4 currentAlgaeGrid = algaeGridRead[index];
+	float4 currentAlgaeGrid = _ResourceGridRead[index];
 
 	currentAlgaeGrid += data;
 
-	algaeGridWrite[index] = saturate(currentAlgaeGrid);
+	_ResourceGridWrite[index] = saturate(currentAlgaeGrid);
 }
 
 
 [numthreads(32,32,1)]
 void CSInitRD (uint3 id : SV_DispatchThreadID)
 {	
+	// CHANNEL X = none
+	// CHANNEL Y = Decomposers
+	// CHANNEL Z = AlgaeGrid
+	float2 uv = ((float2)id.xy + 0.5) / _TextureResolution;
 	rdWrite[id.xy] = float4(0, 0, 0, 1);   // Start blank
 	
-	/*
-	float2 uv = ((float2)id.xy + 0.5) / _TextureResolution;
+	// CHANNEL X = Nutrients
+	// CHANNEL Y = Detritus
+	// CHANNEL Z = Oxygen?
+	_ResourceGridWrite[id.xy] = float4(saturate(sin(uv.x * float2(28.57912, 19.287)) - 0.26),0,0); 
 
-	float dist = 1.0 - saturate(length((uv * 1.17 % 1) - 0.5) * 33);
-	float val = dist;
-	rdWrite[id.xy] = float4(1 - val, val, 0, 1);
-	*/
 }
 
 [numthreads(32,32,1)]
 void CSSimRD (uint3 id : SV_DispatchThreadID)
-{	
+{
+	//float SPEED = 7.5;
 	float s = 1 / _TextureResolution;
+	float2 uv = float2((float2)id.xy + 0.5) / _TextureResolution;
+
+	float4 cc = rdRead.SampleLevel(_PointClamp, uv + float2( 0,  0), 0);	// F[x,   y  ]: Centre Centre
+	
+	float4 rdRead = cc;
+	// Resource Grid:  Nutrients + Detritus
+	float4 amountRight = _ResourceGridRead[int2(id.x + 1, id.y)];
+    float4 amountLeft = _ResourceGridRead[int2(id.x - 1, id.y)];
+    float4 amountUp = _ResourceGridRead[int2(id.x, id.y + 1)];
+    float4 amountDown = _ResourceGridRead[int2(id.x, id.y - 1)];
+    float4 amountCenter = _ResourceGridRead[id.xy];
+	float diffusionAmount = 0.01;
+	float4 resourceGridRead = lerp(amountCenter, (amountCenter + amountRight + amountLeft + amountUp + amountDown) / 5, diffusionAmount);
+	//_ResourceGridRead.SampleLevel(_LinearClamp, uv, 0);	
+	
+	
+	// =============================== NUTRIENTS ================================
+	float nutrientsMass = resourceGridRead.x;
+	
+	
+	// =============================== DETRITUS ================================
+	float detritusMass = resourceGridRead.y;
+
+	
+	// =============================== ALGAE ================================
+	float algaeMass = cc.z;
+
+	//float algaeUpkeep = 0.001;
+	//float algaeMaxIntakeRate = 0.0025;
+
+	float availableNutrientsMass = min(_AlgaeMaxIntakeRate * algaeMass, nutrientsMass);
+	//float algaeGrowthEfficiency = 1.0;
+
+	float energyCost = algaeMass * _AlgaeUpkeep;
+	float energyCreated = availableNutrientsMass * _AlgaeGrowthEfficiency;
+	float nutrientsUsed = availableNutrientsMass;
+	
+	float netEnergy = energyCreated - energyCost;
+
+	float algaeDecayMass = saturate(netEnergy * -1.0);
+	float detritusCreated = algaeDecayMass;
+
+	float algaeGrowthMass = netEnergy;
+	
+	// =============================== DECOMPOSERS ================================
+	float decomposersMass = cc.y;
+
+	//float decomposerUpkeep = 0.001 * SPEED;
+	//float decomposerMaxIntakeRate = 0.0025 * SPEED;
+	float availableDetritusMass = min(_DecomposerMaxIntakeRate * decomposersMass, detritusMass);
+	//float decomposerEnergyGenerationEfficiency = 1.0;
+
+	float decomposerEnergyCost = decomposersMass * _DecomposerUpkeep;
+	float decomposerEnergyCreated = availableDetritusMass * _DecomposerEnergyGenerationEfficiency;
+	float detritusUsed = availableDetritusMass;
+	
+	float nutrientsCreated = decomposerEnergyCreated;
+	float decomposerNetEnergy = decomposerEnergyCreated - decomposerEnergyCost;
+	float decomposerDecayMass = saturate(decomposerNetEnergy * -1.0);
+	float decomposerGrowthMass = decomposerNetEnergy;
+	detritusCreated += decomposerDecayMass;
+	
+	
+	
+	// ======================= WRITE & RETURN! ====================================
+	rdRead.z += algaeGrowthMass;  // saturated later to prevent negative
+	rdRead.y += decomposerGrowthMass;  // saturated later to prevent negative
+	resourceGridRead.x -= nutrientsUsed; 
+	resourceGridRead.x += nutrientsCreated;
+	resourceGridRead.y -= detritusUsed;
+	resourceGridRead.y += detritusCreated * 1.5;
+	
+	_ResourceGridWrite[id.xy] = saturate(resourceGridRead);
+	rdWrite[id.xy] = saturate(rdRead);
+
+
+	
+
+	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	//========== RESOURCE GRID OLD:  (Features Diffusion code)
+	/*
+
+	void CSSimResourceGrid (uint3 id : SV_DispatchThreadID)
+{	
+	// Diffusion - food blurs and spreads out
+	// Store Gradient of increasing food density
+			
+    float4 amountRight = _ResourceGridRead[int2(id.x + 1, id.y)];
+    float4 amountLeft = _ResourceGridRead[int2(id.x - 1, id.y)];
+    float4 amountUp = _ResourceGridRead[int2(id.x, id.y + 1)];
+    float4 amountDown = _ResourceGridRead[int2(id.x, id.y - 1)];
+    float4 amountCenter = _ResourceGridRead[id.xy];
+
+	// Check vs obstacles??
+	float xCoord = ((float)id.x + 0.5)  / 32;  // ** Bad hardcoded!!!!!
+	float yCoord = ((float)id.y + 0.5)  / 32;
+	float2 uvOrigin = float2(xCoord, yCoord);
+	float ps = 1.0 / 32;
+	
+	half4 centerObstacle = ObstaclesRead.SampleLevel(_LinearClamp, uvOrigin, 0);
+
+	half4 leftObstacle = ObstaclesRead.SampleLevel(_LinearClamp, uvOrigin + half2(-ps, 0), 0);
+	half4 rightObstacle = ObstaclesRead.SampleLevel(_LinearClamp, uvOrigin + half2(ps, 0), 0);
+	half4 topObstacle = ObstaclesRead.SampleLevel(_LinearClamp, uvOrigin + half2(0, ps), 0);
+	half4 bottomObstacle = ObstaclesRead.SampleLevel(_LinearClamp, uvOrigin + half2(0, -ps), 0);	
+		
+	if(centerObstacle.b > 0.5) amountCenter = 0.0;
+	if(leftObstacle.b > 0.5) amountLeft = amountCenter;
+	if(rightObstacle.b > 0.5) amountRight = amountCenter;
+	if(topObstacle.b > 0.5) amountUp = amountCenter;
+	if(bottomObstacle.b > 0.5) amountDown = amountCenter;
+	
+	float4 newAmount = lerp(amountCenter, (amountCenter + amountRight + amountLeft + amountUp + amountDown) / 5, _AlgaeGridDiffusion);
+
+	_ResourceGridWrite[id.xy] = newAmount; //float4(newAmount, grad, 1.0);
+}
+
+
+	*/
+}
+
+// DIFFUSION & ADVECTION NEED TO BE IN SEPARATE PASSES:
+
+[numthreads(32,32,1)]
+void CSAdvectRD (uint3 id : SV_DispatchThreadID)
+{
+
+	float xCoord = ((float)id.x + 0.5)  / _TextureResolution;
+	float yCoord = ((float)id.y + 0.5)  / _TextureResolution;
+	float2 uvOrigin = float2(xCoord, yCoord);
+
+	
+	
+	float2 uvSample = uvOrigin - _DeltaTime * _InvGridScale * VelocityRead.SampleLevel(_LinearClamp, uvOrigin, 0).xy * 0.45;
+	float4 newDensityStatic = rdRead.SampleLevel(_LinearClamp, uvOrigin, 0);
+	float4 newDensity = rdRead.SampleLevel(_LinearClamp, uvSample, 0);
+	
+	float4 resourceGridReadStatic = _ResourceGridRead.SampleLevel(_LinearClamp, uvOrigin, 0);	
+	float4 resourceGridRead = _ResourceGridRead.SampleLevel(_LinearClamp, uvSample, 0);	
+	resourceGridRead.y = resourceGridReadStatic.y;  //  Detritus doesn't move in water?? experiemntal....
+
+	// Handle SpiritBrush Here????
+	float4 spiritBrushSample = _SpiritBrushTex.SampleLevel(_LinearClamp, uvOrigin, 0);
+
+	float brushMagnitude = _SpiritBrushIntensity;
+	float deltaBrush = _IsSpiritBrushOn * _SpiritBrushPosNeg * spiritBrushSample.x;
+	newDensity.yz = saturate(newDensity.yz + deltaBrush * brushMagnitude);  // *** TEMPORARY!!! **** Decomposers removed from brushing
+	//newDensity.y = newDensityStatic.y;  // static decomposers
+	rdWrite[id.xy] = newDensity;	
+	
+	_ResourceGridWrite[id.xy] = resourceGridRead;
+
+	
+	
+	
+}
+
+
+//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+//   OLD! REACTION DIFFUSION CoDE
+/*
+float s = 1 / _TextureResolution;
 	
 
 	float2 uv = float2((float2)id.xy + 0.5) / _TextureResolution;
 
 	// Neighbour cells
-	//algaeGridRead.SampleLevel(_LinearRepeat, uvSample, 0);
+	float4 resourceGridRead = _ResourceGridRead.SampleLevel(_LinearClamp, uv, 0);
+
 	float4 bl = rdRead.SampleLevel(_PointClamp, uv + float2(-s, +s), 0);	// F[x-1, y+1]: Bottom Left
 	float4 cl = rdRead.SampleLevel(_PointClamp, uv + float2(-s,  0), 0);	// F[x-1, y  ]: Centre Left
 	float4 tl = rdRead.SampleLevel(_PointClamp, uv + float2(-s, -s), 0); // F[x-1, y-1]: Top Left
@@ -280,9 +458,6 @@ void CSSimRD (uint3 id : SV_DispatchThreadID)
 	float diffusionRateA = 1 * scale;
 	float diffusionRateB = 0.33 * scale;
 
-	//float diffusionRateA = lerp(0.9, 1, frac(uv.x * 3.331 + _Time * 10));
-    //float diffusionRateB = lerp(0.26, 0.33, frac(uv.y * 2.0457 + _Time * 14.23));
-
 	diffusionRateA *= altitudeMask * 0.25 + 0.75;
 	diffusionRateB *= altitudeMask * 0.25 + 0.75;
 		
@@ -305,30 +480,17 @@ void CSSimRD (uint3 id : SV_DispatchThreadID)
 	
 	valB -= altitudeMask;
 
-	float4 col = float4(saturate(valA), saturate(valB), 0, 1); 
 	
+	// ***** ALGAE TEST: CHANNEL Z primary
+	// original value:
+	float curAlgaeVal = cc.z + resourceGridRead.x * 0.001 - resourceGridRead.y * 0.001;
+	
+	
+	float4 col = float4(saturate(valA), saturate(valB), saturate(curAlgaeVal), 0); 
+	
+
 	rdWrite[id.xy] = col;
 	
-}
 
-[numthreads(32,32,1)]
-void CSAdvectRD (uint3 id : SV_DispatchThreadID)
-{
 
-	float xCoord = ((float)id.x + 0.5)  / _TextureResolution;
-	float yCoord = ((float)id.y + 0.5)  / _TextureResolution;
-	float2 uvOrigin = float2(xCoord, yCoord);
-
-	float2 uvSample = uvOrigin - _DeltaTime * _InvGridScale * VelocityRead.SampleLevel(_LinearClamp, uvOrigin, 0).xy * 0.75;
-	float4 newDensity = rdRead.SampleLevel(_LinearClamp, uvSample, 0);
-
-	// Handle SpiritBrush Here????
-	float4 spiritBrushSample = _SpiritBrushTex.SampleLevel(_LinearClamp, uvSample, 0);
-
-	float brushMagnitude = _SpiritBrushIntensity;
-	float deltaBrush = _IsSpiritBrushOn * _SpiritBrushPosNeg * spiritBrushSample.x;
-	newDensity.y = saturate(newDensity.y + deltaBrush * brushMagnitude);  // *** TEMPORARY!!! **** Decomposers removed from brushing
-			
-	rdWrite[id.xy] = newDensity;
-	
-}
+*/

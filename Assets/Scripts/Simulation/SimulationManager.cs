@@ -397,7 +397,7 @@ public class SimulationManager : MonoBehaviour {
         vegetationManager.InitializeAlgaeParticles(numAgents, computeShaderFoodParticles);
     }    
     private void LoadingInitializeResourceGrid() {        
-        vegetationManager.InitializeAlgaeGrid(numAgents, computeShaderResourceGrid); 
+        vegetationManager.InitializeResourceGrid(numAgents, computeShaderResourceGrid); 
         vegetationManager.InitializeReactionDiffusionGrid();
     }
     private void LoadingInitializeAnimalParticles() {
