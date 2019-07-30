@@ -157,7 +157,7 @@ uniform const float _VelConversionConst = 0.033;
 uniform float4 _PlayerPos;
 
 uniform float4 _AlgaeColor;
-uniform float4 _DecomposersColor;
+uniform float4 _NutrientsColor;
 
 float rand(float2 co){   // OUTPUT is in [0,1] RANGE!!!
 	return frac(sin(dot(co.xy ,float2(12.9898,78.233))) * 43758.5453);
@@ -443,7 +443,7 @@ void RefreshColor (uint3 id : SV_DispatchThreadID)
 	float yCoord = ((float)id.y + 0.5)  / _TextureResolution;
 	float2 uvOrigin = float2(xCoord, yCoord);
 
-	float diffusionAmount = 0.015;
+	float diffusionAmount = 0.1;
 	// Diffusion
 	float4 amountRight = DensityRead[int2(id.x + 1, id.y)];
     float4 amountLeft = DensityRead[int2(id.x - 1, id.y)];
@@ -452,7 +452,7 @@ void RefreshColor (uint3 id : SV_DispatchThreadID)
     float4 amountCenter = DensityRead[id.xy];
 	float4 currentColor = lerp(amountCenter, (amountCenter + amountRight + amountLeft + amountUp + amountDown) / 5, diffusionAmount);
 
-	float4 reactionDiffusionSample = _AlgaeDecomposerMapRead.SampleLevel(_LinearClamp, uvOrigin, 0);
+	//float4 reactionDiffusionSample = _AlgaeDecomposerMapRead.SampleLevel(_LinearClamp, uvOrigin, 0);
 	float4 nutrientGridSample = _NutrientGridRead.SampleLevel(_LinearClamp, uvOrigin, 0);
 	
 	float4 sourceColorDynamic = colorInjectionRenderTex.SampleLevel(_LinearRepeat, uvOrigin, 0);
@@ -461,16 +461,13 @@ void RefreshColor (uint3 id : SV_DispatchThreadID)
 	newColor.rgb = lerp(newColor.rgb, sourceColorDynamic.rgb, stampAlpha); //saturate(_ColorRefreshDynamicMultiplier * sourceColorDynamic.a));
 	newColor.a = lerp(newColor.a, 1, stampAlpha);
 	
-	newColor.a = saturate(reactionDiffusionSample.z * 1 + reactionDiffusionSample.y); // saturate(reactionDiffusionSample.y * 1 + reactionDiffusionSample.z + nutrientGridSample.x + nutrientGridSample.y);
-	float3 decomposersHue = _DecomposersColor.rgb;
-	//float3 nutrientsHue = float3(1, 1, 0.0);
-	//float3 detritusHue = float3(0.6, 0.1, 0.9);
+	newColor.a = saturate(nutrientGridSample.w * 2.5 + nutrientGridSample.x * 2.5);
+
+	float3 nutrientsHue = _NutrientsColor.rgb * 2.5;
 	float3 algaeHue = _AlgaeColor.rgb;
-	newColor.rgb = lerp(newColor.rgb, decomposersHue, reactionDiffusionSample.y);
-	newColor.rgb = lerp(newColor.rgb, algaeHue, saturate(reactionDiffusionSample.z * 1));
-	//newColor.rgb = lerp(newColor.rgb, nutrientsHue, nutrientGridSample.x);
-	//newColor.rgb = lerp(newColor.rgb, detritusHue, nutrientGridSample.y);
-	newColor.a *= newColor.a;
+	newColor.rgb = lerp(newColor.rgb, nutrientsHue, nutrientGridSample.x * 2.5);
+	newColor.rgb = lerp(newColor.rgb, algaeHue, saturate(nutrientGridSample.w * 2.5));
+	//newColor.a *= newColor.a;
 	
 	
 	DensityWrite[id.xy] = saturate(newColor); //float4(newColor, 1); //lerp(currentColor, sourceColorDynamic, _ColorRefreshAmount);

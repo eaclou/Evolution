@@ -10,7 +10,7 @@ public class VegetationManager {
     private ComputeShader computeShaderResourceGrid;
     private ComputeShader computeShaderAlgaeParticles;
 
-    //public float curGlobalAlgaeGrid = 0f;  // not using this currently
+    public Vector4 curGlobalNutrientGridValues;  // not using this currently
     
     public int resourceGridTexResolution = 128; 
     public RenderTexture resourceGridRT1;
@@ -29,7 +29,7 @@ public class VegetationManager {
     public WorldLayerAlgaeGenome[] algaeSlotGenomeMutations;
     
 
-    private RenderTexture tempTex16;
+    private RenderTexture tempTex32;
     private RenderTexture tempTex8;  // <-- remove these and make function compress 4x
     private RenderTexture tempTex4;
     private RenderTexture tempTex2;  // <-- remove these and make function compress 4x
@@ -56,8 +56,10 @@ public class VegetationManager {
 
     public bool isBrushActive = false;
 
+    public float tempSharedIntakeRate = 0.0021f;
     //public Vector2 algaeOriginPos;
     //public float algaeOnLerp01;
+    //public float cur
 
     //private AlgaeParticleData representativeAlgaeLayerGenome;
         
@@ -110,16 +112,16 @@ public class VegetationManager {
         //algaeSlotGenomeCurrent.algaeRepData = algaeParticlesArray[0];
         algaeSlotGenomeCurrent.displayColor = UnityEngine.Random.ColorHSV();
         algaeSlotGenomeCurrent.displayColor.a = 1f;
-        algaeSlotGenomeCurrent.name = "Algae Particles!";        
-            
-        float minAlgaeMaxIntakeRate = 0.0005f;
-        float maxAlgaeMaxIntakeRate = 0.005f;
+        algaeSlotGenomeCurrent.name = "Algae Particles!";
+
+        float minAlgaeMaxIntakeRate = tempSharedIntakeRate * 0.8f;
+        float maxAlgaeMaxIntakeRate = tempSharedIntakeRate * 1.25f;
         algaeSlotGenomeCurrent.algaeIntakeRate = Mathf.Lerp(minAlgaeMaxIntakeRate, maxAlgaeMaxIntakeRate, UnityEngine.Random.Range(0f, 1f));
+
+        algaeSlotGenomeCurrent.algaeUpkeep = algaeSlotGenomeCurrent.algaeIntakeRate * 0.45f; // * (UnityEngine.Random.Range(0f, 1f) * 0.05f + 0.95f); // Mathf.Lerp(minAlgaeUpkeep, maxAlgaeUpkeep, UnityEngine.Random.Range(0f, 1f));
             
-        algaeSlotGenomeCurrent.algaeUpkeep = algaeSlotGenomeCurrent.algaeIntakeRate * (UnityEngine.Random.Range(0f, 1f) * 0.5f + 0.5f); // Mathf.Lerp(minAlgaeUpkeep, maxAlgaeUpkeep, UnityEngine.Random.Range(0f, 1f));
-            
-        float minAlgaeGrowthEfficiency = 0.5f;
-        float maxAlgaeGrowthEfficiency = 2.5f;
+        float minAlgaeGrowthEfficiency = 1f;
+        float maxAlgaeGrowthEfficiency = 1f;
         algaeSlotGenomeCurrent.algaeGrowthEfficiency = Mathf.Lerp(minAlgaeGrowthEfficiency, maxAlgaeGrowthEfficiency, UnityEngine.Random.Range(0f, 1f));
          
         algaeSlotGenomeCurrent.textDescriptionMutation = "Upkeep: " + algaeSlotGenomeCurrent.algaeUpkeep.ToString("F4") + ", GrowthEfficiency: " + algaeSlotGenomeCurrent.algaeGrowthEfficiency.ToString("F2") + ", IntakeRate: " + algaeSlotGenomeCurrent.algaeIntakeRate.ToString("F4");
@@ -197,11 +199,6 @@ public class VegetationManager {
 
         
         
-        //representativeAlgaeLayerGenome = 
-
-        
-
-        
 
     }    
     public void InitializeResourceGrid(int numAgents, ComputeShader computeShader) {
@@ -224,16 +221,12 @@ public class VegetationManager {
         resourceGridSamplesArray = new Vector4[numAgents];
         resourceGridEatAmountsArray = new Vector4[numAgents];
 
-        //int kernelCSInitializeResourceGrid = computeShaderResourceGrid.FindKernel("CSInitializeResourceGrid");
-        //computeShaderResourceGrid.SetTexture(kernelCSInitializeResourceGrid, "_ResourceGridWrite", resourceGridRT1);
-        //computeShaderResourceGrid.Dispatch(kernelCSInitializeResourceGrid, resourceGridTexResolution / 32, resourceGridTexResolution / 32, 1);
-        //Graphics.Blit(resourceGridRT1, resourceGridRT2);
-
-        tempTex16 = new RenderTexture(16, 16, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        tempTex16.wrapMode = TextureWrapMode.Clamp;
-        tempTex16.filterMode = FilterMode.Point;
-        tempTex16.enableRandomWrite = true;
-        tempTex16.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
+        
+        tempTex32 = new RenderTexture(32, 32, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+        tempTex32.wrapMode = TextureWrapMode.Clamp;
+        tempTex32.filterMode = FilterMode.Point;
+        tempTex32.enableRandomWrite = true;
+        tempTex32.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
 
         tempTex8 = new RenderTexture(8, 8, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
         tempTex8.wrapMode = TextureWrapMode.Clamp;
@@ -287,14 +280,14 @@ public class VegetationManager {
         decomposerSlotGenomeMutations = new WorldLayerDecomposerGenome[4];
         
 
-        float minIntakeRate = 0.0001f;
-        float maxIntakeRate = 0.05f;
+        float minIntakeRate = tempSharedIntakeRate * 0.8f;
+        float maxIntakeRate = tempSharedIntakeRate * 1.25f;
         float lnLerp = UnityEngine.Random.Range(0f, 1f);
         lnLerp *= lnLerp;
         decomposerSlotGenomeCurrent.decomposerIntakeRate = Mathf.Lerp(minIntakeRate, maxIntakeRate, lnLerp);
-        decomposerSlotGenomeCurrent.decomposerUpkeep = decomposerSlotGenomeCurrent.decomposerIntakeRate * (UnityEngine.Random.Range(0f, 1f) * 0.5f + 0.5f); // Mathf.Lerp(minAlgaeUpkeep, maxAlgaeUpkeep, UnityEngine.Random.Range(0f, 1f));
-        float minGrowthEfficiency = 0.5f;
-        float maxGrowthEfficiency = 2.5f;
+        decomposerSlotGenomeCurrent.decomposerUpkeep = decomposerSlotGenomeCurrent.decomposerIntakeRate * 0.45f; //  * (UnityEngine.Random.Range(0f, 1f) * 0.05f + 0.95f); // Mathf.Lerp(minAlgaeUpkeep, maxAlgaeUpkeep, UnityEngine.Random.Range(0f, 1f));
+        float minGrowthEfficiency = 1f;
+        float maxGrowthEfficiency = 1f;
         decomposerSlotGenomeCurrent.decomposerGrowthEfficiency = Mathf.Lerp(minGrowthEfficiency, maxGrowthEfficiency, UnityEngine.Random.Range(0f, 1f));
          
         decomposerSlotGenomeCurrent.textDescriptionMutation = "Upkeep: " + decomposerSlotGenomeCurrent.decomposerUpkeep.ToString("F4") + ", GrowthEfficiency: " + decomposerSlotGenomeCurrent.decomposerGrowthEfficiency.ToString("F2") + ", IntakeRate: " + decomposerSlotGenomeCurrent.decomposerIntakeRate.ToString("F4");
@@ -310,7 +303,7 @@ public class VegetationManager {
         int kernelCSInitRD = computeShaderResourceGrid.FindKernel("CSInitRD"); 
         //computeShaderResourceGrid.SetTexture(kernelCSUpdateAlgaeGrid, "rdRead", rdRT1);
         computeShaderResourceGrid.SetFloat("_TextureResolution", (float)rdTextureResolution);
-        computeShaderResourceGrid.SetTexture(kernelCSInitRD, "rdWrite", rdRT1);
+        //computeShaderResourceGrid.SetTexture(kernelCSInitRD, "rdWrite", rdRT1);
         computeShaderResourceGrid.SetTexture(kernelCSInitRD, "_ResourceGridWrite", resourceGridRT1);
         computeShaderResourceGrid.Dispatch(kernelCSInitRD, rdTextureResolution / 32, rdTextureResolution / 32, 1);
 
@@ -325,18 +318,18 @@ public class VegetationManager {
             Color col = algaeSlotGenomeCurrent.displayColor;
             col = Color.Lerp(col, randColor, jLerp);
             mutatedGenome.displayColor = col;
-            float minAlgaeMaxIntakeRate = 0.0001f;
-            float maxAlgaeMaxIntakeRate = 0.005f;
+            float minAlgaeMaxIntakeRate = tempSharedIntakeRate * 0.8f;
+            float maxAlgaeMaxIntakeRate = tempSharedIntakeRate * 1.25f;
             float logLerp = UnityEngine.Random.Range(0f, 1f);
             logLerp *= logLerp;
             mutatedGenome.algaeIntakeRate = Mathf.Lerp(minAlgaeMaxIntakeRate, maxAlgaeMaxIntakeRate, logLerp);
             mutatedGenome.algaeIntakeRate = Mathf.Lerp(algaeSlotGenomeCurrent.algaeIntakeRate, mutatedGenome.algaeIntakeRate, jLerp);
             //float minAlgaeUpkeep = 0.0001f;
             //float maxAlgaeUpkeep = 0.05f;
-            mutatedGenome.algaeUpkeep = mutatedGenome.algaeIntakeRate * (UnityEngine.Random.Range(0f, 1f) * 0.5f + 0.5f); // Mathf.Lerp(minAlgaeUpkeep, maxAlgaeUpkeep, UnityEngine.Random.Range(0f, 1f));
+            mutatedGenome.algaeUpkeep = mutatedGenome.algaeIntakeRate * 0.45f; //  * (UnityEngine.Random.Range(0f, 1f) * 0.05f + 0.95f); // Mathf.Lerp(minAlgaeUpkeep, maxAlgaeUpkeep, UnityEngine.Random.Range(0f, 1f));
             mutatedGenome.algaeUpkeep = Mathf.Lerp(algaeSlotGenomeCurrent.algaeUpkeep, mutatedGenome.algaeUpkeep, jLerp);
-            float minAlgaeGrowthEfficiency = 0.5f;
-            float maxAlgaeGrowthEfficiency = 2.5f;
+            float minAlgaeGrowthEfficiency = 1f;
+            float maxAlgaeGrowthEfficiency = 1f;
             mutatedGenome.algaeGrowthEfficiency = Mathf.Lerp(minAlgaeGrowthEfficiency, maxAlgaeGrowthEfficiency, UnityEngine.Random.Range(0f, 1f));
             mutatedGenome.algaeGrowthEfficiency = Mathf.Lerp(algaeSlotGenomeCurrent.algaeGrowthEfficiency, mutatedGenome.algaeGrowthEfficiency, jLerp);
             //mutatedGenome.feedRate = Mathf.Lerp(decomposerSlotGenomeCurrent.feedRate, UnityEngine.Random.Range(0f, 1f), jLerp);
@@ -368,17 +361,17 @@ public class VegetationManager {
 
 
             
-            float minDecomposerMaxIntakeRate = 0.0001f;
-            float maxDecomposerMaxIntakeRate = 0.05f;
+            float minDecomposerMaxIntakeRate = tempSharedIntakeRate * 0.8f;
+            float maxDecomposerMaxIntakeRate = tempSharedIntakeRate * 1.25f;
             float logLerp = UnityEngine.Random.Range(0f, 1f);
             logLerp *= logLerp;
             mutatedGenome.decomposerIntakeRate = Mathf.Lerp(minDecomposerMaxIntakeRate, maxDecomposerMaxIntakeRate, logLerp);
             mutatedGenome.decomposerIntakeRate = Mathf.Lerp(decomposerSlotGenomeCurrent.decomposerIntakeRate, mutatedGenome.decomposerIntakeRate, jLerp);
             
-            mutatedGenome.decomposerUpkeep = mutatedGenome.decomposerIntakeRate * (UnityEngine.Random.Range(0f, 1f) * 0.5f + 0.5f); // Mathf.Lerp(minAlgaeUpkeep, maxAlgaeUpkeep, UnityEngine.Random.Range(0f, 1f));
+            mutatedGenome.decomposerUpkeep = mutatedGenome.decomposerIntakeRate * 0.45f; //  * (UnityEngine.Random.Range(0f, 1f) * 0.05f + 0.95f); // Mathf.Lerp(minAlgaeUpkeep, maxAlgaeUpkeep, UnityEngine.Random.Range(0f, 1f));
             mutatedGenome.decomposerUpkeep = Mathf.Lerp(decomposerSlotGenomeCurrent.decomposerUpkeep, mutatedGenome.decomposerUpkeep, jLerp);
-            float minAlgaeGrowthEfficiency = 0.5f;
-            float maxAlgaeGrowthEfficiency = 2.5f;
+            float minAlgaeGrowthEfficiency = 1f;
+            float maxAlgaeGrowthEfficiency = 1f;
             mutatedGenome.decomposerGrowthEfficiency = Mathf.Lerp(minAlgaeGrowthEfficiency, maxAlgaeGrowthEfficiency, UnityEngine.Random.Range(0f, 1f));
             mutatedGenome.decomposerGrowthEfficiency = Mathf.Lerp(decomposerSlotGenomeCurrent.decomposerGrowthEfficiency, mutatedGenome.decomposerGrowthEfficiency, jLerp);
             
@@ -650,48 +643,59 @@ public class VegetationManager {
         //Graphics.Blit(resourceGridRT2, resourceGridRT1);
         
     } */   
-    /*public float MeasureTotalAlgaeGridAmount() {
+    public void MeasureTotalResourceGridAmount() {
 
         ComputeBuffer outputValuesCBuffer = new ComputeBuffer(1, sizeof(float) * 4);  // holds the result of measurement: total sum of pix colors in texture
         Vector4[] outputValuesArray = new Vector4[1];
 
-        // 32 --> 16:
-        int kernelCSMeasureTotalAlgae = computeShaderAlgaeGrid.FindKernel("CSMeasureTotalAlgae");   
-        computeShaderAlgaeGrid.SetBuffer(kernelCSMeasureTotalAlgae, "outputValuesCBuffer", outputValuesCBuffer);
-        computeShaderAlgaeGrid.SetTexture(kernelCSMeasureTotalAlgae, "measureValuesTex", algaeGridRT1);
-        computeShaderAlgaeGrid.SetTexture(kernelCSMeasureTotalAlgae, "pooledResultTex", tempTex16);
-        computeShaderAlgaeGrid.Dispatch(kernelCSMeasureTotalAlgae, 16, 16, 1);
-        // 16 --> 8:
-        computeShaderAlgaeGrid.SetBuffer(kernelCSMeasureTotalAlgae, "outputValuesCBuffer", outputValuesCBuffer);
-        computeShaderAlgaeGrid.SetTexture(kernelCSMeasureTotalAlgae, "measureValuesTex", tempTex16);
-        computeShaderAlgaeGrid.SetTexture(kernelCSMeasureTotalAlgae, "pooledResultTex", tempTex8);
-        computeShaderAlgaeGrid.Dispatch(kernelCSMeasureTotalAlgae, 8, 8, 1);
+        // WAS 32!
+
+
+        // 128 --> 32:
+        int kernelCSMeasureTotalResources2 = computeShaderResourceGrid.FindKernel("CSMeasureTotalResourceGrid2");   
+        int kernelCSMeasureTotalResources4 = computeShaderResourceGrid.FindKernel("CSMeasureTotalResourceGrid4");  
+
+        computeShaderResourceGrid.SetBuffer(kernelCSMeasureTotalResources4, "outputValuesCBuffer", outputValuesCBuffer);
+        computeShaderResourceGrid.SetTexture(kernelCSMeasureTotalResources4, "measureValuesTex", resourceGridRT1);
+        computeShaderResourceGrid.SetTexture(kernelCSMeasureTotalResources4, "pooledResultTex", tempTex32);
+        computeShaderResourceGrid.Dispatch(kernelCSMeasureTotalResources4, 32, 32, 1);
+        // 32 --> 8:
+        computeShaderResourceGrid.SetBuffer(kernelCSMeasureTotalResources4, "outputValuesCBuffer", outputValuesCBuffer);
+        computeShaderResourceGrid.SetTexture(kernelCSMeasureTotalResources4, "measureValuesTex", tempTex32);
+        computeShaderResourceGrid.SetTexture(kernelCSMeasureTotalResources4, "pooledResultTex", tempTex8);
+        computeShaderResourceGrid.Dispatch(kernelCSMeasureTotalResources4, 8, 8, 1);
         // 8 --> 4:
-        computeShaderAlgaeGrid.SetBuffer(kernelCSMeasureTotalAlgae, "outputValuesCBuffer", outputValuesCBuffer);
-        computeShaderAlgaeGrid.SetTexture(kernelCSMeasureTotalAlgae, "measureValuesTex", tempTex8);
-        computeShaderAlgaeGrid.SetTexture(kernelCSMeasureTotalAlgae, "pooledResultTex", tempTex4);
-        computeShaderAlgaeGrid.Dispatch(kernelCSMeasureTotalAlgae, 4, 4, 1);        
+        computeShaderResourceGrid.SetBuffer(kernelCSMeasureTotalResources2, "outputValuesCBuffer", outputValuesCBuffer);
+        computeShaderResourceGrid.SetTexture(kernelCSMeasureTotalResources2, "measureValuesTex", tempTex8);
+        computeShaderResourceGrid.SetTexture(kernelCSMeasureTotalResources2, "pooledResultTex", tempTex4);
+        computeShaderResourceGrid.Dispatch(kernelCSMeasureTotalResources2, 4, 4, 1);        
         // 4 --> 2:
-        computeShaderAlgaeGrid.SetBuffer(kernelCSMeasureTotalAlgae, "outputValuesCBuffer", outputValuesCBuffer);
-        computeShaderAlgaeGrid.SetTexture(kernelCSMeasureTotalAlgae, "measureValuesTex", tempTex4);
-        computeShaderAlgaeGrid.SetTexture(kernelCSMeasureTotalAlgae, "pooledResultTex", tempTex2);
-        computeShaderAlgaeGrid.Dispatch(kernelCSMeasureTotalAlgae, 2, 2, 1);
+        computeShaderResourceGrid.SetBuffer(kernelCSMeasureTotalResources2, "outputValuesCBuffer", outputValuesCBuffer);
+        computeShaderResourceGrid.SetTexture(kernelCSMeasureTotalResources2, "measureValuesTex", tempTex4);
+        computeShaderResourceGrid.SetTexture(kernelCSMeasureTotalResources2, "pooledResultTex", tempTex2);
+        computeShaderResourceGrid.Dispatch(kernelCSMeasureTotalResources2, 2, 2, 1);
         // 2 --> 1:
-        computeShaderAlgaeGrid.SetBuffer(kernelCSMeasureTotalAlgae, "outputValuesCBuffer", outputValuesCBuffer);
-        computeShaderAlgaeGrid.SetTexture(kernelCSMeasureTotalAlgae, "measureValuesTex", tempTex2);
-        computeShaderAlgaeGrid.SetTexture(kernelCSMeasureTotalAlgae, "pooledResultTex", tempTex1);
-        computeShaderAlgaeGrid.Dispatch(kernelCSMeasureTotalAlgae, 1, 1, 1);
+        computeShaderResourceGrid.SetBuffer(kernelCSMeasureTotalResources2, "outputValuesCBuffer", outputValuesCBuffer);
+        computeShaderResourceGrid.SetTexture(kernelCSMeasureTotalResources2, "measureValuesTex", tempTex2);
+        computeShaderResourceGrid.SetTexture(kernelCSMeasureTotalResources2, "pooledResultTex", tempTex1);
+        computeShaderResourceGrid.Dispatch(kernelCSMeasureTotalResources2, 1, 1, 1);
         
         outputValuesCBuffer.GetData(outputValuesArray);
 
+        /* ********************      ********************  v Re-CONNECT!!!
         curGlobalAlgaeGrid = outputValuesArray[0].x;
+        */
+        curGlobalNutrientGridValues = outputValuesArray[0];
 
         outputValuesCBuffer.Release();
 
-        //Debug.Log("TotalNutrients: " + outputValuesArray[0].x.ToString() + ", " + outputValuesArray[0].y.ToString());
-
-        return outputValuesArray[0].x;
-    }*/    
+        /*Debug.Log("Resource Totals:\nNutrients: " + outputValuesArray[0].x.ToString() + 
+                                  "\nWaste: " + outputValuesArray[0].y.ToString() + 
+                                  "\nDecomposers: " + outputValuesArray[0].z.ToString() + 
+                                  "\nAlgae: " + outputValuesArray[0].w.ToString());
+*/
+        //return outputValuesArray[0].x;
+    }    
     public void AddResourcesAtCoords(Vector4 amount, float x, float y) {  // 0-1 normalized map coords
         
         ComputeBuffer addResourceCBuffer = new ComputeBuffer(1, sizeof(float) * 4);
@@ -802,7 +806,7 @@ public class VegetationManager {
             tempTex2.Release();
             tempTex4.Release();
             tempTex8.Release();
-            tempTex16.Release();
+            tempTex32.Release();
         }
         if(resourceGridAgentSamplesCBuffer != null) {
             resourceGridAgentSamplesCBuffer.Release();

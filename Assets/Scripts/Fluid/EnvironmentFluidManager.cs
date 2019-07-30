@@ -419,14 +419,14 @@ public class EnvironmentFluidManager : MonoBehaviour {
 
         computeShaderFluidSim.SetFloat("_ColorRefreshDynamicMultiplier", colorRefreshDynamicMultiplier);
         computeShaderFluidSim.SetFloat("_ColorRefreshAmount", colorRefreshBackgroundMultiplier);
-        computeShaderFluidSim.SetVector("_DecomposersColor", vegetationManagerRef.decomposerSlotGenomeCurrent.displayColor);
+        computeShaderFluidSim.SetVector("_NutrientsColor", Color.white); // vegetationManagerRef.decomposerSlotGenomeCurrent.displayColor);
         computeShaderFluidSim.SetVector("_AlgaeColor", vegetationManagerRef.algaeSlotGenomeCurrent.displayColor);
         // break this out into Background texture and Dynamic Render pass (agents/food/preds/FX only) ??? ******
         computeShaderFluidSim.SetTexture(kernelRefreshColor, "fluidBackgroundColorTex", initialDensityTex);
         computeShaderFluidSim.SetTexture(kernelRefreshColor, "colorInjectionRenderTex", sourceColorRT);
         computeShaderFluidSim.SetTexture(kernelRefreshColor, "DensityRead", densityB);
         computeShaderFluidSim.SetTexture(kernelRefreshColor, "DensityWrite", densityA);
-        computeShaderFluidSim.SetTexture(kernelRefreshColor, "_AlgaeDecomposerMapRead", vegetationManagerRef.rdRT1); 
+        //computeShaderFluidSim.SetTexture(kernelRefreshColor, "_AlgaeDecomposerMapRead", vegetationManagerRef.rdRT1); 
         computeShaderFluidSim.SetTexture(kernelRefreshColor, "_NutrientGridRead", vegetationManagerRef.resourceGridRT1); 
         computeShaderFluidSim.Dispatch(kernelRefreshColor, resolution / 16, resolution / 16, 1);
 

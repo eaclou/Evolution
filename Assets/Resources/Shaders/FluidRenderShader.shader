@@ -78,7 +78,7 @@
 				//return density; // + density2 * 0.25;
 				fixed4 finalColor = float4(0,0,0,1);
 				finalColor.xyz = density.xyz;
-				finalColor.a = density.y;
+				finalColor.a = 1; // density.y;
 				//finalColor.a = smoothstep(0.15, 0.3, density.y) * 0.15;
 				
 				//float3 Value2D(float2 p, float frequency)
@@ -107,13 +107,24 @@
 				float diffuse = dot(gradNorm, lightDir) * 0.5 + 0.5;
 				float shadow = dot(gradNorm, -lightDir) * 0.5 + 0.5;
 
-				density.rgb += float3(1,1,1) * saturate(diffuse) * 0.05;
-				density.rgb -= float3(1,1,1) * saturate(shadow) * 0.05;
+				//density.rgb += float3(1,1,1) * saturate(diffuse) * 0.05;
+				//density.rgb -= float3(1,1,1) * saturate(shadow) * 0.05;
 				//density.a *= (noiseMag * 0.95 + 0.05);
 
-				fixed4 brushTex = tex2D(_SpiritBrushTex, i.uv);
-				density.a = saturate(brushTex.x * 0.15 + density.a);
 				
+
+				float4 heightTex = tex2D(_TerrainHeightTex, i.uv);
+				float altitude = heightTex.x;  // [-1,1] range
+				float onLandMask = saturate((altitude - 0.48) * 8);
+				float shallowsMask = 1.0 - saturate(((1-altitude) - 0.485) * 2.5);
+				//density.a *= saturate((-altitude + 0.5) * 7.22);
+				fixed4 brushTex = tex2D(_SpiritBrushTex, i.uv);
+				//density.a *= density.a;
+				density.a *= 4.20;
+				density.a = saturate(brushTex.x * 0.15 + density.a) * 0.61;
+				float stripey = (sin(density.a * 12) + 1);
+				density.a = lerp(density.a, stripey, density.a);
+				//(sin(density.a * 16) + 1)) * 0.61;
 				return saturate(density);
 
 				float pressureAmount = saturate((pressure.y - 0.2) * 3);
@@ -125,10 +136,7 @@
 				//finalColor.rgb += velocityGlow * 0.65 * noiseMag;
 				//finalColor.rgb = lerp(finalColor.rgb, float3(1,1,0), velocityGlow);
 				
-				float4 heightTex = tex2D(_TerrainHeightTex, i.uv);
-				float altitude = heightTex.x;  // [-1,1] range
-				float onLandMask = saturate((altitude - 0.48) * 8);
-				float shallowsMask = 1.0 - saturate(((1-altitude) - 0.485) * 2.5);
+				
 				float shorelineGlow = shallowsMask * (1.0 - onLandMask);
 				finalColor.rgb += shorelineGlow * 0.75;
 				//finalColor.a += shorelineGlow * 0.25;

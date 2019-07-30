@@ -578,6 +578,8 @@ public class SimulationManager : MonoBehaviour {
         if(trophicLayersManager.GetAlgaeOnOff()) {
             //vegetationManager.FindClosestAlgaeParticleToCritters(simStateData);
             //vegetationManager.MeasureTotalAlgaeParticlesAmount();
+
+            vegetationManager.MeasureTotalResourceGridAmount();
         }
         if(trophicLayersManager.GetZooplanktonOnOff()) {
             zooplanktonManager.FindClosestAnimalParticleToCritters(simStateData);
@@ -602,7 +604,7 @@ public class SimulationManager : MonoBehaviour {
 
         // Global Resources Here????
         // Try to make sure AlgaeReservoir and AlgaeParticles share same mechanics!!! *********************************************
-        simResourceManager.Tick(settingsManager, trophicLayersManager);  // Resource Flows Here
+        simResourceManager.Tick(settingsManager, trophicLayersManager, vegetationManager);  // Resource Flows Here
         
                 
         // CHECK FOR NULL Objects:        

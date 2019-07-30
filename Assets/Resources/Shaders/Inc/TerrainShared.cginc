@@ -2,7 +2,8 @@ uniform float _Turbidity;
 uniform float _CausticsStrength;
 uniform float _MinFog;
 uniform float4 _FogColor;
-//uniform float4 _DecomposersColor;
+uniform float4 _DecomposersColor;
+uniform float4 _DetritusColor;
 
 float GetDepthNormalized(float rawAltitude) {
 	float depthNormalized = saturate((1.0 - rawAltitude) - 0.5) * 2;
@@ -58,10 +59,13 @@ float4 GetGroundColor(float3 worldPos, float4 frameBufferColor, float4 altitudeT
 	float minFog = 0.06125;
 	
 	float4 finalColor = frameBufferColor;
-	//float3 decomposerHue = float3(0.7,0.71,0.74) * 1.11; // float3(3.5,2.5,1);
-	//float decomposerMask = saturate(resourceTex.x * resourceTex.x * 1.5);
+	float3 decomposerHue = float3(1,0,0);
+	float decomposerMask = saturate(resourceTex.z * 2.5);
+	float3 detritusHue = float3(0,0,0);
+	float detritusMask = saturate(resourceTex.y * 2.5);
 	
-	//finalColor.rgb = lerp(finalColor.rgb, decomposerHue, decomposerMask);
+	finalColor.rgb = lerp(finalColor.rgb, decomposerHue, decomposerMask);
+	finalColor.rgb = lerp(finalColor.rgb, detritusHue, detritusMask);
 	
 	float altitude = altitudeTex.x;
 	// 0-1 range --> -1 to 1

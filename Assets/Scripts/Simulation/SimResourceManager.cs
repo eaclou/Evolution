@@ -50,7 +50,7 @@ public class SimResourceManager {
         curGlobalDetritus = 50f;
     }
 
-    public void Tick(SettingsManager settings, TrophicLayersManager trophicLayersManager) {
+    public void Tick(SettingsManager settings, TrophicLayersManager trophicLayersManager, VegetationManager veggieManager) {
         
         // Algae Reservoir Growth:
         //float algaeGrowthEfficiency = 0.1f;
@@ -136,5 +136,11 @@ public class SimResourceManager {
             curGlobalOxygen = Mathf.Max(0f, curGlobalOxygen);
             curGlobalOxygen = Mathf.Min(curGlobalOxygen, 1000f);
         }
+
+        // ***** TEMP!!!!!
+        curGlobalNutrients = veggieManager.curGlobalNutrientGridValues.x;
+        curGlobalDetritus = veggieManager.curGlobalNutrientGridValues.y;
+        curGlobalDecomposers = veggieManager.curGlobalNutrientGridValues.z;
+        curGlobalAlgaeReservoir = veggieManager.curGlobalNutrientGridValues.w;
     }
 }

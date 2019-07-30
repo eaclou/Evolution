@@ -501,13 +501,13 @@ public class UIManager : MonoBehaviour {
         infoGraphOxygenMat.SetTexture("_DataTex", infoOxygenDataTexture);
         infoGraphOxygenMat.SetFloat("_MaxValue", 1000f);
         infoGraphNutrientsMat.SetTexture("_DataTex", infoNutrientsDataTexture);
-        infoGraphNutrientsMat.SetFloat("_MaxValue", 1000f);
+        infoGraphNutrientsMat.SetFloat("_MaxValue", 4000f);
         infoGraphDetritusMat.SetTexture("_DataTex", infoDetritusDataTexture);
-        infoGraphDetritusMat.SetFloat("_MaxValue", 1000f);
+        infoGraphDetritusMat.SetFloat("_MaxValue", 4000f);
         infoGraphDecomposersMat.SetTexture("_DataTex", infoDecomposersDataTexture);
-        infoGraphDecomposersMat.SetFloat("_MaxValue", 1000f);
+        infoGraphDecomposersMat.SetFloat("_MaxValue", 4000f);
         infoGraphPlantsMat.SetTexture("_DataTex", infoPlantsDataTexture);
-        infoGraphPlantsMat.SetFloat("_MaxValue", 1000f);
+        infoGraphPlantsMat.SetFloat("_MaxValue", 4000f);
         infoGraphAnimalsMat.SetTexture("_DataTex", infoAnimalsDataTexture);
         infoGraphAnimalsMat.SetFloat("_MaxValue", 100f);
 
@@ -1875,15 +1875,15 @@ public class UIManager : MonoBehaviour {
         textMeterPlants.text = (resourcesRef.curGlobalAlgaeParticles + resourcesRef.curGlobalAlgaeReservoir).ToString("F0");
         textMeterAnimals.text = (resourcesRef.curGlobalAgentBiomass + resourcesRef.curGlobalAnimalParticles).ToString("F0");
 
-        float percentageOxygen = resourcesRef.curGlobalOxygen / 1000f;
+        float percentageOxygen = resourcesRef.curGlobalOxygen / 3000f;
         infoMeterOxygenMat.SetFloat("_FillPercentage", Mathf.Sqrt(percentageOxygen));
-        float percentageNutrients = resourcesRef.curGlobalNutrients / 1000f;
+        float percentageNutrients = resourcesRef.curGlobalNutrients / 3000f;
         infoMeterNutrientsMat.SetFloat("_FillPercentage", Mathf.Sqrt(percentageNutrients));
-        float percentageDetritus = resourcesRef.curGlobalDetritus / 1000f;
+        float percentageDetritus = resourcesRef.curGlobalDetritus / 3000f;
         infoMeterDetritusMat.SetFloat("_FillPercentage", Mathf.Sqrt(percentageDetritus));
-        float percentageDecomposers = resourcesRef.curGlobalDecomposers / 1000f;
+        float percentageDecomposers = resourcesRef.curGlobalDecomposers / 3000f;
         infoMeterDecomposersMat.SetFloat("_FillPercentage", Mathf.Sqrt(percentageDecomposers));
-        float percentagePlants = (resourcesRef.curGlobalAlgaeParticles + resourcesRef.curGlobalAlgaeReservoir) / 1000f;
+        float percentagePlants = (resourcesRef.curGlobalAlgaeParticles + resourcesRef.curGlobalAlgaeReservoir) / 3000f;
         infoMeterPlantsMat.SetFloat("_FillPercentage", Mathf.Sqrt(percentagePlants));
         float percentageAnimals = (resourcesRef.curGlobalAgentBiomass + resourcesRef.curGlobalAnimalParticles) / 100f;
         infoMeterAnimalsMat.SetFloat("_FillPercentage", Mathf.Sqrt(percentageAnimals));
