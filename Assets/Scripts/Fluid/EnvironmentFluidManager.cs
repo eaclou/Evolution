@@ -419,7 +419,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
 
         computeShaderFluidSim.SetFloat("_ColorRefreshDynamicMultiplier", colorRefreshDynamicMultiplier);
         computeShaderFluidSim.SetFloat("_ColorRefreshAmount", colorRefreshBackgroundMultiplier);
-        computeShaderFluidSim.SetVector("_NutrientsColor", Color.white); // vegetationManagerRef.decomposerSlotGenomeCurrent.displayColor);
+        computeShaderFluidSim.SetVector("_NutrientsColor", new Color(1f, 1f, 0.4f)); // vegetationManagerRef.decomposerSlotGenomeCurrent.displayColor);
         computeShaderFluidSim.SetVector("_AlgaeColor", vegetationManagerRef.algaeSlotGenomeCurrent.displayColor);
         // break this out into Background texture and Dynamic Render pass (agents/food/preds/FX only) ??? ******
         computeShaderFluidSim.SetTexture(kernelRefreshColor, "fluidBackgroundColorTex", initialDensityTex);

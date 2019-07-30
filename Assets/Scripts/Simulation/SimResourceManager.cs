@@ -115,7 +115,7 @@ public class SimResourceManager {
 
         // waste from algaeReservoir???
         //curGlobalDetritus += wasteProducedByAlgaeReservoirLastFrame;
-        curGlobalDetritus += wasteProducedByAnimalParticlesLastFrame; 
+        curGlobalDetritus += wasteProducedByAnimalParticlesLastFrame;   // will have to add these inputs into the resourceGrid sim texture
         curGlobalDetritus += wasteProducedByAlgaeParticlesLastFrame;
         curGlobalDetritus += wasteProducedByAgentsLastFrame;
         curGlobalDetritus = Mathf.Max(0f, curGlobalDetritus); // cap at 0f

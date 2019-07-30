@@ -119,11 +119,15 @@
 				float shallowsMask = 1.0 - saturate(((1-altitude) - 0.485) * 2.5);
 				//density.a *= saturate((-altitude + 0.5) * 7.22);
 				fixed4 brushTex = tex2D(_SpiritBrushTex, i.uv);
-				//density.a *= density.a;
-				density.a *= 4.20;
-				density.a = saturate(brushTex.x * 0.15 + density.a) * 0.61;
-				float stripey = (sin(density.a * 12) + 1);
-				density.a = lerp(density.a, stripey, density.a);
+				//density.a *= 1.60;
+				//density.a *= density.a * density.a;
+				//density.a = saturate(brushTex.x * 0.25 + density.a) * 1;
+				float stripey = (sin(density.a * 37) + 1);
+				float threshold = saturate((density.a - 0.02) * 16);
+				//density.a *= (threshold * 0.5 + 0.5);
+				//density.a *= 4.20;
+				//density.a -= stripey * 0.05;
+				//density.a = lerp(density.a, stripey, density.a * density.a * density.a);
 				//(sin(density.a * 16) + 1)) * 0.61;
 				return saturate(density);
 

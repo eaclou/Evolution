@@ -461,13 +461,17 @@ void RefreshColor (uint3 id : SV_DispatchThreadID)
 	newColor.rgb = lerp(newColor.rgb, sourceColorDynamic.rgb, stampAlpha); //saturate(_ColorRefreshDynamicMultiplier * sourceColorDynamic.a));
 	newColor.a = lerp(newColor.a, 1, stampAlpha);
 	
-	newColor.a = saturate(nutrientGridSample.w * 2.5 + nutrientGridSample.x * 2.5);
+	newColor.a = saturate(nutrientGridSample.w * 1 + nutrientGridSample.x * 1);
 
-	float3 nutrientsHue = _NutrientsColor.rgb * 2.5;
-	float3 algaeHue = _AlgaeColor.rgb;
-	newColor.rgb = lerp(newColor.rgb, nutrientsHue, nutrientGridSample.x * 2.5);
-	newColor.rgb = lerp(newColor.rgb, algaeHue, saturate(nutrientGridSample.w * 2.5));
-	//newColor.a *= newColor.a;
+	float3 nutrientsHue = _NutrientsColor.rgb * 1.5;
+	float3 algaeHue = lerp(_AlgaeColor.rgb, float3(0.1,0.9,0.1), 0.5) * 1.5;
+	int checkerMask01 = ((id.x + id.y)) % 2;
+	int checkerMask02 = 1 - checkerMask01; // ((id.x + id.y + 1)) % 2;
+	float mask01 = (float)(checkerMask01 * 0.25 + 0.75);
+	float mask02 = (float)(checkerMask02 * 0.25 + 0.75);
+	newColor.rgb = lerp(newColor.rgb, nutrientsHue, nutrientGridSample.x); // * mask01);
+	newColor.rgb = lerp(newColor.rgb, algaeHue, saturate(nutrientGridSample.w)); // * mask02));
+	newColor.a = ((float)mask01 * nutrientGridSample.x + (float)mask02 * nutrientGridSample.w) * 2;
 	
 	
 	DensityWrite[id.xy] = saturate(newColor); //float4(newColor, 1); //lerp(currentColor, sourceColorDynamic, _ColorRefreshAmount);

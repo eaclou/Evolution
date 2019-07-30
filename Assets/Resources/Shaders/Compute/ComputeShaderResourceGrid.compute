@@ -273,7 +273,9 @@ void CSInitRD (uint3 id : SV_DispatchThreadID)
 	// CHANNEL X = Nutrients
 	// CHANNEL Y = Detritus
 	// CHANNEL Z = Oxygen?
-	_ResourceGridWrite[id.xy] = float4(saturate(sin(uv.x * float2(28.57912, 19.287)) - 0.26),0,0); 
+	float4 resources = float4(saturate(sin(uv * float2(28.57912, 19.287)) - 0.76),0,0); 
+	resources.xy *= 0;
+	_ResourceGridWrite[id.xy] = resources; 
 
 }
 
