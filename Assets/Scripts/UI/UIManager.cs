@@ -2104,6 +2104,8 @@ public class UIManager : MonoBehaviour {
         debugTxtResources += "\nLive Agents: " + simManager.simResourceManager.curGlobalAgentBiomass.ToString();
         debugTxtResources += "\nDead Agents: " + simManager.simResourceManager.curGlobalCarrionVolume.ToString();
         debugTxtResources += "\nEggSacks: " + simManager.simResourceManager.curGlobalEggSackVolume.ToString();
+        debugTxtResources += "\nGlobal Mass: " + simManager.simResourceManager.curTotalMass.ToString();
+        
 
         textDebugTrainingInfo2.text = debugTxtResources;
 
@@ -3754,7 +3756,7 @@ public class UIManager : MonoBehaviour {
     }
 
     private void CreateDebugRenderViewerArray() {
-        debugTextureViewerArray = new RenderTexture[12];
+        debugTextureViewerArray = new RenderTexture[13];
         debugTextureViewerArray[0] = gameManager.theRenderKing.baronVonTerrain.terrainHeightDataRT;
         debugTextureViewerArray[0].name = "Terrain Height Data";
         //if (gameManager.theRenderKing.baronVonTerrain.terrainColorRT0 != null) {
@@ -3798,6 +3800,8 @@ public class UIManager : MonoBehaviour {
         //debugTextureViewerArray[3] = gameManager.simulationManager.environmentFluidManager._DensityA;
         //debugTextureViewerArray[3].name = "Water DensityA";
         //}        
+        debugTextureViewerArray[12] = gameManager.simulationManager.vegetationManager.resourceSimTransferRT;
+        debugTextureViewerArray[12].name = "Resource Sim Transfer";
     }
     public void ClickDebugTexturePrev() {
         if(debugTextureViewerArray == null) {
@@ -3806,7 +3810,7 @@ public class UIManager : MonoBehaviour {
 
         _DebugTextureIndex -= 1;
         if(_DebugTextureIndex < 0) {
-            _DebugTextureIndex = 11;
+            _DebugTextureIndex = debugTextureViewerArray.Length - 1;
         }
         imageDebugTexture.enabled = false;
         imageDebugTexture.enabled = true;
@@ -3818,7 +3822,7 @@ public class UIManager : MonoBehaviour {
         }
 
         _DebugTextureIndex += 1;
-        if(_DebugTextureIndex > 11) {
+        if(_DebugTextureIndex > debugTextureViewerArray.Length - 1) {
             _DebugTextureIndex = 0;
         }
         imageDebugTexture.enabled = false;

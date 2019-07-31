@@ -21,9 +21,8 @@ public class TheRenderKing : MonoBehaviour {
     public Camera fluidObstaclesRenderCamera;
     public Camera fluidColorRenderCamera;
     public Camera spiritBrushRenderCamera;
-    //public Camera treeOfLifeRenderCamera;
-    public Camera speciesPortraitRenderCamera;
-    public Camera treeOfLifeSpeciesTreeRenderCamera;
+    public Camera slotPortraitRenderCamera;
+    public Camera resourceSimRenderCamera;
 
     public bool isDebugRender = false;
 
@@ -33,9 +32,10 @@ public class TheRenderKing : MonoBehaviour {
     private CommandBuffer cmdBufferFluidObstacles;
     private CommandBuffer cmdBufferFluidColor;
     private CommandBuffer cmdBufferSpiritBrush;
-    private CommandBuffer cmdBufferTreeOfLifeDisplay;
-    private CommandBuffer cmdBufferSpeciesPortraitDisplay;
-    private CommandBuffer cmdBufferTreeOfLifeSpeciesTree;
+    //private CommandBuffer cmdBufferTreeOfLifeDisplay;
+    private CommandBuffer cmdBufferSlotPortraitDisplay;
+    //private CommandBuffer cmdBufferTreeOfLifeSpeciesTree;
+    private CommandBuffer cmdBufferResourceSim;
 
     public ComputeShader computeShaderBrushStrokes;
     public ComputeShader computeShaderUberChains;
@@ -98,6 +98,7 @@ public class TheRenderKing : MonoBehaviour {
 
     public Material algaeParticleColorInjectMat;
     public Material playerBrushColorInjectMat;
+    public Material resourceSimTransferMat;
 
     public Material gizmoStirToolMat;
     public Material gizmoFeedToolMat;
@@ -255,7 +256,7 @@ public class TheRenderKing : MonoBehaviour {
     private int spiritBrushResolution = 128;
     //public RenderTexture terrainBaseColorRT;
     //private int terrainBaseColorResolution = 128;
-    
+        
     public Texture2D critterBodyWidthsTex;
 
     public float fullscreenFade = 1f;
@@ -469,9 +470,9 @@ public class TheRenderKing : MonoBehaviour {
         fluidObstaclesRenderCamera.enabled = false;
         fluidColorRenderCamera.enabled = false;
         spiritBrushRenderCamera.enabled = false;
-        treeOfLifeSpeciesTreeRenderCamera.enabled = false;  // only render when the King commands it!!!
+        //treeOfLifeSpeciesTreeRenderCamera.enabled = false;  // only render when the King commands it!!!
         //treeOfLifeRenderCamera.enabled = false;
-        speciesPortraitRenderCamera.enabled = false;
+        slotPortraitRenderCamera.enabled = false;
     }
     // Use this for initialization:
     public void InitializeRiseAndShine(SimulationManager simManager) {
@@ -1383,18 +1384,22 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferSpiritBrush.name = "cmdBufferSpiritBrush";
         spiritBrushRenderCamera.AddCommandBuffer(CameraEvent.BeforeDepthNormalsTexture, cmdBufferSpiritBrush);
 
-        cmdBufferTreeOfLifeSpeciesTree = new CommandBuffer();
+        /*cmdBufferTreeOfLifeSpeciesTree = new CommandBuffer();
         cmdBufferTreeOfLifeSpeciesTree.name = "cmdBufferTreeOfLifeSpeciesTree";
         treeOfLifeSpeciesTreeRenderCamera.AddCommandBuffer(CameraEvent.BeforeDepthNormalsTexture, cmdBufferTreeOfLifeSpeciesTree);
-
+        */
         //cmdBufferTreeOfLifeDisplay = new CommandBuffer();
         //cmdBufferTreeOfLifeDisplay.name = "cmdBufferTreeOfLifeDisplay";
         //treeOfLifeRenderCamera.AddCommandBuffer(CameraEvent.AfterEverything, cmdBufferTreeOfLifeDisplay);
         
-        cmdBufferSpeciesPortraitDisplay = new CommandBuffer();
-        cmdBufferSpeciesPortraitDisplay.name = "cmdBufferSpeciesPortraitDisplay";
-        speciesPortraitRenderCamera.AddCommandBuffer(CameraEvent.BeforeDepthNormalsTexture, cmdBufferSpeciesPortraitDisplay);
+        cmdBufferSlotPortraitDisplay = new CommandBuffer();
+        cmdBufferSlotPortraitDisplay.name = "cmdBufferSpeciesPortraitDisplay";
+        slotPortraitRenderCamera.AddCommandBuffer(CameraEvent.BeforeDepthNormalsTexture, cmdBufferSlotPortraitDisplay);
         
+        cmdBufferResourceSim = new CommandBuffer();
+        cmdBufferResourceSim.name = "cmdBufferResourceSim";
+        resourceSimRenderCamera.AddCommandBuffer(CameraEvent.BeforeDepthNormalsTexture, cmdBufferResourceSim);
+        resourceSimRenderCamera.targetTexture = simManager.vegetationManager.resourceSimTransferRT;
     }
 
     /*private void InitializeTerrain() {
@@ -1934,7 +1939,7 @@ public class TheRenderKing : MonoBehaviour {
         //float sizeNormalized = Mathf.Clamp01((size - 0.1f) / 1f);
         float sizeNormalized = Mathf.Clamp01((genome.bodyGenome.coreGenome.creatureBaseLength - 0.8f) / 2f);
         //sizeNormalized = 1f;
-        speciesPortraitRenderCamera.GetComponent<CritterPortraitCameraManager>().UpdateCameraTargetValues(Mathf.Lerp(0.8f, 3.416f, sizeNormalized));
+        slotPortraitRenderCamera.GetComponent<CritterPortraitCameraManager>().UpdateCameraTargetValues(Mathf.Lerp(0.8f, 3.416f, sizeNormalized));
         
         Debug.Log("GenerateCritterPortraitStrokesData: " + genome.bodyGenome.appearanceGenome.huePrimary.ToString());
     }
@@ -3345,10 +3350,10 @@ public class TheRenderKing : MonoBehaviour {
         spiritBrushRenderCamera.Render();
 
         // Species PORTRAIT:
-        cmdBufferSpeciesPortraitDisplay.Clear();
-        cmdBufferSpeciesPortraitDisplay.SetRenderTarget(speciesPortraitRenderCamera.targetTexture); // needed???
-        cmdBufferSpeciesPortraitDisplay.ClearRenderTarget(true, true, new Color(0f,0f,0f,0f), 1.0f);  // clear -- needed???
-        cmdBufferSpeciesPortraitDisplay.SetViewProjectionMatrices(speciesPortraitRenderCamera.worldToCameraMatrix, speciesPortraitRenderCamera.projectionMatrix);
+        cmdBufferSlotPortraitDisplay.Clear();
+        cmdBufferSlotPortraitDisplay.SetRenderTarget(slotPortraitRenderCamera.targetTexture); // needed???
+        cmdBufferSlotPortraitDisplay.ClearRenderTarget(true, true, new Color(0f,0f,0f,0f), 1.0f);  // clear -- needed???
+        cmdBufferSlotPortraitDisplay.SetViewProjectionMatrices(slotPortraitRenderCamera.worldToCameraMatrix, slotPortraitRenderCamera.projectionMatrix);
 
         toolbarSpeciesPortraitStrokesMat.SetPass(0);
         toolbarSpeciesPortraitStrokesMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -3357,10 +3362,32 @@ public class TheRenderKing : MonoBehaviour {
         toolbarSpeciesPortraitStrokesMat.SetBuffer("critterGenericStrokesCBuffer", toolbarCritterPortraitStrokesCBuffer);    
         toolbarSpeciesPortraitStrokesMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
         toolbarSpeciesPortraitStrokesMat.SetFloat("_MapSize", SimulationManager._MapSize);          
-        cmdBufferSpeciesPortraitDisplay.DrawProcedural(Matrix4x4.identity, toolbarSpeciesPortraitStrokesMat, 0, MeshTopology.Triangles, 6, toolbarCritterPortraitStrokesCBuffer.count);
+        cmdBufferSlotPortraitDisplay.DrawProcedural(Matrix4x4.identity, toolbarSpeciesPortraitStrokesMat, 0, MeshTopology.Triangles, 6, toolbarCritterPortraitStrokesCBuffer.count);
         
-        Graphics.ExecuteCommandBuffer(cmdBufferSpeciesPortraitDisplay);
-        speciesPortraitRenderCamera.Render();
+        Graphics.ExecuteCommandBuffer(cmdBufferSlotPortraitDisplay);
+        slotPortraitRenderCamera.Render();
+
+
+
+        //===================   RESOURCE SIMULATION   ==========================================================
+        cmdBufferResourceSim.Clear();
+        cmdBufferResourceSim.SetRenderTarget(resourceSimRenderCamera.targetTexture); // needed???
+        //cmdBufferResourceSim.SetRenderTarget(simManager.vegetationManager.resourceSimTransferRT); // this doesn't work????
+        //cmdBufferResourceSim.ClearRenderTarget(true, true, new Color(0f,0f,0f,0f), 1.0f);  // clear -- needed???
+        cmdBufferResourceSim.SetViewProjectionMatrices(resourceSimRenderCamera.worldToCameraMatrix, resourceSimRenderCamera.projectionMatrix);
+
+        // render StructuredBuffers:
+        resourceSimTransferMat.SetPass(0);
+        resourceSimTransferMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        resourceSimTransferMat.SetBuffer("foodParticleDataCBuffer", simManager.vegetationManager.algaeParticlesCBuffer);    
+        //resourceSimTransferMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+        resourceSimTransferMat.SetFloat("_MapSize", SimulationManager._MapSize);          
+        cmdBufferSlotPortraitDisplay.DrawProcedural(Matrix4x4.identity, resourceSimTransferMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.algaeParticlesCBuffer.count);
+        
+
+        Graphics.ExecuteCommandBuffer(cmdBufferResourceSim);
+        resourceSimRenderCamera.Render();
+        //======================================================================================================
 
 
 
@@ -4600,14 +4627,14 @@ public class TheRenderKing : MonoBehaviour {
         if(spiritBrushRenderCamera != null) {
             spiritBrushRenderCamera.RemoveAllCommandBuffers();
         }
-        if(treeOfLifeSpeciesTreeRenderCamera != null) {
+        /*if(treeOfLifeSpeciesTreeRenderCamera != null) {
             treeOfLifeSpeciesTreeRenderCamera.RemoveAllCommandBuffers();
-        }
+        }*/
         /*if(treeOfLifeRenderCamera != null) {
             treeOfLifeRenderCamera.RemoveAllCommandBuffers();
         }*/
-        if(speciesPortraitRenderCamera != null) {
-            speciesPortraitRenderCamera.RemoveAllCommandBuffers();
+        if(slotPortraitRenderCamera != null) {
+            slotPortraitRenderCamera.RemoveAllCommandBuffers();
         }
 
         if(baronVonTerrain != null) {
@@ -4632,8 +4659,8 @@ public class TheRenderKing : MonoBehaviour {
         if(cmdBufferFluidColor != null) {
             cmdBufferFluidColor.Release();
         }
-        if(cmdBufferTreeOfLifeSpeciesTree != null) {
-            cmdBufferTreeOfLifeSpeciesTree.Release();
+        if(cmdBufferResourceSim != null) {
+            cmdBufferResourceSim.Release();
         }
         
         if (agentBodyStrokesCBuffer != null) {

@@ -16,6 +16,8 @@ public class SimResourceManager {
     public float curGlobalAgentBiomass = 0f;
     public float curGlobalCarrionVolume = 0f;
 
+    public float curTotalMass = 0f;
+
     public float oxygenUsedByAnimalParticlesLastFrame = 0f;
     public float wasteProducedByAnimalParticlesLastFrame = 0f;
     public float algaeConsumedByAnimalParticlesLastFrame = 0f;
@@ -45,9 +47,9 @@ public class SimResourceManager {
         // constructor
         // TEMP:::::
         curGlobalOxygen = 100f;
-        curGlobalNutrients = 200f;
+        curGlobalNutrients = 0f;
         curGlobalDecomposers = 0f;
-        curGlobalDetritus = 50f;
+        curGlobalDetritus = 0f;
     }
 
     public void Tick(SettingsManager settings, TrophicLayersManager trophicLayersManager, VegetationManager veggieManager) {
@@ -76,7 +78,7 @@ public class SimResourceManager {
             */
         }
         
-
+        /*
         // OXYGEN:
         curGlobalOxygen -= oxygenUsedByAnimalParticlesLastFrame;
         curGlobalOxygen -= oxygenUsedByAgentsLastFrame;
@@ -89,14 +91,14 @@ public class SimResourceManager {
             // also add algaeParticle Oxygen production:        
             curGlobalOxygen += oxygenProducedByAlgaeParticlesLastFrame;
         }
-
+        */
         float nutrientsProduced = 0f;
         float decomposersTotalProductivity = 0f;
         if(trophicLayersManager.GetDecomposersOnOff()) {
             float decomposersOxygenMask = Mathf.Clamp01(curGlobalOxygen * settings.environmentSettings._DecomposersOxygenMask);
             float decomposersDetritusMask = Mathf.Clamp01(curGlobalDetritus * settings.environmentSettings._DecomposersDetritusMask);
             decomposersTotalProductivity = curGlobalDecomposers * settings.environmentSettings._BaseDecompositionRate * decomposersOxygenMask * decomposersDetritusMask;
-                
+            /*    
             curGlobalDecomposers = Mathf.Lerp(curGlobalDecomposers, curGlobalDetritus, 0.0005f); // *** TEMP:: Scale decomposers with detritus amount
             if(curGlobalDecomposers > 150f) {
                 curGlobalDecomposers = 150f;  // try capping?
@@ -105,7 +107,7 @@ public class SimResourceManager {
             if(curGlobalOxygen < 50f) {
                 curGlobalDecomposers = Mathf.Lerp(curGlobalDecomposers, 0f, 0.001f);  // die off if no oxygen
             }
-
+            */
             detritusRemovedByDecomposersLastFrame = decomposersTotalProductivity;
             curGlobalDetritus -= decomposersTotalProductivity;
 
@@ -129,18 +131,20 @@ public class SimResourceManager {
         curGlobalNutrients -= nutrientsUsedByAlgaeParticlesLastFrame;
         curGlobalNutrients = Mathf.Max(0f, curGlobalNutrients); // cap at 0f
         curGlobalNutrients = Mathf.Min(curGlobalNutrients, 1000f);
-        
+        /*
         if(trophicLayersManager.GetDecomposersOnOff()) {
             oxygenUsedByDecomposersLastFrame = decomposersTotalProductivity * settings.environmentSettings._DecompositionOxygenUsage;
             curGlobalOxygen -= oxygenUsedByDecomposersLastFrame;
             curGlobalOxygen = Mathf.Max(0f, curGlobalOxygen);
             curGlobalOxygen = Mathf.Min(curGlobalOxygen, 1000f);
-        }
+        }*/
 
         // ***** TEMP!!!!!
         curGlobalNutrients = veggieManager.curGlobalNutrientGridValues.x;
         curGlobalDetritus = veggieManager.curGlobalNutrientGridValues.y;
         curGlobalDecomposers = veggieManager.curGlobalNutrientGridValues.z;
         curGlobalAlgaeReservoir = veggieManager.curGlobalNutrientGridValues.w;
+
+        curTotalMass = curGlobalNutrients + curGlobalDetritus + curGlobalDecomposers + curGlobalAlgaeReservoir;
     }
 }

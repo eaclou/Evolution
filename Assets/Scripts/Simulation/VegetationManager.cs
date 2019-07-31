@@ -18,6 +18,8 @@ public class VegetationManager {
     public Vector4[] resourceGridSamplesArray;
     public Vector4[] resourceGridEatAmountsArray;
 
+    public RenderTexture resourceSimTransferRT;
+
     public RenderTexture rdRT1;
     public RenderTexture rdRT2;
     private int rdTextureResolution = 128;  // decomposers and algae Tex2D's
@@ -221,6 +223,11 @@ public class VegetationManager {
         resourceGridSamplesArray = new Vector4[numAgents];
         resourceGridEatAmountsArray = new Vector4[numAgents];
 
+        resourceSimTransferRT = new RenderTexture(resourceGridTexResolution, resourceGridTexResolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+        resourceSimTransferRT.wrapMode = TextureWrapMode.Clamp;
+        resourceSimTransferRT.enableRandomWrite = true;
+        resourceSimTransferRT.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***  
+        
         
         tempTex32 = new RenderTexture(32, 32, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
         tempTex32.wrapMode = TextureWrapMode.Clamp;
