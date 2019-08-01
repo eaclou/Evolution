@@ -35,6 +35,8 @@ Texture2D<float4> _SpiritBrushTex;
 Texture2D<float4> _ResourceGridRead;
 RWTexture2D<float4> _ResourceGridWrite;
 
+Texture2D<float4> _ResourceSimTransferRead;
+
 Texture2D<float4> rdRead;
 RWTexture2D<float4> rdWrite;
 
@@ -442,6 +444,11 @@ void CSAdvectRD (uint3 id : SV_DispatchThreadID)
 	// Handle SpiritBrush Here????
 	float4 spiritBrushSample = _SpiritBrushTex.SampleLevel(_LinearClamp, uvOrigin, 0);
 
+	float4 externalResource = _ResourceSimTransferRead.SampleLevel(_PointClamp, uvOrigin, 0);
+
+	resourceGridRead.y += externalResource.z * 100; // Waste += Zooplankton Poop
+	resourceGridRead.w -= externalResource.y * 100; // Algae -= Algae Eaten
+
 	float brushMagnitude = _SpiritBrushIntensity;
 	float deltaBrushDecomposer = _IsSpiritBrushDecomposersOn * _SpiritBrushPosNeg * spiritBrushSample.x;
 	float deltaBrushAlgae = _IsSpiritBrushAlgaeOn * _SpiritBrushPosNeg * spiritBrushSample.x;
@@ -449,7 +456,8 @@ void CSAdvectRD (uint3 id : SV_DispatchThreadID)
 	resourceGridRead.w = saturate(resourceGridRead.w + deltaBrushAlgae * brushMagnitude);
 	
 
-	//rdWrite[id.xy] = newDensity;		
+
+			
 	_ResourceGridWrite[id.xy] = resourceGridRead;
 	
 }

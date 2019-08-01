@@ -471,7 +471,8 @@ void RefreshColor (uint3 id : SV_DispatchThreadID)
 	float mask02 = (float)(checkerMask02 * 0.25 + 0.75);
 	newColor.rgb = lerp(newColor.rgb, nutrientsHue, nutrientGridSample.x); // * mask01);
 	newColor.rgb = lerp(newColor.rgb, algaeHue, saturate(nutrientGridSample.w)); // * mask02));
-	newColor.a = ((float)mask01 * nutrientGridSample.x + (float)mask02 * nutrientGridSample.w) * 2;
+	newColor.a = max(nutrientGridSample.x, nutrientGridSample.w) * 4;
+	//newColor.a = ((float)mask01 * nutrientGridSample.x + (float)mask02 * nutrientGridSample.w) * 2;
 	
 	
 	DensityWrite[id.xy] = saturate(newColor); //float4(newColor, 1); //lerp(currentColor, sourceColorDynamic, _ColorRefreshAmount);

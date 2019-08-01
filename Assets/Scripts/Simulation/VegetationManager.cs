@@ -799,6 +799,7 @@ public class VegetationManager {
         computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "_ResourceGridRead", resourceGridRT2);
         computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "_ResourceGridWrite", resourceGridRT1);
         computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "_SpiritBrushTex", theRenderKingRef.spiritBrushRT);
+        computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "_ResourceSimTransferRead", resourceSimTransferRT);
         computeShaderResourceGrid.Dispatch(kernelCSAdvectRD, rdTextureResolution / 32, rdTextureResolution / 32, 1);
         //back into 1
     }

@@ -3374,22 +3374,16 @@ public class TheRenderKing : MonoBehaviour {
         //===================   RESOURCE SIMULATION   ==========================================================
         cmdBufferResourceSim.Clear();
         cmdBufferResourceSim.SetRenderTarget(simManager.vegetationManager.resourceSimTransferRT);
-        //cmdBufferResourceSim.SetRenderTarget(resourceSimRenderCamera.targetTexture); // needed???
         cmdBufferResourceSim.ClearRenderTarget(true, true, Color.black, 1.0f);
         cmdBufferResourceSim.SetViewProjectionMatrices(resourceSimRenderCamera.worldToCameraMatrix, resourceSimRenderCamera.projectionMatrix);
         
-        //cmdBufferResourceSim.SetRenderTarget(simManager.vegetationManager.resourceSimTransferRT); // this doesn't work????
-        //cmdBufferResourceSim.ClearRenderTarget(true, true, new Color(0f,0f,0f,0f), 1.0f);  // clear -- needed???
-        //cmdBufferResourceSim.SetViewProjectionMatrices(resourceSimRenderCamera.worldToCameraMatrix, resourceSimRenderCamera.projectionMatrix);
-        //simManager.vegetationManager.resourceSimTransferRT = resourceSimRenderCamera.targetTexture;
         // render StructuredBuffers:
         resourceSimTransferMat.SetPass(0);
         resourceSimTransferMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        resourceSimTransferMat.SetBuffer("foodParticleDataCBuffer", simManager.vegetationManager.algaeParticlesCBuffer);    
+        resourceSimTransferMat.SetBuffer("animalParticleDataCBuffer", simManager.zooplanktonManager.animalParticlesCBuffer); // simManager.vegetationManager.algaeParticlesCBuffer);    
         resourceSimTransferMat.SetFloat("_MapSize", SimulationManager._MapSize);
-        cmdBufferSlotPortraitDisplay.DrawProcedural(Matrix4x4.identity, resourceSimTransferMat, 0, MeshTopology.Triangles, 6, 1); // simManager.vegetationManager.algaeParticlesCBuffer.count);
+        cmdBufferResourceSim.DrawProcedural(Matrix4x4.identity, resourceSimTransferMat, 0, MeshTopology.Triangles, 6, simManager.zooplanktonManager.animalParticlesCBuffer.count); // simManager.vegetationManager.algaeParticlesCBuffer.count);
         
-
         Graphics.ExecuteCommandBuffer(cmdBufferResourceSim);
         resourceSimRenderCamera.Render();
         //======================================================================================================
@@ -4091,14 +4085,7 @@ public class TheRenderKing : MonoBehaviour {
             fluidRenderMat.SetTexture("_SpiritBrushTex", spiritBrushRT);
             cmdBufferMain.DrawMesh(fluidRenderMesh, Matrix4x4.identity, fluidRenderMat);
 
-
-            resourceSimTransferMat.SetPass(0);
-            resourceSimTransferMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-            resourceSimTransferMat.SetBuffer("foodParticleDataCBuffer", simManager.vegetationManager.algaeParticlesCBuffer);  
-            resourceSimTransferMat.SetFloat("_MapSize", SimulationManager._MapSize);          
-            cmdBufferMain.DrawProcedural(Matrix4x4.identity, resourceSimTransferMat, 0, MeshTopology.Triangles, 6, 1);
-        
-            
+          
             // WATER :::::
             //baronVonWater.RenderCommands(ref cmdBufferTest, renderedSceneID);
             // Re-capture FrameBuffer to match backgroundColor
