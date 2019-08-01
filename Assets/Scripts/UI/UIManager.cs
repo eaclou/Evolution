@@ -3800,6 +3800,7 @@ public class UIManager : MonoBehaviour {
         //debugTextureViewerArray[3] = gameManager.simulationManager.environmentFluidManager._DensityA;
         //debugTextureViewerArray[3].name = "Water DensityA";
         //}        
+        
         debugTextureViewerArray[12] = gameManager.simulationManager.vegetationManager.resourceSimTransferRT;
         debugTextureViewerArray[12].name = "Resource Sim Transfer";
     }

@@ -32,12 +32,13 @@
 			
 			StructuredBuffer<AlgaeParticleData> foodParticleDataCBuffer;			
 			StructuredBuffer<float3> quadVerticesCBuffer;
+
+			uniform float _MapSize;
 			
 			struct v2f
 			{
 				float4 pos : SV_POSITION;
-				float2 uv : TEXCOORD0;  // uv of the brushstroke quad itself, particle texture	
-				float3 moundUV : TEXCOORD1;
+				float2 uv : TEXCOORD0;  // uv of the brushstroke quad itself, particle texture					
 				float2 altitudeUV : TEXCOORD2;
 				float4 color : COLOR;
 				float4 hue : TEXCOORD3;
@@ -67,14 +68,14 @@
 				float3 worldPosition = float3(128, 128, 0.0);    // float3(particleData.worldPos, 1.0);    //float3(rawData.worldPos, -random2);
 				
 				
-				float radius = 10; // (0.1 + saturate(particleData.biomass * 2.2) + rand2 * 0.4) * particleData.isActive * 2.8;
+				float radius = 42; // (0.1 + saturate(particleData.biomass * 2.2) + rand2 * 0.4) * particleData.isActive * 2.8;
 				worldPosition.xy += quadPoint.xy * radius;
 				
 				//worldPosition
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
 				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(quadPoint, 0.0f));				
 				o.uv = quadVerticesCBuffer[id].xy + 0.5f;	
-								
+				o.altitudeUV = 	particleData.worldPos.xy / _MapSize;			
 				o.color = float4(saturate(particleData.isDecaying), 0, rand2, 1 - saturate(particleData.isDecaying));
 				o.hue = float4(particleData.color, radius);
 				return o;

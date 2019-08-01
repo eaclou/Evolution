@@ -473,6 +473,7 @@ public class TheRenderKing : MonoBehaviour {
         //treeOfLifeSpeciesTreeRenderCamera.enabled = false;  // only render when the King commands it!!!
         //treeOfLifeRenderCamera.enabled = false;
         slotPortraitRenderCamera.enabled = false;
+        resourceSimRenderCamera.enabled = false;
     }
     // Use this for initialization:
     public void InitializeRiseAndShine(SimulationManager simManager) {
@@ -1399,7 +1400,8 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferResourceSim = new CommandBuffer();
         cmdBufferResourceSim.name = "cmdBufferResourceSim";
         resourceSimRenderCamera.AddCommandBuffer(CameraEvent.BeforeDepthNormalsTexture, cmdBufferResourceSim);
-        resourceSimRenderCamera.targetTexture = simManager.vegetationManager.resourceSimTransferRT;
+        //simManager.vegetationManager.resourceSimTransferRT = resourceSimRenderCamera.targetTexture;
+        //resourceSimRenderCamera.targetTexture = simManager.vegetationManager.resourceSimTransferRT;
     }
 
     /*private void InitializeTerrain() {
@@ -3371,18 +3373,21 @@ public class TheRenderKing : MonoBehaviour {
 
         //===================   RESOURCE SIMULATION   ==========================================================
         cmdBufferResourceSim.Clear();
-        cmdBufferResourceSim.SetRenderTarget(resourceSimRenderCamera.targetTexture); // needed???
+        cmdBufferResourceSim.SetRenderTarget(simManager.vegetationManager.resourceSimTransferRT);
+        //cmdBufferResourceSim.SetRenderTarget(resourceSimRenderCamera.targetTexture); // needed???
+        cmdBufferResourceSim.ClearRenderTarget(true, true, Color.black, 1.0f);
+        cmdBufferResourceSim.SetViewProjectionMatrices(resourceSimRenderCamera.worldToCameraMatrix, resourceSimRenderCamera.projectionMatrix);
+        
         //cmdBufferResourceSim.SetRenderTarget(simManager.vegetationManager.resourceSimTransferRT); // this doesn't work????
         //cmdBufferResourceSim.ClearRenderTarget(true, true, new Color(0f,0f,0f,0f), 1.0f);  // clear -- needed???
-        cmdBufferResourceSim.SetViewProjectionMatrices(resourceSimRenderCamera.worldToCameraMatrix, resourceSimRenderCamera.projectionMatrix);
-
+        //cmdBufferResourceSim.SetViewProjectionMatrices(resourceSimRenderCamera.worldToCameraMatrix, resourceSimRenderCamera.projectionMatrix);
+        //simManager.vegetationManager.resourceSimTransferRT = resourceSimRenderCamera.targetTexture;
         // render StructuredBuffers:
         resourceSimTransferMat.SetPass(0);
         resourceSimTransferMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         resourceSimTransferMat.SetBuffer("foodParticleDataCBuffer", simManager.vegetationManager.algaeParticlesCBuffer);    
-        //resourceSimTransferMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-        resourceSimTransferMat.SetFloat("_MapSize", SimulationManager._MapSize);          
-        cmdBufferSlotPortraitDisplay.DrawProcedural(Matrix4x4.identity, resourceSimTransferMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.algaeParticlesCBuffer.count);
+        resourceSimTransferMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        cmdBufferSlotPortraitDisplay.DrawProcedural(Matrix4x4.identity, resourceSimTransferMat, 0, MeshTopology.Triangles, 6, 1); // simManager.vegetationManager.algaeParticlesCBuffer.count);
         
 
         Graphics.ExecuteCommandBuffer(cmdBufferResourceSim);
@@ -4086,6 +4091,13 @@ public class TheRenderKing : MonoBehaviour {
             fluidRenderMat.SetTexture("_SpiritBrushTex", spiritBrushRT);
             cmdBufferMain.DrawMesh(fluidRenderMesh, Matrix4x4.identity, fluidRenderMat);
 
+
+            resourceSimTransferMat.SetPass(0);
+            resourceSimTransferMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+            resourceSimTransferMat.SetBuffer("foodParticleDataCBuffer", simManager.vegetationManager.algaeParticlesCBuffer);  
+            resourceSimTransferMat.SetFloat("_MapSize", SimulationManager._MapSize);          
+            cmdBufferMain.DrawProcedural(Matrix4x4.identity, resourceSimTransferMat, 0, MeshTopology.Triangles, 6, 1);
+        
             
             // WATER :::::
             //baronVonWater.RenderCommands(ref cmdBufferTest, renderedSceneID);
@@ -4635,6 +4647,9 @@ public class TheRenderKing : MonoBehaviour {
         }*/
         if(slotPortraitRenderCamera != null) {
             slotPortraitRenderCamera.RemoveAllCommandBuffers();
+        }
+        if(resourceSimRenderCamera != null) {
+            resourceSimRenderCamera.RemoveAllCommandBuffers();
         }
 
         if(baronVonTerrain != null) {
