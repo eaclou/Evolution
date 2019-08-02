@@ -40,6 +40,7 @@ struct CritterSimData {
 	float turnAmount;
 	float accel;
 	float smoothedThrottle;
+	float wasteProduced;
 };
 struct CritterSkinStrokeData {
 	int parentIndex;  // what agent/object is this attached to?	

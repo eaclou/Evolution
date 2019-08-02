@@ -271,13 +271,13 @@ public class EnvironmentFluidManager : MonoBehaviour {
     }
     private void SetCurrentsByTier() {
         float lerpAmount = 0.06f;
-        viscosity = Mathf.Lerp(viscosity, 0.0002f, lerpAmount);
-        damping = Mathf.Lerp(damping, 0.0002f, lerpAmount);
+        viscosity = Mathf.Lerp(viscosity, 0.002f, lerpAmount);
+        damping = Mathf.Lerp(damping, 0.00052f, lerpAmount);
         //colorRefreshBackgroundMultiplier = Mathf.Lerp(colorRefreshBackgroundMultiplier, 0.001f, lerpAmount);
         //colorRefreshDynamicMultiplier = Mathf.Lerp(colorRefreshDynamicMultiplier, 0.0075f, lerpAmount);
 
         float baseTierLerp = Mathf.Clamp01((float)curTierWaterCurrents / 10f);
-        float targetSpeed = Mathf.Lerp(0f, 15f, baseTierLerp * baseTierLerp * baseTierLerp);
+        float targetSpeed = 0.5f; // Mathf.Lerp(0f, 15f, baseTierLerp * baseTierLerp * baseTierLerp);
         
         forceMultiplier = Mathf.Lerp(forceMultiplier, targetSpeed, lerpAmount);
     }

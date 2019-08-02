@@ -10,7 +10,7 @@ public class SimResourceManager {
     public float curGlobalDetritus = 1f;
     public float curGlobalDecomposers = 1f;
     public float curGlobalAlgaeReservoir = 0f;  // separate from algaeParticles -- takes place of algaeGrid
-    public float curGlobalAlgaeParticles = 0f;
+    public float curGlobalPlantParticles = 0f;
     public float curGlobalAnimalParticles = 0f;
     public float curGlobalEggSackVolume = 0f;    
     public float curGlobalAgentBiomass = 0f;
@@ -34,9 +34,9 @@ public class SimResourceManager {
     public float wasteProducedByAlgaeReservoirLastFrame = 0f;
     public float nutrientsUsedByAlgaeReservoirLastFrame = 0f;
     
-    public float oxygenProducedByAlgaeParticlesLastFrame = 0f;
-    public float wasteProducedByAlgaeParticlesLastFrame = 0f;
-    public float nutrientsUsedByAlgaeParticlesLastFrame = 0f;
+    public float oxygenProducedByPlantParticlesLastFrame = 0f;
+    public float wasteProducedByPlantParticlesLastFrame = 0f;
+    public float nutrientsUsedByPlantParticlesLastFrame = 0f;
 
     public float oxygenUsedByDecomposersLastFrame = 0f;
     public float nutrientsProducedByDecomposersLastFrame = 0f;
@@ -118,7 +118,7 @@ public class SimResourceManager {
         // waste from algaeReservoir???
         //curGlobalDetritus += wasteProducedByAlgaeReservoirLastFrame;
         curGlobalDetritus += wasteProducedByAnimalParticlesLastFrame;   // will have to add these inputs into the resourceGrid sim texture
-        curGlobalDetritus += wasteProducedByAlgaeParticlesLastFrame;
+        curGlobalDetritus += wasteProducedByPlantParticlesLastFrame;
         curGlobalDetritus += wasteProducedByAgentsLastFrame;
         curGlobalDetritus = Mathf.Max(0f, curGlobalDetritus); // cap at 0f
         curGlobalDetritus = Mathf.Min(curGlobalDetritus, 1000f);
@@ -128,7 +128,7 @@ public class SimResourceManager {
 
         curGlobalNutrients += nutrientsProduced;
         //curGlobalNutrients -= algaeReservoirGrowth;
-        curGlobalNutrients -= nutrientsUsedByAlgaeParticlesLastFrame;
+        curGlobalNutrients -= nutrientsUsedByPlantParticlesLastFrame;
         curGlobalNutrients = Mathf.Max(0f, curGlobalNutrients); // cap at 0f
         curGlobalNutrients = Mathf.Min(curGlobalNutrients, 1000f);
         /*
@@ -141,10 +141,10 @@ public class SimResourceManager {
 
         // ***** TEMP!!!!!
         curGlobalNutrients = veggieManager.curGlobalNutrientGridValues.x;
-        curGlobalDetritus = veggieManager.curGlobalNutrientGridValues.y;
+        curGlobalDetritus = veggieManager.curGlobalNutrientGridValues.y + wasteProducedByAgentsLastFrame + wasteProducedByAnimalParticlesLastFrame;
         curGlobalDecomposers = veggieManager.curGlobalNutrientGridValues.z;
         curGlobalAlgaeReservoir = veggieManager.curGlobalNutrientGridValues.w;
-
+        //oxygenUsedByAgentsLastFrame
         curTotalMass = curGlobalNutrients + curGlobalDetritus + curGlobalDecomposers + curGlobalAlgaeReservoir;
     }
 }

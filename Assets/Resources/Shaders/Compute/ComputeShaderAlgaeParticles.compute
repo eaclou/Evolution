@@ -31,7 +31,7 @@ RWTexture2D<float4> critterDistancesWrite;
 Texture2D<float4> obstaclesRead;
 Texture2D<float4> velocityRead;
 Texture2D<float4> altitudeRead;
-//Texture2D<float4> _ResourceGridTex
+Texture2D<float4> _ResourceGridRead;
 
 Texture2D<float4> _SpawnDensityMap;  // spiritBrush?
 uniform float _SpiritBrushPosNeg;
@@ -275,8 +275,9 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 		if(foodParticle.isDecaying < 0.5) {  // ALIVE !!!!!
 		
 			// Growth: // sample nutrients & light?
-			float nutrientsGrowthMask = saturate(_GlobalNutrients * _AlgaeGrowthNutrientsMask);
-			float lightGrowthMask = saturate(((1.0 - altitudeRaw) - 0.5) * 40);
+			float4 resourceGridSample = _ResourceGridRead.SampleLevel(_PointClamp, uv, 0); 
+			float nutrientsGrowthMask = saturate(resourceGridSample.x * _AlgaeGrowthNutrientsMask);
+			float lightGrowthMask = 1; // saturate(((1.0 - altitudeRaw) - 0.5) * 40);
 			
 			float growthMass = _AlgaeBaseGrowthRate * nutrientsGrowthMask * lightGrowthMask * _SolarEnergy;
 

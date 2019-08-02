@@ -99,6 +99,8 @@ public class TheRenderKing : MonoBehaviour {
     public Material algaeParticleColorInjectMat;
     public Material playerBrushColorInjectMat;
     public Material resourceSimTransferMat;
+    public Material resourceSimAgentDataMat;
+    public Material plantParticleDataMat;
 
     public Material gizmoStirToolMat;
     public Material gizmoFeedToolMat;
@@ -2976,7 +2978,7 @@ public class TheRenderKing : MonoBehaviour {
         if(toolbarPortraitCritterSimDataCBuffer != null) {
             toolbarPortraitCritterSimDataCBuffer.Release();
         }
-        toolbarPortraitCritterSimDataCBuffer = new ComputeBuffer(1, sizeof(float) * 21);
+        toolbarPortraitCritterSimDataCBuffer = new ComputeBuffer(1, SimulationStateData.GetCritterSimDataSize());
         toolbarPortraitCritterSimDataCBuffer.SetData(toolbarPortraitCritterSimDataArray);
         // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     }
@@ -3378,12 +3380,30 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferResourceSim.SetViewProjectionMatrices(resourceSimRenderCamera.worldToCameraMatrix, resourceSimRenderCamera.projectionMatrix);
         
         // render StructuredBuffers:
+        // ZOOPLANKTON:
         resourceSimTransferMat.SetPass(0);
         resourceSimTransferMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         resourceSimTransferMat.SetBuffer("animalParticleDataCBuffer", simManager.zooplanktonManager.animalParticlesCBuffer); // simManager.vegetationManager.algaeParticlesCBuffer);    
         resourceSimTransferMat.SetFloat("_MapSize", SimulationManager._MapSize);
         cmdBufferResourceSim.DrawProcedural(Matrix4x4.identity, resourceSimTransferMat, 0, MeshTopology.Triangles, 6, simManager.zooplanktonManager.animalParticlesCBuffer.count); // simManager.vegetationManager.algaeParticlesCBuffer.count);
-        
+
+        // PLANT PARTICLES:
+        plantParticleDataMat.SetPass(0);
+        plantParticleDataMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        plantParticleDataMat.SetBuffer("plantParticleDataCBuffer", simManager.vegetationManager.algaeParticlesCBuffer); // simManager.vegetationManager.algaeParticlesCBuffer);    
+        plantParticleDataMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        cmdBufferResourceSim.DrawProcedural(Matrix4x4.identity, plantParticleDataMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.algaeParticlesCBuffer.count); // simManager.vegetationManager.algaeParticlesCBuffer.count);
+
+
+        // CRITTERS:
+        //critterSimDataCBuffer
+        resourceSimAgentDataMat.SetPass(0);
+        resourceSimAgentDataMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        resourceSimAgentDataMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer); // simManager.vegetationManager.algaeParticlesCBuffer);    
+        resourceSimAgentDataMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        cmdBufferResourceSim.DrawProcedural(Matrix4x4.identity, resourceSimAgentDataMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.critterSimDataCBuffer.count); // simManager.vegetationManager.algaeParticlesCBuffer.count);
+
+
         Graphics.ExecuteCommandBuffer(cmdBufferResourceSim);
         resourceSimRenderCamera.Render();
         //======================================================================================================

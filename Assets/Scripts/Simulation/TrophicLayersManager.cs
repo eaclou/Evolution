@@ -6,6 +6,7 @@ public class TrophicLayersManager {
 
     private bool decomposersOn = false;  // first pass -- temporary?
     private bool algaeOn = false;
+    private bool plantsOn = false;
     private bool zooplanktonOn = false;
     private bool agentsOn = false;
     private bool terrainOn = true;
@@ -22,8 +23,10 @@ public class TrophicLayersManager {
 
     public Vector2 decomposerOriginPos;
     public Vector2 algaeOriginPos;
+    public Vector2 plantOriginPos;
     public Vector2 zooplanktonOriginPos;
     public int timeStepAlgaeOn = 0;
+    public int timeStepPlantsOn = 0;
     public int timeStepDecomposersOn = 0;
     public int timeStepZooplanktonOn = 0;
     private int timeStepsLayerGrowthDuration = 1200;
@@ -31,6 +34,7 @@ public class TrophicLayersManager {
 	public TrophicLayersManager() {  // constructor
         decomposersOn = false;  // first pass -- temporary?
         algaeOn = false;
+        plantsOn = false;
         zooplanktonOn = false;
         agentsOn = false;
         terrainOn = false;
@@ -90,9 +94,12 @@ public class TrophicLayersManager {
             TurnOnDecomposers(spawnPos, timeStep);
         }
         if (selectedTrophicSlotRef.kingdomID == 1) { // plants!:
-            if (selectedTrophicSlotRef.tierID == 0) { // plants!:
+            if (selectedTrophicSlotRef.tierID == 0) { // ALGAE!:
                 TurnOnAlgae(spawnPos, timeStep);
                 //simManagerRef.vegetationManager.SpawnInitialAlgaeParticles(5f, new Vector4(spawnPos.x, spawnPos.y, 0f, 0f));
+            }
+            else {
+                TurnOnPlants(spawnPos, timeStep);
             }
         }
         if (selectedTrophicSlotRef.kingdomID == 2) { // Animals:
@@ -124,6 +131,18 @@ public class TrophicLayersManager {
                 simManager.uiManager.AnnounceUnlockAlgae();
                 simManager.uiManager.isUnlockCooldown = true;
                 simManager.uiManager.unlockedAnnouncementSlotRef = kingdomPlants.trophicTiersList[0].trophicSlots[0];                
+            }
+        }
+
+        if(kingdomPlants.trophicTiersList[1].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
+            if(simManager.simResourceManager.curGlobalAlgaeReservoir > 15f) { // || simManager.simResourceManager.curGlobalDetritus > 150f) {
+                kingdomPlants.trophicTiersList[1].trophicSlots[0].status = TrophicSlot.SlotStatus.Empty;
+                Debug.Log("PLANTS UNLOCKED!!! " + simManager.uiManager.unlockCooldownCounter.ToString());
+
+                //simManager.uiManager.AnnounceUnlockDecomposers();
+                simManager.uiManager.isUnlockCooldown = true;
+                simManager.uiManager.unlockedAnnouncementSlotRef = kingdomPlants.trophicTiersList[1].trophicSlots[0];
+                //simManager.uiManager.buttonToolbarExpandOn.GetComponent<Animator>().enabled = true;
             }
         }
         
@@ -206,6 +225,9 @@ public class TrophicLayersManager {
         if(kingdomPlants.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {            
             kingdomPlants.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.Empty;
         }
+        if(kingdomPlants.trophicTiersList[1].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {            
+            kingdomPlants.trophicTiersList[1].trophicSlots[0].status = TrophicSlot.SlotStatus.Empty;
+        }
         
         //check for unlocks:
         if(kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {            
@@ -247,15 +269,29 @@ public class TrophicLayersManager {
 
         }
         else if(selectedTrophicSlotRef.kingdomID == 1) {
-            str = "Tiny Plants that form the foundation of the ecosystem."; //   \n\nUses: <b><color=#FBC653FF>Nutrients</color></b>\n\nProduces: <b><color=#8EDEEEFF>Oxygen</color></b>";
+            if (selectedTrophicSlotRef.tierID == 0) {  // ALGAE GRID
+                str = "Tiny Plants that form the foundation of the ecosystem."; //   \n\nUses: <b><color=#FBC653FF>Nutrients</color></b>\n\nProduces: <b><color=#8EDEEEFF>Oxygen</color></b>";
 
-            str += "\n\n";
-            str += "<size=13><b>Total Biomass: " + simManager.simResourceManager.curGlobalAlgaeParticles.ToString("F1") + "</b></size>\n\n";
+                str += "\n\n";
+                str += "<size=13><b>Total Biomass: " + simManager.simResourceManager.curGlobalAlgaeReservoir.ToString("F1") + "</b></size>\n\n";
 
-            str += "<color=#8EDEEEFF>Oxygen Production: <b>" + simManager.simResourceManager.oxygenProducedByAlgaeParticlesLastFrame.ToString("F3") + "</b></color>\n";
-            str += "<color=#FBC653FF>Nutrient Usage: <b>" + simManager.simResourceManager.nutrientsUsedByAlgaeParticlesLastFrame.ToString("F3") + "</b></color>\n";
-            str += "<color=#A97860FF>Waste Generated: <b>" + simManager.simResourceManager.wasteProducedByAlgaeParticlesLastFrame.ToString("F3") + "</b></color>\n";
+                str += "<color=#8EDEEEFF>Oxygen Production: <b>" + simManager.simResourceManager.oxygenProducedByAlgaeReservoirLastFrame.ToString("F3") + "</b></color>\n";
+                str += "<color=#FBC653FF>Nutrient Usage: <b>" + simManager.simResourceManager.nutrientsUsedByAlgaeReservoirLastFrame.ToString("F3") + "</b></color>\n";
+                str += "<color=#A97860FF>Waste Generated: <b>" + simManager.simResourceManager.wasteProducedByAlgaeReservoirLastFrame.ToString("F3") + "</b></color>\n";
 
+            }
+            else { //BIG PLANTS
+                str = "Larger Plants."; //   \n\nUses: <b><color=#FBC653FF>Nutrients</color></b>\n\nProduces: <b><color=#8EDEEEFF>Oxygen</color></b>";
+
+                str += "\n\n";
+                str += "<size=13><b>Total Biomass: " + simManager.simResourceManager.curGlobalPlantParticles.ToString("F1") + "</b></size>\n\n";
+
+                str += "<color=#8EDEEEFF>Oxygen Production: <b>" + simManager.simResourceManager.oxygenProducedByPlantParticlesLastFrame.ToString("F3") + "</b></color>\n";
+                str += "<color=#FBC653FF>Nutrient Usage: <b>" + simManager.simResourceManager.nutrientsUsedByPlantParticlesLastFrame.ToString("F3") + "</b></color>\n";
+                str += "<color=#A97860FF>Waste Generated: <b>" + simManager.simResourceManager.wasteProducedByPlantParticlesLastFrame.ToString("F3") + "</b></color>\n";
+
+            }
+            
         }
         else if(selectedTrophicSlotRef.kingdomID == 2) {
             if(selectedTrophicSlotRef.tierID == 0) {
@@ -344,6 +380,12 @@ public class TrophicLayersManager {
         timeStepAlgaeOn = timeStep;
         algaeOn = true;
     }
+    public void TurnOnPlants(Vector2 spawnPos, int timeStep) {
+        plantOriginPos = spawnPos;
+        timeStepPlantsOn = timeStep;
+        plantsOn = true;
+        Debug.Log("PLANTS ON!");
+    }
     public void TurnOnZooplankton(Vector2 spawnPos, int timeStep) {
         zooplanktonOriginPos = spawnPos;
         timeStepZooplanktonOn = timeStep;
@@ -358,6 +400,9 @@ public class TrophicLayersManager {
     }
     public void TurnOffAlgae() {
         algaeOn = false;
+    }
+    public void TurnOffPlants() {
+        plantsOn = false;
     }
     public void TurnOffZooplankton() {
         zooplanktonOn = false;        
@@ -380,9 +425,16 @@ public class TrophicLayersManager {
         }
         return lerp;
     }
+    public float GetPlantsOnLerp(int curTimeStep) {
+        float lerp = 0f;
+        if(plantsOn) {
+            lerp = Mathf.Clamp01((float)(curTimeStep - timeStepPlantsOn) / (float)timeStepsLayerGrowthDuration);
+        }
+        return lerp;
+    }
     public float GetZooplanktonOnLerp(int curTimeStep) {
         float lerp = 0f;
-        if(algaeOn) {
+        if(zooplanktonOn) {
             lerp = Mathf.Clamp01((float)(curTimeStep - timeStepZooplanktonOn) / (float)timeStepsLayerGrowthDuration);
         }
         return lerp;
@@ -394,6 +446,10 @@ public class TrophicLayersManager {
 
     public bool GetAlgaeOnOff() {
         return algaeOn;
+    }
+
+    public bool GetPlantsOnOff() {
+        return plantsOn;
     }
 
     public bool GetZooplanktonOnOff() {

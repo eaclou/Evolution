@@ -446,7 +446,8 @@ void CSAdvectRD (uint3 id : SV_DispatchThreadID)
 
 	float4 externalResource = _ResourceSimTransferRead.SampleLevel(_PointClamp, uvOrigin, 0);
 
-	resourceGridRead.y += externalResource.z * 100; // Waste += Zooplankton Poop
+	resourceGridRead.x = saturate(resourceGridRead.x - externalResource.x * 10);  // plantParticles Nutrient Usage
+	resourceGridRead.y += externalResource.z * 10; // Waste += Zooplankton Poop
 	resourceGridRead.w -= externalResource.y * 100; // Algae -= Algae Eaten
 
 	float brushMagnitude = _SpiritBrushIntensity;

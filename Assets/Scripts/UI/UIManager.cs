@@ -873,7 +873,13 @@ public class UIManager : MonoBehaviour {
                                 gameManager.simulationManager.vegetationManager.isBrushActive = true;
                             }// PLANTS:
                             else if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 1) {
-                                gameManager.simulationManager.vegetationManager.isBrushActive = true;
+                                if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) {
+                                    gameManager.simulationManager.vegetationManager.isBrushActive = true;
+                                }
+                                else {
+                                    gameManager.simulationManager.vegetationManager.isBrushActive = true;
+                                }
+                                
                             }
                             // ANIMALS::::
                             if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2) {
@@ -987,7 +993,7 @@ public class UIManager : MonoBehaviour {
         // 
         if(!announceAlgaeCollapseOccurred) {
             if(announceAlgaeCollapsePossible) {
-                if(gameManager.simulationManager.simResourceManager.curGlobalAlgaeParticles < 10f) {
+                if(gameManager.simulationManager.simResourceManager.curGlobalPlantParticles < 10f) {
                     announceAlgaeCollapsePossible = false;
                     announceAlgaeCollapseOccurred = true;
 
@@ -1134,7 +1140,7 @@ public class UIManager : MonoBehaviour {
         wireSpiritBrush.SetActive(false);
         wireTerrain.SetActive(false);
         wireAnimals.SetActive(false);
-        wirePlants.SetActive(false);
+        //wirePlants.SetActive(false);
         wireDecomposers.SetActive(false);
 
         float smallThumbnailSize = 40f;
@@ -1213,21 +1219,26 @@ public class UIManager : MonoBehaviour {
             SetToolbarButtonStateUI(ref buttonToolbarDecomposers, layerManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status, isSelected);
             
             // KINGDOM PLANTS:
+            // ALGAE GRID:
             isSelected = false;            
             if(layerManager.isSelectedTrophicSlot) {
                 if(layerManager.selectedTrophicSlotRef.kingdomID == 1 && layerManager.selectedTrophicSlotRef.tierID == 0) {
-                    isSelected = true; 
-
-                    //if(!isSpiritBrushSelected) {
-                        wirePlants.SetActive(true);
-                    //}
+                    isSelected = true;                     
                 }
-
             }
             SetToolbarButtonStateUI(ref buttonToolbarAlgae, layerManager.kingdomPlants.trophicTiersList[0].trophicSlots[0].status, isSelected);
             
-            SetToolbarButtonStateUI(ref buttonToolbarPlant1, TrophicSlot.SlotStatus.Locked, false);
-            SetToolbarButtonStateUI(ref buttonToolbarPlant2, TrophicSlot.SlotStatus.Locked, false);
+            isSelected = false;            
+            if(layerManager.isSelectedTrophicSlot) {
+                if(layerManager.selectedTrophicSlotRef.kingdomID == 1 && layerManager.selectedTrophicSlotRef.tierID == 1) {  // Big Plants
+                    isSelected = true;                     
+                }
+            }
+            SetToolbarButtonStateUI(ref buttonToolbarPlant1, layerManager.kingdomPlants.trophicTiersList[1].trophicSlots[0].status, isSelected);
+            
+
+            //SetToolbarButtonStateUI(ref buttonToolbarPlant1, layerManager.kingdomPlants.trophicTiersList[1].trophicSlots[0].status, isSelected);
+            //SetToolbarButtonStateUI(ref buttonToolbarPlant2, layerManager.kingdomPlants.trophicTiersList[1].trophicSlots[1].status, isAlgaeSelected);
             // KINGDOM ANIMALS:
             //Zooplankton:
             isSelected = false;            
@@ -1378,7 +1389,7 @@ public class UIManager : MonoBehaviour {
                 imageToolbarSpeciesPortraitRender.sprite = spriteAlgaePortrait;
                 buttonToolbarWingDeleteSpecies.gameObject.SetActive(true);
                 imageToolbarSpeciesPortraitBorder.color = gameManager.simulationManager.vegetationManager.algaeSlotGenomeCurrent.displayColor;
-                        
+                // Big Plants        
             }
             else if (layerManager.selectedTrophicSlotRef.kingdomID == 2) {
                 buttonToolbarWingDeleteSpecies.gameObject.SetActive(true); 
@@ -1557,8 +1568,15 @@ public class UIManager : MonoBehaviour {
             gameManager.simulationManager.vegetationManager.GenerateWorldLayerDecomposersGenomeMutationOptions();
         }
         else if(slotRef.kingdomID == 1) {  // Plants
-            gameManager.simulationManager.vegetationManager.algaeSlotGenomeCurrent = gameManager.simulationManager.vegetationManager.algaeSlotGenomeMutations[selectedToolbarMutationID];
-            gameManager.simulationManager.vegetationManager.GenerateWorldLayerAlgaeGridGenomeMutationOptions();
+            if (slotRef.tierID == 0) {
+                gameManager.simulationManager.vegetationManager.algaeSlotGenomeCurrent = gameManager.simulationManager.vegetationManager.algaeSlotGenomeMutations[selectedToolbarMutationID];
+                gameManager.simulationManager.vegetationManager.GenerateWorldLayerAlgaeGridGenomeMutationOptions();
+            }
+            else {
+                gameManager.simulationManager.vegetationManager.plantSlotGenomeCurrent = gameManager.simulationManager.vegetationManager.plantSlotGenomeMutations[selectedToolbarMutationID];
+                gameManager.simulationManager.vegetationManager.GenerateWorldLayerPlantParticleGenomeMutationOptions();
+            }
+            
             //gameManager.simulationManager.vegetationManager.ProcessSlotMutation();
             //algaeRepData = gameManager.simulationManager.vegetationManager.algaeSlotGenomeCurrent.algaeRepData;
         }
@@ -1697,25 +1715,47 @@ public class UIManager : MonoBehaviour {
             //textMutationPanelOptionB.text = gameManager.simulationManager.vegetationManager.algaeSlotGenomeMutations[1].textDescriptionMutation; // "Minor Decomposers Mutation!"; //\nShininess: " + (gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[1].color.a * 100f).ToString("F0") + "%";
             //textMutationPanelOptionC.text = gameManager.simulationManager.vegetationManager.algaeSlotGenomeMutations[2].textDescriptionMutation; // "Major Decomposers Mutation!"; //\nShininess: " + (gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[2].color.a * 100f).ToString("F0") + "%";
             //textMutationPanelOptionD.text = gameManager.simulationManager.vegetationManager.algaeSlotGenomeMutations[3].textDescriptionMutation; // "Major Decomposers Mutation!";
+            if(layerManager.selectedTrophicSlotRef.tierID ==0) {
+                Color uiColor = gameManager.simulationManager.vegetationManager.algaeSlotGenomeMutations[0].displayColor; // new Color(hue.x, hue.y, hue.z);
+                //uiColor.a = 1f;
+                imageMutationPanelThumbnailA.color = uiColor; // UnityEngine.Random.ColorHSV();
+                uiColor = gameManager.simulationManager.vegetationManager.algaeSlotGenomeMutations[1].displayColor;
+                imageMutationPanelThumbnailB.color = uiColor;
+                uiColor = gameManager.simulationManager.vegetationManager.algaeSlotGenomeMutations[2].displayColor;
+                imageMutationPanelThumbnailC.color = uiColor;
+                uiColor = gameManager.simulationManager.vegetationManager.algaeSlotGenomeMutations[3].displayColor;
+                imageMutationPanelThumbnailD.color = uiColor;
             
-            Color uiColor = gameManager.simulationManager.vegetationManager.algaeSlotGenomeMutations[0].displayColor; // new Color(hue.x, hue.y, hue.z);
-            //uiColor.a = 1f;
-            imageMutationPanelThumbnailA.color = uiColor; // UnityEngine.Random.ColorHSV();
-            uiColor = gameManager.simulationManager.vegetationManager.algaeSlotGenomeMutations[1].displayColor;
-            imageMutationPanelThumbnailB.color = uiColor;
-            uiColor = gameManager.simulationManager.vegetationManager.algaeSlotGenomeMutations[2].displayColor;
-            imageMutationPanelThumbnailC.color = uiColor;
-            uiColor = gameManager.simulationManager.vegetationManager.algaeSlotGenomeMutations[3].displayColor;
-            imageMutationPanelThumbnailD.color = uiColor;
+                uiColor = gameManager.simulationManager.vegetationManager.algaeSlotGenomeMutations[selectedToolbarMutationID].displayColor;
+                //uiColor.a = 1f;
+                imageMutationPanelNewPortrait.color = uiColor;
+                textMutationPanelCur.text = gameManager.simulationManager.vegetationManager.algaeSlotGenomeCurrent.textDescriptionMutation; // "Reaction Rate: " + gameManager.simulationManager.vegetationManager.decomposerSlotGenomeCurrent.reactionRate.ToString();
+                textMutationPanelNew.text = gameManager.simulationManager.vegetationManager.algaeSlotGenomeMutations[selectedToolbarMutationID].textDescriptionMutation; // "placeholder";
             
-            uiColor = gameManager.simulationManager.vegetationManager.algaeSlotGenomeMutations[selectedToolbarMutationID].displayColor;
-            //uiColor.a = 1f;
-            imageMutationPanelNewPortrait.color = uiColor;
-            textMutationPanelCur.text = gameManager.simulationManager.vegetationManager.algaeSlotGenomeCurrent.textDescriptionMutation; // "Reaction Rate: " + gameManager.simulationManager.vegetationManager.decomposerSlotGenomeCurrent.reactionRate.ToString();
-            textMutationPanelNew.text = gameManager.simulationManager.vegetationManager.algaeSlotGenomeMutations[selectedToolbarMutationID].textDescriptionMutation; // "placeholder";
+                uiColor = gameManager.simulationManager.vegetationManager.algaeSlotGenomeCurrent.displayColor;
+                imageMutationPanelCurPortrait.color = uiColor; 
+            }
+            else {  // PLANTS:
+                Color uiColor = gameManager.simulationManager.vegetationManager.plantSlotGenomeMutations[0].displayColor; // new Color(hue.x, hue.y, hue.z);
+                //uiColor.a = 1f;
+                imageMutationPanelThumbnailA.color = uiColor; // UnityEngine.Random.ColorHSV();
+                uiColor = gameManager.simulationManager.vegetationManager.plantSlotGenomeMutations[1].displayColor;
+                imageMutationPanelThumbnailB.color = uiColor;
+                uiColor = gameManager.simulationManager.vegetationManager.plantSlotGenomeMutations[2].displayColor;
+                imageMutationPanelThumbnailC.color = uiColor;
+                uiColor = gameManager.simulationManager.vegetationManager.plantSlotGenomeMutations[3].displayColor;
+                imageMutationPanelThumbnailD.color = uiColor;
             
-            uiColor = gameManager.simulationManager.vegetationManager.algaeSlotGenomeCurrent.displayColor;
-            imageMutationPanelCurPortrait.color = uiColor; 
+                uiColor = gameManager.simulationManager.vegetationManager.plantSlotGenomeMutations[selectedToolbarMutationID].displayColor;
+                //uiColor.a = 1f;
+                imageMutationPanelNewPortrait.color = uiColor;
+                textMutationPanelCur.text = gameManager.simulationManager.vegetationManager.plantSlotGenomeCurrent.textDescriptionMutation; // "Reaction Rate: " + gameManager.simulationManager.vegetationManager.decomposerSlotGenomeCurrent.reactionRate.ToString();
+                textMutationPanelNew.text = gameManager.simulationManager.vegetationManager.plantSlotGenomeMutations[selectedToolbarMutationID].textDescriptionMutation; // "placeholder";
+            
+                uiColor = gameManager.simulationManager.vegetationManager.plantSlotGenomeCurrent.displayColor;
+                imageMutationPanelCurPortrait.color = uiColor; 
+            }
+            
         }
         else if(layerManager.selectedTrophicSlotRef.kingdomID == 2) { // ANIMALS
             if(layerManager.selectedTrophicSlotRef.tierID == 0) {  // Zooplankton
@@ -1872,7 +1912,7 @@ public class UIManager : MonoBehaviour {
         textMeterNutrients.text = resourcesRef.curGlobalNutrients.ToString("F0");
         textMeterDetritus.text = resourcesRef.curGlobalDetritus.ToString("F0");
         textMeterDecomposers.text = resourcesRef.curGlobalDecomposers.ToString("F0");
-        textMeterPlants.text = (resourcesRef.curGlobalAlgaeParticles + resourcesRef.curGlobalAlgaeReservoir).ToString("F0");
+        textMeterPlants.text = (resourcesRef.curGlobalPlantParticles + resourcesRef.curGlobalAlgaeReservoir).ToString("F0");
         textMeterAnimals.text = (resourcesRef.curGlobalAgentBiomass + resourcesRef.curGlobalAnimalParticles).ToString("F0");
 
         float percentageOxygen = resourcesRef.curGlobalOxygen / 3000f;
@@ -1883,7 +1923,7 @@ public class UIManager : MonoBehaviour {
         infoMeterDetritusMat.SetFloat("_FillPercentage", Mathf.Sqrt(percentageDetritus));
         float percentageDecomposers = resourcesRef.curGlobalDecomposers / 3000f;
         infoMeterDecomposersMat.SetFloat("_FillPercentage", Mathf.Sqrt(percentageDecomposers));
-        float percentagePlants = (resourcesRef.curGlobalAlgaeParticles + resourcesRef.curGlobalAlgaeReservoir) / 3000f;
+        float percentagePlants = (resourcesRef.curGlobalPlantParticles + resourcesRef.curGlobalAlgaeReservoir) / 3000f;
         infoMeterPlantsMat.SetFloat("_FillPercentage", Mathf.Sqrt(percentagePlants));
         float percentageAnimals = (resourcesRef.curGlobalAgentBiomass + resourcesRef.curGlobalAnimalParticles) / 100f;
         infoMeterAnimalsMat.SetFloat("_FillPercentage", Mathf.Sqrt(percentageAnimals));
@@ -2083,23 +2123,23 @@ public class UIManager : MonoBehaviour {
         debugTxtResources += "\nSunlight: " + simManager.settingsManager.environmentSettings._BaseSolarEnergy.ToString();
         debugTxtResources += "\nOxygen: " + simManager.simResourceManager.curGlobalOxygen.ToString();
         debugTxtResources += "\n     + " + simManager.simResourceManager.oxygenProducedByAlgaeReservoirLastFrame.ToString() + " ( algae reservoir )";
-        debugTxtResources += "\n     + " + simManager.simResourceManager.oxygenProducedByAlgaeParticlesLastFrame.ToString() + " ( algae particles )";
+        debugTxtResources += "\n     + " + simManager.simResourceManager.oxygenProducedByPlantParticlesLastFrame.ToString() + " ( algae particles )";
         debugTxtResources += "\n     - " + simManager.simResourceManager.oxygenUsedByDecomposersLastFrame.ToString() + " ( decomposers )";
         debugTxtResources += "\n     - " + simManager.simResourceManager.oxygenUsedByAnimalParticlesLastFrame.ToString() + " ( zooplankton )";
         debugTxtResources += "\n     - " + simManager.simResourceManager.oxygenUsedByAgentsLastFrame.ToString() + " ( agents )";
         debugTxtResources += "\nNutrients: " + simManager.simResourceManager.curGlobalNutrients.ToString();
         debugTxtResources += "\n     + " + simManager.simResourceManager.nutrientsProducedByDecomposersLastFrame.ToString() + " ( decomposers )";
         debugTxtResources += "\n     - " + simManager.simResourceManager.nutrientsUsedByAlgaeReservoirLastFrame.ToString() + " ( algae reservoir )";
-        debugTxtResources += "\n     - " + simManager.simResourceManager.nutrientsUsedByAlgaeParticlesLastFrame.ToString() + " ( algae particles )";
+        debugTxtResources += "\n     - " + simManager.simResourceManager.nutrientsUsedByPlantParticlesLastFrame.ToString() + " ( algae particles )";
         debugTxtResources += "\nDetritus: " + simManager.simResourceManager.curGlobalDetritus.ToString();
         debugTxtResources += "\n     + " + simManager.simResourceManager.wasteProducedByAlgaeReservoirLastFrame.ToString() + " ( algae reservoir )";
-        debugTxtResources += "\n     + " + simManager.simResourceManager.wasteProducedByAlgaeParticlesLastFrame.ToString() + " ( algae particles )";
+        debugTxtResources += "\n     + " + simManager.simResourceManager.wasteProducedByPlantParticlesLastFrame.ToString() + " ( algae particles )";
         debugTxtResources += "\n     + " + simManager.simResourceManager.wasteProducedByAnimalParticlesLastFrame.ToString() + " ( zooplankton )";
         debugTxtResources += "\n     + " + simManager.simResourceManager.wasteProducedByAgentsLastFrame.ToString() + " ( agents )";
         debugTxtResources += "\n     - " + simManager.simResourceManager.detritusRemovedByDecomposersLastFrame.ToString() + " ( decomposers )";
         debugTxtResources += "\nDecomposers: " + simManager.simResourceManager.curGlobalDecomposers.ToString();
         debugTxtResources += "\nAlgae (Reservoir): " + simManager.simResourceManager.curGlobalAlgaeReservoir.ToString();
-        debugTxtResources += "\nAlgae (Particles): " + simManager.simResourceManager.curGlobalAlgaeParticles.ToString();
+        debugTxtResources += "\nAlgae (Particles): " + simManager.simResourceManager.curGlobalPlantParticles.ToString();
         debugTxtResources += "\nZooplankton: " + simManager.simResourceManager.curGlobalAnimalParticles.ToString();
         debugTxtResources += "\nLive Agents: " + simManager.simResourceManager.curGlobalAgentBiomass.ToString();
         debugTxtResources += "\nDead Agents: " + simManager.simResourceManager.curGlobalCarrionVolume.ToString();
@@ -2572,16 +2612,16 @@ public class UIManager : MonoBehaviour {
             }
         }
         else if(slot.kingdomID == 1) {
-            descriptionText += "<size=13><b>Total Biomass: " + gameManager.simulationManager.simResourceManager.curGlobalAlgaeParticles.ToString("F1") + "</b></size>\n\n";
+            descriptionText += "<size=13><b>Total Biomass: " + gameManager.simulationManager.simResourceManager.curGlobalPlantParticles.ToString("F1") + "</b></size>\n\n";
 
-            descriptionText += "<color=#8EDEEEFF>Oxygen Production: <b>" + gameManager.simulationManager.simResourceManager.oxygenProducedByAlgaeParticlesLastFrame.ToString("F3") + "</b></color>\n";
-            descriptionText += "<color=#FBC653FF>Nutrient Usage: <b>" + gameManager.simulationManager.simResourceManager.nutrientsUsedByAlgaeParticlesLastFrame.ToString("F3") + "</b></color>\n";
-            descriptionText += "<color=#A97860FF>Waste Generated: <b>" + gameManager.simulationManager.simResourceManager.wasteProducedByAlgaeParticlesLastFrame.ToString("F3") + "</b></color>\n";
+            descriptionText += "<color=#8EDEEEFF>Oxygen Production: <b>" + gameManager.simulationManager.simResourceManager.oxygenProducedByPlantParticlesLastFrame.ToString("F3") + "</b></color>\n";
+            descriptionText += "<color=#FBC653FF>Nutrient Usage: <b>" + gameManager.simulationManager.simResourceManager.nutrientsUsedByPlantParticlesLastFrame.ToString("F3") + "</b></color>\n";
+            descriptionText += "<color=#A97860FF>Waste Generated: <b>" + gameManager.simulationManager.simResourceManager.wasteProducedByPlantParticlesLastFrame.ToString("F3") + "</b></color>\n";
 
             // *************** GROSS CODE ALERT!!!!   temp hack!!!! *****************
             if(gameManager.simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
                 textToolbarWingStatsUnlockStatus.text = "<b>Next Unlock:</b>\nReach <b><i>150</i></b> Total Biomass";
-                float unlockProgressLerp = Mathf.Clamp01(gameManager.simulationManager.simResourceManager.curGlobalAlgaeParticles / 150f);
+                float unlockProgressLerp = Mathf.Clamp01(gameManager.simulationManager.simResourceManager.curGlobalPlantParticles / 150f);
                 textToolbarWingStatsUnlockPercentage.text = (unlockProgressLerp * 100f).ToString("F0") + "%";
                 //imageUnlockMeter;
                 matUnlockMeter.SetFloat("_FillPercentage", unlockProgressLerp);
@@ -3399,27 +3439,23 @@ public class UIManager : MonoBehaviour {
         gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = slot;
         isToolbarDetailPanelOn = true;
         
-        if(gameManager.simulationManager.trophicLayersManager.GetAlgaeOnOff()) {
-            // if already on:
-            // Selected!!!
-            /*if (slot.status == TrophicSlot.SlotStatus.On) {            
-                gameManager.simulationManager.trophicLayersManager.selectedTrophicSlot = true;
-                gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = slot; 
-                buttonSelectedTrophicSlot = buttonToolbarAlgae;
-            }*/
-        }
-        else {
-            
-            //gameManager.simulationManager.trophicLayersManager.PendingAlgae();
-            //buttonPendingTrophicSlot = buttonToolbarAlgae;
-            
-        }
-
         if(slot.status == TrophicSlot.SlotStatus.Empty) {
             ClickToolbarCreateNewSpecies();
         }
 
-        //curActiveTool = ToolType.None;
+        isSpiritBrushSelected = false;
+    }
+    public void ClickButtonToolbarPlants(int slotID) {
+        TrophicSlot slot = gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[slotID];
+
+        gameManager.simulationManager.trophicLayersManager.isSelectedTrophicSlot = true;
+        gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = slot;
+        isToolbarDetailPanelOn = true;
+        
+        if(slot.status == TrophicSlot.SlotStatus.Empty) {
+            ClickToolbarCreateNewSpecies();
+        }
+
         isSpiritBrushSelected = false;
     }
     public void ClickButtonToolbarZooplankton() {
@@ -3549,8 +3585,10 @@ public class UIManager : MonoBehaviour {
         isAnnouncementTextOn = true;
     }
     public void ClickToolbarCreateNewSpecies() {
+        // questionable code, possibly un-needed:
         gameManager.simulationManager.trophicLayersManager.CreateTrophicSlotSpecies(gameManager.simulationManager, cameraManager.curCameraFocusPivotPos, gameManager.simulationManager.simAgeTimeSteps);
                 
+
         gameManager.theRenderKing.baronVonWater.StartCursorClick(cameraManager.curCameraFocusPivotPos);
         
         isAnnouncementTextOn = true;
@@ -3561,9 +3599,17 @@ public class UIManager : MonoBehaviour {
             panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
         }
         else if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 1) {
-            panelPendingClickPrompt.GetComponentInChildren<Text>().text = "A new species of Algae added!";
-            panelPendingClickPrompt.GetComponentInChildren<Text>().color = colorPlantsLight;
-            panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
+            if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) {
+                panelPendingClickPrompt.GetComponentInChildren<Text>().text = "A new species of Algae added!";
+                panelPendingClickPrompt.GetComponentInChildren<Text>().color = colorPlantsLight;
+                panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
+            }
+            else {   /// BIG PLANTS:
+                panelPendingClickPrompt.GetComponentInChildren<Text>().text = "A new species of PLAN%T added!";
+                panelPendingClickPrompt.GetComponentInChildren<Text>().color = colorPlantsLight;
+                panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
+            }
+            
         }
         else if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2) { // ANIMALS
             if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 1) {

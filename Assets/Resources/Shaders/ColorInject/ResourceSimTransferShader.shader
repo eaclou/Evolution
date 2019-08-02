@@ -75,7 +75,7 @@
 				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(quadPoint, 0.0f));				
 				o.uv = quadVerticesCBuffer[id].xy + 0.5f;	
 				o.altitudeUV = 	particleData.worldPos.xy / _MapSize;			
-				o.color = float4(saturate(particleData.biomass), saturate(particleData.algaeConsumed), saturate(particleData.wasteProduced), particleData.isActive); // float4(saturate(particleData.isDecaying), 0, rand2, 1 - saturate(particleData.isDecaying));
+				o.color = float4(0, saturate(particleData.algaeConsumed), saturate(particleData.wasteProduced), particleData.isActive); // float4(saturate(particleData.isDecaying), 0, rand2, 1 - saturate(particleData.isDecaying));
 				o.hue = float4(1,1,1,1); // float4(particleData.color, radius);
 				return o;
 			}

@@ -62,6 +62,7 @@ public class SimulationStateData {
         public float turnAmount;
         public float accel;
 		public float smoothedThrottle;
+        public float wasteProduced;  // newly added 8/1/2019
     }
     /*public struct DebugBodyResourcesData {
         public float developmentPercentage;
@@ -175,6 +176,10 @@ public class SimulationStateData {
     public SimulationStateData(SimulationManager simManager) {
         InitializeData(simManager);
     }
+
+    public static int GetCritterSimDataSize() {
+        return sizeof(float) * 22;
+    }
 	
     private void InitializeData(SimulationManager simManager) {
 
@@ -194,7 +199,7 @@ public class SimulationStateData {
         for(int i = 0; i < critterSimDataArray.Length; i++) {
             critterSimDataArray[i] = new CritterSimData();
         }
-        critterSimDataCBuffer = new ComputeBuffer(critterSimDataArray.Length, sizeof(float) * 21);
+        critterSimDataCBuffer = new ComputeBuffer(critterSimDataArray.Length, SimulationStateData.GetCritterSimDataSize());
         /*
         debugBodyResourcesArray = new DebugBodyResourcesData[simManager._NumAgents];
         for(int i = 0; i < debugBodyResourcesArray.Length; i++) {
@@ -379,6 +384,8 @@ public class SimulationStateData {
                 critterSimDataArray[i].turnAmount = simManager.agentsArray[i].turningAmount;
                 critterSimDataArray[i].accel += Mathf.Clamp01(simManager.agentsArray[i].curAccel) * 0.8f; // ** RE-FACTOR!!!!
 		        critterSimDataArray[i].smoothedThrottle = simManager.agentsArray[i].smoothedThrottle.magnitude;
+
+                critterSimDataArray[i].wasteProduced = simManager.agentsArray[i].wasteProducedLastFrame;// 
 
                 // Z & W coords represents agent's x/y Radii (in FluidCoords)
                 agentFluidPositionsArray[i] = new Vector4(agentPos.x / SimulationManager._MapSize, 

@@ -243,8 +243,8 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 			// Some resource conversions still occur,
 			// Still moved by water currents
 
-			float decayEfficiency = 10; // *** should be inverse of growthEfficiency?
-			float decayRate = 0.000025;
+			float decayEfficiency = 8; // *** should be inverse of growthEfficiency?
+			float decayRate = 0.00025;
 			float decayMass = decayRate * decayEfficiency;
 						
 			bodyMass -= decayMass;
@@ -304,8 +304,9 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 			// *********************************************
 				float4 resourceGridSample = _ResourceGridRead.SampleLevel(_PointClamp, uv, 1);
 
+				float isAliveMask = saturate(1.0 - animalParticle.isDecaying);
 				float maxAlgaeConsumptionRate = 0.005;  // one-thousandth of biomass per tick = bodyweight consumed per 1000 ticks
-				float algaeConsumptionMask = saturate(resourceGridSample.w);  // - 0.01);  //    1; // saturate(_GlobalAlgaeLevel * 0.01);   //  if global levels are too low it reduces consumption?
+				float algaeConsumptionMask = saturate(resourceGridSample.w * isAliveMask);  // - 0.01);  //    1; // saturate(_GlobalAlgaeLevel * 0.01);   //  if global levels are too low it reduces consumption?
 
 				float maxOxygenConsumptionRate = 0.0085; // relative to biomass?
 				float oxygenConsumptionMask = 1; //saturate(_GlobalOxygenLevel * 0.01);
