@@ -133,7 +133,11 @@ public class ZooplanktonManager {
         int numMutations = 4;  // don't change this
         zooplanktonSlotGenomeCurrent = new WorldLayerZooplanktonGenome();
         zooplanktonSlotGenomeCurrent.representativeData = animalParticlesArray[0];
+        zooplanktonSlotGenomeCurrent.swimSpeed01 = 0.5f;
+        zooplanktonSlotGenomeCurrent.agingRate01 = 0.5f;
+        zooplanktonSlotGenomeCurrent.attractForce01 = 0.5f;
         zooplanktonSlotGenomeCurrent.name = "Zooplankton, Bebe!";
+        zooplanktonSlotGenomeCurrent.textDescriptionMutation = "Swim Speed: " + zooplanktonSlotGenomeCurrent.swimSpeed01.ToString("F2") + "\nAging Rate: " + zooplanktonSlotGenomeCurrent.agingRate01.ToString("F2") + "\nAttraction: " + zooplanktonSlotGenomeCurrent.attractForce01.ToString("F2");
         zooplanktonSlotGenomeMutations = new WorldLayerZooplanktonGenome[numMutations];
 
         GenerateWorldLayerZooplanktonGenomeMutationOptions();
@@ -159,8 +163,18 @@ public class ZooplanktonManager {
             mutatedGenome.representativeData = zooplanktonSlotGenomeCurrent.representativeData;
             mutatedGenome.representativeData.color = col;
 
+            mutatedGenome.swimSpeed01 = Mathf.Lerp(0f, 1f, UnityEngine.Random.Range(0f, 1f));
+            mutatedGenome.swimSpeed01 = Mathf.Lerp(zooplanktonSlotGenomeCurrent.swimSpeed01, mutatedGenome.swimSpeed01, jLerp);
+
+            mutatedGenome.agingRate01 = Mathf.Lerp(0f, 1f, UnityEngine.Random.Range(0f, 1f));
+            mutatedGenome.agingRate01 = Mathf.Lerp(zooplanktonSlotGenomeCurrent.agingRate01, mutatedGenome.agingRate01, jLerp);
+
+            mutatedGenome.attractForce01 = Mathf.Lerp(0f, 1f, UnityEngine.Random.Range(0f, 1f));
+            mutatedGenome.attractForce01 = Mathf.Lerp(zooplanktonSlotGenomeCurrent.attractForce01, mutatedGenome.attractForce01, jLerp);
+
+
             mutatedGenome.name = zooplanktonSlotGenomeCurrent.name;
-            mutatedGenome.textDescriptionMutation = "Mutation Amt: " + (jLerp * 100f).ToString("F0") + "% - " + mutatedGenome.representativeData.color.ToString();
+            mutatedGenome.textDescriptionMutation = "Swim Speed: " + mutatedGenome.swimSpeed01.ToString("F2") + "\nAging Rate: " + mutatedGenome.agingRate01.ToString("F2") + "\nAttraction: " + mutatedGenome.attractForce01.ToString("F2");
             
 
             zooplanktonSlotGenomeMutations[j] = mutatedGenome;
@@ -205,12 +219,13 @@ public class ZooplanktonManager {
         computeShaderAnimalParticles.SetFloat("_GlobalAlgaeLevel", resourceManagerRef.curGlobalPlantParticles);
         computeShaderAnimalParticles.SetFloat("_SpiritBrushPosNeg", renderKingRef.spiritBrushPosNeg);
         // Movement Params:
-        computeShaderAnimalParticles.SetFloat("_MasterSwimSpeed", settingsRef.zooplanktonSettings._MasterSwimSpeed); // = 0.35;
+        computeShaderAnimalParticles.SetFloat("_MasterSwimSpeed", settingsRef.zooplanktonSettings._MasterSwimSpeed * Mathf.Lerp(0.01f, 5f, zooplanktonSlotGenomeCurrent.swimSpeed01)); // = 0.35;
         computeShaderAnimalParticles.SetFloat("_AlignMaskRange", settingsRef.zooplanktonSettings._AlignMaskRange); // = 0.025;
         computeShaderAnimalParticles.SetFloat("_AlignMaskOffset", settingsRef.zooplanktonSettings._AlignMaskOffset); // = 0.0833;
         computeShaderAnimalParticles.SetFloat("_AlignSpeedMult", settingsRef.zooplanktonSettings._AlignSpeedMult); // = 0.00015;
-        computeShaderAnimalParticles.SetFloat("_AttractMag", settingsRef.zooplanktonSettings._AttractMag); // = 0.0000137;
-        computeShaderAnimalParticles.SetFloat("_AttractMaskMaxDistance", settingsRef.zooplanktonSettings._AttractMaskMaxDistance); // = 0.0036;
+        
+        computeShaderAnimalParticles.SetFloat("_AttractMag", settingsRef.zooplanktonSettings._AttractMag * Mathf.Lerp(0.1f, 10f, zooplanktonSlotGenomeCurrent.attractForce01)); // = 0.0000137;
+        computeShaderAnimalParticles.SetFloat("_AttractMaskMaxDistance", settingsRef.zooplanktonSettings._AttractMaskMaxDistance * Mathf.Lerp(0.1f, 10f, zooplanktonSlotGenomeCurrent.attractForce01)); // = 0.0036;
         computeShaderAnimalParticles.SetFloat("_AttractMaskOffset", settingsRef.zooplanktonSettings._AttractMaskOffset); // = 0.5;
         computeShaderAnimalParticles.SetFloat("_SwimNoiseMag", settingsRef.zooplanktonSettings._SwimNoiseMag); // = 0.000086;
         computeShaderAnimalParticles.SetFloat("_SwimNoiseFreqMin", settingsRef.zooplanktonSettings._SwimNoiseFreqMin); // = 0.00002
@@ -219,7 +234,7 @@ public class ZooplanktonManager {
         computeShaderAnimalParticles.SetFloat("_ShoreCollisionMag", settingsRef.zooplanktonSettings._ShoreCollisionMag); // = 0.0065;
         computeShaderAnimalParticles.SetFloat("_ShoreCollisionDistOffset", settingsRef.zooplanktonSettings._ShoreCollisionDistOffset); // = 0.15;
         computeShaderAnimalParticles.SetFloat("_ShoreCollisionDistSlope", settingsRef.zooplanktonSettings._ShoreCollisionDistSlope); // = 3.5;
-
+        computeShaderAnimalParticles.SetFloat("_AgingMult", Mathf.Lerp(0.1f, 10f, zooplanktonSlotGenomeCurrent.agingRate01));
         //computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "animalParticlesNearestCrittersRT", animalParticlesNearestCritters1);
         computeShaderAnimalParticles.SetFloat("_MapSize", SimulationManager._MapSize);
         

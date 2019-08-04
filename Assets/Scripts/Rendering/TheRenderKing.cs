@@ -3727,7 +3727,7 @@ public class TheRenderKing : MonoBehaviour {
             RenderTargetIdentifier renderTarget = new RenderTargetIdentifier(BuiltinRenderTextureType.CameraTarget);
             cmdBufferMain.Blit(renderTarget, renderedSceneID);  // save contents of Standard Rendering Pipeline
             cmdBufferMain.SetRenderTarget(renderTarget);  // Set render Target
-            cmdBufferMain.ClearRenderTarget(true, true, Color.black, 1.0f);  // clear -- needed???
+            cmdBufferMain.ClearRenderTarget(true, true, new Color(1f, 0.9f, 0.75f) * 0.8f, 1.0f);  // clear -- needed???
             
             
             

@@ -6,9 +6,9 @@ public class WorldLayerAlgaeGenome {
 
     public string name;
     public string textDescriptionMutation;
-    public float algaeUpkeep;
-    public float algaeIntakeRate;
-    public float algaeGrowthEfficiency;
+    public float metabolicRate;
+    //public float decomposerIntakeRate;
+    public float growthEfficiency;
     public Color displayColor;
     //public VegetationManager.AlgaeParticleData algaeRepData;
     /*representativeAlgaeLayerGenome = algaeParticlesArray[0];

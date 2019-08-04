@@ -1564,7 +1564,7 @@ public class UIManager : MonoBehaviour {
         TrophicSlot slotRef = gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef;
         if(slotRef.kingdomID == 0) {  // Decomposers
             gameManager.simulationManager.vegetationManager.decomposerSlotGenomeCurrent = gameManager.simulationManager.vegetationManager.decomposerSlotGenomeMutations[selectedToolbarMutationID];
-
+            //gameManager.simulationManager.vegetationManager.WorldLayerDecomposerGenomeStuff(ref decomposerSlotGenomeCurrent, 0f);
             gameManager.simulationManager.vegetationManager.GenerateWorldLayerDecomposersGenomeMutationOptions();
         }
         else if(slotRef.kingdomID == 1) {  // Plants
@@ -1574,6 +1574,7 @@ public class UIManager : MonoBehaviour {
             }
             else {
                 gameManager.simulationManager.vegetationManager.plantSlotGenomeCurrent = gameManager.simulationManager.vegetationManager.plantSlotGenomeMutations[selectedToolbarMutationID];
+
                 gameManager.simulationManager.vegetationManager.GenerateWorldLayerPlantParticleGenomeMutationOptions();
             }
             
@@ -1715,7 +1716,7 @@ public class UIManager : MonoBehaviour {
             //textMutationPanelOptionB.text = gameManager.simulationManager.vegetationManager.algaeSlotGenomeMutations[1].textDescriptionMutation; // "Minor Decomposers Mutation!"; //\nShininess: " + (gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[1].color.a * 100f).ToString("F0") + "%";
             //textMutationPanelOptionC.text = gameManager.simulationManager.vegetationManager.algaeSlotGenomeMutations[2].textDescriptionMutation; // "Major Decomposers Mutation!"; //\nShininess: " + (gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[2].color.a * 100f).ToString("F0") + "%";
             //textMutationPanelOptionD.text = gameManager.simulationManager.vegetationManager.algaeSlotGenomeMutations[3].textDescriptionMutation; // "Major Decomposers Mutation!";
-            if(layerManager.selectedTrophicSlotRef.tierID ==0) {
+            if(layerManager.selectedTrophicSlotRef.tierID == 0) {
                 Color uiColor = gameManager.simulationManager.vegetationManager.algaeSlotGenomeMutations[0].displayColor; // new Color(hue.x, hue.y, hue.z);
                 //uiColor.a = 1f;
                 imageMutationPanelThumbnailA.color = uiColor; // UnityEngine.Random.ColorHSV();
@@ -1779,7 +1780,7 @@ public class UIManager : MonoBehaviour {
                 uiColor = gameManager.simulationManager.zooplanktonManager.zooplanktonSlotGenomeMutations[selectedToolbarMutationID].representativeData.color;
                 uiColor.a = 1f;
                 imageMutationPanelNewPortrait.color = uiColor;
-                textMutationPanelCur.text = gameManager.simulationManager.zooplanktonManager.zooplanktonSlotGenomeCurrent.name; // "Reaction Rate: " + gameManager.simulationManager.vegetationManager.decomposerSlotGenomeCurrent.reactionRate.ToString();
+                textMutationPanelCur.text = gameManager.simulationManager.zooplanktonManager.zooplanktonSlotGenomeCurrent.textDescriptionMutation; // "Reaction Rate: " + gameManager.simulationManager.vegetationManager.decomposerSlotGenomeCurrent.reactionRate.ToString();
                 textMutationPanelNew.text = gameManager.simulationManager.zooplanktonManager.zooplanktonSlotGenomeMutations[selectedToolbarMutationID].textDescriptionMutation; // "placeholder";
                 uiColor = gameManager.simulationManager.zooplanktonManager.zooplanktonSlotGenomeCurrent.representativeData.color;
                 uiColor.a = 1f;

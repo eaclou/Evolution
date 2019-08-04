@@ -6,9 +6,10 @@ public class WorldLayerPlantGenome {
 
     public string name;
     public string textDescriptionMutation;
-    public float plantUpkeep;
-    public float plantIntakeRate;
-    public float plantGrowthEfficiency;
+    public float growthRate;
+    //public float plantUpkeep;
+    //public float plantIntakeRate;
+    //public float plantGrowthEfficiency;
     public Color displayColor;
     public VegetationManager.PlantParticleData plantRepData;
     /*

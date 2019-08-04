@@ -69,11 +69,11 @@
 				float rand2 = rand(float2(rand1, rand1) * 10);
 				float rand3 = rand(float2(rand2, rand2) * 10);	
 
-				float3 offsetRaw = (float3(rand0, rand1, rand2) * 2 - 1) * rand3;
-				worldPosition.xyz += offsetRaw * 5;
-
-				//float2 offsetRaw = (float2(rand0, rand1) * 2 - 1) * rand3;					
-				//worldPosition.xy += offsetRaw * 5;
+				float3 offsetRaw = (float3(rand0, rand1, rand2) * 2 - 1) * rand3;				
+				//float2 offset = offsetRaw * (16 * particleData.biomass + 0.2);
+				float maxSpread = 6.28;
+				float spread = (saturate(1000 * particleData.biomass * particleData.biomass) * 0.8 + 0.2) * maxSpread;
+				worldPosition.xyz += offsetRaw * spread;
 
 				float threshold = particleData.biomass * 4.5 + 0.033;
 				float isOn = saturate((threshold - length(offsetRaw)) * 10);
@@ -82,29 +82,33 @@
 				float spatialFreq = 0.06125285;
 				float timeMult = 0.08;
 				float4 noiseSample = Value3D(worldPosition * spatialFreq + offsetRaw + _Time * timeMult, masterFreq); //float3(0, 0, _Time * timeMult) + 
-				float noiseMag = 0.18;
+				float noiseMag = 0.2;
 				float3 noiseOffset = noiseSample.yzw * noiseMag;
 				
 
 				worldPosition.xyz += noiseOffset;
+				float radius = saturate(250 * particleData.biomass * particleData.biomass) * 4; // particleData.radius * 0.3 * isOn; // 1; //sqrt(particleData.biomass) * 2 + 0.5;
+				quadPoint = quadPoint * radius; // * particleData.active; // *** remove * 3 after!!!
+				quadPoint.y *= 1.6;
+				float randAngle = (rand2 + rand3 * rand0 - rand1) * 13.92;
+				
+				float2 forward = float2(cos(randAngle), sin(randAngle));
+				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
+				float3 rotatedPoint = float3(quadPoint.x * right + quadPoint.y * forward, 0);  // Rotate localRotation by AgentRotation
 
+				
+				worldPosition.z = 0.0;
+				worldPosition = worldPosition + rotatedPoint * particleData.isActive;
 
-				//quadPoint = quadPoint * particleData.radius * particleData.active;
-				quadPoint = quadPoint * particleData.radius * 0.2 * isOn; // * (1.0 - particleData.digestedAmount) * 4 * particleData.isActive;
-
-				worldPosition = worldPosition + quadPoint;
 				// REFRACTION:
 				float2 altUV = worldPosition.xy / 256;
 				o.altitudeUV = altUV;
 				float altitudeRaw = tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 0)).x;
 
-				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / 256, 0, 0)).yzw;
-				float depth = saturate(-altitudeRaw + 0.5);
-				float refractionStrength = depth * 5.5;
-
-				//float refractionStrength = 2.5;
+				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / 256, 0, 0)).yzw;				
+				float refractionStrength = 0.5;
 				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
-				
+
 				
 				//o.altitudeUV = altUV;
 				
@@ -141,7 +145,7 @@
 				//float3 particleColor = lerp(baseHue * 0.7, baseHue * 1.3, saturate(1.0 - i.color.y * 2));
 				frameBufferColor.rgb *= 0.75; // = lerp(frameBufferColor.rgb, particleColor, 0.25);
 				float4 finalColor = GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, float4(0,0,0,0));
-				finalColor.a = brushColor.a * 0.2;
+				finalColor.a = brushColor.a * 0.7;
 
 				return finalColor;
 			}

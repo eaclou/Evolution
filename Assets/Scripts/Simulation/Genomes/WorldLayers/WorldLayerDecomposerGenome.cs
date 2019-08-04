@@ -7,9 +7,9 @@ public class WorldLayerDecomposerGenome {
 	public string name;
     public string textDescriptionMutation;
     public Color displayColor;
-    public float decomposerUpkeep;
-    public float decomposerIntakeRate;
-    public float decomposerGrowthEfficiency;
+    public float metabolicRate;
+    //public float decomposerIntakeRate;
+    public float growthEfficiency;
 	
     public WorldLayerDecomposerGenome() {   // construction
         displayColor = Color.white;

@@ -71,6 +71,8 @@ uniform float _ShoreCollisionMag; // = 0.0065;
 uniform float _ShoreCollisionDistOffset; // = 0.15;
 uniform float _ShoreCollisionDistSlope; // = 3.5;
 
+uniform float _AgingMult;
+
 SamplerState _LinearClamp;
 SamplerState _LinearRepeat;
 SamplerState _PointClamp;
@@ -371,7 +373,7 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 		float4 spiritBrushTex = _SpawnDensityMap.SampleLevel(_LinearClamp, uv, 0);  // brush mask
 		float rightClickMask01 = saturate(_SpiritBrushPosNeg * -1);
 		// AGING:
-		animalParticlesWrite[id.x].age = animalParticle.age + 0.00005 + spiritBrushTex.x * rightClickMask01 * 0.1 * _IsBrushing;
+		animalParticlesWrite[id.x].age = animalParticle.age + 0.00005 * _AgingMult + spiritBrushTex.x * rightClickMask01 * 0.1 * _IsBrushing;
 
 		// Resource Conversions:::::		
 		animalParticlesWrite[id.x].wasteProduced = wasteMass;	// Combined Poop & Decomposing	

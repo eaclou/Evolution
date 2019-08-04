@@ -57,7 +57,7 @@
 				o.altitudeUV = 	plantParticleData.worldPos.xy / _MapSize;			
 
 				//float isAliveMask = critterSimData.embryoPercentage * (1.0 - critterSimData.decayPercentage);
-				o.color = float4(plantParticleData.nutrientsUsed, 0, plantParticleData.wasteProduced * 0.5, plantParticleData.isActive); // float4(particleData.age, particleData.algaeConsumed, 1, particleData.isActive);
+				o.color = float4(plantParticleData.nutrientsUsed, 0, plantParticleData.wasteProduced * 1.5, plantParticleData.isActive); // float4(particleData.age, particleData.algaeConsumed, 1, particleData.isActive);
 				
 				return o;
 			}

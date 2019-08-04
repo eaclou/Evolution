@@ -298,7 +298,7 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 			}
 		}
 		else {  // DEAD !!!!!
-			// if is fully decayed:
+			
 			float decayEfficiency = 1.0;
 			float decayRate = _AlgaeDecayRate;
 			float decayMass = decayRate * decayEfficiency;
@@ -306,6 +306,7 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 			bodyMass -= decayMass;
 			wasteMass += decayMass;
 			
+			// if is fully decayed:
 			if(bodyMass <= 0.0) {  // fully decayed:
 				foodParticlesWrite[id.x].isActive = 0.0;
 				foodParticlesWrite[id.x].isDecaying = 0.0;

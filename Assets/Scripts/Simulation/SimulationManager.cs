@@ -641,7 +641,7 @@ public class SimulationManager : MonoBehaviour {
         //vegetationManager.ApplyDiffusionOnResourceGrid(environmentFluidManager);
         //vegetationManager.AdvectResourceGrid(environmentFluidManager);
         //if(curSimYear < 4) {  // stop simulating after certain point !! TEMPORARY!!!
-        vegetationManager.SimReactionDiffusionGrid(ref environmentFluidManager, ref theRenderKing.baronVonTerrain, ref theRenderKing);
+        vegetationManager.SimResourceGrid(ref environmentFluidManager, ref theRenderKing.baronVonTerrain, ref theRenderKing);
         //}
         
 

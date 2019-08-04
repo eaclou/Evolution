@@ -270,7 +270,7 @@ public class TrophicLayersManager {
         }
         else if(selectedTrophicSlotRef.kingdomID == 1) {
             if (selectedTrophicSlotRef.tierID == 0) {  // ALGAE GRID
-                str = "Tiny Plants that form the foundation of the ecosystem."; //   \n\nUses: <b><color=#FBC653FF>Nutrients</color></b>\n\nProduces: <b><color=#8EDEEEFF>Oxygen</color></b>";
+                str = "Microscopic Plants that form the foundation of the ecosystem along with the Decomposers."; //   \n\nUses: <b><color=#FBC653FF>Nutrients</color></b>\n\nProduces: <b><color=#8EDEEEFF>Oxygen</color></b>";
 
                 str += "\n\n";
                 str += "<size=13><b>Total Biomass: " + simManager.simResourceManager.curGlobalAlgaeReservoir.ToString("F1") + "</b></size>\n\n";
@@ -282,7 +282,7 @@ public class TrophicLayersManager {
             }
             else { //BIG PLANTS
                 str = "Larger Plants."; //   \n\nUses: <b><color=#FBC653FF>Nutrients</color></b>\n\nProduces: <b><color=#8EDEEEFF>Oxygen</color></b>";
-
+                str += "\n\nWelcome to the Big Leagues, chloroplasts";
                 str += "\n\n";
                 str += "<size=13><b>Total Biomass: " + simManager.simResourceManager.curGlobalPlantParticles.ToString("F1") + "</b></size>\n\n";
 
