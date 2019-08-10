@@ -84,10 +84,10 @@
 				float2 curveTangent = normalize(GetFirstDerivative(particleData.worldPos.xy, particleData.p1, particleData.p2, particleData.p3, t));
 				float2 curveBitangent = float2(curveTangent.y, -curveTangent.x);
 						
-				float width = sqrt(particleData.biomass) * 0.4 * (1 - 2 * abs(0.75 - uv.y)) + 0.0725; //GetPoint1D(waterCurveData.widths.x, waterCurveData.widths.y, waterCurveData.widths.z, waterCurveData.widths.w, t) * 0.75 * (1 - saturate(testNewVignetteMask));
+				float width = sqrt(particleData.biomass) * 0.375 * (1 - 2 * abs(0.75 - uv.y)) + 0.00725; //GetPoint1D(waterCurveData.widths.x, waterCurveData.widths.y, waterCurveData.widths.z, waterCurveData.widths.w, t) * 0.75 * (1 - saturate(testNewVignetteMask));
 				
-				float freq = 10;
-				float swimAnimOffset = sin(_Time.y * freq - t * 7 + (float)inst * 0.1237) * 5;
+				float freq = 20;
+				float swimAnimOffset = sin(_Time.y * freq - t * 7 + (float)inst * 0.1237) * 4;
 				float swimAnimMask = t * saturate(1.0 - particleData.isDecaying); //saturate(1.0 - uv.y); //saturate(1.0 - t);
 				
 				float2 offset = curveBitangent * -(quadPoint.x * 4 + swimAnimOffset * swimAnimMask) * width; // * randomWidth; // *** support full vec4 widths!!!
@@ -112,7 +112,9 @@
 
 				o.color = particleData.genome;
 				float oldAgeMask = saturate((particleData.age - 1.0) * 1000);
-				o.color.a = 1.0 - oldAgeMask; // particleData.isDecaying;
+				o.color.a = saturate(particleData.age * 0.5); //  1.0 - oldAgeMask; // particleData.isDecaying;
+				o.color.x = 1.0 - particleData.isDecaying;
+				
 				//o.color = float4(saturate(particleData.isDecaying), saturate(particleData.biomass * 5), saturate(particleData.age * 0.5), 1);
 				
 				return o;
@@ -121,6 +123,7 @@
 			fixed4 frag(v2f i) : SV_Target
 			{
 				
+
 				float4 texColor = tex2D(_MainTex, i.uv);
 				
 				float val = i.color.a;
@@ -133,6 +136,9 @@
 				float circleFade = saturate(uvDist - 0.9);
 				finalColor.rgb *= saturate(1.0 - uvDist);
 				float circleMask = saturate(circleFade * 20);
+				// ****************************************************************************
+				return float4(1.0 - i.color.a, 1.0 - i.color.a, 1.0 - i.color.a, (1.0 - circleMask) * i.color.x);  // age
+
 				finalColor.a *= 1.0 - circleMask;
 				finalColor.a *= i.color.a;
 				//finalColor.rgb = float3(0.45, 0.55, 1.295) * 1.25;

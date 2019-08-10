@@ -163,7 +163,7 @@ public class SimulationManager : MonoBehaviour {
     private int recentlyAddedSpeciesID; // = masterGenomePool.completeSpeciesPoolsList.Count - 1;
     private int recentlyAddedSpeciesTimeCounter = 0;
 
-    public static float energyDifficultyMultiplier = 1f;
+    //public static float energyDifficultyMultiplier = 1f;
 
     //public bool isBrushingAgents = false;
     
@@ -359,7 +359,7 @@ public class SimulationManager : MonoBehaviour {
     }
     private void LoadingInitializePopulationGenomes() {
         masterGenomePool = new MasterGenomePool();
-        masterGenomePool.FirstTimeInitialize(numAgents, settingsManager.mutationSettingsAgents, uiManager);
+        masterGenomePool.FirstTimeInitialize(numAgents, settingsManager.mutationSettingsVertebrates, uiManager);
         
 
         // EGGSACKS:
@@ -596,7 +596,7 @@ public class SimulationManager : MonoBehaviour {
         float totalOxygenUsedByAgents = 0f;
         float totalWasteProducedByAgents = 0f;
         if(trophicLayersManager.GetAgentsOnOff()) {
-            vegetationManager.FindClosestAlgaeParticleToCritters(simStateData);
+            vegetationManager.FindClosestPlantParticleToCritters(simStateData);
             for (int i = 0; i < agentsArray.Length; i++) {
                 totalOxygenUsedByAgents += agentsArray[i].oxygenUsedLastFrame;
                 totalWasteProducedByAgents += agentsArray[i].wasteProducedLastFrame;          
@@ -646,7 +646,7 @@ public class SimulationManager : MonoBehaviour {
         
 
         if(trophicLayersManager.GetPlantsOnOff()) {
-            //vegetationManager.EatSelectedFoodParticles(simStateData); // 
+            vegetationManager.EatSelectedFoodParticles(simStateData); // 
             // How much light/nutrients available?
             vegetationManager.SimulatePlantParticles(environmentFluidManager, theRenderKing, simStateData, simResourceManager);
         }
@@ -711,8 +711,8 @@ public class SimulationManager : MonoBehaviour {
             simEventsManager.curEventBucks += 5; // temporarily high!
             simAgeYearCounter = 0;
 
-            energyDifficultyMultiplier = Mathf.Lerp(3f, 1f, (float)curSimYear / 100f);
-            Debug.Log("energyDifficultyMultiplier: " + energyDifficultyMultiplier.ToString());
+            //energyDifficultyMultiplier = Mathf.Lerp(3f, 1f, (float)curSimYear / 100f);
+            //Debug.Log("energyDifficultyMultiplier: " + energyDifficultyMultiplier.ToString());
             
             AddNewHistoricalDataEntry();
             AddNewSpeciesDataEntry(curSimYear);
@@ -1009,6 +1009,7 @@ public class SimulationManager : MonoBehaviour {
                     int randomTableIndex = UnityEngine.Random.Range(0, masterGenomePool.currentlyActiveSpeciesIDList.Count);
                     int speciesIndex = masterGenomePool.currentlyActiveSpeciesIDList[randomTableIndex];
                     CandidateAgentData candidateData = masterGenomePool.completeSpeciesPoolsList[speciesIndex].GetNextAvailableCandidate();
+
                     AttemptToSpawnAgent(a, speciesIndex, candidateData);
                     agentRespawnCounter = 0;
                 }
@@ -1038,7 +1039,10 @@ public class SimulationManager : MonoBehaviour {
             if (agentsArray[a].curLifeStage == Agent.AgentLifeStage.AwaitingRespawn) {
                           
                 CandidateAgentData candidateData = masterGenomePool.completeSpeciesPoolsList[speciesIndex].GetNextAvailableCandidate();
-                if(candidateData == null) {
+                candidateData.candidateGenome = masterGenomePool.vertebrateSlotsGenomesCurrentArray[trophicLayersManager.selectedTrophicSlotRef.slotID].representativeGenome;
+
+
+                if (candidateData == null) {
                     Debug.LogError("GetNextAvailableCandidate(): candidateData NULL!!!!");
                 }
                 else {
@@ -1132,8 +1136,8 @@ public class SimulationManager : MonoBehaviour {
         Debug.Log("CREATE CreateAgentSpecies pos: " + spawnPos.ToString());
     }
     public void ExecuteSimEvent(SimEventData eventData) {
-
-        simEventsManager.ExecuteEvent(this, eventData);
+        Debug.LogError("ExecuteSimEvent(SimEventData eventData) DISABLED");
+        //simEventsManager.ExecuteEvent(this, eventData);
     }
     // *** confirm these are set up alright       
     public void ProcessNullAgent(Agent agentRef) {   // (Upon Agent Death:)
@@ -1197,6 +1201,9 @@ public class SimulationManager : MonoBehaviour {
         // -- Select a ParentGenome from the leaderboardList and create a mutated copy (childGenome):
         //AgentGenome newGenome = sourceSpeciesPool.GetNewMutatedGenome();
         AgentGenome newGenome = sourceSpeciesPool.GetGenomeFromFitnessLottery();
+        masterGenomePool.mutationSettingsRef.defaultBodyMutationChance = 1f;
+        masterGenomePool.mutationSettingsRef.defaultBodyMutationStepSize = 1f;
+        masterGenomePool.mutationSettingsRef.mutationStrengthSlot = 0.05f;  // ************
         newGenome = sourceSpeciesPool.Mutate(newGenome, true, true);
 
         // -- Check which species this new childGenome should belong to (most likely its parent, but maybe it creates a new species or better fits in with a diff existing species)        
@@ -1232,36 +1239,14 @@ public class SimulationManager : MonoBehaviour {
         Vector3 cursorWorldPos = uiManager.curMousePositionOnWaterPlane;
         cursorWorldPos.x += UnityEngine.Random.Range(-1f, 1f) * 5f;
         cursorWorldPos.y += UnityEngine.Random.Range(-1f, 1f) * 5f;
+        // Find parent agent location:
         Vector3 spawnWorldPos = Vector3.Lerp(GetRandomFoodSpawnPosition().startPosition, cursorWorldPos, isBrushingLerp); // uiManager.curCtrlCursorPositionOnWaterPlane; // GetRandomFoodSpawnPosition().startPosition;
         
-        /*
-        if (recentlyAddedSpeciesOn) {
-
-            if(speciesIndex == recentlyAddedSpeciesID) {
-                spawnOn = true;
-                spawnWorldPos = new Vector3(recentlyAddedSpeciesWorldPos.x + UnityEngine.Random.Range(0f, 1f), recentlyAddedSpeciesWorldPos.y + UnityEngine.Random.Range(0f, 1f), 0f);
-            }
-            else {
-                Debug.Log("ERROR! couldn't spqawn correct speciesID!!!");
-            }
-        }
-        else {
-            spawnOn = true;
-        }
-        */
-        /*if(isBrushingAgents) {
-            spawnOn = true;
-
-            Debug.Log("*** ON **** SIMMANAGER isBrushingAgents = TRUE!");
-        }
-        else {
-            Debug.Log("*** OFF **** SIMMANAGER isBrushingAgents = FALSE!");
-        }*/
         if(spawnOn) {
             agentsArray[agentIndex].InitializeSpawnAgentImmaculate(settingsManager, agentIndex, sourceCandidate, spawnWorldPos); // Spawn that genome in dead Agent's body and revive it!
             theRenderKing.UpdateCritterGenericStrokesData(agentsArray[agentIndex]); //agentIndex, sourceCandidate.candidateGenome);
             numAgentsBorn++;
-            //Debug.Log("%%%%%%%% SpawnAgentImmaculates pos: " + spawnWorldPos.ToString());
+            //Debug.Log("%%%%%% SpawnAgentImmaculate pos: " + spawnWorldPos.ToString());
         }
         
     }
@@ -1310,7 +1295,7 @@ public class SimulationManager : MonoBehaviour {
 
                 // RespawnFood  // *** REFACTOR -- Need to sync egg and agent genomes to match each other
                 EggSackGenome newEggSackGenome = new EggSackGenome(eggSackIndex);
-                newEggSackGenome.SetToMutatedCopyOfParentGenome(eggSackGenomePoolArray[eggSackIndex], settingsManager.mutationSettingsAgents);
+                newEggSackGenome.SetToMutatedCopyOfParentGenome(eggSackGenomePoolArray[eggSackIndex], settingsManager.mutationSettingsVertebrates);
                 eggSackGenomePoolArray[eggSackIndex] = newEggSackGenome;
 
                 Debug.Log("BeginPregnancy! Egg[" + eggSackIndex.ToString() + "]  Agent[" + randParentAgentIndex.ToString() + "]");
@@ -1494,10 +1479,13 @@ public class SimulationManager : MonoBehaviour {
         int newSpeciesID = masterGenomePool.completeSpeciesPoolsList.Count;
                
         
-        SpeciesGenomePool newSpecies = new SpeciesGenomePool(newSpeciesID, parentSpeciesID, curSimYear, simAgeTimeSteps, settingsManager.mutationSettingsAgents);
+        SpeciesGenomePool newSpecies = new SpeciesGenomePool(newSpeciesID, parentSpeciesID, curSimYear, simAgeTimeSteps, settingsManager.mutationSettingsVertebrates);
 
         // Random Body?
         newGenome.ProcessNewSpeciesExtraMutation();
+        masterGenomePool.mutationSettingsRef.defaultBodyMutationChance = 1f;
+        masterGenomePool.mutationSettingsRef.defaultBodyMutationStepSize = 1f;
+        masterGenomePool.mutationSettingsRef.mutationStrengthSlot = 0.05f; // ****
         newGenome.GenerateInitialRandomBodyGenome(); // might break?
         AgentGenome agentGenome = newSpecies.Mutate(newGenome, true, true); //
         

@@ -159,7 +159,7 @@ void CSEatSelectedAnimalParticles (uint3 id : SV_DispatchThreadID)
 	float isAlive01 = saturate((critterSimData.embryoPercentage - 0.99) * 10000) * saturate(((1.0 - critterSimData.decayPercentage) - 0.99) * 10000);
 
 	float distanceSquared = data.y;
-	float mouthRadius = critterInitData.boundingBoxSize.x * critterSimData.growthPercentage;  // **** REMEMBER TO *0.5 EVENTUALLY FOR ACCURATE SIZE
+	float mouthRadius = 1; // critterInitData.boundingBoxSize.x * critterSimData.growthPercentage;  // **** REMEMBER TO *0.5 EVENTUALLY FOR ACCURATE SIZE
 	float particleRadius = particleData.radius;
 	float combinedRadius = (mouthRadius + particleRadius * 0.5) * isAlive01 * critterSimData.consumeOn;
 		
@@ -245,8 +245,8 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 			// Some resource conversions still occur,
 			// Still moved by water currents
 
-			float decayEfficiency = 8; // *** should be inverse of growthEfficiency?
-			float decayRate = 0.00025;
+			float decayEfficiency = 16; // *** should be inverse of growthEfficiency?
+			float decayRate = 0.0025;
 			float decayMass = decayRate * decayEfficiency;
 						
 			bodyMass -= decayMass;
@@ -307,21 +307,22 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 				float4 resourceGridSample = _ResourceGridRead.SampleLevel(_PointClamp, uv, 1);
 
 				float isAliveMask = saturate(1.0 - animalParticle.isDecaying);
-				float maxAlgaeConsumptionRate = 0.005;  // one-thousandth of biomass per tick = bodyweight consumed per 1000 ticks
+				float maxAlgaeConsumptionRate = 0.0035;  // one-thousandth of biomass per tick = bodyweight consumed per 1000 ticks
 				float algaeConsumptionMask = saturate(resourceGridSample.w * isAliveMask);  // - 0.01);  //    1; // saturate(_GlobalAlgaeLevel * 0.01);   //  if global levels are too low it reduces consumption?
 
-				float maxOxygenConsumptionRate = 0.0085; // relative to biomass?
+				float maxOxygenConsumptionRate = 0.01; // relative to biomass?
 				float oxygenConsumptionMask = 1; //saturate(_GlobalOxygenLevel * 0.01);
 
 				float algaeConsumed = bodyMass * maxAlgaeConsumptionRate * algaeConsumptionMask;
 				float oxygenUsed = bodyMass * maxOxygenConsumptionRate * oxygenConsumptionMask;
 		
-				float growthEfficiency = 0.4; //
-				float wasteEfficiency = 0.6;
+				float growthEfficiency = 7; //
+				float wasteEfficiency = 4;
 				float growthMass = algaeConsumed * growthEfficiency * oxygenConsumptionMask; // Also limited by OXYGEN!!!
 					// Maximum growth needs an explicit cap? or should it simply be determined by max algaeConsumption Rate + maxAge?
 				wasteMass += algaeConsumed * wasteEfficiency;		
 					// (The rest of energy is lost as heat)
+				animalParticle.age = max(0, animalParticle.age - algaeConsumptionMask * 0.1);  // *** revisit
 
 				bodyMass += growthMass;
 
@@ -347,8 +348,8 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 		animalParticlesWrite[id.x].velocity = posOffset;
 		
 		// SPLINE::::::
-		float restDistance = 9.8 * sqrt(animalParticle.biomass); // creature length
-		float lerpStrength = 0.24375;
+		float restDistance = 1.5 * sqrt(animalParticle.biomass); // creature length
+		float lerpStrength = 0.7375;
 
 		float2 p0 = newWorldPos;
 	
@@ -373,7 +374,7 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 		float4 spiritBrushTex = _SpawnDensityMap.SampleLevel(_LinearClamp, uv, 0);  // brush mask
 		float rightClickMask01 = saturate(_SpiritBrushPosNeg * -1);
 		// AGING:
-		animalParticlesWrite[id.x].age = animalParticle.age + 0.00005 * _AgingMult + spiritBrushTex.x * rightClickMask01 * 0.1 * _IsBrushing;
+		animalParticlesWrite[id.x].age = animalParticle.age + 0.00025 * _AgingMult + spiritBrushTex.x * rightClickMask01 * 1 * _IsBrushing;
 
 		// Resource Conversions:::::		
 		animalParticlesWrite[id.x].wasteProduced = wasteMass;	// Combined Poop & Decomposing	

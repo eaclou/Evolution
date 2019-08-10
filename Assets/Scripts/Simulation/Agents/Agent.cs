@@ -871,7 +871,8 @@ public class Agent : MonoBehaviour {
         // include reproductive stockpile energy???
 
         currentBiomass -= decayAmount;
-        wasteProducedLastFrame += decayAmount;
+        float wasteProducedMult = 1f;
+        wasteProducedLastFrame += decayAmount * wasteProducedMult;
 
         if(currentBiomass <= 0f) {
             currentBiomass = 0f;
@@ -938,7 +939,7 @@ public class Agent : MonoBehaviour {
         float digestedMeatMass = digestedAmountTotal * foodProportionsVec.y;
         float meatToEnergyAmount = digestedMeatMass; // * coreModule.foodEfficiencyMeat;        
         
-        float createdEnergyTotal = (plantToEnergyAmount + meatToEnergyAmount) * SimulationManager.energyDifficultyMultiplier;
+        float createdEnergyTotal = (plantToEnergyAmount + meatToEnergyAmount) * settingsRef.agentSettings._DigestionEnergyEfficiency;
         
         wasteProducedLastFrame += digestedAmountTotal * settingsRef.agentSettings._DigestionWasteEfficiency;
         oxygenUsedLastFrame = currentBiomass * settingsRef.agentSettings._BaseOxygenUsage;
@@ -959,7 +960,7 @@ public class Agent : MonoBehaviour {
 
         float oxygenMask = Mathf.Clamp01(simManager.simResourceManager.curGlobalOxygen * settingsRef.agentSettings._OxygenEnergyMask);
         
-        coreModule.energy += createdEnergyTotal * settingsRef.agentSettings._DigestionEnergyEfficiency * oxygenMask; 
+        coreModule.energy += createdEnergyTotal * settingsRef.agentSettings._DigestionEnergyEfficiency * oxygenMask;
 
         //if(coreModule.energy > 1f) {
         //    coreModule.energy = 1f;
@@ -997,7 +998,7 @@ public class Agent : MonoBehaviour {
         }*/
 
         //ENERGY:
-        float energyCost = currentBiomass * settingsRef.agentSettings._BaseEnergyCost * SimulationManager.energyDifficultyMultiplier; // / coreModule.energyBonus;
+        float energyCost = currentBiomass * settingsRef.agentSettings._BaseEnergyCost; // * SimulationManager.energyDifficultyMultiplier; // / coreModule.energyBonus;
         
         float throttleMag = smoothedThrottle.magnitude;
         
@@ -1025,12 +1026,15 @@ public class Agent : MonoBehaviour {
                 //mouthRef.InitiatePassiveBite();
                 //float sizeEfficiencyPlant = Mathf.Lerp(settings.minSizeFeedingEfficiencyDecay, settings.maxSizeFeedingEfficiencyDecay, sizeValue);
                 startBite = true;
+                //Debug.Log("Agent[" + index.ToString() + "], Ate Plant: " + foodParticleEatAmount.ToString());
                 EatFoodPlant(foodParticleEatAmount);                
             }
 
             float animalParticleEatAmount = simManager.zooplanktonManager.animalParticlesEatAmountsArray[index];
             if(animalParticleEatAmount > 0f) {
                 //float sizeEfficiencyPlant = Mathf.Lerp(settings.minSizeFeedingEfficiencyDecay, settings.maxSizeFeedingEfficiencyDecay, sizeValue);
+                animalParticleEatAmount *= 1f;
+                //Debug.Log("Agent[" + index.ToString() + "], Ate Zooplankton: " + animalParticleEatAmount.ToString());
                 EatFoodMeat(animalParticleEatAmount); // * sizeEfficiencyPlant);    
                 startBite = true;
             }

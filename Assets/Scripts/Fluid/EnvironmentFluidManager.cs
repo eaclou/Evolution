@@ -103,7 +103,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
 
     //public bool tick = false;
     
-    private int maxNumForcePoints = 32;
+    private int maxNumForcePoints = 64;
     public ForcePoint[] forcePointsArray;
     public ComputeBuffer forcePointsCBuffer;
     public struct ForcePoint {
@@ -190,10 +190,10 @@ public class EnvironmentFluidManager : MonoBehaviour {
         RerollForcePoints();
         debugMat.SetTexture("_MainTex", sourceColorRT);
 
-        computeShaderFluidSim.SetFloat("_ForceOn", 0f);
+        computeShaderFluidSim.SetFloat("_ForceOn", 1f);
     }
     public void RerollForcePoints() {
-        CreateForcePoints(12f, 120f, 256f);
+        CreateForcePoints(12f, 64f, 128f);
     }
     public void Tick(VegetationManager vegetationManagerRef) {
         //Debug.Log("Tick!");
@@ -271,15 +271,15 @@ public class EnvironmentFluidManager : MonoBehaviour {
     }
     private void SetCurrentsByTier() {
         float lerpAmount = 0.06f;
-        viscosity = Mathf.Lerp(viscosity, 0.002f, lerpAmount);
-        damping = Mathf.Lerp(damping, 0.00052f, lerpAmount);
+        viscosity = Mathf.Lerp(viscosity, 0.003f, lerpAmount);
+        damping = Mathf.Lerp(damping, 0.00152f, lerpAmount);
         //colorRefreshBackgroundMultiplier = Mathf.Lerp(colorRefreshBackgroundMultiplier, 0.001f, lerpAmount);
         //colorRefreshDynamicMultiplier = Mathf.Lerp(colorRefreshDynamicMultiplier, 0.0075f, lerpAmount);
 
         float baseTierLerp = Mathf.Clamp01((float)curTierWaterCurrents / 10f);
         float targetSpeed = 0.5f; // Mathf.Lerp(0f, 15f, baseTierLerp * baseTierLerp * baseTierLerp);
-        
-        forceMultiplier = Mathf.Lerp(forceMultiplier, targetSpeed, lerpAmount);
+
+        forceMultiplier = 0.5f; // Mathf.Lerp(forceMultiplier, targetSpeed, lerpAmount);
     }
     private void SetClimateInitial() {
         //Debug.Log("UpdateSimulationClimate Initial!");

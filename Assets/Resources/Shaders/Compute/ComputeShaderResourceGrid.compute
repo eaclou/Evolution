@@ -10,6 +10,7 @@
 #pragma kernel CSInitRD
 #pragma kernel CSSimRD
 #pragma kernel CSAdvectRD
+#pragma kernel CSSampleTexture
 
 
 #include "Assets/Resources/Shaders/Inc/StructsCritterData.cginc"
@@ -64,10 +65,6 @@ uniform float _SpiritBrushIntensity;
 uniform float _CoordX;
 uniform float _CoordY;
 
-//uniform float _RD_FeedRate;
-//uniform float _RD_KillRate;            
-//uniform float _RD_Scale;
-//uniform float _RD_Rate;
 
 uniform float _AlgaeUpkeep; // = 0.001;
 uniform	float _AlgaeMaxIntakeRate; // = 0.0025;
@@ -335,7 +332,7 @@ void CSSimRD (uint3 id : SV_DispatchThreadID)
 	float algaeDecayMass = saturate(netEnergy * -1.0);
 	float detritusCreated = algaeDecayMass;
 
-	float algaeGrowthMass = netEnergy;
+	float algaeGrowthMass = netEnergy * 1;
 	
 	// =============================== DECOMPOSERS ================================
 	float decomposersMass = resourceGridRead.z;
@@ -356,14 +353,14 @@ void CSSimRD (uint3 id : SV_DispatchThreadID)
 	
 	// ======================= WRITE & RETURN! ====================================
 	resourceGridRead.w += algaeGrowthMass;  // saturated later to prevent negative
-	//resourceGridRead.w -= algaeDecayMass;//
+	
 	resourceGridRead.z += decomposerGrowthMass;  // saturated later to prevent negative
 	resourceGridRead.z += decomposerDecayMass * 0.15; // ** shouldn't be necessary???
-	//resourceGridRead.x += algaeGrowthMass; 
+	
 	resourceGridRead.x -= nutrientsUsed; 
-	resourceGridRead.x += nutrientsCreated * 1.42;
+	resourceGridRead.x += nutrientsCreated * 2;
 	resourceGridRead.y -= detritusUsed;
-	resourceGridRead.y += detritusCreated * 1.42;  // // *** hacky empirical fix for balancing conservation of energy/mass
+	resourceGridRead.y += detritusCreated * 2.2;  // // *** hacky empirical fix for balancing conservation of energy/mass
 	
 	// X = nutrients
 	// Y = detritus
@@ -372,7 +369,7 @@ void CSSimRD (uint3 id : SV_DispatchThreadID)
 	
 
 	_ResourceGridWrite[id.xy] = saturate(resourceGridRead);
-	//rdWrite[id.xy] = saturate(resourceGridRead);
+	
 
 
 	
@@ -457,6 +454,16 @@ void CSAdvectRD (uint3 id : SV_DispatchThreadID)
 	
 }
 
+
+[numthreads(1,1,1)]
+void CSSampleTexture (uint3 id : SV_DispatchThreadID)
+{
+	float2 uv = float2(_CoordX, _CoordY);
+
+	float4 sample = _ResourceGridRead.SampleLevel(_PointClamp, uv, 0);
+
+	outputValuesCBuffer[0] = sample;
+}
 
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 //   OLD! REACTION DIFFUSION CoDE

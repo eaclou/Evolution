@@ -307,18 +307,19 @@ public class TrophicLayersManager {
                 str += "\n\n";
                 str += "<size=13><b>Total Biomass: " + simManager.simResourceManager.curGlobalAgentBiomass.ToString("F1") + "</b></size>\n\n";
 
+                SpeciesGenomePool GenomePool = simManager.masterGenomePool.completeSpeciesPoolsList[selectedTrophicSlotRef.linkedSpeciesID];
                 str += "<color=#8EDEEEFF>Oxygen Usage: <b>" + simManager.simResourceManager.oxygenUsedByAgentsLastFrame.ToString("F3") + "</b></color>\n";
                 str += "<color=#A97860FF>Waste Generated: <b>" + simManager.simResourceManager.wasteProducedByAgentsLastFrame.ToString("F3") + "</b></color>\n";
-                /*
-                str += "<color=#8BD06AFF>Avg Food Consumed: <b>" + (selectedPool.avgConsumptionPlant + selectedPool.avgConsumptionMeat).ToString("F3") + "</b></color>\n";
+                
+                str += "<color=#8BD06AFF>Avg Food Eaten: <b>" + (GenomePool.avgConsumptionPlant + GenomePool.avgConsumptionMeat).ToString("F3") + "</b></color>\n";
                
-                str += "\n\n\nAvg Lifespan: <b>" + (selectedPool.avgLifespan / 1500f).ToString("F1") + " Years</b>\n\n";
+                str += "\n\n\nAvg Lifespan: <b>" + (GenomePool.avgLifespan / 1500f).ToString("F1") + " Years</b>\n\n";
 
-                selectedPool.representativeGenome.bodyGenome.CalculateFullsizeBoundingBox();
-                str += "Avg Body Size: <b>" + ((selectedPool.representativeGenome.bodyGenome.fullsizeBoundingBox.x + selectedPool.representativeGenome.bodyGenome.fullsizeBoundingBox.y) * 0.5f * selectedPool.representativeGenome.bodyGenome.fullsizeBoundingBox.z).ToString("F2") + "</b>\n";
+                GenomePool.representativeGenome.bodyGenome.CalculateFullsizeBoundingBox();
+                str += "Avg Body Size: <b>" + ((GenomePool.representativeGenome.bodyGenome.fullsizeBoundingBox.x + GenomePool.representativeGenome.bodyGenome.fullsizeBoundingBox.y) * 0.5f * GenomePool.representativeGenome.bodyGenome.fullsizeBoundingBox.z).ToString("F2") + "</b>\n";
                                                        
-                str += "Avg Brain Size: <b>" + ((selectedPool.avgNumNeurons + selectedPool.avgNumAxons) * 0.1f).ToString("F1") + "</b>\n";
-                */
+                str += "Avg Brain Size: <b>" + ((GenomePool.avgNumNeurons + GenomePool.avgNumAxons) * 0.1f).ToString("F1") + "</b>\n";
+                
             }            
         }
         else {

@@ -70,6 +70,7 @@ public class UIManager : MonoBehaviour {
     public bool isActiveInfoPanel = false;
     public bool isActiveInfoResourcesTab = true;  // toggle between resources tab and species tab
     public GameObject panelInfoExpanded;
+    public Text textGlobalMass;
     public Button buttonInfoTime;
     public Button buttonInfoOpenClose;
     public Button buttonTabResourcesOverview;
@@ -1038,6 +1039,26 @@ public class UIManager : MonoBehaviour {
         }*/
     }
 
+    public Vector4 SampleTexture(RenderTexture tex, Vector2 uv) {
+        Vector4[] sample = new Vector4[1];
+
+
+        ComputeBuffer outputBuffer = new ComputeBuffer(1, sizeof(float) * 4);
+        outputBuffer.SetData(sample);
+        int kernelCSSampleTexture = gameManager.simulationManager.computeShaderResourceGrid.FindKernel("CSSampleTexture");
+        gameManager.simulationManager.computeShaderResourceGrid.SetTexture(kernelCSSampleTexture, "_ResourceGridRead", tex);
+        gameManager.simulationManager.computeShaderResourceGrid.SetBuffer(kernelCSSampleTexture, "outputValuesCBuffer", outputBuffer);
+        gameManager.simulationManager.computeShaderResourceGrid.SetFloat("_CoordX", uv.x);
+        gameManager.simulationManager.computeShaderResourceGrid.SetFloat("_CoordY", uv.y); 
+        // DISPATCH !!!
+        gameManager.simulationManager.computeShaderResourceGrid.Dispatch(kernelCSSampleTexture, 1, 1, 1);
+        
+        outputBuffer.GetData(sample);
+
+        outputBuffer.Release();
+
+        return sample[0];
+    }
     private string GetSpiritBrushSummary() {
         string str = "";
 
@@ -1080,7 +1101,7 @@ public class UIManager : MonoBehaviour {
                 simManager.uiManager.buttonToolbarExpandOn.interactable = true;)
                 */
         if(!inspectToolUnlocked) {
-            if(gameManager.simulationManager.simResourceManager.curGlobalAgentBiomass > 0.6f) {
+            if(gameManager.simulationManager.simResourceManager.curGlobalAgentBiomass > 0f) {
                 // Unlock!!!!
                 AnnounceUnlockInspect();
                 inspectToolUnlocked = true;
@@ -1144,7 +1165,7 @@ public class UIManager : MonoBehaviour {
         wireDecomposers.SetActive(false);
 
         float smallThumbnailSize = 40f;
-        float largeThumbnailSize = 80f;
+        float largeThumbnailSize = 120f;
         float spiritBrushThumbnailSize = smallThumbnailSize;
         float paletteSlotThumbnailSize = largeThumbnailSize;
         wireSpiritBrush.SetActive(true);
@@ -1386,10 +1407,23 @@ public class UIManager : MonoBehaviour {
                 imageToolbarSpeciesPortraitBorder.color = displayCol;
             }
             else if (layerManager.selectedTrophicSlotRef.kingdomID == 1) {
-                imageToolbarSpeciesPortraitRender.sprite = spriteAlgaePortrait;
-                buttonToolbarWingDeleteSpecies.gameObject.SetActive(true);
-                imageToolbarSpeciesPortraitBorder.color = gameManager.simulationManager.vegetationManager.algaeSlotGenomeCurrent.displayColor;
-                // Big Plants        
+                if(layerManager.selectedTrophicSlotRef.tierID == 0) {
+                    imageToolbarSpeciesPortraitRender.sprite = spriteAlgaePortrait;
+                    buttonToolbarWingDeleteSpecies.gameObject.SetActive(true);
+                    imageToolbarSpeciesPortraitBorder.color = gameManager.simulationManager.vegetationManager.algaeSlotGenomeCurrent.displayColor;
+                }
+                else {
+                      
+                // Big Plants   
+                     imageToolbarSpeciesPortraitRender.sprite = spriteAlgaePortrait;
+                    Vector3 hue = gameManager.simulationManager.vegetationManager.plantSlotGenomeCurrent.plantRepData.hue;
+                    Color colo = new Color(hue.x, hue.y, hue.z);
+                    imageToolbarSpeciesPortraitRender.color = colo;
+                    buttonToolbarWingDeleteSpecies.gameObject.SetActive(true);
+                    imageToolbarSpeciesPortraitBorder.color = colo;
+                }
+                
+                       
             }
             else if (layerManager.selectedTrophicSlotRef.kingdomID == 2) {
                 buttonToolbarWingDeleteSpecies.gameObject.SetActive(true); 
@@ -1401,10 +1435,13 @@ public class UIManager : MonoBehaviour {
                     imageToolbarSpeciesPortraitRender.sprite = null;
                     imageToolbarSpeciesPortraitRender.color = Color.white;
                     // BORDER:
-                    Color hue = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[layerManager.selectedTrophicSlotRef.slotID].displayColor;//    linkedSpeciesID].representativeGenome.bodyGenome.appearanceGenome.hueSecondary;
-                    hue.a = 1f;
+                    //Color hue = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[layerManager.selectedTrophicSlotRef.slotID].displayColor;//    linkedSpeciesID].representativeGenome.bodyGenome.appearanceGenome.hueSecondary;
+                    Vector3 hue = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[layerManager.selectedTrophicSlotRef.slotID].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
+                    Debug.Log("ADSF: " + hue.ToString());
+                    //gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[layerManager.selectedTrophicSlotRef.slotID].representativeGenome;
+                    //hue.a = 1f;
                     //Vector3 hue = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[layerManager.selectedTrophicSlotRef.linkedSpeciesID].representativeGenome.bodyGenome.appearanceGenome.hueSecondary;
-                    imageToolbarSpeciesPortraitBorder.color = hue; // new Color(hue.x, hue.y, hue.z); 
+                    imageToolbarSpeciesPortraitBorder.color = new Color(hue.x, hue.y, hue.z); 
                         
                     buttonToolbarWingDeleteSpecies.gameObject.SetActive(true); 
                 }
@@ -1573,9 +1610,11 @@ public class UIManager : MonoBehaviour {
                 gameManager.simulationManager.vegetationManager.GenerateWorldLayerAlgaeGridGenomeMutationOptions();
             }
             else {
-                gameManager.simulationManager.vegetationManager.plantSlotGenomeCurrent = gameManager.simulationManager.vegetationManager.plantSlotGenomeMutations[selectedToolbarMutationID];
-
+                // OLD //gameManager.simulationManager.vegetationManager.plantSlotGenomeCurrent = gameManager.simulationManager.vegetationManager.plantSlotGenomeMutations[selectedToolbarMutationID];
+                gameManager.simulationManager.vegetationManager.plantSlotGenomeCurrent.plantRepData = gameManager.simulationManager.vegetationManager.plantSlotGenomeMutations[selectedToolbarMutationID].plantRepData;
+                gameManager.simulationManager.vegetationManager.ProcessPlantSlotMutation();
                 gameManager.simulationManager.vegetationManager.GenerateWorldLayerPlantParticleGenomeMutationOptions();
+                 
             }
             
             //gameManager.simulationManager.vegetationManager.ProcessSlotMutation();
@@ -1588,9 +1627,24 @@ public class UIManager : MonoBehaviour {
                 gameManager.simulationManager.zooplanktonManager.ProcessSlotMutation();
             }
             else { // vertebrates
-                gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[slotRef.slotID] = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotRef.slotID][selectedToolbarMutationID];
+                // *** REFERENCE ISSUE!!!!!
+                AgentGenome parentGenome = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotRef.slotID][selectedToolbarMutationID].representativeGenome;
+                //generate "mutated" genome copy with 0 mutationSize ??? workaround:::::  ***********
+                gameManager.simulationManager.settingsManager.mutationSettingsVertebrates.mutationStrengthSlot = 0f;
+
+                //vertebrateSlotsGenomesCurrentArray[slotID].representativeGenome  // **** Use this genome as basis?
+                AgentGenome mutatedGenome = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[0].Mutate(parentGenome, true, true);  // does speciesPoolIndex matter?
+
+                gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[slotRef.slotID].representativeGenome = mutatedGenome;
+                //gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotRef.slotID][selectedToolbarMutationID];
+                //gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[slotRef.slotID].representativeGenome.bodyGenome.appearanceGenome.huePrimary = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotRef.slotID][selectedToolbarMutationID].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
+
+                Debug.Log("CONFIR<M  " + gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[slotRef.slotID].representativeGenome.bodyGenome.appearanceGenome.huePrimary.ToString());
+                //gameManager.simulationManager.masterGenomePool.
+                //gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[slotRef.linkedSpeciesID].representativeGenome = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[slotRef.slotID].representativeGenome;
+
                 gameManager.simulationManager.masterGenomePool.GenerateWorldLayerVertebrateGenomeMutationOptions(slotRef.slotID, slotRef.linkedSpeciesID);
-                gameManager.simulationManager.masterGenomePool.ProcessSlotMutation(slotRef.slotID, selectedToolbarMutationID, slotRef.linkedSpeciesID);
+                //gameManager.simulationManager.masterGenomePool.ProcessSlotMutation(slotRef.slotID, selectedToolbarMutationID, slotRef.linkedSpeciesID);
                 InitToolbarPortraitCritterData(slotRef);
             }
         }
@@ -1794,19 +1848,27 @@ public class UIManager : MonoBehaviour {
                 //textMutationPanelOptionD.text = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][3].textDescriptionMutation;
 
                 int speciesID = layerManager.selectedTrophicSlotRef.linkedSpeciesID;
-                //Vector3 hue0 = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][0].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
-                imageMutationPanelThumbnailA.color = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][0].displayColor; // new Color(hue0.x, hue0.y, hue0.z); 
-                //Vector3 hue1 = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][1].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
-                imageMutationPanelThumbnailB.color = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][1].displayColor; //
-                //Vector3 hue2 = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][2].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
-                imageMutationPanelThumbnailC.color = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][2].displayColor; //
-                //Vector3 hue3 = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][3].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
-                imageMutationPanelThumbnailD.color = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][3].displayColor; //
+                Vector3 hue0 = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][0].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
+                imageMutationPanelThumbnailA.color = new Color(hue0.x, hue0.y, hue0.z); // gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][0].displayColor; // new Color(hue0.x, hue0.y, hue0.z); 
+                Vector3 hue1 = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][1].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
+                imageMutationPanelThumbnailB.color = new Color(hue1.x, hue1.y, hue1.z); // gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][1].displayColor; //
+                Vector3 hue2 = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][2].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
+                imageMutationPanelThumbnailC.color = new Color(hue2.x, hue2.y, hue2.z); // gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][2].displayColor; //
+                Vector3 hue3 = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][3].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
+                imageMutationPanelThumbnailD.color = new Color(hue3.x, hue3.y, hue3.z); // gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][3].displayColor; //
                 //Vector3 hue0 = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
 
-                Vector3 hueCur = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][0].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
-                imageMutationPanelCurPortrait.color = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[slotID].displayColor; // new Color(hueCur.x, hueCur.y, hueCur.z);
+                Vector3 hue = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[layerManager.selectedTrophicSlotRef.slotID].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
+                Debug.Log("ADSF: " + hue.ToString());
+                //Vector3 hueCur = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][0].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
+                Color thumbCol = new Color(hue.x, hue.y, hue.z); 
+                imageMutationPanelCurPortrait.color = thumbCol;
+                imageMutationPanelCurPortrait.sprite = null;
 
+                //imageMutationPanelCurPortrait.color = Color.white;
+                Vector3 hueNew = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][selectedToolbarMutationID].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
+                imageToolbarSpeciesPortraitBorder.color = thumbCol; 
+                imageMutationPanelNewPortrait.color = new Color(hueNew.x, hueNew.y, hueNew.z); // uiColor;
                 textMutationPanelCur.text = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[slotID].name; // "Reaction Rate: " + gameManager.simulationManager.vegetationManager.decomposerSlotGenomeCurrent.reactionRate.ToString();
                 textMutationPanelNew.text = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][selectedToolbarMutationID].textDescriptionMutation; // "placeholder";
             }
@@ -1908,6 +1970,8 @@ public class UIManager : MonoBehaviour {
     public void UpdateInfoPanelUI() {
         textCurYear.text = (gameManager.simulationManager.curSimYear + 1).ToString();
 
+
+        textGlobalMass.text = "Global Biomass: " + gameManager.simulationManager.simResourceManager.curTotalMass.ToString("F0");
         SimResourceManager resourcesRef = gameManager.simulationManager.simResourceManager;
         textMeterOxygen.text = resourcesRef.curGlobalOxygen.ToString("F0");
         textMeterNutrients.text = resourcesRef.curGlobalNutrients.ToString("F0");
@@ -2146,7 +2210,11 @@ public class UIManager : MonoBehaviour {
         debugTxtResources += "\nDead Agents: " + simManager.simResourceManager.curGlobalCarrionVolume.ToString();
         debugTxtResources += "\nEggSacks: " + simManager.simResourceManager.curGlobalEggSackVolume.ToString();
         debugTxtResources += "\nGlobal Mass: " + simManager.simResourceManager.curTotalMass.ToString();
-        
+        Vector4 resourceGridSample = SampleTexture(simManager.vegetationManager.resourceGridRT1, curMousePositionOnWaterPlane / SimulationManager._MapSize);
+        Vector4 simTansferSample = SampleTexture(simManager.vegetationManager.resourceSimTransferRT, curMousePositionOnWaterPlane / SimulationManager._MapSize) * 100f;
+        //Debug.Log("curMousePositionOnWaterPlane: " + curMousePositionOnWaterPlane.ToString());
+        debugTxtResources += "\nresourceGridSample: (" + resourceGridSample.x.ToString("F4") + ", " + resourceGridSample.y.ToString("F4") + ", " + resourceGridSample.z.ToString("F4") + ", " + resourceGridSample.w.ToString("F4") + ")";
+        debugTxtResources += "\nsimTansferSample: (" + simTansferSample.x.ToString("F4") + ", " + simTansferSample.y.ToString("F4") + ", " + simTansferSample.z.ToString("F4") + ", " + simTansferSample.w.ToString("F4") + ")";
 
         textDebugTrainingInfo2.text = debugTxtResources;
 
@@ -3626,7 +3694,9 @@ public class UIManager : MonoBehaviour {
                 int speciesIndex = slot.linkedSpeciesID;
                 gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[slot.slotID].representativeGenome = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesIndex].representativeGenome;
                 gameManager.simulationManager.masterGenomePool.GenerateWorldLayerVertebrateGenomeMutationOptions(slot.slotID, slot.linkedSpeciesID);
-                
+
+                Debug.Log("ADSF: " + gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[slot.slotID].representativeGenome.bodyGenome.appearanceGenome.huePrimary.ToString());
+
                 // duplicated code shared with clickAgentButton :(   bad 
                 //
                 //gameManager.simulationManager.trophicLayersManager.isSelectedTrophicSlot = true;

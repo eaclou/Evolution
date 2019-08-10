@@ -68,19 +68,20 @@ public class CritterModuleAppearanceGenome {
 
     public void SetToMutatedCopyOfParentGenome(CritterModuleAppearanceGenome parentGenome, MutationSettings settings) {
 
-        huePrimary = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.huePrimary, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
-        hueSecondary = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.hueSecondary, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
+        float slotMult = settings.mutationStrengthSlot;
+        huePrimary = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.huePrimary, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0f, 1f);
+        hueSecondary = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.hueSecondary, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0f, 1f);
         // ***** v v v Revisit when implementing #BrushTypes!! **** REVISIT!!
-        bodyStrokeBrushTypeX = UtilityMutationFunctions.GetMutatedIntAdditive(parentGenome.bodyStrokeBrushTypeX, settings.defaultBodyMutationChance * 0.2f, 2, 0, 7); // *****
-        bodyStrokeBrushTypeY = UtilityMutationFunctions.GetMutatedIntAdditive(parentGenome.bodyStrokeBrushTypeY, settings.defaultBodyMutationChance * 0.2f, 2, 0, 3);
+        bodyStrokeBrushTypeX = UtilityMutationFunctions.GetMutatedIntAdditive(parentGenome.bodyStrokeBrushTypeX, settings.defaultBodyMutationChance * 0.2f * slotMult, 2, 0, 7); // *****
+        bodyStrokeBrushTypeY = UtilityMutationFunctions.GetMutatedIntAdditive(parentGenome.bodyStrokeBrushTypeY, settings.defaultBodyMutationChance * 0.2f * slotMult, 2, 0, 3);
 
         eyeGenome = new EyeGenome();
 
-        eyeGenome.localPos = UtilityMutationFunctions.GetMutatedVector2Additive(parentGenome.eyeGenome.localPos, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, new Vector2(0.45f, 0.4f), new Vector2(1f, 1f));
+        eyeGenome.localPos = UtilityMutationFunctions.GetMutatedVector2Additive(parentGenome.eyeGenome.localPos, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, new Vector2(0.45f, 0.4f), new Vector2(1f, 1f));
         // EYES SCALE IS: (x= size, y= aspectRatio)
-        eyeGenome.localScale = UtilityMutationFunctions.GetMutatedVector2Additive(parentGenome.eyeGenome.localScale, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, new Vector2(1f, 1f), new Vector2(1f, 1f));
-        eyeGenome.irisHue = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.eyeGenome.irisHue, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
-        eyeGenome.pupilHue = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.eyeGenome.pupilHue, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
+        eyeGenome.localScale = UtilityMutationFunctions.GetMutatedVector2Additive(parentGenome.eyeGenome.localScale, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, new Vector2(1f, 1f), new Vector2(1f, 1f));
+        eyeGenome.irisHue = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.eyeGenome.irisHue, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0f, 1f);
+        eyeGenome.pupilHue = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.eyeGenome.pupilHue, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0f, 1f);
         eyeGenome.eyeBrushType = UtilityMutationFunctions.GetMutatedIntAdditive(parentGenome.eyeGenome.eyeBrushType, settings.defaultBodyMutationChance, 7, 0, 7);
         //eyeGenome.pupilRadius = UtilityMutationFunctions.GetMutatedFloatAdditive(parentBodyGenome.eyeGenome.pupilRadius, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.25f, 0.95f);
         

@@ -41,8 +41,8 @@ public class VegetationManager {
     
     private ComputeBuffer resourceGridAgentSamplesCBuffer;
 
-    private const int numAlgaeParticles = 1024;  // *** 
-    public ComputeBuffer algaeParticlesCBuffer;
+    private const int numPlantParticles = 1024;  // *** 
+    public ComputeBuffer plantParticlesCBuffer;
     private ComputeBuffer plantParticlesRepresentativeGenomeCBuffer;
     private ComputeBuffer algaeParticlesCBufferSwap;    
     private RenderTexture algaeParticlesNearestCritters1024;
@@ -85,7 +85,7 @@ public class VegetationManager {
         public Vector3 hue;
     }
     
-    private int GetAlgaeParticleDataSize() {
+    private int GetPlantParticleDataSize() {
         int bitSize = sizeof(float) * 15 + sizeof(int) * 3;
         return bitSize;
     }
@@ -106,6 +106,9 @@ public class VegetationManager {
         PlantParticleData[] plantParticlesRepresentativeGenomeArray = new PlantParticleData[1];
         plantParticlesRepresentativeGenomeArray[0] = plantSlotGenomeCurrent.plantRepData;
         plantParticlesRepresentativeGenomeCBuffer.SetData(plantParticlesRepresentativeGenomeArray);
+
+        Vector3 hue = plantSlotGenomeCurrent.plantRepData.hue;
+        plantSlotGenomeCurrent.displayColor = new Color(hue.x, hue.y, hue.z);
     }
 
     // PLANT PARTICLES:::::
@@ -144,14 +147,14 @@ public class VegetationManager {
         //Debug.Log((Time.realtimeSinceStartup - startTime).ToString());
         computeShaderPlantParticles = computeShader;
         
-        algaeParticlesCBuffer = new ComputeBuffer(numAlgaeParticles, GetAlgaeParticleDataSize());
-        algaeParticlesCBufferSwap = new ComputeBuffer(numAlgaeParticles, GetAlgaeParticleDataSize());
-        PlantParticleData[] algaeParticlesArray = new PlantParticleData[numAlgaeParticles];
+        plantParticlesCBuffer = new ComputeBuffer(numPlantParticles, GetPlantParticleDataSize());
+        algaeParticlesCBufferSwap = new ComputeBuffer(numPlantParticles, GetPlantParticleDataSize());
+        PlantParticleData[] plantParticlesArray = new PlantParticleData[numPlantParticles];
 
         float minParticleSize = settingsRef.avgAlgaeParticleRadius / settingsRef.algaeParticleRadiusVariance;
         float maxParticleSize = settingsRef.avgAlgaeParticleRadius * settingsRef.algaeParticleRadiusVariance;
 
-        for(int i = 0; i < algaeParticlesCBuffer.count; i++) {
+        for(int i = 0; i < plantParticlesCBuffer.count; i++) {
             PlantParticleData data = new PlantParticleData();
             data.index = i;            
             data.worldPos = new Vector2(UnityEngine.Random.Range(0f, SimulationManager._MapSize), UnityEngine.Random.Range(0f, SimulationManager._MapSize));
@@ -162,15 +165,15 @@ public class VegetationManager {
             data.isDecaying = 0f;
             data.age = UnityEngine.Random.Range(1f, 2f);
             data.hue = new Vector3(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f));
-            algaeParticlesArray[i] = data;
+            plantParticlesArray[i] = data;
         }
         //Debug.Log("Fill Initial Particle Array Data CPU: " + (Time.realtimeSinceStartup - startTime).ToString());
 
-        algaeParticlesCBuffer.SetData(algaeParticlesArray);
-        algaeParticlesCBufferSwap.SetData(algaeParticlesArray);
+        plantParticlesCBuffer.SetData(plantParticlesArray);
+        algaeParticlesCBufferSwap.SetData(plantParticlesArray);
         //Debug.Log("Set Data GPU: " + (Time.realtimeSinceStartup - startTime).ToString());
 
-        algaeParticlesNearestCritters1024 = new RenderTexture(numAlgaeParticles, numAgents, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+        algaeParticlesNearestCritters1024 = new RenderTexture(numPlantParticles, numAgents, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
         algaeParticlesNearestCritters1024.wrapMode = TextureWrapMode.Clamp;
         algaeParticlesNearestCritters1024.filterMode = FilterMode.Point;
         algaeParticlesNearestCritters1024.enableRandomWrite = true;        
@@ -189,14 +192,14 @@ public class VegetationManager {
         algaeParticlesNearestCritters1.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
         //Debug.Log("Pre Buffer Creation: " + (Time.realtimeSinceStartup - startTime).ToString());
         closestAlgaeParticlesDataArray = new PlantParticleData[numAgents];
-        closestAlgaeParticlesDataCBuffer = new ComputeBuffer(numAgents, GetAlgaeParticleDataSize());
+        closestAlgaeParticlesDataCBuffer = new ComputeBuffer(numAgents, GetPlantParticleDataSize());
 
         algaeParticlesEatAmountsCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 1);
         algaeParticlesEatAmountsArray = new float[numAgents];
 
         algaeParticleMeasurementTotalsData = new PlantParticleData[1];
-        algaeParticlesMeasure32 = new ComputeBuffer(32, GetAlgaeParticleDataSize());
-        algaeParticlesMeasure1 = new ComputeBuffer(1, GetAlgaeParticleDataSize());
+        algaeParticlesMeasure32 = new ComputeBuffer(32, GetPlantParticleDataSize());
+        algaeParticlesMeasure1 = new ComputeBuffer(1, GetPlantParticleDataSize());
         //Debug.Log("End: " + (Time.realtimeSinceStartup - startTime).ToString());
         
         
@@ -217,12 +220,12 @@ public class VegetationManager {
         // initialized in InitializeAlgaePArticles() method *** missing here
         plantSlotGenomeMutations = new WorldLayerPlantGenome[4];
 
-
+        plantSlotGenomeCurrent.plantRepData = plantParticlesArray[0];
         
-        plantParticlesRepresentativeGenomeCBuffer = new ComputeBuffer(1, GetAlgaeParticleDataSize());
+        plantParticlesRepresentativeGenomeCBuffer = new ComputeBuffer(1, GetPlantParticleDataSize());
         PlantParticleData[] plantParticlesRepresentativeGenomeArray = new PlantParticleData[1];
         Debug.Log(" BADFHADFHADF" + plantSlotGenomeCurrent.name);
-        plantParticlesRepresentativeGenomeArray[0] = algaeParticlesArray[0]; // plantSlotGenomeCurrent.plantRepData;
+        plantParticlesRepresentativeGenomeArray[0] = plantParticlesArray[0]; // plantSlotGenomeCurrent.plantRepData;
         plantParticlesRepresentativeGenomeCBuffer.SetData(plantParticlesRepresentativeGenomeArray);
         
 
@@ -365,8 +368,8 @@ public class VegetationManager {
             col = Color.Lerp(col, randColor, jLerp);
             mutatedGenome.displayColor = col;
 
-            float minIntakeRate = tempSharedIntakeRate * 0.36f;
-            float maxIntakeRate = tempSharedIntakeRate * 2.42f; // init around 1?
+            float minIntakeRate = tempSharedIntakeRate * 0.1f;
+            float maxIntakeRate = tempSharedIntakeRate * 10f; // init around 1?
             float lnLerp = UnityEngine.Random.Range(0f, 1f);
             lnLerp *= lnLerp;
             mutatedGenome.metabolicRate = Mathf.Lerp(minIntakeRate, maxIntakeRate, lnLerp);
@@ -386,10 +389,10 @@ public class VegetationManager {
             float jLerp = Mathf.Clamp01((float)j / 3f + 0.015f); 
             jLerp = jLerp * jLerp;
             WorldLayerPlantGenome mutatedGenome = new WorldLayerPlantGenome();
-            Color randColor = UnityEngine.Random.ColorHSV();
-            Color col = plantSlotGenomeCurrent.displayColor;
-            col = Color.Lerp(col, randColor, jLerp);
-            mutatedGenome.displayColor = col;
+            //Color randColor = UnityEngine.Random.ColorHSV();
+            //Color col = plantSlotGenomeCurrent.displayColor;
+            //col = Color.Lerp(col, randColor, jLerp);
+            //mutatedGenome.displayColor = col;
 
             float minRate = 0.5f;
             float maxRate = 1.75f;
@@ -398,8 +401,13 @@ public class VegetationManager {
 
             mutatedGenome.name = plantSlotGenomeCurrent.name;
             mutatedGenome.textDescriptionMutation = "Growth Rate: " + mutatedGenome.growthRate.ToString("F2");
+
+            mutatedGenome.plantRepData = plantSlotGenomeCurrent.plantRepData;
+            mutatedGenome.plantRepData.hue = Vector3.Lerp(mutatedGenome.plantRepData.hue, UnityEngine.Random.insideUnitSphere, 0.1f);
             
             plantSlotGenomeMutations[j] = mutatedGenome;
+            Vector3 hue = mutatedGenome.plantRepData.hue;
+            plantSlotGenomeMutations[j].displayColor = new Color(hue.x, hue.y, hue.z);
         }
     }
 
@@ -479,7 +487,7 @@ public class VegetationManager {
 
         int kernelCSSimulateAlgaeParticles = computeShaderPlantParticles.FindKernel("CSSimulateAlgaeParticles");
         computeShaderPlantParticles.SetBuffer(kernelCSSimulateAlgaeParticles, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
-        computeShaderPlantParticles.SetBuffer(kernelCSSimulateAlgaeParticles, "foodParticlesRead", algaeParticlesCBuffer);
+        computeShaderPlantParticles.SetBuffer(kernelCSSimulateAlgaeParticles, "foodParticlesRead", plantParticlesCBuffer);
         computeShaderPlantParticles.SetBuffer(kernelCSSimulateAlgaeParticles, "foodParticlesWrite", algaeParticlesCBufferSwap);
         computeShaderPlantParticles.SetTexture(kernelCSSimulateAlgaeParticles, "velocityRead", fluidManagerRef._VelocityA);        
         computeShaderPlantParticles.SetTexture(kernelCSSimulateAlgaeParticles, "altitudeRead", renderKingRef.baronVonTerrain.terrainHeightDataRT);
@@ -538,7 +546,7 @@ public class VegetationManager {
         // Copy/Swap Food Particle Buffer:
         int kernelCSCopyFoodParticlesBuffer = computeShaderPlantParticles.FindKernel("CSCopyFoodParticlesBuffer");
         computeShaderPlantParticles.SetBuffer(kernelCSCopyFoodParticlesBuffer, "foodParticlesRead", algaeParticlesCBufferSwap);
-        computeShaderPlantParticles.SetBuffer(kernelCSCopyFoodParticlesBuffer, "foodParticlesWrite", algaeParticlesCBuffer);        
+        computeShaderPlantParticles.SetBuffer(kernelCSCopyFoodParticlesBuffer, "foodParticlesWrite", plantParticlesCBuffer);        
         computeShaderPlantParticles.Dispatch(kernelCSCopyFoodParticlesBuffer, 1, 1, 1);        
         
     }
@@ -554,7 +562,7 @@ public class VegetationManager {
         int kernelCSEatSelectedFoodParticles = computeShaderPlantParticles.FindKernel("CSEatSelectedFoodParticles");
         computeShaderPlantParticles.SetBuffer(kernelCSEatSelectedFoodParticles, "critterInitDataCBuffer", simStateDataRef.critterInitDataCBuffer);
         computeShaderPlantParticles.SetBuffer(kernelCSEatSelectedFoodParticles, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
-        computeShaderPlantParticles.SetBuffer(kernelCSEatSelectedFoodParticles, "foodParticlesRead", algaeParticlesCBuffer);
+        computeShaderPlantParticles.SetBuffer(kernelCSEatSelectedFoodParticles, "foodParticlesRead", plantParticlesCBuffer);
         computeShaderPlantParticles.SetBuffer(kernelCSEatSelectedFoodParticles, "foodParticlesWrite", algaeParticlesCBufferSwap);
         computeShaderPlantParticles.SetBuffer(kernelCSEatSelectedFoodParticles, "foodParticlesEatAmountsCBuffer", algaeParticlesEatAmountsCBuffer);        
         computeShaderPlantParticles.SetBuffer(kernelCSEatSelectedFoodParticles, "closestParticlesDataCBuffer", closestAlgaeParticlesDataCBuffer);  
@@ -570,31 +578,31 @@ public class VegetationManager {
         // Copy/Swap Food PArticle Buffer:
         int kernelCSCopyFoodParticlesBuffer = computeShaderPlantParticles.FindKernel("CSCopyFoodParticlesBuffer");
         computeShaderPlantParticles.SetBuffer(kernelCSCopyFoodParticlesBuffer, "foodParticlesRead", algaeParticlesCBufferSwap);
-        computeShaderPlantParticles.SetBuffer(kernelCSCopyFoodParticlesBuffer, "foodParticlesWrite", algaeParticlesCBuffer);
+        computeShaderPlantParticles.SetBuffer(kernelCSCopyFoodParticlesBuffer, "foodParticlesWrite", plantParticlesCBuffer);
         computeShaderPlantParticles.Dispatch(kernelCSCopyFoodParticlesBuffer, 1, 1, 1);
     }
-    public void FindClosestAlgaeParticleToCritters(SimulationStateData simStateDataRef) {  // need to send info on closest particle pos/dir/amt back to CPU also
+    public void FindClosestPlantParticleToCritters(SimulationStateData simStateDataRef) {  // need to send info on closest particle pos/dir/amt back to CPU also
         
         // Populate main RenderTexture with distances for each foodParticle to each Critter:
 
         int kernelCSMeasureInitCritterDistances = computeShaderPlantParticles.FindKernel("CSMeasureInitCritterDistances");
         computeShaderPlantParticles.SetBuffer(kernelCSMeasureInitCritterDistances, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
         computeShaderPlantParticles.SetBuffer(kernelCSMeasureInitCritterDistances, "critterInitDataCBuffer", simStateDataRef.critterInitDataCBuffer);
-        computeShaderPlantParticles.SetBuffer(kernelCSMeasureInitCritterDistances, "foodParticlesRead", algaeParticlesCBuffer);        
+        computeShaderPlantParticles.SetBuffer(kernelCSMeasureInitCritterDistances, "foodParticlesRead", plantParticlesCBuffer);        
         computeShaderPlantParticles.SetTexture(kernelCSMeasureInitCritterDistances, "foodParticlesNearestCrittersRT", algaeParticlesNearestCritters1024);        
-        computeShaderPlantParticles.Dispatch(kernelCSMeasureInitCritterDistances, algaeParticlesCBuffer.count / 1024, simStateDataRef.critterSimDataCBuffer.count, 1);
+        computeShaderPlantParticles.Dispatch(kernelCSMeasureInitCritterDistances, plantParticlesCBuffer.count / 1024, simStateDataRef.critterSimDataCBuffer.count, 1);
         
         // Reduce from 1024 --> 32 particles per critter:
         int kernelCSReduceCritterDistances32 = computeShaderPlantParticles.FindKernel("CSReduceCritterDistances32");
         computeShaderPlantParticles.SetTexture(kernelCSReduceCritterDistances32, "critterDistancesRead", algaeParticlesNearestCritters1024);
         computeShaderPlantParticles.SetTexture(kernelCSReduceCritterDistances32, "critterDistancesWrite", algaeParticlesNearestCritters32);
-        computeShaderPlantParticles.SetBuffer(kernelCSReduceCritterDistances32, "foodParticlesRead", algaeParticlesCBuffer);        
+        computeShaderPlantParticles.SetBuffer(kernelCSReduceCritterDistances32, "foodParticlesRead", plantParticlesCBuffer);        
         computeShaderPlantParticles.Dispatch(kernelCSReduceCritterDistances32, 32, simStateDataRef.critterSimDataCBuffer.count, 1);
         
         // Reduce from 32 --> 1 particles per critter:
         computeShaderPlantParticles.SetTexture(kernelCSReduceCritterDistances32, "critterDistancesRead", algaeParticlesNearestCritters32);
         computeShaderPlantParticles.SetTexture(kernelCSReduceCritterDistances32, "critterDistancesWrite", algaeParticlesNearestCritters1);
-        computeShaderPlantParticles.SetBuffer(kernelCSReduceCritterDistances32, "foodParticlesRead", algaeParticlesCBuffer);
+        computeShaderPlantParticles.SetBuffer(kernelCSReduceCritterDistances32, "foodParticlesRead", plantParticlesCBuffer);
         computeShaderPlantParticles.SetBuffer(kernelCSReduceCritterDistances32, "closestParticlesDataCBuffer", closestAlgaeParticlesDataCBuffer);
         computeShaderPlantParticles.Dispatch(kernelCSReduceCritterDistances32, 1, simStateDataRef.critterSimDataCBuffer.count, 1);
 
@@ -611,7 +619,7 @@ public class VegetationManager {
     public void MeasureTotalPlantParticlesAmount() {
         
         int kernelCSMeasureTotalFoodParticlesAmount = computeShaderPlantParticles.FindKernel("CSMeasureTotalFoodParticlesAmount");
-        computeShaderPlantParticles.SetBuffer(kernelCSMeasureTotalFoodParticlesAmount, "foodParticlesRead", algaeParticlesCBuffer);
+        computeShaderPlantParticles.SetBuffer(kernelCSMeasureTotalFoodParticlesAmount, "foodParticlesRead", plantParticlesCBuffer);
         computeShaderPlantParticles.SetBuffer(kernelCSMeasureTotalFoodParticlesAmount, "foodParticlesWrite", algaeParticlesMeasure32);
          
         // DISPATCH !!!
@@ -822,7 +830,7 @@ public class VegetationManager {
         //computeShaderResourceGrid.SetFloat("_RD_Rate", theRenderKingRef.simManager.vegetationManager.decomposerSlotGenomeCurrent.reactionRate);
 
         //float algaeUpkeep = algaeSlotGenomeCurrent.
-        computeShaderResourceGrid.SetFloat("_AlgaeUpkeep", algaeSlotGenomeCurrent.metabolicRate * 0.42f); // decomposerSlotGenomeCurrent.metabolicRate);  // *********** SHARING WITH DECOMPOSERS!!!! *****
+        computeShaderResourceGrid.SetFloat("_AlgaeUpkeep", algaeSlotGenomeCurrent.metabolicRate * 0.35f); // decomposerSlotGenomeCurrent.metabolicRate);  // *********** SHARING WITH DECOMPOSERS!!!! *****
         computeShaderResourceGrid.SetFloat("_AlgaeMaxIntakeRate", algaeSlotGenomeCurrent.metabolicRate);
         computeShaderResourceGrid.SetFloat("_AlgaeGrowthEfficiency", 1f);
 
@@ -862,8 +870,8 @@ public class VegetationManager {
             algaeParticlesNearestCritters32.Release();
             algaeParticlesNearestCritters1024.Release();
         }        
-        if(algaeParticlesCBuffer != null) {
-            algaeParticlesCBuffer.Release();
+        if(plantParticlesCBuffer != null) {
+            plantParticlesCBuffer.Release();
         }  
         if(algaeParticlesCBufferSwap != null) {
             algaeParticlesCBufferSwap.Release();

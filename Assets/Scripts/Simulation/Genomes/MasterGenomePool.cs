@@ -21,7 +21,7 @@ public class MasterGenomePool {
 
     public bool speciesCreatedOrDestroyedThisFrame = false;
 
-    private MutationSettings mutationSettingsRef;
+    public MutationSettings mutationSettingsRef;
 
     public List<int> debugRecentlyDeletedCandidateIDsList;
 
@@ -78,25 +78,18 @@ public class MasterGenomePool {
         //int speciesIndex = 
         Debug.Log("GenerateWorldLayerVertebrateGenomeMutationOptions:  slot[ " + slotID.ToString() + " } __ Species:  " + speciesIndex.ToString());
         for(int mutationID = 0; mutationID < 4; mutationID++) {
-            float mutationSize = Mathf.Clamp01((float)mutationID / 3f + 0.015f); 
+            float mutationSize = Mathf.Clamp01((float)mutationID / 3f + 0.00015f); 
             mutationSize = mutationSize * mutationSize;
-
-            // need to create mutated copy of representative AgentGenome:
             
-
             SpeciesGenomePool sourceSpeciesPool = completeSpeciesPoolsList[speciesIndex];
-            AgentGenome mutatedGenome = sourceSpeciesPool.Mutate(sourceSpeciesPool.representativeGenome, true, true);
-            vertebrateSlotsGenomesMutationsArray[slotID][mutationID].SetRepresentativeGenome(mutatedGenome);
-           // old:
-            //vertebrateSlotsGenomesMutationsArray[slotID][mutationID].representativeGenome = vertebrateSlotsGenomesCurrentArray[slotID].representativeGenome;
-            //vertebrateSlotsGenomesMutationsArray[slotID][mutationID].representativeGenome = mutatedGenome;
-           
-            // -- Select a ParentGenome from the leaderboardList and create a mutated copy (childGenome):
-            //AgentGenome newGenome = sourceSpeciesPool.GetNewMutatedGenome();
-            //AgentGenome newGenome = sourceSpeciesPool.GetGenomeFromFitnessLottery();
-            //newGenome = sourceSpeciesPool.Mutate(newGenome, true, true);
-            
+            // update settings:::  not best way to do this.......
+            mutationSettingsRef.defaultBodyMutationChance = 1f;
+            mutationSettingsRef.defaultBodyMutationStepSize = 1f;
+            mutationSettingsRef.mutationStrengthSlot = mutationSize * mutationSize;  // ***** Shallower curve --> smaller mutations on lower end
 
+            AgentGenome mutatedGenome = sourceSpeciesPool.Mutate(vertebrateSlotsGenomesCurrentArray[slotID].representativeGenome, true, true); // sourceSpeciesPool.representativeGenome, true, true);
+            vertebrateSlotsGenomesMutationsArray[slotID][mutationID].SetRepresentativeGenome(mutatedGenome);
+           
             vertebrateSlotsGenomesMutationsArray[slotID][mutationID].name = vertebrateSlotsGenomesCurrentArray[slotID].name;
             vertebrateSlotsGenomesMutationsArray[slotID][mutationID].textDescriptionMutation = "Mutation Amt: " + (mutationSize * 100f).ToString("F1") + "%";
             

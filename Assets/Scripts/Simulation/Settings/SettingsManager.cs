@@ -5,7 +5,7 @@ using UnityEngine;
 public class SettingsManager : MonoBehaviour {
 
     //public MutationSettings mutationSettingsSupervised;
-    public MutationSettings mutationSettingsAgents;
+    public MutationSettings mutationSettingsVertebrates;
 
     public SettingsEnvironment environmentSettings;
     public SettingsAlgaeParticles algaeSettings;
@@ -59,7 +59,7 @@ public class SettingsManager : MonoBehaviour {
     public int curTierFoodCorpse = 6;
     
 
-    public void ChangeTierBrainMutationAmplitude(int delta) {
+    /*public void ChangeTierBrainMutationAmplitude(int delta) {
         curTierBrainMutationAmplitude = Mathf.Clamp(curTierBrainMutationAmplitude + delta, 0, 10);
         float tierLerp = (float)curTierBrainMutationAmplitude / 10f;        
         mutationSettingsAgents.mutationStepSize = Mathf.Lerp(0.001f, 1.5f, tierLerp * tierLerp);
@@ -123,15 +123,15 @@ public class SettingsManager : MonoBehaviour {
         curTierFoodCorpse = Mathf.Clamp(curTierFoodCorpse + delta, 0, 10);
         float lerp = (float)curTierFoodCorpse / 10f;
     }
-
+    */
     public void UpdateValuesFromCurTiers() {
         
     }
 
     public void Initialize() {
         //mutationSettingsSupervised = new MutationSettings(0.5f, 0.015f, 1f, 0.005f, 1f, 0.1f, 0.001f);
-        mutationSettingsAgents = new MutationSettings(0.25f, 0.025f, 1f, 0.01f, 0.997f, 0.6f, 0.01f);
-
+        mutationSettingsVertebrates = new MutationSettings(0.33f, 0.05f, 0.1f, 0.01f, 0.997f, 0.85f, 0.01f, 1f);
+/*
         ChangeTierFoodDecay(0);
         ChangeTierFoodPlant(0);
         ChangeTierFoodEgg(0);
@@ -146,6 +146,7 @@ public class SettingsManager : MonoBehaviour {
         ChangeTierBodyMutationAmplitude(0);
         ChangeTierBodyMutationFrequency(0);
         ChangeTierBodyMutationModules(0);
+        */
         //mutationSettingsRandomBody = new MutationSettings(0.25f, 0.02f, 1f, 0.0f, 0.999f, 0.0f, 0.0f);
         //mutationSettingsRandomBody.defaultBodyMutationChance = 0.05f;
         //mutationSettingsRandomBody.defaultBodyMutationStepSize = 0.535f;

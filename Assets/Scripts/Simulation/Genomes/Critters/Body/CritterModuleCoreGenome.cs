@@ -436,6 +436,8 @@ public class CritterModuleCoreGenome {
 
         isPassive = UtilityMutationFunctions.GetMutatedBool(parentGenome.isPassive, 0.033f, settings.defaultBodyMutationStepSize);
 
+        float slotMult = settings.mutationStrengthSlot;
+        
         // Copy modifiers list? do I need to create copies of each entry? or staright copy should work since they are structs (value-typed)
         shapeModifiersList = new List<ShapeModifierData>();  // empty
         for(int i = 0; i < parentGenome.shapeModifiersList.Count; i++) {
@@ -444,12 +446,12 @@ public class CritterModuleCoreGenome {
             for(int j = 0; j < parentGenome.shapeModifiersList[i].maskIndicesList.Count; j++) {
                 int maskIndex = parentGenome.shapeModifiersList[i].maskIndicesList[j];
                 // MUTATE?
-                maskIndex = UtilityMutationFunctions.GetMutatedIntAdditive(maskIndex, settings.defaultBodyMutationChance, 2, 0, parentGenome.shapeModifiersList[i].maskIndicesList.Count - 1);
+                maskIndex = UtilityMutationFunctions.GetMutatedIntAdditive(maskIndex, settings.defaultBodyMutationChance * slotMult, 2, 0, parentGenome.shapeModifiersList[i].maskIndicesList.Count - 1);
                 newData.maskIndicesList.Add(maskIndex); // make sure this isn't passing as a reference? it's an 'int' (data-type) so should be ok... // newMaskData);
             }            
             newData.modifierTypeID = parentGenome.shapeModifiersList[i].modifierTypeID;  // only works if this is NOT a reference type!!! ***
-            newData.amplitude = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.shapeModifiersList[i].amplitude, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, -0.5f, 0.5f); //parentGenome.shapeModifiersList[i].amplitude;
-            newData.taperDistance = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.shapeModifiersList[i].taperDistance, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.2f, 2f); //;
+            newData.amplitude = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.shapeModifiersList[i].amplitude, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, -0.5f, 0.5f); //parentGenome.shapeModifiersList[i].amplitude;
+            newData.taperDistance = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.shapeModifiersList[i].taperDistance, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.2f, 2f); //;
             shapeModifiersList.Add(newData);
         }
         masksList = new List<MaskData>();
@@ -460,12 +462,12 @@ public class CritterModuleCoreGenome {
             newMask.coordinateTypeID = MaskCoordinateType.Polygonize; // (MaskCoordinateType)UtilityMutationFunctions.GetMutatedIntAdditive(maskCoordinateTypeID, settings.defaultBodyMutationChance, 1, 0, 1);
             int maskFunctionTypeID = (int)newMask.functionTypeID;
             newMask.functionTypeID = MaskFunctionType.Cos; // (MaskFunctionType)UtilityMutationFunctions.GetMutatedIntAdditive(maskFunctionTypeID, settings.defaultBodyMutationChance, 2, 0, 2);
-            newMask.numPolyEdges = UtilityMutationFunctions.GetMutatedIntAdditive(newMask.numPolyEdges, settings.defaultBodyMutationChance, 4, 1, 6);
-            newMask.origin = UtilityMutationFunctions.GetMutatedFloatAdditive(newMask.origin, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
-            newMask.phase = UtilityMutationFunctions.GetMutatedFloatAdditive(newMask.phase, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, -5f, 5f);
-            newMask.cycleDistance = UtilityMutationFunctions.GetMutatedFloatAdditive(newMask.origin, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.1f, 1f);
-            newMask.amplitude = UtilityMutationFunctions.GetMutatedFloatAdditive(newMask.origin, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.05f, 0.5f);
-            newMask.axisDir = UtilityMutationFunctions.GetMutatedVector2Additive(newMask.axisDir, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, -1f, 1f).normalized;
+            newMask.numPolyEdges = UtilityMutationFunctions.GetMutatedIntAdditive(newMask.numPolyEdges, settings.defaultBodyMutationChance * slotMult, 4, 1, 6);
+            newMask.origin = UtilityMutationFunctions.GetMutatedFloatAdditive(newMask.origin, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0f, 1f);
+            newMask.phase = UtilityMutationFunctions.GetMutatedFloatAdditive(newMask.phase, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, -5f, 5f);
+            newMask.cycleDistance = UtilityMutationFunctions.GetMutatedFloatAdditive(newMask.origin, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.1f, 1f);
+            newMask.amplitude = UtilityMutationFunctions.GetMutatedFloatAdditive(newMask.origin, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.05f, 0.5f);
+            newMask.axisDir = UtilityMutationFunctions.GetMutatedVector2Additive(newMask.axisDir, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, -1f, 1f).normalized;
             masksList.Add(newMask);
         }
         // Mutate Add New Modifiers Here:?
@@ -502,95 +504,95 @@ public class CritterModuleCoreGenome {
         }        
         
         // Or start with deformed sphere???? *****
-        creatureBaseLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.creatureBaseLength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 1f, 3.14f);
-        creatureAspectRatio = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.creatureAspectRatio, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.12f, 0.45f);
+        creatureBaseLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.creatureBaseLength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 1f, 3.14f);
+        creatureAspectRatio = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.creatureAspectRatio, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.12f, 0.45f);
         
         //creatureComplexShapeLerp = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.creatureComplexShapeLerp, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
         // Mouth/Snout:
-        creatureFrontTaperSize = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.creatureFrontTaperSize, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.05f, 0.33f);
-        creatureBackTaperSize = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.creatureBackTaperSize, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.05f, 0.33f);
+        creatureFrontTaperSize = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.creatureFrontTaperSize, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.05f, 0.33f);
+        creatureBackTaperSize = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.creatureBackTaperSize, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.05f, 0.33f);
                 
-        mouthLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.mouthLength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.2f, 2f);
-        mouthFrontWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.mouthFrontWidth, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.05f, 1.5f);  // width of snout at front of critter (RELATIVE TO LENGTH OF SEGMENT!)
-        mouthFrontHeight = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.mouthFrontHeight, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.05f, 1.5f);
-        mouthFrontVerticalOffset = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.mouthFrontVerticalOffset, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, -1f, 1f);
-        mouthBackWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.mouthBackWidth, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.05f, 1.5f);
-        mouthBackHeight = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.mouthBackHeight, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.05f, 1.5f);
-        mouthBackVerticalOffset = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.mouthBackVerticalOffset, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, -1f, 1f);
+        mouthLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.mouthLength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.2f, 2f);
+        mouthFrontWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.mouthFrontWidth, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.05f, 1.5f);  // width of snout at front of critter (RELATIVE TO LENGTH OF SEGMENT!)
+        mouthFrontHeight = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.mouthFrontHeight, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.05f, 1.5f);
+        mouthFrontVerticalOffset = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.mouthFrontVerticalOffset, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, -1f, 1f);
+        mouthBackWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.mouthBackWidth, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.05f, 1.5f);
+        mouthBackHeight = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.mouthBackHeight, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.05f, 1.5f);
+        mouthBackVerticalOffset = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.mouthBackVerticalOffset, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, -1f, 1f);
         
-        mouthToHeadTransitionSize = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.mouthToHeadTransitionSize, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.25f, 1f);
+        mouthToHeadTransitionSize = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.mouthToHeadTransitionSize, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.25f, 1f);
         // Head        
-        headLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.headLength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.2f, 2f);
-        headFrontWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.headFrontWidth, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.05f, 1.5f);
-        headFrontHeight = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.headFrontHeight, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.05f, 1.5f);
-        headFrontVerticalOffset = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.headFrontVerticalOffset, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, -1f, 1f);
-        headBackWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.headBackWidth, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.05f, 1.5f);
-        headBackHeight = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.headBackHeight, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.05f, 1.5f);
-        headBackVerticalOffset = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.headBackVerticalOffset, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, -1f, 1f);
+        headLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.headLength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.2f, 2f);
+        headFrontWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.headFrontWidth, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.05f, 1.5f);
+        headFrontHeight = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.headFrontHeight, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.05f, 1.5f);
+        headFrontVerticalOffset = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.headFrontVerticalOffset, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, -1f, 1f);
+        headBackWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.headBackWidth, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.05f, 1.5f);
+        headBackHeight = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.headBackHeight, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.05f, 1.5f);
+        headBackVerticalOffset = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.headBackVerticalOffset, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, -1f, 1f);
 
-        headToBodyTransitionSize = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.headToBodyTransitionSize, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.25f, 1f);
+        headToBodyTransitionSize = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.headToBodyTransitionSize, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.25f, 1f);
         // Body:
-        bodyLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.bodyLength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.5f, 5f);
-        bodyFrontWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.bodyFrontWidth, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.05f, 1.5f);
-        bodyFrontHeight = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.bodyFrontHeight, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.05f, 1.5f);
-        bodyFrontVerticalOffset = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.bodyFrontVerticalOffset, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, -1f, 1f);
-        bodyBackWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.bodyBackWidth, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.05f, 1.5f);
+        bodyLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.bodyLength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.5f, 5f);
+        bodyFrontWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.bodyFrontWidth, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.05f, 1.5f);
+        bodyFrontHeight = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.bodyFrontHeight, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.05f, 1.5f);
+        bodyFrontVerticalOffset = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.bodyFrontVerticalOffset, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, -1f, 1f);
+        bodyBackWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.bodyBackWidth, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.05f, 1.5f);
         bodyBackHeight = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.bodyBackHeight, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.05f, 1.5f);
-        bodyBackVerticalOffset = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.bodyBackVerticalOffset, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, -1f, 1f);
+        bodyBackVerticalOffset = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.bodyBackVerticalOffset, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, -1f, 1f);
 
-        bodyToTailTransitionSize = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.bodyToTailTransitionSize, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.25f, 1f);
+        bodyToTailTransitionSize = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.bodyToTailTransitionSize, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.25f, 1f);
         //Tail:
-        tailLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.tailLength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.5f, 5f);
-        tailFrontWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.tailFrontWidth, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.05f, 1.5f);
-        tailFrontHeight = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.tailFrontHeight, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.05f, 1.5f);
-        tailFrontVerticalOffset = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.tailFrontVerticalOffset, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, -1f, 1f);
-        tailBackWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.tailBackWidth, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.05f, 1.5f);
-        tailBackHeight = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.tailBackHeight, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.05f, 1.5f);
-        tailBackVerticalOffset = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.tailBackVerticalOffset, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, -1f, 1f);
+        tailLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.tailLength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.5f, 5f);
+        tailFrontWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.tailFrontWidth, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.05f, 1.5f);
+        tailFrontHeight = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.tailFrontHeight, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.05f, 1.5f);
+        tailFrontVerticalOffset = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.tailFrontVerticalOffset, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, -1f, 1f);
+        tailBackWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.tailBackWidth, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.05f, 1.5f);
+        tailBackHeight = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.tailBackHeight, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.05f, 1.5f);
+        tailBackVerticalOffset = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.tailBackVerticalOffset, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, -1f, 1f);
 
         //tailEndCapTaperSize = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.tailEndCapTaperSize, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.5f, 1f);
 
         // EYES EYES EYES EYES:::
         numEyes = UtilityMutationFunctions.GetMutatedIntAdditive(parentGenome.numEyes, settings.defaultBodyMutationChance, 1, 1, 6);
-        eyePosSpread = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.eyePosSpread, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.5f, 1f);  // 1f == full hemisphere coverage, 0 == top
-        eyeLocAmplitude = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.eyeLocAmplitude, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
-        eyeLocFrequency = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.eyeLocFrequency, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.25f, 6f);
-        eyeLocOffset = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.eyeLocOffset, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 5f);        
-        socketRadius = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.socketRadius, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.2f, 0.9f);
-        socketHeight = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.socketHeight, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.25f, 1.25f);
-        socketBulge = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.socketBulge, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, -0.75f, 0.75f);
-        eyeballRadius = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.eyeballRadius, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.5f, 1.75f); // relative to socket radius
-        eyeBulge = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.eyeBulge, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.4f, 1.35f);
-        irisWidthFraction = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.irisWidthFraction, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.6f, 0.9f);       
-        pupilWidthFraction = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.pupilWidthFraction, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.33f, 1f);  // percentage of iris size
-        pupilHeightFraction = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.pupilHeightFraction, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.33f, 1f);
-        eyeballHue = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.eyeballHue, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.9f, 1f);
-        irisHue = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.irisHue, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
+        eyePosSpread = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.eyePosSpread, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.5f, 1f);  // 1f == full hemisphere coverage, 0 == top
+        eyeLocAmplitude = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.eyeLocAmplitude, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0f, 1f);
+        eyeLocFrequency = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.eyeLocFrequency, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.25f, 6f);
+        eyeLocOffset = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.eyeLocOffset, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0f, 5f);        
+        socketRadius = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.socketRadius, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.2f, 0.9f);
+        socketHeight = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.socketHeight, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.25f, 1.25f);
+        socketBulge = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.socketBulge, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, -0.75f, 0.75f);
+        eyeballRadius = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.eyeballRadius, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.5f, 1.75f); // relative to socket radius
+        eyeBulge = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.eyeBulge, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.4f, 1.35f);
+        irisWidthFraction = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.irisWidthFraction, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.6f, 0.9f);       
+        pupilWidthFraction = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.pupilWidthFraction, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.33f, 1f);  // percentage of iris size
+        pupilHeightFraction = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.pupilHeightFraction, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.33f, 1f);
+        eyeballHue = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.eyeballHue, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.9f, 1f);
+        irisHue = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.irisHue, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0f, 1f);
 
         // DORSAL FIN:
-        dorsalFinStartCoordY = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.dorsalFinStartCoordY, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 0.49f);
-        dorsalFinEndCoordY = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.dorsalFinEndCoordY, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.51f, 1f);
-        dorsalFinSlantAmount = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.dorsalFinSlantAmount, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 0.67f);
-        dorsalFinBaseHeight = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.dorsalFinBaseHeight, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.2f, 2f);
+        dorsalFinStartCoordY = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.dorsalFinStartCoordY, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0f, 0.49f);
+        dorsalFinEndCoordY = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.dorsalFinEndCoordY, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.51f, 1f);
+        dorsalFinSlantAmount = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.dorsalFinSlantAmount, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0f, 0.67f);
+        dorsalFinBaseHeight = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.dorsalFinBaseHeight, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.2f, 2f);
 
         // Tail Fin:
-        tailFinSpreadAngle = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.tailFinSpreadAngle, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.05f, 0.8f);
-        tailFinBaseLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.tailFinBaseLength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.1f, 1f);
-        tailFinFrequencies = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.tailFinFrequencies, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.1f, 10f);
-        tailFinAmplitudes = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.tailFinAmplitudes, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
-        tailFinOffsets = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.tailFinOffsets, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, -10f, 10f);
+        tailFinSpreadAngle = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.tailFinSpreadAngle, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.05f, 0.8f);
+        tailFinBaseLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.tailFinBaseLength, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.1f, 1f);
+        tailFinFrequencies = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.tailFinFrequencies, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.1f, 10f);
+        tailFinAmplitudes = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.tailFinAmplitudes, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0f, 1f);
+        tailFinOffsets = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.tailFinOffsets, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, -10f, 10f);
 
-        talentSpecializationAttack = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.talentSpecializationAttack, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.01f, 1f);
-        talentSpecializationDefense = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.talentSpecializationDefense, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.01f, 1f);
-        talentSpecializationSpeed = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.talentSpecializationSpeed, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.01f, 1f);
-        talentSpecializationUtility = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.talentSpecializationUtility, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.01f, 1f);
+        talentSpecializationAttack = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.talentSpecializationAttack, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.01f, 1f);
+        talentSpecializationDefense = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.talentSpecializationDefense, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.01f, 1f);
+        talentSpecializationSpeed = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.talentSpecializationSpeed, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.01f, 1f);
+        talentSpecializationUtility = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.talentSpecializationUtility, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.01f, 1f);
 
-        dietSpecializationPlant = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.dietSpecializationPlant, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.01f, 1f);
-        dietSpecializationDecay = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.dietSpecializationDecay, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.01f, 1f);
-        dietSpecializationMeat = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.dietSpecializationMeat, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.01f, 1f);
+        dietSpecializationPlant = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.dietSpecializationPlant, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.01f, 1f);
+        dietSpecializationDecay = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.dietSpecializationDecay, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.01f, 1f);
+        dietSpecializationMeat = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.dietSpecializationMeat, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.01f, 1f);
         
-        mouthFeedFrequency = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.mouthFeedFrequency, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.25f, 4f);
-        mouthAttackAmplitude = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.mouthAttackAmplitude, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0.25f, 4f);
+        mouthFeedFrequency = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.mouthFeedFrequency, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.25f, 4f);
+        mouthAttackAmplitude = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.mouthAttackAmplitude, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize * slotMult, 0.25f, 4f);
         
     }
 }

@@ -3263,11 +3263,11 @@ public class TheRenderKing : MonoBehaviour {
         //cmdBufferFluidColor.DrawMesh(fluidRenderMesh, Matrix4x4.identity, fluidBackgroundColorMat); // Simple unlit Texture shader -- wysiwyg
 
         algaeParticleColorInjectMat.SetPass(0);
-        algaeParticleColorInjectMat.SetBuffer("foodParticleDataCBuffer", simManager.vegetationManager.algaeParticlesCBuffer);
+        algaeParticleColorInjectMat.SetBuffer("foodParticleDataCBuffer", simManager.vegetationManager.plantParticlesCBuffer);
         algaeParticleColorInjectMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         algaeParticleColorInjectMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
         algaeParticleColorInjectMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-        cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, algaeParticleColorInjectMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.algaeParticlesCBuffer.count);
+        cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, algaeParticleColorInjectMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.plantParticlesCBuffer.count);
 
         /*Vector4 cursorPos = new Vector4(simManager.uiManager.curMousePositionOnWaterPlane.x, simManager.uiManager.curMousePositionOnWaterPlane.y, 0f, 0f);
         if(isStirring) {            // Particle-based instead? // hijack and use for stir tool
@@ -3390,9 +3390,9 @@ public class TheRenderKing : MonoBehaviour {
         // PLANT PARTICLES:
         plantParticleDataMat.SetPass(0);
         plantParticleDataMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        plantParticleDataMat.SetBuffer("plantParticleDataCBuffer", simManager.vegetationManager.algaeParticlesCBuffer); // simManager.vegetationManager.algaeParticlesCBuffer);    
+        plantParticleDataMat.SetBuffer("plantParticleDataCBuffer", simManager.vegetationManager.plantParticlesCBuffer); // simManager.vegetationManager.algaeParticlesCBuffer);    
         plantParticleDataMat.SetFloat("_MapSize", SimulationManager._MapSize);
-        cmdBufferResourceSim.DrawProcedural(Matrix4x4.identity, plantParticleDataMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.algaeParticlesCBuffer.count); // simManager.vegetationManager.algaeParticlesCBuffer.count);
+        cmdBufferResourceSim.DrawProcedural(Matrix4x4.identity, plantParticleDataMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.plantParticlesCBuffer.count); // simManager.vegetationManager.algaeParticlesCBuffer.count);
 
 
         // CRITTERS:
@@ -3694,10 +3694,10 @@ public class TheRenderKing : MonoBehaviour {
             cmdBufferDebugVis.DrawProcedural(Matrix4x4.identity, debugAgentResourcesMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.critterInitDataCBuffer.count);
             
             debugVisAlgaeParticlesMat.SetPass(0);
-            debugVisAlgaeParticlesMat.SetBuffer("foodParticleDataCBuffer", simManager.vegetationManager.algaeParticlesCBuffer);
+            debugVisAlgaeParticlesMat.SetBuffer("foodParticleDataCBuffer", simManager.vegetationManager.plantParticlesCBuffer);
             debugVisAlgaeParticlesMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
             //debugVisAlgaeParticlesMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-            cmdBufferDebugVis.DrawProcedural(Matrix4x4.identity, debugVisAlgaeParticlesMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.algaeParticlesCBuffer.count);
+            cmdBufferDebugVis.DrawProcedural(Matrix4x4.identity, debugVisAlgaeParticlesMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.plantParticlesCBuffer.count);
         
             // add shadow pass eventually
             debugVisAnimalParticlesMat.SetPass(0);
@@ -3941,7 +3941,7 @@ public class TheRenderKing : MonoBehaviour {
             if(simManager.trophicLayersManager.GetAlgaeOnOff()) {
                 // algae shadows:
                 foodParticleShadowDisplayMat.SetPass(0);
-                foodParticleShadowDisplayMat.SetBuffer("foodParticleDataCBuffer", simManager.vegetationManager.algaeParticlesCBuffer);
+                foodParticleShadowDisplayMat.SetBuffer("foodParticleDataCBuffer", simManager.vegetationManager.plantParticlesCBuffer);
                 foodParticleShadowDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
                 foodParticleShadowDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
                 foodParticleShadowDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
@@ -3950,7 +3950,7 @@ public class TheRenderKing : MonoBehaviour {
                 foodParticleShadowDisplayMat.SetFloat("_MinFog", 0.0625f);  
                 foodParticleShadowDisplayMat.SetVector("_FogColor", simManager.fogColor);      
                 cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); 
-                cmdBufferMain.DrawProcedural(Matrix4x4.identity, foodParticleShadowDisplayMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.algaeParticlesCBuffer.count * 32);
+                cmdBufferMain.DrawProcedural(Matrix4x4.identity, foodParticleShadowDisplayMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.plantParticlesCBuffer.count * 32);
         
             }
 
@@ -4084,11 +4084,11 @@ public class TheRenderKing : MonoBehaviour {
 
             if(simManager.trophicLayersManager.GetAlgaeOnOff()) {
                 foodParticleDisplayMat.SetPass(0);
-                foodParticleDisplayMat.SetBuffer("foodParticleDataCBuffer", simManager.vegetationManager.algaeParticlesCBuffer);
+                foodParticleDisplayMat.SetBuffer("foodParticleDataCBuffer", simManager.vegetationManager.plantParticlesCBuffer);
                 foodParticleDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
                 foodParticleDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
                 foodParticleDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-                cmdBufferMain.DrawProcedural(Matrix4x4.identity, foodParticleDisplayMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.algaeParticlesCBuffer.count * 32);
+                cmdBufferMain.DrawProcedural(Matrix4x4.identity, foodParticleDisplayMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.plantParticlesCBuffer.count * 32);
         
             }
                                     

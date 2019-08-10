@@ -148,9 +148,9 @@ void CSEatSelectedFoodParticles (uint3 id : SV_DispatchThreadID)
 	float isAlive01 = saturate((critterSimData.embryoPercentage - 0.99) * 10000) * saturate(((1.0 - critterSimData.decayPercentage) - 0.99) * 10000);
 
 	float distanceSquared = data.y;
-	float mouthRadius = critterInitData.boundingBoxSize.x * critterSimData.growthPercentage;  // **** REMEMBER TO *0.5 EVENTUALLY FOR ACCURATE SIZE
+	float mouthRadius = 1.0;     //critterInitData.boundingBoxSize.x * critterSimData.growthPercentage;  // **** REMEMBER TO *0.5 EVENTUALLY FOR ACCURATE SIZE
 	float particleRadius = particleData.radius;
-	float combinedRadius = (mouthRadius * 0.5 + particleRadius * 0.5) * isAlive01 * critterSimData.consumeOn;
+	float combinedRadius = (mouthRadius + particleRadius * 0.5) * isAlive01 * critterSimData.consumeOn;
 	float mass = critterSimData.currentBiomass;
 	if(distanceSquared < combinedRadius * combinedRadius) {	
 		
@@ -299,12 +299,13 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 		}
 		else {  // DEAD !!!!!
 			
-			float decayEfficiency = 1.0;
+			float decayEfficiency = 1;
 			float decayRate = _AlgaeDecayRate;
 			float decayMass = decayRate * decayEfficiency;
 						
 			bodyMass -= decayMass;
-			wasteMass += decayMass;
+			float tempWasteProducedMult = 0.33;
+			wasteMass += decayMass * tempWasteProducedMult;
 			
 			// if is fully decayed:
 			if(bodyMass <= 0.0) {  // fully decayed:

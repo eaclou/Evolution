@@ -42,7 +42,7 @@ public class SimEventsManager {
             }
         }
     }
-
+    /*
     public void ExecuteEvent(SimulationManager simManager, SimEventData data) {
         curEventBucks -= data.cost;
         
@@ -301,7 +301,7 @@ public class SimEventsManager {
                 break;            
         }
     }
-
+    */
     private int GetEventSpeciesID(SimulationManager simManager, SimEventData data) {
         int speciesID = 0; // -1;
         float recordLow = 9999999f;

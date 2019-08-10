@@ -13,10 +13,10 @@ public class CritterMouthComponent : MonoBehaviour {
     public int attackingFrameCounter = 0;
 
     public Vector2 mouthTriggerSize;
-    public int feedAnimDuration = 10;
-    public int feedAnimCooldown = 24;
-    public int attackAnimDuration = 8;
-    public int attackAnimCooldown = 60;
+    public int feedAnimDuration = 6;
+    public int feedAnimCooldown = 12;
+    public int attackAnimDuration = 6;
+    public int attackAnimCooldown = 12;
 
     // efficiency? calculated elsewhere?
     
