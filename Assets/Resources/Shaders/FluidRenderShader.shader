@@ -77,8 +77,10 @@
 				//return float4(val, val, val, 1);
 				//return density; // + density2 * 0.25;
 				fixed4 finalColor = float4(0,0,0,1);
-				finalColor.xyz = density.xyz;
-				finalColor.a = 1; // density.y;
+				finalColor = density;
+				finalColor.rgb *= 0.75;
+				finalColor.a *= 0.5; // density.y;
+				return finalColor;
 				//finalColor.a = smoothstep(0.15, 0.3, density.y) * 0.15;
 				
 				//float3 Value2D(float2 p, float frequency)

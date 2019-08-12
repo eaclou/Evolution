@@ -23,7 +23,7 @@ public class CritterModuleEnvironmentSensorsGenome {
         // Do stuff:
         useCardinals = false;
         useDiagonals = false;
-        useWaterStats = false;
+        useWaterStats = true;
 
         maxRange = 20f;
     }

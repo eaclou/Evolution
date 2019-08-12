@@ -771,6 +771,33 @@ public class SimulationManager : MonoBehaviour {
             {
                 float wallForce = Mathf.Clamp01(agentSize - floorDepth) / agentSize;
                 agentsArray[i].bodyRigidbody.AddForce(new Vector2(depthSample.y, depthSample.z).normalized * 24f * agentsArray[i].bodyRigidbody.mass * wallForce, ForceMode2D.Impulse);
+
+
+                float damage = wallForce * 0.1f;
+                float defendBonus = 1f;
+                if(agentsArray[i].coreModule.isDefending) {
+                    if(agentsArray[i].coreModule.defendFrameCounter < agentsArray[i].coreModule.defendDuration) {
+                        defendBonus = 0.1f;
+                    }
+                    else {
+                        defendBonus = 1.25f; // cooldown penalty
+                    }
+                }
+
+                damage *= defendBonus;
+
+                agentsArray[i].coreModule.hitPoints[0] -= damage;
+                // currently no distinctionbetween regions:
+                agentsArray[i].coreModule.healthHead -= damage;
+                agentsArray[i].coreModule.healthBody -= damage;
+                agentsArray[i].coreModule.healthExternal -= damage;
+
+                agentsArray[i].totalDamageTaken += damage;
+        
+
+                agentsArray[i].CheckForDeathHealth();
+
+
             }
             
             agentsArray[i].bodyRigidbody.AddForce(simStateData.fluidVelocitiesAtAgentPositionsArray[i] * 48f * agentsArray[i].bodyRigidbody.mass, ForceMode2D.Impulse);
@@ -1239,9 +1266,24 @@ public class SimulationManager : MonoBehaviour {
         Vector3 cursorWorldPos = uiManager.curMousePositionOnWaterPlane;
         cursorWorldPos.x += UnityEngine.Random.Range(-1f, 1f) * 5f;
         cursorWorldPos.y += UnityEngine.Random.Range(-1f, 1f) * 5f;
+
+        Vector3 spawnWorldPos = GetRandomFoodSpawnPosition().startPosition;
         // Find parent agent location:
-        Vector3 spawnWorldPos = Vector3.Lerp(GetRandomFoodSpawnPosition().startPosition, cursorWorldPos, isBrushingLerp); // uiManager.curCtrlCursorPositionOnWaterPlane; // GetRandomFoodSpawnPosition().startPosition;
+        Agent parentAgent;
+        for(int i = 0; i < numAgents; i++) {
+            if(agentsArray[i].curLifeStage == Agent.AgentLifeStage.Mature) {
+                float rand = UnityEngine.Random.Range(0f, 1f);
+                if(rand < 0.2f) {
+                    spawnWorldPos = new Vector3(agentsArray[i].ownPos.x + UnityEngine.Random.Range(-1f, 1f), agentsArray[i].ownPos.y + UnityEngine.Random.Range(-1f, 1f), 0f);
+                    Debug.Log("SPAWNED!i= " + i.ToString() + ", spawnWorldPos: " + spawnWorldPos.ToString());
+                }
+            }
+        }
+        //Vector3 spawnPosParent = 
+        spawnWorldPos = Vector3.Lerp(spawnWorldPos, cursorWorldPos, isBrushingLerp); // uiManager.curCtrlCursorPositionOnWaterPlane; // GetRandomFoodSpawnPosition().startPosition;
         
+
+
         if(spawnOn) {
             agentsArray[agentIndex].InitializeSpawnAgentImmaculate(settingsManager, agentIndex, sourceCandidate, spawnWorldPos); // Spawn that genome in dead Agent's body and revive it!
             theRenderKing.UpdateCritterGenericStrokesData(agentsArray[agentIndex]); //agentIndex, sourceCandidate.candidateGenome);

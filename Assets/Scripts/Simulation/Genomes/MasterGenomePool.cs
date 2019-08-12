@@ -89,9 +89,12 @@ public class MasterGenomePool {
 
             AgentGenome mutatedGenome = sourceSpeciesPool.Mutate(vertebrateSlotsGenomesCurrentArray[slotID].representativeGenome, true, true); // sourceSpeciesPool.representativeGenome, true, true);
             vertebrateSlotsGenomesMutationsArray[slotID][mutationID].SetRepresentativeGenome(mutatedGenome);
-           
-            vertebrateSlotsGenomesMutationsArray[slotID][mutationID].name = vertebrateSlotsGenomesCurrentArray[slotID].name;
-            vertebrateSlotsGenomesMutationsArray[slotID][mutationID].textDescriptionMutation = "Mutation Amt: " + (mutationSize * 100f).ToString("F1") + "%";
+            mutatedGenome.bodyGenome.CalculateFullsizeBoundingBox();
+            string descriptionText = "baseLength: " + mutatedGenome.bodyGenome.coreGenome.creatureBaseLength.ToString("F2") +
+                                     "\naspectRatio: " + mutatedGenome.bodyGenome.coreGenome.creatureAspectRatio.ToString("F2") +
+                                     "\n" + mutatedGenome.bodyGenome.fullsizeBoundingBox.ToString("F1");
+            vertebrateSlotsGenomesMutationsArray[slotID][mutationID].name = descriptionText; // vertebrateSlotsGenomesCurrentArray[slotID].name;
+            vertebrateSlotsGenomesMutationsArray[slotID][mutationID].textDescriptionMutation = descriptionText; // "Mutation^^^ Amt: " + (mutationSize * 100f).ToString("F1") + "%";
             
             
         }
@@ -99,6 +102,7 @@ public class MasterGenomePool {
     public void ProcessSlotMutation(int slotID, int mutationID, int speciesIndex) {
         SpeciesGenomePool sourceSpeciesPool = completeSpeciesPoolsList[speciesIndex];
         vertebrateSlotsGenomesCurrentArray[slotID].representativeGenome = vertebrateSlotsGenomesMutationsArray[slotID][mutationID].representativeGenome;
+        vertebrateSlotsGenomesCurrentArray[slotID].name = vertebrateSlotsGenomesMutationsArray[slotID][mutationID].name;
         Debug.Log("____ProcessSlotMutation: slot: " + slotID.ToString() + ", mut#: " + mutationID.ToString() + ", speciesID: " + speciesIndex.ToString());
         // = mutatedGenome;
 

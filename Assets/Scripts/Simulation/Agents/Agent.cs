@@ -432,7 +432,7 @@ public class Agent : MonoBehaviour {
             InitializeDeath();
         }
     }
-    private void CheckForDeathHealth() {
+    public void CheckForDeathHealth() {
         // HEALTH FAILURE:
         if (coreModule.healthHead <= 0f) {
 

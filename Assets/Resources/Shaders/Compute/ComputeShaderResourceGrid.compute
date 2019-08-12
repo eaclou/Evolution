@@ -308,7 +308,9 @@ void CSSimRD (uint3 id : SV_DispatchThreadID)
 	resourceGridRead.z = lerp(resourceGridCenter.z, (resourceGridCenter.z + resourceGridRight.z + resourceGridLeft.z + resourceGridUp.z + resourceGridDown.z) / 5, diffusionAmounts.z);
 	resourceGridRead.w = lerp(resourceGridCenter.w, (resourceGridCenter.w + resourceGridRight.w + resourceGridLeft.w + resourceGridUp.w + resourceGridDown.w) / 5, diffusionAmounts.w);
 
-	
+	// ALTITUDE:
+	float4 altitudeTexSample = _AltitudeTex.SampleLevel(_LinearClamp, uv, 0);
+	float isUnderwater = 1.0 - saturate((altitudeTexSample.x - 0.5) * 10);
 
 	// =============================== NUTRIENTS ================================
 	float nutrientsMass = resourceGridRead.x;
@@ -324,7 +326,7 @@ void CSSimRD (uint3 id : SV_DispatchThreadID)
 	float availableNutrientsMass = min(_AlgaeMaxIntakeRate * algaeMass, nutrientsMass);
 
 	float energyCost = algaeMass * _AlgaeUpkeep;
-	float energyCreated = availableNutrientsMass * _AlgaeGrowthEfficiency;
+	float energyCreated = availableNutrientsMass * _AlgaeGrowthEfficiency * isUnderwater;
 	float nutrientsUsed = availableNutrientsMass;
 	
 	float netEnergy = energyCreated - energyCost;
@@ -340,7 +342,7 @@ void CSSimRD (uint3 id : SV_DispatchThreadID)
 	float availableDetritusMass = min(_DecomposerMaxIntakeRate * decomposersMass, detritusMass);
 
 	float decomposerEnergyCost = decomposersMass * _DecomposerUpkeep;
-	float decomposerEnergyCreated = availableDetritusMass * _DecomposerEnergyGenerationEfficiency;
+	float decomposerEnergyCreated = availableDetritusMass * _DecomposerEnergyGenerationEfficiency * isUnderwater;
 	float detritusUsed = availableDetritusMass;
 	
 	float nutrientsCreated = decomposerEnergyCreated;
@@ -358,9 +360,9 @@ void CSSimRD (uint3 id : SV_DispatchThreadID)
 	resourceGridRead.z += decomposerDecayMass * 0.15; // ** shouldn't be necessary???
 	
 	resourceGridRead.x -= nutrientsUsed; 
-	resourceGridRead.x += nutrientsCreated * 2;
+	resourceGridRead.x += nutrientsCreated * 1.05;
 	resourceGridRead.y -= detritusUsed;
-	resourceGridRead.y += detritusCreated * 2.2;  // // *** hacky empirical fix for balancing conservation of energy/mass
+	resourceGridRead.y += detritusCreated * 2.1;  // // *** hacky empirical fix for balancing conservation of energy/mass
 	
 	// X = nutrients
 	// Y = detritus

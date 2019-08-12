@@ -106,7 +106,7 @@ public class VegetationManager {
         PlantParticleData[] plantParticlesRepresentativeGenomeArray = new PlantParticleData[1];
         plantParticlesRepresentativeGenomeArray[0] = plantSlotGenomeCurrent.plantRepData;
         plantParticlesRepresentativeGenomeCBuffer.SetData(plantParticlesRepresentativeGenomeArray);
-
+        Debug.Log("ASDF ProcessPlantSlotMutation " + plantSlotGenomeCurrent.growthRate.ToString());
         Vector3 hue = plantSlotGenomeCurrent.plantRepData.hue;
         plantSlotGenomeCurrent.displayColor = new Color(hue.x, hue.y, hue.z);
     }
@@ -394,8 +394,8 @@ public class VegetationManager {
             //col = Color.Lerp(col, randColor, jLerp);
             //mutatedGenome.displayColor = col;
 
-            float minRate = 0.5f;
-            float maxRate = 1.75f;
+            float minRate = 0.05f;
+            float maxRate = 5f;
             mutatedGenome.growthRate = Mathf.Lerp(minRate, maxRate, UnityEngine.Random.Range(0f, 1f));
             mutatedGenome.growthRate = Mathf.Lerp(plantSlotGenomeCurrent.growthRate, mutatedGenome.growthRate, jLerp);
 
@@ -408,6 +408,7 @@ public class VegetationManager {
             plantSlotGenomeMutations[j] = mutatedGenome;
             Vector3 hue = mutatedGenome.plantRepData.hue;
             plantSlotGenomeMutations[j].displayColor = new Color(hue.x, hue.y, hue.z);
+            
         }
     }
 
@@ -804,23 +805,26 @@ public class VegetationManager {
         computeShaderResourceGrid.SetFloat("_InvGridScale", fluidManagerRef.invGridScale);
         computeShaderResourceGrid.SetFloat("_MapSize", SimulationManager._MapSize);
         float brushDecomposersOn = 0f;  // eventually make this more elegant during next refactor ***
-        float brushAlgaeOn = 0f; 
+        float brushAlgaeOn = 0f;
+        float brushIntensityMult = 1f;
         if(isBrushActive) {  // Set from uiManager
 
             if (theRenderKingRef.simManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 0) {
                 brushDecomposersOn = 1f;
+                brushIntensityMult = 0.05f;
             }
             else if (theRenderKingRef.simManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 1) {
                 if (theRenderKingRef.simManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) { 
                     brushAlgaeOn = 1f;
                     Debug.Log("// Algae brush on!");
+                    brushIntensityMult = 0.025f;
                 }
                 else {
                     //brushPlantsOn = 1f;
                 }
             }
         }
-        computeShaderResourceGrid.SetFloat("_SpiritBrushIntensity", 0.1f); // *** INVESTIGATE THIS -- not used/needed?
+        computeShaderResourceGrid.SetFloat("_SpiritBrushIntensity", brushIntensityMult); // *** INVESTIGATE THIS -- not used/needed?
         computeShaderResourceGrid.SetFloat("_IsSpiritBrushDecomposersOn", brushDecomposersOn);
         computeShaderResourceGrid.SetFloat("_IsSpiritBrushAlgaeOn", brushAlgaeOn);
         computeShaderResourceGrid.SetFloat("_SpiritBrushPosNeg", theRenderKingRef.spiritBrushPosNeg);

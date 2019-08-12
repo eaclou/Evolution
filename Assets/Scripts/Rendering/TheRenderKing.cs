@@ -1938,12 +1938,15 @@ public class TheRenderKing : MonoBehaviour {
         
         toolbarCritterPortraitStrokesCBuffer.SetData(singleCritterGenericStrokesArray);
 
-        
+
         //float size = (genome.bodyGenome.fullsizeBoundingBox.x + genome.bodyGenome.fullsizeBoundingBox.y) * 5f;        
         //float sizeNormalized = Mathf.Clamp01((size - 0.1f) / 1f);
-        float sizeNormalized = Mathf.Clamp01((genome.bodyGenome.coreGenome.creatureBaseLength - 0.8f) / 2f);
+        genome.bodyGenome.CalculateFullsizeBoundingBox();
+        float minLength = 0.5f;
+        float maxLength = 40f;
+        float sizeNormalized = Mathf.Clamp01((genome.bodyGenome.fullsizeBoundingBox.y - minLength) / (maxLength - minLength));
         //sizeNormalized = 1f;
-        slotPortraitRenderCamera.GetComponent<CritterPortraitCameraManager>().UpdateCameraTargetValues(Mathf.Lerp(0.8f, 3.416f, sizeNormalized));
+        slotPortraitRenderCamera.GetComponent<CritterPortraitCameraManager>().UpdateCameraTargetValues(sizeNormalized);
         
         Debug.Log("GenerateCritterPortraitStrokesData: " + genome.bodyGenome.appearanceGenome.huePrimary.ToString());
     }
