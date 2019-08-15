@@ -347,8 +347,12 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 		
 		// **** UPDATE POSITION !!!! ****
 		float2 newWorldPos = animalParticle.worldPos.xy + posOffset;
+		newWorldPos.x = min(max(newWorldPos.x, 0), _MapSize);   // CAP BOUNDARIES
+		newWorldPos.y = min(max(newWorldPos.y, 0), _MapSize);   // CAP BOUNDARIES
+		
+		animalParticlesWrite[id.x].velocity = newWorldPos - animalParticlesWrite[id.x].worldPos.xy;
 		animalParticlesWrite[id.x].worldPos.xy = newWorldPos;
-		animalParticlesWrite[id.x].velocity = posOffset;
+		
 		
 		// SPLINE::::::
 		float restDistance = 1.5 * sqrt(animalParticle.biomass); // creature length

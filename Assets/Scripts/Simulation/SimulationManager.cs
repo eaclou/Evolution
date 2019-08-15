@@ -1273,8 +1273,9 @@ public class SimulationManager : MonoBehaviour {
         for(int i = 0; i < numAgents; i++) {
             if(agentsArray[i].curLifeStage == Agent.AgentLifeStage.Mature) {
                 float rand = UnityEngine.Random.Range(0f, 1f);
-                if(rand < 0.2f) {
-                    spawnWorldPos = new Vector3(agentsArray[i].ownPos.x + UnityEngine.Random.Range(-1f, 1f), agentsArray[i].ownPos.y + UnityEngine.Random.Range(-1f, 1f), 0f);
+                if(rand < 0.1f) {
+                    float mag = 5f;
+                    spawnWorldPos = new Vector3(agentsArray[i].ownPos.x + UnityEngine.Random.Range(-1f, 1f) * mag, agentsArray[i].ownPos.y + UnityEngine.Random.Range(-1f, 1f) * mag, 0f);
                     Debug.Log("SPAWNED!i= " + i.ToString() + ", spawnWorldPos: " + spawnWorldPos.ToString());
                 }
             }

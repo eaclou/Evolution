@@ -66,6 +66,8 @@ public class UIManager : MonoBehaviour {
 
     public Image imageHighlightNewUI;
 
+    public Text textInspectReadout;
+
     // &&& INFO PANEL &&& !!!! ==============================================
     public bool isActiveInfoPanel = false;
     public bool isActiveInfoResourcesTab = true;  // toggle between resources tab and species tab
@@ -2264,6 +2266,7 @@ public class UIManager : MonoBehaviour {
         int critterIndex = cameraManager.targetCritterIndex;
         Agent agent = gameManager.simulationManager.agentsArray[critterIndex];
 
+        
         // DIET:
         string txt = "Diet:\nHerbivore";
         Color dietColor = new Color(0.5f, 1f, 0.3f);
@@ -2379,18 +2382,7 @@ public class UIManager : MonoBehaviour {
         textSpeciesID.text = gameManager.simulationManager.agentsArray[critterIndex].speciesIndex.ToString();
         Vector3 primaryHue = gameManager.simulationManager.simStateData.critterInitDataArray[critterIndex].primaryHue;
         Color speciesHue = new Color(primaryHue.x, primaryHue.y, primaryHue.z);
-        /*if(cameraManager.targetAgent.speciesIndex == 1) {
-            speciesHue = new Color(0.33f, 1f, 0.33f);
-            textSpeciesID.text = "B";
-        }
-        else if(cameraManager.targetAgent.speciesIndex == 2) {
-            speciesHue = new Color(0.33f, 0.33f, 1f);
-            textSpeciesID.text = "C";
-        }
-        else if(cameraManager.targetAgent.speciesIndex == 3) {
-            speciesHue = new Color(1f, 1f, 1f);
-            textSpeciesID.text = "D";
-        }*/
+        
         inspectWidgetSpeciesIconMat.SetPass(0);
         inspectWidgetSpeciesIconMat.SetColor("_Tint", speciesHue);
 
@@ -2398,8 +2390,34 @@ public class UIManager : MonoBehaviour {
         inspectWidgetAgentIconMat.SetPass(0);
         inspectWidgetAgentIconMat.SetColor("_Tint", Color.gray);
         textAgentID.text = cameraManager.targetAgent.index.ToString();
-        
 
+        //****************
+        
+        string readoutText = "";
+        readoutText += "ID " + critterIndex.ToString() + "    SpeciesID " + agent.speciesIndex.ToString();
+        float health = 100f;
+        if(agent.coreModule != null) {
+            health = agent.coreModule.healthBody * 100f;
+        }
+        readoutText += "\nBiomass  " + (agent.currentBiomass * 100f).ToString("F0") + "   ( " + (agent.sizePercentage * 100f).ToString("F0") + "%)   Health: " + health.ToString("F0") + "%";
+        readoutText += "\nThrottle  " + (agent.smoothedThrottle * 100f).ToString("F0");
+        readoutText += "\nWaste   " + (agent.wasteProducedLastFrame * 1000f).ToString("F0") + ", Oxygen   " + (agent.oxygenUsedLastFrame * 1000f).ToString("F0");        
+        
+        float bodWidth = (agent.fullSizeBoundingBox.x + agent.fullSizeBoundingBox.z) * 0.5f;
+        float bodLength = agent.fullSizeBoundingBox.y;
+        readoutText += "\nBody Size   " + (bodLength * 10f).ToString("F0") + " x " + (bodWidth * 10f).ToString("F0");
+        readoutText += "\nTotal Eaten -- Meat: " + (agent.totalFoodEatenMeat * 1000f).ToString("F0") + ", Plant: " + (agent.totalFoodEatenPlant * 1000f).ToString("F0");
+        readoutText += "\nBiteAnimCounter   " + agent.mouthRef.feedingFrameCounter.ToString();
+        Vector4 resourceGridSample = SampleTexture(gameManager.simulationManager.vegetationManager.resourceGridRT1, curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
+        Vector4 simTansferSample = SampleTexture(gameManager.simulationManager.vegetationManager.resourceSimTransferRT, curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
+        readoutText += "\n\nNutrients    " + (resourceGridSample.x * 1000f).ToString("F0");
+        readoutText += "\nWaste        " + (resourceGridSample.y * 1000f).ToString("F0");
+        readoutText += "\nDecomposers  " + (resourceGridSample.z * 1000f).ToString("F0");
+        readoutText += "\nAlgae        " + (resourceGridSample.w * 1000f).ToString("F0");
+        //readoutText += "\nresourceGridSample: (" + resourceGridSample.x.ToString("F4") + ", " + resourceGridSample.y.ToString("F4") + ", " + resourceGridSample.z.ToString("F4") + ", " + resourceGridSample.w.ToString("F4") + ")";
+        //readoutText += "\nsimTansferSample: (" + simTansferSample.x.ToString("F4") + ", " + simTansferSample.y.ToString("F4") + ", " + simTansferSample.z.ToString("F4") + ", " + simTansferSample.w.ToString("F4") + ")";
+
+        textInspectReadout.text = readoutText;
     }    
         
     public void UpdateSpeciesTreeDataTextures(int year) {  // refactor using year?
@@ -3634,26 +3652,26 @@ public class UIManager : MonoBehaviour {
     public void AnnounceUnlockAlgae() {
         panelPendingClickPrompt.GetComponentInChildren<Text>().text = "Algae Species Unlocked!";
         panelPendingClickPrompt.GetComponentInChildren<Text>().color = colorPlantsLight;
-        panelPendingClickPrompt.GetComponent<Image>().raycastTarget = true;
+        //panelPendingClickPrompt.GetComponent<Image>().raycastTarget = true;
         isAnnouncementTextOn = true;
     }
     public void AnnounceUnlockDecomposers() {
         panelPendingClickPrompt.GetComponentInChildren<Text>().text = "Decomposer Species Unlocked!";
         panelPendingClickPrompt.GetComponentInChildren<Text>().color = colorDecomposersLight;
-        panelPendingClickPrompt.GetComponent<Image>().raycastTarget = true;
+        //panelPendingClickPrompt.GetComponent<Image>().raycastTarget = true;
 
         isAnnouncementTextOn = true;
     }
     public void AnnounceUnlockZooplankton() {
         panelPendingClickPrompt.GetComponentInChildren<Text>().text = "Zooplankton Species Unlocked!";
         panelPendingClickPrompt.GetComponentInChildren<Text>().color = colorAnimalsLight;
-        panelPendingClickPrompt.GetComponent<Image>().raycastTarget = true;
+        //panelPendingClickPrompt.GetComponent<Image>().raycastTarget = true;
         isAnnouncementTextOn = true;
     }
     public void AnnounceUnlockVertebrates() {
         panelPendingClickPrompt.GetComponentInChildren<Text>().text = "Vertebrate Species Unlocked!";
         panelPendingClickPrompt.GetComponentInChildren<Text>().color = colorAnimalsLight;
-        panelPendingClickPrompt.GetComponent<Image>().raycastTarget = true;
+        //panelPendingClickPrompt.GetComponent<Image>().raycastTarget = true;
         isAnnouncementTextOn = true;
     }
     public void ClickToolbarCreateNewSpecies() {
@@ -3668,18 +3686,18 @@ public class UIManager : MonoBehaviour {
         if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 0) {
             panelPendingClickPrompt.GetComponentInChildren<Text>().text = "A new species of Decomposer added!";
             panelPendingClickPrompt.GetComponentInChildren<Text>().color = colorDecomposersLight;
-            panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
+            //panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
         }
         else if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 1) {
             if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) {
                 panelPendingClickPrompt.GetComponentInChildren<Text>().text = "A new species of Algae added!";
                 panelPendingClickPrompt.GetComponentInChildren<Text>().color = colorPlantsLight;
-                panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
+                //panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
             }
             else {   /// BIG PLANTS:
                 panelPendingClickPrompt.GetComponentInChildren<Text>().text = "A new species of PLAN%T added!";
                 panelPendingClickPrompt.GetComponentInChildren<Text>().color = colorPlantsLight;
-                panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
+                //panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
             }
             
         }
@@ -3712,7 +3730,7 @@ public class UIManager : MonoBehaviour {
                 
                 panelPendingClickPrompt.GetComponentInChildren<Text>().text = "A new species of Vertebrate added!";
                 panelPendingClickPrompt.GetComponentInChildren<Text>().color = colorAnimalsLight;
-                panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
+                //panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
                 
                 if(slot.slotID == 0) {
                     //panelPendingClickPrompt.GetComponentInChildren<Text>().text = "These creatures start with randomly-generated brains\n and must evolve successful behavior\nthrough survival of the fittest";
@@ -3724,7 +3742,7 @@ public class UIManager : MonoBehaviour {
             else {
                 panelPendingClickPrompt.GetComponentInChildren<Text>().text = "A new species of Zooplankton added!";
                 panelPendingClickPrompt.GetComponentInChildren<Text>().color = colorAnimalsLight;
-                panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
+                //panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
             }
         }
 
@@ -3842,7 +3860,7 @@ public class UIManager : MonoBehaviour {
 
     }
 
-    public void ClickAnnouncementText() {
+    /*public void ClickAnnouncementText() {
         Debug.Log("ClickAnnouncementText");
 
         //if blah -- which species unlocked?
@@ -3874,7 +3892,7 @@ public class UIManager : MonoBehaviour {
             } 
         }
     }
-
+    */
     private void CreateDebugRenderViewerArray() {
         debugTextureViewerArray = new RenderTexture[13];
         debugTextureViewerArray[0] = gameManager.theRenderKing.baronVonTerrain.terrainHeightDataRT;

@@ -314,8 +314,10 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 				bodyMass = 0;
 			}
 		}
-
-		foodParticlesWrite[id.x].worldPos = foodParticle.worldPos + posOffset;
+		float2 newWorldPos = foodParticle.worldPos + posOffset;
+		newWorldPos.x = min(max(newWorldPos.x, 0), _MapSize);   // CAP BOUNDARIES
+		newWorldPos.y = min(max(newWorldPos.y, 0), _MapSize);   // CAP BOUNDARIES
+		foodParticlesWrite[id.x].worldPos = newWorldPos; // foodParticle.worldPos + posOffset;
 		foodParticlesWrite[id.x].biomass = bodyMass;
 		foodParticlesWrite[id.x].wasteProduced = wasteMass;
 		foodParticlesWrite[id.x].oxygenProduced = oxygenProduced;
@@ -373,7 +375,9 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 					foodParticlesWrite[id.x].digestedAmount = 0.0;
 					foodParticlesWrite[id.x].age = rand(float2(rand01 * 70.158, randX * 13.37)) * 1;
 					float mutationSize = 0.071;
-					foodParticlesWrite[id.x].color = lerp(representativeParticle.color, float3(1.0 - randZ, rand01, randY), mutationSize);
+					foodParticlesWrite[id.x].color = representativeParticle.color; 
+					
+					// lerp(representativeParticle.color, float3(1.0 - randZ, rand01, randY), mutationSize);
 					//foodParticlesWrite[id.x].color = representativeParticle.color; // float3(1,1,1); // float3(randY, randX, randZ); //float3(0,0,0); //saturate(parentParticle.color + (float3(randY, randX, randZ) - 0.5) * 0.1);
 				}			
 			}			

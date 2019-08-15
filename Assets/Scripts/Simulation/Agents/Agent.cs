@@ -17,7 +17,7 @@ public class Agent : MonoBehaviour {
     public float turningAmount = 0f;
     public float swimAnimationCycleSpeed = 0.1f;
 
-    public float spawnStartingScale = 0.2f; // *** REFACTOR!!! SYNC WITH EGGS!!!
+    public float spawnStartingScale = 0.1f; // *** REFACTOR!!! SYNC WITH EGGS!!!
 
     public bool isInert = true;  // when inert, colliders disabled
     // Refactor??
@@ -881,8 +881,8 @@ public class Agent : MonoBehaviour {
 
     private void ScaleBody(float sizePercentage, bool resizeColliders) {
         //segmentFullSizeArray
-        float minScale = 0.005f;
-        float scale = Mathf.Lerp(minScale, 1f, sizePercentage); // Minimum size = 0.1 ???  // SYNC WITH EGG SIZE!!!
+        //float minScale = 0.2f;
+        float scale = Mathf.Lerp(spawnStartingScale, 1f, sizePercentage); // Minimum size = 0.1 ???  // SYNC WITH EGG SIZE!!!
         currentBoundingBoxSize = fullSizeBoundingBox * scale;
         float currentBodyVolume = currentBoundingBoxSize.y * (currentBoundingBoxSize.x + currentBoundingBoxSize.z) * 0.5f; // coreModule.currentBodySize.x * coreModule.currentBodySize.y;
 
