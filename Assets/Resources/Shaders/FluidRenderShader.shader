@@ -9,6 +9,7 @@
 		_ObstaclesTex ("_ObstaclesTex", 2D) = "white" {}
 		_TerrainHeightTex ("_TerrainHeightTex", 2D) = "grey" {}
 		_WaterSurfaceTex ("_WaterSurfaceTex", 2D) = "black" {}
+		_SkyTex ("_SkyTex", 2D) = "white" {}
 		_SpiritBrushTex ("_SpiritBrushTex", 2D) = "black" {}
 	}
 	SubShader
@@ -27,17 +28,21 @@
 			#pragma target 5.0
 			#include "UnityCG.cginc"
 			#include "Assets/Resources/Shaders/Inc/NoiseShared.cginc"
+			#include "Assets/Resources/Shaders/Inc/WaterUtilityFunctions.cginc"
 
 			struct appdata
 			{
 				float4 vertex : POSITION;
 				float2 uv : TEXCOORD0;
+				//float2 skyUV : TEXCOORD5;
 			};
 
 			struct v2f
 			{
 				float2 uv : TEXCOORD0;
 				float4 vertex : SV_POSITION;
+				float3 worldPos : TEXCOORD6;
+				//float2 skyUV : TEXCOORD5;
 			};
 
 			sampler2D _DensityTex;
@@ -48,6 +53,7 @@
 			sampler2D _TerrainHeightTex;
 			sampler2D _WaterSurfaceTex;
 			sampler2D _SpiritBrushTex;
+			sampler2D _SkyTex;
 			
 			v2f vert (appdata v)
 			{
@@ -55,6 +61,21 @@
 				//v.vertex.z -= tex2Dlod(_WaterSurfaceTex, float4(v.uv,0,0)).x * 5;
 				o.vertex = UnityObjectToClipPos(v.vertex);
 				o.uv = v.uv;
+
+				//float4 waterSurfaceTex = tex2D(_WaterSurfaceTex, i.altitudeUV);				
+				//float3 surfaceNormal = waterSurfaceTex.yzw;
+				
+				//float3 worldPosition = o.vertex.xyz;
+				o.worldPos = o.vertex.xyz;
+				//float3 cameraToVertex = worldPosition - _WorldSpaceCameraPos;
+                //float3 cameraToVertexDir = normalize(cameraToVertex);				
+				//float viewDot = dot(-cameraToVertexDir, surfaceNormal);
+				//float reflectLerp = GetReflectionLerpSml(worldPosition, surfaceNormal, viewDot, _CamDistNormalized * 0.25 + 0.2, _CamFocusPosition, vignetteRadius);
+
+				//o.skyUV = worldPosition.xy / _MapSize;
+				
+				//o.vignetteLerp = float4(reflectLerp,0,0,0);
+				
 				return o;
 			}
 			
@@ -62,27 +83,48 @@
 			{
 				
 				
+				
 				// sample the texture
 				fixed4 density = tex2D(_DensityTex, i.uv);
-				//return density;
-				//density.a = 1;
+				float4 waterSurfaceTex = tex2D(_WaterSurfaceTex, i.uv);
+
+
+				float3 worldPosition = i.worldPos;
+				float waveHeight = 1.0;
+				worldPosition.z += waterSurfaceTex.x * waveHeight;
+
+
+				float3 surfaceNormal = waterSurfaceTex.yzw;
+				float3 cameraToVertex = worldPosition - _WorldSpaceCameraPos;
+                float3 cameraToVertexDir = normalize(cameraToVertex);
+				float waveDistortMag = 0.5;
+				float3 reflectedViewDir = cameraToVertexDir + surfaceNormal * waveDistortMag;
+				float viewDot = dot(-cameraToVertexDir, surfaceNormal);
+
+				float2 skyCoords = reflectedViewDir.xy * 0.5 + 0.5;
 				
+				float skyScrollingSpeed = 0.015;
+				const int skySampleLOD = 1;
+				float4 skySampleUV = float4((skyCoords) - _Time.y * skyScrollingSpeed, 0, skySampleLOD);
+				//skySampleUV.xy * 0.5 + 0.25;
+				//skySampleUV.xy = 0.5;
+				float4 reflectedColor = float4(tex2Dlod(_SkyTex, skySampleUV).rgb, 1); //col;
 				
-				fixed4 velocity = tex2D(_VelocityTex, i.uv);
-				fixed4 pressure = tex2D(_PressureTex, i.uv);
-				fixed4 divergence = tex2D(_DivergenceTex, i.uv);
-				fixed4 obstacles = tex2D(_ObstaclesTex, i.uv);
-				//float val = density.y * 2;
-				//float dist = 1.0 - saturate(abs(0.3 - val) * 4.2);
-				//return float4(val, val, val, 1);
-				//return density; // + density2 * 0.25;
-				fixed4 finalColor = float4(0,0,0,1);
-				finalColor = density;
-				finalColor.rgb *= 0.75;
-				finalColor.a *= 0.5; // density.y;
+				fixed4 finalColor = density;
+				
+				float reflectLerp = 1.0 - saturate(viewDot);
+				finalColor = lerp(finalColor, reflectedColor, reflectLerp);
+				
+
 				return finalColor;
-				//finalColor.a = smoothstep(0.15, 0.3, density.y) * 0.15;
 				
+				
+
+
+
+
+				//===================================================================================
+				/*
 				//float3 Value2D(float2 p, float frequency)
 				float timeMult = 0.420;
 				float noiseMag01 = (Value3D(float3(-_Time.y * 0.25, -i.uv), 53).x * 0.5 + 0.5);
@@ -97,21 +139,13 @@
 
 				float noiseMag = saturate((noiseMag04 * 0.4 + noiseMag02 * 0.2 + noiseMag03 * 0.4) * 0.5 + 0.5 * (noiseMag05 * 0.25 + noiseMag06 * 0.25 + noiseMag07 * 0.25 + noiseMag08 * 0.25)); // * noiseMag01;
 				noiseMag = saturate((noiseMag - 0.5) * 2 + 0.5);
-				//density.rgb = lerp(density.rgb, float3(0.64, 1, 0.45) * 0.25, 0.85);
-				//density.a = saturate((density.a - 0.000055) * 3.95) * 1;
-
-				//density.a *= (noiseMag * 0.01 + 0.99);
-				//float4 testAlpha = density;
-				//testAlpha.a *= (noiseMag * 0.25 + 0.75);
+				
 				float2 grad = float2(ddx(density.a), ddy(density.a));
 				float2 gradNorm = normalize(grad);
 				float2 lightDir = float2(0,-1);
 				float diffuse = dot(gradNorm, lightDir) * 0.5 + 0.5;
 				float shadow = dot(gradNorm, -lightDir) * 0.5 + 0.5;
 
-				//density.rgb += float3(1,1,1) * saturate(diffuse) * 0.05;
-				//density.rgb -= float3(1,1,1) * saturate(shadow) * 0.05;
-				//density.a *= (noiseMag * 0.95 + 0.05);
 
 				
 
@@ -119,28 +153,19 @@
 				float altitude = heightTex.x;  // [-1,1] range
 				float onLandMask = saturate((altitude - 0.48) * 8);
 				float shallowsMask = 1.0 - saturate(((1-altitude) - 0.485) * 2.5);
-				//density.a *= saturate((-altitude + 0.5) * 7.22);
+				
 				fixed4 brushTex = tex2D(_SpiritBrushTex, i.uv);
-				//density.a *= 1.60;
-				//density.a *= density.a * density.a;
-				//density.a = saturate(brushTex.x * 0.25 + density.a) * 1;
+				
 				float stripey = (sin(density.a * 37) + 1);
 				float threshold = saturate((density.a - 0.02) * 16);
-				//density.a *= (threshold * 0.5 + 0.5);
-				//density.a *= 4.20;
-				//density.a -= stripey * 0.05;
-				//density.a = lerp(density.a, stripey, density.a * density.a * density.a);
-				//(sin(density.a * 16) + 1)) * 0.61;
+				
 				return saturate(density);
 
 				float pressureAmount = saturate((pressure.y - 0.2) * 3);
-				//finalColor.a += pressureAmount * 0.4 * noiseMag;
+				
 				finalColor.rgb += pressureAmount * 0.2 * noiseMag;
 
 				float velocityGlow = saturate((length(velocity) - 0.025) * 3.3);
-				//finalColor.a += velocityGlow * 0.4 * noiseMag;
-				//finalColor.rgb += velocityGlow * 0.65 * noiseMag;
-				//finalColor.rgb = lerp(finalColor.rgb, float3(1,1,0), velocityGlow);
 				
 				
 				float shorelineGlow = shallowsMask * (1.0 - onLandMask);
@@ -214,6 +239,8 @@
 				//return debugColor;
 
 				return finalColor;
+
+				*/
 			}
 			ENDCG
 		}

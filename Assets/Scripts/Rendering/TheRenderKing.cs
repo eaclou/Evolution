@@ -4106,6 +4106,7 @@ public class TheRenderKing : MonoBehaviour {
             fluidRenderMat.SetTexture("_TerrainHeightTex", baronVonTerrain.terrainHeightDataRT);
             fluidRenderMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
             fluidRenderMat.SetTexture("_SpiritBrushTex", spiritBrushRT);
+            
             cmdBufferMain.DrawMesh(fluidRenderMesh, Matrix4x4.identity, fluidRenderMat);
 
           
