@@ -4085,15 +4085,7 @@ public class TheRenderKing : MonoBehaviour {
             */
             
 
-            if(simManager.trophicLayersManager.GetAlgaeOnOff()) {
-                foodParticleDisplayMat.SetPass(0);
-                foodParticleDisplayMat.SetBuffer("foodParticleDataCBuffer", simManager.vegetationManager.plantParticlesCBuffer);
-                foodParticleDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-                foodParticleDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
-                foodParticleDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-                cmdBufferMain.DrawProcedural(Matrix4x4.identity, foodParticleDisplayMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.plantParticlesCBuffer.count * 32);
-        
-            }
+            
                                     
             
             // FLUID ITSELF:
@@ -4109,6 +4101,15 @@ public class TheRenderKing : MonoBehaviour {
             
             cmdBufferMain.DrawMesh(fluidRenderMesh, Matrix4x4.identity, fluidRenderMat);
 
+            if(simManager.trophicLayersManager.GetAlgaeOnOff()) {
+                foodParticleDisplayMat.SetPass(0);
+                foodParticleDisplayMat.SetBuffer("foodParticleDataCBuffer", simManager.vegetationManager.plantParticlesCBuffer);
+                foodParticleDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+                foodParticleDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
+                foodParticleDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+                cmdBufferMain.DrawProcedural(Matrix4x4.identity, foodParticleDisplayMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.plantParticlesCBuffer.count * 32);
+        
+            }
           
             // WATER :::::
             //baronVonWater.RenderCommands(ref cmdBufferTest, renderedSceneID);
