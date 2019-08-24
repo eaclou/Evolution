@@ -3778,7 +3778,7 @@ public class TheRenderKing : MonoBehaviour {
             cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
             //cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundStrokesSmlDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.groundStrokesSmlCBuffer.count);
 
-
+            /*
             // CARPET BITS:: (microbial mats, algae?) -- DETRITUS / WASTE
             baronVonTerrain.carpetBitsDisplayMat.SetPass(0);
             baronVonTerrain.carpetBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -3792,7 +3792,7 @@ public class TheRenderKing : MonoBehaviour {
             baronVonTerrain.carpetBitsDisplayMat.SetVector("_FogColor", simManager.fogColor); 
             cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.carpetBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.carpetBitsCBuffer.count);
-            
+            */
             
             // GROUND BITS:::   DECOMPOSERS
             /*if(simManager.trophicLayersManager.GetDecomposersOnOff()) {

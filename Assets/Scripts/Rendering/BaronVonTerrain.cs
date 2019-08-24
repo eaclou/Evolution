@@ -72,9 +72,9 @@ public class BaronVonTerrain : RenderBaron {
     public ComputeBuffer groundStrokesMedCBuffer;
     public ComputeBuffer groundStrokesSmlCBuffer;
 
-    private int numGroundBits = 1024 * 16;
+    private int numGroundBits = 1024 * 4;
     public ComputeBuffer groundBitsCBuffer;
-    private int numCarpetBits = 1024 * 16;
+    private int numCarpetBits = 1024 * 4;
     public ComputeBuffer carpetBitsCBuffer;
 
     public Vector4 spawnBoundsCameraDetails;

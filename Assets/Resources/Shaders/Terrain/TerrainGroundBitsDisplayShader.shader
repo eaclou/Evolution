@@ -110,7 +110,7 @@
 				float fadeOut = saturate((1 - groundBitData.age) / fadeDuration);							
 				float alpha = fadeIn * fadeOut;
 				
-				float2 scale = 1; //groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25) * 2.0;
+				float2 scale = 3; //groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25) * 2.0;
 			
 				float sizeFadeMask = saturate((1.0 - altitude) * 4 - 2);
 				quadPoint *= float3(scale, 1.0) * (_Density * 0.5 + 0.5) * sizeFadeMask;
@@ -171,10 +171,11 @@
 
 			fixed4 frag(v2f i) : SV_Target
 			{
-				return float4(1,1,1,1);
+				
 
 				float4 brushColor = tex2D(_MainTex, i.quadUV);	
-				
+				brushColor.rgb *= 0.051;
+				return brushColor;
 				float2 screenUV = i.screenUV.xy / i.screenUV.w;
 				float4 frameBufferColor = tex2D(_RenderedSceneRT, screenUV);  //  Color of brushtroke source					
 				float4 altitudeTex = tex2D(_AltitudeTex, i.altitudeUV); //i.worldPos.z / 10; // [-1,1] range
