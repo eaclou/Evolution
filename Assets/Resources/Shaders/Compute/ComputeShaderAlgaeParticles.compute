@@ -7,18 +7,18 @@
 #pragma kernel CSSimulateAlgaeParticles
 
 #include "Assets/Resources/Shaders/Inc/StructsCritterData.cginc"
-#include "Assets/Resources/Shaders/Inc/StructsAlgaeParticles.cginc"
+#include "Assets/Resources/Shaders/Inc/StructsPlantParticles.cginc"
 
 StructuredBuffer<CritterInitData> critterInitDataCBuffer;
 StructuredBuffer<CritterSimData> critterSimDataCBuffer;
 
-StructuredBuffer<AlgaeParticleData> foodParticlesRead;
-RWStructuredBuffer<AlgaeParticleData> foodParticlesWrite;
+StructuredBuffer<PlantParticleData> foodParticlesRead;
+RWStructuredBuffer<PlantParticleData> foodParticlesWrite;
 RWTexture2D<float4> foodParticlesNearestCrittersRT;
 
-RWStructuredBuffer<AlgaeParticleData> closestParticlesDataCBuffer;
+RWStructuredBuffer<PlantParticleData> closestParticlesDataCBuffer;
 
-StructuredBuffer<AlgaeParticleData> _RepresentativeAlgaeParticleGenomeCBuffer;
+StructuredBuffer<PlantParticleData> _RepresentativeAlgaeParticleGenomeCBuffer;
 
 StructuredBuffer<float> foodParticlesEatAmountsRead;
 RWStructuredBuffer<float> foodParticlesEatAmountsCBuffer;
@@ -76,7 +76,7 @@ void CSMeasureInitCritterDistances (uint3 id : SV_DispatchThreadID)
 	int particleIndex = id.x;
 	int critterIndex = id.y;
 
-	AlgaeParticleData particleData = foodParticlesRead[particleIndex];
+	PlantParticleData particleData = foodParticlesRead[particleIndex];
 	CritterInitData critterInitData = critterInitDataCBuffer[critterIndex];
 	CritterSimData critterSimData = critterSimDataCBuffer[critterIndex];
 
@@ -109,7 +109,7 @@ void CSReduceCritterDistances32 (uint3 id : SV_DispatchThreadID)
 		
 		float4 sourceData = critterDistancesRead[int2(particleIndex, critterIndex)];
 		
-		AlgaeParticleData particleData = foodParticlesRead[particleIndex];
+		PlantParticleData particleData = foodParticlesRead[particleIndex];
 
 		if(sourceData.y < minSquaredDistance) {
 			if(particleData.isActive > 0.5) {
@@ -119,7 +119,7 @@ void CSReduceCritterDistances32 (uint3 id : SV_DispatchThreadID)
 		}
 	}
 		
-	AlgaeParticleData closestFoodData = foodParticlesRead[closestParticleIndex];	
+	PlantParticleData closestFoodData = foodParticlesRead[closestParticleIndex];	
 		
 	critterDistancesWrite[int2(id.x, critterIndex)] = float4(closestParticleIndex, minSquaredDistance, 1.0, 1.0);
 	closestParticlesDataCBuffer[critterIndex] = closestFoodData; // assuming there's only 1 thread at end
@@ -136,7 +136,7 @@ void CSEatSelectedFoodParticles (uint3 id : SV_DispatchThreadID)
 
 	int particleIndex = (int)data.x;
 
-	AlgaeParticleData particleData = foodParticlesRead[particleIndex];
+	PlantParticleData particleData = foodParticlesRead[particleIndex];
 	
 	foodParticlesWrite[particleIndex] = particleData;
 
@@ -174,7 +174,7 @@ void CSEatSelectedFoodParticles (uint3 id : SV_DispatchThreadID)
 [numthreads(1024,1,1)]
 void CSCopyFoodParticlesBuffer (uint3 id : SV_DispatchThreadID)
 {	
-	AlgaeParticleData particleData = foodParticlesRead[id.x];
+	PlantParticleData particleData = foodParticlesRead[id.x];
 	
 	foodParticlesWrite[id.x] = particleData;
 }
@@ -182,7 +182,7 @@ void CSCopyFoodParticlesBuffer (uint3 id : SV_DispatchThreadID)
 [numthreads(1,1,1)]
 void CSMeasureTotalFoodParticlesAmount (uint3 id : SV_DispatchThreadID)
 {	
-	AlgaeParticleData copyData = foodParticlesRead[id.x];
+	PlantParticleData copyData = foodParticlesRead[id.x];
 	
 	float totalBiomassAmount = 0;
 	float totalOxygenProduced = 0.0;
@@ -191,7 +191,7 @@ void CSMeasureTotalFoodParticlesAmount (uint3 id : SV_DispatchThreadID)
 	
 	for(int i = 0; i < 32; i++) {		
 		int particleIndex = id.x * 32 + i;		
-		AlgaeParticleData particleData = foodParticlesRead[particleIndex];				
+		PlantParticleData particleData = foodParticlesRead[particleIndex];				
 		
 		totalBiomassAmount += particleData.biomass;
 		totalOxygenProduced += particleData.oxygenProduced;
@@ -233,7 +233,7 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 {
 	// Check if particle isn't in the water:
 
-	AlgaeParticleData foodParticle = foodParticlesRead[id.x];
+	PlantParticleData foodParticle = foodParticlesRead[id.x];
 	
 	if(foodParticle.isActive > 0.5) { // poor man's boolean -- Being Simulated
 		
@@ -257,7 +257,7 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 		
 		/*int neighborIndex = (id.x + round(_Time * 11) + 512) % 1024;
 			
-		AlgaeParticleData neighborParticle = foodParticlesRead[neighborIndex];
+		PlantParticleData neighborParticle = foodParticlesRead[neighborIndex];
 		float neighborAliveMask = neighborParticle.isActive; //    (1.0 - neighborParticle.isDecaying) * neighborParticle.isActive;
 
 		float2 neighborPos = neighborParticle.worldPos;
@@ -342,7 +342,7 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 			float randZ = rand(float2((float)id.x, randY * -62.39 - _Time));			
 			
 			int parentIndex = (id.x + round(_Time * 0.25) + 256) % 1024;			
-			AlgaeParticleData parentParticle = foodParticlesRead[parentIndex];
+			PlantParticleData parentParticle = foodParticlesRead[parentIndex];
 			float aliveMask = (1.0 - parentParticle.isDecaying) * parentParticle.isActive;
 			float2 parentPos = parentParticle.worldPos;
 
@@ -362,7 +362,7 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 				
 					foodParticlesWrite[id.x].worldPos = spawnUV * _MapSize;
 					
-					AlgaeParticleData representativeParticle = _RepresentativeAlgaeParticleGenomeCBuffer[0];
+					PlantParticleData representativeParticle = _RepresentativeAlgaeParticleGenomeCBuffer[0];
 					
 
 					float randRadius = rand(float2(randX * 10, randY * -3.37)) * (_MaxParticleSize - _MinParticleSize) + _MinParticleSize;					
@@ -389,7 +389,7 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 			float randZ = rand(float2((float)id.x, randY * -62.39 - _Time));			
 			
 			int parentIndex = (id.x + round(_Time * 0.25) + 256) % 1024;			
-			AlgaeParticleData parentParticle = foodParticlesRead[parentIndex];
+			PlantParticleData parentParticle = foodParticlesRead[parentIndex];
 			float aliveMask = (1.0 - parentParticle.isDecaying) * parentParticle.isActive;
 			float2 parentPos = parentParticle.worldPos;
 

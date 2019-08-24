@@ -101,7 +101,7 @@
 				float fadeOut = saturate((1 - groundBitData.age) / fadeDuration);							
 				float alpha = fadeIn * fadeOut;
 				
-				float2 scale = groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25) * (_DetritusDensityLerp * 3.14 + 0.5);
+				float2 scale = 1; //groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25) * (_DetritusDensityLerp * 3.14 + 0.5);
 			
 				quadPoint *= float3(scale, 1.0);
 				
@@ -121,7 +121,7 @@
 
 
 				// Figure out final facing Vectors!!!
-				float2 forward = groundBitData.heading; // fluidDir; //
+				float2 forward = float2(1,0); // groundBitData.heading; // fluidDir; //
 				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
 				float2 rotatedPoint = float2(quadPoint.x * right + quadPoint.y * forward);  // Rotate localRotation by AgentRotation
 
@@ -159,7 +159,8 @@
 
 			fixed4 frag(v2f i) : SV_Target
 			{
-				//return float4(1,1,1,1);
+				return float4(1,1,0,1);
+
 				float4 brushColor = tex2D(_MainTex, i.quadUV);	
 				
 				float2 screenUV = i.screenUV.xy / i.screenUV.w;

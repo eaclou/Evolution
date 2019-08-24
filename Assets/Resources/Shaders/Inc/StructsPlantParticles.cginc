@@ -1,4 +1,4 @@
-struct AlgaeParticleData {
+struct PlantParticleData {
 	int index;				
 	int critterIndex; // index of creature which swallowed this foodParticle
 	int nearestCritterIndex;

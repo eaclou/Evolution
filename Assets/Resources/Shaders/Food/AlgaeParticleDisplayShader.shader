@@ -24,13 +24,13 @@
 			#pragma target 5.0
 			#include "UnityCG.cginc"
 			#include "Assets/Resources/Shaders/Inc/NoiseShared.cginc"
-			#include "Assets/Resources/Shaders/Inc/StructsAlgaeParticles.cginc"
+			#include "Assets/Resources/Shaders/Inc/StructsPlantParticles.cginc"
 
 			sampler2D _MainTex;
 			sampler2D _AltitudeTex;
 			sampler2D _WaterSurfaceTex;
 			
-			StructuredBuffer<AlgaeParticleData> foodParticleDataCBuffer;			
+			StructuredBuffer<PlantParticleData> plantParticleDataCBuffer;			
 			StructuredBuffer<float3> quadVerticesCBuffer;
 			
 			struct v2f
@@ -63,7 +63,7 @@
 				float rand2 = rand(float2(rand1, rand1) * 10);
 				
 							
-				AlgaeParticleData particleData = foodParticleDataCBuffer[particleIndex];
+				PlantParticleData particleData = plantParticleDataCBuffer[particleIndex];
 
 				float3 worldPosition = float3(particleData.worldPos, 1.0);    //float3(rawData.worldPos, -random2);
 				float2 offsetRaw = (float2(rand0, rand1) * 2 - 1);

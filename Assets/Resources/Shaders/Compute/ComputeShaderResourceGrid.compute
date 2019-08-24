@@ -14,14 +14,14 @@
 
 
 #include "Assets/Resources/Shaders/Inc/StructsCritterData.cginc"
-#include "Assets/Resources/Shaders/Inc/StructsAlgaeParticles.cginc"
+#include "Assets/Resources/Shaders/Inc/StructsPlantParticles.cginc"
 
 StructuredBuffer<CritterInitData> critterInitDataCBuffer;
 StructuredBuffer<CritterSimData> critterSimDataCBuffer;
 
 Texture2D<float4> ObstaclesRead;
 
-StructuredBuffer<AlgaeParticleData> algaeParticlesRead;
+StructuredBuffer<PlantParticleData> algaeParticlesRead;
 
 RWStructuredBuffer<float4> _ResourceGridSamplesCBuffer;
 StructuredBuffer<float4> _ResourceGridEatAmountsCBuffer;
@@ -149,7 +149,7 @@ void CSAdvectResourceGrid (uint3 id : SV_DispatchThreadID)
 	float2 uvSample = uvOrigin - _DeltaTime * _InvGridScale * VelocityRead.SampleLevel(_LinearRepeat, uvOrigin, 0).xy;
 	float4 newDensity = _ResourceGridRead.SampleLevel(_LinearRepeat, uvSample, 0);
 	
-	AlgaeParticleData particleData = algaeParticlesRead[(id.x * 32 + id.y + round(_Time * 75.4837)) % 1024];
+	PlantParticleData particleData = algaeParticlesRead[(id.x * 32 + id.y + round(_Time * 75.4837)) % 1024];
 	float2 particleCoords = particleData.worldPos / _MapSize;
 	float dist = length(uvOrigin - particleCoords);
 	float distMask = saturate(1.0 - dist * 7);
