@@ -360,9 +360,9 @@ void CSSimRD (uint3 id : SV_DispatchThreadID)
 	resourceGridRead.z += decomposerDecayMass * 0.15; // ** shouldn't be necessary???
 	
 	resourceGridRead.x -= nutrientsUsed; 
-	resourceGridRead.x += nutrientsCreated * 1.05;
+	resourceGridRead.x += nutrientsCreated * 20.15;
 	resourceGridRead.y -= detritusUsed;
-	resourceGridRead.y += detritusCreated * 2.1;  // // *** hacky empirical fix for balancing conservation of energy/mass
+	resourceGridRead.y += detritusCreated * 1.91;  // // *** hacky empirical fix for balancing conservation of energy/mass
 	
 	// X = nutrients
 	// Y = detritus

@@ -9,6 +9,7 @@ public class BaronVonWater : RenderBaron {
     public ComputeShader computeShaderWaterRender;
 
     public EnvironmentFluidManager fluidManagerRef;
+    public VegetationManager veggieManRef;
 
     public Material waterQuadStrokesLrgDisplayMat;
     public Material waterQuadStrokesSmlDisplayMat;
@@ -423,6 +424,8 @@ public class BaronVonWater : RenderBaron {
         computeShaderWaterRender.SetBuffer(kernelSimDetailBitsData, "waterQuadStrokesCBuffer", waterNutrientsBitsCBuffer);
         computeShaderWaterRender.SetTexture(kernelSimDetailBitsData, "VelocityRead", fluidManagerRef._VelocityA);
         computeShaderWaterRender.SetTexture(kernelSimDetailBitsData, "AltitudeRead", altitudeMapRef);
+        computeShaderWaterRender.SetTexture(kernelSimDetailBitsData, "_ResourceSimTransferTex", veggieManRef.resourceSimTransferRT);
+        computeShaderWaterRender.SetTexture(kernelSimDetailBitsData, "_ResourceGridTex", veggieManRef.resourceGridRT1);
         computeShaderWaterRender.SetFloat("_MapSize", SimulationManager._MapSize);
         computeShaderWaterRender.SetVector("_SpawnBoundsCameraDetails", spawnBoundsCameraDetails);
         computeShaderWaterRender.Dispatch(kernelSimDetailBitsData, waterNutrientsBitsCBuffer.count / 1024, 1, 1);

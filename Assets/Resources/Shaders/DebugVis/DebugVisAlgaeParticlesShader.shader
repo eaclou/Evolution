@@ -23,7 +23,7 @@
 			#pragma target 5.0
 			#include "UnityCG.cginc"
 			#include "Assets/Resources/Shaders/Inc/NoiseShared.cginc"
-			#include "Assets/Resources/Shaders/Inc/StructsAlgaeParticles.cginc"
+			#include "Assets/Resources/Shaders/Inc/StructsPlantParticles.cginc"
 
 			sampler2D _MainTex;
 			//sampler2D _WaterSurfaceTex;
@@ -32,7 +32,7 @@
 			//float4 _Tint;
 			//float4 _Size;
 			
-			StructuredBuffer<AlgaeParticleData> foodParticleDataCBuffer;			
+			StructuredBuffer<PlantParticleData> foodParticleDataCBuffer;			
 			StructuredBuffer<float3> quadVerticesCBuffer;
 			
 			struct v2f
@@ -54,7 +54,7 @@
 
 				float3 quadPoint = quadVerticesCBuffer[id];
 							
-				AlgaeParticleData particleData = foodParticleDataCBuffer[inst];
+				PlantParticleData particleData = foodParticleDataCBuffer[inst];
 
 				float3 worldPosition = float3(particleData.worldPos, 1.0);    //float3(rawData.worldPos, -random2);
 				

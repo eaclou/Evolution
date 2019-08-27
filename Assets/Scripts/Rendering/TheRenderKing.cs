@@ -491,7 +491,9 @@ public class TheRenderKing : MonoBehaviour {
         InitializeCommandBuffers();
         
         baronVonTerrain.Initialize();
+        baronVonWater.veggieManRef = simManager.vegetationManager;
         baronVonWater.Initialize();
+        
 
         for(int i = 0; i < simManager._NumEggSacks; i++) {
             UpdateDynamicFoodBuffers(i);
@@ -3818,6 +3820,7 @@ public class TheRenderKing : MonoBehaviour {
             baronVonTerrain.groundBitsDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
             baronVonTerrain.groundBitsDisplayMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
             baronVonTerrain.groundBitsDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+            baronVonTerrain.groundBitsDisplayMat.SetTexture("_ResourceGridTex", simManager.vegetationManager.resourceGridRT1);
             baronVonTerrain.groundBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
             baronVonTerrain.groundBitsDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);     
             baronVonTerrain.groundBitsDisplayMat.SetFloat("_MinFog", 0.0625f);                

@@ -6,7 +6,7 @@
 		_AltitudeTex ("_AltitudeTex", 2D) = "gray" {}
 		_VelocityTex ("_VelocityTex", 2D) = "black" {}
 		_WaterSurfaceTex ("_WaterSurfaceTex", 2D) = "black" {}
-		_NutrientTex ("_NutrientTex", 2D) = "black" {}
+		_ResourceGridTex ("_ResourceGridTex", 2D) = "black" {}
 		_WaterColorTex ("_WaterColorTex", 2D) = "black" {}
 		
 		
@@ -32,7 +32,7 @@
 			sampler2D _AltitudeTex;			
 			sampler2D _VelocityTex;
 			sampler2D _WaterSurfaceTex;
-			sampler2D _NutrientTex;
+			sampler2D _ResourceGridTex;
 			sampler2D _WaterColorTex;
 			
 			sampler2D _RenderedSceneRT;  // Provided by CommandBuffer -- global tex??? seems confusing... ** revisit this
@@ -90,7 +90,7 @@
 
 				o.quadUV = quadPoint + 0.5;
 				o.worldPos = worldPosition;
-				float2 uv = worldPosition.xy / 256;
+				float2 uv = worldPosition.xy / _MapSize;
 				o.altitudeUV = uv;
 
 				float altitude = tex2Dlod(_AltitudeTex, float4(o.altitudeUV, 0, 0)).x; //i.worldPos.z / 10; // [-1,1] range
@@ -105,16 +105,18 @@
 				worldPosition.z = -altitude * 20 + 10 + groundBitData.age;
 ;
 
-				float fadeDuration = 0.1;
+				float fadeDuration = 0.25;
 				float fadeIn = saturate(groundBitData.age / fadeDuration);  // fade time = 0.1
 				float fadeOut = saturate((1 - groundBitData.age) / fadeDuration);							
 				float alpha = fadeIn * fadeOut;
 				
-				float2 scale = 3; //groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25) * 2.0;
+				float2 scale = float2(5,2.5) * 0.9 * alpha; //groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25) * 2.0;
 			
-				float sizeFadeMask = saturate((1.0 - altitude) * 4 - 2);
-				quadPoint *= float3(scale, 1.0) * (_Density * 0.5 + 0.5) * sizeFadeMask;
-				quadPoint.x *= 0.75;
+				float wasteTex = saturate(tex2Dlod(_ResourceGridTex, float4(uv, 0, 0)).y * 1.5 + 0.25);
+
+				float sizeFadeMask = wasteTex; // saturate((1.0 - altitude) * 4 - 2);
+				quadPoint *= float3(scale, 1.0) * sizeFadeMask;
+				//quadPoint.x *= 0.75;
 				
 				float4 fluidVelocity = tex2Dlod(_VelocityTex, float4(worldPosition.xy / 256, 0, 2));
 				float fluidSpeed = length(fluidVelocity.xy);
@@ -133,7 +135,7 @@
 
 
 				// Figure out final facing Vectors!!!
-				float2 forward = float2(0,1); // lerp(groundBitData.heading, fluidDir, saturate(fluidSpeed * 5)); //groundBitData.heading;
+				float2 forward = groundBitData.heading; //float2(0,1); // lerp(groundBitData.heading, fluidDir, saturate(fluidSpeed * 5)); //groundBitData.heading;
 				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
 				float2 rotatedPoint = float2(quadPoint.x * right + quadPoint.y * forward);  // Rotate localRotation by AgentRotation
 
@@ -171,10 +173,11 @@
 
 			fixed4 frag(v2f i) : SV_Target
 			{
-				
+				//return float4(1,1,1,1);
 
 				float4 brushColor = tex2D(_MainTex, i.quadUV);	
 				brushColor.rgb *= 0.051;
+				brushColor.a *= 1;
 				return brushColor;
 				float2 screenUV = i.screenUV.xy / i.screenUV.w;
 				float4 frameBufferColor = tex2D(_RenderedSceneRT, screenUV);  //  Color of brushtroke source					

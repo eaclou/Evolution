@@ -163,10 +163,10 @@ void CSSimGroundBitsData (uint3 id : SV_DispatchThreadID)
 		float2 uv = groundBitData.worldPos.xy / _MapSize;		
 		float altitude = AltitudeRead.SampleLevel(_LinearClamp, uv, 0).x;
 		
-		groundBitData.age = groundBitData.age + 0.01;  // ? frame lifespan
+		groundBitData.age = groundBitData.age + 0.0025;  // ? frame lifespan
 
 		// if should be killed:
-		if(groundBitData.age > 1.0 || altitude > 0.55 ) {
+		if(groundBitData.age > 1.0) {
 			groundBitData.isActive = 0;
 				
 		}
@@ -179,7 +179,7 @@ void CSSimGroundBitsData (uint3 id : SV_DispatchThreadID)
 	
 			float2 nextPos = uv + vel * speedMult;
 			
-			float pixelOffset = 1.0 / 256;  // resolution
+			float pixelOffset = 1.0 / 256;  // resolution  // **** THIS CAN"T BE HARDCODED AS FINAL ****"
 
 			float altitudeCenter = AltitudeRead.SampleLevel(_LinearClamp, uv, 0).x;
 			float altitudeNorth = AltitudeRead.SampleLevel(_LinearClamp, uv + float2(0, pixelOffset), 0).x;
@@ -217,21 +217,22 @@ void CSSimGroundBitsData (uint3 id : SV_DispatchThreadID)
 		float altitudeMask = saturate((1 - spawnAltitude) * 4);
 		
 		// Try respawning:
-		float4 decomposersMask = decomposersRead.SampleLevel(_LinearRepeat, spawnUV, 0);
-		float spawnRating = decomposersMask.y * altitudeMask;
+		float4 decomposersMask = decomposersRead.SampleLevel(_LinearClamp, spawnUV, 0);  // ** actually the resourceGrid Tex -- rename
+		float spawnRating = decomposersMask.y; // * altitudeMask;
 
 		float distToOrigin = length(_SpawnPos.xy - (spawnUV * _MapSize));
-			
-		if(distToOrigin < _SpawnRadius) {
-			if(spawnRating > 0.4 * ((1.0 - _DecomposerDensityLerp) * 0.2 + 0.8)) { // (float)id.x / 1024.0 / 8.0) {
-				spawnPos += float2(spawnNoise1, spawnNoise2) * 0.93416;		
-				groundBitData.worldPos = float3(spawnPos, 0);
-				groundBitData.age = groundBitData.age % 1.0;
-				groundBitData.isActive = 1.0;
+		if(spawnRating > 0.025) {	
+		//if(distToOrigin < _SpawnRadius) {
+		//	if(spawnRating > 0.4 * ((1.0 - _DecomposerDensityLerp) * 0.2 + 0.8)) { // (float)id.x / 1024.0 / 8.0) {
+		
+			spawnPos += float2(spawnNoise1, spawnNoise2) * 0.93416;		
+			groundBitData.worldPos = float3(spawnPos, 0);
+			groundBitData.age = groundBitData.age % 1.0;
+			groundBitData.isActive = 1.0;
 
 				
 			
-			}
+			//}
 		}		
 	}
 	

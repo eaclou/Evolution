@@ -18,12 +18,12 @@
 			#pragma fragment frag
 			#pragma target 5.0
 			#include "UnityCG.cginc"
-			#include "Assets/Resources/Shaders/Inc/StructsAlgaeParticles.cginc"
+			#include "Assets/Resources/Shaders/Inc/StructsPlantParticles.cginc"
 
 			// Resource transfer Texture for Plants (Big Plants, not Algae)
 			sampler2D _MainTex;
 			
-			StructuredBuffer<AlgaeParticleData> plantParticleDataCBuffer;			
+			StructuredBuffer<PlantParticleData> plantParticleDataCBuffer;			
 			StructuredBuffer<float3> quadVerticesCBuffer;
 
 			uniform float _MapSize;
@@ -44,7 +44,7 @@
 
 				int particleIndex = inst;
 							
-				AlgaeParticleData plantParticleData = plantParticleDataCBuffer[particleIndex];
+				PlantParticleData plantParticleData = plantParticleDataCBuffer[particleIndex];
 
 				float3 worldPosition = float3(plantParticleData.worldPos.xy, 0);   
 				

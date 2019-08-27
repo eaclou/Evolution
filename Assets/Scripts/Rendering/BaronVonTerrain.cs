@@ -268,8 +268,8 @@ public class BaronVonTerrain : RenderBaron {
         {
             groundBitsArray[x].index = x;
             //int index = y * numGroundStrokesLrg + x;
-            float xPos = (float)x / (float)(numGroundBits - 1) * boundsLrg;
-            float yPos = xPos; // (1f - (float)y / (float)(numGroundStrokesLrg - 1)) * boundsLrg;
+            float xPos = 0f; // (float)x / (float)(numGroundBits - 1) * boundsLrg;
+            float yPos = 0f; // xPos; // (1f - (float)y / (float)(numGroundStrokesLrg - 1)) * boundsLrg;
             Vector2 offset = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f) * 0.0f) * 16f;
             Vector3 pos = new Vector3(xPos + offset.x, yPos + offset.y, 0f);
             groundBitsArray[x].worldPos = pos;

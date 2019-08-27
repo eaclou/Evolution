@@ -775,29 +775,30 @@ public class SimulationManager : MonoBehaviour {
 
                 float damage = wallForce * 0.1f;
                 float defendBonus = 1f;
-                if(agentsArray[i].coreModule.isDefending) {
-                    if(agentsArray[i].coreModule.defendFrameCounter < agentsArray[i].coreModule.defendDuration) {
-                        defendBonus = 0.1f;
+                if(agentsArray[i].coreModule != null) {
+                    if(agentsArray[i].coreModule.isDefending) {
+                        if(agentsArray[i].coreModule.defendFrameCounter < agentsArray[i].coreModule.defendDuration) {
+                            defendBonus = 0.1f;
+                        }
+                        else {
+                            defendBonus = 1.25f; // cooldown penalty
+                        }
                     }
-                    else {
-                        defendBonus = 1.25f; // cooldown penalty
-                    }
-                }
 
-                damage *= defendBonus;
+                    damage *= defendBonus;
 
-                agentsArray[i].coreModule.hitPoints[0] -= damage;
-                // currently no distinctionbetween regions:
-                agentsArray[i].coreModule.healthHead -= damage;
-                agentsArray[i].coreModule.healthBody -= damage;
-                agentsArray[i].coreModule.healthExternal -= damage;
+                    agentsArray[i].coreModule.hitPoints[0] -= damage;
+                    // currently no distinctionbetween regions:
+                    agentsArray[i].coreModule.healthHead -= damage;
+                    agentsArray[i].coreModule.healthBody -= damage;
+                    agentsArray[i].coreModule.healthExternal -= damage;
 
-                agentsArray[i].totalDamageTaken += damage;
+                    agentsArray[i].totalDamageTaken += damage;
         
 
-                agentsArray[i].CheckForDeathHealth();
+                    agentsArray[i].CheckForDeathHealth();
 
-
+                }
             }
             
             agentsArray[i].bodyRigidbody.AddForce(simStateData.fluidVelocitiesAtAgentPositionsArray[i] * 48f * agentsArray[i].bodyRigidbody.mass, ForceMode2D.Impulse);

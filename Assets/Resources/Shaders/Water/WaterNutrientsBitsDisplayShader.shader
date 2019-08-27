@@ -95,14 +95,14 @@
 				o.altitudeUV = uv;
 								
 				float2 scale = waterQuadData.localScale * 12;
-				scale.x *= 1;
-				scale.y = scale.y * (1 + saturate(waterQuadData.speed * 64));
+				//scale.x *= 1;
+				//scale.y = scale.y * (1 + saturate(waterQuadData.speed * 64));
 				
 				//float4 nutrientGridSample = tex2Dlod(_NutrientTex, float4((o.altitudeUV - 0.25) * 2.0, 0, 0));
 				//scale *= (nutrientGridSample.x * 0.4 + 0.6) * 1;				
 				//scale = float2(1,1) * 0.033;
-				
-				quadPoint *= float3(scale, 1.0) * (0.2 + _NutrientDensity * 0.175) * (_CamDistNormalized * 0.85 + 0.15);
+				_NutrientDensity = 1.0;
+				quadPoint *= float3(scale, 1.0); // * (0.2 + _NutrientDensity * 0.175) * (_CamDistNormalized * 0.85 + 0.15);
 				
 				float4 fluidVelocity = tex2Dlod(_VelocityTex, float4(worldPosition.xy / 256, 0, 2));
 				float2 fluidDir = float2(0,1); //normalize(fluidVelocity.xy);
@@ -173,6 +173,9 @@
 
 			fixed4 frag(v2f i) : SV_Target
 			{
+				return float4(1,1,1,1);
+
+
 				float4 finalColor = tex2D(_MainTex, i.quadUV);
 				//i.color.r = random 0-1
 				finalColor.rgb = lerp(float3(0.05,0.04,0.015), float3(0.9,1,0.7) * 0.5, i.color.r); //rand()); //saturate(nutrientGridSample.x * 10 + 0.033));
