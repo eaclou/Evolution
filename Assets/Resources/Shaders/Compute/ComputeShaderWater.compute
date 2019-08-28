@@ -181,7 +181,7 @@ void CSSimDetailBitsData (uint3 id : SV_DispatchThreadID)
 
 	float altitude = AltitudeRead.SampleLevel(_LinearClamp, uv, 0).x;
 
-	waterQuadData.age = waterQuadData.age + 0.0075;  // ? frame lifespan
+	waterQuadData.age = waterQuadData.age + 0.042;  // ? frame lifespan
 		
 	float respawnFromAge = saturate((waterQuadData.age - 1.0) * 1000); // 0 = fine, 1 == TOO OLD!!!
 	float respawnFromAltitude = saturate((altitude - 0.5) * 100);  // 0 if in water, 1 if on land
@@ -190,22 +190,29 @@ void CSSimDetailBitsData (uint3 id : SV_DispatchThreadID)
 	//respawnMask *= saturate(nutrients * 1);
 
 	// **** Resource Grid TEX!
-	if(respawnMask > 0.025 ) {
+	if(respawnMask > 0.5 ) {
 		
 		// Respawn!!!
 
-		float2 spawnPos = float2(rand(float2(id.x, uv.x)), rand(float2(uv.y, id.x)));				
-		float2 spawnBoxSize = float2(_SpawnBoundsCameraDetails.z - _SpawnBoundsCameraDetails.x, _SpawnBoundsCameraDetails.w - _SpawnBoundsCameraDetails.y);
-		spawnPos = spawnPos * spawnBoxSize + _SpawnBoundsCameraDetails.xy;
+				
+		//float2 spawnBoxSize = float2(_SpawnBoundsCameraDetails.z - _SpawnBoundsCameraDetails.x, _SpawnBoundsCameraDetails.w - _SpawnBoundsCameraDetails.y);
+		//spawnPos = spawnPos * spawnBoxSize + _SpawnBoundsCameraDetails.xy;
 		
-		float2 spawnUV = spawnPos / _MapSize;
-		float4 resourceGridTex = _ResourceGridTex.SampleLevel(_LinearClamp, spawnUV, 0);
-		float nutrients = resourceGridTex.x;
+		for(int i = 0; i < 8; i++) {
+			float2 spawnPos = float2(rand(float2(id.x + i, uv.x - i)), rand(float2(uv.y - i, id.x + i)));		
+			float2 spawnUV = spawnPos; // / _MapSize;
+			float4 resourceGridTex = _ResourceGridTex.SampleLevel(_LinearClamp, spawnUV, 0);
+			float nutrients = resourceGridTex.x;
 
-		if(nutrients > 0.175) {
-			waterQuadData.worldPos = float3(spawnPos, 0);
-			waterQuadData.age = frac(waterQuadData.age);
+			if(nutrients > 0.005) {
+				waterQuadData.worldPos = float3(spawnPos * _MapSize, 0);
+				waterQuadData.age = frac(waterQuadData.age);
+
+				break;
+			}
+		
 		}
+		
 		
 		
 	}

@@ -176,7 +176,7 @@
 				//return float4(1,1,1,1);
 
 				float4 brushColor = tex2D(_MainTex, i.quadUV);	
-				brushColor.rgb *= 0.051;
+				brushColor.rgb = float3(1,1,0.25) * 0.05;
 				brushColor.a *= 1;
 				return brushColor;
 				float2 screenUV = i.screenUV.xy / i.screenUV.w;

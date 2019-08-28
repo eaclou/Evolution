@@ -7,7 +7,7 @@
 		_VelocityTex ("_VelocityTex", 2D) = "black" {}
 		_SkyTex ("_SkyTex", 2D) = "white" {}
 		_WaterSurfaceTex ("_WaterSurfaceTex", 2D) = "black" {}
-		_NutrientTex ("_NutrientTex", 2D) = "black" {}
+		_ResourceGridTex ("_ResourceGridTex", 2D) = "black" {}
 	}
 	SubShader
 	{		
@@ -30,7 +30,7 @@
 			sampler2D _VelocityTex;
 			sampler2D _SkyTex;
 			sampler2D _WaterSurfaceTex;
-			sampler2D _NutrientTex;
+			sampler2D _ResourceGridTex;
 			
 			sampler2D _RenderedSceneRT;  // Provided by CommandBuffer -- global tex??? seems confusing... ** revisit this
 			
@@ -90,6 +90,7 @@
 				
 
 				o.quadUV = quadPoint + 0.5;
+				worldPosition.z = 0;
 				o.worldPos = worldPosition;
 				float2 uv = worldPosition.xy / 256;
 				o.altitudeUV = uv;
@@ -159,12 +160,13 @@
 				o.vignetteLerp = float4(testNewVignetteMask,sampleUV,saturate(vignetteRadius));
 
 				float fadeDuration = 0.1;
-				float fadeIn = saturate(waterQuadData.age / fadeDuration);  // fade time = 0.1
-				float fadeOut = saturate((1 - waterQuadData.age) / fadeDuration);
+				float normAge = saturate(waterQuadData.age);
+				float fadeIn = saturate(normAge / fadeDuration);  // fade time = 0.1
+				float fadeOut = saturate((1 - normAge) / fadeDuration);
 							
 				float alpha = fadeIn * fadeOut;
 
-				alpha *= densityMask;
+				//alpha *= densityMask;
 
 				o.color = float4(rand(float2(-0.347 * inst, inst)),(saturate(_NutrientDensity * 1)),1,alpha);
 				
@@ -173,13 +175,16 @@
 
 			fixed4 frag(v2f i) : SV_Target
 			{
-				return float4(1,1,1,1);
+				
+				float debugVal = i.color.y;
+				return float4(float3(1, 0.95, 0.75) * 1.1485, 0.01 + 0.99 * i.color.a);
+
 
 
 				float4 finalColor = tex2D(_MainTex, i.quadUV);
 				//i.color.r = random 0-1
-				finalColor.rgb = lerp(float3(0.05,0.04,0.015), float3(0.9,1,0.7) * 0.5, i.color.r); //rand()); //saturate(nutrientGridSample.x * 10 + 0.033));
-				finalColor.rgb = float3(1, 0.85, 0.2) * 1.25;
+				finalColor.rgb = float3(1, 0.95, 0.75) * 1.1485; // lerp(float3(0.05,0.04,0.015), float3(0.9,1,0.7) * 0.5, i.color.r); //rand()); //saturate(nutrientGridSample.x * 10 + 0.033));
+				//finalColor.rgb = float3(1, 0.85, 0.2) * 1.25;
 				//finalColor.rgb *= i.color.y;
 				finalColor.a *= i.color.a;				
 				return finalColor;

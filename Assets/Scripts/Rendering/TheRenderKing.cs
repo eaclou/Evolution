@@ -628,11 +628,14 @@ public class TheRenderKing : MonoBehaviour {
         //GameObject plane  = GameObject.CreatePrimitive(PrimitiveType.Plane);
         //fluidRenderMesh = plane.GetComponent<MeshFilter>().sharedMesh; // 
         fluidRenderMesh = new Mesh();
+
+        int resolution = 128;
+
         Vector3[] vertices = new Vector3[4];
-        vertices[0] = new Vector3(0f, 0f, 1f);
-        vertices[1] = new Vector3(SimulationManager._MapSize, 0f, 1f);
-        vertices[2] = new Vector3(0f, SimulationManager._MapSize, 1f);
-        vertices[3] = new Vector3(SimulationManager._MapSize, SimulationManager._MapSize, 1f);
+        vertices[0] = new Vector3(0f, 0f, 0f);
+        vertices[1] = new Vector3(SimulationManager._MapSize, 0f, 0f);
+        vertices[2] = new Vector3(0f, SimulationManager._MapSize, 0f);
+        vertices[3] = new Vector3(SimulationManager._MapSize, SimulationManager._MapSize, 0f);
 
         Vector2[] uvs = new Vector2[4] {
             new Vector2(0f, 0f),
@@ -3725,6 +3728,7 @@ public class TheRenderKing : MonoBehaviour {
             //cmdBufferMainRender.Clear();
 
             cmdBufferMain.Clear();
+            //cmdBufferMain.ClearRenderTarget(true, true, new Color(1f, 0.9f, 0.75f) * 0.8f, 1.0f);  // clear -- needed???
             // control render target capture Here?
             // Create RenderTargets:
             int renderedSceneID = Shader.PropertyToID("_RenderedSceneID");
@@ -3732,8 +3736,13 @@ public class TheRenderKing : MonoBehaviour {
             RenderTargetIdentifier renderTarget = new RenderTargetIdentifier(BuiltinRenderTextureType.CameraTarget);
             cmdBufferMain.Blit(renderTarget, renderedSceneID);  // save contents of Standard Rendering Pipeline
             cmdBufferMain.SetRenderTarget(renderTarget);  // Set render Target
-            cmdBufferMain.ClearRenderTarget(true, true, new Color(1f, 0.9f, 0.75f) * 0.8f, 1.0f);  // clear -- needed???
             
+            
+
+                 
+            // TERRAIN MESH:
+            //rockMat.SetPass(0);        
+            //cmdBufferMain.DrawMesh(baronVonTerrain.terrainMesh, Matrix4x4.identity, rockMat);
             
             
             //baronVonTerrain.RenderCommands(ref cmdBufferTest, renderedSceneID);
@@ -4059,7 +4068,7 @@ public class TheRenderKing : MonoBehaviour {
             baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
             baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
             baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-            baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_NutrientTex", simManager.vegetationManager.resourceGridRT1);
+            baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_ResourceGridTex", simManager.vegetationManager.resourceGridRT1);
             baronVonWater.waterNutrientsBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
             baronVonWater.waterNutrientsBitsDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
             baronVonWater.waterNutrientsBitsDisplayMat.SetFloat("_NutrientDensity", Mathf.Clamp01(simManager.simResourceManager.curGlobalNutrients / 300f));
