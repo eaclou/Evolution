@@ -171,11 +171,11 @@
 				//finalColor.a *= reflectLerp;
 				
 				
-				finalColor.a = algaeCoverAmount * 0.35;
+				finalColor.a = algaeCoverAmount;// * 0.35;
 				finalColor.a *= onLandMask;
 				finalColor.rgb = lerp(finalColor.rgb, finalColor.rgb * diffuse, 1); //saturate(algaeCoverAmount * 1.5));
 				finalColor += reflectLerp * saturate(1.0 - algaeCoverAmount * 1.752) * onLandMask * 0.97;
-				finalColor.a *= 0.725;
+				//finalColor.a *= 0.725;
 				//finalColor = float4(abs(cameraToVertexDir), 1);
 
 				//finalColor = float4(algaeCoverAmount, algaeCoverAmount, algaeCoverAmount, 1);

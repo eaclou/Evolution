@@ -59,9 +59,9 @@ float4 GetGroundColor(float3 worldPos, float4 frameBufferColor, float4 altitudeT
 	float minFog = 0.06125;
 	
 	float4 finalColor = frameBufferColor;
-	float3 decomposerHue = float3(1,0,0);
-	float decomposerMask = saturate(resourceTex.z * 2.5);
-	float3 detritusHue = float3(0,0,0);
+	float3 decomposerHue = float3(1,0.2,0);
+	float decomposerMask = saturate(resourceTex.z * 2.75);
+	float3 detritusHue = float3(0.08,0.01,0.02);
 	float detritusMask = saturate(resourceTex.y * 2.5);
 	
 	finalColor.rgb = lerp(finalColor.rgb, decomposerHue, decomposerMask);
