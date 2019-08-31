@@ -11,7 +11,7 @@
 	SubShader
 	{		
 		Tags { "RenderType"="Transparent" }
-		ZTest Off
+		ZTest Less
 		ZWrite Off
 		Cull Off
 		Blend SrcAlpha OneMinusSrcAlpha

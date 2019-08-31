@@ -3787,7 +3787,7 @@ public class TheRenderKing : MonoBehaviour {
             baronVonTerrain.groundStrokesSmlDisplayMat.SetFloat("_MinFog", 0.0625f);             
             baronVonTerrain.groundStrokesSmlDisplayMat.SetVector("_FogColor", simManager.fogColor);            
             cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
-            //cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundStrokesSmlDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.groundStrokesSmlCBuffer.count);
+            cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundStrokesSmlDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.groundStrokesSmlCBuffer.count);
 
             /*
             // CARPET BITS:: (microbial mats, algae?) -- DETRITUS / WASTE

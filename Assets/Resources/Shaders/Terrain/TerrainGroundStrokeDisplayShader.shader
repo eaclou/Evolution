@@ -13,6 +13,7 @@
 	{		
 		Tags { "RenderType"="Transparent" }
 		ZWrite Off
+		ZTest Always
 		Cull Off
 		Blend SrcAlpha OneMinusSrcAlpha
 
