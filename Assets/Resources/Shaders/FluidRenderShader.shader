@@ -91,7 +91,7 @@
 
 
 				float3 worldPosition = i.worldPos;
-				float waveHeight = 1;
+				float waveHeight = 10;
 				//worldPosition.z = 0;
 				worldPosition.z += waterSurfaceTex.x * waveHeight;
 
@@ -150,12 +150,13 @@
 				float diffuse = saturate(dot(normalize(float3(-0.5,0.4,-0.6)), surfaceNormal));
 				
 				float reflectLerp = (1.0 - saturate(viewDot));
-				//reflectLerp = reflectLerp * reflectLerp;
+				reflectLerp = reflectLerp * reflectLerp;
 
 				float4 reflectedColor = float4(tex2Dlod(_SkyTex, skySampleUV).rgb, 1); //col;
 				
 				
-				fixed4 finalColor = density;
+				fixed4 finalColor = density * 0.5;
+				//finalColor.rgb = float3(1,1,1);
 				float4 heightTex = tex2D(_TerrainHeightTex, i.uv);
 				float altitude = heightTex.x;  // [-1,1] range
 				float onLandMask = 1.0 - saturate((altitude - 0.5) * 8);
@@ -166,15 +167,20 @@
 				
 				
 				
-				finalColor = lerp(finalColor, reflectedColor, reflectLerp * saturate(1.0 - algaeCoverAmount * 1.752) * onLandMask);
-
-				//finalColor.a *= reflectLerp;
-				
-				
-				finalColor.a = algaeCoverAmount;// * 0.35;
+				finalColor = lerp(finalColor, reflectedColor, reflectLerp * onLandMask);
+				finalColor.a *= reflectLerp;
+				finalColor.a = saturate(finalColor.a + algaeCoverAmount * 0.55);// * 0.35;
 				finalColor.a *= onLandMask;
-				finalColor.rgb = lerp(finalColor.rgb, finalColor.rgb * diffuse, 1); //saturate(algaeCoverAmount * 1.5));
-				finalColor += reflectLerp * saturate(1.0 - algaeCoverAmount * 1.752) * onLandMask * 0.97;
+				//finalColor.rgb = lerp(finalColor.rgb, finalColor.rgb * diffuse, 1); //saturate(algaeCoverAmount * 1.5));
+				finalColor += reflectLerp * onLandMask * 1;
+				
+				//finalColor = lerp(finalColor, reflectedColor, reflectLerp * saturate(1.0 - algaeCoverAmount * 1.752) * onLandMask);
+				//finalColor.a *= reflectLerp;
+				//finalColor.a = algaeCoverAmount;// * 0.35;
+				//finalColor.a *= onLandMask;
+				//finalColor.rgb = lerp(finalColor.rgb, finalColor.rgb * diffuse, 1); //saturate(algaeCoverAmount * 1.5));
+				//finalColor += reflectLerp * saturate(1.0 - algaeCoverAmount * 1.752) * onLandMask * 0.97;
+				
 				//finalColor.a *= 0.725;
 				//finalColor = float4(abs(cameraToVertexDir), 1);
 

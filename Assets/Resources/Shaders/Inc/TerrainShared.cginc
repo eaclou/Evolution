@@ -59,20 +59,23 @@ float4 GetGroundColor(float3 worldPos, float4 frameBufferColor, float4 altitudeT
 	float minFog = 0.06125;
 	
 	float4 finalColor = frameBufferColor;
-	float3 decomposerHue = float3(1,0.2,0);
-	float decomposerMask = saturate(resourceTex.z * 2.75);
-	float3 detritusHue = float3(0.08,0.01,0.02);
-	float detritusMask = saturate(resourceTex.y * 2.5);
+	float3 decomposerHue = float3(0.8,0.3,0);
+	float decomposerMask = saturate(resourceTex.z * 1) * 0.8;
+	float3 detritusHue = float3(0.2,0.1,0.02);
+	float detritusMask = saturate(resourceTex.y * 1) * 0.8;
 	
 	finalColor.rgb = lerp(finalColor.rgb, decomposerHue, decomposerMask);
 	finalColor.rgb = lerp(finalColor.rgb, detritusHue, detritusMask);
+
+	float algaeMask = saturate(resourceTex.w * 1.0);
+	minFog += algaeMask * 0.8;
 	
 	float altitude = altitudeTex.x;
 	// 0-1 range --> -1 to 1
 	altitude = (altitude * 2 - 1) * -1;
 	float isUnderwater = saturate(altitude * 10000);
 	
-	float3 waterFogColor = _FogColor.rgb;
+	float3 waterFogColor = float3(0.42, 1, 0.34) * 0.4; // _FogColor.rgb;
 	
 	// FAKE CAUSTICS:::
 	float3 surfaceNormal = waterSurfaceTex.yzw; // pre-calculated
@@ -84,14 +87,15 @@ float4 GetGroundColor(float3 worldPos, float4 frameBufferColor, float4 altitudeT
 	depthNormalized = saturate(depthNormalized);
 
 	// Wetness darkening:
-	float wetnessMask = saturate(((altitudeTex.x + waterSurfaceTex.x * 0.05) - 0.5) * 8.25);
-	finalColor.rgb *= (0.5 + wetnessMask * 0.5);
+	float wetnessMask = saturate(((altitudeTex.x + waterSurfaceTex.x * 0.1) - 0.5) * 9.25);
+	finalColor.rgb *= (0.6 + wetnessMask * 0.4);
 	
+	// Caustics
 	finalColor.rgb += dotLight * isUnderwater * (1.0 - depthNormalized) * causticsStrength;		
 	
 	
 	// FOG:	
-	finalColor.rgb = lerp(finalColor.rgb, waterFogColor, (saturate(depthNormalized + minFog) * isUnderwater));
+	finalColor.rgb = lerp(finalColor.rgb, waterFogColor, (saturate(depthNormalized + algaeMask) * isUnderwater) * algaeMask);
 
 	
 	//finalColor.rgb += decomposerHue * decomposerMask * 0.025;

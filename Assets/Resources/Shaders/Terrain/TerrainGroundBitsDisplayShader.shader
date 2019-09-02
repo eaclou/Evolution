@@ -102,15 +102,17 @@
 
 				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
 
-				worldPosition.z = -altitude * 20 + 10 + groundBitData.age;
-;
+				//worldPosition.z = -altitude * 20 + 10 + groundBitData.age;
+				
 
 				float fadeDuration = 0.25;
 				float fadeIn = saturate(groundBitData.age / fadeDuration);  // fade time = 0.1
 				float fadeOut = saturate((1 - groundBitData.age) / fadeDuration);							
 				float alpha = fadeIn * fadeOut;
+
+				worldPosition.z = -altitude * 20 + 10.5 - alpha;
 				
-				float2 scale = float2(5,2.5) * 0.9 * alpha; //groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25) * 2.0;
+				float2 scale = float2(5,2.5) * 0.26 * alpha; //groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25) * 2.0;
 			
 				float wasteTex = saturate(tex2Dlod(_ResourceGridTex, float4(uv, 0, 0)).y * 1.5 + 0.25);
 
@@ -176,9 +178,13 @@
 				//return float4(1,1,1,1);
 
 				float4 brushColor = tex2D(_MainTex, i.quadUV);	
-				brushColor.rgb = float3(1,1,0.25) * 0.05;
-				brushColor.a *= 1;
+				brushColor.rgb = float3(1,1,0.25) * 0.09;
+				brushColor.a *= 0.45;
 				return brushColor;
+				
+				
+				/*
+				
 				float2 screenUV = i.screenUV.xy / i.screenUV.w;
 				float4 frameBufferColor = tex2D(_RenderedSceneRT, screenUV);  //  Color of brushtroke source					
 				float4 altitudeTex = tex2D(_AltitudeTex, i.altitudeUV); //i.worldPos.z / 10; // [-1,1] range
@@ -195,7 +201,7 @@
 				//finalColor.rgb = lerp(finalColor.rgb, float3(1,0.5,0), 0.5);
 				//return float4(1,1,1,1);
 				return finalColor;
-				
+				*/
 			}
 		ENDCG
 		}
