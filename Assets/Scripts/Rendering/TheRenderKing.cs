@@ -3205,10 +3205,10 @@ public class TheRenderKing : MonoBehaviour {
 
 
         //baronVonTerrain.Tick(simManager.vegetationManager.rdRT1);
-        int kernelSimGroundBits = baronVonTerrain.computeShaderTerrainGeneration.FindKernel("CSSimGroundBitsData");
-        baronVonTerrain.computeShaderTerrainGeneration.SetBuffer(kernelSimGroundBits, "groundBitsCBuffer", baronVonTerrain.groundBitsCBuffer);
+        int kernelSimGroundBits = baronVonTerrain.computeShaderTerrainGeneration.FindKernel("CSSimDecomposerBitsData");
+        baronVonTerrain.computeShaderTerrainGeneration.SetBuffer(kernelSimGroundBits, "groundBitsCBuffer", baronVonTerrain.decomposerBitsCBuffer);
         baronVonTerrain.computeShaderTerrainGeneration.SetTexture(kernelSimGroundBits, "AltitudeRead", baronVonTerrain.terrainHeightDataRT);
-        baronVonTerrain.computeShaderTerrainGeneration.SetTexture(kernelSimGroundBits, "decomposersRead", simManager.vegetationManager.resourceGridRT1);
+        baronVonTerrain.computeShaderTerrainGeneration.SetTexture(kernelSimGroundBits, "_ResourceGridRead", simManager.vegetationManager.resourceGridRT1);
         baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
         baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_Time", Time.realtimeSinceStartup);        
         baronVonTerrain.computeShaderTerrainGeneration.SetVector("_SpawnBoundsCameraDetails", baronVonTerrain.spawnBoundsCameraDetails);
@@ -3218,15 +3218,16 @@ public class TheRenderKing : MonoBehaviour {
         Vector4 spawnPos = new Vector4(simManager.trophicLayersManager.decomposerOriginPos.x, simManager.trophicLayersManager.decomposerOriginPos.y, 0f, 0f);
         baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_SpawnRadius", spawnRadius);
         baronVonTerrain.computeShaderTerrainGeneration.SetVector("_SpawnPos", spawnPos);
-        baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_DecomposerDensityLerp", Mathf.Clamp01(simManager.simResourceManager.curGlobalDecomposers / 100f));
-        baronVonTerrain.computeShaderTerrainGeneration.Dispatch(kernelSimGroundBits, baronVonTerrain.groundBitsCBuffer.count / 1024, 1, 1);
+        //baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_DecomposerDensityLerp", Mathf.Clamp01(simManager.simResourceManager.curGlobalDecomposers / 100f));
+        baronVonTerrain.computeShaderTerrainGeneration.Dispatch(kernelSimGroundBits, baronVonTerrain.decomposerBitsCBuffer.count / 1024, 1, 1);
 
-        int kernelSimCarpetBits = baronVonTerrain.computeShaderTerrainGeneration.FindKernel("CSSimCarpetBitsData");
-        baronVonTerrain.computeShaderTerrainGeneration.SetBuffer(kernelSimCarpetBits, "groundBitsCBuffer", baronVonTerrain.carpetBitsCBuffer);
-        baronVonTerrain.computeShaderTerrainGeneration.SetTexture(kernelSimCarpetBits, "AltitudeRead", baronVonTerrain.terrainHeightDataRT);
+        int kernelSimWasteBits = baronVonTerrain.computeShaderTerrainGeneration.FindKernel("CSSimWasteBitsData");
+        baronVonTerrain.computeShaderTerrainGeneration.SetBuffer(kernelSimWasteBits, "groundBitsCBuffer", baronVonTerrain.wasteBitsCBuffer);
+        baronVonTerrain.computeShaderTerrainGeneration.SetTexture(kernelSimWasteBits, "AltitudeRead", baronVonTerrain.terrainHeightDataRT);
+        baronVonTerrain.computeShaderTerrainGeneration.SetTexture(kernelSimWasteBits, "_ResourceGridRead", simManager.vegetationManager.resourceGridRT1);
         baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
         baronVonTerrain.computeShaderTerrainGeneration.SetVector("_SpawnBoundsCameraDetails", baronVonTerrain.spawnBoundsCameraDetails);
-        baronVonTerrain.computeShaderTerrainGeneration.Dispatch(kernelSimCarpetBits, baronVonTerrain.carpetBitsCBuffer.count / 1024, 1, 1);
+        baronVonTerrain.computeShaderTerrainGeneration.Dispatch(kernelSimWasteBits, baronVonTerrain.wasteBitsCBuffer.count / 1024, 1, 1);
 
 
         baronVonWater.Tick(null);  // <-- SimWaterCurves/Chains/Water surface
@@ -3789,54 +3790,56 @@ public class TheRenderKing : MonoBehaviour {
             cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundStrokesSmlDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.groundStrokesSmlCBuffer.count);
 
-            /*
+            
             // CARPET BITS:: (microbial mats, algae?) -- DETRITUS / WASTE
-            baronVonTerrain.carpetBitsDisplayMat.SetPass(0);
-            baronVonTerrain.carpetBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-            baronVonTerrain.carpetBitsDisplayMat.SetBuffer("groundBitsCBuffer", baronVonTerrain.carpetBitsCBuffer);
-            baronVonTerrain.carpetBitsDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
-            baronVonTerrain.carpetBitsDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-            baronVonTerrain.carpetBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
-            baronVonTerrain.carpetBitsDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);     
-            baronVonTerrain.carpetBitsDisplayMat.SetFloat("_MinFog", 0.0625f);  
-            baronVonTerrain.carpetBitsDisplayMat.SetFloat("_DetritusDensityLerp", Mathf.Clamp01(simManager.simResourceManager.curGlobalDetritus / 200f));  
-            baronVonTerrain.carpetBitsDisplayMat.SetVector("_FogColor", simManager.fogColor); 
+            baronVonTerrain.wasteBitsDisplayMat.SetPass(0);
+            baronVonTerrain.wasteBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+            baronVonTerrain.wasteBitsDisplayMat.SetBuffer("groundBitsCBuffer", baronVonTerrain.wasteBitsCBuffer);
+            baronVonTerrain.wasteBitsDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
+            baronVonTerrain.wasteBitsDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+            baronVonTerrain.wasteBitsDisplayMat.SetTexture("_ResourceGridTex", simManager.vegetationManager.resourceGridRT1);
+            baronVonTerrain.wasteBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+            baronVonTerrain.wasteBitsDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);     
+            baronVonTerrain.wasteBitsDisplayMat.SetFloat("_MinFog", 0.0625f);  
+            //baronVonTerrain.wasteBitsDisplayMat.SetFloat("_DetritusDensityLerp", Mathf.Clamp01(simManager.simResourceManager.curGlobalDetritus / 200f));  
+            baronVonTerrain.wasteBitsDisplayMat.SetVector("_FogColor", simManager.fogColor); 
             cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
-            cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.carpetBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.carpetBitsCBuffer.count);
-            */
+            cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.wasteBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.wasteBitsCBuffer.count);
+            
             
             // GROUND BITS:::   DECOMPOSERS
-            /*if(simManager.trophicLayersManager.GetDecomposersOnOff()) {
-                baronVonTerrain.groundBitsShadowDisplayMat.SetPass(0);
-                baronVonTerrain.groundBitsShadowDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-                baronVonTerrain.groundBitsShadowDisplayMat.SetBuffer("groundBitsCBuffer", baronVonTerrain.groundBitsCBuffer);                
-                baronVonTerrain.groundBitsShadowDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
-                baronVonTerrain.groundBitsShadowDisplayMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
-                baronVonTerrain.groundBitsShadowDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-                baronVonTerrain.groundBitsShadowDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
-                baronVonTerrain.groundBitsShadowDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);     
-                baronVonTerrain.groundBitsShadowDisplayMat.SetFloat("_MinFog", 0.0625f);  
-                baronVonTerrain.groundBitsShadowDisplayMat.SetFloat("_Density", Mathf.Lerp(0.15f, 1f, Mathf.Clamp01(simManager.simResourceManager.curGlobalDecomposers / 100f)));  
-                baronVonTerrain.groundBitsShadowDisplayMat.SetVector("_FogColor", simManager.fogColor);                
-                cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
-                cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundBitsShadowDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.groundBitsCBuffer.count);
-            */
+            
+            baronVonTerrain.decomposerBitsShadowDisplayMat.SetPass(0);
+            baronVonTerrain.decomposerBitsShadowDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+            baronVonTerrain.decomposerBitsShadowDisplayMat.SetBuffer("groundBitsCBuffer", baronVonTerrain.decomposerBitsCBuffer);                
+            baronVonTerrain.decomposerBitsShadowDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
+            baronVonTerrain.decomposerBitsShadowDisplayMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
+            baronVonTerrain.decomposerBitsShadowDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+            baronVonTerrain.decomposerBitsShadowDisplayMat.SetTexture("_ResourceGridTex", simManager.vegetationManager.resourceGridRT1);
+            baronVonTerrain.decomposerBitsShadowDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+            baronVonTerrain.decomposerBitsShadowDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);     
+            baronVonTerrain.decomposerBitsShadowDisplayMat.SetFloat("_MinFog", 0.0625f);  
+            baronVonTerrain.decomposerBitsShadowDisplayMat.SetFloat("_Density", Mathf.Lerp(0.15f, 1f, Mathf.Clamp01(simManager.simResourceManager.curGlobalDecomposers / 100f)));  
+            baronVonTerrain.decomposerBitsShadowDisplayMat.SetVector("_FogColor", simManager.fogColor);                
+            cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
+            cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.decomposerBitsShadowDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.decomposerBitsCBuffer.count);
+            
                 
             // WASTE?????? ********* convert this to waste particles?
-            baronVonTerrain.groundBitsDisplayMat.SetPass(0);
-            baronVonTerrain.groundBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-            baronVonTerrain.groundBitsDisplayMat.SetBuffer("groundBitsCBuffer", baronVonTerrain.groundBitsCBuffer);                
-            baronVonTerrain.groundBitsDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
-            baronVonTerrain.groundBitsDisplayMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
-            baronVonTerrain.groundBitsDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-            baronVonTerrain.groundBitsDisplayMat.SetTexture("_ResourceGridTex", simManager.vegetationManager.resourceGridRT1);
-            baronVonTerrain.groundBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
-            baronVonTerrain.groundBitsDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);     
-            baronVonTerrain.groundBitsDisplayMat.SetFloat("_MinFog", 0.0625f);                
-            baronVonTerrain.groundBitsDisplayMat.SetFloat("_Density", Mathf.Lerp(0.15f, 1f, Mathf.Clamp01(simManager.simResourceManager.curGlobalDecomposers / 100f)));  
-            baronVonTerrain.groundBitsDisplayMat.SetVector("_FogColor", simManager.fogColor);                
+            baronVonTerrain.decomposerBitsDisplayMat.SetPass(0);
+            baronVonTerrain.decomposerBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+            baronVonTerrain.decomposerBitsDisplayMat.SetBuffer("groundBitsCBuffer", baronVonTerrain.decomposerBitsCBuffer);                
+            baronVonTerrain.decomposerBitsDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
+            baronVonTerrain.decomposerBitsDisplayMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
+            baronVonTerrain.decomposerBitsDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+            baronVonTerrain.decomposerBitsDisplayMat.SetTexture("_ResourceGridTex", simManager.vegetationManager.resourceGridRT1);
+            baronVonTerrain.decomposerBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+            baronVonTerrain.decomposerBitsDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);     
+            baronVonTerrain.decomposerBitsDisplayMat.SetFloat("_MinFog", 0.0625f);                
+            baronVonTerrain.decomposerBitsDisplayMat.SetFloat("_Density", Mathf.Lerp(0.15f, 1f, Mathf.Clamp01(simManager.simResourceManager.curGlobalDecomposers / 100f)));  
+            baronVonTerrain.decomposerBitsDisplayMat.SetVector("_FogColor", simManager.fogColor);                
             cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
-            cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.groundBitsCBuffer.count);
+            cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.decomposerBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.decomposerBitsCBuffer.count);
             
             //}
             

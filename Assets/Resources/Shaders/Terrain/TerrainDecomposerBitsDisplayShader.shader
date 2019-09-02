@@ -1,4 +1,4 @@
-﻿Shader "Terrain/TerrainGroundBitsDisplayShader"
+﻿Shader "Terrain/TerrainDecomposerBitsDisplayShader"
 {
 	Properties
 	{
@@ -98,13 +98,8 @@
 				float depth = saturate(-altitude + 0.5);
 				float refractionStrength = depth * 4.5;
 
-				
-
 				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
-
-				//worldPosition.z = -altitude * 20 + 10 + groundBitData.age;
 				
-
 				float fadeDuration = 0.25;
 				float fadeIn = saturate(groundBitData.age / fadeDuration);  // fade time = 0.1
 				float fadeOut = saturate((1 - groundBitData.age) / fadeDuration);							
@@ -112,13 +107,13 @@
 
 				worldPosition.z = -altitude * 20 + 10.5 - alpha;
 				
-				float2 scale = float2(5,2.5) * 0.26 * alpha; //groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25) * 2.0;
+				float2 scale = float2(2.6,5.45) * 0.5 * alpha; //groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25) * 2.0;
 			
-				float wasteTex = saturate(tex2Dlod(_ResourceGridTex, float4(uv, 0, 0)).y * 1.5 + 0.25);
+				float decomposerAmount = saturate(tex2Dlod(_ResourceGridTex, float4(uv, 0, 0)).z);
 
-				float sizeFadeMask = wasteTex; // saturate((1.0 - altitude) * 4 - 2);
+				float sizeFadeMask = decomposerAmount * 0.9 + 0.1; // saturate((1.0 - altitude) * 4 - 2);
 				quadPoint *= float3(scale, 1.0) * sizeFadeMask;
-				//quadPoint.x *= 0.75;
+				
 				
 				float4 fluidVelocity = tex2Dlod(_VelocityTex, float4(worldPosition.xy / 256, 0, 2));
 				float fluidSpeed = length(fluidVelocity.xy);
@@ -133,16 +128,14 @@
 				dotLight = dotLight * dotLight;
 				float waveHeight = waterSurfaceData.x;
 
-				//worldPosition.z -= waveHeight * 2.5;
-
+				
 
 				// Figure out final facing Vectors!!!
 				float2 forward = groundBitData.heading; //float2(0,1); // lerp(groundBitData.heading, fluidDir, saturate(fluidSpeed * 5)); //groundBitData.heading;
 				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
 				float2 rotatedPoint = float2(quadPoint.x * right + quadPoint.y * forward);  // Rotate localRotation by AgentRotation
 
-				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)) + float4(rotatedPoint, 0, 0));
-
+				
 
 				float4 pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)) + float4(rotatedPoint, 0, 0)); //mul(UNITY_MATRIX_VP, float4(worldPosition + quadVerticesCBuffer[id] * 1, 1.0)); // *** Revisit to better understand!!!! ***
 				o.pos = pos;
@@ -175,7 +168,7 @@
 
 			fixed4 frag(v2f i) : SV_Target
 			{
-				//return float4(1,1,1,1);
+				return float4(1,0.8,0.2,1);
 
 				float4 brushColor = tex2D(_MainTex, i.quadUV);	
 				brushColor.rgb = float3(1,1,0.25) * 0.09;

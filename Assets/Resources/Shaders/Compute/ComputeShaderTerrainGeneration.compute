@@ -3,8 +3,8 @@
 #pragma kernel CSGetObjectDepths
 #pragma kernel CSGenerateMeshData
 #pragma kernel CSGenerateTriangleIndices
-#pragma kernel CSSimGroundBitsData
-#pragma kernel CSSimCarpetBitsData
+#pragma kernel CSSimDecomposerBitsData
+#pragma kernel CSSimWasteBitsData
 
 struct TriangleIndexData {
     int v1;
@@ -51,7 +51,7 @@ RWStructuredBuffer<FrameBufferStrokeData> terrainFrameBufferStrokesCBuffer;
 Texture2D<float4> VelocityRead;
 Texture2D<float4> AltitudeRead;
 
-Texture2D<float4> decomposersRead;
+Texture2D<float4> _ResourceGridRead;
 
 int _MeshResolution = 32;
 
@@ -154,28 +154,28 @@ void CSGetObjectDepths (uint3 id : SV_DispatchThreadID)
 }
 
 [numthreads(1024,1,1)]
-void CSSimGroundBitsData (uint3 id : SV_DispatchThreadID)
+void CSSimDecomposerBitsData (uint3 id : SV_DispatchThreadID)
 {	
-	GroundBitsData groundBitData = groundBitsCBuffer[id.x];
+	GroundBitsData decomposerBitData = groundBitsCBuffer[id.x];
 
-	if(groundBitData.isActive > 0.5) {  // ALIVE!
+	if(decomposerBitData.isActive > 0.5) {  // ALIVE!
 		
-		float2 uv = groundBitData.worldPos.xy / _MapSize;		
+		float2 uv = decomposerBitData.worldPos.xy / _MapSize;		
 		float altitude = AltitudeRead.SampleLevel(_LinearClamp, uv, 0).x;
 		
-		groundBitData.age = groundBitData.age + 0.0025;  // ? frame lifespan
+		decomposerBitData.age = decomposerBitData.age + 0.0025;  // ? frame lifespan
 
 		// if should be killed:
-		if(groundBitData.age > 1.0) {
-			groundBitData.isActive = 0;
-				
+		if(decomposerBitData.age > 1.0) {
+			decomposerBitData.isActive = 0;
+			// age resetting happens at birth	
 		}
 		else {
 			
 			float2 vel = VelocityRead.SampleLevel(_LinearRepeat, uv, 0).xy;
 			float speedMult = 0.0075;
 
-			groundBitData.speed = length(vel);
+			decomposerBitData.speed = length(vel);
 	
 			float2 nextPos = uv + vel * speedMult;
 			
@@ -195,91 +195,100 @@ void CSSimGroundBitsData (uint3 id : SV_DispatchThreadID)
 				grad = normalize(lerp(float2(dX, dY), float2(0,1), 0.5));
 			}
 		
-			groundBitData.heading = grad;
-			groundBitData.worldPos = float3(nextPos * _MapSize, 0);		
+			decomposerBitData.heading = grad;
+			decomposerBitData.worldPos = float3(nextPos * _MapSize, 0);		
 		}
 	}
 	else { // DEAD / INACTIVE:::
-		float2 spawnPos = float2(rand(float2(id.x, _Time * 120)), rand(float2(-_Time, id.x + _Time * 89.913)));		
-		float2 spawnBoxSize = float2(_SpawnBoundsCameraDetails.z - _SpawnBoundsCameraDetails.x, _SpawnBoundsCameraDetails.w - _SpawnBoundsCameraDetails.y);
-		spawnPos = spawnPos * spawnBoxSize + _SpawnBoundsCameraDetails.xy;
-		float noiseFreq = 3.2;
-		float spawnNoise1 = Value2D(spawnPos + 5, noiseFreq * 0.255).x;
-		float spawnNoise2 = Value2D(spawnPos - 33, noiseFreq * 0.35).x;
 		
 		// check potential spawn location:
-		float2 spawnUV = spawnPos / _MapSize;
+		float2 spawnUV = float2(rand(float2(id.x, _Time * 120)), rand(float2(-_Time, id.x + _Time * 89.913)));
+				
+		//float spawnAltitude = AltitudeRead.SampleLevel(_LinearClamp, spawnUV, 0).x;
+
+		float2 spawnPos = spawnUV * _MapSize;
 		
-		
-		float spawnAltitude = AltitudeRead.SampleLevel(_LinearClamp, spawnUV, 0).x;
-		
+		float noiseFreq = 4.2;
+		float spawnNoise1 = Value2D(spawnPos + 5, noiseFreq * 0.2755).x;
+		float spawnNoise2 = Value2D(spawnPos - 33, noiseFreq * 0.3254).x;
 		float spawnNoise3 = saturate(Value2D(spawnPos + 349.7, 2.4579).x * 2.5);
-		float altitudeMask = saturate((1 - spawnAltitude) * 4);
+		//float altitudeMask = saturate((1 - spawnAltitude) * 4);
 		
 		// Try respawning:
-		float4 decomposersMask = decomposersRead.SampleLevel(_LinearClamp, spawnUV, 0);  // ** actually the resourceGrid Tex -- rename
-		float spawnRating = decomposersMask.y; // * altitudeMask;
+		float4 resourceGridSample = _ResourceGridRead.SampleLevel(_LinearClamp, spawnUV, 0);  // ** actually the resourceGrid Tex -- rename
+		float spawnRating = resourceGridSample.z;
 
 		float distToOrigin = length(_SpawnPos.xy - (spawnUV * _MapSize));
-		if(spawnRating > 0.025) {	
-		//if(distToOrigin < _SpawnRadius) {
-		//	if(spawnRating > 0.4 * ((1.0 - _DecomposerDensityLerp) * 0.2 + 0.8)) { // (float)id.x / 1024.0 / 8.0) {
-		
+		if(spawnRating > 0.025) {			
 			spawnPos += float2(spawnNoise1, spawnNoise2) * 0.93416;		
-			groundBitData.worldPos = float3(spawnPos, 0);
-			groundBitData.age = groundBitData.age % 1.0;
-			groundBitData.isActive = 1.0;
-
-				
-			
-			//}
+			decomposerBitData.worldPos = float3(spawnPos, 0);
+			decomposerBitData.age = decomposerBitData.age % 1.0;
+			decomposerBitData.isActive = 1.0;
 		}		
 	}
 	
-	groundBitsCBuffer[id.x] = groundBitData;
+	groundBitsCBuffer[id.x] = decomposerBitData;
 	
 }
 
 [numthreads(1024,1,1)]
-void CSSimCarpetBitsData (uint3 id : SV_DispatchThreadID)
+void CSSimWasteBitsData (uint3 id : SV_DispatchThreadID)
 {	
-	GroundBitsData groundBitData = groundBitsCBuffer[id.x];
+	GroundBitsData wasteBitData = groundBitsCBuffer[id.x];
 
-	// ***** Move Head Point0: //
-
-	float2 uv = groundBitData.worldPos.xy / _MapSize;	
-	float2 vel = VelocityRead.SampleLevel(_LinearClamp, uv, 0).xy;
-	float speedMult = 0.0;
-
-	groundBitData.speed = length(vel);
+	if(wasteBitData.isActive > 0.5) {  // ALIVE!
+		
+		
 	
-	float2 nextPos = uv + vel * speedMult;
+		if(wasteBitData.age > 1.0) {  // OLD AGE DEATH:::
+			wasteBitData.isActive = 0.0;			
 
-	float altitude = AltitudeRead.SampleLevel(_LinearRepeat, uv, 0).x;
+		}
+		else {   // ALIVE && ACTIVE
+			float2 uv = wasteBitData.worldPos.xy / _MapSize;		
+			float altitude = AltitudeRead.SampleLevel(_LinearClamp, uv, 0).x;
+			float2 vel = VelocityRead.SampleLevel(_LinearClamp, uv, 0).xy;
+			float speedMult = 0.0;
+			wasteBitData.speed = length(vel);
+	
+			float2 nextPos = uv + vel * speedMult;
 
-	groundBitData.age = groundBitData.age + 0.0025;  // ? frame lifespan
-	if(groundBitData.age > 1.0 || altitude > 0.5 ) {
-		
-		float2 spawnPos = float2(rand(float2(id.x, uv.x + _Time)), rand(float2(uv.y - _Time, id.x + _Time * 8.913)));		
-		float2 spawnBoxSize = float2(_SpawnBoundsCameraDetails.z - _SpawnBoundsCameraDetails.x, _SpawnBoundsCameraDetails.w - _SpawnBoundsCameraDetails.y);
-		spawnPos = spawnPos * spawnBoxSize + _SpawnBoundsCameraDetails.xy;
 
-		// check potential spawn location:
-		float2 spawnUV = spawnPos / _MapSize;
-		float spawnAltitude = AltitudeRead.SampleLevel(_LinearClamp, spawnUV, 0).x;
-		float spawnNoise1 = saturate(Value2D(spawnPos + 5, 0.0255).x * 6);
-		float spawnNoise2 = saturate(Value2D(spawnPos - 33, 0.35).x * 6.5);
-		float spawnNoise3 = saturate(Value2D(spawnPos + 349.7, 0.4579).x * 10);
-		float altitudeMask = (1.0 - saturate(-1.0 * (spawnAltitude * 2.0 - 1.0)));
-		
-		float spawnRating = altitudeMask;
+			wasteBitData.age = wasteBitData.age + 0.0025;  // ? frame lifespan
+			wasteBitData.worldPos = float3(nextPos * _MapSize, 0);		
+		}
+
 
 	}
-	else {
-		groundBitData.worldPos = float3(nextPos * _MapSize, 0);		
-	}	
+	else {  // INACTIVE::::
 	
-	groundBitsCBuffer[id.x] = groundBitData;
+		//float2 spawnPos = float2(rand(float2(id.x, _Time * 120)), rand(float2(-_Time, id.x + _Time * 89.913)));		
+		//float2 spawnBoxSize = float2(_SpawnBoundsCameraDetails.z - _SpawnBoundsCameraDetails.x, _SpawnBoundsCameraDetails.w - _SpawnBoundsCameraDetails.y);
+		//spawnPos = spawnPos * spawnBoxSize + _SpawnBoundsCameraDetails.xy;
+		
+		// check potential spawn location:
+		float2 spawnUV = float2(rand(float2(id.x, _Time * 120)), rand(float2(-_Time, id.x + _Time * 89.913)));
+		float2 spawnPos = spawnUV * _MapSize;
+		
+		float noiseFreq = 4.2;
+		float spawnNoise1 = Value2D(spawnPos + 5, noiseFreq * 0.2755).x;
+		float spawnNoise2 = Value2D(spawnPos - 33, noiseFreq * 0.3254).x;
+		
+		// Try respawning:
+		float4 resourceGridSample = _ResourceGridRead.SampleLevel(_LinearClamp, spawnUV, 0);  // ** actually the resourceGrid Tex -- rename
+		float spawnRating = resourceGridSample.y;  // WASTE
+
+		float distToOrigin = length(_SpawnPos.xy - (spawnUV * _MapSize));
+		if(spawnRating > 0.025) {			
+			spawnPos += float2(spawnNoise1, spawnNoise2) * 0.93416;		
+			wasteBitData.worldPos = float3(spawnPos, 0);
+			wasteBitData.age = wasteBitData.age % 1.0;
+			wasteBitData.isActive = 1.0;
+			
+		}	
+	}
+	
+	groundBitsCBuffer[id.x] = wasteBitData;
 	
 }
 
