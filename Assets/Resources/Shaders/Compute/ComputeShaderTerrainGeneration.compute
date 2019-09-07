@@ -163,7 +163,7 @@ void CSSimDecomposerBitsData (uint3 id : SV_DispatchThreadID)
 		float2 uv = decomposerBitData.worldPos.xy / _MapSize;		
 		float altitude = AltitudeRead.SampleLevel(_LinearClamp, uv, 0).x;
 		
-		decomposerBitData.age = decomposerBitData.age + 0.0025;  // ? frame lifespan
+		decomposerBitData.age = decomposerBitData.age + 0.0065;  // ? frame lifespan
 
 		// if should be killed:
 		if(decomposerBitData.age > 1.0) {
@@ -254,7 +254,7 @@ void CSSimWasteBitsData (uint3 id : SV_DispatchThreadID)
 			float2 nextPos = uv + vel * speedMult;
 
 
-			wasteBitData.age = wasteBitData.age + 0.0025;  // ? frame lifespan
+			wasteBitData.age = wasteBitData.age + 0.0045;  // ? frame lifespan
 			wasteBitData.worldPos = float3(nextPos * _MapSize, 0);		
 		}
 
@@ -283,6 +283,7 @@ void CSSimWasteBitsData (uint3 id : SV_DispatchThreadID)
 			spawnPos += float2(spawnNoise1, spawnNoise2) * 0.93416;		
 			wasteBitData.worldPos = float3(spawnPos, 0);
 			wasteBitData.age = wasteBitData.age % 1.0;
+			wasteBitData.heading = normalize(float2(spawnNoise1, spawnNoise2));
 			wasteBitData.isActive = 1.0;
 			
 		}	

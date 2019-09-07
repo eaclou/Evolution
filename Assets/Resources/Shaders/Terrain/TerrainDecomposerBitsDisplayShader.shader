@@ -107,11 +107,14 @@
 
 				worldPosition.z = -altitude * 20 + 10.5 - alpha;
 				
-				float2 scale = float2(2.6,5.45) * 0.5 * alpha; //groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25) * 2.0;
+				float2 scale = float2(2.6,5.45) * 0.31 * alpha; //groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25) * 2.0;
 			
-				float decomposerAmount = saturate(tex2Dlod(_ResourceGridTex, float4(uv, 0, 0)).z);
+				float4 resourceGridSample = tex2Dlod(_ResourceGridTex, float4(uv, 0, 0));
+				float decomposerAmount = saturate(resourceGridSample.z);
+				float decomposerMinMask = saturate(decomposerAmount * 100);
+				float wasteAmount = saturate(resourceGridSample.y) * decomposerMinMask;
 
-				float sizeFadeMask = decomposerAmount * 0.9 + 0.1; // saturate((1.0 - altitude) * 4 - 2);
+				float sizeFadeMask = (decomposerAmount + wasteAmount * 0.5) * 0.9 + 0.1; // saturate((1.0 - altitude) * 4 - 2);
 				quadPoint *= float3(scale, 1.0) * sizeFadeMask;
 				
 				
@@ -168,7 +171,7 @@
 
 			fixed4 frag(v2f i) : SV_Target
 			{
-				return float4(1,0.8,0.2,1);
+				return float4(0.6,0.4,0.1,1);
 
 				float4 brushColor = tex2D(_MainTex, i.quadUV);	
 				brushColor.rgb = float3(1,1,0.25) * 0.09;

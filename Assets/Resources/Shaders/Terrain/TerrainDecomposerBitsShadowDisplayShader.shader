@@ -6,7 +6,7 @@
 		_AltitudeTex ("_AltitudeTex", 2D) = "gray" {}
 		_VelocityTex ("_VelocityTex", 2D) = "black" {}
 		_WaterSurfaceTex ("_WaterSurfaceTex", 2D) = "black" {}
-		_NutrientTex ("_NutrientTex", 2D) = "black" {}
+		_ResourceGridTex ("_ResourceGridTex", 2D) = "black" {}
 		_WaterColorTex ("_WaterColorTex", 2D) = "black" {}
 		
 		
@@ -32,7 +32,7 @@
 			sampler2D _AltitudeTex;			
 			sampler2D _VelocityTex;
 			sampler2D _WaterSurfaceTex;
-			sampler2D _NutrientTex;
+			sampler2D _ResourceGridTex;
 			sampler2D _WaterColorTex;
 			
 			sampler2D _RenderedSceneRT;  // Provided by CommandBuffer -- global tex??? seems confusing... ** revisit this
@@ -172,7 +172,8 @@
 
 			fixed4 frag(v2f i) : SV_Target
 			{
-				//return float4(1,1,1,1);
+				return float4(1,1,1,1) * 0.1;
+
 				float4 brushColor = tex2D(_MainTex, i.quadUV);	
 				
 				float2 screenUV = i.screenUV.xy / i.screenUV.w;

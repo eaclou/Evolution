@@ -3729,7 +3729,7 @@ public class TheRenderKing : MonoBehaviour {
             //cmdBufferMainRender.Clear();
 
             cmdBufferMain.Clear();
-            //cmdBufferMain.ClearRenderTarget(true, true, new Color(1f, 0.9f, 0.75f) * 0.8f, 1.0f);  // clear -- needed???
+            cmdBufferMain.ClearRenderTarget(true, false, new Color(1f, 0.9f, 0.75f) * 0.8f, 1.0f);
             // control render target capture Here?
             // Create RenderTargets:
             int renderedSceneID = Shader.PropertyToID("_RenderedSceneID");
@@ -3791,7 +3791,7 @@ public class TheRenderKing : MonoBehaviour {
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundStrokesSmlDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.groundStrokesSmlCBuffer.count);
 
             
-            // CARPET BITS:: (microbial mats, algae?) -- DETRITUS / WASTE
+            // -- DETRITUS / WASTE
             baronVonTerrain.wasteBitsDisplayMat.SetPass(0);
             baronVonTerrain.wasteBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
             baronVonTerrain.wasteBitsDisplayMat.SetBuffer("groundBitsCBuffer", baronVonTerrain.wasteBitsCBuffer);
@@ -3807,8 +3807,8 @@ public class TheRenderKing : MonoBehaviour {
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.wasteBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.wasteBitsCBuffer.count);
             
             
-            // GROUND BITS:::   DECOMPOSERS
             
+            // DECOMPOSERS SHADOWS
             baronVonTerrain.decomposerBitsShadowDisplayMat.SetPass(0);
             baronVonTerrain.decomposerBitsShadowDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
             baronVonTerrain.decomposerBitsShadowDisplayMat.SetBuffer("groundBitsCBuffer", baronVonTerrain.decomposerBitsCBuffer);                
@@ -3825,7 +3825,7 @@ public class TheRenderKing : MonoBehaviour {
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.decomposerBitsShadowDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.decomposerBitsCBuffer.count);
             
                 
-            // WASTE?????? ********* convert this to waste particles?
+            // GROUND BITS:::   DECOMPOSERS
             baronVonTerrain.decomposerBitsDisplayMat.SetPass(0);
             baronVonTerrain.decomposerBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
             baronVonTerrain.decomposerBitsDisplayMat.SetBuffer("groundBitsCBuffer", baronVonTerrain.decomposerBitsCBuffer);                
@@ -4074,7 +4074,7 @@ public class TheRenderKing : MonoBehaviour {
             baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_ResourceGridTex", simManager.vegetationManager.resourceGridRT1);
             baronVonWater.waterNutrientsBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
             baronVonWater.waterNutrientsBitsDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
-            baronVonWater.waterNutrientsBitsDisplayMat.SetFloat("_NutrientDensity", Mathf.Clamp01(simManager.simResourceManager.curGlobalNutrients / 300f));
+            //baronVonWater.waterNutrientsBitsDisplayMat.SetFloat("_NutrientDensity", Mathf.Clamp01(simManager.simResourceManager.curGlobalNutrients / 300f));
             cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonWater.waterNutrientsBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterNutrientsBitsCBuffer.count);
             

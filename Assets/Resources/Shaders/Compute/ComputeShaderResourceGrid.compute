@@ -357,12 +357,12 @@ void CSSimRD (uint3 id : SV_DispatchThreadID)
 	resourceGridRead.w += algaeGrowthMass;  // saturated later to prevent negative
 	
 	resourceGridRead.z += decomposerGrowthMass;  // saturated later to prevent negative
-	resourceGridRead.z += decomposerDecayMass * 0.15; // ** shouldn't be necessary???
+	resourceGridRead.z += decomposerDecayMass * 0.05; // ** shouldn't be necessary???
 	
 	resourceGridRead.x -= nutrientsUsed; 
-	resourceGridRead.x += nutrientsCreated * 1.25;
+	resourceGridRead.x += nutrientsCreated * 1.15;
 	resourceGridRead.y -= detritusUsed;
-	resourceGridRead.y += detritusCreated * 1.51;  // // *** hacky empirical fix for balancing conservation of energy/mass
+	resourceGridRead.y += detritusCreated * 1.41;  // // *** hacky empirical fix for balancing conservation of energy/mass
 	
 	// X = nutrients
 	// Y = detritus

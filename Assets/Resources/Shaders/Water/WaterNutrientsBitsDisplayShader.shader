@@ -14,7 +14,7 @@
 		Tags { "RenderType"="Transparent" }
 		ZWrite Off
 		Cull Off
-		Blend SrcAlpha OneMinusSrcAlpha
+		Blend One One
 
 		Pass
 		{
@@ -38,7 +38,7 @@
 			uniform float _CamDistNormalized;
 
 			uniform float _AlgaeReservoir;
-			uniform float _NutrientDensity;
+			//uniform float _NutrientDensity;
 
 			struct FrameBufferStrokeData {
 				float3 worldPos;
@@ -86,34 +86,51 @@
 				float3 quadPoint = quadVerticesCBuffer[id];
 
 				float rand0 = rand(float2(inst, 0));	
-				float densityMask = saturate((_NutrientDensity - rand0) * 100);
+				//float densityMask = saturate((_NutrientDensity - rand0) * 100);
 				
 
 				o.quadUV = quadPoint + 0.5;
 				worldPosition.z = 0;
 				o.worldPos = worldPosition;
-				float2 uv = worldPosition.xy / 256;
+				float2 uv = worldPosition.xy / _MapSize;
 				o.altitudeUV = uv;
-								
-				float2 scale = waterQuadData.localScale * 12;
+					
+				float4 fluidVelocity = tex2Dlod(_VelocityTex, float4(worldPosition.xy / _MapSize, 0, 2));
+				float2 fluidDir = float2(0,1); //normalize(fluidVelocity.xy);
+				if(length(fluidVelocity) > 0.0000001) {
+					fluidDir = normalize(fluidVelocity.xy);
+				}
+
+				
+				float fadeInDuration = 0.6;
+				float fadeOutDuration = 0.01;
+				float normAge = saturate(waterQuadData.age);
+				float fadeIn = saturate(normAge / fadeInDuration);  // fade time = 0.1
+				float fadeOut = saturate((1 - normAge) / fadeOutDuration);
+							
+				float alpha = fadeIn * fadeOut;
+
+							
+				float2 scale = waterQuadData.localScale * 4;
 				//scale.x *= 1;
 				//scale.y = scale.y * (1 + saturate(waterQuadData.speed * 64));
 				
 				//float4 nutrientGridSample = tex2Dlod(_NutrientTex, float4((o.altitudeUV - 0.25) * 2.0, 0, 0));
 				//scale *= (nutrientGridSample.x * 0.4 + 0.6) * 1;				
 				//scale = float2(1,1) * 0.033;
-				_NutrientDensity = 1.0;
+				//_NutrientDensity = 1.0;
 				quadPoint *= float3(scale, 1.0); // * (0.2 + _NutrientDensity * 0.175) * (_CamDistNormalized * 0.85 + 0.15);
 				
-				float4 fluidVelocity = tex2Dlod(_VelocityTex, float4(worldPosition.xy / 256, 0, 2));
-				float2 fluidDir = float2(0,1); //normalize(fluidVelocity.xy);
-				if(length(fluidVelocity) > 0.0000001) {
-					fluidDir = normalize(fluidVelocity.xy);
-				}
+
+				//Topology/depth:
+				float4 altitudeSample = tex2Dlod(_AltitudeTex, float4(worldPosition.xy / _MapSize, 0, 0));
+				float floorPosZ = -(altitudeSample.x - 0.5) * 10.0;
+				float zPos = lerp(floorPosZ, worldPosition.z, smoothstep(0,1,normAge));
+				worldPosition.z = zPos;
 
 				// Wave Surface Height:
 				// Water Surface:
-				float4 waterSurfaceData = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / 256, 0, 0));
+				float4 waterSurfaceData = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / _MapSize, 0, 0));
 				float dotLight = dot(waterSurfaceData.yzw, _WorldSpaceLightPos0.xyz);
 				dotLight = dotLight * dotLight;
 				float waveHeight = waterSurfaceData.x;
@@ -123,7 +140,7 @@
 
 				// REFRACTION:
 				//float3 offset = worldPosition;				
-				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / 256, 0, 0)).yzw;
+				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / _MapSize, 0, 0)).yzw;
 				float refractionStrength = 1.5 * (rand0 * 0.5 + 0.5);
 				//worldPosition.xy += -surfaceNormal.xy * refractionStrength;
 
@@ -159,16 +176,11 @@
 				float testNewVignetteMask = saturate(((randThreshold + 0.6 - (saturate(vignetteRadius) * 0.4 + 0.3)) * 2));
 				o.vignetteLerp = float4(testNewVignetteMask,sampleUV,saturate(vignetteRadius));
 
-				float fadeDuration = 0.1;
-				float normAge = saturate(waterQuadData.age);
-				float fadeIn = saturate(normAge / fadeDuration);  // fade time = 0.1
-				float fadeOut = saturate((1 - normAge) / fadeDuration);
-							
-				float alpha = fadeIn * fadeOut;
+				
 
 				//alpha *= densityMask;
 
-				o.color = float4(rand(float2(-0.347 * inst, inst)),(saturate(_NutrientDensity * 1)),1,alpha);
+				o.color = float4(rand(float2(-0.347 * inst, inst)),0,1,alpha);
 				
 				return o;
 			}
@@ -177,16 +189,16 @@
 			{
 				
 				float debugVal = i.color.y;
-				return float4(float3(1, 0.95, 0.75) * 1.1485, 0.01 + 0.99 * i.color.a);
+				return float4(float3(0.76, 0.3, 1.2) * 0.951485, 0.005 + 0.995 * i.color.a);
 
 
 
 				float4 finalColor = tex2D(_MainTex, i.quadUV);
 				//i.color.r = random 0-1
-				finalColor.rgb = float3(1, 0.95, 0.75) * 1.1485; // lerp(float3(0.05,0.04,0.015), float3(0.9,1,0.7) * 0.5, i.color.r); //rand()); //saturate(nutrientGridSample.x * 10 + 0.033));
+				finalColor.rgb = float3(1, 0.95, 0.75) * 1.4485; // lerp(float3(0.05,0.04,0.015), float3(0.9,1,0.7) * 0.5, i.color.r); //rand()); //saturate(nutrientGridSample.x * 10 + 0.033));
 				//finalColor.rgb = float3(1, 0.85, 0.2) * 1.25;
 				//finalColor.rgb *= i.color.y;
-				finalColor.a *= i.color.a;				
+				finalColor *= i.color.a;				
 				return finalColor;
 
 				//return float4(1,1,1,1);

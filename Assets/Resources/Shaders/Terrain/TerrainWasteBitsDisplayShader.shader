@@ -99,13 +99,13 @@
 				float fadeOut = saturate((1 - groundBitData.age) / fadeDuration);							
 				float alpha = fadeIn * fadeOut;
 				
-				float2 scale = 1; //groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25) * (_DetritusDensityLerp * 3.14 + 0.5);
+				float2 scale = 3 * alpha; //groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25) * (_DetritusDensityLerp * 3.14 + 0.5);
 				float wasteTex = saturate(tex2Dlod(_ResourceGridTex, float4(uv, 0, 0)).y);
 				scale = scale * (wasteTex * 0.9 + 0.1);
 				quadPoint *= float3(scale, 1.0);
 				
 				float4 fluidVelocity = tex2Dlod(_VelocityTex, float4(worldPosition.xy / _MapSize, 0, 2));
-				float2 fluidDir = float2(0,1); //normalize(fluidVelocity.xy);
+				float2 fluidDir = normalize(fluidVelocity.xy);
 				if(length(fluidVelocity) > 0.0000001) {
 					fluidDir = normalize(fluidVelocity.xy);
 				}
@@ -117,7 +117,7 @@
 				
 
 				// Figure out final facing Vectors!!!
-				float2 forward = float2(1,0); // groundBitData.heading; // fluidDir; //
+				float2 forward = groundBitData.heading; //
 				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
 				float2 rotatedPoint = float2(quadPoint.x * right + quadPoint.y * forward);  // Rotate localRotation by AgentRotation
 
@@ -155,21 +155,24 @@
 
 			fixed4 frag(v2f i) : SV_Target
 			{
-				return float4(0.03, 0.02, 0.01, 1);
+				
 
 				float4 brushColor = tex2D(_MainTex, i.quadUV);	
+
+				return float4(0.03, 0.02, 0.01, brushColor.a * i.color.a);
 				
 				float2 screenUV = i.screenUV.xy / i.screenUV.w;
 				float4 frameBufferColor = tex2D(_RenderedSceneRT, screenUV);  //  Color of brushtroke source					
 				float4 altitudeTex = tex2D(_AltitudeTex, i.altitudeUV); //i.worldPos.z / 10; // [-1,1] range
 				float4 waterSurfaceTex = tex2D(_WaterSurfaceTex, i.altitudeUV);
 				float4 waterColorTex = tex2D(_WaterColorTex, i.altitudeUV);
+				float4 resourceGridTex = tex2D(_ResourceGridTex, i.altitudeUV);
 				
-				float3 baseHue = float3(0.45,0.372,0.15);
-				float3 particleColor = lerp(baseHue * 1.2, baseHue * 0.5, saturate(1.0 - i.color.y * 2));
+				float3 baseHue = float3(0.045,0.0372,0.015);
+				//float3 particleColor = lerp(baseHue * 1.2, baseHue * 0.5, saturate(1.0 - i.color.y * 2));
 				//frameBufferColor.rgb = lerp(frameBufferColor.rgb, particleColor, 0.7 * _DetritusDensityLerp);
-				float4 finalColor = GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, float4(0,0,0,0));
-				finalColor.a = brushColor.a * 0.1;
+				float4 finalColor = GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, resourceGridTex);
+				finalColor.a = brushColor.a;
 				
 				return finalColor;
 				
