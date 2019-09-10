@@ -171,11 +171,11 @@
 
 			fixed4 frag(v2f i) : SV_Target
 			{
-				return float4(0.6,0.4,0.1,1);
+				//return float4(0.6,0.4,0.1,1);
 
 				float4 brushColor = tex2D(_MainTex, i.quadUV);	
-				brushColor.rgb = float3(1,1,0.25) * 0.09;
-				brushColor.a *= 0.45;
+				brushColor.rgb = float3(0.6,0.4,0.1) * 0.975;
+				//brushColor.a *= 1;
 				return brushColor;
 				
 				

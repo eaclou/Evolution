@@ -84,7 +84,7 @@
 				float2 curveTangent = normalize(GetFirstDerivative(particleData.worldPos.xy, particleData.p1, particleData.p2, particleData.p3, t));
 				float2 curveBitangent = float2(curveTangent.y, -curveTangent.x);
 						
-				float width = sqrt(particleData.biomass) * 0.375 * (1 - 2 * abs(0.75 - uv.y)) + 0.00725; //GetPoint1D(waterCurveData.widths.x, waterCurveData.widths.y, waterCurveData.widths.z, waterCurveData.widths.w, t) * 0.75 * (1 - saturate(testNewVignetteMask));
+				float width = sqrt(particleData.biomass) * 0.1 * (1 - 2 * abs(0.75 - uv.y)) + 0.02; //GetPoint1D(waterCurveData.widths.x, waterCurveData.widths.y, waterCurveData.widths.z, waterCurveData.widths.w, t) * 0.75 * (1 - saturate(testNewVignetteMask));
 				
 				float freq = 20;
 				float swimAnimOffset = sin(_Time.y * freq - t * 7 + (float)inst * 0.1237) * 4;
@@ -103,9 +103,9 @@
 				float3 worldPosition = float3(curvePos,0) + float4(offset, 0.0, 0.0);
 
 				// REFRACTION:
-				//float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / 256, 0, 0)).yzw;				
-				//float refractionStrength = 0.15;
-				//worldPosition.xy += -surfaceNormal.xy * refractionStrength;
+				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / 256, 0, 0)).yzw;				
+				float refractionStrength = 0.15;
+				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
 				
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));			
 				o.uv = uv; //quadVerticesCBuffer[id].xy + 0.5f;	
@@ -113,7 +113,7 @@
 				o.color = particleData.genome;
 				float oldAgeMask = saturate((particleData.age - 1.0) * 1000);
 				o.color.a = saturate(particleData.age * 0.5); //  1.0 - oldAgeMask; // particleData.isDecaying;
-				o.color.x = 1.0 - particleData.isDecaying;
+				o.color.x = (1.0 - particleData.isDecaying) * particleData.isActive;
 				
 				//o.color = float4(saturate(particleData.isDecaying), saturate(particleData.biomass * 5), saturate(particleData.age * 0.5), 1);
 				
