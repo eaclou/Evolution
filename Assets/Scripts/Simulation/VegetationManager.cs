@@ -53,10 +53,14 @@ public class VegetationManager {
     //private ComputeBuffer closestParticlesToCursorDataCBuffer;    
     //public PlantParticleData[] closestParticlesToCursorDataArray;
     private ComputeBuffer cursorClosestParticleDataCBuffer;
-    public PlantParticleData[] cursorClosestParticleDataArray;
+    public PlantParticleData[] cursorParticleDataArray;
     private ComputeBuffer cursorDistances1024;
-    private ComputeBuffer cursorDistances32;
-    private ComputeBuffer cursorDistances1;
+    public PlantParticleData selectedPlantParticleData;
+    public PlantParticleData closestPlantParticleData;
+    public bool isPlantParticleSelected = false;
+    public int selectedPlantParticleIndex = 0;
+    //private ComputeBuffer cursorDistances32;
+    //private ComputeBuffer cursorDistances1;
 
     private ComputeBuffer plantParticlesEatAmountsCBuffer;
     public float[] plantParticlesEatAmountsArray;
@@ -208,11 +212,11 @@ public class VegetationManager {
         
         //closestParticlesToCursorDataArray = new PlantParticleData[32];
         //closestParticlesToCursorDataCBuffer = new ComputeBuffer(32, GetPlantParticleDataSize());
-        cursorClosestParticleDataCBuffer = new ComputeBuffer(1, GetPlantParticleDataSize());
-        cursorClosestParticleDataArray = new PlantParticleData[1];
+        cursorClosestParticleDataCBuffer = new ComputeBuffer(2, GetPlantParticleDataSize());  // 0 = selected, 1 = closest to cursor
+        cursorParticleDataArray = new PlantParticleData[2];
         cursorDistances1024 = new ComputeBuffer(1024, sizeof(float) * 4);
-        cursorDistances32 = new ComputeBuffer(32, sizeof(float) * 1);
-        cursorDistances1 = new ComputeBuffer(1, sizeof(float) * 1);
+        //cursorDistances32 = new ComputeBuffer(32, sizeof(float) * 1);
+        //cursorDistances1 = new ComputeBuffer(1, sizeof(float) * 1);
 
         plantParticlesEatAmountsCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 1);
         plantParticlesEatAmountsArray = new float[numAgents];
@@ -683,7 +687,7 @@ public class VegetationManager {
         // Manual Sort!
         Vector4[] swapBuffer = cursorDistanceArray1024; // new Vector4[cursorDistanceArray1024.Length / 2];
         swapBuffer = ReduceDistancesArray(cursorDistanceArray1024);        
-        for(int tierID = 0; tierID < 7; tierID++) {            
+        for(int tierID = 0; tierID < 9; tierID++) {            
             Vector4[] writeBuffer = ReduceDistancesArray(swapBuffer);            
             swapBuffer = new Vector4[writeBuffer.Length];
             for(int x = 0; x < writeBuffer.Length; x++) {
@@ -691,7 +695,7 @@ public class VegetationManager {
             }
         }
         // assuming size of 4 because this is a gross hack
-        float nearestDist = swapBuffer[0].y;
+        /*float nearestDist = swapBuffer[0].y;
         int nearestIndex = 0;
         if(swapBuffer[0].y < swapBuffer[1].y) {
 
@@ -707,12 +711,32 @@ public class VegetationManager {
         if(swapBuffer[3].y < nearestDist) {
             nearestDist = swapBuffer[3].y;
             nearestIndex = 3;
-        }
-        tempClosestPlantParticleIndexAndPos.x = swapBuffer[nearestIndex].x;
+        }*/
+        tempClosestPlantParticleIndexAndPos.x = swapBuffer[0].x;
         //int bufferLength = swapBuffer.Length;
-        string txt = "nearestIndex = " + nearestIndex.ToString() + " (" + nearestDist.ToString() + ")   " + tempClosestPlantParticleIndexAndPos.x.ToString(); // "lngth: " + swapBuffer.Length.ToString() + ",  " + swapBuffer[0].ToString() + "   " + swapBuffer[1].ToString() + "   " + swapBuffer[swapBuffer.Length - 2].ToString() + "   " + swapBuffer[swapBuffer.Length - 1].ToString();
-            //"nearestIndex = " + nearestIndex.ToString() + " (" + nearestDist.ToString() + ")  size: " + swapBuffer.Length.ToString() + ", " + swapBuffer[0].ToString();
+
+        // Now Fetch the actual particleData:::::
+        int kernelCSFetchParticleByID = computeShaderPlantParticles.FindKernel("CSFetchParticleByID");
+        computeShaderPlantParticles.SetBuffer(kernelCSFetchParticleByID, "selectedPlantParticleDataCBuffer", cursorClosestParticleDataCBuffer);
         
+        computeShaderPlantParticles.SetInt("_SelectedParticleID", selectedPlantParticleIndex);   
+        computeShaderPlantParticles.SetInt("_ClosestParticleID", Mathf.RoundToInt(tempClosestPlantParticleIndexAndPos.x)); 
+        computeShaderPlantParticles.SetBuffer(kernelCSFetchParticleByID, "foodParticlesRead", plantParticlesCBuffer);        
+        computeShaderPlantParticles.Dispatch(kernelCSFetchParticleByID, 1, 1, 1);
+
+        cursorClosestParticleDataCBuffer.GetData(cursorParticleDataArray);
+
+        //string txt = "nearestIndex = " + cursorClosestParticleDataArray[0].index + " (" + cursorClosestParticleDataArray[0].age +  ")   " + (cursorClosestParticleDataArray[0].biomass * 1000f).ToString("F0"); // "lngth: " + swapBuffer.Length.ToString() + ",  " + swapBuffer[0].ToString() + "   " + swapBuffer[1].ToString() + "   " + swapBuffer[swapBuffer.Length - 2].ToString() + "   " + swapBuffer[swapBuffer.Length - 1].ToString();
+                                                                                                                                                                                                                //"nearestIndex = " + nearestIndex.ToString() + " (" + nearestDist.ToString() + ")  size: " + swapBuffer.Length.ToString() + ", " + swapBuffer[0].ToString();
+
+        // TEMPP!!!!!
+        //closestPlantParticlesDataArray[0] = cursorClosestParticleDataArray[0];
+        closestPlantParticleData = cursorParticleDataArray[1];
+        selectedPlantParticleData = cursorParticleDataArray[0];
+
+
+
+
         /*
         // Reduce from 1024 --> 32 particles per cursor:  
         // need to set buffers early?
@@ -1063,12 +1087,12 @@ public class VegetationManager {
         if(cursorDistances1024 != null) {
             cursorDistances1024.Release();
         }
-        if(cursorDistances32 != null) {
-            cursorDistances32.Release();
-        } 
-        if(cursorDistances1 != null) {
-            cursorDistances1.Release();
-        }
+        //if(cursorDistances32 != null) {
+        //    cursorDistances32.Release();
+        //} 
+        //if(cursorDistances1 != null) {
+        //    cursorDistances1.Release();
+        //}
         if(cursorClosestParticleDataCBuffer != null) {
             cursorClosestParticleDataCBuffer.Release();
         } 

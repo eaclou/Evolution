@@ -32,7 +32,9 @@
 			StructuredBuffer<float3> quadVerticesCBuffer;
 
 			uniform int _SelectedParticleIndex;
-			uniform float _IsHighlight;
+			uniform int _HoverParticleIndex;
+			uniform float _IsSelected;
+			uniform float _IsHover;
 			
 			struct v2f
 			{
@@ -57,7 +59,8 @@
 
 				PlantParticleData particleData = plantParticleDataCBuffer[particleIndex];
 
-				float highlightMask = (1.0 - saturate(abs(_SelectedParticleIndex - particleIndex))) * _IsHighlight;
+				float selectedMask = (1.0 - saturate(abs(_SelectedParticleIndex - particleIndex))) * _IsSelected;
+				float hoverMask = (1.0 - saturate(abs(_HoverParticleIndex - particleIndex))) * _IsHover;
 
 				float3 worldPosition = float3(particleData.worldPos, 1.0);    //float3(rawData.worldPos, -random2);
 
@@ -85,8 +88,8 @@
 				worldPosition.xyz += noiseOffset;
 
 
-				float radius = saturate(512 * particleData.biomass * particleData.biomass) * 0.5185 + 0.052 + 0.42 * highlightMask; // particleData.radius * 0.3 * isOn; // 1; //sqrt(particleData.biomass) * 2 + 0.5;
-				radius = 0.1 + 0.2 * highlightMask;
+				float radius = saturate(512 * particleData.biomass * particleData.biomass) * 0.5185 + 0.052 + 0.6 * max(hoverMask * 0.5, selectedMask); // particleData.radius * 0.3 * isOn; // 1; //sqrt(particleData.biomass) * 2 + 0.5;
+				radius = lerp(radius, 0.1, 0.95) + 0.3 * max(hoverMask * 0.5, selectedMask);
 				quadPoint = quadPoint * radius; // * particleData.active; // *** remove * 3 after!!!
 				quadPoint.y *= 1.6;
 				float randAngle = (rand2 + rand3 * rand0 - rand1) * 13.92;
@@ -111,7 +114,7 @@
 								
 				float posterizeIndex = floor((float)particleIndex / 128.0) / 8.0;
 				
-				o.color = float4(saturate(particleData.isDecaying), saturate(particleData.biomass * 5), posterizeIndex, highlightMask);
+				o.color = float4(saturate(particleData.isDecaying), saturate(particleData.biomass * 5), posterizeIndex, max(hoverMask * 0.5, selectedMask));
 				o.hue = float4(particleData.color, 1);
 				return o;
 			}

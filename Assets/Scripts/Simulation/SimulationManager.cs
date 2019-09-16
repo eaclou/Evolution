@@ -187,7 +187,7 @@ public class SimulationManager : MonoBehaviour {
                 //turn off menu music:
                 audioManager.TurnOffMenuAudioGroup();
 
-                cameraManager.SetTarget(agentsArray[0], 0);  // otherwise it's null and a giant mess
+                cameraManager.SetTargetAgent(agentsArray[0], 0);  // otherwise it's null and a giant mess
              
             }
             else {

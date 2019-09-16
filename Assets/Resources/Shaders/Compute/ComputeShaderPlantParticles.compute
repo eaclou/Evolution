@@ -1,9 +1,8 @@
 ﻿#pragma kernel CSMeasureInitCritterDistances
 #pragma kernel CSMeasureInitCursorDistances
-#pragma kernel CSReduceCursorDistances32
 #pragma kernel CSReduceCritterDistances32
 #pragma kernel CSReduceCritterDistances1
-#pragma kernel CSFetchParticleToCursorDistances32
+#pragma kernel CSFetchParticleByID
 #pragma kernel CSEatSelectedFoodParticles
 #pragma kernel CSCopyFoodParticlesBuffer
 #pragma kernel CSMeasureTotalFoodParticlesAmount
@@ -22,7 +21,7 @@ RWTexture2D<float4> foodParticlesNearestCrittersRT;
 
 RWStructuredBuffer<PlantParticleData> closestParticlesDataCBuffer;
 
-RWStructuredBuffer<PlantParticleData> closestParticlesToCursorCBuffer;
+RWStructuredBuffer<PlantParticleData> selectedPlantParticleDataCBuffer;
 StructuredBuffer<float4> cursorDistancesRead; // used to reduce foodParticlesNearestCrittersRT down to minimum distances
 RWStructuredBuffer<float4> cursorDistancesWrite;
 
@@ -56,6 +55,9 @@ uniform float _FoodParticleRegrowthRate;
 
 uniform float _MouseCoordX;
 uniform float _MouseCoordY;
+
+uniform int _SelectedParticleID;
+uniform int _ClosestParticleID;
 
 uniform float4 _FoodSprinklePos;
 uniform float _FoodSprinkleRadius;
@@ -117,34 +119,6 @@ void CSMeasureInitCursorDistances (uint3 id : SV_DispatchThreadID)
 	float distanceSquared = particleToCursor.x * particleToCursor.x + particleToCursor.y * particleToCursor.y;
 	
 	cursorDistancesWrite[particleIndex] = float4(particleIndex, distanceSquared, particleData.worldPos.xy);			
-}
-[numthreads(1,1,1)]
-void CSReduceCursorDistances32 (uint3 id : SV_DispatchThreadID)
-{		
-				
-	float closestParticleIndex = 0;
-	float minSquaredDistance = 50000;
-		
-	for(int i = 0; i < 32; i++) {
-		
-		int particleIndex = id.x * 32 + i;
-		
-		float4 sourceData = cursorDistancesRead[particleIndex];
-		
-		PlantParticleData particleData = foodParticlesRead[particleIndex];
-
-		if(sourceData.y < minSquaredDistance) {			
-			minSquaredDistance = sourceData.y;
-			closestParticleIndex = (int)sourceData.x;							
-		}
-	}
-		
-	PlantParticleData closestFoodData = foodParticlesRead[closestParticleIndex];	
-		
-	cursorDistancesWrite[id.x] = float4(closestParticleIndex, minSquaredDistance, cursorDistancesRead[0].z, 0.1);
-	
-	closestParticlesToCursorCBuffer[0] = closestFoodData;
-	
 }
 
 [numthreads(1,1,1)]
@@ -211,11 +185,14 @@ void CSReduceCritterDistances1 (uint3 id : SV_DispatchThreadID)
 	closestParticlesDataCBuffer[critterIndex] = closestFoodData; // assuming there's only 1 thread at end
 }
 
-[numthreads(32,1,1)]
-void CSFetchParticleToCursorDistances32 (uint3 id : SV_DispatchThreadID)
+[numthreads(1,1,1)]
+void CSFetchParticleByID (uint3 id : SV_DispatchThreadID)
 {
-	PlantParticleData closestFoodData = foodParticlesRead[critterDistancesRead[int2(id.x, 0)].x];	
-	closestParticlesToCursorCBuffer[id.x] = closestFoodData;
+	PlantParticleData selectedParticleData = foodParticlesRead[_SelectedParticleID];
+	PlantParticleData closestParticleData = foodParticlesRead[_ClosestParticleID];
+	
+	selectedPlantParticleDataCBuffer[0] = selectedParticleData;
+	selectedPlantParticleDataCBuffer[1] = closestParticleData;
 }
 
 

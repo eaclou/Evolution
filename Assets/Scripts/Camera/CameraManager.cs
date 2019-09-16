@@ -13,14 +13,19 @@ public class CameraManager : MonoBehaviour {
 
     public Vector3 masterTargetCamPosition;
 
-    public bool isFollowing = false;
-    public Transform targetTransform;
+    public bool isFollowingAgent = false;
+    public Transform targetAgentTransform;
     public Agent targetAgent;
-    public int targetCritterIndex = 0;
+    public int targetAgentIndex = 0;
 
     public int mouseHoverAgentIndex = 0;
     public bool isMouseHoverAgent = false;
     public Agent mouseHoverAgentRef;
+
+    public bool isFollowingPlantParticle = false;
+    public Vector2 targetPlantWorldPos;
+    //public Agent targetAgent;
+    //public int targetAgentIndex = 0;
 
     public float masterTargetDistance = 50f;
     public float masterTargetTiltAngle = 33f;
@@ -59,10 +64,19 @@ public class CameraManager : MonoBehaviour {
 
     private void UpdateCam() {
         // Calculate where the focus pivot should be:
-        if (targetTransform != null && isFollowing)
+        if (targetAgentTransform != null && isFollowingAgent)
         {
-            curCameraFocusPivotPos = targetTransform.position;
+            curCameraFocusPivotPos = targetAgentTransform.position;
             curCameraFocusPivotPos.z = 1.0f; // *** for now this is where creatures are for now           
+        }
+        else {
+            
+        }
+
+        if(isFollowingPlantParticle) {
+            curCameraFocusPivotPos.x = targetPlantWorldPos.x;
+            curCameraFocusPivotPos.y = targetPlantWorldPos.y;
+            //curCameraFocusPivotPos.z = 0f;
         }
 
         curTiltAngleDegrees = Mathf.Lerp(curTiltAngleDegrees, -masterTargetTiltAngle, 12f * Time.deltaTime);        
@@ -169,11 +183,11 @@ public class CameraManager : MonoBehaviour {
         //masterTargetDistance = Mathf.Max(masterTargetDistance, minDistance);
     }
 
-    public void SetTarget(Agent agent, int index) {
+    public void SetTargetAgent(Agent agent, int index) {
         //Debug.Log("SetTarget! " + index.ToString());
         targetAgent = agent;
-        targetTransform = agent.bodyGO.transform;
-        targetCritterIndex = index;
+        targetAgentTransform = agent.bodyGO.transform;
+        targetAgentIndex = index;
     }
     
     private Vector2 SmoothApproach(Vector2 pastPosition, Vector2 pastTargetPosition, Vector2 targetPosition, float speed) {

@@ -4047,9 +4047,9 @@ public class TheRenderKing : MonoBehaviour {
                 critterDebugGenericStrokeMat.SetFloat("_HighlightOn", highlightOn); 
                 */
                 critterDebugGenericStrokeMat.SetInt("_HoverID", simManager.uiManager.cameraManager.mouseHoverAgentIndex);
-                critterDebugGenericStrokeMat.SetInt("_SelectedID", simManager.uiManager.cameraManager.targetCritterIndex);
+                critterDebugGenericStrokeMat.SetInt("_SelectedID", simManager.uiManager.cameraManager.targetAgentIndex);
                 critterDebugGenericStrokeMat.SetFloat("_IsHover", simManager.uiManager.cameraManager.isMouseHoverAgent ? 1f : 0f);
-                critterDebugGenericStrokeMat.SetFloat("_IsSelected", simManager.uiManager.cameraManager.isFollowing ? 1f : 0f);
+                critterDebugGenericStrokeMat.SetFloat("_IsSelected", simManager.uiManager.cameraManager.isFollowingAgent ? 1f : 0f);
                 critterDebugGenericStrokeMat.SetFloat("_MapSize", SimulationManager._MapSize);            
                 cmdBufferMain.DrawProcedural(Matrix4x4.identity, critterDebugGenericStrokeMat, 0, MeshTopology.Triangles, 6, critterGenericStrokesCBuffer.count);
 
@@ -4089,8 +4089,33 @@ public class TheRenderKing : MonoBehaviour {
             plantParticleDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
             plantParticleDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
             plantParticleDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-            plantParticleDisplayMat.SetInt("_SelectedParticleIndex", Mathf.RoundToInt(simManager.vegetationManager.tempClosestPlantParticleIndexAndPos.x));
-            plantParticleDisplayMat.SetFloat("_IsHighlight", 1f);
+            plantParticleDisplayMat.SetInt("_SelectedParticleIndex", Mathf.RoundToInt(simManager.vegetationManager.selectedPlantParticleIndex));
+            plantParticleDisplayMat.SetInt("_HoverParticleIndex", Mathf.RoundToInt(simManager.vegetationManager.closestPlantParticleData.index));
+            float isSelected = 0f;
+            if(simManager.vegetationManager.isPlantParticleSelected) {
+                if(simManager.uiManager.curActiveTool == UIManager.ToolType.Inspect) {
+                    isSelected = 1f;
+                }
+                else {
+                    simManager.vegetationManager.isPlantParticleSelected = false;
+                    simManager.uiManager.StopFollowingPlantParticle();
+                }
+            }
+            float isHover = 0f;
+            if(simManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 1) {
+                if(simManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 1) {
+                    if(simManager.uiManager.curActiveTool == UIManager.ToolType.Inspect) {
+                        isHover = 1f;
+                    }
+                    else {
+                        simManager.vegetationManager.isPlantParticleSelected = false;
+                        simManager.uiManager.StopFollowingPlantParticle();
+                    }
+                }
+            }
+            
+            plantParticleDisplayMat.SetFloat("_IsSelected", isSelected);
+            plantParticleDisplayMat.SetFloat("_IsHover", isHover);
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, plantParticleDisplayMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.plantParticlesCBuffer.count * 32);
         
             //}

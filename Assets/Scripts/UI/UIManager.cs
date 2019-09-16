@@ -679,10 +679,12 @@ public class UIManager : MonoBehaviour {
 
             if (isKeyboardInput) {
                 moveDir = moveDir.normalized;
-                StopFollowing();
+                StopFollowingAgent();
+                StopFollowingPlantParticle();
             }
             if (moveDir.sqrMagnitude > 0.001f) {
-                StopFollowing();
+                StopFollowingAgent();
+                StopFollowingPlantParticle();
             }
 
             cameraManager.MoveCamera(moveDir); // ********************
@@ -756,6 +758,33 @@ public class UIManager : MonoBehaviour {
                 //gameManager.simulationManager.isBrushingAgents = false;
             }
 
+
+            // Plant Particle Following/Selection
+            if(leftClickThisFrame) {
+                if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 1) {
+                    if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 1) {
+                        // if plant particles
+                        if (curActiveTool == ToolType.Inspect) {
+                            int selectedID = gameManager.simulationManager.vegetationManager.selectedPlantParticleIndex;
+                            int closestID = gameManager.simulationManager.vegetationManager.closestPlantParticleData.index;
+
+                            if(selectedID != closestID) {
+                                gameManager.simulationManager.vegetationManager.selectedPlantParticleIndex = closestID;
+                                gameManager.simulationManager.vegetationManager.isPlantParticleSelected = true;
+                                Debug.Log("FOLLOWING " + gameManager.simulationManager.vegetationManager.selectedPlantParticleIndex.ToString());
+
+                                StartFollowingPlantParticle();
+                            }
+                        }
+                    }
+                }
+            }
+
+            if(cameraManager.isFollowingPlantParticle) {
+                cameraManager.targetPlantWorldPos = gameManager.simulationManager.vegetationManager.selectedPlantParticleData.worldPos;
+            }
+            
+
             /*if (leftClickThisFrame) {
                 
                 gameManager.simulationManager.isBrushingAgents = true; // ** TEMP DEBUGGING
@@ -812,6 +841,10 @@ public class UIManager : MonoBehaviour {
             
                 if (curActiveTool == ToolType.Inspect || curActiveTool == ToolType.None) {                    
                     //gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_IsVisible", 0f);
+
+                    if (curActiveTool == ToolType.Inspect) {                    
+                        //if()
+                    }
                 }
                 else {
                     stirGizmoVisible = true;
@@ -884,6 +917,8 @@ public class UIManager : MonoBehaviour {
                                 }
                                 else {
                                     gameManager.simulationManager.vegetationManager.isBrushActive = true;
+
+                                    
                                 }
                                 
                             }
@@ -1097,13 +1132,13 @@ public class UIManager : MonoBehaviour {
                     }
                     else {
                      
-                        VegetationManager.PlantParticleData particleData = gameManager.simulationManager.vegetationManager.closestPlantParticlesDataArray[0];
+                        VegetationManager.PlantParticleData particleData = gameManager.simulationManager.vegetationManager.selectedPlantParticleData;
 
                         str += "\nPlant Particle # " + particleData.index.ToString() + "  [" + particleData.nearestCritterIndex.ToString() + "]";
-                        str += "\nCPU: " + gameManager.simulationManager.vegetationManager.tempClosestPlantParticleIndexAndPos.ToString();
+                        //str += "\nCPU: " + gameManager.simulationManager.vegetationManager.tempClosestPlantParticleIndexAndPos.ToString();
                         str += "\nCoords [ " + particleData.worldPos.x.ToString("F0") + " , " + particleData.worldPos.y.ToString("F0");
-                        str += "\nCritter (" + gameManager.simulationManager.uiManager.curMousePositionOnWaterPlane.x.ToString() + ", " + gameManager.simulationManager.uiManager.curMousePositionOnWaterPlane.y.ToString() + ")";                        
-                        str += "\nAge: " + (particleData.age * 1000f).ToString("F0");
+                        //str += "\nCritter (" + gameManager.simulationManager.uiManager.curMousePositionOnWaterPlane.x.ToString() + ", " + gameManager.simulationManager.uiManager.curMousePositionOnWaterPlane.y.ToString() + ")";                        
+                        str += "\n\nAge: " + (particleData.age * 1000f).ToString("F0");
                         str += "\nBiomass: " + (particleData.biomass * 1000f).ToString("F0");
                         str += "\nNutrients Used: " + (particleData.nutrientsUsed * 1000000f).ToString("F0");
                         str += "\nOxygen Produced: " + (particleData.oxygenProduced * 1000000f).ToString("F0");
@@ -1152,7 +1187,7 @@ public class UIManager : MonoBehaviour {
                     else {
                         
 
-                        int critterIndex = cameraManager.targetCritterIndex;
+                        int critterIndex = cameraManager.targetAgentIndex;
                         Agent agent = gameManager.simulationManager.agentsArray[critterIndex];
                         str += "ID " + critterIndex.ToString() + "    SpeciesID " + agent.speciesIndex.ToString();
                         float health = 100f;
@@ -1225,12 +1260,12 @@ public class UIManager : MonoBehaviour {
                 simManager.uiManager.buttonToolbarExpandOn.interactable = true;)
                 */
         if(!inspectToolUnlocked) {
-            if(gameManager.simulationManager.simResourceManager.curGlobalAgentBiomass > 0f) {
+            //if(gameManager.simulationManager.simResourceManager.curGlobalAgentBiomass > 0f) {
                 // Unlock!!!!
                 AnnounceUnlockInspect();
                 inspectToolUnlocked = true;
                 
-            }
+            //}
         }
         
         // Check for Announcements:
@@ -2385,7 +2420,7 @@ public class UIManager : MonoBehaviour {
         }
     }    
     private void UpdateInspectPanelUI() {
-        int critterIndex = cameraManager.targetCritterIndex;
+        int critterIndex = cameraManager.targetAgentIndex;
         Agent agent = gameManager.simulationManager.agentsArray[critterIndex];
 
         
@@ -3296,8 +3331,8 @@ public class UIManager : MonoBehaviour {
           
     }
 
-    public void StopFollowing() {
-        cameraManager.isFollowing = false;
+    public void StopFollowingAgent() {
+        cameraManager.isFollowingAgent = false;
         
         if(isActiveInspectPanel) {
             isActiveInspectPanel = false;
@@ -3306,11 +3341,20 @@ public class UIManager : MonoBehaviour {
             animatorInspectPanel.Play("SlideOffPanelInspect");
         } 
     }
-    public void StartFollowing() {
-        cameraManager.isFollowing = true;
+    public void StartFollowingAgent() {
+        cameraManager.isFollowingAgent = true;
         isActiveInspectPanel = true;    
         animatorInspectPanel.enabled = true;
         animatorInspectPanel.Play("SlideOnPanelInspect");        
+    }
+
+    public void StopFollowingPlantParticle() {
+        cameraManager.isFollowingPlantParticle = false;
+        
+    }
+    public void StartFollowingPlantParticle() {
+        cameraManager.isFollowingPlantParticle = true;
+        
     }
     
     private void MouseRaycastWaterPlane(Vector3 screenPos) {
@@ -3349,12 +3393,14 @@ public class UIManager : MonoBehaviour {
                 //Debug.Log("AGENT: [ " + agentRef.gameObject.name + " ] #" + agentRef.index.ToString());
                     
                 if(clicked && curActiveTool == ToolType.Inspect) {
-                    cameraManager.SetTarget(agentRef, agentRef.index);
-                    cameraManager.isFollowing = true;
-
-                    //ClickOnSpeciesNode(agentRef.speciesIndex);
+                    if (gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2) {
+                        if (gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 1) {
+                            cameraManager.SetTargetAgent(agentRef, agentRef.index);
+                            cameraManager.isFollowingAgent = true;
+                            StartFollowingAgent();
+                        }
+                    }
                     
-                    StartFollowing();
                 }
                 else {
                     // HOVER:
@@ -3473,7 +3519,8 @@ public class UIManager : MonoBehaviour {
         curActiveTool = ToolType.Stir;
              
         isActiveStirToolPanel = true;  
-        StopFollowing();
+        StopFollowingAgent();
+        StopFollowingPlantParticle();
         //animatorStirToolPanel.enabled = true;
         //animatorStirToolPanel.Play("SlideOnPanelStirTool"); 
         buttonToolbarStir.GetComponent<Image>().color = buttonActiveColor; 
@@ -3511,6 +3558,8 @@ public class UIManager : MonoBehaviour {
         //if(curActiveTool != ToolType.Nutrients) {
         curActiveTool = ToolType.Add;
 
+        StopFollowingAgent();
+        StopFollowingPlantParticle();
         //isActiveFeedToolPanel = true;    
         //animatorFeedToolPanel.enabled = true;
         //animatorFeedToolPanel.Play("SlideOnPanelFeedTool"); 
@@ -3949,24 +3998,24 @@ public class UIManager : MonoBehaviour {
     public void ClickPrevAgent() {
         Debug.Log("ClickPrevAgent");
         
-        int newIndex = cameraManager.targetCritterIndex;
+        int newIndex = cameraManager.targetAgentIndex;
         for(int i = 1; i < gameManager.simulationManager._NumAgents; i++) {
-            int index = (gameManager.simulationManager._NumAgents + cameraManager.targetCritterIndex - i) % gameManager.simulationManager._NumAgents;
+            int index = (gameManager.simulationManager._NumAgents + cameraManager.targetAgentIndex - i) % gameManager.simulationManager._NumAgents;
 
             if (gameManager.simulationManager.agentsArray[index].speciesIndex == selectedSpeciesID) {
                 newIndex = index;
                 break;
             }
         }
-        cameraManager.SetTarget(gameManager.simulationManager.agentsArray[newIndex], newIndex);          
+        cameraManager.SetTargetAgent(gameManager.simulationManager.agentsArray[newIndex], newIndex);          
                            
     }
     public void ClickNextAgent() {
         Debug.Log("ClickNextAgent");
         
-        int newIndex = cameraManager.targetCritterIndex;
+        int newIndex = cameraManager.targetAgentIndex;
         for(int i = 1; i < gameManager.simulationManager._NumAgents; i++) {
-            int index = (cameraManager.targetCritterIndex + i) % gameManager.simulationManager._NumAgents;
+            int index = (cameraManager.targetAgentIndex + i) % gameManager.simulationManager._NumAgents;
 
             if (gameManager.simulationManager.agentsArray[index].speciesIndex == selectedSpeciesID) {
                 newIndex = index;
@@ -3974,7 +4023,7 @@ public class UIManager : MonoBehaviour {
             }
         }
         
-        cameraManager.SetTarget(gameManager.simulationManager.agentsArray[newIndex], newIndex);                
+        cameraManager.SetTargetAgent(gameManager.simulationManager.agentsArray[newIndex], newIndex);                
     }
     
     public void ClickInfoPanelExpand() {
