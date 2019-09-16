@@ -105,9 +105,9 @@
 				float fadeOut = saturate((1 - groundBitData.age) / fadeDuration);							
 				float alpha = fadeIn * fadeOut;
 
-				worldPosition.z = -altitude * 20 + 10.5 - alpha;
+				worldPosition.z = -altitude * 20 + 10.0 - alpha;
 				
-				float2 scale = float2(2.6,5.45) * 0.31 * alpha; //groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25) * 2.0;
+				float2 scale = float2(7,6.65) * 0.641 * alpha; //groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25) * 2.0;
 			
 				float4 resourceGridSample = tex2Dlod(_ResourceGridTex, float4(uv, 0, 0));
 				float decomposerAmount = saturate(resourceGridSample.z);
@@ -174,7 +174,7 @@
 				//return float4(0.6,0.4,0.1,1);
 
 				float4 brushColor = tex2D(_MainTex, i.quadUV);	
-				brushColor.rgb = float3(0.6,0.4,0.1) * 0.975;
+				brushColor.rgb = float3(0.5,0.25,0.1) * 0.875;
 				//brushColor.a *= 1;
 				return brushColor;
 				

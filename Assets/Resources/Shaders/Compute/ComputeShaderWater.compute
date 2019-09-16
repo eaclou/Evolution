@@ -249,7 +249,7 @@ void CSSimWaterQuadsData (uint3 id : SV_DispatchThreadID)
 
 	float altitude = AltitudeRead.SampleLevel(_LinearClamp, uv, 0).x;
 
-	waterQuadData.age = waterQuadData.age + 0.0035;
+	
 	if(waterQuadData.age > 1.0 || altitude > 0.45) {
 		
 		float2 spawnPos = float2(rand(float2(id.x, uv.x + _Time)), rand(float2(uv.y - _Time, id.x + _Time * 8.913)));		
@@ -267,12 +267,13 @@ void CSSimWaterQuadsData (uint3 id : SV_DispatchThreadID)
 
 		if(spawnRating > (float)id.x / (float)_BufferLength) {
 			waterQuadData.worldPos = float3(spawnPos, 0);
-			waterQuadData.age -= 1;
+			waterQuadData.age = 0.0;
 		}
 	}
 	else {
 		waterQuadData.worldPos = float3(nextPos * _MapSize, 0);
 		
+		waterQuadData.age = waterQuadData.age + 0.0035;
 	}
 
 	float2 forwardDir = normalize(vel);

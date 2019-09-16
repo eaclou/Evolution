@@ -31,6 +31,8 @@
 			StructuredBuffer<AnimalParticleData> animalParticleDataCBuffer;			
 			StructuredBuffer<float3> quadVerticesCBuffer;
 			
+			uniform int _SelectedParticleIndex;
+			uniform float _IsHighlight;
 			
 			struct v2f
 			{
@@ -71,7 +73,8 @@
 				uv.x += 0.5;
 				
 				AnimalParticleData particleData = animalParticleDataCBuffer[inst];
-
+				//_SelectedParticleIndex = round(_Time.y * 3) % 1024;
+				float highlightMask = (1.0 - saturate(abs((round(_Time.y * 3) % 1024) - inst))) * _IsHighlight;
 
 				// Figure out worldPosition by constructing a bezierCurve between the 4 points
 				// and adjusting vertPosition based on curve output.
@@ -84,7 +87,7 @@
 				float2 curveTangent = normalize(GetFirstDerivative(particleData.worldPos.xy, particleData.p1, particleData.p2, particleData.p3, t));
 				float2 curveBitangent = float2(curveTangent.y, -curveTangent.x);
 						
-				float width = sqrt(particleData.biomass) * 0.1 * (1 - 2 * abs(0.75 - uv.y)) + 0.02; //GetPoint1D(waterCurveData.widths.x, waterCurveData.widths.y, waterCurveData.widths.z, waterCurveData.widths.w, t) * 0.75 * (1 - saturate(testNewVignetteMask));
+				float width = sqrt(particleData.biomass) * 0.1 * (1 - 2 * abs(0.75 - uv.y)) + 0.02 + 0.67 * highlightMask; //GetPoint1D(waterCurveData.widths.x, waterCurveData.widths.y, waterCurveData.widths.z, waterCurveData.widths.w, t) * 0.75 * (1 - saturate(testNewVignetteMask));
 				
 				float freq = 20;
 				float swimAnimOffset = sin(_Time.y * freq - t * 7 + (float)inst * 0.1237) * 4;
@@ -114,6 +117,7 @@
 				float oldAgeMask = saturate((particleData.age - 1.0) * 1000);
 				o.color.a = saturate(particleData.age * 0.5); //  1.0 - oldAgeMask; // particleData.isDecaying;
 				o.color.x = (1.0 - particleData.isDecaying) * particleData.isActive;
+				o.color.y = highlightMask;
 				
 				//o.color = float4(saturate(particleData.isDecaying), saturate(particleData.biomass * 5), saturate(particleData.age * 0.5), 1);
 				
@@ -137,13 +141,15 @@
 				finalColor.rgb *= saturate(1.0 - uvDist);
 				float circleMask = saturate(circleFade * 20);
 				// ****************************************************************************
-				return float4(1.0 - i.color.a, 1.0 - i.color.a, 1.0 - i.color.a, (1.0 - circleMask) * i.color.x);  // age
+				finalColor *= 1.0 + i.color.y * 2;
+				return float4(finalColor.rgb, (1.0 - circleMask) * i.color.x * (1.0 + i.color.y));  // age
 
 				finalColor.a *= 1.0 - circleMask;
 				finalColor.a *= i.color.a;
 				//finalColor.rgb = float3(0.45, 0.55, 1.295) * 1.25;
 
 				finalColor.rgb = i.color.rgb;
+				
 				return finalColor;
 			}
 		ENDCG

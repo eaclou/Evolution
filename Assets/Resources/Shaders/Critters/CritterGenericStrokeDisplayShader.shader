@@ -79,7 +79,7 @@
 				// Decay color bleach value:
 				float decayTimeRange = 0.4;
 				float decayAmount = saturate((critterSimData.decayPercentage) / decayTimeRange - genericStrokeData.thresholdValue * 2);
-				float4 decayColor = float4(0.5, 0.4, 0.3, 1);
+				float4 decayColor = float4(0.25, 0.14, 0.052, 0.9);
 				
 
 				float3 brushScale = float3(genericStrokeData.scale, 1);
@@ -92,7 +92,7 @@
 				quadVertexOffset *= (1 - critterSimData.decayPercentage);
 				// old //float3 vertexWorldPos = critterWorldPos + strokeBindPos + quadVerticesCBuffer[id] * 0.645 * length(genericStrokeData.scale);
 				float3 vertexWorldPos = genericStrokeData.worldPos + quadVertexOffset * 1.25 * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage) * 1;
-
+				vertexWorldPos.z += decayAmount * 9.5;
 				// REFRACTION:							
 				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(genericStrokeData.worldPos.xy /  _MapSize, 0, 0)).yzw;
 				float refractionStrength = 0.4;
@@ -123,9 +123,12 @@
 				float3 hue = lerp(critterInitData.secondaryHue, critterInitData.primaryHue, patternTexSample.x);
 				
 				hue = lerp(hue, genericStrokeData.color.rgb, genericStrokeData.color.a);
-				hue = lerp(float3(1,0,0), hue, critterSimData.health);
+				//float damagedThreshold = saturate(abs((sin((float)inst * -198264.1111927) * 319287419.8) % 100) / 100);
+				float damagedThreshold = saturate(float(inst % 1024) / 1024.0);
+				float damagedMask = saturate((critterSimData.health - damagedThreshold) * 9999);
+				hue = lerp(float3(0.75,0.25,0.1), hue, damagedMask);
 				
-				float alpha = saturate((critterSimData.embryoPercentage - 0.995) * 200);
+				float alpha = saturate((critterSimData.embryoPercentage - 0.995) * 200) * saturate((0.9 - critterSimData.decayPercentage) * 999);
 								
 				o.color = float4(specTest * 0.65 + hue * crudeDiffuse, alpha); //genericStrokeData.bindPos.x * 0.5 + 0.5, genericStrokeData.bindPos.z * 0.33 + 0.5, genericStrokeData.bindPos.y * 0.5 + 0.5, 1);
 				o.color = lerp(o.color, decayColor, saturate(decayAmount + saturate(critterSimData.decayPercentage * 50) * 0.25));

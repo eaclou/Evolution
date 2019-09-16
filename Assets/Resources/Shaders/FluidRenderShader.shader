@@ -140,6 +140,7 @@
 				//float waveDistortMag = 0.05;
 				float3 reflectedViewDir = cameraToVertexDir + surfaceNormal * waveHeight;
 				float viewDot = dot(-cameraToVertexDir, surfaceNormal);
+				viewDot = min(max(viewDot, 0.5), 0.985);
 
 				float2 skyCoords = reflectedViewDir.xy * 0.25 + 0.75;
 				
@@ -150,7 +151,7 @@
 				float diffuse = saturate(dot(normalize(float3(-0.5,0.4,-0.6)), surfaceNormal));
 				
 				float reflectLerp = (1.0 - saturate(viewDot));
-				reflectLerp = reflectLerp * reflectLerp;
+				//reflectLerp = reflectLerp * reflectLerp;
 
 				float4 reflectedColor = float4(tex2Dlod(_SkyTex, skySampleUV).rgb, 1); //col;
 				

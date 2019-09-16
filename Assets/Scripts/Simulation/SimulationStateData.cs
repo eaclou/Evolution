@@ -392,6 +392,13 @@ public class SimulationStateData {
                                                           agentPos.y / SimulationManager._MapSize, 
                                                           (simManager.agentsArray[i].fullSizeBoundingBox.x + 0.25f) * 0.5f / SimulationManager._MapSize, // **** RE-VISIT!!!!! ****
                                                           (simManager.agentsArray[i].fullSizeBoundingBox.y + 0.25f) * 0.5f / SimulationManager._MapSize); //... 0.5/140 ...
+
+
+                // ***************************** // TEMP HACK!!!!!!! *************************
+                /*if(i == 0) {
+                    critterSimDataArray[i].worldPos = simManager.uiManager.curMousePositionOnWaterPlane;// / SimulationManager._MapSize;
+                    critterSimDataArray[i].consumeOn = 0f;
+                }*/
             }
         }
         critterInitDataCBuffer.SetData(critterInitDataArray);        

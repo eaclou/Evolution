@@ -71,7 +71,7 @@
 
 				float3 offsetRaw = (float3(rand0, rand1, rand2) * 2 - 1) * rand3;				
 				//float2 offset = offsetRaw * (16 * particleData.biomass + 0.2);
-				float maxSpread = 5.28;
+				float maxSpread = 3.728;
 				float spread = (saturate(256 * particleData.biomass * particleData.biomass) * 0.95 + 0.05) * maxSpread;
 				worldPosition.xyz += offsetRaw * spread;
 
@@ -87,7 +87,7 @@
 				
 
 				worldPosition.xyz += noiseOffset;
-				float radius = saturate(256 * particleData.biomass * particleData.biomass) * 1.85 + 0.042; // particleData.radius * 0.3 * isOn; // 1; //sqrt(particleData.biomass) * 2 + 0.5;
+				float radius = saturate(512 * particleData.biomass * particleData.biomass) * 0.5185 + 0.052; // particleData.radius * 0.3 * isOn; // 1; //sqrt(particleData.biomass) * 2 + 0.5;
 				quadPoint = quadPoint * radius; // * particleData.active; // *** remove * 3 after!!!
 				quadPoint.y *= 1.6;
 				float randAngle = (rand2 + rand3 * rand0 - rand1) * 13.92;

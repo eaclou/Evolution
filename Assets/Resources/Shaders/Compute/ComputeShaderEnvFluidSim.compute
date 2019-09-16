@@ -464,7 +464,7 @@ void RefreshColor (uint3 id : SV_DispatchThreadID)
 	newColor.a = saturate(nutrientGridSample.w * 1 + nutrientGridSample.x * 1);
 
 	float3 nutrientsHue = _NutrientsColor.rgb * 1.5;
-	float3 algaeHue = lerp(_AlgaeColor.rgb, float3(0.1,0.9,0.1), 0.5) * 1.5;
+	float3 algaeHue = lerp(_AlgaeColor.rgb, float3(0.275,0.8,0.175), 0.95) * 1.0;
 	int checkerMask01 = ((id.x + id.y)) % 2;
 	int checkerMask02 = 1 - checkerMask01; // ((id.x + id.y + 1)) % 2;
 	float mask01 = (float)(checkerMask01 * 0.25 + 0.75);

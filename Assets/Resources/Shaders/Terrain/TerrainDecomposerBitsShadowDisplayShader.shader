@@ -106,16 +106,25 @@
 				worldPosition.x += 0.25 * groundBitData.age;
 ;
 
-				float fadeDuration = 0.1;
+				float fadeDuration = 0.25;
 				float fadeIn = saturate(groundBitData.age / fadeDuration);  // fade time = 0.1
 				float fadeOut = saturate((1 - groundBitData.age) / fadeDuration);							
 				float alpha = fadeIn * fadeOut;
 				
-				float2 scale = groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25);
-			
-				float sizeFadeMask = saturate((1.0 - altitude) * 4 - 2);
-				quadPoint *= float3(scale, 1.0) * (_Density * 0.5 + 0.5) * sizeFadeMask;
-				quadPoint.x *= 0.75;
+				float2 scale = float2(7,6.65) * 1.0741 * alpha; 
+				float4 resourceGridSample = tex2Dlod(_ResourceGridTex, float4(uv, 0, 0));
+				float decomposerAmount = saturate(resourceGridSample.z);
+				float decomposerMinMask = saturate(decomposerAmount * 100);
+				float wasteAmount = saturate(resourceGridSample.y) * decomposerMinMask;
+
+				float sizeFadeMask = (decomposerAmount + wasteAmount * 0.5) * 0.9 + 0.1; // saturate((1.0 - altitude) * 4 - 2);
+				quadPoint *= float3(scale, 1.0) * sizeFadeMask;
+
+				// OLD:
+				//float2 scale = groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25);			
+				//float sizeFadeMask = saturate((1.0 - altitude) * 4 - 2);
+				//quadPoint *= float3(scale, 1.0) * (_Density * 0.5 + 0.5) * sizeFadeMask;
+				//quadPoint.x *= 0.75;
 				
 				float4 fluidVelocity = tex2Dlod(_VelocityTex, float4(worldPosition.xy / 256, 0, 2));
 				float fluidSpeed = length(fluidVelocity.xy);

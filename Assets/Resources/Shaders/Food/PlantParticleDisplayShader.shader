@@ -30,6 +30,9 @@
 			
 			StructuredBuffer<PlantParticleData> plantParticleDataCBuffer;			
 			StructuredBuffer<float3> quadVerticesCBuffer;
+
+			uniform int _SelectedParticleIndex;
+			uniform float _IsHighlight;
 			
 			struct v2f
 			{
@@ -54,7 +57,7 @@
 
 				PlantParticleData particleData = plantParticleDataCBuffer[particleIndex];
 
-				
+				float highlightMask = (1.0 - saturate(abs(_SelectedParticleIndex - particleIndex))) * _IsHighlight;
 
 				float3 worldPosition = float3(particleData.worldPos, 1.0);    //float3(rawData.worldPos, -random2);
 
@@ -65,7 +68,7 @@
 				
 				float3 offsetRaw = (float3(rand0, rand1, rand2) * 2 - 1) * rand3;				
 				//float2 offset = offsetRaw * (16 * particleData.biomass + 0.2);
-				float maxSpread = 5.28;
+				float maxSpread = 3.728;
 				float spread = (saturate(256 * particleData.biomass * particleData.biomass) * 0.95 + 0.05) * maxSpread;
 				worldPosition.xyz += offsetRaw * spread;
 				
@@ -82,7 +85,8 @@
 				worldPosition.xyz += noiseOffset;
 
 
-				float radius = saturate(256 * particleData.biomass * particleData.biomass) * 1.185 + 0.042; // particleData.radius * 0.3 * isOn; // 1; //sqrt(particleData.biomass) * 2 + 0.5;
+				float radius = saturate(512 * particleData.biomass * particleData.biomass) * 0.5185 + 0.052 + 0.42 * highlightMask; // particleData.radius * 0.3 * isOn; // 1; //sqrt(particleData.biomass) * 2 + 0.5;
+				radius = 0.1 + 0.2 * highlightMask;
 				quadPoint = quadPoint * radius; // * particleData.active; // *** remove * 3 after!!!
 				quadPoint.y *= 1.6;
 				float randAngle = (rand2 + rand3 * rand0 - rand1) * 13.92;
@@ -105,7 +109,9 @@
 				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(quadPoint, 0.0f));				
 				o.uv = quadVerticesCBuffer[id].xy + 0.5f;	
 								
-				o.color = float4(saturate(particleData.isDecaying), saturate(particleData.biomass * 5), 1 - rand2, 1 - saturate(particleData.isDecaying));
+				float posterizeIndex = floor((float)particleIndex / 128.0) / 8.0;
+				
+				o.color = float4(saturate(particleData.isDecaying), saturate(particleData.biomass * 5), posterizeIndex, highlightMask);
 				o.hue = float4(particleData.color, 1);
 				return o;
 			}
@@ -115,15 +121,21 @@
 				//return float4(1,1,1,1);
 				float4 texColor = tex2D(_MainTex, i.uv);
 				
-				float val = i.color.a;
+				float val = 1 - i.color.x;
 				
 				float4 finalColor = i.hue; // float4(float3(i.color.z * 1.2, 0.85, (1.0 - i.color.w) * 0.2) + i.color.y, texColor.a * i.color.x * 0.33 * (1 - i.color.z));
-				finalColor.rgb = lerp(finalColor.rgb, float3(0.35, 0.95, 0.45), 0.07);
+				finalColor.rgb = lerp(finalColor.rgb, float3(0.485, 0.75, 0.35), 0.87);
 				//finalColor.rgb += 0.25;
 				finalColor.a = texColor.a * 0.8175;
 				
 				finalColor.rgb = lerp(finalColor, float3(0.81, 0.79, 0.65) * 0.4, i.color.x);
-				finalColor.rgb *= i.color.z * 0.3 + 0.7;
+				//finalColor.rgb *= i.color.z * 0.3 + 0.7;
+				
+				
+				
+				finalColor = float4(0.7, 1, 0.6, 1);
+				finalColor.rgb *= i.color.z;  // index issues?
+				finalColor += 2.67 * i.color.a;
 				//finalColor.rgb = i.hue;
 				return finalColor;
 			}

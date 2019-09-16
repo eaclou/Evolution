@@ -597,6 +597,7 @@ public class SimulationManager : MonoBehaviour {
         float totalWasteProducedByAgents = 0f;
         if(trophicLayersManager.GetAgentsOnOff()) {
             vegetationManager.FindClosestPlantParticleToCritters(simStateData);
+            vegetationManager.FindClosestPlantParticleToCursor(uiManager.curMousePositionOnWaterPlane.x, uiManager.curMousePositionOnWaterPlane.y);
             for (int i = 0; i < agentsArray.Length; i++) {
                 totalOxygenUsedByAgents += agentsArray[i].oxygenUsedLastFrame;
                 totalWasteProducedByAgents += agentsArray[i].wasteProducedLastFrame;          
@@ -1277,7 +1278,7 @@ public class SimulationManager : MonoBehaviour {
                 if(rand < 0.1f) {
                     float mag = 5f;
                     spawnWorldPos = new Vector3(agentsArray[i].ownPos.x + UnityEngine.Random.Range(-1f, 1f) * mag, agentsArray[i].ownPos.y + UnityEngine.Random.Range(-1f, 1f) * mag, 0f);
-                    Debug.Log("SPAWNED!i= " + i.ToString() + ", spawnWorldPos: " + spawnWorldPos.ToString());
+                    //Debug.Log("SPAWNED!i= " + i.ToString() + ", spawnWorldPos: " + spawnWorldPos.ToString());
                 }
             }
         }

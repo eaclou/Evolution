@@ -2,7 +2,7 @@
 {
 	Properties
 	{
-		_MainTex ("Main Texture", 2D) = "white" {}
+		_MainTex ("_MainTex", 2D) = "white" {}
 		_AltitudeTex ("_AltitudeTex", 2D) = "gray" {}
 		_VelocityTex ("_VelocityTex", 2D) = "black" {}
 		_SkyTex ("_SkyTex", 2D) = "white" {}
@@ -14,7 +14,7 @@
 		Tags { "RenderType"="Transparent" }
 		ZWrite Off
 		Cull Off
-		Blend One One
+		Blend SrcAlpha One    //OneMinusSrcAlpha
 
 		Pass
 		{
@@ -37,7 +37,7 @@
 			uniform float _MapSize;
 			uniform float _CamDistNormalized;
 
-			uniform float _AlgaeReservoir;
+			//uniform float _AlgaeReservoir;
 			//uniform float _NutrientDensity;
 
 			struct FrameBufferStrokeData {
@@ -89,7 +89,7 @@
 				//float densityMask = saturate((_NutrientDensity - rand0) * 100);
 				
 
-				o.quadUV = quadPoint + 0.5;
+				o.quadUV = quadPoint.xy + 0.5;
 				worldPosition.z = 0;
 				o.worldPos = worldPosition;
 				float2 uv = worldPosition.xy / _MapSize;
@@ -102,8 +102,8 @@
 				}
 
 				
-				float fadeInDuration = 0.6;
-				float fadeOutDuration = 0.01;
+				float fadeInDuration = 0.2;
+				float fadeOutDuration = 0.3;
 				float normAge = saturate(waterQuadData.age);
 				float fadeIn = saturate(normAge / fadeInDuration);  // fade time = 0.1
 				float fadeOut = saturate((1 - normAge) / fadeOutDuration);
@@ -111,7 +111,13 @@
 				float alpha = fadeIn * fadeOut;
 
 							
-				float2 scale = waterQuadData.localScale * 4;
+				float2 scale = 0.05 * alpha; // waterQuadData.localScale * 4;
+
+				float bonusAmplitude = cos((float)inst * 91204.119273 + _Time.y * 70.9128397) * 0.5 + 0.5;
+				bonusAmplitude = bonusAmplitude * bonusAmplitude * bonusAmplitude;  // carve out
+
+				scale += bonusAmplitude * 0.25;
+				scale *= 0.67;
 				//scale.x *= 1;
 				//scale.y = scale.y * (1 + saturate(waterQuadData.speed * 64));
 				
@@ -124,7 +130,7 @@
 
 				//Topology/depth:
 				float4 altitudeSample = tex2Dlod(_AltitudeTex, float4(worldPosition.xy / _MapSize, 0, 0));
-				float floorPosZ = -(altitudeSample.x - 0.5) * 10.0;
+				float floorPosZ = -(altitudeSample.x - 0.5) * 20.0;
 				float zPos = lerp(floorPosZ, worldPosition.z, smoothstep(0,1,normAge));
 				worldPosition.z = zPos;
 
@@ -146,12 +152,13 @@
 
 
 				// Figure out final facing Vectors!!!
-				float2 forward = fluidDir; //waterQuadData.heading;
+				float theta = _Time.y * 75.1237 + inst * 123.12;
+				float2 forward = float2(cos(theta), sin(theta));  //fluidDir; //waterQuadData.heading;
 				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
 				float2 rotatedPoint = float2(quadPoint.x * right + quadPoint.y * forward);  // Rotate localRotation by AgentRotation
 
 				//worldPosition.z = 1.0;
-				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)) + float4(quadPoint.xy, 0, 0));
+				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)) + float4(rotatedPoint.xy, 0, 0));
 
 
 				float4 pos = mul(UNITY_MATRIX_VP, float4(worldPosition, 1.0)); // *** Revisit to better understand!!!! ***
@@ -180,7 +187,7 @@
 
 				//alpha *= densityMask;
 
-				o.color = float4(rand(float2(-0.347 * inst, inst)),0,1,alpha);
+				o.color = float4(rand(float2(-0.347 * inst, inst)),bonusAmplitude,1,alpha);
 				
 				return o;
 			}
@@ -189,17 +196,22 @@
 			{
 				
 				float debugVal = i.color.y;
-				return float4(float3(0.76, 0.3, 1.2) * 0.951485, 0.005 + 0.995 * i.color.a);
-
-
-
 				float4 finalColor = tex2D(_MainTex, i.quadUV);
+				finalColor.rgb = float3(0.6, 0.514, 0.25) * 3.7 * (i.color.y * 0.7 + 1);
+				//finalColor.rgb += float3(2,1.9,0.13) * saturate(i.color.y - 0.25) * 0.3;
+				finalColor.a *= i.color.a;	
+				//finalColor = float4(i.quadUV, 0, 0);
+				return finalColor;
+
+
+
+				//float4 finalColor = tex2D(_MainTex, i.quadUV);
 				//i.color.r = random 0-1
-				finalColor.rgb = float3(1, 0.95, 0.75) * 1.4485; // lerp(float3(0.05,0.04,0.015), float3(0.9,1,0.7) * 0.5, i.color.r); //rand()); //saturate(nutrientGridSample.x * 10 + 0.033));
+				//finalColor.rgb = float3(1, 0.95, 0.75) * 1.4485; // lerp(float3(0.05,0.04,0.015), float3(0.9,1,0.7) * 0.5, i.color.r); //rand()); //saturate(nutrientGridSample.x * 10 + 0.033));
 				//finalColor.rgb = float3(1, 0.85, 0.2) * 1.25;
 				//finalColor.rgb *= i.color.y;
-				finalColor *= i.color.a;				
-				return finalColor;
+				//finalColor *= i.color.a;				
+				//return finalColor;
 
 				//return float4(1,1,1,1);
 				/*

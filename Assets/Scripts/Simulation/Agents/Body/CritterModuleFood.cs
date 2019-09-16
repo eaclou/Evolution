@@ -284,13 +284,13 @@ public class CritterModuleFood {
         // eventually, if none of first preference are in range of sensor, use next in line: *****
         //foodPreferenceOrder[0] = 0;
         //if(foodPreferenceOrder[0] == 0) {  // particle
-        nearestFoodParticleIndex = simManager.vegetationManager.closestAlgaeParticlesDataArray[agent.index].index;
-        nearestFoodParticlePos = simManager.vegetationManager.closestAlgaeParticlesDataArray[agent.index].worldPos - 
+        nearestFoodParticleIndex = simManager.vegetationManager.closestPlantParticlesDataArray[agent.index].index;
+        nearestFoodParticlePos = simManager.vegetationManager.closestPlantParticlesDataArray[agent.index].worldPos - 
                                     new Vector2(simManager.agentsArray[agent.index].bodyRigidbody.transform.position.x,
                                     simManager.agentsArray[agent.index].bodyRigidbody.transform.position.y);
 
-        nearestFoodParticleAmount = simManager.vegetationManager.closestAlgaeParticlesDataArray[agent.index].biomass;
-        Vector2 critterToFoodParticle = simManager.vegetationManager.closestAlgaeParticlesDataArray[agent.index].worldPos - agent.ownPos;
+        nearestFoodParticleAmount = simManager.vegetationManager.closestPlantParticlesDataArray[agent.index].biomass;
+        Vector2 critterToFoodParticle = simManager.vegetationManager.closestPlantParticlesDataArray[agent.index].worldPos - agent.ownPos;
         float distToNearestFoodParticle = critterToFoodParticle.magnitude;
         Vector2 foodParticleDir = critterToFoodParticle.normalized;
         float nearestFoodParticleDistance = Mathf.Clamp01((sensorRange - critterToFoodParticle.magnitude) / sensorRange); // inverted dist(proximity) 0-1

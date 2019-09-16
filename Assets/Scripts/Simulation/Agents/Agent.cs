@@ -1021,7 +1021,7 @@ public class Agent : MonoBehaviour {
             // Food calc before energy/healing/etc? **************
             float sizeValue = BodyGenome.GetBodySizeScore01(candidateRef.candidateGenome.bodyGenome);
             // FOOD PARTICLES: Either mouth type for now:
-            float foodParticleEatAmount = simManager.vegetationManager.algaeParticlesEatAmountsArray[index];
+            float foodParticleEatAmount = simManager.vegetationManager.plantParticlesEatAmountsArray[index];
             if(foodParticleEatAmount > 0f) {
                 //mouthRef.InitiatePassiveBite();
                 //float sizeEfficiencyPlant = Mathf.Lerp(settings.minSizeFeedingEfficiencyDecay, settings.maxSizeFeedingEfficiencyDecay, sizeValue);
