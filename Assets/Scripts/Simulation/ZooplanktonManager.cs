@@ -29,6 +29,19 @@ public class ZooplanktonManager {
     private ComputeBuffer animalParticlesMeasure1;
     private AnimalParticleData[] animalParticleMeasurementTotalsData;
 
+    private ComputeBuffer cursorClosestParticleDataCBuffer;
+    public AnimalParticleData[] cursorParticleDataArray;
+    private ComputeBuffer cursorDistances1024;
+    public AnimalParticleData selectedAnimalParticleData;
+    public AnimalParticleData closestAnimalParticleData;
+    public bool isAnimalParticleSelected = false;
+    public int selectedAnimalParticleIndex = 0;
+    public int closestZooplanktonToCursorIndex = 0;
+
+    public RenderTexture critterNearestZooplankton32;
+    private ComputeBuffer closestZooplanktonCBuffer;
+    public Vector4[] closestZooplanktonArray;
+
     private ComputeBuffer zooplanktonRepresentativeGenomeCBuffer;
 
     public WorldLayerZooplanktonGenome zooplanktonSlotGenomeCurrent;  // algae particles!  -- likely to be converted into plants eventually ***
@@ -129,6 +142,21 @@ public class ZooplanktonManager {
         animalParticlesMeasure32 = new ComputeBuffer(32, GetAnimalParticleDataSize());
         animalParticlesMeasure1 = new ComputeBuffer(1, GetAnimalParticleDataSize());
         //Debug.Log("End: " + (Time.realtimeSinceStartup - startTime).ToString());
+
+
+        critterNearestZooplankton32 = new RenderTexture(32, numAgents, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+        critterNearestZooplankton32.wrapMode = TextureWrapMode.Clamp;
+        critterNearestZooplankton32.filterMode = FilterMode.Point;
+        critterNearestZooplankton32.enableRandomWrite = true;        
+        critterNearestZooplankton32.Create(); 
+
+        closestZooplanktonCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 4);
+        closestZooplanktonArray = new Vector4[numAgents];
+
+        cursorClosestParticleDataCBuffer = new ComputeBuffer(2, GetAnimalParticleDataSize());  // 0 = selected, 1 = closest to cursor
+        cursorParticleDataArray = new AnimalParticleData[2];
+        cursorDistances1024 = new ComputeBuffer(1024, sizeof(float) * 4);
+
 
         int numMutations = 4;  // don't change this
         zooplanktonSlotGenomeCurrent = new WorldLayerZooplanktonGenome();
@@ -306,7 +334,7 @@ public class ZooplanktonManager {
         computeShaderAnimalParticles.SetBuffer(kernelCSEatSelectedAnimalParticles, "animalParticlesWrite", animalParticlesCBufferSwap);
         computeShaderAnimalParticles.SetBuffer(kernelCSEatSelectedAnimalParticles, "animalParticlesEatAmountsCBuffer", animalParticlesEatAmountsCBuffer);        
         computeShaderAnimalParticles.SetBuffer(kernelCSEatSelectedAnimalParticles, "closestParticlesDataCBuffer", closestAnimalParticlesDataCBuffer);  
-        computeShaderAnimalParticles.SetTexture(kernelCSEatSelectedAnimalParticles, "critterDistancesRead", animalParticlesNearestCritters1);
+        computeShaderAnimalParticles.SetBuffer(kernelCSEatSelectedAnimalParticles, "_CritterToZooplanktonDistancesRead", closestZooplanktonCBuffer);
         computeShaderAnimalParticles.Dispatch(kernelCSEatSelectedAnimalParticles, simStateDataRef.critterSimDataCBuffer.count, 1, 1);
 
         animalParticlesEatAmountsCBuffer.GetData(animalParticlesEatAmountsArray);
@@ -322,6 +350,35 @@ public class ZooplanktonManager {
         computeShaderAnimalParticles.Dispatch(kernelCSCopyAnimalParticlesBuffer, 1, 1, 1);
     }
     public void FindClosestAnimalParticleToCritters(SimulationStateData simStateDataRef) {  // need to send info on closest particle pos/dir/amt back to CPU also        
+        
+        int kernelCSNewMeasureDistancesInit = computeShaderAnimalParticles.FindKernel("CSNewMeasureDistancesInit");
+        computeShaderAnimalParticles.SetBuffer(kernelCSNewMeasureDistancesInit, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
+        computeShaderAnimalParticles.SetBuffer(kernelCSNewMeasureDistancesInit, "critterInitDataCBuffer", simStateDataRef.critterInitDataCBuffer);
+        computeShaderAnimalParticles.SetBuffer(kernelCSNewMeasureDistancesInit, "animalParticlesRead", animalParticlesCBuffer);        
+        computeShaderAnimalParticles.SetTexture(kernelCSNewMeasureDistancesInit, "_CritterToZooplanktonDistancesRT", critterNearestZooplankton32);        
+        computeShaderAnimalParticles.Dispatch(kernelCSNewMeasureDistancesInit, 1, simStateDataRef.critterSimDataCBuffer.count, 1);
+
+        int kernelCSNewMeasureDistancesMainA = computeShaderAnimalParticles.FindKernel("CSNewMeasureDistancesMainA");
+        //computeShaderAnimalParticles.SetBuffer(kernelCSNewMeasureDistancesInit, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
+        //computeShaderAnimalParticles.SetBuffer(kernelCSNewMeasureDistancesInit, "critterInitDataCBuffer", simStateDataRef.critterInitDataCBuffer);
+        computeShaderAnimalParticles.SetBuffer(kernelCSNewMeasureDistancesMainA, "animalParticlesRead", animalParticlesCBuffer);      
+        computeShaderAnimalParticles.SetBuffer(kernelCSNewMeasureDistancesMainA, "_ClosestZooplanktonCBuffer", closestZooplanktonCBuffer);    
+        computeShaderAnimalParticles.SetTexture(kernelCSNewMeasureDistancesMainA, "_CritterToZooplanktonDistancesRT", critterNearestZooplankton32);  
+        computeShaderAnimalParticles.SetBuffer(kernelCSNewMeasureDistancesMainA, "closestParticlesDataCBuffer", closestAnimalParticlesDataCBuffer);
+        computeShaderAnimalParticles.Dispatch(kernelCSNewMeasureDistancesMainA, 1, simStateDataRef.critterSimDataCBuffer.count, 1);
+        
+
+        closestAnimalParticlesDataCBuffer.GetData(closestAnimalParticlesDataArray);
+        closestZooplanktonCBuffer.GetData(closestZooplanktonArray);
+
+        /*string txt = "";
+        for(int i = 0; i < simStateDataRef.critterSimDataCBuffer.count; i++) {
+            txt += "[" + i.ToString() + ": " + closestZooplanktonArray[i].x.ToString() + ", " + closestZooplanktonArray[i].y.ToString() + "]  ";
+        }
+        Debug.Log(txt);*/
+
+        // OLD ************************
+        /*
         // Populate main RenderTexture with distances for each animalParticle to each Critter:
         int kernelCSMeasureInitCritterDistances = computeShaderAnimalParticles.FindKernel("CSMeasureInitCritterDistances");
         computeShaderAnimalParticles.SetBuffer(kernelCSMeasureInitCritterDistances, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
@@ -345,6 +402,69 @@ public class ZooplanktonManager {
         computeShaderAnimalParticles.Dispatch(kernelCSReduceCritterDistances32, 1, simStateDataRef.critterSimDataCBuffer.count, 1);
 
         closestAnimalParticlesDataCBuffer.GetData(closestAnimalParticlesDataArray);
+        */
+    }
+    private Vector4[] ReduceDistancesArray(Vector4[] inBuffer) {
+
+        Vector4[] newBuffer = new Vector4[(inBuffer.Length / 2)];
+        for (int i = 0; i < newBuffer.Length; i++) {
+            Vector4 cellDataA = inBuffer[i * 2];
+            Vector4 cellDataB = inBuffer[i * 2 + 1];
+
+            if(cellDataA.y <= cellDataB.y) {  // A is closer
+                newBuffer[i] = cellDataA;
+            }
+            else {
+                newBuffer[i] = cellDataB;
+            }
+        }
+
+        return newBuffer;
+    }
+    public void FindClosestAnimalParticleToCursor(float xCoord, float yCoord) {
+        
+        int kernelCSMeasureInitCursorDistances = computeShaderAnimalParticles.FindKernel("CSMeasureInitCursorDistances");        
+        computeShaderAnimalParticles.SetBuffer(kernelCSMeasureInitCursorDistances, "animalParticlesRead", animalParticlesCBuffer);  
+        computeShaderAnimalParticles.SetBuffer(kernelCSMeasureInitCursorDistances, "cursorDistancesWrite", cursorDistances1024);
+        computeShaderAnimalParticles.SetFloat("_MouseCoordX", xCoord);
+        computeShaderAnimalParticles.SetFloat("_MouseCoordY", yCoord);
+        computeShaderAnimalParticles.Dispatch(kernelCSMeasureInitCursorDistances, animalParticlesCBuffer.count / 32, 1, 1);
+
+        Vector4[] cursorDistanceArray1024 = new Vector4[1024];
+        cursorDistances1024.GetData(cursorDistanceArray1024);
+
+       
+        
+        // Manual Sort!
+        Vector4[] swapBuffer = cursorDistanceArray1024;
+        swapBuffer = ReduceDistancesArray(cursorDistanceArray1024);        
+        for(int tierID = 0; tierID < 9; tierID++) {            
+            Vector4[] writeBuffer = ReduceDistancesArray(swapBuffer);            
+            swapBuffer = new Vector4[writeBuffer.Length];
+            for(int x = 0; x < writeBuffer.Length; x++) {
+                swapBuffer[x] = writeBuffer[x];
+            }
+        }
+        closestZooplanktonToCursorIndex = Mathf.RoundToInt(swapBuffer[0].x);
+        //string txt = "Closest = " + swapBuffer[0].x.ToString() + ", D: " + swapBuffer[0].y.ToString(); // + "__ " + swapBuffer[3].x.ToString() + " __ (" + cursorDistanceArray1024[1023].ToString() + ")   " + cursorDistanceArray1024[511].ToString();
+        //Debug.Log(txt);
+        
+        // Now Fetch the actual particleData:::::
+        int kernelCSFetchParticleByID = computeShaderAnimalParticles.FindKernel("CSFetchParticleByID");
+        computeShaderAnimalParticles.SetBuffer(kernelCSFetchParticleByID, "selectedAnimalParticleDataCBuffer", cursorClosestParticleDataCBuffer);      
+        
+        computeShaderAnimalParticles.SetInt("_SelectedParticleID", selectedAnimalParticleIndex);   
+        computeShaderAnimalParticles.SetInt("_ClosestParticleID", Mathf.RoundToInt(swapBuffer[0].x)); 
+        computeShaderAnimalParticles.SetBuffer(kernelCSFetchParticleByID, "animalParticlesRead", animalParticlesCBuffer);        
+        computeShaderAnimalParticles.Dispatch(kernelCSFetchParticleByID, 1, 1, 1);
+
+        cursorClosestParticleDataCBuffer.GetData(cursorParticleDataArray);
+
+        //string txt = "nearestIndex = " + cursorParticleDataArray[0].index + " (" + cursorParticleDataArray[0].age +  ")   " + (cursorParticleDataArray[0].biomass * 1000f).ToString("F0"); // "lngth: " + swapBuffer.Length.ToString() + ",  " + swapBuffer[0].ToString() + "   " + swapBuffer[1].ToString() + "   " + swapBuffer[swapBuffer.Length - 2].ToString() + "   " + swapBuffer[swapBuffer.Length - 1].ToString();
+        //Debug.Log(txt);
+        closestAnimalParticleData = cursorParticleDataArray[1];
+        selectedAnimalParticleData = cursorParticleDataArray[0];
+
     }
     public void MeasureTotalAnimalParticlesAmount() {
         
@@ -402,5 +522,23 @@ public class ZooplanktonManager {
         if(zooplanktonRepresentativeGenomeCBuffer != null) {
             zooplanktonRepresentativeGenomeCBuffer.Release();
         }
+
+        if(critterNearestZooplankton32 != null) {
+            critterNearestZooplankton32.Release();
+        }
+        if(closestZooplanktonCBuffer != null) {
+            closestZooplanktonCBuffer.Release();
+        }
+
+        if(closestAnimalParticlesDataCBuffer != null) {
+            closestAnimalParticlesDataCBuffer.Release();
+        }
+        if(cursorDistances1024 != null) {
+            cursorDistances1024.Release();
+        }
+        if(cursorClosestParticleDataCBuffer != null) {
+            cursorClosestParticleDataCBuffer.Release();
+        } 
+        
     }
 }

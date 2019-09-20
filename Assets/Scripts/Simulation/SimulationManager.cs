@@ -587,7 +587,7 @@ public class SimulationManager : MonoBehaviour {
 
 
         if(trophicLayersManager.GetZooplanktonOnOff()) {
-            zooplanktonManager.FindClosestAnimalParticleToCritters(simStateData);
+            
             zooplanktonManager.MeasureTotalAnimalParticlesAmount();
         }
         
@@ -605,6 +605,8 @@ public class SimulationManager : MonoBehaviour {
             for (int i = 0; i < eggSackArray.Length; i++) {
             
             }
+            zooplanktonManager.FindClosestAnimalParticleToCritters(simStateData);
+            zooplanktonManager.FindClosestAnimalParticleToCursor(uiManager.curMousePositionOnWaterPlane.x, uiManager.curMousePositionOnWaterPlane.y);
         }   
         // Find best way to insert Agent Waste into ResourceGridTex.waste
 
@@ -1234,6 +1236,7 @@ public class SimulationManager : MonoBehaviour {
         masterGenomePool.mutationSettingsRef.defaultBodyMutationStepSize = 1f;
         masterGenomePool.mutationSettingsRef.mutationStrengthSlot = 0.05f;  // ************
         newGenome = sourceSpeciesPool.Mutate(newGenome, true, true);
+        newGenome.bodyGenome.coreGenome.generation++;
 
         // -- Check which species this new childGenome should belong to (most likely its parent, but maybe it creates a new species or better fits in with a diff existing species)        
         masterGenomePool.AssignNewMutatedGenomeToSpecies(newGenome, sourceSpeciesPool.speciesID, this); // Checks which species this new genome should belong to and adds it to queue / does necessary processing   

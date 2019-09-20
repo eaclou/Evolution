@@ -8,6 +8,9 @@ public class CritterModuleCoreGenome {
     public int parentID;
     public int inno;
 
+    public int generation;
+    public string name;
+
     // 4 main sections: 
     //    Mouth/Snout
     //    Head
@@ -244,8 +247,24 @@ public class CritterModuleCoreGenome {
     }
     
     public void GenerateRandomInitialGenome() {
+        generation = 0;
         // Do stuff:
         //Debug.Log("GenerateRandomGenome()");
+        string[] namesList = new string[12];
+        namesList[0] = "ALBERT";
+        namesList[1] = "BORT";
+        namesList[2] = "CANDICE";
+        namesList[3] = "DOMINIQUE";
+        namesList[4] = "ELIZABETH";
+        namesList[5] = "FRANKLIN";
+        namesList[6] = "GRUBBS";
+        namesList[7] = "HORNWORT";
+        namesList[8] = "ISABELLE";
+        namesList[9] = "JERRY";
+        namesList[10] = "KILLINGTON";
+        namesList[11] = "LOSER";
+        int randomNameIndex = UnityEngine.Random.Range(0, 12);
+        name = namesList[randomNameIndex];
 
         isPassive = true;  // mouth type -- change later
         if(UnityEngine.Random.Range(0f, 1f) < 0.5f) {
@@ -433,6 +452,62 @@ public class CritterModuleCoreGenome {
     }
 
     public void SetToMutatedCopyOfParentGenome(CritterModuleCoreGenome parentGenome, MutationSettings settings) {
+        
+        string parentName = parentGenome.name;
+        //int parentNameLength = parentName;
+        int randIndex = UnityEngine.Random.Range(0, parentName.Length - 1);
+        
+        string frontHalf = parentName.Substring(0, randIndex);
+        string middleChar = parentName.Substring(randIndex, 1);
+        string backHalf = parentName.Substring(randIndex + 1);
+        name = parentName;
+
+        float randChance1 = UnityEngine.Random.Range(0f, 1f);
+        if(randChance1 < 0.15) {
+            int randLetterIndex = UnityEngine.Random.Range(0, 26);
+            string[] lettersArray = new string[26];
+            lettersArray[0] = "A";
+            lettersArray[1] = "B";
+            lettersArray[2] = "C";
+            lettersArray[3] = "D";
+            lettersArray[4] = "E";
+            lettersArray[5] = "F";
+            lettersArray[6] = "G";
+            lettersArray[7] = "H";
+            lettersArray[8] = "I";
+            lettersArray[9] = "J";
+            lettersArray[10] = "K";
+            lettersArray[11] = "L";
+            lettersArray[12] = "M";
+            lettersArray[13] = "N";
+            lettersArray[14] = "O";
+            lettersArray[15] = "P";
+            lettersArray[16] = "Q";
+            lettersArray[17] = "R";
+            lettersArray[18] = "S";
+            lettersArray[19] = "T";
+            lettersArray[20] = "U";
+            lettersArray[21] = "V";
+            lettersArray[22] = "W";
+            lettersArray[23] = "X";
+            lettersArray[24] = "Y";
+            lettersArray[25] = "Z";
+
+            middleChar = lettersArray[randLetterIndex];
+            
+        }
+
+        frontHalf = frontHalf + middleChar;
+
+        float randChance2 = UnityEngine.Random.Range(0f, 1f);
+        if(randChance2 < 0.05) {
+            name = backHalf + frontHalf;
+        }
+        else {
+            name = frontHalf + backHalf;
+        }
+
+        generation = parentGenome.generation; // This is incremented elsewhere (simManager at time of reproduction)
 
         isPassive = UtilityMutationFunctions.GetMutatedBool(parentGenome.isPassive, 0.033f, settings.defaultBodyMutationStepSize);
 

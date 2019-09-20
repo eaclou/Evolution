@@ -33,6 +33,15 @@
 			
 			uniform int _SelectedParticleIndex;
 			uniform float _IsHighlight;
+
+			uniform float _MapSize;
+			//uniform float _MouseCoordX;
+			//uniform float _MouseCoordY;
+
+			uniform int _SelectedParticleID;
+			uniform int _ClosestParticleID;
+			uniform float _IsSelected;
+			uniform float _IsHover;
 			
 			struct v2f
 			{
@@ -74,20 +83,20 @@
 				
 				AnimalParticleData particleData = animalParticleDataCBuffer[inst];
 				//_SelectedParticleIndex = round(_Time.y * 3) % 1024;
-				float highlightMask = (1.0 - saturate(abs((round(_Time.y * 3) % 1024) - inst))) * _IsHighlight;
+				float highlightMask = _IsHighlight;
 
-				// Figure out worldPosition by constructing a bezierCurve between the 4 points
-				// and adjusting vertPosition based on curve output.
-				// curve t = vertex UV.x
-				// find tangent and bitangent of curve and use to project vertex UV.y
 				float t = uv.y; // + 0.5;
 				uv.y = 1.0 - uv.y;
 
 				float2 curvePos = GetPoint2D(particleData.worldPos.xy, particleData.p1, particleData.p2, particleData.p3, t);
 				float2 curveTangent = normalize(GetFirstDerivative(particleData.worldPos.xy, particleData.p1, particleData.p2, particleData.p3, t));
 				float2 curveBitangent = float2(curveTangent.y, -curveTangent.x);
-						
-				float width = sqrt(particleData.biomass) * 0.1 * (1 - 2 * abs(0.75 - uv.y)) + 0.02 + 0.67 * highlightMask; //GetPoint1D(waterCurveData.widths.x, waterCurveData.widths.y, waterCurveData.widths.z, waterCurveData.widths.w, t) * 0.75 * (1 - saturate(testNewVignetteMask));
+				
+				float selectedMask = (1.0 - saturate(abs(_SelectedParticleIndex - inst))) * _IsSelected;
+				float hoverMask = (1.0 - saturate(abs(_ClosestParticleID - inst))) * _IsHover;
+
+				//float width = 0.25 + hoverMask + selectedMask * 2.5;
+				float width = sqrt(particleData.biomass) * 0.04 * (1 - 2 * abs(0.75 - uv.y)) + 0.015 + 0.033 * hoverMask; //GetPoint1D(waterCurveData.widths.x, waterCurveData.widths.y, waterCurveData.widths.z, waterCurveData.widths.w, t) * 0.75 * (1 - saturate(testNewVignetteMask));
 				
 				float freq = 20;
 				float swimAnimOffset = sin(_Time.y * freq - t * 7 + (float)inst * 0.1237) * 4;
@@ -95,18 +104,10 @@
 				
 				float2 offset = curveBitangent * -(quadPoint.x * 4 + swimAnimOffset * swimAnimMask) * width; // * randomWidth; // *** support full vec4 widths!!!
 				
-
-				//float fadeDuration = 0.1;
-				//float fadeIn = saturate(waterCurveData.age / fadeDuration);  // fade time = 0.1
-				//float fadeOut = saturate((1 - waterCurveData.age) / fadeDuration);							
-				//float alpha = fadeIn * fadeOut;
-				
-				//o.pos = UnityObjectToClipPos(float4(curvePos, 0, 1.0) + float4(offset, 0.0, 0.0));
-				//o.worldPos = float3(curvePos,0) + float4(offset, 0.0, 0.0);
-				float3 worldPosition = float3(curvePos,0) + float4(offset, 0.0, 0.0);
+				float3 worldPosition = float3(curvePos,0) + float3(offset, 0.0);
 
 				// REFRACTION:
-				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / 256, 0, 0)).yzw;				
+				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / _MapSize, 0, 0)).yzw;				
 				float refractionStrength = 0.15;
 				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
 				
@@ -117,7 +118,7 @@
 				float oldAgeMask = saturate((particleData.age - 1.0) * 1000);
 				o.color.a = saturate(particleData.age * 0.5); //  1.0 - oldAgeMask; // particleData.isDecaying;
 				o.color.x = (1.0 - particleData.isDecaying) * particleData.isActive;
-				o.color.y = highlightMask;
+				o.color.y = hoverMask;
 				
 				//o.color = float4(saturate(particleData.isDecaying), saturate(particleData.biomass * 5), saturate(particleData.age * 0.5), 1);
 				
@@ -126,7 +127,7 @@
 
 			fixed4 frag(v2f i) : SV_Target
 			{
-				
+				//return float4(1,1,1,1) * (0.5 + i.color.y);
 
 				float4 texColor = tex2D(_MainTex, i.uv);
 				

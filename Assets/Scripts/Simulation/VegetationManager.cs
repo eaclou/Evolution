@@ -67,6 +67,10 @@ public class VegetationManager {
     private ComputeBuffer plantParticlesMeasure32;
     private ComputeBuffer plantParticlesMeasure1;
     private PlantParticleData[] plantParticleMeasurementTotalsData;
+
+    public RenderTexture critterNearestPlants32;
+    private ComputeBuffer closestPlantIndexCBuffer;
+    public Vector4[] closestPlantIndexArray;
     
     public Vector2[] resourceGridSpawnPatchesArray;
 
@@ -225,7 +229,19 @@ public class VegetationManager {
         plantParticlesMeasure32 = new ComputeBuffer(32, GetPlantParticleDataSize());
         plantParticlesMeasure1 = new ComputeBuffer(1, GetPlantParticleDataSize());
         //Debug.Log("End: " + (Time.realtimeSinceStartup - startTime).ToString());
-        
+       
+        critterNearestPlants32 = new RenderTexture(32, numAgents, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+        critterNearestPlants32.wrapMode = TextureWrapMode.Clamp;
+        critterNearestPlants32.filterMode = FilterMode.Point;
+        critterNearestPlants32.enableRandomWrite = true;        
+        critterNearestPlants32.Create(); 
+
+        closestPlantIndexCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 4);
+        closestPlantIndexArray = new Vector4[numAgents];
+
+        cursorClosestParticleDataCBuffer = new ComputeBuffer(2, GetPlantParticleDataSize());  // 0 = selected, 1 = closest to cursor
+        cursorParticleDataArray = new PlantParticleData[2];
+        cursorDistances1024 = new ComputeBuffer(1024, sizeof(float) * 4);
         
         //plantSlotGenomeCurrent
         plantSlotGenomeCurrent = new WorldLayerPlantGenome();
@@ -591,7 +607,7 @@ public class VegetationManager {
         computeShaderPlantParticles.SetBuffer(kernelCSEatSelectedFoodParticles, "foodParticlesWrite", plantParticlesCBufferSwap);
         computeShaderPlantParticles.SetBuffer(kernelCSEatSelectedFoodParticles, "foodParticlesEatAmountsCBuffer", plantParticlesEatAmountsCBuffer);        
         computeShaderPlantParticles.SetBuffer(kernelCSEatSelectedFoodParticles, "closestParticlesDataCBuffer", closestPlantParticlesDataCBuffer);  
-        computeShaderPlantParticles.SetTexture(kernelCSEatSelectedFoodParticles, "critterDistancesRead", plantParticlesNearestCritters1);
+        computeShaderPlantParticles.SetBuffer(kernelCSEatSelectedFoodParticles, "_CritterToPlantDistancesRead", closestPlantIndexCBuffer);
         computeShaderPlantParticles.Dispatch(kernelCSEatSelectedFoodParticles, simStateDataRef.critterSimDataCBuffer.count, 1, 1);
 
         plantParticlesEatAmountsCBuffer.GetData(plantParticlesEatAmountsArray);
@@ -607,48 +623,23 @@ public class VegetationManager {
         computeShaderPlantParticles.Dispatch(kernelCSCopyFoodParticlesBuffer, 1, 1, 1);
     }
     public void FindClosestPlantParticleToCritters(SimulationStateData simStateDataRef) {  // need to send info on closest particle pos/dir/amt back to CPU also
-        if(tempMeasureClosestParticlesCounter > 0) {
-
-            // **** DEBUG INVESTIGATING!!!! *****
-            /*int kernelCSFetchParticleToCursorDistances32 = computeShaderPlantParticles.FindKernel("CSFetchParticleToCursorDistances32");
-            computeShaderPlantParticles.SetTexture(kernelCSFetchParticleToCursorDistances32, "critterDistancesRead", plantParticlesNearestCritters32);
-            computeShaderPlantParticles.SetBuffer(kernelCSFetchParticleToCursorDistances32, "foodParticlesRead", plantParticlesCBuffer);  
-            computeShaderPlantParticles.SetBuffer(kernelCSFetchParticleToCursorDistances32, "closestParticlesToCursorCBuffer", closestParticlesToCursorDataCBuffer);
-            computeShaderPlantParticles.Dispatch(kernelCSFetchParticleToCursorDistances32, 1, 1, 1);
-            closestParticlesToCursorDataCBuffer.GetData(closestParticlesToCursorDataArray);
-                   */     
-            tempMeasureClosestParticlesCounter = 0;
-        }
-        else {
-            // Populate main RenderTexture with distances for each foodParticle to each Critter:
-            int kernelCSMeasureInitCritterDistances = computeShaderPlantParticles.FindKernel("CSMeasureInitCritterDistances");
-            computeShaderPlantParticles.SetBuffer(kernelCSMeasureInitCritterDistances, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
-            computeShaderPlantParticles.SetBuffer(kernelCSMeasureInitCritterDistances, "foodParticlesRead", plantParticlesCBuffer);        
-            computeShaderPlantParticles.SetTexture(kernelCSMeasureInitCritterDistances, "foodParticlesNearestCrittersRT", plantParticlesNearestCritters1024);        
-            computeShaderPlantParticles.Dispatch(kernelCSMeasureInitCritterDistances, plantParticlesCBuffer.count / 1024, simStateDataRef.critterSimDataCBuffer.count, 1);
         
-            // Reduce from 1024 --> 32 particles per critter:
-            int kernelCSReduceCritterDistances32 = computeShaderPlantParticles.FindKernel("CSReduceCritterDistances32");
-            computeShaderPlantParticles.SetTexture(kernelCSReduceCritterDistances32, "critterDistancesRead", plantParticlesNearestCritters1024);
-            computeShaderPlantParticles.SetTexture(kernelCSReduceCritterDistances32, "critterDistancesWrite", plantParticlesNearestCritters32);
-            computeShaderPlantParticles.SetBuffer(kernelCSReduceCritterDistances32, "foodParticlesRead", plantParticlesCBuffer);        
-            computeShaderPlantParticles.Dispatch(kernelCSReduceCritterDistances32, 1024 / 32, simStateDataRef.critterSimDataCBuffer.count, 1);
+        int kernelCSNewMeasureDistancesInit = computeShaderPlantParticles.FindKernel("CSNewMeasureDistancesInit");
+        computeShaderPlantParticles.SetBuffer(kernelCSNewMeasureDistancesInit, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
+        computeShaderPlantParticles.SetBuffer(kernelCSNewMeasureDistancesInit, "critterInitDataCBuffer", simStateDataRef.critterInitDataCBuffer);
+        computeShaderPlantParticles.SetBuffer(kernelCSNewMeasureDistancesInit, "foodParticlesRead", plantParticlesCBuffer);        
+        computeShaderPlantParticles.SetTexture(kernelCSNewMeasureDistancesInit, "_CritterToPlantDistancesRT", critterNearestPlants32);        
+        computeShaderPlantParticles.Dispatch(kernelCSNewMeasureDistancesInit, 1, simStateDataRef.critterSimDataCBuffer.count, 1);
 
-            // Reduce from 32 --> 1 particles per cursor:
-            int kernelCSReduceCritterDistances1 = computeShaderPlantParticles.FindKernel("CSReduceCritterDistances1");
-            computeShaderPlantParticles.SetTexture(kernelCSReduceCritterDistances1, "cursorDistancesRead", plantParticlesNearestCritters1024);
-            computeShaderPlantParticles.SetTexture(kernelCSReduceCritterDistances1, "cursorDistancesWrite", plantParticlesNearestCritters32);
-            computeShaderPlantParticles.SetBuffer(kernelCSReduceCritterDistances1, "foodParticlesRead", plantParticlesCBuffer);
-            computeShaderPlantParticles.SetBuffer(kernelCSReduceCritterDistances1, "closestParticlesDataCBuffer", closestPlantParticlesDataCBuffer);
-            computeShaderPlantParticles.Dispatch(kernelCSReduceCritterDistances1, 1, simStateDataRef.critterSimDataCBuffer.count, 1);
-
-            closestPlantParticlesDataCBuffer.GetData(closestPlantParticlesDataArray);
-
-
-            tempMeasureClosestParticlesCounter++;
-        }
+        int kernelCSNewMeasureDistancesMainA = computeShaderPlantParticles.FindKernel("CSNewMeasureDistancesMainA");
+        computeShaderPlantParticles.SetBuffer(kernelCSNewMeasureDistancesMainA, "foodParticlesRead", plantParticlesCBuffer);      
+        computeShaderPlantParticles.SetBuffer(kernelCSNewMeasureDistancesMainA, "_ClosestPlantIndexCBuffer", closestPlantIndexCBuffer);    
+        computeShaderPlantParticles.SetTexture(kernelCSNewMeasureDistancesMainA, "_CritterToPlantDistancesRT", critterNearestPlants32);  
+        computeShaderPlantParticles.SetBuffer(kernelCSNewMeasureDistancesMainA, "closestParticlesDataCBuffer", closestPlantParticlesDataCBuffer);
+        computeShaderPlantParticles.Dispatch(kernelCSNewMeasureDistancesMainA, 1, simStateDataRef.critterSimDataCBuffer.count, 1);
         
-        
+        closestPlantParticlesDataCBuffer.GetData(closestPlantParticlesDataArray);
+        closestPlantIndexCBuffer.GetData(closestPlantIndexArray);
         
     }
     // Keep these two pipelines separate at first while try to debug::::
@@ -1093,6 +1084,13 @@ public class VegetationManager {
         //if(cursorDistances1 != null) {
         //    cursorDistances1.Release();
         //}
+
+        if(critterNearestPlants32 != null) {
+            critterNearestPlants32.Release();
+        }
+        if(closestPlantIndexCBuffer != null) {
+            closestPlantIndexCBuffer.Release();
+        }
         if(cursorClosestParticleDataCBuffer != null) {
             cursorClosestParticleDataCBuffer.Release();
         } 

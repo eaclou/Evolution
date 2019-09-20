@@ -1,7 +1,9 @@
-﻿#pragma kernel CSMeasureInitCritterDistances
+﻿////#pragma kernel CSMeasureInitCritterDistances
 #pragma kernel CSMeasureInitCursorDistances
-#pragma kernel CSReduceCritterDistances32
-#pragma kernel CSReduceCritterDistances1
+#pragma kernel CSNewMeasureDistancesInit
+#pragma kernel CSNewMeasureDistancesMainA
+//#pragma kernel CSReduceCritterDistances32
+//#pragma kernel CSReduceCritterDistances1
 #pragma kernel CSFetchParticleByID
 #pragma kernel CSEatSelectedFoodParticles
 #pragma kernel CSCopyFoodParticlesBuffer
@@ -20,6 +22,10 @@ RWStructuredBuffer<PlantParticleData> foodParticlesWrite;
 RWTexture2D<float4> foodParticlesNearestCrittersRT;
 
 RWStructuredBuffer<PlantParticleData> closestParticlesDataCBuffer;
+
+RWTexture2D<float4> _CritterToPlantDistancesRT;
+RWStructuredBuffer<float4> _ClosestPlantIndexCBuffer;
+StructuredBuffer<float4> _CritterToPlantDistancesRead;
 
 RWStructuredBuffer<PlantParticleData> selectedPlantParticleDataCBuffer;
 StructuredBuffer<float4> cursorDistancesRead; // used to reduce foodParticlesNearestCrittersRT down to minimum distances
@@ -83,22 +89,91 @@ float rand(float2 co){   // OUTPUT is in [0,1] RANGE!!!
 	return frac(sin(dot(co.xy ,float2(12.9898,78.233))) * 43758.5453);
 }
 
+[numthreads(32,1,1)]
+void CSNewMeasureDistancesInit (uint3 id : SV_DispatchThreadID)
+{	
+	
+	int critterIndex = id.y;
+	CritterInitData critterInitData = critterInitDataCBuffer[critterIndex];
+	CritterSimData critterSimData = critterSimDataCBuffer[critterIndex];
+
+	float closestParticleIndex = 0;
+	float minSquaredDistance = 100000;
+	
+	for(int i = 0; i < 32; i++) {
+		int particleIndex = id.x * 32 + i;
+		PlantParticleData particleData = foodParticlesRead[particleIndex];
+	
+		float mouthRadius = critterInitData.boundingBoxSize.x * critterSimData.growthPercentage; // **** REMEMBER TO *0.5 EVENTUALLY FOR ACCURATE SIZE
+		float2 mouthCenterPos = critterSimData.heading * critterInitData.boundingBoxSize.y * 0.5 * critterSimData.growthPercentage;
+
+		float2 particleToCritter = critterSimData.worldPos.xy + mouthCenterPos * 1.0 - particleData.worldPos.xy;
+
+		float distanceSquared = particleToCritter.x * particleToCritter.x + particleToCritter.y * particleToCritter.y;
+		if(particleData.isActive > 0.5) {
+			if(distanceSquared < minSquaredDistance) {
+			
+				minSquaredDistance = distanceSquared;
+				closestParticleIndex = particleIndex;
+			}				
+		}
+	}	
+
+	_CritterToPlantDistancesRT[int2(id.x, critterIndex)] = float4(closestParticleIndex, minSquaredDistance, foodParticlesRead[closestParticleIndex].worldPos.xy);
+}
+
+[numthreads(1,1,1)]
+void CSNewMeasureDistancesMainA (uint3 id : SV_DispatchThreadID)
+{	
+	int critterIndex = id.y;
+	CritterSimData critterSimData = critterSimDataCBuffer[critterIndex];
+			
+	float closestParticleIndex = 0;
+	float minSquaredDistance = 100000;
+		
+	for(int i = 0; i < 32; i++) {
+		
+		int particleIndex = id.x * 32 + i;
+		
+		float4 sourceData = _CritterToPlantDistancesRT[int2(i, critterIndex)];
+		
+		PlantParticleData particleData = foodParticlesRead[particleIndex];
+
+		if(sourceData.y < minSquaredDistance) {
+			if(particleData.isActive > 0.5) {
+				minSquaredDistance = sourceData.y;
+				closestParticleIndex = sourceData.x;
+			}				
+		}
+	}
+		
+	PlantParticleData closestPlantData = foodParticlesRead[closestParticleIndex];	
+	
+	closestParticlesDataCBuffer[critterIndex] = closestPlantData;
+	_ClosestPlantIndexCBuffer[id.y] = float4(closestParticleIndex, minSquaredDistance, closestPlantData.worldPos.xy);
+}
+
 [numthreads(1024,1,1)]
 void CSMeasureInitCritterDistances (uint3 id : SV_DispatchThreadID)
 {	
 	int particleIndex = id.x;
 	int critterIndex = id.y;
 
-	PlantParticleData particleData = foodParticlesRead[particleIndex];
 	CritterInitData critterInitData = critterInitDataCBuffer[critterIndex];
 	CritterSimData critterSimData = critterSimDataCBuffer[critterIndex];
 
+	
+	
+	PlantParticleData particleData = foodParticlesRead[particleIndex];
+
 	//float mouthRadius = critterInitData.boundingBoxSize.x * critterSimData.growthPercentage; // **** REMEMBER TO *0.5 EVENTUALLY FOR ACCURATE SIZE
 	float2 mouthCenterPos = critterSimData.heading * critterInitData.boundingBoxSize.y * 0.5 * critterSimData.growthPercentage;
+	
 
 	float2 particleToCritter = critterSimData.worldPos.xy - particleData.worldPos; // + mouthCenterPos * 1.0;
 
 	float distanceSquared = particleToCritter.x * particleToCritter.x + particleToCritter.y * particleToCritter.y;
+		
 	
 	foodParticlesNearestCrittersRT[int2(particleIndex, critterIndex)] = float4(particleData.index, distanceSquared, particleData.worldPos);
 		
@@ -107,7 +182,8 @@ void CSMeasureInitCritterDistances (uint3 id : SV_DispatchThreadID)
 
 [numthreads(32,1,1)]
 void CSMeasureInitCursorDistances (uint3 id : SV_DispatchThreadID)
-{	
+{
+	
 	int particleIndex = id.x;	
 
 	PlantParticleData particleData = foodParticlesRead[particleIndex];
@@ -119,70 +195,6 @@ void CSMeasureInitCursorDistances (uint3 id : SV_DispatchThreadID)
 	float distanceSquared = particleToCursor.x * particleToCursor.x + particleToCursor.y * particleToCursor.y;
 	
 	cursorDistancesWrite[particleIndex] = float4(particleIndex, distanceSquared, particleData.worldPos.xy);			
-}
-
-[numthreads(1,1,1)]
-void CSReduceCritterDistances32 (uint3 id : SV_DispatchThreadID)
-{		
-	int critterIndex = id.y;
-		
-	CritterSimData critterSimData = critterSimDataCBuffer[critterIndex];
-			
-	float closestParticleIndex = 0;
-	float minSquaredDistance = 50000;
-		
-	for(int i = 0; i < 32; i++) {
-		
-		int particleIndex = id.x * 32 + i;
-		
-		float4 sourceData = critterDistancesRead[int2(particleIndex, critterIndex)];
-		
-		PlantParticleData particleData = foodParticlesRead[particleIndex];
-
-		if(sourceData.y < minSquaredDistance) {
-			if(particleData.isActive > 0.5) {
-				minSquaredDistance = sourceData.y;
-				closestParticleIndex = sourceData.x;
-			}				
-		}
-	}
-		
-	PlantParticleData closestFoodData = foodParticlesRead[closestParticleIndex];	
-		
-	critterDistancesWrite[int2(id.x, critterIndex)] = float4(closestParticleIndex, minSquaredDistance, 1.0, 1.0);
-	//closestParticlesDataCBuffer[critterIndex] = closestFoodData; // assuming there's only 1 thread at end
-}
-
-[numthreads(1,1,1)]
-void CSReduceCritterDistances1 (uint3 id : SV_DispatchThreadID)
-{		
-	int critterIndex = id.y;
-		
-	CritterSimData critterSimData = critterSimDataCBuffer[critterIndex];
-			
-	float closestParticleIndex = 0;
-	float minSquaredDistance = 50000;
-		
-	for(int i = 0; i < 32; i++) {
-		
-		int particleIndex = id.x * 32 + i;
-		
-		float4 sourceData = critterDistancesRead[int2(particleIndex, critterIndex)];
-		
-		PlantParticleData particleData = foodParticlesRead[particleIndex];
-
-		if(sourceData.y < minSquaredDistance) {
-			if(particleData.isActive > 0.5) {
-				minSquaredDistance = sourceData.y;
-				closestParticleIndex = sourceData.x;
-			}				
-		}
-	}
-		
-	PlantParticleData closestFoodData = foodParticlesRead[closestParticleIndex];	
-		
-	critterDistancesWrite[int2(id.x, critterIndex)] = float4(closestParticleIndex, minSquaredDistance, 1.0, 1.0);
-	closestParticlesDataCBuffer[critterIndex] = closestFoodData; // assuming there's only 1 thread at end
 }
 
 [numthreads(1,1,1)]
@@ -202,7 +214,7 @@ void CSEatSelectedFoodParticles (uint3 id : SV_DispatchThreadID)
 	// Check distance to nearest particle
 	int critterIndex = id.x;
 
-	float4 data = critterDistancesRead[int2(0, id.x)];
+	float4 data = _CritterToPlantDistancesRead[critterIndex];
 
 	int particleIndex = (int)data.x;
 

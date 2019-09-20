@@ -3990,8 +3990,38 @@ public class TheRenderKing : MonoBehaviour {
                 animalParticleDisplayMat.SetBuffer("animalParticleDataCBuffer", simManager.zooplanktonManager.animalParticlesCBuffer);
                 animalParticleDisplayMat.SetBuffer("quadVerticesCBuffer", curveRibbonVerticesCBuffer);
                 animalParticleDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-                animalParticleDisplayMat.SetInt("_SelectedParticleIndex", simManager.zooplanktonManager.closestAnimalParticlesDataArray[0].index);
+                int selectedParticleIndex = (int)simManager.zooplanktonManager.closestAnimalParticlesDataArray[simManager.cameraManager.targetAgentIndex].index;
+                animalParticleDisplayMat.SetInt("_SelectedParticleIndex", selectedParticleIndex); // Mathf.RoundToInt(simManager.zooplanktonManager.closestZooplanktonArray[0].x));  // Here goes nothing....
                 animalParticleDisplayMat.SetFloat("_IsHighlight", 1f);
+                
+                animalParticleDisplayMat.SetInt("_SelectedParticleIndex", Mathf.RoundToInt(simManager.zooplanktonManager.selectedAnimalParticleIndex));
+                animalParticleDisplayMat.SetInt("_ClosestParticleID", Mathf.RoundToInt(simManager.zooplanktonManager.closestZooplanktonToCursorIndex));
+                float isSelectedA = 0f;
+                if(simManager.zooplanktonManager.isAnimalParticleSelected) {
+                    if(simManager.uiManager.curActiveTool == UIManager.ToolType.Inspect) {
+                        isSelectedA = 1f;
+                    }
+                    else {
+                        simManager.zooplanktonManager.isAnimalParticleSelected = false;
+                        //simManager.uiManager.StopFollowingPlantParticle();
+                    }
+                }
+                float isHoverA = 0f;
+                if(simManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2) {
+                    if(simManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) {
+                        if(simManager.uiManager.curActiveTool == UIManager.ToolType.Inspect) {
+                            isHoverA = 1f;
+                        }
+                        else {
+                            simManager.zooplanktonManager.isAnimalParticleSelected = false;
+                            //simManager.uiManager.StopFollowingPlantParticle();
+                        }
+                    }
+                }
+            
+                animalParticleDisplayMat.SetFloat("_IsSelected", 1f);
+                animalParticleDisplayMat.SetFloat("_IsHover", 1f); // isHoverA);
+                animalParticleDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
                 cmdBufferMain.DrawProcedural(Matrix4x4.identity, animalParticleDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, simManager.zooplanktonManager.animalParticlesCBuffer.count);
         
             }
