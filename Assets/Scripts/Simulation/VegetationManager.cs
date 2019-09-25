@@ -141,8 +141,8 @@ public class VegetationManager {
         algaeSlotGenomeCurrent.displayColor.a = 1f;
         algaeSlotGenomeCurrent.name = "Algae Particles!";
 
-        float minIntakeRate = tempSharedIntakeRate * 0.96f;
-        float maxIntakeRate = tempSharedIntakeRate * 1.042f; // init around 1?
+        float minIntakeRate = tempSharedIntakeRate * 1f;
+        float maxIntakeRate = tempSharedIntakeRate * 1f; // init around 1?
         float lnLerp = UnityEngine.Random.Range(0f, 1f);
         lnLerp *= lnLerp;
         algaeSlotGenomeCurrent.metabolicRate = Mathf.Lerp(minIntakeRate, maxIntakeRate, lnLerp);
@@ -1023,11 +1023,11 @@ public class VegetationManager {
         //computeShaderResourceGrid.SetFloat("_RD_Rate", theRenderKingRef.simManager.vegetationManager.decomposerSlotGenomeCurrent.reactionRate);
 
         //float algaeUpkeep = algaeSlotGenomeCurrent.
-        computeShaderResourceGrid.SetFloat("_AlgaeUpkeep", algaeSlotGenomeCurrent.metabolicRate * 0.35f); // decomposerSlotGenomeCurrent.metabolicRate);  // *********** SHARING WITH DECOMPOSERS!!!! *****
-        computeShaderResourceGrid.SetFloat("_AlgaeMaxIntakeRate", algaeSlotGenomeCurrent.metabolicRate);
-        computeShaderResourceGrid.SetFloat("_AlgaeGrowthEfficiency", 1f);
+        computeShaderResourceGrid.SetFloat("_AlgaeUpkeep", algaeSlotGenomeCurrent.metabolicRate * 0.5f); // decomposerSlotGenomeCurrent.metabolicRate);  // *********** SHARING WITH DECOMPOSERS!!!! *****
+        computeShaderResourceGrid.SetFloat("_AlgaeMaxIntakeRate", algaeSlotGenomeCurrent.metabolicRate * 0.1f);
+        computeShaderResourceGrid.SetFloat("_AlgaeGrowthEfficiency", 6.55f); // empirical
 
-        computeShaderResourceGrid.SetFloat("_DecomposerUpkeep", decomposerSlotGenomeCurrent.metabolicRate * 0.42f); // decomposerSlotGenomeCurrent.metabolicRate);
+        computeShaderResourceGrid.SetFloat("_DecomposerUpkeep", decomposerSlotGenomeCurrent.metabolicRate * 0.6f); // value from empirical tinkering // decomposerSlotGenomeCurrent.metabolicRate);
         computeShaderResourceGrid.SetFloat("_DecomposerMaxIntakeRate", decomposerSlotGenomeCurrent.metabolicRate);
         computeShaderResourceGrid.SetFloat("_DecomposerEnergyGenerationEfficiency", 1f);
         

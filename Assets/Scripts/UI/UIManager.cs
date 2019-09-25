@@ -681,10 +681,12 @@ public class UIManager : MonoBehaviour {
                 moveDir = moveDir.normalized;
                 StopFollowingAgent();
                 StopFollowingPlantParticle();
+                StopFollowingAnimalParticle();
             }
             if (moveDir.sqrMagnitude > 0.001f) {
                 StopFollowingAgent();
                 StopFollowingPlantParticle();
+                StopFollowingAnimalParticle();
             }
 
             cameraManager.MoveCamera(moveDir); // ********************
@@ -764,6 +766,9 @@ public class UIManager : MonoBehaviour {
             if(cameraManager.isFollowingPlantParticle) {
                 cameraManager.targetPlantWorldPos = gameManager.simulationManager.vegetationManager.selectedPlantParticleData.worldPos;
             }
+            if(cameraManager.isFollowingAnimalParticle) {
+                cameraManager.targetZooplanktonWorldPos = gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleData.worldPos;
+            }
             
 
             /*if (leftClickThisFrame) {
@@ -831,8 +836,25 @@ public class UIManager : MonoBehaviour {
                                     gameManager.simulationManager.vegetationManager.selectedPlantParticleIndex = closestID;
                                     gameManager.simulationManager.vegetationManager.isPlantParticleSelected = true;
                                     Debug.Log("FOLLOWING " + gameManager.simulationManager.vegetationManager.selectedPlantParticleIndex.ToString());
-
+                                    isSpiritBrushSelected = true;
                                     StartFollowingPlantParticle();
+                                }
+                            }
+                        }
+                    }
+                    if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2) {
+                        if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) {
+                            // if plant particles
+                            if (curActiveTool == ToolType.Inspect) {
+                                int selectedID = gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex;
+                                int closestID = gameManager.simulationManager.zooplanktonManager.closestAnimalParticleData.index;
+
+                                if(selectedID != closestID) {
+                                    gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex = closestID;
+                                    gameManager.simulationManager.zooplanktonManager.isAnimalParticleSelected = true;
+                                    Debug.Log("FOLLOWING " + gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex.ToString());
+                                    isSpiritBrushSelected = true;
+                                    StartFollowingAnimalParticle();
                                 }
                             }
                         }
@@ -1159,18 +1181,19 @@ public class UIManager : MonoBehaviour {
                     if(layerManager.selectedTrophicSlotRef.tierID == 0) {
                         ZooplanktonManager.AnimalParticleData particleData = gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleData;
                         
-                        str += "\nZooplankton # " + gameManager.simulationManager.zooplanktonManager.closestZooplanktonArray[0].x.ToString() + "  [" + particleData.nearestCritterIndex.ToString() + "]";
-                        str += "\nCoords [ " + particleData.worldPos.x.ToString("F0") + " , " + particleData.worldPos.y.ToString("F0") + " ]  Critter (" + gameManager.simulationManager.agentsArray[0].ownPos.ToString() + ")";
+                        str += "\nZooplankton # " + gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex.ToString();
+                        str += "\nCoords [ " + particleData.worldPos.x.ToString("F0") + " , " + particleData.worldPos.y.ToString("F0") + " ]"; //  Critter (" + gameManager.simulationManager.agentsArray[0].ownPos.ToString() + ")";
                         str += "\nAge: " + (particleData.age * 1000f).ToString("F0");
                         str += "\nBiomass: " + (particleData.biomass * 1000f).ToString("F0");
-                        str += "\nAlgae Eaten: " + (particleData.algaeConsumed * 1000000f).ToString("F0");
+                        str += "\nEnergy: " + (particleData.energy * 100f).ToString();
+                        str += "\nAlgae Eaten: " + (particleData.algaeConsumed * 1000000000f).ToString();
                         str += "\nOxygen Used: " + (particleData.oxygenUsed * 1000000f).ToString("F0");
-                        str += "\nWaste Produced: " + (particleData.wasteProduced * 1000000f).ToString("F0");
+                        str += "\nWaste Produced: " + (particleData.wasteProduced * 1000000000f).ToString();                        
                         str += "\nVelocity (" + (particleData.velocity.x * 1000f).ToString("F0") + ", " + (particleData.velocity.y * 1000f).ToString("F0") + ")";
-                        str += "\nDigested Amt: " + (particleData.digestedAmount * 1000f).ToString("F0");
+                        str += "\nGenome: " + (particleData.genomeVector * 1f).ToString("F2");
                         str += "\nIsDecaying: " + (particleData.isDecaying).ToString("F0");
                         str += "\nIsSwallowed: " + (particleData.isSwallowed).ToString("F0");
-                        str += "\n\nDistance: " + gameManager.simulationManager.zooplanktonManager.closestZooplanktonArray[0].y.ToString(); // (gameManager.simulationManager.agentsArray[0].ownPos - new Vector2(particleData.worldPos.x, particleData.worldPos.y)).magnitude;
+                        //str += "\n\nDistance: " + gameManager.simulationManager.zooplanktonManager.closestZooplanktonArray[0].y.ToString(); // (gameManager.simulationManager.agentsArray[0].ownPos - new Vector2(particleData.worldPos.x, particleData.worldPos.y)).magnitude;
                         
                         
                     }
@@ -1208,17 +1231,18 @@ public class UIManager : MonoBehaviour {
                         str += aliveTxt;
                         str += "\n";
                         str += "\nBiomass  " + (agent.currentBiomass * 100f).ToString("F0") + "   ( " + (agent.sizePercentage * 100f).ToString("F0") + "%)";
-                        str += "\nFull Size   " + (bodLength * 10f).ToString("F0") + " x " + (bodWidth * 10f).ToString("F0");
+                        //str += "\nFull Size   " + (bodLength * 10f).ToString("F0") + " x " + (bodWidth * 10f).ToString("F0");
                             
                         //str += "\n";      
                         str += "\nTotal Eaten\nMeat: " + (agent.totalFoodEatenMeat * 1000f).ToString("F0") + ", Plant: " + (agent.totalFoodEatenPlant * 1000f).ToString("F0");
                         //str += "\nBiteAnimCounter   " + agent.mouthRef.feedingFrameCounter.ToString();
+                        str += "\n\nLast Known Activity:\n" + agent.lastEvent + ", " + (UnityEngine.Time.frameCount - agent.lastEventTime).ToString() + " frames ago.";
                         Vector4 closestZooplanktonData = gameManager.simulationManager.zooplanktonManager.closestZooplanktonArray[agent.index];
                         Vector4 closestPlantData = gameManager.simulationManager.vegetationManager.closestPlantIndexArray[agent.index];
                         closestZooplanktonData.y = Mathf.Sqrt(closestZooplanktonData.y);
                         closestPlantData.y = Mathf.Sqrt(closestPlantData.y);
-                        str += "\nNearest Zoo [" + Mathf.RoundToInt(closestZooplanktonData.x).ToString() + "] " + closestZooplanktonData.y; // + gameManager.simulationManager.zooplanktonManager.closestZooplanktonArray[agent.index].y.ToString();
-                        str += "\nNearest Plant [" + Mathf.RoundToInt(closestPlantData.x).ToString() + "] " + closestPlantData.y;
+                        //str += "\nNearest Meat [" + Mathf.RoundToInt(closestZooplanktonData.x).ToString() + "] " + closestZooplanktonData.y; // + gameManager.simulationManager.zooplanktonManager.closestZooplanktonArray[agent.index].y.ToString();
+                        //str += "\nNearest Plant [" + Mathf.RoundToInt(closestPlantData.x).ToString() + "] " + closestPlantData.y;
                         //str += "\nLiarShader [" + gameManager.simulationManager.zooplanktonManager.closestAnimalParticlesDataArray[gameManager.simulationManager.cameraManager.targetAgentIndex].index.ToString();
                     }
                 }
@@ -3357,7 +3381,14 @@ public class UIManager : MonoBehaviour {
     }
     public void StartFollowingPlantParticle() {
         cameraManager.isFollowingPlantParticle = true;
-        
+        cameraManager.isFollowingAnimalParticle = false; 
+    }
+    public void StopFollowingAnimalParticle() {
+        cameraManager.isFollowingAnimalParticle = false;        
+    }
+    public void StartFollowingAnimalParticle() {
+        cameraManager.isFollowingAnimalParticle = true;  
+        cameraManager.isFollowingPlantParticle = false;
     }
     
     private void MouseRaycastWaterPlane(Vector3 screenPos) {

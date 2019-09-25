@@ -89,7 +89,8 @@
 
 
 				float radius = saturate(512 * particleData.biomass * particleData.biomass) * 0.5185 + 0.052 + 0.6 * max(hoverMask * 0.5, selectedMask); // particleData.radius * 0.3 * isOn; // 1; //sqrt(particleData.biomass) * 2 + 0.5;
-				radius = lerp(radius, 0.1, 0.95) + 0.3 * max(hoverMask * 0.5, selectedMask);
+				radius = lerp(radius, 0.1, 0.6) + 0.3 * max(hoverMask * 0.5, selectedMask);
+				
 				quadPoint = quadPoint * radius; // * particleData.active; // *** remove * 3 after!!!
 				quadPoint.y *= 1.6;
 				float randAngle = (rand2 + rand3 * rand0 - rand1) * 13.92;
@@ -137,7 +138,7 @@
 				
 				
 				finalColor = float4(0.7, 1, 0.6, 1);
-				finalColor.rgb *= i.color.z;  // index issues?
+				//finalColor.rgb *= i.color.z;  // index issues?
 				finalColor += 2.67 * i.color.a;
 				//finalColor.rgb = i.hue;
 				return finalColor;

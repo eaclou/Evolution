@@ -24,6 +24,8 @@ public class CameraManager : MonoBehaviour {
 
     public bool isFollowingPlantParticle = false;
     public Vector2 targetPlantWorldPos;
+    public bool isFollowingAnimalParticle = false;
+    public Vector2 targetZooplanktonWorldPos;
     //public Agent targetAgent;
     //public int targetAgentIndex = 0;
 
@@ -76,6 +78,11 @@ public class CameraManager : MonoBehaviour {
         if(isFollowingPlantParticle) {
             curCameraFocusPivotPos.x = targetPlantWorldPos.x;
             curCameraFocusPivotPos.y = targetPlantWorldPos.y;
+            //curCameraFocusPivotPos.z = 0f;
+        }
+        if(isFollowingAnimalParticle) {
+            curCameraFocusPivotPos.x = targetZooplanktonWorldPos.x;
+            curCameraFocusPivotPos.y = targetZooplanktonWorldPos.y;
             //curCameraFocusPivotPos.z = 0f;
         }
 

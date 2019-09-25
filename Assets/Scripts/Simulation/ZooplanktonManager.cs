@@ -54,9 +54,9 @@ public class ZooplanktonManager {
         public float isSwallowed;   // 0 = normal, 1 = in critter's belly
         public float digestedAmount;  // 0 = freshly eaten, 1 = fully dissolved/shrunk        
         public Vector3 worldPos;
-        public Vector2 p1;  // spline points:
-	    public Vector2 p2;
-	    public Vector2 p3;
+        //public Vector2 p1;  // spline points:
+	    //public Vector2 p2;
+	    //public Vector2 p3;
         public Vector2 velocity;
         public float radius;
         public float oxygenUsed;
@@ -69,6 +69,9 @@ public class ZooplanktonManager {
 	    public float age;
 	    public float speed;
         public Vector4 color;
+        public Vector4 genomeVector;
+        public float extra0;
+        public float energy;
     }
    
     private int GetAnimalParticleDataSize() {
@@ -104,8 +107,11 @@ public class ZooplanktonManager {
             data.biomass = 0.001f; // data.radius * data.radius * Mathf.PI; // * settingsRef.animalParticleNutrientDensity;
             data.isActive = 0f;
             data.isDecaying = 0f;
-            data.age = UnityEngine.Random.Range(1f, 2f);
+            data.age = 0f; // UnityEngine.Random.Range(1f, 2f);
             data.color = UnityEngine.Random.ColorHSV();
+            data.genomeVector = Vector4.zero;
+            data.extra0 = 0f;
+            data.energy = 0f;
             animalParticlesArray[i] = data;
         }
         //Debug.Log("Fill Initial Particle Array Data CPU: " + (Time.realtimeSinceStartup - startTime).ToString());

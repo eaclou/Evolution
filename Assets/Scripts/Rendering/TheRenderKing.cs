@@ -3932,6 +3932,7 @@ public class TheRenderKing : MonoBehaviour {
                 animalParticleShadowDisplayMat.SetPass(0);
                 animalParticleShadowDisplayMat.SetBuffer("animalParticleDataCBuffer", simManager.zooplanktonManager.animalParticlesCBuffer);
                 animalParticleShadowDisplayMat.SetBuffer("quadVerticesCBuffer", curveRibbonVerticesCBuffer);
+                animalParticleShadowDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
                 animalParticleShadowDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
                 animalParticleShadowDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
                 cmdBufferMain.DrawProcedural(Matrix4x4.identity, animalParticleShadowDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, simManager.zooplanktonManager.animalParticlesCBuffer.count);
@@ -3990,27 +3991,24 @@ public class TheRenderKing : MonoBehaviour {
                 animalParticleDisplayMat.SetBuffer("animalParticleDataCBuffer", simManager.zooplanktonManager.animalParticlesCBuffer);
                 animalParticleDisplayMat.SetBuffer("quadVerticesCBuffer", curveRibbonVerticesCBuffer);
                 animalParticleDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-                int selectedParticleIndex = (int)simManager.zooplanktonManager.closestAnimalParticlesDataArray[simManager.cameraManager.targetAgentIndex].index;
-                animalParticleDisplayMat.SetInt("_SelectedParticleIndex", selectedParticleIndex); // Mathf.RoundToInt(simManager.zooplanktonManager.closestZooplanktonArray[0].x));  // Here goes nothing....
-                animalParticleDisplayMat.SetFloat("_IsHighlight", 1f);
+                //int selectedParticleIndex = (int)simManager.zooplanktonManager.closestAnimalParticlesDataArray[simManager.cameraManager.targetAgentIndex].index;
+                //animalParticleDisplayMat.SetInt("_SelectedParticleIndex", selectedParticleIndex); // Mathf.RoundToInt(simManager.zooplanktonManager.closestZooplanktonArray[0].x));  // Here goes nothing....
+                float isHighlight = 0f;
+
                 
                 animalParticleDisplayMat.SetInt("_SelectedParticleIndex", Mathf.RoundToInt(simManager.zooplanktonManager.selectedAnimalParticleIndex));
                 animalParticleDisplayMat.SetInt("_ClosestParticleID", Mathf.RoundToInt(simManager.zooplanktonManager.closestZooplanktonToCursorIndex));
                 float isSelectedA = 0f;
-                if(simManager.zooplanktonManager.isAnimalParticleSelected) {
-                    if(simManager.uiManager.curActiveTool == UIManager.ToolType.Inspect) {
-                        isSelectedA = 1f;
-                    }
-                    else {
-                        simManager.zooplanktonManager.isAnimalParticleSelected = false;
-                        //simManager.uiManager.StopFollowingPlantParticle();
-                    }
-                }
+                
                 float isHoverA = 0f;
                 if(simManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2) {
                     if(simManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) {
                         if(simManager.uiManager.curActiveTool == UIManager.ToolType.Inspect) {
                             isHoverA = 1f;
+                            isHighlight = 1f;
+                            if(simManager.zooplanktonManager.isAnimalParticleSelected) {                   
+                                isSelectedA = 1f;
+                            }
                         }
                         else {
                             simManager.zooplanktonManager.isAnimalParticleSelected = false;
@@ -4019,8 +4017,9 @@ public class TheRenderKing : MonoBehaviour {
                     }
                 }
             
-                animalParticleDisplayMat.SetFloat("_IsSelected", 1f);
-                animalParticleDisplayMat.SetFloat("_IsHover", 1f); // isHoverA);
+                animalParticleDisplayMat.SetFloat("_IsSelected", isSelectedA);
+                animalParticleDisplayMat.SetFloat("_IsHover", isHoverA); // isHoverA);
+                animalParticleDisplayMat.SetFloat("_IsHighlight", isHighlight);
                 animalParticleDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
                 cmdBufferMain.DrawProcedural(Matrix4x4.identity, animalParticleDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, simManager.zooplanktonManager.animalParticlesCBuffer.count);
         
@@ -4122,20 +4121,19 @@ public class TheRenderKing : MonoBehaviour {
             plantParticleDisplayMat.SetInt("_SelectedParticleIndex", Mathf.RoundToInt(simManager.vegetationManager.selectedPlantParticleIndex));
             plantParticleDisplayMat.SetInt("_HoverParticleIndex", Mathf.RoundToInt(simManager.vegetationManager.closestPlantParticleData.index));
             float isSelected = 0f;
-            if(simManager.vegetationManager.isPlantParticleSelected) {
-                if(simManager.uiManager.curActiveTool == UIManager.ToolType.Inspect) {
-                    isSelected = 1f;
-                }
-                else {
-                    simManager.vegetationManager.isPlantParticleSelected = false;
-                    simManager.uiManager.StopFollowingPlantParticle();
-                }
-            }
+            
             float isHover = 0f;
             if(simManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 1) {
                 if(simManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 1) {
                     if(simManager.uiManager.curActiveTool == UIManager.ToolType.Inspect) {
                         isHover = 1f;
+                        if(simManager.vegetationManager.isPlantParticleSelected) {                
+                            isSelected = 1f;                
+                        }
+                        else {
+                            simManager.vegetationManager.isPlantParticleSelected = false;
+                            simManager.uiManager.StopFollowingPlantParticle();
+                        }
                     }
                     else {
                         simManager.vegetationManager.isPlantParticleSelected = false;

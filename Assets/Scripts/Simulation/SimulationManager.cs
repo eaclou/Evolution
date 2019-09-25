@@ -597,7 +597,7 @@ public class SimulationManager : MonoBehaviour {
         float totalWasteProducedByAgents = 0f;
         if(trophicLayersManager.GetAgentsOnOff()) {
             vegetationManager.FindClosestPlantParticleToCritters(simStateData);
-            vegetationManager.FindClosestPlantParticleToCursor(uiManager.curMousePositionOnWaterPlane.x, uiManager.curMousePositionOnWaterPlane.y);
+            
             for (int i = 0; i < agentsArray.Length; i++) {
                 totalOxygenUsedByAgents += agentsArray[i].oxygenUsedLastFrame;
                 totalWasteProducedByAgents += agentsArray[i].wasteProducedLastFrame;          
@@ -606,8 +606,10 @@ public class SimulationManager : MonoBehaviour {
             
             }
             zooplanktonManager.FindClosestAnimalParticleToCritters(simStateData);
-            zooplanktonManager.FindClosestAnimalParticleToCursor(uiManager.curMousePositionOnWaterPlane.x, uiManager.curMousePositionOnWaterPlane.y);
-        }   
+            
+        } 
+        vegetationManager.FindClosestPlantParticleToCursor(uiManager.curMousePositionOnWaterPlane.x, uiManager.curMousePositionOnWaterPlane.y);
+        zooplanktonManager.FindClosestAnimalParticleToCursor(uiManager.curMousePositionOnWaterPlane.x, uiManager.curMousePositionOnWaterPlane.y);
         // Find best way to insert Agent Waste into ResourceGridTex.waste
 
         simResourceManager.oxygenUsedByAgentsLastFrame = totalOxygenUsedByAgents;

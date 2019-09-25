@@ -75,7 +75,7 @@
 				float spread = (saturate(256 * particleData.biomass * particleData.biomass) * 0.95 + 0.05) * maxSpread;
 				worldPosition.xyz += offsetRaw * spread;
 
-				float threshold = particleData.biomass * 4.5 + 0.033;
+				float threshold = particleData.biomass * 1.5 + 0.06;
 				float isOn = saturate((threshold - length(offsetRaw)) * 10);
 
 				float masterFreq = 5;
@@ -87,7 +87,9 @@
 				
 
 				worldPosition.xyz += noiseOffset;
-				float radius = saturate(512 * particleData.biomass * particleData.biomass) * 0.5185 + 0.052; // particleData.radius * 0.3 * isOn; // 1; //sqrt(particleData.biomass) * 2 + 0.5;
+				float radius = saturate(512 * particleData.biomass * particleData.biomass) * 0.5185 + 0.052; // + 0.6 * max(hoverMask * 0.5, selectedMask); // particleData.radius * 0.3 * isOn; // 1; //sqrt(particleData.biomass) * 2 + 0.5;
+				radius = lerp(radius, 0.1, 0.6); // + 0.3 * max(hoverMask * 0.5, selectedMask);
+				
 				quadPoint = quadPoint * radius; // * particleData.active; // *** remove * 3 after!!!
 				quadPoint.y *= 1.6;
 				float randAngle = (rand2 + rand3 * rand0 - rand1) * 13.92;
@@ -97,11 +99,11 @@
 				float3 rotatedPoint = float3(quadPoint.x * right + quadPoint.y * forward, 0);  // Rotate localRotation by AgentRotation
 
 				
-				worldPosition.z = 0.0;
+				//worldPosition.z = 0.0;
 				worldPosition = worldPosition + rotatedPoint * particleData.isActive;
 
 				// REFRACTION:
-				float2 altUV = worldPosition.xy / 256;
+				float2 altUV = worldPosition.xy / _MapSize;
 				o.altitudeUV = altUV;
 				float altitudeRaw = tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 0)).x;
 

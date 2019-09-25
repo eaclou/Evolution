@@ -31,6 +31,8 @@ public class Agent : MonoBehaviour {
     public CandidateAgentData candidateRef;
 
     public string stringCauseOfDeath = "";
+    public string lastEvent = "";
+    public int lastEventTime = 0;
     
     public AgentLifeStage curLifeStage;
     public enum AgentLifeStage {
@@ -52,20 +54,9 @@ public class Agent : MonoBehaviour {
 
         }
     }
-    /*private int youngDurationTimeSteps = 480;
-    public int _YoungDurationTimeSteps
-    {
-        get
-        {
-            return youngDurationTimeSteps;
-        }
-        set
-        {
-
-        }
-    }*/
-    public int maxAgeTimeSteps = 20000;
-    private int decayDurationTimeSteps = 360;
+    
+    public int maxAgeTimeSteps = 100000;
+    private int decayDurationTimeSteps = 420;
     public int _DecayDurationTimeSteps
     {
         get
@@ -77,7 +68,7 @@ public class Agent : MonoBehaviour {
 
         }
     }
-    private int maxGrowthPeriod = 1280;
+    private int maxGrowthPeriod = 2560;
 
     private int growthScalingSkipFrames = 8;
 
@@ -421,10 +412,10 @@ public class Agent : MonoBehaviour {
         // STARVATION::
         if (coreModule.energy <= 0f) {
             if(coreModule.stomachContentsNorm > 0.01f) {
-                stringCauseOfDeath = "Suffocated!";
+                stringCauseOfDeath = "Suffocated";
             }
             else {
-                stringCauseOfDeath = "Starved!";
+                stringCauseOfDeath = "Starved";
             }
             curLifeStage = AgentLifeStage.Dead;
             lifeStageTransitionTimeStepCounter = 0;
@@ -444,7 +435,7 @@ public class Agent : MonoBehaviour {
             coreModule.healthBody = 0f;
             coreModule.healthExternal = 0f;
 
-            stringCauseOfDeath = "Killed!";
+            stringCauseOfDeath = "Fatal Injuries";
             InitializeDeath();
         }
         /*if (coreModule.healthBody <= 0f) {
@@ -465,7 +456,7 @@ public class Agent : MonoBehaviour {
             lifeStageTransitionTimeStepCounter = 0;
 
             //Debug.Log("Died of old age!");
-            stringCauseOfDeath = "Old Age!";
+            stringCauseOfDeath = "Old Age";
             InitializeDeath();
         }
     }
@@ -473,7 +464,7 @@ public class Agent : MonoBehaviour {
         if(isMarkedForDeathByUser) {
             curLifeStage = Agent.AgentLifeStage.Dead;
             lifeStageTransitionTimeStepCounter = 0;
-            stringCauseOfDeath = "Divine Judgment!";
+            stringCauseOfDeath = "Divine Judgment";
             InitializeDeath();
         }
     }
@@ -566,7 +557,10 @@ public class Agent : MonoBehaviour {
         else {
             coreModule.stomachContentsPlant += amount;
         }
-        GainExperience((amount / coreModule.stomachCapacity) * coreModule.foodEfficiencyPlant * 1f); // Exp for appropriate food      
+        GainExperience((amount / coreModule.stomachCapacity) * coreModule.foodEfficiencyPlant * 1f); // Exp for appropriate food    
+
+        lastEvent = "Ate Plant! (" + amount.ToString() + ")";
+        lastEventTime = UnityEngine.Time.frameCount;
     }
     public void EatFoodMeat(float amount) {
         totalFoodEatenMeat += amount; 
@@ -587,6 +581,9 @@ public class Agent : MonoBehaviour {
         }
         
         GainExperience((amount / coreModule.stomachCapacity) * coreModule.foodEfficiencyMeat * 1f); // Exp for appropriate food
+
+        lastEvent = "Ate Zooplankton! (" + amount.ToString() + ")";
+        lastEventTime = UnityEngine.Time.frameCount;
     }
     public void ProcessDamageReceived(float damage, Agent predatorAgentRef) {
 
@@ -614,6 +611,9 @@ public class Agent : MonoBehaviour {
         predatorAgentRef.totalDamageDealt += damage;
 
         CheckForDeathHealth();
+
+        lastEvent = "Bitten! (" + damage.ToString() + ") by #" + predatorAgentRef.index.ToString();
+        lastEventTime = UnityEngine.Time.frameCount;
     }
     public void ProcessBeingEaten(float amount) {
         // if this agent is dead, it acts as food.
@@ -658,7 +658,8 @@ public class Agent : MonoBehaviour {
             */
         }
 
-        
+        lastEvent = "Devoured!";
+        lastEventTime = UnityEngine.Time.frameCount;
     }
 
     public void Tick(SimulationManager simManager, SettingsManager settings) {
@@ -794,6 +795,9 @@ public class Agent : MonoBehaviour {
         coreModule.energy = currentBiomass * 20f;  // should be proportional to body size??
 
         mouthRef.Enable();
+
+        lastEvent = "Was Born!";
+        lastEventTime = UnityEngine.Time.frameCount;
         
     }
     

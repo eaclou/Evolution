@@ -48,7 +48,8 @@
 				float4 pos : SV_POSITION;
 				float2 uv : TEXCOORD0;  // uv of the brushstroke quad itself, particle texture	
 				float4 color : COLOR;
-				
+				float2 highlight : TEXCOORD1;
+				float2 status : TEXCOORD2;
 			};
 
 			float rand(float2 co){   // OUTPUT is in [0,1] RANGE!!!
@@ -88,37 +89,41 @@
 				float t = uv.y; // + 0.5;
 				uv.y = 1.0 - uv.y;
 
-				float2 curvePos = GetPoint2D(particleData.worldPos.xy, particleData.p1, particleData.p2, particleData.p3, t);
-				float2 curveTangent = normalize(GetFirstDerivative(particleData.worldPos.xy, particleData.p1, particleData.p2, particleData.p3, t));
-				float2 curveBitangent = float2(curveTangent.y, -curveTangent.x);
+				//float2 curvePos = GetPoint2D(particleData.worldPos.xy, particleData.p1, particleData.p2, particleData.p3, t);
+				//float2 curveTangent = normalize(GetFirstDerivative(particleData.worldPos.xy, particleData.p1, particleData.p2, particleData.p3, t));
+				//float2 curveBitangent = float2(curveTangent.y, -curveTangent.x);
 				
-				float selectedMask = (1.0 - saturate(abs(_SelectedParticleIndex - inst))) * _IsSelected;
-				float hoverMask = (1.0 - saturate(abs(_ClosestParticleID - inst))) * _IsHover;
+				float selectedMask = (1.0 - saturate(abs(_SelectedParticleIndex - (int)inst))) * _IsSelected;
+				float hoverMask = (1.0 - saturate(abs(_ClosestParticleID - (int)inst))) * _IsHover;
 
 				//float width = 0.25 + hoverMask + selectedMask * 2.5;
-				float width = sqrt(particleData.biomass) * 0.04 * (1 - 2 * abs(0.75 - uv.y)) + 0.015 + 0.033 * hoverMask; //GetPoint1D(waterCurveData.widths.x, waterCurveData.widths.y, waterCurveData.widths.z, waterCurveData.widths.w, t) * 0.75 * (1 - saturate(testNewVignetteMask));
+				float width = sqrt(particleData.biomass) * 0.04 * (1 - 2 * abs(0.75 - uv.y)) + 0.015 + 0.015 * hoverMask + 0.025 * selectedMask; //GetPoint1D(waterCurveData.widths.x, waterCurveData.widths.y, waterCurveData.widths.z, waterCurveData.widths.w, t) * 0.75 * (1 - saturate(testNewVignetteMask));
 				
 				float freq = 20;
 				float swimAnimOffset = sin(_Time.y * freq - t * 7 + (float)inst * 0.1237) * 4;
 				float swimAnimMask = t * saturate(1.0 - particleData.isDecaying); //saturate(1.0 - uv.y); //saturate(1.0 - t);
 				
-				float2 offset = curveBitangent * -(quadPoint.x * 4 + swimAnimOffset * swimAnimMask) * width; // * randomWidth; // *** support full vec4 widths!!!
+				//float2 offset = curveBitangent * -(quadPoint.x * 4 + swimAnimOffset * swimAnimMask) * width; // * randomWidth; // *** support full vec4 widths!!!
 				
-				float3 worldPosition = float3(curvePos,0) + float3(offset, 0.0);
-
+				float3 worldPosition = particleData.worldPos; // float3(curvePos,0) + float3(offset, 0.0);
+				worldPosition.x += (swimAnimOffset * swimAnimMask) * width;
 				// REFRACTION:
 				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / _MapSize, 0, 0)).yzw;				
 				float refractionStrength = 0.15;
 				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
 				
-				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));			
+				float2 vertexOffset = quadPoint.xy * width * 6;
+				vertexOffset.xy *= 4;
+				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition.xy + vertexOffset, worldPosition.z, 1.0)));			
 				o.uv = uv; //quadVerticesCBuffer[id].xy + 0.5f;	
 
-				o.color = particleData.genome;
+				o.color = particleData.color;
 				float oldAgeMask = saturate((particleData.age - 1.0) * 1000);
 				o.color.a = saturate(particleData.age * 0.5); //  1.0 - oldAgeMask; // particleData.isDecaying;
-				o.color.x = (1.0 - particleData.isDecaying) * particleData.isActive;
-				o.color.y = hoverMask;
+				o.highlight = float2(hoverMask, selectedMask);
+				o.status = float2(particleData.isActive, particleData.isDecaying);
+				//o.color.x = (1.0 - particleData.isDecaying) * particleData.isActive;
+				//o.color.y = hoverMask;
 				
 				//o.color = float4(saturate(particleData.isDecaying), saturate(particleData.biomass * 5), saturate(particleData.age * 0.5), 1);
 				
@@ -137,13 +142,15 @@
 				finalColor.rgb = lerp(finalColor.rgb, float3(0.4, 0.4, 0.4), val);
 				finalColor.rgb *= 3.14;
 				finalColor.rgb = lerp(finalColor.rgb, float3(0.75, 0.2, 0.92), 0.372);
+				finalColor.rgb = lerp(finalColor.rgb, i.color.rgb, 0.33);
 				float uvDist = length(i.uv - 0.5) * 2;
 				float circleFade = saturate(uvDist - 0.9);
 				finalColor.rgb *= saturate(1.0 - uvDist);
 				float circleMask = saturate(circleFade * 20);
 				// ****************************************************************************
-				finalColor *= 1.0 + i.color.y * 2;
-				return float4(finalColor.rgb, (1.0 - circleMask) * i.color.x * (1.0 + i.color.y));  // age
+				finalColor.rgb = lerp(finalColor.rgb, float3(0.1, 0.05, 0.02), i.status.y);
+				finalColor *= 1.0 + i.highlight.x * 2 + i.highlight.y;
+				return float4(finalColor.rgb, (1.0 - circleMask) * i.status.x); // * (1.0 + i.color.y));  // age
 
 				finalColor.a *= 1.0 - circleMask;
 				finalColor.a *= i.color.a;
