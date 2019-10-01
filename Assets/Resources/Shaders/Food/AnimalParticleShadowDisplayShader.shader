@@ -82,9 +82,13 @@
 				float refractionStrength = 0.15;
 				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
 
-				float2 altUV = particleData.worldPos.xy / _MapSize;
-				worldPosition.z = -(tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 0)).x) * 10;
+				//float2 altUV = particleData.worldPos.xy / _MapSize;
+				//worldPosition.z = -(tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 0)).x) * 10;
 				
+				float2 altUV = worldPosition.xy / _MapSize;
+				//o.altitudeUV = altUV;
+				float altitudeRaw = tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 0)).x;								
+				worldPosition.z = -(altitudeRaw * 2 - 1) * 10;
 
 				float2 vertexOffset = quadPoint.xy * width * 6;
 				vertexOffset.xy *= 4;

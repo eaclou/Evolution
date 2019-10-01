@@ -386,7 +386,7 @@ public class CritterMouthComponent : MonoBehaviour {
         float damage = baseDamage * sizeRatio * agentRef.coreModule.damageBonus;
         damage = Mathf.Clamp01(damage);
 
-        preyAgent.ProcessDamageReceived(damage, agentRef);
+        preyAgent.ProcessBiteDamageReceived(damage, agentRef);
 
         //if(agentRef.coreModule.foodEfficiencyMeat > 0.5f) { // ** // damage bonus -- provided has the required specialization level:::::
         //    agentRef.GainExperience(damage * 0.5f);  
@@ -448,8 +448,11 @@ public class CritterMouthComponent : MonoBehaviour {
         if(collider.gameObject.CompareTag("HazardCollider")) {
 
         }
-        else {                
-            agentRef.coreModule.isMouthTrigger[0] = 1f;  // there is an object in range of mouth trigger:
+        else {
+            //Debug.Log(agentRef.coreModule.ToString());
+            if(agentRef != null) {
+                agentRef.coreModule.isMouthTrigger[0] = 1f;  // there is an object in range of mouth trigger:
+            }
         } 
 
         if(isFeeding) {

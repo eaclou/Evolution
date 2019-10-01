@@ -35,6 +35,11 @@
 
 			StructuredBuffer<PlantParticleData> plantParticleDataCBuffer;			
 			StructuredBuffer<float3> quadVerticesCBuffer;
+
+			uniform int _SelectedParticleIndex;
+			uniform int _HoverParticleIndex;
+			uniform float _IsSelected;
+			uniform float _IsHover;
 			
 			struct v2f
 			{
@@ -56,76 +61,75 @@
 				v2f o;
 
 				float3 quadPoint = quadVerticesCBuffer[id];
+				float2 uv = quadPoint.xy;
+				uv.x += 0.5;
+				float t = uv.y; // + 0.5;
+				uv.y = 1.0 - uv.y;
 
+				
 				int particleIndex = floor((float)inst / 32.0);
-							
+
 				PlantParticleData particleData = plantParticleDataCBuffer[particleIndex];
 
-				//float threshold = 
+				float selectedMask = (1.0 - saturate(abs(_SelectedParticleIndex - particleIndex))) * _IsSelected;
+				float hoverMask = (1.0 - saturate(abs(_HoverParticleIndex - particleIndex))) * _IsHover;
 
-				float3 worldPosition = float3(particleData.worldPos, 5);    //float3(rawData.worldPos, -random2);
+				float3 worldPosition = float3(particleData.worldPos, 1.0);    //float3(rawData.worldPos, -random2);
+				float3 localQuadPos = quadPoint;
+
 				float rand0 = rand(float2(inst, inst) * 10);
 				float rand1 = rand(float2(rand0, rand0) * 10);
-				float rand2 = rand(float2(rand1, rand1) * 10);
+				float rand2 = rand(float2(rand1, rand1) * 10);	
 				float rand3 = rand(float2(rand2, rand2) * 10);	
 
-				float3 offsetRaw = (float3(rand0, rand1, rand2) * 2 - 1) * rand3;				
-				//float2 offset = offsetRaw * (16 * particleData.biomass + 0.2);
-				float maxSpread = 3.728;
-				float spread = (saturate(256 * particleData.biomass * particleData.biomass) * 0.95 + 0.05) * maxSpread;
-				worldPosition.xyz += offsetRaw * spread;
+				float leafIndex = (float)(inst % 32);
+				float leafIndexNormalized = leafIndex / 32.0;
+				//Type:
+				float type = particleData.typeID;
+				if(type < 0.5) {
+					// Rooted fully, grows separately on ground in circle? Grassy
 
-				float threshold = particleData.biomass * 1.5 + 0.06;
-				float isOn = saturate((threshold - length(offsetRaw)) * 10);
+					float radius = saturate(particleData.biomass * 5 + 0.06) * leafIndexNormalized;
+					float2 spawnOffset = float2(cos(particleData.angleInc * leafIndex * 10) * radius, sin(particleData.angleInc * leafIndex * 10) * radius);
+					
+					worldPosition.xy += spawnOffset;
+														
+					// REFRACTION:
+					float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / _MapSize, 0, 0)).yzw;				
+					float refractionStrength = 0.5;
+					
+					worldPosition.xy += -surfaceNormal.xy * refractionStrength;
+				
+				}
+				else {
+				
+				}
 
 				float masterFreq = 5;
 				float spatialFreq = 0.06125285;
 				float timeMult = 0.08;
-				float4 noiseSample = Value3D(worldPosition * spatialFreq + offsetRaw + _Time * timeMult, masterFreq); //float3(0, 0, _Time * timeMult) + 
-				float noiseMag = 0.2;
+				float4 noiseSample = Value3D(worldPosition * spatialFreq + _Time.y * timeMult + inst * 11.11, masterFreq); //float3(0, 0, _Time * timeMult) + 
+				float noiseMag = 0.025;
 				float3 noiseOffset = noiseSample.yzw * noiseMag;
-				
 
 				worldPosition.xyz += noiseOffset;
-				float radius = saturate(512 * particleData.biomass * particleData.biomass) * 0.5185 + 0.052; // + 0.6 * max(hoverMask * 0.5, selectedMask); // particleData.radius * 0.3 * isOn; // 1; //sqrt(particleData.biomass) * 2 + 0.5;
-				radius = lerp(radius, 0.1, 0.6); // + 0.3 * max(hoverMask * 0.5, selectedMask);
 				
-				quadPoint = quadPoint * radius; // * particleData.active; // *** remove * 3 after!!!
-				quadPoint.y *= 1.6;
-				float randAngle = (rand2 + rand3 * rand0 - rand1) * 13.92;
-				
-				float2 forward = float2(cos(randAngle), sin(randAngle));
+				float2 forward = float2(cos(rand3 * 10), sin(rand3 * 10));
 				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
 				float3 rotatedPoint = float3(quadPoint.x * right + quadPoint.y * forward, 0);  // Rotate localRotation by AgentRotation
 
+				float2 altitudeUV = worldPosition.xy / _MapSize;					
+				float altRaw = tex2Dlod(_AltitudeTex, float4(altitudeUV.xy, 0, 0)).x;	
 				
-				//worldPosition.z = 0.0;
-				worldPosition = worldPosition + rotatedPoint * particleData.isActive;
+				worldPosition.z = -(altRaw * 2 - 1) * 10;
 
-				// REFRACTION:
-				float2 altUV = worldPosition.xy / _MapSize;
-				o.altitudeUV = altUV;
-				float altitudeRaw = tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 0)).x;
-
-				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / 256, 0, 0)).yzw;				
-				float refractionStrength = 0.5;
-				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
-
+				float leafScale = saturate(particleData.biomass * 4 + 0.1) * 0.25 * particleData.isActive;
+				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition + rotatedPoint * leafScale, 1.0)));
+				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(quadPoint, 0.0f));				
+				o.uv = uv;	
 				
-				//o.altitudeUV = altUV;
-				
-				worldPosition.z = -(altitudeRaw * 2 - 1) * 10;
-				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
-				//o.worldPos = worldPosition;
-
-				o.worldPos = worldPosition;
-				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
-				
-				float4 screenUV = ComputeScreenPos(o.pos);
-				o.screenUV = screenUV; //altitudeUV.xy / altitudeUV.w;
-
-				o.uv = quadVerticesCBuffer[id].xy + 0.5f;	
-				
+				//o.color = float4(saturate(particleData.isDecaying), saturate(particleData.biomass * 5), particleData.rootedness, max(hoverMask * 0.5, selectedMask));
+				//o.hue = float4(particleData.colorA, 1);
 				return o;
 			}
 
@@ -145,9 +149,9 @@
 				//frameBufferColor = float4(1,1,1,1);
 				
 				//float3 particleColor = lerp(baseHue * 0.7, baseHue * 1.3, saturate(1.0 - i.color.y * 2));
-				frameBufferColor.rgb *= 0.75; // = lerp(frameBufferColor.rgb, particleColor, 0.25);
+				frameBufferColor.rgb *= 0.1375; // = lerp(frameBufferColor.rgb, particleColor, 0.25);
 				float4 finalColor = GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, float4(0,0,0,0));
-				finalColor.a = brushColor.a * 0.7;
+				finalColor.a = brushColor.a * 0.4675;
 
 				return finalColor;
 			}

@@ -769,18 +769,19 @@ public class SimulationManager : MonoBehaviour {
         // ********** REVISIT CONVERSION btw fluid/scene coords and Force Amounts !!!! *************
         for (int i = 0; i < agentsArray.Length; i++) {
 
-            Vector3 depthSample = simStateData.depthAtAgentPositionsArray[i];
-            float agentSize = agentsArray[i].fullSizeBoundingBox.z * 1.1f + 0.15f;
+            Vector3 depthSample = simStateData.depthAtAgentPositionsArray[i * 5];
+            float agentSize = (agentsArray[i].fullSizeBoundingBox.x + agentsArray[i].fullSizeBoundingBox.y) * agentsArray[i].sizePercentage * 0.25f + 0.025f;
             float floorDepth = depthSample.x * 10f;
             if (floorDepth < agentSize)
             {
                 float wallForce = Mathf.Clamp01(agentSize - floorDepth) / agentSize;
-                agentsArray[i].bodyRigidbody.AddForce(new Vector2(depthSample.y, depthSample.z).normalized * 24f * agentsArray[i].bodyRigidbody.mass * wallForce, ForceMode2D.Impulse);
+                Vector2 grad = new Vector2(depthSample.y, depthSample.z).normalized;
+                agentsArray[i].bodyRigidbody.AddForce(grad * 12f * agentsArray[i].bodyRigidbody.mass * wallForce, ForceMode2D.Impulse);
 
 
-                float damage = wallForce * 0.1f;
+                float damage = wallForce * 0.04f;
                 float defendBonus = 1f;
-                if(agentsArray[i].coreModule != null) {
+                if(agentsArray[i].coreModule != null && agentsArray[i].curLifeStage == Agent.AgentLifeStage.Mature) {
                     if(agentsArray[i].coreModule.isDefending) {
                         if(agentsArray[i].coreModule.defendFrameCounter < agentsArray[i].coreModule.defendDuration) {
                             defendBonus = 0.1f;
@@ -799,18 +800,29 @@ public class SimulationManager : MonoBehaviour {
                     agentsArray[i].coreModule.healthExternal -= damage;
 
                     agentsArray[i].totalDamageTaken += damage;
-        
 
-                    agentsArray[i].CheckForDeathHealth();
+                    agentsArray[i].coreModule.isContact[0] = 1f;
+                    agentsArray[i].coreModule.contactForceX[0] = wallForce;
+                    agentsArray[i].coreModule.contactForceY[0] = grad.y;
+        
+                    agentsArray[i].TakeDamage(damage);
 
                 }
             }
             
-            agentsArray[i].bodyRigidbody.AddForce(simStateData.fluidVelocitiesAtAgentPositionsArray[i] * 48f * agentsArray[i].bodyRigidbody.mass, ForceMode2D.Impulse);
+            agentsArray[i].bodyRigidbody.AddForce(simStateData.fluidVelocitiesAtAgentPositionsArray[i] * 24f * agentsArray[i].bodyRigidbody.mass, ForceMode2D.Impulse);
 
             agentsArray[i].avgFluidVel = Vector2.Lerp(agentsArray[i].avgFluidVel, simStateData.fluidVelocitiesAtAgentPositionsArray[i], 0.25f);
 
             agentsArray[i].depth = depthSample.x;
+            Vector3 depthSampleNorth = simStateData.depthAtAgentPositionsArray[i * 5 + 1];
+            agentsArray[i].depthNorth = depthSampleNorth.x;
+            Vector3 depthSampleEast = simStateData.depthAtAgentPositionsArray[i * 5 + 2];
+            agentsArray[i].depthEast = depthSampleEast.x;
+            Vector3 depthSampleSouth = simStateData.depthAtAgentPositionsArray[i * 5 + 3];
+            agentsArray[i].depthSouth = depthSampleSouth.x;
+            Vector3 depthSampleWest = simStateData.depthAtAgentPositionsArray[i * 5 + 4];
+            agentsArray[i].depthWest = depthSampleWest.x;
         }
         for (int i = 0; i < eggSackArray.Length; i++) { // *** cache rigidBody reference
             
@@ -1126,7 +1138,7 @@ public class SimulationManager : MonoBehaviour {
                 int randIndex = UnityEngine.Random.Range(0, validEggSackIndicesList.Count);
                 //Debug.Log("listLength:" + validEggSackIndicesList.Count.ToString() + ", randIndex = " + randIndex.ToString() + ", p: " + validEggSackIndicesList[randIndex].ToString());
                 parentEggSack = eggSackArray[validEggSackIndicesList[randIndex]];
-                Debug.Log("SpawnAgentFromEggSack:");
+                
                 SpawnAgentFromEggSack(candidateData, agentIndex, speciesIndex, parentEggSack);
                 candidateData.isBeingEvaluated = true;
             }
@@ -1254,11 +1266,13 @@ public class SimulationManager : MonoBehaviour {
     }
     // ********** RE-IMPLEMENT THIS LATER!!!! ******************************************************************************
     private void SpawnAgentFromEggSack(CandidateAgentData sourceCandidate, int agentIndex, int speciesIndex, EggSack parentEggSack) {
-        
+        Debug.Log("Spawn Creature #" + agentIndex.ToString() + " (" + numAgentsBorn.ToString() + ") FromEggSack " + parentEggSack.index.ToString() + "  " + parentEggSack._PrevPos.ToString());
+
         numAgentsBorn++;
         //currentOldestAgent = agentsArray[rankedIndicesList[0]].ageCounter;
         agentsArray[agentIndex].InitializeSpawnAgentFromEggSack(settingsManager, agentIndex, sourceCandidate, parentEggSack); // Spawn that genome in dead Agent's body and revive it!
         theRenderKing.UpdateCritterGenericStrokesData(agentsArray[agentIndex]); // agentIndex, sourceCandidate.candidateGenome);
+        
         
     }
     private void SpawnAgentImmaculate(CandidateAgentData sourceCandidate, int agentIndex, int speciesIndex) {

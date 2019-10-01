@@ -390,7 +390,7 @@ public class SpeciesGenomePool {
         BodyGenome parentBodyGenome = parentGenome.bodyGenome;
         BrainGenome parentBrainGenome = parentGenome.brainGenome;
 
-        Debug.Log("Mutate() " + mutationSettingsRef.mutationStrengthSlot.ToString("F2"));
+        //Debug.Log("Mutate() " + mutationSettingsRef.mutationStrengthSlot.ToString("F2"));
         newBodyGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome, mutationSettingsRef);
         newBrainGenome.SetToMutatedCopyOfParentGenome(parentBrainGenome, newBodyGenome, mutationSettingsRef);
         

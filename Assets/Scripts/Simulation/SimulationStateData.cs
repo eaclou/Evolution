@@ -238,11 +238,11 @@ public class SimulationStateData {
         fluidVelocitiesAtAgentPositionsArray = new Vector2[simManager._NumAgents];
         fluidVelocitiesAtEggSackPositionsArray = new Vector2[simManager._NumEggSacks];
         //fluidVelocitiesAtPredatorPositionsArray = new Vector2[simManager._NumPredators];
-        agentFluidPositionsArray = new Vector4[simManager._NumAgents];
+        agentFluidPositionsArray = new Vector4[simManager._NumAgents * 5];
         eggSackFluidPositionsArray = new Vector4[simManager._NumEggSacks];
         //predatorFluidPositionsArray = new Vector4[simManager._NumPredators];
 
-        depthAtAgentPositionsArray = new Vector3[simManager._NumAgents];
+        depthAtAgentPositionsArray = new Vector3[simManager._NumAgents * 5];
     }
 
     public void PopulateSimDataArrays(SimulationManager simManager) {
@@ -285,7 +285,7 @@ public class SimulationStateData {
                 //freq range: 1 --> 2
                 critterInitDataArray[i].swimMagnitude = Mathf.Lerp(0.33f, 1.5f, swimLerp); // 1f * (1f - flexibilityScore * 0.2f);
                 critterInitDataArray[i].swimFrequency = Mathf.Lerp(2f, 0.8f, swimLerp);   //flexibilityScore * 1.05f;
-                critterInitDataArray[i].swimAnimSpeed = 12f;    // 12f * (1f - approxSize * 0.25f);
+                critterInitDataArray[i].swimAnimSpeed = 2.10f;    // 12f * (1f - approxSize * 0.25f);
                 critterInitDataArray[i].bodyCoord = genome.bodyGenome.coreGenome.tailLength / critterFullsizeLength;
 	            critterInitDataArray[i].headCoord = (genome.bodyGenome.coreGenome.tailLength + genome.bodyGenome.coreGenome.bodyLength) / critterFullsizeLength;
                 critterInitDataArray[i].mouthCoord = (genome.bodyGenome.coreGenome.tailLength + genome.bodyGenome.coreGenome.bodyLength + genome.bodyGenome.coreGenome.headLength) / critterFullsizeLength;
@@ -312,10 +312,10 @@ public class SimulationStateData {
                 critterSimDataArray[i].growthPercentage = Mathf.Clamp01(simManager.agentsArray[i].sizePercentage);
                 float decay = 0f;
                 if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Dead) {
-                    decay = (float)simManager.agentsArray[i].lifeStageTransitionTimeStepCounter / (float)simManager.agentsArray[i]._DecayDurationTimeSteps;
+                    decay = simManager.agentsArray[i].GetDecayPercentage();
                 }
                 if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.AwaitingRespawn) {
-                    decay = 1f;
+                    decay = 0f;
                 }
                 critterSimDataArray[i].decayPercentage = decay;
 
@@ -388,11 +388,27 @@ public class SimulationStateData {
                 critterSimDataArray[i].wasteProduced = simManager.agentsArray[i].wasteProducedLastFrame;// 
 
                 // Z & W coords represents agent's x/y Radii (in FluidCoords)
-                agentFluidPositionsArray[i] = new Vector4(agentPos.x / SimulationManager._MapSize, 
-                                                          agentPos.y / SimulationManager._MapSize, 
+                float agentCenterX = agentPos.x / SimulationManager._MapSize;
+                float agentCenterY = agentPos.y / SimulationManager._MapSize;
+                float sensorRange = 0.015f;  // in UV 0-1
+                Vector2[] directionsArray = new Vector2[5];
+                directionsArray[0] = new Vector2(0f, 0f) * sensorRange;
+                directionsArray[1] = new Vector2(0f, 1f) * sensorRange;
+                directionsArray[2] = new Vector2(1f, 0f) * sensorRange;
+                directionsArray[3] = new Vector2(0f, -1f) * sensorRange;
+                directionsArray[4] = new Vector2(-1f, 0f) * sensorRange;
+                
+
+                for(int k = 0; k < 5; k++) {  // 5 waterDepth samples in a T-Cross shape around each critter
+                    int index = i * 5 + k;
+
+                    agentFluidPositionsArray[index] = new Vector4(agentCenterX + directionsArray[k].x, 
+                                                          agentCenterY + directionsArray[k].y, 
                                                           (simManager.agentsArray[i].fullSizeBoundingBox.x + 0.25f) * 0.5f / SimulationManager._MapSize, // **** RE-VISIT!!!!! ****
                                                           (simManager.agentsArray[i].fullSizeBoundingBox.y + 0.25f) * 0.5f / SimulationManager._MapSize); //... 0.5/140 ...
 
+                }
+                
 
                 // ***************************** // TEMP HACK!!!!!!! *************************
                 /*if(i == 0) {

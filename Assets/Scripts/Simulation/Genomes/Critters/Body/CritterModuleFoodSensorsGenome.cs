@@ -30,13 +30,13 @@ public class CritterModuleFoodSensorsGenome {
 
     public void GenerateRandomInitialGenome() {
         // Do stuff:
-        useNutrients = true;
-        usePos = false;
-        useVel = false;
+        useNutrients = false;
+        usePos = true;
+        useVel = true;
         useDir = true;
         useStats = false;
-        useEggs = true;
-        useCorpse = true;
+        useEggs = false;
+        useCorpse = false;
 
         //preferenceParticles = 0.5f;
         //preferenceEggs = 0.5f;

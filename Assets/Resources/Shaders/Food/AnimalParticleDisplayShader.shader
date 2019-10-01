@@ -4,6 +4,7 @@
 	{
 		_MainTex ("_MainTex", 2D) = "white" {}  // stem texture sheet		
 		_WaterSurfaceTex ("_WaterSurfaceTex", 2D) = "black" {}
+		_AltitudeTex ("_AltitudeTex", 2D) = "gray" {}
 		//_Tint("Color", Color) = (1,1,1,1)
 		//_Size("Size", vector) = (1,1,1,1)
 	}
@@ -27,6 +28,7 @@
 
 			sampler2D _MainTex;
 			sampler2D _WaterSurfaceTex;
+			sampler2D _AltitudeTex;
 			
 			StructuredBuffer<AnimalParticleData> animalParticleDataCBuffer;			
 			StructuredBuffer<float3> quadVerticesCBuffer;
@@ -89,25 +91,30 @@
 				float t = uv.y; // + 0.5;
 				uv.y = 1.0 - uv.y;
 
-				//float2 curvePos = GetPoint2D(particleData.worldPos.xy, particleData.p1, particleData.p2, particleData.p3, t);
-				//float2 curveTangent = normalize(GetFirstDerivative(particleData.worldPos.xy, particleData.p1, particleData.p2, particleData.p3, t));
-				//float2 curveBitangent = float2(curveTangent.y, -curveTangent.x);
-				
 				float selectedMask = (1.0 - saturate(abs(_SelectedParticleIndex - (int)inst))) * _IsSelected;
 				float hoverMask = (1.0 - saturate(abs(_ClosestParticleID - (int)inst))) * _IsHover;
 
 				//float width = 0.25 + hoverMask + selectedMask * 2.5;
-				float width = sqrt(particleData.biomass) * 0.04 * (1 - 2 * abs(0.75 - uv.y)) + 0.015 + 0.015 * hoverMask + 0.025 * selectedMask; //GetPoint1D(waterCurveData.widths.x, waterCurveData.widths.y, waterCurveData.widths.z, waterCurveData.widths.w, t) * 0.75 * (1 - saturate(testNewVignetteMask));
+				float width = sqrt(particleData.biomass) * 0.025 * (1 - 2 * abs(0.75 - uv.y)) + 0.0115 + 0.01 * hoverMask + 0.02 * selectedMask; //GetPoint1D(waterCurveData.widths.x, waterCurveData.widths.y, waterCurveData.widths.z, waterCurveData.widths.w, t) * 0.75 * (1 - saturate(testNewVignetteMask));
 				
 				float freq = 20;
 				float swimAnimOffset = sin(_Time.y * freq - t * 7 + (float)inst * 0.1237) * 4;
 				float swimAnimMask = t * saturate(1.0 - particleData.isDecaying); //saturate(1.0 - uv.y); //saturate(1.0 - t);
 				
-				//float2 offset = curveBitangent * -(quadPoint.x * 4 + swimAnimOffset * swimAnimMask) * width; // * randomWidth; // *** support full vec4 widths!!!
-				
 				float3 worldPosition = particleData.worldPos; // float3(curvePos,0) + float3(offset, 0.0);
 				worldPosition.x += (swimAnimOffset * swimAnimMask) * width;
-				// REFRACTION:
+
+				float decayProgress = 0;
+				if(particleData.isDecaying > 0.5) {
+					float2 altUV = worldPosition.xy / _MapSize;				
+					float altitudeRaw = tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 0)).x;
+					float zPosOfLand = -(altitudeRaw * 2 - 1) * 10;
+					decayProgress = 1.0 - (particleData.biomass / (particleData.extra0 + 0.0000001));
+					worldPosition.z = lerp(worldPosition.z, zPosOfLand, decayProgress * particleData.isDecaying * 1.1);
+
+				}
+				
+				// REFRACTION:				
 				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / _MapSize, 0, 0)).yzw;				
 				float refractionStrength = 0.15;
 				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
@@ -115,17 +122,15 @@
 				float2 vertexOffset = quadPoint.xy * width * 6;
 				vertexOffset.xy *= 4;
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition.xy + vertexOffset, worldPosition.z, 1.0)));			
-				o.uv = uv; //quadVerticesCBuffer[id].xy + 0.5f;	
+				o.uv = uv;
+
+
 
 				o.color = particleData.color;
 				float oldAgeMask = saturate((particleData.age - 1.0) * 1000);
 				o.color.a = saturate(particleData.age * 0.5); //  1.0 - oldAgeMask; // particleData.isDecaying;
 				o.highlight = float2(hoverMask, selectedMask);
-				o.status = float2(particleData.isActive, particleData.isDecaying);
-				//o.color.x = (1.0 - particleData.isDecaying) * particleData.isActive;
-				//o.color.y = hoverMask;
-				
-				//o.color = float4(saturate(particleData.isDecaying), saturate(particleData.biomass * 5), saturate(particleData.age * 0.5), 1);
+				o.status = float2(particleData.isActive, decayProgress);
 				
 				return o;
 			}

@@ -4,6 +4,7 @@
 	{
 		_MainTex ("Texture", 2D) = "white" {}
 		_PatternTex ("Pattern Texture", 2D) = "white" {}
+		_AltitudeTex ("_AltitudeTex", 2D) = "gray" {}
 		_WaterSurfaceTex ("_WaterSurfaceTex", 2D) = "black" {}
 	}
 	SubShader
@@ -36,6 +37,7 @@
 			sampler2D _MainTex;
 			//float4 _MainTex_ST;
 			sampler2D _PatternTex;
+			sampler2D _AltitudeTex;
 			sampler2D _WaterSurfaceTex;
 
 			uniform float _MapSize;
@@ -92,7 +94,12 @@
 				quadVertexOffset *= (1 - critterSimData.decayPercentage);
 				// old //float3 vertexWorldPos = critterWorldPos + strokeBindPos + quadVerticesCBuffer[id] * 0.645 * length(genericStrokeData.scale);
 				float3 vertexWorldPos = genericStrokeData.worldPos + quadVertexOffset * 1.25 * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage) * 1;
-				vertexWorldPos.z += decayAmount * 9.5;
+				
+				float2 altUV = vertexWorldPos.xy / _MapSize;					
+				float altitudeRaw = tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 0)).x;
+				float seaFloorAltitude = -(altitudeRaw * 2 - 1) * 10;
+
+				vertexWorldPos.z = lerp(vertexWorldPos.z, seaFloorAltitude, decayAmount);
 				// REFRACTION:							
 				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(genericStrokeData.worldPos.xy /  _MapSize, 0, 0)).yzw;
 				float refractionStrength = 0.4;

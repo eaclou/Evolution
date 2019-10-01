@@ -13,15 +13,18 @@ public class CritterModuleEnvironment {
     public float[] waterVelX;
     public float[] waterVelY;
 
-    public float[] distUp; // start up and go clockwise!    
-    public float[] distRight;
-    public float[] distDown;
-    public float[] distLeft;
+    public float[] waterGradX;  // plan B
+    public float[] waterGradY;  // plan B
 
-    public float[] distTopRight;
-    public float[] distBottomRight;    
-    public float[] distBottomLeft;
-    public float[] distTopLeft;
+    public float[] depthNorth; // start up and go clockwise!    
+    public float[] depthEast;
+    public float[] depthSouth;
+    public float[] depthWest;
+
+    public float[] velTopRightX;
+    public float[] velTopLeftY;    
+    public float[] velBottomLeftX;
+    public float[] velBottomRightY;
     
     public CritterModuleEnvironment() {
                 
@@ -34,15 +37,15 @@ public class CritterModuleEnvironment {
         waterVelX = new float[1];
         waterVelY = new float[1];
 
-        distUp = new float[1]; 
-        distRight = new float[1]; 
-        distDown = new float[1];       
-        distLeft = new float[1]; 
+        depthNorth = new float[1]; 
+        depthEast = new float[1]; 
+        depthSouth = new float[1];       
+        depthWest = new float[1]; 
 
-        distTopRight = new float[1]; 
-        distBottomRight = new float[1]; 
-        distBottomLeft = new float[1];
-        distTopLeft = new float[1]; 
+        velTopRightX = new float[1]; 
+        velTopLeftY = new float[1]; 
+        velBottomLeftX = new float[1];
+        velBottomRightY = new float[1]; 
         
         this.parentID = genome.parentID;
         this.inno = genome.inno;
@@ -50,7 +53,7 @@ public class CritterModuleEnvironment {
 
     public void MapNeuron(NID nid, Neuron neuron) {
         if (inno == nid.moduleID) {
-            if (nid.neuronID == 1) {
+            if (nid.neuronID == 1) {                
                 neuron.currentValue = waterDepth;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
@@ -62,39 +65,43 @@ public class CritterModuleEnvironment {
                 neuron.currentValue = waterVelY;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
+
+
+            
             if (nid.neuronID == 4) {
-                neuron.currentValue = distUp;
+                neuron.currentValue = depthNorth;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
             if (nid.neuronID == 5) {
-                neuron.currentValue = distRight;
+                neuron.currentValue = depthEast;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
             if (nid.neuronID == 6) {
-                neuron.currentValue = distDown;
+                neuron.currentValue = depthSouth;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
             if (nid.neuronID == 7) {
-                neuron.currentValue = distLeft;
+                neuron.currentValue = depthWest;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
 
             if (nid.neuronID == 8) {
-                neuron.currentValue = distTopRight;
+                neuron.currentValue = velTopRightX;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }            
             if (nid.neuronID == 9) {
-                neuron.currentValue = distBottomRight;
+                neuron.currentValue = velTopLeftY;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }            
             if (nid.neuronID == 10) {
-                neuron.currentValue = distBottomLeft;
+                neuron.currentValue = velBottomLeftX;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }            
             if (nid.neuronID == 11) {
-                neuron.currentValue = distTopLeft;
+                neuron.currentValue = velBottomRightY;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
+            
         }
     }
 
@@ -103,6 +110,11 @@ public class CritterModuleEnvironment {
             waterDepth[0] = agent.depth;
             waterVelX[0] = agent.avgFluidVel.x * 10f;
             waterVelY[0] = agent.avgFluidVel.y * 10f; // *** *10f to get closer to 0-1 range since values are very low
+
+            depthNorth[0] = agent.depthNorth;
+            depthEast[0] = agent.depthEast;
+            depthSouth[0] = agent.depthSouth;
+            depthWest[0] = agent.depthWest;
         }
 
         int rayLayer = LayerMask.GetMask("EnvironmentCollision");

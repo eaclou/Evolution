@@ -381,6 +381,8 @@ public class UIManager : MonoBehaviour {
     private bool isBrushAddingAgents = false;
     private int brushAddAgentCounter = 0;
     private int framesPerAgentSpawn = 3;
+
+    public bool brainDisplayOn = false;
     
     #endregion
 
@@ -1159,7 +1161,7 @@ public class UIManager : MonoBehaviour {
                         str += "\nPlant Particle # " + particleData.index.ToString() + "  [" + particleData.nearestCritterIndex.ToString() + "]";
                         //str += "\nCPU: " + gameManager.simulationManager.vegetationManager.tempClosestPlantParticleIndexAndPos.ToString();
                         str += "\nCoords [ " + particleData.worldPos.x.ToString("F0") + " , " + particleData.worldPos.y.ToString("F0");
-                        //str += "\nCritter (" + gameManager.simulationManager.uiManager.curMousePositionOnWaterPlane.x.ToString() + ", " + gameManager.simulationManager.uiManager.curMousePositionOnWaterPlane.y.ToString() + ")";                        
+                        str += "\nColorA (" + particleData.colorA.ToString() + ".";                        
                         str += "\n\nAge: " + (particleData.age * 1000f).ToString("F0");
                         str += "\nBiomass: " + (particleData.biomass * 1000f).ToString("F0");
                         str += "\nNutrients Used: " + (particleData.nutrientsUsed * 100000000f).ToString("F0");
@@ -1198,52 +1200,127 @@ public class UIManager : MonoBehaviour {
                         
                     }
                     else {
-                        
 
                         int critterIndex = cameraManager.targetAgentIndex;
                         Agent agent = gameManager.simulationManager.agentsArray[critterIndex];
-                        str += agent.candidateRef.candidateGenome.bodyGenome.coreGenome.name + " (gen " + agent.candidateRef.candidateGenome.bodyGenome.coreGenome.generation.ToString() + ")\n[" + critterIndex.ToString() + "]    SpeciesID " + agent.speciesIndex.ToString();
-                        float energy = 0f;
-                        float stomach = 0f; // agent.coreModule.foodStored
-                        float health = 100f;
-                        if(agent.coreModule != null) {
-                            energy = agent.coreModule.energy * 100f;
-                            stomach = agent.coreModule.stomachContentsNorm * 100f;
-                            health = agent.coreModule.healthBody * 100f;
+
+                        
+
+                        if(brainDisplayOn) {
+                            //str += "nearestEA" + agent.coreModule.nearestEnemyAgent.ownPos.ToString() + "?";
+
+                            str += "\n" + agent.brain.neuronList.Count.ToString() + " Neurons    " + agent.brain.axonList.Count.ToString() + " Axons";
+                            //str += "\nisMouthTrigger" + agent.coreModule.isMouthTrigger[0].ToString() + "";
+                            //str += "\nWaterDepth " + agent.environmentModule.waterDepth[0].ToString("F3") + "";
+                            //str += "\nN=" + agent.environmentModule.depthNorth[0].ToString("F3") + ", E=" + agent.environmentModule.depthEast[0].ToString("F3") + ", S=" + agent.environmentModule.depthSouth[0].ToString("F3") + ", W=" + agent.environmentModule.depthWest[0].ToString("F3") + ",";
+                            //str += "\nWaterVel " + agent.environmentModule.waterVelX[0].ToString("F3") + ", " + agent.environmentModule.waterVelY[0].ToString("F3");
+                            //str += "\nPlant[" + agent.foodModule.nearestFoodParticleIndex.ToString() + "] " + agent.foodModule.nearestFoodParticlePos.ToString() + "";
+                            //str += "\nZoo[" + agent.foodModule.nearestAnimalParticleIndex.ToString() + "] " + agent.foodModule.nearestAnimalParticlePos.ToString() + "";
+                            //str += "\nOwnVel" + agent.movementModule.ownVelX[0].ToString("F3") + ", " + agent.movementModule.ownVelY[0].ToString("F3");
+                            //str += "\nHit " + agent.coreModule.isContact[0].ToString("F2") + " (" + agent.coreModule.contactForceX[0].ToString("F4") + ", " + agent.coreModule.contactForceY[0].ToString("F4");
+                            //str += "\nInCOMM: (" + agent.communicationModule.inComm0[0].ToString("F2") + ", " + agent.communicationModule.inComm1[0].ToString("F2") + ", " + agent.communicationModule.inComm2[0].ToString("F2") + ", " + agent.communicationModule.inComm3[0].ToString("F2") + ")";
+                            //str += "\nOutCOMM: (" + agent.communicationModule.outComm0[0].ToString("F2") + ", " + agent.communicationModule.outComm1[0].ToString("F2") + ", " + agent.communicationModule.outComm2[0].ToString("F2") + ", " + agent.communicationModule.outComm3[0].ToString("F2") + ")";
+
+                            string brainInputsTxt = "\nINPUTS:";
+                            for(int n = 0; n < agent.brain.neuronList.Count; n++) {
+                                if(agent.brain.neuronList[n].neuronType == NeuronGenome.NeuronType.In) {
+                                    
+                                    if (n % 3 == 0) {
+                                        brainInputsTxt += "\n";
+                                    }
+                                    float neuronValue = agent.brain.neuronList[n].currentValue[0];
+                                    if(neuronValue < -0.2f) {
+                                        brainInputsTxt += "<color=#FF6644FF>";
+                                    }
+                                    else if(neuronValue > 0.2f) {
+                                        brainInputsTxt += "<color=#44FF66FF>";
+                                    }
+                                    else {
+                                        brainInputsTxt += "<color=#A998B5FF>";
+                                    }
+                                    brainInputsTxt += "[" + n.ToString() + "] " + agent.brain.neuronList[n].currentValue[0].ToString("F2") + "</color>  ";
+                                    
+                                }
+                            }
+                            string brainOutputsTxt = "\n\nOUTPUTS:\n";
+                            for(int o = 0; o < agent.brain.neuronList.Count; o++) {
+                                if(agent.brain.neuronList[o].neuronType == NeuronGenome.NeuronType.Out) {
+                                    
+                                    if (o % 3 == 0) {
+                                        brainOutputsTxt += "\n";
+                                    }
+                                    float neuronValue = agent.brain.neuronList[o].currentValue[0];
+                                    if(neuronValue < -0.2f) {
+                                        brainOutputsTxt += "<color=#FF6644FF>";
+                                    }
+                                    else if(neuronValue > 0.2f) {
+                                        brainOutputsTxt += "<color=#44FF66FF>";
+                                    }
+                                    else {
+                                        brainOutputsTxt += "<color=#A998B5FF>";
+                                    }
+                                    brainOutputsTxt += "[" + o.ToString() + "] " + agent.brain.neuronList[o].currentValue[0].ToString("F2") + "</color>  ";
+                                    
+                                    brainOutputsTxt += "";
+                                    
+                                }
+                            }
+                            str += brainInputsTxt + brainOutputsTxt;
+                        }
+                        else {
+                            str += agent.candidateRef.candidateGenome.bodyGenome.coreGenome.name + " (gen " + agent.candidateRef.candidateGenome.bodyGenome.coreGenome.generation.ToString() + ")\n[" + critterIndex.ToString() + "]    SpeciesID " + agent.speciesIndex.ToString();
+                            float energy = 0f;
+                            float stomach = 0f; // agent.coreModule.foodStored
+                            float health = 100f;
+                            
+                            if(agent.coreModule != null) {
+                                energy = agent.coreModule.energy * 100f;
+                                stomach = agent.coreModule.stomachContentsNorm * 100f;
+                                health = agent.coreModule.healthBody * 100f;
+                                
+                            }
+                        
+                            float bodWidth = (agent.fullSizeBoundingBox.x + agent.fullSizeBoundingBox.z) * 0.5f;
+                            float bodLength = agent.fullSizeBoundingBox.y;
+                            str += "\nAge: " + ((float)agent.ageCounter / 100f).ToString("F0");
+                            string aliveTxt = "\nALIVE!"; // + health.ToString("F0") + "%";
+                            aliveTxt += "\nEnergy: " + energy.ToString("F0") + "%";
+                            aliveTxt += "\nHealth: " + health.ToString("F0") + "%";
+                            aliveTxt += "\nStomach: " + stomach.ToString("F0") + "%";
+                            //aliveTxt += "\nThrottle  " + (agent.smoothedThrottle * 100f).ToString("F0");
+                            //aliveTxt += "\nWaste   " + (agent.wasteProducedLastFrame * 1000f).ToString("F0") + ", Oxygen   " + (agent.oxygenUsedLastFrame * 1000f).ToString("F0");        
+                            if(agent.curLifeStage == Agent.AgentLifeStage.Dead) {
+                                aliveTxt = "\nDEAD! (" + agent.stringCauseOfDeath + ") " + (agent.GetDecayPercentage() * 100f).ToString("F0") + "%  ";
+                            }
+                            else if(agent.curLifeStage == Agent.AgentLifeStage.Null) {
+                                aliveTxt = "\nNull";
+                            }
+                            else {
+                                aliveTxt += "\n" + agent.curLifeStage.ToString() + ", " + (agent.biomassAtDeath * 100f).ToString("F2");
+                            }
+                            //str += "\n";
+                            str += aliveTxt;
+                            str += "\n";
+                            str += "\nBiomass  " + (agent.currentBiomass * 100f).ToString("F0") + "   ( " + (agent.sizePercentage * 100f).ToString("F0") + "%)";
+                            str += "\nFull Size   " + (bodLength * 10f).ToString("F0") + " x " + (bodWidth * 10f).ToString("F0");
+                            if(agent.coreModule != null) {                                
+                                str += "\ng# " + agent.candidateRef.candidateID.ToString() + ", " + agent.candidateRef.isBeingEvaluated.ToString() + ", " + agent.candidateRef.candidateGenome.bodyGenome.fullsizeBoundingBox.ToString();
+                            }
+                            str += "\n" + agent.brain.neuronList.Count.ToString() + " Neurons    " + agent.brain.axonList.Count.ToString() + " Axons";
+                            //str += "\n";      
+                            str += "\nTotal Eaten\nMeat: " + (agent.totalFoodEatenMeat * 1000f).ToString("F0") + ", Plant: " + (agent.totalFoodEatenPlant * 1000f).ToString("F0");
+                            //str += "\nBiteAnimCounter   " + agent.mouthRef.feedingFrameCounter.ToString();
+                            str += "\n\nLast Known Activity:\n" + agent.lastEvent + ", " + (UnityEngine.Time.frameCount - agent.lastEventTime).ToString() + " frames ago.";
+                            Vector4 closestZooplanktonData = gameManager.simulationManager.zooplanktonManager.closestZooplanktonArray[agent.index];
+                            Vector4 closestPlantData = gameManager.simulationManager.vegetationManager.closestPlantIndexArray[agent.index];
+                            closestZooplanktonData.y = Mathf.Sqrt(closestZooplanktonData.y);
+                            closestPlantData.y = Mathf.Sqrt(closestPlantData.y);
+                            //str += "\nNearest Meat [" + Mathf.RoundToInt(closestZooplanktonData.x).ToString() + "] " + closestZooplanktonData.y; // + gameManager.simulationManager.zooplanktonManager.closestZooplanktonArray[agent.index].y.ToString();
+                            //str += "\nNearest Plant [" + Mathf.RoundToInt(closestPlantData.x).ToString() + "] " + closestPlantData.y;
+                            //str += "\nLiarShader [" + gameManager.simulationManager.zooplanktonManager.closestAnimalParticlesDataArray[gameManager.simulationManager.cameraManager.targetAgentIndex].index.ToString();
+
                         }
                         
-                        float bodWidth = (agent.fullSizeBoundingBox.x + agent.fullSizeBoundingBox.z) * 0.5f;
-                        float bodLength = agent.fullSizeBoundingBox.y;
-                        str += "\nAge: " + ((float)agent.ageCounter / 100f).ToString("F0");
-                        string aliveTxt = "\nALIVE!"; // + health.ToString("F0") + "%";
-                        aliveTxt += "\nEnergy: " + energy.ToString("F0") + "%";
-                        aliveTxt += "\nHealth: " + health.ToString("F0") + "%";
-                        aliveTxt += "\nStomach: " + stomach.ToString("F0") + "%";
-                        //aliveTxt += "\nThrottle  " + (agent.smoothedThrottle * 100f).ToString("F0");
-                        //aliveTxt += "\nWaste   " + (agent.wasteProducedLastFrame * 1000f).ToString("F0") + ", Oxygen   " + (agent.oxygenUsedLastFrame * 1000f).ToString("F0");        
-                        if(agent.curLifeStage == Agent.AgentLifeStage.Dead) {
-                            aliveTxt = "\nDEAD! (" + agent.stringCauseOfDeath + ")";
-                        }
-                        if(agent.curLifeStage == Agent.AgentLifeStage.Null) {
-                            aliveTxt = "\nNull";
-                        }
-                        //str += "\n";
-                        str += aliveTxt;
-                        str += "\n";
-                        str += "\nBiomass  " + (agent.currentBiomass * 100f).ToString("F0") + "   ( " + (agent.sizePercentage * 100f).ToString("F0") + "%)";
-                        //str += "\nFull Size   " + (bodLength * 10f).ToString("F0") + " x " + (bodWidth * 10f).ToString("F0");
-                            
-                        //str += "\n";      
-                        str += "\nTotal Eaten\nMeat: " + (agent.totalFoodEatenMeat * 1000f).ToString("F0") + ", Plant: " + (agent.totalFoodEatenPlant * 1000f).ToString("F0");
-                        //str += "\nBiteAnimCounter   " + agent.mouthRef.feedingFrameCounter.ToString();
-                        str += "\n\nLast Known Activity:\n" + agent.lastEvent + ", " + (UnityEngine.Time.frameCount - agent.lastEventTime).ToString() + " frames ago.";
-                        Vector4 closestZooplanktonData = gameManager.simulationManager.zooplanktonManager.closestZooplanktonArray[agent.index];
-                        Vector4 closestPlantData = gameManager.simulationManager.vegetationManager.closestPlantIndexArray[agent.index];
-                        closestZooplanktonData.y = Mathf.Sqrt(closestZooplanktonData.y);
-                        closestPlantData.y = Mathf.Sqrt(closestPlantData.y);
-                        //str += "\nNearest Meat [" + Mathf.RoundToInt(closestZooplanktonData.x).ToString() + "] " + closestZooplanktonData.y; // + gameManager.simulationManager.zooplanktonManager.closestZooplanktonArray[agent.index].y.ToString();
-                        //str += "\nNearest Plant [" + Mathf.RoundToInt(closestPlantData.x).ToString() + "] " + closestPlantData.y;
-                        //str += "\nLiarShader [" + gameManager.simulationManager.zooplanktonManager.closestAnimalParticlesDataArray[gameManager.simulationManager.cameraManager.targetAgentIndex].index.ToString();
                     }
                 }
                 else if(layerManager.selectedTrophicSlotRef.kingdomID == 3) {
@@ -1602,7 +1679,7 @@ public class UIManager : MonoBehaviour {
                       
                 // Big Plants   
                      imageToolbarSpeciesPortraitRender.sprite = spriteAlgaePortrait;
-                    Vector3 hue = gameManager.simulationManager.vegetationManager.plantSlotGenomeCurrent.plantRepData.hue;
+                    Vector3 hue = gameManager.simulationManager.vegetationManager.plantSlotGenomeCurrent.plantRepData.colorA;
                     Color colo = new Color(hue.x, hue.y, hue.z);
                     imageToolbarSpeciesPortraitRender.color = colo;
                     buttonToolbarWingDeleteSpecies.gameObject.SetActive(true);
@@ -2265,7 +2342,7 @@ public class UIManager : MonoBehaviour {
             }
             if (agentRef.curLifeStage == Agent.AgentLifeStage.Dead) {
                 curCount = agentRef.lifeStageTransitionTimeStepCounter;
-                maxCount = agentRef._DecayDurationTimeSteps;
+                maxCount = curCount; // agentRef._DecayDurationTimeSteps;
             }
             int progressPercent = Mathf.RoundToInt((float)curCount / (float)maxCount * 100f);
             string lifeStageProgressTxt = " " + agentRef.curLifeStage.ToString() + " " + curCount.ToString() + "/" + maxCount.ToString() + "  " + progressPercent.ToString() + "% ";
@@ -3371,8 +3448,8 @@ public class UIManager : MonoBehaviour {
     public void StartFollowingAgent() {
         cameraManager.isFollowingAgent = true;
         isActiveInspectPanel = true;    
-        animatorInspectPanel.enabled = true;
-        animatorInspectPanel.Play("SlideOnPanelInspect");        
+        //animatorInspectPanel.enabled = true;
+        //animatorInspectPanel.Play("SlideOnPanelInspect");        
     }
 
     public void StopFollowingPlantParticle() {
@@ -4063,6 +4140,10 @@ public class UIManager : MonoBehaviour {
     public void ClickInfoPanelExpand() {
         isActiveInfoPanel = !isActiveInfoPanel;
 
+    }
+
+    public void ClickToolbarInspectInfoPanelPageCycle() {
+        brainDisplayOn = !brainDisplayOn;
     }
 
     /*public void ClickAnnouncementText() {

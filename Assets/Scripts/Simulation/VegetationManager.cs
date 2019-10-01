@@ -85,7 +85,7 @@ public class VegetationManager {
 
     //private AlgaeParticleData representativeAlgaeLayerGenome;
         
-    public struct PlantParticleData {
+    public struct PlantParticleData {  // 4 ints, 28 floats
         public int index;
         public int critterIndex;
         public int nearestCritterIndex;
@@ -100,11 +100,23 @@ public class VegetationManager {
         public float oxygenProduced;
         public float nutrientsUsed;
         public float wasteProduced;
-        public Vector3 hue;
+	    public Vector3 colorA;	
+	    public Vector3 colorB;
+	    public float health;
+	    public float typeID;
+	    public float rootedness;
+	    public float radiusAxisOne;
+	    public float radiusAxisTwo;
+	    public float leafDensity;
+	    public float angleInc;
+	    public float leafLength;
+	    public float leafWidth;
+	    public float leafRoundness;
+	    public int brushTypeX;
     }
     
     private int GetPlantParticleDataSize() {
-        int bitSize = sizeof(float) * 15 + sizeof(int) * 3;
+        int bitSize = sizeof(float) * 28 + sizeof(int) * 4;
         return bitSize;
     }
 
@@ -127,7 +139,7 @@ public class VegetationManager {
         plantParticlesRepresentativeGenomeArray[0] = plantSlotGenomeCurrent.plantRepData;
         plantParticlesRepresentativeGenomeCBuffer.SetData(plantParticlesRepresentativeGenomeArray);
         Debug.Log("ASDF ProcessPlantSlotMutation " + plantSlotGenomeCurrent.growthRate.ToString());
-        Vector3 hue = plantSlotGenomeCurrent.plantRepData.hue;
+        Vector3 hue = plantSlotGenomeCurrent.plantRepData.colorA;
         plantSlotGenomeCurrent.displayColor = new Color(hue.x, hue.y, hue.z);
     }
 
@@ -184,7 +196,20 @@ public class VegetationManager {
             data.isActive = 0f;
             data.isDecaying = 0f;
             data.age = UnityEngine.Random.Range(1f, 2f);
-            data.hue = new Vector3(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f));
+            data.colorA = new Vector3(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f));
+            data.colorB = new Vector3(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f));
+            data.health = 0f;
+            data.typeID = 0f;
+	        data.rootedness = UnityEngine.Random.Range(0f, 1f);
+	        data.radiusAxisOne = UnityEngine.Random.Range(0f, 1f);
+	        data.radiusAxisTwo = UnityEngine.Random.Range(0f, 1f);
+	        data.leafDensity = UnityEngine.Random.Range(0f, 1f);
+	        data.angleInc = UnityEngine.Random.Range(0f, 1f);
+	        data.leafLength = UnityEngine.Random.Range(0f, 1f);
+	        data.leafWidth = UnityEngine.Random.Range(0f, 1f);
+	        data.leafRoundness = UnityEngine.Random.Range(0f, 1f);
+	        data.brushTypeX = 0;
+
             plantParticlesArray[i] = data;
         }
         //Debug.Log("Fill Initial Particle Array Data CPU: " + (Time.realtimeSinceStartup - startTime).ToString());
@@ -443,10 +468,10 @@ public class VegetationManager {
             mutatedGenome.textDescriptionMutation = "Growth Rate: " + mutatedGenome.growthRate.ToString("F2");
 
             mutatedGenome.plantRepData = plantSlotGenomeCurrent.plantRepData;
-            mutatedGenome.plantRepData.hue = Vector3.Lerp(mutatedGenome.plantRepData.hue, UnityEngine.Random.insideUnitSphere, 0.1f);
+            mutatedGenome.plantRepData.colorA = Vector3.Lerp(mutatedGenome.plantRepData.colorA, UnityEngine.Random.insideUnitSphere, 0.1f);
             
             plantSlotGenomeMutations[j] = mutatedGenome;
-            Vector3 hue = mutatedGenome.plantRepData.hue;
+            Vector3 hue = mutatedGenome.plantRepData.colorA;
             plantSlotGenomeMutations[j].displayColor = new Color(hue.x, hue.y, hue.z);
             
         }

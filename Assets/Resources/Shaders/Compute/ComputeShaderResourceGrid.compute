@@ -214,7 +214,7 @@ void CSAdvectRD (uint3 id : SV_DispatchThreadID)
 	float deltaBrushAlgae = _IsSpiritBrushAlgaeOn * _SpiritBrushPosNeg * spiritBrushSample.x;
 
 	resourceGridRead.x = saturate(resourceGridRead.x - externalResource.x * 10);  // plantParticles Nutrient Usage
-	resourceGridRead.y += externalResource.z * 10; // Waste += Zooplankton Poop
+	resourceGridRead.y += externalResource.z * 4; // Waste += Zooplankton Poop
 	resourceGridRead.w -= externalResource.y * 100; // Algae -= Algae Eaten
 	resourceGridRead.z = saturate(resourceGridReadSlow.z + deltaBrushDecomposer * brushMagnitude);  // *** TEMPORARY!!! **** Decomposers removed from brushing
 	resourceGridRead.w = saturate(resourceGridRead.w + deltaBrushAlgae * brushMagnitude);

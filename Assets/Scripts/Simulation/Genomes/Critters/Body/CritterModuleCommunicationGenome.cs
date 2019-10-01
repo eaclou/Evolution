@@ -18,7 +18,7 @@ public class CritterModuleCommunicationGenome {
     public void GenerateRandomInitialGenome() {
         // Do stuff:
 
-        useComms = false;
+        useComms = true;
     }
 
     public void AppendModuleNeuronsToMasterList(ref List<NeuronGenome> neuronList) {

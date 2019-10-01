@@ -36,9 +36,19 @@ public class CritterModuleEnvironmentSensorsGenome {
             neuronList.Add(depth);      
             neuronList.Add(velX);      
             neuronList.Add(velY);   
+
+            NeuronGenome depthNorth = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 4); // 32 // start up and go clockwise!        
+            NeuronGenome depthEast = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 5);  // 34        
+            NeuronGenome depthSouth = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 6);  // 36        
+            NeuronGenome depthWest = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 7);  // 38       
+        
+            neuronList.Add(depthNorth);   
+            neuronList.Add(depthEast);     
+            neuronList.Add(depthSouth);       
+            neuronList.Add(depthWest); 
         }
         if (useCardinals) {
-            NeuronGenome distUp = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 4); // 32 // start up and go clockwise!        
+            /*NeuronGenome distUp = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 4); // 32 // start up and go clockwise!        
             NeuronGenome distRight = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 5);  // 34        
             NeuronGenome distDown = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 6);  // 36        
             NeuronGenome distLeft = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 7);  // 38       
@@ -46,7 +56,7 @@ public class CritterModuleEnvironmentSensorsGenome {
             neuronList.Add(distUp);   
             neuronList.Add(distRight);     
             neuronList.Add(distDown);       
-            neuronList.Add(distLeft); 
+            neuronList.Add(distLeft); */
         }   
         if(useDiagonals) {
             NeuronGenome distTopRight = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 8); // 33

@@ -56,7 +56,7 @@ float3 GetFinalBackgroundColor() {   // for shadows?
 float4 GetGroundColor(float3 worldPos, float4 frameBufferColor, float4 altitudeTex, float4 waterSurfaceTex, float4 resourceTex) {
 	float turbidity = _Turbidity;  
 	float causticsStrength = lerp(0.025, 0.275, _Turbidity);
-	float minFog = 0.06125;
+	float minFog = 0.2;
 	
 	float4 finalColor = frameBufferColor;
 	float3 decomposerHue = float3(0.8,0.3,0);

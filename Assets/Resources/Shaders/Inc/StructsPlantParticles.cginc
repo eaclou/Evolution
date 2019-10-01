@@ -13,5 +13,17 @@ struct PlantParticleData {
 	float oxygenProduced;
     float nutrientsUsed;
     float wasteProduced;
-	float3 color;
+	float3 colorA;	
+	float3 colorB; /// x == generationCount,  y== ?,  z == ?
+	float health;
+	float typeID;
+	float rootedness;
+	float radiusAxisOne;
+	float radiusAxisTwo;
+	float leafDensity;
+	float angleInc;
+	float leafLength;
+	float leafWidth;
+	float leafRoundness;
+	int brushTypeX;
 };

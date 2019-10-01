@@ -122,7 +122,7 @@
 				o.uv = quadVerticesCBuffer[id].xy + 0.5f;	
 								
 				o.color = float4(saturate(particleData.isDecaying), 0, rand2, 1 - saturate(particleData.isDecaying));
-				o.hue = float4(particleData.color, radius);
+				o.hue = float4(particleData.colorA, radius);
 				return o;
 			}
 

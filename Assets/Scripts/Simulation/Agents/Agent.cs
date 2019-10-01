@@ -23,6 +23,7 @@ public class Agent : MonoBehaviour {
     // Refactor??
     public bool isActing = false;  // biting, defending, dashing, etc -- exclusive actions
     public bool isResting = false;
+    public bool isDecaying = false;
 
     public bool isMarkedForDeathByUser = false;
 
@@ -42,7 +43,7 @@ public class Agent : MonoBehaviour {
         Dead,
         Null
     }
-    private int gestationDurationTimeSteps = 21;
+    private int gestationDurationTimeSteps = 36;
     public int _GestationDurationTimeSteps
     {
         get
@@ -56,7 +57,7 @@ public class Agent : MonoBehaviour {
     }
     
     public int maxAgeTimeSteps = 100000;
-    private int decayDurationTimeSteps = 420;
+    /*private int decayDurationTimeSteps = 420;
     public int _DecayDurationTimeSteps
     {
         get
@@ -67,10 +68,10 @@ public class Agent : MonoBehaviour {
         {
 
         }
-    }
-    private int maxGrowthPeriod = 2560;
+    }*/
+    //private int maxGrowthPeriod = 2560;
 
-    private int growthScalingSkipFrames = 8;
+    private int growthScalingSkipFrames = 10;
 
     public float sizePercentage = 0f;
     
@@ -120,7 +121,7 @@ public class Agent : MonoBehaviour {
     public float oxygenUsedLastFrame = 0f;
     //public float currentReproductiveStockpile = 0f;
     private float fullsizeBiomass = 1f;
-    private float biomassAtDeath = 1f;
+    public float biomassAtDeath = 1f;
     
     private Vector3 prevPos;  // use these instead of sampling rigidbody?
     public Vector3 _PrevPos
@@ -148,6 +149,10 @@ public class Agent : MonoBehaviour {
     public float avgVel;
     public Vector2 avgFluidVel;
     public float depth;
+    public float depthNorth;
+    public float depthEast;
+    public float depthSouth;
+    public float depthWest;
     
     public bool isSwallowingPrey = false;
     public bool isBeingSwallowed = false;
@@ -172,6 +177,20 @@ public class Agent : MonoBehaviour {
         // temp fix for delayed spawning of Agents (leading to nullReferenceExceptions)
         //agentWidthsArray = new float[widthsTexResolution];
         isInert = true;
+    }
+
+    public float GetDecayPercentage() {
+        float percentage = 0f;
+        if(curLifeStage == AgentLifeStage.Dead) {
+            if(this.biomassAtDeath == 0f) {
+                Debug.LogError("AAAHH" + index.ToString());
+            }
+            else {
+                percentage = 1f - (this.currentBiomass / this.biomassAtDeath);
+            }
+            
+        }
+        return Mathf.Clamp01(percentage);
     }
     
     public void SetToAwaitingRespawn() {
@@ -425,7 +444,7 @@ public class Agent : MonoBehaviour {
     }
     public void CheckForDeathHealth() {
         // HEALTH FAILURE:
-        if (coreModule.healthHead <= 0f) {
+        if (coreModule.healthBody <= 0f) {
 
             curLifeStage = Agent.AgentLifeStage.Dead;
             lifeStageTransitionTimeStepCounter = 0;
@@ -435,20 +454,11 @@ public class Agent : MonoBehaviour {
             coreModule.healthBody = 0f;
             coreModule.healthExternal = 0f;
 
+            //Debug.LogError("CheckForDeathHealth" + currentBiomass.ToString());
+
             stringCauseOfDeath = "Fatal Injuries";
             InitializeDeath();
         }
-        /*if (coreModule.healthBody <= 0f) {
-
-            curLifeStage = Agent.AgentLifeStage.Dead;
-            lifeStageTransitionTimeStepCounter = 0;
-            
-            coreModule.healthHead = 0f;
-            coreModule.healthBody = 0f;
-            coreModule.healthExternal = 0f;
-
-            InitializeDeath();
-        }*/
     }
     private void CheckForDeathOldAge() {
         if(ageCounter > maxAgeTimeSteps) {
@@ -480,6 +490,8 @@ public class Agent : MonoBehaviour {
 
         masterFitnessScore = totalExperience; // update this???
         
+        biomassAtDeath = currentBiomass;
+
         mouthRef.Disable();
     }
     private void CheckForLifeStageTransition() {
@@ -502,7 +514,7 @@ public class Agent : MonoBehaviour {
                 CheckForDeathDivineJudgment();
                 break;
             case AgentLifeStage.Dead:
-                if(currentBiomass <= 0f && lifeStageTransitionTimeStepCounter >= decayDurationTimeSteps) {  // Fully decayed
+                if(currentBiomass <= 0f) { //// || lifeStageTransitionTimeStepCounter >= decayDurationTimeSteps) {  // Fully decayed
                     curLifeStage = AgentLifeStage.Null;                    
                     lifeStageTransitionTimeStepCounter = 0;
                     isInert = true;
@@ -532,6 +544,8 @@ public class Agent : MonoBehaviour {
 
                 bodyRigidbody.velocity = Vector2.zero;
                 bodyRigidbody.angularVelocity = 0f;
+
+                biomassAtDeath = 1f; // ??
                               
                 break;
             default:
@@ -585,7 +599,18 @@ public class Agent : MonoBehaviour {
         lastEvent = "Ate Zooplankton! (" + amount.ToString() + ")";
         lastEventTime = UnityEngine.Time.frameCount;
     }
-    public void ProcessDamageReceived(float damage, Agent predatorAgentRef) {
+    public void TakeDamage(float damage) {
+        coreModule.hitPoints[0] -= damage;
+        // currently no distinctionbetween regions:
+        coreModule.healthHead -= damage;
+        coreModule.healthBody -= damage;
+        coreModule.healthExternal -= damage;
+
+        totalDamageTaken += damage;
+
+        CheckForDeathHealth();
+    }
+    public void ProcessBiteDamageReceived(float damage, Agent predatorAgentRef) {
 
         damage = damage / coreModule.healthBonus;
 
@@ -601,16 +626,11 @@ public class Agent : MonoBehaviour {
 
         damage *= defendBonus;
 
-        coreModule.hitPoints[0] -= damage;
-        // currently no distinctionbetween regions:
-        coreModule.healthHead -= damage;
-        coreModule.healthBody -= damage;
-        coreModule.healthExternal -= damage;
-
-        totalDamageTaken += damage;
+        
         predatorAgentRef.totalDamageDealt += damage;
 
-        CheckForDeathHealth();
+        TakeDamage(damage);
+        
 
         lastEvent = "Bitten! (" + damage.ToString() + ") by #" + predatorAgentRef.index.ToString();
         lastEventTime = UnityEngine.Time.frameCount;
@@ -791,8 +811,11 @@ public class Agent : MonoBehaviour {
         colliderBody.enabled = true;
 
         currentBiomass = settingsRef.agentSettings._BaseInitMass;
-        fullsizeBiomass = currentBiomass * 10f;
-        coreModule.energy = currentBiomass * 20f;  // should be proportional to body size??
+        biomassAtDeath = currentBiomass; // avoid divide by 0
+        fullsizeBiomass = currentBiomass * 100f;
+        coreModule.energy = currentBiomass * 36f;  // should be proportional to body size??
+
+        
 
         mouthRef.Enable();
 
@@ -880,6 +903,8 @@ public class Agent : MonoBehaviour {
 
         if(currentBiomass <= 0f) {
             currentBiomass = 0f;
+
+
         }
     }
 
@@ -962,6 +987,17 @@ public class Agent : MonoBehaviour {
             coreModule.stomachContentsMeat = 0f;
         }
 
+        // Heal:  // *** Re-Implement !!! ***************
+        float healRate = 0.0005f;
+        float energyToHealthConversionRate = 5f * coreModule.healthBonus;
+        if(coreModule.healthBody < 1f) {
+            coreModule.healthBody += healRate;
+            coreModule.healthHead += healRate;
+            coreModule.healthExternal += healRate;
+
+            coreModule.energy -= healRate / energyToHealthConversionRate;
+        }
+
         float oxygenMask = Mathf.Clamp01(simManager.simResourceManager.curGlobalOxygen * settingsRef.agentSettings._OxygenEnergyMask);
         
         coreModule.energy += createdEnergyTotal * settingsRef.agentSettings._DigestionEnergyEfficiency * oxygenMask;
@@ -970,16 +1006,7 @@ public class Agent : MonoBehaviour {
         //    coreModule.energy = 1f;
         //}
 
-        // Heal:  // *** Re-Implement !!! ***************
-        /*float healRate = 0.0005f;
-        float energyToHealthConversionRate = 5f * coreModule.healthBonus;
-        if(coreModule.healthBody < 1f) {
-            coreModule.healthBody += healRate;
-            coreModule.healthHead += healRate;
-            coreModule.healthExternal += healRate;
-
-            coreModule.energy -= healRate / energyToHealthConversionRate;
-        }*/
+        
 
         /* STAMINA:
         float staminaRefillRate = 0.0005f;

@@ -288,8 +288,8 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 
 		// ** Pre-compute this in future:::: *****
 		float4 terrainSampleCenter = altitudeRead.SampleLevel(_LinearClamp, altUV, 1);
-		float4 terrainSampleRight = altitudeRead.SampleLevel(_LinearClamp, altUV + float2(0.001, 0), 1);
-		float4 terrainSampleTop = altitudeRead.SampleLevel(_LinearClamp, altUV + float2(0, 0.001), 1);
+		float4 terrainSampleRight = altitudeRead.SampleLevel(_LinearClamp, altUV + float2(0.005, 0), 1);
+		float4 terrainSampleTop = altitudeRead.SampleLevel(_LinearClamp, altUV + float2(0, 0.005), 1);
 
 		float altitude = terrainSampleCenter.x;			
 		
@@ -330,7 +330,7 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 				animalParticlesWrite[id.x].extra0 = bodyMass;
 			}
 			else {   // ALIVE AND YOUNG:::
-				const int numSamples = 8;
+				const int numSamples = 4;
 				int gapLength = 1024 / numSamples;
 				
 				for(int i = 0; i < numSamples; i++) {
@@ -385,9 +385,10 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 
 				float energyDelta = algaeConsumed - (bodyMass * 0.000016 + 0.0000000065);
 				energy += (energyDelta * 20000);
+				energy -= (1.0 - isUnderwater) * 0.00001;
 		
-				float growthEfficiency = 45; //
-				float wasteEfficiency = 5;
+				float growthEfficiency = 42; //
+				float wasteEfficiency = 2.5;
 				float growthMass = algaeConsumed * growthEfficiency * oxygenConsumptionMask; // Also limited by OXYGEN!!!
 					// Maximum growth needs an explicit cap? or should it simply be determined by max algaeConsumption Rate + maxAge?
 				wasteMass += algaeConsumed * wasteEfficiency;		
@@ -401,7 +402,7 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 				animalParticlesWrite[id.x].energy = energy;
 			}		
 		}
-
+		 
 		// WATER CURRENTS *********  (happens regardless of dead/alive)
 		float2 fluidVel = velocityRead.SampleLevel(_LinearRepeat, uv, 2).xy;  // water velocity
 		float fluidSpeedMult = 0.0167;
@@ -492,6 +493,7 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 						float randD = rand(float2(rand01, _Time * 0.9174 + 90.13));
 
 						animalParticlesWrite[id.x].genomeVector = lerp(representativeParticle.genomeVector, float4(randA, randB, randC, randD), 0.33);
+						animalParticlesWrite[id.x].genomeVector.w = 0.0;
 
 						animalParticlesWrite[id.x].extra0 = 0;
 
@@ -516,19 +518,20 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 			
 			int parentIndex = (id.x + round(_Time * 0.25) + 256) % 1024;
 			AnimalParticleData parentParticle = animalParticlesRead[parentIndex];
+			
+			
 			float aliveMask = (1.0 - parentParticle.isDecaying) * parentParticle.isActive;
+			float fertilityMask = saturate((parentParticle.energy - 1.0) * 3) * aliveMask;
+			
 			float2 parentPos = parentParticle.worldPos.xy;
 
-			float2 spawnUV = (parentPos + (float2(randX, randY) - 0.5) * 2) / _MapSize; 						
+			float2 spawnUV = (parentPos + (float2(randX, randY) - 0.5) * 0.2) / _MapSize; 						
 			float4 spawnAltitudeSample = altitudeRead.SampleLevel(_LinearClamp, spawnUV, 0);			
 				
-			if(spawnAltitudeSample.x < 0.5 * aliveMask && rand01 > 0.9975) {  // in water only? // for now...
+			if(spawnAltitudeSample.x < 0.5 * fertilityMask && rand01 > 0.9) {  // in water only? // for now...
 				float2 worldPos = float2(spawnUV.x * _MapSize, spawnUV.y * _MapSize);
 				animalParticlesWrite[id.x].worldPos.xy = worldPos;
-				//animalParticlesWrite[id.x].p1 = worldPos.xy - float2(0, 0.01);
-				//animalParticlesWrite[id.x].p2 = worldPos.xy - float2(0, 0.02);
-				//animalParticlesWrite[id.x].p3 = worldPos.xy - float2(0, 0.03);
-
+				
 				float randRadius = rand(float2(randX * 10, randY * -3.37)) * (_MaxParticleSize - _MinParticleSize) + _MinParticleSize;					
 			
 				// StartSize?
@@ -544,13 +547,15 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 				animalParticlesWrite[id.x].age = 0; //rand(float2(rand01 * 70.158, randX * 13.37));  // 0-1, death at 2
 				animalParticlesWrite[id.x].color = lerp(parentParticle.color, float4(rand01,randX,randY,1), 0.125);
 
-				float randA = rand(float2((float)id.x - randY, _Time * 6.14 * rand01));
-				float randB = rand(float2(randX * 62.39 + _Time, randY));
-				float randC = rand(float2((float)id.x, randX * -62.39 - _Time));	
-				float randD = rand(float2(rand01, _Time * 0.9174 + 90.13));
+				float randA = rand(float2((float)id.x - randY * 1009.431, _Time * 46.14 * rand01));
+				float randB = rand(float2(randX * 62.39 + _Time * -2398, randY));
+				float randC = rand(float2((float)id.x, randX * -62.39 - _Time * -14925));	
+				float randD = rand(float2(rand01, _Time * 7330.9174 + 900.13));
 
-				animalParticlesWrite[id.x].genomeVector = lerp(parentParticle.genomeVector, float4(randA, randB, randC, randD), 0.1);
-				animalParticlesWrite[id.x].extra0 = 0;
+				float4 vec = lerp(parentParticle.genomeVector, float4(randA, randB, randC, randD), 0.05);
+				vec.w = parentParticle.genomeVector.w + 1.0;  // generation
+				animalParticlesWrite[id.x].genomeVector = vec;
+				animalParticlesWrite[id.x].extra0 = 0;  // biomass size at time of death?
 			}
 		}
 	}
