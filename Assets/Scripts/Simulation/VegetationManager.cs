@@ -264,9 +264,9 @@ public class VegetationManager {
         closestPlantIndexCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 4);
         closestPlantIndexArray = new Vector4[numAgents];
 
-        cursorClosestParticleDataCBuffer = new ComputeBuffer(2, GetPlantParticleDataSize());  // 0 = selected, 1 = closest to cursor
-        cursorParticleDataArray = new PlantParticleData[2];
-        cursorDistances1024 = new ComputeBuffer(1024, sizeof(float) * 4);
+        //cursorClosestParticleDataCBuffer = new ComputeBuffer(2, GetPlantParticleDataSize());  // 0 = selected, 1 = closest to cursor
+        //cursorParticleDataArray = new PlantParticleData[2];
+        //cursorDistances1024 = new ComputeBuffer(1024, sizeof(float) * 4);
         
         //plantSlotGenomeCurrent
         plantSlotGenomeCurrent = new WorldLayerPlantGenome();

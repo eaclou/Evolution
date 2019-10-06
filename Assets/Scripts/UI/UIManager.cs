@@ -284,6 +284,20 @@ public class UIManager : MonoBehaviour {
     public Animator animatorInspectPanel;
     public Text textInspectData;
 
+    public Text textNewInspectAgentName;
+    public Material newInspectAgentEnergyMat;
+    public Material newInspectAgentStaminaMat;
+    public Material newInspectAgentStomachMat;
+    public Material newInspectAgentAgeMat;
+    public Material newInspectAgentHealthMat;
+    public Material newInspectAgentThrottleMat;
+    public Material newInspectAgentCommsMat;
+    public Material newInspectAgentStateMat;
+    public Material newInspectAgentCurActivityMat;
+    public Material newInspectAgentWasteMat;
+    public Material newInspectAgentBrainMat;
+    public Text textNewInspectLog;
+
     private Vector4 _Zoom = new Vector4(1f, 1f, 1f, 1f);
     private float _Amplitude = 1f;
     private Vector4 _ChannelMask = new Vector4(1f, 1f, 1f, 1f);
@@ -1132,6 +1146,10 @@ public class UIManager : MonoBehaviour {
 
                 break;
             case ToolType.Inspect:
+
+                
+
+
                 str = "This spirit reveals\nhidden information.";
                 str += "\n\n";
                 
@@ -1204,7 +1222,68 @@ public class UIManager : MonoBehaviour {
                         int critterIndex = cameraManager.targetAgentIndex;
                         Agent agent = gameManager.simulationManager.agentsArray[critterIndex];
 
-                        
+                        textNewInspectAgentName.text = agent.candidateRef.candidateGenome.bodyGenome.coreGenome.name;
+                        textNewInspectLog.text = agent.lastEvent;
+                        newInspectAgentEnergyMat.SetFloat("_Value", Mathf.Clamp01(agent.coreModule.energy * 0.25f));
+                        newInspectAgentStaminaMat.SetFloat("_Value", Mathf.Clamp01(agent.coreModule.stamina[0] * 1f));
+                        newInspectAgentStomachMat.SetFloat("_Value", Mathf.Clamp01(agent.coreModule.stomachContentsNorm * 1f));
+
+                        newInspectAgentHealthMat.SetFloat("_HealthHead", Mathf.Clamp01(agent.coreModule.healthHead));
+                        newInspectAgentHealthMat.SetFloat("_HealthBody", Mathf.Clamp01(agent.coreModule.healthBody));
+                        newInspectAgentHealthMat.SetFloat("_HealthExternal", Mathf.Clamp01(agent.coreModule.healthExternal));
+                        newInspectAgentAgeMat.SetFloat("_Value", Mathf.Clamp01((float)agent.ageCounter * 0.0005f));
+                        newInspectAgentAgeMat.SetFloat("_Age", agent.ageCounter);
+                        int developmentStateID = 0;
+                        int curActivityID = 0;
+                        if(agent.curLifeStage == Agent.AgentLifeStage.Dead) {
+                            developmentStateID = 7;
+                            curActivityID = 7;
+                        }
+                        if(agent.curLifeStage == Agent.AgentLifeStage.Mature) {
+
+                            // state
+                            if (agent.ageCounter < 1000) {
+                                developmentStateID = 1;
+                            }
+                            else {
+                                if (agent.ageCounter < 10000) {
+                                    developmentStateID = 2;
+                                }
+                            }
+                            if(agent.sizePercentage > 0.5f) {
+                                developmentStateID = 3;
+                            }
+                            
+
+                            // curActivity
+                            if(agent.coreModule.mouthFeedEffector[0] > 0f) {
+                                curActivityID = 1;
+                            }
+                            if(agent.coreModule.mouthAttackEffector[0] > 0f) {
+                                curActivityID = 2;
+                            }
+                            if(agent.coreModule.isDashing) {
+                                curActivityID = 3;
+                            }
+                            if(agent.coreModule.isDefending) {
+                                curActivityID = 4;
+                            }
+                            if(agent.coreModule.isResting) {
+                                curActivityID = 5;
+                            }
+                            if(agent.isPregnantAndCarryingEggs) {
+                                curActivityID = 6;
+                            }
+                        }
+                        newInspectAgentStateMat.SetInt("_StateID", developmentStateID);
+                        newInspectAgentCurActivityMat.SetInt("_CurActivityID", curActivityID);
+                        newInspectAgentBrainMat.SetFloat("_Value", Mathf.Clamp01((float)agent.brain.axonList.Count * 0.05f + (float)agent.brain.neuronList.Count * 0.05f));
+                        newInspectAgentWasteMat.SetFloat("_Value", Mathf.Clamp01(agent.wasteProducedLastFrame * 1000f));
+                        newInspectAgentThrottleMat.SetFloat("_ThrottleX", Mathf.Clamp01(agent.smoothedThrottle.x));
+                        newInspectAgentThrottleMat.SetFloat("_ThrottleY", Mathf.Clamp01(agent.smoothedThrottle.y));
+                        newInspectAgentThrottleMat.SetTexture("_VelocityTex", gameManager.simulationManager.environmentFluidManager._VelocityA);
+                        newInspectAgentThrottleMat.SetFloat("_AgentCoordX", agent.ownPos.x / SimulationManager._MapSize);
+                        newInspectAgentThrottleMat.SetFloat("_AgentCoordY", agent.ownPos.y / SimulationManager._MapSize);
 
                         if(brainDisplayOn) {
                             //str += "nearestEA" + agent.coreModule.nearestEnemyAgent.ownPos.ToString() + "?";
@@ -1300,7 +1379,17 @@ public class UIManager : MonoBehaviour {
                             }
                             //str += "\n";
                             str += aliveTxt;
-                            str += "\n";
+                            //str += "\n";
+                            str += "\n[" + agent.coreModule.mouthFeedEffector[0].ToString("F2") + ", " +
+                                        agent.coreModule.mouthAttackEffector[0].ToString("F2") + ", " +
+                                        agent.coreModule.defendEffector[0].ToString("F2") + ", " +
+                                        agent.coreModule.dashEffector[0].ToString("F2") + ", " +
+                                        agent.coreModule.healEffector[0].ToString("F2") + "]";
+                            str += "\n[" + agent.coreModule.isMouthTrigger[0].ToString() + ", " +
+                                        agent.coreModule.isDashing.ToString() + ", " +
+                                        agent.coreModule.isDefending.ToString() + ", " +
+                                        agent.coreModule.isResting.ToString() + "]";
+                                        //agent.coreModule.healEffector[0].ToString("F2") + "]";
                             str += "\nBiomass  " + (agent.currentBiomass * 100f).ToString("F0") + "   ( " + (agent.sizePercentage * 100f).ToString("F0") + "%)";
                             str += "\nFull Size   " + (bodLength * 10f).ToString("F0") + " x " + (bodWidth * 10f).ToString("F0");
                             if(agent.coreModule != null) {                                

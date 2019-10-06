@@ -21,8 +21,7 @@ public class Agent : MonoBehaviour {
 
     public bool isInert = true;  // when inert, colliders disabled
     // Refactor??
-    public bool isActing = false;  // biting, defending, dashing, etc -- exclusive actions
-    public bool isResting = false;
+    public bool isActing = false;  // biting, defending, dashing, etc -- exclusive actions    
     public bool isDecaying = false;
 
     public bool isMarkedForDeathByUser = false;
@@ -43,7 +42,7 @@ public class Agent : MonoBehaviour {
         Dead,
         Null
     }
-    private int gestationDurationTimeSteps = 36;
+    private int gestationDurationTimeSteps = 72;
     public int _GestationDurationTimeSteps
     {
         get
@@ -168,7 +167,7 @@ public class Agent : MonoBehaviour {
 
     public EggSack childEggSackRef;
     public bool isPregnantAndCarryingEggs = false;
-    public int pregnancyRefactoryDuration = 1600;
+    public int pregnancyRefactoryDuration = 3200;
 
     //public float overflowFoodAmount = 0f;
         
@@ -600,11 +599,12 @@ public class Agent : MonoBehaviour {
         lastEventTime = UnityEngine.Time.frameCount;
     }
     public void TakeDamage(float damage) {
-        coreModule.hitPoints[0] -= damage;
-        // currently no distinctionbetween regions:
-        coreModule.healthHead -= damage;
-        coreModule.healthBody -= damage;
-        coreModule.healthExternal -= damage;
+
+        coreModule.healthHead -= damage * UnityEngine.Random.Range(0f, 1f);
+        coreModule.healthBody -= damage * UnityEngine.Random.Range(0f, 1f);
+        coreModule.healthExternal -= damage * UnityEngine.Random.Range(0f, 1f);
+
+        coreModule.hitPoints[0] = (coreModule.healthHead + coreModule.healthBody + coreModule.healthExternal) / 3f;
 
         totalDamageTaken += damage;
 
@@ -617,10 +617,10 @@ public class Agent : MonoBehaviour {
         float defendBonus = 1f;
         if(coreModule.isDefending) {
             if(coreModule.defendFrameCounter < coreModule.defendDuration) {
-                defendBonus = 0.2f;
+                defendBonus = 0.05f;
             }
             else {
-                defendBonus = 1.25f; // cooldown penalty
+                defendBonus = 1.1f; // cooldown penalty
             }
         }
 
@@ -1006,7 +1006,7 @@ public class Agent : MonoBehaviour {
         //    coreModule.energy = 1f;
         //}
 
-        
+
 
         /* STAMINA:
         float staminaRefillRate = 0.0005f;
@@ -1029,7 +1029,12 @@ public class Agent : MonoBehaviour {
         }*/
 
         //ENERGY:
-        float energyCost = currentBiomass * settingsRef.agentSettings._BaseEnergyCost; // * SimulationManager.energyDifficultyMultiplier; // / coreModule.energyBonus;
+        float energyCostMult = Mathf.Lerp(settingsRef.agentSettings._BaseEnergyCost, settingsRef.agentSettings._BaseEnergyCost * 0.25f, sizePercentage);
+        float restingBonusMult = 1f;
+        if(coreModule.isResting) {
+            restingBonusMult = 0.75f;
+        }
+        float energyCost = (currentBiomass) * energyCostMult * restingBonusMult; // * SimulationManager.energyDifficultyMultiplier; // / coreModule.energyBonus;
         
         float throttleMag = smoothedThrottle.magnitude;
         
@@ -1073,32 +1078,7 @@ public class Agent : MonoBehaviour {
             if(startBite) {
                 mouthRef.AttemptInitiateActiveFeedBite(); 
             }
-            
-
-            // DECAY NUTRIENTS: // Grid:
-            /*if(mouthRef.GetIsFeeding() > 0.5f) {
-                //mouthRef.Enable();
-                                        
-                float ambientFoodDensity = nutrientCellInfo.x;
-                float mouthArea = mouthRef.triggerCollider.radius * mouthRef.triggerCollider.radius * Mathf.PI;
-
-                float maxEatRate = mouthArea * 4f * settings.eatRateMultiplier;
-                // *** This is gross - CHANGE IT:::
-                // Mathf.Clamp01(((fullSizeBoundingBox.x + fullSizeBoundingBox.z) * 0.5f - 0.035f) / 2f); // ** Hardcoded assuming size ranges from 0.1 --> 2.5 !!! ********
-                float sizeEfficiencyDecay = Mathf.Lerp(settings.minSizeFeedingEfficiencyDecay, settings.maxSizeFeedingEfficiencyDecay, sizeValue) * ambientFoodDensity;
-                    
-                // *** Can double dip !!! BROKEN! **** Check reservoir first to avoid overdrafting!! ******
-                float filteredFoodAmount = Mathf.Min(maxEatRate * sizeEfficiencyDecay, maxEatRate);
-                   
-                // Needs to use Compute shader here to sample the current nutrientMapRT:::: ****
-                eatAmountsArray[index].x = filteredFoodAmount;
-
-                EatFoodDecay(filteredFoodAmount);
-            }  
-            else {
-                //mouthRef.Disable();
-            }*/
-
+           
             // *** REFACTOR THIS GARBAGE!!!!! ********
             float mostActiveEffectorVal = 0f;
             mostActiveEffectorVal = Mathf.Max(mostActiveEffectorVal, coreModule.mouthFeedEffector[0]);
@@ -1110,10 +1090,10 @@ public class Agent : MonoBehaviour {
             /*if(coreModule.mouthFeedEffector[0] >= mostActiveEffectorVal) {                
                 mouthRef.AttemptInitiateActiveFeedBite();                
             }*/
-            /*if(coreModule.mouthAttackEffector[0] >= mostActiveEffectorVal) {                
+            if(coreModule.mouthAttackEffector[0] >= mostActiveEffectorVal) {                
                 mouthRef.AttemptInitiateActiveAttackBite();                
-            }*/
-            /*if(coreModule.dashEffector[0] >= mostActiveEffectorVal) {
+            }
+            if(coreModule.dashEffector[0] >= mostActiveEffectorVal) {
                 if(!coreModule.isDashing && coreModule.stamina[0] > 0.1f) {
                     coreModule.isDashing = true;
                     //coreModule.stamina[0] -= 0.1f;
@@ -1126,13 +1106,13 @@ public class Agent : MonoBehaviour {
                 }
             }
             
-            isResting = false;
+            coreModule.isResting = false;
             if(coreModule.healEffector[0] >= mostActiveEffectorVal) {
                 if(!coreModule.isDefending && !coreModule.isDashing && !mouthRef.isFeeding && !mouthRef.isAttacking) {
-                    isResting = true;
+                    coreModule.isResting = true;
                     //coreModule.stamina[0] -= 0.1f;
                 }                
-            }*/
+            }
                      
         }
         //coreModule.debugFoodValue = nutrientCellInfo.x;
@@ -1160,7 +1140,7 @@ public class Agent : MonoBehaviour {
         {
             bitingPenalty = 1f;
         }*/
-        if(coreModule.mouthFeedEffector[0] > 0f)
+        if(coreModule.mouthFeedEffector[0] > 0f)  // Clean up code for State-machine-esque behaviors/abilities
         {
             bitingPenalty = 0.5f;
         }
@@ -1195,20 +1175,24 @@ public class Agent : MonoBehaviour {
             // get size in 0-1 range from minSize to maxSize:
             float sizeValue = Mathf.Clamp01(coreModule.speedBonus * (candidateRef.candidateGenome.bodyGenome.coreGenome.creatureBaseLength - 0.2f) / 2f); ; // Mathf.Clamp01((fullSizeBoundingBox.x - 0.1f) / 2.5f); // ** Hardcoded assuming size ranges from 0.1 --> 2.5 !!! ********
 
-            float aspectSpeedPenalty = Mathf.Lerp(1.2f, 0.4f, candidateRef.candidateGenome.bodyGenome.coreGenome.creatureAspectRatio);
+            float aspectSpeedPenalty = 1.0f; // Mathf.Lerp(1.2f, 0.4f, candidateRef.candidateGenome.bodyGenome.coreGenome.creatureAspectRatio);
 
             float swimSpeed = Mathf.Lerp(movementModule.smallestCreatureBaseSpeed, movementModule.largestCreatureBaseSpeed, sizeValue);
             float turnRate = Mathf.Lerp(movementModule.smallestCreatureBaseTurnRate, movementModule.largestCreatureBaseTurnRate, sizeValue);
             float dashBonus = 1f;
-            /*if(coreModule.isDashing) {
+            if(coreModule.isDashing) {
                 if(coreModule.dashFrameCounter < coreModule.dashDuration) {
-                    dashBonus = 2f;
+                    dashBonus = 5f;
                 }
                 else {
-                    dashBonus = 0.5f; // cooldown penalty
+                    dashBonus = 0.33f; // cooldown penalty
                 }
-            }*/
-            speed = swimSpeed * movementModule.speedBonus * dashBonus * aspectSpeedPenalty;
+            }
+            float restingPenalty = 1f;
+            if(coreModule.isResting) {
+                restingPenalty = 0.167f;
+            }
+            speed = swimSpeed * movementModule.speedBonus * dashBonus * aspectSpeedPenalty * restingPenalty;
             // Forward Slide
             //for(int k = 0; k < numSegments; k++) {
             Vector2 segmentForwardDir = new Vector2(this.bodyRigidbody.transform.up.x, this.bodyRigidbody.transform.up.y).normalized;

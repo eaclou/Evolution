@@ -156,30 +156,25 @@ public class SpeciesGenomePool {
         InitShared();
         depthLevel = depth;
 
+        string debugTxt = "";
         for (int i = 0; i < 36; i++) {
-            /*AgentGenome agentGenome = new AgentGenome();
-            agentGenome.GenerateInitialRandomBodyGenome();            
-            int tempNumHiddenNeurons = 0;
-            agentGenome.InitializeRandomBrainFromCurrentBody(mutationSettingsRef.initialConnectionChance, tempNumHiddenNeurons);
+            
+            mutationSettingsRef.defaultBodyMutationChance = 0.3f;
+            mutationSettingsRef.defaultBodyMutationStepSize = 0.05f;
+            mutationSettingsRef.mutationStrengthSlot = 0.1f;
 
-            CandidateAgentData candidate = new CandidateAgentData(agentGenome, speciesID);
-            if(i < maxLeaderboardGenomePoolSize) {
-                leaderboardGenomesList.Add(candidate);
-            }
-            candidateGenomesList.Add(candidate);
-            */
-            mutationSettingsRef.defaultBodyMutationChance = 1f;
-            mutationSettingsRef.defaultBodyMutationStepSize = 1f;
-            mutationSettingsRef.mutationStrengthSlot = 0.075f;
             AgentGenome agentGenome = Mutate(foundingGenome, true, true);
             int tempNumHiddenNeurons = 0;
-            agentGenome.InitializeRandomBrainFromCurrentBody(1.25f, mutationSettingsRef.initialConnectionChance, tempNumHiddenNeurons);
+            agentGenome.InitializeRandomBrainFromCurrentBody(0.5f, mutationSettingsRef.initialConnectionChance, tempNumHiddenNeurons);
+
             CandidateAgentData candidate = new CandidateAgentData(agentGenome, speciesID);
             candidateGenomesList.Add(candidate);
             leaderboardGenomesList.Add(candidate);
+
+            debugTxt += "" + candidate.candidateGenome.brainGenome.linkList[0].weight.ToString("F2") + "  ";
         }
-        
-        
+
+        Debug.Log("SPECIES CREATED! " + debugTxt);
         
         representativeGenome = foundingGenome;
     }

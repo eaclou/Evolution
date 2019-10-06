@@ -297,8 +297,8 @@ public class CritterModuleCoreGenome {
         initModifier.maskIndicesList.Add(masksList.Count - 1); // reference mask by index to allow re-use by other shape modifiers    
         shapeModifiersList.Add(initModifier);
 
-        creatureBaseLength = UnityEngine.Random.Range(0.6f, 1.2f) * 2f;
-        creatureAspectRatio = UnityEngine.Random.Range(0.175f, 0.4f);
+        creatureBaseLength = UnityEngine.Random.Range(0.9f, 0.9f) * 2f;
+        creatureAspectRatio = UnityEngine.Random.Range(0.25f, 0.25f);
 
         //creatureComplexShapeLerp = 0f;
         // Or start with deformed sphere???? *****

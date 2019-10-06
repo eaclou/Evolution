@@ -86,7 +86,7 @@
 				if(type < 0.5) {
 					// Rooted fully, grows separately on ground in circle? Grassy
 
-					float radius = saturate(particleData.biomass * 5 + 0.06) * leafIndexNormalized;
+					float radius = saturate(particleData.biomass * 5 + 0.2) * leafIndexNormalized;
 					float2 spawnOffset = float2(cos(particleData.angleInc * leafIndex * 10) * radius, sin(particleData.angleInc * leafIndex * 10) * radius);
 					
 					worldPosition.xy += spawnOffset;
@@ -115,7 +115,7 @@
 				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
 				float3 rotatedPoint = float3(quadPoint.x * right + quadPoint.y * forward, 0);  // Rotate localRotation by AgentRotation
 
-				float leafScale = saturate(particleData.biomass * 4 + 0.1) * 0.25 * particleData.isActive;
+				float leafScale = saturate(particleData.biomass * 4 + 0.3) * 0.25 * particleData.isActive;
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition + rotatedPoint * leafScale, 1.0)));
 				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(quadPoint, 0.0f));				
 				o.uv = uv;	

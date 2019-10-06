@@ -292,7 +292,7 @@ public class CritterMouthComponent : MonoBehaviour {
 
             if(ownBiteArea > targetArea) {
                 // Swallow!:::
-                //Debug.Log("SwallowEggSackWhole:    Agent [" + agentRef.index.ToString() + "] biteSize: " + ownBiteArea.ToString() + "   ---> EggSack [" + collidingEggSack.index.ToString() + "] food: " + collidingEggSack.foodAmount.ToString() + ", growthStatus: " + collidingEggSack.growthStatus.ToString());
+                Debug.Log("SwallowEggSackWhole:    Agent [" + agentRef.index.ToString() + "] biteSize: " + ownBiteArea.ToString() + "   ---> EggSack [" + collidingEggSack.index.ToString() + "] food: " + collidingEggSack.foodAmount.ToString() + ", growthStatus: ");
                 SwallowEggSackWhole(collidingEggSack);
             }
             else {
@@ -328,7 +328,7 @@ public class CritterMouthComponent : MonoBehaviour {
             }
         }
 
-        /*EggSack collidingEggSack = collider.gameObject.GetComponent<EggSack>();
+        EggSack collidingEggSack = collider.gameObject.GetComponent<EggSack>();
         if (collidingEggSack != null) {
             // FOOD:
             // Compare sizes:
@@ -343,11 +343,11 @@ public class CritterMouthComponent : MonoBehaviour {
                 // Bite off a smaller chunk -- sharper teeth better?
                 BiteDamageEggSack(collidingEggSack, ownBiteArea, targetArea);      
             }
-        }*/
+        }
     }
 
     private void SwallowAnimalWhole(Agent preyAgent) {
-        //Debug.Log("SwallowAnimalWhole [" + agentRef.index.ToString() + "] ---> [" + preyAgent.index.ToString() + "]");
+        Debug.Log("SwallowAnimalWhole [" + agentRef.index.ToString() + "] ---> [" + preyAgent.index.ToString() + "]");
         ProcessPredatorySwallowAttempt(agentRef, preyAgent);
         // Credit food:
         float flow = preyAgent.sizePercentage * (preyAgent.fullSizeBoundingBox.x + preyAgent.fullSizeBoundingBox.z) * preyAgent.fullSizeBoundingBox.y * 0.5f; // + preyAgent.coreModule.stomachContents;
@@ -379,7 +379,7 @@ public class CritterMouthComponent : MonoBehaviour {
     private void BiteDamageAnimal(Agent preyAgent, float ownBiteArea, float targetArea) {
         
         //Debug.Log("BiteDamageAnimal");
-        float baseDamage = 0.5f;
+        float baseDamage = 5f;
 
         float sizeRatio = ownBiteArea / targetArea; // for now clamped to 10x
 
@@ -391,7 +391,7 @@ public class CritterMouthComponent : MonoBehaviour {
         //if(agentRef.coreModule.foodEfficiencyMeat > 0.5f) { // ** // damage bonus -- provided has the required specialization level:::::
         //    agentRef.GainExperience(damage * 0.5f);  
         //}
-        //Debug.Log("BiteDamageAnimal [" + agentRef.index.ToString() + "] ---> [" + preyAgent.index.ToString() + "] damage: " + damage.ToString() + ", preyHealth: " + preyAgent.coreModule.healthHead.ToString());
+        Debug.Log("BiteDamageAnimal [" + agentRef.index.ToString() + "] ---> [" + preyAgent.index.ToString() + "] damage: " + damage.ToString() + ", preyHealth: " + preyAgent.coreModule.healthHead.ToString());
     }
     private void BiteDamageEggSack(EggSack eggSack, float ownArea, float targetArea) {
 
@@ -423,11 +423,12 @@ public class CritterMouthComponent : MonoBehaviour {
         }        
         
         agentRef.EatFoodMeat(flowR * 1f); // assumes all foodAmounts are equal !! *****
-    
+
+        Debug.Log("BiteEggsack [" + agentRef.index.ToString() + "] ---> [" + eggSack.index.ToString() + "]");
     }
     private void BiteCorpseFood(Agent corpseAgent, float ownBiteArea, float targetArea)
     {  
-        //Debug.Log("BiteCorpseFood [" + agentRef.index.ToString() + "] ---> [" + corpseAgent.index.ToString() + "]");
+        Debug.Log("BiteCorpseFood [" + agentRef.index.ToString() + "] ---> [" + corpseAgent.index.ToString() + "]");
         float flow = ownBiteArea * 1f; // / colliderCount;
 
         float flowR = Mathf.Min(corpseAgent.currentBiomass, flow);

@@ -776,10 +776,10 @@ public class SimulationManager : MonoBehaviour {
             {
                 float wallForce = Mathf.Clamp01(agentSize - floorDepth) / agentSize;
                 Vector2 grad = new Vector2(depthSample.y, depthSample.z).normalized;
-                agentsArray[i].bodyRigidbody.AddForce(grad * 12f * agentsArray[i].bodyRigidbody.mass * wallForce, ForceMode2D.Impulse);
+                agentsArray[i].bodyRigidbody.AddForce(grad * 15f * agentsArray[i].bodyRigidbody.mass * wallForce, ForceMode2D.Impulse);
 
 
-                float damage = wallForce * 0.04f;
+                float damage = wallForce * 0.089f;
                 float defendBonus = 1f;
                 if(agentsArray[i].coreModule != null && agentsArray[i].curLifeStage == Agent.AgentLifeStage.Mature) {
                     if(agentsArray[i].coreModule.isDefending) {
@@ -810,7 +810,7 @@ public class SimulationManager : MonoBehaviour {
                 }
             }
             
-            agentsArray[i].bodyRigidbody.AddForce(simStateData.fluidVelocitiesAtAgentPositionsArray[i] * 24f * agentsArray[i].bodyRigidbody.mass, ForceMode2D.Impulse);
+            agentsArray[i].bodyRigidbody.AddForce(simStateData.fluidVelocitiesAtAgentPositionsArray[i] * 36f * agentsArray[i].bodyRigidbody.mass, ForceMode2D.Impulse);
 
             agentsArray[i].avgFluidVel = Vector2.Lerp(agentsArray[i].avgFluidVel, simStateData.fluidVelocitiesAtAgentPositionsArray[i], 0.25f);
 
@@ -1015,11 +1015,16 @@ public class SimulationManager : MonoBehaviour {
             
                 // Set proper references between AgentBrains and Environment/Game Objects:::
                 // ***** DISABLED!!!! *** NEED TO RE_IMPLEMENT THIS LATER!!!! ********************************************
-                agentsArray[a].coreModule.nearestFriendAgent = agentsArray[closestFriendIndex];
-                agentsArray[a].coreModule.nearestEnemyAgent = agentsArray[closestEnemyAgentIndex];
-                if(closestEggSackIndex != -1) {
-                    agentsArray[a].coreModule.nearestEggSackModule = eggSackArray[closestEggSackIndex];                
-                }  
+                if(agentsArray[a].coreModule != null) {
+                    agentsArray[a].coreModule.nearestFriendAgent = agentsArray[closestFriendIndex];
+                    agentsArray[a].coreModule.nearestEnemyAgent = agentsArray[closestEnemyAgentIndex];
+                    if(closestEggSackIndex != -1) {
+                        agentsArray[a].coreModule.nearestEggSackModule = eggSackArray[closestEggSackIndex];                
+                    }  
+                }
+                else {
+                    Debug.LogError("if(agentsArray[a].coreModule != null) {");
+                }
             }
                       
             //agentsArray[a].coreModule.nearestPredatorModule = predatorArray[closestPredIndex];            
@@ -1126,7 +1131,7 @@ public class SimulationManager : MonoBehaviour {
             EggSack parentEggSack = null;
             List<int> validEggSackIndicesList = new List<int>();
             for(int i = 0; i < numEggSacks; i++) {  // if EggSack belongs to the right species
-                if(eggSackArray[i].curLifeStage == EggSack.EggLifeStage.Growing) {
+                if(eggSackArray[i].curLifeStage == EggSack.EggLifeStage.Mature) {
                     if(eggSackArray[i].lifeStageTransitionTimeStepCounter < eggSackArray[i]._MatureDurationTimeSteps) {  // egg sack is at proper stage of development
                         if(eggSackArray[i].speciesIndex == speciesIndex) {
                             validEggSackIndicesList.Add(i);
@@ -1551,17 +1556,19 @@ public class SimulationManager : MonoBehaviour {
         masterGenomePool.mutationSettingsRef.defaultBodyMutationStepSize = 1f;
         masterGenomePool.mutationSettingsRef.mutationStrengthSlot = 0.05f; // ****
         newGenome.GenerateInitialRandomBodyGenome(); // might break?
-        AgentGenome agentGenome = newSpecies.Mutate(newGenome, true, true); //
+        AgentGenome foundingGenome = newSpecies.Mutate(newGenome, true, true); //
         
         // **** I want to just change the APPEARANCE of body genome, but keep the brain? ... area to revisit later
         // Maybe just do a fresh restart for now -- fully random init
 
-        newSpecies.FirstTimeInitialize(agentGenome, masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].depthLevel + 1);
+        newSpecies.FirstTimeInitialize(foundingGenome, masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].depthLevel + 1);
         masterGenomePool.currentlyActiveSpeciesIDList.Add(newSpeciesID);
         masterGenomePool.completeSpeciesPoolsList.Add(newSpecies);
         masterGenomePool.speciesCreatedOrDestroyedThisFrame = true;
 
-        // Inherit Parent Data Stats:
+
+
+        // Inherit Parent Data Stats:  // *** Vestigial but harmless ***
         newSpecies.avgLifespanPerYearList.Clear();
         newSpecies.avgConsumptionDecayPerYearList.Clear();
         newSpecies.avgConsumptionPlantPerYearList.Clear();

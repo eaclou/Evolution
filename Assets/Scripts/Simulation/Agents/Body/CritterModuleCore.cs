@@ -72,13 +72,15 @@ public class CritterModuleCore {
 
     public bool isDashing = false;
     public int dashFrameCounter = 0;
-    public int dashDuration = 20;
-    public int dashCooldown = 80;
+    public int dashDuration = 25;
+    public int dashCooldown = 60;
 
     public bool isDefending = false;
     public int defendFrameCounter = 0;
     public int defendDuration = 40;
     public int defendCooldown = 120;
+
+    public bool isResting = false;
 
 	public CritterModuleCore() {
 

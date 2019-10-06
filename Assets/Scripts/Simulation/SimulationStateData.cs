@@ -285,7 +285,7 @@ public class SimulationStateData {
                 //freq range: 1 --> 2
                 critterInitDataArray[i].swimMagnitude = Mathf.Lerp(0.33f, 1.5f, swimLerp); // 1f * (1f - flexibilityScore * 0.2f);
                 critterInitDataArray[i].swimFrequency = Mathf.Lerp(2f, 0.8f, swimLerp);   //flexibilityScore * 1.05f;
-                critterInitDataArray[i].swimAnimSpeed = 2.10f;    // 12f * (1f - approxSize * 0.25f);
+                critterInitDataArray[i].swimAnimSpeed = 1f;    // 12f * (1f - approxSize * 0.25f);
                 critterInitDataArray[i].bodyCoord = genome.bodyGenome.coreGenome.tailLength / critterFullsizeLength;
 	            critterInitDataArray[i].headCoord = (genome.bodyGenome.coreGenome.tailLength + genome.bodyGenome.coreGenome.bodyLength) / critterFullsizeLength;
                 critterInitDataArray[i].mouthCoord = (genome.bodyGenome.coreGenome.tailLength + genome.bodyGenome.coreGenome.bodyLength + genome.bodyGenome.coreGenome.headLength) / critterFullsizeLength;
