@@ -329,47 +329,27 @@ public class SimulationStateData {
                 critterSimDataArray[i].health = simManager.agentsArray[i].coreModule.healthHead;
                 critterSimDataArray[i].stamina = simManager.agentsArray[i].coreModule.stamina[0];
 
-                critterSimDataArray[i].consumeOn = 1f; // simManager.agentsArray[i].mouthRef.GetIsFeeding();    // Flag for intention to eat gpu food particle (plant-type)         
+                float isFeedingF = 0f;
+                if(simManager.agentsArray[i].isFeeding) {
+                    isFeedingF = 1f;
+                }
+                float isFreeToEat = 1f;
+                if(simManager.agentsArray[i].isDefending) {
+                    isFreeToEat = 0f;
+                }
+                if(simManager.agentsArray[i].isCooldown) {
+                    isFreeToEat = 0f;
+                }                
+                critterSimDataArray[i].consumeOn = isFreeToEat;    // Flag for intention to eat gpu food particle (plant-type)         
 
                 critterSimDataArray[i].biteAnimCycle = 0f;
-                if(simManager.agentsArray[i].mouthRef.isFeeding) {
-                    critterSimDataArray[i].biteAnimCycle = Mathf.Clamp01((float)simManager.agentsArray[i].mouthRef.feedingFrameCounter / (float)simManager.agentsArray[i].mouthRef.feedAnimDuration);
+                if(simManager.agentsArray[i].isFeeding) {
+                    critterSimDataArray[i].biteAnimCycle = Mathf.Clamp01((float)simManager.agentsArray[i].feedingFrameCounter / (float)simManager.agentsArray[i].feedAnimDuration);
                 }
-                /*if(simManager.agentsArray[i].mouthRef.isAttacking) {
-                    critterSimDataArray[i].biteAnimCycle = Mathf.Clamp01((float)simManager.agentsArray[i].mouthRef.attackingFrameCounter / (float)simManager.agentsArray[i].mouthRef.attackAnimDuration);
-                }*/
+                if(simManager.agentsArray[i].isAttacking) {
+                    critterSimDataArray[i].biteAnimCycle = Mathf.Clamp01((float)simManager.agentsArray[i].attackingFrameCounter / (float)simManager.agentsArray[i].attackAnimDuration);
+                }
 
-                if (simManager.agentsArray[i].sizePercentage > 0.025f)
-                {
-                    if (simManager.agentsArray[i].coreModule.mouthFeedEffector[0] > 0.0f)
-                    {
-                        //if (simManager.agentsArray[i].mouthRef.isPassive)
-                        //{
-                        //critterSimDataArray[i].consumeOn = 1f;
-                        //}
-                        //else
-                        //{
-                        //    if (simManager.agentsArray[i].mouthRef.isBiting)
-                        //    {
-                        //        if (simManager.agentsArray[i].mouthRef.bitingFrameCounter <= simManager.agentsArray[i].mouthRef.biteHalfCycleDuration)
-                        //        {
-                        //            critterSimDataArray[i].isBiting = 1f;
-                        //        }
-                        //    }
-                        //}
-                    }
-                    /*if (simManager.agentsArray[i].mouthRef.isBiting)
-                    {
-                        if (simManager.agentsArray[i].mouthRef.isPassive)
-                        {
-                            critterSimDataArray[i].biteAnimCycle = Mathf.Clamp01((float)simManager.agentsArray[i].mouthRef.bitingFrameCounter / (float)(simManager.agentsArray[i].mouthRef.biteHalfCycleDuration * 4)); //Mathf.Lerp(1f, critterSimDataArray[i].biteAnimCycle, 0.1f);
-                        }
-                        else
-                        {
-                            critterSimDataArray[i].biteAnimCycle = Mathf.Clamp01((float)simManager.agentsArray[i].mouthRef.bitingFrameCounter / (float)(simManager.agentsArray[i].mouthRef.biteHalfCycleDuration * 2));
-                        }
-                    }*/
-                }
                 if (simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Egg)
                 {
                     critterSimDataArray[i].consumeOn = 0f;

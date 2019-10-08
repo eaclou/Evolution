@@ -107,16 +107,28 @@ public class CritterModuleThreats {
             }
             else {
 
-            }            
-
-            enemyHealth[0] = agent.coreModule.nearestEnemyAgent.coreModule.hitPoints[0];
-            enemyGrowthStage[0] = agent.coreModule.nearestEnemyAgent.sizePercentage;
+            } 
+            enemyHealth[0] = 0f;
+            enemyGrowthStage[0] = 0f;
+            if(agent.coreModule != null) {
+                if (agent.coreModule.nearestEnemyAgent != null) {
+                    if (agent.coreModule.nearestEnemyAgent.coreModule != null) {
+                        enemyHealth[0] = agent.coreModule.nearestEnemyAgent.coreModule.hitPoints[0];              
+                    }
+                                   
+                    enemyGrowthStage[0] = agent.coreModule.nearestEnemyAgent.sizePercentage;
+                    
+                }
+                
+            }
+            
+            
 
             float threat = 1f;
             //if(agent.coreModule.nearestEnemyAgent.mouthRef.isPassive) {
             //    threat = 0f;
             //}
-            enemyThreatRating[0] = threat;
+            enemyThreatRating[0] = 0f; // threat;
         }
 
         enemyPosX[0] = enemyPos.x / 20f;

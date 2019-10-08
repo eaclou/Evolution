@@ -24,6 +24,34 @@ public class Agent : MonoBehaviour {
     public bool isActing = false;  // biting, defending, dashing, etc -- exclusive actions    
     public bool isDecaying = false;
 
+    public bool isFeeding = false;
+    public bool isAttacking = false;    
+
+    public int feedAnimDuration = 30;
+    public int feedAnimCooldown = 30;
+    public int attackAnimDuration = 40;
+    public int attackAnimCooldown = 75;
+    public int feedingFrameCounter = 0;
+    public int attackingFrameCounter = 0;
+    
+    public bool isDashing = false;
+    public int dashFrameCounter = 0;
+    public int dashDuration = 30;
+    public int dashCooldown = 60;
+
+    public bool isDefending = false;
+    public int defendFrameCounter = 0;
+    public int defendDuration = 60;
+    public int defendCooldown = 60;
+
+    public bool isResting = false;
+    //public bool isBiteFeeding = false;
+    //public bool isBiteAttacking = false;
+    public bool isCooldown = false;
+
+    public int cooldownFrameCounter = 0;
+    public int cooldownDuration = 60;  // arbitrary default
+
     public bool isMarkedForDeathByUser = false;
 
     public int index;    
@@ -41,6 +69,17 @@ public class Agent : MonoBehaviour {
         Mature,
         Dead,
         Null
+    }
+    public AgentActionState curActionState;
+    public enum AgentActionState {
+        Default,  // swimming, no actions
+        Resting,
+        Feeding,
+        Attacking,
+        Dashing,
+        Defending,
+        Cooldown,
+        Decaying
     }
     private int gestationDurationTimeSteps = 72;
     public int _GestationDurationTimeSteps
@@ -190,6 +229,28 @@ public class Agent : MonoBehaviour {
             
         }
         return Mathf.Clamp01(percentage);
+    }
+
+    public void AttemptInitiateActiveFeedBite() {
+        if (isFeeding) {
+            // this shouldn't happen?
+        }
+        else {
+            isFeeding = true;            
+            mouthRef.triggerCollider.enabled = true;
+            feedingFrameCounter = 0;          
+        }
+    }
+
+    public void AttemptInitiateActiveAttackBite() {
+        if (isAttacking) {
+            // this shouldn't happen?
+        }
+        else {            
+            isAttacking = true;
+            mouthRef.triggerCollider.enabled = true;
+            attackingFrameCounter = 0;                                              
+        }
     }
     
     public void SetToAwaitingRespawn() {
@@ -599,10 +660,19 @@ public class Agent : MonoBehaviour {
         lastEventTime = UnityEngine.Time.frameCount;
     }
     public void TakeDamage(float damage) {
-
-        coreModule.healthHead -= damage * UnityEngine.Random.Range(0f, 1f);
-        coreModule.healthBody -= damage * UnityEngine.Random.Range(0f, 1f);
-        coreModule.healthExternal -= damage * UnityEngine.Random.Range(0f, 1f);
+        int rand = UnityEngine.Random.Range(0, 3);
+        if(rand == 0) {
+            coreModule.healthHead -= damage; // * UnityEngine.Random.Range(0f, 1f);
+        }
+        else if(rand == 1) {
+            coreModule.healthBody -= damage;
+        }
+        else {
+            coreModule.healthExternal -= damage;
+        }
+        //coreModule.healthHead -= damage * UnityEngine.Random.Range(0f, 1f);
+        //coreModule.healthBody -= damage * UnityEngine.Random.Range(0f, 1f);
+        //coreModule.healthExternal -= damage * UnityEngine.Random.Range(0f, 1f);
 
         coreModule.hitPoints[0] = (coreModule.healthHead + coreModule.healthBody + coreModule.healthExternal) / 3f;
 
@@ -615,8 +685,8 @@ public class Agent : MonoBehaviour {
         damage = damage / coreModule.healthBonus;
 
         float defendBonus = 1f;
-        if(coreModule.isDefending) {
-            if(coreModule.defendFrameCounter < coreModule.defendDuration) {
+        if(isDefending) {
+            if(defendFrameCounter < defendDuration) {
                 defendBonus = 0.05f;
             }
             else {
@@ -818,6 +888,7 @@ public class Agent : MonoBehaviour {
         
 
         mouthRef.Enable();
+        isCooldown = false;
 
         lastEvent = "Was Born!";
         lastEventTime = UnityEngine.Time.frameCount;
@@ -825,7 +896,8 @@ public class Agent : MonoBehaviour {
     }
     
     private void TickMature(SimulationManager simManager) {
-
+        mouthRef.isFeeding = this.isFeeding;
+        mouthRef.isAttacking = this.isAttacking;
         //ProcessSwallowing();
 
         // Check for death & stuff? Or is this handled inside OnCollisionEnter() events?
@@ -938,6 +1010,7 @@ public class Agent : MonoBehaviour {
 
     public void TickActions(SimulationManager simManager) {
        
+        AgentActionState currentState = AgentActionState.Default;
         
         float horizontalMovementInput = movementModule.throttleX[0]; // Mathf.Lerp(horAI, horHuman, humanControlLerp);
         float verticalMovementInput = movementModule.throttleY[0]; // Mathf.Lerp(verAI, verHuman, humanControlLerp);
@@ -1001,21 +1074,16 @@ public class Agent : MonoBehaviour {
         float oxygenMask = Mathf.Clamp01(simManager.simResourceManager.curGlobalOxygen * settingsRef.agentSettings._OxygenEnergyMask);
         
         coreModule.energy += createdEnergyTotal * settingsRef.agentSettings._DigestionEnergyEfficiency * oxygenMask;
-
-        //if(coreModule.energy > 1f) {
-        //    coreModule.energy = 1f;
-        //}
-
-
-
-        /* STAMINA:
-        float staminaRefillRate = 0.0005f;
+        
+        // STAMINA:
+        float staminaRefillRate = 0.00025f;
         float energyToStaminaConversionRate = 5f; // * coreModule.healthBonus;
         coreModule.stamina[0] += staminaRefillRate * energyToStaminaConversionRate;
         coreModule.energy -= staminaRefillRate; // / energyToStaminaConversionRate;
-        */
-        /*if(coreModule.stamina[0] < 0.25f) {
-            staminaRefillRate *= 0.25f;
+
+        
+        if(coreModule.stamina[0] < 0.1f) {
+            staminaRefillRate *= 0.5f;
         }
         if(coreModule.stamina[0] > 0.75f) {
             staminaRefillRate *= 1.5f;
@@ -1026,13 +1094,16 @@ public class Agent : MonoBehaviour {
         if(coreModule.stamina[0] < 1f) {
             coreModule.stamina[0] += staminaRefillRate;
             coreModule.energy -= staminaRefillRate / energyToStaminaConversionRate;
-        }*/
+        }
+        else {
+            coreModule.stamina[0] = 1f;
+        }
 
         //ENERGY:
         float energyCostMult = Mathf.Lerp(settingsRef.agentSettings._BaseEnergyCost, settingsRef.agentSettings._BaseEnergyCost * 0.25f, sizePercentage);
         float restingBonusMult = 1f;
-        if(coreModule.isResting) {
-            restingBonusMult = 0.75f;
+        if(isResting) {
+            restingBonusMult = 0.5f;
         }
         float energyCost = (currentBiomass) * energyCostMult * restingBonusMult; // * SimulationManager.energyDifficultyMultiplier; // / coreModule.energyBonus;
         
@@ -1044,10 +1115,6 @@ public class Agent : MonoBehaviour {
             coreModule.energy = 0f;
         }
 
-        //if(coreModule.stamina[0] <= 0f) {
-//
-        //}
-        
         if(curLifeStage == AgentLifeStage.Dead || curLifeStage == AgentLifeStage.Egg) {
             throttle = Vector2.zero;
             smoothedThrottle = Vector2.zero;
@@ -1076,7 +1143,12 @@ public class Agent : MonoBehaviour {
             }
 
             if(startBite) {
-                mouthRef.AttemptInitiateActiveFeedBite(); 
+                //if(IsFreeToAct()) {
+                if(!isAttacking && !isDefending) {
+                    //if (coreModule.mouthFeedEffector[0] >= 0f) {   //  needed?
+                    AttemptInitiateActiveFeedBite();
+                    //}
+                }                
             }
            
             // *** REFACTOR THIS GARBAGE!!!!! ********
@@ -1087,40 +1159,134 @@ public class Agent : MonoBehaviour {
             mostActiveEffectorVal = Mathf.Max(mostActiveEffectorVal, coreModule.dashEffector[0]);
             mostActiveEffectorVal = Mathf.Max(mostActiveEffectorVal, coreModule.healEffector[0]);
 
-            /*if(coreModule.mouthFeedEffector[0] >= mostActiveEffectorVal) {                
-                mouthRef.AttemptInitiateActiveFeedBite();                
-            }*/
-            if(coreModule.mouthAttackEffector[0] >= mostActiveEffectorVal) {                
-                mouthRef.AttemptInitiateActiveAttackBite();                
+            if(coreModule.mouthAttackEffector[0] >= mostActiveEffectorVal) {
+                if (IsFreeToAct()) {
+                    AttemptInitiateActiveAttackBite();      
+                }
+                          
             }
             if(coreModule.dashEffector[0] >= mostActiveEffectorVal) {
-                if(!coreModule.isDashing && coreModule.stamina[0] > 0.1f) {
-                    coreModule.isDashing = true;
-                    //coreModule.stamina[0] -= 0.1f;
+                if (IsFreeToAct()) {
+                    ActionDash();
                 }
             }
             if(coreModule.defendEffector[0] >= mostActiveEffectorVal) {
-                if(!coreModule.isDefending && coreModule.stamina[0] > 0.1f) {
-                    coreModule.isDefending = true;
-                    //coreModule.stamina[0] -= 0.1f;
+                if(IsFreeToAct()) {
+                    ActionDefend();
                 }
-            }
+            }            
             
-            coreModule.isResting = false;
             if(coreModule.healEffector[0] >= mostActiveEffectorVal) {
-                if(!coreModule.isDefending && !coreModule.isDashing && !mouthRef.isFeeding && !mouthRef.isAttacking) {
-                    coreModule.isResting = true;
-                    //coreModule.stamina[0] -= 0.1f;
-                }                
-            }
-                     
+                if(IsFreeToAct()) {
+                    isResting = true;
+                }
+                else {
+                    isResting = false;
+                }
+            }                    
         }
-        //coreModule.debugFoodValue = nutrientCellInfo.x;
-
+        
         ApplyPhysicsForces(smoothedThrottle);
 
         float rotationInRadians = (bodyRigidbody.transform.localRotation.eulerAngles.z + 90f) * Mathf.Deg2Rad;
         facingDirection = new Vector2(Mathf.Cos(rotationInRadians), Mathf.Sin(rotationInRadians));
+                
+        curActionState = currentState;
+
+        
+        
+        if(isDashing) {
+            dashFrameCounter++;
+            if(dashFrameCounter >= dashDuration) {                
+                isDashing = false;
+                EnterCooldown(dashCooldown);
+                dashFrameCounter = 0;
+            }
+        }
+        
+        if(isDefending) {
+            defendFrameCounter++;
+            if (defendFrameCounter >= defendDuration) {                                
+                isDefending = false;
+                EnterCooldown(defendCooldown);
+                defendFrameCounter = 0;
+            }
+        }
+
+        if(isFeeding) {            
+            feedingFrameCounter++;
+            if(feedingFrameCounter > feedAnimDuration) {                
+                isFeeding = false;
+                EnterCooldown(feedAnimCooldown);
+                feedingFrameCounter = 0;
+            }
+        }
+        if(isAttacking) {            
+            attackingFrameCounter++;
+            if(attackingFrameCounter > attackAnimDuration) {
+                isAttacking = false;
+                EnterCooldown(attackAnimCooldown);
+                attackingFrameCounter = 0;
+            }
+        }
+
+        if(isCooldown) {
+            cooldownFrameCounter++;
+            if(cooldownFrameCounter >= cooldownDuration) {
+                cooldownFrameCounter = 0;
+                isCooldown = false;
+            }
+        }
+        
+    }
+
+    private void EnterCooldown(int frames) {
+        isCooldown = true;
+        cooldownDuration = frames;
+        cooldownFrameCounter = 0;
+    }
+
+    private void ActionDash() {
+        if(IsFreeToAct()) {
+            if(coreModule.stamina[0] >= 0.1f) {
+                isDashing = true;
+                coreModule.stamina[0] -= 0.1f;
+            }            
+        } 
+    }
+    private void ActionDefend() {
+        if(IsFreeToAct()) {
+            if(coreModule.stamina[0] >= 0.1f) {
+                isDefending = true;
+                coreModule.stamina[0] -= 0.1f;
+            }            
+        } 
+    }
+    
+
+    private bool IsFreeToAct() {
+        bool isFree = true;
+
+        if(isCooldown) {
+            isFree = false;
+        }
+        if(isDashing) {
+            isFree = false;
+        }
+        if(isDefending) {
+            isFree = false;
+        }
+        if(isFeeding) {
+            isFree = false;
+        }
+        if(isAttacking) {
+            isFree = false;
+        }
+        if(curLifeStage != AgentLifeStage.Mature) {
+            isFree = false;
+        }
+
+        return isFree;
     }
 
     private void ApplyPhysicsForces(Vector2 throttle) {
@@ -1180,63 +1346,30 @@ public class Agent : MonoBehaviour {
             float swimSpeed = Mathf.Lerp(movementModule.smallestCreatureBaseSpeed, movementModule.largestCreatureBaseSpeed, sizeValue);
             float turnRate = Mathf.Lerp(movementModule.smallestCreatureBaseTurnRate, movementModule.largestCreatureBaseTurnRate, sizeValue);
             float dashBonus = 1f;
-            if(coreModule.isDashing) {
-                if(coreModule.dashFrameCounter < coreModule.dashDuration) {
-                    dashBonus = 5f;
-                }
-                else {
-                    dashBonus = 0.33f; // cooldown penalty
-                }
+            if(isDashing) {                
+                dashBonus = 5f;                
+            }
+            if(isCooldown) {
+                dashBonus = 0.5f;
             }
             float restingPenalty = 1f;
-            if(coreModule.isResting) {
-                restingPenalty = 0.167f;
+            if(isResting) {
+                restingPenalty = 0.1f;
             }
             speed = swimSpeed * movementModule.speedBonus * dashBonus * aspectSpeedPenalty * restingPenalty;
-            // Forward Slide
-            //for(int k = 0; k < numSegments; k++) {
+            
             Vector2 segmentForwardDir = new Vector2(this.bodyRigidbody.transform.up.x, this.bodyRigidbody.transform.up.y).normalized;
 
             Vector2 forwardThrustDir = Vector2.Lerp(segmentForwardDir, throttleDir, 0.1f).normalized;
 
-            this.bodyRigidbody.AddForce(forwardThrustDir * (1f - turnSharpness * 0.25f) * swimSpeed * this.bodyRigidbody.mass * Time.deltaTime * developmentMultiplier * fatigueMultiplier * bitingPenalty, ForceMode2D.Impulse);
-            //}
-
+            this.bodyRigidbody.AddForce(forwardThrustDir * (1f - turnSharpness * 0.25f) * speed * this.bodyRigidbody.mass * Time.deltaTime * developmentMultiplier * fatigueMultiplier * bitingPenalty, ForceMode2D.Impulse);
+            
             // modify turning rate based on body proportions:
             float turnRatePenalty = Mathf.Lerp(0.25f, 1f, 1f - sizeValue);
 
             // Head turn:
             this.bodyRigidbody.AddTorque(Mathf.Lerp(headTurn, headTurnSign, 0.75f) * turnRatePenalty * turnRate * this.bodyRigidbody.mass * this.bodyRigidbody.mass * fatigueMultiplier * bitingPenalty * Time.deltaTime, ForceMode2D.Impulse);
             
-            // OLD:::
-            /*
-            for(int i = 1; i < numSegments; i++) {
-
-                float phaseOffset = (float)(i - 1) / (float)(numSegments - 1) * offsetDelay;
-                
-                float targetOscillateAngle = Mathf.Sin((-animationCycle + phaseOffset) * Mathf.PI * 2f * frequency);
-
-                float oscillateTorque = targetOscillateAngle - (jointAnglesArray[i - 1] * Mathf.PI / 180f);
-                
-                float bendMultiplier = Mathf.Lerp(bendRatioHead, bendRatioTailTip, (float)(i - 1) / (float)(numSegments - 1));
-                
-                float targetTurnAngle = -10f * Vector2.Dot(throttleDir, headRightDir) * Mathf.PI / 4f / ((float)numSegments - 1f);
-                float turningTorque = targetTurnAngle - (jointAnglesArray[i - 1] * Mathf.PI / 180f);
-
-                float uTurnMultiplier = -Vector2.Dot(throttleDir, headRightDir) * 0.5f + 0.5f;
-                float turningMultiplier = (Mathf.Abs(Vector2.Dot(throttleDir, headRightDir)) + 0.05f) * (1.0f + uTurnMultiplier);                
-                float oscillateMultiplier = (Vector2.Dot(throttleDir, headForwardDir) * 0.5f + 0.4f);
-
-                float finalTorque = oscillateTorque * oscillateMultiplier + turningTorque * turningMultiplier * bendMultiplier;
-
-                //hingeJointsArray[i - 1].useMotor = true;
-
-                JointMotor2D motor = hingeJointsArray[i-1].motor;           
-                motor.motorSpeed = 0f;
-                motor.maxMotorTorque = restingJointTorque;
-
-                hingeJointsArray[i-1].motor = motor;
-            }*/
         }
     }
 
@@ -1429,13 +1562,18 @@ public class Agent : MonoBehaviour {
         mouthRef.triggerCollider.isTrigger = true;
         mouthRef.triggerCollider.radius = fullSizeBoundingBox.x / 2f * sizePercentage;
         mouthRef.triggerCollider.offset = new Vector2(0f, fullSizeBoundingBox.y / 2f * sizePercentage);
-        mouthRef.isFeeding = false;
-        mouthRef.feedingFrameCounter = 0;
-        mouthRef.isAttacking = false;
-        mouthRef.attackingFrameCounter = 0;
-        mouthRef.isCooldown = false;
+        isFeeding = false;
+        feedingFrameCounter = 0;
+        isAttacking = false;
+        attackingFrameCounter = 0;
+        //mouthRef.isCooldown = false;
         mouthRef.agentIndex = this.index;
         mouthRef.agentRef = this;
+        isResting = false;
+        isDefending = false;
+        isDashing = false;
+
+
 
         //mouthRef.Disable();
 

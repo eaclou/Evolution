@@ -56,9 +56,9 @@
 				
 				fixed4 col = float4(0,0,0,max(max(texColor.x, texColor.y), texColor.z));
 				
-				float3 bodyHealthHue = lerp(float3(0.5,0,0), float3(0, 1,0), _HealthBody);
-				float3 headHealthHue = lerp(float3(0.5,0,0), float3(0, 1,0), _HealthHead);
-				float3 externalHealthHue = lerp(float3(0.5,0,0), float3(0, 1,0), _HealthExternal);
+				float3 bodyHealthHue = lerp(float3(2,0,0), float3(0, 2, 0), _HealthBody);
+				float3 headHealthHue = lerp(float3(2,0,0), float3(0, 2, 0), _HealthHead);
+				float3 externalHealthHue = lerp(float3(2,0,0), float3(0, 2, 0), _HealthExternal);
 				col.rgb = lerp(col.rgb, bodyHealthHue, texColor.b);
 				col.rgb = lerp(col.rgb, headHealthHue, texColor.g);
 				col.rgb = lerp(col.rgb, externalHealthHue, texColor.r);

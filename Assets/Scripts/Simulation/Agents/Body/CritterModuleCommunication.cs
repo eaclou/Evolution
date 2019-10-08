@@ -79,10 +79,12 @@ public class CritterModuleCommunication {
 
     public void Tick(Agent agent) {
         if(genome.useComms) {
-            inComm0[0] = Mathf.Round(agent.coreModule.nearestFriendAgent.communicationModule.outComm0[0] * 3f / 2f);
-            inComm1[0] = Mathf.Round(agent.coreModule.nearestFriendAgent.communicationModule.outComm1[0] * 3f / 2f);
-            inComm2[0] = Mathf.Round(agent.coreModule.nearestFriendAgent.communicationModule.outComm2[0] * 3f / 2f);
-            inComm3[0] = Mathf.Round(agent.coreModule.nearestFriendAgent.communicationModule.outComm3[0] * 3f / 2f);        
+            if(agent.coreModule.nearestFriendAgent != null) {
+                inComm0[0] = Mathf.Round(agent.coreModule.nearestFriendAgent.communicationModule.outComm0[0] * 3f / 2f);
+                inComm1[0] = Mathf.Round(agent.coreModule.nearestFriendAgent.communicationModule.outComm1[0] * 3f / 2f);
+                inComm2[0] = Mathf.Round(agent.coreModule.nearestFriendAgent.communicationModule.outComm2[0] * 3f / 2f);
+                inComm3[0] = Mathf.Round(agent.coreModule.nearestFriendAgent.communicationModule.outComm3[0] * 3f / 2f);   
+            }                 
         }
     }
 }

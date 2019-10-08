@@ -5,18 +5,11 @@ public class CritterMouthComponent : MonoBehaviour {
     public Agent agentRef;
     public int agentIndex = -1;
     
-    public bool isFeeding = false;
-    public bool isAttacking = false;
-    public bool isCooldown = false;
-
-    public int feedingFrameCounter = 0;
-    public int attackingFrameCounter = 0;
 
     public Vector2 mouthTriggerSize;
-    public int feedAnimDuration = 6;
-    public int feedAnimCooldown = 12;
-    public int attackAnimDuration = 6;
-    public int attackAnimCooldown = 12;
+    
+    public bool isFeeding = false;
+    public bool isAttacking = false;  
 
     // efficiency? calculated elsewhere?
     
@@ -53,91 +46,30 @@ public class CritterMouthComponent : MonoBehaviour {
     public void Tick() {
         agentRef.coreModule.isMouthTrigger[0] = 0f;
 
-        if(isFeeding) {
-            //Debug.Log("mouthTick(" + bitingFrameCounter.ToString() + ")");  
-            float randChance = UnityEngine.Random.Range(0f, 1f);
-            if(randChance < 0.75f) {  // RANDOM DURATION VARIANCE
-                feedingFrameCounter++;
-            }                 
-            if(feedingFrameCounter > feedAnimDuration) {
-                isCooldown = true;
-                //feedingFrameCounter = 0;
-                //isFeeding = false;
-            }
-            if(feedingFrameCounter >= feedAnimDuration + feedAnimCooldown) {
-                feedingFrameCounter = 0;
-                isCooldown = false;
-                isFeeding = false;
-            }
-        }
-        if(isAttacking) {
-            //Debug.Log("mouthTick(" + bitingFrameCounter.ToString() + ")");      
-            float randChance = UnityEngine.Random.Range(0f, 1f);
-            if(randChance < 0.75f) {  // RANDOM DURATION VARIANCE
-                attackingFrameCounter++;   
-            }
-            if(attackingFrameCounter > attackAnimDuration) {
-                isCooldown = true;
-            }
-            if(attackingFrameCounter >= attackAnimDuration + attackAnimCooldown) {
-                attackingFrameCounter = 0;
-                isCooldown = false;
-                isAttacking = false;
-            }
-        }
+        
         
         /*else
         {
             bitingFrameCounter = 0; // needed?
         }*/
     }
-
-    public float GetIsFeeding() {
-        float isConsuming = 1f;
-        if(isCooldown) {            
-            isConsuming = 0f;            
-        }
-
-        /*float isConsuming = 0f;
-        if(isFeeding) {
-            if(feedingFrameCounter <= feedAnimDuration) {
-                isConsuming = 1f;
-            }
-        }
-        else {
-
-        }*/
-        return isConsuming;
-    }
-    public float GetIsAttacking() {
-        float val = 0f;
-        if(isAttacking) {
-            if(attackingFrameCounter == attackAnimDuration / 2) {
-                val = 1f;
-            }
-        }
-        else {
-
-        }
-        return val;
-    }
-
+    
     public void Disable() {
         triggerCollider.enabled = false;
-        isCooldown = false;
-        isFeeding = false;
-        isAttacking = false;
+        //isCooldown = false;
+        //isFeeding = false;
+        //isAttacking = false;
         //isBiting = false;        
     }
     public void Enable() {
         triggerCollider.enabled = true;
-        isCooldown = false;
+        /*isCooldown = false;
         if(!isFeeding) {
             feedingFrameCounter = 0;
         }
         if(!isAttacking) {
             attackingFrameCounter = 0;
-        }
+        }*/
     }
 
     public void Initialize(CritterModuleCoreGenome genome, Agent agent) {
@@ -178,65 +110,13 @@ public class CritterMouthComponent : MonoBehaviour {
             }
         }*/
 
-        feedAnimDuration = Mathf.RoundToInt(baseFeedDuration * genome.mouthFeedFrequency);
-        feedAnimCooldown = Mathf.RoundToInt(baseFeedCooldown * genome.mouthFeedFrequency);
-        attackAnimDuration = Mathf.RoundToInt(baseAttackDuration / genome.mouthAttackAmplitude);
-        attackAnimCooldown = Mathf.RoundToInt(baseAttackCooldown / genome.mouthAttackAmplitude);
+        //feedAnimDuration = Mathf.RoundToInt(baseFeedDuration * genome.mouthFeedFrequency);
+        //feedAnimCooldown = Mathf.RoundToInt(baseFeedCooldown * genome.mouthFeedFrequency);
+        //attackAnimDuration = Mathf.RoundToInt(baseAttackDuration / genome.mouthAttackAmplitude);
+        //attackAnimCooldown = Mathf.RoundToInt(baseAttackCooldown / genome.mouthAttackAmplitude);
         
     }
 
-    public void AttemptInitiateActiveFeedBite() {
-        if (isFeeding) {
-            // this shouldn't happen?
-        }
-        else {
-            // Check if able to bite:
-            bool biteReqsMet = true;
-
-            /*if(agentRef.coreModule.stamina[0] <= 0.05f) {
-                biteReqsMet = false;
-            }*/
-            if(isAttacking) {
-                biteReqsMet = false;
-            }
-            if(isCooldown) {
-                biteReqsMet = false;
-            }
-            if(biteReqsMet) {
-                isFeeding = true;
-                triggerCollider.enabled = true;
-                feedingFrameCounter = 0;
-                //agentRef.coreModule.stamina[0] -= 0.05f;
-                //Debug.Log("FEED!");
-            }           
-        }
-    }
-
-    public void AttemptInitiateActiveAttackBite() {
-        if (isAttacking) {
-            // this shouldn't happen?
-        }
-        else {
-            // Check if able to bite:
-            bool biteReqsMet = true;
-            if(agentRef.coreModule.stamina[0] <= 0.25f) {
-                biteReqsMet = false;
-            }
-            if (isFeeding) {
-                biteReqsMet = false;
-            }
-            if(isCooldown) {
-                biteReqsMet = false;
-            }
-            if(biteReqsMet) {
-                isAttacking = true;
-                triggerCollider.enabled = true;
-                attackingFrameCounter = 0;
-                //agentRef.coreModule.stamina[0] -= 0.25f;
-                //Debug.Log("ATTACK!");
-            }                                  
-        }
-    }
     
     private void ActiveFeedBiteCheck(Collider2D collider) {
         // own Bite Capacity:
@@ -379,7 +259,7 @@ public class CritterMouthComponent : MonoBehaviour {
     private void BiteDamageAnimal(Agent preyAgent, float ownBiteArea, float targetArea) {
         
         //Debug.Log("BiteDamageAnimal");
-        float baseDamage = 5f;
+        float baseDamage = 1f;
 
         float sizeRatio = ownBiteArea / targetArea; // for now clamped to 10x
 
@@ -457,13 +337,13 @@ public class CritterMouthComponent : MonoBehaviour {
         } 
 
         if(isFeeding) {
-            if(feedingFrameCounter == feedAnimDuration / 2) {  // is the current frame the Damage-Frame?
+            //if(feedingFrameCounter == feedAnimDuration / 2) {  // is the current frame the Damage-Frame?
                 // if so, BITE!!
                 if(agentRef.curLifeStage != Agent.AgentLifeStage.Dead)
                 {
                     ActiveFeedBiteCheck(collider);
                 }               
-            }
+            //}
         }
         else {
             if(collider.gameObject.CompareTag("HazardCollider")) {
@@ -475,13 +355,13 @@ public class CritterMouthComponent : MonoBehaviour {
         }
 
         if(isAttacking) {
-            if(attackingFrameCounter == attackAnimDuration / 2) {  // is the current frame the Damage-Frame?
+            //if(attackingFrameCounter == attackAnimDuration / 2) {  // is the current frame the Damage-Frame?
                 // if so, BITE!!
                 if(agentRef.curLifeStage != Agent.AgentLifeStage.Dead)
                 {
                     ActiveAttackBiteCheck(collider);
                 }               
-            }
+            //}
         }
         else {
             if(collider.gameObject.CompareTag("HazardCollider")) {

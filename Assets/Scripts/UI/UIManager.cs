@@ -284,6 +284,7 @@ public class UIManager : MonoBehaviour {
     public Animator animatorInspectPanel;
     public Text textInspectData;
 
+    public GameObject panelNewInspect;
     public Text textNewInspectAgentName;
     public Material newInspectAgentEnergyMat;
     public Material newInspectAgentStaminaMat;
@@ -1223,7 +1224,7 @@ public class UIManager : MonoBehaviour {
                         Agent agent = gameManager.simulationManager.agentsArray[critterIndex];
 
                         textNewInspectAgentName.text = agent.candidateRef.candidateGenome.bodyGenome.coreGenome.name;
-                        textNewInspectLog.text = agent.lastEvent;
+                        textNewInspectLog.text = agent.lastEvent.ToString() + ", " + agent.cooldownFrameCounter.ToString() + " / " + agent.cooldownDuration.ToString(); // agent.lastEvent;
                         newInspectAgentEnergyMat.SetFloat("_Value", Mathf.Clamp01(agent.coreModule.energy * 0.25f));
                         newInspectAgentStaminaMat.SetFloat("_Value", Mathf.Clamp01(agent.coreModule.stamina[0] * 1f));
                         newInspectAgentStomachMat.SetFloat("_Value", Mathf.Clamp01(agent.coreModule.stomachContentsNorm * 1f));
@@ -1237,7 +1238,7 @@ public class UIManager : MonoBehaviour {
                         int curActivityID = 0;
                         if(agent.curLifeStage == Agent.AgentLifeStage.Dead) {
                             developmentStateID = 7;
-                            curActivityID = 7;
+                            //curActivityID = 7;
                         }
                         if(agent.curLifeStage == Agent.AgentLifeStage.Mature) {
 
@@ -1256,23 +1257,27 @@ public class UIManager : MonoBehaviour {
                             
 
                             // curActivity
-                            if(agent.coreModule.mouthFeedEffector[0] > 0f) {
-                                curActivityID = 1;
-                            }
-                            if(agent.coreModule.mouthAttackEffector[0] > 0f) {
-                                curActivityID = 2;
-                            }
-                            if(agent.coreModule.isDashing) {
-                                curActivityID = 3;
-                            }
-                            if(agent.coreModule.isDefending) {
-                                curActivityID = 4;
-                            }
-                            if(agent.coreModule.isResting) {
-                                curActivityID = 5;
-                            }
                             if(agent.isPregnantAndCarryingEggs) {
                                 curActivityID = 6;
+                            }
+                            if(agent.isFeeding) {
+                                curActivityID = 1;
+                            }
+                            if(agent.isAttacking) {
+                                curActivityID = 2;
+                            }
+                            if(agent.isDashing) {
+                                curActivityID = 3;
+                            }
+                            if(agent.isDefending) {
+                                curActivityID = 4;
+                            }
+                            if(agent.isResting) {
+                                curActivityID = 5;
+                            }
+                            
+                            if(agent.isCooldown) {
+                                curActivityID = 7;
                             }
                         }
                         newInspectAgentStateMat.SetInt("_StateID", developmentStateID);
@@ -1386,9 +1391,9 @@ public class UIManager : MonoBehaviour {
                                         agent.coreModule.dashEffector[0].ToString("F2") + ", " +
                                         agent.coreModule.healEffector[0].ToString("F2") + "]";
                             str += "\n[" + agent.coreModule.isMouthTrigger[0].ToString() + ", " +
-                                        agent.coreModule.isDashing.ToString() + ", " +
-                                        agent.coreModule.isDefending.ToString() + ", " +
-                                        agent.coreModule.isResting.ToString() + "]";
+                                        agent.isDashing.ToString() + ", " +
+                                        agent.isDefending.ToString() + ", " +
+                                        agent.isResting.ToString() + "]";
                                         //agent.coreModule.healEffector[0].ToString("F2") + "]";
                             str += "\nBiomass  " + (agent.currentBiomass * 100f).ToString("F0") + "   ( " + (agent.sizePercentage * 100f).ToString("F0") + "%)";
                             str += "\nFull Size   " + (bodLength * 10f).ToString("F0") + " x " + (bodWidth * 10f).ToString("F0");
@@ -1889,10 +1894,25 @@ public class UIManager : MonoBehaviour {
                     //buttonToolbarWingDescription.interactable = false;
                     if(!isToolbarDeletePromptOn) {
                         textToolbarWingSpeciesSummary.gameObject.SetActive(true);
+                        textToolbarWingSpeciesSummary.gameObject.SetActive(true);
                         string summaryText = layerManager.GetSpeciesPreviewDescriptionString(gameManager.simulationManager);
                         if(isSpiritBrushSelected) {
                             summaryText = GetSpiritBrushSummary(layerManager);
+                            if(curActiveTool == ToolType.Inspect) {
+                                textToolbarWingSpeciesSummary.gameObject.SetActive(false);
+                                panelNewInspect.SetActive(true);
+                            }
+                            else {
+                                panelNewInspect.SetActive(false);
+                                textToolbarWingSpeciesSummary.gameObject.SetActive(true);
+                            }
+                            
+                            
                         }
+                        else {
+                            
+                        }
+                        
                         textToolbarWingSpeciesSummary.text = summaryText;
                         textToolbarWingPanelName.text = "Overview:";
                         textToolbarWingPanelName.color = new Color(0.9f, 0.9f, 0.9f); //new Color(0.7f, 0.94f, 1f);
@@ -2757,7 +2777,7 @@ public class UIManager : MonoBehaviour {
         float bodLength = agent.fullSizeBoundingBox.y;
         readoutText += "\nBody Size   " + (bodLength * 10f).ToString("F0") + " x " + (bodWidth * 10f).ToString("F0");
         readoutText += "\nTotal Eaten -- Meat: " + (agent.totalFoodEatenMeat * 1000f).ToString("F0") + ", Plant: " + (agent.totalFoodEatenPlant * 1000f).ToString("F0");
-        readoutText += "\nBiteAnimCounter   " + agent.mouthRef.feedingFrameCounter.ToString();
+        readoutText += "\nBiteAnimCounter   " + agent.feedingFrameCounter.ToString();
         Vector4 resourceGridSample = SampleTexture(gameManager.simulationManager.vegetationManager.resourceGridRT1, curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
         Vector4 simTansferSample = SampleTexture(gameManager.simulationManager.vegetationManager.resourceSimTransferRT, curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
         readoutText += "\n\nNutrients    " + (resourceGridSample.x * 1000f).ToString("F0");

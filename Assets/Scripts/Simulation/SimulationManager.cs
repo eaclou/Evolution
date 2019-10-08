@@ -782,15 +782,12 @@ public class SimulationManager : MonoBehaviour {
                 float damage = wallForce * 0.089f;
                 float defendBonus = 1f;
                 if(agentsArray[i].coreModule != null && agentsArray[i].curLifeStage == Agent.AgentLifeStage.Mature) {
-                    if(agentsArray[i].coreModule.isDefending) {
-                        if(agentsArray[i].coreModule.defendFrameCounter < agentsArray[i].coreModule.defendDuration) {
-                            defendBonus = 0.1f;
-                        }
-                        else {
-                            defendBonus = 1.25f; // cooldown penalty
-                        }
+                    if(agentsArray[i].isDefending) {                        
+                        defendBonus = 0.1f;
                     }
-
+                    else {
+                        defendBonus = 1.25f; // cooldown penalty
+                    }
                     damage *= defendBonus;
 
                     agentsArray[i].coreModule.hitPoints[0] -= damage;
@@ -931,7 +928,7 @@ public class SimulationManager : MonoBehaviour {
 
         // Find NearestNeighbors:
         for (int a = 0; a < agentsArray.Length; a++) {
-            if(agentsArray[a].curLifeStage != Agent.AgentLifeStage.Null && agentsArray[a].curLifeStage != Agent.AgentLifeStage.AwaitingRespawn) { // *****
+            if(agentsArray[a].curLifeStage == Agent.AgentLifeStage.Mature) { // *****
                 // Find which gridCell this Agent is in:    
                 Vector2 agentPos = new Vector2(agentsArray[a].bodyRigidbody.transform.position.x, agentsArray[a].bodyRigidbody.transform.position.y);
                 int xCoord = Mathf.FloorToInt(agentPos.x / mapSize * (float)agentGridCellResolution); // Mathf.FloorToInt((agentPos.x + mapSize) / (mapSize * 2f) * (float)agentGridCellResolution);
@@ -961,7 +958,7 @@ public class SimulationManager : MonoBehaviour {
                     int neighborIndex = mapGridCellArray[xCoord][yCoord].agentIndicesList[i];
                     int neighborSpeciesIndex = agentsArray[neighborIndex].speciesIndex; 
 
-                    if(agentsArray[neighborIndex].curLifeStage != Agent.AgentLifeStage.Null && agentsArray[neighborIndex].curLifeStage != Agent.AgentLifeStage.AwaitingRespawn) {
+                    if(agentsArray[neighborIndex].curLifeStage == Agent.AgentLifeStage.Mature) {
                         // FRIEND:
                         Vector2 neighborPos = new Vector2(agentsArray[neighborIndex].bodyRigidbody.transform.localPosition.x, agentsArray[neighborIndex].bodyRigidbody.transform.localPosition.y);
                         float squaredDistNeighbor = (neighborPos - agentPos).sqrMagnitude;
@@ -1023,7 +1020,11 @@ public class SimulationManager : MonoBehaviour {
                     }  
                 }
                 else {
-                    Debug.LogError("if(agentsArray[a].coreModule != null) {");
+                    Debug.LogError("agentsArray[" + a.ToString() + "].coreModule == null) " + agentsArray[a].curLifeStage.ToString());
+                    //agentsArray[a].coreModule.nearestFriendAgent = agentsArray[0];
+                    //agentsArray[a].coreModule.nearestEnemyAgent = agentsArray[0];                    
+                    //agentsArray[a].coreModule.nearestEggSackModule = eggSackArray[0];               
+                    
                 }
             }
                       
@@ -1089,7 +1090,13 @@ public class SimulationManager : MonoBehaviour {
             if (agentsArray[a].curLifeStage == Agent.AgentLifeStage.AwaitingRespawn) {
                           
                 CandidateAgentData candidateData = masterGenomePool.completeSpeciesPoolsList[speciesIndex].GetNextAvailableCandidate();
+                Debug.Log("" + masterGenomePool.ToString());
+                Debug.Log("" + masterGenomePool.vertebrateSlotsGenomesCurrentArray[trophicLayersManager.selectedTrophicSlotRef.slotID].ToString());
+                Debug.Log("" + masterGenomePool.vertebrateSlotsGenomesCurrentArray[trophicLayersManager.selectedTrophicSlotRef.slotID].representativeGenome.ToString());
+                Debug.Log("" + trophicLayersManager.selectedTrophicSlotRef.ToString());
                 candidateData.candidateGenome = masterGenomePool.vertebrateSlotsGenomesCurrentArray[trophicLayersManager.selectedTrophicSlotRef.slotID].representativeGenome;
+                
+                
 
 
                 if (candidateData == null) {

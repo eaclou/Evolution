@@ -70,18 +70,6 @@ public class CritterModuleCore {
     public float foodEfficiencyDecay;
     public float foodEfficiencyMeat;
 
-    public bool isDashing = false;
-    public int dashFrameCounter = 0;
-    public int dashDuration = 25;
-    public int dashCooldown = 60;
-
-    public bool isDefending = false;
-    public int defendFrameCounter = 0;
-    public int defendDuration = 40;
-    public int defendCooldown = 120;
-
-    public bool isResting = false;
-
 	public CritterModuleCore() {
 
     }
@@ -218,20 +206,6 @@ public class CritterModuleCore {
         energyStored[0] = Mathf.Clamp01(energy);  // Mathf.Clamp01(energyRaw / maxEnergyStorage);
         foodStored[0] = stomachContentsNorm; // / stomachCapacity;
         
-        if(isDashing) {
-            dashFrameCounter++;
-            if(dashFrameCounter >= dashDuration + dashCooldown) {
-                dashFrameCounter = 0;
-                isDashing = false;
-            }
-        }
         
-        if(isDefending) {
-            defendFrameCounter++;
-            if(defendFrameCounter >= defendDuration + defendCooldown) {
-                defendFrameCounter = 0;
-                isDefending = false;
-            }
-        }
     }
 }
