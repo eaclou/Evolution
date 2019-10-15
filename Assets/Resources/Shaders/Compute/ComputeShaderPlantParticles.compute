@@ -331,8 +331,8 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 		float oxygenProduced = 0;
 		float nutrientsUsed = 0;
 
-		float2 vel = velocityRead.SampleLevel(_LinearClamp, uv, 2).xy;
-		float speedMult = 0.0167 * (1.0 - foodParticle.rootedness);				
+		float2 vel = velocityRead.SampleLevel(_LinearClamp, uv, 0).xy;
+		float speedMult = 0.0167; // * (1.0 - foodParticle.rootedness);				
 		
 		posOffset += vel * speedMult * _MapSize;
 
@@ -448,7 +448,7 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 					float randRadius = rand(float2(randX * 10, randY * -3.37)) * (_MaxParticleSize - _MinParticleSize) + _MinParticleSize;					
 					
 					foodParticlesWrite[id.x].radius = 1.0; // representativeParticle.radius * (0.9 + 0.2 * (1.0 - rand01)); // 1.0; //randRadius;
-					foodParticlesWrite[id.x].biomass = _AlgaeParticleInitMass;
+					foodParticlesWrite[id.x].biomass = _AlgaeParticleInitMass * 10;
 					foodParticlesWrite[id.x].isActive = 1.0;
 					foodParticlesWrite[id.x].isDecaying = 0.0;
 					foodParticlesWrite[id.x].isSwallowed = 0.0;
@@ -498,7 +498,7 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 				//float randRadius = rand(float2(randX * 10, randY * -3.37)) * (_MaxParticleSize - _MinParticleSize) + _MinParticleSize;					
 					
 				foodParticlesWrite[id.x].radius = 1.0; //parentParticle.radius * (0.9 + 0.2 * (1.0 - rand01));  // ** UNUSED?*** // parentParticle.radius; // 1.0; //randRadius;
-				foodParticlesWrite[id.x].biomass = _AlgaeParticleInitMass;
+				foodParticlesWrite[id.x].biomass = _AlgaeParticleInitMass * 5;
 				foodParticlesWrite[id.x].isActive = 1.0;
 				foodParticlesWrite[id.x].isDecaying = 0.0;
 				foodParticlesWrite[id.x].isSwallowed = 0.0;

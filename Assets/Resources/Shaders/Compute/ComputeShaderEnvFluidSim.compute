@@ -209,7 +209,7 @@ void SimFloatyBits (uint3 id : SV_DispatchThreadID)
 	FloatyBitData floatyBitData = FloatyBitsCBuffer[id.x];
 	float2 uv = floatyBitData.coords;
 	float2 vel = VelocityRead.SampleLevel(_LinearRepeat, uv, 0).xy;
-	float speedMult = 0.033;
+	float speedMult = 0.0167;
 	
 	float2 nextPos = uv + vel * speedMult;
 
@@ -219,13 +219,13 @@ void SimFloatyBits (uint3 id : SV_DispatchThreadID)
 	float velocityLerp = 85 * length(vel);
 	floatyBitData.heading = normalize(lerp(floatyBitData.heading, vel, saturate(velocityLerp)));
 
-	floatyBitData.age = floatyBitData.age + 0.0001;  // 1000 frame lifespan
+	floatyBitData.age = floatyBitData.age + 0.00001;  // 1000 frame lifespan
 	if(floatyBitData.age > 1.0) {
 		
 		//float2 spawnPos = float2(rand(float2((float)id.x, uv.x)) * 0.02 + 0.49, rand(float2(uv.y, (float)id.x)) * 0.02 + 49);		
 		
 		int numZones = 2;
-		float numTotalBits = 1024 * 64;
+		//float numTotalBits = 1024 * 64;
 		float val01 = (float)id.x / (1024 * 64);
 		float randZoneX = floor(rand(float2((float)id.x, 5)) * (float)numZones);
 		float randZoneY = floor(rand(float2(val01, (float)id.x)) * (float)numZones);
@@ -235,6 +235,7 @@ void SimFloatyBits (uint3 id : SV_DispatchThreadID)
 		randOffset.x += 0.05 * rand(uv);
 		float2 spawnCoords = randOffset + float2(randZoneX / 3.0 + 0.25, randZoneY / 3.0 + 0.25); // + float2(randZoneX, randZoneY)
 
+		//float randAge = rand(randOffset * 20 * id.x + _Time);
 		floatyBitData.coords = spawnCoords; //float2(rand(float2((float)id.x,0)) * 0.04 + 0.48, 0.495 + 0.01 * (float)id.x / (1024 * 64)); //spawnPos;
 		floatyBitData.age = 0;
 	}

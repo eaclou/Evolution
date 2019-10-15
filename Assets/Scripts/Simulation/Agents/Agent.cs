@@ -19,7 +19,7 @@ public class Agent : MonoBehaviour {
 
     public float spawnStartingScale = 0.1f; // *** REFACTOR!!! SYNC WITH EGGS!!!
 
-    public bool isInert = true;  // when inert, colliders disabled
+    public bool isInert = true;  // when inert, colliders disabled // is this still used?? ****
     // Refactor??
     public bool isActing = false;  // biting, defending, dashing, etc -- exclusive actions    
     public bool isDecaying = false;
@@ -45,8 +45,6 @@ public class Agent : MonoBehaviour {
     public int defendCooldown = 60;
 
     public bool isResting = false;
-    //public bool isBiteFeeding = false;
-    //public bool isBiteAttacking = false;
     public bool isCooldown = false;
 
     public int cooldownFrameCounter = 0;
@@ -95,20 +93,7 @@ public class Agent : MonoBehaviour {
     }
     
     public int maxAgeTimeSteps = 100000;
-    /*private int decayDurationTimeSteps = 420;
-    public int _DecayDurationTimeSteps
-    {
-        get
-        {
-            return decayDurationTimeSteps;
-        }
-        set
-        {
-
-        }
-    }*/
-    //private int maxGrowthPeriod = 2560;
-
+    
     private int growthScalingSkipFrames = 10;
 
     public float sizePercentage = 0f;
@@ -206,7 +191,7 @@ public class Agent : MonoBehaviour {
 
     public EggSack childEggSackRef;
     public bool isPregnantAndCarryingEggs = false;
-    public int pregnancyRefactoryDuration = 3200;
+    public int pregnancyRefactoryDuration = 4800;
 
     //public float overflowFoodAmount = 0f;
         
@@ -262,16 +247,21 @@ public class Agent : MonoBehaviour {
 
     public void InitiateBeingSwallowed(Agent predatorAgent)
     {
-        curLifeStage = Agent.AgentLifeStage.Dead; // ....
+        //curLifeStage = Agent.AgentLifeStage.Dead; // ....
 
-        isInert = true;
+        //isInert = false; // *** is this still used? ... (sorta...)
 
         colliderBody.enabled = false;
         isBeingSwallowed = true;
-        isSexuallyMature = false;
+        //isSexuallyMature = false;
         beingSwallowedFrameCounter = 0;
         predatorAgentRef = predatorAgent;
 
+        //Debug.Log("Died of old age!");
+        stringCauseOfDeath = "Swallowed Whole";
+        InitializeDeath();
+
+        /*
         springJoint.connectedBody = predatorAgentRef.bodyRigidbody;
         springJoint.autoConfigureConnectedAnchor = false;
         springJoint.anchor = Vector2.zero;
@@ -281,12 +271,25 @@ public class Agent : MonoBehaviour {
         springJoint.enableCollision = false;
         springJoint.enabled = true;
         springJoint.frequency = 15f;
+        */
+        //this.biomassAtDeath
+        
     }
     public void InitiateSwallowingPrey(Agent preyAgent)
     {
         isSwallowingPrey = true;
         swallowingPreyFrameCounter = 0;
         preyAgentRef = preyAgent;
+
+        EatFoodMeat(preyAgent.currentBiomass);
+        preyAgent.ProcessBeingEaten(preyAgent.currentBiomass);
+        //preyAgent.currentBiomass = 0f;
+        
+        //beingSwallowedFrameCounter = 0;
+        //isBeingSwallowed = false;
+        colliderBody.enabled = false;
+        springJoint.enabled = false;
+        springJoint.connectedBody = null;
     }
 
     //private int GetNumInputs() {
@@ -496,7 +499,7 @@ public class Agent : MonoBehaviour {
             else {
                 stringCauseOfDeath = "Starved";
             }
-            curLifeStage = AgentLifeStage.Dead;
+            
             lifeStageTransitionTimeStepCounter = 0;
             
             InitializeDeath();
@@ -539,7 +542,9 @@ public class Agent : MonoBehaviour {
         }
     }
     private void InitializeDeath()   // THIS CAN BE A LOT CLEANER!!!!! *****
-    {    
+    {  
+        curLifeStage = AgentLifeStage.Dead;
+
         if(isPregnantAndCarryingEggs) {
             AbortPregnancy();
         }
@@ -564,6 +569,10 @@ public class Agent : MonoBehaviour {
                 if(lifeStageTransitionTimeStepCounter >= gestationDurationTimeSteps) {
                     BeginHatching();
                 }
+                else {
+                    CheckForDeathHealth();
+                }
+                
                 break;
             case AgentLifeStage.Mature:
                 
@@ -579,14 +588,6 @@ public class Agent : MonoBehaviour {
                     lifeStageTransitionTimeStepCounter = 0;
                     isInert = true;
                 }
-
-                // REFACTOR THIS!!!! ******  SYNC actual biomass decay with visual percentage?!??
-
-                // OLD::::
-                /*
-                if(lifeStageTransitionTimeStepCounter >= decayDurationTimeSteps) { //  Corpse naturally decayed without being fully consumed:
-                    
-                }*/
                 break;
             case AgentLifeStage.Null:
                 isInert = true;
@@ -656,7 +657,7 @@ public class Agent : MonoBehaviour {
         
         GainExperience((amount / coreModule.stomachCapacity) * coreModule.foodEfficiencyMeat * 1f); // Exp for appropriate food
 
-        lastEvent = "Ate Zooplankton! (" + amount.ToString() + ")";
+        lastEvent = "Ate Meat! (" + amount.ToString() + ")";
         lastEventTime = UnityEngine.Time.frameCount;
     }
     public void TakeDamage(float damage) {
@@ -708,46 +709,32 @@ public class Agent : MonoBehaviour {
     public void ProcessBeingEaten(float amount) {
         // if this agent is dead, it acts as food.
         // it was just bitten by another creature and removed material -- 
-
+        
         currentBiomass -= amount;
 
-        if (currentBiomass < 0f)
+        if (currentBiomass <= 0f)
         {
             currentBiomass = 0f;
 
-            coreModule.healthBody = 0f;
-            coreModule.healthHead = 0f;
-            coreModule.healthExternal = 0f;
+            //coreModule.healthBody = 0f;
+            //coreModule.healthHead = 0f;
+            //coreModule.healthExternal = 0f;
 
-            curLifeStage = AgentLifeStage.Null;
-            lifeStageTransitionTimeStepCounter = 0;
+            //curLifeStage = AgentLifeStage.Null;
+            //lifeStageTransitionTimeStepCounter = 0;
                 
-            beingSwallowedFrameCounter = 0;
-            isBeingSwallowed = false;
+            //beingSwallowedFrameCounter = 0;
+            //isBeingSwallowed = false;
 
             colliderBody.enabled = false;
             springJoint.enabled = false;
             springJoint.connectedBody = null;
-
-            // fully consumed?? Should this case be checked for earlier in the pipe ???
-            // Need to 
         }
         else
         {
-            ScaleBody(sizePercentage, true);
-
-            // ******** CHANGE THIS LATER IT"S FUCKING AWFUL!!!! **************************************************  *** ***** ***** ***** **
-            /*float sidesRatio = coreModule.coreWidth / coreModule.coreLength;
-            float sideY = Mathf.Sqrt(currentCorpseFoodAmount / sidesRatio);
-            float sideX = sideY * sidesRatio;
-
-            // v v v move this into ScaleBody function?  Or re-organize into sub functions?
-            // Do I even use currentBodySize as a trusted value?
-            coreModule.currentBodySize = new Vector2(sideX, sideY);
-            colliderBody.size = coreModule.currentBodySize;
-            */
+            ScaleBody(sizePercentage, false);
         }
-
+        
         lastEvent = "Devoured!";
         lastEventTime = UnityEngine.Time.frameCount;
     }
@@ -759,15 +746,15 @@ public class Agent : MonoBehaviour {
         oxygenUsedLastFrame = 0f;
 
 
-        if(isBeingSwallowed)
+        /*if(isBeingSwallowed)
         {
             beingSwallowedFrameCounter++;
 
-            if(beingSwallowedFrameCounter >= swallowDuration + 6)
+            if(beingSwallowedFrameCounter >= 10)
             {
                 //Debug.Log("isBeingSwallowed + swallow Complete!");
-                curLifeStage = AgentLifeStage.Null;
-                lifeStageTransitionTimeStepCounter = 0;
+                //curLifeStage = AgentLifeStage.Null;
+                //lifeStageTransitionTimeStepCounter = 0;
                 
                 beingSwallowedFrameCounter = 0;
                 isBeingSwallowed = false;
@@ -782,7 +769,7 @@ public class Agent : MonoBehaviour {
 
                 ScaleBody((1.0f - scale) * 1f * sizePercentage, true);
             }
-        }        
+        }  */      
 
         // Any external inputs updated by simManager just before this
 
@@ -829,6 +816,13 @@ public class Agent : MonoBehaviour {
     // *** Condense these into ONE?
     private void TickEgg() {        
         lifeStageTransitionTimeStepCounter++;
+
+        if(isBeingSwallowed) {
+            
+            Debug.Log("TickEgg() isBeingSwallowed! " + index.ToString() + " --> " + predatorAgentRef.index.ToString());
+            
+
+        }
 
         sizePercentage = Mathf.Clamp01(((float)lifeStageTransitionTimeStepCounter / (float)gestationDurationTimeSteps) * spawnStartingScale);
 
@@ -899,6 +893,11 @@ public class Agent : MonoBehaviour {
         mouthRef.isFeeding = this.isFeeding;
         mouthRef.isAttacking = this.isAttacking;
         //ProcessSwallowing();
+
+        if(isSwallowingPrey) {
+            Debug.Log("Holy SH!T a creature was eaten! " + index.ToString() + " --> " + preyAgentRef.index.ToString());
+            //mouthRef.BiteCorpseFood(preyAgentRef, currentBiomass * 0.05f);
+        }
 
         // Check for death & stuff? Or is this handled inside OnCollisionEnter() events?
         // Refactor this eventually!!!!
@@ -975,7 +974,6 @@ public class Agent : MonoBehaviour {
 
         if(currentBiomass <= 0f) {
             currentBiomass = 0f;
-
 
         }
     }
@@ -1302,13 +1300,18 @@ public class Agent : MonoBehaviour {
 
         float bitingPenalty = 1f;
         
-        /*if(mouthRef.isBiting)
+        if(isFeeding)
         {
-            bitingPenalty = 1f;
-        }*/
-        if(coreModule.mouthFeedEffector[0] > 0f)  // Clean up code for State-machine-esque behaviors/abilities
+            bitingPenalty = 0.65f;
+        }
+        /*if(coreModule.mouthFeedEffector[0] > 0f)  // Clean up code for State-machine-esque behaviors/abilities
         {
             bitingPenalty = 0.5f;
+        }*/
+
+        float forcePenalty = 0.7f;
+        if(isResting) {
+            forcePenalty = 0.05f;
         }
         
         float fatigueMultiplier = Mathf.Clamp01(coreModule.energy * 5f + 0.05f) * Mathf.Clamp01(coreModule.stamina[0] * 4f + 0.05f);
@@ -1318,10 +1321,12 @@ public class Agent : MonoBehaviour {
 
         turningAmount = Mathf.Lerp(turningAmount, this.bodyRigidbody.angularVelocity * Mathf.Deg2Rad * 0.1f, 0.28f);
 
-        animationCycle += smoothedThrottle.magnitude * swimAnimationCycleSpeed * (sizePercentage * 0.25f + 0.75f) * fatigueMultiplier; // (Mathf.Lerp(fullSizeBoundingBox.y, 1f, 1f)
+        animationCycle += smoothedThrottle.magnitude * swimAnimationCycleSpeed * fatigueMultiplier * forcePenalty; // (Mathf.Lerp(fullSizeBoundingBox.y, 1f, 1f)
 
         if (throttle.sqrMagnitude > 0.000001f) {  // Throttle is NOT == ZERO
             
+            
+
             Vector2 headForwardDir = new Vector2(this.bodyRigidbody.transform.up.x, this.bodyRigidbody.transform.up.y).normalized;
             Vector2 headRightDir =  new Vector2(this.bodyRigidbody.transform.right.x, this.bodyRigidbody.transform.right.y).normalized;
             Vector2 throttleDir = throttle.normalized;
@@ -1330,7 +1335,7 @@ public class Agent : MonoBehaviour {
             float headTurn = Vector2.Dot(throttleDir, headRightDir) * -1f * turnSharpness;
             float headTurnSign = Mathf.Clamp(Vector2.Dot(throttleDir, headRightDir) * -10000f, -1f, 1f);
                         
-            float developmentMultiplier = Mathf.Lerp(0.25f, 1f, Mathf.Clamp01(sizePercentage * 2f));
+            //float developmentMultiplier = Mathf.Lerp(0.25f, 1f, Mathf.Clamp01(sizePercentage * 2f));
             //turningAmount = Mathf.Lerp(turningAmount, this.bodyRigidbody.angularVelocity * Mathf.Deg2Rad * 0.1f, 0.15f);
 
             //this.rigidbodiesArray[0].AddForce(headForwardDir * speed * Time.deltaTime, ForceMode2D.Impulse);
@@ -1339,12 +1344,12 @@ public class Agent : MonoBehaviour {
             //animationCycle = animationCycle % 1.0f;
 
             // get size in 0-1 range from minSize to maxSize:
-            float sizeValue = Mathf.Clamp01(coreModule.speedBonus * (candidateRef.candidateGenome.bodyGenome.coreGenome.creatureBaseLength - 0.2f) / 2f); ; // Mathf.Clamp01((fullSizeBoundingBox.x - 0.1f) / 2.5f); // ** Hardcoded assuming size ranges from 0.1 --> 2.5 !!! ********
+            float sizeValue = Mathf.Clamp01(coreModule.speedBonus * (candidateRef.candidateGenome.bodyGenome.coreGenome.creatureBaseLength - 0.2f) / 2f);  // Mathf.Clamp01((fullSizeBoundingBox.x - 0.1f) / 2.5f); // ** Hardcoded assuming size ranges from 0.1 --> 2.5 !!! ********
 
-            float aspectSpeedPenalty = 1.0f; // Mathf.Lerp(1.2f, 0.4f, candidateRef.candidateGenome.bodyGenome.coreGenome.creatureAspectRatio);
+            //float aspectSpeedPenalty = 1.0f; // Mathf.Lerp(1.2f, 0.4f, candidateRef.candidateGenome.bodyGenome.coreGenome.creatureAspectRatio);
 
-            float swimSpeed = Mathf.Lerp(movementModule.smallestCreatureBaseSpeed, movementModule.largestCreatureBaseSpeed, sizeValue);
-            float turnRate = Mathf.Lerp(movementModule.smallestCreatureBaseTurnRate, movementModule.largestCreatureBaseTurnRate, sizeValue);
+            float swimSpeed = Mathf.Lerp(movementModule.smallestCreatureBaseSpeed, movementModule.largestCreatureBaseSpeed, 0.5f); // sizeValue);
+            float turnRate = Mathf.Lerp(movementModule.smallestCreatureBaseTurnRate, movementModule.largestCreatureBaseTurnRate, 0.5f); // sizeValue);
             float dashBonus = 1f;
             if(isDashing) {                
                 dashBonus = 5f;                
@@ -1352,23 +1357,21 @@ public class Agent : MonoBehaviour {
             if(isCooldown) {
                 dashBonus = 0.5f;
             }
-            float restingPenalty = 1f;
-            if(isResting) {
-                restingPenalty = 0.1f;
-            }
-            speed = swimSpeed * movementModule.speedBonus * dashBonus * aspectSpeedPenalty * restingPenalty;
+            
+
+            speed = swimSpeed * movementModule.speedBonus * dashBonus * forcePenalty; // * restingPenalty;
             
             Vector2 segmentForwardDir = new Vector2(this.bodyRigidbody.transform.up.x, this.bodyRigidbody.transform.up.y).normalized;
 
             Vector2 forwardThrustDir = Vector2.Lerp(segmentForwardDir, throttleDir, 0.1f).normalized;
 
-            this.bodyRigidbody.AddForce(forwardThrustDir * (1f - turnSharpness * 0.25f) * speed * this.bodyRigidbody.mass * Time.deltaTime * developmentMultiplier * fatigueMultiplier * bitingPenalty, ForceMode2D.Impulse);
+            this.bodyRigidbody.AddForce(forwardThrustDir * (1f - turnSharpness * 0.25f) * speed * this.bodyRigidbody.mass * Time.deltaTime * fatigueMultiplier * bitingPenalty, ForceMode2D.Impulse);
             
             // modify turning rate based on body proportions:
-            float turnRatePenalty = Mathf.Lerp(0.25f, 1f, 1f - sizeValue);
+            //float turnRatePenalty = Mathf.Lerp(0.25f, 1f, 1f - sizeValue);
 
             // Head turn:
-            this.bodyRigidbody.AddTorque(Mathf.Lerp(headTurn, headTurnSign, 0.75f) * turnRatePenalty * turnRate * this.bodyRigidbody.mass * this.bodyRigidbody.mass * fatigueMultiplier * bitingPenalty * Time.deltaTime, ForceMode2D.Impulse);
+            this.bodyRigidbody.AddTorque(Mathf.Lerp(headTurn, headTurnSign, 0.75f) * forcePenalty * turnRate * this.bodyRigidbody.mass * this.bodyRigidbody.mass * fatigueMultiplier * bitingPenalty * Time.deltaTime, ForceMode2D.Impulse);
             
         }
     }
@@ -1586,6 +1589,8 @@ public class Agent : MonoBehaviour {
     }
 
     private void ResetStartingValues() {
+        stringCauseOfDeath = "alive";
+
         animationCycle = 0f;
         lifeStageTransitionTimeStepCounter = 0;
         pregnancyRefactoryTimeStepCounter = 0;

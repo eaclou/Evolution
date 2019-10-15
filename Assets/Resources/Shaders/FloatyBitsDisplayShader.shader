@@ -67,13 +67,14 @@
 
 				float random1 = rand(float2(inst, inst));
 				float random2 = rand(float2(random1, random1));
+				float random3 = rand(float2(random1 - _Time.y * 21.34, random2));
 
 				float randomAspect = lerp(0.75, 1.36, random1);
 				float randomValue = rand(float2(inst, randomAspect * 10));
 				float randomScale = lerp(0.75, 1.4, random2) * 3.6;
 				float2 scale = float2(0.05 * randomAspect, 0.05 * (1.0 / randomAspect)) * randomScale; //float2(randomAspect * randomScale, (1.0 / randomAspect) * randomScale * (length(velocity) * 25 + 1.61));
-				//scale.x *= 1.35;
-				quadPoint *= float3(scale, 1.0);
+				scale.y *= 2.735;
+				quadPoint *= float3(scale, 1.0) * 0.34;
 				
 				float2 forward = floatyBitData.heading; //normalize(velocity);
 				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
@@ -95,6 +96,7 @@
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(rotatedPoint, 0.0f));
 				float brightness = (random1);
+				dotLight *= brightness;
 				o.color = float4(dotLight,dotLight,dotLight,alpha * 1); // float4(randomValue, randomValue, randomValue, 1 / (length(velocity) * 50 + 1.15));
 				o.uv = quadVerticesCBuffer[id] + 0.5f;
 				
@@ -109,7 +111,7 @@
 
 				float4 finalColor = texColor; //float4(1,1,1,1); //float4(0.1,0.1,0.05,1) * texColor; //texColor * _Tint * float4(i.color, 1);
 				finalColor.rgb = float3(0.9, 0.8, 0.5) * (0.25 + 0.75 * i.color.x);
-				//finalColor.a *= i.color.a * 0.25;
+				finalColor.a *= i.color.a * 0.7;
 				//finalColor.rgb = lerp(fluidColor.rgb, i.color.rgb, 0.06);
 				//finalColor.a *= 0.65;
 				//finalColor.rgb *= 1.16;

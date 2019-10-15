@@ -575,12 +575,12 @@ public class SimulationManager : MonoBehaviour {
 
 
         // MEASURE GLOBAL RESOURCES:
-        if(trophicLayersManager.GetAlgaeOnOff()) {
+        //if(trophicLayersManager.GetAlgaeOnOff()) {
             //vegetationManager.FindClosestAlgaeParticleToCritters(simStateData);
             //vegetationManager.MeasureTotalAlgaeParticlesAmount();
 
-            vegetationManager.MeasureTotalResourceGridAmount();
-        }
+        vegetationManager.MeasureTotalResourceGridAmount();
+        //}
         
 
         vegetationManager.MeasureTotalPlantParticlesAmount();
@@ -779,7 +779,7 @@ public class SimulationManager : MonoBehaviour {
                 agentsArray[i].bodyRigidbody.AddForce(grad * 15f * agentsArray[i].bodyRigidbody.mass * wallForce, ForceMode2D.Impulse);
 
 
-                float damage = wallForce * 0.089f;
+                float damage = wallForce * 0.089f;                
                 float defendBonus = 1f;
                 if(agentsArray[i].coreModule != null && agentsArray[i].curLifeStage == Agent.AgentLifeStage.Mature) {
                     if(agentsArray[i].isDefending) {                        
@@ -1155,7 +1155,7 @@ public class SimulationManager : MonoBehaviour {
                 candidateData.isBeingEvaluated = true;
             }
             else { // No eggSack found:
-                //if(agentIndex == 0) {  // temp hack to avoid null reference exceptions:
+                //if(agentIndex != 0) {  // temp hack to avoid null reference exceptions:
                 SpawnAgentImmaculate(candidateData, agentIndex, speciesIndex);
                 candidateData.isBeingEvaluated = true;
                 //}    
@@ -1203,6 +1203,9 @@ public class SimulationManager : MonoBehaviour {
         // -- look up the connected CandidateGenome & its speciesID
         CandidateAgentData candidateData = agentRef.candidateRef;
         int agentSpeciesIndex = agentRef.speciesIndex;
+        if(candidateData == null) {
+            Debug.LogError("candidateData NULL (" + agentRef.index.ToString() + ") species " + agentSpeciesIndex.ToString());
+        }
         int candidateSpeciesIndex = candidateData.speciesID;
         if(agentSpeciesIndex != candidateSpeciesIndex) {
             Debug.LogError("agentSpeciesIndex (" + agentSpeciesIndex.ToString() + " != candidateSpeciesIndex (" + candidateSpeciesIndex.ToString());

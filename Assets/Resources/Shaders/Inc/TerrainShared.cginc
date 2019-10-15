@@ -56,7 +56,7 @@ float3 GetFinalBackgroundColor() {   // for shadows?
 float4 GetGroundColor(float3 worldPos, float4 frameBufferColor, float4 altitudeTex, float4 waterSurfaceTex, float4 resourceTex) {
 	float turbidity = _Turbidity;  
 	float causticsStrength = lerp(0.025, 0.275, _Turbidity);
-	float minFog = 0.2;
+	float minFog = 0.5;
 	
 	float4 finalColor = frameBufferColor;
 	float3 decomposerHue = float3(0.8,0.3,0);
@@ -68,7 +68,7 @@ float4 GetGroundColor(float3 worldPos, float4 frameBufferColor, float4 altitudeT
 	finalColor.rgb = lerp(finalColor.rgb, detritusHue, detritusMask);
 
 	float algaeMask = saturate(resourceTex.w * 1.0);
-	minFog += algaeMask * 0.8;
+	minFog = max(algaeMask * 1, minFog);
 	
 	float altitude = altitudeTex.x;
 	// 0-1 range --> -1 to 1
@@ -95,7 +95,8 @@ float4 GetGroundColor(float3 worldPos, float4 frameBufferColor, float4 altitudeT
 	
 	
 	// FOG:	
-	finalColor.rgb = lerp(finalColor.rgb, waterFogColor, (saturate(depthNormalized + algaeMask) * isUnderwater) * algaeMask);
+	float fogAmount = lerp(0, 1, depthNormalized);
+	finalColor.rgb = lerp(finalColor.rgb, waterFogColor, fogAmount * isUnderwater); // (max(minFog, saturate(depthNormalized + algaeMask))
 
 	
 	//finalColor.rgb += decomposerHue * decomposerMask * 0.025;

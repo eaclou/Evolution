@@ -475,7 +475,7 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 						AnimalParticleData representativeParticle = _RepresentativeGenomeCBuffer[0];
 
 						// StartSize?
-						float startingMass = 0.0025;
+						float startingMass = 0.005;
 						float startingRadius = sqrt(startingMass);
 						animalParticlesWrite[id.x].radius = startingRadius;  // Obsolete? 
 						animalParticlesWrite[id.x].biomass = startingMass;         //randRadius * randRadius * 3.141592 * _ParticleNutrientDensity;
@@ -535,7 +535,7 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 				float randRadius = rand(float2(randX * 10, randY * -3.37)) * (_MaxParticleSize - _MinParticleSize) + _MinParticleSize;					
 			
 				// StartSize?
-				float startingMass = 0.0025;
+				float startingMass = 0.01;
 				float startingRadius = sqrt(startingMass);
 				animalParticlesWrite[id.x].radius = startingRadius;  // Obsolete? 
 				animalParticlesWrite[id.x].biomass = startingMass;         //randRadius * randRadius * 3.141592 * _ParticleNutrientDensity;

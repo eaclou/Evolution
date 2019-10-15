@@ -121,6 +121,11 @@
 				
 				float2 vertexOffset = quadPoint.xy * width * 6;
 				vertexOffset.xy *= 4;
+
+				//*** TEMP::::: ****
+				vertexOffset.xy = quadPoint.xy * 0.1;
+
+
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition.xy + vertexOffset, worldPosition.z, 1.0)));			
 				o.uv = uv;
 

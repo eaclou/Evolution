@@ -127,14 +127,14 @@ public class CritterMouthComponent : MonoBehaviour {
         if(collidingAgent != null) {
             if(agentIndex != collidingAgent.index) {
 
-                if(agentRef.speciesIndex == collidingAgent.speciesIndex) {  // same species
+                if(agentRef.speciesIndex == collidingAgent.speciesIndex) {  // same species  // Cannibalism
                     if(collidingAgent.curLifeStage == Agent.AgentLifeStage.Dead)
                     {
                         if (ownBiteArea > targetArea) {
                             SwallowAnimalWhole(collidingAgent);
                         }
                         else {
-                            BiteCorpseFood(collidingAgent, ownBiteArea, targetArea);
+                            BiteCorpseFood(collidingAgent, ownBiteArea);
                         }
                     }
                 }
@@ -150,7 +150,7 @@ public class CritterMouthComponent : MonoBehaviour {
                         // Toothy Attack Bite GO!!!
                         if(collidingAgent.curLifeStage == Agent.AgentLifeStage.Dead)
                         {
-                            BiteCorpseFood(collidingAgent, ownBiteArea, targetArea);
+                            BiteCorpseFood(collidingAgent, ownBiteArea);
                         }
                         else
                         {
@@ -227,11 +227,18 @@ public class CritterMouthComponent : MonoBehaviour {
     }
 
     private void SwallowAnimalWhole(Agent preyAgent) {
-        Debug.Log("SwallowAnimalWhole [" + agentRef.index.ToString() + "] ---> [" + preyAgent.index.ToString() + "]");
-        ProcessPredatorySwallowAttempt(agentRef, preyAgent);
+        if(preyAgent.index == 0) {
+            Debug.Log("So tired of this BUG");
+            // No idea what's going on -- game crashes if agent[0] is eaten and seems to thing it's null when it is not??? ****
+        }
+        else {
+            Debug.Log("SwallowAnimalWhole [" + agentRef.index.ToString() + "] ---> [" + preyAgent.index.ToString() + "]");
+            ProcessPredatorySwallowAttempt(agentRef, preyAgent);
+        }
+        
         // Credit food:
-        float flow = preyAgent.sizePercentage * (preyAgent.fullSizeBoundingBox.x + preyAgent.fullSizeBoundingBox.z) * preyAgent.fullSizeBoundingBox.y * 0.5f; // + preyAgent.coreModule.stomachContents;
-        agentRef.EatFoodMeat(flow); // assumes all foodAmounts are equal !! *****  
+        //float flow = preyAgent.sizePercentage * (preyAgent.fullSizeBoundingBox.x + preyAgent.fullSizeBoundingBox.z) * preyAgent.fullSizeBoundingBox.y * 0.5f; // + preyAgent.coreModule.stomachContents;
+        //agentRef.EatFoodMeat(flow); // assumes all foodAmounts are equal !! *****  
         
     }
     private void ProcessPredatorySwallowAttempt(Agent predatorAgent, Agent preyAgent)
@@ -271,7 +278,7 @@ public class CritterMouthComponent : MonoBehaviour {
         //if(agentRef.coreModule.foodEfficiencyMeat > 0.5f) { // ** // damage bonus -- provided has the required specialization level:::::
         //    agentRef.GainExperience(damage * 0.5f);  
         //}
-        Debug.Log("BiteDamageAnimal [" + agentRef.index.ToString() + "] ---> [" + preyAgent.index.ToString() + "] damage: " + damage.ToString() + ", preyHealth: " + preyAgent.coreModule.healthHead.ToString());
+        //Debug.Log("BiteDamageAnimal [" + agentRef.index.ToString() + "] ---> [" + preyAgent.index.ToString() + "] damage: " + damage.ToString() + ", preyHealth: " + preyAgent.coreModule.healthHead.ToString());
     }
     private void BiteDamageEggSack(EggSack eggSack, float ownArea, float targetArea) {
 
@@ -306,7 +313,7 @@ public class CritterMouthComponent : MonoBehaviour {
 
         Debug.Log("BiteEggsack [" + agentRef.index.ToString() + "] ---> [" + eggSack.index.ToString() + "]");
     }
-    private void BiteCorpseFood(Agent corpseAgent, float ownBiteArea, float targetArea)
+    public void BiteCorpseFood(Agent corpseAgent, float ownBiteArea)
     {  
         Debug.Log("BiteCorpseFood [" + agentRef.index.ToString() + "] ---> [" + corpseAgent.index.ToString() + "]");
         float flow = ownBiteArea * 1f; // / colliderCount;

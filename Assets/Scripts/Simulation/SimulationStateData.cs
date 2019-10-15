@@ -319,11 +319,11 @@ public class SimulationStateData {
                 }
                 critterSimDataArray[i].decayPercentage = decay;
 
-                if(simManager.agentsArray[i].isBeingSwallowed)
-                {
-                    float digestedPercentage = (float)simManager.agentsArray[i].beingSwallowedFrameCounter / (float)simManager.agentsArray[i].swallowDuration;
-                    critterSimDataArray[i].decayPercentage = digestedPercentage;
-                }
+                //if(simManager.agentsArray[i].isBeingSwallowed)
+                //{
+                    //float digestedPercentage = (float)simManager.agentsArray[i].beingSwallowedFrameCounter / (float)simManager.agentsArray[i].swallowDuration;
+                    //critterSimDataArray[i].decayPercentage = digestedPercentage;
+                //}
                 critterSimDataArray[i].foodAmount = Mathf.Lerp(critterSimDataArray[i].foodAmount, simManager.agentsArray[i].coreModule.stomachContentsNorm, 0.16f);
                 critterSimDataArray[i].energy = simManager.agentsArray[i].coreModule.energy; // Raw / simManager.agentsArray[i].coreModule.maxEnergyStorage;
                 critterSimDataArray[i].health = simManager.agentsArray[i].coreModule.healthHead;

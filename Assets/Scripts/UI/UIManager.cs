@@ -42,7 +42,9 @@ public class UIManager : MonoBehaviour {
         Add,
         Stir,
         Mutate,
-        Remove
+        Remove,
+        Resources,
+        Sage
     }
 
     public Color buttonActiveColor = new Color(1f, 1f, 1f, 1f);
@@ -146,7 +148,7 @@ public class UIManager : MonoBehaviour {
     public GameObject panelToolbarPaletteExpand;
     public Button buttonToolbarPaletteExpandOn;
     
-    private bool inspectToolUnlocked = false;
+    private bool inspectToolUnlocked = true;
 
     public Button buttonToolbarInspect;
     public Sprite spriteToolbarInspectButton;
@@ -158,12 +160,12 @@ public class UIManager : MonoBehaviour {
     public Button buttonToolbarAdd;
     //public Button buttonToolbarRemove;
 
-    public GameObject wireSpiritBrush;
+    /*public GameObject wireSpiritBrush;
     public GameObject wireTerrain;
     public GameObject wireAnimals;
     public GameObject wirePlants;
     public GameObject wireDecomposers;
-
+*/
     public GameObject panelPendingClickPrompt;
 
     public int selectedToolbarTerrainLayer = 0;
@@ -1469,11 +1471,11 @@ public class UIManager : MonoBehaviour {
         // Check for Announcements:
         CheckForAnnouncements();
         
-        buttonToolbarInspect.GetComponent<Image>().color = buttonDisabledColor;
+        //buttonToolbarInspect.GetComponent<Image>().color = buttonDisabledColor;
         buttonToolbarInspect.gameObject.transform.localScale = Vector3.one;
-        buttonToolbarStir.GetComponent<Image>().color = buttonDisabledColor;
+        //buttonToolbarStir.GetComponent<Image>().color = buttonDisabledColor;
         buttonToolbarStir.gameObject.transform.localScale = Vector3.one;
-        buttonToolbarAdd.GetComponent<Image>().color = buttonDisabledColor;
+        //buttonToolbarAdd.GetComponent<Image>().color = buttonDisabledColor;
         buttonToolbarAdd.gameObject.transform.localScale = Vector3.one;
         //buttonToolbarMutate.GetComponent<Image>().color = buttonDisabledColor;
         //buttonToolbarRemove.GetComponent<Image>().color = buttonDisabledColor;
@@ -1515,35 +1517,35 @@ public class UIManager : MonoBehaviour {
         //infoMeterInfluencePointsMat.SetFloat("_FillPercentage", toolbarInfluencePoints);
         //textInfluencePointsValue.text = "Influence: \n" + (toolbarInfluencePoints * 100f).ToString("F0") + "%";
 
-        wireSpiritBrush.SetActive(false);
-        wireTerrain.SetActive(false);
-        wireAnimals.SetActive(false);
+        //wireSpiritBrush.SetActive(false);
+        //wireTerrain.SetActive(false);
+        //wireAnimals.SetActive(false);
         //wirePlants.SetActive(false);
-        wireDecomposers.SetActive(false);
+        //wireDecomposers.SetActive(false);
 
-        float smallThumbnailSize = 40f;
-        float largeThumbnailSize = 120f;
-        float spiritBrushThumbnailSize = smallThumbnailSize;
-        float paletteSlotThumbnailSize = largeThumbnailSize;
-        wireSpiritBrush.SetActive(true);
-        if(isSpiritBrushSelected) {            
-            spiritBrushThumbnailSize = largeThumbnailSize;
-            paletteSlotThumbnailSize = smallThumbnailSize;
+        //float smallThumbnailSize = 40f;
+        //float largeThumbnailSize = 128f;
+        //float spiritBrushThumbnailSize = smallThumbnailSize;
+        //float paletteSlotThumbnailSize = largeThumbnailSize;
+        //wireSpiritBrush.SetActive(false);
+        //if(isSpiritBrushSelected) {            
+            //spiritBrushThumbnailSize = largeThumbnailSize;
+           // paletteSlotThumbnailSize = largeThumbnailSize;
 
-            textSelectedSpeciesTitle.resizeTextMaxSize = 20;
+            textSelectedSpeciesTitle.resizeTextMaxSize = 24;
             textSelectedSpiritBrushName.resizeTextMaxSize = 24;
 
             textSelectedSpiritBrushName.color = colorSpiritBrushLight;
 
             
-        }
-        else {
+        //}
+        /*else {
             textSelectedSpeciesTitle.resizeTextMaxSize = 24;
             
             textSelectedSpiritBrushName.resizeTextMaxSize = 20;
             textSelectedSpiritBrushName.color = colorSpiritBrushDark;
-        }
-        imageToolbarSpiritBrushThumbnail.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, spiritBrushThumbnailSize);
+        }*/
+        /*imageToolbarSpiritBrushThumbnail.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, spiritBrushThumbnailSize);
         imageToolbarSpiritBrushThumbnail.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, spiritBrushThumbnailSize);
         imageToolbarSpiritBrushThumbnailBorder.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, spiritBrushThumbnailSize);
         imageToolbarSpiritBrushThumbnailBorder.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, spiritBrushThumbnailSize);
@@ -1552,7 +1554,7 @@ public class UIManager : MonoBehaviour {
         imageToolbarSpeciesPortraitRender.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, paletteSlotThumbnailSize);
         imageToolbarSpeciesPortraitBorder.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, paletteSlotThumbnailSize);
         imageToolbarSpeciesPortraitBorder.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, paletteSlotThumbnailSize);
-
+        */
         panelToolbarPaletteExpand.SetActive(isToolbarPaletteExpandOn);
         panelToolbarWing.SetActive(isToolbarDetailPanelOn);
         buttonToolbarPaletteExpandOn.gameObject.SetActive(true);
@@ -1590,7 +1592,7 @@ public class UIManager : MonoBehaviour {
                     isSelected = true; 
 
                     //if(!isSpiritBrushSelected) {
-                        wireDecomposers.SetActive(true);
+                        //wireDecomposers.SetActive(true);
                     //}
                 }
             }
@@ -1624,7 +1626,7 @@ public class UIManager : MonoBehaviour {
                 if(layerManager.selectedTrophicSlotRef.kingdomID == 2 && layerManager.selectedTrophicSlotRef.tierID == 0) {
                     isSelected = true; 
                     //if(!isSpiritBrushSelected) {
-                        wireAnimals.SetActive(true);
+                        //wireAnimals.SetActive(true);
                     //}
                 }
             }
@@ -1652,7 +1654,7 @@ public class UIManager : MonoBehaviour {
                     }
 
                     //if(!isSpiritBrushSelected) {
-                        wireAnimals.SetActive(true);
+                        //wireAnimals.SetActive(true);
                     //}
                 }
             }            
@@ -1682,7 +1684,7 @@ public class UIManager : MonoBehaviour {
                     }
 
                     //if(!isSpiritBrushSelected) {
-                        wireTerrain.SetActive(true);
+                        //wireTerrain.SetActive(true);
                     //}
                 }
             }  
@@ -1874,8 +1876,8 @@ public class UIManager : MonoBehaviour {
                 // Panel Buttons!!!
                 buttonToolbarWingDescription.interactable = false;
                 //buttonToolbarWingDeleteSpecies.interactable = false;
-                buttonToolbarWingStats.interactable = false;   
-                buttonToolbarWingMutation.interactable = false;
+                //buttonToolbarWingStats.interactable = false;   
+                //buttonToolbarWingMutation.interactable = false;
 
                 //curToolbarWingPanelSelectID
                 if(panelTier >= 0) {
@@ -1885,12 +1887,12 @@ public class UIManager : MonoBehaviour {
                     buttonToolbarWingStats.interactable = true;   
                 }
                 if(panelTier >= 2) {
-                    buttonToolbarWingMutation.interactable = true;                    
+                    //buttonToolbarWingMutation.interactable = true;                    
                     //buttonToolbarWingDeleteSpecies.interactable = true;
                 }
 
                 if(curToolbarWingPanelSelectID == 0) {
-                    buttonToolbarWingDescription.transform.localScale = Vector3.one * 1.5f;
+                    //buttonToolbarWingDescription.transform.localScale = Vector3.one * 1.5f;
                     //buttonToolbarWingDescription.interactable = false;
                     if(!isToolbarDeletePromptOn) {
                         textToolbarWingSpeciesSummary.gameObject.SetActive(true);
@@ -1927,7 +1929,7 @@ public class UIManager : MonoBehaviour {
                     buttonToolbarWingDescription.interactable = true;
                     textToolbarWingSpeciesSummary.gameObject.SetActive(false);
                 }
-                if(curToolbarWingPanelSelectID == 1) {  // Stats panel
+                /*if(curToolbarWingPanelSelectID == 1) {  // Stats panel
                     buttonToolbarWingStats.transform.localScale = Vector3.one * 1.5f;
                     //buttonToolbarWingStats.interactable = false;
 
@@ -1944,16 +1946,16 @@ public class UIManager : MonoBehaviour {
                     buttonToolbarWingStats.transform.localScale = Vector3.one;
                     panelToolbarWingStats.SetActive(false);
                     //buttonToolbarWingStats.interactable = true;
-                }
+                }*/
                 if(curToolbarWingPanelSelectID == 2) {  // mutation panel
-                    buttonToolbarWingMutation.transform.localScale = Vector3.one * 1.5f;
+                    //buttonToolbarWingMutation.transform.localScale = Vector3.one * 1.5f;
 
                     if (!isToolbarDeletePromptOn) {
                         UpdateToolbarMutationPanel();
                     }                
                 }
                 else {
-                    buttonToolbarWingMutation.transform.localScale = Vector3.one;
+                    //buttonToolbarWingMutation.transform.localScale = Vector3.one;
                     panelToolbarWingMutation.SetActive(false);
                 }
                                 
@@ -3849,7 +3851,7 @@ public class UIManager : MonoBehaviour {
         //isActiveMutateToolPanel = false;
     }
     private void TurnOffStirTool() {
-        buttonToolbarStir.GetComponent<Image>().color = buttonDisabledColor;
+        //buttonToolbarStir.GetComponent<Image>().color = buttonDisabledColor;
         //if(isActiveStirToolPanel) {
         //    animatorStirToolPanel.enabled = true;
         //    animatorStirToolPanel.Play("SlideOffPanelStirTool");
