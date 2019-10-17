@@ -123,7 +123,8 @@
 				vertexOffset.xy *= 4;
 
 				//*** TEMP::::: ****
-				vertexOffset.xy = quadPoint.xy * 0.1;
+				float spriteScale = (sqrt(particleData.biomass) * 0.025 + 0.0115 + (0.01 * hoverMask + 0.02 * selectedMask)) * 1.25;
+				vertexOffset.xy = quadPoint.xy * spriteScale;
 
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition.xy + vertexOffset, worldPosition.z, 1.0)));			
