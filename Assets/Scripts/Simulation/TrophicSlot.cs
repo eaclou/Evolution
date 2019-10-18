@@ -8,7 +8,7 @@ public class TrophicSlot {
     public enum SlotStatus {
         Off,  // doesn't exist
         Locked,  // exists but unavailable
-        Empty,  // ready to be added
+        Unlocked,  // ready to be added
         On,  // active, occupied
     }
     public int kingdomID;
