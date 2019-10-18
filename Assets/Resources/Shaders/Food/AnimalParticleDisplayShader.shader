@@ -119,12 +119,12 @@
 				float refractionStrength = 0.15;
 				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
 				
-				float2 vertexOffset = quadPoint.xy * width * 6;
-				vertexOffset.xy *= 4;
+				float2 vertexOffset = quadPoint.xy * width;
+				//vertexOffset.xy *= 4;
 
 				//*** TEMP::::: ****
 				float spriteScale = (sqrt(particleData.biomass) * 0.025 + 0.0115 + (0.01 * hoverMask + 0.02 * selectedMask)) * 1.25;
-				vertexOffset.xy = quadPoint.xy * spriteScale;
+				vertexOffset.xy = quadPoint.xy * spriteScale * 10;
 
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition.xy + vertexOffset, worldPosition.z, 1.0)));			

@@ -174,6 +174,7 @@ public class UIManager : MonoBehaviour {
     private bool inspectToolUnlocked = true;
 
     public Button buttonToolbarInspect;
+    public Image imageToolbarInspectLinkedIcon;
     //public Sprite spriteToolbarInspectButton;
     //public Button buttonToolbarNutrients;
     //public Sprite spriteToolbarStirButton;
@@ -181,7 +182,10 @@ public class UIManager : MonoBehaviour {
     //public Button buttonToolbarMutate;
     //public Sprite spriteToolbarAddButton;
     public Button buttonToolbarAdd;
+    public Image imageToolbarAddLinkedIcon;
     //public Button buttonToolbarRemove;
+    public Button buttonToolbarKnowledge;
+    public Image imageToolbarKnowledgeLinkedIcon;
 
     /*public GameObject wireSpiritBrush;
     public GameObject wireTerrain;
@@ -190,6 +194,11 @@ public class UIManager : MonoBehaviour {
     public GameObject wireDecomposers;
 */
     public GameObject panelPendingClickPrompt;
+
+    public int selectedToolbarOtherLayer = 0;
+    public Button buttonToolbarOther0;  // Minerals
+    public Button buttonToolbarOther1;  // Water
+    public Button buttonToolbarOther2;  // Air
 
     public int selectedToolbarTerrainLayer = 0;
     public Button buttonToolbarTerrain0;
@@ -1494,13 +1503,19 @@ public class UIManager : MonoBehaviour {
         // Check for Announcements:
         CheckForAnnouncements();
         
-        //buttonToolbarInspect.GetComponent<Image>().color = buttonDisabledColor;
+        buttonToolbarInspect.GetComponent<Image>().color = buttonDisabledColor;
         buttonToolbarInspect.gameObject.transform.localScale = Vector3.one;
-        //buttonToolbarStir.GetComponent<Image>().color = buttonDisabledColor;
+        imageToolbarInspectLinkedIcon.color = buttonDisabledColor;
+        buttonToolbarStir.GetComponent<Image>().color = buttonDisabledColor;
         buttonToolbarStir.gameObject.transform.localScale = Vector3.one;
-        //buttonToolbarAdd.GetComponent<Image>().color = buttonDisabledColor;
+        buttonToolbarAdd.GetComponent<Image>().color = buttonDisabledColor;
         buttonToolbarAdd.gameObject.transform.localScale = Vector3.one;
-        //buttonToolbarMutate.GetComponent<Image>().color = buttonDisabledColor;
+        imageToolbarAddLinkedIcon.color = buttonDisabledColor;
+        //buttonTool.gameObject.transform.localScale = Vector3.one;
+        buttonToolbarKnowledge.GetComponent<Image>().color = buttonDisabledColor;
+        buttonToolbarKnowledge.gameObject.transform.localScale = Vector3.one;
+        imageToolbarKnowledgeLinkedIcon.color = buttonDisabledColor;
+        
         //buttonToolbarRemove.GetComponent<Image>().color = buttonDisabledColor;
         //buttonToolbarRemove.gameObject.transform.localScale = Vector3.one;
 
@@ -1512,6 +1527,7 @@ public class UIManager : MonoBehaviour {
             case ToolType.Inspect:
                 buttonToolbarInspect.GetComponent<Image>().color = buttonActiveColor;
                 buttonToolbarInspect.gameObject.transform.localScale = Vector3.one * 1.25f;
+                imageToolbarInspectLinkedIcon.color = buttonActiveColor;
                 break;
             case ToolType.Mutate:
                 //buttonToolbarMutate.GetComponent<Image>().color = buttonActiveColor;
@@ -1519,6 +1535,7 @@ public class UIManager : MonoBehaviour {
             case ToolType.Add:
                 buttonToolbarAdd.GetComponent<Image>().color = buttonActiveColor;
                 buttonToolbarAdd.gameObject.transform.localScale = Vector3.one * 1.25f;
+                imageToolbarAddLinkedIcon.color = buttonActiveColor;
                 break;
             case ToolType.Remove:
                 //buttonToolbarRemove.GetComponent<Image>().color = buttonActiveColor;
@@ -1527,6 +1544,11 @@ public class UIManager : MonoBehaviour {
             case ToolType.Stir:
                 buttonToolbarStir.GetComponent<Image>().color = buttonActiveColor;
                 buttonToolbarStir.gameObject.transform.localScale = Vector3.one * 1.25f;
+                break;
+            case ToolType.Sage:
+                buttonToolbarKnowledge.GetComponent<Image>().color = buttonActiveColor;
+                buttonToolbarKnowledge.gameObject.transform.localScale = Vector3.one * 1.25f;
+                imageToolbarKnowledgeLinkedIcon.color = buttonActiveColor;
                 break;
             default:
                 break;
@@ -1574,8 +1596,13 @@ public class UIManager : MonoBehaviour {
             spiritBrushName = "Minor Watcher Spirit";
             imageToolbarSpiritBrushThumbnail.sprite = spriteSpiritBrushWatcherIcon;
 
+            //imageToolbarInspectLinkedIcon.sprite = sprit
             //strSpiritBrushDescription = "This spirit reveals hidden information about aspects of the world";
             //strSpiritBrushEffects = "Left-Click:\nFollows the nearest Vertebrate\n\nRight-Click:\nStops following";
+        }
+        if (curActiveTool == ToolType.Sage) {
+            spiritBrushName = "Knowledge Spirit";
+            imageToolbarSpiritBrushThumbnail.sprite = spriteSpiritBrushKnowledgeIcon;
         }
         //textSpiritBrushDescription.text = strSpiritBrushDescription;
         //textSpiritBrushEffects.text = strSpiritBrushEffects;
@@ -1796,18 +1823,11 @@ public class UIManager : MonoBehaviour {
                 buttonToolbarWingDeleteSpecies.gameObject.SetActive(true); 
                 if (layerManager.selectedTrophicSlotRef.tierID == 1) {
                     panelTier = 2;
-
-                    //buttonToolbarWingDeleteSpecies.gameObject.SetActive(true);
-                                                        
-                    imageToolbarSpeciesPortraitRender.sprite = null;
+          
+                    imageToolbarSpeciesPortraitRender.sprite = spriteSpiritVertebrateIcon;
                     imageToolbarSpeciesPortraitRender.color = Color.white;
                     // BORDER:
-                    //Color hue = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[layerManager.selectedTrophicSlotRef.slotID].displayColor;//    linkedSpeciesID].representativeGenome.bodyGenome.appearanceGenome.hueSecondary;
-                    Vector3 hue = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[layerManager.selectedTrophicSlotRef.slotID].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
-                    //Debug.Log("ADSF: " + hue.ToString());
-                    //gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[layerManager.selectedTrophicSlotRef.slotID].representativeGenome;
-                    //hue.a = 1f;
-                    //Vector3 hue = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[layerManager.selectedTrophicSlotRef.linkedSpeciesID].representativeGenome.bodyGenome.appearanceGenome.hueSecondary;
+                    Vector3 hue = Vector3.one;
                     imageToolbarSpeciesPortraitBorder.color = new Color(hue.x, hue.y, hue.z); 
                         
                     buttonToolbarWingDeleteSpecies.gameObject.SetActive(true); 
@@ -1817,11 +1837,11 @@ public class UIManager : MonoBehaviour {
                             
                 }
             }   
-            else {  // Terrain
-                //spriteBedrockPortrait
+            else if (layerManager.selectedTrophicSlotRef.kingdomID == 3) {  // TERRAIN
+                
                 if(layerManager.selectedTrophicSlotRef.slotID == 0) {
                     // bedrock
-                    imageToolbarSpeciesPortraitRender.sprite = spriteSpiritStoneIcon;
+                    imageToolbarSpeciesPortraitRender.sprite = spriteSpiritWorldIcon;
                     //imageToolbarSpeciesPortraitRender.color = gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeCurrent.color;
                     Color displayCol = gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeCurrent.color;
                     displayCol.a = 1f;
@@ -1850,6 +1870,17 @@ public class UIManager : MonoBehaviour {
                 }
                 //imageToolbarSpeciesPortraitRender.sprite = null;
                 panelTier = 1;
+            }
+            else {
+                if(layerManager.selectedTrophicSlotRef.slotID == 0) {
+                    imageToolbarSpeciesPortraitRender.sprite = spriteSpiritMineralsIcon;
+                }
+                else if(layerManager.selectedTrophicSlotRef.slotID == 1) {
+                    imageToolbarSpeciesPortraitRender.sprite = spriteSpiritWaterIcon;
+                }
+                else {
+                    imageToolbarSpeciesPortraitRender.sprite = spriteSpiritAirIcon;
+                }
             }
 
             if (isToolbarDetailPanelOn) {  // a species is selected
@@ -2003,9 +2034,9 @@ public class UIManager : MonoBehaviour {
                 linkedSpiritIndex = 11;
             }
         }
-        else {
-            if(layerManager.selectedTrophicSlotRef.slotID == 0) {
-                linkedSpiritIndex = 7;
+        else if(layerManager.selectedTrophicSlotRef.kingdomID == 3) {
+            if(layerManager.selectedTrophicSlotRef.slotID == 0) {  // world/bedrock
+                linkedSpiritIndex = 0;
             }
             else if(layerManager.selectedTrophicSlotRef.slotID == 1) {
                 linkedSpiritIndex = 1;
@@ -2017,11 +2048,22 @@ public class UIManager : MonoBehaviour {
                 linkedSpiritIndex = 3;
             }
         }
+        else {  // 4 == OTHER
+            if(layerManager.selectedTrophicSlotRef.slotID == 0) {  // minerals
+                linkedSpiritIndex = 4;
+            }
+            else if(layerManager.selectedTrophicSlotRef.slotID == 1) {  // water
+                linkedSpiritIndex = 5;
+            }
+            else {  // air
+                linkedSpiritIndex = 6;
+            }
+        }
 
-        int spiritBrushIndex = 0; 
-        
-        if(curActiveTool == ToolType.Sage) {
-            spiritBrushIndex = 0; 
+        int spiritBrushIndex = 0;
+
+        if (curActiveTool == ToolType.Sage) {
+            //spiritBrushIndex = 0; 
             //strSpiritBrushDescription = "This spirit reveals hidden information about aspects of the world";
             //strSpiritBrushEffects = "Left-Click:\nFollows the nearest Vertebrate\n\nRight-Click:\nStops following";
         }
@@ -2057,26 +2099,26 @@ public class UIManager : MonoBehaviour {
         linkedSpiritNamesArray[11] = "Vertebrates";
         
         string[] strSpiritBrushDescriptionArray = new string[6]; // = "Decomposers break down the old so that new life can grow.";
-        strSpiritBrushDescriptionArray[0] = "Timeless, chronicling events through the relentless march of time";
+        strSpiritBrushDescriptionArray[0] = "Provides information about the world and its contents, and chronicles events through time";
         strSpiritBrushDescriptionArray[1] = "This spirit possesses limited control of life & existence itself";
         strSpiritBrushDescriptionArray[2] = "A mysterioues Kelpie able to control the flow of water";
         strSpiritBrushDescriptionArray[3] = "A Watcher Spirit can track an organism's journey through space and time";
-        strSpiritBrushDescriptionArray[4] = "Mutate...       Boop";
+        strSpiritBrushDescriptionArray[4] = "Mutate...       blah blah";
         strSpiritBrushDescriptionArray[5] = "Extra.";
 
         string[] strLinkedSpiritDescriptionArray = new string[12]; // = "Decomposers break down the old so that new life can grow.";
-        strLinkedSpiritDescriptionArray[0] = "WorldSpirit";
-        strLinkedSpiritDescriptionArray[1] = "Stone";
-        strLinkedSpiritDescriptionArray[2] = "Pebbles";
-        strLinkedSpiritDescriptionArray[3] = "Sand";
-        strLinkedSpiritDescriptionArray[4] = "Minerals";
-        strLinkedSpiritDescriptionArray[5] = "Water.";
-        strLinkedSpiritDescriptionArray[6] = "Air";
+        strLinkedSpiritDescriptionArray[0] = "The World Spirit provides the spark for a new universe";
+        strLinkedSpiritDescriptionArray[1] = "Stone Spirits are some of the oldest beings in the world, they value Stability and Strength";
+        strLinkedSpiritDescriptionArray[2] = "Pebble Spirits are usually found in rivers and streams, but can find their way to a lake or pond. They value Balance and Patience";
+        strLinkedSpiritDescriptionArray[3] = "Sand Spirits are slippery and hard to pin down. They prize Cooperation and Speed";
+        strLinkedSpiritDescriptionArray[4] = "Mineral Spirits infuse nutrients into the earth. They value Empathy and Nurturing";
+        strLinkedSpiritDescriptionArray[5] = "Water Spirits are sometimes called Kelpies, They are known for Adaptability and Resilience";
+        strLinkedSpiritDescriptionArray[6] = "Air Spirits come in many forms, and value Swiftness and Persistence";
         strLinkedSpiritDescriptionArray[7] = "Decomposers break down the old so that new life can grow.";
-        strLinkedSpiritDescriptionArray[8] = "Algae";
-        strLinkedSpiritDescriptionArray[9] = "Plants";
-        strLinkedSpiritDescriptionArray[10] = "Zooplankton";
-        strLinkedSpiritDescriptionArray[11] = "vertebrate";
+        strLinkedSpiritDescriptionArray[8] = "Algae needs light and nutrients to grow.";
+        strLinkedSpiritDescriptionArray[9] = "Floating Plants that are a foodsource for Vertebrates";
+        strLinkedSpiritDescriptionArray[10] = "Tiny Organisms that feed on Algae";
+        strLinkedSpiritDescriptionArray[11] = "Animals that can feed on Plants, Zooplankton, or even other Vertebrates.";
 
         string startTxt = "Left-Click:\n";
         string midTxt = "\n\nRight-Click:\n";
@@ -2098,7 +2140,7 @@ public class UIManager : MonoBehaviour {
         strBrushEffectsArray[0][10] = startTxt + "Knowledge Spirit --> Zooplankton Spirit" + midTxt + "Knowledge Spirit --> Zooplankton Spirit";
         strBrushEffectsArray[0][11] = startTxt + "Knowledge Spirit --> Vertebrate Spirit" + midTxt + "Knowledge Spirit --> Vertebrate Spirit";
         // CREATION BRUSH:
-        strBrushEffectsArray[1][0] = startTxt + "Creates World" + midTxt + "Knowledge Spirit --> World Spirit";
+        strBrushEffectsArray[1][0] = startTxt + "Creates World" + midTxt + "None";
         strBrushEffectsArray[1][1] = startTxt + "Raises stone from deep below" + midTxt + "Destroys stone, deeping the Pond";
         strBrushEffectsArray[1][2] = startTxt + "Creates mounds of pebbles" + midTxt + "Removes pebbles from the area";
         strBrushEffectsArray[1][3] = startTxt + "Blankets the terrain with sand" + midTxt + "Removes sand from the area";
@@ -3946,6 +3988,7 @@ public class UIManager : MonoBehaviour {
         TurnOffAddTool();
         TurnOffMutateTool();
         TurnOffRemoveTool();
+        TurnOffKnowledgeTool();
 
         isSpiritBrushSelected = true;
               
@@ -3953,22 +3996,17 @@ public class UIManager : MonoBehaviour {
     public void ClickToolButtonInspect() {
         //gameManager.simulationManager.trophicLayersManager.ResetSelectedAgentSlots();
         //if(curActiveTool != ToolType.Inspect) {
-            curActiveTool = ToolType.Inspect;
-            
-            TurnOnInspectTool();
-            TurnOffStirTool();  
-            TurnOffAddTool();
-            TurnOffMutateTool();
-            TurnOffRemoveTool();
+        curActiveTool = ToolType.Inspect;
+        
+        TurnOffStirTool();  
+        TurnOffAddTool();
+        TurnOffMutateTool();
+        TurnOffRemoveTool();
+        TurnOffKnowledgeTool();
 
-            buttonToolbarInspect.GetComponent<Animator>().StopPlayback();
-            buttonToolbarInspect.GetComponent<Animator>().enabled = false;    
-        //} 
-        /*else {
-            curActiveTool = ToolType.None;
-            TurnOffInspectTool();
-        } */
+        buttonToolbarInspect.GetComponent<Image>().color = buttonActiveColor; 
         isSpiritBrushSelected = true;
+
     }
     public void ClickToolButtonAdd() {
         //gameManager.simulationManager.trophicLayersManager.ResetSelectedAgentSlots();
@@ -3977,6 +4015,7 @@ public class UIManager : MonoBehaviour {
 
         StopFollowingAgent();
         StopFollowingPlantParticle();
+        StopFollowingAnimalParticle();
         //isActiveFeedToolPanel = true;    
         //animatorFeedToolPanel.enabled = true;
         //animatorFeedToolPanel.Play("SlideOnPanelFeedTool"); 
@@ -3986,6 +4025,7 @@ public class UIManager : MonoBehaviour {
         TurnOffStirTool();
         TurnOffMutateTool();
         TurnOffRemoveTool();
+        TurnOffKnowledgeTool();
             
         isSpiritBrushSelected = true;
         //}  
@@ -3993,6 +4033,24 @@ public class UIManager : MonoBehaviour {
             curActiveTool = ToolType.None;
             TurnOffNutrientsTool();
         } */
+    }
+    public void ClickToolButtonKnowledge() {
+        
+        curActiveTool = ToolType.Sage;
+
+        StopFollowingAgent();
+        StopFollowingPlantParticle();
+        StopFollowingAnimalParticle();
+
+        buttonToolbarKnowledge.GetComponent<Image>().color = buttonActiveColor;
+
+        TurnOffAddTool();
+        TurnOffInspectTool();
+        TurnOffStirTool();
+        TurnOffMutateTool();
+        TurnOffRemoveTool();
+            
+        isSpiritBrushSelected = true;        
     }
     public void ClickToolButtonRemove() {
         //gameManager.simulationManager.trophicLayersManager.ResetSelectedAgentSlots();
@@ -4015,11 +4073,18 @@ public class UIManager : MonoBehaviour {
         } */
     }
 
-    private void TurnOnInspectTool() {
+    /*private void TurnOnInspectTool() {
         buttonToolbarInspect.GetComponent<Image>().color = buttonActiveColor; 
         isSpiritBrushSelected = true;
         //buttonToolbarInspect.GetComponent<Animator>().enabled = false;    
-    }    
+    }    */
+    private void TurnOffKnowledgeTool() {
+                
+        buttonToolbarKnowledge.GetComponent<Image>().color = buttonDisabledColor;  
+        //buttonToolbarInspect.GetComponent<Animator>().enabled = false;       
+        isActiveInspectPanel = false;
+        //StopFollowing();
+    }
     private void TurnOffInspectTool() {
                 
         buttonToolbarInspect.GetComponent<Image>().color = buttonDisabledColor;  
@@ -4061,6 +4126,20 @@ public class UIManager : MonoBehaviour {
         //    animatorStirToolPanel.Play("SlideOffPanelStirTool");
         //}        
         //isActiveStirToolPanel = false;
+    }
+    public void ClickButtonToolbarOther(int index) {
+        Debug.Log("ClickButtonToolbarOther: " + index.ToString());
+
+        TrophicSlot slot = gameManager.simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[index];
+        gameManager.simulationManager.trophicLayersManager.isSelectedTrophicSlot = true;
+        gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = slot;
+        isToolbarDetailPanelOn = true;
+
+        selectedSpeciesID = slot.linkedSpeciesID; // update this next ***
+        
+        selectedToolbarOtherLayer = index;
+
+        isSpiritBrushSelected = false;
     }
     public void ClickButtonToolbarTerrain(int index) {
         Debug.Log("ClickButtonToolbarTerrain: " + index.ToString());

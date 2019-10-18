@@ -20,6 +20,7 @@ public class TrophicLayersManager {
     public TrophicKingdom kingdomPlants;
     public TrophicKingdom kingdomAnimals;
     public TrophicKingdom kingdomTerrain;
+    public TrophicKingdom kingdomOther;
 
     public Vector2 decomposerOriginPos;
     public Vector2 algaeOriginPos;
@@ -74,11 +75,20 @@ public class TrophicLayersManager {
         kingdomTerrain = new TrophicKingdom();
         kingdomTerrain.name = "Terrain";
         TrophicTier terrainTier0 = new TrophicTier();
-        terrainTier0.trophicSlots[0].Initialize("Bedrock", TrophicSlot.SlotStatus.On, 3, 0, 0);
+        terrainTier0.trophicSlots[0].Initialize("World", TrophicSlot.SlotStatus.On, 3, 0, 0);
         terrainTier0.trophicSlots[1].Initialize("Stones", TrophicSlot.SlotStatus.On, 3, 0, 1);
         terrainTier0.trophicSlots[2].Initialize("Pebbles", TrophicSlot.SlotStatus.On, 3, 0, 2);
         terrainTier0.trophicSlots[3].Initialize("Sand", TrophicSlot.SlotStatus.On, 3, 0, 3);
         kingdomTerrain.trophicTiersList.Add(terrainTier0);
+
+        // OTHER!!!!!%%%
+        kingdomOther = new TrophicKingdom();
+        kingdomOther.name = "Other";
+        TrophicTier otherTier0 = new TrophicTier();
+        otherTier0.trophicSlots[0].Initialize("Minerals", TrophicSlot.SlotStatus.Locked, 4, 0, 0);
+        otherTier0.trophicSlots[1].Initialize("Water", TrophicSlot.SlotStatus.On, 4, 0, 1);
+        otherTier0.trophicSlots[2].Initialize("Air", TrophicSlot.SlotStatus.Empty, 4, 0, 2);
+        kingdomOther.trophicTiersList.Add(otherTier0);
                 
         selectedTrophicSlotRef = terrainTier0.trophicSlots[0];
         //selectedTrophicSlotRef.status = TrophicSlot.SlotStatus.On;
