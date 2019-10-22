@@ -4182,7 +4182,18 @@ public class TheRenderKing : MonoBehaviour {
             fluidRenderMat.SetTexture("_SpiritBrushTex", spiritBrushRT);            
             cmdBufferMain.DrawMesh(fluidRenderMesh, Matrix4x4.identity, fluidRenderMat);
 
-               
+             
+            
+            if(simManager.uiManager.curActiveTool == UIManager.ToolType.Add) {
+                gizmoStirToolMat.SetPass(0);
+                gizmoStirToolMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+                gizmoStirToolMat.SetBuffer("gizmoStirToolPosCBuffer", gizmoCursorPosCBuffer);
+                gizmoStirToolMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
+                gizmoStirToolMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+                gizmoStirToolMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
+                gizmoStirToolMat.SetFloat("_Radius", Mathf.Lerp(0.067f, 5f, baronVonWater.camDistNormalized));  // **** Make radius variable! (possibly texture based?)
+                cmdBufferMain.DrawProcedural(Matrix4x4.identity, gizmoStirToolMat, 0, MeshTopology.Triangles, 6, 1);
+            }
             /*// SURFACE BITS FLOATY:::::  // Lily Pads
             baronVonWater.waterSurfaceBitsDisplayMat.SetPass(0);
             baronVonWater.waterSurfaceBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -4292,8 +4303,8 @@ public class TheRenderKing : MonoBehaviour {
             // WATER BITS TEMP::::::::::::::^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
             // use this as algae grid???
             
-            float yOffset = Mathf.Sin(simManager.cameraManager.curTiltAngleDegrees * Mathf.Deg2Rad) * simManager.cameraManager.curCameraPos.z;
-            Vector4 camFocusPos = new Vector4(simManager.cameraManager.curCameraPos.x, simManager.cameraManager.curCameraPos.y + yOffset, 0f, 0f);
+            //float yOffset = Mathf.Sin(simManager.cameraManager.curTiltAngleDegrees * Mathf.Deg2Rad) * simManager.cameraManager.curCameraPos.z;
+            //Vector4 camFocusPos = new Vector4(simManager.cameraManager.curCameraPos.x, simManager.cameraManager.curCameraPos.y + yOffset, 0f, 0f);
         /*
             // Water surface reflective
             baronVonWater.waterQuadStrokesLrgDisplayMat.SetPass(0);
@@ -4347,14 +4358,7 @@ public class TheRenderKing : MonoBehaviour {
 
             //if(simManager.uiManager.tolInspectOn) {
             //}
-            gizmoStirToolMat.SetPass(0);
-            gizmoStirToolMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-            gizmoStirToolMat.SetBuffer("gizmoStirToolPosCBuffer", gizmoCursorPosCBuffer);
-            gizmoStirToolMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
-            gizmoStirToolMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-            gizmoStirToolMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
-            gizmoStirToolMat.SetFloat("_Radius", Mathf.Lerp(0.067f, 5f, baronVonWater.camDistNormalized));  // **** Make radius variable! (possibly texture based?)
-            cmdBufferMain.DrawProcedural(Matrix4x4.identity, gizmoStirToolMat, 0, MeshTopology.Triangles, 6, 1);
+            
         
         }
         

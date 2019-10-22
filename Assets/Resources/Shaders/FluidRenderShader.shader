@@ -160,7 +160,7 @@
 				//finalColor.rgb = float3(1,1,1);
 				float4 heightTex = tex2D(_TerrainHeightTex, i.uv);
 				float altitude = heightTex.x;  // [-1,1] range
-				float onLandMask = 1.0 - saturate((altitude - 0.5) * 8);
+				float onLandMask = 1.0 - saturate((altitude - 0.5) * 16);
 				float shorelineGlow = saturate((altitude - 0.38) * 6.2) * (1 - algaeCoverAmount);
 
 				finalColor *= 1.0 + shorelineGlow;
@@ -174,7 +174,10 @@
 				
 				finalColor += saturate((altitude - 0.5) * 80) * 0.01;
 				//finalColor += reflectLerp * onLandMask * 1;
-				
+				float shoreMask = saturate((altitude - 0.34) * 3.20) * (onLandMask);
+				//finalColor.a = saturate(max(finalColor.a, shoreMask));
+				finalColor.a += shoreMask * 0.22;
+				finalColor.rgb += shoreMask * 0.42;
 				return saturate(finalColor);
 				
 				
