@@ -35,7 +35,7 @@ struct FrameBufferStrokeData {
 #include "Assets/Resources/Shaders/Inc/NoiseShared.cginc"
 
 StructuredBuffer<float4> ObjectPositionsCBuffer;
-RWStructuredBuffer<float3> DepthValuesCBuffer;
+RWStructuredBuffer<float4> DepthValuesCBuffer;
 
 //Texture2D<float4> heightTexture;
 RWStructuredBuffer<float3> terrainVertexCBuffer;
@@ -132,25 +132,27 @@ void CSUpdateGroundStrokes (uint3 id : SV_DispatchThreadID)
 	terrainFrameBufferStrokesCBuffer[id.x].worldPos.z = -altitudeCenter * 20 + 10;
 }
 
-[numthreads(1,1,1)]
+[numthreads(64,1,1)]
 void CSGetObjectDepths (uint3 id : SV_DispatchThreadID)
 {				
 	float4 data = ObjectPositionsCBuffer[id.x];
 	
 	float2 uv = data.xy;
-	float2 uvOffset = data.zw;
+	//float2 uvOffset = data.zw;
 	
-	float depthCenter = AltitudeRead.SampleLevel(_LinearRepeat, uv, 0).x;
-	float depthLeft = AltitudeRead.SampleLevel(_LinearRepeat, uv + float2(-uvOffset.x, 0), 0).x;
-	float depthRight = AltitudeRead.SampleLevel(_LinearRepeat, uv + float2(uvOffset.x, 0), 0).x;
-	float depthUp = AltitudeRead.SampleLevel(_LinearRepeat, uv + float2(0, uvOffset.y), 0).x;
-	float depthDown = AltitudeRead.SampleLevel(_LinearRepeat, uv + float2(0, -uvOffset.y), 0).x;
+	float4 depthCenter = AltitudeRead.SampleLevel(_LinearClamp, uv, 0);
+	//float depthLeft = AltitudeRead.SampleLevel(_LinearClamp, uv + float2(-uvOffset.x, 0), 0).x;
+	//float depthRight = AltitudeRead.SampleLevel(_LinearClamp, uv + float2(uvOffset.x, 0), 0).x;
+	//float depthUp = AltitudeRead.SampleLevel(_LinearClamp, uv + float2(0, uvOffset.y), 0).x;
+	//float depthDown = AltitudeRead.SampleLevel(_LinearClamp, uv + float2(0, -uvOffset.y), 0).x;
 
-	float2 grad = float2(depthRight - depthLeft, depthUp - depthDown);
+	//float2 grad = float2(depthRight - depthLeft, depthUp - depthDown);
 
-	float3 depth = float3(1.0 - saturate(depthCenter * 2.0), -grad); // (velLeft + velRight + velUp + velDown) / 4;
+	//float3 depth = float3(1.0 - saturate(depthCenter * 2.0), -grad); // (velLeft + velRight + velUp + velDown) / 4;
 
-	DepthValuesCBuffer[id.x] = depth;
+	float4 depthStats = float4(depthCenter.x, 1, 0, 0);
+	
+	DepthValuesCBuffer[id.x] = depthStats;
 }
 
 [numthreads(1024,1,1)]

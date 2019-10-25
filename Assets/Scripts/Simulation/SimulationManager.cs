@@ -770,16 +770,28 @@ public class SimulationManager : MonoBehaviour {
         for (int i = 0; i < agentsArray.Length; i++) {
 
             Vector3 depthSample = simStateData.depthAtAgentPositionsArray[i * 5];
-            float agentSize = (agentsArray[i].fullSizeBoundingBox.x + agentsArray[i].fullSizeBoundingBox.y) * agentsArray[i].sizePercentage * 0.25f + 0.025f;
-            float floorDepth = depthSample.x * 10f;
-            if (floorDepth < agentSize)
+            agentsArray[i].depth = depthSample.x;
+            //float agentSize = (agentsArray[i].fullSizeBoundingBox.x + agentsArray[i].fullSizeBoundingBox.y) * agentsArray[i].sizePercentage * 0.25f + 0.025f;
+            //float floorDepth = depthSample.x * 10f;
+            Vector3 depthSampleNorth = simStateData.depthAtAgentPositionsArray[i * 5 + 1];
+            agentsArray[i].depthNorth = depthSampleNorth.x;
+            Vector3 depthSampleEast = simStateData.depthAtAgentPositionsArray[i * 5 + 2];
+            agentsArray[i].depthEast = depthSampleEast.x;
+            Vector3 depthSampleSouth = simStateData.depthAtAgentPositionsArray[i * 5 + 3];
+            agentsArray[i].depthSouth = depthSampleSouth.x;
+            Vector3 depthSampleWest = simStateData.depthAtAgentPositionsArray[i * 5 + 4];
+            agentsArray[i].depthWest = depthSampleWest.x;
+
+            Vector2 TempGrad = new Vector2(depthSampleEast.x - depthSampleWest.x, depthSampleNorth.x - depthSampleSouth.x).normalized;
+            
+            if (depthSample.x > 0.475f) //(floorDepth < agentSize)
             {
-                float wallForce = Mathf.Clamp01(agentSize - floorDepth) / agentSize;
-                Vector2 grad = new Vector2(depthSample.y, depthSample.z).normalized;
-                agentsArray[i].bodyRigidbody.AddForce(grad * 15f * agentsArray[i].bodyRigidbody.mass * wallForce, ForceMode2D.Impulse);
+                float wallForce = 25f; // Mathf.Clamp01(agentSize - floorDepth) / agentSize;
+                Vector2 grad = TempGrad; // new Vector2(depthSample.y, depthSample.z); //.normalized;
+                agentsArray[i].bodyRigidbody.AddForce(-grad * agentsArray[i].bodyRigidbody.mass * wallForce, ForceMode2D.Impulse);
 
 
-                float damage = wallForce * 0.089f;                
+                float damage = wallForce * 0.1f;                
                 float defendBonus = 1f;
                 if(agentsArray[i].coreModule != null && agentsArray[i].curLifeStage == Agent.AgentLifeStage.Mature) {
                     if(agentsArray[i].isDefending) {                        
@@ -811,21 +823,14 @@ public class SimulationManager : MonoBehaviour {
 
             agentsArray[i].avgFluidVel = Vector2.Lerp(agentsArray[i].avgFluidVel, simStateData.fluidVelocitiesAtAgentPositionsArray[i], 0.25f);
 
-            agentsArray[i].depth = depthSample.x;
-            Vector3 depthSampleNorth = simStateData.depthAtAgentPositionsArray[i * 5 + 1];
-            agentsArray[i].depthNorth = depthSampleNorth.x;
-            Vector3 depthSampleEast = simStateData.depthAtAgentPositionsArray[i * 5 + 2];
-            agentsArray[i].depthEast = depthSampleEast.x;
-            Vector3 depthSampleSouth = simStateData.depthAtAgentPositionsArray[i * 5 + 3];
-            agentsArray[i].depthSouth = depthSampleSouth.x;
-            Vector3 depthSampleWest = simStateData.depthAtAgentPositionsArray[i * 5 + 4];
-            agentsArray[i].depthWest = depthSampleWest.x;
+            
+            
         }
-        for (int i = 0; i < eggSackArray.Length; i++) { // *** cache rigidBody reference
+        /*for (int i = 0; i < eggSackArray.Length; i++) { // *** cache rigidBody reference
             
             eggSackArray[i].GetComponent<Rigidbody2D>().AddForce(simStateData.fluidVelocitiesAtEggSackPositionsArray[i] * 16f * eggSackArray[i].GetComponent<Rigidbody2D>().mass, ForceMode2D.Impulse); //
             
-        }
+        }*/
     }
     
     public void PlayerToolStirOn(Vector3 origin, Vector2 forceVector, float radiusMult) {

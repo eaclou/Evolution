@@ -1530,9 +1530,10 @@ public class TheRenderKing : MonoBehaviour {
         baronVonTerrain.computeShaderTerrainGeneration.SetBuffer(kernelGetObjectDepths, "ObjectPositionsCBuffer", objectDataInFluidCoordsCBuffer);
         baronVonTerrain.computeShaderTerrainGeneration.SetBuffer(kernelGetObjectDepths, "DepthValuesCBuffer", depthValuesCBuffer);
         baronVonTerrain.computeShaderTerrainGeneration.SetTexture(kernelGetObjectDepths, "AltitudeRead", baronVonTerrain.terrainHeightDataRT);
-        //computeShaderFluidSim.SetFloat("_MapSize", SimulationManager._MapSize);
-        baronVonTerrain.computeShaderTerrainGeneration.Dispatch(kernelGetObjectDepths, positionsArray.Length, 1, 1);
-
+        baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
+        baronVonTerrain.computeShaderTerrainGeneration.Dispatch(kernelGetObjectDepths, positionsArray.Length / 64, 1, 1);
+        // *******
+        // only returning x channel data currently!!!! **** Need to move depthMapGeneration to terrainCompute and pre-calculate gradients there
         depthValuesCBuffer.GetData(objectDepthsArray);
 
         depthValuesCBuffer.Release();
@@ -3948,7 +3949,7 @@ public class TheRenderKing : MonoBehaviour {
                 float isHover = 0f;
                 if(simManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 1) {
                     if(simManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 1) {
-                        if(simManager.uiManager.curActiveTool == UIManager.ToolType.Inspect) {
+                        if(simManager.uiManager.curActiveTool == UIManager.ToolType.Watcher) {
                             isHover = 1f;
                             if(simManager.vegetationManager.isPlantParticleSelected) {                
                                 isSelected = 1f;                
@@ -4050,7 +4051,7 @@ public class TheRenderKing : MonoBehaviour {
                 float isHoverA = 0f;
                 if(simManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2) {
                     if(simManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) {
-                        if(simManager.uiManager.curActiveTool == UIManager.ToolType.Inspect) {
+                        if(simManager.uiManager.curActiveTool == UIManager.ToolType.Watcher) {
                             isHoverA = 1f;
                             isHighlight = 1f;
                             if(simManager.zooplanktonManager.isAnimalParticleSelected) {                   

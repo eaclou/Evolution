@@ -38,7 +38,7 @@ public class UIManager : MonoBehaviour {
     public ToolType curActiveTool;
     public enum ToolType {
         None,
-        Inspect,
+        Watcher,
         Add,
         Stir,
         Mutate,
@@ -53,15 +53,6 @@ public class UIManager : MonoBehaviour {
     public Color colorSpiritBrushLight;
     public Color colorSpiritBrushDark;
 
-    /*public Color colorDecomposersLight;
-    public Color colorDecomposersDark;
-    public Color colorPlantsLight;
-    public Color colorPlantsDark;
-    public Color colorAnimalsLight;
-    public Color colorAnimalsDark;
-    public Color colorTerrainLight;
-    public Color colorTerrainDark;
-    */
     public Color colorWorldLayer;
     public Color colorTerrainLayer;
     public Color colorMineralLayer;
@@ -78,7 +69,7 @@ public class UIManager : MonoBehaviour {
     private Vector3 prevMousePositionOnWaterPlane;
     public Vector3 curMousePositionOnWaterPlane;
 
-    public Image imageHighlightNewUI;
+    //public Image imageHighlightNewUI;
 
     public Text textInspectReadout;
 
@@ -247,10 +238,10 @@ public class UIManager : MonoBehaviour {
     public Sprite spriteSpeciesSlotFull;
     public Sprite spriteSpeciesSlotSelected;
     // // WING:::::
-    public GameObject panelToolbarWing;
+    //public GameObject panelToolbarWing;
     //public GameObject panelToolbarWingDescription;
-    public GameObject panelToolbarWingStats;
-    public GameObject panelToolbarWingMutation;
+    //public GameObject panelToolbarWingStats;
+    //public GameObject panelToolbarWingMutation;
     public GameObject panelToolbarWingDeletePrompt;
     public Button buttonToolbarWingDeleteSpecies;
     //public Button buttonToolbarWingDescription;
@@ -299,6 +290,18 @@ public class UIManager : MonoBehaviour {
     public GameObject panelNewMutationPreview;
     private int selectedToolbarMutationID = 0;
     public Button buttonToolbarMutateConfirm;
+
+    public GameObject panelWatcherSpiritMain;
+    public Text TextCommonStatsA;
+    public GameObject panelWatcherSpiritVertebratesHUD;
+    public GameObject panelWatcherSpiritVertebratesText;
+    public GameObject panelWatcherSpiritVertebratesGenome;
+    public GameObject panelWatcherSpiritVertebratesBrain;
+    public GameObject panelWatcherSpiritZooplankton;    
+    public GameObject panelWatcherSpiritPlants;
+    public GameObject panelWatcherSpiritAlgae;
+    public GameObject panelWatcherSpiritDecomposers;
+    public GameObject panelWatcherSpiritTerrain;
 
     //public Texture2D textureWorldStats;
     //public Texture2D textureWorldStatsKey;
@@ -901,7 +904,7 @@ public class UIManager : MonoBehaviour {
                     if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 1) {
                         if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 1) {
                             // if plant particles
-                            if (curActiveTool == ToolType.Inspect) {
+                            if (curActiveTool == ToolType.Watcher) {
                                 int selectedID = gameManager.simulationManager.vegetationManager.selectedPlantParticleIndex;
                                 int closestID = gameManager.simulationManager.vegetationManager.closestPlantParticleData.index;
 
@@ -918,7 +921,7 @@ public class UIManager : MonoBehaviour {
                     if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2) {
                         if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) {
                             // if plant particles
-                            if (curActiveTool == ToolType.Inspect) {
+                            if (curActiveTool == ToolType.Watcher) {
                                 int selectedID = gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex;
                                 int closestID = gameManager.simulationManager.zooplanktonManager.closestAnimalParticleData.index;
 
@@ -934,7 +937,7 @@ public class UIManager : MonoBehaviour {
                     }
                 }
             
-                if (curActiveTool == ToolType.Inspect || curActiveTool == ToolType.None) {                    
+                if (curActiveTool == ToolType.Watcher || curActiveTool == ToolType.None) {                    
                     //gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_IsVisible", 0f);
 
                     
@@ -1214,7 +1217,7 @@ public class UIManager : MonoBehaviour {
                 //buttonToolbarInspect.GetComponent<Image>().color = buttonDisabledColor;
 
                 break;
-            case ToolType.Inspect:
+            case ToolType.Watcher:
 
                 
 
@@ -1223,277 +1226,7 @@ public class UIManager : MonoBehaviour {
                 str += "\n\n";
                 
 
-                if(layerManager.selectedTrophicSlotRef.kingdomID == 0) {
-                    Vector4 resourceGridSample = SampleTexture(gameManager.simulationManager.vegetationManager.resourceGridRT1, curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
-                    str += "\n\nWaste    : " + (resourceGridSample.y * 1000f).ToString("F0");                    
-                    str += "\nDecomposers  : " + (resourceGridSample.z * 1000f).ToString("F0");
-
-                    Vector4 simTansferSample = SampleTexture(gameManager.simulationManager.vegetationManager.resourceSimTransferRT, curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
-                    str += "\n\nProduced This Frame:\nWaste: " + (simTansferSample.z * 1000000f).ToString("F0") + "\n\nConsumed This Frame:\nNutrients: " + (simTansferSample.x * 1000000f).ToString("F0");
-                    //str += "\nProduced This Frame:\nWaste: " + (simTansferSample.z * 1000000f).ToString("F0") + ")";
-                }
-                else if(layerManager.selectedTrophicSlotRef.kingdomID == 1) {
-                    if(layerManager.selectedTrophicSlotRef.tierID == 0) {
-                        Vector4 resourceGridSample = SampleTexture(gameManager.simulationManager.vegetationManager.resourceGridRT1, curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
-                        str += "\n\nNutrients    : " + (resourceGridSample.x * 1000f).ToString("F0");                    
-                        str += "\nAlgae        : " + (resourceGridSample.w * 1000f).ToString("F0");
-                        Vector4 simTansferSample = SampleTexture(gameManager.simulationManager.vegetationManager.resourceSimTransferRT, curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
-                        str += "\n\nProduced This Frame:\nWaste: " + (simTansferSample.z * 1000000f).ToString("F0") + "\n\nConsumed This Frame:\nNutrients: " + (simTansferSample.x * 1000000f).ToString("F0");
-                    
-                    }
-                    else {
-                     
-                        VegetationManager.PlantParticleData particleData = gameManager.simulationManager.vegetationManager.selectedPlantParticleData;
-
-                        str += "\nPlant Particle # " + particleData.index.ToString() + "  [" + particleData.nearestCritterIndex.ToString() + "]";
-                        //str += "\nCPU: " + gameManager.simulationManager.vegetationManager.tempClosestPlantParticleIndexAndPos.ToString();
-                        str += "\nCoords [ " + particleData.worldPos.x.ToString("F0") + " , " + particleData.worldPos.y.ToString("F0");
-                        str += "\nColorA (" + particleData.colorA.ToString() + ".";                        
-                        str += "\n\nAge: " + (particleData.age * 1000f).ToString("F0");
-                        str += "\nBiomass: " + (particleData.biomass * 1000f).ToString("F0");
-                        str += "\nNutrients Used: " + (particleData.nutrientsUsed * 100000000f).ToString("F0");
-                        str += "\nOxygen Produced: " + (particleData.oxygenProduced * 10000000f).ToString("F0");
-                        str += "\nIsDecaying: " + (particleData.isDecaying).ToString("F0");
-                        str += "\nIsSwallowed: " + (particleData.isSwallowed).ToString("F0");
-                        str += "\n\nDistance: " + (new Vector2(gameManager.simulationManager.uiManager.curMousePositionOnWaterPlane.x, gameManager.simulationManager.uiManager.curMousePositionOnWaterPlane.y) - particleData.worldPos).magnitude;
-
-                        Vector4 resourceGridSample = SampleTexture(gameManager.simulationManager.vegetationManager.resourceGridRT1, curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
-                        str += "\n\nNutrients    : " + (resourceGridSample.x * 1000000f).ToString("F0");                    
-                        //str += "\nAlgae        : " + (resourceGridSample.w * 1000f).ToString("F0");
-                        Vector4 simTansferSample = SampleTexture(gameManager.simulationManager.vegetationManager.resourceSimTransferRT, curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
-                        str += "\n\nProduced This Frame:\nWaste: " + (simTansferSample.z * 1000000f).ToString("F0") + "\n\nConsumed This Frame:\nNutrients: " + (simTansferSample.x * 1000000f).ToString("F0");
-                    
-                    }
-                    
-                }
-                else if(layerManager.selectedTrophicSlotRef.kingdomID == 2) {
-                    if(layerManager.selectedTrophicSlotRef.tierID == 0) {
-                        ZooplanktonManager.AnimalParticleData particleData = gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleData;
-                        
-                        str += "\nZooplankton # " + gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex.ToString();
-                        str += "\nCoords [ " + particleData.worldPos.x.ToString("F0") + " , " + particleData.worldPos.y.ToString("F0") + " ]"; //  Critter (" + gameManager.simulationManager.agentsArray[0].ownPos.ToString() + ")";
-                        str += "\nAge: " + (particleData.age * 1000f).ToString("F0");
-                        str += "\nBiomass: " + (particleData.biomass * 1000f).ToString("F0");
-                        str += "\nEnergy: " + (particleData.energy * 100f).ToString();
-                        str += "\nAlgae Eaten: " + (particleData.algaeConsumed * 1000000000f).ToString();
-                        str += "\nOxygen Used: " + (particleData.oxygenUsed * 1000000f).ToString("F0");
-                        str += "\nWaste Produced: " + (particleData.wasteProduced * 1000000000f).ToString();                        
-                        str += "\nVelocity (" + (particleData.velocity.x * 1000f).ToString("F0") + ", " + (particleData.velocity.y * 1000f).ToString("F0") + ")";
-                        str += "\nGenome: " + (particleData.genomeVector * 1f).ToString("F2");
-                        str += "\nIsDecaying: " + (particleData.isDecaying).ToString("F0");
-                        str += "\nIsSwallowed: " + (particleData.isSwallowed).ToString("F0");
-                        //str += "\n\nDistance: " + gameManager.simulationManager.zooplanktonManager.closestZooplanktonArray[0].y.ToString(); // (gameManager.simulationManager.agentsArray[0].ownPos - new Vector2(particleData.worldPos.x, particleData.worldPos.y)).magnitude;
-                        
-                        
-                    }
-                    else {
-
-                        int critterIndex = cameraManager.targetAgentIndex;
-                        Agent agent = gameManager.simulationManager.agentsArray[critterIndex];
-
-                        textNewInspectAgentName.text = agent.candidateRef.candidateGenome.bodyGenome.coreGenome.name;
-                        textNewInspectLog.text = agent.lastEvent.ToString() + ", " + agent.cooldownFrameCounter.ToString() + " / " + agent.cooldownDuration.ToString(); // agent.lastEvent;
-                        newInspectAgentEnergyMat.SetFloat("_Value", Mathf.Clamp01(agent.coreModule.energy * 0.25f));
-                        newInspectAgentStaminaMat.SetFloat("_Value", Mathf.Clamp01(agent.coreModule.stamina[0] * 1f));
-                        newInspectAgentStomachMat.SetFloat("_Value", Mathf.Clamp01(agent.coreModule.stomachContentsNorm * 1f));
-
-                        newInspectAgentHealthMat.SetFloat("_HealthHead", Mathf.Clamp01(agent.coreModule.healthHead));
-                        newInspectAgentHealthMat.SetFloat("_HealthBody", Mathf.Clamp01(agent.coreModule.healthBody));
-                        newInspectAgentHealthMat.SetFloat("_HealthExternal", Mathf.Clamp01(agent.coreModule.healthExternal));
-                        newInspectAgentAgeMat.SetFloat("_Value", Mathf.Clamp01((float)agent.ageCounter * 0.0005f));
-                        newInspectAgentAgeMat.SetFloat("_Age", agent.ageCounter);
-                        int developmentStateID = 0;
-                        int curActivityID = 0;
-                        if(agent.curLifeStage == Agent.AgentLifeStage.Dead) {
-                            developmentStateID = 7;
-                            //curActivityID = 7;
-                        }
-                        if(agent.curLifeStage == Agent.AgentLifeStage.Mature) {
-
-                            // state
-                            if (agent.ageCounter < 1000) {
-                                developmentStateID = 1;
-                            }
-                            else {
-                                if (agent.ageCounter < 10000) {
-                                    developmentStateID = 2;
-                                }
-                            }
-                            if(agent.sizePercentage > 0.5f) {
-                                developmentStateID = 3;
-                            }
-                            
-
-                            // curActivity
-                            if(agent.isPregnantAndCarryingEggs) {
-                                curActivityID = 6;
-                            }
-                            if(agent.isFeeding) {
-                                curActivityID = 1;
-                            }
-                            if(agent.isAttacking) {
-                                curActivityID = 2;
-                            }
-                            if(agent.isDashing) {
-                                curActivityID = 3;
-                            }
-                            if(agent.isDefending) {
-                                curActivityID = 4;
-                            }
-                            if(agent.isResting) {
-                                curActivityID = 5;
-                            }
-                            
-                            if(agent.isCooldown) {
-                                curActivityID = 7;
-                            }
-                        }
-                        newInspectAgentStateMat.SetInt("_StateID", developmentStateID);
-                        newInspectAgentCurActivityMat.SetInt("_CurActivityID", curActivityID);
-                        newInspectAgentBrainMat.SetFloat("_Value", Mathf.Clamp01((float)agent.brain.axonList.Count * 0.05f + (float)agent.brain.neuronList.Count * 0.05f));
-                        newInspectAgentWasteMat.SetFloat("_Value", Mathf.Clamp01(agent.wasteProducedLastFrame * 1000f));
-                        newInspectAgentThrottleMat.SetFloat("_ThrottleX", Mathf.Clamp01(agent.smoothedThrottle.x));
-                        newInspectAgentThrottleMat.SetFloat("_ThrottleY", Mathf.Clamp01(agent.smoothedThrottle.y));
-                        newInspectAgentThrottleMat.SetTexture("_VelocityTex", gameManager.simulationManager.environmentFluidManager._VelocityA);
-                        newInspectAgentThrottleMat.SetFloat("_AgentCoordX", agent.ownPos.x / SimulationManager._MapSize);
-                        newInspectAgentThrottleMat.SetFloat("_AgentCoordY", agent.ownPos.y / SimulationManager._MapSize);
-
-                        if(brainDisplayOn) {
-                            //str += "nearestEA" + agent.coreModule.nearestEnemyAgent.ownPos.ToString() + "?";
-
-                            str += "\n" + agent.brain.neuronList.Count.ToString() + " Neurons    " + agent.brain.axonList.Count.ToString() + " Axons";
-                            //str += "\nisMouthTrigger" + agent.coreModule.isMouthTrigger[0].ToString() + "";
-                            //str += "\nWaterDepth " + agent.environmentModule.waterDepth[0].ToString("F3") + "";
-                            //str += "\nN=" + agent.environmentModule.depthNorth[0].ToString("F3") + ", E=" + agent.environmentModule.depthEast[0].ToString("F3") + ", S=" + agent.environmentModule.depthSouth[0].ToString("F3") + ", W=" + agent.environmentModule.depthWest[0].ToString("F3") + ",";
-                            //str += "\nWaterVel " + agent.environmentModule.waterVelX[0].ToString("F3") + ", " + agent.environmentModule.waterVelY[0].ToString("F3");
-                            //str += "\nPlant[" + agent.foodModule.nearestFoodParticleIndex.ToString() + "] " + agent.foodModule.nearestFoodParticlePos.ToString() + "";
-                            //str += "\nZoo[" + agent.foodModule.nearestAnimalParticleIndex.ToString() + "] " + agent.foodModule.nearestAnimalParticlePos.ToString() + "";
-                            //str += "\nOwnVel" + agent.movementModule.ownVelX[0].ToString("F3") + ", " + agent.movementModule.ownVelY[0].ToString("F3");
-                            //str += "\nHit " + agent.coreModule.isContact[0].ToString("F2") + " (" + agent.coreModule.contactForceX[0].ToString("F4") + ", " + agent.coreModule.contactForceY[0].ToString("F4");
-                            //str += "\nInCOMM: (" + agent.communicationModule.inComm0[0].ToString("F2") + ", " + agent.communicationModule.inComm1[0].ToString("F2") + ", " + agent.communicationModule.inComm2[0].ToString("F2") + ", " + agent.communicationModule.inComm3[0].ToString("F2") + ")";
-                            //str += "\nOutCOMM: (" + agent.communicationModule.outComm0[0].ToString("F2") + ", " + agent.communicationModule.outComm1[0].ToString("F2") + ", " + agent.communicationModule.outComm2[0].ToString("F2") + ", " + agent.communicationModule.outComm3[0].ToString("F2") + ")";
-
-                            string brainInputsTxt = "\nINPUTS:";
-                            for(int n = 0; n < agent.brain.neuronList.Count; n++) {
-                                if(agent.brain.neuronList[n].neuronType == NeuronGenome.NeuronType.In) {
-                                    
-                                    if (n % 3 == 0) {
-                                        brainInputsTxt += "\n";
-                                    }
-                                    float neuronValue = agent.brain.neuronList[n].currentValue[0];
-                                    if(neuronValue < -0.2f) {
-                                        brainInputsTxt += "<color=#FF6644FF>";
-                                    }
-                                    else if(neuronValue > 0.2f) {
-                                        brainInputsTxt += "<color=#44FF66FF>";
-                                    }
-                                    else {
-                                        brainInputsTxt += "<color=#A998B5FF>";
-                                    }
-                                    brainInputsTxt += "[" + n.ToString() + "] " + agent.brain.neuronList[n].currentValue[0].ToString("F2") + "</color>  ";
-                                    
-                                }
-                            }
-                            string brainOutputsTxt = "\n\nOUTPUTS:\n";
-                            for(int o = 0; o < agent.brain.neuronList.Count; o++) {
-                                if(agent.brain.neuronList[o].neuronType == NeuronGenome.NeuronType.Out) {
-                                    
-                                    if (o % 3 == 0) {
-                                        brainOutputsTxt += "\n";
-                                    }
-                                    float neuronValue = agent.brain.neuronList[o].currentValue[0];
-                                    if(neuronValue < -0.2f) {
-                                        brainOutputsTxt += "<color=#FF6644FF>";
-                                    }
-                                    else if(neuronValue > 0.2f) {
-                                        brainOutputsTxt += "<color=#44FF66FF>";
-                                    }
-                                    else {
-                                        brainOutputsTxt += "<color=#A998B5FF>";
-                                    }
-                                    brainOutputsTxt += "[" + o.ToString() + "] " + agent.brain.neuronList[o].currentValue[0].ToString("F2") + "</color>  ";
-                                    
-                                    brainOutputsTxt += "";
-                                    
-                                }
-                            }
-                            str += brainInputsTxt + brainOutputsTxt;
-                        }
-                        else {
-                            str += agent.candidateRef.candidateGenome.bodyGenome.coreGenome.name + " (gen " + agent.candidateRef.candidateGenome.bodyGenome.coreGenome.generation.ToString() + ")\n[" + critterIndex.ToString() + "]    SpeciesID " + agent.speciesIndex.ToString();
-                            float energy = 0f;
-                            float stomach = 0f; // agent.coreModule.foodStored
-                            float health = 100f;
-                            
-                            if(agent.coreModule != null) {
-                                energy = agent.coreModule.energy * 100f;
-                                stomach = agent.coreModule.stomachContentsNorm * 100f;
-                                health = agent.coreModule.healthBody * 100f;
-                                
-                            }
-                        
-                            float bodWidth = (agent.fullSizeBoundingBox.x + agent.fullSizeBoundingBox.z) * 0.5f;
-                            float bodLength = agent.fullSizeBoundingBox.y;
-                            str += "\nAge: " + ((float)agent.ageCounter / 100f).ToString("F0");
-                            string aliveTxt = "\nALIVE!"; // + health.ToString("F0") + "%";
-                            aliveTxt += "\nEnergy: " + energy.ToString("F0") + "%";
-                            aliveTxt += "\nHealth: " + health.ToString("F0") + "%";
-                            aliveTxt += "\nStomach: " + stomach.ToString("F0") + "%";
-                            //aliveTxt += "\nThrottle  " + (agent.smoothedThrottle * 100f).ToString("F0");
-                            //aliveTxt += "\nWaste   " + (agent.wasteProducedLastFrame * 1000f).ToString("F0") + ", Oxygen   " + (agent.oxygenUsedLastFrame * 1000f).ToString("F0");        
-                            if(agent.curLifeStage == Agent.AgentLifeStage.Dead) {
-                                aliveTxt = "\nDEAD! (" + agent.stringCauseOfDeath + ") " + (agent.GetDecayPercentage() * 100f).ToString("F0") + "%  ";
-                            }
-                            else if(agent.curLifeStage == Agent.AgentLifeStage.Null) {
-                                aliveTxt = "\nNull";
-                            }
-                            else {
-                                aliveTxt += "\n" + agent.curLifeStage.ToString() + ", " + (agent.biomassAtDeath * 100f).ToString("F2");
-                            }
-                            //str += "\n";
-                            str += aliveTxt;
-                            //str += "\n";
-                            str += "\n[" + agent.coreModule.mouthFeedEffector[0].ToString("F2") + ", " +
-                                        agent.coreModule.mouthAttackEffector[0].ToString("F2") + ", " +
-                                        agent.coreModule.defendEffector[0].ToString("F2") + ", " +
-                                        agent.coreModule.dashEffector[0].ToString("F2") + ", " +
-                                        agent.coreModule.healEffector[0].ToString("F2") + "]";
-                            str += "\n[" + agent.coreModule.isMouthTrigger[0].ToString() + ", " +
-                                        agent.isDashing.ToString() + ", " +
-                                        agent.isDefending.ToString() + ", " +
-                                        agent.isResting.ToString() + "]";
-                                        //agent.coreModule.healEffector[0].ToString("F2") + "]";
-                            str += "\nBiomass  " + (agent.currentBiomass * 100f).ToString("F0") + "   ( " + (agent.sizePercentage * 100f).ToString("F0") + "%)";
-                            str += "\nFull Size   " + (bodLength * 10f).ToString("F0") + " x " + (bodWidth * 10f).ToString("F0");
-                            if(agent.coreModule != null) {                                
-                                str += "\ng# " + agent.candidateRef.candidateID.ToString() + ", " + agent.candidateRef.isBeingEvaluated.ToString() + ", " + agent.candidateRef.candidateGenome.bodyGenome.fullsizeBoundingBox.ToString();
-                            }
-                            str += "\n" + agent.brain.neuronList.Count.ToString() + " Neurons    " + agent.brain.axonList.Count.ToString() + " Axons";
-                            //str += "\n";      
-                            str += "\nTotal Eaten\nMeat: " + (agent.totalFoodEatenMeat * 1000f).ToString("F0") + ", Plant: " + (agent.totalFoodEatenPlant * 1000f).ToString("F0");
-                            //str += "\nBiteAnimCounter   " + agent.mouthRef.feedingFrameCounter.ToString();
-                            str += "\n\nLast Known Activity:\n" + agent.lastEvent + ", " + (UnityEngine.Time.frameCount - agent.lastEventTime).ToString() + " frames ago.";
-                            Vector4 closestZooplanktonData = gameManager.simulationManager.zooplanktonManager.closestZooplanktonArray[agent.index];
-                            Vector4 closestPlantData = gameManager.simulationManager.vegetationManager.closestPlantIndexArray[agent.index];
-                            closestZooplanktonData.y = Mathf.Sqrt(closestZooplanktonData.y);
-                            closestPlantData.y = Mathf.Sqrt(closestPlantData.y);
-                            //str += "\nNearest Meat [" + Mathf.RoundToInt(closestZooplanktonData.x).ToString() + "] " + closestZooplanktonData.y; // + gameManager.simulationManager.zooplanktonManager.closestZooplanktonArray[agent.index].y.ToString();
-                            //str += "\nNearest Plant [" + Mathf.RoundToInt(closestPlantData.x).ToString() + "] " + closestPlantData.y;
-                            //str += "\nLiarShader [" + gameManager.simulationManager.zooplanktonManager.closestAnimalParticlesDataArray[gameManager.simulationManager.cameraManager.targetAgentIndex].index.ToString();
-
-                        }
-                        
-                    }
-                }
-                else if(layerManager.selectedTrophicSlotRef.kingdomID == 3) {
-                    Vector4 resourceGridSample = SampleTexture(gameManager.simulationManager.vegetationManager.resourceGridRT1, curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
-                    str += "\n\nNutrients    : " + (resourceGridSample.x * 1000f).ToString("F0");
-                    str += "\nWaste        : " + (resourceGridSample.y * 1000f).ToString("F0");
-                    str += "\nDecomposers  : " + (resourceGridSample.z * 1000f).ToString("F0");
-                    str += "\nAlgae        : " + (resourceGridSample.w * 1000f).ToString("F0");
-                    Vector4 simTansferSample = SampleTexture(gameManager.simulationManager.vegetationManager.resourceSimTransferRT, curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
-                    str += "\n\nProduced This Frame:\nWaste: " + (simTansferSample.z * 1000000f).ToString("F0") + "\n\nConsumed This Frame:\nNutrients: " + (simTansferSample.x * 1000000f).ToString("F0");
-                }
+                
                 break;
             case ToolType.Mutate:
                 //buttonToolbarMutate.GetComponent<Image>().color = buttonActiveColor;
@@ -1516,6 +1249,321 @@ public class UIManager : MonoBehaviour {
         return str;
     }
 
+    private void UpdateWatcherDecomposersPanelUI() {
+
+    }
+    private void UpdateWatcherPanelUI(TrophicLayersManager layerManager) {
+
+        panelWatcherSpiritVertebratesHUD.SetActive(false);
+        panelWatcherSpiritVertebratesText.SetActive(false);
+        panelWatcherSpiritVertebratesGenome.SetActive(false);
+        panelWatcherSpiritVertebratesBrain.SetActive(false);
+        panelWatcherSpiritZooplankton.SetActive(false);
+        panelWatcherSpiritPlants.SetActive(false);
+        panelWatcherSpiritAlgae.SetActive(false);
+        panelWatcherSpiritDecomposers.SetActive(false);
+        panelWatcherSpiritTerrain.SetActive(false);
+
+        TextCommonStatsA.gameObject.SetActive(true);
+
+        string str = "";
+        if (layerManager.selectedTrophicSlotRef.kingdomID == 0) {
+            
+
+            Vector4 resourceGridSample = SampleTexture(gameManager.simulationManager.vegetationManager.resourceGridRT1, curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
+            str += "\n\nWaste    : " + (resourceGridSample.y * 1000f).ToString("F0");                    
+            str += "\nDecomposers  : " + (resourceGridSample.z * 1000f).ToString("F0");
+
+            Vector4 simTansferSample = SampleTexture(gameManager.simulationManager.vegetationManager.resourceSimTransferRT, curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
+            str += "\n\nProduced This Frame:\nWaste: " + (simTansferSample.z * 1000000f).ToString("F0") + "\n\nConsumed This Frame:\nNutrients: " + (simTansferSample.x * 1000000f).ToString("F0");
+            //str += "\nProduced This Frame:\nWaste: " + (simTansferSample.z * 1000000f).ToString("F0") + ")";
+
+            panelWatcherSpiritDecomposers.SetActive(true);
+            UpdateWatcherDecomposersPanelUI();
+        }
+        else if(layerManager.selectedTrophicSlotRef.kingdomID == 1) {
+            if(layerManager.selectedTrophicSlotRef.tierID == 0) {
+                Vector4 resourceGridSample = SampleTexture(gameManager.simulationManager.vegetationManager.resourceGridRT1, curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
+                str += "\n\nNutrients    : " + (resourceGridSample.x * 1000f).ToString("F0");                    
+                str += "\nAlgae        : " + (resourceGridSample.w * 1000f).ToString("F0");
+                Vector4 simTansferSample = SampleTexture(gameManager.simulationManager.vegetationManager.resourceSimTransferRT, curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
+                str += "\n\nProduced This Frame:\nWaste: " + (simTansferSample.z * 1000000f).ToString("F0") + "\n\nConsumed This Frame:\nNutrients: " + (simTansferSample.x * 1000000f).ToString("F0");
+                 
+                
+                panelWatcherSpiritAlgae.SetActive(true);
+            }
+            else {
+                     
+                VegetationManager.PlantParticleData particleData = gameManager.simulationManager.vegetationManager.selectedPlantParticleData;
+
+                str += "\nPlant Particle # " + particleData.index.ToString() + "  [" + particleData.nearestCritterIndex.ToString() + "]";
+                //str += "\nCPU: " + gameManager.simulationManager.vegetationManager.tempClosestPlantParticleIndexAndPos.ToString();
+                str += "\nCoords [ " + particleData.worldPos.x.ToString("F0") + " , " + particleData.worldPos.y.ToString("F0");
+                str += "\nColorA (" + particleData.colorA.ToString() + ".";                        
+                str += "\n\nAge: " + (particleData.age * 1000f).ToString("F0");
+                str += "\nBiomass: " + (particleData.biomass * 1000f).ToString("F0");
+                str += "\nNutrients Used: " + (particleData.nutrientsUsed * 100000000f).ToString("F0");
+                str += "\nOxygen Produced: " + (particleData.oxygenProduced * 10000000f).ToString("F0");
+                str += "\nIsDecaying: " + (particleData.isDecaying).ToString("F0");
+                str += "\nIsSwallowed: " + (particleData.isSwallowed).ToString("F0");
+                str += "\n\nDistance: " + (new Vector2(gameManager.simulationManager.uiManager.curMousePositionOnWaterPlane.x, gameManager.simulationManager.uiManager.curMousePositionOnWaterPlane.y) - particleData.worldPos).magnitude;
+
+                Vector4 resourceGridSample = SampleTexture(gameManager.simulationManager.vegetationManager.resourceGridRT1, curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
+                str += "\n\nNutrients    : " + (resourceGridSample.x * 1000000f).ToString("F0");                    
+                //str += "\nAlgae        : " + (resourceGridSample.w * 1000f).ToString("F0");
+                Vector4 simTansferSample = SampleTexture(gameManager.simulationManager.vegetationManager.resourceSimTransferRT, curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
+                str += "\n\nProduced This Frame:\nWaste: " + (simTansferSample.z * 1000000f).ToString("F0") + "\n\nConsumed This Frame:\nNutrients: " + (simTansferSample.x * 1000000f).ToString("F0");
+                
+                panelWatcherSpiritPlants.SetActive(true);
+            }
+                    
+        }
+        else if(layerManager.selectedTrophicSlotRef.kingdomID == 2) {
+            if(layerManager.selectedTrophicSlotRef.tierID == 0) {
+                ZooplanktonManager.AnimalParticleData particleData = gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleData;
+                        
+                str += "\nZooplankton # " + gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex.ToString();
+                str += "\nCoords [ " + particleData.worldPos.x.ToString("F0") + " , " + particleData.worldPos.y.ToString("F0") + " ]"; //  Critter (" + gameManager.simulationManager.agentsArray[0].ownPos.ToString() + ")";
+                str += "\nAge: " + (particleData.age * 1000f).ToString("F0");
+                str += "\nBiomass: " + (particleData.biomass * 1000f).ToString("F0");
+                str += "\nEnergy: " + (particleData.energy * 100f).ToString();
+                str += "\nAlgae Eaten: " + (particleData.algaeConsumed * 1000000000f).ToString();
+                str += "\nOxygen Used: " + (particleData.oxygenUsed * 1000000f).ToString("F0");
+                str += "\nWaste Produced: " + (particleData.wasteProduced * 1000000000f).ToString();                        
+                str += "\nVelocity (" + (particleData.velocity.x * 1000f).ToString("F0") + ", " + (particleData.velocity.y * 1000f).ToString("F0") + ")";
+                str += "\nGenome: " + (particleData.genomeVector * 1f).ToString("F2");
+                str += "\nIsDecaying: " + (particleData.isDecaying).ToString("F0");
+                str += "\nIsSwallowed: " + (particleData.isSwallowed).ToString("F0");
+                //str += "\n\nDistance: " + gameManager.simulationManager.zooplanktonManager.closestZooplanktonArray[0].y.ToString(); // (gameManager.simulationManager.agentsArray[0].ownPos - new Vector2(particleData.worldPos.x, particleData.worldPos.y)).magnitude;
+                   
+                panelWatcherSpiritZooplankton.SetActive(true);
+                        
+            }
+            else {
+
+                int critterIndex = cameraManager.targetAgentIndex;
+                Agent agent = gameManager.simulationManager.agentsArray[critterIndex];
+
+                textNewInspectAgentName.text = agent.candidateRef.candidateGenome.bodyGenome.coreGenome.name;
+                textNewInspectLog.text = agent.lastEvent.ToString() + ", " + agent.cooldownFrameCounter.ToString() + " / " + agent.cooldownDuration.ToString(); // agent.lastEvent;
+                newInspectAgentEnergyMat.SetFloat("_Value", Mathf.Clamp01(agent.coreModule.energy * 0.25f));
+                newInspectAgentStaminaMat.SetFloat("_Value", Mathf.Clamp01(agent.coreModule.stamina[0] * 1f));
+                newInspectAgentStomachMat.SetFloat("_Value", Mathf.Clamp01(agent.coreModule.stomachContentsNorm * 1f));
+
+                newInspectAgentHealthMat.SetFloat("_HealthHead", Mathf.Clamp01(agent.coreModule.healthHead));
+                newInspectAgentHealthMat.SetFloat("_HealthBody", Mathf.Clamp01(agent.coreModule.healthBody));
+                newInspectAgentHealthMat.SetFloat("_HealthExternal", Mathf.Clamp01(agent.coreModule.healthExternal));
+                newInspectAgentAgeMat.SetFloat("_Value", Mathf.Clamp01((float)agent.ageCounter * 0.0005f));
+                newInspectAgentAgeMat.SetFloat("_Age", agent.ageCounter);
+                int developmentStateID = 0;
+                int curActivityID = 0;
+                if(agent.curLifeStage == Agent.AgentLifeStage.Dead) {
+                    developmentStateID = 7;
+                    //curActivityID = 7;
+                }
+                if(agent.curLifeStage == Agent.AgentLifeStage.Mature) {
+
+                    // state
+                    if (agent.ageCounter < 1000) {
+                        developmentStateID = 1;
+                    }
+                    else {
+                        if (agent.ageCounter < 10000) {
+                            developmentStateID = 2;
+                        }
+                    }
+                    if(agent.sizePercentage > 0.5f) {
+                        developmentStateID = 3;
+                    }
+                            
+
+                    // curActivity
+                    if(agent.isPregnantAndCarryingEggs) {
+                        curActivityID = 6;
+                    }
+                    if(agent.isFeeding) {
+                        curActivityID = 1;
+                    }
+                    if(agent.isAttacking) {
+                        curActivityID = 2;
+                    }
+                    if(agent.isDashing) {
+                        curActivityID = 3;
+                    }
+                    if(agent.isDefending) {
+                        curActivityID = 4;
+                    }
+                    if(agent.isResting) {
+                        curActivityID = 5;
+                    }
+                            
+                    if(agent.isCooldown) {
+                        curActivityID = 7;
+                    }
+                }
+                newInspectAgentStateMat.SetInt("_StateID", developmentStateID);
+                newInspectAgentCurActivityMat.SetInt("_CurActivityID", curActivityID);
+                newInspectAgentBrainMat.SetFloat("_Value", Mathf.Clamp01((float)agent.brain.axonList.Count * 0.05f + (float)agent.brain.neuronList.Count * 0.05f));
+                newInspectAgentWasteMat.SetFloat("_Value", Mathf.Clamp01(agent.wasteProducedLastFrame * 1000f));
+                newInspectAgentThrottleMat.SetFloat("_ThrottleX", Mathf.Clamp01(agent.smoothedThrottle.x));
+                newInspectAgentThrottleMat.SetFloat("_ThrottleY", Mathf.Clamp01(agent.smoothedThrottle.y));
+                newInspectAgentThrottleMat.SetTexture("_VelocityTex", gameManager.simulationManager.environmentFluidManager._VelocityA);
+                newInspectAgentThrottleMat.SetFloat("_AgentCoordX", agent.ownPos.x / SimulationManager._MapSize);
+                newInspectAgentThrottleMat.SetFloat("_AgentCoordY", agent.ownPos.y / SimulationManager._MapSize);
+
+                if(brainDisplayOn) {
+                    //str += "nearestEA" + agent.coreModule.nearestEnemyAgent.ownPos.ToString() + "?";
+
+                    str += "\n" + agent.brain.neuronList.Count.ToString() + " Neurons    " + agent.brain.axonList.Count.ToString() + " Axons";
+                    //str += "\nisMouthTrigger" + agent.coreModule.isMouthTrigger[0].ToString() + "";
+                    //str += "\nWaterDepth " + agent.environmentModule.waterDepth[0].ToString("F3") + "";
+                    //str += "\nN=" + agent.environmentModule.depthNorth[0].ToString("F3") + ", E=" + agent.environmentModule.depthEast[0].ToString("F3") + ", S=" + agent.environmentModule.depthSouth[0].ToString("F3") + ", W=" + agent.environmentModule.depthWest[0].ToString("F3") + ",";
+                    //str += "\nWaterVel " + agent.environmentModule.waterVelX[0].ToString("F3") + ", " + agent.environmentModule.waterVelY[0].ToString("F3");
+                    //str += "\nPlant[" + agent.foodModule.nearestFoodParticleIndex.ToString() + "] " + agent.foodModule.nearestFoodParticlePos.ToString() + "";
+                    //str += "\nZoo[" + agent.foodModule.nearestAnimalParticleIndex.ToString() + "] " + agent.foodModule.nearestAnimalParticlePos.ToString() + "";
+                    //str += "\nOwnVel" + agent.movementModule.ownVelX[0].ToString("F3") + ", " + agent.movementModule.ownVelY[0].ToString("F3");
+                    //str += "\nHit " + agent.coreModule.isContact[0].ToString("F2") + " (" + agent.coreModule.contactForceX[0].ToString("F4") + ", " + agent.coreModule.contactForceY[0].ToString("F4");
+                    //str += "\nInCOMM: (" + agent.communicationModule.inComm0[0].ToString("F2") + ", " + agent.communicationModule.inComm1[0].ToString("F2") + ", " + agent.communicationModule.inComm2[0].ToString("F2") + ", " + agent.communicationModule.inComm3[0].ToString("F2") + ")";
+                    //str += "\nOutCOMM: (" + agent.communicationModule.outComm0[0].ToString("F2") + ", " + agent.communicationModule.outComm1[0].ToString("F2") + ", " + agent.communicationModule.outComm2[0].ToString("F2") + ", " + agent.communicationModule.outComm3[0].ToString("F2") + ")";
+
+                    string brainInputsTxt = "\nINPUTS:";
+                    for(int n = 0; n < agent.brain.neuronList.Count; n++) {
+                        if(agent.brain.neuronList[n].neuronType == NeuronGenome.NeuronType.In) {
+                                    
+                            if (n % 3 == 0) {
+                                brainInputsTxt += "\n";
+                            }
+                            float neuronValue = agent.brain.neuronList[n].currentValue[0];
+                            if(neuronValue < -0.2f) {
+                                brainInputsTxt += "<color=#FF6644FF>";
+                            }
+                            else if(neuronValue > 0.2f) {
+                                brainInputsTxt += "<color=#44FF66FF>";
+                            }
+                            else {
+                                brainInputsTxt += "<color=#A998B5FF>";
+                            }
+                            brainInputsTxt += "[" + n.ToString() + "] " + agent.brain.neuronList[n].currentValue[0].ToString("F2") + "</color>  ";
+                                    
+                        }
+                    }
+                    string brainOutputsTxt = "\n\nOUTPUTS:\n";
+                    for(int o = 0; o < agent.brain.neuronList.Count; o++) {
+                        if(agent.brain.neuronList[o].neuronType == NeuronGenome.NeuronType.Out) {
+                                    
+                            if (o % 3 == 0) {
+                                brainOutputsTxt += "\n";
+                            }
+                            float neuronValue = agent.brain.neuronList[o].currentValue[0];
+                            if(neuronValue < -0.2f) {
+                                brainOutputsTxt += "<color=#FF6644FF>";
+                            }
+                            else if(neuronValue > 0.2f) {
+                                brainOutputsTxt += "<color=#44FF66FF>";
+                            }
+                            else {
+                                brainOutputsTxt += "<color=#A998B5FF>";
+                            }
+                            brainOutputsTxt += "[" + o.ToString() + "] " + agent.brain.neuronList[o].currentValue[0].ToString("F2") + "</color>  ";
+                                    
+                            brainOutputsTxt += "";
+                                    
+                        }
+                    }
+                    str += brainInputsTxt + brainOutputsTxt;
+                }
+                else {
+                    str += agent.candidateRef.candidateGenome.bodyGenome.coreGenome.name + " (gen " + agent.candidateRef.candidateGenome.bodyGenome.coreGenome.generation.ToString() + ")\n[" + critterIndex.ToString() + "]    SpeciesID " + agent.speciesIndex.ToString();
+                    float energy = 0f;
+                    float stomach = 0f; // agent.coreModule.foodStored
+                    float health = 100f;
+                            
+                    if(agent.coreModule != null) {
+                        energy = agent.coreModule.energy * 100f;
+                        stomach = agent.coreModule.stomachContentsNorm * 100f;
+                        health = agent.coreModule.healthBody * 100f;
+                                
+                    }
+                        
+                    float bodWidth = (agent.fullSizeBoundingBox.x + agent.fullSizeBoundingBox.z) * 0.5f;
+                    float bodLength = agent.fullSizeBoundingBox.y;
+                    str += "\nAge: " + ((float)agent.ageCounter / 100f).ToString("F0");
+                    string aliveTxt = "\nALIVE!"; // + health.ToString("F0") + "%";
+                    aliveTxt += "\nEnergy: " + energy.ToString("F0") + "%";
+                    aliveTxt += "\nHealth: " + health.ToString("F0") + "%";
+                    aliveTxt += "\nStomach: " + stomach.ToString("F0") + "%";
+                    //aliveTxt += "\nThrottle  " + (agent.smoothedThrottle * 100f).ToString("F0");
+                    //aliveTxt += "\nWaste   " + (agent.wasteProducedLastFrame * 1000f).ToString("F0") + ", Oxygen   " + (agent.oxygenUsedLastFrame * 1000f).ToString("F0");        
+                    if(agent.curLifeStage == Agent.AgentLifeStage.Dead) {
+                        aliveTxt = "\nDEAD! (" + agent.stringCauseOfDeath + ") " + (agent.GetDecayPercentage() * 100f).ToString("F0") + "%  ";
+                    }
+                    else if(agent.curLifeStage == Agent.AgentLifeStage.Null) {
+                        aliveTxt = "\nNull";
+                    }
+                    else {
+                        aliveTxt += "\n" + agent.curLifeStage.ToString() + ", " + (agent.biomassAtDeath * 100f).ToString("F2");
+                    }
+                    //str += "\n";
+                    str += aliveTxt;
+                    //str += "\n";
+                    str += "\n[" + agent.coreModule.mouthFeedEffector[0].ToString("F2") + ", " +
+                                agent.coreModule.mouthAttackEffector[0].ToString("F2") + ", " +
+                                agent.coreModule.defendEffector[0].ToString("F2") + ", " +
+                                agent.coreModule.dashEffector[0].ToString("F2") + ", " +
+                                agent.coreModule.healEffector[0].ToString("F2") + "]";
+                    str += "\n[" + agent.coreModule.isMouthTrigger[0].ToString() + ", " +
+                                agent.isDashing.ToString() + ", " +
+                                agent.isDefending.ToString() + ", " +
+                                agent.isResting.ToString() + "]";
+                                //agent.coreModule.healEffector[0].ToString("F2") + "]";
+                    str += "\nBiomass  " + (agent.currentBiomass * 100f).ToString("F0") + "   ( " + (agent.sizePercentage * 100f).ToString("F0") + "%)";
+                    str += "\nFull Size   " + (bodLength * 10f).ToString("F0") + " x " + (bodWidth * 10f).ToString("F0");
+                    if(agent.coreModule != null) {                                
+                        str += "\ng# " + agent.candidateRef.candidateID.ToString() + ", " + agent.candidateRef.isBeingEvaluated.ToString() + ", " + agent.candidateRef.candidateGenome.bodyGenome.fullsizeBoundingBox.ToString();
+                    }
+                    str += "\n" + agent.brain.neuronList.Count.ToString() + " Neurons    " + agent.brain.axonList.Count.ToString() + " Axons";
+                    //str += "\n";      
+                    str += "\nTotal Eaten\nMeat: " + (agent.totalFoodEatenMeat * 1000f).ToString("F0") + ", Plant: " + (agent.totalFoodEatenPlant * 1000f).ToString("F0");
+                    //str += "\nBiteAnimCounter   " + agent.mouthRef.feedingFrameCounter.ToString();
+                    str += "\n\nLast Known Activity:\n" + agent.lastEvent + ", " + (UnityEngine.Time.frameCount - agent.lastEventTime).ToString() + " frames ago.";
+                    Vector4 closestZooplanktonData = gameManager.simulationManager.zooplanktonManager.closestZooplanktonArray[agent.index];
+                    Vector4 closestPlantData = gameManager.simulationManager.vegetationManager.closestPlantIndexArray[agent.index];
+                    closestZooplanktonData.y = Mathf.Sqrt(closestZooplanktonData.y);
+                    closestPlantData.y = Mathf.Sqrt(closestPlantData.y);
+                    //str += "\nNearest Meat [" + Mathf.RoundToInt(closestZooplanktonData.x).ToString() + "] " + closestZooplanktonData.y; // + gameManager.simulationManager.zooplanktonManager.closestZooplanktonArray[agent.index].y.ToString();
+                    //str += "\nNearest Plant [" + Mathf.RoundToInt(closestPlantData.x).ToString() + "] " + closestPlantData.y;
+                    //str += "\nLiarShader [" + gameManager.simulationManager.zooplanktonManager.closestAnimalParticlesDataArray[gameManager.simulationManager.cameraManager.targetAgentIndex].index.ToString();
+
+                }
+                 
+                TextCommonStatsA.gameObject.SetActive(false);
+                // pages:
+                panelWatcherSpiritVertebratesHUD.SetActive(true);
+                panelWatcherSpiritVertebratesText.SetActive(false);
+                panelWatcherSpiritVertebratesGenome.SetActive(false);
+                panelWatcherSpiritVertebratesBrain.SetActive(false);
+            }
+
+            
+        }
+        else if(layerManager.selectedTrophicSlotRef.kingdomID == 3) {
+            Vector4 resourceGridSample = SampleTexture(gameManager.simulationManager.vegetationManager.resourceGridRT1, curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
+            str += "\n\nNutrients    : " + (resourceGridSample.x * 1000f).ToString("F0");
+            str += "\nWaste        : " + (resourceGridSample.y * 1000f).ToString("F0");
+            str += "\nDecomposers  : " + (resourceGridSample.z * 1000f).ToString("F0");
+            str += "\nAlgae        : " + (resourceGridSample.w * 1000f).ToString("F0");
+            Vector4 simTansferSample = SampleTexture(gameManager.simulationManager.vegetationManager.resourceSimTransferRT, curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
+            str += "\n\nProduced This Frame:\nWaste: " + (simTansferSample.z * 1000000f).ToString("F0") + "\n\nConsumed This Frame:\nNutrients: " + (simTansferSample.x * 1000000f).ToString("F0");
+
+            panelWatcherSpiritTerrain.SetActive(true);
+        }
+        else {
+            // minerals? water? air?
+        }
+
+        TextCommonStatsA.text = str;
+        // string?
+    }
     public void UpdateToolbarPanelUI() {
 
         //if (true) { }
@@ -1562,10 +1610,12 @@ public class UIManager : MonoBehaviour {
                 //buttonToolbarInspect.GetComponent<Image>().color = buttonDisabledColor;
 
                 break;
-            case ToolType.Inspect:
+            case ToolType.Watcher:
                 buttonToolbarWatcher.GetComponent<Image>().color = buttonActiveColor;
                 buttonToolbarWatcher.gameObject.transform.localScale = Vector3.one * 1.25f;
                 imageToolbarInspectLinkedIcon.color = buttonActiveColor;
+
+                UpdateWatcherPanelUI(layerManager);
                 break;
             case ToolType.Mutate:
                 //buttonToolbarMutate.GetComponent<Image>().color = buttonActiveColor;
@@ -1636,16 +1686,20 @@ public class UIManager : MonoBehaviour {
             //strSpiritBrushDescription = "This spirit reveals hidden information about aspects of the world";
             //strSpiritBrushEffects = "Left-Click:\nFollows the nearest Vertebrate\n\nRight-Click:\nStops following";
         }
-        if (curActiveTool == ToolType.Inspect) {
+        if (curActiveTool == ToolType.Watcher) {
             spiritBrushName = "Minor Watcher Spirit";
             imageToolbarSpiritBrushThumbnail.sprite = spriteSpiritBrushWatcherIcon;
-            panelToolbarWing.SetActive(true);
+
+            panelWatcherSpiritMain.SetActive(true);
+            
+            //panelToolbarWing.SetActive(true);
             //imageToolbarInspectLinkedIcon.sprite = sprit
             //strSpiritBrushDescription = "This spirit reveals hidden information about aspects of the world";
             //strSpiritBrushEffects = "Left-Click:\nFollows the nearest Vertebrate\n\nRight-Click:\nStops following";
         }
         else {
-            panelToolbarWing.SetActive(false);
+            panelWatcherSpiritMain.SetActive(false);
+            //panelToolbarWing.SetActive(false);
         }
         if (curActiveTool == ToolType.Sage) {
             spiritBrushName = "Knowledge Spirit";
@@ -2007,7 +2061,7 @@ public class UIManager : MonoBehaviour {
         else if (curActiveTool == ToolType.Stir) {
             spiritBrushIndex = 2; 
         }
-        else if (curActiveTool == ToolType.Inspect) {
+        else if (curActiveTool == ToolType.Watcher) {
             spiritBrushIndex = 3; 
         }
         else if (curActiveTool == ToolType.Mutate) {
@@ -2227,7 +2281,12 @@ public class UIManager : MonoBehaviour {
     }
     private void UpdateToolbarMutationPanel() {
         textToolbarWingPanelName.text = "Mutations:";
-        panelToolbarWingMutation.SetActive(true);
+        //panelToolbarWingMutation.SetActive(true);
+        
+        
+        
+        
+        
         // Update mutation/upgrade panel
 
         //imageMutationPanelThumbnailB.color = Color.red;
@@ -3798,7 +3857,7 @@ public class UIManager : MonoBehaviour {
             if(agentRef != null) {
                 //Debug.Log("AGENT: [ " + agentRef.gameObject.name + " ] #" + agentRef.index.ToString());
                     
-                if(clicked && curActiveTool == ToolType.Inspect) {
+                if(clicked && curActiveTool == ToolType.Watcher) {
                     if (gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2) {
                         if (gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 1) {
                             cameraManager.SetTargetAgent(agentRef, agentRef.index);
@@ -3943,7 +4002,7 @@ public class UIManager : MonoBehaviour {
     public void ClickToolButtonInspect() {
         //gameManager.simulationManager.trophicLayersManager.ResetSelectedAgentSlots();
         //if(curActiveTool != ToolType.Inspect) {
-        curActiveTool = ToolType.Inspect;
+        curActiveTool = ToolType.Watcher;
         
         TurnOffStirTool();  
         TurnOffAddTool();
@@ -4213,7 +4272,7 @@ public class UIManager : MonoBehaviour {
     }
     public void ClickToolbarExpandOn() {
         isToolbarPaletteExpandOn = true;
-        imageHighlightNewUI.gameObject.SetActive(false);
+        //imageHighlightNewUI.gameObject.SetActive(false);
         //buttonToolbarExpandOn.GetComponent<Animation>().Stop();
         //buttonToolbarExpandOn.GetComponent<Animator>().StopPlayback();
         buttonToolbarPaletteExpandOn.GetComponent<Animator>().enabled = false;

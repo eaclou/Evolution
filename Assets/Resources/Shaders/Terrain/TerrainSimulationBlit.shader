@@ -71,6 +71,13 @@
 				float newAltitude = lerp(center, ((top.x + right.x + bottom.x + left.x) / 4.0), 0.05 * steepnessMask * hardness);
 
 				col.x = newAltitude; // (isUnderwater * 0.025 + 0.01) * 0.2);
+				
+				//if(altitudeGradient.x == 0 && altitudeGradient.y == 0) {
+				//	col.yz = float2(1,0);  // default facing right?
+				//}
+				//else {
+				col.yz = normalize(altitudeGradient);
+				//}
 
 				return col;
 			}

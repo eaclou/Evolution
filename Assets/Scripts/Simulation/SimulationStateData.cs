@@ -296,7 +296,7 @@ public class SimulationStateData {
 
 
                 // SIMDATA ::===========================================================================================================================================================================
-                Vector3 agentPos = simManager.agentsArray[i].bodyRigidbody.position;
+                Vector2 agentPos = simManager.agentsArray[i].ownPos; //.bodyRigidbody.position;
                 critterSimDataArray[i].worldPos = new Vector3(agentPos.x, agentPos.y, 1f);
                 if(simManager.agentsArray[i].smoothedThrottle.sqrMagnitude > 0f) {
                     critterSimDataArray[i].velocity = simManager.agentsArray[i].smoothedThrottle.normalized;
@@ -370,7 +370,7 @@ public class SimulationStateData {
                 // Z & W coords represents agent's x/y Radii (in FluidCoords)
                 float agentCenterX = agentPos.x / SimulationManager._MapSize;
                 float agentCenterY = agentPos.y / SimulationManager._MapSize;
-                float sensorRange = 0.015f;  // in UV 0-1
+                float sensorRange = 0.0025f;  // in UV 0-1
                 Vector2[] directionsArray = new Vector2[5];
                 directionsArray[0] = new Vector2(0f, 0f) * sensorRange;
                 directionsArray[1] = new Vector2(0f, 1f) * sensorRange;
