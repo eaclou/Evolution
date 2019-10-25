@@ -244,7 +244,7 @@ public class ZooplanktonManager {
         computeShaderAnimalParticles.SetBuffer(kernelCSSimulateAnimalParticles, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
         computeShaderAnimalParticles.SetBuffer(kernelCSSimulateAnimalParticles, "animalParticlesRead", animalParticlesCBuffer);
         computeShaderAnimalParticles.SetBuffer(kernelCSSimulateAnimalParticles, "animalParticlesWrite", animalParticlesCBufferSwap);
-        computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "velocityRead", fluidManagerRef._VelocityA);        
+        computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "velocityRead", fluidManagerRef._VelocityPressureDivergenceMain);        
         computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "altitudeRead", renderKingRef.baronVonTerrain.terrainHeightDataRT);
         computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "_SpawnDensityMap", renderKingRef.spiritBrushRT);
         computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "_ResourceGridRead", renderKingRef.simManager.vegetationManager.resourceGridRT1);

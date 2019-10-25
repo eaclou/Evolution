@@ -465,7 +465,7 @@ void CSUpdateWaterSurface (uint3 id : SV_DispatchThreadID)
 	float2 uv = (((float2)id.xy + 0.5) / (float)_TextureResolution);
 	float4 pressureSample = PressureRead.SampleLevel(_LinearClamp, uv, 0);
 	
-	waterSurfaceDataWriteRT[id.xy] = float4(height * 0.25 + waveHeight * 0.35 + pressureSample.x * 1.0, 0, 0, 1);
+	waterSurfaceDataWriteRT[id.xy] = float4(height * 0.25 + waveHeight * 0.35 + pressureSample.z * 1.0, 0, 0, 1);
 }
 
 [numthreads(32,32,1)]

@@ -402,7 +402,7 @@ public class BaronVonWater : RenderBaron {
     private void SimWaterQuads() {
         int kernelSimWaterQuads = computeShaderWaterRender.FindKernel("CSSimWaterQuadsData");                
         computeShaderWaterRender.SetBuffer(kernelSimWaterQuads, "waterQuadStrokesCBuffer", waterQuadStrokesCBufferLrg);
-        computeShaderWaterRender.SetTexture(kernelSimWaterQuads, "VelocityRead", fluidManagerRef._VelocityA);    
+        computeShaderWaterRender.SetTexture(kernelSimWaterQuads, "VelocityRead", fluidManagerRef._VelocityPressureDivergenceMain);    
         computeShaderWaterRender.SetTexture(kernelSimWaterQuads, "AltitudeRead", altitudeMapRef);     
         computeShaderWaterRender.SetFloat("_MapSize", SimulationManager._MapSize);
         computeShaderWaterRender.SetVector("_SpawnBoundsCameraDetails", new Vector4(0f, 0f, SimulationManager._MapSize, SimulationManager._MapSize));
@@ -412,7 +412,7 @@ public class BaronVonWater : RenderBaron {
         // SML:
         kernelSimWaterQuads = computeShaderWaterRender.FindKernel("CSSimWaterQuadsData");
         computeShaderWaterRender.SetBuffer(kernelSimWaterQuads, "waterQuadStrokesCBuffer", waterQuadStrokesCBufferSml);
-        computeShaderWaterRender.SetTexture(kernelSimWaterQuads, "VelocityRead", fluidManagerRef._VelocityA);
+        computeShaderWaterRender.SetTexture(kernelSimWaterQuads, "VelocityRead", fluidManagerRef._VelocityPressureDivergenceMain);
         computeShaderWaterRender.SetTexture(kernelSimWaterQuads, "AltitudeRead", altitudeMapRef);
         computeShaderWaterRender.SetVector("_SpawnBoundsCameraDetails", spawnBoundsCameraDetails);
         computeShaderWaterRender.SetFloat("_MapSize", SimulationManager._MapSize);
@@ -422,7 +422,7 @@ public class BaronVonWater : RenderBaron {
         // WATER BITS HERE::: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         int kernelSimDetailBitsData = computeShaderWaterRender.FindKernel("CSSimDetailBitsData");
         computeShaderWaterRender.SetBuffer(kernelSimDetailBitsData, "waterQuadStrokesCBuffer", waterNutrientsBitsCBuffer);
-        computeShaderWaterRender.SetTexture(kernelSimDetailBitsData, "VelocityRead", fluidManagerRef._VelocityA);
+        computeShaderWaterRender.SetTexture(kernelSimDetailBitsData, "VelocityRead", fluidManagerRef._VelocityPressureDivergenceMain);
         computeShaderWaterRender.SetTexture(kernelSimDetailBitsData, "AltitudeRead", altitudeMapRef);
         computeShaderWaterRender.SetTexture(kernelSimDetailBitsData, "_ResourceSimTransferTex", veggieManRef.resourceSimTransferRT);
         computeShaderWaterRender.SetTexture(kernelSimDetailBitsData, "_ResourceGridTex", veggieManRef.resourceGridRT1);
@@ -432,7 +432,7 @@ public class BaronVonWater : RenderBaron {
 
         int kernelSimSurfaceBitsData = computeShaderWaterRender.FindKernel("CSSimSurfaceBitsData");
         computeShaderWaterRender.SetBuffer(kernelSimSurfaceBitsData, "waterQuadStrokesCBuffer", waterSurfaceBitsCBuffer);
-        computeShaderWaterRender.SetTexture(kernelSimSurfaceBitsData, "VelocityRead", fluidManagerRef._VelocityA);
+        computeShaderWaterRender.SetTexture(kernelSimSurfaceBitsData, "VelocityRead", fluidManagerRef._VelocityPressureDivergenceMain);
         computeShaderWaterRender.SetTexture(kernelSimSurfaceBitsData, "AltitudeRead", altitudeMapRef);
         computeShaderWaterRender.SetFloat("_MapSize", SimulationManager._MapSize);
         computeShaderWaterRender.SetFloat("_Time", Time.realtimeSinceStartup);
@@ -470,7 +470,7 @@ public class BaronVonWater : RenderBaron {
         //computeShaderWaterRender.SetFloat("_DeltaTime", fluidManager.deltaTime);
         //computeShaderWaterRender.SetFloat("_InvGridScale", fluidManager.invGridScale);
         computeShaderWaterRender.SetBuffer(kernelSimWaterCurves, "waterCurveStrokesCBuffer", waterCurveStrokesCBuffer);
-        computeShaderWaterRender.SetTexture(kernelSimWaterCurves, "VelocityRead", fluidManagerRef._VelocityA);    
+        computeShaderWaterRender.SetTexture(kernelSimWaterCurves, "VelocityRead", fluidManagerRef._VelocityPressureDivergenceMain);    
         computeShaderWaterRender.SetTexture(kernelSimWaterCurves, "AltitudeRead", altitudeMapRef);     
         computeShaderWaterRender.SetFloat("_MapSize", SimulationManager._MapSize);
         //computeShaderWaterRender.SetTexture(kernelSimWaterCurves, "DensityRead", fluidManager._DensityA);  
@@ -481,7 +481,7 @@ public class BaronVonWater : RenderBaron {
         int kernelCSPinWaterChainsData = computeShaderWaterRender.FindKernel("CSPinWaterChainsData");        
         computeShaderWaterRender.SetBuffer(kernelCSPinWaterChainsData, "waterChainsReadCBuffer", waterChains0CBuffer);
         computeShaderWaterRender.SetBuffer(kernelCSPinWaterChainsData, "waterChainsWriteCBuffer", waterChains1CBuffer);
-        computeShaderWaterRender.SetTexture(kernelCSPinWaterChainsData, "VelocityRead", fluidManagerRef._VelocityA);
+        computeShaderWaterRender.SetTexture(kernelCSPinWaterChainsData, "VelocityRead", fluidManagerRef._VelocityPressureDivergenceMain);
         computeShaderWaterRender.Dispatch(kernelCSPinWaterChainsData, waterChains0CBuffer.count / numPointsPerWaterChain / 1024, 1, 1);
         
         if(debugFrameCounter % 1 == 0) {
@@ -489,7 +489,7 @@ public class BaronVonWater : RenderBaron {
             int kernelCSShiftWaterChainsData = computeShaderWaterRender.FindKernel("CSShiftWaterChainsData");
             computeShaderWaterRender.SetBuffer(kernelCSShiftWaterChainsData, "waterChainsReadCBuffer", waterChains0CBuffer);
             computeShaderWaterRender.SetBuffer(kernelCSShiftWaterChainsData, "waterChainsWriteCBuffer", waterChains1CBuffer);
-            computeShaderWaterRender.SetTexture(kernelCSShiftWaterChainsData, "VelocityRead", fluidManagerRef._VelocityA);
+            computeShaderWaterRender.SetTexture(kernelCSShiftWaterChainsData, "VelocityRead", fluidManagerRef._VelocityPressureDivergenceMain);
             computeShaderWaterRender.Dispatch(kernelCSShiftWaterChainsData, waterChains0CBuffer.count / 1024, 1, 1);
         }      
         
@@ -497,7 +497,7 @@ public class BaronVonWater : RenderBaron {
         int kernelCSSwapWaterChainsData = computeShaderWaterRender.FindKernel("CSSwapWaterChainsData");
         computeShaderWaterRender.SetBuffer(kernelCSSwapWaterChainsData, "waterChainsReadCBuffer", waterChains1CBuffer);
         computeShaderWaterRender.SetBuffer(kernelCSSwapWaterChainsData, "waterChainsWriteCBuffer", waterChains0CBuffer);
-        computeShaderWaterRender.SetTexture(kernelCSSwapWaterChainsData, "VelocityRead", fluidManagerRef._VelocityA);
+        computeShaderWaterRender.SetTexture(kernelCSSwapWaterChainsData, "VelocityRead", fluidManagerRef._VelocityPressureDivergenceMain);
         computeShaderWaterRender.Dispatch(kernelCSSwapWaterChainsData, waterChains0CBuffer.count / 1024, 1, 1);
 
         debugFrameCounter++;
@@ -514,7 +514,7 @@ public class BaronVonWater : RenderBaron {
     {
         int kernelCSUpdateWaterSurface = computeShaderWaterRender.FindKernel("CSUpdateWaterSurface");
         computeShaderWaterRender.SetTexture(kernelCSUpdateWaterSurface, "waterSurfaceDataWriteRT", waterSurfaceDataRT0);
-        computeShaderWaterRender.SetTexture(kernelCSUpdateWaterSurface, "PressureRead", fluidManagerRef._PressureA);
+        computeShaderWaterRender.SetTexture(kernelCSUpdateWaterSurface, "PressureRead", fluidManagerRef._VelocityPressureDivergenceMain);
         computeShaderWaterRender.SetFloat("_TextureResolution", waterSurfaceDataRT0.width);
         computeShaderWaterRender.SetFloat("_Time", Time.realtimeSinceStartup);
         computeShaderWaterRender.SetFloat("_MapSize", SimulationManager._MapSize);

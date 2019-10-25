@@ -432,10 +432,12 @@ public class SimulationManager : MonoBehaviour {
     private void LoadingHookUpFluidAndRenderKing() {
         // **** NEED TO ADDRESS THIS!!!!!! ************************
         theRenderKing.fluidObstaclesRenderCamera.targetTexture = environmentFluidManager._ObstaclesRT; // *** See if this works **
-        theRenderKing.fluidColorRenderCamera.targetTexture = environmentFluidManager._SourceColorRT;
+
+        //theRenderKing.fluidColorRenderCamera.targetTexture = environmentFluidManager._SourceColorRT;
+        
         //treeOfLifeSpeciesTreeRenderCamera targetTexture set in scene
         //temp:
-        theRenderKing.debugRT = environmentFluidManager._SourceColorRT;
+        //theRenderKing.debugRT = environmentFluidManager._SourceColorRT;
     }
     
     private void LoadingInitializeGridCells() {
@@ -721,7 +723,7 @@ public class SimulationManager : MonoBehaviour {
             
             AddNewHistoricalDataEntry();
             AddNewSpeciesDataEntry(curSimYear);
-            uiManager.UpdateSpeciesTreeDataTextures(curSimYear);
+            //uiManager.UpdateSpeciesTreeDataTextures(curSimYear);
                         
             if(curSimYear == 1) {
                 SimEventData newEventData = new SimEventData();
@@ -758,7 +760,7 @@ public class SimulationManager : MonoBehaviour {
 
             RefreshLatestHistoricalDataEntry();
             RefreshLatestSpeciesDataEntry();
-            uiManager.UpdateSpeciesTreeDataTextures(curSimYear); // shouldn't lengthen!
+            //uiManager.UpdateSpeciesTreeDataTextures(curSimYear); // shouldn't lengthen!
             
             uiManager.UpdateTolWorldStatsTexture(statsNutrientsEachGenerationList);
             

@@ -22,19 +22,20 @@ public class EnvironmentFluidManager : MonoBehaviour {
 
     public int curTierWaterCurrents = 2;
 
-    private RenderTexture velocityA;
-    public RenderTexture _VelocityA
+    private RenderTexture velocityPressureDivergenceMain;
+    public RenderTexture _VelocityPressureDivergenceMain
     {
         get
         {
-            return velocityA;
+            return velocityPressureDivergenceMain;
         }
         set
         {
 
         }
     }
-    private RenderTexture velocityB;
+    private RenderTexture velocityPressureDivergenceSwap;
+    /*
     private RenderTexture pressureA;
     public RenderTexture _PressureA
     {
@@ -73,6 +74,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
 
         }
     }
+    */
     private RenderTexture obstaclesRT;
     public RenderTexture _ObstaclesRT
     {
@@ -85,7 +87,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
 
         }
     }
-    private RenderTexture sourceColorRT; // Rendered by renderKing.fluidColorRenderCamera;
+    /*private RenderTexture sourceColorRT; // Rendered by renderKing.fluidColorRenderCamera;
     public RenderTexture _SourceColorRT
     {
         get
@@ -97,9 +99,9 @@ public class EnvironmentFluidManager : MonoBehaviour {
 
         }
     }
-
-    private Material displayMat; // shader for display Mesh
-    public Material debugMat;
+    */
+    //private Material displayMat; // shader for display Mesh
+    //public Material debugMat;
 
     //public bool tick = false;
     
@@ -124,7 +126,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
         public Vector3 color;
     }*/
     
-    public DisplayTexture displayTex = DisplayTexture.densityA;
+    /*public DisplayTexture displayTex = DisplayTexture.densityA;
     public enum DisplayTexture {
         velocityA,
         velocityB,
@@ -134,7 +136,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
         densityB,
         divergence,
         obstacles
-    }
+    }*/
 
     public void StirWaterOff() {
         computeShaderFluidSim.SetFloat("_ForcePosX", 0.5f);
@@ -188,7 +190,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
         forcePointsCBuffer = new ComputeBuffer(maxNumForcePoints, sizeof(float) * 5);
         forcePointsArray = new ForcePoint[maxNumForcePoints];
         RerollForcePoints();
-        debugMat.SetTexture("_MainTex", sourceColorRT);
+        //debugMat.SetTexture("_MainTex", sourceColorRT);
 
         computeShaderFluidSim.SetFloat("_ForceOn", 1f);
     }
@@ -205,12 +207,14 @@ public class EnvironmentFluidManager : MonoBehaviour {
         computeShaderFluidSim.SetFloat("_ColorRefreshAmount", colorRefreshBackgroundMultiplier);
 
         // Lerp towards sourceTexture color:
-        RefreshColor(vegetationManagerRef);
+        //RefreshColor(vegetationManagerRef);
 
         // ADVECTION:::::
-        Advection();
+        Advection(velocityPressureDivergenceMain, velocityPressureDivergenceSwap);
         //Graphics.Blit(velocityB, velocityA); // TEMP! slow...
-        VelocityInjectionPoints(velocityB, velocityA);
+
+        // ******************** TEMPORARY!!! BRING THIS BACK OR REPLACE WITH Texture-based approach!!!! *******
+        VelocityInjectionPoints(velocityPressureDivergenceSwap, velocityPressureDivergenceMain);
 
         // VISCOUS DIFFUSION:::::
         /*int numViscousDiffusionIter = 8;
@@ -225,23 +229,23 @@ public class EnvironmentFluidManager : MonoBehaviour {
         // if #iter is even, then velA will hold latest values, so no need to Blit():
         
         // DIVERGENCE:::::
-        VelocityDivergence(velocityA);  // calculate velocity divergence
+        VelocityDivergence(velocityPressureDivergenceMain, velocityPressureDivergenceSwap);  // calculate velocity divergence
 
         // PRESSURE JACOBI:::::
         //InitializePressure();  // zeroes out initial pressure guess // doesn't seem to produce great results
         int numPressureJacobiIter = 64;
         for (int i = 0; i < numPressureJacobiIter; i++) {
             if (i % 2 == 0) {
-                PressureJacobi(pressureA, pressureB);
+                PressureJacobi(velocityPressureDivergenceSwap, velocityPressureDivergenceMain);
             }
-            else {
-                PressureJacobi(pressureB, pressureA);
+            else {                
+                PressureJacobi(velocityPressureDivergenceMain, velocityPressureDivergenceSwap);
             }
         }
 
         // SUBTRACT GRADIENT:::::
-        SubtractGradient();
-        Graphics.Blit(velocityB, velocityA); // TEMP! slow...  
+        SubtractGradient(velocityPressureDivergenceSwap, velocityPressureDivergenceMain);
+        //Graphics.Blit(velocityPressureDivergenceSwap, velocityPressureDivergenceMain); // TEMP! slow...  
 
         
         //SimFloatyBits();
@@ -338,16 +342,17 @@ public class EnvironmentFluidManager : MonoBehaviour {
     private void CreateTextures() {
         //Debug.Log("CreateTextures()!");
 
-        velocityA = new RenderTexture(resolution, resolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        velocityA.wrapMode = TextureWrapMode.Repeat;
-        velocityA.enableRandomWrite = true;
-        velocityA.Create();
+        velocityPressureDivergenceMain = new RenderTexture(resolution, resolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+        velocityPressureDivergenceMain.wrapMode = TextureWrapMode.Clamp;
+        velocityPressureDivergenceMain.enableRandomWrite = true;
+        velocityPressureDivergenceMain.Create();
 
-        velocityB = new RenderTexture(resolution, resolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        velocityB.wrapMode = TextureWrapMode.Repeat;
-        velocityB.enableRandomWrite = true;
-        velocityB.Create();
+        velocityPressureDivergenceSwap = new RenderTexture(resolution, resolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+        velocityPressureDivergenceSwap.wrapMode = TextureWrapMode.Clamp;
+        velocityPressureDivergenceSwap.enableRandomWrite = true;
+        velocityPressureDivergenceSwap.Create();
 
+        /*
         pressureA = new RenderTexture(resolution, resolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
         pressureA.wrapMode = TextureWrapMode.Repeat;
         pressureA.enableRandomWrite = true;
@@ -373,17 +378,18 @@ public class EnvironmentFluidManager : MonoBehaviour {
         divergence.wrapMode = TextureWrapMode.Repeat;
         divergence.enableRandomWrite = true;
         divergence.Create();
-
+        */
         // ** Needed?
+
         obstaclesRT = new RenderTexture(resolution, resolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        obstaclesRT.wrapMode = TextureWrapMode.Repeat;
+        obstaclesRT.wrapMode = TextureWrapMode.Clamp;
         obstaclesRT.enableRandomWrite = true;
         obstaclesRT.Create();
-
+        /*
         sourceColorRT = new RenderTexture(resolution, resolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
         sourceColorRT.wrapMode = TextureWrapMode.Repeat;
         sourceColorRT.enableRandomWrite = true;
-        sourceColorRT.Create();
+        sourceColorRT.Create();*/
     }
     public Vector2[] GetFluidVelocityAtObjectPositions(Vector4[] positionsArray) {
 
@@ -397,8 +403,8 @@ public class EnvironmentFluidManager : MonoBehaviour {
         int kernelGetObjectVelocities = computeShaderFluidSim.FindKernel("GetObjectVelocities");  
         computeShaderFluidSim.SetBuffer(kernelGetObjectVelocities, "ObjectPositionsCBuffer", objectDataInFluidCoordsCBuffer);
         computeShaderFluidSim.SetBuffer(kernelGetObjectVelocities, "VelocityValuesCBuffer", velocityValuesCBuffer);
-        computeShaderFluidSim.SetTexture(kernelGetObjectVelocities, "VelocityRead", velocityA);
-        //computeShaderFluidSim.SetFloat("_MapSize", SimulationManager._MapSize);
+        computeShaderFluidSim.SetTexture(kernelGetObjectVelocities, "VelocityRead", velocityPressureDivergenceMain);
+        computeShaderFluidSim.SetFloat("_MapSize", SimulationManager._MapSize);
         computeShaderFluidSim.Dispatch(kernelGetObjectVelocities, positionsArray.Length, 1, 1);
 
         velocityValuesCBuffer.GetData(objectVelocitiesArray);
@@ -409,7 +415,8 @@ public class EnvironmentFluidManager : MonoBehaviour {
         return objectVelocitiesArray;
         
     }
-
+    // *** TEMP DISABLED!!!!! ****
+    /*
     private void RefreshColor(VegetationManager vegetationManagerRef) { 
         int kernelRefreshColor = computeShaderFluidSim.FindKernel("RefreshColor");
         //RenderTexture reactionDiffusionRT
@@ -430,10 +437,11 @@ public class EnvironmentFluidManager : MonoBehaviour {
         //computeShaderFluidSim.SetTexture(kernelRefreshColor, "_AlgaeDecomposerMapRead", vegetationManagerRef.rdRT1); 
         computeShaderFluidSim.SetTexture(kernelRefreshColor, "_NutrientGridRead", vegetationManagerRef.resourceGridRT1); 
         computeShaderFluidSim.Dispatch(kernelRefreshColor, resolution / 16, resolution / 16, 1);
-
         
     }
-    private void Advection() {
+    */
+
+    private void Advection(RenderTexture readRT, RenderTexture writeRT) {
 
         int kernelAdvection = computeShaderFluidSim.FindKernel("Advection");
         computeShaderFluidSim.SetFloat("_TextureResolution", (float)resolution);
@@ -441,11 +449,11 @@ public class EnvironmentFluidManager : MonoBehaviour {
         computeShaderFluidSim.SetFloat("_InvGridScale", invGridScale);
         computeShaderFluidSim.SetFloat("_MapSize", SimulationManager._MapSize);
         computeShaderFluidSim.SetTexture(kernelAdvection, "ObstaclesRead", obstaclesRT);
-        computeShaderFluidSim.SetTexture(kernelAdvection, "VelocityRead", velocityA);
-        computeShaderFluidSim.SetTexture(kernelAdvection, "VelocityWrite", velocityB);
-        computeShaderFluidSim.SetTexture(kernelAdvection, "DensityRead", densityA);
-        computeShaderFluidSim.SetTexture(kernelAdvection, "DensityWrite", densityB);
-        computeShaderFluidSim.Dispatch(kernelAdvection, resolution / 16, resolution / 16, 1);
+        computeShaderFluidSim.SetTexture(kernelAdvection, "VelocityRead", readRT);
+        computeShaderFluidSim.SetTexture(kernelAdvection, "VelocityWrite", writeRT);
+        //computeShaderFluidSim.SetTexture(kernelAdvection, "DensityRead", densityA);
+        //computeShaderFluidSim.SetTexture(kernelAdvection, "DensityWrite", densityB);
+        computeShaderFluidSim.Dispatch(kernelAdvection, resolution / 32, resolution / 32, 1);
     }
     private void ViscousDiffusion(RenderTexture readRT, RenderTexture writeRT) {
 
@@ -456,8 +464,10 @@ public class EnvironmentFluidManager : MonoBehaviour {
         computeShaderFluidSim.SetFloat("_InvGridScale", invGridScale);
         computeShaderFluidSim.SetTexture(kernelViscousDiffusion, "VelocityRead", readRT);
         computeShaderFluidSim.SetTexture(kernelViscousDiffusion, "VelocityWrite", writeRT);
-        computeShaderFluidSim.Dispatch(kernelViscousDiffusion, resolution / 16, resolution / 16, 1);
+        computeShaderFluidSim.Dispatch(kernelViscousDiffusion, resolution / 32, resolution / 32, 1);
     }
+
+    // *** Replace with textural?
     private void VelocityInjectionPoints(RenderTexture readRT, RenderTexture writeRT) {
         
         //int kernelVelocityInjectionPoints = computeShaderFluidSim.FindKernel("VelocityInjectionPoints");
@@ -470,7 +480,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
         computeShaderFluidSim.SetTexture(kernelVelocityInjectionPoints, "VelocityRead", readRT);
         computeShaderFluidSim.SetTexture(kernelVelocityInjectionPoints, "VelocityWrite", writeRT);
         
-        computeShaderFluidSim.Dispatch(kernelVelocityInjectionPoints, resolution / 16, resolution / 16, 1);
+        computeShaderFluidSim.Dispatch(kernelVelocityInjectionPoints, resolution / 32, resolution / 32, 1);
     }
     /*private void DensityInjectionPoints() {
         
@@ -484,7 +494,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
 
         computeShaderFluidSim.Dispatch(kernelDensityInjectionPoints, resolution / 16, resolution / 16, 1);
     }  */  
-    private void VelocityDivergence(RenderTexture readTex) {
+    private void VelocityDivergence(RenderTexture readTex, RenderTexture writeTex) {
         int kernelViscosityDivergence = computeShaderFluidSim.FindKernel("VelocityDivergence");
 
         computeShaderFluidSim.SetFloat("_TextureResolution", (float)resolution);
@@ -492,8 +502,8 @@ public class EnvironmentFluidManager : MonoBehaviour {
         computeShaderFluidSim.SetFloat("_InvGridScale", invGridScale);
         computeShaderFluidSim.SetTexture(kernelViscosityDivergence, "ObstaclesRead", obstaclesRT);
         computeShaderFluidSim.SetTexture(kernelViscosityDivergence, "VelocityRead", readTex);
-        computeShaderFluidSim.SetTexture(kernelViscosityDivergence, "DivergenceWrite", divergence);
-        computeShaderFluidSim.Dispatch(kernelViscosityDivergence, resolution / 16, resolution / 16, 1);
+        computeShaderFluidSim.SetTexture(kernelViscosityDivergence, "VelocityWrite", writeTex);
+        computeShaderFluidSim.Dispatch(kernelViscosityDivergence, resolution / 32, resolution / 32, 1);
     }
     private void PressureJacobi(RenderTexture readRT, RenderTexture writeRT) {
         int kernelPressureJacobi = computeShaderFluidSim.FindKernel("PressureJacobi");
@@ -502,22 +512,23 @@ public class EnvironmentFluidManager : MonoBehaviour {
         computeShaderFluidSim.SetFloat("_DeltaTime", deltaTime);
         computeShaderFluidSim.SetFloat("_InvGridScale", invGridScale);
         computeShaderFluidSim.SetTexture(kernelPressureJacobi, "ObstaclesRead", obstaclesRT);
-        computeShaderFluidSim.SetTexture(kernelPressureJacobi, "DivergenceRead", divergence);
-        computeShaderFluidSim.SetTexture(kernelPressureJacobi, "PressureRead", readRT);
-        computeShaderFluidSim.SetTexture(kernelPressureJacobi, "PressureWrite", writeRT);
-        computeShaderFluidSim.Dispatch(kernelPressureJacobi, resolution / 16, resolution / 16, 1);
+        //computeShaderFluidSim.SetTexture(kernelPressureJacobi, "DivergenceRead", divergence);
+        //computeShaderFluidSim.SetTexture(kernelPressureJacobi, "PressureRead", readRT);
+        //computeShaderFluidSim.SetTexture(kernelPressureJacobi, "PressureWrite", writeRT);
+        computeShaderFluidSim.SetTexture(kernelPressureJacobi, "VelocityRead", readRT);
+        computeShaderFluidSim.SetTexture(kernelPressureJacobi, "VelocityWrite", writeRT);
+        computeShaderFluidSim.Dispatch(kernelPressureJacobi, resolution / 32, resolution / 32, 1);
     }
-    private void SubtractGradient() {
+    private void SubtractGradient(RenderTexture readRT, RenderTexture writeRT) {
         int kernelSubtractGradient = computeShaderFluidSim.FindKernel("SubtractGradient");
 
         computeShaderFluidSim.SetFloat("_TextureResolution", (float)resolution);
         computeShaderFluidSim.SetFloat("_DeltaTime", deltaTime);
         computeShaderFluidSim.SetFloat("_InvGridScale", invGridScale);
         computeShaderFluidSim.SetTexture(kernelSubtractGradient, "ObstaclesRead", obstaclesRT);
-        computeShaderFluidSim.SetTexture(kernelSubtractGradient, "VelocityRead", velocityA);
-        computeShaderFluidSim.SetTexture(kernelSubtractGradient, "PressureRead", pressureA);
-        computeShaderFluidSim.SetTexture(kernelSubtractGradient, "VelocityWrite", velocityB);
-        computeShaderFluidSim.Dispatch(kernelSubtractGradient, resolution / 16, resolution / 16, 1);
+        computeShaderFluidSim.SetTexture(kernelSubtractGradient, "VelocityRead", readRT);
+        computeShaderFluidSim.SetTexture(kernelSubtractGradient, "VelocityWrite", writeRT);
+        computeShaderFluidSim.Dispatch(kernelSubtractGradient, resolution / 32, resolution / 32, 1);
     }
 
     private void OnDisable() {

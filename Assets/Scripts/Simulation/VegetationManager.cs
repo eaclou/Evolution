@@ -555,7 +555,7 @@ public class VegetationManager {
         computeShaderPlantParticles.SetBuffer(kernelCSSimulateAlgaeParticles, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
         computeShaderPlantParticles.SetBuffer(kernelCSSimulateAlgaeParticles, "foodParticlesRead", plantParticlesCBuffer);
         computeShaderPlantParticles.SetBuffer(kernelCSSimulateAlgaeParticles, "foodParticlesWrite", plantParticlesCBufferSwap);
-        computeShaderPlantParticles.SetTexture(kernelCSSimulateAlgaeParticles, "velocityRead", fluidManagerRef._VelocityA);        
+        computeShaderPlantParticles.SetTexture(kernelCSSimulateAlgaeParticles, "velocityRead", fluidManagerRef._VelocityPressureDivergenceMain);        
         computeShaderPlantParticles.SetTexture(kernelCSSimulateAlgaeParticles, "altitudeRead", renderKingRef.baronVonTerrain.terrainHeightDataRT);
         computeShaderPlantParticles.SetTexture(kernelCSSimulateAlgaeParticles, "_SpawnDensityMap", renderKingRef.spiritBrushRT);
         computeShaderPlantParticles.SetTexture(kernelCSSimulateAlgaeParticles, "_ResourceGridRead", resourceGridRT1);
@@ -1047,7 +1047,7 @@ public class VegetationManager {
         computeShaderResourceGrid.SetFloat("_DecomposerMaxIntakeRate", decomposerSlotGenomeCurrent.metabolicRate);
         computeShaderResourceGrid.SetFloat("_DecomposerEnergyGenerationEfficiency", 1f);
         
-        computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "VelocityRead", fluidManagerRef._VelocityA);
+        computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "VelocityRead", fluidManagerRef._VelocityPressureDivergenceMain);
         computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "_ResourceGridRead", resourceGridRT2);
         computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "_ResourceGridWrite", resourceGridRT1);
         computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "_SpiritBrushTex", theRenderKingRef.spiritBrushRT);

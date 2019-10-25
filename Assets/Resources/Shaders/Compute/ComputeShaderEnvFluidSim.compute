@@ -1,23 +1,24 @@
 ﻿// Each #kernel tells which function to compile; you can have many kernels
-#pragma kernel RefreshColor
-#pragma kernel InitializeVelocity
+//#pragma kernel RefreshColor
+//#pragma kernel InitializeVelocity
 #pragma kernel Advection
 #pragma kernel ViscousDiffusion
-#pragma kernel VelocityInjectionPoints
+//#pragma kernel VelocityInjectionPoints
 #pragma kernel VelocityInjectionPointsVortex
 #pragma kernel VelocityDivergence
 #pragma kernel PressureJacobi
 #pragma kernel SubtractGradient
 #pragma kernel GetVelAtCoords
 #pragma kernel GetObjectVelocities
-#pragma kernel SimPlayerGlowyBits
+
+//#pragma kernel SimPlayerGlowyBits
 #pragma kernel SimFloatyBits
-#pragma kernel SimRipples
-#pragma kernel SimTrailDots
-#pragma kernel SimWaterSplines
-#pragma kernel CSPinWaterChainsData
-#pragma kernel CSShiftWaterChainsData
-#pragma kernel CSSwapWaterChainsData
+//#pragma kernel SimRipples
+//#pragma kernel SimTrailDots
+//#pragma kernel SimWaterSplines
+//#pragma kernel CSPinWaterChainsData
+//#pragma kernel CSShiftWaterChainsData
+//#pragma kernel CSSwapWaterChainsData
 
 
 struct ForcePoint {
@@ -62,7 +63,7 @@ struct WaterSplineData {   // 2 ints, 17 floats
     int brushType;  // brush texture mask
 };
 
-struct AgentSimData {
+struct AgentSimData {   // OBSOLETE!!!
 	float2 worldPos;
 	float2 velocity;
 	float2 heading;
@@ -81,43 +82,47 @@ struct AgentSimData {
 
 Texture2D<float4> fluidBackgroundColorTex;
 Texture2D<float4> colorInjectionRenderTex;
-Texture2D<float4> InputVelocityTex;
+//Texture2D<float4> InputVelocityTex;
 StructuredBuffer<ForcePoint> ForcePointsCBuffer;
+
 Texture2D<float4> VelocityRead;
 RWTexture2D<float4> VelocityWrite;
-Texture2D<float4> PressureRead;
-RWTexture2D<float4> PressureWrite;
-Texture2D<float4> DensityRead;
-RWTexture2D<float4> DensityWrite;
-Texture2D<float4> DivergenceRead;
-RWTexture2D<float4> DivergenceWrite;
+
+//Texture2D<float4> PressureRead;
+//RWTexture2D<float4> PressureWrite;
+//Texture2D<float4> DensityRead;
+//RWTexture2D<float4> DensityWrite;
+//Texture2D<float4> DivergenceRead;
+//RWTexture2D<float4> DivergenceWrite;
 Texture2D<float4> ObstaclesRead;
 
 StructuredBuffer<float4> ObjectPositionsCBuffer;
 RWStructuredBuffer<float2> VelocityValuesCBuffer;
 
+RWStructuredBuffer<FloatyBitData> FloatyBitsCBuffer;
+
+/*
 RWStructuredBuffer<PlayerGlowyBitData> PlayerGlowyBitsCBuffer;
 RWStructuredBuffer<WaterSplineData> WaterSplinesCBuffer;
-RWStructuredBuffer<FloatyBitData> FloatyBitsCBuffer;
 StructuredBuffer<AgentSimData> AgentSimDataCBuffer;
 RWStructuredBuffer<TrailDotData> RipplesCBuffer;
 RWStructuredBuffer<TrailDotData> TrailDotsCBuffer;
-
 RWStructuredBuffer<float2> waterChainsReadCBuffer;
 RWStructuredBuffer<float2> waterChainsWriteCBuffer;
+*/
 
 StructuredBuffer<CritterInitData> critterInitDataCBuffer;
 StructuredBuffer<CritterSimData> critterSimDataCBuffer;
 
-RWStructuredBuffer<float4> nutrientSamplesCBuffer;
-StructuredBuffer<float4> nutrientEatAmountsCBuffer;
+//RWStructuredBuffer<float4> nutrientSamplesCBuffer;
+//StructuredBuffer<float4> nutrientEatAmountsCBuffer;
 
-Texture2D<float4> _AlgaeDecomposerMapRead;
-Texture2D<float4> _NutrientGridRead;
-RWTexture2D<float4> nutrientMapWrite; // ???***
+//Texture2D<float4> _AlgaeDecomposerMapRead;
+//Texture2D<float4> _NutrientGridRead;
+//RWTexture2D<float4> nutrientMapWrite; // ???***
 
 RWStructuredBuffer<float4> outputValuesCBuffer;
-StructuredBuffer<float4> addNutrientsCBuffer;
+//StructuredBuffer<float4> addNutrientsCBuffer;
 Texture2D<float4> measureValuesTex;
 RWTexture2D<float4> pooledResultTex;
 
@@ -163,6 +168,392 @@ float rand(float2 co){   // OUTPUT is in [0,1] RANGE!!!
 	return frac(sin(dot(co.xy ,float2(12.9898,78.233))) * 43758.5453);
 }
 
+[numthreads(32,32,1)]
+void Advection (uint3 id : SV_DispatchThreadID)
+{
+
+	float xCoord = ((float)id.x + 0.5)  / _TextureResolution;
+	float yCoord = ((float)id.y + 0.5)  / _TextureResolution;
+	float2 uvOrigin = float2(xCoord, yCoord);
+
+	float isSolid = ObstaclesRead[id.xy].b;	
+	float2 uvSample = uvOrigin - _DeltaTime * _InvGridScale * VelocityRead.SampleLevel(_LinearRepeat, uvOrigin, 0).xy;
+	//float4 newDensity = DensityRead.SampleLevel(_LinearClamp, uvSample, 0);
+
+	float4 newVelocity = VelocityRead.SampleLevel(_LinearClamp, uvSample, 0);
+	
+	// *********************************************************************************
+	// Pressure and Divergence are advected or not?????
+	// *********************************************************************************
+
+	if(isSolid > 0.5) {
+		//DensityWrite[id.xy] = newDensity;
+		VelocityWrite[id.xy] = float4(0, 0, newVelocity.zw);
+
+		return;
+	}
+	
+	
+	
+	newVelocity.xy *= (1.0 - saturate(_Damping));
+		
+	VelocityWrite[id.xy] = newVelocity;
+
+
+	//DensityWrite[id.xy] = newDensity;	
+}
+
+[numthreads(32,32,1)]
+void ViscousDiffusion (uint3 id : SV_DispatchThreadID)
+{
+	float xCoord = ((float)id.x + 0.5)  / _TextureResolution;
+	float yCoord = ((float)id.y + 0.5)  / _TextureResolution;
+	float2 uvOrigin = float2(xCoord, yCoord);
+	float ps = 1.0 / _TextureResolution;
+
+	half viscosity = _Viscosity;
+
+	half alpha = (_InvGridScale * _InvGridScale) / (viscosity * _DeltaTime);
+	half beta = 4.0 + alpha;
+
+	half4 leftVal = VelocityRead.SampleLevel(_LinearClamp, uvOrigin + half2(-ps, 0), 0);
+	half4 rightVal = VelocityRead.SampleLevel(_LinearClamp, uvOrigin + half2(ps, 0), 0);
+	half4 topVal = VelocityRead.SampleLevel(_LinearClamp, uvOrigin + half2(0, ps), 0);
+	half4 bottomVal = VelocityRead.SampleLevel(_LinearClamp, uvOrigin + half2(0, -ps), 0);
+	half4 centerVal = VelocityRead.SampleLevel(_LinearClamp, uvOrigin, 0);
+
+	float4 newVal = (leftVal + rightVal + topVal + bottomVal + centerVal * alpha) / beta;
+
+	VelocityWrite[id.xy] = newVal;
+}
+
+[numthreads(32,32,1)]
+void VelocityDivergence (uint3 id : SV_DispatchThreadID)
+{
+	float xCoord = ((float)id.x + 0.5)  / _TextureResolution;
+	float yCoord = ((float)id.y + 0.5)  / _TextureResolution;
+	float2 uvOrigin = float2(xCoord, yCoord);
+	float ps = 1.0 / _TextureResolution;
+
+	float4 leftVal = VelocityRead.SampleLevel(_LinearClamp, uvOrigin + half2(-ps, 0), 0);  // should I use direct index access for these?
+	float4 rightVal = VelocityRead.SampleLevel(_LinearClamp, uvOrigin + half2(ps, 0), 0);
+	float4 topVal = VelocityRead.SampleLevel(_LinearClamp, uvOrigin + half2(0, ps), 0);
+	float4 bottomVal = VelocityRead.SampleLevel(_LinearClamp, uvOrigin + half2(0, -ps), 0);
+
+	half4 leftObstacle = ObstaclesRead.SampleLevel(_LinearClamp, uvOrigin + half2(-ps, 0), 0);
+	half4 rightObstacle = ObstaclesRead.SampleLevel(_LinearClamp, uvOrigin + half2(ps, 0), 0);
+	half4 topObstacle = ObstaclesRead.SampleLevel(_LinearClamp, uvOrigin + half2(0, ps), 0);
+	half4 bottomObstacle = ObstaclesRead.SampleLevel(_LinearClamp, uvOrigin + half2(0, -ps), 0);
+
+	if(leftObstacle.b > 0.5) leftVal.xy = leftObstacle.xy;
+	if(rightObstacle.b > 0.5) rightVal.xy = rightObstacle.xy;
+	if(topObstacle.b > 0.5) topVal.xy = topObstacle.xy;
+	if(bottomObstacle.b > 0.5) bottomVal.xy = bottomObstacle.xy;
+	
+	float divergence = _InvGridScale * 0.5 * ((rightVal.x - leftVal.x) + (topVal.y - bottomVal.y));
+	
+	float4 centerSample = VelocityRead[id.xy]; 
+	centerSample.w = divergence; // only update divergence channel
+
+	VelocityWrite[id.xy] = centerSample;
+
+	//DivergenceWrite[id.xy] = float4(divergence, divergence, divergence, 1);
+}
+
+[numthreads(32,32,1)]
+void PressureJacobi (uint3 id : SV_DispatchThreadID)
+{
+	
+	float xCoord = ((float)id.x + 0.5)  / _TextureResolution;
+	float yCoord = ((float)id.y + 0.5)  / _TextureResolution;
+	float2 uvOrigin = float2(xCoord, yCoord);
+	float ps = 1.0 / _TextureResolution;
+	
+	half alpha = -(_InvGridScale * _InvGridScale);
+	half beta = 4.0;
+
+	half4 leftObstacle = ObstaclesRead.SampleLevel(_LinearClamp, uvOrigin + half2(-ps, 0), 0);
+	half4 rightObstacle = ObstaclesRead.SampleLevel(_LinearClamp, uvOrigin + half2(ps, 0), 0);
+	half4 topObstacle = ObstaclesRead.SampleLevel(_LinearClamp, uvOrigin + half2(0, ps), 0);
+	half4 bottomObstacle = ObstaclesRead.SampleLevel(_LinearClamp, uvOrigin + half2(0, -ps), 0);
+		
+	half4 centerSample = VelocityRead[id.xy];
+	half4 leftSample = VelocityRead.SampleLevel(_LinearClamp, uvOrigin + half2(-ps, 0), 0);
+	half4 rightSample = VelocityRead.SampleLevel(_LinearClamp, uvOrigin + half2(ps, 0), 0);
+	half4 topSample = VelocityRead.SampleLevel(_LinearClamp, uvOrigin + half2(0, ps), 0);
+	half4 bottomSample = VelocityRead.SampleLevel(_LinearClamp, uvOrigin + half2(0, -ps), 0);
+
+	half centerPressure = centerSample.z;
+	half leftPressure = leftSample.z;
+	half rightPressure = rightSample.z;
+	half topPressure = topSample.z;
+	half bottomPressure = bottomSample.z;
+
+	if(leftObstacle.b > 0.5) leftPressure = centerPressure;
+	if(rightObstacle.b > 0.5) rightPressure = centerPressure;
+	if(topObstacle.b > 0.5) topPressure = centerPressure;
+	if(bottomObstacle.b > 0.5) bottomPressure = centerPressure;
+
+	half divergence = centerSample.w;
+
+	float newPressure = (leftPressure + rightPressure + topPressure + bottomPressure + divergence * alpha) / beta;
+	float pressureDamping = 0.001;
+	
+	centerSample.z = newPressure * (1.0 - pressureDamping);
+	VelocityWrite[id.xy] = centerSample;
+	
+	//PressureWrite[id.xy] = newPressure * (1.0 - pressureDamping);
+}
+
+[numthreads(32,32,1)]
+void SubtractGradient (uint3 id : SV_DispatchThreadID)
+{
+	float4 centerObstacle = ObstaclesRead[id.xy];
+	float4 centerSample = VelocityRead[id.xy];
+
+	if (centerObstacle.b > 0.5) {
+        VelocityWrite[id.xy] = float4(centerObstacle.xy, centerSample.zw);
+        return;
+    }
+
+	float xCoord = ((float)id.x + 0.5)  / _TextureResolution;
+	float yCoord = ((float)id.y + 0.5)  / _TextureResolution;
+	float2 uvOrigin = float2(xCoord, yCoord);
+	float ps = 1.0 / _TextureResolution;
+	
+	float centerPressure = centerSample.z;
+	float leftPressure = VelocityRead.SampleLevel(_LinearClamp, uvOrigin + half2(-ps, 0), 0).z;
+	float rightPressure = VelocityRead.SampleLevel(_LinearClamp, uvOrigin + half2(ps, 0), 0).z;
+	float topPressure = VelocityRead.SampleLevel(_LinearClamp, uvOrigin + half2(0, ps), 0).z;
+	float bottomPressure = VelocityRead.SampleLevel(_LinearClamp, uvOrigin + half2(0, -ps), 0).z;
+
+	half4 leftObstacle = ObstaclesRead.SampleLevel(_LinearClamp, uvOrigin + half2(-ps, 0), 0);
+	half4 rightObstacle = ObstaclesRead.SampleLevel(_LinearClamp, uvOrigin + half2(ps, 0), 0);
+	half4 topObstacle = ObstaclesRead.SampleLevel(_LinearClamp, uvOrigin + half2(0, ps), 0);
+	half4 bottomObstacle = ObstaclesRead.SampleLevel(_LinearClamp, uvOrigin + half2(0, -ps), 0);
+	
+	// Copied from internet example... still need to understand this better::::
+	float2 obstV = float2(0,0);
+	float2 vMask = float2(1,1);
+
+	if(leftObstacle.b > 0.5) { leftPressure = centerPressure; obstV.x = leftObstacle.x; vMask.x = 0; }
+	if(rightObstacle.b > 0.5) { rightPressure = centerPressure; obstV.x = rightObstacle.x; vMask.x = 0; }
+	if(topObstacle.b > 0.5) { topPressure = centerPressure; obstV.y = topObstacle.y; vMask.y = 0; }
+	if(bottomObstacle.b > 0.5) { bottomPressure = centerPressure; obstV.y = bottomObstacle.y; vMask.y = 0; }
+	
+	float4 newVelocity = VelocityRead.SampleLevel(_LinearClamp, uvOrigin, 0);
+
+	float2 grad = 0.5 * _InvGridScale * half2(rightPressure - leftPressure, topPressure - bottomPressure);
+
+	newVelocity.xy -= grad;
+	newVelocity.xy = newVelocity.xy * vMask + obstV;
+
+	VelocityWrite[id.xy] = newVelocity;
+}
+
+
+
+[numthreads(1,1,1)]
+void GetVelAtCoords (uint3 id : SV_DispatchThreadID)
+{	
+	float uvOffset = 0.75 / _MapSize; // 0.005357;  // 0.75/140   ***** REVISIT!!! *******************************
+	float2 uv = float2(_SampleCoordX, _SampleCoordY);
+	float2 velLeft = VelocityRead.SampleLevel(_LinearRepeat, uv + float2(-uvOffset, 0), 0).xy;
+	float2 velRight = VelocityRead.SampleLevel(_LinearRepeat, uv + float2(uvOffset, 0), 0).xy;
+	float2 velUp = VelocityRead.SampleLevel(_LinearRepeat, uv + float2(0, uvOffset), 0).xy;
+	float2 velDown = VelocityRead.SampleLevel(_LinearRepeat, uv + float2(0, -uvOffset), 0).xy;
+
+	float2 vel = (velLeft + velRight + velUp + velDown) / 4;
+
+	VelocityValuesCBuffer[0] = vel;
+}
+
+[numthreads(1,1,1)]
+void GetObjectVelocities (uint3 id : SV_DispatchThreadID)
+{	
+	
+		
+	float4 data = ObjectPositionsCBuffer[id.x];
+	
+	float2 uv = data.xy;
+	float2 uvOffset = data.zw;
+	
+	float2 velLeft = VelocityRead.SampleLevel(_LinearRepeat, uv + float2(-uvOffset.x, 0), 0).xy;
+	float2 velRight = VelocityRead.SampleLevel(_LinearRepeat, uv + float2(uvOffset.x, 0), 0).xy;
+	float2 velUp = VelocityRead.SampleLevel(_LinearRepeat, uv + float2(0, uvOffset.y), 0).xy;
+	float2 velDown = VelocityRead.SampleLevel(_LinearRepeat, uv + float2(0, -uvOffset.y), 0).xy;
+
+	float2 vel = (velLeft + velRight + velUp + velDown) / 4;
+
+	VelocityValuesCBuffer[id.x] = vel;
+}
+
+
+
+/*[numthreads(16,16,1)]
+void RefreshColor (uint3 id : SV_DispatchThreadID)
+{	
+	float xCoord = ((float)id.x + 0.5)  / _TextureResolution;
+	float yCoord = ((float)id.y + 0.5)  / _TextureResolution;
+	float2 uvOrigin = float2(xCoord, yCoord);
+
+	float diffusionAmount = 0.1;
+	// Diffusion
+	float4 amountRight = DensityRead[int2(id.x + 1, id.y)];
+    float4 amountLeft = DensityRead[int2(id.x - 1, id.y)];
+    float4 amountUp = DensityRead[int2(id.x, id.y + 1)];
+    float4 amountDown = DensityRead[int2(id.x, id.y - 1)];
+    float4 amountCenter = DensityRead[id.xy];
+	float4 currentColor = lerp(amountCenter, (amountCenter + amountRight + amountLeft + amountUp + amountDown) / 5, diffusionAmount);
+
+	//float4 reactionDiffusionSample = _AlgaeDecomposerMapRead.SampleLevel(_LinearClamp, uvOrigin, 0);
+	float4 nutrientGridSample = _NutrientGridRead.SampleLevel(_LinearClamp, uvOrigin, 0);
+	
+	float4 sourceColorDynamic = colorInjectionRenderTex.SampleLevel(_LinearRepeat, uvOrigin, 0);
+	float4 newColor = lerp(currentColor, float4(0,0,0,0), _ColorRefreshAmount);
+	float stampAlpha = saturate(_ColorRefreshDynamicMultiplier * sourceColorDynamic.a);	
+	newColor.rgb = lerp(newColor.rgb, sourceColorDynamic.rgb, stampAlpha); //saturate(_ColorRefreshDynamicMultiplier * sourceColorDynamic.a));
+	newColor.a = lerp(newColor.a, 1, stampAlpha);
+	
+	newColor.a = saturate(nutrientGridSample.w * 1 + nutrientGridSample.x * 1);
+
+	float3 nutrientsHue = _NutrientsColor.rgb * 1.5;
+	float3 algaeHue = lerp(_AlgaeColor.rgb, float3(0.275,0.8,0.175), 0.95) * 1.0;
+	int checkerMask01 = ((id.x + id.y)) % 2;
+	int checkerMask02 = 1 - checkerMask01; // ((id.x + id.y + 1)) % 2;
+	float mask01 = (float)(checkerMask01 * 0.25 + 0.75);
+	float mask02 = (float)(checkerMask02 * 0.25 + 0.75);
+	newColor.rgb = lerp(newColor.rgb, nutrientsHue, nutrientGridSample.x); // * mask01);
+	newColor.rgb = lerp(newColor.rgb, algaeHue, saturate(nutrientGridSample.w)); // * mask02));
+	newColor.a = max(nutrientGridSample.x, nutrientGridSample.w) * 4;
+	//newColor.a = ((float)mask01 * nutrientGridSample.x + (float)mask02 * nutrientGridSample.w) * 2;
+	
+	
+	DensityWrite[id.xy] = saturate(newColor); //float4(newColor, 1); //lerp(currentColor, sourceColorDynamic, _ColorRefreshAmount);
+
+}*/
+
+
+/*
+[numthreads(16,16,1)]
+void InitializeVelocity (uint3 id : SV_DispatchThreadID)
+{
+	float xCoord = ((float)id.x + 0.5)  / _TextureResolution;
+	float yCoord = ((float)id.y + 0.5)  / _TextureResolution;
+	float2 uvOrigin = float2(xCoord, yCoord);
+
+	VelocityWrite[id.xy] = float4(sin(20 * uvOrigin.y) * uvOrigin.x,sin(13.79 * uvOrigin.x) * uvOrigin.y,0,0) * 0.2; // 
+}*/
+
+/*
+[numthreads(32,32,1)]
+void VelocityInjectionPoints (uint3 id : SV_DispatchThreadID)
+{	
+	float4 currentVelocity = VelocityRead[id.xy];
+
+	float isSolid = ObstaclesRead[id.xy].b;
+	if(isSolid > 0.5) {
+		VelocityWrite[id.xy] = currentVelocity;
+		return;
+	}
+	
+	uint elements;
+	uint stride;
+	ForcePointsCBuffer.GetDimensions(elements, stride);
+
+	float xCoord = ((float)id.x + 0.5) / _TextureResolution;
+	float yCoord = ((float)id.y + 0.5) / _TextureResolution;
+	float2 pixelCoords = float2(xCoord, yCoord);
+	
+	float2 newForce = currentVelocity.xy; //float2(0,0);
+
+	//float influenceAmount = 0;
+	for(uint i = 0; i < elements; i++) {
+		
+		ForcePoint fp;
+		fp = ForcePointsCBuffer[i];	
+
+		float2 forceCoords = float2(fp.posX, fp.posY);
+		float animatedStrengthModifierX = sin((_Time + i * 10.0) * 0.2) * _ForceMagnitude;
+		float animatedStrengthModifierY = cos((_Time - i * 20.1793) * 0.182451) * _ForceMagnitude;
+		float2 forceVal = float2(fp.velX * animatedStrengthModifierX, fp.velY * animatedStrengthModifierY);		
+		float dist = length(pixelCoords - forceCoords);
+		float influenceAmount = exp(-fp.size * ((forceCoords.x - pixelCoords.x) * (forceCoords.x - pixelCoords.x) + (forceCoords.y - pixelCoords.y) * (forceCoords.y - pixelCoords.y)) / dist);
+		//newForce += forceVal * _DeltaTime * ;
+		newForce = lerp(newForce, forceVal, influenceAmount);
+	}
+	float damping = saturate(_Damping);
+
+	// STIR TOOL::::	
+	float2 stirCoords = float2(_ForcePosX, _ForcePosY);
+	float distanceToStirOrigin = length(pixelCoords - stirCoords);
+	float attenuation = exp(-_ForceSize * ((stirCoords.x - pixelCoords.x) * (stirCoords.x - pixelCoords.x) + (stirCoords.y - pixelCoords.y) * (stirCoords.y - pixelCoords.y)) / distanceToStirOrigin);
+	float2 playerStirVel = float2(_ForceDirX, _ForceDirY);
+	
+	newForce = lerp(newForce, playerStirVel, attenuation * _ForceOn);
+
+	VelocityWrite[id.xy] = float4(newForce, 0, 0) * (1.0 - damping);
+}
+*/
+
+[numthreads(32,32,1)]
+void VelocityInjectionPointsVortex (uint3 id : SV_DispatchThreadID)
+{	
+	float4 currentVelocity = VelocityRead[id.xy];
+
+	float isSolid = ObstaclesRead[id.xy].b;
+	if(isSolid > 0.5) {
+		VelocityWrite[id.xy] = currentVelocity;
+		return;
+	}
+	
+	uint elements;
+	uint stride;
+	ForcePointsCBuffer.GetDimensions(elements, stride);
+
+	float xCoord = ((float)id.x + 0.5) / _TextureResolution;
+	float yCoord = ((float)id.y + 0.5) / _TextureResolution;
+	float2 pixelCoords = float2(xCoord, yCoord);
+	
+	float2 newForce = currentVelocity.xy; //float2(0,0);
+
+	for(uint i = 0; i < elements; i++) {
+		
+		ForcePoint fp;
+		fp = ForcePointsCBuffer[i];	
+
+		float2 forceCoords = float2(fp.posX, fp.posY);
+		float animatedStrengthModifierX = sin((_Time + i * 1.01) * 0.2) * _ForceMagnitude;
+		float animatedStrengthModifierY = cos((_Time - i * 1.793) * 0.182451) * _ForceMagnitude;
+		float2 forceVal = float2(fp.velX * animatedStrengthModifierX, fp.velY * animatedStrengthModifierY);	
+		
+		float2 vortexOriginToPoint = pixelCoords - forceCoords;
+		float dist = length(vortexOriginToPoint);
+		float2 vortexToPointDir = normalize(vortexOriginToPoint);
+		float2 vortexForce = float2(vortexToPointDir.y, -vortexToPointDir.x) * dist * length(forceVal);
+		
+		float influenceAmount = exp(-fp.size * ((forceCoords.x - pixelCoords.x) * (forceCoords.x - pixelCoords.x) + (forceCoords.y - pixelCoords.y) * (forceCoords.y - pixelCoords.y)) / dist);
+		
+		newForce = lerp(newForce, vortexForce, influenceAmount);
+	}
+	float damping = saturate(_Damping);
+
+	// STIR TOOL::::	
+	float2 stirCoords = float2(_ForcePosX, _ForcePosY);
+	float distanceToStirOrigin = length(pixelCoords - stirCoords);
+	float attenuation = exp(-_ForceSize * ((stirCoords.x - pixelCoords.x) * (stirCoords.x - pixelCoords.x) + (stirCoords.y - pixelCoords.y) * (stirCoords.y - pixelCoords.y)) / distanceToStirOrigin);
+	float2 playerStirVel = float2(_ForceDirX, _ForceDirY);
+	
+	newForce = lerp(newForce, playerStirVel, attenuation * _ForceOn);
+
+
+	VelocityWrite[id.xy] = float4(newForce * (1.0 - damping), currentVelocity.zw);
+}
+
+
+
+
+/*
 [numthreads(1024,1,1)]
 void SimPlayerGlowyBits (uint3 id : SV_DispatchThreadID)
 {	
@@ -202,6 +593,7 @@ void SimPlayerGlowyBits (uint3 id : SV_DispatchThreadID)
 	
 	PlayerGlowyBitsCBuffer[id.x] = data;
 }
+*/
 
 [numthreads(1024,1,1)]
 void SimFloatyBits (uint3 id : SV_DispatchThreadID)
@@ -246,6 +638,7 @@ void SimFloatyBits (uint3 id : SV_DispatchThreadID)
 	FloatyBitsCBuffer[id.x] = floatyBitData;
 }
 
+/*
 [numthreads(8,1,1)]
 void SimRipples (uint3 id : SV_DispatchThreadID)
 {	
@@ -280,8 +673,9 @@ void SimRipples (uint3 id : SV_DispatchThreadID)
 	rippleData.coords01 = nextPos;
 	
 	RipplesCBuffer[id.x] = rippleData;
-}
+}*/
 
+/*
 [numthreads(8,1,1)]
 void SimTrailDots (uint3 id : SV_DispatchThreadID)
 {	
@@ -339,7 +733,9 @@ void SimTrailDots (uint3 id : SV_DispatchThreadID)
 	
 	TrailDotsCBuffer[id.x] = trailDotData;
 }
+*/
 
+/*
 [numthreads(1024,1,1)]
 void SimWaterSplines (uint3 id : SV_DispatchThreadID)
 {	
@@ -400,365 +796,9 @@ void SimWaterSplines (uint3 id : SV_DispatchThreadID)
 	waterSplineData.p3 = p3;
 	
 	WaterSplinesCBuffer[id.x] = waterSplineData;
-}
+}*/
 
-[numthreads(1,1,1)]
-void GetVelAtCoords (uint3 id : SV_DispatchThreadID)
-{	
-	float uvOffset = 0.75 / _MapSize; // 0.005357;  // 0.75/140   ***** REVISIT!!! *******************************
-	float2 uv = float2(_SampleCoordX, _SampleCoordY);
-	float2 velLeft = VelocityRead.SampleLevel(_LinearRepeat, uv + float2(-uvOffset, 0), 0).xy;
-	float2 velRight = VelocityRead.SampleLevel(_LinearRepeat, uv + float2(uvOffset, 0), 0).xy;
-	float2 velUp = VelocityRead.SampleLevel(_LinearRepeat, uv + float2(0, uvOffset), 0).xy;
-	float2 velDown = VelocityRead.SampleLevel(_LinearRepeat, uv + float2(0, -uvOffset), 0).xy;
-
-	float2 vel = (velLeft + velRight + velUp + velDown) / 4;
-
-	VelocityValuesCBuffer[0] = vel;
-}
-
-[numthreads(1,1,1)]
-void GetObjectVelocities (uint3 id : SV_DispatchThreadID)
-{	
-	
-		
-	float4 data = ObjectPositionsCBuffer[id.x];
-	
-	float2 uv = data.xy;
-	float2 uvOffset = data.zw;
-	
-	float2 velLeft = VelocityRead.SampleLevel(_LinearRepeat, uv + float2(-uvOffset.x, 0), 0).xy;
-	float2 velRight = VelocityRead.SampleLevel(_LinearRepeat, uv + float2(uvOffset.x, 0), 0).xy;
-	float2 velUp = VelocityRead.SampleLevel(_LinearRepeat, uv + float2(0, uvOffset.y), 0).xy;
-	float2 velDown = VelocityRead.SampleLevel(_LinearRepeat, uv + float2(0, -uvOffset.y), 0).xy;
-
-	float2 vel = (velLeft + velRight + velUp + velDown) / 4;
-
-	VelocityValuesCBuffer[id.x] = vel;
-}
-
-[numthreads(16,16,1)]
-void RefreshColor (uint3 id : SV_DispatchThreadID)
-{	
-	float xCoord = ((float)id.x + 0.5)  / _TextureResolution;
-	float yCoord = ((float)id.y + 0.5)  / _TextureResolution;
-	float2 uvOrigin = float2(xCoord, yCoord);
-
-	float diffusionAmount = 0.1;
-	// Diffusion
-	float4 amountRight = DensityRead[int2(id.x + 1, id.y)];
-    float4 amountLeft = DensityRead[int2(id.x - 1, id.y)];
-    float4 amountUp = DensityRead[int2(id.x, id.y + 1)];
-    float4 amountDown = DensityRead[int2(id.x, id.y - 1)];
-    float4 amountCenter = DensityRead[id.xy];
-	float4 currentColor = lerp(amountCenter, (amountCenter + amountRight + amountLeft + amountUp + amountDown) / 5, diffusionAmount);
-
-	//float4 reactionDiffusionSample = _AlgaeDecomposerMapRead.SampleLevel(_LinearClamp, uvOrigin, 0);
-	float4 nutrientGridSample = _NutrientGridRead.SampleLevel(_LinearClamp, uvOrigin, 0);
-	
-	float4 sourceColorDynamic = colorInjectionRenderTex.SampleLevel(_LinearRepeat, uvOrigin, 0);
-	float4 newColor = lerp(currentColor, float4(0,0,0,0), _ColorRefreshAmount);
-	float stampAlpha = saturate(_ColorRefreshDynamicMultiplier * sourceColorDynamic.a);	
-	newColor.rgb = lerp(newColor.rgb, sourceColorDynamic.rgb, stampAlpha); //saturate(_ColorRefreshDynamicMultiplier * sourceColorDynamic.a));
-	newColor.a = lerp(newColor.a, 1, stampAlpha);
-	
-	newColor.a = saturate(nutrientGridSample.w * 1 + nutrientGridSample.x * 1);
-
-	float3 nutrientsHue = _NutrientsColor.rgb * 1.5;
-	float3 algaeHue = lerp(_AlgaeColor.rgb, float3(0.275,0.8,0.175), 0.95) * 1.0;
-	int checkerMask01 = ((id.x + id.y)) % 2;
-	int checkerMask02 = 1 - checkerMask01; // ((id.x + id.y + 1)) % 2;
-	float mask01 = (float)(checkerMask01 * 0.25 + 0.75);
-	float mask02 = (float)(checkerMask02 * 0.25 + 0.75);
-	newColor.rgb = lerp(newColor.rgb, nutrientsHue, nutrientGridSample.x); // * mask01);
-	newColor.rgb = lerp(newColor.rgb, algaeHue, saturate(nutrientGridSample.w)); // * mask02));
-	newColor.a = max(nutrientGridSample.x, nutrientGridSample.w) * 4;
-	//newColor.a = ((float)mask01 * nutrientGridSample.x + (float)mask02 * nutrientGridSample.w) * 2;
-	
-	
-	DensityWrite[id.xy] = saturate(newColor); //float4(newColor, 1); //lerp(currentColor, sourceColorDynamic, _ColorRefreshAmount);
-
-	
-
-	//OLD:
-	//float4 sourceColorBackground = float4(0,0,0,1); //lerp(float4(0.012, 0.16, 0.12, 1), fluidBackgroundColorTex.SampleLevel(_LinearRepeat, uvOrigin, 0), 0.04);
-	//float4 sourceColorDynamic = colorInjectionRenderTex.SampleLevel(_LinearRepeat, uvOrigin, 0);
-	//sourceColor.a = saturate(sourceColor.a);
-	//float4 currentColor = DensityRead[id.xy];
-
-	//float3 newColor = lerp(currentColor.rgb, sourceColorBackground.rgb, _ColorRefreshAmount);
-	//newColor = lerp(newColor, sourceColorDynamic.rgb, _ColorRefreshDynamicMultiplier * sourceColorDynamic.a);
-	
-	//DensityWrite[id.xy] = float4(newColor, 1); //lerp(currentColor, sourceColorDynamic, _ColorRefreshAmount);
-}
-
-[numthreads(16,16,1)]
-void InitializeVelocity (uint3 id : SV_DispatchThreadID)
-{
-	float xCoord = ((float)id.x + 0.5)  / _TextureResolution;
-	float yCoord = ((float)id.y + 0.5)  / _TextureResolution;
-	float2 uvOrigin = float2(xCoord, yCoord);
-
-	VelocityWrite[id.xy] = float4(sin(20 * uvOrigin.y) * uvOrigin.x,sin(13.79 * uvOrigin.x) * uvOrigin.y,0,0) * 0.2; // 
-}
-
-[numthreads(16,16,1)]
-void Advection (uint3 id : SV_DispatchThreadID)
-{
-
-	float xCoord = ((float)id.x + 0.5)  / _TextureResolution;
-	float yCoord = ((float)id.y + 0.5)  / _TextureResolution;
-	float2 uvOrigin = float2(xCoord, yCoord);
-
-	float isSolid = ObstaclesRead[id.xy].b;	
-	float2 uvSample = uvOrigin - _DeltaTime * _InvGridScale * VelocityRead.SampleLevel(_LinearRepeat, uvOrigin, 0).xy;
-	float4 newDensity = DensityRead.SampleLevel(_LinearRepeat, uvSample, 0);
-
-	if(isSolid > 0.5) {
-		DensityWrite[id.xy] = newDensity;
-		VelocityWrite[id.xy] = float4(0,0,0,0);
-
-		return;
-	}
-
-	
-	
-	
-	float4 newVelocity = VelocityRead.SampleLevel(_LinearRepeat, uvSample, 0);
-		
-	DensityWrite[id.xy] = newDensity;
-	VelocityWrite[id.xy] = newVelocity * (1.0 - saturate(_Damping)); // + float4(uvSample, 0, 0);
-}
-
-[numthreads(16,16,1)]
-void ViscousDiffusion (uint3 id : SV_DispatchThreadID)
-{
-	float xCoord = ((float)id.x + 0.5)  / _TextureResolution;
-	float yCoord = ((float)id.y + 0.5)  / _TextureResolution;
-	float2 uvOrigin = float2(xCoord, yCoord);
-	float ps = 1.0 / _TextureResolution;
-
-	half viscosity = _Viscosity;
-
-	half alpha = (_InvGridScale * _InvGridScale) / (viscosity * _DeltaTime);
-	half beta = 4.0 + alpha;
-
-	half4 leftVal = VelocityRead.SampleLevel(_LinearRepeat, uvOrigin + half2(-ps, 0), 0);
-	half4 rightVal = VelocityRead.SampleLevel(_LinearRepeat, uvOrigin + half2(ps, 0), 0);
-	half4 topVal = VelocityRead.SampleLevel(_LinearRepeat, uvOrigin + half2(0, ps), 0);
-	half4 bottomVal = VelocityRead.SampleLevel(_LinearRepeat, uvOrigin + half2(0, -ps), 0);
-	half4 centerVal = VelocityRead.SampleLevel(_LinearRepeat, uvOrigin, 0);
-
-	float4 newVal = (leftVal + rightVal + topVal + bottomVal + centerVal * alpha) / beta;
-
-	VelocityWrite[id.xy] = newVal;
-}
-
-[numthreads(16,16,1)]
-void VelocityInjectionPoints (uint3 id : SV_DispatchThreadID)
-{	
-	float4 currentVelocity = VelocityRead[id.xy];
-
-	float isSolid = ObstaclesRead[id.xy].b;
-	if(isSolid > 0.5) {
-		VelocityWrite[id.xy] = currentVelocity;
-		return;
-	}
-	
-	uint elements;
-	uint stride;
-	ForcePointsCBuffer.GetDimensions(elements, stride);
-
-	float xCoord = ((float)id.x + 0.5) / _TextureResolution;
-	float yCoord = ((float)id.y + 0.5) / _TextureResolution;
-	float2 pixelCoords = float2(xCoord, yCoord);
-	
-	float2 newForce = currentVelocity.xy; //float2(0,0);
-
-	//float influenceAmount = 0;
-	for(uint i = 0; i < elements; i++) {
-		
-		ForcePoint fp;
-		fp = ForcePointsCBuffer[i];	
-
-		float2 forceCoords = float2(fp.posX, fp.posY);
-		float animatedStrengthModifierX = sin((_Time + i * 10.0) * 0.2) * _ForceMagnitude;
-		float animatedStrengthModifierY = cos((_Time - i * 20.1793) * 0.182451) * _ForceMagnitude;
-		float2 forceVal = float2(fp.velX * animatedStrengthModifierX, fp.velY * animatedStrengthModifierY);		
-		float dist = length(pixelCoords - forceCoords);
-		float influenceAmount = exp(-fp.size * ((forceCoords.x - pixelCoords.x) * (forceCoords.x - pixelCoords.x) + (forceCoords.y - pixelCoords.y) * (forceCoords.y - pixelCoords.y)) / dist);
-		//newForce += forceVal * _DeltaTime * ;
-		newForce = lerp(newForce, forceVal, influenceAmount);
-	}
-	float damping = saturate(_Damping);
-
-	// STIR TOOL::::	
-	float2 stirCoords = float2(_ForcePosX, _ForcePosY);
-	float distanceToStirOrigin = length(pixelCoords - stirCoords);
-	float attenuation = exp(-_ForceSize * ((stirCoords.x - pixelCoords.x) * (stirCoords.x - pixelCoords.x) + (stirCoords.y - pixelCoords.y) * (stirCoords.y - pixelCoords.y)) / distanceToStirOrigin);
-	float2 playerStirVel = float2(_ForceDirX, _ForceDirY);
-	
-	newForce = lerp(newForce, playerStirVel, attenuation * _ForceOn);
-
-	VelocityWrite[id.xy] = float4(newForce, 0, 0) * (1.0 - damping);
-}
-
-[numthreads(16,16,1)]
-void VelocityInjectionPointsVortex (uint3 id : SV_DispatchThreadID)
-{	
-	float4 currentVelocity = VelocityRead[id.xy];
-
-	float isSolid = ObstaclesRead[id.xy].b;
-	if(isSolid > 0.5) {
-		VelocityWrite[id.xy] = currentVelocity;
-		return;
-	}
-	
-	uint elements;
-	uint stride;
-	ForcePointsCBuffer.GetDimensions(elements, stride);
-
-	float xCoord = ((float)id.x + 0.5) / _TextureResolution;
-	float yCoord = ((float)id.y + 0.5) / _TextureResolution;
-	float2 pixelCoords = float2(xCoord, yCoord);
-	
-	float2 newForce = currentVelocity.xy; //float2(0,0);
-
-	for(uint i = 0; i < elements; i++) {
-		
-		ForcePoint fp;
-		fp = ForcePointsCBuffer[i];	
-
-		float2 forceCoords = float2(fp.posX, fp.posY);
-		float animatedStrengthModifierX = sin((_Time + i * 1.01) * 0.2) * _ForceMagnitude;
-		float animatedStrengthModifierY = cos((_Time - i * 1.793) * 0.182451) * _ForceMagnitude;
-		float2 forceVal = float2(fp.velX * animatedStrengthModifierX, fp.velY * animatedStrengthModifierY);	
-		
-		float2 vortexOriginToPoint = pixelCoords - forceCoords;
-		float dist = length(vortexOriginToPoint);
-		float2 vortexToPointDir = normalize(vortexOriginToPoint);
-		float2 vortexForce = float2(vortexToPointDir.y, -vortexToPointDir.x) * dist * length(forceVal);
-		
-		float influenceAmount = exp(-fp.size * ((forceCoords.x - pixelCoords.x) * (forceCoords.x - pixelCoords.x) + (forceCoords.y - pixelCoords.y) * (forceCoords.y - pixelCoords.y)) / dist);
-		
-		newForce = lerp(newForce, vortexForce, influenceAmount);
-	}
-	float damping = saturate(_Damping);
-
-	// STIR TOOL::::	
-	float2 stirCoords = float2(_ForcePosX, _ForcePosY);
-	float distanceToStirOrigin = length(pixelCoords - stirCoords);
-	float attenuation = exp(-_ForceSize * ((stirCoords.x - pixelCoords.x) * (stirCoords.x - pixelCoords.x) + (stirCoords.y - pixelCoords.y) * (stirCoords.y - pixelCoords.y)) / distanceToStirOrigin);
-	float2 playerStirVel = float2(_ForceDirX, _ForceDirY);
-	
-	newForce = lerp(newForce, playerStirVel, attenuation * _ForceOn);
-
-	VelocityWrite[id.xy] = float4(newForce, 0, 0) * (1.0 - damping);
-}
-
-[numthreads(16,16,1)]
-void VelocityDivergence (uint3 id : SV_DispatchThreadID)
-{
-	float xCoord = ((float)id.x + 0.5)  / _TextureResolution;
-	float yCoord = ((float)id.y + 0.5)  / _TextureResolution;
-	float2 uvOrigin = float2(xCoord, yCoord);
-	float ps = 1.0 / _TextureResolution;
-
-	float4 leftVal = VelocityRead.SampleLevel(_LinearClamp, uvOrigin + half2(-ps, 0), 0);  // should I use direct index access for these?
-	float4 rightVal = VelocityRead.SampleLevel(_LinearClamp, uvOrigin + half2(ps, 0), 0);
-	float4 topVal = VelocityRead.SampleLevel(_LinearClamp, uvOrigin + half2(0, ps), 0);
-	float4 bottomVal = VelocityRead.SampleLevel(_LinearClamp, uvOrigin + half2(0, -ps), 0);
-
-	half4 leftObstacle = ObstaclesRead.SampleLevel(_LinearClamp, uvOrigin + half2(-ps, 0), 0);
-	half4 rightObstacle = ObstaclesRead.SampleLevel(_LinearClamp, uvOrigin + half2(ps, 0), 0);
-	half4 topObstacle = ObstaclesRead.SampleLevel(_LinearClamp, uvOrigin + half2(0, ps), 0);
-	half4 bottomObstacle = ObstaclesRead.SampleLevel(_LinearClamp, uvOrigin + half2(0, -ps), 0);
-
-	if(leftObstacle.b > 0.5) leftVal.xy = leftObstacle.xy;
-	if(rightObstacle.b > 0.5) rightVal.xy = rightObstacle.xy;
-	if(topObstacle.b > 0.5) topVal.xy = topObstacle.xy;
-	if(bottomObstacle.b > 0.5) bottomVal.xy = bottomObstacle.xy;
-	
-	float divergence = _InvGridScale * 0.5 * ((rightVal.x - leftVal.x) + (topVal.y - bottomVal.y));
-
-	DivergenceWrite[id.xy] = float4(divergence, divergence, divergence, 1);
-}
-
-[numthreads(16,16,1)]
-void PressureJacobi (uint3 id : SV_DispatchThreadID)
-{
-	//float isSolid = saturate(ceil(ObstaclesRead[id.xy].r));
-
-	float xCoord = ((float)id.x + 0.5)  / _TextureResolution;
-	float yCoord = ((float)id.y + 0.5)  / _TextureResolution;
-	float2 uvOrigin = float2(xCoord, yCoord);
-	float ps = 1.0 / _TextureResolution;
-	
-	half alpha = -(_InvGridScale * _InvGridScale);
-	half beta = 4.0;
-
-	half4 leftObstacle = ObstaclesRead.SampleLevel(_LinearClamp, uvOrigin + half2(-ps, 0), 0);
-	half4 rightObstacle = ObstaclesRead.SampleLevel(_LinearClamp, uvOrigin + half2(ps, 0), 0);
-	half4 topObstacle = ObstaclesRead.SampleLevel(_LinearClamp, uvOrigin + half2(0, ps), 0);
-	half4 bottomObstacle = ObstaclesRead.SampleLevel(_LinearClamp, uvOrigin + half2(0, -ps), 0);
-		
-	half4 centerPressure = PressureRead[id.xy];
-	half4 leftPressure = PressureRead.SampleLevel(_LinearClamp, uvOrigin + half2(-ps, 0), 0);
-	half4 rightPressure = PressureRead.SampleLevel(_LinearClamp, uvOrigin + half2(ps, 0), 0);
-	half4 topPressure = PressureRead.SampleLevel(_LinearClamp, uvOrigin + half2(0, ps), 0);
-	half4 bottomPressure = PressureRead.SampleLevel(_LinearClamp, uvOrigin + half2(0, -ps), 0);
-
-	if(leftObstacle.b > 0.5) leftPressure = centerPressure;
-	if(rightObstacle.b > 0.5) rightPressure = centerPressure;
-	if(topObstacle.b > 0.5) topPressure = centerPressure;
-	if(bottomObstacle.b > 0.5) bottomPressure = centerPressure;
-
-	half4 divergence = DivergenceRead.SampleLevel(_LinearRepeat, uvOrigin, 0);
-	float4 newPressure = (leftPressure + rightPressure + topPressure + bottomPressure + divergence * alpha) / beta;
-	float pressureDamping = 0.0025;
-	PressureWrite[id.xy] = newPressure * (1.0 - pressureDamping);
-}
-
-[numthreads(16,16,1)]
-void SubtractGradient (uint3 id : SV_DispatchThreadID)
-{
-	float4 centerObstacle = ObstaclesRead[id.xy];
-	if (centerObstacle.b > 0.5) {
-        VelocityWrite[id.xy] = float4(centerObstacle.xy,0,0);
-        return;
-    }
-
-	float xCoord = ((float)id.x + 0.5)  / _TextureResolution;
-	float yCoord = ((float)id.y + 0.5)  / _TextureResolution;
-	float2 uvOrigin = float2(xCoord, yCoord);
-	float ps = 1.0 / _TextureResolution;
-	
-	float centerPressure = PressureRead[id.xy].x;
-	float leftPressure = PressureRead.SampleLevel(_LinearClamp, uvOrigin + half2(-ps, 0), 0).x;
-	float rightPressure = PressureRead.SampleLevel(_LinearClamp, uvOrigin + half2(ps, 0), 0).x;
-	float topPressure = PressureRead.SampleLevel(_LinearClamp, uvOrigin + half2(0, ps), 0).x;
-	float bottomPressure = PressureRead.SampleLevel(_LinearClamp, uvOrigin + half2(0, -ps), 0).x;
-
-	half4 leftObstacle = ObstaclesRead.SampleLevel(_LinearClamp, uvOrigin + half2(-ps, 0), 0);
-	half4 rightObstacle = ObstaclesRead.SampleLevel(_LinearClamp, uvOrigin + half2(ps, 0), 0);
-	half4 topObstacle = ObstaclesRead.SampleLevel(_LinearClamp, uvOrigin + half2(0, ps), 0);
-	half4 bottomObstacle = ObstaclesRead.SampleLevel(_LinearClamp, uvOrigin + half2(0, -ps), 0);
-	
-	// Copied from internet example... still need to understand this better::::
-	float2 obstV = float2(0,0);
-	float2 vMask = float2(1,1);
-
-	if(leftObstacle.b > 0.5) { leftPressure = centerPressure; obstV.x = leftObstacle.x; vMask.x = 0; }
-	if(rightObstacle.b > 0.5) { rightPressure = centerPressure; obstV.x = rightObstacle.x; vMask.x = 0; }
-	if(topObstacle.b > 0.5) { topPressure = centerPressure; obstV.y = topObstacle.y; vMask.y = 0; }
-	if(bottomObstacle.b > 0.5) { bottomPressure = centerPressure; obstV.y = bottomObstacle.y; vMask.y = 0; }
-	
-	float4 newVelocity = VelocityRead.SampleLevel(_LinearRepeat, uvOrigin, 0);
-	float2 grad = 0.5 * _InvGridScale * half2(rightPressure - leftPressure, topPressure - bottomPressure);
-	newVelocity.xy -= grad;
-	VelocityWrite[id.xy] = float4(newVelocity.xy * vMask + obstV, 0, 0);
-}
-
+/*
 [numthreads(1024,1,1)]
 void CSPinWaterChainsData (uint3 id : SV_DispatchThreadID)
 {	
@@ -814,3 +854,5 @@ void CSSwapWaterChainsData (uint3 id : SV_DispatchThreadID)
 {	
 	waterChainsWriteCBuffer[id.x] = waterChainsReadCBuffer[id.x];
 }
+
+*/

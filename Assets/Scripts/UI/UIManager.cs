@@ -1407,7 +1407,7 @@ public class UIManager : MonoBehaviour {
                 newInspectAgentWasteMat.SetFloat("_Value", Mathf.Clamp01(agent.wasteProducedLastFrame * 1000f));
                 newInspectAgentThrottleMat.SetFloat("_ThrottleX", Mathf.Clamp01(agent.smoothedThrottle.x));
                 newInspectAgentThrottleMat.SetFloat("_ThrottleY", Mathf.Clamp01(agent.smoothedThrottle.y));
-                newInspectAgentThrottleMat.SetTexture("_VelocityTex", gameManager.simulationManager.environmentFluidManager._VelocityA);
+                newInspectAgentThrottleMat.SetTexture("_VelocityTex", gameManager.simulationManager.environmentFluidManager._VelocityPressureDivergenceMain);
                 newInspectAgentThrottleMat.SetFloat("_AgentCoordX", agent.ownPos.x / SimulationManager._MapSize);
                 newInspectAgentThrottleMat.SetFloat("_AgentCoordY", agent.ownPos.y / SimulationManager._MapSize);
 
@@ -4575,23 +4575,23 @@ public class UIManager : MonoBehaviour {
         debugTextureViewerArray[2] = gameManager.theRenderKing.baronVonWater.waterSurfaceDataRT0;
         debugTextureViewerArray[2].name = "Water Surface Data";
 
-        debugTextureViewerArray[3] = gameManager.theRenderKing.fluidManager._DensityA;
-        debugTextureViewerArray[3].name = "Fluid Density";
+        debugTextureViewerArray[3] = gameManager.theRenderKing.fluidManager._VelocityPressureDivergenceMain;
+        debugTextureViewerArray[3].name = "_VelocityPressureDivergenceMain";
 
-        debugTextureViewerArray[4] = gameManager.theRenderKing.fluidManager._VelocityA;
-        debugTextureViewerArray[4].name = "Fluid Velocity";
+        debugTextureViewerArray[4] = gameManager.theRenderKing.fluidManager._VelocityPressureDivergenceMain;
+        debugTextureViewerArray[4].name = "_VelocityPressureDivergenceMain";
 
-        debugTextureViewerArray[5] = gameManager.theRenderKing.fluidManager._PressureA;
-        debugTextureViewerArray[5].name = "Fluid Pressure";
+        debugTextureViewerArray[5] = gameManager.theRenderKing.fluidManager._VelocityPressureDivergenceMain;
+        debugTextureViewerArray[5].name = "_VelocityPressureDivergenceMain";
 
-        debugTextureViewerArray[6] = gameManager.theRenderKing.fluidManager._Divergence;
-        debugTextureViewerArray[6].name = "Fluid Divergence";
+        debugTextureViewerArray[6] = gameManager.theRenderKing.fluidManager._VelocityPressureDivergenceMain;
+        debugTextureViewerArray[6].name = "_VelocityPressureDivergenceMain";
 
         debugTextureViewerArray[7] = gameManager.theRenderKing.fluidManager._ObstaclesRT;
         debugTextureViewerArray[7].name = "Obstacles Inject Render";
 
-        debugTextureViewerArray[8] = gameManager.theRenderKing.fluidManager._SourceColorRT;
-        debugTextureViewerArray[8].name = "Color Inject Render";        
+        debugTextureViewerArray[8] = gameManager.theRenderKing.fluidManager._ObstaclesRT;
+        debugTextureViewerArray[8].name = "Obstacles Inject Render";        
         
         debugTextureViewerArray[9] = gameManager.simulationManager.zooplanktonManager.critterNearestZooplankton32;
         debugTextureViewerArray[9].name = "ZooplanktonMap";

@@ -529,14 +529,14 @@ public class TheRenderKing : MonoBehaviour {
         InitializeAgentTailStrokesBuffer();
         //InitializeFrameBufferStrokesBuffer();
         //InitializePlayerGlowBuffer();
-        InitializePlayerGlowyBitsBuffer();
+        //InitializePlayerGlowyBitsBuffer();
         InitializeFloatyBitsBuffer();
         //InitializeRipplesBuffer();
-        InitializeWaterSplinesCBuffer();
-        InitializeWaterChainsCBuffer();
+        //InitializeWaterSplinesCBuffer();
+        //InitializeWaterChainsCBuffer();
         InitializeGizmos();
         //InitializeAgentHoverHighlightCBuffer();
-        InitializeTreeOfLifeBuffers();
+        //InitializeTreeOfLifeBuffers();
         //InitializeDebugBuffers(); 
 
 
@@ -2669,7 +2669,7 @@ public class TheRenderKing : MonoBehaviour {
         //computeShaderCritters.SetVector("_PlayerPos", new Vector4(simManager.agentsArray[0].bodyRigidbody.transform.position.x / SimulationManager._MapSize, simManager.agentsArray[0].bodyRigidbody.transform.position.y / SimulationManager._MapSize, 0f, 0f));
         computeShaderCritters.SetFloat("_Time", Time.realtimeSinceStartup);
         computeShaderCritters.SetVector("_CursorCoords", new Vector4(simManager.uiManager.curMousePositionOnWaterPlane.x, simManager.uiManager.curMousePositionOnWaterPlane.y, 0f, 0f));
-        computeShaderCritters.SetTexture(kernelCSSimulateHighlightTrail, "velocityRead", fluidManager._VelocityA); 
+        computeShaderCritters.SetTexture(kernelCSSimulateHighlightTrail, "velocityRead", fluidManager._VelocityPressureDivergenceMain); 
         computeShaderCritters.SetBuffer(kernelCSSimulateHighlightTrail, "highlightTrailDataCBuffer", critterHighlightTrailCBuffer);
         computeShaderCritters.SetBuffer(kernelCSSimulateHighlightTrail, "critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer); 
         computeShaderCritters.SetBuffer(kernelCSSimulateHighlightTrail, "critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);        
@@ -2682,7 +2682,7 @@ public class TheRenderKing : MonoBehaviour {
         fluidManager.computeShaderFluidSim.SetFloat("_DeltaTime", fluidManager.deltaTime);
         fluidManager.computeShaderFluidSim.SetFloat("_InvGridScale", fluidManager.invGridScale);
         fluidManager.computeShaderFluidSim.SetBuffer(kernelSimFloatyBits, "FloatyBitsCBuffer", floatyBitsCBuffer);
-        fluidManager.computeShaderFluidSim.SetTexture(kernelSimFloatyBits, "VelocityRead", fluidManager._VelocityA);        
+        fluidManager.computeShaderFluidSim.SetTexture(kernelSimFloatyBits, "VelocityRead", fluidManager._VelocityPressureDivergenceMain);        
         fluidManager.computeShaderFluidSim.Dispatch(kernelSimFloatyBits, floatyBitsCBuffer.count / 1024, 1, 1);
     }
     /*private void SimRipples() {
@@ -2700,7 +2700,7 @@ public class TheRenderKing : MonoBehaviour {
     private void SimEggSacks() {
         int kernelCSSimulateEggs = computeShaderEggSacks.FindKernel("CSSimulateEggs");
         
-        computeShaderEggSacks.SetTexture(kernelCSSimulateEggs, "velocityRead", fluidManager._VelocityA);
+        computeShaderEggSacks.SetTexture(kernelCSSimulateEggs, "velocityRead", fluidManager._VelocityPressureDivergenceMain);
         computeShaderEggSacks.SetBuffer(kernelCSSimulateEggs, "eggSackSimDataCBuffer", simManager.simStateData.eggSackSimDataCBuffer);
         computeShaderEggSacks.SetBuffer(kernelCSSimulateEggs, "eggDataWriteCBuffer", simManager.simStateData.eggDataCBuffer);
         computeShaderEggSacks.SetFloat("_MapSize", SimulationManager._MapSize);
@@ -2746,23 +2746,24 @@ public class TheRenderKing : MonoBehaviour {
         computeShaderBrushStrokes.Dispatch(kernelCSIterateTrailStrokesData, agentTrailStrokes0CBuffer.count, 1, 1);
         //}
     }*/
-    private void SimWaterSplines() {
+    /*private void SimWaterSplines() {
         int kernelSimWaterSplines = fluidManager.computeShaderFluidSim.FindKernel("SimWaterSplines");
 
         fluidManager.computeShaderFluidSim.SetFloat("_TextureResolution", (float)fluidManager.resolution);
         fluidManager.computeShaderFluidSim.SetFloat("_DeltaTime", fluidManager.deltaTime);
         fluidManager.computeShaderFluidSim.SetFloat("_InvGridScale", fluidManager.invGridScale);
         fluidManager.computeShaderFluidSim.SetBuffer(kernelSimWaterSplines, "WaterSplinesCBuffer", waterSplinesCBuffer);
-        fluidManager.computeShaderFluidSim.SetTexture(kernelSimWaterSplines, "VelocityRead", fluidManager._VelocityA);     
+        fluidManager.computeShaderFluidSim.SetTexture(kernelSimWaterSplines, "VelocityRead", fluidManager._VelocityPressureDivergenceMain);     
         fluidManager.computeShaderFluidSim.SetTexture(kernelSimWaterSplines, "DensityRead", fluidManager._DensityA);  
         fluidManager.computeShaderFluidSim.Dispatch(kernelSimWaterSplines, waterSplinesCBuffer.count / 1024, 1, 1);
-    }
+    }*/
+    /*
     private void SimWaterChains() {
         // Set position of trail Roots:
         int kernelCSPinWaterChainsData = fluidManager.computeShaderFluidSim.FindKernel("CSPinWaterChainsData");        
         fluidManager.computeShaderFluidSim.SetBuffer(kernelCSPinWaterChainsData, "waterChainsReadCBuffer", waterChains0CBuffer);
         fluidManager.computeShaderFluidSim.SetBuffer(kernelCSPinWaterChainsData, "waterChainsWriteCBuffer", waterChains1CBuffer);
-        fluidManager.computeShaderFluidSim.SetTexture(kernelCSPinWaterChainsData, "VelocityRead", fluidManager._VelocityA);
+        fluidManager.computeShaderFluidSim.SetTexture(kernelCSPinWaterChainsData, "VelocityRead", fluidManager._VelocityPressureDivergenceMain);
         fluidManager.computeShaderFluidSim.Dispatch(kernelCSPinWaterChainsData, waterChains0CBuffer.count / numPointsPerWaterChain / 1024, 1, 1);
         
         if(debugFrameCounter % 1 == 0) {
@@ -2770,7 +2771,7 @@ public class TheRenderKing : MonoBehaviour {
             int kernelCSShiftWaterChainsData = fluidManager.computeShaderFluidSim.FindKernel("CSShiftWaterChainsData");
             fluidManager.computeShaderFluidSim.SetBuffer(kernelCSShiftWaterChainsData, "waterChainsReadCBuffer", waterChains0CBuffer);
             fluidManager.computeShaderFluidSim.SetBuffer(kernelCSShiftWaterChainsData, "waterChainsWriteCBuffer", waterChains1CBuffer);
-            fluidManager.computeShaderFluidSim.SetTexture(kernelCSShiftWaterChainsData, "VelocityRead", fluidManager._VelocityA);
+            fluidManager.computeShaderFluidSim.SetTexture(kernelCSShiftWaterChainsData, "VelocityRead", fluidManager._VelocityPressureDivergenceMain);
             fluidManager.computeShaderFluidSim.Dispatch(kernelCSShiftWaterChainsData, waterChains0CBuffer.count / 1024, 1, 1);
         }      
         
@@ -2778,24 +2779,25 @@ public class TheRenderKing : MonoBehaviour {
         int kernelCSSwapWaterChainsData = fluidManager.computeShaderFluidSim.FindKernel("CSSwapWaterChainsData");
         fluidManager.computeShaderFluidSim.SetBuffer(kernelCSSwapWaterChainsData, "waterChainsReadCBuffer", waterChains1CBuffer);
         fluidManager.computeShaderFluidSim.SetBuffer(kernelCSSwapWaterChainsData, "waterChainsWriteCBuffer", waterChains0CBuffer);
-        fluidManager.computeShaderFluidSim.SetTexture(kernelCSSwapWaterChainsData, "VelocityRead", fluidManager._VelocityA);
+        fluidManager.computeShaderFluidSim.SetTexture(kernelCSSwapWaterChainsData, "VelocityRead", fluidManager._VelocityPressureDivergenceMain);
         fluidManager.computeShaderFluidSim.Dispatch(kernelCSSwapWaterChainsData, waterChains0CBuffer.count / 1024, 1, 1);
 
         debugFrameCounter++;
     }
-    private void SimCritterSkinStrokes() {
+    */
+    /*private void SimCritterSkinStrokes() {
         int kernelCSCSSimulateCritterSkinStrokes = computeShaderCritters.FindKernel("CSSimulateSkinCritterStrokes");
         
-        computeShaderCritters.SetTexture(kernelCSCSSimulateCritterSkinStrokes, "velocityRead", fluidManager._VelocityA);
+        computeShaderCritters.SetTexture(kernelCSCSSimulateCritterSkinStrokes, "velocityRead", fluidManager._VelocityPressureDivergenceMain);
         computeShaderCritters.SetBuffer(kernelCSCSSimulateCritterSkinStrokes, "critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
         computeShaderCritters.SetBuffer(kernelCSCSSimulateCritterSkinStrokes, "critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
         computeShaderCritters.SetBuffer(kernelCSCSSimulateCritterSkinStrokes, "critterSkinStrokesWriteCBuffer", critterSkinStrokesCBuffer);
         computeShaderCritters.SetFloat("_MapSize", SimulationManager._MapSize);
         computeShaderCritters.Dispatch(kernelCSCSSimulateCritterSkinStrokes, critterSkinStrokesCBuffer.count / 16, 1, 1);
-    }
+    }*/
     private void SimCritterGenericStrokes() {
         int kernelCSSimulateCritterGenericStrokes = computeShaderCritters.FindKernel("CSSimulateCritterGenericStrokes");        
-        computeShaderCritters.SetTexture(kernelCSSimulateCritterGenericStrokes, "velocityRead", fluidManager._VelocityA);
+        computeShaderCritters.SetTexture(kernelCSSimulateCritterGenericStrokes, "velocityRead", fluidManager._VelocityPressureDivergenceMain);
         computeShaderCritters.SetBuffer(kernelCSSimulateCritterGenericStrokes, "critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
         computeShaderCritters.SetBuffer(kernelCSSimulateCritterGenericStrokes, "critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
         computeShaderCritters.SetBuffer(kernelCSSimulateCritterGenericStrokes, "critterGenericStrokesWriteCBuffer", critterGenericStrokesCBuffer);
@@ -2805,7 +2807,7 @@ public class TheRenderKing : MonoBehaviour {
     }
     private void SimUIToolbarCritterPortraitStrokes() {
         int kernelCSSimulateCritterPortraitStrokes = computeShaderCritters.FindKernel("CSSimulateCritterPortraitStrokes");        
-        computeShaderCritters.SetTexture(kernelCSSimulateCritterPortraitStrokes, "velocityRead", fluidManager._VelocityA);
+        computeShaderCritters.SetTexture(kernelCSSimulateCritterPortraitStrokes, "velocityRead", fluidManager._VelocityPressureDivergenceMain);
         computeShaderCritters.SetBuffer(kernelCSSimulateCritterPortraitStrokes, "critterInitDataCBuffer", toolbarPortraitCritterInitDataCBuffer);
         computeShaderCritters.SetBuffer(kernelCSSimulateCritterPortraitStrokes, "critterSimDataCBuffer", toolbarPortraitCritterSimDataCBuffer);
         computeShaderCritters.SetBuffer(kernelCSSimulateCritterPortraitStrokes, "critterGenericStrokesWriteCBuffer", toolbarCritterPortraitStrokesCBuffer);
@@ -3183,9 +3185,10 @@ public class TheRenderKing : MonoBehaviour {
 
         // PORTRAIT
         if(isToolbarCritterPortraitEnabled) {
-            //SimCritterPortrait();
-            SetToolbarPortraitCritterSimData();
-            SimUIToolbarCritterPortraitStrokes();
+            
+
+            //SetToolbarPortraitCritterSimData();
+            //SimUIToolbarCritterPortraitStrokes();
         }
         
 
@@ -3239,7 +3242,7 @@ public class TheRenderKing : MonoBehaviour {
     }
 
     public void RenderSimulationCameras() { // **** revisit
-        debugRT = fluidManager._SourceColorRT;
+        //debugRT = fluidManager._SourceColorRT;
 
         // SOLID OBJECTS OBSTACLES:::
         PopulateObstaclesBuffer();  // update data for obstacles before rendering
@@ -3264,7 +3267,7 @@ public class TheRenderKing : MonoBehaviour {
         // Still not sure if this will work correctly... ****
         fluidObstaclesRenderCamera.Render(); // is this even needed? all drawcalls taken care of within commandBuffer?
 
-
+        /*
         // COLOR INJECTION:::
         PopulateColorInjectionBuffer(); // update data for colorInjection objects before rendering
 
@@ -3281,7 +3284,7 @@ public class TheRenderKing : MonoBehaviour {
         algaeParticleColorInjectMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
         algaeParticleColorInjectMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
         cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, algaeParticleColorInjectMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.plantParticlesCBuffer.count);
-
+        */
         /*Vector4 cursorPos = new Vector4(simManager.uiManager.curMousePositionOnWaterPlane.x, simManager.uiManager.curMousePositionOnWaterPlane.y, 0f, 0f);
         if(isStirring) {            // Particle-based instead? // hijack and use for stir tool
             playerBrushColorInjectMat.SetPass(0);
@@ -3293,6 +3296,7 @@ public class TheRenderKing : MonoBehaviour {
             playerBrushColorInjectMat.SetVector("_BrushColor", new Vector4(0.7f, 0.8f, 1f, Mathf.Clamp(simManager.uiManager.smoothedMouseVel.magnitude * 0.5f, 0f, 10f)));
             cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, playerBrushColorInjectMat, 0, MeshTopology.Triangles, 6, 1);        
         }*/
+        /*
         // Creatures + EggSacks:
         basicStrokeDisplayMat.SetPass(0);
         basicStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -3304,7 +3308,7 @@ public class TheRenderKing : MonoBehaviour {
         fluidColorRenderCamera.Render();
         //simManager.environmentFluidManager.densityA.GenerateMips();
         // Update this ^^ to use Graphics.ExecuteCommandBuffer()  ****
-
+        */
 
 
         // SPIRIT BRUSH TEST!
@@ -3366,6 +3370,7 @@ public class TheRenderKing : MonoBehaviour {
         // Still not sure if this will work correctly... ****
         spiritBrushRenderCamera.Render();
 
+        /*
         // Species PORTRAIT:
         cmdBufferSlotPortraitDisplay.Clear();
         cmdBufferSlotPortraitDisplay.SetRenderTarget(slotPortraitRenderCamera.targetTexture); // needed???
@@ -3384,7 +3389,7 @@ public class TheRenderKing : MonoBehaviour {
         Graphics.ExecuteCommandBuffer(cmdBufferSlotPortraitDisplay);
         slotPortraitRenderCamera.Render();
 
-
+        */
 
         //===================   RESOURCE SIMULATION   ==========================================================
         cmdBufferResourceSim.Clear();
@@ -3406,8 +3411,7 @@ public class TheRenderKing : MonoBehaviour {
         plantParticleDataMat.SetBuffer("plantParticleDataCBuffer", simManager.vegetationManager.plantParticlesCBuffer); // simManager.vegetationManager.algaeParticlesCBuffer);    
         plantParticleDataMat.SetFloat("_MapSize", SimulationManager._MapSize);
         cmdBufferResourceSim.DrawProcedural(Matrix4x4.identity, plantParticleDataMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.plantParticlesCBuffer.count); // simManager.vegetationManager.algaeParticlesCBuffer.count);
-
-
+        
         // CRITTERS:
         //critterSimDataCBuffer
         resourceSimAgentDataMat.SetPass(0);
@@ -3415,8 +3419,7 @@ public class TheRenderKing : MonoBehaviour {
         resourceSimAgentDataMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer); // simManager.vegetationManager.algaeParticlesCBuffer);    
         resourceSimAgentDataMat.SetFloat("_MapSize", SimulationManager._MapSize);
         cmdBufferResourceSim.DrawProcedural(Matrix4x4.identity, resourceSimAgentDataMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.critterSimDataCBuffer.count); // simManager.vegetationManager.algaeParticlesCBuffer.count);
-
-
+        
         Graphics.ExecuteCommandBuffer(cmdBufferResourceSim);
         resourceSimRenderCamera.Render();
         //======================================================================================================
@@ -3834,7 +3837,7 @@ public class TheRenderKing : MonoBehaviour {
             baronVonTerrain.decomposerBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
             baronVonTerrain.decomposerBitsDisplayMat.SetBuffer("groundBitsCBuffer", baronVonTerrain.decomposerBitsCBuffer);                
             baronVonTerrain.decomposerBitsDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
-            baronVonTerrain.decomposerBitsDisplayMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
+            baronVonTerrain.decomposerBitsDisplayMat.SetTexture("_VelocityTex", fluidManager._VelocityPressureDivergenceMain);
             baronVonTerrain.decomposerBitsDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
             baronVonTerrain.decomposerBitsDisplayMat.SetTexture("_ResourceGridTex", simManager.vegetationManager.resourceGridRT1);
             baronVonTerrain.decomposerBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
@@ -4145,7 +4148,7 @@ public class TheRenderKing : MonoBehaviour {
             
              // FLOATY BITS!
             floatyBitsDisplayMat.SetPass(0);
-            floatyBitsDisplayMat.SetTexture("_FluidColorTex", fluidManager._DensityA);
+            floatyBitsDisplayMat.SetTexture("_FluidColorTex", fluidManager._VelocityPressureDivergenceMain);
             floatyBitsDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
             floatyBitsDisplayMat.SetBuffer("floatyBitsCBuffer", floatyBitsCBuffer);
             floatyBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -4157,7 +4160,7 @@ public class TheRenderKing : MonoBehaviour {
             baronVonWater.waterNutrientsBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
             baronVonWater.waterNutrientsBitsDisplayMat.SetBuffer("frameBufferStrokesCBuffer", baronVonWater.waterNutrientsBitsCBuffer);
             baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
-            baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
+            baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_VelocityTex", fluidManager._VelocityPressureDivergenceMain);
             baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
             baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_ResourceGridTex", simManager.vegetationManager.resourceGridRT1);
             baronVonWater.waterNutrientsBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
@@ -4173,10 +4176,10 @@ public class TheRenderKing : MonoBehaviour {
             
             // FLUID ITSELF:
             fluidRenderMat.SetPass(0);
-            fluidRenderMat.SetTexture("_DensityTex", fluidManager._DensityA);
-            fluidRenderMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
-            fluidRenderMat.SetTexture("_PressureTex", fluidManager._PressureA);
-            fluidRenderMat.SetTexture("_DivergenceTex", fluidManager._Divergence);
+            //fluidRenderMat.SetTexture("_DensityTex", fluidManager._DensityA);
+            fluidRenderMat.SetTexture("_VelocityTex", fluidManager._VelocityPressureDivergenceMain);
+            //fluidRenderMat.SetTexture("_PressureTex", fluidManager._PressureA);
+            //fluidRenderMat.SetTexture("_DivergenceTex", fluidManager._Divergence);
             fluidRenderMat.SetTexture("_ObstaclesTex", fluidManager._ObstaclesRT);
             fluidRenderMat.SetTexture("_TerrainHeightTex", baronVonTerrain.terrainHeightDataRT);
             fluidRenderMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
