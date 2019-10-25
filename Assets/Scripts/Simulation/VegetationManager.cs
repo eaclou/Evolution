@@ -20,9 +20,9 @@ public class VegetationManager {
 
     public RenderTexture resourceSimTransferRT;
 
-    public RenderTexture rdRT1;
-    public RenderTexture rdRT2;
-    private int rdTextureResolution = 128;  // decomposers and algae Tex2D's
+    //public RenderTexture rdRT1;
+    //public RenderTexture rdRT2;
+    //private int rdTextureResolution = 128;  // decomposers and algae Tex2D's
     // decomposer genomes:
     public WorldLayerDecomposerGenome decomposerSlotGenomeCurrent;
     public WorldLayerDecomposerGenome[] decomposerSlotGenomeMutations;
@@ -354,7 +354,7 @@ public class VegetationManager {
 
         resourceGridAgentSamplesCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 4);
 
-        
+        /*
         // Decomposers and algae grid:
         rdRT1 = new RenderTexture(rdTextureResolution, rdTextureResolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
         rdRT1.wrapMode = TextureWrapMode.Clamp;
@@ -367,7 +367,7 @@ public class VegetationManager {
         rdRT2.filterMode = FilterMode.Bilinear;
         rdRT2.enableRandomWrite = true;
         rdRT2.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
-
+        */
         //theRenderKing.fluidRenderMat.SetTexture("_DebugTex", nutrientMapRT1);
         
     }
@@ -391,12 +391,12 @@ public class VegetationManager {
         
 
 
-        int kernelCSInitRD = computeShaderResourceGrid.FindKernel("CSInitRD"); 
+        int kernelCSInitResourceGrid = computeShaderResourceGrid.FindKernel("CSInitResourceGrid"); 
         //computeShaderResourceGrid.SetTexture(kernelCSUpdateAlgaeGrid, "rdRead", rdRT1);
-        computeShaderResourceGrid.SetFloat("_TextureResolution", (float)rdTextureResolution);
+        computeShaderResourceGrid.SetFloat("_TextureResolution", (float)resourceGridTexResolution);
         //computeShaderResourceGrid.SetTexture(kernelCSInitRD, "rdWrite", rdRT1);
-        computeShaderResourceGrid.SetTexture(kernelCSInitRD, "_ResourceGridWrite", resourceGridRT1);
-        computeShaderResourceGrid.Dispatch(kernelCSInitRD, rdTextureResolution / 32, rdTextureResolution / 32, 1);
+        computeShaderResourceGrid.SetTexture(kernelCSInitResourceGrid, "_ResourceGridWrite", resourceGridRT1);
+        computeShaderResourceGrid.Dispatch(kernelCSInitResourceGrid, resourceGridTexResolution / 32, resourceGridTexResolution / 32, 1);
 
     }
 
@@ -876,7 +876,7 @@ public class VegetationManager {
         computeShaderResourceGrid.Dispatch(kernelAdvectResourceGrid, 1, 1, 1);
     }
     */
-    public void GetResourceGridValuesAtMouthPositions(SimulationStateData simStateDataRef) {
+    /*public void GetResourceGridValuesAtMouthPositions(SimulationStateData simStateDataRef) {
         // Doing it this way to avoid resetting ALL agents whenever ONE is respawned!
         //ComputeBuffer nutrientSamplesCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 4);
         
@@ -894,7 +894,7 @@ public class VegetationManager {
         //nutrientSamplesCBuffer.Release();
         
         // Read out sample values::::
-    }
+    }*/
     /*public void ApplyDiffusionOnResourceGrid(EnvironmentFluidManager fluidManagerRef) {
         int kernelCSUpdateAlgaeGrid = computeShaderResourceGrid.FindKernel("CSUpdateAlgaeGrid");
         computeShaderResourceGrid.SetFloat("_AlgaeGridDiffusion", settingsRef.nutrientDiffusionRate);
@@ -911,10 +911,7 @@ public class VegetationManager {
 
         ComputeBuffer outputValuesCBuffer = new ComputeBuffer(1, sizeof(float) * 4);  // holds the result of measurement: total sum of pix colors in texture
         Vector4[] outputValuesArray = new Vector4[1];
-
-        // WAS 32!
-
-
+        
         // 128 --> 32:
         int kernelCSMeasureTotalResources2 = computeShaderResourceGrid.FindKernel("CSMeasureTotalResourceGrid2");   
         int kernelCSMeasureTotalResources4 = computeShaderResourceGrid.FindKernel("CSMeasureTotalResourceGrid4");  
@@ -945,10 +942,7 @@ public class VegetationManager {
         computeShaderResourceGrid.Dispatch(kernelCSMeasureTotalResources2, 1, 1, 1);
         
         outputValuesCBuffer.GetData(outputValuesArray);
-
-        /* ********************      ********************  v Re-CONNECT!!!
-        curGlobalAlgaeGrid = outputValuesArray[0].x;
-        */
+        
         curGlobalNutrientGridValues = outputValuesArray[0];
 
         outputValuesCBuffer.Release();
@@ -960,7 +954,7 @@ public class VegetationManager {
 */
         //return outputValuesArray[0].x;
     }    
-    public void AddResourcesAtCoords(Vector4 amount, float x, float y) {  // 0-1 normalized map coords
+    /*public void AddResourcesAtCoords(Vector4 amount, float x, float y) {  // 0-1 normalized map coords
         
         ComputeBuffer addResourceCBuffer = new ComputeBuffer(1, sizeof(float) * 4);
         Vector4[] addResourceArray = new Vector4[1];
@@ -980,8 +974,8 @@ public class VegetationManager {
 
         addResourceCBuffer.Release();
         
-    }
-    public void RemoveEatenResourceGrid(int numAgents, SimulationStateData simStateDataRef) { // **** WILL BE MODIFIED!!! *****
+    }*/
+    /*public void RemoveEatenResourceGrid(int numAgents, SimulationStateData simStateDataRef) { // **** WILL BE MODIFIED!!! *****
         ComputeBuffer eatAmountsCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 4);
                 
         eatAmountsCBuffer.SetData(resourceGridEatAmountsArray);
@@ -997,23 +991,20 @@ public class VegetationManager {
         Graphics.Blit(resourceGridRT2, resourceGridRT1);
         
         eatAmountsCBuffer.Release();
-    }
-
-    // REACTION DIFFUSION (i.e DECOMPOSERS AND ALGAE GRID) ::::
+    }*/
+       
     
     public void SimResourceGrid(ref EnvironmentFluidManager fluidManagerRef, ref BaronVonTerrain baronTerrainRef, ref TheRenderKing theRenderKingRef) {
-        int kernelCSSimRD = computeShaderResourceGrid.FindKernel("CSSimRD"); 
+        int kernelCSSimRD = computeShaderResourceGrid.FindKernel("CSSimResourceGrid"); 
         computeShaderResourceGrid.SetTexture(kernelCSSimRD, "_AltitudeTex", baronTerrainRef.terrainHeightRT0);        
-        computeShaderResourceGrid.SetFloat("_TextureResolution", (float)rdTextureResolution);
+        computeShaderResourceGrid.SetFloat("_TextureResolution", (float)resourceGridTexResolution);
         computeShaderResourceGrid.SetFloat("_Time", Time.realtimeSinceStartup);
         computeShaderResourceGrid.SetTexture(kernelCSSimRD, "_ResourceGridRead", resourceGridRT1);
         computeShaderResourceGrid.SetTexture(kernelCSSimRD, "_ResourceGridWrite", resourceGridRT2);
-        computeShaderResourceGrid.SetTexture(kernelCSSimRD, "rdRead", rdRT1);
-        computeShaderResourceGrid.SetTexture(kernelCSSimRD, "rdWrite", rdRT2);
-        computeShaderResourceGrid.Dispatch(kernelCSSimRD, rdTextureResolution / 32, rdTextureResolution / 32, 1);
+        computeShaderResourceGrid.Dispatch(kernelCSSimRD, resourceGridTexResolution / 32, resourceGridTexResolution / 32, 1);
         // write into 2
-        int kernelCSAdvectRD = computeShaderResourceGrid.FindKernel("CSAdvectRD");
-        computeShaderResourceGrid.SetFloat("_TextureResolution", (float)rdTextureResolution);        
+        int kernelCSAdvectRD = computeShaderResourceGrid.FindKernel("CSAdvectResourceGrid");
+        computeShaderResourceGrid.SetFloat("_TextureResolution", (float)resourceGridTexResolution);        
         computeShaderResourceGrid.SetFloat("_Time", Time.realtimeSinceStartup);
         computeShaderResourceGrid.SetFloat("_DeltaTime", fluidManagerRef.deltaTime);
         computeShaderResourceGrid.SetFloat("_InvGridScale", fluidManagerRef.invGridScale);
@@ -1025,7 +1016,7 @@ public class VegetationManager {
 
             if (theRenderKingRef.simManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 0) {
                 brushDecomposersOn = 1f;
-                brushIntensityMult = 0.05f;
+                brushIntensityMult = 0.2f;
             }
             else if (theRenderKingRef.simManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 1) {
                 if (theRenderKingRef.simManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) { 
@@ -1057,13 +1048,11 @@ public class VegetationManager {
         computeShaderResourceGrid.SetFloat("_DecomposerEnergyGenerationEfficiency", 1f);
         
         computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "VelocityRead", fluidManagerRef._VelocityA);
-        computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "rdRead", rdRT2);
-        computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "rdWrite", rdRT1);
         computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "_ResourceGridRead", resourceGridRT2);
         computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "_ResourceGridWrite", resourceGridRT1);
         computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "_SpiritBrushTex", theRenderKingRef.spiritBrushRT);
         computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "_ResourceSimTransferRead", resourceSimTransferRT);
-        computeShaderResourceGrid.Dispatch(kernelCSAdvectRD, rdTextureResolution / 32, rdTextureResolution / 32, 1);
+        computeShaderResourceGrid.Dispatch(kernelCSAdvectRD, resourceGridTexResolution / 32, resourceGridTexResolution / 32, 1);
         //back into 1
     }
 

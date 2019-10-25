@@ -374,6 +374,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
         divergence.enableRandomWrite = true;
         divergence.Create();
 
+        // ** Needed?
         obstaclesRT = new RenderTexture(resolution, resolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
         obstaclesRT.wrapMode = TextureWrapMode.Repeat;
         obstaclesRT.enableRandomWrite = true;

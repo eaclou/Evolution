@@ -4584,17 +4584,17 @@ public class UIManager : MonoBehaviour {
         debugTextureViewerArray[5] = gameManager.theRenderKing.fluidManager._PressureA;
         debugTextureViewerArray[5].name = "Fluid Pressure";
 
-        debugTextureViewerArray[6] = gameManager.simulationManager.zooplanktonManager.critterNearestZooplankton32;
-        debugTextureViewerArray[6].name = "ZooplanktonMap";
+        debugTextureViewerArray[6] = gameManager.theRenderKing.fluidManager._Divergence;
+        debugTextureViewerArray[6].name = "Fluid Divergence";
 
         debugTextureViewerArray[7] = gameManager.theRenderKing.fluidManager._ObstaclesRT;
-        debugTextureViewerArray[7].name = "Fluid Obstacles Map";
+        debugTextureViewerArray[7].name = "Obstacles Inject Render";
 
         debugTextureViewerArray[8] = gameManager.theRenderKing.fluidManager._SourceColorRT;
-        debugTextureViewerArray[8].name = "Fluid Source Color";
+        debugTextureViewerArray[8].name = "Color Inject Render";        
         
-        debugTextureViewerArray[9] = gameManager.simulationManager.vegetationManager.rdRT1;
-        debugTextureViewerArray[9].name = "Reaction Diffusion Decomposers";
+        debugTextureViewerArray[9] = gameManager.simulationManager.zooplanktonManager.critterNearestZooplankton32;
+        debugTextureViewerArray[9].name = "ZooplanktonMap";
 
         debugTextureViewerArray[10] = gameManager.simulationManager.vegetationManager.resourceGridRT1;
         debugTextureViewerArray[10].name = "Resources Grid";

@@ -1,15 +1,10 @@
-﻿//#pragma kernel CSGetResourceGridSamples
-//#pragma kernel CSSimResourceGrid
-//#pragma kernel CSAdvectResourceGrid
-//#pragma kernel CSInitializeResourceGrid
-//#pragma kernel CSRemoveResourceGridAtLocations
+﻿
 #pragma kernel CSMeasureTotalResourceGrid2
 #pragma kernel CSMeasureTotalResourceGrid4
-#pragma kernel CSAddResourcesAtCoords
 
-#pragma kernel CSInitRD
-#pragma kernel CSSimRD
-#pragma kernel CSAdvectRD
+#pragma kernel CSInitResourceGrid
+#pragma kernel CSSimResourceGrid
+#pragma kernel CSAdvectResourceGrid   /// generic function inside computeFluidEnv?? that all textures that flow can use
 #pragma kernel CSSampleTexture
 
 
@@ -25,21 +20,15 @@ StructuredBuffer<PlantParticleData> algaeParticlesRead;
 
 RWStructuredBuffer<float4> _ResourceGridSamplesCBuffer;
 StructuredBuffer<float4> _ResourceGridEatAmountsCBuffer;
-StructuredBuffer<float4> _AddResourceCBuffer;
 
 Texture2D<float4> VelocityRead;
-
 Texture2D<float4> _AltitudeTex;
-
 Texture2D<float4> _SpiritBrushTex;
 
 Texture2D<float4> _ResourceGridRead;
 RWTexture2D<float4> _ResourceGridWrite;
 
 Texture2D<float4> _ResourceSimTransferRead;
-
-Texture2D<float4> rdRead;
-RWTexture2D<float4> rdWrite;
 
 RWStructuredBuffer<float4> outputValuesCBuffer;
 
@@ -65,7 +54,6 @@ uniform float _SpiritBrushIntensity;
 uniform float _CoordX;
 uniform float _CoordY;
 
-
 uniform float _AlgaeUpkeep; // = 0.001;
 uniform	float _AlgaeMaxIntakeRate; // = 0.0025;
 uniform float _AlgaeGrowthEfficiency; // = 1.0;
@@ -76,13 +64,12 @@ uniform float _DecomposerEnergyGenerationEfficiency; // = 1.0;
 uniform float _Time;
 
 [numthreads(32,32,1)]
-void CSInitRD (uint3 id : SV_DispatchThreadID)
+void CSInitResourceGrid (uint3 id : SV_DispatchThreadID)
 {	
 	// CHANNEL X = none
 	// CHANNEL Y = Decomposers
 	// CHANNEL Z = AlgaeGrid
 	float2 uv = ((float2)id.xy + 0.5) / _TextureResolution;
-	//rdWrite[id.xy] = float4(0, 0, 0, 1);   // Start blank
 	
 	// CHANNEL X = Nutrients
 	// CHANNEL Y = Detritus
@@ -98,7 +85,7 @@ void CSInitRD (uint3 id : SV_DispatchThreadID)
 }
 
 [numthreads(32,32,1)]
-void CSSimRD (uint3 id : SV_DispatchThreadID)
+void CSSimResourceGrid (uint3 id : SV_DispatchThreadID)
 {
 
 	// X = nutrients
@@ -190,7 +177,7 @@ void CSSimRD (uint3 id : SV_DispatchThreadID)
 // DIFFUSION & ADVECTION NEED TO BE IN SEPARATE PASSES:
 
 [numthreads(32,32,1)]
-void CSAdvectRD (uint3 id : SV_DispatchThreadID)
+void CSAdvectResourceGrid (uint3 id : SV_DispatchThreadID)
 {
 
 	float xCoord = ((float)id.x + 0.5)  / _TextureResolution;
@@ -270,7 +257,7 @@ void CSMeasureTotalResourceGrid4 (uint3 id : SV_DispatchThreadID)
 	outputValuesCBuffer[0] = pixValue;
 }
 
-[numthreads(1,1,1)]
+/*[numthreads(1,1,1)]
 void CSAddResourcesAtCoords (uint3 id : SV_DispatchThreadID)
 {	
 	float4 data = _AddResourceCBuffer[id.x];
@@ -284,7 +271,7 @@ void CSAddResourcesAtCoords (uint3 id : SV_DispatchThreadID)
 	currentAlgaeGrid += data;
 
 	_ResourceGridWrite[index] = saturate(currentAlgaeGrid);
-}
+}*/
 
 [numthreads(1,1,1)]
 void CSSampleTexture (uint3 id : SV_DispatchThreadID)
