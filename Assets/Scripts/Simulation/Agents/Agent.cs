@@ -172,6 +172,7 @@ public class Agent : MonoBehaviour {
     public float avgVel;
     public Vector2 avgFluidVel;
     public float depth;
+    public Vector2 depthGradient;
     //public float depthNorth;
     //public float depthEast;
     //public float depthSouth;

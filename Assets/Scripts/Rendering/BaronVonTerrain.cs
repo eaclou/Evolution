@@ -64,7 +64,7 @@ public class BaronVonTerrain : RenderBaron {
     private ComputeBuffer quadVerticesCBuffer;  // quad mesh
 
     private int numFrameBufferStrokesPerDimension = 512;
-    private ComputeBuffer frameBufferStrokesCBuffer;
+    private ComputeBuffer frameBufferStrokesCBuffer; // combine!!! ***
     private int numGroundStrokesLrg = 64;
     private int numGroundStrokesMed = 128;
     private int numGroundStrokesSml = 256;
@@ -138,11 +138,21 @@ public class BaronVonTerrain : RenderBaron {
         terrainHeightRT0.enableRandomWrite = true;
         terrainHeightRT0.Create();
 
-        
+        int CSInitTerrainMapsKernelID = computeShaderTerrainGeneration.FindKernel("CSInitTerrainMaps");
+        computeShaderTerrainGeneration.SetTexture(CSInitTerrainMapsKernelID, "AltitudeRead", terrainInitHeightMap);   // Read-Only 
+        computeShaderTerrainGeneration.SetTexture(CSInitTerrainMapsKernelID, "AltitudeWrite", terrainHeightRT0);
+        computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
+        // GENERATE MESH DATA!!!!
+        computeShaderTerrainGeneration.Dispatch(CSInitTerrainMapsKernelID, terrainHeightMapResolution / 32, terrainHeightMapResolution / 32, 1);
+
+        /*
         Graphics.Blit(terrainInitHeightMap, terrainHeightRT0); //, testInitTerrainDataBlitMat);
         testInitTerrainDataBlitMat.SetPass(0);
         testInitTerrainDataBlitMat.SetTexture("_MainTex", terrainInitHeightMap);
         Graphics.Blit(terrainInitHeightMap, terrainHeightRT0, testInitTerrainDataBlitMat);
+        */
+
+        //computeShaderTerrainGeneration.Set
 
         terrainHeightRT1 = new RenderTexture(terrainHeightMapResolution, terrainHeightMapResolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
         terrainHeightRT1.wrapMode = TextureWrapMode.Clamp;
@@ -565,7 +575,7 @@ public class BaronVonTerrain : RenderBaron {
         computeShaderBrushStrokes.SetBuffer(kernelCSAlignFrameBufferStrokes, "terrainFrameBufferStrokesCBuffer", frameBufferStrokesCBuffer);        
         computeShaderBrushStrokes.Dispatch(kernelCSAlignFrameBufferStrokes, frameBufferStrokesCBuffer.count, 1, 1);
     }*/
-    public void AlignGroundStrokesToTerrain() {
+    public void AlignGroundStrokesToTerrain() {  // ****  OPTIMIZE!!!! *******
         int kernelCSAlignGroundStrokesLrg = computeShaderTerrainGeneration.FindKernel("CSUpdateGroundStrokes");
         computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
         //computeShaderTerrainGeneration.SetFloat("_GroundStrokeTerrainAlign", 1f);

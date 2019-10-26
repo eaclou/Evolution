@@ -4613,8 +4613,7 @@ public class TheRenderKing : MonoBehaviour {
 
         //Debug.Log("CLICKED TEST TERRAIN BUTTON! " + on.ToString());
 
-        // TEMP!!! ********* DECOMPOSERS!!!!!
-
+        /*
         
         baronVonTerrain.terrainBlitMat.SetTexture("_DeltaTex", spiritBrushRT);
         baronVonTerrain.terrainBlitMat.SetInt("_ChannelID", simManager.uiManager.selectedToolbarTerrainLayer);
@@ -4648,7 +4647,10 @@ public class TheRenderKing : MonoBehaviour {
         baronVonTerrain.terrainGenerateColorBlitMat.SetVector("_Color3", baronVonTerrain.sandSlotGenomeCurrent.color); // new Vector4(0.7f, 0.6f, 0.3f, 1f));
         Graphics.Blit(baronVonTerrain.terrainHeightRT0, baronVonTerrain.terrainColorRT0, baronVonTerrain.terrainGenerateColorBlitMat);
 
-        baronVonTerrain.InitializeTerrain();
+        // ^^ CONVERT TO COMPUTE SHADER!!
+        */
+
+        baronVonTerrain.InitializeTerrain(); // generates Land Mesh
         baronVonTerrain.AlignGroundStrokesToTerrain();
         
         

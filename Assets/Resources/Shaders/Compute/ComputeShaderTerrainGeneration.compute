@@ -5,6 +5,9 @@
 #pragma kernel CSGenerateTriangleIndices
 #pragma kernel CSSimDecomposerBitsData
 #pragma kernel CSSimWasteBitsData
+#pragma kernel CSInitTerrainMaps
+#pragma kernel CSUpdateTerrainMapsBrush
+#pragma kernel CSUpdateTerrainMapsConvolution
 
 struct TriangleIndexData {
     int v1;
@@ -50,10 +53,12 @@ RWStructuredBuffer<FrameBufferStrokeData> terrainFrameBufferStrokesCBuffer;
 
 Texture2D<float4> VelocityRead;
 Texture2D<float4> AltitudeRead;
+RWTexture2D<float4> AltitudeWrite;
+Texture2D<float4> SimDeltaTexRead;
 
 Texture2D<float4> _ResourceGridRead;
 
-int _MeshResolution = 32;
+int _MeshResolution = 32;  // even necessary?
 
 float4 _QuadBounds;  // xy = min, zw = max
 float2 _HeightRange;
@@ -137,7 +142,7 @@ void CSGetObjectDepths (uint3 id : SV_DispatchThreadID)
 {				
 	float4 data = ObjectPositionsCBuffer[id.x];
 	
-	float2 uv = data.xy;
+	float2 uv = saturate(data.xy);
 	//float2 uvOffset = data.zw;
 	
 	float4 depthCenter = AltitudeRead.SampleLevel(_LinearClamp, uv, 0);
@@ -347,3 +352,26 @@ void CSGenerateTriangleIndices (uint3 id : SV_DispatchThreadID)
 	terrainTriangleCBuffer[index0] = triangleIndexData0;
 	terrainTriangleCBuffer[index1] = triangleIndexData1;
 }
+
+[numthreads(32,32,1)]
+void CSInitTerrainMaps (uint3 id : SV_DispatchThreadID)
+{
+	float4 initTexSample = AltitudeRead[id.xy];
+
+	AltitudeWrite[id.xy] = initTexSample;
+}
+[numthreads(32,32,1)]
+void CSUpdateTerrainMapsBrush (uint3 id : SV_DispatchThreadID)
+{
+	float4 curTexSample = AltitudeRead[id.xy];
+
+	AltitudeWrite[id.xy] = curTexSample;
+}
+[numthreads(32,32,1)]
+void CSUpdateTerrainMapsConvolution (uint3 id : SV_DispatchThreadID)
+{
+	float4 initTexSample = AltitudeRead[id.xy];
+
+	AltitudeWrite[id.xy] = initTexSample;
+}
+

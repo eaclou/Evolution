@@ -773,6 +773,10 @@ public class SimulationManager : MonoBehaviour {
 
             Vector3 depthSample = simStateData.depthAtAgentPositionsArray[i];
             agentsArray[i].depth = depthSample.x;
+            agentsArray[i].depthGradient = new Vector2(depthSample.y, depthSample.z).normalized;
+            if(depthSample.y == 0 && depthSample.z == 0) {
+                agentsArray[i].depthGradient = new Vector2(0f, 0f);
+            }
             //float agentSize = (agentsArray[i].fullSizeBoundingBox.x + agentsArray[i].fullSizeBoundingBox.y) * agentsArray[i].sizePercentage * 0.25f + 0.025f;
             //float floorDepth = depthSample.x * 10f;
             /*Vector3 depthSampleNorth = simStateData.depthAtAgentPositionsArray[i * 5 + 1];
@@ -785,14 +789,11 @@ public class SimulationManager : MonoBehaviour {
             agentsArray[i].depthWest = depthSampleWest.x;
             */
             // precalculate normals?
-            Vector2 TempGrad = Vector2.one; // new Vector2(depthSample.y, depthSample.z) * 1f; // new Vector2(depthSampleEast.x - depthSampleWest.x, depthSampleNorth.x - depthSampleSouth.x).normalized;
-            if(depthSample.y != 0f && depthSample.z != 0f) {
-                TempGrad = new Vector2(depthSample.y, depthSample.z).normalized * 1f;
-            }
+            
             if (depthSample.x > 0.5f) //(floorDepth < agentSize)
             {
                 float wallForce = 10f; // Mathf.Clamp01(agentSize - floorDepth) / agentSize;
-                Vector2 grad = TempGrad; // new Vector2(depthSample.y, depthSample.z); //.normalized;
+                Vector2 grad = agentsArray[i].depthGradient; // new Vector2(depthSample.y, depthSample.z); //.normalized;
                 agentsArray[i].bodyRigidbody.AddForce(-grad * agentsArray[i].bodyRigidbody.mass * wallForce, ForceMode2D.Impulse);
 
 

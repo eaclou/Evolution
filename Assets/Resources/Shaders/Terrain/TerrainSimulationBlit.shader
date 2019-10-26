@@ -60,7 +60,7 @@
 				float4 left = tex2Dlod(_MainTex, float4(i.uv + float2( -s, 0), 0, 0));	// F[x,   y-1]: Top Centre
 
 				float2 altitudeGradient = float2(right.x - left.x, top.x - bottom.x);
-				float steepness = length(altitudeGradient);
+				//float steepness = length(altitudeGradient);
 
 				float steepnessMask = 1.0; //saturate((steepness - 0.1) * 1);
 				
@@ -70,13 +70,13 @@
 
 				float newAltitude = lerp(center, ((top.x + right.x + bottom.x + left.x) / 4.0), 0.05 * steepnessMask * hardness);
 
-				col.x = newAltitude; // (isUnderwater * 0.025 + 0.01) * 0.2);
+				col.x = saturate(newAltitude); // (isUnderwater * 0.025 + 0.01) * 0.2);
 				
 				//if(altitudeGradient.x == 0 && altitudeGradient.y == 0) {
 				//	col.yz = float2(1,0);  // default facing right?
 				//}
 				//else {
-				col.yz = normalize(altitudeGradient);
+				col.yz = altitudeGradient;
 				//}
 
 				return col;

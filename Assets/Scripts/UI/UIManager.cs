@@ -242,8 +242,8 @@ public class UIManager : MonoBehaviour {
     //public GameObject panelToolbarWingDescription;
     //public GameObject panelToolbarWingStats;
     //public GameObject panelToolbarWingMutation;
-    public GameObject panelToolbarWingDeletePrompt;
-    public Button buttonToolbarWingDeleteSpecies;
+    //public GameObject panelToolbarWingDeletePrompt;
+    //public Button buttonToolbarWingDeleteSpecies;
     //public Button buttonToolbarWingDescription;
     //public Button buttonToolbarWingStats;
     //public Button buttonToolbarWingMutation;
@@ -293,10 +293,16 @@ public class UIManager : MonoBehaviour {
 
     public GameObject panelWatcherSpiritMain;
     public Text TextCommonStatsA;
-    public GameObject panelWatcherSpiritVertebratesHUD;
-    public GameObject panelWatcherSpiritVertebratesText;
-    public GameObject panelWatcherSpiritVertebratesGenome;
-    public GameObject panelWatcherSpiritVertebratesBrain;
+    private int curWatcherPanelVertebratePageNum;
+    public Button buttonWatcherVertebrateCyclePage; // maybe not needed?
+    public GameObject panelWatcherSpiritVertebratesHUD; // 0
+    public Text textWatcherVertebrateHUD;
+    public GameObject panelWatcherSpiritVertebratesText;  // 1
+    public Text textWatcherVertebrateText;
+    public GameObject panelWatcherSpiritVertebratesGenome; // 2
+    public Text textWatcherVertebrateGenome;
+    public GameObject panelWatcherSpiritVertebratesBrain; // 3
+    public Text textWatcherVertebrateBrain;
     public GameObject panelWatcherSpiritZooplankton;    
     public GameObject panelWatcherSpiritPlants;
     public GameObject panelWatcherSpiritAlgae;
@@ -1411,68 +1417,8 @@ public class UIManager : MonoBehaviour {
                 newInspectAgentThrottleMat.SetFloat("_AgentCoordX", agent.ownPos.x / SimulationManager._MapSize);
                 newInspectAgentThrottleMat.SetFloat("_AgentCoordY", agent.ownPos.y / SimulationManager._MapSize);
 
-                if(brainDisplayOn) {
-                    //str += "nearestEA" + agent.coreModule.nearestEnemyAgent.ownPos.ToString() + "?";
-
-                    str += "\n" + agent.brain.neuronList.Count.ToString() + " Neurons    " + agent.brain.axonList.Count.ToString() + " Axons";
-                    //str += "\nisMouthTrigger" + agent.coreModule.isMouthTrigger[0].ToString() + "";
-                    //str += "\nWaterDepth " + agent.environmentModule.waterDepth[0].ToString("F3") + "";
-                    //str += "\nN=" + agent.environmentModule.depthNorth[0].ToString("F3") + ", E=" + agent.environmentModule.depthEast[0].ToString("F3") + ", S=" + agent.environmentModule.depthSouth[0].ToString("F3") + ", W=" + agent.environmentModule.depthWest[0].ToString("F3") + ",";
-                    //str += "\nWaterVel " + agent.environmentModule.waterVelX[0].ToString("F3") + ", " + agent.environmentModule.waterVelY[0].ToString("F3");
-                    //str += "\nPlant[" + agent.foodModule.nearestFoodParticleIndex.ToString() + "] " + agent.foodModule.nearestFoodParticlePos.ToString() + "";
-                    //str += "\nZoo[" + agent.foodModule.nearestAnimalParticleIndex.ToString() + "] " + agent.foodModule.nearestAnimalParticlePos.ToString() + "";
-                    //str += "\nOwnVel" + agent.movementModule.ownVelX[0].ToString("F3") + ", " + agent.movementModule.ownVelY[0].ToString("F3");
-                    //str += "\nHit " + agent.coreModule.isContact[0].ToString("F2") + " (" + agent.coreModule.contactForceX[0].ToString("F4") + ", " + agent.coreModule.contactForceY[0].ToString("F4");
-                    //str += "\nInCOMM: (" + agent.communicationModule.inComm0[0].ToString("F2") + ", " + agent.communicationModule.inComm1[0].ToString("F2") + ", " + agent.communicationModule.inComm2[0].ToString("F2") + ", " + agent.communicationModule.inComm3[0].ToString("F2") + ")";
-                    //str += "\nOutCOMM: (" + agent.communicationModule.outComm0[0].ToString("F2") + ", " + agent.communicationModule.outComm1[0].ToString("F2") + ", " + agent.communicationModule.outComm2[0].ToString("F2") + ", " + agent.communicationModule.outComm3[0].ToString("F2") + ")";
-
-                    string brainInputsTxt = "\nINPUTS:";
-                    for(int n = 0; n < agent.brain.neuronList.Count; n++) {
-                        if(agent.brain.neuronList[n].neuronType == NeuronGenome.NeuronType.In) {
-                                    
-                            if (n % 3 == 0) {
-                                brainInputsTxt += "\n";
-                            }
-                            float neuronValue = agent.brain.neuronList[n].currentValue[0];
-                            if(neuronValue < -0.2f) {
-                                brainInputsTxt += "<color=#FF6644FF>";
-                            }
-                            else if(neuronValue > 0.2f) {
-                                brainInputsTxt += "<color=#44FF66FF>";
-                            }
-                            else {
-                                brainInputsTxt += "<color=#A998B5FF>";
-                            }
-                            brainInputsTxt += "[" + n.ToString() + "] " + agent.brain.neuronList[n].currentValue[0].ToString("F2") + "</color>  ";
-                                    
-                        }
-                    }
-                    string brainOutputsTxt = "\n\nOUTPUTS:\n";
-                    for(int o = 0; o < agent.brain.neuronList.Count; o++) {
-                        if(agent.brain.neuronList[o].neuronType == NeuronGenome.NeuronType.Out) {
-                                    
-                            if (o % 3 == 0) {
-                                brainOutputsTxt += "\n";
-                            }
-                            float neuronValue = agent.brain.neuronList[o].currentValue[0];
-                            if(neuronValue < -0.2f) {
-                                brainOutputsTxt += "<color=#FF6644FF>";
-                            }
-                            else if(neuronValue > 0.2f) {
-                                brainOutputsTxt += "<color=#44FF66FF>";
-                            }
-                            else {
-                                brainOutputsTxt += "<color=#A998B5FF>";
-                            }
-                            brainOutputsTxt += "[" + o.ToString() + "] " + agent.brain.neuronList[o].currentValue[0].ToString("F2") + "</color>  ";
-                                    
-                            brainOutputsTxt += "";
-                                    
-                        }
-                    }
-                    str += brainInputsTxt + brainOutputsTxt;
-                }
-                else {
+                
+                /*else {
                     str += agent.candidateRef.candidateGenome.bodyGenome.coreGenome.name + " (gen " + agent.candidateRef.candidateGenome.bodyGenome.coreGenome.generation.ToString() + ")\n[" + critterIndex.ToString() + "]    SpeciesID " + agent.speciesIndex.ToString();
                     float energy = 0f;
                     float stomach = 0f; // agent.coreModule.foodStored
@@ -1535,13 +1481,152 @@ public class UIManager : MonoBehaviour {
                     //str += "\nLiarShader [" + gameManager.simulationManager.zooplanktonManager.closestAnimalParticlesDataArray[gameManager.simulationManager.cameraManager.targetAgentIndex].index.ToString();
 
                 }
-                 
-                TextCommonStatsA.gameObject.SetActive(false);
-                // pages:
-                panelWatcherSpiritVertebratesHUD.SetActive(true);
+                 */
+
+                TextCommonStatsA.gameObject.SetActive(false);  // non-vertebrates just share one textbox for now
+
+                panelWatcherSpiritVertebratesHUD.SetActive(false);
                 panelWatcherSpiritVertebratesText.SetActive(false);
                 panelWatcherSpiritVertebratesGenome.SetActive(false);
                 panelWatcherSpiritVertebratesBrain.SetActive(false);
+                // pages:
+                if(curWatcherPanelVertebratePageNum == 0) {
+                    panelWatcherSpiritVertebratesHUD.SetActive(true);
+                    //where do hud elements get updated?? ***
+                    string hudString = "HUD PAGE! 0";
+                    
+                    hudString += "\nisMouthTrigger" + agent.coreModule.isMouthTrigger[0].ToString() + "";
+                    hudString += "\nWaterDepth " + agent.environmentModule.waterDepth[0].ToString("F3") + "  " + agent.depthGradient.ToString();
+                    hudString += "\n" + agent.index.ToString() + " Coords: " + gameManager.simulationManager.simStateData.agentFluidPositionsArray[agent.index].ToString();
+                    //hudString += "\nN=" + agent.environmentModule.depthNorth[0].ToString("F3") + ", E=" + agent.environmentModule.depthEast[0].ToString("F3") + ", S=" + agent.environmentModule.depthSouth[0].ToString("F3") + ", W=" + agent.environmentModule.depthWest[0].ToString("F3") + ",";
+                    hudString += "\nWaterVel " + agent.environmentModule.waterVelX[0].ToString("F3") + ", " + agent.environmentModule.waterVelY[0].ToString("F3");
+                    hudString += "\nPlant[" + agent.foodModule.nearestFoodParticleIndex.ToString() + "] " + agent.foodModule.nearestFoodParticlePos.ToString() + "";
+                    hudString += "\nZoo[" + agent.foodModule.nearestAnimalParticleIndex.ToString() + "] " + agent.foodModule.nearestAnimalParticlePos.ToString() + "";
+                    hudString += "\nOwnVel" + agent.movementModule.ownVelX[0].ToString("F3") + ", " + agent.movementModule.ownVelY[0].ToString("F3");
+                    hudString += "\nHit " + agent.coreModule.isContact[0].ToString("F2") + " (" + agent.coreModule.contactForceX[0].ToString("F4") + ", " + agent.coreModule.contactForceY[0].ToString("F4");
+                    hudString += "\nInCOMM: (" + agent.communicationModule.inComm0[0].ToString("F2") + ", " + agent.communicationModule.inComm1[0].ToString("F2") + ", " + agent.communicationModule.inComm2[0].ToString("F2") + ", " + agent.communicationModule.inComm3[0].ToString("F2") + ")";
+                    hudString += "\nOutCOMM: (" + agent.communicationModule.outComm0[0].ToString("F2") + ", " + agent.communicationModule.outComm1[0].ToString("F2") + ", " + agent.communicationModule.outComm2[0].ToString("F2") + ", " + agent.communicationModule.outComm3[0].ToString("F2") + ")";
+                    
+                    textWatcherVertebrateHUD.text = hudString;
+
+                }
+                else if(curWatcherPanelVertebratePageNum == 1) {
+                    panelWatcherSpiritVertebratesText.SetActive(true);
+
+                    string textString = "TEXT PAGE! 1";
+
+                    
+                    textString += "\n\nNumChildrenBorn: " + gameManager.simulationManager.numAgentsBorn.ToString() + ", numDied: " + gameManager.simulationManager.numAgentsDied.ToString() + ", ~Gen: " + ((float)gameManager.simulationManager.numAgentsBorn / (float)gameManager.simulationManager._NumAgents).ToString();
+                    textString += "\nSimulation Age: " + gameManager.simulationManager.simAgeTimeSteps.ToString();
+                    textString += "\nYear " + gameManager.simulationManager.curSimYear.ToString() + "\n\n";
+                    int numActiveSpecies = gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList.Count;
+                    textString += numActiveSpecies.ToString() + " Active Species:\n";
+
+                    textWatcherVertebrateText.text = textString;
+                }
+                else if(curWatcherPanelVertebratePageNum == 2) {
+                    panelWatcherSpiritVertebratesGenome.SetActive(true);
+                    
+                    string genomeString = "GENOME PAGE! 2"; ;
+                    
+                    int curCount = 0;
+                    int maxCount = 1;
+                    if (agent.curLifeStage == Agent.AgentLifeStage.Egg) {
+                        curCount = agent.lifeStageTransitionTimeStepCounter;
+                        maxCount = agent._GestationDurationTimeSteps;
+                    }            
+                    if (agent.curLifeStage == Agent.AgentLifeStage.Mature) {
+                        curCount = agent.ageCounter;
+                        maxCount = agent.maxAgeTimeSteps;
+                    }
+                    if (agent.curLifeStage == Agent.AgentLifeStage.Dead) {
+                        curCount = agent.lifeStageTransitionTimeStepCounter;
+                        maxCount = curCount; // agentRef._DecayDurationTimeSteps;
+                    }
+                    int progressPercent = Mathf.RoundToInt((float)curCount / (float)maxCount * 100f);
+                    string lifeStageProgressTxt = " " + agent.curLifeStage.ToString() + " " + curCount.ToString() + "/" + maxCount.ToString() + "  " + progressPercent.ToString() + "% ";
+                    genomeString += lifeStageProgressTxt;
+                    // &&&& INDIVIDUAL AGENT: &&&&
+                    //string debugTxtAgent = "";            
+                    genomeString += "CRITTER# [" + agent.index.ToString() + "]     SPECIES# [" + agent.speciesIndex.ToString() + "]\n\n";
+                    // Init Attributes:
+                    // Body:
+                    genomeString += "Base Size: " + agent.candidateRef.candidateGenome.bodyGenome.coreGenome.creatureBaseLength.ToString("F2") + ",  Aspect: " + agent.candidateRef.candidateGenome.bodyGenome.coreGenome.creatureAspectRatio.ToString("F2") + "\n"; 
+                    genomeString += "Fullsize Dimensions: ( " + agent.fullSizeBoundingBox.x.ToString("F2") + ", " + agent.fullSizeBoundingBox.y.ToString("F2") + ", " + agent.fullSizeBoundingBox.z.ToString("F2") + " )\n";
+                    genomeString += "BONUS - Damage: " + agent.coreModule.damageBonus.ToString("F2") + ", Speed: " + agent.coreModule.speedBonus.ToString("F2") + ", Health: " + agent.coreModule.healthBonus.ToString("F2") + ", Energy: " + agent.coreModule.energyBonus.ToString("F2") + "\n";
+                    genomeString += "DIET - Decay: " + agent.coreModule.foodEfficiencyDecay.ToString("F2") + ", Plant: " + agent.coreModule.foodEfficiencyPlant.ToString("F2") + ", Meat: " + agent.coreModule.foodEfficiencyMeat.ToString("F2") + "\n";
+                    //string mouthType = "Active";
+                    //if (agentRef.mouthRef.isPassive) { mouthType = "Passive"; }
+                    //debugTxtAgent += "Mouth: [" + mouthType + "]\n";
+                    genomeString += "# Neurons: " + agent.brain.neuronList.Count.ToString() + ", # Axons: " + agent.brain.axonList.Count.ToString() + "\n";
+                    genomeString += "# In/Out Nodes: " + agent.candidateRef.candidateGenome.brainGenome.bodyNeuronList.Count.ToString() + ", # Hidden Nodes: " + agent.candidateRef.candidateGenome.brainGenome.hiddenNeuronList.Count.ToString() + ", # Links: " + agent.candidateRef.candidateGenome.brainGenome.linkList.Count.ToString() + "\n";
+
+                    genomeString += "\nSENSORS:\n";
+                    genomeString += "Comms= " + agent.candidateRef.candidateGenome.bodyGenome.communicationGenome.useComms.ToString() + "\n";
+                    genomeString += "Enviro: WaterStats: " + agent.candidateRef.candidateGenome.bodyGenome.environmentalGenome.useWaterStats.ToString() + ", Cardinals= " + agent.candidateRef.candidateGenome.bodyGenome.environmentalGenome.useCardinals.ToString() + ", Diagonals= " + agent.candidateRef.candidateGenome.bodyGenome.environmentalGenome.useDiagonals.ToString() + "\n";
+                    CritterModuleFoodSensorsGenome foodGenome = agent.candidateRef.candidateGenome.bodyGenome.foodGenome;
+                    genomeString += "Food: Nutrients= " + foodGenome.useNutrients.ToString() + ", Pos= " + foodGenome.usePos.ToString() + ",  Dir= " + foodGenome.useDir.ToString() + ",  Stats= " + foodGenome.useStats.ToString() + ", useEggs: " + foodGenome.useEggs.ToString() + ", useCorpse: " + foodGenome.useCorpse.ToString() + "\n";
+                    genomeString += "Friend: Pos= " + agent.candidateRef.candidateGenome.bodyGenome.friendGenome.usePos.ToString() + ",  Dir= " + agent.candidateRef.candidateGenome.bodyGenome.friendGenome.useDir.ToString() + ",  Vel= " + agent.candidateRef.candidateGenome.bodyGenome.friendGenome.useVel.ToString() + "\n";
+                    genomeString += "Threat: Pos= " + agent.candidateRef.candidateGenome.bodyGenome.threatGenome.usePos.ToString() + ",  Dir= " + agent.candidateRef.candidateGenome.bodyGenome.threatGenome.useDir.ToString() + ",  Vel= " + agent.candidateRef.candidateGenome.bodyGenome.threatGenome.useVel.ToString() + ",  Stats= " + agent.candidateRef.candidateGenome.bodyGenome.threatGenome.useStats.ToString() + "\n";
+            
+                    textWatcherVertebrateGenome.text = genomeString;
+                }
+                else if(curWatcherPanelVertebratePageNum == 3) {
+                    panelWatcherSpiritVertebratesBrain.SetActive(true);
+                    // update brain panel
+                                        
+                    string brainString = "BRAIN PAGE! 3";
+                    brainString += "\n" + agent.brain.neuronList.Count.ToString() + " Neurons    " + agent.brain.axonList.Count.ToString() + " Axons";
+                  
+                    string brainInputsTxt = "\nINPUTS:";
+                    for(int n = 0; n < agent.brain.neuronList.Count; n++) {
+                        if(agent.brain.neuronList[n].neuronType == NeuronGenome.NeuronType.In) {
+                                    
+                            if (n % 3 == 0) {
+                                brainInputsTxt += "\n";
+                            }
+                            float neuronValue = agent.brain.neuronList[n].currentValue[0];
+                            if(neuronValue < -0.2f) {
+                                brainInputsTxt += "<color=#FF6644FF>";
+                            }
+                            else if(neuronValue > 0.2f) {
+                                brainInputsTxt += "<color=#44FF66FF>";
+                            }
+                            else {
+                                brainInputsTxt += "<color=#A998B5FF>";
+                            }
+                            brainInputsTxt += "[" + n.ToString() + "] " + agent.brain.neuronList[n].currentValue[0].ToString("F2") + "</color>  ";
+                                    
+                        }
+                    }
+                    string brainOutputsTxt = "\n\nOUTPUTS:\n";
+                    for(int o = 0; o < agent.brain.neuronList.Count; o++) {
+                        if(agent.brain.neuronList[o].neuronType == NeuronGenome.NeuronType.Out) {
+                                    
+                            if (o % 3 == 0) {
+                                brainOutputsTxt += "\n";
+                            }
+                            float neuronValue = agent.brain.neuronList[o].currentValue[0];
+                            if(neuronValue < -0.2f) {
+                                brainOutputsTxt += "<color=#FF6644FF>";
+                            }
+                            else if(neuronValue > 0.2f) {
+                                brainOutputsTxt += "<color=#44FF66FF>";
+                            }
+                            else {
+                                brainOutputsTxt += "<color=#A998B5FF>";
+                            }
+                            brainOutputsTxt += "[" + o.ToString() + "] " + agent.brain.neuronList[o].currentValue[0].ToString("F2") + "</color>  ";
+                                    
+                            brainOutputsTxt += "";
+                                    
+                        }
+                    }
+                    brainString += brainInputsTxt + brainOutputsTxt;
+
+                    textWatcherVertebrateBrain.text = brainString;
+                }
+                
             }
 
             
@@ -1896,13 +1981,13 @@ public class UIManager : MonoBehaviour {
             textSelectedSpeciesTitle.text = "NONE";
         }
 
-        panelToolbarWingDeletePrompt.SetActive(false);
+        //panelToolbarWingDeletePrompt.SetActive(false);
         textToolbarWingSpeciesSummary.gameObject.SetActive(true);
                                 
         // Which panels are available?
         //int panelTier = -1;
         panelInfoResourcesOverview.SetActive(false);          
-        buttonToolbarWingDeleteSpecies.gameObject.SetActive(false); 
+        //buttonToolbarWingDeleteSpecies.gameObject.SetActive(false); 
         if (layerManager.selectedTrophicSlotRef.kingdomID == 0) {
             imageToolbarSpeciesPortraitRender.sprite = spriteSpiritDecomposerIcon;
             //buttonToolbarWingDeleteSpecies.gameObject.SetActive(true); 
@@ -4668,6 +4753,14 @@ public class UIManager : MonoBehaviour {
     }
     public void SliderDebugTextureGamma(float val) {
         _Gamma = val;
+    }
+
+    public void ClickWatcherVertebratePageCycle() {
+        curWatcherPanelVertebratePageNum++;
+
+        if(curWatcherPanelVertebratePageNum > 3) {
+            curWatcherPanelVertebratePageNum = 0;
+        }
     }
 
 
