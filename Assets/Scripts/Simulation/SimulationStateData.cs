@@ -238,11 +238,11 @@ public class SimulationStateData {
         fluidVelocitiesAtAgentPositionsArray = new Vector2[simManager._NumAgents];
         fluidVelocitiesAtEggSackPositionsArray = new Vector2[simManager._NumEggSacks];
         //fluidVelocitiesAtPredatorPositionsArray = new Vector2[simManager._NumPredators];
-        agentFluidPositionsArray = new Vector4[simManager._NumAgents * 5];
+        agentFluidPositionsArray = new Vector4[simManager._NumAgents];
         eggSackFluidPositionsArray = new Vector4[simManager._NumEggSacks];
         //predatorFluidPositionsArray = new Vector4[simManager._NumPredators];
 
-        depthAtAgentPositionsArray = new Vector3[simManager._NumAgents * 5];
+        depthAtAgentPositionsArray = new Vector3[simManager._NumAgents];
     }
 
     public void PopulateSimDataArrays(SimulationManager simManager) {
@@ -370,24 +370,22 @@ public class SimulationStateData {
                 // Z & W coords represents agent's x/y Radii (in FluidCoords)
                 float agentCenterX = agentPos.x / SimulationManager._MapSize;
                 float agentCenterY = agentPos.y / SimulationManager._MapSize;
-                float sensorRange = 0.0025f;  // in UV 0-1
+                /*float sensorRange = 0.0025f;  // in UV 0-1
                 Vector2[] directionsArray = new Vector2[5];
                 directionsArray[0] = new Vector2(0f, 0f) * sensorRange;
                 directionsArray[1] = new Vector2(0f, 1f) * sensorRange;
                 directionsArray[2] = new Vector2(1f, 0f) * sensorRange;
                 directionsArray[3] = new Vector2(0f, -1f) * sensorRange;
                 directionsArray[4] = new Vector2(-1f, 0f) * sensorRange;
+                */
+
                 
-
-                for(int k = 0; k < 5; k++) {  // 5 waterDepth samples in a T-Cross shape around each critter
-                    int index = i * 5 + k;
-
-                    agentFluidPositionsArray[index] = new Vector4(agentCenterX + directionsArray[k].x, 
-                                                          agentCenterY + directionsArray[k].y, 
+                agentFluidPositionsArray[i] = new Vector4(agentCenterX, 
+                                                          agentCenterY, 
                                                           (simManager.agentsArray[i].fullSizeBoundingBox.x + 0.25f) * 0.5f / SimulationManager._MapSize, // **** RE-VISIT!!!!! ****
                                                           (simManager.agentsArray[i].fullSizeBoundingBox.y + 0.25f) * 0.5f / SimulationManager._MapSize); //... 0.5/140 ...
 
-                }
+                
                 
 
                 // ***************************** // TEMP HACK!!!!!!! *************************
@@ -432,7 +430,7 @@ public class SimulationStateData {
         fluidVelocitiesAtAgentPositionsArray = simManager.environmentFluidManager.GetFluidVelocityAtObjectPositions(agentFluidPositionsArray);
         fluidVelocitiesAtEggSackPositionsArray = simManager.environmentFluidManager.GetFluidVelocityAtObjectPositions(eggSackFluidPositionsArray);
         //fluidVelocitiesAtPredatorPositionsArray = simManager.environmentFluidManager.GetFluidVelocityAtObjectPositions(predatorFluidPositionsArray);
-
+        Debug.Log("agentFluidPositionsArray: " + agentFluidPositionsArray.Length.ToString());
         depthAtAgentPositionsArray = simManager.theRenderKing.GetDepthAtObjectPositions(agentFluidPositionsArray);
 
 

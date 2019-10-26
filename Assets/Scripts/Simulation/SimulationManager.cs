@@ -771,11 +771,11 @@ public class SimulationManager : MonoBehaviour {
         // ********** REVISIT CONVERSION btw fluid/scene coords and Force Amounts !!!! *************
         for (int i = 0; i < agentsArray.Length; i++) {
 
-            Vector3 depthSample = simStateData.depthAtAgentPositionsArray[i * 5];
+            Vector3 depthSample = simStateData.depthAtAgentPositionsArray[i];
             agentsArray[i].depth = depthSample.x;
             //float agentSize = (agentsArray[i].fullSizeBoundingBox.x + agentsArray[i].fullSizeBoundingBox.y) * agentsArray[i].sizePercentage * 0.25f + 0.025f;
             //float floorDepth = depthSample.x * 10f;
-            Vector3 depthSampleNorth = simStateData.depthAtAgentPositionsArray[i * 5 + 1];
+            /*Vector3 depthSampleNorth = simStateData.depthAtAgentPositionsArray[i * 5 + 1];
             agentsArray[i].depthNorth = depthSampleNorth.x;
             Vector3 depthSampleEast = simStateData.depthAtAgentPositionsArray[i * 5 + 2];
             agentsArray[i].depthEast = depthSampleEast.x;
@@ -783,12 +783,15 @@ public class SimulationManager : MonoBehaviour {
             agentsArray[i].depthSouth = depthSampleSouth.x;
             Vector3 depthSampleWest = simStateData.depthAtAgentPositionsArray[i * 5 + 4];
             agentsArray[i].depthWest = depthSampleWest.x;
-
-            Vector2 TempGrad = new Vector2(depthSampleEast.x - depthSampleWest.x, depthSampleNorth.x - depthSampleSouth.x).normalized;
-            
-            if (depthSample.x > 0.475f) //(floorDepth < agentSize)
+            */
+            // precalculate normals?
+            Vector2 TempGrad = Vector2.one; // new Vector2(depthSample.y, depthSample.z) * 1f; // new Vector2(depthSampleEast.x - depthSampleWest.x, depthSampleNorth.x - depthSampleSouth.x).normalized;
+            if(depthSample.y != 0f && depthSample.z != 0f) {
+                TempGrad = new Vector2(depthSample.y, depthSample.z).normalized * 1f;
+            }
+            if (depthSample.x > 0.5f) //(floorDepth < agentSize)
             {
-                float wallForce = 25f; // Mathf.Clamp01(agentSize - floorDepth) / agentSize;
+                float wallForce = 10f; // Mathf.Clamp01(agentSize - floorDepth) / agentSize;
                 Vector2 grad = TempGrad; // new Vector2(depthSample.y, depthSample.z); //.normalized;
                 agentsArray[i].bodyRigidbody.AddForce(-grad * agentsArray[i].bodyRigidbody.mass * wallForce, ForceMode2D.Impulse);
 
@@ -1103,8 +1106,6 @@ public class SimulationManager : MonoBehaviour {
                 Debug.Log("" + trophicLayersManager.selectedTrophicSlotRef.ToString());
                 candidateData.candidateGenome = masterGenomePool.vertebrateSlotsGenomesCurrentArray[trophicLayersManager.selectedTrophicSlotRef.slotID].representativeGenome;
                 
-                
-
 
                 if (candidateData == null) {
                     Debug.LogError("GetNextAvailableCandidate(): candidateData NULL!!!!");

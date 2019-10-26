@@ -110,7 +110,7 @@
 				//float4 fluidColor = tex2D(_FluidColorTex, i.fluidCoords * 1); // i.fluidCoords); 
 
 				float4 finalColor = texColor; //float4(1,1,1,1); //float4(0.1,0.1,0.05,1) * texColor; //texColor * _Tint * float4(i.color, 1);
-				finalColor.rgb = float3(0.9, 0.8, 0.5) * (0.25 + 0.75 * i.color.x) * 2;
+				finalColor.rgb = float3(0.9, 0.8, 0.5) * (0.25 + 0.75 * i.color.x) * 5;
 				finalColor.a *= i.color.a * 0.7;
 				//finalColor.rgb = lerp(fluidColor.rgb, i.color.rgb, 0.06);
 				//finalColor.a *= 0.65;

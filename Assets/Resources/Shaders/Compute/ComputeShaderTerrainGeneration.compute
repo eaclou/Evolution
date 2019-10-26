@@ -150,9 +150,9 @@ void CSGetObjectDepths (uint3 id : SV_DispatchThreadID)
 
 	//float3 depth = float3(1.0 - saturate(depthCenter * 2.0), -grad); // (velLeft + velRight + velUp + velDown) / 4;
 
-	float4 depthStats = float4(depthCenter.x, 1, 0, 0);
+	//float4 depthStats = float4(depthCenter.x, 1, 0, 0);
 	
-	DepthValuesCBuffer[id.x] = depthStats;
+	DepthValuesCBuffer[id.x] = depthCenter;
 }
 
 [numthreads(1024,1,1)]

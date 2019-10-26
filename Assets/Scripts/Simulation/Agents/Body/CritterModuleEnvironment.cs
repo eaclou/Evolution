@@ -111,10 +111,10 @@ public class CritterModuleEnvironment {
             waterVelX[0] = agent.avgFluidVel.x * 10f;
             waterVelY[0] = agent.avgFluidVel.y * 10f; // *** *10f to get closer to 0-1 range since values are very low
 
-            depthNorth[0] = agent.depthNorth;
-            depthEast[0] = agent.depthEast;
-            depthSouth[0] = agent.depthSouth;
-            depthWest[0] = agent.depthWest;
+            //depthNorth[0] = agent.depthNorth;
+            //depthEast[0] = agent.depthEast;
+            //depthSouth[0] = agent.depthSouth;
+            //depthWest[0] = agent.depthWest;
         }
 
         int rayLayer = LayerMask.GetMask("EnvironmentCollision");
