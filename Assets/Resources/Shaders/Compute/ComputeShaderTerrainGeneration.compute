@@ -55,10 +55,17 @@ Texture2D<float4> VelocityRead;
 Texture2D<float4> AltitudeRead;
 RWTexture2D<float4> AltitudeWrite;
 Texture2D<float4> SpiritBrushRead;
-
-//Texture2D<float4> SimDeltaTexRead;
-
+RWTexture2D<float4> TerrainColorWrite;
+uniform float _IsUpdateTerrainColor;
 Texture2D<float4> _ResourceGridRead;  // for decomposer bits which are in this file for whatever reason...
+
+uniform float _BrushIntensity;
+uniform float4 _Color0;
+uniform float4 _Color1;
+uniform float4 _Color2;
+uniform float4 _Color3;
+uniform int _ChannelID = 0;			
+uniform float _AddSubtractSign = 1; 
 
 int _MeshResolution = 32;  // even necessary?
 
@@ -91,7 +98,7 @@ float rand(float2 co){   // OUTPUT is in [0,1] RANGE!!!
 	return frac(sin(dot(co.xy ,float2(12.9898,78.233))) * 43758.5453);
 }
 
-[numthreads(1,1,1)]
+[numthreads(256,1,1)]
 void CSUpdateGroundStrokes (uint3 id : SV_DispatchThreadID)
 {
 	FrameBufferStrokeData data = terrainFrameBufferStrokesCBuffer[id.x];
@@ -388,21 +395,56 @@ void CSInitTerrainMaps (uint3 id : SV_DispatchThreadID)
 	
 	AltitudeWrite[id.xy] = outputTex;
 }
+
+float4 GetTerrainColor(float4 terrainCompositionData) {
+	return terrainCompositionData;
+}
 [numthreads(32,32,1)]
 void CSUpdateTerrainMapsBrush (uint3 id : SV_DispatchThreadID)
 {
-	float2 uv = (float2)id.xy / _TextureResolution;
-	float4 texSample = AltitudeRead.SampleLevel(_LinearClamp, uv, 0);
+	float2 uv = ((float2)id.xy + 0.5) / _TextureResolution;
+	float4 texSample = AltitudeRead[id.xy]; //    .SampleLevel(_LinearClamp, uv, 0);
 
 	float4 brushSample = SpiritBrushRead.SampleLevel(_LinearClamp, uv, 0);
+	
+	// WHICH CHANNEL????
+	//texSample.x += brushSample.x * _BrushIntensity * _AddSubtractSign;
+	if(_ChannelID == 0) {
+		texSample.x = saturate(texSample.x + brushSample.x * _AddSubtractSign * _BrushIntensity);
+	}
+
+	if(_ChannelID == 1) {
+		texSample.x = saturate(texSample.x + brushSample.x * _AddSubtractSign * _BrushIntensity);
+		texSample.y = saturate(texSample.y + brushSample.x * _AddSubtractSign * _BrushIntensity);
+	}
+
+	if(_ChannelID == 2) {
+		texSample.x = saturate(texSample.x + brushSample.x * _AddSubtractSign * _BrushIntensity); 
+		texSample.z = saturate(texSample.z + brushSample.x * _AddSubtractSign * _BrushIntensity);
+	}
+
+	if(_ChannelID == 3) {
+		texSample.x = saturate(texSample.x + brushSample.x * _AddSubtractSign * _BrushIntensity);
+		texSample.w = saturate(texSample.w + brushSample.x * _AddSubtractSign * _BrushIntensity);
+	}
+
+	if(_IsUpdateTerrainColor > 0.5) {		
+		float4 finalColor = float4(1,1,1,1);
+		finalColor.rgb = saturate(_Color0.rgb);
+		finalColor = lerp(finalColor, _Color1, saturate(texSample.y));
+		finalColor = lerp(finalColor, _Color2, saturate(texSample.z));
+		finalColor = lerp(finalColor, _Color3, saturate(texSample.w));
+		finalColor.rgb = lerp(finalColor.rgb, 0.75, 0.33);
+		finalColor.a = 1;				
+		TerrainColorWrite[id.xy] = finalColor;
+	}	
 
 	AltitudeWrite[id.xy] = texSample;
 }
 [numthreads(32,32,1)]
 void CSUpdateTerrainMapsConvolution (uint3 id : SV_DispatchThreadID)
 {
-	float2 uv = (float2)id.xy / _TextureResolution;
-	float4 texSample = AltitudeRead.SampleLevel(_LinearClamp, uv, 0);
+	float4 texSample = AltitudeRead[id.xy];
 
 	AltitudeWrite[id.xy] = texSample;
 }

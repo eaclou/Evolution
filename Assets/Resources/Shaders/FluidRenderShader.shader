@@ -172,12 +172,14 @@
 				finalColor.a = saturate(finalColor.a + algaeCoverAmount * 0.55);// * 0.35;
 				finalColor.a *= onLandMask;
 				
-				finalColor += saturate((altitude - 0.5) * 80) * 0.01;
+				finalColor += saturate((altitude - 0.5) * 20) * 0.01;
 				//finalColor += reflectLerp * onLandMask * 1;
 				float shoreMask = saturate((altitude - 0.34) * 3.20) * (onLandMask);
 				//finalColor.a = saturate(max(finalColor.a, shoreMask));
-				finalColor.a += shoreMask * 0.22;
-				finalColor.rgb += shoreMask * 0.42;
+				finalColor.a += shoreMask * 0.022;
+				finalColor.rgb += shoreMask * 0.142;
+				
+				finalColor.a *= 0.75;
 				return saturate(finalColor);
 				
 				

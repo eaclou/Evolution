@@ -959,7 +959,7 @@ public class UIManager : MonoBehaviour {
             
                 if (curActiveTool == ToolType.Stir) {  
                     stirGizmoVisible = true;
-                    gameManager.simulationManager.theRenderKing.ClickTestTerrain(false);
+                    gameManager.simulationManager.theRenderKing.ClickTestTerrainUpdateMaps(false);
                     float isActing = 0f;
                     
                     if (isDraggingMouseLeft) {
@@ -1011,7 +1011,7 @@ public class UIManager : MonoBehaviour {
                         // IF TERRAIN SELECTED::::
                         if (gameManager.simulationManager.trophicLayersManager.isSelectedTrophicSlot) {
                             if (gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID > 2) {
-                                gameManager.simulationManager.theRenderKing.ClickTestTerrain(true);
+                                gameManager.simulationManager.theRenderKing.ClickTestTerrainUpdateMaps(true);
                             }
 
                             // DECOMPOSERS::::
@@ -1079,7 +1079,7 @@ public class UIManager : MonoBehaviour {
 
                     }
                     else {
-                        gameManager.simulationManager.theRenderKing.ClickTestTerrain(false);
+                        gameManager.simulationManager.theRenderKing.ClickTestTerrainUpdateMaps(false);
                         gameManager.simulationManager.recentlyAddedSpeciesOn = false;
                     }
                 }
@@ -2353,7 +2353,7 @@ public class UIManager : MonoBehaviour {
 
             // if terrain:
             gameManager.theRenderKing.baronVonTerrain.GenerateTerrainSlotGenomeMutationOptions(slotRef.slotID);
-            gameManager.theRenderKing.ClickTestTerrain(false); // refresh color
+            gameManager.theRenderKing.ClickTestTerrainUpdateMaps(false); // refresh color
         }
         Debug.Log("MUTATION!!! kingdom(" + slotRef.kingdomID.ToString() + ")");
         //selectedToolbarMutationID = 0; // Reset?? figure out what you want to do here

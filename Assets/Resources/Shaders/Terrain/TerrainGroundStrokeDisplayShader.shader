@@ -5,8 +5,8 @@
 		_MainTex ("Main Texture", 2D) = "white" {}
 		_AltitudeTex ("_AltitudeTex", 2D) = "gray" {}
 		_WaterSurfaceTex ("_WaterSurfaceTex", 2D) = "black" {}
-		_DecomposerTex ("_DecomposerTex", 2D) = "black" {}
-		//_NutrientTex ("_NutrientTex", 2D) = "black" {}
+		_ResourceGridTex ("_ResourceGridTex", 2D) = "black" {}
+		_TerrainColorTex ("_TerrainColorTex", 2D) = "black" {}
 		
 	}
 	SubShader
@@ -29,10 +29,11 @@
 			sampler2D _MainTex;
 			sampler2D _AltitudeTex;
 			sampler2D _WaterSurfaceTex;
-			sampler2D _DecomposerTex;
+			sampler2D _ResourceGridTex;
+			sampler2D _TerrainColorTex;
 			
-			sampler2D _RenderedSceneRT;  // Provided by CommandBuffer -- global tex??? seems confusing... ** revisit this
-						
+			//sampler2D _RenderedSceneRT;  // Provided by CommandBuffer -- global tex??? seems confusing... ** revisit this
+			uniform float _MapSize;			
 			
 			struct FrameBufferStrokeData {
 				float3 worldPos;
@@ -48,7 +49,7 @@
 			{
 				float4 pos : SV_POSITION;
 				float2 uv : TEXCOORD0;  // uv of the brushstroke quad itself, particle texture
-				float4 screenUV : TEXCOORD1;
+				//float4 screenUV : TEXCOORD1;
 				float2 altitudeUV : TEXCOORD2;
 				float3 worldPos : TEXCOORD3;
 			};
@@ -63,7 +64,7 @@
 
 				// New code:
 				// Brushstrokes here vary in:  (size, position, color)
-								
+				// Simulated separately (within ComputeTerrain) -- rendered here				
 				FrameBufferStrokeData strokeData = frameBufferStrokesCBuffer[inst];
 
 				float3 worldPosition = strokeData.worldPos;
@@ -71,7 +72,7 @@
 
 				o.worldPos = worldPosition;
 
-				float2 altUV = worldPosition.xy / 256;
+				float2 altUV = worldPosition.xy / _MapSize;
 				o.altitudeUV = altUV;
 
 				float altitude = tex2Dlod(_AltitudeTex, float4(altUV, 0, 0)).x; //i.worldPos.z / 10; // [-1,1] range
@@ -91,8 +92,8 @@
 				// &&&& Screen-space UV of center of brushstroke:
 				// Magic to get proper UV's for sampling from GBuffers:
 				float4 pos = mul(UNITY_MATRIX_VP, float4(worldPosition, 1.0)); // *** Revisit to better understand!!!! ***
-				float4 screenUV = ComputeScreenPos(pos);
-				o.screenUV = screenUV; //centerUV.xy / centerUV.w;
+				//float4 screenUV = ComputeScreenPos(pos);
+				//o.screenUV = screenUV; //centerUV.xy / centerUV.w;
 
 				// Figure out final facing Vectors!!!
 				float2 forward = strokeData.heading;
@@ -113,13 +114,13 @@
 				
 				float4 brushColor = tex2D(_MainTex, i.uv);	
 				
-				float2 screenUV = i.screenUV.xy / i.screenUV.w;
-				float4 frameBufferColor = tex2D(_RenderedSceneRT, screenUV);  //  Color of brushtroke source					
+				//float2 screenUV = i.screenUV.xy / i.screenUV.w;
+				//float4 frameBufferColor = tex2D(_RenderedSceneRT, screenUV);  //  Color of brushtroke source					
 				float4 altitudeTex = tex2D(_AltitudeTex, i.altitudeUV); //i.worldPos.z / 10; // [-1,1] range
 				float4 waterSurfaceTex = tex2D(_WaterSurfaceTex, i.altitudeUV);
-				float4 resourceTex = tex2D(_DecomposerTex, i.altitudeUV);	
-				
-				float4 finalColor = GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, resourceTex);
+				float4 resourceTex = tex2D(_ResourceGridTex, i.altitudeUV);	
+				float4 terrainColorTex = tex2D(_TerrainColorTex, i.altitudeUV);	
+				float4 finalColor = GetGroundColor(i.worldPos, terrainColorTex, altitudeTex, waterSurfaceTex, resourceTex);
 				finalColor.a = brushColor.a;
 				
 				

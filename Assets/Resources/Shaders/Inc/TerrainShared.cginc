@@ -55,8 +55,10 @@ float3 GetFinalBackgroundColor() {   // for shadows?
 
 float4 GetGroundColor(float3 worldPos, float4 frameBufferColor, float4 altitudeTex, float4 waterSurfaceTex, float4 resourceTex) {
 	float turbidity = _Turbidity;  
-	float causticsStrength = lerp(0.025, 0.275, _Turbidity);
-	float minFog = 0.5;
+	float causticsStrength = lerp(0.025, 0.275, 0.6); //_Turbidity);
+	float minFog = 1;
+
+	
 	
 	float4 finalColor = frameBufferColor;
 	float3 decomposerHue = float3(0.8,0.3,0);
@@ -73,9 +75,9 @@ float4 GetGroundColor(float3 worldPos, float4 frameBufferColor, float4 altitudeT
 	float altitude = altitudeTex.x;
 	// 0-1 range --> -1 to 1
 	altitude = (altitude * 2 - 1) * -1;
-	float isUnderwater = saturate(altitude * 10000);
+	float isUnderwater = saturate(altitude * 100);
 	
-	float3 waterFogColor = float3(0.42, 1, 0.34) * 0.4; // _FogColor.rgb;
+	float3 waterFogColor = float3(0.32, 0.5, 0.44) * 0.4; // _FogColor.rgb;
 	
 	// FAKE CAUSTICS:::
 	float3 surfaceNormal = waterSurfaceTex.yzw; // pre-calculated
@@ -83,25 +85,32 @@ float4 GetGroundColor(float3 worldPos, float4 frameBufferColor, float4 altitudeT
 	dotLight = dotLight * dotLight;
 	
 	float depthNormalized = saturate((1.0 - altitudeTex.x) - 0.5) * 2;
-	depthNormalized *= turbidity;
+	//depthNormalized *= turbidity;
 	depthNormalized = saturate(depthNormalized);
 
 	// Wetness darkening:
-	float wetnessMask = saturate(((altitudeTex.x + waterSurfaceTex.x * 0.1) - 0.5) * 9.25);
+	float wetnessMask = saturate(((altitudeTex.x + waterSurfaceTex.x * 0.34) - 0.6) * 5.25);
 	finalColor.rgb *= (0.6 + wetnessMask * 0.4);
 	
 	// Caustics
 	finalColor.rgb += dotLight * isUnderwater * (1.0 - depthNormalized) * causticsStrength;		
 	
-	
+	//Diffuse 
+	float3 sunDir = normalize(float3(1,1,-1));
+	float3 horizontalNormal = float3(0.01, 0, altitudeTex.y);
+	float3 verticalNormal = float3(0, 0.01, altitudeTex.z);
+	float3 groundNormal = normalize(cross(verticalNormal, horizontalNormal));
+	float dotDiffuse = saturate(dot(groundNormal, sunDir));
+	//finalColor.rgb += dotDiffuse * 0.1;
+
 	// FOG:	
 	float fogAmount = lerp(0, 1, depthNormalized);
 	finalColor.rgb = lerp(finalColor.rgb, waterFogColor, fogAmount * isUnderwater); // (max(minFog, saturate(depthNormalized + algaeMask))
 
 	
-	//finalColor.rgb += decomposerHue * decomposerMask * 0.025;
+	finalColor.rgb += decomposerHue * decomposerMask * 0.025;
 	
-	//return float4(1,1,1,1);
+	//return float4(frameBufferColor.rgb,1);
 	return finalColor;
 
 	

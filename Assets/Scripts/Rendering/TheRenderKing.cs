@@ -3758,33 +3758,34 @@ public class TheRenderKing : MonoBehaviour {
             //baronVonTerrain.RenderCommands(ref cmdBufferTest, renderedSceneID);
             // GROUND:
             // LARGE STROKES!!!!
-            baronVonTerrain.groundStrokesLrgDisplayMat.SetPass(0);
+            /*baronVonTerrain.groundStrokesLrgDisplayMat.SetPass(0);
             baronVonTerrain.groundStrokesLrgDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
             baronVonTerrain.groundStrokesLrgDisplayMat.SetBuffer("frameBufferStrokesCBuffer", baronVonTerrain.groundStrokesLrgCBuffer);
             baronVonTerrain.groundStrokesLrgDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
             baronVonTerrain.groundStrokesLrgDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
             baronVonTerrain.groundStrokesLrgDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-            baronVonTerrain.groundStrokesLrgDisplayMat.SetTexture("_DecomposerTex", simManager.vegetationManager.resourceGridRT1);
+            baronVonTerrain.groundStrokesLrgDisplayMat.SetTexture("_ResourceGridTex", simManager.vegetationManager.resourceGridRT1);
             baronVonTerrain.groundStrokesLrgDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);  
             baronVonTerrain.groundStrokesLrgDisplayMat.SetFloat("_MinFog", minimumFogDensity);
             baronVonTerrain.groundStrokesLrgDisplayMat.SetVector("_FogColor", simManager.fogColor);
             //cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundStrokesLrgDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.groundStrokesLrgCBuffer.count);
-
+            */
             // MEDIUM STROKES!!!!
             baronVonTerrain.groundStrokesMedDisplayMat.SetPass(0);
             baronVonTerrain.groundStrokesMedDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-            baronVonTerrain.groundStrokesMedDisplayMat.SetBuffer("frameBufferStrokesCBuffer", baronVonTerrain.groundStrokesMedCBuffer);
+            baronVonTerrain.groundStrokesMedDisplayMat.SetBuffer("frameBufferStrokesCBuffer", baronVonTerrain.terrainStrokesCBuffer);
             baronVonTerrain.groundStrokesMedDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
             baronVonTerrain.groundStrokesMedDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
             baronVonTerrain.groundStrokesMedDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-            baronVonTerrain.groundStrokesMedDisplayMat.SetTexture("_DecomposerTex", simManager.vegetationManager.resourceGridRT1);
+            baronVonTerrain.groundStrokesMedDisplayMat.SetTexture("_ResourceGridTex", simManager.vegetationManager.resourceGridRT1);
+            baronVonTerrain.groundStrokesMedDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
             baronVonTerrain.groundStrokesMedDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);       
-            baronVonTerrain.groundStrokesMedDisplayMat.SetFloat("_MinFog", minimumFogDensity);             
+            baronVonTerrain.groundStrokesMedDisplayMat.SetFloat("_MinFog", minimumFogDensity);        
             baronVonTerrain.groundStrokesMedDisplayMat.SetVector("_FogColor", simManager.fogColor);
             //cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
-            cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundStrokesMedDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.groundStrokesMedCBuffer.count);
-
+            cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundStrokesMedDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.terrainStrokesCBuffer.count);
+            /*
             // SMALL STROKES!!!!
             baronVonTerrain.groundStrokesSmlDisplayMat.SetPass(0);
             baronVonTerrain.groundStrokesSmlDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -3792,13 +3793,13 @@ public class TheRenderKing : MonoBehaviour {
             baronVonTerrain.groundStrokesSmlDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
             baronVonTerrain.groundStrokesSmlDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
             baronVonTerrain.groundStrokesSmlDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-            baronVonTerrain.groundStrokesSmlDisplayMat.SetTexture("_DecomposerTex", simManager.vegetationManager.resourceGridRT1);
+            baronVonTerrain.groundStrokesSmlDisplayMat.SetTexture("_ResourceGridTex", simManager.vegetationManager.resourceGridRT1);
             baronVonTerrain.groundStrokesSmlDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);     
             baronVonTerrain.groundStrokesSmlDisplayMat.SetFloat("_MinFog", minimumFogDensity);             
             baronVonTerrain.groundStrokesSmlDisplayMat.SetVector("_FogColor", simManager.fogColor);            
             //cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundStrokesSmlDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.groundStrokesSmlCBuffer.count);
-
+            */
             
             // -- DETRITUS / WASTE
             baronVonTerrain.wasteBitsDisplayMat.SetPass(0);
@@ -4610,48 +4611,72 @@ public class TheRenderKing : MonoBehaviour {
         //Graphics.DrawProcedural(MeshTopology.Triangles, 6, simManager.simStateData.predatorSimDataCBuffer.count);
     }
 
-    public void ClickTestTerrain(bool on) {  // *** RENAME!!! ***********
+    public void ClickTestTerrainUpdateMaps(bool on) {  // *** RENAME!!! ***********
 
         //Debug.Log("CLICKED TEST TERRAIN BUTTON! " + on.ToString());
 
-        /*
         
-        baronVonTerrain.terrainBlitMat.SetTexture("_DeltaTex", spiritBrushRT);
-        baronVonTerrain.terrainBlitMat.SetInt("_ChannelID", simManager.uiManager.selectedToolbarTerrainLayer);
+        
+        
+        
+        //baronVonTerrain.terrainBlitMat.SetTexture("_DeltaTex", spiritBrushRT);
+        //baronVonTerrain.terrainBlitMat.SetInt("_ChannelID", simManager.uiManager.selectedToolbarTerrainLayer);
 
         float intensity = 0.0420f; // Mathf.Lerp(0.02f, 0.06f, baronVonWater.camDistNormalized) * 1.05f;
-        baronVonTerrain.terrainBlitMat.SetFloat("_Intensity", intensity);
+        //baronVonTerrain.terrainBlitMat.SetFloat("_Intensity", intensity);
 
         float addSubtract = spiritBrushPosNeg; // 1f;
-        //if(simManager.uiManager.curActiveTool == UIManager.ToolType.Remove) {
-        //    addSubtract = -1f;
-        //}
+        int texRes = baronVonTerrain.terrainHeightRT0.width;
+        int CSUpdateTerrainMapsBrushKernelID = baronVonTerrain.computeShaderTerrainGeneration.FindKernel("CSUpdateTerrainMapsBrush");
+        baronVonTerrain.computeShaderTerrainGeneration.SetTexture(CSUpdateTerrainMapsBrushKernelID, "AltitudeRead", baronVonTerrain.terrainHeightRT0);   // Read-Only 
+        baronVonTerrain.computeShaderTerrainGeneration.SetTexture(CSUpdateTerrainMapsBrushKernelID, "AltitudeWrite", baronVonTerrain.terrainHeightRT1);
+        baronVonTerrain.computeShaderTerrainGeneration.SetTexture(CSUpdateTerrainMapsBrushKernelID, "SpiritBrushRead", spiritBrushRT);
+        baronVonTerrain.computeShaderTerrainGeneration.SetTexture(CSUpdateTerrainMapsBrushKernelID, "TerrainColorWrite", baronVonTerrain.terrainColorRT0);
+        baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
+        baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_TextureResolution", texRes);
+        baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_BrushIntensity", intensity);       
+        baronVonTerrain.computeShaderTerrainGeneration.SetInt("_ChannelID", simManager.uiManager.selectedToolbarTerrainLayer);
         if(on) {  // Actively brushing this frame
-            baronVonTerrain.terrainBlitMat.SetFloat("_AddSubtractSign", addSubtract);
-            Graphics.Blit(baronVonTerrain.terrainHeightRT0, baronVonTerrain.terrainHeightRT1, baronVonTerrain.terrainBlitMat);
-            Graphics.Blit(baronVonTerrain.terrainHeightRT1, baronVonTerrain.terrainHeightRT0, baronVonTerrain.terrainSimulationBlitMat); 
+            //baronVonTerrain.terrainBlitMat.SetFloat("_AddSubtractSign", addSubtract);
+            //Graphics.Blit(baronVonTerrain.terrainHeightRT0, baronVonTerrain.terrainHeightRT1, baronVonTerrain.terrainBlitMat);
+            //Graphics.Blit(baronVonTerrain.terrainHeightRT1, baronVonTerrain.terrainHeightRT0, baronVonTerrain.terrainSimulationBlitMat); 
 
             
         }
         else {
             addSubtract = 0f;
-            baronVonTerrain.terrainBlitMat.SetFloat("_AddSubtractSign", addSubtract);
-            Graphics.Blit(baronVonTerrain.terrainHeightRT0, baronVonTerrain.terrainHeightRT1);
-            Graphics.Blit(baronVonTerrain.terrainHeightRT1, baronVonTerrain.terrainHeightRT0, baronVonTerrain.terrainSimulationBlitMat); 
+            //baronVonTerrain.terrainBlitMat.SetFloat("_AddSubtractSign", addSubtract);
+            //Graphics.Blit(baronVonTerrain.terrainHeightRT0, baronVonTerrain.terrainHeightRT1);
+            //Graphics.Blit(baronVonTerrain.terrainHeightRT1, baronVonTerrain.terrainHeightRT0, baronVonTerrain.terrainSimulationBlitMat); 
         }
+        baronVonTerrain.computeShaderTerrainGeneration.SetVector("_Color0", baronVonTerrain.bedrockSlotGenomeCurrent.color); // new Vector4(0.54f, 0.43f, 0.37f, 1f));
+        baronVonTerrain.computeShaderTerrainGeneration.SetVector("_Color1", baronVonTerrain.stoneSlotGenomeCurrent.color); // new Vector4(0.9f, 0.9f, 0.8f, 1f));
+        baronVonTerrain.computeShaderTerrainGeneration.SetVector("_Color2", baronVonTerrain.pebblesSlotGenomeCurrent.color); // new Vector4(0.7f, 0.8f, 0.9f, 1f));
+        baronVonTerrain.computeShaderTerrainGeneration.SetVector("_Color3", baronVonTerrain.sandSlotGenomeCurrent.color); // new Vector4(0.7f, 0.6f, 0.3f, 1f));
+        baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_AddSubtractSign", addSubtract);
+        baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_IsUpdateTerrainColor", 1f);
+        baronVonTerrain.computeShaderTerrainGeneration.Dispatch(CSUpdateTerrainMapsBrushKernelID, texRes / 32, texRes / 32, 1);
         
-        baronVonTerrain.terrainGenerateColorBlitMat.SetTexture("_MainTex", baronVonTerrain.terrainHeightRT0);
-        baronVonTerrain.terrainGenerateColorBlitMat.SetTexture("_DeltaTex", spiritBrushRT);
-        baronVonTerrain.terrainGenerateColorBlitMat.SetVector("_Color0", baronVonTerrain.bedrockSlotGenomeCurrent.color); // new Vector4(0.54f, 0.43f, 0.37f, 1f));
-        baronVonTerrain.terrainGenerateColorBlitMat.SetVector("_Color1", baronVonTerrain.stoneSlotGenomeCurrent.color); // new Vector4(0.9f, 0.9f, 0.8f, 1f));
-        baronVonTerrain.terrainGenerateColorBlitMat.SetVector("_Color2", baronVonTerrain.pebblesSlotGenomeCurrent.color); // new Vector4(0.7f, 0.8f, 0.9f, 1f));
-        baronVonTerrain.terrainGenerateColorBlitMat.SetVector("_Color3", baronVonTerrain.sandSlotGenomeCurrent.color); // new Vector4(0.7f, 0.6f, 0.3f, 1f));
-        Graphics.Blit(baronVonTerrain.terrainHeightRT0, baronVonTerrain.terrainColorRT0, baronVonTerrain.terrainGenerateColorBlitMat);
+        // Convolve! Erosion etc.
+        int CSUpdateTerrainMapsConvolutionKernelID = baronVonTerrain.computeShaderTerrainGeneration.FindKernel("CSUpdateTerrainMapsConvolution");
+        baronVonTerrain.computeShaderTerrainGeneration.SetTexture(CSUpdateTerrainMapsConvolutionKernelID, "AltitudeRead", baronVonTerrain.terrainHeightRT1);   // Read-Only 
+        baronVonTerrain.computeShaderTerrainGeneration.SetTexture(CSUpdateTerrainMapsConvolutionKernelID, "AltitudeWrite", baronVonTerrain.terrainHeightRT0);
+        baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
+        baronVonTerrain.computeShaderTerrainGeneration.Dispatch(CSUpdateTerrainMapsConvolutionKernelID, texRes / 32, texRes / 32, 1);
+        
+        // ********* TEMP!!!!!!!!
+        //Graphics.Blit(baronVonTerrain.terrainHeightRT1, baronVonTerrain.terrainHeightRT0);
+        // ********* TEMP!!!!!!!! ***************************
+        
+        //Graphics.Blit(baronVonTerrain.terrainHeightRT0, baronVonTerrain.terrainColorRT0, baronVonTerrain.terrainGenerateColorBlitMat);
 
         // ^^ CONVERT TO COMPUTE SHADER!!
-        */
+        
 
-        baronVonTerrain.InitializeTerrain(); // generates Land Mesh
+
+        baronVonTerrain.RebuildTerrainMesh(); // generates Land Mesh
+
+
         baronVonTerrain.AlignGroundStrokesToTerrain();
         
         
