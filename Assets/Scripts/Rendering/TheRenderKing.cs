@@ -1516,13 +1516,13 @@ public class TheRenderKing : MonoBehaviour {
         return terrainMesh;
     }*/
 
-    public Vector3[] GetDepthAtObjectPositions(Vector4[] positionsArray)
+    public Vector4[] GetDepthAtObjectPositions(Vector4[] positionsArray)
     {
 
         ComputeBuffer objectDataInFluidCoordsCBuffer = new ComputeBuffer(positionsArray.Length, sizeof(float) * 4);
-        ComputeBuffer depthValuesCBuffer = new ComputeBuffer(positionsArray.Length, sizeof(float) * 3);
+        ComputeBuffer depthValuesCBuffer = new ComputeBuffer(positionsArray.Length, sizeof(float) * 4);
 
-        Vector3[] objectDepthsArray = new Vector3[positionsArray.Length];
+        Vector4[] objectDepthsArray = new Vector4[positionsArray.Length];
 
         objectDataInFluidCoordsCBuffer.SetData(positionsArray);
 
@@ -1531,6 +1531,7 @@ public class TheRenderKing : MonoBehaviour {
         baronVonTerrain.computeShaderTerrainGeneration.SetBuffer(kernelGetObjectDepths, "DepthValuesCBuffer", depthValuesCBuffer);
         baronVonTerrain.computeShaderTerrainGeneration.SetTexture(kernelGetObjectDepths, "AltitudeRead", baronVonTerrain.terrainHeightDataRT);
         baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
+        baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_TextureResolution", (float)baronVonTerrain.terrainHeightDataRT.width);
         baronVonTerrain.computeShaderTerrainGeneration.Dispatch(kernelGetObjectDepths, positionsArray.Length / 64, 1, 1);
         // *******
         // only returning x channel data currently!!!! **** Need to move depthMapGeneration to terrainCompute and pre-calculate gradients there

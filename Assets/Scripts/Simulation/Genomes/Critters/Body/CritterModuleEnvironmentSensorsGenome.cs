@@ -30,15 +30,18 @@ public class CritterModuleEnvironmentSensorsGenome {
 
     public void AppendModuleNeuronsToMasterList(ref List<NeuronGenome> neuronList) {
         if(useWaterStats) {
-            NeuronGenome depth = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 1); // 33
-            NeuronGenome velX = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 2); // 35
-            NeuronGenome velY = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 3);  // 37
+            NeuronGenome depth = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 1); 
+            NeuronGenome velX = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 2); 
+            NeuronGenome velY = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 3); 
             neuronList.Add(depth);      
             neuronList.Add(velX);      
             neuronList.Add(velY);   
+            
+            NeuronGenome depthGradX = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 4); 
+            NeuronGenome depthGradY = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 5); 
+            neuronList.Add(depthGradX);   
+            neuronList.Add(depthGradY); 
             /*
-            NeuronGenome depthNorth = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 4); // 32 // start up and go clockwise!        
-            NeuronGenome depthEast = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 5);  // 34        
             NeuronGenome depthSouth = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 6);  // 36        
             NeuronGenome depthWest = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 7);  // 38       
         

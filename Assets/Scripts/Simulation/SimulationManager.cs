@@ -771,7 +771,7 @@ public class SimulationManager : MonoBehaviour {
         // ********** REVISIT CONVERSION btw fluid/scene coords and Force Amounts !!!! *************
         for (int i = 0; i < agentsArray.Length; i++) {
 
-            Vector3 depthSample = simStateData.depthAtAgentPositionsArray[i];
+            Vector4 depthSample = simStateData.depthAtAgentPositionsArray[i];
             agentsArray[i].depth = depthSample.x;
             agentsArray[i].depthGradient = new Vector2(depthSample.y, depthSample.z).normalized;
             if(depthSample.y == 0 && depthSample.z == 0) {
@@ -790,9 +790,9 @@ public class SimulationManager : MonoBehaviour {
             */
             // precalculate normals?
             
-            if (depthSample.x > 0.5f) //(floorDepth < agentSize)
+            if (depthSample.x > 0.475f) //(floorDepth < agentSize)
             {
-                float wallForce = 10f; // Mathf.Clamp01(agentSize - floorDepth) / agentSize;
+                float wallForce = 2.5f; // Mathf.Clamp01(agentSize - floorDepth) / agentSize;
                 Vector2 grad = agentsArray[i].depthGradient; // new Vector2(depthSample.y, depthSample.z); //.normalized;
                 agentsArray[i].bodyRigidbody.AddForce(-grad * agentsArray[i].bodyRigidbody.mass * wallForce, ForceMode2D.Impulse);
 

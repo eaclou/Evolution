@@ -170,7 +170,7 @@ public class SimulationStateData {
     //public Vector2[] fluidVelocitiesAtPredatorPositionsArray;
     //public Vector4[] predatorFluidPositionsArray;
 
-    public Vector3[] depthAtAgentPositionsArray;
+    public Vector4[] depthAtAgentPositionsArray;
         
 
     public SimulationStateData(SimulationManager simManager) {
@@ -242,7 +242,7 @@ public class SimulationStateData {
         eggSackFluidPositionsArray = new Vector4[simManager._NumEggSacks];
         //predatorFluidPositionsArray = new Vector4[simManager._NumPredators];
 
-        depthAtAgentPositionsArray = new Vector3[simManager._NumAgents];
+        depthAtAgentPositionsArray = new Vector4[simManager._NumAgents];
     }
 
     public void PopulateSimDataArrays(SimulationManager simManager) {
@@ -250,7 +250,7 @@ public class SimulationStateData {
         // CRITTER INIT: // *** MOVE INTO OWN FUNCTION -- update more efficiently with compute shader?
         for(int i = 0; i < simManager._NumAgents; i++) {
 
-            if (simManager.agentsArray[i].isInert) {
+            if (simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.AwaitingRespawn) {
 
             }
             else {

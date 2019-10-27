@@ -17,9 +17,9 @@ public class BaronVonTerrain : RenderBaron {
     public Material wasteBitsDisplayMat;
     public Material groundDryLandDisplayMat;
 
-    public Material terrainBlitMat;
+    //public Material terrainBlitMat;
     public Material terrainSimulationBlitMat;
-    public Material testInitTerrainDataBlitMat;
+    //public Material testInitTerrainDataBlitMat;
     public Material terrainGenerateColorBlitMat;
 
     public Color terrainColor0;
@@ -142,6 +142,7 @@ public class BaronVonTerrain : RenderBaron {
         computeShaderTerrainGeneration.SetTexture(CSInitTerrainMapsKernelID, "AltitudeRead", terrainInitHeightMap);   // Read-Only 
         computeShaderTerrainGeneration.SetTexture(CSInitTerrainMapsKernelID, "AltitudeWrite", terrainHeightRT0);
         computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
+        computeShaderTerrainGeneration.SetFloat("_TextureResolution", terrainHeightMapResolution);
         // GENERATE MESH DATA!!!!
         computeShaderTerrainGeneration.Dispatch(CSInitTerrainMapsKernelID, terrainHeightMapResolution / 32, terrainHeightMapResolution / 32, 1);
 

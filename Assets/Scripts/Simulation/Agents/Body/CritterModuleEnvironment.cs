@@ -16,8 +16,8 @@ public class CritterModuleEnvironment {
     public float[] waterGradX;  // plan B
     public float[] waterGradY;  // plan B
 
-    public float[] depthNorth; // start up and go clockwise!    
-    public float[] depthEast;
+    public float[] depthGradX; // start up and go clockwise!    
+    public float[] depthGradY;
     public float[] depthSouth;
     public float[] depthWest;
 
@@ -37,8 +37,8 @@ public class CritterModuleEnvironment {
         waterVelX = new float[1];
         waterVelY = new float[1];
 
-        depthNorth = new float[1]; 
-        depthEast = new float[1]; 
+        depthGradX = new float[1]; 
+        depthGradY = new float[1]; 
         depthSouth = new float[1];       
         depthWest = new float[1]; 
 
@@ -69,11 +69,11 @@ public class CritterModuleEnvironment {
 
             
             if (nid.neuronID == 4) {
-                neuron.currentValue = depthNorth;
+                neuron.currentValue = depthGradX;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
             if (nid.neuronID == 5) {
-                neuron.currentValue = depthEast;
+                neuron.currentValue = depthGradY;
                 neuron.neuronType = NeuronGenome.NeuronType.In;
             }
             if (nid.neuronID == 6) {
@@ -111,7 +111,8 @@ public class CritterModuleEnvironment {
             waterVelX[0] = agent.avgFluidVel.x * 10f;
             waterVelY[0] = agent.avgFluidVel.y * 10f; // *** *10f to get closer to 0-1 range since values are very low
 
-            //depthNorth[0] = agent.depthNorth;
+            depthGradX[0] = agent.depthGradient.x;
+            depthGradY[0] = agent.depthGradient.y;
             //depthEast[0] = agent.depthEast;
             //depthSouth[0] = agent.depthSouth;
             //depthWest[0] = agent.depthWest;
