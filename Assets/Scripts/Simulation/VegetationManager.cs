@@ -665,7 +665,10 @@ public class VegetationManager {
         
         closestPlantParticlesDataCBuffer.GetData(closestPlantParticlesDataArray);
         closestPlantIndexCBuffer.GetData(closestPlantIndexArray);
-        
+
+        Debug.Log("FindClosestPlantParticleToCritters[1] " + closestPlantParticlesDataArray[1].nearestCritterIndex.ToString() + ", " +
+                    closestPlantParticlesDataArray[1].worldPos.ToString() + ", id: " +
+                    closestPlantParticlesDataArray[1].index.ToString());
     }
     // Keep these two pipelines separate at first while try to debug::::
     private Vector4[] ReduceDistancesArray(Vector4[] inBuffer) {
@@ -831,12 +834,11 @@ public class VegetationManager {
         closestPlantParticlesDataCBuffer.GetData(closestPlantParticlesDataArray);
         */
     }
-    public void MeasureTotalPlantParticlesAmount() {
+    public void MeasureTotalPlantParticlesAmount() {  // 
         
         int kernelCSMeasureTotalFoodParticlesAmount = computeShaderPlantParticles.FindKernel("CSMeasureTotalFoodParticlesAmount");
         computeShaderPlantParticles.SetBuffer(kernelCSMeasureTotalFoodParticlesAmount, "foodParticlesRead", plantParticlesCBuffer);
-        computeShaderPlantParticles.SetBuffer(kernelCSMeasureTotalFoodParticlesAmount, "foodParticlesWrite", plantParticlesMeasure32);
-         
+        computeShaderPlantParticles.SetBuffer(kernelCSMeasureTotalFoodParticlesAmount, "foodParticlesWrite", plantParticlesMeasure32);         
         // DISPATCH !!!
         computeShaderPlantParticles.Dispatch(kernelCSMeasureTotalFoodParticlesAmount, 32, 1, 1);
         

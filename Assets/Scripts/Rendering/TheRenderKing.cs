@@ -3250,10 +3250,12 @@ public class TheRenderKing : MonoBehaviour {
 
         cmdBufferFluidObstacles.Clear(); // needed since camera clear flag is set to none
         cmdBufferFluidObstacles.SetRenderTarget(fluidManager._ObstaclesRT);
-        cmdBufferFluidObstacles.ClearRenderTarget(true, true, Color.black, 1.0f);  // clear -- needed???
+        //cmdBufferFluidObstacles.ClearRenderTarget(true, true, Color.black, 1.0f);  // clear -- needed???
         cmdBufferFluidObstacles.SetViewProjectionMatrices(fluidObstaclesRenderCamera.worldToCameraMatrix, fluidObstaclesRenderCamera.projectionMatrix);
         // Draw Solid Land boundaries:
-        cmdBufferFluidObstacles.DrawMesh(baronVonTerrain.terrainMesh, Matrix4x4.identity, baronVonTerrain.terrainObstaclesHeightMaskMat); // Masks out areas above the fluid "Sea Level"
+        Matrix4x4 matrix = Matrix4x4.TRS(Vector3.one * 0.5f * SimulationManager._MapSize, Quaternion.identity, Vector3.one * SimulationManager._MapSize);
+        baronVonTerrain.terrainObstaclesHeightMaskMat.SetTexture("_MainTex", baronVonTerrain.terrainHeightDataRT);
+        cmdBufferFluidObstacles.DrawMesh(baronVonTerrain.quadMesh, matrix, baronVonTerrain.terrainObstaclesHeightMaskMat); // Masks out areas above the fluid "Sea Level"
         
         
         // Draw dynamic Obstacles:        
@@ -4674,7 +4676,7 @@ public class TheRenderKing : MonoBehaviour {
         
 
 
-        baronVonTerrain.RebuildTerrainMesh(); // generates Land Mesh
+        //baronVonTerrain.RebuildTerrainMesh(); // generates Land Mesh
 
 
         baronVonTerrain.AlignGroundStrokesToTerrain();

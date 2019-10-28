@@ -53,6 +53,12 @@ float3 GetFinalBackgroundColor() {   // for shadows?
 
 }
 
+// Would it make more sense to Pre-compute color within UpdateTerrainStrokes compute process, then just display
+//  If pre-computed, then other layers can sample a single texture to "know" the correct background color???
+// Cloudiness/sediment! global water level!
+// i'm already rebuilding it every frame..... might as well re-use  -- bake in lighting etc.?
+// How to mix??? Test appearnce with Critters -- how to get proper water fog contribution
+
 float4 GetGroundColor(float3 worldPos, float4 frameBufferColor, float4 altitudeTex, float4 waterSurfaceTex, float4 resourceTex) {
 	float turbidity = _Turbidity;  
 	float causticsStrength = lerp(0.025, 0.275, 0.6); //_Turbidity);

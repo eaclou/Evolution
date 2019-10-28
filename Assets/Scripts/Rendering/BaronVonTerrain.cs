@@ -53,7 +53,7 @@ public class BaronVonTerrain : RenderBaron {
         public int v2;
         public int v3;
     }
-    public Mesh terrainMesh;
+    public Mesh quadMesh;
 
     private ComputeBuffer terrainVertexCBuffer;
     private ComputeBuffer terrainUVCBuffer;
@@ -177,7 +177,7 @@ public class BaronVonTerrain : RenderBaron {
 
         InitializeBuffers();        
         InitializeMaterials();
-        RebuildTerrainMesh();
+        //RebuildTerrainMesh();
         //AlignFrameBufferStrokesToTerrain();
         AlignGroundStrokesToTerrain();
     }
@@ -468,7 +468,7 @@ public class BaronVonTerrain : RenderBaron {
         //groundDryLandDisplayMat.SetBuffer("frameBufferStrokesCBuffer", groundStrokesSmlCBuffer);  
     }
 
-    
+    /*
     public void RebuildTerrainMesh() {
         //Debug.Log("InitializeTerrain!");
 
@@ -579,7 +579,7 @@ public class BaronVonTerrain : RenderBaron {
 
         return terrainMesh;
     }
-
+    */
     /*private void AlignFrameBufferStrokesToTerrain() {
         int kernelCSAlignFrameBufferStrokes = computeShaderBrushStrokes.FindKernel("CSAlignFrameBufferStrokes");
         computeShaderBrushStrokes.SetFloat("_MapSize", SimulationManager._MapSize);

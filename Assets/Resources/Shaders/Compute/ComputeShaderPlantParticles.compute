@@ -153,32 +153,6 @@ void CSNewMeasureDistancesMainA (uint3 id : SV_DispatchThreadID)
 	_ClosestPlantIndexCBuffer[id.y] = float4(closestParticleIndex, minSquaredDistance, closestPlantData.worldPos.xy);
 }
 
-[numthreads(1024,1,1)]
-void CSMeasureInitCritterDistances (uint3 id : SV_DispatchThreadID)
-{	
-	int particleIndex = id.x;
-	int critterIndex = id.y;
-
-	CritterInitData critterInitData = critterInitDataCBuffer[critterIndex];
-	CritterSimData critterSimData = critterSimDataCBuffer[critterIndex];
-
-	
-	
-	PlantParticleData particleData = foodParticlesRead[particleIndex];
-
-	//float mouthRadius = critterInitData.boundingBoxSize.x * critterSimData.growthPercentage; // **** REMEMBER TO *0.5 EVENTUALLY FOR ACCURATE SIZE
-	float2 mouthCenterPos = critterSimData.heading * critterInitData.boundingBoxSize.y * 0.5 * critterSimData.growthPercentage;
-	
-
-	float2 particleToCritter = critterSimData.worldPos.xy - particleData.worldPos; // + mouthCenterPos * 1.0;
-
-	float distanceSquared = particleToCritter.x * particleToCritter.x + particleToCritter.y * particleToCritter.y;
-		
-	
-	foodParticlesNearestCrittersRT[int2(particleIndex, critterIndex)] = float4(particleData.index, distanceSquared, particleData.worldPos);
-		
-}
-
 
 [numthreads(32,1,1)]
 void CSMeasureInitCursorDistances (uint3 id : SV_DispatchThreadID)
@@ -428,9 +402,9 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 
 			float2 spawnUV = float2(randZ, randX); 	
 						
-			float4 spawnAltitudeSample = altitudeRead.SampleLevel(_LinearClamp, spawnUV, 0);
+			//float4 spawnAltitudeSample = altitudeRead.SampleLevel(_LinearClamp, spawnUV, 0);
 			
-			float distToOrigin = length(_FoodSprinklePos.xy - (spawnUV * _MapSize));
+			//float distToOrigin = length(_FoodSprinklePos.xy - (spawnUV * _MapSize));
 			
 			//  SPIRIT BRUSH MASK:
 			float4 brushMaskTex = _SpawnDensityMap.SampleLevel(_LinearClamp, spawnUV, 0);			
@@ -440,38 +414,38 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 			if(brushMask * (1.0 - isRightClick) > 0.5) {  
 				//if(spawnAltitudeSample.x < _AlgaeSpawnMaxAltitude) {  // in water only? // for now...
 				
-					foodParticlesWrite[id.x].worldPos = spawnUV * _MapSize;
+				foodParticlesWrite[id.x].worldPos = spawnUV * _MapSize;
 					
-					PlantParticleData representativeParticle = _RepresentativeAlgaeParticleGenomeCBuffer[0];
+				PlantParticleData representativeParticle = _RepresentativeAlgaeParticleGenomeCBuffer[0];
 					
 
-					float randRadius = rand(float2(randX * 10, randY * -3.37)) * (_MaxParticleSize - _MinParticleSize) + _MinParticleSize;					
+				float randRadius = rand(float2(randX * 10, randY * -3.37)) * (_MaxParticleSize - _MinParticleSize) + _MinParticleSize;					
 					
-					foodParticlesWrite[id.x].radius = 1.0; // representativeParticle.radius * (0.9 + 0.2 * (1.0 - rand01)); // 1.0; //randRadius;
-					foodParticlesWrite[id.x].biomass = _AlgaeParticleInitMass * 10;
-					foodParticlesWrite[id.x].isActive = 1.0;
-					foodParticlesWrite[id.x].isDecaying = 0.0;
-					foodParticlesWrite[id.x].isSwallowed = 0.0;
-					foodParticlesWrite[id.x].digestedAmount = 0.0;
-					foodParticlesWrite[id.x].age = rand(float2(rand01 * 70.158, randX * 13.37)) * 1;
-					float mutationSize = 0.1;
-					foodParticlesWrite[id.x].colorA = representativeParticle.colorA; 
+				foodParticlesWrite[id.x].radius = 1.0; // representativeParticle.radius * (0.9 + 0.2 * (1.0 - rand01)); // 1.0; //randRadius;
+				foodParticlesWrite[id.x].biomass = _AlgaeParticleInitMass * 10;
+				foodParticlesWrite[id.x].isActive = 1.0;
+				foodParticlesWrite[id.x].isDecaying = 0.0;
+				foodParticlesWrite[id.x].isSwallowed = 0.0;
+				foodParticlesWrite[id.x].digestedAmount = 0.0;
+				foodParticlesWrite[id.x].age = rand(float2(rand01 * 70.158, randX * 13.37)) * 1;
+				float mutationSize = 0.1;
+				foodParticlesWrite[id.x].colorA = representativeParticle.colorA; 
 					
-					foodParticlesWrite[id.x].colorB = representativeParticle.colorB; 
-					foodParticlesWrite[id.x].health = 1.0;
-					foodParticlesWrite[id.x].typeID = representativeParticle.typeID;
-					foodParticlesWrite[id.x].rootedness = representativeParticle.rootedness;
-					foodParticlesWrite[id.x].radiusAxisOne = representativeParticle.radiusAxisOne;
-					foodParticlesWrite[id.x].radiusAxisTwo = representativeParticle.radiusAxisTwo;
-					foodParticlesWrite[id.x].leafDensity = representativeParticle.leafDensity;
-					foodParticlesWrite[id.x].angleInc = representativeParticle.angleInc;
-					foodParticlesWrite[id.x].leafLength = representativeParticle.leafLength;
-					foodParticlesWrite[id.x].leafWidth = representativeParticle.leafWidth;
-					foodParticlesWrite[id.x].leafRoundness = representativeParticle.leafRoundness;
-					foodParticlesWrite[id.x].brushTypeX = representativeParticle.brushTypeX;
+				foodParticlesWrite[id.x].colorB = representativeParticle.colorB; 
+				foodParticlesWrite[id.x].health = 1.0;
+				foodParticlesWrite[id.x].typeID = representativeParticle.typeID;
+				foodParticlesWrite[id.x].rootedness = representativeParticle.rootedness;
+				foodParticlesWrite[id.x].radiusAxisOne = representativeParticle.radiusAxisOne;
+				foodParticlesWrite[id.x].radiusAxisTwo = representativeParticle.radiusAxisTwo;
+				foodParticlesWrite[id.x].leafDensity = representativeParticle.leafDensity;
+				foodParticlesWrite[id.x].angleInc = representativeParticle.angleInc;
+				foodParticlesWrite[id.x].leafLength = representativeParticle.leafLength;
+				foodParticlesWrite[id.x].leafWidth = representativeParticle.leafWidth;
+				foodParticlesWrite[id.x].leafRoundness = representativeParticle.leafRoundness;
+				foodParticlesWrite[id.x].brushTypeX = representativeParticle.brushTypeX;
 
-					// lerp(representativeParticle.color, float3(1.0 - randZ, rand01, randY), mutationSize);
-					//foodParticlesWrite[id.x].color = representativeParticle.color; // float3(1,1,1); // float3(randY, randX, randZ); //float3(0,0,0); //saturate(parentParticle.color + (float3(randY, randX, randZ) - 0.5) * 0.1);
+				// lerp(representativeParticle.color, float3(1.0 - randZ, rand01, randY), mutationSize);
+				//foodParticlesWrite[id.x].color = representativeParticle.color; // float3(1,1,1); // float3(randY, randX, randZ); //float3(0,0,0); //saturate(parentParticle.color + (float3(randY, randX, randZ) - 0.5) * 0.1);
 				//}			
 			}			
 		}
@@ -524,3 +498,30 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 		}
 	}
 }
+
+/*
+[numthreads(1024,1,1)]
+void CSMeasureInitCritterDistances (uint3 id : SV_DispatchThreadID)
+{	
+	int particleIndex = id.x;
+	int critterIndex = id.y;
+
+	CritterInitData critterInitData = critterInitDataCBuffer[critterIndex];
+	CritterSimData critterSimData = critterSimDataCBuffer[critterIndex];
+
+	
+	
+	PlantParticleData particleData = foodParticlesRead[particleIndex];
+
+	//float mouthRadius = critterInitData.boundingBoxSize.x * critterSimData.growthPercentage; // **** REMEMBER TO *0.5 EVENTUALLY FOR ACCURATE SIZE
+	float2 mouthCenterPos = critterSimData.heading * critterInitData.boundingBoxSize.y * 0.5 * critterSimData.growthPercentage;
+	
+
+	float2 particleToCritter = critterSimData.worldPos.xy - particleData.worldPos; // + mouthCenterPos * 1.0;
+
+	float distanceSquared = particleToCritter.x * particleToCritter.x + particleToCritter.y * particleToCritter.y;
+		
+	
+	foodParticlesNearestCrittersRT[int2(particleIndex, critterIndex)] = float4(particleData.index, distanceSquared, particleData.worldPos);
+		
+}*/

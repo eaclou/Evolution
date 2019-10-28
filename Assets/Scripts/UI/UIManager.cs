@@ -4673,13 +4673,13 @@ public class UIManager : MonoBehaviour {
         debugTextureViewerArray[6].name = "_VelocityPressureDivergenceMain";
 
         debugTextureViewerArray[7] = gameManager.theRenderKing.fluidManager._ObstaclesRT;
-        debugTextureViewerArray[7].name = "Obstacles Inject Render";
+        debugTextureViewerArray[7].name = "Solid Obstacles Render";
 
-        debugTextureViewerArray[8] = gameManager.theRenderKing.fluidManager._ObstaclesRT;
-        debugTextureViewerArray[8].name = "Obstacles Inject Render";        
+        debugTextureViewerArray[8] = gameManager.simulationManager.vegetationManager.critterNearestPlants32;
+        debugTextureViewerArray[8].name = "critterNearestPlants32";        
         
         debugTextureViewerArray[9] = gameManager.simulationManager.zooplanktonManager.critterNearestZooplankton32;
-        debugTextureViewerArray[9].name = "ZooplanktonMap";
+        debugTextureViewerArray[9].name = "critterNearestZooplankton32";
 
         debugTextureViewerArray[10] = gameManager.simulationManager.vegetationManager.resourceGridRT1;
         debugTextureViewerArray[10].name = "Resources Grid";
