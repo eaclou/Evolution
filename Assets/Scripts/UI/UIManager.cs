@@ -1254,10 +1254,11 @@ public class UIManager : MonoBehaviour {
 
         return str;
     }
-
+    /*
     private void UpdateWatcherDecomposersPanelUI() {
 
     }
+    */
     private void UpdateWatcherPanelUI(TrophicLayersManager layerManager) {
 
         panelWatcherSpiritVertebratesHUD.SetActive(false);
@@ -1285,7 +1286,7 @@ public class UIManager : MonoBehaviour {
             //str += "\nProduced This Frame:\nWaste: " + (simTansferSample.z * 1000000f).ToString("F0") + ")";
 
             panelWatcherSpiritDecomposers.SetActive(true);
-            UpdateWatcherDecomposersPanelUI();
+            //UpdateWatcherDecomposersPanelUI();
         }
         else if(layerManager.selectedTrophicSlotRef.kingdomID == 1) {
             if(layerManager.selectedTrophicSlotRef.tierID == 0) {
@@ -1515,6 +1516,8 @@ public class UIManager : MonoBehaviour {
 
                     string textString = "TEXT PAGE! 1";
 
+                    textString += "\nNearestPlant[" + agent.foodModule.nearestFoodParticleIndex.ToString() + "] " + agent.foodModule.nearestFoodParticlePos.ToString() + " d: " + (agent.foodModule.nearestFoodParticlePos.magnitude).ToString();
+                    textString += "\nNearestZooplankton[" + agent.foodModule.nearestAnimalParticleIndex.ToString() + "] " + agent.foodModule.nearestAnimalParticlePos.ToString() + " d: " + (agent.foodModule.nearestAnimalParticlePos.magnitude).ToString();
                     
                     textString += "\n\nNumChildrenBorn: " + gameManager.simulationManager.numAgentsBorn.ToString() + ", numDied: " + gameManager.simulationManager.numAgentsDied.ToString() + ", ~Gen: " + ((float)gameManager.simulationManager.numAgentsBorn / (float)gameManager.simulationManager._NumAgents).ToString();
                     textString += "\nSimulation Age: " + gameManager.simulationManager.simAgeTimeSteps.ToString();

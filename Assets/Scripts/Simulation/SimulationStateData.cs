@@ -349,15 +349,10 @@ public class SimulationStateData {
                 if(simManager.agentsArray[i].isAttacking) {
                     critterSimDataArray[i].biteAnimCycle = Mathf.Clamp01((float)simManager.agentsArray[i].attackingFrameCounter / (float)simManager.agentsArray[i].attackAnimDuration);
                 }
-
-                if (simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Egg)
+                if (simManager.agentsArray[i].curLifeStage != Agent.AgentLifeStage.Mature)
                 {
                     critterSimDataArray[i].consumeOn = 0f;
                     //critterSimDataArray[i].biteAnimCycle *= 0.75f;
-                }
-                if (simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Dead)
-                {
-                    critterSimDataArray[i].consumeOn = 0f;
                 }
 
                 critterSimDataArray[i].moveAnimCycle = simManager.agentsArray[i].animationCycle;
@@ -430,7 +425,7 @@ public class SimulationStateData {
         fluidVelocitiesAtAgentPositionsArray = simManager.environmentFluidManager.GetFluidVelocityAtObjectPositions(agentFluidPositionsArray);
         fluidVelocitiesAtEggSackPositionsArray = simManager.environmentFluidManager.GetFluidVelocityAtObjectPositions(eggSackFluidPositionsArray);
         //fluidVelocitiesAtPredatorPositionsArray = simManager.environmentFluidManager.GetFluidVelocityAtObjectPositions(predatorFluidPositionsArray);
-        Debug.Log("agentFluidPositionsArray: " + agentFluidPositionsArray.Length.ToString());
+        //Debug.Log("agentFluidPositionsArray: " + agentFluidPositionsArray.Length.ToString());
         depthAtAgentPositionsArray = simManager.theRenderKing.GetDepthAtObjectPositions(agentFluidPositionsArray);
 
 

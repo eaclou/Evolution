@@ -2682,6 +2682,7 @@ public class TheRenderKing : MonoBehaviour {
         fluidManager.computeShaderFluidSim.SetFloat("_TextureResolution", (float)fluidManager.resolution);
         fluidManager.computeShaderFluidSim.SetFloat("_DeltaTime", fluidManager.deltaTime);
         fluidManager.computeShaderFluidSim.SetFloat("_InvGridScale", fluidManager.invGridScale);
+        fluidManager.computeShaderFluidSim.SetTexture(kernelSimFloatyBits, "_SpiritBrushTex", spiritBrushRT);
         fluidManager.computeShaderFluidSim.SetBuffer(kernelSimFloatyBits, "FloatyBitsCBuffer", floatyBitsCBuffer);
         fluidManager.computeShaderFluidSim.SetTexture(kernelSimFloatyBits, "VelocityRead", fluidManager._VelocityPressureDivergenceMain);        
         fluidManager.computeShaderFluidSim.Dispatch(kernelSimFloatyBits, floatyBitsCBuffer.count / 1024, 1, 1);

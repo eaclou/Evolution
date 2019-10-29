@@ -97,7 +97,7 @@
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(rotatedPoint, 0.0f));
 				float brightness = (random1);
 				dotLight *= brightness;
-				o.color = float4(dotLight,dotLight,dotLight,alpha * 1); // float4(randomValue, randomValue, randomValue, 1 / (length(velocity) * 50 + 1.15));
+				o.color = float4(dotLight,floatyBitData.age,dotLight,alpha * 1); // float4(randomValue, randomValue, randomValue, 1 / (length(velocity) * 50 + 1.15));
 				o.uv = quadVerticesCBuffer[id] + 0.5f;
 				
 				return o;
@@ -110,8 +110,10 @@
 				//float4 fluidColor = tex2D(_FluidColorTex, i.fluidCoords * 1); // i.fluidCoords); 
 
 				float4 finalColor = texColor; //float4(1,1,1,1); //float4(0.1,0.1,0.05,1) * texColor; //texColor * _Tint * float4(i.color, 1);
-				finalColor.rgb = float3(0.9, 0.8, 0.5) * (0.25 + 0.75 * i.color.x) * 5;
+				finalColor.rgb = float3(0.9, 0.8, 0.5) * (0.25 + 0.75 * i.color.x) * 1.5;
 				finalColor.a *= i.color.a * 0.7;
+				float birthGlowMask = saturate((-i.color.y + 0.2) * 20);
+				finalColor += birthGlowMask;
 				//finalColor.rgb = lerp(fluidColor.rgb, i.color.rgb, 0.06);
 				//finalColor.a *= 0.65;
 				//finalColor.rgb *= 1.16;

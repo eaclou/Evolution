@@ -208,6 +208,8 @@ void CSEatSelectedFoodParticles (uint3 id : SV_DispatchThreadID)
 	float particleRadius = particleData.radius;
 	float combinedRadius = (mouthRadius + particleRadius * 0.5) * isAlive01 * critterSimData.consumeOn;
 	float mass = critterSimData.currentBiomass;
+
+	/*
 	if(distanceSquared < combinedRadius * combinedRadius) {	
 		
 		if(critterSimData.consumeOn > 0.5) {   // revisit
@@ -223,7 +225,7 @@ void CSEatSelectedFoodParticles (uint3 id : SV_DispatchThreadID)
 			}
 		}	
 	}
-
+	*/
 	foodParticlesEatAmountsCBuffer[id.x] = eatenAmount;
 }
 

@@ -656,6 +656,11 @@ public class VegetationManager {
         computeShaderPlantParticles.SetTexture(kernelCSNewMeasureDistancesInit, "_CritterToPlantDistancesRT", critterNearestPlants32);        
         computeShaderPlantParticles.Dispatch(kernelCSNewMeasureDistancesInit, 1, simStateDataRef.critterSimDataCBuffer.count, 1);
 
+        //PlantParticleData[] debugArray = new PlantParticleData[plantParticlesMeasure32.count];
+        //plantParticlesMeasure32.GetData(debugArray);
+        //Debug.Log("Ugh: " + debugArray[0].index.ToString() + ", " + debugArray[0].worldPos.ToString());
+
+
         int kernelCSNewMeasureDistancesMainA = computeShaderPlantParticles.FindKernel("CSNewMeasureDistancesMainA");
         computeShaderPlantParticles.SetBuffer(kernelCSNewMeasureDistancesMainA, "foodParticlesRead", plantParticlesCBuffer);      
         computeShaderPlantParticles.SetBuffer(kernelCSNewMeasureDistancesMainA, "_ClosestPlantIndexCBuffer", closestPlantIndexCBuffer);    
@@ -666,7 +671,7 @@ public class VegetationManager {
         closestPlantParticlesDataCBuffer.GetData(closestPlantParticlesDataArray);
         closestPlantIndexCBuffer.GetData(closestPlantIndexArray);
 
-        Debug.Log("FindClosestPlantParticleToCritters[1] " + closestPlantParticlesDataArray[1].nearestCritterIndex.ToString() + ", " +
+        Debug.Log("FindClosestPlantParticleToCritters[1] " + simStateDataRef.critterSimDataArray[1].worldPos.ToString() +  ", " +
                     closestPlantParticlesDataArray[1].worldPos.ToString() + ", id: " +
                     closestPlantParticlesDataArray[1].index.ToString());
     }
@@ -835,13 +840,18 @@ public class VegetationManager {
         */
     }
     public void MeasureTotalPlantParticlesAmount() {  // 
+
         
         int kernelCSMeasureTotalFoodParticlesAmount = computeShaderPlantParticles.FindKernel("CSMeasureTotalFoodParticlesAmount");
         computeShaderPlantParticles.SetBuffer(kernelCSMeasureTotalFoodParticlesAmount, "foodParticlesRead", plantParticlesCBuffer);
         computeShaderPlantParticles.SetBuffer(kernelCSMeasureTotalFoodParticlesAmount, "foodParticlesWrite", plantParticlesMeasure32);         
         // DISPATCH !!!
         computeShaderPlantParticles.Dispatch(kernelCSMeasureTotalFoodParticlesAmount, 32, 1, 1);
-        
+
+        //PlantParticleData[] debugArray = new PlantParticleData[plantParticlesMeasure32.count];
+        //plantParticlesMeasure32.GetData(debugArray);
+        //Debug.Log("Ugh: " + debugArray[0].index.ToString() + ", " + debugArray[0].worldPos.ToString());
+
         computeShaderPlantParticles.SetBuffer(kernelCSMeasureTotalFoodParticlesAmount, "foodParticlesRead", plantParticlesMeasure32);
         computeShaderPlantParticles.SetBuffer(kernelCSMeasureTotalFoodParticlesAmount, "foodParticlesWrite", plantParticlesMeasure1);
         computeShaderPlantParticles.Dispatch(kernelCSMeasureTotalFoodParticlesAmount, 1, 1, 1);
