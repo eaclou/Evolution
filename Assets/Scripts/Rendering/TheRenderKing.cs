@@ -3974,7 +3974,7 @@ public class TheRenderKing : MonoBehaviour {
                         }
                     }
                 }
-            
+            /*
                 // floating plants  shadows:
                 plantParticleShadowDisplayMat.SetPass(0);
                 plantParticleShadowDisplayMat.SetBuffer("plantParticleDataCBuffer", simManager.vegetationManager.plantParticlesCBuffer);
@@ -3991,7 +3991,7 @@ public class TheRenderKing : MonoBehaviour {
                 plantParticleShadowDisplayMat.SetVector("_FogColor", simManager.fogColor);      
                 //cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); 
                 cmdBufferMain.DrawProcedural(Matrix4x4.identity, plantParticleShadowDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, simManager.vegetationManager.plantParticlesCBuffer.count * 32);
-        
+        */
                 //if(simManager.trophicLayersManager.GetAlgaeOnOff()) {
                 plantParticleDisplayMat.SetPass(0);
                 plantParticleDisplayMat.SetBuffer("plantParticleDataCBuffer", simManager.vegetationManager.plantParticlesCBuffer);

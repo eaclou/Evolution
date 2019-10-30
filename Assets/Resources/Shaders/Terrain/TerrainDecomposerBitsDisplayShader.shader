@@ -35,7 +35,7 @@
 			sampler2D _ResourceGridTex;
 			sampler2D _WaterColorTex;
 			
-			sampler2D _RenderedSceneRT;  // Provided by CommandBuffer -- global tex??? seems confusing... ** revisit this
+			//sampler2D _RenderedSceneRT;  // Provided by CommandBuffer -- global tex??? seems confusing... ** revisit this
 			
 			uniform float _MapSize;
 

@@ -33,7 +33,7 @@
 			sampler2D _ResourceGridTex;
 			sampler2D _WaterColorTex;
 			
-			sampler2D _RenderedSceneRT;  // Provided by CommandBuffer -- global tex??? seems confusing... ** revisit this
+			//sampler2D _RenderedSceneRT;  // Provided by CommandBuffer -- global tex??? seems confusing... ** revisit this
 			
 			uniform float _MapSize;
 
@@ -155,14 +155,14 @@
 
 			fixed4 frag(v2f i) : SV_Target
 			{
-				
+				// Pre-compute color/lighting at the particle level within ComputePass???
 
 				float4 brushColor = tex2D(_MainTex, i.quadUV);	
 
 				//return float4(0.03, 0.02, 0.01, brushColor.a * i.color.a);
 				
 				float2 screenUV = i.screenUV.xy / i.screenUV.w;
-				float4 frameBufferColor = tex2D(_RenderedSceneRT, screenUV);  //  Color of brushtroke source					
+				float4 frameBufferColor = float4(0, 0.1, 0.35, 1); // tex2D(_RenderedSceneRT, screenUV);  //  Color of brushtroke source					
 				float4 altitudeTex = tex2D(_AltitudeTex, i.altitudeUV); //i.worldPos.z / 10; // [-1,1] range
 				float4 waterSurfaceTex = tex2D(_WaterSurfaceTex, i.altitudeUV);
 				float4 waterColorTex = tex2D(_WaterColorTex, i.altitudeUV);

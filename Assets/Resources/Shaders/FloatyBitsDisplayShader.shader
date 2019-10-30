@@ -13,8 +13,8 @@
 		Tags{ "RenderType" = "Transparent" }
 		ZWrite Off
 		Cull Off
-		//Blend SrcAlpha One
-		Blend SrcAlpha OneMinusSrcAlpha
+		Blend SrcAlpha One
+		//Blend SrcAlpha OneMinusSrcAlpha
 
 		Pass
 		{
@@ -73,8 +73,8 @@
 				float randomValue = rand(float2(inst, randomAspect * 10));
 				float randomScale = lerp(0.75, 1.4, random2) * 3.6;
 				float2 scale = float2(0.05 * randomAspect, 0.05 * (1.0 / randomAspect)) * randomScale; //float2(randomAspect * randomScale, (1.0 / randomAspect) * randomScale * (length(velocity) * 25 + 1.61));
-				scale.y *= 2.735;
-				quadPoint *= float3(scale, 1.0) * 0.34;
+				scale.y *= 0.735;
+				quadPoint *= float3(scale, 1.0) * 20.34;
 				
 				float2 forward = floatyBitData.heading; //normalize(velocity);
 				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
@@ -110,10 +110,13 @@
 				//float4 fluidColor = tex2D(_FluidColorTex, i.fluidCoords * 1); // i.fluidCoords); 
 
 				float4 finalColor = texColor; //float4(1,1,1,1); //float4(0.1,0.1,0.05,1) * texColor; //texColor * _Tint * float4(i.color, 1);
-				finalColor.rgb = float3(0.9, 0.8, 0.5) * (0.25 + 0.75 * i.color.x) * 1.5;
+				finalColor.rgb = float3(0.49, 0.48, 0.35) * (0.25 + 0.75 * i.color.x) * 1.5;
+				finalColor.rgb = float3(0.49, 0.48, 0.95);
 				finalColor.a *= i.color.a * 0.7;
 				float birthGlowMask = saturate((-i.color.y + 0.2) * 20);
 				finalColor += birthGlowMask;
+				finalColor *= 0.125 * texColor.a;
+				finalColor.rgb *= 0.14;
 				//finalColor.rgb = lerp(fluidColor.rgb, i.color.rgb, 0.06);
 				//finalColor.a *= 0.65;
 				//finalColor.rgb *= 1.16;
