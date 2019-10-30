@@ -5,6 +5,12 @@ uniform float4 _FogColor;
 uniform float4 _DecomposersColor;
 uniform float4 _DetritusColor;
 
+
+float4 GetEnvironmentColor(float3 worldPos) {
+
+	return float4(1,1,1,1);
+}
+
 float GetDepthNormalized(float rawAltitude) {
 	float depthNormalized = saturate((1.0 - rawAltitude) - 0.5) * 2;
 	depthNormalized *= _Turbidity;
@@ -41,16 +47,80 @@ float3 ApplyCausticsLight(float3 sourceColor, float4 waterSurfaceTex, float rawA
 	return sourceColor;
 }
 
-float3 ApplyDirectionalLight() {  // for non-ground?  Eventually change the whole thing to not depend on first framebuffer shadow render
+// can this be broken up into modules?
 
-}
+float4 GetEnvironmentColor(float3 worldPos, float4 terrainColorTex, float4 altitudeTex, float4 waterSurfaceTex, float4 resourceTex, float4 skyTex) {
+	float4 outColor = float4(0,0,0,1);
 
-float2 GetRefractionOffset() {
+	float turbidity = _Turbidity;  
+	float causticsStrength = lerp(0.025, 0.275, 0.6); //_Turbidity);
+	float minFog = 1;
+	
+	float3 decomposerHue = float3(0.8,0.3,0);
+	float decomposerMask = saturate(resourceTex.z * 1) * 0.8;
+	float3 detritusHue = float3(0.2,0.1,0.02);
+	float detritusMask = saturate(resourceTex.y * 1) * 0.8;
+	
+	outColor.rgb = lerp(terrainColorTex.rgb, decomposerHue, decomposerMask);
+	outColor.rgb = lerp(outColor.rgb, detritusHue, detritusMask);
 
-}
+	float algaeMask = saturate(resourceTex.w * 1.0);
+	//minFog = max(algaeMask * 1, minFog);
 
-float3 GetFinalBackgroundColor() {   // for shadows?
+	float altitudeRaw = altitudeTex.x;
+	
+	//float altitude = altitudeTex.x;
+	// 0-1 range --> -1 to 1
+	float worldSpaceZ = (altitudeRaw * 2 - 1) * -1;
+	float isUnderwater = saturate(worldSpaceZ * 100);  // *** UPDATE!!!! ****
+	
+	float3 waterFogColor = float3(0.36, 0.4, 0.44) * 0.42; // _FogColor.rgb;
+	
+	// FAKE CAUSTICS:::
+	float3 surfaceNormal = waterSurfaceTex.yzw; // pre-calculated
+	float dotLight = dot(surfaceNormal, _WorldSpaceLightPos0.xyz);
+	dotLight = dotLight * dotLight;
+	
+	float depthNormalized = saturate((1.0 - altitudeRaw) - 0.5) * 2;	
+	depthNormalized = saturate(depthNormalized); //  ????
 
+	// Wetness darkening:
+	float wetnessMask = saturate(((altitudeRaw + waterSurfaceTex.x * 0.34) - 0.6) * 5.25);
+	outColor.rgb *= (0.6 + wetnessMask * 0.4);
+	
+	// Caustics
+	outColor.rgb += dotLight * isUnderwater * (1.0 - depthNormalized) * causticsStrength;		
+	
+	//Diffuse 
+	float3 sunDir = normalize(float3(1,1,-1));
+	float3 waterSurfaceNormal = waterSurfaceTex.yzw;
+	
+	float dotDiffuse = saturate(dot(waterSurfaceNormal, sunDir));
+	outColor.rgb *= dotDiffuse;
+
+	// FOG:	
+	float fogAmount = lerp(0, 1, depthNormalized);
+	outColor.rgb = lerp(outColor.rgb, waterFogColor, fogAmount * isUnderwater); // (max(minFog, saturate(depthNormalized + algaeMask))
+		
+	//finalColor.rgb += decomposerHue * decomposerMask * 0.025;
+	
+	// Reflection!!!
+	
+	float3 cameraToVertex = i.worldPos - _WorldSpaceCameraPos;
+    float3 cameraToVertexDir = normalize(cameraToVertex);
+	float3 reflectedViewDir = cameraToVertexDir + 2 * waterSurfaceNormal * 0.05;
+	//float viewDot = dot(-cameraToVertexDir, waterSurfaceNormal);
+
+	float2 skyCoords = reflectedViewDir.xy * 0.5 + 0.5;
+	// Have to sample SkyTexture in displayShader????
+
+	float4 reflectedColor = float4(tex2Dlod(_SkyTex, float4((skyCoords) - _Time.y * 0.015, 0, 1)).rgb, finalColor.a); //col;
+								
+	float reflectLerp = saturate(i.vignetteLerp.x * 2);
+	finalColor = lerp(finalColor, reflectedColor, reflectLerp);
+
+	//outColor.rgb = terrainColorTex;
+	return outColor;
 }
 
 // Would it make more sense to Pre-compute color within UpdateTerrainStrokes compute process, then just display
@@ -58,13 +128,12 @@ float3 GetFinalBackgroundColor() {   // for shadows?
 // Cloudiness/sediment! global water level!
 // i'm already rebuilding it every frame..... might as well re-use  -- bake in lighting etc.?
 // How to mix??? Test appearnce with Critters -- how to get proper water fog contribution
-
+                                            //  frameBufferColor replaced by terrain baseAlbedo??
 float4 GetGroundColor(float3 worldPos, float4 frameBufferColor, float4 altitudeTex, float4 waterSurfaceTex, float4 resourceTex) {
 	float turbidity = _Turbidity;  
 	float causticsStrength = lerp(0.025, 0.275, 0.6); //_Turbidity);
 	float minFog = 1;
-
-	
+		
 	
 	float4 finalColor = frameBufferColor;
 	float3 decomposerHue = float3(0.8,0.3,0);

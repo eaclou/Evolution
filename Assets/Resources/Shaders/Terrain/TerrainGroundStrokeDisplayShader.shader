@@ -7,13 +7,13 @@
 		_WaterSurfaceTex ("_WaterSurfaceTex", 2D) = "black" {}
 		_ResourceGridTex ("_ResourceGridTex", 2D) = "black" {}
 		_TerrainColorTex ("_TerrainColorTex", 2D) = "black" {}
-		
+		_SkyTex ("_SkyTex", 2D) = "white" {}
 	}
 	SubShader
 	{		
 		Tags { "RenderType"="Transparent" }
 		ZWrite Off
-		ZTest Always
+		//ZTest Always
 		Cull Off
 		Blend SrcAlpha OneMinusSrcAlpha
 
@@ -31,6 +31,7 @@
 			sampler2D _WaterSurfaceTex;
 			sampler2D _ResourceGridTex;
 			sampler2D _TerrainColorTex;
+			sampler2D _SkyTex;
 			
 			//sampler2D _RenderedSceneRT;  // Provided by CommandBuffer -- global tex??? seems confusing... ** revisit this
 			uniform float _MapSize;			
@@ -107,11 +108,7 @@
 			}
 
 			fixed4 frag(v2f i) : SV_Target
-			{
-				
-				//float4 texColor0 = tex2D(_MainTex, i.uv.xy);  // Read Brush Texture start Row
-				//float4 texColor1 = tex2D(_MainTex, i.uv.zw);  // Read Brush Texture end Row
-				
+			{				
 				float4 brushColor = tex2D(_MainTex, i.uv);	
 				
 				//float2 screenUV = i.screenUV.xy / i.screenUV.w;
@@ -120,7 +117,10 @@
 				float4 waterSurfaceTex = tex2D(_WaterSurfaceTex, i.altitudeUV);
 				float4 resourceTex = tex2D(_ResourceGridTex, i.altitudeUV);	
 				float4 terrainColorTex = tex2D(_TerrainColorTex, i.altitudeUV);	
-				float4 finalColor = GetGroundColor(i.worldPos, terrainColorTex, altitudeTex, waterSurfaceTex, resourceTex);
+				float4 skySample = tex2D(_SkyTex, i.altitudeUV);
+				
+				float4 finalColor = GetEnvironmentColor(i.worldPos, terrainColorTex, altitudeTex, waterSurfaceTex, resourceTex, skySample);
+				//float4 finalColor = GetGroundColor(i.worldPos, terrainColorTex, altitudeTex, waterSurfaceTex, resourceTex);
 				finalColor.a = brushColor.a;
 				
 				

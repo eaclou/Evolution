@@ -531,8 +531,10 @@ public class BaronVonWater : RenderBaron {
         computeShaderWaterRender.SetFloat("_Time", Time.realtimeSinceStartup);
         computeShaderWaterRender.SetFloat("_MapSize", SimulationManager._MapSize);
         computeShaderWaterRender.SetFloat("_CamDistNormalized", camDistNormalized);
+        computeShaderWaterRender.SetFloat("_TextureResolution", (float)waterSurfaceMapResolution);
         computeShaderWaterRender.Dispatch(kernelCSCalculateWaterSurfaceNormals, waterSurfaceMapResolution / 32, waterSurfaceMapResolution / 32, 1);
-        
+
+        Graphics.Blit(waterSurfaceDataRT1, waterSurfaceDataRT0);
     }
 
     public override void Tick(RenderTexture maskTex) {

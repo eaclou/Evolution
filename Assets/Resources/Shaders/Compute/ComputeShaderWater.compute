@@ -464,7 +464,7 @@ void CSUpdateWaterSurface (uint3 id : SV_DispatchThreadID)
 	// UNDER PRESSURE!!! (do do doo d d doo do)
 	float2 uv = (((float2)id.xy + 0.5) / (float)_TextureResolution);
 	float4 pressureSample = PressureRead.SampleLevel(_LinearClamp, uv, 0);
-	
+		
 	waterSurfaceDataWriteRT[id.xy] = float4(height * 0.25 + waveHeight * 0.35 + pressureSample.z * 1.0, 0, 0, 1);
 }
 
@@ -475,16 +475,15 @@ void CSCalculateWaterSurfaceNormals (uint3 id : SV_DispatchThreadID)
 		
 	float heightCenter = curValue.x;
 
-	uint2 upIndex = uint2(id.x, min(1023, id.y + 1));
+	uint2 upIndex = uint2(id.x, min(round(_TextureResolution - 1.0), id.y + 1));
 	float heightUp = waterSurfaceDataReadRT[upIndex].x;
-	uint2 rightIndex = uint2(min(1023, id.x + 1), id.y);
+	uint2 rightIndex = uint2(min(round(_TextureResolution - 1.0), id.x + 1), id.y);
 	float heightRight = waterSurfaceDataReadRT[rightIndex].x;
 	uint2 downIndex = uint2(id.x, max(0, id.y - 1));
 	float heightDown = waterSurfaceDataReadRT[downIndex].x;
 	uint2 leftIndex = uint2(max(0, id.x - 1), id.y);
 	float heightLeft = waterSurfaceDataReadRT[leftIndex].x;
-		
-	
+			
 	float2 grad = float2(heightRight - heightLeft, heightUp - heightDown);
 	float zx = -grad.x;
 	float zy = -grad.y;
@@ -497,5 +496,5 @@ void CSCalculateWaterSurfaceNormals (uint3 id : SV_DispatchThreadID)
 	
 	curValue.yzw = normal;
 	
-	waterSurfaceDataWriteRT[id.xy] = curValue; //float4(1,1,1,1); //curValue;
+	waterSurfaceDataWriteRT[id.xy] = curValue;
 }
