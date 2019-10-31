@@ -6,11 +6,6 @@ uniform float4 _DecomposersColor;
 uniform float4 _DetritusColor;
 
 
-float4 GetEnvironmentColor(float3 worldPos) {
-
-	return float4(1,1,1,1);
-}
-
 float GetDepthNormalized(float rawAltitude) {
 	float depthNormalized = saturate((1.0 - rawAltitude) - 0.5) * 2;
 	depthNormalized *= _Turbidity;
@@ -71,8 +66,8 @@ float4 GetEnvironmentColor(float3 worldPos, float4 terrainColorTex, float4 altit
 	
 	//float altitude = altitudeTex.x;
 	// 0-1 range --> -1 to 1
-	float worldSpaceZ = (altitudeRaw * 2 - 1) * -1;
-	float isUnderwater = saturate(worldSpaceZ * 100);  // *** UPDATE!!!! ****
+	//float worldSpaceZ = (altitudeRaw * 2 - 1) * -1;
+	//float isUnderwater = saturate(worldSpaceZ * 100);  // *** UPDATE!!!! ****
 	
 	float3 waterFogColor = float3(0.36, 0.4, 0.44) * 0.42; // _FogColor.rgb;
 	
@@ -81,8 +76,10 @@ float4 GetEnvironmentColor(float3 worldPos, float4 terrainColorTex, float4 altit
 	float dotLight = dot(surfaceNormal, _WorldSpaceLightPos0.xyz);
 	dotLight = dotLight * dotLight;
 	
-	float depthNormalized = saturate((1.0 - altitudeRaw) - 0.5) * 2;	
+	float altitude = altitudeRaw + waterSurfaceTex.x * 0.05;
+	float depthNormalized = saturate((1.0 - altitude) - 0.5) * 2;	
 	depthNormalized = saturate(depthNormalized); //  ????
+	float isUnderwater = (altitude * 2 - 1) * -1;
 
 	// Wetness darkening:
 	float wetnessMask = saturate(((altitudeRaw + waterSurfaceTex.x * 0.34) - 0.6) * 5.25);
@@ -102,22 +99,23 @@ float4 GetEnvironmentColor(float3 worldPos, float4 terrainColorTex, float4 altit
 	float fogAmount = lerp(0, 1, depthNormalized);
 	outColor.rgb = lerp(outColor.rgb, waterFogColor, fogAmount * isUnderwater); // (max(minFog, saturate(depthNormalized + algaeMask))
 		
-	//finalColor.rgb += decomposerHue * decomposerMask * 0.025;
-	
 	// Reflection!!!
 	
-	float3 cameraToVertex = i.worldPos - _WorldSpaceCameraPos;
+	float3 cameraToVertex = worldPos - _WorldSpaceCameraPos;
     float3 cameraToVertexDir = normalize(cameraToVertex);
 	float3 reflectedViewDir = cameraToVertexDir + 2 * waterSurfaceNormal * 0.05;
-	//float viewDot = dot(-cameraToVertexDir, waterSurfaceNormal);
+	float viewDot = dot(-cameraToVertexDir, waterSurfaceNormal);
 
-	float2 skyCoords = reflectedViewDir.xy * 0.5 + 0.5;
+	//float2 skyCoords = reflectedViewDir.xy * 0.5 + 0.5;
 	// Have to sample SkyTexture in displayShader????
 
-	float4 reflectedColor = float4(tex2Dlod(_SkyTex, float4((skyCoords) - _Time.y * 0.015, 0, 1)).rgb, finalColor.a); //col;
-								
-	float reflectLerp = saturate(i.vignetteLerp.x * 2);
-	finalColor = lerp(finalColor, reflectedColor, reflectLerp);
+	
+	//float2 skyCoords = reflectedViewDir.xy * 0.5 + 0.5;
+	float4 reflectedColor = float4(skyTex.rgb, outColor.a); //col;
+	
+				
+	float reflectLerp = saturate(viewDot * viewDot * 0.35 * isUnderwater);
+	outColor.rgb += lerp(float3(0,0,0), reflectedColor, reflectLerp);
 
 	//outColor.rgb = terrainColorTex;
 	return outColor;
