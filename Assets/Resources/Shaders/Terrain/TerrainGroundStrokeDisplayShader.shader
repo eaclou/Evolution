@@ -120,7 +120,7 @@
 				float4 waterSurfaceTex = tex2D(_WaterSurfaceTex, i.altitudeUV);
 				float4 resourceTex = tex2D(_ResourceGridTex, i.altitudeUV);	
 				float4 terrainColorTex = tex2D(_TerrainColorTex, i.altitudeUV);	
-				float4 skyTex = tex2D(_SkyTex, i.altitudeUV);
+				
 				
 				//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -153,7 +153,7 @@
 				float altitude = altitudeRaw + waterSurfaceTex.x * 0.05;
 				float depthNormalized = saturate((1.0 - altitude) - 0.5) * 2;	
 				depthNormalized = saturate(depthNormalized); //  ????
-				float isUnderwater = (altitude * 2 - 1) * -1;
+				float isUnderwater = saturate((altitude * 2 - 1) * -11);
 
 				// Wetness darkening:
 				float wetnessMask = saturate(((altitudeRaw + waterSurfaceTex.x * 0.34) - 0.6) * 5.25);
@@ -177,18 +177,19 @@
 	
 				float3 cameraToVertex = i.worldPos - _WorldSpaceCameraPos;
 				float3 cameraToVertexDir = normalize(cameraToVertex);
-				float3 reflectedViewDir = cameraToVertexDir + 2 * waterSurfaceNormal * 0.05;
-				float viewDot = dot(-cameraToVertexDir, waterSurfaceNormal);
+				float3 reflectedViewDir = cameraToVertexDir + 2 * waterSurfaceNormal * 0.5;
+				float viewDot = 1.0 - saturate(dot(-cameraToVertexDir, waterSurfaceNormal));
 
 				//float2 skyCoords = reflectedViewDir.xy * 0.5 + 0.5;
-				// Have to sample SkyTexture in displayShader????
+				// Have to sample SkyTexture din displayShader????
 
 	
-				//float2 skyCoords = reflectedViewDir.xy * 0.5 + 0.5;
+				float2 skyCoords = reflectedViewDir.xy * 0.5 + 0.5;
+				float4 skyTex = tex2D(_SkyTex, skyCoords);
 				float4 reflectedColor = float4(skyTex.rgb, outColor.a); //col;
 	
 				
-				float reflectLerp = saturate(viewDot * viewDot * 0.35 * isUnderwater);
+				float reflectLerp = saturate(viewDot * isUnderwater);
 				outColor.rgb += lerp(float3(0,0,0), reflectedColor, reflectLerp);
 
 				//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
