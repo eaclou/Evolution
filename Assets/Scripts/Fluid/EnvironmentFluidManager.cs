@@ -281,9 +281,9 @@ public class EnvironmentFluidManager : MonoBehaviour {
         //colorRefreshDynamicMultiplier = Mathf.Lerp(colorRefreshDynamicMultiplier, 0.0075f, lerpAmount);
 
         float baseTierLerp = Mathf.Clamp01((float)curTierWaterCurrents / 10f);
-        float targetSpeed = 0.5f; // Mathf.Lerp(0f, 15f, baseTierLerp * baseTierLerp * baseTierLerp);
+        float targetSpeed = 2.24f * baseTierLerp; // Mathf.Lerp(0f, 15f, baseTierLerp * baseTierLerp * baseTierLerp);
 
-        forceMultiplier = 0.5f; // Mathf.Lerp(forceMultiplier, targetSpeed, lerpAmount);
+        forceMultiplier = targetSpeed; // Mathf.Lerp(forceMultiplier, targetSpeed, lerpAmount);
     }
     private void SetClimateInitial() {
         //Debug.Log("UpdateSimulationClimate Initial!");

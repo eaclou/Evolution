@@ -6,6 +6,7 @@
 		_PatternTex ("Pattern Texture", 2D) = "white" {}
 		_AltitudeTex ("_AltitudeTex", 2D) = "gray" {}
 		_WaterSurfaceTex ("_WaterSurfaceTex", 2D) = "black" {}
+		_TerrainColorTex ("_TerrainColorTex", 2D) = "black" {}
 	}
 	SubShader
 	{
@@ -39,6 +40,7 @@
 			sampler2D _PatternTex;
 			sampler2D _AltitudeTex;
 			sampler2D _WaterSurfaceTex;
+			sampler2D _TerrainColorTex;
 
 			uniform float _MapSize;
 
@@ -48,6 +50,8 @@
 			uniform int _SelectedID;
 			uniform float _IsHover;			
 			uniform float _IsSelected;
+
+			uniform float _GlobalWaterLevel;
 
 			StructuredBuffer<float3> quadVerticesCBuffer;			
 			StructuredBuffer<CritterInitData> critterInitDataCBuffer;
@@ -95,10 +99,10 @@
 				// old //float3 vertexWorldPos = critterWorldPos + strokeBindPos + quadVerticesCBuffer[id] * 0.645 * length(genericStrokeData.scale);
 				float3 vertexWorldPos = genericStrokeData.worldPos + quadVertexOffset * 1.25 * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage) * 1;
 				
-				float2 altUV = vertexWorldPos.xy / _MapSize;					
-				float altitudeRaw = tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 0)).x;
+				float2 altUV = vertexWorldPos.xy / _MapSize;				
+				float altitudeRaw = tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 0));
 				float seaFloorAltitude = -(altitudeRaw * 2 - 1) * 10;
-
+				vertexWorldPos.z = -(max(_GlobalWaterLevel, altitudeRaw) * 2 - 1) * 10;
 				vertexWorldPos.z = lerp(vertexWorldPos.z, seaFloorAltitude, decayAmount);
 				// REFRACTION:							
 				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(genericStrokeData.worldPos.xy /  _MapSize, 0, 0)).yzw;
@@ -159,10 +163,13 @@
 			{
 				//return i.color;
 				// sample the texture
-				float3 waterFogColor = float3(0.03,0.4,0.3) * 0.4;
+				float3 waterFogColor = float3(0.03,0.4,0.3) * 4.4;
 
+				float4 terrainColor = tex2D(_TerrainColorTex, i.worldPos.xy / _MapSize);
+				
 				fixed4 col = tex2D(_MainTex, i.uv) * i.color;
-				col.rgb = lerp(col.rgb, waterFogColor, 0.5 * saturate((i.worldPos.z - 0.75) * 0.5));
+				
+				col.rgb = lerp(col.rgb, terrainColor.rgb, 0.7); //0.5 * saturate((i.worldPos.z - 0.75) * 0.5));
 
 				float highlightBoost = saturate(i.highlight.x * _IsHover + i.highlight.y * _IsSelected * 0.25) * _HighlightOn;
 				col.rgb = col.rgb * (1 + highlightBoost) + highlightBoost * 0.1;

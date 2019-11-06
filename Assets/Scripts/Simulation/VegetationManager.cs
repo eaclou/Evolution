@@ -559,7 +559,8 @@ public class VegetationManager {
         computeShaderPlantParticles.SetTexture(kernelCSSimulateAlgaeParticles, "altitudeRead", renderKingRef.baronVonTerrain.terrainHeightDataRT);
         computeShaderPlantParticles.SetTexture(kernelCSSimulateAlgaeParticles, "_SpawnDensityMap", renderKingRef.spiritBrushRT);
         computeShaderPlantParticles.SetTexture(kernelCSSimulateAlgaeParticles, "_ResourceGridRead", resourceGridRT1);
-        computeShaderPlantParticles.SetFloat("_MapSize", SimulationManager._MapSize);    
+        computeShaderPlantParticles.SetFloat("_MapSize", SimulationManager._MapSize);   
+        computeShaderPlantParticles.SetFloat("_GlobalWaterLevel", renderKingRef.baronVonWater._GlobalWaterLevel);   
         computeShaderPlantParticles.SetFloat("_SpiritBrushPosNeg", renderKingRef.spiritBrushPosNeg);            
         //computeShaderFoodParticles.SetFloat("_RespawnFoodParticles", 1f);
         computeShaderPlantParticles.SetFloat("_Time", Time.realtimeSinceStartup);
@@ -671,9 +672,9 @@ public class VegetationManager {
         closestPlantParticlesDataCBuffer.GetData(closestPlantParticlesDataArray);
         closestPlantIndexCBuffer.GetData(closestPlantIndexArray);
 
-        Debug.Log("FindClosestPlantParticleToCritters[1] " + simStateDataRef.critterSimDataArray[1].worldPos.ToString() +  ", " +
+        /*Debug.Log("FindClosestPlantParticleToCritters[1] " + simStateDataRef.critterSimDataArray[1].worldPos.ToString() +  ", " +
                     closestPlantParticlesDataArray[1].worldPos.ToString() + ", id: " +
-                    closestPlantParticlesDataArray[1].index.ToString());
+                    closestPlantParticlesDataArray[1].index.ToString());*/
     }
     // Keep these two pipelines separate at first while try to debug::::
     private Vector4[] ReduceDistancesArray(Vector4[] inBuffer) {
@@ -1023,6 +1024,7 @@ public class VegetationManager {
         computeShaderResourceGrid.SetFloat("_MapSize", SimulationManager._MapSize);
         float brushDecomposersOn = 0f;  // eventually make this more elegant during next refactor ***
         float brushAlgaeOn = 0f;
+        float brushMineralsOn = 0f;
         float brushIntensityMult = 1f;
         if(isBrushActive) {  // Set from uiManager
 
@@ -1031,19 +1033,27 @@ public class VegetationManager {
                 brushIntensityMult = 0.2f;
             }
             else if (theRenderKingRef.simManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 1) {
-                if (theRenderKingRef.simManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) { 
+                if (theRenderKingRef.simManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) {
                     brushAlgaeOn = 1f;
-                    Debug.Log("// Algae brush on!");
+                    
                     brushIntensityMult = 0.025f;
                 }
                 else {
                     //brushPlantsOn = 1f;
                 }
             }
+            else if (theRenderKingRef.simManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 4) {
+                if (theRenderKingRef.simManager.trophicLayersManager.selectedTrophicSlotRef.slotID == 0) {  // MINERALS
+                    brushMineralsOn = 1f;  
+                    brushIntensityMult = 0.1f;
+                    Debug.Log("// minerals brush on!");
+                }
+            }
         }
         computeShaderResourceGrid.SetFloat("_SpiritBrushIntensity", brushIntensityMult); // *** INVESTIGATE THIS -- not used/needed?
         computeShaderResourceGrid.SetFloat("_IsSpiritBrushDecomposersOn", brushDecomposersOn);
         computeShaderResourceGrid.SetFloat("_IsSpiritBrushAlgaeOn", brushAlgaeOn);
+        computeShaderResourceGrid.SetFloat("_IsSpiritBrushMineralsOn", brushMineralsOn);
         computeShaderResourceGrid.SetFloat("_SpiritBrushPosNeg", theRenderKingRef.spiritBrushPosNeg);
         //computeShaderResourceGrid.SetFloat("_RD_FeedRate", theRenderKingRef.simManager.vegetationManager.decomposerSlotGenomeCurrent.feedRate);
         //computeShaderResourceGrid.SetFloat("_RD_KillRate", theRenderKingRef.simManager.vegetationManager.decomposerSlotGenomeCurrent.killRate);            

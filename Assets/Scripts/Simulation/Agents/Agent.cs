@@ -79,7 +79,7 @@ public class Agent : MonoBehaviour {
         Cooldown,
         Decaying
     }
-    private int gestationDurationTimeSteps = 72;
+    private int gestationDurationTimeSteps = 90;
     public int _GestationDurationTimeSteps
     {
         get
@@ -171,7 +171,7 @@ public class Agent : MonoBehaviour {
 
     public float avgVel;
     public Vector2 avgFluidVel;
-    public float depth;
+    public float worldAltitude;
     public Vector2 depthGradient;
     //public float depthNorth;
     //public float depthEast;
@@ -1320,7 +1320,7 @@ public class Agent : MonoBehaviour {
         fatigueMultiplier *= lowHealthPenalty;
         //float growthStatus = 
 
-        turningAmount = Mathf.Lerp(turningAmount, this.bodyRigidbody.angularVelocity * Mathf.Deg2Rad * 0.1f, 0.28f);
+        turningAmount = Mathf.Lerp(turningAmount, this.bodyRigidbody.angularVelocity * Mathf.Deg2Rad * 0.03f, 0.28f);
 
         animationCycle += smoothedThrottle.magnitude * swimAnimationCycleSpeed * fatigueMultiplier * forcePenalty; // (Mathf.Lerp(fullSizeBoundingBox.y, 1f, 1f)
 
@@ -1350,7 +1350,7 @@ public class Agent : MonoBehaviour {
             //float aspectSpeedPenalty = 1.0f; // Mathf.Lerp(1.2f, 0.4f, candidateRef.candidateGenome.bodyGenome.coreGenome.creatureAspectRatio);
 
             float swimSpeed = Mathf.Lerp(movementModule.smallestCreatureBaseSpeed, movementModule.largestCreatureBaseSpeed, 0.5f); // sizeValue);
-            float turnRate = Mathf.Lerp(movementModule.smallestCreatureBaseTurnRate, movementModule.largestCreatureBaseTurnRate, 0.5f); // sizeValue);
+            float turnRate = Mathf.Lerp(movementModule.smallestCreatureBaseTurnRate, movementModule.largestCreatureBaseTurnRate, 0.5f) * 0.1f; // sizeValue);
             float dashBonus = 1f;
             if(isDashing) {                
                 dashBonus = 5f;                
@@ -1513,7 +1513,7 @@ public class Agent : MonoBehaviour {
         averageFullSizeWidth = avgSegmentWidth;       
     }*/
     
-    public void ReconstructAgentGameObjects(SettingsManager settings, AgentGenome genome, EggSack parentEggSack, Vector3 startPos, bool isImmaculate) {
+    public void ReconstructAgentGameObjects(SettingsManager settings, AgentGenome genome, EggSack parentEggSack, Vector3 startPos, bool isImmaculate, float globalWaterLevel) {
         float corpseLerp = (float)settings.curTierFoodCorpse / 10f;
         //decayDurationTimeSteps = 480; // Mathf.RoundToInt(Mathf.Lerp(360f, 3600f, corpseLerp));
         float eggLerp = (float)settings.curTierFoodEgg / 10f;
@@ -1583,7 +1583,7 @@ public class Agent : MonoBehaviour {
 
         //mouseclickcollider MCC
         mouseClickCollider.direction = 1; // Y-Axis ???
-        mouseClickCollider.center = Vector3.zero; // new Vector3(0f, -0.65f, 0f); //Vector3.zero; // new Vector3(0f, 0f, 1f);
+        mouseClickCollider.center = new Vector3(0f, 0f, (globalWaterLevel * 2 - 1) * -10); //Vector3.zero; // new Vector3(0f, 0f, 1f);
         mouseClickCollider.radius = fullSizeBoundingBox.x / 2f * sizePercentage;
         mouseClickCollider.radius *= 1.85f; // ** TEMP
         mouseClickCollider.height = fullSizeBoundingBox.y / 2f * sizePercentage;
@@ -1623,7 +1623,7 @@ public class Agent : MonoBehaviour {
     // If spawnImmaculate, where does the biomass come from? -- should it be free?
     //  
 
-    public void InitializeSpawnAgentImmaculate(SettingsManager settings, int agentIndex, CandidateAgentData candidateData, Vector3 spawnWorldPos) {        
+    public void InitializeSpawnAgentImmaculate(SettingsManager settings, int agentIndex, CandidateAgentData candidateData, Vector3 spawnWorldPos, float globalWaterLevel) {        
         index = agentIndex;
         speciesIndex = candidateData.speciesID;
         candidateRef = candidateData;
@@ -1638,13 +1638,13 @@ public class Agent : MonoBehaviour {
         InitializeModules(genome);      // Modules need to be created first so that Brain can map its neurons to existing modules  
         
         // Upgrade this to proper Pooling!!!!
-        ReconstructAgentGameObjects(settings, genome, null, spawnWorldPos, true);
+        ReconstructAgentGameObjects(settings, genome, null, spawnWorldPos, true, globalWaterLevel);
 
         brain = new Brain(genome.brainGenome, this); 
         
         isInert = false;
     }
-    public void InitializeSpawnAgentFromEggSack(SettingsManager settings, int agentIndex, CandidateAgentData candidateData, EggSack parentEggSack) {        
+    public void InitializeSpawnAgentFromEggSack(SettingsManager settings, int agentIndex, CandidateAgentData candidateData, EggSack parentEggSack, float globalWaterLevel) {        
         index = agentIndex;
         speciesIndex = candidateData.speciesID;
         candidateRef = candidateData;
@@ -1660,7 +1660,7 @@ public class Agent : MonoBehaviour {
         // Upgrade this to proper Pooling!!!!
         Vector3 spawnOffset = UnityEngine.Random.insideUnitSphere * parentEggSack.curSize.magnitude * 0.167f;
         spawnOffset.z = 0f;
-        ReconstructAgentGameObjects(settings, genome, parentEggSack, parentEggSack.gameObject.transform.position + spawnOffset, false);
+        ReconstructAgentGameObjects(settings, genome, parentEggSack, parentEggSack.gameObject.transform.position + spawnOffset, false, globalWaterLevel);
 
         brain = new Brain(genome.brainGenome, this);   
         

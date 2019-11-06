@@ -5,6 +5,7 @@
 		_MainTex ("Main Texture", 2D) = "white" {}  // stem texture sheet
 		_AltitudeTex ("_AltitudeTex", 2D) = "gray" {}
 		_WaterSurfaceTex ("_WaterSurfaceTex", 2D) = "black" {}
+		_TerrainColorTex ("_TerrainColorTex", 2D) = "black" {}
 		//_Tint("Color", Color) = (1,1,1,1)
 		//_Size("Size", vector) = (1,1,1,1)
 	}
@@ -29,6 +30,7 @@
 			sampler2D _MainTex;
 			sampler2D _AltitudeTex;	
 			sampler2D _WaterSurfaceTex;
+			sampler2D _TerrainColorTex;
 			
 			StructuredBuffer<PlantParticleData> plantParticleDataCBuffer;			
 			StructuredBuffer<float3> quadVerticesCBuffer;
@@ -39,6 +41,8 @@
 			uniform float _IsHover;
 
 			uniform float _MapSize;
+
+			uniform float _GlobalWaterLevel;
 			
 			struct v2f
 			{
@@ -46,6 +50,7 @@
 				float2 uv : TEXCOORD0;  // uv of the brushstroke quad itself, particle texture	
 				float4 color : COLOR;
 				float4 hue : TEXCOORD1;
+				float4 worldPos : TEXCOORD2;
 			};
 
 			float rand(float2 co) {   // OUTPUT is in [0,1] RANGE!!!
@@ -71,7 +76,12 @@
 				float selectedMask = (1.0 - saturate(abs(_SelectedParticleIndex - particleIndex))) * _IsSelected;
 				float hoverMask = (1.0 - saturate(abs(_HoverParticleIndex - particleIndex))) * _IsHover;
 
-				float3 worldPosition = float3(particleData.worldPos, 1.0);    //float3(rawData.worldPos, -random2);
+				float2 altUV = particleData.worldPos.xy / _MapSize;				
+				float altitudeRaw = tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 0));
+				float zPos = -(max(_GlobalWaterLevel, altitudeRaw) * 2 - 1) * 10;
+
+				float3 worldPosition = float3(particleData.worldPos, zPos);    //float3(rawData.worldPos, -random2);
+				
 				//float3 localQuadPos = quadPoint;
 
 				float rand0 = rand(float2(inst, inst) * 10);
@@ -116,6 +126,7 @@
 				float3 rotatedPoint = float3(quadPoint.x * right + quadPoint.y * forward, 0);  // Rotate localRotation by AgentRotation
 
 				float leafScale = saturate(particleData.biomass * 4 + 0.3) * 0.25 * particleData.isActive;
+				o.worldPos = float4(worldPosition, 0);
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition + rotatedPoint * leafScale, 1.0)));
 				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(quadPoint, 0.0f));				
 				o.uv = uv;	
@@ -128,6 +139,18 @@
 
 			fixed4 frag(v2f i) : SV_Target
 			{
+				float4 texColor = tex2D(_MainTex, i.uv);
+				float4 terrainColor = tex2D(_TerrainColorTex, i.worldPos.xy / _MapSize);
+				
+				fixed4 col = tex2D(_MainTex, i.uv) * i.color;
+				col.rgb = lerp(col, float3(0.81, 0.79, 0.65) * 0.1, i.color.x * 0.6);
+				col.rgb = lerp(col, float3(0.6, 1, 0.4) * 1, 0.25);
+				col.rgb = lerp(col.rgb, terrainColor.rgb, 0.37);
+				col.a = texColor.a;
+
+				return col;
+
+				/*
 				//return float4(1,1,1,1);
 				float4 texColor = tex2D(_MainTex, i.uv);
 				
@@ -143,6 +166,7 @@
 				finalColor += 1 * i.color.a;  // hover/select
 				
 				return finalColor;
+				*/
 			}
 		ENDCG
 		}

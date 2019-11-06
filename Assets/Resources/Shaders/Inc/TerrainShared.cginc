@@ -44,7 +44,7 @@ float3 ApplyCausticsLight(float3 sourceColor, float4 waterSurfaceTex, float rawA
 
 // can this be broken up into modules?
 
-float4 GetEnvironmentColor(float3 worldPos, float4 terrainColorTex, float4 altitudeTex, float4 waterSurfaceTex, float4 resourceTex, float4 skyTex) {
+float4 GetEnvironmentColor(float3 worldPos, float4 terrainColorTex, float4 altitudeTex, float4 waterSurfaceTex, float4 resourceTex, float4 skyTex, float globalWaterLevel) {
 	float4 outColor = float4(0,0,0,1);
 
 	float turbidity = _Turbidity;  
@@ -60,14 +60,6 @@ float4 GetEnvironmentColor(float3 worldPos, float4 terrainColorTex, float4 altit
 	outColor.rgb = lerp(outColor.rgb, detritusHue, detritusMask);
 
 	float algaeMask = saturate(resourceTex.w * 1.0);
-	//minFog = max(algaeMask * 1, minFog);
-
-	float altitudeRaw = altitudeTex.x;
-	
-	//float altitude = altitudeTex.x;
-	// 0-1 range --> -1 to 1
-	//float worldSpaceZ = (altitudeRaw * 2 - 1) * -1;
-	//float isUnderwater = saturate(worldSpaceZ * 100);  // *** UPDATE!!!! ****
 	
 	float3 waterFogColor = float3(0.36, 0.4, 0.44) * 0.42; // _FogColor.rgb;
 	
@@ -76,17 +68,17 @@ float4 GetEnvironmentColor(float3 worldPos, float4 terrainColorTex, float4 altit
 	float dotLight = dot(surfaceNormal, _WorldSpaceLightPos0.xyz);
 	dotLight = dotLight * dotLight;
 	
-	float altitude = altitudeRaw + waterSurfaceTex.x * 0.05;
-	float depthNormalized = saturate((1.0 - altitude) - 0.5) * 2;	
-	depthNormalized = saturate(depthNormalized); //  ????
-	float isUnderwater = (altitude * 2 - 1) * -1;
+	
+	float altitude = altitudeTex.x + waterSurfaceTex.x * 0.05;						
+	float depth = saturate(-altitude + globalWaterLevel);
+	float isUnderwater = saturate(depth * 50);
 
 	// Wetness darkening:
-	float wetnessMask = saturate(((altitudeRaw + waterSurfaceTex.x * 0.34) - 0.6) * 5.25);
-	outColor.rgb *= (0.6 + wetnessMask * 0.4);
+	float wetnessMask = 1.0 - saturate((-altitude + globalWaterLevel + 0.31) * 4.5); 
+	outColor.rgb *= (0.65 + wetnessMask * 0.35);
 	
 	// Caustics
-	outColor.rgb += dotLight * isUnderwater * (1.0 - depthNormalized) * causticsStrength;		
+	outColor.rgb += dotLight * isUnderwater * (1.0 - depth) * causticsStrength;		
 	
 	//Diffuse 
 	float3 sunDir = normalize(float3(1,1,-1));
@@ -96,8 +88,8 @@ float4 GetEnvironmentColor(float3 worldPos, float4 terrainColorTex, float4 altit
 	outColor.rgb *= dotDiffuse;
 
 	// FOG:	
-	float fogAmount = lerp(0, 1, depthNormalized);
-	outColor.rgb = lerp(outColor.rgb, waterFogColor, fogAmount * isUnderwater); // (max(minFog, saturate(depthNormalized + algaeMask))
+	float fogAmount = lerp(0, 1, depth);
+	outColor.rgb = lerp(outColor.rgb, waterFogColor, fogAmount * isUnderwater); 
 		
 	// Reflection!!!
 	

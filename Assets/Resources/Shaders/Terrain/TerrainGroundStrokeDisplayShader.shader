@@ -7,6 +7,7 @@
 		_WaterSurfaceTex ("_WaterSurfaceTex", 2D) = "black" {}
 		_ResourceGridTex ("_ResourceGridTex", 2D) = "black" {}
 		_TerrainColorTex ("_TerrainColorTex", 2D) = "black" {}
+		_SpiritBrushTex ("_SpiritBrushTex", 2D) = "black" {}
 		_SkyTex ("_SkyTex", 2D) = "white" {}
 	}
 	SubShader
@@ -31,10 +32,13 @@
 			sampler2D _WaterSurfaceTex;
 			sampler2D _ResourceGridTex;
 			sampler2D _TerrainColorTex;
+			sampler2D _SpiritBrushTex;
 			sampler2D _SkyTex;
 			
 			//sampler2D _RenderedSceneRT;  // Provided by CommandBuffer -- global tex??? seems confusing... ** revisit this
-			uniform float _MapSize;			
+			uniform float _MapSize;	
+			
+			uniform float _GlobalWaterLevel;
 			
 			struct FrameBufferStrokeData {
 				float3 worldPos;
@@ -43,7 +47,19 @@
 				int brushType;
 			};
 
+			struct EnvironmentStrokeData {
+				float3 worldPos;
+				float2 scale;
+				float2 heading;
+				float isActive;
+				int brushType;
+				// extra stuff:
+				// mass, type,
+				// velocity, accel
+			};
+
 			StructuredBuffer<FrameBufferStrokeData> frameBufferStrokesCBuffer;
+			StructuredBuffer<EnvironmentStrokeData> environmentStrokesCBuffer;
 			StructuredBuffer<float3> quadVerticesCBuffer;			
 
 			struct v2f
@@ -66,20 +82,24 @@
 				// New code:
 				// Brushstrokes here vary in:  (size, position, color)
 				// Simulated separately (within ComputeTerrain) -- rendered here				
-				FrameBufferStrokeData strokeData = frameBufferStrokesCBuffer[inst];
+				EnvironmentStrokeData strokeData = environmentStrokesCBuffer[inst];
 
 				float3 worldPosition = strokeData.worldPos;
 				float3 quadPoint = quadVerticesCBuffer[id];
 
 				o.worldPos = worldPosition;
 
+				//float _GlobalWaterLevel = 0.25;
+
 				float2 altUV = worldPosition.xy / _MapSize;
 				o.altitudeUV = altUV;
 
-				float altitude = tex2Dlod(_AltitudeTex, float4(altUV, 0, 0)).x; //i.worldPos.z / 10; // [-1,1] range
+				float4 altitudeSample = tex2Dlod(_AltitudeTex, float4(altUV, 0, 0));
+				float altitude = altitudeSample.x; //i.worldPos.z / 10; // [-1,1] range
 				float4 waterSurfaceSample = tex2Dlod(_WaterSurfaceTex, float4(altUV, 0, 0));
 				float3 surfaceNormal = waterSurfaceSample.yzw;
-				float depth = saturate(-altitude + 0.5);
+				float depth = saturate(-altitude + _GlobalWaterLevel);
+
 				float refractionStrength = depth * 7.5;
 				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
 				
@@ -88,7 +108,7 @@
 				float random2 = rand(float2(random1, random1));
 				float randomAspect = lerp(0.75, 1.33, random1);
 				
-				float2 scale = strokeData.scale * randomAspect * 1.0;
+				float2 scale = strokeData.scale * randomAspect * 1.0 * strokeData.isActive;
 				quadPoint *= float3(scale, 1.0);
 
 				// &&&& Screen-space UV of center of brushstroke:
@@ -120,8 +140,10 @@
 				float4 waterSurfaceTex = tex2D(_WaterSurfaceTex, i.altitudeUV);
 				float4 resourceTex = tex2D(_ResourceGridTex, i.altitudeUV);	
 				float4 terrainColorTex = tex2D(_TerrainColorTex, i.altitudeUV);	
+				float4 spiritBrushTex = tex2D(_SpiritBrushTex, i.altitudeUV);	
 				
-				
+				return float4(terrainColorTex.rgb, brushColor.a);
+				//float _GlobalWaterLevel = 0.25;
 				//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
@@ -144,6 +166,7 @@
 				float altitudeRaw = altitudeTex.x;
 	
 				float3 waterFogColor = float3(0.36, 0.4, 0.44) * 0.42; // _FogColor.rgb;
+				waterFogColor = lerp(waterFogColor, float3(0.3,0.8,0.3) * 0.66, algaeMask);
 	
 				// FAKE CAUSTICS:::
 				float3 surfaceNormal = waterSurfaceTex.yzw; // pre-calculated
@@ -151,26 +174,31 @@
 				dotLight = dotLight * dotLight;
 	
 				float altitude = altitudeRaw + waterSurfaceTex.x * 0.05;
-				float depthNormalized = saturate((1.0 - altitude) - 0.5) * 2;	
-				depthNormalized = saturate(depthNormalized); //  ????
-				float isUnderwater = saturate((altitude * 2 - 1) * -11);
+
+				
+				float depth = saturate(-altitude + _GlobalWaterLevel);
+				//float depthNormalized = saturate((1.0 - altitude) - 0.5) * 2;	
+				//depthNormalized = saturate(depthNormalized); //  ????
+				float isUnderwater = saturate(depth * 50); //(altitude * 2 - 1) * -11);
 
 				// Wetness darkening:
-				float wetnessMask = saturate(((altitudeRaw + waterSurfaceTex.x * 0.34) - 0.6) * 5.25);
-				outColor.rgb *= (0.6 + wetnessMask * 0.4);
+				float wetnessMask = 1.0 - saturate((-altitude + _GlobalWaterLevel + 0.31) * 4.5); // saturate(((altitudeRaw + waterSurfaceTex.x * 0.34) - 0.6) * 5.25);
+				outColor.rgb *= (0.65 + wetnessMask * 0.35);
 	
 				// Caustics
-				outColor.rgb += dotLight * isUnderwater * (1.0 - depthNormalized) * causticsStrength;		
+				outColor.rgb += dotLight * isUnderwater * (1.0 - depth) * causticsStrength;		
 	
 				//Diffuse 
 				float3 sunDir = normalize(float3(1,1,-1));
 				float3 waterSurfaceNormal = waterSurfaceTex.yzw;
-	
-				float dotDiffuse = saturate(dot(waterSurfaceNormal, sunDir));
+				float3 groundSurfaceNormal = normalize(altitudeTex.yzw);
+				groundSurfaceNormal.z *= -1;
+				float3 diffuseSurfaceNormal = lerp(groundSurfaceNormal, waterSurfaceNormal, isUnderwater);
+				float dotDiffuse = saturate(dot(diffuseSurfaceNormal, sunDir));
 				outColor.rgb *= dotDiffuse;
 
 				// FOG:	
-				float fogAmount = lerp(0, 1, depthNormalized);
+				float fogAmount = lerp(0, 1, depth);
 				outColor.rgb = lerp(outColor.rgb, waterFogColor, fogAmount * isUnderwater);
 		
 				// Reflection!!!
@@ -193,7 +221,7 @@
 				outColor.rgb += lerp(float3(0,0,0), reflectedColor, reflectLerp);
 
 				//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
+				outColor.rgb += spiritBrushTex.x;
 				//float4 finalColor = GetEnvironmentColor(i.worldPos, terrainColorTex, altitudeTex, waterSurfaceTex, resourceTex, skySample);
 				
 				float4 finalColor = outColor;

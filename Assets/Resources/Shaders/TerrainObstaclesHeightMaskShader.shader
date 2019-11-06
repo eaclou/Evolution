@@ -32,6 +32,8 @@
 
 			sampler2D _MainTex;
 			float4 _MainTex_ST;
+
+			uniform float _GlobalWaterLevel;
 			
 			v2f vert (appdata v)
 			{
@@ -48,11 +50,14 @@
 				//fixed4 col = float4(0,0,0,1);
 				//tex2D(_MainTex, i.uv);
 
-				float4 altitudeSample = tex2D(_MainTex, i.uv);
-				float isAboveWater = saturate(10000 * (altitudeSample - 0.485));
+				float4 altitudeSample = tex2Dlod(_MainTex, float4(i.uv, 0, 2));
+				float isAboveWater = saturate(10000 * (altitudeSample - _GlobalWaterLevel));
 				//float aboveSeaLevel = saturate(-sign(altitude * 10) * 0.5 + 0.5);
 
-				float4 finalColor = float4(0, 0, isAboveWater, 1);
+				float gridActive = saturate(altitudeSample.a * 100);
+				float disabled = 1.0 - gridActive;
+
+				float4 finalColor = float4(0, 0, max(isAboveWater, disabled), 1);
 
 				return finalColor;
 			}

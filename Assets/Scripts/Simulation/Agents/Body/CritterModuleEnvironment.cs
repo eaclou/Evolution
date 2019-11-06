@@ -107,7 +107,7 @@ public class CritterModuleEnvironment {
 
     public void Tick(Agent agent) {
         if(genome.useWaterStats) {
-            waterDepth[0] = agent.depth;
+            waterDepth[0] = agent.worldAltitude;
             waterVelX[0] = agent.avgFluidVel.x * 10f;
             waterVelY[0] = agent.avgFluidVel.y * 10f; // *** *10f to get closer to 0-1 range since values are very low
 

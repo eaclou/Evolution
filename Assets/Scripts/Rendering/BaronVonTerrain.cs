@@ -48,6 +48,12 @@ public class BaronVonTerrain : RenderBaron {
     public RenderTexture terrainColorRT0;
     public RenderTexture terrainColorRT1; // *** needed?
 
+    private int simTextureBetaResolution = 128;
+    //  x = dust, y = _, z = _, w = map active mask
+    public RenderTexture simTextureBetaRT0;
+    public RenderTexture simTextureBetaRT1;
+    
+
     public struct TriangleIndexData {
         public int v1;
         public int v2;
@@ -70,6 +76,7 @@ public class BaronVonTerrain : RenderBaron {
     private int numGroundStrokesSml = 256;
     //public ComputeBuffer groundStrokesLrgCBuffer;
     public ComputeBuffer terrainStrokesCBuffer;
+
     //public ComputeBuffer groundStrokesSmlCBuffer;
 
     private int numDecomposerBits = 1024 * 4;
@@ -84,11 +91,12 @@ public class BaronVonTerrain : RenderBaron {
         public float elevationChange;
     }*/
 
-    public struct TerrainSimpleBrushData { // background terrain
+    public struct EnvironmentStrokeData { // background terrain
         public Vector3 worldPos;
 		public Vector2 scale;
 		public Vector2 heading;
 		public int brushType;
+        public float isActive;        
     }
 
     public struct GroundBitsData
@@ -171,9 +179,17 @@ public class BaronVonTerrain : RenderBaron {
         terrainColorRT1.enableRandomWrite = true;
         terrainColorRT1.Create();
 
-        //Graphics.Blit(terrainHeightRT0, terrainColorRT0, testInitTerrainDataBlitMat);
-        //Graphics.Blit(terrainColorRT0, terrainColorRT1);  // maybe not needed?
-        //Graphics.Blit(terrainHeightRT0, terrainHeightDataRT);  // maybe not needed?
+        // dump extra data in here:::
+        simTextureBetaRT0 = new RenderTexture(simTextureBetaResolution, simTextureBetaResolution, 0, RenderTextureFormat.Default, RenderTextureReadWrite.Linear);
+        simTextureBetaRT0.wrapMode = TextureWrapMode.Clamp;
+        simTextureBetaRT0.enableRandomWrite = true;
+        simTextureBetaRT0.Create();
+
+        simTextureBetaRT1 = new RenderTexture(simTextureBetaResolution, simTextureBetaResolution, 0, RenderTextureFormat.Default, RenderTextureReadWrite.Linear);
+        simTextureBetaRT1.wrapMode = TextureWrapMode.Clamp;
+        simTextureBetaRT1.enableRandomWrite = true;
+        simTextureBetaRT1.Create();
+
 
         InitializeBuffers();        
         InitializeMaterials();
@@ -318,6 +334,7 @@ public class BaronVonTerrain : RenderBaron {
         wasteBitsCBuffer.SetData(wasteBitsArray);
     }
 
+
     private void InitializeGroundStrokeBuffers() {
 
         // LARGE ::::::
@@ -327,9 +344,9 @@ public class BaronVonTerrain : RenderBaron {
         int totalNumTerrainStrokes = totalNumLrgStrokes + totalNumMedStrokes + totalNumSmlStrokes;
         int baseIndex = 0;
 
-        terrainStrokesCBuffer = new ComputeBuffer(totalNumTerrainStrokes, sizeof(float) * 7 + sizeof(int));
+        terrainStrokesCBuffer = new ComputeBuffer(totalNumTerrainStrokes, sizeof(float) * 8 + sizeof(int));
         //groundStrokesLrgCBuffer = new ComputeBuffer(numGroundStrokesLrg * numGroundStrokesLrg, sizeof(float) * 7 + sizeof(int));
-        TerrainSimpleBrushData[] terrainStrokesArray = new TerrainSimpleBrushData[totalNumTerrainStrokes];
+        EnvironmentStrokeData[] terrainStrokesArray = new EnvironmentStrokeData[totalNumTerrainStrokes];
         //float boundsLrg = 256f;
         for(int x = 0; x < numGroundStrokesLrg; x++) {
             for(int y = 0; y < numGroundStrokesLrg; y++) {
@@ -342,6 +359,7 @@ public class BaronVonTerrain : RenderBaron {
                 terrainStrokesArray[index].scale = new Vector2(UnityEngine.Random.Range(0.4f, 0.8f), UnityEngine.Random.Range(1.5f, 2f)) * 12f; // Y is forward, along stroke
                 terrainStrokesArray[index].heading = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)).normalized;
                 terrainStrokesArray[index].brushType = UnityEngine.Random.Range(0,4);
+                terrainStrokesArray[index].isActive = 0f;
             }
         }
         baseIndex = totalNumLrgStrokes;
@@ -356,6 +374,7 @@ public class BaronVonTerrain : RenderBaron {
                 terrainStrokesArray[index].scale = new Vector2(UnityEngine.Random.Range(0.4f, 0.8f), UnityEngine.Random.Range(1.55f, 2.3f)) * 4.20f; // Y is forward, along stroke
                 terrainStrokesArray[index].heading = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)).normalized;
                 terrainStrokesArray[index].brushType = UnityEngine.Random.Range(0,4);
+                terrainStrokesArray[index].isActive = 0f;
             }
         }
         baseIndex = totalNumLrgStrokes + totalNumMedStrokes;
@@ -370,6 +389,7 @@ public class BaronVonTerrain : RenderBaron {
                 terrainStrokesArray[index].scale = new Vector2(UnityEngine.Random.Range(0.4f, 0.8f), UnityEngine.Random.Range(1.75f, 3f) * 0.5f) * 1.55f; // Y is forward, along stroke
                 terrainStrokesArray[index].heading = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)).normalized;
                 terrainStrokesArray[index].brushType = UnityEngine.Random.Range(0,4);
+                terrainStrokesArray[index].isActive = 0f;
             }
         }
 
@@ -438,7 +458,7 @@ public class BaronVonTerrain : RenderBaron {
         groundStrokesMedDisplayMat.SetPass(0);
         groundStrokesMedDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
         groundStrokesMedDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        groundStrokesMedDisplayMat.SetBuffer("frameBufferStrokesCBuffer", terrainStrokesCBuffer);    
+        groundStrokesMedDisplayMat.SetBuffer("environmentStrokesCBuffer", terrainStrokesCBuffer);    
 
         //groundStrokesSmlDisplayMat.SetPass(0);
         //groundStrokesSmlDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);

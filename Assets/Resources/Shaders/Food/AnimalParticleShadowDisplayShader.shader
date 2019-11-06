@@ -5,6 +5,7 @@
 		_MainTex ("_MainTex", 2D) = "white" {}  // stem texture sheet	
 		_AltitudeTex ("_AltitudeTex", 2D) = "gray" {}
 		_WaterSurfaceTex ("_WaterSurfaceTex", 2D) = "black" {}
+		_TerrainColorTex ("_TerrainColorTex", 2D) = "black" {}
 		//_Tint("Color", Color) = (1,1,1,1)
 		//_Size("Size", vector) = (1,1,1,1)
 	}
@@ -29,7 +30,9 @@
 			sampler2D _MainTex;
 			sampler2D _AltitudeTex;	
 			sampler2D _WaterSurfaceTex;
+			sampler2D _TerrainColorTex;
 			uniform float _MapSize;
+			uniform float _GlobalWaterLevel;
 
 			StructuredBuffer<AnimalParticleData> animalParticleDataCBuffer;			
 			StructuredBuffer<float3> quadVerticesCBuffer;
@@ -45,6 +48,7 @@
 				float4 pos : SV_POSITION;
 				float2 uv : TEXCOORD0;  // uv of the brushstroke quad itself, particle texture	
 				float4 color : COLOR;
+				float2 altitudeUV : TEXCOORD1;
 			};
 
 			float rand(float2 co){   // OUTPUT is in [0,1] RANGE!!!
@@ -70,7 +74,7 @@
 				float hoverMask = (1.0 - saturate(abs(_ClosestParticleID - (int)inst))) * _IsHover;
 
 				float width = sqrt(particleData.biomass) * 0.04 * (1 - 2 * abs(0.75 - uv.y)) + 0.015 + 0.015 * hoverMask + 0.025 * selectedMask;
-
+				//width *= 0.5;
 				float freq = 20;
 				float swimAnimOffset = sin(_Time.y * freq - t * 7 + (float)inst * 0.1237) * 4;
 				float swimAnimMask = t * saturate(1.0 - particleData.isDecaying); //saturate(1.0 - uv.y); //saturate(1.0 - t);
@@ -85,13 +89,13 @@
 				//float2 altUV = particleData.worldPos.xy / _MapSize;
 				//worldPosition.z = -(tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 0)).x) * 10;
 				
-				float2 altUV = worldPosition.xy / _MapSize;
-				//o.altitudeUV = altUV;
+				float2 altUV = particleData.worldPos.xy / _MapSize;
+				o.altitudeUV = altUV;
 				float altitudeRaw = tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 0)).x;								
 				worldPosition.z = -(altitudeRaw * 2 - 1) * 10;
 
 				float2 vertexOffset = quadPoint.xy * width * 6;
-				vertexOffset.xy *= 4;
+				//vertexOffset.xy *= 4;
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition.xy + vertexOffset, worldPosition.z, 1.0)));			
 				o.uv = uv; //quadVerticesCBuffer[id].xy + 0.5f;	
 				/////////////////////////////////////////////////////
@@ -106,14 +110,18 @@
 
 			fixed4 frag(v2f i) : SV_Target
 			{
-				//return float4(1,1,1,1);
+				float4 brushColor = tex2D(_MainTex, i.uv);									
+				float4 altitudeTex = tex2D(_AltitudeTex, i.altitudeUV); //i.worldPos.z / 10; // [-1,1] range
+				float depth = saturate((_GlobalWaterLevel - altitudeTex.x) * 2);
+				//float4 waterSurfaceTex = tex2D(_WaterSurfaceTex, i.altitudeUV);
+				float4 terrainColorTex = tex2D(_TerrainColorTex, i.altitudeUV);
+				float4 finalColor = float4(0,0,0,1);
+				finalColor.rgb = lerp(finalColor.rgb, terrainColorTex.rgb, (0.5 + 0.5 * depth)); //GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, float4(0,0,0,0));
+				finalColor.a = brushColor.a * 1;
 
-				float4 texColor = tex2D(_MainTex, i.uv);	
-				float3 waterFogColor = float3(0.03,0.4,0.3) * 0.33;
-				texColor.rgb = waterFogColor;  // shadow
-				texColor.a *= 0.25 * i.color.a;
-				return texColor;
-				//return float4(0.7,1,0.1,texColor.a * 0.75);
+				return finalColor;
+				
+
 			}
 		ENDCG
 		}

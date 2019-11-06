@@ -5,6 +5,7 @@
 		_MainTex ("_MainTex", 2D) = "white" {}  // stem texture sheet		
 		_WaterSurfaceTex ("_WaterSurfaceTex", 2D) = "black" {}
 		_AltitudeTex ("_AltitudeTex", 2D) = "gray" {}
+		_TerrainColorTex ("_TerrainColorTex", 2D) = "black" {}
 		//_Tint("Color", Color) = (1,1,1,1)
 		//_Size("Size", vector) = (1,1,1,1)
 	}
@@ -29,6 +30,7 @@
 			sampler2D _MainTex;
 			sampler2D _WaterSurfaceTex;
 			sampler2D _AltitudeTex;
+			sampler2D _TerrainColorTex;
 			
 			StructuredBuffer<AnimalParticleData> animalParticleDataCBuffer;			
 			StructuredBuffer<float3> quadVerticesCBuffer;
@@ -37,6 +39,8 @@
 			uniform float _IsHighlight;
 
 			uniform float _MapSize;
+
+			uniform float _GlobalWaterLevel;
 			//uniform float _MouseCoordX;
 			//uniform float _MouseCoordY;
 
@@ -52,6 +56,7 @@
 				float4 color : COLOR;
 				float2 highlight : TEXCOORD1;
 				float2 status : TEXCOORD2;
+				float2 altitudeUV : TEXCOORD3;
 			};
 
 			float rand(float2 co){   // OUTPUT is in [0,1] RANGE!!!
@@ -104,20 +109,21 @@
 				float3 worldPosition = particleData.worldPos; // float3(curvePos,0) + float3(offset, 0.0);
 				worldPosition.x += (swimAnimOffset * swimAnimMask) * width;
 
-				float decayProgress = 0;
-				if(particleData.isDecaying > 0.5) {
-					float2 altUV = worldPosition.xy / _MapSize;				
-					float altitudeRaw = tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 0)).x;
-					float zPosOfLand = -(altitudeRaw * 2 - 1) * 10;
-					decayProgress = 1.0 - (particleData.biomass / (particleData.extra0 + 0.0000001));
-					worldPosition.z = lerp(worldPosition.z, zPosOfLand, decayProgress * particleData.isDecaying * 1.1);
-
-				}
+				//float decayProgress = 0;				
+				//decayProgress = 1.0 - (particleData.biomass / (particleData.extra0 + 0.0000001));
+					
 				
 				// REFRACTION:				
 				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / _MapSize, 0, 0)).yzw;				
 				float refractionStrength = 0.15;
 				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
+
+				
+				float2 altUV = worldPosition.xy / _MapSize;				
+				float altitudeRaw = tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 0));
+				float seaFloorAltitude = -(altitudeRaw * 2 - 1) * 10;
+				worldPosition.z = -(max(_GlobalWaterLevel, altitudeRaw) * 2 - 1) * 10;
+				worldPosition.z = lerp(worldPosition.z, seaFloorAltitude, particleData.isDecaying);
 				
 				float2 vertexOffset = quadPoint.xy * width;
 				//vertexOffset.xy *= 4;
@@ -129,14 +135,14 @@
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition.xy + vertexOffset, worldPosition.z, 1.0)));			
 				o.uv = uv;
-
+				o.altitudeUV = worldPosition.xy / _MapSize;
 
 
 				o.color = particleData.color;
 				float oldAgeMask = saturate((particleData.age - 1.0) * 1000);
 				o.color.a = saturate(particleData.age * 0.5); //  1.0 - oldAgeMask; // particleData.isDecaying;
 				o.highlight = float2(hoverMask, selectedMask);
-				o.status = float2(particleData.isActive, decayProgress);
+				o.status = float2(particleData.isActive, particleData.isDecaying);
 				
 				return o;
 			}
@@ -146,7 +152,8 @@
 				//return float4(1,1,1,1) * (0.5 + i.color.y);
 
 				float4 texColor = tex2D(_MainTex, i.uv);
-				
+				float4 terrainColorTex = tex2D(_TerrainColorTex, i.altitudeUV);
+
 				float val = i.color.a;
 				
 				float4 finalColor = float4(lerp(i.color.rgb, float3(0.75, 0.75, 1.0), 0.5) * 1.25, i.uv.y); // float4(float3(i.color.z * 1.2, 0.85, (1.0 - i.color.w) * 0.2) + i.color.y, texColor.a * i.color.x * 0.33 * (1 - i.color.z));
@@ -163,13 +170,6 @@
 				finalColor *= 1.0 + i.highlight.x * 2 + i.highlight.y;
 				return float4(finalColor.rgb, (1.0 - circleMask) * i.status.x); // * (1.0 + i.color.y));  // age
 
-				finalColor.a *= 1.0 - circleMask;
-				finalColor.a *= i.color.a;
-				//finalColor.rgb = float3(0.45, 0.55, 1.295) * 1.25;
-
-				finalColor.rgb = i.color.rgb;
-				
-				return finalColor;
 			}
 		ENDCG
 		}

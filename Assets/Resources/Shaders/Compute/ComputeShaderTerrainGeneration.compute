@@ -35,6 +35,17 @@ struct FrameBufferStrokeData {
 	int brushType;
 };
 
+struct EnvironmentStrokeData {
+	float3 worldPos;
+	float2 scale;
+	float2 heading;
+	float isActive;
+	int brushType;
+	// extra stuff:
+	// mass, type,
+	// velocity, accel
+};
+
 #include "Assets/Resources/Shaders/Inc/NoiseShared.cginc"
 
 StructuredBuffer<float4> ObjectPositionsCBuffer;
@@ -49,7 +60,7 @@ RWStructuredBuffer<TriangleIndexData> terrainTriangleCBuffer;
 
 RWStructuredBuffer<GroundBitsData> groundBitsCBuffer;
 
-RWStructuredBuffer<FrameBufferStrokeData> terrainFrameBufferStrokesCBuffer;
+RWStructuredBuffer<EnvironmentStrokeData> terrainFrameBufferStrokesCBuffer;
 
 Texture2D<float4> VelocityRead;
 Texture2D<float4> AltitudeRead;
@@ -58,6 +69,11 @@ Texture2D<float4> SpiritBrushRead;
 RWTexture2D<float4> TerrainColorWrite;
 uniform float _IsUpdateTerrainColor;
 Texture2D<float4> _ResourceGridRead;  // for decomposer bits which are in this file for whatever reason...
+Texture2D<float4> _WaterSurfaceTex;
+Texture2D<float4> _SkyTex;
+
+Texture2D<float4> _SimTextureBetaRead;
+RWTexture2D<float4> _SimTextureBetaWrite;
 
 uniform float _BrushIntensity;
 uniform float4 _Color0;
@@ -72,6 +88,7 @@ int _MeshResolution = 32;  // even necessary?
 float4 _QuadBounds;  // xy = min, zw = max
 float2 _HeightRange;
 
+uniform float4 _WorldSpaceCameraPosition;
 uniform float _CamDistNormalized;
 uniform float4 _SpawnBoundsCameraDetails;
 
@@ -88,6 +105,7 @@ uniform float _DecomposerDensityLerp;
 
 uniform float _BrushAlignment = 1.0;
 
+uniform float _GlobalWaterLevel;
 
 SamplerState _LinearClamp;
 SamplerState _LinearRepeat;
@@ -101,7 +119,7 @@ float rand(float2 co){   // OUTPUT is in [0,1] RANGE!!!
 [numthreads(256,1,1)]
 void CSUpdateGroundStrokes (uint3 id : SV_DispatchThreadID)
 {
-	FrameBufferStrokeData data = terrainFrameBufferStrokesCBuffer[id.x];
+	EnvironmentStrokeData data = terrainFrameBufferStrokesCBuffer[id.x];
 
 	// find uv for sampling terrainHeightMap
 
@@ -114,7 +132,7 @@ void CSUpdateGroundStrokes (uint3 id : SV_DispatchThreadID)
 	float4 altitudeSampleSouth = AltitudeRead.SampleLevel(_LinearClamp, uv + float2(0, -pixelOffset), 0);
 	float4 altitudeSampleWest = AltitudeRead.SampleLevel(_LinearClamp, uv + float2(-pixelOffset, 0), 0);
 
-	float altitudeCenter = altitudeSampleCenter.x;
+	float altitudeCenter = altitudeSampleCenter.x;  // x now represents stone
 	float altitudeNorth = altitudeSampleNorth.x;
 	float altitudeEast = altitudeSampleEast.x;
 	float altitudeSouth = altitudeSampleSouth.x;
@@ -128,9 +146,9 @@ void CSUpdateGroundStrokes (uint3 id : SV_DispatchThreadID)
 	float randAngle = Value2D(uv, 1000).x * 6.28;
 	float2 randDir = float2(cos(randAngle), sin(randAngle));
 
-	float2 heading = lerp(gradDir, randDir, altitudeSampleCenter.y);
-	heading = lerp(heading, randDir, altitudeSampleCenter.z);
-	heading = lerp(heading, topoDir, altitudeSampleCenter.w);
+	float2 heading = topoDir; // lerp(gradDir, randDir, altitudeSampleCenter.y); 
+	//heading = lerp(heading, topoDir, altitudeSampleCenter.z);  // was pebbles, now is sand
+	//heading = lerp(heading, topoDir, altitudeSampleCenter.w); 
 	
 	if(heading.x != 0 && heading.y != 0) {
 		heading = normalize(heading);
@@ -141,7 +159,10 @@ void CSUpdateGroundStrokes (uint3 id : SV_DispatchThreadID)
 
 	// New code:
 	// Brushstrokes vary in:  (heading, brush alpha)
+
+	float isActive = saturate((altitudeSampleCenter.w - 0.15) * 1000);
 	
+	terrainFrameBufferStrokesCBuffer[id.x].isActive = isActive;
 	terrainFrameBufferStrokesCBuffer[id.x].heading = heading;
 	terrainFrameBufferStrokesCBuffer[id.x].worldPos.z = -altitudeCenter * 20 + 10;
 }
@@ -157,16 +178,21 @@ void CSGetObjectDepths (uint3 id : SV_DispatchThreadID)
 	float2 uvOffset = float2(1,1) * pixSize; // data.zw;
 	
 	float4 depthCenter = AltitudeRead.SampleLevel(_LinearClamp, uv, 0);
-	float depthLeft = AltitudeRead.SampleLevel(_LinearClamp, uv + float2(-uvOffset.x, 0), 0).x;
-	float depthRight = AltitudeRead.SampleLevel(_LinearClamp, uv + float2(uvOffset.x, 0), 0).x;
-	float depthUp = AltitudeRead.SampleLevel(_LinearClamp, uv + float2(0, uvOffset.y), 0).x;
-	float depthDown = AltitudeRead.SampleLevel(_LinearClamp, uv + float2(0, -uvOffset.y), 0).x;
+	float4 sampleLeft = AltitudeRead.SampleLevel(_LinearClamp, uv + float2(-uvOffset.x, 0), 0);
+	float4 sampleRight = AltitudeRead.SampleLevel(_LinearClamp, uv + float2(uvOffset.x, 0), 0);
+	float4 sampleUp = AltitudeRead.SampleLevel(_LinearClamp, uv + float2(0, uvOffset.y), 0);
+	float4 sampleDown = AltitudeRead.SampleLevel(_LinearClamp, uv + float2(0, -uvOffset.y), 0);
+
+	float depthLeft = max(sampleLeft.x, (1.0 - sampleLeft.w));
+	float depthRight = max(sampleRight.x, (1.0 - sampleRight.w));
+	float depthUp = max(sampleUp.x, (1.0 - sampleUp.w));
+	float depthDown = max(sampleDown.x, (1.0 - sampleDown.w));
 
 	float2 grad = float2(depthRight - depthLeft, depthUp - depthDown);
 
 	//float3 depth = float3(1.0 - saturate(depthCenter * 2.0), -grad); // (velLeft + velRight + velUp + velDown) / 4;
 
-	float4 depthStats = float4(saturate(depthCenter.x), grad, 0);
+	float4 depthStats = float4(saturate(depthCenter.x), grad, depthCenter.w);
 	
 	DepthValuesCBuffer[id.x] = depthStats;
 }
@@ -386,13 +412,14 @@ void CSInitTerrainMaps (uint3 id : SV_DispatchThreadID)
 	float initZ = saturate((noise10 * 0.8 + noise11 * 0.65 + noise12 * 0.55 + noise13 * 0.55) - 0.55);
 	float initW = saturate(((1.0 - noise10) * 0.75 + (1.0 - noise1) * 0.65 + (1.0 - noise12) * 0.45 - (1.0 - noise3) * 0.25) - 0.75);
 
+	float distToCenter = length(uv - 0.5);
 
-	float4 outputTex = float4(texSample.x, 
+	float4 outputTex = float4(saturate(texSample.x * 0.3 + distToCenter * 0.6 - 0.1), 
 								initY * initY, 
 								initZ * initZ, 
 								initW * initW);
 	
-	
+	outputTex.w = 0;
 	AltitudeWrite[id.xy] = outputTex;
 }
 
@@ -408,36 +435,131 @@ void CSUpdateTerrainMapsBrush (uint3 id : SV_DispatchThreadID)
 	float4 brushSample = SpiritBrushRead.SampleLevel(_LinearClamp, uv, 0);
 	
 	// WHICH CHANNEL????
-	//texSample.x += brushSample.x * _BrushIntensity * _AddSubtractSign;
-	if(_ChannelID == 0) {
-		texSample.x = saturate(texSample.x + brushSample.x * _AddSubtractSign * _BrushIntensity);
+	if(_ChannelID == 0) {  // WORLD SPIRIT
+		texSample.w = saturate(texSample.w + brushSample.x * _AddSubtractSign * _BrushIntensity);
 	}
 
 	if(_ChannelID == 1) {
 		texSample.x = saturate(texSample.x + brushSample.x * _AddSubtractSign * _BrushIntensity);
-		texSample.y = saturate(texSample.y + brushSample.x * _AddSubtractSign * _BrushIntensity);
+		//texSample.y = saturate(texSample.y + brushSample.x * _AddSubtractSign * _BrushIntensity);
 	}
 
 	if(_ChannelID == 2) {
-		texSample.x = saturate(texSample.x + brushSample.x * _AddSubtractSign * _BrushIntensity); 
-		texSample.z = saturate(texSample.z + brushSample.x * _AddSubtractSign * _BrushIntensity);
+		texSample.x = saturate(texSample.x + brushSample.x * _AddSubtractSign * _BrushIntensity * 0.5); 
+		texSample.y = saturate(texSample.y + brushSample.x * _AddSubtractSign * _BrushIntensity);
 	}
 
 	if(_ChannelID == 3) {
-		texSample.x = saturate(texSample.x + brushSample.x * _AddSubtractSign * _BrushIntensity);
-		texSample.w = saturate(texSample.w + brushSample.x * _AddSubtractSign * _BrushIntensity);
+		texSample.x = saturate(texSample.x + brushSample.x * _AddSubtractSign * _BrushIntensity * 0.25);
+		texSample.z = saturate(texSample.z + brushSample.x * _AddSubtractSign * _BrushIntensity);
 	}
 
-	if(_IsUpdateTerrainColor > 0.5) {		
-		float4 finalColor = float4(1,1,1,1);
-		finalColor.rgb = saturate(_Color0.rgb);
-		finalColor = lerp(finalColor, _Color1, saturate(texSample.y));
-		finalColor = lerp(finalColor, _Color2, saturate(texSample.z));
-		finalColor = lerp(finalColor, _Color3, saturate(texSample.w));
-		finalColor.rgb = lerp(finalColor.rgb, 0.75, 0.33);
-		finalColor.a = 1;				
-		TerrainColorWrite[id.xy] = finalColor;
-	}	
+	// ***** COLOR PRE-CALCULATION:
+	//if(_IsUpdateTerrainColor > 0.5) {		
+		
+	float4 finalColor = float4(1,1,1,1);   // BASE COLOR:
+	finalColor.rgb = saturate(_Color0.rgb);
+	finalColor = lerp(finalColor, _Color1, saturate(texSample.y));
+	finalColor = lerp(finalColor, _Color2, saturate(texSample.z));
+	finalColor = lerp(finalColor, _Color3, saturate(texSample.w));
+	finalColor.rgb = lerp(finalColor.rgb, 0.75, 0.33);
+	finalColor.a = 1;	
+		
+	float4 altitudeTex = texSample;
+	float4 waterSurfaceTex = _WaterSurfaceTex.SampleLevel(_LinearClamp, uv, 0);
+	float4 resourceTex = _ResourceGridRead.SampleLevel(_LinearClamp, uv, 0);
+	float4 spiritBrushTex = brushSample;
+				
+	float causticsStrength = lerp(0.025, 0.275, 0.6);
+	float minFog = 1;
+	
+	float3 decomposerHue = float3(0.8,0.3,0);
+	float decomposerMask = saturate(resourceTex.z * 1) * 0.8;
+	float3 detritusHue = float3(0.2,0.1,0.02);
+	float detritusMask = saturate(resourceTex.y * 1) * 0.8;
+	
+	finalColor.rgb = lerp(finalColor.rgb, decomposerHue, decomposerMask);
+	finalColor.rgb = lerp(finalColor.rgb, detritusHue, detritusMask);
+
+	float algaeMask = saturate(resourceTex.w * 5.0);
+	
+	float altitudeRaw = altitudeTex.x;
+	
+	float3 waterFogColor = float3(0.36, 0.4, 0.44) * 0.42;
+	waterFogColor = lerp(waterFogColor, float3(0.3,0.8,0.3) * 0.66, algaeMask);
+
+	float3 sunDir = normalize(float3(-1,1,-1));
+
+	// FAKE CAUSTICS:::
+	float3 waterSurfaceNormal = waterSurfaceTex.yzw; // pre-calculated
+	float dotLight = dot(waterSurfaceNormal, sunDir);     //_WorldSpaceLightPos0.xyz);
+	dotLight = dotLight * dotLight;
+	
+	float altitude = altitudeRaw + waterSurfaceTex.x * 0.05;
+				
+	float visualCheatWaterLevelBias = 0.02;
+	float depth = saturate(-altitude + _GlobalWaterLevel + visualCheatWaterLevelBias);
+	float isUnderwater = saturate(depth * 50);
+
+	
+	//Diffuse
+	float pixelOffset = 1.0 / 256;  // resolution  // **** THIS CAN"T BE HARDCODED AS FINAL ****"
+	//float altitudeCenter = AltitudeRead.SampleLevel(_LinearClamp, uv, 0).x;
+	float altitudeNorth = AltitudeRead.SampleLevel(_LinearClamp, uv + float2(0, pixelOffset), 0).x;
+	float altitudeEast = AltitudeRead.SampleLevel(_LinearClamp, uv + float2(pixelOffset, 0), 0).x;
+	float altitudeSouth = AltitudeRead.SampleLevel(_LinearClamp, uv + float2(0, -pixelOffset), 0).x;
+	float altitudeWest = AltitudeRead.SampleLevel(_LinearClamp, uv + float2(-pixelOffset, 0), 0).x;
+
+	float dX = altitudeEast - altitudeWest;
+	float dY = altitudeNorth - altitudeSouth;
+
+	float2 grad = float2(0,1);
+	if(dX != 0 && dY != 0) {
+		grad = normalize(float2(dX, dY));
+	}
+	float3 groundSurfaceNormal = normalize(float3(-grad.x, -grad.y, -length(float2(dX,dY)))); ////normalize(altitudeTex.yzw);
+	groundSurfaceNormal.z *= -1;
+	//waterSurfaceNormal.z *= -1;
+	float3 diffuseSurfaceNormal = lerp(groundSurfaceNormal, waterSurfaceNormal, depth);
+	float dotDiffuse = saturate(dot(diffuseSurfaceNormal, sunDir));
+	
+	finalColor.rgb *= (0.75 + dotDiffuse * 0.25);
+
+	// Wetness darkening:
+	float wetnessMask = 1.0 - saturate((-altitude + _GlobalWaterLevel + 0.33) * 5.5); // saturate(((altitudeRaw + waterSurfaceTex.x * 0.34) - 0.6) * 5.25);
+	finalColor.rgb *= (0.65 + wetnessMask * 0.35);
+	
+	// Caustics
+	finalColor.rgb += dotLight * isUnderwater * (1.0 - depth) * causticsStrength;		
+	
+
+	// FOG:	
+	float fogAmount = lerp(0, 1, depth * 2);
+	finalColor.rgb = lerp(finalColor.rgb, waterFogColor, fogAmount * isUnderwater);
+		
+	// Reflection!!!
+	float3 worldPos = float3(uv * _MapSize, (altitudeRaw - 0.5) * -10);
+	float3 cameraToVertex = worldPos - _WorldSpaceCameraPosition.xyz;
+	float3 cameraToVertexDir = normalize(cameraToVertex);
+	float3 reflectedViewDir = cameraToVertexDir + 2 * waterSurfaceNormal * 0.5;
+	float viewDot = 1.0 - saturate(dot(-cameraToVertexDir, waterSurfaceNormal));
+					
+	float2 skyCoords = reflectedViewDir.xy * 0.5 + 0.5;
+	float4 skyTex = _SkyTex.SampleLevel(_LinearClamp, skyCoords, 0);
+	float4 reflectedColor = float4(skyTex.rgb, finalColor.a); //col;
+	
+				
+	float reflectLerp = saturate(viewDot * isUnderwater);
+	finalColor.rgb += lerp(float3(0,0,0), reflectedColor.xyz, reflectLerp);
+
+	finalColor.rgb += spiritBrushTex.x;
+				
+	finalColor.a = 1; //brushColor.a;
+	//finalColor.rgb = float3(1,1,1) * dotDiffuse; //diffuseSurfaceNormal; //dotDiffuse;			
+				
+
+
+	TerrainColorWrite[id.xy] = finalColor;	
 
 	AltitudeWrite[id.xy] = texSample;
 }

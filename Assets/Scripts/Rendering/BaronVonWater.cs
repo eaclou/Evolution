@@ -11,6 +11,8 @@ public class BaronVonWater : RenderBaron {
     public EnvironmentFluidManager fluidManagerRef;
     public VegetationManager veggieManRef;
 
+    public float _GlobalWaterLevel = 0f;
+
     public Material waterQuadStrokesLrgDisplayMat;
     public Material waterQuadStrokesSmlDisplayMat;
     public Material waterCurveStrokeDisplayMat;
@@ -64,6 +66,19 @@ public class BaronVonWater : RenderBaron {
     private int debugFrameCounter = 0;
 
     public float camDistNormalized = 1f;
+
+    public ComputeBuffer waterRipplesCBuffer;
+    public WaterRippleData[] waterRipplesDataArray;
+    public int numWaterRipples = 32;
+    private int nextWaterRippleIndex = 0;
+
+    public struct WaterRippleData {
+        public Vector2 coords;
+        public float startTime;
+        public float amplitude;
+        public float frequency;
+        public float falloff;
+    }
     
     public struct WaterCurveStrokeData {   // 2 ints, 17 floats
         public int index;        
@@ -122,9 +137,26 @@ public class BaronVonWater : RenderBaron {
         InitializeWaterNutrientsBits();
         InitializeWaterSurfaceBits();
         InitializeWaterDebrisBits();
+        InitializeWaterRipplesBuffer();
     }
 
-    
+    private void InitializeWaterRipplesBuffer() {
+        waterRipplesCBuffer = new ComputeBuffer(numWaterRipples, sizeof(float) * 6);
+        waterRipplesDataArray = new WaterRippleData[waterRipplesCBuffer.count];
+
+        for(int i = 0; i < numWaterRipples; i++) {
+            WaterRippleData data = new WaterRippleData();
+            data.coords = new Vector2(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f));
+            data.startTime = UnityEngine.Time.realtimeSinceStartup;
+
+            waterRipplesDataArray[i] = data;
+        }
+        // Temp init state for debugging:
+        waterRipplesCBuffer.SetData(waterRipplesDataArray);
+    }
+    public void RequestNewWaterRipple(Vector2 coords, float time, float amp, float freq) {
+
+    }
 
 
     private void InitializeWaterCurveMeshBuffer() {
@@ -510,9 +542,24 @@ public class BaronVonWater : RenderBaron {
     //private int cursorClickWaveDuration;
     //private int cursorClickWaveTimeStepCounter = 0;
     }
+    public void RequestNewWaterRipple(Vector2 coords) {
+                
+        WaterRippleData data = new WaterRippleData();
+        data.coords = coords;
+        data.startTime = UnityEngine.Time.realtimeSinceStartup;
+
+        waterRipplesDataArray[nextWaterRippleIndex] = data;
+        nextWaterRippleIndex++;
+        if(nextWaterRippleIndex >= numWaterRipples) {  // cycle through the array, reusing each
+            nextWaterRippleIndex = 0;
+        }
+
+        waterRipplesCBuffer.SetData(waterRipplesDataArray);
+    }
     private void SimWaterSurface()
     {
         int kernelCSUpdateWaterSurface = computeShaderWaterRender.FindKernel("CSUpdateWaterSurface");
+        computeShaderWaterRender.SetBuffer(kernelCSUpdateWaterSurface, "waterRippleDataCBuffer", waterRipplesCBuffer);
         computeShaderWaterRender.SetTexture(kernelCSUpdateWaterSurface, "waterSurfaceDataWriteRT", waterSurfaceDataRT0);
         computeShaderWaterRender.SetTexture(kernelCSUpdateWaterSurface, "PressureRead", fluidManagerRef._VelocityPressureDivergenceMain);
         computeShaderWaterRender.SetFloat("_TextureResolution", waterSurfaceDataRT0.width);
@@ -521,7 +568,7 @@ public class BaronVonWater : RenderBaron {
         computeShaderWaterRender.SetFloat("_CamDistNormalized", camDistNormalized);
         computeShaderWaterRender.SetVector("_CursorClickWorldPos", cursorClickWorldPos);
         computeShaderWaterRender.SetFloat("_CursorClickTimeLerp", Mathf.Clamp01((float)cursorClickWaveTimeStepCounter / (float)cursorClickWaveDuration));
-        computeShaderWaterRender.SetFloat("_CursorClickWaveOn", cursorClickWaveOn);
+        computeShaderWaterRender.SetFloat("_CursorClickWaveOn", cursorClickWaveOn);        
         computeShaderWaterRender.Dispatch(kernelCSUpdateWaterSurface, waterSurfaceMapResolution / 32, waterSurfaceMapResolution / 32, 1);
 
         
@@ -625,6 +672,9 @@ public class BaronVonWater : RenderBaron {
         if (waterSurfaceBitsCBuffer != null)
         {
             waterSurfaceBitsCBuffer.Release();
+        }
+        if(waterRipplesCBuffer != null) {
+            waterRipplesCBuffer.Release();
         }
         /*if (waterSurfaceBitsShadowsCBuffer != null)
         {

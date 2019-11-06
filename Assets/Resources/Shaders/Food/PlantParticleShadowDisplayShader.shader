@@ -5,6 +5,7 @@
 		_MainTex ("Main Texture", 2D) = "white" {}  // stem texture sheet	
 		_AltitudeTex ("_AltitudeTex", 2D) = "gray" {}
 		_WaterSurfaceTex ("_WaterSurfaceTex", 2D) = "black" {}
+		_TerrainColorTex ("_TerrainColorTex", 2D) = "black" {}
 		//_Tint("Color", Color) = (1,1,1,1)
 		//_Size("Size", vector) = (1,1,1,1)
 	}
@@ -30,8 +31,9 @@
 			sampler2D _MainTex;
 			sampler2D _AltitudeTex;	
 			sampler2D _WaterSurfaceTex;
+			sampler2D _TerrainColorTex;
 			uniform float _MapSize;
-			sampler2D _RenderedSceneRT; 
+			//sampler2D _RenderedSceneRT; 
 
 			StructuredBuffer<PlantParticleData> plantParticleDataCBuffer;			
 			StructuredBuffer<float3> quadVerticesCBuffer;
@@ -40,14 +42,16 @@
 			uniform int _HoverParticleIndex;
 			uniform float _IsSelected;
 			uniform float _IsHover;
+
+			uniform float _GlobalWaterLevel;
 			
 			struct v2f
 			{
 				float4 pos : SV_POSITION;
 				float2 uv : TEXCOORD0;  // uv of the brushstroke quad itself, particle texture	
 				float2 altitudeUV : TEXCOORD1;
-				float4 screenUV : TEXCOORD2;
-				float3 worldPos : TEXCOORD3;
+				//float4 screenUV : TEXCOORD2;
+				//float3 worldPos : TEXCOORD3;
 				//float4 color : COLOR;
 			};
 
@@ -74,7 +78,11 @@
 				float selectedMask = (1.0 - saturate(abs(_SelectedParticleIndex - particleIndex))) * _IsSelected;
 				float hoverMask = (1.0 - saturate(abs(_HoverParticleIndex - particleIndex))) * _IsHover;
 
-				float3 worldPosition = float3(particleData.worldPos, 1.0);    //float3(rawData.worldPos, -random2);
+				float2 altUV = particleData.worldPos.xy / _MapSize;
+				float altitudeRaw = tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 0));
+				float seaFloorAltitude = -(altitudeRaw * 2 - 1) * 10;
+
+				float3 worldPosition = float3(particleData.worldPos, seaFloorAltitude);    //float3(rawData.worldPos, -random2);
 				float3 localQuadPos = quadPoint;
 
 				float rand0 = rand(float2(inst, inst) * 10);
@@ -127,7 +135,7 @@
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition + rotatedPoint * leafScale, 1.0)));
 				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(quadPoint, 0.0f));				
 				o.uv = uv;	
-				
+				o.altitudeUV = altitudeUV;
 				//o.color = float4(saturate(particleData.isDecaying), saturate(particleData.biomass * 5), particleData.rootedness, max(hoverMask * 0.5, selectedMask));
 				//o.hue = float4(particleData.colorA, 1);
 				return o;
@@ -135,25 +143,16 @@
 
 			fixed4 frag(v2f i) : SV_Target
 			{
-				//return float4(1,1,1,1);
-
-
 				float4 brushColor = tex2D(_MainTex, i.uv);	
-				
-				float2 screenUV = i.screenUV.xy / i.screenUV.w;
-				float4 frameBufferColor = tex2D(_RenderedSceneRT, screenUV);  //  Color of brushtroke source					
 				float4 altitudeTex = tex2D(_AltitudeTex, i.altitudeUV); //i.worldPos.z / 10; // [-1,1] range
-				float4 waterSurfaceTex = tex2D(_WaterSurfaceTex, i.altitudeUV);
-				//float4 waterColorTex = tex2D(_WaterColorTex, (i.altitudeUV - 0.25) * 2);
-
-				//frameBufferColor = float4(1,1,1,1);
-				
-				//float3 particleColor = lerp(baseHue * 0.7, baseHue * 1.3, saturate(1.0 - i.color.y * 2));
-				frameBufferColor.rgb *= 0.1375; // = lerp(frameBufferColor.rgb, particleColor, 0.25);
-				float4 finalColor = GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, float4(0,0,0,0));
-				finalColor.a = brushColor.a * 0.4675;
+				float depth = saturate((_GlobalWaterLevel - altitudeTex.x) * 2);				
+				float4 terrainColorTex = tex2D(_TerrainColorTex, i.altitudeUV);
+				float4 finalColor = float4(0,0,0,1);
+				finalColor.rgb = lerp(finalColor.rgb, terrainColorTex.rgb, (0.5 + 0.5 * depth)); //GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, float4(0,0,0,0));
+				finalColor.a = brushColor.a * 0.25;
 
 				return finalColor;
+				
 			}
 		ENDCG
 		}

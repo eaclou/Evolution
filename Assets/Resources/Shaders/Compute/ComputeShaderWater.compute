@@ -40,6 +40,14 @@ struct WaterCurveData {   // 2 ints, 17 floats
     int brushType;  // brush texture mask
 };
 
+struct WaterRippleData {
+    float2 coords;
+    float startTime;
+    float amplitude;
+    float frequency;
+    float falloff;    
+};
+
 #include "Assets/Resources/Shaders/Inc/StructsCritterData.cginc"
 #include "Assets/Resources/Shaders/Inc/NoiseShared.cginc"
 
@@ -50,6 +58,8 @@ Texture2D<float4> AltitudeRead;
 Texture2D<float4> PressureRead;
 
 //Texture2D<float4> ObstaclesRead;
+
+StructuredBuffer<WaterRippleData> waterRippleDataCBuffer;
 
 RWStructuredBuffer<WaterQuadData> waterQuadStrokesCBuffer;
 RWStructuredBuffer<WaterCurveData> waterCurveStrokesCBuffer;
@@ -459,13 +469,36 @@ void CSUpdateWaterSurface (uint3 id : SV_DispatchThreadID)
 	float falloffMask = 1.0 - saturate(distToOrigin / falloffDist);
 	float waveAmp = 0.55;
 	
-	float waveHeight = waveAmp * _CursorClickWaveOn * distMask * falloffMask; // sin(distToOrigin * waveFreq) * waveAmp * _CursorClickWaveOn * (1.0 - _CursorClickTimeLerp);
+	float waveHeight = 0; // waveAmp * _CursorClickWaveOn * distMask * falloffMask; // sin(distToOrigin * waveFreq) * waveAmp * _CursorClickWaveOn * (1.0 - _CursorClickTimeLerp);
 	
 	// UNDER PRESSURE!!! (do do doo d d doo do)
 	float2 uv = (((float2)id.xy + 0.5) / (float)_TextureResolution);
 	float4 pressureSample = PressureRead.SampleLevel(_LinearClamp, uv, 0);
+
+	// Ripples:
+	float ripplesTotalHeight = 0;
+	for(int i = 0; i < 32; i ++) {
+		WaterRippleData rippleData = waterRippleDataCBuffer[i];
+		float rippleHeight = 0;
+		float wavePropagationSpeed = 0.06;
+		float distanceToRippleOrigin = length(rippleData.coords - uv);		
+		float elapsedTime = _Time - rippleData.startTime;
+		float phase = elapsedTime - (distanceToRippleOrigin / wavePropagationSpeed);
+		float frequency = 13.374;
+
+		float maxDuration = 1.40 + i * 0.041;
+		float timeDecayMask = saturate((maxDuration - elapsedTime) / maxDuration);
+
+		float maxDist = 37 / _MapSize;
+		float falloffMask = saturate((maxDist - distanceToRippleOrigin) / maxDist);
+		float phaseMask = saturate((phase + 0.5) * 100);
+		rippleHeight = sin(phase * frequency) * falloffMask * timeDecayMask * phaseMask;
+
+		ripplesTotalHeight += rippleHeight;
+	}
+	
 		
-	waterSurfaceDataWriteRT[id.xy] = float4(height * 0.25 + waveHeight * 0.35 + pressureSample.z * 1.0, 0, 0, 1);
+	waterSurfaceDataWriteRT[id.xy] = float4(height * 0.25 + waveHeight * 0.35 + saturate(pressureSample.z * 6.0) * 0.25 + ripplesTotalHeight * 0.0515, 0, 0, 1);
 }
 
 [numthreads(32,32,1)]
@@ -476,13 +509,17 @@ void CSCalculateWaterSurfaceNormals (uint3 id : SV_DispatchThreadID)
 	float heightCenter = curValue.x;
 
 	uint2 upIndex = uint2(id.x, min(round(_TextureResolution - 1.0), id.y + 1));
-	float heightUp = waterSurfaceDataReadRT[upIndex].x;
+	float4 sampleTop = waterSurfaceDataReadRT[upIndex];
+	float heightUp = max(sampleTop.x, (1.0 - sampleTop.w));
 	uint2 rightIndex = uint2(min(round(_TextureResolution - 1.0), id.x + 1), id.y);
-	float heightRight = waterSurfaceDataReadRT[rightIndex].x;
+	float4 sampleRight = waterSurfaceDataReadRT[rightIndex];
+	float heightRight = max(sampleRight.x, (1.0 - sampleRight.w));
 	uint2 downIndex = uint2(id.x, max(0, id.y - 1));
-	float heightDown = waterSurfaceDataReadRT[downIndex].x;
+	float4 sampleDown = waterSurfaceDataReadRT[downIndex];
+	float heightDown = max(sampleDown.x, (1.0 - sampleDown.w));
 	uint2 leftIndex = uint2(max(0, id.x - 1), id.y);
-	float heightLeft = waterSurfaceDataReadRT[leftIndex].x;
+	float4 sampleLeft = waterSurfaceDataReadRT[leftIndex];
+	float heightLeft = max(sampleLeft.x, (1.0 - sampleLeft.w));
 			
 	float2 grad = float2(heightRight - heightLeft, heightUp - heightDown);
 	float zx = -grad.x;

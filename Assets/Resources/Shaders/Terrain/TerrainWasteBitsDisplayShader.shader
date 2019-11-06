@@ -7,7 +7,7 @@
 		_VelocityTex ("_VelocityTex", 2D) = "black" {}
 		_WaterSurfaceTex ("_WaterSurfaceTex", 2D) = "black" {}
 		_ResourceGridTex ("_ResourceGridTex", 2D) = "black" {}
-		_WaterColorTex ("_WaterColorTex", 2D) = "black" {}
+		_TerrainColorTex ("_TerrainColorTex", 2D) = "black" {}
 	}
 	SubShader
 	{		
@@ -31,12 +31,12 @@
 			sampler2D _VelocityTex;
 			sampler2D _WaterSurfaceTex;
 			sampler2D _ResourceGridTex;
-			sampler2D _WaterColorTex;
+			sampler2D _TerrainColorTex;
 			
 			//sampler2D _RenderedSceneRT;  // Provided by CommandBuffer -- global tex??? seems confusing... ** revisit this
 			
 			uniform float _MapSize;
-
+			uniform float _GlobalWaterLevel;
 			uniform float _CamDistNormalized;
 			
 			struct GroundBitsData   
@@ -161,19 +161,26 @@
 
 				//return float4(0.03, 0.02, 0.01, brushColor.a * i.color.a);
 				
-				float2 screenUV = i.screenUV.xy / i.screenUV.w;
-				float4 frameBufferColor = float4(0, 0.1, 0.35, 1); // tex2D(_RenderedSceneRT, screenUV);  //  Color of brushtroke source					
+				//float2 screenUV = i.screenUV.xy / i.screenUV.w;
+				//float4 frameBufferColor = float4(0, 0.1, 0.35, 1); // tex2D(_RenderedSceneRT, screenUV);  //  Color of brushtroke source					
 				float4 altitudeTex = tex2D(_AltitudeTex, i.altitudeUV); //i.worldPos.z / 10; // [-1,1] range
-				float4 waterSurfaceTex = tex2D(_WaterSurfaceTex, i.altitudeUV);
-				float4 waterColorTex = tex2D(_WaterColorTex, i.altitudeUV);
-				float4 resourceGridTex = tex2D(_ResourceGridTex, i.altitudeUV);
+				float depth = saturate((_GlobalWaterLevel - altitudeTex.x) * 2);
+				//float4 waterSurfaceTex = tex2D(_WaterSurfaceTex, i.altitudeUV);
+				float4 terrainColorTex = tex2D(_TerrainColorTex, i.altitudeUV);
+				//float4 resourceGridTex = tex2D(_ResourceGridTex, i.altitudeUV);
 				
 				float3 baseHue = float3(0.145,0.0972,0.015);
 				//float3 particleColor = lerp(baseHue * 1.2, baseHue * 0.5, saturate(1.0 - i.color.y * 2));
 				//frameBufferColor.rgb = lerp(frameBufferColor.rgb, particleColor, 0.7 * _DetritusDensityLerp);
-				float4 finalColor = GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, resourceGridTex);
+				float4 finalColor = terrainColorTex;  // *** BACKGROUND COLOR:
+				finalColor.rgb = lerp(baseHue, finalColor.rgb, depth);
+				// NEED to figure out how much water fog
+
+
+
+				// GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, resourceGridTex);
 				//finalColor.a = brushColor.a;
-				finalColor.rgb = lerp(finalColor.rgb, baseHue, 0.5);
+				//finalColor.rgb = lerp(finalColor.rgb, baseHue, 0.5);
 
 				
 				finalColor.a = brushColor.a * i.color.a * 0.45;

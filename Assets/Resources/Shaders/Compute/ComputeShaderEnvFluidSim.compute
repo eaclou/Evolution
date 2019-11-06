@@ -299,12 +299,12 @@ void PressureJacobi (uint3 id : SV_DispatchThreadID)
 	half divergence = centerSample.w;
 
 	float newPressure = (leftPressure + rightPressure + topPressure + bottomPressure + divergence * alpha) / beta;
-	float pressureDamping = 0.001;
+	float pressureDamping = 0.0033;
 	
-	centerSample.z = newPressure * (1.0 - pressureDamping);
-	VelocityWrite[id.xy] = centerSample;
+	centerSample.z = min(newPressure * (1.0 - pressureDamping), 100); // Capping maximum pressure -- observe effect:
+	VelocityWrite[id.xy] = centerSample;  // velocity map also holds divergence & pressure values
 	
-	//PressureWrite[id.xy] = newPressure * (1.0 - pressureDamping);
+	
 }
 
 [numthreads(32,32,1)]
