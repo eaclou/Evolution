@@ -36,7 +36,7 @@
 			
 			uniform float _MapSize;
 			uniform float _CamDistNormalized;
-
+			uniform float _GlobalWaterLevel;
 			//uniform float _AlgaeReservoir;
 			//uniform float _NutrientDensity;
 
@@ -90,7 +90,7 @@
 				
 
 				o.quadUV = quadPoint.xy + 0.5;
-				worldPosition.z = 0;
+				//worldPosition.z = 0;
 				o.worldPos = worldPosition;
 				float2 uv = worldPosition.xy / _MapSize;
 				o.altitudeUV = uv;
@@ -111,43 +111,34 @@
 				float alpha = fadeIn * fadeOut;
 
 							
-				float2 scale = 0.05 * alpha; // waterQuadData.localScale * 4;
+				float2 scale = 0.042 * alpha; // waterQuadData.localScale * 4;
 
 				float bonusAmplitude = cos((float)inst * 91204.119273 + _Time.y * 70.9128397) * 0.5 + 0.5;
-				bonusAmplitude = bonusAmplitude * bonusAmplitude * bonusAmplitude;  // carve out
+				bonusAmplitude = bonusAmplitude * bonusAmplitude;  // carve out
 
-				scale += bonusAmplitude * 0.25;
-				scale *= 0.67;
-				//scale.x *= 1;
-				//scale.y = scale.y * (1 + saturate(waterQuadData.speed * 64));
+				scale += bonusAmplitude * 0.1;				
 				
-				//float4 nutrientGridSample = tex2Dlod(_NutrientTex, float4((o.altitudeUV - 0.25) * 2.0, 0, 0));
-				//scale *= (nutrientGridSample.x * 0.4 + 0.6) * 1;				
-				//scale = float2(1,1) * 0.033;
-				//_NutrientDensity = 1.0;
 				quadPoint *= float3(scale, 1.0); // * (0.2 + _NutrientDensity * 0.175) * (_CamDistNormalized * 0.85 + 0.15);
 				
-
-				//Topology/depth:
-				float4 altitudeSample = tex2Dlod(_AltitudeTex, float4(worldPosition.xy / _MapSize, 0, 0));
-				float floorPosZ = -(altitudeSample.x - 0.5) * 20.0;
-				float zPos = lerp(floorPosZ, worldPosition.z, smoothstep(0,1,normAge));
-				worldPosition.z = zPos;
-
 				// Wave Surface Height:
 				// Water Surface:
 				float4 waterSurfaceData = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / _MapSize, 0, 0));
 				float dotLight = dot(waterSurfaceData.yzw, _WorldSpaceLightPos0.xyz);
 				dotLight = dotLight * dotLight;
 				float waveHeight = waterSurfaceData.x;
+								
 				
-							
-				//worldPosition.z -= waveHeight * 1 - rand0 * 2; // - 1;
+				float4 altitudeTex = tex2Dlod(_AltitudeTex, float4(uv, 0, 0));			
+				float altitudeRaw = altitudeTex.x;
+				float seaFloorAltitude = -(altitudeRaw * 2 - 1) * 10;
+				worldPosition.z = -(max(_GlobalWaterLevel, altitudeRaw) * 2 - 1) * 10 - waveHeight * 2.5;
+				worldPosition.z = lerp(seaFloorAltitude, worldPosition.z, smoothstep(0,1,normAge));
 
+					
 				// REFRACTION:
 				//float3 offset = worldPosition;				
-				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / _MapSize, 0, 0)).yzw;
-				float refractionStrength = 1.5 * (rand0 * 0.5 + 0.5);
+				//float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / _MapSize, 0, 0)).yzw;
+				//float refractionStrength = 1.5 * (rand0 * 0.5 + 0.5);
 				//worldPosition.xy += -surfaceNormal.xy * refractionStrength;
 
 
@@ -199,7 +190,7 @@
 				float4 finalColor = tex2D(_MainTex, i.quadUV);
 				finalColor.rgb = float3(0.6, 0.514, 0.25) * 3.7 * (i.color.y * 0.7 + 1);
 				//finalColor.rgb += float3(2,1.9,0.13) * saturate(i.color.y - 0.25) * 0.3;
-				finalColor.a *= i.color.a;	
+				finalColor.a = 1; // *= i.color.a;	
 				//finalColor = float4(i.quadUV, 0, 0);
 				return finalColor;
 

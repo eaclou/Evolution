@@ -2685,6 +2685,7 @@ public class TheRenderKing : MonoBehaviour {
         fluidManager.computeShaderFluidSim.SetFloat("_TextureResolution", (float)fluidManager.resolution);
         fluidManager.computeShaderFluidSim.SetFloat("_DeltaTime", fluidManager.deltaTime);
         fluidManager.computeShaderFluidSim.SetFloat("_InvGridScale", fluidManager.invGridScale);
+        fluidManager.computeShaderFluidSim.SetFloat("_Time", Time.realtimeSinceStartup);
         fluidManager.computeShaderFluidSim.SetTexture(kernelSimFloatyBits, "_SpiritBrushTex", spiritBrushRT);
         fluidManager.computeShaderFluidSim.SetBuffer(kernelSimFloatyBits, "FloatyBitsCBuffer", floatyBitsCBuffer);
         fluidManager.computeShaderFluidSim.SetTexture(kernelSimFloatyBits, "VelocityRead", fluidManager._VelocityPressureDivergenceMain);        
@@ -4181,9 +4182,11 @@ public class TheRenderKing : MonoBehaviour {
             floatyBitsDisplayMat.SetPass(0);
             //floatyBitsDisplayMat.SetTexture("_FluidColorTex", fluidManager._VelocityPressureDivergenceMain);
             floatyBitsDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+            floatyBitsDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
             floatyBitsDisplayMat.SetBuffer("floatyBitsCBuffer", floatyBitsCBuffer);
             floatyBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
             floatyBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+            floatyBitsDisplayMat.SetFloat("_GlobalWaterLevel", baronVonWater._GlobalWaterLevel);
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, floatyBitsDisplayMat, 0, MeshTopology.Triangles, 6, floatyBitsCBuffer.count);
         
             
@@ -4198,6 +4201,7 @@ public class TheRenderKing : MonoBehaviour {
             baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
             baronVonWater.waterNutrientsBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
             baronVonWater.waterNutrientsBitsDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
+            baronVonWater.waterNutrientsBitsDisplayMat.SetFloat("_GlobalWaterLevel", baronVonWater._GlobalWaterLevel);
             //baronVonWater.waterNutrientsBitsDisplayMat.SetFloat("_NutrientDensity", Mathf.Clamp01(simManager.simResourceManager.curGlobalNutrients / 300f));
             //cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonWater.waterNutrientsBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterNutrientsBitsCBuffer.count);

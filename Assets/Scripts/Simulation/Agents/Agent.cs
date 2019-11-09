@@ -1583,9 +1583,9 @@ public class Agent : MonoBehaviour {
 
         //mouseclickcollider MCC
         mouseClickCollider.direction = 1; // Y-Axis ???
-        mouseClickCollider.center = new Vector3(0f, 0f, (globalWaterLevel * 2 - 1) * -10); //Vector3.zero; // new Vector3(0f, 0f, 1f);
+        mouseClickCollider.center = new Vector3(0f, 0f, (globalWaterLevel * 2f - 1f) * -10f); //Vector3.zero; // new Vector3(0f, 0f, 1f);
         mouseClickCollider.radius = fullSizeBoundingBox.x / 2f * sizePercentage;
-        mouseClickCollider.radius *= 1.85f; // ** TEMP
+        mouseClickCollider.radius *= 3.14f; // ** TEMP
         mouseClickCollider.height = fullSizeBoundingBox.y / 2f * sizePercentage;
     }
 

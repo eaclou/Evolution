@@ -615,24 +615,20 @@ void SimFloatyBits (uint3 id : SV_DispatchThreadID)
 
 	float rand00 = rand(float2(5 + _Time * 99, (float)id.x));
 	
-	floatyBitData.age = floatyBitData.age + 0.02 * rand00;  // 1000 frame lifespan
+	floatyBitData.age = floatyBitData.age + 0.001 * rand00;  // 1000 frame lifespan
 	if(floatyBitData.age > 1.0) {
 		float val01 = (float)id.x / (1024 * 8);
-		float rand01 = rand(float2((float)id.x, 5 + _Time * 99));
-		float rand02 = rand(float2(val01 - rand01 * 3.123, (float)id.x - _Time * 6.37));
+		float rand01 = rand(float2((float)id.x - vel.y * 900, 5 + _Time * 99));
+		float rand02 = rand(float2(val01 - rand01 * 3.123, vel.x * -123.7 * (float)id.x - _Time * 6.37));
 
 		float2 spawnUV = float2(rand01, rand02);	
 		
 		float4 spiritBrushSample = _SpiritBrushTex.SampleLevel(_LinearClamp, spawnUV, 0);
 	
 		float brushMask = spiritBrushSample.x;
-		float randRoll = rand(float2((float)id.x, _Time * 19.18827 + id.x * 3.2198));
+		//float randRoll = rand(float2((float)id.x, _Time * 19.18827 + id.x * 3.2198));
 		
 		if(brushMask > 0.51) {
-					
-			
-			
-		
 			floatyBitData.coords = spawnUV; 
 			floatyBitData.age = 0;
 		}
