@@ -1756,7 +1756,8 @@ public class UIManager : MonoBehaviour {
 
         TrophicLayersManager layerManager = gameManager.simulationManager.trophicLayersManager;  
 
-        panelKnowledgeSpiritBase.SetActive(false);
+        //panelKnowledgeSpiritBase.SetActive(false);
+        textToolbarWingSpeciesSummary.gameObject.SetActive(true);
         switch(curActiveTool) {
             case ToolType.None:
                 //buttonToolbarInspect.GetComponent<Image>().color = buttonDisabledColor;
@@ -1853,7 +1854,7 @@ public class UIManager : MonoBehaviour {
             panelWatcherSpiritMain.SetActive(false);
             //panelToolbarWing.SetActive(false);
         }
-        panelInfoResourcesOverview.SetActive(false); 
+        //panelInfoResourcesOverview.SetActive(false); 
         if (curActiveTool == ToolType.Sage) {
             spiritBrushName = "Knowledge Spirit";
             imageToolbarSpiritBrushThumbnail.sprite = spriteSpiritBrushKnowledgeIcon;
