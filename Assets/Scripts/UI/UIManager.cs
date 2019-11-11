@@ -587,8 +587,8 @@ public class UIManager : MonoBehaviour {
         infoGraphOxygenMat.SetFloat("_MaxValue", 1000f);
         infoGraphNutrientsMat.SetTexture("_DataTex", infoNutrientsDataTexture);
         infoGraphNutrientsMat.SetFloat("_MaxValue", 4000f);
-        infoGraphDetritusMat.SetTexture("_DataTex", infoDetritusDataTexture);
-        infoGraphDetritusMat.SetFloat("_MaxValue", 4000f);
+        //infoGraphDetritusMat.SetTexture("_DataTex", infoDetritusDataTexture);
+        //infoGraphDetritusMat.SetFloat("_MaxValue", 4000f);
         infoGraphDecomposersMat.SetTexture("_DataTex", infoDecomposersDataTexture);
         infoGraphDecomposersMat.SetFloat("_MaxValue", 4000f);
         infoGraphPlantsMat.SetTexture("_DataTex", infoPlantsDataTexture);
@@ -700,8 +700,9 @@ public class UIManager : MonoBehaviour {
         isActiveInspectPanel = false;
         panelInspectHUD.SetActive(false);
 
-        UpdateInfoPanelUI();
+        //UpdateInfoPanelUI();
         UpdateToolbarPanelUI();
+        UpdateKnowledgePanelUI(gameManager.simulationManager.trophicLayersManager);
 
         //UpdateStatsPanelUI(); // needed?
         //UpdateInspectPanelUI();  // needed?        
@@ -1323,6 +1324,22 @@ public class UIManager : MonoBehaviour {
 
     }
     */
+    public void UpdateKnowledgePanelUI(TrophicLayersManager layerManager) {
+        textCurYear.text = (gameManager.simulationManager.curSimYear + 1).ToString();
+        
+        textGlobalMass.text = "Global Biomass: " + gameManager.simulationManager.simResourceManager.curTotalMass.ToString("F0");
+        SimResourceManager resourcesRef = gameManager.simulationManager.simResourceManager;
+        textMeterOxygen.text = resourcesRef.curGlobalOxygen.ToString("F0");
+        textMeterNutrients.text = resourcesRef.curGlobalNutrients.ToString("F0");
+        textMeterDetritus.text = resourcesRef.curGlobalDetritus.ToString("F0");
+        textMeterDecomposers.text = resourcesRef.curGlobalDecomposers.ToString("F0");
+        textMeterPlants.text = (resourcesRef.curGlobalPlantParticles + resourcesRef.curGlobalAlgaeReservoir).ToString("F0");
+        textMeterAnimals.text = (resourcesRef.curGlobalAgentBiomass + resourcesRef.curGlobalAnimalParticles).ToString("F0");
+                
+        textToolbarWingSpeciesSummary.gameObject.SetActive(true);
+        string summaryText = layerManager.GetSpeciesPreviewDescriptionString(gameManager.simulationManager);
+        textToolbarWingSpeciesSummary.text = summaryText;
+    }
     private void UpdateWatcherPanelUI(TrophicLayersManager layerManager) {
 
         panelWatcherSpiritVertebratesHUD.SetActive(false);
@@ -1579,25 +1596,30 @@ public class UIManager : MonoBehaviour {
                 else if(curWatcherPanelVertebratePageNum == 1) {
                     panelWatcherSpiritVertebratesText.SetActive(true);
 
-                    string textString = "TEXT PAGE! 1";
-
+                    string textString = "Event Log! [" + agent.index.ToString() + "]";
+                    textString += "Depth Gradient: " + agent.depthGradient.ToString();
+                    // Agent Event Log:
+                    int maxEventsToDisplay = 12;
+                    int numEvents = Mathf.Min(agent.agentEventDataList.Count, maxEventsToDisplay);
+                    int startIndex = Mathf.Max(0, agent.agentEventDataList.Count - maxEventsToDisplay);                   
                     string eventLogString = "";
-                    if(agent.agentEventDataList.Count > 0) {
-                        for(int q = 0; q < Mathf.Min(5, agent.agentEventDataList.Count); q++) {
-                            eventLogString += "\n[" + agent.agentEventDataList[q].eventFrame.ToString() + "] " + agent.agentEventDataList[q].eventText;
-                        } 
-                        textString += eventLogString;
-                        Debug.Log("eventLogString" + eventLogString);
-                    }                    
+                    //if(agent.agentEventDataList.Count > 0) {
+                    for(int q = agent.agentEventDataList.Count - 1; q >= startIndex; q--) {
+                        eventLogString += "\n[" + agent.agentEventDataList[q].eventFrame.ToString() + "] " + agent.agentEventDataList[q].eventText;
+                    } 
+                    
+                    //Debug.Log("eventLogString" + eventLogString);
+                    //}                    
 
-                    textString += "\nNearestPlant[" + agent.foodModule.nearestFoodParticleIndex.ToString() + "] " + agent.foodModule.nearestFoodParticlePos.ToString() + " d: " + (agent.foodModule.nearestFoodParticlePos.magnitude).ToString();
-                    textString += "\nNearestZooplankton[" + agent.foodModule.nearestAnimalParticleIndex.ToString() + "] " + agent.foodModule.nearestAnimalParticlePos.ToString() + " d: " + (agent.foodModule.nearestAnimalParticlePos.magnitude).ToString();
+                    //textString += "\nNearestPlant[" + agent.foodModule.nearestFoodParticleIndex.ToString() + "] " + agent.foodModule.nearestFoodParticlePos.ToString() + " d: " + (agent.foodModule.nearestFoodParticlePos.magnitude).ToString();
+                    //textString += "\nNearestZooplankton[" + agent.foodModule.nearestAnimalParticleIndex.ToString() + "] " + agent.foodModule.nearestAnimalParticlePos.ToString() + " d: " + (agent.foodModule.nearestAnimalParticlePos.magnitude).ToString();
                     
                     textString += "\n\nNumChildrenBorn: " + gameManager.simulationManager.numAgentsBorn.ToString() + ", numDied: " + gameManager.simulationManager.numAgentsDied.ToString() + ", ~Gen: " + ((float)gameManager.simulationManager.numAgentsBorn / (float)gameManager.simulationManager._NumAgents).ToString();
                     textString += "\nSimulation Age: " + gameManager.simulationManager.simAgeTimeSteps.ToString();
                     textString += "\nYear " + gameManager.simulationManager.curSimYear.ToString() + "\n\n";
                     int numActiveSpecies = gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList.Count;
                     textString += numActiveSpecies.ToString() + " Active Species:\n";
+                    textString += eventLogString;
 
                     textWatcherVertebrateText.text = textString;
                 }
@@ -1803,9 +1825,8 @@ public class UIManager : MonoBehaviour {
 
                 panelKnowledgeSpiritBase.SetActive(true);
 
-                textToolbarWingSpeciesSummary.gameObject.SetActive(true);
-                string summaryText = layerManager.GetSpeciesPreviewDescriptionString(gameManager.simulationManager);
-                textToolbarWingSpeciesSummary.text = summaryText;
+                //UpdateKnowledgePanelUI();
+
                 break;
             default:
                 break;
@@ -2602,6 +2623,7 @@ public class UIManager : MonoBehaviour {
         }
          
     }
+    /*
     public void UpdateInfoPanelUI() {
         textCurYear.text = (gameManager.simulationManager.curSimYear + 1).ToString();
 
@@ -2637,47 +2659,7 @@ public class UIManager : MonoBehaviour {
                 //panelInfoSpeciesOverview.SetActive(false);
             }
             else {  // &&& SPECIES TAB::::
-                /*TrophicLayersManager layerManager = gameManager.simulationManager.trophicLayersManager;  
-
-                panelInfoResourcesOverview.SetActive(false);
-                //panelInfoSpeciesOverview.SetActive(true);
-
-                SetInfoSpeciesButtonStateUI(ref buttonInfoSpeciesDecomposers, layerManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status);
-
-                SetInfoSpeciesButtonStateUI(ref buttonInfoSpeciesAlgae, layerManager.kingdomPlants.trophicTiersList[0].trophicSlots[0].status);
-                SetInfoSpeciesButtonStateUI(ref buttonInfoSpeciesPlant1, layerManager.kingdomPlants.trophicTiersList[1].trophicSlots[0].status);
-                SetInfoSpeciesButtonStateUI(ref buttonInfoSpeciesPlant2, layerManager.kingdomPlants.trophicTiersList[1].trophicSlots[1].status);
-
-                SetInfoSpeciesButtonStateUI(ref buttonInfoSpeciesZooplankton, layerManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0].status);
-                SetInfoSpeciesButtonStateUI(ref buttonInfoSpeciesAnimal1, layerManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0].status);
-                SetInfoSpeciesButtonStateUI(ref buttonInfoSpeciesAnimal2, layerManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1].status);
-                SetInfoSpeciesButtonStateUI(ref buttonInfoSpeciesAnimal3, layerManager.kingdomAnimals.trophicTiersList[1].trophicSlots[2].status);
-                SetInfoSpeciesButtonStateUI(ref buttonInfoSpeciesAnimal4, layerManager.kingdomAnimals.trophicTiersList[1].trophicSlots[3].status);
-
-                if(infoSpeciesSelectedKingdom == 0) {
-                    textInfoSpeciesName.text = "Decomposers";
-                    textInfoSpeciesStats.text = "stats stats stats!";
-                }
-                else if(infoSpeciesSelectedKingdom == 1) {
-                    textInfoSpeciesName.text = "Algae";
-                    textInfoSpeciesStats.text = "stats stats stats!";
-                }
-                else {  // Animals
-                    if(infoSpeciesSelectedTier == 0) {
-                        //zooplankton
-                        textInfoSpeciesName.text = "Zooplankton";
-                        textInfoSpeciesStats.text = "stats stats stats!";
-                    }
-                    else {
-                        // Agents:
-                        textInfoSpeciesName.text = "Creature " + infoSpeciesSelectedSlot.ToString() + ", " + gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[infoSpeciesSelectedSlot].linkedSpeciesID.ToString();
-                        textInfoSpeciesStats.text = "stats stats stats!";
-
-                    }
-                }
-                //textInfoSpeciesName.text = "SpeciesName";
-                //textInfoSpeciesStats.text = "stats stats stats!";
-                */
+                
             }
         }
         else {
@@ -2685,6 +2667,7 @@ public class UIManager : MonoBehaviour {
             buttonInfoOpenClose.GetComponentInChildren<Text>().text = "<";
         }
     }    
+    */
     public void UpdateDebugUI() {
 
         // DISABLED!!!! -- Need to establish good method for grabbing data from SimulationManager!
@@ -3646,6 +3629,8 @@ public class UIManager : MonoBehaviour {
         //maxPredationValue = maxValue;     
     }
     public void UpdateTolWorldStatsTexture(List<Vector4> nutrientData) {
+        
+        
         //Debug.Log("UpdateTolWorldStatsTexture");
         int numDataPoints = Mathf.Max(1, nutrientData.Count);
 

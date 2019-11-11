@@ -163,6 +163,8 @@ public class SimulationManager : MonoBehaviour {
     private int recentlyAddedSpeciesID; // = masterGenomePool.completeSpeciesPoolsList.Count - 1;
     private int recentlyAddedSpeciesTimeCounter = 0;
 
+
+    public GraphData graphDataGlobalNutrients;
     //public static float energyDifficultyMultiplier = 1f;
 
     //public bool isBrushingAgents = false;
@@ -336,8 +338,13 @@ public class SimulationManager : MonoBehaviour {
         Debug.Log("LOADING COMPLETE - Starting WarmUp!");
     }
 
+    private void InitializeGraphData() {
+        graphDataGlobalNutrients = new GraphData(uiManager.infoGraphNutrientsMat);  // testing!!!!
+
+    }
     private void LoadingInitializeCoreSimulationState() {
         // allocate memory and initialize data structures, classes, arrays, etc.
+        InitializeGraphData();
 
         settingsManager.Initialize();
         trophicLayersManager = new TrophicLayersManager();
@@ -355,6 +362,8 @@ public class SimulationManager : MonoBehaviour {
         }
 
         simStateData = new SimulationStateData(this);
+
+
         
     }
     private void LoadingInitializePopulationGenomes() {
@@ -755,6 +764,12 @@ public class SimulationManager : MonoBehaviour {
             }
         }
 
+        if(simAgeTimeSteps % 20 == 10) {
+            graphDataGlobalNutrients.AddNewEntry(simResourceManager.curGlobalNutrients);
+            //uiManager.UpdateTolWorldStatsTexture(statsNutrientsEachGenerationList);
+            
+        }
+
         if(simAgeTimeSteps % 79 == 3) {
             UpdateSimulationClimate();
 
@@ -794,7 +809,7 @@ public class SimulationManager : MonoBehaviour {
             */
             // precalculate normals?
             
-            if (depthSample.x > theRenderKing.baronVonWater._GlobalWaterLevel || depthSample.w < 0.5f) //(floorDepth < agentSize)
+            if (depthSample.x > theRenderKing.baronVonWater._GlobalWaterLevel || depthSample.w < 0.15f) //(floorDepth < agentSize)
             {
                 float wallForce = 10.5f; // Mathf.Clamp01(agentSize - floorDepth) / agentSize;
                 Vector2 grad = agentsArray[i].depthGradient; // new Vector2(depthSample.y, depthSample.z); //.normalized;

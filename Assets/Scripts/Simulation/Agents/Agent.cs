@@ -509,9 +509,11 @@ public class Agent : MonoBehaviour {
         if (coreModule.energy <= 0f) {
             if(coreModule.stomachContentsNorm > 0.01f) {
                 stringCauseOfDeath = "Suffocated";
+                RegisterAgentEvent(UnityEngine.Time.frameCount, "Suffocated!");
             }
             else {
                 stringCauseOfDeath = "Starved";
+                RegisterAgentEvent(UnityEngine.Time.frameCount, "Starved!");
             }
             
             lifeStageTransitionTimeStepCounter = 0;
@@ -534,6 +536,7 @@ public class Agent : MonoBehaviour {
             //Debug.LogError("CheckForDeathHealth" + currentBiomass.ToString());
 
             stringCauseOfDeath = "Fatal Injuries";
+            RegisterAgentEvent(UnityEngine.Time.frameCount, "Died of Injuries!");
             InitializeDeath();
         }
     }
@@ -544,6 +547,7 @@ public class Agent : MonoBehaviour {
 
             //Debug.Log("Died of old age!");
             stringCauseOfDeath = "Old Age";
+            RegisterAgentEvent(UnityEngine.Time.frameCount, "Died of Old Age!");
             InitializeDeath();
         }
     }
@@ -552,6 +556,7 @@ public class Agent : MonoBehaviour {
             curLifeStage = Agent.AgentLifeStage.Dead;
             lifeStageTransitionTimeStepCounter = 0;
             stringCauseOfDeath = "Divine Judgment";
+            RegisterAgentEvent(UnityEngine.Time.frameCount, "Struck down by Divine Judgment!");
             InitializeDeath();
         }
     }
@@ -726,7 +731,7 @@ public class Agent : MonoBehaviour {
 
         TakeDamage(damage);
         
-        RegisterAgentEvent(UnityEngine.Time.frameCount, "Bitten! (" + damage.ToString() + ") by #" + predatorAgentRef.index.ToString());
+        RegisterAgentEvent(UnityEngine.Time.frameCount, "Bitten! (" + damage.ToString("F2") + ") by #" + predatorAgentRef.index.ToString());
      
     }
     public void ProcessBeingEaten(float amount) {
@@ -804,6 +809,8 @@ public class Agent : MonoBehaviour {
             case AgentLifeStage.AwaitingRespawn:
                 //
                 bodyRigidbody.simulated = false;
+                bodyRigidbody.isKinematic = false;
+                colliderBody.enabled = false;
                 break;
             case AgentLifeStage.Egg:
                 //
@@ -1248,7 +1255,7 @@ public class Agent : MonoBehaviour {
 
                 // EVENT HERE!!!!!
                 if(mouthRef.lastBiteFoodAmount > 0f) {
-                    RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Plant/Meat! (" + mouthRef.lastBiteFoodAmount.ToString() + ")");
+                    RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Plant/Meat! (" + mouthRef.lastBiteFoodAmount.ToString("F3") + ")");
                 }
             }
         }
@@ -1565,6 +1572,7 @@ public class Agent : MonoBehaviour {
         // Positioning and Pinning to parentEggSack HERE:
         bodyGO.transform.position = startPos;
 
+        bodyRigidbody.isKinematic = false;
         bodyRigidbody.simulated = true;
 
         springJoint.distance = 0.005f;

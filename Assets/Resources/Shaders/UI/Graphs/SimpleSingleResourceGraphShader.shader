@@ -3,14 +3,10 @@
 	Properties
 	{
 		_DataTex ("_DataTex", 2D) = "black" {}
-		//_KeyTex ("_KeyTex", 2D) = "black" {}
-		//_BrushTex ("_BrushTex", 2D) = "white" {}
 		_Tint ("_Tint", Color) = (1,1,1,1)
 	}
 	SubShader
 	{
-		//Tags { "RenderType"="Opaque" }
-		//LOD 100
 		Tags{ "RenderType" = "Transparent" }
 		//ZWrite Off
 		//Cull Off
@@ -54,26 +50,13 @@
 			sampler2D _DataTex;		
 			uniform float4 _Tint;
 			uniform float _MaxValue;
+			uniform float _MinValue;
 
-			//uniform int _SelectedWorldStatsID;
-			//uniform float _IsOn;
-			//uniform float _GraphCoordStatsStart;
-			//uniform float _MouseCoordX;
-			//uniform float _MouseCoordY;
-			//uniform float _MouseOn;
-
-			
+			uniform float _SampleCoordMax;
+						
 			fixed4 frag(v2f IN) : SV_Target
 			{
-				//return float4(1, 0.5, 0.2, 1);
-				//float4 dataColor = tex2D(_DataTex, IN.texcoord);
-				//return dataColor; 
-				//float fade = (1.0 - i.uv.x);
-				//float4 finalColor = float4(i.color.rgb, fade * fade * 1);	
-				//finalColor.a *= brushColor.a;
-				//finalColor = float4(0,1,1,1);
-				//return finalColor;
-
+				
 				float _ZoomFactorX = 1.0;
 				float _ZoomFactorY = 1.0;
 								
@@ -104,25 +87,11 @@
 												
 				half4 pixColor = bgColor;
 
-				float4 fitnessScores = saturate(sqrt(tex2D(_DataTex, float2(finalCoords.x, 0)) / _MaxValue));
+				
+				float4 fitnessScores = saturate(sqrt(tex2D(_DataTex, float2(finalCoords.x * _SampleCoordMax, 0.5)) / _MaxValue));
 
 				float distR = abs(finalCoords.y - fitnessScores.x);
-								
-				// Create GRIDLINES:
-				/*for(int j = 0; j < gridDivisions; j++) {
-					float linePos = j * gridLineSpacing;
-					float gridDistX = abs(finalCoords.x - linePos);
-					if(gridDistX < (gridLineWidthX + lineFadeWidth)) {
-						float smoothDist = smoothstep(0.0, lineFadeWidth, gridDistX - gridLineWidthX);
-						pixColor = lerp(pixColor, gridColor, (1.0 - smoothDist) * 0.1);
-					}
-					float gridDistY = abs(finalCoords.y - linePos);
-					if(gridDistY < (gridLineWidthY + lineFadeWidth)) {
-						float smoothDist = smoothstep(0.0, lineFadeWidth, gridDistX - gridLineWidthY);
-						pixColor = lerp(pixColor, gridColor, (1.0 - smoothDist) * 0.1);
-					}
-				}*/
-
+				
 				//  smoothstep( min , max , x )
 				//  For values of x between min and max , returns a smoothly varying value that ranges from 0 at x = min to 1 at x = max .
 				//  x is clamped to the range [ min , max ] and then the interpolation formula is evaluated:
