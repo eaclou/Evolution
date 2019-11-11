@@ -469,7 +469,7 @@ void CSUpdateTerrainMapsBrush (uint3 id : SV_DispatchThreadID)
 	float4 waterSurfaceTex = _WaterSurfaceTex.SampleLevel(_LinearClamp, uv, 0);
 	float4 resourceTex = _ResourceGridRead.SampleLevel(_LinearClamp, uv, 0);
 	float4 spiritBrushTex = brushSample;
-				
+		
 	float causticsStrength = lerp(0.025, 0.275, 0.6);
 	float minFog = 1;
 	
@@ -477,18 +477,22 @@ void CSUpdateTerrainMapsBrush (uint3 id : SV_DispatchThreadID)
 	float decomposerMask = saturate(resourceTex.z * 1) * 0.8;
 	float3 detritusHue = float3(0.2,0.1,0.02);
 	float detritusMask = saturate(resourceTex.y * 1) * 0.8;
-	
+	float3 algaeColor = float3(0.5,0.8,0.5) * 0.5;
+	float algaeMask = saturate(resourceTex.w * 2.70);
+
+
 	finalColor.rgb = lerp(finalColor.rgb, decomposerHue, decomposerMask);
 	finalColor.rgb = lerp(finalColor.rgb, detritusHue, detritusMask);
-
-	float algaeMask = saturate(resourceTex.w * 5.0);
+	finalColor.rgb = lerp(finalColor.rgb, algaeColor, algaeMask);
+	
 	
 	float altitudeRaw = altitudeTex.x;
 	
 	float3 waterFogColor = float3(0.36, 0.4, 0.44) * 0.42;
-	waterFogColor = lerp(waterFogColor, float3(0.3,0.8,0.3) * 0.66, algaeMask);
+	
+	waterFogColor = lerp(waterFogColor, algaeColor, algaeMask);
 
-	float3 sunDir = normalize(float3(-1,1,-1));
+	float3 sunDir = normalize(float3(-1,0.75,-1));
 
 	// FAKE CAUSTICS:::
 	float3 waterSurfaceNormal = waterSurfaceTex.yzw; // pre-calculated
@@ -521,9 +525,9 @@ void CSUpdateTerrainMapsBrush (uint3 id : SV_DispatchThreadID)
 	groundSurfaceNormal.z *= -1;
 	//waterSurfaceNormal.z *= -1;
 	float3 diffuseSurfaceNormal = lerp(groundSurfaceNormal, waterSurfaceNormal, depth);
-	float dotDiffuse = saturate(dot(diffuseSurfaceNormal, sunDir));
-	
-	finalColor.rgb *= (0.75 + dotDiffuse * 0.25);
+	float dotDiffuse = dot(diffuseSurfaceNormal, sunDir);
+	float diffuseWrap = dotDiffuse * 0.5 + 0.5;
+	finalColor.rgb *= (0.7 + dotDiffuse * 0.33 + 0.1 * diffuseWrap);
 
 	// Wetness darkening:
 	float wetnessMask = 1.0 - saturate((-altitude + _GlobalWaterLevel + 0.33) * 5.5); // saturate(((altitudeRaw + waterSurfaceTex.x * 0.34) - 0.6) * 5.25);

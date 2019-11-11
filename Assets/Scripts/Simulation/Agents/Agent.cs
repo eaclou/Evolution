@@ -11,11 +11,16 @@ public class Agent : MonoBehaviour {
     public float totalDamageDealt = 0f;
     public float totalDamageTaken = 0f;
 
+    private bool isFeedingPlant = false;
+    private bool isFeedingZooplankton = false;
+
     public float speed = 500f;
     public float smoothedThrottleLerp = 0.2f;
     public float animationCycle = 0f;
     public float turningAmount = 0f;
     public float swimAnimationCycleSpeed = 0.1f;
+
+    public float globalWaterLevel;
 
     public float spawnStartingScale = 0.1f; // *** REFACTOR!!! SYNC WITH EGGS!!!
 
@@ -56,9 +61,15 @@ public class Agent : MonoBehaviour {
     public int speciesIndex = -1;  // ********************** NEED to set these at birth!
     public CandidateAgentData candidateRef;
 
+    public struct AgentEventData {
+        public int eventFrame;
+        public string eventText;
+        public float extra;
+    }
     public string stringCauseOfDeath = "";
-    public string lastEvent = "";
-    public int lastEventTime = 0;
+    public List<AgentEventData> agentEventDataList;
+    //public string lastEvent = "";
+    //public int lastEventTime = 0;
     
     public AgentLifeStage curLifeStage;
     public enum AgentLifeStage {
@@ -201,6 +212,7 @@ public class Agent : MonoBehaviour {
         // temp fix for delayed spawning of Agents (leading to nullReferenceExceptions)
         //agentWidthsArray = new float[widthsTexResolution];
         isInert = true;
+        agentEventDataList = new List<AgentEventData>();  // created once
     }
 
     public float GetDecayPercentage() {
@@ -224,6 +236,7 @@ public class Agent : MonoBehaviour {
         else {
             isFeeding = true;            
             mouthRef.triggerCollider.enabled = true;
+            mouthRef.lastBiteFoodAmount = 0f;
             feedingFrameCounter = 0;          
         }
     }
@@ -616,6 +629,17 @@ public class Agent : MonoBehaviour {
         }
     }
     
+    public void RegisterAgentEvent(int frame, string textString) {
+        //lastEvent = "Ate Plant! (" + amount.ToString() + ")";
+        //lastEventTime = UnityEngine.Time.frameCount;
+        //eventLogStringList
+        AgentEventData newEvent = new AgentEventData();
+        newEvent.eventFrame = frame;
+        newEvent.eventText = textString;
+        newEvent.extra = 1f;
+
+        agentEventDataList.Add(newEvent);
+    }
     public void EatFoodPlant(float amount) {
         totalFoodEatenPlant += amount;  
         float stomachSpace = coreModule.stomachCapacity - coreModule.stomachContentsPlant - coreModule.stomachContentsMeat;
@@ -635,8 +659,8 @@ public class Agent : MonoBehaviour {
         }
         GainExperience((amount / coreModule.stomachCapacity) * coreModule.foodEfficiencyPlant * 1f); // Exp for appropriate food    
 
-        lastEvent = "Ate Plant! (" + amount.ToString() + ")";
-        lastEventTime = UnityEngine.Time.frameCount;
+        
+        
     }
     public void EatFoodMeat(float amount) {
         totalFoodEatenMeat += amount; 
@@ -658,8 +682,7 @@ public class Agent : MonoBehaviour {
         
         GainExperience((amount / coreModule.stomachCapacity) * coreModule.foodEfficiencyMeat * 1f); // Exp for appropriate food
 
-        lastEvent = "Ate Meat! (" + amount.ToString() + ")";
-        lastEventTime = UnityEngine.Time.frameCount;
+        //RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Meat! (" + amount.ToString() + ")");
     }
     public void TakeDamage(float damage) {
         int rand = UnityEngine.Random.Range(0, 3);
@@ -703,9 +726,8 @@ public class Agent : MonoBehaviour {
 
         TakeDamage(damage);
         
-
-        lastEvent = "Bitten! (" + damage.ToString() + ") by #" + predatorAgentRef.index.ToString();
-        lastEventTime = UnityEngine.Time.frameCount;
+        RegisterAgentEvent(UnityEngine.Time.frameCount, "Bitten! (" + damage.ToString() + ") by #" + predatorAgentRef.index.ToString());
+     
     }
     public void ProcessBeingEaten(float amount) {
         // if this agent is dead, it acts as food.
@@ -736,8 +758,8 @@ public class Agent : MonoBehaviour {
             ScaleBody(sizePercentage, false);
         }
         
-        lastEvent = "Devoured!";
-        lastEventTime = UnityEngine.Time.frameCount;
+        RegisterAgentEvent(UnityEngine.Time.frameCount, "Devoured!");
+        
     }
 
     public void Tick(SimulationManager simManager, SettingsManager settings) {
@@ -746,6 +768,7 @@ public class Agent : MonoBehaviour {
         wasteProducedLastFrame = 0f;
         oxygenUsedLastFrame = 0f;
 
+        globalWaterLevel = simManager.theRenderKing.baronVonWater._GlobalWaterLevel;
 
         /*if(isBeingSwallowed)
         {
@@ -780,6 +803,7 @@ public class Agent : MonoBehaviour {
         switch(curLifeStage) {
             case AgentLifeStage.AwaitingRespawn:
                 //
+                bodyRigidbody.simulated = false;
                 break;
             case AgentLifeStage.Egg:
                 //
@@ -885,9 +909,9 @@ public class Agent : MonoBehaviour {
         mouthRef.Enable();
         isCooldown = false;
 
-        lastEvent = "Was Born!";
-        lastEventTime = UnityEngine.Time.frameCount;
-        
+
+        agentEventDataList.Clear();
+        RegisterAgentEvent(UnityEngine.Time.frameCount, "Was Born!");        
     }
     
     private void TickMature(SimulationManager simManager) {
@@ -1002,6 +1026,7 @@ public class Agent : MonoBehaviour {
             // THIS IS HOT GARBAGE !!! RE-FACTOR!! *****
             mouseClickCollider.radius = currentBoundingBoxSize.x * 0.5f + 2f;        
             mouseClickCollider.height = currentBoundingBoxSize.y + 2f;
+            mouseClickCollider.center = new Vector3(0f, 0f, (globalWaterLevel * 2f - 1f) * -10f);
             //mouseClickCollider.radius += 2f; // ** TEMP -- should be based on camera distance also
             //mouseClickCollider.height += 2f;
         }               
@@ -1141,6 +1166,8 @@ public class Agent : MonoBehaviour {
                 startBite = true;
             }
 
+            mouthRef.lastBiteFoodAmount += foodParticleEatAmount + animalParticleEatAmount;
+
             if(startBite) {
                 //if(IsFreeToAct()) {
                 if(!isAttacking && !isDefending) {
@@ -1218,6 +1245,11 @@ public class Agent : MonoBehaviour {
                 isFeeding = false;
                 EnterCooldown(feedAnimCooldown);
                 feedingFrameCounter = 0;
+
+                // EVENT HERE!!!!!
+                if(mouthRef.lastBiteFoodAmount > 0f) {
+                    RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Plant/Meat! (" + mouthRef.lastBiteFoodAmount.ToString() + ")");
+                }
             }
         }
         if(isAttacking) {            
@@ -1450,7 +1482,7 @@ public class Agent : MonoBehaviour {
 
             GameObject mouseClickColliderGO = new GameObject("MouseClickCollider");
             mouseClickColliderGO.transform.parent = bodyGO.transform;
-            mouseClickColliderGO.transform.localPosition = new Vector3(0f, 0f, 1f);
+            mouseClickColliderGO.transform.localPosition = new Vector3(0f, 0f, 0f);
             mouseClickCollider = mouseClickColliderGO.AddComponent<CapsuleCollider>();
             mouseClickCollider.isTrigger = true;
         }
@@ -1513,7 +1545,7 @@ public class Agent : MonoBehaviour {
         averageFullSizeWidth = avgSegmentWidth;       
     }*/
     
-    public void ReconstructAgentGameObjects(SettingsManager settings, AgentGenome genome, EggSack parentEggSack, Vector3 startPos, bool isImmaculate, float globalWaterLevel) {
+    public void ReconstructAgentGameObjects(SettingsManager settings, AgentGenome genome, EggSack parentEggSack, Vector3 startPos, bool isImmaculate, float waterLevel) {
         float corpseLerp = (float)settings.curTierFoodCorpse / 10f;
         //decayDurationTimeSteps = 480; // Mathf.RoundToInt(Mathf.Lerp(360f, 3600f, corpseLerp));
         float eggLerp = (float)settings.curTierFoodEgg / 10f;
@@ -1532,6 +1564,8 @@ public class Agent : MonoBehaviour {
 
         // Positioning and Pinning to parentEggSack HERE:
         bodyGO.transform.position = startPos;
+
+        bodyRigidbody.simulated = true;
 
         springJoint.distance = 0.005f;
         springJoint.enableCollision = false;        
@@ -1583,9 +1617,9 @@ public class Agent : MonoBehaviour {
 
         //mouseclickcollider MCC
         mouseClickCollider.direction = 1; // Y-Axis ???
-        mouseClickCollider.center = new Vector3(0f, 0f, (globalWaterLevel * 2f - 1f) * -10f); //Vector3.zero; // new Vector3(0f, 0f, 1f);
+        mouseClickCollider.center = new Vector3(0f, 0f, (waterLevel * 2f - 1f) * -10f); //Vector3.zero; // new Vector3(0f, 0f, 1f);
         mouseClickCollider.radius = fullSizeBoundingBox.x / 2f * sizePercentage;
-        mouseClickCollider.radius *= 3.14f; // ** TEMP
+        mouseClickCollider.radius *= 5.14f; // ** TEMP
         mouseClickCollider.height = fullSizeBoundingBox.y / 2f * sizePercentage;
     }
 
@@ -1630,6 +1664,7 @@ public class Agent : MonoBehaviour {
         AgentGenome genome = candidateRef.candidateGenome;        
         
         curLifeStage = AgentLifeStage.Egg;
+        
         parentEggSackRef = null;
 
         // **** Separate out this code into shared function to avoid duplicate code::::

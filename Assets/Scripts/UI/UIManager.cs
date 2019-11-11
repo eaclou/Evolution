@@ -1416,7 +1416,8 @@ public class UIManager : MonoBehaviour {
                 Agent agent = gameManager.simulationManager.agentsArray[critterIndex];
 
                 textNewInspectAgentName.text = agent.candidateRef.candidateGenome.bodyGenome.coreGenome.name;
-                textNewInspectLog.text = agent.lastEvent.ToString() + ", " + agent.cooldownFrameCounter.ToString() + " / " + agent.cooldownDuration.ToString(); // agent.lastEvent;
+
+                textNewInspectLog.text = agent.stringCauseOfDeath.ToString() + ", " + agent.cooldownFrameCounter.ToString() + " / " + agent.cooldownDuration.ToString(); // agent.lastEvent;
                 newInspectAgentEnergyMat.SetFloat("_Value", Mathf.Clamp01(agent.coreModule.energy * 0.25f));
                 newInspectAgentStaminaMat.SetFloat("_Value", Mathf.Clamp01(agent.coreModule.stamina[0] * 1f));
                 newInspectAgentStomachMat.SetFloat("_Value", Mathf.Clamp01(agent.coreModule.stomachContentsNorm * 1f));
@@ -1579,6 +1580,15 @@ public class UIManager : MonoBehaviour {
                     panelWatcherSpiritVertebratesText.SetActive(true);
 
                     string textString = "TEXT PAGE! 1";
+
+                    string eventLogString = "";
+                    if(agent.agentEventDataList.Count > 0) {
+                        for(int q = 0; q < Mathf.Min(5, agent.agentEventDataList.Count); q++) {
+                            eventLogString += "\n[" + agent.agentEventDataList[q].eventFrame.ToString() + "] " + agent.agentEventDataList[q].eventText;
+                        } 
+                        textString += eventLogString;
+                        Debug.Log("eventLogString" + eventLogString);
+                    }                    
 
                     textString += "\nNearestPlant[" + agent.foodModule.nearestFoodParticleIndex.ToString() + "] " + agent.foodModule.nearestFoodParticlePos.ToString() + " d: " + (agent.foodModule.nearestFoodParticlePos.magnitude).ToString();
                     textString += "\nNearestZooplankton[" + agent.foodModule.nearestAnimalParticleIndex.ToString() + "] " + agent.foodModule.nearestAnimalParticlePos.ToString() + " d: " + (agent.foodModule.nearestAnimalParticlePos.magnitude).ToString();
@@ -3861,8 +3871,9 @@ public class UIManager : MonoBehaviour {
         
         Ray ray = cameraManager.gameObject.GetComponent<Camera>().ScreenPointToRay(Input.mousePosition);
         RaycastHit hit = new RaycastHit();
-        //int layerMask = 0;
-        Physics.Raycast(ray, out hit);  // *** USE DEDICATED LAYER FOR THIS CHECK!!!! *********
+        int layerMask = ~(1 << LayerMask.NameToLayer("UtilityRaycast")); 
+
+        Physics.Raycast(ray, out hit, 1000f, layerMask);  // *** USE DEDICATED LAYER FOR THIS CHECK!!!! *********
 
         cameraManager.isMouseHoverAgent = false;
         cameraManager.mouseHoverAgentIndex = 0;

@@ -772,11 +772,15 @@ public class SimulationManager : MonoBehaviour {
         for (int i = 0; i < agentsArray.Length; i++) {
 
             Vector4 depthSample = simStateData.depthAtAgentPositionsArray[i];
-            agentsArray[i].worldAltitude = depthSample.x;
-            agentsArray[i].depthGradient = new Vector2(depthSample.y, depthSample.z).normalized;
-            if(depthSample.y == 0 && depthSample.z == 0) {
+            agentsArray[i].worldAltitude = theRenderKing.baronVonWater._GlobalWaterLevel - depthSample.x;
+            if(depthSample.y == 0f && depthSample.z == 0f) {
                 agentsArray[i].depthGradient = new Vector2(0f, 0f);
             }
+            else {
+                agentsArray[i].depthGradient = new Vector2(depthSample.y, depthSample.z).normalized;
+            }
+            
+            
             //float agentSize = (agentsArray[i].fullSizeBoundingBox.x + agentsArray[i].fullSizeBoundingBox.y) * agentsArray[i].sizePercentage * 0.25f + 0.025f;
             //float floorDepth = depthSample.x * 10f;
             /*Vector3 depthSampleNorth = simStateData.depthAtAgentPositionsArray[i * 5 + 1];

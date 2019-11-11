@@ -9,7 +9,9 @@ public class CritterMouthComponent : MonoBehaviour {
     public Vector2 mouthTriggerSize;
     
     public bool isFeeding = false;
-    public bool isAttacking = false;  
+    public bool isAttacking = false;
+
+    public float lastBiteFoodAmount = 0f;
 
     // efficiency? calculated elsewhere?
     

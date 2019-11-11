@@ -190,7 +190,7 @@
 				float4 finalColor = tex2D(_MainTex, i.quadUV);
 				finalColor.rgb = float3(0.6, 0.514, 0.25) * 3.7 * (i.color.y * 0.7 + 1);
 				//finalColor.rgb += float3(2,1.9,0.13) * saturate(i.color.y - 0.25) * 0.3;
-				finalColor.a = 1; // *= i.color.a;	
+				finalColor.a *= i.color.a;	
 				//finalColor = float4(i.quadUV, 0, 0);
 				return finalColor;
 

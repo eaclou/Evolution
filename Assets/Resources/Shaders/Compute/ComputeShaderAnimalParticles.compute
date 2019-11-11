@@ -410,8 +410,11 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 		float fluidSpeedMult = 0.0167;
 		posOffset += fluidVel * fluidSpeedMult * _MapSize;  // carried by water
 
-		// Shoreline "Collision"		
-		float2 slope = float2(terrainSampleRight.x - terrainSampleCenter.x, terrainSampleTop.x - terrainSampleCenter.x);
+		// Shoreline "Collision"	
+		float effectiveAltitudeCenter = max(terrainSampleCenter.x, (1.0 - terrainSampleCenter.w));  // *** Out-Of-Bounds areas act like they have altitude = 1.0 ***
+		float effectiveAltitudeRight = max(terrainSampleRight.x, (1.0 - terrainSampleRight.w));
+		float effectiveAltitudeTop = max(terrainSampleTop.x, (1.0 - terrainSampleTop.w));
+		float2 slope = float2(effectiveAltitudeRight - effectiveAltitudeCenter, effectiveAltitudeTop - effectiveAltitudeCenter);
 		float aboveWaterMask = saturate((altitude - _GlobalWaterLevel) * _ShoreCollisionDistSlope);		
 		float2 landCollisionVel = -slope * aboveWaterMask * _ShoreCollisionMag;
 		posOffset += landCollisionVel * _MasterSwimSpeed;	// Independent of Map size?!?!?
