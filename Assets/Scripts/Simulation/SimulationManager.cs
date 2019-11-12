@@ -165,6 +165,12 @@ public class SimulationManager : MonoBehaviour {
 
 
     public GraphData graphDataGlobalNutrients;
+    public GraphData graphDataGlobalWaste;
+    public GraphData graphDataGlobalDecomposers;
+    public GraphData graphDataGlobalAlgae;
+    public GraphData graphDataGlobalPlants;
+    public GraphData graphDataGlobalZooplankton;
+    public GraphData graphDataGlobalVertebrates;
     //public static float energyDifficultyMultiplier = 1f;
 
     //public bool isBrushingAgents = false;
@@ -339,8 +345,14 @@ public class SimulationManager : MonoBehaviour {
     }
 
     private void InitializeGraphData() {
-        graphDataGlobalNutrients = new GraphData(uiManager.infoGraphNutrientsMat);  // testing!!!!
-
+        graphDataGlobalNutrients = new GraphData(uiManager.knowledgeGraphNutrientsMat);  // testing!!!!
+        graphDataGlobalWaste = new GraphData(uiManager.knowledgeGraphDetritusMat);  // testing!!!!
+        graphDataGlobalDecomposers = new GraphData(uiManager.knowledgeGraphDecomposersMat);  // testing!!!!
+        graphDataGlobalAlgae = new GraphData(uiManager.knowledgeGraphAlgaeMat);  // testing!!!!
+        graphDataGlobalPlants = new GraphData(uiManager.knowledgeGraphPlantsMat);  // testing!!!!
+        graphDataGlobalZooplankton = new GraphData(uiManager.knowledgeGraphZooplanktonMat);  // testing!!!!
+        graphDataGlobalVertebrates = new GraphData(uiManager.knowledgeGraphVertebratesMat);  // testing!!!!
+        //graphDataGlobalNutrients = new GraphData(uiManager.infoMeterAnimalsMat);  // testing!!!!
     }
     private void LoadingInitializeCoreSimulationState() {
         // allocate memory and initialize data structures, classes, arrays, etc.
@@ -764,8 +776,16 @@ public class SimulationManager : MonoBehaviour {
             }
         }
 
-        if(simAgeTimeSteps % 20 == 10) {
+        //int numDoubles = Mathf.Min(graphDataGlobalNutrients.doublingCounter, 4);
+        if(simAgeTimeSteps % 80 == 10) {
+            
             graphDataGlobalNutrients.AddNewEntry(simResourceManager.curGlobalNutrients);
+            graphDataGlobalWaste.AddNewEntry(simResourceManager.curGlobalDetritus);
+            graphDataGlobalDecomposers.AddNewEntry(simResourceManager.curGlobalDecomposers);
+            graphDataGlobalAlgae.AddNewEntry(simResourceManager.curGlobalAlgaeReservoir);
+            graphDataGlobalPlants.AddNewEntry(simResourceManager.curGlobalPlantParticles);
+            graphDataGlobalZooplankton.AddNewEntry(simResourceManager.curGlobalAnimalParticles);
+            graphDataGlobalVertebrates.AddNewEntry(simResourceManager.curGlobalAgentBiomass);
             //uiManager.UpdateTolWorldStatsTexture(statsNutrientsEachGenerationList);
             
         }
@@ -773,11 +793,11 @@ public class SimulationManager : MonoBehaviour {
         if(simAgeTimeSteps % 79 == 3) {
             UpdateSimulationClimate();
 
-            RefreshLatestHistoricalDataEntry();
-            RefreshLatestSpeciesDataEntry();
+            //RefreshLatestHistoricalDataEntry();
+            //RefreshLatestSpeciesDataEntry();
             //uiManager.UpdateSpeciesTreeDataTextures(curSimYear); // shouldn't lengthen!
             
-            uiManager.UpdateTolWorldStatsTexture(statsNutrientsEachGenerationList);
+            //uiManager.UpdateTolWorldStatsTexture(statsNutrientsEachGenerationList);
             
             //theRenderKing.UpdateTreeOfLifeEventLineData(simEventsManager.completeEventHistoryList);
         }

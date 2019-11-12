@@ -568,6 +568,10 @@ public class Agent : MonoBehaviour {
             AbortPregnancy();
         }
 
+        colliderBody.enabled = false;
+        bodyRigidbody.simulated = false;
+        bodyRigidbody.isKinematic = true;
+
         isSexuallyMature = false;
         isSwallowingPrey = false;
         swallowingPreyFrameCounter = 0;

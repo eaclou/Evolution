@@ -10,9 +10,11 @@ public class GraphData {
     public float[] dataArray;
     public Texture2D dataTex;
     public Material targetDisplayMat;
-    public float minValue = 0f;
+    public float minValue = 0.01f;
     public float maxValue = 1f;
     public int nextWriteIndex = 0;
+
+    public int doublingCounter = 0;
 
 	public GraphData(Material targetMat) {
         if (dataTex == null) {
@@ -69,7 +71,7 @@ public class GraphData {
     
     private void RebuildDataArray() {
         // take full buffer, compress temporally by half. 
-
+        doublingCounter++;
         // Build new value array? --> build texture
         
 

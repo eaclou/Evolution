@@ -96,8 +96,11 @@ public class UIManager : MonoBehaviour {
     public Text textMeterNutrients;
     public Text textMeterDetritus;
     public Text textMeterDecomposers;
+    public Text textMeterAlgae;
     public Text textMeterPlants;
+    public Text textMeterZooplankton;
     public Text textMeterAnimals;
+
     // Info Expanded: Resources Overview:
     public GameObject panelInfoResourcesOverview;
     private Texture2D infoOxygenDataTexture;
@@ -106,12 +109,14 @@ public class UIManager : MonoBehaviour {
     private Texture2D infoDecomposersDataTexture;
     private Texture2D infoPlantsDataTexture;
     private Texture2D infoAnimalsDataTexture;
-    public Material infoGraphOxygenMat;
-    public Material infoGraphNutrientsMat;
-    public Material infoGraphDetritusMat;
-    public Material infoGraphDecomposersMat;
-    public Material infoGraphPlantsMat;
-    public Material infoGraphAnimalsMat;
+    public Material knowledgeGraphOxygenMat;
+    public Material knowledgeGraphNutrientsMat;
+    public Material knowledgeGraphDetritusMat;
+    public Material knowledgeGraphDecomposersMat;
+    public Material knowledgeGraphAlgaeMat;
+    public Material knowledgeGraphPlantsMat;
+    public Material knowledgeGraphZooplanktonMat;
+    public Material knowledgeGraphVertebratesMat;
 
     public Material debugTextureViewerMat;
     
@@ -308,7 +313,8 @@ public class UIManager : MonoBehaviour {
     public GameObject panelWatcherSpiritAlgae;
     public GameObject panelWatcherSpiritDecomposers;
     public GameObject panelWatcherSpiritTerrain;
-
+    public Text textWatcherVertebratePageNum;
+    public Text textWatcherTargetIndex;
     //public Texture2D textureWorldStats;
     //public Texture2D textureWorldStatsKey;
     //public Vector2[] tolWorldStatsValueRangesKeyArray;
@@ -526,6 +532,7 @@ public class UIManager : MonoBehaviour {
 
         UpdateMainMenuUI();
 
+        /*
         // Best place for these???
         if (statsSpeciesColorKey == null) {
             statsSpeciesColorKey = new Texture2D(maxDisplaySpecies, 1, TextureFormat.ARGB32, false);
@@ -595,7 +602,7 @@ public class UIManager : MonoBehaviour {
         infoGraphPlantsMat.SetFloat("_MaxValue", 4000f);
         infoGraphAnimalsMat.SetTexture("_DataTex", infoAnimalsDataTexture);
         infoGraphAnimalsMat.SetFloat("_MaxValue", 100f);
-
+        */
     }
     private void EnterLoadingUI() {
         panelMainMenu.SetActive(false);
@@ -1319,11 +1326,7 @@ public class UIManager : MonoBehaviour {
 
         return str;
     }
-    /*
-    private void UpdateWatcherDecomposersPanelUI() {
-
-    }
-    */
+    
     public void UpdateKnowledgePanelUI(TrophicLayersManager layerManager) {
         textCurYear.text = (gameManager.simulationManager.curSimYear + 1).ToString();
         
@@ -1333,8 +1336,10 @@ public class UIManager : MonoBehaviour {
         textMeterNutrients.text = resourcesRef.curGlobalNutrients.ToString("F0");
         textMeterDetritus.text = resourcesRef.curGlobalDetritus.ToString("F0");
         textMeterDecomposers.text = resourcesRef.curGlobalDecomposers.ToString("F0");
-        textMeterPlants.text = (resourcesRef.curGlobalPlantParticles + resourcesRef.curGlobalAlgaeReservoir).ToString("F0");
-        textMeterAnimals.text = (resourcesRef.curGlobalAgentBiomass + resourcesRef.curGlobalAnimalParticles).ToString("F0");
+        textMeterAlgae.text = (resourcesRef.curGlobalAlgaeReservoir).ToString("F0");
+        textMeterPlants.text = (resourcesRef.curGlobalPlantParticles).ToString("F0");
+        textMeterZooplankton.text = (resourcesRef.curGlobalAnimalParticles).ToString("F0");
+        textMeterAnimals.text = (resourcesRef.curGlobalAgentBiomass).ToString("F0");
                 
         textToolbarWingSpeciesSummary.gameObject.SetActive(true);
         string summaryText = layerManager.GetSpeciesPreviewDescriptionString(gameManager.simulationManager);
@@ -1402,6 +1407,7 @@ public class UIManager : MonoBehaviour {
                 Vector4 simTansferSample = SampleTexture(gameManager.simulationManager.vegetationManager.resourceSimTransferRT, curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
                 str += "\n\nProduced This Frame:\nWaste: " + (simTansferSample.z * 1000000f).ToString("F0") + "\n\nConsumed This Frame:\nNutrients: " + (simTansferSample.x * 1000000f).ToString("F0");
                 
+                textWatcherTargetIndex.text = "#" + particleData.index.ToString();
                 panelWatcherSpiritPlants.SetActive(true);
             }
                     
@@ -1423,7 +1429,8 @@ public class UIManager : MonoBehaviour {
                 str += "\nIsDecaying: " + (particleData.isDecaying).ToString("F0");
                 str += "\nIsSwallowed: " + (particleData.isSwallowed).ToString("F0");
                 //str += "\n\nDistance: " + gameManager.simulationManager.zooplanktonManager.closestZooplanktonArray[0].y.ToString(); // (gameManager.simulationManager.agentsArray[0].ownPos - new Vector2(particleData.worldPos.x, particleData.worldPos.y)).magnitude;
-                   
+                  
+                textWatcherTargetIndex.text = "#" + gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex.ToString();
                 panelWatcherSpiritZooplankton.SetActive(true);
                         
             }
@@ -1572,6 +1579,9 @@ public class UIManager : MonoBehaviour {
                 panelWatcherSpiritVertebratesText.SetActive(false);
                 panelWatcherSpiritVertebratesGenome.SetActive(false);
                 panelWatcherSpiritVertebratesBrain.SetActive(false);
+
+                textWatcherVertebratePageNum.text = "PAGE " + (curWatcherPanelVertebratePageNum + 1).ToString() + " of 4";
+                textWatcherTargetIndex.text = "#" + agent.index.ToString();
                 // pages:
                 if(curWatcherPanelVertebratePageNum == 0) {
                     panelWatcherSpiritVertebratesHUD.SetActive(true);
@@ -4684,7 +4694,14 @@ public class UIManager : MonoBehaviour {
         _Gamma = val;
     }
 
-    public void ClickWatcherVertebratePageCycle() {
+    public void ClickWatcherVertebratePageCyclePrev() {
+        curWatcherPanelVertebratePageNum--;
+
+        if(curWatcherPanelVertebratePageNum < 0) {
+            curWatcherPanelVertebratePageNum = 3;
+        }
+    }
+    public void ClickWatcherVertebratePageCycleNext() {
         curWatcherPanelVertebratePageNum++;
 
         if(curWatcherPanelVertebratePageNum > 3) {
@@ -4692,6 +4709,62 @@ public class UIManager : MonoBehaviour {
         }
     }
 
+    public void ClickWatcherCycleTargetPrev() {
+        if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 1) {
+            if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) {
+
+            }
+            else {
+                VegetationManager veggieRef = gameManager.simulationManager.vegetationManager;
+                veggieRef.selectedPlantParticleIndex--;
+                if(veggieRef.selectedPlantParticleIndex < 0) {
+                    veggieRef.selectedPlantParticleIndex = veggieRef.plantParticlesCBuffer.count - 1;
+                    veggieRef.isPlantParticleSelected = true; // ???
+                }
+            }
+        }
+        else if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2) {
+            if (gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) {
+                ZooplanktonManager zoopRef = gameManager.simulationManager.zooplanktonManager;
+                zoopRef.selectedAnimalParticleIndex--;
+                if (zoopRef.selectedAnimalParticleIndex < 0) {
+                    zoopRef.selectedAnimalParticleIndex = zoopRef.animalParticlesCBuffer.count - 1;
+                    zoopRef.isAnimalParticleSelected = true; // ???
+                }
+            }
+            else {
+                ClickPrevAgent();
+            }
+        }        
+    }
+    public void ClickWatcherCycleTargetNext() {
+        if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 1) {
+            if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) {
+
+            }
+            else {
+                VegetationManager veggieRef = gameManager.simulationManager.vegetationManager;
+                veggieRef.selectedPlantParticleIndex++;
+                if(veggieRef.selectedPlantParticleIndex > veggieRef.plantParticlesCBuffer.count - 1) {
+                    veggieRef.selectedPlantParticleIndex = 0;
+                    veggieRef.isPlantParticleSelected = true; // ???
+                }
+            }
+        }
+        else if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2) {
+            if (gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) {
+                ZooplanktonManager zoopRef = gameManager.simulationManager.zooplanktonManager;
+                zoopRef.selectedAnimalParticleIndex++;
+                if (zoopRef.selectedAnimalParticleIndex > zoopRef.animalParticlesCBuffer.count - 1) {
+                    zoopRef.selectedAnimalParticleIndex = 0;
+                    zoopRef.isAnimalParticleSelected = true; // ???
+                }
+            }
+            else {
+                ClickNextAgent();
+            }
+        } 
+    }
 
 
     #endregion
