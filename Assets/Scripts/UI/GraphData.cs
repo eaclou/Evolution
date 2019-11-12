@@ -4,15 +4,17 @@ using UnityEngine;
 
 public class GraphData {
 
-    public static int historicalGraphsResolution = 64;
+    public static int historicalGraphsResolution = 128;
 
     public bool isActive = false;
     public float[] dataArray;
     public Texture2D dataTex;
     public Material targetDisplayMat;
     public float minValue = 0.01f;
-    public float maxValue = 1f;
+    public float maxValue = 0.1f;
     public int nextWriteIndex = 0;
+
+    public float curVal;
 
     public int doublingCounter = 0;
 
@@ -33,7 +35,7 @@ public class GraphData {
     }
 
     public void AddNewEntry(float value) {
-        
+        curVal = value;
         if(nextWriteIndex >= historicalGraphsResolution) {
             RebuildDataArray(); 
             

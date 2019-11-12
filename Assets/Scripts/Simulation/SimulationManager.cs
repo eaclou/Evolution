@@ -171,10 +171,27 @@ public class SimulationManager : MonoBehaviour {
     public GraphData graphDataGlobalPlants;
     public GraphData graphDataGlobalZooplankton;
     public GraphData graphDataGlobalVertebrates;
-    //public static float energyDifficultyMultiplier = 1f;
 
-    //public bool isBrushingAgents = false;
-    
+    public GraphData graphDataVertebrateLifespan0;
+    public GraphData graphDataVertebratePopulation0;
+    public GraphData graphDataVertebrateFoodEaten0;
+    public GraphData graphDataVertebrateGenome0;
+
+    public GraphData graphDataVertebrateLifespan1;
+    public GraphData graphDataVertebratePopulation1;
+    public GraphData graphDataVertebrateFoodEaten1;
+    public GraphData graphDataVertebrateGenome1;
+
+    public GraphData graphDataVertebrateLifespan2;
+    public GraphData graphDataVertebratePopulation2;
+    public GraphData graphDataVertebrateFoodEaten2;
+    public GraphData graphDataVertebrateGenome2;
+
+    public GraphData graphDataVertebrateLifespan3;
+    public GraphData graphDataVertebratePopulation3;
+    public GraphData graphDataVertebrateFoodEaten3;
+    public GraphData graphDataVertebrateGenome3;
+        
 
     #region loading   // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& LOADING LOADING LOADING &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
     public void TickLoading() {
@@ -352,7 +369,26 @@ public class SimulationManager : MonoBehaviour {
         graphDataGlobalPlants = new GraphData(uiManager.knowledgeGraphPlantsMat);  // testing!!!!
         graphDataGlobalZooplankton = new GraphData(uiManager.knowledgeGraphZooplanktonMat);  // testing!!!!
         graphDataGlobalVertebrates = new GraphData(uiManager.knowledgeGraphVertebratesMat);  // testing!!!!
-        //graphDataGlobalNutrients = new GraphData(uiManager.infoMeterAnimalsMat);  // testing!!!!
+
+        graphDataVertebrateLifespan0 = new GraphData(uiManager.knowledgeGraphVertebrateLifespanMat0);
+        graphDataVertebratePopulation0 = new GraphData(uiManager.knowledgeGraphVertebratePopulationMat0);
+        graphDataVertebrateFoodEaten0 = new GraphData(uiManager.knowledgeGraphVertebrateFoodEatenMat0);
+        graphDataVertebrateGenome0 = new GraphData(uiManager.knowledgeGraphVertebrateGenomeMat0);
+
+        graphDataVertebrateLifespan1 = new GraphData(uiManager.knowledgeGraphVertebrateLifespanMat1);
+        graphDataVertebratePopulation1 = new GraphData(uiManager.knowledgeGraphVertebratePopulationMat1);
+        graphDataVertebrateFoodEaten1 = new GraphData(uiManager.knowledgeGraphVertebrateFoodEatenMat1);
+        graphDataVertebrateGenome1 = new GraphData(uiManager.knowledgeGraphVertebrateGenomeMat1);
+
+        graphDataVertebrateLifespan2 = new GraphData(uiManager.knowledgeGraphVertebrateLifespanMat2);
+        graphDataVertebratePopulation2 = new GraphData(uiManager.knowledgeGraphVertebratePopulationMat2);
+        graphDataVertebrateFoodEaten2 = new GraphData(uiManager.knowledgeGraphVertebrateFoodEatenMat2);
+        graphDataVertebrateGenome2 = new GraphData(uiManager.knowledgeGraphVertebrateGenomeMat2);
+
+        graphDataVertebrateLifespan3 = new GraphData(uiManager.knowledgeGraphVertebrateLifespanMat3);
+        graphDataVertebratePopulation3 = new GraphData(uiManager.knowledgeGraphVertebratePopulationMat3);
+        graphDataVertebrateFoodEaten3 = new GraphData(uiManager.knowledgeGraphVertebrateFoodEatenMat3);
+        graphDataVertebrateGenome3 = new GraphData(uiManager.knowledgeGraphVertebrateGenomeMat3);
     }
     private void LoadingInitializeCoreSimulationState() {
         // allocate memory and initialize data structures, classes, arrays, etc.
@@ -785,9 +821,62 @@ public class SimulationManager : MonoBehaviour {
             graphDataGlobalAlgae.AddNewEntry(simResourceManager.curGlobalAlgaeReservoir);
             graphDataGlobalPlants.AddNewEntry(simResourceManager.curGlobalPlantParticles);
             graphDataGlobalZooplankton.AddNewEntry(simResourceManager.curGlobalAnimalParticles);
-            graphDataGlobalVertebrates.AddNewEntry(simResourceManager.curGlobalAgentBiomass);
-            //uiManager.UpdateTolWorldStatsTexture(statsNutrientsEachGenerationList);
             
+            int speciesID0 = trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0].linkedSpeciesID;
+            int speciesID1 = trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1].linkedSpeciesID;
+            int speciesID2 = trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[2].linkedSpeciesID;
+            int speciesID3 = trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[3].linkedSpeciesID;
+            
+            float totalAgentBiomass = 0f;
+            float totalSpeciesPopulation0 = 0f;
+            float totalSpeciesPopulation1 = 0f;
+            float totalSpeciesPopulation2 = 0f;
+            float totalSpeciesPopulation3 = 0f;
+            for(int a = 0; a < _NumAgents; a++) {
+                if(agentsArray[a].curLifeStage == Agent.AgentLifeStage.Mature) {
+                    totalAgentBiomass += agentsArray[a].currentBiomass;
+                }
+                if(speciesID0 == agentsArray[a].speciesIndex) {
+                    totalSpeciesPopulation0 += 1f;
+                }
+                if(speciesID1 == agentsArray[a].speciesIndex) {
+                    totalSpeciesPopulation1 += 1f;
+                }
+                if(speciesID2 == agentsArray[a].speciesIndex) {
+                    totalSpeciesPopulation2 += 1f;
+                }
+                if(speciesID3 == agentsArray[a].speciesIndex) {
+                    totalSpeciesPopulation3 += 1f;
+                }
+            }
+            graphDataGlobalVertebrates.AddNewEntry(totalAgentBiomass); // simResourceManager.curGlobalAgentBiomass);
+                                                                       //uiManager.UpdateTolWorldStatsTexture(statsNutrientsEachGenerationList);
+
+            
+            if(speciesID0 >= masterGenomePool.completeSpeciesPoolsList.Count) {
+                Debug.LogError("ERROR! speciesID >= masterGenomePool.completeSpeciesPoolsList.Count");
+            }
+            else {
+                graphDataVertebrateLifespan0.AddNewEntry(masterGenomePool.completeSpeciesPoolsList[speciesID0].avgLifespan);
+                graphDataVertebratePopulation0.AddNewEntry(totalSpeciesPopulation0);
+                graphDataVertebrateFoodEaten0.AddNewEntry(masterGenomePool.completeSpeciesPoolsList[speciesID0].avgConsumptionMeat + masterGenomePool.completeSpeciesPoolsList[speciesID0].avgConsumptionPlant);
+                graphDataVertebrateGenome0.AddNewEntry(masterGenomePool.completeSpeciesPoolsList[speciesID0].avgBodySize);
+            }
+            
+            graphDataVertebrateLifespan1.AddNewEntry(masterGenomePool.completeSpeciesPoolsList[speciesID1].avgLifespan);
+            graphDataVertebratePopulation1.AddNewEntry(totalSpeciesPopulation1);
+            graphDataVertebrateFoodEaten1.AddNewEntry(masterGenomePool.completeSpeciesPoolsList[speciesID1].avgConsumptionMeat + masterGenomePool.completeSpeciesPoolsList[speciesID1].avgConsumptionPlant);
+            graphDataVertebrateGenome1.AddNewEntry(masterGenomePool.completeSpeciesPoolsList[speciesID1].avgBodySize);
+
+            graphDataVertebrateLifespan2.AddNewEntry(masterGenomePool.completeSpeciesPoolsList[speciesID2].avgLifespan);
+            graphDataVertebratePopulation2.AddNewEntry(totalSpeciesPopulation2);
+            graphDataVertebrateFoodEaten2.AddNewEntry(masterGenomePool.completeSpeciesPoolsList[speciesID2].avgConsumptionMeat + masterGenomePool.completeSpeciesPoolsList[speciesID2].avgConsumptionPlant);
+            graphDataVertebrateGenome2.AddNewEntry(masterGenomePool.completeSpeciesPoolsList[speciesID2].avgBodySize);
+
+            graphDataVertebrateLifespan3.AddNewEntry(masterGenomePool.completeSpeciesPoolsList[speciesID3].avgLifespan);
+            graphDataVertebratePopulation3.AddNewEntry(totalSpeciesPopulation3);
+            graphDataVertebrateFoodEaten3.AddNewEntry(masterGenomePool.completeSpeciesPoolsList[speciesID3].avgConsumptionMeat + masterGenomePool.completeSpeciesPoolsList[speciesID3].avgConsumptionPlant);
+            graphDataVertebrateGenome3.AddNewEntry(masterGenomePool.completeSpeciesPoolsList[speciesID3].avgBodySize);
         }
 
         if(simAgeTimeSteps % 79 == 3) {

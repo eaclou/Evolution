@@ -313,31 +313,35 @@ public class TrophicLayersManager {
 
             }
             else {
-                str = "Simple Animal that feeds on Algae and Zooplankton.";  //    \n\nUses: <b><color=#8EDEEEFF>Oxygen</color></b>\n\nProduces: <b><color=#A97860FF>Waste</color></b>";
+                str = "Simple Animal that feeds on Plants and Zooplankton.";  //    \n\nUses: <b><color=#8EDEEEFF>Oxygen</color></b>\n\nProduces: <b><color=#A97860FF>Waste</color></b>";
                 str += "\n\n";
                 str += "<size=13><b>Total Biomass: " + simManager.simResourceManager.curGlobalAgentBiomass.ToString("F1") + "</b></size>\n\n";
 
                 SpeciesGenomePool GenomePool = simManager.masterGenomePool.completeSpeciesPoolsList[selectedTrophicSlotRef.linkedSpeciesID];
                 str += "<color=#8EDEEEFF>Oxygen Usage: <b>" + simManager.simResourceManager.oxygenUsedByAgentsLastFrame.ToString("F3") + "</b></color>\n";
                 str += "<color=#A97860FF>Waste Generated: <b>" + simManager.simResourceManager.wasteProducedByAgentsLastFrame.ToString("F3") + "</b></color>\n";
-                
-                str += "<color=#8BD06AFF>Avg Food Eaten: <b>" + (GenomePool.avgConsumptionPlant + GenomePool.avgConsumptionMeat).ToString("F3") + "</b></color>\n";
-               
-                str += "\n\n\nAvg Lifespan: <b>" + (GenomePool.avgLifespan / 1500f).ToString("F1") + " Years</b>\n\n";
+                //str += "<color=#8BD06AFF>Avg Food Eaten: <b>" + (GenomePool.avgConsumptionPlant + GenomePool.avgConsumptionMeat).ToString("F3") + "</b></color>\n";
+                //str += "\n\n\nAvg Lifespan: <b>" + (GenomePool.avgLifespan / 1500f).ToString("F1") + " Years</b>\n\n";
 
                 GenomePool.representativeGenome.bodyGenome.CalculateFullsizeBoundingBox();
                 str += "Avg Body Size: <b>" + ((GenomePool.representativeGenome.bodyGenome.fullsizeBoundingBox.x + GenomePool.representativeGenome.bodyGenome.fullsizeBoundingBox.y) * 0.5f * GenomePool.representativeGenome.bodyGenome.fullsizeBoundingBox.z).ToString("F2") + "</b>\n";
-                                                       
-                str += "Avg Brain Size: <b>" + ((GenomePool.avgNumNeurons + GenomePool.avgNumAxons) * 0.1f).ToString("F1") + "</b>\n";
+                str += "Avg Brain Size: <b>" + ((GenomePool.avgNumNeurons + GenomePool.avgNumAxons) * 1f).ToString("F0") + "</b>\n";
                 
+                str += "\nFOOD EATEN:\nPlants: <b>" + ((GenomePool.avgConsumptionPlant) * 1f).ToString("F3") + "</b> [" + (GenomePool.avgFoodSpecPlant).ToString() + "]\n";
+                str += "Meat: <b>" + ((GenomePool.avgConsumptionMeat) * 1f).ToString("F3") + "</b> [" + (GenomePool.avgFoodSpecMeat).ToString() + "]\n";
+
+                str += "\nSPECIALIZATIONS:\nAttack: <b>" + ((GenomePool.avgSpecAttack) * 1f).ToString("F2") + "</b>\n";
+                str += "Defend: <b>" + ((GenomePool.avgSpecDefend) * 1f).ToString("F2") + "</b>\n";
+                str += "Speed: <b>" + ((GenomePool.avgSpecSpeed) * 1f).ToString("F2") + "</b>\n";
+                str += "Utility: <b>" + ((GenomePool.avgSpecUtility) * 1f).ToString("F2") + "</b>\n";
             }            
         }
         else {
             if(selectedTrophicSlotRef.slotID == 0) {
-                str = "Solid Bedrock";
+                str = "World";
             }
             else if(selectedTrophicSlotRef.slotID == 1) {
-                str = "Large Boulders";
+                str = "Stone";
             }
             else if(selectedTrophicSlotRef.slotID == 2) {
                 str = "Pebbles";
