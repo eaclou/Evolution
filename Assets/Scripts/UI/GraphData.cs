@@ -61,7 +61,7 @@ public class GraphData {
 
         nextWriteIndex++;
 
-        Debug.Log("AddNewEntry[" + index.ToString() + "] (" + value.ToString() + ")  (" + minValue.ToString() + ",  " + maxValue.ToString() + ")");
+        //Debug.Log("AddNewEntry[" + index.ToString() + "] (" + value.ToString() + ")  (" + minValue.ToString() + ",  " + maxValue.ToString() + ")");
     }
 
     private void RefreshShaderProperties() {
@@ -92,6 +92,6 @@ public class GraphData {
         // update pointer to start writing at midpoint
         
         nextWriteIndex = historicalGraphsResolution / 2;
-        Debug.Log("RebuildDataArray() " + nextWriteIndex.ToString());
+        //Debug.Log("RebuildDataArray() " + nextWriteIndex.ToString());
     }
 }

@@ -34,6 +34,8 @@
 			float4 _MainTex_ST;
 
 			uniform float _GlobalWaterLevel;
+			uniform float _TexResolution;
+			uniform float _MapSize;
 			
 			v2f vert (appdata v)
 			{
@@ -58,6 +60,13 @@
 				float disabled = 1.0 - gridActive;
 
 				float4 finalColor = float4(0, 0, max(isAboveWater, disabled), 1);
+
+				float pixSizeUV = 1.0 / _TexResolution;
+
+				float2 uv = i.uv;
+				if(uv.x < pixSizeUV || uv.x > (1.0 - pixSizeUV) || uv.y < pixSizeUV || uv.y > 1.0 - pixSizeUV) {
+					finalColor = float4(0,0,1,1);
+				}
 
 				return finalColor;
 			}

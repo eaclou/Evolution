@@ -1579,9 +1579,9 @@ public class Agent : MonoBehaviour {
         bodyRigidbody.isKinematic = false;
         bodyRigidbody.simulated = true;
 
-        springJoint.distance = 0.005f;
-        springJoint.enableCollision = false;        
-        springJoint.frequency = 15f;
+        //springJoint.distance = 0.005f;
+        //springJoint.enableCollision = false;        
+        //springJoint.frequency = 15f;
 
         if(isImmaculate) {            
             springJoint.connectedBody = null; // parentEggSack.rigidbodyRef;
@@ -1592,8 +1592,8 @@ public class Agent : MonoBehaviour {
         }
         else {
             //bodyGO.transform.localPosition = parentEggSack.gameObject.transform.position; // startPos.startPosition;        
-            springJoint.connectedBody = parentEggSack.rigidbodyRef;
-            springJoint.enabled = true;
+            //springJoint.connectedBody = parentEggSack.rigidbodyRef;
+            //springJoint.enabled = true;
             isAttachedToParentEggSack = true;
 
             colliderBody.enabled = false;
@@ -1673,7 +1673,8 @@ public class Agent : MonoBehaviour {
         index = agentIndex;
         speciesIndex = candidateData.speciesID;
         candidateRef = candidateData;
-        AgentGenome genome = candidateRef.candidateGenome;        
+        AgentGenome genome = candidateRef.candidateGenome;
+        genome.generationCount++;
         
         curLifeStage = AgentLifeStage.Egg;
         
@@ -1696,6 +1697,7 @@ public class Agent : MonoBehaviour {
         speciesIndex = candidateData.speciesID;
         candidateRef = candidateData;
         AgentGenome genome = candidateRef.candidateGenome;
+        genome.generationCount++;
                 
         curLifeStage = AgentLifeStage.Egg;
         parentEggSackRef = parentEggSack;

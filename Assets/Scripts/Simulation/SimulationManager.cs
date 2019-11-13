@@ -1233,10 +1233,10 @@ public class SimulationManager : MonoBehaviour {
             if (agentsArray[a].curLifeStage == Agent.AgentLifeStage.AwaitingRespawn) {
                           
                 CandidateAgentData candidateData = masterGenomePool.completeSpeciesPoolsList[speciesIndex].GetNextAvailableCandidate();
-                Debug.Log("" + masterGenomePool.ToString());
-                Debug.Log("" + masterGenomePool.vertebrateSlotsGenomesCurrentArray[trophicLayersManager.selectedTrophicSlotRef.slotID].ToString());
-                Debug.Log("" + masterGenomePool.vertebrateSlotsGenomesCurrentArray[trophicLayersManager.selectedTrophicSlotRef.slotID].representativeGenome.ToString());
-                Debug.Log("" + trophicLayersManager.selectedTrophicSlotRef.ToString());
+                //Debug.Log("" + masterGenomePool.ToString());
+                //Debug.Log("" + masterGenomePool.vertebrateSlotsGenomesCurrentArray[trophicLayersManager.selectedTrophicSlotRef.slotID].ToString());
+                //Debug.Log("" + masterGenomePool.vertebrateSlotsGenomesCurrentArray[trophicLayersManager.selectedTrophicSlotRef.slotID].representativeGenome.ToString());
+                //Debug.Log("" + trophicLayersManager.selectedTrophicSlotRef.ToString());
                 candidateData.candidateGenome = masterGenomePool.vertebrateSlotsGenomesCurrentArray[trophicLayersManager.selectedTrophicSlotRef.slotID].representativeGenome;
                 
 
@@ -1297,6 +1297,7 @@ public class SimulationManager : MonoBehaviour {
             }
             else { // No eggSack found:
                 //if(agentIndex != 0) {  // temp hack to avoid null reference exceptions:
+
                 SpawnAgentImmaculate(candidateData, agentIndex, speciesIndex);
                 candidateData.isBeingEvaluated = true;
                 //}    
@@ -1459,7 +1460,7 @@ public class SimulationManager : MonoBehaviour {
                 }
             }
         }
-        //Vector3 spawnPosParent = 
+        
         spawnWorldPos = Vector3.Lerp(spawnWorldPos, cursorWorldPos, isBrushingLerp); // uiManager.curCtrlCursorPositionOnWaterPlane; // GetRandomFoodSpawnPosition().startPosition;
         
         Vector4 altitudeSample = uiManager.SampleTexture(theRenderKing.baronVonTerrain.terrainHeightDataRT, new Vector2(spawnWorldPos.x / _MapSize, spawnWorldPos.y / _MapSize));
@@ -1484,9 +1485,6 @@ public class SimulationManager : MonoBehaviour {
         else {
             //Debug.Log("INVALID!" + altitudeSample.ToString() + ", spawnWorldPos: " + spawnWorldPos.ToString());
         }
-
-        
-        
     }
     public void ProcessDeadEggSack(int eggSackIndex) {
         //Debug.Log("ProcessDeadEggSack(" + eggSackIndex.ToString() + ") eggSackRespawnCounter " + eggSackRespawnCounter.ToString());

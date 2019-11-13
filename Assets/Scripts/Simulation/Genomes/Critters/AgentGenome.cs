@@ -6,6 +6,8 @@ using UnityEngine;
 public class AgentGenome {
 
     //public int index = -1;  // *** THIS IS NOW MEANINGLESS??
+    
+    public int generationCount = 0;
     public BodyGenome bodyGenome;
     public BrainGenome brainGenome;
 
@@ -18,18 +20,10 @@ public class AgentGenome {
     }
 
     public void GenerateInitialRandomBodyGenome() {
+        generationCount = 0;
         bodyGenome.FirstTimeInitializeCritterModuleGenomes();
-        bodyGenome.GenerateInitialRandomBodyGenome();
-
-        // **** TEMPORARY !!!! TESTING!!! ******
-        //if(index < 41) {
-            //bodyGenome.coreGenome.isPassive = false;
-        //}
+        bodyGenome.GenerateInitialRandomBodyGenome();        
     }
-
-    /*public void InitializeBodyGenomeFromTemplate(BodyGenome bodyGenomeTemplate) {  // OLD
-        bodyGenome.CopyBodyGenomeFromTemplate(bodyGenomeTemplate);
-    }*/
 
     public void ProcessNewSpeciesExtraMutation() {
         float magnitude = 0.75f;

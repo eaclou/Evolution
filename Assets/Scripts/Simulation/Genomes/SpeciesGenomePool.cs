@@ -128,15 +128,7 @@ public class SpeciesGenomePool {
         for (int i = 0; i < numGenomes; i++) {
             AgentGenome agentGenome = new AgentGenome();
             agentGenome.GenerateInitialRandomBodyGenome();
-            //BodyGenome newBodyGenome = new BodyGenome();
-            //newBodyGenome.SetToMutatedCopyOfParentGenome(agentGenome.bodyGenome, mutationSettingsRef);
-            //agentGenome.bodyGenome = newBodyGenome;
             
-            //agentGenome.bodyGenome.SetToMutatedCopyOfParentGenome(agentGenome.bodyGenome, mutationSettingsRef);
-            //agentGenome.bodyGenome.SetToMutatedCopyOfParentGenome(agentGenome.bodyGenome, mutationSettingsRef);
-            //agentGenome.bodyGenome.SetToMutatedCopyOfParentGenome(agentGenome.bodyGenome, mutationSettingsRef);
-            //agentGenome.bodyGenome.SetToMutatedCopyOfParentGenome(agentGenome.bodyGenome, mutationSettingsRef);
-            //agentGenome.
             int tempNumHiddenNeurons = 0;
             agentGenome.InitializeRandomBrainFromCurrentBody(1.25f, mutationSettingsRef.initialConnectionChance, tempNumHiddenNeurons);
 
@@ -390,7 +382,8 @@ public class SpeciesGenomePool {
         newBrainGenome.SetToMutatedCopyOfParentGenome(parentBrainGenome, newBodyGenome, mutationSettingsRef);
         
         childGenome.bodyGenome = newBodyGenome; 
-        childGenome.brainGenome = newBrainGenome; 
+        childGenome.brainGenome = newBrainGenome;
+        //childGenome.generationCount = parentGenome.generationCount + 1;
 
         return childGenome;
     }
