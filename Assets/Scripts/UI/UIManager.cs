@@ -1596,7 +1596,7 @@ public class UIManager : MonoBehaviour {
                 else if(curWatcherPanelVertebratePageNum == 2) {
                     panelWatcherSpiritVertebratesGenome.SetActive(true);
                     
-                    string genomeString = "GENOME PAGE! 2"; ;
+                    string genomeString = "GENOME PAGE!"; ;
                     
                     int curCount = 0;
                     int maxCount = 1;
@@ -1620,8 +1620,8 @@ public class UIManager : MonoBehaviour {
                     //genomeString += "CRITTER# [" + agent.index.ToString() + "]     SPECIES# [" + agent.speciesIndex.ToString() + "]\n\n";
                     // Init Attributes:
                     // Body:
-                    genomeString += "Base Size: " + agent.candidateRef.candidateGenome.bodyGenome.coreGenome.creatureBaseLength.ToString("F2") + ",  Aspect: " + agent.candidateRef.candidateGenome.bodyGenome.coreGenome.creatureAspectRatio.ToString("F2") + "\n"; 
-                    genomeString += "Fullsize Dimensions: ( " + agent.fullSizeBoundingBox.x.ToString("F2") + ", " + agent.fullSizeBoundingBox.y.ToString("F2") + ", " + agent.fullSizeBoundingBox.z.ToString("F2") + " )\n";
+                    genomeString += "\nBase Size: " + agent.candidateRef.candidateGenome.bodyGenome.coreGenome.creatureBaseLength.ToString("F2") + ",  Aspect: " + agent.candidateRef.candidateGenome.bodyGenome.coreGenome.creatureAspectRatio.ToString("F2") + "\n"; 
+                    genomeString += "Fullsize: ( " + agent.fullSizeBoundingBox.x.ToString("F2") + ", " + agent.fullSizeBoundingBox.y.ToString("F2") + ", " + agent.fullSizeBoundingBox.z.ToString("F2") + " )\n";
                     genomeString += "\nBONUSES:\nDamage: " + agent.coreModule.damageBonus.ToString("F2") + "\nSpeed: " + agent.coreModule.speedBonus.ToString("F2") + "\nHealth: " + agent.coreModule.healthBonus.ToString("F2") + "\nEnergy: " + agent.coreModule.energyBonus.ToString("F2") + "\n";
                     genomeString += "\nDIET:\nDecay: " + agent.coreModule.foodEfficiencyDecay.ToString("F2") + "\nPlant: " + agent.coreModule.foodEfficiencyPlant.ToString("F2") + "\nMeat: " + agent.coreModule.foodEfficiencyMeat.ToString("F2") + "\n";
                     //string mouthType = "Active";
