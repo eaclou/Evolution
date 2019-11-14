@@ -17,7 +17,7 @@ public class SpeciesGenomePool {
     public List<CandidateAgentData> leaderboardGenomesList;
     public List<CandidateAgentData> candidateGenomesList;
 
-    public int maxLeaderboardGenomePoolSize = 32;    
+    public int maxLeaderboardGenomePoolSize = 64;    
     public int numAgentsEvaluated = 0;
      
     public int yearCreated = -1;
@@ -318,16 +318,20 @@ public class SpeciesGenomePool {
         int[] rankedIndicesList = new int[numCandidates];
         float totalFitness = 0f;
 
+        string leaderboardGenomesListString = "LEADERBOARD GENOMES (" + speciesID.ToString() + ")";
         // Rank current leaderBoard list based on score
         for (int i = 0; i < numCandidates; i++) {
-            float fitnessScore = 0f;
+            float fitnessScore = 0.01f;
             for(int j = 0; j < leaderboardGenomesList[i].evaluationScoresList.Count; j++) {
                 fitnessScore += (float)leaderboardGenomesList[i].evaluationScoresList[j];
             }
             rankedFitnessScoresArray[i] = fitnessScore;
             rankedIndicesList[i] = i;
             totalFitness += fitnessScore;
+
+            leaderboardGenomesListString += "\n#" + i.ToString() + ", score= " + fitnessScore.ToString();
         }
+        Debug.Log(leaderboardGenomesListString);
         
         // Sort By Fitness
         for (int i = 0; i < numCandidates - 1; i++) {

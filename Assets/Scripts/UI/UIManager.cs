@@ -89,9 +89,6 @@ public class UIManager : MonoBehaviour {
     public Material infoMeterDecomposersMat;
     public Material infoMeterPlantsMat;
     public Material infoMeterAnimalsMat;
-    //public Image imageMeterDecomposersIcon;
-    //public Image imageMeterPlantsIcon;
-    //public Image imageMeterAnimalsIcon;
     public Text textMeterOxygen;
     public Text textMeterNutrients;
     public Text textMeterDetritus;
@@ -103,12 +100,13 @@ public class UIManager : MonoBehaviour {
 
     // Info Expanded: Resources Overview:
     public GameObject panelInfoResourcesOverview;
-    private Texture2D infoOxygenDataTexture;
+    /*private Texture2D infoOxygenDataTexture;
     private Texture2D infoNutrientsDataTexture;
     private Texture2D infoDetritusDataTexture;
     private Texture2D infoDecomposersDataTexture;
     private Texture2D infoPlantsDataTexture;
     private Texture2D infoAnimalsDataTexture;
+    */
     public Material knowledgeGraphOxygenMat;
     public Material knowledgeGraphNutrientsMat;
     public Material knowledgeGraphDetritusMat;
@@ -229,13 +227,7 @@ public class UIManager : MonoBehaviour {
     //public Button buttonToolbarRemove;
     public Button buttonToolbarKnowledge;
     public Image imageToolbarKnowledgeLinkedIcon;
-
-    /*public GameObject wireSpiritBrush;
-    public GameObject wireTerrain;
-    public GameObject wireAnimals;
-    public GameObject wirePlants;
-    public GameObject wireDecomposers;
-*/
+    
     public GameObject panelPendingClickPrompt;
 
     public int selectedToolbarOtherLayer = 0;
@@ -268,15 +260,7 @@ public class UIManager : MonoBehaviour {
     public Sprite spriteSpeciesSlotFull;
     public Sprite spriteSpeciesSlotSelected;
     // // WING:::::
-    //public GameObject panelToolbarWing;
-    //public GameObject panelToolbarWingDescription;
-    //public GameObject panelToolbarWingStats;
-    //public GameObject panelToolbarWingMutation;
-    //public GameObject panelToolbarWingDeletePrompt;
-    //public Button buttonToolbarWingDeleteSpecies;
-    //public Button buttonToolbarWingDescription;
-    //public Button buttonToolbarWingStats;
-    //public Button buttonToolbarWingMutation;
+    
     public Material toolbarSpeciesStatsGraphMat;
     public Image imageToolbarSpeciesStatsGraph;
     public Text textToolbarWingStatsUnlockStatus;
@@ -340,18 +324,7 @@ public class UIManager : MonoBehaviour {
     public GameObject panelWatcherSpiritTerrain;
     public Text textWatcherVertebratePageNum;
     public Text textWatcherTargetIndex;
-    //public Texture2D textureWorldStats;
-    //public Texture2D textureWorldStatsKey;
-    //public Vector2[] tolWorldStatsValueRangesKeyArray;
-    //public int tolSelectedWorldStatsIndex = 0;
-    //public int tolSelectedSpeciesStatsIndex = 0;
-    //public Sprite spriteAlgaePortrait;
-    //public Sprite spriteDecomposerPortrait;
-    //public Sprite spriteZooplanktonPortrait;
-    //public Sprite spriteBedrockPortrait;
-    //public Sprite spriteStonesPortrait;
-    //public Sprite spritePebblesPortrait;
-    //public Sprite spriteSandPortrait;
+    
 
     //Inspect!!!
     public bool isActiveInspectPanel = false;
@@ -423,16 +396,13 @@ public class UIManager : MonoBehaviour {
     private RenderTexture[] debugTextureViewerArray;
 
     public GameObject panelObserverMode;
-    
     public GameObject panelPaused;
-
     public GameObject panelDebug;
     
     public Text textDebugTrainingInfo1;
     public Text textDebugTrainingInfo2;
     public Text textDebugTrainingInfo3;
-    public Text textDebugSimSettings;
-    
+    public Text textDebugSimSettings;    
 
     public Button buttonToggleDebug;
     public bool isActiveDebug = true;
@@ -1074,9 +1044,9 @@ public class UIManager : MonoBehaviour {
                                 else {// AGENTS                                
                                     int speciesIndex = gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.linkedSpeciesID;
                                     if (isDraggingMouseLeft) {
-                                        gameManager.simulationManager.recentlyAddedSpeciesOn = true; // ** needed?
+                                        //gameManager.simulationManager.recentlyAddedSpeciesOn = true; // ** needed?
                                         isBrushAddingAgents = true;
-                                        //gameManager.simulationManager.isBrushingAgents = true;
+                                        
                                         Debug.Log("isBrushAddingAgents = true; speciesID = " + speciesIndex.ToString());
 
                                         brushAddAgentCounter++;
@@ -1168,7 +1138,7 @@ public class UIManager : MonoBehaviour {
                     }
                     else {
                         //gameManager.simulationManager.theRenderKing.ClickTestTerrainUpdateMaps(false, 0.05f);
-                        gameManager.simulationManager.recentlyAddedSpeciesOn = false;
+                        //gameManager.simulationManager.recentlyAddedSpeciesOn = false;
                     }
                 }
                 else {
@@ -3714,125 +3684,7 @@ public class UIManager : MonoBehaviour {
 
         //maxPredationValue = maxValue;     
     }
-    public void UpdateTolWorldStatsTexture(List<Vector4> nutrientData) {
-        
-        
-        //Debug.Log("UpdateTolWorldStatsTexture");
-        int numDataPoints = Mathf.Max(1, nutrientData.Count);
-
-        /*if(numDataPoints != textureWorldStats.width) {  // resize needed?
-            textureWorldStats.Resize(numDataPoints, 32);  // 32 max values? should be more than enough
-        }*/
-
-        if(numDataPoints != infoOxygenDataTexture.width) {
-            infoOxygenDataTexture.Resize(numDataPoints, 1);
-            infoNutrientsDataTexture.Resize(numDataPoints, 1);
-            infoDetritusDataTexture.Resize(numDataPoints, 1);
-            infoDecomposersDataTexture.Resize(numDataPoints, 1);
-            infoPlantsDataTexture.Resize(numDataPoints, 1);
-            infoAnimalsDataTexture.Resize(numDataPoints, 1);
-        }
-
-        // INDEX KEY:
-        // 0 == decay nutrients
-        // 1 == plant food
-        // 2 == eggs food
-        // 3 = corpse food
-        // 4 = brain mutation freq
-        // 5 = brain mutation amp
-        // 6 = brain size bias
-        // 7 = body proportion freq
-        // 8 = body proportion amp
-        // 9 = body sensor mutation rate
-        // 10 = water current / storminess
-        
-        // NUTRIENTS / FOOD TYPES:          
-        for(int i = 0; i < numDataPoints; i++) {   
-            
-            infoOxygenDataTexture.SetPixel(i, 0, new Color(gameManager.simulationManager.statsHistoryOxygenList[i], 0f, 0f));
-            infoNutrientsDataTexture.SetPixel(i, 0, new Color(gameManager.simulationManager.statsHistoryNutrientsList[i], 0f, 0f));
-            infoDetritusDataTexture.SetPixel(i, 0, new Color(gameManager.simulationManager.statsHistoryDetritusList[i], 0f, 0f));
-            infoDecomposersDataTexture.SetPixel(i, 0, new Color(gameManager.simulationManager.statsHistoryDecomposersList[i], 0f, 0f));
-            infoPlantsDataTexture.SetPixel(i, 0, new Color(gameManager.simulationManager.statsHistoryAlgaeParticleList[i] + gameManager.simulationManager.statsHistoryAlgaeSingleList[i], 0f, 0f));
-            infoAnimalsDataTexture.SetPixel(i, 0, new Color(gameManager.simulationManager.statsHistoryZooplanktonList[i] + gameManager.simulationManager.statsHistoryLivingAgentsList[i], 0f, 0f));
-            
-            // NEW:
-            /*float value = gameManager.simulationManager.statsHistoryOxygenList[i];
-            tolWorldStatsValueRangesKeyArray[0].x = Mathf.Min(tolWorldStatsValueRangesKeyArray[0].x, value);
-            tolWorldStatsValueRangesKeyArray[0].y = Mathf.Max(tolWorldStatsValueRangesKeyArray[0].y, value);
-            textureWorldStats.SetPixel(i, 0, new Color(value, 0f, 0f));
-
-            value = gameManager.simulationManager.statsHistoryNutrientsList[i];
-            tolWorldStatsValueRangesKeyArray[1].x = Mathf.Min(tolWorldStatsValueRangesKeyArray[1].x, value);
-            tolWorldStatsValueRangesKeyArray[1].y = Mathf.Max(tolWorldStatsValueRangesKeyArray[1].y, value);
-            textureWorldStats.SetPixel(i, 1, new Color(value, 0f, 0f));
-
-            value = gameManager.simulationManager.statsHistoryDetritusList[i];
-            tolWorldStatsValueRangesKeyArray[2].x = Mathf.Min(tolWorldStatsValueRangesKeyArray[2].x, value);
-            tolWorldStatsValueRangesKeyArray[2].y = Mathf.Max(tolWorldStatsValueRangesKeyArray[2].y, value);
-            textureWorldStats.SetPixel(i, 2, new Color(value, 0f, 0f));
-
-            value = gameManager.simulationManager.statsHistoryDecomposersList[i];
-            tolWorldStatsValueRangesKeyArray[3].x = Mathf.Min(tolWorldStatsValueRangesKeyArray[3].x, value);
-            tolWorldStatsValueRangesKeyArray[3].y = Mathf.Max(tolWorldStatsValueRangesKeyArray[3].y, value);
-            textureWorldStats.SetPixel(i, 3, new Color(value, 0f, 0f));
-
-            value = gameManager.simulationManager.statsHistoryAlgaeSingleList[i];
-            tolWorldStatsValueRangesKeyArray[4].x = Mathf.Min(tolWorldStatsValueRangesKeyArray[4].x, value);
-            tolWorldStatsValueRangesKeyArray[4].y = Mathf.Max(tolWorldStatsValueRangesKeyArray[4].y, value);
-            textureWorldStats.SetPixel(i, 4, new Color(value, 0f, 0f));
-
-            value = gameManager.simulationManager.statsHistoryAlgaeParticleList[i];
-            tolWorldStatsValueRangesKeyArray[5].x = Mathf.Min(tolWorldStatsValueRangesKeyArray[5].x, value);
-            tolWorldStatsValueRangesKeyArray[5].y = Mathf.Max(tolWorldStatsValueRangesKeyArray[5].y, value);
-            textureWorldStats.SetPixel(i, 5, new Color(value, 0f, 0f));
-
-            value = gameManager.simulationManager.statsHistoryZooplanktonList[i];
-            tolWorldStatsValueRangesKeyArray[6].x = Mathf.Min(tolWorldStatsValueRangesKeyArray[6].x, value);
-            tolWorldStatsValueRangesKeyArray[6].y = Mathf.Max(tolWorldStatsValueRangesKeyArray[6].y, value);
-            textureWorldStats.SetPixel(i, 6, new Color(value, 0f, 0f));
-
-            value = gameManager.simulationManager.statsHistoryLivingAgentsList[i];
-            tolWorldStatsValueRangesKeyArray[7].x = Mathf.Min(tolWorldStatsValueRangesKeyArray[7].x, value);
-            tolWorldStatsValueRangesKeyArray[7].y = Mathf.Max(tolWorldStatsValueRangesKeyArray[7].y, value);
-            textureWorldStats.SetPixel(i, 7, new Color(value, 0f, 0f));
-
-            value = gameManager.simulationManager.statsHistoryDeadAgentsList[i];
-            tolWorldStatsValueRangesKeyArray[8].x = Mathf.Min(tolWorldStatsValueRangesKeyArray[8].x, value);
-            tolWorldStatsValueRangesKeyArray[8].y = Mathf.Max(tolWorldStatsValueRangesKeyArray[8].y, value);
-            textureWorldStats.SetPixel(i, 8, new Color(value, 0f, 0f));
-
-            value = gameManager.simulationManager.statsHistoryEggSacksList[i];
-            tolWorldStatsValueRangesKeyArray[9].x = Mathf.Min(tolWorldStatsValueRangesKeyArray[9].x, value);
-            tolWorldStatsValueRangesKeyArray[9].y = Mathf.Max(tolWorldStatsValueRangesKeyArray[9].y, value);
-            textureWorldStats.SetPixel(i, 9, new Color(value, 0f, 0f));
-
-            // WATER / WEATHER STATS:
-            //
-
-            value = gameManager.simulationManager.statsHistoryWaterCurrentsList[i];
-            tolWorldStatsValueRangesKeyArray[10].x = 0f; // Mathf.Min(tolWorldStatsValueRangesKeyArray[10].x, value);
-            tolWorldStatsValueRangesKeyArray[10].y = Mathf.Max(tolWorldStatsValueRangesKeyArray[10].y, value);
-            textureWorldStats.SetPixel(i, 10, new Color(value, 0f, 0f));
-            */
-        }        
-        
-        // Min/Max values for each stat stored in second pixel --> set from valueRangeKeyArray, x = min, y = max
-        //for(int i = 0; i < tolWorldStatsValueRangesKeyArray.Length; i++) {
-            //textureWorldStatsKey.SetPixel(1, i, new Color(tolWorldStatsValueRangesKeyArray[i].x, tolWorldStatsValueRangesKeyArray[i].y, 0f));
-        //}
-
-        //textureWorldStats.Apply();
-        //textureWorldStatsKey.Apply();
-
-
-        infoOxygenDataTexture.Apply();
-        infoNutrientsDataTexture.Apply();
-        infoDetritusDataTexture.Apply();
-        infoDecomposersDataTexture.Apply();
-        infoPlantsDataTexture.Apply();
-        infoAnimalsDataTexture.Apply();
-    }
+    
     #endregion
 
     #region UTILITY & EVENT FUNCTIONS

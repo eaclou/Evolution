@@ -158,10 +158,10 @@ public class SimulationManager : MonoBehaviour {
     private int simAgeYearCounter = 0;
     public int curSimYear = 0;
 
-    public bool recentlyAddedSpeciesOn = false;// = true;
-    private Vector2 recentlyAddedSpeciesWorldPos; // = new Vector2(spawnPos.x, spawnPos.y);
-    private int recentlyAddedSpeciesID; // = masterGenomePool.completeSpeciesPoolsList.Count - 1;
-    private int recentlyAddedSpeciesTimeCounter = 0;
+    //public bool recentlyAddedSpeciesOn = false;// = true;
+    //private Vector2 recentlyAddedSpeciesWorldPos; // = new Vector2(spawnPos.x, spawnPos.y);
+    //private int recentlyAddedSpeciesID; // = masterGenomePool.completeSpeciesPoolsList.Count - 1;
+    //private int recentlyAddedSpeciesTimeCounter = 0;
 
 
     public GraphData graphDataGlobalNutrients;
@@ -615,6 +615,7 @@ public class SimulationManager : MonoBehaviour {
         private int recentlyAddedSpeciesID; // = masterGenomePool.completeSpeciesPoolsList.Count - 1;
         private int recentlyAddedSpeciesTimeCounter = 0;*/
 
+        /*
         if(recentlyAddedSpeciesOn) {
             recentlyAddedSpeciesTimeCounter++;
 
@@ -625,6 +626,7 @@ public class SimulationManager : MonoBehaviour {
                 Debug.Log("recentlyAddedSpeciesOn  TIMED OUT!!!");
             }
         }
+        */
 
         // Go through each Trophic Layer:
             // Measure resources used/produced
@@ -641,7 +643,6 @@ public class SimulationManager : MonoBehaviour {
         vegetationManager.MeasureTotalResourceGridAmount();
         //}
         
-
         vegetationManager.MeasureTotalPlantParticlesAmount();
 
 
@@ -833,21 +834,21 @@ public class SimulationManager : MonoBehaviour {
             float totalSpeciesPopulation2 = 0f;
             float totalSpeciesPopulation3 = 0f;
             for(int a = 0; a < _NumAgents; a++) {
-                if(agentsArray[a].curLifeStage == Agent.AgentLifeStage.Mature) {
+                if(agentsArray[a].curLifeStage != Agent.AgentLifeStage.AwaitingRespawn) {
                     totalAgentBiomass += agentsArray[a].currentBiomass;
-                }
-                if(speciesID0 == agentsArray[a].speciesIndex) {
+                    if(speciesID0 == agentsArray[a].speciesIndex) {
                     totalSpeciesPopulation0 += 1f;
-                }
-                if(speciesID1 == agentsArray[a].speciesIndex) {
-                    totalSpeciesPopulation1 += 1f;
-                }
-                if(speciesID2 == agentsArray[a].speciesIndex) {
-                    totalSpeciesPopulation2 += 1f;
-                }
-                if(speciesID3 == agentsArray[a].speciesIndex) {
-                    totalSpeciesPopulation3 += 1f;
-                }
+                    }
+                    if(speciesID1 == agentsArray[a].speciesIndex) {
+                        totalSpeciesPopulation1 += 1f;
+                    }
+                    if(speciesID2 == agentsArray[a].speciesIndex) {
+                        totalSpeciesPopulation2 += 1f;
+                    }
+                    if(speciesID3 == agentsArray[a].speciesIndex) {
+                        totalSpeciesPopulation3 += 1f;
+                    }
+                }                
             }
             graphDataGlobalVertebrates.AddNewEntry(totalAgentBiomass); // simResourceManager.curGlobalAgentBiomass);
                                                                        //uiManager.UpdateTolWorldStatsTexture(statsNutrientsEachGenerationList);
@@ -1179,12 +1180,7 @@ public class SimulationManager : MonoBehaviour {
         // CHECK FOR DEAD FOOD!!! :::::::
         for (int f = 0; f < eggSackArray.Length; f++) {
             if (eggSackArray[f].isDepleted) {
-                if(recentlyAddedSpeciesOn) {
-
-                }
-                else {
-                    ProcessDeadEggSack(f);
-                }                
+                ProcessDeadEggSack(f);                              
             }
         }
     }
@@ -1237,15 +1233,20 @@ public class SimulationManager : MonoBehaviour {
                 //Debug.Log("" + masterGenomePool.vertebrateSlotsGenomesCurrentArray[trophicLayersManager.selectedTrophicSlotRef.slotID].ToString());
                 //Debug.Log("" + masterGenomePool.vertebrateSlotsGenomesCurrentArray[trophicLayersManager.selectedTrophicSlotRef.slotID].representativeGenome.ToString());
                 //Debug.Log("" + trophicLayersManager.selectedTrophicSlotRef.ToString());
-                candidateData.candidateGenome = masterGenomePool.vertebrateSlotsGenomesCurrentArray[trophicLayersManager.selectedTrophicSlotRef.slotID].representativeGenome;
+                //candidateData.candidateGenome = masterGenomePool.vertebrateSlotsGenomesCurrentArray[trophicLayersManager.selectedTrophicSlotRef.slotID].representativeGenome;
                 
 
                 if (candidateData == null) {
                     Debug.LogError("GetNextAvailableCandidate(): candidateData NULL!!!!");
                 }
                 else {
-                    Debug.Log("AttemptToBrushSpawnAgent(" + a.ToString() + ") species: " + speciesIndex.ToString() + ", " + candidateData.ToString());      
-                    AttemptToSpawnAgent(a, speciesIndex, candidateData);
+                    Debug.Log("AttemptToBrushSpawnAgent(" + a.ToString() + ") species: " + speciesIndex.ToString() + ", " + candidateData.ToString());
+                    
+                    SpawnAgentImmaculate(candidateData, a, speciesIndex);
+                    candidateData.isBeingEvaluated = true;
+                     
+
+                    //AttemptToSpawnAgent(a, speciesIndex, candidateData);
                     //agentRespawnCounter = 0;
                     break;
                 }
@@ -1329,10 +1330,10 @@ public class SimulationManager : MonoBehaviour {
                 
         AddNewSpecies(masterGenomePool.completeSpeciesPoolsList[masterGenomePool.completeSpeciesPoolsList.Count - 1].leaderboardGenomesList[0].candidateGenome, 0);
 
-        recentlyAddedSpeciesOn = true;
-        recentlyAddedSpeciesWorldPos = new Vector2(spawnPos.x, spawnPos.y);
-        recentlyAddedSpeciesID = masterGenomePool.completeSpeciesPoolsList.Count - 1;
-        recentlyAddedSpeciesTimeCounter = 0;
+        //recentlyAddedSpeciesOn = true;
+        //recentlyAddedSpeciesWorldPos = new Vector2(spawnPos.x, spawnPos.y);
+        //recentlyAddedSpeciesID = masterGenomePool.completeSpeciesPoolsList.Count - 1;
+        //recentlyAddedSpeciesTimeCounter = 0;
 
         Debug.Log("CREATE CreateAgentSpecies pos: " + spawnPos.ToString());
     }
@@ -1397,8 +1398,6 @@ public class SimulationManager : MonoBehaviour {
 
         // &&&&& *****  HERE!!!! **** &&&&&&   --- Select a species first to serve as parentGenome !! ***** &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
         // Can be random selection (unbiased), or proportional to species avg Fitnesses?
-
-
         SpeciesGenomePool sourceSpeciesPool = masterGenomePool.SelectNewGenomeSourceSpecies(false, 0.33f); // select at random
                 
         
