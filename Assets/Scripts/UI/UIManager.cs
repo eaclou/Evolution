@@ -1552,8 +1552,8 @@ public class UIManager : MonoBehaviour {
                     hudString += "\n#" + agent.index.ToString() + " (" + agent.speciesIndex.ToString() + ") Coords: (" + gameManager.simulationManager.simStateData.agentFluidPositionsArray[agent.index].x.ToString("F2") + ", " + gameManager.simulationManager.simStateData.agentFluidPositionsArray[agent.index].x.ToString("F2") + ")";
                     //hudString += "\nN=" + agent.environmentModule.depthNorth[0].ToString("F3") + ", E=" + agent.environmentModule.depthEast[0].ToString("F3") + ", S=" + agent.environmentModule.depthSouth[0].ToString("F3") + ", W=" + agent.environmentModule.depthWest[0].ToString("F3") + ",";
                     //hudString += "\nWaterVel " + agent.environmentModule.waterVelX[0].ToString("F3") + ", " + agent.environmentModule.waterVelY[0].ToString("F3");
-                    //hudString += "\nPlant[" + agent.foodModule.nearestFoodParticleIndex.ToString() + "] " + agent.foodModule.nearestFoodParticlePos.ToString() + "";
-                    //hudString += "\nZoo[" + agent.foodModule.nearestAnimalParticleIndex.ToString() + "] " + agent.foodModule.nearestAnimalParticlePos.ToString() + "";
+                    hudString += "\nPlant[" + agent.foodModule.nearestFoodParticleIndex.ToString() + "] " + agent.foodModule.nearestFoodParticlePos.ToString() + "";
+                    hudString += "\nZoo[" + agent.foodModule.nearestAnimalParticleIndex.ToString() + "] " + agent.foodModule.nearestAnimalParticlePos.ToString() + "";
                     //hudString += "\nOwnVel" + agent.movementModule.ownVelX[0].ToString("F3") + ", " + agent.movementModule.ownVelY[0].ToString("F3");
                     hudString += "\nCID: " + agent.candidateRef.candidateID.ToString() + ", gen# " + agent.candidateRef.candidateGenome.bodyGenome.coreGenome.generation.ToString();
 
@@ -1568,7 +1568,8 @@ public class UIManager : MonoBehaviour {
                     panelWatcherSpiritVertebratesText.SetActive(true);
 
                     string textString = "Event Log! [" + agent.index.ToString() + "]";
-                    textString += "PlantsEaten: " + agent.totalFoodEatenPlant.ToString();
+                    textString += "\nPlantsEaten: " + agent.totalFoodEatenPlant.ToString();
+                    textString += "\nMeatEaten: " + agent.totalFoodEatenMeat.ToString();
                     //textString += "Depth Gradient: " + agent.depthGradient.ToString();
                     // Agent Event Log:
                     int maxEventsToDisplay = 12;
@@ -2631,7 +2632,7 @@ public class UIManager : MonoBehaviour {
 
                 gameManager.simulationManager.masterGenomePool.GenerateWorldLayerVertebrateGenomeMutationOptions(slotRef.slotID, slotRef.linkedSpeciesID);
                 //gameManager.simulationManager.masterGenomePool.ProcessSlotMutation(slotRef.slotID, selectedToolbarMutationID, slotRef.linkedSpeciesID);
-                InitToolbarPortraitCritterData(slotRef);
+                //InitToolbarPortraitCritterData(slotRef);
             }
         }
         else if(slotRef.kingdomID == 3) { // Terrain
@@ -4359,7 +4360,7 @@ public class UIManager : MonoBehaviour {
 
 
         if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.status != TrophicSlot.SlotStatus.Unlocked) {
-            InitToolbarPortraitCritterData(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef); // ***
+            //InitToolbarPortraitCritterData(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef); // ***
         }
 
         isSpiritBrushSelected = false;
@@ -4492,7 +4493,7 @@ public class UIManager : MonoBehaviour {
                 //selectedSpeciesID = slot.linkedSpeciesID; // update this next
                                 
                 selectedSpeciesID = slot.linkedSpeciesID; // ???
-                InitToolbarPortraitCritterData(slot);                
+                //InitToolbarPortraitCritterData(slot);                
                 
                 panelPendingClickPrompt.GetComponentInChildren<Text>().text = "A new species of Vertebrate added!";
                 panelPendingClickPrompt.GetComponentInChildren<Text>().color = colorVertebratesLayer;

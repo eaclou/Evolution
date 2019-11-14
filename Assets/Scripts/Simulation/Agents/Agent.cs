@@ -203,7 +203,7 @@ public class Agent : MonoBehaviour {
 
     public EggSack childEggSackRef;
     public bool isPregnantAndCarryingEggs = false;
-    public int pregnancyRefactoryDuration = 4800;
+    public int pregnancyRefactoryDuration = 1200;
 
     //public float overflowFoodAmount = 0f;
         

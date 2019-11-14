@@ -1287,6 +1287,8 @@ public class SimulationManager : MonoBehaviour {
                     }
                 }
             }
+
+            //validEggSackIndicesList.Clear(); // ********************************************* REMOVE THIS AFTER FIX!!!! ************************************
             if(validEggSackIndicesList.Count > 0) {  // move this inside the for loop ??   // **** BROKEN BY SPECIATION UPDATE!!! *****
                 int randIndex = UnityEngine.Random.Range(0, validEggSackIndicesList.Count);
                 //Debug.Log("listLength:" + validEggSackIndicesList.Count.ToString() + ", randIndex = " + randIndex.ToString() + ", p: " + validEggSackIndicesList[randIndex].ToString());
