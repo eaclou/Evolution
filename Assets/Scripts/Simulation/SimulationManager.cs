@@ -1457,7 +1457,7 @@ public class SimulationManager : MonoBehaviour {
                     float mag = 5f;
                     spawnWorldPos = new Vector3(agentsArray[i].ownPos.x + UnityEngine.Random.Range(-1f, 1f) * mag, agentsArray[i].ownPos.y + UnityEngine.Random.Range(-1f, 1f) * mag, 0f);
 
-                    
+                    break;
                 }
             }
         }
@@ -1550,11 +1550,11 @@ public class SimulationManager : MonoBehaviour {
             }
             else {
                 // Wait? SpawnImmaculate?
-                /*
-                int respawnCooldown = 83;
+                
+                int respawnCooldown = 1000;
                 
                 if(eggSackRespawnCounter > respawnCooldown) {  // try to encourage more pregnancies?
-                   
+                    Debug.Log("eggSackRespawnCounter > respawnCooldown");
                     List<int> eligibleAgentIndicesList = new List<int>();
                     for(int a = 0; a < numAgents; a++) {
                         if(agentsArray[a].isInert) {
@@ -1576,7 +1576,7 @@ public class SimulationManager : MonoBehaviour {
                         
                         eggSackRespawnCounter = 0;       
                     }         
-                }  */           
+                }           
             }
         }
         else {

@@ -65,10 +65,25 @@ public class GraphData {
     }
 
     private void RefreshShaderProperties() {
+        RefreshDataUpperLowerBounds();
         targetDisplayMat.SetFloat("_MinValue", minValue);
         targetDisplayMat.SetFloat("_MaxValue", maxValue);
 
         targetDisplayMat.SetFloat("_SampleCoordMax", (float)nextWriteIndex / (float)historicalGraphsResolution);
+    }
+
+    private void RefreshDataUpperLowerBounds() {
+        minValue = float.PositiveInfinity;
+        maxValue = float.NegativeInfinity;
+        for(int i = 0; i < historicalGraphsResolution; i++) {
+            float value = dataArray[i];
+            if(value < minValue) {
+                minValue = value;
+            }   
+            if(value > maxValue) {
+                maxValue = value;
+            }
+        }
     }
     
     private void RebuildDataArray() {
@@ -93,5 +108,7 @@ public class GraphData {
         
         nextWriteIndex = historicalGraphsResolution / 2;
         //Debug.Log("RebuildDataArray() " + nextWriteIndex.ToString());
+
+        
     }
 }

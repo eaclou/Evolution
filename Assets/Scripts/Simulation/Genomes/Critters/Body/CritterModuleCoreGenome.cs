@@ -250,7 +250,7 @@ public class CritterModuleCoreGenome {
         generation = 0;
         // Do stuff:
         //Debug.Log("GenerateRandomGenome()");
-        string[] namesList = new string[12];
+        string[] namesList = new string[29];
         namesList[0] = "ALBERT";
         namesList[1] = "BORT";
         namesList[2] = "CANDICE";
@@ -263,6 +263,23 @@ public class CritterModuleCoreGenome {
         namesList[9] = "JERRY";
         namesList[10] = "KILLINGTON";
         namesList[11] = "LOSER";
+        namesList[12] = "MARTHA";
+        namesList[13] = "NICHOLAS";
+        namesList[14] = "OPHELIA";
+        namesList[15] = "PATRICE";
+        namesList[16] = "QWERTY";
+        namesList[17] = "RANCHEROS";
+        namesList[18] = "STALLION";
+        namesList[19] = "THEODORE";
+        namesList[20] = "UMBERTO";
+        namesList[21] = "VILLAIN";
+        namesList[22] = "WINNER";
+        namesList[23] = "XAVIER";
+        namesList[24] = "YENNIFER";
+        namesList[25] = "ZELDO";
+        namesList[26] = "THE CHOSEN ONE";
+        namesList[27] = "EXCALIBUR";
+        namesList[28] = "HAM";
         int randomNameIndex = UnityEngine.Random.Range(0, 12);
         name = namesList[randomNameIndex];
 
