@@ -142,7 +142,8 @@
 				float oldAgeMask = saturate((particleData.age - 1.0) * 1000);
 				o.color.a = saturate(particleData.age * 0.5); //  1.0 - oldAgeMask; // particleData.isDecaying;
 				o.highlight = float2(hoverMask, selectedMask);
-				o.status = float2(particleData.isActive, particleData.isDecaying);
+				float blah = (1.0 - (particleData.biomass / particleData.extra0)) * particleData.isDecaying;
+				o.status = float2(particleData.isActive, blah);
 				
 				return o;
 			}
@@ -166,8 +167,10 @@
 				finalColor.rgb *= saturate(1.0 - uvDist);
 				float circleMask = saturate(circleFade * 20);
 				// ****************************************************************************
-				finalColor.rgb = lerp(finalColor.rgb, float3(0.1, 0.05, 0.02), i.status.y);
+				finalColor.rgb = lerp(finalColor.rgb, float3(0.1, 0.05, 0.02) * 2, saturate(i.status.y));
 				finalColor *= 1.0 + i.highlight.x * 2 + i.highlight.y;
+
+				finalColor.rgb = lerp(finalColor.rgb, terrainColorTex.rgb, 0.4 + saturate(i.status.y) * 0.7);
 				return float4(finalColor.rgb, (1.0 - circleMask) * i.status.x); // * (1.0 + i.color.y));  // age
 
 			}

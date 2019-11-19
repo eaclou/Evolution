@@ -3957,7 +3957,7 @@ public class TheRenderKing : MonoBehaviour {
                 cmdBufferTest.DrawProcedural(Matrix4x4.identity, critterInspectHighlightMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.critterInitDataCBuffer.count);
             }*/
 
-            if(simManager.trophicLayersManager.GetZooplanktonOnOff()) {
+            /*if(simManager.trophicLayersManager.GetZooplanktonOnOff()) {
                 animalParticleShadowDisplayMat.SetPass(0);
                 animalParticleShadowDisplayMat.SetBuffer("animalParticleDataCBuffer", simManager.zooplanktonManager.animalParticlesCBuffer);
                 animalParticleShadowDisplayMat.SetBuffer("quadVerticesCBuffer", curveRibbonVerticesCBuffer);
@@ -3968,7 +3968,7 @@ public class TheRenderKing : MonoBehaviour {
                 animalParticleShadowDisplayMat.SetFloat("_GlobalWaterLevel", baronVonWater._GlobalWaterLevel);
                 cmdBufferMain.DrawProcedural(Matrix4x4.identity, animalParticleShadowDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, simManager.zooplanktonManager.animalParticlesCBuffer.count);
         
-            }
+            }*/
             
             if(simManager.trophicLayersManager.GetAlgaeOnOff()) {
 
@@ -3992,7 +3992,7 @@ public class TheRenderKing : MonoBehaviour {
                         }
                     }
                 }
-            
+            /*
                 // floating plants  shadows:
                 plantParticleShadowDisplayMat.SetPass(0);
                 plantParticleShadowDisplayMat.SetBuffer("plantParticleDataCBuffer", simManager.vegetationManager.plantParticlesCBuffer);
@@ -4011,7 +4011,7 @@ public class TheRenderKing : MonoBehaviour {
                 plantParticleShadowDisplayMat.SetVector("_FogColor", simManager.fogColor);      
                 //cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); 
                 cmdBufferMain.DrawProcedural(Matrix4x4.identity, plantParticleShadowDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, simManager.vegetationManager.plantParticlesCBuffer.count * 32);
-        
+        */
                 //if(simManager.trophicLayersManager.GetAlgaeOnOff()) {
                 plantParticleDisplayMat.SetPass(0);
                 plantParticleDisplayMat.SetBuffer("plantParticleDataCBuffer", simManager.vegetationManager.plantParticlesCBuffer);

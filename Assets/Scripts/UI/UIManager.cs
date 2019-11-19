@@ -1517,6 +1517,7 @@ public class UIManager : MonoBehaviour {
                     
                     hudString += "\nCur Biomass: " + agent.currentBiomass.ToString("F3") + "";
                     hudString += "\nAge: " + agent.ageCounter.ToString() + "\n";
+                    hudString += "\nNRG: " + agent.coreModule.energy.ToString() + "\n";
                     //hudString += "\nisMouthTrigger" + agent.coreModule.isMouthTrigger[0].ToString() + "";
                     //hudString += "\nWaterDepth " + agent.environmentModule.waterDepth[0].ToString("F3") + "  " + agent.depthGradient.ToString();
                     hudString += "\n#" + agent.index.ToString() + " (" + agent.speciesIndex.ToString() + ") Coords: (" + gameManager.simulationManager.simStateData.agentFluidPositionsArray[agent.index].x.ToString("F2") + ", " + gameManager.simulationManager.simStateData.agentFluidPositionsArray[agent.index].x.ToString("F2") + ")";

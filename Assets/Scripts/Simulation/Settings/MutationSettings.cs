@@ -44,7 +44,7 @@ public class MutationSettings {
         defaultFoodMutationStepSize = 0.01f;
 
         newBodyModuleChance = 0.005f;
-        bodyModuleMutationChance = 0.01f;
+        bodyModuleMutationChance = 0.0f;
         removeBodyModuleChance = 0.001f;
 
         //mutationStrengthSlot = 0f;

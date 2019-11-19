@@ -1601,12 +1601,31 @@ public class SimulationManager : MonoBehaviour {
                 totalEggSackVolume += eggSackArray[i].currentBiomass;
             }
         }
+        simResourceManager.curGlobalAgentBiomass0 = 0f;
+        simResourceManager.curGlobalAgentBiomass1 = 0f;
+        simResourceManager.curGlobalAgentBiomass2 = 0f;
+        simResourceManager.curGlobalAgentBiomass3 = 0f;
         for(int i = 0; i < agentsArray.Length; i++) {
+            if(trophicLayersManager.selectedTrophicSlotRef.slotID == 0) {
+                simResourceManager.curGlobalAgentBiomass0 += agentsArray[i].currentBiomass;
+            }
+            else if(trophicLayersManager.selectedTrophicSlotRef.slotID == 1) {
+                simResourceManager.curGlobalAgentBiomass1 += agentsArray[i].currentBiomass;
+            }
+            else if(trophicLayersManager.selectedTrophicSlotRef.slotID == 2) {
+                simResourceManager.curGlobalAgentBiomass2 += agentsArray[i].currentBiomass;
+            }
+            else {
+                simResourceManager.curGlobalAgentBiomass3 += agentsArray[i].currentBiomass;
+            }
+
             if(agentsArray[i].curLifeStage == Agent.AgentLifeStage.Dead) {
                 totalCarrionVolume += agentsArray[i].currentBiomass;
+                
             }
             if(agentsArray[i].curLifeStage == Agent.AgentLifeStage.Egg || agentsArray[i].curLifeStage == Agent.AgentLifeStage.Mature) {
                 totalAgentBiomass += agentsArray[i].currentBiomass;
+
             }
         }
 
@@ -1729,7 +1748,7 @@ public class SimulationManager : MonoBehaviour {
         // **** I want to just change the APPEARANCE of body genome, but keep the brain? ... area to revisit later
         // Maybe just do a fresh restart for now -- fully random init
 
-        newSpecies.FirstTimeInitialize(foundingGenome, masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].depthLevel + 1);
+        newSpecies.FirstTimeInitialize(foundingGenome, masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].depthLevel + 1, _NumAgents);
         masterGenomePool.currentlyActiveSpeciesIDList.Add(newSpeciesID);
         masterGenomePool.completeSpeciesPoolsList.Add(newSpecies);
         masterGenomePool.speciesCreatedOrDestroyedThisFrame = true;

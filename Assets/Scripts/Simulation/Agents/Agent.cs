@@ -509,7 +509,7 @@ public class Agent : MonoBehaviour {
         if (coreModule.energy <= 0f) {
             if(coreModule.stomachContentsNorm > 0.01f) {
                 stringCauseOfDeath = "Suffocated";
-                RegisterAgentEvent(UnityEngine.Time.frameCount, "Suffocated!");
+                RegisterAgentEvent(UnityEngine.Time.frameCount, "Suffocated! stomachContentsNorm: " + coreModule.stomachContentsNorm.ToString());
             }
             else {
                 stringCauseOfDeath = "Starved";
@@ -668,7 +668,7 @@ public class Agent : MonoBehaviour {
         }
         GainExperience((amount / coreModule.stomachCapacity) * coreModule.foodEfficiencyPlant * 1f); // Exp for appropriate food    
 
-        
+        //Debug.Log("EatFoodPlant " + amount.ToString());
         
     }
     public void EatFoodMeat(float amount) {

@@ -125,7 +125,7 @@ public class SpeciesGenomePool {
         InitShared();
         depthLevel = depth;
     
-        for (int i = 0; i < numGenomes; i++) {
+        for (int i = 0; i < numGenomes * 2; i++) {
             AgentGenome agentGenome = new AgentGenome();
             agentGenome.GenerateInitialRandomBodyGenome();
             
@@ -144,12 +144,12 @@ public class SpeciesGenomePool {
 
         representativeGenome = candidateGenomesList[0].candidateGenome;
     }
-    public void FirstTimeInitialize(AgentGenome foundingGenome, int depth) {
+    public void FirstTimeInitialize(AgentGenome foundingGenome, int depth, int arraySize) {
         InitShared();
         depthLevel = depth;
 
         string debugTxt = "";
-        for (int i = 0; i < 36; i++) {
+        for (int i = 0; i < 64; i++) {
             
             mutationSettingsRef.defaultBodyMutationChance = 0.3f;
             mutationSettingsRef.defaultBodyMutationStepSize = 0.05f;
@@ -243,14 +243,17 @@ public class SpeciesGenomePool {
             for (int i = 0; i < candidateGenomesList.Count; i++) {
                 if(candidateGenomesList[i].isBeingEvaluated) {
                     // already being tested
+                    Debug.LogError("GetNextAvailableCandidate(): candidateGenomesList[i].isBeingEvaluated!");
                 }
                 else {
-                    candidateData = candidateGenomesList[i];                
+                    candidateData = candidateGenomesList[i];
+                    break;
                 }
             }
         }
         else {
             candidateData = new CandidateAgentData(representativeGenome, speciesID);
+            Debug.LogError("GetNextAvailableCandidate(): candidateData representativeGenome!!!! " + candidateData.ToString());
         }
         
         /*if(candidateData == null) {

@@ -30,13 +30,13 @@ public class CritterModuleFoodSensorsGenome {
 
     public void GenerateRandomInitialGenome() {
         // Do stuff:
-        useNutrients = false;
+        useNutrients = true;
         usePos = true;
         useVel = true;
         useDir = true;
-        useStats = false;
-        useEggs = false;
-        useCorpse = false;
+        useStats = true;
+        useEggs = true;
+        useCorpse = true;
 
         //preferenceParticles = 0.5f;
         //preferenceEggs = 0.5f;
@@ -125,43 +125,43 @@ public class CritterModuleFoodSensorsGenome {
         this.useNutrients = parentGenome.useNutrients;
         float randChance = UnityEngine.Random.Range(0f, 1f);
         if(randChance < settings.bodyModuleMutationChance) {
-            this.useNutrients = !this.useNutrients;
+            //this.useNutrients = !this.useNutrients;
         }
 
         this.usePos = parentGenome.usePos;
         randChance = UnityEngine.Random.Range(0f, 1f);
         if(randChance < settings.bodyModuleMutationChance) {
-            this.usePos = !this.usePos;
+            //this.usePos = !this.usePos;
         }
 
         this.useVel = parentGenome.useVel;
         randChance = UnityEngine.Random.Range(0f, 1f);
         if(randChance < settings.bodyModuleMutationChance) {
-            this.useVel = !this.useVel;
+            //this.useVel = !this.useVel;
         }
 
         this.useDir = parentGenome.useDir;
         randChance = UnityEngine.Random.Range(0f, 1f);
         if(randChance < settings.bodyModuleMutationChance) {
-            this.useDir = !this.useDir;
+            //this.useDir = !this.useDir;
         }
 
         this.useStats = parentGenome.useStats;
         randChance = UnityEngine.Random.Range(0f, 1f);
         if(randChance < settings.bodyModuleMutationChance) {
-            this.useStats = !this.useStats;
+            //this.useStats = !this.useStats;
         }
 
         this.useEggs = parentGenome.useEggs;
         randChance = UnityEngine.Random.Range(0f, 1f);
         if(randChance < settings.bodyModuleMutationChance) {
-            this.useEggs = !this.useEggs;
+            //this.useEggs = !this.useEggs;
         }
 
         this.useCorpse = parentGenome.useCorpse;
         randChance = UnityEngine.Random.Range(0f, 1f);
         if(randChance < settings.bodyModuleMutationChance) {
-            this.useCorpse = !this.useCorpse;
+            //this.useCorpse = !this.useCorpse;
         }
 
         //preferenceParticles = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.preferenceParticles, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);

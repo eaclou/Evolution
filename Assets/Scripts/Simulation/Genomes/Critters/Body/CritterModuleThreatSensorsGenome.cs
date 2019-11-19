@@ -22,7 +22,7 @@ public class CritterModuleThreatSensorsGenome {
         // Do stuff:
         usePos = false;
         useVel = false;
-        useDir = false;
+        useDir = true;
         useStats = false;
     }
 
@@ -61,25 +61,25 @@ public class CritterModuleThreatSensorsGenome {
         this.usePos = parentGenome.usePos;
         float randChance = UnityEngine.Random.Range(0f, 1f);
         if(randChance < settings.bodyModuleMutationChance) {
-            this.usePos = !this.usePos;
+            //this.usePos = !this.usePos;
         }
 
         this.useVel = parentGenome.useVel;
         randChance = UnityEngine.Random.Range(0f, 1f);
         if(randChance < settings.bodyModuleMutationChance) {
-            this.useVel = !this.useVel;
+            //this.useVel = !this.useVel;
         }
 
         this.useDir = parentGenome.useDir;
         randChance = UnityEngine.Random.Range(0f, 1f);
         if(randChance < settings.bodyModuleMutationChance) {
-            this.useDir = !this.useDir;
+            //this.useDir = !this.useDir;
         }
 
         this.useStats = parentGenome.useStats;
         randChance = UnityEngine.Random.Range(0f, 1f);
         if(randChance < settings.bodyModuleMutationChance) {
-            this.useStats = !this.useStats;
+            //this.useStats = !this.useStats;
         }
     }
 }

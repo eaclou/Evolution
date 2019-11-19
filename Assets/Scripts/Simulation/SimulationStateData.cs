@@ -356,7 +356,7 @@ public class SimulationStateData {
                 }
 
                 critterSimDataArray[i].moveAnimCycle = simManager.agentsArray[i].animationCycle;
-                critterSimDataArray[i].turnAmount = simManager.agentsArray[i].turningAmount;
+                critterSimDataArray[i].turnAmount = simManager.agentsArray[i].turningAmount * 2f;
                 critterSimDataArray[i].accel += Mathf.Clamp01(simManager.agentsArray[i].curAccel) * 0.8f; // ** RE-FACTOR!!!!
 		        critterSimDataArray[i].smoothedThrottle = simManager.agentsArray[i].smoothedThrottle.magnitude;
 

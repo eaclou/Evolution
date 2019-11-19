@@ -14,6 +14,10 @@ public class SimResourceManager {
     public float curGlobalAnimalParticles = 0f;
     public float curGlobalEggSackVolume = 0f;    
     public float curGlobalAgentBiomass = 0f;
+    public float curGlobalAgentBiomass0 = 0f;
+    public float curGlobalAgentBiomass1 = 0f;
+    public float curGlobalAgentBiomass2 = 0f;
+    public float curGlobalAgentBiomass3 = 0f;
     public float curGlobalCarrionVolume = 0f;
 
     public float curTotalMass = 0f;

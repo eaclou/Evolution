@@ -500,7 +500,7 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 						animalParticlesWrite[id.x].genomeVector = lerp(representativeParticle.genomeVector, float4(randA, randB, randC, randD), 0.33);
 						animalParticlesWrite[id.x].genomeVector.w = 0.0;
 
-						animalParticlesWrite[id.x].extra0 = 0;
+						animalParticlesWrite[id.x].extra0 = startingMass;
 
 						// subtract startingMass from algae?  or ignore for now?
 						//animalParticlesWrite[id.x]

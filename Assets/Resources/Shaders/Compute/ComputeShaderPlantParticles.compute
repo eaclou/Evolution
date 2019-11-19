@@ -211,7 +211,7 @@ void CSEatSelectedFoodParticles (uint3 id : SV_DispatchThreadID)
 	float combinedRadius = (mouthRadius + particleRadius * 0.5) * isAlive01 * critterSimData.consumeOn;
 	float mass = critterSimData.currentBiomass;
 
-	/*
+	
 	if(distanceSquared < combinedRadius * combinedRadius) {	
 		
 		if(critterSimData.consumeOn > 0.5) {   // revisit
@@ -227,7 +227,7 @@ void CSEatSelectedFoodParticles (uint3 id : SV_DispatchThreadID)
 			}
 		}	
 	}
-	*/
+	
 	foodParticlesEatAmountsCBuffer[id.x] = eatenAmount;
 }
 
@@ -314,24 +314,6 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 		
 		posOffset += vel * speedMult * _MapSize;
 
-		
-		/*int neighborIndex = (id.x + round(_Time * 11) + 512) % 1024;
-			
-		PlantParticleData neighborParticle = foodParticlesRead[neighborIndex];
-		float neighborAliveMask = neighborParticle.isActive; //    (1.0 - neighborParticle.isDecaying) * neighborParticle.isActive;
-
-		float2 neighborPos = neighborParticle.worldPos;
-		float2 dirToNeighbor = neighborPos - foodParticle.worldPos;
-		float distToNeighborSquared = dirToNeighbor.x * dirToNeighbor.x + dirToNeighbor.y * dirToNeighbor.y;		
-			
-		float repelMaskRange = 0.004;
-		float repelMaskOffset = 0.0;
-		float repelDistanceMask = 1.0 - saturate(distToNeighborSquared * repelMaskRange - repelMaskOffset);
-		float2 repelVel = -dirToNeighbor * repelDistanceMask * neighborAliveMask;
-		float repelMag = 0.005;
-		posOffset += repelVel * repelMag;
-		*/		
-
 		if(foodParticle.isDecaying < 0.5) {  // ALIVE !!!!!
 		
 			// Growth: // sample nutrients & light?
@@ -410,15 +392,13 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 			//  SPIRIT BRUSH MASK:
 			float4 brushMaskTex = _SpawnDensityMap.SampleLevel(_LinearClamp, spawnUV, 0);			// <-- badly named! should be SpiritBrush!!! 
 			float brushMask = saturate(brushMaskTex.x * 1.33);
-			
-			//if(distToOrigin < _FoodSprinkleRadius * rand01 * rand01) { 	// to prevent mass respawning, overshooting the intended max global food amount ?  // Needed?		
+						
 			if(brushMask * (1.0 - isRightClick) > 0.5) {  
 				
 				foodParticlesWrite[id.x].worldPos = spawnUV * _MapSize;
 					
 				PlantParticleData representativeParticle = _RepresentativeAlgaeParticleGenomeCBuffer[0];
-					
-
+				
 				float randRadius = rand(float2(randX * 10, randY * -3.37)) * (_MaxParticleSize - _MinParticleSize) + _MinParticleSize;					
 					
 				foodParticlesWrite[id.x].radius = 1.0; // representativeParticle.radius * (0.9 + 0.2 * (1.0 - rand01)); // 1.0; //randRadius;
@@ -462,11 +442,10 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 
 			float2 spawnUV = (parentPos + (float2(randZ, randX) - 0.5) * 33) / _MapSize;  //lerp(float2(randZ, randX), parentPos / _MapSize, 0.95); 	
 									
-			float4 spawnAltitudeSample = altitudeRead.SampleLevel(_LinearClamp, spawnUV, 0);			
-			float activeGridCellMask = saturate((spawnAltitudeSample.w - 0.04) * 100);
-			float spawnAltitude = spawnAltitudeSample.x;  // * (1.0 - activeGridCellMask);
+			float4 spawnAltitudeSample = altitudeRead.SampleLevel(_LinearClamp, spawnUV, 0);
+			float spawnAltitude = max(spawnAltitudeSample.x, (1.0 - spawnAltitudeSample.w));
 			
-			if(parentParticle.biomass > 0.0002 && rand01 > 0.99 && spawnAltitude < _GlobalWaterLevel * activeGridCellMask) {  // in water only? // for now...
+			if(parentParticle.biomass > 0.0002 && rand01 > 0.99 && spawnAltitude < _GlobalWaterLevel) {  // in water only? // for now...
 				
 				foodParticlesWrite[id.x].worldPos = spawnUV * _MapSize;
 				

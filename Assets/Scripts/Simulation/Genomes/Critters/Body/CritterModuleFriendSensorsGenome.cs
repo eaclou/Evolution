@@ -22,7 +22,7 @@ public class CritterModuleFriendSensorsGenome {
     public void GenerateRandomInitialGenome() {
         // Do stuff:
 
-        usePos = false;
+        usePos = true;
         useVel = false;
         useDir = false;
     }
@@ -52,19 +52,19 @@ public class CritterModuleFriendSensorsGenome {
         this.usePos = parentGenome.usePos;
         float randChance = UnityEngine.Random.Range(0f, 1f);
         if(randChance < settings.bodyModuleMutationChance) {
-            this.usePos = !this.usePos;
+            //this.usePos = !this.usePos;
         }
 
         this.useVel = parentGenome.useVel;
         randChance = UnityEngine.Random.Range(0f, 1f);
         if(randChance < settings.bodyModuleMutationChance) {
-            this.useVel = !this.useVel;
+            //this.useVel = !this.useVel;
         }
 
         this.useDir = parentGenome.useDir;
         randChance = UnityEngine.Random.Range(0f, 1f);
         if(randChance < settings.bodyModuleMutationChance) {
-            this.useDir = !this.useDir;
+            //this.useDir = !this.useDir;
         }
 
 

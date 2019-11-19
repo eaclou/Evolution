@@ -315,7 +315,20 @@ public class TrophicLayersManager {
             else {
                 str = "Simple Animal that feeds on Plants and Zooplankton.";  //    \n\nUses: <b><color=#8EDEEEFF>Oxygen</color></b>\n\nProduces: <b><color=#A97860FF>Waste</color></b>";
                 str += "\n\n";
-                str += "<size=13><b>Total Biomass: " + simManager.simResourceManager.curGlobalAgentBiomass.ToString("F1") + "</b></size>\n\n";
+                float speciesMass = 0f;
+                if (selectedTrophicSlotRef.slotID == 0) {
+                    speciesMass = simManager.simResourceManager.curGlobalAgentBiomass0;
+                }
+                else if(selectedTrophicSlotRef.slotID == 1) {
+                    speciesMass = simManager.simResourceManager.curGlobalAgentBiomass1;
+                }
+                else if(selectedTrophicSlotRef.slotID == 2) {
+                    speciesMass = simManager.simResourceManager.curGlobalAgentBiomass2;
+                }
+                else {
+                    speciesMass = simManager.simResourceManager.curGlobalAgentBiomass3;
+                }
+                str += "<size=13><b>Total Biomass: " + speciesMass.ToString("F1") + "</b></size>\n\n";// simManager.simResourceManager.curGlobalAgentBiomass.ToString("F1") + "</b></size>\n\n";
 
                 SpeciesGenomePool GenomePool = simManager.masterGenomePool.completeSpeciesPoolsList[selectedTrophicSlotRef.linkedSpeciesID];
                 str += "<color=#8EDEEEFF>Oxygen Usage: <b>" + simManager.simResourceManager.oxygenUsedByAgentsLastFrame.ToString("F3") + "</b></color>\n";

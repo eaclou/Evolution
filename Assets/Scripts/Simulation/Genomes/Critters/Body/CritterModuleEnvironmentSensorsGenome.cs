@@ -76,6 +76,7 @@ public class CritterModuleEnvironmentSensorsGenome {
 	
     public void SetToMutatedCopyOfParentGenome(CritterModuleEnvironmentSensorsGenome parentGenome, MutationSettings settings) {
         this.useWaterStats = parentGenome.useWaterStats;
+        /*
         float randChance = UnityEngine.Random.Range(0f, 1f);
         if(randChance < settings.bodyModuleMutationChance) {
             this.useWaterStats = !this.useWaterStats;
@@ -92,5 +93,6 @@ public class CritterModuleEnvironmentSensorsGenome {
         if(randChance < settings.bodyModuleMutationChance) {
             this.useDiagonals = !this.useDiagonals;
         }
+        */
     }
 }
