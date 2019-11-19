@@ -488,8 +488,7 @@ public class Agent : MonoBehaviour {
         
         //UpdateInternalResources();  // update energy, stamina, food -- or do this during TickActions?
 
-        ownPos = new Vector2(bodyRigidbody.transform.localPosition.x, bodyRigidbody.transform.localPosition.y);
-        ownVel = new Vector2(bodyRigidbody.velocity.x, bodyRigidbody.velocity.y); // change this to ownPos - prevPos *****************
+        
 
         coreModule.Tick();
         communicationModule.Tick(this);
@@ -838,6 +837,9 @@ public class Agent : MonoBehaviour {
         }
         
         Vector3 curPos = bodyRigidbody.transform.position;
+
+        ownPos = new Vector2(bodyRigidbody.transform.localPosition.x, bodyRigidbody.transform.localPosition.y);
+        ownVel = new Vector2(bodyRigidbody.velocity.x, bodyRigidbody.velocity.y); // change this to ownPos - prevPos *****************
         
         curVel = (curPos - prevPos).magnitude;
         curAccel = Mathf.Lerp(curAccel, (curVel - prevVel), 0.2f);

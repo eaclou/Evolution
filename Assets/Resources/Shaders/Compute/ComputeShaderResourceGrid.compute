@@ -25,6 +25,8 @@ Texture2D<float4> VelocityRead;
 Texture2D<float4> _AltitudeTex;
 Texture2D<float4> _SpiritBrushTex;
 
+Texture2D<float4> _CommonSampleTex;
+
 Texture2D<float4> _ResourceGridRead;
 RWTexture2D<float4> _ResourceGridWrite;
 
@@ -114,6 +116,7 @@ void CSSimResourceGrid (uint3 id : SV_DispatchThreadID)
 	// ALTITUDE:
 	float4 altitudeTexSample = _AltitudeTex.SampleLevel(_LinearClamp, uv, 0);
 	float isUnderwater = 1.0 - saturate((altitudeTexSample.x - 0.5) * 10);
+	float worldActiveMask = saturate(altitudeTexSample.w * 10);
 
 	// =============================== NUTRIENTS ================================
 	float nutrientsMass = resourceGridRead.x;
@@ -170,7 +173,7 @@ void CSSimResourceGrid (uint3 id : SV_DispatchThreadID)
 	// Z = decomposers
 	// W = algae
 	
-	_ResourceGridWrite[id.xy] = saturate(resourceGridRead);
+	_ResourceGridWrite[id.xy] = saturate(resourceGridRead * worldActiveMask);
 	
 
 }
@@ -280,7 +283,7 @@ void CSSampleTexture (uint3 id : SV_DispatchThreadID)
 {
 	float2 uv = float2(_CoordX, _CoordY);
 
-	float4 sample = _ResourceGridRead.SampleLevel(_PointClamp, uv, 0);
+	float4 sample = _CommonSampleTex.SampleLevel(_PointClamp, uv, 0);
 
 	outputValuesCBuffer[0] = sample;
 }

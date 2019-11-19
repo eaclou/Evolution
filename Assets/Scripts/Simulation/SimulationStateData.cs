@@ -296,8 +296,8 @@ public class SimulationStateData {
 
 
                 // SIMDATA ::===========================================================================================================================================================================
-                Vector2 agentPos = simManager.agentsArray[i].ownPos; //.bodyRigidbody.position;
-                critterSimDataArray[i].worldPos = new Vector3(agentPos.x, agentPos.y, 1f);
+                Vector2 agentPos = simManager.agentsArray[i].bodyRigidbody.position;
+                critterSimDataArray[i].worldPos = new Vector3(agentPos.x, agentPos.y, 0f);
                 if(simManager.agentsArray[i].smoothedThrottle.sqrMagnitude > 0f) {
                     critterSimDataArray[i].velocity = simManager.agentsArray[i].smoothedThrottle.normalized;
                 }

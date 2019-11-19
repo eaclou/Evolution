@@ -243,7 +243,7 @@ public class SpeciesGenomePool {
             for (int i = 0; i < candidateGenomesList.Count; i++) {
                 if(candidateGenomesList[i].isBeingEvaluated) {
                     // already being tested
-                    Debug.LogError("GetNextAvailableCandidate(): candidateGenomesList[i].isBeingEvaluated!");
+                    //Debug.LogError("GetNextAvailableCandidate(): candidateGenomesList[i].isBeingEvaluated!");
                 }
                 else {
                     candidateData = candidateGenomesList[i];

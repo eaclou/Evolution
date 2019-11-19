@@ -205,9 +205,12 @@ void CSSimDecomposerBitsData (uint3 id : SV_DispatchThreadID)
 	if(decomposerBitData.isActive > 0.5) {  // ALIVE!
 		
 		float2 uv = decomposerBitData.worldPos.xy / _MapSize;		
-		float altitude = AltitudeRead.SampleLevel(_LinearClamp, uv, 0).x;
+		float4 altitudeTexSample = AltitudeRead.SampleLevel(_LinearClamp, uv, 0);
+		float altitudeRaw = altitudeTexSample.x;
+		float worldActiveMask = saturate(altitudeTexSample.w * 10);
 		
-		decomposerBitData.age = decomposerBitData.age + 0.0065;  // ? frame lifespan
+		// faster aging outside world bounds
+		decomposerBitData.age = decomposerBitData.age + 0.0065 + (1.0 - worldActiveMask) * 0.01;  // ? frame lifespan
 
 		// if should be killed:
 		if(decomposerBitData.age > 1.0) {
@@ -247,16 +250,13 @@ void CSSimDecomposerBitsData (uint3 id : SV_DispatchThreadID)
 		
 		// check potential spawn location:
 		float2 spawnUV = float2(rand(float2(id.x, _Time * 120)), rand(float2(-_Time, id.x + _Time * 89.913)));
-				
-		//float spawnAltitude = AltitudeRead.SampleLevel(_LinearClamp, spawnUV, 0).x;
-
+		
 		float2 spawnPos = spawnUV * _MapSize;
 		
 		float noiseFreq = 4.2;
 		float spawnNoise1 = Value2D(spawnPos + 5, noiseFreq * 0.2755).x;
 		float spawnNoise2 = Value2D(spawnPos - 33, noiseFreq * 0.3254).x;
 		float spawnNoise3 = saturate(Value2D(spawnPos + 349.7, 2.4579).x * 2.5);
-		//float altitudeMask = saturate((1 - spawnAltitude) * 4);
 		
 		// Try respawning:
 		float4 resourceGridSample = _ResourceGridRead.SampleLevel(_LinearClamp, spawnUV, 0);  // ** actually the resourceGrid Tex -- rename
@@ -282,23 +282,24 @@ void CSSimWasteBitsData (uint3 id : SV_DispatchThreadID)
 
 	if(wasteBitData.isActive > 0.5) {  // ALIVE!
 		
-		
-	
 		if(wasteBitData.age > 1.0) {  // OLD AGE DEATH:::
 			wasteBitData.isActive = 0.0;			
 
 		}
 		else {   // ALIVE && ACTIVE
 			float2 uv = wasteBitData.worldPos.xy / _MapSize;		
-			float altitude = AltitudeRead.SampleLevel(_LinearClamp, uv, 0).x;
+			float4 altitudeTexSample = AltitudeRead.SampleLevel(_LinearClamp, uv, 0);
+			float altitudeRaw = altitudeTexSample.x;
+			float worldActiveMask = saturate(altitudeTexSample.w * 10);
+
 			float2 vel = VelocityRead.SampleLevel(_LinearClamp, uv, 0).xy;
 			float speedMult = 0.0;
 			wasteBitData.speed = length(vel);
 	
 			float2 nextPos = uv + vel * speedMult;
 
-
-			wasteBitData.age = wasteBitData.age + 0.0045;  // ? frame lifespan
+			  // Accelerate Aging Rate if outside world bounds
+			wasteBitData.age = wasteBitData.age + 0.0045 + (1.0 - worldActiveMask) * 0.01;  // ? frame lifespan
 			wasteBitData.worldPos = float3(nextPos * _MapSize, 0);		
 		}
 

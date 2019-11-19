@@ -2,8 +2,7 @@
 #pragma kernel CSMeasureInitCursorDistances
 #pragma kernel CSNewMeasureDistancesInit
 #pragma kernel CSNewMeasureDistancesMainA
-//#pragma kernel CSReduceCritterDistances32
-//#pragma kernel CSReduceCritterDistances1
+
 #pragma kernel CSFetchParticleByID
 #pragma kernel CSEatSelectedFoodParticles
 #pragma kernel CSCopyFoodParticlesBuffer
@@ -23,9 +22,11 @@ RWTexture2D<float4> foodParticlesNearestCrittersRT;
 
 RWStructuredBuffer<PlantParticleData> closestParticlesDataCBuffer;
 
-RWTexture2D<float4> _CritterToPlantDistancesRT;
+Texture2D<float4> _CritterToPlantDistancesRead;
+RWTexture2D<float4> _CritterToPlantDistancesWrite;
+
 RWStructuredBuffer<float4> _ClosestPlantIndexCBuffer;
-StructuredBuffer<float4> _CritterToPlantDistancesRead;
+//StructuredBuffer<float4> _CritterToPlantDistancesReadBuffer;
 
 RWStructuredBuffer<PlantParticleData> selectedPlantParticleDataCBuffer;
 StructuredBuffer<float4> cursorDistancesRead; // used to reduce foodParticlesNearestCrittersRT down to minimum distances
@@ -121,7 +122,7 @@ void CSNewMeasureDistancesInit (uint3 id : SV_DispatchThreadID)
 		}
 	}	
 
-	_CritterToPlantDistancesRT[int2(id.x, critterIndex)] = float4(closestParticleIndex, minSquaredDistance, foodParticlesRead[closestParticleIndex].worldPos.xy);
+	_CritterToPlantDistancesWrite[int2(id.x, critterIndex)] = float4(closestParticleIndex, minSquaredDistance, foodParticlesRead[closestParticleIndex].worldPos.xy);
 }
 
 [numthreads(1,1,1)]
@@ -137,7 +138,7 @@ void CSNewMeasureDistancesMainA (uint3 id : SV_DispatchThreadID)
 		
 		int particleIndex = id.x * 32 + i;
 		
-		float4 sourceData = _CritterToPlantDistancesRT[int2(i, critterIndex)];
+		float4 sourceData = _CritterToPlantDistancesRead[int2(i, critterIndex)];
 		
 		PlantParticleData particleData = foodParticlesRead[particleIndex];
 
@@ -190,7 +191,8 @@ void CSEatSelectedFoodParticles (uint3 id : SV_DispatchThreadID)
 	// Check distance to nearest particle
 	int critterIndex = id.x;
 
-	float4 data = _CritterToPlantDistancesRead[critterIndex];
+	float4 data = _ClosestPlantIndexCBuffer[critterIndex];
+	//float4 data = _CritterToPlantDistancesRead[int2(0, critterIndex)];
 
 	int particleIndex = (int)data.x;
 

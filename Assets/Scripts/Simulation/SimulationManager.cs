@@ -1200,7 +1200,7 @@ public class SimulationManager : MonoBehaviour {
                     int speciesIndex = masterGenomePool.currentlyActiveSpeciesIDList[randomTableIndex];
                     CandidateAgentData candidateData = masterGenomePool.completeSpeciesPoolsList[speciesIndex].GetNextAvailableCandidate();
 
-                    AttemptToSpawnAgent(a, speciesIndex, candidateData);
+                    //AttemptToSpawnAgent(a, speciesIndex, candidateData);
                     agentRespawnCounter = 0;
                 }
             }
@@ -1225,29 +1225,49 @@ public class SimulationManager : MonoBehaviour {
         }
     }
     public void AttemptToBrushSpawnAgent(int speciesIndex) {
+        
         for (int a = 0; a < agentsArray.Length; a++) {            
             if (agentsArray[a].curLifeStage == Agent.AgentLifeStage.AwaitingRespawn) {
                           
                 CandidateAgentData candidateData = masterGenomePool.completeSpeciesPoolsList[speciesIndex].GetNextAvailableCandidate();
-                //Debug.Log("" + masterGenomePool.ToString());
-                //Debug.Log("" + masterGenomePool.vertebrateSlotsGenomesCurrentArray[trophicLayersManager.selectedTrophicSlotRef.slotID].ToString());
-                //Debug.Log("" + masterGenomePool.vertebrateSlotsGenomesCurrentArray[trophicLayersManager.selectedTrophicSlotRef.slotID].representativeGenome.ToString());
-                //Debug.Log("" + trophicLayersManager.selectedTrophicSlotRef.ToString());
-                //candidateData.candidateGenome = masterGenomePool.vertebrateSlotsGenomesCurrentArray[trophicLayersManager.selectedTrophicSlotRef.slotID].representativeGenome;
                 
-
                 if (candidateData == null) {
                     Debug.LogError("GetNextAvailableCandidate(): candidateData NULL!!!!");
                 }
                 else {
                     Debug.Log("AttemptToBrushSpawnAgent(" + a.ToString() + ") species: " + speciesIndex.ToString() + ", " + candidateData.ToString());
                     
-                    SpawnAgentImmaculate(candidateData, a, speciesIndex);
-                    candidateData.isBeingEvaluated = true;
-                     
+                    // Spawn POS:
+                    
+                    //float isBrushingLerp = 0f;
+                    //if(uiManager.isDraggingMouseLeft && trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2) {
+                    //    isBrushingLerp = 1f;
+                    //}
 
-                    //AttemptToSpawnAgent(a, speciesIndex, candidateData);
-                    //agentRespawnCounter = 0;
+                    Vector3 cursorWorldPos = uiManager.curMousePositionOnWaterPlane;
+                    cursorWorldPos.x += UnityEngine.Random.Range(-1f, 1f) * 5f;
+                    cursorWorldPos.y += UnityEngine.Random.Range(-1f, 1f) * 5f;
+                    
+                    Vector2 spawnWorldPos = new Vector2(cursorWorldPos.x, cursorWorldPos.y); 
+        
+                    Vector4 altitudeSample = uiManager.SampleTexture(theRenderKing.baronVonTerrain.terrainHeightDataRT, spawnWorldPos / _MapSize);
+
+                    bool isValidSpawnLoc = true;
+                    if(altitudeSample.x > theRenderKing.baronVonWater._GlobalWaterLevel) {
+                        isValidSpawnLoc = false;
+                    }
+                    if(altitudeSample.w < 0.1f) {
+                        isValidSpawnLoc = false;
+                    }
+        
+                    if(isValidSpawnLoc) {
+                        SpawnAgentImmaculate(candidateData, a, speciesIndex, spawnWorldPos);
+                        candidateData.isBeingEvaluated = true;
+                    }
+                    else {
+                        Debug.Log("AttemptToBrushSpawnAgent(" + ") pos: " + spawnWorldPos.ToString() + ", alt: " + altitudeSample.ToString());
+                    }
+                    
                     break;
                 }
                 
@@ -1256,7 +1276,7 @@ public class SimulationManager : MonoBehaviour {
         } 
     }
     private void AttemptToSpawnAgent(int agentIndex, int speciesIndex, CandidateAgentData candidateData) { //, int speciesIndex) {
-
+        Debug.Log("AttemptToSpawnAgent(" + agentIndex.ToString());
         // Which Species will the new agent belong to?
         // Random selection? Lottery-Selection among Species? Use this Agent's previous-life's Species?  Global Ranked Selection (across all species w/ modifiers) ?
 
@@ -1300,9 +1320,44 @@ public class SimulationManager : MonoBehaviour {
             }
             else { // No eggSack found:
                 //if(agentIndex != 0) {  // temp hack to avoid null reference exceptions:
+                
+        
+                Vector3 randWorldPos = GetRandomFoodSpawnPosition().startPosition;
+                // Find parent agent location:
+                //Agent parentAgent;
+                for(int i = 0; i < numAgents; i++) {
+                    if(agentsArray[i].curLifeStage == Agent.AgentLifeStage.Mature) {
+                        float rand = UnityEngine.Random.Range(0f, 1f);
+                        if(rand < 0.1f) {
+                            float mag = 5f;
+                            randWorldPos = new Vector3(agentsArray[i].ownPos.x + UnityEngine.Random.Range(-1f, 1f) * mag, agentsArray[i].ownPos.y + UnityEngine.Random.Range(-1f, 1f) * mag, 0f);
 
-                SpawnAgentImmaculate(candidateData, agentIndex, speciesIndex);
-                candidateData.isBeingEvaluated = true;
+                            break;
+                        }
+                    }
+                }
+
+                Vector2 spawnWorldPos = new Vector2(randWorldPos.x, randWorldPos.y);
+                Vector4 altitudeSample = uiManager.SampleTexture(theRenderKing.baronVonTerrain.terrainHeightDataRT, spawnWorldPos / _MapSize);
+                  
+                bool isValidSpawnLoc = true;
+                if(altitudeSample.x > theRenderKing.baronVonWater._GlobalWaterLevel) {
+                    isValidSpawnLoc = false;
+                }
+                if(altitudeSample.w < 0.1f) {
+                    isValidSpawnLoc = false;
+                }
+
+
+                if(isValidSpawnLoc) {
+                    SpawnAgentImmaculate(candidateData, agentIndex, speciesIndex, spawnWorldPos);
+                    candidateData.isBeingEvaluated = true;
+                }
+                else {
+                    Debug.Log("INVALID SPAWN POS " + spawnWorldPos.ToString() + ", alt: " + altitudeSample.ToString());
+                }
+
+                
                 //}    
                 //Debug.Log("AttemptToSpawnAgent Immaculate (" + agentIndex.ToString() + ") speciesIndex: " + speciesIndex.ToString() + " candidates: " + masterGenomePool.completeSpeciesPoolsList[speciesIndex].candidateGenomesList.Count.ToString());
             }
@@ -1433,10 +1488,10 @@ public class SimulationManager : MonoBehaviour {
         
         
     }
-    private void SpawnAgentImmaculate(CandidateAgentData sourceCandidate, int agentIndex, int speciesIndex) {
+    private void SpawnAgentImmaculate(CandidateAgentData sourceCandidate, int agentIndex, int speciesIndex, Vector2 spawnPos2D) {
         
-        bool spawnOn = true;
-
+        //bool spawnOn = true;
+        /*
         float isBrushingLerp = 0f;
         if(uiManager.isDraggingMouseLeft && trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2) {
             isBrushingLerp = 1f;
@@ -1469,23 +1524,25 @@ public class SimulationManager : MonoBehaviour {
         if(altitudeSample.x > theRenderKing.baronVonWater._GlobalWaterLevel) {
             isValidSpawnLoc = false;
         }
-        if(altitudeSample.w < 0.01f) {
+        if(altitudeSample.w < 0.1f) {
             isValidSpawnLoc = false;
         }
         
-
         if(isValidSpawnLoc) {
             //Debug.Log("isValidSpawnLoc!i= " + altitudeSample.ToString() + ", spawnWorldPos: " + spawnWorldPos.ToString());
-            if(spawnOn) {
-                agentsArray[agentIndex].InitializeSpawnAgentImmaculate(settingsManager, agentIndex, sourceCandidate, spawnWorldPos, theRenderKing.baronVonWater._GlobalWaterLevel); // Spawn that genome in dead Agent's body and revive it!
-                theRenderKing.UpdateCritterGenericStrokesData(agentsArray[agentIndex]); //agentIndex, sourceCandidate.candidateGenome);
-                numAgentsBorn++;
-                //Debug.Log("%%%%%% SpawnAgentImmaculate pos: " + spawnWorldPos.ToString());
-            }
+            
+            agentsArray[agentIndex].InitializeSpawnAgentImmaculate(settingsManager, agentIndex, sourceCandidate, spawnWorldPos, theRenderKing.baronVonWater._GlobalWaterLevel); // Spawn that genome in dead Agent's body and revive it!
+            theRenderKing.UpdateCritterGenericStrokesData(agentsArray[agentIndex]); //agentIndex, sourceCandidate.candidateGenome);
+            numAgentsBorn++;
+            //Debug.Log("%%%%%% SpawnAgentImmaculate pos: " + spawnWorldPos.ToString());
+            
         }
         else {
-            //Debug.Log("INVALID!" + altitudeSample.ToString() + ", spawnWorldPos: " + spawnWorldPos.ToString());
+            Debug.Log("INVALID!" + altitudeSample.ToString() + ", spawnWorldPos: " + spawnWorldPos.ToString());
         }
+        */
+
+
     }
     public void ProcessDeadEggSack(int eggSackIndex) {
         //Debug.Log("ProcessDeadEggSack(" + eggSackIndex.ToString() + ") eggSackRespawnCounter " + eggSackRespawnCounter.ToString());

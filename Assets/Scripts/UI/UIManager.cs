@@ -3037,7 +3037,7 @@ public class UIManager : MonoBehaviour {
         ComputeBuffer outputBuffer = new ComputeBuffer(1, sizeof(float) * 4);
         outputBuffer.SetData(sample);
         int kernelCSSampleTexture = gameManager.simulationManager.computeShaderResourceGrid.FindKernel("CSSampleTexture");
-        gameManager.simulationManager.computeShaderResourceGrid.SetTexture(kernelCSSampleTexture, "_ResourceGridRead", tex);
+        gameManager.simulationManager.computeShaderResourceGrid.SetTexture(kernelCSSampleTexture, "_CommonSampleTex", tex);
         gameManager.simulationManager.computeShaderResourceGrid.SetBuffer(kernelCSSampleTexture, "outputValuesCBuffer", outputBuffer);
         gameManager.simulationManager.computeShaderResourceGrid.SetFloat("_CoordX", uv.x);
         gameManager.simulationManager.computeShaderResourceGrid.SetFloat("_CoordY", uv.y); 

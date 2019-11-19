@@ -22,7 +22,7 @@ RWTexture2D<float4> animalParticlesNearestCrittersRT;
 RWStructuredBuffer<AnimalParticleData> closestParticlesDataCBuffer;
 
 RWStructuredBuffer<float4> _ClosestZooplanktonCBuffer;
-StructuredBuffer<float4> _CritterToZooplanktonDistancesRead;
+//StructuredBuffer<float4> _CritterToZooplanktonDistancesRead;
 
 RWStructuredBuffer<AnimalParticleData> selectedAnimalParticleDataCBuffer;
 StructuredBuffer<float4> cursorDistancesRead; // used to reduce foodParticlesNearestCrittersRT down to minimum distances
@@ -38,7 +38,8 @@ StructuredBuffer<int> selectRespawnAnimalParticleIndicesCBuffer;
 Texture2D<float4> critterDistancesRead; // used to reduce animalParticlesNearestCrittersRT down to minimum distancesanimalParticleData
 RWTexture2D<float4> critterDistancesWrite;
 
-RWTexture2D<float4> _CritterToZooplanktonDistancesRT;
+Texture2D<float4> _CritterToZooplanktonDistancesTexRead;
+RWTexture2D<float4> _CritterToZooplanktonDistancesTexWrite;
 
 
 Texture2D<float4> obstaclesRead;  // water info
@@ -135,7 +136,7 @@ void CSNewMeasureDistancesInit (uint3 id : SV_DispatchThreadID)
 		}
 	}	
 
-	_CritterToZooplanktonDistancesRT[int2(id.x, critterIndex)] = float4(closestParticleIndex, minSquaredDistance, animalParticlesRead[closestParticleIndex].worldPos.xy);
+	_CritterToZooplanktonDistancesTexWrite[int2(id.x, critterIndex)] = float4(closestParticleIndex, minSquaredDistance, animalParticlesRead[closestParticleIndex].worldPos.xy);
 }
 
 [numthreads(1,1,1)]
@@ -151,7 +152,7 @@ void CSNewMeasureDistancesMainA (uint3 id : SV_DispatchThreadID)
 		
 		int particleIndex = id.x * 32 + i;
 		
-		float4 sourceData = _CritterToZooplanktonDistancesRT[int2(i, critterIndex)];
+		float4 sourceData = _CritterToZooplanktonDistancesTexRead[int2(i, critterIndex)];
 		
 		AnimalParticleData particleData = animalParticlesRead[particleIndex];
 
@@ -202,8 +203,9 @@ void CSEatSelectedAnimalParticles (uint3 id : SV_DispatchThreadID)
 {	
 	// Check distance to nearest particle
 	int critterIndex = id.x;
-
-	float4 data = _CritterToZooplanktonDistancesRead[critterIndex];
+	
+	float4 data = _ClosestZooplanktonCBuffer[critterIndex];
+	//float4 data = _CritterToZooplanktonDistancesRead[critterIndex];
 
 	int particleIndex = (int)data.x;
 
@@ -222,8 +224,7 @@ void CSEatSelectedAnimalParticles (uint3 id : SV_DispatchThreadID)
 	float mouthRadius = 1; // critterInitData.boundingBoxSize.x * critterSimData.growthPercentage;  // **** REMEMBER TO *0.5 EVENTUALLY FOR ACCURATE SIZE
 	float particleRadius = particleData.radius;
 	float combinedRadius = (mouthRadius + particleRadius * 0.5) * isAlive01 * critterSimData.consumeOn;
-		
-	
+			
 	if(distanceSquared < combinedRadius * combinedRadius) {	
 		
 		if(critterSimData.consumeOn > 0.5) {   // revisit

@@ -1,7 +1,7 @@
 ﻿// Each #kernel tells which function to compile; you can have many kernels
 
 #pragma kernel CSSimSurfaceBitsData
-#pragma kernel CSSimDetailBitsData
+#pragma kernel CSSimDetailBitsData  // NUTRIENTS!!! ******
 #pragma kernel CSSimWaterQuadsData
 #pragma kernel CSSimWaterCurvesData
 #pragma kernel CSPinWaterChainsData
@@ -178,8 +178,6 @@ void CSSimDetailBitsData (uint3 id : SV_DispatchThreadID)
 	
 	WaterQuadData waterQuadData = waterQuadStrokesCBuffer[id.x];
 
-	// ***** Move Head Point0: //
-
 	float2 uv = waterQuadData.worldPos.xy / _MapSize;
 	
 	float2 vel = VelocityRead.SampleLevel(_LinearClamp, uv, 0).xy;
@@ -189,30 +187,26 @@ void CSSimDetailBitsData (uint3 id : SV_DispatchThreadID)
 	
 	float2 nextPos = uv + vel * speedMult;
 
-	float altitude = AltitudeRead.SampleLevel(_LinearClamp, uv, 0).x;
+	float4 altitudeSampleTex = AltitudeRead.SampleLevel(_LinearClamp, uv, 0);
+	float altitudeRaw = altitudeSampleTex.x;
+	float worldActiveMask = saturate(altitudeSampleTex.w * 10);
 
-	waterQuadData.age = waterQuadData.age + 0.005;  // ? frame lifespan
+	waterQuadData.age = waterQuadData.age + 0.005 + (1.0 - worldActiveMask) * 0.01;  // ? frame lifespan
 		
 	float respawnFromAge = saturate((waterQuadData.age - 1.0) * 1000); // 0 = fine, 1 == TOO OLD!!!
-	float respawnFromAltitude = saturate((altitude - 0.5) * 100);  // 0 if in water, 1 if on land
+	//float respawnFromAltitude = saturate((altitudeRaw - 0.5) * 100);  // 0 if in water, 1 if on land
 	float respawnMask = respawnFromAge; // + respawnFromAltitude;  // equivalent to OR
 		
-	//respawnMask *= saturate(nutrients * 1);
-
 	// **** Resource Grid TEX!
 	if(respawnMask > 0.5 ) {
 		
 		// Respawn!!!
 
-				
-		//float2 spawnBoxSize = float2(_SpawnBoundsCameraDetails.z - _SpawnBoundsCameraDetails.x, _SpawnBoundsCameraDetails.w - _SpawnBoundsCameraDetails.y);
-		//spawnPos = spawnPos * spawnBoxSize + _SpawnBoundsCameraDetails.xy;
-		
 		for(int i = 0; i < 4; i++) {
 			float2 spawnPos = float2(rand(float2(id.x + i * 1.3337, uv.x - i - _Time)), rand(float2(uv.y - i + _Time, id.x + i) * 31.987634));		
 			float2 spawnUV = spawnPos; // / _MapSize;
 			float4 resourceGridTex = _ResourceGridTex.SampleLevel(_LinearClamp, spawnUV, 0);
-			float nutrients = saturate(resourceGridTex.x * 1.5);
+			float nutrients = saturate(resourceGridTex.x * 15);
 			float extraMask = saturate(resourceGridTex.y * 25) * saturate((resourceGridTex.z - 0.1) * 50); // waste & decomposers active
 			float spawnMask = nutrients * 1 + extraMask;
 
@@ -221,23 +215,16 @@ void CSSimDetailBitsData (uint3 id : SV_DispatchThreadID)
 				waterQuadData.age = frac(waterQuadData.age);
 
 				break;
-			}
-		
-		}
-		
-		
-		
+			}		
+		}		
 	}
 	else {
-		waterQuadData.worldPos = float3(nextPos * _MapSize, 0);
-		
+		waterQuadData.worldPos = float3(nextPos * _MapSize, 0);		
 	}
 
-	float2 forwardDir = normalize(vel);
+	float2 forwardDir = normalize(vel);	
 	
-	
-	waterQuadStrokesCBuffer[id.x] = waterQuadData;
-	
+	waterQuadStrokesCBuffer[id.x] = waterQuadData;	
 }
 
 [numthreads(1024,1,1)]

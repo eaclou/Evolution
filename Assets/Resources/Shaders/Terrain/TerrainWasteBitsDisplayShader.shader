@@ -85,19 +85,23 @@
 				float2 uv = worldPosition.xy / _MapSize;
 				o.altitudeUV = uv;
 
-				float altitude = tex2Dlod(_AltitudeTex, float4(o.altitudeUV, 0, 0)).x; //i.worldPos.z / 10; // [-1,1] range
+				float4 altitudeTexSample = tex2Dlod(_AltitudeTex, float4(o.altitudeUV, 0, 0)); //i.worldPos.z / 10; // [-1,1] range
+				float altitudeRaw = altitudeTexSample.x;
+				float worldActiveMask = saturate(altitudeTexSample.w * 10);
+
 				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(o.altitudeUV, 0, 0)).yzw;
-				float depth = saturate(-altitude + 0.5);
+				float depth = saturate(-altitudeRaw + 0.5);
 				float refractionStrength = depth * 4.5;
 
 				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
 
-				worldPosition.z = -altitude * 20 + 10;
+				worldPosition.z = -altitudeRaw * 20 + 10;
 
 				float fadeDuration = 0.2;
 				float fadeIn = saturate(groundBitData.age / fadeDuration);  // fade time = 0.1
 				float fadeOut = saturate((1 - groundBitData.age) / fadeDuration);							
 				float alpha = fadeIn * fadeOut;
+				alpha *= worldActiveMask;
 				
 				float2 scale = 3.978312 * alpha; //groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25) * (_DetritusDensityLerp * 3.14 + 0.5);
 				float wasteTex = saturate(tex2Dlod(_ResourceGridTex, float4(uv, 0, 0)).y);
