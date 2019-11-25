@@ -96,7 +96,7 @@ public class CritterModuleCore {
         dashEffector = new float[1];
         healEffector = new float[1];
                                                                           
-        energy = 1;
+        energy = 1f;
         healthHead = 1f;
         healthBody = 1f;
         healthExternal = 1f;
@@ -203,7 +203,7 @@ public class CritterModuleCore {
         contactForceY[0] = 0f;
         hitPoints[0] = Mathf.Max(healthBody, 0f);
         //stamina[0] = stamina; // set in Agent.cs
-        energyStored[0] = Mathf.Clamp01(energy);  // Mathf.Clamp01(energyRaw / maxEnergyStorage);
+        energyStored[0] = Mathf.Clamp01(energy * 0.01f);  // Mathf.Clamp01(energyRaw / maxEnergyStorage);
         foodStored[0] = stomachContentsNorm; // / stomachCapacity;
         
         

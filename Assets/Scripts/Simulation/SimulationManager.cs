@@ -897,7 +897,7 @@ public class SimulationManager : MonoBehaviour {
         for (int i = 0; i < agentsArray.Length; i++) {
 
             Vector4 depthSample = simStateData.depthAtAgentPositionsArray[i];
-            agentsArray[i].worldAltitude = theRenderKing.baronVonWater._GlobalWaterLevel - depthSample.x;
+            agentsArray[i].waterDepth = theRenderKing.baronVonWater._GlobalWaterLevel - depthSample.x;
             if(depthSample.y == 0f && depthSample.z == 0f) {
                 agentsArray[i].depthGradient = new Vector2(0f, 0f);
             }
@@ -919,17 +919,17 @@ public class SimulationManager : MonoBehaviour {
             */
             // precalculate normals?
             
-            if (depthSample.x > theRenderKing.baronVonWater._GlobalWaterLevel || depthSample.w < 0.15f) //(floorDepth < agentSize)
+            if (depthSample.x > theRenderKing.baronVonWater._GlobalWaterLevel || depthSample.w < 0.1f) //(floorDepth < agentSize)
             {
-                float wallForce = 10.5f; // Mathf.Clamp01(agentSize - floorDepth) / agentSize;
+                float wallForce = 10.0f; // Mathf.Clamp01(agentSize - floorDepth) / agentSize;
                 Vector2 grad = agentsArray[i].depthGradient; // new Vector2(depthSample.y, depthSample.z); //.normalized;
                 agentsArray[i].bodyRigidbody.AddForce(-grad * agentsArray[i].bodyRigidbody.mass * wallForce, ForceMode2D.Impulse);
 
 
-                float damage = wallForce * 0.002f;  
+                float damage = wallForce * 0.005f;  
                 
                 if(depthSample.w < 0.5f) {
-                    damage *= 0f;
+                    damage *= 0.33f;
                 }
                 float defendBonus = 1f;
                 if(agentsArray[i].coreModule != null && agentsArray[i].curLifeStage == Agent.AgentLifeStage.Mature) {
@@ -958,7 +958,7 @@ public class SimulationManager : MonoBehaviour {
                 }
             }
             
-            agentsArray[i].bodyRigidbody.AddForce(simStateData.fluidVelocitiesAtAgentPositionsArray[i] * 36f * agentsArray[i].bodyRigidbody.mass, ForceMode2D.Impulse);
+            agentsArray[i].bodyRigidbody.AddForce(simStateData.fluidVelocitiesAtAgentPositionsArray[i] * 32f * agentsArray[i].bodyRigidbody.mass, ForceMode2D.Impulse);
 
             agentsArray[i].avgFluidVel = Vector2.Lerp(agentsArray[i].avgFluidVel, simStateData.fluidVelocitiesAtAgentPositionsArray[i], 0.25f);
 
@@ -1193,14 +1193,14 @@ public class SimulationManager : MonoBehaviour {
     }  // *** revisit
     private void CheckForReadyToSpawnAgents() {    // AUTO-SPAWN     
         for (int a = 0; a < agentsArray.Length; a++) {
-            if(agentRespawnCounter > 35) {
+            if(agentRespawnCounter > 7) {
                 if (agentsArray[a].curLifeStage == Agent.AgentLifeStage.AwaitingRespawn) {
                     //Debug.Log("AttemptToSpawnAgent(" + a.ToString() + ")");
                     int randomTableIndex = UnityEngine.Random.Range(0, masterGenomePool.currentlyActiveSpeciesIDList.Count);
                     int speciesIndex = masterGenomePool.currentlyActiveSpeciesIDList[randomTableIndex];
                     CandidateAgentData candidateData = masterGenomePool.completeSpeciesPoolsList[speciesIndex].GetNextAvailableCandidate();
 
-                    //AttemptToSpawnAgent(a, speciesIndex, candidateData);
+                    AttemptToSpawnAgent(a, speciesIndex, candidateData);
                     agentRespawnCounter = 0;
                 }
             }
@@ -1319,23 +1319,23 @@ public class SimulationManager : MonoBehaviour {
                 candidateData.isBeingEvaluated = true;
             }
             else { // No eggSack found:
-                //if(agentIndex != 0) {  // temp hack to avoid null reference exceptions:
-                
-        
-                Vector3 randWorldPos = GetRandomFoodSpawnPosition().startPosition;
+                   //if(agentIndex != 0) {  // temp hack to avoid null reference exceptions:
+
+
+                Vector3 randWorldPos = new Vector3(UnityEngine.Random.Range(_MapSize * 0.1f, _MapSize * 0.9f), UnityEngine.Random.Range(_MapSize * 0.1f, _MapSize * 0.9f), 0f);// GetRandomFoodSpawnPosition().startPosition;
                 // Find parent agent location:
                 //Agent parentAgent;
-                for(int i = 0; i < numAgents; i++) {
+                /*for(int i = 0; i < numAgents; i++) {
                     if(agentsArray[i].curLifeStage == Agent.AgentLifeStage.Mature) {
                         float rand = UnityEngine.Random.Range(0f, 1f);
                         if(rand < 0.1f) {
-                            float mag = 5f;
+                            float mag = 7.5f;
                             randWorldPos = new Vector3(agentsArray[i].ownPos.x + UnityEngine.Random.Range(-1f, 1f) * mag, agentsArray[i].ownPos.y + UnityEngine.Random.Range(-1f, 1f) * mag, 0f);
 
                             break;
                         }
                     }
-                }
+                }*/
 
                 Vector2 spawnWorldPos = new Vector2(randWorldPos.x, randWorldPos.y);
                 Vector4 altitudeSample = uiManager.SampleTexture(theRenderKing.baronVonTerrain.terrainHeightDataRT, spawnWorldPos / _MapSize);
@@ -1489,59 +1489,12 @@ public class SimulationManager : MonoBehaviour {
         
     }
     private void SpawnAgentImmaculate(CandidateAgentData sourceCandidate, int agentIndex, int speciesIndex, Vector2 spawnPos2D) {
-        
-        //bool spawnOn = true;
-        /*
-        float isBrushingLerp = 0f;
-        if(uiManager.isDraggingMouseLeft && trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2) {
-            isBrushingLerp = 1f;
-        }
-
-        Vector3 cursorWorldPos = uiManager.curMousePositionOnWaterPlane;
-        cursorWorldPos.x += UnityEngine.Random.Range(-1f, 1f) * 5f;
-        cursorWorldPos.y += UnityEngine.Random.Range(-1f, 1f) * 5f;
-
-        Vector3 spawnWorldPos = GetRandomFoodSpawnPosition().startPosition;
-        // Find parent agent location:
-        Agent parentAgent;
-        bool isValidSpawnLoc = true;
-        for(int i = 0; i < numAgents; i++) {
-            if(agentsArray[i].curLifeStage == Agent.AgentLifeStage.Mature) {
-                float rand = UnityEngine.Random.Range(0f, 1f);
-                if(rand < 0.1f) {
-                    float mag = 5f;
-                    spawnWorldPos = new Vector3(agentsArray[i].ownPos.x + UnityEngine.Random.Range(-1f, 1f) * mag, agentsArray[i].ownPos.y + UnityEngine.Random.Range(-1f, 1f) * mag, 0f);
-
-                    break;
-                }
-            }
-        }
-        
-        spawnWorldPos = Vector3.Lerp(spawnWorldPos, cursorWorldPos, isBrushingLerp); // uiManager.curCtrlCursorPositionOnWaterPlane; // GetRandomFoodSpawnPosition().startPosition;
-        
-        Vector4 altitudeSample = uiManager.SampleTexture(theRenderKing.baronVonTerrain.terrainHeightDataRT, new Vector2(spawnWorldPos.x / _MapSize, spawnWorldPos.y / _MapSize));
-                            
-        if(altitudeSample.x > theRenderKing.baronVonWater._GlobalWaterLevel) {
-            isValidSpawnLoc = false;
-        }
-        if(altitudeSample.w < 0.1f) {
-            isValidSpawnLoc = false;
-        }
-        
-        if(isValidSpawnLoc) {
-            //Debug.Log("isValidSpawnLoc!i= " + altitudeSample.ToString() + ", spawnWorldPos: " + spawnWorldPos.ToString());
+       
+        Debug.Log("SpawnAgentImmaculate!i= " + agentIndex.ToString() + ", spawnWorldPos: " + spawnPos2D.ToString());
             
-            agentsArray[agentIndex].InitializeSpawnAgentImmaculate(settingsManager, agentIndex, sourceCandidate, spawnWorldPos, theRenderKing.baronVonWater._GlobalWaterLevel); // Spawn that genome in dead Agent's body and revive it!
-            theRenderKing.UpdateCritterGenericStrokesData(agentsArray[agentIndex]); //agentIndex, sourceCandidate.candidateGenome);
-            numAgentsBorn++;
-            //Debug.Log("%%%%%% SpawnAgentImmaculate pos: " + spawnWorldPos.ToString());
-            
-        }
-        else {
-            Debug.Log("INVALID!" + altitudeSample.ToString() + ", spawnWorldPos: " + spawnWorldPos.ToString());
-        }
-        */
-
+        agentsArray[agentIndex].InitializeSpawnAgentImmaculate(settingsManager, agentIndex, sourceCandidate, new Vector3(spawnPos2D.x, spawnPos2D.y, 0f), theRenderKing.baronVonWater._GlobalWaterLevel); // Spawn that genome in dead Agent's body and revive it!
+        theRenderKing.UpdateCritterGenericStrokesData(agentsArray[agentIndex]); //agentIndex, sourceCandidate.candidateGenome);
+        numAgentsBorn++;
 
     }
     public void ProcessDeadEggSack(int eggSackIndex) {

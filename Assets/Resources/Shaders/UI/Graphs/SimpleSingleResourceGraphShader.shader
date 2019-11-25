@@ -68,35 +68,26 @@
 				float gridLineSpacing = 1 / gridDivisions;
 				
 				half2 finalCoords = IN.texcoord;
-				//float initialScore = tex2D(_FitnessTex, 0).b;
-				//float latestScore = tex2D(_FitnessTex, 1).x;
-				/*float pivotY = 0.5; //(initialScore + latestScore) / 2;
-				if((pivotY + (_ZoomFactorY * 0.5)) > 1) {
-					pivotY = 1 - (_ZoomFactorY * 0.5);
-				}
-				if((pivotY - (_ZoomFactorY * 0.5)) < 0) {
-					pivotY = (_ZoomFactorY * 0.5);
-				}
-				finalCoords.x = (finalCoords.x * _ZoomFactorX) + (1 - _ZoomFactorX);
-				finalCoords.y = (finalCoords.y * _ZoomFactorY) + (pivotY - (_ZoomFactorY * 0.5));
-				*/
+				
 				half4 bgColor = half4(0, 0, 0, 0.33);
 				half4 onColor = half4(0.24, 0.33, 0.26, 1.0);
 				half4 centerLineColor = half4(0.5, 0.5, 0.5, 1.0);
 				half4 gridColor = half4(0.14, 0.14, 0.14, 1.0);
 												
 				half4 pixColor = bgColor;
-
+						
+					
+				//OLD//   float4 fitnessScores = saturate(sqrt(tex2D(_DataTex, float2(finalCoords.x * _SampleCoordMax, 0.5)) / _MaxValue));
+				float4 fitnessScores = tex2D(_DataTex, float2(finalCoords.x * _SampleCoordMax, 0.5)); // / _MaxValue;
+				float score = (fitnessScores.x - _MinValue) / (_MaxValue - _MinValue);
 				
-				float4 fitnessScores = saturate(sqrt(tex2D(_DataTex, float2(finalCoords.x * _SampleCoordMax, 0.5)) / _MaxValue));
-
-				float distR = abs(finalCoords.y - fitnessScores.x);
+				float distR = abs(finalCoords.y - score);
 				
 				//  smoothstep( min , max , x )
 				//  For values of x between min and max , returns a smoothly varying value that ranges from 0 at x = min to 1 at x = max .
 				//  x is clamped to the range [ min , max ] and then the interpolation formula is evaluated:
 				
-				float isSolidMask = saturate((fitnessScores.x - finalCoords.y) * 100);
+				float isSolidMask = saturate((score - finalCoords.y) * 100);
 				pixColor.rgb = lerp(pixColor.rgb, _Tint.rgb, 0.5 * isSolidMask);
 
 				if(distR < (lineWidth + lineFadeWidth)) {

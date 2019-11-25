@@ -171,7 +171,11 @@
 				finalColor *= 1.0 + i.highlight.x * 2 + i.highlight.y;
 
 				finalColor.rgb = lerp(finalColor.rgb, terrainColorTex.rgb, 0.4 + saturate(i.status.y) * 0.7);
-				return float4(finalColor.rgb, (1.0 - circleMask) * i.status.x); // * (1.0 + i.color.y));  // age
+				finalColor = float4(finalColor.rgb, (1.0 - circleMask) * i.status.x);
+				
+				
+				finalColor.rgb = float3(1,0.25,0.521) * 1.73;
+				return finalColor;//  // * (1.0 + i.color.y));  // age
 
 			}
 		ENDCG

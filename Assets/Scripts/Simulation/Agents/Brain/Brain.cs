@@ -23,12 +23,14 @@ public class Brain {
         // I need access to all of the Modules in order to link the neuron values to the module values!!!!
         for (int i = 0; i < genome.bodyNeuronList.Count; i++) {
             Neuron neuron = new Neuron();
+            neuron.name = genome.bodyNeuronList[i].name;
             agent.MapNeuronToModule(genome.bodyNeuronList[i].nid, neuron);
             IDs.Add(genome.bodyNeuronList[i].nid, i);
             neuronList.Add(neuron);
         }
         for (int i = 0; i < genome.hiddenNeuronList.Count; i++) {  // REVISIT
             Neuron neuron = new Neuron();
+            neuron.name = genome.hiddenNeuronList[i].name;
             agent.MapNeuronToModule(genome.hiddenNeuronList[i].nid, neuron);
             IDs.Add(genome.hiddenNeuronList[i].nid, i);
             neuronList.Add(neuron);

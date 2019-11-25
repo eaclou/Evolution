@@ -321,7 +321,7 @@ public class SpeciesGenomePool {
         int[] rankedIndicesList = new int[numCandidates];
         float totalFitness = 0f;
 
-        string leaderboardGenomesListString = "LEADERBOARD GENOMES (" + speciesID.ToString() + ")";
+        //string leaderboardGenomesListString = "LEADERBOARD GENOMES (" + speciesID.ToString() + ")";
         // Rank current leaderBoard list based on score
         for (int i = 0; i < numCandidates; i++) {
             float fitnessScore = 0.01f;
@@ -332,9 +332,9 @@ public class SpeciesGenomePool {
             rankedIndicesList[i] = i;
             totalFitness += fitnessScore;
 
-            leaderboardGenomesListString += "\n#" + i.ToString() + ", score= " + fitnessScore.ToString();
+            //leaderboardGenomesListString += "\n#" + i.ToString() + ", score= " + fitnessScore.ToString();
         }
-        Debug.Log(leaderboardGenomesListString);
+        //Debug.Log(leaderboardGenomesListString);
         
         // Sort By Fitness
         for (int i = 0; i < numCandidates - 1; i++) {

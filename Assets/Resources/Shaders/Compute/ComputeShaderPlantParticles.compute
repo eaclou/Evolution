@@ -217,7 +217,7 @@ void CSEatSelectedFoodParticles (uint3 id : SV_DispatchThreadID)
 	if(distanceSquared < combinedRadius * combinedRadius) {	
 		
 		if(critterSimData.consumeOn > 0.5) {   // revisit
-			eatenAmount = mass * 0.0085; // mouthRadius * mouthRadius * 0.025; // * critterInitData.eatEfficiencyPlant * 0.05f;		
+			eatenAmount = mass * 0.085; // mouthRadius * mouthRadius * 0.025; // * critterInitData.eatEfficiencyPlant * 0.05f;		
 			
 			foodParticlesWrite[particleIndex].biomass = particleData.biomass - eatenAmount;
 			

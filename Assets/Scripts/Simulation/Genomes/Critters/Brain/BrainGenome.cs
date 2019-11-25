@@ -54,7 +54,7 @@ public class BrainGenome {
         }
         //Create Hidden nodes TEMP!!!!
         for (int i = 0; i < numInitHiddenNeurons; i++) {
-            NeuronGenome neuron = new NeuronGenome(NeuronGenome.NeuronType.Hid, -1, i);
+            NeuronGenome neuron = new NeuronGenome("Hid" + i.ToString(), NeuronGenome.NeuronType.Hid, -1, i);
             hiddenNeuronList.Add(neuron);
         }
         // Initialize partially connected with all weights Random
@@ -201,7 +201,7 @@ public class BrainGenome {
             // find a link and expand it:
             int randLinkID = UnityEngine.Random.Range(0, linkList.Count);
             // create new neuron
-            NeuronGenome newNeuronGenome = new NeuronGenome(NeuronGenome.NeuronType.Hid, -1, hiddenNeuronList.Count);
+            NeuronGenome newNeuronGenome = new NeuronGenome("HidNew", NeuronGenome.NeuronType.Hid, -1, hiddenNeuronList.Count);
             hiddenNeuronList.Add(newNeuronGenome);
             // create 2 new links
             LinkGenome linkGenome1 = new LinkGenome(linkList[randLinkID].fromModuleID, linkList[randLinkID].fromNeuronID, newNeuronGenome.nid.moduleID, newNeuronGenome.nid.neuronID, 1f, true);

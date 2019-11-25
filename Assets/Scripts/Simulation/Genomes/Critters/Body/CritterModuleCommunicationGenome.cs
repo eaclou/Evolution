@@ -18,20 +18,20 @@ public class CritterModuleCommunicationGenome {
     public void GenerateRandomInitialGenome() {
         // Do stuff:
 
-        useComms = true;
+        useComms = false;
     }
 
     public void AppendModuleNeuronsToMasterList(ref List<NeuronGenome> neuronList) {
         if(useComms) {
-            NeuronGenome inComm0 = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 40); // 40
-            NeuronGenome inComm1 = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 41);// 41
-            NeuronGenome inComm2 = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 42); // 42
-            NeuronGenome inComm3 = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 43); // 43 
+            NeuronGenome inComm0 = new NeuronGenome("InComm0", NeuronGenome.NeuronType.In, inno, 40); // 40
+            NeuronGenome inComm1 = new NeuronGenome("InComm1", NeuronGenome.NeuronType.In, inno, 41);// 41
+            NeuronGenome inComm2 = new NeuronGenome("InComm2", NeuronGenome.NeuronType.In, inno, 42); // 42
+            NeuronGenome inComm3 = new NeuronGenome("InComm3", NeuronGenome.NeuronType.In, inno, 43); // 43 
             // 44 Total Inputs
-            NeuronGenome outComm0 = new NeuronGenome(NeuronGenome.NeuronType.Out, inno, 103); // 103
-            NeuronGenome outComm1 = new NeuronGenome(NeuronGenome.NeuronType.Out, inno, 104); // 104
-            NeuronGenome outComm2 = new NeuronGenome(NeuronGenome.NeuronType.Out, inno, 105); // 105
-            NeuronGenome outComm3 = new NeuronGenome(NeuronGenome.NeuronType.Out, inno, 106); // 106
+            NeuronGenome outComm0 = new NeuronGenome("OutComm0", NeuronGenome.NeuronType.Out, inno, 103); // 103
+            NeuronGenome outComm1 = new NeuronGenome("OutComm1", NeuronGenome.NeuronType.Out, inno, 104); // 104
+            NeuronGenome outComm2 = new NeuronGenome("OutComm2", NeuronGenome.NeuronType.Out, inno, 105); // 105
+            NeuronGenome outComm3 = new NeuronGenome("OutComm3", NeuronGenome.NeuronType.Out, inno, 106); // 106
 
             neuronList.Add(inComm0); // 40
             neuronList.Add(inComm1); // 41

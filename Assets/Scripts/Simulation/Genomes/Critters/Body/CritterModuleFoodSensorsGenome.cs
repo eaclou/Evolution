@@ -30,17 +30,14 @@ public class CritterModuleFoodSensorsGenome {
 
     public void GenerateRandomInitialGenome() {
         // Do stuff:
-        useNutrients = true;
+        useNutrients = false;
         usePos = true;
         useVel = true;
         useDir = true;
-        useStats = true;
-        useEggs = true;
-        useCorpse = true;
+        useStats = false;
+        useEggs = false;
+        useCorpse = false;
 
-        //preferenceParticles = 0.5f;
-        //preferenceEggs = 0.5f;
-        //preferenceCreatures = 0.5f;
         preferredSize = 0.5f;
 
         sensorRangeMult = 1f;
@@ -48,73 +45,73 @@ public class CritterModuleFoodSensorsGenome {
 
     public void AppendModuleNeuronsToMasterList(ref List<NeuronGenome> neuronList) {
         if(useNutrients) {
-            NeuronGenome nutrientDensity = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 1);
-            NeuronGenome nutrientGradX = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 2);
-            NeuronGenome nutrientGradY = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 3);
+            NeuronGenome nutrientDensity = new NeuronGenome("nutrientDensity", NeuronGenome.NeuronType.In, inno, 1);
+            NeuronGenome nutrientGradX = new NeuronGenome("nutrientGradX", NeuronGenome.NeuronType.In, inno, 2);
+            NeuronGenome nutrientGradY = new NeuronGenome("nutrientGradY", NeuronGenome.NeuronType.In, inno, 3);
             neuronList.Add(nutrientDensity);
             neuronList.Add(nutrientGradX);
             neuronList.Add(nutrientGradY);
         }
         if(usePos) {
-            NeuronGenome foodPosX = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 4);
-            NeuronGenome foodPosY = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 5);
-            NeuronGenome distance = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 6);
+            NeuronGenome foodPosX = new NeuronGenome("foodPosX", NeuronGenome.NeuronType.In, inno, 4);
+            NeuronGenome foodPosY = new NeuronGenome("foodPosY", NeuronGenome.NeuronType.In, inno, 5);
+            NeuronGenome distance = new NeuronGenome("distance", NeuronGenome.NeuronType.In, inno, 6);
             neuronList.Add(foodPosX);
             neuronList.Add(foodPosY);
             neuronList.Add(distance);
 
-            NeuronGenome animalPosX = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 24);
-            NeuronGenome animalPosY = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 25);
-            NeuronGenome animalDistance = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 26);
+            NeuronGenome animalPosX = new NeuronGenome("animalPosX", NeuronGenome.NeuronType.In, inno, 24);
+            NeuronGenome animalPosY = new NeuronGenome("animalPosY", NeuronGenome.NeuronType.In, inno, 25);
+            NeuronGenome animalDistance = new NeuronGenome("animalDistance", NeuronGenome.NeuronType.In, inno, 26);
             neuronList.Add(animalPosX);
             neuronList.Add(animalPosY);
             neuronList.Add(animalDistance);
         }
         if(useVel) {
-            NeuronGenome foodVelX = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 7);
-            NeuronGenome foodVelY = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 8);
+            NeuronGenome foodVelX = new NeuronGenome("foodVelX", NeuronGenome.NeuronType.In, inno, 7);
+            NeuronGenome foodVelY = new NeuronGenome("foodVelY", NeuronGenome.NeuronType.In, inno, 8);
             neuronList.Add(foodVelX);
             neuronList.Add(foodVelY);
 
-            NeuronGenome animalVelX = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 27);
-            NeuronGenome animalVelY = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 28);
+            NeuronGenome animalVelX = new NeuronGenome("animalVelX", NeuronGenome.NeuronType.In, inno, 27);
+            NeuronGenome animalVelY = new NeuronGenome("animalVelY", NeuronGenome.NeuronType.In, inno, 28);
             neuronList.Add(animalVelX);
             neuronList.Add(animalVelY);
         }
         if(useDir) {
-            NeuronGenome foodDirX = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 9);
-            NeuronGenome foodDirY = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 10);
+            NeuronGenome foodDirX = new NeuronGenome("foodDirX", NeuronGenome.NeuronType.In, inno, 9);
+            NeuronGenome foodDirY = new NeuronGenome("foodDirY", NeuronGenome.NeuronType.In, inno, 10);
             neuronList.Add(foodDirX);
             neuronList.Add(foodDirY);
 
-            NeuronGenome animalDirX = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 29);
-            NeuronGenome animalDirY = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 30);
+            NeuronGenome animalDirX = new NeuronGenome("animalDirX", NeuronGenome.NeuronType.In, inno, 29);
+            NeuronGenome animalDirY = new NeuronGenome("animalDirY", NeuronGenome.NeuronType.In, inno, 30);
             neuronList.Add(animalDirX);
             neuronList.Add(animalDirY);
         }
         if(useStats) {
-            NeuronGenome foodQuality = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 11);
-            NeuronGenome foodRelSize = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 12);
+            NeuronGenome foodQuality = new NeuronGenome("foodQuality", NeuronGenome.NeuronType.In, inno, 11);
+            NeuronGenome foodRelSize = new NeuronGenome("foodRelSize", NeuronGenome.NeuronType.In, inno, 12);
             neuronList.Add(foodQuality);
             neuronList.Add(foodRelSize);
 
-            NeuronGenome animalQuality = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 31);
-            NeuronGenome animalRelSize = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 32);
+            NeuronGenome animalQuality = new NeuronGenome("animalQuality", NeuronGenome.NeuronType.In, inno, 31);
+            NeuronGenome animalRelSize = new NeuronGenome("animalRelSize", NeuronGenome.NeuronType.In, inno, 32);
             neuronList.Add(animalQuality);
             neuronList.Add(animalRelSize);
         }
         if(useEggs) {
-            NeuronGenome distance = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 13);
-            NeuronGenome eggDirX = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 14);
-            NeuronGenome eggDirY = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 15);
+            NeuronGenome distance = new NeuronGenome("distance", NeuronGenome.NeuronType.In, inno, 13);
+            NeuronGenome eggDirX = new NeuronGenome("eggDirX", NeuronGenome.NeuronType.In, inno, 14);
+            NeuronGenome eggDirY = new NeuronGenome("eggDirY", NeuronGenome.NeuronType.In, inno, 15);
             neuronList.Add(distance);
             neuronList.Add(eggDirX);
             neuronList.Add(eggDirY);
         }
         if(useCorpse) {
-            NeuronGenome distance = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 16);
-            NeuronGenome corpseDirX = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 17);
-            NeuronGenome corpseDirY = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 18);
+            NeuronGenome distance = new NeuronGenome("distance", NeuronGenome.NeuronType.In, inno, 16);
+            NeuronGenome corpseDirX = new NeuronGenome("corpseDirX", NeuronGenome.NeuronType.In, inno, 17);
+            NeuronGenome corpseDirY = new NeuronGenome("corpseDirY", NeuronGenome.NeuronType.In, inno, 18);
             neuronList.Add(distance);
             neuronList.Add(corpseDirX);
             neuronList.Add(corpseDirY);

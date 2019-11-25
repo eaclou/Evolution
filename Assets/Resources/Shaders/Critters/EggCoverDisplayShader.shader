@@ -21,7 +21,7 @@
 			#pragma target 5.0
 			#include "UnityCG.cginc"
 			#include "Assets/Resources/Shaders/Inc/NoiseShared.cginc"
-			#include "Assets/Resources/Shaders/Inc/StructsEggData.cginc"
+			//#include "Assets/Resources/Shaders/Inc/StructsEggData.cginc"
 			#include "Assets/Resources/Shaders/Inc/StructsCritterData.cginc"
 
 			sampler2D _MainTex;
@@ -105,7 +105,7 @@
 				float refractionStrength = 2.45;
 				//worldPosition.xy += -surfaceNormal.xy * refractionStrength;
 				
-				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)) + float4(quadPoint * 0.5, 0.0));
+				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)) + float4(quadPoint * 0.15, 0.0));
 				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)) + float4(rotatedPoint, 0.0));
 				
 				float2 uv0 = quadVerticesCBuffer[id] + 0.5; // full texture

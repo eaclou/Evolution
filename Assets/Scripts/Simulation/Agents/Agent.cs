@@ -182,7 +182,7 @@ public class Agent : MonoBehaviour {
 
     public float avgVel;
     public Vector2 avgFluidVel;
-    public float worldAltitude;
+    public float waterDepth;
     public Vector2 depthGradient;
     //public float depthNorth;
     //public float depthEast;
@@ -915,7 +915,7 @@ public class Agent : MonoBehaviour {
         currentBiomass = settingsRef.agentSettings._BaseInitMass;
         biomassAtDeath = currentBiomass; // avoid divide by 0
         fullsizeBiomass = currentBiomass * 100f;
-        coreModule.energy = currentBiomass * 36f;  // should be proportional to body size??
+        coreModule.energy = currentBiomass * 120f;  // should be proportional to body size??
 
         
 
@@ -1098,7 +1098,7 @@ public class Agent : MonoBehaviour {
         }
 
         // Heal:  // *** Re-Implement !!! ***************
-        float healRate = 0.0005f;
+        float healRate = 0.0001f;
         float energyToHealthConversionRate = 5f * coreModule.healthBonus;
         if(coreModule.healthBody < 1f) {
             coreModule.healthBody += healRate;
@@ -1137,11 +1137,12 @@ public class Agent : MonoBehaviour {
         }
 
         //ENERGY:
-        float energyCostMult = Mathf.Lerp(settingsRef.agentSettings._BaseEnergyCost, settingsRef.agentSettings._BaseEnergyCost * 0.25f, sizePercentage);
+        float energyCostMult = 0.44f; // Mathf.Lerp(settingsRef.agentSettings._BaseEnergyCost, settingsRef.agentSettings._BaseEnergyCost * 0.25f, sizePercentage);
         float restingBonusMult = 1f;
         if(isResting) {
-            restingBonusMult = 0.5f;
+            restingBonusMult = 0.9f;
         }
+        
         float energyCost = (currentBiomass) * energyCostMult * restingBonusMult; // * SimulationManager.energyDifficultyMultiplier; // / coreModule.energyBonus;
         
         float throttleMag = smoothedThrottle.magnitude;
@@ -1394,8 +1395,8 @@ public class Agent : MonoBehaviour {
 
             //float aspectSpeedPenalty = 1.0f; // Mathf.Lerp(1.2f, 0.4f, candidateRef.candidateGenome.bodyGenome.coreGenome.creatureAspectRatio);
 
-            float swimSpeed = Mathf.Lerp(movementModule.smallestCreatureBaseSpeed, movementModule.largestCreatureBaseSpeed, 0.5f); // sizeValue);
-            float turnRate = Mathf.Lerp(movementModule.smallestCreatureBaseTurnRate, movementModule.largestCreatureBaseTurnRate, 0.5f) * 0.1f; // sizeValue);
+            float swimSpeed = 200f; // Mathf.Lerp(movementModule.smallestCreatureBaseSpeed, movementModule.largestCreatureBaseSpeed, 0.5f); // sizeValue);
+            float turnRate = 10f; // Mathf.Lerp(movementModule.smallestCreatureBaseTurnRate, movementModule.largestCreatureBaseTurnRate, 0.5f) * 0.1f; // sizeValue);
             float dashBonus = 1f;
             if(isDashing) {                
                 dashBonus = 5f;                
@@ -1403,9 +1404,9 @@ public class Agent : MonoBehaviour {
             if(isCooldown) {
                 dashBonus = 0.5f;
             }
-            
 
-            speed = swimSpeed * movementModule.speedBonus * dashBonus * forcePenalty; // * restingPenalty;
+
+            speed = swimSpeed * dashBonus * forcePenalty; // * movementModule.speedBonus ; // * restingPenalty;
             
             Vector2 segmentForwardDir = new Vector2(this.bodyRigidbody.transform.up.x, this.bodyRigidbody.transform.up.y).normalized;
 
@@ -1576,7 +1577,11 @@ public class Agent : MonoBehaviour {
         sizePercentage = 0.005f;
 
         // Positioning and Pinning to parentEggSack HERE:
-        bodyGO.transform.position = startPos;
+        bodyRigidbody.isKinematic = true;
+        bodyRigidbody.simulated = false;
+
+        bodyGO.transform.position = startPos;  //old//
+        bodyRigidbody.MovePosition(startPos);
 
         bodyRigidbody.isKinematic = false;
         bodyRigidbody.simulated = true;

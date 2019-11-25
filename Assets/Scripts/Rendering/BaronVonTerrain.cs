@@ -356,7 +356,7 @@ public class BaronVonTerrain : RenderBaron {
                 Vector2 offset = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f) * 0.0f) * 16f;
                 Vector3 pos = new Vector3(xPos + offset.x, yPos + offset.y, 0f);
                 terrainStrokesArray[index].worldPos = pos;
-                terrainStrokesArray[index].scale = new Vector2(UnityEngine.Random.Range(0.4f, 0.8f), UnityEngine.Random.Range(1.5f, 2f)) * 12f; // Y is forward, along stroke
+                terrainStrokesArray[index].scale = new Vector2(UnityEngine.Random.Range(0.4f, 0.8f), UnityEngine.Random.Range(1.5f, 2f)) * 14f; // Y is forward, along stroke
                 terrainStrokesArray[index].heading = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)).normalized;
                 terrainStrokesArray[index].brushType = UnityEngine.Random.Range(0,4);
                 terrainStrokesArray[index].isActive = 0f;

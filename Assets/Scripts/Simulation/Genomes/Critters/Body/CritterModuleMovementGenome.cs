@@ -18,15 +18,15 @@ public class CritterModuleMovementGenome {
 
     public void AppendModuleNeuronsToMasterList(ref List<NeuronGenome> neuronList) {
 
-        NeuronGenome ownVelX = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 20); // 20
-        NeuronGenome ownVelY = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 21); // 21
+        NeuronGenome ownVelX = new NeuronGenome("ownVelX", NeuronGenome.NeuronType.In, inno, 20); // 20
+        NeuronGenome ownVelY = new NeuronGenome("ownVelY", NeuronGenome.NeuronType.In, inno, 21); // 21
 
-        NeuronGenome facingDirX = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 207); // 20
-        NeuronGenome facingDirY = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 208); // 21
+        NeuronGenome facingDirX = new NeuronGenome("facingDirX", NeuronGenome.NeuronType.In, inno, 207); // 20
+        NeuronGenome facingDirY = new NeuronGenome("facingDirY", NeuronGenome.NeuronType.In, inno, 208); // 21
 
-        NeuronGenome throttleX = new NeuronGenome(NeuronGenome.NeuronType.Out, inno, 100); // 100
-        NeuronGenome throttleY = new NeuronGenome(NeuronGenome.NeuronType.Out, inno, 101); // 101
-        NeuronGenome dash = new NeuronGenome(NeuronGenome.NeuronType.Out, inno, 102); // 102
+        NeuronGenome throttleX = new NeuronGenome("throttleX", NeuronGenome.NeuronType.Out, inno, 100); // 100
+        NeuronGenome throttleY = new NeuronGenome("throttleY", NeuronGenome.NeuronType.Out, inno, 101); // 101
+        NeuronGenome dash = new NeuronGenome("dash", NeuronGenome.NeuronType.Out, inno, 102); // 102
 
         neuronList.Add(ownVelX); // 20
         neuronList.Add(ownVelY); // 21

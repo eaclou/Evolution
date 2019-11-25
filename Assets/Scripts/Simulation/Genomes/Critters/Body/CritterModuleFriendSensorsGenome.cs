@@ -22,27 +22,27 @@ public class CritterModuleFriendSensorsGenome {
     public void GenerateRandomInitialGenome() {
         // Do stuff:
 
-        usePos = true;
+        usePos = false;
         useVel = false;
         useDir = false;
     }
 
     public void AppendModuleNeuronsToMasterList(ref List<NeuronGenome> neuronList) {
         if(usePos) {
-            NeuronGenome friendPosX = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 8);
-            NeuronGenome friendPosY = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 9);
+            NeuronGenome friendPosX = new NeuronGenome("friendPosX", NeuronGenome.NeuronType.In, inno, 8);
+            NeuronGenome friendPosY = new NeuronGenome("friendPosY", NeuronGenome.NeuronType.In, inno, 9);
             neuronList.Add(friendPosX); // 8
             neuronList.Add(friendPosY); // 9
         }
         if(useVel) {
-            NeuronGenome friendVelX = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 10);
-            NeuronGenome friendVelY = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 11);
+            NeuronGenome friendVelX = new NeuronGenome("friendVelX", NeuronGenome.NeuronType.In, inno, 10);
+            NeuronGenome friendVelY = new NeuronGenome("friendVelY", NeuronGenome.NeuronType.In, inno, 11);
             neuronList.Add(friendVelX); // 10
             neuronList.Add(friendVelY); // 11
         }
         if(useDir) {
-            NeuronGenome friendDirX = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 12);
-            NeuronGenome friendDirY = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 13);
+            NeuronGenome friendDirX = new NeuronGenome("friendDirX", NeuronGenome.NeuronType.In, inno, 12);
+            NeuronGenome friendDirY = new NeuronGenome("friendDirY", NeuronGenome.NeuronType.In, inno, 13);
             neuronList.Add(friendDirX); // 12
             neuronList.Add(friendDirY); // 13
         }

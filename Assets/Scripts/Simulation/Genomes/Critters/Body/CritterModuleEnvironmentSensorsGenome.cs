@@ -30,15 +30,15 @@ public class CritterModuleEnvironmentSensorsGenome {
 
     public void AppendModuleNeuronsToMasterList(ref List<NeuronGenome> neuronList) {
         if(useWaterStats) {
-            NeuronGenome depth = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 1); 
-            NeuronGenome velX = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 2); 
-            NeuronGenome velY = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 3); 
+            NeuronGenome depth = new NeuronGenome("depth", NeuronGenome.NeuronType.In, inno, 1); 
+            NeuronGenome velX = new NeuronGenome("velX", NeuronGenome.NeuronType.In, inno, 2); 
+            NeuronGenome velY = new NeuronGenome("velY", NeuronGenome.NeuronType.In, inno, 3); 
             neuronList.Add(depth);      
             neuronList.Add(velX);      
             neuronList.Add(velY);   
             
-            NeuronGenome depthGradX = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 4); 
-            NeuronGenome depthGradY = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 5); 
+            NeuronGenome depthGradX = new NeuronGenome("depthGradX", NeuronGenome.NeuronType.In, inno, 4); 
+            NeuronGenome depthGradY = new NeuronGenome("depthGradY", NeuronGenome.NeuronType.In, inno, 5); 
             neuronList.Add(depthGradX);   
             neuronList.Add(depthGradY); 
             /*

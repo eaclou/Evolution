@@ -3900,7 +3900,7 @@ public class TheRenderKing : MonoBehaviour {
                 float isHover = 0f;
                 if(simManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 1) {
                     if(simManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 1) {
-                        if(simManager.uiManager.curActiveTool == UIManager.ToolType.Watcher) {
+                        if(simManager.uiManager.curActiveTool == UIManager.ToolType.None) {
                             isHover = 1f;
                             if(simManager.vegetationManager.isPlantParticleSelected) {                
                                 isSelected = 1f;                
@@ -4007,7 +4007,7 @@ public class TheRenderKing : MonoBehaviour {
                 float isHoverA = 0f;
                 if(simManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2) {
                     if(simManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) {
-                        if(simManager.uiManager.curActiveTool == UIManager.ToolType.Watcher) {
+                        if(simManager.uiManager.curActiveTool == UIManager.ToolType.None) {
                             isHoverA = 1f;
                             isHighlight = 1f;
                             if(simManager.zooplanktonManager.isAnimalParticleSelected) {                   

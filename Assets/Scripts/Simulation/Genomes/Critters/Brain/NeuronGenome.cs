@@ -11,25 +11,28 @@ public class NeuronGenome {
         Hid,
         Out
     }
-
+    public string name = "none";
     public NID nid; // Neuron ID
 
     public NeuronGenome() {
 
     }
 
-    public NeuronGenome(NeuronType type, int moduleID, int neuronID) {
+    public NeuronGenome(string name, NeuronType type, int moduleID, int neuronID) {
         neuronType = type;
+        this.name = name;
         nid = new NID(moduleID, neuronID);
     }
 
-    public NeuronGenome(NeuronType type, NID nid) {
+    public NeuronGenome(string name, NeuronType type, NID nid) {
         neuronType = type;
+        this.name = name;
         this.nid = nid;
     }
 
     public NeuronGenome(NeuronGenome template) {
-        neuronType = template.neuronType;
-        nid = template.nid;
+        this.neuronType = template.neuronType;
+        this.name = template.name;
+        this.nid = template.nid;
     }
 }

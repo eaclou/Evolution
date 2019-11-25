@@ -31,6 +31,7 @@ public class TestModuleGenome {
     }
 
     public void InitializeBrainGenome(List<NeuronGenome> neuronList) {
+        /*
         NeuronGenome bias = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 0);
         NeuronGenome foodPosX = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 1);
         NeuronGenome foodPosY = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 2);
@@ -150,6 +151,6 @@ public class TestModuleGenome {
         neuronList.Add(outComm2); // 105
         neuronList.Add(outComm3); // 106 
         // 7 Total Outputs
-        
+        */
     }
 }

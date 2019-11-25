@@ -156,6 +156,7 @@
 
 				o.highlight = float4(hoverMask, selectedMask, 0, 0);
 
+				o.color = float4(lerp(critterInitData.secondaryHue, critterInitData.primaryHue, patternTexSample.x), 1);
 				return o;
 			}
 			
@@ -175,6 +176,7 @@
 				col.rgb = col.rgb * (1 + highlightBoost) + highlightBoost * 0.1;
 
 				//fixed4 col = tex2D(_MainTex, i.bodyUV) * i.color;
+				col.rgb = i.color.rgb;
 				return col;
 			}
 			ENDCG
