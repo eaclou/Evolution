@@ -16,16 +16,20 @@ public class TrophicSlot {
     public int slotID;
     public int linkedSpeciesID;
     public string speciesName;
+    public Sprite icon;
+    public Color color;
 
     public TrophicSlot() {
         status = SlotStatus.Off;  // default off (hidden)
     }
 
-    public void Initialize(string name, SlotStatus status, int kingdomID, int tierID, int slotID) {
+    public void Initialize(string name, SlotStatus status, int kingdomID, int tierID, int slotID, Sprite icon, Color color) {
         speciesName = name;
         this.status = status;
         this.kingdomID = kingdomID;
         this.tierID = tierID;
         this.slotID = slotID;
+        this.icon = icon;
+        this.color = color;
     }
 }

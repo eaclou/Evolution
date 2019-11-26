@@ -32,7 +32,7 @@ public class TrophicLayersManager {
     public int timeStepZooplanktonOn = 0;
     private int timeStepsLayerGrowthDuration = 1200;
 
-	public TrophicLayersManager() {  // constructor
+	public TrophicLayersManager(UIManager uiManagerRef) {  // constructor
         decomposersOn = false;  // first pass -- temporary?
         algaeOn = false;
         plantsOn = false;
@@ -44,50 +44,50 @@ public class TrophicLayersManager {
         kingdomDecomposers = new TrophicKingdom();
         kingdomDecomposers.name = "Decomposers";
         TrophicTier decomposersTier0 = new TrophicTier();
-        decomposersTier0.trophicSlots[0].Initialize("Decomposers", TrophicSlot.SlotStatus.Locked, 0, 0, 0);
+        decomposersTier0.trophicSlots[0].Initialize("Decomposers", TrophicSlot.SlotStatus.Locked, 0, 0, 0, uiManagerRef.spriteSpiritDecomposerIcon, uiManagerRef.colorDecomposersLayer);
         kingdomDecomposers.trophicTiersList.Add(decomposersTier0);
 
         // PLANTS::::
         kingdomPlants = new TrophicKingdom();
         kingdomPlants.name = "Plants";
         TrophicTier plantsTier0 = new TrophicTier();  // simple algae
-        plantsTier0.trophicSlots[0].Initialize("Algae", TrophicSlot.SlotStatus.Locked, 1, 0, 0);        
+        plantsTier0.trophicSlots[0].Initialize("Algae", TrophicSlot.SlotStatus.Locked, 1, 0, 0, uiManagerRef.spriteSpiritAlgaeIcon, uiManagerRef.colorAlgaeLayer);        
         kingdomPlants.trophicTiersList.Add(plantsTier0);
         TrophicTier plantsTier1 = new TrophicTier();  // bigger plants
-        plantsTier1.trophicSlots[0].Initialize("Floating Plants", TrophicSlot.SlotStatus.Locked, 1, 1, 0);
-        plantsTier1.trophicSlots[1].Initialize("Submerged Plants", TrophicSlot.SlotStatus.Locked, 1, 1, 1);
+        plantsTier1.trophicSlots[0].Initialize("Floating Plants", TrophicSlot.SlotStatus.Locked, 1, 1, 0, uiManagerRef.spriteSpiritPlantIcon, uiManagerRef.colorPlantsLayer);
+        plantsTier1.trophicSlots[1].Initialize("Submerged Plants", TrophicSlot.SlotStatus.Locked, 1, 1, 1, uiManagerRef.spriteSpiritPlantIcon, uiManagerRef.colorPlantsLayer);
         kingdomPlants.trophicTiersList.Add(plantsTier1);
 
         // ANIMALS:::::
         kingdomAnimals = new TrophicKingdom();
         kingdomAnimals.name = "Animals";
         TrophicTier animalsTier0 = new TrophicTier();  // Zooplankton
-        animalsTier0.trophicSlots[0].Initialize("Zooplankton", TrophicSlot.SlotStatus.Locked, 2, 0, 0);
+        animalsTier0.trophicSlots[0].Initialize("Zooplankton", TrophicSlot.SlotStatus.Locked, 2, 0, 0, uiManagerRef.spriteSpiritZooplanktonIcon, uiManagerRef.colorZooplanktonLayer);
         kingdomAnimals.trophicTiersList.Add(animalsTier0);
         TrophicTier animalsTier1 = new TrophicTier();  // full Agents
-        animalsTier1.trophicSlots[0].Initialize("Vertebrate", TrophicSlot.SlotStatus.Locked, 2, 1, 0);
-        animalsTier1.trophicSlots[1].Initialize("Vertebrate", TrophicSlot.SlotStatus.Locked, 2, 1, 1);
-        animalsTier1.trophicSlots[2].Initialize("Vertebrate", TrophicSlot.SlotStatus.Locked, 2, 1, 2);
-        animalsTier1.trophicSlots[3].Initialize("Vertebrate", TrophicSlot.SlotStatus.Locked, 2, 1, 3);
+        animalsTier1.trophicSlots[0].Initialize("Vertebrate", TrophicSlot.SlotStatus.Locked, 2, 1, 0, uiManagerRef.spriteSpiritVertebrateIcon, uiManagerRef.colorVertebratesLayer);
+        animalsTier1.trophicSlots[1].Initialize("Vertebrate", TrophicSlot.SlotStatus.Locked, 2, 1, 1, uiManagerRef.spriteSpiritVertebrateIcon, uiManagerRef.colorVertebratesLayer);
+        animalsTier1.trophicSlots[2].Initialize("Vertebrate", TrophicSlot.SlotStatus.Locked, 2, 1, 2, uiManagerRef.spriteSpiritVertebrateIcon, uiManagerRef.colorVertebratesLayer);
+        animalsTier1.trophicSlots[3].Initialize("Vertebrate", TrophicSlot.SlotStatus.Locked, 2, 1, 3, uiManagerRef.spriteSpiritVertebrateIcon, uiManagerRef.colorVertebratesLayer);
         kingdomAnimals.trophicTiersList.Add(animalsTier1);
 
         // TERRAIN !!!!::::::
         kingdomTerrain = new TrophicKingdom();
         kingdomTerrain.name = "Terrain";
         TrophicTier terrainTier0 = new TrophicTier();
-        terrainTier0.trophicSlots[0].Initialize("World", TrophicSlot.SlotStatus.On, 3, 0, 0);
-        terrainTier0.trophicSlots[1].Initialize("Stones", TrophicSlot.SlotStatus.On, 3, 0, 1);
-        terrainTier0.trophicSlots[2].Initialize("Pebbles", TrophicSlot.SlotStatus.On, 3, 0, 2);
-        terrainTier0.trophicSlots[3].Initialize("Sand", TrophicSlot.SlotStatus.On, 3, 0, 3);
+        terrainTier0.trophicSlots[0].Initialize("World", TrophicSlot.SlotStatus.On, 3, 0, 0, uiManagerRef.spriteSpiritWorldIcon, uiManagerRef.colorWorldLayer);
+        terrainTier0.trophicSlots[1].Initialize("Stones", TrophicSlot.SlotStatus.On, 3, 0, 1, uiManagerRef.spriteSpiritStoneIcon, uiManagerRef.colorTerrainLayer);
+        terrainTier0.trophicSlots[2].Initialize("Pebbles", TrophicSlot.SlotStatus.On, 3, 0, 2, uiManagerRef.spriteSpiritPebblesIcon, uiManagerRef.colorTerrainLayer);
+        terrainTier0.trophicSlots[3].Initialize("Sand", TrophicSlot.SlotStatus.On, 3, 0, 3, uiManagerRef.spriteSpiritSandIcon, uiManagerRef.colorTerrainLayer);
         kingdomTerrain.trophicTiersList.Add(terrainTier0);
 
         // OTHER!!!!!%%%
         kingdomOther = new TrophicKingdom();
         kingdomOther.name = "Other";
         TrophicTier otherTier0 = new TrophicTier();
-        otherTier0.trophicSlots[0].Initialize("Minerals", TrophicSlot.SlotStatus.On, 4, 0, 0);
-        otherTier0.trophicSlots[1].Initialize("Water", TrophicSlot.SlotStatus.On, 4, 0, 1);
-        otherTier0.trophicSlots[2].Initialize("Air", TrophicSlot.SlotStatus.On, 4, 0, 2);
+        otherTier0.trophicSlots[0].Initialize("Minerals", TrophicSlot.SlotStatus.On, 4, 0, 0, uiManagerRef.spriteSpiritMineralsIcon, uiManagerRef.colorMineralLayer);
+        otherTier0.trophicSlots[1].Initialize("Water", TrophicSlot.SlotStatus.On, 4, 0, 1, uiManagerRef.spriteSpiritWaterIcon, uiManagerRef.colorWaterLayer);
+        otherTier0.trophicSlots[2].Initialize("Air", TrophicSlot.SlotStatus.On, 4, 0, 2, uiManagerRef.spriteSpiritAirIcon, uiManagerRef.colorAirLayer);
         kingdomOther.trophicTiersList.Add(otherTier0);
                 
         selectedTrophicSlotRef = terrainTier0.trophicSlots[0];
@@ -267,7 +267,7 @@ public class TrophicLayersManager {
     public string GetSpeciesPreviewDescriptionString(SimulationManager simManager) {
         string str = "";
 
-        if(selectedTrophicSlotRef.kingdomID == 0) {
+        if(simManager.uiManager.knowledgeLockedTrophicSlotRef.kingdomID == 0) {
             str = "Bacterial and Fungal organisms that recycle vital nutrients."; //   \n\nUses: <b><color=#A97860FF>Waste</color></b>, <b><color=#8EDEEEFF>Oxygen</color></b>\n\nProduces: <b><color=#FBC653FF>Nutrients</color></b>";
 
             str += "\n\n";
@@ -278,8 +278,8 @@ public class TrophicLayersManager {
             str += "<color=#A97860FF>Waste Processed: <b>" + simManager.simResourceManager.detritusRemovedByDecomposersLastFrame.ToString("F3") + "</b></color>\n";
 
         }
-        else if(selectedTrophicSlotRef.kingdomID == 1) {
-            if (selectedTrophicSlotRef.tierID == 0) {  // ALGAE GRID
+        else if(simManager.uiManager.knowledgeLockedTrophicSlotRef.kingdomID == 1) {
+            if (simManager.uiManager.knowledgeLockedTrophicSlotRef.tierID == 0) {  // ALGAE GRID
                 str = "Microscopic Plants that form the foundation of the ecosystem along with the Decomposers."; //   \n\nUses: <b><color=#FBC653FF>Nutrients</color></b>\n\nProduces: <b><color=#8EDEEEFF>Oxygen</color></b>";
 
                 str += "\n\n";
@@ -303,8 +303,8 @@ public class TrophicLayersManager {
             }
             
         }
-        else if(selectedTrophicSlotRef.kingdomID == 2) {
-            if(selectedTrophicSlotRef.tierID == 0) {
+        else if(simManager.uiManager.knowledgeLockedTrophicSlotRef.kingdomID == 2) {
+            if(simManager.uiManager.knowledgeLockedTrophicSlotRef.tierID == 0) {
                 str = "Tiny Animals that feed on Algae."; //   \n\nUses: <b><color=#8EDEEEFF>Oxygen</color></b>\n\nProduces: <b><color=#A97860FF>Waste</color></b>";
                 str += "\n\n";
                 str += "<size=13><b>Total Biomass: " + simManager.simResourceManager.curGlobalAnimalParticles.ToString("F1") + "</b></size>\n\n";
@@ -316,13 +316,13 @@ public class TrophicLayersManager {
                 str = "Simple Animal that feeds on Plants and Zooplankton.";  //    \n\nUses: <b><color=#8EDEEEFF>Oxygen</color></b>\n\nProduces: <b><color=#A97860FF>Waste</color></b>";
                 str += "\n\n";
                 float speciesMass = 0f;
-                if (selectedTrophicSlotRef.slotID == 0) {
+                if (simManager.uiManager.knowledgeLockedTrophicSlotRef.slotID == 0) {
                     speciesMass = simManager.simResourceManager.curGlobalAgentBiomass0;
                 }
-                else if(selectedTrophicSlotRef.slotID == 1) {
+                else if(simManager.uiManager.knowledgeLockedTrophicSlotRef.slotID == 1) {
                     speciesMass = simManager.simResourceManager.curGlobalAgentBiomass1;
                 }
-                else if(selectedTrophicSlotRef.slotID == 2) {
+                else if(simManager.uiManager.knowledgeLockedTrophicSlotRef.slotID == 2) {
                     speciesMass = simManager.simResourceManager.curGlobalAgentBiomass2;
                 }
                 else {
@@ -350,13 +350,13 @@ public class TrophicLayersManager {
             }            
         }
         else {
-            if(selectedTrophicSlotRef.slotID == 0) {
+            if(simManager.uiManager.knowledgeLockedTrophicSlotRef.slotID == 0) {
                 str = "World";
             }
-            else if(selectedTrophicSlotRef.slotID == 1) {
+            else if(simManager.uiManager.knowledgeLockedTrophicSlotRef.slotID == 1) {
                 str = "Stone";
             }
-            else if(selectedTrophicSlotRef.slotID == 2) {
+            else if(simManager.uiManager.knowledgeLockedTrophicSlotRef.slotID == 2) {
                 str = "Pebbles";
             }
             else {

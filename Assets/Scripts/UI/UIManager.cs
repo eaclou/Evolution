@@ -9,6 +9,9 @@ public class UIManager : MonoBehaviour {
 
     #region attributes
     public GameManager gameManager;
+    public WatcherUI watcherUI;
+    public KnowledgeUI knowledgeUI;
+    public MutationUI mutationUI;
     //public SimulationManager simManager; - go through gameManager
     public CameraManager cameraManager;
     public GameOptionsManager gameOptionsManager;
@@ -188,7 +191,7 @@ public class UIManager : MonoBehaviour {
     //private bool inspectToolUnlocked = true;
 
     public Button buttonToolbarWatcher;
-    public Image imageToolbarInspectLinkedIcon;
+    //public Image imageToolbarInspectLinkedIcon;
     //public Sprite spriteToolbarInspectButton;
     //public Button buttonToolbarNutrients;
     //public Sprite spriteToolbarStirButton;
@@ -199,7 +202,7 @@ public class UIManager : MonoBehaviour {
     public Image imageToolbarAddLinkedIcon;
     //public Button buttonToolbarRemove;
     public Button buttonToolbarKnowledge;
-    public Image imageToolbarKnowledgeLinkedIcon;
+    //public Image imageToolbarKnowledgeLinkedIcon;
 
     public Text textKnowledgePanelTargetLayer;    
     
@@ -967,8 +970,7 @@ public class UIManager : MonoBehaviour {
                     }
                     gameManager.theRenderKing.isStirring = isDraggingMouseLeft;
                     gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_IsStirring", isActing);
-                    gameManager.theRenderKing.gizmoStirStickAMat.SetFloat("_IsStirring", isActing);
-                    //gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_Radius", Mathf.Lerp(0.05f, 2.5f, gameManager.theRenderKing.baronVonWater.camDistNormalized));  // **** Make radius variable! (possibly texture based?)
+                    gameManager.theRenderKing.gizmoStirStickAMat.SetFloat("_IsStirring", isActing);                    
                     gameManager.theRenderKing.gizmoStirStickAMat.SetFloat("_Radius", 6.2f);
                 }
 
@@ -977,8 +979,7 @@ public class UIManager : MonoBehaviour {
                 gameManager.theRenderKing.nutrientToolOn = false;
                 isBrushAddingAgents = false;
                 gameManager.simulationManager.vegetationManager.isBrushActive = false;
-                //isBrushingAgents = false;
-                //gameManager.simulationManager.theRenderKing.ClickTestTerrain(true); // *********************** always updates!
+                
                 if (curActiveTool == ToolType.Add) {
                     // What Palette Trophic Layer is selected?
 
@@ -1018,7 +1019,7 @@ public class UIManager : MonoBehaviour {
                                         //gameManager.simulationManager.recentlyAddedSpeciesOn = true; // ** needed?
                                         isBrushAddingAgents = true;
                                         
-                                        Debug.Log("isBrushAddingAgents = true; speciesID = " + speciesIndex.ToString());
+                                        //Debug.Log("isBrushAddingAgents = true; speciesID = " + speciesIndex.ToString());
 
                                         brushAddAgentCounter++;
 
@@ -1108,8 +1109,7 @@ public class UIManager : MonoBehaviour {
 
                     }
                     else {
-                        //gameManager.simulationManager.theRenderKing.ClickTestTerrainUpdateMaps(false, 0.05f);
-                        //gameManager.simulationManager.recentlyAddedSpeciesOn = false;
+                        
                     }
                 }
                 else {
@@ -1181,12 +1181,20 @@ public class UIManager : MonoBehaviour {
         TrophicSlot slotRef = gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef;
         if (slotRef != null) {
             if (isKnowledgeTargetLayerLocked) {
-
+                knowledgeUI.buttonKnowledgeLock.GetComponent<Image>().color = knowledgeLockedTrophicSlotRef.color;
             }
             else {
                 knowledgeLockedTrophicSlotRef = slotRef;
                 textKnowledgePanelTargetLayer.text = isKnowledgeTargetLayerLocked.ToString() + ", " + knowledgeLockedTrophicSlotRef.kingdomID.ToString();
             }
+        }
+
+        if(isKnowledgeTargetLayerLocked) {
+            knowledgeUI.buttonKnowledgeLock.GetComponentInChildren<Text>().text = "Locked!";
+        }
+        else {
+            knowledgeUI.buttonKnowledgeLock.GetComponentInChildren<Text>().text = "Unlocked!";
+            knowledgeUI.buttonKnowledgeLock.GetComponent<Image>().color = Color.white;
         }
 
         panelKnowledgeInfoWorld.SetActive(false);
@@ -1323,7 +1331,7 @@ public class UIManager : MonoBehaviour {
         TrophicSlot slotRef = gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef;
         if(slotRef != null) {
             if(isWatcherTargetLayerLocked) {
-
+                watcherUI.buttonWatcherLock.GetComponent<Image>().color = watcherLockedTrophicSlotRef.color;
             }
             else {
                 watcherLockedTrophicSlotRef = slotRef;
@@ -1333,7 +1341,13 @@ public class UIManager : MonoBehaviour {
         }
         
        
-        
+        if(isWatcherTargetLayerLocked) {
+            watcherUI.buttonWatcherLock.GetComponentInChildren<Text>().text = "Locked!";
+        }
+        else {
+            watcherUI.buttonWatcherLock.GetComponentInChildren<Text>().text = "Unlocked!";
+            watcherUI.buttonWatcherLock.GetComponent<Image>().color = Color.white;
+        }
 
         panelWatcherSpiritVertebratesHUD.SetActive(false);
         panelWatcherSpiritVertebratesText.SetActive(false);
@@ -1520,8 +1534,8 @@ public class UIManager : MonoBehaviour {
                     hudString += "\nCur Biomass: " + agent.currentBiomass.ToString("F3");
                     hudString += "\nGrowth % " + (agent.currentBiomass / 2.5f * 100f).ToString("F0");
                     // STATE
-                    hudString += "\n" + curActivityID.ToString();
-                    hudString += "\n" + developmentStateID.ToString();
+                    hudString += "\n";// + curActivityID.ToString();
+                    hudString += "\n";// + developmentStateID.ToString();
                     // BIOMETRICS:
                     hudString += "\n\nNRG: " + agent.coreModule.energy.ToString("F1");
                     hudString += "\nHP: " + ((agent.coreModule.healthBody + agent.coreModule.healthHead + agent.coreModule.healthExternal) / 3f * 100f).ToString("F0");
@@ -1715,12 +1729,12 @@ public class UIManager : MonoBehaviour {
     public void UpdateToolbarPanelUI() {
 
         //if (true) { }
-            /*simManager.uiManager.AnnounceUnlockAlgae();
-                simManager.uiManager.isUnlockCooldown = true;
-                simManager.uiManager.unlockedAnnouncementSlotRef = kingdomPlants.trophicTiersList[0].trophicSlots[0];
-                simManager.uiManager.buttonToolbarExpandOn.GetComponent<Animator>().enabled = true;
-                simManager.uiManager.buttonToolbarExpandOn.interactable = true;)
-                */
+        /*simManager.uiManager.AnnounceUnlockAlgae();
+            simManager.uiManager.isUnlockCooldown = true;
+            simManager.uiManager.unlockedAnnouncementSlotRef = kingdomPlants.trophicTiersList[0].trophicSlots[0];
+            simManager.uiManager.buttonToolbarExpandOn.GetComponent<Animator>().enabled = true;
+            simManager.uiManager.buttonToolbarExpandOn.interactable = true;)
+            */
         /*if(!inspectToolUnlocked) {
             //if(gameManager.simulationManager.simResourceManager.curGlobalAgentBiomass > 0f) {
                 // Unlock!!!!
@@ -1729,14 +1743,57 @@ public class UIManager : MonoBehaviour {
                 
             //}
         }*/
-        
+
         // Check for Announcements:
         //CheckForAnnouncements();
+        TrophicSlot slotRefWatcher = gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef;
+        if(slotRefWatcher != null) {
+            if(isWatcherTargetLayerLocked) {
+                slotRefWatcher = watcherLockedTrophicSlotRef;
+            }
+            else {
+                
+                //textWatcherPanelTargetLayer.text = isWatcherTargetLayerLocked.ToString() + ", " + watcherLockedTrophicSlotRef.kingdomID.ToString();
+            }
+            
+        }
+        if(slotRefWatcher != null) {
+            watcherUI.imageWatcherButtonMIP.sprite = slotRefWatcher.icon; // isWatcherTargetLayerLocked;
+            watcherUI.imageWatcherButtonMIP.color = slotRefWatcher.color;
+            watcherUI.imageWatcherCurTarget.sprite = slotRefWatcher.icon;
+            watcherUI.imageWatcherCurTarget.color = slotRefWatcher.color;
+            watcherUI.textTargetLayer.text = slotRefWatcher.speciesName;
+            watcherUI.textTargetLayer.color = slotRefWatcher.color;
+
+        }
+        else {
+            
+        }
+
+        TrophicSlot slotRefKnowledge = gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef;
+        if(slotRefKnowledge != null) {
+            if(isKnowledgeTargetLayerLocked) {
+                slotRefKnowledge = knowledgeLockedTrophicSlotRef;
+            }            
+        }
+        if(slotRefKnowledge != null) {
+            knowledgeUI.imageKnowledgeButtonMIP.sprite = slotRefKnowledge.icon; // isWatcherTargetLayerLocked;
+            knowledgeUI.imageKnowledgeButtonMIP.color = slotRefKnowledge.color;
+            knowledgeUI.imageKnowledgeCurTarget.sprite = slotRefKnowledge.icon;
+            knowledgeUI.imageKnowledgeCurTarget.color = slotRefKnowledge.color;
+            knowledgeUI.textTargetLayer.text = slotRefKnowledge.speciesName;
+            knowledgeUI.textTargetLayer.color = slotRefKnowledge.color;
+        }
+        else {
+            
+        }
+        
+
         
         // SpiritBrush Icons
         buttonToolbarWatcher.GetComponent<Image>().color = buttonDisabledColor;
         buttonToolbarWatcher.gameObject.transform.localScale = Vector3.one;
-        imageToolbarInspectLinkedIcon.color = buttonDisabledColor;
+        //imageToolbarInspectLinkedIcon.color = buttonDisabledColor;
         buttonToolbarStir.GetComponent<Image>().color = buttonDisabledColor;
         buttonToolbarStir.gameObject.transform.localScale = Vector3.one;
         buttonToolbarAdd.GetComponent<Image>().color = buttonDisabledColor;
@@ -1744,7 +1801,7 @@ public class UIManager : MonoBehaviour {
         imageToolbarAddLinkedIcon.color = buttonDisabledColor;
         buttonToolbarKnowledge.GetComponent<Image>().color = buttonDisabledColor;
         buttonToolbarKnowledge.gameObject.transform.localScale = Vector3.one;
-        imageToolbarKnowledgeLinkedIcon.color = buttonDisabledColor;
+        //imageToolbarKnowledgeLinkedIcon.color = buttonDisabledColor;
         
         TrophicLayersManager layerManager = gameManager.simulationManager.trophicLayersManager;  
 
@@ -1758,7 +1815,7 @@ public class UIManager : MonoBehaviour {
             case ToolType.Add:
                 buttonToolbarAdd.GetComponent<Image>().color = buttonActiveColor;
                 buttonToolbarAdd.gameObject.transform.localScale = Vector3.one * 1.25f;
-                imageToolbarAddLinkedIcon.color = buttonActiveColor;
+                //imageToolbarAddLinkedIcon.color = buttonActiveColor;
                 break;            
             case ToolType.Stir:
                 buttonToolbarStir.GetComponent<Image>().color = buttonActiveColor;
@@ -1772,7 +1829,7 @@ public class UIManager : MonoBehaviour {
         if(isWatcherPanelOn) {
             buttonToolbarWatcher.GetComponent<Image>().color = buttonActiveColor;
             buttonToolbarWatcher.gameObject.transform.localScale = Vector3.one * 1.25f;
-            imageToolbarInspectLinkedIcon.color = buttonActiveColor;
+            //imageToolbarInspectLinkedIcon.color = buttonActiveColor;
 
             UpdateWatcherPanelUI(layerManager);
 
@@ -1781,7 +1838,7 @@ public class UIManager : MonoBehaviour {
         else {
             buttonToolbarWatcher.GetComponent<Image>().color = buttonDisabledColor;
             buttonToolbarWatcher.gameObject.transform.localScale = Vector3.one;
-            imageToolbarInspectLinkedIcon.color = buttonDisabledColor;
+            //imageToolbarInspectLinkedIcon.color = buttonDisabledColor;
 
             panelWatcherSpiritMain.SetActive(false);
         }
@@ -1789,7 +1846,7 @@ public class UIManager : MonoBehaviour {
         if(isKnowledgePanelOn) {
             buttonToolbarKnowledge.GetComponent<Image>().color = buttonActiveColor;
             buttonToolbarKnowledge.gameObject.transform.localScale = Vector3.one * 1.25f;
-            imageToolbarKnowledgeLinkedIcon.color = buttonActiveColor;            
+            //imageToolbarKnowledgeLinkedIcon.color = buttonActiveColor;            
                         
             //spiritBrushName = "Knowledge Spirit";
             //imageToolbarSpiritBrushThumbnail.sprite = spriteSpiritBrushKnowledgeIcon;
@@ -1801,7 +1858,7 @@ public class UIManager : MonoBehaviour {
         else {
             buttonToolbarKnowledge.GetComponent<Image>().color = buttonDisabledColor;
             buttonToolbarKnowledge.gameObject.transform.localScale = Vector3.one;
-            imageToolbarKnowledgeLinkedIcon.color = buttonDisabledColor;
+            //imageToolbarKnowledgeLinkedIcon.color = buttonDisabledColor;
 
             panelKnowledgeSpiritBase.SetActive(false);
             //panelKnowledgeSpirit.SetActive(false); 
@@ -3602,17 +3659,25 @@ public class UIManager : MonoBehaviour {
     
     private void MouseRaycastWaterPlane(Vector3 screenPos) {
         mouseRaycastWaterPlane.SetActive(true);
+
+        //float scale = SimulationManager._MapSize * 0.1f;
+        Vector3 targetPosition = mouseRaycastWaterPlane.gameObject.transform.position; //
+        targetPosition.z = (gameManager.simulationManager.theRenderKing.baronVonWater._GlobalWaterLevel - 0.5f) * -20f;
+        mouseRaycastWaterPlane.gameObject.transform.position = targetPosition;
+        //new Vector3(SimulationManager._MapSize * 0.5f, gameManager.simulationManager.theRenderKing.baronVonWater._GlobalWaterLevel, SimulationManager._MapSize * 0.5f);
+        //mouseRaycastWaterPlane.gameObject.transform.position = targetPosition;
+        //mouseRaycastWaterPlane.gameObject.transform.localScale = Vector3.one * scale;
         //Vector3 camPos = cameraManager.gameObject.transform.position;                
         Ray ray = cameraManager.gameObject.GetComponent<Camera>().ScreenPointToRay(screenPos);
         RaycastHit hit = new RaycastHit();
-        int layerMask = 1 << 12;
+        int layerMask = 1 << 12;  // UtilityRaycast???
         Physics.Raycast(ray, out hit, layerMask);
 
         if (hit.collider != null) {
-            curMousePositionOnWaterPlane = hit.point;  
-            // Z = -0.5f ???? Look into that if it's causing a problem:
             prevMousePositionOnWaterPlane = curMousePositionOnWaterPlane;
-            //Debug.Log("curMousePositionOnWaterPlane:" + curMousePositionOnWaterPlane.ToString());
+            curMousePositionOnWaterPlane = hit.point;            
+
+            //Debug.Log("curMousePositionOnWaterPlane:" + curMousePositionOnWaterPlane.ToString() + ", " + screenPos.ToString());
         }
     }    
     private void MouseRaycastCheckAgents(bool clicked) {

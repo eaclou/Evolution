@@ -395,7 +395,7 @@ public class SimulationManager : MonoBehaviour {
         InitializeGraphData();
 
         settingsManager.Initialize();
-        trophicLayersManager = new TrophicLayersManager();
+        trophicLayersManager = new TrophicLayersManager(uiManager);
         simEventsManager = new SimEventsManager(this);
         simResourceManager = new SimResourceManager();
         //agentsManager = new AgentsManager();
@@ -1235,7 +1235,7 @@ public class SimulationManager : MonoBehaviour {
                     Debug.LogError("GetNextAvailableCandidate(): candidateData NULL!!!!");
                 }
                 else {
-                    Debug.Log("AttemptToBrushSpawnAgent(" + a.ToString() + ") species: " + speciesIndex.ToString() + ", " + candidateData.ToString());
+                    //Debug.Log("AttemptToBrushSpawnAgent(" + a.ToString() + ") species: " + speciesIndex.ToString() + ", " + candidateData.ToString());
                     
                     // Spawn POS:
                     
@@ -1276,7 +1276,7 @@ public class SimulationManager : MonoBehaviour {
         } 
     }
     private void AttemptToSpawnAgent(int agentIndex, int speciesIndex, CandidateAgentData candidateData) { //, int speciesIndex) {
-        Debug.Log("AttemptToSpawnAgent(" + agentIndex.ToString());
+        //Debug.Log("AttemptToSpawnAgent(" + agentIndex.ToString());
         // Which Species will the new agent belong to?
         // Random selection? Lottery-Selection among Species? Use this Agent's previous-life's Species?  Global Ranked Selection (across all species w/ modifiers) ?
 
@@ -1354,7 +1354,7 @@ public class SimulationManager : MonoBehaviour {
                     candidateData.isBeingEvaluated = true;
                 }
                 else {
-                    Debug.Log("INVALID SPAWN POS " + spawnWorldPos.ToString() + ", alt: " + altitudeSample.ToString());
+                    //Debug.Log("INVALID SPAWN POS " + spawnWorldPos.ToString() + ", alt: " + altitudeSample.ToString());
                 }
 
                 
@@ -1479,7 +1479,7 @@ public class SimulationManager : MonoBehaviour {
     }
     // ********** RE-IMPLEMENT THIS LATER!!!! ******************************************************************************
     private void SpawnAgentFromEggSack(CandidateAgentData sourceCandidate, int agentIndex, int speciesIndex, EggSack parentEggSack) {
-        Debug.Log("Spawn Creature #" + agentIndex.ToString() + " (" + numAgentsBorn.ToString() + ") FromEggSack " + parentEggSack.index.ToString() + "  " + parentEggSack._PrevPos.ToString());
+        //Debug.Log("Spawn Creature #" + agentIndex.ToString() + " (" + numAgentsBorn.ToString() + ") FromEggSack " + parentEggSack.index.ToString() + "  " + parentEggSack._PrevPos.ToString());
 
         numAgentsBorn++;
         //currentOldestAgent = agentsArray[rankedIndicesList[0]].ageCounter;
@@ -1490,7 +1490,7 @@ public class SimulationManager : MonoBehaviour {
     }
     private void SpawnAgentImmaculate(CandidateAgentData sourceCandidate, int agentIndex, int speciesIndex, Vector2 spawnPos2D) {
        
-        Debug.Log("SpawnAgentImmaculate!i= " + agentIndex.ToString() + ", spawnWorldPos: " + spawnPos2D.ToString());
+        //Debug.Log("SpawnAgentImmaculate!i= " + agentIndex.ToString() + ", spawnWorldPos: " + spawnPos2D.ToString());
             
         agentsArray[agentIndex].InitializeSpawnAgentImmaculate(settingsManager, agentIndex, sourceCandidate, new Vector3(spawnPos2D.x, spawnPos2D.y, 0f), theRenderKing.baronVonWater._GlobalWaterLevel); // Spawn that genome in dead Agent's body and revive it!
         theRenderKing.UpdateCritterGenericStrokesData(agentsArray[agentIndex]); //agentIndex, sourceCandidate.candidateGenome);
@@ -1564,7 +1564,7 @@ public class SimulationManager : MonoBehaviour {
                 int respawnCooldown = 1000;
                 
                 if(eggSackRespawnCounter > respawnCooldown) {  // try to encourage more pregnancies?
-                    Debug.Log("eggSackRespawnCounter > respawnCooldown");
+                    //Debug.Log("eggSackRespawnCounter > respawnCooldown");
                     List<int> eligibleAgentIndicesList = new List<int>();
                     for(int a = 0; a < numAgents; a++) {
                         if(agentsArray[a].isInert) {

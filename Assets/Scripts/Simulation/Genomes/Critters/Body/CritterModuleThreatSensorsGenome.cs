@@ -22,7 +22,7 @@ public class CritterModuleThreatSensorsGenome {
         // Do stuff:
         usePos = false;
         useVel = false;
-        useDir = false;
+        useDir = true;
         useStats = false;
     }
 

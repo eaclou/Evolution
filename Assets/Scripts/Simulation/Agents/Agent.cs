@@ -295,7 +295,7 @@ public class Agent : MonoBehaviour {
         swallowingPreyFrameCounter = 0;
         preyAgentRef = preyAgent;
 
-        EatFoodMeat(preyAgent.currentBiomass);
+        EatFoodMeat(preyAgent.currentBiomass * 100f); // *(*********************************************** experiment!
         preyAgent.ProcessBeingEaten(preyAgent.currentBiomass);
         //preyAgent.currentBiomass = 0f;
         
@@ -1396,7 +1396,7 @@ public class Agent : MonoBehaviour {
             //float aspectSpeedPenalty = 1.0f; // Mathf.Lerp(1.2f, 0.4f, candidateRef.candidateGenome.bodyGenome.coreGenome.creatureAspectRatio);
 
             float swimSpeed = 200f; // Mathf.Lerp(movementModule.smallestCreatureBaseSpeed, movementModule.largestCreatureBaseSpeed, 0.5f); // sizeValue);
-            float turnRate = 10f; // Mathf.Lerp(movementModule.smallestCreatureBaseTurnRate, movementModule.largestCreatureBaseTurnRate, 0.5f) * 0.1f; // sizeValue);
+            float turnRate = 5.5f; //10 // Mathf.Lerp(movementModule.smallestCreatureBaseTurnRate, movementModule.largestCreatureBaseTurnRate, 0.5f) * 0.1f; // sizeValue);
             float dashBonus = 1f;
             if(isDashing) {                
                 dashBonus = 5f;                
