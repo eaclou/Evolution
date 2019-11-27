@@ -744,6 +744,7 @@ public class VegetationManager {
             nearestIndex = 3;
         }*/
         tempClosestPlantParticleIndexAndPos.x = swapBuffer[0].x;
+        
         //int bufferLength = swapBuffer.Length;
 
         // Now Fetch the actual particleData:::::
@@ -765,7 +766,7 @@ public class VegetationManager {
         closestPlantParticleData = cursorParticleDataArray[1];
         selectedPlantParticleData = cursorParticleDataArray[0];
 
-
+        //Debug.Log(xCoord.ToString() + ", " + yCoord.ToString() + " *** " + swapBuffer[0].x + ", c: " + closestPlantParticleData.index.ToString() + ", s: " + selectedPlantParticleData.index.ToString());
 
 
         /*

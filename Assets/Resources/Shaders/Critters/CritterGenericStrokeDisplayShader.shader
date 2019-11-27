@@ -156,7 +156,7 @@
 
 				o.highlight = float4(hoverMask, selectedMask, 0, 0);
 
-				o.color = float4(lerp(critterInitData.secondaryHue, critterInitData.primaryHue, patternTexSample.x), 1);
+				o.color = lerp(o.color, float4(lerp(critterInitData.secondaryHue, critterInitData.primaryHue, patternTexSample.x), 1), 0.45);
 				return o;
 			}
 			
@@ -170,13 +170,13 @@
 				
 				fixed4 col = tex2D(_MainTex, i.uv) * i.color;
 				
-				col.rgb = lerp(col.rgb, terrainColor.rgb, 0.7); //0.5 * saturate((i.worldPos.z - 0.75) * 0.5));
+				col.rgb = lerp(col.rgb, terrainColor.rgb, 0.45); //0.5 * saturate((i.worldPos.z - 0.75) * 0.5));
 
-				float highlightBoost = saturate(i.highlight.x * _IsHover + i.highlight.y * _IsSelected * 0.25) * _HighlightOn;
-				col.rgb = col.rgb * (1 + highlightBoost) + highlightBoost * 0.1;
+				float highlightBoost = saturate(i.highlight.x * _IsHover + i.highlight.y * _IsSelected * 0.5) * _HighlightOn;
+				col.rgb = col.rgb + i.highlight.x * 0.47;
 
 				//fixed4 col = tex2D(_MainTex, i.bodyUV) * i.color;
-				col.rgb = i.color.rgb;
+				//col.rgb = float3(i.highlight.x, i.highlight.y, _IsSelected); //i.color.rgb;
 				return col;
 			}
 			ENDCG

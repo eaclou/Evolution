@@ -174,7 +174,7 @@
 				finalColor = float4(finalColor.rgb, (1.0 - circleMask) * i.status.x);
 				
 				
-				finalColor.rgb = float3(1,0.25,0.521) * 1.73;
+				//finalColor.rgb = float3(1,0.25,0.521) * 1.73;
 				return finalColor;//  // * (1.0 + i.color.y));  // age
 
 			}

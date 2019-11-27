@@ -125,7 +125,7 @@
 				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
 				float3 rotatedPoint = float3(quadPoint.x * right + quadPoint.y * forward, 0);  // Rotate localRotation by AgentRotation
 
-				float leafScale = saturate(particleData.biomass * 4 + 0.3) * 0.25 * particleData.isActive;
+				float leafScale = saturate(particleData.biomass * 3 + 0.2) * 0.15 * particleData.isActive;
 				o.worldPos = float4(worldPosition, 0);
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition + rotatedPoint * leafScale, 1.0)));
 				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(quadPoint, 0.0f));				
@@ -146,6 +146,7 @@
 				col.rgb = lerp(col, float3(0.81, 0.79, 0.65) * 0.1, i.color.x * 0.6);
 				col.rgb = lerp(col, float3(0.6, 1, 0.4) * 1, 0.25);
 				col.rgb = lerp(col.rgb, terrainColor.rgb, 0.37);
+				col.rgb += i.color.w * 2.5;
 				col.a = texColor.a;
 
 				return col;

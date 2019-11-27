@@ -3748,7 +3748,7 @@ public class TheRenderKing : MonoBehaviour {
 
             cmdBufferMain.Clear();
 
-            //cmdBufferMain.ClearRenderTarget(true, false, new Color(1f, 0.9f, 0.75f) * 0.8f, 1.0f);
+            cmdBufferMain.ClearRenderTarget(true, true, new Color(1f, 0.9f, 0.75f) * 0.8f, 1.0f);
             // control render target capture Here?
             // Create RenderTargets:
             //int renderedSceneID = Shader.PropertyToID("_RenderedSceneID");
@@ -3893,12 +3893,30 @@ public class TheRenderKing : MonoBehaviour {
                 cmdBufferMain.DrawProcedural(Matrix4x4.identity, animalParticleShadowDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, simManager.zooplanktonManager.animalParticlesCBuffer.count);
         
             }*/
+
+            float isHighlight = 0f;
+            if(simManager.uiManager.watcherUI.isHighlight && simManager.uiManager.isWatcherPanelOn) {
+                isHighlight = 1f;
+            }
+            float isSelectedZoop = 0f;
+            if(simManager.uiManager.watcherUI.isHighlight && simManager.uiManager.isWatcherPanelOn) {
+                if(simManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2 && simManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) {
+                    isSelectedZoop = 1f;
+                }                
+            }
+            float isSelectedPlant = 0f;
+            if(simManager.uiManager.watcherUI.isHighlight && simManager.uiManager.isWatcherPanelOn) {
+                if(simManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 1 && simManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 1) {
+                    isSelectedPlant = 1f;
+                }                
+            }
+            //simManager.vegetationManager.isPlantParticleSelected
             
             if(simManager.trophicLayersManager.GetAlgaeOnOff()) {
 
-                float isSelected = 0f;            
-                float isHover = 0f;
-                if(simManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 1) {
+                //float isSelected = 0f;            
+                //float isHover = 0f;
+                /*if(simManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 1) {
                     if(simManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 1) {
                         if(simManager.uiManager.curActiveTool == UIManager.ToolType.None) {
                             isHover = 1f;
@@ -3915,7 +3933,7 @@ public class TheRenderKing : MonoBehaviour {
                             simManager.uiManager.StopFollowingPlantParticle();
                         }
                     }
-                }
+                }*/
             /*
                 // floating plants  shadows:
                 plantParticleShadowDisplayMat.SetPass(0);
@@ -3947,9 +3965,11 @@ public class TheRenderKing : MonoBehaviour {
                 plantParticleDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);     
                 plantParticleDisplayMat.SetFloat("_MinFog", minimumFogDensity);  
                 plantParticleDisplayMat.SetInt("_SelectedParticleIndex", Mathf.RoundToInt(simManager.vegetationManager.selectedPlantParticleIndex));
-                plantParticleDisplayMat.SetInt("_HoverParticleIndex", Mathf.RoundToInt(simManager.vegetationManager.closestPlantParticleData.index));                
-                plantParticleDisplayMat.SetFloat("_IsSelected", isSelected);
-                plantParticleDisplayMat.SetFloat("_IsHover", isHover);
+                plantParticleDisplayMat.SetInt("_HoverParticleIndex", Mathf.RoundToInt(simManager.vegetationManager.closestPlantParticleData.index));
+                //Debug.Log("_SelectedParticleIndex: " + Mathf.RoundToInt(simManager.vegetationManager.selectedPlantParticleIndex).ToString() + ", _HoverParticleIndex: " + Mathf.RoundToInt(simManager.vegetationManager.closestPlantParticleData.index).ToString());
+                
+                plantParticleDisplayMat.SetFloat("_IsSelected", isSelectedPlant); // isSelected);
+                plantParticleDisplayMat.SetFloat("_IsHover", isHighlight); // isHover);
                 plantParticleDisplayMat.SetFloat("_GlobalWaterLevel", baronVonWater._GlobalWaterLevel);
                 plantParticleDisplayMat.SetVector("_FogColor", simManager.fogColor); 
                 cmdBufferMain.DrawProcedural(Matrix4x4.identity, plantParticleDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, simManager.vegetationManager.plantParticlesCBuffer.count * 32);
@@ -3997,19 +4017,17 @@ public class TheRenderKing : MonoBehaviour {
                 animalParticleDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
                 //int selectedParticleIndex = (int)simManager.zooplanktonManager.closestAnimalParticlesDataArray[simManager.cameraManager.targetAgentIndex].index;
                 //animalParticleDisplayMat.SetInt("_SelectedParticleIndex", selectedParticleIndex); // Mathf.RoundToInt(simManager.zooplanktonManager.closestZooplanktonArray[0].x));  // Here goes nothing....
-                float isHighlight = 0f;
-
                 
                 animalParticleDisplayMat.SetInt("_SelectedParticleIndex", Mathf.RoundToInt(simManager.zooplanktonManager.selectedAnimalParticleIndex));
                 animalParticleDisplayMat.SetInt("_ClosestParticleID", Mathf.RoundToInt(simManager.zooplanktonManager.closestZooplanktonToCursorIndex));
-                float isSelectedA = 0f;
+                /*float isSelectedA = 0f;
                 
                 float isHoverA = 0f;
                 if(simManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2) {
                     if(simManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) {
-                        if(simManager.uiManager.curActiveTool == UIManager.ToolType.None) {
+                        if(simManager.uiManager.watcherUI.isHighlight) {
                             isHoverA = 1f;
-                            isHighlight = 1f;
+                            //isHighlight = 1f;
                             if(simManager.zooplanktonManager.isAnimalParticleSelected) {                   
                                 isSelectedA = 1f;
                             }
@@ -4020,10 +4038,10 @@ public class TheRenderKing : MonoBehaviour {
                         }
                     }
                 }
-            
-                animalParticleDisplayMat.SetFloat("_IsSelected", isSelectedA);
-                animalParticleDisplayMat.SetFloat("_IsHover", isHoverA); // isHoverA);
-                animalParticleDisplayMat.SetFloat("_IsHighlight", isHighlight);
+                */
+                animalParticleDisplayMat.SetFloat("_IsSelected", isSelectedZoop);// isSelectedA);
+                animalParticleDisplayMat.SetFloat("_IsHover", isHighlight); // isHoverA); // isHoverA);
+                animalParticleDisplayMat.SetFloat("_IsHighlight", isHighlight); // isHighlight);
                 animalParticleDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
                 animalParticleDisplayMat.SetFloat("_GlobalWaterLevel", baronVonWater._GlobalWaterLevel);
                 cmdBufferMain.DrawProcedural(Matrix4x4.identity, animalParticleDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, simManager.zooplanktonManager.animalParticlesCBuffer.count);
