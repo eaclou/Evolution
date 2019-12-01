@@ -129,7 +129,7 @@
 				//vertexOffset.xy *= 4;
 
 				//*** TEMP::::: ****
-				float spriteScale = (sqrt(particleData.biomass) * 0.025 + 0.0115 + (0.01 * hoverMask + 0.02 * selectedMask)) * 1.25;
+				float spriteScale = (sqrt(particleData.biomass) * 0.025 + 0.0115 + (0.06 * hoverMask + 0.02 * selectedMask)) * 1;
 				vertexOffset.xy = quadPoint.xy * spriteScale * 10;
 
 

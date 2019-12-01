@@ -471,7 +471,7 @@ void CSUpdateTerrainMapsBrush (uint3 id : SV_DispatchThreadID)
 	float4 resourceTex = _ResourceGridRead.SampleLevel(_LinearClamp, uv, 0);
 	float4 spiritBrushTex = brushSample;
 		
-	float causticsStrength = lerp(0.025, 0.275, 0.6);
+	float causticsStrength = 0.4; //lerp(0.025, 0.275, 0.6);
 	float minFog = 1;
 	
 	float3 decomposerHue = float3(0.8,0.3,0);
@@ -489,7 +489,7 @@ void CSUpdateTerrainMapsBrush (uint3 id : SV_DispatchThreadID)
 	
 	float altitudeRaw = altitudeTex.x;
 	
-	float3 waterFogColor = float3(0.36, 0.4, 0.44) * 0.42;
+	float3 waterFogColor = float3(0.36, 0.4, 0.44) * 0.43;
 	
 	waterFogColor = lerp(waterFogColor, algaeColor, algaeMask);
 
@@ -531,8 +531,8 @@ void CSUpdateTerrainMapsBrush (uint3 id : SV_DispatchThreadID)
 	finalColor.rgb *= (0.7 + dotDiffuse * 0.33 + 0.1 * diffuseWrap);
 
 	// Wetness darkening:
-	float wetnessMask = 1.0 - saturate((-altitude + _GlobalWaterLevel + 0.33) * 5.5); // saturate(((altitudeRaw + waterSurfaceTex.x * 0.34) - 0.6) * 5.25);
-	finalColor.rgb *= (0.65 + wetnessMask * 0.35);
+	float wetnessMask = 1.0 - saturate((-altitude + _GlobalWaterLevel + 0.033) * 25.5); // saturate(((altitudeRaw + waterSurfaceTex.x * 0.34) - 0.6) * 5.25);
+	finalColor.rgb *= (0.4 + wetnessMask * 0.6);
 	
 	// Caustics
 	finalColor.rgb += dotLight * isUnderwater * (1.0 - depth) * causticsStrength;		
@@ -553,7 +553,7 @@ void CSUpdateTerrainMapsBrush (uint3 id : SV_DispatchThreadID)
 	float4 skyTex = _SkyTex.SampleLevel(_LinearClamp, skyCoords, 0);
 	float4 reflectedColor = float4(skyTex.rgb, finalColor.a); //col;
 	
-				
+	viewDot * 0.3 + 0.2;		
 	float reflectLerp = saturate(viewDot * isUnderwater);
 	finalColor.rgb += lerp(float3(0,0,0), reflectedColor.xyz, reflectLerp);
 

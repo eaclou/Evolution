@@ -74,8 +74,8 @@ float4 GetEnvironmentColor(float3 worldPos, float4 terrainColorTex, float4 altit
 	float isUnderwater = saturate(depth * 50);
 
 	// Wetness darkening:
-	float wetnessMask = 1.0 - saturate((-altitude + globalWaterLevel + 0.31) * 4.5); 
-	outColor.rgb *= (0.65 + wetnessMask * 0.35);
+	float wetnessMask = saturate(depth * 45.5); 
+	outColor.rgb *= wetnessMask; //(0.4 + wetnessMask * 0.6);
 	
 	// Caustics
 	outColor.rgb += dotLight * isUnderwater * (1.0 - depth) * causticsStrength;		
