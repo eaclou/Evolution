@@ -15,13 +15,7 @@ public class BaronVonTerrain : RenderBaron {
     public Material decomposerBitsDisplayMat;
     public Material decomposerBitsShadowDisplayMat;
     public Material wasteBitsDisplayMat;
-    //public Material groundDryLandDisplayMat;
-
-    //public Material terrainBlitMat;
-    //public Material terrainSimulationBlitMat;
-    //public Material testInitTerrainDataBlitMat;
-    //public Material terrainGenerateColorBlitMat;
-
+    
     public Color terrainColor0;
     public Color terrainColor1;
     public Color terrainColor2;

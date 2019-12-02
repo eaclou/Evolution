@@ -1413,12 +1413,14 @@ public class Agent : MonoBehaviour {
             Vector2 forwardThrustDir = Vector2.Lerp(segmentForwardDir, throttleDir, 0.1f).normalized;
 
             this.bodyRigidbody.AddForce(forwardThrustDir * (1f - turnSharpness * 0.25f) * speed * this.bodyRigidbody.mass * Time.deltaTime * fatigueMultiplier * bitingPenalty, ForceMode2D.Impulse);
-            
+
             // modify turning rate based on body proportions:
             //float turnRatePenalty = Mathf.Lerp(0.25f, 1f, 1f - sizeValue);
 
             // Head turn:
-            this.bodyRigidbody.AddTorque(Mathf.Lerp(headTurn, headTurnSign, 0.75f) * forcePenalty * turnRate * this.bodyRigidbody.mass * this.bodyRigidbody.mass * fatigueMultiplier * bitingPenalty * Time.deltaTime, ForceMode2D.Impulse);
+            float torqueForce = Mathf.Lerp(headTurn, headTurnSign, 0.75f) * forcePenalty * turnRate * this.bodyRigidbody.mass * this.bodyRigidbody.mass * fatigueMultiplier * bitingPenalty * Time.deltaTime;
+            torqueForce = Mathf.Min(torqueForce, 10f);
+            this.bodyRigidbody.AddTorque(torqueForce, ForceMode2D.Impulse);
             
         }
     }

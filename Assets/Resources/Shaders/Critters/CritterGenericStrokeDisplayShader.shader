@@ -172,8 +172,9 @@
 				
 				col.rgb = lerp(col.rgb, terrainColor.rgb, 0.45); //0.5 * saturate((i.worldPos.z - 0.75) * 0.5));
 
-				float highlightBoost = saturate(i.highlight.x * _IsHover + i.highlight.y * _IsSelected * 0.5) * _HighlightOn;
-				col.rgb = col.rgb + i.highlight.x * 0.47;
+				float highlightBoost = (i.highlight.y * _IsSelected * 0.25 * _HighlightOn + i.highlight.x * _IsHover); //saturate(i.highlight.x * _IsHover + i.highlight.y * _IsSelected * 0.5) * _HighlightOn;
+				col.rgb = col.rgb + highlightBoost * 0.5; // i.highlight.x * 0.47;
+
 
 				//fixed4 col = tex2D(_MainTex, i.bodyUV) * i.color;
 				//col.rgb = float3(i.highlight.x, i.highlight.y, _IsSelected); //i.color.rgb;

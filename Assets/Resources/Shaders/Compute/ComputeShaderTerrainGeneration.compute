@@ -410,17 +410,18 @@ void CSInitTerrainMaps (uint3 id : SV_DispatchThreadID)
 	float noise13 = saturate(Value2D(noiseCoords - 349.7, 0.6579).x);
 
 	float initY = saturate(noise0 * 0.9 + noise1 * 0.85 + noise2 * 0.65 + noise3 * 0.35 - 0.35);
-	float initZ = saturate((noise10 * 0.8 + noise11 * 0.65 + noise12 * 0.55 + noise13 * 0.55) - 0.55);
+	float initZ = saturate((noise10 * 0.8 + noise11 * 0.65 + noise12 * 0.55 + noise13 * 0.55) - 0.035);
 	float initW = saturate(((1.0 - noise10) * 0.75 + (1.0 - noise1) * 0.65 + (1.0 - noise12) * 0.45 - (1.0 - noise3) * 0.25) - 0.75);
 
 	float distToCenter = length(uv - 0.5);
 
-	float4 outputTex = float4(saturate(texSample.x * 0.3 + distToCenter * 0.6 - 0.1), 
+	float4 outputTex = float4(saturate(texSample.x * 0.3 + distToCenter * 0.6 - 0.05), 
 								initY * initY, 
 								initZ * initZ, 
 								initW * initW);
 	
 	outputTex.w = 0;
+	//outputTex.x += 0.005;
 	AltitudeWrite[id.xy] = outputTex;
 }
 
@@ -455,23 +456,17 @@ void CSUpdateTerrainMapsBrush (uint3 id : SV_DispatchThreadID)
 		texSample.z = saturate(texSample.z + brushSample.x * _AddSubtractSign * _BrushIntensity);
 	}
 
-	// ***** COLOR PRE-CALCULATION:
-	//if(_IsUpdateTerrainColor > 0.5) {		
-		
-	float4 finalColor = float4(1,1,1,1);   // BASE COLOR:
-	finalColor.rgb = saturate(_Color0.rgb);
+	float4 finalColor = _Color0;   // BASE STONE COLOR:	
 	finalColor = lerp(finalColor, _Color1, saturate(texSample.y));
 	finalColor = lerp(finalColor, _Color2, saturate(texSample.z));
-	finalColor = lerp(finalColor, _Color3, saturate(texSample.w));
-	finalColor.rgb = lerp(finalColor.rgb, 0.75, 0.33);
-	finalColor.a = 1;	
-		
+	//finalColor = lerp(finalColor, _Color3, saturate(texSample.w));  // W Channel is just alpha (active sim) mask!
+			
 	float4 altitudeTex = texSample;
 	float4 waterSurfaceTex = _WaterSurfaceTex.SampleLevel(_LinearClamp, uv, 0);
 	float4 resourceTex = _ResourceGridRead.SampleLevel(_LinearClamp, uv, 0);
 	float4 spiritBrushTex = brushSample;
 		
-	float causticsStrength = 0.4; //lerp(0.025, 0.275, 0.6);
+	float causticsStrength = 0.4;
 	float minFog = 1;
 	
 	float3 decomposerHue = float3(0.8,0.3,0);
@@ -524,7 +519,7 @@ void CSUpdateTerrainMapsBrush (uint3 id : SV_DispatchThreadID)
 	}
 	float3 groundSurfaceNormal = normalize(float3(-grad.x, -grad.y, -length(float2(dX,dY)))); ////normalize(altitudeTex.yzw);
 	groundSurfaceNormal.z *= -1;
-	//waterSurfaceNormal.z *= -1;
+	
 	float3 diffuseSurfaceNormal = lerp(groundSurfaceNormal, waterSurfaceNormal, depth);
 	float dotDiffuse = dot(diffuseSurfaceNormal, sunDir);
 	float diffuseWrap = dotDiffuse * 0.5 + 0.5;
@@ -537,7 +532,6 @@ void CSUpdateTerrainMapsBrush (uint3 id : SV_DispatchThreadID)
 	// Caustics
 	finalColor.rgb += dotLight * isUnderwater * (1.0 - depth) * causticsStrength;		
 	
-
 	// FOG:	
 	float fogAmount = lerp(0, 1, depth * 2);
 	finalColor.rgb = lerp(finalColor.rgb, waterFogColor, fogAmount * isUnderwater);
@@ -559,10 +553,7 @@ void CSUpdateTerrainMapsBrush (uint3 id : SV_DispatchThreadID)
 
 	finalColor.rgb += spiritBrushTex.x;
 				
-	finalColor.a = 1; //brushColor.a;
-	//finalColor.rgb = float3(1,1,1) * dotDiffuse; //diffuseSurfaceNormal; //dotDiffuse;			
-				
-
+	finalColor.a = 1; 
 
 	TerrainColorWrite[id.xy] = finalColor;	
 

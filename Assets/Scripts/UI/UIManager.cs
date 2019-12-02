@@ -19,6 +19,10 @@ public class UIManager : MonoBehaviour {
 
     private bool firstTimeStartup = true;
 
+    public float isPlantParticleHighlight;
+    public float isZooplanktonHighlight;
+    public float isVertebrateHighlight;
+
     // Main Menu:
     public Button buttonQuickStartResume;
     public Button buttonNewSimulation;
@@ -888,92 +892,64 @@ public class UIManager : MonoBehaviour {
 
             bool updateTerrainAltitude = false;
             float terrainUpdateMagnitude = 0f;
-
+            
             
             if (EventSystem.current.IsPointerOverGameObject()) {  // if mouse is over ANY unity canvas UI object (with raycast enabled)
                 //Debug.Log("MouseOverUI!!!");
             }
             else {
-                // Plant Particle Following/Selection
-                if(leftClickThisFrame) { 
+                int selectedPlantID = gameManager.simulationManager.vegetationManager.selectedPlantParticleIndex;
+                int closestPlantID = gameManager.simulationManager.vegetationManager.closestPlantParticleData.index;
+                float plantDist = (gameManager.simulationManager.vegetationManager.closestPlantParticleData.worldPos - new Vector2(curMousePositionOnWaterPlane.x, curMousePositionOnWaterPlane.y)).magnitude;
+
+                int selectedZoopID = gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex;
+                int closestZoopID = gameManager.simulationManager.zooplanktonManager.closestAnimalParticleData.index;
+                float zoopDist = (new Vector2(gameManager.simulationManager.zooplanktonManager.closestAnimalParticleData.worldPos.x, gameManager.simulationManager.zooplanktonManager.closestAnimalParticleData.worldPos.y) - new Vector2(curMousePositionOnWaterPlane.x, curMousePositionOnWaterPlane.y)).magnitude;
+                
+                if(plantDist < zoopDist) {                    
                     
-                    if(isWatcherPanelOn && watcherUI.isHighlight && cameraManager.isMouseHoverAgent == false) { 
-                        int selectedPlantID = gameManager.simulationManager.vegetationManager.selectedPlantParticleIndex;
-                        int closestPlantID = gameManager.simulationManager.vegetationManager.closestPlantParticleData.index;
-                        float plantDist = (gameManager.simulationManager.vegetationManager.closestPlantParticleData.worldPos - new Vector2(curMousePositionOnWaterPlane.x, curMousePositionOnWaterPlane.y)).magnitude;
-
-                        int selectedZoopID = gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex;
-                        int closestZoopID = gameManager.simulationManager.zooplanktonManager.closestAnimalParticleData.index;
-                        float zoopDist = (new Vector2(gameManager.simulationManager.zooplanktonManager.closestAnimalParticleData.worldPos.x, gameManager.simulationManager.zooplanktonManager.closestAnimalParticleData.worldPos.y) - new Vector2(curMousePositionOnWaterPlane.x, curMousePositionOnWaterPlane.y)).magnitude;
-
-                        if(plantDist < zoopDist) {
-                            //StopFollowingAnimalParticle();
-                            //StopFollowingAgent();
-
-                            //StartFollowingPlantParticle();
-                            if(selectedPlantID != closestPlantID && plantDist < 2f) {
-                                gameManager.simulationManager.vegetationManager.selectedPlantParticleIndex = closestPlantID;
-                                gameManager.simulationManager.vegetationManager.isPlantParticleSelected = true;
-                                Debug.Log("FOLLOWING PLANT " + gameManager.simulationManager.vegetationManager.selectedPlantParticleIndex.ToString());
-                                isSpiritBrushSelected = true;
-                                StartFollowingPlantParticle();
-                            }
-                        }
-                        else {
-                            //StopFollowingPlantParticle();
-                            //StopFollowingAgent();
-
-                            //StartFollowingAnimalParticle();
-                            if(selectedZoopID != closestZoopID && zoopDist < 2f) {
-                                gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex = closestZoopID;
-                                gameManager.simulationManager.zooplanktonManager.isAnimalParticleSelected = true;
-                                Debug.Log("FOLLOWING ZOOP " + gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex.ToString());
-                                isSpiritBrushSelected = true;
-                                StartFollowingAnimalParticle();
-                            }
-                        }
-
-                        Debug.Log("plantDist: " + plantDist.ToString() + ", zoopDist: " + zoopDist.ToString() + ",  agent: " + cameraManager.isMouseHoverAgent.ToString());
-
-                    }
-
-                    /*if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 1) {
-                        if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 1) {
-                            // if plant particles
-                            if (isWatcherPanelOn) {
-                                int selectedID = gameManager.simulationManager.vegetationManager.selectedPlantParticleIndex;
-                                int closestID = gameManager.simulationManager.vegetationManager.closestPlantParticleData.index;
-
-                                if(selectedID != closestID) {
-                                    gameManager.simulationManager.vegetationManager.selectedPlantParticleIndex = closestID;
-                                    gameManager.simulationManager.vegetationManager.isPlantParticleSelected = true;
-                                    Debug.Log("FOLLOWING " + gameManager.simulationManager.vegetationManager.selectedPlantParticleIndex.ToString());
-                                    isSpiritBrushSelected = true;
-                                    StartFollowingPlantParticle();
-                                }
-                            }
+                    if(isWatcherPanelOn && watcherUI.isHighlight && !cameraManager.isMouseHoverAgent && leftClickThisFrame) { 
+                        if(selectedPlantID != closestPlantID && plantDist < 2f) {
+                            gameManager.simulationManager.vegetationManager.selectedPlantParticleIndex = closestPlantID;
+                            gameManager.simulationManager.vegetationManager.isPlantParticleSelected = true;
+                            Debug.Log("FOLLOWING PLANT " + gameManager.simulationManager.vegetationManager.selectedPlantParticleIndex.ToString());
+                            isSpiritBrushSelected = true;
+                            StartFollowingPlantParticle();
                         }
                     }
-                    if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2) {
-                        if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) {
-                            // if zooplankton
-                            if (isWatcherPanelOn) {
-                                int selectedID = gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex;
-                                int closestID = gameManager.simulationManager.zooplanktonManager.closestAnimalParticleData.index;
-
-                                if(selectedID != closestID) {
-                                    gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex = closestID;
-                                    gameManager.simulationManager.zooplanktonManager.isAnimalParticleSelected = true;
-                                    Debug.Log("FOLLOWING " + gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex.ToString());
-                                    isSpiritBrushSelected = true;
-                                    StartFollowingAnimalParticle();
-                                }
-                            }
-                        }
-                    }*/
+                    
                 }
-            
+                else {                   
 
+                    if (isWatcherPanelOn && watcherUI.isHighlight && !cameraManager.isMouseHoverAgent && leftClickThisFrame) {
+                        if (selectedZoopID != closestZoopID && zoopDist < 2f) {
+                            gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex = closestZoopID;
+                            gameManager.simulationManager.zooplanktonManager.isAnimalParticleSelected = true;
+                            Debug.Log("FOLLOWING ZOOP " + gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex.ToString());
+                            isSpiritBrushSelected = true;
+                            StartFollowingAnimalParticle();
+                        }
+                    }
+                }
+
+                isPlantParticleHighlight = 0f;
+                isZooplanktonHighlight = 0f;
+                isVertebrateHighlight = 0f;
+                if(cameraManager.isMouseHoverAgent) {
+                    isVertebrateHighlight = 1f;
+                }
+                else {
+                    if(plantDist < zoopDist && plantDist < 2f) {
+                        isPlantParticleHighlight = 1f;
+                    }
+                    if(plantDist > zoopDist && zoopDist < 2f) {
+                        isZooplanktonHighlight = 1f;
+                    }
+                }
+                
+
+                //Debug.Log("plantDist: " + plantDist.ToString() + ", zoopDist: " + zoopDist.ToString() + ",  agent: " + cameraManager.isMouseHoverAgent.ToString());
+                
                 if (curActiveTool == ToolType.Stir) {  
                     stirGizmoVisible = true;
                     //gameManager.simulationManager.theRenderKing.ClickTestTerrainUpdateMaps(false, 0.05f);
@@ -3751,7 +3727,7 @@ public class UIManager : MonoBehaviour {
                         cameraManager.isFollowingAgent = true;
                         StopFollowingPlantParticle();
                         StopFollowingAnimalParticle();
-
+                        
                         StartFollowingAgent();
                         gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[agentRef.speciesIndex];
                     }
