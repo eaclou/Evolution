@@ -296,6 +296,7 @@ public class Agent : MonoBehaviour {
         preyAgentRef = preyAgent;
 
         EatFoodMeat(preyAgent.currentBiomass * 100f); // *(*********************************************** experiment!
+        RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Vertebrate! (" + preyAgent.currentBiomass.ToString() + ")");
         preyAgent.ProcessBeingEaten(preyAgent.currentBiomass);
         //preyAgent.currentBiomass = 0f;
         
@@ -668,7 +669,7 @@ public class Agent : MonoBehaviour {
         GainExperience((amount / coreModule.stomachCapacity) * coreModule.foodEfficiencyPlant * 1f); // Exp for appropriate food    
 
         //Debug.Log("EatFoodPlant " + amount.ToString());
-        
+        RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Plant! (" + amount.ToString() + ")");
     }
     public void EatFoodMeat(float amount) {
         totalFoodEatenMeat += amount; 
@@ -690,7 +691,7 @@ public class Agent : MonoBehaviour {
         
         GainExperience((amount / coreModule.stomachCapacity) * coreModule.foodEfficiencyMeat * 1f); // Exp for appropriate food
 
-        //RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Meat! (" + amount.ToString() + ")");
+        //RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Zoop! (" + amount.ToString() + ")");
     }
     public void TakeDamage(float damage) {
         int rand = UnityEngine.Random.Range(0, 3);
@@ -710,6 +711,8 @@ public class Agent : MonoBehaviour {
         coreModule.hitPoints[0] = (coreModule.healthHead + coreModule.healthBody + coreModule.healthExternal) / 3f;
 
         totalDamageTaken += damage;
+
+        RegisterAgentEvent(UnityEngine.Time.frameCount, "Took Damage! (" + damage.ToString() + ")");
 
         CheckForDeathHealth();
     }
@@ -1177,6 +1180,7 @@ public class Agent : MonoBehaviour {
                 animalParticleEatAmount *= 1f;
                 //Debug.Log("Agent[" + index.ToString() + "], Ate Zooplankton: " + animalParticleEatAmount.ToString());
                 EatFoodMeat(animalParticleEatAmount); // * sizeEfficiencyPlant);    
+                RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Zooplankton! (" + animalParticleEatAmount.ToString() + ")");
                 startBite = true;
             }
 
@@ -1261,9 +1265,9 @@ public class Agent : MonoBehaviour {
                 feedingFrameCounter = 0;
 
                 // EVENT HERE!!!!!
-                if(mouthRef.lastBiteFoodAmount > 0f) {
-                    RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Plant/Meat! (" + mouthRef.lastBiteFoodAmount.ToString("F3") + ")");
-                }
+                //if(mouthRef.lastBiteFoodAmount > 0f) {
+                    //RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Plant/Meat! (" + mouthRef.lastBiteFoodAmount.ToString("F3") + ")");
+                //}
             }
         }
         if(isAttacking) {            
@@ -1419,7 +1423,7 @@ public class Agent : MonoBehaviour {
 
             // Head turn:
             float torqueForce = Mathf.Lerp(headTurn, headTurnSign, 0.75f) * forcePenalty * turnRate * this.bodyRigidbody.mass * this.bodyRigidbody.mass * fatigueMultiplier * bitingPenalty * Time.deltaTime;
-            torqueForce = Mathf.Min(torqueForce, 10f);
+            torqueForce = Mathf.Min(torqueForce, 7.55f);
             this.bodyRigidbody.AddTorque(torqueForce, ForceMode2D.Impulse);
             
         }

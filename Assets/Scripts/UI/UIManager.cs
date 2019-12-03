@@ -139,6 +139,7 @@ public class UIManager : MonoBehaviour {
     public TrophicSlot knowledgeLockedTrophicSlotRef;
     public bool isKnowledgeTargetLayerLocked;
     public bool isKnowledgePanelOn = false;
+    public bool isMutationPanelOn = false;
     
     public bool isToolbarDeletePromptOn = false;
     public int timerAnnouncementTextCounter = 0;
@@ -200,7 +201,7 @@ public class UIManager : MonoBehaviour {
     //public Button buttonToolbarNutrients;
     //public Sprite spriteToolbarStirButton;
     public Button buttonToolbarStir;
-    //public Button buttonToolbarMutate;
+    public Button buttonToolbarMutate;
     //public Sprite spriteToolbarAddButton;
     public Button buttonToolbarAdd;
     public Image imageToolbarAddLinkedIcon;
@@ -253,7 +254,7 @@ public class UIManager : MonoBehaviour {
     public Image imageToolbarWingLine;
     public Button buttonToolbarWingCreateSpecies;
     public Text textToolbarWingSpeciesSummary;
-    public Text textToolbarWingPanelName;
+    //public Text textToolbarWingPanelName;
     public Text textSelectedSpeciesTitle;
     public Text textSelectedSpeciesIndex;
     public Image imageToolbarSpeciesPortraitRender;
@@ -264,6 +265,7 @@ public class UIManager : MonoBehaviour {
     public Image imageToolbarSpiritBrushThumbnail;
     public Image imageToolbarSpiritBrushThumbnailBorder;
     // Mutation Panel elements:
+    public GameObject panelMutationSpirit;
     public Image imageMutationPanelThumbnailA;
     public Image imageMutationPanelThumbnailB;
     public Image imageMutationPanelThumbnailC;
@@ -1878,6 +1880,21 @@ public class UIManager : MonoBehaviour {
             panelKnowledgeSpiritBase.SetActive(false);
             //panelKnowledgeSpirit.SetActive(false); 
         }
+
+        if(isMutationPanelOn) {
+            buttonToolbarMutate.GetComponent<Image>().color = buttonActiveColor;
+            buttonToolbarMutate.gameObject.transform.localScale = Vector3.one * 1.25f;            
+            panelMutationSpirit.SetActive(true);
+        
+            UpdateToolbarMutationPanel(layerManager);
+        }
+        else {
+            buttonToolbarMutate.GetComponent<Image>().color = buttonDisabledColor;
+            buttonToolbarMutate.gameObject.transform.localScale = Vector3.one;
+            //imageToolbarKnowledgeLinkedIcon.color = buttonDisabledColor;
+
+            panelMutationSpirit.SetActive(false);
+        }
                
 
         // Influence points meter:     
@@ -2542,21 +2559,9 @@ public class UIManager : MonoBehaviour {
         selectedToolbarMutationID = id;
                 
     }
-    private void UpdateToolbarMutationPanel() {
-        textToolbarWingPanelName.text = "Mutations:";
-        //panelToolbarWingMutation.SetActive(true);
+    private void UpdateToolbarMutationPanel(TrophicLayersManager layerManager) {
+        //textToolbarWingPanelName.text = "Mutations:";
         
-        
-        
-        
-        
-        // Update mutation/upgrade panel
-
-        //imageMutationPanelThumbnailB.color = Color.red;
-        //imageMutationPanelThumbnailB.sprite = null;
-        //imageMutationPanelThumbnailC.color = Color.white;
-        //imageMutationPanelThumbnailC.sprite = null;
-
         textMutationPanelOptionA.text = "Tiny";
         textMutationPanelOptionB.text = "Small";
         textMutationPanelOptionC.text = "Large";
@@ -2601,8 +2606,6 @@ public class UIManager : MonoBehaviour {
         }
 
 
-
-        TrophicLayersManager layerManager = gameManager.simulationManager.trophicLayersManager;   
         if(layerManager.selectedTrophicSlotRef.kingdomID == 0) { // DECOMPOSERS
             // Look up decomposer variants and populate UI elements from them:
             //textMutationPanelOptionA.text = gameManager.simulationManager.vegetationManager.decomposerSlotGenomeMutations[0].textDescriptionMutation; // "Minor Decomposers Mutation!"; //\nShininess: " + (gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[0].color.a * 100f).ToString("F0") + "%";
@@ -3929,7 +3932,9 @@ public class UIManager : MonoBehaviour {
         isSpiritBrushSelected = true;   
         */
     }
-    
+    public void ClickToolButtonMutate() {
+        isMutationPanelOn = !isMutationPanelOn;
+    }
     
     private void TurnOffKnowledgeTool() {
                 
