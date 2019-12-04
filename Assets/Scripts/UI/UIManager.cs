@@ -911,7 +911,7 @@ public class UIManager : MonoBehaviour {
                 if(plantDist < zoopDist) {                    
                     
                     if(isWatcherPanelOn && watcherUI.isHighlight && !cameraManager.isMouseHoverAgent && leftClickThisFrame) { 
-                        if(selectedPlantID != closestPlantID && plantDist < 2f) {
+                        if(selectedPlantID != closestPlantID && plantDist < 3.3f) {
                             gameManager.simulationManager.vegetationManager.selectedPlantParticleIndex = closestPlantID;
                             gameManager.simulationManager.vegetationManager.isPlantParticleSelected = true;
                             Debug.Log("FOLLOWING PLANT " + gameManager.simulationManager.vegetationManager.selectedPlantParticleIndex.ToString());
@@ -924,7 +924,7 @@ public class UIManager : MonoBehaviour {
                 else {                   
 
                     if (isWatcherPanelOn && watcherUI.isHighlight && !cameraManager.isMouseHoverAgent && leftClickThisFrame) {
-                        if (selectedZoopID != closestZoopID && zoopDist < 2f) {
+                        if (selectedZoopID != closestZoopID && zoopDist < 3.3f) {
                             gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex = closestZoopID;
                             gameManager.simulationManager.zooplanktonManager.isAnimalParticleSelected = true;
                             Debug.Log("FOLLOWING ZOOP " + gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex.ToString());

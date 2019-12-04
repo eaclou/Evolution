@@ -4079,8 +4079,14 @@ public class TheRenderKing : MonoBehaviour {
                 */
                 critterDebugGenericStrokeMat.SetInt("_HoverID", simManager.uiManager.cameraManager.mouseHoverAgentIndex);
                 critterDebugGenericStrokeMat.SetInt("_SelectedID", simManager.uiManager.cameraManager.targetAgentIndex);
-                critterDebugGenericStrokeMat.SetFloat("_HighlightOn", simManager.uiManager.watcherUI.isHighlight ? 1f : 0f);
-                critterDebugGenericStrokeMat.SetFloat("_IsHover", simManager.uiManager.cameraManager.isMouseHoverAgent ? 1f : 0f);
+                float isHighlightCritter = simManager.uiManager.watcherUI.isHighlight ? 1f : 0f;
+                float isHoverCritter = simManager.uiManager.cameraManager.isMouseHoverAgent ? 1f : 0f;
+                if(simManager.uiManager.curActiveTool == UIManager.ToolType.Add) {
+                    isHighlightCritter = 0f;
+                    isHoverCritter = 0f;
+                }
+                critterDebugGenericStrokeMat.SetFloat("_HighlightOn", isHighlightCritter);
+                critterDebugGenericStrokeMat.SetFloat("_IsHover", isHoverCritter);
                 critterDebugGenericStrokeMat.SetFloat("_IsSelected", simManager.uiManager.cameraManager.isFollowingAgent ? 1f : 0f);
                 Debug.Log("SetTargetAgent: [ " + simManager.uiManager.cameraManager.targetAgentIndex.ToString());
                 critterDebugGenericStrokeMat.SetFloat("_MapSize", SimulationManager._MapSize);    
