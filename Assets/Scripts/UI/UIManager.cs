@@ -49,6 +49,9 @@ public class UIManager : MonoBehaviour {
         Stir
     }
 
+    //public CreationBrush brush1;
+    public int curCreationBrushIndex = 0;  // 0 == original, 1-3 extra experimental
+
     public Color buttonActiveColor = new Color(1f, 1f, 1f, 1f);
     public Color buttonDisabledColor = new Color(0.7f, 0.7f, 0.7f, 1f);
 
@@ -202,6 +205,11 @@ public class UIManager : MonoBehaviour {
     //public Sprite spriteToolbarStirButton;
     public Button buttonToolbarStir;
     public Button buttonToolbarMutate;
+
+    public Button buttonToolbarExtra1;
+    public Button buttonToolbarExtra2;
+    public Button buttonToolbarExtra3;
+
     //public Sprite spriteToolbarAddButton;
     public Button buttonToolbarAdd;
     public Image imageToolbarAddLinkedIcon;
@@ -459,31 +467,11 @@ public class UIManager : MonoBehaviour {
     // Use this for initialization
     void Start() {
 
-        //animatorStatsPanel.enabled = false;
+        
         animatorInspectPanel.enabled = false;
-        //animatorToolsPanel.enabled = false;
-        //animatorFeedToolPanel.enabled = false;
-        //animatorMutateToolPanel.enabled = false;
-        //animatorStirToolPanel.enabled = false;
-
-        //buttonToolStir.GetComponent<Image>().color = buttonDisabledColor;   
-        //buttonToolInspect.GetComponent<Image>().color = buttonDisabledColor;        
-        //buttonToolFeed.GetComponent<Image>().color = buttonDisabledColor;
-        //buttonToolMutate.GetComponent<Image>().color = buttonDisabledColor;
-
-        /*simEventComponentsArray = new SimEventComponent[4];
-        simEventComponentsArray[0] = simEvent0;
-        simEventComponentsArray[1] = simEvent1;
-        simEventComponentsArray[2] = simEvent2;
-        simEventComponentsArray[3] = simEvent3;
-        */
+        
         ClickToolButtonAdd();
-        //buttonToolbarExpandOn.GetComponent<Animator>().StopPlayback();
-        //buttonToolbarExpandOn.GetComponent<Animator>().enabled = false;
-        //buttonToolbarWatcher.GetComponent<Animator>().enabled = false;
-
-        //buttonToolbarExpandOn.GetComponent<Animator>().enabled = true;
-        buttonToolbarPaletteExpandOn.interactable = true;
+        //buttonToolbarPaletteExpandOn.interactable = true;
 
         
 
@@ -1830,9 +1818,50 @@ public class UIManager : MonoBehaviour {
                 //
                 break;            
             case ToolType.Add:
-                buttonToolbarAdd.GetComponent<Image>().color = buttonActiveColor;
-                buttonToolbarAdd.gameObject.transform.localScale = Vector3.one * 1.25f;
-                //imageToolbarAddLinkedIcon.color = buttonActiveColor;
+                if(curCreationBrushIndex == 0) {
+                    buttonToolbarAdd.GetComponent<Image>().color = buttonActiveColor;
+                    buttonToolbarAdd.gameObject.transform.localScale = Vector3.one * 1.25f;
+
+                    buttonToolbarExtra1.GetComponent<Image>().color = buttonDisabledColor;
+                    buttonToolbarExtra1.gameObject.transform.localScale = Vector3.one;
+                    buttonToolbarExtra2.GetComponent<Image>().color = buttonDisabledColor;
+                    buttonToolbarExtra2.gameObject.transform.localScale = Vector3.one;
+                    buttonToolbarExtra3.GetComponent<Image>().color = buttonDisabledColor;
+                    buttonToolbarExtra3.gameObject.transform.localScale = Vector3.one;
+                }
+                else if(curCreationBrushIndex == 1) {
+                    buttonToolbarExtra1.GetComponent<Image>().color = buttonActiveColor;
+                    buttonToolbarExtra1.gameObject.transform.localScale = Vector3.one * 1.25f;
+
+                    buttonToolbarAdd.GetComponent<Image>().color = buttonDisabledColor;
+                    buttonToolbarAdd.gameObject.transform.localScale = Vector3.one;
+                    buttonToolbarExtra2.GetComponent<Image>().color = buttonDisabledColor;
+                    buttonToolbarExtra2.gameObject.transform.localScale = Vector3.one;
+                    buttonToolbarExtra3.GetComponent<Image>().color = buttonDisabledColor;
+                    buttonToolbarExtra3.gameObject.transform.localScale = Vector3.one;
+                }
+                else if(curCreationBrushIndex == 2) {
+                    buttonToolbarExtra2.GetComponent<Image>().color = buttonActiveColor;
+                    buttonToolbarExtra2.gameObject.transform.localScale = Vector3.one * 1.25f;
+
+                    buttonToolbarExtra1.GetComponent<Image>().color = buttonDisabledColor;
+                    buttonToolbarExtra1.gameObject.transform.localScale = Vector3.one;
+                    buttonToolbarAdd.GetComponent<Image>().color = buttonDisabledColor;
+                    buttonToolbarAdd.gameObject.transform.localScale = Vector3.one;
+                    buttonToolbarExtra3.GetComponent<Image>().color = buttonDisabledColor;
+                    buttonToolbarExtra3.gameObject.transform.localScale = Vector3.one;
+                }
+                else {
+                    buttonToolbarExtra3.GetComponent<Image>().color = buttonActiveColor;
+                    buttonToolbarExtra3.gameObject.transform.localScale = Vector3.one * 1.25f;
+
+                    buttonToolbarExtra1.GetComponent<Image>().color = buttonDisabledColor;
+                    buttonToolbarExtra1.gameObject.transform.localScale = Vector3.one;
+                    buttonToolbarExtra2.GetComponent<Image>().color = buttonDisabledColor;
+                    buttonToolbarExtra2.gameObject.transform.localScale = Vector3.one;
+                    buttonToolbarAdd.GetComponent<Image>().color = buttonDisabledColor;
+                    buttonToolbarAdd.gameObject.transform.localScale = Vector3.one;
+                }
                 break;            
             case ToolType.Stir:
                 buttonToolbarStir.GetComponent<Image>().color = buttonActiveColor;
@@ -3885,32 +3914,52 @@ public class UIManager : MonoBehaviour {
         //isSpiritBrushSelected = true;
 
     }
-    public void ClickToolButtonAdd() {
-        //gameManager.simulationManager.trophicLayersManager.ResetSelectedAgentSlots();
-        //if(curActiveTool != ToolType.Nutrients) {
+    public void ClickToolButtonExtra1() {
+        Debug.Log("ClickToolButtonExtra1()");
+        curCreationBrushIndex = 1;
+        EnterCreationBrushMode();
+        buttonToolbarAdd.GetComponent<Image>().color = buttonDisabledColor;
+        buttonToolbarExtra1.GetComponent<Image>().color = buttonActiveColor;
+        buttonToolbarExtra2.GetComponent<Image>().color = buttonDisabledColor;
+        buttonToolbarExtra3.GetComponent<Image>().color = buttonDisabledColor;
+    }
+    public void ClickToolButtonExtra2() {
+        Debug.Log("ClickToolButtonExtra2()");
+        curCreationBrushIndex = 2;
+        EnterCreationBrushMode();
+        buttonToolbarAdd.GetComponent<Image>().color = buttonDisabledColor;
+        buttonToolbarExtra1.GetComponent<Image>().color = buttonDisabledColor;
+        buttonToolbarExtra2.GetComponent<Image>().color = buttonActiveColor;
+        buttonToolbarExtra3.GetComponent<Image>().color = buttonDisabledColor;
+    }
+    public void ClickToolButtonExtra3() {
+        Debug.Log("ClickToolButtonExtra3()");
+        curCreationBrushIndex = 3;
+        EnterCreationBrushMode();
+        buttonToolbarAdd.GetComponent<Image>().color = buttonDisabledColor;
+        buttonToolbarExtra1.GetComponent<Image>().color = buttonDisabledColor;
+        buttonToolbarExtra2.GetComponent<Image>().color = buttonDisabledColor;
+        buttonToolbarExtra3.GetComponent<Image>().color = buttonActiveColor;
+    }
+    private void EnterCreationBrushMode() {
         curActiveTool = ToolType.Add;
-
         StopFollowingAgent();
         StopFollowingPlantParticle();
         StopFollowingAnimalParticle();
         watcherUI.isHighlight = false;
-        //isActiveFeedToolPanel = true;    
-        //animatorFeedToolPanel.enabled = true;
-        //animatorFeedToolPanel.Play("SlideOnPanelFeedTool"); 
-        buttonToolbarAdd.GetComponent<Image>().color = buttonActiveColor;
-
-        ///TurnOffWatcherTool();
-        TurnOffStirTool();
-        //TurnOffMutateTool();
-        //TurnOffRemoveTool();
-        //TurnOffKnowledgeTool();
-            
+        TurnOffStirTool();        
         isSpiritBrushSelected = true;
-        //}  
-        /*else {
-            curActiveTool = ToolType.None;
-            TurnOffNutrientsTool();
-        } */
+    }
+    public void ClickToolButtonAdd() {  
+        Debug.Log("ClickToolButtonAdd(0)");
+        curCreationBrushIndex = 0;
+        EnterCreationBrushMode();
+        
+        buttonToolbarAdd.GetComponent<Image>().color = buttonActiveColor;
+        buttonToolbarExtra1.GetComponent<Image>().color = buttonDisabledColor;
+        buttonToolbarExtra2.GetComponent<Image>().color = buttonDisabledColor;
+        buttonToolbarExtra3.GetComponent<Image>().color = buttonDisabledColor;
+        
     }
     public void ClickToolButtonKnowledge() {
         isKnowledgePanelOn = !isKnowledgePanelOn;

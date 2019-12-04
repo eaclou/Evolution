@@ -3330,8 +3330,8 @@ public class TheRenderKing : MonoBehaviour {
             // clear -- needed???
         cmdBufferSpiritBrush.SetViewProjectionMatrices(spiritBrushRenderCamera.worldToCameraMatrix, spiritBrushRenderCamera.projectionMatrix);
         // Draw Solid Land boundaries:
-        float scale = Mathf.Lerp(8f, 12f, baronVonWater.camDistNormalized) * 6.283f;
-        if(simManager.trophicLayersManager.isSelectedTrophicSlot) {
+        float scale = 60f; // Mathf.Lerp(8f, 12f, baronVonWater.camDistNormalized) * 6.283f;
+        /*if(simManager.trophicLayersManager.isSelectedTrophicSlot) {
             if(simManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 0) {
                 scale *= 0.5f;
             }
@@ -3345,7 +3345,7 @@ public class TheRenderKing : MonoBehaviour {
                 // terrain
             
             }
-        }
+        }*/
         
         Matrix4x4 stirStickTransformMatrix = Matrix4x4.TRS(new Vector3(simManager.uiManager.curMousePositionOnWaterPlane.x, simManager.uiManager.curMousePositionOnWaterPlane.y, 0f), Quaternion.identity, Vector3.one * scale);
         //Debug.Log("mouseCursorPos: " + simManager.uiManager.curMousePositionOnWaterPlane.ToString());

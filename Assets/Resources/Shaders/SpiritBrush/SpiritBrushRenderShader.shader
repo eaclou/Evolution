@@ -64,8 +64,7 @@
 			
 			fixed4 frag (v2f i) : SV_Target
 			{
-				//return float4(1,1,1,1);
-				// sample the texture
+				
 				fixed4 col = tex2D(_MainTex, i.uv);
 				col.rgb = 1 * _Strength;
 				col.rgb = saturate(col.rgb);
@@ -79,7 +78,7 @@
 
 				float mult = lerp(mask, saturate(((noiseTex.x * noiseTex.x * 1 + 0.05) - uvDist) * 15), 0.5);
 				col.rgb *= mult;
-				// apply fog
+				
 				return col;
 			}
 			ENDCG
