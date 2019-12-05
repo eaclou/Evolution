@@ -4,6 +4,7 @@
 	{
 		_MainTex ("Texture", 2D) = "white" {}
 		_NoiseTex ("_NoiseTex", 2D) = "white" {}
+		_BrushPatternTex ("_BrushPatternTex", 2D) = "white" {}
 	}
 	SubShader
 	{
@@ -31,6 +32,10 @@
 			sampler2D _MainTex;
 			float4 _MainTex_ST;
 			sampler2D _NoiseTex;
+			sampler2D _BrushPatternTex;
+
+			uniform float _PatternColumn;
+			uniform float _PatternRow;
 
 			uniform float _Scale = 1.0;
 			uniform float _Strength = 1.0;
@@ -78,6 +83,12 @@
 
 				float mult = lerp(mask, saturate(((noiseTex.x * noiseTex.x * 1 + 0.05) - uvDist) * 15), 0.5);
 				col.rgb *= mult;
+
+				float2 patternUV = i.uv * (1.0 / 8.0) + float2(0.125 * _PatternColumn, 0.125 * _PatternRow);
+
+				float4 patternSample = tex2D(_BrushPatternTex, patternUV);
+
+				return float4(patternSample.rgb, 1);
 				
 				return col;
 			}

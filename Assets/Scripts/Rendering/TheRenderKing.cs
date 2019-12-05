@@ -3330,7 +3330,7 @@ public class TheRenderKing : MonoBehaviour {
             // clear -- needed???
         cmdBufferSpiritBrush.SetViewProjectionMatrices(spiritBrushRenderCamera.worldToCameraMatrix, spiritBrushRenderCamera.projectionMatrix);
         // Draw Solid Land boundaries:
-        float scale = 60f; // Mathf.Lerp(8f, 12f, baronVonWater.camDistNormalized) * 6.283f;
+        float scale = Mathf.Lerp(8f, 60f, Mathf.Clamp01(baronVonWater.camDistNormalized * 1.5f));
         /*if(simManager.trophicLayersManager.isSelectedTrophicSlot) {
             if(simManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 0) {
                 scale *= 0.5f;
@@ -3364,6 +3364,26 @@ public class TheRenderKing : MonoBehaviour {
                 brushIntensity = (baronVonWater.camDistNormalized * 0.25f + 0.75f) * 0.05f;
             }*/
             spiritBrushRenderMat.SetFloat("_Strength", brushIntensity);
+            float patternColumn = 0f;
+            float patternRow = 0f;
+            if(simManager.uiManager.curCreationBrushIndex == 0) {
+                patternColumn = 5f;
+                patternRow = 1f;                
+            }
+            else if(simManager.uiManager.curCreationBrushIndex == 1) {
+                patternColumn = 1f;
+                patternRow = 1f;
+            }
+            else if(simManager.uiManager.curCreationBrushIndex == 2) {
+                patternColumn = 3f;
+                patternRow = 3f;
+            }
+            else {
+                patternColumn = 0f;
+                patternRow = 2f;
+            }
+            spiritBrushRenderMat.SetFloat("_PatternColumn", patternColumn);
+            spiritBrushRenderMat.SetFloat("_PatternRow", patternRow);
             //spiritBrushRenderMat.SetBuffer("basicStrokesCBuffer", obstacleStrokesCBuffer); 
             cmdBufferSpiritBrush.DrawProcedural(Matrix4x4.identity, spiritBrushRenderMat, 0, MeshTopology.Triangles, 6, 1);
             // Draw dynamic Obstacles:        

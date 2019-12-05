@@ -1171,13 +1171,13 @@ public class Agent : MonoBehaviour {
                 //float sizeEfficiencyPlant = Mathf.Lerp(settings.minSizeFeedingEfficiencyDecay, settings.maxSizeFeedingEfficiencyDecay, sizeValue);
                 startBite = true;
                 //Debug.Log("Agent[" + index.ToString() + "], Ate Plant: " + foodParticleEatAmount.ToString());
-                EatFoodPlant(foodParticleEatAmount);                
+                EatFoodPlant(foodParticleEatAmount * 2.5f);                
             }
 
             float animalParticleEatAmount = simManager.zooplanktonManager.animalParticlesEatAmountsArray[index];
             if(animalParticleEatAmount > 0f) {
                 //float sizeEfficiencyPlant = Mathf.Lerp(settings.minSizeFeedingEfficiencyDecay, settings.maxSizeFeedingEfficiencyDecay, sizeValue);
-                animalParticleEatAmount *= 1f;
+                animalParticleEatAmount *= 0.9f;
                 //Debug.Log("Agent[" + index.ToString() + "], Ate Zooplankton: " + animalParticleEatAmount.ToString());
                 EatFoodMeat(animalParticleEatAmount); // * sizeEfficiencyPlant);    
                 RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Zooplankton! (" + animalParticleEatAmount.ToString() + ")");
