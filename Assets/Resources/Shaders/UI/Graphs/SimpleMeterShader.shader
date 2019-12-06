@@ -42,7 +42,7 @@
 			{
 				v2f o;
 				o.vertex = UnityObjectToClipPos(v.vertex);
-				o.uv = v.uv; // TRANSFORM_TEX(v.uv, _MainTex);
+				o.uv = (v.uv - 0.2) * 1.5; // TRANSFORM_TEX(v.uv, _MainTex);
 				return o;
 			}
 			
@@ -53,6 +53,7 @@
 
 				fixed4 col = lerp(float4(0,0,0,0.33), _Tint, mask); //tex2D(_MainTex, i.uv);
 				
+				//return float4(i.uv.x, i.uv.x, i.uv.x, 1);
 				//col.a = mask;
 				//return _Tint;
 				return col;

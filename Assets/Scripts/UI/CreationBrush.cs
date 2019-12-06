@@ -5,8 +5,11 @@ using UnityEngine;
 public class CreationBrush {
 
     public string name;
+    public float patternColumn = 0f;
+    public float patternRow = 0f;
+
     public float baseAmplitude;
-    public float baseRadius;
+    public float baseScale;
     public int numParticles;
     public float emitMinVel;
     public float emitMaxVel;

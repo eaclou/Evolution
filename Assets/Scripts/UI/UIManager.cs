@@ -37,6 +37,9 @@ public class UIManager : MonoBehaviour {
 
     public Text textLoadingTooltips;
 
+    private bool updateTerrainAltitude;
+    private float terrainUpdateMagnitude;
+
     /*public GameObject panelStatsHUD;
     public Animator animatorStatsPanel;
     public Button buttonStats;
@@ -154,10 +157,14 @@ public class UIManager : MonoBehaviour {
     private bool inspectToolUnlockedAnnounce = false;
     // portrait
     //public int curToolUnlockLevel = 0;
-    public float toolbarInfluencePoints = 0.5f;
+    public float toolbarInfluencePoints = 1f;
     public Text textInfluencePointsValue;
     public Material infoMeterInfluencePointsMat;
-    private float addSpeciesInfluenceCost = 0.33f;
+    private int influencePointsCooldownCounter = 0;
+    private int influencePointsCooldownDuration = 90;
+    private bool isInfluencePointsCooldown = false;
+    //private float addSpeciesInfluenceCost = 0.33f;
+    public CreationBrush[] creationBrushesArray;
 
     private Button buttonPendingTrophicSlot;  // 
     private Button buttonSelectedTrophicSlot;
@@ -469,13 +476,43 @@ public class UIManager : MonoBehaviour {
 
         
         animatorInspectPanel.enabled = false;
+
+        creationBrushesArray = new CreationBrush[4];
+        CreationBrush createBrush0 = new CreationBrush();
+        createBrush0.name = "Create Brush 0";
+        createBrush0.baseScale = 0.25f;
+        createBrush0.baseAmplitude = 1f;
+        createBrush0.patternColumn = 5f;
+        createBrush0.patternRow = 1f;  
+
+        CreationBrush createBrush1 = new CreationBrush();
+        createBrush1.name = "Create Brush 1";
+        createBrush1.baseScale = 0.5f;
+        createBrush1.baseAmplitude = 1f;
+        createBrush1.patternColumn = 1f;
+        createBrush1.patternRow = 1f;
+
+        CreationBrush createBrush2 = new CreationBrush();
+        createBrush2.name = "Create Brush 2";
+        createBrush2.baseScale = 1f;
+        createBrush2.baseAmplitude = 1f;
+        createBrush2.patternColumn = 3f;
+        createBrush2.patternRow = 3f;
+
+        CreationBrush createBrush3 = new CreationBrush();
+        createBrush3.name = "Create Brush 3";
+        createBrush3.baseScale = 2f;
+        createBrush3.baseAmplitude = 0.2f;
+        createBrush3.patternColumn = 0f;
+        createBrush3.patternRow = 2f;
+
+        creationBrushesArray[0] = createBrush0;
+        creationBrushesArray[1] = createBrush1;
+        creationBrushesArray[2] = createBrush2;
+        creationBrushesArray[3] = createBrush3;
         
         ClickToolButtonAdd();
-        //buttonToolbarPaletteExpandOn.interactable = true;
-
         
-
-        //ClickToolButtonInspect();  // **** Clean this up! don't mix UI click function with underlying code for initialization
     }
     public void EnterObserverMode() {
         isObserverMode = true;
@@ -673,7 +710,8 @@ public class UIManager : MonoBehaviour {
         UpdateDebugUI();
         //UpdateHUDUI();
         
-        UpdateObserverModeUI();  // <== this is the big one        
+        UpdateObserverModeUI();  // <== this is the big one *******
+        
         UpdatePausedUI();
         //UpdateInspectPanelUI();
         //isWatcherPanelOn = false;
@@ -693,6 +731,125 @@ public class UIManager : MonoBehaviour {
         smoothedMouseVel = Vector2.Lerp(smoothedMouseVel, instantMouseVel, 0.16f);
 
         prevMousePos = curMousePos;
+    }
+    private void ApplyCreationBrush() {
+        toolbarInfluencePoints -= 0.002f;
+
+        float randRipple = UnityEngine.Random.Range(0f, 1f);
+        if(randRipple < 0.33) {
+            gameManager.theRenderKing.baronVonWater.RequestNewWaterRipple(new Vector2(curMousePositionOnWaterPlane.x / SimulationManager._MapSize, curMousePositionOnWaterPlane.y / SimulationManager._MapSize));
+
+        }
+        updateTerrainAltitude = false;                
+        // IF TERRAIN SELECTED::::
+        if (gameManager.simulationManager.trophicLayersManager.isSelectedTrophicSlot) {
+            // DECOMPOSERS::::
+            if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 0) {
+                gameManager.simulationManager.vegetationManager.isBrushActive = true;
+            }// PLANTS:
+            else if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 1) {
+                if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) {
+                    gameManager.simulationManager.vegetationManager.isBrushActive = true;
+                }
+                else {
+                    gameManager.simulationManager.vegetationManager.isBrushActive = true;
+                                    
+                }                                
+            }  // ANIMALS::::                            
+            else if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2) {
+                if (gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) {  
+                    // zooplankton?
+                }
+                else {// AGENTS                                
+                    int speciesIndex = gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.linkedSpeciesID;
+                    if (isDraggingMouseLeft) {
+                        //gameManager.simulationManager.recentlyAddedSpeciesOn = true; // ** needed?
+                        isBrushAddingAgents = true;
+                                        
+                        //Debug.Log("isBrushAddingAgents = true; speciesID = " + speciesIndex.ToString());
+
+                        brushAddAgentCounter++;
+
+                        if(brushAddAgentCounter >= framesPerAgentSpawn) {
+                            brushAddAgentCounter = 0;
+
+                            gameManager.simulationManager.AttemptToBrushSpawnAgent(speciesIndex);
+                        }
+                    }
+                    if (isDraggingMouseRight) {
+                        gameManager.simulationManager.AttemptToKillAgent(speciesIndex, new Vector2(curMousePositionOnWaterPlane.x, curMousePositionOnWaterPlane.y), 15f);
+                    }                                   
+                }
+            }
+            else if (gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 3) {
+                updateTerrainAltitude = true;
+                terrainUpdateMagnitude = 0.05f;
+                if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.slotID == 0) { // WORLD
+                    terrainUpdateMagnitude = 1f;
+                    //gameManager.simulationManager.theRenderKing.ClickTestTerrainUpdateMaps(true, 0.4f);
+                }
+                else if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.slotID == 1) {  // STONE
+
+                    //gameManager.simulationManager.theRenderKing.ClickTestTerrainUpdateMaps(true, 0.04f);
+                }
+                else if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.slotID == 2) {  // PEBBLES
+                    //gameManager.simulationManager.theRenderKing.ClickTestTerrainUpdateMaps(true, 0.04f);
+                }
+                else if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.slotID == 3) {  // SAND
+                    //gameManager.simulationManager.theRenderKing.ClickTestTerrainUpdateMaps(true, 0.04f);
+                }
+                                
+            }
+            else {
+                if (gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.slotID == 0) {  // MINERALS
+                    gameManager.simulationManager.vegetationManager.isBrushActive = true;
+                    Debug.Log("SDFADSFAS");
+                }
+                else if (gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.slotID == 1) {   // WATER
+                    if (isDraggingMouseLeft) {
+                        gameManager.theRenderKing.baronVonWater._GlobalWaterLevel = Mathf.Clamp01(gameManager.theRenderKing.baronVonWater._GlobalWaterLevel + 0.002f);
+                    }
+                    if (isDraggingMouseRight) {
+                        gameManager.theRenderKing.baronVonWater._GlobalWaterLevel = Mathf.Clamp01(gameManager.theRenderKing.baronVonWater._GlobalWaterLevel - 0.002f);
+                    }
+                    //gameManager.simulationManager.theRenderKing.ClickTestTerrainUpdateMaps(true, 0.04f);
+                }
+                else if (gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.slotID == 2) {   // AIR
+                    if (isDraggingMouseLeft) {
+                        if (UnityEngine.Random.Range(0f, 1f) < 0.1f) {
+                            gameManager.simulationManager.environmentFluidManager.curTierWaterCurrents = Mathf.Clamp((gameManager.simulationManager.environmentFluidManager.curTierWaterCurrents + 1), 0, 10);
+                        }                                    
+                    }
+                    if (isDraggingMouseRight) {
+                        if(UnityEngine.Random.Range(0f, 1f) < 0.1f) {
+                            gameManager.simulationManager.environmentFluidManager.curTierWaterCurrents = Mathf.Clamp((gameManager.simulationManager.environmentFluidManager.curTierWaterCurrents - 1), 0, 10);
+                                            
+                        }
+                    }  
+                }
+            }              
+        }
+                        
+        gameManager.theRenderKing.isBrushing = true;
+        gameManager.theRenderKing.isSpiritBrushOn = true;
+        gameManager.theRenderKing.spiritBrushPosNeg = 1f;
+        if(isDraggingMouseRight) {  // *** Re-Factor!!!
+            gameManager.theRenderKing.spiritBrushPosNeg = -1f;
+        }
+
+        // Also Stir Water -- secondary effect
+        float mag = smoothedMouseVel.magnitude * 0.35f;
+        float radiusMult = Mathf.Lerp(0.075f, 1.33f, Mathf.Clamp01(gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.4f)); // 0.62379f; // (1f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.5f);
+
+        if (mag > 0f) {
+            gameManager.simulationManager.PlayerToolStirOn(curMousePositionOnWaterPlane, smoothedMouseVel * (0.25f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.2f) * 0.33f, radiusMult);
+
+        }
+        else {
+            gameManager.simulationManager.PlayerToolStirOff();
+        }
+        gameManager.theRenderKing.isStirring = isDraggingMouseLeft || isDraggingMouseRight; 
+        
     }
     public void UpdateObserverModeUI() {
         if (isObserverMode) {
@@ -831,20 +988,6 @@ public class UIManager : MonoBehaviour {
                 cameraManager.targetZooplanktonWorldPos = gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleData.worldPos;
             }
             
-
-            /*if (leftClickThisFrame) {
-                
-                gameManager.simulationManager.isBrushingAgents = true; // ** TEMP DEBUGGING
-                // ANIMALS::::
-                if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2) {
-                    if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 1) {  // AGENTS
-                        gameManager.simulationManager.isBrushingAgents = true;
-                    }
-                }
-                
-                Debug.Log("Left Click! " + gameManager.simulationManager.isBrushingAgents.ToString());
-            }*/
-
             // check for player clicking on an animal in the world
             MouseRaycastCheckAgents(leftClickThisFrame);
 
@@ -879,11 +1022,7 @@ public class UIManager : MonoBehaviour {
                     recentlyCreatedSpeciesTimeStepCounter = 0;
                 }
             }
-
-            bool updateTerrainAltitude = false;
-            float terrainUpdateMagnitude = 0f;
-            
-            
+                        
             if (EventSystem.current.IsPointerOverGameObject()) {  // if mouse is over ANY unity canvas UI object (with raycast enabled)
                 //Debug.Log("MouseOverUI!!!");
             }
@@ -990,125 +1129,16 @@ public class UIManager : MonoBehaviour {
 
                     if (isDraggingMouseLeft || isDraggingMouseRight) {
 
-                        float randRipple = UnityEngine.Random.Range(0f, 1f);
-                        if(randRipple < 0.33) {
-                            gameManager.theRenderKing.baronVonWater.RequestNewWaterRipple(new Vector2(curMousePositionOnWaterPlane.x / SimulationManager._MapSize, curMousePositionOnWaterPlane.y / SimulationManager._MapSize));
-
-                        }
-                        
-                        // IF TERRAIN SELECTED::::
-                        if (gameManager.simulationManager.trophicLayersManager.isSelectedTrophicSlot) {
-                            // DECOMPOSERS::::
-                            if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 0) {
-                                gameManager.simulationManager.vegetationManager.isBrushActive = true;
-                            }// PLANTS:
-                            else if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 1) {
-                                if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) {
-                                    gameManager.simulationManager.vegetationManager.isBrushActive = true;
-                                }
-                                else {
-                                    gameManager.simulationManager.vegetationManager.isBrushActive = true;
-                                    
-                                }                                
-                            }  // ANIMALS::::                            
-                            else if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2) {
-                                if (gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) {  
-                                    // zooplankton?
-                                }
-                                else {// AGENTS                                
-                                    int speciesIndex = gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.linkedSpeciesID;
-                                    if (isDraggingMouseLeft) {
-                                        //gameManager.simulationManager.recentlyAddedSpeciesOn = true; // ** needed?
-                                        isBrushAddingAgents = true;
-                                        
-                                        //Debug.Log("isBrushAddingAgents = true; speciesID = " + speciesIndex.ToString());
-
-                                        brushAddAgentCounter++;
-
-                                        if(brushAddAgentCounter >= framesPerAgentSpawn) {
-                                            brushAddAgentCounter = 0;
-
-                                            gameManager.simulationManager.AttemptToBrushSpawnAgent(speciesIndex);
-                                        }
-                                    }
-                                    if (isDraggingMouseRight) {
-                                        gameManager.simulationManager.AttemptToKillAgent(speciesIndex, new Vector2(curMousePositionOnWaterPlane.x, curMousePositionOnWaterPlane.y), 15f);
-                                    }                                   
-                                }
-                            }
-                            else if (gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 3) {
-                                updateTerrainAltitude = true;
-                                terrainUpdateMagnitude = 0.05f;
-                                if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.slotID == 0) { // WORLD
-                                    terrainUpdateMagnitude = 1f;
-                                    //gameManager.simulationManager.theRenderKing.ClickTestTerrainUpdateMaps(true, 0.4f);
-                                }
-                                else if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.slotID == 1) {  // STONE
-
-                                    //gameManager.simulationManager.theRenderKing.ClickTestTerrainUpdateMaps(true, 0.04f);
-                                }
-                                else if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.slotID == 2) {  // PEBBLES
-                                    //gameManager.simulationManager.theRenderKing.ClickTestTerrainUpdateMaps(true, 0.04f);
-                                }
-                                else if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.slotID == 3) {  // SAND
-                                    //gameManager.simulationManager.theRenderKing.ClickTestTerrainUpdateMaps(true, 0.04f);
-                                }
-                                
+                        if(!isInfluencePointsCooldown) {
+                            if(toolbarInfluencePoints >= 0.05f) {
+                                ApplyCreationBrush();
                             }
                             else {
-                                if (gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.slotID == 0) {  // MINERALS
-                                    gameManager.simulationManager.vegetationManager.isBrushActive = true;
-                                    Debug.Log("SDFADSFAS");
-                                }
-                                else if (gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.slotID == 1) {   // WATER
-                                    if (isDraggingMouseLeft) {
-                                        gameManager.theRenderKing.baronVonWater._GlobalWaterLevel = Mathf.Clamp01(gameManager.theRenderKing.baronVonWater._GlobalWaterLevel + 0.002f);
-                                    }
-                                    if (isDraggingMouseRight) {
-                                       gameManager.theRenderKing.baronVonWater._GlobalWaterLevel = Mathf.Clamp01(gameManager.theRenderKing.baronVonWater._GlobalWaterLevel - 0.002f);
-                                    }
-                                    //gameManager.simulationManager.theRenderKing.ClickTestTerrainUpdateMaps(true, 0.04f);
-                                }
-                                else if (gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.slotID == 2) {   // AIR
-                                    if (isDraggingMouseLeft) {
-                                        if (UnityEngine.Random.Range(0f, 1f) < 0.1f) {
-                                            gameManager.simulationManager.environmentFluidManager.curTierWaterCurrents = Mathf.Clamp((gameManager.simulationManager.environmentFluidManager.curTierWaterCurrents + 1), 0, 10);
-                                        }                                    
-                                    }
-                                    if (isDraggingMouseRight) {
-                                       if(UnityEngine.Random.Range(0f, 1f) < 0.1f) {
-                                            gameManager.simulationManager.environmentFluidManager.curTierWaterCurrents = Mathf.Clamp((gameManager.simulationManager.environmentFluidManager.curTierWaterCurrents - 1), 0, 10);
-                                            
-                                        }
-                                    }  
-                                }
-                            }
-                            
-                            
-                            
-                        }
-
-                        
-                        gameManager.theRenderKing.isBrushing = true;
-                        gameManager.theRenderKing.isSpiritBrushOn = true;
-                        gameManager.theRenderKing.spiritBrushPosNeg = 1f;
-                        if(isDraggingMouseRight) {  // *** Re-Factor!!!
-                            gameManager.theRenderKing.spiritBrushPosNeg = -1f;
-                        }
-
-                        // Also Stir Water -- secondary effect
-                        float mag = smoothedMouseVel.magnitude;
-                        float radiusMult = Mathf.Lerp(0.075f, 1.33f, Mathf.Clamp01(gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.4f)); // 0.62379f; // (1f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.5f);
-
-                        if (mag > 0f) {
-                            gameManager.simulationManager.PlayerToolStirOn(curMousePositionOnWaterPlane, smoothedMouseVel * (0.25f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.2f) * 0.33f, radiusMult);
-
-                        }
-                        else {
-                            gameManager.simulationManager.PlayerToolStirOff();
-                        }
-                        gameManager.theRenderKing.isStirring = isDraggingMouseLeft || isDraggingMouseRight; 
-
+                                Debug.Log("NOT ENOUGH MANA!");
+                                // Enter Cooldown!
+                                isInfluencePointsCooldown = true;
+                            } 
+                        }                                               
                     }
                     else {
                         
@@ -1117,10 +1147,8 @@ public class UIManager : MonoBehaviour {
                 else {
 
                 }
-
-                
             }
-
+            
             if (isDraggingMouseLeft || isDraggingMouseRight) {
                 gameManager.simulationManager.theRenderKing.ClickTestTerrainUpdateMaps(updateTerrainAltitude, terrainUpdateMagnitude);
             }
@@ -1927,10 +1955,29 @@ public class UIManager : MonoBehaviour {
                
 
         // Influence points meter:     
-        //toolbarInfluencePoints += 0.0005225f; // x10 while debugging
-        //toolbarInfluencePoints = Mathf.Clamp01(toolbarInfluencePoints);
-        //infoMeterInfluencePointsMat.SetFloat("_FillPercentage", toolbarInfluencePoints);
-        //textInfluencePointsValue.text = "Influence: \n" + (toolbarInfluencePoints * 100f).ToString("F0") + "%";
+        if(isInfluencePointsCooldown) {
+            influencePointsCooldownCounter++;
+            if(influencePointsCooldownCounter > influencePointsCooldownDuration) {
+                influencePointsCooldownCounter = 0;
+                isInfluencePointsCooldown = false;
+            }
+        }
+        if(toolbarInfluencePoints < 0.1f) {
+            toolbarInfluencePoints += 0.002f; // x10 while debugging
+        }
+        else {
+            toolbarInfluencePoints += 0.0002f; // x10 while debugging
+        }
+        toolbarInfluencePoints = Mathf.Clamp01(toolbarInfluencePoints);
+        infoMeterInfluencePointsMat.SetFloat("_FillPercentage", toolbarInfluencePoints);
+        Color influenceBarTint = new Color(0.2f, 0.8f, 1f, 1f);
+        string influenceText = (toolbarInfluencePoints * 100f).ToString("F0") + "%";
+        if(isInfluencePointsCooldown) {
+            influenceBarTint = new Color(0.8f, 0.2f, 0.2f, 1f);
+            influenceText = "cooldown";
+        }
+        infoMeterInfluencePointsMat.SetColor("_Tint", influenceBarTint);
+        textInfluencePointsValue.text = "Influence: \n" + influenceText;
 
         textSelectedSpeciesTitle.resizeTextMaxSize = 20;
         textSelectedSpiritBrushName.resizeTextMaxSize = 24;
@@ -1953,15 +2000,6 @@ public class UIManager : MonoBehaviour {
             //strSpiritBrushDescription = "This spirit reveals hidden information about aspects of the world";
             //strSpiritBrushEffects = "Left-Click:\nFollows the nearest Vertebrate\n\nRight-Click:\nStops following";
         }
-        /*if (curActiveTool == ToolType.Watcher) {
-            spiritBrushName = "Minor Watcher Spirit";
-            imageToolbarSpiritBrushThumbnail.sprite = spriteSpiritBrushWatcherIcon;
-            panelWatcherSpiritMain.SetActive(true);            
-        }
-        else {
-            panelWatcherSpiritMain.SetActive(false);
-        }*/
-        
         
         textSelectedSpiritBrushName.text = spiritBrushName;
 
@@ -1969,9 +2007,7 @@ public class UIManager : MonoBehaviour {
         imageToolbarSpiritBrushThumbnailBorder.color = colorSpiritBrushDark;
 
         UpdateSpiritBrushDescriptionsUI(); // ****************************************************************
-
         
-
 
         Color iconColor = Color.white;
         
@@ -2106,10 +2142,6 @@ public class UIManager : MonoBehaviour {
 
         //panelToolbarWingDeletePrompt.SetActive(false);
         textToolbarWingSpeciesSummary.gameObject.SetActive(true);
-                                
-        // Which panels are available?
-        //int panelTier = -1;
-                 
         
         imageToolbarSpeciesPortraitRender.color = iconColor;                
         imageToolbarSpeciesPortraitBorder.color = iconColor;
@@ -2130,10 +2162,6 @@ public class UIManager : MonoBehaviour {
                 curCount = agentRef.lifeStageTransitionTimeStepCounter;
                 maxCount = agentRef._GestationDurationTimeSteps;
             }
-            /*if (agentRef.curLifeStage == Agent.AgentLifeStage.Young) {
-                curCount = agentRef.lifeStageTransitionTimeStepCounter;
-                maxCount = agentRef._YoungDurationTimeSteps;
-            }*/
             if (agentRef.curLifeStage == Agent.AgentLifeStage.Mature) {
                 curCount = agentRef.ageCounter;
                 maxCount = agentRef.maxAgeTimeSteps;

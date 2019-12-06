@@ -3330,60 +3330,24 @@ public class TheRenderKing : MonoBehaviour {
             // clear -- needed???
         cmdBufferSpiritBrush.SetViewProjectionMatrices(spiritBrushRenderCamera.worldToCameraMatrix, spiritBrushRenderCamera.projectionMatrix);
         // Draw Solid Land boundaries:
-        float scale = Mathf.Lerp(8f, 60f, Mathf.Clamp01(baronVonWater.camDistNormalized * 1.5f));
-        /*if(simManager.trophicLayersManager.isSelectedTrophicSlot) {
-            if(simManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 0) {
-                scale *= 0.5f;
-            }
-            else if(simManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 1) {
-
-            }
-            else if(simManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2) {
-                scale *= 0.37f;
-            }
-            else {
-                // terrain
-            
-            }
-        }*/
         
-        Matrix4x4 stirStickTransformMatrix = Matrix4x4.TRS(new Vector3(simManager.uiManager.curMousePositionOnWaterPlane.x, simManager.uiManager.curMousePositionOnWaterPlane.y, 0f), Quaternion.identity, Vector3.one * scale);
-        //Debug.Log("mouseCursorPos: " + simManager.uiManager.curMousePositionOnWaterPlane.ToString());
+        
         if(isBrushing) {
+            // Get brush:
+            CreationBrush brushData = simManager.uiManager.creationBrushesArray[simManager.uiManager.curCreationBrushIndex];
             
-            //cmdBufferSpiritBrush.DrawMesh(meshStirStickLrg, stirStickTransformMatrix, spiritBrushRenderMat); // Masks out areas above the fluid "Sea Level"
+            float scale = Mathf.Lerp(8f, 60f, Mathf.Clamp01(baronVonWater.camDistNormalized * 1.5f)) * brushData.baseScale;
+            float brushIntensity = 1f * brushData.baseAmplitude;
+            Matrix4x4 stirStickTransformMatrix = Matrix4x4.TRS(new Vector3(simManager.uiManager.curMousePositionOnWaterPlane.x, simManager.uiManager.curMousePositionOnWaterPlane.y, 0f), Quaternion.identity, Vector3.one * scale);
+            //Debug.Log("mouseCursorPos: " + simManager.uiManager.curMousePositionOnWaterPlane.ToString());
+                        
             spiritBrushRenderMat.SetPass(0);
             spiritBrushRenderMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer); // *** Needed? or just set it once in beginning....
             spiritBrushRenderMat.SetVector("_Position", new Vector4(simManager.uiManager.curMousePositionOnWaterPlane.x, simManager.uiManager.curMousePositionOnWaterPlane.y, 0f, 0f));
-            spiritBrushRenderMat.SetFloat("_Scale", scale);
-            float brushIntensity = 1f;
-            /*if(simManager.uiManager.selectedToolbarTerrainLayer > 0) {
-                brushIntensity *= 0.42f;
-            }
-            else {
-                brushIntensity = (baronVonWater.camDistNormalized * 0.25f + 0.75f) * 0.05f;
-            }*/
-            spiritBrushRenderMat.SetFloat("_Strength", brushIntensity);
-            float patternColumn = 0f;
-            float patternRow = 0f;
-            if(simManager.uiManager.curCreationBrushIndex == 0) {
-                patternColumn = 5f;
-                patternRow = 1f;                
-            }
-            else if(simManager.uiManager.curCreationBrushIndex == 1) {
-                patternColumn = 1f;
-                patternRow = 1f;
-            }
-            else if(simManager.uiManager.curCreationBrushIndex == 2) {
-                patternColumn = 3f;
-                patternRow = 3f;
-            }
-            else {
-                patternColumn = 0f;
-                patternRow = 2f;
-            }
-            spiritBrushRenderMat.SetFloat("_PatternColumn", patternColumn);
-            spiritBrushRenderMat.SetFloat("_PatternRow", patternRow);
+            spiritBrushRenderMat.SetFloat("_Scale", scale);            
+            spiritBrushRenderMat.SetFloat("_Strength", brushIntensity);            
+            spiritBrushRenderMat.SetFloat("_PatternColumn", brushData.patternColumn);
+            spiritBrushRenderMat.SetFloat("_PatternRow", brushData.patternRow);
             //spiritBrushRenderMat.SetBuffer("basicStrokesCBuffer", obstacleStrokesCBuffer); 
             cmdBufferSpiritBrush.DrawProcedural(Matrix4x4.identity, spiritBrushRenderMat, 0, MeshTopology.Triangles, 6, 1);
             // Draw dynamic Obstacles:        
