@@ -1,4 +1,4 @@
-﻿Shader "SpiritBrush/SpiritBrushRenderShader"
+﻿Shader "SpiritBrush/SpiritBrushRenderShaderMultiBurst"
 {
 	Properties
 	{
@@ -29,6 +29,22 @@
 				float4 color : TEXCOORD1;
 			};
 
+			struct SpiritBrushQuadData {
+				int index;
+				float3 worldPos;
+				float2 heading;
+				float2 localScale;
+				float lifespan;
+				float2 vel;
+				float drag;
+				float noiseStart;
+				float noiseEnd;
+				float noiseFreq;
+				int brushType;
+			};
+
+			StructuredBuffer<SpiritBrushQuadData> _SpiritBrushQuadsRead;
+
 			sampler2D _MainTex;
 			float4 _MainTex_ST;
 			sampler2D _NoiseTex;
@@ -50,11 +66,13 @@
 			{
 				v2f o;
 				
-				float3 worldPosition = float3(_Position.xy, 0.0);
-				float3 quadPoint = quadVerticesCBuffer[id];
-				float2 uv = quadPoint.xy + 0.5f;
+				SpiritBrushQuadData data = _SpiritBrushQuadsRead[inst];
 
-				float2 scale = float2(_Scale, _Scale); //strokeData.scale;				
+				float3 worldPosition = data.worldPos;
+				float3 quadPoint = quadVerticesCBuffer[id];
+				float2 uv = quadPoint.xy + 0.5;
+								
+				float2 scale = float2(_Scale, _Scale) * 0.15; //strokeData.scale;				
 				quadPoint *= float3(scale, 1.0);
 
 				// Figure out final facing Vectors!!!
@@ -62,8 +80,8 @@
 				float2 right0 = float2(forward0.y, -forward0.x); // perpendicular to forward vector
 				float3 rotatedPoint0 = float3(quadPoint.x * right0 + quadPoint.y * forward0,
 											 quadPoint.z);
-				
-				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(rotatedPoint0, 0.0f));				
+				//worldPosition = float3(0,0,0);
+				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition + quadPoint * 0.25, 1.0)));				
 				o.color = float4(1,1,1,1);				
 				o.uv = uv;
 				
@@ -91,6 +109,7 @@
 
 				float4 patternSample = tex2D(_BrushPatternTex, patternUV);
 
+				return float4(1,1,1,1);
 				return float4(patternSample.rgb * mask, 1);
 				
 				return col;

@@ -1,0 +1,44 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSSimulateBrushQuads
+#pragma kernel CSCopyBuffer
+#pragma kernel CSSpawnBrushQuads
+
+struct SpiritBrushQuadData {
+	int index;
+	float3 worldPos;
+	float2 heading;
+	float2 localScale;
+	float lifespan;
+	float2 vel;
+	float drag;
+	float noiseStart;
+	float noiseEnd;
+	float noiseFreq;
+	int brushType;
+};
+
+uniform int _StartIndex;
+uniform int _UpdateBufferLength;
+
+StructuredBuffer<SpiritBrushQuadData> _SpiritBrushQuadsRead;
+RWStructuredBuffer<SpiritBrushQuadData> _SpiritBrushQuadsWrite;
+
+[numthreads(1024,1,1)]
+void CSSimulateBrushQuads (uint3 id : SV_DispatchThreadID)
+{
+	SpiritBrushQuadData data = _SpiritBrushQuadsRead[id.x];
+	data.worldPos.x = fmod(data.worldPos.x + 0.1, 256.0);
+	_SpiritBrushQuadsWrite[id.x] = data;
+}
+
+[numthreads(1024,1,1)]
+void CSCopyBuffer (uint3 id : SV_DispatchThreadID)
+{
+	_SpiritBrushQuadsWrite[id.x] = _SpiritBrushQuadsRead[id.x];
+}
+
+[numthreads(32,1,1)]
+void CSSpawnBrushQuads (uint3 id : SV_DispatchThreadID)
+{
+	
+}

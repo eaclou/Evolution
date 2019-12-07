@@ -42,6 +42,7 @@ public class TheRenderKing : MonoBehaviour {
     public ComputeShader computeShaderCritters;
     public ComputeShader computeShaderEggSacks;
     public ComputeShader computeShaderTreeOfLife;
+    public ComputeShader computeShaderSpiritBrush;
 
     public Mesh meshStirStickA;
     public Mesh meshStirStickSml;
@@ -121,7 +122,7 @@ public class TheRenderKing : MonoBehaviour {
     public Material treeOfLifeSpeciesHeadTipMat;
     public Material treeOfLifeCursorLineMat;
     public Material toolbarSpeciesPortraitStrokesMat;
-
+    public Material spiritBrushRenderMultiBurstMat;
     public Material spiritBrushRenderMat;
 
     public ComputeBuffer gizmoCursorPosCBuffer;
@@ -247,6 +248,23 @@ public class TheRenderKing : MonoBehaviour {
 
     private BasicStrokeData[] colorInjectionStrokeDataArray;
     private ComputeBuffer colorInjectionStrokesCBuffer;
+
+    private struct SpiritBrushQuadData {
+		public int index;
+		public Vector3 worldPos;
+		public Vector2 heading;
+		public Vector2 localScale;
+		public float lifespan;
+		public Vector2 vel;
+		public float drag;
+	    public float noiseStart;
+	    public float noiseEnd;
+	    public float noiseFreq;
+	    public int brushType;
+	}
+    private ComputeBuffer spiritBrushQuadDataCBuffer0;
+    private ComputeBuffer spiritBrushQuadDataCBuffer1;
+    private SpiritBrushQuadData[] spiritBrushQuadDataArray;
 
     //private ComputeBuffer debugAgentResourcesCBuffer;
 
@@ -540,7 +558,7 @@ public class TheRenderKing : MonoBehaviour {
         //InitializeAgentHoverHighlightCBuffer();
         //InitializeTreeOfLifeBuffers();
         //InitializeDebugBuffers(); 
-
+        InitializeSpiritBrushQuadBuffer();
 
         // INIT:: ugly :(
         if(toolbarPortraitCritterInitDataCBuffer != null) {
@@ -573,6 +591,25 @@ public class TheRenderKing : MonoBehaviour {
         return numBytes;
     }
     
+    private int GetMemorySizeSpiritbrushQuadData() {
+        return (sizeof(int) * 2 + sizeof(float) * 14);
+    }
+    private void InitializeSpiritBrushQuadBuffer() {
+        SpiritBrushQuadData[] spiritBrushQuadDataArray = new SpiritBrushQuadData[1024];
+        spiritBrushQuadDataCBuffer0 = new ComputeBuffer(1024, GetMemorySizeSpiritbrushQuadData());
+        spiritBrushQuadDataCBuffer1 = new ComputeBuffer(1024, GetMemorySizeSpiritbrushQuadData());
+        for(int i = 0; i < 1024; i++) {
+            SpiritBrushQuadData data = new SpiritBrushQuadData();
+            data.worldPos = new Vector3(UnityEngine.Random.Range((float)i * 0.25f, 256f), UnityEngine.Random.Range(0f, 256f), 0f);
+            data.vel = new Vector2(0f, 1f);
+            data.heading = new Vector2(0f, 1f);
+            data.lifespan = 0f;
+            spiritBrushQuadDataArray[i] = data;
+        }
+        spiritBrushQuadDataCBuffer0.SetData(spiritBrushQuadDataArray);
+        
+        
+    }
     private void InitializeCurveRibbonMeshBuffer() {
         
         float rowSize = 1f / (float)numCurveRibbonQuads;
@@ -2691,6 +2728,26 @@ public class TheRenderKing : MonoBehaviour {
         fluidManager.computeShaderFluidSim.SetTexture(kernelSimFloatyBits, "VelocityRead", fluidManager._VelocityPressureDivergenceMain);        
         fluidManager.computeShaderFluidSim.Dispatch(kernelSimFloatyBits, floatyBitsCBuffer.count / 1024, 1, 1);
     }
+    public void SimSpiritBrushQuads() {
+        int kernelCSSimulateBrushQuads = computeShaderSpiritBrush.FindKernel("CSSimulateBrushQuads");
+
+        computeShaderSpiritBrush.SetFloat("_TextureResolution", (float)fluidManager.resolution);
+        computeShaderSpiritBrush.SetFloat("_DeltaTime", fluidManager.deltaTime);
+        computeShaderSpiritBrush.SetFloat("_InvGridScale", fluidManager.invGridScale);
+        computeShaderSpiritBrush.SetFloat("_Time", Time.realtimeSinceStartup);
+        computeShaderSpiritBrush.SetBuffer(kernelCSSimulateBrushQuads, "_SpiritBrushQuadsRead", spiritBrushQuadDataCBuffer0);      
+        computeShaderSpiritBrush.SetBuffer(kernelCSSimulateBrushQuads, "_SpiritBrushQuadsWrite", spiritBrushQuadDataCBuffer1);  
+        computeShaderSpiritBrush.Dispatch(kernelCSSimulateBrushQuads, 1, 1, 1);
+
+
+        int kernelCSCopyBuffer = computeShaderSpiritBrush.FindKernel("CSCopyBuffer");   // Copy back to original buffer0
+        computeShaderSpiritBrush.SetBuffer(kernelCSCopyBuffer, "_SpiritBrushQuadsRead", spiritBrushQuadDataCBuffer1);      
+        computeShaderSpiritBrush.SetBuffer(kernelCSCopyBuffer, "_SpiritBrushQuadsWrite", spiritBrushQuadDataCBuffer0);  
+        computeShaderSpiritBrush.Dispatch(kernelCSCopyBuffer, 1, 1, 1);
+    }
+    public void SpawnSpiritBrushQuads(int startIndex, int numCells) {
+
+    }
     /*private void SimRipples() {
         int kernelSimRipples = fluidManager.computeShaderFluidSim.FindKernel("SimRipples");
         
@@ -3175,6 +3232,7 @@ public class TheRenderKing : MonoBehaviour {
         SimEggSacks();
         //SimWaterSplines();
         //SimWaterChains();
+        SimSpiritBrushQuads();
 
 
         //SimTreeOfLife(); // issues with this being on FixedUpdate() cycle vs Update() ?? ***
@@ -3335,27 +3393,65 @@ public class TheRenderKing : MonoBehaviour {
         if(isBrushing) {
             // Get brush:
             CreationBrush brushData = simManager.uiManager.creationBrushesArray[simManager.uiManager.curCreationBrushIndex];
-            
-            float scale = Mathf.Lerp(8f, 60f, Mathf.Clamp01(baronVonWater.camDistNormalized * 1.5f)) * brushData.baseScale;
+
+            float scale = Mathf.Lerp(1f, 50f, Mathf.Clamp01(baronVonWater.camDistNormalized * 1.35f)) * brushData.baseScale;
             float brushIntensity = 1f * brushData.baseAmplitude;
-            Matrix4x4 stirStickTransformMatrix = Matrix4x4.TRS(new Vector3(simManager.uiManager.curMousePositionOnWaterPlane.x, simManager.uiManager.curMousePositionOnWaterPlane.y, 0f), Quaternion.identity, Vector3.one * scale);
-            //Debug.Log("mouseCursorPos: " + simManager.uiManager.curMousePositionOnWaterPlane.ToString());
+
+            // branch based on brushType --> different materials!
+            if(brushData.type == CreationBrush.BrushType.Burst) {
+                spiritBrushRenderMultiBurstMat.SetPass(0); // *** is this really necessary?
+                spiritBrushRenderMultiBurstMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer); // *** Needed? or just set it once in beginning....
+                spiritBrushRenderMultiBurstMat.SetBuffer("_SpiritBrushQuadsRead", spiritBrushQuadDataCBuffer0);
+                spiritBrushRenderMultiBurstMat.SetVector("_Position", new Vector4(simManager.uiManager.curMousePositionOnWaterPlane.x, simManager.uiManager.curMousePositionOnWaterPlane.y, 0f, 0f));
+                spiritBrushRenderMultiBurstMat.SetFloat("_Scale", scale);            
+                spiritBrushRenderMultiBurstMat.SetFloat("_Strength", brushIntensity);            
+                spiritBrushRenderMultiBurstMat.SetFloat("_PatternColumn", brushData.patternColumn);
+                spiritBrushRenderMultiBurstMat.SetFloat("_PatternRow", brushData.patternRow);
+                //dir:
+                Vector2 brushDir = new Vector2(0f, 1f);
+                if(simManager.uiManager.smoothedMouseVel.x != 0f || simManager.uiManager.smoothedMouseVel.y != 0f) {
+                    brushDir = new Vector2(simManager.uiManager.smoothedMouseVel.x, simManager.uiManager.smoothedMouseVel.y).normalized;
+                }
+                else {
+
+                }
+                spiritBrushRenderMultiBurstMat.SetFloat("_FacingDirX", brushDir.x);
+                spiritBrushRenderMultiBurstMat.SetFloat("_FacingDirY", brushDir.y);
+                //spiritBrushRenderMat.SetBuffer("basicStrokesCBuffer", obstacleStrokesCBuffer); 
+                cmdBufferSpiritBrush.DrawProcedural(Matrix4x4.identity, spiritBrushRenderMultiBurstMat, 0, MeshTopology.Triangles, 6, spiritBrushQuadDataCBuffer0.count);
+            }   
+            else {
+                
+                //Matrix4x4 stirStickTransformMatrix = Matrix4x4.TRS(new Vector3(simManager.uiManager.curMousePositionOnWaterPlane.x, simManager.uiManager.curMousePositionOnWaterPlane.y, 0f), Quaternion.identity, Vector3.one * scale);
+                //Debug.Log("mouseCursorPos: " + simManager.uiManager.curMousePositionOnWaterPlane.ToString());
                         
-            spiritBrushRenderMat.SetPass(0);
-            spiritBrushRenderMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer); // *** Needed? or just set it once in beginning....
-            spiritBrushRenderMat.SetVector("_Position", new Vector4(simManager.uiManager.curMousePositionOnWaterPlane.x, simManager.uiManager.curMousePositionOnWaterPlane.y, 0f, 0f));
-            spiritBrushRenderMat.SetFloat("_Scale", scale);            
-            spiritBrushRenderMat.SetFloat("_Strength", brushIntensity);            
-            spiritBrushRenderMat.SetFloat("_PatternColumn", brushData.patternColumn);
-            spiritBrushRenderMat.SetFloat("_PatternRow", brushData.patternRow);
-            //spiritBrushRenderMat.SetBuffer("basicStrokesCBuffer", obstacleStrokesCBuffer); 
-            cmdBufferSpiritBrush.DrawProcedural(Matrix4x4.identity, spiritBrushRenderMat, 0, MeshTopology.Triangles, 6, 1);
-            // Draw dynamic Obstacles:        
-            //basicStrokeDisplayMat.SetPass(0);
-            //basicStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer); // *** Needed? or just set it once in beginning....
-            //basicStrokeDisplayMat.SetBuffer("basicStrokesCBuffer", obstacleStrokesCBuffer);        
-            //cmdBufferSpiritBrush.DrawProcedural(Matrix4x4.identity, basicStrokeDisplayMat, 0, MeshTopology.Triangles, 6, .count);
-            // Disabling for now -- starting with one-way interaction between fluid & objects (fluid pushes objects, they don't push back)
+                spiritBrushRenderMat.SetPass(0);
+                spiritBrushRenderMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer); // *** Needed? or just set it once in beginning....
+                spiritBrushRenderMat.SetVector("_Position", new Vector4(simManager.uiManager.curMousePositionOnWaterPlane.x, simManager.uiManager.curMousePositionOnWaterPlane.y, 0f, 0f));
+                spiritBrushRenderMat.SetFloat("_Scale", scale);            
+                spiritBrushRenderMat.SetFloat("_Strength", brushIntensity);            
+                spiritBrushRenderMat.SetFloat("_PatternColumn", brushData.patternColumn);
+                spiritBrushRenderMat.SetFloat("_PatternRow", brushData.patternRow);
+                //dir:
+                Vector2 brushDir = new Vector2(0f, 1f);
+                if(simManager.uiManager.smoothedMouseVel.x != 0f || simManager.uiManager.smoothedMouseVel.y != 0f) {
+                    brushDir = new Vector2(simManager.uiManager.smoothedMouseVel.x, simManager.uiManager.smoothedMouseVel.y).normalized;
+                }
+                else {
+
+                }
+                spiritBrushRenderMat.SetFloat("_FacingDirX", brushDir.x);
+                spiritBrushRenderMat.SetFloat("_FacingDirY", brushDir.y);
+                //spiritBrushRenderMat.SetBuffer("basicStrokesCBuffer", obstacleStrokesCBuffer); 
+                cmdBufferSpiritBrush.DrawProcedural(Matrix4x4.identity, spiritBrushRenderMat, 0, MeshTopology.Triangles, 6, 1);
+                // Draw dynamic Obstacles:        
+                //basicStrokeDisplayMat.SetPass(0);
+                //basicStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer); // *** Needed? or just set it once in beginning....
+                //basicStrokeDisplayMat.SetBuffer("basicStrokesCBuffer", obstacleStrokesCBuffer);        
+                //cmdBufferSpiritBrush.DrawProcedural(Matrix4x4.identity, basicStrokeDisplayMat, 0, MeshTopology.Triangles, 6, .count);
+                // Disabling for now -- starting with one-way interaction between fluid & objects (fluid pushes objects, they don't push back)
+            
+            }
             
         }
         else {
