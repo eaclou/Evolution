@@ -10,7 +10,7 @@ public class CreationBrush {
 
     public int burstEmitDuration;
     public int burstTotalDuration;
-    private int burstFrameCounter = 0;
+    public int burstFrameCounter = 0;
     public bool isBurstActive = false;
 
     public float baseAmplitude;

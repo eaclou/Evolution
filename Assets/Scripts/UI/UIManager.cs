@@ -473,42 +473,42 @@ public class UIManager : MonoBehaviour {
     #region Initialization Functions:::
     // Use this for initialization
     void Start() {
-
-        
         animatorInspectPanel.enabled = false;
 
         creationBrushesArray = new CreationBrush[4];
         CreationBrush createBrush0 = new CreationBrush();
         createBrush0.name = "Create Brush 0";
         createBrush0.type = CreationBrush.BrushType.Drag;
-        createBrush0.baseScale = 0.25f;
+        createBrush0.baseScale = 3f;
         createBrush0.baseAmplitude = 1f;
-        createBrush0.patternColumn = 5f;
-        createBrush0.patternRow = 1f;  
+        createBrush0.patternColumn = 0f;
+        createBrush0.patternRow = 2f;  
 
         CreationBrush createBrush1 = new CreationBrush();
         createBrush1.name = "Create Brush 1";
         createBrush1.type = CreationBrush.BrushType.Drag;
-        createBrush1.baseScale = 0.5f;
+        createBrush1.baseScale = 3f;
         createBrush1.baseAmplitude = 1f;
-        createBrush1.patternColumn = 1f;
-        createBrush1.patternRow = 0f;
+        createBrush1.patternColumn = 3f;
+        createBrush1.patternRow = 3f;
 
         CreationBrush createBrush2 = new CreationBrush();
         createBrush2.name = "Create Brush 2";
         createBrush2.type = CreationBrush.BrushType.Burst;
         createBrush2.baseScale = 1f;
         createBrush2.baseAmplitude = 1f;
-        createBrush2.patternColumn = 3f;
-        createBrush2.patternRow = 3f;
+        createBrush2.patternColumn = 0f;
+        createBrush2.patternRow = 2f;
+        createBrush2.burstTotalDuration = 40;
 
         CreationBrush createBrush3 = new CreationBrush();
         createBrush3.name = "Create Brush 3";
         createBrush3.type = CreationBrush.BrushType.Burst;
         createBrush3.baseScale = 2f;
         createBrush3.baseAmplitude = 0.2f;
-        createBrush3.patternColumn = 0f;
-        createBrush3.patternRow = 2f;
+        createBrush3.patternColumn = 3f;
+        createBrush3.patternRow = 3f;
+        createBrush3.burstTotalDuration = 40;
 
         creationBrushesArray[0] = createBrush0;
         creationBrushesArray[1] = createBrush1;
@@ -2430,19 +2430,19 @@ public class UIManager : MonoBehaviour {
         string[] strSpiritBrushDescriptionArray = new string[6]; // = "Decomposers break down the old so that new life can grow.";
         strSpiritBrushDescriptionArray[0] = "Provides information about the world and its contents, and chronicles events through time";
         strSpiritBrushDescriptionArray[1] = "This spirit possesses limited control of life & existence itself";
-        strSpiritBrushDescriptionArray[2] = "A mysterioues Kelpie able to control the flow of water";
+        strSpiritBrushDescriptionArray[2] = "A mysterious Kelpie able to control the flow of water";
         strSpiritBrushDescriptionArray[3] = "A Watcher Spirit can track an organism's journey through space and time";
         strSpiritBrushDescriptionArray[4] = "Mutate...       blah blah";
         strSpiritBrushDescriptionArray[5] = "Extra.";
 
         string[] strLinkedSpiritDescriptionArray = new string[12]; // = "Decomposers break down the old so that new life can grow.";
         strLinkedSpiritDescriptionArray[0] = "The World Spirit provides the spark for a new universe";
-        strLinkedSpiritDescriptionArray[1] = "Stone Spirits are some of the oldest beings in the world, they value Stability and Strength";
-        strLinkedSpiritDescriptionArray[2] = "Pebble Spirits are usually found in rivers and streams, but can find their way to a lake or pond. They value Balance and Patience";
-        strLinkedSpiritDescriptionArray[3] = "Sand Spirits are slippery and hard to pin down. They prize Cooperation and Speed";
-        strLinkedSpiritDescriptionArray[4] = "Mineral Spirits infuse nutrients into the earth. They value Empathy and Nurturing";
-        strLinkedSpiritDescriptionArray[5] = "Water Spirits are sometimes called Kelpies, They are known for Adaptability and Resilience";
-        strLinkedSpiritDescriptionArray[6] = "Air Spirits come in many forms, and value Swiftness and Persistence";
+        strLinkedSpiritDescriptionArray[1] = "Stone Spirits are some of the oldest known";
+        strLinkedSpiritDescriptionArray[2] = "Pebble Spirits are usually found in rivers and streams";
+        strLinkedSpiritDescriptionArray[3] = "Sand Spirits";
+        strLinkedSpiritDescriptionArray[4] = "Mineral Spirits infuse nutrients into the earth.";
+        strLinkedSpiritDescriptionArray[5] = "Water Spirits";
+        strLinkedSpiritDescriptionArray[6] = "Air Spirits";
         strLinkedSpiritDescriptionArray[7] = "Decomposers break down the old so that new life can grow.";
         strLinkedSpiritDescriptionArray[8] = "Algae needs light and nutrients to grow.";
         strLinkedSpiritDescriptionArray[9] = "Floating Plants that are a foodsource for Vertebrates";

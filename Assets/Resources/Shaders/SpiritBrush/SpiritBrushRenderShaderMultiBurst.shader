@@ -11,7 +11,7 @@
 		Tags{ "RenderType" = "Transparent" }
 		ZWrite Off
 		Cull Off
-		Blend SrcAlpha One
+		Blend SrcAlpha OneMinusSrcAlpha
 
 		Pass
 		{
@@ -35,6 +35,8 @@
 				float2 heading;
 				float2 localScale;
 				float lifespan;
+				float age01;
+				float4 extraVec4;
 				float2 vel;
 				float drag;
 				float noiseStart;
@@ -72,17 +74,21 @@
 				float3 quadPoint = quadVerticesCBuffer[id];
 				float2 uv = quadPoint.xy + 0.5;
 								
-				float2 scale = float2(_Scale, _Scale) * 0.15; //strokeData.scale;				
+				float2 scale = float2(5, 12) * data.age01 * 2;// * 0.05 + data.age01 * 4; //strokeData.scale;				
 				quadPoint *= float3(scale, 1.0);
 
+				float fadeIn = saturate(data.age01 * 3);
+				float fadeOut = saturate((1.0 - data.age01) * 3);
+				float alpha = fadeIn * fadeOut;
+
 				// Figure out final facing Vectors!!!
-				float2 forward0 = float2(_FacingDirX, _FacingDirY);
+				float2 forward0 = data.heading;
 				float2 right0 = float2(forward0.y, -forward0.x); // perpendicular to forward vector
 				float3 rotatedPoint0 = float3(quadPoint.x * right0 + quadPoint.y * forward0,
 											 quadPoint.z);
 				//worldPosition = float3(0,0,0);
-				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition + quadPoint * 0.25, 1.0)));				
-				o.color = float4(1,1,1,1);				
+				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition + rotatedPoint0, 1.0)));				
+				o.color = float4(1,1,1,alpha);				
 				o.uv = uv;
 				
 				return o;
@@ -95,22 +101,22 @@
 				col.rgb = 1 * _Strength;
 				col.rgb = saturate(col.rgb);
 
-				float timeScale = 0.2789;
-				float4 noiseTex = tex2D(_NoiseTex, frac(i.uv * 0.12 + _Time.y * 0.935 * timeScale)) * tex2D(_NoiseTex, frac(i.uv * 0.256 - _Time.y * 0.835 * timeScale));
+				//float timeScale = 0.2789;
+				//float4 noiseTex = tex2D(_NoiseTex, frac(i.uv * 0.12 + _Time.y * 0.935 * timeScale)) * tex2D(_NoiseTex, frac(i.uv * 0.256 - _Time.y * 0.835 * timeScale));
 				
 				float uvDist = length(i.uv - 0.5) * 2;
 				
 				float mask = saturate(1.0 - uvDist);
 
-				float mult = lerp(mask, saturate(((noiseTex.x * noiseTex.x * 1 + 0.05) - uvDist) * 15), 0.5);
-				col.rgb *= mult;
+				//float mult = lerp(mask, saturate(((noiseTex.x * noiseTex.x * 1 + 0.05) - uvDist) * 15), 0.5);
+				//col.rgb *= mult;
 
 				float2 patternUV = i.uv * (1.0 / 8.0) + float2(0.125 * _PatternColumn, 0.125 * _PatternRow);
 
 				float4 patternSample = tex2D(_BrushPatternTex, patternUV);
 
-				return float4(1,1,1,1);
-				return float4(patternSample.rgb * mask, 1);
+				//return float4(1,1,1,);
+				return float4(1,1,1, i.color.a * patternSample.x);
 				
 				return col;
 			}

@@ -9,6 +9,8 @@ struct SpiritBrushQuadData {
 	float2 heading;
 	float2 localScale;
 	float lifespan;
+	float age01;
+	float4 extraVec4;
 	float2 vel;
 	float drag;
 	float noiseStart;
@@ -23,11 +25,19 @@ uniform int _UpdateBufferLength;
 StructuredBuffer<SpiritBrushQuadData> _SpiritBrushQuadsRead;
 RWStructuredBuffer<SpiritBrushQuadData> _SpiritBrushQuadsWrite;
 
+float rand(float2 co){   // OUTPUT is in [0,1] RANGE!!!
+	return frac(sin(dot(co.xy ,float2(12.9898,78.233))) * 43758.5453);
+}
+
 [numthreads(1024,1,1)]
 void CSSimulateBrushQuads (uint3 id : SV_DispatchThreadID)
 {
 	SpiritBrushQuadData data = _SpiritBrushQuadsRead[id.x];
-	data.worldPos.x = fmod(data.worldPos.x + 0.1, 256.0);
+	float2 randNoise = float2(rand(data.worldPos.xy * 0.01), rand(-data.worldPos.yz * 0.006));
+	data.worldPos.xy += data.vel * 0.35 + randNoise * 0.33;
+	float agingRate = 1.0 / data.lifespan;
+	//agingRate = 0.1;
+	data.age01 = saturate(data.age01 + agingRate);
 	_SpiritBrushQuadsWrite[id.x] = data;
 }
 
@@ -40,5 +50,5 @@ void CSCopyBuffer (uint3 id : SV_DispatchThreadID)
 [numthreads(32,1,1)]
 void CSSpawnBrushQuads (uint3 id : SV_DispatchThreadID)
 {
-	
+	_SpiritBrushQuadsWrite[id.x + _StartIndex] = _SpiritBrushQuadsRead[id.x];
 }
