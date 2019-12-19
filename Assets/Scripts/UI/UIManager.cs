@@ -411,15 +411,17 @@ public class UIManager : MonoBehaviour {
     }
     private void UpdateSimulationUI() {
         UpdateObserverModeUI();  // <== this is the big one *******  
+        // ^^^  Need to Clean this up and replace with better approach ***********************
 
-        theCursorCzar.UpdateCursorCzar();
+
+        theCursorCzar.UpdateCursorCzar();  // this will assume a larger role
+
+
         brushesUI.UpdateBrushesUI();
-
-
         watcherUI.UpdateWatcherPanelUI(gameManager.simulationManager.trophicLayersManager);
         knowledgeUI.UpdateKnowledgePanelUI(gameManager.simulationManager.trophicLayersManager);
         mutationUI.UpdateMutationPanelUI(gameManager.simulationManager.trophicLayersManager);
-        
+        worldSpiritHubUI.UpdateWorldSpiritHubUI();
         globalResourcesUI.UpdateGlobalResourcesPanelUpdate();
         UpdateClockPanelUI();
         
@@ -896,7 +898,6 @@ public class UIManager : MonoBehaviour {
         return sample[0];
     }
     
-     
     private void InitToolbarPortraitCritterData(TrophicSlot slot) { // ** should be called AFTER new species actually created?? something is fucked here
         Debug.Log("InitToolbarPortraitCritterData.. selectedSpeciesID: " + selectedSpeciesID.ToString() + " , slotLinkedID: " + slot.linkedSpeciesID.ToString());
         
@@ -1100,7 +1101,9 @@ public class UIManager : MonoBehaviour {
         textMouseOverInfo.gameObject.SetActive(false);
     }
 
-
+    public void ClickToolButtonBrushes() {
+        brushesUI.ClickToolButton();
+    }
     public void ClickToolButtonWatcher() {
         watcherUI.ClickToolButton();
     }
@@ -1109,6 +1112,9 @@ public class UIManager : MonoBehaviour {
     }
     public void ClickToolButtonMutate() {
         mutationUI.ClickToolButton();        
+    }
+    public void ClickToolButtonGlobalResources() {
+        globalResourcesUI.ClickToolButton();        
     }
   
     public void AnnounceUnlockAlgae() {

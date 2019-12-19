@@ -39,9 +39,9 @@ public class DebugPanelUI : MonoBehaviour {
     public Text textDebugTrainingInfo1;
     public Text textDebugTrainingInfo2;
     public Text textDebugTrainingInfo3;
-    public Text textDebugSimSettings;    
+    //public Text textDebugSimSettings;    
 
-    public Button buttonToggleDebug;
+    //public Button buttonToggleDebug;
 
     private RenderTexture[] debugTextureViewerArray;
 
@@ -51,8 +51,7 @@ public class DebugPanelUI : MonoBehaviour {
         
 	}
 	
-    public void UpdateDebugUI() {
-
+    private void UpdateUI() {
         // DISABLED!!!! -- Need to establish good method for grabbing data from SimulationManager!
         SimulationManager simManager = uiManagerRef.gameManager.simulationManager;
 
@@ -245,6 +244,12 @@ public class DebugPanelUI : MonoBehaviour {
         textDebugTextureAmplitude.text = _Amplitude.ToString();
         textDebugTextureSoloChannelIndex.text = _ChannelSoloIndex.ToString();
         textDebugTextureGamma.text = _Gamma.ToString();
+    }
+    public void UpdateDebugUI() {
+        panelDebug.SetActive(isOpen);
+        if(isOpen) {            
+            UpdateUI();
+        }        
     }    
 
 

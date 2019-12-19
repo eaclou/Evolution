@@ -63,7 +63,7 @@ public class KnowledgeUI : MonoBehaviour {
         isOpen = !isOpen;
     }
 
-    public void UpdateKnowledgePanelUI(TrophicLayersManager layerManager) {
+    private void UpdateUI(TrophicLayersManager layerManager) {
         //TrophicSlot slotRef = uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef;
 
         //panelKnowledgeInfoWorld.SetActive(false);
@@ -186,8 +186,13 @@ public class KnowledgeUI : MonoBehaviour {
                 // AIR
             }
         }
+    }
 
-
+    public void UpdateKnowledgePanelUI(TrophicLayersManager layerManager) {
+        panelKnowledgeSpiritBase.SetActive(isOpen);
+        if(isOpen) {
+            UpdateUI(layerManager);
+        }        
     }
 
     /*
@@ -321,7 +326,7 @@ public class KnowledgeUI : MonoBehaviour {
         return str;
     }
 
-    private void UpdateKnowledgePanel() {
+    private void UpdateUI() {        
         imageKnowledgeSpeciesStatsGraph.gameObject.SetActive(false);
 
         TrophicSlot slot = uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot; ; // slot uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef;

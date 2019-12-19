@@ -5,11 +5,13 @@ using UnityEngine.UI;
 
 public class BrushesUI : MonoBehaviour {
     public UIManager uiManagerRef;
-    public TheCursorCzar theCursorCzar;
     public bool isOpen;
     public bool isBrushSelected;
     public TrophicSlot selectedBrushSlot;        
     public int curCreationBrushIndex = 0;  // 0 == original, 1-3 extra experimental
+
+    public GameObject panelBrushes;
+    public GameObject panelBrushPaletteSelect;
 
     public Button buttonBrushStir;
     public Button buttonBrushAdd;
@@ -269,8 +271,7 @@ public class BrushesUI : MonoBehaviour {
         
     }
     
-	public void UpdateBrushesUI() {
-        
+    private void UpdateUI() {
         buttonBrushStir.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
         buttonBrushStir.gameObject.transform.localScale = Vector3.one;
         buttonBrushAdd.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
@@ -367,7 +368,7 @@ public class BrushesUI : MonoBehaviour {
         imageSelectedBrushThumbnail.sprite = uiManagerRef.spriteSpiritBrushCreationIcon;
         //strSpiritBrushDescription = "This spirit has some powers of life and death";
         //strSpiritBrushEffects = "Left-Click:\n" + strLeftClickEffect[leftClickDescriptionIndex] + "\n\nRight-Click:\n" + strRightClickEffect[rightClickDescriptionIndex];
-        if(theCursorCzar.isDraggingMouseRight) {
+        if(uiManagerRef.theCursorCzar.isDraggingMouseRight) {
             spiritBrushName = "Minor Decay Spirit";
 
             
@@ -390,11 +391,6 @@ public class BrushesUI : MonoBehaviour {
         imageSelectedBrushThumbnailBorder.color = uiManagerRef.colorSpiritBrushDark;
         
         Color iconColor = Color.white;
-        // figure out color from selected brush slot
-
-
-        //  
-        //uiManagerRef.worldSpiritHubUI.UpdateSpiritBrushDescriptionsUI(); // ****************************************************************
         
         textBrushLinkedSpiritName.color = iconColor; // speciesColorLight;
         imageBrushLinkedSpiritThumbnailBorder.color = iconColor; // speciesColorDark;
@@ -407,6 +403,12 @@ public class BrushesUI : MonoBehaviour {
         imageSelectedBrushThumbnail.color = iconColor;                
         imageBrushLinkedSpiritThumbnail.color = iconColor;
 
+    }
+	public void UpdateBrushesUI() {
+        panelBrushes.SetActive(isOpen);
+        if (isOpen) {
+            UpdateUI();
+        }
     }
 
     private void UpdateBrushPaletteUI() {
@@ -643,6 +645,9 @@ public class BrushesUI : MonoBehaviour {
 
     }
     
+    public void ClickToolButton() {
+        isOpen = !isOpen;
+    }
     public void ClickToolButtonStir() {
         
         uiManagerRef.curActiveTool = UIManager.ToolType.Stir;
@@ -706,7 +711,6 @@ public class BrushesUI : MonoBehaviour {
         isBrushSelected = true;
     }
     
-
     //*********************************************
     public void ClickButtonBrushPaletteOther(int index) {
         Debug.Log("ClickButtonPaletteOther: " + index.ToString());

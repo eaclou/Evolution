@@ -7,7 +7,8 @@ public class GlobalResourcesUI : MonoBehaviour {
     public UIManager uiManagerRef;
     public bool isOpen;
     public Text textGlobalMass;
-    
+
+    public GameObject panelGlobalResourcesMain;
   
     public Text textMeterOxygen;
     public Text textMeterNutrients;
@@ -32,8 +33,14 @@ public class GlobalResourcesUI : MonoBehaviour {
         
 	}
 
-    public void UpdateGlobalResourcesPanelUpdate() {
+    public void ClickToolButton() {
+        Debug.Log("Click mutation toggle button)");
+        isOpen = !isOpen;
+    }
+
+    private void UpdateUI() {
         
+
         textGlobalMass.text = "Global Biomass: " + uiManagerRef.gameManager.simulationManager.simResourceManager.curTotalMass.ToString("F0");
         SimResourceManager resourcesRef = uiManagerRef.gameManager.simulationManager.simResourceManager;
         textMeterOxygen.text = resourcesRef.curGlobalOxygen.ToString("F0");
@@ -44,6 +51,14 @@ public class GlobalResourcesUI : MonoBehaviour {
         textMeterPlants.text = (resourcesRef.curGlobalPlantParticles).ToString("F0");
         textMeterZooplankton.text = (resourcesRef.curGlobalAnimalParticles).ToString("F0");
         textMeterAnimals.text = (resourcesRef.curGlobalAgentBiomass).ToString("F2");   
+    }
+
+    public void UpdateGlobalResourcesPanelUpdate() {
+        panelGlobalResourcesMain.SetActive(isOpen);
+        if(isOpen) {
+            UpdateUI();
+        }
+
     }
 	/*
 	 

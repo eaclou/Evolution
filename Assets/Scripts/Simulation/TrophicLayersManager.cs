@@ -93,6 +93,10 @@ public class TrophicLayersManager {
         selectedTrophicSlotRef = terrainTier0.trophicSlots[0];
         //selectedTrophicSlotRef.status = TrophicSlot.SlotStatus.On;
         isSelectedTrophicSlot = true;
+
+        // SET INITIAL SELECTED!!!!!
+        uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot = kingdomTerrain.trophicTiersList[0].trophicSlots[0];
+        uiManagerRef.brushesUI.selectedBrushSlot = kingdomTerrain.trophicTiersList[0].trophicSlots[0];
     }
     public void CreateTrophicSlotSpecies(SimulationManager simManagerRef, Vector2 spawnPos, int timeStep) {
         

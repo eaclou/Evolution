@@ -46,7 +46,6 @@ public class WatcherUI : MonoBehaviour {
     public Text textWatcherVertebratePageNum;
     public Text textWatcherTargetIndex;
     
-
     //Inspect!!!
     //public bool isWatcherPanelOn = false;
     
@@ -93,7 +92,7 @@ public class WatcherUI : MonoBehaviour {
         isHighlight = true;
     }
 	
-	public void UpdateWatcherPanelUI(TrophicLayersManager layerManager) {
+    private void UpdateUI(TrophicLayersManager layerManager) {
         TrophicSlot slotRef = uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef;
         if(slotRef != null) {
             if(isWatcherTargetLayerLocked) {
@@ -502,6 +501,13 @@ public class WatcherUI : MonoBehaviour {
 
         TextCommonStatsA.text = str;
         // string?
+    }
+
+	public void UpdateWatcherPanelUI(TrophicLayersManager layerManager) {
+        panelWatcherSpiritMain.SetActive(isOpen);
+        if (isOpen) {
+            UpdateUI(layerManager);
+        }
     }
     /*
     TrophicSlot slotRefWatcher = uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef;

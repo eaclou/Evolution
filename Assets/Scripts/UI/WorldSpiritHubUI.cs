@@ -9,6 +9,9 @@ public class WorldSpiritHubUI : MonoBehaviour {
 
     //public int selectedSlotID;
     public TrophicSlot selectedWorldSpiritSlot;
+
+    public GameObject panelWorldHubMain;
+    public GameObject panelWorldHubExpand;
         
     public int selectedToolbarOtherLayer = 0;
     public Button buttonWorldSpiritOther0;  // Minerals
@@ -43,11 +46,9 @@ public class WorldSpiritHubUI : MonoBehaviour {
         
 	}
 
-    public void UpdateWorldSpiritHubUI() {
-
+    private void UpdateUI() {
         TrophicLayersManager layerManager = uiManagerRef.gameManager.simulationManager.trophicLayersManager;  
-
-
+        
         Color iconColor = Color.white;
 
         bool isSelectedDecomposers = false;
@@ -169,11 +170,13 @@ public class WorldSpiritHubUI : MonoBehaviour {
         uiManagerRef.SetToolbarButtonStateUI(ref buttonWorldSpiritOther2, layerManager.kingdomOther.trophicTiersList[0].trophicSlots[2].status, isSelectedAir);
 
     }
-
-
+    public void UpdateWorldSpiritHubUI() {
+        panelWorldHubExpand.SetActive(isOpen);
+        if(isOpen) {
+            UpdateUI();
+        }
+    }
     
-
-
     
     //*********************************************
     public void ClickButtonWorldSpiritHubOther(int index) {
