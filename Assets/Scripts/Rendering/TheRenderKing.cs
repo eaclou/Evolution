@@ -2714,7 +2714,7 @@ public class TheRenderKing : MonoBehaviour {
         //computeShaderCritters.SetFloat("_InvGridScale", fluidManager.invGridScale);
         //computeShaderCritters.SetVector("_PlayerPos", new Vector4(simManager.agentsArray[0].bodyRigidbody.transform.position.x / SimulationManager._MapSize, simManager.agentsArray[0].bodyRigidbody.transform.position.y / SimulationManager._MapSize, 0f, 0f));
         computeShaderCritters.SetFloat("_Time", Time.realtimeSinceStartup);
-        computeShaderCritters.SetVector("_CursorCoords", new Vector4(simManager.uiManager.curMousePositionOnWaterPlane.x, simManager.uiManager.curMousePositionOnWaterPlane.y, 0f, 0f));
+        computeShaderCritters.SetVector("_CursorCoords", new Vector4(simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.x, simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.y, 0f, 0f));
         computeShaderCritters.SetTexture(kernelCSSimulateHighlightTrail, "velocityRead", fluidManager._VelocityPressureDivergenceMain); 
         computeShaderCritters.SetBuffer(kernelCSSimulateHighlightTrail, "highlightTrailDataCBuffer", critterHighlightTrailCBuffer);
         computeShaderCritters.SetBuffer(kernelCSSimulateHighlightTrail, "critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer); 
@@ -2767,7 +2767,7 @@ public class TheRenderKing : MonoBehaviour {
             SpiritBrushQuadData data = new SpiritBrushQuadData();
             
             data.vel = UnityEngine.Random.insideUnitCircle * 5;// new Vector2(0f, 1f);
-            data.worldPos = new Vector3(simManager.uiManager.curMousePositionOnWaterPlane.x + data.vel.x, simManager.uiManager.curMousePositionOnWaterPlane.y + data.vel.y, 0f);
+            data.worldPos = new Vector3(simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.x + data.vel.x, simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.y + data.vel.y, 0f);
             data.heading = data.vel.normalized;
             data.lifespan = UnityEngine.Random.Range(10f, 40f);
             data.age01 = 0f;
@@ -3426,7 +3426,7 @@ public class TheRenderKing : MonoBehaviour {
         // Draw Solid Land boundaries:
         
         // Get brush:
-        CreationBrush brushData = simManager.uiManager.creationBrushesArray[simManager.uiManager.curCreationBrushIndex];
+        CreationBrush brushData = simManager.uiManager.brushesUI.creationBrushesArray[simManager.uiManager.brushesUI.curCreationBrushIndex];
         float scale = Mathf.Lerp(1f, 50f, Mathf.Clamp01(baronVonWater.camDistNormalized * 1.35f)) * brushData.baseScale;
         float brushIntensity = 1f * brushData.baseAmplitude;
 
@@ -3435,14 +3435,14 @@ public class TheRenderKing : MonoBehaviour {
                 spiritBrushRenderMultiBurstMat.SetPass(0); // *** is this really necessary?
                 spiritBrushRenderMultiBurstMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer); // *** Needed? or just set it once in beginning....
                 spiritBrushRenderMultiBurstMat.SetBuffer("_SpiritBrushQuadsRead", spiritBrushQuadDataCBuffer0);
-                spiritBrushRenderMultiBurstMat.SetVector("_Position", new Vector4(simManager.uiManager.curMousePositionOnWaterPlane.x, simManager.uiManager.curMousePositionOnWaterPlane.y, 0f, 0f));
+                spiritBrushRenderMultiBurstMat.SetVector("_Position", new Vector4(simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.x, simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.y, 0f, 0f));
                 spiritBrushRenderMultiBurstMat.SetFloat("_Scale", scale);            
                 spiritBrushRenderMultiBurstMat.SetFloat("_Strength", brushIntensity);            
                 spiritBrushRenderMultiBurstMat.SetFloat("_PatternColumn", brushData.patternColumn);
                 spiritBrushRenderMultiBurstMat.SetFloat("_PatternRow", brushData.patternRow);
                 Vector2 brushDir = new Vector2(0f, 1f);
-                if(simManager.uiManager.smoothedMouseVel.x != 0f || simManager.uiManager.smoothedMouseVel.y != 0f) {
-                    brushDir = new Vector2(simManager.uiManager.smoothedMouseVel.x, simManager.uiManager.smoothedMouseVel.y).normalized;
+                if(simManager.uiManager.theCursorCzar.smoothedMouseVel.x != 0f || simManager.uiManager.theCursorCzar.smoothedMouseVel.y != 0f) {
+                    brushDir = new Vector2(simManager.uiManager.theCursorCzar.smoothedMouseVel.x, simManager.uiManager.theCursorCzar.smoothedMouseVel.y).normalized;
                 }
                 cmdBufferSpiritBrush.DrawProcedural(Matrix4x4.identity, spiritBrushRenderMultiBurstMat, 0, MeshTopology.Triangles, 6, spiritBrushQuadDataCBuffer0.count);
                 
@@ -3465,15 +3465,15 @@ public class TheRenderKing : MonoBehaviour {
             if (isBrushing) {
                 spiritBrushRenderMat.SetPass(0);
                 spiritBrushRenderMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer); // *** Needed? or just set it once in beginning....
-                spiritBrushRenderMat.SetVector("_Position", new Vector4(simManager.uiManager.curMousePositionOnWaterPlane.x, simManager.uiManager.curMousePositionOnWaterPlane.y, 0f, 0f));
+                spiritBrushRenderMat.SetVector("_Position", new Vector4(simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.x, simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.y, 0f, 0f));
                 spiritBrushRenderMat.SetFloat("_Scale", scale);            
                 spiritBrushRenderMat.SetFloat("_Strength", brushIntensity);            
                 spiritBrushRenderMat.SetFloat("_PatternColumn", brushData.patternColumn);
                 spiritBrushRenderMat.SetFloat("_PatternRow", brushData.patternRow);
                 //dir:
                 Vector2 brushDir = new Vector2(0f, 1f);
-                if(simManager.uiManager.smoothedMouseVel.x != 0f || simManager.uiManager.smoothedMouseVel.y != 0f) {
-                    brushDir = new Vector2(simManager.uiManager.smoothedMouseVel.x, simManager.uiManager.smoothedMouseVel.y).normalized;
+                if(simManager.uiManager.theCursorCzar.smoothedMouseVel.x != 0f || simManager.uiManager.theCursorCzar.smoothedMouseVel.y != 0f) {
+                    brushDir = new Vector2(simManager.uiManager.theCursorCzar.smoothedMouseVel.x, simManager.uiManager.theCursorCzar.smoothedMouseVel.y).normalized;
                 }
                 spiritBrushRenderMat.SetFloat("_FacingDirX", brushDir.x);
                 spiritBrushRenderMat.SetFloat("_FacingDirY", brushDir.y);
@@ -4000,17 +4000,17 @@ public class TheRenderKing : MonoBehaviour {
             }*/
 
             float isHighlight = 0f;
-            if(simManager.uiManager.watcherUI.isHighlight && simManager.uiManager.isWatcherPanelOn) {
+            if(simManager.uiManager.watcherUI.isHighlight && simManager.uiManager.watcherUI.isOpen) {
                 isHighlight = 1f;
             }
             float isSelectedZoop = 0f;
-            if(simManager.uiManager.watcherUI.isHighlight && simManager.uiManager.isWatcherPanelOn) {
+            if(simManager.uiManager.watcherUI.isHighlight && simManager.uiManager.watcherUI.isOpen) {
                 if(simManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2 && simManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) {
                     isSelectedZoop = 1f;
                 }                
             }
             float isSelectedPlant = 0f;
-            if(simManager.uiManager.watcherUI.isHighlight && simManager.uiManager.isWatcherPanelOn) {
+            if(simManager.uiManager.watcherUI.isHighlight && simManager.uiManager.watcherUI.isOpen) {
                 if(simManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 1 && simManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 1) {
                     isSelectedPlant = 1f;
                 }                
@@ -4074,7 +4074,7 @@ public class TheRenderKing : MonoBehaviour {
                 //Debug.Log("_SelectedParticleIndex: " + Mathf.RoundToInt(simManager.vegetationManager.selectedPlantParticleIndex).ToString() + ", _HoverParticleIndex: " + Mathf.RoundToInt(simManager.vegetationManager.closestPlantParticleData.index).ToString());
                 
                 plantParticleDisplayMat.SetFloat("_IsSelected", isSelectedPlant); // isSelected);
-                plantParticleDisplayMat.SetFloat("_IsHover", simManager.uiManager.isPlantParticleHighlight * isHighlight); // isHighlight); // isHover);
+                plantParticleDisplayMat.SetFloat("_IsHover", simManager.uiManager.watcherUI.isPlantParticleHighlight * isHighlight); // isHighlight); // isHover);
                 plantParticleDisplayMat.SetFloat("_GlobalWaterLevel", baronVonWater._GlobalWaterLevel);
                 plantParticleDisplayMat.SetVector("_FogColor", simManager.fogColor); 
                 cmdBufferMain.DrawProcedural(Matrix4x4.identity, plantParticleDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, simManager.vegetationManager.plantParticlesCBuffer.count * 32);
@@ -4086,9 +4086,9 @@ public class TheRenderKing : MonoBehaviour {
             if(simManager.uiManager.curActiveTool == UIManager.ToolType.Stir) {
                 //gizmoStirStickAMat.SetPass(0);
                 //simManager.uiManager.smoothedCtrlCursorVel
-                Quaternion rot = Quaternion.Euler(new Vector3(Mathf.Clamp(simManager.uiManager.smoothedMouseVel.y * 2.5f + 10f, -45f, 45f), Mathf.Clamp(simManager.uiManager.smoothedMouseVel.x * -1.5f, -45f, 45f), 0f));
+                Quaternion rot = Quaternion.Euler(new Vector3(Mathf.Clamp(simManager.uiManager.theCursorCzar.smoothedMouseVel.y * 2.5f + 10f, -45f, 45f), Mathf.Clamp(simManager.uiManager.theCursorCzar.smoothedMouseVel.x * -1.5f, -45f, 45f), 0f));
                 float scale = Mathf.Lerp(0.35f, 1.75f, baronVonWater.camDistNormalized);
-                Matrix4x4 stirStickTransformMatrix = Matrix4x4.TRS(new Vector3(simManager.uiManager.curMousePositionOnWaterPlane.x, simManager.uiManager.curMousePositionOnWaterPlane.y, simManager.uiManager.stirStickDepth), rot, Vector3.one * scale);
+                Matrix4x4 stirStickTransformMatrix = Matrix4x4.TRS(new Vector3(simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.x, simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.y, simManager.uiManager.theCursorCzar.stirStickDepth), rot, Vector3.one * scale);
                 Mesh stickMesh = meshStirStickMed;
                 if(baronVonWater.camDistNormalized > 0.67f) {
                     stickMesh = meshStirStickLrg;
@@ -4145,8 +4145,8 @@ public class TheRenderKing : MonoBehaviour {
                 }
                 */
                 animalParticleDisplayMat.SetFloat("_IsSelected", isSelectedZoop);// isSelectedA);
-                animalParticleDisplayMat.SetFloat("_IsHover", simManager.uiManager.isZooplanktonHighlight * isHighlight); // isHighlight); // isHoverA); // isHoverA);
-                animalParticleDisplayMat.SetFloat("_IsHighlight", simManager.uiManager.isZooplanktonHighlight * isHighlight); // isHighlight); // isHighlight);
+                animalParticleDisplayMat.SetFloat("_IsHover", simManager.uiManager.watcherUI.isZooplanktonHighlight * isHighlight); // isHighlight); // isHoverA); // isHoverA);
+                animalParticleDisplayMat.SetFloat("_IsHighlight", simManager.uiManager.watcherUI.isZooplanktonHighlight * isHighlight); // isHighlight); // isHighlight);
                 animalParticleDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
                 animalParticleDisplayMat.SetFloat("_GlobalWaterLevel", baronVonWater._GlobalWaterLevel);
                 cmdBufferMain.DrawProcedural(Matrix4x4.identity, animalParticleDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, simManager.zooplanktonManager.animalParticlesCBuffer.count);
@@ -4277,7 +4277,7 @@ public class TheRenderKing : MonoBehaviour {
         baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_GlobalWaterLevel", baronVonWater._GlobalWaterLevel);  
         baronVonTerrain.computeShaderTerrainGeneration.SetVector("_WorldSpaceCameraPosition", new Vector4(mainRenderCam.transform.position.x, mainRenderCam.transform.position.y, mainRenderCam.transform.position.z, 0f));
 
-        baronVonTerrain.computeShaderTerrainGeneration.SetInt("_ChannelID", simManager.uiManager.selectedToolbarTerrainLayer); // simManager.trophicLayersManager.selectedTrophicSlotRef.slotID); // 
+        baronVonTerrain.computeShaderTerrainGeneration.SetInt("_ChannelID", simManager.uiManager.brushesUI.selectedBrushLinkedSpiritTerrainLayer); // simManager.trophicLayersManager.selectedTrophicSlotRef.slotID); // 
         if(on) {  // Actively brushing this frame
         }
         else {

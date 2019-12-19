@@ -362,33 +362,33 @@ public class SimulationManager : MonoBehaviour {
     }
 
     private void InitializeGraphData() {
-        graphDataGlobalNutrients = new GraphData(uiManager.knowledgeGraphNutrientsMat);  // testing!!!!
-        graphDataGlobalWaste = new GraphData(uiManager.knowledgeGraphDetritusMat);  // testing!!!!
-        graphDataGlobalDecomposers = new GraphData(uiManager.knowledgeGraphDecomposersMat);  // testing!!!!
-        graphDataGlobalAlgae = new GraphData(uiManager.knowledgeGraphAlgaeMat);  // testing!!!!
-        graphDataGlobalPlants = new GraphData(uiManager.knowledgeGraphPlantsMat);  // testing!!!!
-        graphDataGlobalZooplankton = new GraphData(uiManager.knowledgeGraphZooplanktonMat);  // testing!!!!
-        graphDataGlobalVertebrates = new GraphData(uiManager.knowledgeGraphVertebratesMat);  // testing!!!!
+        graphDataGlobalNutrients = new GraphData(uiManager.globalResourcesUI.knowledgeGraphNutrientsMat);  // testing!!!!
+        graphDataGlobalWaste = new GraphData(uiManager.globalResourcesUI.knowledgeGraphDetritusMat);  // testing!!!!
+        graphDataGlobalDecomposers = new GraphData(uiManager.globalResourcesUI.knowledgeGraphDecomposersMat);  // testing!!!!
+        graphDataGlobalAlgae = new GraphData(uiManager.globalResourcesUI.knowledgeGraphAlgaeMat);  // testing!!!!
+        graphDataGlobalPlants = new GraphData(uiManager.globalResourcesUI.knowledgeGraphPlantsMat);  // testing!!!!
+        graphDataGlobalZooplankton = new GraphData(uiManager.globalResourcesUI.knowledgeGraphZooplanktonMat);  // testing!!!!
+        graphDataGlobalVertebrates = new GraphData(uiManager.globalResourcesUI.knowledgeGraphVertebratesMat);  // testing!!!!
 
-        graphDataVertebrateLifespan0 = new GraphData(uiManager.knowledgeGraphVertebrateLifespanMat0);
-        graphDataVertebratePopulation0 = new GraphData(uiManager.knowledgeGraphVertebratePopulationMat0);
-        graphDataVertebrateFoodEaten0 = new GraphData(uiManager.knowledgeGraphVertebrateFoodEatenMat0);
-        graphDataVertebrateGenome0 = new GraphData(uiManager.knowledgeGraphVertebrateGenomeMat0);
+        graphDataVertebrateLifespan0 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateLifespanMat0);
+        graphDataVertebratePopulation0 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebratePopulationMat0);
+        graphDataVertebrateFoodEaten0 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateFoodEatenMat0);
+        graphDataVertebrateGenome0 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateGenomeMat0);
 
-        graphDataVertebrateLifespan1 = new GraphData(uiManager.knowledgeGraphVertebrateLifespanMat1);
-        graphDataVertebratePopulation1 = new GraphData(uiManager.knowledgeGraphVertebratePopulationMat1);
-        graphDataVertebrateFoodEaten1 = new GraphData(uiManager.knowledgeGraphVertebrateFoodEatenMat1);
-        graphDataVertebrateGenome1 = new GraphData(uiManager.knowledgeGraphVertebrateGenomeMat1);
+        graphDataVertebrateLifespan1 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateLifespanMat1);
+        graphDataVertebratePopulation1 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebratePopulationMat1);
+        graphDataVertebrateFoodEaten1 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateFoodEatenMat1);
+        graphDataVertebrateGenome1 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateGenomeMat1);
 
-        graphDataVertebrateLifespan2 = new GraphData(uiManager.knowledgeGraphVertebrateLifespanMat2);
-        graphDataVertebratePopulation2 = new GraphData(uiManager.knowledgeGraphVertebratePopulationMat2);
-        graphDataVertebrateFoodEaten2 = new GraphData(uiManager.knowledgeGraphVertebrateFoodEatenMat2);
-        graphDataVertebrateGenome2 = new GraphData(uiManager.knowledgeGraphVertebrateGenomeMat2);
+        graphDataVertebrateLifespan2 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateLifespanMat2);
+        graphDataVertebratePopulation2 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebratePopulationMat2);
+        graphDataVertebrateFoodEaten2 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateFoodEatenMat2);
+        graphDataVertebrateGenome2 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateGenomeMat2);
 
-        graphDataVertebrateLifespan3 = new GraphData(uiManager.knowledgeGraphVertebrateLifespanMat3);
-        graphDataVertebratePopulation3 = new GraphData(uiManager.knowledgeGraphVertebratePopulationMat3);
-        graphDataVertebrateFoodEaten3 = new GraphData(uiManager.knowledgeGraphVertebrateFoodEatenMat3);
-        graphDataVertebrateGenome3 = new GraphData(uiManager.knowledgeGraphVertebrateGenomeMat3);
+        graphDataVertebrateLifespan3 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateLifespanMat3);
+        graphDataVertebratePopulation3 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebratePopulationMat3);
+        graphDataVertebrateFoodEaten3 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateFoodEatenMat3);
+        graphDataVertebrateGenome3 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateGenomeMat3);
     }
     private void LoadingInitializeCoreSimulationState() {
         // allocate memory and initialize data structures, classes, arrays, etc.
@@ -668,8 +668,8 @@ public class SimulationManager : MonoBehaviour {
             zooplanktonManager.FindClosestAnimalParticleToCritters(simStateData);
             
         } 
-        vegetationManager.FindClosestPlantParticleToCursor(uiManager.curMousePositionOnWaterPlane.x, uiManager.curMousePositionOnWaterPlane.y);
-        zooplanktonManager.FindClosestAnimalParticleToCursor(uiManager.curMousePositionOnWaterPlane.x, uiManager.curMousePositionOnWaterPlane.y);
+        vegetationManager.FindClosestPlantParticleToCursor(uiManager.theCursorCzar.curMousePositionOnWaterPlane.x, uiManager.theCursorCzar.curMousePositionOnWaterPlane.y);
+        zooplanktonManager.FindClosestAnimalParticleToCursor(uiManager.theCursorCzar.curMousePositionOnWaterPlane.x, uiManager.theCursorCzar.curMousePositionOnWaterPlane.y);
         // Find best way to insert Agent Waste into ResourceGridTex.waste
 
         simResourceManager.oxygenUsedByAgentsLastFrame = totalOxygenUsedByAgents;
@@ -1244,7 +1244,7 @@ public class SimulationManager : MonoBehaviour {
                     //    isBrushingLerp = 1f;
                     //}
 
-                    Vector3 cursorWorldPos = uiManager.curMousePositionOnWaterPlane;
+                    Vector3 cursorWorldPos = uiManager.theCursorCzar.curMousePositionOnWaterPlane;
                     cursorWorldPos.x += UnityEngine.Random.Range(-1f, 1f) * 5f;
                     cursorWorldPos.y += UnityEngine.Random.Range(-1f, 1f) * 5f;
                     

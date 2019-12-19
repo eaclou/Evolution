@@ -7,6 +7,8 @@ public class DebugPanelUI : MonoBehaviour {
     public UIManager uiManagerRef;
     public bool isOpen;
     public GameObject panelDebug;
+
+    public Material debugTextureViewerMat;
     
     private Vector4 _Zoom = new Vector4(1f, 1f, 1f, 1f);
     private float _Amplitude = 1f;
@@ -52,9 +54,9 @@ public class DebugPanelUI : MonoBehaviour {
     public void UpdateDebugUI() {
 
         // DISABLED!!!! -- Need to establish good method for grabbing data from SimulationManager!
-        SimulationManager simManager = gameManager.simulationManager;
+        SimulationManager simManager = uiManagerRef.gameManager.simulationManager;
 
-        Agent agentRef = cameraManager.targetAgent;        
+        Agent agentRef = uiManagerRef.cameraManager.targetAgent;        
         int agentIndex = agentRef.index;
 
         if (!agentRef.isInert) {
@@ -205,8 +207,8 @@ public class DebugPanelUI : MonoBehaviour {
         debugTxtResources += "\nDead Agents: " + simManager.simResourceManager.curGlobalCarrionVolume.ToString();
         debugTxtResources += "\nEggSacks: " + simManager.simResourceManager.curGlobalEggSackVolume.ToString();
         debugTxtResources += "\nGlobal Mass: " + simManager.simResourceManager.curTotalMass.ToString();
-        Vector4 resourceGridSample = SampleTexture(simManager.vegetationManager.resourceGridRT1, curMousePositionOnWaterPlane / SimulationManager._MapSize);
-        Vector4 simTansferSample = SampleTexture(simManager.vegetationManager.resourceSimTransferRT, curMousePositionOnWaterPlane / SimulationManager._MapSize) * 100f;
+        Vector4 resourceGridSample = uiManagerRef.SampleTexture(simManager.vegetationManager.resourceGridRT1, uiManagerRef.theCursorCzar.curMousePositionOnWaterPlane / SimulationManager._MapSize);
+        Vector4 simTansferSample = uiManagerRef.SampleTexture(simManager.vegetationManager.resourceSimTransferRT, uiManagerRef.theCursorCzar.curMousePositionOnWaterPlane / SimulationManager._MapSize) * 100f;
         //Debug.Log("curMousePositionOnWaterPlane: " + curMousePositionOnWaterPlane.ToString());
         debugTxtResources += "\nresourceGridSample: (" + resourceGridSample.x.ToString("F4") + ", " + resourceGridSample.y.ToString("F4") + ", " + resourceGridSample.z.ToString("F4") + ", " + resourceGridSample.w.ToString("F4") + ")";
         debugTxtResources += "\nsimTansferSample: (" + simTansferSample.x.ToString("F4") + ", " + simTansferSample.y.ToString("F4") + ", " + simTansferSample.z.ToString("F4") + ", " + simTansferSample.w.ToString("F4") + ")";
@@ -248,43 +250,43 @@ public class DebugPanelUI : MonoBehaviour {
 
     private void CreateDebugRenderViewerArray() {
         debugTextureViewerArray = new RenderTexture[13];
-        debugTextureViewerArray[0] = gameManager.theRenderKing.baronVonTerrain.terrainHeightDataRT;
+        debugTextureViewerArray[0] = uiManagerRef.gameManager.theRenderKing.baronVonTerrain.terrainHeightDataRT;
         debugTextureViewerArray[0].name = "Terrain Height Data";
         //if (gameManager.theRenderKing.baronVonTerrain.terrainColorRT0 != null) {
-        debugTextureViewerArray[1] = gameManager.theRenderKing.baronVonTerrain.terrainColorRT0;
+        debugTextureViewerArray[1] = uiManagerRef.gameManager.theRenderKing.baronVonTerrain.terrainColorRT0;
         debugTextureViewerArray[1].name = "Terrain Color";
 
-        debugTextureViewerArray[2] = gameManager.theRenderKing.baronVonWater.waterSurfaceDataRT0;
+        debugTextureViewerArray[2] = uiManagerRef.gameManager.theRenderKing.baronVonWater.waterSurfaceDataRT0;
         debugTextureViewerArray[2].name = "Water Surface Data";
 
-        debugTextureViewerArray[3] = gameManager.theRenderKing.fluidManager._VelocityPressureDivergenceMain;
+        debugTextureViewerArray[3] = uiManagerRef.gameManager.theRenderKing.fluidManager._VelocityPressureDivergenceMain;
         debugTextureViewerArray[3].name = "_VelocityPressureDivergenceMain";
 
-        debugTextureViewerArray[4] = gameManager.theRenderKing.fluidManager._VelocityPressureDivergenceMain;
+        debugTextureViewerArray[4] = uiManagerRef.gameManager.theRenderKing.fluidManager._VelocityPressureDivergenceMain;
         debugTextureViewerArray[4].name = "_VelocityPressureDivergenceMain";
 
-        debugTextureViewerArray[5] = gameManager.theRenderKing.fluidManager._VelocityPressureDivergenceMain;
+        debugTextureViewerArray[5] = uiManagerRef.gameManager.theRenderKing.fluidManager._VelocityPressureDivergenceMain;
         debugTextureViewerArray[5].name = "_VelocityPressureDivergenceMain";
 
-        debugTextureViewerArray[6] = gameManager.theRenderKing.fluidManager._VelocityPressureDivergenceMain;
+        debugTextureViewerArray[6] = uiManagerRef.gameManager.theRenderKing.fluidManager._VelocityPressureDivergenceMain;
         debugTextureViewerArray[6].name = "_VelocityPressureDivergenceMain";
 
-        debugTextureViewerArray[7] = gameManager.theRenderKing.fluidManager._ObstaclesRT;
+        debugTextureViewerArray[7] = uiManagerRef.gameManager.theRenderKing.fluidManager._ObstaclesRT;
         debugTextureViewerArray[7].name = "Solid Obstacles Render";
 
-        debugTextureViewerArray[8] = gameManager.simulationManager.vegetationManager.critterNearestPlants32;
+        debugTextureViewerArray[8] = uiManagerRef.gameManager.simulationManager.vegetationManager.critterNearestPlants32;
         debugTextureViewerArray[8].name = "critterNearestPlants32";        
         
-        debugTextureViewerArray[9] = gameManager.simulationManager.zooplanktonManager.critterNearestZooplankton32;
+        debugTextureViewerArray[9] = uiManagerRef.gameManager.simulationManager.zooplanktonManager.critterNearestZooplankton32;
         debugTextureViewerArray[9].name = "critterNearestZooplankton32";
 
-        debugTextureViewerArray[10] = gameManager.simulationManager.vegetationManager.resourceGridRT1;
+        debugTextureViewerArray[10] = uiManagerRef.gameManager.simulationManager.vegetationManager.resourceGridRT1;
         debugTextureViewerArray[10].name = "Resources Grid";
 
         
         //}
         //if(gameManager.theRenderKing.spiritBrushRT != null) {
-        debugTextureViewerArray[11] = gameManager.theRenderKing.spiritBrushRT;
+        debugTextureViewerArray[11] = uiManagerRef.gameManager.theRenderKing.spiritBrushRT;
         debugTextureViewerArray[11].name = "Spirit Brush";
         //}        
         //if(gameManager.simulationManager.environmentFluidManager._DensityA != null) {
@@ -292,7 +294,7 @@ public class DebugPanelUI : MonoBehaviour {
         //debugTextureViewerArray[3].name = "Water DensityA";
         //}        
         
-        debugTextureViewerArray[12] = gameManager.simulationManager.vegetationManager.resourceSimTransferRT;
+        debugTextureViewerArray[12] = uiManagerRef.gameManager.simulationManager.vegetationManager.resourceSimTransferRT;
         debugTextureViewerArray[12].name = "Resource Sim Transfer";
     }
     public void ClickDebugTexturePrev() {
@@ -353,9 +355,8 @@ public class DebugPanelUI : MonoBehaviour {
     }
 
     public void ClickButtonToggleDebug() {
-        isActiveDebug = !isActiveDebug;
-        //gameManager.theRenderKing.isDebugRender = isActiveDebug;
-        panelDebug.SetActive(isActiveDebug);
+        isOpen = !isOpen;
+        panelDebug.SetActive(isOpen);
     }
 
 }

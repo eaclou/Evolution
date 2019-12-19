@@ -18,7 +18,9 @@ public class WatcherUI : MonoBehaviour {
     public TrophicSlot targetSlotRef;
     public bool isSelected;
 
-
+    public float isPlantParticleHighlight;
+    public float isZooplanktonHighlight;
+    public float isVertebrateHighlight;
 
     
     public TrophicSlot watcherLockedTrophicSlotRef;
@@ -46,31 +48,24 @@ public class WatcherUI : MonoBehaviour {
     
 
     //Inspect!!!
-    public bool isWatcherPanelOn = false;
-    public Material inspectWidgetDietMat;
-    public Material inspectWidgetStomachFoodMat;
-    public Material inspectWidgetEnergyMat;
-    public Material inspectWidgetLifeCycleMat;
-    public Material inspectWidgetDimensionsMat;
-    public Material inspectWidgetHealthMat;
-    public Material inspectWidgetSpeciesIconMat;
-    public Material inspectWidgetAgentIconMat;
+    //public bool isWatcherPanelOn = false;
+    
     public Button buttonInspectCyclePrevSpecies;
     public Button buttonInspectCycleNextSpecies;
     public Button buttonInspectCyclePrevAgent;
     public Button buttonInspectCycleNextAgent;
-    public Text textStomachContents;
-    public Text textEnergy;
-    public Text textHealth;
-    public Text textDiet;
-    public Text textDimensionsWidth;
-    public Text textDimensionsLength;
-    public Text textSpeciesID;
-    public Text textAgentID;
-    public Text textLifeCycle;
-    public GameObject panelInspectHUD;
-    public Animator animatorInspectPanel;
-    public Text textInspectData;
+    //public Text textStomachContents;
+    //public Text textEnergy;
+    //public Text textHealth;
+    //public Text textDiet;
+    //public Text textDimensionsWidth;
+    //public Text textDimensionsLength;
+    //public Text textSpeciesID;
+    //public Text textAgentID;
+    //public Text textLifeCycle;
+    //public GameObject panelInspectHUD;
+    //public Animator animatorInspectPanel;
+    //public Text textInspectData;
 
     public GameObject panelNewInspect;
     public Text textNewInspectAgentName;
@@ -92,12 +87,17 @@ public class WatcherUI : MonoBehaviour {
 	void Start () {
         isHighlight = false;
 	}
+
+    public void ClickToolButton() {
+        isOpen = !isOpen;
+        isHighlight = true;
+    }
 	
-	private void UpdateWatcherPanelUI(TrophicLayersManager layerManager) {
-        TrophicSlot slotRef = gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef;
+	public void UpdateWatcherPanelUI(TrophicLayersManager layerManager) {
+        TrophicSlot slotRef = uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef;
         if(slotRef != null) {
             if(isWatcherTargetLayerLocked) {
-                watcherUI.buttonWatcherLock.GetComponent<Image>().color = watcherLockedTrophicSlotRef.color;
+                buttonWatcherLock.GetComponent<Image>().color = watcherLockedTrophicSlotRef.color;
             }
             else {
                 watcherLockedTrophicSlotRef = slotRef;
@@ -105,16 +105,24 @@ public class WatcherUI : MonoBehaviour {
             }            
         }
 
-        watcherUI.buttonHighlightingToggle.GetComponentInChildren<Text>().text = watcherUI.isHighlight.ToString();
-        watcherUI.buttonFollowingToggle.GetComponentInChildren<Text>().text = watcherUI.isFollow.ToString();
+        buttonHighlightingToggle.GetComponentInChildren<Text>().text = isHighlight.ToString();
+        buttonFollowingToggle.GetComponentInChildren<Text>().text = isFollow.ToString();
         
        
         if(isWatcherTargetLayerLocked) {
-            watcherUI.buttonWatcherLock.GetComponentInChildren<Text>().text = "Locked!";
+            buttonWatcherLock.GetComponentInChildren<Text>().text = "Locked!";
         }
         else {
-            watcherUI.buttonWatcherLock.GetComponentInChildren<Text>().text = "Unlocked!";
-            watcherUI.buttonWatcherLock.GetComponent<Image>().color = Color.white;
+            buttonWatcherLock.GetComponentInChildren<Text>().text = "Unlocked!";
+            buttonWatcherLock.GetComponent<Image>().color = Color.white;
+        }
+
+        
+        if(uiManagerRef.cameraManager.isFollowingPlantParticle) {
+            uiManagerRef.cameraManager.targetPlantWorldPos = uiManagerRef.gameManager.simulationManager.vegetationManager.selectedPlantParticleData.worldPos;
+        }
+        if(uiManagerRef.cameraManager.isFollowingAnimalParticle) {
+            uiManagerRef.cameraManager.targetZooplanktonWorldPos = uiManagerRef.gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleData.worldPos;
         }
 
         panelWatcherSpiritVertebratesHUD.SetActive(false);
@@ -135,11 +143,11 @@ public class WatcherUI : MonoBehaviour {
         if (watcherLockedTrophicSlotRef.kingdomID == 0) {
             
 
-            Vector4 resourceGridSample = SampleTexture(gameManager.simulationManager.vegetationManager.resourceGridRT1, curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
+            Vector4 resourceGridSample = uiManagerRef.SampleTexture(uiManagerRef.gameManager.simulationManager.vegetationManager.resourceGridRT1, uiManagerRef.theCursorCzar.curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
             str += "\n\nWaste    : " + (resourceGridSample.y * 1000f).ToString("F0");                    
             str += "\nDecomposers  : " + (resourceGridSample.z * 1000f).ToString("F0");
 
-            Vector4 simTansferSample = SampleTexture(gameManager.simulationManager.vegetationManager.resourceSimTransferRT, curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
+            Vector4 simTansferSample = uiManagerRef.SampleTexture(uiManagerRef.gameManager.simulationManager.vegetationManager.resourceSimTransferRT, uiManagerRef.theCursorCzar.curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
             str += "\n\nProduced This Frame:\nWaste: " + (simTansferSample.z * 1000000f).ToString("F0") + "\n\nConsumed This Frame:\nNutrients: " + (simTansferSample.x * 1000000f).ToString("F0");
             //str += "\nProduced This Frame:\nWaste: " + (simTansferSample.z * 1000000f).ToString("F0") + ")";
 
@@ -148,10 +156,10 @@ public class WatcherUI : MonoBehaviour {
         }
         else if(watcherLockedTrophicSlotRef.kingdomID == 1) {
             if(watcherLockedTrophicSlotRef.tierID == 0) {
-                Vector4 resourceGridSample = SampleTexture(gameManager.simulationManager.vegetationManager.resourceGridRT1, curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
+                Vector4 resourceGridSample = uiManagerRef.SampleTexture(uiManagerRef.gameManager.simulationManager.vegetationManager.resourceGridRT1, uiManagerRef.theCursorCzar.curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
                 str += "\n\nNutrients    : " + (resourceGridSample.x * 1000f).ToString("F0");                    
                 str += "\nAlgae        : " + (resourceGridSample.w * 1000f).ToString("F0");
-                Vector4 simTansferSample = SampleTexture(gameManager.simulationManager.vegetationManager.resourceSimTransferRT, curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
+                Vector4 simTansferSample = uiManagerRef.SampleTexture(uiManagerRef.gameManager.simulationManager.vegetationManager.resourceSimTransferRT, uiManagerRef.theCursorCzar.curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
                 str += "\n\nProduced This Frame:\nWaste: " + (simTansferSample.z * 1000000f).ToString("F0") + "\n\nConsumed This Frame:\nNutrients: " + (simTansferSample.x * 1000000f).ToString("F0");
                  
                 
@@ -159,7 +167,7 @@ public class WatcherUI : MonoBehaviour {
             }
             else {
                      
-                VegetationManager.PlantParticleData particleData = gameManager.simulationManager.vegetationManager.selectedPlantParticleData;
+                VegetationManager.PlantParticleData particleData = uiManagerRef.gameManager.simulationManager.vegetationManager.selectedPlantParticleData;
 
                 str += "\nPlant Particle # " + particleData.index.ToString() + "  [" + particleData.nearestCritterIndex.ToString() + "]";
                 //str += "\nCPU: " + gameManager.simulationManager.vegetationManager.tempClosestPlantParticleIndexAndPos.ToString();
@@ -171,12 +179,12 @@ public class WatcherUI : MonoBehaviour {
                 str += "\nOxygen Produced: " + (particleData.oxygenProduced * 10000000f).ToString("F0");
                 str += "\nIsDecaying: " + (particleData.isDecaying).ToString("F0");
                 str += "\nIsSwallowed: " + (particleData.isSwallowed).ToString("F0");
-                str += "\n\nDistance: " + (new Vector2(gameManager.simulationManager.uiManager.curMousePositionOnWaterPlane.x, gameManager.simulationManager.uiManager.curMousePositionOnWaterPlane.y) - particleData.worldPos).magnitude;
+                str += "\n\nDistance: " + (new Vector2(uiManagerRef.gameManager.simulationManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.x, uiManagerRef.gameManager.simulationManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.y) - particleData.worldPos).magnitude;
 
-                Vector4 resourceGridSample = SampleTexture(gameManager.simulationManager.vegetationManager.resourceGridRT1, curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
+                Vector4 resourceGridSample = uiManagerRef.SampleTexture(uiManagerRef.gameManager.simulationManager.vegetationManager.resourceGridRT1, uiManagerRef.theCursorCzar.curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
                 str += "\n\nNutrients    : " + (resourceGridSample.x * 1000000f).ToString("F0");                    
                 //str += "\nAlgae        : " + (resourceGridSample.w * 1000f).ToString("F0");
-                Vector4 simTansferSample = SampleTexture(gameManager.simulationManager.vegetationManager.resourceSimTransferRT, curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
+                Vector4 simTansferSample = uiManagerRef.SampleTexture(uiManagerRef.gameManager.simulationManager.vegetationManager.resourceSimTransferRT, uiManagerRef.theCursorCzar.curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
                 str += "\n\nProduced This Frame:\nWaste: " + (simTansferSample.z * 1000000f).ToString("F0") + "\n\nConsumed This Frame:\nNutrients: " + (simTansferSample.x * 1000000f).ToString("F0");
                 
                 textWatcherTargetIndex.text = "#" + particleData.index.ToString();
@@ -186,9 +194,9 @@ public class WatcherUI : MonoBehaviour {
         }
         else if(watcherLockedTrophicSlotRef.kingdomID == 2) {
             if(watcherLockedTrophicSlotRef.tierID == 0) {
-                ZooplanktonManager.AnimalParticleData particleData = gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleData;
+                ZooplanktonManager.AnimalParticleData particleData = uiManagerRef.gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleData;
                         
-                str += "\nZooplankton # " + gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex.ToString();
+                str += "\nZooplankton # " + uiManagerRef.gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex.ToString();
                 str += "\nCoords [ " + particleData.worldPos.x.ToString("F0") + " , " + particleData.worldPos.y.ToString("F0") + " ]"; //  Critter (" + gameManager.simulationManager.agentsArray[0].ownPos.ToString() + ")";
                 str += "\nAge: " + (particleData.age * 1000f).ToString("F0");
                 str += "\nBiomass: " + (particleData.biomass * 1000f).ToString("F0");
@@ -202,14 +210,14 @@ public class WatcherUI : MonoBehaviour {
                 str += "\nIsSwallowed: " + (particleData.isSwallowed).ToString("F0");
                 //str += "\n\nDistance: " + gameManager.simulationManager.zooplanktonManager.closestZooplanktonArray[0].y.ToString(); // (gameManager.simulationManager.agentsArray[0].ownPos - new Vector2(particleData.worldPos.x, particleData.worldPos.y)).magnitude;
                   
-                textWatcherTargetIndex.text = "#" + gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex.ToString();
+                textWatcherTargetIndex.text = "#" + uiManagerRef.gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex.ToString();
                 panelWatcherSpiritZooplankton.SetActive(true);
                         
             }
             else {
 
-                int critterIndex = cameraManager.targetAgentIndex;
-                Agent agent = gameManager.simulationManager.agentsArray[critterIndex];
+                int critterIndex = uiManagerRef.cameraManager.targetAgentIndex;
+                Agent agent = uiManagerRef.gameManager.simulationManager.agentsArray[critterIndex];
                 if(agent.coreModule != null) {
                     textNewInspectAgentName.text = agent.candidateRef.candidateGenome.bodyGenome.coreGenome.name;
 
@@ -275,7 +283,7 @@ public class WatcherUI : MonoBehaviour {
                     newInspectAgentWasteMat.SetFloat("_Value", Mathf.Clamp01(agent.wasteProducedLastFrame * 1000f));
                     newInspectAgentThrottleMat.SetFloat("_ThrottleX", Mathf.Clamp01(agent.smoothedThrottle.x));
                     newInspectAgentThrottleMat.SetFloat("_ThrottleY", Mathf.Clamp01(agent.smoothedThrottle.y));
-                    newInspectAgentThrottleMat.SetTexture("_VelocityTex", gameManager.simulationManager.environmentFluidManager._VelocityPressureDivergenceMain);
+                    newInspectAgentThrottleMat.SetTexture("_VelocityTex", uiManagerRef.gameManager.simulationManager.environmentFluidManager._VelocityPressureDivergenceMain);
                     newInspectAgentThrottleMat.SetFloat("_AgentCoordX", agent.ownPos.x / SimulationManager._MapSize);
                     newInspectAgentThrottleMat.SetFloat("_AgentCoordY", agent.ownPos.y / SimulationManager._MapSize);
                 
@@ -369,10 +377,10 @@ public class WatcherUI : MonoBehaviour {
                         //textString += "\nNearestPlant[" + agent.foodModule.nearestFoodParticleIndex.ToString() + "] " + agent.foodModule.nearestFoodParticlePos.ToString() + " d: " + (agent.foodModule.nearestFoodParticlePos.magnitude).ToString();
                         //textString += "\nNearestZooplankton[" + agent.foodModule.nearestAnimalParticleIndex.ToString() + "] " + agent.foodModule.nearestAnimalParticlePos.ToString() + " d: " + (agent.foodModule.nearestAnimalParticlePos.magnitude).ToString();
                     
-                        textString += "\n\nNumChildrenBorn: " + gameManager.simulationManager.numAgentsBorn.ToString() + ", numDied: " + gameManager.simulationManager.numAgentsDied.ToString() + ", ~Gen: " + ((float)gameManager.simulationManager.numAgentsBorn / (float)gameManager.simulationManager._NumAgents).ToString();
-                        textString += "\nSimulation Age: " + gameManager.simulationManager.simAgeTimeSteps.ToString();
-                        textString += "\nYear " + gameManager.simulationManager.curSimYear.ToString() + "\n\n";
-                        int numActiveSpecies = gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList.Count;
+                        textString += "\n\nNumChildrenBorn: " + uiManagerRef.gameManager.simulationManager.numAgentsBorn.ToString() + ", numDied: " + uiManagerRef.gameManager.simulationManager.numAgentsDied.ToString() + ", ~Gen: " + ((float)uiManagerRef.gameManager.simulationManager.numAgentsBorn / (float)uiManagerRef.gameManager.simulationManager._NumAgents).ToString();
+                        textString += "\nSimulation Age: " + uiManagerRef.gameManager.simulationManager.simAgeTimeSteps.ToString();
+                        textString += "\nYear " + uiManagerRef.gameManager.simulationManager.curSimYear.ToString() + "\n\n";
+                        int numActiveSpecies = uiManagerRef.gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList.Count;
                         textString += numActiveSpecies.ToString() + " Active Species:\n";
                         textString += eventLogString;
 
@@ -478,12 +486,12 @@ public class WatcherUI : MonoBehaviour {
             
         }
         else if(layerManager.selectedTrophicSlotRef.kingdomID == 3) {
-            Vector4 resourceGridSample = SampleTexture(gameManager.simulationManager.vegetationManager.resourceGridRT1, curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
+            Vector4 resourceGridSample = uiManagerRef.SampleTexture(uiManagerRef.gameManager.simulationManager.vegetationManager.resourceGridRT1, uiManagerRef.theCursorCzar.curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
             str += "\n\nNutrients    : " + (resourceGridSample.x * 1000f).ToString("F0");
             str += "\nWaste        : " + (resourceGridSample.y * 1000f).ToString("F0");
             str += "\nDecomposers  : " + (resourceGridSample.z * 1000f).ToString("F0");
             str += "\nAlgae        : " + (resourceGridSample.w * 1000f).ToString("F0");
-            Vector4 simTansferSample = SampleTexture(gameManager.simulationManager.vegetationManager.resourceSimTransferRT, curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
+            Vector4 simTansferSample = uiManagerRef.SampleTexture(uiManagerRef.gameManager.simulationManager.vegetationManager.resourceSimTransferRT, uiManagerRef.theCursorCzar.curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
             str += "\n\nProduced This Frame:\nWaste: " + (simTansferSample.z * 1000000f).ToString("F0") + "\n\nConsumed This Frame:\nNutrients: " + (simTansferSample.x * 1000000f).ToString("F0");
 
             panelWatcherSpiritTerrain.SetActive(true);
@@ -495,8 +503,8 @@ public class WatcherUI : MonoBehaviour {
         TextCommonStatsA.text = str;
         // string?
     }
-
-    TrophicSlot slotRefWatcher = gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef;
+    /*
+    TrophicSlot slotRefWatcher = uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef;
         if(slotRefWatcher != null) {
             if(isWatcherTargetLayerLocked) {
                 slotRefWatcher = watcherLockedTrophicSlotRef;
@@ -508,18 +516,18 @@ public class WatcherUI : MonoBehaviour {
             
         }
         if(slotRefWatcher != null) {
-            watcherUI.imageWatcherButtonMIP.sprite = slotRefWatcher.icon; // isWatcherTargetLayerLocked;
-            watcherUI.imageWatcherButtonMIP.color = slotRefWatcher.color;
-            watcherUI.imageWatcherCurTarget.sprite = slotRefWatcher.icon;
-            watcherUI.imageWatcherCurTarget.color = slotRefWatcher.color;
-            watcherUI.textTargetLayer.text = slotRefWatcher.speciesName;
-            watcherUI.textTargetLayer.color = slotRefWatcher.color;
+            imageWatcherButtonMIP.sprite = slotRefWatcher.icon; // isWatcherTargetLayerLocked;
+            imageWatcherButtonMIP.color = slotRefWatcher.color;
+            imageWatcherCurTarget.sprite = slotRefWatcher.icon;
+            imageWatcherCurTarget.color = slotRefWatcher.color;
+            textTargetLayer.text = slotRefWatcher.speciesName;
+            textTargetLayer.color = slotRefWatcher.color;
 
         }
         else {
             
         }
-
+*/
     public void ClickButtonHighlightingToggle() {
         isHighlight = !isHighlight;
         if(isHighlight) {
@@ -538,14 +546,14 @@ public class WatcherUI : MonoBehaviour {
             //uiManagerRef.StartFollowingAnimalParticle();
         }
         else {
-            uiManagerRef.StopFollowingAgent();
-            uiManagerRef.StopFollowingPlantParticle();
-            uiManagerRef.StopFollowingAnimalParticle();
+            StopFollowingAgent();
+            StopFollowingPlantParticle();
+            StopFollowingAnimalParticle();
         }
     }
 
 
-public void ClickWatcherVertebratePageCyclePrev() {
+    public void ClickWatcherVertebratePageCyclePrev() {
         curWatcherPanelVertebratePageNum--;
 
         if(curWatcherPanelVertebratePageNum < 0) {
@@ -561,12 +569,12 @@ public void ClickWatcherVertebratePageCyclePrev() {
     }
 
     public void ClickWatcherCycleTargetPrev() {
-        if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 1) {
-            if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) {
+        if(uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 1) {
+            if(uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) {
 
             }
             else {
-                VegetationManager veggieRef = gameManager.simulationManager.vegetationManager;
+                VegetationManager veggieRef = uiManagerRef.gameManager.simulationManager.vegetationManager;
                 veggieRef.selectedPlantParticleIndex--;
                 if(veggieRef.selectedPlantParticleIndex < 0) {
                     veggieRef.selectedPlantParticleIndex = veggieRef.plantParticlesCBuffer.count - 1;
@@ -574,9 +582,9 @@ public void ClickWatcherVertebratePageCyclePrev() {
                 }
             }
         }
-        else if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2) {
-            if (gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) {
-                ZooplanktonManager zoopRef = gameManager.simulationManager.zooplanktonManager;
+        else if(uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2) {
+            if (uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) {
+                ZooplanktonManager zoopRef = uiManagerRef.gameManager.simulationManager.zooplanktonManager;
                 zoopRef.selectedAnimalParticleIndex--;
                 if (zoopRef.selectedAnimalParticleIndex < 0) {
                     zoopRef.selectedAnimalParticleIndex = zoopRef.animalParticlesCBuffer.count - 1;
@@ -589,12 +597,12 @@ public void ClickWatcherVertebratePageCyclePrev() {
         }        
     }
     public void ClickWatcherCycleTargetNext() {
-        if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 1) {
-            if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) {
+        if(uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 1) {
+            if(uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) {
 
             }
             else {
-                VegetationManager veggieRef = gameManager.simulationManager.vegetationManager;
+                VegetationManager veggieRef = uiManagerRef.gameManager.simulationManager.vegetationManager;
                 veggieRef.selectedPlantParticleIndex++;
                 if(veggieRef.selectedPlantParticleIndex > veggieRef.plantParticlesCBuffer.count - 1) {
                     veggieRef.selectedPlantParticleIndex = 0;
@@ -602,9 +610,9 @@ public void ClickWatcherVertebratePageCyclePrev() {
                 }
             }
         }
-        else if(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2) {
-            if (gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) {
-                ZooplanktonManager zoopRef = gameManager.simulationManager.zooplanktonManager;
+        else if(uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2) {
+            if (uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) {
+                ZooplanktonManager zoopRef = uiManagerRef.gameManager.simulationManager.zooplanktonManager;
                 zoopRef.selectedAnimalParticleIndex++;
                 if (zoopRef.selectedAnimalParticleIndex > zoopRef.animalParticlesCBuffer.count - 1) {
                     zoopRef.selectedAnimalParticleIndex = 0;
@@ -617,4 +625,46 @@ public void ClickWatcherVertebratePageCyclePrev() {
         } 
     }
 
+    
+    public void ClickPrevAgent() {
+        Debug.Log("ClickPrevAgent");
+        
+        int newIndex = (uiManagerRef.gameManager.simulationManager._NumAgents + uiManagerRef.cameraManager.targetAgentIndex - 1) % uiManagerRef.gameManager.simulationManager._NumAgents;
+        uiManagerRef.cameraManager.SetTargetAgent(uiManagerRef.gameManager.simulationManager.agentsArray[newIndex], newIndex);          
+                           
+    }
+    public void ClickNextAgent() {
+        Debug.Log("ClickNextAgent");
+        
+        int newIndex = (uiManagerRef.cameraManager.targetAgentIndex + 1) % uiManagerRef.gameManager.simulationManager._NumAgents;
+        uiManagerRef.cameraManager.SetTargetAgent(uiManagerRef.gameManager.simulationManager.agentsArray[newIndex], newIndex);                
+    }
+    
+
+    public void StopFollowingAgent() {
+        uiManagerRef.cameraManager.isFollowingAgent = false;
+        
+    }
+    public void StartFollowingAgent() {
+        uiManagerRef.cameraManager.isFollowingAgent = true;       
+    }
+
+    public void StopFollowingPlantParticle() {
+        uiManagerRef.cameraManager.isFollowingPlantParticle = false;
+        
+    }
+    public void StartFollowingPlantParticle() {
+        uiManagerRef.cameraManager.isFollowingPlantParticle = true;
+        uiManagerRef.cameraManager.isFollowingAnimalParticle = false; 
+        uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[0];
+    }
+    public void StopFollowingAnimalParticle() {
+        uiManagerRef.cameraManager.isFollowingAnimalParticle = false;        
+    }
+    public void StartFollowingAnimalParticle() {
+        uiManagerRef.cameraManager.isFollowingAnimalParticle = true;  
+        uiManagerRef.cameraManager.isFollowingPlantParticle = false;
+        uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0];
+    }
+    
 }
