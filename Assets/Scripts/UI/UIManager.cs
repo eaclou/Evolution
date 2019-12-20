@@ -911,7 +911,7 @@ public class UIManager : MonoBehaviour {
     public void SetToolbarButtonStateUI(ref Button button, TrophicSlot.SlotStatus slotStatus, bool isSelected) {
 
         button.gameObject.SetActive(true);
-        Animation anim = button.GetComponent<Animation>();
+        //Animation anim = button.GetComponent<Animation>();
         Vector3 scale = Vector3.one;
         ColorBlock colBlock = button.colors; //.colorMultiplier = 1f;
         colBlock.colorMultiplier = 1f;
@@ -958,24 +958,11 @@ public class UIManager : MonoBehaviour {
                 break;
         }
         if(isSelected) {
-            scale = Vector3.one * 1.2f;
-            colBlock.colorMultiplier = 1.2f;
+            scale = Vector3.one * 1.5f;
+            colBlock.colorMultiplier = 2f;
         }
 
         button.colors = colBlock;
-
-        /*if(isSelected) {
-            scale = Vector3.one * 1.33f;
-            ColorBlock colorBlock = button.colors;
-            colorBlock.colorMultiplier = 1.4f;
-            button.colors = colorBlock;
-            //button.GetComponent<Image>().sprite = spriteSpeciesSlotSelected;
-        }
-        else {            
-            ColorBlock colorBlock = button.colors;
-            colorBlock.colorMultiplier = 0.9f;
-            button.colors = colorBlock;
-        }*/
 
         button.gameObject.transform.localScale = scale;
     }
@@ -984,7 +971,7 @@ public class UIManager : MonoBehaviour {
 
     #region UTILITY & EVENT FUNCTIONS
 
-    private void RemoveSpeciesSlot() {
+    /*private void RemoveSpeciesSlot() {
                 
         TrophicSlot slot = gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef;
         //Debug.Log("RemoveSpeciesSlot( " + slot.slotID.ToString() + " ), k= " + slot.slotID.ToString());
@@ -1014,26 +1001,8 @@ public class UIManager : MonoBehaviour {
         slot.status = TrophicSlot.SlotStatus.Unlocked;
         
         gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = gameManager.simulationManager.trophicLayersManager.kingdomTerrain.trophicTiersList[0].trophicSlots[0]; // Bedrock
-        //gameManager.simulationManager.trophicLayersManager.isSelectedTrophicSlot = false;
-
-        //isToolbarDetailPanelOn = false;
-        //pressedRemoveSpecies = false;
-        //buttonToolbarRemoveDecomposer.gameObject.SetActive(false);
-        //buttonToolbarRemovePlant.gameObject.SetActive(false);
-        //buttonToolbarRemoveAnimal.gameObject.SetActive(false);
         
-        // REMOVE!!!
-        // which slot was deleted? selectedID
-        //layerManager.selectedTrophicSlotRef.kingdomID;
-        //remove from simulation -- need function for this!
-        // update trophic layers?
-        //deselect
-        //SetToolbarButtonStateUI()
-        //buttonToolbarRemoveAnimal.gameObject.SetActive(false);
-                
-        //gameManager.simulationManager.trophicLayersManager.ResetSelectedAgentSlots();
-          
-    }
+    }*/
 
     #endregion
 
@@ -1115,6 +1084,9 @@ public class UIManager : MonoBehaviour {
     }
     public void ClickToolButtonGlobalResources() {
         globalResourcesUI.ClickToolButton();        
+    }
+    public void ClickToolWorldSpiritHub() {
+        worldSpiritHubUI.ClickToolButton();
     }
   
     public void AnnounceUnlockAlgae() {

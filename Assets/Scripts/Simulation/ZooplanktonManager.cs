@@ -282,8 +282,8 @@ public class ZooplanktonManager {
         //if(animalParticleMeasurementTotalsData[0].biomass < maxAnimalParticleTotal) {
         float brushF = 0f;
         if(renderKingRef.isSpiritBrushOn) {
-            if(renderKingRef.simManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2) {  // Animals kingdom selected
-                if(renderKingRef.simManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) {  // Zooplankton slot selected
+            if(renderKingRef.simManager.uiManager.brushesUI.selectedBrushSlot.kingdomID == 2) {  // Animals kingdom selected
+                if(renderKingRef.simManager.uiManager.brushesUI.selectedBrushSlot.tierID == 0) {  // Zooplankton slot selected
                     brushF = 1f;
                 }
             }            

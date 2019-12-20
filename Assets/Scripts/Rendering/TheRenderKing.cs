@@ -3998,23 +3998,28 @@ public class TheRenderKing : MonoBehaviour {
                 cmdBufferMain.DrawProcedural(Matrix4x4.identity, animalParticleShadowDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, simManager.zooplanktonManager.animalParticlesCBuffer.count);
         
             }*/
-
             float isHighlight = 0f;
-            if(simManager.uiManager.watcherUI.isHighlight && simManager.uiManager.watcherUI.isOpen) {
-                isHighlight = 1f;
-            }
             float isSelectedZoop = 0f;
-            if(simManager.uiManager.watcherUI.isHighlight && simManager.uiManager.watcherUI.isOpen) {
-                if(simManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2 && simManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) {
-                    isSelectedZoop = 1f;
-                }                
-            }
             float isSelectedPlant = 0f;
-            if(simManager.uiManager.watcherUI.isHighlight && simManager.uiManager.watcherUI.isOpen) {
-                if(simManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 1 && simManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 1) {
-                    isSelectedPlant = 1f;
-                }                
+            if(simManager.uiManager.watcherUI.watcherSelectedTrophicSlotRef != null) {
+                
+                if(simManager.uiManager.watcherUI.isHighlight && simManager.uiManager.watcherUI.isOpen) {
+                    isHighlight = 1f;
+                }
+                
+                if(simManager.uiManager.watcherUI.isHighlight && simManager.uiManager.watcherUI.isOpen) {
+                    if(simManager.uiManager.watcherUI.watcherSelectedTrophicSlotRef.kingdomID == 2 && simManager.uiManager.watcherUI.watcherSelectedTrophicSlotRef.tierID == 0) {
+                        isSelectedZoop = 1f;
+                    }                
+                }
+                
+                if(simManager.uiManager.watcherUI.isHighlight && simManager.uiManager.watcherUI.isOpen) {
+                    if(simManager.uiManager.watcherUI.watcherSelectedTrophicSlotRef.kingdomID == 1 && simManager.uiManager.watcherUI.watcherSelectedTrophicSlotRef.tierID == 1) {
+                        isSelectedPlant = 1f;
+                    }                
+                }
             }
+            
             //simManager.vegetationManager.isPlantParticleSelected
             
             if(simManager.trophicLayersManager.GetAlgaeOnOff()) {

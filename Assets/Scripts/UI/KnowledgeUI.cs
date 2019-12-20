@@ -10,6 +10,7 @@ public class KnowledgeUI : MonoBehaviour {
     public Image imageKnowledgeCurTarget; // in watcher panel
     public Text textTargetLayer;
     //public Button buttonKnowledgeLock;
+    public Image imageColorBar;
 
     public Image imageKnowledgeSpeciesStatsGraph;
 
@@ -72,13 +73,19 @@ public class KnowledgeUI : MonoBehaviour {
         panelKnowledgeInfoPlants.SetActive(false);
         panelKnowledgeInfoZooplankton.SetActive(false);
         panelKnowledgeInfoVertebrates.SetActive(false);
-
-
+        
         textKnowledgeSpeciesSummary.gameObject.SetActive(true);
         string summaryText = GetSpeciesDescriptionString(uiManagerRef.gameManager.simulationManager);
         textKnowledgeSpeciesSummary.text = summaryText;
 
         TrophicSlot slotRef = uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot;
+
+        textTargetLayer.text = slotRef.speciesName;
+        textTargetLayer.color = uiManagerRef.worldSpiritHubUI.curIconColor;
+        imageColorBar.color = uiManagerRef.worldSpiritHubUI.curIconColor;
+        imageKnowledgeCurTarget.color = uiManagerRef.worldSpiritHubUI.curIconColor;
+        imageKnowledgeCurTarget.sprite = uiManagerRef.worldSpiritHubUI.curIconSprite;
+
 
         //knowledgeLockedTrophicSlotRef ---> worldSpiritSelectedSlotRef
         if (slotRef.kingdomID == 0) {
@@ -307,12 +314,14 @@ public class KnowledgeUI : MonoBehaviour {
                 str += "Utility: <b>" + ((GenomePool.avgSpecUtility) * 1f).ToString("F2") + "</b>\n";
             }            
         }
-        else {
+        else if(slot.kingdomID == 3) {
             if(slot.slotID == 0) {
                 str = "World";
+                str += "\n\nWorld Size: X square meters";
             }
             else if(slot.slotID == 1) {
                 str = "Stone";
+                str += "\n\nTotal Stone: Y lbs";
             }
             else if(slot.slotID == 2) {
                 str = "Pebbles";
@@ -321,11 +330,22 @@ public class KnowledgeUI : MonoBehaviour {
                 str = "Fine Sand";
             }
         }
+        else {
+            if(slot.slotID == 0) {
+                str = "Minerals";
+            }
+            else if(slot.slotID == 1) {
+                str = "Water";
+            }
+            else if(slot.slotID == 2) {
+                str = "Air";
+            }
+        }
 
 
         return str;
     }
-
+    /*
     private void UpdateUI() {        
         imageKnowledgeSpeciesStatsGraph.gameObject.SetActive(false);
 
@@ -339,23 +359,7 @@ public class KnowledgeUI : MonoBehaviour {
             descriptionText += "<color=#FBC653FF>Nutrient Production: <b>" + uiManagerRef.gameManager.simulationManager.simResourceManager.nutrientsProducedByDecomposersLastFrame.ToString("F3") + "</b></color>\n";
             descriptionText += "<color=#8EDEEEFF>Oxygen Usage: <b>" + uiManagerRef.gameManager.simulationManager.simResourceManager.oxygenUsedByDecomposersLastFrame.ToString("F3") + "</b></color>\n";
             descriptionText += "<color=#A97860FF>Waste Processed: <b>" + uiManagerRef.gameManager.simulationManager.simResourceManager.detritusRemovedByDecomposersLastFrame.ToString("F3") + "</b></color>\n";
-            /*
-            if (uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
-                textToolbarWingStatsUnlockStatus.text = "<b>Next Unlock:</b>\nReach <b><i>10</i></b> Total Biomass";
-                float unlockProgressLerp = Mathf.Clamp01(uiManagerRef.gameManager.simulationManager.simResourceManager.curGlobalDecomposers / 10f);
-                textToolbarWingStatsUnlockPercentage.text = (unlockProgressLerp * 100f).ToString("F0") + "%";
-                //imageUnlockMeter;
-                matUnlockMeter.SetFloat("_FillPercentage", unlockProgressLerp);
-
-                textToolbarWingStatsUnlockStatus.gameObject.SetActive(true);
-                textToolbarWingStatsUnlockPercentage.gameObject.SetActive(true);
-                imageUnlockMeter.gameObject.SetActive(true);
-            }
-            else {
-                textToolbarWingStatsUnlockStatus.gameObject.SetActive(false);
-                textToolbarWingStatsUnlockPercentage.gameObject.SetActive(false);
-                imageUnlockMeter.gameObject.SetActive(false);
-            }*/
+            
         }
         else if (slot.kingdomID == 1) {
             descriptionText += "<size=13><b>Total Biomass: " + uiManagerRef.gameManager.simulationManager.simResourceManager.curGlobalPlantParticles.ToString("F1") + "</b></size>\n\n";
@@ -364,25 +368,8 @@ public class KnowledgeUI : MonoBehaviour {
             descriptionText += "<color=#FBC653FF>Nutrient Usage: <b>" + uiManagerRef.gameManager.simulationManager.simResourceManager.nutrientsUsedByPlantParticlesLastFrame.ToString("F3") + "</b></color>\n";
             descriptionText += "<color=#A97860FF>Waste Generated: <b>" + uiManagerRef.gameManager.simulationManager.simResourceManager.wasteProducedByPlantParticlesLastFrame.ToString("F3") + "</b></color>\n";
 
-            // *************** GROSS CODE ALERT!!!!   temp hack!!!! *****************
-            /*if (uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
-                textToolbarWingStatsUnlockStatus.text = "<b>Next Unlock:</b>\nReach <b><i>150</i></b> Total Biomass";
-                float unlockProgressLerp = Mathf.Clamp01(uiManagerRef.gameManager.simulationManager.simResourceManager.curGlobalPlantParticles / 150f);
-                textToolbarWingStatsUnlockPercentage.text = (unlockProgressLerp * 100f).ToString("F0") + "%";
-                //imageUnlockMeter;
-                matUnlockMeter.SetFloat("_FillPercentage", unlockProgressLerp);
-
-                textToolbarWingStatsUnlockStatus.gameObject.SetActive(true);
-                textToolbarWingStatsUnlockPercentage.gameObject.SetActive(true);
-                imageUnlockMeter.gameObject.SetActive(true);
-            }
-            else {
-                textToolbarWingStatsUnlockStatus.gameObject.SetActive(false);
-                textToolbarWingStatsUnlockPercentage.gameObject.SetActive(false);
-                imageUnlockMeter.gameObject.SetActive(false);
-            }*/
         }
-        else {
+        else if (slot.kingdomID == 2) {
             if (slot.tierID == 0) {  // ZOOPLANKTON
                 descriptionText += "<size=13><b>Total Biomass: " + uiManagerRef.gameManager.simulationManager.simResourceManager.curGlobalAnimalParticles.ToString("F1") + "</b></size>\n\n";
 
@@ -390,22 +377,6 @@ public class KnowledgeUI : MonoBehaviour {
                 //descriptionText += "<color=#FBC653FF>Nutrient Usage: <b>" + gameManager.simulationManager.simResourceManager.nutrientsUsedByAlgaeParticlesLastFrame.ToString("F3") + "</b></color>\n";
                 descriptionText += "<color=#A97860FF>Waste Generated: <b>" + uiManagerRef.gameManager.simulationManager.simResourceManager.wasteProducedByAnimalParticlesLastFrame.ToString("F3") + "</b></color>\n";
 
-                /*if (uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
-                    textToolbarWingStatsUnlockStatus.text = "<b>Next Unlock:</b>\nReach <b><i>6</i></b> Total Biomass";
-                    float unlockProgressLerp = Mathf.Clamp01(uiManagerRef.gameManager.simulationManager.simResourceManager.curGlobalAnimalParticles / 6f);
-                    textToolbarWingStatsUnlockPercentage.text = (unlockProgressLerp * 100f).ToString("F0") + "%";
-                    //imageUnlockMeter;
-                    matUnlockMeter.SetFloat("_FillPercentage", unlockProgressLerp);
-
-                    textToolbarWingStatsUnlockStatus.gameObject.SetActive(true);
-                    textToolbarWingStatsUnlockPercentage.gameObject.SetActive(true);
-                    imageUnlockMeter.gameObject.SetActive(true);
-                }
-                else {
-                    textToolbarWingStatsUnlockStatus.gameObject.SetActive(false);
-                    textToolbarWingStatsUnlockPercentage.gameObject.SetActive(false);
-                    imageUnlockMeter.gameObject.SetActive(false);
-                }*/
             }
             else {  // AGENTS
                 imageKnowledgeSpeciesStatsGraph.gameObject.SetActive(true);
@@ -428,71 +399,43 @@ public class KnowledgeUI : MonoBehaviour {
                 //+ selectedPool.avgBodySize.ToString("F2") + "</b>\n";
                 descriptionText += "Avg Brain Size: <b>" + ((selectedPool.avgNumNeurons + selectedPool.avgNumAxons) * 0.1f).ToString("F1") + "</b>\n";
                 //descriptionText += "Avg Axon Count: <b>" + selectedPool.avgNumAxons.ToString("F0") + "</b>\n\n";
-                /*
-                toolbarSpeciesStatsGraphMat.SetTexture("_MainTex", statsTreeOfLifeSpeciesTexArray[0]); // statsTreeOfLifeSpeciesTexArray[0]);
-                toolbarSpeciesStatsGraphMat.SetTexture("_ColorKeyTex", statsSpeciesColorKey); // statsTreeOfLifeSpeciesTexArray[0]);
-                toolbarSpeciesStatsGraphMat.SetFloat("_MinValue", 0f);
-                toolbarSpeciesStatsGraphMat.SetFloat("_MaxValue", maxValuesStatArray[0]);
-                toolbarSpeciesStatsGraphMat.SetFloat("_NumEntries", (float)statsTreeOfLifeSpeciesTexArray[0].width);
-                toolbarSpeciesStatsGraphMat.SetFloat("_SelectedSpeciesID", slot.slotID);
-                */
+                
                 // TEMP UNLOCK TEXT:
                 // Slot 4/4:
-                /*if (uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[3].status == TrophicSlot.SlotStatus.Locked) {
-                    textToolbarWingStatsUnlockStatus.text = "<b>Next Unlock:</b>\nReach <b><i>8</i></b> Total Biomass";
-                    float unlockProgressLerp = Mathf.Clamp01(uiManagerRef.gameManager.simulationManager.simResourceManager.curGlobalAgentBiomass / 8f);
-                    textToolbarWingStatsUnlockPercentage.text = (unlockProgressLerp * 100f).ToString("F0") + "%";
-                    //imageUnlockMeter;
-                    matUnlockMeter.SetFloat("_FillPercentage", unlockProgressLerp);
-
-                    textToolbarWingStatsUnlockStatus.gameObject.SetActive(true);
-                    textToolbarWingStatsUnlockPercentage.gameObject.SetActive(true);
-                    imageUnlockMeter.gameObject.SetActive(true);
-                }
-                else {
-                    textToolbarWingStatsUnlockStatus.gameObject.SetActive(false);
-                    textToolbarWingStatsUnlockPercentage.gameObject.SetActive(false);
-                    imageUnlockMeter.gameObject.SetActive(false);
-                }
-                // Slot 3/4:
-                if (uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[2].status == TrophicSlot.SlotStatus.Locked) {
-                    textToolbarWingStatsUnlockStatus.text = "<b>Next Unlock:</b>\nReach <b><i>4</i></b> Total Biomass";
-                    float unlockProgressLerp = Mathf.Clamp01(uiManagerRef.gameManager.simulationManager.simResourceManager.curGlobalAgentBiomass / 4f);
-                    textToolbarWingStatsUnlockPercentage.text = (unlockProgressLerp * 100f).ToString("F0") + "%";
-                    //imageUnlockMeter;
-                    matUnlockMeter.SetFloat("_FillPercentage", unlockProgressLerp);
-
-                    textToolbarWingStatsUnlockStatus.gameObject.SetActive(true);
-                    textToolbarWingStatsUnlockPercentage.gameObject.SetActive(true);
-                    imageUnlockMeter.gameObject.SetActive(true);
-                }
-                else {
-                    //textToolbarWingStatsUnlockStatus.gameObject.SetActive(false);
-                    //textToolbarWingStatsUnlockPercentage.gameObject.SetActive(false);
-                    //imageUnlockMeter.gameObject.SetActive(false);
-                }
-                // Slot 2/4:
-                if (uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1].status == TrophicSlot.SlotStatus.Locked) {
-                    textToolbarWingStatsUnlockStatus.text = "<b>Next Unlock:</b>\nReach <b><i>1</i></b> Total Biomass";
-                    float unlockProgressLerp = Mathf.Clamp01(uiManagerRef.gameManager.simulationManager.simResourceManager.curGlobalAgentBiomass / 1f);
-                    textToolbarWingStatsUnlockPercentage.text = (unlockProgressLerp * 100f).ToString("F0") + "%";
-                    //imageUnlockMeter;
-                    matUnlockMeter.SetFloat("_FillPercentage", unlockProgressLerp);
-
-                    textToolbarWingStatsUnlockStatus.gameObject.SetActive(true);
-                    textToolbarWingStatsUnlockPercentage.gameObject.SetActive(true);
-                    imageUnlockMeter.gameObject.SetActive(true);
-                }
-                else {
-                    //textToolbarWingStatsUnlockStatus.gameObject.SetActive(false);
-                    //textToolbarWingStatsUnlockPercentage.gameObject.SetActive(false);
-                    //imageUnlockMeter.gameObject.SetActive(false);
-                }
-                */
+                
+            }
+        }
+        else if (slot.kingdomID == 3) {  // TERRAIN
+            if(slot.slotID == 0) {
+                //world
+            }
+            else if(slot.slotID == 1) {
+                //stone
+            }
+            else if(slot.slotID == 2) {
+                //pebbles
+            }
+            else {
+                //sand
+            }
+        }
+        else {  // OTHER
+            if(slot.slotID == 0) {
+                //minerals
+            }
+            else if(slot.slotID == 1) {
+                //water
+            }
+            else {
+                //atmosphere
             }
         }
 
-        textKnowledgeSpeciesSummary.text = descriptionText;
-    }
 
+        //imageColorBar
+        //imageKnowledgeCurTarget
+
+        //textKnowledgeSpeciesSummary.text = descriptionText;
+    }
+    */
 }

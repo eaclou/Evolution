@@ -12,6 +12,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
 
     public GameObject panelWorldHubMain;
     public GameObject panelWorldHubExpand;
+    public Image imageSelectedTargetLayer;
         
     public int selectedToolbarOtherLayer = 0;
     public Button buttonWorldSpiritOther0;  // Minerals
@@ -41,6 +42,9 @@ public class WorldSpiritHubUI : MonoBehaviour {
     //public int selectedWorldSpiritVertebrateLayer = 0;
     public int selectedWorldSpiritVertebrateSpeciesID = 0;
 
+    public Color curIconColor = Color.white;
+    public Sprite curIconSprite = null;
+
 	// Use this for initialization
 	void Start () {
         
@@ -48,8 +52,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
 
     private void UpdateUI() {
         TrophicLayersManager layerManager = uiManagerRef.gameManager.simulationManager.trophicLayersManager;  
-        
-        Color iconColor = Color.white;
+               
 
         bool isSelectedDecomposers = false;
         bool isSelectedAlgae = false;
@@ -66,40 +69,41 @@ public class WorldSpiritHubUI : MonoBehaviour {
         bool isSelectedTerrain1 = false;
         bool isSelectedTerrain2 = false;
         bool isSelectedTerrain3 = false;
-        if (layerManager.isSelectedTrophicSlot) {
-            if (layerManager.selectedTrophicSlotRef.kingdomID == 0) {
+        if (true) { // used to have an isSelected flag
+            if (selectedWorldSpiritSlot.kingdomID == 0) {
                 isSelectedDecomposers = true;
-                iconColor = uiManagerRef.colorDecomposersLayer;
-                //imageToolbarSpeciesPortraitRender.sprite = uiManagerRef.spriteSpiritDecomposerIcon;
+                curIconColor = uiManagerRef.colorDecomposersLayer;
+                curIconSprite = uiManagerRef.spriteSpiritDecomposerIcon;
             }
-            else if (layerManager.selectedTrophicSlotRef.kingdomID == 1) {
-                if (layerManager.selectedTrophicSlotRef.tierID == 0) {
+            else if (selectedWorldSpiritSlot.kingdomID == 1) {
+                if (selectedWorldSpiritSlot.tierID == 0) {
                     isSelectedAlgae = true;
-                    iconColor = uiManagerRef.colorAlgaeLayer;
-                    //imageToolbarSpeciesPortraitRender.sprite = uiManagerRef.spriteSpiritAlgaeIcon;
+                    curIconColor = uiManagerRef.colorAlgaeLayer;
+                    curIconSprite = uiManagerRef.spriteSpiritAlgaeIcon;
                 }
                 else {
                     isSelectedPlants = true;
-                    iconColor = uiManagerRef.colorPlantsLayer;
-                    //imageToolbarSpeciesPortraitRender.sprite = uiManagerRef.spriteSpiritPlantIcon;
+                    curIconColor = uiManagerRef.colorPlantsLayer;
+                    curIconSprite = uiManagerRef.spriteSpiritPlantIcon;
                 }
             }
-            else if (layerManager.selectedTrophicSlotRef.kingdomID == 2) {
-                if (layerManager.selectedTrophicSlotRef.tierID == 0) {
+            else if (selectedWorldSpiritSlot.kingdomID == 2) {
+                if (selectedWorldSpiritSlot.tierID == 0) {
                     isSelectedZooplankton = true;
-                    //imageToolbarSpeciesPortraitRender.sprite = uiManagerRef.spriteSpiritZooplanktonIcon;
+                    curIconColor = uiManagerRef.colorZooplanktonLayer;
+                    curIconSprite = uiManagerRef.spriteSpiritZooplanktonIcon;
                 }
                 else {
-                    iconColor = uiManagerRef.colorVertebratesLayer;
-                    //imageToolbarSpeciesPortraitRender.sprite = uiManagerRef.spriteSpiritVertebrateIcon;
+                    curIconColor = uiManagerRef.colorVertebratesLayer;
+                    curIconSprite = uiManagerRef.spriteSpiritVertebrateIcon;
 
-                    if (layerManager.selectedTrophicSlotRef.slotID == 0) {
+                    if (selectedWorldSpiritSlot.slotID == 0) {
                         isSelectedVertebrate0 = true;
                     }
-                    else if (layerManager.selectedTrophicSlotRef.slotID == 1) {
+                    else if (selectedWorldSpiritSlot.slotID == 1) {
                         isSelectedVertebrate1 = true;
                     }
-                    else if (layerManager.selectedTrophicSlotRef.slotID == 2) {
+                    else if (selectedWorldSpiritSlot.slotID == 2) {
                         isSelectedVertebrate2 = true;
                     }
                     else {
@@ -109,40 +113,44 @@ public class WorldSpiritHubUI : MonoBehaviour {
                 }
 
             }
-            else if (layerManager.selectedTrophicSlotRef.kingdomID == 3) {
-                iconColor = uiManagerRef.colorTerrainLayer;
-                if (layerManager.selectedTrophicSlotRef.slotID == 0) {
-                    //imageToolbarSpeciesPortraitRender.sprite = uiManagerRef.spriteSpiritWorldIcon;
+            else if (selectedWorldSpiritSlot.kingdomID == 3) {
+                
+                if (selectedWorldSpiritSlot.slotID == 0) {
+                    curIconSprite = uiManagerRef.spriteSpiritWorldIcon;
                     isSelectedTerrain0 = true;
+                    curIconColor = uiManagerRef.colorWorldLayer;
                 }
-                else if (layerManager.selectedTrophicSlotRef.slotID == 1) {
+                else if (selectedWorldSpiritSlot.slotID == 1) {
                     isSelectedTerrain1 = true;
-                    //imageToolbarSpeciesPortraitRender.sprite = uiManagerRef.spriteSpiritStoneIcon;
+                    curIconSprite = uiManagerRef.spriteSpiritStoneIcon;
+                    curIconColor = uiManagerRef.colorTerrainLayer;
                 }
-                else if (layerManager.selectedTrophicSlotRef.slotID == 2) {
+                else if (selectedWorldSpiritSlot.slotID == 2) {
                     isSelectedTerrain2 = true;
-                    //imageToolbarSpeciesPortraitRender.sprite = uiManagerRef.spriteSpiritPebblesIcon;
+                    curIconSprite = uiManagerRef.spriteSpiritPebblesIcon;
+                    curIconColor = uiManagerRef.colorTerrainLayer;
                 }
-                else if (layerManager.selectedTrophicSlotRef.slotID == 3) {
+                else if (selectedWorldSpiritSlot.slotID == 3) {
                     isSelectedTerrain3 = true;
-                    //imageToolbarSpeciesPortraitRender.sprite = uiManagerRef.spriteSpiritSandIcon;
+                    curIconSprite = uiManagerRef.spriteSpiritSandIcon;
+                    curIconColor = uiManagerRef.colorTerrainLayer;
                 }
             }
-            else if (layerManager.selectedTrophicSlotRef.kingdomID == 4) {
-                if (layerManager.selectedTrophicSlotRef.slotID == 0) {
+            else if (selectedWorldSpiritSlot.kingdomID == 4) {
+                if (selectedWorldSpiritSlot.slotID == 0) {
                     isSelectedMinerals = true;
-                    iconColor = uiManagerRef.colorMineralLayer;
-                    //imageToolbarSpeciesPortraitRender.sprite = uiManagerRef.spriteSpiritMineralsIcon;
+                    curIconColor = uiManagerRef.colorMineralLayer;
+                    curIconSprite = uiManagerRef.spriteSpiritMineralsIcon;
                 }
-                else if (layerManager.selectedTrophicSlotRef.slotID == 1) {
+                else if (selectedWorldSpiritSlot.slotID == 1) {
                     isSelectedWater = true;
-                    iconColor = uiManagerRef.colorWaterLayer;
-                    //imageToolbarSpeciesPortraitRender.sprite = uiManagerRef.spriteSpiritWaterIcon;
+                    curIconColor = uiManagerRef.colorWaterLayer;
+                    curIconSprite = uiManagerRef.spriteSpiritWaterIcon;
                 }
-                else if (layerManager.selectedTrophicSlotRef.slotID == 2) {
+                else if (selectedWorldSpiritSlot.slotID == 2) {
                     isSelectedAir = true;
-                    iconColor = uiManagerRef.colorAirLayer;
-                    //imageToolbarSpeciesPortraitRender.sprite = uiManagerRef.spriteSpiritAirIcon;
+                    curIconColor = uiManagerRef.colorAirLayer;
+                    curIconSprite = uiManagerRef.spriteSpiritAirIcon;
                 }
             }
         }
@@ -169,12 +177,20 @@ public class WorldSpiritHubUI : MonoBehaviour {
         uiManagerRef.SetToolbarButtonStateUI(ref buttonWorldSpiritOther1, layerManager.kingdomOther.trophicTiersList[0].trophicSlots[1].status, isSelectedWater);
         uiManagerRef.SetToolbarButtonStateUI(ref buttonWorldSpiritOther2, layerManager.kingdomOther.trophicTiersList[0].trophicSlots[2].status, isSelectedAir);
 
+        imageSelectedTargetLayer.sprite = curIconSprite;
+        imageSelectedTargetLayer.color = curIconColor;
+
     }
     public void UpdateWorldSpiritHubUI() {
         panelWorldHubExpand.SetActive(isOpen);
         if(isOpen) {
             UpdateUI();
         }
+    }
+
+    public void ClickToolButton() {
+        Debug.Log("Click worldSpiritHUB toggle button)");
+        isOpen = !isOpen;
     }
     
     
@@ -183,8 +199,8 @@ public class WorldSpiritHubUI : MonoBehaviour {
         Debug.Log("ClickButtonPaletteOther: " + index.ToString());
 
         TrophicSlot slot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[index];
-        uiManagerRef.gameManager.simulationManager.trophicLayersManager.isSelectedTrophicSlot = true;
-        uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = slot;
+        //uiManagerRef.gameManager.simulationManager.trophicLayersManager.isSelectedTrophicSlot = true;
+        selectedWorldSpiritSlot = slot;
         
         selectedWorldSpiritVertebrateSpeciesID = slot.linkedSpeciesID; // update this next ***
         
@@ -196,8 +212,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
         Debug.Log("ClickButtonPaletteTerrain: " + index.ToString());
 
         TrophicSlot slot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomTerrain.trophicTiersList[0].trophicSlots[index];
-        uiManagerRef.gameManager.simulationManager.trophicLayersManager.isSelectedTrophicSlot = true;
-        uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = slot;
+        selectedWorldSpiritSlot = slot;
         
         selectedWorldSpiritVertebrateSpeciesID = slot.linkedSpeciesID; // update this next
 
@@ -208,8 +223,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
     public void ClickButtonWorldSpiritHubDecomposers() {
         TrophicSlot slot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0];
 
-        uiManagerRef.gameManager.simulationManager.trophicLayersManager.isSelectedTrophicSlot = true;
-        uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = slot;
+        selectedWorldSpiritSlot = slot;
         
         if(slot.status == TrophicSlot.SlotStatus.Unlocked) {
             ClickWorldCreateNewSpecies(slot);
@@ -219,8 +233,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
     }
     public void ClickButtonWorldSpiritHubAlgae() {  // shouldn't be able to click if LOCKED (interactive = false)
         TrophicSlot slot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];
-        uiManagerRef.gameManager.simulationManager.trophicLayersManager.isSelectedTrophicSlot = true;
-        uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = slot;
+        selectedWorldSpiritSlot = slot;
         
         if(slot.status == TrophicSlot.SlotStatus.Unlocked) {
             ClickWorldCreateNewSpecies(slot);
@@ -229,8 +242,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
     }
     public void ClickButtonWorldSpiritHubPlants(int slotID) {
         TrophicSlot slot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[slotID];
-        uiManagerRef.gameManager.simulationManager.trophicLayersManager.isSelectedTrophicSlot = true;
-        uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = slot;
+        selectedWorldSpiritSlot = slot;
         
         if(slot.status == TrophicSlot.SlotStatus.Unlocked) {
             ClickWorldCreateNewSpecies(slot);
@@ -239,8 +251,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
     }
     public void ClickButtonWorldSpiritHubZooplankton() {
         TrophicSlot slot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0];        
-        uiManagerRef.gameManager.simulationManager.trophicLayersManager.isSelectedTrophicSlot = true;
-        uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = slot;
+        selectedWorldSpiritSlot = slot;
         
         if(slot.status == TrophicSlot.SlotStatus.Unlocked) {
             //ClickToolbarCreateNewSpecies();
@@ -251,8 +262,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
     }
     public void ClickButtonWorldSpiritHubAgent(int index) {
         TrophicSlot slot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[index];
-        uiManagerRef.gameManager.simulationManager.trophicLayersManager.isSelectedTrophicSlot = true;
-        uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = slot;
+        selectedWorldSpiritSlot = slot;
         //isToolbarDetailPanelOn = true;
 
         selectedWorldSpiritVertebrateSpeciesID = slot.linkedSpeciesID; // update this next
@@ -263,7 +273,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
 
         }
         
-        if(uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.status != TrophicSlot.SlotStatus.Unlocked) {
+        if(selectedWorldSpiritSlot.status != TrophicSlot.SlotStatus.Unlocked) {
             //InitToolbarPortraitCritterData(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef); // ***
         }
 
@@ -272,19 +282,19 @@ public class WorldSpiritHubUI : MonoBehaviour {
     
     public void ClickWorldCreateNewSpecies(TrophicSlot slot) {
         // questionable code, possibly un-needed:
-        uiManagerRef.gameManager.simulationManager.trophicLayersManager.CreateTrophicSlotSpecies(uiManagerRef.gameManager.simulationManager, uiManagerRef.cameraManager.curCameraFocusPivotPos, uiManagerRef.gameManager.simulationManager.simAgeTimeSteps);
+        uiManagerRef.gameManager.simulationManager.trophicLayersManager.CreateTrophicSlotSpecies(uiManagerRef.gameManager.simulationManager, slot, uiManagerRef.cameraManager.curCameraFocusPivotPos, uiManagerRef.gameManager.simulationManager.simAgeTimeSteps);
                 
         uiManagerRef.gameManager.theRenderKing.baronVonWater.StartCursorClick(uiManagerRef.cameraManager.curCameraFocusPivotPos);
         
         //isAnnouncementTextOn = true;
 
-        if(uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 0) {
+        if(slot.kingdomID == 0) {
             uiManagerRef.panelPendingClickPrompt.GetComponentInChildren<Text>().text = "A new species of Decomposer added!";
             uiManagerRef.panelPendingClickPrompt.GetComponentInChildren<Text>().color = uiManagerRef.colorDecomposersLayer;
             //panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
         }
-        else if(uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 1) {
-            if(uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) {
+        else if(slot.kingdomID == 1) {
+            if(slot.tierID == 0) {
                 uiManagerRef.panelPendingClickPrompt.GetComponentInChildren<Text>().text = "A new species of Algae added!";
                 uiManagerRef.panelPendingClickPrompt.GetComponentInChildren<Text>().color = uiManagerRef.colorAlgaeLayer;
                 //panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
@@ -296,15 +306,15 @@ public class WorldSpiritHubUI : MonoBehaviour {
             }
             
         }
-        else if(uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2) { // ANIMALS
-            if(uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 1) {
+        else if(slot.kingdomID == 2) { // ANIMALS
+            if(slot.tierID == 1) {
                 //if(createSpecies) {
                 // v v v Actually creates new speciesPool here:::
                 //TrophicSlot slot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef;
                 slot.speciesName = "Vertebrate " + (slot.slotID + 1).ToString();
                 uiManagerRef.gameManager.simulationManager.CreateAgentSpecies(uiManagerRef.cameraManager.curCameraFocusPivotPos);
                 
-                uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef.slotID].linkedSpeciesID = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList.Count - 1].speciesID;
+                uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[slot.slotID].linkedSpeciesID = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList.Count - 1].speciesID;
 
                 // *** IMPORTANT::::
                 int speciesIndex = slot.linkedSpeciesID;

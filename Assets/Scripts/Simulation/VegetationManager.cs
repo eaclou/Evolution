@@ -568,9 +568,9 @@ public class VegetationManager {
         //float randRoll = UnityEngine.Random.Range(0f, 1f);
         float brushF = 0f;
         if(renderKingRef.isSpiritBrushOn) {
-            if(renderKingRef.simManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 1) {  // Plants kingdom selected
+            if(renderKingRef.simManager.uiManager.brushesUI.selectedBrushSlot.kingdomID == 1) {  // Plants kingdom selected
                 //Debug.Log("brushF: " + brushF.ToString());
-                if(renderKingRef.simManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) {  // Algae selected
+                if(renderKingRef.simManager.uiManager.brushesUI.selectedBrushSlot.tierID == 0) {  // Algae selected
                     //brushF = 1f;
                 }
                 else {  // Big Plants
@@ -1035,12 +1035,12 @@ public class VegetationManager {
         float brushIntensityMult = 1f;
         if(isBrushActive) {  // Set from uiManager
 
-            if (theRenderKingRef.simManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 0) {
+            if (theRenderKingRef.simManager.uiManager.brushesUI.selectedBrushSlot.kingdomID == 0) {
                 brushDecomposersOn = 1f;
                 brushIntensityMult = 0.2f;
             }
-            else if (theRenderKingRef.simManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 1) {
-                if (theRenderKingRef.simManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) {
+            else if (theRenderKingRef.simManager.uiManager.brushesUI.selectedBrushSlot.kingdomID == 1) {
+                if (theRenderKingRef.simManager.uiManager.brushesUI.selectedBrushSlot.tierID == 0) {
                     brushAlgaeOn = 1f;
                     
                     brushIntensityMult = 0.025f;
@@ -1049,8 +1049,8 @@ public class VegetationManager {
                     //brushPlantsOn = 1f;
                 }
             }
-            else if (theRenderKingRef.simManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 4) {
-                if (theRenderKingRef.simManager.trophicLayersManager.selectedTrophicSlotRef.slotID == 0) {  // MINERALS
+            else if (theRenderKingRef.simManager.uiManager.brushesUI.selectedBrushSlot.kingdomID == 4) {
+                if (theRenderKingRef.simManager.uiManager.brushesUI.selectedBrushSlot.slotID == 0) {  // MINERALS
                     brushMineralsOn = 1f;  
                     brushIntensityMult = 0.1f;
                     Debug.Log("// minerals brush on!");

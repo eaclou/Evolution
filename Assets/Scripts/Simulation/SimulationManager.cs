@@ -1369,7 +1369,7 @@ public class SimulationManager : MonoBehaviour {
     #region Process Events // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& PROCESS EVENTS! &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
     
     public void RemoveSelectedAgentSpecies(int slotIndex) {
-        Debug.Log("pressedRemoveSpecies! " + trophicLayersManager.selectedTrophicSlotRef.slotID.ToString());
+        //Debug.Log("pressedRemoveSpecies! " + trophicLayersManager.selectedTrophicSlotRef.slotID.ToString());
 
         // need to connect UI slotID to speciesID
         if(masterGenomePool.currentlyActiveSpeciesIDList.Count > 1) {
@@ -1616,17 +1616,20 @@ public class SimulationManager : MonoBehaviour {
         simResourceManager.curGlobalAgentBiomass2 = 0f;
         simResourceManager.curGlobalAgentBiomass3 = 0f;
         for(int i = 0; i < agentsArray.Length; i++) {
-            if(trophicLayersManager.selectedTrophicSlotRef.slotID == 0) {
+            if(agentRef.speciesIndex == 0) {
                 simResourceManager.curGlobalAgentBiomass0 += agentsArray[i].currentBiomass;
             }
-            else if(trophicLayersManager.selectedTrophicSlotRef.slotID == 1) {
+            else if(agentRef.speciesIndex == 1) {
                 simResourceManager.curGlobalAgentBiomass1 += agentsArray[i].currentBiomass;
             }
-            else if(trophicLayersManager.selectedTrophicSlotRef.slotID == 2) {
+            else if(agentRef.speciesIndex == 2) {
                 simResourceManager.curGlobalAgentBiomass2 += agentsArray[i].currentBiomass;
             }
-            else {
+            else if(agentRef.speciesIndex == 3) {
                 simResourceManager.curGlobalAgentBiomass3 += agentsArray[i].currentBiomass;
+            }
+            else {
+                Debug.LogError("ASDFASD");
             }
 
             if(agentsArray[i].curLifeStage == Agent.AgentLifeStage.Dead) {

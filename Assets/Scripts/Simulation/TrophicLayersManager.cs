@@ -13,8 +13,8 @@ public class TrophicLayersManager {
 
     //public bool pendingTrophicSlot = false;
     //public TrophicSlot pendingTrophicSlotRef;
-    public bool isSelectedTrophicSlot = false;
-    public TrophicSlot selectedTrophicSlotRef;
+    //public bool isSelectedTrophicSlot = false;
+    //public TrophicSlot selectedTrophicSlotRef;
 
     public TrophicKingdom kingdomDecomposers;
     public TrophicKingdom kingdomPlants;
@@ -90,25 +90,24 @@ public class TrophicLayersManager {
         otherTier0.trophicSlots[2].Initialize("Air", TrophicSlot.SlotStatus.On, 4, 0, 2, uiManagerRef.spriteSpiritAirIcon, uiManagerRef.colorAirLayer);
         kingdomOther.trophicTiersList.Add(otherTier0);
                 
-        selectedTrophicSlotRef = terrainTier0.trophicSlots[0];
-        //selectedTrophicSlotRef.status = TrophicSlot.SlotStatus.On;
-        isSelectedTrophicSlot = true;
+        //selectedTrophicSlotRef = terrainTier0.trophicSlots[0];        
+        //isSelectedTrophicSlot = true;
 
         // SET INITIAL SELECTED!!!!!
         uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot = kingdomTerrain.trophicTiersList[0].trophicSlots[0];
         uiManagerRef.brushesUI.selectedBrushSlot = kingdomTerrain.trophicTiersList[0].trophicSlots[0];
     }
-    public void CreateTrophicSlotSpecies(SimulationManager simManagerRef, Vector2 spawnPos, int timeStep) {
+    public void CreateTrophicSlotSpecies(SimulationManager simManagerRef, TrophicSlot addedSlot, Vector2 spawnPos, int timeStep) {
         
         // reset things, figure out which slot was created:
         //isSelectedTrophicSlot = false;
-        selectedTrophicSlotRef.status = TrophicSlot.SlotStatus.On;
+        addedSlot.status = TrophicSlot.SlotStatus.On;
 
-        if (selectedTrophicSlotRef.kingdomID == 0) { // decomposers:
+        if (addedSlot.kingdomID == 0) { // decomposers:
             TurnOnDecomposers(spawnPos, timeStep);
         }
-        if (selectedTrophicSlotRef.kingdomID == 1) { // plants!:
-            if (selectedTrophicSlotRef.tierID == 0) { // ALGAE!:
+        if (addedSlot.kingdomID == 1) { // plants!:
+            if (addedSlot.tierID == 0) { // ALGAE!:
                 TurnOnAlgae(spawnPos, timeStep);
                 //simManagerRef.vegetationManager.SpawnInitialAlgaeParticles(5f, new Vector4(spawnPos.x, spawnPos.y, 0f, 0f));
             }
@@ -116,8 +115,8 @@ public class TrophicLayersManager {
                 TurnOnPlants(spawnPos, timeStep);
             }
         }
-        if (selectedTrophicSlotRef.kingdomID == 2) { // Animals:
-            if (selectedTrophicSlotRef.tierID == 0) { // Animals:
+        if (addedSlot.kingdomID == 2) { // Animals:
+            if (addedSlot.tierID == 0) { // Animals:
                 TurnOnZooplankton(spawnPos, timeStep);
                 // Unlock Slots:
                 //kingdomAnimals.trophicTiersList[1].unlocked = true;
@@ -126,7 +125,7 @@ public class TrophicLayersManager {
                 //kingdomAnimals.trophicTiersList[1].trophicSlots[2].status = TrophicSlot.SlotStatus.Empty;
                 //kingdomAnimals.trophicTiersList[1].trophicSlots[3].status = TrophicSlot.SlotStatus.Empty;
             }
-            if(selectedTrophicSlotRef.tierID == 1) {
+            if(addedSlot.tierID == 1) {
                 TurnOnAgents();
 
                 
