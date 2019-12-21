@@ -6,9 +6,9 @@ using UnityEngine.UI;
 public class BrushesUI : MonoBehaviour {
     public UIManager uiManagerRef;
     public bool isOpen;
-    public bool isBrushSelected;
+    //public bool isBrushSelected;
     public bool isPaletteOpen;
-    public TrophicSlot selectedBrushSlot;        
+    public TrophicSlot selectedEssenceSlot;        
     public int curCreationBrushIndex = 0;  // 0 == original, 1-3 extra experimental
 
     public GameObject panelBrushes;
@@ -27,6 +27,9 @@ public class BrushesUI : MonoBehaviour {
     private int influencePointsCooldownDuration = 90;
     public bool isInfluencePointsCooldown = false;
     public CreationBrush[] creationBrushesArray;
+
+    public Image imageColorBar;
+    public Image imageIsBrushing;
 
     public Text textSelectedBrushName;
     public Text textSelectedBrushDescription;
@@ -181,6 +184,12 @@ public class BrushesUI : MonoBehaviour {
         TrophicLayersManager layerManager = uiManagerRef.gameManager.simulationManager.trophicLayersManager;
 
         UpdateCurSelectedColor();
+        imageColorBar.color = curIconColor;
+
+        imageIsBrushing.gameObject.SetActive(uiManagerRef.isBrushModeON_snoopingOFF);
+        imageIsBrushing.sprite = curIconSprite;
+        imageIsBrushing.color = curIconColor;
+
 
         switch(uiManagerRef.curActiveTool) {
             case UIManager.ToolType.None:
@@ -189,7 +198,7 @@ public class BrushesUI : MonoBehaviour {
             case UIManager.ToolType.Add:
                 if(curCreationBrushIndex == 0) {
                     buttonBrushAdd.GetComponent<Image>().color = uiManagerRef.buttonActiveColor;
-                    buttonBrushAdd.gameObject.transform.localScale = Vector3.one * 1.25f;
+                    buttonBrushAdd.gameObject.transform.localScale = Vector3.one * 1.33f;
 
                     buttonBrushExtra1.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
                     buttonBrushExtra1.gameObject.transform.localScale = Vector3.one;
@@ -200,7 +209,7 @@ public class BrushesUI : MonoBehaviour {
                 }
                 else if(curCreationBrushIndex == 1) {
                     buttonBrushExtra1.GetComponent<Image>().color = uiManagerRef.buttonActiveColor;
-                    buttonBrushExtra1.gameObject.transform.localScale = Vector3.one * 1.25f;
+                    buttonBrushExtra1.gameObject.transform.localScale = Vector3.one * 1.33f;
 
                     buttonBrushAdd.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
                     buttonBrushAdd.gameObject.transform.localScale = Vector3.one;
@@ -211,7 +220,7 @@ public class BrushesUI : MonoBehaviour {
                 }
                 else if(curCreationBrushIndex == 2) {
                     buttonBrushExtra2.GetComponent<Image>().color = uiManagerRef.buttonActiveColor;
-                    buttonBrushExtra2.gameObject.transform.localScale = Vector3.one * 1.25f;
+                    buttonBrushExtra2.gameObject.transform.localScale = Vector3.one * 1.33f;
 
                     buttonBrushExtra1.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
                     buttonBrushExtra1.gameObject.transform.localScale = Vector3.one;
@@ -222,7 +231,7 @@ public class BrushesUI : MonoBehaviour {
                 }
                 else {
                     buttonBrushExtra3.GetComponent<Image>().color = uiManagerRef.buttonActiveColor;
-                    buttonBrushExtra3.gameObject.transform.localScale = Vector3.one * 1.25f;
+                    buttonBrushExtra3.gameObject.transform.localScale = Vector3.one * 1.33f;
 
                     buttonBrushExtra1.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
                     buttonBrushExtra1.gameObject.transform.localScale = Vector3.one;
@@ -234,7 +243,7 @@ public class BrushesUI : MonoBehaviour {
                 break;            
             case UIManager.ToolType.Stir:
                 buttonBrushStir.GetComponent<Image>().color = uiManagerRef.buttonActiveColor;
-                buttonBrushStir.gameObject.transform.localScale = Vector3.one * 1.25f;
+                buttonBrushStir.gameObject.transform.localScale = Vector3.one * 1.5f;
                 break;            
             default:
                 break;
@@ -242,12 +251,12 @@ public class BrushesUI : MonoBehaviour {
         }
 
     
-        string spiritBrushName = "Minor Creation Spirit";
+        string spiritBrushName = "Minor Creation Spirit " + curCreationBrushIndex.ToString();
         imageSelectedBrushThumbnail.sprite = uiManagerRef.spriteSpiritBrushCreationIcon;
         //strSpiritBrushDescription = "This spirit has some powers of life and death";
         //strSpiritBrushEffects = "Left-Click:\n" + strLeftClickEffect[leftClickDescriptionIndex] + "\n\nRight-Click:\n" + strRightClickEffect[rightClickDescriptionIndex];
         if(uiManagerRef.theCursorCzar.isDraggingMouseRight) {
-            spiritBrushName = "Minor Decay Spirit";
+            spiritBrushName = "Minor Decay Spirit" + curCreationBrushIndex.ToString();
 
             
         }
@@ -273,46 +282,51 @@ public class BrushesUI : MonoBehaviour {
         textBrushLinkedSpiritName.color = curIconColor; // speciesColorLight;
         imageBrushLinkedSpiritThumbnailBorder.color = curIconColor; // speciesColorDark;
           
-        textBrushLinkedSpiritName.text = "Brushing: " + selectedBrushSlot.speciesName;
+        textBrushLinkedSpiritName.text = "Brushing: " + selectedEssenceSlot.speciesName;
         
-
         imageSelectedBrushThumbnail.color = curIconColor;                
         imageBrushLinkedSpiritThumbnail.color = curIconColor;
         imageBrushLinkedSpiritThumbnail.sprite = curIconSprite;
 
     }
-    private void UpdateCurSelectedColor() {        
+    private void UpdateCurSelectedColor() {
+        
+        string str = "";
         //selected layer ui identifying color:
-        if (selectedBrushSlot.kingdomID == 0) {
+        if (selectedEssenceSlot.kingdomID == 0) {
             curIconColor = uiManagerRef.colorDecomposersLayer;
             curIconSprite = uiManagerRef.spriteSpiritDecomposerIcon;
+            str = "Creates Decomposers";
         }
-        else if (selectedBrushSlot.kingdomID == 1) {
-            if (selectedBrushSlot.tierID == 0) {
+        else if (selectedEssenceSlot.kingdomID == 1) {
+            if (selectedEssenceSlot.tierID == 0) {
                 curIconColor = uiManagerRef.colorAlgaeLayer;
                 curIconSprite = uiManagerRef.spriteSpiritAlgaeIcon;
+                str = "Creates a bloom of Algae";
             }
             else {
                 curIconColor = uiManagerRef.colorPlantsLayer;
                 curIconSprite = uiManagerRef.spriteSpiritPlantIcon;
+                str = "Creates floating plant seedlings";
             }
         }
-        else if (selectedBrushSlot.kingdomID == 2) {
-            if (selectedBrushSlot.tierID == 0) {
+        else if (selectedEssenceSlot.kingdomID == 2) {
+            if (selectedEssenceSlot.tierID == 0) {
                 curIconColor = uiManagerRef.colorZooplanktonLayer;
                 curIconSprite = uiManagerRef.spriteSpiritZooplanktonIcon;
+                str = "Creates simple tiny creatures";
             }
             else {
                 curIconColor = uiManagerRef.colorVertebratesLayer;
                 curIconSprite = uiManagerRef.spriteSpiritVertebrateIcon;
-
-                if (selectedBrushSlot.slotID == 0) {
+                str = "Hatches Vertebrates";
+                if (selectedEssenceSlot.slotID == 0) {
                     //isSelectedVertebrate0 = true;
                 }
-                else if (selectedBrushSlot.slotID == 1) {
+                else if (selectedEssenceSlot.slotID == 1) {
                     //isSelectedVertebrate1 = true;
                 }
-                else if (selectedBrushSlot.slotID == 2) {
+                else if (selectedEssenceSlot.slotID == 2) {
                     //isSelectedVertebrate2 = true;
                 }
                 else {
@@ -320,38 +334,47 @@ public class BrushesUI : MonoBehaviour {
                 }
             }
         }
-        else if (selectedBrushSlot.kingdomID == 3) {                
-            if (selectedBrushSlot.slotID == 0) {
+        else if (selectedEssenceSlot.kingdomID == 3) {                
+            if (selectedEssenceSlot.slotID == 0) {
                 curIconSprite = uiManagerRef.spriteSpiritWorldIcon;                    
                 curIconColor = uiManagerRef.colorWorldLayer;
+                str = "Creates World";
             }
-            else if (selectedBrushSlot.slotID == 1) {
+            else if (selectedEssenceSlot.slotID == 1) {
                 curIconSprite = uiManagerRef.spriteSpiritStoneIcon;
                 curIconColor = uiManagerRef.colorTerrainLayer;
+                str = "Raises stone from deep below";
             }
-            else if (selectedBrushSlot.slotID == 2) {
+            else if (selectedEssenceSlot.slotID == 2) {
                 curIconSprite = uiManagerRef.spriteSpiritPebblesIcon;
                 curIconColor = uiManagerRef.colorTerrainLayer;
+                str = "Creates mounds of pebbles";
             }
-            else if (selectedBrushSlot.slotID == 3) {
+            else if (selectedEssenceSlot.slotID == 3) {
                 curIconSprite = uiManagerRef.spriteSpiritSandIcon;
                 curIconColor = uiManagerRef.colorTerrainLayer;
+                str = "Blankets the terrain with sand";
             }
         }
-        else if (selectedBrushSlot.kingdomID == 4) {
-            if (selectedBrushSlot.slotID == 0) {
+        else if (selectedEssenceSlot.kingdomID == 4) {
+            if (selectedEssenceSlot.slotID == 0) {
                 curIconColor = uiManagerRef.colorMineralLayer;
                 curIconSprite = uiManagerRef.spriteSpiritMineralsIcon;
+                str = "Creates nutrient-rich minerals in the ground";
             }
-            else if (selectedBrushSlot.slotID == 1) {
+            else if (selectedEssenceSlot.slotID == 1) {
                 curIconColor = uiManagerRef.colorWaterLayer;
                 curIconSprite = uiManagerRef.spriteSpiritWaterIcon;
+                str = "Raises the water level";
             }
-            else if (selectedBrushSlot.slotID == 2) {
+            else if (selectedEssenceSlot.slotID == 2) {
                 curIconColor = uiManagerRef.colorAirLayer;
                 curIconSprite = uiManagerRef.spriteSpiritAirIcon;
+                str = "Increases wind strength";
             }
-        }        
+        }
+
+        textSelectedBrushDescription.text = str;
     }
 	private void UpdateInfluencePointsUI() {
         // Influence points meter:     
@@ -401,13 +424,13 @@ public class BrushesUI : MonoBehaviour {
         bool isSelectedTerrain2 = false;
         bool isSelectedTerrain3 = false;
         if (true) { //layerManager.isSelectedTrophicSlot) {
-            if (selectedBrushSlot.kingdomID == 0) {
+            if (selectedEssenceSlot.kingdomID == 0) {
                 isSelectedDecomposers = true;
                 iconColor = uiManagerRef.colorDecomposersLayer;
                 //imageToolbarSpeciesPortraitRender.sprite = uiManagerRef.spriteSpiritDecomposerIcon;
             }
-            else if (selectedBrushSlot.kingdomID == 1) {
-                if (selectedBrushSlot.tierID == 0) {
+            else if (selectedEssenceSlot.kingdomID == 1) {
+                if (selectedEssenceSlot.tierID == 0) {
                     isSelectedAlgae = true;
                     iconColor = uiManagerRef.colorAlgaeLayer;
                     //imageToolbarSpeciesPortraitRender.sprite = uiManagerRef.spriteSpiritAlgaeIcon;
@@ -418,8 +441,8 @@ public class BrushesUI : MonoBehaviour {
                     //imageToolbarSpeciesPortraitRender.sprite = uiManagerRef.spriteSpiritPlantIcon;
                 }
             }
-            else if (selectedBrushSlot.kingdomID == 2) {
-                if (selectedBrushSlot.tierID == 0) {
+            else if (selectedEssenceSlot.kingdomID == 2) {
+                if (selectedEssenceSlot.tierID == 0) {
                     isSelectedZooplankton = true;
                     //imageToolbarSpeciesPortraitRender.sprite = uiManagerRef.spriteSpiritZooplanktonIcon;
                 }
@@ -427,13 +450,13 @@ public class BrushesUI : MonoBehaviour {
                     iconColor = uiManagerRef.colorVertebratesLayer;
                     //imageToolbarSpeciesPortraitRender.sprite = uiManagerRef.spriteSpiritVertebrateIcon;
 
-                    if (selectedBrushSlot.slotID == 0) {
+                    if (selectedEssenceSlot.slotID == 0) {
                         isSelectedVertebrate0 = true;
                     }
-                    else if (selectedBrushSlot.slotID == 1) {
+                    else if (selectedEssenceSlot.slotID == 1) {
                         isSelectedVertebrate1 = true;
                     }
-                    else if (selectedBrushSlot.slotID == 2) {
+                    else if (selectedEssenceSlot.slotID == 2) {
                         isSelectedVertebrate2 = true;
                     }
                     else {
@@ -443,37 +466,37 @@ public class BrushesUI : MonoBehaviour {
                 }
 
             }
-            else if (selectedBrushSlot.kingdomID == 3) {
+            else if (selectedEssenceSlot.kingdomID == 3) {
                 iconColor = uiManagerRef.colorTerrainLayer;
-                if (selectedBrushSlot.slotID == 0) {
+                if (selectedEssenceSlot.slotID == 0) {
                     //imageToolbarSpeciesPortraitRender.sprite = uiManagerRef.spriteSpiritWorldIcon;
                     isSelectedTerrain0 = true;
                 }
-                else if (selectedBrushSlot.slotID == 1) {
+                else if (selectedEssenceSlot.slotID == 1) {
                     isSelectedTerrain1 = true;
                     //imageToolbarSpeciesPortraitRender.sprite = uiManagerRef.spriteSpiritStoneIcon;
                 }
-                else if (selectedBrushSlot.slotID == 2) {
+                else if (selectedEssenceSlot.slotID == 2) {
                     isSelectedTerrain2 = true;
                     //imageToolbarSpeciesPortraitRender.sprite = uiManagerRef.spriteSpiritPebblesIcon;
                 }
-                else if (selectedBrushSlot.slotID == 3) {
+                else if (selectedEssenceSlot.slotID == 3) {
                     isSelectedTerrain3 = true;
                     //imageToolbarSpeciesPortraitRender.sprite = uiManagerRef.spriteSpiritSandIcon;
                 }
             }
-            else if (selectedBrushSlot.kingdomID == 4) {
-                if (selectedBrushSlot.slotID == 0) {
+            else if (selectedEssenceSlot.kingdomID == 4) {
+                if (selectedEssenceSlot.slotID == 0) {
                     isSelectedMinerals = true;
                     iconColor = uiManagerRef.colorMineralLayer;
                     //imageToolbarSpeciesPortraitRender.sprite = uiManagerRef.spriteSpiritMineralsIcon;
                 }
-                else if (selectedBrushSlot.slotID == 1) {
+                else if (selectedEssenceSlot.slotID == 1) {
                     isSelectedWater = true;
                     iconColor = uiManagerRef.colorWaterLayer;
                     //imageToolbarSpeciesPortraitRender.sprite = uiManagerRef.spriteSpiritWaterIcon;
                 }
-                else if (selectedBrushSlot.slotID == 2) {
+                else if (selectedEssenceSlot.slotID == 2) {
                     isSelectedAir = true;
                     iconColor = uiManagerRef.colorAirLayer;
                     //imageToolbarSpeciesPortraitRender.sprite = uiManagerRef.spriteSpiritAirIcon;
@@ -487,6 +510,7 @@ public class BrushesUI : MonoBehaviour {
 
         uiManagerRef.SetToolbarButtonStateUI(ref buttonBrushLinkedSpiritAlgae, layerManager.kingdomPlants.trophicTiersList[0].trophicSlots[0].status, isSelectedAlgae);
         uiManagerRef.SetToolbarButtonStateUI(ref buttonBrushLinkedSpiritPlant1, layerManager.kingdomPlants.trophicTiersList[1].trophicSlots[0].status, isSelectedPlants);
+        uiManagerRef.SetToolbarButtonStateUI(ref buttonBrushLinkedSpiritPlant2, layerManager.kingdomPlants.trophicTiersList[1].trophicSlots[1].status, isSelectedPlants);
 
         uiManagerRef.SetToolbarButtonStateUI(ref buttonBrushLinkedSpiritZooplankton, layerManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0].status, isSelectedZooplankton);
         uiManagerRef.SetToolbarButtonStateUI(ref buttonBrushLinkedSpiritAnimal1, layerManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0].status, isSelectedVertebrate0);
@@ -505,38 +529,38 @@ public class BrushesUI : MonoBehaviour {
 
     }
 	
-    public void UpdateSpiritBrushDescriptionsUI() {
+    /*public void UpdateSpiritBrushDescriptionsUI() {
         TrophicLayersManager layerManager = uiManagerRef.gameManager.simulationManager.trophicLayersManager;  
 
         int linkedSpiritIndex = 0;
 
-        if (selectedBrushSlot.kingdomID == 0) {
+        if (selectedEssenceSlot.kingdomID == 0) {
             linkedSpiritIndex = 7;            
         }
-        else if(selectedBrushSlot.kingdomID == 1) {
-            if(selectedBrushSlot.tierID == 0) {
+        else if(selectedEssenceSlot.kingdomID == 1) {
+            if(selectedEssenceSlot.tierID == 0) {
                 linkedSpiritIndex = 8;
             }
             else {
                 linkedSpiritIndex = 9;
             }            
         }
-        else if(selectedBrushSlot.kingdomID == 2) {
-            if(selectedBrushSlot.tierID == 0) {
+        else if(selectedEssenceSlot.kingdomID == 2) {
+            if(selectedEssenceSlot.tierID == 0) {
                 linkedSpiritIndex = 10;
             }
             else {
                 linkedSpiritIndex = 11;
             }
         }
-        else if(selectedBrushSlot.kingdomID == 3) {
-            if(selectedBrushSlot.slotID == 0) {  // world/bedrock
+        else if(selectedEssenceSlot.kingdomID == 3) {
+            if(selectedEssenceSlot.slotID == 0) {  // world/bedrock
                 linkedSpiritIndex = 0;
             }
-            else if(selectedBrushSlot.slotID == 1) {
+            else if(selectedEssenceSlot.slotID == 1) {
                 linkedSpiritIndex = 1;
             }
-            else if(selectedBrushSlot.slotID == 2) {
+            else if(selectedEssenceSlot.slotID == 2) {
                 linkedSpiritIndex = 2;
             }
             else {
@@ -544,10 +568,10 @@ public class BrushesUI : MonoBehaviour {
             }
         }
         else {  // 4 == OTHER
-            if(selectedBrushSlot.slotID == 0) {  // minerals
+            if(selectedEssenceSlot.slotID == 0) {  // minerals
                 linkedSpiritIndex = 4;
             }
-            else if(selectedBrushSlot.slotID == 1) {  // water
+            else if(selectedEssenceSlot.slotID == 1) {  // water
                 linkedSpiritIndex = 5;
             }
             else {  // air
@@ -612,7 +636,7 @@ public class BrushesUI : MonoBehaviour {
         strBrushEffectsArray[2][10] = startTxt + "Drags water along with itself while moving" + midTxt + "None";
         strBrushEffectsArray[2][11] = startTxt + "Drags water along with itself while moving" + midTxt + "None";
 
-    }
+    }*/
     
     public void ApplyCreationBrush() {
         toolbarInfluencePoints -= 0.002f;
@@ -626,11 +650,11 @@ public class BrushesUI : MonoBehaviour {
         // IF TERRAIN SELECTED::::
         if (true) { //uiManagerRef.gameManager.simulationManager.trophicLayersManager.isSelectedTrophicSlot) {
             // DECOMPOSERS::::
-            if(selectedBrushSlot.kingdomID == 0) {
+            if(selectedEssenceSlot.kingdomID == 0) {
                 uiManagerRef.gameManager.simulationManager.vegetationManager.isBrushActive = true;
             }// PLANTS:
-            else if(selectedBrushSlot.kingdomID == 1) {
-                if(selectedBrushSlot.tierID == 0) {
+            else if(selectedEssenceSlot.kingdomID == 1) {
+                if(selectedEssenceSlot.tierID == 0) {
                     uiManagerRef.gameManager.simulationManager.vegetationManager.isBrushActive = true;
                 }
                 else {
@@ -638,12 +662,12 @@ public class BrushesUI : MonoBehaviour {
                                     
                 }                                
             }  // ANIMALS::::                            
-            else if(selectedBrushSlot.kingdomID == 2) {
-                if (selectedBrushSlot.tierID == 0) {  
+            else if(selectedEssenceSlot.kingdomID == 2) {
+                if (selectedEssenceSlot.tierID == 0) {  
                     // zooplankton?
                 }
                 else {// AGENTS                                
-                    int speciesIndex = selectedBrushSlot.linkedSpeciesID;
+                    int speciesIndex = selectedEssenceSlot.linkedSpeciesID;
                     if (uiManagerRef.theCursorCzar.isDraggingMouseLeft) {
                         //gameManager.simulationManager.recentlyAddedSpeciesOn = true; // ** needed?
                         uiManagerRef.isBrushAddingAgents = true;
@@ -663,31 +687,31 @@ public class BrushesUI : MonoBehaviour {
                     }                                   
                 }
             }
-            else if (selectedBrushSlot.kingdomID == 3) {
+            else if (selectedEssenceSlot.kingdomID == 3) {
                 uiManagerRef.updateTerrainAltitude = true;
                 uiManagerRef.terrainUpdateMagnitude = 0.05f;
-                if(selectedBrushSlot.slotID == 0) { // WORLD
+                if(selectedEssenceSlot.slotID == 0) { // WORLD
                     uiManagerRef.terrainUpdateMagnitude = 1f;
                     //gameManager.simulationManager.theRenderKing.ClickTestTerrainUpdateMaps(true, 0.4f);
                 }
-                else if(selectedBrushSlot.slotID == 1) {  // STONE
+                else if(selectedEssenceSlot.slotID == 1) {  // STONE
 
                     //gameManager.simulationManager.theRenderKing.ClickTestTerrainUpdateMaps(true, 0.04f);
                 }
-                else if(selectedBrushSlot.slotID == 2) {  // PEBBLES
+                else if(selectedEssenceSlot.slotID == 2) {  // PEBBLES
                     //gameManager.simulationManager.theRenderKing.ClickTestTerrainUpdateMaps(true, 0.04f);
                 }
-                else if(selectedBrushSlot.slotID == 3) {  // SAND
+                else if(selectedEssenceSlot.slotID == 3) {  // SAND
                     //gameManager.simulationManager.theRenderKing.ClickTestTerrainUpdateMaps(true, 0.04f);
                 }
                                 
             }
             else {
-                if (selectedBrushSlot.slotID == 0) {  // MINERALS
+                if (selectedEssenceSlot.slotID == 0) {  // MINERALS
                     uiManagerRef.gameManager.simulationManager.vegetationManager.isBrushActive = true;
                     Debug.Log("SDFADSFAS");
                 }
-                else if (selectedBrushSlot.slotID == 1) {   // WATER
+                else if (selectedEssenceSlot.slotID == 1) {   // WATER
                     if (uiManagerRef.theCursorCzar.isDraggingMouseLeft) {
                         uiManagerRef.gameManager.theRenderKing.baronVonWater._GlobalWaterLevel = Mathf.Clamp01(uiManagerRef.gameManager.theRenderKing.baronVonWater._GlobalWaterLevel + 0.002f);
                     }
@@ -695,7 +719,7 @@ public class BrushesUI : MonoBehaviour {
                         uiManagerRef.gameManager.theRenderKing.baronVonWater._GlobalWaterLevel = Mathf.Clamp01(uiManagerRef.gameManager.theRenderKing.baronVonWater._GlobalWaterLevel - 0.002f);
                     }
                 }
-                else if (selectedBrushSlot.slotID == 2) {   // AIR
+                else if (selectedEssenceSlot.slotID == 2) {   // AIR
                     if (uiManagerRef.theCursorCzar.isDraggingMouseLeft) {
                         if (UnityEngine.Random.Range(0f, 1f) < 0.1f) {
                             uiManagerRef.gameManager.simulationManager.environmentFluidManager.curTierWaterCurrents = Mathf.Clamp((uiManagerRef.gameManager.simulationManager.environmentFluidManager.curTierWaterCurrents + 1), 0, 10);
@@ -735,6 +759,11 @@ public class BrushesUI : MonoBehaviour {
 
     public void ClickToolButton() {
         isOpen = !isOpen;
+
+        if(isOpen) {
+            EnterCreationBrushMode();
+            //uiManagerRef.isBrushModeON_snoopingOFF = true; // ***** Switching to brushingMode!!! ***
+        }
     }
     public void ClickBrushPaletteOpen() {
         isPaletteOpen = !isPaletteOpen;
@@ -746,12 +775,14 @@ public class BrushesUI : MonoBehaviour {
         uiManagerRef.watcherUI.StopFollowingAgent();
         uiManagerRef.watcherUI.StopFollowingPlantParticle();
         uiManagerRef.watcherUI.StopFollowingAnimalParticle();
-        uiManagerRef.watcherUI.isHighlight = false;
+        //uiManagerRef.watcherUI.isHighlight = false;
         buttonBrushStir.GetComponent<Image>().color = uiManagerRef.buttonActiveColor; 
  
         //TurnOffAddTool();
 
-        isBrushSelected = true;
+        //isBrushSelected = true; // ??????
+
+        uiManagerRef.isBrushModeON_snoopingOFF = true; // ***** Switching to brushingMode!!! ***
               
     }
     public void ClickToolButtonAdd() {  
@@ -759,47 +790,56 @@ public class BrushesUI : MonoBehaviour {
         curCreationBrushIndex = 0;
         EnterCreationBrushMode();
         
-        buttonBrushAdd.GetComponent<Image>().color = uiManagerRef.buttonActiveColor;
-        buttonBrushExtra1.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
-        buttonBrushExtra2.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
-        buttonBrushExtra3.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
+        //buttonBrushAdd.GetComponent<Image>().color = uiManagerRef.buttonActiveColor;
+        //buttonBrushExtra1.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
+        //buttonBrushExtra2.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
+        //buttonBrushExtra3.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
         
+        uiManagerRef.isBrushModeON_snoopingOFF = true; // ***** Switching to brushingMode!!! ***
     }
     public void ClickToolButtonExtra1() {
         Debug.Log("ClickToolButtonExtra1()");
         curCreationBrushIndex = 1;
         EnterCreationBrushMode();
-        buttonBrushAdd.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
-        buttonBrushExtra1.GetComponent<Image>().color = uiManagerRef.buttonActiveColor;
-        buttonBrushExtra2.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
-        buttonBrushExtra3.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
+        //buttonBrushAdd.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
+        //buttonBrushExtra1.GetComponent<Image>().color = uiManagerRef.buttonActiveColor;
+        //buttonBrushExtra2.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
+        //buttonBrushExtra3.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
+
+        uiManagerRef.isBrushModeON_snoopingOFF = true; // ***** Switching to brushingMode!!! ***
     }
     public void ClickToolButtonExtra2() {
         Debug.Log("ClickToolButtonExtra2()");
         curCreationBrushIndex = 2;
         EnterCreationBrushMode();
-        buttonBrushAdd.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
-        buttonBrushExtra1.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
-        buttonBrushExtra2.GetComponent<Image>().color = uiManagerRef.buttonActiveColor;
-        buttonBrushExtra3.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
+        //buttonBrushAdd.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
+        //buttonBrushExtra1.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
+        //buttonBrushExtra2.GetComponent<Image>().color = uiManagerRef.buttonActiveColor;
+        //buttonBrushExtra3.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
+
+        uiManagerRef.isBrushModeON_snoopingOFF = true; // ***** Switching to brushingMode!!! ***
     }
     public void ClickToolButtonExtra3() {
         Debug.Log("ClickToolButtonExtra3()");
         curCreationBrushIndex = 3;
         EnterCreationBrushMode();
-        buttonBrushAdd.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
-        buttonBrushExtra1.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
-        buttonBrushExtra2.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
-        buttonBrushExtra3.GetComponent<Image>().color = uiManagerRef.buttonActiveColor;
+        //buttonBrushAdd.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
+        //buttonBrushExtra1.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
+        //buttonBrushExtra2.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
+        //buttonBrushExtra3.GetComponent<Image>().color = uiManagerRef.buttonActiveColor;
+
+        uiManagerRef.isBrushModeON_snoopingOFF = true; // ***** Switching to brushingMode!!! ***
     }
     private void EnterCreationBrushMode() {
         uiManagerRef.curActiveTool = UIManager.ToolType.Add;
         uiManagerRef.watcherUI.StopFollowingAgent();
         uiManagerRef.watcherUI.StopFollowingPlantParticle();
         uiManagerRef.watcherUI.StopFollowingAnimalParticle();
-        uiManagerRef.watcherUI.isHighlight = false;
+        //uiManagerRef.watcherUI.isHighlight = false;
         //TurnOffStirTool();        
-        isBrushSelected = true;
+        //isBrushSelected = true;
+
+        uiManagerRef.isBrushModeON_snoopingOFF = true; // ***** Switching to brushingMode!!! ***
     }
     
     //*********************************************
@@ -807,7 +847,7 @@ public class BrushesUI : MonoBehaviour {
         Debug.Log("ClickButtonPaletteOther: " + index.ToString());
 
         TrophicSlot slot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[index];
-        selectedBrushSlot = slot;
+        selectedEssenceSlot = slot;
         //uiManagerRef.gameManager.simulationManager.trophicLayersManager.isSelectedTrophicSlot = true;
         //uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = slot;
         
@@ -825,7 +865,7 @@ public class BrushesUI : MonoBehaviour {
         TrophicSlot slot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomTerrain.trophicTiersList[0].trophicSlots[index];
         //uiManagerRef.gameManager.simulationManager.trophicLayersManager.isSelectedTrophicSlot = true;
         //old: //uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = slot;
-        selectedBrushSlot = slot;
+        selectedEssenceSlot = slot;
 
 
         selectedBrushVertebrateSpeciesID = slot.linkedSpeciesID; // update this next
@@ -837,27 +877,27 @@ public class BrushesUI : MonoBehaviour {
     }
     public void ClickButtonBrushPaletteDecomposers() {
         TrophicSlot slot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0];
-        selectedBrushSlot = slot; 
+        selectedEssenceSlot = slot; 
         isPaletteOpen = false;
     }
     public void ClickButtonBrushPaletteAlgae() {  // shouldn't be able to click if LOCKED (interactive = false)
         TrophicSlot slot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];
-        selectedBrushSlot = slot;    
+        selectedEssenceSlot = slot;    
         isPaletteOpen = false;
     }
     public void ClickButtonBrushPalettePlants(int slotID) {
         TrophicSlot slot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[slotID];
-        selectedBrushSlot = slot;      
+        selectedEssenceSlot = slot;      
         isPaletteOpen = false;
     }
     public void ClickButtonBrushPaletteZooplankton() {
         TrophicSlot slot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0];        
-        selectedBrushSlot = slot;  
+        selectedEssenceSlot = slot;  
         isPaletteOpen = false;
     }
     public void ClickButtonBrushPaletteAgent(int index) {
         TrophicSlot slot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[index];
-        selectedBrushSlot = slot;
+        selectedEssenceSlot = slot;
        
         selectedBrushVertebrateSpeciesID = slot.linkedSpeciesID; // update this next
 

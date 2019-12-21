@@ -13,10 +13,14 @@ public class WatcherUI : MonoBehaviour {
     public Button buttonWatcherLock;
     public Button buttonHighlightingToggle;
     public Button buttonFollowingToggle;
-    public bool isHighlight;
+    
     public bool isFollow;
     public TrophicSlot targetSlotRef;
-    public bool isSelected;
+    //public bool isSelected;
+
+    public Image imageColorBar;
+    public Image imageIsSnooping;
+    public Text textIsSnooping;
 
     public float isPlantParticleHighlight;
     public float isZooplanktonHighlight;
@@ -83,20 +87,42 @@ public class WatcherUI : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-        isHighlight = false;
+        //isSnoopingModeON = false;
 	}
 
     public void ClickToolButton() {
         isOpen = !isOpen;
-        isHighlight = true;
-
+        //isHighlight = true;
+        if(isOpen) {  // if opening the panel automatically engage snooping mode
+            //isSnoopingModeON = true;
+            uiManagerRef.isBrushModeON_snoopingOFF = false;
+            uiManagerRef.curActiveTool = UIManager.ToolType.None;
+        }
         //watcherLockedTrophicSlotRef = uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot;//
     }
 	
     private void UpdateUI(TrophicLayersManager layerManager) {
         //TrophicSlot slotRef = uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot; // *************   CHANGE THIS!!!!! ************
+              
         
-        buttonHighlightingToggle.GetComponentInChildren<Text>().text = isHighlight.ToString();
+        if(uiManagerRef.isBrushModeON_snoopingOFF) {
+            imageIsSnooping.color = Color.gray;
+            textIsSnooping.text = "DORMANT";
+        }
+        else {
+            imageIsSnooping.color = Color.green;
+            textIsSnooping.text = "SNOOPING";
+        }
+        if(watcherSelectedTrophicSlotRef == null) {
+            //imageIsSnooping.color = Color.green;
+            //textIsSnooping.text = "SNOOPING";
+            imageColorBar.color = Color.black;
+        }
+        else {
+            imageColorBar.color = watcherSelectedTrophicSlotRef.color;
+        }
+
+        //buttonHighlightingToggle.GetComponentInChildren<Text>().text = "huh?"; // isHighlight.ToString();
         buttonFollowingToggle.GetComponentInChildren<Text>().text = isFollow.ToString();
         
         if(uiManagerRef.cameraManager.isFollowingPlantParticle) {
@@ -519,13 +545,13 @@ public class WatcherUI : MonoBehaviour {
             
         }
 */
-    public void ClickButtonHighlightingToggle() {
+    /*public void ClickButtonHighlightingToggle() {
         isHighlight = !isHighlight;
         if(isHighlight) {
             uiManagerRef.curActiveTool = UIManager.ToolType.None;
             //Set ToolType to .None
         }
-    }
+    }*/
     public void ClickButtonFollowingToggle() {
         isFollow = !isFollow;
 

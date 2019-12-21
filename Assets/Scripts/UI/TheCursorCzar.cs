@@ -87,7 +87,7 @@ public class TheCursorCzar : MonoBehaviour {
                 //Debug.Log("AGENT: [ " + agentRef.gameObject.name + " ] #" + agentRef.index.ToString());
                     
                 if(clicked) {
-                    if (uiManagerRef.watcherUI.isOpen && uiManagerRef.watcherUI.isHighlight) {
+                    if (uiManagerRef.watcherUI.isOpen && !uiManagerRef.isBrushModeON_snoopingOFF) {
                         uiManagerRef.cameraManager.SetTargetAgent(agentRef, agentRef.index);
                         uiManagerRef.cameraManager.isFollowingAgent = true;
                         uiManagerRef.watcherUI.StopFollowingPlantParticle();

@@ -23,7 +23,8 @@ public class UIManager : MonoBehaviour {
 
     private bool firstTimeStartup = true;
 
-    
+    public bool isBrushModeON_snoopingOFF = true;
+    //public bool isSnoopingModeON = false;
 
     // Main Menu:
     public Button buttonQuickStartResume;
@@ -42,13 +43,14 @@ public class UIManager : MonoBehaviour {
     public bool updateTerrainAltitude;
     public float terrainUpdateMagnitude;
     
-    public ToolType curActiveTool;
+    public ToolType curActiveTool;  // ******** move to phase out this approach
     public enum ToolType {
         None,
         Add,
         Stir
     }
 
+    
     // *********************************************    NEW UI PASS *******************
     public GameObject panelClock;
     public Text textCurYear;
@@ -640,7 +642,7 @@ public class UIManager : MonoBehaviour {
                 
                 if(plantDist < zoopDist) {                    
                     
-                    if(watcherUI.isOpen && watcherUI.isHighlight && !cameraManager.isMouseHoverAgent && theCursorCzar.leftClickThisFrame) { 
+                    if(watcherUI.isOpen && !isBrushModeON_snoopingOFF && !cameraManager.isMouseHoverAgent && theCursorCzar.leftClickThisFrame) { 
                         if(selectedPlantID != closestPlantID && plantDist < 3.3f) {
                             gameManager.simulationManager.vegetationManager.selectedPlantParticleIndex = closestPlantID;
                             gameManager.simulationManager.vegetationManager.isPlantParticleSelected = true;
@@ -653,7 +655,7 @@ public class UIManager : MonoBehaviour {
                 }
                 else {                   
 
-                    if (watcherUI.isOpen && watcherUI.isHighlight && !cameraManager.isMouseHoverAgent && theCursorCzar.leftClickThisFrame) {
+                    if (watcherUI.isOpen && !isBrushModeON_snoopingOFF && !cameraManager.isMouseHoverAgent && theCursorCzar.leftClickThisFrame) {
                         if (selectedZoopID != closestZoopID && zoopDist < 3.3f) {
                             gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex = closestZoopID;
                             gameManager.simulationManager.zooplanktonManager.isAnimalParticleSelected = true;

@@ -13,6 +13,11 @@ public class WorldSpiritHubUI : MonoBehaviour {
     public GameObject panelWorldHubMain;
     public GameObject panelWorldHubExpand;
     public Image imageSelectedTargetLayer;
+
+    public Text textSelectedEssenceName;
+    public Text textSelectedEssenceDescription;
+    public Image imageSelectedEssence;
+    public Image imageColorBar;
         
     public int selectedToolbarOtherLayer = 0;
     public Button buttonWorldSpiritOther0;  // Minerals
@@ -45,18 +50,22 @@ public class WorldSpiritHubUI : MonoBehaviour {
     public Color curIconColor = Color.white;
     public Sprite curIconSprite = null;
 
+
+
 	// Use this for initialization
 	void Start () {
         
 	}
 
     private void UpdateUI() {
-        TrophicLayersManager layerManager = uiManagerRef.gameManager.simulationManager.trophicLayersManager;  
-               
+        TrophicLayersManager layerManager = uiManagerRef.gameManager.simulationManager.trophicLayersManager;
+
+        string essenceDescriptionStr = "";
 
         bool isSelectedDecomposers = false;
         bool isSelectedAlgae = false;
-        bool isSelectedPlants = false;
+        bool isSelectedPlants0 = false;
+        bool isSelectedPlants1 = false;
         bool isSelectedZooplankton = false;
         bool isSelectedVertebrate0 = false;
         bool isSelectedVertebrate1 = false;
@@ -69,98 +78,117 @@ public class WorldSpiritHubUI : MonoBehaviour {
         bool isSelectedTerrain1 = false;
         bool isSelectedTerrain2 = false;
         bool isSelectedTerrain3 = false;
-        if (true) { // used to have an isSelected flag
-            if (selectedWorldSpiritSlot.kingdomID == 0) {
-                isSelectedDecomposers = true;
-                curIconColor = uiManagerRef.colorDecomposersLayer;
-                curIconSprite = uiManagerRef.spriteSpiritDecomposerIcon;
+        
+        if (selectedWorldSpiritSlot.kingdomID == 0) {
+            isSelectedDecomposers = true;
+            curIconColor = uiManagerRef.colorDecomposersLayer;
+            curIconSprite = uiManagerRef.spriteSpiritDecomposerIcon;
+            essenceDescriptionStr = "Decomposers break down the old so that new life can grow.";
+        }
+        else if (selectedWorldSpiritSlot.kingdomID == 1) {
+            if (selectedWorldSpiritSlot.tierID == 0) {
+                isSelectedAlgae = true;
+                curIconColor = uiManagerRef.colorAlgaeLayer;
+                curIconSprite = uiManagerRef.spriteSpiritAlgaeIcon;
+                essenceDescriptionStr = "Algae needs light and nutrients to grow.";
             }
-            else if (selectedWorldSpiritSlot.kingdomID == 1) {
-                if (selectedWorldSpiritSlot.tierID == 0) {
-                    isSelectedAlgae = true;
-                    curIconColor = uiManagerRef.colorAlgaeLayer;
-                    curIconSprite = uiManagerRef.spriteSpiritAlgaeIcon;
-                }
-                else {
-                    isSelectedPlants = true;
+            else {
+                if(selectedWorldSpiritSlot.slotID == 0) {
+                    isSelectedPlants0 = true;
                     curIconColor = uiManagerRef.colorPlantsLayer;
                     curIconSprite = uiManagerRef.spriteSpiritPlantIcon;
-                }
-            }
-            else if (selectedWorldSpiritSlot.kingdomID == 2) {
-                if (selectedWorldSpiritSlot.tierID == 0) {
-                    isSelectedZooplankton = true;
-                    curIconColor = uiManagerRef.colorZooplanktonLayer;
-                    curIconSprite = uiManagerRef.spriteSpiritZooplanktonIcon;
+                    essenceDescriptionStr = "Floating Plants that are a foodsource for Vertebrates";
                 }
                 else {
-                    curIconColor = uiManagerRef.colorVertebratesLayer;
-                    curIconSprite = uiManagerRef.spriteSpiritVertebrateIcon;
-
-                    if (selectedWorldSpiritSlot.slotID == 0) {
-                        isSelectedVertebrate0 = true;
-                    }
-                    else if (selectedWorldSpiritSlot.slotID == 1) {
-                        isSelectedVertebrate1 = true;
-                    }
-                    else if (selectedWorldSpiritSlot.slotID == 2) {
-                        isSelectedVertebrate2 = true;
-                    }
-                    else {
-                        isSelectedVertebrate3 = true;
-                    }
-
+                    isSelectedPlants1 = true;
+                    curIconColor = uiManagerRef.colorPlantsLayer;
+                    curIconSprite = uiManagerRef.spriteSpiritPlantIcon;
+                    essenceDescriptionStr = "Big Plants?";
                 }
-
-            }
-            else if (selectedWorldSpiritSlot.kingdomID == 3) {
                 
-                if (selectedWorldSpiritSlot.slotID == 0) {
-                    curIconSprite = uiManagerRef.spriteSpiritWorldIcon;
-                    isSelectedTerrain0 = true;
-                    curIconColor = uiManagerRef.colorWorldLayer;
-                }
-                else if (selectedWorldSpiritSlot.slotID == 1) {
-                    isSelectedTerrain1 = true;
-                    curIconSprite = uiManagerRef.spriteSpiritStoneIcon;
-                    curIconColor = uiManagerRef.colorTerrainLayer;
-                }
-                else if (selectedWorldSpiritSlot.slotID == 2) {
-                    isSelectedTerrain2 = true;
-                    curIconSprite = uiManagerRef.spriteSpiritPebblesIcon;
-                    curIconColor = uiManagerRef.colorTerrainLayer;
-                }
-                else if (selectedWorldSpiritSlot.slotID == 3) {
-                    isSelectedTerrain3 = true;
-                    curIconSprite = uiManagerRef.spriteSpiritSandIcon;
-                    curIconColor = uiManagerRef.colorTerrainLayer;
-                }
-            }
-            else if (selectedWorldSpiritSlot.kingdomID == 4) {
-                if (selectedWorldSpiritSlot.slotID == 0) {
-                    isSelectedMinerals = true;
-                    curIconColor = uiManagerRef.colorMineralLayer;
-                    curIconSprite = uiManagerRef.spriteSpiritMineralsIcon;
-                }
-                else if (selectedWorldSpiritSlot.slotID == 1) {
-                    isSelectedWater = true;
-                    curIconColor = uiManagerRef.colorWaterLayer;
-                    curIconSprite = uiManagerRef.spriteSpiritWaterIcon;
-                }
-                else if (selectedWorldSpiritSlot.slotID == 2) {
-                    isSelectedAir = true;
-                    curIconColor = uiManagerRef.colorAirLayer;
-                    curIconSprite = uiManagerRef.spriteSpiritAirIcon;
-                }
             }
         }
-        else {
+        else if (selectedWorldSpiritSlot.kingdomID == 2) {
+            if (selectedWorldSpiritSlot.tierID == 0) {
+                isSelectedZooplankton = true;
+                curIconColor = uiManagerRef.colorZooplanktonLayer;
+                curIconSprite = uiManagerRef.spriteSpiritZooplanktonIcon;
+                essenceDescriptionStr = "Tiny Organisms that feed on Algae";
+            }
+            else {
+                curIconColor = uiManagerRef.colorVertebratesLayer;
+                curIconSprite = uiManagerRef.spriteSpiritVertebrateIcon;
+                essenceDescriptionStr = "Animals that can feed on Plants, Zooplankton, or even other Vertebrates.";
+
+                if (selectedWorldSpiritSlot.slotID == 0) {
+                    isSelectedVertebrate0 = true;
+                }
+                else if (selectedWorldSpiritSlot.slotID == 1) {
+                    isSelectedVertebrate1 = true;
+                }
+                else if (selectedWorldSpiritSlot.slotID == 2) {
+                    isSelectedVertebrate2 = true;
+                }
+                else {
+                    isSelectedVertebrate3 = true;
+                }
+
+            }
 
         }
+        else if (selectedWorldSpiritSlot.kingdomID == 3) {
+                
+            if (selectedWorldSpiritSlot.slotID == 0) {
+                curIconSprite = uiManagerRef.spriteSpiritWorldIcon;
+                isSelectedTerrain0 = true;
+                curIconColor = uiManagerRef.colorWorldLayer;
+                essenceDescriptionStr = "The World Spirit provides the spark for a new universe";
+            }
+            else if (selectedWorldSpiritSlot.slotID == 1) {
+                isSelectedTerrain1 = true;
+                curIconSprite = uiManagerRef.spriteSpiritStoneIcon;
+                curIconColor = uiManagerRef.colorTerrainLayer;
+                essenceDescriptionStr = "Stone Spirits are some of the oldest known";
+            }
+            else if (selectedWorldSpiritSlot.slotID == 2) {
+                isSelectedTerrain2 = true;
+                curIconSprite = uiManagerRef.spriteSpiritPebblesIcon;
+                curIconColor = uiManagerRef.colorTerrainLayer;
+                essenceDescriptionStr = "Pebble Spirits are usually found in rivers and streams";
+            }
+            else if (selectedWorldSpiritSlot.slotID == 3) {
+                isSelectedTerrain3 = true;
+                curIconSprite = uiManagerRef.spriteSpiritSandIcon;
+                curIconColor = uiManagerRef.colorTerrainLayer;
+                essenceDescriptionStr = "Sand Spirits";
+            }
+        }
+        else if (selectedWorldSpiritSlot.kingdomID == 4) {
+            if (selectedWorldSpiritSlot.slotID == 0) {
+                isSelectedMinerals = true;
+                curIconColor = uiManagerRef.colorMineralLayer;
+                curIconSprite = uiManagerRef.spriteSpiritMineralsIcon;
+                essenceDescriptionStr = "Mineral Spirits infuse nutrients into the earth.";
+            }
+            else if (selectedWorldSpiritSlot.slotID == 1) {
+                isSelectedWater = true;
+                curIconColor = uiManagerRef.colorWaterLayer;
+                curIconSprite = uiManagerRef.spriteSpiritWaterIcon;
+                essenceDescriptionStr = "Water Spirits";
+            }
+            else if (selectedWorldSpiritSlot.slotID == 2) {
+                isSelectedAir = true;
+                curIconColor = uiManagerRef.colorAirLayer;
+                curIconSprite = uiManagerRef.spriteSpiritAirIcon;
+                essenceDescriptionStr = "Air Spirits";
+            }
+        }
+       
         uiManagerRef.SetToolbarButtonStateUI(ref buttonWorldSpiritDecomposers, layerManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status, isSelectedDecomposers);
 
         uiManagerRef.SetToolbarButtonStateUI(ref buttonWorldSpiritAlgae, layerManager.kingdomPlants.trophicTiersList[0].trophicSlots[0].status, isSelectedAlgae);
-        uiManagerRef.SetToolbarButtonStateUI(ref buttonWorldSpiritPlant1, layerManager.kingdomPlants.trophicTiersList[1].trophicSlots[0].status, isSelectedPlants);
+        uiManagerRef.SetToolbarButtonStateUI(ref buttonWorldSpiritPlant1, layerManager.kingdomPlants.trophicTiersList[1].trophicSlots[0].status, isSelectedPlants0);
+        uiManagerRef.SetToolbarButtonStateUI(ref buttonWorldSpiritPlant2, layerManager.kingdomPlants.trophicTiersList[1].trophicSlots[1].status, isSelectedPlants1);
 
         uiManagerRef.SetToolbarButtonStateUI(ref buttonWorldSpiritZooplankton, layerManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0].status, isSelectedZooplankton);
         uiManagerRef.SetToolbarButtonStateUI(ref buttonWorldSpiritAnimal1, layerManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0].status, isSelectedVertebrate0);
@@ -177,8 +205,14 @@ public class WorldSpiritHubUI : MonoBehaviour {
         uiManagerRef.SetToolbarButtonStateUI(ref buttonWorldSpiritOther1, layerManager.kingdomOther.trophicTiersList[0].trophicSlots[1].status, isSelectedWater);
         uiManagerRef.SetToolbarButtonStateUI(ref buttonWorldSpiritOther2, layerManager.kingdomOther.trophicTiersList[0].trophicSlots[2].status, isSelectedAir);
 
-        imageSelectedTargetLayer.sprite = curIconSprite;
-        imageSelectedTargetLayer.color = curIconColor;
+        //imageSelectedTargetLayer.sprite = curIconSprite;
+        //imageSelectedTargetLayer.color = curIconColor;
+
+        textSelectedEssenceName.text = selectedWorldSpiritSlot.speciesName;
+        textSelectedEssenceDescription.text = essenceDescriptionStr;
+        imageSelectedEssence.color = curIconColor;
+        imageSelectedEssence.sprite = curIconSprite;
+        imageColorBar.color = curIconColor;
 
     }
     public void UpdateWorldSpiritHubUI() {
