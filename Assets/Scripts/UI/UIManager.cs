@@ -117,6 +117,7 @@ public class UIManager : MonoBehaviour {
     public Sprite spriteSpiritBrushMutationIcon;
     public Sprite spriteSpiritBrushStirIcon;
     public Sprite spriteSpiritBrushWatcherIcon;
+    public Sprite spriteSpiritBrushWatcherOffIcon;
     public Sprite spriteSpiritBrushCreationIcon;
 
     public Sprite spriteSpiritWorldIcon;

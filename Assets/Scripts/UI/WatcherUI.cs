@@ -20,6 +20,7 @@ public class WatcherUI : MonoBehaviour {
 
     public Image imageColorBar;
     public Image imageIsSnooping;
+    public Image imageWatcherInactiveOverlay;
     public Text textIsSnooping;
 
     public float isPlantParticleHighlight;
@@ -96,11 +97,17 @@ public class WatcherUI : MonoBehaviour {
         
         if(uiManagerRef.isBrushModeON_snoopingOFF) {
             imageIsSnooping.color = Color.gray;
+            imageIsSnooping.sprite = uiManagerRef.spriteSpiritBrushWatcherOffIcon;
             textIsSnooping.text = "DORMANT";
+
+            imageWatcherInactiveOverlay.gameObject.SetActive(true);
         }
         else {
-            imageIsSnooping.color = Color.green;
-            textIsSnooping.text = "SNOOPING";
+            imageIsSnooping.color = Color.white;
+            imageIsSnooping.sprite = uiManagerRef.spriteSpiritBrushWatcherIcon;
+            textIsSnooping.text = "";
+
+            imageWatcherInactiveOverlay.gameObject.SetActive(false);
         }
         if(watcherSelectedTrophicSlotRef == null) {
             //imageIsSnooping.color = Color.green;
