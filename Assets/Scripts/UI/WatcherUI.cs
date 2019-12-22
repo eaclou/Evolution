@@ -7,15 +7,15 @@ public class WatcherUI : MonoBehaviour {
     public UIManager uiManagerRef;
     public bool isOpen;
 
-    public Image imageWatcherButtonMIP;  // superscript button over watcher toolbar Button
-    public Image imageWatcherCurTarget; // in watcher panel
+    //public Image imageWatcherButtonMIP;  // superscript button over watcher toolbar Button
+    public Image imageWatcherCurTargetLayer; // in watcher panel
     public Text textTargetLayer;
-    public Button buttonWatcherLock;
+    //public Button buttonWatcherLock;
     public Button buttonHighlightingToggle;
-    public Button buttonFollowingToggle;
+    //public Button buttonFollowingToggle;
     
     public bool isFollow;
-    public TrophicSlot targetSlotRef;
+    //public TrophicSlot targetSlotRef;
     //public bool isSelected;
 
     public Image imageColorBar;
@@ -52,8 +52,8 @@ public class WatcherUI : MonoBehaviour {
     //Inspect!!!
     //public bool isWatcherPanelOn = false;
     
-    public Button buttonInspectCyclePrevSpecies;
-    public Button buttonInspectCycleNextSpecies;
+    //public Button buttonInspectCyclePrevSpecies;
+    //public Button buttonInspectCycleNextSpecies;
     public Button buttonInspectCyclePrevAgent;
     public Button buttonInspectCycleNextAgent;
     //public Text textStomachContents;
@@ -69,7 +69,7 @@ public class WatcherUI : MonoBehaviour {
     //public Animator animatorInspectPanel;
     //public Text textInspectData;
 
-    public GameObject panelNewInspect;
+    //public GameObject panelNewInspect;
     public Text textNewInspectAgentName;
     public Material newInspectAgentEnergyMat;
     public Material newInspectAgentStaminaMat;
@@ -89,18 +89,7 @@ public class WatcherUI : MonoBehaviour {
 	void Start () {
         //isSnoopingModeON = false;
 	}
-
-    public void ClickToolButton() {
-        isOpen = !isOpen;
-        //isHighlight = true;
-        if(isOpen) {  // if opening the panel automatically engage snooping mode
-            //isSnoopingModeON = true;
-            uiManagerRef.isBrushModeON_snoopingOFF = false;
-            uiManagerRef.curActiveTool = UIManager.ToolType.None;
-        }
-        //watcherLockedTrophicSlotRef = uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot;//
-    }
-	
+    	
     private void UpdateUI(TrophicLayersManager layerManager) {
         //TrophicSlot slotRef = uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot; // *************   CHANGE THIS!!!!! ************
               
@@ -120,10 +109,12 @@ public class WatcherUI : MonoBehaviour {
         }
         else {
             imageColorBar.color = watcherSelectedTrophicSlotRef.color;
+            imageWatcherCurTargetLayer.color = watcherSelectedTrophicSlotRef.color;
+            textWatcherPanelTargetLayer.color = watcherSelectedTrophicSlotRef.color;
         }
 
         //buttonHighlightingToggle.GetComponentInChildren<Text>().text = "huh?"; // isHighlight.ToString();
-        buttonFollowingToggle.GetComponentInChildren<Text>().text = isFollow.ToString();
+        //buttonFollowingToggle.GetComponentInChildren<Text>().text = isFollow.ToString();
         
         if(uiManagerRef.cameraManager.isFollowingPlantParticle) {
             uiManagerRef.cameraManager.targetPlantWorldPos = uiManagerRef.gameManager.simulationManager.vegetationManager.selectedPlantParticleData.worldPos;
@@ -131,6 +122,8 @@ public class WatcherUI : MonoBehaviour {
         if(uiManagerRef.cameraManager.isFollowingAnimalParticle) {
             uiManagerRef.cameraManager.targetZooplanktonWorldPos = uiManagerRef.gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleData.worldPos;
         }
+
+        //textNewInspectAgentName.text = "asda";
 
         panelWatcherSpiritVertebratesHUD.SetActive(false);
         panelWatcherSpiritVertebratesText.SetActive(false);
@@ -145,9 +138,12 @@ public class WatcherUI : MonoBehaviour {
         TextCommonStatsA.gameObject.SetActive(true);
 
         if(watcherSelectedTrophicSlotRef != null) {
+            textTargetLayer.text = watcherSelectedTrophicSlotRef.speciesName;
+            //textTargetLayer.color = 
+
             string str = "";
             if (watcherSelectedTrophicSlotRef.kingdomID == 0) {
-            
+                /*
 
                 Vector4 resourceGridSample = uiManagerRef.SampleTexture(uiManagerRef.gameManager.simulationManager.vegetationManager.resourceGridRT1, uiManagerRef.theCursorCzar.curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
                 str += "\n\nWaste    : " + (resourceGridSample.y * 1000f).ToString("F0");                    
@@ -159,20 +155,23 @@ public class WatcherUI : MonoBehaviour {
 
                 panelWatcherSpiritDecomposers.SetActive(true);
                 //UpdateWatcherDecomposersPanelUI();
+                */
             }
             else if(watcherSelectedTrophicSlotRef.kingdomID == 1) {
                 if(watcherSelectedTrophicSlotRef.tierID == 0) {
-                    Vector4 resourceGridSample = uiManagerRef.SampleTexture(uiManagerRef.gameManager.simulationManager.vegetationManager.resourceGridRT1, uiManagerRef.theCursorCzar.curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
+                    /*Vector4 resourceGridSample = uiManagerRef.SampleTexture(uiManagerRef.gameManager.simulationManager.vegetationManager.resourceGridRT1, uiManagerRef.theCursorCzar.curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
                     str += "\n\nNutrients    : " + (resourceGridSample.x * 1000f).ToString("F0");                    
                     str += "\nAlgae        : " + (resourceGridSample.w * 1000f).ToString("F0");
                     Vector4 simTansferSample = uiManagerRef.SampleTexture(uiManagerRef.gameManager.simulationManager.vegetationManager.resourceSimTransferRT, uiManagerRef.theCursorCzar.curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
                     str += "\n\nProduced This Frame:\nWaste: " + (simTansferSample.z * 1000000f).ToString("F0") + "\n\nConsumed This Frame:\nNutrients: " + (simTansferSample.x * 1000000f).ToString("F0");
                  
                 
-                    panelWatcherSpiritAlgae.SetActive(true);
+                    panelWatcherSpiritAlgae.SetActive(true);*/
                 }
                 else {
-                     
+                    textNewInspectAgentName.text = "Flora";
+                    imageWatcherCurTargetLayer.sprite = uiManagerRef.spriteSpiritPlantIcon;
+
                     VegetationManager.PlantParticleData particleData = uiManagerRef.gameManager.simulationManager.vegetationManager.selectedPlantParticleData;
 
                     str += "\nPlant Particle # " + particleData.index.ToString() + "  [" + particleData.nearestCritterIndex.ToString() + "]";
@@ -200,6 +199,11 @@ public class WatcherUI : MonoBehaviour {
             }
             else if(watcherSelectedTrophicSlotRef.kingdomID == 2) {
                 if(watcherSelectedTrophicSlotRef.tierID == 0) {
+                    imageWatcherCurTargetLayer.color = uiManagerRef.colorZooplanktonLayer;
+                    imageWatcherCurTargetLayer.sprite = uiManagerRef.spriteSpiritZooplanktonIcon;
+
+                    textNewInspectAgentName.text = "Mittens";
+
                     ZooplanktonManager.AnimalParticleData particleData = uiManagerRef.gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleData;
                         
                     str += "\nZooplankton # " + uiManagerRef.gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex.ToString();
@@ -221,11 +225,16 @@ public class WatcherUI : MonoBehaviour {
                         
                 }
                 else {
+                    imageWatcherCurTargetLayer.color = uiManagerRef.colorVertebratesLayer;
+                    imageWatcherCurTargetLayer.sprite = uiManagerRef.spriteSpiritVertebrateIcon;
 
                     int critterIndex = uiManagerRef.cameraManager.targetAgentIndex;
                     Agent agent = uiManagerRef.gameManager.simulationManager.agentsArray[critterIndex];
+
+                    textNewInspectAgentName.text = agent.candidateRef.candidateGenome.bodyGenome.coreGenome.name;
+
                     if(agent.coreModule != null) {
-                        textNewInspectAgentName.text = agent.candidateRef.candidateGenome.bodyGenome.coreGenome.name;
+                        //textNewInspectAgentName.text = agent.candidateRef.candidateGenome.bodyGenome.coreGenome.name;
 
                         textNewInspectLog.text = agent.stringCauseOfDeath.ToString() + ", " + agent.cooldownFrameCounter.ToString() + " / " + agent.cooldownDuration.ToString(); // agent.lastEvent;
                         newInspectAgentEnergyMat.SetFloat("_Value", Mathf.Clamp01(agent.coreModule.energy * 0.01f));
@@ -342,22 +351,6 @@ public class WatcherUI : MonoBehaviour {
                                 eventLogString += "\n[" + agent.agentEventDataList[q].eventFrame.ToString() + "] " + agent.agentEventDataList[q].eventText;
                             }
                             textNewInspectLog.text = eventLogString;
-
-
-                            //hudString += "\nisMouthTrigger" + agent.coreModule.isMouthTrigger[0].ToString() + "";
-                            //hudString += "\nWaterDepth " + agent.environmentModule.waterDepth[0].ToString("F3") + "  " + agent.depthGradient.ToString();
-                            //hudString += "\n#" + agent.index.ToString() + " (" + agent.speciesIndex.ToString() + ") Coords: (" + gameManager.simulationManager.simStateData.agentFluidPositionsArray[agent.index].x.ToString("F2") + ", " + gameManager.simulationManager.simStateData.agentFluidPositionsArray[agent.index].x.ToString("F2") + ")";
-                            //hudString += "\nN=" + agent.environmentModule.depthNorth[0].ToString("F3") + ", E=" + agent.environmentModule.depthEast[0].ToString("F3") + ", S=" + agent.environmentModule.depthSouth[0].ToString("F3") + ", W=" + agent.environmentModule.depthWest[0].ToString("F3") + ",";
-                            //hudString += "\nWaterVel " + agent.environmentModule.waterVelX[0].ToString("F3") + ", " + agent.environmentModule.waterVelY[0].ToString("F3");
-                            //hudString += "\nPlant[" + agent.foodModule.nearestFoodParticleIndex.ToString() + "] " + agent.foodModule.nearestFoodParticlePos.ToString() + "";
-                            //hudString += "\nZoo[" + agent.foodModule.nearestAnimalParticleIndex.ToString() + "] " + agent.foodModule.nearestAnimalParticlePos.ToString() + "";
-                            //hudString += "\nOwnVel" + agent.movementModule.ownVelX[0].ToString("F3") + ", " + agent.movementModule.ownVelY[0].ToString("F3");
-                            //hudString += "\nCID: " + agent.candidateRef.candidateID.ToString() + ", gen# " + agent.candidateRef.candidateGenome.bodyGenome.coreGenome.generation.ToString();
-
-                            //hudString += "\n\nHit " + agent.coreModule.isContact[0].ToString("F2") + " (" + agent.coreModule.contactForceX[0].ToString("F4") + ", " + agent.coreModule.contactForceY[0].ToString("F4");
-                            //hudString += "\nInCOMM: (" + agent.communicationModule.inComm0[0].ToString("F2") + ", " + agent.communicationModule.inComm1[0].ToString("F2") + ", " + agent.communicationModule.inComm2[0].ToString("F2") + ", " + agent.communicationModule.inComm3[0].ToString("F2") + ")";
-                            //hudString += "\nOutCOMM: (" + agent.communicationModule.outComm0[0].ToString("F2") + ", " + agent.communicationModule.outComm1[0].ToString("F2") + ", " + agent.communicationModule.outComm2[0].ToString("F2") + ", " + agent.communicationModule.outComm3[0].ToString("F2") + ")";
-                    
                             textWatcherVertebrateHUD.text = hudString;
 
                         }
@@ -485,14 +478,11 @@ public class WatcherUI : MonoBehaviour {
 
                             textWatcherVertebrateBrain.text = brainString;
                         }
-                    }               
-                
+                    }
                 }
-
-            
             }
             else if(watcherSelectedTrophicSlotRef.kingdomID == 3) {
-                Vector4 resourceGridSample = uiManagerRef.SampleTexture(uiManagerRef.gameManager.simulationManager.vegetationManager.resourceGridRT1, uiManagerRef.theCursorCzar.curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
+                /*Vector4 resourceGridSample = uiManagerRef.SampleTexture(uiManagerRef.gameManager.simulationManager.vegetationManager.resourceGridRT1, uiManagerRef.theCursorCzar.curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
                 str += "\n\nNutrients    : " + (resourceGridSample.x * 1000f).ToString("F0");
                 str += "\nWaste        : " + (resourceGridSample.y * 1000f).ToString("F0");
                 str += "\nDecomposers  : " + (resourceGridSample.z * 1000f).ToString("F0");
@@ -500,7 +490,7 @@ public class WatcherUI : MonoBehaviour {
                 Vector4 simTansferSample = uiManagerRef.SampleTexture(uiManagerRef.gameManager.simulationManager.vegetationManager.resourceSimTransferRT, uiManagerRef.theCursorCzar.curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
                 str += "\n\nProduced This Frame:\nWaste: " + (simTansferSample.z * 1000000f).ToString("F0") + "\n\nConsumed This Frame:\nNutrients: " + (simTansferSample.x * 1000000f).ToString("F0");
 
-                panelWatcherSpiritTerrain.SetActive(true);
+                panelWatcherSpiritTerrain.SetActive(true);*/
             }
             else {
                 // minerals? water? air?
@@ -552,6 +542,7 @@ public class WatcherUI : MonoBehaviour {
             //Set ToolType to .None
         }
     }*/
+    /*
     public void ClickButtonFollowingToggle() {
         isFollow = !isFollow;
 
@@ -568,7 +559,21 @@ public class WatcherUI : MonoBehaviour {
             StopFollowingAnimalParticle();
         }
     }
-
+    */
+    public void ClickToolButton() {
+        isOpen = !isOpen;
+        //isHighlight = true;
+        if(isOpen) {  // if opening the panel automatically engage snooping mode
+            //isSnoopingModeON = true;
+            uiManagerRef.isBrushModeON_snoopingOFF = false;
+            uiManagerRef.curActiveTool = UIManager.ToolType.None;
+        }
+        //watcherLockedTrophicSlotRef = uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot;//
+    }
+    public void ClickSnoopModeButton() {        
+        uiManagerRef.isBrushModeON_snoopingOFF = false;
+        uiManagerRef.curActiveTool = UIManager.ToolType.None;
+    }
 
     public void ClickWatcherVertebratePageCyclePrev() {
         curWatcherPanelVertebratePageNum--;
@@ -677,7 +682,8 @@ public class WatcherUI : MonoBehaviour {
     public void StartFollowingPlantParticle() {
         uiManagerRef.cameraManager.isFollowingPlantParticle = true;
         uiManagerRef.cameraManager.isFollowingAnimalParticle = false; 
-        //uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[0];
+        watcherSelectedTrophicSlotRef = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[0];
+        //uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = 
     }
     public void StopFollowingAnimalParticle() {
         uiManagerRef.cameraManager.isFollowingAnimalParticle = false;        
@@ -685,7 +691,7 @@ public class WatcherUI : MonoBehaviour {
     public void StartFollowingAnimalParticle() {
         uiManagerRef.cameraManager.isFollowingAnimalParticle = true;  
         uiManagerRef.cameraManager.isFollowingPlantParticle = false;
-        //uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0];
+        watcherSelectedTrophicSlotRef = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0];
     }
     
 }
