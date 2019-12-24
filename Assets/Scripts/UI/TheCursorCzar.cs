@@ -31,6 +31,8 @@ public class TheCursorCzar : MonoBehaviour {
     public bool isDraggingMouseRight = false;
     public bool isDraggingSpeciesNode = false;
 
+    public Texture2D cursorTexBrush;
+    public Texture2D cursorTexWatcher;
 
 	// Use this for initialization
 	void Start () {
@@ -119,6 +121,14 @@ public class TheCursorCzar : MonoBehaviour {
     
 	
 	public void UpdateCursorCzar () {
+        /*
+        if(uiManagerRef.isBrushModeON_snoopingOFF) {
+            Cursor.SetCursor(cursorTexBrush, Vector2.one * 64f, CursorMode.Auto);
+        }
+        else {
+            Cursor.SetCursor(cursorTexWatcher, Vector2.one * 64f, CursorMode.Auto);
+        }
+        */
 
         // &&&&&&&&&&&&&&&&& MOUSE: &&&&&&&&&&&&&&&
         leftClickThisFrame = Input.GetMouseButtonDown(0);

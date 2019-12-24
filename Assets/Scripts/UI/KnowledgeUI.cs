@@ -39,6 +39,9 @@ public class KnowledgeUI : MonoBehaviour {
     public Material knowledgeGraphVertebrateFoodEatenMat3;
     public Material knowledgeGraphVertebrateGenomeMat3;
 
+    public Image imageKnowledgeMapTextureViewer;
+    public Material uiKnowledgeMapViewerMat;
+
     public GameObject panelKnowledgeSpiritBase;
     //public GameObject panelKnowledgeInfoWorld;
     public GameObject panelKnowledgeInfoDecomposers;
@@ -86,15 +89,33 @@ public class KnowledgeUI : MonoBehaviour {
         imageKnowledgeCurTarget.color = uiManagerRef.worldSpiritHubUI.curIconColor;
         imageKnowledgeCurTarget.sprite = uiManagerRef.worldSpiritHubUI.curIconSprite;
 
-
+        imageKnowledgeMapTextureViewer.gameObject.SetActive(false);
+        
         //knowledgeLockedTrophicSlotRef ---> worldSpiritSelectedSlotRef
         if (slotRef.kingdomID == 0) {
             // DECOMPOSERS
             panelKnowledgeInfoDecomposers.SetActive(true);
+
+            imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
+            uiKnowledgeMapViewerMat.SetTexture("_MainTex", uiManagerRef.gameManager.simulationManager.vegetationManager.resourceGridRT1);
+            uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
+            uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 2f);
+            uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
+            uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 2);
+            uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 1f);
+            uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1.05f);  
         }
         else if (slotRef.kingdomID == 1) {
             if (slotRef.tierID == 0) {  // ALGAE
                 panelKnowledgeInfoAlgae.SetActive(true);
+                imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
+                uiKnowledgeMapViewerMat.SetTexture("_MainTex", uiManagerRef.gameManager.simulationManager.vegetationManager.resourceGridRT1);
+                uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
+                uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 2f);
+                uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
+                uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 3);
+                uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 1f);
+                uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1.05f); 
             }
             else {  // PLANT PARTICLES
                 panelKnowledgeInfoPlants.SetActive(true);
@@ -169,25 +190,77 @@ public class KnowledgeUI : MonoBehaviour {
         else if (slotRef.kingdomID == 3) {
             //panelKnowledgeInfoWorld.SetActive(true);
             if (slotRef.slotID == 0) {
-                // WORLD    
+                // WORLD 
+                imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
+                uiKnowledgeMapViewerMat.SetTexture("_MainTex", uiManagerRef.gameManager.theRenderKing.baronVonTerrain.terrainHeightDataRT);
+                uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
+                uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
+                uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
+                uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 3);
+                uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 1f);
+                uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1f);  
             }
             else if (slotRef.slotID == 1) {
                 // STONE
+                imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
+                uiKnowledgeMapViewerMat.SetTexture("_MainTex", uiManagerRef.gameManager.theRenderKing.baronVonTerrain.terrainHeightDataRT);
+                uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
+                uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
+                uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
+                uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 0);
+                uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 1f);
+                uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1f);
             }
             else if (slotRef.slotID == 2) {
                 // PEBBLES
+                imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
+                uiKnowledgeMapViewerMat.SetTexture("_MainTex", uiManagerRef.gameManager.theRenderKing.baronVonTerrain.terrainHeightDataRT);
+                uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
+                uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
+                uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
+                uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 1);
+                uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 1f);
+                uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1f);
             }
             else {
                 // SAND
+                imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
+                uiKnowledgeMapViewerMat.SetTexture("_MainTex", uiManagerRef.gameManager.theRenderKing.baronVonTerrain.terrainHeightDataRT);
+                uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
+                uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
+                uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
+                uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 2);
+                uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 1f);
+                uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1f);
             }
         }
         else if (slotRef.kingdomID == 4) {
             //panelKnowledgeInfoWorld.SetActive(true);
+            
             if (slotRef.slotID == 0) {
                 // Minerals
+                panelKnowledgeInfoAlgae.SetActive(true);
+                imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
+                uiKnowledgeMapViewerMat.SetTexture("_MainTex", uiManagerRef.gameManager.simulationManager.vegetationManager.resourceGridRT1);
+                uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
+                uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 5f);
+                uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
+                uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 0);
+                uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 1f);
+                uiKnowledgeMapViewerMat.SetFloat("_Gamma", 0.75f); 
             }
             else if (slotRef.slotID == 1) {
                 // Water
+                //Debug.Log("sadfasdfadsfas");
+                imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
+                uiKnowledgeMapViewerMat.SetTexture("_MainTex", uiManagerRef.gameManager.theRenderKing.baronVonWater.waterSurfaceDataRT0);
+                uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
+                uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
+                uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
+                uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 0);
+                uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 1f);
+                uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1f);  
+            
             }
             else if (slotRef.slotID == 2) {
                 // AIR

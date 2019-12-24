@@ -33,6 +33,8 @@
 			//StructuredBuffer<CritterSimData> critterSimDataCBuffer;
 			//StructuredBuffer<float4> agentHoverHighlightData;
 			StructuredBuffer<float3> quadVerticesCBuffer;
+
+			uniform float4 _Tint;
 			
 			uniform float _IsVisible;
 			uniform float _IsStirring;
@@ -108,7 +110,10 @@
 				float4 texColor = tex2D(_MainTex, i.uv);
 				texColor.a = texColor.a * texColor.a;
 				finalColor = finalColor * i.color * texColor;
-				finalColor.a *= 0.55;
+				
+
+				finalColor = texColor * _Tint;
+				finalColor.a *= 0.33;
 				//return texColor; // temp debug
 				return finalColor;
 

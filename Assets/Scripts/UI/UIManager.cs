@@ -765,20 +765,20 @@ public class UIManager : MonoBehaviour {
             if(theCursorCzar.stirGizmoVisible) {
                 gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_IsVisible", 1f);
                 gameManager.theRenderKing.gizmoStirStickAMat.SetFloat("_IsVisible", 1f);
-                Cursor.visible = false;
+                //Cursor.visible = false;
             }         
             else {
                 gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_IsVisible", 0f);
                 gameManager.theRenderKing.gizmoStirStickAMat.SetFloat("_IsVisible", 0f);
-                Cursor.visible = true;
+                //Cursor.visible = true;
             }
 
-            bool isCursorOn = true;
+            //bool isCursorOn = true;
             if(gameManager.uiManager.curActiveTool == ToolType.Add) {
-                isCursorOn = false;
+                //isCursorOn = false;
             }
             if(gameManager.uiManager.curActiveTool == ToolType.Stir) {
-                isCursorOn = false;
+                //isCursorOn = false;
             }
             //Cursor.visible = isCursorOn;
 

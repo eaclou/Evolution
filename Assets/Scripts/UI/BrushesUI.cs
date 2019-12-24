@@ -129,7 +129,7 @@ public class BrushesUI : MonoBehaviour {
         CreationBrush createBrush1 = new CreationBrush();
         createBrush1.name = "Create Brush 1";
         createBrush1.type = CreationBrush.BrushType.Drag;
-        createBrush1.baseScale = 3f;
+        createBrush1.baseScale = 1.5f;
         createBrush1.baseAmplitude = 1f;
         createBrush1.patternColumn = 3f;
         createBrush1.patternRow = 3f;
@@ -767,6 +767,8 @@ public class BrushesUI : MonoBehaviour {
     }
     public void ClickBrushPaletteOpen() {
         isPaletteOpen = !isPaletteOpen;
+
+        uiManagerRef.isBrushModeON_snoopingOFF = true;
     }
     public void ClickToolButtonStir() {
         

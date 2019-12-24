@@ -236,7 +236,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
         //uiManagerRef.gameManager.simulationManager.trophicLayersManager.isSelectedTrophicSlot = true;
         selectedWorldSpiritSlot = slot;
         
-        selectedWorldSpiritVertebrateSpeciesID = slot.linkedSpeciesID; // update this next ***
+        //selectedWorldSpiritVertebrateSpeciesID = slot.linkedSpeciesID; // update this next ***
         
         selectedToolbarOtherLayer = index;
 
@@ -248,7 +248,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
         TrophicSlot slot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomTerrain.trophicTiersList[0].trophicSlots[index];
         selectedWorldSpiritSlot = slot;
         
-        selectedWorldSpiritVertebrateSpeciesID = slot.linkedSpeciesID; // update this next
+        //selectedWorldSpiritVertebrateSpeciesID = slot.linkedSpeciesID; // update this next
 
         selectedToolbarTerrainLayer = index;
 

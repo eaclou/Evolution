@@ -3427,7 +3427,7 @@ public class TheRenderKing : MonoBehaviour {
         
         // Get brush:
         CreationBrush brushData = simManager.uiManager.brushesUI.creationBrushesArray[simManager.uiManager.brushesUI.curCreationBrushIndex];
-        float scale = Mathf.Lerp(1f, 50f, Mathf.Clamp01(baronVonWater.camDistNormalized * 1.35f)) * brushData.baseScale;
+        float scale = Mathf.Lerp(1f, 25f, Mathf.Clamp01(baronVonWater.camDistNormalized * 1.35f)) * brushData.baseScale;
         float brushIntensity = 1f * brushData.baseAmplitude;
 
         if (brushData.type == CreationBrush.BrushType.Burst) {  
@@ -4249,10 +4249,12 @@ public class TheRenderKing : MonoBehaviour {
                 gizmoStirToolMat.SetPass(0);
                 gizmoStirToolMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
                 gizmoStirToolMat.SetBuffer("gizmoStirToolPosCBuffer", gizmoCursorPosCBuffer);
+                gizmoStirToolMat.SetTexture("_MainTex", simManager.uiManager.brushesUI.selectedEssenceSlot.icon.texture);
                 gizmoStirToolMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
                 gizmoStirToolMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+                gizmoStirToolMat.SetColor("_Tint", simManager.uiManager.brushesUI.selectedEssenceSlot.color);
                 gizmoStirToolMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
-                gizmoStirToolMat.SetFloat("_Radius", Mathf.Lerp(0.067f, 5f, baronVonWater.camDistNormalized));  // **** Make radius variable! (possibly texture based?)
+                gizmoStirToolMat.SetFloat("_Radius", 0.4f * Mathf.Lerp(0.067f, 5f, baronVonWater.camDistNormalized));  // **** Make radius variable! (possibly texture based?)
                 cmdBufferMain.DrawProcedural(Matrix4x4.identity, gizmoStirToolMat, 0, MeshTopology.Triangles, 6, 1);
             }
         }

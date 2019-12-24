@@ -31,7 +31,10 @@ public class WatcherUI : MonoBehaviour {
     //public bool isWatcherTargetLayerLocked;
     public Text textWatcherPanelTargetLayer;
     public GameObject panelWatcherSpiritMain;
+    public GameObject panelWatcherExpand;
     public Text TextCommonStatsA;
+    private int curWatcherPanelPlantsPageNum;
+    private int curWatcherPanelZooplanktonPageNum;
     private int curWatcherPanelVertebratePageNum;
     public Button buttonWatcherVertebrateCyclePage; // maybe not needed?
     public GameObject panelWatcherSpiritVertebratesHUD; // 0
@@ -44,9 +47,9 @@ public class WatcherUI : MonoBehaviour {
     public Text textWatcherVertebrateBrain;
     public GameObject panelWatcherSpiritZooplankton;    
     public GameObject panelWatcherSpiritPlants;
-    public GameObject panelWatcherSpiritAlgae;
-    public GameObject panelWatcherSpiritDecomposers;
-    public GameObject panelWatcherSpiritTerrain;
+    //public GameObject panelWatcherSpiritAlgae;
+    //public GameObject panelWatcherSpiritDecomposers;
+    //public GameObject panelWatcherSpiritTerrain;
     public Text textWatcherVertebratePageNum;
     public Text textWatcherTargetIndex;
     
@@ -93,22 +96,7 @@ public class WatcherUI : MonoBehaviour {
     	
     private void UpdateUI(TrophicLayersManager layerManager) {
         //TrophicSlot slotRef = uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot; // *************   CHANGE THIS!!!!! ************
-              
-        
-        if(uiManagerRef.isBrushModeON_snoopingOFF) {
-            imageIsSnooping.color = Color.gray;
-            imageIsSnooping.sprite = uiManagerRef.spriteSpiritBrushWatcherOffIcon;
-            textIsSnooping.text = "DORMANT";
-
-            imageWatcherInactiveOverlay.gameObject.SetActive(true);
-        }
-        else {
-            imageIsSnooping.color = Color.white;
-            imageIsSnooping.sprite = uiManagerRef.spriteSpiritBrushWatcherIcon;
-            textIsSnooping.text = "";
-
-            imageWatcherInactiveOverlay.gameObject.SetActive(false);
-        }
+         
         if(watcherSelectedTrophicSlotRef == null) {
             //imageIsSnooping.color = Color.green;
             //textIsSnooping.text = "SNOOPING";
@@ -119,6 +107,22 @@ public class WatcherUI : MonoBehaviour {
             imageWatcherCurTargetLayer.color = watcherSelectedTrophicSlotRef.color;
             textWatcherPanelTargetLayer.color = watcherSelectedTrophicSlotRef.color;
         }
+        
+        if(uiManagerRef.isBrushModeON_snoopingOFF) {
+            imageIsSnooping.color = Color.gray;
+            imageIsSnooping.sprite = uiManagerRef.spriteSpiritBrushWatcherOffIcon;
+            textIsSnooping.text = "";
+            panelWatcherExpand.SetActive(false);
+            imageWatcherInactiveOverlay.gameObject.SetActive(true);
+        }
+        else {
+            imageIsSnooping.color = Color.white;
+            imageIsSnooping.sprite = uiManagerRef.spriteSpiritBrushWatcherIcon;
+            textIsSnooping.text = "";
+            panelWatcherExpand.SetActive(true);
+            imageWatcherInactiveOverlay.gameObject.SetActive(false);
+        }
+        
 
         //buttonHighlightingToggle.GetComponentInChildren<Text>().text = "huh?"; // isHighlight.ToString();
         //buttonFollowingToggle.GetComponentInChildren<Text>().text = isFollow.ToString();
@@ -138,13 +142,14 @@ public class WatcherUI : MonoBehaviour {
         panelWatcherSpiritVertebratesBrain.SetActive(false);
         panelWatcherSpiritZooplankton.SetActive(false);
         panelWatcherSpiritPlants.SetActive(false);
-        panelWatcherSpiritAlgae.SetActive(false);
-        panelWatcherSpiritDecomposers.SetActive(false);
-        panelWatcherSpiritTerrain.SetActive(false);
-
-        TextCommonStatsA.gameObject.SetActive(true);
-
-        if(watcherSelectedTrophicSlotRef != null) {
+        //panelWatcherSpiritAlgae.SetActive(false);
+        //panelWatcherSpiritDecomposers.SetActive(false);
+        //panelWatcherSpiritTerrain.SetActive(false);
+        //
+        
+        TextCommonStatsA.gameObject.SetActive(false);
+        if(watcherSelectedTrophicSlotRef != null && !uiManagerRef.isBrushModeON_snoopingOFF) {
+            TextCommonStatsA.gameObject.SetActive(true);
             textTargetLayer.text = watcherSelectedTrophicSlotRef.speciesName;
             //textTargetLayer.color = 
 
@@ -176,30 +181,38 @@ public class WatcherUI : MonoBehaviour {
                     panelWatcherSpiritAlgae.SetActive(true);*/
                 }
                 else {
-                    textNewInspectAgentName.text = "Flora";
+                    textNewInspectAgentName.text = "P-487";
+                    textNewInspectAgentName.color = uiManagerRef.colorPlantsLayer;
                     imageWatcherCurTargetLayer.sprite = uiManagerRef.spriteSpiritPlantIcon;
 
-                    VegetationManager.PlantParticleData particleData = uiManagerRef.gameManager.simulationManager.vegetationManager.selectedPlantParticleData;
+                    if(curWatcherPanelPlantsPageNum == 0) {
+                        str = "";
+                    }
+                    else if(curWatcherPanelPlantsPageNum == 1) {
+                        VegetationManager.PlantParticleData particleData = uiManagerRef.gameManager.simulationManager.vegetationManager.selectedPlantParticleData;
 
-                    str += "\nPlant Particle # " + particleData.index.ToString() + "  [" + particleData.nearestCritterIndex.ToString() + "]";
-                    //str += "\nCPU: " + gameManager.simulationManager.vegetationManager.tempClosestPlantParticleIndexAndPos.ToString();
-                    str += "\nCoords [ " + particleData.worldPos.x.ToString("F0") + " , " + particleData.worldPos.y.ToString("F0");
-                    str += "\nColorA (" + particleData.colorA.ToString() + ".";                        
-                    str += "\n\nAge: " + (particleData.age * 1000f).ToString("F0");
-                    str += "\nBiomass: " + (particleData.biomass * 1000f).ToString("F0");
-                    str += "\nNutrients Used: " + (particleData.nutrientsUsed * 100000000f).ToString("F0");
-                    str += "\nOxygen Produced: " + (particleData.oxygenProduced * 10000000f).ToString("F0");
-                    str += "\nIsDecaying: " + (particleData.isDecaying).ToString("F0");
-                    str += "\nIsSwallowed: " + (particleData.isSwallowed).ToString("F0");
-                    str += "\n\nDistance: " + (new Vector2(uiManagerRef.gameManager.simulationManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.x, uiManagerRef.gameManager.simulationManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.y) - particleData.worldPos).magnitude;
+                        str += "\nPlant Particle # " + particleData.index.ToString() + "  [" + particleData.nearestCritterIndex.ToString() + "]";
+                        //str += "\nCPU: " + gameManager.simulationManager.vegetationManager.tempClosestPlantParticleIndexAndPos.ToString();
+                        str += "\nCoords [ " + particleData.worldPos.x.ToString("F0") + " , " + particleData.worldPos.y.ToString("F0");
+                        str += "\nColorA (" + particleData.colorA.ToString() + ".";                        
+                        str += "\n\nAge: " + (particleData.age * 1000f).ToString("F0");
+                        str += "\nBiomass: " + (particleData.biomass * 1000f).ToString("F0");
+                        str += "\nNutrients Used: " + (particleData.nutrientsUsed * 100000000f).ToString("F0");
+                        str += "\nOxygen Produced: " + (particleData.oxygenProduced * 10000000f).ToString("F0");
+                        str += "\nIsDecaying: " + (particleData.isDecaying).ToString("F0");
+                        str += "\nIsSwallowed: " + (particleData.isSwallowed).ToString("F0");
+                        str += "\n\nDistance: " + (new Vector2(uiManagerRef.gameManager.simulationManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.x, uiManagerRef.gameManager.simulationManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.y) - particleData.worldPos).magnitude;
 
-                    Vector4 resourceGridSample = uiManagerRef.SampleTexture(uiManagerRef.gameManager.simulationManager.vegetationManager.resourceGridRT1, uiManagerRef.theCursorCzar.curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
-                    str += "\n\nNutrients    : " + (resourceGridSample.x * 1000000f).ToString("F0");                    
-                    //str += "\nAlgae        : " + (resourceGridSample.w * 1000f).ToString("F0");
-                    Vector4 simTansferSample = uiManagerRef.SampleTexture(uiManagerRef.gameManager.simulationManager.vegetationManager.resourceSimTransferRT, uiManagerRef.theCursorCzar.curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
-                    str += "\n\nProduced This Frame:\nWaste: " + (simTansferSample.z * 1000000f).ToString("F0") + "\n\nConsumed This Frame:\nNutrients: " + (simTansferSample.x * 1000000f).ToString("F0");
+                        Vector4 resourceGridSample = uiManagerRef.SampleTexture(uiManagerRef.gameManager.simulationManager.vegetationManager.resourceGridRT1, uiManagerRef.theCursorCzar.curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
+                        str += "\n\nNutrients    : " + (resourceGridSample.x * 1000000f).ToString("F0");                    
+                        //str += "\nAlgae        : " + (resourceGridSample.w * 1000f).ToString("F0");
+                        Vector4 simTansferSample = uiManagerRef.SampleTexture(uiManagerRef.gameManager.simulationManager.vegetationManager.resourceSimTransferRT, uiManagerRef.theCursorCzar.curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
+                        str += "\n\nProduced This Frame:\nWaste: " + (simTansferSample.z * 1000000f).ToString("F0") + "\n\nConsumed This Frame:\nNutrients: " + (simTansferSample.x * 1000000f).ToString("F0");
                 
-                    textWatcherTargetIndex.text = "#" + particleData.index.ToString();
+                        textWatcherTargetIndex.text = "#" + particleData.index.ToString();
+                    }
+                    
+                    TextCommonStatsA.text = str;
                     panelWatcherSpiritPlants.SetActive(true);
                 }
                     
@@ -209,27 +222,36 @@ public class WatcherUI : MonoBehaviour {
                     imageWatcherCurTargetLayer.color = uiManagerRef.colorZooplanktonLayer;
                     imageWatcherCurTargetLayer.sprite = uiManagerRef.spriteSpiritZooplanktonIcon;
 
-                    textNewInspectAgentName.text = "Mittens";
-
-                    ZooplanktonManager.AnimalParticleData particleData = uiManagerRef.gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleData;
+                    textNewInspectAgentName.text = "Z-34";
+                    textNewInspectAgentName.color = uiManagerRef.colorZooplanktonLayer;
+                    //textNewInspectAgentName.text = "Mittens";
+                    if (curWatcherPanelZooplanktonPageNum == 0) {
+                        str = "";
+                    }
+                    else if (curWatcherPanelZooplanktonPageNum == 1) {
+                        ZooplanktonManager.AnimalParticleData particleData = uiManagerRef.gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleData;
                         
-                    str += "\nZooplankton # " + uiManagerRef.gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex.ToString();
-                    str += "\nCoords [ " + particleData.worldPos.x.ToString("F0") + " , " + particleData.worldPos.y.ToString("F0") + " ]"; //  Critter (" + gameManager.simulationManager.agentsArray[0].ownPos.ToString() + ")";
-                    str += "\nAge: " + (particleData.age * 1000f).ToString("F0");
-                    str += "\nBiomass: " + (particleData.biomass * 1000f).ToString("F0");
-                    str += "\nEnergy: " + (particleData.energy * 100f).ToString();
-                    str += "\nAlgae Eaten: " + (particleData.algaeConsumed * 1000000000f).ToString();
-                    str += "\nOxygen Used: " + (particleData.oxygenUsed * 1000000f).ToString("F0");
-                    str += "\nWaste Produced: " + (particleData.wasteProduced * 1000000000f).ToString();                        
-                    str += "\nVelocity (" + (particleData.velocity.x * 1000f).ToString("F0") + ", " + (particleData.velocity.y * 1000f).ToString("F0") + ")";
-                    str += "\nGenome: " + (particleData.genomeVector * 1f).ToString("F2");
-                    str += "\nIsDecaying: " + (particleData.isDecaying).ToString("F0");
-                    str += "\nIsSwallowed: " + (particleData.isSwallowed).ToString("F0");
-                    //str += "\n\nDistance: " + gameManager.simulationManager.zooplanktonManager.closestZooplanktonArray[0].y.ToString(); // (gameManager.simulationManager.agentsArray[0].ownPos - new Vector2(particleData.worldPos.x, particleData.worldPos.y)).magnitude;
+                        str += "\nZooplankton # " + uiManagerRef.gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex.ToString();
+                        str += "\nCoords [ " + particleData.worldPos.x.ToString("F0") + " , " + particleData.worldPos.y.ToString("F0") + " ]"; //  Critter (" + gameManager.simulationManager.agentsArray[0].ownPos.ToString() + ")";
+                        str += "\nAge: " + (particleData.age * 1000f).ToString("F0");
+                        str += "\nBiomass: " + (particleData.biomass * 1000f).ToString("F0");
+                        str += "\nEnergy: " + (particleData.energy * 100f).ToString();
+                        str += "\nAlgae Eaten: " + (particleData.algaeConsumed * 1000000000f).ToString();
+                        str += "\nOxygen Used: " + (particleData.oxygenUsed * 1000000f).ToString("F0");
+                        str += "\nWaste Produced: " + (particleData.wasteProduced * 1000000000f).ToString();                        
+                        str += "\nVelocity (" + (particleData.velocity.x * 1000f).ToString("F0") + ", " + (particleData.velocity.y * 1000f).ToString("F0") + ")";
+                        str += "\nGenome: " + (particleData.genomeVector * 1f).ToString("F2");
+                        str += "\nIsDecaying: " + (particleData.isDecaying).ToString("F0");
+                        str += "\nIsSwallowed: " + (particleData.isSwallowed).ToString("F0");
+                        //str += "\n\nDistance: " + gameManager.simulationManager.zooplanktonManager.closestZooplanktonArray[0].y.ToString(); // (gameManager.simulationManager.agentsArray[0].ownPos - new Vector2(particleData.worldPos.x, particleData.worldPos.y)).magnitude;
                   
-                    textWatcherTargetIndex.text = "#" + uiManagerRef.gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex.ToString();
+                        textWatcherTargetIndex.text = "#" + uiManagerRef.gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex.ToString();
+                    
+                    }
+
                     panelWatcherSpiritZooplankton.SetActive(true);
-                        
+                    
+                    TextCommonStatsA.text = str;
                 }
                 else {
                     imageWatcherCurTargetLayer.color = uiManagerRef.colorVertebratesLayer;
@@ -239,6 +261,7 @@ public class WatcherUI : MonoBehaviour {
                     Agent agent = uiManagerRef.gameManager.simulationManager.agentsArray[critterIndex];
 
                     textNewInspectAgentName.text = agent.candidateRef.candidateGenome.bodyGenome.coreGenome.name;
+                    textNewInspectAgentName.color = uiManagerRef.colorVertebratesLayer;
 
                     if(agent.coreModule != null) {
                         //textNewInspectAgentName.text = agent.candidateRef.candidateGenome.bodyGenome.coreGenome.name;
@@ -321,6 +344,9 @@ public class WatcherUI : MonoBehaviour {
                 
                         // pages:
                         if(curWatcherPanelVertebratePageNum == 0) {
+                            textNewInspectLog.text = "";
+                            textWatcherVertebrateHUD.text = "";
+
                             panelWatcherSpiritVertebratesHUD.SetActive(true);
                             //where do hud elements get updated?? ***
                             string hudString = "";
@@ -357,31 +383,24 @@ public class WatcherUI : MonoBehaviour {
                             for(int q = agent.agentEventDataList.Count - 1; q >= startIndex; q--) {
                                 eventLogString += "\n[" + agent.agentEventDataList[q].eventFrame.ToString() + "] " + agent.agentEventDataList[q].eventText;
                             }
-                            textNewInspectLog.text = eventLogString;
-                            textWatcherVertebrateHUD.text = hudString;
+                            //textNewInspectLog.text = eventLogString;
+                            //textWatcherVertebrateHUD.text = hudString;
 
                         }
                         else if(curWatcherPanelVertebratePageNum == 1) {
+                            
                             panelWatcherSpiritVertebratesText.SetActive(true);
 
                             string textString = "Event Log! [" + agent.index.ToString() + "]";
                     
-                            //textString += "Depth Gradient: " + agent.depthGradient.ToString();
                             // Agent Event Log:
                             int maxEventsToDisplay = 12;
                             int numEvents = Mathf.Min(agent.agentEventDataList.Count, maxEventsToDisplay);
                             int startIndex = Mathf.Max(0, agent.agentEventDataList.Count - maxEventsToDisplay);                   
                             string eventLogString = "";
-                            //if(agent.agentEventDataList.Count > 0) {
                             for(int q = agent.agentEventDataList.Count - 1; q >= startIndex; q--) {
                                 eventLogString += "\n[" + agent.agentEventDataList[q].eventFrame.ToString() + "] " + agent.agentEventDataList[q].eventText;
                             } 
-                    
-                            //Debug.Log("eventLogString" + eventLogString);
-                            //}                    
-
-                            //textString += "\nNearestPlant[" + agent.foodModule.nearestFoodParticleIndex.ToString() + "] " + agent.foodModule.nearestFoodParticlePos.ToString() + " d: " + (agent.foodModule.nearestFoodParticlePos.magnitude).ToString();
-                            //textString += "\nNearestZooplankton[" + agent.foodModule.nearestAnimalParticleIndex.ToString() + "] " + agent.foodModule.nearestAnimalParticlePos.ToString() + " d: " + (agent.foodModule.nearestAnimalParticlePos.magnitude).ToString();
                     
                             textString += "\n\nNumChildrenBorn: " + uiManagerRef.gameManager.simulationManager.numAgentsBorn.ToString() + ", numDied: " + uiManagerRef.gameManager.simulationManager.numAgentsDied.ToString() + ", ~Gen: " + ((float)uiManagerRef.gameManager.simulationManager.numAgentsBorn / (float)uiManagerRef.gameManager.simulationManager._NumAgents).ToString();
                             textString += "\nSimulation Age: " + uiManagerRef.gameManager.simulationManager.simAgeTimeSteps.ToString();
@@ -391,6 +410,7 @@ public class WatcherUI : MonoBehaviour {
                             textString += eventLogString;
 
                             textWatcherVertebrateText.text = textString;
+                            
                         }
                         else if(curWatcherPanelVertebratePageNum == 2) {
                             panelWatcherSpiritVertebratesGenome.SetActive(true);
@@ -486,6 +506,8 @@ public class WatcherUI : MonoBehaviour {
                             textWatcherVertebrateBrain.text = brainString;
                         }
                     }
+
+                    TextCommonStatsA.text = str;
                 }
             }
             else if(watcherSelectedTrophicSlotRef.kingdomID == 3) {
@@ -503,12 +525,19 @@ public class WatcherUI : MonoBehaviour {
                 // minerals? water? air?
             }
 
-            TextCommonStatsA.text = str;
+            
             // string?
         }
         else {
             // No target
-        }        
+        }  
+        
+        if(watcherSelectedTrophicSlotRef == null) {
+
+            //panelWatcherExpand.SetActive(false);
+            panelWatcherExpand.SetActive(false);
+            imageWatcherInactiveOverlay.gameObject.SetActive(true);
+        }
     }
 
 	public void UpdateWatcherPanelUI(TrophicLayersManager layerManager) {
@@ -699,6 +728,27 @@ public class WatcherUI : MonoBehaviour {
         uiManagerRef.cameraManager.isFollowingAnimalParticle = true;  
         uiManagerRef.cameraManager.isFollowingPlantParticle = false;
         watcherSelectedTrophicSlotRef = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0];
+    }
+
+    public void ClickWatcherPage0() {
+        curWatcherPanelPlantsPageNum = 0;
+        curWatcherPanelZooplanktonPageNum = 0;
+        curWatcherPanelVertebratePageNum = 0;
+    }
+    public void ClickWatcherPage1() {
+        curWatcherPanelPlantsPageNum = 1;
+        curWatcherPanelZooplanktonPageNum = 1;
+        curWatcherPanelVertebratePageNum = 1;
+    }
+    public void ClickWatcherPage2() {
+        curWatcherPanelPlantsPageNum = 2;
+        curWatcherPanelZooplanktonPageNum = 2;
+        curWatcherPanelVertebratePageNum = 2;
+    }
+    public void ClickWatcherPage3() {
+        curWatcherPanelPlantsPageNum = 3;
+        curWatcherPanelZooplanktonPageNum = 3;
+        curWatcherPanelVertebratePageNum = 3;
     }
     
 }
