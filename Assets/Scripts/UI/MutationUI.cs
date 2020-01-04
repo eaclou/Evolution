@@ -388,17 +388,15 @@ public class MutationUI : MonoBehaviour {
         }
         else if(slotRef.kingdomID == 3) { // Terrain
             if(slotRef.slotID == 0) {
-                //gameManager.theRenderKing.baronVonTerrain.ApplyMutation(id);
                 uiManagerRef.gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeCurrent = uiManagerRef.gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeMutations[selectedToolbarMutationID];
             }
             else if(slotRef.slotID == 1) {
-                //gameManager.theRenderKing.baronVonTerrain.ApplyMutation(id);
                 uiManagerRef.gameManager.theRenderKing.baronVonTerrain.stoneSlotGenomeCurrent = uiManagerRef.gameManager.theRenderKing.baronVonTerrain.stoneSlotGenomeMutations[selectedToolbarMutationID];
             }
             else if(slotRef.slotID == 2) {
                 uiManagerRef.gameManager.theRenderKing.baronVonTerrain.pebblesSlotGenomeCurrent = uiManagerRef.gameManager.theRenderKing.baronVonTerrain.pebblesSlotGenomeMutations[selectedToolbarMutationID];
             }
-            else if(slotRef.slotID == 3) {
+            else if(slotRef.slotID == 3) { // world?
                 uiManagerRef.gameManager.theRenderKing.baronVonTerrain.sandSlotGenomeCurrent = uiManagerRef.gameManager.theRenderKing.baronVonTerrain.sandSlotGenomeMutations[selectedToolbarMutationID];
             }
 
