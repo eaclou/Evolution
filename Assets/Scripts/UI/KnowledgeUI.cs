@@ -67,6 +67,10 @@ public class KnowledgeUI : MonoBehaviour {
         isOpen = !isOpen;
     }
 
+    public void OpenKnowledgePanel() {
+        isOpen = true;
+    }
+
     private void UpdateUI(TrophicLayersManager layerManager) {
         //TrophicSlot slotRef = uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef;
 

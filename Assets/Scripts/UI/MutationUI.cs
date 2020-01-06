@@ -7,6 +7,9 @@ public class MutationUI : MonoBehaviour {
     public UIManager uiManagerRef;
     public bool isOpen;
 
+    public Image imageMutationCurTarget; // in watcher panel
+    public Text textMutationTargetLayer;
+
     // Mutation Panel elements:
     public GameObject panelMutationSpirit;
     public Image imageMutationPanelThumbnailA;
@@ -85,6 +88,11 @@ public class MutationUI : MonoBehaviour {
         }
 
         TrophicSlot slotRef = uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot;
+
+        textMutationTargetLayer.text = slotRef.speciesName;
+        textMutationTargetLayer.color = uiManagerRef.worldSpiritHubUI.curIconColor;
+        imageMutationCurTarget.color = uiManagerRef.worldSpiritHubUI.curIconColor;
+        imageMutationCurTarget.sprite = uiManagerRef.worldSpiritHubUI.curIconSprite;
 
         if(slotRef.kingdomID == 0) { // DECOMPOSERS
             // Look up decomposer variants and populate UI elements from them:
@@ -327,6 +335,9 @@ public class MutationUI : MonoBehaviour {
         }
     }
 
+    public void OpenMutationPanel() {
+        isOpen = true;
+    }
     
     public void ClickToolButton() {
         Debug.Log("Click mutation toggle button)");

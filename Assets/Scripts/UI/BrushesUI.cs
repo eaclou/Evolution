@@ -765,9 +765,17 @@ public class BrushesUI : MonoBehaviour {
             //uiManagerRef.isBrushModeON_snoopingOFF = true; // ***** Switching to brushingMode!!! ***
         }
     }
+    public void SetTargetFromWorldTree() {
+        selectedEssenceSlot = uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot;
+
+        EnterCreationBrushMode();
+        isOpen = true;
+        isPaletteOpen = false;
+
+    }
     public void ClickBrushPaletteOpen() {
         isPaletteOpen = !isPaletteOpen;
-
+        uiManagerRef.curActiveTool = UIManager.ToolType.Add;
         uiManagerRef.isBrushModeON_snoopingOFF = true;
     }
     public void ClickToolButtonStir() {
@@ -777,13 +785,8 @@ public class BrushesUI : MonoBehaviour {
         uiManagerRef.watcherUI.StopFollowingAgent();
         uiManagerRef.watcherUI.StopFollowingPlantParticle();
         uiManagerRef.watcherUI.StopFollowingAnimalParticle();
-        //uiManagerRef.watcherUI.isHighlight = false;
         buttonBrushStir.GetComponent<Image>().color = uiManagerRef.buttonActiveColor; 
  
-        //TurnOffAddTool();
-
-        //isBrushSelected = true; // ??????
-
         uiManagerRef.isBrushModeON_snoopingOFF = true; // ***** Switching to brushingMode!!! ***
               
     }
@@ -791,11 +794,6 @@ public class BrushesUI : MonoBehaviour {
         Debug.Log("ClickToolButtonAdd(0)");
         curCreationBrushIndex = 0;
         EnterCreationBrushMode();
-        
-        //buttonBrushAdd.GetComponent<Image>().color = uiManagerRef.buttonActiveColor;
-        //buttonBrushExtra1.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
-        //buttonBrushExtra2.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
-        //buttonBrushExtra3.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
         
         uiManagerRef.isBrushModeON_snoopingOFF = true; // ***** Switching to brushingMode!!! ***
     }

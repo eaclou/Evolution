@@ -226,7 +226,17 @@ public class WorldSpiritHubUI : MonoBehaviour {
         Debug.Log("Click worldSpiritHUB toggle button)");
         isOpen = !isOpen;
     }
-    
+    public void SetTargetFromBrushesUI() {
+        selectedWorldSpiritSlot = uiManagerRef.brushesUI.selectedEssenceSlot;
+
+        //isPaletteOpen = true;
+    }
+    public void SetTargetFromWatcherUI() {
+        selectedWorldSpiritSlot = uiManagerRef.watcherUI.watcherSelectedTrophicSlotRef;
+    }
+    public void OpenWorldTreeSelect() {
+        isOpen = true;
+    }
     
     //*********************************************
     public void ClickButtonWorldSpiritHubOther(int index) {
