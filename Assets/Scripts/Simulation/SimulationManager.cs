@@ -63,6 +63,7 @@ public class SimulationManager : MonoBehaviour {
     }
     private int numWarmUpTimeSteps = 30;
     private int currentWarmUpTimeStep = 0;
+    public bool _BigBangOn = false;
 
     private static float mapSize = 256f;  // This determines scale of environment, size of FluidSim plane!!! Important!
     public static float _MapSize
@@ -203,6 +204,13 @@ public class SimulationManager : MonoBehaviour {
             // if so, warming up:
             uiManager.loadingProgress = (float)currentWarmUpTimeStep / (float)numWarmUpTimeSteps;
         
+            uiManager.imageLoadingGemGrowing.gameObject.SetActive(false);
+            uiManager.buttonLoadingGemStart.gameObject.SetActive(true);
+            // CURSOR is born!!!!!!!
+            Cursor.visible = true;
+
+
+
             if(currentWarmUpTimeStep >= numWarmUpTimeSteps) {
                 Debug.Log("WarmUp Complete!!! ");
                 simulationWarmUpComplete = true;
@@ -228,6 +236,10 @@ public class SimulationManager : MonoBehaviour {
             }
         }
         else {
+            Cursor.visible = false;
+            uiManager.imageLoadingGemGrowing.gameObject.SetActive(true);
+            uiManager.buttonLoadingGemStart.gameObject.SetActive(false);
+
             // Check if already loading or if this is the first time startup:
             if(isLoading) {
                 // loading coroutine already underway.. chill out and relax
@@ -253,8 +265,20 @@ public class SimulationManager : MonoBehaviour {
         //float elapsedTime;
         //uiManager.textLoadingTooltips.text = "LoadingInitializeCoreSimulationState()";
         // Do some stuff:: LOAD!
+
+        uiManager.textLoadingTooltips.text = "";
+        uiManager.imageLoadingStartBG.gameObject.SetActive(true);
+
+        uiManager.imageLoadingStrokes01.gameObject.SetActive(false);
+        uiManager.imageLoadingStrokes02.gameObject.SetActive(false);
+        uiManager.imageLoadingStrokes03.gameObject.SetActive(false);
+        uiManager.imageLoadingStrokesFull.gameObject.SetActive(false);
+
         LoadingInitializeCoreSimulationState();  // creates arrays and stuff for the (hopefully)only time
         Debug.Log("LoadingInitializeCoreSimulationState: " + (Time.realtimeSinceStartup - startTime).ToString());
+
+        
+        
         // Fitness Stuffs:::
         startTime = Time.realtimeSinceStartup;
         LoadingSetUpFitnessStorage();
@@ -264,6 +288,15 @@ public class SimulationManager : MonoBehaviour {
         //uiManager.textLoadingTooltips.text = "LoadingInstantiateEggSacks()";
         // create first EggSacks:
         LoadingInstantiateEggSacks();
+
+        uiManager.textLoadingTooltips.text = "( Reticulating Splines )";
+        uiManager.imageLoadingStartBG.gameObject.SetActive(true);
+        uiManager.imageLoadingStrokes01.gameObject.SetActive(true);
+
+        uiManager.imageLoadingStrokes02.gameObject.SetActive(false);
+        uiManager.imageLoadingStrokes03.gameObject.SetActive(false);
+        uiManager.imageLoadingStrokesFull.gameObject.SetActive(false);
+
         Debug.Log("LoadingInstantiateEggSacks: " + (Time.realtimeSinceStartup - startTime).ToString());
         yield return null;
         // ******  Combine this with ^ ^ ^ function ??? **************
@@ -294,6 +327,9 @@ public class SimulationManager : MonoBehaviour {
         Debug.Log("End Total up to LoadingInstantiateAgents: " + (Time.realtimeSinceStartup - masterStartTime).ToString());
         yield return null;
         
+
+        
+
         // Load pre-saved genomes:
         //LoadingLoadGenepoolFiles();       
         //yield return null;
@@ -302,6 +338,7 @@ public class SimulationManager : MonoBehaviour {
         // Once Agents, Food, etc. are established, Initialize the Fluid:
         LoadingInitializeFluidSim();
         Debug.Log("End Total up to LoadingInitializeFluidSim: " + (Time.realtimeSinceStartup - masterStartTime).ToString());
+
 
         yield return null;
         startTime = Time.realtimeSinceStartup;
@@ -316,6 +353,14 @@ public class SimulationManager : MonoBehaviour {
         LoadingInitializeAnimalParticles();
 
         yield return null;
+
+        uiManager.textLoadingTooltips.text = "( Calculating Enjoyment Coefficients )";
+        uiManager.imageLoadingStartBG.gameObject.SetActive(true);
+        uiManager.imageLoadingStrokes01.gameObject.SetActive(true);
+        uiManager.imageLoadingStrokes02.gameObject.SetActive(true);
+
+        uiManager.imageLoadingStrokes03.gameObject.SetActive(false);
+        uiManager.imageLoadingStrokesFull.gameObject.SetActive(false);
 
         //uiManager.textLoadingTooltips.text = "GentlyRouseTheRenderMonarchHisHighnessLordOfPixels()";   
         // Wake up the Render King and prepare him for the day ahead, proudly ruling over Renderland.
@@ -350,6 +395,14 @@ public class SimulationManager : MonoBehaviour {
         // Populates GridCells with their contents (agents/food/preds)
         LoadingFillGridCells();
         LoadingHookUpModules();
+
+        uiManager.imageLoadingStartBG.gameObject.SetActive(true);
+        uiManager.imageLoadingStrokes01.gameObject.SetActive(true);
+        uiManager.imageLoadingStrokes02.gameObject.SetActive(true);
+        uiManager.imageLoadingStrokes03.gameObject.SetActive(true);
+
+        uiManager.imageLoadingStrokesFull.gameObject.SetActive(false);
+
         
         //yield return new WaitForSeconds(5f); // TEMP!!!
         Debug.Log("End Total: " + (Time.realtimeSinceStartup - masterStartTime).ToString());

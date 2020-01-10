@@ -38,6 +38,13 @@ public class UIManager : MonoBehaviour {
     public bool controlsMenuOn = false; // main menu
     public bool optionsMenuOn = false;  // Game options main menu
 
+    public Image imageLoadingStartBG;
+    public Image imageLoadingStrokes01;
+    public Image imageLoadingStrokes02;
+    public Image imageLoadingStrokes03;
+    public Image imageLoadingStrokesFull;
+    public Image imageLoadingGemGrowing;
+    public Button buttonLoadingGemStart;
     public Text textLoadingTooltips;
 
     public bool updateTerrainAltitude;
@@ -397,14 +404,20 @@ public class UIManager : MonoBehaviour {
         //panelDebug.SetActive(isActiveDebug);
     }
     private void UpdateLoadingUI() {
-        Cursor.visible = true;
-        if (loadingProgress < 1f) {
-            //textLoadingTooltips.text = "( Calculating Enjoyment Coefficients )";
-            textLoadingTooltips.text = "( Reticulating Splines )";
+        //Cursor.visible = true;
+        //imageLoadingGemGrowing.gameObject.SetActive(true);
+        //buttonLoadingGemStart.gameObject.SetActive(false);
+        if (loadingProgress > 0.5f) {
+            textLoadingTooltips.text = "";
+            
+            imageLoadingStartBG.gameObject.SetActive(false);
+            imageLoadingStrokes01.gameObject.SetActive(false);
+            imageLoadingStrokes02.gameObject.SetActive(false);
+            imageLoadingStrokes03.gameObject.SetActive(false);
+
+            imageLoadingStrokesFull.gameObject.SetActive(true);
         }
-        if (loadingProgress < 0.4f) {
-            textLoadingTooltips.text = "( Warming Up Simulation Cubes )";
-        }
+        
         /*if (loadingProgress < 0.4f) {
             //textLoadingTooltips.text = "( Feeding Hamsters )";
         }
@@ -1071,6 +1084,12 @@ public class UIManager : MonoBehaviour {
     }
     public void MouseExitControlsButton() {
         textMouseOverInfo.gameObject.SetActive(false);
+    }
+
+    public void ClickLoadingGemStart() {
+        Debug.Log("Let there be not nothing!");
+
+        gameManager.simulationManager._BigBangOn = true;
     }
 
     public void ClickToolButtonBrushes() {

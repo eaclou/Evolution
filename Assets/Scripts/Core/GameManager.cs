@@ -143,7 +143,8 @@ public class GameManager : MonoBehaviour {
             case GameState.Loading:
                 // Check on status of Simulation manager, wait for it to be fully loaded and ready to go:                
                 if(simulationManager._LoadingComplete) {
-                    if(simulationManager._SimulationWarmUpComplete) {                        
+                    if(simulationManager._BigBangOn) { //_SimulationWarmUpComplete) {
+
                         TransitionToGameState(GameState.Playing);
                     }
                     else {
