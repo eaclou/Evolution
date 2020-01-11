@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class BrushesUI : MonoBehaviour {
     public UIManager uiManagerRef;
+    public bool isUnlocked;
     public bool isOpen;
     //public bool isBrushSelected;
     public bool isPaletteOpen;

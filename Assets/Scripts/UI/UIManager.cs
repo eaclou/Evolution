@@ -47,6 +47,11 @@ public class UIManager : MonoBehaviour {
     public Button buttonLoadingGemStart;
     public Text textLoadingTooltips;
 
+    public GameObject panelBigBang;
+    public Image imageBigBangStrokes01;
+    public Image imageBigBangStrokes02;
+    public Image imageBigBangStrokes03;
+
     public bool updateTerrainAltitude;
     public float terrainUpdateMagnitude;
     
@@ -62,8 +67,13 @@ public class UIManager : MonoBehaviour {
     public GameObject panelClock;
     public Text textCurYear;
     public Button buttonClockOpenClose;
-    public Button buttonToolbarKnowledge;
-    public Button buttonToolbarWatcher;
+    //public Button buttonToolbarKnowledge;
+    //public Button buttonToolbarWatcher;
+    public Button buttonOpenGlobalResourcesPanel;
+    public Button buttonOpenMutationPanel;
+    public Button buttonOpenWatcherPanel;
+    public Button buttonOpenBrushesPanel;
+    public Button buttonOpenKnowledgePanel;
 
     // *******************************************
 
@@ -217,6 +227,8 @@ public class UIManager : MonoBehaviour {
     public int brushAddAgentCounter = 0;
     public int framesPerAgentSpawn = 3;
 
+    public int bigBangFramesCounter = 0;
+
     //public bool brainDisplayOn = false;
     
     #endregion
@@ -342,17 +354,21 @@ public class UIManager : MonoBehaviour {
         panelPlaying.SetActive(true);
         panelGameOptions.SetActive(false);
 
+        //Animation Big Bang here
+        gameManager.simulationManager._BigBangOn = true;
+
+
         SimEventData newEventData = new SimEventData();
         newEventData.name = "New Simulation Start!";
         newEventData.category = SimEventData.SimEventCategories.NPE;
         newEventData.timeStepActivated = 0;
         gameManager.simulationManager.simEventsManager.completeEventHistoryList.Add(newEventData);
 
-        //panelPendingClickPrompt.GetComponentInChildren<Text>().text = "Welcome! This Pond is devoid of life...\nIt's up to you to change that!";
-        //panelPendingClickPrompt.GetComponentInChildren<Text>().color = new Color(0.75f, 0.75f, 0.75f);
-        //panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
-        //isAnnouncementTextOn = true;
-        //timerAnnouncementTextCounter = 0;
+        panelPendingClickPrompt.GetComponentInChildren<Text>().text = "... And Then There Was Not Nothing ...";// "Welcome! This Pond is devoid of life...\nIt's up to you to change that!";
+        panelPendingClickPrompt.GetComponentInChildren<Text>().color = new Color(0.75f, 0.75f, 0.75f);
+        panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
+        isAnnouncementTextOn = true;
+        timerAnnouncementTextCounter = 0;
     }
     #endregion
 
@@ -426,13 +442,42 @@ public class UIManager : MonoBehaviour {
         }*/
     }
     private void UpdateSimulationUI() {
+
+        if(gameManager.simulationManager._BigBangOn) {
+            panelBigBang.SetActive(true);
+            bigBangFramesCounter += 3;
+            
+            if(bigBangFramesCounter > 60) {
+                bigBangFramesCounter = 0;
+                gameManager.simulationManager._BigBangOn = false;
+                panelBigBang.SetActive(false);
+
+                worldSpiritHubUI.isUnlocked = true;
+                worldSpiritHubUI.ClickToolButton();
+            }
+            else if(bigBangFramesCounter > 40) {
+                imageBigBangStrokes01.gameObject.SetActive(true);
+                imageBigBangStrokes02.gameObject.SetActive(false);
+                imageBigBangStrokes03.gameObject.SetActive(false);
+            }
+            else if(bigBangFramesCounter > 20) {
+                imageBigBangStrokes01.gameObject.SetActive(true);
+                imageBigBangStrokes02.gameObject.SetActive(true);
+                imageBigBangStrokes03.gameObject.SetActive(false);
+            }
+            else if(bigBangFramesCounter > 0) {
+                imageBigBangStrokes01.gameObject.SetActive(true);
+                imageBigBangStrokes02.gameObject.SetActive(true);
+                imageBigBangStrokes03.gameObject.SetActive(true);
+            }
+        }
+
+
         UpdateObserverModeUI();  // <== this is the big one *******  
         // ^^^  Need to Clean this up and replace with better approach ***********************
-
-
+        
         theCursorCzar.UpdateCursorCzar();  // this will assume a larger role
-
-
+        
         brushesUI.UpdateBrushesUI();
         watcherUI.UpdateWatcherPanelUI(gameManager.simulationManager.trophicLayersManager);
         knowledgeUI.UpdateKnowledgePanelUI(gameManager.simulationManager.trophicLayersManager);
@@ -445,6 +490,47 @@ public class UIManager : MonoBehaviour {
               
         UpdatePausedUI();
         
+        if(worldSpiritHubUI.isUnlocked) {
+            worldSpiritHubUI.panelWorldHubExpand.SetActive(true);
+        }
+        else {
+            worldSpiritHubUI.panelWorldHubExpand.SetActive(false);
+        }
+
+        if(brushesUI.isUnlocked) {
+            buttonOpenBrushesPanel.gameObject.SetActive(true);
+        }
+        else {
+            buttonOpenBrushesPanel.gameObject.SetActive(false);
+        }
+
+        if(watcherUI.isUnlocked) {
+            buttonOpenWatcherPanel.gameObject.SetActive(true);
+        }
+        else {
+            buttonOpenWatcherPanel.gameObject.SetActive(false);
+        }
+
+        if(knowledgeUI.isUnlocked) {
+            buttonOpenKnowledgePanel.gameObject.SetActive(true);
+        }
+        else {
+            buttonOpenKnowledgePanel.gameObject.SetActive(false);
+        }
+
+        if(mutationUI.isUnlocked) {
+            buttonOpenMutationPanel.gameObject.SetActive(true);
+        }
+        else {
+            buttonOpenMutationPanel.gameObject.SetActive(false);
+        }
+
+        if(globalResourcesUI.isUnlocked) {
+            buttonOpenGlobalResourcesPanel.gameObject.SetActive(true);
+        }
+        else {
+            buttonOpenGlobalResourcesPanel.gameObject.SetActive(false);
+        }
         
 
 

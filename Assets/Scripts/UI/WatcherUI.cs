@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class WatcherUI : MonoBehaviour {
     public UIManager uiManagerRef;
+    public bool isUnlocked;
     public bool isOpen;
 
     //public Image imageWatcherButtonMIP;  // superscript button over watcher toolbar Button

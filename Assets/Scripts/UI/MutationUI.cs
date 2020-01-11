@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class MutationUI : MonoBehaviour {
     public UIManager uiManagerRef;
+    public bool isUnlocked;
     public bool isOpen;
 
     public Image imageMutationCurTarget; // in watcher panel

@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class GlobalResourcesUI : MonoBehaviour {
     public UIManager uiManagerRef;
+    public bool isUnlocked;
     public bool isOpen;
     public Text textGlobalMass;
 

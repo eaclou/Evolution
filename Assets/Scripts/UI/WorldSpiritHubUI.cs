@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class WorldSpiritHubUI : MonoBehaviour {
     public UIManager uiManagerRef;
+    public bool isUnlocked;
     public bool isOpen;
 
     //public int selectedSlotID;
@@ -54,7 +55,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-        
+        isUnlocked = false;
 	}
 
     private void UpdateUI() {
@@ -333,7 +334,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
         //isAnnouncementTextOn = true;
 
         if(slot.kingdomID == 0) {
-            uiManagerRef.panelPendingClickPrompt.GetComponentInChildren<Text>().text = "A new species of Decomposer added!";
+            uiManagerRef.panelPendingClickPrompt.GetComponentInChildren<Text>().text = "A new species of DEcomposer added!";
             uiManagerRef.panelPendingClickPrompt.GetComponentInChildren<Text>().color = uiManagerRef.colorDecomposersLayer;
             //panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
         }

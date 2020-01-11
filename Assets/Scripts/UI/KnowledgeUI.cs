@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class KnowledgeUI : MonoBehaviour {
     public UIManager uiManagerRef;
+    public bool isUnlocked;
     public bool isOpen;
     public Image imageKnowledgeButtonMIP;  // superscript button over watcher toolbar Button
     public Image imageKnowledgeCurTarget; // in watcher panel

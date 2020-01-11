@@ -16,6 +16,8 @@ public class TrophicLayersManager {
     //public bool isSelectedTrophicSlot = false;
     //public TrophicSlot selectedTrophicSlotRef;
 
+    //private bool _IsUnlocked
+
     public TrophicKingdom kingdomDecomposers;
     public TrophicKingdom kingdomPlants;
     public TrophicKingdom kingdomAnimals;
@@ -165,7 +167,7 @@ public class TrophicLayersManager {
         
         //check for unlocks:
         if(kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
-            if(simManager.simAgeTimeSteps > 200) { // || simManager.simResourceManager.curGlobalDetritus > 150f) {
+            if(simManager.simAgeTimeSteps > 2000) { // || simManager.simResourceManager.curGlobalDetritus > 150f) {
                 kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
                 Debug.Log("DECOMPOSERS UNLOCKED!!! " + simManager.uiManager.unlockCooldownCounter.ToString());
 
