@@ -176,6 +176,8 @@ public class TrophicLayersManager {
                 simManager.uiManager.unlockedAnnouncementSlotRef = kingdomDecomposers.trophicTiersList[0].trophicSlots[0];
                 //simManager.uiManager.buttonToolbarExpandOn.GetComponent<Animator>().enabled = true;
                 simManager.uiManager.worldSpiritHubUI.ClickWorldCreateNewSpecies(kingdomDecomposers.trophicTiersList[0].trophicSlots[0]);
+
+                simManager.uiManager.knowledgeUI.isUnlocked = true;
             }
         }
         
@@ -188,6 +190,8 @@ public class TrophicLayersManager {
                 simManager.uiManager.unlockedAnnouncementSlotRef = kingdomAnimals.trophicTiersList[0].trophicSlots[0];
                 //simManager.uiManager.buttonToolbarExpandOn.GetComponent<Animator>().enabled = true;
                 simManager.uiManager.worldSpiritHubUI.ClickWorldCreateNewSpecies(kingdomAnimals.trophicTiersList[0].trophicSlots[0]);
+
+                simManager.uiManager.watcherUI.isUnlocked = true;
             }
         }
 
@@ -219,6 +223,8 @@ public class TrophicLayersManager {
                 simManager.uiManager.unlockedAnnouncementSlotRef = kingdomAnimals.trophicTiersList[1].trophicSlots[1];
                 //simManager.uiManager.buttonToolbarExpandOn.GetComponent<Animator>().enabled = true;
                 simManager.uiManager.worldSpiritHubUI.ClickWorldCreateNewSpecies(kingdomAnimals.trophicTiersList[1].trophicSlots[1]);
+
+                simManager.uiManager.mutationUI.isUnlocked = true;
             }
         }
         if(kingdomAnimals.trophicTiersList[1].trophicSlots[2].status == TrophicSlot.SlotStatus.Locked) {

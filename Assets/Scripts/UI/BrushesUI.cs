@@ -162,11 +162,12 @@ public class BrushesUI : MonoBehaviour {
 
     public void UpdateBrushesUI() {
         panelBrushes.SetActive(isOpen);
-        panelBrushPaletteSelect.SetActive(isPaletteOpen);
+        panelBrushPaletteSelect.SetActive(true); // isPaletteOpen);
         if (isOpen) {
             UpdateUI();
+            UpdateBrushPaletteUI();
             if(isPaletteOpen) {
-                UpdateBrushPaletteUI();
+                //UpdateBrushPaletteUI();
             }
         }        
     }
@@ -187,10 +188,9 @@ public class BrushesUI : MonoBehaviour {
         UpdateCurSelectedColor();
         imageColorBar.color = curIconColor;
 
-        imageIsBrushing.gameObject.SetActive(uiManagerRef.isBrushModeON_snoopingOFF);
-        imageIsBrushing.sprite = curIconSprite;
-        imageIsBrushing.color = curIconColor;
-
+        //imageIsBrushing.gameObject.SetActive(uiManagerRef.isBrushModeON_snoopingOFF);
+        //imageIsBrushing.sprite = curIconSprite;
+        //imageIsBrushing.color = curIconColor;
 
         switch(uiManagerRef.curActiveTool) {
             case UIManager.ToolType.None:
@@ -756,6 +756,10 @@ public class BrushesUI : MonoBehaviour {
         }
         uiManagerRef.gameManager.theRenderKing.isStirring = uiManagerRef.theCursorCzar.isDraggingMouseLeft || uiManagerRef.theCursorCzar.isDraggingMouseRight; 
         
+    }
+
+    public void Unlock() {
+        this.isUnlocked = true;
     }
 
     public void ClickToolButton() {

@@ -17,6 +17,7 @@ public class UIManager : MonoBehaviour {
     public MutationUI mutationUI;
     public GlobalResourcesUI globalResourcesUI;
     public TheCursorCzar theCursorCzar;
+    public ClockUI clockUI;
 
     public CameraManager cameraManager;
     public GameOptionsManager gameOptionsManager;
@@ -356,7 +357,7 @@ public class UIManager : MonoBehaviour {
 
         //Animation Big Bang here
         gameManager.simulationManager._BigBangOn = true;
-
+        //worldSpiritHubUI.OpenWorldTreeSelect();
 
         SimEventData newEventData = new SimEventData();
         newEventData.name = "New Simulation Start!";
@@ -445,15 +446,21 @@ public class UIManager : MonoBehaviour {
 
         if(gameManager.simulationManager._BigBangOn) {
             panelBigBang.SetActive(true);
-            bigBangFramesCounter += 3;
+            bigBangFramesCounter += 2;
+
+            if(bigBangFramesCounter == 10) {
+                worldSpiritHubUI.isUnlocked = true;
+                worldSpiritHubUI.OpenWorldTreeSelect();
+            }
             
             if(bigBangFramesCounter > 60) {
                 bigBangFramesCounter = 0;
                 gameManager.simulationManager._BigBangOn = false;
                 panelBigBang.SetActive(false);
 
-                worldSpiritHubUI.isUnlocked = true;
-                worldSpiritHubUI.ClickToolButton();
+                
+
+                brushesUI.Unlock();
             }
             else if(bigBangFramesCounter > 40) {
                 imageBigBangStrokes01.gameObject.SetActive(true);
@@ -470,6 +477,8 @@ public class UIManager : MonoBehaviour {
                 imageBigBangStrokes02.gameObject.SetActive(true);
                 imageBigBangStrokes03.gameObject.SetActive(true);
             }
+
+            
         }
 
 
@@ -490,12 +499,12 @@ public class UIManager : MonoBehaviour {
               
         UpdatePausedUI();
         
-        if(worldSpiritHubUI.isUnlocked) {
+        /*if(worldSpiritHubUI.isUnlocked) {
             worldSpiritHubUI.panelWorldHubExpand.SetActive(true);
         }
         else {
             worldSpiritHubUI.panelWorldHubExpand.SetActive(false);
-        }
+        }*/
 
         if(brushesUI.isUnlocked) {
             buttonOpenBrushesPanel.gameObject.SetActive(true);
@@ -914,6 +923,8 @@ public class UIManager : MonoBehaviour {
     }        
     public void UpdateClockPanelUI() {
         textCurYear.text = (gameManager.simulationManager.curSimYear + 1).ToString();
+
+        clockUI.UpdateClockUI(gameManager.simulationManager.simAgeTimeSteps);
         //Update Clock
     }
     public void UpdatePausedUI() {

@@ -15,10 +15,27 @@ public class WorldSpiritHubUI : MonoBehaviour {
     public GameObject panelWorldHubExpand;
     public Image imageSelectedTargetLayer;
 
+    public Button buttonMutationLink;
+    public Button buttonBrushesLink;
+    public Button buttonKnowledgeLink;
+
     public Text textSelectedEssenceName;
     public Text textSelectedEssenceDescription;
     public Image imageSelectedEssence;
     public Image imageColorBar;
+
+    public Image imageBitHub;
+    public Image imageBitTerrain;
+    public Image imageBitWater;
+    public Image imageBitAir;
+    public Image imageBitMinerals;
+    public Image imageBitDecomposers;
+    public Image imageBitPlants;
+    public Image imageBitAnimals;
+    public Image imageBitInfo;
+    public Image imageBitMutation;
+    public Image imageBitKnowledge;
+    public Image imageBitBrushes;
         
     public int selectedToolbarOtherLayer = 0;
     public Button buttonWorldSpiritOther0;  // Minerals
@@ -60,6 +77,16 @@ public class WorldSpiritHubUI : MonoBehaviour {
 
     private void UpdateUI() {
         TrophicLayersManager layerManager = uiManagerRef.gameManager.simulationManager.trophicLayersManager;
+
+        buttonKnowledgeLink.interactable = false;
+        buttonMutationLink.interactable = false;
+
+        if(uiManagerRef.brushesUI.isUnlocked) {
+            buttonBrushesLink.interactable = true;
+        }
+        else {
+            buttonBrushesLink.interactable = false;
+        }
 
         string essenceDescriptionStr = "";
 
@@ -221,11 +248,16 @@ public class WorldSpiritHubUI : MonoBehaviour {
         if(isOpen) {
             UpdateUI();
         }
+        else {
+            //panelWorldHubExpand.SetActive(false);
+        }
     }
 
     public void ClickToolButton() {
-        Debug.Log("Click worldSpiritHUB toggle button)");
-        isOpen = !isOpen;
+        
+        isOpen = false;
+        //panelWorldHubExpand.SetActive(false);
+        Debug.Log("ClickToolButton) " + isOpen.ToString());
     }
     public void SetTargetFromBrushesUI() {
         selectedWorldSpiritSlot = uiManagerRef.brushesUI.selectedEssenceSlot;
@@ -237,6 +269,12 @@ public class WorldSpiritHubUI : MonoBehaviour {
     }
     public void OpenWorldTreeSelect() {
         isOpen = true;
+
+        Animation animTerrainShake = imageBitTerrain.GetComponent<Animation>();
+        //animTerrainShake.StartPlayback();
+        animTerrainShake.Play();
+
+        Debug.Log("OpenWorldTreeSelect " + isOpen.ToString());
     }
     
     //*********************************************
@@ -254,6 +292,8 @@ public class WorldSpiritHubUI : MonoBehaviour {
         //isBrushSelected = false;
     }
     public void ClickButtonWorldSpiritHubTerrain(int index) {
+        
+
         Debug.Log("ClickButtonPaletteTerrain: " + index.ToString());
 
         TrophicSlot slot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomTerrain.trophicTiersList[0].trophicSlots[index];
