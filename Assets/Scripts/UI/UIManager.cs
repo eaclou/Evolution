@@ -27,6 +27,17 @@ public class UIManager : MonoBehaviour {
     public bool isBrushModeON_snoopingOFF = true;
     //public bool isSnoopingModeON = false;
 
+    public GameObject protoSpiritClickColliderGO;
+
+
+    public PanelFocus panelFocus = PanelFocus.WorldHub;
+    public enum PanelFocus {
+        None,
+        WorldHub,
+        Brushes,
+        Watcher
+    }
+
     // Main Menu:
     public Button buttonQuickStartResume;
     public Button buttonNewSimulation;
@@ -68,8 +79,6 @@ public class UIManager : MonoBehaviour {
     public GameObject panelClock;
     public Text textCurYear;
     public Button buttonClockOpenClose;
-    //public Button buttonToolbarKnowledge;
-    //public Button buttonToolbarWatcher;
     public Button buttonOpenGlobalResourcesPanel;
     public Button buttonOpenMutationPanel;
     public Button buttonOpenWatcherPanel;
@@ -94,7 +103,7 @@ public class UIManager : MonoBehaviour {
     public Color colorPlantsLayer;
     public Color colorZooplanktonLayer;
     public Color colorVertebratesLayer;
-         
+        
     
     // announcements:
     public GameObject panelPendingClickPrompt;
@@ -108,28 +117,7 @@ public class UIManager : MonoBehaviour {
     public int unlockCooldownCounter = 0;
     private bool inspectToolUnlockedAnnounce = false;
     public TrophicSlot unlockedAnnouncementSlotRef;
-    //public Text textToolbarWingStatsUnlockStatus;
-    //public Text textToolbarWingStatsUnlockPercentage;
-    //public Image imageUnlockMeter;
-    //public Material matUnlockMeter;
-    
-    //public bool isSpiritBrushSelected = true;  // ************************************ REVISIT!!!! *******
-    
-    //public TrophicSlot knowledgeLockedTrophicSlotRef;
-    //public bool isKnowledgeTargetLayerLocked;
-    //public bool isKnowledgePanelOn = false;
-    //public bool isMutationPanelOn = false;
-    
-    //public bool isToolbarDeletePromptOn = false;
-    
-    // portrait
-    //public int curToolUnlockLevel = 0;
-    
-
-    //private Button buttonPendingTrophicSlot;  // 
-    //private Button buttonSelectedTrophicSlot;  // still used??? *************************************************
-    
-    
+  
     // ***** figure out where to put this
     public Sprite spriteSpiritBrushKnowledgeIcon;
     public Sprite spriteSpiritBrushMutationIcon;
@@ -150,38 +138,7 @@ public class UIManager : MonoBehaviour {
     public Sprite spriteSpiritPlantIcon;
     public Sprite spriteSpiritZooplanktonIcon;
     public Sprite spriteSpiritVertebrateIcon;
-
-    //public GameObject panelToolbarPaletteExpand;
-    //public Button buttonToolbarPaletteExpandOn;
-    
-
-    //private bool inspectToolUnlocked = true;
-
-    
-    //public Image imageToolbarInspectLinkedIcon;
-    //public Sprite spriteToolbarInspectButton;
-    //public Button buttonToolbarNutrients;
-    //public Sprite spriteToolbarStirButton;
-    
-    //public Image imageToolbarAddLinkedIcon;
-    //public Button buttonToolbarRemove;
-    
-    //public Image imageToolbarKnowledgeLinkedIcon;
-
-    //public Text textKnowledgePanelTargetLayer;    
-    
-    
-
-    //
-    //public Sprite spriteSpeciesSlotRing;
-    //public Sprite spriteSpeciesSlotFull;
-    //public Sprite spriteSpeciesSlotSelected;
-    // // WING:::::
-    
-    ///public Material toolbarSpeciesStatsGraphMat;
-    //public Image imageToolbarSpeciesStatsGraph;
-    
-    
+        
     public GameObject panelObserverMode;
     public GameObject panelPaused;
     
@@ -197,26 +154,7 @@ public class UIManager : MonoBehaviour {
     public float loadingProgress = 0f;
 
     private int[] displaySpeciesIndicesArray;
-    /*
-    public Image imageStatsGraphDisplay;
-    public Material statsGraphMatLifespan;
-    public Material statsGraphMatBodySizes;
-    public Material statsGraphMatFoodEaten;
-    public Material statsGraphMatPredation;
-    public Material statsGraphMatNutrients;
-    public Material statsGraphMatMutation;
-    //public Texture2D statsGraphDataTex;
-    public Texture2D[] statsTreeOfLifeSpeciesTexArray;
-    public Texture2D statsSpeciesColorKey;
-    public Texture2D statsTextureLifespan;
-    public Texture2D statsTextureBodySizes;
-    public Texture2D statsTextureFoodEaten;
-    public Texture2D statsTexturePredation;
-    public Texture2D statsTextureNutrients;
-    public Texture2D statsTextureMutation;    
-    public float[] maxValuesStatArray;
-    */
-    
+   
     public int selectedSpeciesID;
     public int hoverAgentID;
 
@@ -229,6 +167,10 @@ public class UIManager : MonoBehaviour {
     public int framesPerAgentSpawn = 3;
 
     public int bigBangFramesCounter = 0;
+
+    public Vector3 creationSpiritClickablePos = new Vector3(137f, 160f, 0f);
+    public bool isCreationSpiritRoaming = true;
+    
 
     //public bool brainDisplayOn = false;
     
@@ -459,8 +401,7 @@ public class UIManager : MonoBehaviour {
                 panelBigBang.SetActive(false);
 
                 
-
-                brushesUI.Unlock();
+                                
             }
             else if(bigBangFramesCounter > 40) {
                 imageBigBangStrokes01.gameObject.SetActive(true);
@@ -498,6 +439,14 @@ public class UIManager : MonoBehaviour {
         debugPanelUI.UpdateDebugUI();
               
         UpdatePausedUI();
+
+        if(isCreationSpiritRoaming) {
+            protoSpiritClickColliderGO.SetActive(true);
+            protoSpiritClickColliderGO.transform.position = creationSpiritClickablePos;
+        }
+        else {
+            protoSpiritClickColliderGO.SetActive(false);
+        }
         
         /*if(worldSpiritHubUI.isUnlocked) {
             worldSpiritHubUI.panelWorldHubExpand.SetActive(true);
@@ -522,6 +471,7 @@ public class UIManager : MonoBehaviour {
 
         if(knowledgeUI.isUnlocked) {
             buttonOpenKnowledgePanel.gameObject.SetActive(true);
+            buttonOpenKnowledgePanel.GetComponent<Image>().sprite = worldSpiritHubUI.curIconSprite;
         }
         else {
             buttonOpenKnowledgePanel.gameObject.SetActive(false);
@@ -720,8 +670,7 @@ public class UIManager : MonoBehaviour {
                 Debug.Log("Pressed RightTrigger: " + Input.GetAxis("RightTrigger").ToString());
                 //ClickStatsButton();
             }
-
-            
+                        
             if (isAnnouncementTextOn) {
                 panelPendingClickPrompt.SetActive(true);
                 timerAnnouncementTextCounter++;
@@ -778,7 +727,7 @@ public class UIManager : MonoBehaviour {
                 watcherUI.isPlantParticleHighlight = 0f;
                 watcherUI.isZooplanktonHighlight = 0f;
                 watcherUI.isVertebrateHighlight = 0f;
-                if(cameraManager.isMouseHoverAgent) {
+                if(cameraManager.isMouseHoverAgent) {  // move this to cursorCzar?
                     watcherUI.isVertebrateHighlight = 1f;
                 }
                 else {
@@ -835,7 +784,7 @@ public class UIManager : MonoBehaviour {
                 isBrushAddingAgents = false;
                 gameManager.simulationManager.vegetationManager.isBrushActive = false;
                 
-                if (curActiveTool == ToolType.Add) {
+                if (curActiveTool == ToolType.Add && panelFocus == PanelFocus.Brushes) {
                     // What Palette Trophic Layer is selected?
                     theCursorCzar.stirGizmoVisible = true;
 

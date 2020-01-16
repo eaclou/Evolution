@@ -79,17 +79,17 @@ public class TrophicLayersManager {
         TrophicTier terrainTier0 = new TrophicTier();
         terrainTier0.trophicSlots[0].Initialize("World", TrophicSlot.SlotStatus.On, 3, 0, 0, uiManagerRef.spriteSpiritWorldIcon, uiManagerRef.colorWorldLayer);
         terrainTier0.trophicSlots[1].Initialize("Stones", TrophicSlot.SlotStatus.On, 3, 0, 1, uiManagerRef.spriteSpiritStoneIcon, uiManagerRef.colorTerrainLayer);
-        terrainTier0.trophicSlots[2].Initialize("Pebbles", TrophicSlot.SlotStatus.On, 3, 0, 2, uiManagerRef.spriteSpiritPebblesIcon, uiManagerRef.colorTerrainLayer);
-        terrainTier0.trophicSlots[3].Initialize("Sand", TrophicSlot.SlotStatus.On, 3, 0, 3, uiManagerRef.spriteSpiritSandIcon, uiManagerRef.colorTerrainLayer);
+        terrainTier0.trophicSlots[2].Initialize("Pebbles", TrophicSlot.SlotStatus.Locked, 3, 0, 2, uiManagerRef.spriteSpiritPebblesIcon, uiManagerRef.colorTerrainLayer);
+        terrainTier0.trophicSlots[3].Initialize("Sand", TrophicSlot.SlotStatus.Locked, 3, 0, 3, uiManagerRef.spriteSpiritSandIcon, uiManagerRef.colorTerrainLayer);
         kingdomTerrain.trophicTiersList.Add(terrainTier0);
 
         // OTHER!!!!!%%%
         kingdomOther = new TrophicKingdom();
         kingdomOther.name = "Other";
         TrophicTier otherTier0 = new TrophicTier();
-        otherTier0.trophicSlots[0].Initialize("Minerals", TrophicSlot.SlotStatus.On, 4, 0, 0, uiManagerRef.spriteSpiritMineralsIcon, uiManagerRef.colorMineralLayer);
+        otherTier0.trophicSlots[0].Initialize("Minerals", TrophicSlot.SlotStatus.Locked, 4, 0, 0, uiManagerRef.spriteSpiritMineralsIcon, uiManagerRef.colorMineralLayer);
         otherTier0.trophicSlots[1].Initialize("Water", TrophicSlot.SlotStatus.On, 4, 0, 1, uiManagerRef.spriteSpiritWaterIcon, uiManagerRef.colorWaterLayer);
-        otherTier0.trophicSlots[2].Initialize("Air", TrophicSlot.SlotStatus.On, 4, 0, 2, uiManagerRef.spriteSpiritAirIcon, uiManagerRef.colorAirLayer);
+        otherTier0.trophicSlots[2].Initialize("Air", TrophicSlot.SlotStatus.Locked, 4, 0, 2, uiManagerRef.spriteSpiritAirIcon, uiManagerRef.colorAirLayer);
         kingdomOther.trophicTiersList.Add(otherTier0);
                 
         //selectedTrophicSlotRef = terrainTier0.trophicSlots[0];        
@@ -137,6 +137,12 @@ public class TrophicLayersManager {
     }
 
     public void Tick(SimulationManager simManager) {
+        //temp clickable spirits!
+        if(!simManager.uiManager.isCreationSpiritRoaming && simManager.simAgeTimeSteps > 200 && simManager.simAgeTimeSteps < 202) {
+            simManager.uiManager.isCreationSpiritRoaming = true;
+
+        }
+
         // ALGAE
         if(kingdomPlants.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
             if(simManager.simResourceManager.curGlobalDecomposers > 25f) {
@@ -177,7 +183,7 @@ public class TrophicLayersManager {
                 //simManager.uiManager.buttonToolbarExpandOn.GetComponent<Animator>().enabled = true;
                 simManager.uiManager.worldSpiritHubUI.ClickWorldCreateNewSpecies(kingdomDecomposers.trophicTiersList[0].trophicSlots[0]);
 
-                simManager.uiManager.knowledgeUI.isUnlocked = true;
+                
             }
         }
         

@@ -415,13 +415,13 @@ void CSInitTerrainMaps (uint3 id : SV_DispatchThreadID)
 
 	float distToCenter = length(uv - 0.5);
 
+
 	float4 outputTex = float4(saturate(texSample.x * 0.3 + distToCenter * 0.6 - 0.05), 
 								initY * initY, 
 								initZ * initZ, 
 								initW * initW);
 	
-	outputTex.w = 0;
-	//outputTex.x += 0.005;
+	outputTex.w = saturate(1.0 - distToCenter * 10);
 	AltitudeWrite[id.xy] = outputTex;
 }
 

@@ -56,7 +56,8 @@ public class KnowledgeUI : MonoBehaviour {
 
     // Use this for initialization
     void Start() {
-
+        isUnlocked = true;
+        isOpen = true;
     }
 
     // Update is called once per frame

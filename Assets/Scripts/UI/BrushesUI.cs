@@ -769,6 +769,9 @@ public class BrushesUI : MonoBehaviour {
             EnterCreationBrushMode();
             //uiManagerRef.isBrushModeON_snoopingOFF = true; // ***** Switching to brushingMode!!! ***
         }
+        else {
+            uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
+        }
     }
     public void SetTargetFromWorldTree() {
         selectedEssenceSlot = uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot;
@@ -845,6 +848,7 @@ public class BrushesUI : MonoBehaviour {
         //isBrushSelected = true;
 
         uiManagerRef.isBrushModeON_snoopingOFF = true; // ***** Switching to brushingMode!!! ***
+        uiManagerRef.panelFocus = UIManager.PanelFocus.Brushes;
     }
     
     //*********************************************

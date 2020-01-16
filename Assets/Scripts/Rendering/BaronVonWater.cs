@@ -123,7 +123,9 @@ public class BaronVonWater : RenderBaron {
         //altitudeMapRef.Create();
 
         InitializeBuffers();        
-        InitializeMaterials();        
+        InitializeMaterials();
+
+        _GlobalWaterLevel = 0.1f;
     }
 
     private void InitializeBuffers() {

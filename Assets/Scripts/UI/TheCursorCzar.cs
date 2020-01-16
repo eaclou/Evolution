@@ -73,14 +73,14 @@ public class TheCursorCzar : MonoBehaviour {
         
         Ray ray = uiManagerRef.cameraManager.gameObject.GetComponent<Camera>().ScreenPointToRay(Input.mousePosition);
         RaycastHit hit = new RaycastHit();
-        int layerMask = ~(1 << LayerMask.NameToLayer("UtilityRaycast")); 
+        int layerMask = ~(1 << LayerMask.NameToLayer("UtilityRaycast"));  // *** THIS ISN'T WORKING!!! *** might be inverted?
 
         Physics.Raycast(ray, out hit, 1000f, layerMask);  // *** USE DEDICATED LAYER FOR THIS CHECK!!!! *********
 
         uiManagerRef.cameraManager.isMouseHoverAgent = false;
         uiManagerRef.cameraManager.mouseHoverAgentIndex = 0;
         uiManagerRef.cameraManager.mouseHoverAgentRef = null;
-
+        //Debug.Log("MouseRaycastCheckAgents");
         if(hit.collider != null) {
             
             // CHECK FOR AGENT COLLISION:
@@ -111,11 +111,18 @@ public class TheCursorCzar : MonoBehaviour {
                 uiManagerRef.cameraManager.mouseHoverAgentRef = agentRef;                    
             }
             else {
-                
+                if(clicked) {
+                    Debug.Log("CLICKED ON A SPIRIT!!!! ?");
+
+                    uiManagerRef.brushesUI.Unlock();
+                    uiManagerRef.brushesUI.SetTargetFromWorldTree();
+                    uiManagerRef.isCreationSpiritRoaming = false;
+                }                
             }
             //Debug.Log("CLICKED ON: [ " + hit.collider.gameObject.name + " ] Ray= " + ray.ToString() + ", hit= " + hit.point.ToString());
         }
         else {
+            //Debug.Log("hit.collider == null");
         }
     }
     

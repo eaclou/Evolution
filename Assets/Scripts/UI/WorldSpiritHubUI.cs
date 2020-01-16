@@ -7,7 +7,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
     public UIManager uiManagerRef;
     public bool isUnlocked;
     public bool isOpen;
-
+    
     //public int selectedSlotID;
     public TrophicSlot selectedWorldSpiritSlot;
 
@@ -72,20 +72,51 @@ public class WorldSpiritHubUI : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-        isUnlocked = false;
+        isUnlocked = true; // false;
+        //isFocused = true;
 	}
 
     private void UpdateUI() {
         TrophicLayersManager layerManager = uiManagerRef.gameManager.simulationManager.trophicLayersManager;
 
-        buttonKnowledgeLink.interactable = false;
-        buttonMutationLink.interactable = false;
+        if(uiManagerRef.panelFocus == UIManager.PanelFocus.WorldHub) {
+            imageBitMinerals.color = Color.white;
+            imageBitWater.color = Color.white;
+            imageBitAir.color = Color.white;
+            imageBitHub.color = Color.white;
+            imageBitTerrain.color = Color.white;
+            imageBitDecomposers.color = Color.white;
+            imageBitPlants.color = Color.white;
+            imageBitAnimals.color = Color.white;
+            imageBitInfo.color = Color.white;
+            imageBitMutation.color = Color.white;
+            imageBitKnowledge.color = Color.white;
+        }
+        else {
+            imageBitMinerals.color = Color.gray;
+            imageBitWater.color = Color.gray;
+            imageBitAir.color = Color.gray;
+            imageBitHub.color = Color.gray;
+            imageBitTerrain.color = Color.gray;
+            imageBitDecomposers.color = Color.gray;
+            imageBitPlants.color = Color.gray;
+            imageBitAnimals.color = Color.gray;
+            imageBitInfo.color = Color.gray;
+            imageBitMutation.color = Color.gray;
+            imageBitKnowledge.color = Color.gray;
+        }
+
+        buttonKnowledgeLink.interactable = true;
+        //buttonMutationLink.interactable = false;3
+        
 
         if(uiManagerRef.brushesUI.isUnlocked) {
             buttonBrushesLink.interactable = true;
+            buttonBrushesLink.gameObject.SetActive(true);
         }
         else {
             buttonBrushesLink.interactable = false;
+            buttonBrushesLink.gameObject.SetActive(false);
         }
 
         string essenceDescriptionStr = "";
@@ -254,7 +285,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
     }
 
     public void ClickToolButton() {
-        
+        uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
         isOpen = false;
         //panelWorldHubExpand.SetActive(false);
         Debug.Log("ClickToolButton) " + isOpen.ToString());
@@ -269,7 +300,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
     }
     public void OpenWorldTreeSelect() {
         isOpen = true;
-
+        uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
         Animation animTerrainShake = imageBitTerrain.GetComponent<Animation>();
         //animTerrainShake.StartPlayback();
         animTerrainShake.Play();

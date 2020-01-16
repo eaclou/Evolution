@@ -4116,6 +4116,28 @@ public class TheRenderKing : MonoBehaviour {
                 gizmoStirStickAMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
                 cmdBufferMain.DrawMesh(stickMesh, stirStickTransformMatrix, gizmoStirStickAMat);
             }
+            else {
+                if(simManager.uiManager.isCreationSpiritRoaming) {
+                    float scale = 5f; // Mathf.Lerp(0.35f, 1.75f, baronVonWater.camDistNormalized);
+                    Matrix4x4 stirStickTransformMatrix = Matrix4x4.TRS(simManager.uiManager.creationSpiritClickablePos, Quaternion.identity, Vector3.one * scale);
+                    Mesh stickMesh = meshStirStickLrg;
+
+                    gizmoStirStickShadowMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
+                    gizmoStirStickShadowMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+                    gizmoStirStickShadowMat.SetFloat("_MapSize", SimulationManager._MapSize);
+                    gizmoStirStickShadowMat.SetFloat("_MinFog", minimumFogDensity);  
+                    gizmoStirStickShadowMat.SetVector("_FogColor", simManager.fogColor);
+                    gizmoStirStickShadowMat.SetFloat("_Turbidity", simManager.fogAmount); 
+                    cmdBufferMain.DrawMesh(stickMesh, stirStickTransformMatrix, gizmoStirStickShadowMat);
+
+                    gizmoStirStickAMat.SetFloat("_MinFog", minimumFogDensity);  
+                    gizmoStirStickAMat.SetVector("_FogColor", simManager.fogColor);
+                    gizmoStirStickAMat.SetFloat("_Turbidity", simManager.fogAmount);
+                    gizmoStirStickAMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+                    cmdBufferMain.DrawMesh(stickMesh, stirStickTransformMatrix, gizmoStirStickAMat);
+                }
+                
+            }
 
             if(simManager.trophicLayersManager.GetZooplanktonOnOff()) {
                 // add shadow pass eventually
@@ -4246,16 +4268,18 @@ public class TheRenderKing : MonoBehaviour {
             
             
             if(simManager.uiManager.curActiveTool == UIManager.ToolType.Add && simManager.uiManager.isBrushModeON_snoopingOFF) {
-                gizmoStirToolMat.SetPass(0);
-                gizmoStirToolMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-                gizmoStirToolMat.SetBuffer("gizmoStirToolPosCBuffer", gizmoCursorPosCBuffer);
-                gizmoStirToolMat.SetTexture("_MainTex", simManager.uiManager.brushesUI.selectedEssenceSlot.icon.texture);
-                gizmoStirToolMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
-                gizmoStirToolMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-                gizmoStirToolMat.SetColor("_Tint", simManager.uiManager.brushesUI.selectedEssenceSlot.color);
-                gizmoStirToolMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
-                gizmoStirToolMat.SetFloat("_Radius", 0.4f * Mathf.Lerp(0.067f, 5f, baronVonWater.camDistNormalized));  // **** Make radius variable! (possibly texture based?)
-                cmdBufferMain.DrawProcedural(Matrix4x4.identity, gizmoStirToolMat, 0, MeshTopology.Triangles, 6, 1);
+                if(simManager.uiManager.panelFocus == UIManager.PanelFocus.Brushes) {
+                    gizmoStirToolMat.SetPass(0);
+                    gizmoStirToolMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+                    gizmoStirToolMat.SetBuffer("gizmoStirToolPosCBuffer", gizmoCursorPosCBuffer);
+                    gizmoStirToolMat.SetTexture("_MainTex", simManager.uiManager.brushesUI.selectedEssenceSlot.icon.texture);
+                    gizmoStirToolMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
+                    gizmoStirToolMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+                    gizmoStirToolMat.SetColor("_Tint", simManager.uiManager.brushesUI.selectedEssenceSlot.color);
+                    gizmoStirToolMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
+                    gizmoStirToolMat.SetFloat("_Radius", 0.4f * Mathf.Lerp(0.067f, 5f, baronVonWater.camDistNormalized));  // **** Make radius variable! (possibly texture based?)
+                    cmdBufferMain.DrawProcedural(Matrix4x4.identity, gizmoStirToolMat, 0, MeshTopology.Triangles, 6, 1);
+                }                
             }
         }
 

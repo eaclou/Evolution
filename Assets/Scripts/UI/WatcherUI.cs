@@ -117,6 +117,7 @@ public class WatcherUI : MonoBehaviour {
             imageWatcherInactiveOverlay.gameObject.SetActive(true);
         }
         else {
+            
             imageIsSnooping.color = Color.white;
             imageIsSnooping.sprite = uiManagerRef.spriteSpiritBrushWatcherIcon;
             textIsSnooping.text = "";
@@ -603,12 +604,14 @@ public class WatcherUI : MonoBehaviour {
         if(isOpen) {  // if opening the panel automatically engage snooping mode
             //isSnoopingModeON = true;
             uiManagerRef.isBrushModeON_snoopingOFF = false;
+            uiManagerRef.panelFocus = UIManager.PanelFocus.Watcher;
             uiManagerRef.curActiveTool = UIManager.ToolType.None;
         }
         //watcherLockedTrophicSlotRef = uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot;//
     }
     public void ClickSnoopModeButton() {        
         uiManagerRef.isBrushModeON_snoopingOFF = false;
+        uiManagerRef.panelFocus = UIManager.PanelFocus.Watcher;
         uiManagerRef.curActiveTool = UIManager.ToolType.None;
     }
 
