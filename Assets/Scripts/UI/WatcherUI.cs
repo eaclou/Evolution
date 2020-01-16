@@ -543,6 +543,15 @@ public class WatcherUI : MonoBehaviour {
     }
 
 	public void UpdateWatcherPanelUI(TrophicLayersManager layerManager) {
+
+        if(uiManagerRef.panelFocus == UIManager.PanelFocus.Watcher) {
+            //imageBitMinerals.color = Color.white;
+        }
+        else {
+            isOpen = false;  // turn off panel if unfocused
+            
+        }
+
         panelWatcherSpiritMain.SetActive(isOpen);
         if (isOpen) {
             UpdateUI(layerManager);

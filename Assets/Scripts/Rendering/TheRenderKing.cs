@@ -50,6 +50,7 @@ public class TheRenderKing : MonoBehaviour {
     public Mesh meshStirStickLrg;
     public Material gizmoStirStickAMat;
     public Material gizmoStirStickShadowMat;
+    public Material gizmoProtoSpiritClickableMat;
 
     // ORGANIZE AND REMOVE UNUSED!!!!!! *********
     public Material rockMat;
@@ -4117,24 +4118,24 @@ public class TheRenderKing : MonoBehaviour {
                 cmdBufferMain.DrawMesh(stickMesh, stirStickTransformMatrix, gizmoStirStickAMat);
             }
             else {
-                if(simManager.uiManager.isCreationSpiritRoaming) {
-                    float scale = 5f; // Mathf.Lerp(0.35f, 1.75f, baronVonWater.camDistNormalized);
-                    Matrix4x4 stirStickTransformMatrix = Matrix4x4.TRS(simManager.uiManager.creationSpiritClickablePos, Quaternion.identity, Vector3.one * scale);
-                    Mesh stickMesh = meshStirStickLrg;
+                if(simManager.uiManager.isClickableSpiritRoaming) {
+                    //float scale = 4.2f; // Mathf.Lerp(0.35f, 1.75f, baronVonWater.camDistNormalized);
+                    Matrix4x4 stirStickTransformMatrix = Matrix4x4.TRS(simManager.uiManager.roamingSpiritPosition, Quaternion.identity, Vector3.one * simManager.uiManager.roamingSpiritScale);
+                    Mesh stickMesh = simManager.uiManager.protoSpiritClickColliderGO.GetComponent<MeshFilter>().mesh; // meshStirStickLrg;
 
-                    gizmoStirStickShadowMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
-                    gizmoStirStickShadowMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-                    gizmoStirStickShadowMat.SetFloat("_MapSize", SimulationManager._MapSize);
-                    gizmoStirStickShadowMat.SetFloat("_MinFog", minimumFogDensity);  
-                    gizmoStirStickShadowMat.SetVector("_FogColor", simManager.fogColor);
-                    gizmoStirStickShadowMat.SetFloat("_Turbidity", simManager.fogAmount); 
-                    cmdBufferMain.DrawMesh(stickMesh, stirStickTransformMatrix, gizmoStirStickShadowMat);
+                    gizmoProtoSpiritClickableMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
+                    gizmoProtoSpiritClickableMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+                    gizmoProtoSpiritClickableMat.SetFloat("_MapSize", SimulationManager._MapSize);
+                    gizmoProtoSpiritClickableMat.SetFloat("_MinFog", minimumFogDensity);
+                    gizmoProtoSpiritClickableMat.SetVector("_FogColor", simManager.uiManager.roamingSpiritColor); //simManager.fogColor);
+                    gizmoProtoSpiritClickableMat.SetFloat("_Turbidity", simManager.fogAmount); 
+                    cmdBufferMain.DrawMesh(stickMesh, stirStickTransformMatrix, gizmoProtoSpiritClickableMat);
 
-                    gizmoStirStickAMat.SetFloat("_MinFog", minimumFogDensity);  
-                    gizmoStirStickAMat.SetVector("_FogColor", simManager.fogColor);
-                    gizmoStirStickAMat.SetFloat("_Turbidity", simManager.fogAmount);
-                    gizmoStirStickAMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-                    cmdBufferMain.DrawMesh(stickMesh, stirStickTransformMatrix, gizmoStirStickAMat);
+                    //gizmoStirStickAMat.SetFloat("_MinFog", minimumFogDensity);  
+                    //gizmoStirStickAMat.SetVector("_FogColor", simManager.fogColor);
+                    //gizmoStirStickAMat.SetFloat("_Turbidity", simManager.fogAmount);
+                    //gizmoStirStickAMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+                    //cmdBufferMain.DrawMesh(stickMesh, stirStickTransformMatrix, gizmoStirStickAMat);
                 }
                 
             }

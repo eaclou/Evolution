@@ -161,6 +161,15 @@ public class BrushesUI : MonoBehaviour {
 	}
 
     public void UpdateBrushesUI() {
+
+        if(uiManagerRef.panelFocus == UIManager.PanelFocus.Brushes) {
+            //imageBitMinerals.color = Color.white;
+        }
+        else {
+            isOpen = false;  // turn off panel if unfocused
+            
+        }
+
         panelBrushes.SetActive(isOpen);
         panelBrushPaletteSelect.SetActive(true); // isPaletteOpen);
         if (isOpen) {
@@ -187,6 +196,7 @@ public class BrushesUI : MonoBehaviour {
 
         UpdateCurSelectedColor();
         imageColorBar.color = curIconColor;
+                
 
         //imageIsBrushing.gameObject.SetActive(uiManagerRef.isBrushModeON_snoopingOFF);
         //imageIsBrushing.sprite = curIconSprite;
@@ -781,11 +791,12 @@ public class BrushesUI : MonoBehaviour {
         isPaletteOpen = false;
 
     }
-    public void ClickBrushPaletteOpen() {
+    /*public void ClickBrushPaletteOpen() {
         isPaletteOpen = !isPaletteOpen;
         uiManagerRef.curActiveTool = UIManager.ToolType.Add;
         uiManagerRef.isBrushModeON_snoopingOFF = true;
-    }
+        EnterCreationBrushMode();
+    }*/
     public void ClickToolButtonStir() {
         
         uiManagerRef.curActiveTool = UIManager.ToolType.Stir;
@@ -867,6 +878,7 @@ public class BrushesUI : MonoBehaviour {
 
         //isBrushSelected = false;
         isPaletteOpen = false;
+        EnterCreationBrushMode();
     }
     public void ClickButtonBrushPaletteTerrain(int index) {
         Debug.Log("ClickButtonPaletteTerrain: " + index.ToString());
@@ -883,26 +895,31 @@ public class BrushesUI : MonoBehaviour {
 
         //isBrushSelected = false;
         isPaletteOpen = false;
+        EnterCreationBrushMode();
     }
     public void ClickButtonBrushPaletteDecomposers() {
         TrophicSlot slot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0];
         selectedEssenceSlot = slot; 
         isPaletteOpen = false;
+        EnterCreationBrushMode();
     }
     public void ClickButtonBrushPaletteAlgae() {  // shouldn't be able to click if LOCKED (interactive = false)
         TrophicSlot slot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];
         selectedEssenceSlot = slot;    
         isPaletteOpen = false;
+        EnterCreationBrushMode();
     }
     public void ClickButtonBrushPalettePlants(int slotID) {
         TrophicSlot slot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[slotID];
         selectedEssenceSlot = slot;      
         isPaletteOpen = false;
+        EnterCreationBrushMode();
     }
     public void ClickButtonBrushPaletteZooplankton() {
         TrophicSlot slot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0];        
         selectedEssenceSlot = slot;  
         isPaletteOpen = false;
+        EnterCreationBrushMode();
     }
     public void ClickButtonBrushPaletteAgent(int index) {
         TrophicSlot slot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[index];
@@ -912,5 +929,6 @@ public class BrushesUI : MonoBehaviour {
 
         selectedBrushLinkedSpiritVertebrateLayer = index;
         isPaletteOpen = false;
+        EnterCreationBrushMode();
     }
 }

@@ -275,6 +275,14 @@ public class WorldSpiritHubUI : MonoBehaviour {
 
     }
     public void UpdateWorldSpiritHubUI() {
+        if(uiManagerRef.panelFocus == UIManager.PanelFocus.WorldHub) {
+            //imageBitMinerals.color = Color.white;
+        }
+        else {
+            //isOpen = false;  // turn off panel if unfocused
+            
+        }
+
         panelWorldHubExpand.SetActive(isOpen);
         if(isOpen) {
             UpdateUI();
@@ -284,19 +292,20 @@ public class WorldSpiritHubUI : MonoBehaviour {
         }
     }
 
-    public void ClickToolButton() {
-        uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
+    public void ClickMinimizePanel() {
+        //uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
         isOpen = false;
         //panelWorldHubExpand.SetActive(false);
         Debug.Log("ClickToolButton) " + isOpen.ToString());
     }
     public void SetTargetFromBrushesUI() {
         selectedWorldSpiritSlot = uiManagerRef.brushesUI.selectedEssenceSlot;
-
+        uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
         //isPaletteOpen = true;
     }
     public void SetTargetFromWatcherUI() {
         selectedWorldSpiritSlot = uiManagerRef.watcherUI.watcherSelectedTrophicSlotRef;
+        uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
     }
     public void OpenWorldTreeSelect() {
         isOpen = true;
@@ -319,7 +328,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
         //selectedWorldSpiritVertebrateSpeciesID = slot.linkedSpeciesID; // update this next ***
         
         selectedToolbarOtherLayer = index;
-
+        uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
         //isBrushSelected = false;
     }
     public void ClickButtonWorldSpiritHubTerrain(int index) {
@@ -333,7 +342,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
         //selectedWorldSpiritVertebrateSpeciesID = slot.linkedSpeciesID; // update this next
 
         selectedToolbarTerrainLayer = index;
-
+        uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
         //isBrushSelected = false;
     }
     public void ClickButtonWorldSpiritHubDecomposers() {
@@ -345,6 +354,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
             ClickWorldCreateNewSpecies(slot);
             //ClickToolbarCreateNewSpecies();
         }
+        uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
         //isBrushSelected = false;
     }
     public void ClickButtonWorldSpiritHubAlgae() {  // shouldn't be able to click if LOCKED (interactive = false)
@@ -355,6 +365,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
             ClickWorldCreateNewSpecies(slot);
             //ClickToolbarCreateNewSpecies();
         }
+        uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
     }
     public void ClickButtonWorldSpiritHubPlants(int slotID) {
         TrophicSlot slot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[slotID];
@@ -364,6 +375,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
             ClickWorldCreateNewSpecies(slot);
             //ClickToolbarCreateNewSpecies();
         }
+        uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
     }
     public void ClickButtonWorldSpiritHubZooplankton() {
         TrophicSlot slot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0];        
@@ -373,6 +385,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
             //ClickToolbarCreateNewSpecies();
             ClickWorldCreateNewSpecies(slot);
         }
+        uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
         //curActiveTool = ToolType.None;
         //isBrushSelected = false;
     }
@@ -392,7 +405,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
         if(selectedWorldSpiritSlot.status != TrophicSlot.SlotStatus.Unlocked) {
             //InitToolbarPortraitCritterData(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef); // ***
         }
-
+        uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
     }
 
     

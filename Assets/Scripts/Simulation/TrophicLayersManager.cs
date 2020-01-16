@@ -138,13 +138,99 @@ public class TrophicLayersManager {
 
     public void Tick(SimulationManager simManager) {
         //temp clickable spirits!
-        if(!simManager.uiManager.isCreationSpiritRoaming && simManager.simAgeTimeSteps > 200 && simManager.simAgeTimeSteps < 202) {
-            simManager.uiManager.isCreationSpiritRoaming = true;
+        // HACKY AF!
+        if(!simManager.uiManager.isClickableSpiritRoaming && simManager.uiManager.framesSinceLastClickableSpirit > 100 && !simManager.uiManager.brushesUI.isUnlocked) {
+            simManager.uiManager.isClickableSpiritRoaming = true;
+            simManager.uiManager.roamingSpiritColor = Color.white;
 
+            Debug.Log("ASDFASDFLASDFJADSFJ");
+        }
+
+        // DECOMPOSERS!
+        if(kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
+            if(simManager.uiManager.curClickableSpiritType == UIManager.ClickableSpiritType.Decomposers && simManager.uiManager.framesSinceLastClickableSpirit > 50) { // simManager.simAgeTimeSteps > 2000) {
+                simManager.uiManager.isClickableSpiritRoaming = true;
+                simManager.uiManager.roamingSpiritColor = kingdomDecomposers.trophicTiersList[0].trophicSlots[0].color;
+            }            
+        }
+
+        // KNOWLEDGE:
+        if(!simManager.uiManager.knowledgeUI.isUnlocked && simManager.uiManager.framesSinceLastClickableSpirit > 50 && simManager.uiManager.curClickableSpiritType == UIManager.ClickableSpiritType.KnowledgeSpirit) {
+            simManager.uiManager.isClickableSpiritRoaming = true;
+            simManager.uiManager.roamingSpiritColor = Color.red;
+        }
+        // MUTATION:
+        if(!simManager.uiManager.mutationUI.isUnlocked && simManager.uiManager.framesSinceLastClickableSpirit > 50 && simManager.uiManager.curClickableSpiritType == UIManager.ClickableSpiritType.MutationSpirit) {
+            simManager.uiManager.isClickableSpiritRoaming = true;
+            simManager.uiManager.roamingSpiritColor = Color.magenta;
+        }
+        // WATCHER:
+        if(!simManager.uiManager.watcherUI.isUnlocked && simManager.uiManager.framesSinceLastClickableSpirit > 50 && simManager.uiManager.curClickableSpiritType == UIManager.ClickableSpiritType.WatcherSpirit) {
+            simManager.uiManager.isClickableSpiritRoaming = true;
+            simManager.uiManager.roamingSpiritColor = Color.cyan;
         }
 
         // ALGAE
         if(kingdomPlants.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
+            if(simManager.simResourceManager.curGlobalDecomposers > 25f && simManager.uiManager.framesSinceLastClickableSpirit > 50 && simManager.uiManager.curClickableSpiritType == UIManager.ClickableSpiritType.Algae) {
+                simManager.uiManager.isClickableSpiritRoaming = true;
+                simManager.uiManager.roamingSpiritColor = kingdomPlants.trophicTiersList[0].trophicSlots[0].color;
+            }
+        }
+        // PLANTS:
+        if(kingdomPlants.trophicTiersList[1].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
+            if(simManager.simResourceManager.curGlobalAlgaeReservoir > 150f && simManager.uiManager.framesSinceLastClickableSpirit > 50 && simManager.uiManager.curClickableSpiritType == UIManager.ClickableSpiritType.Plants) {
+                simManager.uiManager.isClickableSpiritRoaming = true;
+                simManager.uiManager.roamingSpiritColor = kingdomPlants.trophicTiersList[1].trophicSlots[0].color;
+            }
+        }
+        // ZOOPLANKTON:
+        if(kingdomAnimals.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
+            if(simManager.simResourceManager.curGlobalDecomposers > 40f && simManager.uiManager.framesSinceLastClickableSpirit > 50 && simManager.uiManager.curClickableSpiritType == UIManager.ClickableSpiritType.Zooplankton) {
+                simManager.uiManager.isClickableSpiritRoaming = true;
+                simManager.uiManager.roamingSpiritColor = kingdomAnimals.trophicTiersList[0].trophicSlots[0].color;
+            }
+        }
+        // VERTEBRATE A:
+        if(kingdomAnimals.trophicTiersList[1].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
+            if(simManager.simResourceManager.curGlobalAnimalParticles > 1f && simManager.uiManager.framesSinceLastClickableSpirit > 50 && simManager.uiManager.curClickableSpiritType == UIManager.ClickableSpiritType.VertA) {     // && !simManager.uiManager.isUnlockCooldown) {
+                simManager.uiManager.isClickableSpiritRoaming = true;
+                simManager.uiManager.roamingSpiritColor = kingdomAnimals.trophicTiersList[1].trophicSlots[0].color;
+            }
+        }
+
+        // Minerals:
+        if(kingdomOther.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
+            if(simManager.uiManager.framesSinceLastClickableSpirit > 50 && simManager.uiManager.curClickableSpiritType == UIManager.ClickableSpiritType.Minerals) {
+                simManager.uiManager.isClickableSpiritRoaming = true;
+                simManager.uiManager.roamingSpiritColor = kingdomOther.trophicTiersList[0].trophicSlots[0].color;
+            }
+        }
+        // Air:
+        if(kingdomOther.trophicTiersList[0].trophicSlots[2].status == TrophicSlot.SlotStatus.Locked) {
+            if(simManager.uiManager.framesSinceLastClickableSpirit > 50 && simManager.uiManager.curClickableSpiritType == UIManager.ClickableSpiritType.Air) {
+                simManager.uiManager.isClickableSpiritRoaming = true;
+                simManager.uiManager.roamingSpiritColor = kingdomOther.trophicTiersList[0].trophicSlots[2].color;
+            }
+        }
+        // Pebbles:
+        if(kingdomTerrain.trophicTiersList[0].trophicSlots[2].status == TrophicSlot.SlotStatus.Locked) {
+            if(simManager.uiManager.framesSinceLastClickableSpirit > 50 && simManager.uiManager.curClickableSpiritType == UIManager.ClickableSpiritType.Pebbles) {
+                simManager.uiManager.isClickableSpiritRoaming = true;
+                simManager.uiManager.roamingSpiritColor = kingdomTerrain.trophicTiersList[0].trophicSlots[2].color;
+            }
+        }
+        // sand:
+        if(kingdomTerrain.trophicTiersList[0].trophicSlots[3].status == TrophicSlot.SlotStatus.Locked) {
+            if(simManager.uiManager.framesSinceLastClickableSpirit > 50 && simManager.uiManager.curClickableSpiritType == UIManager.ClickableSpiritType.Sand) {
+                simManager.uiManager.isClickableSpiritRoaming = true;
+                simManager.uiManager.roamingSpiritColor = kingdomTerrain.trophicTiersList[0].trophicSlots[3].color;
+            }
+        }
+
+        // UNLOCKS USED TO BE HERE:::::: ***************************************************
+        // ALGAE
+        /*if(kingdomPlants.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
             if(simManager.simResourceManager.curGlobalDecomposers > 25f) {
                 kingdomPlants.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
                 Debug.Log("ALGAE UNLOCKED!!! " + simManager.uiManager.unlockCooldownCounter.ToString());
@@ -155,9 +241,9 @@ public class TrophicLayersManager {
                 
                 simManager.uiManager.worldSpiritHubUI.ClickWorldCreateNewSpecies(kingdomPlants.trophicTiersList[0].trophicSlots[0]);
             }
-        }
+        }*/
 
-        if(kingdomPlants.trophicTiersList[1].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
+        /*if(kingdomPlants.trophicTiersList[1].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
             if(simManager.simResourceManager.curGlobalAlgaeReservoir > 150f) { // || simManager.simResourceManager.curGlobalDetritus > 150f) {
                 kingdomPlants.trophicTiersList[1].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
                 Debug.Log("PLANTS UNLOCKED!!! " + simManager.uiManager.unlockCooldownCounter.ToString());
@@ -169,10 +255,10 @@ public class TrophicLayersManager {
                 
                 simManager.uiManager.worldSpiritHubUI.ClickWorldCreateNewSpecies(kingdomPlants.trophicTiersList[1].trophicSlots[0]);
             }
-        }
+        }*/
         
         //check for unlocks:
-        if(kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
+        /*if(kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
             if(simManager.simAgeTimeSteps > 2000) { // || simManager.simResourceManager.curGlobalDetritus > 150f) {
                 kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
                 Debug.Log("DECOMPOSERS UNLOCKED!!! " + simManager.uiManager.unlockCooldownCounter.ToString());
@@ -185,9 +271,9 @@ public class TrophicLayersManager {
 
                 
             }
-        }
+        }*/
         
-        if(kingdomAnimals.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
+        /*if(kingdomAnimals.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
             if(simManager.simResourceManager.curGlobalDecomposers > 10f) { // && !simManager.uiManager.isUnlockCooldown) {
                 kingdomAnimals.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
                 Debug.Log("ZOOPLANKTON UNLOCKED!!! " + simManager.uiManager.unlockCooldownCounter.ToString());
@@ -199,28 +285,25 @@ public class TrophicLayersManager {
 
                 simManager.uiManager.watcherUI.isUnlocked = true;
             }
-        }
+        }*/
 
-        if(kingdomAnimals.trophicTiersList[1].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
+        /*if(kingdomAnimals.trophicTiersList[1].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
             if(simManager.simResourceManager.curGlobalAnimalParticles > 1f) {     // && !simManager.uiManager.isUnlockCooldown) {
                 
                 kingdomAnimals.trophicTiersList[1].unlocked = true;
                 kingdomAnimals.trophicTiersList[1].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
-                //kingdomAnimals.trophicTiersList[1].trophicSlots[1].status = TrophicSlot.SlotStatus.Empty;
-                //kingdomAnimals.trophicTiersList[1].trophicSlots[2].status = TrophicSlot.SlotStatus.Empty;
-                //kingdomAnimals.trophicTiersList[1].trophicSlots[3].status = TrophicSlot.SlotStatus.Empty;
-
+                
                 Debug.Log("CREATURE 1 UNLOCKED!!! " + simManager.uiManager.unlockCooldownCounter.ToString());
                 //simManager.uiManager.AnnounceUnlockVertebrates();
                 simManager.uiManager.isUnlockCooldown = true;
 
                 simManager.uiManager.unlockedAnnouncementSlotRef = kingdomAnimals.trophicTiersList[1].trophicSlots[0];
-                //simManager.uiManager.buttonToolbarExpandOn.GetComponent<Animator>().enabled = true;
+                
                 simManager.uiManager.worldSpiritHubUI.ClickWorldCreateNewSpecies(kingdomAnimals.trophicTiersList[1].trophicSlots[0]);
             }
-        }
+        }*/
 
-        if(kingdomAnimals.trophicTiersList[1].trophicSlots[1].status == TrophicSlot.SlotStatus.Locked) {
+        /*if(kingdomAnimals.trophicTiersList[1].trophicSlots[1].status == TrophicSlot.SlotStatus.Locked) {
             if(simManager.simResourceManager.curGlobalAgentBiomass > 0.1f) {     // && !simManager.uiManager.isUnlockCooldown) {                
                 kingdomAnimals.trophicTiersList[1].trophicSlots[1].status = TrophicSlot.SlotStatus.On;
                 Debug.Log("CREATURE 2 UNLOCKED!!! " + simManager.uiManager.unlockCooldownCounter.ToString());
@@ -254,7 +337,7 @@ public class TrophicLayersManager {
                 //simManager.uiManager.buttonToolbarExpandOn.GetComponent<Animator>().enabled = true;
                 simManager.uiManager.worldSpiritHubUI.ClickWorldCreateNewSpecies(kingdomAnimals.trophicTiersList[1].trophicSlots[3]);
             }
-        }
+        }*/
     }
 
     public void CheatUnlockAll() {

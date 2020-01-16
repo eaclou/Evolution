@@ -56,8 +56,8 @@ public class KnowledgeUI : MonoBehaviour {
 
     // Use this for initialization
     void Start() {
-        isUnlocked = true;
-        isOpen = true;
+        //isUnlocked = true;
+        //isOpen = true;
     }
 
     // Update is called once per frame
@@ -275,8 +275,10 @@ public class KnowledgeUI : MonoBehaviour {
     }
 
     public void UpdateKnowledgePanelUI(TrophicLayersManager layerManager) {
-        panelKnowledgeSpiritBase.SetActive(isOpen);
-        if(isOpen) {
+
+
+        panelKnowledgeSpiritBase.SetActive(isOpen && uiManagerRef.worldSpiritHubUI.isOpen);
+        if(isOpen && uiManagerRef.worldSpiritHubUI.isOpen) {
             UpdateUI(layerManager);
         }        
     }

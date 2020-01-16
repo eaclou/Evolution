@@ -28,8 +28,7 @@ public class UIManager : MonoBehaviour {
     //public bool isSnoopingModeON = false;
 
     public GameObject protoSpiritClickColliderGO;
-
-
+    
     public PanelFocus panelFocus = PanelFocus.WorldHub;
     public enum PanelFocus {
         None,
@@ -168,9 +167,31 @@ public class UIManager : MonoBehaviour {
 
     public int bigBangFramesCounter = 0;
 
-    public Vector3 creationSpiritClickablePos = new Vector3(137f, 160f, 0f);
-    public bool isCreationSpiritRoaming = true;
-    
+    public Vector3 creationSpiritClickableStartPos = new Vector3(120f, 124f, -5f);
+    public Vector3 roamingSpiritPosition;
+    public float roamingSpiritScale = 4.0f;
+    public bool isClickableSpiritRoaming;
+    public Color roamingSpiritColor;
+    public int framesSinceLastClickableSpirit;
+    public ClickableSpiritType curClickableSpiritType = ClickableSpiritType.CreationBrush;
+    public enum ClickableSpiritType {
+        CreationBrush,
+        KnowledgeSpirit,
+        MutationSpirit,
+        WatcherSpirit,
+        Pebbles,
+        Sand,
+        Air,
+        Minerals,
+        Decomposers,
+        Algae,
+        Zooplankton,
+        Plants,
+        VertA,
+        VertB,
+        VertC,
+        VertD
+    }
 
     //public bool brainDisplayOn = false;
     
@@ -440,11 +461,22 @@ public class UIManager : MonoBehaviour {
               
         UpdatePausedUI();
 
-        if(isCreationSpiritRoaming) {
+        if(isClickableSpiritRoaming) {
             protoSpiritClickColliderGO.SetActive(true);
-            protoSpiritClickColliderGO.transform.position = creationSpiritClickablePos;
+            float orbitSpeed = 0.45f;
+            float orbitRadius = 18f;
+            float spinAngle = Time.realtimeSinceStartup * orbitSpeed;
+            float zPhase = spinAngle * 5f;
+            float zBounceMag = 1f;
+            roamingSpiritScale = 3f + 0.5f * Mathf.Cos(Time.realtimeSinceStartup * 4f);
+            roamingSpiritPosition = creationSpiritClickableStartPos + new Vector3(Mathf.Cos(spinAngle) * orbitRadius, Mathf.Sin(spinAngle) * orbitRadius, Mathf.Sin(zPhase) * zBounceMag);
+
+            protoSpiritClickColliderGO.transform.position = roamingSpiritPosition;
+
+            framesSinceLastClickableSpirit = 0;
         }
         else {
+            framesSinceLastClickableSpirit++;
             protoSpiritClickColliderGO.SetActive(false);
         }
         
@@ -1153,10 +1185,51 @@ public class UIManager : MonoBehaviour {
     public void ClickToolButtonGlobalResources() {
         globalResourcesUI.ClickToolButton();        
     }
-    public void ClickToolWorldSpiritHub() {
-        worldSpiritHubUI.ClickToolButton();
-    }
+    //public void ClickToolWorldSpiritHub() {
+    //    worldSpiritHubUI.ClickToolButton();
+    //}
   
+
+    public void AnnounceUnlockBrushes() {
+        panelPendingClickPrompt.GetComponentInChildren<Text>().text = "Creation Spirit Captured!";
+        panelPendingClickPrompt.GetComponentInChildren<Text>().color = new Color(1f, 1f, 1f);        
+        isAnnouncementTextOn = true;
+    }
+    public void AnnounceUnlockKnowledgeSpirit() {
+        panelPendingClickPrompt.GetComponentInChildren<Text>().text = "Knowledge Spirit Captured!";
+        panelPendingClickPrompt.GetComponentInChildren<Text>().color = new Color(0.9f, 0.77f, 0.76f);        
+        isAnnouncementTextOn = true;
+    }
+    public void AnnounceUnlockWatcherSpirit() {
+        panelPendingClickPrompt.GetComponentInChildren<Text>().text = "Watcher Spirit Captured!";
+        panelPendingClickPrompt.GetComponentInChildren<Text>().color = new Color(0.6f, 0.71277f, 1f);        
+        isAnnouncementTextOn = true;
+    }
+    public void AnnounceUnlockMutationSpirit() {
+        panelPendingClickPrompt.GetComponentInChildren<Text>().text = "Mutation Spirit Captured!";
+        panelPendingClickPrompt.GetComponentInChildren<Text>().color = new Color(0.8f, 0.1277f, 0.1276f);        
+        isAnnouncementTextOn = true;
+    }
+    public void AnnounceUnlockMinerals() {
+        panelPendingClickPrompt.GetComponentInChildren<Text>().text = "Minerals Essence Captured!";
+        panelPendingClickPrompt.GetComponentInChildren<Text>().color = new Color(1f, 1f, 1f);        
+        isAnnouncementTextOn = true;
+    }
+    public void AnnounceUnlockAir() {
+        panelPendingClickPrompt.GetComponentInChildren<Text>().text = "Air Spirit Captured!";
+        panelPendingClickPrompt.GetComponentInChildren<Text>().color = new Color(0.5f, 0.5f, 1f);        
+        isAnnouncementTextOn = true;
+    }
+    public void AnnounceUnlockPebbles() {
+        panelPendingClickPrompt.GetComponentInChildren<Text>().text = "Pebble Spirit Captured!";
+        panelPendingClickPrompt.GetComponentInChildren<Text>().color = new Color(1f, 1f, 1f);        
+        isAnnouncementTextOn = true;
+    }
+    public void AnnounceUnlockSand() {
+        panelPendingClickPrompt.GetComponentInChildren<Text>().text = "Sand Spirit Captured!";
+        panelPendingClickPrompt.GetComponentInChildren<Text>().color = new Color(1f, 1f, 1f);        
+        isAnnouncementTextOn = true;
+    }
     public void AnnounceUnlockAlgae() {
         panelPendingClickPrompt.GetComponentInChildren<Text>().text = "Algae Species Unlocked!";
         panelPendingClickPrompt.GetComponentInChildren<Text>().color = colorAlgaeLayer;
@@ -1179,6 +1252,12 @@ public class UIManager : MonoBehaviour {
     public void AnnounceUnlockVertebrates() {
         panelPendingClickPrompt.GetComponentInChildren<Text>().text = "Vertebrate Species Unlocked!";
         panelPendingClickPrompt.GetComponentInChildren<Text>().color = colorVertebratesLayer;
+        //panelPendingClickPrompt.GetComponent<Image>().raycastTarget = true;
+        isAnnouncementTextOn = true;
+    }
+    public void AnnounceUnlockPlants() {
+        panelPendingClickPrompt.GetComponentInChildren<Text>().text = "Plant Species Unlocked!";
+        panelPendingClickPrompt.GetComponentInChildren<Text>().color = colorPlantsLayer;
         //panelPendingClickPrompt.GetComponent<Image>().raycastTarget = true;
         isAnnouncementTextOn = true;
     }
