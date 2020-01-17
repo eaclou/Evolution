@@ -277,8 +277,8 @@ public class KnowledgeUI : MonoBehaviour {
     public void UpdateKnowledgePanelUI(TrophicLayersManager layerManager) {
 
 
-        panelKnowledgeSpiritBase.SetActive(isOpen && uiManagerRef.worldSpiritHubUI.isOpen);
-        if(isOpen && uiManagerRef.worldSpiritHubUI.isOpen) {
+        panelKnowledgeSpiritBase.SetActive(isOpen); // && uiManagerRef.worldSpiritHubUI.isOpen);
+        if(isOpen) {
             UpdateUI(layerManager);
         }        
     }

@@ -55,6 +55,10 @@ public class GlobalResourcesUI : MonoBehaviour {
     }
 
     public void UpdateGlobalResourcesPanelUpdate() {
+        
+        this.isOpen = uiManagerRef.knowledgeUI.isOpen;
+        
+
         panelGlobalResourcesMain.SetActive(isOpen);
         if(isOpen) {
             UpdateUI();

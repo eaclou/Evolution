@@ -25,7 +25,11 @@ public class UIManager : MonoBehaviour {
     private bool firstTimeStartup = true;
 
     public bool isBrushModeON_snoopingOFF = true;
-    //public bool isSnoopingModeON = false;
+
+
+    public Text textFXPH_loading_start;
+    public Text textFXPH_loading_end;
+    public Text textFXPH_playing_start;
 
     public GameObject protoSpiritClickColliderGO;
     
@@ -409,14 +413,14 @@ public class UIManager : MonoBehaviour {
 
         if(gameManager.simulationManager._BigBangOn) {
             panelBigBang.SetActive(true);
-            bigBangFramesCounter += 2;
+            bigBangFramesCounter += 1;
 
-            if(bigBangFramesCounter == 10) {
+            if(bigBangFramesCounter == 120) {
                 worldSpiritHubUI.isUnlocked = true;
                 worldSpiritHubUI.OpenWorldTreeSelect();
             }
             
-            if(bigBangFramesCounter > 60) {
+            if(bigBangFramesCounter > 140) {
                 bigBangFramesCounter = 0;
                 gameManager.simulationManager._BigBangOn = false;
                 panelBigBang.SetActive(false);
@@ -424,12 +428,12 @@ public class UIManager : MonoBehaviour {
                 
                                 
             }
-            else if(bigBangFramesCounter > 40) {
+            else if(bigBangFramesCounter > 80) {
                 imageBigBangStrokes01.gameObject.SetActive(true);
                 imageBigBangStrokes02.gameObject.SetActive(false);
                 imageBigBangStrokes03.gameObject.SetActive(false);
             }
-            else if(bigBangFramesCounter > 20) {
+            else if(bigBangFramesCounter > 40) {
                 imageBigBangStrokes01.gameObject.SetActive(true);
                 imageBigBangStrokes02.gameObject.SetActive(true);
                 imageBigBangStrokes03.gameObject.SetActive(false);
@@ -460,6 +464,13 @@ public class UIManager : MonoBehaviour {
         debugPanelUI.UpdateDebugUI();
               
         UpdatePausedUI();
+
+        if(gameManager.simulationManager.simAgeTimeSteps < 400f && gameManager.simulationManager.simAgeTimeSteps > 160f) {
+            textFXPH_playing_start.gameObject.SetActive(true);
+        }
+        else {
+            textFXPH_playing_start.gameObject.SetActive(false);
+        }
 
         if(isClickableSpiritRoaming) {
             protoSpiritClickColliderGO.SetActive(true);
@@ -732,7 +743,7 @@ public class UIManager : MonoBehaviour {
                 
                 if(plantDist < zoopDist) {                    
                     
-                    if(watcherUI.isOpen && !isBrushModeON_snoopingOFF && !cameraManager.isMouseHoverAgent && theCursorCzar.leftClickThisFrame) { 
+                    if(watcherUI.isOpen && !cameraManager.isMouseHoverAgent && theCursorCzar.leftClickThisFrame) { 
                         if(selectedPlantID != closestPlantID && plantDist < 3.3f) {
                             gameManager.simulationManager.vegetationManager.selectedPlantParticleIndex = closestPlantID;
                             gameManager.simulationManager.vegetationManager.isPlantParticleSelected = true;
@@ -745,7 +756,7 @@ public class UIManager : MonoBehaviour {
                 }
                 else {                   
 
-                    if (watcherUI.isOpen && !isBrushModeON_snoopingOFF && !cameraManager.isMouseHoverAgent && theCursorCzar.leftClickThisFrame) {
+                    if (watcherUI.isOpen && !cameraManager.isMouseHoverAgent && theCursorCzar.leftClickThisFrame) {
                         if (selectedZoopID != closestZoopID && zoopDist < 3.3f) {
                             gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex = closestZoopID;
                             gameManager.simulationManager.zooplanktonManager.isAnimalParticleSelected = true;
@@ -1002,7 +1013,7 @@ public class UIManager : MonoBehaviour {
          
     }
 
-    public void SetToolbarButtonStateUI(ref Button button, TrophicSlot.SlotStatus slotStatus, bool isSelected) {
+    public void SetToolbarButtonStateUI(bool isDim, ref Button button, TrophicSlot.SlotStatus slotStatus, bool isSelected) {
 
         button.gameObject.SetActive(true);
         //Animation anim = button.GetComponent<Animation>();
@@ -1056,9 +1067,20 @@ public class UIManager : MonoBehaviour {
             colBlock.colorMultiplier = 2f;
         }
 
-        button.colors = colBlock;
+        if(isDim) {
+            button.colors = colBlock;
+            button.gameObject.transform.localScale = scale;
 
-        button.gameObject.transform.localScale = scale;
+            button.gameObject.SetActive(false);
+        }
+        else {
+            button.colors = colBlock;
+
+            button.gameObject.transform.localScale = scale;
+            button.gameObject.SetActive(true);
+        }
+
+        
     }
     
     #endregion
@@ -1189,7 +1211,11 @@ public class UIManager : MonoBehaviour {
     //    worldSpiritHubUI.ClickToolButton();
     //}
   
-
+    public void AnnounceBrushAppear() {
+        panelPendingClickPrompt.GetComponentInChildren<Text>().text = "A Minor Creation Spirit Appeared!";
+        panelPendingClickPrompt.GetComponentInChildren<Text>().color = new Color(1f, 1f, 1f);        
+        isAnnouncementTextOn = true;
+    }
     public void AnnounceUnlockBrushes() {
         panelPendingClickPrompt.GetComponentInChildren<Text>().text = "Creation Spirit Captured!";
         panelPendingClickPrompt.GetComponentInChildren<Text>().color = new Color(1f, 1f, 1f);        

@@ -120,6 +120,7 @@ public class TheCursorCzar : MonoBehaviour {
                         case UIManager.ClickableSpiritType.CreationBrush:
                             uiManagerRef.brushesUI.Unlock();
                             uiManagerRef.brushesUI.SetTargetFromWorldTree();
+                            uiManagerRef.AnnounceUnlockBrushes();
                             //uiManagerRef.isClickableSpiritRoaming = false;
                             uiManagerRef.curClickableSpiritType = UIManager.ClickableSpiritType.Decomposers;
                             break;
@@ -135,6 +136,7 @@ public class TheCursorCzar : MonoBehaviour {
 
                             uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0];
                             uiManagerRef.brushesUI.selectedEssenceSlot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0];
+                            
                             //uiManagerRef.isClickableSpiritRoaming = false;
                             uiManagerRef.curClickableSpiritType = UIManager.ClickableSpiritType.KnowledgeSpirit;
                             break;
@@ -194,7 +196,9 @@ public class TheCursorCzar : MonoBehaviour {
                             uiManagerRef.unlockedAnnouncementSlotRef = pebblesSlot;
                             uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot = pebblesSlot;
                             uiManagerRef.brushesUI.selectedEssenceSlot = pebblesSlot;
-                            
+                            uiManagerRef.brushesUI.selectedBrushLinkedSpiritTerrainLayer = 2; // uiManagerRef.worldSpiritHubUI.selectedToolbarTerrainLayer; 
+                            uiManagerRef.brushesUI.ClickButtonBrushPaletteTerrain(2);
+
                             uiManagerRef.curClickableSpiritType = UIManager.ClickableSpiritType.Zooplankton;
                             break;
                         case UIManager.ClickableSpiritType.Sand:
@@ -206,6 +210,8 @@ public class TheCursorCzar : MonoBehaviour {
                             uiManagerRef.unlockedAnnouncementSlotRef = sandSlot;
                             uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot = sandSlot;
                             uiManagerRef.brushesUI.selectedEssenceSlot = sandSlot;
+                            uiManagerRef.brushesUI.selectedBrushLinkedSpiritTerrainLayer = 3; 
+                            uiManagerRef.brushesUI.ClickButtonBrushPaletteTerrain(3);
                             
                             uiManagerRef.curClickableSpiritType = UIManager.ClickableSpiritType.Air;
                             break;
