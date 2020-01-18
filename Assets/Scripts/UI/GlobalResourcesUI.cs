@@ -63,9 +63,5 @@ public class GlobalResourcesUI : MonoBehaviour {
         if(isOpen) {
             UpdateUI();
         }
-
-    }
-	/*
-	 
-        */    
+    }   
 }

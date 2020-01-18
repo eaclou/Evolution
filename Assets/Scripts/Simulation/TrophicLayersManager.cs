@@ -139,11 +139,11 @@ public class TrophicLayersManager {
     public void Tick(SimulationManager simManager) {
         //temp clickable spirits!
         // HACKY AF!
-        if(!simManager.uiManager.isClickableSpiritRoaming && simManager.simAgeTimeSteps > 600 && !simManager.uiManager.brushesUI.isUnlocked) {
+        if(!simManager.uiManager.isClickableSpiritRoaming && simManager.simAgeTimeSteps > 400 && !simManager.uiManager.brushesUI.isUnlocked) {
             simManager.uiManager.isClickableSpiritRoaming = true;
             simManager.uiManager.roamingSpiritColor = Color.white;
             simManager.uiManager.AnnounceBrushAppear();
-            Debug.Log("ASDFASDFLASDFJADSFJ");
+            //Debug.Log("ASDFASDFLASDFJADSFJ");
         }
 
         // DECOMPOSERS!

@@ -415,36 +415,41 @@ public class UIManager : MonoBehaviour {
             panelBigBang.SetActive(true);
             bigBangFramesCounter += 1;
 
-            if(bigBangFramesCounter == 120) {
+            if(bigBangFramesCounter == 70) {
                 worldSpiritHubUI.isUnlocked = true;
                 worldSpiritHubUI.OpenWorldTreeSelect();
+                
             }
             
-            if(bigBangFramesCounter > 140) {
+            if(bigBangFramesCounter > 70) {
                 bigBangFramesCounter = 0;
                 gameManager.simulationManager._BigBangOn = false;
                 panelBigBang.SetActive(false);
 
                 
-                                
-            }
-            else if(bigBangFramesCounter > 80) {
-                imageBigBangStrokes01.gameObject.SetActive(true);
-                imageBigBangStrokes02.gameObject.SetActive(false);
-                imageBigBangStrokes03.gameObject.SetActive(false);
             }
             else if(bigBangFramesCounter > 40) {
                 imageBigBangStrokes01.gameObject.SetActive(true);
+                imageBigBangStrokes02.gameObject.SetActive(false);
+                imageBigBangStrokes03.gameObject.SetActive(false);
+
+                 worldSpiritHubUI.PlayBigBangSpawnAnim();               
+
+            }
+            else if(bigBangFramesCounter > 20) {
+                imageBigBangStrokes01.gameObject.SetActive(true);
                 imageBigBangStrokes02.gameObject.SetActive(true);
                 imageBigBangStrokes03.gameObject.SetActive(false);
+
+                
             }
             else if(bigBangFramesCounter > 0) {
                 imageBigBangStrokes01.gameObject.SetActive(true);
                 imageBigBangStrokes02.gameObject.SetActive(true);
                 imageBigBangStrokes03.gameObject.SetActive(true);
-            }
 
-            
+                
+            }
         }
 
 
@@ -474,12 +479,12 @@ public class UIManager : MonoBehaviour {
 
         if(isClickableSpiritRoaming) {
             protoSpiritClickColliderGO.SetActive(true);
-            float orbitSpeed = 0.45f;
-            float orbitRadius = 18f;
+            float orbitSpeed = 0.5f;
+            float orbitRadius = 20f;
             float spinAngle = Time.realtimeSinceStartup * orbitSpeed;
-            float zPhase = spinAngle * 5f;
+            float zPhase = spinAngle * 9.5f;
             float zBounceMag = 1f;
-            roamingSpiritScale = 3f + 0.5f * Mathf.Cos(Time.realtimeSinceStartup * 4f);
+            roamingSpiritScale = 3f + 0.5f * Mathf.Cos(Time.realtimeSinceStartup * 7.673f);
             roamingSpiritPosition = creationSpiritClickableStartPos + new Vector3(Mathf.Cos(spinAngle) * orbitRadius, Mathf.Sin(spinAngle) * orbitRadius, Mathf.Sin(zPhase) * zBounceMag);
 
             protoSpiritClickColliderGO.transform.position = roamingSpiritPosition;

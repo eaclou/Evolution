@@ -15,6 +15,9 @@ public class WorldSpiritHubUI : MonoBehaviour {
     public GameObject panelWorldHubExpand;
     public Image imageSelectedTargetLayer;
 
+    public Animator animatorTest01;
+    private int animTestTriggerHash = Animator.StringToHash("PlayAnim");
+
     public Button buttonMutationLink;
     public Button buttonBrushesLink;
     public Button buttonKnowledgeLink;
@@ -75,6 +78,12 @@ public class WorldSpiritHubUI : MonoBehaviour {
         isUnlocked = true; // false;
         //isFocused = true;
 	}
+
+    public void PlayBigBangSpawnAnim() {
+        Debug.Log("Play Anim!!!!!!");
+
+        animatorTest01.SetTrigger(animTestTriggerHash);
+    }
 
     private void UpdateUI() {
         TrophicLayersManager layerManager = uiManagerRef.gameManager.simulationManager.trophicLayersManager;
@@ -315,9 +324,9 @@ public class WorldSpiritHubUI : MonoBehaviour {
     public void OpenWorldTreeSelect() {
         isOpen = true;
         uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
-        Animation animTerrainShake = imageBitTerrain.GetComponent<Animation>();
+        //Animation animTerrainShake = imageBitTerrain.GetComponent<Animation>();
         //animTerrainShake.StartPlayback();
-        animTerrainShake.Play();
+        //animTerrainShake.Play();
 
         Debug.Log("OpenWorldTreeSelect " + isOpen.ToString());
     }
