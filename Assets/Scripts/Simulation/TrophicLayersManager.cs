@@ -88,7 +88,7 @@ public class TrophicLayersManager {
         kingdomOther.name = "Other";
         TrophicTier otherTier0 = new TrophicTier();
         otherTier0.trophicSlots[0].Initialize("Minerals", TrophicSlot.SlotStatus.Locked, 4, 0, 0, uiManagerRef.spriteSpiritMineralsIcon, uiManagerRef.colorMineralLayer);
-        otherTier0.trophicSlots[1].Initialize("Water", TrophicSlot.SlotStatus.On, 4, 0, 1, uiManagerRef.spriteSpiritWaterIcon, uiManagerRef.colorWaterLayer);
+        otherTier0.trophicSlots[1].Initialize("Water", TrophicSlot.SlotStatus.Locked, 4, 0, 1, uiManagerRef.spriteSpiritWaterIcon, uiManagerRef.colorWaterLayer);
         otherTier0.trophicSlots[2].Initialize("Air", TrophicSlot.SlotStatus.Locked, 4, 0, 2, uiManagerRef.spriteSpiritAirIcon, uiManagerRef.colorAirLayer);
         kingdomOther.trophicTiersList.Add(otherTier0);
                 
@@ -204,6 +204,13 @@ public class TrophicLayersManager {
             if(simManager.uiManager.framesSinceLastClickableSpirit > 150 && simManager.uiManager.curClickableSpiritType == UIManager.ClickableSpiritType.Minerals) {
                 simManager.uiManager.isClickableSpiritRoaming = true;
                 simManager.uiManager.roamingSpiritColor = kingdomOther.trophicTiersList[0].trophicSlots[0].color;
+            }
+        }
+        // WATER:
+        if(kingdomOther.trophicTiersList[0].trophicSlots[1].status == TrophicSlot.SlotStatus.Locked) {
+            if(simManager.uiManager.framesSinceLastClickableSpirit > 150 && simManager.uiManager.curClickableSpiritType == UIManager.ClickableSpiritType.Water) {
+                simManager.uiManager.isClickableSpiritRoaming = true;
+                simManager.uiManager.roamingSpiritColor = kingdomOther.trophicTiersList[0].trophicSlots[1].color;
             }
         }
         // Air:

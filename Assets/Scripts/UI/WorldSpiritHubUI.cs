@@ -17,6 +17,8 @@ public class WorldSpiritHubUI : MonoBehaviour {
 
     public Animator animatorTest01;
     private int animTestTriggerHash = Animator.StringToHash("PlayAnim");
+    public Animator animatorWorldHubUI;
+
 
     public Button buttonMutationLink;
     public Button buttonBrushesLink;
@@ -82,7 +84,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
     public void PlayBigBangSpawnAnim() {
         Debug.Log("Play Anim!!!!!!");
 
-        animatorTest01.SetTrigger(animTestTriggerHash);
+        //animatorTest01.SetTrigger(animTestTriggerHash);
     }
 
     private void UpdateUI() {
@@ -253,9 +255,9 @@ public class WorldSpiritHubUI : MonoBehaviour {
             }
         }
 
-        bool isDim = true;
+        bool isDim = false;
         if(uiManagerRef.panelFocus == UIManager.PanelFocus.WorldHub) {
-            isDim = false;
+            //isDim = false;
         }
         uiManagerRef.SetToolbarButtonStateUI(isDim, ref buttonWorldSpiritDecomposers, layerManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status, isSelectedDecomposers);
 
@@ -282,6 +284,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
         //imageSelectedTargetLayer.color = curIconColor;
 
         textSelectedEssenceName.text = selectedWorldSpiritSlot.speciesName;
+        textSelectedEssenceName.color = curIconColor;
         textSelectedEssenceDescription.text = essenceDescriptionStr;
         imageSelectedEssence.color = curIconColor;
         imageSelectedEssence.sprite = curIconSprite;
@@ -289,15 +292,17 @@ public class WorldSpiritHubUI : MonoBehaviour {
 
     }
     public void UpdateWorldSpiritHubUI() {
-        if(uiManagerRef.panelFocus == UIManager.PanelFocus.WorldHub) {
+        if(uiManagerRef.panelFocus == UIManager.PanelFocus.Brushes) {
+            isOpen = false;  // turn off panel if unfocused
             //imageBitMinerals.color = Color.white;
+            animatorWorldHubUI.SetBool("_IsOpen", false);
         }
         else {
-            isOpen = false;  // turn off panel if unfocused
+            
             
         }
 
-        panelWorldHubExpand.SetActive(isOpen);
+        panelWorldHubExpand.SetActive(true); // isOpen);
         if(isOpen) {
             UpdateUI();
         }
@@ -309,21 +314,27 @@ public class WorldSpiritHubUI : MonoBehaviour {
     public void ClickMinimizePanel() {
         //uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
         isOpen = false;
+        animatorWorldHubUI.SetBool("_IsOpen", false);
         //panelWorldHubExpand.SetActive(false);
         Debug.Log("ClickToolButton) " + isOpen.ToString());
     }
     public void SetTargetFromBrushesUI() {
         selectedWorldSpiritSlot = uiManagerRef.brushesUI.selectedEssenceSlot;
         uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
+        this.isOpen = true;
+        animatorWorldHubUI.SetBool("_IsOpen", true);
         //isPaletteOpen = true;
     }
     public void SetTargetFromWatcherUI() {
         selectedWorldSpiritSlot = uiManagerRef.watcherUI.watcherSelectedTrophicSlotRef;
         uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
+        this.isOpen = true;
+        animatorWorldHubUI.SetBool("_IsOpen", true);
     }
     public void OpenWorldTreeSelect() {
         isOpen = true;
         uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
+        animatorWorldHubUI.SetBool("_IsOpen", true);
         //Animation animTerrainShake = imageBitTerrain.GetComponent<Animation>();
         //animTerrainShake.StartPlayback();
         //animTerrainShake.Play();

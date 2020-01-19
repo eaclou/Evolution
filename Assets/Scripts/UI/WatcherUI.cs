@@ -19,6 +19,8 @@ public class WatcherUI : MonoBehaviour {
     //public TrophicSlot targetSlotRef;
     //public bool isSelected;
 
+    public Animator animatorWatcherUI;
+
     public Image imageColorBar;
     public Image imageIsSnooping;
     public Image imageWatcherInactiveOverlay;
@@ -545,14 +547,23 @@ public class WatcherUI : MonoBehaviour {
 	public void UpdateWatcherPanelUI(TrophicLayersManager layerManager) {
 
         if(uiManagerRef.panelFocus == UIManager.PanelFocus.Watcher) {
+            animatorWatcherUI.SetBool("_IsOpen", true);
             //imageBitMinerals.color = Color.white;
         }
         else {
-            isOpen = false;  // turn off panel if unfocused
+            if(uiManagerRef.panelFocus == UIManager.PanelFocus.WorldHub && isOpen) {
+                animatorWatcherUI.SetBool("_IsOpen", true);
+                
+            }
+            else {
+                animatorWatcherUI.SetBool("_IsOpen", false);
+                isOpen = false;  // turn off panel if unfocused
+            }
+            
             
         }
 
-        panelWatcherSpiritMain.SetActive(isOpen);
+        panelWatcherSpiritMain.SetActive(true); // isOpen);
         if (isOpen) {
             UpdateUI(layerManager);
         }
@@ -615,6 +626,12 @@ public class WatcherUI : MonoBehaviour {
             uiManagerRef.isBrushModeON_snoopingOFF = false;
             uiManagerRef.panelFocus = UIManager.PanelFocus.Watcher;
             uiManagerRef.curActiveTool = UIManager.ToolType.None;
+
+            animatorWatcherUI.SetBool("_IsOpen", true);
+        }
+        else {
+            uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
+            animatorWatcherUI.SetBool("_IsOpen", false);
         }
         //watcherLockedTrophicSlotRef = uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot;//
     }

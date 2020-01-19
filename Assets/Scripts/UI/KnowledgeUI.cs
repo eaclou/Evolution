@@ -13,6 +13,8 @@ public class KnowledgeUI : MonoBehaviour {
     //public Button buttonKnowledgeLock;
     public Image imageColorBar;
 
+    public Animator animatorKnowledgeUI;
+
     public Image imageKnowledgeSpeciesStatsGraph;
 
     public Image knowledgeGraphVertebrateLifespan;
@@ -67,10 +69,18 @@ public class KnowledgeUI : MonoBehaviour {
 
     public void ClickToolButton() {
         isOpen = !isOpen;
+
+        if(isOpen) {
+            animatorKnowledgeUI.SetBool("_IsOpen", true);
+        }
+        else {
+            animatorKnowledgeUI.SetBool("_IsOpen", false);
+        }
     }
 
     public void OpenKnowledgePanel() {
         isOpen = true;
+        animatorKnowledgeUI.SetBool("_IsOpen", true);
     }
 
     private void UpdateUI(TrophicLayersManager layerManager) {
@@ -277,7 +287,7 @@ public class KnowledgeUI : MonoBehaviour {
     public void UpdateKnowledgePanelUI(TrophicLayersManager layerManager) {
 
 
-        panelKnowledgeSpiritBase.SetActive(isOpen); // && uiManagerRef.worldSpiritHubUI.isOpen);
+        panelKnowledgeSpiritBase.SetActive(true); // && uiManagerRef.worldSpiritHubUI.isOpen);
         if(isOpen) {
             UpdateUI(layerManager);
         }        

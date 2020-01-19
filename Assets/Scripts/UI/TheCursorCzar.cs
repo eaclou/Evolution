@@ -33,6 +33,7 @@ public class TheCursorCzar : MonoBehaviour {
 
     public Texture2D cursorTexBrush;
     public Texture2D cursorTexWatcher;
+    public Texture2D cursorTexWorld;
 
 	// Use this for initialization
 	void Start () {
@@ -122,6 +123,19 @@ public class TheCursorCzar : MonoBehaviour {
                             uiManagerRef.brushesUI.SetTargetFromWorldTree();
                             uiManagerRef.AnnounceUnlockBrushes();
                             //uiManagerRef.isClickableSpiritRoaming = false;
+                            uiManagerRef.curClickableSpiritType = UIManager.ClickableSpiritType.Water;
+                            break;
+                        case UIManager.ClickableSpiritType.Water:
+                            uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[1].status = TrophicSlot.SlotStatus.On;
+                            Debug.Log("WATER UNLOCKED!!! " + uiManagerRef.unlockCooldownCounter.ToString());
+                            //uiManagerRef.brushesUI.Unlock();
+                            //uiManagerRef.brushesUI.SetTargetFromWorldTree();
+                            uiManagerRef.AnnounceUnlockWater();
+                            uiManagerRef.isUnlockCooldown = true;
+                            uiManagerRef.unlockedAnnouncementSlotRef = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[1];
+                            uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[1];
+                            uiManagerRef.brushesUI.selectedEssenceSlot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[1];
+                            
                             uiManagerRef.curClickableSpiritType = UIManager.ClickableSpiritType.Decomposers;
                             break;
                         case UIManager.ClickableSpiritType.Decomposers:
@@ -152,14 +166,17 @@ public class TheCursorCzar : MonoBehaviour {
                         case UIManager.ClickableSpiritType.WatcherSpirit:
                             uiManagerRef.watcherUI.isUnlocked = true;
                             uiManagerRef.watcherUI.ClickToolButton();
+                            uiManagerRef.watcherUI.animatorWatcherUI.SetBool("_IsOpen", true);
                             uiManagerRef.AnnounceUnlockWatcherSpirit();
-                            uiManagerRef.curClickableSpiritType = UIManager.ClickableSpiritType.VertA;
+                            uiManagerRef.curClickableSpiritType = UIManager.ClickableSpiritType.Plants;
                             break;
                         case UIManager.ClickableSpiritType.MutationSpirit:
                             uiManagerRef.mutationUI.isUnlocked = true;
                             uiManagerRef.AnnounceUnlockMutationSpirit();
                             //uiManagerRef.curClickableSpiritType = UIManager.ClickableSpiritType.Zooplankton; // *** Last unlock?
-                            uiManagerRef.curClickableSpiritType = UIManager.ClickableSpiritType.VertB;
+                            uiManagerRef.curClickableSpiritType = UIManager.ClickableSpiritType.Air;
+                            uiManagerRef.mutationUI.ClickToolButton();
+                            uiManagerRef.worldSpiritHubUI.OpenWorldTreeSelect();
                             break;
                         case UIManager.ClickableSpiritType.Minerals:
                             TrophicSlot mineralSlot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[0];
@@ -173,7 +190,7 @@ public class TheCursorCzar : MonoBehaviour {
                             uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot = mineralSlot;
                             uiManagerRef.brushesUI.selectedEssenceSlot = mineralSlot;
                             
-                            uiManagerRef.curClickableSpiritType = UIManager.ClickableSpiritType.Pebbles;
+                            uiManagerRef.curClickableSpiritType = UIManager.ClickableSpiritType.Zooplankton;
                             break;
                         case UIManager.ClickableSpiritType.Air:
                             TrophicSlot airSlot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[2];
@@ -185,7 +202,7 @@ public class TheCursorCzar : MonoBehaviour {
                             uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot = airSlot;
                             uiManagerRef.brushesUI.selectedEssenceSlot = airSlot;
                             
-                            uiManagerRef.curClickableSpiritType = UIManager.ClickableSpiritType.Plants;
+                            uiManagerRef.curClickableSpiritType = UIManager.ClickableSpiritType.MutationSpirit;
                             break;
                         case UIManager.ClickableSpiritType.Pebbles:
                             TrophicSlot pebblesSlot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomTerrain.trophicTiersList[0].trophicSlots[2];
@@ -199,7 +216,7 @@ public class TheCursorCzar : MonoBehaviour {
                             uiManagerRef.brushesUI.selectedBrushLinkedSpiritTerrainLayer = 2; // uiManagerRef.worldSpiritHubUI.selectedToolbarTerrainLayer; 
                             uiManagerRef.brushesUI.ClickButtonBrushPaletteTerrain(2);
 
-                            uiManagerRef.curClickableSpiritType = UIManager.ClickableSpiritType.Zooplankton;
+                            uiManagerRef.curClickableSpiritType = UIManager.ClickableSpiritType.WatcherSpirit;
                             break;
                         case UIManager.ClickableSpiritType.Sand:
                             TrophicSlot sandSlot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomTerrain.trophicTiersList[0].trophicSlots[3];
@@ -213,7 +230,7 @@ public class TheCursorCzar : MonoBehaviour {
                             uiManagerRef.brushesUI.selectedBrushLinkedSpiritTerrainLayer = 3; 
                             uiManagerRef.brushesUI.ClickButtonBrushPaletteTerrain(3);
                             
-                            uiManagerRef.curClickableSpiritType = UIManager.ClickableSpiritType.Air;
+                            uiManagerRef.curClickableSpiritType = UIManager.ClickableSpiritType.VertA;
                             break;
                         case UIManager.ClickableSpiritType.Algae:
                             uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
@@ -241,7 +258,7 @@ public class TheCursorCzar : MonoBehaviour {
                             uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[0];
                             uiManagerRef.brushesUI.selectedEssenceSlot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[0];
 
-                            uiManagerRef.curClickableSpiritType = UIManager.ClickableSpiritType.WatcherSpirit;
+                            uiManagerRef.curClickableSpiritType = UIManager.ClickableSpiritType.Sand;
                             break;
                         case UIManager.ClickableSpiritType.Zooplankton:
                             uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
@@ -254,7 +271,7 @@ public class TheCursorCzar : MonoBehaviour {
                             uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0];
                             uiManagerRef.brushesUI.selectedEssenceSlot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0];
                             
-                            uiManagerRef.curClickableSpiritType = UIManager.ClickableSpiritType.Sand;
+                            uiManagerRef.curClickableSpiritType = UIManager.ClickableSpiritType.Pebbles;
                             break;
                         case UIManager.ClickableSpiritType.VertA:                            
                             uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].unlocked = true;
@@ -270,6 +287,19 @@ public class TheCursorCzar : MonoBehaviour {
 
                             
                             uiManagerRef.curClickableSpiritType = UIManager.ClickableSpiritType.MutationSpirit;
+                            break;
+                        case UIManager.ClickableSpiritType.VertB:                            
+                            uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].unlocked = true;
+                            uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1].status = TrophicSlot.SlotStatus.On;                
+                            Debug.Log("CREATURE B UNLOCKED!!! " + uiManagerRef.unlockCooldownCounter.ToString());
+                            uiManagerRef.AnnounceUnlockVertebrates();
+                            uiManagerRef.isUnlockCooldown = true;
+                            uiManagerRef.unlockedAnnouncementSlotRef = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1];                
+                            uiManagerRef.worldSpiritHubUI.ClickWorldCreateNewSpecies(uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1]);
+
+                            uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1];
+                            uiManagerRef.brushesUI.selectedEssenceSlot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1];
+
                             break;
                         default:
                             Debug.LogError("No Enum Type Found! (");
@@ -288,14 +318,17 @@ public class TheCursorCzar : MonoBehaviour {
     
 	
 	public void UpdateCursorCzar () {
-        /*
-        if(uiManagerRef.isBrushModeON_snoopingOFF) {
-            Cursor.SetCursor(cursorTexBrush, Vector2.one * 64f, CursorMode.Auto);
+        
+        if(uiManagerRef.panelFocus == UIManager.PanelFocus.Brushes) {
+            Cursor.SetCursor(cursorTexBrush, Vector2.zero, CursorMode.Auto);
+        }
+        else if(uiManagerRef.panelFocus == UIManager.PanelFocus.Watcher) {
+            Cursor.SetCursor(cursorTexWatcher, Vector2.zero, CursorMode.Auto);
         }
         else {
-            Cursor.SetCursor(cursorTexWatcher, Vector2.one * 64f, CursorMode.Auto);
+            Cursor.SetCursor(cursorTexWorld, Vector2.zero, CursorMode.Auto);
         }
-        */
+        
 
         // &&&&&&&&&&&&&&&&& MOUSE: &&&&&&&&&&&&&&&
         leftClickThisFrame = Input.GetMouseButtonDown(0);

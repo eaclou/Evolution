@@ -20,6 +20,8 @@ public class BrushesUI : MonoBehaviour {
     public Button buttonBrushExtra1;
     public Button buttonBrushExtra2;
     public Button buttonBrushExtra3;
+
+    public Animator animatorBrushesUI;
         
     public float toolbarInfluencePoints = 1f;
     public Text textInfluencePointsValue;
@@ -164,13 +166,14 @@ public class BrushesUI : MonoBehaviour {
 
         if(uiManagerRef.panelFocus == UIManager.PanelFocus.Brushes) {
             //imageBitMinerals.color = Color.white;
+            animatorBrushesUI.SetBool("MinPanel", false);
         }
         else {
-            isOpen = false;  // turn off panel if unfocused
-            
+            //isOpen = false;  // turn off panel if unfocused
+            animatorBrushesUI.SetBool("MinPanel", true);
         }
 
-        panelBrushes.SetActive(isOpen);
+        //panelBrushes.SetActive(isOpen);
         panelBrushPaletteSelect.SetActive(true); // isPaletteOpen);
         if (isOpen) {
             UpdateUI();
@@ -782,9 +785,13 @@ public class BrushesUI : MonoBehaviour {
         if(isOpen) {
             EnterCreationBrushMode();
             //uiManagerRef.isBrushModeON_snoopingOFF = true; // ***** Switching to brushingMode!!! ***
+
+            animatorBrushesUI.SetBool("MinPanel", false);
         }
         else {
             uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
+
+            animatorBrushesUI.SetBool("MinPanel", true);
         }
     }
     public void SetTargetFromWorldTree() {

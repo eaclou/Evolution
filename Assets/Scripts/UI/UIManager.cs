@@ -186,6 +186,7 @@ public class UIManager : MonoBehaviour {
         Pebbles,
         Sand,
         Air,
+        Water,
         Minerals,
         Decomposers,
         Algae,
@@ -1224,6 +1225,11 @@ public class UIManager : MonoBehaviour {
     public void AnnounceUnlockBrushes() {
         panelPendingClickPrompt.GetComponentInChildren<Text>().text = "Creation Spirit Captured!";
         panelPendingClickPrompt.GetComponentInChildren<Text>().color = new Color(1f, 1f, 1f);        
+        isAnnouncementTextOn = true;
+    }
+    public void AnnounceUnlockWater() {
+        panelPendingClickPrompt.GetComponentInChildren<Text>().text = "Water Spirit Found!";
+        panelPendingClickPrompt.GetComponentInChildren<Text>().color = new Color(0.4f, 0.4f, 0.9f);        
         isAnnouncementTextOn = true;
     }
     public void AnnounceUnlockKnowledgeSpirit() {
