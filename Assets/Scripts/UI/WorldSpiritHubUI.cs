@@ -7,6 +7,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
     public UIManager uiManagerRef;
     public bool isUnlocked;
     public bool isOpen;
+    public bool isDim;
     
     //public int selectedSlotID;
     public TrophicSlot selectedWorldSpiritSlot;
@@ -20,9 +21,9 @@ public class WorldSpiritHubUI : MonoBehaviour {
     public Animator animatorWorldHubUI;
 
 
-    public Button buttonMutationLink;
+    //public Button buttonMutationLink;
     public Button buttonBrushesLink;
-    public Button buttonKnowledgeLink;
+    //public Button buttonKnowledgeLink;
 
     public Text textSelectedEssenceName;
     public Text textSelectedEssenceDescription;
@@ -124,11 +125,11 @@ public class WorldSpiritHubUI : MonoBehaviour {
 
         if(uiManagerRef.brushesUI.isUnlocked) {
             buttonBrushesLink.interactable = true;
-            buttonBrushesLink.gameObject.SetActive(true);
+            //buttonBrushesLink.gameObject.SetActive(true);
         }
         else {
             buttonBrushesLink.interactable = false;
-            buttonBrushesLink.gameObject.SetActive(false);
+            //buttonBrushesLink.gameObject.SetActive(false);
         }
 
         string essenceDescriptionStr = "";
@@ -255,10 +256,17 @@ public class WorldSpiritHubUI : MonoBehaviour {
             }
         }
 
-        bool isDim = false;
+        isDim = true;
         if(uiManagerRef.panelFocus == UIManager.PanelFocus.WorldHub) {
-            //isDim = false;
+            isDim = false;
         }
+        //imageBitInfo.gameObject.SetActive(isDim);
+        textSelectedEssenceName.gameObject.SetActive(!isDim);
+        textSelectedEssenceDescription.gameObject.SetActive(!isDim);
+        buttonBrushesLink.gameObject.SetActive(!isDim);
+        //buttonKnowledgeLink.gameObject.SetActive(!isDim);
+        //buttonMutationLink.gameObject.SetActive(!isDim);
+
         uiManagerRef.SetToolbarButtonStateUI(isDim, ref buttonWorldSpiritDecomposers, layerManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status, isSelectedDecomposers);
 
         uiManagerRef.SetToolbarButtonStateUI(isDim, ref buttonWorldSpiritAlgae, layerManager.kingdomPlants.trophicTiersList[0].trophicSlots[0].status, isSelectedAlgae);
@@ -292,16 +300,21 @@ public class WorldSpiritHubUI : MonoBehaviour {
 
     }
     public void UpdateWorldSpiritHubUI() {
-        if(uiManagerRef.panelFocus == UIManager.PanelFocus.Brushes) {
-            isOpen = false;  // turn off panel if unfocused
-            //imageBitMinerals.color = Color.white;
-            animatorWorldHubUI.SetBool("_IsOpen", false);
+        if(uiManagerRef.panelFocus == UIManager.PanelFocus.WorldHub) {
+            animatorWorldHubUI.SetBool("_IsDimmed", false);
         }
         else {
-            
-            
+            animatorWorldHubUI.SetBool("_IsDimmed", true);            
         }
 
+        animatorWorldHubUI.SetBool("_IsOpen", isOpen);
+
+        bool animFinished = animatorWorldHubUI.GetBool("_AnimFinished");
+        if(animFinished) {
+            //Debug.Log("UpdateWorldSpiritHubUI: animFinished " + animFinished.ToString());
+            //animatorWorldHubUI.SetBool("_AnimFinished", false);
+        }
+        imageBitInfo.gameObject.SetActive(animFinished); // Testing anim-driven approach
         panelWorldHubExpand.SetActive(true); // isOpen);
         if(isOpen) {
             UpdateUI();

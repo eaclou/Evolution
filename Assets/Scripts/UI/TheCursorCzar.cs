@@ -6,6 +6,8 @@ using UnityEngine.UI;
 public class TheCursorCzar : MonoBehaviour {
     public UIManager uiManagerRef;
 
+    public bool _IsHoverClickableSpirit;
+
     public GameObject mouseRaycastWaterPlane;
     private Vector3 prevMousePositionOnWaterPlane;
     public Vector3 curMousePositionOnWaterPlane;
@@ -81,6 +83,9 @@ public class TheCursorCzar : MonoBehaviour {
         uiManagerRef.cameraManager.isMouseHoverAgent = false;
         uiManagerRef.cameraManager.mouseHoverAgentIndex = 0;
         uiManagerRef.cameraManager.mouseHoverAgentRef = null;
+
+        _IsHoverClickableSpirit = false;
+
         //Debug.Log("MouseRaycastCheckAgents");
         if(hit.collider != null) {
             
@@ -90,7 +95,7 @@ public class TheCursorCzar : MonoBehaviour {
                 //Debug.Log("AGENT: [ " + agentRef.gameObject.name + " ] #" + agentRef.index.ToString());
                     
                 if(clicked) {
-                    if (uiManagerRef.watcherUI.isOpen && !uiManagerRef.isBrushModeON_snoopingOFF) {
+                    if (uiManagerRef.panelFocus == UIManager.PanelFocus.Watcher) {
                         uiManagerRef.cameraManager.SetTargetAgent(agentRef, agentRef.index);
                         uiManagerRef.cameraManager.isFollowingAgent = true;
                         uiManagerRef.watcherUI.StopFollowingPlantParticle();
@@ -113,201 +118,14 @@ public class TheCursorCzar : MonoBehaviour {
             }
             else {
                 if(clicked) {
-                    Debug.Log("CLICKED ON A SPIRIT!!!! ?");
+                    Debug.Log("CLICKED ON A SPIRIT!!!! ? " + uiManagerRef.curClickableSpiritType.ToString());
+                    uiManagerRef.CapturedClickableSpirit();
 
-                    uiManagerRef.isClickableSpiritRoaming = false;
-
-                    switch(uiManagerRef.curClickableSpiritType) {
-                        case UIManager.ClickableSpiritType.CreationBrush:
-                            uiManagerRef.brushesUI.Unlock();
-                            uiManagerRef.brushesUI.SetTargetFromWorldTree();
-                            uiManagerRef.AnnounceUnlockBrushes();
-                            //uiManagerRef.isClickableSpiritRoaming = false;
-                            uiManagerRef.curClickableSpiritType = UIManager.ClickableSpiritType.Water;
-                            break;
-                        case UIManager.ClickableSpiritType.Water:
-                            uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[1].status = TrophicSlot.SlotStatus.On;
-                            Debug.Log("WATER UNLOCKED!!! " + uiManagerRef.unlockCooldownCounter.ToString());
-                            //uiManagerRef.brushesUI.Unlock();
-                            //uiManagerRef.brushesUI.SetTargetFromWorldTree();
-                            uiManagerRef.AnnounceUnlockWater();
-                            uiManagerRef.isUnlockCooldown = true;
-                            uiManagerRef.unlockedAnnouncementSlotRef = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[1];
-                            uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[1];
-                            uiManagerRef.brushesUI.selectedEssenceSlot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[1];
-                            
-                            uiManagerRef.curClickableSpiritType = UIManager.ClickableSpiritType.Decomposers;
-                            break;
-                        case UIManager.ClickableSpiritType.Decomposers:
-                            uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
-                            Debug.Log("DECOMPOSERS UNLOCKED!!! " + uiManagerRef.unlockCooldownCounter.ToString());
-
-                            uiManagerRef.AnnounceUnlockDecomposers();
-                            uiManagerRef.isUnlockCooldown = true;
-                            uiManagerRef.unlockedAnnouncementSlotRef = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0];
-                            //simManager.uiManager.buttonToolbarExpandOn.GetComponent<Animator>().enabled = true;
-                            uiManagerRef.worldSpiritHubUI.ClickWorldCreateNewSpecies(uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0]);
-
-                            uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0];
-                            uiManagerRef.brushesUI.selectedEssenceSlot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0];
-                            
-                            //uiManagerRef.isClickableSpiritRoaming = false;
-                            uiManagerRef.curClickableSpiritType = UIManager.ClickableSpiritType.KnowledgeSpirit;
-                            break;
-                        case UIManager.ClickableSpiritType.KnowledgeSpirit:
-
-                            uiManagerRef.knowledgeUI.isUnlocked = true;
-                            uiManagerRef.AnnounceUnlockKnowledgeSpirit();
-                            uiManagerRef.knowledgeUI.OpenKnowledgePanel();
-                            uiManagerRef.worldSpiritHubUI.OpenWorldTreeSelect();
-                            //uiManagerRef.isClickableSpiritRoaming = false;
-                            uiManagerRef.curClickableSpiritType = UIManager.ClickableSpiritType.Algae;
-                            break;
-                        case UIManager.ClickableSpiritType.WatcherSpirit:
-                            uiManagerRef.watcherUI.isUnlocked = true;
-                            uiManagerRef.watcherUI.ClickToolButton();
-                            uiManagerRef.watcherUI.animatorWatcherUI.SetBool("_IsOpen", true);
-                            uiManagerRef.AnnounceUnlockWatcherSpirit();
-                            uiManagerRef.curClickableSpiritType = UIManager.ClickableSpiritType.Plants;
-                            break;
-                        case UIManager.ClickableSpiritType.MutationSpirit:
-                            uiManagerRef.mutationUI.isUnlocked = true;
-                            uiManagerRef.AnnounceUnlockMutationSpirit();
-                            //uiManagerRef.curClickableSpiritType = UIManager.ClickableSpiritType.Zooplankton; // *** Last unlock?
-                            uiManagerRef.curClickableSpiritType = UIManager.ClickableSpiritType.Air;
-                            uiManagerRef.mutationUI.ClickToolButton();
-                            uiManagerRef.worldSpiritHubUI.OpenWorldTreeSelect();
-                            break;
-                        case UIManager.ClickableSpiritType.Minerals:
-                            TrophicSlot mineralSlot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[0];
-                            mineralSlot.status = TrophicSlot.SlotStatus.On;
-                            Debug.Log("MINERALS UNLOCKED!!! " + uiManagerRef.unlockCooldownCounter.ToString());
-                            uiManagerRef.AnnounceUnlockMinerals();
-                            uiManagerRef.isUnlockCooldown = true;
-                            uiManagerRef.unlockedAnnouncementSlotRef = mineralSlot;
-                            //simManager.uiManager.buttonToolbarExpandOn.GetComponent<Animator>().enabled = true;
-                            //uiManagerRef.worldSpiritHubUI.ClickWorldCreateNewSpecies(uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0]);
-                            uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot = mineralSlot;
-                            uiManagerRef.brushesUI.selectedEssenceSlot = mineralSlot;
-                            
-                            uiManagerRef.curClickableSpiritType = UIManager.ClickableSpiritType.Zooplankton;
-                            break;
-                        case UIManager.ClickableSpiritType.Air:
-                            TrophicSlot airSlot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[2];
-                            airSlot.status = TrophicSlot.SlotStatus.On;
-                            Debug.Log("AIR SPIRIT UNLOCKED!!! " + uiManagerRef.unlockCooldownCounter.ToString());
-                            uiManagerRef.AnnounceUnlockAir();
-                            uiManagerRef.isUnlockCooldown = true;
-                            uiManagerRef.unlockedAnnouncementSlotRef = airSlot;
-                            uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot = airSlot;
-                            uiManagerRef.brushesUI.selectedEssenceSlot = airSlot;
-                            
-                            uiManagerRef.curClickableSpiritType = UIManager.ClickableSpiritType.MutationSpirit;
-                            break;
-                        case UIManager.ClickableSpiritType.Pebbles:
-                            TrophicSlot pebblesSlot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomTerrain.trophicTiersList[0].trophicSlots[2];
-                            pebblesSlot.status = TrophicSlot.SlotStatus.On;
-                            Debug.Log("PEBBLES SPIRIT UNLOCKED!!! " + uiManagerRef.unlockCooldownCounter.ToString());
-                            uiManagerRef.AnnounceUnlockPebbles();
-                            uiManagerRef.isUnlockCooldown = true;
-                            uiManagerRef.unlockedAnnouncementSlotRef = pebblesSlot;
-                            uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot = pebblesSlot;
-                            uiManagerRef.brushesUI.selectedEssenceSlot = pebblesSlot;
-                            uiManagerRef.brushesUI.selectedBrushLinkedSpiritTerrainLayer = 2; // uiManagerRef.worldSpiritHubUI.selectedToolbarTerrainLayer; 
-                            uiManagerRef.brushesUI.ClickButtonBrushPaletteTerrain(2);
-
-                            uiManagerRef.curClickableSpiritType = UIManager.ClickableSpiritType.WatcherSpirit;
-                            break;
-                        case UIManager.ClickableSpiritType.Sand:
-                            TrophicSlot sandSlot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomTerrain.trophicTiersList[0].trophicSlots[3];
-                            sandSlot.status = TrophicSlot.SlotStatus.On;
-                            Debug.Log("SAND SPIRIT UNLOCKED!!! " + uiManagerRef.unlockCooldownCounter.ToString());
-                            uiManagerRef.AnnounceUnlockSand();
-                            uiManagerRef.isUnlockCooldown = true;
-                            uiManagerRef.unlockedAnnouncementSlotRef = sandSlot;
-                            uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot = sandSlot;
-                            uiManagerRef.brushesUI.selectedEssenceSlot = sandSlot;
-                            uiManagerRef.brushesUI.selectedBrushLinkedSpiritTerrainLayer = 3; 
-                            uiManagerRef.brushesUI.ClickButtonBrushPaletteTerrain(3);
-                            
-                            uiManagerRef.curClickableSpiritType = UIManager.ClickableSpiritType.VertA;
-                            break;
-                        case UIManager.ClickableSpiritType.Algae:
-                            uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
-                            Debug.Log("ALGAE UNLOCKED!!! " + uiManagerRef.unlockCooldownCounter.ToString());
-
-                            uiManagerRef.AnnounceUnlockAlgae();
-                            uiManagerRef.isUnlockCooldown = true;
-                            uiManagerRef.unlockedAnnouncementSlotRef = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];   
-                
-                            uiManagerRef.worldSpiritHubUI.ClickWorldCreateNewSpecies(uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0]);
-                            
-                            uiManagerRef.brushesUI.selectedEssenceSlot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];
-                            uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];
-                            //uiManagerRef.isClickableSpiritRoaming = false;
-                            uiManagerRef.curClickableSpiritType = UIManager.ClickableSpiritType.Minerals;
-                            break;
-                        case UIManager.ClickableSpiritType.Plants:
-                            uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
-                            Debug.Log("PLANTS UNLOCKED!!! " + uiManagerRef.unlockCooldownCounter.ToString());
-                            uiManagerRef.AnnounceUnlockPlants();
-                            uiManagerRef.isUnlockCooldown = true;
-                            uiManagerRef.unlockedAnnouncementSlotRef = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[0];                
-                            uiManagerRef.worldSpiritHubUI.ClickWorldCreateNewSpecies(uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[0]);
-
-                            uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[0];
-                            uiManagerRef.brushesUI.selectedEssenceSlot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[0];
-
-                            uiManagerRef.curClickableSpiritType = UIManager.ClickableSpiritType.Sand;
-                            break;
-                        case UIManager.ClickableSpiritType.Zooplankton:
-                            uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
-                            Debug.Log("ZOOPLANKTON UNLOCKED!!! " + uiManagerRef.unlockCooldownCounter.ToString());
-                            uiManagerRef.AnnounceUnlockZooplankton();
-                            uiManagerRef.isUnlockCooldown = true;
-                            uiManagerRef.unlockedAnnouncementSlotRef = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0];
-                            uiManagerRef.worldSpiritHubUI.ClickWorldCreateNewSpecies(uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0]);
-                            
-                            uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0];
-                            uiManagerRef.brushesUI.selectedEssenceSlot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0];
-                            
-                            uiManagerRef.curClickableSpiritType = UIManager.ClickableSpiritType.Pebbles;
-                            break;
-                        case UIManager.ClickableSpiritType.VertA:                            
-                            uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].unlocked = true;
-                            uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0].status = TrophicSlot.SlotStatus.On;                
-                            Debug.Log("CREATURE A UNLOCKED!!! " + uiManagerRef.unlockCooldownCounter.ToString());
-                            uiManagerRef.AnnounceUnlockVertebrates();
-                            uiManagerRef.isUnlockCooldown = true;
-                            uiManagerRef.unlockedAnnouncementSlotRef = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0];                
-                            uiManagerRef.worldSpiritHubUI.ClickWorldCreateNewSpecies(uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0]);
-
-                            uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0];
-                            uiManagerRef.brushesUI.selectedEssenceSlot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0];
-
-                            
-                            uiManagerRef.curClickableSpiritType = UIManager.ClickableSpiritType.MutationSpirit;
-                            break;
-                        case UIManager.ClickableSpiritType.VertB:                            
-                            uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].unlocked = true;
-                            uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1].status = TrophicSlot.SlotStatus.On;                
-                            Debug.Log("CREATURE B UNLOCKED!!! " + uiManagerRef.unlockCooldownCounter.ToString());
-                            uiManagerRef.AnnounceUnlockVertebrates();
-                            uiManagerRef.isUnlockCooldown = true;
-                            uiManagerRef.unlockedAnnouncementSlotRef = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1];                
-                            uiManagerRef.worldSpiritHubUI.ClickWorldCreateNewSpecies(uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1]);
-
-                            uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1];
-                            uiManagerRef.brushesUI.selectedEssenceSlot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1];
-
-                            break;
-                        default:
-                            Debug.LogError("No Enum Type Found! (");
-                            break;
-
-                    }
-                    
-                }                
+                }
+                else {
+                    _IsHoverClickableSpirit = true;
+                    Debug.Log("_IsHoverClickableSpirit ON: [ ");
+                }
             }
             //Debug.Log("CLICKED ON: [ " + hit.collider.gameObject.name + " ] Ray= " + ray.ToString() + ", hit= " + hit.point.ToString());
         }

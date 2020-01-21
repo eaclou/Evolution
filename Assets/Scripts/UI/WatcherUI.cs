@@ -42,14 +42,32 @@ public class WatcherUI : MonoBehaviour {
     public Button buttonWatcherVertebrateCyclePage; // maybe not needed?
     public GameObject panelWatcherSpiritVertebratesHUD; // 0
     public Text textWatcherVertebrateHUD;
+    public Text textVertebrateGen;
+    public Text textVertebrateLifestage;
+    public Text textVertebrateStatus;
     public GameObject panelWatcherSpiritVertebratesText;  // 1
     public Text textWatcherVertebrateText;
     public GameObject panelWatcherSpiritVertebratesGenome; // 2
     public Text textWatcherVertebrateGenome;
     public GameObject panelWatcherSpiritVertebratesBrain; // 3
     public Text textWatcherVertebrateBrain;
-    public GameObject panelWatcherSpiritZooplankton;    
+
+    public GameObject panelWatcherSpiritZooplankton;
+    public Text textZoopGen;
+    public Text textZoopLifestage;
+    public Text textZoopSize;
+    public Text textZoopHealth;
+    public Text textZoopStatus;
+    public Text textZoopLog;
+
     public GameObject panelWatcherSpiritPlants;
+    public Text textPlantGen;
+    public Text textPlantLifestage;
+    public Text textPlantSize;
+    public Text textPlantHealth;
+    public Text textPlantStatus;
+    public Text textPlantLog;
+
     //public GameObject panelWatcherSpiritAlgae;
     //public GameObject panelWatcherSpiritDecomposers;
     //public GameObject panelWatcherSpiritTerrain;
@@ -111,7 +129,7 @@ public class WatcherUI : MonoBehaviour {
             textWatcherPanelTargetLayer.color = watcherSelectedTrophicSlotRef.color;
         }
         
-        if(uiManagerRef.isBrushModeON_snoopingOFF) {
+        if(uiManagerRef.panelFocus != UIManager.PanelFocus.Watcher) {
             imageIsSnooping.color = Color.gray;
             imageIsSnooping.sprite = uiManagerRef.spriteSpiritBrushWatcherOffIcon;
             textIsSnooping.text = "";
@@ -152,7 +170,7 @@ public class WatcherUI : MonoBehaviour {
         //
         
         TextCommonStatsA.gameObject.SetActive(false);
-        if(watcherSelectedTrophicSlotRef != null && !uiManagerRef.isBrushModeON_snoopingOFF) {
+        if(watcherSelectedTrophicSlotRef != null && uiManagerRef.panelFocus == UIManager.PanelFocus.Watcher) {
             TextCommonStatsA.gameObject.SetActive(true);
             textTargetLayer.text = watcherSelectedTrophicSlotRef.speciesName;
             //textTargetLayer.color = 
@@ -175,25 +193,57 @@ public class WatcherUI : MonoBehaviour {
             }
             else if(watcherSelectedTrophicSlotRef.kingdomID == 1) {
                 if(watcherSelectedTrophicSlotRef.tierID == 0) {
-                    /*Vector4 resourceGridSample = uiManagerRef.SampleTexture(uiManagerRef.gameManager.simulationManager.vegetationManager.resourceGridRT1, uiManagerRef.theCursorCzar.curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
-                    str += "\n\nNutrients    : " + (resourceGridSample.x * 1000f).ToString("F0");                    
-                    str += "\nAlgae        : " + (resourceGridSample.w * 1000f).ToString("F0");
-                    Vector4 simTansferSample = uiManagerRef.SampleTexture(uiManagerRef.gameManager.simulationManager.vegetationManager.resourceSimTransferRT, uiManagerRef.theCursorCzar.curMousePositionOnWaterPlane / SimulationManager._MapSize) * 1f;
-                    str += "\n\nProduced This Frame:\nWaste: " + (simTansferSample.z * 1000000f).ToString("F0") + "\n\nConsumed This Frame:\nNutrients: " + (simTansferSample.x * 1000000f).ToString("F0");
-                 
-                
-                    panelWatcherSpiritAlgae.SetActive(true);*/
+                    
                 }
                 else {
-                    textNewInspectAgentName.text = "P-487";
+                    VegetationManager.PlantParticleData particleData = uiManagerRef.gameManager.simulationManager.vegetationManager.selectedPlantParticleData;
+
+                    textNewInspectAgentName.text = "Name# " + particleData.index.ToString();
                     textNewInspectAgentName.color = uiManagerRef.colorPlantsLayer;
                     imageWatcherCurTargetLayer.sprite = uiManagerRef.spriteSpiritPlantIcon;
 
                     if(curWatcherPanelPlantsPageNum == 0) {
-                        str = "";
+                        string strPlantStatus = "Alive!";
+                        Color statusColor = Color.white;
+                        Color healthColor = Color.green;
+                        if(particleData.isDecaying > 0.5) {
+                            strPlantStatus = "Dead! (Decaying)";
+                            statusColor = Color.gray;
+                            healthColor = Color.red;
+
+                        }
+                        if(particleData.isSwallowed > 0.5) {
+                            strPlantStatus = "Dead! (Swallowed)";
+                            healthColor = Color.red;
+                        }
+                        if(particleData.isActive > 0.5f) {
+
+                        }
+                        else {
+                            strPlantStatus = "INACTIVE";
+                            statusColor = Color.black;
+                            healthColor = Color.black;
+                        }
+
+                        textPlantGen.text = "Gen: " + "coming soon"; // (particleData.genomeVector.w * 1f).ToString("F0");
+                        textPlantGen.color = statusColor;
+                        textPlantLifestage.text = "Age: " + (particleData.age * 100f).ToString("F0");
+                        textPlantLifestage.color = statusColor;
+                        textPlantSize.text = "Biomass: " + (particleData.biomass * 1000f).ToString("F0") + 
+                                            "\nSize: " + "...";
+                        textPlantSize.color = statusColor;
+                        textPlantHealth.text = "Health: " + (particleData.health * 100f).ToString("F0") 
+                                              + "\nNutrients Used: " + (particleData.nutrientsUsed * 1000000f).ToString("F0");
+                        textPlantHealth.color = healthColor;
+
+                        textPlantStatus.text = strPlantStatus;
+                        textPlantStatus.color = healthColor;
+                        textPlantLog.text = "ColorA: " + particleData.colorA.ToString() + "\nColorB: " + particleData.colorB.ToString();
+                            //+ (particleData.genomeVector.x * 1f).ToString("F2") + ", " + (particleData.genomeVector.y * 1f).ToString("F2") + ", " + (particleData.genomeVector.x * 1f).ToString("F2");
+                        textPlantLog.color = statusColor;
                     }
                     else if(curWatcherPanelPlantsPageNum == 1) {
-                        VegetationManager.PlantParticleData particleData = uiManagerRef.gameManager.simulationManager.vegetationManager.selectedPlantParticleData;
+                        
 
                         str += "\nPlant Particle # " + particleData.index.ToString() + "  [" + particleData.nearestCritterIndex.ToString() + "]";
                         //str += "\nCPU: " + gameManager.simulationManager.vegetationManager.tempClosestPlantParticleIndexAndPos.ToString();
@@ -226,14 +276,55 @@ public class WatcherUI : MonoBehaviour {
                     imageWatcherCurTargetLayer.color = uiManagerRef.colorZooplanktonLayer;
                     imageWatcherCurTargetLayer.sprite = uiManagerRef.spriteSpiritZooplanktonIcon;
 
-                    textNewInspectAgentName.text = "Z-34";
+                    textNewInspectAgentName.text = "Name#" + uiManagerRef.gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex.ToString();
                     textNewInspectAgentName.color = uiManagerRef.colorZooplanktonLayer;
+
+                    ZooplanktonManager.AnimalParticleData particleData = uiManagerRef.gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleData;
                     //textNewInspectAgentName.text = "Mittens";
+
                     if (curWatcherPanelZooplanktonPageNum == 0) {
+                        
+                        string strZoopStatus = "Alive!";
+                        Color statusColor = Color.white;
+                        Color healthColor = Color.green;
+                        if(particleData.isDecaying > 0.5) {
+                            strZoopStatus = "Dead! (Decaying)";
+                            statusColor = Color.gray;
+                            healthColor = Color.red;
+
+                        }
+                        if(particleData.isSwallowed > 0.5) {
+                            strZoopStatus = "Dead! (Swallowed)";
+                            healthColor = Color.red;
+                        }
+                        if(particleData.isActive > 0.5f) {
+
+                        }
+                        else {
+                            strZoopStatus = "INACTIVE";
+                            statusColor = Color.black;
+                            healthColor = Color.black;
+                        }
+
+                        textZoopGen.text = "Gen: " + (particleData.genomeVector.w * 1f).ToString("F0");
+                        textZoopGen.color = statusColor;
+                        textZoopLifestage.text = "Age: " + (particleData.age * 100f).ToString("F0");
+                        textZoopLifestage.color = statusColor;
+                        textZoopSize.text = "Biomass: " + (particleData.biomass * 1000f).ToString("F0") + 
+                                            "\nSize: " + "...";
+                        textZoopSize.color = statusColor;
+                        textZoopHealth.text = "Energy: " + (particleData.energy * 100f).ToString("F0") 
+                                              + "\nAlgae Eaten: " + (particleData.algaeConsumed * 100000000f).ToString("F0");
+                        textZoopHealth.color = healthColor;
+
+                        textZoopStatus.text = strZoopStatus;
+                        textZoopStatus.color = healthColor;
+                        textZoopLog.text = "Genome: " + (particleData.genomeVector.x * 1f).ToString("F2") + ", " + (particleData.genomeVector.y * 1f).ToString("F2") + ", " + (particleData.genomeVector.x * 1f).ToString("F2");
+                        textZoopLog.color = statusColor;
                         str = "";
                     }
                     else if (curWatcherPanelZooplanktonPageNum == 1) {
-                        ZooplanktonManager.AnimalParticleData particleData = uiManagerRef.gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleData;
+                        
                         
                         str += "\nZooplankton # " + uiManagerRef.gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex.ToString();
                         str += "\nCoords [ " + particleData.worldPos.x.ToString("F0") + " , " + particleData.worldPos.y.ToString("F0") + " ]"; //  Critter (" + gameManager.simulationManager.agentsArray[0].ownPos.ToString() + ")";
@@ -352,6 +443,33 @@ public class WatcherUI : MonoBehaviour {
                             textWatcherVertebrateHUD.text = "";
 
                             panelWatcherSpiritVertebratesHUD.SetActive(true);
+                            
+                            textVertebrateGen.text = "Gen #" + agent.candidateRef.candidateGenome.bodyGenome.coreGenome.generation.ToString();
+                            textVertebrateLifestage.text = "Age: " + agent.ageCounter.ToString() + ", stateID: " + developmentStateID;
+                            string statusStr = "Alive!";
+                            Color statusColor = Color.white;
+                            Color healthColor = Color.green;
+                            if(agent.curLifeStage == Agent.AgentLifeStage.Dead) {
+                                statusStr = "Dead! (Decaying)";
+                                statusColor = Color.gray;
+                                healthColor = Color.red;
+
+                            }
+                            if(agent.curLifeStage == Agent.AgentLifeStage.Egg) {
+                                statusStr = "Egg!";
+                                healthColor = Color.yellow;
+                            }
+                            if(agent.coreModule.healthBody <= 0f) {
+                                statusStr = "Died of Injury";
+                            }
+                            /*if(!agent.isActing) {
+                                statusStr = "INACTIVE";
+                                statusColor = Color.black;
+                                healthColor = Color.black;
+                            }*/
+
+                            textVertebrateStatus.text = statusStr; // "activity: " + curActivityID;
+
                             //where do hud elements get updated?? ***
                             string hudString = "";
                             hudString += "Species " + agent.speciesIndex.ToString();
@@ -545,22 +663,19 @@ public class WatcherUI : MonoBehaviour {
     }
 
 	public void UpdateWatcherPanelUI(TrophicLayersManager layerManager) {
+        animatorWatcherUI.SetBool("_IsOpen", isOpen);
 
         if(uiManagerRef.panelFocus == UIManager.PanelFocus.Watcher) {
-            animatorWatcherUI.SetBool("_IsOpen", true);
-            //imageBitMinerals.color = Color.white;
+            //animatorWatcherUI.SetBool("_IsOpen", true);
+            animatorWatcherUI.SetBool("_IsDim", false);
         }
         else {
-            if(uiManagerRef.panelFocus == UIManager.PanelFocus.WorldHub && isOpen) {
-                animatorWatcherUI.SetBool("_IsOpen", true);
-                
-            }
-            else {
-                animatorWatcherUI.SetBool("_IsOpen", false);
-                isOpen = false;  // turn off panel if unfocused
-            }
-            
-            
+            animatorWatcherUI.SetBool("_IsDim", true);
+
+            StopFollowingAgent();
+            StopFollowingPlantParticle();
+            StopFollowingAnimalParticle();
+
         }
 
         panelWatcherSpiritMain.SetActive(true); // isOpen);
@@ -623,7 +738,7 @@ public class WatcherUI : MonoBehaviour {
         //isHighlight = true;
         if(isOpen) {  // if opening the panel automatically engage snooping mode
             //isSnoopingModeON = true;
-            uiManagerRef.isBrushModeON_snoopingOFF = false;
+            //uiManagerRef.isBrushModeON_snoopingOFF = false;
             uiManagerRef.panelFocus = UIManager.PanelFocus.Watcher;
             uiManagerRef.curActiveTool = UIManager.ToolType.None;
 
@@ -636,7 +751,7 @@ public class WatcherUI : MonoBehaviour {
         //watcherLockedTrophicSlotRef = uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot;//
     }
     public void ClickSnoopModeButton() {        
-        uiManagerRef.isBrushModeON_snoopingOFF = false;
+        //uiManagerRef.isBrushModeON_snoopingOFF = false;
         uiManagerRef.panelFocus = UIManager.PanelFocus.Watcher;
         uiManagerRef.curActiveTool = UIManager.ToolType.None;
     }

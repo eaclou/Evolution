@@ -31,6 +31,9 @@ public class BrushesUI : MonoBehaviour {
     public bool isInfluencePointsCooldown = false;
     public CreationBrush[] creationBrushesArray;
 
+    public Button buttonSendToWorldHub;
+    public Image imageInfluencePoints;
+
     public Image imageColorBar;
     public Image imageIsBrushing;
 
@@ -163,15 +166,22 @@ public class BrushesUI : MonoBehaviour {
 	}
 
     public void UpdateBrushesUI() {
-
-        if(uiManagerRef.panelFocus == UIManager.PanelFocus.Brushes) {
-            //imageBitMinerals.color = Color.white;
-            animatorBrushesUI.SetBool("MinPanel", false);
+        animatorBrushesUI.SetBool("MinPanel", !isOpen);
+        bool isDim = false;
+        if(uiManagerRef.panelFocus == UIManager.PanelFocus.Brushes) {            
+            animatorBrushesUI.SetBool("_IsDim", false);
         }
         else {
-            //isOpen = false;  // turn off panel if unfocused
-            animatorBrushesUI.SetBool("MinPanel", true);
+            animatorBrushesUI.SetBool("_IsDim", true);
+            isDim = true;
         }
+        textBrushLinkedSpiritName.gameObject.SetActive(!isDim);
+        textSelectedBrushDescription.gameObject.SetActive(!isDim);
+        textSelectedBrushEffects.gameObject.SetActive(!isDim);
+        textSelectedBrushName.gameObject.SetActive(!isDim);
+        textInfluencePointsValue.gameObject.SetActive(!isDim);
+        buttonSendToWorldHub.gameObject.SetActive(!isDim);
+        imageInfluencePoints.gameObject.SetActive(!isDim);
 
         //panelBrushes.SetActive(isOpen);
         panelBrushPaletteSelect.SetActive(true); // isPaletteOpen);
@@ -547,115 +557,6 @@ public class BrushesUI : MonoBehaviour {
 
     }
 	
-    /*public void UpdateSpiritBrushDescriptionsUI() {
-        TrophicLayersManager layerManager = uiManagerRef.gameManager.simulationManager.trophicLayersManager;  
-
-        int linkedSpiritIndex = 0;
-
-        if (selectedEssenceSlot.kingdomID == 0) {
-            linkedSpiritIndex = 7;            
-        }
-        else if(selectedEssenceSlot.kingdomID == 1) {
-            if(selectedEssenceSlot.tierID == 0) {
-                linkedSpiritIndex = 8;
-            }
-            else {
-                linkedSpiritIndex = 9;
-            }            
-        }
-        else if(selectedEssenceSlot.kingdomID == 2) {
-            if(selectedEssenceSlot.tierID == 0) {
-                linkedSpiritIndex = 10;
-            }
-            else {
-                linkedSpiritIndex = 11;
-            }
-        }
-        else if(selectedEssenceSlot.kingdomID == 3) {
-            if(selectedEssenceSlot.slotID == 0) {  // world/bedrock
-                linkedSpiritIndex = 0;
-            }
-            else if(selectedEssenceSlot.slotID == 1) {
-                linkedSpiritIndex = 1;
-            }
-            else if(selectedEssenceSlot.slotID == 2) {
-                linkedSpiritIndex = 2;
-            }
-            else {
-                linkedSpiritIndex = 3;
-            }
-        }
-        else {  // 4 == OTHER
-            if(selectedEssenceSlot.slotID == 0) {  // minerals
-                linkedSpiritIndex = 4;
-            }
-            else if(selectedEssenceSlot.slotID == 1) {  // water
-                linkedSpiritIndex = 5;
-            }
-            else {  // air
-                linkedSpiritIndex = 6;
-            }
-        }
-
-        int spiritBrushIndex = 0;
-        if(uiManagerRef.curActiveTool == UIManager.ToolType.Add) {
-            spiritBrushIndex = 1;
-        }
-        else if (uiManagerRef.curActiveTool == UIManager.ToolType.Stir) {
-            spiritBrushIndex = 2; 
-        }
-
-        string strSpiritBrushDescription = "";
-        string[] linkedSpiritNamesArray = new string[12]; 
-        linkedSpiritNamesArray[0] = "World";
-        linkedSpiritNamesArray[1] = "Stone";
-        linkedSpiritNamesArray[2] = "Pebbles";
-        linkedSpiritNamesArray[3] = "Sand";
-        linkedSpiritNamesArray[4] = "Minerals";
-        linkedSpiritNamesArray[5] = "Water";
-        linkedSpiritNamesArray[6] = "Air";
-        linkedSpiritNamesArray[7] = "Decomposers";
-        linkedSpiritNamesArray[8] = "Algae";
-        linkedSpiritNamesArray[9] = "Plants";
-        linkedSpiritNamesArray[10] = "Zooplankton";
-        linkedSpiritNamesArray[11] = "Vertebrates";
-        
-        string startTxt = "Left-Click:\n";
-        string midTxt = "\n\nRight-Click:\n";
-        string[][] strBrushEffectsArray = new string[5][];
-        for(int s = 0; s < 5; s++) {
-            strBrushEffectsArray[s] = new string[12];            
-        }
-        // CREATION BRUSH:
-        strBrushEffectsArray[1][0] = startTxt + "Creates World" + midTxt + "None";
-        strBrushEffectsArray[1][1] = startTxt + "Raises stone from deep below" + midTxt + "Destroys stone, deeping the Pond";
-        strBrushEffectsArray[1][2] = startTxt + "Creates mounds of pebbles" + midTxt + "Removes pebbles from the area";
-        strBrushEffectsArray[1][3] = startTxt + "Blankets the terrain with sand" + midTxt + "Removes sand from the area";
-        strBrushEffectsArray[1][4] = startTxt + "Creates nutrient-rich minerals in the ground" + midTxt + "Saps nutrients out of the environment";
-        strBrushEffectsArray[1][5] = startTxt + "Raises the water level" + midTxt + "Lowers water level";
-        strBrushEffectsArray[1][6] = startTxt + "Increases wind strength" + midTxt + "Decreases wind strength";
-        strBrushEffectsArray[1][7] = startTxt + "Creates Decomposers" + midTxt + "Kills decomposers in the area";
-        strBrushEffectsArray[1][8] = startTxt + "Creates a bloom of Algae" + midTxt + "Kills algae in the area";
-        strBrushEffectsArray[1][9] = startTxt + "Creates floating plant seedlings" + midTxt + "Kills plants in the area";
-        strBrushEffectsArray[1][10] = startTxt + "Creates simple tiny creatures" + midTxt + "Kills nearby zooplankton";
-        strBrushEffectsArray[1][11] = startTxt + "Hatches Vertebrates" + midTxt + "Kills Animals";
-
-        // STIR BRUSH:
-        strBrushEffectsArray[2][0] = startTxt + "Drags water along with itself while moving" + midTxt + "None";
-        strBrushEffectsArray[2][1] = startTxt + "Drags water along with itself while moving" + midTxt + "None";
-        strBrushEffectsArray[2][2] = startTxt + "Drags water along with itself while moving" + midTxt + "None";
-        strBrushEffectsArray[2][3] = startTxt + "Drags water along with itself while moving" + midTxt + "None";
-        strBrushEffectsArray[2][4] = startTxt + "Drags water along with itself while moving" + midTxt + "None";
-        strBrushEffectsArray[2][5] = startTxt + "Drags water along with itself while moving" + midTxt + "None";
-        strBrushEffectsArray[2][6] = startTxt + "Drags water along with itself while moving" + midTxt + "None";
-        strBrushEffectsArray[2][7] = startTxt + "Drags water along with itself while moving" + midTxt + "None";
-        strBrushEffectsArray[2][8] = startTxt + "Drags water along with itself while moving" + midTxt + "None";
-        strBrushEffectsArray[2][9] = startTxt + "Drags water along with itself while moving" + midTxt + "None";
-        strBrushEffectsArray[2][10] = startTxt + "Drags water along with itself while moving" + midTxt + "None";
-        strBrushEffectsArray[2][11] = startTxt + "Drags water along with itself while moving" + midTxt + "None";
-
-    }*/
-    
     public void ApplyCreationBrush() {
         toolbarInfluencePoints -= 0.002f;
 
@@ -817,7 +718,7 @@ public class BrushesUI : MonoBehaviour {
         uiManagerRef.watcherUI.StopFollowingAnimalParticle();
         buttonBrushStir.GetComponent<Image>().color = uiManagerRef.buttonActiveColor; 
  
-        uiManagerRef.isBrushModeON_snoopingOFF = true; // ***** Switching to brushingMode!!! ***
+        //uiManagerRef.isBrushModeON_snoopingOFF = true; // ***** Switching to brushingMode!!! ***
               
     }
     public void ClickToolButtonAdd() {  
@@ -825,7 +726,7 @@ public class BrushesUI : MonoBehaviour {
         curCreationBrushIndex = 0;
         EnterCreationBrushMode();
         
-        uiManagerRef.isBrushModeON_snoopingOFF = true; // ***** Switching to brushingMode!!! ***
+        //uiManagerRef.isBrushModeON_snoopingOFF = true; // ***** Switching to brushingMode!!! ***
     }
     public void ClickToolButtonExtra1() {
         Debug.Log("ClickToolButtonExtra1()");
@@ -836,7 +737,7 @@ public class BrushesUI : MonoBehaviour {
         //buttonBrushExtra2.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
         //buttonBrushExtra3.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
 
-        uiManagerRef.isBrushModeON_snoopingOFF = true; // ***** Switching to brushingMode!!! ***
+        //uiManagerRef.isBrushModeON_snoopingOFF = true; // ***** Switching to brushingMode!!! ***
     }
     public void ClickToolButtonExtra2() {
         Debug.Log("ClickToolButtonExtra2()");
@@ -847,7 +748,7 @@ public class BrushesUI : MonoBehaviour {
         //buttonBrushExtra2.GetComponent<Image>().color = uiManagerRef.buttonActiveColor;
         //buttonBrushExtra3.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
 
-        uiManagerRef.isBrushModeON_snoopingOFF = true; // ***** Switching to brushingMode!!! ***
+        //uiManagerRef.isBrushModeON_snoopingOFF = true; // ***** Switching to brushingMode!!! ***
     }
     public void ClickToolButtonExtra3() {
         Debug.Log("ClickToolButtonExtra3()");
@@ -858,7 +759,7 @@ public class BrushesUI : MonoBehaviour {
         //buttonBrushExtra2.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
         //buttonBrushExtra3.GetComponent<Image>().color = uiManagerRef.buttonActiveColor;
 
-        uiManagerRef.isBrushModeON_snoopingOFF = true; // ***** Switching to brushingMode!!! ***
+        //uiManagerRef.isBrushModeON_snoopingOFF = true; // ***** Switching to brushingMode!!! ***
     }
     private void EnterCreationBrushMode() {
         uiManagerRef.curActiveTool = UIManager.ToolType.Add;
@@ -869,7 +770,7 @@ public class BrushesUI : MonoBehaviour {
         //TurnOffStirTool();        
         //isBrushSelected = true;
 
-        uiManagerRef.isBrushModeON_snoopingOFF = true; // ***** Switching to brushingMode!!! ***
+        //uiManagerRef.isBrushModeON_snoopingOFF = true; // ***** Switching to brushingMode!!! ***
         uiManagerRef.panelFocus = UIManager.PanelFocus.Brushes;
     }
     

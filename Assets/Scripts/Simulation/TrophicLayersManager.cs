@@ -139,102 +139,107 @@ public class TrophicLayersManager {
     public void Tick(SimulationManager simManager) {
         //temp clickable spirits!
         // HACKY AF!
-        if(!simManager.uiManager.isClickableSpiritRoaming && simManager.simAgeTimeSteps > 400 && !simManager.uiManager.brushesUI.isUnlocked) {
-            simManager.uiManager.isClickableSpiritRoaming = true;
-            simManager.uiManager.roamingSpiritColor = Color.white;
-            simManager.uiManager.AnnounceBrushAppear();
-            //Debug.Log("ASDFASDFLASDFJADSFJ");
-        }
+        if(!simManager.uiManager.animatorSpiritUnlock.GetBool("_PlayingUnlockAnim")) {
+            if(!simManager.uiManager.isClickableSpiritRoaming && simManager.simAgeTimeSteps == 240 && !simManager.uiManager.brushesUI.isUnlocked) {
+                simManager.uiManager.isClickableSpiritRoaming = true;
+                simManager.uiManager.roamingSpiritColor = Color.white;
+                simManager.uiManager.AnnounceBrushAppear();
+                //Debug.Log("ASDFASDFLASDFJADSFJ");
+            }
 
-        // DECOMPOSERS!
-        if(kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
-            if(simManager.uiManager.curClickableSpiritType == UIManager.ClickableSpiritType.Decomposers && simManager.uiManager.framesSinceLastClickableSpirit > 150) { // simManager.simAgeTimeSteps > 2000) {
-                simManager.uiManager.isClickableSpiritRoaming = true;
-                simManager.uiManager.roamingSpiritColor = kingdomDecomposers.trophicTiersList[0].trophicSlots[0].color;
-            }            
-        }
+            // DECOMPOSERS!
+            if(kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
+                if(simManager.uiManager.curClickableSpiritType == UIManager.ClickableSpiritType.Decomposers && simManager.uiManager.framesSinceLastClickableSpirit > 150) { // simManager.simAgeTimeSteps > 2000) {
+                    simManager.uiManager.isClickableSpiritRoaming = true;
+                    simManager.uiManager.roamingSpiritColor = kingdomDecomposers.trophicTiersList[0].trophicSlots[0].color;
+                }            
+            }
 
-        // KNOWLEDGE:
-        if(!simManager.uiManager.knowledgeUI.isUnlocked && simManager.uiManager.framesSinceLastClickableSpirit > 150 && simManager.uiManager.curClickableSpiritType == UIManager.ClickableSpiritType.KnowledgeSpirit) {
-            simManager.uiManager.isClickableSpiritRoaming = true;
-            simManager.uiManager.roamingSpiritColor = Color.red;
-        }
-        // MUTATION:
-        if(!simManager.uiManager.mutationUI.isUnlocked && simManager.uiManager.framesSinceLastClickableSpirit > 150 && simManager.uiManager.curClickableSpiritType == UIManager.ClickableSpiritType.MutationSpirit) {
-            simManager.uiManager.isClickableSpiritRoaming = true;
-            simManager.uiManager.roamingSpiritColor = Color.magenta;
-        }
-        // WATCHER:
-        if(!simManager.uiManager.watcherUI.isUnlocked && simManager.uiManager.framesSinceLastClickableSpirit > 150 && simManager.uiManager.curClickableSpiritType == UIManager.ClickableSpiritType.WatcherSpirit) {
-            simManager.uiManager.isClickableSpiritRoaming = true;
-            simManager.uiManager.roamingSpiritColor = Color.cyan;
-        }
+            // KNOWLEDGE:
+            if(!simManager.uiManager.knowledgeUI.isUnlocked && simManager.uiManager.framesSinceLastClickableSpirit > 150 && simManager.uiManager.curClickableSpiritType == UIManager.ClickableSpiritType.KnowledgeSpirit) {
+                simManager.uiManager.isClickableSpiritRoaming = true;
+                simManager.uiManager.roamingSpiritColor = Color.red;
+            }
+            // MUTATION:
+            if(!simManager.uiManager.mutationUI.isUnlocked && simManager.uiManager.framesSinceLastClickableSpirit > 150 && simManager.uiManager.curClickableSpiritType == UIManager.ClickableSpiritType.MutationSpirit) {
+                simManager.uiManager.isClickableSpiritRoaming = true;
+                simManager.uiManager.roamingSpiritColor = Color.magenta;
+            }
+            // WATCHER:
+            if(!simManager.uiManager.watcherUI.isUnlocked && simManager.uiManager.framesSinceLastClickableSpirit > 150 && simManager.uiManager.curClickableSpiritType == UIManager.ClickableSpiritType.WatcherSpirit) {
+                simManager.uiManager.isClickableSpiritRoaming = true;
+                simManager.uiManager.roamingSpiritColor = Color.cyan;
+            }
 
-        // ALGAE
-        if(kingdomPlants.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
-            if(simManager.simResourceManager.curGlobalDecomposers > 25f && simManager.uiManager.framesSinceLastClickableSpirit > 150 && simManager.uiManager.curClickableSpiritType == UIManager.ClickableSpiritType.Algae) {
-                simManager.uiManager.isClickableSpiritRoaming = true;
-                simManager.uiManager.roamingSpiritColor = kingdomPlants.trophicTiersList[0].trophicSlots[0].color;
+            // ALGAE
+            if(kingdomPlants.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
+                if(simManager.simResourceManager.curGlobalDecomposers > 25f && simManager.uiManager.framesSinceLastClickableSpirit > 150 && simManager.uiManager.curClickableSpiritType == UIManager.ClickableSpiritType.Algae) {
+                    simManager.uiManager.isClickableSpiritRoaming = true;
+                    simManager.uiManager.roamingSpiritColor = kingdomPlants.trophicTiersList[0].trophicSlots[0].color;
+                }
             }
-        }
-        // PLANTS:
-        if(kingdomPlants.trophicTiersList[1].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
-            if(simManager.simResourceManager.curGlobalAlgaeReservoir > 150f && simManager.uiManager.framesSinceLastClickableSpirit > 150 && simManager.uiManager.curClickableSpiritType == UIManager.ClickableSpiritType.Plants) {
-                simManager.uiManager.isClickableSpiritRoaming = true;
-                simManager.uiManager.roamingSpiritColor = kingdomPlants.trophicTiersList[1].trophicSlots[0].color;
+            // PLANTS:
+            if(kingdomPlants.trophicTiersList[1].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
+                if(simManager.simResourceManager.curGlobalAlgaeReservoir > 150f && simManager.uiManager.framesSinceLastClickableSpirit > 150 && simManager.uiManager.curClickableSpiritType == UIManager.ClickableSpiritType.Plants) {
+                    simManager.uiManager.isClickableSpiritRoaming = true;
+                    simManager.uiManager.roamingSpiritColor = kingdomPlants.trophicTiersList[1].trophicSlots[0].color;
+                }
             }
-        }
-        // ZOOPLANKTON:
-        if(kingdomAnimals.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
-            if(simManager.simResourceManager.curGlobalDecomposers > 40f && simManager.uiManager.framesSinceLastClickableSpirit > 150 && simManager.uiManager.curClickableSpiritType == UIManager.ClickableSpiritType.Zooplankton) {
-                simManager.uiManager.isClickableSpiritRoaming = true;
-                simManager.uiManager.roamingSpiritColor = kingdomAnimals.trophicTiersList[0].trophicSlots[0].color;
+            // ZOOPLANKTON:
+            if(kingdomAnimals.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
+                if(simManager.simResourceManager.curGlobalDecomposers > 40f && simManager.uiManager.framesSinceLastClickableSpirit > 150 && simManager.uiManager.curClickableSpiritType == UIManager.ClickableSpiritType.Zooplankton) {
+                    simManager.uiManager.isClickableSpiritRoaming = true;
+                    simManager.uiManager.roamingSpiritColor = kingdomAnimals.trophicTiersList[0].trophicSlots[0].color;
+                }
             }
-        }
-        // VERTEBRATE A:
-        if(kingdomAnimals.trophicTiersList[1].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
-            if(simManager.simResourceManager.curGlobalAnimalParticles > 1f && simManager.uiManager.framesSinceLastClickableSpirit > 150 && simManager.uiManager.curClickableSpiritType == UIManager.ClickableSpiritType.VertA) {     // && !simManager.uiManager.isUnlockCooldown) {
-                simManager.uiManager.isClickableSpiritRoaming = true;
-                simManager.uiManager.roamingSpiritColor = kingdomAnimals.trophicTiersList[1].trophicSlots[0].color;
+            // VERTEBRATE A:
+            if(kingdomAnimals.trophicTiersList[1].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
+                if(simManager.simResourceManager.curGlobalAnimalParticles > 1f && simManager.uiManager.framesSinceLastClickableSpirit > 150 && simManager.uiManager.curClickableSpiritType == UIManager.ClickableSpiritType.VertA) {     // && !simManager.uiManager.isUnlockCooldown) {
+                    simManager.uiManager.isClickableSpiritRoaming = true;
+                    simManager.uiManager.roamingSpiritColor = kingdomAnimals.trophicTiersList[1].trophicSlots[0].color;
+                }
             }
-        }
 
-        // Minerals:
-        if(kingdomOther.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
-            if(simManager.uiManager.framesSinceLastClickableSpirit > 150 && simManager.uiManager.curClickableSpiritType == UIManager.ClickableSpiritType.Minerals) {
-                simManager.uiManager.isClickableSpiritRoaming = true;
-                simManager.uiManager.roamingSpiritColor = kingdomOther.trophicTiersList[0].trophicSlots[0].color;
+            // Minerals:
+            if(kingdomOther.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
+                if(simManager.uiManager.framesSinceLastClickableSpirit > 150 && simManager.uiManager.curClickableSpiritType == UIManager.ClickableSpiritType.Minerals) {
+                    simManager.uiManager.isClickableSpiritRoaming = true;
+                    simManager.uiManager.roamingSpiritColor = kingdomOther.trophicTiersList[0].trophicSlots[0].color;
+                }
             }
-        }
-        // WATER:
-        if(kingdomOther.trophicTiersList[0].trophicSlots[1].status == TrophicSlot.SlotStatus.Locked) {
-            if(simManager.uiManager.framesSinceLastClickableSpirit > 150 && simManager.uiManager.curClickableSpiritType == UIManager.ClickableSpiritType.Water) {
-                simManager.uiManager.isClickableSpiritRoaming = true;
-                simManager.uiManager.roamingSpiritColor = kingdomOther.trophicTiersList[0].trophicSlots[1].color;
+            // WATER:
+            if(kingdomOther.trophicTiersList[0].trophicSlots[1].status == TrophicSlot.SlotStatus.Locked) {
+                if(simManager.uiManager.framesSinceLastClickableSpirit > 150 && simManager.uiManager.curClickableSpiritType == UIManager.ClickableSpiritType.Water) {
+                    simManager.uiManager.isClickableSpiritRoaming = true;
+                    simManager.uiManager.roamingSpiritColor = kingdomOther.trophicTiersList[0].trophicSlots[1].color;
+                }
             }
-        }
-        // Air:
-        if(kingdomOther.trophicTiersList[0].trophicSlots[2].status == TrophicSlot.SlotStatus.Locked) {
-            if(simManager.uiManager.framesSinceLastClickableSpirit > 150 && simManager.uiManager.curClickableSpiritType == UIManager.ClickableSpiritType.Air) {
-                simManager.uiManager.isClickableSpiritRoaming = true;
-                simManager.uiManager.roamingSpiritColor = kingdomOther.trophicTiersList[0].trophicSlots[2].color;
+            // Air:
+            if(kingdomOther.trophicTiersList[0].trophicSlots[2].status == TrophicSlot.SlotStatus.Locked) {
+                if(simManager.uiManager.framesSinceLastClickableSpirit > 150 && simManager.uiManager.curClickableSpiritType == UIManager.ClickableSpiritType.Air) {
+                    simManager.uiManager.isClickableSpiritRoaming = true;
+                    simManager.uiManager.roamingSpiritColor = kingdomOther.trophicTiersList[0].trophicSlots[2].color;
+                }
             }
-        }
-        // Pebbles:
-        if(kingdomTerrain.trophicTiersList[0].trophicSlots[2].status == TrophicSlot.SlotStatus.Locked) {
-            if(simManager.uiManager.framesSinceLastClickableSpirit > 150 && simManager.uiManager.curClickableSpiritType == UIManager.ClickableSpiritType.Pebbles) {
-                simManager.uiManager.isClickableSpiritRoaming = true;
-                simManager.uiManager.roamingSpiritColor = kingdomTerrain.trophicTiersList[0].trophicSlots[2].color;
+            // Pebbles:
+            if(kingdomTerrain.trophicTiersList[0].trophicSlots[2].status == TrophicSlot.SlotStatus.Locked) {
+                if(simManager.uiManager.framesSinceLastClickableSpirit > 150 && simManager.uiManager.curClickableSpiritType == UIManager.ClickableSpiritType.Pebbles) {
+                    simManager.uiManager.isClickableSpiritRoaming = true;
+                    simManager.uiManager.roamingSpiritColor = kingdomTerrain.trophicTiersList[0].trophicSlots[2].color;
+                }
             }
-        }
-        // sand:
-        if(kingdomTerrain.trophicTiersList[0].trophicSlots[3].status == TrophicSlot.SlotStatus.Locked) {
-            if(simManager.uiManager.framesSinceLastClickableSpirit > 150 && simManager.uiManager.curClickableSpiritType == UIManager.ClickableSpiritType.Sand) {
-                simManager.uiManager.isClickableSpiritRoaming = true;
-                simManager.uiManager.roamingSpiritColor = kingdomTerrain.trophicTiersList[0].trophicSlots[3].color;
+            // sand:
+            if(kingdomTerrain.trophicTiersList[0].trophicSlots[3].status == TrophicSlot.SlotStatus.Locked) {
+                if(simManager.uiManager.framesSinceLastClickableSpirit > 150 && simManager.uiManager.curClickableSpiritType == UIManager.ClickableSpiritType.Sand) {
+                    simManager.uiManager.isClickableSpiritRoaming = true;
+                    simManager.uiManager.roamingSpiritColor = kingdomTerrain.trophicTiersList[0].trophicSlots[3].color;
+                }
             }
-        }
 
+
+
+        }
+        
         // UNLOCKS USED TO BE HERE:::::: ***************************************************
         // ALGAE
         /*if(kingdomPlants.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {

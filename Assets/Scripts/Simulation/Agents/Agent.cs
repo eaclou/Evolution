@@ -1422,7 +1422,7 @@ public class Agent : MonoBehaviour {
             //float turnRatePenalty = Mathf.Lerp(0.25f, 1f, 1f - sizeValue);
 
             // Head turn:
-            float torqueForce = Mathf.Lerp(headTurn, headTurnSign, 0.75f) * forcePenalty * turnRate * this.bodyRigidbody.mass * this.bodyRigidbody.mass * fatigueMultiplier * bitingPenalty * Time.deltaTime;
+            float torqueForce = Mathf.Lerp(headTurn, headTurnSign, 0.75f) * forcePenalty * turnRate * this.bodyRigidbody.mass * fatigueMultiplier * bitingPenalty * Time.deltaTime;
             torqueForce = Mathf.Min(torqueForce, 7.55f);
             this.bodyRigidbody.AddTorque(torqueForce, ForceMode2D.Impulse);
             

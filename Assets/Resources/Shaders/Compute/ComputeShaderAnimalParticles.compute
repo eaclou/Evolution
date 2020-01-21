@@ -472,10 +472,7 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 					if(spawnAltitudeSample.x < _GlobalWaterLevel) {  // in water only? // for now...
 						float2 worldPos = float2(spawnUV.x * _MapSize, spawnUV.y * _MapSize);
 						animalParticlesWrite[id.x].worldPos.xy = worldPos;
-						//animalParticlesWrite[id.x].p1 = worldPos.xy - float2(0, 0.01);
-						//animalParticlesWrite[id.x].p2 = worldPos.xy - float2(0, 0.02);
-						//animalParticlesWrite[id.x].p3 = worldPos.xy - float2(0, 0.03);
-
+						
 						float randRadius = rand(float2(randX * 10, randY * -3.37)) * (_MaxParticleSize - _MinParticleSize) + _MinParticleSize;					
 			
 						AnimalParticleData representativeParticle = _RepresentativeGenomeCBuffer[0];
@@ -496,16 +493,13 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 						float randA = rand(float2((float)id.x - randY, _Time * 6.14 * rand01));
 						float randB = rand(float2(randX * 62.39 + _Time, randY));
 						float randC = rand(float2((float)id.x, randX * -62.39 - _Time));	
-						float randD = rand(float2(rand01, _Time * 0.9174 + 90.13));
+						//float randD = rand(float2(rand01, _Time * 0.9174 + 90.13));
 
-						animalParticlesWrite[id.x].genomeVector = lerp(representativeParticle.genomeVector, float4(randA, randB, randC, randD), 0.33);
-						animalParticlesWrite[id.x].genomeVector.w = 0.0;
+						animalParticlesWrite[id.x].genomeVector.xyz = lerp(representativeParticle.genomeVector.xyz, float3(randA, randB, randC), 0.33);
+						animalParticlesWrite[id.x].genomeVector.w = representativeParticle.genomeVector.w + 1.0;
 
 						animalParticlesWrite[id.x].extra0 = startingMass;
 
-						// subtract startingMass from algae?  or ignore for now?
-						//animalParticlesWrite[id.x]
-					
 						break;
 					}	
 					else {

@@ -4002,26 +4002,16 @@ public class TheRenderKing : MonoBehaviour {
             float isHighlight = 0f;
             float isSelectedZoop = 0f;
             float isSelectedPlant = 0f;
-            if(simManager.uiManager.watcherUI.watcherSelectedTrophicSlotRef != null) {
+            if(simManager.uiManager.watcherUI.watcherSelectedTrophicSlotRef != null && simManager.uiManager.panelFocus == UIManager.PanelFocus.Watcher) {
                 
-                if(!simManager.uiManager.isBrushModeON_snoopingOFF && simManager.uiManager.watcherUI.isOpen) {
-                    isHighlight = 1f;
-                }
-                
-                if(!simManager.uiManager.isBrushModeON_snoopingOFF && simManager.uiManager.watcherUI.isOpen) {
-                    if(simManager.uiManager.watcherUI.watcherSelectedTrophicSlotRef.kingdomID == 2 && simManager.uiManager.watcherUI.watcherSelectedTrophicSlotRef.tierID == 0) {
-                        isSelectedZoop = 1f;
-                    }                
-                }
-                
-                if(!simManager.uiManager.isBrushModeON_snoopingOFF && simManager.uiManager.watcherUI.isOpen) {
-                    if(simManager.uiManager.watcherUI.watcherSelectedTrophicSlotRef.kingdomID == 1 && simManager.uiManager.watcherUI.watcherSelectedTrophicSlotRef.tierID == 1) {
-                        isSelectedPlant = 1f;
-                    }                
+                isHighlight = 1f;                
+                if(simManager.uiManager.watcherUI.watcherSelectedTrophicSlotRef.kingdomID == 2 && simManager.uiManager.watcherUI.watcherSelectedTrophicSlotRef.tierID == 0) {
+                    isSelectedZoop = 1f;
+                }                
+                if(simManager.uiManager.watcherUI.watcherSelectedTrophicSlotRef.kingdomID == 1 && simManager.uiManager.watcherUI.watcherSelectedTrophicSlotRef.tierID == 1) {
+                    isSelectedPlant = 1f;
                 }
             }
-            
-            //simManager.vegetationManager.isPlantParticleSelected
             
             if(simManager.trophicLayersManager.GetAlgaeOnOff()) {
 
@@ -4120,7 +4110,15 @@ public class TheRenderKing : MonoBehaviour {
             else {
                 if(simManager.uiManager.isClickableSpiritRoaming) {
                     //float scale = 4.2f; // Mathf.Lerp(0.35f, 1.75f, baronVonWater.camDistNormalized);
-                    Matrix4x4 stirStickTransformMatrix = Matrix4x4.TRS(simManager.uiManager.roamingSpiritPosition, Quaternion.identity, Vector3.one * simManager.uiManager.roamingSpiritScale);
+                    float radius = simManager.uiManager.roamingSpiritScale;
+                    Color tint = simManager.uiManager.roamingSpiritColor;
+                    if(simManager.uiManager.theCursorCzar._IsHoverClickableSpirit) {
+                        radius *= 2f;
+                        tint *= 2f;
+                    }
+                    
+
+                    Matrix4x4 stirStickTransformMatrix = Matrix4x4.TRS(simManager.uiManager.roamingSpiritPosition, Quaternion.identity, Vector3.one * radius);
                     Mesh stickMesh = simManager.uiManager.protoSpiritClickColliderGO.GetComponent<MeshFilter>().mesh; // meshStirStickLrg;
 
                     gizmoProtoSpiritClickableMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
@@ -4212,9 +4210,9 @@ public class TheRenderKing : MonoBehaviour {
                 */
                 critterDebugGenericStrokeMat.SetInt("_HoverID", simManager.uiManager.cameraManager.mouseHoverAgentIndex);
                 critterDebugGenericStrokeMat.SetInt("_SelectedID", simManager.uiManager.cameraManager.targetAgentIndex);
-                float isHighlightCritter = !simManager.uiManager.isBrushModeON_snoopingOFF ? 1f : 0f;
+                float isHighlightCritter = simManager.uiManager.panelFocus == UIManager.PanelFocus.Watcher ? 1f : 0f;
                 float isHoverCritter = simManager.uiManager.cameraManager.isMouseHoverAgent ? 1f : 0f;
-                if(simManager.uiManager.curActiveTool == UIManager.ToolType.Add) {
+                if(simManager.uiManager.panelFocus != UIManager.PanelFocus.Watcher) {
                     isHighlightCritter = 0f;
                     isHoverCritter = 0f;
                 }
@@ -4268,8 +4266,9 @@ public class TheRenderKing : MonoBehaviour {
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonWater.waterNutrientsBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterNutrientsBitsCBuffer.count);
             
             
-            if(simManager.uiManager.curActiveTool == UIManager.ToolType.Add && simManager.uiManager.isBrushModeON_snoopingOFF) {
+            if(simManager.uiManager.curActiveTool == UIManager.ToolType.Add) {
                 if(simManager.uiManager.panelFocus == UIManager.PanelFocus.Brushes) {
+                    
                     gizmoStirToolMat.SetPass(0);
                     gizmoStirToolMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
                     gizmoStirToolMat.SetBuffer("gizmoStirToolPosCBuffer", gizmoCursorPosCBuffer);
