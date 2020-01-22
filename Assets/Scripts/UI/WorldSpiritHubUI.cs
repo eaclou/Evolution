@@ -91,38 +91,24 @@ public class WorldSpiritHubUI : MonoBehaviour {
     private void UpdateUI() {
         TrophicLayersManager layerManager = uiManagerRef.gameManager.simulationManager.trophicLayersManager;
 
-        if(false) { //uiManagerRef.panelFocus == UIManager.PanelFocus.WorldHub) {
-            imageBitMinerals.color = Color.white;
-            imageBitWater.color = Color.white;
-            imageBitAir.color = Color.white;
-            imageBitHub.color = Color.white;
-            imageBitTerrain.color = Color.white;
-            imageBitDecomposers.color = Color.white;
-            imageBitPlants.color = Color.white;
-            imageBitAnimals.color = Color.white;
-            imageBitInfo.color = Color.white;
-            imageBitMutation.color = Color.white;
-            imageBitKnowledge.color = Color.white;
-        }
-        else {
-            
-        }
-        imageBitMinerals.color = Color.gray;
-        imageBitWater.color = Color.gray;
-        imageBitAir.color = Color.gray;
-        imageBitHub.color = Color.gray;
-        imageBitTerrain.color = Color.gray;
-        imageBitDecomposers.color = Color.gray;
-        imageBitPlants.color = Color.gray;
-        imageBitAnimals.color = Color.gray;
-        imageBitInfo.color = Color.gray;
-        imageBitMutation.color = Color.gray;
-        imageBitKnowledge.color = Color.gray;
+        bool showMinerals = layerManager.kingdomOther.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.On;
+        imageBitMinerals.gameObject.SetActive(showMinerals);
+        
+        bool showAir = layerManager.kingdomOther.trophicTiersList[0].trophicSlots[2].status == TrophicSlot.SlotStatus.On;
+        imageBitAir.gameObject.SetActive(showAir);
+        
+        bool showDecomposers = layerManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.On;
+        imageBitDecomposers.gameObject.SetActive(showDecomposers);
 
+        bool showPlants = layerManager.kingdomPlants.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.On;
+        imageBitPlants.gameObject.SetActive(showPlants);
+
+        bool showAnimals = layerManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.On;
+        imageBitAnimals.gameObject.SetActive(showAnimals);
+        
         //buttonKnowledgeLink.interactable = true;
         //buttonMutationLink.interactable = false;3
         
-
         if(uiManagerRef.brushesUI.isUnlocked) {
             buttonBrushesLink.interactable = true;
             //buttonBrushesLink.gameObject.SetActive(true);
@@ -260,10 +246,11 @@ public class WorldSpiritHubUI : MonoBehaviour {
         if(uiManagerRef.panelFocus == UIManager.PanelFocus.WorldHub) {
             isDim = false;
         }
+        isDim = false;
         //imageBitInfo.gameObject.SetActive(isDim);
         textSelectedEssenceName.gameObject.SetActive(!isDim);
         textSelectedEssenceDescription.gameObject.SetActive(!isDim);
-        buttonBrushesLink.gameObject.SetActive(!isDim);
+        //buttonBrushesLink.gameObject.SetActive(!isDim);
         //buttonKnowledgeLink.gameObject.SetActive(!isDim);
         //buttonMutationLink.gameObject.SetActive(!isDim);
 
@@ -301,10 +288,10 @@ public class WorldSpiritHubUI : MonoBehaviour {
     }
     public void UpdateWorldSpiritHubUI() {
         if(uiManagerRef.panelFocus == UIManager.PanelFocus.WorldHub) {
-            animatorWorldHubUI.SetBool("_IsDimmed", false);
+            //animatorWorldHubUI.SetBool("_IsDimmed", false);
         }
         else {
-            animatorWorldHubUI.SetBool("_IsDimmed", true);            
+            //animatorWorldHubUI.SetBool("_IsDimmed", true);            
         }
 
         animatorWorldHubUI.SetBool("_IsOpen", isOpen);
@@ -366,7 +353,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
         //selectedWorldSpiritVertebrateSpeciesID = slot.linkedSpeciesID; // update this next ***
         
         selectedToolbarOtherLayer = index;
-        uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
+        //uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
         //isBrushSelected = false;
     }
     public void ClickButtonWorldSpiritHubTerrain(int index) {
@@ -380,7 +367,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
         //selectedWorldSpiritVertebrateSpeciesID = slot.linkedSpeciesID; // update this next
 
         selectedToolbarTerrainLayer = index;
-        uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
+        //uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
         //isBrushSelected = false;
     }
     public void ClickButtonWorldSpiritHubDecomposers() {
@@ -392,7 +379,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
             ClickWorldCreateNewSpecies(slot);
             //ClickToolbarCreateNewSpecies();
         }
-        uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
+        //uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
         //isBrushSelected = false;
     }
     public void ClickButtonWorldSpiritHubAlgae() {  // shouldn't be able to click if LOCKED (interactive = false)
@@ -403,7 +390,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
             ClickWorldCreateNewSpecies(slot);
             //ClickToolbarCreateNewSpecies();
         }
-        uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
+        //uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
     }
     public void ClickButtonWorldSpiritHubPlants(int slotID) {
         TrophicSlot slot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[slotID];
@@ -413,7 +400,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
             ClickWorldCreateNewSpecies(slot);
             //ClickToolbarCreateNewSpecies();
         }
-        uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
+        //uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
     }
     public void ClickButtonWorldSpiritHubZooplankton() {
         TrophicSlot slot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0];        
@@ -423,7 +410,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
             //ClickToolbarCreateNewSpecies();
             ClickWorldCreateNewSpecies(slot);
         }
-        uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
+        //uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
         //curActiveTool = ToolType.None;
         //isBrushSelected = false;
     }
@@ -443,7 +430,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
         if(selectedWorldSpiritSlot.status != TrophicSlot.SlotStatus.Unlocked) {
             //InitToolbarPortraitCritterData(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef); // ***
         }
-        uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
+        //uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
     }
 
     

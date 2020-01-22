@@ -4080,8 +4080,7 @@ public class TheRenderKing : MonoBehaviour {
 
             // STIR STICK!!!!
             if(simManager.uiManager.curActiveTool == UIManager.ToolType.Stir) {
-                //gizmoStirStickAMat.SetPass(0);
-                //simManager.uiManager.smoothedCtrlCursorVel
+                
                 Quaternion rot = Quaternion.Euler(new Vector3(Mathf.Clamp(simManager.uiManager.theCursorCzar.smoothedMouseVel.y * 2.5f + 10f, -45f, 45f), Mathf.Clamp(simManager.uiManager.theCursorCzar.smoothedMouseVel.x * -1.5f, -45f, 45f), 0f));
                 float scale = Mathf.Lerp(0.35f, 1.75f, baronVonWater.camDistNormalized);
                 Matrix4x4 stirStickTransformMatrix = Matrix4x4.TRS(new Vector3(simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.x, simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.y, simManager.uiManager.theCursorCzar.stirStickDepth), rot, Vector3.one * scale);
@@ -4128,12 +4127,7 @@ public class TheRenderKing : MonoBehaviour {
                     gizmoProtoSpiritClickableMat.SetVector("_FogColor", simManager.uiManager.roamingSpiritColor); //simManager.fogColor);
                     gizmoProtoSpiritClickableMat.SetFloat("_Turbidity", simManager.fogAmount); 
                     cmdBufferMain.DrawMesh(stickMesh, stirStickTransformMatrix, gizmoProtoSpiritClickableMat);
-
-                    //gizmoStirStickAMat.SetFloat("_MinFog", minimumFogDensity);  
-                    //gizmoStirStickAMat.SetVector("_FogColor", simManager.fogColor);
-                    //gizmoStirStickAMat.SetFloat("_Turbidity", simManager.fogAmount);
-                    //gizmoStirStickAMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-                    //cmdBufferMain.DrawMesh(stickMesh, stirStickTransformMatrix, gizmoStirStickAMat);
+                    
                 }
                 
             }
@@ -4151,25 +4145,7 @@ public class TheRenderKing : MonoBehaviour {
                 
                 animalParticleDisplayMat.SetInt("_SelectedParticleIndex", Mathf.RoundToInt(simManager.zooplanktonManager.selectedAnimalParticleIndex));
                 animalParticleDisplayMat.SetInt("_ClosestParticleID", Mathf.RoundToInt(simManager.zooplanktonManager.closestZooplanktonToCursorIndex));
-                /*float isSelectedA = 0f;
                 
-                float isHoverA = 0f;
-                if(simManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2) {
-                    if(simManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 0) {
-                        if(simManager.uiManager.watcherUI.isHighlight) {
-                            isHoverA = 1f;
-                            //isHighlight = 1f;
-                            if(simManager.zooplanktonManager.isAnimalParticleSelected) {                   
-                                isSelectedA = 1f;
-                            }
-                        }
-                        else {
-                            simManager.zooplanktonManager.isAnimalParticleSelected = false;
-                            //simManager.uiManager.StopFollowingPlantParticle();
-                        }
-                    }
-                }
-                */
                 animalParticleDisplayMat.SetFloat("_IsSelected", isSelectedZoop);// isSelectedA);
                 animalParticleDisplayMat.SetFloat("_IsHover", simManager.uiManager.watcherUI.isZooplanktonHighlight * isHighlight); // isHighlight); // isHoverA); // isHoverA);
                 animalParticleDisplayMat.SetFloat("_IsHighlight", simManager.uiManager.watcherUI.isZooplanktonHighlight * isHighlight); // isHighlight); // isHighlight);
@@ -4219,7 +4195,7 @@ public class TheRenderKing : MonoBehaviour {
                 critterDebugGenericStrokeMat.SetFloat("_HighlightOn", isHighlightCritter);
                 critterDebugGenericStrokeMat.SetFloat("_IsHover", isHoverCritter);
                 critterDebugGenericStrokeMat.SetFloat("_IsSelected", simManager.uiManager.cameraManager.isFollowingAgent ? 1f : 0f);
-                Debug.Log("SetTargetAgent: [ " + simManager.uiManager.cameraManager.targetAgentIndex.ToString());
+                //Debug.Log("SetTargetAgent: [ " + simManager.uiManager.cameraManager.targetAgentIndex.ToString());
                 critterDebugGenericStrokeMat.SetFloat("_MapSize", SimulationManager._MapSize);    
                 critterDebugGenericStrokeMat.SetFloat("_GlobalWaterLevel", baronVonWater._GlobalWaterLevel);  
                 cmdBufferMain.DrawProcedural(Matrix4x4.identity, critterDebugGenericStrokeMat, 0, MeshTopology.Triangles, 6, critterGenericStrokesCBuffer.count);

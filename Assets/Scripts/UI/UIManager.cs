@@ -512,9 +512,11 @@ public class UIManager : MonoBehaviour {
 
         if(brushesUI.isUnlocked) {
             buttonOpenBrushesPanel.gameObject.SetActive(true);
+            worldSpiritHubUI.imageBitBrushes.gameObject.SetActive(true);
         }
         else {
             buttonOpenBrushesPanel.gameObject.SetActive(false);
+            worldSpiritHubUI.imageBitBrushes.gameObject.SetActive(false);
         }
 
         if(watcherUI.isUnlocked) {
@@ -527,18 +529,22 @@ public class UIManager : MonoBehaviour {
         if(knowledgeUI.isUnlocked) {
             buttonOpenKnowledgePanel.gameObject.SetActive(true);
             buttonOpenKnowledgePanel.GetComponent<Image>().sprite = worldSpiritHubUI.curIconSprite;
+            worldSpiritHubUI.imageBitKnowledge.gameObject.SetActive(true);
         }
         else {
             buttonOpenKnowledgePanel.gameObject.SetActive(false);
+            worldSpiritHubUI.imageBitKnowledge.gameObject.SetActive(false);
         }
 
         if(mutationUI.isUnlocked) {
             buttonOpenMutationPanel.gameObject.SetActive(true);
+            worldSpiritHubUI.imageBitMutation.gameObject.SetActive(true);
         }
         else {
             buttonOpenMutationPanel.gameObject.SetActive(false);
+            worldSpiritHubUI.imageBitMutation.gameObject.SetActive(false);
         }
-
+        
         if(globalResourcesUI.isUnlocked) {
             buttonOpenGlobalResourcesPanel.gameObject.SetActive(true);
         }
@@ -1038,6 +1044,7 @@ public class UIManager : MonoBehaviour {
                 //button.gameObject.transform.localScale = Vector3.one;
                 break;
             case TrophicSlot.SlotStatus.Locked:
+                button.gameObject.SetActive(false); 
                 button.interactable = false; 
                 colBlock.colorMultiplier = 0.5f;
                 //button.GetComponentInChildren<Text>().text = "";
@@ -1045,7 +1052,8 @@ public class UIManager : MonoBehaviour {
                 
                 break;
             case TrophicSlot.SlotStatus.Unlocked:
-                button.interactable = true;  
+                button.gameObject.SetActive(false); 
+                button.interactable = false;  
                 colBlock.colorMultiplier = 0.8f;
                 //button.GetComponentInChildren<Text>().text = "";
                 //button.GetComponent<Image>().sprite = spriteSpeciesSlotRing;
@@ -1057,6 +1065,7 @@ public class UIManager : MonoBehaviour {
             //    button.GetComponentInChildren<Text>().text = "%";
             //    break;
             case TrophicSlot.SlotStatus.On:
+                button.gameObject.SetActive(true); 
                 button.interactable = true;
                 colBlock.colorMultiplier = 0.8f;                
                 
@@ -1083,13 +1092,13 @@ public class UIManager : MonoBehaviour {
             button.colors = colBlock;
             button.gameObject.transform.localScale = scale;
 
-            button.gameObject.SetActive(false);
+            //button.gameObject.SetActive(false);
         }
         else {
             button.colors = colBlock;
 
             button.gameObject.transform.localScale = scale;
-            button.gameObject.SetActive(true);
+            //button.gameObject.SetActive(true);
         }
 
         

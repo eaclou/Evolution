@@ -443,9 +443,7 @@ public class WatcherUI : MonoBehaviour {
                             textWatcherVertebrateHUD.text = "";
 
                             panelWatcherSpiritVertebratesHUD.SetActive(true);
-                            
-                            textVertebrateGen.text = "Gen #" + agent.candidateRef.candidateGenome.bodyGenome.coreGenome.generation.ToString();
-                            textVertebrateLifestage.text = "Age: " + agent.ageCounter.ToString() + ", stateID: " + developmentStateID;
+                                                        
                             string statusStr = "Alive!";
                             Color statusColor = Color.white;
                             Color healthColor = Color.green;
@@ -468,6 +466,9 @@ public class WatcherUI : MonoBehaviour {
                                 healthColor = Color.black;
                             }*/
 
+                            textVertebrateGen.text = "Gen #" + agent.candidateRef.candidateGenome.bodyGenome.coreGenome.generation.ToString();
+                            textVertebrateLifestage.text = "Age: " + agent.ageCounter.ToString() + ", stateID: " + developmentStateID;
+                            textVertebrateLifestage.color = healthColor;
                             textVertebrateStatus.text = statusStr; // "activity: " + curActivityID;
 
                             //where do hud elements get updated?? ***

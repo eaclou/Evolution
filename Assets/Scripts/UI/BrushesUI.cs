@@ -166,6 +166,13 @@ public class BrushesUI : MonoBehaviour {
 	}
 
     public void UpdateBrushesUI() {
+        // TEMPORARY!!!!!::::::
+        selectedEssenceSlot = uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot;
+        selectedBrushLinkedSpiritOtherLayer = uiManagerRef.worldSpiritHubUI.selectedToolbarOtherLayer;
+        selectedBrushLinkedSpiritTerrainLayer = uiManagerRef.worldSpiritHubUI.selectedToolbarTerrainLayer;
+        selectedBrushVertebrateSpeciesID = uiManagerRef.worldSpiritHubUI.selectedWorldSpiritVertebrateSpeciesID;
+
+
         animatorBrushesUI.SetBool("MinPanel", !isOpen);
         bool isDim = false;
         if(uiManagerRef.panelFocus == UIManager.PanelFocus.Brushes) {            
@@ -184,7 +191,7 @@ public class BrushesUI : MonoBehaviour {
         imageInfluencePoints.gameObject.SetActive(!isDim);
 
         //panelBrushes.SetActive(isOpen);
-        panelBrushPaletteSelect.SetActive(true); // isPaletteOpen);
+        panelBrushPaletteSelect.SetActive(false); // isPaletteOpen);
         if (isOpen) {
             UpdateUI();
             UpdateBrushPaletteUI();
