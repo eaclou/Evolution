@@ -417,41 +417,30 @@ public class UIManager : MonoBehaviour {
         if(gameManager.simulationManager._BigBangOn) {
             panelBigBang.SetActive(true);
             bigBangFramesCounter += 1;
-
             if(bigBangFramesCounter == 70) {
                 worldSpiritHubUI.isUnlocked = true;
-                worldSpiritHubUI.OpenWorldTreeSelect();
-                
-            }
-            
+                worldSpiritHubUI.OpenWorldTreeSelect();                
+            }            
             if(bigBangFramesCounter > 70) {
                 bigBangFramesCounter = 0;
                 gameManager.simulationManager._BigBangOn = false;
                 panelBigBang.SetActive(false);
-
-                
             }
             else if(bigBangFramesCounter > 40) {
                 imageBigBangStrokes01.gameObject.SetActive(true);
                 imageBigBangStrokes02.gameObject.SetActive(false);
                 imageBigBangStrokes03.gameObject.SetActive(false);
-
-                 worldSpiritHubUI.PlayBigBangSpawnAnim();               
-
+                worldSpiritHubUI.PlayBigBangSpawnAnim();
             }
             else if(bigBangFramesCounter > 20) {
                 imageBigBangStrokes01.gameObject.SetActive(true);
                 imageBigBangStrokes02.gameObject.SetActive(true);
                 imageBigBangStrokes03.gameObject.SetActive(false);
-
-                
             }
             else if(bigBangFramesCounter > 0) {
                 imageBigBangStrokes01.gameObject.SetActive(true);
                 imageBigBangStrokes02.gameObject.SetActive(true);
                 imageBigBangStrokes03.gameObject.SetActive(true);
-
-                
             }
         }
         
@@ -460,7 +449,7 @@ public class UIManager : MonoBehaviour {
         
         theCursorCzar.UpdateCursorCzar();  // this will assume a larger role
         // nearPlaneQuad vertex positions --> find worldSpacePos of Canvas 2D Cursor
-        Vector2 cursorScreenPosNormalized = new Vector2(Input.mousePosition.x / cameraManager.cameraRef.pixelWidth, Input.mousePosition.y / cameraManager.cameraRef.pixelHeight);
+        /*Vector2 cursorScreenPosNormalized = new Vector2(Input.mousePosition.x / cameraManager.cameraRef.pixelWidth, Input.mousePosition.y / cameraManager.cameraRef.pixelHeight);
         Vector3 bottomMidpoint = Vector3.Lerp(cameraManager.worldSpaceBottomLeft, cameraManager.worldSpaceBottomRight, cursorScreenPosNormalized.x);
         Vector3 topMidpoint = Vector3.Lerp(cameraManager.worldSpaceTopLeft, cameraManager.worldSpaceTopRight, cursorScreenPosNormalized.x);
         Vector3 midMidpoint = Vector3.Lerp(bottomMidpoint, topMidpoint, cursorScreenPosNormalized.y);
@@ -470,9 +459,9 @@ public class UIManager : MonoBehaviour {
         cursorTextString += "\nCZWP: (" + theCursorCzar.curMousePositionOnWaterPlane.x.ToString() + ", " + theCursorCzar.curMousePositionOnWaterPlane.y.ToString() + ", " + theCursorCzar.curMousePositionOnWaterPlane.z.ToString() + ")";
         cursorTextString += "\nRay: (" + theCursorCzar.cursorRay.ToString();
         cursorTextString += "\nCPs: (" + theCursorCzar.cursorParticlesWorldPos.ToString();
-        
+        */
         //cameraRef.pixelHeight
-        textCursorInfo.text = cursorTextString;
+        //textCursorInfo.text = cursorTextString;
         
         brushesUI.UpdateBrushesUI();
         watcherUI.UpdateWatcherPanelUI(gameManager.simulationManager.trophicLayersManager);
@@ -485,26 +474,14 @@ public class UIManager : MonoBehaviour {
         debugPanelUI.UpdateDebugUI();
               
         UpdatePausedUI();
+        
 
-        /*
-        // **** TEST WITH DIFFERENT SHADER (UI) *********
-        float cursorPosX = Input.mousePosition.x;
-        float cursorPosY = Input.mousePosition.y;
-        cursorParticlesGO.transform.position = new Vector3(cursorPosX, cursorPosY, 0f);
-        */
-
-
-
-        //
-        //
-        //
-
-        if(gameManager.simulationManager.simAgeTimeSteps < 240f && gameManager.simulationManager.simAgeTimeSteps > 160f) {
+        /*if(gameManager.simulationManager.simAgeTimeSteps < 240f && gameManager.simulationManager.simAgeTimeSteps > 160f) {
             textFXPH_playing_start.gameObject.SetActive(true);
         }
         else {
             textFXPH_playing_start.gameObject.SetActive(false);
-        }
+        }*/
 
         if(isClickableSpiritRoaming) {
             protoSpiritClickColliderGO.SetActive(true);

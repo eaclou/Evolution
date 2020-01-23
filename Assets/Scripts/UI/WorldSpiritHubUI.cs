@@ -92,19 +92,19 @@ public class WorldSpiritHubUI : MonoBehaviour {
         TrophicLayersManager layerManager = uiManagerRef.gameManager.simulationManager.trophicLayersManager;
 
         bool showMinerals = layerManager.kingdomOther.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.On;
-        imageBitMinerals.gameObject.SetActive(showMinerals);
+        imageBitMinerals.gameObject.SetActive(true);
         
         bool showAir = layerManager.kingdomOther.trophicTiersList[0].trophicSlots[2].status == TrophicSlot.SlotStatus.On;
-        imageBitAir.gameObject.SetActive(showAir);
+        imageBitAir.gameObject.SetActive(true);
         
         bool showDecomposers = layerManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.On;
-        imageBitDecomposers.gameObject.SetActive(showDecomposers);
+        imageBitDecomposers.gameObject.SetActive(true);
 
         bool showPlants = layerManager.kingdomPlants.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.On;
-        imageBitPlants.gameObject.SetActive(showPlants);
+        imageBitPlants.gameObject.SetActive(true);
 
         bool showAnimals = layerManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.On;
-        imageBitAnimals.gameObject.SetActive(showAnimals);
+        imageBitAnimals.gameObject.SetActive(true);
         
         //buttonKnowledgeLink.interactable = true;
         //buttonMutationLink.interactable = false;3

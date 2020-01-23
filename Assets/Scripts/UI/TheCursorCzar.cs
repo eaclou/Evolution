@@ -78,7 +78,7 @@ public class TheCursorCzar : MonoBehaviour {
             prevMousePositionOnWaterPlane = curMousePositionOnWaterPlane;
             curMousePositionOnWaterPlane = hit.point;            
 
-            cursorParticlesWorldPos = hit.point - ray.direction * 30f;
+            cursorParticlesWorldPos = hit.point - ray.direction * 5f;
             //Debug.Log("curMousePositionOnWaterPlane:" + curMousePositionOnWaterPlane.ToString() + ", " + screenPos.ToString() + ", hit: " + hit.point.ToString());
         }
         else {

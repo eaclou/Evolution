@@ -63,7 +63,7 @@
 				float3 rotatedPoint0 = float3(quadPoint.x * right0 + quadPoint.y * forward0,
 											 quadPoint.z);
 				
-				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(rotatedPoint0, 0.0f));				
+				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(quadPoint, 0.0f));				
 				o.color = float4(1,1,1,1);				
 				o.uv = uv;
 				
@@ -87,11 +87,10 @@
 				float mult = lerp(mask, saturate(((noiseTex.x * noiseTex.x * 1 + 0.05) - uvDist) * 15), 0.5);
 				col.rgb *= mult;
 
-				float2 patternUV = i.uv * (1.0 / 8.0) + float2(0.125 * _PatternColumn, 0.125 * _PatternRow);
+				//float2 patternUV = i.uv * (1.0 / 8.0) + float2(0.125 * _PatternColumn, 0.125 * _PatternRow);
+				//float4 patternSample = tex2D(_BrushPatternTex, patternUV);
 
-				float4 patternSample = tex2D(_BrushPatternTex, patternUV);
-
-				return float4(patternSample.rgb * mask, 1);
+				//return float4(patternSample.rgb * mask, 1);
 				
 				return col;
 			}

@@ -5,6 +5,7 @@
 #pragma kernel CSCopyBuffer
 #pragma kernel CSSpawnBrushQuads
 
+#include "Assets/Resources/Shaders/Inc/NoiseShared.cginc"
 
 struct SpiritBrushQuadData {
 	int index;
@@ -41,11 +42,20 @@ struct CursorParticleData {
 uniform int _StartIndex;
 uniform int _UpdateBufferLength;
 
+uniform float _Time;
+
 uniform float _CursorScreenPosX;
 uniform float _CursorScreenPosY;
 
 uniform float _CursorWorldPosX;
 uniform float _CursorWorldPosY;
+
+uniform float4 _CursorWorldPosition;
+uniform float4 _ParticleColor;
+uniform float _ParticleSpawnRadius;
+
+uniform bool _SpawnOn;
+uniform float _IsBrushing;
 
 StructuredBuffer<CursorParticleData> _CursorParticlesRead;
 RWStructuredBuffer<CursorParticleData> _CursorParticlesWrite;
@@ -62,25 +72,27 @@ void CSSimulateCursorParticles (uint3 id : SV_DispatchThreadID)
 {
 	CursorParticleData data = _CursorParticlesRead[id.x];
 	
-	float agingRate = 1.0 / data.lifespan;	
+	float agingRate = 1.0 / data.lifespan;
 	
-	
-	if(data.age01 >= 1.0) {
-		data.worldPos.xy = float2(_CursorWorldPosX, _CursorWorldPosY) + 1 * float2(rand(float2(id.x + 12, id.x * 34.17)), rand(float2(data.age01, id.x * 3.3389)));
-		data.age01 -= 1.0;
-		
-	}
-	else {
-		//data.worldPos.xy = float2(id.x * 0.1, id.x * 0.3);
+	float4 randNoise = Value3D(data.worldPos.xyz + (float)id.x * 0.01 + float3(0, 0, -_Time * 4), 0.375);
 
-		float2 randNoise = float2(rand(data.worldPos.xy * 0.00001), rand(-data.worldPos.yz * 0.00001)) - 0.5;
+	if(data.age01 >= 1.0) {  // DEAD!!! // RESPAWN??		
+		if(_SpawnOn) {
+			data.worldPos.xyz = _CursorWorldPosition.xyz;
+			data.worldPos.xyz += (_ParticleSpawnRadius + _IsBrushing * 3) * normalize(randNoise.wyz);
+			data.age01 = data.age01 % 1.0;	
+
+			data.extraVec4 = _ParticleColor * (0.16 + _IsBrushing * 0.72);
+		}
+	}
+	else {	
+		float rootedness = saturate(1 - data.age01 * 64);
+		rootedness *= rootedness * 0.9;
+		data.worldPos.xyz = lerp(data.worldPos.xyz + randNoise.yzw * 0.1 * data.age01, _CursorWorldPosition.xyz + randNoise.yzw * _ParticleSpawnRadius, rootedness);
 		
-		data.worldPos.xy += data.vel * 0.05 + randNoise * 0.1;
 		data.age01 = saturate(data.age01 + agingRate);
 	}
-
 	
-
 	_CursorParticlesWrite[id.x] = data;
 }
 

@@ -2778,6 +2778,15 @@ public class TheRenderKing : MonoBehaviour {
     }
     public void SimSpiritBrushQuads() {
 
+        bool isSpawn = false;
+        if(simManager.uiManager.panelFocus == UIManager.PanelFocus.Brushes) {
+            isSpawn = true;
+        }
+        float isBrushing = 0f;
+        if(isSpiritBrushOn) {
+            isBrushing = 1f;
+        }
+
         // CursorParticles:
         int kernelCSSimulateCursorParticles = computeShaderSpiritBrush.FindKernel("CSSimulateCursorParticles");
 
@@ -2785,8 +2794,16 @@ public class TheRenderKing : MonoBehaviour {
         computeShaderSpiritBrush.SetFloat("_DeltaTime", fluidManager.deltaTime);
         computeShaderSpiritBrush.SetFloat("_InvGridScale", fluidManager.invGridScale);
         computeShaderSpiritBrush.SetFloat("_Time", Time.realtimeSinceStartup);
-        computeShaderSpiritBrush.SetFloat("_CursorWorldPosX", simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.x);
-        computeShaderSpiritBrush.SetFloat("_CursorWorldPosY", simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.y);
+        computeShaderSpiritBrush.SetVector("_ParticleColor", simManager.uiManager.worldSpiritHubUI.curIconColor);
+        computeShaderSpiritBrush.SetFloat("_ParticleSpawnRadius", 1.15f + isBrushing * 0.75f);
+        computeShaderSpiritBrush.SetVector("_CursorWorldPosition", new Vector4(simManager.uiManager.theCursorCzar.cursorParticlesWorldPos.x,
+                                                                              simManager.uiManager.theCursorCzar.cursorParticlesWorldPos.y,
+                                                                              simManager.uiManager.theCursorCzar.cursorParticlesWorldPos.z,
+                                                                              0f));        
+        computeShaderSpiritBrush.SetBool("_SpawnOn", isSpawn);
+        computeShaderSpiritBrush.SetFloat("_IsBrushing", isBrushing);
+        //computeShaderSpiritBrush.SetFloat("_CursorWorldPosX", simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.x);
+        //computeShaderSpiritBrush.SetFloat("_CursorWorldPosY", simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.y);
         computeShaderSpiritBrush.SetBuffer(kernelCSSimulateCursorParticles, "_CursorParticlesRead", cursorParticlesCBuffer0);      
         computeShaderSpiritBrush.SetBuffer(kernelCSSimulateCursorParticles, "_CursorParticlesWrite", cursorParticlesCBuffer1);  
         computeShaderSpiritBrush.Dispatch(kernelCSSimulateCursorParticles, 1, 1, 1);

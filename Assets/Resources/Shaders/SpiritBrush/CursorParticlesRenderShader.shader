@@ -12,6 +12,7 @@
 		ZWrite Off
 		Cull Off
 		Blend SrcAlpha One
+		//Blend SrcAlpha OneMinusSrcAlpha
 
 		Pass
 		{
@@ -87,9 +88,9 @@
 				float3 rotatedPoint0 = float3(quadPoint.x * right0 + quadPoint.y * forward0,
 											 quadPoint.z);
 				
-				worldPosition.xyz = float3(particleData.worldPos) + quadPoint * 0.025;
+				worldPosition.xyz = float3(particleData.worldPos) + quadPoint * 0.045;
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)));				
-				o.color = float4(particleData.age01,1,1,alpha * 0.1);				
+				o.color = float4(particleData.extraVec4.xyz, alpha * 1);				
 				o.uv = uv;
 				
 				return o;
@@ -97,9 +98,16 @@
 			
 			fixed4 frag (v2f i) : SV_Target
 			{
-				return i.color;
+				
 				
 				fixed4 col = tex2D(_MainTex, i.uv);
+				
+				float4 finalCol = i.color;
+				finalCol.a *= col.a;
+				
+				return finalCol;
+				
+				/*
 				col.rgb = 1 * _Strength;
 				col.rgb = saturate(col.rgb);
 
@@ -120,6 +128,7 @@
 				return float4(patternSample.rgb * mask, 1);
 				
 				return col;
+				*/
 			}
 			ENDCG
 		}
