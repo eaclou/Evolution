@@ -45,6 +45,7 @@ public class WatcherUI : MonoBehaviour {
     public Text textVertebrateGen;
     public Text textVertebrateLifestage;
     public Text textVertebrateStatus;
+    public GameObject panelWatcherVertebrateWidgets01;
     public GameObject panelWatcherSpiritVertebratesText;  // 1
     public Text textWatcherVertebrateText;
     public GameObject panelWatcherSpiritVertebratesGenome; // 2
@@ -443,15 +444,17 @@ public class WatcherUI : MonoBehaviour {
                             textWatcherVertebrateHUD.text = "";
 
                             panelWatcherSpiritVertebratesHUD.SetActive(true);
-                                                        
+                            panelWatcherVertebrateWidgets01.SetActive(true);
+
                             string statusStr = "Alive!";
                             Color statusColor = Color.white;
                             Color healthColor = Color.green;
+                            
                             if(agent.curLifeStage == Agent.AgentLifeStage.Dead) {
                                 statusStr = "Dead! (Decaying)";
                                 statusColor = Color.gray;
                                 healthColor = Color.red;
-
+                                panelWatcherVertebrateWidgets01.SetActive(false);
                             }
                             if(agent.curLifeStage == Agent.AgentLifeStage.Egg) {
                                 statusStr = "Egg!";

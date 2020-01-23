@@ -37,6 +37,9 @@ public class TheCursorCzar : MonoBehaviour {
     public Texture2D cursorTexWatcher;
     public Texture2D cursorTexWorld;
 
+    public Vector3 cursorParticlesWorldPos;
+    public Ray cursorRay;
+
 	// Use this for initialization
 	void Start () {
 		
@@ -45,17 +48,28 @@ public class TheCursorCzar : MonoBehaviour {
 
     
     private void MouseRaycastWaterPlane(Vector3 screenPos) {
+
+        Vector2 cursorScreenPosNormalized = new Vector2(Input.mousePosition.x / uiManagerRef.cameraManager.cameraRef.pixelWidth, Input.mousePosition.y / uiManagerRef.cameraManager.cameraRef.pixelHeight);
+        Vector3 bottomMidpoint = Vector3.Lerp(uiManagerRef.cameraManager.worldSpaceBottomLeft, uiManagerRef.cameraManager.worldSpaceBottomRight, cursorScreenPosNormalized.x);
+        Vector3 topMidpoint = Vector3.Lerp(uiManagerRef.cameraManager.worldSpaceTopLeft, uiManagerRef.cameraManager.worldSpaceTopRight, cursorScreenPosNormalized.x);
+        Vector3 midMidpoint = Vector3.Lerp(bottomMidpoint, topMidpoint, cursorScreenPosNormalized.y);
+        
+
         mouseRaycastWaterPlane.SetActive(true);
 
         //float scale = SimulationManager._MapSize * 0.1f;
         Vector3 targetPosition = mouseRaycastWaterPlane.gameObject.transform.position; //
         targetPosition.z = (uiManagerRef.gameManager.simulationManager.theRenderKing.baronVonWater._GlobalWaterLevel - 0.5f) * -20f;
-        mouseRaycastWaterPlane.gameObject.transform.position = targetPosition;
+
+        mouseRaycastWaterPlane.gameObject.transform.position = Vector3.zero; // targetPosition;
         //new Vector3(SimulationManager._MapSize * 0.5f, gameManager.simulationManager.theRenderKing.baronVonWater._GlobalWaterLevel, SimulationManager._MapSize * 0.5f);
         //mouseRaycastWaterPlane.gameObject.transform.position = targetPosition;
         //mouseRaycastWaterPlane.gameObject.transform.localScale = Vector3.one * scale;
         //Vector3 camPos = cameraManager.gameObject.transform.position;                
+
         Ray ray = uiManagerRef.cameraManager.gameObject.GetComponent<Camera>().ScreenPointToRay(screenPos);
+        cursorRay = ray;
+        //Ray ray = new Ray(uiManagerRef.cameraManager.gameObject.transform.position, midMidpoint - uiManagerRef.cameraManager.gameObject.transform.position);
         RaycastHit hit = new RaycastHit();
         int layerMask = 1 << 12;  // UtilityRaycast???
         Physics.Raycast(ray, out hit, layerMask);
@@ -64,6 +78,7 @@ public class TheCursorCzar : MonoBehaviour {
             prevMousePositionOnWaterPlane = curMousePositionOnWaterPlane;
             curMousePositionOnWaterPlane = hit.point;            
 
+            cursorParticlesWorldPos = hit.point - ray.direction * 30f;
             //Debug.Log("curMousePositionOnWaterPlane:" + curMousePositionOnWaterPlane.ToString() + ", " + screenPos.ToString() + ", hit: " + hit.point.ToString());
         }
         else {

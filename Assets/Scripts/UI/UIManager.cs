@@ -25,6 +25,7 @@ public class UIManager : MonoBehaviour {
     private bool firstTimeStartup = true;
 
     //public bool isBrushModeON_snoopingOFF = true;
+    public GameObject cursorParticlesGO;
 
     public Animator animatorSpiritUnlock;
 
@@ -49,6 +50,8 @@ public class UIManager : MonoBehaviour {
     //public Texture2D healthDisplayTex;
     public GameObject panelTitleMenu;
     public GameObject panelGameOptions;
+
+    public Text textCursorInfo;
 
     //public GameObject panelTint;
     public bool controlsMenuOn = false; // main menu
@@ -209,9 +212,7 @@ public class UIManager : MonoBehaviour {
     void Start() {
         //animatorInspectPanel.enabled = false;
 
-        
-        //ClickToolButtonAdd();
-        
+        //ClickToolButtonAdd();        
     }
     public void EnterObserverMode() {
         isObserverMode = true;
@@ -453,12 +454,25 @@ public class UIManager : MonoBehaviour {
                 
             }
         }
-
-
+        
         UpdateObserverModeUI();  // <== this is the big one *******  
         // ^^^  Need to Clean this up and replace with better approach ***********************
         
         theCursorCzar.UpdateCursorCzar();  // this will assume a larger role
+        // nearPlaneQuad vertex positions --> find worldSpacePos of Canvas 2D Cursor
+        Vector2 cursorScreenPosNormalized = new Vector2(Input.mousePosition.x / cameraManager.cameraRef.pixelWidth, Input.mousePosition.y / cameraManager.cameraRef.pixelHeight);
+        Vector3 bottomMidpoint = Vector3.Lerp(cameraManager.worldSpaceBottomLeft, cameraManager.worldSpaceBottomRight, cursorScreenPosNormalized.x);
+        Vector3 topMidpoint = Vector3.Lerp(cameraManager.worldSpaceTopLeft, cameraManager.worldSpaceTopRight, cursorScreenPosNormalized.x);
+        Vector3 midMidpoint = Vector3.Lerp(bottomMidpoint, topMidpoint, cursorScreenPosNormalized.y);
+        //theCursorCzar.cursorParticlesWorldPos = midMidpoint;
+        string cursorTextString = "";
+        cursorTextString += "MP: (" + Input.mousePosition.x.ToString() + ", " + Input.mousePosition.y.ToString() + ", " + Input.mousePosition.z.ToString() + ")";
+        cursorTextString += "\nCZWP: (" + theCursorCzar.curMousePositionOnWaterPlane.x.ToString() + ", " + theCursorCzar.curMousePositionOnWaterPlane.y.ToString() + ", " + theCursorCzar.curMousePositionOnWaterPlane.z.ToString() + ")";
+        cursorTextString += "\nRay: (" + theCursorCzar.cursorRay.ToString();
+        cursorTextString += "\nCPs: (" + theCursorCzar.cursorParticlesWorldPos.ToString();
+        
+        //cameraRef.pixelHeight
+        textCursorInfo.text = cursorTextString;
         
         brushesUI.UpdateBrushesUI();
         watcherUI.UpdateWatcherPanelUI(gameManager.simulationManager.trophicLayersManager);
@@ -471,6 +485,19 @@ public class UIManager : MonoBehaviour {
         debugPanelUI.UpdateDebugUI();
               
         UpdatePausedUI();
+
+        /*
+        // **** TEST WITH DIFFERENT SHADER (UI) *********
+        float cursorPosX = Input.mousePosition.x;
+        float cursorPosY = Input.mousePosition.y;
+        cursorParticlesGO.transform.position = new Vector3(cursorPosX, cursorPosY, 0f);
+        */
+
+
+
+        //
+        //
+        //
 
         if(gameManager.simulationManager.simAgeTimeSteps < 240f && gameManager.simulationManager.simAgeTimeSteps > 160f) {
             textFXPH_playing_start.gameObject.SetActive(true);

@@ -52,6 +52,8 @@ public class TheRenderKing : MonoBehaviour {
     public Material gizmoStirStickShadowMat;
     public Material gizmoProtoSpiritClickableMat;
 
+    public Material cursorParticlesDisplayMat;
+
     // ORGANIZE AND REMOVE UNUSED!!!!!! *********
     public Material rockMat;
     public Material backgroundMat;
@@ -250,6 +252,21 @@ public class TheRenderKing : MonoBehaviour {
     private BasicStrokeData[] colorInjectionStrokeDataArray;
     private ComputeBuffer colorInjectionStrokesCBuffer;
 
+    private struct CursorParticleData {
+		public int index;
+		public Vector3 worldPos;
+		public Vector2 heading;
+		public Vector2 localScale;
+		public float lifespan;
+        public float age01;
+	    public Vector4 extraVec4;
+		public Vector2 vel;
+		public float drag;
+	    public float noiseStart;
+	    public float noiseEnd;
+	    public float noiseFreq;
+	    public int brushType;
+	}
     private struct SpiritBrushQuadData {
 		public int index;
 		public Vector3 worldPos;
@@ -271,6 +288,9 @@ public class TheRenderKing : MonoBehaviour {
     private SpiritBrushQuadData[] spiritBrushQuadDataArray;
     private int spiritBrushSpawnCounter = 0;
     //private ComputeBuffer debugAgentResourcesCBuffer;
+    private ComputeBuffer cursorParticlesCBuffer0;
+    private ComputeBuffer cursorParticlesCBuffer1;
+    private CursorParticleData[] cursorParticlesArray;
 
     public Material debugMaterial;
     public Mesh debugMesh;
@@ -598,7 +618,29 @@ public class TheRenderKing : MonoBehaviour {
     private int GetMemorySizeSpiritbrushQuadData() {
         return (sizeof(int) * 2 + sizeof(float) * 19);
     }
+    private int GetMemorySizeCursorParticleData() {
+        return (sizeof(int) * 2 + sizeof(float) * 19);
+    }
     private void InitializeSpiritBrushQuadBuffer() {
+
+        
+
+        cursorParticlesArray = new CursorParticleData[1024];
+        //spiritBrushQuadDataSpawnCBuffer = new ComputeBuffer(32, GetMemorySizeSpiritbrushQuadData());
+        cursorParticlesCBuffer0 = new ComputeBuffer(1024, GetMemorySizeCursorParticleData());
+        cursorParticlesCBuffer1 = new ComputeBuffer(1024, GetMemorySizeCursorParticleData());
+        for(int i = 0; i < 1024; i++) {
+            CursorParticleData data = new CursorParticleData();
+            data.worldPos = new Vector3(UnityEngine.Random.Range(0f, 256f), UnityEngine.Random.Range(0f, 256f), 0f);
+            data.vel = UnityEngine.Random.insideUnitCircle;
+            data.heading = new Vector2(0f, 1f);
+            data.lifespan = UnityEngine.Random.Range(10f, 80f);
+            data.age01 = UnityEngine.Random.Range(0f, 1f);
+            cursorParticlesArray[i] = data;
+        }
+        cursorParticlesCBuffer0.SetData(cursorParticlesArray);
+
+//============================================================
         SpiritBrushQuadData[] spiritBrushQuadDataArray = new SpiritBrushQuadData[1024];
         //spiritBrushQuadDataSpawnCBuffer = new ComputeBuffer(32, GetMemorySizeSpiritbrushQuadData());
         spiritBrushQuadDataCBuffer0 = new ComputeBuffer(1024, GetMemorySizeSpiritbrushQuadData());
@@ -2735,6 +2777,27 @@ public class TheRenderKing : MonoBehaviour {
         fluidManager.computeShaderFluidSim.Dispatch(kernelSimFloatyBits, floatyBitsCBuffer.count / 1024, 1, 1);
     }
     public void SimSpiritBrushQuads() {
+
+        // CursorParticles:
+        int kernelCSSimulateCursorParticles = computeShaderSpiritBrush.FindKernel("CSSimulateCursorParticles");
+
+        computeShaderSpiritBrush.SetFloat("_TextureResolution", (float)fluidManager.resolution);
+        computeShaderSpiritBrush.SetFloat("_DeltaTime", fluidManager.deltaTime);
+        computeShaderSpiritBrush.SetFloat("_InvGridScale", fluidManager.invGridScale);
+        computeShaderSpiritBrush.SetFloat("_Time", Time.realtimeSinceStartup);
+        computeShaderSpiritBrush.SetFloat("_CursorWorldPosX", simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.x);
+        computeShaderSpiritBrush.SetFloat("_CursorWorldPosY", simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.y);
+        computeShaderSpiritBrush.SetBuffer(kernelCSSimulateCursorParticles, "_CursorParticlesRead", cursorParticlesCBuffer0);      
+        computeShaderSpiritBrush.SetBuffer(kernelCSSimulateCursorParticles, "_CursorParticlesWrite", cursorParticlesCBuffer1);  
+        computeShaderSpiritBrush.Dispatch(kernelCSSimulateCursorParticles, 1, 1, 1);
+
+        int kernelCSCopyBufferCursorParticles = computeShaderSpiritBrush.FindKernel("CSCopyBufferCursorParticles");   // Copy back to original buffer0
+        computeShaderSpiritBrush.SetBuffer(kernelCSCopyBufferCursorParticles, "_CursorParticlesRead", cursorParticlesCBuffer1);      
+        computeShaderSpiritBrush.SetBuffer(kernelCSCopyBufferCursorParticles, "_CursorParticlesWrite", cursorParticlesCBuffer0);  
+        computeShaderSpiritBrush.Dispatch(kernelCSCopyBufferCursorParticles, 1, 1, 1);
+
+
+        //==========================================================================================================
         int kernelCSSimulateBrushQuads = computeShaderSpiritBrush.FindKernel("CSSimulateBrushQuads");
 
         computeShaderSpiritBrush.SetFloat("_TextureResolution", (float)fluidManager.resolution);
@@ -2753,6 +2816,40 @@ public class TheRenderKing : MonoBehaviour {
         // Get brush:
         
         
+    }
+
+    public void SpawnCursorParticles(CreationBrush brushData, int startIndex, int numCells) {
+        
+        // DISABLED FOR NOW due to being gross:
+
+
+        //spiritBrushSpawnCounter++;
+        /*
+        //if(spiritBrushSpawnCounter > 32) {
+        Debug.Log("SpawnSpiritBrushQuads(int startIndex, int numCells)");
+        spiritBrushSpawnCounter = 0;
+        CursorParticleData[] CursorParticlesArray = new CursorParticleData[32];
+        cursorParticlesSpawnCBuffer = new ComputeBuffer(32, GetMemorySizeCursorParticleData());
+        for(int i = 0; i < 32; i++) {
+            CursorParticlesData data = new CursorParticlesData();
+            
+            data.vel = UnityEngine.Random.insideUnitCircle * 5;// new Vector2(0f, 1f);
+            data.worldPos = new Vector3(simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.x + data.vel.x, simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.y + data.vel.y, 0f);
+            data.heading = data.vel.normalized;
+            data.lifespan = UnityEngine.Random.Range(10f, 40f);
+            data.age01 = 0f;
+            CursorParticlesArray[i] = data;
+        }
+        CursorParticlesSpawnCBuffer.SetData(CursorParticlesArray);
+
+        int kernelCSSpawnCursorParticles = computeShaderSpiritBrush.FindKernel("CSSpawnCursorParticles");
+        computeShaderSpiritBrush.SetInt("_StartIndex", 0);
+        computeShaderSpiritBrush.SetBuffer(kernelCSSpawnBrushQuads, "_CursorParticlesRead", CursorParticlesSpawnCBuffer);  
+        computeShaderSpiritBrush.SetBuffer(kernelCSSpawnBrushQuads, "_CursorParticlesWrite", CursorParticlesCBuffer0);  
+        computeShaderSpiritBrush.Dispatch(kernelCSSpawnBrushQuads, 1, 1, 1);
+        //}
+        spiritBrushQuadDataSpawnCBuffer.Release();
+        */
     }
     
     public void SpawnSpiritBrushQuads(CreationBrush brushData, int startIndex, int numCells) {
@@ -4257,6 +4354,18 @@ public class TheRenderKing : MonoBehaviour {
                     cmdBufferMain.DrawProcedural(Matrix4x4.identity, gizmoStirToolMat, 0, MeshTopology.Triangles, 6, 1);
                 }                
             }
+
+             // CURSOR PARTICLES!
+            cursorParticlesDisplayMat.SetPass(0);
+            
+            cursorParticlesDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+            cursorParticlesDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
+            cursorParticlesDisplayMat.SetBuffer("cursorParticlesCBuffer", cursorParticlesCBuffer0);
+            cursorParticlesDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+            cursorParticlesDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+            cursorParticlesDisplayMat.SetFloat("_GlobalWaterLevel", baronVonWater._GlobalWaterLevel);
+            cmdBufferMain.DrawProcedural(Matrix4x4.identity, cursorParticlesDisplayMat, 0, MeshTopology.Triangles, 6, cursorParticlesCBuffer0.count);
+        
         }
 
         // Fluid Render Article:
@@ -4435,6 +4544,12 @@ public class TheRenderKing : MonoBehaviour {
         }
         if(spiritBrushQuadDataCBuffer1 != null) {
             spiritBrushQuadDataCBuffer1.Release();
+        }
+        if(cursorParticlesCBuffer0 != null) {
+            cursorParticlesCBuffer0.Release();
+        }
+        if(cursorParticlesCBuffer1 != null) {
+            cursorParticlesCBuffer1.Release();
         }
         
         if(bodySwimAnimVerticesCBuffer != null) {
