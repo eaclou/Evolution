@@ -133,8 +133,8 @@ public class TheCursorCzar : MonoBehaviour {
             }
             else {
                 if(clicked) {
-                    Debug.Log("CLICKED ON A SPIRIT!!!! ? " + uiManagerRef.curClickableSpiritType.ToString());
-                    uiManagerRef.CapturedClickableSpirit();
+                    Debug.Log("CLICKED ON A SPIRIT!!!! ? " + uiManagerRef.wildSpirit.curClickableSpiritType.ToString());
+                    uiManagerRef.wildSpirit.CapturedClickableSpirit();
 
                 }
                 else {

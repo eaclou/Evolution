@@ -288,10 +288,10 @@ public class WorldSpiritHubUI : MonoBehaviour {
     }
     public void UpdateWorldSpiritHubUI() {
         if(uiManagerRef.panelFocus == UIManager.PanelFocus.WorldHub) {
-            //animatorWorldHubUI.SetBool("_IsDimmed", false);
+            animatorWorldHubUI.SetBool("_IsDimmed", false);
         }
         else {
-            //animatorWorldHubUI.SetBool("_IsDimmed", true);            
+            animatorWorldHubUI.SetBool("_IsDimmed", true);            
         }
 
         animatorWorldHubUI.SetBool("_IsOpen", isOpen);

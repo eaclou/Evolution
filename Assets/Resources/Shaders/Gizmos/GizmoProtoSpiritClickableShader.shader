@@ -11,8 +11,8 @@
 		Tags { "RenderType"="Transparent" }
 		ZWrite Off
 		Cull Off
-		//Blend SrcAlpha One
-		Blend SrcAlpha OneMinusSrcAlpha
+		Blend SrcAlpha One
+		//Blend SrcAlpha OneMinusSrcAlpha
 
 		Pass
 		{
@@ -54,17 +54,24 @@
 			uniform float _Radius;
 			uniform float _CamDistNormalized;
 
+			uniform float _IsFleeing;
+			uniform float _CurTime;
 			
 			v2f vert (appdata v)
 			{
 				v2f o;
 				
 				o.objectPos = v.vertex;
-								
+				
+				v.vertex.xy += cos(_CurTime * (1.1 + _IsFleeing * 5) - v.vertex.x * 2.41 - v.vertex.y * 6.77783 + v.vertex.z * 2.29) * 0.07;
+				v.vertex.xz += sin(_CurTime * (3.1 + _IsFleeing * 5) + v.vertex.x * 18.41 - v.vertex.y * 16.77783 - v.vertex.z * 12.29) * 0.07;
+				v.vertex.yz += sin(-_CurTime * (1.91 + _IsFleeing * 5) - v.vertex.z * 8.41 + v.vertex.y * 6.77783 + v.vertex.z * 12.29) * 0.07;
+
 				v.vertex = mul(unity_ObjectToWorld, v.vertex); //float4(pos, 1.0)), //UnityObjectToWorldSpace v.vertex.xyz;				
+				o.worldPos = v.vertex.xyz;
 				
 				o.vertex = mul(UNITY_MATRIX_VP, v.vertex); // UnityObjectToClipPos(v.vertex);
-				o.worldPos = v.vertex.xyz;
+				
 				o.uv = TRANSFORM_TEX(v.uv, _MainTex);
 				o.altitudeUV = v.uv;
 				float3 worldNormal = mul(unity_ObjectToWorld, float4(v.normal, 0)).xyz;
@@ -84,7 +91,8 @@
 				fixed4 col = tex2D(_MainTex, i.uv);
 				
 				float4 finalColor = i.color; // float4(1,1,1,1); // = lerp(frameBufferColor.rgb, particleColor, 0.25);
-				
+				//finalColor.gb *= (1.0 - _IsFleeing * 0.5);
+				finalColor.rgb *= 0.5 + (_IsFleeing * 0.5);
 				return finalColor;
 			}
 			ENDCG

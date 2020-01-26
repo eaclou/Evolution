@@ -77,8 +77,8 @@
 				quadPoint *= 10; // float3(scale, 1.0);
 
 				
-				float fadeIn = saturate(particleData.age01 / 0.02);
-				float fadeOut = saturate((1.0 - particleData.age01) / 0.7);
+				float fadeIn = saturate(particleData.age01 / 0.1);
+				float fadeOut = saturate((1.0 - particleData.age01 * particleData.age01) / 0.5 + 0.36);
 				float alpha = fadeIn * fadeOut;
 
 
@@ -88,9 +88,9 @@
 				float3 rotatedPoint0 = float3(quadPoint.x * right0 + quadPoint.y * forward0,
 											 quadPoint.z);
 				
-				worldPosition.xyz = float3(particleData.worldPos) + quadPoint * 0.045;
+				worldPosition.xyz = float3(particleData.worldPos) + quadPoint * 0.2 * (1.0 - saturate(particleData.age01));
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)));				
-				o.color = float4(particleData.extraVec4.xyz, alpha * 1);				
+				o.color = float4(particleData.extraVec4.xyz, alpha * 0.1);
 				o.uv = uv;
 				
 				return o;

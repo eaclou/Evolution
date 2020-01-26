@@ -50,6 +50,7 @@ public class TheRenderKing : MonoBehaviour {
     public Mesh meshStirStickLrg;
     public Material gizmoStirStickAMat;
     public Material gizmoStirStickShadowMat;
+
     public Material gizmoProtoSpiritClickableMat;
 
     public Material cursorParticlesDisplayMat;
@@ -629,12 +630,20 @@ public class TheRenderKing : MonoBehaviour {
         //spiritBrushQuadDataSpawnCBuffer = new ComputeBuffer(32, GetMemorySizeSpiritbrushQuadData());
         cursorParticlesCBuffer0 = new ComputeBuffer(1024, GetMemorySizeCursorParticleData());
         cursorParticlesCBuffer1 = new ComputeBuffer(1024, GetMemorySizeCursorParticleData());
+
+        int numSpawnPoints = 3;
+        Vector3[] spawnPointsArray = new Vector3[numSpawnPoints];
+        for(int j = 0; j < numSpawnPoints; j++) {
+            spawnPointsArray[j] = UnityEngine.Random.onUnitSphere;
+        }
         for(int i = 0; i < 1024; i++) {
             CursorParticleData data = new CursorParticleData();
             data.worldPos = new Vector3(UnityEngine.Random.Range(0f, 256f), UnityEngine.Random.Range(0f, 256f), 0f);
             data.vel = UnityEngine.Random.insideUnitCircle;
-            data.heading = new Vector2(0f, 1f);
-            data.lifespan = UnityEngine.Random.Range(10f, 80f);
+
+            int spawnPointIndex = i % numSpawnPoints; 
+            data.heading = new Vector2(spawnPointsArray[spawnPointIndex].x, spawnPointsArray[spawnPointIndex].z);
+            data.lifespan = UnityEngine.Random.Range(20f, 40f);
             data.age01 = UnityEngine.Random.Range(0f, 1f);
             cursorParticlesArray[i] = data;
         }
@@ -1466,7 +1475,7 @@ public class TheRenderKing : MonoBehaviour {
         cmdBufferFluidColor.name = "cmdBufferFluidColor";
         fluidColorRenderCamera.AddCommandBuffer(CameraEvent.BeforeDepthNormalsTexture, cmdBufferFluidColor);
 
-        spiritBrushRT = new RenderTexture(spiritBrushResolution, spiritBrushResolution, 0, RenderTextureFormat.RFloat, RenderTextureReadWrite.Linear);
+        spiritBrushRT = new RenderTexture(spiritBrushResolution, spiritBrushResolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
         spiritBrushRT.wrapMode = TextureWrapMode.Clamp;
         spiritBrushRT.enableRandomWrite = true;
         spiritBrushRT.Create();
@@ -2795,7 +2804,7 @@ public class TheRenderKing : MonoBehaviour {
         computeShaderSpiritBrush.SetFloat("_InvGridScale", fluidManager.invGridScale);
         computeShaderSpiritBrush.SetFloat("_Time", Time.realtimeSinceStartup);
         computeShaderSpiritBrush.SetVector("_ParticleColor", simManager.uiManager.worldSpiritHubUI.curIconColor);
-        computeShaderSpiritBrush.SetFloat("_ParticleSpawnRadius", 1.15f + isBrushing * 0.75f);
+        computeShaderSpiritBrush.SetFloat("_ParticleSpawnRadius", (0.515f + isBrushing * 0.075f) * 5.3065f);
         computeShaderSpiritBrush.SetVector("_CursorWorldPosition", new Vector4(simManager.uiManager.theCursorCzar.cursorParticlesWorldPos.x,
                                                                               simManager.uiManager.theCursorCzar.cursorParticlesWorldPos.y,
                                                                               simManager.uiManager.theCursorCzar.cursorParticlesWorldPos.z,
@@ -3578,13 +3587,43 @@ public class TheRenderKing : MonoBehaviour {
         }
         else { // Continuous/Drag type brush  
             if (isBrushing) {
+                if (simManager.uiManager.panelFocus == UIManager.PanelFocus.Brushes) {
+                    spiritBrushRenderMat.SetPass(0);
+                    spiritBrushRenderMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer); // *** Needed? or just set it once in beginning....
+                    spiritBrushRenderMat.SetVector("_Position", new Vector4(simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.x, simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.y, simManager.uiManager.wildSpirit.curRoamingSpiritPosition.x, simManager.uiManager.wildSpirit.curRoamingSpiritPosition.y));
+                    spiritBrushRenderMat.SetFloat("_Scale", scale);
+                    spiritBrushRenderMat.SetFloat("_Strength", brushIntensity);
+                    spiritBrushRenderMat.SetFloat("_PatternColumn", brushData.patternColumn);
+                    spiritBrushRenderMat.SetFloat("_PatternRow", brushData.patternRow);
+                    spiritBrushRenderMat.SetFloat("_IsActive", 1f);
+                    spiritBrushRenderMat.SetFloat("_IsWildSpirit", 1f);
+                    spiritBrushRenderMat.SetFloat("_IsBrushing", 1f);
+                    //dir:
+                    Vector2 brushDir = new Vector2(0f, 1f);
+                    if (simManager.uiManager.theCursorCzar.smoothedMouseVel.x != 0f || simManager.uiManager.theCursorCzar.smoothedMouseVel.y != 0f) {
+                        brushDir = new Vector2(simManager.uiManager.theCursorCzar.smoothedMouseVel.x, simManager.uiManager.theCursorCzar.smoothedMouseVel.y).normalized;
+                    }
+                    spiritBrushRenderMat.SetFloat("_FacingDirX", brushDir.x);
+                    spiritBrushRenderMat.SetFloat("_FacingDirY", brushDir.y);
+                    cmdBufferSpiritBrush.DrawProcedural(Matrix4x4.identity, spiritBrushRenderMat, 0, MeshTopology.Triangles, 6, 2);
+                }
+            }
+            else {
+                float isBrushin = 0f;
+
+                if (simManager.uiManager.panelFocus == UIManager.PanelFocus.Brushes) {
+                    isBrushin = 1f;
+                }
                 spiritBrushRenderMat.SetPass(0);
                 spiritBrushRenderMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer); // *** Needed? or just set it once in beginning....
-                spiritBrushRenderMat.SetVector("_Position", new Vector4(simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.x, simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.y, 0f, 0f));
+                spiritBrushRenderMat.SetVector("_Position", new Vector4(simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.x, simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.y, simManager.uiManager.wildSpirit.curRoamingSpiritPosition.x, simManager.uiManager.wildSpirit.curRoamingSpiritPosition.y));
                 spiritBrushRenderMat.SetFloat("_Scale", scale);            
-                spiritBrushRenderMat.SetFloat("_Strength", brushIntensity);            
+                spiritBrushRenderMat.SetFloat("_Strength", brushIntensity * 1f);            
                 spiritBrushRenderMat.SetFloat("_PatternColumn", brushData.patternColumn);
                 spiritBrushRenderMat.SetFloat("_PatternRow", brushData.patternRow);
+                spiritBrushRenderMat.SetFloat("_IsActive", 0f);
+                spiritBrushRenderMat.SetFloat("_IsBrushing", isBrushin);
+                spiritBrushRenderMat.SetFloat("_IsWildSpirit", 1f);
                 //dir:
                 Vector2 brushDir = new Vector2(0f, 1f);
                 if(simManager.uiManager.theCursorCzar.smoothedMouseVel.x != 0f || simManager.uiManager.theCursorCzar.smoothedMouseVel.y != 0f) {
@@ -3592,8 +3631,10 @@ public class TheRenderKing : MonoBehaviour {
                 }
                 spiritBrushRenderMat.SetFloat("_FacingDirX", brushDir.x);
                 spiritBrushRenderMat.SetFloat("_FacingDirY", brushDir.y);
-                cmdBufferSpiritBrush.DrawProcedural(Matrix4x4.identity, spiritBrushRenderMat, 0, MeshTopology.Triangles, 6, 1); 
+                cmdBufferSpiritBrush.DrawProcedural(Matrix4x4.identity, spiritBrushRenderMat, 0, MeshTopology.Triangles, 6, 2); 
 
+                
+                
             }
         }
         
@@ -4221,25 +4262,33 @@ public class TheRenderKing : MonoBehaviour {
                 cmdBufferMain.DrawMesh(stickMesh, stirStickTransformMatrix, gizmoStirStickAMat);
             }
             else {
-                if(simManager.uiManager.isClickableSpiritRoaming) {
+                if(simManager.uiManager.wildSpirit.isClickableSpiritRoaming) {
                     //float scale = 4.2f; // Mathf.Lerp(0.35f, 1.75f, baronVonWater.camDistNormalized);
-                    float radius = simManager.uiManager.roamingSpiritScale;
-                    Color tint = simManager.uiManager.roamingSpiritColor;
+                    float radius = simManager.uiManager.wildSpirit.roamingSpiritScale * 1.075f;
+                    Color tint = simManager.uiManager.wildSpirit.roamingSpiritColor * 0.66f;
                     if(simManager.uiManager.theCursorCzar._IsHoverClickableSpirit) {
-                        radius *= 2f;
-                        tint *= 2f;
+                        radius *= 1.4f;
+                        tint *= 1.4f;
+                    }
+                    else {
+
                     }
                     
 
-                    Matrix4x4 stirStickTransformMatrix = Matrix4x4.TRS(simManager.uiManager.roamingSpiritPosition, Quaternion.identity, Vector3.one * radius);
-                    Mesh stickMesh = simManager.uiManager.protoSpiritClickColliderGO.GetComponent<MeshFilter>().mesh; // meshStirStickLrg;
+                    Matrix4x4 stirStickTransformMatrix = Matrix4x4.TRS(simManager.uiManager.wildSpirit.curRoamingSpiritPosition, Quaternion.identity, Vector3.one * radius);
+                    Mesh stickMesh = simManager.uiManager.wildSpirit.protoSpiritClickColliderGO.GetComponent<MeshFilter>().mesh; // meshStirStickLrg;
 
                     gizmoProtoSpiritClickableMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
                     gizmoProtoSpiritClickableMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
                     gizmoProtoSpiritClickableMat.SetFloat("_MapSize", SimulationManager._MapSize);
                     gizmoProtoSpiritClickableMat.SetFloat("_MinFog", minimumFogDensity);
-                    gizmoProtoSpiritClickableMat.SetVector("_FogColor", simManager.uiManager.roamingSpiritColor); //simManager.fogColor);
-                    gizmoProtoSpiritClickableMat.SetFloat("_Turbidity", simManager.fogAmount); 
+                    gizmoProtoSpiritClickableMat.SetVector("_FogColor", tint); //simManager.fogColor);
+                    gizmoProtoSpiritClickableMat.SetFloat("_CurTime", Time.realtimeSinceStartup); //simManager.fogColor);
+                    float isFleeingF = 0f;
+                    if(simManager.uiManager.wildSpirit.isFleeing) {
+                        isFleeingF = 1f;
+                    }
+                    gizmoProtoSpiritClickableMat.SetFloat("_IsFleeing", isFleeingF); 
                     cmdBufferMain.DrawMesh(stickMesh, stirStickTransformMatrix, gizmoProtoSpiritClickableMat);
                     
                 }

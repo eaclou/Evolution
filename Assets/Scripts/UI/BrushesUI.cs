@@ -215,6 +215,14 @@ public class BrushesUI : MonoBehaviour {
         TrophicLayersManager layerManager = uiManagerRef.gameManager.simulationManager.trophicLayersManager;
 
         UpdateCurSelectedColor();
+
+        if(uiManagerRef.panelFocus == UIManager.PanelFocus.Brushes) {            
+            
+        }
+        else {
+            curIconColor = new Color(curIconColor.r * 0.35f, curIconColor.g * 0.35f, curIconColor.b * 0.35f);
+        }
+        
         imageColorBar.color = curIconColor;
                 
 
@@ -270,6 +278,7 @@ public class BrushesUI : MonoBehaviour {
                     buttonBrushExtra2.gameObject.transform.localScale = Vector3.one;
                     buttonBrushAdd.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
                     buttonBrushAdd.gameObject.transform.localScale = Vector3.one;
+
                 }
                 break;            
             case UIManager.ToolType.Stir:
@@ -281,6 +290,9 @@ public class BrushesUI : MonoBehaviour {
 
         }
 
+        if(uiManagerRef.panelFocus != UIManager.PanelFocus.Brushes) {
+            buttonBrushAdd.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor * 0.5f;
+        }
     
         string spiritBrushName = "Minor Creation Spirit " + curCreationBrushIndex.ToString();
         imageSelectedBrushThumbnail.sprite = uiManagerRef.spriteSpiritBrushCreationIcon;

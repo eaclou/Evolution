@@ -551,7 +551,7 @@ void CSUpdateTerrainMapsBrush (uint3 id : SV_DispatchThreadID)
 	float reflectLerp = saturate(viewDot * isUnderwater);
 	finalColor.rgb += lerp(float3(0,0,0), reflectedColor.xyz, reflectLerp);
 
-	finalColor.rgb += spiritBrushTex.x;
+	finalColor.rgb += spiritBrushTex.y;
 				
 	finalColor.a = 1; 
 

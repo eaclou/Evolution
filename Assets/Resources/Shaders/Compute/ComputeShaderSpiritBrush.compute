@@ -51,6 +51,7 @@ uniform float _CursorWorldPosX;
 uniform float _CursorWorldPosY;
 
 uniform float4 _CursorWorldPosition;
+uniform float4 _PrevCursorWorldPosition;
 uniform float4 _ParticleColor;
 uniform float _ParticleSpawnRadius;
 
@@ -74,21 +75,25 @@ void CSSimulateCursorParticles (uint3 id : SV_DispatchThreadID)
 	
 	float agingRate = 1.0 / data.lifespan;
 	
-	float4 randNoise = Value3D(data.worldPos.xyz + (float)id.x * 0.01 + float3(0, 0, -_Time * 4), 0.375);
+	float4 randNoise = Value3D(data.worldPos.xyz + (float)id.x * 0.0062 + float3(0, 0, -_Time * 11), 0.281252);
+	randNoise.xyz += 0.5; // ?
+	float4 spawnNoise = Value3D(_CursorWorldPosition.xyz + float3(0, 0, _Time * 0.0937), 0.0253);
+	//float4 spawnNoise = float4(data.heading.x, data.heading.y, 0, 0);
 
 	if(data.age01 >= 1.0) {  // DEAD!!! // RESPAWN??		
 		if(_SpawnOn) {
 			data.worldPos.xyz = _CursorWorldPosition.xyz;
-			data.worldPos.xyz += (_ParticleSpawnRadius + _IsBrushing * 3) * normalize(randNoise.wyz);
+			data.worldPos.xyz += (_ParticleSpawnRadius + _IsBrushing * 0.75) * spawnNoise.xyz;
 			data.age01 = data.age01 % 1.0;	
 
-			data.extraVec4 = _ParticleColor * (0.16 + _IsBrushing * 0.72);
+			data.extraVec4 = _ParticleColor * (0.075 + _IsBrushing * 0.74);
 		}
 	}
 	else {	
-		float rootedness = saturate(1 - data.age01 * 64);
-		rootedness *= rootedness * 0.9;
-		data.worldPos.xyz = lerp(data.worldPos.xyz + randNoise.yzw * 0.1 * data.age01, _CursorWorldPosition.xyz + randNoise.yzw * _ParticleSpawnRadius, rootedness);
+		float rootedness = saturate(1 - data.age01 * 4);
+		rootedness *= rootedness * 1;
+		//rootedness = 0;
+		data.worldPos.xyz = lerp(data.worldPos.xyz + randNoise.yzw * (0.09 + _IsBrushing * 0.30) * (data.age01 * 0.4 + 0.15), _CursorWorldPosition.xyz + randNoise.yzw * _ParticleSpawnRadius, rootedness);
 		
 		data.age01 = saturate(data.age01 + agingRate);
 	}
