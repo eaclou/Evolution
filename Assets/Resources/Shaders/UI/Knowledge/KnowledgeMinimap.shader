@@ -60,14 +60,14 @@
 				float4 bgColor;
 				float4 terrainHeightTex = tex2D(_AltitudeTex, i.uv * _Zoom.xy);
 				if(terrainHeightTex.x < _WaterLevel) {
-					bgColor = float4(0.3,0.3,1,1);
+					bgColor = float4(58.0 / 255, 67 / 255.0, 75 / 255.0, 1);
 					//col.rgb = lerp(col.rgb, float3(0.3,0.3,1), 0.1);
 				}
 				else {
-					bgColor = float4(1,0.8,0.3,1);
+					bgColor = float4(62.0 / 255.0, 55.0 / 255, 48.0 / 255, 1);
 					//col.rgb = lerp(col.rgb, float3(1,0.8,0.3), 0.1);
 				}
-				bgColor.rgb *= 0.165;
+				bgColor.rgb *= 0.6165;
 				// sample the texture
 				fixed4 col = tex2D(_MainTex, i.uv * _Zoom.xy);
 								

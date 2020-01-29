@@ -734,9 +734,11 @@ public class UIManager : MonoBehaviour {
                 isUnlockCooldown = true;
                 unlockedAnnouncementSlotRef = pebblesSlot;
                 worldSpiritHubUI.selectedWorldSpiritSlot = pebblesSlot;
-                brushesUI.selectedEssenceSlot = pebblesSlot;
-                brushesUI.selectedBrushLinkedSpiritTerrainLayer = 2; // worldSpiritHubUI.selectedToolbarTerrainLayer; 
-                brushesUI.ClickButtonBrushPaletteTerrain(2);
+                worldSpiritHubUI.selectedToolbarTerrainLayer = 2;
+
+                //brushesUI.selectedEssenceSlot = pebblesSlot;
+                //brushesUI.selectedBrushLinkedSpiritTerrainLayer = 2; // worldSpiritHubUI.selectedToolbarTerrainLayer; 
+                //brushesUI.ClickButtonBrushPaletteTerrain(2);
 
                 wildSpirit.curClickableSpiritType = WildSpirit.ClickableSpiritType.Sand;
                 break;
@@ -748,9 +750,11 @@ public class UIManager : MonoBehaviour {
                 isUnlockCooldown = true;
                 unlockedAnnouncementSlotRef = sandSlot;
                 worldSpiritHubUI.selectedWorldSpiritSlot = sandSlot;
-                brushesUI.selectedEssenceSlot = sandSlot;
-                brushesUI.selectedBrushLinkedSpiritTerrainLayer = 3; 
-                brushesUI.ClickButtonBrushPaletteTerrain(3);
+                worldSpiritHubUI.selectedToolbarTerrainLayer = 3;
+
+                //brushesUI.selectedEssenceSlot = sandSlot;
+                //brushesUI.selectedBrushLinkedSpiritTerrainLayer = 3; 
+                //brushesUI.ClickButtonBrushPaletteTerrain(3);
                             
                 wildSpirit.curClickableSpiritType = WildSpirit.ClickableSpiritType.Air;
                 break;

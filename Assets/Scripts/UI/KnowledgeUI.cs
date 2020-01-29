@@ -140,17 +140,33 @@ public class KnowledgeUI : MonoBehaviour {
             }
             else {  // PLANT PARTICLES
                 panelKnowledgeInfoPlants.SetActive(true);
-            }
 
+                imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
+                uiKnowledgeMapViewerMat.SetTexture("_MainTex", uiManagerRef.gameManager.simulationManager.environmentFluidManager._SourceColorRT);
+                uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
+                uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
+                uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
+                uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 3);
+                uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 1f);
+                uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1f); 
+            }
         }
         else if (slotRef.kingdomID == 2) {
             if (slotRef.tierID == 0) { // ZOOPLANKTON
                 panelKnowledgeInfoZooplankton.SetActive(true);
+
+                imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
+                uiKnowledgeMapViewerMat.SetTexture("_MainTex", uiManagerRef.gameManager.simulationManager.environmentFluidManager._SourceColorRT);
+                uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
+                uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
+                uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
+                uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 3);
+                uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 1f);
+                uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1f); 
             }
             else {  // VERTEBRATES
                 panelKnowledgeInfoVertebrates.SetActive(true);
-
-
+                
                 float lifespan = 0f;
                 float population = 0f;
                 float foodEaten = 0f;
@@ -205,6 +221,15 @@ public class KnowledgeUI : MonoBehaviour {
                 textKnowledgeGraphPopulation.text = population.ToString("F0");
                 textKnowledgeGraphFoodEaten.text = foodEaten.ToString("F3");
                 textKnowledgeGraphGenome.text = genome.ToString("F1");  // avg Body size
+
+                imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
+                uiKnowledgeMapViewerMat.SetTexture("_MainTex", uiManagerRef.gameManager.simulationManager.environmentFluidManager._SourceColorRT);
+                uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
+                uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
+                uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
+                uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 3);
+                uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 1f);
+                uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1f); 
             }
 
         }

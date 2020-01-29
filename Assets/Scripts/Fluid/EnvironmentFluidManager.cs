@@ -87,7 +87,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
 
         }
     }
-    /*private RenderTexture sourceColorRT; // Rendered by renderKing.fluidColorRenderCamera;
+    private RenderTexture sourceColorRT; // Rendered by renderKing.fluidColorRenderCamera;
     public RenderTexture _SourceColorRT
     {
         get
@@ -99,7 +99,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
 
         }
     }
-    */
+    
     //private Material displayMat; // shader for display Mesh
     //public Material debugMat;
 
@@ -385,11 +385,11 @@ public class EnvironmentFluidManager : MonoBehaviour {
         obstaclesRT.wrapMode = TextureWrapMode.Clamp;
         obstaclesRT.enableRandomWrite = true;
         obstaclesRT.Create();
-        /*
-        sourceColorRT = new RenderTexture(resolution, resolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+        
+        sourceColorRT = new RenderTexture(resolution, resolution, 0, RenderTextureFormat.Default, RenderTextureReadWrite.Default);
         sourceColorRT.wrapMode = TextureWrapMode.Repeat;
         sourceColorRT.enableRandomWrite = true;
-        sourceColorRT.Create();*/
+        sourceColorRT.Create();
     }
     public Vector2[] GetFluidVelocityAtObjectPositions(Vector4[] positionsArray) {
 

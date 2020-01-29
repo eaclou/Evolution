@@ -1,4 +1,4 @@
-﻿Shader "ColorInject/AlgaeParticleColorInjectShader"
+﻿Shader "Zooplankton/ZooplanktonParticleColorInjectShader"
 {
 	Properties
 	{
@@ -24,13 +24,13 @@
 			#pragma target 5.0
 			#include "UnityCG.cginc"
 			#include "Assets/Resources/Shaders/Inc/NoiseShared.cginc"
-			#include "Assets/Resources/Shaders/Inc/StructsPlantParticles.cginc"
+			#include "Assets/Resources/Shaders/Inc/StructsAnimalParticles.cginc"
 
 			sampler2D _MainTex;
 			sampler2D _AltitudeTex;
 			sampler2D _WaterSurfaceTex;
 			
-			StructuredBuffer<PlantParticleData> foodParticleDataCBuffer;			
+			StructuredBuffer<AnimalParticleData> animalParticleDataCBuffer;			
 			StructuredBuffer<float3> quadVerticesCBuffer;
 			
 			struct v2f
@@ -54,36 +54,31 @@
 
 				float3 quadPoint = quadVerticesCBuffer[id];
 
-				int particleIndex = inst;
-								
+				int particleIndex = inst;								
 
 				float rand0 = rand(float2(inst, inst) * 10);
 				float rand1 = rand(float2(rand0, rand0) * 10);
-				float rand2 = rand(float2(rand1, rand1) * 10);
-				
+				float rand2 = rand(float2(rand1, rand1) * 10);				
 							
-				PlantParticleData particleData = foodParticleDataCBuffer[particleIndex];
+				AnimalParticleData particleData = animalParticleDataCBuffer[particleIndex];
 
-				float3 worldPosition = float3(particleData.worldPos, 1.0);    //float3(rawData.worldPos, -random2);
+				float3 worldPosition = float3(particleData.worldPos);    //float3(rawData.worldPos, -random2);
 				float radius = 2.5; //(0.1 + saturate(particleData.biomass * 2.2) + rand2 * 0.4) * particleData.isActive * 2.8;
 				worldPosition.xy += quadPoint.xy * radius;
 				
-				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
-							
-				o.uv = quadVerticesCBuffer[id].xy + 0.5f;	
-								
+				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));			
+				o.uv = quadVerticesCBuffer[id].xy + 0.5f;
 				o.color = float4(saturate(particleData.isDecaying), 0, rand2, 1 - saturate(particleData.isDecaying));
-				o.hue = float4(particleData.colorA, particleData.isActive);
+				o.hue = float4(1,1,1, particleData.isActive);
 				return o;
 			}
 
 			fixed4 frag(v2f i) : SV_Target
 			{
-				return float4(1,1,1,i.hue.a);
+				
 				float4 texColor = tex2D(_MainTex, i.uv);
-				//float lerp = 
-				return float4(0.6,0.8,0.5, texColor.a);
-
+				
+				return float4(1,1,1,i.hue.a);
 			}
 		ENDCG
 		}

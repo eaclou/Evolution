@@ -103,6 +103,7 @@ public class TheRenderKing : MonoBehaviour {
     public Material critterHighlightTrailMat;
 
     public Material algaeParticleColorInjectMat;
+    public Material zooplanktonParticleColorInjectMat;
     public Material playerBrushColorInjectMat;
     public Material resourceSimTransferMat;
     public Material resourceSimAgentDataMat;
@@ -139,6 +140,8 @@ public class TheRenderKing : MonoBehaviour {
 
     private Mesh fluidRenderMesh;
     public Texture2D skyTexture;
+
+    //public RenderTexture minimapObjectsRT;
 
     //private RenderTexture primaryRT;
 
@@ -1480,6 +1483,11 @@ public class TheRenderKing : MonoBehaviour {
         spiritBrushRT.enableRandomWrite = true;
         spiritBrushRT.Create();
 
+        //minimapObjectsRT = new RenderTexture(256, 256, 0, RenderTextureFormat.Default, RenderTextureReadWrite.Default);
+        //minimapObjectsRT.wrapMode = TextureWrapMode.Clamp;
+        //minimapObjectsRT.enableRandomWrite = true;
+        //minimapObjectsRT.Create();
+
         //terrainBaseColorRT = new RenderTexture(terrainBaseColorResolution, terrainBaseColorResolution, 0, RenderTextureFormat.Default, RenderTextureReadWrite.sRGB);
         //terrainBaseColorRT.wrapMode = TextureWrapMode.Clamp;
         //terrainBaseColorRT.enableRandomWrite = true;
@@ -1700,7 +1708,7 @@ public class TheRenderKing : MonoBehaviour {
             Vector3 agentPos = simManager.agentsArray[i].bodyRigidbody.position;
             colorInjectionStrokeDataArray[baseIndex + i].worldPos = new Vector2(agentPos.x, agentPos.y);
             colorInjectionStrokeDataArray[baseIndex + i].localDir = simManager.agentsArray[i].facingDirection;
-            colorInjectionStrokeDataArray[baseIndex + i].scale = simManager.agentsArray[i].fullSizeBoundingBox * 1.55f; // * simManager.agentsArray[i].sizePercentage;
+            colorInjectionStrokeDataArray[baseIndex + i].scale = Vector2.one * 4f; // simManager.agentsArray[i].fullSizeBoundingBox * 1.55f; // * simManager.agentsArray[i].sizePercentage;
             
             float agentAlpha = 0.024f;
             if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Mature) {
@@ -1710,7 +1718,7 @@ public class TheRenderKing : MonoBehaviour {
                 agentAlpha = 3f * simManager.agentsArray[i].GetDecayPercentage();
             }
             // ********** BROKEN BY SPECIATION UPDATE!!!! *****************************
-            Color drawColor = new Color(1f, 1f, 1f, 3f);
+            Color drawColor = new Color(1f, 1f, 1f, 1f);
             if(simManager.agentsArray[i].candidateRef != null) {
                 Vector3 rgb = simManager.agentsArray[i].candidateRef.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
                 if(i % 2 == 0) {
@@ -1718,8 +1726,8 @@ public class TheRenderKing : MonoBehaviour {
                 }
                 drawColor = new Color(rgb.x, rgb.y, rgb.z, 1.1f); // agentAlpha);
             }
-            
-            
+
+
             /*if(simManager.agentsArray[i].wasImpaled) {
                 drawColor.r = 0.8f;
                 drawColor.g = 0.1f;
@@ -1727,6 +1735,7 @@ public class TheRenderKing : MonoBehaviour {
                 drawColor.a = 1.4f;
                 colorInjectionStrokeDataArray[baseIndex + i].scale *= 1.25f;
             }*/
+            drawColor = Color.white;
             colorInjectionStrokeDataArray[baseIndex + i].color = drawColor;
             
         }
@@ -3496,24 +3505,59 @@ public class TheRenderKing : MonoBehaviour {
         // Still not sure if this will work correctly... ****
         fluidObstaclesRenderCamera.Render(); // is this even needed? all drawcalls taken care of within commandBuffer?
 
-        /*
+        
+        if(simManager.uiManager.knowledgeUI.isOpen) {
+
+            cmdBufferFluidColor.Clear(); // needed since camera clear flag is set to none
+            cmdBufferFluidColor.SetRenderTarget(fluidManager._SourceColorRT);
+            cmdBufferFluidColor.ClearRenderTarget(true, true, new Color(0f,0f,0f,0f), 1.0f);  // clear -- needed???
+            cmdBufferFluidColor.SetViewProjectionMatrices(fluidColorRenderCamera.worldToCameraMatrix, fluidColorRenderCamera.projectionMatrix);
+            //cmdBufferFluidColor.Blit(fluidManager.initialDensityTex, fluidManager._SourceColorRT);
+            //cmdBufferFluidColor.DrawMesh(fluidRenderMesh, Matrix4x4.identity, fluidBackgroundColorMat); // Simple unlit Texture shader -- wysiwyg
+
+            if(simManager.uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.kingdomID == 1) {
+                if(simManager.uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.tierID == 1) {
+                    
+                    algaeParticleColorInjectMat.SetPass(0);
+                    algaeParticleColorInjectMat.SetBuffer("foodParticleDataCBuffer", simManager.vegetationManager.plantParticlesCBuffer);
+                    algaeParticleColorInjectMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+                    algaeParticleColorInjectMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
+                    algaeParticleColorInjectMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+                    cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, algaeParticleColorInjectMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.plantParticlesCBuffer.count);
+        
+                }
+            }
+            else if(simManager.uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.kingdomID == 2) {
+                if(simManager.uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.tierID == 0) {
+                    
+                    zooplanktonParticleColorInjectMat.SetPass(0);
+                    zooplanktonParticleColorInjectMat.SetBuffer("animalParticleDataCBuffer", simManager.zooplanktonManager.animalParticlesCBuffer);
+                    zooplanktonParticleColorInjectMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+                    zooplanktonParticleColorInjectMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
+                    zooplanktonParticleColorInjectMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+                    cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, zooplanktonParticleColorInjectMat, 0, MeshTopology.Triangles, 6, simManager.zooplanktonManager.animalParticlesCBuffer.count);
+        
+                }
+                else {   // Vertebrates:
+                    PopulateColorInjectionBuffer(); // update data for colorInjection objects before rendering
+                    
+                    // Creatures + EggSacks:
+                    basicStrokeDisplayMat.SetPass(0);
+                    basicStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+                    basicStrokeDisplayMat.SetBuffer("basicStrokesCBuffer", colorInjectionStrokesCBuffer);
+                    cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, basicStrokeDisplayMat, 0, MeshTopology.Triangles, 6, colorInjectionStrokesCBuffer.count);
+                    // Render Agent/Food/Pred colors here!!!
+                    // just use their display renders?
+                    
+                }
+            }
+            Graphics.ExecuteCommandBuffer(cmdBufferFluidColor);
+            fluidColorRenderCamera.Render();
+            //simManager.environmentFluidManager.densityA.GenerateMips();
+            // Update this ^^ to use Graphics.ExecuteCommandBuffer()  ****
+        }
         // COLOR INJECTION:::
-        PopulateColorInjectionBuffer(); // update data for colorInjection objects before rendering
-
-        cmdBufferFluidColor.Clear(); // needed since camera clear flag is set to none
-        cmdBufferFluidColor.SetRenderTarget(fluidManager._SourceColorRT);
-        cmdBufferFluidColor.ClearRenderTarget(true, true, new Color(0f,0f,0f,0f), 1.0f);  // clear -- needed???
-        cmdBufferFluidColor.SetViewProjectionMatrices(fluidColorRenderCamera.worldToCameraMatrix, fluidColorRenderCamera.projectionMatrix);
-        //cmdBufferFluidColor.Blit(fluidManager.initialDensityTex, fluidManager._SourceColorRT);
-        //cmdBufferFluidColor.DrawMesh(fluidRenderMesh, Matrix4x4.identity, fluidBackgroundColorMat); // Simple unlit Texture shader -- wysiwyg
-
-        algaeParticleColorInjectMat.SetPass(0);
-        algaeParticleColorInjectMat.SetBuffer("foodParticleDataCBuffer", simManager.vegetationManager.plantParticlesCBuffer);
-        algaeParticleColorInjectMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        algaeParticleColorInjectMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
-        algaeParticleColorInjectMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-        cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, algaeParticleColorInjectMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.plantParticlesCBuffer.count);
-        */
+        
         /*Vector4 cursorPos = new Vector4(simManager.uiManager.curMousePositionOnWaterPlane.x, simManager.uiManager.curMousePositionOnWaterPlane.y, 0f, 0f);
         if(isStirring) {            // Particle-based instead? // hijack and use for stir tool
             playerBrushColorInjectMat.SetPass(0);
@@ -3525,19 +3569,9 @@ public class TheRenderKing : MonoBehaviour {
             playerBrushColorInjectMat.SetVector("_BrushColor", new Vector4(0.7f, 0.8f, 1f, Mathf.Clamp(simManager.uiManager.smoothedMouseVel.magnitude * 0.5f, 0f, 10f)));
             cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, playerBrushColorInjectMat, 0, MeshTopology.Triangles, 6, 1);        
         }*/
-        /*
-        // Creatures + EggSacks:
-        basicStrokeDisplayMat.SetPass(0);
-        basicStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        basicStrokeDisplayMat.SetBuffer("basicStrokesCBuffer", colorInjectionStrokesCBuffer);
-        cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, basicStrokeDisplayMat, 0, MeshTopology.Triangles, 6, colorInjectionStrokesCBuffer.count);
-        // Render Agent/Food/Pred colors here!!!
-        // just use their display renders?
-        Graphics.ExecuteCommandBuffer(cmdBufferFluidColor);
-        fluidColorRenderCamera.Render();
-        //simManager.environmentFluidManager.densityA.GenerateMips();
-        // Update this ^^ to use Graphics.ExecuteCommandBuffer()  ****
-        */
+        
+        
+        
 
 
         // SPIRIT BRUSH TEST!
