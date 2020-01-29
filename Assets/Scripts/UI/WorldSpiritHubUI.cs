@@ -21,14 +21,16 @@ public class WorldSpiritHubUI : MonoBehaviour {
     public Animator animatorWorldHubUI;
 
 
-    //public Button buttonMutationLink;
+    public Button buttonMutationLink;
     public Button buttonBrushesLink;
-    //public Button buttonKnowledgeLink;
+    public Button buttonKnowledgeLink;
+    public Button buttonWatcherLink;
 
     public Text textSelectedEssenceName;
     public Text textSelectedEssenceDescription;
     public Image imageSelectedEssence;
     public Image imageColorBar;
+    public Image imageBitBG;
 
     public Image imageBitHub;
     public Image imageBitTerrain;
@@ -41,6 +43,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
     public Image imageBitInfo;
     public Image imageBitMutation;
     public Image imageBitKnowledge;
+    public Image imageBitWatcher;
     public Image imageBitBrushes;
         
     public int selectedToolbarOtherLayer = 0;
@@ -109,14 +112,63 @@ public class WorldSpiritHubUI : MonoBehaviour {
         //buttonKnowledgeLink.interactable = true;
         //buttonMutationLink.interactable = false;3
         
+        if(uiManagerRef.watcherUI.isUnlocked) {
+            buttonWatcherLink.gameObject.SetActive(true);
+            if (uiManagerRef.panelFocus == UIManager.PanelFocus.WorldHub) {
+                imageBitWatcher.color = Color.white;
+            }
+            else {
+                imageBitWatcher.color = Color.gray;
+            }
+        }
+        else {
+            buttonWatcherLink.gameObject.SetActive(false);
+        }
+
         if(uiManagerRef.brushesUI.isUnlocked) {
             buttonBrushesLink.interactable = true;
-            //buttonBrushesLink.gameObject.SetActive(true);
+            buttonBrushesLink.gameObject.SetActive(true);
         }
         else {
             buttonBrushesLink.interactable = false;
-            //buttonBrushesLink.gameObject.SetActive(false);
+            buttonBrushesLink.gameObject.SetActive(false);
         }
+
+        if(uiManagerRef.panelFocus == UIManager.PanelFocus.Brushes) {
+            imageBitBrushes.color = selectedWorldSpiritSlot.color;// Color.white;
+            buttonBrushesLink.GetComponent<Image>().color = Color.white;
+        }
+        else {
+            imageBitBrushes.color = new Color(73f / 255f, 79f / 255f, 88f / 255f); // Color.gray;
+            buttonBrushesLink.GetComponent<Image>().color = Color.gray;
+        }
+        if(uiManagerRef.panelFocus == UIManager.PanelFocus.Watcher) {
+            imageBitWatcher.color = Color.white;
+            buttonWatcherLink.GetComponent<Image>().color = Color.white;
+
+        }
+        else {
+            imageBitWatcher.color = Color.gray;
+            buttonWatcherLink.GetComponent<Image>().color = Color.gray;
+        }
+
+        if(uiManagerRef.knowledgeUI.isUnlocked) {
+            
+            if (uiManagerRef.panelFocus == UIManager.PanelFocus.WorldHub) {
+                imageBitKnowledge.color = Color.white;
+                buttonKnowledgeLink.GetComponent<Image>().color = Color.white;
+            }
+            else {
+                imageBitKnowledge.color = Color.gray;
+                buttonKnowledgeLink.GetComponent<Image>().color = Color.gray;
+            }            
+        }
+        else {
+            //buttonOpenKnowledgePanel.gameObject.SetActive(false);
+            //worldSpiritHubUI.imageBitKnowledge.gameObject.SetActive(false);
+        }
+        
+        
 
         string essenceDescriptionStr = "";
 
@@ -281,9 +333,10 @@ public class WorldSpiritHubUI : MonoBehaviour {
         textSelectedEssenceName.text = selectedWorldSpiritSlot.speciesName;
         textSelectedEssenceName.color = curIconColor;
         textSelectedEssenceDescription.text = essenceDescriptionStr;
-        imageSelectedEssence.color = curIconColor;
+        imageSelectedEssence.color = curIconColor * 1.35f;
         imageSelectedEssence.sprite = curIconSprite;
         imageColorBar.color = curIconColor;
+        imageBitBG.color = curIconColor;
 
     }
     public void UpdateWorldSpiritHubUI() {

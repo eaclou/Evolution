@@ -39,7 +39,7 @@ public class WildSpirit : MonoBehaviour {
 
     private Vector3 velocity;
 
-    private float spiritSpeed = 0.815f;
+    private float spiritSpeed = 0.615f;
 
     private float threatLevel = 0f;
 
@@ -95,7 +95,7 @@ public class WildSpirit : MonoBehaviour {
             velocity = Vector3.Lerp(velocity, cursorToSpiritVec.normalized * spiritSpeed, 0.24f);
 
             fleeingFrameCounter++;
-            if(fleeingFrameCounter > 110) {
+            if(fleeingFrameCounter > 70) {
                 isFleeing = false;
                 fleeingFrameCounter = 0;
             }
@@ -115,7 +115,7 @@ public class WildSpirit : MonoBehaviour {
             velocity.z = Mathf.Lerp(velocity.z, 0f, 0.05f);  // stay near zero altitude?
 
         }
-        velocity = Vector3.Lerp(velocity, Vector3.zero, 0.025f); // drag
+        velocity = Vector3.Lerp(velocity, Vector3.zero, 0.033f); // drag
 
         curRoamingSpiritPosition = curRoamingSpiritPosition + velocity;
 

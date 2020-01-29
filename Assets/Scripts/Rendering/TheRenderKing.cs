@@ -3586,6 +3586,11 @@ public class TheRenderKing : MonoBehaviour {
             }
         }
         else { // Continuous/Drag type brush  
+            float isWildOn = 0f;
+            if(simManager.uiManager.wildSpirit.isClickableSpiritRoaming) {
+                isWildOn = 1f;
+            }
+
             if (isBrushing) {
                 if (simManager.uiManager.panelFocus == UIManager.PanelFocus.Brushes) {
                     spiritBrushRenderMat.SetPass(0);
@@ -3596,7 +3601,7 @@ public class TheRenderKing : MonoBehaviour {
                     spiritBrushRenderMat.SetFloat("_PatternColumn", brushData.patternColumn);
                     spiritBrushRenderMat.SetFloat("_PatternRow", brushData.patternRow);
                     spiritBrushRenderMat.SetFloat("_IsActive", 1f);
-                    spiritBrushRenderMat.SetFloat("_IsWildSpirit", 1f);
+                    spiritBrushRenderMat.SetFloat("_IsWildSpirit", isWildOn);
                     spiritBrushRenderMat.SetFloat("_IsBrushing", 1f);
                     //dir:
                     Vector2 brushDir = new Vector2(0f, 1f);
@@ -3623,7 +3628,8 @@ public class TheRenderKing : MonoBehaviour {
                 spiritBrushRenderMat.SetFloat("_PatternRow", brushData.patternRow);
                 spiritBrushRenderMat.SetFloat("_IsActive", 0f);
                 spiritBrushRenderMat.SetFloat("_IsBrushing", isBrushin);
-                spiritBrushRenderMat.SetFloat("_IsWildSpirit", 1f);
+                
+                spiritBrushRenderMat.SetFloat("_IsWildSpirit", isWildOn);
                 //dir:
                 Vector2 brushDir = new Vector2(0f, 1f);
                 if(simManager.uiManager.theCursorCzar.smoothedMouseVel.x != 0f || simManager.uiManager.theCursorCzar.smoothedMouseVel.y != 0f) {

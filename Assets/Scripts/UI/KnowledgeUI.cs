@@ -107,6 +107,10 @@ public class KnowledgeUI : MonoBehaviour {
 
         imageKnowledgeMapTextureViewer.gameObject.SetActive(false);
         
+        uiKnowledgeMapViewerMat.SetTexture("_AltitudeTex", uiManagerRef.gameManager.theRenderKing.baronVonTerrain.terrainHeightDataRT);
+        uiKnowledgeMapViewerMat.SetTexture("_ResourceGridTex", uiManagerRef.gameManager.simulationManager.vegetationManager.resourceGridRT1);
+        uiKnowledgeMapViewerMat.SetFloat("_WaterLevel", uiManagerRef.gameManager.theRenderKing.baronVonWater._GlobalWaterLevel);
+
         //knowledgeLockedTrophicSlotRef ---> worldSpiritSelectedSlotRef
         if (slotRef.kingdomID == 0) {
             // DECOMPOSERS
@@ -119,7 +123,8 @@ public class KnowledgeUI : MonoBehaviour {
             uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
             uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 2);
             uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 1f);
-            uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1.05f);  
+            uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1.05f);
+            
         }
         else if (slotRef.kingdomID == 1) {
             if (slotRef.tierID == 0) {  // ALGAE

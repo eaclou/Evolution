@@ -77,7 +77,7 @@
 				
 				float4 color0 = float4(1,1,0,1);
 				color0.x *= _IsActive;
-				color0.y *= _IsActive * 0.5 + 0.5;
+				color0.y *= _IsActive * 0.9 + 0.1;
 				color0.y *= _IsBrushing;
 				color0.z = 0;
 
@@ -99,7 +99,10 @@
 				col.rgb = 1 * _Strength;
 				col.rgb = saturate(col.rgb * i.color.rgb);
 
-				float timeScale = 0.3789;
+				//color0.y *= _IsActive * 0.9 + 0.1;
+				//color0.y *= _IsBrushing;
+
+				float timeScale = 0.093789 + _IsActive * _IsBrushing * 0.41;
 				float4 noiseTex = tex2D(_NoiseTex, frac(i.uv * 0.12 + _Time.y * 0.935 * timeScale)) * tex2D(_NoiseTex, frac(i.uv * 0.256 - _Time.y * 0.835 * timeScale));
 				
 				float uvDist = length(i.uv - 0.5) * 2;

@@ -63,28 +63,28 @@ public class MutationUI : MonoBehaviour {
             buttonToolbarMutateConfirm.gameObject.SetActive(true);
 
             if(selectedToolbarMutationID == 0) {
-                imageMutationPanelHighlightA.color = Color.gray;
+                imageMutationPanelHighlightA.color = Color.white;
                 imageMutationPanelHighlightB.color = Color.black;
                 imageMutationPanelHighlightC.color = Color.black;
                 imageMutationPanelHighlightD.color = Color.black;
             }
             else if(selectedToolbarMutationID == 1) {
                 imageMutationPanelHighlightA.color = Color.black;
-                imageMutationPanelHighlightB.color = Color.gray;
+                imageMutationPanelHighlightB.color = Color.white;
                 imageMutationPanelHighlightC.color = Color.black;
                 imageMutationPanelHighlightD.color = Color.black;
             }
             else if(selectedToolbarMutationID == 2) {
                 imageMutationPanelHighlightA.color = Color.black;
                 imageMutationPanelHighlightB.color = Color.black;
-                imageMutationPanelHighlightC.color = Color.gray;
+                imageMutationPanelHighlightC.color = Color.white;
                 imageMutationPanelHighlightD.color = Color.black;
             }
             else if(selectedToolbarMutationID == 3) {
                 imageMutationPanelHighlightA.color = Color.black;
                 imageMutationPanelHighlightB.color = Color.black;
                 imageMutationPanelHighlightC.color = Color.black;
-                imageMutationPanelHighlightD.color = Color.gray;
+                imageMutationPanelHighlightD.color = Color.white;
             }
         }
 
@@ -324,13 +324,13 @@ public class MutationUI : MonoBehaviour {
                 colorOptionD.a = 1f;
                 colorCur.a = 1f;
                 imageMutationPanelThumbnailA.color = colorOptionA;
-                imageMutationPanelThumbnailA.sprite = null;
+                //imageMutationPanelThumbnailA.sprite = null;
                 imageMutationPanelThumbnailB.color = colorOptionB;
-                imageMutationPanelThumbnailB.sprite = null;
+                //imageMutationPanelThumbnailB.sprite = null;
                 imageMutationPanelThumbnailC.color = colorOptionC;
-                imageMutationPanelThumbnailC.sprite = null;
+                //imageMutationPanelThumbnailC.sprite = null;
                 imageMutationPanelThumbnailD.color = colorOptionD;
-                imageMutationPanelThumbnailD.sprite = null;
+                //imageMutationPanelThumbnailD.sprite = null;
 
                 imageMutationPanelCurPortrait.color = colorCur;
 

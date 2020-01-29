@@ -744,7 +744,7 @@ public class WatcherUI : MonoBehaviour {
             //isSnoopingModeON = true;
             //uiManagerRef.isBrushModeON_snoopingOFF = false;
             uiManagerRef.panelFocus = UIManager.PanelFocus.Watcher;
-            uiManagerRef.curActiveTool = UIManager.ToolType.None;
+            //uiManagerRef.curActiveTool = UIManager.ToolType.None;
 
             animatorWatcherUI.SetBool("_IsOpen", true);
         }
@@ -757,7 +757,12 @@ public class WatcherUI : MonoBehaviour {
     public void ClickSnoopModeButton() {        
         //uiManagerRef.isBrushModeON_snoopingOFF = false;
         uiManagerRef.panelFocus = UIManager.PanelFocus.Watcher;
-        uiManagerRef.curActiveTool = UIManager.ToolType.None;
+        //uiManagerRef.curActiveTool = UIManager.ToolType.None;
+    }
+    public void ActivateWatcherPanel() {
+        isOpen = true;
+        uiManagerRef.panelFocus = UIManager.PanelFocus.Watcher;
+        animatorWatcherUI.SetBool("_IsOpen", true);
     }
 
     public void ClickWatcherVertebratePageCyclePrev() {
