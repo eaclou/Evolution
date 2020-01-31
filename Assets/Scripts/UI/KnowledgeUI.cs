@@ -6,12 +6,19 @@ using UnityEngine.UI;
 public class KnowledgeUI : MonoBehaviour {
     public UIManager uiManagerRef;
     public bool isUnlocked;
-    public bool isOpen;
+    public bool isOpen;    
     public Image imageKnowledgeButtonMIP;  // superscript button over watcher toolbar Button
     public Image imageKnowledgeCurTarget; // in watcher panel
     public Text textTargetLayer;
     //public Button buttonKnowledgeLock;
     public Image imageColorBar;
+
+    public Page curPage;
+    public enum Page {
+        One,
+        Two,
+        Three
+    }
 
     public Animator animatorKnowledgeUI;
 
@@ -41,18 +48,30 @@ public class KnowledgeUI : MonoBehaviour {
     public Material knowledgeGraphVertebratePopulationMat3;
     public Material knowledgeGraphVertebrateFoodEatenMat3;
     public Material knowledgeGraphVertebrateGenomeMat3;
-
+    
     public Image imageKnowledgeMapTextureViewer;
     public Material uiKnowledgeMapViewerMat;
 
+    public Button buttonPageA;
+    public Button buttonPageB;
+    public Button buttonPageC;
+
     public GameObject panelKnowledgeSpiritBase;
+    public Text textCurPage;
     //public GameObject panelKnowledgeInfoWorld;
+    public GameObject groupMinimap;
     public GameObject panelKnowledgeInfoDecomposers;
+    public GameObject panelPageOne;
+    public GameObject panelPageTwo;
+    public GameObject panelPageThree;
+    public Text textDecomposersPage1;
+    public Text textDecomposersPage2;
+    public Text textDecomposersPage3;
+
     public GameObject panelKnowledgeInfoAlgae;
     public GameObject panelKnowledgeInfoPlants;
     public GameObject panelKnowledgeInfoZooplankton;
     public GameObject panelKnowledgeInfoVertebrates;
-
     public Text textKnowledgeSpeciesSummary;
 
 
@@ -94,8 +113,7 @@ public class KnowledgeUI : MonoBehaviour {
         panelKnowledgeInfoVertebrates.SetActive(false);
         
         textKnowledgeSpeciesSummary.gameObject.SetActive(true);
-        string summaryText = GetSpeciesDescriptionString(uiManagerRef.gameManager.simulationManager);
-        textKnowledgeSpeciesSummary.text = summaryText;
+        
 
         TrophicSlot slotRef = uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot;
 
@@ -106,37 +124,107 @@ public class KnowledgeUI : MonoBehaviour {
         imageKnowledgeCurTarget.sprite = uiManagerRef.worldSpiritHubUI.curIconSprite;
 
         imageKnowledgeMapTextureViewer.gameObject.SetActive(false);
-        
-        uiKnowledgeMapViewerMat.SetTexture("_AltitudeTex", uiManagerRef.gameManager.theRenderKing.baronVonTerrain.terrainHeightDataRT);
-        uiKnowledgeMapViewerMat.SetTexture("_ResourceGridTex", uiManagerRef.gameManager.simulationManager.vegetationManager.resourceGridRT1);
-        uiKnowledgeMapViewerMat.SetFloat("_WaterLevel", uiManagerRef.gameManager.theRenderKing.baronVonWater._GlobalWaterLevel);
+        buttonPageA.GetComponent<Image>().color = new Color(0.6f, 0.65f, 0.87f);
+        buttonPageB.GetComponent<Image>().color = new Color(0.6f, 0.65f, 0.87f);
+        buttonPageC.GetComponent<Image>().color = new Color(0.6f, 0.65f, 0.87f);
+        if(curPage == Page.One) {
+            groupMinimap.gameObject.SetActive(true);
+            textCurPage.text = "OVERVIEW";
+            
+            uiKnowledgeMapViewerMat.SetTexture("_AltitudeTex", uiManagerRef.gameManager.theRenderKing.baronVonTerrain.terrainHeightDataRT);
+            uiKnowledgeMapViewerMat.SetTexture("_ResourceGridTex", uiManagerRef.gameManager.simulationManager.vegetationManager.resourceGridRT1);
+            uiKnowledgeMapViewerMat.SetFloat("_WaterLevel", uiManagerRef.gameManager.theRenderKing.baronVonWater._GlobalWaterLevel);
 
+            string summaryText = GetSpeciesDescriptionString(uiManagerRef.gameManager.simulationManager);
+            textKnowledgeSpeciesSummary.text = summaryText;
+
+            buttonPageA.gameObject.transform.localScale = Vector3.one * 1.5f;
+            buttonPageA.GetComponent<Image>().color = Color.white;
+            buttonPageB.gameObject.transform.localScale = Vector3.one * 1f;            
+            buttonPageC.gameObject.transform.localScale = Vector3.one * 1f;
+
+            panelPageOne.SetActive(true);
+            panelPageTwo.SetActive(false);
+            panelPageThree.SetActive(false);
+        }
+        else if(curPage == Page.Two) {
+            groupMinimap.gameObject.SetActive(false);  
+            textCurPage.text = "STATISTICS";
+
+            buttonPageA.gameObject.transform.localScale = Vector3.one * 1f;
+            buttonPageB.gameObject.transform.localScale = Vector3.one * 1.5f;
+            buttonPageB.GetComponent<Image>().color = Color.white;
+            buttonPageC.gameObject.transform.localScale = Vector3.one * 1f;
+
+            panelPageOne.SetActive(false);
+            panelPageTwo.SetActive(true);
+            panelPageThree.SetActive(false);
+        }
+        else {
+            groupMinimap.gameObject.SetActive(false); 
+            textCurPage.text = "MISC";
+
+            buttonPageA.gameObject.transform.localScale = Vector3.one * 1f;
+            buttonPageB.gameObject.transform.localScale = Vector3.one * 1f;
+            buttonPageC.gameObject.transform.localScale = Vector3.one * 1.5f;
+            buttonPageC.GetComponent<Image>().color = Color.white;
+
+            panelPageOne.SetActive(false);
+            panelPageTwo.SetActive(false);
+            panelPageThree.SetActive(true);
+        }
+        
         //knowledgeLockedTrophicSlotRef ---> worldSpiritSelectedSlotRef
         if (slotRef.kingdomID == 0) {
             // DECOMPOSERS
             panelKnowledgeInfoDecomposers.SetActive(true);
 
-            imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
-            uiKnowledgeMapViewerMat.SetTexture("_MainTex", uiManagerRef.gameManager.simulationManager.vegetationManager.resourceGridRT1);
-            uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
-            uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 2f);
-            uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
-            uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 2);
-            uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 1f);
-            uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1.05f);
+            if(curPage == Page.One) {                
+                imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
+                uiKnowledgeMapViewerMat.SetTexture("_MainTex", uiManagerRef.gameManager.simulationManager.vegetationManager.resourceGridRT1);
+                uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
+                uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
+                uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
+                uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 2);
+                uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 1f);
+                uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1f);
+            }
+            else if(curPage == Page.Two) {              
+
+                float metabolicRate = uiManagerRef.gameManager.simulationManager.vegetationManager.decomposerSlotGenomeCurrent.metabolicRate;
+                float efficiencyDecomp = uiManagerRef.gameManager.simulationManager.vegetationManager.decomposerSlotGenomeCurrent.growthEfficiency;
+                string decompInfoString = "Metabolic Rate: " + metabolicRate.ToString();
+                decompInfoString += "\nGrowth Efficiency: " + efficiencyDecomp.ToString();
+                textDecomposersPage2.text = decompInfoString;
+            }
+            else {
+                
+            }
+            
+
+            
             
         }
         else if (slotRef.kingdomID == 1) {
             if (slotRef.tierID == 0) {  // ALGAE
-                panelKnowledgeInfoAlgae.SetActive(true);
+                
                 imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
                 uiKnowledgeMapViewerMat.SetTexture("_MainTex", uiManagerRef.gameManager.simulationManager.vegetationManager.resourceGridRT1);
                 uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
-                uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 2f);
+                uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
                 uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
                 uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 3);
                 uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 1f);
-                uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1.05f); 
+                uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1f); 
+            
+                panelKnowledgeInfoAlgae.SetActive(true);
+
+                float metabolicRate = uiManagerRef.gameManager.simulationManager.vegetationManager.algaeSlotGenomeCurrent.metabolicRate;
+                float efficiencyDecomp = uiManagerRef.gameManager.simulationManager.vegetationManager.algaeSlotGenomeCurrent.growthEfficiency;
+                string decompInfoString = "Metabolic Rate: " + metabolicRate.ToString();
+                decompInfoString += "\nGrowth Efficiency: " + efficiencyDecomp.ToString();
+                textDecomposersPage2.text = decompInfoString;
+                
             }
             else {  // PLANT PARTICLES
                 panelKnowledgeInfoPlants.SetActive(true);
@@ -475,6 +563,22 @@ public class KnowledgeUI : MonoBehaviour {
 
 
         return str;
+    }
+    
+    public void ClickMinimapZoomIn() {
+
+    }
+    public void ClickMinimapZoomOut() {
+
+    }
+    public void ClickPageOne() {
+        curPage = Page.One;
+    }
+    public void ClickPageTwo() {
+        curPage = Page.Two;
+    }
+    public void ClickPageThree() {
+        curPage = Page.Three;
     }
     /*
     private void UpdateUI() {        

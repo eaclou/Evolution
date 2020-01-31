@@ -45,6 +45,8 @@ public class WorldSpiritHubUI : MonoBehaviour {
     public Image imageBitKnowledge;
     public Image imageBitWatcher;
     public Image imageBitBrushes;
+
+    public Text textTotalMass;
         
     public int selectedToolbarOtherLayer = 0;
     public Button buttonWorldSpiritOther0;  // Minerals
@@ -194,6 +196,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
             curIconColor = uiManagerRef.colorDecomposersLayer;
             curIconSprite = uiManagerRef.spriteSpiritDecomposerIcon;
             essenceDescriptionStr = "Decomposers break down the old so that new life can grow.";
+            textTotalMass.text = "Biomass: " + uiManagerRef.gameManager.simulationManager.simResourceManager.curGlobalDecomposers.ToString("F1");
         }
         else if (selectedWorldSpiritSlot.kingdomID == 1) {
             if (selectedWorldSpiritSlot.tierID == 0) {
@@ -201,6 +204,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
                 curIconColor = uiManagerRef.colorAlgaeLayer;
                 curIconSprite = uiManagerRef.spriteSpiritAlgaeIcon;
                 essenceDescriptionStr = "Algae needs light and nutrients to grow.";
+                textTotalMass.text = "Biomass: " + uiManagerRef.gameManager.simulationManager.simResourceManager.curGlobalAlgaeReservoir.ToString("F1");
             }
             else {
                 if(selectedWorldSpiritSlot.slotID == 0) {
@@ -208,12 +212,14 @@ public class WorldSpiritHubUI : MonoBehaviour {
                     curIconColor = uiManagerRef.colorPlantsLayer;
                     curIconSprite = uiManagerRef.spriteSpiritPlantIcon;
                     essenceDescriptionStr = "Floating Plants that are a foodsource for Vertebrates";
+                    textTotalMass.text = "Biomass: " + uiManagerRef.gameManager.simulationManager.simResourceManager.curGlobalPlantParticles.ToString("F1");
                 }
                 else {
                     isSelectedPlants1 = true;
                     curIconColor = uiManagerRef.colorPlantsLayer;
                     curIconSprite = uiManagerRef.spriteSpiritPlantIcon;
                     essenceDescriptionStr = "Big Plants?";
+                    //textTotalMass.text = "Biomass: " + uiManagerRef.gameManager.simulationManager
                 }
                 
             }
@@ -224,11 +230,13 @@ public class WorldSpiritHubUI : MonoBehaviour {
                 curIconColor = uiManagerRef.colorZooplanktonLayer;
                 curIconSprite = uiManagerRef.spriteSpiritZooplanktonIcon;
                 essenceDescriptionStr = "Tiny Organisms that feed on Algae";
+                textTotalMass.text = "Biomass: " + uiManagerRef.gameManager.simulationManager.simResourceManager.curGlobalAnimalParticles.ToString("F1");
             }
             else {
                 curIconColor = uiManagerRef.colorVertebratesLayer;
                 curIconSprite = uiManagerRef.spriteSpiritVertebrateIcon;
                 essenceDescriptionStr = "Animals that can feed on Plants, Zooplankton, or even other Vertebrates.";
+                textTotalMass.text = "Biomass: " + uiManagerRef.gameManager.simulationManager.simResourceManager.curGlobalAgentBiomass.ToString("F1");
 
                 if (selectedWorldSpiritSlot.slotID == 0) {
                     isSelectedVertebrate0 = true;
@@ -253,24 +261,28 @@ public class WorldSpiritHubUI : MonoBehaviour {
                 isSelectedTerrain0 = true;
                 curIconColor = uiManagerRef.colorWorldLayer;
                 essenceDescriptionStr = "The World Spirit provides the spark for a new universe";
+                textTotalMass.text = "Area: ";
             }
             else if (selectedWorldSpiritSlot.slotID == 1) {
                 isSelectedTerrain1 = true;
                 curIconSprite = uiManagerRef.spriteSpiritStoneIcon;
                 curIconColor = uiManagerRef.colorTerrainLayer;
                 essenceDescriptionStr = "Stone Spirits are some of the oldest known";
+                textTotalMass.text = "Mass: ";
             }
             else if (selectedWorldSpiritSlot.slotID == 2) {
                 isSelectedTerrain2 = true;
                 curIconSprite = uiManagerRef.spriteSpiritPebblesIcon;
                 curIconColor = uiManagerRef.colorTerrainLayer;
                 essenceDescriptionStr = "Pebble Spirits are usually found in rivers and streams";
+                textTotalMass.text = "Mass: ";
             }
             else if (selectedWorldSpiritSlot.slotID == 3) {
                 isSelectedTerrain3 = true;
                 curIconSprite = uiManagerRef.spriteSpiritSandIcon;
                 curIconColor = uiManagerRef.colorTerrainLayer;
                 essenceDescriptionStr = "Sand Spirits";
+                textTotalMass.text = "Mass: ";
             }
         }
         else if (selectedWorldSpiritSlot.kingdomID == 4) {
@@ -279,18 +291,21 @@ public class WorldSpiritHubUI : MonoBehaviour {
                 curIconColor = uiManagerRef.colorMineralLayer;
                 curIconSprite = uiManagerRef.spriteSpiritMineralsIcon;
                 essenceDescriptionStr = "Mineral Spirits infuse nutrients into the earth.";
+                textTotalMass.text = "Mass: ";
             }
             else if (selectedWorldSpiritSlot.slotID == 1) {
                 isSelectedWater = true;
                 curIconColor = uiManagerRef.colorWaterLayer;
                 curIconSprite = uiManagerRef.spriteSpiritWaterIcon;
                 essenceDescriptionStr = "Water Spirits";
+                textTotalMass.text = "Level: " + uiManagerRef.gameManager.theRenderKing.baronVonWater._GlobalWaterLevel;
             }
             else if (selectedWorldSpiritSlot.slotID == 2) {
                 isSelectedAir = true;
                 curIconColor = uiManagerRef.colorAirLayer;
                 curIconSprite = uiManagerRef.spriteSpiritAirIcon;
                 essenceDescriptionStr = "Air Spirits";
+                textTotalMass.text = "Speed: " + uiManagerRef.gameManager.simulationManager.environmentFluidManager.curTierWaterCurrents.ToString();
             }
         }
 

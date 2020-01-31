@@ -385,6 +385,7 @@ public class VegetationManager {
         float lnLerp = UnityEngine.Random.Range(0f, 1f);
         lnLerp *= lnLerp;
         decomposerSlotGenomeCurrent.metabolicRate = Mathf.Lerp(minIntakeRate, maxIntakeRate, lnLerp);
+        decomposerSlotGenomeCurrent.growthEfficiency = UnityEngine.Random.Range(0.9f, 1.1f);
         decomposerSlotGenomeCurrent.textDescriptionMutation = "Metabolic Rate: " + (decomposerSlotGenomeCurrent.metabolicRate * 100f).ToString("F2"); 
 
         GenerateWorldLayerDecomposersGenomeMutationOptions();
@@ -414,7 +415,7 @@ public class VegetationManager {
         genome.name = decomposerSlotGenomeCurrent.name;
         genome.textDescriptionMutation = "Metabolic Rate: " + (genome.metabolicRate * 100f).ToString("F2"); // + ", GrowthEfficiency: " + mutatedGenome.algaeGrowthEfficiency.ToString("F2") + ", IntakeRate: " + mutatedGenome.algaeIntakeRate.ToString("F4");
             
-        genome.growthEfficiency = 1f;
+        genome.growthEfficiency = UnityEngine.Random.Range(0.9f, 1.1f);
         //decomposerSlotGenomeCurrent.decomposerUpkeep = decomposerSlotGenomeCurrent.decomposerIntakeRate * 0.45f; //  * (UnityEngine.Random.Range(0f, 1f) * 0.05f + 0.95f); // Mathf.Lerp(minAlgaeUpkeep, maxAlgaeUpkeep, UnityEngine.Random.Range(0f, 1f));
         //float minGrowthEfficiency = 1f;
         //float maxGrowthEfficiency = 1f;
