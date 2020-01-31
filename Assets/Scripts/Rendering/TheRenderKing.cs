@@ -1709,33 +1709,16 @@ public class TheRenderKing : MonoBehaviour {
             colorInjectionStrokeDataArray[baseIndex + i].worldPos = new Vector2(agentPos.x, agentPos.y);
             colorInjectionStrokeDataArray[baseIndex + i].localDir = simManager.agentsArray[i].facingDirection;
             colorInjectionStrokeDataArray[baseIndex + i].scale = Vector2.one * 4f; // simManager.agentsArray[i].fullSizeBoundingBox * 1.55f; // * simManager.agentsArray[i].sizePercentage;
-            
-            float agentAlpha = 0.024f;
+            /*
+            float agentAlpha = 1f;
             if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Mature) {
                 agentAlpha = 2.2f / simManager.agentsArray[i].fullSizeBoundingBox.magnitude;
             }
             if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Dead) {
                 agentAlpha = 3f * simManager.agentsArray[i].GetDecayPercentage();
-            }
-            // ********** BROKEN BY SPECIATION UPDATE!!!! *****************************
-            Color drawColor = new Color(1f, 1f, 1f, 1f);
-            if(simManager.agentsArray[i].candidateRef != null) {
-                Vector3 rgb = simManager.agentsArray[i].candidateRef.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
-                if(i % 2 == 0) {
-                    rgb = simManager.agentsArray[i].candidateRef.candidateGenome.bodyGenome.appearanceGenome.hueSecondary;
-                }
-                drawColor = new Color(rgb.x, rgb.y, rgb.z, 1.1f); // agentAlpha);
-            }
-
-
-            /*if(simManager.agentsArray[i].wasImpaled) {
-                drawColor.r = 0.8f;
-                drawColor.g = 0.1f;
-                drawColor.b = 0f;
-                drawColor.a = 1.4f;
-                colorInjectionStrokeDataArray[baseIndex + i].scale *= 1.25f;
             }*/
-            drawColor = Color.white;
+            
+            Color drawColor = Color.white;
             colorInjectionStrokeDataArray[baseIndex + i].color = drawColor;
             
         }

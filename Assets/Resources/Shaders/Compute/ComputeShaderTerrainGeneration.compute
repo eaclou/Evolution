@@ -421,6 +421,7 @@ void CSInitTerrainMaps (uint3 id : SV_DispatchThreadID)
 								initZ * initZ, 
 								initW * initW);
 	
+	outputTex.yz = 0;
 	outputTex.w = saturate(1.0 - distToCenter * 10);
 	AltitudeWrite[id.xy] = outputTex;
 }
@@ -441,18 +442,18 @@ void CSUpdateTerrainMapsBrush (uint3 id : SV_DispatchThreadID)
 		texSample.w = saturate(texSample.w + brushSample.x * _AddSubtractSign * _BrushIntensity);
 	}
 
-	if(_ChannelID == 1) {
-		texSample.x = saturate(texSample.x + brushSample.x * _AddSubtractSign * _BrushIntensity);
-		//texSample.y = saturate(texSample.y + brushSample.x * _AddSubtractSign * _BrushIntensity);
+	if(_ChannelID == 1) {  // STONE
+		texSample.x = saturate(texSample.x + brushSample.x * _AddSubtractSign * _BrushIntensity * 0.025);
+		
 	}
 
-	if(_ChannelID == 2) {
-		texSample.x = saturate(texSample.x + brushSample.x * _AddSubtractSign * _BrushIntensity * 0.5); 
+	if(_ChannelID == 2) { // PEBBLES
+		texSample.x = saturate(texSample.x + brushSample.x * _AddSubtractSign * _BrushIntensity * 0.012); 
 		texSample.y = saturate(texSample.y + brushSample.x * _AddSubtractSign * _BrushIntensity);
 	}
 
 	if(_ChannelID == 3) {
-		texSample.x = saturate(texSample.x + brushSample.x * _AddSubtractSign * _BrushIntensity * 0.25);
+		texSample.x = saturate(texSample.x + brushSample.x * _AddSubtractSign * _BrushIntensity * 0.008);
 		texSample.z = saturate(texSample.z + brushSample.x * _AddSubtractSign * _BrushIntensity);
 	}
 

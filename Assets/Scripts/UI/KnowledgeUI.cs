@@ -146,8 +146,8 @@ public class KnowledgeUI : MonoBehaviour {
                 uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
                 uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
                 uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
-                uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 3);
-                uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 1f);
+                uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 0);
+                uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 0f);
                 uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1f); 
             }
         }
@@ -160,12 +160,14 @@ public class KnowledgeUI : MonoBehaviour {
                 uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
                 uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
                 uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
-                uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 3);
-                uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 1f);
+                uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 0);
+                uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 0f);
                 uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1f); 
             }
             else {  // VERTEBRATES
                 panelKnowledgeInfoVertebrates.SetActive(true);
+
+                
                 
                 float lifespan = 0f;
                 float population = 0f;
@@ -240,9 +242,9 @@ public class KnowledgeUI : MonoBehaviour {
                 imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
                 uiKnowledgeMapViewerMat.SetTexture("_MainTex", uiManagerRef.gameManager.theRenderKing.baronVonTerrain.terrainHeightDataRT);
                 uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
-                uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
+                uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 0.7f);
                 uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
-                uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 3);
+                uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 0);
                 uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 1f);
                 uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1f);  
             }
@@ -289,11 +291,11 @@ public class KnowledgeUI : MonoBehaviour {
                 imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
                 uiKnowledgeMapViewerMat.SetTexture("_MainTex", uiManagerRef.gameManager.simulationManager.vegetationManager.resourceGridRT1);
                 uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
-                uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 5f);
+                uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
                 uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
                 uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 0);
                 uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 1f);
-                uiKnowledgeMapViewerMat.SetFloat("_Gamma", 0.75f); 
+                uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1f); 
             }
             else if (slotRef.slotID == 1) {
                 // Water
@@ -310,6 +312,14 @@ public class KnowledgeUI : MonoBehaviour {
             }
             else if (slotRef.slotID == 2) {
                 // AIR
+                imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
+                uiKnowledgeMapViewerMat.SetTexture("_MainTex", uiManagerRef.gameManager.theRenderKing.baronVonWater.waterSurfaceDataRT0);
+                uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
+                uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 0.5f);
+                uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
+                uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 0);
+                uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 1f);
+                uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1f);  
             }
         }
     }
@@ -401,7 +411,7 @@ public class KnowledgeUI : MonoBehaviour {
             else {
                 str = "Simple Animal that feeds on Plants and Zooplankton.";  //    \n\nUses: <b><color=#8EDEEEFF>Oxygen</color></b>\n\nProduces: <b><color=#A97860FF>Waste</color></b>";
                 str += "\n\n";
-                float speciesMass = 0f;
+                /*float speciesMass = 0f;
                 if (slot.slotID == 0) {
                     speciesMass = simManager.simResourceManager.curGlobalAgentBiomass0;
                 }
@@ -413,8 +423,8 @@ public class KnowledgeUI : MonoBehaviour {
                 }
                 else {
                     speciesMass = simManager.simResourceManager.curGlobalAgentBiomass3;
-                }
-                str += "<size=13><b>Total Biomass: " + speciesMass.ToString("F1") + "</b></size>\n\n";// simManager.simResourceManager.curGlobalAgentBiomass.ToString("F1") + "</b></size>\n\n";
+                }*/
+                str += "<size=13><b>Total Biomass: " + simManager.simResourceManager.curGlobalAgentBiomass.ToString("F1") + "</b></size>\n\n";// simManager.simResourceManager.curGlobalAgentBiomass.ToString("F1") + "</b></size>\n\n";
 
                 SpeciesGenomePool GenomePool = simManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot.linkedSpeciesID];
                 str += "<color=#8EDEEEFF>Oxygen Usage: <b>" + simManager.simResourceManager.oxygenUsedByAgentsLastFrame.ToString("F3") + "</b></color>\n";

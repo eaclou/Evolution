@@ -51,7 +51,17 @@
 				float fillAreaMask = 1.0 - saturate((distToOrigin - _Value) * 25);
 				float alpha = 1.0 - saturate((distToOrigin - 0.975) * 25);
 				fixed4 col = fixed4(0,0,0,alpha);	
+
+				
+				if(_Value < 0.01) {
+					_Tint.rgb = float3(1,0,0);
+				}
+				else if(_Value < 0.2) {
+					_Tint.rgb = float3(1,1,0);
+				}
+
 				col.rgb = lerp(col.rgb, _Tint.rgb, fillAreaMask);
+				
 				//col.rgb *= ((i.uv.y * 0.6) + 0.4) * (1.0 - saturate(distToOrigin) * 0.36);
 				return col;
 			}

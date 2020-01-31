@@ -75,7 +75,7 @@
 
 			fixed4 frag(v2f i) : SV_Target
 			{
-				
+				return float4(1,1,1,1);
 				float4 brushColor = tex2D(_MainTex, i.uv);
 
 				float4 finalColor = float4(i.color) * brushColor;

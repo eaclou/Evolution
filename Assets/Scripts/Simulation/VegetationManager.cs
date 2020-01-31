@@ -78,7 +78,7 @@ public class VegetationManager {
 
     public Vector3 tempClosestPlantParticleIndexAndPos;
 
-    public float tempSharedIntakeRate = 0.0021f;
+    private float tempSharedIntakeRate = 0.0065f;
     //public Vector2 algaeOriginPos;
     //public float algaeOnLerp01;
     //public float cur

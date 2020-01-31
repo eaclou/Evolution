@@ -65,7 +65,7 @@
 				PlantParticleData particleData = foodParticleDataCBuffer[particleIndex];
 
 				float3 worldPosition = float3(particleData.worldPos, 1.0);    //float3(rawData.worldPos, -random2);
-				float radius = 2.5; //(0.1 + saturate(particleData.biomass * 2.2) + rand2 * 0.4) * particleData.isActive * 2.8;
+				float radius = 2; //(0.1 + saturate(particleData.biomass * 2.2) + rand2 * 0.4) * particleData.isActive * 2.8;
 				worldPosition.xy += quadPoint.xy * radius;
 				
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
@@ -73,16 +73,22 @@
 				o.uv = quadVerticesCBuffer[id].xy + 0.5f;	
 								
 				o.color = float4(saturate(particleData.isDecaying), 0, rand2, 1 - saturate(particleData.isDecaying));
-				o.hue = float4(particleData.colorA, particleData.isActive);
+
+				float3 hueAlive = float3(0,1,0);
+				float3 hueDead = float3(1,0,0);
+				float4 col = lerp(float4(hueAlive, particleData.isActive), float4(hueDead, particleData.isActive), saturate(particleData.isDecaying * 3.34));
+				o.hue = col; //float4(1,1,1, particleData.isActive);
+
+				//o.hue = float4(particleData.colorA, particleData.isActive);
 				return o;
 			}
 
 			fixed4 frag(v2f i) : SV_Target
 			{
-				return float4(1,1,1,i.hue.a);
-				float4 texColor = tex2D(_MainTex, i.uv);
+				return i.hue;
+				//float4 texColor = tex2D(_MainTex, i.uv);
 				//float lerp = 
-				return float4(0.6,0.8,0.5, texColor.a);
+				//return float4(0.6,0.8,0.5, texColor.a);
 
 			}
 		ENDCG

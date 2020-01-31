@@ -633,13 +633,15 @@ public class BrushesUI : MonoBehaviour {
                     //gameManager.simulationManager.theRenderKing.ClickTestTerrainUpdateMaps(true, 0.4f);
                 }
                 else if(selectedEssenceSlot.slotID == 1) {  // STONE
-
+                    uiManagerRef.terrainUpdateMagnitude = 1f;
                     //gameManager.simulationManager.theRenderKing.ClickTestTerrainUpdateMaps(true, 0.04f);
                 }
                 else if(selectedEssenceSlot.slotID == 2) {  // PEBBLES
+                    uiManagerRef.terrainUpdateMagnitude = 1f;
                     //gameManager.simulationManager.theRenderKing.ClickTestTerrainUpdateMaps(true, 0.04f);
                 }
                 else if(selectedEssenceSlot.slotID == 3) {  // SAND
+                    uiManagerRef.terrainUpdateMagnitude = 1f;
                     //gameManager.simulationManager.theRenderKing.ClickTestTerrainUpdateMaps(true, 0.04f);
                 }
                                 

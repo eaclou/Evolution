@@ -308,7 +308,7 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 			energy = 0;
 
 			float decayEfficiency = 8; // *** should be inverse of growthEfficiency?
-			float decayRate = 0.000015;
+			float decayRate = 0.00015;
 			float decayMass = decayRate * decayEfficiency;
 						
 			bodyMass -= decayMass;

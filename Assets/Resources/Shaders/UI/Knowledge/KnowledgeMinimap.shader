@@ -61,13 +61,15 @@
 				float4 terrainHeightTex = tex2D(_AltitudeTex, i.uv * _Zoom.xy);
 				if(terrainHeightTex.x < _WaterLevel) {
 					bgColor = float4(58.0 / 255, 67 / 255.0, 75 / 255.0, 1);
+					bgColor.rgb *= 0.8;
 					//col.rgb = lerp(col.rgb, float3(0.3,0.3,1), 0.1);
 				}
 				else {
 					bgColor = float4(62.0 / 255.0, 55.0 / 255, 48.0 / 255, 1);
+					
 					//col.rgb = lerp(col.rgb, float3(1,0.8,0.3), 0.1);
 				}
-				bgColor.rgb *= 0.6165;
+				bgColor.rgb *= 0.8;
 				// sample the texture
 				fixed4 col = tex2D(_MainTex, i.uv * _Zoom.xy);
 								
@@ -83,17 +85,19 @@
 				soloChannelCol = lerp(soloChannelCol, col.w, wChannelSolo);
 
 				float4 soloChannelColor = bgColor + float4(soloChannelCol, soloChannelCol, soloChannelCol, 1);
-
+				col = lerp(bgColor, col, col.a);
 				//soloChannelColor = lerp(bgColor, soloChannelColor, 0.3);
 
+				
 				float4 finalColor = lerp(col, soloChannelColor, _IsChannelSolo);
 
-				finalColor.rgb *= _Amplitude;
-				finalColor.rgb = pow(finalColor.rgb, _Gamma);
+				//finalColor.rgb *= _Amplitude;
+				//finalColor.rgb = pow(finalColor.rgb, _Gamma);
 
 				
 				finalColor.a *= terrainHeightTex.a;
 
+				//return col;
 				return finalColor;
 				
 				//return col;
