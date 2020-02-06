@@ -4488,10 +4488,11 @@ public class TheRenderKing : MonoBehaviour {
         else {
             addSubtract = 0f;
         }
-        baronVonTerrain.computeShaderTerrainGeneration.SetVector("_Color0", baronVonTerrain.bedrockSlotGenomeCurrent.color); // new Vector4(0.54f, 0.43f, 0.37f, 1f));
-        baronVonTerrain.computeShaderTerrainGeneration.SetVector("_Color1", baronVonTerrain.stoneSlotGenomeCurrent.color); // new Vector4(0.9f, 0.9f, 0.8f, 1f));
-        baronVonTerrain.computeShaderTerrainGeneration.SetVector("_Color2", baronVonTerrain.pebblesSlotGenomeCurrent.color); // new Vector4(0.7f, 0.8f, 0.9f, 1f));
-        baronVonTerrain.computeShaderTerrainGeneration.SetVector("_Color3", baronVonTerrain.sandSlotGenomeCurrent.color); // new Vector4(0.7f, 0.6f, 0.3f, 1f));
+        // LAYERS ARE SWIZZLED!!!!! **********************************************************************************************************************************
+        baronVonTerrain.computeShaderTerrainGeneration.SetVector("_Color3", baronVonTerrain.bedrockSlotGenomeCurrent.color); // new Vector4(0.54f, 0.43f, 0.37f, 1f));
+        baronVonTerrain.computeShaderTerrainGeneration.SetVector("_Color0", baronVonTerrain.stoneSlotGenomeCurrent.color); // new Vector4(0.9f, 0.9f, 0.8f, 1f));
+        baronVonTerrain.computeShaderTerrainGeneration.SetVector("_Color1", baronVonTerrain.pebblesSlotGenomeCurrent.color); // new Vector4(0.7f, 0.8f, 0.9f, 1f));
+        baronVonTerrain.computeShaderTerrainGeneration.SetVector("_Color2", baronVonTerrain.sandSlotGenomeCurrent.color); // new Vector4(0.7f, 0.6f, 0.3f, 1f));
         baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_AddSubtractSign", addSubtract);        
         baronVonTerrain.computeShaderTerrainGeneration.Dispatch(CSUpdateTerrainMapsBrushKernelID, texRes / 32, texRes / 32, 1);
         //----------------------------------------------------------------------------------------------------------------------------------------

@@ -1495,6 +1495,11 @@ public class UIManager : MonoBehaviour {
         Debug.Log("Cheat!!! Unlocked all species!!!");
 
         gameManager.simulationManager.trophicLayersManager.CheatUnlockAll();
+
+        mutationUI.isUnlocked = true;
+        knowledgeUI.isUnlocked = true;
+        watcherUI.isUnlocked = true;
+        brushesUI.isUnlocked = true;
     }
     public void ClickButtonQuit() {
         Debug.Log("Quit!");

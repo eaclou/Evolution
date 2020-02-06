@@ -5,7 +5,7 @@ using UnityEngine;
 public class WorldLayerAlgaeGenome {
 
     public string name;
-    public string textDescriptionMutation;
+    //public string textDescriptionMutation;
     public float metabolicRate;
     //public float decomposerIntakeRate;
     public float growthEfficiency;
