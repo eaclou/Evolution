@@ -139,8 +139,10 @@ public class VegetationManager {
         plantParticlesRepresentativeGenomeArray[0] = plantSlotGenomeCurrent.plantRepData;
         plantParticlesRepresentativeGenomeCBuffer.SetData(plantParticlesRepresentativeGenomeArray);
         Debug.Log("ASDF ProcessPlantSlotMutation " + plantSlotGenomeCurrent.growthRate.ToString());
-        Vector3 hue = plantSlotGenomeCurrent.plantRepData.colorA;
-        plantSlotGenomeCurrent.displayColor = new Color(hue.x, hue.y, hue.z);
+        Vector3 hueA = plantSlotGenomeCurrent.plantRepData.colorA;
+        plantSlotGenomeCurrent.displayColorPri = new Color(hueA.x, hueA.y, hueA.z);
+        Vector3 hueB = plantSlotGenomeCurrent.plantRepData.colorB;
+        plantSlotGenomeCurrent.displayColorSec = new Color(hueB.x, hueB.y, hueB.z);
     }
 
     // PLANT PARTICLES:::::
@@ -148,27 +150,6 @@ public class VegetationManager {
         // Plants:
         algaeSlotGenomeCurrent = new WorldLayerAlgaeGenome();
         
-        //algaeSlotGenomeCurrent.algaeRepData = algaeParticlesArray[0];
-        algaeSlotGenomeCurrent.displayColor = UnityEngine.Random.ColorHSV();
-        algaeSlotGenomeCurrent.displayColor.a = 1f;
-        algaeSlotGenomeCurrent.name = "Algae Particles!";
-
-        float minIntakeRate = tempSharedIntakeRate * 1f;
-        float maxIntakeRate = tempSharedIntakeRate * 1f; // init around 1?
-        float lnLerp = UnityEngine.Random.Range(0f, 1f);
-        lnLerp *= lnLerp;
-        algaeSlotGenomeCurrent.metabolicRate = Mathf.Lerp(minIntakeRate, maxIntakeRate, lnLerp);
-        //algaeSlotGenomeCurrent.algaeIntakeRate = Mathf.Lerp(minAlgaeMaxIntakeRate, maxAlgaeMaxIntakeRate, UnityEngine.Random.Range(0f, 1f));
-
-        //algaeSlotGenomeCurrent.algaeUpkeep = algaeSlotGenomeCurrent.algaeIntakeRate * 0.45f; // * (UnityEngine.Random.Range(0f, 1f) * 0.05f + 0.95f); // Mathf.Lerp(minAlgaeUpkeep, maxAlgaeUpkeep, UnityEngine.Random.Range(0f, 1f));
-            
-        //float minAlgaeGrowthEfficiency = 1f;
-        //float maxAlgaeGrowthEfficiency = 1f;
-        algaeSlotGenomeCurrent.growthEfficiency = 1f; // Mathf.Lerp(minAlgaeGrowthEfficiency, maxAlgaeGrowthEfficiency, UnityEngine.Random.Range(0f, 1f));
-
-        //algaeSlotGenomeCurrent.textDescriptionMutation = "Metabolic Rate: " + (algaeSlotGenomeCurrent.metabolicRate * 100f).ToString("F2"); // + ", GrowthEfficiency: " + algaeSlotGenomeCurrent.algaeGrowthEfficiency.ToString("F2") + ", IntakeRate: " + algaeSlotGenomeCurrent.algaeIntakeRate.ToString("F4");
-        
-        // initialized in InitializeAlgaePArticles() method *** missing here
         algaeSlotGenomeMutations = new WorldLayerAlgaeGenome[4];
 
         GenerateWorldLayerAlgaeGridGenomeMutationOptions();
@@ -264,26 +245,17 @@ public class VegetationManager {
 
         closestPlantIndexCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 4);
         closestPlantIndexArray = new Vector4[numAgents];
-
-        //cursorClosestParticleDataCBuffer = new ComputeBuffer(2, GetPlantParticleDataSize());  // 0 = selected, 1 = closest to cursor
-        //cursorParticleDataArray = new PlantParticleData[2];
-        //cursorDistances1024 = new ComputeBuffer(1024, sizeof(float) * 4);
-        
-        //plantSlotGenomeCurrent
-        plantSlotGenomeCurrent = new WorldLayerPlantGenome();
-        
+                
+        plantSlotGenomeCurrent = new WorldLayerPlantGenome();        
         //algaeSlotGenomeCurrent.algaeRepData = algaeParticlesArray[0];
-        plantSlotGenomeCurrent.displayColor = UnityEngine.Random.ColorHSV();
-        plantSlotGenomeCurrent.displayColor.a = 1f;
+        plantSlotGenomeCurrent.displayColorPri = UnityEngine.Random.ColorHSV();
+        plantSlotGenomeCurrent.displayColorPri.a = 1f;
         plantSlotGenomeCurrent.name = "Plant Particles!";
-
         float minRate = 0.5f;
         float maxRate = 1.75f;
         plantSlotGenomeCurrent.growthRate = Mathf.Lerp(minRate, maxRate, UnityEngine.Random.Range(0f, 1f));
-
         plantSlotGenomeCurrent.textDescriptionMutation = "Growth Rate: " + plantSlotGenomeCurrent.growthRate.ToString("F2"); // + ", GrowthEfficiency: " + plantSlotGenomeCurrent.plantGrowthEfficiency.ToString("F2") + ", IntakeRate: " + plantSlotGenomeCurrent.plantIntakeRate.ToString("F4");
         
-        // initialized in InitializeAlgaePArticles() method *** missing here
         plantSlotGenomeMutations = new WorldLayerPlantGenome[4];
 
         plantSlotGenomeCurrent.plantRepData = plantParticlesArray[0];
@@ -294,7 +266,6 @@ public class VegetationManager {
         plantParticlesRepresentativeGenomeArray[0] = plantParticlesArray[0]; // plantSlotGenomeCurrent.plantRepData;
         plantParticlesRepresentativeGenomeCBuffer.SetData(plantParticlesRepresentativeGenomeArray);
         
-
         GenerateWorldLayerPlantParticleGenomeMutationOptions();
     }    
     public void InitializeResourceGrid(int numAgents, ComputeShader computeShader) {
@@ -422,24 +393,33 @@ public class VegetationManager {
             float jLerp = Mathf.Clamp01((float)j / 3f + 0.015f); 
             jLerp = jLerp * jLerp;
             WorldLayerAlgaeGenome mutatedGenome = new WorldLayerAlgaeGenome();
-            Color randColor = UnityEngine.Random.ColorHSV();
-            Color col = algaeSlotGenomeCurrent.displayColor;
-            col = Color.Lerp(col, randColor, jLerp);
-            mutatedGenome.displayColor = col;
 
+            Color randColorPri = UnityEngine.Random.ColorHSV();
+            Color randColorSec = UnityEngine.Random.ColorHSV();
+            
+            Color mutatedColorPri = Color.Lerp(algaeSlotGenomeCurrent.displayColorPri, randColorPri, jLerp);
+            Color mutatedColorSec = Color.Lerp(algaeSlotGenomeCurrent.displayColorSec, randColorSec, jLerp);
+            mutatedGenome.displayColorPri = mutatedColorPri;
+            mutatedGenome.displayColorSec = mutatedColorSec;
+            if(UnityEngine.Random.Range(0f, 1f) < jLerp * 1f) {
+                mutatedGenome.patternRowID = UnityEngine.Random.Range(0, 8);
+                mutatedGenome.patternColumnID = UnityEngine.Random.Range(0, 8);
+            }
+            else {
+                mutatedGenome.patternRowID = algaeSlotGenomeCurrent.patternRowID;
+                mutatedGenome.patternColumnID = algaeSlotGenomeCurrent.patternColumnID;
+            }
+            
+            mutatedGenome.patternThreshold = Mathf.Lerp(algaeSlotGenomeCurrent.patternThreshold, UnityEngine.Random.Range(0f, 1f), jLerp);
+            
             float minIntakeRate = tempSharedIntakeRate * 0.1f;
             float maxIntakeRate = tempSharedIntakeRate * 10f; // init around 1?
             float lnLerp = UnityEngine.Random.Range(0f, 1f);
             lnLerp *= lnLerp;
             mutatedGenome.metabolicRate = Mathf.Lerp(minIntakeRate, maxIntakeRate, lnLerp);
             mutatedGenome.metabolicRate = Mathf.Lerp(algaeSlotGenomeCurrent.metabolicRate, mutatedGenome.metabolicRate, jLerp);
-            mutatedGenome.growthEfficiency = 1f; // Mathf.Lerp(minAlgaeGrowthEfficiency, maxAlgaeGrowthEfficiency, UnityEngine.Random.Range(0f, 1f));
-
-            //mutatedGenome.textDescriptionMutation = "Metabolic Rate: " + (mutatedGenome.metabolicRate * 100f).ToString("F2"); // + ", GrowthEfficiency: " + algaeSlotGenomeCurrent.algaeGrowthEfficiency.ToString("F2") + ", IntakeRate: " + algaeSlotGenomeCurrent.algaeIntakeRate.ToString("F4");
-        
-            // other attributes here
-            //mutatedGenome.elevationChange = Mathf.Lerp(bedrockSlotGenomeCurrent.elevationChange, UnityEngine.Random.Range(0f, 1f), iLerp);
-
+            mutatedGenome.growthEfficiency = UnityEngine.Random.Range(0.1f, 2f);
+            
             algaeSlotGenomeMutations[j] = mutatedGenome;
         }
     }
@@ -466,7 +446,9 @@ public class VegetationManager {
             
             plantSlotGenomeMutations[j] = mutatedGenome;
             Vector3 hue = mutatedGenome.plantRepData.colorA;
-            plantSlotGenomeMutations[j].displayColor = new Color(hue.x, hue.y, hue.z);
+            plantSlotGenomeMutations[j].displayColorPri = new Color(hue.x, hue.y, hue.z);
+            hue = mutatedGenome.plantRepData.colorB;
+            plantSlotGenomeMutations[j].displayColorSec = new Color(hue.x, hue.y, hue.z);
             
         }
     }
@@ -475,29 +457,32 @@ public class VegetationManager {
         for(int j = 0; j < decomposerSlotGenomeMutations.Length; j++) {
             float jLerp = Mathf.Clamp01((float)j / 3f + 0.015f); 
             
-            //int magnitudeIndex = Mathf.FloorToInt(jLerp * 3.99f);
-
             jLerp = jLerp * jLerp;
             WorldLayerDecomposerGenome mutatedGenome = new WorldLayerDecomposerGenome();
             Color randColorPri = UnityEngine.Random.ColorHSV();
             Color randColorSec = UnityEngine.Random.ColorHSV();
-            //float randAlpha = UnityEngine.Random.Range(0f, 1f);  // shininess
-            //randColor.a = randAlpha;
+            
             Color mutatedColorPri = Color.Lerp(decomposerSlotGenomeCurrent.displayColorPri, randColorPri, jLerp);
             Color mutatedColorSec = Color.Lerp(decomposerSlotGenomeCurrent.displayColorSec, randColorSec, jLerp);
             mutatedGenome.displayColorPri = mutatedColorPri;
             mutatedGenome.displayColorSec = mutatedColorSec;
-            mutatedGenome.patternRowID = UnityEngine.Random.Range(0, 8);
-            mutatedGenome.patternColumnID = UnityEngine.Random.Range(0, 8);
-            mutatedGenome.patternThreshold = UnityEngine.Random.Range(0f, 1f);
+            if(UnityEngine.Random.Range(0f, 1f) < jLerp * 1f) {
+                mutatedGenome.patternRowID = UnityEngine.Random.Range(0, 8);
+                mutatedGenome.patternColumnID = UnityEngine.Random.Range(0, 8);
+            }
+            else {
+                mutatedGenome.patternRowID = decomposerSlotGenomeCurrent.patternRowID;
+                mutatedGenome.patternColumnID = decomposerSlotGenomeCurrent.patternColumnID;
+            }
+            
+            mutatedGenome.patternThreshold = Mathf.Lerp(decomposerSlotGenomeCurrent.patternThreshold, UnityEngine.Random.Range(0f, 1f), jLerp);
             WorldLayerDecomposerGenomeStuff(ref mutatedGenome, jLerp);
 
             mutatedGenome.name = decomposerSlotGenomeCurrent.name;
             
             decomposerSlotGenomeMutations[j] = mutatedGenome;
         }
-
-        //WorldLayerDecomposerGenomeStuff(ref decomposerSlotGenomeCurrent, 0f);
+        
     }
 	
     /*public void ReviveSelectFoodParticles(int[] indicesArray, float radius, Vector4 spawnCoords, SimulationStateData simStateDataRef) {

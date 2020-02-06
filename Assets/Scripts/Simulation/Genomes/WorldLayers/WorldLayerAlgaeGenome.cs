@@ -5,19 +5,28 @@ using UnityEngine;
 public class WorldLayerAlgaeGenome {
 
     public string name;
-    //public string textDescriptionMutation;
     public float metabolicRate;
-    //public float decomposerIntakeRate;
     public float growthEfficiency;
-    public Color displayColor;
-    //public VegetationManager.AlgaeParticleData algaeRepData;
-    /*representativeAlgaeLayerGenome = algaeParticlesArray[0];
-        algaeParticlesRepresentativeGenomeCBuffer = new ComputeBuffer(1, GetAlgaeParticleDataSize());
-        AlgaeParticleData[] algaeParticlesRepresentativeGenomeArray = new AlgaeParticleData[1];
-        algaeParticlesRepresentativeGenomeArray[0] = representativeAlgaeLayerGenome;
-        algaeParticlesRepresentativeGenomeCBuffer.SetData(algaeParticlesRepresentativeGenomeArray);
-	*/
+    public Color displayColorPri;
+    public Color displayColorSec;
+    public int patternRowID;
+    public int patternColumnID;
+    public float patternThreshold;
+    
     public WorldLayerAlgaeGenome() {   // construction
-        displayColor = Color.white;
+        float minIntakeRate = 0.001f;
+        float maxIntakeRate = 0.01f; // init around 1?
+        float lnLerp = UnityEngine.Random.Range(0f, 1f);
+        lnLerp *= lnLerp;
+        metabolicRate = Mathf.Lerp(minIntakeRate, maxIntakeRate, lnLerp);        
+        growthEfficiency = 1f;
+
+        displayColorPri = Color.white;
+        displayColorSec = Color.black;
+
+        patternRowID = UnityEngine.Random.Range(0, 8);
+        patternColumnID = UnityEngine.Random.Range(0, 8);
+        patternThreshold = UnityEngine.Random.Range(0f, 1f);
+
     }
 }

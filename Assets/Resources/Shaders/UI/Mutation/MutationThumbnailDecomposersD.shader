@@ -1,4 +1,4 @@
-﻿Shader "UI/Mutation/MutationThumbnailDecomposers"
+﻿Shader "UI/Mutation/MutationThumbnailDecomposersD"
 {
 	Properties
 	{
@@ -32,7 +32,7 @@
 			};
 
 			sampler2D _MainTex;
-			float4 _MainTex_ST;
+			//float4 _MainTex_ST;
 			float4 _TintPri;
 			float4 _TintSec;
 
@@ -65,7 +65,6 @@
 				else {
 					return _TintSec;
 				}
-
 			}
 			ENDCG
 		}

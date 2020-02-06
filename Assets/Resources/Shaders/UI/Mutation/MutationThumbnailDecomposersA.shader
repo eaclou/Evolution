@@ -1,4 +1,4 @@
-﻿Shader "UI/Mutation/MutationThumbnailDecomposers"
+﻿Shader "UI/Mutation/MutationThumbnailDecomposersA"
 {
 	Properties
 	{
@@ -48,7 +48,7 @@
 				v.uv = v.uv / 8;
 				v.uv.x += (1.0 / 8.0) * (float)_PatternColumn;
 				v.uv.y += (1.0 / 8.0) * (float)_PatternRow;
-				
+				//o.uv = TRANSFORM_TEX(v.uv, _MainTex);
 				o.uv = v.uv;
 				
 				
@@ -65,7 +65,6 @@
 				else {
 					return _TintSec;
 				}
-
 			}
 			ENDCG
 		}

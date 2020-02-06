@@ -7,19 +7,22 @@ public class WorldLayerPlantGenome {
     public string name;
     public string textDescriptionMutation;
     public float growthRate;
-    //public float plantUpkeep;
-    //public float plantIntakeRate;
-    //public float plantGrowthEfficiency;
-    public Color displayColor;
+    
+    public Color displayColorPri;
+    public Color displayColorSec;
+    public int patternRowID;
+    public int patternColumnID;
+    public float patternThreshold;
     public VegetationManager.PlantParticleData plantRepData;
-    /*
-    representativeAlgaeLayerGenome = algaeParticlesArray[0];
-    algaeParticlesRepresentativeGenomeCBuffer = new ComputeBuffer(1, GetAlgaeParticleDataSize());
-    AlgaeParticleData[] algaeParticlesRepresentativeGenomeArray = new AlgaeParticleData[1];
-    algaeParticlesRepresentativeGenomeArray[0] = representativeAlgaeLayerGenome;
-    algaeParticlesRepresentativeGenomeCBuffer.SetData(algaeParticlesRepresentativeGenomeArray);
-	*/
+   
     public WorldLayerPlantGenome() {   // construction
-        displayColor = Color.green;
+        growthRate = 1f;
+
+        displayColorPri = Color.white;
+        displayColorSec = Color.black;
+
+        patternRowID = UnityEngine.Random.Range(0, 8);
+        patternColumnID = UnityEngine.Random.Range(0, 8);
+        patternThreshold = UnityEngine.Random.Range(0f, 1f);
     }
 }

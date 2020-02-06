@@ -1,4 +1,4 @@
-﻿Shader "UI/Mutation/MutationThumbnailDecomposers"
+﻿Shader "UI/Mutation/MutationThumbnailDecomposersNew"
 {
 	Properties
 	{
@@ -65,7 +65,7 @@
 				else {
 					return _TintSec;
 				}
-
+				
 			}
 			ENDCG
 		}
