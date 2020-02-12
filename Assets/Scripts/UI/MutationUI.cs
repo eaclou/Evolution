@@ -20,6 +20,18 @@ public class MutationUI : MonoBehaviour {
     public Material mutationThumbnailDecomposersMatC;
     public Material mutationThumbnailDecomposersMatD;
 
+    public GameObject posCurGO;
+    public GameObject posNewGO;
+    public GameObject posAGO;
+    public GameObject posBGO;
+    public GameObject posCGO;
+    public GameObject posDGO;
+    public float renderSpaceMult = 0.05f;
+    public float critterSizeMult = 1f;
+
+    public Material mutationVertebrateRenderMat;
+    public Image imageMutationVertebrateRender;
+
     // Mutation Panel elements:
     public GameObject panelMutationSpirit;
     public Image imageMutationPanelThumbnailA;
@@ -42,7 +54,7 @@ public class MutationUI : MonoBehaviour {
     public Text textMutationPanelTitleCur;
     public Text textMutationPanelTitleNew;
     public GameObject panelNewMutationPreview;
-    private int selectedToolbarMutationID = 0;
+    public int selectedToolbarMutationID = 0;
     public Button buttonToolbarMutateConfirm;
     public Text textMutationParameters;
     public Text textCost;
@@ -71,6 +83,11 @@ public class MutationUI : MonoBehaviour {
         titlesTxt[2] = "LARGE MUTATION";
         titlesTxt[3] = "HUGE MUTATION";
         textMutationPanelTitleNew.text = "MUTATION:";// titlesTxt[selectedToolbarMutationID];
+
+        imageMutationPanelThumbnailA.gameObject.SetActive(true);
+        imageMutationPanelThumbnailB.gameObject.SetActive(true);
+        imageMutationPanelThumbnailC.gameObject.SetActive(true);
+        imageMutationPanelThumbnailD.gameObject.SetActive(true);
 
         buttonToolbarMutateConfirm.gameObject.SetActive(false);
         if(selectedToolbarMutationID >= 0) {
@@ -109,6 +126,11 @@ public class MutationUI : MonoBehaviour {
         imageMutationCurTarget.color = uiManagerRef.worldSpiritHubUI.curIconColor;
         imageMutationCurTarget.sprite = uiManagerRef.worldSpiritHubUI.curIconSprite;
 
+        imageMutationVertebrateRender.gameObject.SetActive(false);
+        //imageMutationCurTarget.gameObject.SetActive(true);
+        imageMutationPanelCurPortrait.gameObject.SetActive(true);
+        imageMutationPanelNewPortrait.gameObject.SetActive(true);
+
         if(slotRef.kingdomID == 0) { // DECOMPOSERS
             UpdateDecomposerUI(layerManager);
             
@@ -129,6 +151,10 @@ public class MutationUI : MonoBehaviour {
             }
             else { // vertebrates
                 UpdateVertebratesUI(slotRef);
+                imageMutationPanelThumbnailA.gameObject.SetActive(false);
+                imageMutationPanelThumbnailB.gameObject.SetActive(false);
+                imageMutationPanelThumbnailC.gameObject.SetActive(false);
+                imageMutationPanelThumbnailD.gameObject.SetActive(false);
             }
         }
         else if(slotRef.kingdomID == 3) { // Terrain
@@ -460,20 +486,18 @@ public class MutationUI : MonoBehaviour {
         
     }
     private void UpdateVertebratesUI(TrophicSlot slotRef) {
-        
-        int slotID = slotRef.slotID;
+        imageMutationVertebrateRender.gameObject.SetActive(true);
+        //imageMutationCurTarget.gameObject.SetActive(false);
+        imageMutationPanelCurPortrait.gameObject.SetActive(false);
+        imageMutationPanelNewPortrait.gameObject.SetActive(false);
 
+        int slotID = slotRef.slotID;
         // *** HACK!!!! ***
         slotID = 0;
 
-        //textMutationPanelOptionA.text = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][0].textDescriptionMutation; 
-        //textMutationPanelOptionB.text = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][1].textDescriptionMutation; 
-        //textMutationPanelOptionC.text = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][2].textDescriptionMutation; 
-        //textMutationPanelOptionD.text = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][3].textDescriptionMutation;
-
         int speciesID = slotRef.linkedSpeciesID;
-                
-
+        
+        //mutationVertebrateRenderMat.SetTexture("_MainTex", rt);
 
 
         /*Vector3 hue0 = uiManagerRef.gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][0].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
@@ -572,8 +596,9 @@ public class MutationUI : MonoBehaviour {
                 //gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[slotRef.linkedSpeciesID].representativeGenome = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[slotRef.slotID].representativeGenome;
 
                 uiManagerRef.gameManager.simulationManager.masterGenomePool.GenerateWorldLayerVertebrateGenomeMutationOptions(slotRef.slotID, slotRef.linkedSpeciesID);
-                //gameManager.simulationManager.masterGenomePool.ProcessSlotMutation(slotRef.slotID, selectedToolbarMutationID, slotRef.linkedSpeciesID);
-                //InitToolbarPortraitCritterData(slotRef);
+                uiManagerRef.gameManager.simulationManager.masterGenomePool.ProcessSlotMutation(slotRef.slotID, selectedToolbarMutationID, slotRef.linkedSpeciesID);
+
+                uiManagerRef.InitToolbarPortraitCritterData(slotRef);
             }
         }
         else if(slotRef.kingdomID == 3) { // Terrain
@@ -598,8 +623,8 @@ public class MutationUI : MonoBehaviour {
         //selectedToolbarMutationID = 0; // Reset?? figure out what you want to do here
     }
     public void ClickMutationOption(int id) { // **** Need better smarter way to detect selected slot and point to corresponding data
-        //Debug.Log("ClickMutationOption(" + id.ToString() + ")");
-
+        Debug.Log("ClickMutationOption(" + id.ToString() + ")");
+        uiManagerRef.InitToolbarPortraitCritterData(uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot);
         selectedToolbarMutationID = id;
                 
     }

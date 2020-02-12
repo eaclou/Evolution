@@ -129,6 +129,7 @@ public class TheRenderKing : MonoBehaviour {
     public Material toolbarSpeciesPortraitStrokesMat;
     public Material spiritBrushRenderMultiBurstMat;
     public Material spiritBrushRenderMat;
+    public Material mutationUIVertebratesRenderTexMat;
 
     public ComputeBuffer gizmoCursorPosCBuffer;
     public ComputeBuffer gizmoFeedToolPosCBuffer;
@@ -569,6 +570,8 @@ public class TheRenderKing : MonoBehaviour {
         colorInjectionStrokesCBuffer = new ComputeBuffer(simManager._NumAgents + simManager._NumEggSacks, sizeof(float) * 10);
         colorInjectionStrokeDataArray = new BasicStrokeData[colorInjectionStrokesCBuffer.count];
 
+        
+
         InitializeCritterUberStrokesBuffer();
         //InitializeAgentBodyStrokesBuffer();
         InitializeCritterSkinStrokesCBuffer();
@@ -612,7 +615,8 @@ public class TheRenderKing : MonoBehaviour {
         // Most of this will be populated piece-meal later as critters are generated:
         int bufferLength = simManager._NumAgents * GetNumUberStrokesPerCritter();
         critterGenericStrokesCBuffer = new ComputeBuffer(bufferLength, GetMemorySizeCritterUberStrokeData());
-        toolbarCritterPortraitStrokesCBuffer = new ComputeBuffer(GetNumUberStrokesPerCritter(), GetMemorySizeCritterUberStrokeData());
+
+        toolbarCritterPortraitStrokesCBuffer = new ComputeBuffer(6 * GetNumUberStrokesPerCritter(), GetMemorySizeCritterUberStrokeData());
     }
     private int GetMemorySizeCritterUberStrokeData() {
         int numBytes = sizeof(int) * 3 + sizeof(float) * 32;
@@ -2007,44 +2011,137 @@ public class TheRenderKing : MonoBehaviour {
         computeShaderCritters.Dispatch(kernelCSUpdateCritterGenericStrokes, singleCritterGenericStrokesCBuffer.count, 1, 1);        
         singleCritterGenericStrokesCBuffer.Release(); 
     }
-    public void GenerateCritterPortraitStrokesData(AgentGenome genome) {
-        //ComputeBuffer singleCritterGenericStrokesCBuffer = new ComputeBuffer(GetNumUberStrokesPerCritter(), GetMemorySizeCritterUberStrokeData());
-        CritterUberStrokeData[] singleCritterGenericStrokesArray = new CritterUberStrokeData[toolbarCritterPortraitStrokesCBuffer.count];  // optimize this later?? ***
+    public void GenerateCritterPortraitStrokesData() { // AgentGenome genome2) {
+        
+        // Get genomes:
+        AgentGenome genome0 = simManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[0].representativeGenome;
+        AgentGenome genome1 = simManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][simManager.uiManager.mutationUI.selectedToolbarMutationID].representativeGenome;
+        AgentGenome genome2 = simManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][0].representativeGenome;
+        AgentGenome genome3 = simManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][1].representativeGenome;
+        AgentGenome genome4 = simManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][2].representativeGenome;
+        AgentGenome genome5 = simManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][3].representativeGenome;
 
-        CritterGenomeInterpretor.BrushPoint[] brushPointArray = new CritterGenomeInterpretor.BrushPoint[GetNumUberStrokesPerCritter()];        
+        
+        //ComputeBuffer singleCritterGenericStrokesCBuffer = new ComputeBuffer(GetNumUberStrokesPerCritter(), GetMemorySizeCritterUberStrokeData());
+        CritterUberStrokeData[] singleCritterGenericStrokesArray = new CritterUberStrokeData[GetNumUberStrokesPerCritter()];  // optimize this later?? ***
+        //CritterUberStrokeData[] newCritterGenericStrokesArray = new CritterUberStrokeData[toolbarCritterPortraitStrokesCBuffer.count / 2]; 
+        CritterUberStrokeData[] completeCritterGenericStrokesArray = new CritterUberStrokeData[toolbarCritterPortraitStrokesCBuffer.count]; 
+        CritterGenomeInterpretor.BrushPoint[] brushPointArray = new CritterGenomeInterpretor.BrushPoint[GetNumUberStrokesPerCritter()];  
+        //CritterGenomeInterpretor.BrushPoint[] newPointArray = new CritterGenomeInterpretor.BrushPoint[toolbarCritterPortraitStrokesCBuffer.count / 2];   
         // Generate main body strokes:
-        GenerateCritterBodyBrushstrokes(ref singleCritterGenericStrokesArray, brushPointArray, genome, 0);         
+        GenerateCritterBodyBrushstrokes(ref singleCritterGenericStrokesArray, brushPointArray, genome0, 0);         
         // Loop through all points again and calculate normals/tangents/other things:
-        CalculateCritterBodyBrushstrokesNormals(ref singleCritterGenericStrokesArray, brushPointArray);
+        CalculateCritterBodyBrushstrokesNormals(ref singleCritterGenericStrokesArray, brushPointArray);        
         // Create Eye points here:
-        GenerateCritterEyeBrushstrokes(ref singleCritterGenericStrokesArray, genome, 0);
+        GenerateCritterEyeBrushstrokes(ref singleCritterGenericStrokesArray, genome0, 0);
         // Mouth
-        GenerateCritterMouthTeethBrushstrokes(ref singleCritterGenericStrokesArray, genome, 0);
+        GenerateCritterMouthTeethBrushstrokes(ref singleCritterGenericStrokesArray, genome0, 0);
         // Teeth
         // Pectoral Fins
-        GenerateCritterPectoralFinsBrushstrokes(ref singleCritterGenericStrokesArray, genome, 0);
+        GenerateCritterPectoralFinsBrushstrokes(ref singleCritterGenericStrokesArray, genome0, 0);
         // Dorsal Fin
-        GenerateCritterDorsalFinBrushstrokes(ref singleCritterGenericStrokesArray, genome, 0);
+        GenerateCritterDorsalFinBrushstrokes(ref singleCritterGenericStrokesArray, genome0, 0);
         // Tail Fin
-        GenerateCritterTailFinBrushstrokes(ref singleCritterGenericStrokesArray, genome, 0);
+        GenerateCritterTailFinBrushstrokes(ref singleCritterGenericStrokesArray, genome0, 0);
         // Skin Detail
-        GenerateCritterSkinDetailBrushstrokes(ref singleCritterGenericStrokesArray, genome, 0);
-        // SORT BRUSHSTROKES:::
+        GenerateCritterSkinDetailBrushstrokes(ref singleCritterGenericStrokesArray, genome0, 0);
         SortCritterBrushstrokes(ref singleCritterGenericStrokesArray, 0);
+        // Copy over into master array:
+        for(int i = 0; i < singleCritterGenericStrokesArray.Length; i++) {
+            completeCritterGenericStrokesArray[i] = singleCritterGenericStrokesArray[i];            
+        }
+
         
-        toolbarCritterPortraitStrokesCBuffer.SetData(singleCritterGenericStrokesArray);
+        // Next:
+        GenerateCritterBodyBrushstrokes(ref singleCritterGenericStrokesArray, brushPointArray, genome1, 1);
+        CalculateCritterBodyBrushstrokesNormals(ref singleCritterGenericStrokesArray, brushPointArray);
+        GenerateCritterEyeBrushstrokes(ref singleCritterGenericStrokesArray, genome1, 1);
+        GenerateCritterMouthTeethBrushstrokes(ref singleCritterGenericStrokesArray, genome1, 1);
+        GenerateCritterPectoralFinsBrushstrokes(ref singleCritterGenericStrokesArray, genome1, 1);
+        GenerateCritterDorsalFinBrushstrokes(ref singleCritterGenericStrokesArray, genome1, 1);
+        GenerateCritterTailFinBrushstrokes(ref singleCritterGenericStrokesArray, genome1, 1);
+        GenerateCritterSkinDetailBrushstrokes(ref singleCritterGenericStrokesArray, genome1, 1);
+        SortCritterBrushstrokes(ref singleCritterGenericStrokesArray, 1);
+        // Copy over into master array:
+        for(int i = 0; i < singleCritterGenericStrokesArray.Length; i++) {
+            completeCritterGenericStrokesArray[i + singleCritterGenericStrokesArray.Length * 1] = singleCritterGenericStrokesArray[i];            
+        }
+
+        // A:
+        GenerateCritterBodyBrushstrokes(ref singleCritterGenericStrokesArray, brushPointArray, genome2, 2);
+        CalculateCritterBodyBrushstrokesNormals(ref singleCritterGenericStrokesArray, brushPointArray);
+        GenerateCritterEyeBrushstrokes(ref singleCritterGenericStrokesArray, genome2, 2);
+        GenerateCritterMouthTeethBrushstrokes(ref singleCritterGenericStrokesArray, genome2, 2);
+        GenerateCritterPectoralFinsBrushstrokes(ref singleCritterGenericStrokesArray, genome2, 2);
+        GenerateCritterDorsalFinBrushstrokes(ref singleCritterGenericStrokesArray, genome2, 2);
+        GenerateCritterTailFinBrushstrokes(ref singleCritterGenericStrokesArray, genome2, 2);
+        GenerateCritterSkinDetailBrushstrokes(ref singleCritterGenericStrokesArray, genome2, 2);
+        SortCritterBrushstrokes(ref singleCritterGenericStrokesArray, 2);
+        // Copy over into master array:
+        for(int i = 0; i < singleCritterGenericStrokesArray.Length; i++) {
+            completeCritterGenericStrokesArray[i + singleCritterGenericStrokesArray.Length * 2] = singleCritterGenericStrokesArray[i];            
+        }
+
+        // B:
+        GenerateCritterBodyBrushstrokes(ref singleCritterGenericStrokesArray, brushPointArray, genome3, 3);
+        CalculateCritterBodyBrushstrokesNormals(ref singleCritterGenericStrokesArray, brushPointArray);
+        GenerateCritterEyeBrushstrokes(ref singleCritterGenericStrokesArray, genome3, 3);
+        GenerateCritterMouthTeethBrushstrokes(ref singleCritterGenericStrokesArray, genome3, 3);
+        GenerateCritterPectoralFinsBrushstrokes(ref singleCritterGenericStrokesArray, genome3, 3);
+        GenerateCritterDorsalFinBrushstrokes(ref singleCritterGenericStrokesArray, genome3, 3);
+        GenerateCritterTailFinBrushstrokes(ref singleCritterGenericStrokesArray, genome3, 3);
+        GenerateCritterSkinDetailBrushstrokes(ref singleCritterGenericStrokesArray, genome3, 3);
+        SortCritterBrushstrokes(ref singleCritterGenericStrokesArray, 3);
+        // Copy over into master array:
+        for(int i = 0; i < singleCritterGenericStrokesArray.Length; i++) {
+            completeCritterGenericStrokesArray[i + singleCritterGenericStrokesArray.Length * 3] = singleCritterGenericStrokesArray[i];            
+        }
+
+        // C:
+        GenerateCritterBodyBrushstrokes(ref singleCritterGenericStrokesArray, brushPointArray, genome4, 4);
+        CalculateCritterBodyBrushstrokesNormals(ref singleCritterGenericStrokesArray, brushPointArray);
+        GenerateCritterEyeBrushstrokes(ref singleCritterGenericStrokesArray, genome4, 4);
+        GenerateCritterMouthTeethBrushstrokes(ref singleCritterGenericStrokesArray, genome4, 4);
+        GenerateCritterPectoralFinsBrushstrokes(ref singleCritterGenericStrokesArray, genome4, 4);
+        GenerateCritterDorsalFinBrushstrokes(ref singleCritterGenericStrokesArray, genome4, 4);
+        GenerateCritterTailFinBrushstrokes(ref singleCritterGenericStrokesArray, genome4, 4);
+        GenerateCritterSkinDetailBrushstrokes(ref singleCritterGenericStrokesArray, genome4, 4);
+        SortCritterBrushstrokes(ref singleCritterGenericStrokesArray, 4);
+        // Copy over into master array:
+        for(int i = 0; i < singleCritterGenericStrokesArray.Length; i++) {
+            completeCritterGenericStrokesArray[i + singleCritterGenericStrokesArray.Length * 4] = singleCritterGenericStrokesArray[i];            
+        }
+
+        // Next:
+        GenerateCritterBodyBrushstrokes(ref singleCritterGenericStrokesArray, brushPointArray, genome5, 5);
+        CalculateCritterBodyBrushstrokesNormals(ref singleCritterGenericStrokesArray, brushPointArray);
+        GenerateCritterEyeBrushstrokes(ref singleCritterGenericStrokesArray, genome5, 5);
+        GenerateCritterMouthTeethBrushstrokes(ref singleCritterGenericStrokesArray, genome5, 5);
+        GenerateCritterPectoralFinsBrushstrokes(ref singleCritterGenericStrokesArray, genome5, 5);
+        GenerateCritterDorsalFinBrushstrokes(ref singleCritterGenericStrokesArray, genome5, 5);
+        GenerateCritterTailFinBrushstrokes(ref singleCritterGenericStrokesArray, genome5, 5);
+        GenerateCritterSkinDetailBrushstrokes(ref singleCritterGenericStrokesArray, genome5, 5);
+        SortCritterBrushstrokes(ref singleCritterGenericStrokesArray, 5);
+        // Copy over into master array:
+        for(int i = 0; i < singleCritterGenericStrokesArray.Length; i++) {
+            completeCritterGenericStrokesArray[i + singleCritterGenericStrokesArray.Length * 5] = singleCritterGenericStrokesArray[i];            
+        }
+
+
+
+        toolbarCritterPortraitStrokesCBuffer.SetData(completeCritterGenericStrokesArray);
 
 
         //float size = (genome.bodyGenome.fullsizeBoundingBox.x + genome.bodyGenome.fullsizeBoundingBox.y) * 5f;        
         //float sizeNormalized = Mathf.Clamp01((size - 0.1f) / 1f);
-        genome.bodyGenome.CalculateFullsizeBoundingBox();
+        genome0.bodyGenome.CalculateFullsizeBoundingBox();
         float minLength = 0.5f;
         float maxLength = 40f;
-        float sizeNormalized = Mathf.Clamp01((genome.bodyGenome.fullsizeBoundingBox.y - minLength) / (maxLength - minLength));
+        float sizeNormalized = Mathf.Clamp01((genome0.bodyGenome.fullsizeBoundingBox.y - minLength) / (maxLength - minLength));
         //sizeNormalized = 1f;
         slotPortraitRenderCamera.GetComponent<CritterPortraitCameraManager>().UpdateCameraTargetValues(sizeNormalized);
         
-        Debug.Log("GenerateCritterPortraitStrokesData: " + genome.bodyGenome.appearanceGenome.huePrimary.ToString());
+        //Debug.Log("GenerateCritterPortraitStrokesData: " + genome0.bodyGenome.appearanceGenome.huePrimary.ToString());
     }
 
     private void GenerateCritterBodyBrushstrokes(ref CritterUberStrokeData[] strokesArray, CritterGenomeInterpretor.BrushPoint[] brushPointArray, AgentGenome agentGenome, int agentIndex) {
@@ -3098,30 +3195,42 @@ public class TheRenderKing : MonoBehaviour {
 
 
     
-    public void InitializeNewCritterPortraitGenome(AgentGenome genome) {
-        SetToolbarPortraitCritterInitData(genome);
+    public void InitializeMutationVertebratePortraitGenomes() {
+        //InitializeNewCritterPortraitGenome(simManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[0].representativeGenome); // speciesPool.leaderboardGenomesList[0].candidateGenome);
+        isToolbarCritterPortraitEnabled = true;
+         
+        SetToolbarPortraitCritterInitData();
         // ^^ genome data for critter
 
-        GenerateCritterPortraitStrokesData(genome);
+        //Order: 0 Cur, 1 New, 2 A, 3 B, 4 C, 5 D
+        GenerateCritterPortraitStrokesData();
         // ^^ skin stroke data
     }
-    private void SetToolbarPortraitCritterInitData(AgentGenome genome) {
+    private void SetToolbarPortraitCritterInitData() {
+
+        // Get genomes:
+        AgentGenome genome0 = simManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[0].representativeGenome;
+        AgentGenome genome1 = simManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][simManager.uiManager.mutationUI.selectedToolbarMutationID].representativeGenome;
+        AgentGenome genome2 = simManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][0].representativeGenome;
+        AgentGenome genome3 = simManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][1].representativeGenome;
+        AgentGenome genome4 = simManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][2].representativeGenome;
+        AgentGenome genome5 = simManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][3].representativeGenome;
 
         // NOT the best place for this:::: ***        
-        treeOfLifeBackdropPortraitBorderMat.SetColor("_TintPri", new Color(genome.bodyGenome.appearanceGenome.huePrimary.x, genome.bodyGenome.appearanceGenome.huePrimary.y, genome.bodyGenome.appearanceGenome.huePrimary.z));
-        treeOfLifeBackdropPortraitBorderMat.SetColor("_TintSec", new Color(genome.bodyGenome.appearanceGenome.hueSecondary.x, genome.bodyGenome.appearanceGenome.hueSecondary.y, genome.bodyGenome.appearanceGenome.hueSecondary.z));
+        treeOfLifeBackdropPortraitBorderMat.SetColor("_TintPri", new Color(genome0.bodyGenome.appearanceGenome.huePrimary.x, genome0.bodyGenome.appearanceGenome.huePrimary.y, genome0.bodyGenome.appearanceGenome.huePrimary.z));
+        treeOfLifeBackdropPortraitBorderMat.SetColor("_TintSec", new Color(genome0.bodyGenome.appearanceGenome.hueSecondary.x, genome0.bodyGenome.appearanceGenome.hueSecondary.y, genome0.bodyGenome.appearanceGenome.hueSecondary.z));
         
 
-        SimulationStateData.CritterInitData[] toolbarPortraitCritterInitDataArray = new SimulationStateData.CritterInitData[1];
+        SimulationStateData.CritterInitData[] toolbarPortraitCritterInitDataArray = new SimulationStateData.CritterInitData[6];
         SimulationStateData.CritterInitData initData  = new SimulationStateData.CritterInitData();
 
         // set values
-        initData.boundingBoxSize = genome.bodyGenome.fullsizeBoundingBox; // new Vector3(genome.bodyGenome.coreGenome.fullBodyWidth, genome.bodyGenome.coreGenome.fullBodyLength, genome.bodyGenome.coreGenome.fullBodyWidth);
+        initData.boundingBoxSize = genome0.bodyGenome.fullsizeBoundingBox; // new Vector3(genome.bodyGenome.coreGenome.fullBodyWidth, genome.bodyGenome.coreGenome.fullBodyLength, genome.bodyGenome.coreGenome.fullBodyWidth);
         initData.spawnSizePercentage = 0.1f;
         initData.maxEnergy = Mathf.Min(initData.boundingBoxSize.x * initData.boundingBoxSize.y, 0.5f);
         initData.maxStomachCapacity = 1f;
-        initData.primaryHue = genome.bodyGenome.appearanceGenome.huePrimary;
-        initData.secondaryHue = genome.bodyGenome.appearanceGenome.hueSecondary;
+        initData.primaryHue = genome0.bodyGenome.appearanceGenome.huePrimary;
+        initData.secondaryHue = genome0.bodyGenome.appearanceGenome.hueSecondary;
         initData.biteConsumeRadius = 1f; 
         initData.biteTriggerRadius = 1f;
         initData.biteTriggerLength = 1f;
@@ -3129,18 +3238,13 @@ public class TheRenderKing : MonoBehaviour {
         initData.eatEfficiencyDecay = 1f;
         initData.eatEfficiencyMeat = 1f;
         
-        float critterFullsizeLength = genome.bodyGenome.coreGenome.tailLength + genome.bodyGenome.coreGenome.bodyLength + genome.bodyGenome.coreGenome.headLength + genome.bodyGenome.coreGenome.mouthLength;
+        float critterFullsizeLength = genome0.bodyGenome.coreGenome.tailLength + genome0.bodyGenome.coreGenome.bodyLength + genome0.bodyGenome.coreGenome.headLength + genome0.bodyGenome.coreGenome.mouthLength;
         float flexibilityScore = 1f; // Mathf.Min((1f / genome.bodyGenome.coreGenome.creatureAspectRatio - 1f) * 0.6f, 6f);
         //float mouthLengthNormalized = genome.bodyGenome.coreGenome.mouthLength / critterFullsizeLength;
-        float approxRadius = genome.bodyGenome.coreGenome.creatureBaseLength * genome.bodyGenome.coreGenome.creatureAspectRatio;
+        float approxRadius = genome0.bodyGenome.coreGenome.creatureBaseLength * genome0.bodyGenome.coreGenome.creatureAspectRatio;
         float approxSize = 1f; // approxRadius * genome.bodyGenome.coreGenome.creatureBaseLength;
 
-        //tempSwimMag = 1f;
-        //tempSwimFreq = 1f;
-        //tempSwimSpeed = 1f;
-        //tempAccelMult = 1f;
-
-        float swimLerp = Mathf.Clamp01((genome.bodyGenome.coreGenome.creatureAspectRatio - 0.175f) / 0.35f);  // 0 = longest, 1 = shortest
+        float swimLerp = Mathf.Clamp01((genome0.bodyGenome.coreGenome.creatureAspectRatio - 0.175f) / 0.35f);  // 0 = longest, 1 = shortest
                 
                 // Mag range: 2 --> 0.5
                 //freq range: 1 --> 2
@@ -3151,9 +3255,9 @@ public class TheRenderKing : MonoBehaviour {
         //initData.swimMagnitude = tempSwimMag; // 0.75f * (1f - flexibilityScore * 0.2f);
         //initData.swimFrequency = tempSwimFreq; // flexibilityScore * 2f;
         //initData.swimAnimSpeed = tempSwimSpeed; // 12f * (1f - approxSize * 0.25f);
-        initData.bodyCoord = genome.bodyGenome.coreGenome.tailLength / critterFullsizeLength;
-	    initData.headCoord = (genome.bodyGenome.coreGenome.tailLength + genome.bodyGenome.coreGenome.bodyLength) / critterFullsizeLength;
-        initData.mouthCoord = (genome.bodyGenome.coreGenome.tailLength + genome.bodyGenome.coreGenome.bodyLength + genome.bodyGenome.coreGenome.headLength) / critterFullsizeLength;
+        initData.bodyCoord = genome0.bodyGenome.coreGenome.tailLength / critterFullsizeLength;
+	    initData.headCoord = (genome0.bodyGenome.coreGenome.tailLength + genome0.bodyGenome.coreGenome.bodyLength) / critterFullsizeLength;
+        initData.mouthCoord = (genome0.bodyGenome.coreGenome.tailLength + genome0.bodyGenome.coreGenome.bodyLength + genome0.bodyGenome.coreGenome.headLength) / critterFullsizeLength;
         initData.bendiness = 1f; // tempAccelMult;
         initData.speciesID = 0; // selectedSpeciesID;
 
@@ -3161,24 +3265,131 @@ public class TheRenderKing : MonoBehaviour {
         //if(simManager.agentsArray[i].mouthRef.isPassive) {
         //    initData.mouthIsActive = 0f;
         //}
-        initData.bodyPatternX = genome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeX;
-        initData.bodyPatternY = genome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeY;  // what grid cell of texture sheet to use
+        initData.bodyPatternX = genome0.bodyGenome.appearanceGenome.bodyStrokeBrushTypeX;
+        initData.bodyPatternY = genome0.bodyGenome.appearanceGenome.bodyStrokeBrushTypeY;  // what grid cell of texture sheet to use
         
         toolbarPortraitCritterInitDataArray[0] = initData;
+
+
+
+        initData.primaryHue = genome1.bodyGenome.appearanceGenome.huePrimary;
+        initData.secondaryHue = genome1.bodyGenome.appearanceGenome.hueSecondary;
+        // set values
+        initData.boundingBoxSize = genome1.bodyGenome.fullsizeBoundingBox;
+        initData.maxEnergy = Mathf.Min(initData.boundingBoxSize.x * initData.boundingBoxSize.y, 0.5f);                
+        critterFullsizeLength = genome1.bodyGenome.coreGenome.tailLength + genome1.bodyGenome.coreGenome.bodyLength + genome1.bodyGenome.coreGenome.headLength + genome1.bodyGenome.coreGenome.mouthLength;
+        flexibilityScore = 1f;         
+        approxRadius = genome1.bodyGenome.coreGenome.creatureBaseLength * genome1.bodyGenome.coreGenome.creatureAspectRatio;
+        approxSize = 1f;
+        swimLerp = Mathf.Clamp01((genome1.bodyGenome.coreGenome.creatureAspectRatio - 0.175f) / 0.35f);  // 0 = longest, 1 = shortest
+        initData.swimMagnitude = Mathf.Lerp(0.225f, 1.1f, swimLerp); 
+        initData.swimFrequency = Mathf.Lerp(2f, 0.8f, swimLerp);  
+        initData.swimAnimSpeed = 12f; 
+
+        initData.bodyCoord = genome1.bodyGenome.coreGenome.tailLength / critterFullsizeLength;
+	    initData.headCoord = (genome1.bodyGenome.coreGenome.tailLength + genome1.bodyGenome.coreGenome.bodyLength) / critterFullsizeLength;
+        initData.mouthCoord = (genome1.bodyGenome.coreGenome.tailLength + genome1.bodyGenome.coreGenome.bodyLength + genome1.bodyGenome.coreGenome.headLength) / critterFullsizeLength;
+        initData.bendiness = 1f; // tempAccelMult;
+        initData.speciesID = 0; // selectedSpeciesID;
+
+        initData.bodyPatternX = genome1.bodyGenome.appearanceGenome.bodyStrokeBrushTypeX;
+        initData.bodyPatternY = genome1.bodyGenome.appearanceGenome.bodyStrokeBrushTypeY;  // what grid cell of texture sheet to use
+        
+        toolbarPortraitCritterInitDataArray[1] = initData;
+
+        //initData.wor
+        initData.primaryHue = genome2.bodyGenome.appearanceGenome.huePrimary;
+        initData.secondaryHue = genome2.bodyGenome.appearanceGenome.hueSecondary;        
+        initData.boundingBoxSize = genome2.bodyGenome.fullsizeBoundingBox;
+        initData.maxEnergy = Mathf.Min(initData.boundingBoxSize.x * initData.boundingBoxSize.y, 0.5f);                
+        critterFullsizeLength = genome2.bodyGenome.coreGenome.tailLength + genome2.bodyGenome.coreGenome.bodyLength + genome2.bodyGenome.coreGenome.headLength + genome2.bodyGenome.coreGenome.mouthLength;
+        approxRadius = genome2.bodyGenome.coreGenome.creatureBaseLength * genome2.bodyGenome.coreGenome.creatureAspectRatio;        
+        swimLerp = Mathf.Clamp01((genome2.bodyGenome.coreGenome.creatureAspectRatio - 0.175f) / 0.35f);  // 0 = longest, 1 = shortest
+        initData.swimMagnitude = Mathf.Lerp(0.225f, 1.1f, swimLerp);
+        initData.swimFrequency = Mathf.Lerp(2f, 0.8f, swimLerp);
+        initData.swimAnimSpeed = 12f;
+        initData.bodyCoord = genome2.bodyGenome.coreGenome.tailLength / critterFullsizeLength;
+	    initData.headCoord = (genome2.bodyGenome.coreGenome.tailLength + genome2.bodyGenome.coreGenome.bodyLength) / critterFullsizeLength;
+        initData.mouthCoord = (genome2.bodyGenome.coreGenome.tailLength + genome2.bodyGenome.coreGenome.bodyLength + genome2.bodyGenome.coreGenome.headLength) / critterFullsizeLength;
+        initData.bendiness = 1f;
+        initData.speciesID = 0;
+        initData.bodyPatternX = genome2.bodyGenome.appearanceGenome.bodyStrokeBrushTypeX;
+        initData.bodyPatternY = genome2.bodyGenome.appearanceGenome.bodyStrokeBrushTypeY;  // what grid cell of texture sheet to use
+        
+        toolbarPortraitCritterInitDataArray[2] = initData;
+
+        initData.primaryHue = genome3.bodyGenome.appearanceGenome.huePrimary;
+        initData.secondaryHue = genome3.bodyGenome.appearanceGenome.hueSecondary;        
+        initData.boundingBoxSize = genome3.bodyGenome.fullsizeBoundingBox;
+        initData.maxEnergy = Mathf.Min(initData.boundingBoxSize.x * initData.boundingBoxSize.y, 0.5f);                
+        critterFullsizeLength = genome3.bodyGenome.coreGenome.tailLength + genome3.bodyGenome.coreGenome.bodyLength + genome3.bodyGenome.coreGenome.headLength + genome3.bodyGenome.coreGenome.mouthLength;
+        approxRadius = genome3.bodyGenome.coreGenome.creatureBaseLength * genome3.bodyGenome.coreGenome.creatureAspectRatio;        
+        swimLerp = Mathf.Clamp01((genome3.bodyGenome.coreGenome.creatureAspectRatio - 0.175f) / 0.35f);  // 0 = longest, 1 = shortest
+        initData.swimMagnitude = Mathf.Lerp(0.225f, 1.1f, swimLerp);
+        initData.swimFrequency = Mathf.Lerp(2f, 0.8f, swimLerp);
+        initData.swimAnimSpeed = 12f;
+        initData.bodyCoord = genome3.bodyGenome.coreGenome.tailLength / critterFullsizeLength;
+	    initData.headCoord = (genome3.bodyGenome.coreGenome.tailLength + genome3.bodyGenome.coreGenome.bodyLength) / critterFullsizeLength;
+        initData.mouthCoord = (genome3.bodyGenome.coreGenome.tailLength + genome3.bodyGenome.coreGenome.bodyLength + genome3.bodyGenome.coreGenome.headLength) / critterFullsizeLength;
+        initData.bendiness = 1f;
+        initData.speciesID = 0;
+        initData.bodyPatternX = genome3.bodyGenome.appearanceGenome.bodyStrokeBrushTypeX;
+        initData.bodyPatternY = genome3.bodyGenome.appearanceGenome.bodyStrokeBrushTypeY;  // what grid cell of texture sheet to use        
+        toolbarPortraitCritterInitDataArray[3] = initData;
+
+        initData.primaryHue = genome4.bodyGenome.appearanceGenome.huePrimary;
+        initData.secondaryHue = genome4.bodyGenome.appearanceGenome.hueSecondary;        
+        initData.boundingBoxSize = genome4.bodyGenome.fullsizeBoundingBox;
+        initData.maxEnergy = Mathf.Min(initData.boundingBoxSize.x * initData.boundingBoxSize.y, 0.5f);                
+        critterFullsizeLength = genome4.bodyGenome.coreGenome.tailLength + genome4.bodyGenome.coreGenome.bodyLength + genome4.bodyGenome.coreGenome.headLength + genome4.bodyGenome.coreGenome.mouthLength;
+        approxRadius = genome4.bodyGenome.coreGenome.creatureBaseLength * genome4.bodyGenome.coreGenome.creatureAspectRatio;        
+        swimLerp = Mathf.Clamp01((genome4.bodyGenome.coreGenome.creatureAspectRatio - 0.175f) / 0.35f);  // 0 = longest, 1 = shortest
+        initData.swimMagnitude = Mathf.Lerp(0.225f, 1.1f, swimLerp);
+        initData.swimFrequency = Mathf.Lerp(2f, 0.8f, swimLerp);
+        initData.swimAnimSpeed = 12f;
+        initData.bodyCoord = genome4.bodyGenome.coreGenome.tailLength / critterFullsizeLength;
+	    initData.headCoord = (genome4.bodyGenome.coreGenome.tailLength + genome4.bodyGenome.coreGenome.bodyLength) / critterFullsizeLength;
+        initData.mouthCoord = (genome4.bodyGenome.coreGenome.tailLength + genome4.bodyGenome.coreGenome.bodyLength + genome4.bodyGenome.coreGenome.headLength) / critterFullsizeLength;
+        initData.bendiness = 1f;
+        initData.speciesID = 0;
+        initData.bodyPatternX = genome4.bodyGenome.appearanceGenome.bodyStrokeBrushTypeX;
+        initData.bodyPatternY = genome4.bodyGenome.appearanceGenome.bodyStrokeBrushTypeY;  // what grid cell of texture sheet to use        
+        toolbarPortraitCritterInitDataArray[4] = initData;
+
+        initData.primaryHue = genome5.bodyGenome.appearanceGenome.huePrimary;
+        initData.secondaryHue = genome5.bodyGenome.appearanceGenome.hueSecondary;        
+        initData.boundingBoxSize = genome5.bodyGenome.fullsizeBoundingBox;
+        initData.maxEnergy = Mathf.Min(initData.boundingBoxSize.x * initData.boundingBoxSize.y, 0.5f);                
+        critterFullsizeLength = genome5.bodyGenome.coreGenome.tailLength + genome5.bodyGenome.coreGenome.bodyLength + genome5.bodyGenome.coreGenome.headLength + genome5.bodyGenome.coreGenome.mouthLength;
+        approxRadius = genome5.bodyGenome.coreGenome.creatureBaseLength * genome5.bodyGenome.coreGenome.creatureAspectRatio;        
+        swimLerp = Mathf.Clamp01((genome5.bodyGenome.coreGenome.creatureAspectRatio - 0.175f) / 0.35f);  // 0 = longest, 1 = shortest
+        initData.swimMagnitude = Mathf.Lerp(0.225f, 1.1f, swimLerp);
+        initData.swimFrequency = Mathf.Lerp(2f, 0.8f, swimLerp);
+        initData.swimAnimSpeed = 12f;
+        initData.bodyCoord = genome5.bodyGenome.coreGenome.tailLength / critterFullsizeLength;
+	    initData.headCoord = (genome5.bodyGenome.coreGenome.tailLength + genome5.bodyGenome.coreGenome.bodyLength) / critterFullsizeLength;
+        initData.mouthCoord = (genome5.bodyGenome.coreGenome.tailLength + genome5.bodyGenome.coreGenome.bodyLength + genome5.bodyGenome.coreGenome.headLength) / critterFullsizeLength;
+        initData.bendiness = 1f;
+        initData.speciesID = 0;
+        initData.bodyPatternX = genome5.bodyGenome.appearanceGenome.bodyStrokeBrushTypeX;
+        initData.bodyPatternY = genome5.bodyGenome.appearanceGenome.bodyStrokeBrushTypeY;  // what grid cell of texture sheet to use
+        
+        toolbarPortraitCritterInitDataArray[5] = initData;
+
         if(toolbarPortraitCritterInitDataCBuffer != null) {
             toolbarPortraitCritterInitDataCBuffer.Release();
         }
-        toolbarPortraitCritterInitDataCBuffer = new ComputeBuffer(1, sizeof(float) * 25 + sizeof(int) * 3);
+        toolbarPortraitCritterInitDataCBuffer = new ComputeBuffer(6, sizeof(float) * 25 + sizeof(int) * 3);
         toolbarPortraitCritterInitDataCBuffer.SetData(toolbarPortraitCritterInitDataArray);
         
     }
     private void SetToolbarPortraitCritterSimData() {
         
-        SimulationStateData.CritterSimData[] toolbarPortraitCritterSimDataArray = new SimulationStateData.CritterSimData[1];
+        SimulationStateData.CritterSimData[] toolbarPortraitCritterSimDataArray = new SimulationStateData.CritterSimData[6];
         SimulationStateData.CritterSimData simData = new SimulationStateData.CritterSimData();
         // SIMDATA ::===========================================================================================================================================================================
-        Vector3 agentPos = new Vector3(0f, 0f, 0f); // simManager.agentsArray[i].bodyRigidbody.position;
-        simData.worldPos = new Vector3(agentPos.x, agentPos.y, 0f);
+        //GRAB FROM UI???? positions animated there?
+        simData.worldPos = simManager.uiManager.mutationUI.posCurGO.transform.position * simManager.uiManager.mutationUI.renderSpaceMult;
         float angle = Mathf.Cos(Time.realtimeSinceStartup * 0.67f) * 2f;
         float angle2 = angle; // + (float)selectedSpeciesID; // + Time.realtimeSinceStartup * 0.1f; // + (Mathf.PI * 0.5f);
         Vector2 facingDir = new Vector2(Mathf.Cos(angle2 + (Mathf.PI * 0.75f)), Mathf.Sin(angle2 + (Mathf.PI * 0.75f)));
@@ -3186,7 +3397,7 @@ public class TheRenderKing : MonoBehaviour {
         simData.heading = facingDir.normalized; //new Vector2(0f, 1f); //     facingDir.normalized;        //new Vector2(0f, 1f); //     
         float embryo = 1f;        
         simData.embryoPercentage = embryo;
-        simData.growthPercentage = 1f;
+        simData.growthPercentage = 3f * simManager.uiManager.mutationUI.critterSizeMult;
         float decay = 0f;        
         simData.decayPercentage = decay;
         simData.foodAmount = 0f; // Mathf.Lerp(simData.foodAmount, simManager.agentsArray[i].coreModule.stomachContents / simManager.agentsArray[i].coreModule.stomachCapacity, 0.16f);
@@ -3196,15 +3407,31 @@ public class TheRenderKing : MonoBehaviour {
         simData.consumeOn = Mathf.Sin(angle2 * 3.19f) * 0.5f + 0.5f;
         simData.biteAnimCycle = 0f; // (Time.realtimeSinceStartup * 1f) % 1f;
         simData.moveAnimCycle = Time.realtimeSinceStartup * 0.6f % 1f;
-        simData.turnAmount = Mathf.Sin(Time.realtimeSinceStartup * 1.654321f) * 0.65f + 0.25f;
+        simData.turnAmount = Mathf.Sin(Time.realtimeSinceStartup * 0.654321f) * 0.65f + 0.25f;
         simData.accel = (Mathf.Sin(Time.realtimeSinceStartup * 0.79f) * 0.5f + 0.5f) * 0.081f; // Mathf.Clamp01(simManager.agentsArray[i].curAccel) * 1f; // ** RE-FACTOR!!!!
 		simData.smoothedThrottle = (Mathf.Sin(Time.realtimeSinceStartup * 3.97f + 0.4f) * 0.5f + 0.5f) * 0.85f;
-        simData.velocity = facingDir.normalized * (simData.accel + simData.smoothedThrottle); 
-        toolbarPortraitCritterSimDataArray[0] = simData;     
+        simData.velocity = facingDir.normalized * (simData.accel + simData.smoothedThrottle);
+
+
+        toolbarPortraitCritterSimDataArray[0] = simData;        
+        simData.worldPos = simManager.uiManager.mutationUI.posNewGO.transform.position * simManager.uiManager.mutationUI.renderSpaceMult;
+        simData.growthPercentage = simManager.uiManager.mutationUI.critterSizeMult;
+        toolbarPortraitCritterSimDataArray[1] = simData;
+
+        simData.worldPos = simManager.uiManager.mutationUI.posAGO.transform.position * simManager.uiManager.mutationUI.renderSpaceMult;
+        simData.growthPercentage = simManager.uiManager.mutationUI.critterSizeMult;
+        toolbarPortraitCritterSimDataArray[2] = simData;
+        simData.worldPos = simManager.uiManager.mutationUI.posBGO.transform.position * simManager.uiManager.mutationUI.renderSpaceMult;
+        toolbarPortraitCritterSimDataArray[3] = simData;
+        simData.worldPos = simManager.uiManager.mutationUI.posCGO.transform.position * simManager.uiManager.mutationUI.renderSpaceMult;
+        toolbarPortraitCritterSimDataArray[4] = simData;
+        simData.worldPos = simManager.uiManager.mutationUI.posDGO.transform.position * simManager.uiManager.mutationUI.renderSpaceMult;
+        toolbarPortraitCritterSimDataArray[5] = simData;
+
         if(toolbarPortraitCritterSimDataCBuffer != null) {
             toolbarPortraitCritterSimDataCBuffer.Release();
         }
-        toolbarPortraitCritterSimDataCBuffer = new ComputeBuffer(1, SimulationStateData.GetCritterSimDataSize());
+        toolbarPortraitCritterSimDataCBuffer = new ComputeBuffer(6, SimulationStateData.GetCritterSimDataSize());
         toolbarPortraitCritterSimDataCBuffer.SetData(toolbarPortraitCritterSimDataArray);
         // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     }
@@ -3403,8 +3630,8 @@ public class TheRenderKing : MonoBehaviour {
         if(isToolbarCritterPortraitEnabled) {
             
 
-            //SetToolbarPortraitCritterSimData();
-            //SimUIToolbarCritterPortraitStrokes();
+            SetToolbarPortraitCritterSimData();
+            SimUIToolbarCritterPortraitStrokes();
         }
         
 
@@ -3665,26 +3892,35 @@ public class TheRenderKing : MonoBehaviour {
         // Still not sure if this will work correctly... ****
         spiritBrushRenderCamera.Render();
 
-        /*
+        
         // Species PORTRAIT:
         cmdBufferSlotPortraitDisplay.Clear();
         cmdBufferSlotPortraitDisplay.SetRenderTarget(slotPortraitRenderCamera.targetTexture); // needed???
-        cmdBufferSlotPortraitDisplay.ClearRenderTarget(true, true, new Color(0f,0f,0f,0f), 1.0f);  // clear -- needed???
+        cmdBufferSlotPortraitDisplay.ClearRenderTarget(true, true, new Color(0f,0f,0.1f,0f), 1.0f);  // clear -- needed???
         cmdBufferSlotPortraitDisplay.SetViewProjectionMatrices(slotPortraitRenderCamera.worldToCameraMatrix, slotPortraitRenderCamera.projectionMatrix);
 
-        toolbarSpeciesPortraitStrokesMat.SetPass(0);
-        toolbarSpeciesPortraitStrokesMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        toolbarSpeciesPortraitStrokesMat.SetBuffer("critterInitDataCBuffer", toolbarPortraitCritterInitDataCBuffer);
-        toolbarSpeciesPortraitStrokesMat.SetBuffer("critterSimDataCBuffer", toolbarPortraitCritterSimDataCBuffer);
-        toolbarSpeciesPortraitStrokesMat.SetBuffer("critterGenericStrokesCBuffer", toolbarCritterPortraitStrokesCBuffer);    
-        toolbarSpeciesPortraitStrokesMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-        toolbarSpeciesPortraitStrokesMat.SetFloat("_MapSize", SimulationManager._MapSize);          
-        cmdBufferSlotPortraitDisplay.DrawProcedural(Matrix4x4.identity, toolbarSpeciesPortraitStrokesMat, 0, MeshTopology.Triangles, 6, toolbarCritterPortraitStrokesCBuffer.count);
+        mutationUIVertebratesRenderTexMat.SetPass(0);
+        mutationUIVertebratesRenderTexMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        mutationUIVertebratesRenderTexMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+        mutationUIVertebratesRenderTexMat.SetFloat("_MapSize", SimulationManager._MapSize);   
+        mutationUIVertebratesRenderTexMat.SetBuffer("critterInitDataCBuffer", toolbarPortraitCritterInitDataCBuffer);
+        mutationUIVertebratesRenderTexMat.SetBuffer("critterSimDataCBuffer", toolbarPortraitCritterSimDataCBuffer);
+        mutationUIVertebratesRenderTexMat.SetBuffer("critterGenericStrokesCBuffer", toolbarCritterPortraitStrokesCBuffer);
+
+        //toolbarSpeciesPortraitStrokesMat.SetPass(0);
+        //toolbarSpeciesPortraitStrokesMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        //toolbarSpeciesPortraitStrokesMat.SetBuffer("critterInitDataCBuffer", toolbarPortraitCritterInitDataCBuffer);
+        //toolbarSpeciesPortraitStrokesMat.SetBuffer("critterSimDataCBuffer", toolbarPortraitCritterSimDataCBuffer);
+        //toolbarSpeciesPortraitStrokesMat.SetBuffer("critterGenericStrokesCBuffer", toolbarCritterPortraitStrokesCBuffer);    
+        //toolbarSpeciesPortraitStrokesMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+        //toolbarSpeciesPortraitStrokesMat.SetFloat("_MapSize", SimulationManager._MapSize);          
+        //cmdBufferSlotPortraitDisplay.DrawProcedural(Matrix4x4.identity, toolbarSpeciesPortraitStrokesMat, 0, MeshTopology.Triangles, 6, toolbarCritterPortraitStrokesCBuffer.count);
+        cmdBufferSlotPortraitDisplay.DrawProcedural(Matrix4x4.identity, mutationUIVertebratesRenderTexMat, 0, MeshTopology.Triangles, 6, toolbarCritterPortraitStrokesCBuffer.count); // toolbarCritterPortraitStrokesCBuffer.count);
         
         Graphics.ExecuteCommandBuffer(cmdBufferSlotPortraitDisplay);
         slotPortraitRenderCamera.Render();
 
-        */
+        
 
         //===================   RESOURCE SIMULATION   ==========================================================
         cmdBufferResourceSim.Clear();
@@ -4092,13 +4328,23 @@ public class TheRenderKing : MonoBehaviour {
             baronVonTerrain.decomposerBitsDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
             baronVonTerrain.decomposerBitsDisplayMat.SetTexture("_ResourceGridTex", simManager.vegetationManager.resourceGridRT1);
             baronVonTerrain.decomposerBitsDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
+            
             baronVonTerrain.decomposerBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
             baronVonTerrain.decomposerBitsDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);     
             baronVonTerrain.decomposerBitsDisplayMat.SetFloat("_MinFog", minimumFogDensity);   
             baronVonTerrain.decomposerBitsDisplayMat.SetFloat("_GlobalWaterLevel", baronVonWater._GlobalWaterLevel);  
             baronVonTerrain.decomposerBitsDisplayMat.SetFloat("_Density", Mathf.Lerp(0.15f, 1f, Mathf.Clamp01(simManager.simResourceManager.curGlobalDecomposers / 100f)));  
-            baronVonTerrain.decomposerBitsDisplayMat.SetVector("_FogColor", simManager.fogColor);                
+            baronVonTerrain.decomposerBitsDisplayMat.SetVector("_FogColor", simManager.fogColor);
             //cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
+            if(simManager.vegetationManager.decomposerSlotGenomeCurrent != null) {
+                baronVonTerrain.decomposerBitsDisplayMat.SetFloat("_PatternThreshold", simManager.vegetationManager.decomposerSlotGenomeCurrent.patternThreshold);
+                baronVonTerrain.decomposerBitsDisplayMat.SetColor("_TintPri", simManager.vegetationManager.decomposerSlotGenomeCurrent.displayColorPri);
+                baronVonTerrain.decomposerBitsDisplayMat.SetColor("_TintSec", simManager.vegetationManager.decomposerSlotGenomeCurrent.displayColorSec);
+                baronVonTerrain.decomposerBitsDisplayMat.SetInt("_PatternRow", simManager.vegetationManager.decomposerSlotGenomeCurrent.patternRowID);
+                baronVonTerrain.decomposerBitsDisplayMat.SetInt("_PatternColumn", simManager.vegetationManager.decomposerSlotGenomeCurrent.patternColumnID);
+            }
+            
+            
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.decomposerBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.decomposerBitsCBuffer.count);
             
 

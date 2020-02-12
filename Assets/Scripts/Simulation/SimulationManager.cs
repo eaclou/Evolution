@@ -1283,6 +1283,7 @@ public class SimulationManager : MonoBehaviour {
             if (agentsArray[a].curLifeStage == Agent.AgentLifeStage.AwaitingRespawn) {
                           
                 CandidateAgentData candidateData = masterGenomePool.completeSpeciesPoolsList[speciesIndex].GetNextAvailableCandidate();
+                candidateData.candidateGenome = masterGenomePool.vertebrateSlotsGenomesCurrentArray[0].representativeGenome;
                 
                 if (candidateData == null) {
                     Debug.LogError("GetNextAvailableCandidate(): candidateData NULL!!!!");

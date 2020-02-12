@@ -86,7 +86,7 @@ public class MasterGenomePool {
             mutationSettingsRef.defaultBodyMutationChance = 1f;
             mutationSettingsRef.defaultBodyMutationStepSize = 1f;
             mutationSettingsRef.mutationStrengthSlot = mutationSize * mutationSize;  // ***** Shallower curve --> smaller mutations on lower end
-
+            //uiManagerRef.gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[slotRef.slotID].representativeGenome
             AgentGenome mutatedGenome = sourceSpeciesPool.Mutate(vertebrateSlotsGenomesCurrentArray[slotID].representativeGenome, true, true); // sourceSpeciesPool.representativeGenome, true, true);
             vertebrateSlotsGenomesMutationsArray[slotID][mutationID].SetRepresentativeGenome(mutatedGenome);
             mutatedGenome.bodyGenome.CalculateFullsizeBoundingBox();
@@ -101,7 +101,9 @@ public class MasterGenomePool {
     }
     public void ProcessSlotMutation(int slotID, int mutationID, int speciesIndex) {
         SpeciesGenomePool sourceSpeciesPool = completeSpeciesPoolsList[speciesIndex];
-        vertebrateSlotsGenomesCurrentArray[slotID].representativeGenome = vertebrateSlotsGenomesMutationsArray[slotID][mutationID].representativeGenome;
+         //vertebrateSlotsGenomesMutationsArray[slotID][mutationID].representativeGenome;
+        AgentGenome mutatedGenome = sourceSpeciesPool.Mutate(vertebrateSlotsGenomesCurrentArray[slotID].representativeGenome, false, false);
+        vertebrateSlotsGenomesCurrentArray[slotID].representativeGenome = mutatedGenome;
         vertebrateSlotsGenomesCurrentArray[slotID].name = vertebrateSlotsGenomesMutationsArray[slotID][mutationID].name;
         Debug.Log("____ProcessSlotMutation: slot: " + slotID.ToString() + ", mut#: " + mutationID.ToString() + ", speciesID: " + speciesIndex.ToString());
         // = mutatedGenome;

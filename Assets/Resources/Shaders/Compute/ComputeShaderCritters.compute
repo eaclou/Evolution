@@ -155,7 +155,7 @@ void CSSimulateCritterGenericStrokes (uint3 id : SV_DispatchThreadID)
 void CSSimulateCritterPortraitStrokes (uint3 id : SV_DispatchThreadID)
 {
 	CritterGenericStrokeData strokeData = critterGenericStrokesWriteCBuffer[id.x];
-	int agentIndex = 0; //strokeData.parentIndex;
+	int agentIndex = strokeData.parentIndex;
 
 	CritterInitData critterInitData = critterInitDataCBuffer[agentIndex];
 	CritterSimData critterSimData = critterSimDataCBuffer[agentIndex];

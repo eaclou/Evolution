@@ -333,7 +333,7 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 			float onLandMask = saturate((altitudeRaw - _GlobalWaterLevel) * 100);
 			float rightClickMask01 = saturate(_SpiritBrushPosNeg * -1);
 			float4 spiritBrushTex = _SpawnDensityMap.SampleLevel(_LinearClamp, uv, 0);  // brush mask
-			foodParticlesWrite[id.x].age = foodParticle.age + _AlgaeAgingRate + spiritBrushTex.x * rightClickMask01 * 0.2 * _IsBrushing + onLandMask * 0.01; 
+			foodParticlesWrite[id.x].age = foodParticle.age + _AlgaeAgingRate + spiritBrushTex.x * rightClickMask01 * 0.2 * _IsBrushing;// + onLandMask * 0.01; 
 			
 			foodParticlesWrite[id.x].isDecaying = foodParticle.isDecaying;
 

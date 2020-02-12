@@ -392,6 +392,7 @@ public class VegetationManager {
         for(int j = 0; j < algaeSlotGenomeMutations.Length; j++) {
             float jLerp = Mathf.Clamp01((float)j / 3f + 0.015f); 
             jLerp = jLerp * jLerp;
+            //jLerp = 0.25f;
             WorldLayerAlgaeGenome mutatedGenome = new WorldLayerAlgaeGenome();
 
             Color randColorPri = UnityEngine.Random.ColorHSV();
@@ -458,6 +459,7 @@ public class VegetationManager {
             float jLerp = Mathf.Clamp01((float)j / 3f + 0.015f); 
             
             jLerp = jLerp * jLerp;
+            jLerp = 0.25f;
             WorldLayerDecomposerGenome mutatedGenome = new WorldLayerDecomposerGenome();
             Color randColorPri = UnityEngine.Random.ColorHSV();
             Color randColorSec = UnityEngine.Random.ColorHSV();

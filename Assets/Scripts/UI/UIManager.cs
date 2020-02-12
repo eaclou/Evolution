@@ -710,6 +710,9 @@ public class UIManager : MonoBehaviour {
                 wildSpirit.curClickableSpiritType = WildSpirit.ClickableSpiritType.Minerals;
                 mutationUI.ClickToolButton();
                 worldSpiritHubUI.OpenWorldTreeSelect();
+
+                gameManager.theRenderKing.InitializeMutationVertebratePortraitGenomes();// gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList.Count - 1].representativeGenome, gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][mutationUI.selectedToolbarMutationID].representativeGenome);
+                //Debug.LogError("InitializeNewCritterPortraitGenome");
                 break;
             
             case WildSpirit.ClickableSpiritType.Minerals:
@@ -1191,12 +1194,12 @@ public class UIManager : MonoBehaviour {
         return sample[0];
     }
     
-    private void InitToolbarPortraitCritterData(TrophicSlot slot) { // ** should be called AFTER new species actually created?? something is fucked here
+    public void InitToolbarPortraitCritterData(TrophicSlot slot) { // ** should be called AFTER new species actually created?? something is fucked here
         Debug.Log("InitToolbarPortraitCritterData.. selectedSpeciesID: " + selectedSpeciesID.ToString() + " , slotLinkedID: " + slot.linkedSpeciesID.ToString());
-        
-        SpeciesGenomePool speciesPool = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesID];
+
+        //SpeciesGenomePool speciesPool = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesID];
         //gameManager.theRenderKing.InitializeNewCritterPortraitGenome(speciesPool.representativeGenome);
-        gameManager.theRenderKing.InitializeNewCritterPortraitGenome(gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[slot.slotID].representativeGenome); // speciesPool.leaderboardGenomesList[0].candidateGenome);
+        gameManager.theRenderKing.InitializeMutationVertebratePortraitGenomes();// gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[slot.slotID].representativeGenome, gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][mutationUI.selectedToolbarMutationID].representativeGenome); // speciesPool.leaderboardGenomesList[0].candidateGenome);
         gameManager.theRenderKing.isToolbarCritterPortraitEnabled = true;
          
     }

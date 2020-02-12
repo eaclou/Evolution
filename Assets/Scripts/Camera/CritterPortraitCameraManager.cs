@@ -41,9 +41,9 @@ public class CritterPortraitCameraManager : MonoBehaviour {
 
         float targetDist = Mathf.Lerp(15f, 290f, curZoomLevel);
 
-        targetCamPos = new Vector3(0f, -Mathf.Sin(targetTiltAngleDegrees * Mathf.Deg2Rad) * targetDist, -Mathf.Cos(targetTiltAngleDegrees * Mathf.Deg2Rad) * targetDist);
-        Vector3 newPos = Vector3.Lerp(this.gameObject.transform.position, targetCamPos, lerpSpeed);
-        this.gameObject.transform.position = newPos;
-        this.gameObject.transform.localEulerAngles = new Vector3(-curTiltAngle, 0f, 0f);
+        //targetCamPos = new Vector3(1.3f, -Mathf.Sin(targetTiltAngleDegrees * Mathf.Deg2Rad) * targetDist, -Mathf.Cos(targetTiltAngleDegrees * Mathf.Deg2Rad) * targetDist);
+        //Vector3 newPos = Vector3.Lerp(this.gameObject.transform.position, targetCamPos, lerpSpeed);
+        //this.gameObject.transform.position = newPos;
+        //this.gameObject.transform.localEulerAngles = new Vector3(-curTiltAngle, 0f, 0f);
     }
 }

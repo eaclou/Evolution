@@ -384,9 +384,22 @@ public class SpeciesGenomePool {
         BodyGenome parentBodyGenome = parentGenome.bodyGenome;
         BrainGenome parentBrainGenome = parentGenome.brainGenome;
 
+        MutationSettings mutationSettingsNoneCopy = new MutationSettings(0f, 0f, 0f, 0f, 1f, 0f, 0f, 0f);
+        if(bodySettings) {
+            newBodyGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome, mutationSettingsRef);
+        }
+        else {
+            newBodyGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome, mutationSettingsNoneCopy);
+        }
+        if(brainSettings) {
+            newBrainGenome.SetToMutatedCopyOfParentGenome(parentBrainGenome, newBodyGenome, mutationSettingsRef);
+        }
+        else {
+            newBrainGenome.SetToMutatedCopyOfParentGenome(parentBrainGenome, newBodyGenome, mutationSettingsNoneCopy);
+        }
         //Debug.Log("Mutate() " + mutationSettingsRef.mutationStrengthSlot.ToString("F2"));
-        newBodyGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome, mutationSettingsRef);
-        newBrainGenome.SetToMutatedCopyOfParentGenome(parentBrainGenome, newBodyGenome, mutationSettingsRef);
+        
+        
         
         childGenome.bodyGenome = newBodyGenome; 
         childGenome.brainGenome = newBrainGenome;

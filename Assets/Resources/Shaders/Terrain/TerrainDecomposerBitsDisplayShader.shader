@@ -8,7 +8,7 @@
 		_WaterSurfaceTex ("_WaterSurfaceTex", 2D) = "black" {}
 		_ResourceGridTex ("_ResourceGridTex", 2D) = "black" {}
 		_TerrainColorTex ("_TerrainColorTex", 2D) = "black" {}
-		
+		_PatternTex ("_PatternTex", 2D) = "black" {}
 		
 	}
 	SubShader
@@ -34,7 +34,8 @@
 			sampler2D _WaterSurfaceTex;
 			sampler2D _ResourceGridTex;
 			sampler2D _TerrainColorTex;
-			
+			sampler2D _PatternTex;
+
 			//sampler2D _RenderedSceneRT;  // Provided by CommandBuffer -- global tex??? seems confusing... ** revisit this
 			
 			uniform float _MapSize;
@@ -42,6 +43,12 @@
 			uniform float _CamDistNormalized;
 
 			uniform float _Density;
+
+			float4 _TintPri;
+			float4 _TintSec;
+			float _PatternThreshold;
+			int _PatternColumn;
+			int _PatternRow;
 
 			struct GroundBitsData
 			{
@@ -69,6 +76,7 @@
 				float3 worldPos : TEXCOORD3;
 				float4 vignetteLerp : TEXCOORD4;
 				float2 skyUV : TEXCOORD5;
+				float2 patternUV : TEXCOORD6;
 			};
 
 			float rand(float2 co){   // OUTPUT is in [0,1] RANGE!!!
@@ -97,7 +105,6 @@
 				float altitudeRaw = altitudeTexSample.x;
 				float worldActiveMask = saturate(altitudeTexSample.w * 10);
 
-				//float altitude = tex2Dlod(_AltitudeTex, float4(o.altitudeUV, 0, 0)).x; //i.worldPos.z / 10; // [-1,1] range
 				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(o.altitudeUV, 0, 0)).yzw;
 				float depth = saturate(-altitudeRaw + 0.5);
 				float refractionStrength = depth * 4.5;
@@ -120,8 +127,7 @@
 
 				float sizeFadeMask = (decomposerAmount + wasteAmount * 0.5) * 0.9 + 0.1; // saturate((1.0 - altitude) * 4 - 2);
 				quadPoint *= float3(scale, 1.0) * sizeFadeMask;
-				
-				
+								
 				float4 fluidVelocity = tex2Dlod(_VelocityTex, float4(worldPosition.xy / 256, 0, 2));
 				float fluidSpeed = length(fluidVelocity.xy);
 				float2 fluidDir = float2(0,1); //normalize(fluidVelocity.xy);
@@ -134,8 +140,6 @@
 				float dotLight = dot(waterSurfaceData.yzw, _WorldSpaceLightPos0.xyz);
 				dotLight = dotLight * dotLight;
 				float waveHeight = waterSurfaceData.x;
-
-				
 
 				// Figure out final facing Vectors!!!
 				float2 forward = groundBitData.heading; //float2(0,1); // lerp(groundBitData.heading, fluidDir, saturate(fluidSpeed * 5)); //groundBitData.heading;
@@ -166,7 +170,7 @@
 				float testNewVignetteMask = saturate(((randThreshold + 0.6 - (saturate(vignetteRadius) * 0.4 + 0.3)) * 2));
 				o.vignetteLerp = float4(testNewVignetteMask,sampleUV,saturate(vignetteRadius));
 
-				
+				o.patternUV = float2(o.quadUV.x * (1.0 / 8.0) + (1.0 / 8.0) * (float)_PatternColumn, o.quadUV.y * (1.0 / 8.0) + (1.0 / 8.0) * (float)_PatternRow);
 				float rand = Value2D(float2((float)inst, (float)inst + 30), 100).x;
 				o.color = float4(rand,groundBitData.age,1,alpha);
 				
@@ -175,15 +179,28 @@
 
 			fixed4 frag(v2f i) : SV_Target
 			{
-				float4 brushColor = tex2D(_MainTex, i.quadUV);			
+				float4 brushColor = tex2D(_MainTex, i.quadUV);	
+				float4 patternColor = tex2D(_PatternTex, i.patternUV);
 				float4 altitudeTex = tex2D(_AltitudeTex, i.altitudeUV); //i.worldPos.z / 10; // [-1,1] range
 				float depth = saturate((_GlobalWaterLevel - altitudeTex.x) * 2);
 				float4 terrainColorTex = tex2D(_TerrainColorTex, i.altitudeUV);
-				float3 baseHue = float3(0.5,0.25,0.1) * 0.875;
+				float3 baseHue = _TintPri.rgb; //float3(0.5,0.25,0.1) * 0.875;
 				float4 finalColor = terrainColorTex;  // *** BACKGROUND COLOR:
 				finalColor.rgb = lerp(baseHue, finalColor.rgb, depth);				
 				finalColor.a = brushColor.a * i.color.a * 0.45;
-				return finalColor;				
+				
+				finalColor = lerp(_TintSec, float4(baseHue,1), patternColor.x);
+				finalColor.a *= brushColor.a;
+				return finalColor;
+
+				/*
+				if(i.quadUV.y > i.quadUV.x) {
+					return finalColor;		
+				}
+				else {
+					return _TintSec;
+				}*/
+						
 			}
 		ENDCG
 		}
