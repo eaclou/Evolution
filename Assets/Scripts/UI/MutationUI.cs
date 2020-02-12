@@ -70,11 +70,11 @@ public class MutationUI : MonoBehaviour {
         //textToolbarWingPanelName.text = "Mutations:";
 
         animatorMutationUI.SetBool("_IsOpen", isOpen);
-        
-        textMutationPanelOptionA.text = "Tiny";
-        textMutationPanelOptionB.text = "Small";
-        textMutationPanelOptionC.text = "Large";
-        textMutationPanelOptionD.text = "Huge";
+
+        textMutationPanelOptionA.text = "";// "Tiny";
+        textMutationPanelOptionB.text = "";// "Small";
+        textMutationPanelOptionC.text = "";// "Large";
+        textMutationPanelOptionD.text = "";// "Huge";
 
         textMutationPanelTitleCur.text = "CURRENT";
         string[] titlesTxt = new string[4];
@@ -624,7 +624,7 @@ public class MutationUI : MonoBehaviour {
     }
     public void ClickMutationOption(int id) { // **** Need better smarter way to detect selected slot and point to corresponding data
         Debug.Log("ClickMutationOption(" + id.ToString() + ")");
-        uiManagerRef.InitToolbarPortraitCritterData(uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot);
+        //uiManagerRef.InitToolbarPortraitCritterData(uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot);
         selectedToolbarMutationID = id;
                 
     }

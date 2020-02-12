@@ -1246,7 +1246,7 @@ public class SimulationManager : MonoBehaviour {
     }  // *** revisit
     private void CheckForReadyToSpawnAgents() {    // AUTO-SPAWN     
         for (int a = 0; a < agentsArray.Length; a++) {
-            if(agentRespawnCounter > 7) {
+            if(agentRespawnCounter > 77) {
                 if (agentsArray[a].curLifeStage == Agent.AgentLifeStage.AwaitingRespawn) {
                     //Debug.Log("AttemptToSpawnAgent(" + a.ToString() + ")");
                     int randomTableIndex = UnityEngine.Random.Range(0, masterGenomePool.currentlyActiveSpeciesIDList.Count);
@@ -1299,8 +1299,8 @@ public class SimulationManager : MonoBehaviour {
                     //}
 
                     Vector3 cursorWorldPos = uiManager.theCursorCzar.curMousePositionOnWaterPlane;
-                    cursorWorldPos.x += UnityEngine.Random.Range(-1f, 1f) * 5f;
-                    cursorWorldPos.y += UnityEngine.Random.Range(-1f, 1f) * 5f;
+                    cursorWorldPos.x += UnityEngine.Random.Range(-1f, 1f) * 10f;
+                    cursorWorldPos.y += UnityEngine.Random.Range(-1f, 1f) * 10f;
                     
                     Vector2 spawnWorldPos = new Vector2(cursorWorldPos.x, cursorWorldPos.y); 
         
@@ -1330,7 +1330,7 @@ public class SimulationManager : MonoBehaviour {
         } 
     }
     private void AttemptToSpawnAgent(int agentIndex, int speciesIndex, CandidateAgentData candidateData) { //, int speciesIndex) {
-        //Debug.Log("AttemptToSpawnAgent(" + agentIndex.ToString());
+        Debug.Log("AttemptToSpawnAgent(" + agentIndex.ToString());
         // Which Species will the new agent belong to?
         // Random selection? Lottery-Selection among Species? Use this Agent's previous-life's Species?  Global Ranked Selection (across all species w/ modifiers) ?
 

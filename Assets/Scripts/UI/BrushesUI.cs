@@ -786,12 +786,7 @@ public class BrushesUI : MonoBehaviour {
         uiManagerRef.curActiveTool = UIManager.ToolType.Add;
         uiManagerRef.watcherUI.StopFollowingAgent();
         uiManagerRef.watcherUI.StopFollowingPlantParticle();
-        uiManagerRef.watcherUI.StopFollowingAnimalParticle();
-        //uiManagerRef.watcherUI.isHighlight = false;
-        //TurnOffStirTool();        
-        //isBrushSelected = true;
-
-        //uiManagerRef.isBrushModeON_snoopingOFF = true; // ***** Switching to brushingMode!!! ***
+        uiManagerRef.watcherUI.StopFollowingAnimalParticle();      
         uiManagerRef.panelFocus = UIManager.PanelFocus.Brushes;
     }
     

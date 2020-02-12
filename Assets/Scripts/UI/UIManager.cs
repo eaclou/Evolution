@@ -24,8 +24,7 @@ public class UIManager : MonoBehaviour {
     public GameOptionsManager gameOptionsManager;
 
     private bool firstTimeStartup = true;
-
-    //public bool isBrushModeON_snoopingOFF = true;
+    
     public GameObject cursorParticlesGO;
 
     public Animator animatorSpiritUnlock;
@@ -46,13 +45,12 @@ public class UIManager : MonoBehaviour {
     public Button buttonQuickStartResume;
     public Button buttonNewSimulation;
     public Text textMouseOverInfo;  // use!
-    //public Texture2D healthDisplayTex;
+    
     public GameObject panelTitleMenu;
     public GameObject panelGameOptions;
 
     public Text textCursorInfo;
 
-    //public GameObject panelTint;
     public bool controlsMenuOn = false; // main menu
     public bool optionsMenuOn = false;  // Game options main menu
 
@@ -792,6 +790,10 @@ public class UIManager : MonoBehaviour {
                 Debug.LogError("No Enum Type Found! (");
                 break;
 
+        }
+
+        if(panelFocus != PanelFocus.Brushes) {
+            brushesUI.ClickToolButtonAdd();
         }
     }
     

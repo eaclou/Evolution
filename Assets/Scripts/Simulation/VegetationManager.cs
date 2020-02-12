@@ -19,11 +19,7 @@ public class VegetationManager {
     public Vector4[] resourceGridEatAmountsArray;
 
     public RenderTexture resourceSimTransferRT;
-
-    //public RenderTexture rdRT1;
-    //public RenderTexture rdRT2;
-    //private int rdTextureResolution = 128;  // decomposers and algae Tex2D's
-    // decomposer genomes:
+    
     public WorldLayerDecomposerGenome decomposerSlotGenomeCurrent;
     public WorldLayerDecomposerGenome[] decomposerSlotGenomeMutations;
 
@@ -79,12 +75,7 @@ public class VegetationManager {
     public Vector3 tempClosestPlantParticleIndexAndPos;
 
     private float tempSharedIntakeRate = 0.0065f;
-    //public Vector2 algaeOriginPos;
-    //public float algaeOnLerp01;
-    //public float cur
-
-    //private AlgaeParticleData representativeAlgaeLayerGenome;
-        
+    
     public struct PlantParticleData {  // 4 ints, 28 floats
         public int index;
         public int critterIndex;
@@ -121,12 +112,6 @@ public class VegetationManager {
     }
 
     public int tempMeasureClosestParticlesCounter = 0;
-
-    /*public void MoveRandomResourceGridPatches(int index) {
-        resourceGridSpawnPatchesArray[index] = new Vector2(UnityEngine.Random.Range(0.1f, 0.9f), UnityEngine.Random.Range(0.1f, 0.9f)); // (UnityEngine.Random.insideUnitCircle + Vector2.one) * 0.5f;
-        Debug.Log("Moved Resource Patch! [" + index.ToString() + "], " + resourceGridSpawnPatchesArray[index].ToString());
-    }*/
-    //algaeSlotGenomeCurrent
     
     public VegetationManager(SettingsManager settings, SimResourceManager resourcesRef) {
         settingsRef = settings;
@@ -392,7 +377,7 @@ public class VegetationManager {
         for(int j = 0; j < algaeSlotGenomeMutations.Length; j++) {
             float jLerp = Mathf.Clamp01((float)j / 3f + 0.015f); 
             jLerp = jLerp * jLerp;
-            //jLerp = 0.25f;
+            jLerp = 0.3f;
             WorldLayerAlgaeGenome mutatedGenome = new WorldLayerAlgaeGenome();
 
             Color randColorPri = UnityEngine.Random.ColorHSV();
@@ -459,7 +444,7 @@ public class VegetationManager {
             float jLerp = Mathf.Clamp01((float)j / 3f + 0.015f); 
             
             jLerp = jLerp * jLerp;
-            jLerp = 0.25f;
+            jLerp = 0.3f;
             WorldLayerDecomposerGenome mutatedGenome = new WorldLayerDecomposerGenome();
             Color randColorPri = UnityEngine.Random.ColorHSV();
             Color randColorSec = UnityEngine.Random.ColorHSV();
