@@ -198,5 +198,17 @@ public class TheCursorCzar : MonoBehaviour {
         Vector2 instantMouseVel = curMousePos - prevMousePos;
         smoothedMouseVel = Vector2.Lerp(smoothedMouseVel, instantMouseVel, 0.16f);
         prevMousePos = curMousePos;
+
+        if(Input.mousePosition.x < 320) {
+            if(Input.mousePosition.y < 320) {
+                uiManagerRef.mutationUI.isPointerOver = true;
+            }
+            else {
+                uiManagerRef.mutationUI.isPointerOver = false;
+            }
+        }
+        else {
+            uiManagerRef.mutationUI.isPointerOver = false;
+        }
 	}
 }

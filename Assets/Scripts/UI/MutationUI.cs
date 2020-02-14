@@ -7,6 +7,7 @@ public class MutationUI : MonoBehaviour {
     public UIManager uiManagerRef;
     public bool isUnlocked;
     public bool isOpen;
+    public bool isPointerOver;
 
     public Animator animatorMutationUI;
 
@@ -65,6 +66,15 @@ public class MutationUI : MonoBehaviour {
 	void Start () {
 		
 	}
+
+    public void PointerEnter() {
+        isPointerOver = true;
+        Debug.Log("PointerEnter");
+    }
+    public void PointerExits() {
+        isPointerOver = false;
+        Debug.Log("PointerExits");
+    }
 	
     private void UpdateUI(TrophicLayersManager layerManager) {
         //textToolbarWingPanelName.text = "Mutations:";
@@ -92,7 +102,7 @@ public class MutationUI : MonoBehaviour {
         buttonToolbarMutateConfirm.gameObject.SetActive(false);
         if(selectedToolbarMutationID >= 0) {
             buttonToolbarMutateConfirm.gameObject.SetActive(true);
-
+            /*
             if(selectedToolbarMutationID == 0) {
                 imageMutationPanelHighlightA.color = Color.white;
                 imageMutationPanelHighlightB.color = Color.black;
@@ -117,6 +127,7 @@ public class MutationUI : MonoBehaviour {
                 imageMutationPanelHighlightC.color = Color.black;
                 imageMutationPanelHighlightD.color = Color.white;
             }
+            */
         }
 
         TrophicSlot slotRef = uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot;
@@ -537,11 +548,32 @@ public class MutationUI : MonoBehaviour {
 
     public void OpenMutationPanel() {
         isOpen = true;
+
+        animatorMutationUI.SetBool("_IsSelectedA", false);
+        animatorMutationUI.SetBool("_IsSelectedB", false);   
+        animatorMutationUI.SetBool("_IsSelectedC", false);
+        animatorMutationUI.SetBool("_IsSelectedD", false);
+
+        if(selectedToolbarMutationID == 0) {
+            animatorMutationUI.SetBool("_IsSelectedA", true);
+        }
+        else if(selectedToolbarMutationID == 1) {
+            animatorMutationUI.SetBool("_IsSelectedB", true);
+        }
+        else if(selectedToolbarMutationID == 2) {
+            animatorMutationUI.SetBool("_IsSelectedC", true);
+        }
+        else {
+            animatorMutationUI.SetBool("_IsSelectedD", true);
+        }
     }
     
     public void ClickToolButton() {
         Debug.Log("Click mutation toggle button)");
         isOpen = !isOpen;
+        if(selectedToolbarMutationID == 0) {
+            animatorMutationUI.SetBool("_IsSelectedA", true);
+        }
     }
     public void ClickMutationConfirm() {
         animatorMutationUI.SetTrigger("_TriggerMutate");
@@ -626,7 +658,24 @@ public class MutationUI : MonoBehaviour {
         Debug.Log("ClickMutationOption(" + id.ToString() + ")");
         //uiManagerRef.InitToolbarPortraitCritterData(uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot);
         selectedToolbarMutationID = id;
-                
+
+        animatorMutationUI.SetBool("_IsSelectedA", false);
+        animatorMutationUI.SetBool("_IsSelectedB", false);   
+        animatorMutationUI.SetBool("_IsSelectedC", false);
+        animatorMutationUI.SetBool("_IsSelectedD", false);
+
+        if(selectedToolbarMutationID == 0) {
+            animatorMutationUI.SetBool("_IsSelectedA", true);
+        }
+        else if(selectedToolbarMutationID == 1) {
+            animatorMutationUI.SetBool("_IsSelectedB", true);
+        }
+        else if(selectedToolbarMutationID == 2) {
+            animatorMutationUI.SetBool("_IsSelectedC", true);
+        }
+        else {
+            animatorMutationUI.SetBool("_IsSelectedD", true);
+        }
     }
 
 }

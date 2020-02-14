@@ -80,7 +80,7 @@ public class MasterGenomePool {
         for(int mutationID = 0; mutationID < 4; mutationID++) {
             float mutationSize = Mathf.Clamp01((float)mutationID / 3f + 0.00015f); 
             mutationSize = mutationSize * mutationSize;
-            mutationSize = 0.33f;
+            mutationSize = Mathf.Lerp(mutationSize, 0.33f, 0.5f);
             SpeciesGenomePool sourceSpeciesPool = completeSpeciesPoolsList[speciesIndex];
             // update settings:::  not best way to do this.......
             mutationSettingsRef.defaultBodyMutationChance = 1f;

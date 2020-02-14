@@ -27,19 +27,20 @@ public class CritterPortraitCameraManager : MonoBehaviour {
 	void Update () {
         SimCameraTransform();
 	}
+    
 
     public void UpdateCameraTargetValues(float targetZoom) {
-        targetZoomLevel = targetZoom;
+        //targetZoomLevel = targetZoom;
     }
 
     public void SimCameraTransform() {
 
         // update cur values:
-        curZoomLevel = Mathf.Lerp(curZoomLevel, targetZoomLevel, lerpSpeed);
-        curTiltAngle = Mathf.Lerp(curTiltAngle, targetTiltAngleDegrees, lerpSpeed);
-        curFOV = Mathf.Lerp(curFOV, targetFOV, lerpSpeed);
+        //curZoomLevel = Mathf.Lerp(curZoomLevel, targetZoomLevel, lerpSpeed);
+        //curTiltAngle = Mathf.Lerp(curTiltAngle, targetTiltAngleDegrees, lerpSpeed);
+        //curFOV = Mathf.Lerp(curFOV, targetFOV, lerpSpeed);
 
-        float targetDist = Mathf.Lerp(15f, 290f, curZoomLevel);
+        //float targetDist = Mathf.Lerp(15f, 290f, curZoomLevel);
 
         //targetCamPos = new Vector3(1.3f, -Mathf.Sin(targetTiltAngleDegrees * Mathf.Deg2Rad) * targetDist, -Mathf.Cos(targetTiltAngleDegrees * Mathf.Deg2Rad) * targetDist);
         //Vector3 newPos = Vector3.Lerp(this.gameObject.transform.position, targetCamPos, lerpSpeed);

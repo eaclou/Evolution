@@ -2139,7 +2139,7 @@ public class TheRenderKing : MonoBehaviour {
         float maxLength = 40f;
         float sizeNormalized = Mathf.Clamp01((genome0.bodyGenome.fullsizeBoundingBox.y - minLength) / (maxLength - minLength));
         //sizeNormalized = 1f;
-        slotPortraitRenderCamera.GetComponent<CritterPortraitCameraManager>().UpdateCameraTargetValues(sizeNormalized);
+        //slotPortraitRenderCamera.GetComponent<CritterPortraitCameraManager>().UpdateCameraTargetValues(sizeNormalized);
         
         //Debug.Log("GenerateCritterPortraitStrokesData: " + genome0.bodyGenome.appearanceGenome.huePrimary.ToString());
     }
@@ -3397,7 +3397,7 @@ public class TheRenderKing : MonoBehaviour {
         simData.heading = facingDir.normalized; //new Vector2(0f, 1f); //     facingDir.normalized;        //new Vector2(0f, 1f); //     
         float embryo = 1f;        
         simData.embryoPercentage = embryo;
-        simData.growthPercentage = 3f * simManager.uiManager.mutationUI.critterSizeMult;
+        simData.growthPercentage = 1.5f * simManager.uiManager.mutationUI.critterSizeMult;
         float decay = 0f;        
         simData.decayPercentage = decay;
         simData.foodAmount = 0f; // Mathf.Lerp(simData.foodAmount, simManager.agentsArray[i].coreModule.stomachContents / simManager.agentsArray[i].coreModule.stomachCapacity, 0.16f);
@@ -3418,14 +3418,40 @@ public class TheRenderKing : MonoBehaviour {
         simData.growthPercentage = simManager.uiManager.mutationUI.critterSizeMult;
         toolbarPortraitCritterSimDataArray[1] = simData;
 
-        simData.worldPos = simManager.uiManager.mutationUI.posAGO.transform.position * simManager.uiManager.mutationUI.renderSpaceMult;
-        simData.growthPercentage = simManager.uiManager.mutationUI.critterSizeMult;
+        if(simManager.uiManager.mutationUI.selectedToolbarMutationID == 0) {
+            simData.growthPercentage = simManager.uiManager.mutationUI.critterSizeMult * 1.5f;
+        }
+        else {
+            simData.growthPercentage = simManager.uiManager.mutationUI.critterSizeMult;
+        }
+        simData.worldPos = simManager.uiManager.mutationUI.posAGO.transform.position * simManager.uiManager.mutationUI.renderSpaceMult;        
         toolbarPortraitCritterSimDataArray[2] = simData;
+
         simData.worldPos = simManager.uiManager.mutationUI.posBGO.transform.position * simManager.uiManager.mutationUI.renderSpaceMult;
+        if(simManager.uiManager.mutationUI.selectedToolbarMutationID == 1) {
+            simData.growthPercentage = simManager.uiManager.mutationUI.critterSizeMult * 1.5f;
+        }
+        else {
+            simData.growthPercentage = simManager.uiManager.mutationUI.critterSizeMult;
+        }
         toolbarPortraitCritterSimDataArray[3] = simData;
+
         simData.worldPos = simManager.uiManager.mutationUI.posCGO.transform.position * simManager.uiManager.mutationUI.renderSpaceMult;
+        if(simManager.uiManager.mutationUI.selectedToolbarMutationID == 2) {
+            simData.growthPercentage = simManager.uiManager.mutationUI.critterSizeMult * 1.5f;
+        }
+        else {
+            simData.growthPercentage = simManager.uiManager.mutationUI.critterSizeMult;
+        }
         toolbarPortraitCritterSimDataArray[4] = simData;
+
         simData.worldPos = simManager.uiManager.mutationUI.posDGO.transform.position * simManager.uiManager.mutationUI.renderSpaceMult;
+        if(simManager.uiManager.mutationUI.selectedToolbarMutationID == 3) {
+            simData.growthPercentage = simManager.uiManager.mutationUI.critterSizeMult * 1.5f;
+        }
+        else {
+            simData.growthPercentage = simManager.uiManager.mutationUI.critterSizeMult;
+        }
         toolbarPortraitCritterSimDataArray[5] = simData;
 
         if(toolbarPortraitCritterSimDataCBuffer != null) {

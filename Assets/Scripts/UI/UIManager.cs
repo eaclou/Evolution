@@ -1081,11 +1081,37 @@ public class UIManager : MonoBehaviour {
 
             if (Input.GetAxis("Mouse ScrollWheel") > 0f ) //  Forwards
             {
-                cameraManager.ZoomCamera(-1f);
+                
+
+                if(mutationUI.isPointerOver) {
+                    mutationUI.critterSizeMult += 0.1f;
+                    //gameManager.theRenderKing.slotPortraitRenderCamera.GetComponent<CritterPortraitCameraManager>().targetZoomLevel -= 1f;
+                    //Debug.Log(":::::" + gameManager.theRenderKing.slotPortraitRenderCamera.GetComponent<CritterPortraitCameraManager>().targetZoomLevel.ToString());//.UpdateCameraTargetValues(sizeNormalized);
+                    //genome0.bodyGenome.CalculateFullsizeBoundingBox();
+                    //float minLength = 0.5f;
+                    //float maxLength = 40f;
+                    //float sizeNormalized = Mathf.Clamp01((genome0.bodyGenome.fullsizeBoundingBox.y - minLength) / (maxLength - minLength));
+                    //sizeNormalized = 1f;
+                    //slotPortraitRenderCamera.GetComponent<CritterPortraitCameraManager>().UpdateCameraTargetValues(sizeNormalized);
+                }
+                else {
+                    cameraManager.ZoomCamera(-1f);
+                }
             }
             else if (Input.GetAxis("Mouse ScrollWheel") < 0f ) //  Backwarfds
             {
-                cameraManager.ZoomCamera(1f);            
+                
+                
+                if(mutationUI.isPointerOver) {
+                    //gameManager.theRenderKing.slotPortraitRenderCamera.GetComponent<CritterPortraitCameraManager>().targetZoomLevel += 1f;
+                    //Debug.Log(":::::" + gameManager.theRenderKing.slotPortraitRenderCamera.GetComponent<CritterPortraitCameraManager>().targetZoomLevel.ToString());
+
+                    mutationUI.critterSizeMult -= 0.1f;
+                    mutationUI.critterSizeMult = Mathf.Max(0.1f, mutationUI.critterSizeMult);
+                }
+                else {
+                    cameraManager.ZoomCamera(1f); 
+                }
             }
 
             float zoomSpeed = 0.167f;

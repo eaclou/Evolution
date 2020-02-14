@@ -1244,9 +1244,23 @@ public class SimulationManager : MonoBehaviour {
             }
         }
     }  // *** revisit
-    private void CheckForReadyToSpawnAgents() {    // AUTO-SPAWN     
-        for (int a = 0; a < agentsArray.Length; a++) {
-            if(agentRespawnCounter > 77) {
+    private void CheckForReadyToSpawnAgents() {    // AUTO-SPAWN   
+        int respawnThreshold = 33;
+        //lifespan = uiManagerRef.gameManager.simulationManager.graphDataVertebrateLifespan0.curVal;
+        //       population = uiManagerRef.gameManager.simulationManager.graphDataVertebratePopulation0.curVal;
+        //        foodEaten = uiManagerRef.gameManager.simulationManager.graphDataVertebrateFoodEaten0.curVal;
+        //        genome = uiManagerRef.gameManager.simulationManager.graphDataVertebrateGenome0.curVal
+        if (graphDataVertebratePopulation0.curVal > 48) {
+            respawnThreshold = 77;
+        }
+        else if (graphDataVertebratePopulation0.curVal > 60) {
+            respawnThreshold = 777;
+        }
+
+        for (int a = 0; a < agentsArray.Length; a++) {            
+
+            if(agentRespawnCounter > respawnThreshold) {
+
                 if (agentsArray[a].curLifeStage == Agent.AgentLifeStage.AwaitingRespawn) {
                     //Debug.Log("AttemptToSpawnAgent(" + a.ToString() + ")");
                     int randomTableIndex = UnityEngine.Random.Range(0, masterGenomePool.currentlyActiveSpeciesIDList.Count);
