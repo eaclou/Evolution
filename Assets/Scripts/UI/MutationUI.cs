@@ -542,6 +542,24 @@ public class MutationUI : MonoBehaviour {
     public void UpdateMutationPanelUI(TrophicLayersManager layerManager) {
         panelMutationSpirit.SetActive(isOpen);
         if(isOpen) {
+            animatorMutationUI.SetBool("_IsSelectedA", false);
+            animatorMutationUI.SetBool("_IsSelectedB", false);   
+            animatorMutationUI.SetBool("_IsSelectedC", false);
+            animatorMutationUI.SetBool("_IsSelectedD", false);
+
+            if(selectedToolbarMutationID == 0) {
+                animatorMutationUI.SetBool("_IsSelectedA", true);
+            }
+            else if(selectedToolbarMutationID == 1) {
+                animatorMutationUI.SetBool("_IsSelectedB", true);
+            }
+            else if(selectedToolbarMutationID == 2) {
+                animatorMutationUI.SetBool("_IsSelectedC", true);
+            }
+            else {
+                animatorMutationUI.SetBool("_IsSelectedD", true);
+            }
+
             UpdateUI(layerManager);
         }
     }
@@ -549,23 +567,7 @@ public class MutationUI : MonoBehaviour {
     public void OpenMutationPanel() {
         isOpen = true;
 
-        animatorMutationUI.SetBool("_IsSelectedA", false);
-        animatorMutationUI.SetBool("_IsSelectedB", false);   
-        animatorMutationUI.SetBool("_IsSelectedC", false);
-        animatorMutationUI.SetBool("_IsSelectedD", false);
-
-        if(selectedToolbarMutationID == 0) {
-            animatorMutationUI.SetBool("_IsSelectedA", true);
-        }
-        else if(selectedToolbarMutationID == 1) {
-            animatorMutationUI.SetBool("_IsSelectedB", true);
-        }
-        else if(selectedToolbarMutationID == 2) {
-            animatorMutationUI.SetBool("_IsSelectedC", true);
-        }
-        else {
-            animatorMutationUI.SetBool("_IsSelectedD", true);
-        }
+        
     }
     
     public void ClickToolButton() {
