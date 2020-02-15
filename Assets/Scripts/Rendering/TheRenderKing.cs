@@ -3922,8 +3922,26 @@ public class TheRenderKing : MonoBehaviour {
         // Species PORTRAIT:
         cmdBufferSlotPortraitDisplay.Clear();
         cmdBufferSlotPortraitDisplay.SetRenderTarget(slotPortraitRenderCamera.targetTexture); // needed???
-        cmdBufferSlotPortraitDisplay.ClearRenderTarget(true, true, new Color(0.07f,0.05f,0.22f,1f), 1.0f);  // clear -- needed???
+        cmdBufferSlotPortraitDisplay.ClearRenderTarget(true, true, new Color(0.07f,0.05f,0.12f,1f), 1.0f);  // clear -- needed???
         cmdBufferSlotPortraitDisplay.SetViewProjectionMatrices(slotPortraitRenderCamera.worldToCameraMatrix, slotPortraitRenderCamera.projectionMatrix);
+        /*
+        // MEDIUM STROKES!!!!
+        baronVonTerrain.groundStrokesMedDisplayMat.SetPass(0);
+        baronVonTerrain.groundStrokesMedDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        baronVonTerrain.groundStrokesMedDisplayMat.SetBuffer("environmentStrokesCBuffer", baronVonTerrain.terrainStrokesCBuffer);
+        baronVonTerrain.groundStrokesMedDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        baronVonTerrain.groundStrokesMedDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
+        baronVonTerrain.groundStrokesMedDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+        baronVonTerrain.groundStrokesMedDisplayMat.SetTexture("_ResourceGridTex", simManager.vegetationManager.resourceGridRT1);
+        baronVonTerrain.groundStrokesMedDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);    
+        baronVonTerrain.groundStrokesMedDisplayMat.SetTexture("_SpiritBrushTex", spiritBrushRT); 
+        baronVonTerrain.groundStrokesMedDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);       
+        baronVonTerrain.groundStrokesMedDisplayMat.SetFloat("_MinFog", 0.4f);   
+        baronVonTerrain.groundStrokesMedDisplayMat.SetFloat("_GlobalWaterLevel", baronVonWater._GlobalWaterLevel);        
+        baronVonTerrain.groundStrokesMedDisplayMat.SetVector("_FogColor", simManager.fogColor);
+        //cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
+        cmdBufferSlotPortraitDisplay.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundStrokesMedDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.terrainStrokesCBuffer.count);
+         */   
 
         mutationUIVertebratesRenderTexMat.SetPass(0);
         mutationUIVertebratesRenderTexMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -3932,15 +3950,6 @@ public class TheRenderKing : MonoBehaviour {
         mutationUIVertebratesRenderTexMat.SetBuffer("critterInitDataCBuffer", toolbarPortraitCritterInitDataCBuffer);
         mutationUIVertebratesRenderTexMat.SetBuffer("critterSimDataCBuffer", toolbarPortraitCritterSimDataCBuffer);
         mutationUIVertebratesRenderTexMat.SetBuffer("critterGenericStrokesCBuffer", toolbarCritterPortraitStrokesCBuffer);
-
-        //toolbarSpeciesPortraitStrokesMat.SetPass(0);
-        //toolbarSpeciesPortraitStrokesMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        //toolbarSpeciesPortraitStrokesMat.SetBuffer("critterInitDataCBuffer", toolbarPortraitCritterInitDataCBuffer);
-        //toolbarSpeciesPortraitStrokesMat.SetBuffer("critterSimDataCBuffer", toolbarPortraitCritterSimDataCBuffer);
-        //toolbarSpeciesPortraitStrokesMat.SetBuffer("critterGenericStrokesCBuffer", toolbarCritterPortraitStrokesCBuffer);    
-        //toolbarSpeciesPortraitStrokesMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-        //toolbarSpeciesPortraitStrokesMat.SetFloat("_MapSize", SimulationManager._MapSize);          
-        //cmdBufferSlotPortraitDisplay.DrawProcedural(Matrix4x4.identity, toolbarSpeciesPortraitStrokesMat, 0, MeshTopology.Triangles, 6, toolbarCritterPortraitStrokesCBuffer.count);
         cmdBufferSlotPortraitDisplay.DrawProcedural(Matrix4x4.identity, mutationUIVertebratesRenderTexMat, 0, MeshTopology.Triangles, 6, toolbarCritterPortraitStrokesCBuffer.count); // toolbarCritterPortraitStrokesCBuffer.count);
         
         Graphics.ExecuteCommandBuffer(cmdBufferSlotPortraitDisplay);

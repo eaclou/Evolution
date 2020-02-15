@@ -100,7 +100,7 @@
 				
 				fixed4 patternTexSample = tex2Dlod(_PatternTex, float4(patternUV, 0, 0));
 								
-				float crudeDiffuse = dot(normalize(worldNormal), lightDir) * 0.75 + 0.25;
+				float crudeDiffuse = dot(normalize(worldNormal), lightDir) * 0.5 + 0.5;
 				float3 hue = lerp(critterInitData.secondaryHue, critterInitData.primaryHue, patternTexSample.x);
 				
 				hue = lerp(hue, genericStrokeData.color.rgb, genericStrokeData.color.a);
@@ -108,31 +108,12 @@
 				
 				float alpha = saturate((critterSimData.embryoPercentage - 0.995) * 200);
 								
-				//crudeDiffuse = lerp(crudeDiffuse, 1, 0.35);
-				o.color = float4(specTest * 0.65 + hue * crudeDiffuse + 0.2, alpha); //genericStrokeData.bindPos.x * 0.5 + 0.5, genericStrokeData.bindPos.z * 0.33 + 0.5, genericStrokeData.bindPos.y * 0.5 + 0.5, 1);
+				o.color = float4(specTest * 0.65 + hue * crudeDiffuse + 0.1, alpha); //genericStrokeData.bindPos.x * 0.5 + 0.5, genericStrokeData.bindPos.z * 0.33 + 0.5, genericStrokeData.bindPos.y * 0.5 + 0.5, 1);
 				o.color = lerp(o.color, decayColor, saturate(decayAmount + saturate(critterSimData.decayPercentage * 50) * 0.25));				
 				o.color.a *= alpha;
 
-				//o.worldPos = float4(quadVerticesCBuffer[id].xyz, 1.0);
 				o.worldPos = float4(vertexWorldPos, 1.0);
-				//o.color.rgb = ;
-				//o.color.rgb *= 0.4;
-								
-				//float debugColorVal = detachAmount;
-				//o.color.rgb = float3(debugColorVal, debugColorVal, debugColorVal);
-
-				//vertexWorldPos.z += 1.0;
-				// %^$*%^*$^&*$^&*$&*$^7
-				//vertexWorldPos = genericStrokeData.worldPos + quadVerticesCBuffer[id] * 0.15;
-				// %^$*%^*$^&*$^&*$&*$^7
-
-				//float2 testScale = float2(1,1) * 0.05; // * genericStrokeData.scale;
-				//float3 testPos = quadVerticesCBuffer[id].x * float3(1,0,0) * testScale.x + quadVerticesCBuffer[id].y * float3(0,1,0) * testScale.y;
-				//testPos = testPos + genericStrokeData.worldPos;
-				//float3 testPos = float3(quadVerticesCBuffer[id].xy, 0) * 1;
-				//o.vertex = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(testPos, 1.0)));
-				//o.color = float4(critterInitData.primaryHue, 1); //genericStrokeData.scale.xy, 1, 1);
-
+				
 				return o;
 			}
 			
