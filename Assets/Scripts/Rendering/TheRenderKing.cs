@@ -3922,7 +3922,7 @@ public class TheRenderKing : MonoBehaviour {
         // Species PORTRAIT:
         cmdBufferSlotPortraitDisplay.Clear();
         cmdBufferSlotPortraitDisplay.SetRenderTarget(slotPortraitRenderCamera.targetTexture); // needed???
-        cmdBufferSlotPortraitDisplay.ClearRenderTarget(true, true, new Color(0f,0f,0.1f,0f), 1.0f);  // clear -- needed???
+        cmdBufferSlotPortraitDisplay.ClearRenderTarget(true, true, new Color(0.07f,0.05f,0.22f,1f), 1.0f);  // clear -- needed???
         cmdBufferSlotPortraitDisplay.SetViewProjectionMatrices(slotPortraitRenderCamera.worldToCameraMatrix, slotPortraitRenderCamera.projectionMatrix);
 
         mutationUIVertebratesRenderTexMat.SetPass(0);

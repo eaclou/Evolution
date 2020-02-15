@@ -3,16 +3,17 @@
 	Properties
 	{
 		_MainTex ("Texture", 2D) = "white" {}
+		_MaskTex ("Texture", 2D) = "white" {}
 		_TintPri ("_TintPri", Color) = (1,1,1,1)
 		_TintSec ("_TintSec", Color) = (1,1,1,1)
 	}
 	SubShader
 	{
-		Tags { "RenderType"="Opaque" }
-		//Tags { "RenderType"="Transparent" }
-		//ZWrite Off
-		//Cull Off
-		//Blend SrcAlpha OneMinusSrcAlpha
+		//Tags { "RenderType"="Opaque" }
+		Tags { "RenderType"="Transparent" }
+		ZWrite Off
+		Cull Off
+		Blend SrcAlpha OneMinusSrcAlpha
 
 		Pass
 		{
@@ -36,6 +37,7 @@
 
 			sampler2D _MainTex;
 			float4 _MainTex_ST;
+			sampler2D _MaskTex;
 			float4 _TintPri;
 			float4 _TintSec;
 
@@ -60,7 +62,15 @@
 			
 			fixed4 frag (v2f i) : SV_Target
 			{
-				return tex2D(_MainTex, i.uv);
+				float4 texSample = tex2D(_MainTex, i.uv);
+				float4 maskSample = tex2D(_MaskTex, i.uv);
+				
+				float4 finalCol = texSample;
+				finalCol.a = maskSample.a;
+
+				return finalCol;
+				
+				/*
 				float4 texSample = tex2D(_MainTex, i.uv);
 				
 				if(texSample.x >= _PatternThreshold) {
@@ -68,7 +78,7 @@
 				}
 				else {
 					return float4(1,1,1,1);
-				}
+				}*/
 
 			}
 			ENDCG
