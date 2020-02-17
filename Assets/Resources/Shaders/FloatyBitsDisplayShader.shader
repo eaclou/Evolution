@@ -76,7 +76,6 @@
 				float randomValue = rand(float2(inst, randomAspect * 10));
 				float randomScale = lerp(0.75, 1.4, random2) * 3.6;
 				float2 scale = float2(0.05 * randomAspect, 0.05 * (1.0 / randomAspect)) * randomScale; //float2(randomAspect * randomScale, (1.0 / randomAspect) * randomScale * (length(velocity) * 25 + 1.61));
-				//scale.y *= 0.0735;
 				quadPoint *= float3(scale, 1.0) * 0.54; // * (sin(random3 * 10 + _Time * 123.49) * 0.75 + 0.25);
 				
 				float2 forward = floatyBitData.heading; //normalize(velocity);
@@ -87,7 +86,6 @@
 				float fadeIn = saturate(floatyBitData.age / 0.0055);
 				float fadeOut = saturate((1.0 - floatyBitData.age) / 0.33);
 				float alpha = fadeIn * fadeOut;
-				//alpha = alpha * (saturate(velMag * 20 + 0.5));
 
 				float4 altitudeTex = tex2Dlod(_AltitudeTex, float4(floatyBitData.coords, 0, 0));			
 				float altitudeRaw = altitudeTex.x;
@@ -103,10 +101,7 @@
 				float seaFloorAltitude = -(altitudeRaw * 2 - 1) * 10;
 				float waterAltitude = ((_GlobalWaterLevel + waveHeight * 0.1) * 2 - 1) * -10; 
 				worldPosition.z = clamp(min(seaFloorAltitude, waterAltitude), -10, 10); // -(min(_GlobalWaterLevel, altitudeRaw) * 2 - 1) * 10; // - waveHeight * 2.5;
-				//worldPosition.z = lerp(worldPosition.z, seaFloorAltitude, particleData.isDecaying);
-
-				//worldPosition.z -= waveHeight * 2.5;
-
+				
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(rotatedPoint, 0.0f));
 				float brightness = (random1);
 				dotLight *= brightness;
@@ -120,8 +115,7 @@
 			{
 				
 				float4 texColor = tex2D(_MainTex, i.uv);  // Read Brush Texture
-				//float4 fluidColor = tex2D(_FluidColorTex, i.fluidCoords * 1); // i.fluidCoords); 
-
+				
 				float4 finalColor = texColor; //float4(1,1,1,1); //float4(0.1,0.1,0.05,1) * texColor; //texColor * _Tint * float4(i.color, 1);
 				finalColor.rgb = float3(0.49, 0.48, 0.35) * (0.25 + 0.75 * i.color.x) * 1.5;
 				finalColor.rgb = float3(0.49, 0.48, 0.95);
@@ -129,11 +123,7 @@
 				float birthGlowMask = saturate((-i.color.y + 0.2) * 20);
 				finalColor += birthGlowMask;
 				finalColor *= 1 * texColor.a;
-				//finalColor.rgb *= 0.14;
-				//finalColor.rgb = lerp(fluidColor.rgb, i.color.rgb, 0.06);
-				//finalColor.a = 1;
-				//finalColor.rgb *= 1.16;
-				//finalColor.rgb = float3(1,1,1);
+				
 				return finalColor;
 				
 			}

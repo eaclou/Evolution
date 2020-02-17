@@ -176,8 +176,6 @@
 
 				
 
-				//alpha *= densityMask;
-
 				o.color = float4(rand(float2(-0.347 * inst, inst)),bonusAmplitude,1,alpha);
 				
 				return o;
