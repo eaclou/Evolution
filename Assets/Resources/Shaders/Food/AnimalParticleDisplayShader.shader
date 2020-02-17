@@ -165,7 +165,7 @@
 				float uvDist = length(i.uv - 0.5) * 2;
 				float circleFade = saturate(uvDist - 0.9);
 				finalColor.rgb *= saturate(1.0 - uvDist);
-				float circleMask = saturate(circleFade * 20);
+				float circleMask = saturate(circleFade * 12);
 				// ****************************************************************************
 				finalColor.rgb = lerp(finalColor.rgb, float3(0.1, 0.05, 0.02) * 2, saturate(i.status.y));
 				finalColor *= 1.0 + i.highlight.x * 2 + i.highlight.y;
