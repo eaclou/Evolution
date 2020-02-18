@@ -125,7 +125,7 @@ void CSSimSurfaceBitsData (uint3 id : SV_DispatchThreadID)
 	// ***** Move Head Point0: //
 
 	float2 uv = waterQuadData.worldPos.xy / _MapSize;
-	//float2 altitudeUV = uv * 0.5 + 0.25;
+	
 	float2 vel = VelocityRead.SampleLevel(_LinearClamp, uv, 0).xy;
 	float speedMult = 0.0015;
 
@@ -207,11 +207,11 @@ void CSSimDetailBitsData (uint3 id : SV_DispatchThreadID)
 			
 			float4 resourceGridTex = _ResourceGridTex.SampleLevel(_LinearClamp, spawnUV, 0);
 			
-			float nutrients = saturate(resourceGridTex.x * 1.5);
+			float nutrients = saturate(resourceGridTex.x * 2.0);
 			float extraMask = saturate(resourceGridTex.y * 25) * saturate((resourceGridTex.z - 0.1) * 20); // waste & decomposers active
-			float spawnMask = nutrients; //nutrients * 1 + extraMask;
+			float spawnMask = nutrients * 1 + extraMask * 0.15;
 
-			if(spawnMask > 0.1) {
+			if(spawnMask > rand(float2(id.x + i * -13.47, uv.x - i + _Time))) {
 				waterQuadData.worldPos = float3(spawnUV * _MapSize, 0);
 				waterQuadData.age = frac(waterQuadData.age);
 

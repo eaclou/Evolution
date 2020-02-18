@@ -445,9 +445,9 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 			float2 spawnUV = (parentPos + (float2(randZ, randX) - 0.5) * 33) / _MapSize;  //lerp(float2(randZ, randX), parentPos / _MapSize, 0.95); 	
 									
 			float4 spawnAltitudeSample = altitudeRead.SampleLevel(_LinearClamp, spawnUV, 0);
-			float spawnAltitude = max(spawnAltitudeSample.x, (1.0 - spawnAltitudeSample.w));
-			
-			if(parentParticle.biomass > 0.0002 && rand01 > 0.99 && spawnAltitude < _GlobalWaterLevel) {  // in water only? // for now...
+			//float spawnAltitude = max(spawnAltitudeSample.x, (1.0 - spawnAltitudeSample.w));
+			float spawnAltitude = spawnAltitudeSample.w;
+			if(parentParticle.biomass > 0.0002 && rand01 > 0.994 && spawnAltitude > 0.5) {
 				
 				foodParticlesWrite[id.x].worldPos = spawnUV * _MapSize;
 				

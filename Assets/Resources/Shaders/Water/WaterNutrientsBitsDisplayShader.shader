@@ -32,7 +32,7 @@
 			sampler2D _WaterSurfaceTex;
 			sampler2D _ResourceGridTex;
 			
-			sampler2D _RenderedSceneRT;  // Provided by CommandBuffer -- global tex??? seems confusing... ** revisit this
+			//sampler2D _RenderedSceneRT;  // Provided by CommandBuffer -- global tex??? seems confusing... ** revisit this
 			
 			uniform float _MapSize;
 			uniform float _CamDistNormalized;
@@ -110,13 +110,14 @@
 							
 				float alpha = fadeIn * fadeOut;
 
-							
+				float4 resourceGridSample = tex2Dlod(_ResourceGridTex, float4(uv, 0, 0));
+				
 				float2 scale = 0.042 * alpha; // waterQuadData.localScale * 4;
 
-				float bonusAmplitude = cos((float)inst * 91204.119273 + _Time.y * 70.9128397) * 0.5 + 0.5;
+				float bonusAmplitude = saturate(resourceGridSample.x * 1.5);//  cos((float)inst * 91204.119273 + _Time.y * 70.9128397) * 0.5 + 0.5;
 				bonusAmplitude = bonusAmplitude * bonusAmplitude;  // carve out
 
-				float sizeNorm = _CamDistNormalized * (0.7 + bonusAmplitude * 0.3);
+				float sizeNorm = _CamDistNormalized * (0.7 + bonusAmplitude * 0.7);
 				scale = float2(sizeNorm, sizeNorm);
 				quadPoint *= float3(scale, 1.0); // * (0.2 + _NutrientDensity * 0.175) * (_CamDistNormalized * 0.85 + 0.15);
 				
