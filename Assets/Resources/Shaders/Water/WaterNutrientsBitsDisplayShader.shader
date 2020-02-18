@@ -116,8 +116,8 @@
 				float bonusAmplitude = cos((float)inst * 91204.119273 + _Time.y * 70.9128397) * 0.5 + 0.5;
 				bonusAmplitude = bonusAmplitude * bonusAmplitude;  // carve out
 
-				scale += bonusAmplitude * 0.1;				
-				
+				float sizeNorm = _CamDistNormalized * (0.7 + bonusAmplitude * 0.3);
+				scale = float2(sizeNorm, sizeNorm);
 				quadPoint *= float3(scale, 1.0); // * (0.2 + _NutrientDensity * 0.175) * (_CamDistNormalized * 0.85 + 0.15);
 				
 				// Wave Surface Height:
@@ -131,19 +131,19 @@
 				float4 altitudeTex = tex2Dlod(_AltitudeTex, float4(uv, 0, 0));			
 				float altitudeRaw = altitudeTex.x;
 				float seaFloorAltitude = -(altitudeRaw * 2 - 1) * 10;
-				worldPosition.z = -(max(_GlobalWaterLevel, altitudeRaw) * 2 - 1) * 10 - waveHeight * 2.5;
+				worldPosition.z = -(max(_GlobalWaterLevel, altitudeRaw) * 2 - 1) * 10 - waveHeight * 1;
 				worldPosition.z = lerp(seaFloorAltitude, worldPosition.z, smoothstep(0,1,normAge));
 
 					
 				// REFRACTION:
-				//float3 offset = worldPosition;				
-				//float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / _MapSize, 0, 0)).yzw;
-				//float refractionStrength = 1.5 * (rand0 * 0.5 + 0.5);
-				//worldPosition.xy += -surfaceNormal.xy * refractionStrength;
+				float3 offset = worldPosition;				
+				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / _MapSize, 0, 0)).yzw;
+				float refractionStrength = 1.5 * (rand0 * 0.5 + 0.5);
+				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
 
 
 				// Figure out final facing Vectors!!!
-				float theta = _Time.y * 75.1237 + inst * 123.12;
+				float theta = _Time.y * 75.1237 + (inst - 600) * 123.12;
 				float2 forward = float2(cos(theta), sin(theta));  //fluidDir; //waterQuadData.heading;
 				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
 				float2 rotatedPoint = float2(quadPoint.x * right + quadPoint.y * forward);  // Rotate localRotation by AgentRotation
