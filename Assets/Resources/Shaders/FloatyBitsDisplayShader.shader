@@ -100,7 +100,7 @@
 				
 				float seaFloorAltitude = -(altitudeRaw * 2 - 1) * 10;
 				float waterAltitude = ((_GlobalWaterLevel + waveHeight * 0.1) * 2 - 1) * -10; 
-				worldPosition.z = clamp(min(seaFloorAltitude, waterAltitude), -10, 10); // -(min(_GlobalWaterLevel, altitudeRaw) * 2 - 1) * 10; // - waveHeight * 2.5;
+				//worldPosition.z = clamp(min(seaFloorAltitude, waterAltitude), -10, 10); // -(min(_GlobalWaterLevel, altitudeRaw) * 2 - 1) * 10; // - waveHeight * 2.5;
 				
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(rotatedPoint, 0.0f));
 				float brightness = (random1);
@@ -113,7 +113,8 @@
 
 			fixed4 frag(v2f i) : SV_Target
 			{
-				
+				return float4(1,1,1,1);
+
 				float4 texColor = tex2D(_MainTex, i.uv);  // Read Brush Texture
 				
 				float4 finalColor = texColor; //float4(1,1,1,1); //float4(0.1,0.1,0.05,1) * texColor; //texColor * _Tint * float4(i.color, 1);

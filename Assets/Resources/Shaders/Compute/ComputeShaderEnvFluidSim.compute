@@ -628,16 +628,19 @@ void SimFloatyBits (uint3 id : SV_DispatchThreadID)
 		float brushMask = spiritBrushSample.x;
 		//float randRoll = rand(float2((float)id.x, _Time * 19.18827 + id.x * 3.2198));
 		
-		if(brushMask > 0.51) {
+		if(brushMask > 0.2) {
 			floatyBitData.coords = spawnUV; 
 			floatyBitData.age = 0;
 		}
-
-		
+		else {
+			floatyBitData.coords = nextPos;
+		}
 	}
 	else {
 		floatyBitData.coords = nextPos;
 	}
+
+	
 	
 	FloatyBitsCBuffer[id.x] = floatyBitData;
 }

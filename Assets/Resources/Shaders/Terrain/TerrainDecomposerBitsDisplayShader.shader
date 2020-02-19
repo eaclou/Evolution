@@ -116,7 +116,7 @@
 				float fadeOut = saturate((1 - groundBitData.age) / fadeDuration);							
 				float alpha = fadeIn * fadeOut;
 
-				worldPosition.z = -altitudeRaw * 20 + 10.0 - alpha;
+				worldPosition.z = -altitudeRaw * 20 + 10.0;
 				
 				float2 scale = float2(7,6.65) * 0.641 * alpha; //groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25) * 2.0;
 			
@@ -146,16 +146,13 @@
 				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
 				float2 rotatedPoint = float2(quadPoint.x * right + quadPoint.y * forward);  // Rotate localRotation by AgentRotation
 
-				
-
 				float4 pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)) + float4(rotatedPoint, 0, 0)); //mul(UNITY_MATRIX_VP, float4(worldPosition + quadVerticesCBuffer[id] * 1, 1.0)); // *** Revisit to better understand!!!! ***
 				o.pos = pos;
 				float4 screenUV = ComputeScreenPos(pos);
 				o.screenUV = screenUV; //altitudeUV.xy / altitudeUV.w;
 
 				o.skyUV = worldPosition.xy / _MapSize;
-
-				
+								
 				float randNoise1 = Value3D(float3(worldPosition.x - _Time.y * 5.34, worldPosition.y + _Time.y * 7.1, _Time.y * 15), 0.1).x * 0.5 + 0.5; //				
 				float randNoise2 = Value3D(float3(worldPosition.x + _Time.y * 7.34, worldPosition.y - _Time.y * 6.1, _Time.y * -10), 0.25).x * 0.5 + 0.5;
 				float randNoise3 = Value3D(float3(worldPosition.x + _Time.y * 3.34, worldPosition.y - _Time.y * 5.1, _Time.y * 7.5), 0.36).x * 0.5 + 0.5;
@@ -185,22 +182,13 @@
 				float depth = saturate((_GlobalWaterLevel - altitudeTex.x) * 2);
 				float4 terrainColorTex = tex2D(_TerrainColorTex, i.altitudeUV);
 				float3 baseHue = _TintPri.rgb; //float3(0.5,0.25,0.1) * 0.875;
-				float4 finalColor = terrainColorTex;  // *** BACKGROUND COLOR:
-				finalColor.rgb = lerp(baseHue, finalColor.rgb, depth);				
-				finalColor.a = brushColor.a * i.color.a * 0.45;
-				
+				float4 finalColor = terrainColorTex;  // *** BACKGROUND COLOR:								
+				//finalColor.a = brushColor.a * i.color.a * 0.45;				
 				finalColor = lerp(_TintSec, float4(baseHue,1), patternColor.x);
+				finalColor.rgb = lerp(finalColor.rgb, terrainColorTex.rgb, depth);
 				finalColor.a *= brushColor.a;
 				return finalColor;
-
-				/*
-				if(i.quadUV.y > i.quadUV.x) {
-					return finalColor;		
-				}
-				else {
-					return _TintSec;
-				}*/
-						
+	
 			}
 		ENDCG
 		}

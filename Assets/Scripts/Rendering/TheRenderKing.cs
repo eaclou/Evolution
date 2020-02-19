@@ -3612,45 +3612,10 @@ public class TheRenderKing : MonoBehaviour {
     
 
     public void Tick() {  // should be called from SimManager at proper time!
-        /*fullscreenFade = 1f;
-        if(simManager.agentsArray[0].curLifeStage == Agent.AgentLifeStage.Egg) {
-            fullscreenFade = fullscreenFade * (float)simManager.agentsArray[0].lifeStageTransitionTimeStepCounter / (float)simManager.agentsArray[0]._GestationDurationTimeSteps;
-        }
-        if(simManager.agentsArray[0].curLifeStage == Agent.AgentLifeStage.Dead) {
-            fullscreenFade = fullscreenFade * simManager.agentsArray[0].GetDecayPercentage();
-        }
-        fadeToBlackBlitMat.SetPass(0);
-        fadeToBlackBlitMat.SetFloat("_FadeAmount", fullscreenFade);
-        */
-
-
-        //
-        // Read current stateData and update all Buffers, send data to GPU
-        // Execute computeShaders to update any dynamic particles that are purely cosmetic
-        //SimPlayerGlow();
-        //SimAgentSmearStrokes(); // start with this one?
-        //IterateTrailStrokesData();
-        //SimPlayerGlowyBits();
-        //SimHighlightTrails();
-        SimFloatyBits();
-        //SimRipples();
+        
+        SimFloatyBits();        
         SimEggSacks();
-        //SimWaterSplines();
-        //SimWaterChains();
         SimSpiritBrushQuads();
-
-
-        //SimTreeOfLife(); // issues with this being on FixedUpdate() cycle vs Update() ?? ***
-
-        //SimTreeOfLifeWorldStatsData(simManager.uiManager.textureWorldStats, simManager.uiManager.textureWorldStatsKey);
-        //Debug.Log("size: " + simManager.uiManager.tolSelectedSpeciesStatsIndex.ToString());
-        //Texture2D graphTex = simManager.uiManager.statsTreeOfLifeSpeciesTexArray[simManager.uiManager.selectedSpeciesStatsIndex];
-        //float maxVal = simManager.uiManager.maxValuesStatArray[simManager.uiManager.selectedSpeciesStatsIndex];
-
-        //SimTreeOfLifeSpeciesTreeData(graphTex, maxVal); // update this?                
-        //UpdateAgentHighlightData();
-
-        //SimCritterSkinStrokes();
 
         // PORTRAIT
         if(isToolbarCritterPortraitEnabled) {
@@ -3660,12 +3625,9 @@ public class TheRenderKing : MonoBehaviour {
             SimUIToolbarCritterPortraitStrokes();
         }
         
-
         // PRIMARY CRITTERS
         SimCritterGenericStrokes();
-
         
-
 
         baronVonWater.altitudeMapRef = baronVonTerrain.terrainHeightDataRT;
         float camDist = Mathf.Clamp01(-1f * simManager.cameraManager.gameObject.transform.position.z / (400f - 10f));
@@ -3708,6 +3670,48 @@ public class TheRenderKing : MonoBehaviour {
 
         baronVonWater.Tick(null);  // <-- SimWaterCurves/Chains/Water surface
         
+
+        // OLD::::
+
+        /*fullscreenFade = 1f;
+        if(simManager.agentsArray[0].curLifeStage == Agent.AgentLifeStage.Egg) {
+            fullscreenFade = fullscreenFade * (float)simManager.agentsArray[0].lifeStageTransitionTimeStepCounter / (float)simManager.agentsArray[0]._GestationDurationTimeSteps;
+        }
+        if(simManager.agentsArray[0].curLifeStage == Agent.AgentLifeStage.Dead) {
+            fullscreenFade = fullscreenFade * simManager.agentsArray[0].GetDecayPercentage();
+        }
+        fadeToBlackBlitMat.SetPass(0);
+        fadeToBlackBlitMat.SetFloat("_FadeAmount", fullscreenFade);
+        */
+
+
+        //
+        // Read current stateData and update all Buffers, send data to GPU
+        // Execute computeShaders to update any dynamic particles that are purely cosmetic
+        //SimPlayerGlow();
+        //SimAgentSmearStrokes(); // start with this one?
+        //IterateTrailStrokesData();
+        //SimPlayerGlowyBits();
+        //SimHighlightTrails();
+        
+        //SimWaterSplines();
+        //SimWaterChains();
+        //SimRipples();
+        
+
+
+        //SimTreeOfLife(); // issues with this being on FixedUpdate() cycle vs Update() ?? ***
+
+        //SimTreeOfLifeWorldStatsData(simManager.uiManager.textureWorldStats, simManager.uiManager.textureWorldStatsKey);
+        //Debug.Log("size: " + simManager.uiManager.tolSelectedSpeciesStatsIndex.ToString());
+        //Texture2D graphTex = simManager.uiManager.statsTreeOfLifeSpeciesTexArray[simManager.uiManager.selectedSpeciesStatsIndex];
+        //float maxVal = simManager.uiManager.maxValuesStatArray[simManager.uiManager.selectedSpeciesStatsIndex];
+
+        //SimTreeOfLifeSpeciesTreeData(graphTex, maxVal); // update this?                
+        //UpdateAgentHighlightData();
+
+        //SimCritterSkinStrokes();
+
     }
 
     public void RenderSimulationCameras() { // **** revisit
