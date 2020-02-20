@@ -496,9 +496,9 @@ void CSUpdateTerrainMapsBrush (uint3 id : SV_DispatchThreadID)
 	float dotLight = dot(waterSurfaceNormal, sunDir);     //_WorldSpaceLightPos0.xyz);
 	dotLight = dotLight * dotLight;
 	
-	float altitude = altitudeRaw + waterSurfaceTex.x * 0.05;
+	float altitude = altitudeRaw + waterSurfaceTex.x * 0.15;
 				
-	float visualCheatWaterLevelBias = 0.02;
+	float visualCheatWaterLevelBias = 0.002;
 	float depth = saturate(-altitude + _GlobalWaterLevel + visualCheatWaterLevelBias);
 	float isUnderwater = saturate(depth * 50);
 
@@ -524,11 +524,15 @@ void CSUpdateTerrainMapsBrush (uint3 id : SV_DispatchThreadID)
 	float3 diffuseSurfaceNormal = lerp(groundSurfaceNormal, waterSurfaceNormal, depth);
 	float dotDiffuse = dot(diffuseSurfaceNormal, sunDir);
 	float diffuseWrap = dotDiffuse * 0.5 + 0.5;
-	finalColor.rgb *= (0.7 + dotDiffuse * 0.33 + 0.1 * diffuseWrap);
+	finalColor.rgb *= (0.7 + dotDiffuse * 0.33 + 0.081 * diffuseWrap);
 
 	// Wetness darkening:
-	float wetnessMask = 1.0 - saturate((-altitude + _GlobalWaterLevel + 0.033) * 25.5); // saturate(((altitudeRaw + waterSurfaceTex.x * 0.34) - 0.6) * 5.25);
-	finalColor.rgb *= (0.4 + wetnessMask * 0.6);
+	float wetnessMask = 1.0 - saturate((-altitude + _GlobalWaterLevel + 0.05) * 17.5); 
+	finalColor.rgb *= (0.3 + wetnessMask * 0.7);
+
+	// shoreline foam:
+	float foamMask = 1.0 - saturate((abs(-altitude + _GlobalWaterLevel) * 67));
+	finalColor.rgb += foamMask * 0.375;
 	
 	// Caustics
 	finalColor.rgb += dotLight * isUnderwater * (1.0 - depth) * causticsStrength;		
