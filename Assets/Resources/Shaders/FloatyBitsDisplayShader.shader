@@ -41,6 +41,7 @@
 			StructuredBuffer<float3> quadVerticesCBuffer;
 
 			uniform float _MapSize;
+			uniform float _MaxAltitude;
 			uniform float _GlobalWaterLevel;
 
 			struct v2f
@@ -98,9 +99,9 @@
 				float waveHeight = waterSurfaceData.x * isUnderwaterMask;
 
 				
-				float seaFloorAltitude = -(altitudeRaw * 2 - 1) * 10;
-				float waterAltitude = ((_GlobalWaterLevel + waveHeight * 0.2) * 2 - 1) * -10; 
-				worldPosition.z = clamp(min(seaFloorAltitude, waterAltitude), -10, 10); // -(min(_GlobalWaterLevel, altitudeRaw) * 2 - 1) * 10; // - waveHeight * 2.5;
+				float seaFloorAltitude = -altitudeRaw * _MaxAltitude;
+				float waterAltitude = -(_GlobalWaterLevel + waveHeight * 0.1) * _MaxAltitude; 
+				worldPosition.z = min(seaFloorAltitude, waterAltitude);
 				
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(rotatedPoint, 0.0f));
 				float brightness = (random1);

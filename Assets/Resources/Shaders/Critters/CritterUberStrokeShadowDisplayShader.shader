@@ -41,7 +41,7 @@
 			sampler2D _TerrainColorTex;
 
 			uniform float _MapSize;
-
+			uniform float _MaxAltitude;
 			uniform float _GlobalWaterLevel;
 
 			//sampler2D _RenderedSceneRT;  // Provided by CommandBuffer -- global tex??? seems confusing... ** revisit this
@@ -90,7 +90,7 @@
 				float2 altUV = vertexWorldPos.xy / _MapSize;
 				o.altitudeUV = altUV;
 				float altitudeRaw = tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 0));
-				float seaFloorAltitude = -(altitudeRaw * 2 - 1) * 10;
+				float seaFloorAltitude = -altitudeRaw * _MaxAltitude;
 				vertexWorldPos.z = seaFloorAltitude;
 				
 				//vertexWorldPos.z = ;

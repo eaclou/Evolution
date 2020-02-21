@@ -37,6 +37,8 @@
 			StructuredBuffer<float3> quadVerticesCBuffer;
 
 			uniform float _MapSize;
+			uniform float _MaxAltitude;
+			uniform float _GlobalWaterLevel;
 			
 			struct v2f
 			{

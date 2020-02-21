@@ -40,6 +40,8 @@
 			StructuredBuffer<float3> quadVerticesCBuffer;
 
 			uniform float _MapSize;
+			uniform float _MaxAltitude;
+			uniform float _GlobalWaterLevel;
 			
 			struct v2f
 			{
@@ -134,7 +136,7 @@
 
 				float2 altUV = worldPosition.xy / _MapSize;	
 				o.altitudeUV = altUV;
-				worldPosition.z = -(tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 0)).x * 2 - 1) * 10;
+				worldPosition.z = -tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 0)).x * _MaxAltitude;
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)) + float4(rotatedPoint1, 0.0));
 				o.worldPos = worldPosition;
@@ -193,7 +195,7 @@
 				
 				float altitude = tex2D(_AltitudeTex, i.altitudeUV); // i.worldPos.z / 10; // [-1,1] range
 				// 0-1 range --> -1 to 1
-				altitude = (altitude * 2 - 1) * -1;
+				altitude = -altitude * _MaxAltitude;
 				float isUnderwater = saturate(altitude * 10000);
 				float3 waterFogColor = float3(0.03,0.4,0.3) * 0.4;
 				float strataColorMultiplier = (sin(altitude * (1.0 + i.worldPos.x * 0.01 - i.worldPos.y * -0.01) + i.worldPos.x * 0.01 - i.worldPos.y * 0.01) * 0.5 + 0.5) * 0.5 + 0.5;

@@ -39,7 +39,7 @@
 			uniform float _IsHighlight;
 
 			uniform float _MapSize;
-
+			uniform float _MaxAltitude;
 			uniform float _GlobalWaterLevel;
 			//uniform float _MouseCoordX;
 			//uniform float _MouseCoordY;
@@ -121,8 +121,8 @@
 				
 				float2 altUV = worldPosition.xy / _MapSize;				
 				float altitudeRaw = tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 0));
-				float seaFloorAltitude = -(altitudeRaw * 2 - 1) * 10;
-				worldPosition.z = -(max(_GlobalWaterLevel, altitudeRaw) * 2 - 1) * 10;
+				float seaFloorAltitude = -altitudeRaw * _MaxAltitude;
+				worldPosition.z = -max(_GlobalWaterLevel, altitudeRaw) * _MaxAltitude;
 				worldPosition.z = lerp(worldPosition.z, seaFloorAltitude, particleData.isDecaying);
 				
 				float2 vertexOffset = quadPoint.xy * 1; // * width;

@@ -106,6 +106,7 @@ uniform float _DecomposerDensityLerp;
 uniform float _BrushAlignment = 1.0;
 
 uniform float _GlobalWaterLevel;
+uniform float _MaxAltitude;
 
 SamplerState _LinearClamp;
 SamplerState _LinearRepeat;
@@ -124,7 +125,7 @@ void CSUpdateGroundStrokes (uint3 id : SV_DispatchThreadID)
 	// find uv for sampling terrainHeightMap
 
 	float2 uv = data.worldPos.xy / _MapSize;
-	float pixelOffset = 1.0 / 128;  // resolution
+	float pixelOffset = 1.0 / _TextureResolution;  // resolution
 
 	float4 altitudeSampleCenter = AltitudeRead.SampleLevel(_LinearClamp, uv, 0);
 	float4 altitudeSampleNorth = AltitudeRead.SampleLevel(_LinearClamp, uv + float2(0, pixelOffset), 0);
@@ -164,7 +165,7 @@ void CSUpdateGroundStrokes (uint3 id : SV_DispatchThreadID)
 	
 	terrainFrameBufferStrokesCBuffer[id.x].isActive = isActive;
 	terrainFrameBufferStrokesCBuffer[id.x].heading = heading;
-	terrainFrameBufferStrokesCBuffer[id.x].worldPos.z = -altitudeCenter * 20 + 10;
+	terrainFrameBufferStrokesCBuffer[id.x].worldPos.z = -altitudeCenter * _MaxAltitude;
 }
 
 [numthreads(64,1,1)]
@@ -174,7 +175,7 @@ void CSGetObjectDepths (uint3 id : SV_DispatchThreadID)
 	
 	float2 uv = saturate(data.xy);
 	
-	float pixSize = (1 / _TextureResolution);
+	float pixSize = (1.0 / _TextureResolution);
 	float2 uvOffset = float2(1,1) * pixSize; // data.zw;
 	
 	float4 depthCenter = AltitudeRead.SampleLevel(_LinearClamp, uv, 0);
@@ -226,7 +227,7 @@ void CSSimDecomposerBitsData (uint3 id : SV_DispatchThreadID)
 	
 			float2 nextPos = uv + vel * speedMult;
 			
-			float pixelOffset = 1.0 / 256;  // resolution  // **** THIS CAN"T BE HARDCODED AS FINAL ****"
+			float pixelOffset = 1.0 / _TextureResolution;  // resolution  // **** THIS CAN"T BE HARDCODED AS FINAL ****"
 
 			float altitudeCenter = AltitudeRead.SampleLevel(_LinearClamp, uv, 0).x;
 			float altitudeNorth = AltitudeRead.SampleLevel(_LinearClamp, uv + float2(0, pixelOffset), 0).x;
@@ -496,10 +497,10 @@ void CSUpdateTerrainMapsBrush (uint3 id : SV_DispatchThreadID)
 	float dotLight = dot(waterSurfaceNormal, sunDir);     //_WorldSpaceLightPos0.xyz);
 	dotLight = dotLight * dotLight;
 	
-	float altitude = altitudeRaw + waterSurfaceTex.x * 0.15;
+	float altitude = altitudeRaw;// + waterSurfaceTex.x * 0.15;
 				
-	float visualCheatWaterLevelBias = 0.002;
-	float depth = saturate(-altitude + _GlobalWaterLevel + visualCheatWaterLevelBias);
+	float visualCheatWaterLevelBias = 0.0;
+	float depth = saturate(-altitude + _GlobalWaterLevel + visualCheatWaterLevelBias);  // 0-1 values
 	float isUnderwater = saturate(depth * 50);
 
 	
@@ -518,6 +519,8 @@ void CSUpdateTerrainMapsBrush (uint3 id : SV_DispatchThreadID)
 	if(dX != 0 && dY != 0) {
 		grad = normalize(float2(dX, dY));
 	}
+	//store normals in brushstrokeData?? // *************
+
 	float3 groundSurfaceNormal = normalize(float3(-grad.x, -grad.y, -length(float2(dX,dY)))); ////normalize(altitudeTex.yzw);
 	groundSurfaceNormal.z *= -1;
 	

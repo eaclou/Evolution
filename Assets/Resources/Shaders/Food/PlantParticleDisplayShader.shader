@@ -41,7 +41,7 @@
 			uniform float _IsHover;
 
 			uniform float _MapSize;
-
+			uniform float _MaxAltitude;
 			uniform float _GlobalWaterLevel;
 			
 			struct v2f
@@ -77,8 +77,8 @@
 				float hoverMask = (1.0 - saturate(abs(_HoverParticleIndex - particleIndex))) * _IsHover;
 
 				float2 altUV = particleData.worldPos.xy / _MapSize;				
-				float altitudeRaw = tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 0));
-				float zPos = -(max(_GlobalWaterLevel, altitudeRaw) * 2 - 1) * 10;
+				float altitudeRaw = tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 0)).x;
+				float zPos = -max(_GlobalWaterLevel, altitudeRaw) * _MaxAltitude;
 
 				float3 worldPosition = float3(particleData.worldPos, zPos);    //float3(rawData.worldPos, -random2);
 				

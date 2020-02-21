@@ -35,6 +35,7 @@
 			//sampler2D _RenderedSceneRT;  // Provided by CommandBuffer -- global tex??? seems confusing... ** revisit this
 			
 			uniform float _MapSize;
+			uniform float _MaxAltitude;
 			uniform float _CamDistNormalized;
 			uniform float _GlobalWaterLevel;
 			//uniform float _AlgaeReservoir;
@@ -131,9 +132,9 @@
 				
 				float4 altitudeTex = tex2Dlod(_AltitudeTex, float4(uv, 0, 0));			
 				float altitudeRaw = altitudeTex.x;
-				float seaFloorAltitude = -(altitudeRaw * 2 - 1) * 10;
-				worldPosition.z = -(max(_GlobalWaterLevel, altitudeRaw) * 2 - 1) * 10 - waveHeight * 1;
-				worldPosition.z = lerp(seaFloorAltitude, worldPosition.z, smoothstep(0,1,normAge));
+				float seaFloorAltitude = -altitudeRaw * _MaxAltitude;
+				worldPosition.z = -max(_GlobalWaterLevel, altitudeRaw) * _MaxAltitude; // - waveHeight * 1;
+				//worldPosition.z = lerp(seaFloorAltitude, worldPosition.z, smoothstep(0,1,normAge));
 
 					
 				// REFRACTION:

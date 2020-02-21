@@ -8,6 +8,8 @@ public class BaronVonTerrain : RenderBaron {
     public ComputeShader computeShaderBrushStrokes;
     public ComputeShader computeShaderTerrainGeneration;
 
+    public TheRenderKing renderKingRef;
+
     public Material frameBufferStrokeDisplayMat;
     public Material groundStrokesLrgDisplayMat;
     public Material groundStrokesMedDisplayMat;
@@ -80,6 +82,8 @@ public class BaronVonTerrain : RenderBaron {
 
     public Vector4 spawnBoundsCameraDetails;
 
+    public float maxAltitude = 24f;
+
     /*public struct TerrainSlotGenome {
         public Color color;
         public float elevationChange;
@@ -106,8 +110,8 @@ public class BaronVonTerrain : RenderBaron {
         public int brushType;
     };
 
-    public override void Initialize() {
-
+    public override void Initialize(TheRenderKing renderRef) {
+        this.renderKingRef = renderRef;
         // Bedrock data
         int numMutations = 4;
         bedrockSlotGenomeCurrent = new WorldLayerTerrainGenome();
@@ -144,6 +148,8 @@ public class BaronVonTerrain : RenderBaron {
         computeShaderTerrainGeneration.SetTexture(CSInitTerrainMapsKernelID, "AltitudeRead", terrainInitHeightMap);   // Read-Only 
         computeShaderTerrainGeneration.SetTexture(CSInitTerrainMapsKernelID, "AltitudeWrite", terrainHeightRT0);
         computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
+        computeShaderTerrainGeneration.SetFloat("_GlobalWaterLevel", renderKingRef.baronVonWater._GlobalWaterLevel);
+        computeShaderTerrainGeneration.SetFloat("_MaxAltitude", maxAltitude);
         computeShaderTerrainGeneration.SetFloat("_TextureResolution", terrainHeightMapResolution);
         computeShaderTerrainGeneration.Dispatch(CSInitTerrainMapsKernelID, terrainHeightMapResolution / 32, terrainHeightMapResolution / 32, 1);
 
@@ -272,6 +278,9 @@ public class BaronVonTerrain : RenderBaron {
     }
 
     private void InitializeBuffers() {
+
+        
+
         InitializeQuadMeshBuffer(); // Set up Quad Mesh billboard for brushStroke rendering     
         //InitializeFrameBufferStrokesBuffer();
         InitializeGroundStrokeBuffers();
@@ -612,6 +621,9 @@ public class BaronVonTerrain : RenderBaron {
         */
         int kernelCSAlignGroundStrokesMed = computeShaderTerrainGeneration.FindKernel("CSUpdateGroundStrokes");
         computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
+        computeShaderTerrainGeneration.SetFloat("_GlobalWaterLevel", renderKingRef.baronVonWater._GlobalWaterLevel);
+        computeShaderTerrainGeneration.SetFloat("_MaxAltitude", maxAltitude);
+        computeShaderTerrainGeneration.SetFloat("_TextureResolution", terrainHeightMapResolution);
         //computeShaderTerrainGeneration.SetFloat("_GroundStrokeTerrainAlign", 1f);
         computeShaderTerrainGeneration.SetTexture(kernelCSAlignGroundStrokesMed, "AltitudeRead", terrainHeightDataRT);
         computeShaderTerrainGeneration.SetFloat("_BrushAlignment", 1f);
@@ -640,7 +652,10 @@ public class BaronVonTerrain : RenderBaron {
         computeShaderTerrainGeneration.SetTexture(kernelSimGroundBits, "AltitudeRead", terrainHeightDataRT);
         computeShaderTerrainGeneration.SetTexture(kernelSimGroundBits, "decomposersRead", maskTex);
         computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
+        computeShaderTerrainGeneration.SetFloat("_GlobalWaterLevel", renderKingRef.baronVonWater._GlobalWaterLevel);
+        computeShaderTerrainGeneration.SetFloat("_MaxAltitude", maxAltitude);
         computeShaderTerrainGeneration.SetFloat("_Time", Time.realtimeSinceStartup);
+        computeShaderTerrainGeneration.SetFloat("_TextureResolution", terrainHeightMapResolution);
         computeShaderTerrainGeneration.SetVector("_SpawnBoundsCameraDetails", spawnBoundsCameraDetails);
         
         computeShaderTerrainGeneration.Dispatch(kernelSimGroundBits, decomposerBitsCBuffer.count / 1024, 1, 1);
@@ -649,6 +664,9 @@ public class BaronVonTerrain : RenderBaron {
         computeShaderTerrainGeneration.SetBuffer(kernelSimWasteBits, "groundBitsCBuffer", wasteBitsCBuffer);
         computeShaderTerrainGeneration.SetTexture(kernelSimWasteBits, "AltitudeRead", terrainHeightDataRT);
         computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
+        computeShaderTerrainGeneration.SetFloat("_GlobalWaterLevel", renderKingRef.baronVonWater._GlobalWaterLevel);
+        computeShaderTerrainGeneration.SetFloat("_MaxAltitude", maxAltitude);
+        computeShaderTerrainGeneration.SetFloat("_TextureResolution", terrainHeightMapResolution);
         computeShaderTerrainGeneration.SetVector("_SpawnBoundsCameraDetails", spawnBoundsCameraDetails);
         computeShaderTerrainGeneration.Dispatch(kernelSimWasteBits, wasteBitsCBuffer.count / 1024, 1, 1);
 

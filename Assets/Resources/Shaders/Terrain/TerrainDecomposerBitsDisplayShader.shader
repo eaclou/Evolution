@@ -41,6 +41,7 @@
 			uniform float _MapSize;
 			uniform float _GlobalWaterLevel;
 			uniform float _CamDistNormalized;
+			uniform float _MaxAltitude;
 
 			uniform float _Density;
 
@@ -106,17 +107,17 @@
 				float worldActiveMask = saturate(altitudeTexSample.w * 10);
 
 				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(o.altitudeUV, 0, 0)).yzw;
-				float depth = saturate(-altitudeRaw + 0.5);
-				float refractionStrength = depth * 4.5;
+				//float depth = saturate(-altitudeRaw + 0.5);
+				//float refractionStrength = depth * 4.5;
 
-				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
+				//worldPosition.xy += -surfaceNormal.xy * refractionStrength;
 				
 				float fadeDuration = 0.25;
 				float fadeIn = saturate(groundBitData.age / fadeDuration);  // fade time = 0.1
 				float fadeOut = saturate((1 - groundBitData.age) / fadeDuration);							
 				float alpha = fadeIn * fadeOut;
 
-				worldPosition.z = -altitudeRaw * 20 + 10.0;
+				worldPosition.z = -altitudeRaw * _MaxAltitude;
 				
 				float2 scale = float2(7,6.65) * 0.641 * alpha; //groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25) * 2.0;
 			

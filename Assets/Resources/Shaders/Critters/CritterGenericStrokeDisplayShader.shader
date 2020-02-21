@@ -42,15 +42,15 @@
 			sampler2D _WaterSurfaceTex;
 			sampler2D _TerrainColorTex;
 
-			uniform float _MapSize;
-
 			uniform float _HighlightOn;
 
 			uniform int _HoverID;
 			uniform int _SelectedID;
 			uniform float _IsHover;			
 			uniform float _IsSelected;
-
+			
+			uniform float _MapSize;
+			uniform float _MaxAltitude;
 			uniform float _GlobalWaterLevel;
 
 			StructuredBuffer<float3> quadVerticesCBuffer;			
