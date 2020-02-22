@@ -165,7 +165,7 @@ void CSUpdateGroundStrokes (uint3 id : SV_DispatchThreadID)
 	
 	terrainFrameBufferStrokesCBuffer[id.x].isActive = isActive;
 	terrainFrameBufferStrokesCBuffer[id.x].heading = heading;
-	terrainFrameBufferStrokesCBuffer[id.x].worldPos.z = -altitudeCenter * _MaxAltitude;
+	terrainFrameBufferStrokesCBuffer[id.x].worldPos.z = -max(altitudeCenter, _GlobalWaterLevel) * _MaxAltitude;
 }
 
 [numthreads(64,1,1)]
@@ -358,7 +358,7 @@ void CSGenerateMeshData (uint3 id : SV_DispatchThreadID)
 	float heightRange = _HeightRange.y - _HeightRange.x;
 	float height = (1.0 - textureSample.x) * heightRange + _HeightRange.x;
 	
-	terrainVertexCBuffer[index] = float3(x, z, height);
+	terrainVertexCBuffer[index] = float3(x, z, -textureSample.x * _MaxAltitude); //height);
 	terrainUVCBuffer[index] = uv;
 	terrainNormalCBuffer[index] = float3(0,0,1);
 
@@ -497,7 +497,7 @@ void CSUpdateTerrainMapsBrush (uint3 id : SV_DispatchThreadID)
 	float dotLight = dot(waterSurfaceNormal, sunDir);     //_WorldSpaceLightPos0.xyz);
 	dotLight = dotLight * dotLight;
 	
-	float altitude = altitudeRaw;// + waterSurfaceTex.x * 0.15;
+	float altitude = altitudeRaw + waterSurfaceTex.x * 0.05;
 				
 	float visualCheatWaterLevelBias = 0.0;
 	float depth = saturate(-altitude + _GlobalWaterLevel + visualCheatWaterLevelBias);  // 0-1 values
@@ -545,7 +545,7 @@ void CSUpdateTerrainMapsBrush (uint3 id : SV_DispatchThreadID)
 	finalColor.rgb = lerp(finalColor.rgb, waterFogColor, fogAmount * isUnderwater);
 		
 	// Reflection!!!
-	float3 worldPos = float3(uv * _MapSize, (altitudeRaw - 0.5) * -10);
+	float3 worldPos = float3(uv * _MapSize, -altitudeRaw * _MaxAltitude);
 	float3 cameraToVertex = worldPos - _WorldSpaceCameraPosition.xyz;
 	float3 cameraToVertexDir = normalize(cameraToVertex);
 	float3 reflectedViewDir = cameraToVertexDir + 2 * waterSurfaceNormal * 0.5;

@@ -100,14 +100,14 @@
 				float hoverMask = (1.0 - saturate(abs(_ClosestParticleID - (int)inst))) * _IsHover;
 
 				//float width = 0.25 + hoverMask + selectedMask * 2.5;
-				float width = 0.25 + sqrt(particleData.biomass) * 0.025 * (1 - 2 * abs(0.75 - uv.y)) + 0.0115 + 0.01 * hoverMask + 0.02 * selectedMask; //GetPoint1D(waterCurveData.widths.x, waterCurveData.widths.y, waterCurveData.widths.z, waterCurveData.widths.w, t) * 0.75 * (1 - saturate(testNewVignetteMask));
+				float width = 0.025 + sqrt(particleData.biomass) * 0.025 * (1 - 2 * abs(0.75 - uv.y)) + 0.0115 + 0.01 * hoverMask + 0.02 * selectedMask; //GetPoint1D(waterCurveData.widths.x, waterCurveData.widths.y, waterCurveData.widths.z, waterCurveData.widths.w, t) * 0.75 * (1 - saturate(testNewVignetteMask));
 				
 				float freq = 20;
 				float swimAnimOffset = sin(_Time.y * freq - t * 7 + (float)inst * 0.1237) * 4;
 				float swimAnimMask = t * saturate(1.0 - particleData.isDecaying); //saturate(1.0 - uv.y); //saturate(1.0 - t);
 				
 				float3 worldPosition = particleData.worldPos; // float3(curvePos,0) + float3(offset, 0.0);
-				worldPosition.x += (swimAnimOffset * swimAnimMask) * width;
+				worldPosition.x += width; // (swimAnimOffset * swimAnimMask) * width;
 
 				//float decayProgress = 0;				
 				//decayProgress = 1.0 - (particleData.biomass / (particleData.extra0 + 0.0000001));
@@ -131,7 +131,7 @@
 				//*** TEMP::::: ****
 				float spriteScale = (sqrt(particleData.biomass) * 0.025 + 0.0115 + (0.06 * hoverMask + 0.02 * selectedMask)) * 1;
 				spriteScale = 0.1;
-				vertexOffset.xy = quadPoint.xy * spriteScale * 10;
+				vertexOffset.xy = quadPoint.xy * spriteScale * 1;
 
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition.xy + vertexOffset, worldPosition.z, 1.0)));			

@@ -8,6 +8,7 @@
 		_WaterSurfaceTex ("_WaterSurfaceTex", 2D) = "black" {}
 		_ResourceGridTex ("_ResourceGridTex", 2D) = "black" {}
 		_TerrainColorTex ("_TerrainColorTex", 2D) = "black" {}
+		_SkyTex ("_SkyTex", 2D) = "black" {}
 	}
 	SubShader
 	{		
@@ -32,11 +33,14 @@
 			sampler2D _WaterSurfaceTex;
 			sampler2D _ResourceGridTex;
 			sampler2D _TerrainColorTex;
-			
+			sampler2D _SkyTex;
+
+			uniform float4 _WorldSpaceCameraPosition;
 			//sampler2D _RenderedSceneRT;  // Provided by CommandBuffer -- global tex??? seems confusing... ** revisit this
 			
 			uniform float _MapSize;
 			uniform float _GlobalWaterLevel;
+			uniform float _MaxAltitude;
 			uniform float _CamDistNormalized;
 			
 			struct GroundBitsData   
@@ -95,7 +99,7 @@
 
 				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
 
-				worldPosition.z = -altitudeRaw * 20 + 10;
+				worldPosition.z = -altitudeRaw * _MaxAltitude;
 
 				float fadeDuration = 0.2;
 				float fadeIn = saturate(groundBitData.age / fadeDuration);  // fade time = 0.1
@@ -159,36 +163,70 @@
 
 			fixed4 frag(v2f i) : SV_Target
 			{
-				// Pre-compute color/lighting at the particle level within ComputePass???
-
-				float4 brushColor = tex2D(_MainTex, i.quadUV);	
-
-				//return float4(0.03, 0.02, 0.01, brushColor.a * i.color.a);
 				
-				//float2 screenUV = i.screenUV.xy / i.screenUV.w;
-				//float4 frameBufferColor = float4(0, 0.1, 0.35, 1); // tex2D(_RenderedSceneRT, screenUV);  //  Color of brushtroke source					
+				float4 brushColor = tex2D(_MainTex, i.quadUV);					
+				float4 altitudeTex = tex2D(_AltitudeTex, i.altitudeUV); //i.worldPos.z / 10; // [-1,1] range
+				float depth = saturate((_GlobalWaterLevel - altitudeTex.x));
+				//float depth = saturate(-altitude + _GlobalWaterLevel + visualCheatWaterLevelBias);  // 0-1 values
+				float isUnderwater = saturate(depth * 50);
+				float4 terrainColorTex = tex2D(_TerrainColorTex, i.altitudeUV);
+				float3 baseHue = float3(0.145,0.0972,0.015);
+				
+				
+				float4 finalColor = terrainColorTex;  // *** BACKGROUND COLOR:
+				float4 waterSurfaceTex = tex2D(_WaterSurfaceTex, i.altitudeUV);
+				float3 waterSurfaceNormal = waterSurfaceTex.yzw; // pre-calculated
+				// Reflection!!!
+				float3 worldPos = float3(i.altitudeUV * _MapSize, -altitudeTex.x * _MaxAltitude);
+				float3 cameraToVertex = worldPos - _WorldSpaceCameraPosition.xyz;
+				float3 cameraToVertexDir = normalize(cameraToVertex);
+				float3 reflectedViewDir = cameraToVertexDir + 2 * waterSurfaceNormal * 0.5;
+				float viewDot = 1.0 - saturate(dot(-cameraToVertexDir, waterSurfaceNormal));
+				
+				finalColor.rgb = lerp(baseHue, finalColor.rgb, depth);
+
+				float2 skyCoords = reflectedViewDir.xy * 0.5 + 0.5;
+				float4 skyTex = tex2D(_SkyTex, skyCoords);
+				float4 reflectedColor = float4(skyTex.rgb, finalColor.a); //col;
+	
+				viewDot * 0.3 + 0.2;		
+				float reflectLerp = saturate(viewDot * isUnderwater);
+				finalColor.rgb += lerp(float3(0,0,0), reflectedColor.xyz, reflectLerp);
+
+	//finalColor.rgb += spiritBrushTex.y;
+				//return finalColor;	
+				
+				//return finalColor;	
+				finalColor.a = brushColor.a * i.color.a * 0.75;
+				return finalColor;
+
+				/*
+				// Caustics
+	finalColor.rgb += dotLight * isUnderwater * (1.0 - depth) * causticsStrength;		
+	
+	// FOG:	
+	float fogAmount = lerp(0, 1, depth * 2);
+	finalColor.rgb = lerp(finalColor.rgb, waterFogColor, fogAmount * isUnderwater);
+		
+	
+		
+				*/
+
+				/*
+				float4 brushColor = tex2D(_MainTex, i.quadUV);	
+				float4 patternColor = tex2D(_PatternTex, i.patternUV);
 				float4 altitudeTex = tex2D(_AltitudeTex, i.altitudeUV); //i.worldPos.z / 10; // [-1,1] range
 				float depth = saturate((_GlobalWaterLevel - altitudeTex.x) * 2);
-				//float4 waterSurfaceTex = tex2D(_WaterSurfaceTex, i.altitudeUV);
 				float4 terrainColorTex = tex2D(_TerrainColorTex, i.altitudeUV);
-				//float4 resourceGridTex = tex2D(_ResourceGridTex, i.altitudeUV);
-				
-				float3 baseHue = float3(0.145,0.0972,0.015);
-				//float3 particleColor = lerp(baseHue * 1.2, baseHue * 0.5, saturate(1.0 - i.color.y * 2));
-				//frameBufferColor.rgb = lerp(frameBufferColor.rgb, particleColor, 0.7 * _DetritusDensityLerp);
-				float4 finalColor = terrainColorTex;  // *** BACKGROUND COLOR:
-				finalColor.rgb = lerp(baseHue, finalColor.rgb, depth);
-				// NEED to figure out how much water fog
-
-
-
-				// GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, resourceGridTex);
-				//finalColor.a = brushColor.a;
-				//finalColor.rgb = lerp(finalColor.rgb, baseHue, 0.5);
-
-				
-				finalColor.a = brushColor.a * i.color.a * 0.45;
+				float3 baseHue = _TintPri.rgb; //float3(0.5,0.25,0.1) * 0.875;
+				float4 finalColor = terrainColorTex;  // *** BACKGROUND COLOR:								
+				//finalColor.a = brushColor.a * i.color.a * 0.45;				
+				finalColor = lerp(_TintSec, float4(baseHue,1), patternColor.x);
+				finalColor.rgb = lerp(finalColor.rgb, terrainColorTex.rgb, depth);
+				finalColor.a *= brushColor.a;
 				return finalColor;
+
+				*/
 				
 			}
 		ENDCG

@@ -26,14 +26,14 @@
 			#include "UnityCG.cginc"
 			#include "Assets/Resources/Shaders/Inc/NoiseShared.cginc"
 			#include "Assets/Resources/Shaders/Inc/StructsPlantParticles.cginc"
-			#include "Assets/Resources/Shaders/Inc/TerrainShared.cginc"
+			
 
 			sampler2D _MainTex;
 			sampler2D _AltitudeTex;	
 			sampler2D _WaterSurfaceTex;
 			sampler2D _TerrainColorTex;
 			uniform float _MapSize;
-			//sampler2D _RenderedSceneRT; 
+			
 
 			StructuredBuffer<PlantParticleData> plantParticleDataCBuffer;			
 			StructuredBuffer<float3> quadVerticesCBuffer;
@@ -44,15 +44,15 @@
 			uniform float _IsHover;
 
 			uniform float _GlobalWaterLevel;
+			uniform float _MaxAltitude;
 			
 			struct v2f
 			{
 				float4 pos : SV_POSITION;
 				float2 uv : TEXCOORD0;  // uv of the brushstroke quad itself, particle texture	
-				float2 altitudeUV : TEXCOORD1;
-				//float4 screenUV : TEXCOORD2;
-				//float3 worldPos : TEXCOORD3;
-				//float4 color : COLOR;
+				float4 color : COLOR;
+				float4 hue : TEXCOORD1;
+				float4 worldPos : TEXCOORD2;
 			};
 
 			float rand(float2 co) {   // OUTPUT is in [0,1] RANGE!!!
@@ -78,12 +78,13 @@
 				float selectedMask = (1.0 - saturate(abs(_SelectedParticleIndex - particleIndex))) * _IsSelected;
 				float hoverMask = (1.0 - saturate(abs(_HoverParticleIndex - particleIndex))) * _IsHover;
 
-				float2 altUV = particleData.worldPos.xy / _MapSize;
-				float altitudeRaw = tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 0));
-				float seaFloorAltitude = -(altitudeRaw * 2 - 1) * 10;
+				float2 altUV = particleData.worldPos.xy / _MapSize;				
+				float altitudeRaw = tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 0)).x;
+				float zPos = -altitudeRaw * _MaxAltitude;
 
-				float3 worldPosition = float3(particleData.worldPos, seaFloorAltitude);    //float3(rawData.worldPos, -random2);
-				float3 localQuadPos = quadPoint;
+				float3 worldPosition = float3(particleData.worldPos, zPos);    //float3(rawData.worldPos, -random2);
+				
+				//float3 localQuadPos = quadPoint;
 
 				float rand0 = rand(float2(inst, inst) * 10);
 				float rand1 = rand(float2(rand0, rand0) * 10);
@@ -97,7 +98,7 @@
 				if(type < 0.5) {
 					// Rooted fully, grows separately on ground in circle? Grassy
 
-					float radius = saturate(particleData.biomass * 5 + 0.06) * leafIndexNormalized;
+					float radius = saturate(particleData.biomass * 3.8 + 0.04) * leafIndexNormalized * 0.2 * 10;
 					float2 spawnOffset = float2(cos(particleData.angleInc * leafIndex * 10) * radius, sin(particleData.angleInc * leafIndex * 10) * radius);
 					
 					worldPosition.xy += spawnOffset;
@@ -107,7 +108,7 @@
 					float refractionStrength = 0.5;
 					
 					worldPosition.xy += -surfaceNormal.xy * refractionStrength;
-				
+
 				}
 				else {
 				
@@ -121,38 +122,40 @@
 				float3 noiseOffset = noiseSample.yzw * noiseMag;
 
 				worldPosition.xyz += noiseOffset;
-				
+
 				float2 forward = float2(cos(rand3 * 10), sin(rand3 * 10));
 				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
 				float3 rotatedPoint = float3(quadPoint.x * right + quadPoint.y * forward, 0);  // Rotate localRotation by AgentRotation
 
-				float2 altitudeUV = worldPosition.xy / _MapSize;					
-				float altRaw = tex2Dlod(_AltitudeTex, float4(altitudeUV.xy, 0, 0)).x;	
-				
-				worldPosition.z = -(altRaw * 2 - 1) * 10;
-
-				float leafScale = saturate(particleData.biomass * 4 + 0.1) * 0.25 * particleData.isActive;
+				float leafScale = saturate(particleData.biomass * 3 + 0.1) * 0.35 * particleData.isActive + hoverMask * 0.3;
+				o.worldPos = float4(worldPosition, 0);
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition + rotatedPoint * leafScale, 1.0)));
 				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(quadPoint, 0.0f));				
 				o.uv = uv;	
-				o.altitudeUV = altitudeUV;
-				//o.color = float4(saturate(particleData.isDecaying), saturate(particleData.biomass * 5), particleData.rootedness, max(hoverMask * 0.5, selectedMask));
-				//o.hue = float4(particleData.colorA, 1);
+				
+				o.color = float4(saturate(particleData.isDecaying), saturate(particleData.biomass * 5), particleData.rootedness, max(hoverMask * 0.5, selectedMask));
+				o.hue = float4(particleData.colorA * 0.12, 1);
 				return o;
 			}
 
 			fixed4 frag(v2f i) : SV_Target
 			{
-				float4 brushColor = tex2D(_MainTex, i.uv);	
-				float4 altitudeTex = tex2D(_AltitudeTex, i.altitudeUV); //i.worldPos.z / 10; // [-1,1] range
-				float depth = saturate((_GlobalWaterLevel - altitudeTex.x) * 2);				
-				float4 terrainColorTex = tex2D(_TerrainColorTex, i.altitudeUV);
-				float4 finalColor = float4(0,0,0,1);
-				finalColor.rgb = lerp(finalColor.rgb, terrainColorTex.rgb, (0.5 + 0.5 * depth)); //GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, float4(0,0,0,0));
-				finalColor.a = brushColor.a * 0.25;
-
-				return finalColor;
+				float4 texColor = tex2D(_MainTex, i.uv);
+				float4 terrainColor = tex2D(_TerrainColorTex, i.worldPos.xy / _MapSize);
 				
+				float4 finalCol = terrainColor * 0.7;
+				finalCol.a = 1;
+				return finalCol;
+				/*
+				fixed4 col = tex2D(_MainTex, i.uv) * i.color;
+				col.rgb = lerp(col, float3(0.81, 0.79, 0.65) * 0.1, i.color.x * 0.6);
+				col.rgb = lerp(col, float3(0.6, 1, 0.4) * 1, 0.25);
+				col.rgb = lerp(col.rgb, terrainColor.rgb, 0.37);
+				//col.rgb += i.color.w * 2.5;
+				col.a = texColor.a;
+
+				return col;
+				*/
 			}
 		ENDCG
 		}

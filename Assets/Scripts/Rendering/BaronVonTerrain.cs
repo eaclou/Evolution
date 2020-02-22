@@ -35,7 +35,7 @@ public class BaronVonTerrain : RenderBaron {
     private int terrainHeightMapResolution = 256;
     private int terrainColorResolution = 256;
 
-    public GameObject terrainGO;
+    //public GameObject terrainGO;
     public Material terrainObstaclesHeightMaskMat;
     public Texture2D terrainInitHeightMap;
     public RenderTexture terrainHeightRT0;
@@ -56,6 +56,7 @@ public class BaronVonTerrain : RenderBaron {
         public int v3;
     }
     public Mesh quadMesh;
+    public Mesh terrainMesh;
 
     private ComputeBuffer terrainVertexCBuffer;
     private ComputeBuffer terrainUVCBuffer;
@@ -67,9 +68,9 @@ public class BaronVonTerrain : RenderBaron {
 
     //private int numFrameBufferStrokesPerDimension = 512;
     private ComputeBuffer frameBufferStrokesCBuffer; // combine!!! ***
-    private int numGroundStrokesLrg = 64;
+    private int numGroundStrokesLrg = 32;
     private int numGroundStrokesMed = 128;
-    private int numGroundStrokesSml = 256;
+    private int numGroundStrokesSml = 512;
     //public ComputeBuffer groundStrokesLrgCBuffer;
     public ComputeBuffer terrainStrokesCBuffer;
 
@@ -193,7 +194,7 @@ public class BaronVonTerrain : RenderBaron {
 
         InitializeBuffers();        
         InitializeMaterials();
-        //RebuildTerrainMesh();
+        RebuildTerrainMesh();
         //AlignFrameBufferStrokesToTerrain();
         AlignGroundStrokesToTerrain();
     }
@@ -491,14 +492,14 @@ public class BaronVonTerrain : RenderBaron {
         //groundDryLandDisplayMat.SetBuffer("frameBufferStrokesCBuffer", groundStrokesSmlCBuffer);  
     }
 
-    /*
+    
     public void RebuildTerrainMesh() {
-        //Debug.Log("InitializeTerrain!");
+        Debug.Log("InitializeTerrain!");
 
         int meshResolution = 128;
         float mapSize = SimulationManager._MapSize;
 
-        if(terrainGO != null && terrainInitHeightMap != null) {
+        if(terrainInitHeightMap != null) {
             if (computeShaderTerrainGeneration == null) {
                 Debug.LogError("NO COMPUTE SHADER SET!!!!");
             }
@@ -520,10 +521,11 @@ public class BaronVonTerrain : RenderBaron {
             terrainTriangleCBuffer = new ComputeBuffer((meshResolution - 1) * (meshResolution - 1) * 2, sizeof(int) * 3);
                             
             // Set Shader properties so it knows where and what to build::::
-            computeShaderTerrainGeneration.SetInt("_MeshResolution", meshResolution);
+            //computeShaderTerrainGeneration.SetInt("_MeshResolution", meshResolution);
             computeShaderTerrainGeneration.SetInt("_MeshResolution", meshResolution);
             computeShaderTerrainGeneration.SetVector("_QuadBounds", new Vector4(0f, mapSize, 0f, mapSize)); //new Vector4(-mapSize * 0.5f, mapSize * 1.5f, -mapSize * 0.5f, mapSize * 1.5f));
-            computeShaderTerrainGeneration.SetVector("_HeightRange", new Vector4(-10f, 10f, 0f, 0f));
+            computeShaderTerrainGeneration.SetFloat("_MaxAltitude", maxAltitude);
+            computeShaderTerrainGeneration.SetVector("_HeightRange", new Vector4(-maxAltitude, 0f, 0f, 0f));
 
 
             // Creates Actual Mesh data by reading from existing main Height Texture!!!!::::::
@@ -552,7 +554,7 @@ public class BaronVonTerrain : RenderBaron {
             terrainColorCBuffer.Release();
             terrainTriangleCBuffer.Release();
 
-            terrainGO.GetComponent<MeshFilter>().sharedMesh = mesh;
+            //terrainGO.GetComponent<MeshFilter>().sharedMesh = mesh;
             terrainMesh = mesh;
         }
         else {
@@ -602,7 +604,7 @@ public class BaronVonTerrain : RenderBaron {
 
         return terrainMesh;
     }
-    */
+    
     /*private void AlignFrameBufferStrokesToTerrain() {
         int kernelCSAlignFrameBufferStrokes = computeShaderBrushStrokes.FindKernel("CSAlignFrameBufferStrokes");
         computeShaderBrushStrokes.SetFloat("_MapSize", SimulationManager._MapSize);

@@ -119,7 +119,7 @@
 
 				worldPosition.z = -altitudeRaw * _MaxAltitude;
 				
-				float2 scale = float2(7,6.65) * 0.641 * alpha; //groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25) * 2.0;
+				float2 scale = float2(7,6.65) * 0.1641 * alpha; //groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25) * 2.0;
 			
 				float4 resourceGridSample = tex2Dlod(_ResourceGridTex, float4(uv, 0, 0));
 				float decomposerAmount = saturate(resourceGridSample.z);
@@ -187,6 +187,7 @@
 				//finalColor.a = brushColor.a * i.color.a * 0.45;				
 				finalColor = lerp(_TintSec, float4(baseHue,1), patternColor.x);
 				finalColor.rgb = lerp(finalColor.rgb, terrainColorTex.rgb, depth);
+
 				finalColor.a *= brushColor.a;
 				return finalColor;
 	

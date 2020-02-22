@@ -58,6 +58,7 @@ public class TheRenderKing : MonoBehaviour {
     // ORGANIZE AND REMOVE UNUSED!!!!!! *********
     public Material rockMat;
     public Material backgroundMat;
+    public Material terrainMeshOpaqueMat;
     public Material debugVisModeMat;
     public Material debugVisAlgaeParticlesMat;
     public Material debugVisAnimalParticlesMat;
@@ -3619,6 +3620,13 @@ public class TheRenderKing : MonoBehaviour {
         SimEggSacks();
         SimSpiritBrushQuads();
 
+        debugFrameCounter++;
+        if(debugFrameCounter > 30) {
+            baronVonTerrain.RebuildTerrainMesh();
+            debugFrameCounter = 0;
+        }
+        
+
         // PORTRAIT
         if(isToolbarCritterPortraitEnabled) {
             
@@ -4325,6 +4333,11 @@ public class TheRenderKing : MonoBehaviour {
             //rockMat.SetPass(0);        
             Matrix4x4 canvasQuadTRS = Matrix4x4.TRS(new Vector3(SimulationManager._MapSize * 0.5f, SimulationManager._MapSize * 0.5f, 10f), Quaternion.identity, Vector3.one * 4096f);
             cmdBufferMain.DrawMesh(baronVonTerrain.quadMesh, canvasQuadTRS, backgroundMat);
+
+            //terrainMeshOpaqueMat.SetPass(0);
+            //terrainMeshOpaqueMat.SetTexture("_MainTex", baronVonTerrain.terrainColorRT0);
+            //Matrix4x4 terrainMeshTRS = Matrix4x4.TRS(new Vector3(0f, 0f, 0f), Quaternion.identity, Vector3.one);
+            //cmdBufferMain.DrawMesh(baronVonTerrain.terrainMesh, terrainMeshTRS, terrainMeshOpaqueMat);
             
             // MEDIUM STROKES!!!!
             baronVonTerrain.groundStrokesMedDisplayMat.SetPass(0);
@@ -4351,10 +4364,13 @@ public class TheRenderKing : MonoBehaviour {
             baronVonTerrain.wasteBitsDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
             baronVonTerrain.wasteBitsDisplayMat.SetTexture("_ResourceGridTex", simManager.vegetationManager.resourceGridRT1);
             baronVonTerrain.wasteBitsDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
+            baronVonTerrain.wasteBitsDisplayMat.SetTexture("_SkyTex", skyTexture);
             baronVonTerrain.wasteBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
             baronVonTerrain.wasteBitsDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);     
             baronVonTerrain.wasteBitsDisplayMat.SetFloat("_MinFog", minimumFogDensity);  
-            baronVonTerrain.wasteBitsDisplayMat.SetFloat("_GlobalWaterLevel", baronVonWater._GlobalWaterLevel);  
+            baronVonTerrain.wasteBitsDisplayMat.SetFloat("_MaxAltitude", baronVonTerrain.maxAltitude);
+            baronVonTerrain.wasteBitsDisplayMat.SetFloat("_GlobalWaterLevel", baronVonWater._GlobalWaterLevel);
+            baronVonTerrain.wasteBitsDisplayMat.SetVector("_WorldSpaceCameraPosition", new Vector4(mainRenderCam.transform.position.x, mainRenderCam.transform.position.y, mainRenderCam.transform.position.z, 0f));
             //baronVonTerrain.wasteBitsDisplayMat.SetFloat("_DetritusDensityLerp", Mathf.Clamp01(simManager.simResourceManager.curGlobalDetritus / 200f));  
             baronVonTerrain.wasteBitsDisplayMat.SetVector("_FogColor", simManager.fogColor); 
             //cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
@@ -4503,7 +4519,7 @@ public class TheRenderKing : MonoBehaviour {
                         }
                     }
                 }*/
-            /*
+            
                 // floating plants  shadows:
                 plantParticleShadowDisplayMat.SetPass(0);
                 plantParticleShadowDisplayMat.SetBuffer("plantParticleDataCBuffer", simManager.vegetationManager.plantParticlesCBuffer);
@@ -4514,15 +4530,16 @@ public class TheRenderKing : MonoBehaviour {
                 plantParticleShadowDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
                 plantParticleShadowDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);     
                 plantParticleShadowDisplayMat.SetFloat("_MinFog", minimumFogDensity);  
+                plantParticleShadowDisplayMat.SetFloat("_MaxAltitude", baronVonTerrain.maxAltitude);
                 plantParticleShadowDisplayMat.SetInt("_SelectedParticleIndex", Mathf.RoundToInt(simManager.vegetationManager.selectedPlantParticleIndex));
                 plantParticleShadowDisplayMat.SetInt("_HoverParticleIndex", Mathf.RoundToInt(simManager.vegetationManager.closestPlantParticleData.index));                
-                plantParticleShadowDisplayMat.SetFloat("_IsSelected", isSelected);
-                plantParticleShadowDisplayMat.SetFloat("_IsHover", isHover);
+                plantParticleShadowDisplayMat.SetFloat("_IsSelected", isSelectedPlant); // isSelected);
+                plantParticleShadowDisplayMat.SetFloat("_IsHover", simManager.uiManager.watcherUI.isPlantParticleHighlight * isHighlight);
                 plantParticleShadowDisplayMat.SetFloat("_GlobalWaterLevel", baronVonWater._GlobalWaterLevel);
                 plantParticleShadowDisplayMat.SetVector("_FogColor", simManager.fogColor);      
                 //cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); 
                 cmdBufferMain.DrawProcedural(Matrix4x4.identity, plantParticleShadowDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, simManager.vegetationManager.plantParticlesCBuffer.count * 32);
-        */
+        
                 //if(simManager.trophicLayersManager.GetAlgaeOnOff()) {
                 plantParticleDisplayMat.SetPass(0);
                 plantParticleDisplayMat.SetBuffer("plantParticleDataCBuffer", simManager.vegetationManager.plantParticlesCBuffer);

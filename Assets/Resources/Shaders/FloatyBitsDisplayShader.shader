@@ -14,8 +14,8 @@
 		Tags{ "RenderType" = "Transparent" }
 		ZWrite Off
 		Cull Off
-		//Blend SrcAlpha One
-		Blend SrcAlpha OneMinusSrcAlpha
+		Blend SrcAlpha One
+		//Blend SrcAlpha OneMinusSrcAlpha
 
 		Pass
 		{
@@ -75,11 +75,15 @@
 
 				float randomAspect = lerp(0.75, 1.36, random1);
 				float randomValue = rand(float2(inst, randomAspect * 10));
-				float randomScale = lerp(0.75, 1.4, random2) * 4.6;
+				float randomScale = lerp(0.75, 1.4, random2) * 3.6;
+				
+				float2 dir = normalize(velocity);
 				float2 scale = float2(0.05 * randomAspect, 0.05 * (1.0 / randomAspect)) * randomScale; //float2(randomAspect * randomScale, (1.0 / randomAspect) * randomScale * (length(velocity) * 25 + 1.61));
+				scale.y *= (1.0 + velMag * 100.0);
 				quadPoint *= float3(scale, 1.0) * 0.54; // * (sin(random3 * 10 + _Time * 123.49) * 0.75 + 0.25);
 				
-				float2 forward = floatyBitData.heading; //normalize(velocity);
+
+				float2 forward = dir; //floatyBitData.heading; //normalize(velocity);
 				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
 				float3 rotatedPoint = float3(quadPoint.x * right + quadPoint.y * forward,
 											 quadPoint.z);
@@ -100,7 +104,7 @@
 
 				
 				float seaFloorAltitude = -altitudeRaw * _MaxAltitude;
-				float waterAltitude = -(_GlobalWaterLevel + waveHeight * 0.1) * _MaxAltitude; 
+				float waterAltitude = -(_GlobalWaterLevel + waveHeight * 0.152) * _MaxAltitude; 
 				worldPosition.z = min(seaFloorAltitude, waterAltitude);
 				
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(rotatedPoint, 0.0f));
@@ -114,16 +118,16 @@
 
 			fixed4 frag(v2f i) : SV_Target
 			{
-				return float4(1,1,1,1) * 0.75;
+				//return float4(1,1,1,1) * 0.75;
 
 				float4 texColor = tex2D(_MainTex, i.uv);  // Read Brush Texture
-				
+				//return texColor;
 				float4 finalColor = texColor; //float4(1,1,1,1); //float4(0.1,0.1,0.05,1) * texColor; //texColor * _Tint * float4(i.color, 1);
-				finalColor.rgb = float3(0.49, 0.48, 0.35) * (0.25 + 0.75 * i.color.x) * 1.5;
-				finalColor.rgb = float3(0.49, 0.48, 0.95);
-				finalColor.a *= i.color.a * 1;
-				float birthGlowMask = saturate((-i.color.y + 0.2) * 20);
-				finalColor += birthGlowMask;
+				finalColor.rgb = float3(0.49, 0.48, 0.35) * 1.5;
+				//finalColor.rgb = float3(0.49, 0.48, 0.95);
+				//finalColor.a *= i.color.a * 1;
+				//float birthGlowMask = saturate((-i.color.y + 0.2) * 20);
+				//finalColor += birthGlowMask;
 				finalColor *= 1 * texColor.a;
 				
 				return finalColor;

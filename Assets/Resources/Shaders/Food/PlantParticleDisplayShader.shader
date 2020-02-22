@@ -96,7 +96,7 @@
 				if(type < 0.5) {
 					// Rooted fully, grows separately on ground in circle? Grassy
 
-					float radius = saturate(particleData.biomass * 3.8 + 0.04) * leafIndexNormalized * 0.2 * 4;
+					float radius = saturate(particleData.biomass * 3.8 + 0.04) * leafIndexNormalized * 0.2 * 10;
 					float2 spawnOffset = float2(cos(particleData.angleInc * leafIndex * 10) * radius, sin(particleData.angleInc * leafIndex * 10) * radius);
 					
 					worldPosition.xy += spawnOffset;
@@ -142,12 +142,14 @@
 				float4 texColor = tex2D(_MainTex, i.uv);
 				float4 terrainColor = tex2D(_TerrainColorTex, i.worldPos.xy / _MapSize);
 				
+
+
 				fixed4 col = tex2D(_MainTex, i.uv) * i.color;
 				col.rgb = lerp(col, float3(0.81, 0.79, 0.65) * 0.1, i.color.x * 0.6);
 				col.rgb = lerp(col, float3(0.6, 1, 0.4) * 1, 0.25);
 				col.rgb = lerp(col.rgb, terrainColor.rgb, 0.37);
 				col.rgb += i.color.w * 2.5;
-				col.a = texColor.a;
+				col.a = 1; //texColor.a;
 
 				return col;
 
