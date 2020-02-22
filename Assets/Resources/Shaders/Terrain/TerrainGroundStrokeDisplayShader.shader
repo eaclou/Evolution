@@ -131,9 +131,7 @@
 			fixed4 frag(v2f i) : SV_Target
 			{				
 				float4 brushColor = tex2D(_MainTex, i.uv);	
-				
-				//float2 screenUV = i.screenUV.xy / i.screenUV.w;
-				//float4 frameBufferColor = tex2D(_RenderedSceneRT, screenUV);  //  Color of brushtroke source					
+								
 				float4 altitudeTex = tex2D(_AltitudeTex, i.altitudeUV); //i.worldPos.z / 10; // [-1,1] range
 				float4 waterSurfaceTex = tex2D(_WaterSurfaceTex, i.altitudeUV);
 				float4 resourceTex = tex2D(_ResourceGridTex, i.altitudeUV);	

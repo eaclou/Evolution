@@ -4385,13 +4385,20 @@ public class TheRenderKing : MonoBehaviour {
             baronVonTerrain.decomposerBitsDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
             baronVonTerrain.decomposerBitsDisplayMat.SetTexture("_ResourceGridTex", simManager.vegetationManager.resourceGridRT1);
             baronVonTerrain.decomposerBitsDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
+            baronVonTerrain.decomposerBitsDisplayMat.SetTexture("_SpiritBrushTex", spiritBrushRT);
+            baronVonTerrain.decomposerBitsDisplayMat.SetTexture("_SkyTex", skyTexture);
             baronVonTerrain.decomposerBitsDisplayMat.SetFloat("_MaxAltitude", baronVonTerrain.maxAltitude);
             baronVonTerrain.decomposerBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
             baronVonTerrain.decomposerBitsDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);     
-            baronVonTerrain.decomposerBitsDisplayMat.SetFloat("_MinFog", minimumFogDensity);   
+            baronVonTerrain.decomposerBitsDisplayMat.SetFloat("_MinFog", minimumFogDensity);  
+            baronVonTerrain.decomposerBitsDisplayMat.SetVector("_WorldSpaceCameraPosition", new Vector4(mainRenderCam.transform.position.x, mainRenderCam.transform.position.y, mainRenderCam.transform.position.z, 0f));
             baronVonTerrain.decomposerBitsDisplayMat.SetFloat("_GlobalWaterLevel", baronVonWater._GlobalWaterLevel);  
             baronVonTerrain.decomposerBitsDisplayMat.SetFloat("_Density", Mathf.Lerp(0.15f, 1f, Mathf.Clamp01(simManager.simResourceManager.curGlobalDecomposers / 100f)));  
             baronVonTerrain.decomposerBitsDisplayMat.SetVector("_FogColor", simManager.fogColor);
+            
+            baronVonTerrain.decomposerBitsDisplayMat.SetVector("_Color0", baronVonTerrain.stoneSlotGenomeCurrent.color);
+            baronVonTerrain.decomposerBitsDisplayMat.SetVector("_Color1", baronVonTerrain.pebblesSlotGenomeCurrent.color);
+            baronVonTerrain.decomposerBitsDisplayMat.SetVector("_Color2", baronVonTerrain.sandSlotGenomeCurrent.color);
             //cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
             if(simManager.vegetationManager.decomposerSlotGenomeCurrent != null) {
                 baronVonTerrain.decomposerBitsDisplayMat.SetFloat("_PatternThreshold", simManager.vegetationManager.decomposerSlotGenomeCurrent.patternThreshold);

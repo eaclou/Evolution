@@ -147,9 +147,8 @@ void CSUpdateGroundStrokes (uint3 id : SV_DispatchThreadID)
 	float randAngle = Value2D(uv, 1000).x * 6.28;
 	float2 randDir = float2(cos(randAngle), sin(randAngle));
 
-	float2 heading = topoDir; // lerp(gradDir, randDir, altitudeSampleCenter.y); 
-	//heading = lerp(heading, topoDir, altitudeSampleCenter.z);  // was pebbles, now is sand
-	//heading = lerp(heading, topoDir, altitudeSampleCenter.w); 
+	float2 heading = topoDir; 
+	
 	
 	if(heading.x != 0 && heading.y != 0) {
 		heading = normalize(heading);
@@ -161,7 +160,7 @@ void CSUpdateGroundStrokes (uint3 id : SV_DispatchThreadID)
 	// New code:
 	// Brushstrokes vary in:  (heading, brush alpha)
 
-	float isActive = saturate((altitudeSampleCenter.w - 0.15) * 1000);
+	float isActive = saturate((altitudeSampleCenter.w - 0.05) * 1000);
 	
 	terrainFrameBufferStrokesCBuffer[id.x].isActive = isActive;
 	terrainFrameBufferStrokesCBuffer[id.x].heading = heading;
@@ -461,7 +460,6 @@ void CSUpdateTerrainMapsBrush (uint3 id : SV_DispatchThreadID)
 	float4 finalColor = _Color0;   // BASE STONE COLOR:	
 	finalColor = lerp(finalColor, _Color1, saturate(texSample.y));
 	finalColor = lerp(finalColor, _Color2, saturate(texSample.z));
-	//finalColor = lerp(finalColor, _Color3, saturate(texSample.w));  // W Channel is just alpha (active sim) mask!
 			
 	float4 altitudeTex = texSample;
 	float4 waterSurfaceTex = _WaterSurfaceTex.SampleLevel(_LinearClamp, uv, 0);
@@ -541,7 +539,7 @@ void CSUpdateTerrainMapsBrush (uint3 id : SV_DispatchThreadID)
 	finalColor.rgb += dotLight * isUnderwater * (1.0 - depth) * causticsStrength;		
 	
 	// FOG:	
-	float fogAmount = lerp(0, 1, depth * 2);
+	float fogAmount = lerp(0, 1, depth * 5);
 	finalColor.rgb = lerp(finalColor.rgb, waterFogColor, fogAmount * isUnderwater);
 		
 	// Reflection!!!
