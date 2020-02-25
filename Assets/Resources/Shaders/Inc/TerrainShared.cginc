@@ -5,6 +5,22 @@ uniform float4 _FogColor;
 uniform float4 _DecomposersColor;
 uniform float4 _DetritusColor;
 
+struct ShadingData {
+    float4 baseAlbedo;
+	float4 altitudeTex;
+    float4 waterSurfaceTex;
+	float4 groundNormalsTex;
+    float4 resourceGridTex;
+	float4 spiritBrushTex;
+	float4 skyTex;
+	float3 worldPos;
+	float maxAltitude;
+	float4 waterFogColor;
+	float4 sunDir;
+	float4 worldSpaceCameraPosition;
+	float globalWaterLevel;
+	float causticsStrength;
+};
 
 float GetDepthNormalized(float rawAltitude) {
 	float depthNormalized = saturate((1.0 - rawAltitude) - 0.5) * 2;
@@ -21,137 +37,110 @@ float3 ApplyWaterFogColor(float3 sourceColor, float rawAltitude) {
 	return lerp(sourceColor, waterFogColor, (saturate(depthNormalized + _MinFog) * isUnderwater));
 }
 
-void MasterLightingModel() {
-// What information is needed and when in order to properly render??? *******
-				// Ground Terrain baseAlbedo color? -- either precompute or blend btw stone/pebble/sand colors
-				// Height -- Z-Pos of particle
-				// Resource distribution tinting -- what colors?  :: algae, decomposers, waste, nutrients
-				// Caustics lighting
-				// Water Fog amount
-				// depth
-				// Water fog color
-				// global water level
-				// terrain normals
-				// skyTexture
-				// Camera worldPos
-				// Sun Pos/Dir
-				// SpiritBrush lighting
+float4 MasterLightingModel(ShadingData shadingData) {
+
+	//return float4(1,1,1,1);
+	// What information is needed and when in order to properly render??? *******
+	// Ground Terrain baseAlbedo color? -- either precompute or blend btw stone/pebble/sand colors
+	// Height -- Z-Pos of particle
+	// Resource distribution tinting -- what colors?  :: algae, decomposers, waste, nutrients
+	// Caustics lighting
+	// Water Fog amount
+	// depth
+	// Water fog color
+	// global water level
+	// terrain normals
+	// skyTexture
+	// Camera worldPos
+	// Sun Pos/Dir
+	// SpiritBrush lighting
 
 
-				/// ponderings::
-				//  Inputs:  BaseAlbedo --> spits out lit value
-				//			 worldPos xyz
-				//			 Textures! - altitude, water, (resources?), spiritBrushLight, SkyTex
-				//			 material properties?
+	/// ponderings::
+	//  Inputs:  BaseAlbedo --> spits out lit value
+	//			 worldPos xyz
+	//			 Textures! - altitude, water, (resources?), spiritBrushLight, SkyTex
+	//			 material properties?
 
 			
-				float4 altitudeTex = tex2D(_AltitudeTex, i.altitudeUV);	
-				float4 waterSurfaceTex = tex2D(_WaterSurfaceTex, i.altitudeUV);
-				float4 resourceTex = tex2D(_ResourceGridTex, i.altitudeUV);
-				float4 spiritBrushTex = tex2D(_SpiritBrushTex, i.altitudeUV);
+	float4 altitudeTex = shadingData.altitudeTex;	
+	float4 waterSurfaceTex = shadingData.waterSurfaceTex;
+	float4 resourceTex = shadingData.resourceGridTex;
+	float4 spiritBrushTex = shadingData.spiritBrushTex;
 		
-				float4 finalColor = _Color0;   // BASE STONE COLOR:	
-				finalColor = lerp(finalColor, _Color1, saturate(altitudeTex.y));
-				finalColor = lerp(finalColor, _Color2, saturate(altitudeTex.z));
+	float4 finalColor = shadingData.baseAlbedo;   // INPUT COLOR:	
 
-				float causticsStrength = 0.4;
-				float minFog = 1;
-	
-				float3 decomposerHue = float3(0.8,0.3,0);
-				float decomposerMask = saturate(resourceTex.z * 1) * 0.8;
-				float3 detritusHue = float3(0.2,0.1,0.02);
-				float detritusMask = saturate(resourceTex.y * 1) * 0.8;
-				float3 algaeColor = float3(0.5,0.8,0.5) * 0.5;
-				float algaeMask = saturate(resourceTex.w * 2.70);
-
-
-				finalColor.rgb = lerp(finalColor.rgb, decomposerHue, decomposerMask);
-				finalColor.rgb = lerp(finalColor.rgb, detritusHue, detritusMask);
-				finalColor.rgb = lerp(finalColor.rgb, algaeColor, algaeMask);
-				// ****** MANUAL OVERRIDE!!! SET AlbedoBase directly:
-				finalColor.rgb = lerp(finalColor.rgb, float3(1, 0.7, 0.25) * tex2D(_PatternTex, i.patternUV).xyz, 1);
-
-
-				float altitudeRaw = altitudeTex.x;
-	
-				float3 waterFogColor = float3(0.36, 0.4, 0.44) * 0.43;
-	
-				waterFogColor = lerp(waterFogColor, algaeColor, algaeMask);
-
-				float3 sunDir = normalize(float3(-1,0.75,-1));
-
-				// FAKE CAUSTICS:::
-				float3 waterSurfaceNormal = waterSurfaceTex.yzw; // pre-calculated
-				float dotLight = dot(waterSurfaceNormal, sunDir);     //_WorldSpaceLightPos0.xyz);
-				dotLight = dotLight * dotLight;
-	
-				float altitude = altitudeRaw;// + waterSurfaceTex.x * 0.05;
+	float causticsStrength = shadingData.causticsStrength;
+	float minFog = shadingData.waterFogColor.a;
+/*
+	float3 decomposerHue = float3(0.8,0.3,0);
+	float decomposerMask = saturate(resourceTex.z * 1) * 0.8;
+	float3 detritusHue = float3(0.2,0.1,0.02);
+	float detritusMask = saturate(resourceTex.y * 1) * 0.8;
+	float3 algaeColor = float3(0.5,0.8,0.5) * 0.5;
+	float algaeMask = saturate(resourceTex.w * 2.70);
+*/
 				
-				
-				float depth = saturate(-altitude + _GlobalWaterLevel);  // 0-1 values
-				float isUnderwater = saturate(depth * 50);
-
+	float altitudeRaw = altitudeTex.x;
 	
-				//=============================
-				//Diffuse
-				float pixelOffset = 1.0 / 256;  // resolution  // **** THIS CAN"T BE HARDCODED AS FINAL ****"
-				//float altitudeCenter = AltitudeRead.SampleLevel(_LinearClamp, uv, 0).x;
-				float altitudeNorth = tex2D(_AltitudeTex, i.altitudeUV + float2(0, pixelOffset)).x;	//AltitudeRead.SampleLevel(_LinearClamp, uv + float2(0, pixelOffset), 0).x;
-				float altitudeEast = tex2D(_AltitudeTex, i.altitudeUV + float2(pixelOffset, 0)).x;
-				float altitudeSouth = tex2D(_AltitudeTex, i.altitudeUV + float2(0, -pixelOffset)).x;
-				float altitudeWest = tex2D(_AltitudeTex, i.altitudeUV + float2(-pixelOffset, 0)).x;
-
-				float dX = altitudeEast - altitudeWest;
-				float dY = altitudeNorth - altitudeSouth;
-
-				float2 grad = float2(0,1);
-				if(dX != 0 && dY != 0) {
-					grad = normalize(float2(dX, dY));
-				}
-				//store normals in brushstrokeData?? // *************
-
-				float3 groundSurfaceNormal = normalize(float3(-grad.x, -grad.y, -length(float2(dX,dY)))); ////normalize(altitudeTex.yzw);
-				groundSurfaceNormal.z *= -1;
+	float3 waterFogColor = shadingData.waterFogColor.rgb;
 	
-				float3 diffuseSurfaceNormal = lerp(groundSurfaceNormal, waterSurfaceNormal, depth);
-				float dotDiffuse = dot(diffuseSurfaceNormal, sunDir);
-				float diffuseWrap = dotDiffuse * 0.5 + 0.5;
-				finalColor.rgb *= (0.7 + dotDiffuse * 0.33 + 0.081 * diffuseWrap);//diffuseWrap; //saturate(dotDiffuse) * 1.4; // (0.7 + dotDiffuse * 0.33 + 0.081 * diffuseWrap);
+	//waterFogColor = lerp(waterFogColor, algaeColor, algaeMask);
 
-			// ********* Are these two specific to ground strokes only?? ***
-				// Wetness darkening:
-				float wetnessMask = 1.0 - saturate((-altitude + _GlobalWaterLevel + 0.05) * 17.5); 
-				finalColor.rgb *= (0.3 + wetnessMask * 0.7);
-				// shoreline foam:
-				float foamMask = 1.0 - saturate((abs(-altitude + _GlobalWaterLevel) * 67));
-				finalColor.rgb += foamMask * 0.375;
-			// ********* Are these two specific to ground strokes only?? ***
+	float3 sunDir = shadingData.sunDir.xyz;
 
-				// Caustics
-				finalColor.rgb += dotLight * isUnderwater * (1.0 - depth) * causticsStrength;		
+	// FAKE CAUSTICS:::
+	float3 waterSurfaceNormal = shadingData.waterSurfaceTex.yzw; // pre-calculated
+	float dotLight = dot(waterSurfaceNormal, sunDir);
+	dotLight = dotLight * dotLight;
 	
-				// FOG:	
-				float fogAmount = lerp(0, 1, depth * 5);
-				finalColor.rgb = lerp(finalColor.rgb, waterFogColor, fogAmount * isUnderwater);
-		
-				// Reflection!!!
-				float3 worldPos = float3(i.altitudeUV * _MapSize, -altitude * _MaxAltitude);
-				float3 cameraToVertex = worldPos - _WorldSpaceCameraPosition.xyz;
-				float3 cameraToVertexDir = normalize(cameraToVertex);
-				float3 reflectedViewDir = cameraToVertexDir + 2 * waterSurfaceNormal * 0.5;
-				float viewDot = 1.0 - saturate(dot(-cameraToVertexDir, waterSurfaceNormal));
+	float altitude = altitudeRaw;								
+	float depth = saturate(-altitude + shadingData.globalWaterLevel);  // 0-1 values
+	float isUnderwater = saturate(depth * 50);
 					
-				float2 skyCoords = reflectedViewDir.xy * 0.5 + 0.5;
-				float4 skyTex = tex2D(_SkyTex, skyCoords);
-				float4 reflectedColor = float4(skyTex.rgb, finalColor.a); //col;
-	
-				viewDot * 0.3 + 0.2;		
-				float reflectLerp = saturate(viewDot * isUnderwater);
-				finalColor.rgb += lerp(float3(0,0,0), reflectedColor.xyz, reflectLerp);
+	//=============================//Diffuse				
+	float3 groundSurfaceNormal = shadingData.groundNormalsTex.yzw;
+	float3 diffuseSurfaceNormal = lerp(groundSurfaceNormal, waterSurfaceNormal, depth);
+	float dotDiffuse = dot(diffuseSurfaceNormal, sunDir);
+	float diffuseWrap = dotDiffuse * 0.5 + 0.5;
+	finalColor.rgb *= (0.7 + dotDiffuse * 0.33 + 0.081 * diffuseWrap);
 
-				finalColor.rgb += spiritBrushTex.y;
+// ********* Are these two specific to ground strokes only?? ***
+	// Wetness darkening:
+	float wetnessMask = 1.0 - saturate((-altitude + shadingData.globalWaterLevel + 0.05) * 17.5); 
+	finalColor.rgb *= (0.3 + wetnessMask * 0.7);
+	// shoreline foam:
+	float foamMask = 1.0 - saturate((abs(-altitude + shadingData.globalWaterLevel) * 57));
+	finalColor.rgb += foamMask * 0.3675;
+// ********* Are these two specific to ground strokes only?? ***
+
+	// Caustics
+	finalColor.rgb += dotLight * isUnderwater * (1.0 - depth) * shadingData.causticsStrength;		
+	
+	// FOG:	
+	float fogAmount = lerp(0, 1, depth * 2);
+	finalColor.rgb = lerp(finalColor.rgb, waterFogColor, fogAmount * isUnderwater);
+		
+	// Reflection!!!
+	float3 worldPos = shadingData.worldPos; ////////////////// float3(i.altitudeUV * _MapSize, -altitude * _MaxAltitude);
+	float3 cameraToVertex = worldPos - shadingData.worldSpaceCameraPosition.xyz;
+	float3 cameraToVertexDir = normalize(cameraToVertex);
+	float3 reflectedViewDir = cameraToVertexDir + 2 * waterSurfaceNormal * 0.5;
+	float viewDot = 1.0 - saturate(dot(-cameraToVertexDir, waterSurfaceNormal));
+					
+	//float2 skyCoords = reflectedViewDir.xy * 0.5 + 0.5;
+	float4 skyTex = shadingData.skyTex; ////////////////////////tex2D(_SkyTex, skyCoords);
+	float4 reflectedColor = float4(skyTex.rgb, finalColor.a);
+	
+	viewDot * 0.3 + 0.2;		
+	float reflectLerp = saturate(viewDot * isUnderwater);
+	finalColor.rgb += lerp(float3(0,0,0), reflectedColor.xyz, reflectLerp);
+
+	finalColor.rgb += shadingData.spiritBrushTex.y;
 				
-				finalColor.a = 1; 
+	finalColor.a = 1; 
+
+	return finalColor;
 }
 
 float3 ApplyCausticsLight(float3 sourceColor, float4 waterSurfaceTex, float rawAltitude) {

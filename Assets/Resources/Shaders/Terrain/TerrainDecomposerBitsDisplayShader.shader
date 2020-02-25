@@ -234,7 +234,7 @@
 	
 				float3 waterFogColor = float3(0.36, 0.4, 0.44) * 0.43;
 	
-				waterFogColor = lerp(waterFogColor, algaeColor, algaeMask);
+				//waterFogColor = lerp(waterFogColor, algaeColor, algaeMask);
 
 				float3 sunDir = normalize(float3(-1,0.75,-1));
 
@@ -289,7 +289,7 @@
 				finalColor.rgb += dotLight * isUnderwater * (1.0 - depth) * causticsStrength;		
 	
 				// FOG:	
-				float fogAmount = lerp(0, 1, depth * 5);
+				float fogAmount = lerp(0, 1, depth * 2);
 				finalColor.rgb = lerp(finalColor.rgb, waterFogColor, fogAmount * isUnderwater);
 		
 				// Reflection!!!
@@ -313,7 +313,7 @@
 
 	//=====================================
 
-				finalColor.a *= tex2D(_MainTex, i.quadUV).a;	
+				finalColor.a *= saturate(tex2D(_MainTex, i.quadUV).a * 1.8);	
 				//return float4(1,1,1,1);
 				return finalColor;
 				/*

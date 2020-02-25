@@ -458,9 +458,9 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 				foodParticlesWrite[id.x].isSwallowed = 0.0;
 				foodParticlesWrite[id.x].digestedAmount = 0.0;
 				foodParticlesWrite[id.x].age = rand(float2(rand01 * 70.158, randX * 13.37)) * 1;
-				float mutationSize = 0.001;
-				foodParticlesWrite[id.x].colorA = lerp(parentParticle.colorA, float3(saturate(1.0 - randZ), frac(rand01 + randZ), saturate(randY)), mutationSize);
-				foodParticlesWrite[id.x].colorB = parentParticle.colorB; 
+				float mutationSize = 0.1;
+				foodParticlesWrite[id.x].colorA = lerp(parentParticle.colorA, float3(saturate(1.0 - randZ), frac(rand01 + randX), saturate(randY)), mutationSize);
+				foodParticlesWrite[id.x].colorB = lerp(parentParticle.colorB, float3(saturate(1.0 - randY), frac(rand01 + randZ), saturate(randX)), mutationSize); //parentParticle.colorB; 
 				foodParticlesWrite[id.x].health = 1.0;
 				foodParticlesWrite[id.x].typeID = parentParticle.typeID;
 				foodParticlesWrite[id.x].rootedness = lerp(parentParticle.rootedness, frac(randZ * -33.27), mutationSize);

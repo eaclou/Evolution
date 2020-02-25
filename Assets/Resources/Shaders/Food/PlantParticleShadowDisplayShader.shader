@@ -98,7 +98,7 @@
 				if(type < 0.5) {
 					// Rooted fully, grows separately on ground in circle? Grassy
 
-					float radius = saturate(particleData.biomass * 3.8 + 0.04) * leafIndexNormalized * 0.2 * 10;
+					float radius = saturate(particleData.biomass * 3.8 + 0.04) * leafIndexNormalized * 0.2 * 5;
 					float2 spawnOffset = float2(cos(particleData.angleInc * leafIndex * 10) * radius, sin(particleData.angleInc * leafIndex * 10) * radius);
 					
 					worldPosition.xy += spawnOffset;

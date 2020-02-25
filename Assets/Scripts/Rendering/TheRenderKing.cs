@@ -2010,6 +2010,8 @@ public class TheRenderKing : MonoBehaviour {
         int kernelCSUpdateCritterGenericStrokes = computeShaderCritters.FindKernel("CSUpdateCritterGenericStrokes");        
         computeShaderCritters.SetBuffer(kernelCSUpdateCritterGenericStrokes, "critterGenericStrokesWriteCBuffer", critterGenericStrokesCBuffer);
         computeShaderCritters.SetBuffer(kernelCSUpdateCritterGenericStrokes, "critterGenericStrokesUpdateCBuffer", singleCritterGenericStrokesCBuffer);
+        computeShaderCritters.SetFloat("_GlobalWaterLevel", baronVonWater._GlobalWaterLevel);
+        computeShaderCritters.SetFloat("_MaxAltitude", baronVonTerrain.maxAltitude);
         computeShaderCritters.SetInt("_UpdateBufferStartIndex", agent.index * singleCritterGenericStrokesCBuffer.count);
         computeShaderCritters.Dispatch(kernelCSUpdateCritterGenericStrokes, singleCritterGenericStrokesCBuffer.count, 1, 1);        
         singleCritterGenericStrokesCBuffer.Release(); 
@@ -4431,7 +4433,7 @@ public class TheRenderKing : MonoBehaviour {
                 critterUberStrokeShadowMat.SetFloat("_GlobalWaterLevel", baronVonWater._GlobalWaterLevel); 
                 //cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID);
                 cmdBufferMain.DrawProcedural(Matrix4x4.identity, critterUberStrokeShadowMat, 0, MeshTopology.Triangles, 6, critterGenericStrokesCBuffer.count);
-        
+        /*
                 eggSackShadowDisplayMat.SetPass(0);
                 eggSackShadowDisplayMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
                 eggSackShadowDisplayMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
@@ -4446,7 +4448,7 @@ public class TheRenderKing : MonoBehaviour {
                 eggSackShadowDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
                 //cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID);
                 cmdBufferMain.DrawProcedural(Matrix4x4.identity, eggSackShadowDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.eggDataCBuffer.count);
-        
+        */
             }            
 
             /*if(!simManager.uiManager.tolInspectOn) {

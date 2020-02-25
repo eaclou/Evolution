@@ -29,6 +29,8 @@ Texture2D<float4> terrainHeightTex;
 Texture2D<float4> velocityRead;
 
 uniform float _MapSize;
+uniform float _GlobalWaterLevel;
+uniform float _MaxAltitude;
 
 uniform float _Time;
 
@@ -109,6 +111,7 @@ void CSSimulateCritterGenericStrokes (uint3 id : SV_DispatchThreadID)
 	CritterSimData critterSimData = critterSimDataCBuffer[agentIndex];
 
 	float3 critterWorldPos = critterSimData.worldPos;
+	
 	float3 critterCurScale = float3(1,1,1) * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage) * 1; // *** should be 0.5??? *********
 	
 	// Decay progress value:
@@ -137,11 +140,11 @@ void CSSimulateCritterGenericStrokes (uint3 id : SV_DispatchThreadID)
 	float3 noiseVel = Value3D(curWorldPos * 0.05 + strokeData.thresholdValue * 50, 17.75).yzw;
 	float3 noiseVelNew = Value3D(curWorldPos * 0.8123 + strokeData.thresholdValue * 0.01, 1.75 / (critterInitData.boundingBoxSize.x + critterInitData.boundingBoxSize.z)).yzw;	
 	curWorldPos.xy += noiseVel.xy * 0.033 * strokeData.thresholdValue;
-	curWorldPos.z += 0.0002;
+	//curWorldPos.z += 0.0002;
 	newWorldPos.xyz += noiseVelNew.xyz * -0.00733 * (critterInitData.boundingBoxSize.x + critterInitData.boundingBoxSize.z);
 	float pinnedAmount = saturate(((1.0 - (critterSimData.decayPercentage * 10) + strokeData.thresholdValue * 2) * 100));
 	
-	pinnedAmount = saturate((1 - detachAmount) - strokeData.passiveFollow); // - (1 - strokeData.t) * 0.45;
+	pinnedAmount = saturate((1 - detachAmount) - strokeData.passiveFollow);
 	
 	float3 worldPosition = lerp(curWorldPos, newWorldPos, pinnedAmount);
 				

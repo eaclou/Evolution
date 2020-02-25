@@ -68,26 +68,16 @@
 				CritterSimData critterSimData = critterSimDataCBuffer[agentIndex];
 
 				float3 critterWorldPos = critterSimData.worldPos;
+				//critterWorldPos.z += -_GlobalWaterLevel * _MaxAltitude;
 
 				float3 neighborWorldPos = critterGenericStrokesCBuffer[genericStrokeData.neighborIndex + agentIndex * 1856].worldPos;
 				float3 neighborAlignTangent = neighborWorldPos - genericStrokeData.worldPos;
-
-				// WEIRD COORDINATES!!! Positive Z = DEEPER!!!
-				//float3 strokeBindPos = genericStrokeData.bindPos; //float3(genericStrokeData.bindPos.x, genericStrokeData.bindPos.z, -genericStrokeData.bindPos.y) * 0.8;
-
-				//Temp align with creatures:
-				//float3 critterForwardDir = float3(critterSimData.heading, 0);
-				//float3 critterRightDir = float3(critterForwardDir.y, -critterForwardDir.x, 0);
-								
-				//strokeBindPos = critterRightDir * strokeBindPos.x + critterForwardDir * strokeBindPos.y;
-				//strokeBindPos.z = genericStrokeData.bindPos.z;
 
 				// Decay color bleach value:
 				float decayTimeRange = 0.4;
 				float decayAmount = saturate((critterSimData.decayPercentage) / decayTimeRange - genericStrokeData.thresholdValue * 2);
 				float4 decayColor = float4(0.25, 0.14, 0.052, 0.9);
 				
-
 				float3 brushScale = float3(genericStrokeData.scale, 1);
 								
 				float3 worldNormal = genericStrokeData.worldNormal;
@@ -100,9 +90,9 @@
 				float3 vertexWorldPos = genericStrokeData.worldPos + quadVertexOffset * 1.25 * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage) * 1;
 				
 				float2 altUV = vertexWorldPos.xy / _MapSize;				
-				float altitudeRaw = tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 0));
-				float seaFloorAltitude = -(altitudeRaw * 2 - 1) * 10;
-				vertexWorldPos.z = -(max(_GlobalWaterLevel, altitudeRaw) * 2 - 1) * 10;
+				float altitudeRaw = tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 0)).x;
+				float seaFloorAltitude = -altitudeRaw * _MaxAltitude;
+				vertexWorldPos.z = -max(_GlobalWaterLevel, altitudeRaw) * _MaxAltitude;
 				vertexWorldPos.z = lerp(vertexWorldPos.z, seaFloorAltitude, decayAmount);
 				// REFRACTION:							
 				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(genericStrokeData.worldPos.xy /  _MapSize, 0, 0)).yzw;

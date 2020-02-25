@@ -539,7 +539,7 @@ void CSUpdateTerrainMapsBrush (uint3 id : SV_DispatchThreadID)
 	finalColor.rgb += dotLight * isUnderwater * (1.0 - depth) * causticsStrength;		
 	
 	// FOG:	
-	float fogAmount = lerp(0, 1, depth * 5);
+	float fogAmount = lerp(0, 1, depth * 2);
 	finalColor.rgb = lerp(finalColor.rgb, waterFogColor, fogAmount * isUnderwater);
 		
 	// Reflection!!!
