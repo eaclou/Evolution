@@ -560,7 +560,7 @@ void CSUpdateTerrainMapsBrush (uint3 id : SV_DispatchThreadID)
 	finalColor.rgb += spiritBrushTex.y;
 				
 	finalColor.a = 1; 
-
+	finalColor = float4(0.5,0.5,0.5,1);
 	TerrainColorWrite[id.xy] = finalColor;	
 
 	AltitudeWrite[id.xy] = texSample;

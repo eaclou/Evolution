@@ -44,6 +44,8 @@
 			uniform float _GlobalWaterLevel;
 			uniform float _MaxAltitude;
 			uniform float _CamDistNormalized;
+
+			uniform float3 _SunDir;
 			
 			struct GroundBitsData   
 			{
@@ -186,27 +188,22 @@
 				groundSurfaceNormal.z *= -1;
 
 				float3 algaeColor = float3(0.5,0.8,0.5) * 0.5;
-				float algaeMask = saturate(tex2D(_ResourceGridTex, i.altitudeUV).w * 2.70);
-				float3 waterFogColor = float3(0.36, 0.4, 0.44) * 0.43;
-				waterFogColor = lerp(waterFogColor, algaeColor, algaeMask);
 				
-
-
 				ShadingData data;
 				data.baseAlbedo = float4(0.145,0.0972,0.015,1);
 				data.altitudeTex = tex2D(_AltitudeTex, i.altitudeUV);
     			data.waterSurfaceTex = tex2D(_WaterSurfaceTex, i.altitudeUV);
-				data.groundNormalsTex = float4(groundSurfaceNormal, 1);
+				data.groundNormalsTex = float4(0, groundSurfaceNormal);
     			data.resourceGridTex = tex2D(_ResourceGridTex, i.altitudeUV);
 				data.spiritBrushTex = tex2D(_SpiritBrushTex, i.altitudeUV);
 				data.skyTex = tex2D(_SkyTex, i.altitudeUV);
 				data.worldPos = i.worldPos;
 				data.maxAltitude = _MaxAltitude;
-				data.waterFogColor = float4(waterFogColor, 1);
-				data.sunDir = float4(normalize(float3(-1,0.75,-1)), 1);
+				data.waterFogColor = float4(algaeColor, 1);
+				data.sunDir = float4(_SunDir, 0);
 				data.worldSpaceCameraPosition = _WorldSpaceCameraPosition;
 				data.globalWaterLevel = _GlobalWaterLevel;
-				data.causticsStrength = 0.4;
+				data.causticsStrength = 0.5;
 
 				float4 outColor = MasterLightingModel(data);
 				outColor.a *= tex2D(_MainTex, i.quadUV).a;

@@ -39,10 +39,16 @@
 			sampler2D _SpiritBrushTex;
 			sampler2D _SkyTex;
 			
-			//sampler2D _RenderedSceneRT;  // Provided by CommandBuffer -- global tex??? seems confusing... ** revisit this
+			uniform float4 _WorldSpaceCameraPosition;
 			uniform float _MapSize;	
-			
+			uniform float _MaxAltitude;
 			uniform float _GlobalWaterLevel;
+			uniform float3 _SunDir;
+
+			uniform float4 _Color0;
+			uniform float4 _Color1;
+			uniform float4 _Color2;
+			uniform float4 _Color3;
 			
 			struct EnvironmentStrokeData {
 				float3 worldPos;
@@ -62,8 +68,7 @@
 			struct v2f
 			{
 				float4 pos : SV_POSITION;
-				float2 uv : TEXCOORD0;  // uv of the brushstroke quad itself, particle texture
-				//float4 screenUV : TEXCOORD1;
+				float2 uv : TEXCOORD0;  // uv of the brushstroke quad itself, particle texture				
 				float2 altitudeUV : TEXCOORD2;
 				float3 worldPos : TEXCOORD3;
 			};
@@ -129,19 +134,68 @@
 			}
 
 			fixed4 frag(v2f i) : SV_Target
-			{				
-				float4 brushColor = tex2D(_MainTex, i.uv);	
-								
-				float4 altitudeTex = tex2D(_AltitudeTex, i.altitudeUV); //i.worldPos.z / 10; // [-1,1] range
-				float4 waterSurfaceTex = tex2D(_WaterSurfaceTex, i.altitudeUV);
-				float4 resourceTex = tex2D(_ResourceGridTex, i.altitudeUV);	
-				float4 terrainColorTex = tex2D(_TerrainColorTex, i.altitudeUV);	
-				float4 spiritBrushTex = tex2D(_SpiritBrushTex, i.altitudeUV);	
+			{	
 				
-				float4 finalCol = float4(terrainColorTex.rgb, brushColor.a);
+				float4 resourceTex = tex2D(_ResourceGridTex, i.altitudeUV);
 				
-				return finalCol;
-								
+				float3 decomposerHue = float3(0.8,0.3,0);
+				float decomposerMask = saturate(resourceTex.z * 1) * 0.8;
+				float3 detritusHue = float3(0.2,0.1,0.02);
+				float detritusMask = saturate(resourceTex.y * 1) * 0.8;
+				float3 algaeColor = float3(0.5,0.8,0.5) * 0.5;
+				float algaeMask = saturate(resourceTex.w * 2.70);
+				
+				
+				float4 altitudeTex = tex2D(_AltitudeTex, i.altitudeUV);
+
+				float4 finalColor = _Color0;   // BASE STONE COLOR:	
+				finalColor = lerp(finalColor, _Color1, saturate(altitudeTex.y));
+				finalColor = lerp(finalColor, _Color2, saturate(altitudeTex.z));
+
+				finalColor.rgb = lerp(finalColor.rgb, decomposerHue, decomposerMask);
+				finalColor.rgb = lerp(finalColor.rgb, detritusHue, detritusMask);
+				finalColor.rgb = lerp(finalColor.rgb, algaeColor, algaeMask);
+	
+				//Diffuse
+				float pixelOffset = 1.0 / 256;  // resolution  // **** THIS CAN"T BE HARDCODED AS FINAL ****"
+				// ************  PRE COMPUTE THIS IN A TEXTURE!!!!!! ************************
+				float altitudeNorth = tex2D(_AltitudeTex, i.altitudeUV + float2(0, pixelOffset)).x;
+				float altitudeEast = tex2D(_AltitudeTex, i.altitudeUV + float2(pixelOffset, 0)).x;
+				float altitudeSouth = tex2D(_AltitudeTex, i.altitudeUV + float2(0, -pixelOffset)).x;
+				float altitudeWest = tex2D(_AltitudeTex, i.altitudeUV + float2(-pixelOffset, 0)).x;
+
+				float dX = altitudeEast - altitudeWest;
+				float dY = altitudeNorth - altitudeSouth;
+
+				float2 grad = float2(0,1);
+				if(dX != 0 && dY != 0) {
+					grad = normalize(float2(dX, dY));
+				}
+				//store normals in brushstrokeData?? // *************
+
+				float3 groundSurfaceNormal = normalize(float3(-grad.x, -grad.y, -length(float2(dX,dY)))); ////normalize(altitudeTex.yzw);
+				groundSurfaceNormal.z *= -1;
+
+				
+				ShadingData data;
+				data.baseAlbedo = finalColor; //float4(0.145,0.0972,0.015,1);
+				data.altitudeTex = altitudeTex;
+    			data.waterSurfaceTex = tex2D(_WaterSurfaceTex, i.altitudeUV);
+				data.groundNormalsTex = float4(0, groundSurfaceNormal);
+    			data.resourceGridTex = resourceTex;
+				data.spiritBrushTex = tex2D(_SpiritBrushTex, i.altitudeUV);
+				data.skyTex = tex2D(_SkyTex, i.altitudeUV);
+				data.worldPos = i.worldPos;
+				data.maxAltitude = _MaxAltitude;
+				data.waterFogColor = float4(algaeColor, 1);
+				data.sunDir = float4(_SunDir, 0);
+				data.worldSpaceCameraPosition = _WorldSpaceCameraPosition;
+				data.globalWaterLevel = _GlobalWaterLevel;
+				data.causticsStrength = 0.5;
+
+				float4 outColor = MasterLightingModel(data);
+				outColor.a *= tex2D(_MainTex, i.uv).a;
+				return outColor;
 			}
 		ENDCG
 		}

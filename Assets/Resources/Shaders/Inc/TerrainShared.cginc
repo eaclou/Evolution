@@ -72,21 +72,11 @@ float4 MasterLightingModel(ShadingData shadingData) {
 
 	float causticsStrength = shadingData.causticsStrength;
 	float minFog = shadingData.waterFogColor.a;
-/*
-	float3 decomposerHue = float3(0.8,0.3,0);
-	float decomposerMask = saturate(resourceTex.z * 1) * 0.8;
-	float3 detritusHue = float3(0.2,0.1,0.02);
-	float detritusMask = saturate(resourceTex.y * 1) * 0.8;
-	float3 algaeColor = float3(0.5,0.8,0.5) * 0.5;
-	float algaeMask = saturate(resourceTex.w * 2.70);
-*/
-				
+			
 	float altitudeRaw = altitudeTex.x;
 	
 	float3 waterFogColor = shadingData.waterFogColor.rgb;
 	
-	//waterFogColor = lerp(waterFogColor, algaeColor, algaeMask);
-
 	float3 sunDir = shadingData.sunDir.xyz;
 
 	// FAKE CAUSTICS:::
@@ -103,8 +93,8 @@ float4 MasterLightingModel(ShadingData shadingData) {
 	float3 diffuseSurfaceNormal = lerp(groundSurfaceNormal, waterSurfaceNormal, depth);
 	float dotDiffuse = dot(diffuseSurfaceNormal, sunDir);
 	float diffuseWrap = dotDiffuse * 0.5 + 0.5;
-	finalColor.rgb *= (0.7 + dotDiffuse * 0.33 + 0.081 * diffuseWrap);
-
+	finalColor.rgb *= (0.7 + dotDiffuse * 0.3 + 0.08 * diffuseWrap);
+	//finalColor.rgb += saturate(dotDiffuse) * 1;
 // ********* Are these two specific to ground strokes only?? ***
 	// Wetness darkening:
 	float wetnessMask = 1.0 - saturate((-altitude + shadingData.globalWaterLevel + 0.05) * 17.5); 
@@ -116,11 +106,12 @@ float4 MasterLightingModel(ShadingData shadingData) {
 
 	// Caustics
 	finalColor.rgb += dotLight * isUnderwater * (1.0 - depth) * shadingData.causticsStrength;		
-	
-	// FOG:	
+		
+		
+	// FOG:	  *** needs an overhaul also
 	float fogAmount = lerp(0, 1, depth * 2);
 	finalColor.rgb = lerp(finalColor.rgb, waterFogColor, fogAmount * isUnderwater);
-		
+	
 	// Reflection!!!
 	float3 worldPos = shadingData.worldPos; ////////////////// float3(i.altitudeUV * _MapSize, -altitude * _MaxAltitude);
 	float3 cameraToVertex = worldPos - shadingData.worldSpaceCameraPosition.xyz;

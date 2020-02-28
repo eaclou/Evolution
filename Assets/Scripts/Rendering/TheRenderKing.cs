@@ -17,6 +17,8 @@ public class TheRenderKing : MonoBehaviour {
     public float tempSwimSpeed = 1f;
     public float tempAccelMult = 1f;
 
+    private Vector3 sunDirection = new Vector3(-1f,0.7f,-1f).normalized;
+
     public Camera mainRenderCam;
     public Camera fluidObstaclesRenderCamera;
     public Camera fluidColorRenderCamera;
@@ -4353,8 +4355,14 @@ public class TheRenderKing : MonoBehaviour {
             baronVonTerrain.groundStrokesMedDisplayMat.SetTexture("_SpiritBrushTex", spiritBrushRT); 
             baronVonTerrain.groundStrokesMedDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);       
             baronVonTerrain.groundStrokesMedDisplayMat.SetFloat("_MinFog", minimumFogDensity);   
-            baronVonTerrain.groundStrokesMedDisplayMat.SetFloat("_GlobalWaterLevel", baronVonWater._GlobalWaterLevel);        
+            baronVonTerrain.groundStrokesMedDisplayMat.SetFloat("_GlobalWaterLevel", baronVonWater._GlobalWaterLevel); 
+            baronVonTerrain.groundStrokesMedDisplayMat.SetFloat("_MaxAltitude", baronVonTerrain.maxAltitude);
             baronVonTerrain.groundStrokesMedDisplayMat.SetVector("_FogColor", simManager.fogColor);
+            baronVonTerrain.groundStrokesMedDisplayMat.SetVector("_SunDir", sunDirection);
+            baronVonTerrain.groundStrokesMedDisplayMat.SetVector("_WorldSpaceCameraPosition", new Vector4(mainRenderCam.transform.position.x, mainRenderCam.transform.position.y, mainRenderCam.transform.position.z, 0f));
+            baronVonTerrain.groundStrokesMedDisplayMat.SetVector("_Color0", baronVonTerrain.stoneSlotGenomeCurrent.color); // new Vector4(0.9f, 0.9f, 0.8f, 1f));
+            baronVonTerrain.groundStrokesMedDisplayMat.SetVector("_Color1", baronVonTerrain.pebblesSlotGenomeCurrent.color); // new Vector4(0.7f, 0.8f, 0.9f, 1f));
+            baronVonTerrain.groundStrokesMedDisplayMat.SetVector("_Color2", baronVonTerrain.sandSlotGenomeCurrent.color);
             //cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundStrokesMedDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.terrainStrokesCBuffer.count);
             
@@ -4367,11 +4375,13 @@ public class TheRenderKing : MonoBehaviour {
             baronVonTerrain.wasteBitsDisplayMat.SetTexture("_ResourceGridTex", simManager.vegetationManager.resourceGridRT1);
             baronVonTerrain.wasteBitsDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
             baronVonTerrain.wasteBitsDisplayMat.SetTexture("_SkyTex", skyTexture);
+            baronVonTerrain.wasteBitsDisplayMat.SetTexture("_SpiritBrushTex", spiritBrushRT);
             baronVonTerrain.wasteBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
             baronVonTerrain.wasteBitsDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);     
             baronVonTerrain.wasteBitsDisplayMat.SetFloat("_MinFog", minimumFogDensity);  
             baronVonTerrain.wasteBitsDisplayMat.SetFloat("_MaxAltitude", baronVonTerrain.maxAltitude);
             baronVonTerrain.wasteBitsDisplayMat.SetFloat("_GlobalWaterLevel", baronVonWater._GlobalWaterLevel);
+            baronVonTerrain.wasteBitsDisplayMat.SetVector("_SunDir", sunDirection);
             baronVonTerrain.wasteBitsDisplayMat.SetVector("_WorldSpaceCameraPosition", new Vector4(mainRenderCam.transform.position.x, mainRenderCam.transform.position.y, mainRenderCam.transform.position.z, 0f));
             //baronVonTerrain.wasteBitsDisplayMat.SetFloat("_DetritusDensityLerp", Mathf.Clamp01(simManager.simResourceManager.curGlobalDetritus / 200f));  
             baronVonTerrain.wasteBitsDisplayMat.SetVector("_FogColor", simManager.fogColor); 
@@ -4389,6 +4399,7 @@ public class TheRenderKing : MonoBehaviour {
             baronVonTerrain.decomposerBitsDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
             baronVonTerrain.decomposerBitsDisplayMat.SetTexture("_SpiritBrushTex", spiritBrushRT);
             baronVonTerrain.decomposerBitsDisplayMat.SetTexture("_SkyTex", skyTexture);
+            baronVonTerrain.decomposerBitsDisplayMat.SetVector("_SunDir", sunDirection);
             baronVonTerrain.decomposerBitsDisplayMat.SetFloat("_MaxAltitude", baronVonTerrain.maxAltitude);
             baronVonTerrain.decomposerBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
             baronVonTerrain.decomposerBitsDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);     
@@ -4398,9 +4409,6 @@ public class TheRenderKing : MonoBehaviour {
             baronVonTerrain.decomposerBitsDisplayMat.SetFloat("_Density", Mathf.Lerp(0.15f, 1f, Mathf.Clamp01(simManager.simResourceManager.curGlobalDecomposers / 100f)));  
             baronVonTerrain.decomposerBitsDisplayMat.SetVector("_FogColor", simManager.fogColor);
             
-            baronVonTerrain.decomposerBitsDisplayMat.SetVector("_Color0", baronVonTerrain.stoneSlotGenomeCurrent.color);
-            baronVonTerrain.decomposerBitsDisplayMat.SetVector("_Color1", baronVonTerrain.pebblesSlotGenomeCurrent.color);
-            baronVonTerrain.decomposerBitsDisplayMat.SetVector("_Color2", baronVonTerrain.sandSlotGenomeCurrent.color);
             //cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
             if(simManager.vegetationManager.decomposerSlotGenomeCurrent != null) {
                 baronVonTerrain.decomposerBitsDisplayMat.SetFloat("_PatternThreshold", simManager.vegetationManager.decomposerSlotGenomeCurrent.patternThreshold);
