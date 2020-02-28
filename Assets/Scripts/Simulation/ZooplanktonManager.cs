@@ -253,7 +253,7 @@ public class ZooplanktonManager {
         computeShaderAnimalParticles.SetFloat("_GlobalOxygenLevel", resourcesManager.curGlobalOxygen); // needed?
         computeShaderAnimalParticles.SetFloat("_GlobalAlgaeLevel", resourceManagerRef.curGlobalPlantParticles);
         computeShaderAnimalParticles.SetFloat("_SpiritBrushPosNeg", renderKingRef.spiritBrushPosNeg);
-        computeShaderAnimalParticles.SetFloat("_GlobalWaterLevel", renderKingRef.baronVonWater._GlobalWaterLevel);   
+        computeShaderAnimalParticles.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);   
         // Movement Params:
         computeShaderAnimalParticles.SetFloat("_MasterSwimSpeed", settingsRef.zooplanktonSettings._MasterSwimSpeed * Mathf.Lerp(0.01f, 5f, zooplanktonSlotGenomeCurrent.swimSpeed01)); // = 0.35;
         computeShaderAnimalParticles.SetFloat("_AlignMaskRange", settingsRef.zooplanktonSettings._AlignMaskRange); // = 0.025;

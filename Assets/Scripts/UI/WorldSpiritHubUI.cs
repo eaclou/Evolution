@@ -298,7 +298,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
                 curIconColor = uiManagerRef.colorWaterLayer;
                 curIconSprite = uiManagerRef.spriteSpiritWaterIcon;
                 essenceDescriptionStr = "Water Spirits";
-                textTotalMass.text = "Level: " + uiManagerRef.gameManager.theRenderKing.baronVonWater._GlobalWaterLevel;
+                textTotalMass.text = "Level: " + SimulationManager._GlobalWaterLevel;
             }
             else if (selectedWorldSpiritSlot.slotID == 2) {
                 isSelectedAir = true;

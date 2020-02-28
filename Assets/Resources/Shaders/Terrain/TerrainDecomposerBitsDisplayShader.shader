@@ -39,7 +39,7 @@
 			sampler2D _SpiritBrushTex;
 			sampler2D _PatternTex;
 			sampler2D _SkyTex;
-			//sampler2D _RenderedSceneRT;  // Provided by CommandBuffer -- global tex??? seems confusing... ** revisit this
+			
 			uniform float3 _SunDir;
 
 			uniform float _MapSize;
@@ -198,15 +198,14 @@
 				if(dX != 0 && dY != 0) {
 					grad = normalize(float2(dX, dY));
 				}
-				//store normals in brushstrokeData?? // *************
-
-				float3 groundSurfaceNormal = normalize(float3(-grad.x, -grad.y, -length(float2(dX,dY)))); ////normalize(altitudeTex.yzw);
-				groundSurfaceNormal.z *= -1;
-
+				float3 groundSurfaceNormal = normalize(float3(-grad.x, -grad.y, length(float2(dX,dY)))); ////normalize(altitudeTex.yzw);
+				
 				float3 algaeColor = float3(0.5,0.8,0.5) * 0.5;
 
+				float4 patternTex = tex2D(_PatternTex, i.patternUV);
+
 				ShadingData data;
-				data.baseAlbedo = float4(0.8,0.3,0,1);
+				data.baseAlbedo = 1.62 * float4(0.8,0.3,0,1) * (patternTex.x * 0.5 + 0.5);
 				data.altitudeTex = tex2D(_AltitudeTex, i.altitudeUV);
     			data.waterSurfaceTex = tex2D(_WaterSurfaceTex, i.altitudeUV);
 				data.groundNormalsTex = float4(0, groundSurfaceNormal);
@@ -220,6 +219,7 @@
 				data.worldSpaceCameraPosition = _WorldSpaceCameraPosition;
 				data.globalWaterLevel = _GlobalWaterLevel;
 				data.causticsStrength = 0.5;
+				data.depth = saturate(-data.altitudeTex.x + data.globalWaterLevel);
 
 				float4 outColor = MasterLightingModel(data);
 				outColor.a *= tex2D(_MainTex, i.quadUV).a;

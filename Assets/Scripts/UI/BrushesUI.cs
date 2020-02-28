@@ -653,10 +653,10 @@ public class BrushesUI : MonoBehaviour {
                 }
                 else if (selectedEssenceSlot.slotID == 1) {   // WATER
                     if (uiManagerRef.theCursorCzar.isDraggingMouseLeft) {
-                        uiManagerRef.gameManager.theRenderKing.baronVonWater._GlobalWaterLevel = Mathf.Clamp01(uiManagerRef.gameManager.theRenderKing.baronVonWater._GlobalWaterLevel + 0.002f);
+                        SimulationManager._GlobalWaterLevel = Mathf.Clamp01(SimulationManager._GlobalWaterLevel + 0.002f);
                     }
                     if (uiManagerRef.theCursorCzar.isDraggingMouseRight) {
-                        uiManagerRef.gameManager.theRenderKing.baronVonWater._GlobalWaterLevel = Mathf.Clamp01(uiManagerRef.gameManager.theRenderKing.baronVonWater._GlobalWaterLevel - 0.002f);
+                        SimulationManager._GlobalWaterLevel = Mathf.Clamp01(SimulationManager._GlobalWaterLevel - 0.002f);
                     }
                 }
                 else if (selectedEssenceSlot.slotID == 2) {   // AIR

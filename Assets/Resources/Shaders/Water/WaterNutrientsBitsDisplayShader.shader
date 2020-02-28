@@ -118,7 +118,7 @@
 				float bonusAmplitude = saturate(resourceGridSample.x * 1.5);//  cos((float)inst * 91204.119273 + _Time.y * 70.9128397) * 0.5 + 0.5;
 				bonusAmplitude = bonusAmplitude * bonusAmplitude;  // carve out
 
-				float sizeNorm = _CamDistNormalized * (0.7 + bonusAmplitude * 0.7) * 0.8 * alpha;
+				float sizeNorm = _CamDistNormalized * (0.5 + bonusAmplitude * 0.5) * 0.7 * alpha;
 				scale = float2(sizeNorm, sizeNorm);
 				quadPoint *= float3(scale, 1.0); // * (0.2 + _NutrientDensity * 0.175) * (_CamDistNormalized * 0.85 + 0.15);
 				

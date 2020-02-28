@@ -20,6 +20,7 @@ struct ShadingData {
 	float4 worldSpaceCameraPosition;
 	float globalWaterLevel;
 	float causticsStrength;
+	float depth;
 };
 
 float GetDepthNormalized(float rawAltitude) {
@@ -85,7 +86,7 @@ float4 MasterLightingModel(ShadingData shadingData) {
 	dotLight = dotLight * dotLight;
 	
 	float altitude = altitudeRaw;								
-	float depth = saturate(-altitude + shadingData.globalWaterLevel);  // 0-1 values
+	float depth = shadingData.depth; /// saturate(-altitude + shadingData.globalWaterLevel);  // 0-1 values
 	float isUnderwater = saturate(depth * 50);
 					
 	//=============================//Diffuse				

@@ -204,6 +204,7 @@
 				data.worldSpaceCameraPosition = _WorldSpaceCameraPosition;
 				data.globalWaterLevel = _GlobalWaterLevel;
 				data.causticsStrength = 0.5;
+				data.depth = saturate(-data.altitudeTex.x + data.globalWaterLevel);
 
 				float4 outColor = MasterLightingModel(data);
 				outColor.a *= tex2D(_MainTex, i.quadUV).a;

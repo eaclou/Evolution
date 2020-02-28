@@ -20,7 +20,7 @@ public class Agent : MonoBehaviour {
     public float turningAmount = 0f;
     public float swimAnimationCycleSpeed = 0.1f;
 
-    public float globalWaterLevel;
+    //public float globalWaterLevel;
 
     public float spawnStartingScale = 0.1f; // *** REFACTOR!!! SYNC WITH EGGS!!!
 
@@ -779,7 +779,7 @@ public class Agent : MonoBehaviour {
         wasteProducedLastFrame = 0f;
         oxygenUsedLastFrame = 0f;
 
-        globalWaterLevel = simManager.theRenderKing.baronVonWater._GlobalWaterLevel;
+        //globalWaterLevel = simManager.theRenderKing.baronVonWater._GlobalWaterLevel;
 
         /*if(isBeingSwallowed)
         {
@@ -1042,7 +1042,7 @@ public class Agent : MonoBehaviour {
             // THIS IS HOT GARBAGE !!! RE-FACTOR!! *****
             mouseClickCollider.radius = currentBoundingBoxSize.x * 0.5f + 2f;        
             mouseClickCollider.height = currentBoundingBoxSize.y + 2f;
-            mouseClickCollider.center = new Vector3(0f, 0f, (globalWaterLevel * 2f - 1f) * -10f);
+            mouseClickCollider.center = new Vector3(0f, 0f, -SimulationManager._GlobalWaterLevel * SimulationManager._MaxAltitude);
             //mouseClickCollider.radius += 2f; // ** TEMP -- should be based on camera distance also
             //mouseClickCollider.height += 2f;
         }               

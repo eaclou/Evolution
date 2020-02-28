@@ -133,7 +133,7 @@ public class KnowledgeUI : MonoBehaviour {
             
             uiKnowledgeMapViewerMat.SetTexture("_AltitudeTex", uiManagerRef.gameManager.theRenderKing.baronVonTerrain.terrainHeightDataRT);
             uiKnowledgeMapViewerMat.SetTexture("_ResourceGridTex", uiManagerRef.gameManager.simulationManager.vegetationManager.resourceGridRT1);
-            uiKnowledgeMapViewerMat.SetFloat("_WaterLevel", uiManagerRef.gameManager.theRenderKing.baronVonWater._GlobalWaterLevel);
+            uiKnowledgeMapViewerMat.SetFloat("_WaterLevel", SimulationManager._GlobalWaterLevel);
 
             string summaryText = GetSpeciesDescriptionString(uiManagerRef.gameManager.simulationManager);
             textKnowledgeSpeciesSummary.text = summaryText;

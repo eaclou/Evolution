@@ -77,6 +77,10 @@ public class SimulationManager : MonoBehaviour {
 
         }
     }
+
+    public static float _MaxAltitude = 20f;
+    public static float _GlobalWaterLevel = 0.15f;
+
     private int agentGridCellResolution = 1;  // How much to subdivide the map in order to detect nearest-neighbors more efficiently --> to not be O(n^2)
     public MapGridCell[][] mapGridCellArray;
 
@@ -950,7 +954,7 @@ public class SimulationManager : MonoBehaviour {
         for (int i = 0; i < agentsArray.Length; i++) {
 
             Vector4 depthSample = simStateData.depthAtAgentPositionsArray[i];
-            agentsArray[i].waterDepth = theRenderKing.baronVonWater._GlobalWaterLevel - depthSample.x;
+            agentsArray[i].waterDepth = _GlobalWaterLevel - depthSample.x;
             if(depthSample.y == 0f && depthSample.z == 0f) {
                 agentsArray[i].depthGradient = new Vector2(0f, 0f);
             }
@@ -972,7 +976,7 @@ public class SimulationManager : MonoBehaviour {
             */
             // precalculate normals?
             
-            if (depthSample.x > theRenderKing.baronVonWater._GlobalWaterLevel || depthSample.w < 0.1f) //(floorDepth < agentSize)
+            if (depthSample.x > _GlobalWaterLevel || depthSample.w < 0.1f) //(floorDepth < agentSize)
             {
                 float wallForce = 10.0f; // Mathf.Clamp01(agentSize - floorDepth) / agentSize;
                 Vector2 grad = agentsArray[i].depthGradient; // new Vector2(depthSample.y, depthSample.z); //.normalized;
@@ -1321,7 +1325,7 @@ public class SimulationManager : MonoBehaviour {
                     Vector4 altitudeSample = uiManager.SampleTexture(theRenderKing.baronVonTerrain.terrainHeightDataRT, spawnWorldPos / _MapSize);
 
                     bool isValidSpawnLoc = true;
-                    if(altitudeSample.x > theRenderKing.baronVonWater._GlobalWaterLevel) {
+                    if(altitudeSample.x > _GlobalWaterLevel) {
                         isValidSpawnLoc = false;
                     }
                     if(altitudeSample.w < 0.1f) {
@@ -1409,7 +1413,7 @@ public class SimulationManager : MonoBehaviour {
                 Vector4 altitudeSample = uiManager.SampleTexture(theRenderKing.baronVonTerrain.terrainHeightDataRT, spawnWorldPos / _MapSize);
                   
                 bool isValidSpawnLoc = true;
-                if(altitudeSample.x > theRenderKing.baronVonWater._GlobalWaterLevel) {
+                if(altitudeSample.x > _GlobalWaterLevel) {
                     isValidSpawnLoc = false;
                 }
                 if(altitudeSample.w < 0.1f) {
@@ -1551,7 +1555,7 @@ public class SimulationManager : MonoBehaviour {
 
         numAgentsBorn++;
         //currentOldestAgent = agentsArray[rankedIndicesList[0]].ageCounter;
-        agentsArray[agentIndex].InitializeSpawnAgentFromEggSack(settingsManager, agentIndex, sourceCandidate, parentEggSack, theRenderKing.baronVonWater._GlobalWaterLevel); // Spawn that genome in dead Agent's body and revive it!
+        agentsArray[agentIndex].InitializeSpawnAgentFromEggSack(settingsManager, agentIndex, sourceCandidate, parentEggSack, _GlobalWaterLevel); // Spawn that genome in dead Agent's body and revive it!
         theRenderKing.UpdateCritterGenericStrokesData(agentsArray[agentIndex]); // agentIndex, sourceCandidate.candidateGenome);
         
         
@@ -1560,7 +1564,7 @@ public class SimulationManager : MonoBehaviour {
        
         //Debug.Log("SpawnAgentImmaculate!i= " + agentIndex.ToString() + ", spawnWorldPos: " + spawnPos2D.ToString());
             
-        agentsArray[agentIndex].InitializeSpawnAgentImmaculate(settingsManager, agentIndex, sourceCandidate, new Vector3(spawnPos2D.x, spawnPos2D.y, 0f), theRenderKing.baronVonWater._GlobalWaterLevel); // Spawn that genome in dead Agent's body and revive it!
+        agentsArray[agentIndex].InitializeSpawnAgentImmaculate(settingsManager, agentIndex, sourceCandidate, new Vector3(spawnPos2D.x, spawnPos2D.y, 0f), _GlobalWaterLevel); // Spawn that genome in dead Agent's body and revive it!
         theRenderKing.UpdateCritterGenericStrokesData(agentsArray[agentIndex]); //agentIndex, sourceCandidate.candidateGenome);
         numAgentsBorn++;
 

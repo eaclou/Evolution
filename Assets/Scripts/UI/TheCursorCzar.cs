@@ -56,17 +56,11 @@ public class TheCursorCzar : MonoBehaviour {
         
 
         mouseRaycastWaterPlane.SetActive(true);
+        
+        Vector3 targetPosition = new Vector3(SimulationManager._MapSize * 0.5f, SimulationManager._MapSize * 0.5f, -SimulationManager._GlobalWaterLevel * SimulationManager._MaxAltitude);
 
-        //float scale = SimulationManager._MapSize * 0.1f;
-        Vector3 targetPosition = mouseRaycastWaterPlane.gameObject.transform.position; //
-        targetPosition.z = (uiManagerRef.gameManager.simulationManager.theRenderKing.baronVonWater._GlobalWaterLevel - 0.5f) * -20f;
-
-        mouseRaycastWaterPlane.gameObject.transform.position = Vector3.zero; // targetPosition;
-        //new Vector3(SimulationManager._MapSize * 0.5f, gameManager.simulationManager.theRenderKing.baronVonWater._GlobalWaterLevel, SimulationManager._MapSize * 0.5f);
-        //mouseRaycastWaterPlane.gameObject.transform.position = targetPosition;
-        //mouseRaycastWaterPlane.gameObject.transform.localScale = Vector3.one * scale;
-        //Vector3 camPos = cameraManager.gameObject.transform.position;                
-
+        mouseRaycastWaterPlane.gameObject.transform.position = targetPosition;
+        
         Ray ray = uiManagerRef.cameraManager.gameObject.GetComponent<Camera>().ScreenPointToRay(screenPos);
         cursorRay = ray;
         //Ray ray = new Ray(uiManagerRef.cameraManager.gameObject.transform.position, midMidpoint - uiManagerRef.cameraManager.gameObject.transform.position);

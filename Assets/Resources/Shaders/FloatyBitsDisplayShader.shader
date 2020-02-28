@@ -44,6 +44,8 @@
 			uniform float _MaxAltitude;
 			uniform float _GlobalWaterLevel;
 
+			uniform float _CamDistNormalized;
+
 			struct v2f
 			{
 				float4 pos : SV_POSITION;
@@ -80,10 +82,9 @@
 				float2 dir = normalize(velocity);
 				float2 scale = float2(0.05 * randomAspect, 0.05 * (1.0 / randomAspect)) * randomScale; //float2(randomAspect * randomScale, (1.0 / randomAspect) * randomScale * (length(velocity) * 25 + 1.61));
 				scale.y *= (1.0 + velMag * 100.0);
-				quadPoint *= float3(scale, 1.0) * 0.54; // * (sin(random3 * 10 + _Time * 123.49) * 0.75 + 0.25);
-				
+				quadPoint *= float3(scale, 1.0) * (_CamDistNormalized * 0.8 + 0.2); 
 
-				float2 forward = dir; //floatyBitData.heading; //normalize(velocity);
+				float2 forward = dir;
 				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
 				float3 rotatedPoint = float3(quadPoint.x * right + quadPoint.y * forward,
 											 quadPoint.z);

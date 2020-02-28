@@ -519,7 +519,7 @@ public class VegetationManager {
         computeShaderPlantParticles.SetTexture(kernelCSSimulateAlgaeParticles, "_SpawnDensityMap", renderKingRef.spiritBrushRT);
         computeShaderPlantParticles.SetTexture(kernelCSSimulateAlgaeParticles, "_ResourceGridRead", resourceGridRT1);
         computeShaderPlantParticles.SetFloat("_MapSize", SimulationManager._MapSize);   
-        computeShaderPlantParticles.SetFloat("_GlobalWaterLevel", renderKingRef.baronVonWater._GlobalWaterLevel);   
+        computeShaderPlantParticles.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);   
         computeShaderPlantParticles.SetFloat("_SpiritBrushPosNeg", renderKingRef.spiritBrushPosNeg);            
         //computeShaderFoodParticles.SetFloat("_RespawnFoodParticles", 1f);
         computeShaderPlantParticles.SetFloat("_Time", Time.realtimeSinceStartup);

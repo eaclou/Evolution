@@ -2,12 +2,16 @@
 {
 	Properties
 	{
-		_MainTex ("Main Texture", 2D) = "white" {}  // stem texture sheet
+		
+		_MainTex ("Main Texture", 2D) = "white" {}
 		_AltitudeTex ("_AltitudeTex", 2D) = "gray" {}
+		_VelocityTex ("_VelocityTex", 2D) = "black" {}
 		_WaterSurfaceTex ("_WaterSurfaceTex", 2D) = "black" {}
+		_ResourceGridTex ("_ResourceGridTex", 2D) = "black" {}
 		_TerrainColorTex ("_TerrainColorTex", 2D) = "black" {}
-		//_Tint("Color", Color) = (1,1,1,1)
-		//_Size("Size", vector) = (1,1,1,1)
+		_SpiritBrushTex ("_SpiritBrushTex", 2D) = "black" {}
+		_PatternTex ("_PatternTex", 2D) = "black" {}
+		_SkyTex ("_SkyTex", 2D) = "white" {}
 	}
 	SubShader
 	{		
@@ -26,11 +30,17 @@
 			#include "UnityCG.cginc"
 			#include "Assets/Resources/Shaders/Inc/NoiseShared.cginc"
 			#include "Assets/Resources/Shaders/Inc/StructsPlantParticles.cginc"
+			#include "Assets/Resources/Shaders/Inc/TerrainShared.cginc"
 
 			sampler2D _MainTex;
-			sampler2D _AltitudeTex;	
+			sampler2D _AltitudeTex;			
+			sampler2D _VelocityTex;
 			sampler2D _WaterSurfaceTex;
+			sampler2D _ResourceGridTex;
 			sampler2D _TerrainColorTex;
+			sampler2D _SpiritBrushTex;
+			sampler2D _PatternTex;
+			sampler2D _SkyTex;
 			
 			StructuredBuffer<PlantParticleData> plantParticleDataCBuffer;			
 			StructuredBuffer<float3> quadVerticesCBuffer;
@@ -40,9 +50,12 @@
 			uniform float _IsSelected;
 			uniform float _IsHover;
 
+			uniform float3 _SunDir;
 			uniform float _MapSize;
-			uniform float _MaxAltitude;
 			uniform float _GlobalWaterLevel;
+			uniform float _CamDistNormalized;
+			uniform float4 _WorldSpaceCameraPosition;
+			uniform float _MaxAltitude;
 			
 			struct v2f
 			{
@@ -51,6 +64,7 @@
 				float4 color : COLOR;
 				float4 hue : TEXCOORD1;
 				float4 worldPos : TEXCOORD2;
+				float2 altitudeUV : TEXCOORD3;
 			};
 
 			float rand(float2 co) {   // OUTPUT is in [0,1] RANGE!!!
@@ -76,7 +90,8 @@
 				float selectedMask = (1.0 - saturate(abs(_SelectedParticleIndex - particleIndex))) * _IsSelected;
 				float hoverMask = (1.0 - saturate(abs(_HoverParticleIndex - particleIndex))) * _IsHover;
 
-				float2 altUV = particleData.worldPos.xy / _MapSize;				
+				float2 altUV = particleData.worldPos.xy / _MapSize;	
+				o.altitudeUV = altUV;
 				float altitudeRaw = tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 0)).x;
 				float zPos = -max(_GlobalWaterLevel, altitudeRaw) * _MaxAltitude;
 
@@ -140,37 +155,57 @@
 			fixed4 frag(v2f i) : SV_Target
 			{
 				float4 texColor = tex2D(_MainTex, i.uv);
-				float4 terrainColor = tex2D(_TerrainColorTex, i.worldPos.xy / _MapSize);
 				
-
-
-				fixed4 col = tex2D(_MainTex, i.uv) * i.color;
+				fixed4 col = texColor * i.color;
 				col.rgb = lerp(float3(0.4, 0.97, 0.3), i.hue.rgb, 0.625);
 				col.rgb = lerp(col, float3(0.81, 0.79, 0.65) * 0.1, i.color.x * 0.6);
 				
-				//col.rgb = lerp(col.rgb, terrainColor.rgb, 0.37);
-				col.rgb += i.color.w * 2.5;
-				col.a = 1; //texColor.a;
+				
+				
+				//Diffuse
+				float pixelOffset = 1.0 / 256;  // resolution  // **** THIS CAN"T BE HARDCODED AS FINAL ****"
+				// ************  PRE COMPUTE THIS IN A TEXTURE!!!!!! ************************
+				float altitudeNorth = tex2D(_AltitudeTex, i.altitudeUV + float2(0, pixelOffset)).x;
+				float altitudeEast = tex2D(_AltitudeTex, i.altitudeUV + float2(pixelOffset, 0)).x;
+				float altitudeSouth = tex2D(_AltitudeTex, i.altitudeUV + float2(0, -pixelOffset)).x;
+				float altitudeWest = tex2D(_AltitudeTex, i.altitudeUV + float2(-pixelOffset, 0)).x;
 
-				return col;
+				float dX = altitudeEast - altitudeWest;
+				float dY = altitudeNorth - altitudeSouth;
 
-				/*
+				float2 grad = float2(0,1);
+				if(dX != 0 && dY != 0) {
+					grad = normalize(float2(dX, dY));
+				}
+				float3 groundSurfaceNormal = normalize(float3(-grad.x, -grad.y, length(float2(dX,dY)))); ////normalize(altitudeTex.yzw);
+				
+				float3 algaeColor = float3(0.5,0.8,0.5) * 0.5;
+
+				ShadingData data;
+				data.baseAlbedo = col;
+				data.altitudeTex = tex2D(_AltitudeTex, i.altitudeUV);
+    			data.waterSurfaceTex = tex2D(_WaterSurfaceTex, i.altitudeUV);
+				data.groundNormalsTex = float4(0, groundSurfaceNormal);
+    			data.resourceGridTex = tex2D(_ResourceGridTex, i.altitudeUV);
+				data.spiritBrushTex = tex2D(_SpiritBrushTex, i.altitudeUV);
+				data.skyTex = tex2D(_SkyTex, i.altitudeUV);
+				data.worldPos = i.worldPos;
+				data.maxAltitude = _MaxAltitude;
+				data.waterFogColor = float4(algaeColor, 1);
+				data.sunDir = float4(_SunDir, 0);
+				data.worldSpaceCameraPosition = _WorldSpaceCameraPosition;
+				data.globalWaterLevel = _GlobalWaterLevel;
+				data.causticsStrength = 0.5;
+				data.depth = saturate(-data.altitudeTex.x + data.globalWaterLevel) * 0.24;  // 0-1 values
+
+				float4 outColor = MasterLightingModel(data);
+
+				outColor.rgb += i.color.w * 2.5;  // Hover
+
+				outColor.a *= tex2D(_MainTex, i.uv).a;
+
 				//return float4(1,1,1,1);
-				float4 texColor = tex2D(_MainTex, i.uv);
-				
-				float4 finalColor = i.hue; // float4(float3(i.color.z * 1.2, 0.85, (1.0 - i.color.w) * 0.2) + i.color.y, texColor.a * i.color.x * 0.33 * (1 - i.color.z));
-				
-				
-				finalColor.a = texColor.a * 1;
-				
-				finalColor.rgb = lerp(finalColor, float3(0.81, 0.79, 0.65) * 0.1, i.color.x * 0.7);
-				finalColor.rgb = lerp(finalColor, float3(0.6, 1, 0.4) * 1, 0.25);
-				
-				
-				finalColor += 1 * i.color.a;  // hover/select
-				
-				return finalColor;
-				*/
+				return outColor;
 			}
 		ENDCG
 		}

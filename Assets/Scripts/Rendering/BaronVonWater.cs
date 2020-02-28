@@ -11,7 +11,7 @@ public class BaronVonWater : RenderBaron {
     public EnvironmentFluidManager fluidManagerRef;
     public VegetationManager veggieManRef;
 
-    public float _GlobalWaterLevel = 0f;
+    //public float _GlobalWaterLevel = 0f;
 
     public Material waterQuadStrokesLrgDisplayMat;
     public Material waterQuadStrokesSmlDisplayMat;
@@ -125,7 +125,7 @@ public class BaronVonWater : RenderBaron {
         InitializeBuffers();        
         InitializeMaterials();
 
-        _GlobalWaterLevel = 0.1f;
+        
     }
 
     private void InitializeBuffers() {
