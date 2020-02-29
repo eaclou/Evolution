@@ -98,12 +98,11 @@
 				float4 altitudeSample = tex2Dlod(_AltitudeTex, float4(altUV, 0, 0));
 				float altitude = altitudeSample.x; //i.worldPos.z / 10; // [-1,1] range
 				float4 waterSurfaceSample = tex2Dlod(_WaterSurfaceTex, float4(altUV, 0, 0));
+				
 				float3 surfaceNormal = waterSurfaceSample.yzw;
 				float depth = saturate(-altitude + _GlobalWaterLevel);
-
-				float refractionStrength = depth * 4.5;
-				//worldPosition.xy += -surfaceNormal.xy * refractionStrength;
-				
+				float refractionStrength = depth * 14.5;
+				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
 				
 				float random1 = rand(float2(inst, inst));
 				float random2 = rand(float2(random1, random1));
@@ -173,15 +172,14 @@
 				}
 				//store normals in brushstrokeData?? // *************
 
-				float3 groundSurfaceNormal = normalize(float3(-grad.x, -grad.y, -length(float2(dX,dY)))); ////normalize(altitudeTex.yzw);
-				groundSurfaceNormal.z *= -1;
-
+				float3 groundSurfaceNormal = normalize(float3(-grad.x, -grad.y, length(float2(dX,dY)))); ////normalize(altitudeTex.yzw);
+				
 				
 				ShadingData data;
 				data.baseAlbedo = finalColor; //float4(0.145,0.0972,0.015,1);
 				data.altitudeTex = altitudeTex;
     			data.waterSurfaceTex = tex2D(_WaterSurfaceTex, i.altitudeUV);
-				data.groundNormalsTex = float4(0, groundSurfaceNormal);
+				data.groundNormalsTex = float4(groundSurfaceNormal, 1);
     			data.resourceGridTex = resourceTex;
 				data.spiritBrushTex = tex2D(_SpiritBrushTex, i.altitudeUV);
 				data.skyTex = tex2D(_SkyTex, i.altitudeUV);
@@ -191,12 +189,28 @@
 				data.sunDir = float4(_SunDir, 0);
 				data.worldSpaceCameraPosition = _WorldSpaceCameraPosition;
 				data.globalWaterLevel = _GlobalWaterLevel;
-				data.causticsStrength = 0.5;
+				data.causticsStrength = 0.15;
 				data.depth = saturate(-data.altitudeTex.x + data.globalWaterLevel);
 
-				float4 outColor = MasterLightingModel(data);
-				outColor.a *= tex2D(_MainTex, i.uv).a;
-				return outColor;
+				float caustics = GetCausticsLight(finalColor, data);
+				float diffuse = GetDiffuseLight(finalColor, data);
+				float wetnessMod = GetWetnessModifier(data.altitudeTex.x, _GlobalWaterLevel);
+				float shoreFoam = GetFoamBrightness(data.altitudeTex.x, _GlobalWaterLevel);
+				float fogAmount = GetWaterFogAmount(data.depth * 2);
+				float isUnderwater = saturate(data.depth * 57);
+				float4 reflectionColor = GetReflectionAmount(data.worldPos, data.worldSpaceCameraPosition.xyz, data.waterSurfaceTex.yzw, data.skyTex, isUnderwater);
+				finalColor.rgb *= diffuse;
+				finalColor.rgb += caustics;
+				finalColor.rgb *= wetnessMod;
+				finalColor.rgb += shoreFoam;
+				finalColor.rgb = lerp(finalColor.rgb, data.waterFogColor.rgb, fogAmount);
+				finalColor.rgb += lerp(float3(0,0,0), reflectionColor.xyz, reflectionColor.w);
+				finalColor.rgb += data.spiritBrushTex.y;
+				//float4 outColor = MasterLightingModel(data);
+
+				
+				finalColor.a *= tex2D(_MainTex, i.uv).a;
+				return finalColor;
 			}
 		ENDCG
 		}

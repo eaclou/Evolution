@@ -23,20 +23,92 @@ struct ShadingData {
 	float depth;
 };
 
-float GetDepthNormalized(float rawAltitude) {
-	float depthNormalized = saturate((1.0 - rawAltitude) - 0.5) * 2;
-	depthNormalized *= _Turbidity;
-	return saturate(depthNormalized);
+
+float GetCausticsLight(float4 inColor, ShadingData shadingData) {
+	
+	float3 sunDir = shadingData.sunDir.xyz;
+
+	// FAKE CAUSTICS:::
+	float3 waterSurfaceNormal = shadingData.waterSurfaceTex.yzw; // pre-calculated
+	float dotLight = dot(waterSurfaceNormal, sunDir);
+	dotLight = dotLight * dotLight;
+									
+	float depth = shadingData.depth;
+	float isUnderwater = saturate(depth * 50);
+	
+	//float4 outColor = inColor;
+	//outColor.rgb += dotLight * isUnderwater * (1.0 - depth) * shadingData.causticsStrength;	
+
+	return dotLight * isUnderwater * (1.0 - depth) * shadingData.causticsStrength;	
 }
 
-float3 ApplyWaterFogColor(float3 sourceColor, float rawAltitude) {
-	float depthNormalized = GetDepthNormalized(rawAltitude);
-	float altitude = (rawAltitude * 2 - 1) * -1;
-	float isUnderwater = saturate(altitude * 10000);
-	float3 waterFogColor = _FogColor.rgb;
+float GetDiffuseLight(float4 inColor, ShadingData shadingData) {
+
 	
-	return lerp(sourceColor, waterFogColor, (saturate(depthNormalized + _MinFog) * isUnderwater));
+	float3 sunDir = shadingData.sunDir.xyz;
+	//=============================//Diffuse				
+	float3 groundSurfaceNormal = shadingData.groundNormalsTex.xyz;
+	float3 diffuseSurfaceNormal = groundSurfaceNormal; // lerp(groundSurfaceNormal, waterSurfaceNormal, depth);
+	float dotDiffuse = dot(diffuseSurfaceNormal, sunDir);
+	float diffuseWrap = dotDiffuse * 0.5 + 0.5;
+	//outColor.rgb *= saturate(dotDiffuse); // (0.7 + dotDiffuse * 0.3 + 0.08 * diffuseWrap);
+
+	return (0.5 + dotDiffuse * 0.5 + 0.1 * diffuseWrap);
+	return saturate(dotDiffuse);
 }
+
+float GetWetnessModifier(float altitude, float globalWaterLevel) {
+	// ********* Are these two specific to ground strokes only?? ***
+	// Wetness darkening:
+	float wetnessMask = 1.0 - saturate((-altitude + globalWaterLevel + 0.05) * 17.5); 
+	//finalColor.rgb *= (0.3 + wetnessMask * 0.7);
+	return (0.5 + wetnessMask * 0.5);
+	// ********* Are these two specific to ground strokes only?? ***
+
+}
+
+float GetFoamBrightness(float altitude, float globalWaterLevel) {
+	// shoreline foam:
+	float foamMask = 1.0 - saturate((abs(-altitude + globalWaterLevel) * 57));
+	//finalColor.rgb += foamMask * 0.3675;
+
+	return foamMask * 0.3675;
+}
+
+float4 GetWaterFogAmount(float depth) {
+	
+	float isUnderwater = saturate(depth * 57);
+	// FOG:	  *** needs an overhaul also
+	float fogAmount = lerp(0, 1, depth) * isUnderwater;
+	
+	
+	//finalColor.rgb = lerp(finalColor.rgb, waterFogColor, fogAmount * isUnderwater);
+	
+
+	return fogAmount;
+}
+
+float4 GetReflectionAmount(float3 worldPos, float3 camPos, float3 waterSurfaceNormal, float4 skyTex, float isUnderwater) {
+
+// Reflection!!!
+	float3 cameraToVertex = worldPos - camPos;
+	float3 cameraToVertexDir = normalize(cameraToVertex);
+	float3 reflectedViewDir = cameraToVertexDir + 2 * waterSurfaceNormal * 0.5;
+	float viewDot = 1.0 - saturate(dot(-cameraToVertexDir, waterSurfaceNormal));
+		
+	float4 reflectedColor = float4(skyTex.rgb, 1);
+	
+	viewDot * 0.3 + 0.2;		
+	reflectedColor.a = saturate(viewDot * isUnderwater);
+	
+	return reflectedColor;
+
+
+
+	//finalColor.rgb += lerp(float3(0,0,0), reflectedColor.xyz, reflectLerp);
+
+}
+
 
 float4 MasterLightingModel(ShadingData shadingData) {
 
@@ -294,4 +366,20 @@ float4 GetGroundColor(float3 worldPos, float4 frameBufferColor, float4 altitudeT
 
 	
 	
+}
+
+
+float GetDepthNormalized(float rawAltitude) {
+	float depthNormalized = saturate((1.0 - rawAltitude) - 0.5) * 2;
+	depthNormalized *= _Turbidity;
+	return saturate(depthNormalized);
+}
+
+float3 ApplyWaterFogColor(float3 sourceColor, float rawAltitude) {
+	float depthNormalized = GetDepthNormalized(rawAltitude);
+	float altitude = (rawAltitude * 2 - 1) * -1;
+	float isUnderwater = saturate(altitude * 10000);
+	float3 waterFogColor = _FogColor.rgb;
+	
+	return lerp(sourceColor, waterFogColor, (saturate(depthNormalized + _MinFog) * isUnderwater));
 }

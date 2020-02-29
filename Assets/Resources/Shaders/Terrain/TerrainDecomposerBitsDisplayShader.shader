@@ -113,10 +113,9 @@
 				float worldActiveMask = saturate(altitudeTexSample.w * 10);
 
 				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(o.altitudeUV, 0, 0)).yzw;
-				//float depth = saturate(-altitudeRaw + 0.5);
-				//float refractionStrength = depth * 4.5;
-
-				//worldPosition.xy += -surfaceNormal.xy * refractionStrength;
+				float depth = saturate(-altitudeRaw + _GlobalWaterLevel);
+				float refractionStrength = depth * 14.5;
+				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
 				
 				float fadeDuration = 0.25;
 				float fadeIn = saturate(groundBitData.age / fadeDuration);  // fade time = 0.1
@@ -205,10 +204,10 @@
 				float4 patternTex = tex2D(_PatternTex, i.patternUV);
 
 				ShadingData data;
-				data.baseAlbedo = 1.62 * float4(0.8,0.3,0,1) * (patternTex.x * 0.5 + 0.5);
+				data.baseAlbedo = 1.60962 * float4(0.8,0.3,0,1) * (patternTex.x * 0.5 + 0.5);
 				data.altitudeTex = tex2D(_AltitudeTex, i.altitudeUV);
     			data.waterSurfaceTex = tex2D(_WaterSurfaceTex, i.altitudeUV);
-				data.groundNormalsTex = float4(0, groundSurfaceNormal);
+				data.groundNormalsTex = float4(groundSurfaceNormal, 0);
     			data.resourceGridTex = tex2D(_ResourceGridTex, i.altitudeUV);
 				data.spiritBrushTex = tex2D(_SpiritBrushTex, i.altitudeUV);
 				data.skyTex = tex2D(_SkyTex, i.altitudeUV);
@@ -221,12 +220,26 @@
 				data.causticsStrength = 0.5;
 				data.depth = saturate(-data.altitudeTex.x + data.globalWaterLevel);
 
-				float4 outColor = MasterLightingModel(data);
-				outColor.a *= tex2D(_MainTex, i.quadUV).a;
-
-				//return float4(1,1,1,1);
-				return outColor;
-				
+				float4 finalColor = data.baseAlbedo;
+				float caustics = GetCausticsLight(finalColor, data);
+				float diffuse = GetDiffuseLight(finalColor, data);
+				float wetnessMod = GetWetnessModifier(data.altitudeTex.x, _GlobalWaterLevel);
+				float shoreFoam = GetFoamBrightness(data.altitudeTex.x, _GlobalWaterLevel);
+				float fogAmount = GetWaterFogAmount(data.depth * 2);
+				float isUnderwater = saturate(data.depth * 57);
+				float4 reflectionColor = GetReflectionAmount(data.worldPos, data.worldSpaceCameraPosition.xyz, data.waterSurfaceTex.yzw, data.skyTex, isUnderwater);
+								
+				finalColor.rgb *= diffuse;
+				finalColor.rgb += caustics;
+				finalColor.rgb *= wetnessMod;
+				//finalColor.rgb += shoreFoam;
+				finalColor.rgb = lerp(finalColor.rgb, data.waterFogColor.rgb, fogAmount);
+				finalColor.rgb += lerp(float3(0,0,0), reflectionColor.xyz, reflectionColor.w);
+				//float4 outColor = MasterLightingModel(data);
+				finalColor.rgb += data.spiritBrushTex.y;
+				//finalColor.rgb = float3(diffuse, diffuse, diffuse);
+				finalColor.a *= tex2D(_MainTex, i.quadUV).a;
+				return finalColor;
 				// What information is needed and when in order to properly render??? *******
 				// Ground Terrain baseAlbedo color? -- either precompute or blend btw stone/pebble/sand colors
 				// Height -- Z-Pos of particle
