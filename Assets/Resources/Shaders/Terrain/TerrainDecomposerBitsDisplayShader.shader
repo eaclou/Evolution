@@ -232,12 +232,12 @@
 				finalColor.rgb *= diffuse;
 				finalColor.rgb += caustics;
 				finalColor.rgb *= wetnessMod;
-				//finalColor.rgb += shoreFoam;
+				finalColor.rgb += shoreFoam;
 				finalColor.rgb = lerp(finalColor.rgb, data.waterFogColor.rgb, fogAmount);
 				finalColor.rgb += lerp(float3(0,0,0), reflectionColor.xyz, reflectionColor.w);
-				//float4 outColor = MasterLightingModel(data);
+				
 				finalColor.rgb += data.spiritBrushTex.y;
-				//finalColor.rgb = float3(diffuse, diffuse, diffuse);
+				
 				finalColor.a *= tex2D(_MainTex, i.quadUV).a;
 				return finalColor;
 				// What information is needed and when in order to properly render??? *******

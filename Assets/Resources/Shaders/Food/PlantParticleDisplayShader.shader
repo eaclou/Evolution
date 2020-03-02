@@ -157,7 +157,7 @@
 				float4 texColor = tex2D(_MainTex, i.uv);
 				
 				fixed4 col = texColor * i.color;
-				col.rgb = lerp(float3(0.4, 0.97, 0.3), i.hue.rgb, 0.625);
+				col.rgb = lerp(float3(0.4, 0.97, 0.3), i.hue.rgb, 0.325);
 				col.rgb = lerp(col, float3(0.81, 0.79, 0.65) * 0.1, i.color.x * 0.6);
 				
 				
@@ -185,7 +185,7 @@
 				data.baseAlbedo = col;
 				data.altitudeTex = tex2D(_AltitudeTex, i.altitudeUV);
     			data.waterSurfaceTex = tex2D(_WaterSurfaceTex, i.altitudeUV);
-				data.groundNormalsTex = float4(0, groundSurfaceNormal);
+				data.groundNormalsTex = float4(groundSurfaceNormal, 0);
     			data.resourceGridTex = tex2D(_ResourceGridTex, i.altitudeUV);
 				data.spiritBrushTex = tex2D(_SpiritBrushTex, i.altitudeUV);
 				data.skyTex = tex2D(_SkyTex, i.altitudeUV);
@@ -196,16 +196,31 @@
 				data.worldSpaceCameraPosition = _WorldSpaceCameraPosition;
 				data.globalWaterLevel = _GlobalWaterLevel;
 				data.causticsStrength = 0.5;
-				data.depth = 0;//saturate(-data.altitudeTex.x + data.globalWaterLevel) * 0.24;  // 0-1 values
-
-				float4 outColor = MasterLightingModel(data);
-
-				outColor.rgb += i.color.w * 2.5;  // Hover
-
-				outColor.a *= tex2D(_MainTex, i.uv).a;
+				data.depth = saturate(-data.altitudeTex.x + data.globalWaterLevel);
+				
+				float4 finalColor = data.baseAlbedo;
+				float caustics = GetCausticsLight(finalColor, data);
+				float diffuse = GetDiffuseLight(finalColor, data);
+				
+				float fogAmount = GetWaterFogAmount(data.depth * 0.5);
+				float isUnderwater = saturate(data.depth * 57);
+				float4 reflectionColor = GetReflectionAmount(data.worldPos, data.worldSpaceCameraPosition.xyz, data.waterSurfaceTex.yzw, data.skyTex, isUnderwater);
+								
+				finalColor.rgb *= diffuse;
+				finalColor.rgb += caustics;
+				//finalColor.rgb *= wetnessMod;
+				//finalColor.rgb += shoreFoam;
+				finalColor.rgb = lerp(finalColor.rgb, data.waterFogColor.rgb, fogAmount);
+				finalColor.rgb += lerp(float3(0,0,0), reflectionColor.xyz, reflectionColor.w);
+				
+				finalColor.rgb += data.spiritBrushTex.y;
+				
+				finalColor.a *= tex2D(_MainTex, i.uv).a;
+				finalColor.a = 1;
+				return finalColor;
 
 				//return float4(1,1,1,1);
-				return outColor;
+				return finalColor;
 			}
 		ENDCG
 		}

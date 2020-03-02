@@ -4589,6 +4589,7 @@ public class TheRenderKing : MonoBehaviour {
                 plantParticleDisplayMat.SetVector("_FogColor", simManager.fogColor);               
                 plantParticleDisplayMat.SetVector("_SunDir", sunDirection);
                 plantParticleDisplayMat.SetVector("_WorldSpaceCameraPosition", new Vector4(mainRenderCam.transform.position.x, mainRenderCam.transform.position.y, mainRenderCam.transform.position.z, 0f));
+        
                 cmdBufferMain.DrawProcedural(Matrix4x4.identity, plantParticleDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, simManager.vegetationManager.plantParticlesCBuffer.count * 32);
         
                 //}

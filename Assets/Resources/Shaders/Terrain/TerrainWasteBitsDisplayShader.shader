@@ -193,7 +193,7 @@
 				data.baseAlbedo = float4(0.145,0.0972,0.015,1);
 				data.altitudeTex = tex2D(_AltitudeTex, i.altitudeUV);
     			data.waterSurfaceTex = tex2D(_WaterSurfaceTex, i.altitudeUV);
-				data.groundNormalsTex = float4(0, groundSurfaceNormal);
+				data.groundNormalsTex = float4(groundSurfaceNormal, 0);
     			data.resourceGridTex = tex2D(_ResourceGridTex, i.altitudeUV);
 				data.spiritBrushTex = tex2D(_SpiritBrushTex, i.altitudeUV);
 				data.skyTex = tex2D(_SkyTex, i.altitudeUV);
@@ -206,9 +206,28 @@
 				data.causticsStrength = 0.5;
 				data.depth = saturate(-data.altitudeTex.x + data.globalWaterLevel);
 
-				float4 outColor = MasterLightingModel(data);
-				outColor.a *= tex2D(_MainTex, i.quadUV).a;
-				return outColor;
+				
+				float4 finalColor = data.baseAlbedo;
+				float caustics = GetCausticsLight(finalColor, data);
+				float diffuse = GetDiffuseLight(finalColor, data);
+				float wetnessMod = GetWetnessModifier(data.altitudeTex.x, _GlobalWaterLevel);
+				float shoreFoam = GetFoamBrightness(data.altitudeTex.x, _GlobalWaterLevel);
+				float fogAmount = GetWaterFogAmount(data.depth * 2);
+				float isUnderwater = saturate(data.depth * 57);
+				float4 reflectionColor = GetReflectionAmount(data.worldPos, data.worldSpaceCameraPosition.xyz, data.waterSurfaceTex.yzw, data.skyTex, isUnderwater);
+								
+				finalColor.rgb *= diffuse;
+				finalColor.rgb += caustics;
+				finalColor.rgb *= wetnessMod;
+				finalColor.rgb += shoreFoam;
+				finalColor.rgb = lerp(finalColor.rgb, data.waterFogColor.rgb, fogAmount);
+				finalColor.rgb += lerp(float3(0,0,0), reflectionColor.xyz, reflectionColor.w);
+				
+				finalColor.rgb += data.spiritBrushTex.y;
+				
+				finalColor.a *= tex2D(_MainTex, i.quadUV).a;
+				return finalColor;
+
 			}
 		ENDCG
 		}

@@ -53,8 +53,8 @@ float GetDiffuseLight(float4 inColor, ShadingData shadingData) {
 	float diffuseWrap = dotDiffuse * 0.5 + 0.5;
 	//outColor.rgb *= saturate(dotDiffuse); // (0.7 + dotDiffuse * 0.3 + 0.08 * diffuseWrap);
 
-	return (0.5 + dotDiffuse * 0.5 + 0.1 * diffuseWrap);
-	return saturate(dotDiffuse);
+	return (0.4 + saturate(dotDiffuse) * 0.5 + 0.172 * diffuseWrap);
+	//return saturate(dotDiffuse);
 }
 
 float GetWetnessModifier(float altitude, float globalWaterLevel) {
