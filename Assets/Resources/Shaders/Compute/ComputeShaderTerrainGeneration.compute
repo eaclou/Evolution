@@ -445,8 +445,7 @@ void CSUpdateTerrainMapsBrush (uint3 id : SV_DispatchThreadID)
 	}
 
 	if(_ChannelID == 1) {  // STONE
-		texSample.x = saturate(texSample.x + brushSample.x * _AddSubtractSign * _BrushIntensity * 0.025);
-		
+		texSample.x = saturate(texSample.x + brushSample.x * _AddSubtractSign * _BrushIntensity * 0.025);		
 	}
 
 	if(_ChannelID == 2) { // PEBBLES

@@ -11,6 +11,8 @@
 		_SpiritBrushTex ("_SpiritBrushTex", 2D) = "black" {}
 		_PatternTex ("_PatternTex", 2D) = "black" {}
 		_SkyTex ("_SkyTex", 2D) = "white" {}
+		_NumRows ("_NumRows", Float) = 1
+		_NumColumns ("_NumColumns", Float) = 1
 		
 	}
 	SubShader
@@ -39,6 +41,9 @@
 			sampler2D _SpiritBrushTex;
 			sampler2D _PatternTex;
 			sampler2D _SkyTex;
+
+			uniform float _NumRows;
+			uniform float _NumColumns;
 			
 			uniform float3 _SunDir;
 
@@ -103,7 +108,16 @@
 				float fluidSpeedMult = 5;
 				worldPosition.xy += vel * fluidSpeedMult;  // carried by water
 
-				o.quadUV = quadPoint + 0.5;
+				groundBitData.brushType = (groundBitData.brushType + floor(_Time.y * 17.17)) % (_NumColumns * _NumRows);
+				float2 quadUV = quadPoint + 0.5f; // 0-1,0-1
+				quadUV.x = quadUV.x / _NumColumns;
+				quadUV.y = quadUV.y / _NumRows;				
+				float column = (float)(groundBitData.brushType % _NumColumns);
+				float row = (float)floor((groundBitData.brushType) / _NumColumns);
+				quadUV.x += column * (1.0 / _NumColumns);
+				quadUV.y += row * (1.0 / _NumRows);
+				o.quadUV = quadUV; // full texture
+
 				o.worldPos = worldPosition;
 				float2 uv = worldPosition.xy / _MapSize;
 				o.altitudeUV = uv;
@@ -124,14 +138,14 @@
 
 				worldPosition.z = -altitudeRaw * _MaxAltitude;
 				
-				float2 scale = float2(7,6.65) * 0.23641 * alpha; //groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25) * 2.0;
+				float2 scale = float2(1,1) * 0.23641 * alpha; //groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25) * 2.0;
 			
 				float4 resourceGridSample = tex2Dlod(_ResourceGridTex, float4(uv, 0, 0));
 				float decomposerAmount = saturate(resourceGridSample.z);
 				float decomposerMinMask = saturate(decomposerAmount * 100);
 				float wasteAmount = saturate(resourceGridSample.y) * decomposerMinMask;
 
-				float sizeFadeMask = (decomposerAmount + wasteAmount * 0.5) * 0.9 + 0.1; // saturate((1.0 - altitude) * 4 - 2);
+				float sizeFadeMask = 1;// (decomposerAmount + wasteAmount * 0.5) * 0.9 + 0.1; // saturate((1.0 - altitude) * 4 - 2);
 				quadPoint *= float3(scale, 1.0) * sizeFadeMask;
 								
 				float4 fluidVelocity = tex2Dlod(_VelocityTex, float4(worldPosition.xy / 256, 0, 2));
@@ -204,7 +218,7 @@
 				float4 patternTex = tex2D(_PatternTex, i.patternUV);
 
 				ShadingData data;
-				data.baseAlbedo = 1.60962 * float4(0.8,0.3,0,1) * (patternTex.x * 0.5 + 0.5);
+				data.baseAlbedo = saturate(1.60962 * float4(0.8,0.3,0,1));
 				data.altitudeTex = tex2D(_AltitudeTex, i.altitudeUV);
     			data.waterSurfaceTex = tex2D(_WaterSurfaceTex, i.altitudeUV);
 				data.groundNormalsTex = float4(groundSurfaceNormal, 0);
@@ -228,7 +242,8 @@
 				float fogAmount = GetWaterFogAmount(data.depth * 2);
 				float isUnderwater = saturate(data.depth * 57);
 				float4 reflectionColor = GetReflectionAmount(data.worldPos, data.worldSpaceCameraPosition.xyz, data.waterSurfaceTex.yzw, data.skyTex, isUnderwater);
-								
+				
+				finalColor.a = 1;
 				finalColor.rgb *= diffuse;
 				finalColor.rgb += caustics;
 				finalColor.rgb *= wetnessMod;

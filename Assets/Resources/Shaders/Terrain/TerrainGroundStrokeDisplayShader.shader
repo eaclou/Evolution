@@ -9,6 +9,8 @@
 		_TerrainColorTex ("_TerrainColorTex", 2D) = "black" {}
 		_SpiritBrushTex ("_SpiritBrushTex", 2D) = "black" {}
 		_SkyTex ("_SkyTex", 2D) = "white" {}
+		_NumRows ("_NumRows", Float) = 1
+		_NumColumns ("_NumColumns", Float) = 1
 	}
 	SubShader
 	{	
@@ -38,6 +40,9 @@
 			sampler2D _TerrainColorTex;
 			sampler2D _SpiritBrushTex;
 			sampler2D _SkyTex;
+
+			uniform float _NumRows;
+			uniform float _NumColumns;
 			
 			uniform float4 _WorldSpaceCameraPosition;
 			uniform float _MapSize;	
@@ -101,15 +106,15 @@
 				
 				float3 surfaceNormal = waterSurfaceSample.yzw;
 				float depth = saturate(-altitude + _GlobalWaterLevel);
-				float refractionStrength = depth * 14.5;
+				float refractionStrength = depth * 4.5;
 				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
 				
 				float random1 = rand(float2(inst, inst));
 				float random2 = rand(float2(random1, random1));
-				float randomAspect = lerp(0.8, 1.2, random1);
+				float randomAspect = lerp(0.8, 1.2, random1) * 0.95395;
 				strokeData.scale.x *= randomAspect;
-				float2 scale = strokeData.scale * 1.630773489514 * strokeData.isActive;
-				//scale = float2(0.5,0.5);
+				float2 scale = strokeData.scale * 2.1514 * strokeData.isActive;
+				
 				quadPoint *= float3(scale, 1.0);
 
 				// &&&& Screen-space UV of center of brushstroke:
@@ -129,12 +134,13 @@
 				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0) + float4(rotatedPoint, 0, 0)));	
 				o.pos = lerp( mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0) + float4(rotatedPoint, 0, 0))), mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)) + float4(rotatedPoint, 0, 0)), 0.1);	
 				
-				float2 uv = quadVerticesCBuffer[id] + 0.5f;
-				uv = uv / 4.0;  
-				float row = (float)(strokeData.brushType % 4);
-				float column = (float)floor((strokeData.brushType) / 4.0);
-				uv.x += row * 0.25;
-				uv.y += column * 0.25;
+				float2 uv = quadVerticesCBuffer[id] + 0.5f; // 0-1,0-1
+				uv.x = uv.x / _NumColumns;
+				uv.y = uv.y / _NumRows;				
+				float column = (float)(strokeData.brushType % _NumColumns);
+				float row = (float)floor((strokeData.brushType) / _NumColumns);
+				uv.x += column * (1.0 / _NumColumns);
+				uv.y += row * (1.0 / _NumRows);
 				o.uv = uv; // full texture
 				
 				return o;
@@ -142,7 +148,7 @@
 
 			fixed4 frag(v2f i) : SV_Target
 			{	
-				
+				//return float4(1,1,1,1);
 				float4 resourceTex = tex2D(_ResourceGridTex, i.altitudeUV);
 				
 				float3 decomposerHue = float3(0.8,0.3,0);
@@ -155,9 +161,10 @@
 				
 				float4 altitudeTex = tex2D(_AltitudeTex, i.altitudeUV);
 
-				float4 finalColor = _Color0;   // BASE STONE COLOR:	
-				finalColor = lerp(finalColor, _Color1, saturate(altitudeTex.y));
-				finalColor = lerp(finalColor, _Color2, saturate(altitudeTex.z));
+				float4 finalColor = _Color0;   // BASE STONE COLOR:
+				finalColor.a = 1;
+				//finalColor = lerp(finalColor, _Color1, saturate(altitudeTex.y));
+				//finalColor = lerp(finalColor, _Color2, saturate(altitudeTex.z));
 
 				finalColor.rgb = lerp(finalColor.rgb, decomposerHue, decomposerMask);
 				finalColor.rgb = lerp(finalColor.rgb, detritusHue, detritusMask);

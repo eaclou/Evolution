@@ -10,6 +10,8 @@
 		_TerrainColorTex ("_TerrainColorTex", 2D) = "black" {}
 		_SkyTex ("_SkyTex", 2D) = "black" {}
 		_SpiritBrushTex ("_SpiritBrushTex", 2D) = "black" {}
+		_NumRows ("_NumRows", Float) = 1
+		_NumColumns ("_NumColumns", Float) = 1
 	}
 	SubShader
 	{		
@@ -36,6 +38,9 @@
 			sampler2D _TerrainColorTex;
 			sampler2D _SpiritBrushTex;
 			sampler2D _SkyTex;
+
+			uniform float _NumRows;
+			uniform float _NumColumns;
 
 			uniform float4 _WorldSpaceCameraPosition;
 			//sampler2D _RenderedSceneRT;  // Provided by CommandBuffer -- global tex??? seems confusing... ** revisit this
@@ -88,7 +93,17 @@
 				float3 worldPosition = groundBitData.worldPos;
 				float3 quadPoint = quadVerticesCBuffer[id];
 
-				o.quadUV = quadPoint + 0.5;
+				//o.quadUV = quadPoint + 0.5;
+
+				float2 quadUV = quadPoint + 0.5f; // 0-1,0-1
+				quadUV.x = quadUV.x / _NumColumns;
+				quadUV.y = quadUV.y / _NumRows;				
+				float column = (float)(groundBitData.brushType % _NumColumns);
+				float row = (float)floor((groundBitData.brushType) / _NumColumns);
+				quadUV.x += column * (1.0 / _NumColumns);
+				quadUV.y += row * (1.0 / _NumRows);
+				o.quadUV = quadUV; // full texture
+
 				o.worldPos = worldPosition;
 				float2 uv = worldPosition.xy / _MapSize;
 				o.altitudeUV = uv;
@@ -111,9 +126,10 @@
 				float alpha = fadeIn * fadeOut;
 				alpha *= worldActiveMask;
 				
-				float2 scale = 3.978312 * alpha; //groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25) * (_DetritusDensityLerp * 3.14 + 0.5);
+				float2 scale = 5.978312 * alpha; //groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25) * (_DetritusDensityLerp * 3.14 + 0.5);
 				float wasteTex = saturate(tex2Dlod(_ResourceGridTex, float4(uv, 0, 0)).y);
 				scale = scale * (wasteTex * 0.9 + 0.1);
+				//scale.y *= 4.5;
 				quadPoint *= float3(scale, 1.0);
 				
 				float4 fluidVelocity = tex2Dlod(_VelocityTex, float4(worldPosition.xy / _MapSize, 0, 2));
@@ -166,7 +182,8 @@
 			}
 
 			fixed4 frag(v2f i) : SV_Target
-			{				
+			{	
+				//return float4(1,1,1,1);
 				//Diffuse
 				float pixelOffset = 1.0 / 256;  // resolution  // **** THIS CAN"T BE HARDCODED AS FINAL ****"
 				// ************  PRE COMPUTE THIS IN A TEXTURE!!!!!! ************************
@@ -190,7 +207,7 @@
 				float3 algaeColor = float3(0.5,0.8,0.5) * 0.5;
 				
 				ShadingData data;
-				data.baseAlbedo = float4(0.145,0.0972,0.015,1);
+				data.baseAlbedo = float4(float3(0.145,0.0972,0.015) * 0.5,1);
 				data.altitudeTex = tex2D(_AltitudeTex, i.altitudeUV);
     			data.waterSurfaceTex = tex2D(_WaterSurfaceTex, i.altitudeUV);
 				data.groundNormalsTex = float4(groundSurfaceNormal, 0);

@@ -4345,11 +4345,34 @@ public class TheRenderKing : MonoBehaviour {
             //terrainMeshOpaqueMat.SetTexture("_MainTex", baronVonTerrain.terrainColorRT0);
             //Matrix4x4 terrainMeshTRS = Matrix4x4.TRS(new Vector3(0f, 0f, 0f), Quaternion.identity, Vector3.one);
             //cmdBufferMain.DrawMesh(baronVonTerrain.terrainMesh, terrainMeshTRS, terrainMeshOpaqueMat);
+
+            // STONE STROKES!!!!
+            baronVonTerrain.groundStrokesLrgDisplayMat.SetPass(0);
+            baronVonTerrain.groundStrokesLrgDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+            baronVonTerrain.groundStrokesLrgDisplayMat.SetBuffer("environmentStrokesCBuffer", baronVonTerrain.terrainStoneStrokesCBuffer);
+            baronVonTerrain.groundStrokesLrgDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+            baronVonTerrain.groundStrokesLrgDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
+            baronVonTerrain.groundStrokesLrgDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+            baronVonTerrain.groundStrokesLrgDisplayMat.SetTexture("_ResourceGridTex", simManager.vegetationManager.resourceGridRT1);
+            baronVonTerrain.groundStrokesLrgDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);    
+            baronVonTerrain.groundStrokesLrgDisplayMat.SetTexture("_SpiritBrushTex", spiritBrushRT); 
+            baronVonTerrain.groundStrokesLrgDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);       
+            baronVonTerrain.groundStrokesLrgDisplayMat.SetFloat("_MinFog", minimumFogDensity);   
+            baronVonTerrain.groundStrokesLrgDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel); 
+            baronVonTerrain.groundStrokesLrgDisplayMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
+            baronVonTerrain.groundStrokesLrgDisplayMat.SetVector("_FogColor", simManager.fogColor);
+            baronVonTerrain.groundStrokesLrgDisplayMat.SetVector("_SunDir", sunDirection);
+            baronVonTerrain.groundStrokesLrgDisplayMat.SetVector("_WorldSpaceCameraPosition", new Vector4(mainRenderCam.transform.position.x, mainRenderCam.transform.position.y, mainRenderCam.transform.position.z, 0f));
+            baronVonTerrain.groundStrokesLrgDisplayMat.SetVector("_Color0", baronVonTerrain.stoneSlotGenomeCurrent.color); // new Vector4(0.9f, 0.9f, 0.8f, 1f));
+            //baronVonTerrain.groundStrokesLrgDisplayMat.SetVector("_Color1", baronVonTerrain.pebblesSlotGenomeCurrent.color); // new Vector4(0.7f, 0.8f, 0.9f, 1f));
+            //baronVonTerrain.groundStrokesLrgDisplayMat.SetVector("_Color2", baronVonTerrain.sandSlotGenomeCurrent.color);
+            cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundStrokesLrgDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.terrainStoneStrokesCBuffer.count);
+            
             
             // MEDIUM STROKES!!!!
             baronVonTerrain.groundStrokesMedDisplayMat.SetPass(0);
             baronVonTerrain.groundStrokesMedDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-            baronVonTerrain.groundStrokesMedDisplayMat.SetBuffer("environmentStrokesCBuffer", baronVonTerrain.terrainStrokesCBuffer);
+            baronVonTerrain.groundStrokesMedDisplayMat.SetBuffer("environmentStrokesCBuffer", baronVonTerrain.terrainPebbleStrokesCBuffer);
             baronVonTerrain.groundStrokesMedDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
             baronVonTerrain.groundStrokesMedDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
             baronVonTerrain.groundStrokesMedDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
@@ -4364,11 +4387,33 @@ public class TheRenderKing : MonoBehaviour {
             baronVonTerrain.groundStrokesMedDisplayMat.SetVector("_SunDir", sunDirection);
             baronVonTerrain.groundStrokesMedDisplayMat.SetVector("_WorldSpaceCameraPosition", new Vector4(mainRenderCam.transform.position.x, mainRenderCam.transform.position.y, mainRenderCam.transform.position.z, 0f));
             baronVonTerrain.groundStrokesMedDisplayMat.SetVector("_Color0", baronVonTerrain.stoneSlotGenomeCurrent.color); // new Vector4(0.9f, 0.9f, 0.8f, 1f));
-            baronVonTerrain.groundStrokesMedDisplayMat.SetVector("_Color1", baronVonTerrain.pebblesSlotGenomeCurrent.color); // new Vector4(0.7f, 0.8f, 0.9f, 1f));
-            baronVonTerrain.groundStrokesMedDisplayMat.SetVector("_Color2", baronVonTerrain.sandSlotGenomeCurrent.color);
-            //cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
-            cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundStrokesMedDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.terrainStrokesCBuffer.count);
+            //baronVonTerrain.groundStrokesMedDisplayMat.SetVector("_Color0", baronVonTerrain.pebblesSlotGenomeCurrent.color); // new Vector4(0.7f, 0.8f, 0.9f, 1f));
+            //baronVonTerrain.groundStrokesMedDisplayMat.SetVector("_Color2", baronVonTerrain.sandSlotGenomeCurrent.color);
+            cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundStrokesMedDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.terrainPebbleStrokesCBuffer.count);
             
+            // SAND STROKES!!!!
+            baronVonTerrain.groundStrokesSmlDisplayMat.SetPass(0);
+            baronVonTerrain.groundStrokesSmlDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+            baronVonTerrain.groundStrokesSmlDisplayMat.SetBuffer("environmentStrokesCBuffer", baronVonTerrain.terrainSandStrokesCBuffer);
+            baronVonTerrain.groundStrokesSmlDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+            baronVonTerrain.groundStrokesSmlDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
+            baronVonTerrain.groundStrokesSmlDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+            baronVonTerrain.groundStrokesSmlDisplayMat.SetTexture("_ResourceGridTex", simManager.vegetationManager.resourceGridRT1);
+            baronVonTerrain.groundStrokesSmlDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);    
+            baronVonTerrain.groundStrokesSmlDisplayMat.SetTexture("_SpiritBrushTex", spiritBrushRT); 
+            baronVonTerrain.groundStrokesSmlDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);       
+            baronVonTerrain.groundStrokesSmlDisplayMat.SetFloat("_MinFog", minimumFogDensity);   
+            baronVonTerrain.groundStrokesSmlDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel); 
+            baronVonTerrain.groundStrokesSmlDisplayMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
+            baronVonTerrain.groundStrokesSmlDisplayMat.SetVector("_FogColor", simManager.fogColor);
+            baronVonTerrain.groundStrokesSmlDisplayMat.SetVector("_SunDir", sunDirection);
+            baronVonTerrain.groundStrokesSmlDisplayMat.SetVector("_WorldSpaceCameraPosition", new Vector4(mainRenderCam.transform.position.x, mainRenderCam.transform.position.y, mainRenderCam.transform.position.z, 0f));
+            baronVonTerrain.groundStrokesSmlDisplayMat.SetVector("_Color0", baronVonTerrain.stoneSlotGenomeCurrent.color); // new Vector4(0.9f, 0.9f, 0.8f, 1f));
+            //baronVonTerrain.groundStrokesSmlDisplayMat.SetVector("_Color1", baronVonTerrain.pebblesSlotGenomeCurrent.color); // new Vector4(0.7f, 0.8f, 0.9f, 1f));
+            //baronVonTerrain.groundStrokesSmlDisplayMat.SetVector("_Color0", baronVonTerrain.sandSlotGenomeCurrent.color);
+            cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundStrokesSmlDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.terrainSandStrokesCBuffer.count);
+            
+
             // -- DETRITUS / WASTE
             baronVonTerrain.wasteBitsDisplayMat.SetPass(0);
             baronVonTerrain.wasteBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
