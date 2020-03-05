@@ -106,9 +106,10 @@
 				
 				float random1 = rand(float2(inst, inst));
 				float random2 = rand(float2(random1, random1));
-				float randomAspect = lerp(0.75, 1.33, random1);
-				
-				float2 scale = strokeData.scale * randomAspect * 0.99514 * strokeData.isActive;
+				float randomAspect = lerp(0.8, 1.2, random1);
+				strokeData.scale.x *= randomAspect;
+				float2 scale = strokeData.scale * 1.630773489514 * strokeData.isActive;
+				//scale = float2(0.5,0.5);
 				quadPoint *= float3(scale, 1.0);
 
 				// &&&& Screen-space UV of center of brushstroke:
@@ -126,8 +127,15 @@
 
 				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)) + float4(rotatedPoint, 0, 0));				
 				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0) + float4(rotatedPoint, 0, 0)));	
-				o.pos = lerp( mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0) + float4(rotatedPoint, 0, 0))), mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)) + float4(rotatedPoint, 0, 0)), 0.42);	
-				o.uv = quadVerticesCBuffer[id] + 0.5f; // full texture
+				o.pos = lerp( mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0) + float4(rotatedPoint, 0, 0))), mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)) + float4(rotatedPoint, 0, 0)), 0.1);	
+				
+				float2 uv = quadVerticesCBuffer[id] + 0.5f;
+				uv = uv / 4.0;  
+				float row = (float)(strokeData.brushType % 4);
+				float column = (float)floor((strokeData.brushType) / 4.0);
+				uv.x += row * 0.25;
+				uv.y += column * 0.25;
+				o.uv = uv; // full texture
 				
 				return o;
 			}
@@ -209,7 +217,7 @@
 				//float4 outColor = MasterLightingModel(data);
 
 				
-				finalColor.a *= tex2D(_MainTex, i.uv).a;
+				finalColor.a = saturate(finalColor.a * tex2D(_MainTex, i.uv).a * 1);
 				return finalColor;
 			}
 		ENDCG

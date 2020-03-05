@@ -162,9 +162,11 @@ void CSUpdateGroundStrokes (uint3 id : SV_DispatchThreadID)
 
 	float isActive = saturate((altitudeSampleCenter.w - 0.05) * 1000);
 	
-	terrainFrameBufferStrokesCBuffer[id.x].isActive = isActive;
-	terrainFrameBufferStrokesCBuffer[id.x].heading = heading;
-	terrainFrameBufferStrokesCBuffer[id.x].worldPos.z = -max(altitudeCenter, _GlobalWaterLevel) * _MaxAltitude;
+	data.isActive = isActive;
+	data.heading = heading;
+	data.worldPos.z = -max(altitudeCenter, _GlobalWaterLevel) * _MaxAltitude;
+	data.brushType = (floor(Value2D(uv, 1000).x * 12) + round(_Time * 0.013 + (float)id.x * 0.63 + data.worldPos.y)) % 12;
+	terrainFrameBufferStrokesCBuffer[id.x] = data;
 }
 
 [numthreads(64,1,1)]

@@ -69,7 +69,7 @@ public class BaronVonTerrain : RenderBaron {
     //private int numFrameBufferStrokesPerDimension = 512;
     private ComputeBuffer frameBufferStrokesCBuffer; // combine!!! ***
     private int numGroundStrokesLrg = 32;
-    private int numGroundStrokesMed = 128;
+    private int numGroundStrokesMed = 64;
     private int numGroundStrokesSml = 512;
     //public ComputeBuffer groundStrokesLrgCBuffer;
     public ComputeBuffer terrainStrokesCBuffer;
@@ -357,12 +357,12 @@ public class BaronVonTerrain : RenderBaron {
                 int index = y * numGroundStrokesLrg + x;
                 float xPos = (float)x / (float)(numGroundStrokesLrg - 1) * SimulationManager._MapSize;
                 float yPos = (1f - (float)y / (float)(numGroundStrokesLrg - 1)) * SimulationManager._MapSize;
-                Vector2 offset = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f) * 0.0f) * 16f;
+                Vector2 offset = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f) * 1.0f) * 0.6f;
                 Vector3 pos = new Vector3(xPos + offset.x, yPos + offset.y, 0f);
                 terrainStrokesArray[index].worldPos = pos;
-                terrainStrokesArray[index].scale = new Vector2(UnityEngine.Random.Range(0.4f, 0.8f), UnityEngine.Random.Range(1.5f, 2f)) * 14f; // Y is forward, along stroke
+                terrainStrokesArray[index].scale = new Vector2(UnityEngine.Random.Range(0.5f, 1.2f), UnityEngine.Random.Range(0.5f, 1.2f)) * 14f; // Y is forward, along stroke
                 terrainStrokesArray[index].heading = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)).normalized;
-                terrainStrokesArray[index].brushType = UnityEngine.Random.Range(0,4);
+                terrainStrokesArray[index].brushType = UnityEngine.Random.Range(0,16);
                 terrainStrokesArray[index].isActive = 0f;
             }
         }
@@ -372,12 +372,12 @@ public class BaronVonTerrain : RenderBaron {
                 int index = baseIndex + y * numGroundStrokesMed + x;
                 float xPos = (float)x / (float)(numGroundStrokesMed - 1) * SimulationManager._MapSize;
                 float yPos = (1f - (float)y / (float)(numGroundStrokesMed - 1)) * SimulationManager._MapSize;
-                Vector2 offset = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f) * 0.0f) * 16f;
+                Vector2 offset = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f) * 1.0f) * 0.6f;
                 Vector3 pos = new Vector3(xPos + offset.x, yPos + offset.y, 0f);
                 terrainStrokesArray[index].worldPos = pos;
-                terrainStrokesArray[index].scale = new Vector2(UnityEngine.Random.Range(0.4f, 0.8f), UnityEngine.Random.Range(1.55f, 2.3f)) * 4.20f; // Y is forward, along stroke
+                terrainStrokesArray[index].scale = new Vector2(UnityEngine.Random.Range(0.5f, 1.2f), UnityEngine.Random.Range(0.5f, 1.2f)) * 4.20f; // Y is forward, along stroke
                 terrainStrokesArray[index].heading = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)).normalized;
-                terrainStrokesArray[index].brushType = UnityEngine.Random.Range(0,4);
+                terrainStrokesArray[index].brushType = UnityEngine.Random.Range(0,16);
                 terrainStrokesArray[index].isActive = 0f;
             }
         }
@@ -387,12 +387,12 @@ public class BaronVonTerrain : RenderBaron {
                 int index = baseIndex + y * numGroundStrokesSml + x;
                 float xPos = (float)x / (float)(numGroundStrokesSml - 1) * SimulationManager._MapSize;
                 float yPos = (1f - (float)y / (float)(numGroundStrokesSml - 1)) * SimulationManager._MapSize;
-                Vector2 offset = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f) * 0.0f) * 16f;
+                Vector2 offset = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f) * 1.0f) * 0.6f;
                 Vector3 pos = new Vector3(xPos + offset.x, yPos + offset.y, 0f);
                 terrainStrokesArray[index].worldPos = pos;
-                terrainStrokesArray[index].scale = new Vector2(UnityEngine.Random.Range(0.4f, 0.8f), UnityEngine.Random.Range(1.75f, 3f) * 0.5f) * 1.55f; // Y is forward, along stroke
+                terrainStrokesArray[index].scale = new Vector2(UnityEngine.Random.Range(0.5f, 1.2f), UnityEngine.Random.Range(0.5f, 1.2f)) * 0.55f; // Y is forward, along stroke
                 terrainStrokesArray[index].heading = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)).normalized;
-                terrainStrokesArray[index].brushType = UnityEngine.Random.Range(0,4);
+                terrainStrokesArray[index].brushType = UnityEngine.Random.Range(0,16);
                 terrainStrokesArray[index].isActive = 0f;
             }
         }
