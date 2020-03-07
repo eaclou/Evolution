@@ -6,6 +6,8 @@
 		_WaterSurfaceTex ("_WaterSurfaceTex", 2D) = "black" {}
 		_AltitudeTex ("_AltitudeTex", 2D) = "gray" {}
 		_TerrainColorTex ("_TerrainColorTex", 2D) = "black" {}
+		_NumRows ("_NumRows", Float) = 1
+		_NumColumns ("_NumColumns", Float) = 1
 		//_Tint("Color", Color) = (1,1,1,1)
 		//_Size("Size", vector) = (1,1,1,1)
 	}
@@ -31,6 +33,9 @@
 			sampler2D _WaterSurfaceTex;
 			sampler2D _AltitudeTex;
 			sampler2D _TerrainColorTex;
+
+			uniform float _NumRows;
+			uniform float _NumColumns;
 			
 			StructuredBuffer<AnimalParticleData> animalParticleDataCBuffer;			
 			StructuredBuffer<float3> quadVerticesCBuffer;
@@ -86,15 +91,28 @@
 				v2f o;
 
 				float3 quadPoint = quadVerticesCBuffer[id];
-				float2 uv = quadPoint.xy;
-				uv.x += 0.5;
-				
+								
 				AnimalParticleData particleData = animalParticleDataCBuffer[inst];
+
+				int brushType = (particleData.genomeVector.x * 16 + _Time.y * 13) % (_NumColumns * _NumRows);
+
+				float2 uv = quadPoint.xy;// + 0.5;
+				uv.x += 0.5;
+				float t = uv.y; // + 0.5;
+				//uv.y = 1.0 - uv.y;
+				
+				uv.x = uv.x / _NumColumns;
+				uv.y = uv.y / _NumRows;				
+				float column = (float)(brushType % _NumColumns);
+				float row = (float)floor((brushType) / _NumColumns);
+				uv.x += column * (1.0 / _NumColumns);
+				uv.y += row * (1.0 / _NumRows);
+				o.uv = uv; // full texture
+
 				//_SelectedParticleIndex = round(_Time.y * 3) % 1024;
 				float highlightMask = _IsHighlight;
 
-				float t = uv.y; // + 0.5;
-				uv.y = 1.0 - uv.y;
+				
 
 				float selectedMask = (1.0 - saturate(abs(_SelectedParticleIndex - (int)inst))) * _IsSelected;
 				float hoverMask = (1.0 - saturate(abs(_ClosestParticleID - (int)inst))) * _IsHover;
@@ -131,10 +149,14 @@
 				//*** TEMP::::: ****
 				float spriteScale = (sqrt(particleData.biomass) * 0.25 + 0.115 + (0.06 * hoverMask + 0.02 * selectedMask)) * 1;
 				//spriteScale = 0.1;
-				vertexOffset.xy = quadPoint.xy * spriteScale * 1;
+				vertexOffset.xy = quadPoint.xy * spriteScale * 1.2;
+
+				float2 forward = normalize(particleData.velocity);
+				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
+				float2 rotatedPoint = float2(vertexOffset.x * right + vertexOffset.y * forward);
 
 
-				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition.xy + vertexOffset, worldPosition.z, 1.0)));			
+				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition.xy + rotatedPoint, worldPosition.z, 1.0)));			
 				o.uv = uv;
 				o.altitudeUV = worldPosition.xy / _MapSize;
 
@@ -172,9 +194,11 @@
 				finalColor *= 1.0 + i.highlight.x * 2 + i.highlight.y;
 
 				finalColor.rgb = lerp(finalColor.rgb, terrainColorTex.rgb, 0.4 + saturate(i.status.y) * 0.7);
-				finalColor = float4(finalColor.rgb, (1.0 - circleMask) * i.status.x);
+				//finalColor.rgb = 1;
+				finalColor = float4(finalColor.rgb, texColor.a * i.status.x);
 				
-				
+				//finalColor.rgb = lerp(finalColor.rgb, float3(0.98, 0.45, 0.84) * 1.36, 0.685);
+				finalColor.rgb *= float3(0.98, 0.45, 0.84) + 0.2;
 				//finalColor.rgb = float3(1,0.25,0.521) * 1.73;
 				return finalColor;//  // * (1.0 + i.color.y));  // age
 

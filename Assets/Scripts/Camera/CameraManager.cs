@@ -69,7 +69,7 @@ public class CameraManager : MonoBehaviour {
         if (targetAgentTransform != null && isFollowingAgent)
         {
             curCameraFocusPivotPos = targetAgentTransform.position;
-            curCameraFocusPivotPos.z = 1.0f; // *** for now this is where creatures are for now           
+            curCameraFocusPivotPos.z = -SimulationManager._GlobalWaterLevel * SimulationManager._MaxAltitude; // *** for now this is where creatures are for now           
         }
         else {
             

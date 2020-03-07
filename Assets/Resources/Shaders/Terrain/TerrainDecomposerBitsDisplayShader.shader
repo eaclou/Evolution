@@ -105,10 +105,10 @@
 				float3 quadPoint = quadVerticesCBuffer[id];
 
 				float2 vel = tex2Dlod(_VelocityTex, float4(worldPosition.xy / 256, 0, 1)).xy;
-				float fluidSpeedMult = 5;
+				float fluidSpeedMult = 3;
 				worldPosition.xy += vel * fluidSpeedMult;  // carried by water
 
-				groundBitData.brushType = (groundBitData.brushType + floor(_Time.y * 17.17)) % (_NumColumns * _NumRows);
+				groundBitData.brushType = (groundBitData.brushType + floor(_Time.y * 0)) % (_NumColumns * _NumRows);
 				float2 quadUV = quadPoint + 0.5f; // 0-1,0-1
 				quadUV.x = quadUV.x / _NumColumns;
 				quadUV.y = quadUV.y / _NumRows;				
@@ -128,17 +128,17 @@
 
 				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(o.altitudeUV, 0, 0)).yzw;
 				float depth = saturate(-altitudeRaw + _GlobalWaterLevel);
-				float refractionStrength = depth * 14.5;
+				float refractionStrength = depth * 4.5;
 				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
 				
-				float fadeDuration = 0.25;
+				float fadeDuration = 0.33;
 				float fadeIn = saturate(groundBitData.age / fadeDuration);  // fade time = 0.1
 				float fadeOut = saturate((1 - groundBitData.age) / fadeDuration);							
 				float alpha = fadeIn * fadeOut;
 
 				worldPosition.z = -altitudeRaw * _MaxAltitude;
 				
-				float2 scale = float2(1,1) * 0.23641 * alpha; //groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25) * 2.0;
+				float2 scale = float2(1,1) * 1.53641 * alpha; //groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25) * 2.0;
 			
 				float4 resourceGridSample = tex2Dlod(_ResourceGridTex, float4(uv, 0, 0));
 				float decomposerAmount = saturate(resourceGridSample.z);
@@ -218,7 +218,7 @@
 				float4 patternTex = tex2D(_PatternTex, i.patternUV);
 
 				ShadingData data;
-				data.baseAlbedo = saturate(1.60962 * float4(0.8,0.3,0,1));
+				data.baseAlbedo = saturate(1.0962 * float4(0.8,0.3,0,1));
 				data.altitudeTex = tex2D(_AltitudeTex, i.altitudeUV);
     			data.waterSurfaceTex = tex2D(_WaterSurfaceTex, i.altitudeUV);
 				data.groundNormalsTex = float4(groundSurfaceNormal, 0);
@@ -250,10 +250,10 @@
 				finalColor.rgb += shoreFoam;
 				finalColor.rgb = lerp(finalColor.rgb, data.waterFogColor.rgb, fogAmount);
 				finalColor.rgb += lerp(float3(0,0,0), reflectionColor.xyz, reflectionColor.w);
-				
+								
 				finalColor.rgb += data.spiritBrushTex.y;
 				
-				finalColor.a *= tex2D(_MainTex, i.quadUV).a;
+				finalColor.a *= tex2D(_MainTex, i.quadUV).a * i.color.a;
 				return finalColor;
 				// What information is needed and when in order to properly render??? *******
 				// Ground Terrain baseAlbedo color? -- either precompute or blend btw stone/pebble/sand colors

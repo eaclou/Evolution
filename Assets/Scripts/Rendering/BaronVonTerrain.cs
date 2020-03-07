@@ -360,10 +360,10 @@ public class BaronVonTerrain : RenderBaron {
                 int index = y * numGroundStrokesStone + x;
                 float xPos = (float)x / (float)(numGroundStrokesStone - 1) * SimulationManager._MapSize;
                 float yPos = (1f - (float)y / (float)(numGroundStrokesStone - 1)) * SimulationManager._MapSize;
-                Vector2 offset = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f) * 1.0f) * 7.6f;
+                Vector2 offset = UnityEngine.Random.insideUnitCircle * 71.29f; // new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f) * 1.0f) * 70.6f;
                 Vector3 pos = new Vector3(xPos + offset.x, yPos + offset.y, 0f);
                 terrainStoneStrokesArray[index].worldPos = pos;
-                terrainStoneStrokesArray[index].scale = new Vector2(UnityEngine.Random.Range(0.6f, 1.62f), UnityEngine.Random.Range(0.6f, 1.62f)) * 5.737f; // Y is forward, along stroke
+                terrainStoneStrokesArray[index].scale = new Vector2(UnityEngine.Random.Range(0.6f, 1.62f), UnityEngine.Random.Range(0.6f, 1.62f)) * 4.737f; // Y is forward, along stroke
                 terrainStoneStrokesArray[index].heading = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)).normalized;
                 terrainStoneStrokesArray[index].brushType = UnityEngine.Random.Range(0,16);
                 terrainStoneStrokesArray[index].isActive = 0f;
@@ -376,7 +376,7 @@ public class BaronVonTerrain : RenderBaron {
                 int index = y * numGroundStrokesPebbles + x;
                 float xPos = (float)x / (float)(numGroundStrokesPebbles - 1) * SimulationManager._MapSize;
                 float yPos = (1f - (float)y / (float)(numGroundStrokesPebbles - 1)) * SimulationManager._MapSize;
-                Vector2 offset = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f) * 1.0f) * 5.6f;
+                Vector2 offset = UnityEngine.Random.insideUnitCircle * 21.41729f; // new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f) * 1.0f) * 5.6f;
                 Vector3 pos = new Vector3(xPos + offset.x, yPos + offset.y, 0f);
                 terrainPebbleStrokesArray[index].worldPos = pos;
                 terrainPebbleStrokesArray[index].scale = new Vector2(UnityEngine.Random.Range(0.5f, 1.6f), UnityEngine.Random.Range(0.5f, 1.6f)) * 2.4320f; // Y is forward, along stroke
@@ -395,7 +395,7 @@ public class BaronVonTerrain : RenderBaron {
                 Vector2 offset = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f) * 1.0f) * 1.76f;
                 Vector3 pos = new Vector3(xPos + offset.x, yPos + offset.y, 0f);
                 terrainSandStrokesArray[index].worldPos = pos;
-                terrainSandStrokesArray[index].scale = new Vector2(UnityEngine.Random.Range(0.7f, 1.2f), UnityEngine.Random.Range(0.7f, 1.2f)) * 1.55f; // Y is forward, along stroke
+                terrainSandStrokesArray[index].scale = new Vector2(UnityEngine.Random.Range(0.5f, 1.5f), UnityEngine.Random.Range(3.7f, 5.2f)) * 1.30755f; // Y is forward, along stroke
                 terrainSandStrokesArray[index].heading = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)).normalized;
                 terrainSandStrokesArray[index].brushType = UnityEngine.Random.Range(0,16);
                 terrainSandStrokesArray[index].isActive = 0f;

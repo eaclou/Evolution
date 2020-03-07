@@ -111,9 +111,9 @@
 				
 				float random1 = rand(float2(inst, inst));
 				float random2 = rand(float2(random1, random1));
-				float randomAspect = lerp(0.8, 1.2, random1) * 0.95395;
+				float randomAspect = lerp(0.7, 1.3, random1) * 0.95395;
 				strokeData.scale.x *= randomAspect;
-				float2 scale = strokeData.scale * 2.1514 * strokeData.isActive;
+				float2 scale = strokeData.scale * 2.4514 * strokeData.isActive;
 				
 				quadPoint *= float3(scale, 1.0);
 
@@ -132,7 +132,7 @@
 
 				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)) + float4(rotatedPoint, 0, 0));				
 				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0) + float4(rotatedPoint, 0, 0)));	
-				o.pos = lerp( mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0) + float4(rotatedPoint, 0, 0))), mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)) + float4(rotatedPoint, 0, 0)), 0.1);	
+				o.pos = lerp( mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0) + float4(rotatedPoint, 0, 0))), mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)) + float4(rotatedPoint, 0, 0)), 0);	
 				
 				float2 uv = quadVerticesCBuffer[id] + 0.5f; // 0-1,0-1
 				uv.x = uv.x / _NumColumns;
@@ -189,9 +189,10 @@
 
 				float3 groundSurfaceNormal = normalize(float3(-grad.x, -grad.y, length(float2(dX,dY)))); ////normalize(altitudeTex.yzw);
 				
+				//finalColor = lerp(finalColor, float4(0,0,0.01,1), 1.0 - saturate(altitudeTex.w * 1000));
 				
 				ShadingData data;
-				data.baseAlbedo = finalColor; //float4(0.145,0.0972,0.015,1);
+				data.baseAlbedo = finalColor; // lerp(finalColor, float4(1,1,1,1), 1.0 - altitudeTex.w); //float4(0.145,0.0972,0.015,1);
 				data.altitudeTex = altitudeTex;
     			data.waterSurfaceTex = tex2D(_WaterSurfaceTex, i.altitudeUV);
 				data.groundNormalsTex = float4(groundSurfaceNormal, 1);
@@ -203,14 +204,14 @@
 				data.waterFogColor = float4(algaeColor, 1);
 				data.sunDir = float4(_SunDir, 0);
 				data.worldSpaceCameraPosition = _WorldSpaceCameraPosition;
-				data.globalWaterLevel = _GlobalWaterLevel;
+				data.globalWaterLevel = _GlobalWaterLevel + data.waterSurfaceTex.x * 0.1 - 0.05;
 				data.causticsStrength = 0.15;
 				data.depth = saturate(-data.altitudeTex.x + data.globalWaterLevel);
 
 				float caustics = GetCausticsLight(finalColor, data);
 				float diffuse = GetDiffuseLight(finalColor, data);
-				float wetnessMod = GetWetnessModifier(data.altitudeTex.x, _GlobalWaterLevel);
-				float shoreFoam = GetFoamBrightness(data.altitudeTex.x, _GlobalWaterLevel);
+				float wetnessMod = GetWetnessModifier(data.altitudeTex.x, data.globalWaterLevel);
+				float shoreFoam = GetFoamBrightness(data.altitudeTex.x, data.globalWaterLevel);
 				float fogAmount = GetWaterFogAmount(data.depth * 2);
 				float isUnderwater = saturate(data.depth * 57);
 				float4 reflectionColor = GetReflectionAmount(data.worldPos, data.worldSpaceCameraPosition.xyz, data.waterSurfaceTex.yzw, data.skyTex, isUnderwater);
@@ -222,7 +223,7 @@
 				finalColor.rgb += lerp(float3(0,0,0), reflectionColor.xyz, reflectionColor.w);
 				finalColor.rgb += data.spiritBrushTex.y;
 				//float4 outColor = MasterLightingModel(data);
-
+				finalColor = lerp(finalColor, float4(0.09,0.09,0.14,1), 1.0 - saturate(altitudeTex.w * 100));
 				
 				finalColor.a = saturate(finalColor.a * tex2D(_MainTex, i.uv).a * 1);
 				return finalColor;

@@ -160,12 +160,12 @@ void CSUpdateGroundStrokes (uint3 id : SV_DispatchThreadID)
 	// New code:
 	// Brushstrokes vary in:  (heading, brush alpha)
 
-	float isActive = saturate((altitudeSampleCenter.w - 0.05) * 1000);
+	float isActive = 1; // saturate((altitudeSampleCenter.w - 0.005) * 10);
 	
 	data.isActive = isActive;
 	data.heading = heading;
 	data.worldPos.z = -max(altitudeCenter, _GlobalWaterLevel) * _MaxAltitude;
-	data.brushType = (floor(Value2D(uv, 1000).x * 12) + round(_Time * 0.013 + (float)id.x * 0.63 + data.worldPos.y)) % 12;
+	data.brushType = (floor(Value2D(uv, 1000).x * 16) + round(_Time * 0 + (float)id.x * 0.63 + data.worldPos.y)) % 16;
 	terrainFrameBufferStrokesCBuffer[id.x] = data;
 }
 
@@ -239,9 +239,11 @@ void CSSimDecomposerBitsData (uint3 id : SV_DispatchThreadID)
 			float dX = altitudeEast - altitudeWest;
 			float dY = altitudeNorth - altitudeSouth;
 
+			float spawnNoise1 = Value2D(uv + 5.79 * _Time + id.x * 31.9, 1).x;
+
 			float2 grad = float2(0,1);
 			if(dX != 0 && dY != 0) {
-				grad = normalize(lerp(float2(dX, dY), float2(0,1), 0.5));
+				grad = normalize(lerp(float2(dX, dY), normalize(float2(spawnNoise1,1)), 0));
 			}
 		
 			decomposerBitData.heading = grad;

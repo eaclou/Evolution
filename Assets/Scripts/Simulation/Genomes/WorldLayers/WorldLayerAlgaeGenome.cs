@@ -14,8 +14,8 @@ public class WorldLayerAlgaeGenome {
     public float patternThreshold;
     
     public WorldLayerAlgaeGenome() {   // construction
-        float minIntakeRate = 0.001f;
-        float maxIntakeRate = 0.01f; // init around 1?
+        float minIntakeRate = 0.009f;
+        float maxIntakeRate = 0.012f; // init around 1?
         float lnLerp = UnityEngine.Random.Range(0f, 1f);
         lnLerp *= lnLerp;
         metabolicRate = Mathf.Lerp(minIntakeRate, maxIntakeRate, lnLerp);        
