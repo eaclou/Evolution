@@ -46,6 +46,9 @@
 			uniform float _MapSize;
 			uniform float _MaxAltitude;
 			uniform float _GlobalWaterLevel;
+			uniform float _CamDistNormalized;
+
+			
 			//uniform float _MouseCoordX;
 			//uniform float _MouseCoordY;
 
@@ -94,7 +97,7 @@
 								
 				AnimalParticleData particleData = animalParticleDataCBuffer[inst];
 
-				int brushType = (particleData.genomeVector.x * 16 + _Time.y * 13) % (_NumColumns * _NumRows);
+				int brushType = (particleData.genomeVector.x * 16 + _Time.y * 0.013) % (_NumColumns * _NumRows);
 
 				float2 uv = quadPoint.xy;// + 0.5;
 				uv.x += 0.5;
@@ -125,7 +128,7 @@
 				float swimAnimMask = t * saturate(1.0 - particleData.isDecaying); //saturate(1.0 - uv.y); //saturate(1.0 - t);
 				
 				float3 worldPosition = particleData.worldPos; // float3(curvePos,0) + float3(offset, 0.0);
-				worldPosition.x += width; // (swimAnimOffset * swimAnimMask) * width;
+				//worldPosition.x += width; // (swimAnimOffset * swimAnimMask) * width;
 
 				//float decayProgress = 0;				
 				//decayProgress = 1.0 - (particleData.biomass / (particleData.extra0 + 0.0000001));
@@ -149,7 +152,7 @@
 				//*** TEMP::::: ****
 				float spriteScale = (sqrt(particleData.biomass) * 0.25 + 0.115 + (0.06 * hoverMask + 0.02 * selectedMask)) * 1;
 				//spriteScale = 0.1;
-				vertexOffset.xy = quadPoint.xy * spriteScale * 1.2;
+				vertexOffset.xy = quadPoint.xy * spriteScale * lerp(1, 5, _CamDistNormalized);
 
 				float2 forward = normalize(particleData.velocity);
 				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
@@ -176,7 +179,7 @@
 				//return float4(1,1,1,1) * (0.5 + i.color.y);
 
 				float4 texColor = tex2D(_MainTex, i.uv);
-				float4 terrainColorTex = tex2D(_TerrainColorTex, i.altitudeUV);
+				float4 terrainColorTex = tex2D(_TerrainColorTex, i.altitudeUV) * 0.5 + 0.5;
 
 				float val = i.color.a;
 				
@@ -198,7 +201,7 @@
 				finalColor = float4(finalColor.rgb, texColor.a * i.status.x);
 				
 				//finalColor.rgb = lerp(finalColor.rgb, float3(0.98, 0.45, 0.84) * 1.36, 0.685);
-				finalColor.rgb *= float3(0.98, 0.45, 0.84) + 0.2;
+				finalColor.rgb *= float3(0.98, 0.45, 0.84) * 1.5 + 0.53;
 				//finalColor.rgb = float3(1,0.25,0.521) * 1.73;
 				return finalColor;//  // * (1.0 + i.color.y));  // age
 

@@ -35,6 +35,7 @@
 			uniform float _MapSize;
 			uniform float _MaxAltitude;
 			uniform float _GlobalWaterLevel;
+			uniform float _CamDistNormalized;
 			
 			struct v2f
 			{
@@ -81,13 +82,16 @@
 				CritterSimData critterSimData = critterSimDataCBuffer[inst];
 
 				float3 worldPosition = critterSimData.worldPos;
-										
+				worldPosition.y += 0.5;
+				worldPosition.z -= 0.5;
+														
 				float random1 = rand(float2(inst, inst));
 				float random2 = rand(float2(random1, random1));
 
-				float randomScale = lerp(0.86, 1, random2);				
-				float scale = critterSimData.growthPercentage * (critterInitData.boundingBoxSize.x + critterInitData.boundingBoxSize.y) * 2.5 + 0.25; // length(eggData.localScale) * length(rawData.fullSize) * saturate(rawData.growth * 1.5f) * randomScale * (1.0 + rawData.decay);
+				//float randomScale = lerp(0.86, 1, random2);	
 				
+				float scale = critterSimData.growthPercentage * (critterInitData.boundingBoxSize.x + critterInitData.boundingBoxSize.y) * 4.5 + 0.001; // length(eggData.localScale) * length(rawData.fullSize) * saturate(rawData.growth * 1.5f) * randomScale * (1.0 + rawData.decay);
+				scale *= _CamDistNormalized;
 				// Rotation of Billboard center around Agent's Center (no effect if localPos and localDir are zero/default)'
 				float2 forwardAgent = critterSimData.heading;
 				float2 rightAgent = float2(forwardAgent.y, -forwardAgent.x);
@@ -106,7 +110,7 @@
 				float refractionStrength = 2.45;
 				//worldPosition.xy += -surfaceNormal.xy * refractionStrength;
 				
-				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)) + float4(quadPoint * 0.15, 0.0));
+				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)) + float4(quadPoint * lerp(0.1, 2.5, _CamDistNormalized), 0.0));
 				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)) + float4(rotatedPoint, 0.0));
 				
 				float2 uv0 = quadVerticesCBuffer[id] + 0.5; // full texture
@@ -142,7 +146,7 @@
 
 			fixed4 frag(v2f i) : SV_Target
 			{	
-				return float4(1,1,0.25,1);
+				//return float4(1,1,0.25,1);
 
 				///////////////////////////////////
 

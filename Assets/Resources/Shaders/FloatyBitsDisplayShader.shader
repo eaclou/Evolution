@@ -77,12 +77,12 @@
 
 				float randomAspect = lerp(0.75, 1.36, random1);
 				float randomValue = rand(float2(inst, randomAspect * 10));
-				float randomScale = lerp(0.75, 1.4, random2) * 3.6;
+				float randomScale = lerp(0.75, 1.4, random2) * 2.6;
 				
 				float2 dir = normalize(velocity);
 				float2 scale = float2(0.05 * randomAspect, 0.05 * (1.0 / randomAspect)) * randomScale; //float2(randomAspect * randomScale, (1.0 / randomAspect) * randomScale * (length(velocity) * 25 + 1.61));
 				scale.y *= (1.0 + velMag * 100.0);
-				quadPoint *= float3(scale, 1.0) * (_CamDistNormalized * 0.8 + 0.2); 
+				quadPoint *= float3(scale, 1.0) * (_CamDistNormalized * 0.99 + 0.01); 
 
 				float2 forward = dir;
 				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
@@ -111,7 +111,7 @@
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(rotatedPoint, 0.0f));
 				float brightness = (random1);
 				dotLight *= brightness;
-				o.color = float4(dotLight,floatyBitData.age,dotLight,alpha * 1); // float4(randomValue, randomValue, randomValue, 1 / (length(velocity) * 50 + 1.15));
+				o.color = float4(dotLight, floatyBitData.age, dotLight, alpha * 1); // float4(randomValue, randomValue, randomValue, 1 / (length(velocity) * 50 + 1.15));
 				o.uv = quadVerticesCBuffer[id] + 0.5f;
 				
 				return o;
@@ -129,7 +129,7 @@
 				//finalColor.a *= i.color.a * 1;
 				//float birthGlowMask = saturate((-i.color.y + 0.2) * 20);
 				//finalColor += birthGlowMask;
-				finalColor *= 1 * texColor.a;
+				finalColor *= 0.5 * texColor.a;
 				
 				return finalColor;
 				

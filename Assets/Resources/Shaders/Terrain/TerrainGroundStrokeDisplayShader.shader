@@ -161,10 +161,10 @@
 				
 				float4 altitudeTex = tex2D(_AltitudeTex, i.altitudeUV);
 
-				float4 finalColor = _Color0;   // BASE STONE COLOR:
+				float4 finalColor = _Color0;   // BASE STONE COLOR:				
+				finalColor = lerp(finalColor, _Color1, saturate(altitudeTex.y));
+				finalColor = lerp(finalColor, _Color2, saturate(altitudeTex.z));
 				finalColor.a = 1;
-				//finalColor = lerp(finalColor, _Color1, saturate(altitudeTex.y));
-				//finalColor = lerp(finalColor, _Color2, saturate(altitudeTex.z));
 
 				finalColor.rgb = lerp(finalColor.rgb, decomposerHue, decomposerMask);
 				finalColor.rgb = lerp(finalColor.rgb, detritusHue, detritusMask);
@@ -190,7 +190,7 @@
 				float3 groundSurfaceNormal = normalize(float3(-grad.x, -grad.y, length(float2(dX,dY)))); ////normalize(altitudeTex.yzw);
 				
 				//finalColor = lerp(finalColor, float4(0,0,0.01,1), 1.0 - saturate(altitudeTex.w * 1000));
-				
+				finalColor.rgb *= 0.85;
 				ShadingData data;
 				data.baseAlbedo = finalColor; // lerp(finalColor, float4(1,1,1,1), 1.0 - altitudeTex.w); //float4(0.145,0.0972,0.015,1);
 				data.altitudeTex = altitudeTex;

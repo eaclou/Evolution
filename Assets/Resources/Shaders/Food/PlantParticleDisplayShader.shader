@@ -81,10 +81,8 @@
 				uv.x += 0.5;
 				float t = uv.y; // + 0.5;
 				uv.y = 1.0 - uv.y;
-
-				
+								
 				int particleIndex = floor((float)inst / 32.0);
-
 				PlantParticleData particleData = plantParticleDataCBuffer[particleIndex];
 
 				float selectedMask = (1.0 - saturate(abs(_SelectedParticleIndex - particleIndex))) * _IsSelected;
@@ -95,8 +93,7 @@
 				float altitudeRaw = tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 0)).x;
 				float zPos = -max(_GlobalWaterLevel, altitudeRaw) * _MaxAltitude;
 
-				float3 worldPosition = float3(particleData.worldPos, zPos);    //float3(rawData.worldPos, -random2);
-				
+				float3 worldPosition = float3(particleData.worldPos, zPos);    //float3(rawData.worldPos, -random2);				
 				//float3 localQuadPos = quadPoint;
 
 				float rand0 = rand(float2(inst, inst) * 10);
@@ -111,8 +108,8 @@
 				if(type < 0.5) {
 					// Rooted fully, grows separately on ground in circle? Grassy
 
-					float radius = saturate(particleData.biomass * 3.8 + 0.04) * leafIndexNormalized * 0.2 * 5;
-					float2 spawnOffset = float2(cos(particleData.angleInc * leafIndex * 10) * radius, sin(particleData.angleInc * leafIndex * 10) * radius);
+					float radius = (saturate(particleData.biomass * 1.8 + 0.04) * leafIndexNormalized * 0.5) * lerp(0.8, 3.6, _CamDistNormalized);
+					float2 spawnOffset = float2(cos(particleData.angleInc * leafIndex * 2.5) * radius, sin(particleData.angleInc * leafIndex * 2.5) * radius);
 					
 					worldPosition.xy += spawnOffset;
 														
@@ -140,7 +137,7 @@
 				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
 				float3 rotatedPoint = float3(quadPoint.x * right + quadPoint.y * forward, 0);  // Rotate localRotation by AgentRotation
 
-				float leafScale = saturate(particleData.biomass * 3 + 0.1) * 0.25 * particleData.isActive + hoverMask * 0.3;
+				float leafScale = (saturate(particleData.biomass * 3 + 0.1) * 0.05 * particleData.isActive + hoverMask * 0.3) * lerp(0.8, 3.6, _CamDistNormalized);
 				o.worldPos = float4(worldPosition, 0);
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition + rotatedPoint * leafScale, 1.0)));
 				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(quadPoint, 0.0f));				
@@ -182,7 +179,7 @@
 				float3 algaeColor = float3(0.5,0.8,0.5) * 0.5;
 
 				ShadingData data;
-				data.baseAlbedo = col;
+				data.baseAlbedo = col * 2;
 				data.altitudeTex = tex2D(_AltitudeTex, i.altitudeUV);
     			data.waterSurfaceTex = tex2D(_WaterSurfaceTex, i.altitudeUV);
 				data.groundNormalsTex = float4(groundSurfaceNormal, 0);
