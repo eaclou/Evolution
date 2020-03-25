@@ -1099,9 +1099,7 @@ public class UIManager : MonoBehaviour {
                 }
             }
             else if (Input.GetAxis("Mouse ScrollWheel") < 0f ) //  Backwarfds
-            {
-                
-                
+            {  
                 if(mutationUI.isPointerOver) {
                     //gameManager.theRenderKing.slotPortraitRenderCamera.GetComponent<CritterPortraitCameraManager>().targetZoomLevel += 1f;
                     //Debug.Log(":::::" + gameManager.theRenderKing.slotPortraitRenderCamera.GetComponent<CritterPortraitCameraManager>().targetZoomLevel.ToString());

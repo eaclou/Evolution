@@ -199,7 +199,7 @@ public class TrophicLayersManager {
                     simManager.uiManager.wildSpirit.SpawnWildSpirit(kingdomAnimals.trophicTiersList[1].trophicSlots[0].color);
                 }
             }
-
+            /*
             // Minerals:
             if(kingdomOther.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
                 if(simManager.uiManager.wildSpirit.framesSinceLastClickableSpirit > 150 && simManager.uiManager.wildSpirit.curClickableSpiritType == WildSpirit.ClickableSpiritType.Minerals) {
@@ -207,6 +207,7 @@ public class TrophicLayersManager {
                     simManager.uiManager.wildSpirit.SpawnWildSpirit(kingdomOther.trophicTiersList[0].trophicSlots[0].color);
                 }
             }
+            */
             // WATER:
             if(kingdomOther.trophicTiersList[0].trophicSlots[1].status == TrophicSlot.SlotStatus.Locked) {
                 if(simManager.uiManager.wildSpirit.framesSinceLastClickableSpirit > 150 && simManager.uiManager.wildSpirit.curClickableSpiritType == WildSpirit.ClickableSpiritType.Water) {
@@ -214,6 +215,7 @@ public class TrophicLayersManager {
                     simManager.uiManager.wildSpirit.SpawnWildSpirit(kingdomOther.trophicTiersList[0].trophicSlots[1].color);
                 }
             }
+            /*
             // Air:
             if(kingdomOther.trophicTiersList[0].trophicSlots[2].status == TrophicSlot.SlotStatus.Locked) {
                 if(simManager.uiManager.wildSpirit.framesSinceLastClickableSpirit > 150 && simManager.uiManager.wildSpirit.curClickableSpiritType == WildSpirit.ClickableSpiritType.Air) {
@@ -221,6 +223,8 @@ public class TrophicLayersManager {
                     simManager.uiManager.wildSpirit.SpawnWildSpirit(kingdomOther.trophicTiersList[0].trophicSlots[2].color);
                 }
             }
+            */
+            /*
             // Pebbles:
             if(kingdomTerrain.trophicTiersList[0].trophicSlots[2].status == TrophicSlot.SlotStatus.Locked) {
                 if(simManager.uiManager.wildSpirit.framesSinceLastClickableSpirit > 150 && simManager.uiManager.wildSpirit.curClickableSpiritType == WildSpirit.ClickableSpiritType.Pebbles) {
@@ -235,7 +239,7 @@ public class TrophicLayersManager {
                     simManager.uiManager.wildSpirit.SpawnWildSpirit(kingdomTerrain.trophicTiersList[0].trophicSlots[3].color);
                 }
             }
-
+            */
 
 
         }
