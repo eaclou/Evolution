@@ -97,7 +97,7 @@
 								
 				AnimalParticleData particleData = animalParticleDataCBuffer[inst];
 
-				int brushType = (particleData.genomeVector.x * 16 + _Time.y * 0.013) % (_NumColumns * _NumRows);
+				int brushType = (particleData.genomeVector.x * 16 + inst + _Time.y * 13) % (_NumColumns * _NumRows);
 
 				float2 uv = quadPoint.xy;// + 0.5;
 				uv.x += 0.5;
