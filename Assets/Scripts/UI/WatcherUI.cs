@@ -82,10 +82,10 @@ public class WatcherUI : MonoBehaviour {
     //public Button buttonInspectCycleNextSpecies;
     public Button buttonInspectCyclePrevAgent;
     public Button buttonInspectCycleNextAgent;
-    //public Text textStomachContents;
-    //public Text textEnergy;
-    //public Text textHealth;
-    //public Text textDiet;
+    public Text textStomachContents;
+    public Text textEnergy;
+    public Text textHealth;
+    public Text textWaste;
     //public Text textDimensionsWidth;
     //public Text textDimensionsLength;
     //public Text textSpeciesID;
@@ -362,6 +362,11 @@ public class WatcherUI : MonoBehaviour {
                     if(agent.coreModule != null) {
                         //textNewInspectAgentName.text = agent.candidateRef.candidateGenome.bodyGenome.coreGenome.name;
 
+                        textStomachContents.text = "STOMACH " + Mathf.Clamp01(agent.coreModule.stomachContentsNorm * 1f).ToString("F5");
+                        textEnergy.text = "ENERGY " + agent.coreModule.energy.ToString("F5");
+                        textHealth.text = "HEALTH " + agent.coreModule.healthBody.ToString("F5");
+                        textWaste.text = "WASTE " + agent.wasteProducedLastFrame.ToString("F5");
+
                         textNewInspectLog.text = agent.stringCauseOfDeath.ToString() + ", " + agent.cooldownFrameCounter.ToString() + " / " + agent.cooldownDuration.ToString(); // agent.lastEvent;
                         newInspectAgentEnergyMat.SetFloat("_Value", Mathf.Clamp01(agent.coreModule.energy * 0.001f));
                         newInspectAgentStaminaMat.SetFloat("_Value", Mathf.Clamp01(agent.coreModule.stamina[0] * 1f));
@@ -439,198 +444,193 @@ public class WatcherUI : MonoBehaviour {
                         textWatcherTargetIndex.text = "#" + agent.index.ToString();
                 
                         // pages:
-                        if(curWatcherPanelVertebratePageNum == 0) {
-                            textNewInspectLog.text = "";
-                            textWatcherVertebrateHUD.text = "";
+                        //if(curWatcherPanelVertebratePageNum == 0) {
+                        textNewInspectLog.text = "";
+                        textWatcherVertebrateHUD.text = "";
 
-                            panelWatcherSpiritVertebratesHUD.SetActive(true);
-                            panelWatcherVertebrateWidgets01.SetActive(true);
+                        panelWatcherSpiritVertebratesHUD.SetActive(true);
+                        panelWatcherVertebrateWidgets01.SetActive(true);
 
-                            string statusStr = "Alive!";
-                            Color statusColor = Color.white;
-                            Color healthColor = Color.green;
+                        string statusStr = "Alive!";
+                        Color statusColor = Color.white;
+                        Color healthColor = Color.green;
                             
-                            if(agent.curLifeStage == Agent.AgentLifeStage.Dead) {
-                                statusStr = "Dead! (Decaying)";
-                                statusColor = Color.gray;
-                                healthColor = Color.red;
-                                panelWatcherVertebrateWidgets01.SetActive(false);
-                            }
-                            if(agent.curLifeStage == Agent.AgentLifeStage.Egg) {
-                                statusStr = "Egg!";
-                                healthColor = Color.yellow;
-                            }
-                            if(agent.coreModule.healthBody <= 0f) {
-                                statusStr = "Died of Injury";
-                            }
-                            /*if(!agent.isActing) {
-                                statusStr = "INACTIVE";
-                                statusColor = Color.black;
-                                healthColor = Color.black;
-                            }*/
-
-                            textVertebrateGen.text = "Gen #" + agent.candidateRef.candidateGenome.bodyGenome.coreGenome.generation.ToString();
-                            textVertebrateLifestage.text = "Age: " + agent.ageCounter.ToString() + ", stateID: " + developmentStateID;
-                            textVertebrateLifestage.color = healthColor;
-                            textVertebrateStatus.text = statusStr; // "activity: " + curActivityID;
-
-                            //where do hud elements get updated?? ***
-                            string hudString = "";
-                            hudString += "Species " + agent.speciesIndex.ToString();
-                            hudString += "\nGeneration " + agent.candidateRef.candidateGenome.bodyGenome.coreGenome.generation.ToString();
-
-                            // Life Stage
-                            hudString += "\n\nAge: " + agent.ageCounter.ToString();
-                            hudString += "\nCur Biomass: " + agent.currentBiomass.ToString("F3");
-                            hudString += "\nGrowth % " + (agent.currentBiomass / 2.5f * 100f).ToString("F0");
-                            // STATE
-                            hudString += "\n";// + curActivityID.ToString();
-                            hudString += "\n";// + developmentStateID.ToString();
-                            // BIOMETRICS:
-                            hudString += "\n\nNRG: " + agent.coreModule.energy.ToString("F1");
-                            hudString += "\nHP: " + ((agent.coreModule.healthBody + agent.coreModule.healthHead + agent.coreModule.healthExternal) / 3f * 100f).ToString("F0");
-                            hudString += "\nFOOD: " + (agent.coreModule.stomachContentsNorm * 100f).ToString("F0");
-                            hudString += "\nSTAM: " + agent.coreModule.stamina[0].ToString("F2");
-                            // BASE STATS FROM GENOME:
-                            hudString += "\n\nBase Size: " + agent.candidateRef.candidateGenome.bodyGenome.coreGenome.creatureBaseLength.ToString("F2") + ",  Aspect: " + agent.candidateRef.candidateGenome.bodyGenome.coreGenome.creatureAspectRatio.ToString("F2"); 
-                            hudString += "\nFullsize: ( " + agent.fullSizeBoundingBox.x.ToString("F2") + ", " + agent.fullSizeBoundingBox.y.ToString("F2") + ", " + agent.fullSizeBoundingBox.z.ToString("F2") + " )\n";
-                            hudString += "\n# Neurons: " + agent.brain.neuronList.Count.ToString() + ", # Axons: " + agent.brain.axonList.Count.ToString();
-                            hudString += "\n# In/Out: " + agent.candidateRef.candidateGenome.brainGenome.bodyNeuronList.Count.ToString() + ", Hid: " + agent.candidateRef.candidateGenome.brainGenome.hiddenNeuronList.Count.ToString();
-                    
-                            // History:
-                            hudString += "\nMeatEaten: " + agent.totalFoodEatenMeat.ToString("F3");
-                            hudString += "\nPlantsEaten: " + agent.totalFoodEatenPlant.ToString("F3");
-                    
-                            string textString = "Event Log! [" + agent.index.ToString() + "]";
-                            int maxEventsToDisplay = 8;
-                            int numEvents = Mathf.Min(agent.agentEventDataList.Count, maxEventsToDisplay);
-                            int startIndex = Mathf.Max(0, agent.agentEventDataList.Count - maxEventsToDisplay);                   
-                            string eventLogString = "";
-                            for(int q = agent.agentEventDataList.Count - 1; q >= startIndex; q--) {
-                                eventLogString += "\n[" + agent.agentEventDataList[q].eventFrame.ToString() + "] " + agent.agentEventDataList[q].eventText;
-                            }
-                            //textNewInspectLog.text = eventLogString;
-                            //textWatcherVertebrateHUD.text = hudString;
-
+                        if(agent.curLifeStage == Agent.AgentLifeStage.Dead) {
+                            statusStr = "Dead! (Decaying)";
+                            statusColor = Color.red;
+                            healthColor = Color.red;
+                            panelWatcherVertebrateWidgets01.SetActive(false);
                         }
-                        else if(curWatcherPanelVertebratePageNum == 1) {
-                            
-                            panelWatcherSpiritVertebratesText.SetActive(true);
-
-                            string textString = "Event Log! [" + agent.index.ToString() + "]";
-                    
-                            // Agent Event Log:
-                            int maxEventsToDisplay = 12;
-                            int numEvents = Mathf.Min(agent.agentEventDataList.Count, maxEventsToDisplay);
-                            int startIndex = Mathf.Max(0, agent.agentEventDataList.Count - maxEventsToDisplay);                   
-                            string eventLogString = "";
-                            for(int q = agent.agentEventDataList.Count - 1; q >= startIndex; q--) {
-                                eventLogString += "\n[" + agent.agentEventDataList[q].eventFrame.ToString() + "] " + agent.agentEventDataList[q].eventText;
-                            } 
-                    
-                            textString += "\n\nNumChildrenBorn: " + uiManagerRef.gameManager.simulationManager.numAgentsBorn.ToString() + ", numDied: " + uiManagerRef.gameManager.simulationManager.numAgentsDied.ToString() + ", ~Gen: " + ((float)uiManagerRef.gameManager.simulationManager.numAgentsBorn / (float)uiManagerRef.gameManager.simulationManager._NumAgents).ToString();
-                            textString += "\nSimulation Age: " + uiManagerRef.gameManager.simulationManager.simAgeTimeSteps.ToString();
-                            textString += "\nYear " + uiManagerRef.gameManager.simulationManager.curSimYear.ToString() + "\n\n";
-                            int numActiveSpecies = uiManagerRef.gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList.Count;
-                            textString += numActiveSpecies.ToString() + " Active Species:\n";
-                            textString += eventLogString;
-
-                            textWatcherVertebrateText.text = textString;
-                            
+                        if(agent.curLifeStage == Agent.AgentLifeStage.Egg) {
+                            statusStr = "Egg!";
+                            healthColor = Color.yellow;
                         }
-                        else if(curWatcherPanelVertebratePageNum == 2) {
-                            panelWatcherSpiritVertebratesGenome.SetActive(true);
+                        if(agent.coreModule.healthBody <= 0f) {
+                            statusStr = "Died of Injury";
+                        }
+                        /*if(!agent.isActing) {
+                            statusStr = "INACTIVE";
+                            statusColor = Color.black;
+                            healthColor = Color.black;
+                        }*/
+
+                        textVertebrateGen.text = "Gen #" + agent.candidateRef.candidateGenome.bodyGenome.coreGenome.generation.ToString();
+                        textVertebrateLifestage.text = "Age: " + agent.ageCounter.ToString();// + ", stateID: " + developmentStateID;
+                        textVertebrateLifestage.color = healthColor;
+                        textVertebrateStatus.text = statusStr; // "activity: " + curActivityID;
+
+                        //where do hud elements get updated?? ***
+                        string hudString = "";
+                        hudString += "Species " + agent.speciesIndex.ToString();
+                        hudString += "\nGeneration " + agent.candidateRef.candidateGenome.bodyGenome.coreGenome.generation.ToString();
+
+                        // Life Stage
+                        hudString += "\n\nAge: " + agent.ageCounter.ToString();
+                        hudString += "\nCur Biomass: " + agent.currentBiomass.ToString("F3");
+                        hudString += "\nGrowth % " + (agent.currentBiomass / 2.5f * 100f).ToString("F0");
+                        // STATE
+                        hudString += "\n";// + curActivityID.ToString();
+                        hudString += "\n";// + developmentStateID.ToString();
+                        // BIOMETRICS:
+                        hudString += "\n\nNRG: " + agent.coreModule.energy.ToString("F1");
+                        hudString += "\nHP: " + ((agent.coreModule.healthBody + agent.coreModule.healthHead + agent.coreModule.healthExternal) / 3f * 100f).ToString("F0");
+                        hudString += "\nFOOD: " + (agent.coreModule.stomachContentsNorm * 100f).ToString("F0");
+                        hudString += "\nSTAM: " + agent.coreModule.stamina[0].ToString("F2");
+                        // BASE STATS FROM GENOME:
+                        hudString += "\n\nBase Size: " + agent.candidateRef.candidateGenome.bodyGenome.coreGenome.creatureBaseLength.ToString("F2") + ",  Aspect: " + agent.candidateRef.candidateGenome.bodyGenome.coreGenome.creatureAspectRatio.ToString("F2"); 
+                        hudString += "\nFullsize: ( " + agent.fullSizeBoundingBox.x.ToString("F2") + ", " + agent.fullSizeBoundingBox.y.ToString("F2") + ", " + agent.fullSizeBoundingBox.z.ToString("F2") + " )\n";
+                        hudString += "\n# Neurons: " + agent.brain.neuronList.Count.ToString() + ", # Axons: " + agent.brain.axonList.Count.ToString();
+                        hudString += "\n# In/Out: " + agent.candidateRef.candidateGenome.brainGenome.bodyNeuronList.Count.ToString() + ", Hid: " + agent.candidateRef.candidateGenome.brainGenome.hiddenNeuronList.Count.ToString();
                     
-                            string genomeString = "GENOME PAGE!"; ;
+                        // History:
+                        hudString += "\nMeatEaten: " + agent.totalFoodEatenMeat.ToString("F3");
+                        hudString += "\nPlantsEaten: " + agent.totalFoodEatenPlant.ToString("F3");
                     
-                            int curCount = 0;
-                            int maxCount = 1;
-                            if (agent.curLifeStage == Agent.AgentLifeStage.Egg) {
-                                curCount = agent.lifeStageTransitionTimeStepCounter;
-                                maxCount = agent._GestationDurationTimeSteps;
-                            }            
-                            if (agent.curLifeStage == Agent.AgentLifeStage.Mature) {
-                                curCount = agent.ageCounter;
-                                maxCount = agent.maxAgeTimeSteps;
-                            }
-                            if (agent.curLifeStage == Agent.AgentLifeStage.Dead) {
-                                curCount = agent.lifeStageTransitionTimeStepCounter;
-                                maxCount = curCount; // agentRef._DecayDurationTimeSteps;
-                            }
-                            int progressPercent = Mathf.RoundToInt((float)curCount / (float)maxCount * 100f);
-                            string lifeStageProgressTxt = " " + agent.curLifeStage.ToString() + " " + curCount.ToString() + "/" + maxCount.ToString() + "  " + progressPercent.ToString() + "% ";
-                            genomeString += "\nCID: " + agent.candidateRef.candidateID.ToString() + ", gen# " + agent.candidateRef.candidateGenome.bodyGenome.coreGenome.generation.ToString();
+                        string textString = "Event Log! [" + agent.index.ToString() + "]";
+                        int maxEventsToDisplay = 8;
+                        int numEvents = Mathf.Min(agent.agentEventDataList.Count, maxEventsToDisplay);
+                        int startIndex = Mathf.Max(0, agent.agentEventDataList.Count - maxEventsToDisplay);                   
+                        string eventString = "";
+                        for(int q = agent.agentEventDataList.Count - 1; q >= startIndex; q--) {
+                            eventString += "\n[" + agent.agentEventDataList[q].eventFrame.ToString() + "] " + agent.agentEventDataList[q].eventText;
+                        }
+                        //textNewInspectLog.text = eventLogString;
+                        //textWatcherVertebrateHUD.text = hudString;
+
+                        //}
+                        //else if(curWatcherPanelVertebratePageNum == 1) {
+                        string textStringLog = "Event Log! [" + agent.index.ToString() + "]";
                     
-                            genomeString += "\nBONUSES:\nDamage: " + agent.coreModule.damageBonus.ToString("F2") + "\nSpeed: " + agent.coreModule.speedBonus.ToString("F2") + "\nHealth: " + agent.coreModule.healthBonus.ToString("F2") + "\nEnergy: " + agent.coreModule.energyBonus.ToString("F2") + "\n";
-                            genomeString += "\nDIET:\nDecay: " + agent.coreModule.foodEfficiencyDecay.ToString("F2") + "\nPlant: " + agent.coreModule.foodEfficiencyPlant.ToString("F2") + "\nMeat: " + agent.coreModule.foodEfficiencyMeat.ToString("F2") + "\n";
+                        // Agent Event Log:
+                        int maxEventsToDisplayLog = 12;
+                        int numEventsLog = Mathf.Min(agent.agentEventDataList.Count, maxEventsToDisplayLog);
+                        int startIndexLog = Mathf.Max(0, agent.agentEventDataList.Count - maxEventsToDisplayLog);                   
+                        string eventLogString = "";
+                        for(int q = agent.agentEventDataList.Count - 1; q >= startIndexLog; q--) {
+                            eventLogString += "\n[" + agent.agentEventDataList[q].eventFrame.ToString() + "] " + agent.agentEventDataList[q].eventText;
+                        }
+                        textStringLog += eventLogString;
+
+                        textWatcherVertebrateText.text = textStringLog;
+
+
+                        //}
+                        //else if(curWatcherPanelVertebratePageNum == 2) {
+                        panelWatcherSpiritVertebratesGenome.SetActive(true);
+                    
+                        string genomeString = "GENOME PAGE!"; ;
+                    
+                        int curCount = 0;
+                        int maxCount = 1;
+                        if (agent.curLifeStage == Agent.AgentLifeStage.Egg) {
+                            curCount = agent.lifeStageTransitionTimeStepCounter;
+                            maxCount = agent._GestationDurationTimeSteps;
+                        }            
+                        if (agent.curLifeStage == Agent.AgentLifeStage.Mature) {
+                            curCount = agent.ageCounter;
+                            maxCount = agent.maxAgeTimeSteps;
+                        }
+                        if (agent.curLifeStage == Agent.AgentLifeStage.Dead) {
+                            curCount = agent.lifeStageTransitionTimeStepCounter;
+                            maxCount = curCount; // agentRef._DecayDurationTimeSteps;
+                        }
+                        int progressPercent = Mathf.RoundToInt((float)curCount / (float)maxCount * 100f);
+                        string lifeStageProgressTxt = " " + agent.curLifeStage.ToString() + " " + curCount.ToString() + "/" + maxCount.ToString() + "  " + progressPercent.ToString() + "% ";
+                        genomeString += "\nCID: " + agent.candidateRef.candidateID.ToString() + ", gen# " + agent.candidateRef.candidateGenome.bodyGenome.coreGenome.generation.ToString();
+                    
+                        genomeString += "\nBONUSES:\nDamage: " + agent.coreModule.damageBonus.ToString("F2") + "\nSpeed: " + agent.coreModule.speedBonus.ToString("F2") + "\nHealth: " + agent.coreModule.healthBonus.ToString("F2") + "\nEnergy: " + agent.coreModule.energyBonus.ToString("F2") + "\n";
+                        genomeString += "\nDIET:\nDecay: " + agent.coreModule.foodEfficiencyDecay.ToString("F2") + "\nPlant: " + agent.coreModule.foodEfficiencyPlant.ToString("F2") + "\nMeat: " + agent.coreModule.foodEfficiencyMeat.ToString("F2") + "\n";
                   
-                            genomeString += "\nSENSORS:\n";
-                            genomeString += "Comms= " + agent.candidateRef.candidateGenome.bodyGenome.communicationGenome.useComms.ToString() + "\n";
-                            genomeString += "Enviro: " + agent.candidateRef.candidateGenome.bodyGenome.environmentalGenome.useWaterStats.ToString() + "\n";
-                            CritterModuleFoodSensorsGenome foodGenome = agent.candidateRef.candidateGenome.bodyGenome.foodGenome;
-                            genomeString += "Food: " + foodGenome.useNutrients.ToString() + ", " + foodGenome.usePos.ToString() + ", " + foodGenome.useDir.ToString() + ", " + foodGenome.useStats.ToString() + ", " + foodGenome.useEggs.ToString() + ", " + foodGenome.useCorpse.ToString() + "\n";
-                            genomeString += "Friend: " + agent.candidateRef.candidateGenome.bodyGenome.friendGenome.usePos.ToString() + ", " + agent.candidateRef.candidateGenome.bodyGenome.friendGenome.useDir.ToString() + ", " + agent.candidateRef.candidateGenome.bodyGenome.friendGenome.useVel.ToString() + "\n";
-                            genomeString += "Threat: " + agent.candidateRef.candidateGenome.bodyGenome.threatGenome.usePos.ToString() + ", " + agent.candidateRef.candidateGenome.bodyGenome.threatGenome.useDir.ToString() + ", " + agent.candidateRef.candidateGenome.bodyGenome.threatGenome.useVel.ToString() + ", " + agent.candidateRef.candidateGenome.bodyGenome.threatGenome.useStats.ToString() + "\n";
+                        genomeString += "\nSENSORS:\n";
+                        genomeString += "Comms= " + agent.candidateRef.candidateGenome.bodyGenome.communicationGenome.useComms.ToString() + "\n";
+                        genomeString += "Enviro: " + agent.candidateRef.candidateGenome.bodyGenome.environmentalGenome.useWaterStats.ToString() + "\n";
+                        CritterModuleFoodSensorsGenome foodGenome = agent.candidateRef.candidateGenome.bodyGenome.foodGenome;
+                        genomeString += "Food: " + foodGenome.useNutrients.ToString() + ", " + foodGenome.usePos.ToString() + ", " + foodGenome.useDir.ToString() + ", " + foodGenome.useStats.ToString() + ", " + foodGenome.useEggs.ToString() + ", " + foodGenome.useCorpse.ToString() + "\n";
+                        genomeString += "Friend: " + agent.candidateRef.candidateGenome.bodyGenome.friendGenome.usePos.ToString() + ", " + agent.candidateRef.candidateGenome.bodyGenome.friendGenome.useDir.ToString() + ", " + agent.candidateRef.candidateGenome.bodyGenome.friendGenome.useVel.ToString() + "\n";
+                        genomeString += "Threat: " + agent.candidateRef.candidateGenome.bodyGenome.threatGenome.usePos.ToString() + ", " + agent.candidateRef.candidateGenome.bodyGenome.threatGenome.useDir.ToString() + ", " + agent.candidateRef.candidateGenome.bodyGenome.threatGenome.useVel.ToString() + ", " + agent.candidateRef.candidateGenome.bodyGenome.threatGenome.useStats.ToString() + "\n";
             
-                            textWatcherVertebrateGenome.text = genomeString;
-                        }
-                        else if(curWatcherPanelVertebratePageNum == 3) {
-                            panelWatcherSpiritVertebratesBrain.SetActive(true);
-                            // update brain panel
+                        textWatcherVertebrateGenome.text = genomeString;
+                        //}
+                        //else if(curWatcherPanelVertebratePageNum == 3) {
+                        panelWatcherSpiritVertebratesBrain.SetActive(true);
+                        // update brain panel
                                         
-                            string brainString = "BRAIN PAGE! 3";
-                            brainString += "\n" + agent.brain.neuronList.Count.ToString() + " Neurons    " + agent.brain.axonList.Count.ToString() + " Axons";
+                        string brainString = "BRAIN PAGE! 3";
+                        brainString += "\n" + agent.brain.neuronList.Count.ToString() + " Neurons    " + agent.brain.axonList.Count.ToString() + " Axons";
                   
-                            string brainInputsTxt = "\nINPUTS:";
-                            for(int n = 0; n < agent.brain.neuronList.Count; n++) {
-                                if(agent.brain.neuronList[n].neuronType == NeuronGenome.NeuronType.In) {
+                        string brainInputsTxt = "\nINPUTS:";
+                        for(int n = 0; n < agent.brain.neuronList.Count; n++) {
+                            if(agent.brain.neuronList[n].neuronType == NeuronGenome.NeuronType.In) {
                                     
-                                    if (n % 2 == 0) {
-                                        brainInputsTxt += "\n";
-                                    }
-                                    float neuronValue = agent.brain.neuronList[n].currentValue[0];
-                                    brainInputsTxt += agent.brain.neuronList[n].name + " ";
-                                    if(neuronValue < -0.2f) {
-                                        brainInputsTxt += "<color=#FF6644FF>";
-                                    }
-                                    else if(neuronValue > 0.2f) {
-                                        brainInputsTxt += "<color=#44FF66FF>";
-                                    }
-                                    else {
-                                        brainInputsTxt += "<color=#A998B5FF>";
-                                    }
-                                    brainInputsTxt += "[" + n.ToString() + "] " + agent.brain.neuronList[n].currentValue[0].ToString("F2") + "</color>  ";
-                                    
+                                if (n % 2 == 0) {
+                                    brainInputsTxt += "\n";
                                 }
-                            }
-                            string brainOutputsTxt = "\n\nOUTPUTS:\n";
-                            for(int o = 0; o < agent.brain.neuronList.Count; o++) {
-                                if(agent.brain.neuronList[o].neuronType == NeuronGenome.NeuronType.Out) {
-                                    
-                                    if (o % 2 == 0) {
-                                        brainOutputsTxt += "\n";
-                                    }
-                                    float neuronValue = agent.brain.neuronList[o].currentValue[0];
-                                    brainOutputsTxt += agent.brain.neuronList[o].name + " ";
-                                    if(neuronValue < -0.2f) {
-                                        brainOutputsTxt += "<color=#FF6644FF>";
-                                    }
-                                    else if(neuronValue > 0.2f) {
-                                        brainOutputsTxt += "<color=#44FF66FF>";
-                                    }
-                                    else {
-                                        brainOutputsTxt += "<color=#A998B5FF>";
-                                    }
-                                    brainOutputsTxt += "[" + o.ToString() + "] " + agent.brain.neuronList[o].currentValue[0].ToString("F2") + "</color>  ";
-                                    
-                                    brainOutputsTxt += "";
-                                    
+                                float neuronValue = agent.brain.neuronList[n].currentValue[0];
+                                brainInputsTxt += agent.brain.neuronList[n].name + " ";
+                                if(neuronValue < -0.2f) {
+                                    brainInputsTxt += "<color=#FF6644FF>";
                                 }
+                                else if(neuronValue > 0.2f) {
+                                    brainInputsTxt += "<color=#44FF66FF>";
+                                }
+                                else {
+                                    brainInputsTxt += "<color=#A998B5FF>";
+                                }
+                                brainInputsTxt += "[" + n.ToString() + "] " + agent.brain.neuronList[n].currentValue[0].ToString("F2") + "</color>  ";
+                                    
                             }
-                            brainString += brainInputsTxt + brainOutputsTxt;
-
-                            textWatcherVertebrateBrain.text = brainString;
                         }
+                        string brainOutputsTxt = "\n\nOUTPUTS:\n";
+                        for(int o = 0; o < agent.brain.neuronList.Count; o++) {
+                            if(agent.brain.neuronList[o].neuronType == NeuronGenome.NeuronType.Out) {
+                                    
+                                if (o % 2 == 0) {
+                                    brainOutputsTxt += "\n";
+                                }
+                                float neuronValue = agent.brain.neuronList[o].currentValue[0];
+                                brainOutputsTxt += agent.brain.neuronList[o].name + " ";
+                                if(neuronValue < -0.2f) {
+                                    brainOutputsTxt += "<color=#FF6644FF>";
+                                }
+                                else if(neuronValue > 0.2f) {
+                                    brainOutputsTxt += "<color=#44FF66FF>";
+                                }
+                                else {
+                                    brainOutputsTxt += "<color=#A998B5FF>";
+                                }
+                                brainOutputsTxt += "[" + o.ToString() + "] " + agent.brain.neuronList[o].currentValue[0].ToString("F2") + "</color>  ";
+                                    
+                                brainOutputsTxt += "";
+                                    
+                            }
+                        }
+                        brainString += brainInputsTxt + brainOutputsTxt;
+
+                        textWatcherVertebrateBrain.text = brainString;
+                        //}
+
+                        panelWatcherSpiritVertebratesText.SetActive(true);
+                        
                     }
 
                     TextCommonStatsA.text = str;
