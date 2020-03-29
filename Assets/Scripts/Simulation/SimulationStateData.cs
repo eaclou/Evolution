@@ -330,16 +330,20 @@ public class SimulationStateData {
                 critterSimDataArray[i].stamina = simManager.agentsArray[i].coreModule.stamina[0];
 
                 float isFeedingF = 0f;
-                if(simManager.agentsArray[i].isFeeding) {
+                if(simManager.agentsArray[i].isFeeding && simManager.agentsArray[i].feedingFrameCounter < 2) {
                     isFeedingF = 1f;
                 }
                 float isFreeToEat = 1f;
+                if(simManager.agentsArray[i].feedingFrameCounter > 1) {
+                    isFreeToEat = 0f;
+                }
                 if(simManager.agentsArray[i].isDefending) {
                     isFreeToEat = 0f;
                 }
                 if(simManager.agentsArray[i].isCooldown) {
                     isFreeToEat = 0f;
-                }                
+                }
+                
                 critterSimDataArray[i].consumeOn = isFreeToEat;    // Flag for intention to eat gpu food particle (plant-type)         
 
                 critterSimDataArray[i].biteAnimCycle = 0f;

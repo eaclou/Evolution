@@ -8,6 +8,8 @@ public class WatcherUI : MonoBehaviour {
     public bool isUnlocked;
     public bool isOpen;
 
+    public AgentBehaviorOneHot agentBehaviorOneHot;
+
     //public Image imageWatcherButtonMIP;  // superscript button over watcher toolbar Button
     public Image imageWatcherCurTargetLayer; // in watcher panel
     public Text textTargetLayer;
@@ -362,6 +364,8 @@ public class WatcherUI : MonoBehaviour {
                     if(agent.coreModule != null) {
                         //textNewInspectAgentName.text = agent.candidateRef.candidateGenome.bodyGenome.coreGenome.name;
 
+                        
+
                         textStomachContents.text = "STOMACH " + Mathf.Clamp01(agent.coreModule.stomachContentsNorm * 1f).ToString("F5");
                         textEnergy.text = "ENERGY " + agent.coreModule.energy.ToString("F5");
                         textHealth.text = "HEALTH " + agent.coreModule.healthBody.ToString("F5");
@@ -574,6 +578,20 @@ public class WatcherUI : MonoBehaviour {
                         //else if(curWatcherPanelVertebratePageNum == 3) {
                         panelWatcherSpiritVertebratesBrain.SetActive(true);
                         // update brain panel
+
+                        float restEffector = 0f;
+                        float dashEffector = 0f;
+                        float guardEffector = 0f;
+                        float biteEffector = 0f;
+                        float attackEffector = 0f;
+                        float otherEffector = 0f;
+
+                        agentBehaviorOneHot.UpdateBars( agent.coreModule.healEffector[0],
+                                                        agent.coreModule.dashEffector[0],
+                                                        agent.coreModule.defendEffector[0],
+                                                        agent.coreModule.mouthFeedEffector[0],
+                                                        agent.coreModule.mouthAttackEffector[0],
+                                                        agent.communicationModule.outComm0[0]      );
                                         
                         string brainString = "BRAIN PAGE! 3";
                         brainString += "\n" + agent.brain.neuronList.Count.ToString() + " Neurons    " + agent.brain.axonList.Count.ToString() + " Axons";
@@ -628,6 +646,9 @@ public class WatcherUI : MonoBehaviour {
 
                         textWatcherVertebrateBrain.text = brainString;
                         //}
+
+                        
+                        
 
                         panelWatcherSpiritVertebratesText.SetActive(true);
                         
