@@ -242,6 +242,8 @@ public class Agent : MonoBehaviour {
     }
 
     public void AttemptInitiateActiveAttackBite() {
+        Debug.Log("ATTACK");
+
         if (isAttacking) {
             // this shouldn't happen?
         }
@@ -669,7 +671,7 @@ public class Agent : MonoBehaviour {
         GainExperience((amount / coreModule.stomachCapacity) * coreModule.foodEfficiencyPlant * 1f); // Exp for appropriate food    
 
         //Debug.Log("EatFoodPlant " + amount.ToString());
-        RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Plant! (" + amount.ToString() + ")");
+        RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Plant! (+" + (amount * 1000).ToString("F0") + " food)");
     }
     public void EatFoodMeat(float amount) {
         totalFoodEatenMeat += amount; 
@@ -1180,7 +1182,7 @@ public class Agent : MonoBehaviour {
                 animalParticleEatAmount *= 0.9f;
                 //Debug.Log("Agent[" + index.ToString() + "], Ate Zooplankton: " + animalParticleEatAmount.ToString());
                 EatFoodMeat(animalParticleEatAmount); // * sizeEfficiencyPlant);    
-                RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Zooplankton! (" + animalParticleEatAmount.ToString() + ")");
+                RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Zooplankton! (+" + (animalParticleEatAmount * 1000).ToString("F0").ToString() + " food)");
                 startBite = true;
             }
 

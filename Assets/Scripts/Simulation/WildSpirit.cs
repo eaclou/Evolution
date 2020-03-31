@@ -12,7 +12,7 @@ public class WildSpirit : MonoBehaviour {
     public Vector3 curRoamingSpiritPosition;
     public Vector3 prevRoamingSpiritPosition;
     
-    public float roamingSpiritScale = 4.0f;
+    public float roamingSpiritScale = 2.0f;
     public bool isClickableSpiritRoaming;
     public Color roamingSpiritColor;
     public int framesSinceLastClickableSpirit;
@@ -39,7 +39,7 @@ public class WildSpirit : MonoBehaviour {
 
     private Vector3 velocity;
 
-    private float spiritSpeed = 0.615f;
+    private float spiritSpeed = 0.115f;
 
     private float threatLevel = 0f;
 

@@ -9,6 +9,7 @@ public class WatcherUI : MonoBehaviour {
     public bool isOpen;
 
     public AgentBehaviorOneHot agentBehaviorOneHot;
+    public WidgetAgentStatus widgetAgentStatus;
 
     //public Image imageWatcherButtonMIP;  // superscript button over watcher toolbar Button
     public Image imageWatcherCurTargetLayer; // in watcher panel
@@ -592,7 +593,14 @@ public class WatcherUI : MonoBehaviour {
                                                         agent.coreModule.mouthFeedEffector[0],
                                                         agent.coreModule.mouthAttackEffector[0],
                                                         agent.communicationModule.outComm0[0]      );
-                                        
+
+                        widgetAgentStatus.UpdateBars((agent.coreModule.healthBody + agent.coreModule.healthHead + agent.coreModule.healthExternal) / 3f,
+                                                      Mathf.Clamp01(agent.coreModule.energy * agent.currentBiomass),
+                                                      agent.coreModule.stomachContentsNorm,
+                                                      agent.currentBiomass);
+                        
+                        
+                        /*               
                         string brainString = "BRAIN PAGE! 3";
                         brainString += "\n" + agent.brain.neuronList.Count.ToString() + " Neurons    " + agent.brain.axonList.Count.ToString() + " Axons";
                   
@@ -646,7 +654,7 @@ public class WatcherUI : MonoBehaviour {
 
                         textWatcherVertebrateBrain.text = brainString;
                         //}
-
+                        */
                         
                         
 

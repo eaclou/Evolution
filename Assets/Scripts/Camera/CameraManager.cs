@@ -104,8 +104,8 @@ public class CameraManager : MonoBehaviour {
         masterTargetCamPosition.z -= offsetZ;  // camera is towards the negative Z axis.... a bit awkward.
 
         // Lerp towards Target Transform Position & Orientation:
-        float minDistance = 10f;
-        float maxDistance = 400f;
+        float minDistance = 5f;
+        float maxDistance = 50f;
         float relSize = (masterTargetDistance - minDistance) / (minDistance + maxDistance);
 
         float minSizeLerpSpeed = 15f;
@@ -114,7 +114,7 @@ public class CameraManager : MonoBehaviour {
         masterLerpSpeed = Mathf.Max(masterLerpSpeed, 5f);  // cap
 
         masterTargetDistance = Mathf.Min(masterTargetDistance, maxDistance);
-        masterTargetDistance = Mathf.Max(masterTargetDistance, minDistance);
+        masterTargetDistance = Mathf.Max(masterTargetDistance, minDistance);        
 
         curCameraPos = Vector3.Lerp(this.transform.position, masterTargetCamPosition, masterLerpSpeed * Time.deltaTime);
         this.transform.position = curCameraPos;
