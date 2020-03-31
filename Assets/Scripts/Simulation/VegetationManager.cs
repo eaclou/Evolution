@@ -1001,7 +1001,7 @@ public class VegetationManager {
                 if (theRenderKingRef.simManager.uiManager.brushesUI.selectedEssenceSlot.tierID == 0) {
                     brushAlgaeOn = 1f;
                     
-                    brushIntensityMult = 0.025f;
+                    brushIntensityMult = 0.2f;
                 }
                 else {
                     //brushPlantsOn = 1f;

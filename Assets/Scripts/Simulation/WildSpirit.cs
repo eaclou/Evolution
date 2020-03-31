@@ -66,7 +66,7 @@ public class WildSpirit : MonoBehaviour {
         float spinAngle = Time.realtimeSinceStartup * orbitSpeed;
         float zPhase = spinAngle * 9.5f;
         float zBounceMag = 1f;
-        roamingSpiritScale = 3f + 0.5f * Mathf.Cos(Time.realtimeSinceStartup * 3.673f);
+        //roamingSpiritScale = 3f + 0.5f * Mathf.Cos(Time.realtimeSinceStartup * 3.673f);
 
 
 

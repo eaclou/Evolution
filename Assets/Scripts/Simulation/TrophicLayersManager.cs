@@ -173,7 +173,7 @@ public class TrophicLayersManager {
 
             // ALGAE
             if(kingdomPlants.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
-                if(simManager.simResourceManager.curGlobalDecomposers > 25f && simManager.uiManager.wildSpirit.framesSinceLastClickableSpirit > 150 && simManager.uiManager.wildSpirit.curClickableSpiritType == WildSpirit.ClickableSpiritType.Algae) {
+                if(simManager.simResourceManager.curGlobalDecomposers >= 0f && simManager.uiManager.wildSpirit.framesSinceLastClickableSpirit > 150 && simManager.uiManager.wildSpirit.curClickableSpiritType == WildSpirit.ClickableSpiritType.Algae) {
                     simManager.uiManager.wildSpirit.isClickableSpiritRoaming = true;
                     simManager.uiManager.wildSpirit.SpawnWildSpirit(kingdomPlants.trophicTiersList[0].trophicSlots[0].color);
                 }
@@ -187,14 +187,14 @@ public class TrophicLayersManager {
             }
             // ZOOPLANKTON:
             if(kingdomAnimals.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
-                if(simManager.simResourceManager.curGlobalDecomposers > 40f && simManager.uiManager.wildSpirit.framesSinceLastClickableSpirit > 150 && simManager.uiManager.wildSpirit.curClickableSpiritType == WildSpirit.ClickableSpiritType.Zooplankton) {
+                if(simManager.simResourceManager.curGlobalDecomposers >= 0f && simManager.uiManager.wildSpirit.framesSinceLastClickableSpirit > 150 && simManager.uiManager.wildSpirit.curClickableSpiritType == WildSpirit.ClickableSpiritType.Zooplankton) {
                     simManager.uiManager.wildSpirit.isClickableSpiritRoaming = true;
                     simManager.uiManager.wildSpirit.SpawnWildSpirit(kingdomAnimals.trophicTiersList[0].trophicSlots[0].color);
                 }
             }
             // VERTEBRATE A:
             if(kingdomAnimals.trophicTiersList[1].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {
-                if(simManager.simResourceManager.curGlobalAnimalParticles > 1f && simManager.uiManager.wildSpirit.framesSinceLastClickableSpirit > 150 && simManager.uiManager.wildSpirit.curClickableSpiritType == WildSpirit.ClickableSpiritType.VertA) {     // && !simManager.uiManager.isUnlockCooldown) {
+                if(simManager.simResourceManager.curGlobalAnimalParticles >= 0f && simManager.uiManager.wildSpirit.framesSinceLastClickableSpirit > 150 && simManager.uiManager.wildSpirit.curClickableSpiritType == WildSpirit.ClickableSpiritType.VertA) {     // && !simManager.uiManager.isUnlockCooldown) {
                     simManager.uiManager.wildSpirit.isClickableSpiritRoaming = true;
                     simManager.uiManager.wildSpirit.SpawnWildSpirit(kingdomAnimals.trophicTiersList[1].trophicSlots[0].color);
                 }

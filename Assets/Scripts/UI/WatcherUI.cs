@@ -592,7 +592,7 @@ public class WatcherUI : MonoBehaviour {
                                                         agent.coreModule.defendEffector[0],
                                                         agent.coreModule.mouthFeedEffector[0],
                                                         agent.coreModule.mouthAttackEffector[0],
-                                                        agent.communicationModule.outComm0[0]      );
+                                                        agent.communicationModule.outComm0[0], agent.isCooldown);
 
                         widgetAgentStatus.UpdateBars((agent.coreModule.healthBody + agent.coreModule.healthHead + agent.coreModule.healthExternal) / 3f,
                                                       Mathf.Clamp01(agent.coreModule.energy * agent.currentBiomass),

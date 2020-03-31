@@ -112,7 +112,7 @@
 				float random1 = rand(float2(inst, inst));
 				float random2 = rand(float2(random1, random1));
 				float randomAspect = lerp(0.7, 1.3, random1) * 0.95395;
-				strokeData.scale.x *= randomAspect;
+				strokeData.scale.x *= 0.5;// randomAspect;
 				float2 scale = strokeData.scale * 2.4514 * strokeData.isActive;
 				
 				quadPoint *= float3(scale, 1.0);
