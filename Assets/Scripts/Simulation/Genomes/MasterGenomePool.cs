@@ -281,11 +281,12 @@ public class MasterGenomePool {
             }            
         }
 
-        // *********** AUTO SPECIES CREATION DISABLED FOR NOW!!! *****************************
+        // *********** AUTO SPECIES CREATION DISABLED FOR NOW!!! ***************************** 
+        //*** RE-ENABLED!!!!!!
         // CHECK IF NEW SPECIES CREATED:
 
         bool assignedToNewSpecies = false;
-            /*
+            
         if(closestDistance > speciesSimilarityDistanceThreshold) {
             if(!speciesCreatedOrDestroyedThisFrame) {
                 if(currentlyActiveSpeciesIDList.Count < maxNumActiveSpecies) {
@@ -306,7 +307,7 @@ public class MasterGenomePool {
         else {
             //Debug.Log("closestDistanceSpeciesID: " + closestSpeciesID.ToString() + ", score: " + closestDistance.ToString());
         }
-        */
+        
 
         if(!assignedToNewSpecies) {
             // *** maybe something fishy here??
@@ -324,13 +325,13 @@ public class MasterGenomePool {
 
             // NEW:::
             completeSpeciesPoolsList[parentSpeciesID].AddNewCandidateGenome(newGenome);
-
             // OLD:::
             //completeSpeciesPoolsList[closestSpeciesID].AddNewCandidateGenome(newGenome);
         }
         else {
             // *** ???
             Debug.Log("assignedToNewSpecies closestDistanceSpeciesID: " + closestSpeciesID.ToString() + ", score: " + closestDistance.ToString());
+            completeSpeciesPoolsList[closestSpeciesID].AddNewCandidateGenome(newGenome);
         }
         
         if(currentlyActiveSpeciesIDList.Count < maxNumActiveSpecies) {
@@ -341,7 +342,7 @@ public class MasterGenomePool {
             speciesSimilarityDistanceThreshold = Mathf.Min(speciesSimilarityDistanceThreshold, 10f); // cap
         }
 
-        //CheckForExtinction(simManagerRef);  *** TEMPORARILLY DISABLED!!!!! *************
+        CheckForExtinction(simManagerRef); // *** TEMPORARILLY (UN)DISABLED!!!!! *************
     }
 
     public void GlobalFindCandidateID(int ID) {

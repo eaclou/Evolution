@@ -262,7 +262,7 @@ public class CritterMouthComponent : MonoBehaviour {
         //Debug.Log("SwallowFoodWhole");
         float flow = eggSack.foodAmount;        
         agentRef.EatFoodMeat(flow * 100f);
-        agentRef.RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Egg! (" + flow.ToString() + ")");
+        agentRef.RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Egg! (" + flow.ToString() + ")", 1f);
         eggSack.ConsumedByPredatorAgent();
     }
     private void BiteDamageAnimal(Agent preyAgent, float ownBiteArea, float targetArea) {
@@ -312,7 +312,7 @@ public class CritterMouthComponent : MonoBehaviour {
         }        
         
         agentRef.EatFoodMeat(flowR * 100f); // assumes all foodAmounts are equal !! *****
-        agentRef.RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Egg Bit! (" + flowR.ToString() + ")");
+        agentRef.RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Egg Bit! (" + flowR.ToString() + ")", 1f);
         Debug.Log("BiteEggsack [" + agentRef.index.ToString() + "] ---> [" + eggSack.index.ToString() + "]");
     }
     public void BiteCorpseFood(Agent corpseAgent, float ownBiteArea)
@@ -323,7 +323,7 @@ public class CritterMouthComponent : MonoBehaviour {
         float flowR = Mathf.Min(corpseAgent.currentBiomass, flow);
         
         agentRef.EatFoodMeat(flowR * 100f); // assumes all foodAmounts are equal !! *****
-        agentRef.RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Carrion! (" + flowR.ToString() + ")");
+        agentRef.RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Carrion! (" + flowR.ToString() + ")", 1f);
         //if(agentRef.coreModule.foodEfficiencyMeat > 0.5f) { // ** // damage bonus -- provided has the required specialization level:::::
         //    agentRef.GainExperience((flowR / agentRef.coreModule.stomachCapacity) * 0.5f);  
         //}        

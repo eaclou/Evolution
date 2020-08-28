@@ -451,7 +451,7 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 		float isRightClick = saturate(_SpiritBrushPosNeg * -1.0) * _IsBrushing;
 		float isLeftClick = saturate(_SpiritBrushPosNeg) * _IsBrushing;
 		//if(_IsBrushing > 0.5) {		
-		if(_IsBrushing * isLeftClick > 0.5) {	 // player brushing this// Player-generated:
+		if(true) { //_IsBrushing * isLeftClick > 0.5) {	 // player brushing this// Player-generated:
 			
 			for(int i = 0; i < 8; i++) {
 				float rand01 = rand(float2(_Time * 135.79 + (float)animalParticlesRead[id.x].index * 30.17896 + i, _Time * 28.463 - i));

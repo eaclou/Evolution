@@ -64,7 +64,7 @@ public class Agent : MonoBehaviour {
     public struct AgentEventData {
         public int eventFrame;
         public string eventText;
-        public float extra;
+        public float goodness;
     }
     public string stringCauseOfDeath = "";
     public List<AgentEventData> agentEventDataList;
@@ -203,7 +203,7 @@ public class Agent : MonoBehaviour {
 
     public EggSack childEggSackRef;
     public bool isPregnantAndCarryingEggs = false;
-    public int pregnancyRefactoryDuration = 1200;
+    public int pregnancyRefactoryDuration = 2400;
 
     //public float overflowFoodAmount = 0f;
         
@@ -298,7 +298,7 @@ public class Agent : MonoBehaviour {
         preyAgentRef = preyAgent;
 
         EatFoodMeat(preyAgent.currentBiomass * 100f); // *(*********************************************** experiment!
-        RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Vertebrate! (" + preyAgent.currentBiomass.ToString() + ")");
+        RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Vertebrate! (" + preyAgent.currentBiomass.ToString() + ")", 1f);
         preyAgent.ProcessBeingEaten(preyAgent.currentBiomass);
         //preyAgent.currentBiomass = 0f;
         
@@ -511,11 +511,11 @@ public class Agent : MonoBehaviour {
         if (coreModule.energy <= 0f) {
             if(coreModule.stomachContentsNorm > 0.01f) {
                 stringCauseOfDeath = "Suffocated";
-                RegisterAgentEvent(UnityEngine.Time.frameCount, "Suffocated! stomachContentsNorm: " + coreModule.stomachContentsNorm.ToString());
+                RegisterAgentEvent(UnityEngine.Time.frameCount, "Suffocated! stomachContentsNorm: " + coreModule.stomachContentsNorm.ToString(), 0f);
             }
             else {
                 stringCauseOfDeath = "Starved";
-                RegisterAgentEvent(UnityEngine.Time.frameCount, "Starved!");
+                RegisterAgentEvent(UnityEngine.Time.frameCount, "Starved!", 0f);
             }
             
             lifeStageTransitionTimeStepCounter = 0;
@@ -538,7 +538,7 @@ public class Agent : MonoBehaviour {
             //Debug.LogError("CheckForDeathHealth" + currentBiomass.ToString());
 
             stringCauseOfDeath = "Fatal Injuries";
-            RegisterAgentEvent(UnityEngine.Time.frameCount, "Died of Injuries!");
+            RegisterAgentEvent(UnityEngine.Time.frameCount, "Died of Injuries!", 0f);
             InitializeDeath();
         }
     }
@@ -549,7 +549,7 @@ public class Agent : MonoBehaviour {
 
             //Debug.Log("Died of old age!");
             stringCauseOfDeath = "Old Age";
-            RegisterAgentEvent(UnityEngine.Time.frameCount, "Died of Old Age!");
+            RegisterAgentEvent(UnityEngine.Time.frameCount, "Died of Old Age!", 0f);
             InitializeDeath();
         }
     }
@@ -558,7 +558,7 @@ public class Agent : MonoBehaviour {
             curLifeStage = Agent.AgentLifeStage.Dead;
             lifeStageTransitionTimeStepCounter = 0;
             stringCauseOfDeath = "Divine Judgment";
-            RegisterAgentEvent(UnityEngine.Time.frameCount, "Struck down by Divine Judgment!");
+            RegisterAgentEvent(UnityEngine.Time.frameCount, "Struck down by Divine Judgment!", 0f);
             InitializeDeath();
         }
     }
@@ -640,14 +640,14 @@ public class Agent : MonoBehaviour {
         }
     }
     
-    public void RegisterAgentEvent(int frame, string textString) {
+    public void RegisterAgentEvent(int frame, string textString, float goodness01) {
         //lastEvent = "Ate Plant! (" + amount.ToString() + ")";
         //lastEventTime = UnityEngine.Time.frameCount;
         //eventLogStringList
         AgentEventData newEvent = new AgentEventData();
         newEvent.eventFrame = frame;
         newEvent.eventText = textString;
-        newEvent.extra = 1f;
+        newEvent.goodness = goodness01;
 
         agentEventDataList.Add(newEvent);
     }
@@ -671,7 +671,7 @@ public class Agent : MonoBehaviour {
         GainExperience((amount / coreModule.stomachCapacity) * coreModule.foodEfficiencyPlant * 1f); // Exp for appropriate food    
 
         //Debug.Log("EatFoodPlant " + amount.ToString());
-        RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Plant! (+" + (amount * 1000).ToString("F0") + " food)");
+        RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Plant! (+" + (amount * 1000).ToString("F0") + " food)", 1f);
     }
     public void EatFoodMeat(float amount) {
         totalFoodEatenMeat += amount; 
@@ -714,7 +714,7 @@ public class Agent : MonoBehaviour {
 
         totalDamageTaken += damage;
 
-        RegisterAgentEvent(UnityEngine.Time.frameCount, "Took Damage! (" + damage.ToString() + ")");
+        RegisterAgentEvent(UnityEngine.Time.frameCount, "Took Damage! (" + damage.ToString() + ")", 0f);
 
         CheckForDeathHealth();
     }
@@ -739,7 +739,7 @@ public class Agent : MonoBehaviour {
 
         TakeDamage(damage);
         
-        RegisterAgentEvent(UnityEngine.Time.frameCount, "Bitten! (" + damage.ToString("F2") + ") by #" + predatorAgentRef.index.ToString());
+        RegisterAgentEvent(UnityEngine.Time.frameCount, "Bitten! (" + damage.ToString("F2") + ") by #" + predatorAgentRef.index.ToString(), 0f);
      
     }
     public void ProcessBeingEaten(float amount) {
@@ -771,7 +771,7 @@ public class Agent : MonoBehaviour {
             ScaleBody(sizePercentage, false);
         }
         
-        RegisterAgentEvent(UnityEngine.Time.frameCount, "Devoured!");
+        RegisterAgentEvent(UnityEngine.Time.frameCount, "Devoured!", 0f);
         
     }
 
@@ -920,16 +920,13 @@ public class Agent : MonoBehaviour {
         currentBiomass = settingsRef.agentSettings._BaseInitMass;
         biomassAtDeath = currentBiomass; // avoid divide by 0
         fullsizeBiomass = currentBiomass * 100f;
-        coreModule.energy = currentBiomass * 120f;  // should be proportional to body size??
-
+        coreModule.energy = currentBiomass * 512f;  // should be proportional to body size??
         
-
         mouthRef.Enable();
         isCooldown = false;
 
-
         agentEventDataList.Clear();
-        RegisterAgentEvent(UnityEngine.Time.frameCount, "Was Born!");        
+        RegisterAgentEvent(UnityEngine.Time.frameCount, "Was Born!", 1f);        
     }
     
     private void TickMature(SimulationManager simManager) {
@@ -970,6 +967,8 @@ public class Agent : MonoBehaviour {
     }
     public void BeginPregnancy(EggSack developingEggSackRef) {
         //Debug.Log("BeginPregnancy! [" + developingEggSackRef.index.ToString() + "]");
+
+        
         isPregnantAndCarryingEggs = true;
         childEggSackRef = developingEggSackRef;
 
@@ -979,8 +978,10 @@ public class Agent : MonoBehaviour {
         // probably 0.05 * 2 = 0.1   for now
         if(curProportion > starterMass) { // Good to go!
             Debug.Log("Pregnancy! " + " curMass: " + currentBiomass.ToString() + ", reqMass: " + starterMass.ToString() + ", curProp: " + curProportion.ToString());
-            currentBiomass -= starterMass;
-            childEggSackRef.currentBiomass = starterMass;            
+            currentBiomass -= settingsRef.agentSettings._BaseInitMass;
+            childEggSackRef.currentBiomass = starterMass;     // *************** TROUBLE!!!
+
+            RegisterAgentEvent(UnityEngine.Time.frameCount, "Pregnant! " + starterMass.ToString(), 0.5f);
         }
         else {
             Debug.LogError("Something went wrong!! " + " curMass: " + currentBiomass.ToString() + ", reqMass: " + starterMass.ToString() + ", curProp: " + curProportion.ToString() );
@@ -1001,6 +1002,8 @@ public class Agent : MonoBehaviour {
         
         isPregnantAndCarryingEggs = false;
         pregnancyRefactoryTimeStepCounter = 0;
+
+        RegisterAgentEvent(UnityEngine.Time.frameCount, "Pregnancy Complete!", 0.95f);
     }
     private void TickDead(SettingsManager settings) {
         lifeStageTransitionTimeStepCounter++;
@@ -1076,7 +1079,6 @@ public class Agent : MonoBehaviour {
                                                                    //float digestedAmountTotal = Mathf.Min(totalStomachContentsNorm, maxDigestionRate);
                                                                    //float digestedProportionOfTotalContents = digestedAmountTotal / (totalStomachContentsNorm + 0.000001f);
 
-        
         // *** Remember to Re-Implement dietary specialization!!! ****
         float digestedPlantMass = digestedAmountTotal * foodProportionsVec.x;
         float plantToEnergyAmount = digestedPlantMass; // * coreModule.foodEfficiencyPlant;
@@ -1103,7 +1105,7 @@ public class Agent : MonoBehaviour {
         }
 
         // Heal:  // *** Re-Implement !!! ***************
-        float healRate = 0.0001f;
+        float healRate = 0.00025f;
         float energyToHealthConversionRate = 5f * coreModule.healthBonus;
         if(coreModule.healthBody < 1f) {
             coreModule.healthBody += healRate;
@@ -1145,7 +1147,7 @@ public class Agent : MonoBehaviour {
         float energyCostMult = 0.44f; // Mathf.Lerp(settingsRef.agentSettings._BaseEnergyCost, settingsRef.agentSettings._BaseEnergyCost * 0.25f, sizePercentage);
         float restingBonusMult = 1f;
         if(isResting) {
-            restingBonusMult = 0.9f;
+            restingBonusMult = 0.75f;
         }
         
         float energyCost = (currentBiomass) * energyCostMult * restingBonusMult; // * SimulationManager.energyDifficultyMultiplier; // / coreModule.energyBonus;
@@ -1182,7 +1184,7 @@ public class Agent : MonoBehaviour {
                 animalParticleEatAmount *= 0.9f;
                 //Debug.Log("Agent[" + index.ToString() + "], Ate Zooplankton: " + animalParticleEatAmount.ToString());
                 EatFoodMeat(animalParticleEatAmount); // * sizeEfficiencyPlant);    
-                RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Zooplankton! (+" + (animalParticleEatAmount * 1000).ToString("F0").ToString() + " food)");
+                RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Zooplankton! (+" + (animalParticleEatAmount * 1000).ToString("F0").ToString() + " food)", 1f);
                 startBite = true;
             }
 
@@ -1355,31 +1357,28 @@ public class Agent : MonoBehaviour {
         
         if(isFeeding)
         {
-            bitingPenalty = 0.65f;
+            bitingPenalty = 0.5f;
         }
         /*if(coreModule.mouthFeedEffector[0] > 0f)  // Clean up code for State-machine-esque behaviors/abilities
         {
             bitingPenalty = 0.5f;
         }*/
 
-        float forcePenalty = 0.7f;
+        float forcePenalty = 1f;
         if(isResting) {
-            forcePenalty = 0.05f;
+            forcePenalty = 0.1f;
         }
         
         float fatigueMultiplier = Mathf.Clamp01(coreModule.energy * 5f + 0.05f) * Mathf.Clamp01(coreModule.stamina[0] * 4f + 0.05f);
         float lowHealthPenalty = Mathf.Clamp01(coreModule.healthBody * 5f) * 0.5f + 0.5f;
         fatigueMultiplier *= lowHealthPenalty;
-        //float growthStatus = 
-
+        
         turningAmount = Mathf.Lerp(turningAmount, this.bodyRigidbody.angularVelocity * Mathf.Deg2Rad * 0.03f, 0.28f);
 
         animationCycle += smoothedThrottle.magnitude * swimAnimationCycleSpeed * fatigueMultiplier * forcePenalty; // (Mathf.Lerp(fullSizeBoundingBox.y, 1f, 1f)
 
         if (throttle.sqrMagnitude > 0.000001f) {  // Throttle is NOT == ZERO
             
-            
-
             Vector2 headForwardDir = new Vector2(this.bodyRigidbody.transform.up.x, this.bodyRigidbody.transform.up.y).normalized;
             Vector2 headRightDir =  new Vector2(this.bodyRigidbody.transform.right.x, this.bodyRigidbody.transform.right.y).normalized;
             Vector2 throttleDir = throttle.normalized;
@@ -1402,7 +1401,7 @@ public class Agent : MonoBehaviour {
             //float aspectSpeedPenalty = 1.0f; // Mathf.Lerp(1.2f, 0.4f, candidateRef.candidateGenome.bodyGenome.coreGenome.creatureAspectRatio);
 
             float swimSpeed = 50f; // Mathf.Lerp(movementModule.smallestCreatureBaseSpeed, movementModule.largestCreatureBaseSpeed, 0.5f); // sizeValue);
-            float turnRate = 4f; //10 // Mathf.Lerp(movementModule.smallestCreatureBaseTurnRate, movementModule.largestCreatureBaseTurnRate, 0.5f) * 0.1f; // sizeValue);
+            float turnRate = 8f; //10 // Mathf.Lerp(movementModule.smallestCreatureBaseTurnRate, movementModule.largestCreatureBaseTurnRate, 0.5f) * 0.1f; // sizeValue);
             float dashBonus = 1f;
             if(isDashing) {                
                 dashBonus = 5f;                
@@ -1425,7 +1424,7 @@ public class Agent : MonoBehaviour {
 
             // Head turn:
             float torqueForce = Mathf.Lerp(headTurn, headTurnSign, 0.75f) * forcePenalty * turnRate * this.bodyRigidbody.mass * fatigueMultiplier * bitingPenalty * Time.deltaTime;
-            torqueForce = Mathf.Min(torqueForce, 7.55f);
+            torqueForce = Mathf.Min(torqueForce, 50000.55f) * 2.4f;
             this.bodyRigidbody.AddTorque(torqueForce, ForceMode2D.Impulse);
             
         }

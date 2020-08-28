@@ -329,6 +329,9 @@ public class EggSack : MonoBehaviour {
         fixedJoint.connectedBody = null;
 
         mainCollider.enabled = true;  // *** ???? maybe?
+
+        Debug.Log("is this gfunction being run?");
+        parentAgentRef.CompletedPregnancy();
     }
 
     public void ConsumedByPredatorAgent() {

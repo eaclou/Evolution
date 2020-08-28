@@ -66,12 +66,7 @@ public class WildSpirit : MonoBehaviour {
         float spinAngle = Time.realtimeSinceStartup * orbitSpeed;
         float zPhase = spinAngle * 9.5f;
         float zBounceMag = 1f;
-        //roamingSpiritScale = 3f + 0.5f * Mathf.Cos(Time.realtimeSinceStartup * 3.673f);
-
-
-
-        //curRoamingSpiritPosition = creationSpiritClickableStartPos + new Vector3(Mathf.Cos(spinAngle) * orbitRadius, Mathf.Sin(spinAngle) * orbitRadius, Mathf.Sin(zPhase) * zBounceMag);
-
+        
         
         Vector3 cursorToSpiritVec = (curRoamingSpiritPosition - uiManagerRef.theCursorCzar.cursorParticlesWorldPos);
         cursorToSpiritVec.z = 0f;

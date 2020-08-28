@@ -79,7 +79,9 @@ public class WorldSpiritHubUI : MonoBehaviour {
     public Color curIconColor = Color.white;
     public Sprite curIconSprite = null;
 
-
+    public Text textCurrencies;
+    public int tierA = 1;
+    public int currencyB = 0;
 
 	// Use this for initialization
 	void Start () {
@@ -96,20 +98,23 @@ public class WorldSpiritHubUI : MonoBehaviour {
     private void UpdateUI() {
         TrophicLayersManager layerManager = uiManagerRef.gameManager.simulationManager.trophicLayersManager;
 
+        //textCurrencies.text = "Tier: " + tierA.ToString() + "\n(" + currencyB.ToString() + " of " + "16" + ") to next Tier"; // More # For Tier Up"; // "CurrencyA: " + currencyA.ToString() + "\nCurrencyB: " + currencyB.ToString();
+        textCurrencies.text = "WORLD SIZE: " + uiManagerRef.gameManager.theRenderKing.baronVonTerrain._WorldRadius.ToString();
+
         bool showMinerals = layerManager.kingdomOther.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.On;
-        imageBitMinerals.gameObject.SetActive(true);
+        //imageBitMinerals.gameObject.SetActive(true);
         
         bool showAir = layerManager.kingdomOther.trophicTiersList[0].trophicSlots[2].status == TrophicSlot.SlotStatus.On;
-        imageBitAir.gameObject.SetActive(true);
+        //imageBitAir.gameObject.SetActive(true);
         
         bool showDecomposers = layerManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.On;
-        imageBitDecomposers.gameObject.SetActive(true);
+        //imageBitDecomposers.gameObject.SetActive(true);
 
         bool showPlants = layerManager.kingdomPlants.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.On;
-        imageBitPlants.gameObject.SetActive(true);
+        //imageBitPlants.gameObject.SetActive(true);
 
         bool showAnimals = layerManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.On;
-        imageBitAnimals.gameObject.SetActive(true);
+        //imageBitAnimals.gameObject.SetActive(true);
         
         //buttonKnowledgeLink.interactable = true;
         //buttonMutationLink.interactable = false;3
@@ -347,11 +352,11 @@ public class WorldSpiritHubUI : MonoBehaviour {
 
         textSelectedEssenceName.text = selectedWorldSpiritSlot.speciesName;
         textSelectedEssenceName.color = curIconColor;
-        textSelectedEssenceDescription.text = essenceDescriptionStr;
+        textSelectedEssenceDescription.text = "text here?";// essenceDescriptionStr;
         imageSelectedEssence.color = curIconColor * 1.35f;
         imageSelectedEssence.sprite = curIconSprite;
         imageColorBar.color = curIconColor;
-        imageBitBG.color = curIconColor;
+        //imageBitBG.color = curIconColor;
 
     }
     public void UpdateWorldSpiritHubUI() {
@@ -511,20 +516,17 @@ public class WorldSpiritHubUI : MonoBehaviour {
         //isAnnouncementTextOn = true;
 
         if(slot.kingdomID == 0) {
-            uiManagerRef.panelPendingClickPrompt.GetComponentInChildren<Text>().text = "A new species of DEcomposer added!";
-            uiManagerRef.panelPendingClickPrompt.GetComponentInChildren<Text>().color = uiManagerRef.colorDecomposersLayer;
+            uiManagerRef.NarratorText("A new species of D3composer added!", uiManagerRef.colorDecomposersLayer);
+            //panelPendingClickPrompt.GetComponentInChildren<Text>().text = "A new species of DEcomposer added!";
+            //uiManagerRef.panelPendingClickPrompt.GetComponentInChildren<Text>().color = uiManagerRef.colorDecomposersLayer;
             //panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
         }
         else if(slot.kingdomID == 1) {
             if(slot.tierID == 0) {
-                uiManagerRef.panelPendingClickPrompt.GetComponentInChildren<Text>().text = "A new species of Algae added!";
-                uiManagerRef.panelPendingClickPrompt.GetComponentInChildren<Text>().color = uiManagerRef.colorAlgaeLayer;
-                //panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
+                uiManagerRef.NarratorText("A new species of Algae added!", uiManagerRef.colorAlgaeLayer);                
             }
             else {   /// BIG PLANTS:
-                uiManagerRef.panelPendingClickPrompt.GetComponentInChildren<Text>().text = "A new species of PLAN%T added!";
-                uiManagerRef.panelPendingClickPrompt.GetComponentInChildren<Text>().color = uiManagerRef.colorPlantsLayer;
-                //panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
+                uiManagerRef.NarratorText("A new species of PLAN%T added!", uiManagerRef.colorPlantsLayer);               
             }
             
         }
@@ -555,9 +557,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
                 selectedWorldSpiritVertebrateSpeciesID = slot.linkedSpeciesID; // ???
                 //InitToolbarPortraitCritterData(slot);                
                 
-                uiManagerRef.panelPendingClickPrompt.GetComponentInChildren<Text>().text = "A new species of Vertebrate added!";
-                uiManagerRef.panelPendingClickPrompt.GetComponentInChildren<Text>().color = uiManagerRef.colorVertebratesLayer;
-                //panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
+                uiManagerRef.NarratorText("A new species of Vertebrate added!", uiManagerRef.colorVertebratesLayer);                
                 
                 if(slot.slotID == 0) {
                     //panelPendingClickPrompt.GetComponentInChildren<Text>().text = "These creatures start with randomly-generated brains\n and must evolve successful behavior\nthrough survival of the fittest";
@@ -567,9 +567,8 @@ public class WorldSpiritHubUI : MonoBehaviour {
                 
             }
             else {
-                uiManagerRef.panelPendingClickPrompt.GetComponentInChildren<Text>().text = "A new species of Zooplankton added!";
-                uiManagerRef.panelPendingClickPrompt.GetComponentInChildren<Text>().color = uiManagerRef.colorVertebratesLayer;
-                //panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
+
+                uiManagerRef.NarratorText("A new species of Zooplankton added!", uiManagerRef.colorVertebratesLayer);
             }
         }
 

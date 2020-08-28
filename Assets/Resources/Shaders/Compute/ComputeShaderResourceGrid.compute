@@ -74,14 +74,17 @@ void CSInitResourceGrid (uint3 id : SV_DispatchThreadID)
 	// CHANNEL Z = AlgaeGrid
 	float2 uv = ((float2)id.xy + 0.5) / _TextureResolution;
 	
+	float distFromCenter = length(uv - 0.5);
+	float distFromCenterNormalized = saturate(1.7 - distFromCenter * 25);
 	// CHANNEL X = Nutrients
 	// CHANNEL Y = Detritus
 	// CHANNEL Z = Oxygen?
-	float u = sin(uv.x * -97346 * cos(uv.y * 32143.72)) * 0.5 + 0.5;
-	float v = sin(uv.y * -34983116 * cos(uv.x * 32143.72)) * 0.5 + 0.5;
-	u *= 0.01;
-	v *= 0.01;
-	float4 resources = float4(u, v, 0,0); 
+	float u = sin(uv.x * -9.7346 * cos(uv.y * 13.72)) * 0.5 + 0.5;
+	float v = cos(uv.y * -4.4983116 * sin(uv.x * 3.72)) * 0.5 + 0.5;
+	float b = sin(uv.x * -1.4983116 * cos(uv.y * 1.72)) * 0.5 + 0.5;
+	float a = cos(uv.y * -2.983116 * cos(uv.y * 0.72)) * 0.5 + 0.5;
+	
+	float4 resources = float4(u, v, b, a) * distFromCenterNormalized;;
 	
 	_ResourceGridWrite[id.xy] = resources; 
 

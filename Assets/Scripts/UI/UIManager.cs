@@ -19,6 +19,7 @@ public class UIManager : MonoBehaviour {
     public TheCursorCzar theCursorCzar;
     public ClockUI clockUI;
     public WildSpirit wildSpirit;
+    public FeatsUI featsUI;
 
     public CameraManager cameraManager;
     public GameOptionsManager gameOptionsManager;
@@ -177,6 +178,14 @@ public class UIManager : MonoBehaviour {
     
     #endregion
 
+    public void NarratorText(string message, Color col) {
+        panelPendingClickPrompt.GetComponentInChildren<Text>().text = message;
+        panelPendingClickPrompt.GetComponentInChildren<Text>().color = col;
+
+        panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
+        isAnnouncementTextOn = true;
+        timerAnnouncementTextCounter = 0;
+    }
 
     #region Initialization Functions:::
     // Use this for initialization
@@ -290,7 +299,7 @@ public class UIManager : MonoBehaviour {
         panelPlaying.SetActive(false);
         panelGameOptions.SetActive(false);
     }
-    private void EnterPlayingUI() {
+    private void EnterPlayingUI() {   //// ******* this happens everytime quit to menu and resume.... *** needs to change!!! ***
         panelMainMenu.SetActive(false);
         panelLoading.SetActive(false);
         panelPlaying.SetActive(true);
@@ -306,11 +315,12 @@ public class UIManager : MonoBehaviour {
         newEventData.timeStepActivated = 0;
         gameManager.simulationManager.simEventsManager.completeEventHistoryList.Add(newEventData);
 
-        panelPendingClickPrompt.GetComponentInChildren<Text>().text = "... And Then There Was Not Nothing ...";// "Welcome! This Pond is devoid of life...\nIt's up to you to change that!";
-        panelPendingClickPrompt.GetComponentInChildren<Text>().color = new Color(0.75f, 0.75f, 0.75f);
-        panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
-        isAnnouncementTextOn = true;
-        timerAnnouncementTextCounter = 0;
+        NarratorText("... And Then There Was Not Nothing ...", new Color(0.75f, 0.75f, 0.75f));
+        //panelPendingClickPrompt.GetComponentInChildren<Text>().text = "... And Then There Was Not Nothing ...";// "Welcome! This Pond is devoid of life...\nIt's up to you to change that!";
+        //panelPendingClickPrompt.GetComponentInChildren<Text>().color = new Color(0.75f, 0.75f, 0.75f);
+        //panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
+        //isAnnouncementTextOn = true;
+        //timerAnnouncementTextCounter = 0;
     }
     #endregion
 
@@ -387,10 +397,12 @@ public class UIManager : MonoBehaviour {
         if(gameManager.simulationManager._BigBangOn) {
             panelBigBang.SetActive(true);
             bigBangFramesCounter += 1;
-            if(bigBangFramesCounter == 70) {
-                worldSpiritHubUI.isUnlocked = true;
-                worldSpiritHubUI.OpenWorldTreeSelect();                
-            }            
+            if(bigBangFramesCounter == 10) {
+                InitialUnlocks();
+
+                
+            }   
+            
             if(bigBangFramesCounter > 70) {
                 bigBangFramesCounter = 0;
                 gameManager.simulationManager._BigBangOn = false;
@@ -401,11 +413,14 @@ public class UIManager : MonoBehaviour {
                 imageBigBangStrokes02.gameObject.SetActive(false);
                 imageBigBangStrokes03.gameObject.SetActive(false);
                 worldSpiritHubUI.PlayBigBangSpawnAnim();
+
+                gameManager.simulationManager.vegetationManager.isBrushActive = true;
             }
             else if(bigBangFramesCounter > 20) {
                 imageBigBangStrokes01.gameObject.SetActive(true);
                 imageBigBangStrokes02.gameObject.SetActive(true);
                 imageBigBangStrokes03.gameObject.SetActive(false);
+                //gameManager.simulationManager.zooplanktonManager. = true;
             }
             else if(bigBangFramesCounter > 0) {
                 imageBigBangStrokes01.gameObject.SetActive(true);
@@ -413,6 +428,119 @@ public class UIManager : MonoBehaviour {
                 imageBigBangStrokes03.gameObject.SetActive(true);
             }
         }
+    }
+
+    private void InitialUnlocks() {
+        gameManager.theRenderKing.baronVonTerrain.IncrementWorldRadius(5.7f);
+
+        worldSpiritHubUI.isUnlocked = true;
+        worldSpiritHubUI.OpenWorldTreeSelect();
+
+        knowledgeUI.OpenKnowledgePanel();
+        knowledgeUI.isUnlocked = true;
+
+        UnlockBrushes();   
+        worldSpiritHubUI.selectedWorldSpiritSlot = gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];
+        brushesUI.selectedEssenceSlot = gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];
+
+        gameManager.simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[1].status = TrophicSlot.SlotStatus.On;
+        Debug.Log("WATER UNLOCKED!!! " + unlockCooldownCounter.ToString());
+                
+        unlockedAnnouncementSlotRef = gameManager.simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[1];
+                
+        gameManager.simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
+                
+        unlockedAnnouncementSlotRef = gameManager.simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0];
+                
+        worldSpiritHubUI.ClickWorldCreateNewSpecies(gameManager.simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0]);
+
+                
+        knowledgeUI.isUnlocked = true;
+        AnnounceUnlockKnowledgeSpirit();
+        knowledgeUI.OpenKnowledgePanel();
+        worldSpiritHubUI.OpenWorldTreeSelect();
+                
+
+        gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
+                
+        unlockedAnnouncementSlotRef = gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];   
+                
+        worldSpiritHubUI.ClickWorldCreateNewSpecies(gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0]);
+                
+        gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
+                
+        unlockedAnnouncementSlotRef = gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0];
+        worldSpiritHubUI.ClickWorldCreateNewSpecies(gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0]);
+                  
+
+        watcherUI.isUnlocked = true;
+        watcherUI.ClickToolButton();
+        panelFocus = PanelFocus.Watcher;
+        watcherUI.animatorWatcherUI.SetBool("_IsOpen", true);
+                
+        gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
+                
+        unlockedAnnouncementSlotRef = gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[0];                
+        worldSpiritHubUI.ClickWorldCreateNewSpecies(gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[0]);
+
+                                           
+        gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].unlocked = true;
+        gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0].status = TrophicSlot.SlotStatus.On;                
+        Debug.Log("CREATURE A UNLOCKED!!! " + unlockCooldownCounter.ToString());
+                
+        unlockedAnnouncementSlotRef = gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0];                
+        worldSpiritHubUI.ClickWorldCreateNewSpecies(gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0]);
+         
+                
+        mutationUI.isUnlocked = true;
+                
+        //mutationUI.ClickToolButton();
+        worldSpiritHubUI.OpenWorldTreeSelect();
+        gameManager.theRenderKing.InitializeMutationVertebratePortraitGenomes();// gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList.Count - 1].representativeGenome, gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][mutationUI.selectedToolbarMutationID].representativeGenome);
+                
+
+
+        TrophicSlot mineralSlot = gameManager.simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[0];
+        mineralSlot.status = TrophicSlot.SlotStatus.On;
+                
+        unlockedAnnouncementSlotRef = mineralSlot;
+                
+        TrophicSlot pebblesSlot = gameManager.simulationManager.trophicLayersManager.kingdomTerrain.trophicTiersList[0].trophicSlots[2];
+        pebblesSlot.status = TrophicSlot.SlotStatus.On;
+        Debug.Log("PEBBLES SPIRIT UNLOCKED!!! " + unlockCooldownCounter.ToString());
+                
+        unlockedAnnouncementSlotRef = pebblesSlot;
+                
+
+        TrophicSlot sandSlot = gameManager.simulationManager.trophicLayersManager.kingdomTerrain.trophicTiersList[0].trophicSlots[3];
+        sandSlot.status = TrophicSlot.SlotStatus.On;
+                
+        unlockedAnnouncementSlotRef = sandSlot;
+                
+
+        TrophicSlot airSlot = gameManager.simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[2];
+        airSlot.status = TrophicSlot.SlotStatus.On;
+        Debug.Log("AIR SPIRIT UNLOCKED!!! " + unlockCooldownCounter.ToString());
+        AnnounceUnlockAir();
+        isUnlockCooldown = true;
+        unlockedAnnouncementSlotRef = airSlot;
+                               
+                                         
+        gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].unlocked = true;
+        gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1].status = TrophicSlot.SlotStatus.On;                
+                
+        //AnnounceUnlockVertebrates();
+                
+        unlockedAnnouncementSlotRef = gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1];                
+        worldSpiritHubUI.ClickWorldCreateNewSpecies(gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1]);
+
+        //worldSpiritHubUI.selectedWorldSpiritSlot = gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1];
+        //brushesUI.selectedEssenceSlot = gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1];
+
+
+        // SPAWNS!!!! 
+
+        gameManager.simulationManager.AttemptToBrushSpawnAgent(brushesUI.selectedEssenceSlot.linkedSpeciesID);
     }
     
     private void UpdateSimulationUI() {
@@ -443,7 +571,11 @@ public class UIManager : MonoBehaviour {
         knowledgeUI.UpdateKnowledgePanelUI(gameManager.simulationManager.trophicLayersManager);
         mutationUI.UpdateMutationPanelUI(gameManager.simulationManager.trophicLayersManager);
         worldSpiritHubUI.UpdateWorldSpiritHubUI();
+
         globalResourcesUI.UpdateGlobalResourcesPanelUpdate();
+
+        featsUI.UpdateFeatsPanelUI(gameManager.simulationManager.featsList);
+
         UpdateClockPanelUI();
 
         
@@ -464,140 +596,18 @@ public class UIManager : MonoBehaviour {
               
         UpdatePausedUI();
         
-
-        /*if(gameManager.simulationManager.simAgeTimeSteps < 240f && gameManager.simulationManager.simAgeTimeSteps > 160f) {
-            textFXPH_playing_start.gameObject.SetActive(true);
-        }
-        else {
-            textFXPH_playing_start.gameObject.SetActive(false);
-        }*/
-
-
-        
-        
-        /*if(worldSpiritHubUI.isUnlocked) {
-            worldSpiritHubUI.panelWorldHubExpand.SetActive(true);
-        }
-        else {
-            worldSpiritHubUI.panelWorldHubExpand.SetActive(false);
-        }*/
-
-        if(brushesUI.isUnlocked) {
-            buttonOpenBrushesPanel.gameObject.SetActive(true);
-            //worldSpiritHubUI.imageBitBrushes.gameObject.SetActive(true);
-        }
-        else {
-            buttonOpenBrushesPanel.gameObject.SetActive(false);
-            //worldSpiritHubUI.imageBitBrushes.gameObject.SetActive(false);
-        }
-
-        if(watcherUI.isUnlocked) {
-            buttonOpenWatcherPanel.gameObject.SetActive(true);
-        }
-        else {
-            buttonOpenWatcherPanel.gameObject.SetActive(false);
-        }
-
-        if(knowledgeUI.isUnlocked) {
-            buttonOpenKnowledgePanel.gameObject.SetActive(true);
-            //buttonOpenKnowledgePanel.GetComponent<Image>().sprite = worldSpiritHubUI.curIconSprite;
-            //worldSpiritHubUI.imageBitKnowledge.gameObject.SetActive(true);
-        }
-        else {
-            buttonOpenKnowledgePanel.gameObject.SetActive(false);
-            //worldSpiritHubUI.imageBitKnowledge.gameObject.SetActive(false);
-        }
-
-        if(mutationUI.isUnlocked) {
-            buttonOpenMutationPanel.gameObject.SetActive(true);
-            //worldSpiritHubUI.imageBitMutation.gameObject.SetActive(true);
-        }
-        else {
-            buttonOpenMutationPanel.gameObject.SetActive(false);
-            //worldSpiritHubUI.imageBitMutation.gameObject.SetActive(false);
-        }
-        
-        if(globalResourcesUI.isUnlocked) {
-            buttonOpenGlobalResourcesPanel.gameObject.SetActive(true);
-        }
-        else {
-            buttonOpenGlobalResourcesPanel.gameObject.SetActive(false);
-        }
-        
-
-
-        /*
-        if(isWatcherPanelOn) {
-            buttonToolbarWatcher.GetComponent<Image>().color = buttonActiveColor;
-            buttonToolbarWatcher.gameObject.transform.localScale = Vector3.one * 1.25f;
-            //imageToolbarInspectLinkedIcon.color = buttonActiveColor;
-
-            UpdateWatcherPanelUI(layerManager);
-
-            panelWatcherSpiritMain.SetActive(true);
-        }
-        else {
-            buttonToolbarWatcher.GetComponent<Image>().color = buttonDisabledColor;
-            buttonToolbarWatcher.gameObject.transform.localScale = Vector3.one;
-            //imageToolbarInspectLinkedIcon.color = buttonDisabledColor;
-
-            panelWatcherSpiritMain.SetActive(false);
-        }
-        
-        if(isKnowledgePanelOn) {
-            buttonToolbarKnowledge.GetComponent<Image>().color = buttonActiveColor;
-            buttonToolbarKnowledge.gameObject.transform.localScale = Vector3.one * 1.25f;
-            //imageToolbarKnowledgeLinkedIcon.color = buttonActiveColor;            
-                        
-            //spiritBrushName = "Knowledge Spirit";
-            //imageToolbarSpiritBrushThumbnail.sprite = spriteSpiritBrushKnowledgeIcon;
-            panelKnowledgeSpiritBase.SetActive(true);
-            //panelKnowledgeSpirit.SetActive(true); 
-        
-            UpdateKnowledgePanelUI(layerManager);
-        }
-        else {
-            buttonToolbarKnowledge.GetComponent<Image>().color = buttonDisabledColor;
-            buttonToolbarKnowledge.gameObject.transform.localScale = Vector3.one;
-            //imageToolbarKnowledgeLinkedIcon.color = buttonDisabledColor;
-
-            panelKnowledgeSpiritBase.SetActive(false);
-            //panelKnowledgeSpirit.SetActive(false); 
-        }
-
-        if(isMutationPanelOn) {
-            buttonToolbarMutate.GetComponent<Image>().color = buttonActiveColor;
-            buttonToolbarMutate.gameObject.transform.localScale = Vector3.one * 1.25f;            
-            panelMutationSpirit.SetActive(true);
-        
-            UpdateToolbarMutationPanel(layerManager);
-        }
-        else {
-            buttonToolbarMutate.GetComponent<Image>().color = buttonDisabledColor;
-            buttonToolbarMutate.gameObject.transform.localScale = Vector3.one;
-            //imageToolbarKnowledgeLinkedIcon.color = buttonDisabledColor;
-
-            panelMutationSpirit.SetActive(false);
-        }
-           
-        UpdateDebugUI(); // IF ACTIVE!!!!!!
-        UpdateObserverModeUI();  // <== this is the big one *******        
-        UpdatePausedUI();
-        UpdateToolbarPanelUI();
-        //Update other panels
-        UpdateKnowledgePanelUI(gameManager.simulationManager.trophicLayersManager);
-        */
-        // ***/////// ********************** Move to CursorCzar!!!
-        
-             
-
         
     }
 
     public void SpiritUnlockComplete() {
-        switch(wildSpirit.curClickableSpiritType) {
+        Debug.LogError("SPIRIT UNLOCK!!!  world size increase!");
+        gameManager.theRenderKing.baronVonTerrain.IncrementWorldRadius(0.7f);
+
+        switch (wildSpirit.curClickableSpiritType) {
             case WildSpirit.ClickableSpiritType.CreationBrush:
-                UnlockBrushes();                         
+                UnlockBrushes();   
+                worldSpiritHubUI.selectedWorldSpiritSlot = gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];
+                brushesUI.selectedEssenceSlot = gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];
                 break;
             case WildSpirit.ClickableSpiritType.Water:
                 gameManager.simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[1].status = TrophicSlot.SlotStatus.On;
@@ -1432,92 +1442,74 @@ public class UIManager : MonoBehaviour {
 
         brushesUI.Unlock();
         brushesUI.SetTargetFromWorldTree();
-        wildSpirit.curClickableSpiritType = WildSpirit.ClickableSpiritType.Water;
+        wildSpirit.curClickableSpiritType = WildSpirit.ClickableSpiritType.Zooplankton;
 
         AnnounceUnlockBrushes();
     }
 
     public void AnnounceBrushAppear() {
-        panelPendingClickPrompt.GetComponentInChildren<Text>().text = "A Minor Creation Spirit Appeared!";
-        panelPendingClickPrompt.GetComponentInChildren<Text>().color = new Color(1f, 1f, 1f);        
-        isAnnouncementTextOn = true;
+        NarratorText("A Minor Creation Spirit Appeared!", new Color(1f, 1f, 1f));
+        // map opens!
+
+        
+        
     }
 
     public void AnnounceUnlockBrushes() {
-        panelPendingClickPrompt.GetComponentInChildren<Text>().text = "Creation Spirit Captured!";
-        panelPendingClickPrompt.GetComponentInChildren<Text>().color = new Color(1f, 1f, 1f);        
-        isAnnouncementTextOn = true;
+        NarratorText("Creation Spirit Captured!", new Color(1f, 1f, 1f));  
+        
+        Feat feat = new Feat("Brush", Feat.FeatType.WorldExpand, Time.frameCount, Color.white, "blah blah blah blah!");
+        gameManager.simulationManager.LogFeat(feat);
+        //featsUI.isOpen = true;
     }
     public void AnnounceUnlockWater() {
-        panelPendingClickPrompt.GetComponentInChildren<Text>().text = "Water Spirit Found!";
-        panelPendingClickPrompt.GetComponentInChildren<Text>().color = new Color(0.4f, 0.4f, 0.9f);        
-        isAnnouncementTextOn = true;
+        NarratorText("Water Spirit Found!", new Color(0.4f, 0.4f, 0.9f));  
     }
     public void AnnounceUnlockKnowledgeSpirit() {
-        panelPendingClickPrompt.GetComponentInChildren<Text>().text = "Knowledge Spirit Captured!";
-        panelPendingClickPrompt.GetComponentInChildren<Text>().color = new Color(0.9f, 0.77f, 0.76f);        
-        isAnnouncementTextOn = true;
+        NarratorText("Knowledge Spirit Captured!", new Color(0.9f, 0.77f, 0.76f)); 
     }
     public void AnnounceUnlockWatcherSpirit() {
-        panelPendingClickPrompt.GetComponentInChildren<Text>().text = "Watcher Spirit Captured!";
-        panelPendingClickPrompt.GetComponentInChildren<Text>().color = new Color(0.6f, 0.71277f, 1f);        
-        isAnnouncementTextOn = true;
+        NarratorText("Watcher Spirit Captured!", new Color(0.6f, 0.71277f, 1f)); 
+        
+        Feat feat = new Feat("Inspect Tool Unlocked!", Feat.FeatType.Watcher, Time.frameCount, Color.white, "Use this to see hidden information.");
+        gameManager.simulationManager.LogFeat(feat);
     }
     public void AnnounceUnlockMutationSpirit() {
-        panelPendingClickPrompt.GetComponentInChildren<Text>().text = "Mutation Spirit Captured!";
-        panelPendingClickPrompt.GetComponentInChildren<Text>().color = new Color(0.8f, 0.1277f, 0.1276f);        
-        isAnnouncementTextOn = true;
+        NarratorText("Mutation Spirit Captured!", new Color(0.8f, 0.1277f, 0.1276f));  
     }
     public void AnnounceUnlockMinerals() {
-        panelPendingClickPrompt.GetComponentInChildren<Text>().text = "Minerals Essence Captured!";
-        panelPendingClickPrompt.GetComponentInChildren<Text>().color = new Color(1f, 1f, 1f);        
-        isAnnouncementTextOn = true;
+        NarratorText("Minerals Essence Captured!", new Color(1f, 1f, 1f)); 
     }
     public void AnnounceUnlockAir() {
-        panelPendingClickPrompt.GetComponentInChildren<Text>().text = "Air Spirit Captured!";
-        panelPendingClickPrompt.GetComponentInChildren<Text>().color = new Color(0.5f, 0.5f, 1f);        
-        isAnnouncementTextOn = true;
+        NarratorText("Air Spirit Captured!", new Color(0.5f, 0.5f, 1f));        
     }
     public void AnnounceUnlockPebbles() {
-        panelPendingClickPrompt.GetComponentInChildren<Text>().text = "Pebble Spirit Captured!";
-        panelPendingClickPrompt.GetComponentInChildren<Text>().color = new Color(1f, 1f, 1f);        
-        isAnnouncementTextOn = true;
+        NarratorText("Pebble Spirit Captured!", new Color(1f, 1f, 1f));
     }
     public void AnnounceUnlockSand() {
-        panelPendingClickPrompt.GetComponentInChildren<Text>().text = "Sand Spirit Captured!";
-        panelPendingClickPrompt.GetComponentInChildren<Text>().color = new Color(1f, 1f, 1f);        
-        isAnnouncementTextOn = true;
+        NarratorText("Sand Spirit Captured!", new Color(1f, 1f, 1f));
     }
     public void AnnounceUnlockAlgae() {
-        panelPendingClickPrompt.GetComponentInChildren<Text>().text = "Algae Species Unlocked!";
-        panelPendingClickPrompt.GetComponentInChildren<Text>().color = colorAlgaeLayer;
-        //panelPendingClickPrompt.GetComponent<Image>().raycastTarget = true;
-        isAnnouncementTextOn = true;
+        NarratorText("Algae Species Unlocked!", colorAlgaeLayer);
     }
     public void AnnounceUnlockDecomposers() {
-        panelPendingClickPrompt.GetComponentInChildren<Text>().text = "Decomposer Species Unlocked!";
-        panelPendingClickPrompt.GetComponentInChildren<Text>().color = colorDecomposersLayer;
-        //panelPendingClickPrompt.GetComponent<Image>().raycastTarget = true;
-
-        isAnnouncementTextOn = true;
+        NarratorText("Decomposer Species Unlocked!", colorDecomposersLayer);
     }
     public void AnnounceUnlockZooplankton() {
-        panelPendingClickPrompt.GetComponentInChildren<Text>().text = "Zooplankton Species Unlocked!";
-        panelPendingClickPrompt.GetComponentInChildren<Text>().color = colorZooplanktonLayer;
-        //panelPendingClickPrompt.GetComponent<Image>().raycastTarget = true;
-        isAnnouncementTextOn = true;
+        NarratorText("Zooplankton Species Unlocked!", colorZooplanktonLayer);
+
+        Feat feat = new Feat("Animal Spirit!", Feat.FeatType.Zooplankton, Time.frameCount, Color.white, "Tiny creatures that eat algae.");
+        gameManager.simulationManager.LogFeat(feat);
     }
     public void AnnounceUnlockVertebrates() {
-        panelPendingClickPrompt.GetComponentInChildren<Text>().text = "Vertebrate Species Unlocked!";
-        panelPendingClickPrompt.GetComponentInChildren<Text>().color = colorVertebratesLayer;
-        //panelPendingClickPrompt.GetComponent<Image>().raycastTarget = true;
-        isAnnouncementTextOn = true;
+        NarratorText("Vertebrate Species Unlocked!", colorVertebratesLayer);
+        Feat feat = new Feat("Animal Spirit!", Feat.FeatType.Plants, Time.frameCount, Color.white, "More complex, larger animals");
+        gameManager.simulationManager.LogFeat(feat);
     }
     public void AnnounceUnlockPlants() {
-        panelPendingClickPrompt.GetComponentInChildren<Text>().text = "Plant Species Unlocked!";
-        panelPendingClickPrompt.GetComponentInChildren<Text>().color = colorPlantsLayer;
-        //panelPendingClickPrompt.GetComponent<Image>().raycastTarget = true;
-        isAnnouncementTextOn = true;
+        NarratorText("Plant Species Unlocked!", colorPlantsLayer);
+        Feat feat = new Feat("Plant Spirit!", Feat.FeatType.Plants, Time.frameCount, Color.white, "Tiny simple plants.");
+        gameManager.simulationManager.LogFeat(feat);
     }
    
     public void CheatUnlockAll() {

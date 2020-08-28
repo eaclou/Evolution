@@ -519,8 +519,8 @@ public class VegetationManager {
         computeShaderPlantParticles.SetTexture(kernelCSSimulateAlgaeParticles, "_SpawnDensityMap", renderKingRef.spiritBrushRT);
         computeShaderPlantParticles.SetTexture(kernelCSSimulateAlgaeParticles, "_ResourceGridRead", resourceGridRT1);
         computeShaderPlantParticles.SetFloat("_MapSize", SimulationManager._MapSize);   
-        computeShaderPlantParticles.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);   
-        computeShaderPlantParticles.SetFloat("_SpiritBrushPosNeg", renderKingRef.spiritBrushPosNeg);            
+        computeShaderPlantParticles.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
+        computeShaderPlantParticles.SetFloat("_SpiritBrushPosNeg", 1f); // renderKingRef.spiritBrushPosNeg);            
         //computeShaderFoodParticles.SetFloat("_RespawnFoodParticles", 1f);
         computeShaderPlantParticles.SetFloat("_Time", Time.realtimeSinceStartup);
         //float randRoll = UnityEngine.Random.Range(0f, 1f);
@@ -537,7 +537,7 @@ public class VegetationManager {
                 }
             }            
         }
-        computeShaderPlantParticles.SetFloat("_IsBrushing", brushF);
+        computeShaderPlantParticles.SetFloat("_IsBrushing", 1f);
 
         float spawnLerp = renderKingRef.simManager.trophicLayersManager.GetAlgaeOnLerp(renderKingRef.simManager.simAgeTimeSteps);
         float spawnRadius = Mathf.Lerp(1f, SimulationManager._MapSize, spawnLerp);

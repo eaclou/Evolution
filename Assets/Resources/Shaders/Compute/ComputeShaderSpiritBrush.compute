@@ -108,7 +108,7 @@ void CSSimulateBrushQuads (uint3 id : SV_DispatchThreadID)
 	float2 randNoise = float2(rand(data.worldPos.xy * 0.01), rand(-data.worldPos.yz * 0.006));
 	data.worldPos.xy += data.vel * 0.35 + randNoise * 0.33;
 	float agingRate = 1.0 / data.lifespan;
-	//agingRate = 0.1;
+	
 	data.age01 = saturate(data.age01 + agingRate);
 	_SpiritBrushQuadsWrite[id.x] = data;
 }

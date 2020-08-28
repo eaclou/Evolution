@@ -108,6 +108,8 @@ uniform float _BrushAlignment = 1.0;
 uniform float _GlobalWaterLevel;
 uniform float _MaxAltitude;
 
+uniform float _WorldRadius;
+
 SamplerState _LinearClamp;
 SamplerState _LinearRepeat;
 SamplerState _PointClamp;
@@ -426,7 +428,7 @@ void CSInitTerrainMaps (uint3 id : SV_DispatchThreadID)
 								initW * initW);
 	
 	outputTex.yz = 0;
-	outputTex.w = saturate(1.0 - distToCenter * 10);
+	outputTex.w = saturate(2.0 - distToCenter * 15);
 	AltitudeWrite[id.xy] = outputTex;
 }
 
@@ -443,7 +445,9 @@ void CSUpdateTerrainMapsBrush (uint3 id : SV_DispatchThreadID)
 	
 	// WHICH CHANNEL????
 	if(_ChannelID == 0) {  // WORLD SPIRIT
-		texSample.w = saturate(texSample.w + brushSample.x * _AddSubtractSign * _BrushIntensity);
+		//texSample.w = saturate(texSample.w + brushSample.x * _AddSubtractSign * _BrushIntensity);
+		float distToCenter = length(uv - 0.5);
+		texSample.w = saturate(_WorldRadius - distToCenter * 15);
 	}
 
 	if(_ChannelID == 1) {  // STONE

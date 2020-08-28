@@ -1491,7 +1491,7 @@ public class TheRenderKing : MonoBehaviour {
         spiritBrushRT.enableRandomWrite = true;
         spiritBrushRT.Create();
 
-        //minimapObjectsRT = new RenderTexture(256, 256, 0, RenderTextureFormat.Default, RenderTextureReadWrite.Default);
+        //minimapObjectsRT = new RenderTexture(256, 256, 0, RenderTextureFormat, RenderTextureReadWrite.Default);
         //minimapObjectsRT.wrapMode = TextureWrapMode.Clamp;
         //minimapObjectsRT.enableRandomWrite = true;
         //minimapObjectsRT.Create();
@@ -3882,6 +3882,11 @@ public class TheRenderKing : MonoBehaviour {
                 isWildOn = 1f;
             }
 
+            // *******************************************************
+            isBrushing = true;
+            if(Time.realtimeSinceStartup % 1f > 0.5f) {
+                isBrushing = false;
+            }
             if (isBrushing) {
                 if (simManager.uiManager.panelFocus == UIManager.PanelFocus.Brushes) {
                     spiritBrushRenderMat.SetPass(0);
@@ -3918,7 +3923,7 @@ public class TheRenderKing : MonoBehaviour {
                 spiritBrushRenderMat.SetFloat("_PatternColumn", brushData.patternColumn);
                 spiritBrushRenderMat.SetFloat("_PatternRow", brushData.patternRow);
                 spiritBrushRenderMat.SetFloat("_IsActive", 0f);
-                spiritBrushRenderMat.SetFloat("_IsBrushing", isBrushin);
+                spiritBrushRenderMat.SetFloat("_IsBrushing", 1f); // isBrushin);
                 
                 spiritBrushRenderMat.SetFloat("_IsWildSpirit", isWildOn);
                 //dir:
@@ -4569,7 +4574,7 @@ public class TheRenderKing : MonoBehaviour {
                 }
             }
             
-            if(simManager.trophicLayersManager.GetAlgaeOnOff()) {
+            if(true) { //simManager.trophicLayersManager.GetAlgaeOnOff()) {
 
                 //float isSelected = 0f;            
                 //float isHover = 0f;
@@ -4753,7 +4758,7 @@ public class TheRenderKing : MonoBehaviour {
             }
 
             if(simManager.trophicLayersManager.GetAgentsOnOff()) {
-                /*
+                
                 eggSackStrokeDisplayMat.SetPass(0);
                 eggSackStrokeDisplayMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
                 eggSackStrokeDisplayMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
@@ -4767,7 +4772,7 @@ public class TheRenderKing : MonoBehaviour {
                 eggSackStrokeDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
                 eggSackStrokeDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
                 cmdBufferMain.DrawProcedural(Matrix4x4.identity, eggSackStrokeDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.eggDataCBuffer.count);
-        */
+        
                 // What is this????
                 critterDebugGenericStrokeMat.SetPass(0);
                 critterDebugGenericStrokeMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -4906,6 +4911,9 @@ public class TheRenderKing : MonoBehaviour {
         baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_BrushIntensity", intensity);    
         baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel); 
         baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude); 
+
+        baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_WorldRadius", baronVonTerrain._WorldRadius);   
+
         baronVonTerrain.computeShaderTerrainGeneration.SetVector("_WorldSpaceCameraPosition", new Vector4(mainRenderCam.transform.position.x, mainRenderCam.transform.position.y, mainRenderCam.transform.position.z, 0f));
 
         baronVonTerrain.computeShaderTerrainGeneration.SetInt("_ChannelID", simManager.uiManager.brushesUI.selectedBrushLinkedSpiritTerrainLayer); // simManager.trophicLayersManager.selectedTrophicSlotRef.slotID); // 

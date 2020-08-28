@@ -129,14 +129,14 @@ public class KnowledgeUI : MonoBehaviour {
         buttonPageC.GetComponent<Image>().color = new Color(0.6f, 0.65f, 0.87f);
         if(curPage == Page.One) {
             groupMinimap.gameObject.SetActive(true);
-            textCurPage.text = "OVERVIEW";
+            textCurPage.text = "WORLD MAP";
             
             uiKnowledgeMapViewerMat.SetTexture("_AltitudeTex", uiManagerRef.gameManager.theRenderKing.baronVonTerrain.terrainHeightDataRT);
             uiKnowledgeMapViewerMat.SetTexture("_ResourceGridTex", uiManagerRef.gameManager.simulationManager.vegetationManager.resourceGridRT1);
             uiKnowledgeMapViewerMat.SetFloat("_WaterLevel", SimulationManager._GlobalWaterLevel);
 
             string summaryText = GetSpeciesDescriptionString(uiManagerRef.gameManager.simulationManager);
-            textKnowledgeSpeciesSummary.text = summaryText;
+            textKnowledgeSpeciesSummary.text = "";// summaryText;
 
             buttonPageA.gameObject.transform.localScale = Vector3.one * 1.5f;
             buttonPageA.GetComponent<Image>().color = Color.white;

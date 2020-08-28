@@ -29,6 +29,8 @@ public class SimulationManager : MonoBehaviour {
     public SimEventsManager simEventsManager;
     public SimResourceManager simResourceManager;
 
+    public List<Feat> featsList;
+
     public float fogAmount = 0.25f;
     public Vector4 fogColor; 
 
@@ -447,7 +449,17 @@ public class SimulationManager : MonoBehaviour {
         graphDataVertebrateFoodEaten3 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateFoodEatenMat3);
         graphDataVertebrateGenome3 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateGenomeMat3);
     }
+
+    public void LogFeat(Feat feat) {
+        featsList.Insert(0, feat);
+    }
+
     private void LoadingInitializeCoreSimulationState() {
+
+        featsList = new List<Feat>();
+        Feat feat = new Feat("Power of Creation", Feat.FeatType.WorldExpand, 0, Color.white, "A new world is created!");
+        LogFeat(feat);
+
         // allocate memory and initialize data structures, classes, arrays, etc.
         InitializeGraphData();
 
@@ -975,7 +987,7 @@ public class SimulationManager : MonoBehaviour {
             agentsArray[i].depthWest = depthSampleWest.x;
             */
             // precalculate normals?
-            
+                                                   //***** world boundary *****
             if (depthSample.x > _GlobalWaterLevel || depthSample.w < 0.1f) //(floorDepth < agentSize)
             {
                 float wallForce = 10.0f; // Mathf.Clamp01(agentSize - floorDepth) / agentSize;
@@ -983,7 +995,7 @@ public class SimulationManager : MonoBehaviour {
                 agentsArray[i].bodyRigidbody.AddForce(-grad * agentsArray[i].bodyRigidbody.mass * wallForce, ForceMode2D.Impulse);
 
 
-                float damage = wallForce * 0.005f;  
+                float damage = wallForce * 0.05f;  
                 
                 if(depthSample.w < 0.5f) {
                     damage *= 0.33f;
@@ -1007,7 +1019,7 @@ public class SimulationManager : MonoBehaviour {
                     agentsArray[i].totalDamageTaken += damage;
 
                     agentsArray[i].coreModule.isContact[0] = 1f;
-                    agentsArray[i].coreModule.contactForceX[0] = wallForce;
+                    agentsArray[i].coreModule.contactForceX[0] = grad.x;
                     agentsArray[i].coreModule.contactForceY[0] = grad.y;
         
                     agentsArray[i].TakeDamage(damage);
@@ -1348,7 +1360,7 @@ public class SimulationManager : MonoBehaviour {
         } 
     }
     private void AttemptToSpawnAgent(int agentIndex, int speciesIndex, CandidateAgentData candidateData) { //, int speciesIndex) {
-        Debug.Log("AttemptToSpawnAgent(" + agentIndex.ToString());
+        //Debug.Log("AttemptToSpawnAgent(" + agentIndex.ToString());
         // Which Species will the new agent belong to?
         // Random selection? Lottery-Selection among Species? Use this Agent's previous-life's Species?  Global Ranked Selection (across all species w/ modifiers) ?
 
@@ -1424,6 +1436,8 @@ public class SimulationManager : MonoBehaviour {
                 if(isValidSpawnLoc) {
                     SpawnAgentImmaculate(candidateData, agentIndex, speciesIndex, spawnWorldPos);
                     candidateData.isBeingEvaluated = true;
+
+                    //Debug.Log("AttemptToSpawnAgent(" + agentIndex.ToString() + "x= " + altitudeSample.x.ToString() + ", w= " + altitudeSample.w.ToString() + ", pos: " + spawnWorldPos.ToString());
                 }
                 else {
                     //Debug.Log("INVALID SPAWN POS " + spawnWorldPos.ToString() + ", alt: " + altitudeSample.ToString());
@@ -1520,7 +1534,7 @@ public class SimulationManager : MonoBehaviour {
         else {
             // -- Else:
             // -- (move to end of pool queue OR evaluate all Trials of one genome before moving onto the next)
-
+            // only used if single genomes are tested multiple times
         }
 
         // &&&&& *****  HERE!!!! **** &&&&&&   --- Select a species first to serve as parentGenome !! ***** &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
@@ -1595,7 +1609,7 @@ public class SimulationManager : MonoBehaviour {
                                 float reqMass = settingsManager.agentSettings._BaseInitMass * settingsManager.agentSettings._MinPregnancyFactor;
 
                                 if(reqMass < agentsArray[i].currentBiomass * settingsManager.agentSettings._MaxPregnancyProportion) {
-                                    Debug.Log("RequiredMass met! " + reqMass.ToString() + " biomass: " + agentsArray[i].currentBiomass.ToString() + ", spent: ");
+                                    Debug.Log("RequiredMass met! " + reqMass.ToString() + " biomass: " + agentsArray[i].currentBiomass.ToString() + ", _BaseInitMass: " + settingsManager.agentSettings._BaseInitMass.ToString());
                                     totalSuitableParentAgents++;
                                     suitableParentAgentsList.Add(i);
                                 }

@@ -8,6 +8,13 @@ public class WatcherUI : MonoBehaviour {
     public bool isUnlocked;
     public bool isOpen;
 
+    public AudioSource audioSource00;
+    public AudioSource audioSource01;
+    public AudioSource audioSource02;
+    public AudioSource audioSource03;
+    private int callTickCounter = 90;
+    private int callTickCooldownCounter = 0;
+
     public AgentBehaviorOneHot agentBehaviorOneHot;
     public WidgetAgentStatus widgetAgentStatus;
 
@@ -32,7 +39,8 @@ public class WatcherUI : MonoBehaviour {
     public float isPlantParticleHighlight;
     public float isZooplanktonHighlight;
     public float isVertebrateHighlight;
-        
+
+    public GameObject followCreaturePanel;
     public TrophicSlot watcherSelectedTrophicSlotRef; // plant, zooplankton, or vertebrate
     //public bool isWatcherTargetLayerLocked;
     public Text textWatcherPanelTargetLayer;
@@ -120,6 +128,11 @@ public class WatcherUI : MonoBehaviour {
 	}
     	
     private void UpdateUI(TrophicLayersManager layerManager) {
+
+       
+        //callTickCounter++;
+        //private int callTickCooldownCounter = 0;
+
         //TrophicSlot slotRef = uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot; // *************   CHANGE THIS!!!!! ************
          
         if(watcherSelectedTrophicSlotRef == null) {
@@ -365,7 +378,7 @@ public class WatcherUI : MonoBehaviour {
                     if(agent.coreModule != null) {
                         //textNewInspectAgentName.text = agent.candidateRef.candidateGenome.bodyGenome.coreGenome.name;
 
-                        
+                        followCreaturePanel.SetActive(true);
 
                         textStomachContents.text = "STOMACH " + Mathf.Clamp01(agent.coreModule.stomachContentsNorm * 1f).ToString("F5");
                         textEnergy.text = "ENERGY " + agent.coreModule.energy.ToString("F5");
@@ -399,7 +412,8 @@ public class WatcherUI : MonoBehaviour {
                                     developmentStateID = 2;
                                 }
                             }
-                            if(agent.sizePercentage > 0.5f) {
+
+                            if (agent.sizePercentage > 0.5f) {
                                 developmentStateID = 3;
                             }
                             
@@ -524,7 +538,7 @@ public class WatcherUI : MonoBehaviour {
 
                         //}
                         //else if(curWatcherPanelVertebratePageNum == 1) {
-                        string textStringLog = "Event Log! [" + agent.index.ToString() + "]";
+                        string textStringLog = "Event Log! Agent[" + agent.index.ToString() + "]";
                     
                         // Agent Event Log:
                         int maxEventsToDisplayLog = 12;
@@ -532,7 +546,25 @@ public class WatcherUI : MonoBehaviour {
                         int startIndexLog = Mathf.Max(0, agent.agentEventDataList.Count - maxEventsToDisplayLog);                   
                         string eventLogString = "";
                         for(int q = agent.agentEventDataList.Count - 1; q >= startIndexLog; q--) {
+                            float dimAmount = Mathf.Clamp01((float)(agent.agentEventDataList.Count - q - 1) * 0.55f);
+                            //Color displayColor = Color.Lerp(Color.red, Color.green, agent.agentEventDataList[q].goodness);
+                            string goodColorStr = "#00FF00FF";
+                            if(dimAmount > 0.5f) {
+                                goodColorStr = "#007700FF";
+                            }
+                            string badColorStr = "#FF0000FF";
+                            if(dimAmount > 0.5f) {
+                                badColorStr = "#770000FF";
+                            }
+                            if(agent.agentEventDataList[q].goodness > 0.5f) {
+                                eventLogString += "<color=" + goodColorStr + ">";
+                            }
+                            else {
+                                eventLogString += "<color=" + badColorStr + ">";
+                            }
+                            
                             eventLogString += "\n[" + agent.agentEventDataList[q].eventFrame.ToString() + "] " + agent.agentEventDataList[q].eventText;
+                            eventLogString += "</color>";
                         }
                         textStringLog += eventLogString;
 
@@ -594,8 +626,99 @@ public class WatcherUI : MonoBehaviour {
                                                         agent.coreModule.mouthAttackEffector[0],
                                                         agent.communicationModule.outComm0[0], agent.isCooldown);
 
+                        if(agent.communicationModule.outComm3[0] > 0.25f) {
+                            callTickCounter = Mathf.Min(200, callTickCounter++);
+                            
+                        }
+                        else {
+                            callTickCounter = Mathf.Max(0, callTickCounter--);
+                        }
+                        /*// AUDIO TESTING:
+                        bool isCalling = false;
+                        if(agent.coreModule.defendEffector[0] >= agent.coreModule.healEffector[0] && 
+                        agent.coreModule.defendEffector[0] >= agent.coreModule.dashEffector[0] &&
+                        agent.coreModule.defendEffector[0] >= agent.coreModule.mouthFeedEffector[0] &&
+                        agent.coreModule.defendEffector[0] >= agent.coreModule.mouthAttackEffector[0]) {
+                            if(agent.curLifeStage == Agent.AgentLifeStage.Mature) {
+                                isCalling = true;
+                            }
+                        }
+                        if(agent.curLifeStage == Agent.AgentLifeStage.Mature) {
+                            isCalling = true;
+                        }*/
+
+                        /*
+                        //if(isCalling) {
+                        if(agent.communicationModule.outComm0[0] > 0.15f) {
+                            if(audioSource00.isPlaying) {
+
+                            }
+                            else {
+                                audioSource00.pitch = 2f;
+                                audioSource00.volume = agent.communicationModule.outComm0[0] * 1f;
+                                audioSource00.Play();
+                            }                            
+                        }
+                        else {
+                            audioSource00.Stop();
+                        }
+
+                        if(agent.communicationModule.outComm1[0] > 0.15f) {
+                            if(audioSource01.isPlaying) {
+
+                            }
+                            else {
+                                audioSource01.pitch = 3f;
+                                audioSource01.volume = agent.communicationModule.outComm1[0] * 0.75f;
+                                audioSource01.Play();
+                            }                            
+                        }
+                        else {
+                            audioSource01.Stop();
+                        }
+
+                        if(agent.communicationModule.outComm2[0] > 0.15f) {
+                            if(audioSource02.isPlaying) {
+
+                            }
+                            else {
+                                audioSource02.pitch = 6f + agent.communicationModule.outComm3[0] * 3f;
+                                audioSource02.volume = agent.communicationModule.outComm2[0] * 0.5f;
+                                audioSource02.Play();
+                            }                            
+                        }
+                        else {
+                            audioSource02.Stop();
+                        }
+                            
+                            if(agent.communicationModule.outComm3[0] > 0.15f) {
+                                if(audioSource03.isPlaying) {
+
+                                }
+                                else {
+                                    audioSource03.pitch = 9f;
+                                    audioSource03.volume = agent.communicationModule.outComm3[0] * 0.25f;
+                                    audioSource03.Play();
+                                }                            
+                            }
+                            else {
+                                audioSource03.Stop();
+                                
+                            }
+                        //}
+                        //else {
+                        //    audioSource00.Stop();
+                        //    audioSource01.Stop();
+                        //    audioSource02.Stop();
+                        //    audioSource03.Stop();
+                        //}
+                        
+                        */
+
+                        agentBehaviorOneHot.UpdateExtras(agent);
+
                         widgetAgentStatus.UpdateBars((agent.coreModule.healthBody + agent.coreModule.healthHead + agent.coreModule.healthExternal) / 3f,
-                                                      Mathf.Clamp01(agent.coreModule.energy * agent.currentBiomass),
+                                                      agent.coreModule.energy * agent.currentBiomass,
                                                       agent.coreModule.stomachContentsNorm,
                                                       agent.currentBiomass);
                         
@@ -661,7 +784,9 @@ public class WatcherUI : MonoBehaviour {
                         panelWatcherSpiritVertebratesText.SetActive(true);
                         
                     }
-
+                    else {
+                        followCreaturePanel.SetActive(false);
+                    }
                     TextCommonStatsA.text = str;
                 }
             }
@@ -714,6 +839,9 @@ public class WatcherUI : MonoBehaviour {
         panelWatcherSpiritMain.SetActive(true); // isOpen);
         if (isOpen) {
             UpdateUI(layerManager);
+        }
+        else {
+            followCreaturePanel.SetActive(false);
         }
     }
     /*

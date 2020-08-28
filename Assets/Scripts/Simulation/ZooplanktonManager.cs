@@ -289,8 +289,8 @@ public class ZooplanktonManager {
             }            
         }
         //float randRoll = UnityEngine.Random.Range(0f, 1f);
-        computeShaderAnimalParticles.SetFloat("_RespawnAnimalParticles", brushF);      
-        computeShaderAnimalParticles.SetFloat("_IsBrushing", brushF);  
+        computeShaderAnimalParticles.SetFloat("_RespawnAnimalParticles", 1f);
+        computeShaderAnimalParticles.SetFloat("_IsBrushing", 1f); // brushF);  
         //}
         //else {
         //    computeShaderAnimalParticles.SetFloat("_RespawnAnimalParticles", 0f);      
@@ -299,7 +299,7 @@ public class ZooplanktonManager {
         computeShaderAnimalParticles.SetFloat("_SpawnPosX", UnityEngine.Random.Range(0.1f, 0.9f)); // UPDATE THIS!!! ****
         computeShaderAnimalParticles.SetFloat("_SpawnPosY", UnityEngine.Random.Range(0.1f, 0.9f));
 
-        float spawnLerp = renderKingRef.simManager.trophicLayersManager.GetZooplanktonOnLerp(renderKingRef.simManager.simAgeTimeSteps);
+        float spawnLerp = renderKingRef.simManager.trophicLayersManager.GetZooplanktonOnLerp(renderKingRef.simManager.simAgeTimeSteps);  // no need to still do this??? ****
         float spawnRadius = Mathf.Lerp(1f, SimulationManager._MapSize, spawnLerp);
         Vector4 spawnPos = new Vector4(renderKingRef.simManager.trophicLayersManager.zooplanktonOriginPos.x, renderKingRef.simManager.trophicLayersManager.zooplanktonOriginPos.y, 0f, 0f);
         computeShaderAnimalParticles.SetFloat("_SpawnRadius", spawnRadius);

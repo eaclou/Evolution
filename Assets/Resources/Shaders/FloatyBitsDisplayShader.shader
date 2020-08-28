@@ -14,8 +14,8 @@
 		Tags{ "RenderType" = "Transparent" }
 		ZWrite Off
 		Cull Off
-		Blend SrcAlpha One
-		//Blend SrcAlpha OneMinusSrcAlpha
+		//Blend SrcAlpha One
+		Blend SrcAlpha OneMinusSrcAlpha
 
 		Pass
 		{
@@ -82,7 +82,7 @@
 				float2 dir = normalize(velocity);
 				float2 scale = float2(0.05 * randomAspect, 0.05 * (1.0 / randomAspect)) * randomScale; //float2(randomAspect * randomScale, (1.0 / randomAspect) * randomScale * (length(velocity) * 25 + 1.61));
 				scale.y *= (1.0 + velMag * 100.0);
-				quadPoint *= float3(scale, 1.0) * (_CamDistNormalized * 0.99 + 0.01); 
+				quadPoint *= float3(scale, 1.0) * (_CamDistNormalized * 0.98 + 0.02); 
 
 				float2 forward = dir;
 				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
@@ -119,7 +119,8 @@
 
 			fixed4 frag(v2f i) : SV_Target
 			{
-				//return float4(1,1,1,1) * 0.75;
+				return float4(0,0,0,1);
+				return float4(0.01,0.01,0.01,0.97);
 
 				float4 texColor = tex2D(_MainTex, i.uv);  // Read Brush Texture
 				//return texColor;
