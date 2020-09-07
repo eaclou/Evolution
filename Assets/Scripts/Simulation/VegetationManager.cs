@@ -344,13 +344,13 @@ public class VegetationManager {
         decomposerSlotGenomeCurrent.textDescriptionMutation = "Metabolic Rate: " + (decomposerSlotGenomeCurrent.metabolicRate * 100f).ToString("F2"); 
 
         GenerateWorldLayerDecomposersGenomeMutationOptions();
-
+        
         
 
 
         int kernelCSInitResourceGrid = computeShaderResourceGrid.FindKernel("CSInitResourceGrid"); 
         //computeShaderResourceGrid.SetTexture(kernelCSUpdateAlgaeGrid, "rdRead", rdRT1);
-        computeShaderResourceGrid.SetFloat("_TextureResolution", (float)resourceGridTexResolution);
+        computeShaderResourceGrid.SetFloat("_TextureResolution", (float)resourceGridRT1.width);
         //computeShaderResourceGrid.SetTexture(kernelCSInitRD, "rdWrite", rdRT1);
         computeShaderResourceGrid.SetTexture(kernelCSInitResourceGrid, "_ResourceGridWrite", resourceGridRT1);
         computeShaderResourceGrid.Dispatch(kernelCSInitResourceGrid, resourceGridTexResolution / 32, resourceGridTexResolution / 32, 1);

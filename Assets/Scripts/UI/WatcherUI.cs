@@ -25,7 +25,7 @@ public class WatcherUI : MonoBehaviour {
     public Button buttonHighlightingToggle;
     //public Button buttonFollowingToggle;
     
-    public bool isFollow;
+    //public bool isFollow;
     //public TrophicSlot targetSlotRef;
     //public bool isSelected;
 
@@ -43,7 +43,7 @@ public class WatcherUI : MonoBehaviour {
     public GameObject followCreaturePanel;
     public TrophicSlot watcherSelectedTrophicSlotRef; // plant, zooplankton, or vertebrate
     //public bool isWatcherTargetLayerLocked;
-    public Text textWatcherPanelTargetLayer;
+    //public Text textWatcherPanelTargetLayer;
     public GameObject panelWatcherSpiritMain;
     public GameObject panelWatcherExpand;
     public Text TextCommonStatsA;
@@ -136,14 +136,13 @@ public class WatcherUI : MonoBehaviour {
         //TrophicSlot slotRef = uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot; // *************   CHANGE THIS!!!!! ************
          
         if(watcherSelectedTrophicSlotRef == null) {
-            //imageIsSnooping.color = Color.green;
-            //textIsSnooping.text = "SNOOPING";
+            
             imageColorBar.color = Color.black;
         }
         else {
             imageColorBar.color = watcherSelectedTrophicSlotRef.color;
             imageWatcherCurTargetLayer.color = watcherSelectedTrophicSlotRef.color;
-            textWatcherPanelTargetLayer.color = watcherSelectedTrophicSlotRef.color;
+            
         }
         
         if(uiManagerRef.panelFocus != UIManager.PanelFocus.Watcher) {
@@ -151,7 +150,7 @@ public class WatcherUI : MonoBehaviour {
             imageIsSnooping.sprite = uiManagerRef.spriteSpiritBrushWatcherOffIcon;
             textIsSnooping.text = "";
             panelWatcherExpand.SetActive(false);
-            imageWatcherInactiveOverlay.gameObject.SetActive(true);
+            
         }
         else {
             
@@ -161,10 +160,6 @@ public class WatcherUI : MonoBehaviour {
             panelWatcherExpand.SetActive(true);
             imageWatcherInactiveOverlay.gameObject.SetActive(false);
         }
-        
-
-        //buttonHighlightingToggle.GetComponentInChildren<Text>().text = "huh?"; // isHighlight.ToString();
-        //buttonFollowingToggle.GetComponentInChildren<Text>().text = isFollow.ToString();
         
         if(uiManagerRef.cameraManager.isFollowingPlantParticle) {
             uiManagerRef.cameraManager.targetPlantWorldPos = uiManagerRef.gameManager.simulationManager.vegetationManager.selectedPlantParticleData.worldPos;
@@ -189,8 +184,13 @@ public class WatcherUI : MonoBehaviour {
         TextCommonStatsA.gameObject.SetActive(false);
         if(watcherSelectedTrophicSlotRef != null && uiManagerRef.panelFocus == UIManager.PanelFocus.Watcher) {
             TextCommonStatsA.gameObject.SetActive(true);
-            textTargetLayer.text = watcherSelectedTrophicSlotRef.speciesName;
+                        
+            int index = uiManagerRef.cameraManager.targetAgentIndex;
+            Agent gent = uiManagerRef.gameManager.simulationManager.agentsArray[index];
+            textTargetLayer.text = "Species " + gent.speciesIndex.ToString();
+            //watcherSelectedTrophicSlotRef.speciesName;
             //textTargetLayer.color = 
+            uiManagerRef.globalResourcesUI.selectedSpeciesIndex = gent.speciesIndex;
 
             string str = "";
             if (watcherSelectedTrophicSlotRef.kingdomID == 0) {
@@ -213,7 +213,7 @@ public class WatcherUI : MonoBehaviour {
                     
                 }
                 else {
-                    VegetationManager.PlantParticleData particleData = uiManagerRef.gameManager.simulationManager.vegetationManager.selectedPlantParticleData;
+                    /*VegetationManager.PlantParticleData particleData = uiManagerRef.gameManager.simulationManager.vegetationManager.selectedPlantParticleData;
 
                     textNewInspectAgentName.text = "Name# " + particleData.index.ToString();
                     textNewInspectAgentName.color = uiManagerRef.colorPlantsLayer;
@@ -284,13 +284,14 @@ public class WatcherUI : MonoBehaviour {
                     }
                     
                     TextCommonStatsA.text = str;
-                    panelWatcherSpiritPlants.SetActive(true);
+                    panelWatcherSpiritPlants.SetActive(false);
+                    */
                 }
                     
             }
             else if(watcherSelectedTrophicSlotRef.kingdomID == 2) {
                 if(watcherSelectedTrophicSlotRef.tierID == 0) {
-                    imageWatcherCurTargetLayer.color = uiManagerRef.colorZooplanktonLayer;
+                    /*imageWatcherCurTargetLayer.color = uiManagerRef.colorZooplanktonLayer;
                     imageWatcherCurTargetLayer.sprite = uiManagerRef.spriteSpiritZooplanktonIcon;
 
                     textNewInspectAgentName.text = "Name#" + uiManagerRef.gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex.ToString();
@@ -361,9 +362,10 @@ public class WatcherUI : MonoBehaviour {
                     
                     }
 
-                    panelWatcherSpiritZooplankton.SetActive(true);
+                    panelWatcherSpiritZooplankton.SetActive(false);
                     
                     TextCommonStatsA.text = str;
+                    */
                 }
                 else {
                     imageWatcherCurTargetLayer.color = uiManagerRef.colorVertebratesLayer;
@@ -815,17 +817,19 @@ public class WatcherUI : MonoBehaviour {
         if(watcherSelectedTrophicSlotRef == null) {
 
             //panelWatcherExpand.SetActive(false);
-            panelWatcherExpand.SetActive(false);
-            imageWatcherInactiveOverlay.gameObject.SetActive(true);
+            //panelWatcherExpand.SetActive(false);
+           // imageWatcherInactiveOverlay.gameObject.SetActive(true);
         }
     }
 
 	public void UpdateWatcherPanelUI(TrophicLayersManager layerManager) {
         animatorWatcherUI.SetBool("_IsOpen", isOpen);
 
-        if(uiManagerRef.panelFocus == UIManager.PanelFocus.Watcher) {
+        if(uiManagerRef.cameraManager.isFollowingAgent && !uiManagerRef.knowledgeUI.isOpen) {
             //animatorWatcherUI.SetBool("_IsOpen", true);
             animatorWatcherUI.SetBool("_IsDim", false);
+
+            UpdateUI(layerManager);
         }
         else {
             animatorWatcherUI.SetBool("_IsDim", true);
@@ -834,15 +838,11 @@ public class WatcherUI : MonoBehaviour {
             StopFollowingPlantParticle();
             StopFollowingAnimalParticle();
 
+            followCreaturePanel.SetActive(false);
         }
 
         panelWatcherSpiritMain.SetActive(true); // isOpen);
-        if (isOpen) {
-            UpdateUI(layerManager);
-        }
-        else {
-            followCreaturePanel.SetActive(false);
-        }
+        
     }
     /*
     TrophicSlot slotRefWatcher = uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef;
@@ -1031,6 +1031,8 @@ public class WatcherUI : MonoBehaviour {
         uiManagerRef.cameraManager.isFollowingAnimalParticle = false; 
         watcherSelectedTrophicSlotRef = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[0];
         //uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = 
+
+        
     }
     public void StopFollowingAnimalParticle() {
         uiManagerRef.cameraManager.isFollowingAnimalParticle = false;        

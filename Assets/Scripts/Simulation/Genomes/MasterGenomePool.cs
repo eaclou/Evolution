@@ -298,6 +298,10 @@ public class MasterGenomePool {
                     simManagerRef.AddNewSpecies(newGenome, parentSpeciesID);
 
                     speciesSimilarityDistanceThreshold += 10f;
+
+                    Color colo = new Color(newGenome.bodyGenome.appearanceGenome.huePrimary.x, newGenome.bodyGenome.appearanceGenome.huePrimary.y, newGenome.bodyGenome.appearanceGenome.huePrimary.z);
+                    simManagerRef.uiManager.NarratorText("A new species has emerged! " + newGenome.bodyGenome.coreGenome.name, colo);
+                    simManagerRef.uiManager.globalResourcesUI.selectedSpeciesIndex = completeSpeciesPoolsList.Count - 1;
                 }               
             }
             else {

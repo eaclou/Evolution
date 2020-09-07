@@ -74,9 +74,10 @@ Shader "UI/ToolbarSpeciesStatsShader"
 
 				//float2 keyUV = float2((0.5 + 0.0) / 16, 0.25);
 				//float4 keyTex = tex2D(_ColorKeyTex, keyUV);
-				//float2 uv = float2(IN.texcoord.x, 2.5 / 32);
+				//float2 uv = IN.texcoord.xy;
 				//float4 testCol = tex2D(_MainTex, uv);
-				//testCol.rgb *= 0.001;
+				//testCol.rgb *= 0.0004;
+				//float4 testCol = tex2D(_ColorKeyTex, uv);
 				//return testCol;
 
 				/*float4 testCol = keyTex;
@@ -109,7 +110,7 @@ Shader "UI/ToolbarSpeciesStatsShader"
 				//end coord = 1.0 - halfPixSize (1 should map to this)
 				//u range = halfPixSize * 2
 				float uRange = 1.0 - halfPixSize * 2.0;
-				finalCoords.x = finalCoords.x * uRange + halfPixSize;
+				//finalCoords.x = finalCoords.x * uRange + halfPixSize;
 				
 				/*float pivotY = 0.5; //(initialScore + latestScore) / 2;
 				if((pivotY + (_ZoomFactorY * 0.5)) > 1) {
@@ -127,7 +128,6 @@ Shader "UI/ToolbarSpeciesStatsShader"
 				half4 gridColor = half4(0.1, 0.1, 0.1, 1.0);
 								
 				half4 pixColor = bgColor;
-								
 								
 				// Create GRIDLINES:
 				/*for(int j = 0; j < gridDivisions; j++) {
@@ -148,21 +148,21 @@ Shader "UI/ToolbarSpeciesStatsShader"
 				//  For values of x between min and max , returns a smoothly varying value that ranges from 0 at x = min to 1 at x = max .
 				//  x is clamped to the range [ min , max ] and then the interpolation formula is evaluated:
 				
-				_MinValue = 300;
-				//_MaxValue = 800;
+				_MinValue = 0;
+				_MaxValue = 2800;
 
 				_NumDisplayed = 32;
 				int speciesIndex = _SelectedSpeciesID;
-				float speciesCoord = ((float)speciesIndex + 1.5)/_NumDisplayed;
+				float speciesCoord = ((float)speciesIndex)/_NumDisplayed;
 				//float isSelectedMask = saturate(1.0 - abs((float)_SelectedSpeciesID - (float)i));
 				half4 speciesColor = tex2D(_ColorKeyTex, half2(speciesCoord, 0.5)); // * (isSelectedMask + 0.5);
-				half4 speciesDataSample = tex2D(_MainTex, float2(saturate(finalCoords.x * 0.94 + 0.02), speciesCoord));
+				half4 speciesDataSample = tex2D(_MainTex, float2(saturate(finalCoords.x), speciesCoord));
 				float scoreValue = saturate((speciesDataSample.x - _MinValue) / (_MaxValue - _MinValue));
 				float dist = abs(finalCoords.y - scoreValue);
 				if(dist < (lineWidth + lineFadeWidth)) {
 					float smoothDist = smoothstep(0.0, lineFadeWidth, dist - lineWidth);
-					pixColor = lerp(float4(1,1,1,1), pixColor, smoothDist);
-					//pixColor = lerp(speciesColor, pixColor, smoothDist);
+					//pixColor = lerp(float4(1,1,1,1), pixColor, smoothDist);
+					pixColor = lerp(speciesColor, pixColor, smoothDist);
 				}
 
 				// better as an array/forloop?

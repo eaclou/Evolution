@@ -80,8 +80,8 @@ public class SimulationManager : MonoBehaviour {
         }
     }
 
-    public static float _MaxAltitude = 20f;
-    public static float _GlobalWaterLevel = 0.15f;
+    public static float _MaxAltitude = 5f;
+    public static float _GlobalWaterLevel = 0.42f;
 
     private int agentGridCellResolution = 1;  // How much to subdivide the map in order to detect nearest-neighbors more efficiently --> to not be O(n^2)
     public MapGridCell[][] mapGridCellArray;
@@ -850,7 +850,7 @@ public class SimulationManager : MonoBehaviour {
             
             AddNewHistoricalDataEntry();
             AddNewSpeciesDataEntry(curSimYear);
-            //uiManager.UpdateSpeciesTreeDataTextures(curSimYear);
+            uiManager.globalResourcesUI.UpdateSpeciesTreeDataTextures(curSimYear);
                         
             if(curSimYear == 1) {
                 SimEventData newEventData = new SimEventData();
@@ -953,7 +953,7 @@ public class SimulationManager : MonoBehaviour {
             UpdateSimulationClimate();
 
             //RefreshLatestHistoricalDataEntry();
-            //RefreshLatestSpeciesDataEntry();
+            RefreshLatestSpeciesDataEntry();
             //uiManager.UpdateSpeciesTreeDataTextures(curSimYear); // shouldn't lengthen!
             
             //uiManager.UpdateTolWorldStatsTexture(statsNutrientsEachGenerationList);
@@ -1266,11 +1266,11 @@ public class SimulationManager : MonoBehaviour {
         //       population = uiManagerRef.gameManager.simulationManager.graphDataVertebratePopulation0.curVal;
         //        foodEaten = uiManagerRef.gameManager.simulationManager.graphDataVertebrateFoodEaten0.curVal;
         //        genome = uiManagerRef.gameManager.simulationManager.graphDataVertebrateGenome0.curVal
-        if (graphDataVertebratePopulation0.curVal > 48) {
-            respawnThreshold = 77;
+        if (graphDataVertebratePopulation0.curVal < 32) {
+            respawnThreshold = 21;
         }
-        else if (graphDataVertebratePopulation0.curVal > 60) {
-            respawnThreshold = 777;
+        else if (graphDataVertebratePopulation0.curVal > 48) {
+            respawnThreshold = 700;
         }
 
         for (int a = 0; a < agentsArray.Length; a++) {            

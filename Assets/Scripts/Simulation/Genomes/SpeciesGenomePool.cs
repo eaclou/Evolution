@@ -71,6 +71,8 @@ public class SpeciesGenomePool {
         mutationSettingsRef = settings;
         timeStepCreated = timeStep;
         timeStepExtinct = 2000000000;
+
+        
     }
 
     private void InitShared() {

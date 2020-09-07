@@ -451,9 +451,10 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 		float isRightClick = saturate(_SpiritBrushPosNeg * -1.0) * _IsBrushing;
 		float isLeftClick = saturate(_SpiritBrushPosNeg) * _IsBrushing;
 		//if(_IsBrushing > 0.5) {		
-		if(true) { //_IsBrushing * isLeftClick > 0.5) {	 // player brushing this// Player-generated:
+		
+		if(id.x % 2 > 0.5) { //_IsBrushing * isLeftClick > 0.5) {	 // player brushing this// Player-generated:
 			
-			for(int i = 0; i < 8; i++) {
+			for(int i = 0; i < 4; i++) {
 				float rand01 = rand(float2(_Time * 135.79 + (float)animalParticlesRead[id.x].index * 30.17896 + i, _Time * 28.463 - i));
 			
 				float randX = rand(float2((float)id.x - i, _Time + i));
@@ -464,11 +465,11 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 				//float distToOrigin = length(_SpawnPos.xy - (spawnUV * _MapSize));
 			
 				//  SPIRIT BRUSH MASK:
-				float4 brushMaskTex = _SpawnDensityMap.SampleLevel(_LinearClamp, spawnUV, 0);
-				float rightClickMask01 = saturate(_SpiritBrushPosNeg * -1);  
-				float brushMask = saturate(brushMaskTex.x * 1.33);
+				//float4 brushMaskTex = _SpawnDensityMap.SampleLevel(_LinearClamp, spawnUV, 0);
+				//float rightClickMask01 = saturate(_SpiritBrushPosNeg * -1);  
+				//float brushMask = saturate(brushMaskTex.x * 1.33);
 
-				if(brushMask * (1.0 - rightClickMask01) > 0.5) {  
+				//if(brushMask * (1.0 - rightClickMask01) > 0.5) {  
 					if(spawnAltitudeSample.x < _GlobalWaterLevel) {  // in water only? // for now...
 						float2 worldPos = float2(spawnUV.x * _MapSize, spawnUV.y * _MapSize);
 						animalParticlesWrite[id.x].worldPos.xy = worldPos;
@@ -505,7 +506,7 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 					else {
 						
 					}
-				}
+				//}
 			}
 		}
 		else {  // Player not brushing! -- use standard auto-reproduction!

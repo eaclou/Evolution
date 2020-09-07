@@ -320,7 +320,8 @@ public class EggSack : MonoBehaviour {
     }
 
     private void SeverJointAttachment() {
-        //Debug.Log("SeverJoint!");
+        Debug.Log("SeverJoint! ");
+        parentAgentRef.CompletedPregnancy();
         parentAgentRef = null;
         isAttachedBySpring = false;
         isProtectedByParent = false; // might not be necessary, as this should be flipped at frame 1 of birth?
@@ -331,7 +332,7 @@ public class EggSack : MonoBehaviour {
         mainCollider.enabled = true;  // *** ???? maybe?
 
         Debug.Log("is this gfunction being run?");
-        parentAgentRef.CompletedPregnancy();
+        
     }
 
     public void ConsumedByPredatorAgent() {

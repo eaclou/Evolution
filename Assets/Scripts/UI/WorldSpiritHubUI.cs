@@ -376,12 +376,12 @@ public class WorldSpiritHubUI : MonoBehaviour {
         }
         imageBitInfo.gameObject.SetActive(animFinished); // Testing anim-driven approach
         panelWorldHubExpand.SetActive(true); // isOpen);
-        if(isOpen) {
+        //if(isOpen) {
             UpdateUI();
-        }
-        else {
+        //}
+        //else {
             //panelWorldHubExpand.SetActive(false);
-        }
+        //}
     }
 
     public void ClickMinimizePanel() {
@@ -557,7 +557,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
                 selectedWorldSpiritVertebrateSpeciesID = slot.linkedSpeciesID; // ???
                 //InitToolbarPortraitCritterData(slot);                
                 
-                uiManagerRef.NarratorText("A new species of Vertebrate added!", uiManagerRef.colorVertebratesLayer);                
+                //uiManagerRef.NarratorText("A new species of Vertebrate added!", uiManagerRef.colorVertebratesLayer);                
                 
                 if(slot.slotID == 0) {
                     //panelPendingClickPrompt.GetComponentInChildren<Text>().text = "These creatures start with randomly-generated brains\n and must evolve successful behavior\nthrough survival of the fittest";

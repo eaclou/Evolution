@@ -69,23 +69,25 @@ uniform float _Time;
 [numthreads(32,32,1)]
 void CSInitResourceGrid (uint3 id : SV_DispatchThreadID)
 {	
-	// CHANNEL X = none
-	// CHANNEL Y = Decomposers
-	// CHANNEL Z = AlgaeGrid
+	// CHANNEL X = Nutrients/Minerals
+	// CHANNEL Y = Waste
+	// CHANNEL Z = Decomposers
+	// CHANNEL W = AlgaeGrid
+	/*
 	float2 uv = ((float2)id.xy + 0.5) / _TextureResolution;
 	
 	float distFromCenter = length(uv - 0.5);
-	float distFromCenterNormalized = saturate(1.7 - distFromCenter * 25);
-	// CHANNEL X = Nutrients
-	// CHANNEL Y = Detritus
-	// CHANNEL Z = Oxygen?
+	float distFromCenterNormalized = saturate(0.95 - distFromCenter * 0.15);
+	
 	float u = sin(uv.x * -9.7346 * cos(uv.y * 13.72)) * 0.5 + 0.5;
 	float v = cos(uv.y * -4.4983116 * sin(uv.x * 3.72)) * 0.5 + 0.5;
 	float b = sin(uv.x * -1.4983116 * cos(uv.y * 1.72)) * 0.5 + 0.5;
 	float a = cos(uv.y * -2.983116 * cos(uv.y * 0.72)) * 0.5 + 0.5;
 	
 	float4 resources = float4(u, v, b, a) * distFromCenterNormalized;;
+	*/
 	
+	float4 resources = float4(1,1,1,1);
 	_ResourceGridWrite[id.xy] = resources; 
 
 }
@@ -108,7 +110,7 @@ void CSSimResourceGrid (uint3 id : SV_DispatchThreadID)
     float4 resourceGridUp = _ResourceGridRead[int2(id.x, id.y + 1)];
     float4 resourceGridDown = _ResourceGridRead[int2(id.x, id.y - 1)];
     float4 resourceGridCenter = _ResourceGridRead[id.xy];
-	float4 diffusionAmounts = float4(0.1,0.025,0.005,0);
+	float4 diffusionAmounts = float4(0.1,0.025,0.01,0.01);
 	
 	float4 resourceGridRead;
 	resourceGridRead.x = lerp(resourceGridCenter.x, (resourceGridCenter.x + resourceGridRight.x + resourceGridLeft.x + resourceGridUp.x + resourceGridDown.x) / 5, diffusionAmounts.x);
@@ -192,27 +194,27 @@ void CSAdvectResourceGrid (uint3 id : SV_DispatchThreadID)
 	float2 uvOrigin = float2(xCoord, yCoord);
 		
 	float2 uvSample = uvOrigin - _DeltaTime * _InvGridScale * VelocityRead.SampleLevel(_LinearClamp, uvOrigin, 0).xy * 1;
-	float2 uvSlow = uvOrigin - _DeltaTime * _InvGridScale * VelocityRead.SampleLevel(_LinearClamp, uvOrigin, 0).xy * 0.17182571125;
 	
-	float4 resourceGridReadStatic = _ResourceGridRead.SampleLevel(_LinearClamp, uvOrigin, 0);	
+	float2 uvSlow = uvOrigin - _DeltaTime * _InvGridScale * VelocityRead.SampleLevel(_LinearClamp, uvOrigin, 0).xy * 0.17182571125;
+	float4 resourceGridRead = _ResourceGridRead.SampleLevel(_LinearClamp, uvSample, 0);	// advected!!!	
+	float4 resourceGridReadStatic = _ResourceGridRead.SampleLevel(_PointClamp, uvOrigin, 0);	
 	float4 resourceGridReadSlow = _ResourceGridRead.SampleLevel(_LinearClamp, uvSlow, 0);	
-	float4 resourceGridRead = _ResourceGridRead.SampleLevel(_LinearClamp, uvSample, 0);	
-	resourceGridRead.y = resourceGridReadStatic.y;  //  Detritus doesn't move in water?? experiemntal....
+	
+	//resourceGridRead.y = resourceGridReadStatic.y;  //  Detritus doesn't move in water?? experiemntal....
 
 	// Handle SpiritBrush Here????
-	float4 spiritBrushSample = _SpiritBrushTex.SampleLevel(_LinearClamp, uvOrigin, 0);
+	//float4 spiritBrushSample = _SpiritBrushTex.SampleLevel(_LinearClamp, uvOrigin, 0);
 	float4 externalResource = _ResourceSimTransferRead.SampleLevel(_PointClamp, uvOrigin, 0);
 	
-	float brushMagnitude = _SpiritBrushIntensity;
-	float deltaBrushDecomposer = _IsSpiritBrushDecomposersOn * _SpiritBrushPosNeg * spiritBrushSample.x;
-	float deltaBrushAlgae = _IsSpiritBrushAlgaeOn * _SpiritBrushPosNeg * spiritBrushSample.x;
-	float deltaBrushMinerals = _IsSpiritBrushMineralsOn * _SpiritBrushPosNeg * spiritBrushSample.x;
+	//float brushMagnitude = _SpiritBrushIntensity;
+	//float deltaBrushDecomposer = _IsSpiritBrushDecomposersOn * _SpiritBrushPosNeg * spiritBrushSample.x;
+	//float deltaBrushAlgae = _IsSpiritBrushAlgaeOn * _SpiritBrushPosNeg * spiritBrushSample.x;
+	//float deltaBrushMinerals = _IsSpiritBrushMineralsOn * _SpiritBrushPosNeg * spiritBrushSample.x;
 
-	resourceGridRead.x = saturate(resourceGridRead.x - externalResource.x * 10 + deltaBrushMinerals * brushMagnitude);  // plantParticles Nutrient Usage
-	resourceGridRead.y += externalResource.z * 4; // Waste += Zooplankton Poop
-	resourceGridRead.w -= externalResource.y * 100; // Algae -= Algae Eaten
-	resourceGridRead.z = saturate(resourceGridReadSlow.z + deltaBrushDecomposer * brushMagnitude);  // *** TEMPORARY!!! **** Decomposers removed from brushing
-	resourceGridRead.w = saturate(resourceGridRead.w + deltaBrushAlgae * brushMagnitude);
+	resourceGridRead.x = saturate(resourceGridRead.x - externalResource.x * 10);      // plantParticles Nutrient Usage
+	resourceGridRead.y = saturate(resourceGridReadSlow.y + externalResource.z * 4);       // Waste += Zooplankton Poop
+	resourceGridRead.z = saturate(resourceGridReadSlow.z);                               // decomposers
+	resourceGridRead.w = saturate(resourceGridRead.w - externalResource.y * 100);      // Algae -= Algae Eaten
 	
 			
 	_ResourceGridWrite[id.xy] = resourceGridRead;

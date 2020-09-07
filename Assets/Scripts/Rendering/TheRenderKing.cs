@@ -4567,10 +4567,10 @@ public class TheRenderKing : MonoBehaviour {
                 
                 isHighlight = 1f;                
                 if(simManager.uiManager.watcherUI.watcherSelectedTrophicSlotRef.kingdomID == 2 && simManager.uiManager.watcherUI.watcherSelectedTrophicSlotRef.tierID == 0) {
-                    isSelectedZoop = 1f;
+                    //isSelectedZoop = 1f;
                 }                
                 if(simManager.uiManager.watcherUI.watcherSelectedTrophicSlotRef.kingdomID == 1 && simManager.uiManager.watcherUI.watcherSelectedTrophicSlotRef.tierID == 1) {
-                    isSelectedPlant = 1f;
+                    //isSelectedPlant = 1f;
                 }
             }
             

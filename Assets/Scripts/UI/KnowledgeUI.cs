@@ -416,9 +416,9 @@ public class KnowledgeUI : MonoBehaviour {
 
 
         panelKnowledgeSpiritBase.SetActive(true); // && uiManagerRef.worldSpiritHubUI.isOpen);
-        if(isOpen) {
-            UpdateUI(layerManager);
-        }        
+        //if(isOpen) {
+        UpdateUI(layerManager);
+        //}        
     }
 
     /*

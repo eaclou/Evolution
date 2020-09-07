@@ -221,77 +221,9 @@ public class UIManager : MonoBehaviour {
 
         UpdateMainMenuUI();
 
-        /*
-        // Best place for these???
-        if (statsSpeciesColorKey == null) {
-            statsSpeciesColorKey = new Texture2D(maxDisplaySpecies, 1, TextureFormat.ARGB32, false);
-            statsSpeciesColorKey.filterMode = FilterMode.Point;
-            statsSpeciesColorKey.wrapMode = TextureWrapMode.Clamp;
-        }
+        
+        
 
-        if (statsTreeOfLifeSpeciesTexArray.Length == 0) {
-            statsTreeOfLifeSpeciesTexArray = new Texture2D[16]; // start with 16 choosable stats
-
-            for (int i = 0; i < statsTreeOfLifeSpeciesTexArray.Length; i++) {
-                Texture2D statsTexture = new Texture2D(maxDisplaySpecies, 1, TextureFormat.RGBAFloat, false);
-                statsSpeciesColorKey.filterMode = FilterMode.Point;
-                statsSpeciesColorKey.wrapMode = TextureWrapMode.Clamp;
-
-                statsTreeOfLifeSpeciesTexArray[i] = statsTexture;
-            }
-        }
-
-        if (maxValuesStatArray.Length == 0) {
-            maxValuesStatArray = new float[16];
-            for (int i = 0; i < maxValuesStatArray.Length; i++) {
-                maxValuesStatArray[i] = 0.01f;
-            }
-        }
-
-        // &&&& INFO PANEL GRAPHS::::
-        if (infoOxygenDataTexture == null) {
-            infoOxygenDataTexture = new Texture2D(1, 1, TextureFormat.RGBAFloat, false);
-            infoOxygenDataTexture.filterMode = FilterMode.Bilinear;
-            infoOxygenDataTexture.wrapMode = TextureWrapMode.Clamp;
-        }
-        if (infoNutrientsDataTexture == null) {
-            infoNutrientsDataTexture = new Texture2D(1, 1, TextureFormat.RGBAFloat, false);
-            infoNutrientsDataTexture.filterMode = FilterMode.Bilinear;
-            infoNutrientsDataTexture.wrapMode = TextureWrapMode.Clamp;
-        }
-        if (infoDetritusDataTexture == null) {
-            infoDetritusDataTexture = new Texture2D(1, 1, TextureFormat.RGBAFloat, false);
-            infoDetritusDataTexture.filterMode = FilterMode.Bilinear;
-            infoDetritusDataTexture.wrapMode = TextureWrapMode.Clamp;
-        }
-        if (infoDecomposersDataTexture == null) {
-            infoDecomposersDataTexture = new Texture2D(1, 1, TextureFormat.RGBAFloat, false);
-            infoDecomposersDataTexture.filterMode = FilterMode.Bilinear;
-            infoDecomposersDataTexture.wrapMode = TextureWrapMode.Clamp;
-        }
-        if (infoPlantsDataTexture == null) {
-            infoPlantsDataTexture = new Texture2D(1, 1, TextureFormat.RGBAFloat, false);
-            infoPlantsDataTexture.filterMode = FilterMode.Bilinear;
-            infoPlantsDataTexture.wrapMode = TextureWrapMode.Clamp;
-        }
-        if (infoAnimalsDataTexture == null) {
-            infoAnimalsDataTexture = new Texture2D(1, 1, TextureFormat.RGBAFloat, false);
-            infoAnimalsDataTexture.filterMode = FilterMode.Bilinear;
-            infoAnimalsDataTexture.wrapMode = TextureWrapMode.Clamp;
-        }
-        infoGraphOxygenMat.SetTexture("_DataTex", infoOxygenDataTexture);
-        infoGraphOxygenMat.SetFloat("_MaxValue", 1000f);
-        infoGraphNutrientsMat.SetTexture("_DataTex", infoNutrientsDataTexture);
-        infoGraphNutrientsMat.SetFloat("_MaxValue", 4000f);
-        //infoGraphDetritusMat.SetTexture("_DataTex", infoDetritusDataTexture);
-        //infoGraphDetritusMat.SetFloat("_MaxValue", 4000f);
-        infoGraphDecomposersMat.SetTexture("_DataTex", infoDecomposersDataTexture);
-        infoGraphDecomposersMat.SetFloat("_MaxValue", 4000f);
-        infoGraphPlantsMat.SetTexture("_DataTex", infoPlantsDataTexture);
-        infoGraphPlantsMat.SetFloat("_MaxValue", 4000f);
-        infoGraphAnimalsMat.SetTexture("_DataTex", infoAnimalsDataTexture);
-        infoGraphAnimalsMat.SetFloat("_MaxValue", 100f);
-        */
     }
     private void EnterLoadingUI() {
         panelMainMenu.SetActive(false);
@@ -407,6 +339,7 @@ public class UIManager : MonoBehaviour {
                 bigBangFramesCounter = 0;
                 gameManager.simulationManager._BigBangOn = false;
                 panelBigBang.SetActive(false);
+                curActiveTool = UIManager.ToolType.None;
             }
             else if(bigBangFramesCounter > 40) {
                 imageBigBangStrokes01.gameObject.SetActive(true);
@@ -415,6 +348,7 @@ public class UIManager : MonoBehaviour {
                 worldSpiritHubUI.PlayBigBangSpawnAnim();
 
                 gameManager.simulationManager.vegetationManager.isBrushActive = true;
+                panelFocus = UIManager.PanelFocus.Watcher;
             }
             else if(bigBangFramesCounter > 20) {
                 imageBigBangStrokes01.gameObject.SetActive(true);
@@ -426,6 +360,7 @@ public class UIManager : MonoBehaviour {
                 imageBigBangStrokes01.gameObject.SetActive(true);
                 imageBigBangStrokes02.gameObject.SetActive(true);
                 imageBigBangStrokes03.gameObject.SetActive(true);
+                curActiveTool = UIManager.ToolType.Stir;
             }
         }
     }
@@ -435,9 +370,7 @@ public class UIManager : MonoBehaviour {
 
         worldSpiritHubUI.isUnlocked = true;
         worldSpiritHubUI.OpenWorldTreeSelect();
-
-        knowledgeUI.OpenKnowledgePanel();
-        knowledgeUI.isUnlocked = true;
+        
 
         UnlockBrushes();   
         worldSpiritHubUI.selectedWorldSpiritSlot = gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];
@@ -456,10 +389,9 @@ public class UIManager : MonoBehaviour {
 
                 
         knowledgeUI.isUnlocked = true;
-        AnnounceUnlockKnowledgeSpirit();
-        knowledgeUI.OpenKnowledgePanel();
-        worldSpiritHubUI.OpenWorldTreeSelect();
-                
+        //AnnounceUnlockKnowledgeSpirit();
+        //knowledgeUI.OpenKnowledgePanel();
+        //worldSpiritHubUI.OpenWorldTreeSelect();                
 
         gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
                 
@@ -495,7 +427,7 @@ public class UIManager : MonoBehaviour {
         mutationUI.isUnlocked = true;
                 
         //mutationUI.ClickToolButton();
-        worldSpiritHubUI.OpenWorldTreeSelect();
+        //worldSpiritHubUI.OpenWorldTreeSelect();
         gameManager.theRenderKing.InitializeMutationVertebratePortraitGenomes();// gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList.Count - 1].representativeGenome, gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][mutationUI.selectedToolbarMutationID].representativeGenome);
                 
 
@@ -521,7 +453,7 @@ public class UIManager : MonoBehaviour {
         TrophicSlot airSlot = gameManager.simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[2];
         airSlot.status = TrophicSlot.SlotStatus.On;
         Debug.Log("AIR SPIRIT UNLOCKED!!! " + unlockCooldownCounter.ToString());
-        AnnounceUnlockAir();
+        //AnnounceUnlockAir();
         isUnlockCooldown = true;
         unlockedAnnouncementSlotRef = airSlot;
                                
@@ -541,6 +473,8 @@ public class UIManager : MonoBehaviour {
         // SPAWNS!!!! 
 
         gameManager.simulationManager.AttemptToBrushSpawnAgent(brushesUI.selectedEssenceSlot.linkedSpeciesID);
+
+        
     }
     
     private void UpdateSimulationUI() {
@@ -614,7 +548,7 @@ public class UIManager : MonoBehaviour {
                 Debug.Log("WATER UNLOCKED!!! " + unlockCooldownCounter.ToString());
                 //brushesUI.Unlock();
                 //brushesUI.SetTargetFromWorldTree();
-                AnnounceUnlockWater();
+                //AnnounceUnlockWater();
                 isUnlockCooldown = true;
                 unlockedAnnouncementSlotRef = gameManager.simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[1];
                 worldSpiritHubUI.selectedWorldSpiritSlot = gameManager.simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[1];
@@ -626,7 +560,7 @@ public class UIManager : MonoBehaviour {
                 gameManager.simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
                 Debug.Log("DECOMPOSERS UNLOCKED!!! " + unlockCooldownCounter.ToString());
 
-                AnnounceUnlockDecomposers();
+                //AnnounceUnlockDecomposers();
                 isUnlockCooldown = true;
                 unlockedAnnouncementSlotRef = gameManager.simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0];
                 //simManager.uiManager.buttonToolbarExpandOn.GetComponent<Animator>().enabled = true;
@@ -641,7 +575,7 @@ public class UIManager : MonoBehaviour {
             case WildSpirit.ClickableSpiritType.KnowledgeSpirit:
                 
                 knowledgeUI.isUnlocked = true;
-                AnnounceUnlockKnowledgeSpirit();
+                //AnnounceUnlockKnowledgeSpirit();
                 knowledgeUI.OpenKnowledgePanel();
                 worldSpiritHubUI.OpenWorldTreeSelect();
                 //isClickableSpiritRoaming = false;
@@ -649,9 +583,9 @@ public class UIManager : MonoBehaviour {
                 break;
             case WildSpirit.ClickableSpiritType.Algae:
                 gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
-                Debug.Log("ALGAE UNLOCKED!!! " + unlockCooldownCounter.ToString());
+                //Debug.Log("ALGAE UNLOCKED!!! " + unlockCooldownCounter.ToString());
 
-                AnnounceUnlockAlgae();
+                //AnnounceUnlockAlgae();
                 isUnlockCooldown = true;
                 unlockedAnnouncementSlotRef = gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];   
                 
@@ -664,8 +598,8 @@ public class UIManager : MonoBehaviour {
                 break;
             case WildSpirit.ClickableSpiritType.Zooplankton:
                 gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
-                Debug.Log("ZOOPLANKTON UNLOCKED!!! " + unlockCooldownCounter.ToString());
-                AnnounceUnlockZooplankton();
+                //Debug.Log("ZOOPLANKTON UNLOCKED!!! " + unlockCooldownCounter.ToString());
+                //AnnounceUnlockZooplankton();
                 isUnlockCooldown = true;
                 unlockedAnnouncementSlotRef = gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0];
                 worldSpiritHubUI.ClickWorldCreateNewSpecies(gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0]);
@@ -680,13 +614,13 @@ public class UIManager : MonoBehaviour {
                 watcherUI.ClickToolButton();
                 panelFocus = PanelFocus.Watcher;
                 watcherUI.animatorWatcherUI.SetBool("_IsOpen", true);
-                AnnounceUnlockWatcherSpirit();
+                //AnnounceUnlockWatcherSpirit();
                 wildSpirit.curClickableSpiritType = WildSpirit.ClickableSpiritType.Plants;
                 break;
             case WildSpirit.ClickableSpiritType.Plants:
                 gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
-                Debug.Log("PLANTS UNLOCKED!!! " + unlockCooldownCounter.ToString());
-                AnnounceUnlockPlants();
+                //Debug.Log("PLANTS UNLOCKED!!! " + unlockCooldownCounter.ToString());
+                //AnnounceUnlockPlants();
                 isUnlockCooldown = true;
                 unlockedAnnouncementSlotRef = gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[0];                
                 worldSpiritHubUI.ClickWorldCreateNewSpecies(gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[0]);
@@ -699,8 +633,8 @@ public class UIManager : MonoBehaviour {
             case WildSpirit.ClickableSpiritType.VertA:                            
                 gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].unlocked = true;
                 gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0].status = TrophicSlot.SlotStatus.On;                
-                Debug.Log("CREATURE A UNLOCKED!!! " + unlockCooldownCounter.ToString());
-                AnnounceUnlockVertebrates();
+                //Debug.Log("CREATURE A UNLOCKED!!! " + unlockCooldownCounter.ToString());
+                //AnnounceUnlockVertebrates();
                 isUnlockCooldown = true;
                 unlockedAnnouncementSlotRef = gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0];                
                 worldSpiritHubUI.ClickWorldCreateNewSpecies(gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0]);
@@ -713,7 +647,7 @@ public class UIManager : MonoBehaviour {
                 break;
             case WildSpirit.ClickableSpiritType.MutationSpirit:
                 mutationUI.isUnlocked = true;
-                AnnounceUnlockMutationSpirit();
+                //AnnounceUnlockMutationSpirit();
                 //curClickableSpiritType = UIManager.ClickableSpiritType.Zooplankton; // *** Last unlock?
                 wildSpirit.curClickableSpiritType = WildSpirit.ClickableSpiritType.Minerals;
                 mutationUI.ClickToolButton();
@@ -727,7 +661,7 @@ public class UIManager : MonoBehaviour {
                 TrophicSlot mineralSlot = gameManager.simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[0];
                 mineralSlot.status = TrophicSlot.SlotStatus.On;
                 Debug.Log("MINERALS UNLOCKED!!! " + unlockCooldownCounter.ToString());
-                AnnounceUnlockMinerals();
+                //AnnounceUnlockMinerals();
                 isUnlockCooldown = true;
                 unlockedAnnouncementSlotRef = mineralSlot;
                 //simManager.uiManager.buttonToolbarExpandOn.GetComponent<Animator>().enabled = true;
@@ -740,8 +674,8 @@ public class UIManager : MonoBehaviour {
             case WildSpirit.ClickableSpiritType.Pebbles:
                 TrophicSlot pebblesSlot = gameManager.simulationManager.trophicLayersManager.kingdomTerrain.trophicTiersList[0].trophicSlots[2];
                 pebblesSlot.status = TrophicSlot.SlotStatus.On;
-                Debug.Log("PEBBLES SPIRIT UNLOCKED!!! " + unlockCooldownCounter.ToString());
-                AnnounceUnlockPebbles();
+                //Debug.Log("PEBBLES SPIRIT UNLOCKED!!! " + unlockCooldownCounter.ToString());
+                //AnnounceUnlockPebbles();
                 isUnlockCooldown = true;
                 unlockedAnnouncementSlotRef = pebblesSlot;
                 worldSpiritHubUI.selectedWorldSpiritSlot = pebblesSlot;
@@ -756,8 +690,8 @@ public class UIManager : MonoBehaviour {
             case WildSpirit.ClickableSpiritType.Sand:
                 TrophicSlot sandSlot = gameManager.simulationManager.trophicLayersManager.kingdomTerrain.trophicTiersList[0].trophicSlots[3];
                 sandSlot.status = TrophicSlot.SlotStatus.On;
-                Debug.Log("SAND SPIRIT UNLOCKED!!! " + unlockCooldownCounter.ToString());
-                AnnounceUnlockSand();
+                //Debug.Log("SAND SPIRIT UNLOCKED!!! " + unlockCooldownCounter.ToString());
+                //AnnounceUnlockSand();
                 isUnlockCooldown = true;
                 unlockedAnnouncementSlotRef = sandSlot;
                 worldSpiritHubUI.selectedWorldSpiritSlot = sandSlot;
@@ -772,8 +706,8 @@ public class UIManager : MonoBehaviour {
             case WildSpirit.ClickableSpiritType.Air:
                 TrophicSlot airSlot = gameManager.simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[2];
                 airSlot.status = TrophicSlot.SlotStatus.On;
-                Debug.Log("AIR SPIRIT UNLOCKED!!! " + unlockCooldownCounter.ToString());
-                AnnounceUnlockAir();
+                //Debug.Log("AIR SPIRIT UNLOCKED!!! " + unlockCooldownCounter.ToString());
+                //AnnounceUnlockAir();
                 isUnlockCooldown = true;
                 unlockedAnnouncementSlotRef = airSlot;
                 worldSpiritHubUI.selectedWorldSpiritSlot = airSlot;
@@ -786,8 +720,8 @@ public class UIManager : MonoBehaviour {
             case WildSpirit.ClickableSpiritType.VertB:                            
                 gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].unlocked = true;
                 gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1].status = TrophicSlot.SlotStatus.On;                
-                Debug.Log("CREATURE B UNLOCKED!!! " + unlockCooldownCounter.ToString());
-                AnnounceUnlockVertebrates();
+                //Debug.Log("CREATURE B UNLOCKED!!! " + unlockCooldownCounter.ToString());
+                //AnnounceUnlockVertebrates();
                 isUnlockCooldown = true;
                 unlockedAnnouncementSlotRef = gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1];                
                 worldSpiritHubUI.ClickWorldCreateNewSpecies(gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1]);
@@ -865,12 +799,12 @@ public class UIManager : MonoBehaviour {
 
             cameraManager.MoveCamera(moveDir); // ********************
 
-            if (Input.GetKey(KeyCode.R)) {
+            /*if (Input.GetKey(KeyCode.R)) {
                 cameraManager.TiltCamera(-1f);
             }
             if (Input.GetKey(KeyCode.F)) {
                 cameraManager.TiltCamera(1f);
-            }
+            }*/
             if (Input.GetKeyDown(KeyCode.Escape)) {
                 Debug.Log("Pressed Escape!");
                 // Pause & Main Menu? :::
@@ -943,7 +877,7 @@ public class UIManager : MonoBehaviour {
                 int selectedZoopID = gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex;
                 int closestZoopID = gameManager.simulationManager.zooplanktonManager.closestAnimalParticleData.index;
                 float zoopDist = (new Vector2(gameManager.simulationManager.zooplanktonManager.closestAnimalParticleData.worldPos.x, gameManager.simulationManager.zooplanktonManager.closestAnimalParticleData.worldPos.y) - new Vector2(theCursorCzar.curMousePositionOnWaterPlane.x, theCursorCzar.curMousePositionOnWaterPlane.y)).magnitude;
-                
+                /*
                 if(plantDist < zoopDist) {                    
                     
                     if(panelFocus == PanelFocus.Watcher && !cameraManager.isMouseHoverAgent && theCursorCzar.leftClickThisFrame) { 
@@ -969,7 +903,7 @@ public class UIManager : MonoBehaviour {
                         }
                     }
                 }
-
+                */
                 watcherUI.isPlantParticleHighlight = 0f;
                 watcherUI.isZooplanktonHighlight = 0f;
                 watcherUI.isVertebrateHighlight = 0f;
@@ -1502,7 +1436,8 @@ public class UIManager : MonoBehaviour {
         gameManager.simulationManager.LogFeat(feat);
     }
     public void AnnounceUnlockVertebrates() {
-        NarratorText("Vertebrate Species Unlocked!", colorVertebratesLayer);
+        Debug.LogError("WTF?");
+        //NarratorText("Vertebrate Species Unlocked!", colorVertebratesLayer);
         Feat feat = new Feat("Animal Spirit!", Feat.FeatType.Plants, Time.frameCount, Color.white, "More complex, larger animals");
         gameManager.simulationManager.LogFeat(feat);
     }
@@ -1553,250 +1488,9 @@ public class UIManager : MonoBehaviour {
 
 
  
-      
-    /*public void UpdateSpeciesTreeDataTextures(int year) {  // refactor using year?
+  /*   
 
-        int numActiveSpecies = gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList.Count;
-        int numTotalSpecies = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList.Count;
-        
-        displaySpeciesIndicesArray = new int[maxDisplaySpecies];
-
-        TheRenderKing.TreeOfLifeSpeciesKeyData[] speciesKeyDataArray = new TheRenderKing.TreeOfLifeSpeciesKeyData[32];
-
-         // Get Active ones first:
-        for(int i = 0; i < gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList.Count; i++) {
-            SpeciesGenomePool pool = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList[i]];
-            SpeciesGenomePool parentPool = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[pool.parentSpeciesID];
-
-            Vector3 huePrimary = pool.representativeGenome.bodyGenome.appearanceGenome.huePrimary;
-            Vector3 hueSecondary = pool.representativeGenome.bodyGenome.appearanceGenome.hueSecondary;
-            Vector3 parentHue = parentPool.representativeGenome.bodyGenome.appearanceGenome.huePrimary;
-            statsSpeciesColorKey.SetPixel(i, 1, new Color(huePrimary.x, huePrimary.y, huePrimary.z));            
-            //Debug.Log("(" + i.ToString() + ", " + gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList[i].ToString());
-            displaySpeciesIndicesArray[i] = gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList[i];
-
-            TheRenderKing.TreeOfLifeSpeciesKeyData keyData = new TheRenderKing.TreeOfLifeSpeciesKeyData();
-            keyData.timeCreated = pool.timeStepCreated;  // Use TimeSteps instead of Years???
-            keyData.timeExtinct = pool.timeStepExtinct;
-            keyData.huePrimary = huePrimary;
-            keyData.hueSecondary = hueSecondary;
-            keyData.parentHue = parentHue;
-            keyData.isExtinct = pool.isExtinct ? 1f : 0f;
-            keyData.isOn = 1f;
-            //int selectedID = treeOfLifeManager.selectedID;
-            
-            keyData.isSelected = (selectedSpeciesID == gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList[i]) ? 1f : 0f;
-
-            speciesKeyDataArray[i] = keyData;
-        }
-        
-        // Then fill with most recently extinct:
-        for(int i = (numTotalSpecies - 1); i > Mathf.Clamp((numTotalSpecies - maxDisplaySpecies), 0, numTotalSpecies); i--) {
-            SpeciesGenomePool pool = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[i];
-            SpeciesGenomePool parentPool = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[pool.parentSpeciesID];
-
-            Vector3 huePrimary = pool.representativeGenome.bodyGenome.appearanceGenome.huePrimary;
-            Vector3 hueSecondary = pool.representativeGenome.bodyGenome.appearanceGenome.hueSecondary;
-            Vector3 parentHue = parentPool.representativeGenome.bodyGenome.appearanceGenome.huePrimary;
-            if(gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[i].isExtinct) {
-                huePrimary = Vector3.Lerp(huePrimary, Vector3.one * 0.2f, 0.75f);
-            }
-            statsSpeciesColorKey.SetPixel(i, 1, new Color(huePrimary.x, huePrimary.y, huePrimary.z));
-            
-            displaySpeciesIndicesArray[i] = i;
-
-            TheRenderKing.TreeOfLifeSpeciesKeyData keyData = new TheRenderKing.TreeOfLifeSpeciesKeyData();
-            keyData.timeCreated = pool.timeStepCreated;  // Use TimeSteps instead of Years???
-            keyData.timeExtinct = pool.timeStepExtinct;
-            keyData.huePrimary = huePrimary;
-            keyData.hueSecondary = hueSecondary;
-            keyData.parentHue = parentHue;
-            keyData.isExtinct = pool.isExtinct ? 1f : 0f;
-            keyData.isOn = 1f;
-            if(i >= gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList.Count) {
-                keyData.isOn = 0f;
-            }
-            if(pool.yearCreated == -1) {
-                keyData.isOn = 0f;
-            }
-            if(i == 0) {
-                keyData.isOn = 0f;
-            }
-            
-            keyData.isSelected = selectedSpeciesID == i ? 1f : 0f;
-
-            speciesKeyDataArray[i] = keyData;
-        }
-        statsSpeciesColorKey.Apply();
-
-        gameManager.simulationManager.theRenderKing.treeOfLifeSpeciesDataKeyCBuffer.SetData(speciesKeyDataArray);
-
-        // ========== data: =========== //
-        int years = Mathf.Min(2048, year);  // cap textures at 2k for now?
-        years = Mathf.Max(1, years);
-        // check for resize before doing it?
-        for(int i = 0; i < statsTreeOfLifeSpeciesTexArray.Length; i++) {
-            statsTreeOfLifeSpeciesTexArray[i].Resize(years, maxDisplaySpecies);
-        }
-        
-        for(int i = 0; i < maxValuesStatArray.Length; i++) {
-            maxValuesStatArray[i] = 0.01f;
-        }
-        // for each year & each species, create 2D texture with fitness scores:
-        for(int s = 0; s < maxDisplaySpecies; s++) {            
-            
-            if(displaySpeciesIndicesArray[s] < gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList.Count) {
-
-                SpeciesGenomePool speciesPool = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[displaySpeciesIndicesArray[s]];
-                if(speciesPool == null) {
-                    Debug.LogError("well, shit");
-                }
-                for(int t = 0; t < years; t++) {
-                
-                    //int index = t - speciesPool.yearCreated;
-                    
-                    for(int a = 0; a < statsTreeOfLifeSpeciesTexArray.Length; a++) {
-                        float valStat = 0f;
-                        //= speciesPool
-                        // I know there's a better way to do this:
-                        if(a == 0) {
-                            valStat = speciesPool.avgLifespanPerYearList[t];
-                        }
-                        else if(a == 1) {
-                            valStat = speciesPool.avgConsumptionDecayPerYearList[t];
-                        }
-                        else if(a == 2) {
-                            valStat = speciesPool.avgConsumptionPlantPerYearList[t];
-                        }
-                        else if(a == 3) {
-                            valStat = speciesPool.avgConsumptionMeatPerYearList[t];
-                        }
-                        else if(a == 4) {
-                            valStat = speciesPool.avgBodySizePerYearList[t];
-                        }
-                        else if(a == 5) {
-                            valStat = speciesPool.avgSpecAttackPerYearList[t];
-                        }
-                        else if(a == 6) {
-                            valStat = speciesPool.avgSpecDefendPerYearList[t];
-                        }
-                        else if(a == 7) {
-                            valStat = speciesPool.avgSpecSpeedPerYearList[t];
-                        }
-                        else if(a == 8) {
-                            valStat = speciesPool.avgSpecUtilityPerYearList[t];
-                        }
-                        else if(a == 9) {
-                            valStat = speciesPool.avgFoodSpecDecayPerYearList[t];
-                        }
-                        else if(a == 10) {
-                            valStat = speciesPool.avgFoodSpecPlantPerYearList[t];
-                        }
-                        else if(a == 11) {
-                            valStat = speciesPool.avgFoodSpecMeatPerYearList[t];
-                        }
-                        else if(a == 12) {
-                            valStat = speciesPool.avgNumNeuronsPerYearList[t];
-                        }
-                        else if(a == 13) {
-                            valStat = speciesPool.avgNumAxonsPerYearList[t];
-                        }
-                        else if(a == 14) {
-                            valStat = speciesPool.avgExperiencePerYearList[t];
-                        }
-                        else if(a == 15) {
-                            valStat = speciesPool.avgFitnessScorePerYearList[t];
-                        }
-                        else if(a == 16) {
-                            valStat = speciesPool.avgDamageDealtPerYearList[t];
-                        }
-                        else if(a == 17) {
-                            valStat = speciesPool.avgDamageTakenPerYearList[t];
-                        }
-                        else if(a == 18) {
-                            valStat = speciesPool.avgLifespanPerYearList[t];
-                        }
-
-                        maxValuesStatArray[a] = Mathf.Max(maxValuesStatArray[a], valStat);
-
-                        //statsTreeOfLifeSpeciesTexArray[a].SetPixel(t, s, new Color(valStat, valStat, valStat, 1f));
-                        statsTreeOfLifeSpeciesTexArray[a].SetPixel(t, s, new Color(valStat, valStat, valStat, 1f));
-                    }                    
-                }
-                for (int b = 0; b < statsTreeOfLifeSpeciesTexArray.Length; b++) {
-                    statsTreeOfLifeSpeciesTexArray[b].Apply();
-                }
-            }
-            
-        }
-        
-        //int selectedSpeciesID = treeOfLifeManager.selectedID;
-        
-        SpeciesGenomePool selectedPool = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesID];
-
-
-        curSpeciesStatValue = 0f;
-        
-        if(selectedSpeciesStatsIndex == 0) {
-            curSpeciesStatValue = selectedPool.avgLifespan;
-        }
-        else if(selectedSpeciesStatsIndex == 1) {
-            curSpeciesStatValue = selectedPool.avgConsumptionDecay;
-        }
-        else if(selectedSpeciesStatsIndex == 2) {
-            curSpeciesStatValue = selectedPool.avgConsumptionPlant;
-        }
-        else if(selectedSpeciesStatsIndex == 3) {
-            curSpeciesStatValue = selectedPool.avgConsumptionMeat;
-        }
-        else if(selectedSpeciesStatsIndex == 4) {
-            curSpeciesStatValue = selectedPool.avgBodySize;
-        }
-        else if(selectedSpeciesStatsIndex == 5) {
-            curSpeciesStatValue = selectedPool.avgSpecAttack;
-        }
-        else if(selectedSpeciesStatsIndex == 6) {
-            curSpeciesStatValue = selectedPool.avgSpecDefend;
-        }
-        else if(selectedSpeciesStatsIndex == 7) {
-            curSpeciesStatValue = selectedPool.avgSpecSpeed;
-        }
-        else if(selectedSpeciesStatsIndex == 8) {
-            curSpeciesStatValue = selectedPool.avgSpecUtility;
-        }
-        else if(selectedSpeciesStatsIndex == 9) {
-            curSpeciesStatValue = selectedPool.avgFoodSpecDecay;
-        }
-        else if(selectedSpeciesStatsIndex == 10) {
-            curSpeciesStatValue = selectedPool.avgFoodSpecPlant;
-        }
-        else if(selectedSpeciesStatsIndex == 11) {
-            curSpeciesStatValue = selectedPool.avgFoodSpecMeat;
-        }
-        else if(selectedSpeciesStatsIndex == 12) {
-            curSpeciesStatValue = selectedPool.avgNumNeurons;
-        }
-        else if(selectedSpeciesStatsIndex == 13) {
-            curSpeciesStatValue = selectedPool.avgNumAxons;
-        }
-        else if(selectedSpeciesStatsIndex == 14) {
-            curSpeciesStatValue = selectedPool.avgExperience;
-        }
-        else if(selectedSpeciesStatsIndex == 15) {
-            curSpeciesStatValue = selectedPool.avgFitnessScore;
-        }
-        else if(selectedSpeciesStatsIndex == 16) {
-            curSpeciesStatValue = selectedPool.avgDamageDealt;
-        }
-        else if(selectedSpeciesStatsIndex == 17) {
-            curSpeciesStatValue = selectedPool.avgDamageTaken;
-        }
-        else if(selectedSpeciesStatsIndex == 18) {
-            curSpeciesStatValue = selectedPool.avgLifespan;
-        }
-        
-    }
-    */
+ */   
     
     
     /*
@@ -2705,6 +2399,7 @@ public class UIManager : MonoBehaviour {
         tolMouseOver = 0f;
     }
     */
+    
     /*public void UpdateTolGraphCursorTimeSelectUI(Vector2 coords) {
         // find closest event:
         if(gameManager.simulationManager.simEventsManager.completeEventHistoryList.Count > 0) {
@@ -2725,8 +2420,6 @@ public class UIManager : MonoBehaviour {
 
             curClosestEventToCursor = closestEventIndex;
         }
-
-        
 
 
         int selectedSpeciesID = treeOfLifeManager.selectedID;
