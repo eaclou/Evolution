@@ -177,6 +177,9 @@ public class SimulationStateData {
         InitializeData(simManager);
     }
 
+    public static int GetCritterInitDataSize() {
+        return sizeof(float) * 25 + sizeof(int) * 3;
+    }
     public static int GetCritterSimDataSize() {
         return sizeof(float) * 22;
     }
@@ -193,7 +196,7 @@ public class SimulationStateData {
         for(int i = 0; i < critterInitDataArray.Length; i++) {
             critterInitDataArray[i] = new CritterInitData();
         }
-        critterInitDataCBuffer = new ComputeBuffer(critterInitDataArray.Length, sizeof(float) * 25 + sizeof(int) * 3);
+        critterInitDataCBuffer = new ComputeBuffer(critterInitDataArray.Length, GetCritterInitDataSize());
 
         critterSimDataArray = new CritterSimData[simManager._NumAgents];
         for(int i = 0; i < critterSimDataArray.Length; i++) {

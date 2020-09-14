@@ -313,11 +313,11 @@ public class CritterMouthComponent : MonoBehaviour {
         
         agentRef.EatFoodMeat(flowR * 100f); // assumes all foodAmounts are equal !! *****
         agentRef.RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Egg Bit! (" + flowR.ToString() + ")", 1f);
-        Debug.Log("BiteEggsack [" + agentRef.index.ToString() + "] ---> [" + eggSack.index.ToString() + "]");
+        //Debug.Log("BiteEggsack [" + agentRef.index.ToString() + "] ---> [" + eggSack.index.ToString() + "]");
     }
     public void BiteCorpseFood(Agent corpseAgent, float ownBiteArea)
     {  
-        Debug.Log("BiteCorpseFood [" + agentRef.index.ToString() + "] ---> [" + corpseAgent.index.ToString() + "]");
+        //Debug.Log("BiteCorpseFood [" + agentRef.index.ToString() + "] ---> [" + corpseAgent.index.ToString() + "]");
         float flow = ownBiteArea * 1f; // / colliderCount;
 
         float flowR = Mathf.Min(corpseAgent.currentBiomass, flow);

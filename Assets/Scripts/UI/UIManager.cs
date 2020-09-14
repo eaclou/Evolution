@@ -425,10 +425,10 @@ public class UIManager : MonoBehaviour {
          
                 
         mutationUI.isUnlocked = true;
-                
+
         //mutationUI.ClickToolButton();
         //worldSpiritHubUI.OpenWorldTreeSelect();
-        gameManager.theRenderKing.InitializeMutationVertebratePortraitGenomes();// gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList.Count - 1].representativeGenome, gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][mutationUI.selectedToolbarMutationID].representativeGenome);
+        gameManager.theRenderKing.InitializeCreaturePortraitGenomes(gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[0].representativeGenome); //, gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][mutationUI.selectedToolbarMutationID].representativeGenome);
                 
 
 
@@ -653,7 +653,7 @@ public class UIManager : MonoBehaviour {
                 mutationUI.ClickToolButton();
                 worldSpiritHubUI.OpenWorldTreeSelect();
 
-                gameManager.theRenderKing.InitializeMutationVertebratePortraitGenomes();// gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList.Count - 1].representativeGenome, gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][mutationUI.selectedToolbarMutationID].representativeGenome);
+                //gameManager.theRenderKing.InitializeCreaturePortraitGenomes();// gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList.Count - 1].representativeGenome, gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][mutationUI.selectedToolbarMutationID].representativeGenome);
                 //Debug.LogError("InitializeNewCritterPortraitGenome");
                 break;
             
@@ -1163,17 +1163,17 @@ public class UIManager : MonoBehaviour {
 
         return sample[0];
     }
-    
+    /*
     public void InitToolbarPortraitCritterData(TrophicSlot slot) { // ** should be called AFTER new species actually created?? something is fucked here
         Debug.Log("InitToolbarPortraitCritterData.. selectedSpeciesID: " + selectedSpeciesID.ToString() + " , slotLinkedID: " + slot.linkedSpeciesID.ToString());
 
         //SpeciesGenomePool speciesPool = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesID];
         //gameManager.theRenderKing.InitializeNewCritterPortraitGenome(speciesPool.representativeGenome);
-        gameManager.theRenderKing.InitializeMutationVertebratePortraitGenomes();// gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[slot.slotID].representativeGenome, gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][mutationUI.selectedToolbarMutationID].representativeGenome); // speciesPool.leaderboardGenomesList[0].candidateGenome);
+        gameManager.theRenderKing.InitializeCreaturePortraitGenomes();// gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[slot.slotID].representativeGenome, gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][mutationUI.selectedToolbarMutationID].representativeGenome); // speciesPool.leaderboardGenomesList[0].candidateGenome);
         gameManager.theRenderKing.isToolbarCritterPortraitEnabled = true;
          
     }
-
+    */
     public void SetToolbarButtonStateUI(bool isDim, ref Button button, TrophicSlot.SlotStatus slotStatus, bool isSelected) {
 
         button.gameObject.SetActive(true);

@@ -159,7 +159,7 @@ public class SpeciesGenomePool {
 
             AgentGenome agentGenome = Mutate(foundingGenome, true, true);
             int tempNumHiddenNeurons = 0;
-            agentGenome.InitializeRandomBrainFromCurrentBody(0.5f, mutationSettingsRef.initialConnectionChance, tempNumHiddenNeurons);
+            //agentGenome.InitializeRandomBrainFromCurrentBody(0.5f, mutationSettingsRef.initialConnectionChance, tempNumHiddenNeurons);
 
             CandidateAgentData candidate = new CandidateAgentData(agentGenome, speciesID);
             candidateGenomesList.Add(candidate);

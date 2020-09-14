@@ -182,7 +182,7 @@ public class EggSack : MonoBehaviour {
         }
         
         this.index = index;        
-        this.fullSize = Vector2.one * (agentGenome.bodyGenome.fullsizeBoundingBox.x + agentGenome.bodyGenome.fullsizeBoundingBox.y) * 0.5f; // new Vector2(agentGenome.bodyGenome.fullsizeBoundingBox.x, agentGenome.bodyGenome.fullsizeBoundingBox.y) * 1f;
+        this.fullSize = Vector2.one * (agentGenome.bodyGenome.GetFullsizeBoundingBox().x + agentGenome.bodyGenome.GetFullsizeBoundingBox().y) * 0.5f; // new Vector2(agentGenome.bodyGenome.fullsizeBoundingBox.x, agentGenome.bodyGenome.fullsizeBoundingBox.y) * 1f;
                
         BeginLifeStageGrowing(parentAgent, agentGenome, startPos);
     }
@@ -260,7 +260,7 @@ public class EggSack : MonoBehaviour {
             this.transform.localPosition = startPos;  
             
             // REVISIT THIS:
-            float parentScale = (parentGenomeRef.bodyGenome.fullsizeBoundingBox.x + parentGenomeRef.bodyGenome.fullsizeBoundingBox.y) * 0.5f;
+            float parentScale = (parentGenomeRef.bodyGenome.GetFullsizeBoundingBox().x + parentGenomeRef.bodyGenome.GetFullsizeBoundingBox().y) * 0.5f;
             this.fullSize.x = parentScale * 1f;  // golden ratio? // easter egg for math nerds?
             this.fullSize.y = parentScale * 1f;            
             
@@ -320,7 +320,7 @@ public class EggSack : MonoBehaviour {
     }
 
     private void SeverJointAttachment() {
-        Debug.Log("SeverJoint! ");
+        //Debug.Log("SeverJoint! ");
         parentAgentRef.CompletedPregnancy();
         parentAgentRef = null;
         isAttachedBySpring = false;
@@ -331,7 +331,7 @@ public class EggSack : MonoBehaviour {
 
         mainCollider.enabled = true;  // *** ???? maybe?
 
-        Debug.Log("is this gfunction being run?");
+        //Debug.Log("is this gfunction being run?");
         
     }
 

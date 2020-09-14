@@ -18,19 +18,19 @@ public class BodyGenome {
     public CritterModuleMovementGenome movementGenome;
     public CritterModuleThreatSensorsGenome threatGenome;
 
-    public Vector3 fullsizeBoundingBox;   // Z = forward, Y = up
+    //public Vector3 fullsizeBoundingBox;   // Z = forward, Y = up
     
     public BodyGenome() {
         //Debug.Log("BodyGenome() EMPTY CONSTRUCTOR");
     }
-
+    
     public static float GetBodySizeScore01(BodyGenome genome) {
 
-        float normalizedSizeScore = Mathf.Clamp01(((genome.fullsizeBoundingBox.x + genome.fullsizeBoundingBox.z) / genome.fullsizeBoundingBox.y) / 25f); // *** Remember to redo this more robustly! 25f is hardcoded approximate!
+        float normalizedSizeScore = Mathf.Clamp01(((genome.GetFullsizeBoundingBox().x + genome.GetFullsizeBoundingBox().z) / genome.GetFullsizeBoundingBox().y) / 25f); // *** Remember to redo this more robustly! 25f is hardcoded approximate!
 
         return normalizedSizeScore;
     }
-
+    
     public void FirstTimeInitializeCritterModuleGenomes() {
 
         // ID and inno# needed???? ***** should only be required to keep track of evolving body functions
@@ -45,10 +45,7 @@ public class BodyGenome {
         threatGenome = new CritterModuleThreatSensorsGenome(0, 8);
          
     }
-
-    public void CalculateFullsizeBoundingBox() {
-        fullsizeBoundingBox = GetFullsizeBoundingBox();        
-    }
+        
     public Vector3 GetFullsizeBoundingBox() {
         
         float fullLength = coreGenome.creatureBaseLength * (coreGenome.mouthLength + coreGenome.headLength + coreGenome.bodyLength + coreGenome.tailLength);

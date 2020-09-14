@@ -376,8 +376,8 @@ public class SimulationManager : MonoBehaviour {
         // Tree Of LIFE UI collider & RenderKing updates:
         //wtheRenderKing.TreeOfLifeAddNewSpecies(masterGenomePool, 0);
         //theRenderKing.TreeOfLifeAddNewSpecies(masterGenomePool, 1);
-        masterGenomePool.completeSpeciesPoolsList[0].isFlaggedForExtinction = true;
-        masterGenomePool.ExtinctifySpecies(this, masterGenomePool.currentlyActiveSpeciesIDList[0]);
+        //masterGenomePool.completeSpeciesPoolsList[0].isFlaggedForExtinction = true;
+        //masterGenomePool.ExtinctifySpecies(this, masterGenomePool.currentlyActiveSpeciesIDList[0]);
                 
         Debug.Log("End Total up to GentlyRouseTheRenderMonarchHisHighnessLordOfPixels: " + (Time.realtimeSinceStartup - masterStartTime).ToString());
 
@@ -850,7 +850,7 @@ public class SimulationManager : MonoBehaviour {
             
             AddNewHistoricalDataEntry();
             AddNewSpeciesDataEntry(curSimYear);
-            uiManager.globalResourcesUI.UpdateSpeciesTreeDataTextures(curSimYear);
+            
                         
             if(curSimYear == 1) {
                 SimEventData newEventData = new SimEventData();
@@ -884,7 +884,8 @@ public class SimulationManager : MonoBehaviour {
 
         //int numDoubles = Mathf.Min(graphDataGlobalNutrients.doublingCounter, 4);
         if(simAgeTimeSteps % 80 == 10) {
-            
+            uiManager.globalResourcesUI.UpdateSpeciesTreeDataTextures(curSimYear);
+
             graphDataGlobalNutrients.AddNewEntry(simResourceManager.curGlobalNutrients);
             graphDataGlobalWaste.AddNewEntry(simResourceManager.curGlobalDetritus);
             graphDataGlobalDecomposers.AddNewEntry(simResourceManager.curGlobalDecomposers);
@@ -1313,7 +1314,7 @@ public class SimulationManager : MonoBehaviour {
             if (agentsArray[a].curLifeStage == Agent.AgentLifeStage.AwaitingRespawn) {
                           
                 CandidateAgentData candidateData = masterGenomePool.completeSpeciesPoolsList[speciesIndex].GetNextAvailableCandidate();
-                candidateData.candidateGenome = masterGenomePool.vertebrateSlotsGenomesCurrentArray[0].representativeGenome;
+                candidateData.candidateGenome = masterGenomePool.completeSpeciesPoolsList[speciesIndex].representativeGenome;
                 
                 if (candidateData == null) {
                     Debug.LogError("GetNextAvailableCandidate(): candidateData NULL!!!!");
@@ -1463,7 +1464,7 @@ public class SimulationManager : MonoBehaviour {
         }
         
     }
-    public void CreateAgentSpecies(Vector3 spawnPos) {
+    /*public void CreateAgentSpecies(Vector3 spawnPos) {
         //eggSackArray[0].parentAgentIndex = 0;
         //eggSackArray[0].InitializeEggSackFromGenome(0, masterGenomePool.completeSpeciesPoolsList[0].representativeGenome, null, spawnPos);
         //eggSackArray[0].currentBiomass = settingsManager.agentSettings._BaseInitMass; // *** TEMP!!! ***                        
@@ -1477,7 +1478,7 @@ public class SimulationManager : MonoBehaviour {
         //recentlyAddedSpeciesTimeCounter = 0;
 
         Debug.Log("CREATE CreateAgentSpecies pos: " + spawnPos.ToString());
-    }
+    }*/
     public void ExecuteSimEvent(SimEventData eventData) {
         Debug.LogError("ExecuteSimEvent(SimEventData eventData) DISABLED");
         //simEventsManager.ExecuteEvent(this, eventData);
@@ -1545,9 +1546,9 @@ public class SimulationManager : MonoBehaviour {
         // -- Select a ParentGenome from the leaderboardList and create a mutated copy (childGenome):
         //AgentGenome newGenome = sourceSpeciesPool.GetNewMutatedGenome();
         AgentGenome newGenome = sourceSpeciesPool.GetGenomeFromFitnessLottery();
-        masterGenomePool.mutationSettingsRef.defaultBodyMutationChance = 1f;
-        masterGenomePool.mutationSettingsRef.defaultBodyMutationStepSize = 1f;
-        masterGenomePool.mutationSettingsRef.mutationStrengthSlot = 0.05f;  // ************
+        //masterGenomePool.mutationSettingsRef.defaultBodyMutationChance = 0.5f;
+        //masterGenomePool.mutationSettingsRef.defaultBodyMutationStepSize = 0.1f;
+        //masterGenomePool.mutationSettingsRef.mutationStrengthSlot = 0.05f;  // ************
         newGenome = sourceSpeciesPool.Mutate(newGenome, true, true);
         newGenome.bodyGenome.coreGenome.generation++;
 
@@ -1609,7 +1610,7 @@ public class SimulationManager : MonoBehaviour {
                                 float reqMass = settingsManager.agentSettings._BaseInitMass * settingsManager.agentSettings._MinPregnancyFactor;
 
                                 if(reqMass < agentsArray[i].currentBiomass * settingsManager.agentSettings._MaxPregnancyProportion) {
-                                    Debug.Log("RequiredMass met! " + reqMass.ToString() + " biomass: " + agentsArray[i].currentBiomass.ToString() + ", _BaseInitMass: " + settingsManager.agentSettings._BaseInitMass.ToString());
+                                    //Debug.Log("RequiredMass met! " + reqMass.ToString() + " biomass: " + agentsArray[i].currentBiomass.ToString() + ", _BaseInitMass: " + settingsManager.agentSettings._BaseInitMass.ToString());
                                     totalSuitableParentAgents++;
                                     suitableParentAgentsList.Add(i);
                                 }
@@ -1631,7 +1632,7 @@ public class SimulationManager : MonoBehaviour {
                 newEggSackGenome.SetToMutatedCopyOfParentGenome(eggSackGenomePoolArray[eggSackIndex], settingsManager.mutationSettingsVertebrates);
                 eggSackGenomePoolArray[eggSackIndex] = newEggSackGenome;
 
-                Debug.Log("BeginPregnancy! Egg[" + eggSackIndex.ToString() + "]  Agent[" + randParentAgentIndex.ToString() + "]");
+                //Debug.Log("BeginPregnancy! Egg[" + eggSackIndex.ToString() + "]  Agent[" + randParentAgentIndex.ToString() + "]");
                 if(agentsArray[randParentAgentIndex].childEggSackRef != null && agentsArray[randParentAgentIndex].isPregnantAndCarryingEggs) {
                     Debug.Log("DOUBLE PREGNANT!! egg[" + agentsArray[randParentAgentIndex].childEggSackRef.index.ToString() + "]  Agent[" + randParentAgentIndex.ToString() + "]");
                 }
@@ -1702,7 +1703,7 @@ public class SimulationManager : MonoBehaviour {
         simResourceManager.curGlobalAgentBiomass2 = 0f;
         simResourceManager.curGlobalAgentBiomass3 = 0f;
         for(int i = 0; i < agentsArray.Length; i++) {
-            if(agentRef.speciesIndex == 0) {
+            /*if(agentRef.speciesIndex == 0) {
                 simResourceManager.curGlobalAgentBiomass0 += agentsArray[i].currentBiomass;
             }
             else if(agentRef.speciesIndex == 1) {
@@ -1717,7 +1718,7 @@ public class SimulationManager : MonoBehaviour {
             else {
                 Debug.LogError("ASDFASD");
             }
-
+            */
             if(agentsArray[i].curLifeStage == Agent.AgentLifeStage.Dead) {
                 totalCarrionVolume += agentsArray[i].currentBiomass;
                 
@@ -1837,12 +1838,12 @@ public class SimulationManager : MonoBehaviour {
         SpeciesGenomePool newSpecies = new SpeciesGenomePool(newSpeciesID, parentSpeciesID, curSimYear, simAgeTimeSteps, settingsManager.mutationSettingsVertebrates);
 
         // Random Body?
-        newGenome.ProcessNewSpeciesExtraMutation();
-        masterGenomePool.mutationSettingsRef.defaultBodyMutationChance = 1f;
-        masterGenomePool.mutationSettingsRef.defaultBodyMutationStepSize = 1f;
-        masterGenomePool.mutationSettingsRef.mutationStrengthSlot = 0.05f; // ****
-        newGenome.GenerateInitialRandomBodyGenome(); // might break?
-        AgentGenome foundingGenome = newSpecies.Mutate(newGenome, true, true); //
+        //newGenome.ProcessNewSpeciesExtraMutation();
+        //masterGenomePool.mutationSettingsRef.defaultBodyMutationChance = 1f;
+        //masterGenomePool.mutationSettingsRef.defaultBodyMutationStepSize = 1f;
+        //masterGenomePool.mutationSettingsRef.mutationStrengthSlot = 0.05f; // ****
+        //newGenome.GenerateInitialRandomBodyGenome(); // might break?
+        AgentGenome foundingGenome = newGenome; // newSpecies.Mutate(newGenome, true, true); //
         
         // **** I want to just change the APPEARANCE of body genome, but keep the brain? ... area to revisit later
         // Maybe just do a fresh restart for now -- fully random init

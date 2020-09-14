@@ -520,8 +520,8 @@ public class KnowledgeUI : MonoBehaviour {
                 //str += "<color=#8BD06AFF>Avg Food Eaten: <b>" + (GenomePool.avgConsumptionPlant + GenomePool.avgConsumptionMeat).ToString("F3") + "</b></color>\n";
                 //str += "\n\n\nAvg Lifespan: <b>" + (GenomePool.avgLifespan / 1500f).ToString("F1") + " Years</b>\n\n";
 
-                GenomePool.representativeGenome.bodyGenome.CalculateFullsizeBoundingBox();
-                str += "Avg Body Size: <b>" + ((GenomePool.representativeGenome.bodyGenome.fullsizeBoundingBox.x + GenomePool.representativeGenome.bodyGenome.fullsizeBoundingBox.y) * 0.5f * GenomePool.representativeGenome.bodyGenome.fullsizeBoundingBox.z).ToString("F2") + "</b>\n";
+                
+                str += "Avg Body Size: <b>" + ((GenomePool.representativeGenome.bodyGenome.GetFullsizeBoundingBox().x + GenomePool.representativeGenome.bodyGenome.GetFullsizeBoundingBox().y) * 0.5f * GenomePool.representativeGenome.bodyGenome.GetFullsizeBoundingBox().z).ToString("F2") + "</b>\n";
                 str += "Avg Brain Size: <b>" + ((GenomePool.avgNumNeurons + GenomePool.avgNumAxons) * 1f).ToString("F0") + "</b>\n";
                 
                 str += "\nFOOD EATEN:\nPlants: <b>" + ((GenomePool.avgConsumptionPlant) * 1f).ToString("F3") + "</b> [" + (GenomePool.avgFoodSpecPlant).ToString() + "]\n";

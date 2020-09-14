@@ -1019,7 +1019,9 @@ public class WatcherUI : MonoBehaviour {
         
     }
     public void StartFollowingAgent() {
-        uiManagerRef.cameraManager.isFollowingAgent = true;       
+        uiManagerRef.cameraManager.isFollowingAgent = true;
+
+        uiManagerRef.globalResourcesUI.CreateBrainGenomeTexture(uiManagerRef.cameraManager.targetAgent.candidateRef.candidateGenome);
     }
 
     public void StopFollowingPlantParticle() {

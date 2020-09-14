@@ -536,16 +536,17 @@ public class WorldSpiritHubUI : MonoBehaviour {
                 // v v v Actually creates new speciesPool here:::
                 //TrophicSlot slot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef;
                 slot.speciesName = "Vertebrate " + (slot.slotID + 1).ToString();
-                uiManagerRef.gameManager.simulationManager.CreateAgentSpecies(uiManagerRef.cameraManager.curCameraFocusPivotPos);
+                Debug.LogError("NEEDED THIS AFTER ALL!!!");
+                //uiManagerRef.gameManager.simulationManager.CreateAgentSpecies(uiManagerRef.cameraManager.curCameraFocusPivotPos);
                 
-                uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[slot.slotID].linkedSpeciesID = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList.Count - 1].speciesID;
+                //uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[slot.slotID].linkedSpeciesID = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList.Count - 1].speciesID;
 
                 // *** IMPORTANT::::
                 int speciesIndex = slot.linkedSpeciesID;
-                uiManagerRef.gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[slot.slotID].representativeGenome = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesIndex].representativeGenome;
-                uiManagerRef.gameManager.simulationManager.masterGenomePool.GenerateWorldLayerVertebrateGenomeMutationOptions(slot.slotID, slot.linkedSpeciesID);
+                //uiManagerRef.gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[slot.slotID].representativeGenome = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesIndex].representativeGenome;
+                //uiManagerRef.gameManager.simulationManager.masterGenomePool.GenerateWorldLayerVertebrateGenomeMutationOptions(slot.slotID, slot.linkedSpeciesID);
 
-                Debug.Log("ADSF: " + uiManagerRef.gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[slot.slotID].representativeGenome.bodyGenome.appearanceGenome.huePrimary.ToString());
+                //Debug.Log("ADSF: " + uiManagerRef.gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[slot.slotID].representativeGenome.bodyGenome.appearanceGenome.huePrimary.ToString());
 
                 // duplicated code shared with clickAgentButton :(   bad 
                 //

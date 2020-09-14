@@ -4,7 +4,9 @@ Shader "UI/ToolbarSpeciesStatsShader"
 	Properties
 	{
 		_MainTex ("_MainTex", 2D) = "black" {}
-		_ColorKeyTex ("_ColorKeyTex", 2D) = "black" {}		
+		_ColorKeyTex ("_ColorKeyTex", 2D) = "black" {}	
+		_MaximumValue ("_MaximumValue", Float) = 1
+		_MinimumValue ("_MinimumValue", Float) = 0
 	}
 
 	SubShader
@@ -62,8 +64,8 @@ Shader "UI/ToolbarSpeciesStatsShader"
 			sampler2D _MainTex;			
 			sampler2D _ColorKeyTex;
 
-			uniform float _MinValue;
-			uniform float _MaxValue;
+			uniform float _MinimumValue;
+			uniform float _MaximumValue;
 
 			uniform int _SelectedSpeciesID;
 			uniform int _NumDisplayed;
@@ -71,12 +73,13 @@ Shader "UI/ToolbarSpeciesStatsShader"
 
 			fixed4 frag(v2f IN) : SV_Target
 			{
-
+				
+				
 				//float2 keyUV = float2((0.5 + 0.0) / 16, 0.25);
 				//float4 keyTex = tex2D(_ColorKeyTex, keyUV);
-				//float2 uv = IN.texcoord.xy;
-				//float4 testCol = tex2D(_MainTex, uv);
-				//testCol.rgb *= 0.0004;
+				//float2 uv = ;
+				//float4 testCol = tex2D(_MainTex, IN.texcoord);
+				//testCol.rgb *= 0.04;
 				//float4 testCol = tex2D(_ColorKeyTex, uv);
 				//return testCol;
 
@@ -95,8 +98,8 @@ Shader "UI/ToolbarSpeciesStatsShader"
 				float _ZoomFactorX = 1.0;
 				float _ZoomFactorY = 1.0;
 								
-				float lineWidth = 0.01; // * _ZoomFactorY;
-				float lineFadeWidth = lineWidth * 6;
+				float lineWidth = 0.002; // * _ZoomFactorY;
+				float lineFadeWidth = lineWidth * 3;
 				float gridLineWidthX = 0.001 * _ZoomFactorX;	
 				float gridLineWidthY = 0.001 * _ZoomFactorY;	
 				float gridDivisions = 10;	
@@ -148,37 +151,38 @@ Shader "UI/ToolbarSpeciesStatsShader"
 				//  For values of x between min and max , returns a smoothly varying value that ranges from 0 at x = min to 1 at x = max .
 				//  x is clamped to the range [ min , max ] and then the interpolation formula is evaluated:
 				
-				_MinValue = 0;
-				_MaxValue = 2800;
+				//_MinValue = 0.2;
+				//_MaxValue = 2.5;
 
 				_NumDisplayed = 32;
-				int speciesIndex = _SelectedSpeciesID;
-				float speciesCoord = ((float)speciesIndex)/_NumDisplayed;
-				//float isSelectedMask = saturate(1.0 - abs((float)_SelectedSpeciesID - (float)i));
-				half4 speciesColor = tex2D(_ColorKeyTex, half2(speciesCoord, 0.5)); // * (isSelectedMask + 0.5);
-				half4 speciesDataSample = tex2D(_MainTex, float2(saturate(finalCoords.x), speciesCoord));
-				float scoreValue = saturate((speciesDataSample.x - _MinValue) / (_MaxValue - _MinValue));
-				float dist = abs(finalCoords.y - scoreValue);
-				if(dist < (lineWidth + lineFadeWidth)) {
-					float smoothDist = smoothstep(0.0, lineFadeWidth, dist - lineWidth);
-					//pixColor = lerp(float4(1,1,1,1), pixColor, smoothDist);
-					pixColor = lerp(speciesColor, pixColor, smoothDist);
-				}
-
+				
 				// better as an array/forloop?
 				
-				/*for(int i = 0; i < _NumDisplayed; i++) {
+				for(int i = 0; i < _NumDisplayed; i++) {
 					float speciesCoord = (i + 0.5)/_NumDisplayed;
 					float isSelectedMask = saturate(1.0 - abs((float)_SelectedSpeciesID - (float)i));
 					half4 speciesColor = tex2D(_ColorKeyTex, half2(speciesCoord, 0.5)) * (isSelectedMask + 0.5);
 					half4 speciesDataSample = tex2D(_MainTex, float2(finalCoords.x, speciesCoord));
-					float scoreValue = saturate((speciesDataSample.x - _MinValue) / (_MaxValue - _MinValue));
+					float scoreValue = saturate((speciesDataSample.x - _MinimumValue) / (_MaximumValue - _MinimumValue));
 					float dist = abs(finalCoords.y - scoreValue);
 					if(dist < (lineWidth + lineFadeWidth) * (isSelectedMask + 1.0)) {
 						float smoothDist = smoothstep(0.0, lineFadeWidth * (isSelectedMask + 1.0), dist - lineWidth * (isSelectedMask + 1.0));
 						pixColor = lerp(speciesColor, pixColor, smoothDist);
 					}
-				}*/
+				}
+
+				int speciesIndexSel = _SelectedSpeciesID;
+				float speciesCoordSel = ((float)speciesIndexSel + 0.5)/_NumDisplayed;
+				//float isSelectedMask = saturate(1.0 - abs((float)_SelectedSpeciesID - (float)i));
+				half4 speciesColorSel = tex2D(_ColorKeyTex, half2(speciesCoordSel, 0.5)); // * (isSelectedMask + 0.5);
+				half4 speciesDataSampleSel = tex2D(_MainTex, float2(saturate(finalCoords.x), speciesCoordSel));
+				float scoreValueSel = saturate((speciesDataSampleSel.x - _MinimumValue) / (_MaximumValue - _MinimumValue));
+				float distSel = abs(finalCoords.y - scoreValueSel);
+				if(distSel < (lineWidth + lineFadeWidth)) {
+					float smoothDist = smoothstep(0.0, lineFadeWidth, distSel - lineWidth);
+					//pixColor = lerp(float4(1,1,1,1), pixColor, smoothDist);
+					pixColor = lerp(speciesColorSel, pixColor, smoothDist);
+				}
 				
 				//float distToSideScreenEdge = min((1.0 - finalCoords.x), finalCoords.x);
 				//if(distToSideScreenEdge < 0.3) {

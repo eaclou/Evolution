@@ -242,7 +242,7 @@ public class Agent : MonoBehaviour {
     }
 
     public void AttemptInitiateActiveAttackBite() {
-        Debug.Log("ATTACK");
+        //Debug.Log("ATTACK");
 
         if (isAttacking) {
             // this shouldn't happen?
@@ -977,7 +977,7 @@ public class Agent : MonoBehaviour {
         float curProportion = currentBiomass * settingsRef.agentSettings._MaxPregnancyProportion;
         // probably 0.05 * 2 = 0.1   for now
         if(curProportion > starterMass) { // Good to go!
-            Debug.Log("Pregnancy! " + " curMass: " + currentBiomass.ToString() + ", reqMass: " + starterMass.ToString() + ", curProp: " + curProportion.ToString());
+            //Debug.Log("Pregnancy! " + " curMass: " + currentBiomass.ToString() + ", reqMass: " + starterMass.ToString() + ", curProp: " + curProportion.ToString());
             currentBiomass -= settingsRef.agentSettings._BaseInitMass;
             childEggSackRef.currentBiomass = starterMass;     // *************** TROUBLE!!!
 
@@ -1576,9 +1576,9 @@ public class Agent : MonoBehaviour {
         //InitializeAgentWidths(genome);
         InitializeGameObjectsAndComponents();  // Not needed??? ***
 
-        genome.bodyGenome.CalculateFullsizeBoundingBox();
+        //genome.bodyGenome.CalculateFullsizeBoundingBox();
         //Debug.Log("fullSize = " + genome.bodyGenome.fullsizeBoundingBox.ToString() + ", head: " + genome.bodyGenome.coreGenome.headLength.ToString());
-        fullSizeBoundingBox = genome.bodyGenome.fullsizeBoundingBox; // genome.bodyGenome.GetFullsizeBoundingBox();
+        fullSizeBoundingBox = genome.bodyGenome.GetFullsizeBoundingBox(); // genome.bodyGenome.GetFullsizeBoundingBox();
         fullSizeBodyVolume = (fullSizeBoundingBox.x + fullSizeBoundingBox.z) * 0.5f * fullSizeBoundingBox.y; // * fullSizeBoundingBox.z;
 
         sizePercentage = 0.005f;

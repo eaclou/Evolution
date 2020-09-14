@@ -613,6 +613,7 @@ public class MutationUI : MonoBehaviour {
             }
             else { // vertebrates
                 // *** REFERENCE ISSUE!!!!!
+                /*
                 AgentGenome parentGenome = uiManagerRef.gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotRef.slotID][selectedToolbarMutationID].representativeGenome;
                 //generate "mutated" genome copy with 0 mutationSize ??? workaround:::::  ***********
                 uiManagerRef.gameManager.simulationManager.settingsManager.mutationSettingsVertebrates.mutationStrengthSlot = 0f;
@@ -633,6 +634,7 @@ public class MutationUI : MonoBehaviour {
                 uiManagerRef.gameManager.simulationManager.masterGenomePool.ProcessSlotMutation(slotRef.slotID, selectedToolbarMutationID, slotRef.linkedSpeciesID);
 
                 uiManagerRef.InitToolbarPortraitCritterData(slotRef);
+                */
             }
         }
         else if(slotRef.kingdomID == 3) { // Terrain

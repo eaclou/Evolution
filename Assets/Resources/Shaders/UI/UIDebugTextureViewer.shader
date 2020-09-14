@@ -6,10 +6,10 @@
 	}
 	SubShader
 	{
-		Tags { "RenderType"="Opaque" }
-		//ZWrite Off
-		//Cull Off
-		//Blend SrcAlpha OneMinusSrcAlpha
+		Tags { "RenderType"="Transparent" }
+		ZWrite Off
+		Cull Off
+		Blend SrcAlpha OneMinusSrcAlpha
 
 		Pass
 		{
@@ -54,7 +54,7 @@
 			
 			fixed4 frag (v2f i) : SV_Target
 			{
-				
+				return tex2D(_MainTex, i.uv);
 
 				// sample the texture
 				fixed4 col = tex2D(_MainTex, i.uv * _Zoom.xy);
