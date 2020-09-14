@@ -529,24 +529,24 @@ public class GlobalResourcesUI : MonoBehaviour {
             sensorString += ", FinSpread: " + genome.bodyGenome.coreGenome.tailFinSpreadAngle.ToString();
             // sensors & shit:
                         
-            sensorString += "\nSENSORS:\nComms: " + (genome.bodyGenome.communicationGenome.useComms ? "off" : "ON!");
-            sensorString += "\nWater: " + (genome.bodyGenome.environmentalGenome.useWaterStats ? "off" : "ON!");
-            sensorString += "\nWallsCard: " + (genome.bodyGenome.environmentalGenome.useCardinals ? "off" : "ON!");
-            sensorString += "\nWallsDiag: " + (genome.bodyGenome.environmentalGenome.useDiagonals ? "off" : "ON!");
-            sensorString += "\nNutrients: " + (genome.bodyGenome.foodGenome.useNutrients ? "off" : "ON!");
-            sensorString += "\nFoodPos: " + (genome.bodyGenome.foodGenome.usePos ? "off" : "ON!");
-            sensorString += "\nFoodVel: " + (genome.bodyGenome.foodGenome.useVel ? "off" : "ON!");
-            sensorString += "\nFoodDir: " + (genome.bodyGenome.foodGenome.useDir ? "off" : "ON!");
-            sensorString += "\nFoodInfo: " + (genome.bodyGenome.foodGenome.useStats ? "off" : "ON!");
-            sensorString += "\nEggsack: " + (genome.bodyGenome.foodGenome.useEggs ? "off" : "ON!");
-            sensorString += "\nCorpse: " + (genome.bodyGenome.foodGenome.useCorpse ? "off" : "ON!");
-            sensorString += "\nFriendPos: " + (genome.bodyGenome.friendGenome.usePos ? "off" : "ON!");
-            sensorString += "\nFriendVel: " + (genome.bodyGenome.friendGenome.useVel ? "off" : "ON!");
-            sensorString += "\nFriendDir: " + (genome.bodyGenome.friendGenome.useDir ? "off" : "ON!");
-            sensorString += "\nThreatPos: " + (genome.bodyGenome.threatGenome.usePos ? "off" : "ON!");
-            sensorString += "\nThreatVel: " + (genome.bodyGenome.threatGenome.useVel ? "off" : "ON!");
-            sensorString += "\nThreatDir: " + (genome.bodyGenome.threatGenome.useDir ? "off" : "ON!");
-            sensorString += "\nThreatInfo: " + (genome.bodyGenome.threatGenome.useStats ? "off" : "ON!");
+            sensorString += "\nSENSORS:\nComms: " + (genome.bodyGenome.communicationGenome.useComms ? "ON!" : "off");
+            sensorString += "\nWater: " + (genome.bodyGenome.environmentalGenome.useWaterStats ? "ON!" : "off");
+            sensorString += "\nWallsCard: " + (genome.bodyGenome.environmentalGenome.useCardinals ? "ON!" : "off");
+            sensorString += "\nWallsDiag: " + (genome.bodyGenome.environmentalGenome.useDiagonals ? "ON!" : "off");
+            sensorString += "\nNutrients: " + (genome.bodyGenome.foodGenome.useNutrients ? "ON!" : "off");
+            sensorString += "\nFoodPos: " + (genome.bodyGenome.foodGenome.usePos ? "ON!" : "off");
+            sensorString += "\nFoodVel: " + (genome.bodyGenome.foodGenome.useVel ? "ON!" : "off");
+            sensorString += "\nFoodDir: " + (genome.bodyGenome.foodGenome.useDir ? "ON!" : "off");
+            sensorString += "\nFoodInfo: " + (genome.bodyGenome.foodGenome.useStats ? "ON!" : "off");
+            sensorString += "\nEggsack: " + (genome.bodyGenome.foodGenome.useEggs ? "ON!" : "off");
+            sensorString += "\nCorpse: " + (genome.bodyGenome.foodGenome.useCorpse ? "ON!" : "off");
+            sensorString += "\nFriendPos: " + (genome.bodyGenome.friendGenome.usePos ? "ON!" : "off");
+            sensorString += "\nFriendVel: " + (genome.bodyGenome.friendGenome.useVel ? "ON!" : "off");
+            sensorString += "\nFriendDir: " + (genome.bodyGenome.friendGenome.useDir ? "ON!" : "off");
+            sensorString += "\nThreatPos: " + (genome.bodyGenome.threatGenome.usePos ? "ON!" : "off");
+            sensorString += "\nThreatVel: " + (genome.bodyGenome.threatGenome.useVel ? "ON!" : "off");
+            sensorString += "\nThreatDir: " + (genome.bodyGenome.threatGenome.useDir ? "ON!" : "off");
+            sensorString += "\nThreatInfo: " + (genome.bodyGenome.threatGenome.useStats ? "ON!" : "off");
         
         
 

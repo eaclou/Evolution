@@ -44,7 +44,7 @@ public class MasterGenomePool {
         completeSpeciesPoolsList = new List<SpeciesGenomePool>();
 
         SpeciesGenomePool rootSpecies = new SpeciesGenomePool(0, -1, 0, 0, mutationSettingsRef);
-        rootSpecies.FirstTimeInitialize(numAgentGenomes, 0);
+        rootSpecies.FirstTimeInitializeROOT(numAgentGenomes, 0);
         currentlyActiveSpeciesIDList.Add(0);
         completeSpeciesPoolsList.Add(rootSpecies);
         

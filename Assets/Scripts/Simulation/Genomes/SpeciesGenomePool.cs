@@ -13,6 +13,7 @@ public class SpeciesGenomePool {
     [System.NonSerialized]
     public MutationSettings mutationSettingsRef;  // Or remove this later to keep everything saveable?
 
+    public string identifier;
     public AgentGenome representativeGenome;
     public List<CandidateAgentData> leaderboardGenomesList;
     public List<CandidateAgentData> candidateGenomesList;
@@ -78,8 +79,8 @@ public class SpeciesGenomePool {
     private void InitShared() {
         isFlaggedForExtinction = false;
         isExtinct = false;
-
-        avgLifespanPerYearList = new List<float>();
+        // *** Turn these into Array of Lists
+        avgLifespanPerYearList = new List<float>();   
         avgLifespanPerYearList.Add(0f);
         avgConsumptionDecayPerYearList = new List<float>();
         avgConsumptionDecayPerYearList.Add(0f);
@@ -123,18 +124,26 @@ public class SpeciesGenomePool {
     // **** Change this for special-case of First-Time startup?
     // **** Create a bunch of random genomes and then organize them into Species first?
     // **** THEN create species and place genomes in?
-    public void FirstTimeInitialize(int numGenomes, int depth) {
+    public void FirstTimeInitializeROOT(int numGenomes, int depth) {
         InitShared();
         depthLevel = depth;
-    
-        for (int i = 0; i < numGenomes * 2; i++) {
-            AgentGenome agentGenome = new AgentGenome();
-            agentGenome.GenerateInitialRandomBodyGenome();
-            
-            int tempNumHiddenNeurons = 0;
-            agentGenome.InitializeRandomBrainFromCurrentBody(1.25f, mutationSettingsRef.initialConnectionChance, tempNumHiddenNeurons);
+        int tempNumHiddenNeurons = 0;
+        AgentGenome seedGenome = new AgentGenome();
+        seedGenome.GenerateInitialRandomBodyGenome();
+        seedGenome.InitializeRandomBrainFromCurrentBody(1.25f, mutationSettingsRef.initialConnectionChance, tempNumHiddenNeurons);
 
-            CandidateAgentData candidate = new CandidateAgentData(agentGenome, speciesID);
+        for (int i = 0; i < numGenomes; i++) {
+            //AgentGenome agentGenome = new AgentGenome();
+            //agentGenome.GenerateInitialRandomBodyGenome();
+            //agentGenome = //mutate seedGenome
+            mutationSettingsRef.defaultBodyMutationChance = 0.5f;
+            mutationSettingsRef.defaultBodyMutationStepSize = 0.075f;
+            mutationSettingsRef.mutationStrengthSlot = 0.1f;
+            
+            AgentGenome newGenome = Mutate(seedGenome, true, true);
+            newGenome.InitializeRandomBrainFromCurrentBody(1.25f, mutationSettingsRef.initialConnectionChance, tempNumHiddenNeurons);
+
+            CandidateAgentData candidate = new CandidateAgentData(newGenome, speciesID);
 
             if(i < maxLeaderboardGenomePoolSize) {
                 leaderboardGenomesList.Add(candidate);
@@ -149,15 +158,62 @@ public class SpeciesGenomePool {
     public void FirstTimeInitialize(AgentGenome foundingGenome, int depth, int arraySize) {
         InitShared();
         depthLevel = depth;
+        Vector3 newHue = UnityEngine.Random.insideUnitSphere;
+
+        string newName = "";
+        string[] lettersArray = new string[26];
+                lettersArray[0] = "A";
+                lettersArray[1] = "B";
+                lettersArray[2] = "C";
+                lettersArray[3] = "D";
+                lettersArray[4] = "E";
+                lettersArray[5] = "F";
+                lettersArray[6] = "G";
+                lettersArray[7] = "H";
+                lettersArray[8] = "I";
+                lettersArray[9] = "J";
+                lettersArray[10] = "K";
+                lettersArray[11] = "L";
+                lettersArray[12] = "M";
+                lettersArray[13] = "N";
+                lettersArray[14] = "O";
+                lettersArray[15] = "P";
+                lettersArray[16] = "Q";
+                lettersArray[17] = "R";
+                lettersArray[18] = "S";
+                lettersArray[19] = "T";
+                lettersArray[20] = "U";
+                lettersArray[21] = "V";
+                lettersArray[22] = "W";
+                lettersArray[23] = "X";
+                lettersArray[24] = "Y";
+                lettersArray[25] = "Z";
+
+        for(int i = 0; i < foundingGenome.bodyGenome.coreGenome.name.Length; i++) {
+            float randChance1 = UnityEngine.Random.Range(0f, 1f);
+            if(randChance1 < 0.35) {
+                int randLetterIndex = UnityEngine.Random.Range(0, 26);
+                newName += lettersArray[randLetterIndex];            
+            }
+            else {
+                newName += foundingGenome.bodyGenome.coreGenome.name[i];
+            }
+        }
+
+        foundingGenome.bodyGenome.coreGenome.name = newName;
+
+        //=========================================================================
 
         string debugTxt = "";
         for (int i = 0; i < 64; i++) {
             
-            mutationSettingsRef.defaultBodyMutationChance = 0.3f;
-            mutationSettingsRef.defaultBodyMutationStepSize = 0.05f;
-            mutationSettingsRef.mutationStrengthSlot = 0.1f;
+            mutationSettingsRef.defaultBodyMutationChance = 0.5f;
+            mutationSettingsRef.defaultBodyMutationStepSize = 0.1f;
+            mutationSettingsRef.mutationStrengthSlot = 0.15f;
 
             AgentGenome agentGenome = Mutate(foundingGenome, true, true);
+            agentGenome.bodyGenome.appearanceGenome.huePrimary = Vector3.Lerp(agentGenome.bodyGenome.appearanceGenome.huePrimary, newHue, 0.25f);
+            agentGenome.bodyGenome.appearanceGenome.hueSecondary = Vector3.Lerp(agentGenome.bodyGenome.appearanceGenome.hueSecondary, Vector3.one - newHue, 0.25f);
             int tempNumHiddenNeurons = 0;
             //agentGenome.InitializeRandomBrainFromCurrentBody(0.5f, mutationSettingsRef.initialConnectionChance, tempNumHiddenNeurons);
 
