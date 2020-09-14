@@ -126,17 +126,17 @@ public class BrainGenome {
             LinkGenome newLinkGenome = new LinkGenome(parentGenome.linkList[i].fromModuleID, parentGenome.linkList[i].fromNeuronID, parentGenome.linkList[i].toModuleID, parentGenome.linkList[i].toNeuronID, parentGenome.linkList[i].weight, true);
 
             float randZeroChance = UnityEngine.Random.Range(0f, 1f);
-            if (randZeroChance < settings.removeLinkChance) {
+            if (randZeroChance < settings.brainRemoveLinkChance) {
                 newLinkGenome.weight = 0f;  // Remove fully??? *****
             }
 
             float randMutationChance = UnityEngine.Random.Range(0f, 1f);
-            if (randMutationChance < settings.mutationChance) {
+            if (randMutationChance < settings.brainWeightMutationChance) {
                 float randomWeight = Gaussian.GetRandomGaussian();
-                newLinkGenome.weight = newLinkGenome.weight + Mathf.Lerp(0f, randomWeight, settings.mutationStepSize);
+                newLinkGenome.weight = newLinkGenome.weight + Mathf.Lerp(0f, randomWeight, settings.brainWeightMutationStepSize);
             }
 
-            newLinkGenome.weight *= settings.weightDecayAmount;
+            newLinkGenome.weight *= settings.brainWeightDecayAmount;
             
             linkList.Add(newLinkGenome);
         }
@@ -144,7 +144,7 @@ public class BrainGenome {
         // Add Brand New Link:
         // 
         float randLink = UnityEngine.Random.Range(0f, 1f);
-        if (randLink < settings.newLinkChance) {
+        if (randLink < settings.brainCreateNewLinkChance) {
 
             List<NeuronGenome> inputNeuronList = new List<NeuronGenome>(); // **** Make these Global ??? avoids traversing them multiple times....            
             List<NeuronGenome> outputNeuronList = new List<NeuronGenome>();
@@ -185,7 +185,7 @@ public class BrainGenome {
 
                 }
                 else {
-                    float randomWeight = Gaussian.GetRandomGaussian() * settings.mutationStepSize;
+                    float randomWeight = Gaussian.GetRandomGaussian() * settings.brainWeightMutationStepSize;
                     LinkGenome linkGenome = new LinkGenome(fromNID.moduleID, fromNID.neuronID, toNID.moduleID, toNID.neuronID, randomWeight, true);                    
                     linkList.Add(linkGenome);
 
@@ -197,7 +197,7 @@ public class BrainGenome {
 
         // Add Brand New Hidden Neuron:
         float randNeuronChance = UnityEngine.Random.Range(0f, 1f);
-        if (randNeuronChance < settings.newHiddenNodeChance) {
+        if (randNeuronChance < settings.brainCreateNewHiddenNodeChance) {
             // find a link and expand it:
             int randLinkID = UnityEngine.Random.Range(0, linkList.Count);
             // create new neuron

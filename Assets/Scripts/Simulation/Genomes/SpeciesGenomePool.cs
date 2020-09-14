@@ -130,18 +130,18 @@ public class SpeciesGenomePool {
         int tempNumHiddenNeurons = 0;
         AgentGenome seedGenome = new AgentGenome();
         seedGenome.GenerateInitialRandomBodyGenome();
-        seedGenome.InitializeRandomBrainFromCurrentBody(1.25f, mutationSettingsRef.initialConnectionChance, tempNumHiddenNeurons);
+        seedGenome.InitializeRandomBrainFromCurrentBody(1.25f, mutationSettingsRef.brainInitialConnectionChance, tempNumHiddenNeurons);
 
         for (int i = 0; i < numGenomes; i++) {
             //AgentGenome agentGenome = new AgentGenome();
             //agentGenome.GenerateInitialRandomBodyGenome();
             //agentGenome = //mutate seedGenome
-            mutationSettingsRef.defaultBodyMutationChance = 0.5f;
-            mutationSettingsRef.defaultBodyMutationStepSize = 0.075f;
-            mutationSettingsRef.mutationStrengthSlot = 0.1f;
+            mutationSettingsRef.bodyCoreSizeMutationChance = 0.5f;
+            mutationSettingsRef.bodyCoreMutationStepSize = 0.075f;
+            //mutationSettingsRef.mutationStrengthSlot = 0.1f;
             
             AgentGenome newGenome = Mutate(seedGenome, true, true);
-            newGenome.InitializeRandomBrainFromCurrentBody(1.25f, mutationSettingsRef.initialConnectionChance, tempNumHiddenNeurons);
+            newGenome.InitializeRandomBrainFromCurrentBody(1.25f, mutationSettingsRef.brainInitialConnectionChance, tempNumHiddenNeurons);
 
             CandidateAgentData candidate = new CandidateAgentData(newGenome, speciesID);
 
@@ -207,14 +207,14 @@ public class SpeciesGenomePool {
         string debugTxt = "";
         for (int i = 0; i < 64; i++) {
             
-            mutationSettingsRef.defaultBodyMutationChance = 0.5f;
-            mutationSettingsRef.defaultBodyMutationStepSize = 0.1f;
-            mutationSettingsRef.mutationStrengthSlot = 0.15f;
+            mutationSettingsRef.bodyCoreSizeMutationChance = 0.5f;
+            mutationSettingsRef.bodyCoreMutationStepSize = 0.1f;
+            //mutationSettingsRef.mutationStrengthSlot = 0.15f;
 
             AgentGenome agentGenome = Mutate(foundingGenome, true, true);
             agentGenome.bodyGenome.appearanceGenome.huePrimary = Vector3.Lerp(agentGenome.bodyGenome.appearanceGenome.huePrimary, newHue, 0.25f);
             agentGenome.bodyGenome.appearanceGenome.hueSecondary = Vector3.Lerp(agentGenome.bodyGenome.appearanceGenome.hueSecondary, Vector3.one - newHue, 0.25f);
-            int tempNumHiddenNeurons = 0;
+            //int tempNumHiddenNeurons = 0;
             //agentGenome.InitializeRandomBrainFromCurrentBody(0.5f, mutationSettingsRef.initialConnectionChance, tempNumHiddenNeurons);
 
             CandidateAgentData candidate = new CandidateAgentData(agentGenome, speciesID);
@@ -442,7 +442,7 @@ public class SpeciesGenomePool {
         BodyGenome parentBodyGenome = parentGenome.bodyGenome;
         BrainGenome parentBrainGenome = parentGenome.brainGenome;
 
-        MutationSettings mutationSettingsNoneCopy = new MutationSettings(0f, 0f, 0f, 0f, 1f, 0f, 0f, 0f);
+        MutationSettings mutationSettingsNoneCopy = new MutationSettings();
         if(bodySettings) {
             newBodyGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome, mutationSettingsRef);
         }
@@ -456,8 +456,6 @@ public class SpeciesGenomePool {
             newBrainGenome.SetToMutatedCopyOfParentGenome(parentBrainGenome, newBodyGenome, mutationSettingsNoneCopy);
         }
         //Debug.Log("Mutate() " + mutationSettingsRef.mutationStrengthSlot.ToString("F2"));
-        
-        
         
         childGenome.bodyGenome = newBodyGenome; 
         childGenome.brainGenome = newBrainGenome;

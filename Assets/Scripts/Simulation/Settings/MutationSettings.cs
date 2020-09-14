@@ -4,49 +4,97 @@ using UnityEngine;
 
 [System.Serializable]
 public class MutationSettings {
-    public float initialConnectionChance;
+    public float brainInitialConnectionChance;
+    public float brainWeightMutationChance;
+    public float brainWeightMutationStepSize;
+    public float brainRemoveLinkChance;
+    public float brainWeightDecayAmount;
+    public float brainCreateNewLinkChance;
+    public float brainCreateNewHiddenNodeChance;
 
-    public float mutationChance;
-    public float mutationStepSize;
-
-    public float removeLinkChance;
-    public float weightDecayAmount;
-    public float newLinkChance;
-    public float newHiddenNodeChance;
-
-    public float defaultBodyMutationChance;
-    public float defaultBodyMutationStepSize;
-
-    public float newBodyModuleChance;
-    public float bodyModuleMutationChance;
-    public float removeBodyModuleChance;
+    public float bodyColorsMutationChance;
+    public float bodyColorsMutationStepSize;
+    public float bodyCoreSizeMutationChance;
+    public float bodyCoreMutationStepSize;
+    public float bodyProportionsMutationChance;
+    public float bodyProportionsMutationStepSize;
+    public float bodyEyeProportionsMutationChance;
+    public float bodyEyeProportionsMutationStepSize;    
+    public float bodyModuleCreateNewChance;
+    public float bodyModuleInternalMutationChance;
+    public float bodyModuleInternalMutationStepSize;
+    public float bodyModuleRemoveExistingChance;
+    public float bodyTalentSpecMutationChance;
+    public float bodyTalentSpecMutationStepSize;
+    public float bodyDietSpecMutationChance;
+    public float bodyDietSpecMutationStepSize;
 
     public float defaultFoodMutationChance;
     public float defaultFoodMutationStepSize;
-
-    public float mutationStrengthSlot;
+    //public float mutationStrengthSlot;
 
 
     public MutationSettings(float initialConnectionChance, float mutationChance, float mutationStepSize, float removeLinkChance, float weightDecayAmount, float newLinkChance, float newHiddenNodeChance, float mutationStrengthSlot) {
-        this.initialConnectionChance = initialConnectionChance;
-        this.mutationChance = mutationChance;
-        this.mutationStepSize = mutationStepSize;
-        this.removeLinkChance = removeLinkChance;
-        this.weightDecayAmount = weightDecayAmount;
-        this.newLinkChance = newLinkChance;
-        this.newHiddenNodeChance = newHiddenNodeChance;
-        this.mutationStrengthSlot = mutationStrengthSlot;
-
-        defaultBodyMutationChance = 0.178f;
-        defaultBodyMutationStepSize = 0.0045f;
+        this.brainInitialConnectionChance = initialConnectionChance;
+        this.brainWeightMutationChance = mutationChance;
+        this.brainWeightMutationStepSize = mutationStepSize;
+        this.brainRemoveLinkChance = removeLinkChance;
+        this.brainWeightDecayAmount = weightDecayAmount;
+        this.brainCreateNewLinkChance = newLinkChance;
+        this.brainCreateNewHiddenNodeChance = newHiddenNodeChance;
+        //this.mutationStrengthSlot = mutationStrengthSlot;
+        
+              
+        bodyColorsMutationChance = 0.1f;
+        bodyColorsMutationStepSize = 0.1f;
+        bodyCoreSizeMutationChance = 0.178f;
+        bodyCoreMutationStepSize = 0.0045f;
+        bodyProportionsMutationChance = 0.8f;
+        bodyProportionsMutationStepSize = 0.05f;
+        bodyEyeProportionsMutationChance = 0.8f;
+        bodyEyeProportionsMutationStepSize = 0.05f; 
+        bodyModuleCreateNewChance = 0.01f;
+        bodyModuleInternalMutationChance = 0.01f;
+        bodyModuleInternalMutationStepSize = 0.25f;
+        bodyModuleRemoveExistingChance = 0.01f;
+        bodyTalentSpecMutationChance = 0.5f;
+        bodyTalentSpecMutationStepSize = 0.05f;
+        bodyDietSpecMutationChance = 0.5f;
+        bodyDietSpecMutationStepSize = 0.05f;
 
         defaultFoodMutationChance = 0.01f;
         defaultFoodMutationStepSize = 0.01f;
-
-        newBodyModuleChance = 0.005f;
-        bodyModuleMutationChance = 0.0f;
-        removeBodyModuleChance = 0.001f;
-
         //mutationStrengthSlot = 0f;
+    }
+
+    public MutationSettings() {
+        // Zero-chance settings init
+        this.brainInitialConnectionChance = 0f;
+        this.brainWeightMutationChance = 0f;
+        this.brainWeightMutationStepSize = 0f;
+        this.brainRemoveLinkChance = 0f;
+        this.brainWeightDecayAmount = 1f;
+        this.brainCreateNewLinkChance = 0f;
+        this.brainCreateNewHiddenNodeChance = 0f;        
+              
+        bodyColorsMutationChance = 0f;
+        bodyColorsMutationStepSize = 0f;
+        bodyCoreSizeMutationChance = 0f;
+        bodyCoreMutationStepSize = 0f;
+        bodyProportionsMutationChance = 0f;
+        bodyProportionsMutationStepSize = 0f;
+        bodyEyeProportionsMutationChance = 0f;
+        bodyEyeProportionsMutationStepSize = 0f; 
+        bodyModuleCreateNewChance = 0f;
+        bodyModuleInternalMutationChance = 0f;
+        bodyModuleInternalMutationStepSize = 0f;
+        bodyModuleRemoveExistingChance = 0f;
+        bodyTalentSpecMutationChance = 0f;
+        bodyTalentSpecMutationStepSize = 0f;
+        bodyDietSpecMutationChance = 0f;
+        bodyDietSpecMutationStepSize = 0f;
+
+        defaultFoodMutationChance = 0f;
+        defaultFoodMutationStepSize = 0f;
     }
 }

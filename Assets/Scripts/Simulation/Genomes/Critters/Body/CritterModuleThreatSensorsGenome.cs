@@ -60,25 +60,25 @@ public class CritterModuleThreatSensorsGenome {
     public void SetToMutatedCopyOfParentGenome(CritterModuleThreatSensorsGenome parentGenome, MutationSettings settings) {
         this.usePos = parentGenome.usePos;
         float randChance = UnityEngine.Random.Range(0f, 1f);
-        if(randChance < settings.bodyModuleMutationChance) {
+        if(randChance < settings.bodyModuleInternalMutationChance) {
             //this.usePos = !this.usePos;
         }
 
         this.useVel = parentGenome.useVel;
         randChance = UnityEngine.Random.Range(0f, 1f);
-        if(randChance < settings.bodyModuleMutationChance) {
+        if(randChance < settings.bodyModuleInternalMutationChance) {
             //this.useVel = !this.useVel;
         }
 
         this.useDir = parentGenome.useDir;
         randChance = UnityEngine.Random.Range(0f, 1f);
-        if(randChance < settings.bodyModuleMutationChance) {
+        if(randChance < settings.bodyModuleInternalMutationChance) {
             //this.useDir = !this.useDir;
         }
 
         this.useStats = parentGenome.useStats;
         randChance = UnityEngine.Random.Range(0f, 1f);
-        if(randChance < settings.bodyModuleMutationChance) {
+        if(randChance < settings.bodyModuleInternalMutationChance) {
             //this.useStats = !this.useStats;
         }
     }

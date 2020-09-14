@@ -109,10 +109,10 @@ public class GridSearchManager : ScriptableObject {
         gridSearchRunData.dimensionC = Mathf.Lerp(minC, maxC, (float)coordC / Mathf.Max(1f, (float)(resolutionC - 1)));
         gridSearchRunData.dimensionD = Mathf.Lerp(minD, maxD, (float)coordD / Mathf.Max(1f, (float)(resolutionD - 1)));
 
-        settings.mutationChance = gridSearchRunData.dimensionA;
-        settings.mutationStepSize = gridSearchRunData.dimensionB;
-        settings.initialConnectionChance = gridSearchRunData.dimensionC;
-        settings.weightDecayAmount = gridSearchRunData.dimensionD;
+        settings.brainWeightMutationChance = gridSearchRunData.dimensionA;
+        settings.brainWeightMutationStepSize = gridSearchRunData.dimensionB;
+        settings.brainInitialConnectionChance = gridSearchRunData.dimensionC;
+        settings.brainWeightDecayAmount = gridSearchRunData.dimensionD;
 
         //Debug.Log("gridSearchRunData.dimensionA " + gridSearchRunData.dimensionA.ToString());
 

@@ -131,8 +131,8 @@ public class SettingsManager : MonoBehaviour {
 
     public void Initialize() {
         //mutationSettingsSupervised = new MutationSettings(0.5f, 0.015f, 1f, 0.005f, 1f, 0.1f, 0.001f);
-        mutationSettingsVertebrates = new MutationSettings(0.15f, 0.25f, 0.1f, 0.05f, 0.996f, 0.95f, 0.1f, 1f);
-        mutationSettingsNoneCopy = new MutationSettings(0f, 0f, 0f, 0f, 1f, 0f, 0f, 0f);
+        mutationSettingsVertebrates = new MutationSettings(0.2f, 0.25f, 0.1f, 0.025f, 0.995f, 0.95f, 0.1f, 1f);
+        mutationSettingsNoneCopy = new MutationSettings();
 /*
         ChangeTierFoodDecay(0);
         ChangeTierFoodPlant(0);
