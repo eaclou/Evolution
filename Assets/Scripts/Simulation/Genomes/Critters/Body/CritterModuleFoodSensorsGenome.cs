@@ -30,14 +30,60 @@ public class CritterModuleFoodSensorsGenome {
 
     public void GenerateRandomInitialGenome() {
         // Do stuff:
-        useNutrients = false;
-        usePos = true;
-        useVel = true;
-        useDir = true;
-        useStats = false;
-        useEggs = false;
-        useCorpse = false;
+        float randChance = UnityEngine.Random.Range(0f, 1f);
+        if(randChance < 0.5f) {
+            usePos = false;
+        }
+        else {
+            usePos = true;
+        }
 
+        randChance = UnityEngine.Random.Range(0f, 1f);
+        if(randChance < 0.5f) {
+            useVel = false;
+        }
+        else {
+            useVel = true;
+        }
+
+        randChance = UnityEngine.Random.Range(0f, 1f);
+        if(randChance < 0.5f) {
+            useDir = false;
+        }
+        else {
+            useDir = true;
+        }
+
+        randChance = UnityEngine.Random.Range(0f, 1f);
+        if(randChance < 0.5f) {
+            useStats = false;
+        }
+        else {
+            useStats = true;
+        }
+
+        randChance = UnityEngine.Random.Range(0f, 1f);
+        if(randChance < 0.5f) {
+            useNutrients = false;
+        }
+        else {
+            useNutrients = true;
+        }
+        randChance = UnityEngine.Random.Range(0f, 1f);
+        if(randChance < 0.5f) {
+            useEggs = false;
+        }
+        else {
+            useEggs = true;
+        }
+        randChance = UnityEngine.Random.Range(0f, 1f);
+        if(randChance < 0.5f) {
+            useCorpse = false;
+        }
+        else {
+            useCorpse = true;
+        }
+        
         preferredSize = 0.5f;
 
         sensorRangeMult = 1f;
@@ -122,50 +168,50 @@ public class CritterModuleFoodSensorsGenome {
         this.useNutrients = parentGenome.useNutrients;
         float randChance = UnityEngine.Random.Range(0f, 1f);
         if(randChance < settings.bodyModuleInternalMutationChance) {
-            //this.useNutrients = !this.useNutrients;
+            this.useNutrients = !this.useNutrients;
         }
 
         this.usePos = parentGenome.usePos;
         randChance = UnityEngine.Random.Range(0f, 1f);
         if(randChance < settings.bodyModuleInternalMutationChance) {
-            //this.usePos = !this.usePos;
+            this.usePos = !this.usePos;
         }
 
         this.useVel = parentGenome.useVel;
         randChance = UnityEngine.Random.Range(0f, 1f);
         if(randChance < settings.bodyModuleInternalMutationChance) {
-            //this.useVel = !this.useVel;
+            this.useVel = !this.useVel;
         }
 
         this.useDir = parentGenome.useDir;
         randChance = UnityEngine.Random.Range(0f, 1f);
         if(randChance < settings.bodyModuleInternalMutationChance) {
-            //this.useDir = !this.useDir;
+            this.useDir = !this.useDir;
         }
 
         this.useStats = parentGenome.useStats;
         randChance = UnityEngine.Random.Range(0f, 1f);
         if(randChance < settings.bodyModuleInternalMutationChance) {
-            //this.useStats = !this.useStats;
+            this.useStats = !this.useStats;
         }
 
         this.useEggs = parentGenome.useEggs;
         randChance = UnityEngine.Random.Range(0f, 1f);
         if(randChance < settings.bodyModuleInternalMutationChance) {
-            //this.useEggs = !this.useEggs;
+            this.useEggs = !this.useEggs;
         }
 
         this.useCorpse = parentGenome.useCorpse;
         randChance = UnityEngine.Random.Range(0f, 1f);
         if(randChance < settings.bodyModuleInternalMutationChance) {
-            //this.useCorpse = !this.useCorpse;
+            this.useCorpse = !this.useCorpse;
         }
 
         //preferenceParticles = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.preferenceParticles, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
         //preferenceEggs = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.preferenceEggs, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
         //preferenceCreatures = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.preferenceCreatures, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
-        preferredSize = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.preferredSize, settings.bodyCoreSizeMutationChance, settings.bodyCoreMutationStepSize, 0f, 1f);
+        preferredSize = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.preferredSize, settings.bodyModuleInternalMutationChance, settings.bodyModuleInternalMutationStepSize, 0f, 1f);
 
-        sensorRangeMult = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.sensorRangeMult, settings.bodyCoreSizeMutationChance, settings.bodyCoreMutationStepSize, 0f, 1f);
+        sensorRangeMult = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.sensorRangeMult, settings.bodyModuleInternalMutationChance, settings.bodyModuleInternalMutationStepSize, 0f, 1f);
     }
 }

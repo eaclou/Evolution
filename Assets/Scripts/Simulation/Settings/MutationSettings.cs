@@ -45,14 +45,14 @@ public class MutationSettings {
         //this.mutationStrengthSlot = mutationStrengthSlot;
         
               
-        bodyColorsMutationChance = 0.1f;
-        bodyColorsMutationStepSize = 0.1f;
-        bodyCoreSizeMutationChance = 0.178f;
-        bodyCoreMutationStepSize = 0.0045f;
-        bodyProportionsMutationChance = 0.8f;
-        bodyProportionsMutationStepSize = 0.05f;
-        bodyEyeProportionsMutationChance = 0.8f;
-        bodyEyeProportionsMutationStepSize = 0.05f; 
+        bodyColorsMutationChance = 0.15f;
+        bodyColorsMutationStepSize = 0.04f;
+        bodyCoreSizeMutationChance = 0.25f;
+        bodyCoreMutationStepSize = 0.05f;
+        bodyProportionsMutationChance = 0.5f;
+        bodyProportionsMutationStepSize = 0.005f;
+        bodyEyeProportionsMutationChance = 0.5f;
+        bodyEyeProportionsMutationStepSize = 0.0025f; 
         bodyModuleCreateNewChance = 0.01f;
         bodyModuleInternalMutationChance = 0.01f;
         bodyModuleInternalMutationStepSize = 0.25f;

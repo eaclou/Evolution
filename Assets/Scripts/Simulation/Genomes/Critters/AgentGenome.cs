@@ -25,16 +25,6 @@ public class AgentGenome {
         bodyGenome.GenerateInitialRandomBodyGenome();        
     }
 
-    public void ProcessNewSpeciesExtraMutation() {
-        float magnitude = 0.75f;
-        Vector3 primaryHueShift = UnityEngine.Random.onUnitSphere;
-        Vector3 secondaryHueShift = UnityEngine.Random.onUnitSphere;
-        bodyGenome.appearanceGenome.huePrimary = Vector3.Lerp(bodyGenome.appearanceGenome.huePrimary, primaryHueShift, magnitude);
-        bodyGenome.appearanceGenome.hueSecondary = Vector3.Lerp(bodyGenome.appearanceGenome.hueSecondary, secondaryHueShift, magnitude);
-
-        //bodyGenome.coreGenome.
-    }
-
     public void InitializeRandomBrainFromCurrentBody(float initialWeightsMultiplier, float initialConnectionDensity, int numInitHiddenNeurons) {
         brainGenome.InitializeRandomBrainGenome(bodyGenome, initialWeightsMultiplier, initialConnectionDensity, numInitHiddenNeurons);
     }

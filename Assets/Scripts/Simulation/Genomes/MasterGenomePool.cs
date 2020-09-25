@@ -47,6 +47,20 @@ public class MasterGenomePool {
         rootSpecies.FirstTimeInitializeROOT(numAgentGenomes, 0);
         currentlyActiveSpeciesIDList.Add(0);
         completeSpeciesPoolsList.Add(rootSpecies);
+
+        int numInitSpecies = 5;
+        for(int i = 0; i < numInitSpecies; i++) {
+            int ID = i + 1;
+            SpeciesGenomePool newSpecies = new SpeciesGenomePool(ID, -1, 0, 0, mutationSettingsRef);
+            AgentGenome seedGenome = new AgentGenome();
+            seedGenome.GenerateInitialRandomBodyGenome();
+            int tempNumHiddenNeurons = 0;
+            seedGenome.InitializeRandomBrainFromCurrentBody(1.0f, mutationSettingsRef.brainInitialConnectionChance, tempNumHiddenNeurons);            
+            newSpecies.FirstTimeInitialize(seedGenome, 0);
+            currentlyActiveSpeciesIDList.Add(ID);
+            completeSpeciesPoolsList.Add(newSpecies);
+        }
+        
         
         /*
         vertebrateSlotsGenomesCurrentArray = new WorldLayerVertebrateGenome[4]; // 4 slots
@@ -300,7 +314,7 @@ public class MasterGenomePool {
                     
                     simManagerRef.AddNewSpecies(newGenome, parentSpeciesID);
 
-                    speciesSimilarityDistanceThreshold += 10f;
+                    speciesSimilarityDistanceThreshold += 7f;
 
                     Color colo = new Color(newGenome.bodyGenome.appearanceGenome.huePrimary.x, newGenome.bodyGenome.appearanceGenome.huePrimary.y, newGenome.bodyGenome.appearanceGenome.huePrimary.z);
                     simManagerRef.uiManager.NarratorText("A new species has emerged! " + newGenome.bodyGenome.coreGenome.name, colo);
@@ -342,11 +356,11 @@ public class MasterGenomePool {
         }
         
         if(currentlyActiveSpeciesIDList.Count < maxNumActiveSpecies) {
-            speciesSimilarityDistanceThreshold *= 0.9965f;  // lower while creating treeOfLifeUI
+            speciesSimilarityDistanceThreshold *= 0.97f;  // lower while creating treeOfLifeUI
         }
         else {
-            speciesSimilarityDistanceThreshold *= 1.02f;
-            speciesSimilarityDistanceThreshold = Mathf.Min(speciesSimilarityDistanceThreshold, 10f); // cap
+            speciesSimilarityDistanceThreshold *= 1.05f;
+            speciesSimilarityDistanceThreshold = Mathf.Min(speciesSimilarityDistanceThreshold, 6f); // cap
         }
 
         CheckForExtinction(simManagerRef); // *** TEMPORARILLY (UN)DISABLED!!!!! *************

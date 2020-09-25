@@ -524,8 +524,8 @@ public class KnowledgeUI : MonoBehaviour {
                 str += "Avg Body Size: <b>" + ((GenomePool.representativeGenome.bodyGenome.GetFullsizeBoundingBox().x + GenomePool.representativeGenome.bodyGenome.GetFullsizeBoundingBox().y) * 0.5f * GenomePool.representativeGenome.bodyGenome.GetFullsizeBoundingBox().z).ToString("F2") + "</b>\n";
                 str += "Avg Brain Size: <b>" + ((GenomePool.avgNumNeurons + GenomePool.avgNumAxons) * 1f).ToString("F0") + "</b>\n";
                 
-                str += "\nFOOD EATEN:\nPlants: <b>" + ((GenomePool.avgConsumptionPlant) * 1f).ToString("F3") + "</b> [" + (GenomePool.avgFoodSpecPlant).ToString() + "]\n";
-                str += "Meat: <b>" + ((GenomePool.avgConsumptionMeat) * 1f).ToString("F3") + "</b> [" + (GenomePool.avgFoodSpecMeat).ToString() + "]\n";
+                str += "\nFOOD EATEN:\nPlants: <b>" + ((GenomePool.avgFoodEatenPlant) * 1f).ToString("F3") + "</b> [" + (GenomePool.avgFoodSpecPlant).ToString() + "]\n";
+                str += "Meat: <b>" + ((GenomePool.avgFoodEatenZoop) * 1f).ToString("F3") + "</b> [" + (GenomePool.avgFoodSpecMeat).ToString() + "]\n";
 
                 str += "\nSPECIALIZATIONS:\nAttack: <b>" + ((GenomePool.avgSpecAttack) * 1f).ToString("F2") + "</b>\n";
                 str += "Defend: <b>" + ((GenomePool.avgSpecDefend) * 1f).ToString("F2") + "</b>\n";

@@ -538,7 +538,7 @@ public class CritterModuleCoreGenome {
             for(int j = 0; j < parentGenome.shapeModifiersList[i].maskIndicesList.Count; j++) {
                 int maskIndex = parentGenome.shapeModifiersList[i].maskIndicesList[j];
                 // MUTATE?
-                maskIndex = UtilityMutationFunctions.GetMutatedIntAdditive(maskIndex, settings.bodyCoreSizeMutationChance, 2, 0, parentGenome.shapeModifiersList[i].maskIndicesList.Count - 1);
+                maskIndex = UtilityMutationFunctions.GetMutatedIntAdditive(maskIndex, settings.bodyProportionsMutationChance, 2, 0, parentGenome.shapeModifiersList[i].maskIndicesList.Count - 1);
                 newData.maskIndicesList.Add(maskIndex); // make sure this isn't passing as a reference? it's an 'int' (data-type) so should be ok... // newMaskData);
             }            
             newData.modifierTypeID = parentGenome.shapeModifiersList[i].modifierTypeID;  // only works if this is NOT a reference type!!! ***
@@ -554,7 +554,7 @@ public class CritterModuleCoreGenome {
             newMask.coordinateTypeID = MaskCoordinateType.Polygonize; // (MaskCoordinateType)UtilityMutationFunctions.GetMutatedIntAdditive(maskCoordinateTypeID, settings.defaultBodyMutationChance, 1, 0, 1);
             int maskFunctionTypeID = (int)newMask.functionTypeID;
             newMask.functionTypeID = MaskFunctionType.Cos; // (MaskFunctionType)UtilityMutationFunctions.GetMutatedIntAdditive(maskFunctionTypeID, settings.defaultBodyMutationChance, 2, 0, 2);
-            newMask.numPolyEdges = UtilityMutationFunctions.GetMutatedIntAdditive(newMask.numPolyEdges, settings.bodyCoreSizeMutationChance, 4, 1, 6);
+            newMask.numPolyEdges = UtilityMutationFunctions.GetMutatedIntAdditive(newMask.numPolyEdges, settings.bodyProportionsMutationChance, 4, 1, 6);
 
             newMask.origin = UtilityMutationFunctions.GetMutatedFloatAdditive(newMask.origin, settings.bodyProportionsMutationChance, settings.bodyProportionsMutationStepSize, 0f, 1f);
             newMask.phase = UtilityMutationFunctions.GetMutatedFloatAdditive(newMask.phase, settings.bodyProportionsMutationChance, settings.bodyProportionsMutationStepSize, -5f, 5f);

@@ -49,9 +49,9 @@ public class CritterModuleMovementGenome {
     }
 
     public void SetToMutatedCopyOfParentGenome(CritterModuleMovementGenome parentGenome, MutationSettings settings) {
-        //horsepower = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.horsepower, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 1f, 1f);
-        horsepower = parentGenome.horsepower;
-        //turnRate = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.turnRate, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 1f, 1f);
-        turnRate = parentGenome.turnRate;
+        horsepower = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.horsepower, settings.bodyModuleInternalMutationChance, settings.bodyModuleInternalMutationStepSize, 100f, 200f);
+        //horsepower = parentGenome.horsepower;
+        turnRate = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.turnRate, settings.bodyModuleInternalMutationChance, settings.bodyModuleInternalMutationStepSize, 50f, 60f);
+        //turnRate = parentGenome.turnRate;
     }
 }

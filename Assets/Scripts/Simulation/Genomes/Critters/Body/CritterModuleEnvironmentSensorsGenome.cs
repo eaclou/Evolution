@@ -21,9 +21,30 @@ public class CritterModuleEnvironmentSensorsGenome {
 
     public void GenerateRandomInitialGenome() {
         // Do stuff:
-        useCardinals = false;
-        useDiagonals = false;
-        useWaterStats = true;
+        // Do stuff:
+        float randChance = UnityEngine.Random.Range(0f, 1f);
+        if(randChance < 0.5f) {
+            useCardinals = false;
+        }
+        else {
+            useCardinals = true;
+        }
+
+        randChance = UnityEngine.Random.Range(0f, 1f);
+        if(randChance < 0.5f) {
+            useDiagonals = false;
+        }
+        else {
+            useDiagonals = true;
+        }
+
+        randChance = UnityEngine.Random.Range(0f, 1f);
+        if(randChance < 0.5f) {
+            useWaterStats = false;
+        }
+        else {
+            useWaterStats = true;
+        }
 
         maxRange = 20f;
     }
@@ -76,23 +97,23 @@ public class CritterModuleEnvironmentSensorsGenome {
 	
     public void SetToMutatedCopyOfParentGenome(CritterModuleEnvironmentSensorsGenome parentGenome, MutationSettings settings) {
         this.useWaterStats = parentGenome.useWaterStats;
-        /*
+        
         float randChance = UnityEngine.Random.Range(0f, 1f);
-        if(randChance < settings.bodyModuleMutationChance) {
+        if(randChance < settings.bodyModuleInternalMutationChance) {
             this.useWaterStats = !this.useWaterStats;
         }
 
         this.useCardinals = parentGenome.useCardinals;
         randChance = UnityEngine.Random.Range(0f, 1f);
-        if(randChance < settings.bodyModuleMutationChance) {
+        if(randChance < settings.bodyModuleInternalMutationChance) {
             this.useCardinals = !this.useCardinals;
         }
 
         this.useDiagonals = parentGenome.useDiagonals;
         randChance = UnityEngine.Random.Range(0f, 1f);
-        if(randChance < settings.bodyModuleMutationChance) {
+        if(randChance < settings.bodyModuleInternalMutationChance) {
             this.useDiagonals = !this.useDiagonals;
         }
-        */
+        
     }
 }

@@ -16,9 +16,8 @@ public class CritterModuleCommunicationGenome {
     }
 
     public void GenerateRandomInitialGenome() {
-        // Do stuff:
-
-        useComms = true;
+        // Do stuff:        
+        useComms = (UnityEngine.Random.Range(0f, 1f) < 0.5f) ? false : true;          
     }
 
     public void AppendModuleNeuronsToMasterList(ref List<NeuronGenome> neuronList) {
@@ -48,11 +47,11 @@ public class CritterModuleCommunicationGenome {
 
     public void SetToMutatedCopyOfParentGenome(CritterModuleCommunicationGenome parentGenome, MutationSettings settings) {
         this.useComms = parentGenome.useComms;
-        /*
+        
         float randChance = UnityEngine.Random.Range(0f, 1f);
-        if(randChance < settings.bodyModuleMutationChance) {
+        if(randChance < settings.bodyModuleInternalMutationChance) {
             this.useComms = !this.useComms;
         }
-        */
+        
     }
 }

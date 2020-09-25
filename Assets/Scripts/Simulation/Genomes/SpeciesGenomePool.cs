@@ -26,13 +26,18 @@ public class SpeciesGenomePool {
     public int timeStepExtinct = 2000000000;
 
     public float avgLifespan = 0f;
-    public List<float> avgLifespanPerYearList;
-    public float avgConsumptionDecay = 0f;
-    public List<float> avgConsumptionDecayPerYearList;
-    public float avgConsumptionPlant = 0f;
-    public List<float> avgConsumptionPlantPerYearList;
-    public float avgConsumptionMeat = 0f;
-    public List<float> avgConsumptionMeatPerYearList;
+    public List<float> avgLifespanPerYearList;    
+    public float avgFoodEatenPlant = 0f;
+    public List<float> avgFoodEatenPlantPerYearList;
+    public float avgFoodEatenZoop = 0f;
+    public List<float> avgFoodEatenZoopPerYearList;
+    public float avgFoodEatenCreature = 0f;
+    public List<float> avgFoodEatenCreaturePerYearList;    
+    public float avgFoodEatenEgg = 0f;
+    public List<float> avgFoodEatenEggPerYearList;
+    public float avgFoodEatenCorpse = 0f;
+    public List<float> avgFoodEatenCorpsePerYearList;
+
     public float avgBodySize = 0f;
     public List<float> avgBodySizePerYearList;
     public float avgSpecAttack = 0f;
@@ -62,6 +67,18 @@ public class SpeciesGenomePool {
     public float avgDamageTaken = 0f;
     public List<float> avgDamageTakenPerYearList;
 
+    public float avgTimeRested = 0f;
+    public List<float> avgTimeRestedPerYearList;
+    public float avgTimesDefended = 0f;
+    public List<float> avgTimesDefendedPerYearList;
+    public float avgTimesDashed = 0f;
+    public List<float> avgTimesDashedPerYearList;
+    public float avgTimesAttacked = 0f;
+    public List<float> avgTimesAttackedPerYearList;
+    public float avgTimesPregnant = 0f;
+    public List<float> avgTimesPregenantPerYearList;
+    
+
     public bool isFlaggedForExtinction = false;
     public bool isExtinct = false;
 	
@@ -82,12 +99,16 @@ public class SpeciesGenomePool {
         // *** Turn these into Array of Lists
         avgLifespanPerYearList = new List<float>();   
         avgLifespanPerYearList.Add(0f);
-        avgConsumptionDecayPerYearList = new List<float>();
-        avgConsumptionDecayPerYearList.Add(0f);
-        avgConsumptionPlantPerYearList = new List<float>();
-        avgConsumptionPlantPerYearList.Add(0f);
-        avgConsumptionMeatPerYearList = new List<float>();
-        avgConsumptionMeatPerYearList.Add(0f);
+        avgFoodEatenPlantPerYearList = new List<float>();
+        avgFoodEatenPlantPerYearList.Add(0f);
+        avgFoodEatenZoopPerYearList = new List<float>();
+        avgFoodEatenZoopPerYearList.Add(0f);
+        avgFoodEatenCreaturePerYearList = new List<float>();
+        avgFoodEatenCreaturePerYearList.Add(0f);
+        avgFoodEatenEggPerYearList = new List<float>();
+        avgFoodEatenEggPerYearList.Add(0f);
+        avgFoodEatenCorpsePerYearList = new List<float>();
+        avgFoodEatenCorpsePerYearList.Add(0f);
         avgBodySizePerYearList = new List<float>();
         avgBodySizePerYearList.Add(0f);
         avgSpecAttackPerYearList = new List<float>();
@@ -117,6 +138,18 @@ public class SpeciesGenomePool {
         avgDamageTakenPerYearList = new List<float>();
         avgDamageTakenPerYearList.Add(0f);
 
+        avgTimeRestedPerYearList = new List<float>();
+        avgTimeRestedPerYearList.Add(0f);
+        
+        avgTimesDefendedPerYearList = new List<float>();
+        avgTimesDefendedPerYearList.Add(0f);
+        avgTimesDashedPerYearList = new List<float>();
+        avgTimesDashedPerYearList.Add(0);
+        avgTimesAttackedPerYearList = new List<float>();
+        avgTimesAttackedPerYearList.Add(0);
+        avgTimesPregenantPerYearList = new List<float>();
+        avgTimesPregenantPerYearList.Add(0);
+
         candidateGenomesList = new List<CandidateAgentData>();
         leaderboardGenomesList = new List<CandidateAgentData>();
     }
@@ -125,25 +158,37 @@ public class SpeciesGenomePool {
     // **** Create a bunch of random genomes and then organize them into Species first?
     // **** THEN create species and place genomes in?
     public void FirstTimeInitializeROOT(int numGenomes, int depth) {
+        
         InitShared();
         depthLevel = depth;
         int tempNumHiddenNeurons = 0;
-        AgentGenome seedGenome = new AgentGenome();
-        seedGenome.GenerateInitialRandomBodyGenome();
-        seedGenome.InitializeRandomBrainFromCurrentBody(1.25f, mutationSettingsRef.brainInitialConnectionChance, tempNumHiddenNeurons);
+
+        int numInitialGenomes = 1;
+        AgentGenome[] seedGenomeArray = new AgentGenome[numInitialGenomes];
+        for(int i = 0; i < seedGenomeArray.Length; i++) {
+            AgentGenome seedGenome = new AgentGenome();
+            seedGenome.GenerateInitialRandomBodyGenome();
+            seedGenome.InitializeRandomBrainFromCurrentBody(1.0f, mutationSettingsRef.brainInitialConnectionChance, tempNumHiddenNeurons);
+
+            seedGenomeArray[i] = seedGenome;
+        }
+
+        
 
         for (int i = 0; i < numGenomes; i++) {
-            //AgentGenome agentGenome = new AgentGenome();
-            //agentGenome.GenerateInitialRandomBodyGenome();
-            //agentGenome = //mutate seedGenome
+
+            int seedGenomeIndex = i % numInitialGenomes;
+            
             mutationSettingsRef.bodyCoreSizeMutationChance = 0.5f;
             mutationSettingsRef.bodyCoreMutationStepSize = 0.075f;
-            //mutationSettingsRef.mutationStrengthSlot = 0.1f;
-            
-            AgentGenome newGenome = Mutate(seedGenome, true, true);
-            newGenome.InitializeRandomBrainFromCurrentBody(1.25f, mutationSettingsRef.brainInitialConnectionChance, tempNumHiddenNeurons);
+                        
+            AgentGenome newGenome = Mutate(seedGenomeArray[seedGenomeIndex], true, true);
+
+            //newGenome.InitializeRandomBrainFromCurrentBody(1.0f, mutationSettingsRef.brainInitialConnectionChance, tempNumHiddenNeurons);
 
             CandidateAgentData candidate = new CandidateAgentData(newGenome, speciesID);
+
+
 
             if(i < maxLeaderboardGenomePoolSize) {
                 leaderboardGenomesList.Add(candidate);
@@ -155,7 +200,8 @@ public class SpeciesGenomePool {
 
         representativeGenome = candidateGenomesList[0].candidateGenome;
     }
-    public void FirstTimeInitialize(AgentGenome foundingGenome, int depth, int arraySize) {
+    public void FirstTimeInitialize(AgentGenome foundingGenome, int depth) {
+       
         InitShared();
         depthLevel = depth;
         Vector3 newHue = UnityEngine.Random.insideUnitSphere;
@@ -193,7 +239,15 @@ public class SpeciesGenomePool {
             float randChance1 = UnityEngine.Random.Range(0f, 1f);
             if(randChance1 < 0.35) {
                 int randLetterIndex = UnityEngine.Random.Range(0, 26);
-                newName += lettersArray[randLetterIndex];            
+                newName += lettersArray[randLetterIndex];  
+                
+                if(randChance1 < 0.05) {
+                    randLetterIndex = UnityEngine.Random.Range(0, 26);
+                    newName += lettersArray[randLetterIndex];            
+                }
+            }            
+            else if(randChance1 > 0.95f) {
+
             }
             else {
                 newName += foundingGenome.bodyGenome.coreGenome.name[i];
@@ -201,6 +255,9 @@ public class SpeciesGenomePool {
         }
 
         foundingGenome.bodyGenome.coreGenome.name = newName;
+
+        foundingGenome.bodyGenome.appearanceGenome.huePrimary = Vector3.Lerp(foundingGenome.bodyGenome.appearanceGenome.huePrimary, newHue, 0.75f);
+        foundingGenome.bodyGenome.appearanceGenome.hueSecondary = Vector3.Lerp(foundingGenome.bodyGenome.appearanceGenome.hueSecondary, Vector3.one - newHue, 0.75f);
 
         //=========================================================================
 
@@ -211,9 +268,7 @@ public class SpeciesGenomePool {
             mutationSettingsRef.bodyCoreMutationStepSize = 0.1f;
             //mutationSettingsRef.mutationStrengthSlot = 0.15f;
 
-            AgentGenome agentGenome = Mutate(foundingGenome, true, true);
-            agentGenome.bodyGenome.appearanceGenome.huePrimary = Vector3.Lerp(agentGenome.bodyGenome.appearanceGenome.huePrimary, newHue, 0.25f);
-            agentGenome.bodyGenome.appearanceGenome.hueSecondary = Vector3.Lerp(agentGenome.bodyGenome.appearanceGenome.hueSecondary, Vector3.one - newHue, 0.25f);
+            AgentGenome agentGenome = Mutate(foundingGenome, true, true);            
             //int tempNumHiddenNeurons = 0;
             //agentGenome.InitializeRandomBrainFromCurrentBody(0.5f, mutationSettingsRef.initialConnectionChance, tempNumHiddenNeurons);
 
@@ -225,8 +280,8 @@ public class SpeciesGenomePool {
         }
 
         Debug.Log("SPECIES CREATED! " + debugTxt);
-        
-        representativeGenome = foundingGenome;
+
+        representativeGenome = candidateGenomesList[0].candidateGenome;// foundingGenome;
     }
 
     public void ProcessExtinction(int curTimeStep) {
@@ -255,9 +310,12 @@ public class SpeciesGenomePool {
 
     public void AddNewYearlyStats(int year) {
         avgLifespanPerYearList.Add(avgLifespan);
-        avgConsumptionDecayPerYearList.Add(avgConsumptionDecay);
-        avgConsumptionPlantPerYearList.Add(avgConsumptionPlant);
-        avgConsumptionMeatPerYearList.Add(avgConsumptionMeat);
+        avgFoodEatenPlantPerYearList.Add(avgFoodEatenPlant);
+        avgFoodEatenZoopPerYearList.Add(avgFoodEatenZoop);
+        avgFoodEatenCreaturePerYearList.Add(avgFoodEatenCreature);
+        avgFoodEatenCorpsePerYearList.Add(avgFoodEatenCorpse);
+        avgFoodEatenEggPerYearList.Add(avgFoodEatenEgg);
+        
         avgBodySizePerYearList.Add(avgBodySize);
         avgSpecAttackPerYearList.Add(avgSpecAttack);
         avgSpecDefendPerYearList.Add(avgSpecDefend);
@@ -272,6 +330,12 @@ public class SpeciesGenomePool {
         avgFitnessScorePerYearList.Add(avgFitnessScore);
         avgDamageDealtPerYearList.Add(avgDamageDealt);
         avgDamageTakenPerYearList.Add(avgDamageTaken);
+
+        avgTimeRestedPerYearList.Add(avgTimeRested);
+        avgTimesDashedPerYearList.Add(avgTimesDashed);
+        avgTimesDefendedPerYearList.Add(avgTimesDefended);
+        avgTimesAttackedPerYearList.Add(avgTimesAttacked);
+        avgTimesPregenantPerYearList.Add(avgTimesPregnant);
     }
     /*public void UpdateSpeciesStats() {
         avgLifespanPerYearList[avgLifespanPerYearList.Count - 1] = avgLifespan;

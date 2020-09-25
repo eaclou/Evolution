@@ -139,7 +139,7 @@ Shader "DataVis/GraphSpeciesStatsShader"
 					float dist = abs(finalCoords.y - scoreValue);
 					if(dist < (lineWidth + lineFadeWidth) * (isSelectedMask + 1.0)) {
 						float smoothDist = smoothstep(0.0, lineFadeWidth * (isSelectedMask + 1.0), dist - lineWidth * (isSelectedMask + 1.0));
-						pixColor = lerp(speciesColor, pixColor, smoothDist);
+						pixColor = lerp(saturate(speciesColor + 0.85), pixColor, smoothDist);
 					}
 				}
 				

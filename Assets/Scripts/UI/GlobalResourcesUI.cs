@@ -12,8 +12,7 @@ public class GlobalResourcesUI : MonoBehaviour {
     public GameObject panelGlobalResourcesMain;
 
     public Text textSelectedSpeciesTitle;
-    public Text textSpeciationTree;
-    public int selectedSpeciesIndex = 1;
+    public Text textSpeciationTree;    
     public Text textStatsBody;
   
     public Text textMeterOxygen;
@@ -47,9 +46,16 @@ public class GlobalResourcesUI : MonoBehaviour {
     public Material speciesGraphMat;
     public Image speciesGraphImage;
     public Text textGraphStatType;
+    public Image imageCreaturePortrait;
 
     private Texture2D brainGenomeTex;
     public Material brainGenomeMat;
+    private Texture2D speciesPoolGenomeTex;
+
+    public int selectedSpeciesIndex = 1;
+    private AgentGenome focusedAgentGenome;
+    private int agentSelectType;
+    private int agentIndex;
 
 	// Use this for initialization
 	void Start () {
@@ -58,6 +64,12 @@ public class GlobalResourcesUI : MonoBehaviour {
         brainGenomeTex.wrapMode = TextureWrapMode.Clamp;
         brainGenomeMat.SetTexture("_MainTex", brainGenomeTex);
         //CreateBrainGenomeTexture(null);
+
+        
+        speciesPoolGenomeTex = new Texture2D(16, 16, TextureFormat.RGBA32, false);
+        speciesPoolGenomeTex.filterMode = FilterMode.Point;
+        speciesPoolGenomeTex.wrapMode = TextureWrapMode.Clamp;
+        brainGenomeMat.SetTexture("_MainTex", speciesPoolGenomeTex);
 
         // Best place for these???
         if (statsSpeciesColorKey == null) {
@@ -86,6 +98,52 @@ public class GlobalResourcesUI : MonoBehaviour {
         
 	}
 
+    public void CreateSpeciesLeaderboardGenomeTexture(SpeciesGenomePool pool) {
+        int width = 128;
+        speciesPoolGenomeTex.Resize(width, pool.leaderboardGenomesList.Count);
+
+        for(int i = 0; i < pool.leaderboardGenomesList.Count; i++) {
+            AgentGenome genome = pool.leaderboardGenomesList[i].candidateGenome;
+            for(int x = 0; x < width; x++) {
+
+                int xIndex = x;// i % brainGenomeTex.width;
+                int yIndex = i; // Mathf.FloorToInt(i / brainGenomeTex.width);
+                              
+                Color testColor;
+
+                if (genome.brainGenome.linkList.Count > x) {
+
+                    float weightVal = genome.brainGenome.linkList[x].weight;
+                    testColor = new Color(weightVal * 0.5f + 0.5f, weightVal * 0.5f + 0.5f, weightVal * 0.5f + 0.5f);
+                    if(weightVal < -0.25f) {
+                        testColor = Color.Lerp(testColor, Color.black, 0.15f);
+                    }
+                    else if(weightVal > 0.25f) {
+                        testColor = Color.Lerp(testColor, Color.white, 0.15f);
+                    }
+                    else {
+                        testColor = Color.Lerp(testColor, Color.gray, 0.15f);
+                    }
+                }
+                else {
+                    testColor = Color.gray; // CLEAR
+                    
+                    //break;
+                }
+                
+                speciesPoolGenomeTex.SetPixel(xIndex, yIndex, testColor);
+            }
+       
+        }
+          
+            
+        
+        // Body Genome
+        //int xI = curLinearIndex % speciesPoolGenomeTex.width;
+        //int yI = Mathf.FloorToInt(curLinearIndex / speciesPoolGenomeTex.width);
+        
+        speciesPoolGenomeTex.Apply();
+    }
     public void CreateBrainGenomeTexture(AgentGenome genome) {
 
         
@@ -182,13 +240,20 @@ public class GlobalResourcesUI : MonoBehaviour {
         // Then fill with most recently extinct:
         for(int i = (numTotalSpecies - 1); i > Mathf.Clamp((numTotalSpecies - maxDisplaySpecies), 0, numTotalSpecies); i--) {
             SpeciesGenomePool pool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[i];
-            SpeciesGenomePool parentPool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[pool.parentSpeciesID];
+
+            SpeciesGenomePool parentPool;
+            if (pool.parentSpeciesID == -1) {
+                parentPool = pool; // whoa man...
+            }
+            else {
+                parentPool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[pool.parentSpeciesID];
+            }            
 
             Vector3 huePrimary = pool.representativeGenome.bodyGenome.appearanceGenome.huePrimary;
             Vector3 hueSecondary = pool.representativeGenome.bodyGenome.appearanceGenome.hueSecondary;
             Vector3 parentHue = parentPool.representativeGenome.bodyGenome.appearanceGenome.huePrimary;
             if(uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[i].isExtinct) {
-                huePrimary = Vector3.Lerp(huePrimary, Vector3.one * 0.2f, 0.75f);
+                huePrimary = Vector3.zero;
             }
             statsSpeciesColorKey.SetPixel(i, 1, new Color(huePrimary.x, huePrimary.y, huePrimary.z));
             
@@ -253,13 +318,13 @@ public class GlobalResourcesUI : MonoBehaviour {
                             valStat = speciesPool.avgLifespanPerYearList[t];
                         }
                         else if(a == 1) {
-                            valStat = speciesPool.avgConsumptionDecayPerYearList[t];
+                            valStat = speciesPool.avgFoodEatenCorpsePerYearList[t];
                         }
                         else if(a == 2) {
-                            valStat = speciesPool.avgConsumptionPlantPerYearList[t];
+                            valStat = speciesPool.avgFoodEatenPlantPerYearList[t];
                         }
                         else if(a == 3) {
-                            valStat = speciesPool.avgConsumptionMeatPerYearList[t];
+                            valStat = speciesPool.avgFoodEatenZoopPerYearList[t] + speciesPool.avgFoodEatenCreaturePerYearList[t] + speciesPool.avgFoodEatenEggPerYearList[t];
                         }
                         else if(a == 4) {
                             valStat = speciesPool.avgBodySizePerYearList[t];
@@ -337,39 +402,94 @@ public class GlobalResourcesUI : MonoBehaviour {
 
         if(selectedSpeciesIndex >= uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList.Count) {
             selectedSpeciesIndex = 0;
-        }
-
+        }        
+        
         SpeciesGenomePool pool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex];
+        if(pool.isExtinct) {
+            for(int i = selectedSpeciesIndex; i < uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList.Count; i++) {
+                if(uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[i].isExtinct) {
 
+                }
+                else {
+                    selectedSpeciesIndex = i;
+                    break;
+                }
+            }
+        }
+        pool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex];
+
+        UpdateFocusedAgentGenome();
+
+        CreateSpeciesLeaderboardGenomeTexture(pool);
+        CreateBrainGenomeTexture(focusedAgentGenome);
+        uiManagerRef.gameManager.simulationManager.theRenderKing.InitializeCreaturePortraitGenomes(focusedAgentGenome);
         UpdateSpeciesTreeDataTextures(uiManagerRef.gameManager.simulationManager.curSimYear);        
-
-        CreateBrainGenomeTexture(pool.representativeGenome);
-        uiManagerRef.gameManager.simulationManager.theRenderKing.InitializeCreaturePortraitGenomes(pool.representativeGenome);
     }
-
+    /*
     public void ClickCycleCandidate() {
         SpeciesGenomePool pool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex];
+        CreateSpeciesLeaderboardGenomeTexture(pool);
         if(pool.candidateGenomesList.Count > 0) {
-            int randIndex = UnityEngine.Random.Range(0, pool.candidateGenomesList.Count - 1);
-            AgentGenome genome = pool.candidateGenomesList[randIndex].candidateGenome;
-            CreateBrainGenomeTexture(genome);
-            uiManagerRef.gameManager.simulationManager.theRenderKing.InitializeCreaturePortraitGenomes(genome);
-        }
-        
+            CreateBrainGenomeTexture(focusedAgentGenome);
+            uiManagerRef.gameManager.simulationManager.theRenderKing.InitializeCreaturePortraitGenomes(focusedAgentGenome);
+        }       
         
     }
-
+    */
     public void ClickCycleGraphStatsIndex() {
+        
         selectedSpeciesStatsIndex++;
 
         if(selectedSpeciesStatsIndex >= statsTreeOfLifeSpeciesTexArray.Length) {
             selectedSpeciesStatsIndex = 0;
         }
-
         //
-        UpdateSpeciesTreeDataTextures(uiManagerRef.gameManager.simulationManager.curSimYear);
+        SpeciesGenomePool pool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex];
+        CreateSpeciesLeaderboardGenomeTexture(pool);
 
-        //RefreshGraphMaterial();
+        CreateBrainGenomeTexture(focusedAgentGenome);
+        uiManagerRef.gameManager.simulationManager.theRenderKing.InitializeCreaturePortraitGenomes(focusedAgentGenome);
+        UpdateSpeciesTreeDataTextures(uiManagerRef.gameManager.simulationManager.curSimYear);
+        
+    }
+    private void UpdateFocusedAgentGenome() {
+        SpeciesGenomePool pool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex];
+        if (agentSelectType == 0) {
+            focusedAgentGenome = pool.representativeGenome;
+        }
+        else if(agentSelectType == 1) {
+            focusedAgentGenome = pool.candidateGenomesList[agentIndex].candidateGenome;
+        }
+        else {
+            focusedAgentGenome = pool.leaderboardGenomesList[agentIndex].candidateGenome;
+        }
+    }
+    public void ClickToggleAgentSelectType() {
+        agentIndex = 0;
+        agentSelectType = (agentSelectType + 1) % 3;
+
+        UpdateFocusedAgentGenome();
+
+        SpeciesGenomePool pool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex];
+        CreateSpeciesLeaderboardGenomeTexture(pool);        
+        CreateBrainGenomeTexture(focusedAgentGenome);
+        uiManagerRef.gameManager.simulationManager.theRenderKing.InitializeCreaturePortraitGenomes(focusedAgentGenome);
+        UpdateSpeciesTreeDataTextures(uiManagerRef.gameManager.simulationManager.curSimYear);
+    }
+
+    public void ClickCycleAgentIndex() {
+        if(agentSelectType == 0) {
+
+        }
+        else {
+            agentIndex++;  
+            
+            UpdateFocusedAgentGenome();
+
+            CreateBrainGenomeTexture(focusedAgentGenome);
+            uiManagerRef.gameManager.simulationManager.theRenderKing.InitializeCreaturePortraitGenomes(focusedAgentGenome);
+            UpdateSpeciesTreeDataTextures(uiManagerRef.gameManager.simulationManager.curSimYear);
+        }        
     }
 
     private void RefreshGraphMaterial() {
@@ -384,6 +504,9 @@ public class GlobalResourcesUI : MonoBehaviour {
         speciesGraphImage.material = speciesGraphMat;
         speciesGraphImage.gameObject.SetActive(false);
         speciesGraphImage.gameObject.SetActive(true);
+
+        imageCreaturePortrait.gameObject.SetActive(false);
+        imageCreaturePortrait.gameObject.SetActive(true);
     }
     
 
@@ -393,7 +516,37 @@ public class GlobalResourcesUI : MonoBehaviour {
     }
 
     private void UpdateUI() {
-        
+
+        SpeciesGenomePool pool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex];
+        //AgentGenome genome = pool.representativeGenome;
+        focusedAgentGenome = pool.representativeGenome; // *** DEFAULT
+        if (agentSelectType == 0) {
+            focusedAgentGenome = pool.representativeGenome; // *** DEFAULT
+        }
+        else if(agentSelectType == 1) {
+            if(agentIndex <= pool.candidateGenomesList.Count - 1) {
+                //focusedAgentGenome = pool.candidateGenomesList[agentIndex].candidateGenome; // last one
+            }
+            else {
+                agentIndex = 0; // pool.candidateGenomesList.Count - 1;
+                //focusedAgentGenome = pool.candidateGenomesList[agentIndex].candidateGenome; // last one
+                
+            }
+
+            focusedAgentGenome = pool.candidateGenomesList[agentIndex].candidateGenome;
+        }
+        else {
+            if(agentIndex <= pool.leaderboardGenomesList.Count - 1) {
+                //
+            }
+            else {
+                agentIndex = 0; // pool.leaderboardGenomesList.Count - 1;
+                //focusedAgentGenome = pool.leaderboardGenomesList[agentIndex].candidateGenome; // last one
+                
+            }
+
+            focusedAgentGenome = pool.leaderboardGenomesList[agentIndex].candidateGenome;
+        }
 
         textGlobalMass.text = "Global Biomass: " + uiManagerRef.gameManager.simulationManager.simResourceManager.curTotalMass.ToString("F0");
         SimResourceManager resourcesRef = uiManagerRef.gameManager.simulationManager.simResourceManager;
@@ -429,14 +582,17 @@ public class GlobalResourcesUI : MonoBehaviour {
             }
             speciesDebugStr += "Species[" + speciesID.ToString() + "] p(" + parentSpeciesID.ToString() + "), size: " + speciesPopSize.ToString() + ", #cands: " + numCandidates.ToString() + ", numEvals: " + numBorn.ToString() + 
                             ",   avgFitness: " + avgFitness.ToString("F2") + 
-                            ",   avgConsumption: (" + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgConsumptionDecay.ToString("F4") + ", " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgConsumptionPlant.ToString("F4") + ", " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgConsumptionMeat.ToString("F4") +
+                            ",   avgConsumption: (" + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgFoodEatenCorpse.ToString("F4") + ", " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgFoodEatenPlant.ToString("F4") + ", " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgFoodEatenZoop.ToString("F4") + ", " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgFoodEatenEgg.ToString("F4") + ", " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgFoodEatenCreature.ToString("F4") +
                             "),   avgBodySize: " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgBodySize.ToString("F3") +
                             ",   avgTalentSpec: (" + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgSpecAttack.ToString("F2") + ", " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgSpecDefend.ToString("F2") + ", " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgSpecSpeed.ToString("F2") + ", " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgSpecUtility.ToString("F2") +
                             "),   avgDiet: (" + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgFoodSpecDecay.ToString("F2") + ", " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgFoodSpecPlant.ToString("F2") + ", " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgFoodSpecMeat.ToString("F2") +
                             "),   avgNumNeurons: " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgNumNeurons.ToString("F1") +
                             ",   avgNumAxons: " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgNumAxons.ToString("F1") +
-                            ", avgFitness: " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgFitnessScore.ToString("F2") +
-                            ", avgExp: " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgExperience.ToString() + "\n\n";
+                            ", avgTimesAttacked: " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgTimesAttacked.ToString("F2") +
+                            ", avgTimesDefended: " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgTimesDefended.ToString() +
+                            ", avgTimesDashed: " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgTimesDashed.ToString() +
+                            ", avgTimeResting: " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgTimeRested.ToString() +
+                            ", avgTimesPregnant: " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgTimesPregnant.ToString() + "\n\n";
         }
 
 
@@ -457,7 +613,7 @@ public class GlobalResourcesUI : MonoBehaviour {
 
         //Debug.Break(); 
 
-        SpeciesGenomePool pool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex];
+        
         if(pool != null) {
             string speciesStatsString = "SPECIES[" + selectedSpeciesIndex.ToString() + "] " + pool.representativeGenome.bodyGenome.coreGenome.name + " STATS:\n\n";
 
@@ -473,8 +629,19 @@ public class GlobalResourcesUI : MonoBehaviour {
                 }
             }
 
-            
-            string debugTxtGlobalSim = "";
+
+            string debugTxtGlobalSim = "Species[" + pool.speciesID.ToString() + "] "; // + "] SELECTED AGENT[" + agentIndex.ToString() + "] ";
+            if(agentSelectType == 0) {
+                debugTxtGlobalSim += "Representative Genome!";
+            }
+            else if(agentSelectType == 1) {
+                debugTxtGlobalSim += "Candidate Genome #" + agentIndex.ToString();
+            }
+            else {
+                debugTxtGlobalSim += "Leaderboard Genome #" + agentIndex.ToString();
+            }
+            //debugTxtGlobalSim += "SELECTED AGENT[" + agentIndex.ToString() + agentSelectType.ToString() + "] #"
+
             debugTxtGlobalSim += "\n\nNumCreaturesBorn: " + uiManagerRef.gameManager.simulationManager.numAgentsBorn.ToString() + ", numDied: " + uiManagerRef.gameManager.simulationManager.numAgentsDied.ToString() + ", ~Gen: " + ((float)uiManagerRef.gameManager.simulationManager.numAgentsBorn / (float)uiManagerRef.gameManager.simulationManager._NumAgents).ToString();
             debugTxtGlobalSim += "\nSimulation Age: " + uiManagerRef.gameManager.simulationManager.simAgeTimeSteps.ToString();
             debugTxtGlobalSim += "\nYear " + uiManagerRef.gameManager.simulationManager.curSimYear.ToString() + "\n\n";
@@ -482,10 +649,16 @@ public class GlobalResourcesUI : MonoBehaviour {
 
             speciesStatsString += "Species[" + selectedSpeciesIndex.ToString() + "] p(" + parentSpeciesID.ToString() + "), size: " + speciesPopSize.ToString() + ", #cands: " + numCandidates.ToString() + ", numEvals: " + numBorn.ToString() +
                             "\navgFitness: " + avgFitness.ToString("F2") +
-                            "\navgConsumption: (C: " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgConsumptionDecay.ToString("F4") +
-                            ", P: " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgConsumptionPlant.ToString("F4") + ", M: " +
-                            uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgConsumptionMeat.ToString("F4") + ")";
-
+                            "\navgFoodEaten:\nCorpses: " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgFoodEatenCorpse.ToString("F4") +
+                            "\nPlants: " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgFoodEatenPlant.ToString("F4") + 
+                            "\nZoop: " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgFoodEatenZoop.ToString("F4") + 
+                            "\nEggs: " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgFoodEatenEgg.ToString("F4") +
+                            "\nCritters: " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgFoodEatenCreature.ToString("F4") +
+                            "\nAvgTimesAttacked: " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgTimesAttacked.ToString("F4") +
+                            "\nAvgTimesDefended: " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgTimesDefended.ToString("F4") +
+                            "\nAvgTimesDashed: " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgTimesDashed.ToString("F4") +
+                            "\nAvgTimeResting: " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgTimeRested.ToString("F4") +
+                            "\nAvgTimesPregnant: " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgTimesPregnant.ToString("F4");
                             //"\navgTalentSpec: (" + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgSpecAttack.ToString("F2") + ", " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgSpecDefend.ToString("F2") + ", " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgSpecSpeed.ToString("F2") + ", " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgSpecUtility.ToString("F2") +
                             //")\navgDiet: (" + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgFoodSpecDecay.ToString("F2") + ", " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgFoodSpecPlant.ToString("F2") + ", " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgFoodSpecMeat.ToString("F2") +
                             //"\navgFitness: " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgFitnessScore.ToString("F2");
@@ -502,11 +675,12 @@ public class GlobalResourcesUI : MonoBehaviour {
             debugTxtAgent += "avgNumNeurons: " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgNumNeurons.ToString("F1");
             debugTxtAgent += "\navgNumAxons: " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgNumAxons.ToString("F1");
                 
-            string sensorString = "\nSENSORS_ETC:\n";
-            AgentGenome genome = pool.representativeGenome;
+            string sensorString = "\n\nSENSORS_ETC:\n";
+
+            
         
             string mouthA = "Mouth Type: ";
-            if (genome.bodyGenome.coreGenome.isPassive) {
+            if (focusedAgentGenome.bodyGenome.coreGenome.isPassive) {
                 mouthA += "Passive";
             }
             else {
@@ -514,109 +688,108 @@ public class GlobalResourcesUI : MonoBehaviour {
             }
             sensorString += mouthA + "\n";
 
-            sensorString += "PriCol: " + genome.bodyGenome.appearanceGenome.huePrimary.ToString();
-            sensorString += ", SecColor: " + genome.bodyGenome.appearanceGenome.hueSecondary.ToString() + "\n";
+            sensorString += "PriCol: " + focusedAgentGenome.bodyGenome.appearanceGenome.huePrimary.ToString();
+            sensorString += ", SecColor: " + focusedAgentGenome.bodyGenome.appearanceGenome.hueSecondary.ToString() + "\n";
             // proportions:
-            sensorString += "BODY Proportions: [" + genome.bodyGenome.coreGenome.mouthLength.ToString();
-            sensorString += ", " + genome.bodyGenome.coreGenome.headLength.ToString();
-            sensorString += ", " + genome.bodyGenome.coreGenome.bodyLength.ToString();
-            sensorString += ", " + genome.bodyGenome.coreGenome.tailLength.ToString() + "]\n";        
+            sensorString += "BODY Proportions: [" + focusedAgentGenome.bodyGenome.coreGenome.mouthLength.ToString();
+            sensorString += ", " + focusedAgentGenome.bodyGenome.coreGenome.headLength.ToString();
+            sensorString += ", " + focusedAgentGenome.bodyGenome.coreGenome.bodyLength.ToString();
+            sensorString += ", " + focusedAgentGenome.bodyGenome.coreGenome.tailLength.ToString() + "]\n";        
             // eyes
-            sensorString += "EYE: SocRad: " + genome.bodyGenome.coreGenome.socketRadius.ToString();
-            sensorString += ", SocHght: " + genome.bodyGenome.coreGenome.socketHeight.ToString() + "\n";
+            sensorString += "EYE: SocRad: " + focusedAgentGenome.bodyGenome.coreGenome.socketRadius.ToString();
+            sensorString += ", SocHght: " + focusedAgentGenome.bodyGenome.coreGenome.socketHeight.ToString() + "\n";
             // tail
-            sensorString += "TAIL: FinLength: " + genome.bodyGenome.coreGenome.tailFinBaseLength.ToString();
-            sensorString += ", FinSpread: " + genome.bodyGenome.coreGenome.tailFinSpreadAngle.ToString();
+            sensorString += "TAIL: FinLength: " + focusedAgentGenome.bodyGenome.coreGenome.tailFinBaseLength.ToString();
+            sensorString += ", FinSpread: " + focusedAgentGenome.bodyGenome.coreGenome.tailFinSpreadAngle.ToString();
             // sensors & shit:
                         
-            sensorString += "\nSENSORS:\nComms: " + (genome.bodyGenome.communicationGenome.useComms ? "ON!" : "off");
-            sensorString += "\nWater: " + (genome.bodyGenome.environmentalGenome.useWaterStats ? "ON!" : "off");
-            sensorString += "\nWallsCard: " + (genome.bodyGenome.environmentalGenome.useCardinals ? "ON!" : "off");
-            sensorString += "\nWallsDiag: " + (genome.bodyGenome.environmentalGenome.useDiagonals ? "ON!" : "off");
-            sensorString += "\nNutrients: " + (genome.bodyGenome.foodGenome.useNutrients ? "ON!" : "off");
-            sensorString += "\nFoodPos: " + (genome.bodyGenome.foodGenome.usePos ? "ON!" : "off");
-            sensorString += "\nFoodVel: " + (genome.bodyGenome.foodGenome.useVel ? "ON!" : "off");
-            sensorString += "\nFoodDir: " + (genome.bodyGenome.foodGenome.useDir ? "ON!" : "off");
-            sensorString += "\nFoodInfo: " + (genome.bodyGenome.foodGenome.useStats ? "ON!" : "off");
-            sensorString += "\nEggsack: " + (genome.bodyGenome.foodGenome.useEggs ? "ON!" : "off");
-            sensorString += "\nCorpse: " + (genome.bodyGenome.foodGenome.useCorpse ? "ON!" : "off");
-            sensorString += "\nFriendPos: " + (genome.bodyGenome.friendGenome.usePos ? "ON!" : "off");
-            sensorString += "\nFriendVel: " + (genome.bodyGenome.friendGenome.useVel ? "ON!" : "off");
-            sensorString += "\nFriendDir: " + (genome.bodyGenome.friendGenome.useDir ? "ON!" : "off");
-            sensorString += "\nThreatPos: " + (genome.bodyGenome.threatGenome.usePos ? "ON!" : "off");
-            sensorString += "\nThreatVel: " + (genome.bodyGenome.threatGenome.useVel ? "ON!" : "off");
-            sensorString += "\nThreatDir: " + (genome.bodyGenome.threatGenome.useDir ? "ON!" : "off");
-            sensorString += "\nThreatInfo: " + (genome.bodyGenome.threatGenome.useStats ? "ON!" : "off");
+            sensorString += "\nSENSORS:\nComms: " + (focusedAgentGenome.bodyGenome.communicationGenome.useComms ? "ON!" : "off");
+            sensorString += "\nWater: " + (focusedAgentGenome.bodyGenome.environmentalGenome.useWaterStats ? "ON!" : "off");
+            sensorString += "\nWallsCard: " + (focusedAgentGenome.bodyGenome.environmentalGenome.useCardinals ? "ON!" : "off");
+            sensorString += "\nWallsDiag: " + (focusedAgentGenome.bodyGenome.environmentalGenome.useDiagonals ? "ON!" : "off");
+            sensorString += "\nNutrients: " + (focusedAgentGenome.bodyGenome.foodGenome.useNutrients ? "ON!" : "off");
+            sensorString += "\nFoodPos: " + (focusedAgentGenome.bodyGenome.foodGenome.usePos ? "ON!" : "off");
+            sensorString += "\nFoodVel: " + (focusedAgentGenome.bodyGenome.foodGenome.useVel ? "ON!" : "off");
+            sensorString += "\nFoodDir: " + (focusedAgentGenome.bodyGenome.foodGenome.useDir ? "ON!" : "off");
+            sensorString += "\nFoodInfo: " + (focusedAgentGenome.bodyGenome.foodGenome.useStats ? "ON!" : "off");
+            sensorString += "\nEggsack: " + (focusedAgentGenome.bodyGenome.foodGenome.useEggs ? "ON!" : "off");
+            sensorString += "\nCorpse: " + (focusedAgentGenome.bodyGenome.foodGenome.useCorpse ? "ON!" : "off");
+            sensorString += "\nFriendPos: " + (focusedAgentGenome.bodyGenome.friendGenome.usePos ? "ON!" : "off");
+            sensorString += "\nFriendVel: " + (focusedAgentGenome.bodyGenome.friendGenome.useVel ? "ON!" : "off");
+            sensorString += "\nFriendDir: " + (focusedAgentGenome.bodyGenome.friendGenome.useDir ? "ON!" : "off");
+            sensorString += "\nThreatPos: " + (focusedAgentGenome.bodyGenome.threatGenome.usePos ? "ON!" : "off");
+            sensorString += "\nThreatVel: " + (focusedAgentGenome.bodyGenome.threatGenome.useVel ? "ON!" : "off");
+            sensorString += "\nThreatDir: " + (focusedAgentGenome.bodyGenome.threatGenome.useDir ? "ON!" : "off");
+            sensorString += "\nThreatInfo: " + (focusedAgentGenome.bodyGenome.threatGenome.useStats ? "ON!" : "off");
         
         
 
             textStatsBody.text = debugTxtGlobalSim + speciesStatsString + debugTxtAgent + sensorString;
         }
 
-        SpeciesGenomePool selectedPool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex];
-        
+       
         if(selectedSpeciesStatsIndex == 0) {
-            curSpeciesStatValue = selectedPool.avgLifespan;
+            curSpeciesStatValue = pool.avgLifespan;
             curSpeciesStatName = "Avg Lifespan";
         }
         else if(selectedSpeciesStatsIndex == 1) {
-            curSpeciesStatValue = selectedPool.avgConsumptionDecay;
+            curSpeciesStatValue = pool.avgFoodEatenCorpse;
             curSpeciesStatName = "Avg Carrion Eaten";
         }
         else if(selectedSpeciesStatsIndex == 2) {
-            curSpeciesStatValue = selectedPool.avgConsumptionPlant;
+            curSpeciesStatValue = pool.avgFoodEatenPlant;
             curSpeciesStatName = "Avg Plants Eaten";
         }
         else if(selectedSpeciesStatsIndex == 3) {
-            curSpeciesStatValue = selectedPool.avgConsumptionMeat;
-            curSpeciesStatName = "Avg Meat Eaten";
+            curSpeciesStatValue = pool.avgFoodEatenZoop;
+            curSpeciesStatName = "Avg Zoops Eaten";
         }
         else if(selectedSpeciesStatsIndex == 4) {
-            curSpeciesStatValue = selectedPool.avgBodySize;
+            curSpeciesStatValue = pool.avgBodySize;
             curSpeciesStatName = "Avg Body Weight";
         }
         else if(selectedSpeciesStatsIndex == 5) {
-            curSpeciesStatValue = selectedPool.avgSpecAttack;
+            curSpeciesStatValue = pool.avgSpecAttack;
             curSpeciesStatName = "Specialization: Attack";
         }
         else if(selectedSpeciesStatsIndex == 6) {
-            curSpeciesStatValue = selectedPool.avgSpecDefend;
+            curSpeciesStatValue = pool.avgSpecDefend;
             curSpeciesStatName = "Specialization: Defense";
         }
         else if(selectedSpeciesStatsIndex == 7) {
-            curSpeciesStatValue = selectedPool.avgSpecSpeed;
+            curSpeciesStatValue = pool.avgSpecSpeed;
             curSpeciesStatName = "Specialization: Speed";
         }
         else if(selectedSpeciesStatsIndex == 8) {
-            curSpeciesStatValue = selectedPool.avgSpecUtility;
+            curSpeciesStatValue = pool.avgSpecUtility;
             curSpeciesStatName = "Specialization: Utility";
         }
         else if(selectedSpeciesStatsIndex == 9) {
-            curSpeciesStatValue = selectedPool.avgFoodSpecDecay;
+            curSpeciesStatValue = pool.avgFoodSpecDecay;
             curSpeciesStatName = "Digestion Efficiency: Carrion";
         }
         else if(selectedSpeciesStatsIndex == 10) {
-            curSpeciesStatValue = selectedPool.avgFoodSpecPlant;
+            curSpeciesStatValue = pool.avgFoodSpecPlant;
             curSpeciesStatName = "Digestion Efficiency: Plants";
         }
         else if(selectedSpeciesStatsIndex == 11) {
-            curSpeciesStatValue = selectedPool.avgFoodSpecMeat;
+            curSpeciesStatValue = pool.avgFoodSpecMeat;
             curSpeciesStatName = "Digestion Efficiency: Meat";
         }
         else if(selectedSpeciesStatsIndex == 12) {
-            curSpeciesStatValue = selectedPool.avgNumNeurons;
+            curSpeciesStatValue = pool.avgNumNeurons;
             curSpeciesStatName = "Total Neurons in Brain";
         }
         else if(selectedSpeciesStatsIndex == 13) {
-            curSpeciesStatValue = selectedPool.avgNumAxons;
+            curSpeciesStatValue = pool.avgNumAxons;
             curSpeciesStatName = "Total Axons in Brain";
         }        
         else if(selectedSpeciesStatsIndex == 14) {
-            curSpeciesStatValue = selectedPool.avgDamageDealt;
+            curSpeciesStatValue = pool.avgDamageDealt;
             curSpeciesStatName = "Damage Dealt";
         }
         else if(selectedSpeciesStatsIndex == 15) {
-            curSpeciesStatValue = selectedPool.avgDamageTaken;
+            curSpeciesStatValue = pool.avgDamageTaken;
             curSpeciesStatName = "Damage Taken";
         }
 

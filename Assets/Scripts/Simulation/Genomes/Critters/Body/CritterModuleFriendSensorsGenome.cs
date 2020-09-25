@@ -21,10 +21,29 @@ public class CritterModuleFriendSensorsGenome {
 
     public void GenerateRandomInitialGenome() {
         // Do stuff:
+        float randChance = UnityEngine.Random.Range(0f, 1f);
+        if(randChance < 0.5f) {
+            usePos = false;
+        }
+        else {
+            usePos = true;
+        }
 
-        usePos = false;
-        useVel = false;
-        useDir = false;
+        randChance = UnityEngine.Random.Range(0f, 1f);
+        if(randChance < 0.5f) {
+            useVel = false;
+        }
+        else {
+            useVel = true;
+        }
+
+        randChance = UnityEngine.Random.Range(0f, 1f);
+        if(randChance < 0.5f) {
+            useDir = false;
+        }
+        else {
+            useDir = true;
+        }
     }
 
     public void AppendModuleNeuronsToMasterList(ref List<NeuronGenome> neuronList) {
@@ -52,21 +71,19 @@ public class CritterModuleFriendSensorsGenome {
         this.usePos = parentGenome.usePos;
         float randChance = UnityEngine.Random.Range(0f, 1f);
         if(randChance < settings.bodyModuleInternalMutationChance) {
-            //this.usePos = !this.usePos;
+            this.usePos = !this.usePos;
         }
 
         this.useVel = parentGenome.useVel;
         randChance = UnityEngine.Random.Range(0f, 1f);
         if(randChance < settings.bodyModuleInternalMutationChance) {
-            //this.useVel = !this.useVel;
+            this.useVel = !this.useVel;
         }
 
         this.useDir = parentGenome.useDir;
         randChance = UnityEngine.Random.Range(0f, 1f);
         if(randChance < settings.bodyModuleInternalMutationChance) {
-            //this.useDir = !this.useDir;
+            this.useDir = !this.useDir;
         }
-
-
     }
 }

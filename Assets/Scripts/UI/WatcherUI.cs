@@ -524,7 +524,7 @@ public class WatcherUI : MonoBehaviour {
                         hudString += "\n# In/Out: " + agent.candidateRef.candidateGenome.brainGenome.bodyNeuronList.Count.ToString() + ", Hid: " + agent.candidateRef.candidateGenome.brainGenome.hiddenNeuronList.Count.ToString();
                     
                         // History:
-                        hudString += "\nMeatEaten: " + agent.totalFoodEatenMeat.ToString("F3");
+                        hudString += "\nMeatEaten: " + agent.totalFoodEatenZoop.ToString("F3");
                         hudString += "\nPlantsEaten: " + agent.totalFoodEatenPlant.ToString("F3");
                     
                         string textString = "Event Log! [" + agent.index.ToString() + "]";

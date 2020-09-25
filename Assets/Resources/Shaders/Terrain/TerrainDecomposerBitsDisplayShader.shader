@@ -138,14 +138,14 @@
 
 				worldPosition.z = -altitudeRaw * _MaxAltitude;
 				
-				float2 scale = float2(1,1) * 0.853641 * alpha; //groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25) * 2.0;
+				float2 scale = float2(1,1) * 1.853641 * alpha; //groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25) * 2.0;
 			
 				float4 resourceGridSample = tex2Dlod(_ResourceGridTex, float4(uv, 0, 0));
-				float decomposerAmount = saturate(resourceGridSample.z);
-				float decomposerMinMask = saturate(decomposerAmount * 100);
-				float wasteAmount = saturate(resourceGridSample.y) * decomposerMinMask;
+				float decomposerAmount = resourceGridSample.z;
+				//float decomposerMinMask = saturate(decomposerAmount * 100);
+				//float wasteAmount = saturate(resourceGridSample.y) * decomposerMinMask;
 
-				float sizeFadeMask = (decomposerAmount + wasteAmount * 0.5) * 0.9 + 0.1; // saturate((1.0 - altitude) * 4 - 2);
+				float sizeFadeMask = saturate(decomposerAmount * 100); // saturate((1.0 - altitude) * 4 - 2);
 				quadPoint *= float3(scale, 1.0) * sizeFadeMask;
 								
 				float4 fluidVelocity = tex2Dlod(_VelocityTex, float4(worldPosition.xy / 256, 0, 2));

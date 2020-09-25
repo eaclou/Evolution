@@ -50,7 +50,7 @@ public class AgentBehaviorOneHot : MonoBehaviour {
 
         waterDepthGO.GetComponent<Text>().text = "Water Depth: " + agentRef.waterDepth.ToString() + 
                                                  "\ncontact:(" + agentRef.coreModule.contactForceX[0].ToString() + ", " + agentRef.coreModule.contactForceY[0].ToString() + ")" +
-                                                 "\nmeat eaten: " + (agentRef.totalFoodEatenMeat * 1000f).ToString("F0") + 
+                                                 "\nmeat eaten: " + (agentRef.totalFoodEatenZoop * 1000f).ToString("F0") + 
                                                  "\nplants eaten: " + (agentRef.totalFoodEatenPlant * 1000f).ToString("F0");
 
 

@@ -20,10 +20,38 @@ public class CritterModuleThreatSensorsGenome {
 
     public void GenerateRandomInitialGenome() {
         // Do stuff:
-        usePos = false;
-        useVel = false;
-        useDir = true;
-        useStats = false;
+        float randChance = UnityEngine.Random.Range(0f, 1f);
+        if(randChance < 0.5f) {
+            usePos = false;
+        }
+        else {
+            usePos = true;
+        }
+
+        randChance = UnityEngine.Random.Range(0f, 1f);
+        if(randChance < 0.5f) {
+            useVel = false;
+        }
+        else {
+            useVel = true;
+        }
+
+        randChance = UnityEngine.Random.Range(0f, 1f);
+        if(randChance < 0.5f) {
+            useDir = false;
+        }
+        else {
+            useDir = true;
+        }
+
+        randChance = UnityEngine.Random.Range(0f, 1f);
+        if(randChance < 0.5f) {
+            useStats = false;
+        }
+        else {
+            useStats = true;
+        }
+        
     }
 
     public void AppendModuleNeuronsToMasterList(ref List<NeuronGenome> neuronList) {
@@ -61,25 +89,25 @@ public class CritterModuleThreatSensorsGenome {
         this.usePos = parentGenome.usePos;
         float randChance = UnityEngine.Random.Range(0f, 1f);
         if(randChance < settings.bodyModuleInternalMutationChance) {
-            //this.usePos = !this.usePos;
+            this.usePos = !this.usePos;
         }
 
         this.useVel = parentGenome.useVel;
         randChance = UnityEngine.Random.Range(0f, 1f);
         if(randChance < settings.bodyModuleInternalMutationChance) {
-            //this.useVel = !this.useVel;
+            this.useVel = !this.useVel;
         }
 
         this.useDir = parentGenome.useDir;
         randChance = UnityEngine.Random.Range(0f, 1f);
         if(randChance < settings.bodyModuleInternalMutationChance) {
-            //this.useDir = !this.useDir;
+            this.useDir = !this.useDir;
         }
 
         this.useStats = parentGenome.useStats;
         randChance = UnityEngine.Random.Range(0f, 1f);
         if(randChance < settings.bodyModuleInternalMutationChance) {
-            //this.useStats = !this.useStats;
+            this.useStats = !this.useStats;
         }
     }
 }

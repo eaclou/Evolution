@@ -255,7 +255,7 @@ void CSSimDecomposerBitsData (uint3 id : SV_DispatchThreadID)
 	else { // DEAD / INACTIVE:::
 		
 		// check potential spawn location:
-		float2 spawnUV = float2(rand(float2(id.x, _Time * 120)), rand(float2(-_Time, id.x + _Time * 89.913)));
+		float2 spawnUV = float2(rand(float2(id.x, sin(_Time * 120))), rand(float2(-_Time, id.x + cos(_Time * 89.913))));
 		
 		float2 spawnPos = spawnUV * _MapSize;
 		
@@ -269,8 +269,8 @@ void CSSimDecomposerBitsData (uint3 id : SV_DispatchThreadID)
 		float spawnRating = resourceGridSample.z;
 
 		float distToOrigin = length(_SpawnPos.xy - (spawnUV * _MapSize));
-		if(spawnRating > 0.025) {			
-			spawnPos += float2(spawnNoise1, spawnNoise2) * 0.93416;		
+		if(spawnRating > 0.1) {			
+			spawnPos += float2(spawnNoise1, spawnNoise2 + spawnNoise3) * 0.093416;		
 			decomposerBitData.worldPos = float3(spawnPos, 0);
 			decomposerBitData.age = decomposerBitData.age % 1.0;
 			decomposerBitData.isActive = 1.0;
@@ -330,8 +330,8 @@ void CSSimWasteBitsData (uint3 id : SV_DispatchThreadID)
 		float spawnRating = resourceGridSample.y;  // WASTE
 
 		float distToOrigin = length(_SpawnPos.xy - (spawnUV * _MapSize));
-		if(spawnRating > 0.025) {			
-			spawnPos += float2(spawnNoise1, spawnNoise2) * 0.93416;		
+		if(spawnRating > 0.005) {			
+			spawnPos += float2(spawnNoise1, spawnNoise2) * 0.0193416;		
 			wasteBitData.worldPos = float3(spawnPos, 0);
 			wasteBitData.age = wasteBitData.age % 1.0;
 			wasteBitData.heading = normalize(float2(spawnNoise1, spawnNoise2));

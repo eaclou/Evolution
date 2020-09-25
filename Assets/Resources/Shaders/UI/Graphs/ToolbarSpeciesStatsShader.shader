@@ -167,7 +167,7 @@ Shader "UI/ToolbarSpeciesStatsShader"
 					float dist = abs(finalCoords.y - scoreValue);
 					if(dist < (lineWidth + lineFadeWidth) * (isSelectedMask + 1.0)) {
 						float smoothDist = smoothstep(0.0, lineFadeWidth * (isSelectedMask + 1.0), dist - lineWidth * (isSelectedMask + 1.0));
-						pixColor = lerp(speciesColor, pixColor, smoothDist);
+						pixColor = lerp(saturate(speciesColor + 0.2), pixColor, smoothDist);
 					}
 				}
 
@@ -181,7 +181,7 @@ Shader "UI/ToolbarSpeciesStatsShader"
 				if(distSel < (lineWidth + lineFadeWidth)) {
 					float smoothDist = smoothstep(0.0, lineFadeWidth, distSel - lineWidth);
 					//pixColor = lerp(float4(1,1,1,1), pixColor, smoothDist);
-					pixColor = lerp(speciesColorSel, pixColor, smoothDist);
+					pixColor = lerp(saturate(speciesColorSel + 0.75), pixColor, smoothDist);
 				}
 				
 				//float distToSideScreenEdge = min((1.0 - finalCoords.x), finalCoords.x);
