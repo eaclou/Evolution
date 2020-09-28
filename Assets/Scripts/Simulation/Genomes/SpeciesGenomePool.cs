@@ -25,6 +25,22 @@ public class SpeciesGenomePool {
     public int timeStepCreated = 1;
     public int timeStepExtinct = 2000000000;
 
+    // Records:
+    public int recordLongestLife = 0;
+    public CandidateAgentData recordHolderLongestLife;
+    public float recordMostEaten = 0f;
+    public CandidateAgentData recordHolderMostEaten;
+    public int recordMostPregnancies = 0;
+    public CandidateAgentData recordHolderMostPregnancies;
+    public int recordMostKills = 0;
+    public CandidateAgentData recordHolderMostKills;
+    public int recordBiggestBrain = 0;
+    public CandidateAgentData recordHolderBiggestBrain;
+    public int recordDefender = 0;
+    public CandidateAgentData recordHolderDefender;
+
+    // stats:
+
     public float avgLifespan = 0f;
     public List<float> avgLifespanPerYearList;    
     public float avgFoodEatenPlant = 0f;
@@ -382,8 +398,8 @@ public class SpeciesGenomePool {
             Debug.LogError("GetNextAvailableCandidate(): candidateData NULL!!!!");
         }*/
         return candidateData;
-    }  
-    
+    }
+       
     public void ProcessCompletedCandidate(CandidateAgentData candidateData, MasterGenomePool masterGenomePool) {
 
         numAgentsEvaluated++;

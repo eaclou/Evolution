@@ -318,13 +318,13 @@ public class GlobalResourcesUI : MonoBehaviour {
                             valStat = speciesPool.avgLifespanPerYearList[t];
                         }
                         else if(a == 1) {
-                            valStat = speciesPool.avgFoodEatenCorpsePerYearList[t];
+                            valStat = speciesPool.avgFoodEatenEggPerYearList[t];
                         }
                         else if(a == 2) {
                             valStat = speciesPool.avgFoodEatenPlantPerYearList[t];
                         }
                         else if(a == 3) {
-                            valStat = speciesPool.avgFoodEatenZoopPerYearList[t] + speciesPool.avgFoodEatenCreaturePerYearList[t] + speciesPool.avgFoodEatenEggPerYearList[t];
+                            valStat = speciesPool.avgFoodEatenZoopPerYearList[t];// + speciesPool.avgFoodEatenCreaturePerYearList[t] + speciesPool.avgFoodEatenEggPerYearList[t];
                         }
                         else if(a == 4) {
                             valStat = speciesPool.avgBodySizePerYearList[t];
@@ -617,12 +617,12 @@ public class GlobalResourcesUI : MonoBehaviour {
         if(pool != null) {
             string speciesStatsString = "SPECIES[" + selectedSpeciesIndex.ToString() + "] " + pool.representativeGenome.bodyGenome.coreGenome.name + " STATS:\n\n";
 
-            int parentSpeciesID = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].parentSpeciesID;
-            int numCandidates = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].candidateGenomesList.Count;
-            int numLeaders = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].leaderboardGenomesList.Count;
-            int numBorn = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].numAgentsEvaluated;
+            int parentSpeciesID = pool.parentSpeciesID;
+            int numCandidates = pool.candidateGenomesList.Count;
+            int numLeaders = pool.leaderboardGenomesList.Count;
+            int numBorn = pool.numAgentsEvaluated;
             int speciesPopSize = 0;
-            float avgFitness = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgLifespan;
+            float avgFitness = pool.avgLifespan;
             for (int a = 0; a < uiManagerRef.gameManager.simulationManager._NumAgents; a++) {
                 if (uiManagerRef.gameManager.simulationManager.agentsArray[a].speciesIndex == selectedSpeciesIndex) {
                     speciesPopSize++;
@@ -646,19 +646,24 @@ public class GlobalResourcesUI : MonoBehaviour {
             debugTxtGlobalSim += "\nSimulation Age: " + uiManagerRef.gameManager.simulationManager.simAgeTimeSteps.ToString();
             debugTxtGlobalSim += "\nYear " + uiManagerRef.gameManager.simulationManager.curSimYear.ToString() + "\n\n";
 
-
+            if(pool.recordHolderLongestLife != null) {
+                speciesStatsString += "Longest Life: " + pool.recordLongestLife.ToString() + ", candidate: " + pool.recordHolderLongestLife.candidateID.ToString();
+            }
+            if(pool.recordHolderMostEaten != null) {
+                speciesStatsString += "    Most Eaten: " + pool.recordMostEaten.ToString() + ", candidate: " + pool.recordHolderMostEaten.candidateID.ToString() + "\n";
+            }
             speciesStatsString += "Species[" + selectedSpeciesIndex.ToString() + "] p(" + parentSpeciesID.ToString() + "), size: " + speciesPopSize.ToString() + ", #cands: " + numCandidates.ToString() + ", numEvals: " + numBorn.ToString() +
                             "\navgFitness: " + avgFitness.ToString("F2") +
-                            "\navgFoodEaten:\nCorpses: " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgFoodEatenCorpse.ToString("F4") +
-                            "\nPlants: " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgFoodEatenPlant.ToString("F4") + 
-                            "\nZoop: " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgFoodEatenZoop.ToString("F4") + 
-                            "\nEggs: " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgFoodEatenEgg.ToString("F4") +
-                            "\nCritters: " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgFoodEatenCreature.ToString("F4") +
-                            "\nAvgTimesAttacked: " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgTimesAttacked.ToString("F4") +
-                            "\nAvgTimesDefended: " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgTimesDefended.ToString("F4") +
-                            "\nAvgTimesDashed: " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgTimesDashed.ToString("F4") +
-                            "\nAvgTimeResting: " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgTimeRested.ToString("F4") +
-                            "\nAvgTimesPregnant: " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgTimesPregnant.ToString("F4");
+                            "\navgFoodEaten:\nCorpses: " + pool.avgFoodEatenCorpse.ToString("F4") +
+                            "\nPlants: " + pool.avgFoodEatenPlant.ToString("F4") + 
+                            "\nZoop: " + pool.avgFoodEatenZoop.ToString("F4") + 
+                            "\nEggs: " + pool.avgFoodEatenEgg.ToString("F4") +
+                            "\nCritters: " + pool.avgFoodEatenCreature.ToString("F4") +
+                            "\nAvgTimesAttacked: " + pool.avgTimesAttacked.ToString("F4") +
+                            "\nAvgTimesDefended: " + pool.avgTimesDefended.ToString("F4") +
+                            "\nAvgTimesDashed: " + pool.avgTimesDashed.ToString("F4") +
+                            "\nAvgTimeResting: " + pool.avgTimeRested.ToString("F4") +
+                            "\nAvgTimesPregnant: " + pool.avgTimesPregnant.ToString("F4");
                             //"\navgTalentSpec: (" + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgSpecAttack.ToString("F2") + ", " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgSpecDefend.ToString("F2") + ", " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgSpecSpeed.ToString("F2") + ", " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgSpecUtility.ToString("F2") +
                             //")\navgDiet: (" + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgFoodSpecDecay.ToString("F2") + ", " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgFoodSpecPlant.ToString("F2") + ", " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgFoodSpecMeat.ToString("F2") +
                             //"\navgFitness: " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].avgFitnessScore.ToString("F2");
@@ -733,8 +738,8 @@ public class GlobalResourcesUI : MonoBehaviour {
             curSpeciesStatName = "Avg Lifespan";
         }
         else if(selectedSpeciesStatsIndex == 1) {
-            curSpeciesStatValue = pool.avgFoodEatenCorpse;
-            curSpeciesStatName = "Avg Carrion Eaten";
+            curSpeciesStatValue = pool.avgFoodEatenEgg;
+            curSpeciesStatName = "Avg Eggs Eaten";
         }
         else if(selectedSpeciesStatsIndex == 2) {
             curSpeciesStatValue = pool.avgFoodEatenPlant;

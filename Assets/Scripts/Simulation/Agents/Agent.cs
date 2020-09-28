@@ -306,7 +306,7 @@ public class Agent : MonoBehaviour {
 
         totalFoodEatenCreature += preyAgent.currentBiomass * 1000f;
 
-        EatFoodMeat(preyAgent.currentBiomass * 1000f); // *(*********************************************** experiment!
+        EatFoodMeat(preyAgent.currentBiomass * 100f); // *(*********************************************** experiment!
         RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Vertebrate! (" + preyAgent.currentBiomass.ToString() + ")", 1f);
         preyAgent.ProcessBeingEaten(preyAgent.currentBiomass);
         
@@ -435,9 +435,9 @@ public class Agent : MonoBehaviour {
             AbortPregnancy();
         }
 
-        colliderBody.enabled = false;
-        bodyRigidbody.simulated = false;
-        bodyRigidbody.isKinematic = true;
+        //colliderBody.enabled = false;
+        //bodyRigidbody.simulated = false;
+        //bodyRigidbody.isKinematic = true;
 
         isSexuallyMature = false;
         isSwallowingPrey = false;
@@ -953,7 +953,7 @@ public class Agent : MonoBehaviour {
         float digestedMeatMass = digestedAmountTotal * foodProportionsVec.y;
         float meatToEnergyAmount = digestedMeatMass; // * coreModule.foodEfficiencyMeat;        
         
-        float createdEnergyTotal = (plantToEnergyAmount + meatToEnergyAmount) * settingsRef.agentSettings._DigestionEnergyEfficiency;
+        float createdEnergyTotal = (plantToEnergyAmount * coreModule.dietSpecPlantNorm + meatToEnergyAmount * coreModule.dietSpecMeatNorm) * settingsRef.agentSettings._DigestionEnergyEfficiency;
         
         wasteProducedLastFrame += digestedAmountTotal * settingsRef.agentSettings._DigestionWasteEfficiency;
         oxygenUsedLastFrame = currentBiomass * settingsRef.agentSettings._BaseOxygenUsage;
@@ -973,7 +973,7 @@ public class Agent : MonoBehaviour {
         }
 
         // Heal:  // *** Re-Implement !!! ***************
-        float healRate = 0.00025f;
+        float healRate = 0.0005f;
         float energyToHealthConversionRate = 5f * coreModule.healthBonus;
         if(coreModule.healthBody < 1f) {
             coreModule.healthBody += healRate;
@@ -989,7 +989,7 @@ public class Agent : MonoBehaviour {
         
         // STAMINA:
         float staminaRefillRate = 0.00025f;
-        float energyToStaminaConversionRate = 5f; // * coreModule.healthBonus;
+        float energyToStaminaConversionRate = 5f * coreModule.healthBonus;
         coreModule.stamina[0] += staminaRefillRate * energyToStaminaConversionRate;
         coreModule.energy -= staminaRefillRate; // / energyToStaminaConversionRate;
 
@@ -1012,13 +1012,13 @@ public class Agent : MonoBehaviour {
         }
 
         //ENERGY:
-        float energyCostMult = 0.44f; // Mathf.Lerp(settingsRef.agentSettings._BaseEnergyCost, settingsRef.agentSettings._BaseEnergyCost * 0.25f, sizePercentage);
+        float energyCostMult = 0.1f; // Mathf.Lerp(settingsRef.agentSettings._BaseEnergyCost, settingsRef.agentSettings._BaseEnergyCost * 0.25f, sizePercentage);
         float restingBonusMult = 1f;
         if(isResting) {
             restingBonusMult = 0.75f;
         }
         
-        float energyCost = (currentBiomass) * energyCostMult * restingBonusMult; // * SimulationManager.energyDifficultyMultiplier; // / coreModule.energyBonus;
+        float energyCost = Mathf.Sqrt(currentBiomass) * energyCostMult * restingBonusMult; // * SimulationManager.energyDifficultyMultiplier; // / coreModule.energyBonus;
         
         float throttleMag = smoothedThrottle.magnitude;
         
@@ -1051,7 +1051,7 @@ public class Agent : MonoBehaviour {
             if(animalParticleEatAmount > 0f) {
                 //float sizeEfficiencyPlant = Mathf.Lerp(settings.minSizeFeedingEfficiencyDecay, settings.maxSizeFeedingEfficiencyDecay, sizeValue);
                 totalFoodEatenZoop += animalParticleEatAmount;
-                animalParticleEatAmount *= 0.98f;
+                //animalParticleEatAmount *= 0.98f;
                 
                 //Debug.Log("Agent[" + index.ToString() + "], Ate Zooplankton: " + animalParticleEatAmount.ToString());
                 EatFoodMeat(animalParticleEatAmount); // * sizeEfficiencyPlant);    
@@ -1113,7 +1113,6 @@ public class Agent : MonoBehaviour {
                 
         curActionState = currentState;
 
-        
         
         if(isDashing) {
             dashFrameCounter++;
@@ -1190,7 +1189,6 @@ public class Agent : MonoBehaviour {
         } 
     }
     
-
     private bool IsFreeToAct() {
         bool isFree = true;
 
@@ -1260,19 +1258,9 @@ public class Agent : MonoBehaviour {
             float turnSharpness = (-Vector2.Dot(throttleDir, headForwardDir) * 0.5f + 0.5f);
             float headTurn = Vector2.Dot(throttleDir, headRightDir) * -1f * turnSharpness;
             float headTurnSign = Mathf.Clamp(Vector2.Dot(throttleDir, headRightDir) * -10000f, -1f, 1f);
-                        
-            //float developmentMultiplier = Mathf.Lerp(0.25f, 1f, Mathf.Clamp01(sizePercentage * 2f));
-            //turningAmount = Mathf.Lerp(turningAmount, this.bodyRigidbody.angularVelocity * Mathf.Deg2Rad * 0.1f, 0.15f);
-
-            //this.rigidbodiesArray[0].AddForce(headForwardDir * speed * Time.deltaTime, ForceMode2D.Impulse);
-
-            //animationCycle += 0.01f; // swimAnimationCycleSpeed; // * smoothedThrottle.magnitude / (Mathf.Lerp(fullSizeBoundingBox.y, 1f, 0.6f) * (growthPercentage * 0.4f + 0.6f));
-            //animationCycle = animationCycle % 1.0f;
-
-            // get size in 0-1 range from minSize to maxSize:
+              
+            // get size in 0-1 range from minSize to maxSize: // **** NOT ACCURATE!!!!
             float sizeValue = Mathf.Clamp01(coreModule.speedBonus * (candidateRef.candidateGenome.bodyGenome.coreGenome.creatureBaseLength - 0.2f) / 2f);  // Mathf.Clamp01((fullSizeBoundingBox.x - 0.1f) / 2.5f); // ** Hardcoded assuming size ranges from 0.1 --> 2.5 !!! ********
-
-            //float aspectSpeedPenalty = 1.0f; // Mathf.Lerp(1.2f, 0.4f, candidateRef.candidateGenome.bodyGenome.coreGenome.creatureAspectRatio);
 
             float swimSpeed = 50f; // Mathf.Lerp(movementModule.smallestCreatureBaseSpeed, movementModule.largestCreatureBaseSpeed, 0.5f); // sizeValue);
             float turnRate = 8f; //10 // Mathf.Lerp(movementModule.smallestCreatureBaseTurnRate, movementModule.largestCreatureBaseTurnRate, 0.5f) * 0.1f; // sizeValue);
@@ -1385,61 +1373,6 @@ public class Agent : MonoBehaviour {
     
     // Colliders Footprint???  *************************************************************************************************************
 
-    /*public void InitializeAgentWidths(AgentGenome genome) {   // This is no longer needed -- going point-by-point instead???
-        // Calculate Widths, total volume, center of mass, etc:
-        // REFACTOR!!! ******
-        this.fullSizeBoundingBox = new Vector3(genome.bodyGenome.coreGenome.fullBodyWidth, genome.bodyGenome.coreGenome.fullBodyLength, genome.bodyGenome.coreGenome.fullBodyWidth);
-
-        // Calculate body regions lengthwise:
-        float totalRelativeLength = genome.bodyGenome.coreGenome.relLengthSnout + genome.bodyGenome.coreGenome.relLengthHead + genome.bodyGenome.coreGenome.relLengthTorso + genome.bodyGenome.coreGenome.relLengthTail;
-        float normalizedSnoutLength = genome.bodyGenome.coreGenome.relLengthSnout / totalRelativeLength;
-        float normalizedHeadLength = genome.bodyGenome.coreGenome.relLengthHead / totalRelativeLength;
-        float normalizedTorsoLength = genome.bodyGenome.coreGenome.relLengthTorso / totalRelativeLength;
-        float normalizedTailLength = genome.bodyGenome.coreGenome.relLengthTail / totalRelativeLength;
-
-        // Calculate body Widths:
-        //float totalRelativeWidth = genome.bodyGenome.coreGenome.relWidthMouth + genome.bodyGenome.coreGenome.relWidthHead + genome.bodyGenome.coreGenome.relWidthTorso + genome.bodyGenome.coreGenome.relWidthTail;
-        float maxRelWidth = Mathf.Max(genome.bodyGenome.coreGenome.relWidthHead, genome.bodyGenome.coreGenome.relWidthTorso);        
-        float normalizedHeadWidth = genome.bodyGenome.coreGenome.relWidthHead / maxRelWidth;
-        float normalizedTorsoWidth = genome.bodyGenome.coreGenome.relWidthTorso / maxRelWidth;
-
-        float normalizedSnoutWidth = genome.bodyGenome.coreGenome.relWidthSnout * normalizedHeadWidth;
-        float normalizedTailWidth = genome.bodyGenome.coreGenome.relWidthTail * normalizedTorsoWidth;
-        
-        // Calculate Width:
-        //int numWidthSamples = 16; // resolution to sample at
-        //float sampleIncrementSize = 1f / (float)widthsTexResolution;
-        float totalWidth = 0f;
-        for(int j = 0; j < widthsTexResolution; j++) {
-            float yCoord = j / (float)widthsTexResolution;
-
-            float sampledWidth = Mathf.Lerp(normalizedSnoutWidth, normalizedHeadWidth, genome.bodyGenome.coreGenome.snoutTaper * (yCoord / normalizedSnoutLength));
-            if(yCoord > normalizedSnoutLength) {
-                //sampledWidth = normalizedHeadWidth;
-                sampledWidth = Mathf.Lerp(normalizedHeadWidth, normalizedTorsoWidth, (yCoord - normalizedSnoutLength) / normalizedHeadLength);
-            }
-            if(yCoord > normalizedSnoutLength + normalizedHeadLength) {
-                sampledWidth = normalizedTorsoWidth;
-            }
-            if(yCoord > normalizedSnoutLength + normalizedHeadLength + normalizedTorsoLength) {
-                //sampledWidth = normalizedTailWidth;
-                sampledWidth = Mathf.Lerp(normalizedTailWidth, normalizedTorsoWidth, genome.bodyGenome.coreGenome.tailTaper * ((1f - yCoord) / normalizedTailLength));
-            }
-            // get absolute from relative value:
-            float circleWidth = Mathf.Sqrt(1f - (yCoord * 2f - 1f) * (yCoord * 2f - 1f));
-            sampledWidth = Mathf.Min(sampledWidth, circleWidth) * genome.bodyGenome.coreGenome.fullBodyWidth;
-                       
-
-            totalWidth += sampledWidth;
-
-            agentWidthsArray[j] = Mathf.Lerp(1f, sampledWidth, 0.5f); // sampledWidth;  *** 1f temporarily to test ***
-        }
-        float avgSegmentWidth = totalWidth / (float)widthsTexResolution;
-
-        fullSizeBodyVolume = genome.bodyGenome.coreGenome.fullBodyWidth * genome.bodyGenome.coreGenome.fullBodyLength; ////avgSegmentWidth * genome.bodyGenome.coreGenome.fullBodyLength;
-        averageFullSizeWidth = avgSegmentWidth;       
-    }*/
-    
     public void ReconstructAgentGameObjects(SettingsManager settings, AgentGenome genome, EggSack parentEggSack, Vector3 startPos, bool isImmaculate, float waterLevel) {
         float corpseLerp = (float)settings.curTierFoodCorpse / 10f;
         //decayDurationTimeSteps = 480; // Mathf.RoundToInt(Mathf.Lerp(360f, 3600f, corpseLerp));

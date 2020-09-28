@@ -76,7 +76,7 @@
 				// Decay color bleach value:
 				float decayTimeRange = 0.4;
 				float decayAmount = saturate((critterSimData.decayPercentage) / decayTimeRange - genericStrokeData.thresholdValue * 2);
-				float4 decayColor = float4(0.25, 0.14, 0.052, 0.9);
+				float4 decayColor = float4(0.25, 0.14, 0.052, 1);
 				
 				float3 brushScale = float3(genericStrokeData.scale, 1);
 								
@@ -132,7 +132,7 @@
 				float alpha = saturate((critterSimData.embryoPercentage - 0.995) * 200) * saturate((0.9 - critterSimData.decayPercentage) * 999);
 								
 				o.color = float4(specTest * 0.65 + hue * crudeDiffuse, alpha); //genericStrokeData.bindPos.x * 0.5 + 0.5, genericStrokeData.bindPos.z * 0.33 + 0.5, genericStrokeData.bindPos.y * 0.5 + 0.5, 1);
-				o.color = lerp(o.color, decayColor, saturate(decayAmount + saturate(critterSimData.decayPercentage * 50) * 0.25));
+				//o.color = decayColor; // 
 				o.color.a *= alpha;
 
 				o.worldPos = float4(vertexWorldPos, 1.0);
@@ -146,7 +146,8 @@
 
 				o.highlight = float4(hoverMask, selectedMask, 0, 0);
 
-				o.color = lerp(o.color, float4(lerp(critterInitData.secondaryHue, critterInitData.primaryHue, patternTexSample.x), 1), 0.45);
+				o.color = lerp(o.color, decayColor, saturate(critterSimData.decayPercentage * 50) * 1);
+				//o.color = lerp(o.color, float4(lerp(critterInitData.secondaryHue, critterInitData.primaryHue, patternTexSample.x), 1), 0.45);
 				return o;
 			}
 			
@@ -160,11 +161,12 @@
 				
 				fixed4 col = tex2D(_MainTex, i.uv) * i.color;
 				
-				col.rgb = lerp(col.rgb, terrainColor.rgb, 0.45); //0.5 * saturate((i.worldPos.z - 0.75) * 0.5));
+				col.rgb = lerp(col.rgb, terrainColor.rgb, 0.25); //0.5 * saturate((i.worldPos.z - 0.75) * 0.5));
 
 				float highlightBoost = (i.highlight.y * _IsSelected * 0.25 * _HighlightOn + i.highlight.x * _IsHover); //saturate(i.highlight.x * _IsHover + i.highlight.y * _IsSelected * 0.5) * _HighlightOn;
 				col.rgb = col.rgb + highlightBoost * 0.5; // i.highlight.x * 0.47;
 
+				//col.rgb = lerp(col.rgb, float3(0.1, 0.02, 0.11), i.color.a);
 
 				//fixed4 col = tex2D(_MainTex, i.bodyUV) * i.color;
 				//col.rgb = float3(i.highlight.x, i.highlight.y, _IsSelected); //i.color.rgb;

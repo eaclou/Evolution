@@ -48,7 +48,7 @@ public class MasterGenomePool {
         currentlyActiveSpeciesIDList.Add(0);
         completeSpeciesPoolsList.Add(rootSpecies);
 
-        int numInitSpecies = 5;
+        int numInitSpecies = 7;
         for(int i = 0; i < numInitSpecies; i++) {
             int ID = i + 1;
             SpeciesGenomePool newSpecies = new SpeciesGenomePool(ID, -1, 0, 0, mutationSettingsRef);
@@ -61,80 +61,16 @@ public class MasterGenomePool {
             completeSpeciesPoolsList.Add(newSpecies);
         }
         
-        
-        /*
-        vertebrateSlotsGenomesCurrentArray = new WorldLayerVertebrateGenome[4]; // 4 slots
-        for(int i = 0; i < 4; i++) {
-            WorldLayerVertebrateGenome vertebrateSlotGenome = new WorldLayerVertebrateGenome();
-            vertebrateSlotGenome.name = "Vertebrate " + i.ToString();
-            vertebrateSlotGenome.textDescriptionMutation = "uhhh... " + " ??";
-            vertebrateSlotsGenomesCurrentArray[i] = vertebrateSlotGenome;
-        }
-
-        vertebrateSlotsGenomesMutationsArray = new WorldLayerVertebrateGenome[4][];
-        for(int slot = 0; slot < 4; slot++) {
-            vertebrateSlotsGenomesMutationsArray[slot] = new WorldLayerVertebrateGenome[4]; // this 4 is number of mutation variants
-            for(int mutation = 0; mutation < 4; mutation++) {
-                WorldLayerVertebrateGenome vertebrateSlotMutatedGenome = new WorldLayerVertebrateGenome();
-                vertebrateSlotMutatedGenome.name = vertebrateSlotsGenomesCurrentArray[slot].name;
-                vertebrateSlotsGenomesMutationsArray[slot][mutation] = vertebrateSlotMutatedGenome;
-            }
-        }
-        */
     }
 
     public void AddNewYearlySpeciesStats(int year) {
         for(int i = 0; i < completeSpeciesPoolsList.Count; i++) {
             completeSpeciesPoolsList[i].AddNewYearlyStats(year);
         }
-    }
-    /*
-    public void GenerateWorldLayerVertebrateGenomeMutationOptions(int slotID, int speciesIndex) {
-        //int speciesIndex = 
-        Debug.Log("GenerateWorldLayerVertebrateGenomeMutationOptions:  slot[ " + slotID.ToString() + " } __ Species:  " + speciesIndex.ToString());
-        for(int mutationID = 0; mutationID < 4; mutationID++) {
-            float mutationSize = Mathf.Clamp01((float)mutationID / 3f + 0.00015f); 
-            mutationSize = mutationSize * mutationSize;
-            mutationSize = Mathf.Lerp(mutationSize, 0.33f, 0.5f);
-            SpeciesGenomePool sourceSpeciesPool = completeSpeciesPoolsList[speciesIndex];
-            // update settings:::  not best way to do this.......
-            mutationSettingsRef.defaultBodyMutationChance = 1f;
-            mutationSettingsRef.defaultBodyMutationStepSize = 1f;
-            mutationSettingsRef.mutationStrengthSlot = mutationSize * mutationSize;  // ***** Shallower curve --> smaller mutations on lower end
-            //uiManagerRef.gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[slotRef.slotID].representativeGenome
-            AgentGenome mutatedGenome = sourceSpeciesPool.Mutate(vertebrateSlotsGenomesCurrentArray[slotID].representativeGenome, true, true); // sourceSpeciesPool.representativeGenome, true, true);
-            vertebrateSlotsGenomesMutationsArray[slotID][mutationID].SetRepresentativeGenome(mutatedGenome);
-            //mutatedGenome.bodyGenome.CalculateFullsizeBoundingBox();
-            string descriptionText = "baseLength: " + mutatedGenome.bodyGenome.coreGenome.creatureBaseLength.ToString("F2") +
-                                     "\naspectRatio: " + mutatedGenome.bodyGenome.coreGenome.creatureAspectRatio.ToString("F2") +
-                                     "\n" + mutatedGenome.bodyGenome.GetFullsizeBoundingBox().ToString("F1");
-            vertebrateSlotsGenomesMutationsArray[slotID][mutationID].name = descriptionText; // vertebrateSlotsGenomesCurrentArray[slotID].name;
-            vertebrateSlotsGenomesMutationsArray[slotID][mutationID].textDescriptionMutation = descriptionText; // "Mutation^^^ Amt: " + (mutationSize * 100f).ToString("F1") + "%";
-            
-            
-        }
-    }
-    
+    }        
 
-    public void ProcessSlotMutation(int slotID, int mutationID, int speciesIndex) {
-        SpeciesGenomePool sourceSpeciesPool = completeSpeciesPoolsList[speciesIndex];
-         //vertebrateSlotsGenomesMutationsArray[slotID][mutationID].representativeGenome;
-        AgentGenome mutatedGenome = sourceSpeciesPool.Mutate(vertebrateSlotsGenomesCurrentArray[slotID].representativeGenome, false, false);
-        vertebrateSlotsGenomesCurrentArray[slotID].representativeGenome = mutatedGenome;
-        vertebrateSlotsGenomesCurrentArray[slotID].name = vertebrateSlotsGenomesMutationsArray[slotID][mutationID].name;
-        Debug.Log("____ProcessSlotMutation: slot: " + slotID.ToString() + ", mut#: " + mutationID.ToString() + ", speciesID: " + speciesIndex.ToString());
-        // = mutatedGenome;
-
-        //representativeAlgaeLayerGenome = algaeParticlesArray[0];
-        //algaeParticlesRepresentativeGenomeCBuffer = new ComputeBuffer(1, GetAlgaeParticleDataSize());
-        //AlgaeParticleData[] algaeParticlesRepresentativeGenomeArray = new AlgaeParticleData[1];
-        //algaeParticlesRepresentativeGenomeArray[0] = algaeSlotGenomeCurrent.algaeRepData;
-        //algaeParticlesRepresentativeGenomeCBuffer.SetData(algaeParticlesRepresentativeGenomeArray);
-    }
-    */
     public void Tick() {
         speciesCreatedOrDestroyedThisFrame = false;
-
     }
 
     private void CheckForExtinction(SimulationManager simManagerRef) {

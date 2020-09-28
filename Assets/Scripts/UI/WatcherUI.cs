@@ -383,12 +383,12 @@ public class WatcherUI : MonoBehaviour {
                         followCreaturePanel.SetActive(true);
 
                         textStomachContents.text = "STOMACH " + Mathf.Clamp01(agent.coreModule.stomachContentsNorm * 1f).ToString("F5");
-                        textEnergy.text = "ENERGY " + agent.coreModule.energy.ToString("F5");
+                        textEnergy.text = "ENERGY " + (agent.coreModule.energy / agent.currentBiomass).ToString("F5");
                         textHealth.text = "HEALTH " + agent.coreModule.healthBody.ToString("F5");
                         textWaste.text = "WASTE " + agent.wasteProducedLastFrame.ToString("F5");
 
                         textNewInspectLog.text = agent.stringCauseOfDeath.ToString() + ", " + agent.cooldownFrameCounter.ToString() + " / " + agent.cooldownDuration.ToString(); // agent.lastEvent;
-                        newInspectAgentEnergyMat.SetFloat("_Value", Mathf.Clamp01(agent.coreModule.energy * 0.001f));
+                        newInspectAgentEnergyMat.SetFloat("_Value", Mathf.Clamp01((agent.coreModule.energy * Mathf.Sqrt(agent.currentBiomass)) * 1f));
                         newInspectAgentStaminaMat.SetFloat("_Value", Mathf.Clamp01(agent.coreModule.stamina[0] * 1f));
                         newInspectAgentStomachMat.SetFloat("_Value", Mathf.Clamp01(agent.coreModule.stomachContentsNorm * 1f));
 

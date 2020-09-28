@@ -13,6 +13,10 @@ public class CandidateAgentData {
     public bool allEvaluationsComplete = false;
     public bool isBeingEvaluated = false;
 
+    // move stored performance stats here? *****
+    //
+    //
+
     public CandidateAgentData(AgentGenome genome, int speciesID) {
         //Debug.Log("NewCandidateData: " + MasterGenomePool.nextCandidateIndex.ToString());
         int ID = MasterGenomePool.nextCandidateIndex;
