@@ -982,7 +982,7 @@ public class SimulationManager : MonoBehaviour {
                 agentsArray[i].bodyRigidbody.AddForce(-grad * agentsArray[i].bodyRigidbody.mass * wallForce, ForceMode2D.Impulse);
 
 
-                float damage = wallForce * 0.005f;  
+                float damage = wallForce * 0.015f;  
                 
                 if(depthSample.w < 0.51f) {
                     damage *= 0.33f;

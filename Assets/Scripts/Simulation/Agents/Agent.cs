@@ -1262,14 +1262,14 @@ public class Agent : MonoBehaviour {
             // get size in 0-1 range from minSize to maxSize: // **** NOT ACCURATE!!!!
             float sizeValue = Mathf.Clamp01(coreModule.speedBonus * (candidateRef.candidateGenome.bodyGenome.coreGenome.creatureBaseLength - 0.2f) / 2f);  // Mathf.Clamp01((fullSizeBoundingBox.x - 0.1f) / 2.5f); // ** Hardcoded assuming size ranges from 0.1 --> 2.5 !!! ********
 
-            float swimSpeed = 50f; // Mathf.Lerp(movementModule.smallestCreatureBaseSpeed, movementModule.largestCreatureBaseSpeed, 0.5f); // sizeValue);
-            float turnRate = 8f; //10 // Mathf.Lerp(movementModule.smallestCreatureBaseTurnRate, movementModule.largestCreatureBaseTurnRate, 0.5f) * 0.1f; // sizeValue);
+            float swimSpeed = 80f; // Mathf.Lerp(movementModule.smallestCreatureBaseSpeed, movementModule.largestCreatureBaseSpeed, 0.5f); // sizeValue);
+            float turnRate = 12f; //10 // Mathf.Lerp(movementModule.smallestCreatureBaseTurnRate, movementModule.largestCreatureBaseTurnRate, 0.5f) * 0.1f; // sizeValue);
             float dashBonus = 1f;
             if(isDashing) {                
                 dashBonus = 5f;                
             }
             if(isCooldown) {
-                dashBonus = 0.5f;
+                dashBonus = 0.35f;
             }
 
 
