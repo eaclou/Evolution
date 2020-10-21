@@ -154,10 +154,13 @@ public class AgentBehaviorOneHot : MonoBehaviour {
 
         //isActive = false;
         if(isCooldown) {
-            textOther.color = Color.yellow;            
+            textOther.color = Color.yellow;
+            textOther.gameObject.SetActive(true);
+            throttleGO.gameObject.SetActive(false);
         }
         else {
-            textOther.color = Color.gray;
+            textOther.gameObject.SetActive(false);
+            throttleGO.gameObject.SetActive(true);
         }
         behaviorBarOther.transform.localScale = Vector3.one * (other * 0.5f + 0.5f); // new Vector3(other, other, 1f);
         UpdateBarColor(behaviorBarOther.GetComponent<Image>(), other, isActive);

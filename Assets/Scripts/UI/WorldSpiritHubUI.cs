@@ -361,10 +361,10 @@ public class WorldSpiritHubUI : MonoBehaviour {
     }
     public void UpdateWorldSpiritHubUI() {
         if(uiManagerRef.panelFocus == UIManager.PanelFocus.WorldHub) {
-            animatorWorldHubUI.SetBool("_IsDimmed", false);
+            //animatorWorldHubUI.SetBool("_IsDimmed", false);
         }
         else {
-            animatorWorldHubUI.SetBool("_IsDimmed", true);            
+            //animatorWorldHubUI.SetBool("_IsDimmed", true);            
         }
 
         animatorWorldHubUI.SetBool("_IsOpen", isOpen);
@@ -395,14 +395,14 @@ public class WorldSpiritHubUI : MonoBehaviour {
         selectedWorldSpiritSlot = uiManagerRef.brushesUI.selectedEssenceSlot;
         uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
         this.isOpen = true;
-        animatorWorldHubUI.SetBool("_IsOpen", true);
+        //animatorWorldHubUI.SetBool("_IsOpen", true);
         //isPaletteOpen = true;
     }
     public void SetTargetFromWatcherUI() {
         selectedWorldSpiritSlot = uiManagerRef.watcherUI.watcherSelectedTrophicSlotRef;
         uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
         this.isOpen = true;
-        animatorWorldHubUI.SetBool("_IsOpen", true);
+        //animatorWorldHubUI.SetBool("_IsOpen", true);
     }
     public void OpenWorldTreeSelect() {
         isOpen = true;

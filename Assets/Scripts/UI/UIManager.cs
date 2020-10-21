@@ -42,6 +42,12 @@ public class UIManager : MonoBehaviour {
         Watcher
     }
 
+    public GameObject panelGenomeViewer;
+    public GameObject panelMinimap;
+    public GameObject panelSpeciesTree;
+    public GameObject panelSpeciesOverview;
+    public GameObject panelGraphs;
+
     // Main Menu:
     public Button buttonQuickStartResume;
     public Button buttonNewSimulation;
@@ -68,7 +74,7 @@ public class UIManager : MonoBehaviour {
     public Image imageBigBangStrokes01;
     public Image imageBigBangStrokes02;
     public Image imageBigBangStrokes03;
-
+     
     public bool updateTerrainAltitude;
     public float terrainUpdateMagnitude;
     
@@ -178,6 +184,36 @@ public class UIManager : MonoBehaviour {
     
     #endregion
 
+    public void ClickButtonOpenMinimap() {
+        panelMinimap.SetActive(true);
+    }
+    public void ClickButtonCloseMinimap() {
+        panelMinimap.SetActive(false);
+    }
+
+    public void ClickButtonOpenSpeciesTree() {
+        panelSpeciesTree.SetActive(true);
+        panelGraphs.SetActive(true);
+    }
+    public void ClickButtonCloseSpeciesTree() {
+        panelSpeciesTree.SetActive(false);
+        panelGraphs.SetActive(false);
+    }
+
+    public void ClickButtonOpenGenome() {
+        panelGenomeViewer.SetActive(true);
+    }
+    public void ClickButtonCloseGenome() {
+        panelGenomeViewer.SetActive(false);
+    }
+
+    public void ClickButtonOpenSpeciesOverview() {
+        panelSpeciesOverview.SetActive(true);
+    }
+    public void ClickButtonCloseSpeciesOverview() {
+        panelSpeciesOverview.SetActive(false);
+    }
+
     public void NarratorText(string message, Color col) {
         panelPendingClickPrompt.GetComponentInChildren<Text>().text = message;
         panelPendingClickPrompt.GetComponentInChildren<Text>().color = col;
@@ -277,6 +313,7 @@ public class UIManager : MonoBehaviour {
         }
     }
     private void UpdateMainMenuUI() {
+
         Cursor.visible = true;   /////// ********************** Move to CursorCzar!!!
         if (firstTimeStartup) {
             buttonQuickStartResume.GetComponentInChildren<Text>().text = "QUICK START";
@@ -408,7 +445,8 @@ public class UIManager : MonoBehaviour {
         watcherUI.isUnlocked = true;
         watcherUI.ClickToolButton();
         panelFocus = PanelFocus.Watcher;
-        watcherUI.animatorWatcherUI.SetBool("_IsOpen", true);
+
+        //watcherUI.animatorWatcherUI.SetBool("_IsOpen", true);
                 
         gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
                 
@@ -469,9 +507,7 @@ public class UIManager : MonoBehaviour {
         //worldSpiritHubUI.selectedWorldSpiritSlot = gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1];
         //brushesUI.selectedEssenceSlot = gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1];
 
-
         // SPAWNS!!!! 
-
         gameManager.simulationManager.AttemptToBrushSpawnAgent(brushesUI.selectedEssenceSlot.linkedSpeciesID);
 
         
@@ -485,34 +521,18 @@ public class UIManager : MonoBehaviour {
         // ^^^  Need to Clean this up and replace with better approach ***********************
         
         theCursorCzar.UpdateCursorCzar();  // this will assume a larger role
-        // nearPlaneQuad vertex positions --> find worldSpacePos of Canvas 2D Cursor
-        /*Vector2 cursorScreenPosNormalized = new Vector2(Input.mousePosition.x / cameraManager.cameraRef.pixelWidth, Input.mousePosition.y / cameraManager.cameraRef.pixelHeight);
-        Vector3 bottomMidpoint = Vector3.Lerp(cameraManager.worldSpaceBottomLeft, cameraManager.worldSpaceBottomRight, cursorScreenPosNormalized.x);
-        Vector3 topMidpoint = Vector3.Lerp(cameraManager.worldSpaceTopLeft, cameraManager.worldSpaceTopRight, cursorScreenPosNormalized.x);
-        Vector3 midMidpoint = Vector3.Lerp(bottomMidpoint, topMidpoint, cursorScreenPosNormalized.y);
-        //theCursorCzar.cursorParticlesWorldPos = midMidpoint;
-        string cursorTextString = "";
-        cursorTextString += "MP: (" + Input.mousePosition.x.ToString() + ", " + Input.mousePosition.y.ToString() + ", " + Input.mousePosition.z.ToString() + ")";
-        cursorTextString += "\nCZWP: (" + theCursorCzar.curMousePositionOnWaterPlane.x.ToString() + ", " + theCursorCzar.curMousePositionOnWaterPlane.y.ToString() + ", " + theCursorCzar.curMousePositionOnWaterPlane.z.ToString() + ")";
-        cursorTextString += "\nRay: (" + theCursorCzar.cursorRay.ToString();
-        cursorTextString += "\nCPs: (" + theCursorCzar.cursorParticlesWorldPos.ToString();
-        */
-        //cameraRef.pixelHeight
-        //textCursorInfo.text = cursorTextString;
-        
+
         brushesUI.UpdateBrushesUI();
         watcherUI.UpdateWatcherPanelUI(gameManager.simulationManager.trophicLayersManager);
         knowledgeUI.UpdateKnowledgePanelUI(gameManager.simulationManager.trophicLayersManager);
         mutationUI.UpdateMutationPanelUI(gameManager.simulationManager.trophicLayersManager);
-        worldSpiritHubUI.UpdateWorldSpiritHubUI();
-
+        //worldSpiritHubUI.UpdateWorldSpiritHubUI();
         globalResourcesUI.UpdateGlobalResourcesPanelUpdate();
-
         featsUI.UpdateFeatsPanelUI(gameManager.simulationManager.featsList);
-
         UpdateClockPanelUI();
 
-        
+        // **** Temp panel display stuff:
+ 
         if(wildSpirit.isClickableSpiritRoaming) {
             wildSpirit.UpdateWildSpiritProto();
         }
@@ -528,9 +548,7 @@ public class UIManager : MonoBehaviour {
         
         debugPanelUI.UpdateDebugUI();
               
-        UpdatePausedUI();
-        
-        
+        UpdatePausedUI();        
     }
 
     public void SpiritUnlockComplete() {
@@ -613,7 +631,7 @@ public class UIManager : MonoBehaviour {
                 watcherUI.isUnlocked = true;
                 watcherUI.ClickToolButton();
                 panelFocus = PanelFocus.Watcher;
-                watcherUI.animatorWatcherUI.SetBool("_IsOpen", true);
+                //watcherUI.animatorWatcherUI.SetBool("_IsOpen", true);
                 //AnnounceUnlockWatcherSpirit();
                 wildSpirit.curClickableSpiritType = WildSpirit.ClickableSpiritType.Plants;
                 break;
@@ -877,6 +895,7 @@ public class UIManager : MonoBehaviour {
                 int selectedZoopID = gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex;
                 int closestZoopID = gameManager.simulationManager.zooplanktonManager.closestAnimalParticleData.index;
                 float zoopDist = (new Vector2(gameManager.simulationManager.zooplanktonManager.closestAnimalParticleData.worldPos.x, gameManager.simulationManager.zooplanktonManager.closestAnimalParticleData.worldPos.y) - new Vector2(theCursorCzar.curMousePositionOnWaterPlane.x, theCursorCzar.curMousePositionOnWaterPlane.y)).magnitude;
+                
                 /*
                 if(plantDist < zoopDist) {                    
                     
@@ -909,14 +928,30 @@ public class UIManager : MonoBehaviour {
                 watcherUI.isVertebrateHighlight = 0f;
                 if(cameraManager.isMouseHoverAgent) {  // move this to cursorCzar?
                     watcherUI.isVertebrateHighlight = 1f;
+
+                    theCursorCzar.textTooltip.text = "Critter #" + gameManager.simulationManager.cameraManager.mouseHoverAgentRef.candidateRef.candidateID.ToString();
+                    theCursorCzar.textTooltip.color = Color.white;
                 }
                 else {
                     if(plantDist < zoopDist && plantDist < 2f) {
                         watcherUI.isPlantParticleHighlight = 1f;
+
+                        theCursorCzar.textTooltip.text = "Algae #" + gameManager.simulationManager.vegetationManager.closestPlantParticleData.index.ToString();
+                        theCursorCzar.textTooltip.color = Color.green;
                     }
                     if(plantDist > zoopDist && zoopDist < 2f) {
                         watcherUI.isZooplanktonHighlight = 1f;
+
+                        theCursorCzar.textTooltip.text = "Microbe #" + gameManager.simulationManager.zooplanktonManager.closestAnimalParticleData.index.ToString();
+                        theCursorCzar.textTooltip.color = Color.yellow;
                     }
+                }
+
+                if ((watcherUI.isPlantParticleHighlight == 0f) && (watcherUI.isZooplanktonHighlight == 0f) && (watcherUI.isVertebrateHighlight == 0f)) {
+                    theCursorCzar.panelTooltip.SetActive(false);
+                }
+                else {
+                    theCursorCzar.panelTooltip.SetActive(true);
                 }
                 
 
@@ -1010,53 +1045,21 @@ public class UIManager : MonoBehaviour {
                 //Cursor.visible = true;
             }
 
-            //bool isCursorOn = true;
-            if(gameManager.uiManager.curActiveTool == ToolType.Add) {
-                //isCursorOn = false;
-            }
-            if(gameManager.uiManager.curActiveTool == ToolType.Stir) {
-                //isCursorOn = false;
-            }
-            //Cursor.visible = isCursorOn;
-
             if (Input.GetMouseButtonDown(1)) {
                 Debug.Log("RIGHT CLICKETY-CLICK!");
             }
 
             if (Input.GetAxis("Mouse ScrollWheel") > 0f ) //  Forwards
             {
+                cameraManager.ZoomCamera(-1f);
                 
-
-                if(mutationUI.isPointerOver) {
-                    mutationUI.critterSizeMult += 0.1f;
-                    //gameManager.theRenderKing.slotPortraitRenderCamera.GetComponent<CritterPortraitCameraManager>().targetZoomLevel -= 1f;
-                    //Debug.Log(":::::" + gameManager.theRenderKing.slotPortraitRenderCamera.GetComponent<CritterPortraitCameraManager>().targetZoomLevel.ToString());//.UpdateCameraTargetValues(sizeNormalized);
-                    //genome0.bodyGenome.CalculateFullsizeBoundingBox();
-                    //float minLength = 0.5f;
-                    //float maxLength = 40f;
-                    //float sizeNormalized = Mathf.Clamp01((genome0.bodyGenome.fullsizeBoundingBox.y - minLength) / (maxLength - minLength));
-                    //sizeNormalized = 1f;
-                    //slotPortraitRenderCamera.GetComponent<CritterPortraitCameraManager>().UpdateCameraTargetValues(sizeNormalized);
-                }
-                else {
-                    cameraManager.ZoomCamera(-1f);
-                }
             }
             else if (Input.GetAxis("Mouse ScrollWheel") < 0f ) //  Backwarfds
             {  
-                if(mutationUI.isPointerOver) {
-                    //gameManager.theRenderKing.slotPortraitRenderCamera.GetComponent<CritterPortraitCameraManager>().targetZoomLevel += 1f;
-                    //Debug.Log(":::::" + gameManager.theRenderKing.slotPortraitRenderCamera.GetComponent<CritterPortraitCameraManager>().targetZoomLevel.ToString());
-
-                    mutationUI.critterSizeMult -= 0.1f;
-                    mutationUI.critterSizeMult = Mathf.Max(0.1f, mutationUI.critterSizeMult);
-                }
-                else {
-                    cameraManager.ZoomCamera(1f); 
-                }
+                cameraManager.ZoomCamera(1f);                 
             }
 
-            float zoomSpeed = 0.167f;
+            float zoomSpeed = 0.2f;
             float zoomVal = 0f;
             if (Input.GetKey("joystick button 4")) //  Forwards
             {

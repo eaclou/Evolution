@@ -10,10 +10,10 @@
 	}
 	SubShader
 	{
-		Tags{ "RenderType" = "Opaque" }
+		Tags{ "RenderType" = "Transparent" }
 		ZWrite Off
 		//Cull Off
-		//Blend SrcAlpha OneMinusSrcAlpha
+		Blend SrcAlpha OneMinusSrcAlpha
 
 		Pass
 		{

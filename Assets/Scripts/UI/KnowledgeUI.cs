@@ -20,7 +20,7 @@ public class KnowledgeUI : MonoBehaviour {
         Three
     }
 
-    public Animator animatorKnowledgeUI;
+    //public Animator animatorKnowledgeUI;
 
     public Image imageKnowledgeSpeciesStatsGraph;
 
@@ -90,16 +90,16 @@ public class KnowledgeUI : MonoBehaviour {
         isOpen = !isOpen;
 
         if(isOpen) {
-            animatorKnowledgeUI.SetBool("_IsOpen", true);
+            //animatorKnowledgeUI.SetBool("_IsOpen", true);
         }
         else {
-            animatorKnowledgeUI.SetBool("_IsOpen", false);
+            //animatorKnowledgeUI.SetBool("_IsOpen", false);
         }
     }
 
     public void OpenKnowledgePanel() {
         isOpen = true;
-        animatorKnowledgeUI.SetBool("_IsOpen", true);
+        //animatorKnowledgeUI.SetBool("_IsOpen", true);
     }
 
     private void UpdateUI(TrophicLayersManager layerManager) {

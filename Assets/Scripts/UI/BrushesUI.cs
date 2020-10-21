@@ -21,7 +21,7 @@ public class BrushesUI : MonoBehaviour {
     public Button buttonBrushExtra2;
     public Button buttonBrushExtra3;
 
-    public Animator animatorBrushesUI;
+    //public Animator animatorBrushesUI;
         
     public float toolbarInfluencePoints = 1f;
     public Text textInfluencePointsValue;
@@ -171,15 +171,14 @@ public class BrushesUI : MonoBehaviour {
         selectedBrushLinkedSpiritOtherLayer = uiManagerRef.worldSpiritHubUI.selectedToolbarOtherLayer;
         selectedBrushLinkedSpiritTerrainLayer = uiManagerRef.worldSpiritHubUI.selectedToolbarTerrainLayer;
         selectedBrushVertebrateSpeciesID = uiManagerRef.worldSpiritHubUI.selectedWorldSpiritVertebrateSpeciesID;
-
-
-        animatorBrushesUI.SetBool("MinPanel", !isOpen);
+        
+        //animatorBrushesUI.SetBool("MinPanel", !isOpen);
         bool isDim = false;
         if(uiManagerRef.panelFocus == UIManager.PanelFocus.Brushes) {            
-            animatorBrushesUI.SetBool("_IsDim", false);
+            //animatorBrushesUI.SetBool("_IsDim", false);
         }
         else {
-            animatorBrushesUI.SetBool("_IsDim", true);
+            //animatorBrushesUI.SetBool("_IsDim", true);
             isDim = true;
         }
         textBrushLinkedSpiritName.gameObject.SetActive(!isDim);
@@ -708,12 +707,12 @@ public class BrushesUI : MonoBehaviour {
             EnterCreationBrushMode();
             //uiManagerRef.isBrushModeON_snoopingOFF = true; // ***** Switching to brushingMode!!! ***
 
-            animatorBrushesUI.SetBool("MinPanel", false);
+            //animatorBrushesUI.SetBool("MinPanel", false);
         }
         else {
             uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
 
-            animatorBrushesUI.SetBool("MinPanel", true);
+            //animatorBrushesUI.SetBool("MinPanel", true);
         }
     }
     public void SetTargetFromWorldTree() {

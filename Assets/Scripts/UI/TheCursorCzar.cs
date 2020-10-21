@@ -12,6 +12,9 @@ public class TheCursorCzar : MonoBehaviour {
     private Vector3 prevMousePositionOnWaterPlane;
     public Vector3 curMousePositionOnWaterPlane;
 
+    public Text textTooltip;
+    public GameObject panelTooltip;
+
     public float stirStickDepth = 0f;
 
     public Vector2 smoothedMouseVel;
@@ -107,6 +110,12 @@ public class TheCursorCzar : MonoBehaviour {
                     if (uiManagerRef.panelFocus == UIManager.PanelFocus.Watcher) {
                         uiManagerRef.cameraManager.SetTargetAgent(agentRef, agentRef.index);
                         uiManagerRef.cameraManager.isFollowingAgent = true;
+
+                        uiManagerRef.globalResourcesUI.SetSelectedSpeciesUI(agentRef.speciesIndex);
+                        
+                        
+                        //uiManagerRef.globalResourcesUI.selectedSpeciesIndex = agentRef.speciesIndex; // *************************************************
+
                         uiManagerRef.watcherUI.StopFollowingPlantParticle();
                         uiManagerRef.watcherUI.StopFollowingAnimalParticle();
                         
@@ -146,6 +155,7 @@ public class TheCursorCzar : MonoBehaviour {
 	
 	public void UpdateCursorCzar () {
         
+        //cursor sprite:
         if(uiManagerRef.panelFocus == UIManager.PanelFocus.Brushes) {
             Cursor.SetCursor(cursorTexBrush, Vector2.zero, CursorMode.Auto);
         }
@@ -187,22 +197,11 @@ public class TheCursorCzar : MonoBehaviour {
         stirGizmoVisible = false;
 
         //-----------------------------------------------------------------------------------------
-
         Vector2 curMousePos = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
         Vector2 instantMouseVel = curMousePos - prevMousePos;
         smoothedMouseVel = Vector2.Lerp(smoothedMouseVel, instantMouseVel, 0.16f);
         prevMousePos = curMousePos;
 
-        if(Input.mousePosition.x < 320) {
-            if(Input.mousePosition.y < 320) {
-                uiManagerRef.mutationUI.isPointerOver = true;
-            }
-            else {
-                uiManagerRef.mutationUI.isPointerOver = false;
-            }
-        }
-        else {
-            uiManagerRef.mutationUI.isPointerOver = false;
-        }
+        panelTooltip.transform.position = new Vector3(curMousePos.x, curMousePos.y, 0f);
 	}
 }

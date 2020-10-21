@@ -304,10 +304,11 @@ public class Agent : MonoBehaviour {
         swallowingPreyFrameCounter = 0;
         preyAgentRef = preyAgent;
 
-        totalFoodEatenCreature += preyAgent.currentBiomass * 1000f;
+        float foodAmount = preyAgent.currentBiomass * 1000f;  // *(*********************************************** experiment!
+        totalFoodEatenCreature += foodAmount;
 
-        EatFoodMeat(preyAgent.currentBiomass * 100f); // *(*********************************************** experiment!
-        RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Vertebrate! (" + preyAgent.currentBiomass.ToString() + ")", 1f);
+        EatFoodMeat(foodAmount);
+        RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Vertebrate! (" + foodAmount.ToString() + ") candID: " + preyAgent.candidateRef.candidateID.ToString(), 1f);
         preyAgent.ProcessBeingEaten(preyAgent.currentBiomass);
         
         colliderBody.enabled = false;
@@ -730,7 +731,7 @@ public class Agent : MonoBehaviour {
 
         if(isBeingSwallowed) {
             
-            Debug.Log("TickEgg() isBeingSwallowed! " + index.ToString() + " --> " + predatorAgentRef.index.ToString());
+            //Debug.Log("TickEgg() isBeingSwallowed! " + index.ToString() + " --> " + predatorAgentRef.index.ToString());
             
 
         }
@@ -803,7 +804,7 @@ public class Agent : MonoBehaviour {
         //ProcessSwallowing();
 
         if(isSwallowingPrey) {
-            Debug.Log("Holy SH!T a creature was eaten! " + index.ToString() + " --> " + preyAgentRef.index.ToString());
+            //Debug.Log("Holy SH!T a creature was eaten! " + index.ToString() + " --> " + preyAgentRef.index.ToString());
             //mouthRef.BiteCorpseFood(preyAgentRef, currentBiomass * 0.05f);
         }
 
@@ -1262,14 +1263,14 @@ public class Agent : MonoBehaviour {
             // get size in 0-1 range from minSize to maxSize: // **** NOT ACCURATE!!!!
             float sizeValue = Mathf.Clamp01(coreModule.speedBonus * (candidateRef.candidateGenome.bodyGenome.coreGenome.creatureBaseLength - 0.2f) / 2f);  // Mathf.Clamp01((fullSizeBoundingBox.x - 0.1f) / 2.5f); // ** Hardcoded assuming size ranges from 0.1 --> 2.5 !!! ********
 
-            float swimSpeed = 80f; // Mathf.Lerp(movementModule.smallestCreatureBaseSpeed, movementModule.largestCreatureBaseSpeed, 0.5f); // sizeValue);
+            float swimSpeed = 160f; // Mathf.Lerp(movementModule.smallestCreatureBaseSpeed, movementModule.largestCreatureBaseSpeed, 0.5f); // sizeValue);
             float turnRate = 12f; //10 // Mathf.Lerp(movementModule.smallestCreatureBaseTurnRate, movementModule.largestCreatureBaseTurnRate, 0.5f) * 0.1f; // sizeValue);
             float dashBonus = 1f;
             if(isDashing) {                
                 dashBonus = 5f;                
             }
             if(isCooldown) {
-                dashBonus = 0.35f;
+                dashBonus = 0.25f;
             }
 
 
