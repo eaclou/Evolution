@@ -202,6 +202,7 @@ public class UIManager : MonoBehaviour {
 
     public void ClickButtonOpenGenome() {
         panelGenomeViewer.SetActive(true);
+        //Debug.Log("ClickButtonOpenGenome");
     }
     public void ClickButtonCloseGenome() {
         panelGenomeViewer.SetActive(false);
@@ -213,6 +214,8 @@ public class UIManager : MonoBehaviour {
     public void ClickButtonCloseSpeciesOverview() {
         panelSpeciesOverview.SetActive(false);
     }
+
+    
 
     public void NarratorText(string message, Color col) {
         panelPendingClickPrompt.GetComponentInChildren<Text>().text = message;

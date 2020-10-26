@@ -21,7 +21,7 @@ public class CritterModuleCore {
 
     public float stomachContentsNorm = 0f;  // 0-1 normalized
     public float stomachCapacity = 1f;  // absolute value in units of (area?)
-    //public float stomachContentsDecay = 0f;
+    public float stomachContentsDecay = 0f;
     public float stomachContentsPlant = 0f;
     public float stomachContentsMeat = 0f;
 
@@ -203,7 +203,7 @@ public class CritterModuleCore {
         contactForceY[0] = 0f;
         hitPoints[0] = Mathf.Max(healthBody, 0f);
         //stamina[0] = stamina; // set in Agent.cs
-        energyStored[0] = Mathf.Clamp01(energy * 0.01f);  // Mathf.Clamp01(energyRaw / maxEnergyStorage);
+        energyStored[0] = Mathf.Clamp01(energy * 0.001f);  // Mathf.Clamp01(energyRaw / maxEnergyStorage);
         foodStored[0] = stomachContentsNorm; // / stomachCapacity;
         
         

@@ -79,7 +79,7 @@ public class CritterModuleCommunication {
 
     public void Tick(Agent agent) {
         if(genome.useComms) {
-            if(agent.coreModule.nearestFriendAgent != null && agent.coreModule.nearestFriendAgent.isDefending) {
+            if(agent.coreModule.nearestFriendAgent != null) { // && agent.coreModule.nearestFriendAgent.isDefending) {
                 //Debug.Log("does this happen? yes");
                 inComm0[0] = Mathf.Round(agent.coreModule.nearestFriendAgent.communicationModule.outComm0[0]); 
                 inComm1[0] = Mathf.Round(agent.coreModule.nearestFriendAgent.communicationModule.outComm1[0]);

@@ -147,9 +147,9 @@ public class WatcherUI : MonoBehaviour {
     public void ClickButtonFollowBehavior() {
         isFollowBehaviorPanelOn = !isFollowBehaviorPanelOn;
     }
-    public void ClickButtonFollowGenome() {
-        isFollowGenomePanelOn = !isFollowGenomePanelOn;
-    }
+    //public void ClickButtonFollowGenome() {
+    //    isFollowGenomePanelOn = !isFollowGenomePanelOn;
+    //}
     public void ClickButtonFollowHistory() {
         isFollowHistoryPanelOn = !isFollowHistoryPanelOn;
     }
@@ -219,7 +219,7 @@ public class WatcherUI : MonoBehaviour {
 
                 panelFollowStatus.SetActive(isFollowStatusPanelOn);
                 panelFollowBehavior.SetActive(isFollowBehaviorPanelOn);
-                panelFollowGenome.SetActive(isFollowGenomePanelOn);
+                //panelFollowGenome.SetActive(isFollowGenomePanelOn);
                 panelFollowHistory.SetActive(isFollowHistoryPanelOn);
                 
                 textStomachContents.text = "STOMACH " + Mathf.Clamp01(agent.coreModule.stomachContentsNorm * 1f).ToString("F5");

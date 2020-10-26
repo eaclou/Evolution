@@ -990,10 +990,10 @@ public class SimulationManager : MonoBehaviour {
                 float defendBonus = 1f;
                 if(agentsArray[i].coreModule != null && agentsArray[i].curLifeStage == Agent.AgentLifeStage.Mature) {
                     if(agentsArray[i].isDefending) {                        
-                        defendBonus = 0.1f;
+                        defendBonus = 0f;
                     }
                     else {
-                        defendBonus = 1.25f; // cooldown penalty
+                        defendBonus = 1.5f; // cooldown penalty
                     }
                     damage *= defendBonus;
 

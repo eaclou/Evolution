@@ -12,7 +12,7 @@ public class MasterGenomePool {
     public int maxNumActiveSpecies = 6;
     private int targetNumSpecies = 3;
     public float speciesSimilarityDistanceThreshold = 4f;
-    private int minNumGuaranteedEvalsForNewSpecies = 256;
+    private int minNumGuaranteedEvalsForNewSpecies = 128;
 
     public int currentHighestDepth = 1;
     
@@ -48,13 +48,13 @@ public class MasterGenomePool {
         currentlyActiveSpeciesIDList.Add(0);
         completeSpeciesPoolsList.Add(rootSpecies);
 
-        int numInitSpecies = 7;
+        int numInitSpecies = 6;
         for(int i = 0; i < numInitSpecies; i++) {
             int ID = i + 1;
             SpeciesGenomePool newSpecies = new SpeciesGenomePool(ID, -1, 0, 0, mutationSettingsRef);
             AgentGenome seedGenome = new AgentGenome();
             seedGenome.GenerateInitialRandomBodyGenome();
-            int tempNumHiddenNeurons = 0;
+            int tempNumHiddenNeurons = 12;
             seedGenome.InitializeRandomBrainFromCurrentBody(1.0f, mutationSettingsRef.brainInitialConnectionChance, tempNumHiddenNeurons);            
             newSpecies.FirstTimeInitialize(seedGenome, 0);
             currentlyActiveSpeciesIDList.Add(ID);
