@@ -20,6 +20,8 @@ public class UIManager : MonoBehaviour {
     public ClockUI clockUI;
     public WildSpirit wildSpirit;
     public FeatsUI featsUI;
+    public SpeciesOverviewUI speciesOverviewUI;
+    public GenomeViewerUI genomeViewerUI;
 
     public CameraManager cameraManager;
     public GameOptionsManager gameOptionsManager;
@@ -161,6 +163,10 @@ public class UIManager : MonoBehaviour {
     public GameObject panelMainMenu;
     public GameObject panelLoading;
     public GameObject panelPlaying;
+
+    public GameObject prefabGenomeIcon;
+    public GameObject panelHallOfFameGenomes;
+    public GameObject panelLeaderboardGenomes;
     
     public float loadingProgress = 0f;
 
@@ -369,7 +375,7 @@ public class UIManager : MonoBehaviour {
         if(gameManager.simulationManager._BigBangOn) {
             panelBigBang.SetActive(true);
             bigBangFramesCounter += 1;
-            if(bigBangFramesCounter == 10) {
+            if(bigBangFramesCounter == 1) {
                 InitialUnlocks();
 
                 
@@ -406,6 +412,9 @@ public class UIManager : MonoBehaviour {
     }
 
     private void InitialUnlocks() {
+        globalResourcesUI.focusedAgentGenome = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[0].foundingGenome;
+        globalResourcesUI.agentIndex = 0;
+
         gameManager.theRenderKing.baronVonTerrain.IncrementWorldRadius(5.7f);
 
         worldSpiritHubUI.isUnlocked = true;
@@ -533,6 +542,12 @@ public class UIManager : MonoBehaviour {
         globalResourcesUI.UpdateGlobalResourcesPanelUpdate();
         featsUI.UpdateFeatsPanelUI(gameManager.simulationManager.featsList);
         UpdateClockPanelUI();
+
+        SpeciesGenomePool pool = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[globalResourcesUI.selectedSpeciesIndex];
+        if(globalResourcesUI.focusedAgentGenome != null) {
+            genomeViewerUI.UpdateUI(pool, globalResourcesUI.focusedAgentGenome);
+        }
+        
 
         // **** Temp panel display stuff:
  
@@ -889,6 +904,20 @@ public class UIManager : MonoBehaviour {
                                     
             if (EventSystem.current.IsPointerOverGameObject()) {  // if mouse is over ANY unity canvas UI object (with raycast enabled)
                 //Debug.Log("MouseOverUI!!!");
+                if(genomeViewerUI.isTooltipHover) {
+                    theCursorCzar.panelTooltip.SetActive(true);
+                    string tipString = genomeViewerUI.tooltipString;
+                        //if()
+                    theCursorCzar.textTooltip.text = tipString;
+                    theCursorCzar.textTooltip.color = Color.cyan;
+                }
+                else {
+                    theCursorCzar.panelTooltip.SetActive(false);
+                }
+                
+                      
+                
+                
             }
             else {
                 int selectedPlantID = gameManager.simulationManager.vegetationManager.selectedPlantParticleIndex;

@@ -376,7 +376,7 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 				float4 resourceGridSample = _ResourceGridRead.SampleLevel(_PointClamp, uv, 1);
 
 				float isAliveMask = saturate(1.0 - animalParticle.isDecaying);
-				float maxAlgaeConsumptionRate = 0.0002;  // one-thousandth of biomass per tick = bodyweight consumed per 1000 ticks
+				float maxAlgaeConsumptionRate = 0.00025;  // one-thousandth of biomass per tick = bodyweight consumed per 1000 ticks
 				float algaeConsumptionMask = saturate(resourceGridSample.w * isAliveMask);  // - 0.01);  //    1; // saturate(_GlobalAlgaeLevel * 0.01);   //  if global levels are too low it reduces consumption?
 
 				float maxOxygenConsumptionRate = 0.01; // relative to biomass?

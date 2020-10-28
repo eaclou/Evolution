@@ -54,7 +54,7 @@ public class MasterGenomePool {
             SpeciesGenomePool newSpecies = new SpeciesGenomePool(ID, -1, 0, 0, mutationSettingsRef);
             AgentGenome seedGenome = new AgentGenome();
             seedGenome.GenerateInitialRandomBodyGenome();
-            int tempNumHiddenNeurons = 12;
+            int tempNumHiddenNeurons = 4;
             seedGenome.InitializeRandomBrainFromCurrentBody(1.0f, mutationSettingsRef.brainInitialConnectionChance, tempNumHiddenNeurons);            
             newSpecies.FirstTimeInitialize(seedGenome, 0);
             currentlyActiveSpeciesIDList.Add(ID);

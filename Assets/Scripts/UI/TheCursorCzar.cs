@@ -120,6 +120,7 @@ public class TheCursorCzar : MonoBehaviour {
                         uiManagerRef.watcherUI.StopFollowingAnimalParticle();
                         
                         uiManagerRef.watcherUI.StartFollowingAgent();
+                        uiManagerRef.globalResourcesUI.focusedAgentGenome = agentRef.candidateRef.candidateGenome;
                         //uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[agentRef.speciesIndex];
                         uiManagerRef.watcherUI.watcherSelectedTrophicSlotRef = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0];
                     }

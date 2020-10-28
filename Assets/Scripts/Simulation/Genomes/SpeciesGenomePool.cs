@@ -15,10 +15,14 @@ public class SpeciesGenomePool {
 
     public string identifier;
     public AgentGenome representativeGenome;
+    public AgentGenome foundingGenome;
+    public AgentGenome longestLivedGenome;
+    public AgentGenome mostEatenGenome;
+    public List<AgentGenome> hallOfFameGenomesList;
     public List<CandidateAgentData> leaderboardGenomesList;
     public List<CandidateAgentData> candidateGenomesList;
 
-    public int maxLeaderboardGenomePoolSize = 64;    
+    public int maxLeaderboardGenomePoolSize = 24;    
     public int numAgentsEvaluated = 0;
      
     public int yearCreated = -1;
@@ -168,6 +172,8 @@ public class SpeciesGenomePool {
 
         candidateGenomesList = new List<CandidateAgentData>();
         leaderboardGenomesList = new List<CandidateAgentData>();
+        
+        hallOfFameGenomesList = new List<AgentGenome>();
     }
 
     // **** Change this for special-case of First-Time startup?
@@ -189,7 +195,9 @@ public class SpeciesGenomePool {
             seedGenomeArray[i] = seedGenome;
         }
 
-        
+        foundingGenome = seedGenomeArray[0];
+        longestLivedGenome = foundingGenome;
+        mostEatenGenome = foundingGenome;
 
         for (int i = 0; i < numGenomes; i++) {
 
@@ -200,10 +208,7 @@ public class SpeciesGenomePool {
                         
             AgentGenome newGenome = Mutate(seedGenomeArray[seedGenomeIndex], true, true);
 
-            //newGenome.InitializeRandomBrainFromCurrentBody(1.0f, mutationSettingsRef.brainInitialConnectionChance, tempNumHiddenNeurons);
-
             CandidateAgentData candidate = new CandidateAgentData(newGenome, speciesID);
-
 
 
             if(i < maxLeaderboardGenomePoolSize) {
@@ -217,7 +222,10 @@ public class SpeciesGenomePool {
         representativeGenome = candidateGenomesList[0].candidateGenome;
     }
     public void FirstTimeInitialize(AgentGenome foundingGenome, int depth) {
-       
+        this.foundingGenome = foundingGenome;        
+        longestLivedGenome = foundingGenome;
+        mostEatenGenome = foundingGenome;
+
         InitShared();
         depthLevel = depth;
         Vector3 newHue = UnityEngine.Random.insideUnitSphere;
@@ -278,7 +286,7 @@ public class SpeciesGenomePool {
         //=========================================================================
 
         string debugTxt = "";
-        for (int i = 0; i < 64; i++) {
+        for (int i = 0; i < 24; i++) {
             
             mutationSettingsRef.bodyCoreSizeMutationChance = 0.5f;
             mutationSettingsRef.bodyCoreMutationStepSize = 0.1f;

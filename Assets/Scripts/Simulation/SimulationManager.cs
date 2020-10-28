@@ -485,7 +485,7 @@ public class SimulationManager : MonoBehaviour {
     }
     private void LoadingInitializePopulationGenomes() {
         masterGenomePool = new MasterGenomePool();
-        masterGenomePool.FirstTimeInitialize(numAgents, settingsManager.mutationSettingsVertebrates, uiManager);
+        masterGenomePool.FirstTimeInitialize(24, settingsManager.mutationSettingsVertebrates, uiManager);
         
 
         // EGGSACKS:
@@ -1475,12 +1475,19 @@ public class SimulationManager : MonoBehaviour {
             speciesPool.recordLongestLife = agentRef.ageCounter;
             speciesPool.recordHolderLongestLife = agentRef.candidateRef;
 
+            if(speciesPool.numAgentsEvaluated > 24) {
+                speciesPool.hallOfFameGenomesList.Add(agentRef.candidateRef.candidateGenome);
+            }
             //Debug.Log("it works! " + speciesPool.recordLongestLife.ToString() + ", candidate: " + agentRef.candidateRef.candidateID.ToString() + ", species: " + agentRef.candidateRef.speciesID.ToString());
         }
         float totalEaten = (agentRef.totalFoodEatenCorpse + agentRef.totalFoodEatenEgg + agentRef.totalFoodEatenCorpse + agentRef.totalFoodEatenPlant + agentRef.totalFoodEatenZoop);
         if(totalEaten > speciesPool.recordMostEaten) {
             speciesPool.recordMostEaten = totalEaten;
             speciesPool.recordHolderMostEaten = agentRef.candidateRef;
+
+            if(speciesPool.numAgentsEvaluated > 24) {
+                speciesPool.hallOfFameGenomesList.Add(agentRef.candidateRef.candidateGenome);
+            }
         }
         //if(speciesPool.)
     }
