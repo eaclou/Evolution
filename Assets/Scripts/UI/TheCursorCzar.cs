@@ -111,16 +111,13 @@ public class TheCursorCzar : MonoBehaviour {
                         uiManagerRef.cameraManager.SetTargetAgent(agentRef, agentRef.index);
                         uiManagerRef.cameraManager.isFollowingAgent = true;
 
-                        uiManagerRef.globalResourcesUI.SetSelectedSpeciesUI(agentRef.speciesIndex);
-                        
-                        
                         //uiManagerRef.globalResourcesUI.selectedSpeciesIndex = agentRef.speciesIndex; // *************************************************
 
                         uiManagerRef.watcherUI.StopFollowingPlantParticle();
-                        uiManagerRef.watcherUI.StopFollowingAnimalParticle();
-                        
+                        uiManagerRef.watcherUI.StopFollowingAnimalParticle();                        
                         uiManagerRef.watcherUI.StartFollowingAgent();
-                        uiManagerRef.globalResourcesUI.focusedAgentGenome = agentRef.candidateRef.candidateGenome;
+                        //uiManagerRef.globalResourcesUI.SetSelectedSpeciesUI(agentRef.speciesIndex);
+                        uiManagerRef.SetFocusedCandidateGenome(agentRef.candidateRef);
                         //uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[agentRef.speciesIndex];
                         uiManagerRef.watcherUI.watcherSelectedTrophicSlotRef = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0];
                     }
@@ -203,6 +200,7 @@ public class TheCursorCzar : MonoBehaviour {
         smoothedMouseVel = Vector2.Lerp(smoothedMouseVel, instantMouseVel, 0.16f);
         prevMousePos = curMousePos;
 
-        panelTooltip.transform.position = new Vector3(curMousePos.x, curMousePos.y, 0f);
+        Vector3 newTooltipPosition = new Vector3(Mathf.Clamp(curMousePos.x, 0f, 1780f), Mathf.Clamp(curMousePos.y, 0f, 1000f), 0f); // *** BAD! requires 1920x1080 res ***
+        panelTooltip.transform.position = newTooltipPosition;
 	}
 }

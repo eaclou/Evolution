@@ -156,7 +156,7 @@ public class WatcherUI : MonoBehaviour {
     	
     private void UpdateUI(TrophicLayersManager layerManager) {
 
-       
+        
         //callTickCounter++;
         //private int callTickCooldownCounter = 0;
 

@@ -597,7 +597,7 @@ public class CritterModuleCoreGenome {
         }        
         
         // Or start with deformed sphere???? *****
-        creatureBaseLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.creatureBaseLength, settings.bodyCoreSizeMutationChance, settings.bodyCoreMutationStepSize, 0.2f * 4f, 0.4f * 4f);
+        creatureBaseLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.creatureBaseLength, settings.bodyCoreSizeMutationChance, settings.bodyCoreMutationStepSize, 0.2f * 2f, 0.4f * 2f);
         creatureAspectRatio = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.creatureAspectRatio, settings.bodyCoreSizeMutationChance, settings.bodyCoreMutationStepSize, 0.2f, 0.3f);
         
         // Mouth/Snout:

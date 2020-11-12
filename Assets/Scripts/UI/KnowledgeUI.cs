@@ -255,62 +255,10 @@ public class KnowledgeUI : MonoBehaviour {
             else {  // VERTEBRATES
                 panelKnowledgeInfoVertebrates.SetActive(true);
 
-                
-                
-                float lifespan = 0f;
-                float population = 0f;
-                float foodEaten = 0f;
-                float genome = 0f;
-
-                if (slotRef.slotID == 0) {
-                    lifespan = uiManagerRef.gameManager.simulationManager.graphDataVertebrateLifespan0.curVal;
-                    population = uiManagerRef.gameManager.simulationManager.graphDataVertebratePopulation0.curVal;
-                    foodEaten = uiManagerRef.gameManager.simulationManager.graphDataVertebrateFoodEaten0.curVal;
-                    genome = uiManagerRef.gameManager.simulationManager.graphDataVertebrateGenome0.curVal;
-
-                    knowledgeGraphVertebrateLifespan.material = knowledgeGraphVertebrateLifespanMat0;
-                    knowledgeGraphVertebratePopulation.material = knowledgeGraphVertebratePopulationMat0;
-                    knowledgeGraphVertebrateFoodEaten.material = knowledgeGraphVertebrateFoodEatenMat0;
-                    knowledgeGraphVertebrateGenome.material = knowledgeGraphVertebrateGenomeMat0;
-                }
-                else if (slotRef.slotID == 1) {
-                    lifespan = uiManagerRef.gameManager.simulationManager.graphDataVertebrateLifespan1.curVal;
-                    population = uiManagerRef.gameManager.simulationManager.graphDataVertebratePopulation1.curVal;
-                    foodEaten = uiManagerRef.gameManager.simulationManager.graphDataVertebrateFoodEaten1.curVal;
-                    genome = uiManagerRef.gameManager.simulationManager.graphDataVertebrateGenome1.curVal;
-
-                    knowledgeGraphVertebrateLifespan.material = knowledgeGraphVertebrateLifespanMat1;
-                    knowledgeGraphVertebratePopulation.material = knowledgeGraphVertebratePopulationMat1;
-                    knowledgeGraphVertebrateFoodEaten.material = knowledgeGraphVertebrateFoodEatenMat1;
-                    knowledgeGraphVertebrateGenome.material = knowledgeGraphVertebrateGenomeMat1;
-                }
-                else if (slotRef.slotID == 2) {
-                    lifespan = uiManagerRef.gameManager.simulationManager.graphDataVertebrateLifespan2.curVal;
-                    population = uiManagerRef.gameManager.simulationManager.graphDataVertebratePopulation2.curVal;
-                    foodEaten = uiManagerRef.gameManager.simulationManager.graphDataVertebrateFoodEaten2.curVal;
-                    genome = uiManagerRef.gameManager.simulationManager.graphDataVertebrateGenome2.curVal;
-
-                    knowledgeGraphVertebrateLifespan.material = knowledgeGraphVertebrateLifespanMat2;
-                    knowledgeGraphVertebratePopulation.material = knowledgeGraphVertebratePopulationMat2;
-                    knowledgeGraphVertebrateFoodEaten.material = knowledgeGraphVertebrateFoodEatenMat2;
-                    knowledgeGraphVertebrateGenome.material = knowledgeGraphVertebrateGenomeMat2;
-                }
-                else {
-                    lifespan = uiManagerRef.gameManager.simulationManager.graphDataVertebrateLifespan3.curVal;
-                    population = uiManagerRef.gameManager.simulationManager.graphDataVertebratePopulation3.curVal;
-                    foodEaten = uiManagerRef.gameManager.simulationManager.graphDataVertebrateFoodEaten3.curVal;
-                    genome = uiManagerRef.gameManager.simulationManager.graphDataVertebrateGenome3.curVal;
-
-                    knowledgeGraphVertebrateLifespan.material = knowledgeGraphVertebrateLifespanMat3;
-                    knowledgeGraphVertebratePopulation.material = knowledgeGraphVertebratePopulationMat3;
-                    knowledgeGraphVertebrateFoodEaten.material = knowledgeGraphVertebrateFoodEatenMat3;
-                    knowledgeGraphVertebrateGenome.material = knowledgeGraphVertebrateGenomeMat3;
-                }
-
-                textKnowledgeGraphLifespan.text = lifespan.ToString("F0");
-                textKnowledgeGraphPopulation.text = population.ToString("F0");
-                textKnowledgeGraphFoodEaten.text = foodEaten.ToString("F3");
-                textKnowledgeGraphGenome.text = genome.ToString("F1");  // avg Body size
+                //textKnowledgeGraphLifespan.text = lifespan.ToString("F0");
+                //textKnowledgeGraphPopulation.text = population.ToString("F0");
+                //textKnowledgeGraphFoodEaten.text = foodEaten.ToString("F3");
+                //textKnowledgeGraphGenome.text = genome.ToString("F1");  // avg Body size
 
                 imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
                 uiKnowledgeMapViewerMat.SetTexture("_MainTex", uiManagerRef.gameManager.simulationManager.environmentFluidManager._SourceColorRT);
@@ -521,7 +469,7 @@ public class KnowledgeUI : MonoBehaviour {
                 //str += "\n\n\nAvg Lifespan: <b>" + (GenomePool.avgLifespan / 1500f).ToString("F1") + " Years</b>\n\n";
 
                 
-                str += "Avg Body Size: <b>" + ((GenomePool.representativeGenome.bodyGenome.GetFullsizeBoundingBox().x + GenomePool.representativeGenome.bodyGenome.GetFullsizeBoundingBox().y) * 0.5f * GenomePool.representativeGenome.bodyGenome.GetFullsizeBoundingBox().z).ToString("F2") + "</b>\n";
+                str += "Avg Body Size: <b>" + ((GenomePool.representativeCandidate.candidateGenome.bodyGenome.GetFullsizeBoundingBox().x + GenomePool.representativeCandidate.candidateGenome.bodyGenome.GetFullsizeBoundingBox().y) * 0.5f * GenomePool.representativeCandidate.candidateGenome.bodyGenome.GetFullsizeBoundingBox().z).ToString("F2") + "</b>\n";
                 str += "Avg Brain Size: <b>" + ((GenomePool.avgNumNeurons + GenomePool.avgNumAxons) * 1f).ToString("F0") + "</b>\n";
                 
                 str += "\nFOOD EATEN:\nPlants: <b>" + ((GenomePool.avgFoodEatenPlant) * 1f).ToString("F3") + "</b> [" + (GenomePool.avgFoodSpecPlant).ToString() + "]\n";

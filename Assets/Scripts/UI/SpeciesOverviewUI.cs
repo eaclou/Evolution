@@ -40,11 +40,11 @@ public class SpeciesOverviewUI : MonoBehaviour {
 
     public void RebuildGenomeButtons() {
         
-        SpeciesGenomePool pool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.globalResourcesUI.selectedSpeciesIndex];
+        SpeciesGenomePool pool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID];
 
         // Update Species Panel UI:
         // Hall of fame genomes (checkpoints .. every 50 years?)
-        foreach (Transform child in uiManagerRef.panelHallOfFameGenomes.transform) {
+        /*foreach (Transform child in uiManagerRef.panelHallOfFameGenomes.transform) {
              GameObject.Destroy(child.gameObject);
         }
         for(int i = 0; i < pool.hallOfFameGenomesList.Count; i++) {
@@ -53,25 +53,65 @@ public class SpeciesOverviewUI : MonoBehaviour {
             GenomeButtonPrefabScript buttonScript = tempObj.GetComponent<GenomeButtonPrefabScript>();
             buttonScript.UpdateButtonPrefab(uiManagerRef, SpeciesOverviewUI.SelectionGroup.HallOfFame, i);
             uiManagerRef.speciesOverviewUI.hallOfFameButtonsList.Add(buttonScript);
-        }
+        }*/
         // Current Leaderboard:
-        foreach (Transform child in uiManagerRef.panelLeaderboardGenomes.transform) {
+        /*foreach (Transform child in uiManagerRef.panelLeaderboardGenomes.transform) {
              GameObject.Destroy(child.gameObject);
         }
-        for(int i = 0; i < pool.leaderboardGenomesList.Count; i++) {
+        for(int i = 0; i < Mathf.Min(32, pool.candidateGenomesList.Count); i++) {
             GameObject tempObj = Instantiate(uiManagerRef.prefabGenomeIcon, new Vector3(0, 0, 0), Quaternion.identity);
             tempObj.transform.SetParent(uiManagerRef.panelLeaderboardGenomes.transform, false);
 
             GenomeButtonPrefabScript buttonScript = tempObj.GetComponent<GenomeButtonPrefabScript>();
-            buttonScript.UpdateButtonPrefab(uiManagerRef, SpeciesOverviewUI.SelectionGroup.Leaderboard, i);
+            buttonScript.UpdateButtonPrefab(uiManagerRef, SpeciesOverviewUI.SelectionGroup.Candidates, i);
+            uiManagerRef.speciesOverviewUI.leaderboardGenomeButtonsList.Add(buttonScript);
+        }*/
+        Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;            
+        uiManagerRef.panelLeaderboardGenomes.GetComponent<Image>().color = new Color(hue.x, hue.y, hue.z);
+        // Current Genepool:
+        foreach (Transform child in uiManagerRef.panelLeaderboardGenomes.transform) {
+             GameObject.Destroy(child.gameObject);
+        }
+        for(int i = 0; i < Mathf.Min(pool.candidateGenomesList.Count, 32); i++) {
+            GameObject tempObj = Instantiate(uiManagerRef.prefabGenomeIcon, new Vector3(0, 0, 0), Quaternion.identity);
+            tempObj.transform.SetParent(uiManagerRef.panelLeaderboardGenomes.transform, false);
+            GenomeButtonPrefabScript buttonScript = tempObj.GetComponent<GenomeButtonPrefabScript>();
+            buttonScript.UpdateButtonPrefab(uiManagerRef, SpeciesOverviewUI.SelectionGroup.Candidates, i);
+            CandidateAgentData iCand = pool.candidateGenomesList[i];
+            string statusStr = "";
+            if (iCand.isBeingEvaluated) {
+                buttonScript.GetComponent<Image>().color = Color.white;
+                statusStr = "\n(Under Evaluation)";
+                
+            }
+            else {
+                if(iCand.allEvaluationsComplete) {
+                    buttonScript.GetComponent<Image>().color = Color.green;
+                    statusStr = "\n(Fossil)";
+                }
+                else {
+                    buttonScript.GetComponent<Image>().color = Color.gray;
+                    statusStr = "\n(Unborn)";
+                }
+            }
+
+            if(iCand.candidateID == uiManagerRef.focusedCandidate.candidateID) {
+                buttonScript.GetComponent<Image>().color = Color.yellow;
+                buttonScript.gameObject.transform.localScale = Vector3.one * 1.33f;
+                statusStr = "\n(SELECTED)";
+            }
+            else { buttonScript.gameObject.transform.localScale = Vector3.one; }
+            //buttonScript
+            GenomeButtonTooltipSource tooltip = tempObj.GetComponent<GenomeButtonTooltipSource>();
+            tooltip.genomeViewerUIRef = uiManagerRef.genomeViewerUI;
+            tooltip.tooltipString = pool.speciesID.ToString() + "-" + pool.candidateGenomesList[i].candidateID.ToString() + statusStr;
             uiManagerRef.speciesOverviewUI.leaderboardGenomeButtonsList.Add(buttonScript);
         }
     }
 
 
     public void ChangeSelectedGenome(SelectionGroup group, int index) {
-        selectionGroup = group;
-                
+        selectionGroup = group;                
 
         if(selectedButton != null) {
             selectedButton.GetComponent<Image>().color = Color.yellow;
@@ -85,35 +125,36 @@ public class SpeciesOverviewUI : MonoBehaviour {
         isLeaderboardGenomesSelected = false;    
         isCandidateGenomesSelected = false;    
 
-        SpeciesGenomePool spool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.globalResourcesUI.selectedSpeciesIndex];
+        SpeciesGenomePool spool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID];
+
 
         switch(group) {
             case SelectionGroup.Founder:
                 isFoundingGenomeSelected = true;
                 selectedButton = buttonFoundingGenome;
-                uiManagerRef.globalResourcesUI.SetFocusedAgentGenome(spool.foundingGenome);
+                uiManagerRef.SetFocusedCandidateGenome(spool.foundingCandidate);
                 break;
             case SelectionGroup.Representative:
                 isRepresentativeGenomeSelected = true;
                 selectedButton = buttonRepresentativeGenome;
-                uiManagerRef.globalResourcesUI.SetFocusedAgentGenome(spool.representativeGenome);
+                uiManagerRef.SetFocusedCandidateGenome(spool.representativeCandidate); // maybe weird if used as species-wide average? 
                 break;
             case SelectionGroup.LongestLived:
                 isLongestLivedGenomeSelected = true;
                 selectedButton = buttonLongestLivedGenome;
-                uiManagerRef.globalResourcesUI.SetFocusedAgentGenome(spool.longestLivedGenome);
+                uiManagerRef.SetFocusedCandidateGenome(spool.longestLivedCandidate);
                 break;
             case SelectionGroup.MostEaten:
                 isMostEatenGenomeSelected = true;
                 selectedButton = buttonMostEatenGenome;
-                uiManagerRef.globalResourcesUI.SetFocusedAgentGenome(spool.mostEatenGenome);
+                uiManagerRef.SetFocusedCandidateGenome(spool.mostEatenCandidate);
                 break;
             case SelectionGroup.HallOfFame:
                 isHallOfFameSelected = true;
                 selectedHallOfFameIndex = index;
                 //selectedButton = hallOfFameButtonsList[index].GetComponent<Button>();
                 
-                uiManagerRef.globalResourcesUI.SetFocusedAgentGenome(spool.hallOfFameGenomesList[index]);
+                uiManagerRef.SetFocusedCandidateGenome(spool.hallOfFameGenomesList[index]);
 
                 Debug.Log("ChangeSelectedGenome: " + group.ToString() + ", HallOfFame, #" + index.ToString());
                 break;
@@ -122,7 +163,7 @@ public class SpeciesOverviewUI : MonoBehaviour {
                 selectedLeaderboardGenomeIndex = index;
 
                 //SpeciesGenomePool pool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.globalResourcesUI.selectedSpeciesIndex];
-                uiManagerRef.globalResourcesUI.SetFocusedAgentGenome(spool.leaderboardGenomesList[index].candidateGenome);
+                uiManagerRef.SetFocusedCandidateGenome(spool.leaderboardGenomesList[index]);
 
                 Debug.Log("ChangeSelectedGenome: " + group.ToString() + ", #" + index.ToString());
                 //selectedButton = leaderboardGenomeButtonsList[index].GetComponent<Button>();
@@ -130,6 +171,9 @@ public class SpeciesOverviewUI : MonoBehaviour {
             case SelectionGroup.Candidates:
                 isCandidateGenomesSelected = true;
                 selectedCandidateGenomeIndex = index;
+
+                uiManagerRef.SetFocusedCandidateGenome(spool.candidateGenomesList[index]);
+                Debug.Log("ChangeSelectedGenome: " + group.ToString() + ", #" + index.ToString());
                 //selectedButton = candidateGenomeButtonsList[index].GetComponent<Button>();
                 break;
             default:
@@ -141,7 +185,8 @@ public class SpeciesOverviewUI : MonoBehaviour {
             selectedButton.GetComponent<Image>().color = Color.white;
         }
 
-        uiManagerRef.gameManager.simulationManager.theRenderKing.InitializeCreaturePortraitGenomes(uiManagerRef.globalResourcesUI.focusedAgentGenome);
+
+        uiManagerRef.ClickButtonOpenGenome();
     }
 
     

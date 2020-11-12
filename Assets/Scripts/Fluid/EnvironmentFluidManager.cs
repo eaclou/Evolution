@@ -195,7 +195,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
         computeShaderFluidSim.SetFloat("_ForceOn", 1f);
     }
     public void RerollForcePoints() {
-        CreateForcePoints(5f, 64f, 128f);
+        CreateForcePoints(4.4f, 64f, 128f);
     }
     public void Tick(VegetationManager vegetationManagerRef) {
         //Debug.Log("Tick!");

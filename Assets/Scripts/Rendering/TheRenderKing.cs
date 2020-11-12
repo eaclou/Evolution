@@ -1718,18 +1718,33 @@ public class TheRenderKing : MonoBehaviour {
             Vector3 agentPos = simManager.agentsArray[i].bodyRigidbody.position;
             colorInjectionStrokeDataArray[baseIndex + i].worldPos = new Vector2(agentPos.x, agentPos.y);
             colorInjectionStrokeDataArray[baseIndex + i].localDir = simManager.agentsArray[i].facingDirection;
-            colorInjectionStrokeDataArray[baseIndex + i].scale = Vector2.one * 4f; // simManager.agentsArray[i].fullSizeBoundingBox * 1.55f; // * simManager.agentsArray[i].sizePercentage;
-            /*
-            float agentAlpha = 1f;
-            if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Mature) {
-                agentAlpha = 2.2f / simManager.agentsArray[i].fullSizeBoundingBox.magnitude;
+            colorInjectionStrokeDataArray[baseIndex + i].scale = Vector2.one * 1.5f; // simManager.agentsArray[i].fullSizeBoundingBox * 1.55f; // * simManager.agentsArray[i].sizePercentage;
+                                                                                   /*
+                                                                                   float agentAlpha = 1f;
+                                                                                   if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Mature) {
+                                                                                       agentAlpha = 2.2f / simManager.agentsArray[i].fullSizeBoundingBox.magnitude;
+                                                                                   }
+                                                                                   if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Dead) {
+                                                                                       agentAlpha = 3f * simManager.agentsArray[i].GetDecayPercentage();
+                                                                                   }*/
+
+            Vector4 hue = Vector4.one * 0.695f;
+            if(simManager.agentsArray[i].candidateRef != null) {
+
+                if(simManager.agentsArray[i].candidateRef.speciesID == simManager.uiManager.focusedCandidate.speciesID) {
+                    hue = new Vector4(1f,1f,0f,1f);
+                    colorInjectionStrokeDataArray[baseIndex + i].scale = Vector2.one * 5f;
+                }
+                if(simManager.agentsArray[i].candidateRef.candidateID == simManager.uiManager.focusedCandidate.candidateID) {
+                    hue = new Vector4(1f,1f,1f,1f);
+                    colorInjectionStrokeDataArray[baseIndex + i].scale = Vector2.one * 10f;
+                }   
+                
             }
-            if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Dead) {
-                agentAlpha = 3f * simManager.agentsArray[i].GetDecayPercentage();
-            }*/
             
-            Color drawColor = Color.white;
-            colorInjectionStrokeDataArray[baseIndex + i].color = drawColor;
+
+            //Color drawColor = new Color(hue.x, hue.y, hue.z);
+            colorInjectionStrokeDataArray[baseIndex + i].color = hue;
             
         }
         // FOOD:
@@ -3204,7 +3219,7 @@ public class TheRenderKing : MonoBehaviour {
 
 
     
-    public void InitializeCreaturePortraitGenomes(AgentGenome genome) {
+    public void InitializeCreaturePortrait(AgentGenome genome) {
         //InitializeNewCritterPortraitGenome(simManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[0].representativeGenome); // speciesPool.leaderboardGenomesList[0].candidateGenome);
         isToolbarCritterPortraitEnabled = true;
          
@@ -3399,69 +3414,68 @@ public class TheRenderKing : MonoBehaviour {
         SimulationStateData.CritterSimData simData = new SimulationStateData.CritterSimData();
         // SIMDATA ::===========================================================================================================================================================================
         //GRAB FROM UI???? positions animated there?
-        simData.worldPos = Vector3.one * 128f * simManager.uiManager.mutationUI.renderSpaceMult;
-        float angle = Mathf.Cos(Time.realtimeSinceStartup * 0.67f) * 2f;
-        float angle2 = angle; // + (float)selectedSpeciesID; // + Time.realtimeSinceStartup * 0.1f; // + (Mathf.PI * 0.5f);
-        Vector2 facingDir = new Vector2(Mathf.Cos(angle2 + (Mathf.PI * 0.75f)), Mathf.Sin(angle2 + (Mathf.PI * 0.75f)));
-        //new Vector2(0f, 1f); // facingDir.normalized;
-        simData.heading = facingDir.normalized; //new Vector2(0f, 1f); //     facingDir.normalized;        //new Vector2(0f, 1f); //     
-        float embryo = 1f;        
-        simData.embryoPercentage = embryo;
-        simData.growthPercentage = 1.5f * simManager.uiManager.mutationUI.critterSizeMult;
-        float decay = 0f;        
-        simData.decayPercentage = decay;
-        simData.foodAmount = 0f; // Mathf.Lerp(simData.foodAmount, simManager.agentsArray[i].coreModule.stomachContents / simManager.agentsArray[i].coreModule.stomachCapacity, 0.16f);
-        simData.energy = 1; // simManager.agentsArray[i].coreModule.energyRaw / simManager.agentsArray[i].coreModule.maxEnergyStorage;
-        simData.health = 1; // simManager.agentsArray[i].coreModule.healthHead;
-        simData.stamina = 1; // simManager.agentsArray[i].coreModule.stamina[0];
-        simData.consumeOn = Mathf.Sin(angle2 * 3.19f) * 0.5f + 0.5f;
+        
         simData.biteAnimCycle = 0f; // (Time.realtimeSinceStartup * 1f) % 1f;
-        simData.moveAnimCycle = Time.realtimeSinceStartup * 0.6f % 1f;
-        simData.turnAmount = Mathf.Sin(Time.realtimeSinceStartup * 0.654321f) * 0.65f + 0.25f;
-        simData.accel = (Mathf.Sin(Time.realtimeSinceStartup * 0.79f) * 0.5f + 0.5f) * 0.081f; // Mathf.Clamp01(simManager.agentsArray[i].curAccel) * 1f; // ** RE-FACTOR!!!!
-		simData.smoothedThrottle = (Mathf.Sin(Time.realtimeSinceStartup * 3.97f + 0.4f) * 0.5f + 0.5f) * 0.85f;
-        simData.velocity = facingDir.normalized * (simData.accel + simData.smoothedThrottle);
+        bool isDead = !simManager.uiManager.focusedCandidate.isBeingEvaluated;
+        if(isDead) {
+            simData.worldPos = Vector3.one * 128f * simManager.uiManager.mutationUI.renderSpaceMult;
+            float angle = Mathf.Cos(0f * 0.67f) * 2f;
+            float angle2 = angle; // + (float)selectedSpeciesID; // + Time.realtimeSinceStartup * 0.1f; // + (Mathf.PI * 0.5f);
+            Vector2 facingDir = new Vector2(Mathf.Cos(angle2 + (Mathf.PI * 0.75f)), Mathf.Sin(angle2 + (Mathf.PI * 0.75f)));
+            //new Vector2(0f, 1f); // facingDir.normalized;
+            simData.heading = facingDir.normalized; //new Vector2(0f, 1f); //     facingDir.normalized;        //new Vector2(0f, 1f); //     
+            float embryo = 1f;        
+            simData.embryoPercentage = embryo;
+            simData.growthPercentage = 1.5f * simManager.uiManager.mutationUI.critterSizeMult;
+            float decay = 0f; 
+            if(simManager.uiManager.focusedCandidate.allEvaluationsComplete) {
+                decay = 0.25f; 
+            }
+            simData.decayPercentage = decay;
+            simData.foodAmount = 0f; // Mathf.Lerp(simData.foodAmount, simManager.agentsArray[i].coreModule.stomachContents / simManager.agentsArray[i].coreModule.stomachCapacity, 0.16f);
+            simData.energy = 1f; // simManager.agentsArray[i].coreModule.energyRaw / simManager.agentsArray[i].coreModule.maxEnergyStorage;
+            simData.health = 1f; // simManager.agentsArray[i].coreModule.healthHead;
+            simData.stamina = 1f; // simManager.agentsArray[i].coreModule.stamina[0];
+            simData.consumeOn = 0f; // Mathf.Sin(angle2 * 3.19f) * 0.5f + 0.5f;
 
+            simData.moveAnimCycle = 0f; // Time.realtimeSinceStartup * 0.6f % 1f;
+            simData.turnAmount = 0f; // Mathf.Sin(Time.realtimeSinceStartup * 0.654321f) * 0.65f + 0.25f;
+            simData.accel = 0f;// (Mathf.Sin(Time.realtimeSinceStartup * 0.79f) * 0.5f + 0.5f) * 0.081f; // Mathf.Clamp01(simManager.agentsArray[i].curAccel) * 1f; // ** RE-FACTOR!!!!
+            simData.smoothedThrottle = 0f; // (Mathf.Sin(Time.realtimeSinceStartup * 3.97f + 0.4f) * 0.5f + 0.5f) * 0.85f;
+            simData.velocity = Vector2.zero; // facingDir.normalized * (simData.accel + simData.smoothedThrottle);
+        }
+        else {
+            simData.worldPos = Vector3.one * 128f * simManager.uiManager.mutationUI.renderSpaceMult;
+            float angle = Mathf.Cos(Time.realtimeSinceStartup * 0.67f) * 2f;
+            float angle2 = angle; // + (float)selectedSpeciesID; // + Time.realtimeSinceStartup * 0.1f; // + (Mathf.PI * 0.5f);
+            Vector2 facingDir = new Vector2(Mathf.Cos(angle2 + (Mathf.PI * 0.75f)), Mathf.Sin(angle2 + (Mathf.PI * 0.75f)));
+            //new Vector2(0f, 1f); // facingDir.normalized;
+            simData.heading = facingDir.normalized; //new Vector2(0f, 1f); //     facingDir.normalized;        //new Vector2(0f, 1f); //     
+            float embryo = 1f;        
+            simData.embryoPercentage = embryo;
+            simData.growthPercentage = 1.5f * simManager.uiManager.mutationUI.critterSizeMult;
+            float decay = 0f;        
+            simData.decayPercentage = decay;
+            simData.foodAmount = 0f; // Mathf.Lerp(simData.foodAmount, simManager.agentsArray[i].coreModule.stomachContents / simManager.agentsArray[i].coreModule.stomachCapacity, 0.16f);
+            simData.energy = 1f; // simManager.agentsArray[i].coreModule.energyRaw / simManager.agentsArray[i].coreModule.maxEnergyStorage;
+            simData.health = 1f; // simManager.agentsArray[i].coreModule.healthHead;
+            simData.stamina = 1f; // simManager.agentsArray[i].coreModule.stamina[0];
+            simData.consumeOn = Mathf.Sin(angle2 * 3.19f) * 0.5f + 0.5f;
 
+            simData.moveAnimCycle = Time.realtimeSinceStartup * 0.6f % 1f;
+            simData.turnAmount = Mathf.Sin(Time.realtimeSinceStartup * 0.654321f) * 0.65f + 0.25f;
+            simData.accel = (Mathf.Sin(Time.realtimeSinceStartup * 0.79f) * 0.5f + 0.5f) * 0.081f; // Mathf.Clamp01(simManager.agentsArray[i].curAccel) * 1f; // ** RE-FACTOR!!!!
+		    simData.smoothedThrottle = (Mathf.Sin(Time.realtimeSinceStartup * 3.97f + 0.4f) * 0.5f + 0.5f) * 0.85f;
+            simData.velocity = facingDir.normalized * (simData.accel + simData.smoothedThrottle);
+
+        }
+        
         toolbarPortraitCritterSimDataArray[0] = simData;        
         simData.worldPos = simManager.uiManager.mutationUI.posNewGO.transform.position * simManager.uiManager.mutationUI.renderSpaceMult;
         simData.growthPercentage = simManager.uiManager.mutationUI.critterSizeMult;
         toolbarPortraitCritterSimDataArray[1] = simData;
-
-        if(simManager.uiManager.mutationUI.selectedToolbarMutationID == 0) {
-            simData.growthPercentage = simManager.uiManager.mutationUI.critterSizeMult * 1.5f;
-        }
-        else {
-            simData.growthPercentage = simManager.uiManager.mutationUI.critterSizeMult;
-        }
-        simData.worldPos = simManager.uiManager.mutationUI.posAGO.transform.position * simManager.uiManager.mutationUI.renderSpaceMult;        
-        toolbarPortraitCritterSimDataArray[2] = simData;
-
-        simData.worldPos = simManager.uiManager.mutationUI.posBGO.transform.position * simManager.uiManager.mutationUI.renderSpaceMult;
-        if(simManager.uiManager.mutationUI.selectedToolbarMutationID == 1) {
-            simData.growthPercentage = simManager.uiManager.mutationUI.critterSizeMult * 1.5f;
-        }
-        else {
-            simData.growthPercentage = simManager.uiManager.mutationUI.critterSizeMult;
-        }
-        toolbarPortraitCritterSimDataArray[3] = simData;
-
-        simData.worldPos = simManager.uiManager.mutationUI.posCGO.transform.position * simManager.uiManager.mutationUI.renderSpaceMult;
-        if(simManager.uiManager.mutationUI.selectedToolbarMutationID == 2) {
-            simData.growthPercentage = simManager.uiManager.mutationUI.critterSizeMult * 1.5f;
-        }
-        else {
-            simData.growthPercentage = simManager.uiManager.mutationUI.critterSizeMult;
-        }
-        toolbarPortraitCritterSimDataArray[4] = simData;
-
-        simData.worldPos = simManager.uiManager.mutationUI.posDGO.transform.position * simManager.uiManager.mutationUI.renderSpaceMult;
-        if(simManager.uiManager.mutationUI.selectedToolbarMutationID == 3) {
-            simData.growthPercentage = simManager.uiManager.mutationUI.critterSizeMult * 1.5f;
-        }
-        else {
-            simData.growthPercentage = simManager.uiManager.mutationUI.critterSizeMult;
-        }
+        
+        simData.growthPercentage = 2f; // ************************************************
         toolbarPortraitCritterSimDataArray[5] = simData;
 
         if(toolbarPortraitCritterSimDataCBuffer != null) {
@@ -3631,7 +3645,7 @@ public class TheRenderKing : MonoBehaviour {
 
         debugFrameCounter++;
         if(debugFrameCounter > 30) {
-            baronVonTerrain.RebuildTerrainMesh();
+            //baronVonTerrain.RebuildTerrainMesh();
             debugFrameCounter = 0;
         }
         
@@ -3765,56 +3779,61 @@ public class TheRenderKing : MonoBehaviour {
         fluidObstaclesRenderCamera.Render(); // is this even needed? all drawcalls taken care of within commandBuffer?
 
         
-        if(simManager.uiManager.knowledgeUI.isOpen) {
+        //if(simManager.uiManager.knowledgeUI.isOpen) {
 
-            cmdBufferFluidColor.Clear(); // needed since camera clear flag is set to none
-            cmdBufferFluidColor.SetRenderTarget(fluidManager._SourceColorRT);
-            cmdBufferFluidColor.ClearRenderTarget(true, true, new Color(0f,0f,0f,0f), 1.0f);  // clear -- needed???
-            cmdBufferFluidColor.SetViewProjectionMatrices(fluidColorRenderCamera.worldToCameraMatrix, fluidColorRenderCamera.projectionMatrix);
-            //cmdBufferFluidColor.Blit(fluidManager.initialDensityTex, fluidManager._SourceColorRT);
-            //cmdBufferFluidColor.DrawMesh(fluidRenderMesh, Matrix4x4.identity, fluidBackgroundColorMat); // Simple unlit Texture shader -- wysiwyg
+        cmdBufferFluidColor.Clear(); // needed since camera clear flag is set to none
+        cmdBufferFluidColor.SetRenderTarget(fluidManager._SourceColorRT);
+        cmdBufferFluidColor.ClearRenderTarget(true, true, new Color(0f,0f,0f,0f), 1.0f);  // clear -- needed???
+        cmdBufferFluidColor.SetViewProjectionMatrices(fluidColorRenderCamera.worldToCameraMatrix, fluidColorRenderCamera.projectionMatrix);
+        //cmdBufferFluidColor.Blit(fluidManager.initialDensityTex, fluidManager._SourceColorRT);
+        //cmdBufferFluidColor.DrawMesh(fluidRenderMesh, Matrix4x4.identity, fluidBackgroundColorMat); // Simple unlit Texture shader -- wysiwyg
 
-            if(simManager.uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.kingdomID == 1) {
-                if(simManager.uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.tierID == 1) {
+        if(simManager.uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.kingdomID == 1) {
+            if(simManager.uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.tierID == 1) {
                     
-                    algaeParticleColorInjectMat.SetPass(0);
-                    algaeParticleColorInjectMat.SetBuffer("foodParticleDataCBuffer", simManager.vegetationManager.plantParticlesCBuffer);
-                    algaeParticleColorInjectMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-                    algaeParticleColorInjectMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
-                    algaeParticleColorInjectMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-                    cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, algaeParticleColorInjectMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.plantParticlesCBuffer.count);
+                algaeParticleColorInjectMat.SetPass(0);
+                algaeParticleColorInjectMat.SetBuffer("foodParticleDataCBuffer", simManager.vegetationManager.plantParticlesCBuffer);
+                algaeParticleColorInjectMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+                algaeParticleColorInjectMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
+                algaeParticleColorInjectMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+                cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, algaeParticleColorInjectMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.plantParticlesCBuffer.count);
         
-                }
             }
-            else if(simManager.uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.kingdomID == 2) {
-                if(simManager.uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.tierID == 0) {
-                    
-                    zooplanktonParticleColorInjectMat.SetPass(0);
-                    zooplanktonParticleColorInjectMat.SetBuffer("animalParticleDataCBuffer", simManager.zooplanktonManager.animalParticlesCBuffer);
-                    zooplanktonParticleColorInjectMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-                    zooplanktonParticleColorInjectMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
-                    zooplanktonParticleColorInjectMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-                    cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, zooplanktonParticleColorInjectMat, 0, MeshTopology.Triangles, 6, simManager.zooplanktonManager.animalParticlesCBuffer.count);
-        
-                }
-                else {   // Vertebrates:
-                    PopulateColorInjectionBuffer(); // update data for colorInjection objects before rendering
-                    
-                    // Creatures + EggSacks:
-                    basicStrokeDisplayMat.SetPass(0);
-                    basicStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-                    basicStrokeDisplayMat.SetBuffer("basicStrokesCBuffer", colorInjectionStrokesCBuffer);
-                    cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, basicStrokeDisplayMat, 0, MeshTopology.Triangles, 6, colorInjectionStrokesCBuffer.count);
-                    // Render Agent/Food/Pred colors here!!!
-                    // just use their display renders?
-                    
-                }
-            }
-            Graphics.ExecuteCommandBuffer(cmdBufferFluidColor);
-            fluidColorRenderCamera.Render();
-            //simManager.environmentFluidManager.densityA.GenerateMips();
-            // Update this ^^ to use Graphics.ExecuteCommandBuffer()  ****
         }
+        else if(simManager.uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.kingdomID == 2) {
+            if(simManager.uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.tierID == 0) {
+                    
+                zooplanktonParticleColorInjectMat.SetPass(0);
+                zooplanktonParticleColorInjectMat.SetBuffer("animalParticleDataCBuffer", simManager.zooplanktonManager.animalParticlesCBuffer);
+                zooplanktonParticleColorInjectMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+                zooplanktonParticleColorInjectMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
+                zooplanktonParticleColorInjectMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+                cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, zooplanktonParticleColorInjectMat, 0, MeshTopology.Triangles, 6, simManager.zooplanktonManager.animalParticlesCBuffer.count);
+        
+            }
+            else {   // Vertebrates:
+                
+                    
+            }
+        }
+
+        PopulateColorInjectionBuffer(); // update data for colorInjection objects before rendering                    
+        // Creatures + EggSacks:
+        basicStrokeDisplayMat.SetPass(0);
+        basicStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        basicStrokeDisplayMat.SetBuffer("basicStrokesCBuffer", colorInjectionStrokesCBuffer);
+        cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, basicStrokeDisplayMat, 0, MeshTopology.Triangles, 6, colorInjectionStrokesCBuffer.count);
+        //why are they always rendering white??
+        // Render Agent/Food/Pred colors here!!!
+        // just use their display renders?
+
+
+
+        Graphics.ExecuteCommandBuffer(cmdBufferFluidColor);
+        fluidColorRenderCamera.Render();
+        //simManager.environmentFluidManager.densityA.GenerateMips();
+            // Update this ^^ to use Graphics.ExecuteCommandBuffer()  ****
+        //}
         // COLOR INJECTION:::
         
         /*Vector4 cursorPos = new Vector4(simManager.uiManager.curMousePositionOnWaterPlane.x, simManager.uiManager.curMousePositionOnWaterPlane.y, 0f, 0f);
@@ -3950,7 +3969,7 @@ public class TheRenderKing : MonoBehaviour {
         // Species PORTRAIT:
         cmdBufferSlotPortraitDisplay.Clear();
         cmdBufferSlotPortraitDisplay.SetRenderTarget(slotPortraitRenderCamera.targetTexture); // needed???
-        cmdBufferSlotPortraitDisplay.ClearRenderTarget(true, true, new Color(0.07f,0.05f,0.12f,1f), 1.0f);  // clear -- needed???
+        cmdBufferSlotPortraitDisplay.ClearRenderTarget(true, true, new Color(54f/255f,73f/255f,61f/255f,1f), 1.0f);  // clear -- needed???
         cmdBufferSlotPortraitDisplay.SetViewProjectionMatrices(slotPortraitRenderCamera.worldToCameraMatrix, slotPortraitRenderCamera.projectionMatrix);
         /*
         // MEDIUM STROKES!!!!
@@ -4169,8 +4188,8 @@ public class TheRenderKing : MonoBehaviour {
         data.speciesID = newSpecies.speciesID;
         data.parentSpeciesID = newSpecies.parentSpeciesID;
         data.graphDepth = newSpecies.depthLevel;
-        data.primaryHue = newSpecies.representativeGenome.bodyGenome.appearanceGenome.huePrimary;
-        data.secondaryHue = newSpecies.representativeGenome.bodyGenome.appearanceGenome.hueSecondary;
+        data.primaryHue = newSpecies.representativeCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
+        data.secondaryHue = newSpecies.representativeCandidate.candidateGenome.bodyGenome.appearanceGenome.hueSecondary;
         data.growthPercentage = 1f;
         data.age = 0f;
         data.decayPercentage = 0f;       
@@ -4809,22 +4828,22 @@ public class TheRenderKing : MonoBehaviour {
                 critterDebugGenericStrokeMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
                 cmdBufferMain.DrawProcedural(Matrix4x4.identity, critterDebugGenericStrokeMat, 0, MeshTopology.Triangles, 6, critterGenericStrokesCBuffer.count);
 
-                if(simManager.uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.kingdomID == 2 && simManager.uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.tierID == 1) {
+                //if(simManager.uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.kingdomID == 2 && simManager.uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.tierID == 1) {
                     // *** Revisit this in future - probably can get away without it, just use one pass for all eggSacks
-                    eggCoverDisplayMat.SetPass(0);
-                    eggCoverDisplayMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
-                    eggCoverDisplayMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
-                    //eggCoverDisplayMat.SetBuffer("eggSackSimDataCBuffer", simManager.simStateData.eggSackSimDataCBuffer);
-                    eggCoverDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-                    eggCoverDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
-                    eggCoverDisplayMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
-                    eggCoverDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
-                    eggCoverDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel); 
-                    eggCoverDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-                    //eggCoverDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
-                    cmdBufferMain.DrawProcedural(Matrix4x4.identity, eggCoverDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.critterInitDataCBuffer.count);
+                eggCoverDisplayMat.SetPass(0);
+                eggCoverDisplayMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
+                eggCoverDisplayMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
+                //eggCoverDisplayMat.SetBuffer("eggSackSimDataCBuffer", simManager.simStateData.eggSackSimDataCBuffer);
+                eggCoverDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+                eggCoverDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+                eggCoverDisplayMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
+                eggCoverDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
+                eggCoverDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel); 
+                eggCoverDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+                //eggCoverDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
+                cmdBufferMain.DrawProcedural(Matrix4x4.identity, eggCoverDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.critterInitDataCBuffer.count);
             
-                }
+                //}
                 
             }
             

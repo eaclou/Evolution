@@ -172,6 +172,7 @@ public class UIManager : MonoBehaviour {
 
     private int[] displaySpeciesIndicesArray;
    
+    public CandidateAgentData focusedCandidate; // *** TRANSITION TO THIS?
     public int selectedSpeciesID;
     public int hoverAgentID;
 
@@ -199,11 +200,16 @@ public class UIManager : MonoBehaviour {
 
     public void ClickButtonOpenSpeciesTree() {
         panelSpeciesTree.SetActive(true);
-        panelGraphs.SetActive(true);
     }
     public void ClickButtonCloseSpeciesTree() {
         panelSpeciesTree.SetActive(false);
+    }
+    public void ClickButtonOpenGraphPanel() {
+        panelGraphs.SetActive(true);
+    }
+    public void ClickButtonCloseGraphPanel() {
         panelGraphs.SetActive(false);
+        //Debug.LogError("!@%$#%");
     }
 
     public void ClickButtonOpenGenome() {
@@ -221,7 +227,23 @@ public class UIManager : MonoBehaviour {
         panelSpeciesOverview.SetActive(false);
     }
 
-    
+    public void SetFocusedCandidateGenome(CandidateAgentData candidate) {
+        focusedCandidate = candidate;
+
+        selectedSpeciesID = focusedCandidate.speciesID;
+
+        SpeciesGenomePool pool = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesID];
+        
+        gameManager.simulationManager.theRenderKing.InitializeCreaturePortrait(focusedCandidate.candidateGenome);
+
+        globalResourcesUI.CreateSpeciesLeaderboardGenomeTexture();
+        globalResourcesUI.UpdateSpeciesTreeDataTextures(gameManager.simulationManager.curSimYear);
+        globalResourcesUI.CreateBrainGenomeTexture(focusedCandidate.candidateGenome);
+
+        speciesOverviewUI.RebuildGenomeButtons();
+
+        globalResourcesUI.UpdateSpeciesListBars();
+    }
 
     public void NarratorText(string message, Color col) {
         panelPendingClickPrompt.GetComponentInChildren<Text>().text = message;
@@ -412,9 +434,8 @@ public class UIManager : MonoBehaviour {
     }
 
     private void InitialUnlocks() {
-        globalResourcesUI.focusedAgentGenome = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[0].foundingGenome;
-        globalResourcesUI.agentIndex = 0;
-
+        focusedCandidate = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[0].candidateGenomesList[0];
+        
         gameManager.theRenderKing.baronVonTerrain.IncrementWorldRadius(5.7f);
 
         worldSpiritHubUI.isUnlocked = true;
@@ -478,7 +499,7 @@ public class UIManager : MonoBehaviour {
 
         //mutationUI.ClickToolButton();
         //worldSpiritHubUI.OpenWorldTreeSelect();
-        gameManager.theRenderKing.InitializeCreaturePortraitGenomes(gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[0].representativeGenome); //, gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][mutationUI.selectedToolbarMutationID].representativeGenome);
+        gameManager.theRenderKing.InitializeCreaturePortrait(gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[0].foundingCandidate.candidateGenome); //, gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][mutationUI.selectedToolbarMutationID].representativeGenome);
                 
 
 
@@ -522,6 +543,8 @@ public class UIManager : MonoBehaviour {
         // SPAWNS!!!! 
         gameManager.simulationManager.AttemptToBrushSpawnAgent(brushesUI.selectedEssenceSlot.linkedSpeciesID);
 
+
+        worldSpiritHubUI.ClickButtonWorldSpiritHubAgent(0);
         
     }
     
@@ -543,9 +566,13 @@ public class UIManager : MonoBehaviour {
         featsUI.UpdateFeatsPanelUI(gameManager.simulationManager.featsList);
         UpdateClockPanelUI();
 
-        SpeciesGenomePool pool = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[globalResourcesUI.selectedSpeciesIndex];
-        if(globalResourcesUI.focusedAgentGenome != null) {
-            genomeViewerUI.UpdateUI(pool, globalResourcesUI.focusedAgentGenome);
+        SpeciesGenomePool pool = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesID];
+        if(focusedCandidate != null) {
+            genomeViewerUI.UpdateUI(pool, focusedCandidate);
+
+            if(gameManager.simulationManager.simAgeTimeSteps % 111 == 1) {
+                speciesOverviewUI.RebuildGenomeButtons();  
+            }
         }
         
 

@@ -748,6 +748,16 @@ public class SimulationManager : MonoBehaviour {
         // Try to make sure AlgaeReservoir and AlgaeParticles share same mechanics!!! *********************************************
         simResourceManager.Tick(settingsManager, trophicLayersManager, vegetationManager);  // Resource Flows Here
         
+
+        if(cameraManager.targetAgent != null) {  // *******
+            if(uiManager.focusedCandidate != null) {
+                if(cameraManager.targetAgent.candidateRef != null) {
+                    if(cameraManager.targetAgent.curLifeStage == Agent.AgentLifeStage.AwaitingRespawn && cameraManager.targetAgent.candidateRef.candidateID == uiManager.focusedCandidate.candidateID) {
+                        uiManager.watcherUI.StopFollowingAgent();
+                    }
+                }                
+            }            
+        }
                 
         // CHECK FOR NULL Objects:        
         // ******** REVISIT CODE ORDERING!!!!  -- Should check for death Before or After agent Tick/PhysX ???
@@ -977,7 +987,7 @@ public class SimulationManager : MonoBehaviour {
                                                    //***** world boundary *****
             if (depthSample.x > _GlobalWaterLevel || depthSample.w < 0.1f) //(floorDepth < agentSize)
             {
-                float wallForce = 10.0f; // Mathf.Clamp01(agentSize - floorDepth) / agentSize;
+                float wallForce = 12.0f; // Mathf.Clamp01(agentSize - floorDepth) / agentSize;
                 Vector2 grad = agentsArray[i].depthGradient; // new Vector2(depthSample.y, depthSample.z); //.normalized;
                 agentsArray[i].bodyRigidbody.AddForce(-grad * agentsArray[i].bodyRigidbody.mass * wallForce, ForceMode2D.Impulse);
 
@@ -1014,7 +1024,7 @@ public class SimulationManager : MonoBehaviour {
                 }
             }
             
-            agentsArray[i].bodyRigidbody.AddForce(simStateData.fluidVelocitiesAtAgentPositionsArray[i] * 32f * agentsArray[i].bodyRigidbody.mass, ForceMode2D.Impulse);
+            agentsArray[i].bodyRigidbody.AddForce(simStateData.fluidVelocitiesAtAgentPositionsArray[i] * 64f * agentsArray[i].bodyRigidbody.mass, ForceMode2D.Impulse);
 
             agentsArray[i].avgFluidVel = Vector2.Lerp(agentsArray[i].avgFluidVel, simStateData.fluidVelocitiesAtAgentPositionsArray[i], 0.25f);
 
@@ -1300,7 +1310,7 @@ public class SimulationManager : MonoBehaviour {
             if (agentsArray[a].curLifeStage == Agent.AgentLifeStage.AwaitingRespawn) {
                           
                 CandidateAgentData candidateData = masterGenomePool.completeSpeciesPoolsList[speciesIndex].GetNextAvailableCandidate();
-                candidateData.candidateGenome = masterGenomePool.completeSpeciesPoolsList[speciesIndex].representativeGenome;
+                candidateData.candidateGenome = masterGenomePool.completeSpeciesPoolsList[speciesIndex].representativeCandidate.candidateGenome;
                 
                 if (candidateData == null) {
                     Debug.LogError("GetNextAvailableCandidate(): candidateData NULL!!!!");
@@ -1476,7 +1486,7 @@ public class SimulationManager : MonoBehaviour {
             speciesPool.recordHolderLongestLife = agentRef.candidateRef;
 
             if(speciesPool.numAgentsEvaluated > 24) {
-                speciesPool.hallOfFameGenomesList.Add(agentRef.candidateRef.candidateGenome);
+                speciesPool.hallOfFameGenomesList.Add(agentRef.candidateRef);
             }
             //Debug.Log("it works! " + speciesPool.recordLongestLife.ToString() + ", candidate: " + agentRef.candidateRef.candidateID.ToString() + ", species: " + agentRef.candidateRef.speciesID.ToString());
         }
@@ -1486,7 +1496,7 @@ public class SimulationManager : MonoBehaviour {
             speciesPool.recordHolderMostEaten = agentRef.candidateRef;
 
             if(speciesPool.numAgentsEvaluated > 24) {
-                speciesPool.hallOfFameGenomesList.Add(agentRef.candidateRef.candidateGenome);
+                speciesPool.hallOfFameGenomesList.Add(agentRef.candidateRef);
             }
         }
         //if(speciesPool.)
@@ -1855,7 +1865,7 @@ public class SimulationManager : MonoBehaviour {
         // **** I want to just change the APPEARANCE of body genome, but keep the brain? ... area to revisit later
         // Maybe just do a fresh restart for now -- fully random init
 
-        newSpecies.FirstTimeInitialize(foundingGenome, masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].depthLevel + 1);
+        newSpecies.FirstTimeInitialize(new CandidateAgentData(foundingGenome, newSpeciesID), masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].depthLevel + 1);
         masterGenomePool.currentlyActiveSpeciesIDList.Add(newSpeciesID);
         masterGenomePool.completeSpeciesPoolsList.Add(newSpecies);
         masterGenomePool.speciesCreatedOrDestroyedThisFrame = true;

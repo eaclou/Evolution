@@ -65,11 +65,15 @@ public class CameraManager : MonoBehaviour {
     }
 
     private void UpdateCam() {
+        
+
         // Calculate where the focus pivot should be:
         if (targetAgentTransform != null && isFollowingAgent)
         {
             curCameraFocusPivotPos = targetAgentTransform.position;
-            curCameraFocusPivotPos.z = -SimulationManager._GlobalWaterLevel * SimulationManager._MaxAltitude; // *** for now this is where creatures are for now           
+            curCameraFocusPivotPos.z = -SimulationManager._GlobalWaterLevel * SimulationManager._MaxAltitude; // *** for now this is where creatures are for now          
+            
+            
         }
         else {
             

@@ -1027,8 +1027,8 @@ public class VegetationManager {
 
         //float algaeUpkeep = algaeSlotGenomeCurrent.
         computeShaderResourceGrid.SetFloat("_AlgaeUpkeep", 0.005f); // decomposerSlotGenomeCurrent.metabolicRate);  // *********** SHARING WITH DECOMPOSERS!!!! *****
-        computeShaderResourceGrid.SetFloat("_AlgaeMaxIntakeRate", 0.01f);
-        computeShaderResourceGrid.SetFloat("_AlgaeGrowthEfficiency", 1.56f);
+        computeShaderResourceGrid.SetFloat("_AlgaeMaxIntakeRate", 0.012f);
+        computeShaderResourceGrid.SetFloat("_AlgaeGrowthEfficiency", 1.59f);
 
         computeShaderResourceGrid.SetFloat("_DecomposerUpkeep", 0.01f); // value from empirical tinkering // decomposerSlotGenomeCurrent.metabolicRate);
         computeShaderResourceGrid.SetFloat("_DecomposerMaxIntakeRate", 0.01f);

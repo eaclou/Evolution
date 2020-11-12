@@ -376,7 +376,7 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 				float4 resourceGridSample = _ResourceGridRead.SampleLevel(_PointClamp, uv, 1);
 
 				float isAliveMask = saturate(1.0 - animalParticle.isDecaying);
-				float maxAlgaeConsumptionRate = 0.00025;  // one-thousandth of biomass per tick = bodyweight consumed per 1000 ticks
+				float maxAlgaeConsumptionRate = 0.00026;  // one-thousandth of biomass per tick = bodyweight consumed per 1000 ticks
 				float algaeConsumptionMask = saturate(resourceGridSample.w * isAliveMask);  // - 0.01);  //    1; // saturate(_GlobalAlgaeLevel * 0.01);   //  if global levels are too low it reduces consumption?
 
 				float maxOxygenConsumptionRate = 0.01; // relative to biomass?
@@ -390,8 +390,8 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 				energy -= (1.0 - isUnderwater) * 0.0001;
 				//float dessicationLostMass = saturate((terrainSampleCenter.x - _GlobalWaterLevel) * 25) * 0.001;
 		
-				float growthEfficiency = 42; //
-				float wasteEfficiency = 2.5;
+				float growthEfficiency = 45; //
+				float wasteEfficiency = 2.75;
 				float growthMass = algaeConsumed * growthEfficiency * oxygenConsumptionMask; // Also limited by OXYGEN!!!
 					// Maximum growth needs an explicit cap? or should it simply be determined by max algaeConsumption Rate + maxAge?
 				wasteMass += algaeConsumed * wasteEfficiency;		

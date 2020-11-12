@@ -12,6 +12,7 @@ public class GlobalResourcesUI : MonoBehaviour {
     public GameObject panelGlobalResourcesMain;
 
     public Text textSelectedSpeciesTitle;
+    public Image imageSelectedSpeciesBG;
     public Text textSpeciationTree;    
     public Text textStatsBody;
   
@@ -48,7 +49,7 @@ public class GlobalResourcesUI : MonoBehaviour {
     public Material speciesGraphMatRight;
 
     public Text textGraphCategory;
-    public GameObject graphPanelGO;
+    //public GameObject graphPanelGO;
     public Text textGraphStatsLeft;
     public Text textGraphStatsCenter;
     public Text textGraphStatsRight;
@@ -58,11 +59,13 @@ public class GlobalResourcesUI : MonoBehaviour {
     public Material brainGenomeMat;
     private Texture2D speciesPoolGenomeTex;
 
-    public int selectedSpeciesIndex = 1;
-    public AgentGenome focusedAgentGenome;
-    public CandidateAgentData focusedCandidate; // *** TRANSITION TO THIS?
+    public GameObject treeAnchorUI;
+    public GameObject prefabSpeciesBar;
+
+    //public int selectedSpeciesIndex = 1;
+    //public AgentGenome focusedAgentGenome;    
     //private int agentSelectType = 2;
-    public int agentIndex;
+    //public int agentIndex;
 
     
     public GraphCategory selectedGraphCategory;
@@ -130,43 +133,43 @@ public class GlobalResourcesUI : MonoBehaviour {
         UpdateSpeciesTreeDataTextures(uiManagerRef.gameManager.simulationManager.curSimYear);
         
     }
-    public void CreateSpeciesLeaderboardGenomeTexture(SpeciesGenomePool pool) {
+    public void CreateSpeciesLeaderboardGenomeTexture() {
         int width = 128;
-        speciesPoolGenomeTex.Resize(width, pool.leaderboardGenomesList.Count);
+        speciesPoolGenomeTex.Resize(width, 1); // pool.leaderboardGenomesList.Count);
+        SpeciesGenomePool pool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID];
+        //for(int i = 0; i < pool.leaderboardGenomesList.Count; i++) {
+        AgentGenome genome = uiManagerRef.focusedCandidate.candidateGenome;
+        for(int x = 0; x < width; x++) {
 
-        for(int i = 0; i < pool.leaderboardGenomesList.Count; i++) {
-            AgentGenome genome = pool.leaderboardGenomesList[i].candidateGenome;
-            for(int x = 0; x < width; x++) {
-
-                int xIndex = x;// i % brainGenomeTex.width;
-                int yIndex = i; // Mathf.FloorToInt(i / brainGenomeTex.width);
+            int xIndex = x;// i % brainGenomeTex.width;
+            int yIndex = 0; // i; // Mathf.FloorToInt(i / brainGenomeTex.width);
                               
-                Color testColor;
+            Color testColor;
 
-                if (genome.brainGenome.linkList.Count > x) {
+            if (genome.brainGenome.linkList.Count > x) {
 
-                    float weightVal = genome.brainGenome.linkList[x].weight;
-                    testColor = new Color(weightVal * 0.5f + 0.5f, weightVal * 0.5f + 0.5f, weightVal * 0.5f + 0.5f);
-                    if(weightVal < -0.25f) {
-                        testColor = Color.Lerp(testColor, Color.black, 0.15f);
-                    }
-                    else if(weightVal > 0.25f) {
-                        testColor = Color.Lerp(testColor, Color.white, 0.15f);
-                    }
-                    else {
-                        testColor = Color.Lerp(testColor, Color.gray, 0.15f);
-                    }
+                float weightVal = genome.brainGenome.linkList[x].weight;
+                testColor = new Color(weightVal * 0.5f + 0.5f, weightVal * 0.5f + 0.5f, weightVal * 0.5f + 0.5f);
+                if(weightVal < -0.25f) {
+                    testColor = Color.Lerp(testColor, Color.black, 0.15f);
+                }
+                else if(weightVal > 0.25f) {
+                    testColor = Color.Lerp(testColor, Color.white, 0.15f);
                 }
                 else {
-                    testColor = Color.gray; // CLEAR
-                    
-                    //break;
+                    testColor = Color.Lerp(testColor, Color.gray, 0.15f);
                 }
-                
-                speciesPoolGenomeTex.SetPixel(xIndex, yIndex, testColor);
             }
-       
+            else {
+                testColor = Color.gray; // CLEAR
+                    
+                //break;
+            }
+                
+            speciesPoolGenomeTex.SetPixel(xIndex, yIndex, testColor);
         }
+       
+        //}
           
             
         
@@ -245,10 +248,10 @@ public class GlobalResourcesUI : MonoBehaviour {
             Vector3 parentHue = Vector3.one;
             if(pool.parentSpeciesID != -1) {
                 parentPool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[pool.parentSpeciesID];
-                parentHue = parentPool.representativeGenome.bodyGenome.appearanceGenome.huePrimary;
+                parentHue = parentPool.representativeCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
             }
-            Vector3 huePrimary = pool.representativeGenome.bodyGenome.appearanceGenome.huePrimary;
-            Vector3 hueSecondary = pool.representativeGenome.bodyGenome.appearanceGenome.hueSecondary;
+            Vector3 huePrimary = pool.representativeCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
+            Vector3 hueSecondary = pool.representativeCandidate.candidateGenome.bodyGenome.appearanceGenome.hueSecondary;
             
             statsSpeciesColorKey.SetPixel(i, 1, new Color(huePrimary.x, huePrimary.y, huePrimary.z));            
             //Debug.Log("(" + i.ToString() + ", " + gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList[i].ToString());
@@ -264,7 +267,7 @@ public class GlobalResourcesUI : MonoBehaviour {
             keyData.isOn = 1f;
             //int selectedID = treeOfLifeManager.selectedID;
             
-            keyData.isSelected = (selectedSpeciesIndex == uiManagerRef.gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList[i]) ? 1f : 0f;
+            keyData.isSelected = (uiManagerRef.selectedSpeciesID == uiManagerRef.gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList[i]) ? 1f : 0f;
 
             speciesKeyDataArray[i] = keyData;
         }
@@ -281,9 +284,9 @@ public class GlobalResourcesUI : MonoBehaviour {
                 parentPool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[pool.parentSpeciesID];
             }            
 
-            Vector3 huePrimary = pool.representativeGenome.bodyGenome.appearanceGenome.huePrimary;
-            Vector3 hueSecondary = pool.representativeGenome.bodyGenome.appearanceGenome.hueSecondary;
-            Vector3 parentHue = parentPool.representativeGenome.bodyGenome.appearanceGenome.huePrimary;
+            Vector3 huePrimary = pool.representativeCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
+            Vector3 hueSecondary = pool.representativeCandidate.candidateGenome.bodyGenome.appearanceGenome.hueSecondary;
+            Vector3 parentHue = parentPool.representativeCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
             if(uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[i].isExtinct) {
                 huePrimary = Vector3.zero;
             }
@@ -309,7 +312,7 @@ public class GlobalResourcesUI : MonoBehaviour {
                 keyData.isOn = 0f;
             }
             
-            keyData.isSelected = selectedSpeciesIndex == i ? 1f : 0f;
+            keyData.isSelected = uiManagerRef.selectedSpeciesID == i ? 1f : 0f;
 
             speciesKeyDataArray[i] = keyData;
         }
@@ -427,7 +430,7 @@ public class GlobalResourcesUI : MonoBehaviour {
 			uniform float _NumEntries;
     */
     }
-    
+    /*
     public void ClickCycleSpecies() {
         Debug.Log("CycleSpecies: " + selectedSpeciesIndex.ToString());
 
@@ -451,30 +454,11 @@ public class GlobalResourcesUI : MonoBehaviour {
         }
         SetSelectedSpeciesUI(selectedSpeciesIndex);
 
-
         uiManagerRef.cameraManager.isFollowingAgent = false;
-        uiManagerRef.watcherUI.StopFollowingAgent();
-     
+        uiManagerRef.watcherUI.StopFollowingAgent();     
     }
-    public void SetSelectedSpeciesUI(int id) {
-        selectedSpeciesIndex = id;
-        if(selectedSpeciesIndex >= uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList.Count) {
-            selectedSpeciesIndex = 0;
-        } 
-
-        SpeciesGenomePool pool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex];
-
-        SetFocusedAgentGenome(pool.foundingGenome);
-        CreateSpeciesLeaderboardGenomeTexture(pool);
-        CreateBrainGenomeTexture(focusedAgentGenome);
-        uiManagerRef.gameManager.simulationManager.theRenderKing.InitializeCreaturePortraitGenomes(focusedAgentGenome);
-        UpdateSpeciesTreeDataTextures(uiManagerRef.gameManager.simulationManager.curSimYear);
-
-        uiManagerRef.speciesOverviewUI.RebuildGenomeButtons();     
-        
-        
-     // attach to this parent object
-    }
+    
+    */
     /*
     public void ClickCycleCandidate() {
         SpeciesGenomePool pool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex];
@@ -487,21 +471,7 @@ public class GlobalResourcesUI : MonoBehaviour {
     }
     */
     
-    public void SetFocusedAgentGenome(AgentGenome focusGenome) {
-        focusedAgentGenome = focusGenome;
-
-
-        /*SpeciesGenomePool pool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex];
-        if (agentSelectType == 0) {
-            focusedAgentGenome = pool.representativeGenome;
-        }
-        else if(agentSelectType == 1) {
-            focusedAgentGenome = pool.candidateGenomesList[agentIndex].candidateGenome;
-        }
-        else {
-            focusedAgentGenome = pool.leaderboardGenomesList[agentIndex].candidateGenome;
-        }*/
-    }
+    
     /*public void ClickToggleAgentSelectType() {
         agentIndex = 0;
         agentSelectType = (agentSelectType + 1) % 3;
@@ -531,28 +501,28 @@ public class GlobalResourcesUI : MonoBehaviour {
     }
     */
     private void RefreshGraphMaterial() {
-        SpeciesGenomePool pool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex];
+        SpeciesGenomePool pool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID];
 
         switch(selectedGraphCategory) {
             case GraphCategory.Life:
                 speciesGraphMatLeft.SetTexture("_MainTex", statsTreeOfLifeSpeciesTexArray[0]);
                 speciesGraphMatLeft.SetTexture("_ColorKeyTex", statsSpeciesColorKey);
                 speciesGraphMatLeft.SetFloat("_NumEntries", statsTreeOfLifeSpeciesTexArray[0].width);
-                speciesGraphMatLeft.SetInt("_SelectedSpeciesID", selectedSpeciesIndex);
+                speciesGraphMatLeft.SetInt("_SelectedSpeciesID", uiManagerRef.selectedSpeciesID);
                 speciesGraphMatLeft.SetFloat("_MaximumValue", maxValuesStatArray[0]);
                 speciesGraphMatLeft.SetFloat("_MinimumValue", minValuesStatArray[0]);
 
                 speciesGraphMatCenter.SetTexture("_MainTex", statsTreeOfLifeSpeciesTexArray[14]);
                 speciesGraphMatCenter.SetTexture("_ColorKeyTex", statsSpeciesColorKey);
                 speciesGraphMatCenter.SetFloat("_NumEntries", statsTreeOfLifeSpeciesTexArray[14].width);
-                speciesGraphMatCenter.SetInt("_SelectedSpeciesID", selectedSpeciesIndex);
+                speciesGraphMatCenter.SetInt("_SelectedSpeciesID", uiManagerRef.selectedSpeciesID);
                 speciesGraphMatCenter.SetFloat("_MaximumValue", maxValuesStatArray[14]);
                 speciesGraphMatCenter.SetFloat("_MinimumValue", minValuesStatArray[14]);
 
                 speciesGraphMatRight.SetTexture("_MainTex", statsTreeOfLifeSpeciesTexArray[15]);
                 speciesGraphMatRight.SetTexture("_ColorKeyTex", statsSpeciesColorKey);
                 speciesGraphMatRight.SetFloat("_NumEntries", statsTreeOfLifeSpeciesTexArray[15].width);
-                speciesGraphMatRight.SetInt("_SelectedSpeciesID", selectedSpeciesIndex);
+                speciesGraphMatRight.SetInt("_SelectedSpeciesID", uiManagerRef.selectedSpeciesID);
                 speciesGraphMatRight.SetFloat("_MaximumValue", maxValuesStatArray[15]);
                 speciesGraphMatRight.SetFloat("_MinimumValue", minValuesStatArray[15]);
 
@@ -568,21 +538,21 @@ public class GlobalResourcesUI : MonoBehaviour {
                 speciesGraphMatLeft.SetTexture("_MainTex", statsTreeOfLifeSpeciesTexArray[4]);
                 speciesGraphMatLeft.SetTexture("_ColorKeyTex", statsSpeciesColorKey);
                 speciesGraphMatLeft.SetFloat("_NumEntries", statsTreeOfLifeSpeciesTexArray[4].width);
-                speciesGraphMatLeft.SetInt("_SelectedSpeciesID", selectedSpeciesIndex);
+                speciesGraphMatLeft.SetInt("_SelectedSpeciesID", uiManagerRef.selectedSpeciesID);
                 speciesGraphMatLeft.SetFloat("_MaximumValue", maxValuesStatArray[4]);
                 speciesGraphMatLeft.SetFloat("_MinimumValue", minValuesStatArray[4]);
                 
                 speciesGraphMatCenter.SetTexture("_MainTex", statsTreeOfLifeSpeciesTexArray[12]);
                 speciesGraphMatCenter.SetTexture("_ColorKeyTex", statsSpeciesColorKey);
                 speciesGraphMatCenter.SetFloat("_NumEntries", statsTreeOfLifeSpeciesTexArray[12].width);
-                speciesGraphMatCenter.SetInt("_SelectedSpeciesID", selectedSpeciesIndex);
+                speciesGraphMatCenter.SetInt("_SelectedSpeciesID", uiManagerRef.selectedSpeciesID);
                 speciesGraphMatCenter.SetFloat("_MaximumValue", maxValuesStatArray[12]);
                 speciesGraphMatCenter.SetFloat("_MinimumValue", minValuesStatArray[12]);
 
                 speciesGraphMatRight.SetTexture("_MainTex", statsTreeOfLifeSpeciesTexArray[13]);
                 speciesGraphMatRight.SetTexture("_ColorKeyTex", statsSpeciesColorKey);
                 speciesGraphMatRight.SetFloat("_NumEntries", statsTreeOfLifeSpeciesTexArray[13].width);
-                speciesGraphMatRight.SetInt("_SelectedSpeciesID", selectedSpeciesIndex);
+                speciesGraphMatRight.SetInt("_SelectedSpeciesID", uiManagerRef.selectedSpeciesID);
                 speciesGraphMatRight.SetFloat("_MaximumValue", maxValuesStatArray[13]);
                 speciesGraphMatRight.SetFloat("_MinimumValue", minValuesStatArray[13]);
 
@@ -596,21 +566,21 @@ public class GlobalResourcesUI : MonoBehaviour {
                 speciesGraphMatLeft.SetTexture("_MainTex", statsTreeOfLifeSpeciesTexArray[5]);
                 speciesGraphMatLeft.SetTexture("_ColorKeyTex", statsSpeciesColorKey);
                 speciesGraphMatLeft.SetFloat("_NumEntries", statsTreeOfLifeSpeciesTexArray[5].width);
-                speciesGraphMatLeft.SetInt("_SelectedSpeciesID", selectedSpeciesIndex);
+                speciesGraphMatLeft.SetInt("_SelectedSpeciesID", uiManagerRef.selectedSpeciesID);
                 speciesGraphMatLeft.SetFloat("_MaximumValue", maxValuesStatArray[5]);
                 speciesGraphMatLeft.SetFloat("_MinimumValue", minValuesStatArray[5]);
                 
                 speciesGraphMatCenter.SetTexture("_MainTex", statsTreeOfLifeSpeciesTexArray[6]);
                 speciesGraphMatCenter.SetTexture("_ColorKeyTex", statsSpeciesColorKey);
                 speciesGraphMatCenter.SetFloat("_NumEntries", statsTreeOfLifeSpeciesTexArray[6].width);
-                speciesGraphMatCenter.SetInt("_SelectedSpeciesID", selectedSpeciesIndex);
+                speciesGraphMatCenter.SetInt("_SelectedSpeciesID", uiManagerRef.selectedSpeciesID);
                 speciesGraphMatCenter.SetFloat("_MaximumValue", maxValuesStatArray[6]);
                 speciesGraphMatCenter.SetFloat("_MinimumValue", minValuesStatArray[6]);
 
                 speciesGraphMatRight.SetTexture("_MainTex", statsTreeOfLifeSpeciesTexArray[7]);
                 speciesGraphMatRight.SetTexture("_ColorKeyTex", statsSpeciesColorKey);
                 speciesGraphMatRight.SetFloat("_NumEntries", statsTreeOfLifeSpeciesTexArray[7].width);
-                speciesGraphMatRight.SetInt("_SelectedSpeciesID", selectedSpeciesIndex);
+                speciesGraphMatRight.SetInt("_SelectedSpeciesID", uiManagerRef.selectedSpeciesID);
                 speciesGraphMatRight.SetFloat("_MaximumValue", maxValuesStatArray[7]);
                 speciesGraphMatRight.SetFloat("_MinimumValue", minValuesStatArray[7]);
 
@@ -624,21 +594,21 @@ public class GlobalResourcesUI : MonoBehaviour {
                 speciesGraphMatLeft.SetTexture("_MainTex", statsTreeOfLifeSpeciesTexArray[1]);
                 speciesGraphMatLeft.SetTexture("_ColorKeyTex", statsSpeciesColorKey);
                 speciesGraphMatLeft.SetFloat("_NumEntries", statsTreeOfLifeSpeciesTexArray[1].width);
-                speciesGraphMatLeft.SetInt("_SelectedSpeciesID", selectedSpeciesIndex);
+                speciesGraphMatLeft.SetInt("_SelectedSpeciesID", uiManagerRef.selectedSpeciesID);
                 speciesGraphMatLeft.SetFloat("_MaximumValue", maxValuesStatArray[1]);
                 speciesGraphMatLeft.SetFloat("_MinimumValue", minValuesStatArray[1]);
 
                 speciesGraphMatCenter.SetTexture("_MainTex", statsTreeOfLifeSpeciesTexArray[2]);
                 speciesGraphMatCenter.SetTexture("_ColorKeyTex", statsSpeciesColorKey);
                 speciesGraphMatCenter.SetFloat("_NumEntries", statsTreeOfLifeSpeciesTexArray[2].width);
-                speciesGraphMatCenter.SetInt("_SelectedSpeciesID", selectedSpeciesIndex);
+                speciesGraphMatCenter.SetInt("_SelectedSpeciesID", uiManagerRef.selectedSpeciesID);
                 speciesGraphMatCenter.SetFloat("_MaximumValue", maxValuesStatArray[2]);
                 speciesGraphMatCenter.SetFloat("_MinimumValue", minValuesStatArray[2]);
 
                 speciesGraphMatRight.SetTexture("_MainTex", statsTreeOfLifeSpeciesTexArray[3]);
                 speciesGraphMatRight.SetTexture("_ColorKeyTex", statsSpeciesColorKey);
                 speciesGraphMatRight.SetFloat("_NumEntries", statsTreeOfLifeSpeciesTexArray[3].width);
-                speciesGraphMatRight.SetInt("_SelectedSpeciesID", selectedSpeciesIndex);
+                speciesGraphMatRight.SetInt("_SelectedSpeciesID", uiManagerRef.selectedSpeciesID);
                 speciesGraphMatRight.SetFloat("_MaximumValue", maxValuesStatArray[3]);
                 speciesGraphMatRight.SetFloat("_MinimumValue", minValuesStatArray[3]);
 
@@ -653,21 +623,21 @@ public class GlobalResourcesUI : MonoBehaviour {
                 speciesGraphMatLeft.SetTexture("_MainTex", statsTreeOfLifeSpeciesTexArray[10]);
                 speciesGraphMatLeft.SetTexture("_ColorKeyTex", statsSpeciesColorKey);
                 speciesGraphMatLeft.SetFloat("_NumEntries", statsTreeOfLifeSpeciesTexArray[10].width);
-                speciesGraphMatLeft.SetInt("_SelectedSpeciesID", selectedSpeciesIndex);
+                speciesGraphMatLeft.SetInt("_SelectedSpeciesID", uiManagerRef.selectedSpeciesID);
                 speciesGraphMatLeft.SetFloat("_MaximumValue", maxValuesStatArray[10]);
                 speciesGraphMatLeft.SetFloat("_MinimumValue", minValuesStatArray[10]);
                 
                 speciesGraphMatCenter.SetTexture("_MainTex", statsTreeOfLifeSpeciesTexArray[11]);
                 speciesGraphMatCenter.SetTexture("_ColorKeyTex", statsSpeciesColorKey);
                 speciesGraphMatCenter.SetFloat("_NumEntries", statsTreeOfLifeSpeciesTexArray[11].width);
-                speciesGraphMatCenter.SetInt("_SelectedSpeciesID", selectedSpeciesIndex);
+                speciesGraphMatCenter.SetInt("_SelectedSpeciesID", uiManagerRef.selectedSpeciesID);
                 speciesGraphMatCenter.SetFloat("_MaximumValue", maxValuesStatArray[11]);
                 speciesGraphMatCenter.SetFloat("_MinimumValue", minValuesStatArray[11]);
 
                 speciesGraphMatRight.SetTexture("_MainTex", statsTreeOfLifeSpeciesTexArray[9]);
                 speciesGraphMatRight.SetTexture("_ColorKeyTex", statsSpeciesColorKey);
                 speciesGraphMatRight.SetFloat("_NumEntries", statsTreeOfLifeSpeciesTexArray[9].width);
-                speciesGraphMatRight.SetInt("_SelectedSpeciesID", selectedSpeciesIndex);
+                speciesGraphMatRight.SetInt("_SelectedSpeciesID", uiManagerRef.selectedSpeciesID);
                 speciesGraphMatRight.SetFloat("_MaximumValue", maxValuesStatArray[9]);
                 speciesGraphMatRight.SetFloat("_MinimumValue", minValuesStatArray[9]);
 
@@ -687,23 +657,58 @@ public class GlobalResourcesUI : MonoBehaviour {
         //speciesGraphImage.gameObject.SetActive(false);
         //speciesGraphImage.gameObject.SetActive(true);
 
-        graphPanelGO.gameObject.SetActive(false);
-        graphPanelGO.gameObject.SetActive(true);
+        //graphPanelGO.gameObject.SetActive(false);
+        //graphPanelGO.gameObject.SetActive(true);
     }
     
+    public void SetSelectedSpeciesUI(int id) {
+        
+        SpeciesGenomePool pool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[id];
+        uiManagerRef.selectedSpeciesID = id;
+
+        uiManagerRef.SetFocusedCandidateGenome(pool.candidateGenomesList[0]);
+
+        UpdateSpeciesListBars();
+     // attach to this parent object
+    }
 
     public void ClickToolButton() {
         Debug.Log("Click mutation toggle button)");
         isOpen = !isOpen;
     }
 
+    public void UpdateSpeciesListBars() {
+        int numActiveSpecies = uiManagerRef.gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList.Count;
+        
+        foreach (Transform child in treeAnchorUI.transform) {
+                GameObject.Destroy(child.gameObject);
+        }
+        for (int s = 0; s < numActiveSpecies; s++) {
+            int speciesID = uiManagerRef.gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList[s];
+            int parentSpeciesID = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].parentSpeciesID;
+
+            AgentGenome templateGenome = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].leaderboardGenomesList[0].candidateGenome; //.bodyGenome.coreGenome.name;
+            Color color = new Color(templateGenome.bodyGenome.appearanceGenome.huePrimary.x, templateGenome.bodyGenome.appearanceGenome.huePrimary.y, templateGenome.bodyGenome.appearanceGenome.huePrimary.z);
+
+            GameObject obj = Instantiate(prefabSpeciesBar, new Vector3(0, 0, 0), Quaternion.identity);
+            obj.transform.SetParent(treeAnchorUI.transform, false);
+            if(uiManagerRef.selectedSpeciesID == speciesID) {
+                obj.transform.localScale = Vector3.one * 1.18f;
+            }
+            obj.GetComponent<Image>().color = color;
+            obj.GetComponentInChildren<Text>().text = "[" + speciesID.ToString() + "] " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].foundingCandidate.candidateGenome.bodyGenome.coreGenome.name;
+            SpeciesTreeBarUI buttonScript = obj.GetComponent<SpeciesTreeBarUI>();
+            buttonScript.Initialize(uiManagerRef, s, speciesID);
+
+
+        }
+    }
+
     private void UpdateUI() {
 
-        SpeciesGenomePool pool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex];
-        //AgentGenome genome = pool.representativeGenome;
-        //focusedAgentGenome = pool.representativeGenome; // *** DEFAULT
+        SpeciesGenomePool pool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID];
         
-
+        
         textGlobalMass.text = "Global Biomass: " + uiManagerRef.gameManager.simulationManager.simResourceManager.curTotalMass.ToString("F0");
         SimResourceManager resourcesRef = uiManagerRef.gameManager.simulationManager.simResourceManager;
         //textMeterOxygen.text = resourcesRef.curGlobalOxygen.ToString("F0");
@@ -715,7 +720,12 @@ public class GlobalResourcesUI : MonoBehaviour {
         textMeterZooplankton.text = (resourcesRef.curGlobalAnimalParticles).ToString("F0");
         textMeterAnimals.text = (resourcesRef.curGlobalAgentBiomass).ToString("F2");
 
-        textSelectedSpeciesTitle.text = "[" + selectedSpeciesIndex.ToString() + "]  " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesIndex].foundingGenome.bodyGenome.coreGenome.name;
+        textSelectedSpeciesTitle.text = "SPECIES #" + uiManagerRef.selectedSpeciesID.ToString() + ":  " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID].foundingCandidate.candidateGenome.bodyGenome.coreGenome.name;
+        
+        Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
+        imageSelectedSpeciesBG.color = new Color(hue.x, hue.y, hue.z);
+        textSelectedSpeciesTitle.color = Color.white; // new Color(hue.x, hue.y, hue.z);
+
 /*
         string speciesDebugStr = "";
         int numActiveSpecies = uiManagerRef.gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList.Count;
@@ -752,40 +762,20 @@ public class GlobalResourcesUI : MonoBehaviour {
         }
         */
 
-        int numActiveSpecies = uiManagerRef.gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList.Count;
+        
 
-        string speciesTreeString = ""; // "SPECIES LIST:\n";
-        for (int s = 0; s < numActiveSpecies; s++) {
-            int speciesID = uiManagerRef.gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList[s];
-            int parentSpeciesID = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].parentSpeciesID;
-
-            AgentGenome templateGenome = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].leaderboardGenomesList[0].candidateGenome; //.bodyGenome.coreGenome.name;
-            Color color = new Color(templateGenome.bodyGenome.appearanceGenome.huePrimary.x, templateGenome.bodyGenome.appearanceGenome.huePrimary.y, templateGenome.bodyGenome.appearanceGenome.huePrimary.z);
-            
-            if(selectedSpeciesIndex == speciesID) {
-                speciesTreeString += "<size=24>";
-            }
-            speciesTreeString += "<color=#" + ColorUtility.ToHtmlStringRGBA(color * 1.5f) + ">";
-            speciesTreeString += "Species[" + speciesID.ToString() + "] " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].leaderboardGenomesList[0].candidateGenome.bodyGenome.coreGenome.name + " p(" + parentSpeciesID.ToString() + 
-                ")</color>";
-
-
-            if(selectedSpeciesIndex == speciesID) {
-                speciesTreeString += " - **SELECTED**</size>";
-            }
-            if(uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].isFlaggedForExtinction) {
-                speciesTreeString += "<color=#AAAAAAFF> x (extinct)</color>";
-            }
-            speciesTreeString += "\n";
-
+        if(uiManagerRef.gameManager.simulationManager.simAgeTimeSteps % 277 == 275) {
+            UpdateSpeciesListBars();
         }
         
-        textSpeciationTree.text = speciesTreeString; // speciesDebugStr;
+        
+        //textSpeciationTree.text = speciesTreeString; // speciesDebugStr;
 
         //Debug.Break(); 
                 
         if(pool != null) {
-            string speciesStatsString = "SPECIES[" + selectedSpeciesIndex.ToString() + "] " + pool.representativeGenome.bodyGenome.coreGenome.name + " STATS:\n\n";
+            /*
+            string speciesStatsString = "SPECIES[" + uiManagerRef.selectedSpeciesID.ToString() + "] " + pool.representativeCandidate.candidateGenome.bodyGenome.coreGenome.name + " STATS:\n\n";
 
             int parentSpeciesID = pool.parentSpeciesID;
             int numCandidates = pool.candidateGenomesList.Count;
@@ -794,7 +784,7 @@ public class GlobalResourcesUI : MonoBehaviour {
             int speciesPopSize = 0;
             float avgFitness = pool.avgLifespan;
             for (int a = 0; a < uiManagerRef.gameManager.simulationManager._NumAgents; a++) {
-                if (uiManagerRef.gameManager.simulationManager.agentsArray[a].speciesIndex == selectedSpeciesIndex) {
+                if (uiManagerRef.gameManager.simulationManager.agentsArray[a].speciesIndex == uiManagerRef.selectedSpeciesID) {
                     speciesPopSize++;
                 }
             }
@@ -802,29 +792,7 @@ public class GlobalResourcesUI : MonoBehaviour {
 
             string debugTxtGlobalSim = "Species[" + pool.speciesID.ToString() + "] pop: " + speciesPopSize.ToString() + ", #cands: " + numCandidates.ToString() + ", #leader: " + numLeaders.ToString() + ", #numEval'd: " + numBorn.ToString() + "\n"; // + "] SELECTED AGENT[" + agentIndex.ToString() + "] ";
             
-            /*if(agentSelectType == 0) {
-                debugTxtGlobalSim += "Representative Genome!";
-            }
-            else if(agentSelectType == 1) {
-                debugTxtGlobalSim += "Candidate Genome #" + agentIndex.ToString();
-            }
-            else {
-                debugTxtGlobalSim += "Leaderboard Genome #" + agentIndex.ToString();
-            }
-            //debugTxtGlobalSim += "SELECTED AGENT[" + agentIndex.ToString() + agentSelectType.ToString() + "] #"
-            */
             
-            //debugTxtGlobalSim += "\n\nNumCreaturesBorn: " + uiManagerRef.gameManager.simulationManager.numAgentsBorn.ToString() + ", numDied: " + uiManagerRef.gameManager.simulationManager.numAgentsDied.ToString() + ", ~Gen: " + ((float)uiManagerRef.gameManager.simulationManager.numAgentsBorn / (float)uiManagerRef.gameManager.simulationManager._NumAgents).ToString();
-            //debugTxtGlobalSim += "\nSimulation Age: " + uiManagerRef.gameManager.simulationManager.simAgeTimeSteps.ToString();
-            //debugTxtGlobalSim += "\nYear " + uiManagerRef.gameManager.simulationManager.curSimYear.ToString() + "\n\n";
-
-            if(pool.recordHolderLongestLife != null) {
-                //speciesStatsString += "Longest Life: " + pool.recordLongestLife.ToString() + ", candidate: " + pool.recordHolderLongestLife.candidateID.ToString();
-            }
-            if(pool.recordHolderMostEaten != null) {
-                //speciesStatsString += "    Most Eaten: " + pool.recordMostEaten.ToString() + ", candidate: " + pool.recordHolderMostEaten.candidateID.ToString() + "\n";
-            }
-            /*
             speciesStatsString += "Species[" + selectedSpeciesIndex.ToString() + "] p(" + parentSpeciesID.ToString() + "), size: " + speciesPopSize.ToString() + ", #cands: " + numCandidates.ToString() + ", numEvals: " + numBorn.ToString() +
                             "\navgFitness: " + avgFitness.ToString("F2") +
                             "\navgFoodEaten:\nCorpses: " + pool.avgFoodEatenCorpse.ToString("F4") +
@@ -900,7 +868,7 @@ public class GlobalResourcesUI : MonoBehaviour {
         */
 
 
-            textStatsBody.text = debugTxtGlobalSim; // + speciesStatsString; // + debugTxtAgent + sensorString;
+            //textStatsBody.text = debugTxtGlobalSim; // + speciesStatsString; // + debugTxtAgent + sensorString;
         }
 
        /*

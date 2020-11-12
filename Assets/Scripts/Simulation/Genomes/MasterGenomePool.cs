@@ -43,21 +43,21 @@ public class MasterGenomePool {
         currentlyActiveSpeciesIDList = new List<int>();
         completeSpeciesPoolsList = new List<SpeciesGenomePool>();
 
-        SpeciesGenomePool rootSpecies = new SpeciesGenomePool(0, -1, 0, 0, mutationSettingsRef);
-        rootSpecies.FirstTimeInitializeROOT(numAgentGenomes, 0);
-        currentlyActiveSpeciesIDList.Add(0);
-        completeSpeciesPoolsList.Add(rootSpecies);
+        //SpeciesGenomePool rootSpecies = new SpeciesGenomePool(0, -1, 0, 0, mutationSettingsRef);
+        //rootSpecies.FirstTimeInitializeROOT(numAgentGenomes, 0);
+        //currentlyActiveSpeciesIDList.Add(0);
+        //completeSpeciesPoolsList.Add(rootSpecies);
 
         int numInitSpecies = 6;
         for(int i = 0; i < numInitSpecies; i++) {
-            int ID = i + 1;
-            SpeciesGenomePool newSpecies = new SpeciesGenomePool(ID, -1, 0, 0, mutationSettingsRef);
+            
+            SpeciesGenomePool newSpecies = new SpeciesGenomePool(i, -1, 0, 0, mutationSettingsRef);
             AgentGenome seedGenome = new AgentGenome();
             seedGenome.GenerateInitialRandomBodyGenome();
-            int tempNumHiddenNeurons = 4;
+            int tempNumHiddenNeurons = 8;
             seedGenome.InitializeRandomBrainFromCurrentBody(1.0f, mutationSettingsRef.brainInitialConnectionChance, tempNumHiddenNeurons);            
-            newSpecies.FirstTimeInitialize(seedGenome, 0);
-            currentlyActiveSpeciesIDList.Add(ID);
+            newSpecies.FirstTimeInitialize(new CandidateAgentData(seedGenome, i), 0);
+            currentlyActiveSpeciesIDList.Add(i);
             completeSpeciesPoolsList.Add(newSpecies);
         }
         
@@ -226,7 +226,7 @@ public class MasterGenomePool {
         float closestDistance = 99999f;
         for(int i = 0; i < currentlyActiveSpeciesIDList.Count; i++) {
             if(!completeSpeciesPoolsList[ currentlyActiveSpeciesIDList[i] ].isFlaggedForExtinction) {  // Dying species not allowed?
-                float similarityDistance = GetSimilarityScore(newGenome, completeSpeciesPoolsList[ currentlyActiveSpeciesIDList[i] ].representativeGenome);
+                float similarityDistance = GetSimilarityScore(newGenome, completeSpeciesPoolsList[ currentlyActiveSpeciesIDList[i] ].representativeCandidate.candidateGenome);
                 if(similarityDistance < closestDistance) {
                     closestDistance = similarityDistance;
                     closestSpeciesID = currentlyActiveSpeciesIDList[i];
@@ -254,7 +254,7 @@ public class MasterGenomePool {
 
                     Color colo = new Color(newGenome.bodyGenome.appearanceGenome.huePrimary.x, newGenome.bodyGenome.appearanceGenome.huePrimary.y, newGenome.bodyGenome.appearanceGenome.huePrimary.z);
                     simManagerRef.uiManager.NarratorText("A new species has emerged! " + newGenome.bodyGenome.coreGenome.name, colo);
-                    simManagerRef.uiManager.globalResourcesUI.selectedSpeciesIndex = completeSpeciesPoolsList.Count - 1;
+                    
                 }               
             }
             else {

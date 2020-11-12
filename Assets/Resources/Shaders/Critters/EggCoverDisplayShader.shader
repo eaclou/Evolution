@@ -136,6 +136,8 @@
 				float3 primaryHue = critterInitDataCBuffer[inst].primaryHue;
 				float3 secondaryHue = critterInitDataCBuffer[inst].secondaryHue;
 
+				// *****
+				random2 = 0;
 				o.color = float4(lerp(primaryHue, secondaryHue, random2), 1); 
 				o.frameLerp = frameLerp - row0;
 				o.uv = float4(uv0, uv1);

@@ -48,19 +48,19 @@ public class MutationSettings {
         bodyColorsMutationChance = 0.15f;
         bodyColorsMutationStepSize = 0.04f;
         bodyCoreSizeMutationChance = 0.25f;
-        bodyCoreMutationStepSize = 0.05f;
+        bodyCoreMutationStepSize = 0.025f;
         bodyProportionsMutationChance = 0.5f;
-        bodyProportionsMutationStepSize = 0.005f;
+        bodyProportionsMutationStepSize = 0.0025f;
         bodyEyeProportionsMutationChance = 0.5f;
-        bodyEyeProportionsMutationStepSize = 0.0025f; 
+        bodyEyeProportionsMutationStepSize = 0.00125f; 
         bodyModuleCreateNewChance = 0.01f;
         bodyModuleInternalMutationChance = 0.01f;
         bodyModuleInternalMutationStepSize = 0.25f;
         bodyModuleRemoveExistingChance = 0.01f;
-        bodyTalentSpecMutationChance = 0.5f;
-        bodyTalentSpecMutationStepSize = 0.05f;
-        bodyDietSpecMutationChance = 0.5f;
-        bodyDietSpecMutationStepSize = 0.05f;
+        bodyTalentSpecMutationChance = 0.25f;
+        bodyTalentSpecMutationStepSize = 0.075f;
+        bodyDietSpecMutationChance = 0.25f;
+        bodyDietSpecMutationStepSize = 0.075f;
 
         defaultFoodMutationChance = 0.01f;
         defaultFoodMutationStepSize = 0.01f;

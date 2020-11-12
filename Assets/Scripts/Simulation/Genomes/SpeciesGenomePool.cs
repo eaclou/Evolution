@@ -14,11 +14,11 @@ public class SpeciesGenomePool {
     public MutationSettings mutationSettingsRef;  // Or remove this later to keep everything saveable?
 
     public string identifier;
-    public AgentGenome representativeGenome;
-    public AgentGenome foundingGenome;
-    public AgentGenome longestLivedGenome;
-    public AgentGenome mostEatenGenome;
-    public List<AgentGenome> hallOfFameGenomesList;
+    public CandidateAgentData representativeCandidate;
+    public CandidateAgentData foundingCandidate;
+    public CandidateAgentData longestLivedCandidate;
+    public CandidateAgentData mostEatenCandidate;
+    public List<CandidateAgentData> hallOfFameGenomesList;
     public List<CandidateAgentData> leaderboardGenomesList;
     public List<CandidateAgentData> candidateGenomesList;
 
@@ -173,7 +173,7 @@ public class SpeciesGenomePool {
         candidateGenomesList = new List<CandidateAgentData>();
         leaderboardGenomesList = new List<CandidateAgentData>();
         
-        hallOfFameGenomesList = new List<AgentGenome>();
+        hallOfFameGenomesList = new List<CandidateAgentData>();
     }
 
     // **** Change this for special-case of First-Time startup?
@@ -195,9 +195,9 @@ public class SpeciesGenomePool {
             seedGenomeArray[i] = seedGenome;
         }
 
-        foundingGenome = seedGenomeArray[0];
-        longestLivedGenome = foundingGenome;
-        mostEatenGenome = foundingGenome;
+        foundingCandidate = new CandidateAgentData(seedGenomeArray[0], speciesID);
+        longestLivedCandidate = foundingCandidate;
+        mostEatenCandidate = foundingCandidate;
 
         for (int i = 0; i < numGenomes; i++) {
 
@@ -219,12 +219,12 @@ public class SpeciesGenomePool {
             //yield return null;
         }
 
-        representativeGenome = candidateGenomesList[0].candidateGenome;
+        representativeCandidate = candidateGenomesList[0];
     }
-    public void FirstTimeInitialize(AgentGenome foundingGenome, int depth) {
-        this.foundingGenome = foundingGenome;        
-        longestLivedGenome = foundingGenome;
-        mostEatenGenome = foundingGenome;
+    public void FirstTimeInitialize(CandidateAgentData foundingGenome, int depth) {
+        this.foundingCandidate = foundingGenome;        
+        longestLivedCandidate = foundingGenome;
+        mostEatenCandidate = foundingGenome;
 
         InitShared();
         depthLevel = depth;
@@ -259,7 +259,7 @@ public class SpeciesGenomePool {
                 lettersArray[24] = "Y";
                 lettersArray[25] = "Z";
 
-        for(int i = 0; i < foundingGenome.bodyGenome.coreGenome.name.Length; i++) {
+        for(int i = 0; i < foundingGenome.candidateGenome.bodyGenome.coreGenome.name.Length; i++) {
             float randChance1 = UnityEngine.Random.Range(0f, 1f);
             if(randChance1 < 0.35) {
                 int randLetterIndex = UnityEngine.Random.Range(0, 26);
@@ -274,14 +274,14 @@ public class SpeciesGenomePool {
 
             }
             else {
-                newName += foundingGenome.bodyGenome.coreGenome.name[i];
+                newName += foundingGenome.candidateGenome.bodyGenome.coreGenome.name[i];
             }
         }
 
-        foundingGenome.bodyGenome.coreGenome.name = newName;
+        foundingGenome.candidateGenome.bodyGenome.coreGenome.name = newName;
 
-        foundingGenome.bodyGenome.appearanceGenome.huePrimary = Vector3.Lerp(foundingGenome.bodyGenome.appearanceGenome.huePrimary, newHue, 0.75f);
-        foundingGenome.bodyGenome.appearanceGenome.hueSecondary = Vector3.Lerp(foundingGenome.bodyGenome.appearanceGenome.hueSecondary, Vector3.one - newHue, 0.75f);
+        foundingGenome.candidateGenome.bodyGenome.appearanceGenome.huePrimary = Vector3.Lerp(foundingGenome.candidateGenome.bodyGenome.appearanceGenome.huePrimary, newHue, 0.75f);
+        foundingGenome.candidateGenome.bodyGenome.appearanceGenome.hueSecondary = Vector3.Lerp(foundingGenome.candidateGenome.bodyGenome.appearanceGenome.hueSecondary, Vector3.one - newHue, 0.75f);
 
         //=========================================================================
 
@@ -292,7 +292,7 @@ public class SpeciesGenomePool {
             mutationSettingsRef.bodyCoreMutationStepSize = 0.1f;
             //mutationSettingsRef.mutationStrengthSlot = 0.15f;
 
-            AgentGenome agentGenome = Mutate(foundingGenome, true, true);            
+            AgentGenome agentGenome = Mutate(foundingGenome.candidateGenome, true, true);            
             //int tempNumHiddenNeurons = 0;
             //agentGenome.InitializeRandomBrainFromCurrentBody(0.5f, mutationSettingsRef.initialConnectionChance, tempNumHiddenNeurons);
 
@@ -305,7 +305,7 @@ public class SpeciesGenomePool {
 
         Debug.Log("SPECIES CREATED! " + debugTxt);
 
-        representativeGenome = candidateGenomesList[0].candidateGenome;// foundingGenome;
+        representativeCandidate = foundingGenome;
     }
 
     public void ProcessExtinction(int curTimeStep) {
@@ -398,7 +398,7 @@ public class SpeciesGenomePool {
             }
         }
         else {
-            candidateData = new CandidateAgentData(representativeGenome, speciesID);
+            candidateData = new CandidateAgentData(representativeCandidate.candidateGenome, speciesID);
             Debug.LogError("GetNextAvailableCandidate(): candidateData representativeGenome!!!! " + candidateData.ToString());
         }
         
