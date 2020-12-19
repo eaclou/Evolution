@@ -357,7 +357,7 @@ public class WatcherUI : MonoBehaviour {
             
                 // History:
                 string historyString = "";
-                historyString += "\nMicrobesEaten: " + agent.totalFoodEatenZoop.ToString("F3");
+                /*historyString += "\nMicrobesEaten: " + agent.totalFoodEatenZoop.ToString("F3");
                 historyString += "\nAlgaeEaten: " + agent.totalFoodEatenPlant.ToString("F3");
                 historyString += "\nMeatEaten: " + agent.totalFoodEatenCreature.ToString("F3");
                 historyString += "\nCorpseEaten: " + agent.totalFoodEatenCorpse.ToString("F3");
@@ -368,7 +368,7 @@ public class WatcherUI : MonoBehaviour {
                 historyString += "\nTimesDashed: " + agent.totalTimesDashed.ToString("F0");
                 historyString += "\nTimesPregnant: " + agent.totalTimesPregnant.ToString("F0");
                 historyString += "\nTimeRested: " + agent.totalTicksRested.ToString("F0");
-
+                */
                     
                 string textString = "Event Log! [" + agent.index.ToString() + "]";
                 int maxEventsToDisplay = 8;
@@ -539,7 +539,8 @@ public class WatcherUI : MonoBehaviour {
                 widgetAgentStatus.UpdateBars((agent.coreModule.healthBody + agent.coreModule.healthHead + agent.coreModule.healthExternal) / 3f,
                                                 agent.coreModule.energy * agent.currentBiomass,
                                                 agent.coreModule.stomachContentsNorm,
-                                                agent.currentBiomass);
+                                                agent.currentBiomass,
+                                                agent.coreModule.stamina[0]);
                         
                         
                 /*               
@@ -829,7 +830,7 @@ public class WatcherUI : MonoBehaviour {
     public void StartFollowingAgent() {
         uiManagerRef.cameraManager.isFollowingAgent = true;
 
-        uiManagerRef.globalResourcesUI.CreateBrainGenomeTexture(uiManagerRef.cameraManager.targetAgent.candidateRef.candidateGenome);
+        //uiManagerRef.globalResourcesUI.CreateBrainGenomeTexture(uiManagerRef.cameraManager.targetAgent.candidateRef.candidateGenome);
     }
 
     public void StopFollowingPlantParticle() {

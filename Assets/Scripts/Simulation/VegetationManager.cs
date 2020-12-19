@@ -1026,13 +1026,13 @@ public class VegetationManager {
         //computeShaderResourceGrid.SetFloat("_RD_Rate", theRenderKingRef.simManager.vegetationManager.decomposerSlotGenomeCurrent.reactionRate);
 
         //float algaeUpkeep = algaeSlotGenomeCurrent.
-        computeShaderResourceGrid.SetFloat("_AlgaeUpkeep", 0.005f); // decomposerSlotGenomeCurrent.metabolicRate);  // *********** SHARING WITH DECOMPOSERS!!!! *****
-        computeShaderResourceGrid.SetFloat("_AlgaeMaxIntakeRate", 0.012f);
-        computeShaderResourceGrid.SetFloat("_AlgaeGrowthEfficiency", 1.59f);
+        computeShaderResourceGrid.SetFloat("_AlgaeUpkeep", 0.0043f); // decomposerSlotGenomeCurrent.metabolicRate);  // *********** SHARING WITH DECOMPOSERS!!!! *****
+        computeShaderResourceGrid.SetFloat("_AlgaeMaxIntakeRate", 0.016f);
+        computeShaderResourceGrid.SetFloat("_AlgaeGrowthEfficiency", 1.47f);
 
-        computeShaderResourceGrid.SetFloat("_DecomposerUpkeep", 0.01f); // value from empirical tinkering // decomposerSlotGenomeCurrent.metabolicRate);
-        computeShaderResourceGrid.SetFloat("_DecomposerMaxIntakeRate", 0.01f);
-        computeShaderResourceGrid.SetFloat("_DecomposerEnergyGenerationEfficiency", 1.52f);
+        computeShaderResourceGrid.SetFloat("_DecomposerUpkeep", 0.00927f); // value from empirical tinkering // decomposerSlotGenomeCurrent.metabolicRate);
+        computeShaderResourceGrid.SetFloat("_DecomposerMaxIntakeRate", 0.013f);
+        computeShaderResourceGrid.SetFloat("_DecomposerEnergyGenerationEfficiency", 1.47f);
         
         computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "VelocityRead", fluidManagerRef._VelocityPressureDivergenceMain);
         computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "_ResourceGridRead", resourceGridRT2);

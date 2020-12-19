@@ -428,7 +428,7 @@ public class SimulationManager : MonoBehaviour {
         graphDataGlobalPlants = new GraphData(uiManager.globalResourcesUI.knowledgeGraphPlantsMat);  // testing!!!!
         graphDataGlobalZooplankton = new GraphData(uiManager.globalResourcesUI.knowledgeGraphZooplanktonMat);  // testing!!!!
         graphDataGlobalVertebrates = new GraphData(uiManager.globalResourcesUI.knowledgeGraphVertebratesMat);  // testing!!!!
-
+        /*
         graphDataVertebrateLifespan0 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateLifespanMat0);
         graphDataVertebratePopulation0 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebratePopulationMat0);
         graphDataVertebrateFoodEaten0 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateFoodEatenMat0);
@@ -448,6 +448,7 @@ public class SimulationManager : MonoBehaviour {
         graphDataVertebratePopulation3 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebratePopulationMat3);
         graphDataVertebrateFoodEaten3 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateFoodEatenMat3);
         graphDataVertebrateGenome3 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateGenomeMat3);
+        */
     }
 
     public void LogFeat(Feat feat) {
@@ -933,16 +934,16 @@ public class SimulationManager : MonoBehaviour {
             graphDataGlobalVertebrates.AddNewEntry(totalAgentBiomass); // simResourceManager.curGlobalAgentBiomass);
                                                                        //uiManager.UpdateTolWorldStatsTexture(statsNutrientsEachGenerationList);
 
-            
+            /*
             if(speciesID0 >= masterGenomePool.completeSpeciesPoolsList.Count) {
                 Debug.LogError("ERROR! speciesID >= masterGenomePool.completeSpeciesPoolsList.Count");
             }
             else {
-                graphDataVertebrateLifespan0.AddNewEntry(masterGenomePool.completeSpeciesPoolsList[speciesID0].avgLifespan);
+                graphDataVertebrateLifespan0.AddNewEntry(masterGenomePool.completeSpeciesPoolsList[speciesID0].avgPerformanceData.totalTicksAlive);
                 graphDataVertebratePopulation0.AddNewEntry(totalSpeciesPopulation0);
-                graphDataVertebrateFoodEaten0.AddNewEntry(masterGenomePool.completeSpeciesPoolsList[speciesID0].avgFoodEatenZoop + masterGenomePool.completeSpeciesPoolsList[speciesID0].avgFoodEatenPlant + masterGenomePool.completeSpeciesPoolsList[speciesID0].avgFoodEatenEgg + masterGenomePool.completeSpeciesPoolsList[speciesID0].avgFoodEatenCorpse + masterGenomePool.completeSpeciesPoolsList[speciesID0].avgFoodEatenCreature);
-                graphDataVertebrateGenome0.AddNewEntry(masterGenomePool.completeSpeciesPoolsList[speciesID0].avgBodySize);
-            }
+                graphDataVertebrateFoodEaten0.AddNewEntry(masterGenomePool.completeSpeciesPoolsList[speciesID0].avgPerformanceData.totalFoodEatenZoop + masterGenomePool.completeSpeciesPoolsList[speciesID0].avgPerformanceData.totalFoodEatenPlant + masterGenomePool.completeSpeciesPoolsList[speciesID0].avgPerformanceData.totalFoodEatenEgg + masterGenomePool.completeSpeciesPoolsList[speciesID0].avgPerformanceData.totalFoodEatenCorpse + masterGenomePool.completeSpeciesPoolsList[speciesID0].avgPerformanceData.totalFoodEatenCreature);
+                //graphDataVertebrateGenome0.AddNewEntry(masterGenomePool.completeSpeciesPoolsList[speciesID0].avgBodySize);
+            }*/
             
         }
 
@@ -1013,7 +1014,7 @@ public class SimulationManager : MonoBehaviour {
                     agentsArray[i].coreModule.healthBody -= damage;
                     agentsArray[i].coreModule.healthExternal -= damage;
 
-                    agentsArray[i].totalDamageTaken += damage;
+                    agentsArray[i].candidateRef.performanceData.totalDamageTaken += damage;
 
                     agentsArray[i].coreModule.isContact[0] = 1f;
                     agentsArray[i].coreModule.contactForceX[0] = grad.x;
@@ -1258,17 +1259,17 @@ public class SimulationManager : MonoBehaviour {
         }
     }  // *** revisit
     private void CheckForReadyToSpawnAgents() {    // AUTO-SPAWN   
-        int respawnThreshold = 33;
+        int respawnThreshold = 55;
         //lifespan = uiManagerRef.gameManager.simulationManager.graphDataVertebrateLifespan0.curVal;
         //       population = uiManagerRef.gameManager.simulationManager.graphDataVertebratePopulation0.curVal;
         //        foodEaten = uiManagerRef.gameManager.simulationManager.graphDataVertebrateFoodEaten0.curVal;
         //        genome = uiManagerRef.gameManager.simulationManager.graphDataVertebrateGenome0.curVal
-        if (graphDataVertebratePopulation0.curVal < 32) {
+        /*if (graphDataVertebratePopulation0.curVal < 32) {
             respawnThreshold = 21;
         }
         else if (graphDataVertebratePopulation0.curVal > 48) {
             respawnThreshold = 700;
-        }
+        }*/
 
         for (int a = 0; a < agentsArray.Length; a++) {            
 
@@ -1403,7 +1404,7 @@ public class SimulationManager : MonoBehaviour {
                    //if(agentIndex != 0) {  // temp hack to avoid null reference exceptions:
 
 
-                Vector3 randWorldPos = new Vector3(UnityEngine.Random.Range(_MapSize * 0.1f, _MapSize * 0.9f), UnityEngine.Random.Range(_MapSize * 0.1f, _MapSize * 0.9f), 0f);// GetRandomFoodSpawnPosition().startPosition;
+                Vector3 randWorldPos = new Vector3(UnityEngine.Random.Range(_MapSize * 0.4f, _MapSize * 0.6f), UnityEngine.Random.Range(_MapSize * 0.4f, _MapSize * 0.6f), 0f);// GetRandomFoodSpawnPosition().startPosition;
                 // Find parent agent location:
                 //Agent parentAgent;
                 /*for(int i = 0; i < numAgents; i++) {
@@ -1490,7 +1491,7 @@ public class SimulationManager : MonoBehaviour {
             }
             //Debug.Log("it works! " + speciesPool.recordLongestLife.ToString() + ", candidate: " + agentRef.candidateRef.candidateID.ToString() + ", species: " + agentRef.candidateRef.speciesID.ToString());
         }
-        float totalEaten = (agentRef.totalFoodEatenCorpse + agentRef.totalFoodEatenEgg + agentRef.totalFoodEatenCorpse + agentRef.totalFoodEatenPlant + agentRef.totalFoodEatenZoop);
+        float totalEaten = (agentRef.candidateRef.performanceData.totalFoodEatenCorpse + agentRef.candidateRef.performanceData.totalFoodEatenEgg + agentRef.candidateRef.performanceData.totalFoodEatenCorpse + agentRef.candidateRef.performanceData.totalFoodEatenPlant + agentRef.candidateRef.performanceData.totalFoodEatenZoop);
         if(totalEaten > speciesPool.recordMostEaten) {
             speciesPool.recordMostEaten = totalEaten;
             speciesPool.recordHolderMostEaten = agentRef.candidateRef;
@@ -1531,32 +1532,32 @@ public class SimulationManager : MonoBehaviour {
             speciesPool.ProcessCompletedCandidate(candidateData, masterGenomePool);
             float lerpAmount = Mathf.Max(0.01f, 1f / (float)speciesPool.numAgentsEvaluated);
 
-            speciesPool.avgLifespan = Mathf.Lerp(speciesPool.avgLifespan, (float)agentRef.ageCounter, lerpAmount);
-            speciesPool.avgFoodEatenCorpse = Mathf.Lerp(speciesPool.avgFoodEatenCorpse, agentRef.totalFoodEatenCorpse, lerpAmount);
-            speciesPool.avgFoodEatenPlant = Mathf.Lerp(speciesPool.avgFoodEatenPlant, agentRef.totalFoodEatenPlant, lerpAmount);
-            speciesPool.avgFoodEatenZoop = Mathf.Lerp(speciesPool.avgFoodEatenZoop, agentRef.totalFoodEatenZoop, lerpAmount);
-            speciesPool.avgFoodEatenEgg = Mathf.Lerp(speciesPool.avgFoodEatenEgg, agentRef.totalFoodEatenEgg, lerpAmount);
-            speciesPool.avgFoodEatenCreature = Mathf.Lerp(speciesPool.avgFoodEatenCreature, agentRef.totalFoodEatenCreature, lerpAmount);
-            speciesPool.avgBodySize = Mathf.Lerp(speciesPool.avgBodySize, agentRef.fullSizeBodyVolume, lerpAmount);
-            speciesPool.avgSpecAttack = Mathf.Lerp(speciesPool.avgSpecAttack, (float)agentRef.coreModule.talentSpecAttackNorm, lerpAmount);
-            speciesPool.avgSpecDefend = Mathf.Lerp(speciesPool.avgSpecDefend, (float)agentRef.coreModule.talentSpecDefenseNorm, lerpAmount);
-            speciesPool.avgSpecSpeed = Mathf.Lerp(speciesPool.avgSpecSpeed, (float)agentRef.coreModule.talentSpecSpeedNorm, lerpAmount);
-            speciesPool.avgSpecUtility = Mathf.Lerp(speciesPool.avgSpecUtility, (float)agentRef.coreModule.talentSpecUtilityNorm, lerpAmount);
-            speciesPool.avgFoodSpecDecay = Mathf.Lerp(speciesPool.avgFoodSpecDecay, (float)agentRef.coreModule.dietSpecDecayNorm, lerpAmount);
-            speciesPool.avgFoodSpecPlant = Mathf.Lerp(speciesPool.avgFoodSpecPlant, (float)agentRef.coreModule.dietSpecPlantNorm, lerpAmount);
-            speciesPool.avgFoodSpecMeat = Mathf.Lerp(speciesPool.avgFoodSpecMeat, (float)agentRef.coreModule.dietSpecMeatNorm, lerpAmount);
-            speciesPool.avgNumNeurons = Mathf.Lerp(speciesPool.avgNumNeurons, (float)agentRef.brain.neuronList.Count, lerpAmount);
-            speciesPool.avgNumAxons = Mathf.Lerp(speciesPool.avgNumAxons, (float)agentRef.brain.axonList.Count, lerpAmount);
-            speciesPool.avgExperience = Mathf.Lerp(speciesPool.avgExperience, (float)agentRef.totalExperience, lerpAmount);
-            speciesPool.avgFitnessScore = Mathf.Lerp(speciesPool.avgFitnessScore, (float)agentRef.masterFitnessScore, lerpAmount);
-            speciesPool.avgDamageDealt = Mathf.Lerp(speciesPool.avgDamageDealt, agentRef.totalDamageDealt, lerpAmount);
-            speciesPool.avgDamageTaken = Mathf.Lerp(speciesPool.avgDamageTaken, agentRef.totalDamageTaken, lerpAmount);
+            speciesPool.avgPerformanceData.totalTicksAlive = (int)Mathf.Lerp((float)speciesPool.avgPerformanceData.totalTicksAlive, (float)agentRef.ageCounter, lerpAmount);
+            speciesPool.avgPerformanceData.totalFoodEatenCorpse = Mathf.Lerp(speciesPool.avgPerformanceData.totalFoodEatenCorpse, agentRef.candidateRef.performanceData.totalFoodEatenCorpse, lerpAmount);
+            speciesPool.avgPerformanceData.totalFoodEatenPlant = Mathf.Lerp(speciesPool.avgPerformanceData.totalFoodEatenPlant, agentRef.candidateRef.performanceData.totalFoodEatenPlant, lerpAmount);
+            speciesPool.avgPerformanceData.totalFoodEatenZoop = Mathf.Lerp(speciesPool.avgPerformanceData.totalFoodEatenZoop, agentRef.candidateRef.performanceData.totalFoodEatenZoop, lerpAmount);
+            speciesPool.avgPerformanceData.totalFoodEatenEgg = Mathf.Lerp(speciesPool.avgPerformanceData.totalFoodEatenEgg, agentRef.candidateRef.performanceData.totalFoodEatenEgg, lerpAmount);
+            speciesPool.avgPerformanceData.totalFoodEatenCreature = Mathf.Lerp(speciesPool.avgPerformanceData.totalFoodEatenCreature, agentRef.candidateRef.performanceData.totalFoodEatenCreature, lerpAmount);
+            //speciesPool.avgPerformanceData.avgBodySize = Mathf.Lerp(speciesPool.avgPerformanceData.avgBodySize, agentRef.candidateRef.performanceData.fullSizeBodyVolume, lerpAmount);
+            //speciesPool.avgPerformanceData.avgSpecAttack = Mathf.Lerp(speciesPool.avgPerformanceData.avgSpecAttack, (float)agentRef.candidateRef.performanceData.coreModule.talentSpecAttackNorm, lerpAmount);
+            ////speciesPool.avgPerformanceData.avgSpecDefend = Mathf.Lerp(speciesPool.avgPerformanceData.avgSpecDefend, (float)agentRef.candidateRef.performanceData.coreModule.talentSpecDefenseNorm, lerpAmount);
+            //speciesPool.avgPerformanceData.avgSpecSpeed = Mathf.Lerp(speciesPool.avgPerformanceData.avgSpecSpeed, (float)agentRef.candidateRef.performanceData.coreModule.talentSpecSpeedNorm, lerpAmount);
+            //speciesPool.avgPerformanceData.avgSpecUtility = Mathf.Lerp(speciesPool.avgPerformanceData.avgSpecUtility, (float)agentRef.candidateRef.performanceData.coreModule.talentSpecUtilityNorm, lerpAmount);
+            //speciesPool.avgPerformanceData.avgFoodSpecDecay = Mathf.Lerp(speciesPool.avgPerformanceData.avgFoodSpecDecay, (float)agentRef.candidateRef.performanceData.coreModule.dietSpecDecayNorm, lerpAmount);
+            //speciesPool.avgPerformanceData.avgFoodSpecPlant = Mathf.Lerp(speciesPool.avgPerformanceData.avgFoodSpecPlant, (float)agentRef.candidateRef.performanceData.coreModule.dietSpecPlantNorm, lerpAmount);
+            //speciesPool.avgPerformanceData.avgFoodSpecMeat = Mathf.Lerp(speciesPool.avgPerformanceData.avgFoodSpecMeat, (float)agentRef.candidateRef.performanceData.coreModule.dietSpecMeatNorm, lerpAmount);
+            //speciesPool.avgPerformanceData.avgNumNeurons = Mathf.Lerp(speciesPool.avgPerformanceData.avgNumNeurons, (float)agentRef.candidateRef.performanceData.brain.neuronList.Count, lerpAmount);
+            //speciesPool.avgPerformanceData.avgNumAxons = Mathf.Lerp(speciesPool.avgPerformanceData.avgNumAxons, (float)agentRef.candidateRef.performanceData.brain.axonList.Count, lerpAmount);
+            //speciesPool.avgPerformanceData.avgExperience = Mathf.Lerp(speciesPool.avgPerformanceData.avgExperience, (float)agentRef.candidateRef.performanceData.totalExperience, lerpAmount);
+            //speciesPool.avgPerformanceData.avgFitnessScore = Mathf.Lerp(speciesPool.avgPerformanceData.avgFitnessScore, (float)agentRef.candidateRef.performanceData.masterFitnessScore, lerpAmount);
+            speciesPool.avgPerformanceData.totalDamageDealt = Mathf.Lerp(speciesPool.avgPerformanceData.totalDamageDealt, agentRef.candidateRef.performanceData.totalDamageDealt, lerpAmount);
+            speciesPool.avgPerformanceData.totalDamageTaken = Mathf.Lerp(speciesPool.avgPerformanceData.totalDamageTaken, agentRef.candidateRef.performanceData.totalDamageTaken, lerpAmount);
 
-            speciesPool.avgTimeRested = Mathf.Lerp(speciesPool.avgTimeRested, (float)agentRef.totalTicksRested, lerpAmount);
-            speciesPool.avgTimesAttacked = Mathf.Lerp(speciesPool.avgTimesAttacked, (float)agentRef.totalTimesAttacked, lerpAmount);
-            speciesPool.avgTimesDefended = Mathf.Lerp(speciesPool.avgTimesDefended, (float)agentRef.totalTimesDefended, lerpAmount);
-            speciesPool.avgTimesDashed = Mathf.Lerp(speciesPool.avgTimesDashed, (float)agentRef.totalTimesDashed, lerpAmount);
-            speciesPool.avgTimesPregnant = Mathf.Lerp(speciesPool.avgTimesPregnant, (float)agentRef.totalTimesPregnant, lerpAmount);
+            speciesPool.avgPerformanceData.totalTicksRested = (int)Mathf.Lerp((float)speciesPool.avgPerformanceData.totalTicksRested, (float)agentRef.candidateRef.performanceData.totalTicksRested, lerpAmount);
+            speciesPool.avgPerformanceData.totalTimesAttacked = (int)Mathf.Lerp((float)speciesPool.avgPerformanceData.totalTimesAttacked, (float)agentRef.candidateRef.performanceData.totalTimesAttacked, lerpAmount);
+            speciesPool.avgPerformanceData.totalTimesDefended = (int)Mathf.Lerp((float)speciesPool.avgPerformanceData.totalTimesDefended, (float)agentRef.candidateRef.performanceData.totalTimesDefended, lerpAmount);
+            speciesPool.avgPerformanceData.totalTimesDashed = (int)Mathf.Lerp((float)speciesPool.avgPerformanceData.totalTimesDashed, (float)agentRef.candidateRef.performanceData.totalTimesDashed, lerpAmount);
+            speciesPool.avgPerformanceData.totalTimesPregnant = (int)Mathf.Lerp((float)speciesPool.avgPerformanceData.totalTimesPregnant, (float)agentRef.candidateRef.performanceData.totalTimesPregnant, lerpAmount);
             
             // More??
             //masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].
@@ -1574,16 +1575,13 @@ public class SimulationManager : MonoBehaviour {
         SpeciesGenomePool sourceSpeciesPool = masterGenomePool.SelectNewGenomeSourceSpecies(false, 0.33f); // select at random
                 
         
-        // -- Select a ParentGenome from the leaderboardList and create a mutated copy (childGenome):
-        //AgentGenome newGenome = sourceSpeciesPool.GetNewMutatedGenome();
+        // -- Select a ParentGenome from the leaderboardList and create a mutated copy (childGenome):  
         AgentGenome newGenome = sourceSpeciesPool.GetGenomeFromFitnessLottery();
-        //masterGenomePool.mutationSettingsRef.defaultBodyMutationChance = 0.5f;
-        //masterGenomePool.mutationSettingsRef.defaultBodyMutationStepSize = 0.1f;
-        //masterGenomePool.mutationSettingsRef.mutationStrengthSlot = 0.05f;  // ************
         newGenome = sourceSpeciesPool.Mutate(newGenome, true, true);
         newGenome.bodyGenome.coreGenome.generation++;
 
         // -- Check which species this new childGenome should belong to (most likely its parent, but maybe it creates a new species or better fits in with a diff existing species)        
+        //sourceSpeciesPool.AddNewCandidateGenome(newGenome);
         masterGenomePool.AssignNewMutatedGenomeToSpecies(newGenome, sourceSpeciesPool.speciesID, this); // Checks which species this new genome should belong to and adds it to queue / does necessary processing   
                 
         // -- Clear Agent object so that it's ready to be reused
@@ -1818,8 +1816,14 @@ public class SimulationManager : MonoBehaviour {
         statsHistoryEggSacksList[statsHistoryOxygenList.Count - 1] = simResourceManager.curGlobalEggSackVolume;
     }
     private void RefreshLatestSpeciesDataEntry() {
+        
         for(int i = 0; i < masterGenomePool.completeSpeciesPoolsList.Count; i++) {
+            if(masterGenomePool.completeSpeciesPoolsList[i].avgPerformanceDataYearList.Count > 0) {
+                masterGenomePool.completeSpeciesPoolsList[i].avgPerformanceDataYearList[masterGenomePool.completeSpeciesPoolsList[i].avgPerformanceDataYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgPerformanceData;
+            }
+            
             // Combine these into a single stats class/struct?
+/*
             masterGenomePool.completeSpeciesPoolsList[i].avgLifespanPerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgLifespanPerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgLifespan;
             masterGenomePool.completeSpeciesPoolsList[i].avgFoodEatenCorpsePerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgFoodEatenCorpsePerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgFoodEatenCorpse;
             masterGenomePool.completeSpeciesPoolsList[i].avgFoodEatenPlantPerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgFoodEatenPlantPerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgFoodEatenPlant;
@@ -1840,7 +1844,7 @@ public class SimulationManager : MonoBehaviour {
             masterGenomePool.completeSpeciesPoolsList[i].avgFitnessScorePerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgFitnessScorePerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgFitnessScore;
             masterGenomePool.completeSpeciesPoolsList[i].avgDamageDealtPerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgDamageDealtPerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgDamageDealt;
             masterGenomePool.completeSpeciesPoolsList[i].avgDamageTakenPerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgDamageTakenPerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgDamageTaken;
-
+            */
             
         }
         //avgLifespanPerYearList[avgLifespanPerYearList.Count - 1] = avgLifespan;
@@ -1870,9 +1874,22 @@ public class SimulationManager : MonoBehaviour {
         masterGenomePool.completeSpeciesPoolsList.Add(newSpecies);
         masterGenomePool.speciesCreatedOrDestroyedThisFrame = true;
 
-
+        newSpecies.avgPerformanceDataYearList.Clear();
+        int lastIndex = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgPerformanceDataYearList.Count - 1;
         // Inherit Parent Data Stats:  // *** Vestigial but harmless ***
-        newSpecies.avgLifespanPerYearList.Clear();
+        
+        for(int i = 0; i < masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgPerformanceDataYearList.Count; i++) {
+            newSpecies.avgPerformanceDataYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgPerformanceDataYearList[i]);
+            
+        }  // set
+        newSpecies.avgPerformanceData = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgPerformanceDataYearList[lastIndex];
+        
+        
+        if(newSpecies.depthLevel > masterGenomePool.currentHighestDepth) {
+            masterGenomePool.currentHighestDepth = newSpecies.depthLevel;
+        }
+        //Debug.Log("New Species Created!!! (" + newSpeciesID.ToString() + "] score: " + closestDistance.ToString());
+        /*newSpecies.avgLifespanPerYearList.Clear();
         newSpecies.avgFoodEatenCorpsePerYearList.Clear();
         newSpecies.avgFoodEatenPlantPerYearList.Clear();
         newSpecies.avgFoodEatenZoopPerYearList.Clear();
@@ -1891,9 +1908,9 @@ public class SimulationManager : MonoBehaviour {
         newSpecies.avgExperiencePerYearList.Clear();
         newSpecies.avgFitnessScorePerYearList.Clear();
         newSpecies.avgDamageDealtPerYearList.Clear();
-        newSpecies.avgDamageTakenPerYearList.Clear();
-        int lastIndex = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgLifespanPerYearList.Count - 1;
-        for(int i = 0; i < masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgLifespanPerYearList.Count; i++) {
+        newSpecies.avgDamageTakenPerYearList.Clear();*/
+        
+        /*
             newSpecies.avgLifespanPerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgLifespanPerYearList[i]);
             newSpecies.avgFoodEatenCorpsePerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgFoodEatenCorpsePerYearList[i]);
             newSpecies.avgFoodEatenPlantPerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgFoodEatenPlantPerYearList[i]);
@@ -1913,9 +1930,9 @@ public class SimulationManager : MonoBehaviour {
             newSpecies.avgExperiencePerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgExperiencePerYearList[i]);
             newSpecies.avgFitnessScorePerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgFitnessScorePerYearList[i]);
             newSpecies.avgDamageDealtPerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgDamageDealtPerYearList[i]);
-            newSpecies.avgDamageTakenPerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgDamageTakenPerYearList[i]);
-        }  // set
-        newSpecies.avgLifespan = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgLifespanPerYearList[lastIndex];
+            newSpecies.avgDamageTakenPerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgDamageTakenPerYearList[i]);*/
+
+        /*newSpecies.avgLifespan = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgLifespanPerYearList[lastIndex];
         newSpecies.avgFoodEatenCorpse = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgFoodEatenCorpsePerYearList[lastIndex];
         newSpecies.avgFoodEatenPlant = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgFoodEatenPlantPerYearList[lastIndex];
         newSpecies.avgFoodEatenZoop = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgFoodEatenZoopPerYearList[lastIndex];
@@ -1934,13 +1951,7 @@ public class SimulationManager : MonoBehaviour {
         newSpecies.avgExperience = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgExperiencePerYearList[lastIndex];
         newSpecies.avgFitnessScore = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgFitnessScorePerYearList[lastIndex];
         newSpecies.avgDamageDealt = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgDamageDealtPerYearList[lastIndex];
-        newSpecies.avgDamageTaken = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgDamageTakenPerYearList[lastIndex];
-
-        
-        if(newSpecies.depthLevel > masterGenomePool.currentHighestDepth) {
-            masterGenomePool.currentHighestDepth = newSpecies.depthLevel;
-        }
-        //Debug.Log("New Species Created!!! (" + newSpeciesID.ToString() + "] score: " + closestDistance.ToString());
+        newSpecies.avgDamageTaken = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgDamageTakenPerYearList[lastIndex];*/
     }
     
     private StartPositionGenome GetInitialAgentSpawnPosition(int speciesIndex)

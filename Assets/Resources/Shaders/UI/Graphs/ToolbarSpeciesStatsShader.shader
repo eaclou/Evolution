@@ -98,7 +98,7 @@ Shader "UI/ToolbarSpeciesStatsShader"
 				float _ZoomFactorX = 1.0;
 				float _ZoomFactorY = 1.0;
 								
-				float lineWidth = 0.002; // * _ZoomFactorY;
+				float lineWidth = 0.004; // * _ZoomFactorY;
 				float lineFadeWidth = lineWidth * 3;
 				float gridLineWidthX = 0.001 * _ZoomFactorX;	
 				float gridLineWidthY = 0.001 * _ZoomFactorY;	

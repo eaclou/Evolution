@@ -50,8 +50,8 @@ public class AgentBehaviorOneHot : MonoBehaviour {
 
         waterDepthGO.GetComponent<Text>().text = "Water Depth: " + agentRef.waterDepth.ToString() + 
                                                  "\ncontact:(" + agentRef.coreModule.contactForceX[0].ToString() + ", " + agentRef.coreModule.contactForceY[0].ToString() + ")" +
-                                                 "\nmeat eaten: " + (agentRef.totalFoodEatenZoop * 1000f).ToString("F0") + 
-                                                 "\nplants eaten: " + (agentRef.totalFoodEatenPlant * 1000f).ToString("F0");
+                                                 "\nmeat eaten: " + (agentRef.candidateRef.performanceData.totalFoodEatenZoop * 1000f).ToString("F0") + 
+                                                 "\nplants eaten: " + (agentRef.candidateRef.performanceData.totalFoodEatenPlant * 1000f).ToString("F0");
 
 
 
@@ -69,8 +69,9 @@ public class AgentBehaviorOneHot : MonoBehaviour {
         float sigmaWater = Mathf.Atan2(agentRef.environmentModule.waterVelY[0], agentRef.environmentModule.waterVelX[0]) * Mathf.Rad2Deg;// Vector3.Angle(new Vector3(0.0f, 1.0f, 0.0f), new Vector3(agentRef.environmentModule.waterVelX[0], agentRef.environmentModule.waterVelY[0], 0.0f)); // agentRef.movementModule.throttleX[0];
         sigmaWater -= 90f;
         waterVelGO.transform.rotation = Quaternion.Euler(0f, 0f, sigmaWater);
+        waterVelGO.transform.localScale = new Vector3(1f, Mathf.Clamp01(new Vector2(agentRef.environmentModule.waterVelX[0], agentRef.environmentModule.waterVelY[0]).magnitude * 50f), 1f);
 
-        if(agentRef.coreModule.isContact[0] > 0.5f) {
+        if (agentRef.coreModule.isContact[0] > 0.5f) {
             //float sigmaContact = Vector3.Angle(new Vector3(0.0f, 1.0f, 0.0f), new Vector3(agentRef.coreModule.contactForceX[0], agentRef.coreModule.contactForceY[0], 0.0f)); // agentRef.movementModule.throttleX[0];
             float sigmaContact = Mathf.Atan2(agentRef.coreModule.contactForceY[0], agentRef.coreModule.contactForceX[0]) * Mathf.Rad2Deg;
             sigmaContact -= 90f;
@@ -81,6 +82,7 @@ public class AgentBehaviorOneHot : MonoBehaviour {
             contactForceGO.SetActive(false);
         }
 
+        
         float sigmaFood0 = Mathf.Atan2(agentRef.foodModule.foodPlantDirY[0], agentRef.foodModule.foodPlantDirX[0]) * Mathf.Rad2Deg; // agentRef.movementModule.throttleX[0];
         sigmaFood0 -= 90f;
         food0.transform.rotation = Quaternion.Euler(0f, 0f, sigmaFood0);
@@ -92,6 +94,8 @@ public class AgentBehaviorOneHot : MonoBehaviour {
         float sigmaFood2 = Mathf.Atan2(agentRef.foodModule.foodEggDirY[0], agentRef.foodModule.foodEggDirX[0]) * Mathf.Rad2Deg; // agentRef.movementModule.throttleX[0];
         sigmaFood2 -= 90f;
         food2.transform.rotation = Quaternion.Euler(0f, 0f, sigmaFood2);
+        
+        
     }
     public void UpdateBars(float rest, float dash, float guard, float bite, float attack, float other, bool isCooldown) {
 
@@ -156,7 +160,7 @@ public class AgentBehaviorOneHot : MonoBehaviour {
         if(isCooldown) {
             textOther.color = Color.yellow;
             textOther.gameObject.SetActive(true);
-            throttleGO.gameObject.SetActive(false);
+            //throttleGO.gameObject.SetActive(false);
         }
         else {
             textOther.gameObject.SetActive(false);

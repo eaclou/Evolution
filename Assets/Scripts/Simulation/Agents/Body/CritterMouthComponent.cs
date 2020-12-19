@@ -78,7 +78,7 @@ public class CritterMouthComponent : MonoBehaviour {
         // Set Values from Genome:
 
         //mouthTriggerSize;
-        float baseFeedDuration = 16f;
+        float baseFeedDuration = 10f;
         float baseFeedCooldown = 24f;
         float baseAttackDuration = 16f;
         float baseAttackCooldown = 64f;
@@ -263,7 +263,7 @@ public class CritterMouthComponent : MonoBehaviour {
         float flow = eggSack.foodAmount * 10f * agentRef.coreModule.foodEfficiencyDecay;
         //Debug.Log("SwallowEggSackWhole " + flow.ToString());
 
-        agentRef.totalFoodEatenEgg += flow;
+        agentRef.candidateRef.performanceData.totalFoodEatenEgg += flow;
         agentRef.EatFoodDecay(flow);
         agentRef.RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Egg! (" + flow.ToString() + ")", 1f);
         eggSack.ConsumedByPredatorAgent();
@@ -316,7 +316,7 @@ public class CritterMouthComponent : MonoBehaviour {
             flowR = Mathf.Min(massConsumed, flow) * 10f * agentRef.coreModule.foodEfficiencyDecay;
         }
 
-        agentRef.totalFoodEatenEgg += flowR;
+        agentRef.candidateRef.performanceData.totalFoodEatenEgg += flowR;
 
         agentRef.EatFoodMeat(flowR); // assumes all foodAmounts are equal !! *****
         agentRef.RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Egg Bit! (" + flowR.ToString() + ")", 1f);
@@ -328,7 +328,7 @@ public class CritterMouthComponent : MonoBehaviour {
         float flow = ownBiteArea * 10f * agentRef.coreModule.foodEfficiencyDecay; // / colliderCount;        
         float flowR = Mathf.Min(corpseAgent.currentBiomass, flow) * 100f;
 
-        agentRef.totalFoodEatenCorpse += flow;
+        agentRef.candidateRef.performanceData.totalFoodEatenCorpse += flow;
         agentRef.EatFoodDecay(flowR); // assumes all foodAmounts are equal !! *****
         agentRef.RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Carrion! (" + flowR.ToString() + ")", 1f);
         //if(agentRef.coreModule.foodEfficiencyMeat > 0.5f) { // ** // damage bonus -- provided has the required specialization level:::::
@@ -371,13 +371,13 @@ public class CritterMouthComponent : MonoBehaviour {
         }
 
         if(isAttacking) {
-            //if(attackingFrameCounter == attackAnimDuration / 2) {  // is the current frame the Damage-Frame?
+            if(agentRef.attackingFrameCounter == agentRef.attackAnimDuration / 2) {  // is the current frame the Damage-Frame?
                 // if so, BITE!!
                 if(agentRef.curLifeStage != Agent.AgentLifeStage.Dead)
                 {
                     ActiveAttackBiteCheck(collider);
                 }               
-            //}
+            }
         }
         else {
             if(collider.gameObject.CompareTag("HazardCollider")) {

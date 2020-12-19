@@ -7,6 +7,9 @@ public class GenomeViewerUI : MonoBehaviour {
     public UIManager uiManagerRef;
 
     public Text textFocusedCandidate;
+    public Text textGenomeOverviewA;
+    public Text textGenomeOverviewB;
+    public Text textGenomeOverviewC;
 
     public GameObject panelGenomeSensors;
     public Image imageSensorFoodPlant;
@@ -103,43 +106,77 @@ public class GenomeViewerUI : MonoBehaviour {
             }
             titleString += "</size>";
             textFocusedCandidate.text = titleString;
-            Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
+
+            Vector3 hue = Vector3.one * 0.5f;
+            Vector3 hueB = Vector3.one * 0.5f;
+
+            CandidateAgentData avgCandidate;
+            if(pool.avgCandidateDataYearList.Count > 1) {
+                int yearIndex = Mathf.RoundToInt(Mathf.Lerp(0f, (float)pool.avgCandidateDataYearList.Count - 1f, uiManagerRef.speciesOverviewUI.sliderLineageGenomes.value));
+                avgCandidate = pool.avgCandidateDataYearList[yearIndex];
+            }
+            else {
+                avgCandidate = pool.avgCandidateData;
+            }
+            if(avgCandidate != null) {
+                hue = avgCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
+                hueB = avgCandidate.candidateGenome.bodyGenome.appearanceGenome.hueSecondary;
+
+                //candidate = avgCandidate;
+                /*
+                if(pool.avgCandidateData.candidateGenome != null) {
+                    if(pool.avgCandidateData.candidateGenome.bodyGenome != null) {
+                        
+                    }
+                    else {
+                        Debug.LogError("bodyGenome");
+                    }
+                }
+                else {
+                    Debug.LogError("candidateGenome");
+                }*/
+            }
+            else {
+                Debug.LogError("candData");
+            }
+            //Vector3 hue = pool.avgCandidateData.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
             imagePortraitTitleBG.color = new Color(hue.x, hue.y, hue.z);
-            textFocusedCandidate.color = Color.white;
+            textFocusedCandidate.color = new Color(hueB.x, hueB.y, hueB.z);
             //+ ", " + candidate.numCompletedEvaluations.ToString() + ", " + candidate.speciesID.ToString() + ", " + candidate.isBeingEvaluated.ToString() + ", " + candidate.candidateGenome.bodyGenome.coreGenome.name;
 
-            panelPerformanceBehavior.SetActive(isPerformancePanelON);
-            panelEaten.SetActive(isPerformancePanelON);
-            panelGenomeSpecializations.SetActive(isSpecializationPanelOn);
-            panelGenomeDigestion.SetActive(isSpecializationPanelOn);
-            panelGenomeAbilities.SetActive(isBrainPanelOn);
-            panelGenomeSensors.SetActive(isBrainPanelOn);
-            panelHistory.SetActive(isHistoryPanelOn);
+            panelPerformanceBehavior.SetActive(isFrontPageOn);
+            panelEaten.SetActive(isFrontPageOn);
+            //panelGenomeSpecializations.SetActive(false);
+            //panelGenomeDigestion.SetActive(false);
+            panelGenomeAbilities.SetActive(false);
+            panelGenomeSensors.SetActive(isFrontPageOn);
+            panelHistory.SetActive(!isFrontPageOn);
             panelFrontPage.SetActive(isFrontPageOn);
             //panel
 
             if(isFrontPageOn) {
+                float lifespan = (float)candidate.performanceData.totalTicksAlive;
+                
+                textGenomeOverviewA.text = "Lifespan: " + lifespan.ToString("F2") + ", Gen: " + candidate.candidateGenome.generationCount.ToString();
+                textGenomeOverviewB.text = "Size: " + candidate.candidateGenome.bodyGenome.coreGenome.creatureBaseLength.ToString("F2") + ", Aspect: " + candidate.candidateGenome.bodyGenome.coreGenome.creatureAspectRatio.ToString("F2");
+                textGenomeOverviewC.text = "Neurons: " + candidate.candidateGenome.brainGenome.bodyNeuronList.Count.ToString() + ", Axons: " + candidate.candidateGenome.brainGenome.linkList.Count.ToString();
 
-            }
-            if(isBrainPanelOn) {
-                panelGenomeAbilities.SetActive(true);
-                panelGenomeSensors.SetActive(true);
+                //UpdateDigestSpecUI(pool, candidate.candidateGenome);
+                //UpdateSpecializationsUI(pool, candidate.candidateGenome);
+
+                UpdatePerformanceBehaviors(pool, candidate); // ******
                 UpdateSensorsUI(pool, candidate.candidateGenome);
-                UpdateAbilitiesUI(pool, candidate.candidateGenome);
+                //UpdateAbilitiesUI(pool, candidate.candidateGenome);
+
+                //panelGenomeAbilities.SetActive(true);
+                //panelGenomeSensors.SetActive(true);
+
+                isHistoryPanelOn = false;  // ** unneeded
             }
-            if(isSpecializationPanelOn) {
-                panelGenomeSpecializations.SetActive(true);
-                panelGenomeDigestion.SetActive(true);
-                UpdateDigestSpecUI(pool, candidate.candidateGenome);
-                UpdateSpecializationsUI(pool, candidate.candidateGenome);
+            else {
+                isHistoryPanelOn = true;
             }
-            if(isPerformancePanelON) {
-                
-                UpdatePerformanceBehaviors(pool, null); // ******
-            }
-            if(isHistoryPanelOn) {
-                
-            }
+
             
 
             
@@ -257,39 +294,84 @@ public class GenomeViewerUI : MonoBehaviour {
     }
 	
     public void UpdatePerformanceBehaviors(SpeciesGenomePool pool, CandidateAgentData candidate) {
+        //if(candidate.performanceData != null) {
+        textBehaviorAttack.text = candidate.performanceData.totalTimesAttacked.ToString("F0");
+        textBehaviorDefend.text = candidate.performanceData.totalTimesDefended.ToString("F0");
+        textBehaviorDash.text = candidate.performanceData.totalTimesDashed.ToString("F0");
+        textBehaviorRest.text = (candidate.performanceData.totalTicksRested * 0.01f).ToString("F0");
+        textBehaviorFeed.text = candidate.performanceData.totalTimesPregnant.ToString("F0");
+        
+        float totalTimesActed = candidate.performanceData.totalTimesAttacked + candidate.performanceData.totalTimesDefended + candidate.performanceData.totalTimesDashed + 0.001f; // <-- prevent divide by 0
+        imageBehaviorAttack.transform.localScale = new Vector3(1f, candidate.performanceData.totalTimesAttacked / totalTimesActed, 1f);
+        imageBehaviorDefend.transform.localScale = new Vector3(1f, candidate.performanceData.totalTimesDefended / totalTimesActed, 1f);
+        imageBehaviorDash.transform.localScale = new Vector3(1f, candidate.performanceData.totalTimesDashed / totalTimesActed, 1f);
+        imageBehaviorRest.transform.localScale = new Vector3(1f, Mathf.Clamp01(candidate.performanceData.totalTicksRested / 600f), 1f);
+        imageBehaviorFeed.transform.localScale = new Vector3(1f, Mathf.Clamp01(candidate.performanceData.totalTimesPregnant / 4f), 1f);
+        
+        textEatenPlants.text = candidate.performanceData.totalFoodEatenPlant.ToString("F2");
+        textEatenMicrobes.text = candidate.performanceData.totalFoodEatenZoop.ToString("F2");
+        textEatenAnimals.text = candidate.performanceData.totalFoodEatenCreature.ToString("F2");
+        textEatenEggs.text = candidate.performanceData.totalFoodEatenEgg.ToString("F2");
+        textEatenCorpse.text = candidate.performanceData.totalFoodEatenCorpse.ToString("F2");
+
+        float totalEaten = candidate.performanceData.totalFoodEatenPlant + candidate.performanceData.totalFoodEatenZoop + candidate.performanceData.totalFoodEatenCreature + candidate.performanceData.totalFoodEatenEgg + candidate.performanceData.totalFoodEatenCorpse + 0.001f;
+        imageEatenPlants.transform.localScale = new Vector3(1f, candidate.performanceData.totalFoodEatenPlant / totalEaten, 1f);
+        imageEatenMicrobes.transform.localScale = new Vector3(1f, candidate.performanceData.totalFoodEatenZoop / totalEaten, 1f);
+        imageEatenAnimals.transform.localScale = new Vector3(1f, candidate.performanceData.totalFoodEatenCreature / totalEaten, 1f);
+        imageEatenEggs.transform.localScale = new Vector3(1f, candidate.performanceData.totalFoodEatenEgg / totalEaten, 1f);
+        imageEatenCorpse.transform.localScale = new Vector3(1f, candidate.performanceData.totalFoodEatenCorpse / totalEaten, 1f);
+
+        //}
         //textBehaviorAttack.text = candidate.evaluationScoresList[0].ToString();
-        textBehaviorAttack.text = pool.avgTimesAttacked.ToString("F0");
-        textBehaviorDefend.text = pool.avgTimesDefended.ToString("F0");
-        textBehaviorDash.text = pool.avgTimesDashed.ToString("F0");
-        textBehaviorRest.text = (pool.avgTimeRested * 0.01f).ToString("F0");
-        textBehaviorFeed.text = pool.avgTimesPregnant.ToString("F0");
+        
+        /*
+        textBehaviorAttack.text = pool.avgPerformanceData.totalTimesAttacked.ToString("F0");
+        textBehaviorDefend.text = pool.avgPerformanceData.totalTimesDefended.ToString("F0");
+        textBehaviorDash.text = pool.avgPerformanceData.totalTimesDashed.ToString("F0");
+        textBehaviorRest.text = (pool.avgPerformanceData.totalTicksRested * 0.01f).ToString("F0");
+        textBehaviorFeed.text = pool.avgPerformanceData.totalTimesPregnant.ToString("F0");
+        
+        float totalTimesActed = pool.avgPerformanceData.totalTimesAttacked + pool.avgPerformanceData.totalTimesDefended + pool.avgPerformanceData.totalTimesDashed + 0.001f; // <-- prevent divide by 0
+        imageBehaviorAttack.transform.localScale = new Vector3(1f, pool.avgPerformanceData.totalTimesAttacked / totalTimesActed, 1f);
+        imageBehaviorDefend.transform.localScale = new Vector3(1f, pool.avgPerformanceData.totalTimesDefended / totalTimesActed, 1f);
+        imageBehaviorDash.transform.localScale = new Vector3(1f, pool.avgPerformanceData.totalTimesDashed / totalTimesActed, 1f);
+        imageBehaviorRest.transform.localScale = new Vector3(1f, Mathf.Clamp01(pool.avgPerformanceData.totalTicksRested / 600f), 1f);
+        imageBehaviorFeed.transform.localScale = new Vector3(1f, Mathf.Clamp01(pool.avgPerformanceData.totalTimesPregnant / 4f), 1f);
+        
+        textEatenPlants.text = pool.avgPerformanceData.totalFoodEatenPlant.ToString("F2");
+        textEatenMicrobes.text = pool.avgPerformanceData.totalFoodEatenZoop.ToString("F2");
+        textEatenAnimals.text = pool.avgPerformanceData.totalFoodEatenCreature.ToString("F2");
+        textEatenEggs.text = pool.avgPerformanceData.totalFoodEatenEgg.ToString("F2");
+        textEatenCorpse.text = pool.avgPerformanceData.totalFoodEatenCorpse.ToString("F2");
 
-        float totalTimesActed = pool.avgTimesAttacked + pool.avgTimesDefended + pool.avgTimesDashed + 0.001f; // <-- prevent divide by 0
-        imageBehaviorAttack.transform.localScale = new Vector3(1f, pool.avgTimesAttacked / totalTimesActed, 1f);
-        imageBehaviorDefend.transform.localScale = new Vector3(1f, pool.avgTimesDefended / totalTimesActed, 1f);
-        imageBehaviorDash.transform.localScale = new Vector3(1f, pool.avgTimesDashed / totalTimesActed, 1f);
-        imageBehaviorRest.transform.localScale = new Vector3(1f, Mathf.Clamp01(pool.avgTimeRested / 1000f), 1f);
-        imageBehaviorFeed.transform.localScale = new Vector3(1f, Mathf.Clamp01(pool.avgTimesPregnant / 6f), 1f);
-
-
-        textEatenPlants.text = pool.avgFoodEatenPlant.ToString("F2");
-        textEatenMicrobes.text = pool.avgFoodEatenZoop.ToString("F2");
-        textEatenAnimals.text = pool.avgFoodEatenCreature.ToString("F2");
-        textEatenEggs.text = pool.avgFoodEatenEgg.ToString("F2");
-        textEatenCorpse.text = pool.avgFoodEatenCorpse.ToString("F2");
-
-        float totalEaten = pool.avgFoodEatenPlant + pool.avgFoodEatenZoop + pool.avgFoodEatenCreature + pool.avgFoodEatenEgg + pool.avgFoodEatenCorpse + 0.001f;
-        imageEatenPlants.transform.localScale = new Vector3(1f, pool.avgFoodEatenPlant / totalEaten, 1f);
-        imageEatenMicrobes.transform.localScale = new Vector3(1f, pool.avgFoodEatenZoop / totalEaten, 1f);
-        imageEatenAnimals.transform.localScale = new Vector3(1f, pool.avgFoodEatenCreature / totalEaten, 1f);
-        imageEatenEggs.transform.localScale = new Vector3(1f, pool.avgFoodEatenEgg / totalEaten, 1f);
-        imageEatenCorpse.transform.localScale = new Vector3(1f, pool.avgFoodEatenCorpse / totalEaten, 1f);
+        float totalEaten = pool.avgPerformanceData.totalFoodEatenPlant + pool.avgPerformanceData.totalFoodEatenZoop + pool.avgPerformanceData.totalFoodEatenCreature + pool.avgPerformanceData.totalFoodEatenEgg + pool.avgPerformanceData.totalFoodEatenCorpse + 0.001f;
+        imageEatenPlants.transform.localScale = new Vector3(1f, pool.avgPerformanceData.totalFoodEatenPlant / totalEaten, 1f);
+        imageEatenMicrobes.transform.localScale = new Vector3(1f, pool.avgPerformanceData.totalFoodEatenZoop / totalEaten, 1f);
+        imageEatenAnimals.transform.localScale = new Vector3(1f, pool.avgPerformanceData.totalFoodEatenCreature / totalEaten, 1f);
+        imageEatenEggs.transform.localScale = new Vector3(1f, pool.avgPerformanceData.totalFoodEatenEgg / totalEaten, 1f);
+        imageEatenCorpse.transform.localScale = new Vector3(1f, pool.avgPerformanceData.totalFoodEatenCorpse / totalEaten, 1f);
+    */
     }
     
+    public void ClickButtonNext() {
+        int curSpeciesID = uiManagerRef.selectedSpeciesID;
 
+        if(curSpeciesID >= uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList.Count - 1) {
+            curSpeciesID = 0;
+        }
+        else {
+            curSpeciesID += 1;
+        }
+        uiManagerRef.globalResourcesUI.SetSelectedSpeciesUI(curSpeciesID);  // *** These should be combined??
+        uiManagerRef.SetFocusedCandidateGenome(uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[curSpeciesID].representativeCandidate);
+    }
+    public void ClickButtonPrev() {
+        //uiManagerRef.speciesOverviewUI.CycleHallOfFame();
+        uiManagerRef.speciesOverviewUI.CycleCurrentGenome();
+    }
     public void ClickButtonFrontPage() {
-        ClearPanelBools();
-        isFrontPageOn = true;
+        //ClearPanelBools();
+        isFrontPageOn = !isFrontPageOn; // true;
     }
     public void ClickButtonHistory() {
         ClearPanelBools();

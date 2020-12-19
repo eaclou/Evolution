@@ -10,9 +10,9 @@ public class MasterGenomePool {
     public static int nextCandidateIndex = 0;
 
     public int maxNumActiveSpecies = 6;
-    private int targetNumSpecies = 3;
-    public float speciesSimilarityDistanceThreshold = 4f;
-    private int minNumGuaranteedEvalsForNewSpecies = 128;
+    private int targetNumSpecies = 4;
+    public float speciesSimilarityDistanceThreshold = 18f;
+    private int minNumGuaranteedEvalsForNewSpecies = 196;
 
     public int currentHighestDepth = 1;
     
@@ -25,12 +25,7 @@ public class MasterGenomePool {
 
     public List<int> debugRecentlyDeletedCandidateIDsList;
 
-    //public WorldLayerVertebrateGenome[] vertebrateSlotsGenomesCurrentArray;  // algae particles!  -- likely to be converted into plants eventually ***
-    //public WorldLayerVertebrateGenome[][] vertebrateSlotsGenomesMutationsArray;  // Layer Slots are on outside
-
-    //public int curNumSpecies;
-    //private int maxNumSpecies = 6;
-
+   
     public MasterGenomePool() {
         
     }
@@ -48,14 +43,14 @@ public class MasterGenomePool {
         //currentlyActiveSpeciesIDList.Add(0);
         //completeSpeciesPoolsList.Add(rootSpecies);
 
-        int numInitSpecies = 6;
+        int numInitSpecies = 5;
         for(int i = 0; i < numInitSpecies; i++) {
-            
+            float lerpV = Mathf.Clamp01(((float)i + 0.1f) / (float)(numInitSpecies + 1) + 0.06f); 
             SpeciesGenomePool newSpecies = new SpeciesGenomePool(i, -1, 0, 0, mutationSettingsRef);
             AgentGenome seedGenome = new AgentGenome();
             seedGenome.GenerateInitialRandomBodyGenome();
-            int tempNumHiddenNeurons = 8;
-            seedGenome.InitializeRandomBrainFromCurrentBody(1.0f, mutationSettingsRef.brainInitialConnectionChance, tempNumHiddenNeurons);            
+            int tempNumHiddenNeurons = Mathf.RoundToInt(24f * lerpV);
+            seedGenome.InitializeRandomBrainFromCurrentBody(1.0f, mutationSettingsRef.brainInitialConnectionChance * lerpV, tempNumHiddenNeurons);            
             newSpecies.FirstTimeInitialize(new CandidateAgentData(seedGenome, i), 0);
             currentlyActiveSpeciesIDList.Add(i);
             completeSpeciesPoolsList.Add(newSpecies);
@@ -79,7 +74,7 @@ public class MasterGenomePool {
             float worstFitness = 99999f;
             bool noCurrentlyExtinctFlaggedSpecies = true;
             for(int i = 0; i < currentlyActiveSpeciesIDList.Count; i++) {
-                float fitness = completeSpeciesPoolsList[currentlyActiveSpeciesIDList[i]].avgFitnessScore;
+                float fitness = completeSpeciesPoolsList[currentlyActiveSpeciesIDList[i]].avgPerformanceData.totalTicksAlive;
                 if(fitness < worstFitness) {
                     worstFitness = fitness;
                     leastFitSpeciesID = currentlyActiveSpeciesIDList[i];
@@ -243,14 +238,15 @@ public class MasterGenomePool {
         if(closestDistance > speciesSimilarityDistanceThreshold) {
             if(!speciesCreatedOrDestroyedThisFrame) {
                 if(currentlyActiveSpeciesIDList.Count < maxNumActiveSpecies) {
+                    
                     // Create new species!::::     
                     assignedToNewSpecies = true;
-                    // if so, update this 
-                    // Create foundational Species:
-                    
-                    simManagerRef.AddNewSpecies(newGenome, parentSpeciesID);
 
-                    speciesSimilarityDistanceThreshold += 7f;
+                    int seedSpeciesID = closestSpeciesID; // simManagerRef.masterGenomePool.currentlyActiveSpeciesIDList[ UnityEngine.Random.Range(0, currentlyActiveSpeciesIDList.Count) ];
+                    //AgentGenome seedGenome =
+                    simManagerRef.AddNewSpecies(newGenome, seedSpeciesID);
+
+                    speciesSimilarityDistanceThreshold += 70f;
 
                     Color colo = new Color(newGenome.bodyGenome.appearanceGenome.huePrimary.x, newGenome.bodyGenome.appearanceGenome.huePrimary.y, newGenome.bodyGenome.appearanceGenome.huePrimary.z);
                     simManagerRef.uiManager.NarratorText("A new species has emerged! " + newGenome.bodyGenome.coreGenome.name, colo);
@@ -262,10 +258,11 @@ public class MasterGenomePool {
             }
         }
         else {
+
             //Debug.Log("closestDistanceSpeciesID: " + closestSpeciesID.ToString() + ", score: " + closestDistance.ToString());
         }
-        
 
+        
         if(!assignedToNewSpecies) {
             // *** maybe something fishy here??
             // **********************

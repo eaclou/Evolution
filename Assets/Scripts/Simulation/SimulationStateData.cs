@@ -332,18 +332,19 @@ public class SimulationStateData {
                 critterSimDataArray[i].health = simManager.agentsArray[i].coreModule.healthHead;
                 critterSimDataArray[i].stamina = simManager.agentsArray[i].coreModule.stamina[0];
 
-                float isFeedingF = 0f;
-                if(simManager.agentsArray[i].isFeeding && simManager.agentsArray[i].feedingFrameCounter < 2) {
-                    isFeedingF = 1f;
-                }
+                
                 float isFreeToEat = 1f;
-                if(simManager.agentsArray[i].feedingFrameCounter > 1) {
-                    isFreeToEat = 0f;
+                if(simManager.agentsArray[i].isFeeding) { // simManager.agentsArray[i].isFeeding) { // 
+                    isFreeToEat = 1f;
                 }
+                
                 if(simManager.agentsArray[i].isDefending) {
                     isFreeToEat = 0f;
                 }
                 if(simManager.agentsArray[i].isCooldown) {
+                    isFreeToEat = 0f;
+                }
+                if(simManager.agentsArray[i].feedingFrameCounter > 4) {
                     isFreeToEat = 0f;
                 }
                 

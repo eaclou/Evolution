@@ -468,7 +468,7 @@ public class KnowledgeUI : MonoBehaviour {
                 //str += "<color=#8BD06AFF>Avg Food Eaten: <b>" + (GenomePool.avgConsumptionPlant + GenomePool.avgConsumptionMeat).ToString("F3") + "</b></color>\n";
                 //str += "\n\n\nAvg Lifespan: <b>" + (GenomePool.avgLifespan / 1500f).ToString("F1") + " Years</b>\n\n";
 
-                
+                /*
                 str += "Avg Body Size: <b>" + ((GenomePool.representativeCandidate.candidateGenome.bodyGenome.GetFullsizeBoundingBox().x + GenomePool.representativeCandidate.candidateGenome.bodyGenome.GetFullsizeBoundingBox().y) * 0.5f * GenomePool.representativeCandidate.candidateGenome.bodyGenome.GetFullsizeBoundingBox().z).ToString("F2") + "</b>\n";
                 str += "Avg Brain Size: <b>" + ((GenomePool.avgNumNeurons + GenomePool.avgNumAxons) * 1f).ToString("F0") + "</b>\n";
                 
@@ -478,7 +478,7 @@ public class KnowledgeUI : MonoBehaviour {
                 str += "\nSPECIALIZATIONS:\nAttack: <b>" + ((GenomePool.avgSpecAttack) * 1f).ToString("F2") + "</b>\n";
                 str += "Defend: <b>" + ((GenomePool.avgSpecDefend) * 1f).ToString("F2") + "</b>\n";
                 str += "Speed: <b>" + ((GenomePool.avgSpecSpeed) * 1f).ToString("F2") + "</b>\n";
-                str += "Utility: <b>" + ((GenomePool.avgSpecUtility) * 1f).ToString("F2") + "</b>\n";
+                str += "Utility: <b>" + ((GenomePool.avgSpecUtility) * 1f).ToString("F2") + "</b>\n";*/
             }            
         }
         else if(slot.kingdomID == 3) {

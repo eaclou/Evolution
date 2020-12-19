@@ -18,7 +18,7 @@ public class SettingsManager : MonoBehaviour {
     public float eatRateMultiplier = 1f;
     //public float energyDrainMultiplier = 1f;
     public float spawnNewFoodChance = 0.01f;
-    public float nutrientDiffusionRate = 0.0125f;
+    public float nutrientDiffusionRate = 0.00125f;
     public float minSizeFeedingEfficiencyDecay = 1f;
     public float maxSizeFeedingEfficiencyDecay = 1f;
     public float minSizeFeedingEfficiencyPlant = 1f;
@@ -27,7 +27,7 @@ public class SettingsManager : MonoBehaviour {
     public float maxSizeFeedingEfficiencyMeat = 1f;
 
     public float maxFoodParticleTotalAmount = 512f;
-    public float avgAlgaeParticleRadius = 0.25f;
+    public float avgAlgaeParticleRadius = 0.37f;
     public float algaeParticleRadiusVariance = 4f;
     public float algaeParticleNutrientDensity = 1f;
     public float foodParticleRegrowthRate = 0.0001f;
@@ -131,7 +131,7 @@ public class SettingsManager : MonoBehaviour {
 
     public void Initialize() {
         //mutationSettingsSupervised = new MutationSettings(0.5f, 0.015f, 1f, 0.005f, 1f, 0.1f, 0.001f);
-        mutationSettingsVertebrates = new MutationSettings(0.1f, 0.5f, 0.05f, 0.025f, 0.995f, 0.95f, 0.1f, 1f);
+        mutationSettingsVertebrates = new MutationSettings(0.5f, 0.5f, 0.05f, 0.025f, 0.995f, 0.95f, 0.1f, 1f);
         mutationSettingsNoneCopy = new MutationSettings();
 /*
         ChangeTierFoodDecay(0);

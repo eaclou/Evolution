@@ -18,6 +18,7 @@ public class SpeciesGenomePool {
     public CandidateAgentData foundingCandidate;
     public CandidateAgentData longestLivedCandidate;
     public CandidateAgentData mostEatenCandidate;
+    //public Lineage Map --> avg genome over time
     public List<CandidateAgentData> hallOfFameGenomesList;
     public List<CandidateAgentData> leaderboardGenomesList;
     public List<CandidateAgentData> candidateGenomesList;
@@ -44,59 +45,28 @@ public class SpeciesGenomePool {
     public CandidateAgentData recordHolderDefender;
 
     // stats:
+    public struct PerformanceData {
+        //public int totalLifespan = 0;
+	    public float totalFoodEatenPlant;
+        public float totalFoodEatenZoop;
+        public float totalFoodEatenEgg;
+        public float totalFoodEatenCorpse;
+        public float totalFoodEatenCreature;
+        public float totalDamageDealt;
+        public float totalDamageTaken;
+        public float totalTimesDashed;
+        public float totalTimesDefended;
+        public float totalTimesAttacked;
+        public float totalTimesPregnant;
+        public float totalTicksRested;
+        public float totalTicksAlive;
+    }
+    public List<PerformanceData> avgPerformanceDataYearList;
+    public PerformanceData avgPerformanceData;
+    public List<CandidateAgentData> avgCandidateDataYearList;
+    public CandidateAgentData avgCandidateData;
 
-    public float avgLifespan = 0f;
-    public List<float> avgLifespanPerYearList;    
-    public float avgFoodEatenPlant = 0f;
-    public List<float> avgFoodEatenPlantPerYearList;
-    public float avgFoodEatenZoop = 0f;
-    public List<float> avgFoodEatenZoopPerYearList;
-    public float avgFoodEatenCreature = 0f;
-    public List<float> avgFoodEatenCreaturePerYearList;    
-    public float avgFoodEatenEgg = 0f;
-    public List<float> avgFoodEatenEggPerYearList;
-    public float avgFoodEatenCorpse = 0f;
-    public List<float> avgFoodEatenCorpsePerYearList;
-
-    public float avgBodySize = 0f;
-    public List<float> avgBodySizePerYearList;
-    public float avgSpecAttack = 0f;
-    public List<float> avgSpecAttackPerYearList;
-    public float avgSpecDefend = 0f;
-    public List<float> avgSpecDefendPerYearList;
-    public float avgSpecSpeed = 0f;
-    public List<float> avgSpecSpeedPerYearList;
-    public float avgSpecUtility = 0f;
-    public List<float> avgSpecUtilityPerYearList;
-    public float avgFoodSpecDecay = 0f;
-    public List<float> avgFoodSpecDecayPerYearList;
-    public float avgFoodSpecPlant = 0f;
-    public List<float> avgFoodSpecPlantPerYearList;
-    public float avgFoodSpecMeat = 0f;
-    public List<float> avgFoodSpecMeatPerYearList;
-    public float avgNumNeurons = 0f;
-    public List<float> avgNumNeuronsPerYearList;
-    public float avgNumAxons = 0f;
-    public List<float> avgNumAxonsPerYearList;
-    public float avgExperience = 0f;
-    public List<float> avgExperiencePerYearList;
-    public float avgFitnessScore = 0f;
-    public List<float> avgFitnessScorePerYearList;
-    public float avgDamageDealt = 0f;
-    public List<float> avgDamageDealtPerYearList;
-    public float avgDamageTaken = 0f;
-    public List<float> avgDamageTakenPerYearList;
-
-    public float avgTimeRested = 0f;
-    public List<float> avgTimeRestedPerYearList;
-    public float avgTimesDefended = 0f;
-    public List<float> avgTimesDefendedPerYearList;
-    public float avgTimesDashed = 0f;
-    public List<float> avgTimesDashedPerYearList;
-    public float avgTimesAttacked = 0f;
-    public List<float> avgTimesAttackedPerYearList;
-    public float avgTimesPregnant = 0f;
-    public List<float> avgTimesPregenantPerYearList;
+    //public float avgLifespan = 0f;
     
 
     public bool isFlaggedForExtinction = false;
@@ -116,69 +86,33 @@ public class SpeciesGenomePool {
     private void InitShared() {
         isFlaggedForExtinction = false;
         isExtinct = false;
-        // *** Turn these into Array of Lists
-        avgLifespanPerYearList = new List<float>();   
-        avgLifespanPerYearList.Add(0f);
-        avgFoodEatenPlantPerYearList = new List<float>();
-        avgFoodEatenPlantPerYearList.Add(0f);
-        avgFoodEatenZoopPerYearList = new List<float>();
-        avgFoodEatenZoopPerYearList.Add(0f);
-        avgFoodEatenCreaturePerYearList = new List<float>();
-        avgFoodEatenCreaturePerYearList.Add(0f);
-        avgFoodEatenEggPerYearList = new List<float>();
-        avgFoodEatenEggPerYearList.Add(0f);
-        avgFoodEatenCorpsePerYearList = new List<float>();
-        avgFoodEatenCorpsePerYearList.Add(0f);
-        avgBodySizePerYearList = new List<float>();
-        avgBodySizePerYearList.Add(0f);
-        avgSpecAttackPerYearList = new List<float>();
-        avgSpecAttackPerYearList.Add(0f);
-        avgSpecDefendPerYearList = new List<float>();
-        avgSpecDefendPerYearList.Add(0f);
-        avgSpecSpeedPerYearList = new List<float>();
-        avgSpecSpeedPerYearList.Add(0f);
-        avgSpecUtilityPerYearList = new List<float>();
-        avgSpecUtilityPerYearList.Add(0f);
-        avgFoodSpecDecayPerYearList = new List<float>();
-        avgFoodSpecDecayPerYearList.Add(0f);
-        avgFoodSpecPlantPerYearList = new List<float>();
-        avgFoodSpecPlantPerYearList.Add(0f);
-        avgFoodSpecMeatPerYearList = new List<float>();
-        avgFoodSpecMeatPerYearList.Add(0f);
-        avgNumNeuronsPerYearList = new List<float>();
-        avgNumNeuronsPerYearList.Add(0f);
-        avgNumAxonsPerYearList = new List<float>();
-        avgNumAxonsPerYearList.Add(0f);
-        avgExperiencePerYearList = new List<float>();
-        avgExperiencePerYearList.Add(0f);
-        avgFitnessScorePerYearList = new List<float>();
-        avgFitnessScorePerYearList.Add(0f);
-        avgDamageDealtPerYearList = new List<float>();
-        avgDamageDealtPerYearList.Add(0f);
-        avgDamageTakenPerYearList = new List<float>();
-        avgDamageTakenPerYearList.Add(0f);
 
-        avgTimeRestedPerYearList = new List<float>();
-        avgTimeRestedPerYearList.Add(0f);
-        
-        avgTimesDefendedPerYearList = new List<float>();
-        avgTimesDefendedPerYearList.Add(0f);
-        avgTimesDashedPerYearList = new List<float>();
-        avgTimesDashedPerYearList.Add(0);
-        avgTimesAttackedPerYearList = new List<float>();
-        avgTimesAttackedPerYearList.Add(0);
-        avgTimesPregenantPerYearList = new List<float>();
-        avgTimesPregenantPerYearList.Add(0);
+        avgPerformanceDataYearList = new List<PerformanceData>();
+        avgPerformanceData = new PerformanceData();
+        avgCandidateDataYearList = new List<CandidateAgentData>();
+
+        //avgCandidateData = new CandidateAgentData();
+        CreateNewAverageCandidate(); // *** ???? Redundant??? ***
 
         candidateGenomesList = new List<CandidateAgentData>();
         leaderboardGenomesList = new List<CandidateAgentData>();
         
         hallOfFameGenomesList = new List<CandidateAgentData>();
+
+        
     }
 
+    /*private void RecalculateAverageGenome() { // ** remove *** unneeded ***!!
+        AgentGenome avgGenome = new AgentGenome();
+        CandidateAgentData avgCandidate = new CandidateAgentData(avgGenome, speciesID);
+        for(int i = 0; i < leaderboardGenomesList.Count; i++) {
+
+        }
+    }*/
     // **** Change this for special-case of First-Time startup?
     // **** Create a bunch of random genomes and then organize them into Species first?
     // **** THEN create species and place genomes in?
+    /*
     public void FirstTimeInitializeROOT(int numGenomes, int depth) {
         
         InitShared();
@@ -220,7 +154,7 @@ public class SpeciesGenomePool {
         }
 
         representativeCandidate = candidateGenomesList[0];
-    }
+    }*/
     public void FirstTimeInitialize(CandidateAgentData foundingGenome, int depth) {
         this.foundingCandidate = foundingGenome;        
         longestLivedCandidate = foundingGenome;
@@ -310,77 +244,79 @@ public class SpeciesGenomePool {
 
     public void ProcessExtinction(int curTimeStep) {
         isExtinct = true;
-        /*avgLifespan = 0f;
-        avgConsumptionDecay = 0f;
-        avgConsumptionPlant = 0f;
-        avgConsumptionMeat = 0f;
-        avgBodySize = 0f;
-        avgSpecAttack = 0f;
-        avgSpecDefend = 0f;
-        avgSpecSpeed = 0f;
-        avgSpecUtility = 0f;
-        avgFoodSpecDecay = 0f;
-        avgFoodSpecPlant = 0f;
-        avgFoodSpecMeat = 0f;
-        avgNumNeurons = 0f;
-        avgNumAxons = 0f;
-        avgExperience = 0f;
-        avgFitnessScore = 0f;
-        avgDamageDealt = 0f;
-        avgDamageTaken = 0f;
-        */
+        
         timeStepExtinct = curTimeStep;
     }
 
-    public void AddNewYearlyStats(int year) {
-        avgLifespanPerYearList.Add(avgLifespan);
-        avgFoodEatenPlantPerYearList.Add(avgFoodEatenPlant);
-        avgFoodEatenZoopPerYearList.Add(avgFoodEatenZoop);
-        avgFoodEatenCreaturePerYearList.Add(avgFoodEatenCreature);
-        avgFoodEatenCorpsePerYearList.Add(avgFoodEatenCorpse);
-        avgFoodEatenEggPerYearList.Add(avgFoodEatenEgg);
-        
-        avgBodySizePerYearList.Add(avgBodySize);
-        avgSpecAttackPerYearList.Add(avgSpecAttack);
-        avgSpecDefendPerYearList.Add(avgSpecDefend);
-        avgSpecSpeedPerYearList.Add(avgSpecSpeed);
-        avgSpecUtilityPerYearList.Add(avgSpecUtility);
-        avgFoodSpecDecayPerYearList.Add(avgFoodSpecDecay);
-        avgFoodSpecPlantPerYearList.Add(avgFoodSpecPlant);
-        avgFoodSpecMeatPerYearList.Add(avgFoodSpecMeat);
-        avgNumNeuronsPerYearList.Add(avgNumNeurons);
-        avgNumAxonsPerYearList.Add(avgNumAxons);
-        avgExperiencePerYearList.Add(avgExperience);
-        avgFitnessScorePerYearList.Add(avgFitnessScore);
-        avgDamageDealtPerYearList.Add(avgDamageDealt);
-        avgDamageTakenPerYearList.Add(avgDamageTaken);
-
-        avgTimeRestedPerYearList.Add(avgTimeRested);
-        avgTimesDashedPerYearList.Add(avgTimesDashed);
-        avgTimesDefendedPerYearList.Add(avgTimesDefended);
-        avgTimesAttackedPerYearList.Add(avgTimesAttacked);
-        avgTimesPregenantPerYearList.Add(avgTimesPregnant);
+    private void CreateNewAverageCandidate() {
+        AgentGenome blankGenome = new AgentGenome();
+        blankGenome.GenerateInitialRandomBodyGenome();
+        int tempNumHiddenNeurons = 0;
+        blankGenome.InitializeRandomBrainFromCurrentBody(1.0f, 0.1f, tempNumHiddenNeurons);   // unneeded?
+        avgCandidateData = new CandidateAgentData(blankGenome, speciesID);
     }
-    /*public void UpdateSpeciesStats() {
-        avgLifespanPerYearList[avgLifespanPerYearList.Count - 1] = avgLifespan;
-        avgConsumptionDecayPerYearList[avgConsumptionDecayPerYearList.Count - 1] = avgConsumptionDecay;
-        avgConsumptionPlantPerYearList[avgConsumptionPlantPerYearList.Count - 1] = avgConsumptionPlant;
-        avgConsumptionMeatPerYearList[avgConsumptionMeatPerYearList.Count - 1] = avgConsumptionMeat;
-        avgBodySizePerYearList[avgBodySizePerYearList.Count - 1] = avgBodySize;
-        avgSpecAttackPerYearList[avgSpecAttackPerYearList.Count - 1] = avgSpecAttack;
-        avgSpecDefendPerYearList[avgSpecDefendPerYearList.Count - 1] = avgSpecDefend;
-        avgSpecSpeedPerYearList[avgSpecSpeedPerYearList.Count - 1] = avgSpecSpeed;
-        avgSpecUtilityPerYearList[avgSpecUtilityPerYearList.Count - 1] = avgSpecUtility;
-        avgFoodSpecDecayPerYearList[avgFoodSpecDecayPerYearList.Count - 1] = avgFoodSpecDecay;
-        avgFoodSpecPlantPerYearList[avgFoodSpecPlantPerYearList.Count - 1] = avgFoodSpecPlant;
-        avgFoodSpecMeatPerYearList[avgFoodSpecMeatPerYearList.Count - 1] = avgFoodSpecMeat;
-        avgNumNeuronsPerYearList[avgNumNeuronsPerYearList.Count - 1] = avgNumNeurons;
-        avgNumAxonsPerYearList[avgNumAxonsPerYearList.Count - 1] = avgNumAxons;
-        avgExperiencePerYearList[avgExperiencePerYearList.Count - 1] = avgExperience;
-        avgFitnessScorePerYearList[avgFitnessScorePerYearList.Count - 1] = avgFitnessScore;
-        avgDamageDealtPerYearList[avgDamageDealtPerYearList.Count - 1] = avgDamageDealt;
-        avgDamageTakenPerYearList[avgDamageTakenPerYearList.Count - 1] = avgDamageTaken;
-    }*/
+    private void RecalculateAverageCandidate() {
+        //calculate avg candidate:
+        avgCandidateData.candidateGenome.bodyGenome.appearanceGenome.huePrimary = Vector3.zero;
+        avgCandidateData.candidateGenome.bodyGenome.appearanceGenome.hueSecondary = Vector3.zero;
+        avgCandidateData.candidateGenome.bodyGenome.coreGenome.dietSpecializationDecay = 0f;
+        avgCandidateData.candidateGenome.bodyGenome.coreGenome.dietSpecializationPlant = 0f;
+        avgCandidateData.candidateGenome.bodyGenome.coreGenome.dietSpecializationMeat = 0f;
+        avgCandidateData.candidateGenome.bodyGenome.coreGenome.talentSpecializationAttack = 0f;
+        avgCandidateData.candidateGenome.bodyGenome.coreGenome.talentSpecializationDefense = 0f;
+        avgCandidateData.candidateGenome.bodyGenome.coreGenome.talentSpecializationSpeed = 0f;
+        avgCandidateData.candidateGenome.bodyGenome.coreGenome.talentSpecializationUtility = 0f;
+
+        avgCandidateData.candidateGenome.bodyGenome.coreGenome.bodyLength = 0f;
+        avgCandidateData.candidateGenome.bodyGenome.coreGenome.creatureAspectRatio = 0f;
+
+        avgCandidateData.performanceData = avgPerformanceData;
+        
+                
+        for(int i = 0; i < leaderboardGenomesList.Count; i++) {
+            float norm = 1f / (float)(leaderboardGenomesList.Count - 1);
+            
+            avgCandidateData.candidateGenome.bodyGenome.appearanceGenome.huePrimary += leaderboardGenomesList[i].candidateGenome.bodyGenome.appearanceGenome.huePrimary * norm;
+            avgCandidateData.candidateGenome.bodyGenome.appearanceGenome.hueSecondary += leaderboardGenomesList[i].candidateGenome.bodyGenome.appearanceGenome.hueSecondary * norm;
+            avgCandidateData.candidateGenome.bodyGenome.coreGenome.dietSpecializationDecay += leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome.dietSpecializationDecay * norm;
+            avgCandidateData.candidateGenome.bodyGenome.coreGenome.dietSpecializationPlant += leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome.dietSpecializationPlant * norm;
+            avgCandidateData.candidateGenome.bodyGenome.coreGenome.dietSpecializationMeat += leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome.dietSpecializationMeat * norm;
+            avgCandidateData.candidateGenome.bodyGenome.coreGenome.talentSpecializationAttack += leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome.talentSpecializationAttack * norm;
+            avgCandidateData.candidateGenome.bodyGenome.coreGenome.talentSpecializationDefense += leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome.talentSpecializationDefense * norm;
+            avgCandidateData.candidateGenome.bodyGenome.coreGenome.talentSpecializationSpeed += leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome.talentSpecializationSpeed * norm;
+            avgCandidateData.candidateGenome.bodyGenome.coreGenome.talentSpecializationUtility += leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome.talentSpecializationUtility * norm;
+        
+            avgCandidateData.candidateGenome.bodyGenome.coreGenome.bodyLength += leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome.bodyLength * norm;
+            avgCandidateData.candidateGenome.bodyGenome.coreGenome.creatureAspectRatio += leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome.creatureAspectRatio * norm;
+        }
+    }
+    public void AddNewYearlyStats(int year) {
+        avgPerformanceDataYearList.Add(avgPerformanceData);
+
+        CreateNewAverageCandidate();
+        RecalculateAverageCandidate();
+       
+        for(int i = 0; i < leaderboardGenomesList.Count; i++) {
+            float norm = 1f / (float)(leaderboardGenomesList.Count - 1);
+            avgCandidateData.performanceData.totalDamageDealt += leaderboardGenomesList[i].performanceData.totalDamageDealt * norm;
+            avgCandidateData.performanceData.totalDamageTaken += leaderboardGenomesList[i].performanceData.totalDamageTaken * norm;
+            avgCandidateData.performanceData.totalFoodEatenCorpse += leaderboardGenomesList[i].performanceData.totalFoodEatenCorpse * norm;
+            avgCandidateData.performanceData.totalFoodEatenCreature += leaderboardGenomesList[i].performanceData.totalFoodEatenCreature * norm;
+            avgCandidateData.performanceData.totalFoodEatenEgg += leaderboardGenomesList[i].performanceData.totalFoodEatenEgg * norm;
+            avgCandidateData.performanceData.totalFoodEatenPlant += leaderboardGenomesList[i].performanceData.totalFoodEatenPlant * norm;
+            avgCandidateData.performanceData.totalFoodEatenZoop += leaderboardGenomesList[i].performanceData.totalFoodEatenZoop * norm;
+            avgCandidateData.performanceData.totalTicksAlive += leaderboardGenomesList[i].performanceData.totalTicksAlive * norm;
+            avgCandidateData.performanceData.totalTicksRested += leaderboardGenomesList[i].performanceData.totalTicksRested * norm;
+            avgCandidateData.performanceData.totalTimesAttacked += leaderboardGenomesList[i].performanceData.totalTimesAttacked * norm;
+            avgCandidateData.performanceData.totalTimesDashed += leaderboardGenomesList[i].performanceData.totalTimesDashed * norm;
+            avgCandidateData.performanceData.totalTimesDefended += leaderboardGenomesList[i].performanceData.totalTimesDefended * norm;
+            avgCandidateData.performanceData.totalTimesPregnant += leaderboardGenomesList[i].performanceData.totalTimesPregnant * norm;
+            
+        }
+
+        avgCandidateDataYearList.Add(avgCandidateData); // = new List<CandidateAgentData>();
+    }
+    
 
     public CandidateAgentData GetNextAvailableCandidate() {
 
@@ -470,10 +406,10 @@ public class SpeciesGenomePool {
         //string leaderboardGenomesListString = "LEADERBOARD GENOMES (" + speciesID.ToString() + ")";
         // Rank current leaderBoard list based on score
         for (int i = 0; i < numCandidates; i++) {
-            float fitnessScore = 0.01f;
-            for(int j = 0; j < leaderboardGenomesList[i].evaluationScoresList.Count; j++) {
-                fitnessScore += (float)leaderboardGenomesList[i].evaluationScoresList[j];
-            }
+            float fitnessScore = 0.00001f;
+            //for(int j = 0; j < leaderboardGenomesList[i].evaluationScoresList.Count; j++) {
+                fitnessScore += (float)leaderboardGenomesList[i].performanceData.totalTicksAlive;
+            //}
             rankedFitnessScoresArray[i] = fitnessScore;
             rankedIndicesList[i] = i;
             totalFitness += fitnessScore;
@@ -547,7 +483,8 @@ public class SpeciesGenomePool {
         
         childGenome.bodyGenome = newBodyGenome; 
         childGenome.brainGenome = newBrainGenome;
-        //childGenome.generationCount = parentGenome.generationCount + 1;
+
+        childGenome.generationCount = parentGenome.generationCount + 1;
 
         return childGenome;
     }

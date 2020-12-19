@@ -150,7 +150,7 @@
 				//vertexOffset.xy *= 4;
 
 				//*** TEMP::::: ****
-				float spriteScale = (sqrt(particleData.biomass) * 0.25 + 0.115 + (0.06 * hoverMask + 0.02 * selectedMask)) * 1;
+				float spriteScale = (sqrt(particleData.biomass) * 0.1 + 0.04 + (0.06 * hoverMask + 0.02 * selectedMask)) * 1;
 				//spriteScale = 0.1;
 				vertexOffset.xy = quadPoint.xy * spriteScale * lerp(1, 5, _CamDistNormalized);
 
@@ -178,7 +178,7 @@
 			{
 				//return float4(1,1,1,1) * (0.5 + i.color.y);
 
-				float4 texColor = tex2D(_MainTex, i.uv);
+				float4 texColor = float4(1,1,1,1); // *********************************************************** tex2D(_MainTex, i.uv);
 				float4 terrainColorTex = tex2D(_TerrainColorTex, i.altitudeUV) * 0.5 + 0.5;
 
 				float val = i.color.a;

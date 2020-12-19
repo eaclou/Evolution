@@ -63,40 +63,33 @@ public class CritterModuleFood {
     public void Initialize(CritterModuleFoodSensorsGenome genome, Agent agent) {
         this.genome = genome;
 
-        //if(genome.useNutrients) {
+        if(genome.useNutrients) {
             nutrientDensity = new float[1];
             nutrientGradX = new float[1];
             nutrientGradY = new float[1];
-        //}
-        //if(genome.usePos) {
+        }
+        if(genome.usePos) {
             foodPlantPosX = new float[1];
             foodPlantPosY = new float[1];
-            foodPlantDistance = new float[1];
-        //}
-        //if(genome.useVel) {
+            
+            foodAnimalPosX = new float[1];
+            foodAnimalPosY = new float[1];
+            
+        }
+        if(genome.useVel) {
             foodPlantVelX = new float[1];
             foodPlantVelY = new float[1];
-        //}
+            foodAnimalVelX = new float[1];
+            foodAnimalVelY = new float[1];
+        }
         //if(genome.useDir) {
-            foodPlantDirX = new float[1];
-            foodPlantDirY = new float[1];
-        //}
-        //if(genome.useStats) {
-            foodPlantQuality = new float[1];
-            foodPlantRelSize = new float[1];
-        //}
+        foodPlantDistance = new float[1];
+        foodPlantDirX = new float[1];
+        foodPlantDirY = new float[1];
 
-
-        foodAnimalPosX = new float[1];
-        foodAnimalPosY = new float[1];
         foodAnimalDistance = new float[1];
-        foodAnimalVelX = new float[1];
-        foodAnimalVelY = new float[1];
         foodAnimalDirX = new float[1];
         foodAnimalDirY = new float[1];
-        foodAnimalQuality = new float[1];
-        foodAnimalRelSize = new float[1];
-        
 
         foodEggDistance = new float[1];
         foodEggDirX = new float[1];
@@ -105,8 +98,16 @@ public class CritterModuleFood {
         foodCorpseDistance = new float[1];
         foodCorpseDirX = new float[1];
         foodCorpseDirY = new float[1];
+        //}
+        if(genome.useStats) {
+            foodPlantQuality = new float[1];
+            foodPlantRelSize = new float[1];
+            foodAnimalQuality = new float[1];
+            foodAnimalRelSize = new float[1];
+        }
+                
 
-        sensorRange = 25f; // TEMP HARDCODED *****
+        sensorRange = 16f; // TEMP HARDCODED *****
         preferredSize = genome.preferredSize;
 
         /*foodPreferenceOrder = new int[3];  // 0 == particle, 1=egg, 2==creature
@@ -295,19 +296,11 @@ public class CritterModuleFood {
         Vector2 foodParticleDir = critterToFoodParticle.normalized;
         float nearestFoodParticleDistance = Mathf.Clamp01((sensorRange - critterToFoodParticle.magnitude) / sensorRange); // inverted dist(proximity) 0-1
 
-        foodPlantPosX[0] = Mathf.Clamp(critterToFoodParticle.x / sensorRange, -1f, 1f);
-        foodPlantPosY[0] = Mathf.Clamp(critterToFoodParticle.y / sensorRange, -1f, 1f);
-        foodPlantDistance[0] = nearestFoodParticleDistance;
-        foodPlantDirX[0] = foodParticleDir.x;
-        foodPlantDirY[0] = foodParticleDir.y;
-        foodPlantQuality[0] = 1f; // *** temp until particles can decay naturally
-        foodPlantRelSize[0] = nearestFoodParticleAmount;
 
-
+        //ANIMAL ZOOPLANKTON:
         nearestAnimalParticleIndex = simManager.zooplanktonManager.closestAnimalParticlesDataArray[agent.index].index;
         nearestAnimalParticlePos = simManager.zooplanktonManager.closestAnimalParticlesDataArray[agent.index].worldPos - simManager.agentsArray[agent.index].bodyRigidbody.transform.position; // 
-                                    //new Vector2(simManager.agentsArray[agent.index].bodyRigidbody.transform.position.x,
-                                    //simManager.agentsArray[agent.index].bodyRigidbody.transform.position.y);
+                                 
 
         nearestAnimalParticleAmount = simManager.zooplanktonManager.closestAnimalParticlesDataArray[agent.index].biomass;
         Vector2 critterToAnimalParticle = new Vector2(nearestAnimalParticlePos.x, nearestAnimalParticlePos.y); // - agent.ownPos;
@@ -315,92 +308,73 @@ public class CritterModuleFood {
         Vector2 animalParticleDir = critterToAnimalParticle.normalized;
         float nearestAnimalParticleDistance = Mathf.Clamp01((sensorRange - critterToAnimalParticle.magnitude) / sensorRange); // inverted dist(proximity) 0-1
 
-        foodAnimalPosX[0] = Mathf.Clamp(critterToAnimalParticle.x / sensorRange, -1f, 1f);
-        foodAnimalPosY[0] = Mathf.Clamp(critterToAnimalParticle.y / sensorRange, -1f, 1f);
-        foodAnimalDistance[0] = nearestAnimalParticleDistance;
-        foodAnimalDirX[0] = animalParticleDir.x;
-        foodAnimalDirY[0] = animalParticleDir.y;
-        foodAnimalQuality[0] = 1f; // *** temp until particles can decay naturally
-        foodAnimalRelSize[0] = nearestAnimalParticleAmount;
 
-        //dist = nearestFoodParticleDistance;
-        //quality = 1f;
-        //relSize = nearestFoodParticleAmount;
-        // no food particle Velocity yet! ***** nned to store in gpu struct?
-        //}
-        //else {
-        //    if(foodPreferenceOrder[0] == 1) {  // egg
+        if(genome.useStats) {
+            foodPlantQuality[0] = 1f; // *** temp until particles can decay naturally
+            foodPlantRelSize[0] = nearestFoodParticleAmount;
 
-        // EGGS:::::
-        if(agent.coreModule.nearestEggSackModule != null) {
-            Vector2 eggSackPos = new Vector2(agent.coreModule.nearestEggSackModule.rigidbodyRef.position.x - agent.ownPos.x, agent.coreModule.nearestEggSackModule.rigidbodyRef.position.y - agent.ownPos.y);
-            Vector2 eggSackDir = eggSackPos.normalized;
-            float nearestEggSackDistance = Mathf.Clamp01((sensorRange - eggSackPos.magnitude) / sensorRange);
-
-            foodEggDistance[0] = nearestEggSackDistance;
-            foodEggDirX[0] = eggSackDir.x;
-            foodEggDirY[0] = eggSackDir.y;
-
-            //foodPos = new Vector2(Mathf.Clamp(eggSackPos.x / sensorRange, -1f, 1f), Mathf.Clamp(eggSackPos.y / sensorRange, -1f, 1f));
-            //dist = nearestEggSackDistance;
-            // NO VEL YET!!! **** FIX!!!
-            //foodDir = eggSackDir;
-            //quality = 1f; // **** IMPLEMENT! (decay of eggSack?)
-            //relSize = agent.coreModule.nearestEggSackModule.foodAmount;
+            foodAnimalQuality[0] = 1f; // *** temp until particles can decay naturally
+            foodAnimalRelSize[0] = nearestAnimalParticleAmount;
         }
-        else {
+        if(genome.usePos) {
+            foodPlantPosX[0] = Mathf.Clamp(critterToFoodParticle.x / sensorRange, -1f, 1f);
+            foodPlantPosY[0] = Mathf.Clamp(critterToFoodParticle.y / sensorRange, -1f, 1f);
 
-        }
-
-        // CORPSE FOOD:::::
-            //}
-            //else {  // creatures
-        if(agent.coreModule.nearestEnemyAgent != null) {
-            if(agent.curLifeStage == Agent.AgentLifeStage.Dead) {
-                Vector2 preyPos = new Vector2(agent.coreModule.nearestEnemyAgent.bodyRigidbody.position.x - agent.ownPos.x, agent.coreModule.nearestEnemyAgent.bodyRigidbody.position.y - agent.ownPos.y);
-                Vector2 preyDir = preyPos.normalized;
-                float nearestPreyDistance = Mathf.Clamp01((sensorRange - preyPos.magnitude) / sensorRange);  
-
-                foodCorpseDistance[0] = nearestPreyDistance;
-                foodCorpseDirX[0] = preyDir.x;
-                foodCorpseDirY[0] = preyDir.y;
-            }
-            else {
-
-            }
-            /*Vector2 preyPos = new Vector2(agent.coreModule.nearestEnemyAgent.bodyRigidbody.position.x - agent.ownPos.x, agent.coreModule.nearestEnemyAgent.bodyRigidbody.position.y - agent.ownPos.y);
-            Vector2 preyDir = preyPos.normalized;
-            float nearestPreyDistance = Mathf.Clamp01((sensorRange - preyPos.magnitude) / sensorRange);     
-
-            foodPos = new Vector2(Mathf.Clamp(preyPos.x / sensorRange, -1f, 1f), Mathf.Clamp(preyPos.y / sensorRange, -1f, 1f));
-            dist = nearestPreyDistance;
-            // NO VEL YET!!! **** FIX!!!
-            foodDir = preyDir;
-            quality = 1f; // **** IMPLEMENT! (decay of eggSack?)
-            relSize = (agent.coreModule.nearestEnemyAgent.currentBoundingBoxSize.x * agent.coreModule.nearestEnemyAgent.currentBoundingBoxSize.y) / (agent.currentBoundingBoxSize.x * agent.currentBoundingBoxSize.y);
-            */
-        }
-        else {
-
-        }
-            //}
-        //}
-        
-        /*if(genome.usePos) {
-            foodPlantPosX[0] = foodPos.x;
-            foodPlantPosY[0] = foodPos.y;
-            foodPlantDistance[0] = dist;
+            foodAnimalPosX[0] = Mathf.Clamp(critterToAnimalParticle.x / sensorRange, -1f, 1f);
+            foodAnimalPosY[0] = Mathf.Clamp(critterToAnimalParticle.y / sensorRange, -1f, 1f);
+            
         }
         if(genome.useVel) {
 
         }
         if(genome.useDir) {
-            foodPlantDirX[0] = foodDir.x;
-            foodPlantDirY[0] = foodDir.y;
+            foodPlantDirX[0] = foodParticleDir.x;
+            foodPlantDirY[0] = foodParticleDir.y;
+            foodPlantDistance[0] = nearestFoodParticleDistance;
+
+            foodAnimalDistance[0] = nearestAnimalParticleDistance;
+            foodAnimalDirX[0] = animalParticleDir.x;
+            foodAnimalDirY[0] = animalParticleDir.y;
         }
-        if(genome.useStats) {
-            foodPlantQuality[0] = quality; // *** temp until particles can decay naturally
-            foodPlantRelSize[0] = relSize;
-        }*/
+
+
+        // EGGS:::::
+        if (agent.coreModule.nearestEggSackModule != null) {
+            Vector2 eggSackPos = new Vector2(agent.coreModule.nearestEggSackModule.rigidbodyRef.position.x - agent.ownPos.x, agent.coreModule.nearestEggSackModule.rigidbodyRef.position.y - agent.ownPos.y);
+            Vector2 eggSackDir = eggSackPos.normalized;
+            float nearestEggSackDistance = Mathf.Clamp01((sensorRange - eggSackPos.magnitude) / sensorRange);
+
+            if(genome.useDir) {
+                foodEggDistance[0] = nearestEggSackDistance;
+                foodEggDirX[0] = eggSackDir.x;
+                foodEggDirY[0] = eggSackDir.y;
+            }
+        }
+        else {
+
+        }
+
+        // CORPSE FOOD:::::           
+        if(agent.coreModule.nearestEnemyAgent != null) {
+            if(agent.curLifeStage == Agent.AgentLifeStage.Dead) {
+                Vector2 preyPos = new Vector2(agent.coreModule.nearestEnemyAgent.bodyRigidbody.position.x - agent.ownPos.x, agent.coreModule.nearestEnemyAgent.bodyRigidbody.position.y - agent.ownPos.y);
+                Vector2 preyDir = preyPos.normalized;
+                float nearestPreyDistance = Mathf.Clamp01((sensorRange - preyPos.magnitude) / sensorRange);
+
+                if (genome.useDir) {
+                    foodCorpseDistance[0] = nearestPreyDistance;
+                    foodCorpseDirX[0] = preyDir.x;
+                    foodCorpseDirY[0] = preyDir.y;
+                }
+            }
+            else {
+
+            }
+            
+        }
+        else {
+
+        }
+       
     }
 }

@@ -308,7 +308,7 @@ public class SimEventsManager {
         float recordHigh = -9999999f;
         for (int i = 0; i < simManager.masterGenomePool.currentlyActiveSpeciesIDList.Count; i++) {
             if (data.speciesQualifier == SimEventData.SpeciesQualifier.Age) {
-                float val = (float)simManager.masterGenomePool.completeSpeciesPoolsList[simManager.masterGenomePool.currentlyActiveSpeciesIDList[i]].yearCreated;
+                float val = 0f;// (float)simManager.masterGenomePool.completeSpeciesPoolsList[simManager.masterGenomePool.currentlyActiveSpeciesIDList[i]].yearCreated;
 
                 if(data.polarity) {
                     if (val < recordLow) {
@@ -324,7 +324,7 @@ public class SimEventsManager {
                 }
             }
             else if(data.speciesQualifier == SimEventData.SpeciesQualifier.BodySize) {
-                float val = (float)simManager.masterGenomePool.completeSpeciesPoolsList[simManager.masterGenomePool.currentlyActiveSpeciesIDList[i]].avgBodySize;
+                float val = 0f;// (float)simManager.masterGenomePool.completeSpeciesPoolsList[simManager.masterGenomePool.currentlyActiveSpeciesIDList[i]].avgBodySize;
 
                 if(data.polarity) {
                     if (val > recordHigh) {
@@ -340,7 +340,7 @@ public class SimEventsManager {
                 }
             }
             else if(data.speciesQualifier == SimEventData.SpeciesQualifier.Fitness) {
-                float val = (float)simManager.masterGenomePool.completeSpeciesPoolsList[simManager.masterGenomePool.currentlyActiveSpeciesIDList[i]].avgFitnessScore;
+                float val = (float)simManager.masterGenomePool.completeSpeciesPoolsList[simManager.masterGenomePool.currentlyActiveSpeciesIDList[i]].avgPerformanceData.totalTicksAlive;
 
                 if(data.polarity) {
                     if (val > recordHigh) {

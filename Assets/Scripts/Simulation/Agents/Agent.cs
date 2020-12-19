@@ -5,29 +5,17 @@ using UnityEngine;
 public class Agent : MonoBehaviour {
 
     SettingsManager settingsRef;
+    //private PerformanceData performanceData;
     //public float totalFoodEatenDecay = 0f;
-    public float totalFoodEatenPlant = 0f;
-    public float totalFoodEatenZoop = 0f;
-    public float totalFoodEatenEgg = 0f;
-    public float totalFoodEatenCorpse = 0f;
-    public float totalFoodEatenCreature = 0f;
-    public float totalDamageDealt = 0f;
-    public float totalDamageTaken = 0f;
-    public int totalTimesDashed = 0;
-    public int totalTimesDefended = 0;
-    public int totalTimesAttacked = 0;
-    public int totalTimesPregnant = 0;
-    public int totalTicksRested = 0;
-    public int totalTicksAlive = 0;
-
+    
     private bool isFeedingPlant = false;
     private bool isFeedingZooplankton = false;
 
     public float speed = 500f;
-    public float smoothedThrottleLerp = 0.2f;
+    public float smoothedThrottleLerp = 0.1f;
     public float animationCycle = 0f;
     public float turningAmount = 0f;
-    public float swimAnimationCycleSpeed = 0.1f;
+    public float swimAnimationCycleSpeed = 0.06f;
 
     //public float globalWaterLevel;
 
@@ -257,7 +245,7 @@ public class Agent : MonoBehaviour {
             mouthRef.triggerCollider.enabled = true;
             attackingFrameCounter = 0;    
             
-            totalTimesAttacked++;
+            candidateRef.performanceData.totalTimesAttacked++;
         }
     }
     
@@ -305,7 +293,7 @@ public class Agent : MonoBehaviour {
         preyAgentRef = preyAgent;
 
         float foodAmount = preyAgent.currentBiomass * 1000f * coreModule.foodEfficiencyMeat;  // *(*********************************************** experiment!
-        totalFoodEatenCreature += foodAmount;
+        candidateRef.performanceData.totalFoodEatenCreature += foodAmount;
 
         EatFoodMeat(foodAmount);
         RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Vertebrate! (" + foodAmount.ToString() + ") candID: " + preyAgent.candidateRef.candidateID.ToString(), 1f);
@@ -356,8 +344,7 @@ public class Agent : MonoBehaviour {
         // Separate sensors for each target type or add multiple data types to rangefinder raycasts?
         
         //UpdateInternalResources();  // update energy, stamina, food -- or do this during TickActions?
-
-        
+               
 
         coreModule.Tick();
         communicationModule.Tick(this);
@@ -445,7 +432,7 @@ public class Agent : MonoBehaviour {
         swallowingPreyFrameCounter = 0;
 
         masterFitnessScore = totalExperience; // update this???
-        totalTicksAlive = ageCounter;
+        candidateRef.performanceData.totalTicksAlive = ageCounter;
         
         biomassAtDeath = currentBiomass;
 
@@ -599,7 +586,7 @@ public class Agent : MonoBehaviour {
 
         coreModule.hitPoints[0] = (coreModule.healthHead + coreModule.healthBody + coreModule.healthExternal) / 3f;
 
-        totalDamageTaken += damage;
+        candidateRef.performanceData.totalDamageTaken += damage;
 
         RegisterAgentEvent(UnityEngine.Time.frameCount, "Took Damage! (" + damage.ToString() + ")", 0f);
 
@@ -617,7 +604,7 @@ public class Agent : MonoBehaviour {
         }
         else {
             damage *= defendBonus;
-            predatorAgentRef.totalDamageDealt += damage;
+            predatorAgentRef.candidateRef.performanceData.totalDamageDealt += damage;
             TakeDamage(damage);
             RegisterAgentEvent(UnityEngine.Time.frameCount, "Bitten! (" + damage.ToString("F2") + ") by #" + predatorAgentRef.index.ToString(), 0f);
         }
@@ -886,7 +873,7 @@ public class Agent : MonoBehaviour {
     }
     public void CompletedPregnancy() {
         childEggSackRef = null;
-        totalTimesPregnant++;
+        candidateRef.performanceData.totalTimesPregnant++;
         isPregnantAndCarryingEggs = false;
         pregnancyRefactoryTimeStepCounter = 0;
 
@@ -1062,20 +1049,20 @@ public class Agent : MonoBehaviour {
             // Food calc before energy/healing/etc? **************
             float sizeValue = BodyGenome.GetBodySizeScore01(candidateRef.candidateGenome.bodyGenome);
             // FOOD PARTICLES: Either mouth type for now:
-            float foodParticleEatAmount = simManager.vegetationManager.plantParticlesEatAmountsArray[index] * coreModule.foodEfficiencyPlant * 5f; // **************** PLANT BONUS!! HACKY
+            float foodParticleEatAmount = simManager.vegetationManager.plantParticlesEatAmountsArray[index] * coreModule.foodEfficiencyPlant; // **************** PLANT BONUS!! HACKY
             if(foodParticleEatAmount > 0f) {
                 //mouthRef.InitiatePassiveBite();
                 //float sizeEfficiencyPlant = Mathf.Lerp(settings.minSizeFeedingEfficiencyDecay, settings.maxSizeFeedingEfficiencyDecay, sizeValue);
                 startBite = true;
                 //Debug.Log("Agent[" + index.ToString() + "], Ate Plant: " + foodParticleEatAmount.ToString());
-                totalFoodEatenPlant += foodParticleEatAmount; 
+                candidateRef.performanceData.totalFoodEatenPlant += foodParticleEatAmount; 
                 EatFoodPlant(foodParticleEatAmount);                
             }
 
             float animalParticleEatAmount = simManager.zooplanktonManager.animalParticlesEatAmountsArray[index] * coreModule.foodEfficiencyMeat;
             if(animalParticleEatAmount > 0f) {
                 //float sizeEfficiencyPlant = Mathf.Lerp(settings.minSizeFeedingEfficiencyDecay, settings.maxSizeFeedingEfficiencyDecay, sizeValue);
-                totalFoodEatenZoop += animalParticleEatAmount;
+                candidateRef.performanceData.totalFoodEatenZoop += animalParticleEatAmount;
                 //animalParticleEatAmount *= 0.98f;
                 
                 //Debug.Log("Agent[" + index.ToString() + "], Ate Zooplankton: " + animalParticleEatAmount.ToString());
@@ -1123,7 +1110,7 @@ public class Agent : MonoBehaviour {
             if(coreModule.healEffector[0] >= mostActiveEffectorVal) {
                 if(IsFreeToAct()) {
                     isResting = true;
-                    totalTicksRested++;
+                    candidateRef.performanceData.totalTicksRested++;
                 }
                 else {
                     isResting = false;
@@ -1200,7 +1187,7 @@ public class Agent : MonoBehaviour {
             if(coreModule.stamina[0] >= 0.1f) {
                 isDashing = true;
                 coreModule.stamina[0] -= 0.1f;
-                totalTimesDashed++;
+                candidateRef.performanceData.totalTimesDashed++;
             }            
         } 
     }
@@ -1209,7 +1196,7 @@ public class Agent : MonoBehaviour {
             if(coreModule.stamina[0] >= 0.1f) {
                 isDefending = true;
                 coreModule.stamina[0] -= 0.1f;
-                totalTimesDefended++;
+                candidateRef.performanceData.totalTimesDefended++;
             }            
         } 
     }
@@ -1499,19 +1486,7 @@ public class Agent : MonoBehaviour {
         totalExperience = 0f;
         experienceForNextLevel = 2f; // 2, 4, 8, 16, 32, 64, 128, 256?
         curLevel = 0;
-        totalFoodEatenPlant = 0f;
-        totalFoodEatenZoop = 0f;
-        totalFoodEatenEgg = 0f;
-        totalFoodEatenCorpse = 0f;
-        totalFoodEatenCreature = 0f;
-        totalDamageDealt = 0f;
-        totalDamageTaken = 0f;
-        totalTimesDashed = 0;
-        totalTimesDefended = 0;
-        totalTimesAttacked = 0;
-        totalTimesPregnant = 0;
-        totalTicksRested = 0;
-        totalTicksAlive = 0;
+        
         turningAmount = 5f; // temporary for zygote animation
         facingDirection = new Vector2(0f, 1f);
         throttle = Vector2.zero;
@@ -1527,7 +1502,7 @@ public class Agent : MonoBehaviour {
         speciesIndex = candidateData.speciesID;
         candidateRef = candidateData;
         AgentGenome genome = candidateRef.candidateGenome;
-        genome.generationCount++;
+        //genome.generationCount++;
         
         curLifeStage = AgentLifeStage.Egg;
         
@@ -1550,7 +1525,7 @@ public class Agent : MonoBehaviour {
         speciesIndex = candidateData.speciesID;
         candidateRef = candidateData;
         AgentGenome genome = candidateRef.candidateGenome;
-        genome.generationCount++;
+        //genome.generationCount++;
                 
         curLifeStage = AgentLifeStage.Egg;
         parentEggSackRef = parentEggSack;

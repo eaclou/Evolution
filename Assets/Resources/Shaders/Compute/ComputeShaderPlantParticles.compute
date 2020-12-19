@@ -217,7 +217,7 @@ void CSEatSelectedFoodParticles (uint3 id : SV_DispatchThreadID)
 	if(distanceSquared < combinedRadius * combinedRadius) {	
 		
 		if(critterSimData.consumeOn > 0.5) {   // revisit
-			eatenAmount = mass * 0.085; // mouthRadius * mouthRadius * 0.025; // * critterInitData.eatEfficiencyPlant * 0.05f;		
+			eatenAmount = mass * 0.1; // mouthRadius * mouthRadius * 0.025; // * critterInitData.eatEfficiencyPlant * 0.05f;		
 			
 			foodParticlesWrite[particleIndex].biomass = particleData.biomass - eatenAmount;
 			
@@ -405,7 +405,7 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 				float randRadius = rand(float2(randX * 10, randY * -3.37)) * (_MaxParticleSize - _MinParticleSize) + _MinParticleSize;					
 					
 				foodParticlesWrite[id.x].radius = 1.0; // representativeParticle.radius * (0.9 + 0.2 * (1.0 - rand01)); // 1.0; //randRadius;
-				foodParticlesWrite[id.x].biomass = _AlgaeParticleInitMass * 10;
+				foodParticlesWrite[id.x].biomass = _AlgaeParticleInitMass * 5;
 				foodParticlesWrite[id.x].isActive = 1.0;
 				foodParticlesWrite[id.x].isDecaying = 0.0;
 				foodParticlesWrite[id.x].isSwallowed = 0.0;
