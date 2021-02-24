@@ -66,7 +66,7 @@
 				float4 maskSample = tex2D(_MaskTex, i.uv);
 				
 				float4 finalCol = texSample;
-				finalCol.a = maskSample.a;
+				//finalCol.a = maskSample.a;
 
 				return finalCol;
 				

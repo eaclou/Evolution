@@ -76,17 +76,30 @@ public class GenomeViewerUI : MonoBehaviour {
     public Text textEatenEggs;
     public Text textEatenCorpse;
 
-    public GameObject panelHistory;
-    public GameObject panelFrontPage;
+    public GameObject panelGenomeTab;
+    public GameObject panelPerformanceTab;
+    public GameObject panelHistoryTab;    
+    
+    public Button buttonGenomeTab;
+    public Button buttonPerformanceTab;
+    public Button buttonHistoryTab;
+    // Real-Time panel handled in center bottom with creature portrait and brain info
+    
+    public bool isGenomeTabActive = true;
+    public bool isPerformanceTabActive = false;
+    public bool isHistoryTabActive = false;
+
+    public GameObject imageDeadDim;
+    public Toggle toggleAutofollow;
 
     public bool isTooltipHover = true;
     public string tooltipString;
 
     public bool isPerformancePanelON;
     public bool isSpecializationPanelOn;
-    public bool isHistoryPanelOn;
+    //public bool isHistoryPanelOn;
     public bool isBrainPanelOn;
-    public bool isFrontPageOn;
+
 
 
     public void UpdateUI(SpeciesGenomePool pool, CandidateAgentData candidate) {
@@ -107,82 +120,86 @@ public class GenomeViewerUI : MonoBehaviour {
             titleString += "</size>";
             textFocusedCandidate.text = titleString;
 
-            Vector3 hue = Vector3.one * 0.5f;
-            Vector3 hueB = Vector3.one * 0.5f;
-
-            CandidateAgentData avgCandidate;
+            Vector3 hue = Vector3.one * 0.75f;
+            Vector3 hueB = Vector3.one * 0.25f;
+            /*
+            //CandidateAgentData avgCandidate;
             if(pool.avgCandidateDataYearList.Count > 1) {
                 int yearIndex = Mathf.RoundToInt(Mathf.Lerp(0f, (float)pool.avgCandidateDataYearList.Count - 1f, uiManagerRef.speciesOverviewUI.sliderLineageGenomes.value));
-                avgCandidate = pool.avgCandidateDataYearList[yearIndex];
+                candidate = pool.avgCandidateDataYearList[yearIndex];
             }
             else {
-                avgCandidate = pool.avgCandidateData;
+                candidate = pool.avgCandidateData;
             }
-            if(avgCandidate != null) {
-                hue = avgCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
-                hueB = avgCandidate.candidateGenome.bodyGenome.appearanceGenome.hueSecondary;
+            */
+            if(candidate != null) {
+                hue = candidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
+                hueB = candidate.candidateGenome.bodyGenome.appearanceGenome.hueSecondary;
 
-                //candidate = avgCandidate;
-                /*
-                if(pool.avgCandidateData.candidateGenome != null) {
-                    if(pool.avgCandidateData.candidateGenome.bodyGenome != null) {
-                        
-                    }
-                    else {
-                        Debug.LogError("bodyGenome");
-                    }
-                }
-                else {
-                    Debug.LogError("candidateGenome");
-                }*/
             }
-            else {
+            /*else {
                 Debug.LogError("candData");
             }
+            */
             //Vector3 hue = pool.avgCandidateData.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
             imagePortraitTitleBG.color = new Color(hue.x, hue.y, hue.z);
             textFocusedCandidate.color = new Color(hueB.x, hueB.y, hueB.z);
             //+ ", " + candidate.numCompletedEvaluations.ToString() + ", " + candidate.speciesID.ToString() + ", " + candidate.isBeingEvaluated.ToString() + ", " + candidate.candidateGenome.bodyGenome.coreGenome.name;
 
-            panelPerformanceBehavior.SetActive(isFrontPageOn);
-            panelEaten.SetActive(isFrontPageOn);
+            if(toggleAutofollow.isOn) {  // **********
+
+            }
+
+            panelPerformanceBehavior.SetActive(true);
+            panelEaten.SetActive(true);
             //panelGenomeSpecializations.SetActive(false);
             //panelGenomeDigestion.SetActive(false);
             panelGenomeAbilities.SetActive(false);
-            panelGenomeSensors.SetActive(isFrontPageOn);
-            panelHistory.SetActive(!isFrontPageOn);
-            panelFrontPage.SetActive(isFrontPageOn);
+            panelGenomeSensors.SetActive(true);
+
+            panelGenomeTab.SetActive(isGenomeTabActive);
+            buttonGenomeTab.GetComponentInChildren<Image>().color = isGenomeTabActive ? Color.white : Color.gray;
+            panelPerformanceTab.SetActive(isPerformanceTabActive);
+            buttonPerformanceTab.GetComponentInChildren<Image>().color = isPerformanceTabActive ? Color.white : Color.gray;
+            panelHistoryTab.SetActive(isHistoryTabActive);
+            buttonHistoryTab.GetComponentInChildren<Image>().color = isHistoryTabActive ? Color.white : Color.gray;
+            
             //panel
+            imageDeadDim.gameObject.SetActive(false);
+            float lifespan = (float)candidate.performanceData.totalTicksAlive;
+            textGenomeOverviewA.text = "Lifespan: " + (lifespan * 0.1f).ToString("F0") + ", Gen: " + candidate.candidateGenome.generationCount.ToString();
 
-            if(isFrontPageOn) {
-                float lifespan = (float)candidate.performanceData.totalTicksAlive;
+            if(candidate.isBeingEvaluated) {
                 
-                textGenomeOverviewA.text = "Lifespan: " + lifespan.ToString("F2") + ", Gen: " + candidate.candidateGenome.generationCount.ToString();
-                textGenomeOverviewB.text = "Size: " + candidate.candidateGenome.bodyGenome.coreGenome.creatureBaseLength.ToString("F2") + ", Aspect: " + candidate.candidateGenome.bodyGenome.coreGenome.creatureAspectRatio.ToString("F2");
-                textGenomeOverviewC.text = "Neurons: " + candidate.candidateGenome.brainGenome.bodyNeuronList.Count.ToString() + ", Axons: " + candidate.candidateGenome.brainGenome.linkList.Count.ToString();
+                lifespan = uiManagerRef.gameManager.simulationManager.agentsArray[uiManagerRef.cameraManager.targetAgentIndex].ageCounter;
+                textGenomeOverviewA.text = "Age: " + (lifespan * 0.1f).ToString("F0") + ", Gen: " + candidate.candidateGenome.generationCount.ToString();
+            }
+            if(uiManagerRef.gameManager.simulationManager.agentsArray[uiManagerRef.cameraManager.targetAgentIndex].curLifeStage == Agent.AgentLifeStage.Dead) {
+                imageDeadDim.gameObject.SetActive(true);
+            }
 
-                //UpdateDigestSpecUI(pool, candidate.candidateGenome);
-                //UpdateSpecializationsUI(pool, candidate.candidateGenome);
+            
+            textGenomeOverviewB.text = "Size: " + (100f * candidate.candidateGenome.bodyGenome.coreGenome.creatureBaseLength).ToString("F0") + ", Aspect 1:" + (1f / candidate.candidateGenome.bodyGenome.coreGenome.creatureAspectRatio).ToString("F0");
+            textGenomeOverviewC.text = "Brain Size: " + candidate.candidateGenome.brainGenome.bodyNeuronList.Count.ToString() + "--" + candidate.candidateGenome.brainGenome.linkList.Count.ToString();
+            
+            //if(isFrontPageOn) {
+              
+            UpdateDigestSpecUI(pool, candidate.candidateGenome);
+            UpdateSpecializationsUI(pool, candidate.candidateGenome);
 
-                UpdatePerformanceBehaviors(pool, candidate); // ******
-                UpdateSensorsUI(pool, candidate.candidateGenome);
+            UpdatePerformanceBehaviors(pool, candidate); // ******
+            UpdateSensorsUI(pool, candidate.candidateGenome);
                 //UpdateAbilitiesUI(pool, candidate.candidateGenome);
 
                 //panelGenomeAbilities.SetActive(true);
                 //panelGenomeSensors.SetActive(true);
 
-                isHistoryPanelOn = false;  // ** unneeded
-            }
-            else {
-                isHistoryPanelOn = true;
-            }
-
-            
-
-            
-        }
-
-        
+                //isHistoryPanelOn = false;  // ** unneeded
+            //}
+            //else {
+                //isHistoryPanelOn = true;
+            //}
+        }        
     }
     private void UpdateSensorsUI(SpeciesGenomePool pool, AgentGenome genome) {
         imageSensorComms.GetComponent<GenomeButtonTooltipSource>().isSensorEnabled = genome.bodyGenome.communicationGenome.useComms;
@@ -369,13 +386,23 @@ public class GenomeViewerUI : MonoBehaviour {
         //uiManagerRef.speciesOverviewUI.CycleHallOfFame();
         uiManagerRef.speciesOverviewUI.CycleCurrentGenome();
     }
-    public void ClickButtonFrontPage() {
-        //ClearPanelBools();
-        isFrontPageOn = !isFrontPageOn; // true;
+    public void ClickButtonGenomeTab() {
+        isGenomeTabActive = true;
+        isPerformanceTabActive = false;
+        isHistoryTabActive = false;
+        
     }
-    public void ClickButtonHistory() {
-        ClearPanelBools();
-        isHistoryPanelOn = true;
+    public void ClickButtonPerformanceTab() {
+        isGenomeTabActive = false;
+        isPerformanceTabActive = true;
+        isHistoryTabActive = false;
+        
+    }
+    public void ClickButtonHistoryTab() {
+        isGenomeTabActive = false;
+        isPerformanceTabActive = false;
+        isHistoryTabActive = true;
+        
     }
     public void ClickButtonPerformance() {
         ClearPanelBools();
@@ -392,9 +419,9 @@ public class GenomeViewerUI : MonoBehaviour {
     private void ClearPanelBools() {
         isPerformancePanelON = false;
         isSpecializationPanelOn = false;
-        isHistoryPanelOn = false;
+        //isHistoryPanelOn = false;
         isBrainPanelOn = false;
-        isFrontPageOn = false;
+        //isFrontPageOn = false;
     }
     public void EnterTooltipObject(GenomeButtonTooltipSource tip) {
         isTooltipHover = true;

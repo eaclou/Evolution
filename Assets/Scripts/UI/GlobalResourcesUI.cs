@@ -187,13 +187,13 @@ public class GlobalResourcesUI : MonoBehaviour {
                         }
                     }
                     else {
-                        testColor = Color.green; // CLEAR
+                        testColor = Color.black; // CLEAR
                     
                         //break;
                     }
                 }
                 else {
-                    testColor = Color.blue; // CLEAR
+                    testColor = Color.black; // CLEAR
                 }
 
                 
@@ -958,7 +958,7 @@ public class GlobalResourcesUI : MonoBehaviour {
 
         
 
-        if(uiManagerRef.gameManager.simulationManager.simAgeTimeSteps % 277 == 275) {
+        if(uiManagerRef.gameManager.simulationManager.simAgeTimeSteps % 177 == 275) {
             UpdateSpeciesListBars();
         }
         

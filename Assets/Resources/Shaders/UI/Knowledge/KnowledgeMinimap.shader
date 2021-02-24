@@ -11,8 +11,8 @@
 		Tags { "RenderType"="Transparent" }
 		//ZWrite Off
 		//Cull Off
-		Blend SrcAlpha OneMinusSrcAlpha
-
+		//Blend SrcAlpha OneMinusSrcAlpha
+		Blend SrcAlpha One
 		Pass
 		{
 			CGPROGRAM
@@ -61,11 +61,11 @@
 				float4 terrainHeightTex = tex2D(_AltitudeTex, i.uv * _Zoom.xy);
 				if(terrainHeightTex.x < _WaterLevel) {
 					bgColor = float4(58.0 / 255, 67 / 255.0, 75 / 255.0, 1);
-					bgColor.rgb *= 0.8;
+					bgColor.rgb *= 0.018;
 					//col.rgb = lerp(col.rgb, float3(0.3,0.3,1), 0.1);
 				}
 				else {
-					bgColor = float4(62.0 / 255.0, 55.0 / 255, 48.0 / 255, 1);
+					bgColor = float4(62.0 / 255.0, 55.0 / 255, 48.0 / 255, 0);
 					
 					//col.rgb = lerp(col.rgb, float3(1,0.8,0.3), 0.1);
 				}
@@ -96,6 +96,7 @@
 
 				
 				finalColor.a *= terrainHeightTex.a;
+				
 
 				//return col;
 				return finalColor;

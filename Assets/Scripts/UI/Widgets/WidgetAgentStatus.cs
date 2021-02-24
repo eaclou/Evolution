@@ -39,7 +39,7 @@ public class WidgetAgentStatus : MonoBehaviour {
             imageHealth.color = Color.yellow;
         }
         */
-        float energyCapped = Mathf.Clamp01(energy);
+        float energyCapped = Mathf.Clamp01(energy * 0.167f);
         imageEnergy.gameObject.transform.localScale = new Vector3(1f, energyCapped, 1f);
         textValEnergy.text = (energy * 100f).ToString("F0");
         /*if(energyCapped < 0.33f) {

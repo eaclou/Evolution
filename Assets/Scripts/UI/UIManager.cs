@@ -200,15 +200,23 @@ public class UIManager : MonoBehaviour {
 
     public void ClickButtonOpenSpeciesTree() {
         panelSpeciesTree.SetActive(true);
+        panelGraphs.SetActive(false);
     }
     public void ClickButtonCloseSpeciesTree() {
         panelSpeciesTree.SetActive(false);
+        panelGraphs.SetActive(false);
     }
     public void ClickButtonOpenGraphPanel() {
         panelGraphs.SetActive(true);
+        panelSpeciesTree.SetActive(false);
+    }
+    public void ClickButtonToggleGraphPanel() {
+        panelGraphs.SetActive(!panelGraphs.activeSelf);
+        panelSpeciesTree.SetActive(!panelSpeciesTree.activeSelf);
     }
     public void ClickButtonCloseGraphPanel() {
         panelGraphs.SetActive(false);
+        panelSpeciesTree.SetActive(true);
         //Debug.LogError("!@%$#%");
     }
 
@@ -237,7 +245,9 @@ public class UIManager : MonoBehaviour {
         gameManager.simulationManager.theRenderKing.InitializeCreaturePortrait(focusedCandidate.candidateGenome);
 
         globalResourcesUI.CreateSpeciesLeaderboardGenomeTexture();
+
         globalResourcesUI.UpdateSpeciesTreeDataTextures(gameManager.simulationManager.curSimYear);
+
         globalResourcesUI.CreateBrainGenomeTexture(focusedCandidate.candidateGenome);
 
         speciesOverviewUI.RebuildGenomeButtons();
@@ -985,6 +995,7 @@ public class UIManager : MonoBehaviour {
                 watcherUI.isPlantParticleHighlight = 0f;
                 watcherUI.isZooplanktonHighlight = 0f;
                 watcherUI.isVertebrateHighlight = 0f;
+                float hitboxRadius = 1f;
                 if(cameraManager.isMouseHoverAgent) {  // move this to cursorCzar?
                     watcherUI.isVertebrateHighlight = 1f;
 
@@ -992,13 +1003,13 @@ public class UIManager : MonoBehaviour {
                     theCursorCzar.textTooltip.color = Color.white;
                 }
                 else {
-                    if(plantDist < zoopDist && plantDist < 2f) {
+                    if(plantDist < zoopDist && plantDist < hitboxRadius) {
                         watcherUI.isPlantParticleHighlight = 1f;
 
                         theCursorCzar.textTooltip.text = "Algae #" + gameManager.simulationManager.vegetationManager.closestPlantParticleData.index.ToString();
                         theCursorCzar.textTooltip.color = Color.green;
                     }
-                    if(plantDist > zoopDist && zoopDist < 2f) {
+                    if(plantDist > zoopDist && zoopDist < hitboxRadius) {
                         watcherUI.isZooplanktonHighlight = 1f;
 
                         theCursorCzar.textTooltip.text = "Microbe #" + gameManager.simulationManager.zooplanktonManager.closestAnimalParticleData.index.ToString();

@@ -305,7 +305,7 @@ void CSSimWasteBitsData (uint3 id : SV_DispatchThreadID)
 			float2 nextPos = uv + vel * speedMult;
 
 			  // Accelerate Aging Rate if outside world bounds
-			wasteBitData.age = wasteBitData.age + 0.0045 + (1.0 - worldActiveMask) * 0.01;  // ? frame lifespan
+			wasteBitData.age = wasteBitData.age + 0.00001 + (1.0 - worldActiveMask) * 0.01;  // ? frame lifespan
 			wasteBitData.worldPos = float3(nextPos * _MapSize, 0);		
 		}
 
@@ -318,26 +318,25 @@ void CSSimWasteBitsData (uint3 id : SV_DispatchThreadID)
 		//spawnPos = spawnPos * spawnBoxSize + _SpawnBoundsCameraDetails.xy;
 		
 		// check potential spawn location:
-		float2 spawnUV = float2(rand(float2(id.x, _Time * 120)), rand(float2(-_Time, id.x + _Time * 89.913)));
+		float xCoord = rand(float2(_Time * (5980.7352 - id.x), _Time * 0.3379));  ////(id.x * 16487.0012379213) % 1;
+		float yCoord = frac((float)id.x / 1024.0);
+		float2 spawnUV = float2(saturate(xCoord), saturate(yCoord)); //     float2(rand(float2(id.x, _Time * 120)), rand(float2(-_Time * 87 * id.x, id.x + _Time * 89.913)));
 		float2 spawnPos = spawnUV * _MapSize;
-		
-		float noiseFreq = 4.2;
-		float spawnNoise1 = Value2D(spawnPos + 5, noiseFreq * 0.2755).x;
-		float spawnNoise2 = Value2D(spawnPos - 33, noiseFreq * 0.3254).x;
 		
 		// Try respawning:
 		float4 resourceGridSample = _ResourceGridRead.SampleLevel(_LinearClamp, spawnUV, 0);  // ** actually the resourceGrid Tex -- rename
-		float spawnRating = resourceGridSample.y;  // WASTE
+		float spawnRating = 1; // resourceGridSample.y;  // WASTE
 
 		float distToOrigin = length(_SpawnPos.xy - (spawnUV * _MapSize));
-		if(spawnRating > 0.005) {			
-			spawnPos += float2(spawnNoise1, spawnNoise2) * 0.0193416;		
-			wasteBitData.worldPos = float3(spawnPos, 0);
-			wasteBitData.age = wasteBitData.age % 1.0;
-			wasteBitData.heading = normalize(float2(spawnNoise1, spawnNoise2));
-			wasteBitData.isActive = 1.0;
+		//if(spawnRating > 0.005) {	
+		
+		//spawnPos += float2(spawnNoise1, spawnNoise2) * 0.0193416;		
+		wasteBitData.worldPos = float3(spawnPos, 0);
+		wasteBitData.age = wasteBitData.age % 1.0;
+		wasteBitData.heading = float2(0,1);
+		wasteBitData.isActive = 1.0;
 			
-		}	
+		//}	
 	}
 	
 	groundBitsCBuffer[id.x] = wasteBitData;

@@ -128,7 +128,7 @@
 				rotatedPoint1 *= numEggsMask;
 				
 				// *** $^@$%^#$% TESTING @#^*******
-				float3 worldPosition = float3(eggData.worldPos, orderVal * scale + (1.0 + scale * 0.15));
+				float3 worldPosition = float3(eggData.worldPos, 0); //orderVal * scale + (1.0 + scale * 0.15));
 
 				// REFRACTION:
 				//float2 offset = worldPosition.xy; //skinStrokeData.worldPos;				

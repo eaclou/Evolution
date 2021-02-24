@@ -89,31 +89,31 @@ public class SpeciesOverviewUI : MonoBehaviour {
         }
         textSpeciesLineage.text = lineageTxt;
 
-        panelCurrentGenepool.SetActive(!isShowingLineage);
-        panelLineageGenomes.SetActive(isShowingLineage);
-        if(isShowingLineage) {
+        //panelCurrentGenepool.SetActive(!isShowingLineage);
+        //panelLineageGenomes.SetActive(isShowingLineage);
+        //if(isShowingLineage) {
 
-            uiManagerRef.panelHallOfFameGenomes.SetActive(true);
-            textHallOfFameTitle.gameObject.SetActive(true);
+            //uiManagerRef.panelHallOfFameGenomes.SetActive(true);
+            //textHallOfFameTitle.gameObject.SetActive(true);
 
-            uiManagerRef.panelLeaderboardGenomes.SetActive(false);
-            textCurrentGenepoolTitle.gameObject.SetActive(false);
+            //uiManagerRef.panelLeaderboardGenomes.SetActive(false);
+            //textCurrentGenepoolTitle.gameObject.SetActive(false);
 
-            RebuildGenomeButtonsLineage(pool);
+        RebuildGenomeButtonsLineage(pool);
 
             //float timeLerp = Mathf.Clamp01(sliderLineageGenomes.value);
 
             
-        }
-        else {
-            uiManagerRef.panelHallOfFameGenomes.SetActive(false);
-            textHallOfFameTitle.gameObject.SetActive(false);
+        //}
+        //else {
+            //uiManagerRef.panelHallOfFameGenomes.SetActive(false);
+            //textHallOfFameTitle.gameObject.SetActive(false);
 
-            uiManagerRef.panelLeaderboardGenomes.SetActive(true);
-            textCurrentGenepoolTitle.gameObject.SetActive(true);
+            //uiManagerRef.panelLeaderboardGenomes.SetActive(true);
+            //textCurrentGenepoolTitle.gameObject.SetActive(true);
 
-            RebuildGenomeButtonsCurrent(pool);
-        }
+        RebuildGenomeButtonsCurrent(pool);
+        //}
         
         // Current Leaderboard:
         /*foreach (Transform child in uiManagerRef.panelLeaderboardGenomes.transform) {

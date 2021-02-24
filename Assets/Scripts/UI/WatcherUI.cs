@@ -45,7 +45,7 @@ public class WatcherUI : MonoBehaviour {
     public GameObject panelFollowStatus;
     private bool isFollowStatusPanelOn = true;
     public GameObject panelFollowBehavior;
-    private bool isFollowBehaviorPanelOn = false;
+    private bool isFollowBehaviorPanelOn = true;
     public GameObject panelFollowGenome;
     public Text textFollowGenome;
     private bool isFollowGenomePanelOn = false;
@@ -228,7 +228,7 @@ public class WatcherUI : MonoBehaviour {
                 textWaste.text = "WASTE " + agent.wasteProducedLastFrame.ToString("F5");
 
                 textNewInspectLog.text = agent.stringCauseOfDeath.ToString() + ", " + agent.cooldownFrameCounter.ToString() + " / " + agent.cooldownDuration.ToString(); // agent.lastEvent;
-                newInspectAgentEnergyMat.SetFloat("_Value", Mathf.Clamp01((agent.coreModule.energy * Mathf.Sqrt(agent.currentBiomass)) * 1f));
+                newInspectAgentEnergyMat.SetFloat("_Value", Mathf.Clamp01((agent.coreModule.energy * Mathf.Sqrt(agent.currentBiomass)) * 0.33f));
                 newInspectAgentStaminaMat.SetFloat("_Value", Mathf.Clamp01(agent.coreModule.stamina[0] * 1f));
                 newInspectAgentStomachMat.SetFloat("_Value", Mathf.Clamp01(agent.coreModule.stomachContentsNorm * 1f));
 
@@ -236,7 +236,7 @@ public class WatcherUI : MonoBehaviour {
                 newInspectAgentHealthMat.SetFloat("_HealthBody", Mathf.Clamp01(agent.coreModule.healthBody));
                 newInspectAgentHealthMat.SetFloat("_HealthExternal", Mathf.Clamp01(agent.coreModule.healthExternal));
                 newInspectAgentAgeMat.SetFloat("_Value", Mathf.Clamp01((float)agent.ageCounter * 0.0005f));
-                newInspectAgentAgeMat.SetFloat("_Age", agent.ageCounter);
+                newInspectAgentAgeMat.SetFloat("_Age", Mathf.RoundToInt(agent.ageCounter * 0.1f));
                 int developmentStateID = 0;
                 int curActivityID = 0;
                 if(agent.curLifeStage == Agent.AgentLifeStage.Dead) {
@@ -330,7 +330,7 @@ public class WatcherUI : MonoBehaviour {
                 }*/
 
                 //textVertebrateGen.text = "Gen #" + agent.candidateRef.candidateGenome.bodyGenome.coreGenome.generation.ToString();
-                textVertebrateLifestage.text = "Age: " + agent.ageCounter.ToString();// + ", stateID: " + developmentStateID;
+                textVertebrateLifestage.text = "Age: " + (0.1f * agent.ageCounter).ToString("F0");// + ", stateID: " + developmentStateID;
                 textVertebrateLifestage.color = healthColor;
                 textVertebrateStatus.text = statusStr; // "activity: " + curActivityID;
                 
@@ -379,8 +379,8 @@ public class WatcherUI : MonoBehaviour {
                     eventString += "\n[" + agent.agentEventDataList[q].eventFrame.ToString() + "] " + agent.agentEventDataList[q].eventText;
                 }                
 
-                textFollowGenome.text = "(Genome Stats HERE) " + genomeString;
-                textFollowHistory.text = "(Genome Stats HERE) " + historyString;
+                //textFollowGenome.text = "(Genome Stats HERE) " + genomeString;
+                //textFollowHistory.text = "(Genome Stats HERE) " + historyString;
 
                 string textStringLog = "Event Log! Agent[" + agent.index.ToString() + "]";                    
                 // Agent Event Log:

@@ -87,7 +87,7 @@ public class Agent : MonoBehaviour {
         Cooldown,
         Decaying
     }
-    private int gestationDurationTimeSteps = 90;
+    private int gestationDurationTimeSteps = 120;
     public int _GestationDurationTimeSteps
     {
         get
@@ -102,7 +102,7 @@ public class Agent : MonoBehaviour {
     
     public int maxAgeTimeSteps = 100000;
     
-    private int growthScalingSkipFrames = 10;
+    private int growthScalingSkipFrames = 16;
 
     public float sizePercentage = 0f;
     
@@ -998,7 +998,7 @@ public class Agent : MonoBehaviour {
         float oxygenMask = Mathf.Clamp01(simManager.simResourceManager.curGlobalOxygen * settingsRef.agentSettings._OxygenEnergyMask);
         
         coreModule.energy += createdEnergyTotal * settingsRef.agentSettings._DigestionEnergyEfficiency * oxygenMask;
-        
+        /*
         // STAMINA:
         float staminaRefillRate = 0.00025f;
         float energyToStaminaConversionRate = 5f * coreModule.healthBonus;
@@ -1022,7 +1022,7 @@ public class Agent : MonoBehaviour {
         else {
             coreModule.stamina[0] = 1f;
         }
-
+        */
         //ENERGY:
         float energyCostMult = 0.1f; // Mathf.Lerp(settingsRef.agentSettings._BaseEnergyCost, settingsRef.agentSettings._BaseEnergyCost * 0.25f, sizePercentage);
         float restingBonusMult = 1f;
@@ -1252,8 +1252,8 @@ public class Agent : MonoBehaviour {
         if(isResting) {
             forcePenalty = 0.1f;
         }
-        
-        float fatigueMultiplier = Mathf.Clamp01(coreModule.energy * 5f + 0.05f) * Mathf.Clamp01(coreModule.stamina[0] * 4f + 0.05f);
+
+        float fatigueMultiplier = Mathf.Clamp01(coreModule.energy * 5f + 0.05f); // * Mathf.Clamp01(coreModule.stamina[0] * 4f + 0.05f);
         float lowHealthPenalty = Mathf.Clamp01(coreModule.healthBody * 5f) * 0.5f + 0.5f;
         fatigueMultiplier *= lowHealthPenalty;
         
@@ -1274,11 +1274,11 @@ public class Agent : MonoBehaviour {
             // get size in 0-1 range from minSize to maxSize: // **** NOT ACCURATE!!!!
             //float sizeValue = Mathf.Clamp01(coreModule.speedBonus * (candidateRef.candidateGenome.bodyGenome.coreGenome.creatureBaseLength - 0.2f) / 2f);  // Mathf.Clamp01((fullSizeBoundingBox.x - 0.1f) / 2.5f); // ** Hardcoded assuming size ranges from 0.1 --> 2.5 !!! ********
 
-            float swimSpeed = 32f * coreModule.speedBonus; // Mathf.Lerp(movementModule.smallestCreatureBaseSpeed, movementModule.largestCreatureBaseSpeed, 0.5f); // sizeValue);
-            float turnRate = 4f * coreModule.speedBonus; //10 // Mathf.Lerp(movementModule.smallestCreatureBaseTurnRate, movementModule.largestCreatureBaseTurnRate, 0.5f) * 0.1f; // sizeValue);
+            float swimSpeed = 48f * coreModule.speedBonus; // Mathf.Lerp(movementModule.smallestCreatureBaseSpeed, movementModule.largestCreatureBaseSpeed, 0.5f); // sizeValue);
+            float turnRate = 6f * coreModule.speedBonus; //10 // Mathf.Lerp(movementModule.smallestCreatureBaseTurnRate, movementModule.largestCreatureBaseTurnRate, 0.5f) * 0.1f; // sizeValue);
             float dashBonus = 1f;
             if(isDashing) {                
-                dashBonus = 3.3f;                
+                dashBonus = 4.3f;                
             }
             if(isCooldown) {
                 dashBonus = 0.33f;
@@ -1297,7 +1297,7 @@ public class Agent : MonoBehaviour {
             //float turnRatePenalty = Mathf.Lerp(0.25f, 1f, 1f - sizeValue);
 
             // Head turn:
-            float torqueForce = Mathf.Lerp(headTurn, headTurnSign, 0.75f) * forcePenalty * turnRate * this.bodyRigidbody.mass * fatigueMultiplier * bitingPenalty * Time.deltaTime;
+            float torqueForce = Mathf.Lerp(headTurn, headTurnSign, 0.35f) * forcePenalty * turnRate * this.bodyRigidbody.mass * fatigueMultiplier * bitingPenalty * Time.deltaTime;
             torqueForce = Mathf.Min(torqueForce, 50000.55f) * 3f;
             this.bodyRigidbody.AddTorque(torqueForce, ForceMode2D.Impulse);
             

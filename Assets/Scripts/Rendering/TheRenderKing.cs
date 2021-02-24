@@ -3969,7 +3969,7 @@ public class TheRenderKing : MonoBehaviour {
         // Species PORTRAIT:
         cmdBufferSlotPortraitDisplay.Clear();
         cmdBufferSlotPortraitDisplay.SetRenderTarget(slotPortraitRenderCamera.targetTexture); // needed???
-        cmdBufferSlotPortraitDisplay.ClearRenderTarget(true, true, new Color(54f/255f,73f/255f,61f/255f,1f), 1.0f);  // clear -- needed???
+        cmdBufferSlotPortraitDisplay.ClearRenderTarget(true, true, new Color(54f/255f,73f/255f,61f/255f,0f), 1.0f);  // clear -- needed???
         cmdBufferSlotPortraitDisplay.SetViewProjectionMatrices(slotPortraitRenderCamera.worldToCameraMatrix, slotPortraitRenderCamera.projectionMatrix);
         /*
         // MEDIUM STROKES!!!!
@@ -4496,10 +4496,23 @@ public class TheRenderKing : MonoBehaviour {
                 baronVonTerrain.decomposerBitsDisplayMat.SetColor("_TintSec", simManager.vegetationManager.decomposerSlotGenomeCurrent.displayColorSec);
                 baronVonTerrain.decomposerBitsDisplayMat.SetInt("_PatternRow", simManager.vegetationManager.decomposerSlotGenomeCurrent.patternRowID);
                 baronVonTerrain.decomposerBitsDisplayMat.SetInt("_PatternColumn", simManager.vegetationManager.decomposerSlotGenomeCurrent.patternColumnID);
-            }
-            
-            
+            }  
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.decomposerBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.decomposerBitsCBuffer.count);
+            
+
+             // FLOATY BITS!
+            floatyBitsDisplayMat.SetPass(0);
+            //floatyBitsDisplayMat.SetTexture("_FluidColorTex", fluidManager._VelocityPressureDivergenceMain);
+            floatyBitsDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+            floatyBitsDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
+            floatyBitsDisplayMat.SetBuffer("floatyBitsCBuffer", floatyBitsCBuffer);
+            floatyBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+            floatyBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+            floatyBitsDisplayMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
+            floatyBitsDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
+            floatyBitsDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
+            cmdBufferMain.DrawProcedural(Matrix4x4.identity, floatyBitsDisplayMat, 0, MeshTopology.Triangles, 6, floatyBitsCBuffer.count);
+        
             
 
             if (simManager.trophicLayersManager.GetAgentsOnOff()) {
@@ -4847,19 +4860,6 @@ public class TheRenderKing : MonoBehaviour {
                 
             }
             
-             // FLOATY BITS!
-            floatyBitsDisplayMat.SetPass(0);
-            //floatyBitsDisplayMat.SetTexture("_FluidColorTex", fluidManager._VelocityPressureDivergenceMain);
-            floatyBitsDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-            floatyBitsDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
-            floatyBitsDisplayMat.SetBuffer("floatyBitsCBuffer", floatyBitsCBuffer);
-            floatyBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-            floatyBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
-            floatyBitsDisplayMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
-            floatyBitsDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
-            floatyBitsDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
-            cmdBufferMain.DrawProcedural(Matrix4x4.identity, floatyBitsDisplayMat, 0, MeshTopology.Triangles, 6, floatyBitsCBuffer.count);
-        
             
             // Nutrients bits:
             baronVonWater.waterNutrientsBitsDisplayMat.SetPass(0);

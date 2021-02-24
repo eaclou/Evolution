@@ -96,12 +96,17 @@
 				//o.quadUV = quadPoint + 0.5;
 
 				float2 quadUV = quadPoint + 0.5f; // 0-1,0-1
+				//**** shitty hack:
+				_NumColumns = 4;
+				_NumRows = 4;
+				// ******* 
 				quadUV.x = quadUV.x / _NumColumns;
 				quadUV.y = quadUV.y / _NumRows;				
 				float column = (float)(groundBitData.brushType % _NumColumns);
 				float row = (float)floor((groundBitData.brushType) / _NumColumns);
 				quadUV.x += column * (1.0 / _NumColumns);
 				quadUV.y += row * (1.0 / _NumRows);
+				
 				o.quadUV = quadUV; // full texture
 
 				o.worldPos = worldPosition;
@@ -126,9 +131,9 @@
 				float alpha = fadeIn * fadeOut;
 				alpha *= worldActiveMask;
 				
-				float2 scale = 5.978312 * alpha; //groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25) * (_DetritusDensityLerp * 3.14 + 0.5);
-				float wasteTex = saturate(tex2Dlod(_ResourceGridTex, float4(uv, 0, 0)).y * 100);
-				scale = scale * (wasteTex * 0.8 + 0.2);
+				float2 scale = 6; // * alpha; //groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25) * (_DetritusDensityLerp * 3.14 + 0.5);
+				float wasteVal = saturate(tex2Dlod(_ResourceGridTex, float4(uv, 0, 0)).y * 3);
+				//scale = scale * (wasteTex * 0.8 + 0.2);
 				//scale.y *= 4.5;
 				quadPoint *= float3(scale, 1.0);
 				
@@ -176,14 +181,24 @@
 
 				
 				float rand = Value2D(float2((float)inst, (float)inst + 30), 100).x;
-				o.color = float4(rand,1,1,alpha);
+				o.color = float4(wasteVal,rand,1,alpha);
 				
 				return o;
 			}
 
 			fixed4 frag(v2f i) : SV_Target
 			{	
-				//return float4(1,1,1,1);
+				float4 quadTex = tex2D(_MainTex, i.quadUV);
+				float wasteVal = i.color.x; //(waste)
+				float maskVal = quadTex.a * 0.99;
+
+				float alpha = 0;
+				if(wasteVal > (1.0 - maskVal)) {
+					alpha = 1;
+				}
+				//float mask = saturate(quadTex.a - maskThreshold);
+				//return 				
+				//return float4(1,1,1,alpha);
 				//Diffuse
 				float pixelOffset = 1.0 / 256;  // resolution  // **** THIS CAN"T BE HARDCODED AS FINAL ****"
 				// ************  PRE COMPUTE THIS IN A TEXTURE!!!!!! ************************
@@ -242,7 +257,7 @@
 				
 				finalColor.rgb += data.spiritBrushTex.y;
 				finalColor.rgb *= 0.85;
-				finalColor.a *= tex2D(_MainTex, i.quadUV).a;
+				finalColor.a = alpha; // *= tex2D(_MainTex, i.quadUV).a;
 				return finalColor;
 
 			}

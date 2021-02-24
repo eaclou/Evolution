@@ -330,7 +330,7 @@ public class BaronVonTerrain : RenderBaron {
             wasteBitsArray[x].worldPos = Vector3.zero;
             wasteBitsArray[x].heading = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)).normalized;
             wasteBitsArray[x].localScale = new Vector2(UnityEngine.Random.Range(0.5f, 1.5f), UnityEngine.Random.Range(0.5f, 1.5f)) * UnityEngine.Random.Range(0.5f, 1f); // Y is forward, along stroke
-            wasteBitsArray[x].age = UnityEngine.Random.Range(1f, 2f);
+            wasteBitsArray[x].age = UnityEngine.Random.Range(0f, 1f);
             wasteBitsArray[x].speed = 0f;
             wasteBitsArray[x].noiseVal = 1f;
             wasteBitsArray[x].brushType = UnityEngine.Random.Range(0, 32);
