@@ -118,8 +118,8 @@ public class CritterModuleEnvironment {
             //depthWest[0] = agent.depthWest;
         }
 
-        int rayLayer = LayerMask.GetMask("EnvironmentCollision");
-        float raycastMaxLength = genome.maxRange;        
+        //int rayLayer = LayerMask.GetMask("EnvironmentCollision");
+        //float raycastMaxLength = genome.maxRange;        
         //Debug.Log(LayerMask.GetMask("EnvironmentCollision"));
         //Debug.Log(mask.ToString());
         /*if(genome.useCardinals) {

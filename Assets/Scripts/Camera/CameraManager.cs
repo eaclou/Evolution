@@ -5,11 +5,11 @@ using UnityEngine;
 public class CameraManager : MonoBehaviour {
 
     public Vector3 curCameraFocusPivotPos;
-    private Vector3 prevCameraFocusPivotPos;
+    //private Vector3 prevCameraFocusPivotPos;
     public Vector3 curCameraPos;
-    private Vector3 prevCameraPos;
+    //private Vector3 prevCameraPos;
     public float curTiltAngleDegrees;
-    private float prevTiltAngleDegrees;
+    //private float prevTiltAngleDegrees;
 
     public Vector3 masterTargetCamPosition;
 
@@ -125,9 +125,9 @@ public class CameraManager : MonoBehaviour {
         this.transform.localEulerAngles = new Vector3(curTiltAngleDegrees, 0f, 0f);
 
         // store info for next frame:
-        prevCameraPos = curCameraPos;
-        prevTiltAngleDegrees = curTiltAngleDegrees;
-        prevCameraFocusPivotPos = curCameraFocusPivotPos;
+        //prevCameraPos = curCameraPos;
+        //prevTiltAngleDegrees = curTiltAngleDegrees;
+        //prevCameraFocusPivotPos = curCameraFocusPivotPos;
 
         UpdateWorldSpaceCorners();
     }

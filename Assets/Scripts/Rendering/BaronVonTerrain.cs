@@ -72,7 +72,7 @@ public class BaronVonTerrain : RenderBaron {
     private ComputeBuffer frameBufferStrokesCBuffer; // combine!!! ***
     private int numGroundStrokesStone = 64;
     private int numGroundStrokesPebbles = 128;
-    private int numGroundStrokesSand = 512;
+    private int numGroundStrokesSand = 128;
     public ComputeBuffer terrainStoneStrokesCBuffer;
     public ComputeBuffer terrainPebbleStrokesCBuffer;
     public ComputeBuffer terrainSandStrokesCBuffer;
@@ -294,7 +294,7 @@ public class BaronVonTerrain : RenderBaron {
     {
         decomposerBitsCBuffer = new ComputeBuffer(numDecomposerBits, sizeof(float) * 11 + sizeof(int) * 2);
         GroundBitsData[] decomposerBitsArray = new GroundBitsData[decomposerBitsCBuffer.count];
-        float boundsLrg = 256f;
+        //float boundsLrg = 256f;
         for (int x = 0; x < numDecomposerBits; x++)
         {
             decomposerBitsArray[x].index = x;
@@ -318,15 +318,15 @@ public class BaronVonTerrain : RenderBaron {
     {
         wasteBitsCBuffer = new ComputeBuffer(numWasteBits, sizeof(float) * 11 + sizeof(int) * 2);
         GroundBitsData[] wasteBitsArray = new GroundBitsData[wasteBitsCBuffer.count];
-        float boundsLrg = 256f;
+        //float boundsLrg = 256f;
         for (int x = 0; x < numWasteBits; x++)
         {
             wasteBitsArray[x].index = x;
             //int index = y * numcarpetStrokesLrg + x;
-            float xPos = (float)x / (float)(numWasteBits - 1) * boundsLrg;
-            float yPos = xPos; // (1f - (float)y / (float)(numcarpetStrokesLrg - 1)) * boundsLrg;
-            Vector2 offset = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f) * 0.0f) * 16f;
-            Vector3 pos = new Vector3(xPos + offset.x, yPos + offset.y, 0f);
+            //float xPos = (float)x / (float)(numWasteBits - 1) * boundsLrg;
+            //float yPos = xPos; // (1f - (float)y / (float)(numcarpetStrokesLrg - 1)) * boundsLrg;
+            ////Vector2 offset = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f) * 0.0f) * 16f;
+            //Vector3 pos = new Vector3(xPos + offset.x, yPos + offset.y, 0f);
             wasteBitsArray[x].worldPos = Vector3.zero;
             wasteBitsArray[x].heading = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)).normalized;
             wasteBitsArray[x].localScale = new Vector2(UnityEngine.Random.Range(0.5f, 1.5f), UnityEngine.Random.Range(0.5f, 1.5f)) * UnityEngine.Random.Range(0.5f, 1f); // Y is forward, along stroke
@@ -346,8 +346,8 @@ public class BaronVonTerrain : RenderBaron {
         int totalNumStoneStrokes = numGroundStrokesStone * numGroundStrokesStone;
         int totalNumPebbleStrokes = numGroundStrokesPebbles * numGroundStrokesPebbles;
         int totalNumSandStrokes = numGroundStrokesSand * numGroundStrokesSand;
-        int totalNumTerrainStrokes = totalNumStoneStrokes + totalNumPebbleStrokes + totalNumSandStrokes;
-        int baseIndex = 0;
+        //int totalNumTerrainStrokes = totalNumStoneStrokes + totalNumPebbleStrokes + totalNumSandStrokes;
+        //int baseIndex = 0;
 
         terrainStoneStrokesCBuffer = new ComputeBuffer(totalNumStoneStrokes, sizeof(float) * 8 + sizeof(int));
         terrainPebbleStrokesCBuffer = new ComputeBuffer(totalNumPebbleStrokes, sizeof(float) * 8 + sizeof(int));

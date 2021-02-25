@@ -8,8 +8,8 @@ public class Agent : MonoBehaviour {
     //private PerformanceData performanceData;
     //public float totalFoodEatenDecay = 0f;
     
-    private bool isFeedingPlant = false;
-    private bool isFeedingZooplankton = false;
+    //private bool isFeedingPlant = false;
+    //private bool isFeedingZooplankton = false;
 
     public float speed = 500f;
     public float smoothedThrottleLerp = 0.1f;
@@ -515,7 +515,7 @@ public class Agent : MonoBehaviour {
         coreModule.stomachContentsNorm += (amount / coreModule.stomachCapacity);
         
         if(coreModule.stomachContentsNorm > 1f) {
-            float overStuffAmount = coreModule.stomachContentsNorm - 1f;
+            //float overStuffAmount = coreModule.stomachContentsNorm - 1f;
             //ProcessDamageReceived(overStuffAmount);
             coreModule.stomachContentsNorm = 1f;            
         }
@@ -537,7 +537,7 @@ public class Agent : MonoBehaviour {
         coreModule.stomachContentsNorm += (amount / coreModule.stomachCapacity);
         
         if(coreModule.stomachContentsNorm > 1f) {
-            float overStuffAmount = coreModule.stomachContentsNorm - 1f;
+            //float overStuffAmount = coreModule.stomachContentsNorm - 1f;
             //ProcessDamageReceived(overStuffAmount);
             coreModule.stomachContentsNorm = 1f;
         }
@@ -558,7 +558,7 @@ public class Agent : MonoBehaviour {
         coreModule.stomachContentsNorm += (amount / coreModule.stomachCapacity);
         
         if(coreModule.stomachContentsNorm > 1f) {
-            float overStuffAmount = coreModule.stomachContentsNorm - 1f;            
+            //float overStuffAmount = coreModule.stomachContentsNorm - 1f;            
             coreModule.stomachContentsNorm = 1f;
         }
         else {
@@ -1047,7 +1047,7 @@ public class Agent : MonoBehaviour {
         else {
             bool startBite = false;
             // Food calc before energy/healing/etc? **************
-            float sizeValue = BodyGenome.GetBodySizeScore01(candidateRef.candidateGenome.bodyGenome);
+            //float sizeValue = BodyGenome.GetBodySizeScore01(candidateRef.candidateGenome.bodyGenome);
             // FOOD PARTICLES: Either mouth type for now:
             float foodParticleEatAmount = simManager.vegetationManager.plantParticlesEatAmountsArray[index] * coreModule.foodEfficiencyPlant; // **************** PLANT BONUS!! HACKY
             if(foodParticleEatAmount > 0f) {
@@ -1386,9 +1386,9 @@ public class Agent : MonoBehaviour {
     // Colliders Footprint???  *************************************************************************************************************
 
     public void ReconstructAgentGameObjects(SettingsManager settings, AgentGenome genome, EggSack parentEggSack, Vector3 startPos, bool isImmaculate, float waterLevel) {
-        float corpseLerp = (float)settings.curTierFoodCorpse / 10f;
+        //float corpseLerp = (float)settings.curTierFoodCorpse / 10f;
         //decayDurationTimeSteps = 480; // Mathf.RoundToInt(Mathf.Lerp(360f, 3600f, corpseLerp));
-        float eggLerp = (float)settings.curTierFoodEgg / 10f;
+        //float eggLerp = (float)settings.curTierFoodEgg / 10f;
         //gestationDurationTimeSteps = Mathf.RoundToInt(Mathf.Lerp(360f, 1080f, eggLerp));
         //pregnancyRefactoryDuration = Mathf.RoundToInt(Mathf.Lerp(3600f, 800f, eggLerp));
 

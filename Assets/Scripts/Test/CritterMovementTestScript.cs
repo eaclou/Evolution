@@ -93,7 +93,7 @@ public class CritterMovementTestScript : MonoBehaviour {
         testAgent.bendRatioTailTip = bendRatioTailTip;
         */
         // initialize Agent based on genome:
-        StartPositionGenome startPosGenome = new StartPositionGenome(Vector3.zero, Quaternion.identity);
+        //StartPositionGenome startPosGenome = new StartPositionGenome(Vector3.zero, Quaternion.identity);
         //testAgent.InitializeAgentFromGenome(0, testAgentGenome, startPosGenome);  // This also rebuilds GameObjects
     }
 }

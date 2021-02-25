@@ -506,7 +506,7 @@ public class VegetationManager {
         // Go through foodParticleData and check for inactive
         // determined by current total food -- done!
         // if flag on shader for Respawn is on, set to active and initialize
-        float maxFoodParticleTotal = settingsRef.maxFoodParticleTotalAmount;
+        //float maxFoodParticleTotal = settingsRef.maxFoodParticleTotalAmount;
 
         //Debug.Log("SimulatePlantParticles");
 
@@ -524,19 +524,7 @@ public class VegetationManager {
         //computeShaderFoodParticles.SetFloat("_RespawnFoodParticles", 1f);
         computeShaderPlantParticles.SetFloat("_Time", Time.realtimeSinceStartup);
         //float randRoll = UnityEngine.Random.Range(0f, 1f);
-        float brushF = 0f;
-        if(renderKingRef.isSpiritBrushOn) {
-            if(renderKingRef.simManager.uiManager.brushesUI.selectedEssenceSlot.kingdomID == 1) {  // Plants kingdom selected
-                //Debug.Log("brushF: " + brushF.ToString());
-                if(renderKingRef.simManager.uiManager.brushesUI.selectedEssenceSlot.tierID == 0) {  // Algae selected
-                    //brushF = 1f;
-                }
-                else {  // Big Plants
-                    //Debug.Log("WOOOOOOOOOOOOOOOOOOOOOOOOO");
-                    brushF = 1f;
-                }
-            }            
-        }
+        
         computeShaderPlantParticles.SetFloat("_IsBrushing", 1f);
 
         float spawnLerp = renderKingRef.simManager.trophicLayersManager.GetAlgaeOnLerp(renderKingRef.simManager.simAgeTimeSteps);

@@ -8,11 +8,11 @@
 	}
 	SubShader
 	{		
-		Tags{ "RenderType" = "Opaque" }
+		Tags{ "RenderType" = "Transparent" }
 		ZWrite Off
 		Cull Off
 		//Blend SrcAlpha One
-		//Blend SrcAlpha OneMinusSrcAlpha
+		Blend SrcAlpha OneMinusSrcAlpha
 
 		Pass
 		{
@@ -24,9 +24,7 @@
 
 			sampler2D _MainTex;
 			float4 _MainTex_ST;
-			//float4 _Tint;
-			//float4 _Size;
-
+		
 			struct BasicStrokeData {				
 				float2 worldPos;
 				float2 localDir;
@@ -40,8 +38,8 @@
 			struct v2f
 			{
 				float4 pos : SV_POSITION;
-				float2 uv : TEXCOORD0;  // uv of the brushstroke quad itself, particle texture	
-				float4 color : TEXCOORD1;
+				float2 uv : TEXCOORD1;  // uv of the brushstroke quad itself, particle texture	
+				float4 color : TEXCOORD2;
 			};
 
 			v2f vert(uint id : SV_VertexID, uint inst : SV_InstanceID)
@@ -65,7 +63,8 @@
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(rotatedPoint0, 0.0f));
 				
 				o.color = strokeData.color;
-				
+				o.color.a = 1;
+
 				float2 uv = quadVerticesCBuffer[id] + 0.5f;
 
 				o.uv = uv;
@@ -75,7 +74,7 @@
 
 			fixed4 frag(v2f i) : SV_Target
 			{
-				return i.color; //tex2D(_MainTex, i.uv);; //float4(0.13,0,0.15,1);
+				//return i.color; //tex2D(_MainTex, i.uv);; //float4(0.13,0,0.15,1);
 				//float4 brushColor = tex2D(_MainTex, i.uv);
 
 				float4 finalColor = i.color;

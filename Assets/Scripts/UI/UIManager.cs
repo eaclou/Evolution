@@ -122,13 +122,13 @@ public class UIManager : MonoBehaviour {
     public GameObject panelPendingClickPrompt;
     private bool announceAlgaeCollapsePossible = false;
     private bool announceAlgaeCollapseOccurred = false;
-    private bool announceAgentCollapsePossible = false;
-    private bool announceAgentCollapseOccurred = false;
+    //private bool announceAgentCollapsePossible = false;
+    //private bool announceAgentCollapseOccurred = false;
     public int timerAnnouncementTextCounter = 0;
     public bool isAnnouncementTextOn = false;
     public bool isUnlockCooldown = false;
     public int unlockCooldownCounter = 0;
-    private bool inspectToolUnlockedAnnounce = false;
+    //private bool inspectToolUnlockedAnnounce = false;
     public TrophicSlot unlockedAnnouncementSlotRef;
   
     // ***** figure out where to put this
@@ -826,20 +826,6 @@ public class UIManager : MonoBehaviour {
             moveDir.x = controllerHorizontal;
             moveDir.y = controllerVertical;
 
-            Vector2 rightStickInput = new Vector2(Input.GetAxis("RightStickHorizontal"), Input.GetAxis("RightStickVertical"));
-
-            float leftTrigger = Input.GetAxis("LeftTrigger");
-            float rightTrigger = Input.GetAxis("RightTrigger");
-            //float buttonA = Input.GetAxis("ButtonA");
-            //float buttonB = Input.GetAxis("ButtonB");
-            //float buttonX = Input.GetAxis("ButtonX");
-            //float buttonY = Input.GetAxis("ButtonY");
-            /*if(rightStickInput.sqrMagnitude > 0.01f) {
-                Debug.Log("Controller Right Stick: (" + rightStickInput.x.ToString() + ", " + rightStickInput.y.ToString() + 
-                ")\nTriggers (" + leftTrigger.ToString() + ", " + rightTrigger.ToString() + ") A: " + 
-                buttonA.ToString() + ", B: " + buttonB.ToString() + ", X: " + buttonX.ToString() + ", Y: " + buttonY.ToString());
-
-            }*/
 
             if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W)) {  // UP !!!!
                 moveDir.y = 1f;
@@ -932,7 +918,7 @@ public class UIManager : MonoBehaviour {
                     isAnnouncementTextOn = false;
                     timerAnnouncementTextCounter = 0;
 
-                    inspectToolUnlockedAnnounce = false;
+                    //inspectToolUnlockedAnnounce = false;
                 }
             }
             else {
@@ -957,12 +943,12 @@ public class UIManager : MonoBehaviour {
                 
             }
             else {
-                int selectedPlantID = gameManager.simulationManager.vegetationManager.selectedPlantParticleIndex;
-                int closestPlantID = gameManager.simulationManager.vegetationManager.closestPlantParticleData.index;
+                //int selectedPlantID = gameManager.simulationManager.vegetationManager.selectedPlantParticleIndex;
+                //int closestPlantID = gameManager.simulationManager.vegetationManager.closestPlantParticleData.index;
                 float plantDist = (gameManager.simulationManager.vegetationManager.closestPlantParticleData.worldPos - new Vector2(theCursorCzar.curMousePositionOnWaterPlane.x, theCursorCzar.curMousePositionOnWaterPlane.y)).magnitude;
 
-                int selectedZoopID = gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex;
-                int closestZoopID = gameManager.simulationManager.zooplanktonManager.closestAnimalParticleData.index;
+                //int selectedZoopID = gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex;
+                //int closestZoopID = gameManager.simulationManager.zooplanktonManager.closestAnimalParticleData.index;
                 float zoopDist = (new Vector2(gameManager.simulationManager.zooplanktonManager.closestAnimalParticleData.worldPos.x, gameManager.simulationManager.zooplanktonManager.closestAnimalParticleData.worldPos.y) - new Vector2(theCursorCzar.curMousePositionOnWaterPlane.x, theCursorCzar.curMousePositionOnWaterPlane.y)).magnitude;
                 
                 /*

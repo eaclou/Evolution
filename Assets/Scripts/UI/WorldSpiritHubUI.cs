@@ -17,7 +17,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
     public Image imageSelectedTargetLayer;
 
     public Animator animatorTest01;
-    private int animTestTriggerHash = Animator.StringToHash("PlayAnim");
+    //private int animTestTriggerHash = Animator.StringToHash("PlayAnim");
     public Animator animatorWorldHubUI;
 
 
@@ -99,23 +99,8 @@ public class WorldSpiritHubUI : MonoBehaviour {
         TrophicLayersManager layerManager = uiManagerRef.gameManager.simulationManager.trophicLayersManager;
 
         //textCurrencies.text = "Tier: " + tierA.ToString() + "\n(" + currencyB.ToString() + " of " + "16" + ") to next Tier"; // More # For Tier Up"; // "CurrencyA: " + currencyA.ToString() + "\nCurrencyB: " + currencyB.ToString();
-        textCurrencies.text = "WORLD SIZE: " + uiManagerRef.gameManager.theRenderKing.baronVonTerrain._WorldRadius.ToString();
+        //textCurrencies.text = "WORLD SIZE: " + uiManagerRef.gameManager.theRenderKing.baronVonTerrain._WorldRadius.ToString();
 
-        bool showMinerals = layerManager.kingdomOther.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.On;
-        //imageBitMinerals.gameObject.SetActive(true);
-        
-        bool showAir = layerManager.kingdomOther.trophicTiersList[0].trophicSlots[2].status == TrophicSlot.SlotStatus.On;
-        //imageBitAir.gameObject.SetActive(true);
-        
-        bool showDecomposers = layerManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.On;
-        //imageBitDecomposers.gameObject.SetActive(true);
-
-        bool showPlants = layerManager.kingdomPlants.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.On;
-        //imageBitPlants.gameObject.SetActive(true);
-
-        bool showAnimals = layerManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.On;
-        //imageBitAnimals.gameObject.SetActive(true);
-        
         //buttonKnowledgeLink.interactable = true;
         //buttonMutationLink.interactable = false;3
         
@@ -177,7 +162,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
         
         
 
-        string essenceDescriptionStr = "";
+        //string essenceDescriptionStr = "";
 
         bool isSelectedDecomposers = false;
         bool isSelectedAlgae = false;
@@ -200,7 +185,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
             isSelectedDecomposers = true;
             curIconColor = uiManagerRef.colorDecomposersLayer;
             curIconSprite = uiManagerRef.spriteSpiritDecomposerIcon;
-            essenceDescriptionStr = "Decomposers break down the old so that new life can grow.";
+            //essenceDescriptionStr = "Decomposers break down the old so that new life can grow.";
             textTotalMass.text = "Biomass: " + uiManagerRef.gameManager.simulationManager.simResourceManager.curGlobalDecomposers.ToString("F1");
         }
         else if (selectedWorldSpiritSlot.kingdomID == 1) {
@@ -208,7 +193,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
                 isSelectedAlgae = true;
                 curIconColor = uiManagerRef.colorAlgaeLayer;
                 curIconSprite = uiManagerRef.spriteSpiritAlgaeIcon;
-                essenceDescriptionStr = "Algae needs light and nutrients to grow.";
+                //essenceDescriptionStr = "Algae needs light and nutrients to grow.";
                 textTotalMass.text = "Biomass: " + uiManagerRef.gameManager.simulationManager.simResourceManager.curGlobalAlgaeReservoir.ToString("F1");
             }
             else {
@@ -216,14 +201,14 @@ public class WorldSpiritHubUI : MonoBehaviour {
                     isSelectedPlants0 = true;
                     curIconColor = uiManagerRef.colorPlantsLayer;
                     curIconSprite = uiManagerRef.spriteSpiritPlantIcon;
-                    essenceDescriptionStr = "Floating Plants that are a foodsource for Vertebrates";
+                    //essenceDescriptionStr = "Floating Plants that are a foodsource for Vertebrates";
                     textTotalMass.text = "Biomass: " + uiManagerRef.gameManager.simulationManager.simResourceManager.curGlobalPlantParticles.ToString("F1");
                 }
                 else {
                     isSelectedPlants1 = true;
                     curIconColor = uiManagerRef.colorPlantsLayer;
                     curIconSprite = uiManagerRef.spriteSpiritPlantIcon;
-                    essenceDescriptionStr = "Big Plants?";
+                    //essenceDescriptionStr = "Big Plants?";
                     //textTotalMass.text = "Biomass: " + uiManagerRef.gameManager.simulationManager
                 }
                 
@@ -234,13 +219,13 @@ public class WorldSpiritHubUI : MonoBehaviour {
                 isSelectedZooplankton = true;
                 curIconColor = uiManagerRef.colorZooplanktonLayer;
                 curIconSprite = uiManagerRef.spriteSpiritZooplanktonIcon;
-                essenceDescriptionStr = "Tiny Organisms that feed on Algae";
+                //essenceDescriptionStr = "Tiny Organisms that feed on Algae";
                 textTotalMass.text = "Biomass: " + uiManagerRef.gameManager.simulationManager.simResourceManager.curGlobalAnimalParticles.ToString("F1");
             }
             else {
                 curIconColor = uiManagerRef.colorVertebratesLayer;
                 curIconSprite = uiManagerRef.spriteSpiritVertebrateIcon;
-                essenceDescriptionStr = "Animals that can feed on Plants, Zooplankton, or even other Vertebrates.";
+                //essenceDescriptionStr = "Animals that can feed on Plants, Zooplankton, or even other Vertebrates.";
                 textTotalMass.text = "Biomass: " + uiManagerRef.gameManager.simulationManager.simResourceManager.curGlobalAgentBiomass.ToString("F1");
 
                 if (selectedWorldSpiritSlot.slotID == 0) {
@@ -265,28 +250,28 @@ public class WorldSpiritHubUI : MonoBehaviour {
                 curIconSprite = uiManagerRef.spriteSpiritWorldIcon;
                 isSelectedTerrain0 = true;
                 curIconColor = uiManagerRef.colorWorldLayer;
-                essenceDescriptionStr = "The World Spirit provides the spark for a new universe";
+                //essenceDescriptionStr = "The World Spirit provides the spark for a new universe";
                 textTotalMass.text = "Area: ";
             }
             else if (selectedWorldSpiritSlot.slotID == 1) {
                 isSelectedTerrain1 = true;
                 curIconSprite = uiManagerRef.spriteSpiritStoneIcon;
                 curIconColor = uiManagerRef.colorTerrainLayer;
-                essenceDescriptionStr = "Stone Spirits are some of the oldest known";
+                //essenceDescriptionStr = "Stone Spirits are some of the oldest known";
                 textTotalMass.text = "Mass: ";
             }
             else if (selectedWorldSpiritSlot.slotID == 2) {
                 isSelectedTerrain2 = true;
                 curIconSprite = uiManagerRef.spriteSpiritPebblesIcon;
                 curIconColor = uiManagerRef.colorTerrainLayer;
-                essenceDescriptionStr = "Pebble Spirits are usually found in rivers and streams";
+               // essenceDescriptionStr = "Pebble Spirits are usually found in rivers and streams";
                 textTotalMass.text = "Mass: ";
             }
             else if (selectedWorldSpiritSlot.slotID == 3) {
                 isSelectedTerrain3 = true;
                 curIconSprite = uiManagerRef.spriteSpiritSandIcon;
                 curIconColor = uiManagerRef.colorTerrainLayer;
-                essenceDescriptionStr = "Sand Spirits";
+                //essenceDescriptionStr = "Sand Spirits";
                 textTotalMass.text = "Mass: ";
             }
         }
@@ -295,21 +280,21 @@ public class WorldSpiritHubUI : MonoBehaviour {
                 isSelectedMinerals = true;
                 curIconColor = uiManagerRef.colorMineralLayer;
                 curIconSprite = uiManagerRef.spriteSpiritMineralsIcon;
-                essenceDescriptionStr = "Mineral Spirits infuse nutrients into the earth.";
+                //essenceDescriptionStr = "Mineral Spirits infuse nutrients into the earth.";
                 textTotalMass.text = "Mass: ";
             }
             else if (selectedWorldSpiritSlot.slotID == 1) {
                 isSelectedWater = true;
                 curIconColor = uiManagerRef.colorWaterLayer;
                 curIconSprite = uiManagerRef.spriteSpiritWaterIcon;
-                essenceDescriptionStr = "Water Spirits";
+                //essenceDescriptionStr = "Water Spirits";
                 textTotalMass.text = "Level: " + SimulationManager._GlobalWaterLevel;
             }
             else if (selectedWorldSpiritSlot.slotID == 2) {
                 isSelectedAir = true;
                 curIconColor = uiManagerRef.colorAirLayer;
                 curIconSprite = uiManagerRef.spriteSpiritAirIcon;
-                essenceDescriptionStr = "Air Spirits";
+                //essenceDescriptionStr = "Air Spirits";
                 textTotalMass.text = "Speed: " + uiManagerRef.gameManager.simulationManager.environmentFluidManager.curTierWaterCurrents.ToString();
             }
         }
@@ -407,7 +392,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
     public void OpenWorldTreeSelect() {
         isOpen = true;
         uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
-        animatorWorldHubUI.SetBool("_IsOpen", true);
+        //animatorWorldHubUI.SetBool("_IsOpen", true);
         //Animation animTerrainShake = imageBitTerrain.GetComponent<Animation>();
         //animTerrainShake.StartPlayback();
         //animTerrainShake.Play();
@@ -536,35 +521,14 @@ public class WorldSpiritHubUI : MonoBehaviour {
                 // v v v Actually creates new speciesPool here:::
                 //TrophicSlot slot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef;
                 slot.speciesName = "Vertebrate " + (slot.slotID + 1).ToString();
-                Debug.LogError("NEEDED THIS AFTER ALL!!!");
-                //uiManagerRef.gameManager.simulationManager.CreateAgentSpecies(uiManagerRef.cameraManager.curCameraFocusPivotPos);
-                
-                //uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[slot.slotID].linkedSpeciesID = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList.Count - 1].speciesID;
-
-                // *** IMPORTANT::::
-                int speciesIndex = slot.linkedSpeciesID;
-                //uiManagerRef.gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[slot.slotID].representativeGenome = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesIndex].representativeGenome;
-                //uiManagerRef.gameManager.simulationManager.masterGenomePool.GenerateWorldLayerVertebrateGenomeMutationOptions(slot.slotID, slot.linkedSpeciesID);
-
-                //Debug.Log("ADSF: " + uiManagerRef.gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[slot.slotID].representativeGenome.bodyGenome.appearanceGenome.huePrimary.ToString());
-
-                // duplicated code shared with clickAgentButton :(   bad 
-                //
-                //gameManager.simulationManager.trophicLayersManager.isSelectedTrophicSlot = true;
-                //gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = slot;
-                //isToolbarWingOn = true;
-                //selectedSpeciesID = slot.linkedSpeciesID; // update this next
-                                
+                            
                 selectedWorldSpiritVertebrateSpeciesID = slot.linkedSpeciesID; // ???
                 //InitToolbarPortraitCritterData(slot);                
-                
-                //uiManagerRef.NarratorText("A new species of Vertebrate added!", uiManagerRef.colorVertebratesLayer);                
                 
                 if(slot.slotID == 0) {
                     //panelPendingClickPrompt.GetComponentInChildren<Text>().text = "These creatures start with randomly-generated brains\n and must evolve successful behavior\nthrough survival of the fittest";
                     uiManagerRef.isAnnouncementTextOn = false;  // *** hacky...
                 }
-                //ClickToolButtonInspect();
                 
             }
             else {

@@ -9,7 +9,7 @@ public class TheCursorCzar : MonoBehaviour {
     public bool _IsHoverClickableSpirit;
 
     public GameObject mouseRaycastWaterPlane;
-    private Vector3 prevMousePositionOnWaterPlane;
+    //private Vector3 prevMousePositionOnWaterPlane;
     public Vector3 curMousePositionOnWaterPlane;
 
     public Text textTooltip;
@@ -24,7 +24,7 @@ public class TheCursorCzar : MonoBehaviour {
     private Vector2 prevCtrlCursorPos;
     private Vector3 prevCtrlCursorPositionOnWaterPlane;
     public Vector3 curCtrlCursorPositionOnWaterPlane;
-    private bool rightTriggerOn = false;
+    //private bool rightTriggerOn = false;
 
     public bool stirGizmoVisible = false;
 
@@ -52,12 +52,6 @@ public class TheCursorCzar : MonoBehaviour {
     
     private void MouseRaycastWaterPlane(Vector3 screenPos) {
 
-        Vector2 cursorScreenPosNormalized = new Vector2(Input.mousePosition.x / uiManagerRef.cameraManager.cameraRef.pixelWidth, Input.mousePosition.y / uiManagerRef.cameraManager.cameraRef.pixelHeight);
-        Vector3 bottomMidpoint = Vector3.Lerp(uiManagerRef.cameraManager.worldSpaceBottomLeft, uiManagerRef.cameraManager.worldSpaceBottomRight, cursorScreenPosNormalized.x);
-        Vector3 topMidpoint = Vector3.Lerp(uiManagerRef.cameraManager.worldSpaceTopLeft, uiManagerRef.cameraManager.worldSpaceTopRight, cursorScreenPosNormalized.x);
-        Vector3 midMidpoint = Vector3.Lerp(bottomMidpoint, topMidpoint, cursorScreenPosNormalized.y);
-        
-
         mouseRaycastWaterPlane.SetActive(true);
         
         Vector3 targetPosition = new Vector3(SimulationManager._MapSize * 0.5f, SimulationManager._MapSize * 0.5f, -SimulationManager._GlobalWaterLevel * SimulationManager._MaxAltitude);
@@ -72,7 +66,7 @@ public class TheCursorCzar : MonoBehaviour {
         Physics.Raycast(ray, out hit, layerMask);
 
         if (hit.collider != null) {
-            prevMousePositionOnWaterPlane = curMousePositionOnWaterPlane;
+            //prevMousePositionOnWaterPlane = curMousePositionOnWaterPlane;
             curMousePositionOnWaterPlane = hit.point;            
 
             cursorParticlesWorldPos = hit.point - ray.direction * 5f;

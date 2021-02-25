@@ -36,13 +36,13 @@ public class SettingsManager : MonoBehaviour {
     public float maxEggFood = 1024f;
     public float eggLayingRate = 1f;
 
-    private float minBrainMutationRate = 0.0f;
-    private float maxBrainMutationRate = 0.05f;
+    //private float minBrainMutationRate = 0.0f;
+    //private float maxBrainMutationRate = 0.05f;
 
-    private float minBodyMutationRate = 0.0f;
-    private float maxBodyMutationRate = 0.33f;
-    private float minBodyMutationStepSize = 0.025f;
-    private float maxBodyMutationStepSize = 0.9f;
+    //private float minBodyMutationRate = 0.0f;
+    //private float maxBodyMutationRate = 0.33f;
+    //private float minBodyMutationStepSize = 0.025f;
+    //private float maxBodyMutationStepSize = 0.9f;
 
     public int curTierBodyMutationAmplitude = 3;
     public int curTierBodyMutationFrequency = 4;

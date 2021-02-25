@@ -9,7 +9,7 @@ public class TrophicLayersManager {
     private bool plantsOn = false;
     private bool zooplanktonOn = false;
     private bool agentsOn = false;
-    private bool terrainOn = true;
+    //private bool terrainOn = true;
 
     //public bool pendingTrophicSlot = false;
     //public TrophicSlot pendingTrophicSlotRef;
@@ -40,7 +40,7 @@ public class TrophicLayersManager {
         plantsOn = false;
         zooplanktonOn = false;
         agentsOn = false;
-        terrainOn = false;
+        //terrainOn = false;
 
         // DECOMPOSERS::::  // hacky manual initialization for now!!!!
         kingdomDecomposers = new TrophicKingdom();

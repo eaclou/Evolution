@@ -17,7 +17,7 @@ public class DebugPanelUI : MonoBehaviour {
     private float _IsChannelSolo = 0f;
     private float _Gamma = 1f;
     private int _DebugTextureIndex = 0;
-    private string _DebugTextureString = "-";
+    //private string _DebugTextureString = "-";
         
     public Button buttonDebugTexturePrev;
     public Button buttonDebugTextureNext;
@@ -137,12 +137,12 @@ public class DebugPanelUI : MonoBehaviour {
             debugTxtGlobalSim += numActiveSpecies.ToString() + " Active Species:\n";
             for (int s = 0; s < numActiveSpecies; s++) {
                 int speciesID = simManager.masterGenomePool.currentlyActiveSpeciesIDList[s];
-                int parentSpeciesID = simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].parentSpeciesID;
+                //int parentSpeciesID = simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].parentSpeciesID;
                 int numCandidates = simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].candidateGenomesList.Count;
                 int numLeaders = simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].leaderboardGenomesList.Count;
-                int numBorn = simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].numAgentsEvaluated;
+                //int numBorn = simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].numAgentsEvaluated;
                 int speciesPopSize = 0;
-                float avgFitness = simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgPerformanceData.totalTicksAlive;
+                //float avgFitness = simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgPerformanceData.totalTicksAlive;
                 for (int a = 0; a < simManager._NumAgents; a++) {
                     if (simManager.agentsArray[a].speciesIndex == speciesID) {
                         speciesPopSize++;

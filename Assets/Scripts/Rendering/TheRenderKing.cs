@@ -232,21 +232,21 @@ public class TheRenderKing : MonoBehaviour {
     private BasicStrokeData[] playerGlowInitPos;
     private ComputeBuffer playerGlowCBuffer;
 
-    private int numPlayerGlowyBits = 1024 * 10;
+    private int numPlayerGlowyBits = 1024 * 4;
     private ComputeBuffer playerGlowyBitsCBuffer;
 
-    private int numFloatyBits = 1024 * 64;
+    private int numFloatyBits = 1024 * 8;
     private ComputeBuffer floatyBitsCBuffer;
         
-    private int numRipplesPerAgent = 8;
+    //private int numRipplesPerAgent = 8;
     private ComputeBuffer ripplesCBuffer;
 
     private int numWaterSplineMeshQuads = 4;
     private ComputeBuffer waterSplineVerticesCBuffer;  // short ribbon mesh
-    private int numWaterSplines = 1024 * 3;
+    private int numWaterSplines = 1024 * 1;
     private ComputeBuffer waterSplinesCBuffer;
 
-    private int numWaterChains = 1024 * 3;
+    private int numWaterChains = 1024 * 1;
     private int numPointsPerWaterChain = 16;
     private ComputeBuffer waterChains0CBuffer;
     private ComputeBuffer waterChains1CBuffer;
@@ -295,7 +295,7 @@ public class TheRenderKing : MonoBehaviour {
     private ComputeBuffer spiritBrushQuadDataCBuffer0;
     private ComputeBuffer spiritBrushQuadDataCBuffer1;
     private SpiritBrushQuadData[] spiritBrushQuadDataArray;
-    private int spiritBrushSpawnCounter = 0;
+    //private int spiritBrushSpawnCounter = 0;
     //private ComputeBuffer debugAgentResourcesCBuffer;
     private ComputeBuffer cursorParticlesCBuffer0;
     private ComputeBuffer cursorParticlesCBuffer1;
@@ -736,7 +736,7 @@ public class TheRenderKing : MonoBehaviour {
         //fluidRenderMesh = plane.GetComponent<MeshFilter>().sharedMesh; // 
         fluidRenderMesh = new Mesh();
 
-        int resolution = 128;
+        //int resolution = 128;
 
         Vector3[] vertices = new Vector3[4];
         vertices[0] = new Vector3(0f, 0f, 0f);
@@ -827,9 +827,9 @@ public class TheRenderKing : MonoBehaviour {
             data.coords = Vector2.zero; // new Vector2(UnityEngine.Random.Range(0.25f, 0.35f), UnityEngine.Random.Range(0.65f, 0.75f)); // (UnityEngine.Random.Range(0.2f, 0.8f), UnityEngine.Random.Range(0.2f, 0.8f), 1f, 0f);
             data.vel = new Vector2(1f, 0f);
             data.heading = new Vector2(1f, 0f);
-            int numGroups = 4;
-            int randGroup = UnityEngine.Random.Range(0, numGroups);
-            float startGroupAge = (float)randGroup / (float)numGroups;
+            //int numGroups = 4;
+            //int randGroup = UnityEngine.Random.Range(0, numGroups);
+            //float startGroupAge = (float)randGroup / (float)numGroups;
             data.age = 1.0f; // startGroupAge; // (float)i / (float)numFloatyBits;
             floatyBitsInitPos[i] = data;
             
@@ -1762,133 +1762,10 @@ public class TheRenderKing : MonoBehaviour {
 
             colorInjectionStrokeDataArray[baseIndex + i].color = new Vector4(Mathf.Lerp(simManager.eggSackGenomePoolArray[i].fruitHue.x, 0.1f, 0.7f), Mathf.Lerp(simManager.eggSackGenomePoolArray[i].fruitHue.y, 0.9f, 0.7f), Mathf.Lerp(simManager.eggSackGenomePoolArray[i].fruitHue.z, 0.2f, 0.7f), foodAlpha);
         }
-        // PREDATORS:
-        /*baseIndex = simManager.agentsArray.Length + simManager.eggSackArray.Length;
-        for(int i = 0; i < simManager.predatorArray.Length; i++) {
-            Vector3 predatorPos = simManager.predatorArray[i].transform.position;
-            colorInjectionStrokeDataArray[baseIndex + i].worldPos = new Vector2(predatorPos.x, predatorPos.y);
-            colorInjectionStrokeDataArray[baseIndex + i].localDir = new Vector2(Mathf.Cos(simManager.predatorArray[i].transform.rotation.z), Mathf.Sin(simManager.predatorArray[i].transform.rotation.z));
-            colorInjectionStrokeDataArray[baseIndex + i].scale = new Vector2(simManager.predatorArray[i].curScale, simManager.predatorArray[i].curScale) * 0.9f;
-            
-            colorInjectionStrokeDataArray[baseIndex + i].color = new Vector4(1f, 0.25f, 0f, 0.2f);
-        }*/
+        
 
         colorInjectionStrokesCBuffer.SetData(colorInjectionStrokeDataArray);
     }
-    
-    /*public void UpdateAgentWidthsTexture(Agent agent) {
-        for(int i = 0; i < agent.agentWidthsArray.Length; i++) {
-            critterBodyWidthsTex.SetPixel(i, agent.index, new Color(agent.agentWidthsArray[i], agent.agentWidthsArray[i], agent.agentWidthsArray[i]));
-        }
-        critterBodyWidthsTex.Apply();
-    }*/
-
-    /*public void UpdateAgentBodyStrokesBuffer(int agentIndex) {
-        // Doing it this way to avoid resetting ALL agents whenever ONE is respawned!
-        ComputeBuffer singleAgentBodyStrokeCBuffer = new ComputeBuffer(1, sizeof(float) * 7 + sizeof(int) * 3);
-        AgentBodyStrokeData[] singleBodyStrokeArray = new AgentBodyStrokeData[1];
-        
-        singleBodyStrokeArray[0] = new AgentBodyStrokeData();
-        singleBodyStrokeArray[0].parentIndex = agentIndex; // link to Agent
-        singleBodyStrokeArray[0].localPos = Vector2.zero;
-        singleBodyStrokeArray[0].localDir = new Vector2(0f, 1f); // start up? shouldn't matter
-        singleBodyStrokeArray[0].localScale = Vector2.one; // simManager.agentGenomePoolArray[agentIndex].bodyGenome.sizeAndAspectRatio;
-        singleBodyStrokeArray[0].strength = 1f;
-        singleBodyStrokeArray[0].brushTypeX = simManager.agentGenomePoolArray[agentIndex].bodyGenome.appearanceGenome.bodyStrokeBrushTypeX;
-        singleBodyStrokeArray[0].brushTypeY = simManager.agentGenomePoolArray[agentIndex].bodyGenome.appearanceGenome.bodyStrokeBrushTypeY;
-        
-        singleAgentBodyStrokeCBuffer.SetData(singleBodyStrokeArray);
-
-        int kernelCSUpdateBodyStrokeDataAgentIndex = computeShaderBrushStrokes.FindKernel("CSUpdateBodyStrokeDataAgentIndex");        
-        computeShaderBrushStrokes.SetBuffer(kernelCSUpdateBodyStrokeDataAgentIndex, "agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
-        computeShaderBrushStrokes.SetBuffer(kernelCSUpdateBodyStrokeDataAgentIndex, "agentBodyStrokesReadCBuffer", singleAgentBodyStrokeCBuffer);
-        computeShaderBrushStrokes.SetBuffer(kernelCSUpdateBodyStrokeDataAgentIndex, "agentBodyStrokesWriteCBuffer", agentBodyStrokesCBuffer);
-        computeShaderBrushStrokes.Dispatch(kernelCSUpdateBodyStrokeDataAgentIndex, 1, 1, 1);
-        
-        singleAgentBodyStrokeCBuffer.Release();        
-    }  */  
-    /*public void UpdateAgentEyeStrokesBuffer(int agentIndex) {
-        // Doing it this way to avoid resetting ALL agents whenever ONE is respawned!
-        ComputeBuffer singleAgentEyeStrokeCBuffer = new ComputeBuffer(2, sizeof(float) * 13 + sizeof(int) * 2);
-        AgentEyeStrokeData[] singleAgentEyeStrokeArray = new AgentEyeStrokeData[singleAgentEyeStrokeCBuffer.count];        
-        
-        AgentEyeStrokeData dataLeftEye = new AgentEyeStrokeData();
-        dataLeftEye.parentIndex = agentIndex;
-        dataLeftEye.localPos = simManager.agentGenomePoolArray[agentIndex].bodyGenome.appearanceGenome.eyeGenome.localPos;
-        dataLeftEye.localPos.x *= -1f; // LEFT SIDE!
-        float width = simManager.agentsArray[agentIndex].agentWidthsArray[Mathf.RoundToInt((dataLeftEye.localPos.y * 0.5f + 0.5f) * 15f)];
-        dataLeftEye.localPos.x *= width * 0.5f;
-        dataLeftEye.localDir = new Vector2(0f, 1f);
-        dataLeftEye.localScale = simManager.agentGenomePoolArray[agentIndex].bodyGenome.appearanceGenome.eyeGenome.localScale;
-        dataLeftEye.irisHue = simManager.agentGenomePoolArray[agentIndex].bodyGenome.appearanceGenome.eyeGenome.irisHue;
-        dataLeftEye.pupilHue = simManager.agentGenomePoolArray[agentIndex].bodyGenome.appearanceGenome.eyeGenome.pupilHue;
-        dataLeftEye.strength = 1f;
-        dataLeftEye.brushType = simManager.agentGenomePoolArray[agentIndex].bodyGenome.appearanceGenome.eyeGenome.eyeBrushType;
-
-        AgentEyeStrokeData dataRightEye = new AgentEyeStrokeData();
-        dataRightEye.parentIndex = agentIndex;
-        dataRightEye.localPos = simManager.agentGenomePoolArray[agentIndex].bodyGenome.appearanceGenome.eyeGenome.localPos;
-        width = simManager.agentsArray[agentIndex].agentWidthsArray[Mathf.RoundToInt((dataRightEye.localPos.y * 0.5f + 0.5f) * 15f)];
-        dataRightEye.localPos.x *= width * 0.5f;
-        dataRightEye.localDir = new Vector2(0f, 1f);
-        dataRightEye.localScale = simManager.agentGenomePoolArray[agentIndex].bodyGenome.appearanceGenome.eyeGenome.localScale;
-        dataRightEye.irisHue = simManager.agentGenomePoolArray[agentIndex].bodyGenome.appearanceGenome.eyeGenome.irisHue;
-        dataRightEye.pupilHue = simManager.agentGenomePoolArray[agentIndex].bodyGenome.appearanceGenome.eyeGenome.pupilHue;
-        dataRightEye.strength = 1f;
-        dataRightEye.brushType = simManager.agentGenomePoolArray[agentIndex].bodyGenome.appearanceGenome.eyeGenome.eyeBrushType;
-            
-        singleAgentEyeStrokeArray[0] = dataLeftEye;
-        singleAgentEyeStrokeArray[1] = dataRightEye;
-        
-        singleAgentEyeStrokeCBuffer.SetData(singleAgentEyeStrokeArray);
-
-        int kernelCSUpdateEyeStrokeDataAgentIndex = computeShaderBrushStrokes.FindKernel("CSUpdateEyeStrokeDataAgentIndex");        
-        computeShaderBrushStrokes.SetBuffer(kernelCSUpdateEyeStrokeDataAgentIndex, "agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
-        computeShaderBrushStrokes.SetBuffer(kernelCSUpdateEyeStrokeDataAgentIndex, "agentEyeStrokesReadCBuffer", singleAgentEyeStrokeCBuffer);
-        computeShaderBrushStrokes.SetBuffer(kernelCSUpdateEyeStrokeDataAgentIndex, "agentEyeStrokesWriteCBuffer", agentEyeStrokesCBuffer);
-        computeShaderBrushStrokes.Dispatch(kernelCSUpdateEyeStrokeDataAgentIndex, 1, 1, 1);
-        
-        singleAgentEyeStrokeCBuffer.Release();  
-        
-        //AgentEyeStrokeData[] agentEyesDataArray = new AgentEyeStrokeData[agentEyeStrokesCBuffer.count];
-        //agentEyeStrokesCBuffer.GetData(agentEyesDataArray);
-        //Debug.Log(" " + agentEyesDataArray[agentIndex].parentIndex.ToString() + ", pos: " + agentEyesDataArray[agentIndex].localPos.ToString());
-    }*/
-    /*public void UpdateAgentSmearStrokesBuffer(int agentIndex) {
-        // Doing it this way to avoid resetting ALL agents whenever ONE is respawned!
-
-        ComputeBuffer singleAgentSmearStrokeCBuffer = new ComputeBuffer(1, sizeof(float) * 14 + sizeof(int) * 2);
-        CurveStrokeData[] singleCurveStrokeArray = new CurveStrokeData[1];
-        
-        singleCurveStrokeArray[0] = new CurveStrokeData();
-        singleCurveStrokeArray[0].parentIndex = agentIndex; // link to Agent
-        singleCurveStrokeArray[0].hue = simManager.agentGenomePoolArray[agentIndex].bodyGenome.appearanceGenome.huePrimary;
-
-        singleCurveStrokeArray[0].restLength = simManager.agentsArray[agentIndex].fullSizeBoundingBox.y * 0.25f;  // simManager.agentGenomePoolArray[agentIndex].bodyGenome.sizeAndAspectRatio.y * 0.25f;
-
-        singleCurveStrokeArray[0].p0 = new Vector2(simManager.agentsArray[agentIndex]._PrevPos.x, simManager.agentsArray[agentIndex]._PrevPos.y);
-        singleCurveStrokeArray[0].p1 = singleCurveStrokeArray[0].p0 - new Vector2(0f, singleCurveStrokeArray[0].restLength);
-        singleCurveStrokeArray[0].p2 = singleCurveStrokeArray[0].p0 - new Vector2(0f, singleCurveStrokeArray[0].restLength * 2f);
-        singleCurveStrokeArray[0].p3 = singleCurveStrokeArray[0].p0 - new Vector2(0f, singleCurveStrokeArray[0].restLength * 3f);
-        singleCurveStrokeArray[0].width = simManager.agentsArray[agentIndex].fullSizeBoundingBox.x; //simManager.agentGenomePoolArray[agentIndex].bodyGenome.sizeAndAspectRatio.x;
-        
-        singleCurveStrokeArray[0].strength = 1f;
-        singleCurveStrokeArray[0].brushType = 0;
-               
-        singleAgentSmearStrokeCBuffer.SetData(singleCurveStrokeArray);
-
-        int kernelCSUpdateCurveBrushDataAgentIndex = computeShaderBrushStrokes.FindKernel("CSUpdateCurveBrushDataAgentIndex");
-
-        computeShaderBrushStrokes.SetInt("_CurveStrokesUpdateAgentIndex", agentIndex); // ** can I just use parentIndex instead?
-        computeShaderBrushStrokes.SetBuffer(kernelCSUpdateCurveBrushDataAgentIndex, "agentSimDataCBuffer", simManager.simStateData.agentSimDataCBuffer);
-        computeShaderBrushStrokes.SetBuffer(kernelCSUpdateCurveBrushDataAgentIndex, "agentCurveStrokesReadCBuffer", singleAgentSmearStrokeCBuffer);
-        computeShaderBrushStrokes.SetBuffer(kernelCSUpdateCurveBrushDataAgentIndex, "agentCurveStrokesWriteCBuffer", agentSmearStrokesCBuffer);
-        computeShaderBrushStrokes.Dispatch(kernelCSUpdateCurveBrushDataAgentIndex, 1, 1, 1);
-        
-        singleAgentSmearStrokeCBuffer.Release();
-
-        //Debug.Log("Update curve Strokes! [" + singleCurveStrokeArray[0].p0.ToString() + ", " + singleCurveStrokeArray[0].p1.ToString() + ", " + singleCurveStrokeArray[0].p2.ToString() + ", " + singleCurveStrokeArray[0].p3.ToString() + "]");
-    }  */  
     
     public void UpdateDynamicFoodBuffers(int eggSackIndex) {
         // *** Hard-coded 64 Fruits per food object!!!! *** BEWARE!!!
@@ -1913,84 +1790,6 @@ public class TheRenderKing : MonoBehaviour {
         computeShaderEggSacks.Dispatch(kernelCSUpdateDynamicEggBuffers, 1, 1, 1);        
         eggsUpdateCBuffer.Release();
         
-        /*
-        //if(isPlant) {
-        ComputeBuffer singleStemCBuffer = new ComputeBuffer(1, sizeof(float) * 7 + sizeof(int) * 1);
-        SimulationStateData.StemData[] singleStemDataArray = new SimulationStateData.StemData[1];        
-        singleStemDataArray[0] = new SimulationStateData.StemData();
-        singleStemDataArray[0].foodIndex = foodIndex;
-        singleStemDataArray[0].localBaseCoords = new Vector2(0f, -1f);
-        singleStemDataArray[0].localTipCoords = new Vector2(0f, 1f);
-        singleStemDataArray[0].childGrowth = 0f;
-        singleStemDataArray[0].width = simManager.eggSackGenomePoolArray[foodIndex].stemWidth;
-        singleStemDataArray[0].attached = 1f;
-        singleStemCBuffer.SetData(singleStemDataArray);
-        int kernelCSUpdateDynamicStemBuffers = computeShaderBrushStrokes.FindKernel("CSUpdateDynamicStemBuffers");
-        //computeShaderBrushStrokes.SetInt("_CurveStrokesUpdateAgentIndex", agentIndex); // ** can I just use parentIndex instead?
-        computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicStemBuffers, "foodSimDataCBuffer", simManager.simStateData.eggSackSimDataCBuffer);
-        computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicStemBuffers, "foodStemDataUpdateCBuffer", singleStemCBuffer);
-        computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicStemBuffers, "foodStemDataWriteCBuffer", simManager.simStateData.foodStemDataCBuffer);
-        computeShaderBrushStrokes.Dispatch(kernelCSUpdateDynamicStemBuffers, 1, 1, 1);        
-        singleStemCBuffer.Release();
-
-        // *** Hard-coded 16 leaves per food object!!!! *** BEWARE!!!
-        ComputeBuffer foodLeafUpdateCBuffer = new ComputeBuffer(16, sizeof(float) * 7 + sizeof(int) * 1);
-        SimulationStateData.LeafData[] foodLeafDataArray = new SimulationStateData.LeafData[16];
-        for (int i = 0; i < 16; i++) {
-            foodLeafDataArray[i] = new SimulationStateData.LeafData();
-            foodLeafDataArray[i].foodIndex = foodIndex;
-            foodLeafDataArray[i].worldPos = new Vector3(0f, 0f, 0f);
-            foodLeafDataArray[i].localCoords = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f));
-            foodLeafDataArray[i].localScale =  simManager.eggSackGenomePoolArray[foodIndex].leafScale;          
-            foodLeafDataArray[i].attached = 1f;
-        }
-        foodLeafUpdateCBuffer.SetData(foodLeafDataArray);
-        int kernelCSUpdateDynamicLeafBuffers = computeShaderBrushStrokes.FindKernel("CSUpdateDynamicLeafBuffers");
-        //computeShaderBrushStrokes.SetInt("_CurveStrokesUpdateAgentIndex", agentIndex); // ** can I just use parentIndex instead?
-        computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicLeafBuffers, "foodSimDataCBuffer", simManager.simStateData.eggSackSimDataCBuffer);
-        computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicLeafBuffers, "foodLeafDataUpdateCBuffer", foodLeafUpdateCBuffer);
-        computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicLeafBuffers, "foodLeafDataWriteCBuffer", simManager.simStateData.foodLeafDataCBuffer);
-        computeShaderBrushStrokes.Dispatch(kernelCSUpdateDynamicLeafBuffers, 1, 1, 1);        
-        foodLeafUpdateCBuffer.Release();
-        */
-        // DEBUG ***** RACE CONDITIONS -- NEVER FORGET!!! ********
-        // DEBUG ***** RACE CONDITIONS -- NEVER FORGET!!! ********
-        //SimulationStateData.LeafData[] testDataArray = new SimulationStateData.LeafData[simManager.simStateData.foodLeafDataCBuffer.count];
-        //simManager.simStateData.foodLeafDataCBuffer.GetData(testDataArray);
-        //string txt = "";
-        //for(int i = 0; i < 32; i++) {
-        //    int index = i * 15;
-        //    txt += "\n" + (index).ToString() + ", foodIndex: " + testDataArray[index].foodIndex.ToString();
-        //}
-        //Debug.Log(txt);
-        //Debug.Log("foodLeafDataArray length " + foodLeafDataArray.Length.ToString() + " foodLeafDataCBuffer: " + simManager.simStateData.foodLeafDataCBuffer.count.ToString() + ", index: " + foodLeafDataArray[9].foodIndex.ToString());
-        // DEBUG ***** RACE CONDITIONS -- NEVER FORGET!!! ********
-        // DEBUG ***** RACE CONDITIONS -- NEVER FORGET!!! ********
-                
-        //}
-        /*else {
-            ComputeBuffer foodFruitUpdateCBuffer = new ComputeBuffer(64, sizeof(float) * 7 + sizeof(int) * 1);
-
-            SimulationStateData.FruitData[] foodFruitDataArray = new SimulationStateData.FruitData[64];
-            for(int i = 0; i < 64; i++) {
-                foodFruitDataArray[i] = new SimulationStateData.FruitData();
-                foodFruitDataArray[i].foodIndex = simManager._NumFood + foodIndex;
-                foodFruitDataArray[i].localCoords = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)) * 0.5f + UnityEngine.Random.insideUnitCircle * 0.4f;
-                foodFruitDataArray[i].localScale = simManager.foodGenomePoolArray[0].fruitScale;  
-                foodFruitDataArray[i].worldPos = simManager.foodDeadAnimalArray[foodIndex].transform.position;
-                foodFruitDataArray[i].attached = 1f;
-            }        
-            foodFruitUpdateCBuffer.SetData(foodFruitDataArray);
-            int kernelCSUpdateDynamicFruitBuffers = computeShaderBrushStrokes.FindKernel("CSUpdateDynamicFruitBuffers");
-            //computeShaderBrushStrokes.SetInt("_CurveStrokesUpdateAgentIndex", agentIndex); // ** can I just use parentIndex instead?
-            computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicFruitBuffers, "foodSimDataCBuffer", simManager.simStateData.foodSimDataCBuffer);
-            computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicFruitBuffers, "foodFruitDataUpdateCBuffer", foodFruitUpdateCBuffer);
-            computeShaderBrushStrokes.SetBuffer(kernelCSUpdateDynamicFruitBuffers, "foodFruitDataWriteCBuffer", simManager.simStateData.foodFruitDataCBuffer);
-            computeShaderBrushStrokes.Dispatch(kernelCSUpdateDynamicFruitBuffers, 1, 1, 1);        
-            foodFruitUpdateCBuffer.Release();
-        }*/
-        
-
 
     }
 
@@ -2037,14 +1836,8 @@ public class TheRenderKing : MonoBehaviour {
     public void GenerateCritterPortraitStrokesData(AgentGenome genome) { // AgentGenome genome2) {
 
         // Get genomes:
-        AgentGenome genome0 = genome; // simManager.masterGenomePool.completeSpeciesPoolsList[0].representativeGenome;
-        //AgentGenome genome1 = simManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][simManager.uiManager.mutationUI.selectedToolbarMutationID].representativeGenome;
-        //AgentGenome genome2 = simManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][0].representativeGenome;
-        //AgentGenome genome3 = simManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][1].representativeGenome;
-        //AgentGenome genome4 = simManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][2].representativeGenome;
-        //AgentGenome genome5 = simManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][3].representativeGenome;
-
-        
+        //AgentGenome genome0 = genome; // simManager.masterGenomePool.completeSpeciesPoolsList[0].representativeGenome;
+      
         //ComputeBuffer singleCritterGenericStrokesCBuffer = new ComputeBuffer(GetNumUberStrokesPerCritter(), GetMemorySizeCritterUberStrokeData());
         CritterUberStrokeData[] singleCritterGenericStrokesArray = new CritterUberStrokeData[GetNumUberStrokesPerCritter()];  // optimize this later?? ***
         //CritterUberStrokeData[] newCritterGenericStrokesArray = new CritterUberStrokeData[toolbarCritterPortraitStrokesCBuffer.count / 2]; 
@@ -2052,119 +1845,29 @@ public class TheRenderKing : MonoBehaviour {
         CritterGenomeInterpretor.BrushPoint[] brushPointArray = new CritterGenomeInterpretor.BrushPoint[GetNumUberStrokesPerCritter()];  
         //CritterGenomeInterpretor.BrushPoint[] newPointArray = new CritterGenomeInterpretor.BrushPoint[toolbarCritterPortraitStrokesCBuffer.count / 2];   
         // Generate main body strokes:
-        GenerateCritterBodyBrushstrokes(ref singleCritterGenericStrokesArray, brushPointArray, genome0, 0);         
+        GenerateCritterBodyBrushstrokes(ref singleCritterGenericStrokesArray, brushPointArray, genome, 0);         
         // Loop through all points again and calculate normals/tangents/other things:
         CalculateCritterBodyBrushstrokesNormals(ref singleCritterGenericStrokesArray, brushPointArray);        
         // Create Eye points here:
-        GenerateCritterEyeBrushstrokes(ref singleCritterGenericStrokesArray, genome0, 0);
+        GenerateCritterEyeBrushstrokes(ref singleCritterGenericStrokesArray, genome, 0);
         // Mouth
-        GenerateCritterMouthTeethBrushstrokes(ref singleCritterGenericStrokesArray, genome0, 0);
+        GenerateCritterMouthTeethBrushstrokes(ref singleCritterGenericStrokesArray, genome, 0);
         // Teeth
         // Pectoral Fins
-        GenerateCritterPectoralFinsBrushstrokes(ref singleCritterGenericStrokesArray, genome0, 0);
+        GenerateCritterPectoralFinsBrushstrokes(ref singleCritterGenericStrokesArray, genome, 0);
         // Dorsal Fin
-        GenerateCritterDorsalFinBrushstrokes(ref singleCritterGenericStrokesArray, genome0, 0);
+        GenerateCritterDorsalFinBrushstrokes(ref singleCritterGenericStrokesArray, genome, 0);
         // Tail Fin
-        GenerateCritterTailFinBrushstrokes(ref singleCritterGenericStrokesArray, genome0, 0);
+        GenerateCritterTailFinBrushstrokes(ref singleCritterGenericStrokesArray, genome, 0);
         // Skin Detail
-        GenerateCritterSkinDetailBrushstrokes(ref singleCritterGenericStrokesArray, genome0, 0);
+        GenerateCritterSkinDetailBrushstrokes(ref singleCritterGenericStrokesArray, genome, 0);
         SortCritterBrushstrokes(ref singleCritterGenericStrokesArray, 0);
         // Copy over into master array:
         for(int i = 0; i < singleCritterGenericStrokesArray.Length; i++) {
             completeCritterGenericStrokesArray[i] = singleCritterGenericStrokesArray[i];            
         }
-
         
-
         toolbarCritterPortraitStrokesCBuffer.SetData(completeCritterGenericStrokesArray);
-
-
-        //float size = (genome.bodyGenome.fullsizeBoundingBox.x + genome.bodyGenome.fullsizeBoundingBox.y) * 5f;        
-        //float sizeNormalized = Mathf.Clamp01((size - 0.1f) / 1f);
-        //genome0.bodyGenome.CalculateFullsizeBoundingBox();
-        float minLength = 0.5f;
-        float maxLength = 40f;
-        float sizeNormalized = Mathf.Clamp01((genome0.bodyGenome.GetFullsizeBoundingBox().y - minLength) / (maxLength - minLength));
-        //sizeNormalized = 1f;
-        //slotPortraitRenderCamera.GetComponent<CritterPortraitCameraManager>().UpdateCameraTargetValues(sizeNormalized);
-        
-        //Debug.Log("GenerateCritterPortraitStrokesData: " + genome0.bodyGenome.appearanceGenome.huePrimary.ToString());
-        /*
-        // Next:
-        GenerateCritterBodyBrushstrokes(ref singleCritterGenericStrokesArray, brushPointArray, genome1, 1);
-        CalculateCritterBodyBrushstrokesNormals(ref singleCritterGenericStrokesArray, brushPointArray);
-        GenerateCritterEyeBrushstrokes(ref singleCritterGenericStrokesArray, genome1, 1);
-        GenerateCritterMouthTeethBrushstrokes(ref singleCritterGenericStrokesArray, genome1, 1);
-        GenerateCritterPectoralFinsBrushstrokes(ref singleCritterGenericStrokesArray, genome1, 1);
-        GenerateCritterDorsalFinBrushstrokes(ref singleCritterGenericStrokesArray, genome1, 1);
-        GenerateCritterTailFinBrushstrokes(ref singleCritterGenericStrokesArray, genome1, 1);
-        GenerateCritterSkinDetailBrushstrokes(ref singleCritterGenericStrokesArray, genome1, 1);
-        SortCritterBrushstrokes(ref singleCritterGenericStrokesArray, 1);
-        // Copy over into master array:
-        for(int i = 0; i < singleCritterGenericStrokesArray.Length; i++) {
-            completeCritterGenericStrokesArray[i + singleCritterGenericStrokesArray.Length * 1] = singleCritterGenericStrokesArray[i];            
-        }
-
-        // A:
-        GenerateCritterBodyBrushstrokes(ref singleCritterGenericStrokesArray, brushPointArray, genome2, 2);
-        CalculateCritterBodyBrushstrokesNormals(ref singleCritterGenericStrokesArray, brushPointArray);
-        GenerateCritterEyeBrushstrokes(ref singleCritterGenericStrokesArray, genome2, 2);
-        GenerateCritterMouthTeethBrushstrokes(ref singleCritterGenericStrokesArray, genome2, 2);
-        GenerateCritterPectoralFinsBrushstrokes(ref singleCritterGenericStrokesArray, genome2, 2);
-        GenerateCritterDorsalFinBrushstrokes(ref singleCritterGenericStrokesArray, genome2, 2);
-        GenerateCritterTailFinBrushstrokes(ref singleCritterGenericStrokesArray, genome2, 2);
-        GenerateCritterSkinDetailBrushstrokes(ref singleCritterGenericStrokesArray, genome2, 2);
-        SortCritterBrushstrokes(ref singleCritterGenericStrokesArray, 2);
-        // Copy over into master array:
-        for(int i = 0; i < singleCritterGenericStrokesArray.Length; i++) {
-            completeCritterGenericStrokesArray[i + singleCritterGenericStrokesArray.Length * 2] = singleCritterGenericStrokesArray[i];            
-        }
-
-        // B:
-        GenerateCritterBodyBrushstrokes(ref singleCritterGenericStrokesArray, brushPointArray, genome3, 3);
-        CalculateCritterBodyBrushstrokesNormals(ref singleCritterGenericStrokesArray, brushPointArray);
-        GenerateCritterEyeBrushstrokes(ref singleCritterGenericStrokesArray, genome3, 3);
-        GenerateCritterMouthTeethBrushstrokes(ref singleCritterGenericStrokesArray, genome3, 3);
-        GenerateCritterPectoralFinsBrushstrokes(ref singleCritterGenericStrokesArray, genome3, 3);
-        GenerateCritterDorsalFinBrushstrokes(ref singleCritterGenericStrokesArray, genome3, 3);
-        GenerateCritterTailFinBrushstrokes(ref singleCritterGenericStrokesArray, genome3, 3);
-        GenerateCritterSkinDetailBrushstrokes(ref singleCritterGenericStrokesArray, genome3, 3);
-        SortCritterBrushstrokes(ref singleCritterGenericStrokesArray, 3);
-        // Copy over into master array:
-        for(int i = 0; i < singleCritterGenericStrokesArray.Length; i++) {
-            completeCritterGenericStrokesArray[i + singleCritterGenericStrokesArray.Length * 3] = singleCritterGenericStrokesArray[i];            
-        }
-
-        // C:
-        GenerateCritterBodyBrushstrokes(ref singleCritterGenericStrokesArray, brushPointArray, genome4, 4);
-        CalculateCritterBodyBrushstrokesNormals(ref singleCritterGenericStrokesArray, brushPointArray);
-        GenerateCritterEyeBrushstrokes(ref singleCritterGenericStrokesArray, genome4, 4);
-        GenerateCritterMouthTeethBrushstrokes(ref singleCritterGenericStrokesArray, genome4, 4);
-        GenerateCritterPectoralFinsBrushstrokes(ref singleCritterGenericStrokesArray, genome4, 4);
-        GenerateCritterDorsalFinBrushstrokes(ref singleCritterGenericStrokesArray, genome4, 4);
-        GenerateCritterTailFinBrushstrokes(ref singleCritterGenericStrokesArray, genome4, 4);
-        GenerateCritterSkinDetailBrushstrokes(ref singleCritterGenericStrokesArray, genome4, 4);
-        SortCritterBrushstrokes(ref singleCritterGenericStrokesArray, 4);
-        // Copy over into master array:
-        for(int i = 0; i < singleCritterGenericStrokesArray.Length; i++) {
-            completeCritterGenericStrokesArray[i + singleCritterGenericStrokesArray.Length * 4] = singleCritterGenericStrokesArray[i];            
-        }
-
-        // Next:
-        GenerateCritterBodyBrushstrokes(ref singleCritterGenericStrokesArray, brushPointArray, genome5, 5);
-        CalculateCritterBodyBrushstrokesNormals(ref singleCritterGenericStrokesArray, brushPointArray);
-        GenerateCritterEyeBrushstrokes(ref singleCritterGenericStrokesArray, genome5, 5);
-        GenerateCritterMouthTeethBrushstrokes(ref singleCritterGenericStrokesArray, genome5, 5);
-        GenerateCritterPectoralFinsBrushstrokes(ref singleCritterGenericStrokesArray, genome5, 5);
-        GenerateCritterDorsalFinBrushstrokes(ref singleCritterGenericStrokesArray, genome5, 5);
-        GenerateCritterTailFinBrushstrokes(ref singleCritterGenericStrokesArray, genome5, 5);
-        GenerateCritterSkinDetailBrushstrokes(ref singleCritterGenericStrokesArray, genome5, 5);
-        SortCritterBrushstrokes(ref singleCritterGenericStrokesArray, 5);
-        // Copy over into master array:
-        for(int i = 0; i < singleCritterGenericStrokesArray.Length; i++) {
-            completeCritterGenericStrokesArray[i + singleCritterGenericStrokesArray.Length * 5] = singleCritterGenericStrokesArray[i];            
-        }
-        */
 
     }
 
@@ -2181,7 +1884,7 @@ public class TheRenderKing : MonoBehaviour {
                 float angleRad = ((float)a / (float)numStrokesPerCritterCross) * Mathf.PI * 2f; // verticalLerpPos * Mathf.PI;   
                 float crossSectionCoordX = Mathf.Sin(angleRad);
                 float crossSectionCoordZ = Mathf.Cos(angleRad);
-                Vector2 crossSectionNormalizedCoords = new Vector2(Mathf.Sin(angleRad), Mathf.Cos(angleRad)) * 1f;
+                //Vector2 crossSectionNormalizedCoords = new Vector2(Mathf.Sin(angleRad), Mathf.Cos(angleRad)) * 1f;
                 
                 CritterGenomeInterpretor.BrushPoint newBrushPoint = new CritterGenomeInterpretor.BrushPoint();                
                 newBrushPoint.initCoordsNormalized = new Vector3(crossSectionCoordX, yLerp, crossSectionCoordZ);
@@ -2328,7 +2031,7 @@ public class TheRenderKing : MonoBehaviour {
             //float prevRingRadius = socketRadius; // hack for getting slope of normal?
 
             for(int z = 0; z < totalLengthResolution; z++) {
-                float zFract = (float)z / (float)totalLengthResolution;
+                //float zFract = (float)z / (float)totalLengthResolution;
                 float socketFractZ = Mathf.Clamp01((float)z / (float)(socketLengthResolution - 1));
                 float eyeballFractZ = Mathf.Clamp01((float)(z - socketLengthResolution) / (float)(eyeballLengthResolution));
 
@@ -2398,7 +2101,7 @@ public class TheRenderKing : MonoBehaviour {
                 
                 for (int a = 0; a < baseCrossResolution; a++) {
 
-                    int indexCenter = arrayIndexStart + eyeIndex * (totalLengthResolution * baseCrossResolution) + z * baseCrossResolution + a;
+                    //int indexCenter = arrayIndexStart + eyeIndex * (totalLengthResolution * baseCrossResolution) + z * baseCrossResolution + a;
 
                     // find neighbor positions: (all in bindPos object coordinates)+
                     int indexNegX = arrayIndexStart + eyeIndex * (totalLengthResolution * baseCrossResolution) + z * baseCrossResolution + Mathf.Clamp((a - 1), 0, baseCrossResolution - 1);
@@ -2452,7 +2155,7 @@ public class TheRenderKing : MonoBehaviour {
         // how many rows? 1 at first
 
         int numStrokesPerRowSide = numStrokesPerCritterMouth / 4;
-        float lipThickness = 0.05f;  // how to scale with creature size?
+        //float lipThickness = 0.05f;  // how to scale with creature size?
         // maybe better to interpolate between existing body strokes? measure size by single row?
         
         // JUST TEETH FOR NOW::::
@@ -2574,7 +2277,7 @@ public class TheRenderKing : MonoBehaviour {
         int arrayIndexStart = numStrokesPerCritterLength * numStrokesPerCritterCross + numStrokesPerCritterEyes + numStrokesPerCritterMouth + numStrokesPerCritterTeeth + numStrokesPerCritterPectoralFins;
 
         CritterModuleCoreGenome gene = agentGenome.bodyGenome.coreGenome; // for readability
-        float segmentsSummedCritterLength = gene.mouthLength + gene.headLength + gene.bodyLength + gene.tailLength;
+        //float segmentsSummedCritterLength = gene.mouthLength + gene.headLength + gene.bodyLength + gene.tailLength;
 
         // genome parameters:
         float startCoordY = gene.dorsalFinStartCoordY; // (gene.tailLength * 0.5f) / segmentsSummedCritterLength;
@@ -2604,7 +2307,7 @@ public class TheRenderKing : MonoBehaviour {
                 }
                 else { 
                     Vector3 uTangentAvg = (strokesArray[brushIndexLeft].bindPos - strokesArray[brushIndexLeft - 1].bindPos);
-                    Vector3 vTangentAvg = new Vector3(0f, 0f, -1f);
+                    //Vector3 vTangentAvg = new Vector3(0f, 0f, -1f);
                     strokesArray[brushIndexLeft].scale = new Vector2(uTangentAvg.magnitude, 0.125f) * baseHeight; // vTangentAvg.magnitude);
                     strokesArray[brushIndexLeft].bindNormal = (new Vector3(1f, 0f, -0.5f) + UnityEngine.Random.insideUnitSphere * 0.3f).normalized;
                     strokesArray[brushIndexLeft].bindTangent = new Vector3(0f, -slantAmount, -1f);
@@ -2630,7 +2333,7 @@ public class TheRenderKing : MonoBehaviour {
             // top:
             
             for(int y = 0; y < pointsPerRow; y++) {
-                float yLerp = Mathf.Lerp(startCoordY, endCoordY, Mathf.Clamp01((float)y / (float)(pointsPerRow - 1))); // start at tail (Y = 0)            
+                //float yLerp = Mathf.Lerp(startCoordY, endCoordY, Mathf.Clamp01((float)y / (float)(pointsPerRow - 1))); // start at tail (Y = 0)            
                 int brushIndexLeft = arrayIndexStart + pointsPerRow * i + y;
                 int brushIndexRight = arrayIndexStart + pointsPerRow * i + (numStrokesPerCritterDorsalFin / 2) + y;
        
@@ -2727,8 +2430,8 @@ public class TheRenderKing : MonoBehaviour {
     private void GenerateCritterSkinDetailBrushstrokes(ref CritterUberStrokeData[] strokesArray, AgentGenome agentGenome, int agentIndex) {
         int arrayIndexStart = numStrokesPerCritterLength * numStrokesPerCritterCross + numStrokesPerCritterEyes + numStrokesPerCritterMouth + numStrokesPerCritterTeeth + numStrokesPerCritterPectoralFins + numStrokesPerCritterDorsalFin + numStrokesPerCritterTailFin;
 
-        CritterModuleCoreGenome gene = agentGenome.bodyGenome.coreGenome; // for readability
-        float segmentsSummedCritterLength = gene.mouthLength + gene.headLength + gene.bodyLength + gene.tailLength;
+        //CritterModuleCoreGenome gene = agentGenome.bodyGenome.coreGenome; // for readability
+        //float segmentsSummedCritterLength = gene.mouthLength + gene.headLength + gene.bodyLength + gene.tailLength;
 
         for(int i = 0; i < numStrokesPerCritterSkinDetail; i++) {
             Vector2 randUV = new Vector2(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f));
@@ -2737,7 +2440,7 @@ public class TheRenderKing : MonoBehaviour {
             float angleRad = randUV.x * Mathf.PI * 2f; // verticalLerpPos * Mathf.PI;   
             float crossSectionCoordX = Mathf.Sin(angleRad);
             float crossSectionCoordZ = Mathf.Cos(angleRad);
-            Vector2 crossSectionNormalizedCoords = new Vector2(Mathf.Sin(angleRad), Mathf.Cos(angleRad)) * 1f;
+            //Vector2 crossSectionNormalizedCoords = new Vector2(Mathf.Sin(angleRad), Mathf.Cos(angleRad)) * 1f;
 
             AddUberBrushPoint(ref strokesArray, agentGenome, agentIndex, new Vector3(crossSectionCoordX, randUV.y, crossSectionCoordZ), randUV, brushIndex);
             
@@ -2997,7 +2700,7 @@ public class TheRenderKing : MonoBehaviour {
 
         //if(spiritBrushSpawnCounter > 32) {
         Debug.Log("SpawnSpiritBrushQuads(int startIndex, int numCells)");
-        spiritBrushSpawnCounter = 0;
+        //spiritBrushSpawnCounter = 0;
         SpiritBrushQuadData[] spiritBrushQuadDataArray = new SpiritBrushQuadData[32];
         spiritBrushQuadDataSpawnCBuffer = new ComputeBuffer(32, GetMemorySizeSpiritbrushQuadData());
         for(int i = 0; i < 32; i++) {
@@ -3263,10 +2966,10 @@ public class TheRenderKing : MonoBehaviour {
         initData.eatEfficiencyMeat = 1f;
         
         float critterFullsizeLength = genome0.bodyGenome.coreGenome.tailLength + genome0.bodyGenome.coreGenome.bodyLength + genome0.bodyGenome.coreGenome.headLength + genome0.bodyGenome.coreGenome.mouthLength;
-        float flexibilityScore = 1f; // Mathf.Min((1f / genome.bodyGenome.coreGenome.creatureAspectRatio - 1f) * 0.6f, 6f);
+        //float flexibilityScore = 1f; // Mathf.Min((1f / genome.bodyGenome.coreGenome.creatureAspectRatio - 1f) * 0.6f, 6f);
         //float mouthLengthNormalized = genome.bodyGenome.coreGenome.mouthLength / critterFullsizeLength;
-        float approxRadius = genome0.bodyGenome.coreGenome.creatureBaseLength * genome0.bodyGenome.coreGenome.creatureAspectRatio;
-        float approxSize = 1f; // approxRadius * genome.bodyGenome.coreGenome.creatureBaseLength;
+        //float approxRadius = genome0.bodyGenome.coreGenome.creatureBaseLength * genome0.bodyGenome.coreGenome.creatureAspectRatio;
+        //float approxSize = 1f; // approxRadius * genome.bodyGenome.coreGenome.creatureBaseLength;
 
         float swimLerp = Mathf.Clamp01((genome0.bodyGenome.coreGenome.creatureAspectRatio - 0.175f) / 0.35f);  // 0 = longest, 1 = shortest
                 
@@ -3780,11 +3483,12 @@ public class TheRenderKing : MonoBehaviour {
 
         
         //if(simManager.uiManager.knowledgeUI.isOpen) {
-
+        
         cmdBufferFluidColor.Clear(); // needed since camera clear flag is set to none
         cmdBufferFluidColor.SetRenderTarget(fluidManager._SourceColorRT);
         cmdBufferFluidColor.ClearRenderTarget(true, true, new Color(0f,0f,0f,0f), 1.0f);  // clear -- needed???
         cmdBufferFluidColor.SetViewProjectionMatrices(fluidColorRenderCamera.worldToCameraMatrix, fluidColorRenderCamera.projectionMatrix);
+        
         //cmdBufferFluidColor.Blit(fluidManager.initialDensityTex, fluidManager._SourceColorRT);
         //cmdBufferFluidColor.DrawMesh(fluidRenderMesh, Matrix4x4.identity, fluidBackgroundColorMat); // Simple unlit Texture shader -- wysiwyg
 
@@ -3826,7 +3530,7 @@ public class TheRenderKing : MonoBehaviour {
         //why are they always rendering white??
         // Render Agent/Food/Pred colors here!!!
         // just use their display renders?
-
+        
 
 
         Graphics.ExecuteCommandBuffer(cmdBufferFluidColor);
@@ -3931,11 +3635,7 @@ public class TheRenderKing : MonoBehaviour {
                 }
             }
             else {
-                float isBrushin = 0f;
-
-                if (simManager.uiManager.panelFocus == UIManager.PanelFocus.Brushes) {
-                    isBrushin = 1f;
-                }
+                
                 spiritBrushRenderMat.SetPass(0);
                 spiritBrushRenderMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer); // *** Needed? or just set it once in beginning....
                 spiritBrushRenderMat.SetVector("_Position", new Vector4(simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.x, simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.y, simManager.uiManager.wildSpirit.curRoamingSpiritPosition.x, simManager.uiManager.wildSpirit.curRoamingSpiritPosition.y));
@@ -4369,7 +4069,7 @@ public class TheRenderKing : MonoBehaviour {
 
             terrainMeshOpaqueMat.SetPass(0);
             terrainMeshOpaqueMat.SetTexture("_MainTex", baronVonTerrain.terrainColorRT0);
-            Matrix4x4 terrainMeshTRS = Matrix4x4.TRS(new Vector3(0f, 0f, 1f), Quaternion.identity, Vector3.one);
+            //Matrix4x4 terrainMeshTRS = Matrix4x4.TRS(new Vector3(0f, 0f, 1f), Quaternion.identity, Vector3.one);
             //cmdBufferMain.DrawMesh(baronVonTerrain.terrainMesh, terrainMeshTRS, terrainMeshOpaqueMat);
 
             // STONE STROKES!!!!

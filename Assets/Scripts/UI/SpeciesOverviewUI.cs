@@ -6,15 +6,15 @@ using UnityEngine.UI;
 public class SpeciesOverviewUI : MonoBehaviour {
     public UIManager uiManagerRef;
 
-    private bool isFoundingGenomeSelected = false;
-    private bool isRepresentativeGenomeSelected = false;
-    private bool isLongestLivedGenomeSelected = false;
-    private bool isMostEatenGenomeSelected = false;
-    private bool isHallOfFameSelected = false;
+    //private bool isFoundingGenomeSelected = false;
+    //private bool isRepresentativeGenomeSelected = false;
+    //private bool isLongestLivedGenomeSelected = false;
+    //private bool isMostEatenGenomeSelected = false;
+    //private bool isHallOfFameSelected = false;
     private int selectedHallOfFameIndex = 0;
-    private bool isLeaderboardGenomesSelected = false;
-    private int selectedLeaderboardGenomeIndex = 0;
-    private bool isCandidateGenomesSelected = false;
+    //private bool isLeaderboardGenomesSelected = false;
+    //private int selectedLeaderboardGenomeIndex = 0;
+    //private bool isCandidateGenomesSelected = false;
     private int selectedCandidateGenomeIndex = 0;
 
     public GameObject panelCurrentGenepool;
@@ -41,7 +41,7 @@ public class SpeciesOverviewUI : MonoBehaviour {
     
     public bool isShowingLineage = false;
 
-    private SelectionGroup selectionGroup = SelectionGroup.Founder;
+    //private SelectionGroup selectionGroup = SelectionGroup.Founder;
     public enum SelectionGroup {
         Founder,
         Representative,
@@ -129,12 +129,7 @@ public class SpeciesOverviewUI : MonoBehaviour {
         }*/
        
     }
-    public void SliderChange(float val) {
-        int num = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID].avgPerformanceDataYearList.Count;
-        int index = Mathf.RoundToInt((float)num * val);
-
-        //uiManagerRef.SetFocusedCandidateGenome(uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID].avgPerformanceDataYearList[index])
-    }
+    
     private void UpdateGenomeButton(SpeciesGenomePool pool, CandidateAgentData iCand, Button buttonScript) {
 
         
@@ -243,46 +238,46 @@ public class SpeciesOverviewUI : MonoBehaviour {
     }
 
     public void ChangeSelectedGenome(SelectionGroup group, int index) {
-        selectionGroup = group;                
+        //selectionGroup = group;                
 
         if(selectedButton != null) {
             selectedButton.GetComponent<Image>().color = Color.yellow;
         }
         //clear all selections
-        isFoundingGenomeSelected = false;
-        isRepresentativeGenomeSelected = false;
-        isLongestLivedGenomeSelected = false;
-        isMostEatenGenomeSelected = false;
-        isHallOfFameSelected = false;    
-        isLeaderboardGenomesSelected = false;    
-        isCandidateGenomesSelected = false;    
+       // isFoundingGenomeSelected = false;
+       // isRepresentativeGenomeSelected = false;
+       // isLongestLivedGenomeSelected = false;
+       // isMostEatenGenomeSelected = false;
+       // isHallOfFameSelected = false;    
+        //isLeaderboardGenomesSelected = false;    
+        //isCandidateGenomesSelected = false;    
 
         SpeciesGenomePool spool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID];
 
 
         switch(group) {
             case SelectionGroup.Founder:
-                isFoundingGenomeSelected = true;
+                //isFoundingGenomeSelected = true;
                 selectedButton = buttonFoundingGenome;
                 uiManagerRef.SetFocusedCandidateGenome(spool.foundingCandidate);
                 break;
             case SelectionGroup.Representative:
-                isRepresentativeGenomeSelected = true;
+               // isRepresentativeGenomeSelected = true;
                 selectedButton = buttonRepresentativeGenome;
                 uiManagerRef.SetFocusedCandidateGenome(spool.representativeCandidate); // maybe weird if used as species-wide average? 
                 break;
             case SelectionGroup.LongestLived:
-                isLongestLivedGenomeSelected = true;
+               // isLongestLivedGenomeSelected = true;
                 selectedButton = buttonLongestLivedGenome;
                 uiManagerRef.SetFocusedCandidateGenome(spool.longestLivedCandidate);
                 break;
             case SelectionGroup.MostEaten:
-                isMostEatenGenomeSelected = true;
+                //isMostEatenGenomeSelected = true;
                 selectedButton = buttonMostEatenGenome;
                 uiManagerRef.SetFocusedCandidateGenome(spool.mostEatenCandidate);
                 break;
             case SelectionGroup.HallOfFame:
-                isHallOfFameSelected = true;
+                //isHallOfFameSelected = true;
                 selectedHallOfFameIndex = index;
                 if(selectedHallOfFameIndex >= spool.hallOfFameGenomesList.Count) {
                     selectedHallOfFameIndex = 0;
@@ -294,8 +289,8 @@ public class SpeciesOverviewUI : MonoBehaviour {
                 Debug.Log("ChangeSelectedGenome: " + group.ToString() + ", HallOfFame, #" + index.ToString());
                 break;
             case SelectionGroup.Leaderboard:
-                isLeaderboardGenomesSelected = true;
-                selectedLeaderboardGenomeIndex = index;
+                //isLeaderboardGenomesSelected = true;
+                //selectedLeaderboardGenomeIndex = index;
 
                 //SpeciesGenomePool pool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.globalResourcesUI.selectedSpeciesIndex];
                 uiManagerRef.SetFocusedCandidateGenome(spool.leaderboardGenomesList[index]);
@@ -304,7 +299,7 @@ public class SpeciesOverviewUI : MonoBehaviour {
                 //selectedButton = leaderboardGenomeButtonsList[index].GetComponent<Button>();
                 break;
             case SelectionGroup.Candidates:
-                isCandidateGenomesSelected = true;
+                //isCandidateGenomesSelected = true;
                 selectedCandidateGenomeIndex = index;
                 if(selectedCandidateGenomeIndex >= spool.candidateGenomesList.Count) {
                     selectedCandidateGenomeIndex = 0;

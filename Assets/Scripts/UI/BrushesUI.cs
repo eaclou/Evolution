@@ -211,7 +211,7 @@ public class BrushesUI : MonoBehaviour {
         buttonBrushExtra3.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
         buttonBrushExtra3.gameObject.transform.localScale = Vector3.one;
         
-        TrophicLayersManager layerManager = uiManagerRef.gameManager.simulationManager.trophicLayersManager;
+        //TrophicLayersManager layerManager = uiManagerRef.gameManager.simulationManager.trophicLayersManager;
 
         UpdateCurSelectedColor();
 

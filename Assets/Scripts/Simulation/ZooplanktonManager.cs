@@ -239,7 +239,7 @@ public class ZooplanktonManager {
         // determined by current total animal -- done!
         // if flag on shader for Respawn is on, set to active and initialize
 
-        float maxAnimalParticleTotal = 2048f; // *** Revisit this! Arbitrary! // settingsRef.maxAnimalParticleTotalAmount;
+        //float maxAnimalParticleTotal = 2048f; // *** Revisit this! Arbitrary! // settingsRef.maxAnimalParticleTotalAmount;
 
         int kernelCSSimulateAnimalParticles = computeShaderAnimalParticles.FindKernel("CSSimulateAnimalParticles");
         computeShaderAnimalParticles.SetBuffer(kernelCSSimulateAnimalParticles, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
@@ -275,26 +275,11 @@ public class ZooplanktonManager {
         computeShaderAnimalParticles.SetFloat("_MapSize", SimulationManager._MapSize);
         
         computeShaderAnimalParticles.SetFloat("_Time", Time.realtimeSinceStartup);
-
-        // *** SPAWNING ***
-        int eggSackIndex = Mathf.FloorToInt(Time.realtimeSinceStartup * 0.1f) % simStateDataRef.eggSackSimDataArray.Length;
-
-        //if(animalParticleMeasurementTotalsData[0].biomass < maxAnimalParticleTotal) {
-        float brushF = 0f;
-        if(renderKingRef.isSpiritBrushOn) {
-            if(renderKingRef.simManager.uiManager.brushesUI.selectedEssenceSlot.kingdomID == 2) {  // Animals kingdom selected
-                if(renderKingRef.simManager.uiManager.brushesUI.selectedEssenceSlot.tierID == 0) {  // Zooplankton slot selected
-                    brushF = 1f;
-                }
-            }            
-        }
+                
         //float randRoll = UnityEngine.Random.Range(0f, 1f);
         computeShaderAnimalParticles.SetFloat("_RespawnAnimalParticles", 1f);
         computeShaderAnimalParticles.SetFloat("_IsBrushing", 1f); // brushF);  
-        //}
-        //else {
-        //    computeShaderAnimalParticles.SetFloat("_RespawnAnimalParticles", 0f);      
-        //}
+        
         // Need to compute when they should be allowed to spawn, how to keep track of resources used/transferred??
         computeShaderAnimalParticles.SetFloat("_SpawnPosX", UnityEngine.Random.Range(0.1f, 0.9f)); // UPDATE THIS!!! ****
         computeShaderAnimalParticles.SetFloat("_SpawnPosY", UnityEngine.Random.Range(0.1f, 0.9f));

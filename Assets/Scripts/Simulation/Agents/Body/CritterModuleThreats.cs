@@ -124,7 +124,7 @@ public class CritterModuleThreats {
             
             
 
-            float threat = 1f;
+            //float threat = 1f;
             //if(agent.coreModule.nearestEnemyAgent.mouthRef.isPassive) {
             //    threat = 0f;
             //}

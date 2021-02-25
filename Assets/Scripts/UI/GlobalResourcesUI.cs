@@ -788,8 +788,8 @@ public class GlobalResourcesUI : MonoBehaviour {
                 GameObject obj = Instantiate(prefabSpeciesBar, new Vector3(0, 0, 0), Quaternion.identity);
                 obj.transform.SetParent(treeAnchorUI.transform, false);
 
-                int stepCreated = sourcePool.timeStepCreated;
-                int stepExtinct = sourcePool.timeStepExtinct;
+                //int stepCreated = sourcePool.timeStepCreated;
+                //int stepExtinct = sourcePool.timeStepExtinct;
 
                 //float barStart01 = (float)stepCreated / (float)stepExtinct; // **** Only shrink sub Image<> !!! not whole button!!!
                 //float barEnd01 = 1f;
@@ -849,8 +849,8 @@ public class GlobalResourcesUI : MonoBehaviour {
                 GameObject obj = Instantiate(prefabSpeciesBar, new Vector3(0, 0, 0), Quaternion.identity);
                 obj.transform.SetParent(treeAnchorUI.transform, false);
 
-                int stepCreated = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].timeStepCreated;
-                int stepExtinct = uiManagerRef.gameManager.simulationManager.simAgeTimeSteps;
+                //int stepCreated = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].timeStepCreated;
+                //int stepExtinct = uiManagerRef.gameManager.simulationManager.simAgeTimeSteps;
 
                 //float barStart01 = (float)stepCreated / (float)stepExtinct;
                 //float barEnd01 = 1f;
@@ -865,7 +865,6 @@ public class GlobalResourcesUI : MonoBehaviour {
                 string labelText = "";                
                 labelText += "[" + speciesID.ToString() + "] " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].foundingCandidate.candidateGenome.bodyGenome.coreGenome.name;
 
-                int savedSpeciesID = speciesID;
                 int savedParentSpeciesID = parentSpeciesID;
                 string lineageTxt = "";
                 for(int i = 0; i < 64; i++) {
@@ -875,7 +874,6 @@ public class GlobalResourcesUI : MonoBehaviour {
                         SpeciesGenomePool parentPool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[savedParentSpeciesID];
                         lineageTxt += " <- " + parentPool.speciesID.ToString();
 
-                        savedSpeciesID = parentPool.speciesID;
                         savedParentSpeciesID = parentPool.parentSpeciesID;
                     }
                     else {

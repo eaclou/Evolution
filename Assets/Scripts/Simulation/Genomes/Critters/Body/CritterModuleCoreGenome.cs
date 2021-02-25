@@ -550,9 +550,9 @@ public class CritterModuleCoreGenome {
         for(int i = 0; i < parentGenome.masksList.Count; i++) {
             MaskData newMask = new MaskData();
             newMask = parentGenome.masksList[i];
-            int maskCoordinateTypeID = (int)newMask.coordinateTypeID;
+            //int maskCoordinateTypeID = (int)newMask.coordinateTypeID;
             newMask.coordinateTypeID = MaskCoordinateType.Polygonize; // (MaskCoordinateType)UtilityMutationFunctions.GetMutatedIntAdditive(maskCoordinateTypeID, settings.defaultBodyMutationChance, 1, 0, 1);
-            int maskFunctionTypeID = (int)newMask.functionTypeID;
+            //int maskFunctionTypeID = (int)newMask.functionTypeID;
             newMask.functionTypeID = MaskFunctionType.Cos; // (MaskFunctionType)UtilityMutationFunctions.GetMutatedIntAdditive(maskFunctionTypeID, settings.defaultBodyMutationChance, 2, 0, 2);
             newMask.numPolyEdges = UtilityMutationFunctions.GetMutatedIntAdditive(newMask.numPolyEdges, settings.bodyProportionsMutationChance, 4, 1, 6);
 

@@ -135,7 +135,7 @@ public class KnowledgeUI : MonoBehaviour {
             uiKnowledgeMapViewerMat.SetTexture("_ResourceGridTex", uiManagerRef.gameManager.simulationManager.vegetationManager.resourceGridRT1);
             uiKnowledgeMapViewerMat.SetFloat("_WaterLevel", SimulationManager._GlobalWaterLevel);
 
-            string summaryText = GetSpeciesDescriptionString(uiManagerRef.gameManager.simulationManager);
+            //string summaryText = GetSpeciesDescriptionString(uiManagerRef.gameManager.simulationManager);
             textKnowledgeSpeciesSummary.text = "";// summaryText;
 
             buttonPageA.gameObject.transform.localScale = Vector3.one * 1.5f;

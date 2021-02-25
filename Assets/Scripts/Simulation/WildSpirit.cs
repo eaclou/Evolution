@@ -41,7 +41,7 @@ public class WildSpirit : MonoBehaviour {
 
     private float spiritSpeed = 0.115f;
 
-    private float threatLevel = 0f;
+    //private float threatLevel = 0f;
 
     public bool isFleeing = false;
     private int fleeingFrameCounter = 0;
@@ -55,17 +55,17 @@ public class WildSpirit : MonoBehaviour {
         uiManagerRef.wildSpirit.roamingSpiritColor = col;
         isFleeing = false;
         fleeingFrameCounter = 0;
-        threatLevel = 0f;
+        //threatLevel = 0f;
     }
     public void UpdateWildSpiritProto() {
 
 
         protoSpiritClickColliderGO.SetActive(true);
-        float orbitSpeed = 0.5f;
-        float orbitRadius = 20f;
-        float spinAngle = Time.realtimeSinceStartup * orbitSpeed;
-        float zPhase = spinAngle * 9.5f;
-        float zBounceMag = 1f;
+        //float orbitSpeed = 0.5f;
+        //float orbitRadius = 20f;
+        //float spinAngle = Time.realtimeSinceStartup * orbitSpeed;
+        //float zPhase = spinAngle * 9.5f;
+        //float zBounceMag = 1f;
         
         
         Vector3 cursorToSpiritVec = (curRoamingSpiritPosition - uiManagerRef.theCursorCzar.cursorParticlesWorldPos);

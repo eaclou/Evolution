@@ -7,11 +7,11 @@ public class DiffusionReactionScript : MonoBehaviour {
     public Shader blitShader;
     private Material blitMat;
     public Shader brushClickShader;
-    private Material brushClickMat;
+    //private Material brushClickMat;
 
     public Material displayMat;
     public float refreshDelay = 1.0f;
-    private float lastUpdateTime = 0f;
+    //private float lastUpdateTime = 0f;
 
     public int resolution = 128;
 
@@ -126,7 +126,7 @@ public class DiffusionReactionScript : MonoBehaviour {
         blitMat = new Material(blitShader);
         blitMat.SetFloat("_Resolution", resolution);
 
-        brushClickMat = new Material(brushClickShader);
+        //brushClickMat = new Material(brushClickShader);
 
         displayMat.SetTexture("_MainTex", mainRT);
     }

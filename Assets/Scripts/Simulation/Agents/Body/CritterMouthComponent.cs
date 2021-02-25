@@ -77,45 +77,6 @@ public class CritterMouthComponent : MonoBehaviour {
     public void Initialize(CritterModuleCoreGenome genome, Agent agent) {
         // Set Values from Genome:
 
-        //mouthTriggerSize;
-        float baseFeedDuration = 10f;
-        float baseFeedCooldown = 24f;
-        float baseAttackDuration = 16f;
-        float baseAttackCooldown = 64f;
-
-        /*if(agent.coreModule.dietSpecDecayNorm > 0.5f) {
-            baseFeedDuration = Mathf.RoundToInt((float)baseFeedDuration * 2f);
-            baseFeedCooldown = Mathf.RoundToInt((float)baseFeedCooldown * 0.75f);
-
-            if(agent.coreModule.dietSpecDecayNorm > 0.75f) {
-                baseFeedDuration = Mathf.RoundToInt((float)baseFeedDuration * 4f);
-                baseFeedCooldown = Mathf.RoundToInt((float)baseFeedCooldown * 0.5f);
-            }
-        }
-        if(agent.coreModule.dietSpecPlantNorm > 0.5f) {
-
-            if(agent.coreModule.dietSpecPlantNorm > 0.75f) {
-
-            }
-        }
-        if(agent.coreModule.dietSpecMeatNorm > 0.5f) {
-            baseFeedDuration = Mathf.RoundToInt((float)baseFeedDuration * 0.8f);
-            baseFeedCooldown = Mathf.RoundToInt((float)baseFeedCooldown * 0.9f);
-            baseAttackDuration = Mathf.RoundToInt((float)baseAttackDuration * 0.75f);
-            baseAttackCooldown = Mathf.RoundToInt((float)baseAttackCooldown * 0.9f);
-
-            if(agent.coreModule.dietSpecMeatNorm > 0.75f) {
-                baseFeedDuration = Mathf.RoundToInt((float)baseFeedDuration * 0.6f);
-                baseFeedCooldown = Mathf.RoundToInt((float)baseFeedCooldown * 0.7f);
-                baseAttackDuration = Mathf.RoundToInt((float)baseAttackDuration * 0.75f);  // Make this dependent on Attack Specialization rather than diet?
-                baseAttackCooldown = Mathf.RoundToInt((float)baseAttackCooldown * 0.4f);
-            }
-        }*/
-
-        //feedAnimDuration = Mathf.RoundToInt(baseFeedDuration * genome.mouthFeedFrequency);
-        //feedAnimCooldown = Mathf.RoundToInt(baseFeedCooldown * genome.mouthFeedFrequency);
-        //attackAnimDuration = Mathf.RoundToInt(baseAttackDuration / genome.mouthAttackAmplitude);
-        //attackAnimCooldown = Mathf.RoundToInt(baseAttackCooldown / genome.mouthAttackAmplitude);
         
     }
 

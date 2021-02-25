@@ -79,8 +79,8 @@ public class EggSack : MonoBehaviour {
     public Vector2 fullSize;
     public Vector2 curSize;
 
-    private float minMass = 0.33f;
-    private float maxMass = 3.33f;
+    //private float minMass = 0.33f;
+    //private float maxMass = 3.33f;
 
     public float isBeingEaten = 0f;
     public float healthStructural = 1f;

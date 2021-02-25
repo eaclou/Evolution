@@ -14,7 +14,7 @@ public class WatcherUI : MonoBehaviour {
     public AudioSource audioSource02;
     public AudioSource audioSource03;
     private int callTickCounter = 90;
-    private int callTickCooldownCounter = 0;
+    //private int callTickCooldownCounter = 0;
 
     public AgentBehaviorOneHot agentBehaviorOneHot;
     public WidgetAgentStatus widgetAgentStatus;
@@ -48,7 +48,7 @@ public class WatcherUI : MonoBehaviour {
     private bool isFollowBehaviorPanelOn = true;
     public GameObject panelFollowGenome;
     public Text textFollowGenome;
-    private bool isFollowGenomePanelOn = false;
+    //private bool isFollowGenomePanelOn = false;
     public GameObject panelFollowHistory;
     public Text textFollowHistory;
     private bool isFollowHistoryPanelOn = false;
@@ -61,8 +61,8 @@ public class WatcherUI : MonoBehaviour {
     public GameObject panelWatcherExpand;
     
     public Text TextCommonStatsA;
-    private int curWatcherPanelPlantsPageNum;
-    private int curWatcherPanelZooplanktonPageNum;
+    //private int curWatcherPanelPlantsPageNum;
+    //private int curWatcherPanelZooplanktonPageNum;
     private int curWatcherPanelVertebratePageNum;
     public Button buttonWatcherVertebrateCyclePage; // maybe not needed?
     //public GameObject panelWatcherSpiritVertebratesHUD; // 0
@@ -156,28 +156,10 @@ public class WatcherUI : MonoBehaviour {
     	
     private void UpdateUI(TrophicLayersManager layerManager) {
 
-        
-        //callTickCounter++;
-        //private int callTickCooldownCounter = 0;
-
-        //TrophicSlot slotRef = uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot; // *************   CHANGE THIS!!!!! ************
-         
-        if(watcherSelectedTrophicSlotRef == null) {
-            
-            //imageColorBar.color = Color.black;
+        if(uiManagerRef.panelFocus != UIManager.PanelFocus.Watcher) {           
+            panelWatcherExpand.SetActive(false);            
         }
         else {
-            //imageColorBar.color = watcherSelectedTrophicSlotRef.color;
-            //imageWatcherCurTargetLayer.color = watcherSelectedTrophicSlotRef.color;
-            
-        }
-        
-        if(uiManagerRef.panelFocus != UIManager.PanelFocus.Watcher) {           
-            panelWatcherExpand.SetActive(false);
-            
-        }
-        else {            
-            
             panelWatcherExpand.SetActive(true);
         }
         
@@ -296,14 +278,9 @@ public class WatcherUI : MonoBehaviour {
                 
                 TextCommonStatsA.gameObject.SetActive(false);  // non-vertebrates just share one textbox for now
 
-                
-                //panelWatcherSpiritVertebratesText.SetActive(false);
-                
                 //textWatcherVertebratePageNum.text = "PAGE " + (curWatcherPanelVertebratePageNum + 1).ToString() + " of 4";
                 textWatcherTargetIndex.text = "#" + agent.index.ToString();
-                
-                // pages:
-                //if(curWatcherPanelVertebratePageNum == 0) {
+                                
                 textNewInspectLog.text = "";
                 textWatcherVertebrateHUD.text = "";
 
@@ -322,70 +299,26 @@ public class WatcherUI : MonoBehaviour {
                 }
                 if(agent.coreModule.healthBody <= 0f) {
                     statusStr = "Died of Injury";
-                }
-                /*if(!agent.isActing) {
-                    statusStr = "INACTIVE";
-                    statusColor = Color.black;
-                    healthColor = Color.black;
-                }*/
+                }                
 
                 //textVertebrateGen.text = "Gen #" + agent.candidateRef.candidateGenome.bodyGenome.coreGenome.generation.ToString();
                 textVertebrateLifestage.text = "Age: " + (0.1f * agent.ageCounter).ToString("F0");// + ", stateID: " + developmentStateID;
                 textVertebrateLifestage.color = healthColor;
                 textVertebrateStatus.text = statusStr; // "activity: " + curActivityID;
                 
-                //where do hud elements get updated?? ***
-                string genomeString = "ID: " + agent.candidateRef.candidateID.ToString() + "\n";
-                genomeString += "Species " + agent.speciesIndex.ToString();
-                genomeString += "\nGeneration " + agent.candidateRef.candidateGenome.bodyGenome.coreGenome.generation.ToString();
-                // BASE STATS FROM GENOME:
-                //genomeString += "\n\nBase Size: " + agent.candidateRef.candidateGenome.bodyGenome.coreGenome.creatureBaseLength.ToString("F2") + ",  Aspect: " + agent.candidateRef.candidateGenome.bodyGenome.coreGenome.creatureAspectRatio.ToString("F2"); 
-                genomeString += "\nFullsize: ( " + agent.fullSizeBoundingBox.x.ToString("F2") + ", " + agent.fullSizeBoundingBox.y.ToString("F2") + ", " + agent.fullSizeBoundingBox.z.ToString("F2") + " )\n";
-                genomeString += "\n# Neurons: " + agent.brain.neuronList.Count.ToString() + ", # Axons: " + agent.brain.axonList.Count.ToString();
-                //genomeString += "\n# In/Out: " + agent.candidateRef.candidateGenome.brainGenome.bodyNeuronList.Count.ToString() + ", Hid: " + agent.candidateRef.candidateGenome.brainGenome.hiddenNeuronList.Count.ToString();
-                //genomeString += "\nCID: " + agent.candidateRef.candidateID.ToString() + ", gen# " + agent.candidateRef.candidateGenome.bodyGenome.coreGenome.generation.ToString();
-                genomeString += "\nBONUSES:\nDamage: " + agent.coreModule.damageBonus.ToString("F2") + "\nSpeed: " + agent.coreModule.speedBonus.ToString("F2") + "\nHealth: " + agent.coreModule.healthBonus.ToString("F2") + "\nEnergy: " + agent.coreModule.energyBonus.ToString("F2") + "\n";
-                genomeString += "\nDIET:\nDecay: " + agent.coreModule.foodEfficiencyDecay.ToString("F2") + "\nPlant: " + agent.coreModule.foodEfficiencyPlant.ToString("F2") + "\nMeat: " + agent.coreModule.foodEfficiencyMeat.ToString("F2") + "\n";
-                  
-                genomeString += "\nSENSORS:\n";
-                genomeString += "Comms= " + agent.candidateRef.candidateGenome.bodyGenome.communicationGenome.useComms.ToString() + "\n";
-                genomeString += "Enviro: " + agent.candidateRef.candidateGenome.bodyGenome.environmentalGenome.useWaterStats.ToString() + "\n";
-                CritterModuleFoodSensorsGenome foodGenome = agent.candidateRef.candidateGenome.bodyGenome.foodGenome;
-                genomeString += "Food: " + foodGenome.useNutrients.ToString() + ", " + foodGenome.usePos.ToString() + ", " + foodGenome.useDir.ToString() + ", " + foodGenome.useStats.ToString() + ", " + foodGenome.useEggs.ToString() + ", " + foodGenome.useCorpse.ToString() + "\n";
-                genomeString += "Friend: " + agent.candidateRef.candidateGenome.bodyGenome.friendGenome.usePos.ToString() + ", " + agent.candidateRef.candidateGenome.bodyGenome.friendGenome.useDir.ToString() + ", " + agent.candidateRef.candidateGenome.bodyGenome.friendGenome.useVel.ToString() + "\n";
-                genomeString += "Threat: " + agent.candidateRef.candidateGenome.bodyGenome.threatGenome.usePos.ToString() + ", " + agent.candidateRef.candidateGenome.bodyGenome.threatGenome.useDir.ToString() + ", " + agent.candidateRef.candidateGenome.bodyGenome.threatGenome.useVel.ToString() + ", " + agent.candidateRef.candidateGenome.bodyGenome.threatGenome.useStats.ToString() + "\n";
-            
-                // History:
-                string historyString = "";
-                /*historyString += "\nMicrobesEaten: " + agent.totalFoodEatenZoop.ToString("F3");
-                historyString += "\nAlgaeEaten: " + agent.totalFoodEatenPlant.ToString("F3");
-                historyString += "\nMeatEaten: " + agent.totalFoodEatenCreature.ToString("F3");
-                historyString += "\nCorpseEaten: " + agent.totalFoodEatenCorpse.ToString("F3");
-                historyString += "\nEggEaten: " + agent.totalFoodEatenEgg.ToString("F3");
-                historyString += "\nDamageTaken: " + agent.totalDamageTaken.ToString("F3");
-                historyString += "\nDamageDealt: " + agent.totalDamageDealt.ToString("F3");
-                historyString += "\nTimesAttacked: " + agent.totalTimesAttacked.ToString("F0");
-                historyString += "\nTimesDashed: " + agent.totalTimesDashed.ToString("F0");
-                historyString += "\nTimesPregnant: " + agent.totalTimesPregnant.ToString("F0");
-                historyString += "\nTimeRested: " + agent.totalTicksRested.ToString("F0");
-                */
-                    
-                string textString = "Event Log! [" + agent.index.ToString() + "]";
+                                   
                 int maxEventsToDisplay = 8;
-                int numEvents = Mathf.Min(agent.agentEventDataList.Count, maxEventsToDisplay);
+                //int numEvents = Mathf.Min(agent.agentEventDataList.Count, maxEventsToDisplay);
                 int startIndex = Mathf.Max(0, agent.agentEventDataList.Count - maxEventsToDisplay);                   
                 string eventString = "";
                 for(int q = agent.agentEventDataList.Count - 1; q >= startIndex; q--) {
                     eventString += "\n[" + agent.agentEventDataList[q].eventFrame.ToString() + "] " + agent.agentEventDataList[q].eventText;
                 }                
 
-                //textFollowGenome.text = "(Genome Stats HERE) " + genomeString;
-                //textFollowHistory.text = "(Genome Stats HERE) " + historyString;
-
                 string textStringLog = "Event Log! Agent[" + agent.index.ToString() + "]";                    
                 // Agent Event Log:
                 int maxEventsToDisplayLog = 12;
-                int numEventsLog = Mathf.Min(agent.agentEventDataList.Count, maxEventsToDisplayLog);
+                //int numEventsLog = Mathf.Min(agent.agentEventDataList.Count, maxEventsToDisplayLog);
                 int startIndexLog = Mathf.Max(0, agent.agentEventDataList.Count - maxEventsToDisplayLog);                   
                 string eventLogString = "";
                 for(int q = agent.agentEventDataList.Count - 1; q >= startIndexLog; q--) {
@@ -427,16 +360,9 @@ public class WatcherUI : MonoBehaviour {
                     curCount = agent.lifeStageTransitionTimeStepCounter;
                     maxCount = curCount; // agentRef._DecayDurationTimeSteps;
                 }
-                int progressPercent = Mathf.RoundToInt((float)curCount / (float)maxCount * 100f);
-                string lifeStageProgressTxt = " " + agent.curLifeStage.ToString() + " " + curCount.ToString() + "/" + maxCount.ToString() + "  " + progressPercent.ToString() + "% ";
+                //int progressPercent = Mathf.RoundToInt((float)curCount / (float)maxCount * 100f);
+                //string lifeStageProgressTxt = " " + agent.curLifeStage.ToString() + " " + curCount.ToString() + "/" + maxCount.ToString() + "  " + progressPercent.ToString() + "% ";
                 
-                //float restEffector = 0f;
-                //float dashEffector = 0f;
-                //float guardEffector = 0f;
-                //float biteEffector = 0f;
-                //float attackEffector = 0f;
-                //float otherEffector = 0f;
-
                 agentBehaviorOneHot.UpdateBars( agent.coreModule.healEffector[0],
                                                 agent.coreModule.dashEffector[0],
                                                 agent.coreModule.defendEffector[0],
@@ -451,89 +377,7 @@ public class WatcherUI : MonoBehaviour {
                 else {
                     callTickCounter = Mathf.Max(0, callTickCounter--);
                 }
-                /*
-                // AUDIO TESTING:
-                bool isCalling = false;
-                if(agent.coreModule.defendEffector[0] >= agent.coreModule.healEffector[0] && 
-                agent.coreModule.defendEffector[0] >= agent.coreModule.dashEffector[0] &&
-                agent.coreModule.defendEffector[0] >= agent.coreModule.mouthFeedEffector[0] &&
-                agent.coreModule.defendEffector[0] >= agent.coreModule.mouthAttackEffector[0]) {
-                    if(agent.curLifeStage == Agent.AgentLifeStage.Mature) {
-                        isCalling = true;
-                    }
-                }
-                if(agent.curLifeStage == Agent.AgentLifeStage.Mature) {
-                    isCalling = true;
-                }
-
-                        
-                //if(isCalling) {
-                if(agent.communicationModule.outComm0[0] > 0.15f) {
-                    if(audioSource00.isPlaying) {
-
-                    }
-                    else {
-                        audioSource00.pitch = 2f;
-                        audioSource00.volume = agent.communicationModule.outComm0[0] * 1f;
-                        audioSource00.Play();
-                    }                            
-                }
-                else {
-                    audioSource00.Stop();
-                }
-
-                if(agent.communicationModule.outComm1[0] > 0.15f) {
-                    if(audioSource01.isPlaying) {
-
-                    }
-                    else {
-                        audioSource01.pitch = 3f;
-                        audioSource01.volume = agent.communicationModule.outComm1[0] * 0.75f;
-                        audioSource01.Play();
-                    }                            
-                }
-                else {
-                    audioSource01.Stop();
-                }
-
-                if(agent.communicationModule.outComm2[0] > 0.15f) {
-                    if(audioSource02.isPlaying) {
-
-                    }
-                    else {
-                        audioSource02.pitch = 6f + agent.communicationModule.outComm3[0] * 3f;
-                        audioSource02.volume = agent.communicationModule.outComm2[0] * 0.5f;
-                        audioSource02.Play();
-                    }                            
-                }
-                else {
-                    audioSource02.Stop();
-                }
-                            
-                    if(agent.communicationModule.outComm3[0] > 0.15f) {
-                        if(audioSource03.isPlaying) {
-
-                        }
-                        else {
-                            audioSource03.pitch = 9f;
-                            audioSource03.volume = agent.communicationModule.outComm3[0] * 0.25f;
-                            audioSource03.Play();
-                        }                            
-                    }
-                    else {
-                        audioSource03.Stop();
-                                
-                    }
-                //}
-                //else {
-                //    audioSource00.Stop();
-                //    audioSource01.Stop();
-                //    audioSource02.Stop();
-                //    audioSource03.Stop();
-                //}
-                */
-                        
-
+               
                 agentBehaviorOneHot.UpdateExtras(agent);
 
                 widgetAgentStatus.UpdateBars((agent.coreModule.healthBody + agent.coreModule.healthHead + agent.coreModule.healthExternal) / 3f,
@@ -541,67 +385,7 @@ public class WatcherUI : MonoBehaviour {
                                                 agent.coreModule.stomachContentsNorm,
                                                 agent.currentBiomass,
                                                 agent.coreModule.stamina[0]);
-                        
-                        
-                /*               
-                string brainString = "BRAIN PAGE! 3";
-                brainString += "\n" + agent.brain.neuronList.Count.ToString() + " Neurons    " + agent.brain.axonList.Count.ToString() + " Axons";
-                  
-                string brainInputsTxt = "\nINPUTS:";
-                for(int n = 0; n < agent.brain.neuronList.Count; n++) {
-                    if(agent.brain.neuronList[n].neuronType == NeuronGenome.NeuronType.In) {
-                                    
-                        if (n % 2 == 0) {
-                            brainInputsTxt += "\n";
-                        }
-                        float neuronValue = agent.brain.neuronList[n].currentValue[0];
-                        brainInputsTxt += agent.brain.neuronList[n].name + " ";
-                        if(neuronValue < -0.2f) {
-                            brainInputsTxt += "<color=#FF6644FF>";
-                        }
-                        else if(neuronValue > 0.2f) {
-                            brainInputsTxt += "<color=#44FF66FF>";
-                        }
-                        else {
-                            brainInputsTxt += "<color=#A998B5FF>";
-                        }
-                        brainInputsTxt += "[" + n.ToString() + "] " + agent.brain.neuronList[n].currentValue[0].ToString("F2") + "</color>  ";
-                                    
-                    }
-                }
-                string brainOutputsTxt = "\n\nOUTPUTS:\n";
-                for(int o = 0; o < agent.brain.neuronList.Count; o++) {
-                    if(agent.brain.neuronList[o].neuronType == NeuronGenome.NeuronType.Out) {
-                                    
-                        if (o % 2 == 0) {
-                            brainOutputsTxt += "\n";
-                        }
-                        float neuronValue = agent.brain.neuronList[o].currentValue[0];
-                        brainOutputsTxt += agent.brain.neuronList[o].name + " ";
-                        if(neuronValue < -0.2f) {
-                            brainOutputsTxt += "<color=#FF6644FF>";
-                        }
-                        else if(neuronValue > 0.2f) {
-                            brainOutputsTxt += "<color=#44FF66FF>";
-                        }
-                        else {
-                            brainOutputsTxt += "<color=#A998B5FF>";
-                        }
-                        brainOutputsTxt += "[" + o.ToString() + "] " + agent.brain.neuronList[o].currentValue[0].ToString("F2") + "</color>  ";
-                                    
-                        brainOutputsTxt += "";
-                                    
-                    }
-                }
-                brainString += brainInputsTxt + brainOutputsTxt;
-
-                textWatcherVertebrateBrain.text = brainString;
-                //}
-                */
-                        
-                        
-
-                //panelWatcherSpiritVertebratesText.SetActive(true);
+                       
                         
             }
             else {
@@ -616,12 +400,6 @@ public class WatcherUI : MonoBehaviour {
             // No target
         }  
         
-        if(watcherSelectedTrophicSlotRef == null) {
-
-            //panelWatcherExpand.SetActive(false);
-            //panelWatcherExpand.SetActive(false);
-           // imageWatcherInactiveOverlay.gameObject.SetActive(true);
-        }
     }
 
 	public void UpdateWatcherPanelUI(TrophicLayersManager layerManager) {
@@ -853,26 +631,5 @@ public class WatcherUI : MonoBehaviour {
         uiManagerRef.cameraManager.isFollowingPlantParticle = false;
         watcherSelectedTrophicSlotRef = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0];
     }
-
-    public void ClickWatcherPage0() {
-        curWatcherPanelPlantsPageNum = 0;
-        curWatcherPanelZooplanktonPageNum = 0;
-        curWatcherPanelVertebratePageNum = 0;
-    }
-    public void ClickWatcherPage1() {
-        curWatcherPanelPlantsPageNum = 1;
-        curWatcherPanelZooplanktonPageNum = 1;
-        curWatcherPanelVertebratePageNum = 1;
-    }
-    public void ClickWatcherPage2() {
-        curWatcherPanelPlantsPageNum = 2;
-        curWatcherPanelZooplanktonPageNum = 2;
-        curWatcherPanelVertebratePageNum = 2;
-    }
-    public void ClickWatcherPage3() {
-        curWatcherPanelPlantsPageNum = 3;
-        curWatcherPanelZooplanktonPageNum = 3;
-        curWatcherPanelVertebratePageNum = 3;
-    }
-    
+ 
 }

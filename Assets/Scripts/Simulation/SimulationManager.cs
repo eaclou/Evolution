@@ -1378,7 +1378,7 @@ public class SimulationManager : MonoBehaviour {
         else {
             // Good to go?
             // Look for avaialbe EggSacks first:
-            bool foundValidEggSack = false;
+            //bool foundValidEggSack = false;
             EggSack parentEggSack = null;
             List<int> validEggSackIndicesList = new List<int>();
             for(int i = 0; i < numEggSacks; i++) {  // if EggSack belongs to the right species

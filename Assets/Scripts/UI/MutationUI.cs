@@ -102,32 +102,7 @@ public class MutationUI : MonoBehaviour {
         buttonToolbarMutateConfirm.gameObject.SetActive(false);
         if(selectedToolbarMutationID >= 0) {
             buttonToolbarMutateConfirm.gameObject.SetActive(true);
-            /*
-            if(selectedToolbarMutationID == 0) {
-                imageMutationPanelHighlightA.color = Color.white;
-                imageMutationPanelHighlightB.color = Color.black;
-                imageMutationPanelHighlightC.color = Color.black;
-                imageMutationPanelHighlightD.color = Color.black;
-            }
-            else if(selectedToolbarMutationID == 1) {
-                imageMutationPanelHighlightA.color = Color.black;
-                imageMutationPanelHighlightB.color = Color.white;
-                imageMutationPanelHighlightC.color = Color.black;
-                imageMutationPanelHighlightD.color = Color.black;
-            }
-            else if(selectedToolbarMutationID == 2) {
-                imageMutationPanelHighlightA.color = Color.black;
-                imageMutationPanelHighlightB.color = Color.black;
-                imageMutationPanelHighlightC.color = Color.white;
-                imageMutationPanelHighlightD.color = Color.black;
-            }
-            else if(selectedToolbarMutationID == 3) {
-                imageMutationPanelHighlightA.color = Color.black;
-                imageMutationPanelHighlightB.color = Color.black;
-                imageMutationPanelHighlightC.color = Color.black;
-                imageMutationPanelHighlightD.color = Color.white;
-            }
-            */
+            
         }
 
         TrophicSlot slotRef = uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot;
@@ -161,7 +136,6 @@ public class MutationUI : MonoBehaviour {
                 UpdateZooplanktonUI();                
             }
             else { // vertebrates
-                UpdateVertebratesUI(slotRef);
                 imageMutationPanelThumbnailA.gameObject.SetActive(false);
                 imageMutationPanelThumbnailB.gameObject.SetActive(false);
                 imageMutationPanelThumbnailC.gameObject.SetActive(false);
@@ -496,48 +470,7 @@ public class MutationUI : MonoBehaviour {
    
         
     }
-    private void UpdateVertebratesUI(TrophicSlot slotRef) {
-        imageMutationVertebrateRender.gameObject.SetActive(true);
-        //imageMutationCurTarget.gameObject.SetActive(false);
-        imageMutationPanelCurPortrait.gameObject.SetActive(false);
-        imageMutationPanelNewPortrait.gameObject.SetActive(false);
-
-        int slotID = slotRef.slotID;
-        // *** HACK!!!! ***
-        slotID = 0;
-
-        int speciesID = slotRef.linkedSpeciesID;
-        
-        //mutationVertebrateRenderMat.SetTexture("_MainTex", rt);
-
-
-        /*Vector3 hue0 = uiManagerRef.gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][0].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
-        imageMutationPanelThumbnailA.color = new Color(hue0.x, hue0.y, hue0.z); // gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][0].displayColor; // new Color(hue0.x, hue0.y, hue0.z); 
-        Vector3 hue1 = uiManagerRef.gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][1].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
-        imageMutationPanelThumbnailB.color = new Color(hue1.x, hue1.y, hue1.z); // gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][1].displayColor; //
-        Vector3 hue2 = uiManagerRef.gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][2].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
-        imageMutationPanelThumbnailC.color = new Color(hue2.x, hue2.y, hue2.z); // gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][2].displayColor; //
-        Vector3 hue3 = uiManagerRef.gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][3].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
-        imageMutationPanelThumbnailD.color = new Color(hue3.x, hue3.y, hue3.z); // gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][3].displayColor; //
-        //Vector3 hue0 = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
-
-        Vector3 hue = uiManagerRef.gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[slotRef.slotID].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
-        Debug.Log("ADSF: " + hue.ToString());
-        //Vector3 hueCur = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][0].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
-        Color thumbCol = new Color(hue.x, hue.y, hue.z); 
-        imageMutationPanelCurPortrait.color = thumbCol;
-        imageMutationPanelCurPortrait.sprite = null;
-
-        //imageMutationPanelCurPortrait.color = Color.white;
-        Vector3 hueNew = uiManagerRef.gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][selectedToolbarMutationID].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
-        //imageToolbarSpeciesPortraitBorder.color = thumbCol; 
-        imageMutationPanelNewPortrait.color = new Color(hueNew.x, hueNew.y, hueNew.z); // uiColor;
-        textMutationPanelCur.text = uiManagerRef.gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[slotID].name; // "Reaction Rate: " + gameManager.simulationManager.vegetationManager.decomposerSlotGenomeCurrent.reactionRate.ToString();
-        textMutationPanelNew.text = uiManagerRef.gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotID][selectedToolbarMutationID].textDescriptionMutation; // "placeholder";
-    */
-    }
     
-
 
     public void UpdateMutationPanelUI(TrophicLayersManager layerManager) {
         panelMutationSpirit.SetActive(isOpen);

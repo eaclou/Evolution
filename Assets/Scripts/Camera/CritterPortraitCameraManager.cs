@@ -8,9 +8,9 @@ public class CritterPortraitCameraManager : MonoBehaviour {
     public float targetTiltAngleDegrees = 15f;
     public float targetFOV = 20f;
 
-    private float curZoomLevel;
-    private float curTiltAngle;
-    private float curFOV;
+    //private float curZoomLevel;
+    //private float curTiltAngle;
+    //private float curFOV;
 
     private Vector3 targetCamPos;
 
@@ -18,9 +18,9 @@ public class CritterPortraitCameraManager : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-        curZoomLevel = targetZoomLevel;
-        curTiltAngle = targetTiltAngleDegrees;
-        curFOV = targetFOV;
+        //curZoomLevel = targetZoomLevel;
+        //curTiltAngle = targetTiltAngleDegrees;
+        //curFOV = targetFOV;
 	}
 	
 	// Update is called once per frame

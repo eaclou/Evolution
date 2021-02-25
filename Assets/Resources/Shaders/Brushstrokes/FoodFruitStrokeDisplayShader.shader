@@ -26,9 +26,7 @@
 
 			sampler2D _MainTex;
 			sampler2D _MatureToDecayTex;
-			//float4 _MainTex_ST;
-			//float4 _Tint;
-			//float4 _Size;
+			
 
 			struct FoodSimData {
 				float2 worldPos;

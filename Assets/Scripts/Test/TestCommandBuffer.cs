@@ -5,14 +5,14 @@ using UnityEngine.Rendering;
 
 public class TestCommandBuffer : MonoBehaviour {
 
-    public Camera camera;
+    public Camera cameraRef;
     public CommandBuffer cmdBuffer;
 
 	// Use this for initialization
 	void Start () {
 		cmdBuffer = new CommandBuffer();
         cmdBuffer.name = "cmdBuffer";
-        camera.AddCommandBuffer(CameraEvent.AfterEverything, cmdBuffer);
+        cameraRef.AddCommandBuffer(CameraEvent.AfterEverything, cmdBuffer);
 	}
 	
 	// Update is called once per frame
@@ -29,8 +29,8 @@ public class TestCommandBuffer : MonoBehaviour {
     }
 
     private void OnDisable() {
-        if(camera != null) {
-            camera.RemoveAllCommandBuffers();
+        if(cameraRef != null) {
+            cameraRef.RemoveAllCommandBuffers();
         }
 
         if(cmdBuffer != null) {
