@@ -1,14 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
 public class UIManager : MonoBehaviour {
 
     #region attributes
-    public GameManager gameManager;
     public WorldSpiritHubUI worldSpiritHubUI;
     public DebugPanelUI debugPanelUI;
     public WatcherUI watcherUI;
@@ -25,6 +21,9 @@ public class UIManager : MonoBehaviour {
 
     public CameraManager cameraManager;
     public GameOptionsManager gameOptionsManager;
+    
+    // * Make this private, use accessors to eliminate references to this script
+    public GameManager gameManager => GameManager.instance;
 
     private bool firstTimeStartup = true;
     
@@ -49,19 +48,6 @@ public class UIManager : MonoBehaviour {
     public GameObject panelSpeciesTree;
     public GameObject panelSpeciesOverview;
     public GameObject panelGraphs;
-
-    // Main Menu:
-    public Button buttonQuickStartResume;
-    public Button buttonNewSimulation;
-    public Text textMouseOverInfo;  // use!
-    
-    public GameObject panelTitleMenu;
-    public GameObject panelGameOptions;
-
-    public Text textCursorInfo;
-
-    public bool controlsMenuOn = false; // main menu
-    public bool optionsMenuOn = false;  // Game options main menu
 
     public Image imageLoadingStartBG;
     public Image imageLoadingStrokes01;
@@ -160,7 +146,6 @@ public class UIManager : MonoBehaviour {
     public bool isObserverMode = false;
     public bool isPaused = false;
 
-    public GameObject panelMainMenu;
     public GameObject panelLoading;
     public GameObject panelPlaying;
 
@@ -274,16 +259,16 @@ public class UIManager : MonoBehaviour {
     public void EnterObserverMode() {
         isObserverMode = true;
     }
-    public void TransitionToNewGameState(GameManager.GameState gameState) {
+    public void TransitionToNewGameState(GameState gameState) {
+        mainMenu.gameObject.SetActive(gameState == GameState.MainMenu);
+    
+        // * Remove: replace with delegation
         switch (gameState) {
-            case GameManager.GameState.MainMenu:
-                //canvasMain.renderMode = RenderMode.ScreenSpaceOverlay;
-                EnterMainMenuUI();
-                break;
-            case GameManager.GameState.Loading:
+            case GameState.MainMenu: break;
+            case GameState.Loading:
                 EnterLoadingUI();
                 break;
-            case GameManager.GameState.Playing:
+            case GameState.Playing:
                 //canvasMain.renderMode = RenderMode.ScreenSpaceCamera;
                 firstTimeStartup = false;
                 EnterPlayingUI();
@@ -293,26 +278,14 @@ public class UIManager : MonoBehaviour {
                 break;
         }
     }
-    private void EnterMainMenuUI() {
-        panelMainMenu.SetActive(true);
-
-        UpdateMainMenuUI();
-
-        
-        
-
-    }
+    
     private void EnterLoadingUI() {
-        panelMainMenu.SetActive(false);
         panelLoading.SetActive(true);
         panelPlaying.SetActive(false);
-        panelGameOptions.SetActive(false);
     }
     private void EnterPlayingUI() {   //// ******* this happens everytime quit to menu and resume.... *** needs to change!!! ***
-        panelMainMenu.SetActive(false);
         panelLoading.SetActive(false);
         panelPlaying.SetActive(true);
-        panelGameOptions.SetActive(false);
 
         //Animation Big Bang here
         gameManager.simulationManager._BigBangOn = true;
@@ -336,16 +309,17 @@ public class UIManager : MonoBehaviour {
     // Update is called once per frame    
     // =================================================================================================================================================
     #region UPDATE UI PANELS FUNCTIONS!!! :::
+    
+    [SerializeField] MainMenuUI mainMenu;
 
     void Update() {
+        // * Remove: replace with delegation
         switch (gameManager.CurrentGameState) {
-            case GameManager.GameState.MainMenu:
-                UpdateMainMenuUI();
-                break;
-            case GameManager.GameState.Loading:
+            case GameState.MainMenu: break;
+            case GameState.Loading:
                 UpdateLoadingUI();
                 break;
-            case GameManager.GameState.Playing:
+            case GameState.Playing:
                 UpdateSimulationUI();
                 break;
             default:
@@ -353,34 +327,7 @@ public class UIManager : MonoBehaviour {
                 break;
         }
     }
-    private void UpdateMainMenuUI() {
-
-        Cursor.visible = true;   /////// ********************** Move to CursorCzar!!!
-        if (firstTimeStartup) {
-            buttonQuickStartResume.GetComponentInChildren<Text>().text = "QUICK START";
-        }
-        else {
-            buttonQuickStartResume.GetComponentInChildren<Text>().text = "RESUME";
-            buttonNewSimulation.gameObject.SetActive(false); // *** For now, 1 sim at a time ***
-            textMouseOverInfo.gameObject.SetActive(false);
-        }
-
-        if (optionsMenuOn) {
-            panelGameOptions.SetActive(true);
-            textMouseOverInfo.gameObject.SetActive(false);
-            //panelTitleMenu.SetActive(false);
-        }
-        else {
-            panelGameOptions.SetActive(false);
-            //panelTitleMenu.SetActive(true);
-        }
-
-        panelLoading.SetActive(false);
-        panelPlaying.SetActive(false);
-
-        //panelHUD.SetActive(isActiveHUD);
-        //panelDebug.SetActive(isActiveDebug);
-    }
+    
     private void UpdateLoadingUI() {
         //Cursor.visible = true;
         //imageLoadingGemGrowing.gameObject.SetActive(true);
@@ -403,6 +350,7 @@ public class UIManager : MonoBehaviour {
             textLoadingTooltips.text = "( Reticulating Splines )";
         }*/
     }
+    
     private void UpdateBigBangPanel() {
         if(gameManager.simulationManager._BigBangOn) {
             panelBigBang.SetActive(true);
@@ -1347,68 +1295,6 @@ public class UIManager : MonoBehaviour {
 
     #region UI ELEMENT CLICK FUNCTIONS!!!!
 
-    // 
-    // MAIN MENU STUFFS::
-    public void ClickControlsMenu() {
-        controlsMenuOn = true;
-        optionsMenuOn = false;
-        UpdateMainMenuUI();
-    }
-    public void ClickOptionsMenu() {
-        optionsMenuOn = true;
-        controlsMenuOn = false;
-        UpdateMainMenuUI();
-    }
-    
-    public void ClickQuickStart() {
-        Debug.Log("ClickQuickStart()!");
-        if(firstTimeStartup) {
-            gameManager.StartNewGameQuick();
-        }
-        else {
-            //animatorStatsPanel.enabled = false;
-            //animatorInspectPanel.enabled = false;
-            gameManager.ResumePlaying();
-            ClickButtonPlayNormal();
-
-        } 
-    }
-    public void ClickNewSimulation() {
-        //Debug.Log("ClickNewSimulation()!");
-        if(firstTimeStartup) {
-            gameManager.StartNewGameBlank();
-        }
-        else {
-            //animatorStatsPanel.enabled = false;
-            //animatorInspectPanel.enabled = false;
-            gameManager.ResumePlaying();
-            ClickButtonPlayNormal();
-        }        
-    }
-    public void MouseEnterQuickStart() {
-        //textMouseOverInfo.gameObject.SetActive(true);
-        //textMouseOverInfo.text = "Start with an existing ecosystem full of various living organisms.";
-    }
-    public void MouseExitQuickStart() {
-        textMouseOverInfo.gameObject.SetActive(false);
-    }
-
-    public void MouseEnterNewSimulation() {
-        //textMouseOverInfo.gameObject.SetActive(true);
-        //textMouseOverInfo.text = "Create a brand new ecosystem from scratch. It might take a significant amount of time for intelligent creatures to evolve.\n*Not recommended for first-time players.";
-    }
-    public void MouseExitNewSimulation() {
-        textMouseOverInfo.gameObject.SetActive(false);
-    }
-
-    public void MouseEnterControlsButton() {
-        textMouseOverInfo.gameObject.SetActive(true);
-        textMouseOverInfo.text = "Arrows or WASD for movement, scrollwheel for zoom. 'R' and 'F' tilt Camera.\nKeyboard & Mouse only - Controller support coming soon.";
-    }
-    public void MouseExitControlsButton() {
-        textMouseOverInfo.gameObject.SetActive(false);
-    }
-
     public void ClickLoadingGemStart() {
         Debug.Log("Let there be not nothing!");
 
@@ -1443,9 +1329,6 @@ public class UIManager : MonoBehaviour {
     public void AnnounceBrushAppear() {
         NarratorText("A Minor Creation Spirit Appeared!", new Color(1f, 1f, 1f));
         // map opens!
-
-        
-        
     }
 
     public void AnnounceUnlockBrushes() {
@@ -1516,10 +1399,16 @@ public class UIManager : MonoBehaviour {
         watcherUI.isUnlocked = true;
         brushesUI.isUnlocked = true;
     }
-    public void ClickButtonQuit() {
-        Debug.Log("Quit!");
+    
+    public void ClickButtonQuit() 
+    {
+        #if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+        #else
         Application.Quit();
+        #endif   
     }
+    
     public void ClickButtonMainMenu() {
         gameManager.EscapeToMainMenu();
     }
@@ -1530,12 +1419,6 @@ public class UIManager : MonoBehaviour {
     public void ClickButtonPlayNormal() {
         Time.timeScale = 1f;
     }    
-        
-    
-
-   
-    
-    
 
     #endregion
 }
@@ -1545,11 +1428,6 @@ public class UIManager : MonoBehaviour {
 #region OLD OLD OLD!!!!
 
 
-
- 
-  /*   
-
- */   
     
     
     /*

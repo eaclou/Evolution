@@ -1,9 +1,13 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using Playcraft;
 using UnityEngine;
-using UnityEngine.Rendering;
 
-public class GameManager : MonoBehaviour {
+public enum GameState {
+    MainMenu,
+    Loading,
+    Playing
+}
+
+public class GameManager : Singleton<GameManager> {
 
     public SimulationManager simulationManager;
     public UIManager uiManager;
@@ -13,22 +17,9 @@ public class GameManager : MonoBehaviour {
     //public Material rippleDistortUIMat;
 
     private GameState currentGameState = GameState.MainMenu;
-    public GameState CurrentGameState
-    {
-        get
-        {
-            return currentGameState;
-        }
-        set
-        {
-
-        }
-    }
-    public enum GameState {
-        MainMenu,
-        Loading,
-        Playing
-    }
+    public GameState CurrentGameState => currentGameState;
+    
+    public Profile activeProfile = new Profile();
 
     private void Awake() {
         //distortionCommandBuffer = new CommandBuffer();
@@ -221,4 +212,8 @@ public class GameManager : MonoBehaviour {
                 break;
         }
     }
+    
+    public void Pause() { SetTimeScale(0f); }
+    public void SetNormalTime() { SetTimeScale(1f); }
+    public void SetTimeScale(float value) { Time.timeScale = value; }
 }

@@ -69,6 +69,9 @@ public class GlobalResourcesUI : MonoBehaviour {
     //private int agentSelectType = 2;
     //public int agentIndex;
 
+    GameManager gameManager => GameManager.instance;
+    SimulationManager simulationManager => gameManager.simulationManager;
+    MasterGenomePool masterGenomePool => simulationManager.masterGenomePool;
     
     public GraphCategory selectedGraphCategory;
     public enum GraphCategory {
@@ -121,10 +124,10 @@ public class GlobalResourcesUI : MonoBehaviour {
     public void ClickButtonToggleExtinct() {
         isShowingExtinct = !isShowingExtinct;
         if(isShowingExtinct) { // was extinct, switch to current:
-            if(uiManagerRef.gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList.Count < uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList.Count) {
+            if(masterGenomePool.currentlyActiveSpeciesIDList.Count < masterGenomePool.completeSpeciesPoolsList.Count) {
                 int defaultSpeciesID = 0;
-                for(int i = 0; i < uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList.Count; i++) {
-                    if(uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[i].isExtinct) {
+                for(int i = 0; i < masterGenomePool.completeSpeciesPoolsList.Count; i++) {
+                    if(masterGenomePool.completeSpeciesPoolsList[i].isExtinct) {
                         defaultSpeciesID = i;
                         break;
                     }
@@ -133,7 +136,7 @@ public class GlobalResourcesUI : MonoBehaviour {
             }
         }
         else {
-            int defaultSpeciesID = uiManagerRef.gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList[0];
+            int defaultSpeciesID = masterGenomePool.currentlyActiveSpeciesIDList[0];
             SetSelectedSpeciesUI(defaultSpeciesID);
             
         }
@@ -152,14 +155,14 @@ public class GlobalResourcesUI : MonoBehaviour {
         //CreateSpeciesLeaderboardGenomeTexture(pool);
         //CreateBrainGenomeTexture(focusedAgentGenome);
         //uiManagerRef.gameManager.simulationManager.theRenderKing.InitializeCreaturePortraitGenomes(focusedAgentGenome);
-        UpdateSpeciesTreeDataTextures(uiManagerRef.gameManager.simulationManager.curSimYear);
+        UpdateSpeciesTreeDataTextures(simulationManager.curSimYear);
         
     }
     public void CreateSpeciesLeaderboardGenomeTexture() {
         int width = 32;
         int height = 96;
         speciesPoolGenomeTex.Resize(width, height); // pool.leaderboardGenomesList.Count);
-        SpeciesGenomePool pool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID];
+        SpeciesGenomePool pool = masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID];
         //for(int i = 0; i < pool.leaderboardGenomesList.Count; i++) {
         for(int x = 0; x < width; x++) {
                         
@@ -295,8 +298,8 @@ public class GlobalResourcesUI : MonoBehaviour {
     
     public void UpdateSpeciesTreeDataTextures(int year) {  // refactor using year?
         //Debug.Log("WOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO " + year.ToString());
-        int numActiveSpecies = uiManagerRef.gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList.Count;
-        int numTotalSpecies = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList.Count;
+        int numActiveSpecies = masterGenomePool.currentlyActiveSpeciesIDList.Count;
+        int numTotalSpecies = masterGenomePool.completeSpeciesPoolsList.Count;
 
         //int maxDisplaySpecies = 32;
         int[] displaySpeciesIndicesArray;
@@ -306,12 +309,12 @@ public class GlobalResourcesUI : MonoBehaviour {
         TheRenderKing.TreeOfLifeSpeciesKeyData[] speciesKeyDataArray = new TheRenderKing.TreeOfLifeSpeciesKeyData[32];
 
          // Get Active ones first:
-        for(int i = 0; i < uiManagerRef.gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList.Count; i++) {
-            SpeciesGenomePool pool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList[i]];
+        for(int i = 0; i < masterGenomePool.currentlyActiveSpeciesIDList.Count; i++) {
+            SpeciesGenomePool pool = masterGenomePool.completeSpeciesPoolsList[masterGenomePool.currentlyActiveSpeciesIDList[i]];
             SpeciesGenomePool parentPool;
             Vector3 parentHue = Vector3.one;
             if(pool.parentSpeciesID != -1) {
-                parentPool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[pool.parentSpeciesID];
+                parentPool = masterGenomePool.completeSpeciesPoolsList[pool.parentSpeciesID];
                 parentHue = parentPool.representativeCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
             }
             Vector3 huePrimary = pool.representativeCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
@@ -338,20 +341,20 @@ public class GlobalResourcesUI : MonoBehaviour {
         
         // Then fill with most recently extinct:
         for(int i = (numTotalSpecies - 1); i > Mathf.Clamp((numTotalSpecies - maxDisplaySpecies), 0, numTotalSpecies); i--) {
-            SpeciesGenomePool pool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[i];
+            SpeciesGenomePool pool = masterGenomePool.completeSpeciesPoolsList[i];
 
             SpeciesGenomePool parentPool;
             if (pool.parentSpeciesID == -1) {
                 parentPool = pool; // whoa man...
             }
             else {
-                parentPool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[pool.parentSpeciesID];
+                parentPool = masterGenomePool.completeSpeciesPoolsList[pool.parentSpeciesID];
             }            
 
             Vector3 huePrimary = pool.representativeCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
             Vector3 hueSecondary = pool.representativeCandidate.candidateGenome.bodyGenome.appearanceGenome.hueSecondary;
             Vector3 parentHue = parentPool.representativeCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
-            if(uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[i].isExtinct) {
+            if(masterGenomePool.completeSpeciesPoolsList[i].isExtinct) {
                 huePrimary = Vector3.zero;
             }
             statsSpeciesColorKey.SetPixel(i, 1, new Color(huePrimary.x, huePrimary.y, huePrimary.z));
@@ -366,7 +369,7 @@ public class GlobalResourcesUI : MonoBehaviour {
             keyData.parentHue = parentHue;
             keyData.isExtinct = pool.isExtinct ? 1f : 0f;
             keyData.isOn = 1f;
-            if(i >= uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList.Count) {
+            if(i >= masterGenomePool.completeSpeciesPoolsList.Count) {
                 keyData.isOn = 0f;
             }
             if(pool.yearCreated == -1) {
@@ -399,9 +402,9 @@ public class GlobalResourcesUI : MonoBehaviour {
         // for each year & each species, create 2D texture with fitness scores:
         for(int s = 0; s < maxDisplaySpecies; s++) {            
             
-            if(displaySpeciesIndicesArray[s] < uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList.Count) {
+            if(displaySpeciesIndicesArray[s] < masterGenomePool.completeSpeciesPoolsList.Count) {
 
-                SpeciesGenomePool speciesPool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[displaySpeciesIndicesArray[s]];
+                SpeciesGenomePool speciesPool = masterGenomePool.completeSpeciesPoolsList[displaySpeciesIndicesArray[s]];
                 if(speciesPool == null) {
                     Debug.LogError("well, shit");
                 }
@@ -583,7 +586,7 @@ public class GlobalResourcesUI : MonoBehaviour {
     }
     */
     private void RefreshGraphMaterial() {
-        SpeciesGenomePool pool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID];
+        SpeciesGenomePool pool = masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID];
 
         switch(selectedGraphCategory) {
             case GraphCategory.Life:
@@ -745,7 +748,7 @@ public class GlobalResourcesUI : MonoBehaviour {
     
     public void SetSelectedSpeciesUI(int id) {
         
-        SpeciesGenomePool pool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[id];
+        SpeciesGenomePool pool = masterGenomePool.completeSpeciesPoolsList[id];
         uiManagerRef.selectedSpeciesID = id;
 
         uiManagerRef.SetFocusedCandidateGenome(pool.representativeCandidate);
@@ -766,8 +769,8 @@ public class GlobalResourcesUI : MonoBehaviour {
         // ***** Add tab for Extinct species:
         if(isShowingExtinct) {
             List<int> extinctSpeciesIDList = new List<int>();
-            for(int i = 0; i < uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList.Count; i++) {
-                if(uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[i].isExtinct) {
+            for(int i = 0; i < masterGenomePool.completeSpeciesPoolsList.Count; i++) {
+                if(masterGenomePool.completeSpeciesPoolsList[i].isExtinct) {
                     extinctSpeciesIDList.Add(i);
                     //break;
                 }
@@ -779,7 +782,7 @@ public class GlobalResourcesUI : MonoBehaviour {
             for (int s = 0; s < extinctSpeciesIDList.Count; s++) {
                 int speciesID = extinctSpeciesIDList[s];
 
-                SpeciesGenomePool sourcePool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID];
+                SpeciesGenomePool sourcePool = masterGenomePool.completeSpeciesPoolsList[speciesID];
                 //int parentSpeciesID = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].parentSpeciesID;
 
                 AgentGenome templateGenome = sourcePool.leaderboardGenomesList[0].candidateGenome; //.bodyGenome.coreGenome.name;
@@ -820,7 +823,7 @@ public class GlobalResourcesUI : MonoBehaviour {
             
         }
         else {  // EXTANT!!! ***
-            int numActiveSpecies = uiManagerRef.gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList.Count;
+            int numActiveSpecies = masterGenomePool.currentlyActiveSpeciesIDList.Count;
 
             foreach (Transform child in treeAnchorUI.transform) {
                     GameObject.Destroy(child.gameObject);
@@ -840,10 +843,10 @@ public class GlobalResourcesUI : MonoBehaviour {
             //int pointerID = 0;
             */
             for (int s = 0; s < numActiveSpecies; s++) {
-                int speciesID = uiManagerRef.gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList[s];
-                int parentSpeciesID = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].parentSpeciesID;
+                int speciesID = masterGenomePool.currentlyActiveSpeciesIDList[s];
+                int parentSpeciesID = masterGenomePool.completeSpeciesPoolsList[speciesID].parentSpeciesID;
 
-                AgentGenome templateGenome = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].leaderboardGenomesList[0].candidateGenome; //.bodyGenome.coreGenome.name;
+                AgentGenome templateGenome = masterGenomePool.completeSpeciesPoolsList[speciesID].leaderboardGenomesList[0].candidateGenome; //.bodyGenome.coreGenome.name;
                 Color color = new Color(templateGenome.bodyGenome.appearanceGenome.huePrimary.x, templateGenome.bodyGenome.appearanceGenome.huePrimary.y, templateGenome.bodyGenome.appearanceGenome.huePrimary.z);
 
                 GameObject obj = Instantiate(prefabSpeciesBar, new Vector3(0, 0, 0), Quaternion.identity);
@@ -871,7 +874,7 @@ public class GlobalResourcesUI : MonoBehaviour {
                 
                     if (savedParentSpeciesID >= 0) {
                         //get parent pool:
-                        SpeciesGenomePool parentPool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[savedParentSpeciesID];
+                        SpeciesGenomePool parentPool = masterGenomePool.completeSpeciesPoolsList[savedParentSpeciesID];
                         lineageTxt += " <- " + parentPool.speciesID.ToString();
 
                         savedParentSpeciesID = parentPool.parentSpeciesID;
@@ -898,11 +901,11 @@ public class GlobalResourcesUI : MonoBehaviour {
 
     private void UpdateUI() {
 
-        SpeciesGenomePool pool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID];
+        SpeciesGenomePool pool = masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID];
         
         
-        textGlobalMass.text = "Global Biomass: " + uiManagerRef.gameManager.simulationManager.simResourceManager.curTotalMass.ToString("F0");
-        SimResourceManager resourcesRef = uiManagerRef.gameManager.simulationManager.simResourceManager;
+        textGlobalMass.text = "Global Biomass: " + simulationManager.simResourceManager.curTotalMass.ToString("F0");
+        SimResourceManager resourcesRef = simulationManager.simResourceManager;
         //textMeterOxygen.text = resourcesRef.curGlobalOxygen.ToString("F0");
         textMeterNutrients.text = resourcesRef.curGlobalNutrients.ToString("F0");
         textMeterDetritus.text = resourcesRef.curGlobalDetritus.ToString("F0");
@@ -956,7 +959,7 @@ public class GlobalResourcesUI : MonoBehaviour {
 
         
 
-        if(uiManagerRef.gameManager.simulationManager.simAgeTimeSteps % 177 == 275) {
+        if(simulationManager.simAgeTimeSteps % 177 == 275) {
             UpdateSpeciesListBars();
         }
         

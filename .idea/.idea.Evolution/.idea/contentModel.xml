@@ -1,0 +1,409 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ContentModelStore">
+    <e p="C:\Users\willp\AppData\Local\JetBrains\Rider2020.3\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\willp\AppData\Local\JetBrains\Rider2020.3\resharper-host\Local\Transient\Rider\v203\SolutionCaches\_Evolution.254908852.00" t="ExcludeRecursive" />
+    <e p="D:\UnityProjects\Freelance\Evolution" t="IncludeRecursive">
+      <e p="Assembly-CSharp.csproj" t="IncludeRecursive" />
+      <e p="Assets" t="Include">
+        <e p="Fonts" t="Include">
+          <e p="OFL.txt" t="Include" />
+        </e>
+        <e p="Resources" t="Include">
+          <e p="Shaders" t="Include">
+            <e p="AgentProceduralDisplayShader.shader" t="Include" />
+            <e p="AgentShader.shader" t="Include" />
+            <e p="Brushstrokes" t="Include">
+              <e p="AgentBodyDisplayShader.shader" t="Include" />
+              <e p="AgentEyesDisplayShader.shader" t="Include" />
+              <e p="BasicStrokeDisplayShader.shader" t="Include" />
+              <e p="CurveStrokeDisplayShader.shader" t="Include" />
+              <e p="FoodFruitStrokeDisplayShader.shader" t="Include" />
+              <e p="FoodLeafStrokeDisplayShader.shader" t="Include" />
+              <e p="FoodStemStrokeDisplayShader.shader" t="Include" />
+              <e p="FrameBufferSampleStrokeDisplayShader.shader" t="Include" />
+              <e p="PlayerGlowShader.shader" t="Include" />
+              <e p="PlayerGlowyBitsDisplayShader.shader" t="Include" />
+              <e p="PointStrokeDisplayShader.shader" t="Include" />
+              <e p="TrailStrokeDisplayShader.shader" t="Include" />
+              <e p="UberChainsRenderShader.shader" t="Include" />
+              <e p="WaterChainsDisplayShader.shader" t="Include" />
+              <e p="WaterSplinesShader.shader" t="Include" />
+            </e>
+            <e p="ColorInject" t="Include">
+              <e p="AlgaeParticleColorInjectShader.shader" t="Include" />
+              <e p="PlayerBrushColorInjectShader.shader" t="Include" />
+              <e p="ResourceSimTransferShader.shader" t="Include" />
+              <e p="ZooplanktonParticleColorInjectShader.shader" t="Include" />
+            </e>
+            <e p="Compute" t="Include">
+              <e p="ComputeShaderAnimalParticles.compute" t="Include" />
+              <e p="ComputeShaderBrushStrokes.compute" t="Include" />
+              <e p="ComputeShaderCritters.compute" t="Include" />
+              <e p="ComputeShaderEggSacks.compute" t="Include" />
+              <e p="ComputeShaderEnvFluidSim.compute" t="Include" />
+              <e p="ComputeShaderPlantParticles.compute" t="Include" />
+              <e p="ComputeShaderResourceGrid.compute" t="Include" />
+              <e p="ComputeShaderSpiritBrush.compute" t="Include" />
+              <e p="ComputeShaderTerrainGeneration.compute" t="Include" />
+              <e p="ComputeShaderTreeOfLife.compute" t="Include" />
+              <e p="ComputeShaderUberFlowChain.compute" t="Include" />
+              <e p="ComputeShaderWater.compute" t="Include" />
+            </e>
+            <e p="Critters" t="Include">
+              <e p="AgentHoverHighlightShader.shader" t="Include" />
+              <e p="CritterBodyStrokesShader.shader" t="Include" />
+              <e p="CritterEnergyDotsShader.shader" t="Include" />
+              <e p="CritterEyesStrokesShader.shader" t="Include" />
+              <e p="CritterFoodDotsShader.shader" t="Include" />
+              <e p="CritterGenericStrokeDisplayShader.shader" t="Include" />
+              <e p="CritterHighlightTrailShader.shader" t="Include" />
+              <e p="CritterInspectHighlightShader.shader" t="Include" />
+              <e p="CritterMutationUIStrokeDisplayShader.shader" t="Include" />
+              <e p="CritterPortraitStrokeDisplayShader.shader" t="Include" />
+              <e p="CritterShadowStrokesShader.shader" t="Include" />
+              <e p="CritterSkinStrokesShader.shader" t="Include" />
+              <e p="CritterUberStrokeShadowDisplayShader.shader" t="Include" />
+              <e p="EggCoverDisplayShader.shader" t="Include" />
+              <e p="EggSackShadowDisplayShader.shader" t="Include" />
+              <e p="EggSackStrokeDisplayShader.shader" t="Include" />
+            </e>
+            <e p="DebugViewerShader.shader" t="Include" />
+            <e p="DebugVis" t="Include">
+              <e p="DebugAgentResourcesShader.shader" t="Include" />
+              <e p="DebugVisAlgaeParticlesShader.shader" t="Include" />
+              <e p="DebugVisAnimalParticlesShader.shader" t="Include" />
+              <e p="DebugVisModeShader.shader" t="Include" />
+            </e>
+            <e p="DiffusionReaction" t="Include">
+              <e p="reactionDiffusionBlit.shader" t="Include" />
+            </e>
+            <e p="EnergyMeterDisplayShader.shader" t="Include" />
+            <e p="FadeToBlackBlitShader.shader" t="Include" />
+            <e p="FitnessDisplayShader.shader" t="Include" />
+            <e p="FloatyBitsDisplayShader.shader" t="Include" />
+            <e p="FloatyBitsShadowDisplayShader.shader" t="Include" />
+            <e p="FluidColliderShader.shader" t="Include" />
+            <e p="FluidDisplayShader.shader" t="Include" />
+            <e p="FluidRenderShader.shader" t="Include" />
+            <e p="Food" t="Include">
+              <e p="AlgaeParticleDisplayShader.shader" t="Include" />
+              <e p="AnimalParticleDisplayShader.shader" t="Include" />
+              <e p="AnimalParticleShadowDisplayShader.shader" t="Include" />
+              <e p="PlantParticleDisplayShader.shader" t="Include" />
+              <e p="PlantParticleShadowDisplayShader.shader" t="Include" />
+            </e>
+            <e p="FoodDisplayShader.shader" t="Include" />
+            <e p="FoodProceduralDisplayShader.shader" t="Include" />
+            <e p="FoodShader.shader" t="Include" />
+            <e p="Gizmos" t="Include">
+              <e p="GizmoFeedToolShader.shader" t="Include" />
+              <e p="GizmoProtoSpiritClickableShader.shader" t="Include" />
+              <e p="GizmoStirStickShader.shader" t="Include" />
+              <e p="GizmoStirStickShadowShader.shader" t="Include" />
+              <e p="GizmoStirToolShader.shader" t="Include" />
+            </e>
+            <e p="HitPointsDisplayShader.shader" t="Include" />
+            <e p="Inc" t="Include">
+              <e p="CameraData.cginc" t="Include" />
+              <e p="CritterBodyAnimation.cginc" t="Include" />
+              <e p="DistanceFuncs.cginc" t="Include" />
+              <e p="LightData.cginc" t="Include" />
+              <e p="NoiseShared.cginc" t="Include" />
+              <e p="SimplexShared.cginc" t="Include" />
+              <e p="StructsAnimalParticles.cginc" t="Include" />
+              <e p="StructsCritterData.cginc" t="Include" />
+              <e p="StructsEggData.cginc" t="Include" />
+              <e p="StructsPlantParticles.cginc" t="Include" />
+              <e p="StructsTreeOfLife.cginc" t="Include" />
+              <e p="TerrainShared.cginc" t="Include" />
+              <e p="TreeOfLifeSharedFuncs.cginc" t="Include" />
+              <e p="WaterUtilityFunctions.cginc" t="Include" />
+            </e>
+            <e p="OLD" t="Include">
+              <e p="ComputeShaderFluidSim.compute" t="Include" />
+            </e>
+            <e p="PredatorProceduralDisplayShader.shader" t="Include" />
+            <e p="PredatorShader.shader" t="Include" />
+            <e p="RipplesDisplayShader.shader" t="Include" />
+            <e p="Simulation" t="Include">
+              <e p="PlantParticleSimDataShader.shader" t="Include" />
+              <e p="ResourceSimConversionShader.shader" t="Include" />
+            </e>
+            <e p="SpiritBrush" t="Include">
+              <e p="CursorParticlesRenderShader.shader" t="Include" />
+              <e p="SpiritBrushBlitShader.shader" t="Include" />
+              <e p="SpiritBrushRenderShader.shader" t="Include" />
+              <e p="SpiritBrushRenderShaderMultiBurst.shader" t="Include" />
+            </e>
+            <e p="Terrain" t="Include">
+              <e p="TerrainDecomposerBitsDisplayShader.shader" t="Include" />
+              <e p="TerrainDecomposerBitsShadowDisplayShader.shader" t="Include" />
+              <e p="TerrainGenerateColorBlit.shader" t="Include" />
+              <e p="TerrainGroundDryLandDisplayShader.shader" t="Include" />
+              <e p="TerrainGroundStrokeDisplayShader.shader" t="Include" />
+              <e p="TerrainMeshOpaqueShader.shader" t="Include" />
+              <e p="TerrainSimulationBlit.shader" t="Include" />
+              <e p="TerrainWasteBitsDisplayShader.shader" t="Include" />
+              <e p="TestInitTerrainColorBlit.shader" t="Include" />
+              <e p="TestTerrainBlit.shader" t="Include" />
+            </e>
+            <e p="TerrainObstaclesHeightMaskShader.shader" t="Include" />
+            <e p="TestSwimmingBodyShader.shader" t="Include" />
+            <e p="TrailDotsDisplayShader.shader" t="Include" />
+            <e p="UI" t="Include">
+              <e p="Graphs" t="Include">
+                <e p="GraphSpeciesStatsShader.shader" t="Include" />
+                <e p="SimpleMeterShader.shader" t="Include" />
+                <e p="SimpleSingleResourceGraphShader.shader" t="Include" />
+                <e p="ToolbarSpeciesStatsShader.shader" t="Include" />
+              </e>
+              <e p="InspectAgentIconShader.shader" t="Include" />
+              <e p="InspectDietShader.shader" t="Include" />
+              <e p="InspectDimensionsShader.shader" t="Include" />
+              <e p="InspectEnergyShader.shader" t="Include" />
+              <e p="InspectHealthShader.shader" t="Include" />
+              <e p="InspectLifeCycleShader.shader" t="Include" />
+              <e p="InspectSpeciesIconShader.shader" t="Include" />
+              <e p="InspectStomachFoodShader.shader" t="Include" />
+              <e p="Knowledge" t="Include">
+                <e p="KnowledgeMinimap.shader" t="Include" />
+              </e>
+              <e p="Mutation" t="Include">
+                <e p="MutationThumbnailDecomposers.shader" t="Include" />
+                <e p="MutationThumbnailDecomposersA.shader" t="Include" />
+                <e p="MutationThumbnailDecomposersB.shader" t="Include" />
+                <e p="MutationThumbnailDecomposersC.shader" t="Include" />
+                <e p="MutationThumbnailDecomposersD.shader" t="Include" />
+                <e p="MutationThumbnailDecomposersNew.shader" t="Include" />
+                <e p="MutationVertebrateRender.shader" t="Include" />
+              </e>
+              <e p="NewInspect" t="Include">
+                <e p="NewInspectAgentAge.shader" t="Include" />
+                <e p="NewInspectAgentBrain.shader" t="Include" />
+                <e p="NewInspectAgentComms.shader" t="Include" />
+                <e p="NewInspectAgentCurActivity.shader" t="Include" />
+                <e p="NewInspectAgentEnergy.shader" t="Include" />
+                <e p="NewInspectAgentHealth.shader" t="Include" />
+                <e p="NewInspectAgentStamina.shader" t="Include" />
+                <e p="NewInspectAgentState.shader" t="Include" />
+                <e p="NewInspectAgentStomach.shader" t="Include" />
+                <e p="NewInspectAgentThrottle.shader" t="Include" />
+                <e p="NewInspectAgentWaste.shader" t="Include" />
+              </e>
+              <e p="RippleDistortionBlitShader.shader" t="Include" />
+              <e p="StatsPanelGraphShader.shader" t="Include" />
+              <e p="TreeOfLifeBackdropShader.shader" t="Include" />
+              <e p="TreeOfLifeCursorLineShader.shader" t="Include" />
+              <e p="TreeOfLifeDecorationShader.shader" t="Include" />
+              <e p="TreeOfLifeEventsLineShader.shader" t="Include" />
+              <e p="TreeOfLifeLeafNodesShader.shader" t="Include" />
+              <e p="TreeOfLifePortraitEyeShader.shader" t="Include" />
+              <e p="TreeOfLifePortraitShader.shader" t="Include" />
+              <e p="TreeOfLifeSpeciesHeadTipShader.shader" t="Include" />
+              <e p="TreeOfLifeSpeciesLineShader.shader" t="Include" />
+              <e p="TreeOfLifeStemSegmentsShader.shader" t="Include" />
+              <e p="TreeOfLifeWorldStatsShader.shader" t="Include" />
+              <e p="UIBasicRenderTextureShader.shader" t="Include" />
+              <e p="UIBasicTextureShader.shader" t="Include" />
+              <e p="UIDebugTextureViewer.shader" t="Include" />
+            </e>
+            <e p="WallShader.shader" t="Include" />
+            <e p="Water" t="Include">
+              <e p="WaterChainStrokeDisplayShader.shader" t="Include" />
+              <e p="WaterCurveStrokeDisplayShader.shader" t="Include" />
+              <e p="WaterDebrisBitsDisplayShader.shader" t="Include" />
+              <e p="WaterDebrisBitsShadowsDisplayShader.shader" t="Include" />
+              <e p="WaterMeshRenderShader.shader" t="Include" />
+              <e p="WaterNutrientsBitsDisplayShader.shader" t="Include" />
+              <e p="WaterSurfaceBitsDisplayShader.shader" t="Include" />
+              <e p="WaterSurfaceBitsShadowsDisplayShader.shader" t="Include" />
+              <e p="WaterSurfaceReflectiveLrgDisplayShader.shader" t="Include" />
+              <e p="WaterSurfaceReflectiveSmlDisplayShader.shader" t="Include" />
+              <e p="WaterTestStrokeDisplayShader.shader" t="Include" />
+            </e>
+          </e>
+        </e>
+        <e p="Scripts" t="Include">
+          <e p="Audio" t="Include">
+            <e p="AudioManager.cs" t="Include" />
+          </e>
+          <e p="Camera" t="Include">
+            <e p="CameraManager.cs" t="Include" />
+            <e p="CritterPortraitCameraManager.cs" t="Include" />
+          </e>
+          <e p="Core" t="Include">
+            <e p="GameManager.cs" t="Include" />
+            <e p="GameOptions.cs" t="Include" />
+            <e p="GameOptionsManager.cs" t="Include" />
+          </e>
+          <e p="Fluid" t="Include">
+            <e p="EnvironmentFluidManager.cs" t="Include" />
+          </e>
+          <e p="Mecanim" t="Include">
+            <e p="MecanimMutationUI.cs" t="Include" />
+            <e p="MecanimSpiritClicked.cs" t="Include" />
+            <e p="MecanimWorldHubUI.cs" t="Include" />
+          </e>
+          <e p="OldAndMisc" t="Include">
+            <e p="CritterSegment.cs" t="Include" />
+            <e p="DataSample.cs" t="Include" />
+            <e p="FakeDataGenerator.cs" t="Include" />
+            <e p="FluidManager.cs" t="Include" />
+            <e p="FoodGridCell.cs" t="Include" />
+            <e p="GridSearch" t="Include">
+              <e p="GridSearchManager.cs" t="Include" />
+              <e p="GridSearchResults.cs" t="Include" />
+              <e p="GridSearchRunData.cs" t="Include" />
+            </e>
+            <e p="PredatorModule.cs" t="Include" />
+            <e p="TestModule.cs" t="Include" />
+            <e p="TestModuleGenome.cs" t="Include" />
+          </e>
+          <e p="Rendering" t="Include">
+            <e p="BaronVonTerrain.cs" t="Include" />
+            <e p="BaronVonWater.cs" t="Include" />
+            <e p="RenderBaron.cs" t="Include" />
+            <e p="TheRenderKing.cs" t="Include" />
+            <e p="UberFlowChainBrush.cs" t="Include" />
+          </e>
+          <e p="Simulation" t="Include">
+            <e p="Agents" t="Include">
+              <e p="Agent.cs" t="Include" />
+              <e p="Body" t="Include">
+                <e p="CritterModuleCommunication.cs" t="Include" />
+                <e p="CritterModuleCore.cs" t="Include" />
+                <e p="CritterModuleEnvironment.cs" t="Include" />
+                <e p="CritterModuleFood.cs" t="Include" />
+                <e p="CritterModuleFriends.cs" t="Include" />
+                <e p="CritterModuleMovement.cs" t="Include" />
+                <e p="CritterModuleTarget.cs" t="Include" />
+                <e p="CritterModuleThreats.cs" t="Include" />
+                <e p="CritterMouthComponent.cs" t="Include" />
+              </e>
+              <e p="Brain" t="Include">
+                <e p="Axon.cs" t="Include" />
+                <e p="Brain.cs" t="Include" />
+                <e p="Gaussian.cs" t="Include" />
+                <e p="Neuron.cs" t="Include" />
+                <e p="NID.cs" t="Include" />
+                <e p="TransferFunctions.cs" t="Include" />
+              </e>
+              <e p="EggSack.cs" t="Include" />
+            </e>
+            <e p="AgentsManager.cs" t="Include" />
+            <e p="Environment" t="Include">
+              <e p="MapGridCell.cs" t="Include" />
+              <e p="SpawnZone.cs" t="Include" />
+              <e p="StartPositionsPresetLists.cs" t="Include" />
+            </e>
+            <e p="Feat.cs" t="Include" />
+            <e p="Genomes" t="Include">
+              <e p="CandidateAgentData.cs" t="Include" />
+              <e p="CritterGenomeInterpretor.cs" t="Include" />
+              <e p="Critters" t="Include">
+                <e p="AgentGenome.cs" t="Include" />
+                <e p="Body" t="Include">
+                  <e p="BodyGenome.cs" t="Include" />
+                  <e p="CritterModuleAppearanceGenome.cs" t="Include" />
+                  <e p="CritterModuleCommunicationGenome.cs" t="Include" />
+                  <e p="CritterModuleCoreGenome.cs" t="Include" />
+                  <e p="CritterModuleDevelopmentalGenome.cs" t="Include" />
+                  <e p="CritterModuleEnvironmentSensorsGenome.cs" t="Include" />
+                  <e p="CritterModuleFoodSensorsGenome.cs" t="Include" />
+                  <e p="CritterModuleFriendSensorsGenome.cs" t="Include" />
+                  <e p="CritterModuleMovementGenome.cs" t="Include" />
+                  <e p="CritterModuleTargetGenome.cs" t="Include" />
+                  <e p="CritterModuleThreatSensorsGenome.cs" t="Include" />
+                  <e p="EggSackGenome.cs" t="Include" />
+                </e>
+                <e p="Brain" t="Include">
+                  <e p="BrainGenome.cs" t="Include" />
+                  <e p="LinkGenome.cs" t="Include" />
+                  <e p="NeuronGenome.cs" t="Include" />
+                </e>
+              </e>
+              <e p="GenePool.cs" t="Include" />
+              <e p="MasterGenomePool.cs" t="Include" />
+              <e p="SpeciesGenomePool.cs" t="Include" />
+              <e p="StartPositionGenome.cs" t="Include" />
+              <e p="WorldLayers" t="Include">
+                <e p="WorldLayerAlgaeGenome.cs" t="Include" />
+                <e p="WorldLayerDecomposerGenome.cs" t="Include" />
+                <e p="WorldLayerPlantGenome.cs" t="Include" />
+                <e p="WorldLayerTerrainGenome.cs" t="Include" />
+                <e p="WorldLayerVertebrateGenome.cs" t="Include" />
+                <e p="WorldLayerZooplanktonGenome.cs" t="Include" />
+              </e>
+            </e>
+            <e p="ReactionDiffusion.cs" t="Include" />
+            <e p="Settings" t="Include">
+              <e p="MutationSettings.cs" t="Include" />
+              <e p="SettingsAgents.cs" t="Include" />
+              <e p="SettingsAlgaeParticles.cs" t="Include" />
+              <e p="SettingsEnvironment.cs" t="Include" />
+              <e p="SettingsManager.cs" t="Include" />
+              <e p="SettingsZooplankton.cs" t="Include" />
+            </e>
+            <e p="SimEventData.cs" t="Include" />
+            <e p="SimEventsManager.cs" t="Include" />
+            <e p="SimResourceManager.cs" t="Include" />
+            <e p="SimulationManager.cs" t="Include" />
+            <e p="SimulationStateData.cs" t="Include" />
+            <e p="TrophicKingdom.cs" t="Include" />
+            <e p="TrophicLayersManager.cs" t="Include" />
+            <e p="TrophicSlot.cs" t="Include" />
+            <e p="TrophicTier.cs" t="Include" />
+            <e p="VegetationManager.cs" t="Include" />
+            <e p="WildSpirit.cs" t="Include" />
+            <e p="ZooplanktonManager.cs" t="Include" />
+          </e>
+          <e p="Test" t="Include">
+            <e p="CritterMovementTestScript.cs" t="Include" />
+            <e p="TestCommandBuffer.cs" t="Include" />
+            <e p="TestControllerInput.cs" t="Include" />
+          </e>
+          <e p="UI" t="Include">
+            <e p="BrushesUI.cs" t="Include" />
+            <e p="ClockUI.cs" t="Include" />
+            <e p="CreationBrush.cs" t="Include" />
+            <e p="DebugPanelUI.cs" t="Include" />
+            <e p="FeatsUI.cs" t="Include" />
+            <e p="GenomeViewerUI.cs" t="Include" />
+            <e p="GlobalResourcesUI.cs" t="Include" />
+            <e p="GraphData.cs" t="Include" />
+            <e p="KnowledgeUI.cs" t="Include" />
+            <e p="MutationUI.cs" t="Include" />
+            <e p="OLD" t="Include">
+              <e p="SimEventComponent.cs" t="Include" />
+              <e p="TreeOfLifeManager.cs" t="Include" />
+              <e p="TreeOfLifeNodeRaycastTarget.cs" t="Include" />
+              <e p="TreeOfLifeSpeciesNodeData.cs" t="Include" />
+              <e p="TreeOfLifeStemSegmentData.cs" t="Include" />
+            </e>
+            <e p="SpeciesOverviewUI.cs" t="Include" />
+            <e p="TheCursorCzar.cs" t="Include" />
+            <e p="UIManager.cs" t="Include" />
+            <e p="WatcherUI.cs" t="Include" />
+            <e p="Widgets" t="Include">
+              <e p="AgentBehaviorOneHot.cs" t="Include" />
+              <e p="GenomeButtonPrefabScript.cs" t="Include" />
+              <e p="GenomeButtonTooltipSource.cs" t="Include" />
+              <e p="SpeciesTreeBarUI.cs" t="Include" />
+              <e p="WidgetAgentStatus.cs" t="Include" />
+            </e>
+            <e p="WorldSpiritHubUI.cs" t="Include" />
+          </e>
+          <e p="Utility" t="Include">
+            <e p="UtilityMutationFunctions.cs" t="Include" />
+            <e p="WallRandomizer.cs" t="Include" />
+          </e>
+        </e>
+      </e>
+      <e p="Evolution.sln" t="IncludeFlat" />
+      <e p="obj" t="ExcludeRecursive" />
+      <e p="Packages" t="ExcludeRecursive" />
+      <e p="Temp\bin" t="ExcludeRecursive" />
+    </e>
+  </component>
+</project>
