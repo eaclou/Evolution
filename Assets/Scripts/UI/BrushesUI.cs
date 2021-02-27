@@ -25,7 +25,7 @@ public class BrushesUI : MonoBehaviour {
         
     public float toolbarInfluencePoints = 1f;
     public Text textInfluencePointsValue;
-    public Material infoMeterInfluencePointsMat;
+    //public Material infoMeterInfluencePointsMat;
     private int influencePointsCooldownCounter = 0;
     private int influencePointsCooldownDuration = 90;
     public bool isInfluencePointsCooldown = false;
@@ -310,8 +310,6 @@ public class BrushesUI : MonoBehaviour {
             //strSpiritBrushEffects = "Left-Click:\nFollows the nearest Vertebrate\n\nRight-Click:\nStops following";
         }
 
-        UpdateInfluencePointsUI();
-
         textBrushLinkedSpiritName.resizeTextMaxSize = 20;
 
         textSelectedBrushName.text = spiritBrushName;
@@ -417,33 +415,6 @@ public class BrushesUI : MonoBehaviour {
         }
 
         textSelectedBrushDescription.text = str;
-    }
-	private void UpdateInfluencePointsUI() {
-        // Influence points meter:     
-        if(isInfluencePointsCooldown) {
-            influencePointsCooldownCounter++;
-            if(influencePointsCooldownCounter > influencePointsCooldownDuration) {
-                influencePointsCooldownCounter = 0;
-                isInfluencePointsCooldown = false;
-            }
-        }
-        if(toolbarInfluencePoints < 0.1f) {
-            toolbarInfluencePoints += 0.00015f; // x10 while debugging
-        }
-        else {
-            toolbarInfluencePoints += 0.001f; // x10 while debugging
-        }
-        toolbarInfluencePoints = Mathf.Clamp01(toolbarInfluencePoints);
-        infoMeterInfluencePointsMat.SetFloat("_FillPercentage", toolbarInfluencePoints);
-        Color influenceBarTint = new Color(0.2f, 0.8f, 1f, 1f);
-        string influenceText = (toolbarInfluencePoints * 100f).ToString("F0") + "%";
-        if(isInfluencePointsCooldown) {
-            influenceBarTint = new Color(0.8f, 0.2f, 0.2f, 1f);
-            influenceText = "cooldown";
-        }
-        infoMeterInfluencePointsMat.SetColor("_Tint", influenceBarTint);
-        textInfluencePointsValue.text = "Influence: \n" + influenceText;
-        
     }
     private void UpdateBrushPaletteUI() {
         TrophicLayersManager layerManager = uiManagerRef.gameManager.simulationManager.trophicLayersManager;  

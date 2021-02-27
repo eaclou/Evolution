@@ -46,7 +46,7 @@ public class CameraManager : MonoBehaviour {
     public Vector4 worldSpaceCameraRightDir;
     public Vector4 worldSpaceCameraUpDir;
 
-    public GameObject debugMarker;
+    //public GameObject debugMarker;
     
     // Use this for initialization
     void Start () {
@@ -145,7 +145,7 @@ public class CameraManager : MonoBehaviour {
         Vector3 camUp = this.gameObject.transform.up;
         worldSpaceCameraUpDir = new Vector4(camUp.x, camUp.y, camUp.z, 0f);
 
-        debugMarker.transform.position = topLeft;
+        //debugMarker.transform.position = topLeft;
     }
 
     public void MoveCamera(Vector2 dir) {

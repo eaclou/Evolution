@@ -456,10 +456,6 @@ public class BaronVonTerrain : RenderBaron {
     }*/
 
     private void InitializeMaterials() {
-        frameBufferStrokeDisplayMat.SetPass(0);
-        frameBufferStrokeDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
-        frameBufferStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        frameBufferStrokeDisplayMat.SetBuffer("frameBufferStrokesCBuffer", frameBufferStrokesCBuffer);     
         
         
         //groundStrokesLrgDisplayMat.SetPass(0);

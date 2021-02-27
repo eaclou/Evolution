@@ -25,7 +25,7 @@ public class UIManager : MonoBehaviour {
     // * Make this private, use accessors to eliminate references to this script
     public GameManager gameManager => GameManager.instance;
 
-    private bool firstTimeStartup = true;
+    //private bool firstTimeStartup = true;
     
     public GameObject cursorParticlesGO;
 
@@ -270,7 +270,7 @@ public class UIManager : MonoBehaviour {
                 break;
             case GameState.Playing:
                 //canvasMain.renderMode = RenderMode.ScreenSpaceCamera;
-                firstTimeStartup = false;
+                //firstTimeStartup = false;
                 EnterPlayingUI();
                 break;
             default:
