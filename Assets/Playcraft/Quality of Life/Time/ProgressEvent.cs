@@ -9,6 +9,7 @@ namespace Playcraft
 {
     public class ProgressEvent : MonoBehaviour 
     {
+        public float defaultDuration;
         public PercentEvent[] actions;
         [SerializeField] bool overrideInputValidation = default;
                 
@@ -22,6 +23,8 @@ namespace Playcraft
                 if (actions[i].percent > actions[i + 1].percent)
                     actions[i].percent = actions[i + 1].percent;
         }
+        
+        public void Begin() { Begin(defaultDuration); }
         
         public void Begin(float duration)
         {

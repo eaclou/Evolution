@@ -1,8 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Playcraft;
 using UnityEngine;
 
-public class CameraManager : MonoBehaviour {
+public class CameraManager : Singleton<CameraManager> {
 
     public Vector3 curCameraFocusPivotPos;
     //private Vector3 prevCameraFocusPivotPos;

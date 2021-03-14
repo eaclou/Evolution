@@ -12,14 +12,25 @@
   </component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/17AD9609-AE06-4F2C-9315-931FF97ADCF1/e9/3e0ac117/ComputeBuffer.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Scripts/Rendering/TheRenderKing.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/LoadingPanelUI.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/Rendering/TheRenderKing.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/17AD9609-AE06-4F2C-9315-931FF97ADCF1/c3/85153ec3/ComputeShader.cs" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="IdeDocumentHistory">
     <changedPaths>
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Test/TestCommandBuffer.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Rendering/BaronVonTerrain.cs" />
+      <option value="$PROJECT_DIR$/Assets/Playcraft/Quality of Life/Unity Hooks/Input/KeyboardInput.cs" />
+      <option value="$PROJECT_DIR$/Assets/Playcraft/Validate.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/LoadingUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Playcraft/Quality of Life/Time/ProgressEvent.cs" />
+      <option value="$PROJECT_DIR$/Assets/Playcraft/UI/Cursor/CursorInterface.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Camera/CameraManager.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Core/GameManager.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Audio/AudioManager.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/LoadingPanelUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" />
     </changedPaths>
   </component>
   <component name="ProjectId" id="1owaWgGpM80xkcfA3szn5iw9YkG" />
@@ -63,6 +74,9 @@
       <option name="presentableId" value="Default" />
       <updated>1614200144109</updated>
       <workItem from="1614200153211" duration="1412000" />
+      <workItem from="1614936261144" duration="1612000" />
+      <workItem from="1615064385687" duration="5320000" />
+      <workItem from="1615691236457" duration="9203000" />
     </task>
     <servers />
   </component>

@@ -6,9 +6,7 @@ namespace Playcraft
 {
     public class KeyboardInput : MonoBehaviour
     {    
-        #pragma warning disable 0649
         [SerializeField] Keybinding[] bindings;
-        #pragma warning restore 0649
         
         void Update()
         {
@@ -20,11 +18,9 @@ namespace Playcraft
     [Serializable]
     public class Keybinding
     {
-        #pragma warning disable 0649
-        [SerializeField] KeyCode[] keys;
+        public KeyCode[] keys;
         [SerializeField] PressType pressType;
         [SerializeField] UnityEvent OnActive;
-        #pragma warning restore 0649
         
         public void Update()
         {

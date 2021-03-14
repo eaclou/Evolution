@@ -1,9 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Playcraft;
 using UnityEngine;
 using UnityEngine.Audio;
 
-public class AudioManager : MonoBehaviour {
+public class AudioManager : Singleton<AudioManager> {
 
     public AudioMixer masterAudioMixer;
 
@@ -59,4 +60,20 @@ public class AudioManager : MonoBehaviour {
         gameplayAudioGroupGO.SetActive(false);
     }
 
+    public void BeginFadeMenuToGame(float duration) { StartCoroutine(FadeMenuToGame(duration)); }
+
+    // * Replace method calls with delegates so this can be reused for all fades
+    IEnumerator FadeMenuToGame(float duration)
+    {
+        float percent = 0f;
+        float startTime = Time.time;
+    
+        while (percent < 1f)
+        {
+            AdjustMenuVolume(1f - percent);
+            AdjustGameplayVolume(percent);
+            percent = Time.time - startTime / duration;
+            yield return null;
+        }
+    }
 }

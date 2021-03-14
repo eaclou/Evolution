@@ -32,19 +32,23 @@ public class GameManager : Singleton<GameManager> {
         TransitionToGameState(GameState.MainMenu); // better way to do this???
     }
 
-    public void StartNewGameBlank() {
+    public void StartNewGameBlank() 
+    {
         // Apply Quality Settings from Game Options:
         ApplyQualitySettings();
         simulationManager.isQuickStart = false;
         // SimulationManager needs to Load First:
-        TransitionToGameState(GameState.Loading);       
+        TransitionToGameState(GameState.Loading); 
+        simulationManager.BeginLoadingNewSimulation();    
     }
-    public void StartNewGameQuick() {
+    public void StartNewGameQuick() 
+    {
         // Apply Quality Settings from Game Options:
         ApplyQualitySettings();
         simulationManager.isQuickStart = true;
         // SimulationManager needs to Load First:
-        TransitionToGameState(GameState.Loading);       
+        TransitionToGameState(GameState.Loading);
+        simulationManager.BeginLoadingNewSimulation();           
     }
 
     private void ApplyQualitySettings() {
@@ -124,27 +128,22 @@ public class GameManager : Singleton<GameManager> {
 
         // Depending on GameState, execute Frame:
 
-        switch(currentGameState) {
+        switch(currentGameState) 
+        {
             case GameState.MainMenu:
                 // Do Nothing... hmm
                 // Test ripple distortion ui shader
-
-
                 break;
             case GameState.Loading:
                 // Check on status of Simulation manager, wait for it to be fully loaded and ready to go:                
-                if(simulationManager._LoadingComplete) {
-                    if(simulationManager._BigBangOn) { //_SimulationWarmUpComplete) {
-
-                        TransitionToGameState(GameState.Playing);
-                    }
-                    else {
-                        simulationManager.TickLoading(); // continue Warming Up
-                    }
+                if(simulationManager._LoadingComplete && simulationManager._BigBangOn) 
+                {
+                    TransitionToGameState(GameState.Playing);
                 }
-                else {
-                    simulationManager.TickLoading(); // *** change this to one-time call rather than continual???
-                }
+                //else 
+                //{
+                //    simulationManager.TickLoading(); // *** change this to one-time call rather than continual???
+                //}
                 break;
             case GameState.Playing:
                 simulationManager.TickSimulation();
@@ -204,7 +203,6 @@ public class GameManager : Singleton<GameManager> {
                 // Can add more safety checks and additional logic later:
                 this.currentGameState = nextState;
                 
-
                 uiManager.TransitionToNewGameState(nextState);
                 break;
             default:

@@ -125,6 +125,7 @@ public class MainMenuUI : MonoBehaviour
 
     public void MouseEnterControlsButton() 
     {
+        if (optionsMenuOn) return;
         textMouseOverInfo.gameObject.SetActive(true);
         textMouseOverInfo.text = "Arrows or WASD for movement, scrollwheel for zoom. 'R' and 'F' tilt Camera.\nKeyboard & Mouse only - Controller support coming soon.";
     }

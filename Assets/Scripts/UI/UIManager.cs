@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Playcraft;
+using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
@@ -24,6 +25,7 @@ public class UIManager : MonoBehaviour {
     
     // * Make this private, use accessors to eliminate references to this script
     public GameManager gameManager => GameManager.instance;
+    SimulationManager simManager => SimulationManager.instance;
 
     //private bool firstTimeStartup = true;
     
@@ -49,14 +51,15 @@ public class UIManager : MonoBehaviour {
     public GameObject panelSpeciesOverview;
     public GameObject panelGraphs;
 
-    public Image imageLoadingStartBG;
-    public Image imageLoadingStrokes01;
-    public Image imageLoadingStrokes02;
-    public Image imageLoadingStrokes03;
-    public Image imageLoadingStrokesFull;
-    public Image imageLoadingGemGrowing;
-    public Button buttonLoadingGemStart;
-    public Text textLoadingTooltips;
+    // *** WPP: Removed 3/13/21
+    //public Image imageLoadingStartBG;
+    //public Image imageLoadingStrokes01;
+    //public Image imageLoadingStrokes02;
+    //public Image imageLoadingStrokes03;
+    //public Image imageLoadingStrokesFull;
+    //public Image imageLoadingGemGrowing;
+    //public Button buttonLoadingGemStart;
+    //public Text textLoadingTooltips;
 
     public GameObject panelBigBang;
     public Image imageBigBangStrokes01;
@@ -72,7 +75,6 @@ public class UIManager : MonoBehaviour {
         Add,
         Stir
     }
-
     
     // *********************************************    NEW UI PASS *******************
     public GameObject panelClock;
@@ -259,6 +261,7 @@ public class UIManager : MonoBehaviour {
     public void EnterObserverMode() {
         isObserverMode = true;
     }
+    
     public void TransitionToNewGameState(GameState gameState) {
         mainMenu.gameObject.SetActive(gameState == GameState.MainMenu);
     
@@ -312,13 +315,13 @@ public class UIManager : MonoBehaviour {
     
     [SerializeField] MainMenuUI mainMenu;
 
+
     void Update() {
-        // * Remove: replace with delegation
         switch (gameManager.CurrentGameState) {
             case GameState.MainMenu: break;
-            case GameState.Loading:
-                UpdateLoadingUI();
-                break;
+            case GameState.Loading: break;
+                //UpdateLoadingUI();
+                //break;
             case GameState.Playing:
                 UpdateSimulationUI();
                 break;
@@ -328,7 +331,8 @@ public class UIManager : MonoBehaviour {
         }
     }
     
-    private void UpdateLoadingUI() {
+    // *** WPP: Removed 3/13/21
+    /*private void UpdateLoadingUI() {
         //Cursor.visible = true;
         //imageLoadingGemGrowing.gameObject.SetActive(true);
         //buttonLoadingGemStart.gameObject.SetActive(false);
@@ -343,22 +347,20 @@ public class UIManager : MonoBehaviour {
             imageLoadingStrokesFull.gameObject.SetActive(true);
         }
         
-        /*if (loadingProgress < 0.4f) {
+        //if (loadingProgress < 0.4f) {
             //textLoadingTooltips.text = "( Feeding Hamsters )";
-        }
-        if (loadingProgress < 0.1f) {
-            textLoadingTooltips.text = "( Reticulating Splines )";
-        }*/
-    }
+        //}
+        //if (loadingProgress < 0.1f) {
+        //    textLoadingTooltips.text = "( Reticulating Splines )";
+        //}
+    }*/
     
     private void UpdateBigBangPanel() {
         if(gameManager.simulationManager._BigBangOn) {
             panelBigBang.SetActive(true);
             bigBangFramesCounter += 1;
             if(bigBangFramesCounter == 1) {
-                InitialUnlocks();
-
-                
+                InitialUnlocks();    
             }   
             
             if(bigBangFramesCounter > 70) {
