@@ -40,15 +40,8 @@ public class SimulationManager : Singleton<SimulationManager>
 
     //public float curPlayerMutationRate = 0.75f;  // UI-based value, giving player control over mutation frequency with one parameter
 
-    private bool isLoading = false;
-    private bool loadingComplete = false;
-    public bool _LoadingComplete => loadingComplete;
-
-    private bool simulationWarmUpComplete = false;
-    public bool _SimulationWarmUpComplete => simulationWarmUpComplete;
-
-    private int numWarmUpTimeSteps = 30;
-    private int currentWarmUpTimeStep = 0;
+    public bool loadingComplete = false;
+    
     public bool _BigBangOn = false;
 
     private static float mapSize = 256f;  // This determines scale of environment, size of FluidSim plane!!! Important!
@@ -163,71 +156,12 @@ public class SimulationManager : Singleton<SimulationManager>
         
 
     #region loading   // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& LOADING LOADING LOADING &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-    // *** WPP: Removed 3/13/21
-    /*public void TickLoading() 
-    {
-        // Has basic loading phase completed?
-        if(loadingComplete) 
-        {
-            // if so, warming up:
-            //uiManager.loadingProgress = (float)currentWarmUpTimeStep / (float)numWarmUpTimeSteps;
-        
-            //uiManager.imageLoadingGemGrowing.gameObject.SetActive(false);
-            //uiManager.buttonLoadingGemStart.gameObject.SetActive(true);
-            //Cursor.visible = true;
-
-            if(currentWarmUpTimeStep >= numWarmUpTimeSteps) 
-            {
-                Debug.Log("WarmUp Complete!!! ");
-                simulationWarmUpComplete = true;
-
-                //LoadTrainingData();
-
-                //turn off menu music:
-                audioManager.TurnOffMenuAudioGroup();
-
-                cameraManager.SetTargetAgent(agentsArray[0], 0);  // otherwise it's null and a giant mess
-            }
-            else 
-            {
-                //Debug.Log("WarmUp Step " + currentWarmUpTimeStep.ToString());
-                TickSimulation();
-
-                // Fade out menu music:
-                audioManager.AdjustMenuVolume(1f - ((float)currentWarmUpTimeStep / (float)numWarmUpTimeSteps));
-                // Fade In gameplay audio:
-                audioManager.AdjustGameplayVolume((float)currentWarmUpTimeStep / (float)numWarmUpTimeSteps);
-
-                currentWarmUpTimeStep++;
-            }
-        }
-        else 
-        {
-            Cursor.visible = false;
-            uiManager.imageLoadingGemGrowing.gameObject.SetActive(true);
-            uiManager.buttonLoadingGemStart.gameObject.SetActive(false);
-
-            // Check if already loading or if this is the first time startup:
-            if(!isLoading) 
-            {
-                // Start Loading coroutine!!!!:
-                isLoading = true;
-                Debug.Log("StartCoroutine(LoadingNewSimulation()); " + (Time.realtimeSinceStartup).ToString());
-                StartCoroutine(LoadingNewSimulation());
-
-                // Turn on Gameplay Audio:
-                audioManager.TurnOnGameplayAudioGroup();
-            }  
-        }  
-    }*/
     
     public void LoadingWarmupComplete()
     {
-        simulationWarmUpComplete = true;
-
+        //simulationWarmUpComplete = true;
         // Turn off menu music:
         audioManager.TurnOffMenuAudioGroup();
-
         // otherwise it's null and a giant mess
         cameraManager.SetTargetAgent(agentsArray[0], 0);  
     }
@@ -236,23 +170,13 @@ public class SimulationManager : Singleton<SimulationManager>
 
     IEnumerator LoadingNewSimulation() 
     {
-        //Debug.Log("LoadingNewSimulation() ");
-        //const float maxComputeTimePerFrame = 0.01f; // 10 milliseconds per frame
+        loadingComplete = false;
+
         float startTime = Time.realtimeSinceStartup;
         float masterStartTime = Time.realtimeSinceStartup;
-        //Debug.Log("Start: " + (Time.realtimeSinceStartup - startTime).ToString());
-        //float elapsedTime;
-        //uiManager.textLoadingTooltips.text = "LoadingInitializeCoreSimulationState()";
 
         loadingPanel.SetCursorActive(false);
         loadingPanel.Refresh("", 0);
-        // *** WPP: removed 3/13/21
-        //uiManager.textLoadingTooltips.text = "";
-        //uiManager.imageLoadingStartBG.gameObject.SetActive(true);
-        //uiManager.imageLoadingStrokes01.gameObject.SetActive(false);
-        //uiManager.imageLoadingStrokes02.gameObject.SetActive(false);
-        //uiManager.imageLoadingStrokes03.gameObject.SetActive(false);
-        //uiManager.imageLoadingStrokesFull.gameObject.SetActive(false);
 
         LoadingInitializeCoreSimulationState();  // creates arrays and stuff for the (hopefully)only time
         Debug.Log("LoadingInitializeCoreSimulationState: " + (Time.realtimeSinceStartup - startTime).ToString());
@@ -268,15 +192,6 @@ public class SimulationManager : Singleton<SimulationManager>
         LoadingInstantiateEggSacks();
 
         loadingPanel.Refresh("( Reticulating Splines )", 1);
-        // *** WPP: Removed 3/13/21
-        //uiManager.textLoadingTooltips.text = "( Reticulating Splines )";
-        //uiManager.imageLoadingStartBG.gameObject.SetActive(true);
-        //uiManager.imageLoadingStrokes01.gameObject.SetActive(true);
-
-        //uiManager.imageLoadingStrokes02.gameObject.SetActive(false);
-        //uiManager.imageLoadingStrokes03.gameObject.SetActive(false);
-        //uiManager.imageLoadingStrokesFull.gameObject.SetActive(false);
-        // ***
         
         Debug.Log("LoadingInstantiateEggSacks: " + (Time.realtimeSinceStartup - startTime).ToString());
         yield return null;
@@ -332,15 +247,6 @@ public class SimulationManager : Singleton<SimulationManager>
         yield return null;
 
         loadingPanel.Refresh("( Calculating Enjoyment Coefficients )", 2);
-        // *** WPP: Removed 3/13/21
-        //uiManager.textLoadingTooltips.text = "( Calculating Enjoyment Coefficients )";
-        //uiManager.imageLoadingStartBG.gameObject.SetActive(true);
-        //uiManager.imageLoadingStrokes01.gameObject.SetActive(true);
-        //uiManager.imageLoadingStrokes02.gameObject.SetActive(true);
-
-        //uiManager.imageLoadingStrokes03.gameObject.SetActive(false);
-        //uiManager.imageLoadingStrokesFull.gameObject.SetActive(false);
-        // ***
 
         //uiManager.textLoadingTooltips.text = "GentlyRouseTheRenderMonarchHisHighnessLordOfPixels()";   
         // Wake up the Render King and prepare him for the day ahead, proudly ruling over Renderland.
@@ -376,13 +282,6 @@ public class SimulationManager : Singleton<SimulationManager>
         LoadingHookUpModules();
 
         loadingPanel.Refresh("", 3);
-        // *** WPP: Removed 3/13/21
-        //uiManager.imageLoadingStartBG.gameObject.SetActive(true);
-        //uiManager.imageLoadingStrokes01.gameObject.SetActive(true);
-        //uiManager.imageLoadingStrokes02.gameObject.SetActive(true);
-        //uiManager.imageLoadingStrokes03.gameObject.SetActive(true);
-        //uiManager.imageLoadingStrokesFull.gameObject.SetActive(false);
-        // ***
         
         //yield return new WaitForSeconds(5f); // TEMP!!!
         Debug.Log("End Total: " + (Time.realtimeSinceStartup - masterStartTime).ToString());

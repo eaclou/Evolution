@@ -136,14 +136,10 @@ public class GameManager : Singleton<GameManager> {
                 break;
             case GameState.Loading:
                 // Check on status of Simulation manager, wait for it to be fully loaded and ready to go:                
-                if(simulationManager._LoadingComplete && simulationManager._BigBangOn) 
+                if(simulationManager.loadingComplete && simulationManager._BigBangOn) 
                 {
                     TransitionToGameState(GameState.Playing);
                 }
-                //else 
-                //{
-                //    simulationManager.TickLoading(); // *** change this to one-time call rather than continual???
-                //}
                 break;
             case GameState.Playing:
                 simulationManager.TickSimulation();
@@ -152,28 +148,6 @@ public class GameManager : Singleton<GameManager> {
                 Debug.LogError("No Enum Type Found! (" + currentGameState.ToString() + ")");
                 break;
         }
-
-
-        // OLD CRAP::::
-        //float sTime = Time.realtimeSinceStartup;
-        /*if(simulationManager.isTrainingSupervised && simulationManager.isGridSearching) {
-
-        }
-        else {
-            simulationManager.TickSimulation();
-        }
-        
-        if(simulationManager.trainingRequirementsMetSupervised) {
-            if(simulationManager.isTrainingSupervised) {                
-                for (int i = 0; i < 32; i++) {
-                    simulationManager.TickTrainingMode();
-                }
-            }                      
-        }
-        */
-        //if(Time.realtimeSinceStartup - sTime > 0.05f) {
-        //Debug.Log("FixedUpdate SLOW! " + (Time.realtimeSinceStartup - sTime).ToString());
-        //}
     }
 
     public void EscapeToMainMenu() {
@@ -187,12 +161,12 @@ public class GameManager : Singleton<GameManager> {
         switch (nextState) {
             case GameState.MainMenu:
                 // Can add more safety checks and additional logic later:
-                this.currentGameState = nextState;
+                currentGameState = nextState;
                 uiManager.TransitionToNewGameState(nextState);
                 break;
             case GameState.Loading:
                 // Can add more safety checks and additional logic later:
-                this.currentGameState = nextState;
+                currentGameState = nextState;
                 
                 // temp remove UI commandBuffer **********
                 //mainCam.RemoveAllCommandBuffers();
@@ -201,7 +175,7 @@ public class GameManager : Singleton<GameManager> {
                 break;
             case GameState.Playing:
                 // Can add more safety checks and additional logic later:
-                this.currentGameState = nextState;
+                currentGameState = nextState;
                 
                 uiManager.TransitionToNewGameState(nextState);
                 break;

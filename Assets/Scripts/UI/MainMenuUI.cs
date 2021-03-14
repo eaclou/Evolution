@@ -10,12 +10,12 @@ public class MainMenuUI : MonoBehaviour
     [SerializeField] GameObject panelGameOptions;
     
     GameManager gameManager => GameManager.instance;
-    
+    Profile profile => gameManager.activeProfile;
         
     bool firstTimeStartup
     {
-        get => gameManager.activeProfile.firstTimeStartup;
-        set => gameManager.activeProfile.firstTimeStartup = value;
+        get => profile.firstTimeStartup;
+        set => profile.firstTimeStartup = value;
     }
     
     bool optionsMenuOn;  // Game options main menu
@@ -101,44 +101,37 @@ public class MainMenuUI : MonoBehaviour
     
     #region REFACTOR: delegate to reusable system
     
-    public void MouseEnterQuickStart() 
-    {
+    public void MouseEnterQuickStart() {
         //textMouseOverInfo.gameObject.SetActive(true);
         //textMouseOverInfo.text = "Start with an existing ecosystem full of various living organisms.";
     }
     
-    public void MouseExitQuickStart() 
-    {
+    public void MouseExitQuickStart() {
         textMouseOverInfo.gameObject.SetActive(false);
     }
 
-    public void MouseEnterNewSimulation() 
-    {
+    public void MouseEnterNewSimulation() {
         //textMouseOverInfo.gameObject.SetActive(true);
         //textMouseOverInfo.text = "Create a brand new ecosystem from scratch. It might take a significant amount of time for intelligent creatures to evolve.\n*Not recommended for first-time players.";
     }
     
-    public void MouseExitNewSimulation() 
-    {
+    public void MouseExitNewSimulation() {
         textMouseOverInfo.gameObject.SetActive(false);
     }
 
-    public void MouseEnterControlsButton() 
-    {
+    public void MouseEnterControlsButton() {
         if (optionsMenuOn) return;
         textMouseOverInfo.gameObject.SetActive(true);
         textMouseOverInfo.text = "Arrows or WASD for movement, scrollwheel for zoom. 'R' and 'F' tilt Camera.\nKeyboard & Mouse only - Controller support coming soon.";
     }
     
-    public void MouseExitControlsButton() 
-    {
+    public void MouseExitControlsButton() {
         textMouseOverInfo.gameObject.SetActive(false);
     }
     
     #endregion
 
-    public void Refresh()
-    {
+    public void Refresh() {
         if (optionsMenuOn) 
         {
             panelGameOptions.SetActive(true);

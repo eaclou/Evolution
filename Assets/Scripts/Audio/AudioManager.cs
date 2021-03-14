@@ -63,13 +63,11 @@ public class AudioManager : Singleton<AudioManager> {
     public void BeginFadeMenuToGame(float duration) { StartCoroutine(FadeMenuToGame(duration)); }
 
     // * Replace method calls with delegates so this can be reused for all fades
-    IEnumerator FadeMenuToGame(float duration)
-    {
+    IEnumerator FadeMenuToGame(float duration) {
         float percent = 0f;
         float startTime = Time.time;
     
-        while (percent < 1f)
-        {
+        while (percent < 1f) {
             AdjustMenuVolume(1f - percent);
             AdjustGameplayVolume(percent);
             percent = Time.time - startTime / duration;

@@ -26,8 +26,6 @@ public class UIManager : MonoBehaviour {
     // * Make this private, use accessors to eliminate references to this script
     public GameManager gameManager => GameManager.instance;
     SimulationManager simManager => SimulationManager.instance;
-
-    //private bool firstTimeStartup = true;
     
     public GameObject cursorParticlesGO;
 
@@ -50,16 +48,6 @@ public class UIManager : MonoBehaviour {
     public GameObject panelSpeciesTree;
     public GameObject panelSpeciesOverview;
     public GameObject panelGraphs;
-
-    // *** WPP: Removed 3/13/21
-    //public Image imageLoadingStartBG;
-    //public Image imageLoadingStrokes01;
-    //public Image imageLoadingStrokes02;
-    //public Image imageLoadingStrokes03;
-    //public Image imageLoadingStrokesFull;
-    //public Image imageLoadingGemGrowing;
-    //public Button buttonLoadingGemStart;
-    //public Text textLoadingTooltips;
 
     public GameObject panelBigBang;
     public Image imageBigBangStrokes01;
@@ -330,30 +318,6 @@ public class UIManager : MonoBehaviour {
                 break;
         }
     }
-    
-    // *** WPP: Removed 3/13/21
-    /*private void UpdateLoadingUI() {
-        //Cursor.visible = true;
-        //imageLoadingGemGrowing.gameObject.SetActive(true);
-        //buttonLoadingGemStart.gameObject.SetActive(false);
-        if (loadingProgress > 0.5f) {
-            textLoadingTooltips.text = "";
-            
-            imageLoadingStartBG.gameObject.SetActive(false);
-            imageLoadingStrokes01.gameObject.SetActive(false);
-            imageLoadingStrokes02.gameObject.SetActive(false);
-            imageLoadingStrokes03.gameObject.SetActive(false);
-
-            imageLoadingStrokesFull.gameObject.SetActive(true);
-        }
-        
-        //if (loadingProgress < 0.4f) {
-            //textLoadingTooltips.text = "( Feeding Hamsters )";
-        //}
-        //if (loadingProgress < 0.1f) {
-        //    textLoadingTooltips.text = "( Reticulating Splines )";
-        //}
-    }*/
     
     private void UpdateBigBangPanel() {
         if(gameManager.simulationManager._BigBangOn) {

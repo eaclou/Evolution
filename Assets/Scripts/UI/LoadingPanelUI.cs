@@ -6,6 +6,8 @@ public class LoadingPanelUI : MonoBehaviour
 {
     [Header("Settings")]
     public float warmupTime;
+    [Tooltip("Percent of time into warmup when UI refreshes")]
+    [Range(0, 1)] public float refreshWarmupPercent = 0.5f;
 
     [Header("References")]
     public Image imageLoadingStartBG;
@@ -20,8 +22,7 @@ public class LoadingPanelUI : MonoBehaviour
     SimulationManager sim => SimulationManager.instance;
     AudioManager audio => AudioManager.instance;
     
-    public void Refresh(string tooltip, int stage)
-    {
+    public void Refresh(string tooltip, int stage) {
         textLoadingTooltips.text = tooltip;
         
         var  loading = stage < 4;
@@ -32,26 +33,22 @@ public class LoadingPanelUI : MonoBehaviour
         imageLoadingStrokesFull.gameObject.SetActive(!loading);        
     }
     
-    public void SetCursorActive(bool value)
-    {
+    public void SetCursorActive(bool value) {
         Cursor.visible = value;
         imageLoadingGemGrowing.gameObject.SetActive(!value);
         buttonLoadingGemStart.gameObject.SetActive(value);
     }
     
-    public void BeginWarmUp() 
-    { 
+    public void BeginWarmUp() { 
         StartCoroutine(WarmUpRoutine());
         audio.BeginFadeMenuToGame(warmupTime); 
     }
     
     // * If this gets complicated, delegate to ProgressEvent    
-    IEnumerator WarmUpRoutine()
-    {
-        var halfDelay = new WaitForSeconds(warmupTime/2f);
-        yield return halfDelay;
+    IEnumerator WarmUpRoutine() {
+        yield return new WaitForSeconds(warmupTime * refreshWarmupPercent);
         Refresh("", 4);
-        yield return halfDelay;
+        yield return new WaitForSeconds(warmupTime * (1 - refreshWarmupPercent));
         sim.LoadingWarmupComplete();
     }
 }

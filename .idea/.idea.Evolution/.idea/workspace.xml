@@ -26,11 +26,12 @@
       <option value="$PROJECT_DIR$/Assets/Playcraft/Quality of Life/Time/ProgressEvent.cs" />
       <option value="$PROJECT_DIR$/Assets/Playcraft/UI/Cursor/CursorInterface.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Camera/CameraManager.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Core/GameManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Audio/AudioManager.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Core/GameManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/LoadingPanelUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/MainMenuUI.cs" />
     </changedPaths>
   </component>
   <component name="ProjectId" id="1owaWgGpM80xkcfA3szn5iw9YkG" />
@@ -76,7 +77,8 @@
       <workItem from="1614200153211" duration="1412000" />
       <workItem from="1614936261144" duration="1612000" />
       <workItem from="1615064385687" duration="5320000" />
-      <workItem from="1615691236457" duration="9203000" />
+      <workItem from="1615691236457" duration="10591000" />
+      <workItem from="1615752093154" duration="3850000" />
     </task>
     <servers />
   </component>
