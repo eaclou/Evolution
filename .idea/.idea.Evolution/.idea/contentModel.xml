@@ -11,6 +11,9 @@
           <e p="OFL.txt" t="Include" />
         </e>
         <e p="Playcraft" t="Include">
+          <e p="_NEW" t="Include">
+            <e p="SetTimescale.cs" t="Include" />
+          </e>
           <e p="Additive Scenes" t="Include">
             <e p="AccessAdditiveSceneController.cs" t="Include" />
             <e p="AdditiveSceneController.cs" t="Include" />
@@ -800,7 +803,9 @@
             <e p="TestControllerInput.cs" t="Include" />
           </e>
           <e p="UI" t="Include">
+            <e p="BigBangPanelUI.cs" t="Include" />
             <e p="BrushesUI.cs" t="Include" />
+            <e p="ClockPanelUI.cs" t="Include" />
             <e p="ClockUI.cs" t="Include" />
             <e p="CreationBrush.cs" t="Include" />
             <e p="DebugPanelUI.cs" t="Include" />
@@ -812,6 +817,7 @@
             <e p="LoadingPanelUI.cs" t="Include" />
             <e p="MainMenuUI.cs" t="Include" />
             <e p="MutationUI.cs" t="Include" />
+            <e p="ObserverModeUI.cs" t="Include" />
             <e p="OLD" t="Include">
               <e p="SimEventComponent.cs" t="Include" />
               <e p="TreeOfLifeManager.cs" t="Include" />
@@ -819,6 +825,7 @@
               <e p="TreeOfLifeSpeciesNodeData.cs" t="Include" />
               <e p="TreeOfLifeStemSegmentData.cs" t="Include" />
             </e>
+            <e p="SimulationUI.cs" t="Include" />
             <e p="SpeciesOverviewUI.cs" t="Include" />
             <e p="TheCursorCzar.cs" t="Include" />
             <e p="UIManager.cs" t="Include" />

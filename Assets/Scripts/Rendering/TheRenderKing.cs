@@ -1,9 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Playcraft;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-public class TheRenderKing : MonoBehaviour {
+public class TheRenderKing : Singleton<TheRenderKing> {
 
     // SET IN INSPECTOR!!!::::
     public EnvironmentFluidManager fluidManager;
@@ -1906,7 +1907,7 @@ public class TheRenderKing : MonoBehaviour {
     public void SimSpiritBrushQuads() {
 
         bool isSpawn = false;
-        if (simManager.uiManager.panelFocus == UIManager.PanelFocus.Brushes) {
+        if (simManager.uiManager.panelFocus == PanelFocus.Brushes) {
             isSpawn = true;
         }
         float isBrushing = 0f;
@@ -2772,7 +2773,7 @@ public class TheRenderKing : MonoBehaviour {
                 isBrushing = false;
             }
             if (isBrushing) {
-                if (simManager.uiManager.panelFocus == UIManager.PanelFocus.Brushes) {
+                if (simManager.uiManager.panelFocus == PanelFocus.Brushes) {
                     spiritBrushRenderMat.SetPass(0);
                     spiritBrushRenderMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer); // *** Needed? or just set it once in beginning....
                     spiritBrushRenderMat.SetVector("_Position", new Vector4(simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.x, simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.y, simManager.uiManager.wildSpirit.curRoamingSpiritPosition.x, simManager.uiManager.wildSpirit.curRoamingSpiritPosition.y));
@@ -3436,7 +3437,7 @@ public class TheRenderKing : MonoBehaviour {
             float isHighlight = 0f;
             float isSelectedZoop = 0f;
             float isSelectedPlant = 0f;
-            if (simManager.uiManager.watcherUI.watcherSelectedTrophicSlotRef != null && simManager.uiManager.panelFocus == UIManager.PanelFocus.Watcher) {
+            if (simManager.uiManager.watcherUI.watcherSelectedTrophicSlotRef != null && simManager.uiManager.panelFocus == PanelFocus.Watcher) {
 
                 isHighlight = 1f;
                 if (simManager.uiManager.watcherUI.watcherSelectedTrophicSlotRef.kingdomID == 2 && simManager.uiManager.watcherUI.watcherSelectedTrophicSlotRef.tierID == 0) {
@@ -3535,7 +3536,7 @@ public class TheRenderKing : MonoBehaviour {
             }
 
             // STIR STICK!!!!
-            if (simManager.uiManager.curActiveTool == UIManager.ToolType.Stir) {
+            if (simManager.uiManager.curActiveTool == ToolType.Stir) {
                 /*
                 Quaternion rot = Quaternion.Euler(new Vector3(Mathf.Clamp(simManager.uiManager.theCursorCzar.smoothedMouseVel.y * 2.5f + 10f, -45f, 45f), Mathf.Clamp(simManager.uiManager.theCursorCzar.smoothedMouseVel.x * -1.5f, -45f, 45f), 0f));
                 float scale = Mathf.Lerp(0.35f, 1.75f, baronVonWater.camDistNormalized);
@@ -3664,9 +3665,9 @@ public class TheRenderKing : MonoBehaviour {
                 */
                 critterDebugGenericStrokeMat.SetInt("_HoverID", simManager.uiManager.cameraManager.mouseHoverAgentIndex);
                 critterDebugGenericStrokeMat.SetInt("_SelectedID", simManager.uiManager.cameraManager.targetAgentIndex);
-                float isHighlightCritter = simManager.uiManager.panelFocus == UIManager.PanelFocus.Watcher ? 1f : 0f;
+                float isHighlightCritter = simManager.uiManager.panelFocus == PanelFocus.Watcher ? 1f : 0f;
                 float isHoverCritter = simManager.uiManager.cameraManager.isMouseHoverAgent ? 1f : 0f;
-                if (simManager.uiManager.panelFocus != UIManager.PanelFocus.Watcher) {
+                if (simManager.uiManager.panelFocus != PanelFocus.Watcher) {
                     isHighlightCritter = 0f;
                     isHoverCritter = 0f;
                 }
@@ -3718,8 +3719,8 @@ public class TheRenderKing : MonoBehaviour {
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonWater.waterNutrientsBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterNutrientsBitsCBuffer.count);
 
 
-            if (simManager.uiManager.curActiveTool == UIManager.ToolType.Add) {
-                if (simManager.uiManager.panelFocus == UIManager.PanelFocus.Brushes) {
+            if (simManager.uiManager.curActiveTool == ToolType.Add) {
+                if (simManager.uiManager.panelFocus == PanelFocus.Brushes) {
 
                     gizmoStirToolMat.SetPass(0);
                     gizmoStirToolMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);

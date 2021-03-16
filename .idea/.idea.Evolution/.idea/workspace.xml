@@ -12,7 +12,12 @@
   </component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/17AD9609-AE06-4F2C-9315-931FF97ADCF1/e9/3e0ac117/ComputeBuffer.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/BigBangPanelUI.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/ObserverModeUI.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/ClockPanelUI.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/SimulationUI.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/LoadingPanelUI.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Playcraft/_NEW/SetTimeScale.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Rendering/TheRenderKing.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/17AD9609-AE06-4F2C-9315-931FF97ADCF1/c3/85153ec3/ComputeShader.cs" root0="SKIP_HIGHLIGHTING" />
   </component>
@@ -30,8 +35,21 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/Core/GameManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/LoadingPanelUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/MainMenuUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Playcraft/_NEW/SetTimescale.cs" />
+      <option value="$PROJECT_DIR$/Assets/Playcraft/_NEW/SetTimeScale.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/ClockPanelUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/BrushesUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/WatcherUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/WorldSpiritHubUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Rendering/TheRenderKing.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/SpeciesTreeBarUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/TheCursorCzar.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/BigBangPanelUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/ObserverModeUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/GlobalResourcesUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/SimulationUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" />
     </changedPaths>
   </component>
   <component name="ProjectId" id="1owaWgGpM80xkcfA3szn5iw9YkG" />
@@ -79,6 +97,7 @@
       <workItem from="1615064385687" duration="5320000" />
       <workItem from="1615691236457" duration="10591000" />
       <workItem from="1615752093154" duration="3850000" />
+      <workItem from="1615872028434" duration="8901000" />
     </task>
     <servers />
   </component>
@@ -86,5 +105,24 @@
   <component name="UnityUnitTestConfiguration" currentTestLauncher="EditMode" />
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs</url>
+          <line>476</line>
+          <properties documentPath="D:\UnityProjects\Freelance\Evolution\Assets\Scripts\UI\UIManager.cs" initialLine="473" containingFunctionPresentation="method 'InitialUnlocks'">
+            <startOffsets>
+              <option value="19917" />
+            </startOffsets>
+            <endOffsets>
+              <option value="19918" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

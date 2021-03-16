@@ -816,9 +816,6 @@ public class GlobalResourcesUI : MonoBehaviour {
                 SpeciesTreeBarUI buttonScript = obj.GetComponent<SpeciesTreeBarUI>();
                 
                 buttonScript.Initialize(uiManagerRef, s, speciesID);
-                
-                
-
             }
             
         }

@@ -156,7 +156,7 @@ public class WatcherUI : MonoBehaviour {
     	
     private void UpdateUI(TrophicLayersManager layerManager) {
 
-        if(uiManagerRef.panelFocus != UIManager.PanelFocus.Watcher) {           
+        if(uiManagerRef.panelFocus != PanelFocus.Watcher) {           
             panelWatcherExpand.SetActive(false);            
         }
         else {
@@ -173,7 +173,7 @@ public class WatcherUI : MonoBehaviour {
         //panelWatcherSpiritVertebratesText.SetActive(false);
       
         TextCommonStatsA.gameObject.SetActive(false);
-        if(watcherSelectedTrophicSlotRef != null && uiManagerRef.panelFocus == UIManager.PanelFocus.Watcher) {
+        if(watcherSelectedTrophicSlotRef != null && uiManagerRef.panelFocus == PanelFocus.Watcher) {
             TextCommonStatsA.gameObject.SetActive(true);
 
             int critterIndex = uiManagerRef.cameraManager.targetAgentIndex;
@@ -487,25 +487,25 @@ public class WatcherUI : MonoBehaviour {
         if(isOpen) {  // if opening the panel automatically engage snooping mode
             //isSnoopingModeON = true;
             //uiManagerRef.isBrushModeON_snoopingOFF = false;
-            uiManagerRef.panelFocus = UIManager.PanelFocus.Watcher;
+            uiManagerRef.panelFocus = PanelFocus.Watcher;
             //uiManagerRef.curActiveTool = UIManager.ToolType.None;
 
             //animatorWatcherUI.SetBool("_IsOpen", true);
         }
         else {
-            uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
+            uiManagerRef.panelFocus = PanelFocus.WorldHub;
             //animatorWatcherUI.SetBool("_IsOpen", false);
         }
         //watcherLockedTrophicSlotRef = uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot;//
     }
     public void ClickSnoopModeButton() {        
         //uiManagerRef.isBrushModeON_snoopingOFF = false;
-        uiManagerRef.panelFocus = UIManager.PanelFocus.Watcher;
+        uiManagerRef.panelFocus = PanelFocus.Watcher;
         //uiManagerRef.curActiveTool = UIManager.ToolType.None;
     }
     public void ActivateWatcherPanel() {
         isOpen = true;
-        uiManagerRef.panelFocus = UIManager.PanelFocus.Watcher;
+        uiManagerRef.panelFocus = PanelFocus.Watcher;
         //animatorWatcherUI.SetBool("_IsOpen", true);
     }
 

@@ -91,7 +91,7 @@ public class BrushesUI : MonoBehaviour {
         string str = "";
 
         switch(uiManagerRef.curActiveTool) {
-            case UIManager.ToolType.None:
+            case ToolType.None:
                 //buttonToolbarInspect.GetComponent<Image>().color = buttonDisabledColor;
 
                 break;
@@ -103,14 +103,14 @@ public class BrushesUI : MonoBehaviour {
             case ToolType.Mutate:
                 //buttonToolbarMutate.GetComponent<Image>().color = buttonActiveColor;
                 break;*/
-            case UIManager.ToolType.Add:
+            case ToolType.Add:
                 str = "This spirit creates stuff.\n\nAlt Effect: Removes stuff.";
                 break;
             //case ToolType.Remove:
                 //buttonToolbarRemove.GetComponent<Image>().color = buttonActiveColor;
                 //buttonToolbarRemove.gameObject.transform.localScale = Vector3.one * 1.25f;
                 //break;
-            case UIManager.ToolType.Stir:
+            case ToolType.Stir:
                 str = "This spirit pushes material around.\n\nAlt Effect: None";
                 break;
             default:
@@ -174,7 +174,7 @@ public class BrushesUI : MonoBehaviour {
         
         //animatorBrushesUI.SetBool("MinPanel", !isOpen);
         bool isDim = false;
-        if(uiManagerRef.panelFocus == UIManager.PanelFocus.Brushes) {            
+        if(uiManagerRef.panelFocus == PanelFocus.Brushes) {            
             //animatorBrushesUI.SetBool("_IsDim", false);
         }
         else {
@@ -215,7 +215,7 @@ public class BrushesUI : MonoBehaviour {
 
         UpdateCurSelectedColor();
 
-        if(uiManagerRef.panelFocus == UIManager.PanelFocus.Brushes) {            
+        if(uiManagerRef.panelFocus == PanelFocus.Brushes) {            
             
         }
         else {
@@ -230,10 +230,10 @@ public class BrushesUI : MonoBehaviour {
         //imageIsBrushing.color = curIconColor;
 
         switch(uiManagerRef.curActiveTool) {
-            case UIManager.ToolType.None:
+            case ToolType.None:
                 //
                 break;            
-            case UIManager.ToolType.Add:
+            case ToolType.Add:
                 if(curCreationBrushIndex == 0) {
                     buttonBrushAdd.GetComponent<Image>().color = uiManagerRef.buttonActiveColor;
                     buttonBrushAdd.gameObject.transform.localScale = Vector3.one * 1.33f;
@@ -280,7 +280,7 @@ public class BrushesUI : MonoBehaviour {
 
                 }
                 break;            
-            case UIManager.ToolType.Stir:
+            case ToolType.Stir:
                 buttonBrushStir.GetComponent<Image>().color = uiManagerRef.buttonActiveColor;
                 buttonBrushStir.gameObject.transform.localScale = Vector3.one * 1.5f;
                 break;            
@@ -289,7 +289,7 @@ public class BrushesUI : MonoBehaviour {
 
         }
 
-        if(uiManagerRef.panelFocus != UIManager.PanelFocus.Brushes) {
+        if(uiManagerRef.panelFocus != PanelFocus.Brushes) {
             buttonBrushAdd.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor * 0.5f;
         }
     
@@ -302,7 +302,7 @@ public class BrushesUI : MonoBehaviour {
 
             
         }
-        if(uiManagerRef.curActiveTool == UIManager.ToolType.Stir) {
+        if(uiManagerRef.curActiveTool == ToolType.Stir) {
             spiritBrushName = "Lesser Stir Spirit";      
             imageSelectedBrushThumbnail.sprite = uiManagerRef.spriteSpiritBrushStirIcon;
 
@@ -520,7 +520,7 @@ public class BrushesUI : MonoBehaviour {
 
         }
         bool dimButtons = true;
-        if(uiManagerRef.panelFocus == UIManager.PanelFocus.Brushes) {
+        if(uiManagerRef.panelFocus == PanelFocus.Brushes) {
             dimButtons = false;
         }
         uiManagerRef.SetToolbarButtonStateUI(dimButtons, ref buttonBrushLinkedSpiritDecomposers, layerManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status, isSelectedDecomposers);
@@ -681,7 +681,7 @@ public class BrushesUI : MonoBehaviour {
             //animatorBrushesUI.SetBool("MinPanel", false);
         }
         else {
-            uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
+            uiManagerRef.panelFocus = PanelFocus.WorldHub;
 
             //animatorBrushesUI.SetBool("MinPanel", true);
         }
@@ -702,7 +702,7 @@ public class BrushesUI : MonoBehaviour {
     }*/
     public void ClickToolButtonStir() {
         
-        uiManagerRef.curActiveTool = UIManager.ToolType.Stir;
+        uiManagerRef.curActiveTool = ToolType.Stir;
               
         uiManagerRef.watcherUI.StopFollowingAgent();
         uiManagerRef.watcherUI.StopFollowingPlantParticle();
@@ -753,11 +753,11 @@ public class BrushesUI : MonoBehaviour {
         //uiManagerRef.isBrushModeON_snoopingOFF = true; // ***** Switching to brushingMode!!! ***
     }
     private void EnterCreationBrushMode() {
-        uiManagerRef.curActiveTool = UIManager.ToolType.Add;
+        uiManagerRef.curActiveTool = ToolType.Add;
         uiManagerRef.watcherUI.StopFollowingAgent();
         uiManagerRef.watcherUI.StopFollowingPlantParticle();
         uiManagerRef.watcherUI.StopFollowingAnimalParticle();      
-        uiManagerRef.panelFocus = UIManager.PanelFocus.Brushes;
+        uiManagerRef.panelFocus = PanelFocus.Brushes;
     }
     
     //*********************************************

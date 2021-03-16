@@ -3,6 +3,19 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
+public enum ToolType {
+    None,
+    Add,
+    Stir
+}
+
+public enum PanelFocus {
+    None,
+    WorldHub,
+    Brushes,
+    Watcher
+}
+
 public class UIManager : MonoBehaviour {
 
     #region attributes
@@ -36,12 +49,6 @@ public class UIManager : MonoBehaviour {
     public Text textFXPH_playing_start;
 
     public PanelFocus panelFocus = PanelFocus.WorldHub;
-    public enum PanelFocus {
-        None,
-        WorldHub,
-        Brushes,
-        Watcher
-    }
 
     public GameObject panelGenomeViewer;
     public GameObject panelMinimap;
@@ -58,11 +65,6 @@ public class UIManager : MonoBehaviour {
     public float terrainUpdateMagnitude;
     
     public ToolType curActiveTool;  // ******** move to phase out this approach
-    public enum ToolType {
-        None,
-        Add,
-        Stir
-    }
     
     // *********************************************    NEW UI PASS *******************
     public GameObject panelClock;
@@ -133,8 +135,9 @@ public class UIManager : MonoBehaviour {
     
     //public bool isActiveDebug = true;
 
-    public bool isObserverMode = false;
-    public bool isPaused = false;
+    //public bool isObserverMode = false;
+    
+    //public bool isPaused;
 
     public GameObject panelLoading;
     public GameObject panelPlaying;
@@ -143,10 +146,10 @@ public class UIManager : MonoBehaviour {
     public GameObject panelHallOfFameGenomes;
     public GameObject panelLeaderboardGenomes;
     
-    public float loadingProgress = 0f;
+    //public float loadingProgress = 0f;
 
     private int[] displaySpeciesIndicesArray;
-   
+      
     public CandidateAgentData focusedCandidate; // *** TRANSITION TO THIS?
     public int selectedSpeciesID;
     public int hoverAgentID;
@@ -155,11 +158,11 @@ public class UIManager : MonoBehaviour {
 
     private float curSpeciesStatValue;
 
-    public bool isBrushAddingAgents = false;
+    //public bool isBrushAddingAgents = false;
     public int brushAddAgentCounter = 0;
     public int framesPerAgentSpawn = 3;
 
-    public int bigBangFramesCounter = 0;
+    //public int bigBangFramesCounter = 0;
 
 
     //public bool brainDisplayOn = false;
@@ -246,9 +249,12 @@ public class UIManager : MonoBehaviour {
 
         //ClickToolButtonAdd();        
     }
-    public void EnterObserverMode() {
-        isObserverMode = true;
-    }
+    
+    // *** WPP: removed 3/15/21
+    // Never called?
+    //public void EnterObserverMode() {
+    //    isObserverMode = true;
+    //}
     
     public void TransitionToNewGameState(GameState gameState) {
         mainMenu.gameObject.SetActive(gameState == GameState.MainMenu);
@@ -277,7 +283,7 @@ public class UIManager : MonoBehaviour {
     private void EnterPlayingUI() {   //// ******* this happens everytime quit to menu and resume.... *** needs to change!!! ***
         panelLoading.SetActive(false);
         panelPlaying.SetActive(true);
-
+        
         //Animation Big Bang here
         gameManager.simulationManager._BigBangOn = true;
         //worldSpiritHubUI.OpenWorldTreeSelect();
@@ -303,13 +309,11 @@ public class UIManager : MonoBehaviour {
     
     [SerializeField] MainMenuUI mainMenu;
 
-
-    void Update() {
+    // *** WPP: Removed 3/15/21
+    /*void Update() {
         switch (gameManager.CurrentGameState) {
             case GameState.MainMenu: break;
             case GameState.Loading: break;
-                //UpdateLoadingUI();
-                //break;
             case GameState.Playing:
                 UpdateSimulationUI();
                 break;
@@ -317,8 +321,10 @@ public class UIManager : MonoBehaviour {
                 Debug.LogError("No Enum Type Found! (" + gameManager.CurrentGameState.ToString() + ")");
                 break;
         }
-    }
+    }*/
     
+    // *** WPP: Removed 3/15/21
+    /*
     private void UpdateBigBangPanel() {
         if(gameManager.simulationManager._BigBangOn) {
             panelBigBang.SetActive(true);
@@ -356,15 +362,15 @@ public class UIManager : MonoBehaviour {
             }
         }
     }
-
-    private void InitialUnlocks() {
+    */
+    
+    public void InitialUnlocks() {
         focusedCandidate = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[0].candidateGenomesList[0];
         
         gameManager.theRenderKing.baronVonTerrain.IncrementWorldRadius(5.7f);
 
         worldSpiritHubUI.isUnlocked = true;
         worldSpiritHubUI.OpenWorldTreeSelect();
-        
 
         UnlockBrushes();   
         worldSpiritHubUI.selectedWorldSpiritSlot = gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];
@@ -467,11 +473,10 @@ public class UIManager : MonoBehaviour {
         // SPAWNS!!!! 
         gameManager.simulationManager.AttemptToBrushSpawnAgent(brushesUI.selectedEssenceSlot.linkedSpeciesID);
 
-
-        worldSpiritHubUI.ClickButtonWorldSpiritHubAgent(0);
-        
+        worldSpiritHubUI.ClickButtonWorldSpiritHubAgent(0);   
     }
     
+    /*
     private void UpdateSimulationUI() {
 
         UpdateBigBangPanel();
@@ -519,7 +524,9 @@ public class UIManager : MonoBehaviour {
               
         UpdatePausedUI();        
     }
+    */
 
+    // * REFACTOR: delegate to something else
     public void SpiritUnlockComplete() {
         Debug.LogError("SPIRIT UNLOCK!!!  world size increase!");
         gameManager.theRenderKing.baronVonTerrain.IncrementWorldRadius(0.7f);
@@ -728,6 +735,7 @@ public class UIManager : MonoBehaviour {
         }
     }
     
+    /*
     public void UpdateObserverModeUI() {
         if (isObserverMode) {
             panelObserverMode.SetActive(true);
@@ -739,7 +747,6 @@ public class UIManager : MonoBehaviour {
             float controllerVertical = Input.GetAxis("Vertical");
             moveDir.x = controllerHorizontal;
             moveDir.y = controllerVertical;
-
 
             if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W)) {  // UP !!!!
                 moveDir.y = 1f;
@@ -772,12 +779,12 @@ public class UIManager : MonoBehaviour {
 
             cameraManager.MoveCamera(moveDir); // ********************
 
-            /*if (Input.GetKey(KeyCode.R)) {
-                cameraManager.TiltCamera(-1f);
-            }
-            if (Input.GetKey(KeyCode.F)) {
-                cameraManager.TiltCamera(1f);
-            }*/
+            //if (Input.GetKey(KeyCode.R)) {
+            //    cameraManager.TiltCamera(-1f);
+            //}
+            //if (Input.GetKey(KeyCode.F)) {
+            //    cameraManager.TiltCamera(1f);
+            //}
             if (Input.GetKeyDown(KeyCode.Escape)) {
                 Debug.Log("Pressed Escape!");
                 // Pause & Main Menu? :::
@@ -850,11 +857,7 @@ public class UIManager : MonoBehaviour {
                 }
                 else {
                     theCursorCzar.panelTooltip.SetActive(false);
-                }
-                
-                      
-                
-                
+                }   
             }
             else {
                 //int selectedPlantID = gameManager.simulationManager.vegetationManager.selectedPlantParticleIndex;
@@ -865,33 +868,31 @@ public class UIManager : MonoBehaviour {
                 //int closestZoopID = gameManager.simulationManager.zooplanktonManager.closestAnimalParticleData.index;
                 float zoopDist = (new Vector2(gameManager.simulationManager.zooplanktonManager.closestAnimalParticleData.worldPos.x, gameManager.simulationManager.zooplanktonManager.closestAnimalParticleData.worldPos.y) - new Vector2(theCursorCzar.curMousePositionOnWaterPlane.x, theCursorCzar.curMousePositionOnWaterPlane.y)).magnitude;
                 
-                /*
-                if(plantDist < zoopDist) {                    
-                    
-                    if(panelFocus == PanelFocus.Watcher && !cameraManager.isMouseHoverAgent && theCursorCzar.leftClickThisFrame) { 
-                        if(selectedPlantID != closestPlantID && plantDist < 3.3f) {
-                            gameManager.simulationManager.vegetationManager.selectedPlantParticleIndex = closestPlantID;
-                            gameManager.simulationManager.vegetationManager.isPlantParticleSelected = true;
-                            Debug.Log("FOLLOWING PLANT " + gameManager.simulationManager.vegetationManager.selectedPlantParticleIndex.ToString());
+                
+                //if(plantDist < zoopDist) {                       
+                //    if(panelFocus == PanelFocus.Watcher && !cameraManager.isMouseHoverAgent && theCursorCzar.leftClickThisFrame) { 
+                //        if(selectedPlantID != closestPlantID && plantDist < 3.3f) {
+                //            gameManager.simulationManager.vegetationManager.selectedPlantParticleIndex = closestPlantID;
+                //            gameManager.simulationManager.vegetationManager.isPlantParticleSelected = true;
+                //            Debug.Log("FOLLOWING PLANT " + gameManager.simulationManager.vegetationManager.selectedPlantParticleIndex.ToString());
                             //isSpiritBrushSelected = true;
-                            watcherUI.StartFollowingPlantParticle();
-                        }
-                    }
+                //            watcherUI.StartFollowingPlantParticle();
+                //        }
+                //    }
                     
-                }
-                else {                   
-
-                    if (panelFocus == PanelFocus.Watcher && !cameraManager.isMouseHoverAgent && theCursorCzar.leftClickThisFrame) {
-                        if (selectedZoopID != closestZoopID && zoopDist < 3.3f) {
-                            gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex = closestZoopID;
-                            gameManager.simulationManager.zooplanktonManager.isAnimalParticleSelected = true;
-                            Debug.Log("FOLLOWING ZOOP " + gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex.ToString());
+                //}
+                //else {                   
+                //    if (panelFocus == PanelFocus.Watcher && !cameraManager.isMouseHoverAgent && theCursorCzar.leftClickThisFrame) {
+                //        if (selectedZoopID != closestZoopID && zoopDist < 3.3f) {
+                //            gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex = closestZoopID;
+                //            gameManager.simulationManager.zooplanktonManager.isAnimalParticleSelected = true;
+                //            Debug.Log("FOLLOWING ZOOP " + gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex.ToString());
                             //isSpiritBrushSelected = true;
-                            watcherUI.StartFollowingAnimalParticle();
-                        }
-                    }
-                }
-                */
+                //            watcherUI.StartFollowingAnimalParticle();
+                //        }
+                //    }
+                //}
+                
                 watcherUI.isPlantParticleHighlight = 0f;
                 watcherUI.isZooplanktonHighlight = 0f;
                 watcherUI.isVertebrateHighlight = 0f;
@@ -917,14 +918,13 @@ public class UIManager : MonoBehaviour {
                     }
                 }
 
-                if ((watcherUI.isPlantParticleHighlight == 0f) && (watcherUI.isZooplanktonHighlight == 0f) && (watcherUI.isVertebrateHighlight == 0f)) {
+                if (watcherUI.isPlantParticleHighlight == 0f && (watcherUI.isZooplanktonHighlight == 0f) && watcherUI.isVertebrateHighlight == 0f) {
                     theCursorCzar.panelTooltip.SetActive(false);
                 }
                 else {
                     theCursorCzar.panelTooltip.SetActive(true);
                 }
                 
-
                 //Debug.Log("plantDist: " + plantDist.ToString() + ", zoopDist: " + zoopDist.ToString() + ",  agent: " + cameraManager.isMouseHoverAgent.ToString());
                 
                 if (curActiveTool == ToolType.Stir) {  
@@ -988,12 +988,6 @@ public class UIManager : MonoBehaviour {
                             } 
                         }                                               
                     }
-                    else {
-                        
-                    }
-                }
-                else {
-
                 }
             }
             
@@ -1036,7 +1030,7 @@ public class UIManager : MonoBehaviour {
                 zoomVal += 1f;
                 //Debug.Log("RightShoulder");     
             }
-            if (Input.GetKey("joystick button 5")) //  Backwarfds
+            if (Input.GetKey("joystick button 5")) //  Backwards
             {
                 zoomVal -= 1f; 
                 //Debug.Log("LeftShoulder");    
@@ -1047,20 +1041,24 @@ public class UIManager : MonoBehaviour {
             panelObserverMode.SetActive(false);
         }
     }        
+    */
+    
+    /*
     public void UpdateClockPanelUI() {
         textCurYear.text = (gameManager.simulationManager.curSimYear + 1).ToString();
-
         clockUI.UpdateClockUI(gameManager.simulationManager.simAgeTimeSteps);
-        //Update Clock
     }
-    public void UpdatePausedUI() {
-        if(isPaused) {
-            panelPaused.SetActive(true);
+    */
+    
+    // *** WPP: Removed 3/15/21
+    /*public void UpdatePausedUI() {
+        if (isPaused) {
+            panelPausedSetActive(true);
         }
         else {
             panelPaused.SetActive(false);
         }
-    }    
+    } */   
             
     public void CheckForAnnouncements() {
         //announceAlgaeCollapsePossible = false;
@@ -1119,7 +1117,6 @@ public class UIManager : MonoBehaviour {
     public Vector4 SampleTexture(RenderTexture tex, Vector2 uv) {
         Vector4[] sample = new Vector4[1];
 
-
         ComputeBuffer outputBuffer = new ComputeBuffer(1, sizeof(float) * 4);
         outputBuffer.SetData(sample);
         int kernelCSSampleTexture = gameManager.simulationManager.computeShaderResourceGrid.FindKernel("CSSampleTexture");
@@ -1131,11 +1128,11 @@ public class UIManager : MonoBehaviour {
         gameManager.simulationManager.computeShaderResourceGrid.Dispatch(kernelCSSampleTexture, 1, 1, 1);
         
         outputBuffer.GetData(sample);
-
         outputBuffer.Release();
 
         return sample[0];
     }
+    
     /*
     public void InitToolbarPortraitCritterData(TrophicSlot slot) { // ** should be called AFTER new species actually created?? something is fucked here
         Debug.Log("InitToolbarPortraitCritterData.. selectedSpeciesID: " + selectedSpeciesID.ToString() + " , slotLinkedID: " + slot.linkedSpeciesID.ToString());
@@ -1147,6 +1144,7 @@ public class UIManager : MonoBehaviour {
          
     }
     */
+    
     public void SetToolbarButtonStateUI(bool isDim, ref Button button, TrophicSlot.SlotStatus slotStatus, bool isSelected) {
 
         button.gameObject.SetActive(true);
@@ -1165,7 +1163,6 @@ public class UIManager : MonoBehaviour {
                 colBlock.colorMultiplier = 0.5f;
                 //button.GetComponentInChildren<Text>().text = "";
                 //button.gameObject.transform.localScale = Vector3.one;
-                
                 break;
             case TrophicSlot.SlotStatus.Unlocked:
                 button.gameObject.SetActive(false); 
@@ -1207,17 +1204,13 @@ public class UIManager : MonoBehaviour {
         if(isDim) {
             button.colors = colBlock;
             button.gameObject.transform.localScale = scale;
-
             //button.gameObject.SetActive(false);
         }
         else {
             button.colors = colBlock;
-
             button.gameObject.transform.localScale = scale;
             //button.gameObject.SetActive(true);
-        }
-
-        
+        }  
     }
     
     #endregion
@@ -1263,28 +1256,30 @@ public class UIManager : MonoBehaviour {
 
     public void ClickLoadingGemStart() {
         Debug.Log("Let there be not nothing!");
-
         gameManager.simulationManager._BigBangOn = true;
     }
 
     public void ClickToolButtonBrushes() {
         brushesUI.ClickToolButton();
     }
+    
     public void ClickToolButtonWatcher() {
         watcherUI.ClickToolButton();
     }
+    
     public void ClickToolButtonKnowledge() {
         knowledgeUI.ClickToolButton();
     }
+    
     public void ClickToolButtonMutate() {
         mutationUI.ClickToolButton();        
     }
+    
     public void ClickToolButtonGlobalResources() {
         globalResourcesUI.ClickToolButton();        
     }
     
     public void UnlockBrushes() {
-
         brushesUI.Unlock();
         brushesUI.SetTargetFromWorldTree();
         wildSpirit.curClickableSpiritType = WildSpirit.ClickableSpiritType.Zooplankton;
@@ -1304,51 +1299,64 @@ public class UIManager : MonoBehaviour {
         gameManager.simulationManager.LogFeat(feat);
         //featsUI.isOpen = true;
     }
+    
     public void AnnounceUnlockWater() {
         NarratorText("Water Spirit Found!", new Color(0.4f, 0.4f, 0.9f));  
     }
+    
     public void AnnounceUnlockKnowledgeSpirit() {
         NarratorText("Knowledge Spirit Captured!", new Color(0.9f, 0.77f, 0.76f)); 
     }
+    
     public void AnnounceUnlockWatcherSpirit() {
         NarratorText("Watcher Spirit Captured!", new Color(0.6f, 0.71277f, 1f)); 
         
         Feat feat = new Feat("Inspect Tool Unlocked!", Feat.FeatType.Watcher, Time.frameCount, Color.white, "Use this to see hidden information.");
         gameManager.simulationManager.LogFeat(feat);
     }
+    
     public void AnnounceUnlockMutationSpirit() {
         NarratorText("Mutation Spirit Captured!", new Color(0.8f, 0.1277f, 0.1276f));  
     }
+    
     public void AnnounceUnlockMinerals() {
         NarratorText("Minerals Essence Captured!", new Color(1f, 1f, 1f)); 
     }
+    
     public void AnnounceUnlockAir() {
         NarratorText("Air Spirit Captured!", new Color(0.5f, 0.5f, 1f));        
     }
+    
     public void AnnounceUnlockPebbles() {
         NarratorText("Pebble Spirit Captured!", new Color(1f, 1f, 1f));
     }
+    
     public void AnnounceUnlockSand() {
         NarratorText("Sand Spirit Captured!", new Color(1f, 1f, 1f));
     }
+    
     public void AnnounceUnlockAlgae() {
         NarratorText("Algae Species Unlocked!", colorAlgaeLayer);
     }
+    
     public void AnnounceUnlockDecomposers() {
         NarratorText("Decomposer Species Unlocked!", colorDecomposersLayer);
     }
+    
     public void AnnounceUnlockZooplankton() {
         NarratorText("Zooplankton Species Unlocked!", colorZooplanktonLayer);
 
         Feat feat = new Feat("Animal Spirit!", Feat.FeatType.Zooplankton, Time.frameCount, Color.white, "Tiny creatures that eat algae.");
         gameManager.simulationManager.LogFeat(feat);
     }
+    
     public void AnnounceUnlockVertebrates() {
         Debug.LogError("WTF?");
         //NarratorText("Vertebrate Species Unlocked!", colorVertebratesLayer);
         Feat feat = new Feat("Animal Spirit!", Feat.FeatType.Plants, Time.frameCount, Color.white, "More complex, larger animals");
         gameManager.simulationManager.LogFeat(feat);
     }
+    
     public void AnnounceUnlockPlants() {
         NarratorText("Plant Species Unlocked!", colorPlantsLayer);
         Feat feat = new Feat("Plant Spirit!", Feat.FeatType.Plants, Time.frameCount, Color.white, "Tiny simple plants.");
@@ -1366,6 +1374,7 @@ public class UIManager : MonoBehaviour {
         brushesUI.isUnlocked = true;
     }
     
+    // *** WPP: remove, replace with external utility
     public void ClickButtonQuit() 
     {
         #if UNITY_EDITOR
@@ -1379,22 +1388,21 @@ public class UIManager : MonoBehaviour {
         gameManager.EscapeToMainMenu();
     }
 
+    // WPP: Removed 3/15/21
+    /*
     public void ClickButtonPause() {
         Time.timeScale = 0f;
     }
     public void ClickButtonPlayNormal() {
         Time.timeScale = 1f;
     }    
-
+    */
     #endregion
 }
 
 
 
 #region OLD OLD OLD!!!!
-
-
-    
     
     /*
     public void UpdateInfoPanelUI() {
@@ -1441,8 +1449,7 @@ public class UIManager : MonoBehaviour {
         }
     }    
     */
-     
-    
+      
     
     /*
     public void UpdateInfoPanelUI() {
@@ -1513,8 +1520,6 @@ public class UIManager : MonoBehaviour {
         //CheckForAnnouncements();
         
     //}
-    
-
 
  /*public void ClickAnnouncementText() {
         Debug.Log("ClickAnnouncementText");

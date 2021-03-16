@@ -106,7 +106,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
         
         if(uiManagerRef.watcherUI.isUnlocked) {
             buttonWatcherLink.gameObject.SetActive(true);
-            if (uiManagerRef.panelFocus == UIManager.PanelFocus.WorldHub) {
+            if (uiManagerRef.panelFocus == PanelFocus.WorldHub) {
                 imageBitWatcher.color = Color.white;
             }
             else {
@@ -126,7 +126,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
             buttonBrushesLink.gameObject.SetActive(false);
         }
 
-        if(uiManagerRef.panelFocus == UIManager.PanelFocus.Brushes) {
+        if(uiManagerRef.panelFocus == PanelFocus.Brushes) {
             imageBitBrushes.color = selectedWorldSpiritSlot.color;// Color.white;
             buttonBrushesLink.GetComponent<Image>().color = Color.white;
         }
@@ -134,7 +134,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
             imageBitBrushes.color = new Color(73f / 255f, 79f / 255f, 88f / 255f); // Color.gray;
             buttonBrushesLink.GetComponent<Image>().color = Color.gray;
         }
-        if(uiManagerRef.panelFocus == UIManager.PanelFocus.Watcher) {
+        if(uiManagerRef.panelFocus == PanelFocus.Watcher) {
             imageBitWatcher.color = Color.white;
             buttonWatcherLink.GetComponent<Image>().color = Color.white;
 
@@ -146,7 +146,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
 
         if(uiManagerRef.knowledgeUI.isUnlocked) {
             
-            if (uiManagerRef.panelFocus == UIManager.PanelFocus.WorldHub) {
+            if (uiManagerRef.panelFocus == PanelFocus.WorldHub) {
                 imageBitKnowledge.color = Color.white;
                 buttonKnowledgeLink.GetComponent<Image>().color = Color.white;
             }
@@ -300,7 +300,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
         }
 
         isDim = true;
-        if(uiManagerRef.panelFocus == UIManager.PanelFocus.WorldHub) {
+        if(uiManagerRef.panelFocus == PanelFocus.WorldHub) {
             isDim = false;
         }
         isDim = false;
@@ -345,7 +345,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
 
     }
     public void UpdateWorldSpiritHubUI() {
-        if(uiManagerRef.panelFocus == UIManager.PanelFocus.WorldHub) {
+        if(uiManagerRef.panelFocus == PanelFocus.WorldHub) {
             //animatorWorldHubUI.SetBool("_IsDimmed", false);
         }
         else {
@@ -378,20 +378,20 @@ public class WorldSpiritHubUI : MonoBehaviour {
     }
     public void SetTargetFromBrushesUI() {
         selectedWorldSpiritSlot = uiManagerRef.brushesUI.selectedEssenceSlot;
-        uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
+        uiManagerRef.panelFocus = PanelFocus.WorldHub;
         this.isOpen = true;
         //animatorWorldHubUI.SetBool("_IsOpen", true);
         //isPaletteOpen = true;
     }
     public void SetTargetFromWatcherUI() {
         selectedWorldSpiritSlot = uiManagerRef.watcherUI.watcherSelectedTrophicSlotRef;
-        uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
+        uiManagerRef.panelFocus = PanelFocus.WorldHub;
         this.isOpen = true;
         //animatorWorldHubUI.SetBool("_IsOpen", true);
     }
     public void OpenWorldTreeSelect() {
         isOpen = true;
-        uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
+        uiManagerRef.panelFocus = PanelFocus.WorldHub;
         //animatorWorldHubUI.SetBool("_IsOpen", true);
         //Animation animTerrainShake = imageBitTerrain.GetComponent<Animation>();
         //animTerrainShake.StartPlayback();

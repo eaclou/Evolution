@@ -1,9 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using Playcraft;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class TheCursorCzar : MonoBehaviour {
+public class TheCursorCzar : Singleton<TheCursorCzar> {
     public UIManager uiManagerRef;
 
     public bool _IsHoverClickableSpirit;
@@ -42,14 +41,9 @@ public class TheCursorCzar : MonoBehaviour {
 
     public Vector3 cursorParticlesWorldPos;
     public Ray cursorRay;
-
-	// Use this for initialization
-	void Start () {
-		
-	}
-
-
     
+    TheRenderKing theRenderKing => TheRenderKing.instance;
+
     private void MouseRaycastWaterPlane(Vector3 screenPos) {
 
         mouseRaycastWaterPlane.SetActive(true);
@@ -101,7 +95,7 @@ public class TheCursorCzar : MonoBehaviour {
                 //Debug.Log("AGENT: [ " + agentRef.gameObject.name + " ] #" + agentRef.index.ToString());
                     
                 if(clicked) {
-                    if (uiManagerRef.panelFocus == UIManager.PanelFocus.Watcher) {
+                    if (uiManagerRef.panelFocus == PanelFocus.Watcher) {
                         uiManagerRef.cameraManager.SetTargetAgent(agentRef, agentRef.index);
                         uiManagerRef.cameraManager.isFollowingAgent = true;
 
@@ -148,10 +142,10 @@ public class TheCursorCzar : MonoBehaviour {
 	public void UpdateCursorCzar () {
         
         //cursor sprite:
-        if(uiManagerRef.panelFocus == UIManager.PanelFocus.Brushes) {
+        if(uiManagerRef.panelFocus == PanelFocus.Brushes) {
             Cursor.SetCursor(cursorTexBrush, Vector2.zero, CursorMode.Auto);
         }
-        else if(uiManagerRef.panelFocus == UIManager.PanelFocus.Watcher) {
+        else if(uiManagerRef.panelFocus == PanelFocus.Watcher) {
             Cursor.SetCursor(cursorTexWatcher, Vector2.zero, CursorMode.Auto);
         }
         else {
@@ -184,7 +178,7 @@ public class TheCursorCzar : MonoBehaviour {
         Vector4[] dataArray = new Vector4[1];
         Vector4 gizmoPos = new Vector4(curMousePositionOnWaterPlane.x, curMousePositionOnWaterPlane.y, 0f, 0f);
         dataArray[0] = gizmoPos;
-        uiManagerRef.gameManager.theRenderKing.gizmoCursorPosCBuffer.SetData(dataArray);
+        theRenderKing.gizmoCursorPosCBuffer.SetData(dataArray);
 
         stirGizmoVisible = false;
 
