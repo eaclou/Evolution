@@ -158,7 +158,7 @@ public class UIManager : MonoBehaviour {
 
     private float curSpeciesStatValue;
 
-    //public bool isBrushAddingAgents = false;
+    public bool isBrushAddingAgents = false;
     public int brushAddAgentCounter = 0;
     public int framesPerAgentSpawn = 3;
 

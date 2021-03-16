@@ -97,7 +97,7 @@
       <workItem from="1615064385687" duration="5320000" />
       <workItem from="1615691236457" duration="10591000" />
       <workItem from="1615752093154" duration="3850000" />
-      <workItem from="1615872028434" duration="8901000" />
+      <workItem from="1615872028434" duration="9208000" />
     </task>
     <servers />
   </component>
@@ -114,10 +114,10 @@
           <line>476</line>
           <properties documentPath="D:\UnityProjects\Freelance\Evolution\Assets\Scripts\UI\UIManager.cs" initialLine="473" containingFunctionPresentation="method 'InitialUnlocks'">
             <startOffsets>
-              <option value="19917" />
+              <option value="19923" />
             </startOffsets>
             <endOffsets>
-              <option value="19918" />
+              <option value="19924" />
             </endOffsets>
           </properties>
           <option name="timeStamp" value="1" />
