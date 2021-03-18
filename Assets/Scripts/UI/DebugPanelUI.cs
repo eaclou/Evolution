@@ -45,6 +45,7 @@ public class DebugPanelUI : MonoBehaviour {
 
     private RenderTexture[] debugTextureViewerArray;
 
+    TheCursorCzar theCursorCzar => TheCursorCzar.instance;
 
 	// Use this for initialization
 	void Start () {
@@ -206,8 +207,8 @@ public class DebugPanelUI : MonoBehaviour {
         debugTxtResources += "\nDead Agents: " + simManager.simResourceManager.curGlobalCarrionVolume.ToString();
         debugTxtResources += "\nEggSacks: " + simManager.simResourceManager.curGlobalEggSackVolume.ToString();
         debugTxtResources += "\nGlobal Mass: " + simManager.simResourceManager.curTotalMass.ToString();
-        Vector4 resourceGridSample = uiManagerRef.SampleTexture(simManager.vegetationManager.resourceGridRT1, uiManagerRef.theCursorCzar.curMousePositionOnWaterPlane / SimulationManager._MapSize);
-        Vector4 simTansferSample = uiManagerRef.SampleTexture(simManager.vegetationManager.resourceSimTransferRT, uiManagerRef.theCursorCzar.curMousePositionOnWaterPlane / SimulationManager._MapSize) * 100f;
+        Vector4 resourceGridSample = uiManagerRef.SampleTexture(simManager.vegetationManager.resourceGridRT1, theCursorCzar.curMousePositionOnWaterPlane / SimulationManager._MapSize);
+        Vector4 simTansferSample = uiManagerRef.SampleTexture(simManager.vegetationManager.resourceSimTransferRT, theCursorCzar.curMousePositionOnWaterPlane / SimulationManager._MapSize) * 100f;
         //Debug.Log("curMousePositionOnWaterPlane: " + curMousePositionOnWaterPlane.ToString());
         debugTxtResources += "\nresourceGridSample: (" + resourceGridSample.x.ToString("F4") + ", " + resourceGridSample.y.ToString("F4") + ", " + resourceGridSample.z.ToString("F4") + ", " + resourceGridSample.w.ToString("F4") + ")";
         debugTxtResources += "\nsimTansferSample: (" + simTansferSample.x.ToString("F4") + ", " + simTansferSample.y.ToString("F4") + ", " + simTansferSample.z.ToString("F4") + ", " + simTansferSample.w.ToString("F4") + ")";

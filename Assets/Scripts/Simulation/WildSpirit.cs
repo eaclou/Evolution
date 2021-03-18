@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
+﻿using UnityEngine;
 
 public class WildSpirit : MonoBehaviour {
     public UIManager uiManagerRef;
@@ -36,6 +33,8 @@ public class WildSpirit : MonoBehaviour {
         VertC,
         VertD
     }
+    
+    TheCursorCzar theCursorCzar => TheCursorCzar.instance;
 
     private Vector3 velocity;
 
@@ -46,10 +45,19 @@ public class WildSpirit : MonoBehaviour {
     public bool isFleeing = false;
     private int fleeingFrameCounter = 0;
 
-
+    // *** WPP: moved from UIManager 3/17/21
+    void Update()
+    {
+        if(isClickableSpiritRoaming) {
+            UpdateWildSpiritProto();
+        }
+        else {
+            framesSinceLastClickableSpirit++;
+            protoSpiritClickColliderGO.SetActive(false);
+        }
+    }
 
     public void SpawnWildSpirit(Color col) {
-        
         uiManagerRef.wildSpirit.isClickableSpiritRoaming = true;
         uiManagerRef.wildSpirit.curRoamingSpiritPosition = uiManagerRef.wildSpirit.creationSpiritClickableStartPos;
         uiManagerRef.wildSpirit.roamingSpiritColor = col;
@@ -57,9 +65,8 @@ public class WildSpirit : MonoBehaviour {
         fleeingFrameCounter = 0;
         //threatLevel = 0f;
     }
+    
     public void UpdateWildSpiritProto() {
-
-
         protoSpiritClickColliderGO.SetActive(true);
         //float orbitSpeed = 0.5f;
         //float orbitRadius = 20f;
@@ -67,8 +74,7 @@ public class WildSpirit : MonoBehaviour {
         //float zPhase = spinAngle * 9.5f;
         //float zBounceMag = 1f;
         
-        
-        Vector3 cursorToSpiritVec = (curRoamingSpiritPosition - uiManagerRef.theCursorCzar.cursorParticlesWorldPos);
+        Vector3 cursorToSpiritVec = (curRoamingSpiritPosition - theCursorCzar.cursorParticlesWorldPos);
         cursorToSpiritVec.z = 0f;
         float sqrDistanceToCursor = cursorToSpiritVec.sqrMagnitude;
 
@@ -76,8 +82,6 @@ public class WildSpirit : MonoBehaviour {
         if(sqrDistanceToCursor < 150f) {
             isFleeing = true;
             fleeingFrameCounter = 0;
-
-            
         }
 
         if(isFleeing) {
@@ -102,38 +106,22 @@ public class WildSpirit : MonoBehaviour {
             }
 
             // guide back to center:
-            if(framesSinceLastClickableSpirit % 831 == 0) {
-                
+            if(framesSinceLastClickableSpirit % 831 == 0) {    
                 velocity = Vector3.Lerp(velocity, (new Vector3(128f, 128f, 0f) - curRoamingSpiritPosition).normalized * spiritSpeed * 0.2f, 0.18f);
             }
 
             velocity.z = Mathf.Lerp(velocity.z, 0f, 0.05f);  // stay near zero altitude?
-
         }
         velocity = Vector3.Lerp(velocity, Vector3.zero, 0.033f); // drag
 
         curRoamingSpiritPosition = curRoamingSpiritPosition + velocity;
 
-
         protoSpiritClickColliderGO.transform.position = curRoamingSpiritPosition;
         framesSinceLastClickableSpirit = 0;
     }
-
     
     public void CapturedClickableSpirit() {
         uiManagerRef.animatorSpiritUnlock.SetTrigger("_TriggerClicked");
-        isClickableSpiritRoaming = false;
-
-        
+        isClickableSpiritRoaming = false;   
     }
-
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
 }

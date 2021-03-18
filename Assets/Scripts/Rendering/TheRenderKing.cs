@@ -5,11 +5,12 @@ using UnityEngine;
 using UnityEngine.Rendering;
 
 public class TheRenderKing : Singleton<TheRenderKing> {
+    // Singleton references
+    TheCursorCzar theCursorCzar => TheCursorCzar.instance;
+    SimulationManager simManager => SimulationManager.instance;
 
     // SET IN INSPECTOR!!!::::
     public EnvironmentFluidManager fluidManager;
-    public SimulationManager simManager;
-
     public BaronVonTerrain baronVonTerrain;
     public BaronVonWater baronVonWater;
 
@@ -345,6 +346,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         public float randomSeed;
         public float followLerp;
     }
+    
     public struct CritterUberStrokeData {
         public int parentIndex;  // which Critter is this attached to?	
         public int neighborIndex;
@@ -365,6 +367,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         public float passiveFollow;  // only look at neighborPos/restDistance for positioning
         public float thresholdValue;  // evenly distributed random 0-1 for decay
     }
+    
     public struct CurveStrokeData {
         public int parentIndex;
         public Vector3 hue;
@@ -377,6 +380,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         public float strength;
         public int brushType;
     }
+    
     public struct WaterSplineData {   // 2 ints, 17 floats
         public int index;
         public Vector2 p0;
@@ -391,15 +395,18 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         public float age;  // to allow for fade-in and fade-out
         public int brushType;  // brush texture mask
     }
+    
     public struct TrailStrokeData {
         public Vector2 worldPos;
     }
+    
     public struct TrailDotData {  // for Ripples (temp)
         public int parentIndex;
         public Vector2 coords01;
         public float age;
         public float initAlpha;
     }
+    
     public struct BasicStrokeData {  // fluidSim Render -- Obstacles + ColorInjection
         public Vector2 worldPos;
         public Vector2 localDir;
@@ -410,6 +417,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     private int debugFrameCounter = 0;
 
     public bool isToolbarCritterPortraitEnabled = false;
+    
 
     private void Awake() {
         fluidObstaclesRenderCamera.enabled = false;
@@ -421,9 +429,9 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         resourceSimRenderCamera.enabled = false;
     }
     // Use this for initialization:
-    public void InitializeRiseAndShine(SimulationManager simManager) {
+    public void InitializeRiseAndShine() {
 
-        this.simManager = simManager;
+        //this.simManager = simManager;
 
         // temp bodyWidthsTexture:
         //critterBodyWidthsTex = new Texture2D(16, simManager._NumAgents, TextureFormat.RGBAFloat, false, true);
@@ -458,8 +466,6 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
         colorInjectionStrokesCBuffer = new ComputeBuffer(simManager._NumAgents + simManager._NumEggSacks, sizeof(float) * 10);
         colorInjectionStrokeDataArray = new BasicStrokeData[colorInjectionStrokesCBuffer.count];
-
-
 
         InitializeCritterUberStrokesBuffer();  // In-World        
         InitializeCritterSkinStrokesCBuffer();  // Portrait        
@@ -1924,9 +1930,9 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         computeShaderSpiritBrush.SetFloat("_Time", Time.realtimeSinceStartup);
         computeShaderSpiritBrush.SetVector("_ParticleColor", simManager.uiManager.worldSpiritHubUI.curIconColor);
         computeShaderSpiritBrush.SetFloat("_ParticleSpawnRadius", (0.515f + isBrushing * 0.075f) * 5.3065f);
-        computeShaderSpiritBrush.SetVector("_CursorWorldPosition", new Vector4(simManager.uiManager.theCursorCzar.cursorParticlesWorldPos.x,
-                                                                              simManager.uiManager.theCursorCzar.cursorParticlesWorldPos.y,
-                                                                              simManager.uiManager.theCursorCzar.cursorParticlesWorldPos.z,
+        computeShaderSpiritBrush.SetVector("_CursorWorldPosition", new Vector4(theCursorCzar.cursorParticlesWorldPos.x,
+                                                                              theCursorCzar.cursorParticlesWorldPos.y,
+                                                                              theCursorCzar.cursorParticlesWorldPos.z,
                                                                               0f));
         computeShaderSpiritBrush.SetBool("_SpawnOn", isSpawn);
         computeShaderSpiritBrush.SetFloat("_IsBrushing", isBrushing);
@@ -1959,8 +1965,6 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         computeShaderSpiritBrush.Dispatch(kernelCSCopyBuffer, 1, 1, 1);
 
         // Get brush:
-
-
     }
 
     public void SpawnSpiritBrushQuads(CreationBrush brushData, int startIndex, int numCells) {
@@ -1975,10 +1979,10 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         for (int i = 0; i < 32; i++) {
             SpiritBrushQuadData data = new SpiritBrushQuadData();
 
-            data.vel = UnityEngine.Random.insideUnitCircle * 5;// new Vector2(0f, 1f);
-            data.worldPos = new Vector3(simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.x + data.vel.x, simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.y + data.vel.y, 0f);
+            data.vel = Random.insideUnitCircle * 5;// new Vector2(0f, 1f);
+            data.worldPos = new Vector3(theCursorCzar.curMousePositionOnWaterPlane.x + data.vel.x, theCursorCzar.curMousePositionOnWaterPlane.y + data.vel.y, 0f);
             data.heading = data.vel.normalized;
-            data.lifespan = UnityEngine.Random.Range(10f, 40f);
+            data.lifespan = Random.Range(10f, 40f);
             data.age01 = 0f;
             spiritBrushQuadDataArray[i] = data;
         }
@@ -2735,14 +2739,14 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                 spiritBrushRenderMultiBurstMat.SetPass(0); // *** is this really necessary?
                 spiritBrushRenderMultiBurstMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer); // *** Needed? or just set it once in beginning....
                 spiritBrushRenderMultiBurstMat.SetBuffer("_SpiritBrushQuadsRead", spiritBrushQuadDataCBuffer0);
-                spiritBrushRenderMultiBurstMat.SetVector("_Position", new Vector4(simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.x, simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.y, 0f, 0f));
+                spiritBrushRenderMultiBurstMat.SetVector("_Position", new Vector4(theCursorCzar.curMousePositionOnWaterPlane.x, theCursorCzar.curMousePositionOnWaterPlane.y, 0f, 0f));
                 spiritBrushRenderMultiBurstMat.SetFloat("_Scale", scale);
                 spiritBrushRenderMultiBurstMat.SetFloat("_Strength", brushIntensity);
                 spiritBrushRenderMultiBurstMat.SetFloat("_PatternColumn", brushData.patternColumn);
                 spiritBrushRenderMultiBurstMat.SetFloat("_PatternRow", brushData.patternRow);
                 Vector2 brushDir = new Vector2(0f, 1f);
-                if (simManager.uiManager.theCursorCzar.smoothedMouseVel.x != 0f || simManager.uiManager.theCursorCzar.smoothedMouseVel.y != 0f) {
-                    brushDir = new Vector2(simManager.uiManager.theCursorCzar.smoothedMouseVel.x, simManager.uiManager.theCursorCzar.smoothedMouseVel.y).normalized;
+                if (theCursorCzar.smoothedMouseVel.x != 0f || theCursorCzar.smoothedMouseVel.y != 0f) {
+                    brushDir = new Vector2(theCursorCzar.smoothedMouseVel.x, theCursorCzar.smoothedMouseVel.y).normalized;
                 }
                 cmdBufferSpiritBrush.DrawProcedural(Matrix4x4.identity, spiritBrushRenderMultiBurstMat, 0, MeshTopology.Triangles, 6, spiritBrushQuadDataCBuffer0.count);
 
@@ -2776,7 +2780,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                 if (simManager.uiManager.panelFocus == PanelFocus.Brushes) {
                     spiritBrushRenderMat.SetPass(0);
                     spiritBrushRenderMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer); // *** Needed? or just set it once in beginning....
-                    spiritBrushRenderMat.SetVector("_Position", new Vector4(simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.x, simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.y, simManager.uiManager.wildSpirit.curRoamingSpiritPosition.x, simManager.uiManager.wildSpirit.curRoamingSpiritPosition.y));
+                    spiritBrushRenderMat.SetVector("_Position", new Vector4(theCursorCzar.curMousePositionOnWaterPlane.x, theCursorCzar.curMousePositionOnWaterPlane.y, simManager.uiManager.wildSpirit.curRoamingSpiritPosition.x, simManager.uiManager.wildSpirit.curRoamingSpiritPosition.y));
                     spiritBrushRenderMat.SetFloat("_Scale", scale);
                     spiritBrushRenderMat.SetFloat("_Strength", brushIntensity);
                     spiritBrushRenderMat.SetFloat("_PatternColumn", brushData.patternColumn);
@@ -2786,8 +2790,8 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                     spiritBrushRenderMat.SetFloat("_IsBrushing", 1f);
                     //dir:
                     Vector2 brushDir = new Vector2(0f, 1f);
-                    if (simManager.uiManager.theCursorCzar.smoothedMouseVel.x != 0f || simManager.uiManager.theCursorCzar.smoothedMouseVel.y != 0f) {
-                        brushDir = new Vector2(simManager.uiManager.theCursorCzar.smoothedMouseVel.x, simManager.uiManager.theCursorCzar.smoothedMouseVel.y).normalized;
+                    if (theCursorCzar.smoothedMouseVel.x != 0f || theCursorCzar.smoothedMouseVel.y != 0f) {
+                        brushDir = new Vector2(theCursorCzar.smoothedMouseVel.x, theCursorCzar.smoothedMouseVel.y).normalized;
                     }
                     spiritBrushRenderMat.SetFloat("_FacingDirX", brushDir.x);
                     spiritBrushRenderMat.SetFloat("_FacingDirY", brushDir.y);
@@ -2798,7 +2802,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
                 spiritBrushRenderMat.SetPass(0);
                 spiritBrushRenderMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer); // *** Needed? or just set it once in beginning....
-                spiritBrushRenderMat.SetVector("_Position", new Vector4(simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.x, simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.y, simManager.uiManager.wildSpirit.curRoamingSpiritPosition.x, simManager.uiManager.wildSpirit.curRoamingSpiritPosition.y));
+                spiritBrushRenderMat.SetVector("_Position", new Vector4(theCursorCzar.curMousePositionOnWaterPlane.x, theCursorCzar.curMousePositionOnWaterPlane.y, simManager.uiManager.wildSpirit.curRoamingSpiritPosition.x, simManager.uiManager.wildSpirit.curRoamingSpiritPosition.y));
                 spiritBrushRenderMat.SetFloat("_Scale", scale);
                 spiritBrushRenderMat.SetFloat("_Strength", brushIntensity * 1f);
                 spiritBrushRenderMat.SetFloat("_PatternColumn", brushData.patternColumn);
@@ -2809,8 +2813,8 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                 spiritBrushRenderMat.SetFloat("_IsWildSpirit", isWildOn);
                 //dir:
                 Vector2 brushDir = new Vector2(0f, 1f);
-                if (simManager.uiManager.theCursorCzar.smoothedMouseVel.x != 0f || simManager.uiManager.theCursorCzar.smoothedMouseVel.y != 0f) {
-                    brushDir = new Vector2(simManager.uiManager.theCursorCzar.smoothedMouseVel.x, simManager.uiManager.theCursorCzar.smoothedMouseVel.y).normalized;
+                if (theCursorCzar.smoothedMouseVel.x != 0f || theCursorCzar.smoothedMouseVel.y != 0f) {
+                    brushDir = new Vector2(theCursorCzar.smoothedMouseVel.x, theCursorCzar.smoothedMouseVel.y).normalized;
                 }
                 spiritBrushRenderMat.SetFloat("_FacingDirX", brushDir.x);
                 spiritBrushRenderMat.SetFloat("_FacingDirY", brushDir.y);
@@ -3569,12 +3573,10 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                     //float scale = 4.2f; // Mathf.Lerp(0.35f, 1.75f, baronVonWater.camDistNormalized);
                     float radius = simManager.uiManager.wildSpirit.roamingSpiritScale * 1.075f;
                     Color tint = simManager.uiManager.wildSpirit.roamingSpiritColor * 0.66f;
-                    if (simManager.uiManager.theCursorCzar._IsHoverClickableSpirit) {
+                    
+                    if (theCursorCzar._IsHoverClickableSpirit) {
                         radius *= 1.4f;
                         tint *= 1.4f;
-                    }
-                    else {
-
                     }
                     // WILD ROAMING ROGUE SPIRIT:::::
 
@@ -3593,9 +3595,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                     }
                     gizmoProtoSpiritClickableMat.SetFloat("_IsFleeing", isFleeingF);
                     cmdBufferMain.DrawMesh(stickMesh, stirStickTransformMatrix, gizmoProtoSpiritClickableMat);
-
                 }
-
             }
 
             if (simManager.trophicLayersManager.GetZooplanktonOnOff()) {

@@ -4,6 +4,9 @@ using UnityEngine.UI;
 
 public class LoadingPanelUI : MonoBehaviour
 {
+    SimulationManager simulationManager => SimulationManager.instance;
+    AudioManager audioManager => AudioManager.instance;
+
     [Header("Settings")]
     public float warmupTime;
     [Tooltip("Percent of time into warmup when UI refreshes")]
@@ -18,9 +21,6 @@ public class LoadingPanelUI : MonoBehaviour
     public Image imageLoadingGemGrowing;
     public Button buttonLoadingGemStart;
     public Text textLoadingTooltips;
-    
-    SimulationManager sim => SimulationManager.instance;
-    AudioManager audio => AudioManager.instance;
     
     public void Refresh(string tooltip, int stage) {
         textLoadingTooltips.text = tooltip;
@@ -41,7 +41,7 @@ public class LoadingPanelUI : MonoBehaviour
     
     public void BeginWarmUp() { 
         StartCoroutine(WarmUpRoutine());
-        audio.BeginFadeMenuToGame(warmupTime); 
+        audioManager.BeginFadeMenuToGame(warmupTime); 
     }
     
     // * If this gets complicated, delegate to ProgressEvent    
@@ -49,6 +49,6 @@ public class LoadingPanelUI : MonoBehaviour
         yield return new WaitForSeconds(warmupTime * refreshWarmupPercent);
         Refresh("", 4);
         yield return new WaitForSeconds(warmupTime * (1 - refreshWarmupPercent));
-        sim.LoadingWarmupComplete();
+        simulationManager.LoadingWarmupComplete();
     }
 }

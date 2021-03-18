@@ -1,8 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class VegetationManager {
+    SimulationManager simManager => SimulationManager.instance;
 
     public SettingsManager settingsRef;
     public SimResourceManager resourceManagerRef;
@@ -527,9 +526,9 @@ public class VegetationManager {
         
         computeShaderPlantParticles.SetFloat("_IsBrushing", 1f);
 
-        float spawnLerp = renderKingRef.simManager.trophicLayersManager.GetAlgaeOnLerp(renderKingRef.simManager.simAgeTimeSteps);
+        float spawnLerp = simManager.trophicLayersManager.GetAlgaeOnLerp(simManager.simAgeTimeSteps);
         float spawnRadius = Mathf.Lerp(1f, SimulationManager._MapSize, spawnLerp);
-        Vector4 spawnPos = new Vector4(renderKingRef.simManager.trophicLayersManager.algaeOriginPos.x, renderKingRef.simManager.trophicLayersManager.algaeOriginPos.y, 0f, 0f);
+        Vector4 spawnPos = new Vector4(simManager.trophicLayersManager.algaeOriginPos.x, simManager.trophicLayersManager.algaeOriginPos.y, 0f, 0f);
         computeShaderPlantParticles.SetFloat("_FoodSprinkleRadius", spawnRadius);
         computeShaderPlantParticles.SetVector("_FoodSprinklePos", spawnPos);
         
@@ -981,12 +980,12 @@ public class VegetationManager {
         float brushIntensityMult = 1f;
         if(isBrushActive) {  // Set from uiManager
 
-            if (theRenderKingRef.simManager.uiManager.brushesUI.selectedEssenceSlot.kingdomID == 0) {
+            if (simManager.uiManager.brushesUI.selectedEssenceSlot.kingdomID == 0) {
                 brushDecomposersOn = 1f;
                 brushIntensityMult = 0.2f;
             }
-            else if (theRenderKingRef.simManager.uiManager.brushesUI.selectedEssenceSlot.kingdomID == 1) {
-                if (theRenderKingRef.simManager.uiManager.brushesUI.selectedEssenceSlot.tierID == 0) {
+            else if (simManager.uiManager.brushesUI.selectedEssenceSlot.kingdomID == 1) {
+                if (simManager.uiManager.brushesUI.selectedEssenceSlot.tierID == 0) {
                     brushAlgaeOn = 1f;
                     
                     brushIntensityMult = 0.2f;
@@ -995,8 +994,8 @@ public class VegetationManager {
                     //brushPlantsOn = 1f;
                 }
             }
-            else if (theRenderKingRef.simManager.uiManager.brushesUI.selectedEssenceSlot.kingdomID == 4) {
-                if (theRenderKingRef.simManager.uiManager.brushesUI.selectedEssenceSlot.slotID == 0) {  // MINERALS
+            else if (simManager.uiManager.brushesUI.selectedEssenceSlot.kingdomID == 4) {
+                if (simManager.uiManager.brushesUI.selectedEssenceSlot.slotID == 0) {  // MINERALS
                     brushMineralsOn = 1f;  
                     brushIntensityMult = 0.1f;
                     Debug.Log("// minerals brush on!");

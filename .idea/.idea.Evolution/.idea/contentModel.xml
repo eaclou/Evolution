@@ -813,6 +813,7 @@
             <e p="GenomeViewerUI.cs" t="Include" />
             <e p="GlobalResourcesUI.cs" t="Include" />
             <e p="GraphData.cs" t="Include" />
+            <e p="GraphStatPanel.cs" t="Include" />
             <e p="KnowledgeUI.cs" t="Include" />
             <e p="LoadingPanelUI.cs" t="Include" />
             <e p="MainMenuUI.cs" t="Include" />
@@ -827,6 +828,7 @@
             </e>
             <e p="SimulationUI.cs" t="Include" />
             <e p="SpeciesOverviewUI.cs" t="Include" />
+            <e p="SpeciesTreePanel.cs" t="Include" />
             <e p="TheCursorCzar.cs" t="Include" />
             <e p="UIManager.cs" t="Include" />
             <e p="WatcherUI.cs" t="Include" />

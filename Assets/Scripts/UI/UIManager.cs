@@ -1,4 +1,5 @@
-﻿using Playcraft;
+﻿using System.Collections.Generic;
+using Playcraft;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
@@ -20,16 +21,15 @@ public class UIManager : MonoBehaviour {
 
     #region attributes
     public WorldSpiritHubUI worldSpiritHubUI;
-    public DebugPanelUI debugPanelUI;
+    //public DebugPanelUI debugPanelUI;
     public WatcherUI watcherUI;
     public BrushesUI brushesUI;
     public KnowledgeUI knowledgeUI;
     public MutationUI mutationUI;
     public GlobalResourcesUI globalResourcesUI;
-    public TheCursorCzar theCursorCzar;
-    public ClockUI clockUI;
+    //public ClockUI clockUI;
     public WildSpirit wildSpirit;
-    public FeatsUI featsUI;
+    //public FeatsUI featsUI;
     public SpeciesOverviewUI speciesOverviewUI;
     public GenomeViewerUI genomeViewerUI;
 
@@ -38,15 +38,18 @@ public class UIManager : MonoBehaviour {
     
     // * Make this private, use accessors to eliminate references to this script
     public GameManager gameManager => GameManager.instance;
-    SimulationManager simManager => SimulationManager.instance;
+    SimulationManager simulationManager => SimulationManager.instance;
+    TheCursorCzar theCursorCzar => TheCursorCzar.instance;
+    MasterGenomePool genomePool => simulationManager.masterGenomePool;
+    TheRenderKing theRenderKing => TheRenderKing.instance;
     
-    public GameObject cursorParticlesGO;
+    //public GameObject cursorParticlesGO;
 
     public Animator animatorSpiritUnlock;
 
-    public Text textFXPH_loading_start;
-    public Text textFXPH_loading_end;
-    public Text textFXPH_playing_start;
+    //public Text textFXPH_loading_start;
+    //public Text textFXPH_loading_end;
+    //public Text textFXPH_playing_start;
 
     public PanelFocus panelFocus = PanelFocus.WorldHub;
 
@@ -56,25 +59,26 @@ public class UIManager : MonoBehaviour {
     public GameObject panelSpeciesOverview;
     public GameObject panelGraphs;
 
-    public GameObject panelBigBang;
-    public Image imageBigBangStrokes01;
-    public Image imageBigBangStrokes02;
-    public Image imageBigBangStrokes03;
+    // WPP: Removed 3/18/21
+    //public GameObject panelBigBang;
+    //public Image imageBigBangStrokes01;
+    //public Image imageBigBangStrokes02;
+    //public Image imageBigBangStrokes03;
      
-    public bool updateTerrainAltitude;
-    public float terrainUpdateMagnitude;
+    public bool updateTerrainAltitude;  // WPP: assigned but not used
+    public float terrainUpdateMagnitude;// WPP: assigned but not used
     
     public ToolType curActiveTool;  // ******** move to phase out this approach
     
     // *********************************************    NEW UI PASS *******************
-    public GameObject panelClock;
-    public Text textCurYear;
-    public Button buttonClockOpenClose;
-    public Button buttonOpenGlobalResourcesPanel;
-    public Button buttonOpenMutationPanel;
-    public Button buttonOpenWatcherPanel;
-    public Button buttonOpenBrushesPanel;
-    public Button buttonOpenKnowledgePanel;
+    //public GameObject panelClock;
+    //public Text textCurYear;
+    //public Button buttonClockOpenClose;
+    //public Button buttonOpenGlobalResourcesPanel;
+    //public Button buttonOpenMutationPanel;
+    //public Button buttonOpenWatcherPanel;
+    //public Button buttonOpenBrushesPanel;
+    //public Button buttonOpenKnowledgePanel;
 
     // *******************************************
 
@@ -102,19 +106,19 @@ public class UIManager : MonoBehaviour {
     private bool announceAlgaeCollapseOccurred = false;
     //private bool announceAgentCollapsePossible = false;
     //private bool announceAgentCollapseOccurred = false;
-    public int timerAnnouncementTextCounter = 0;
-    public bool isAnnouncementTextOn = false;
-    public bool isUnlockCooldown = false;
+    public int timerAnnouncementTextCounter = 0;// WPP: assigned but not used
+    public bool isAnnouncementTextOn = false;   // WPP: assigned but not used
+    public bool isUnlockCooldown = false;       // WPP: assigned but not used
     public int unlockCooldownCounter = 0;
     //private bool inspectToolUnlockedAnnounce = false;
-    public TrophicSlot unlockedAnnouncementSlotRef;
+    TrophicSlot unlockedAnnouncementSlotRef;    // WPP: assigned but not used
   
     // ***** figure out where to put this
-    public Sprite spriteSpiritBrushKnowledgeIcon;
-    public Sprite spriteSpiritBrushMutationIcon;
+    //public Sprite spriteSpiritBrushKnowledgeIcon;
+    //public Sprite spriteSpiritBrushMutationIcon;
     public Sprite spriteSpiritBrushStirIcon;
-    public Sprite spriteSpiritBrushWatcherIcon;
-    public Sprite spriteSpiritBrushWatcherOffIcon;
+    //public Sprite spriteSpiritBrushWatcherIcon;
+    //public Sprite spriteSpiritBrushWatcherOffIcon;
     public Sprite spriteSpiritBrushCreationIcon;
 
     public Sprite spriteSpiritWorldIcon;
@@ -130,8 +134,8 @@ public class UIManager : MonoBehaviour {
     public Sprite spriteSpiritZooplanktonIcon;
     public Sprite spriteSpiritVertebrateIcon;
         
-    public GameObject panelObserverMode;
-    public GameObject panelPaused;
+    //public GameObject panelObserverMode;
+    //public GameObject panelPaused;
     
     //public bool isActiveDebug = true;
 
@@ -152,13 +156,13 @@ public class UIManager : MonoBehaviour {
       
     public CandidateAgentData focusedCandidate; // *** TRANSITION TO THIS?
     public int selectedSpeciesID;
-    public int hoverAgentID;
+    //public int hoverAgentID;
 
     private const int maxDisplaySpecies = 32;
 
     private float curSpeciesStatValue;
 
-    public bool isBrushAddingAgents = false;
+    public bool isBrushAddingAgents = false; // WPP: assigned but not used
     public int brushAddAgentCounter = 0;
     public int framesPerAgentSpawn = 3;
 
@@ -169,7 +173,9 @@ public class UIManager : MonoBehaviour {
     
     #endregion
 
-    public void ClickButtonOpenMinimap() {
+    // WPP: Removed 3/18/21
+    // Moved to direct UnityEvent or mini panel scripts
+    /*public void ClickButtonOpenMinimap() {
         panelMinimap.SetActive(true);
     }
     public void ClickButtonCloseMinimap() {
@@ -180,18 +186,22 @@ public class UIManager : MonoBehaviour {
         panelSpeciesTree.SetActive(true);
         panelGraphs.SetActive(false);
     }
+    
     public void ClickButtonCloseSpeciesTree() {
         panelSpeciesTree.SetActive(false);
         panelGraphs.SetActive(false);
     }
+    
     public void ClickButtonOpenGraphPanel() {
         panelGraphs.SetActive(true);
         panelSpeciesTree.SetActive(false);
     }
+    
     public void ClickButtonToggleGraphPanel() {
         panelGraphs.SetActive(!panelGraphs.activeSelf);
         panelSpeciesTree.SetActive(!panelSpeciesTree.activeSelf);
     }
+    
     public void ClickButtonCloseGraphPanel() {
         panelGraphs.SetActive(false);
         panelSpeciesTree.SetActive(true);
@@ -211,25 +221,17 @@ public class UIManager : MonoBehaviour {
     }
     public void ClickButtonCloseSpeciesOverview() {
         panelSpeciesOverview.SetActive(false);
-    }
+    }*/
 
     public void SetFocusedCandidateGenome(CandidateAgentData candidate) {
         focusedCandidate = candidate;
-
         selectedSpeciesID = focusedCandidate.speciesID;
-
-        SpeciesGenomePool pool = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesID];
+        theRenderKing.InitializeCreaturePortrait(focusedCandidate.candidateGenome);
         
-        gameManager.simulationManager.theRenderKing.InitializeCreaturePortrait(focusedCandidate.candidateGenome);
-
         globalResourcesUI.CreateSpeciesLeaderboardGenomeTexture();
-
-        globalResourcesUI.UpdateSpeciesTreeDataTextures(gameManager.simulationManager.curSimYear);
-
+        globalResourcesUI.UpdateSpeciesTreeDataTextures(simulationManager.curSimYear);
         globalResourcesUI.CreateBrainGenomeTexture(focusedCandidate.candidateGenome);
-
         speciesOverviewUI.RebuildGenomeButtons();
-
         globalResourcesUI.UpdateSpeciesListBars();
     }
 
@@ -285,14 +287,14 @@ public class UIManager : MonoBehaviour {
         panelPlaying.SetActive(true);
         
         //Animation Big Bang here
-        gameManager.simulationManager._BigBangOn = true;
+        simulationManager._BigBangOn = true;
         //worldSpiritHubUI.OpenWorldTreeSelect();
 
         SimEventData newEventData = new SimEventData();
         newEventData.name = "New Simulation Start!";
         newEventData.category = SimEventData.SimEventCategories.NPE;
         newEventData.timeStepActivated = 0;
-        gameManager.simulationManager.simEventsManager.completeEventHistoryList.Add(newEventData);
+        simulationManager.simEventsManager.completeEventHistoryList.Add(newEventData);
 
         NarratorText("... And Then There Was Not Nothing ...", new Color(0.75f, 0.75f, 0.75f));
         //panelPendingClickPrompt.GetComponentInChildren<Text>().text = "... And Then There Was Not Nothing ...";// "Welcome! This Pond is devoid of life...\nIt's up to you to change that!";
@@ -322,6 +324,31 @@ public class UIManager : MonoBehaviour {
                 break;
         }
     }*/
+    
+    
+    [SerializeField] int timeStepsToRebuildGenomeButtons = 111;
+    SpeciesGenomePool pool;
+    const string ANIM_FINISHED = "_AnimFinished";
+    List<SpeciesGenomePool> speciesPools => genomePool.completeSpeciesPoolsList;
+    bool isRebuildTimeStep => simulationManager.simAgeTimeSteps % timeStepsToRebuildGenomeButtons == 1;
+    
+    public void SetFocus()
+    {
+        pool = speciesPools[selectedSpeciesID];
+        
+        if(focusedCandidate != null) {
+            genomeViewerUI.UpdateUI(pool, focusedCandidate);
+
+            if(isRebuildTimeStep) {
+                speciesOverviewUI.RebuildGenomeButtons();  
+            }
+        }
+        
+        if(animatorSpiritUnlock.GetBool(ANIM_FINISHED)) {
+            SpiritUnlockComplete();
+            animatorSpiritUnlock.SetBool(ANIM_FINISHED, false);
+        }
+    }
     
     // *** WPP: Removed 3/15/21
     /*
@@ -365,27 +392,27 @@ public class UIManager : MonoBehaviour {
     */
     
     public void InitialUnlocks() {
-        focusedCandidate = gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[0].candidateGenomesList[0];
+        focusedCandidate = simulationManager.masterGenomePool.completeSpeciesPoolsList[0].candidateGenomesList[0];
         
-        gameManager.theRenderKing.baronVonTerrain.IncrementWorldRadius(5.7f);
+        theRenderKing.baronVonTerrain.IncrementWorldRadius(5.7f);
 
         worldSpiritHubUI.isUnlocked = true;
         worldSpiritHubUI.OpenWorldTreeSelect();
 
         UnlockBrushes();   
-        worldSpiritHubUI.selectedWorldSpiritSlot = gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];
-        brushesUI.selectedEssenceSlot = gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];
+        worldSpiritHubUI.selectedWorldSpiritSlot = simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];
+        brushesUI.selectedEssenceSlot = simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];
 
-        gameManager.simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[1].status = TrophicSlot.SlotStatus.On;
+        simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[1].status = TrophicSlot.SlotStatus.On;
         Debug.Log("WATER UNLOCKED!!! " + unlockCooldownCounter.ToString());
                 
-        unlockedAnnouncementSlotRef = gameManager.simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[1];
+        unlockedAnnouncementSlotRef = simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[1];
                 
-        gameManager.simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
+        simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
                 
-        unlockedAnnouncementSlotRef = gameManager.simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0];
+        unlockedAnnouncementSlotRef = simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0];
                 
-        worldSpiritHubUI.ClickWorldCreateNewSpecies(gameManager.simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0]);
+        worldSpiritHubUI.ClickWorldCreateNewSpecies(simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0]);
 
                 
         knowledgeUI.isUnlocked = true;
@@ -393,16 +420,16 @@ public class UIManager : MonoBehaviour {
         //knowledgeUI.OpenKnowledgePanel();
         //worldSpiritHubUI.OpenWorldTreeSelect();                
 
-        gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
+        simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
                 
-        unlockedAnnouncementSlotRef = gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];   
+        unlockedAnnouncementSlotRef = simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];   
                 
-        worldSpiritHubUI.ClickWorldCreateNewSpecies(gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0]);
+        worldSpiritHubUI.ClickWorldCreateNewSpecies(simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0]);
                 
-        gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
+        simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
                 
-        unlockedAnnouncementSlotRef = gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0];
-        worldSpiritHubUI.ClickWorldCreateNewSpecies(gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0]);
+        unlockedAnnouncementSlotRef = simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0];
+        worldSpiritHubUI.ClickWorldCreateNewSpecies(simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0]);
                   
 
         watcherUI.isUnlocked = true;
@@ -411,67 +438,64 @@ public class UIManager : MonoBehaviour {
 
         //watcherUI.animatorWatcherUI.SetBool("_IsOpen", true);
                 
-        gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
+        simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
                 
-        unlockedAnnouncementSlotRef = gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[0];                
-        worldSpiritHubUI.ClickWorldCreateNewSpecies(gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[0]);
-
-                                           
-        gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].unlocked = true;
-        gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0].status = TrophicSlot.SlotStatus.On;                
+        unlockedAnnouncementSlotRef = simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[0];                
+        worldSpiritHubUI.ClickWorldCreateNewSpecies(simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[0]);
+                             
+        simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].unlocked = true;
+        simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0].status = TrophicSlot.SlotStatus.On;                
         Debug.Log("CREATURE A UNLOCKED!!! " + unlockCooldownCounter.ToString());
                 
-        unlockedAnnouncementSlotRef = gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0];                
-        worldSpiritHubUI.ClickWorldCreateNewSpecies(gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0]);
+        unlockedAnnouncementSlotRef = simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0];                
+        worldSpiritHubUI.ClickWorldCreateNewSpecies(simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0]);
          
                 
         mutationUI.isUnlocked = true;
 
         //mutationUI.ClickToolButton();
         //worldSpiritHubUI.OpenWorldTreeSelect();
-        gameManager.theRenderKing.InitializeCreaturePortrait(gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[0].foundingCandidate.candidateGenome); //, gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][mutationUI.selectedToolbarMutationID].representativeGenome);
+        theRenderKing.InitializeCreaturePortrait(simulationManager.masterGenomePool.completeSpeciesPoolsList[0].foundingCandidate.candidateGenome); //, gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][mutationUI.selectedToolbarMutationID].representativeGenome);
                 
 
 
-        TrophicSlot mineralSlot = gameManager.simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[0];
+        TrophicSlot mineralSlot = simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[0];
         mineralSlot.status = TrophicSlot.SlotStatus.On;
                 
         unlockedAnnouncementSlotRef = mineralSlot;
                 
-        TrophicSlot pebblesSlot = gameManager.simulationManager.trophicLayersManager.kingdomTerrain.trophicTiersList[0].trophicSlots[2];
+        TrophicSlot pebblesSlot = simulationManager.trophicLayersManager.kingdomTerrain.trophicTiersList[0].trophicSlots[2];
         pebblesSlot.status = TrophicSlot.SlotStatus.On;
         Debug.Log("PEBBLES SPIRIT UNLOCKED!!! " + unlockCooldownCounter.ToString());
                 
         unlockedAnnouncementSlotRef = pebblesSlot;
-                
-
-        TrophicSlot sandSlot = gameManager.simulationManager.trophicLayersManager.kingdomTerrain.trophicTiersList[0].trophicSlots[3];
+            
+        TrophicSlot sandSlot = simulationManager.trophicLayersManager.kingdomTerrain.trophicTiersList[0].trophicSlots[3];
         sandSlot.status = TrophicSlot.SlotStatus.On;
                 
         unlockedAnnouncementSlotRef = sandSlot;
                 
 
-        TrophicSlot airSlot = gameManager.simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[2];
+        TrophicSlot airSlot = simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[2];
         airSlot.status = TrophicSlot.SlotStatus.On;
         Debug.Log("AIR SPIRIT UNLOCKED!!! " + unlockCooldownCounter.ToString());
         //AnnounceUnlockAir();
         isUnlockCooldown = true;
         unlockedAnnouncementSlotRef = airSlot;
-                               
-                                         
-        gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].unlocked = true;
-        gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1].status = TrophicSlot.SlotStatus.On;                
+                                                               
+        simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].unlocked = true;
+        simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1].status = TrophicSlot.SlotStatus.On;                
                 
         //AnnounceUnlockVertebrates();
                 
-        unlockedAnnouncementSlotRef = gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1];                
-        worldSpiritHubUI.ClickWorldCreateNewSpecies(gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1]);
+        unlockedAnnouncementSlotRef = simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1];                
+        worldSpiritHubUI.ClickWorldCreateNewSpecies(simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1]);
 
         //worldSpiritHubUI.selectedWorldSpiritSlot = gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1];
         //brushesUI.selectedEssenceSlot = gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1];
 
         // SPAWNS!!!! 
-        gameManager.simulationManager.AttemptToBrushSpawnAgent(brushesUI.selectedEssenceSlot.linkedSpeciesID);
+        simulationManager.AttemptToBrushSpawnAgent(brushesUI.selectedEssenceSlot.linkedSpeciesID);
 
         worldSpiritHubUI.ClickButtonWorldSpiritHubAgent(0);   
     }
@@ -529,13 +553,13 @@ public class UIManager : MonoBehaviour {
     // * REFACTOR: delegate to something else
     public void SpiritUnlockComplete() {
         Debug.LogError("SPIRIT UNLOCK!!!  world size increase!");
-        gameManager.theRenderKing.baronVonTerrain.IncrementWorldRadius(0.7f);
+        theRenderKing.baronVonTerrain.IncrementWorldRadius(0.7f);
 
         switch (wildSpirit.curClickableSpiritType) {
             case WildSpirit.ClickableSpiritType.CreationBrush:
                 UnlockBrushes();   
-                worldSpiritHubUI.selectedWorldSpiritSlot = gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];
-                brushesUI.selectedEssenceSlot = gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];
+                worldSpiritHubUI.selectedWorldSpiritSlot = simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];
+                brushesUI.selectedEssenceSlot = simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];
                 break;
             case WildSpirit.ClickableSpiritType.Water:
                 gameManager.simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[1].status = TrophicSlot.SlotStatus.On;
@@ -544,24 +568,24 @@ public class UIManager : MonoBehaviour {
                 //brushesUI.SetTargetFromWorldTree();
                 //AnnounceUnlockWater();
                 isUnlockCooldown = true;
-                unlockedAnnouncementSlotRef = gameManager.simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[1];
-                worldSpiritHubUI.selectedWorldSpiritSlot = gameManager.simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[1];
-                brushesUI.selectedEssenceSlot = gameManager.simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[1];
+                unlockedAnnouncementSlotRef = simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[1];
+                worldSpiritHubUI.selectedWorldSpiritSlot = simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[1];
+                brushesUI.selectedEssenceSlot = simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[1];
                             
                 wildSpirit.curClickableSpiritType = WildSpirit.ClickableSpiritType.Decomposers;
                 break;
             case WildSpirit.ClickableSpiritType.Decomposers:
-                gameManager.simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
+                simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
                 Debug.Log("DECOMPOSERS UNLOCKED!!! " + unlockCooldownCounter.ToString());
 
                 //AnnounceUnlockDecomposers();
                 isUnlockCooldown = true;
-                unlockedAnnouncementSlotRef = gameManager.simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0];
+                unlockedAnnouncementSlotRef = simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0];
                 //simManager.uiManager.buttonToolbarExpandOn.GetComponent<Animator>().enabled = true;
-                worldSpiritHubUI.ClickWorldCreateNewSpecies(gameManager.simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0]);
+                worldSpiritHubUI.ClickWorldCreateNewSpecies(simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0]);
 
-                worldSpiritHubUI.selectedWorldSpiritSlot = gameManager.simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0];
-                brushesUI.selectedEssenceSlot = gameManager.simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0];
+                worldSpiritHubUI.selectedWorldSpiritSlot = simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0];
+                brushesUI.selectedEssenceSlot = simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0];
                             
                 //isClickableSpiritRoaming = false;
                 wildSpirit.curClickableSpiritType = WildSpirit.ClickableSpiritType.KnowledgeSpirit;
@@ -576,30 +600,30 @@ public class UIManager : MonoBehaviour {
                 wildSpirit.curClickableSpiritType = WildSpirit.ClickableSpiritType.Algae;
                 break;
             case WildSpirit.ClickableSpiritType.Algae:
-                gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
+                simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
                 //Debug.Log("ALGAE UNLOCKED!!! " + unlockCooldownCounter.ToString());
 
                 //AnnounceUnlockAlgae();
                 isUnlockCooldown = true;
-                unlockedAnnouncementSlotRef = gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];   
+                unlockedAnnouncementSlotRef = simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];   
                 
-                worldSpiritHubUI.ClickWorldCreateNewSpecies(gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0]);
+                worldSpiritHubUI.ClickWorldCreateNewSpecies(simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0]);
                             
-                brushesUI.selectedEssenceSlot = gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];
-                worldSpiritHubUI.selectedWorldSpiritSlot = gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];
+                brushesUI.selectedEssenceSlot =simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];
+                worldSpiritHubUI.selectedWorldSpiritSlot = simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];
                 //isClickableSpiritRoaming = false;
                 wildSpirit.curClickableSpiritType = WildSpirit.ClickableSpiritType.Zooplankton;
                 break;
             case WildSpirit.ClickableSpiritType.Zooplankton:
-                gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
+                simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
                 //Debug.Log("ZOOPLANKTON UNLOCKED!!! " + unlockCooldownCounter.ToString());
                 //AnnounceUnlockZooplankton();
                 isUnlockCooldown = true;
-                unlockedAnnouncementSlotRef = gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0];
-                worldSpiritHubUI.ClickWorldCreateNewSpecies(gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0]);
+                unlockedAnnouncementSlotRef = simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0];
+                worldSpiritHubUI.ClickWorldCreateNewSpecies(simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0]);
                             
-                worldSpiritHubUI.selectedWorldSpiritSlot = gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0];
-                brushesUI.selectedEssenceSlot = gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0];
+                worldSpiritHubUI.selectedWorldSpiritSlot = simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0];
+                brushesUI.selectedEssenceSlot = simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0];
                             
                 wildSpirit.curClickableSpiritType = WildSpirit.ClickableSpiritType.WatcherSpirit;
                 break;
@@ -612,29 +636,29 @@ public class UIManager : MonoBehaviour {
                 wildSpirit.curClickableSpiritType = WildSpirit.ClickableSpiritType.Plants;
                 break;
             case WildSpirit.ClickableSpiritType.Plants:
-                gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
+                simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
                 //Debug.Log("PLANTS UNLOCKED!!! " + unlockCooldownCounter.ToString());
                 //AnnounceUnlockPlants();
                 isUnlockCooldown = true;
-                unlockedAnnouncementSlotRef = gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[0];                
-                worldSpiritHubUI.ClickWorldCreateNewSpecies(gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[0]);
+                unlockedAnnouncementSlotRef = simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[0];                
+                worldSpiritHubUI.ClickWorldCreateNewSpecies(simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[0]);
 
-                worldSpiritHubUI.selectedWorldSpiritSlot = gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[0];
-                brushesUI.selectedEssenceSlot = gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[0];
+                worldSpiritHubUI.selectedWorldSpiritSlot = simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[0];
+                brushesUI.selectedEssenceSlot = simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[0];
 
                 wildSpirit.curClickableSpiritType = WildSpirit.ClickableSpiritType.VertA;
                 break;
             case WildSpirit.ClickableSpiritType.VertA:                            
-                gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].unlocked = true;
-                gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0].status = TrophicSlot.SlotStatus.On;                
+                simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].unlocked = true;
+                simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0].status = TrophicSlot.SlotStatus.On;                
                 //Debug.Log("CREATURE A UNLOCKED!!! " + unlockCooldownCounter.ToString());
                 //AnnounceUnlockVertebrates();
                 isUnlockCooldown = true;
-                unlockedAnnouncementSlotRef = gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0];                
-                worldSpiritHubUI.ClickWorldCreateNewSpecies(gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0]);
+                unlockedAnnouncementSlotRef = simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0];                
+                worldSpiritHubUI.ClickWorldCreateNewSpecies(simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0]);
 
-                worldSpiritHubUI.selectedWorldSpiritSlot = gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0];
-                brushesUI.selectedEssenceSlot = gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0];
+                worldSpiritHubUI.selectedWorldSpiritSlot = simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0];
+                brushesUI.selectedEssenceSlot = simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0];
 
                             
                 wildSpirit.curClickableSpiritType = WildSpirit.ClickableSpiritType.MutationSpirit;
@@ -652,7 +676,7 @@ public class UIManager : MonoBehaviour {
                 break;
             
             case WildSpirit.ClickableSpiritType.Minerals:
-                TrophicSlot mineralSlot = gameManager.simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[0];
+                TrophicSlot mineralSlot = simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[0];
                 mineralSlot.status = TrophicSlot.SlotStatus.On;
                 Debug.Log("MINERALS UNLOCKED!!! " + unlockCooldownCounter.ToString());
                 //AnnounceUnlockMinerals();
@@ -666,7 +690,7 @@ public class UIManager : MonoBehaviour {
                 wildSpirit.curClickableSpiritType = WildSpirit.ClickableSpiritType.Pebbles;
                 break;
             case WildSpirit.ClickableSpiritType.Pebbles:
-                TrophicSlot pebblesSlot = gameManager.simulationManager.trophicLayersManager.kingdomTerrain.trophicTiersList[0].trophicSlots[2];
+                TrophicSlot pebblesSlot = simulationManager.trophicLayersManager.kingdomTerrain.trophicTiersList[0].trophicSlots[2];
                 pebblesSlot.status = TrophicSlot.SlotStatus.On;
                 //Debug.Log("PEBBLES SPIRIT UNLOCKED!!! " + unlockCooldownCounter.ToString());
                 //AnnounceUnlockPebbles();
@@ -682,7 +706,7 @@ public class UIManager : MonoBehaviour {
                 wildSpirit.curClickableSpiritType = WildSpirit.ClickableSpiritType.Sand;
                 break;
             case WildSpirit.ClickableSpiritType.Sand:
-                TrophicSlot sandSlot = gameManager.simulationManager.trophicLayersManager.kingdomTerrain.trophicTiersList[0].trophicSlots[3];
+                TrophicSlot sandSlot = simulationManager.trophicLayersManager.kingdomTerrain.trophicTiersList[0].trophicSlots[3];
                 sandSlot.status = TrophicSlot.SlotStatus.On;
                 //Debug.Log("SAND SPIRIT UNLOCKED!!! " + unlockCooldownCounter.ToString());
                 //AnnounceUnlockSand();
@@ -698,7 +722,7 @@ public class UIManager : MonoBehaviour {
                 wildSpirit.curClickableSpiritType = WildSpirit.ClickableSpiritType.Air;
                 break;
             case WildSpirit.ClickableSpiritType.Air:
-                TrophicSlot airSlot = gameManager.simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[2];
+                TrophicSlot airSlot = simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[2];
                 airSlot.status = TrophicSlot.SlotStatus.On;
                 //Debug.Log("AIR SPIRIT UNLOCKED!!! " + unlockCooldownCounter.ToString());
                 //AnnounceUnlockAir();
@@ -712,16 +736,16 @@ public class UIManager : MonoBehaviour {
             
             
             case WildSpirit.ClickableSpiritType.VertB:                            
-                gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].unlocked = true;
-                gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1].status = TrophicSlot.SlotStatus.On;                
+                simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].unlocked = true;
+                simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1].status = TrophicSlot.SlotStatus.On;                
                 //Debug.Log("CREATURE B UNLOCKED!!! " + unlockCooldownCounter.ToString());
                 //AnnounceUnlockVertebrates();
                 isUnlockCooldown = true;
-                unlockedAnnouncementSlotRef = gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1];                
-                worldSpiritHubUI.ClickWorldCreateNewSpecies(gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1]);
+                unlockedAnnouncementSlotRef = simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1];                
+                worldSpiritHubUI.ClickWorldCreateNewSpecies(simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1]);
 
-                worldSpiritHubUI.selectedWorldSpiritSlot = gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1];
-                brushesUI.selectedEssenceSlot = gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1];
+                worldSpiritHubUI.selectedWorldSpiritSlot = simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1];
+                brushesUI.selectedEssenceSlot = simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1];
 
                 break;
             default:
@@ -937,10 +961,10 @@ public class UIManager : MonoBehaviour {
                         isActing = 1f;
                         
                         float mag = theCursorCzar.smoothedMouseVel.magnitude;
-                        float radiusMult = Mathf.Lerp(0.075f, 1.33f, Mathf.Clamp01(gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.4f)); // 0.62379f; // (1f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.5f);
+                        float radiusMult = Mathf.Lerp(0.075f, 1.33f, Mathf.Clamp01(theRenderKing.baronVonWater.camDistNormalized * 1.4f)); // 0.62379f; // (1f + theRenderKing.baronVonWater.camDistNormalized * 1.5f);
 
                         if(mag > 0f) {
-                            gameManager.simulationManager.PlayerToolStirOn(theCursorCzar.curMousePositionOnWaterPlane, theCursorCzar.smoothedMouseVel * (0.25f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.2f), radiusMult);
+                            gameManager.simulationManager.PlayerToolStirOn(theCursorCzar.curMousePositionOnWaterPlane, theCursorCzar.smoothedMouseVel * (0.25f + theRenderKing.baronVonWater.camDistNormalized * 1.2f), radiusMult);
                             
                         }
                         else {
@@ -1069,7 +1093,7 @@ public class UIManager : MonoBehaviour {
         // 
         if(!announceAlgaeCollapseOccurred) {
             if(announceAlgaeCollapsePossible) {
-                if(gameManager.simulationManager.simResourceManager.curGlobalPlantParticles < 10f) {
+                if(simulationManager.simResourceManager.curGlobalPlantParticles < 10f) {
                     announceAlgaeCollapsePossible = false;
                     announceAlgaeCollapseOccurred = true;
 
@@ -1078,9 +1102,6 @@ public class UIManager : MonoBehaviour {
                     panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
                     isAnnouncementTextOn = true;
                 }
-            }
-            else {
-
             }
         }
         // Enable checking for this announcement happening -- algae collapse requires it to have reached full population at some point
@@ -1119,13 +1140,13 @@ public class UIManager : MonoBehaviour {
 
         ComputeBuffer outputBuffer = new ComputeBuffer(1, sizeof(float) * 4);
         outputBuffer.SetData(sample);
-        int kernelCSSampleTexture = gameManager.simulationManager.computeShaderResourceGrid.FindKernel("CSSampleTexture");
-        gameManager.simulationManager.computeShaderResourceGrid.SetTexture(kernelCSSampleTexture, "_CommonSampleTex", tex);
-        gameManager.simulationManager.computeShaderResourceGrid.SetBuffer(kernelCSSampleTexture, "outputValuesCBuffer", outputBuffer);
-        gameManager.simulationManager.computeShaderResourceGrid.SetFloat("_CoordX", uv.x);
-        gameManager.simulationManager.computeShaderResourceGrid.SetFloat("_CoordY", uv.y); 
+        int kernelCSSampleTexture = simulationManager.computeShaderResourceGrid.FindKernel("CSSampleTexture");
+        simulationManager.computeShaderResourceGrid.SetTexture(kernelCSSampleTexture, "_CommonSampleTex", tex);
+        simulationManager.computeShaderResourceGrid.SetBuffer(kernelCSSampleTexture, "outputValuesCBuffer", outputBuffer);
+        simulationManager.computeShaderResourceGrid.SetFloat("_CoordX", uv.x);
+        simulationManager.computeShaderResourceGrid.SetFloat("_CoordY", uv.y); 
         // DISPATCH !!!
-        gameManager.simulationManager.computeShaderResourceGrid.Dispatch(kernelCSSampleTexture, 1, 1, 1);
+        simulationManager.computeShaderResourceGrid.Dispatch(kernelCSSampleTexture, 1, 1, 1);
         
         outputBuffer.GetData(sample);
         outputBuffer.Release();
@@ -1256,7 +1277,7 @@ public class UIManager : MonoBehaviour {
 
     public void ClickLoadingGemStart() {
         Debug.Log("Let there be not nothing!");
-        gameManager.simulationManager._BigBangOn = true;
+        simulationManager._BigBangOn = true;
     }
 
     public void ClickToolButtonBrushes() {
@@ -1296,7 +1317,7 @@ public class UIManager : MonoBehaviour {
         NarratorText("Creation Spirit Captured!", new Color(1f, 1f, 1f));  
         
         Feat feat = new Feat("Brush", Feat.FeatType.WorldExpand, Time.frameCount, Color.white, "blah blah blah blah!");
-        gameManager.simulationManager.LogFeat(feat);
+        simulationManager.LogFeat(feat);
         //featsUI.isOpen = true;
     }
     
@@ -1312,7 +1333,7 @@ public class UIManager : MonoBehaviour {
         NarratorText("Watcher Spirit Captured!", new Color(0.6f, 0.71277f, 1f)); 
         
         Feat feat = new Feat("Inspect Tool Unlocked!", Feat.FeatType.Watcher, Time.frameCount, Color.white, "Use this to see hidden information.");
-        gameManager.simulationManager.LogFeat(feat);
+        simulationManager.LogFeat(feat);
     }
     
     public void AnnounceUnlockMutationSpirit() {
@@ -1347,26 +1368,26 @@ public class UIManager : MonoBehaviour {
         NarratorText("Zooplankton Species Unlocked!", colorZooplanktonLayer);
 
         Feat feat = new Feat("Animal Spirit!", Feat.FeatType.Zooplankton, Time.frameCount, Color.white, "Tiny creatures that eat algae.");
-        gameManager.simulationManager.LogFeat(feat);
+        simulationManager.LogFeat(feat);
     }
     
     public void AnnounceUnlockVertebrates() {
         Debug.LogError("WTF?");
         //NarratorText("Vertebrate Species Unlocked!", colorVertebratesLayer);
         Feat feat = new Feat("Animal Spirit!", Feat.FeatType.Plants, Time.frameCount, Color.white, "More complex, larger animals");
-        gameManager.simulationManager.LogFeat(feat);
+        simulationManager.LogFeat(feat);
     }
     
     public void AnnounceUnlockPlants() {
         NarratorText("Plant Species Unlocked!", colorPlantsLayer);
         Feat feat = new Feat("Plant Spirit!", Feat.FeatType.Plants, Time.frameCount, Color.white, "Tiny simple plants.");
-        gameManager.simulationManager.LogFeat(feat);
+        simulationManager.LogFeat(feat);
     }
    
     public void CheatUnlockAll() {
         Debug.Log("Cheat!!! Unlocked all species!!!");
 
-        gameManager.simulationManager.trophicLayersManager.CheatUnlockAll();
+        simulationManager.trophicLayersManager.CheatUnlockAll();
 
         mutationUI.isUnlocked = true;
         knowledgeUI.isUnlocked = true;

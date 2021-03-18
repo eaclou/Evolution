@@ -154,6 +154,7 @@ public class SimulationManager : Singleton<SimulationManager>
     public GraphData graphDataVertebrateFoodEaten3;
     public GraphData graphDataVertebrateGenome3;
         
+    TheCursorCzar theCursorCzar => TheCursorCzar.instance;
 
     #region loading   // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& LOADING LOADING LOADING &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
     
@@ -377,9 +378,11 @@ public class SimulationManager : Singleton<SimulationManager>
     private void LoadingInitializeFluidSim() {
         environmentFluidManager.InitializeFluidSystem();
     }
+    
     private void GentlyRouseTheRenderMonarchHisHighnessLordOfPixels() {
-        theRenderKing.InitializeRiseAndShine(this);
+        theRenderKing.InitializeRiseAndShine();
     }
+    
     private void LoadingInstantiateAgents() {
         
         // Instantiate AI Agents
@@ -610,8 +613,8 @@ public class SimulationManager : Singleton<SimulationManager>
             zooplanktonManager.FindClosestAnimalParticleToCritters(simStateData);
             
         } 
-        vegetationManager.FindClosestPlantParticleToCursor(uiManager.theCursorCzar.curMousePositionOnWaterPlane.x, uiManager.theCursorCzar.curMousePositionOnWaterPlane.y);
-        zooplanktonManager.FindClosestAnimalParticleToCursor(uiManager.theCursorCzar.curMousePositionOnWaterPlane.x, uiManager.theCursorCzar.curMousePositionOnWaterPlane.y);
+        vegetationManager.FindClosestPlantParticleToCursor(theCursorCzar.curMousePositionOnWaterPlane.x, theCursorCzar.curMousePositionOnWaterPlane.y);
+        zooplanktonManager.FindClosestAnimalParticleToCursor(theCursorCzar.curMousePositionOnWaterPlane.x, theCursorCzar.curMousePositionOnWaterPlane.y);
         // Find best way to insert Agent Waste into ResourceGridTex.waste
 
         simResourceManager.oxygenUsedByAgentsLastFrame = totalOxygenUsedByAgents;
@@ -1198,7 +1201,7 @@ public class SimulationManager : Singleton<SimulationManager>
                     //    isBrushingLerp = 1f;
                     //}
 
-                    Vector3 cursorWorldPos = uiManager.theCursorCzar.curMousePositionOnWaterPlane;
+                    Vector3 cursorWorldPos = theCursorCzar.curMousePositionOnWaterPlane;
                     cursorWorldPos.x += UnityEngine.Random.Range(-1f, 1f) * 10f;
                     cursorWorldPos.y += UnityEngine.Random.Range(-1f, 1f) * 10f;
                     

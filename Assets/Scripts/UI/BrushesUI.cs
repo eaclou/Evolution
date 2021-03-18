@@ -26,8 +26,8 @@ public class BrushesUI : MonoBehaviour {
     public float toolbarInfluencePoints = 1f;
     public Text textInfluencePointsValue;
     //public Material infoMeterInfluencePointsMat;
-    private int influencePointsCooldownCounter = 0;
-    private int influencePointsCooldownDuration = 90;
+    private int influencePointsCooldownCounter = 0;     // WPP: assigned but not used
+    private int influencePointsCooldownDuration = 90;   // WPP: assigned but not used
     public bool isInfluencePointsCooldown = false;
     public CreationBrush[] creationBrushesArray;
 
@@ -71,6 +71,8 @@ public class BrushesUI : MonoBehaviour {
 
     public Color curIconColor = Color.white;
     public Sprite curIconSprite = null;
+    
+    TheCursorCzar theCursorCzar => TheCursorCzar.instance;
 
     //public Text textLinkedSpiritDescription; -- more of KnowledgeSpirit's thing
 
@@ -297,11 +299,10 @@ public class BrushesUI : MonoBehaviour {
         imageSelectedBrushThumbnail.sprite = uiManagerRef.spriteSpiritBrushCreationIcon;
         //strSpiritBrushDescription = "This spirit has some powers of life and death";
         //strSpiritBrushEffects = "Left-Click:\n" + strLeftClickEffect[leftClickDescriptionIndex] + "\n\nRight-Click:\n" + strRightClickEffect[rightClickDescriptionIndex];
-        if(uiManagerRef.theCursorCzar.isDraggingMouseRight) {
-            spiritBrushName = "Minor Decay Spirit" + curCreationBrushIndex.ToString();
-
-            
+        if(theCursorCzar.isDraggingMouseRight) {
+            spiritBrushName = "Minor Decay Spirit" + curCreationBrushIndex.ToString();  
         }
+        
         if(uiManagerRef.curActiveTool == ToolType.Stir) {
             spiritBrushName = "Lesser Stir Spirit";      
             imageSelectedBrushThumbnail.sprite = uiManagerRef.spriteSpiritBrushStirIcon;
@@ -549,9 +550,9 @@ public class BrushesUI : MonoBehaviour {
     public void ApplyCreationBrush() {
         toolbarInfluencePoints -= 0.002f;
 
-        float randRipple = UnityEngine.Random.Range(0f, 1f);
+        float randRipple = Random.Range(0f, 1f);
         if(randRipple < 0.33) {
-            uiManagerRef.gameManager.theRenderKing.baronVonWater.RequestNewWaterRipple(new Vector2(uiManagerRef.theCursorCzar.curMousePositionOnWaterPlane.x / SimulationManager._MapSize, uiManagerRef.theCursorCzar.curMousePositionOnWaterPlane.y / SimulationManager._MapSize));
+            uiManagerRef.gameManager.theRenderKing.baronVonWater.RequestNewWaterRipple(new Vector2(theCursorCzar.curMousePositionOnWaterPlane.x / SimulationManager._MapSize, theCursorCzar.curMousePositionOnWaterPlane.y / SimulationManager._MapSize));
 
         }
         uiManagerRef.updateTerrainAltitude = false;                
@@ -576,7 +577,7 @@ public class BrushesUI : MonoBehaviour {
                 }
                 else {// AGENTS                                
                     int speciesIndex = selectedEssenceSlot.linkedSpeciesID;
-                    if (uiManagerRef.theCursorCzar.isDraggingMouseLeft) {
+                    if (theCursorCzar.isDraggingMouseLeft) {
                         //gameManager.simulationManager.recentlyAddedSpeciesOn = true; // ** needed?
                         uiManagerRef.isBrushAddingAgents = true;
                                         
@@ -590,8 +591,8 @@ public class BrushesUI : MonoBehaviour {
                             uiManagerRef.gameManager.simulationManager.AttemptToBrushSpawnAgent(speciesIndex);
                         }
                     }
-                    if (uiManagerRef.theCursorCzar.isDraggingMouseRight) {
-                        uiManagerRef.gameManager.simulationManager.AttemptToKillAgent(speciesIndex, new Vector2(uiManagerRef.theCursorCzar.curMousePositionOnWaterPlane.x, uiManagerRef.theCursorCzar.curMousePositionOnWaterPlane.y), 15f);
+                    if (theCursorCzar.isDraggingMouseRight) {
+                        uiManagerRef.gameManager.simulationManager.AttemptToKillAgent(speciesIndex, new Vector2(theCursorCzar.curMousePositionOnWaterPlane.x, theCursorCzar.curMousePositionOnWaterPlane.y), 15f);
                     }                                   
                 }
             }
@@ -622,21 +623,21 @@ public class BrushesUI : MonoBehaviour {
                     Debug.Log("SDFADSFAS");
                 }
                 else if (selectedEssenceSlot.slotID == 1) {   // WATER
-                    if (uiManagerRef.theCursorCzar.isDraggingMouseLeft) {
+                    if (theCursorCzar.isDraggingMouseLeft) {
                         SimulationManager._GlobalWaterLevel = Mathf.Clamp01(SimulationManager._GlobalWaterLevel + 0.002f);
                     }
-                    if (uiManagerRef.theCursorCzar.isDraggingMouseRight) {
+                    if (theCursorCzar.isDraggingMouseRight) {
                         SimulationManager._GlobalWaterLevel = Mathf.Clamp01(SimulationManager._GlobalWaterLevel - 0.002f);
                     }
                 }
                 else if (selectedEssenceSlot.slotID == 2) {   // AIR
-                    if (uiManagerRef.theCursorCzar.isDraggingMouseLeft) {
-                        if (UnityEngine.Random.Range(0f, 1f) < 0.1f) {
+                    if (theCursorCzar.isDraggingMouseLeft) {
+                        if (Random.Range(0f, 1f) < 0.1f) {
                             uiManagerRef.gameManager.simulationManager.environmentFluidManager.curTierWaterCurrents = Mathf.Clamp((uiManagerRef.gameManager.simulationManager.environmentFluidManager.curTierWaterCurrents + 1), 0, 10);
                         }                                    
                     }
-                    if (uiManagerRef.theCursorCzar.isDraggingMouseRight) {
-                        if(UnityEngine.Random.Range(0f, 1f) < 0.1f) {
+                    if (theCursorCzar.isDraggingMouseRight) {
+                        if(Random.Range(0f, 1f) < 0.1f) {
                             uiManagerRef.gameManager.simulationManager.environmentFluidManager.curTierWaterCurrents = Mathf.Clamp((uiManagerRef.gameManager.simulationManager.environmentFluidManager.curTierWaterCurrents - 1), 0, 10);
                                             
                         }
@@ -648,27 +649,27 @@ public class BrushesUI : MonoBehaviour {
         uiManagerRef.gameManager.theRenderKing.isBrushing = true;
         uiManagerRef.gameManager.theRenderKing.isSpiritBrushOn = true;
         uiManagerRef.gameManager.theRenderKing.spiritBrushPosNeg = 1f;
-        if(uiManagerRef.theCursorCzar.isDraggingMouseRight) {  // *** Re-Factor!!!
+        if(theCursorCzar.isDraggingMouseRight) {  // *** Re-Factor!!!
             uiManagerRef.gameManager.theRenderKing.spiritBrushPosNeg = -1f;
         }
 
         // Also Stir Water -- secondary effect
-        float mag = uiManagerRef.theCursorCzar.smoothedMouseVel.magnitude * 0.35f;
+        float mag = theCursorCzar.smoothedMouseVel.magnitude * 0.35f;
         float radiusMult = Mathf.Lerp(0.075f, 1.33f, Mathf.Clamp01(uiManagerRef.gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.4f)); // 0.62379f; // (1f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.5f);
 
         if (mag > 0f) {
-            uiManagerRef.gameManager.simulationManager.PlayerToolStirOn(uiManagerRef.theCursorCzar.curMousePositionOnWaterPlane, uiManagerRef.theCursorCzar.smoothedMouseVel * (0.25f + uiManagerRef.gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.2f) * 0.33f, radiusMult);
+            uiManagerRef.gameManager.simulationManager.PlayerToolStirOn(theCursorCzar.curMousePositionOnWaterPlane, theCursorCzar.smoothedMouseVel * (0.25f + uiManagerRef.gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.2f) * 0.33f, radiusMult);
 
         }
         else {
             uiManagerRef.gameManager.simulationManager.PlayerToolStirOff();
         }
-        uiManagerRef.gameManager.theRenderKing.isStirring = uiManagerRef.theCursorCzar.isDraggingMouseLeft || uiManagerRef.theCursorCzar.isDraggingMouseRight; 
+        uiManagerRef.gameManager.theRenderKing.isStirring = theCursorCzar.isDraggingMouseLeft || theCursorCzar.isDraggingMouseRight; 
         
     }
 
     public void Unlock() {
-        this.isUnlocked = true;
+        isUnlocked = true;
     }
 
     public void ClickToolButton() {

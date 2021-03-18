@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class SimulationUI : MonoBehaviour
 {
+    SimulationManager simulation => SimulationManager.instance;
+    TheCursorCzar theCursorCzar => TheCursorCzar.instance;
+
     public UIManager manager;
-    public WildSpirit wildSpirit;
     public WatcherUI watcherUI;
     public BrushesUI brushesUI;
     public KnowledgeUI knowledgeUI;
@@ -19,20 +20,12 @@ public class SimulationUI : MonoBehaviour
     public ObserverModeUI observerModeUI;
     public BigBangPanelUI bigBangPanelUI;
     
-    SimulationManager simulation => SimulationManager.instance;
-    TheCursorCzar theCursorCzar => TheCursorCzar.instance;
-    MasterGenomePool genomePool => simulation.masterGenomePool;
-    List<SpeciesGenomePool> speciesPools => genomePool.completeSpeciesPoolsList;
-    
-    const string ANIM_FINISHED = "_AnimFinished";
-    
     void OnEnable()
     {
         manager.InitialUnlocks();
     }
     
-    SpeciesGenomePool pool;
-
+    // * WPP: why are these centralized?
     void Update() {
         bigBangPanelUI.Tick();
         observerModeUI.Tick();  
@@ -45,32 +38,7 @@ public class SimulationUI : MonoBehaviour
         globalResourcesUI.UpdateGlobalResourcesPanelUpdate();
         featsUI.UpdateFeatsPanelUI(simulation.featsList);
         clockPanelUI.Tick();
-
-        // * Only reassign this when it changes
-        pool = speciesPools[manager.selectedSpeciesID];
-        
-        if(manager.focusedCandidate != null) {
-            genomeViewerUI.UpdateUI(pool, manager.focusedCandidate);
-
-            if(simulation.simAgeTimeSteps % 111 == 1) {
-                speciesOverviewUI.RebuildGenomeButtons();  
-            }
-        }
-        
-        // REFACTOR: delegate to WildSpirit        
-        if(wildSpirit.isClickableSpiritRoaming) {
-            wildSpirit.UpdateWildSpiritProto();
-        }
-        else {
-            wildSpirit.framesSinceLastClickableSpirit++;
-            wildSpirit.protoSpiritClickColliderGO.SetActive(false);
-        }
-
-        if(animatorSpiritUnlock.GetBool(ANIM_FINISHED)) {
-            manager.SpiritUnlockComplete();
-            animatorSpiritUnlock.SetBool(ANIM_FINISHED, false);
-        }
-        
+        manager.SetFocus();
         debugPanelUI.UpdateDebugUI();              
     }
 }

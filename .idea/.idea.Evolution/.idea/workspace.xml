@@ -10,6 +10,14 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
+  </component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/17AD9609-AE06-4F2C-9315-931FF97ADCF1/e9/3e0ac117/ComputeBuffer.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/BigBangPanelUI.cs" root0="FORCE_HIGHLIGHTING" />
@@ -33,22 +41,28 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/Camera/CameraManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Audio/AudioManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Core/GameManager.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/LoadingPanelUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/MainMenuUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Playcraft/_NEW/SetTimescale.cs" />
       <option value="$PROJECT_DIR$/Assets/Playcraft/_NEW/SetTimeScale.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/ClockPanelUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/BrushesUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/WatcherUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/WorldSpiritHubUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Rendering/TheRenderKing.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/SpeciesTreeBarUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/TheCursorCzar.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/BigBangPanelUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/ObserverModeUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/GlobalResourcesUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/DebugPanelUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Rendering/TheRenderKing.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/VegetationManager.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/ZooplanktonManager.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/WildSpirit.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/SimulationUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/LoadingPanelUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/BrushesUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/SpeciesTreePanel.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/GraphStatPanel.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" />
     </changedPaths>
   </component>
@@ -97,7 +111,8 @@
       <workItem from="1615064385687" duration="5320000" />
       <workItem from="1615691236457" duration="10591000" />
       <workItem from="1615752093154" duration="3850000" />
-      <workItem from="1615872028434" duration="9208000" />
+      <workItem from="1615872028434" duration="9271000" />
+      <workItem from="1616048791562" duration="5174000" />
     </task>
     <servers />
   </component>
@@ -105,24 +120,5 @@
   <component name="UnityUnitTestConfiguration" currentTestLauncher="EditMode" />
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs</url>
-          <line>476</line>
-          <properties documentPath="D:\UnityProjects\Freelance\Evolution\Assets\Scripts\UI\UIManager.cs" initialLine="473" containingFunctionPresentation="method 'InitialUnlocks'">
-            <startOffsets>
-              <option value="19923" />
-            </startOffsets>
-            <endOffsets>
-              <option value="19924" />
-            </endOffsets>
-          </properties>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>

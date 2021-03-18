@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -19,6 +18,7 @@ public class SpeciesOverviewUI : MonoBehaviour {
 
     public GameObject panelCurrentGenepool;
     public GameObject panelLineageGenomes;
+    public GameObject panelGenomeViewer;
     public Image imageLineageA;
     public Image imageLineageB;
 
@@ -182,7 +182,6 @@ public class SpeciesOverviewUI : MonoBehaviour {
                 //buttonScript.GetComponent<Image>().color = Color.white;
                 //statusStr = "\n(Under Evaluation)";
             }
-
         }
         else {
             buttonScript.gameObject.transform.localScale = Vector3.one;
@@ -318,21 +317,22 @@ public class SpeciesOverviewUI : MonoBehaviour {
             selectedButton.GetComponent<Image>().color = Color.white;
         }
 
-
-        uiManagerRef.ClickButtonOpenGenome();
+        //uiManagerRef.ClickButtonOpenGenome();
+        panelGenomeViewer.SetActive(true);
     }
 
     public void CycleHallOfFame() {
         ChangeSelectedGenome(SelectionGroup.HallOfFame, selectedHallOfFameIndex + 1); 
     }
+    
     public void CycleCurrentGenome() {
         ChangeSelectedGenome(SelectionGroup.Candidates, selectedCandidateGenomeIndex + 1); 
     }    
-        
 
     public void UpdateUI(SpeciesGenomePool pool) {
         UpdateLeaderboardGenomesUI(pool);
     }
+    
     private void UpdateLeaderboardGenomesUI(SpeciesGenomePool pool) {
 
     }
@@ -340,10 +340,5 @@ public class SpeciesOverviewUI : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
         selectedButton = buttonFoundingGenome; // default
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
 	}
 }

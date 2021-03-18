@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
+﻿using UnityEngine;
 
 
 /// <summary>
@@ -9,6 +6,7 @@ using UnityEngine;
 /// </summary>
 
 public class ZooplanktonManager {
+    SimulationManager simManager => SimulationManager.instance;
 
     public SettingsManager settingsRef;
     public SimResourceManager resourceManagerRef;
@@ -103,12 +101,12 @@ public class ZooplanktonManager {
             data.index = i;
             data.worldPos = Vector3.zero; // new Vector3(UnityEngine.Random.Range(0f, SimulationManager._MapSize), UnityEngine.Random.Range(0f, SimulationManager._MapSize), 0f);
 
-            data.radius = UnityEngine.Random.Range(minParticleSize, maxParticleSize); // obsolete!
+            data.radius = Random.Range(minParticleSize, maxParticleSize); // obsolete!
             data.biomass = 0.001f; // data.radius * data.radius * Mathf.PI; // * settingsRef.animalParticleNutrientDensity;
             data.isActive = 0f;
             data.isDecaying = 0f;
             data.age = 0f; // UnityEngine.Random.Range(1f, 2f);
-            data.color = UnityEngine.Random.ColorHSV();
+            data.color = Random.ColorHSV();
             data.genomeVector = Vector4.zero;
             data.extra0 = 0f;
             data.energy = 0f;
@@ -248,7 +246,7 @@ public class ZooplanktonManager {
         computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "velocityRead", fluidManagerRef._VelocityPressureDivergenceMain);        
         computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "altitudeRead", renderKingRef.baronVonTerrain.terrainHeightDataRT);
         computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "_SpawnDensityMap", renderKingRef.spiritBrushRT);
-        computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "_ResourceGridRead", renderKingRef.simManager.vegetationManager.resourceGridRT1);
+        computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "_ResourceGridRead", simManager.vegetationManager.resourceGridRT1);
         //computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "_SpawnDensityMap", algaeGridRT1);        
         computeShaderAnimalParticles.SetFloat("_GlobalOxygenLevel", resourcesManager.curGlobalOxygen); // needed?
         computeShaderAnimalParticles.SetFloat("_GlobalAlgaeLevel", resourceManagerRef.curGlobalPlantParticles);
@@ -281,12 +279,12 @@ public class ZooplanktonManager {
         computeShaderAnimalParticles.SetFloat("_IsBrushing", 1f); // brushF);  
         
         // Need to compute when they should be allowed to spawn, how to keep track of resources used/transferred??
-        computeShaderAnimalParticles.SetFloat("_SpawnPosX", UnityEngine.Random.Range(0.1f, 0.9f)); // UPDATE THIS!!! ****
-        computeShaderAnimalParticles.SetFloat("_SpawnPosY", UnityEngine.Random.Range(0.1f, 0.9f));
+        computeShaderAnimalParticles.SetFloat("_SpawnPosX", Random.Range(0.1f, 0.9f)); // UPDATE THIS!!! ****
+        computeShaderAnimalParticles.SetFloat("_SpawnPosY", Random.Range(0.1f, 0.9f));
 
-        float spawnLerp = renderKingRef.simManager.trophicLayersManager.GetZooplanktonOnLerp(renderKingRef.simManager.simAgeTimeSteps);  // no need to still do this??? ****
+        float spawnLerp = simManager.trophicLayersManager.GetZooplanktonOnLerp(simManager.simAgeTimeSteps);  // no need to still do this??? ****
         float spawnRadius = Mathf.Lerp(1f, SimulationManager._MapSize, spawnLerp);
-        Vector4 spawnPos = new Vector4(renderKingRef.simManager.trophicLayersManager.zooplanktonOriginPos.x, renderKingRef.simManager.trophicLayersManager.zooplanktonOriginPos.y, 0f, 0f);
+        Vector4 spawnPos = new Vector4(simManager.trophicLayersManager.zooplanktonOriginPos.x, simManager.trophicLayersManager.zooplanktonOriginPos.y, 0f, 0f);
         computeShaderAnimalParticles.SetFloat("_SpawnRadius", spawnRadius);
         computeShaderAnimalParticles.SetVector("_SpawnPos", spawnPos);
 
@@ -538,6 +536,5 @@ public class ZooplanktonManager {
         if(cursorClosestParticleDataCBuffer != null) {
             cursorClosestParticleDataCBuffer.Release();
         } 
-        
     }
 }
