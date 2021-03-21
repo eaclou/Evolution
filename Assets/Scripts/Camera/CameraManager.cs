@@ -162,6 +162,7 @@ public class CameraManager : Singleton<CameraManager> {
 
         curCameraFocusPivotPos += new Vector3(dir.x * camPanSpeed, dir.y * camPanSpeed, 0f);
     }
+    
     public void TiltCamera(float tiltAngle) {
         float minDistance = 1f;
         float maxDistance = 420f;
@@ -178,6 +179,17 @@ public class CameraManager : Singleton<CameraManager> {
 
         //cameraManager.masterTargetTiltAngle -= cameraManager.masterTiltSpeed * tiltSpeedMult * Time.deltaTime;
     }
+
+    // WPP: added 3/20/21, receiver should modify values
+    // use values that are intuitive in context, expose inversion on source
+    // Called from PanelObserverMode -> GetMouseScroll
+    public void ZoomCameraFixed(float zoomValue)
+    {
+        if (zoomValue > 0f) zoomValue = 1f;
+        else if (zoomValue < 0f) zoomValue = -1f;
+        ZoomCamera(zoomValue);
+    }
+        
     public void ZoomCamera(float zoomValue) {
         float minDistance = 1f;
         float maxDistance = 420f;

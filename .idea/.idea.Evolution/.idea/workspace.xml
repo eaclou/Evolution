@@ -22,6 +22,7 @@
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/17AD9609-AE06-4F2C-9315-931FF97ADCF1/e9/3e0ac117/ComputeBuffer.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/BigBangPanelUI.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/ObserverModeUI.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Playcraft/_NEW/DirectionInputToVector2.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/ClockPanelUI.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Utility/QuitGame.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/SimulationUI.cs" root0="FORCE_HIGHLIGHTING" />
@@ -39,7 +40,6 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/LoadingUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Playcraft/Quality of Life/Time/ProgressEvent.cs" />
       <option value="$PROJECT_DIR$/Assets/Playcraft/UI/Cursor/CursorInterface.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Camera/CameraManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Audio/AudioManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Core/GameManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/MainMenuUI.cs" />
@@ -50,9 +50,7 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/SpeciesTreeBarUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/TheCursorCzar.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/BigBangPanelUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/ObserverModeUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/GlobalResourcesUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/DebugPanelUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Rendering/TheRenderKing.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/VegetationManager.cs" />
@@ -62,12 +60,17 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/SpeciesTreePanel.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/GraphStatPanel.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/SpeciesOverviewUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/SimulationUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Utility/QuitGame.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Utility/WallRandomizer.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/WildSpirit.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/WatcherUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Playcraft/_NEW/KeyboardInputToDirection.cs" />
+      <option value="$PROJECT_DIR$/Assets/Playcraft/_NEW/DirectionInputToVector2.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/SimulationUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/DebugPanelUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Camera/CameraManager.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/ObserverModeUI.cs" />
     </changedPaths>
   </component>
   <component name="ProjectId" id="1owaWgGpM80xkcfA3szn5iw9YkG" />
@@ -117,7 +120,7 @@
       <workItem from="1615752093154" duration="3850000" />
       <workItem from="1615872028434" duration="9271000" />
       <workItem from="1616048791562" duration="5777000" />
-      <workItem from="1616297465275" duration="2389000" />
+      <workItem from="1616297465275" duration="5638000" />
     </task>
     <servers />
   </component>

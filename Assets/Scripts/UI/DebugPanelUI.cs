@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class DebugPanelUI : MonoBehaviour {
@@ -46,17 +44,16 @@ public class DebugPanelUI : MonoBehaviour {
     private RenderTexture[] debugTextureViewerArray;
 
     TheCursorCzar theCursorCzar => TheCursorCzar.instance;
-
-	// Use this for initialization
-	void Start () {
-        
-	}
 	
     private void UpdateUI() {
         // DISABLED!!!! -- Need to establish good method for grabbing data from SimulationManager!
         SimulationManager simManager = uiManagerRef.gameManager.simulationManager;
 
-        Agent agentRef = uiManagerRef.cameraManager.targetAgent;        
+        Agent agentRef = uiManagerRef.cameraManager.targetAgent;  
+
+        // WPP: exit early if no target agent
+        if (!agentRef) return;
+     
         int agentIndex = agentRef.index;
 
         if (!agentRef.isInert) {
@@ -246,6 +243,7 @@ public class DebugPanelUI : MonoBehaviour {
         textDebugTextureSoloChannelIndex.text = _ChannelSoloIndex.ToString();
         textDebugTextureGamma.text = _Gamma.ToString();
     }
+    
     public void UpdateDebugUI() {
         panelDebug.SetActive(isOpen);
         if(isOpen) {            

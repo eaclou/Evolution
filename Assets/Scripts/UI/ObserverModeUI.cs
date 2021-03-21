@@ -38,15 +38,21 @@ public class ObserverModeUI : MonoBehaviour
         Brushes,
         Watcher
     }
+    
+    bool isKeyboardInput;
 
-    public void Tick()
-    {
+    public void StepCamera(Vector2 input)
+    {    
         panelObserverMode.SetActive(enabled);
         if (!enabled) return;
 
+        isKeyboardInput = input != Vector2.zero;
+        input = input.normalized;
+        
+        // WPP: extracted input system
+        /*
         Vector2 moveDir = Vector2.zero;
         bool isKeyboardInput = false;
-        // CONTROLLER:
         float controllerHorizontal = Input.GetAxis("Horizontal");
         float controllerVertical = Input.GetAxis("Vertical");
         moveDir.x = controllerHorizontal;
@@ -68,22 +74,25 @@ public class ObserverModeUI : MonoBehaviour
             moveDir.x = -1f;
             isKeyboardInput = true;
         }
+        */
 
+        // WPP: Conditions are the same???
         if (isKeyboardInput) {
-            moveDir = moveDir.normalized;
+            //moveDir = moveDir.normalized;
             watcherUI.StopFollowingAgent();
             watcherUI.StopFollowingPlantParticle();
             watcherUI.StopFollowingAnimalParticle();
         }
-        if (moveDir.sqrMagnitude > 0.001f) {
+        if (input.sqrMagnitude > 0.001f) {
             watcherUI.StopFollowingAgent();
             watcherUI.StopFollowingPlantParticle();
             watcherUI.StopFollowingAnimalParticle();
         }
 
-        cameraManager.MoveCamera(moveDir); // ********************
-
-        // * Replace with KeyboardInput
+        cameraManager.MoveCamera(input);
+        
+        // WPP: commented out because only logging to console
+        // and should be replaced with keyboard input calls when ready to implement
         /*
         //if (Input.GetKey(KeyCode.R)) {
         //    cameraManager.TiltCamera(-1f);
@@ -127,7 +136,11 @@ public class ObserverModeUI : MonoBehaviour
             //ClickStatsButton();
         }
         */
-                    
+    }
+
+    // WPP: break into separate functions, call from here
+    public void Tick()
+    {                    
         if (isAnnouncementTextOn) {
             panelPendingClickPrompt.SetActive(true);
             timerAnnouncementTextCounter++;
@@ -142,7 +155,8 @@ public class ObserverModeUI : MonoBehaviour
             panelPendingClickPrompt.SetActive(false);
         }
                                 
-        if (EventSystem.current.IsPointerOverGameObject()) {  // if mouse is over ANY unity canvas UI object (with raycast enabled)
+        // If mouse is over ANY unity canvas UI object (with raycast enabled)
+        if (EventSystem.current.IsPointerOverGameObject()) {  
             //Debug.Log("MouseOverUI!!!");
             if(genomeViewerUI.isTooltipHover) {
                 panelTooltip.SetActive(true);
@@ -235,7 +249,7 @@ public class ObserverModeUI : MonoBehaviour
                     float radiusMult = Mathf.Lerp(0.075f, 1.33f, Mathf.Clamp01(theRenderKing.baronVonWater.camDistNormalized * 1.4f)); // 0.62379f; // (1f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.5f);
 
                     if(mag > 0f) {
-                        simulationManager.PlayerToolStirOn(theCursorCzar.curMousePositionOnWaterPlane, theCursorCzar.smoothedMouseVel * (0.25f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.2f), radiusMult);  
+                        simulationManager.PlayerToolStirOn(theCursorCzar.curMousePositionOnWaterPlane, theCursorCzar.smoothedMouseVel * (0.25f + theRenderKing.baronVonWater.camDistNormalized * 1.2f), radiusMult);  
                     }
                     else {
                         simulationManager.PlayerToolStirOff();
@@ -285,7 +299,7 @@ public class ObserverModeUI : MonoBehaviour
         }
         
         if (theCursorCzar.isDraggingMouseLeft || theCursorCzar.isDraggingMouseRight) {
-            simulationManager.theRenderKing.ClickTestTerrainUpdateMaps(updateTerrainAltitude, terrainUpdateMagnitude);
+            theRenderKing.ClickTestTerrainUpdateMaps(updateTerrainAltitude, terrainUpdateMagnitude);
         }
         else {
             theRenderKing.ClickTestTerrainUpdateMaps(updateTerrainAltitude, terrainUpdateMagnitude);                   
@@ -297,16 +311,18 @@ public class ObserverModeUI : MonoBehaviour
             //Cursor.visible = false;
         }         
         else {
-            gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_IsVisible", 0f);
-            gameManager.theRenderKing.gizmoStirStickAMat.SetFloat("_IsVisible", 0f);
+            theRenderKing.gizmoStirToolMat.SetFloat("_IsVisible", 0f);
+            theRenderKing.gizmoStirStickAMat.SetFloat("_IsVisible", 0f);
             //Cursor.visible = true;
         }
 
-        // REFACTOR: Receive commands to MouseInput and other input systems
+        // WPP: call externally
         if (Input.GetMouseButtonDown(1)) {
             Debug.Log("RIGHT CLICKETY-CLICK!");
         }
 
+        // WPP: removed 3/20/21, extracted to GetMouseScroll
+        /*
         if (Input.GetAxis("Mouse ScrollWheel") > 0f ) //  Forwards
         {
             cameraManager.ZoomCamera(-1f);
@@ -315,8 +331,10 @@ public class ObserverModeUI : MonoBehaviour
         {  
             cameraManager.ZoomCamera(1f);                 
         }
+        */
 
-        float zoomSpeed = 0.2f;
+        // WPP: extract to Joystick input system
+        float zoomSpeed = 0.2f; // * magic number, expose ("sensitivity")
         float zoomVal = 0f;
         if (Input.GetKey("joystick button 4")) //  Forwards
         {
