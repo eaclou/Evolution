@@ -45,7 +45,6 @@ public class WildSpirit : MonoBehaviour {
     public bool isFleeing = false;
     private int fleeingFrameCounter = 0;
 
-    // *** WPP: moved from UIManager 3/17/21
     void Update()
     {
         if(isClickableSpiritRoaming) {

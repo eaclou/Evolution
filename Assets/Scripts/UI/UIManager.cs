@@ -58,29 +58,11 @@ public class UIManager : MonoBehaviour {
     public GameObject panelSpeciesTree;
     public GameObject panelSpeciesOverview;
     public GameObject panelGraphs;
-
-    // WPP: Removed 3/18/21
-    //public GameObject panelBigBang;
-    //public Image imageBigBangStrokes01;
-    //public Image imageBigBangStrokes02;
-    //public Image imageBigBangStrokes03;
      
     public bool updateTerrainAltitude;  // WPP: assigned but not used
     public float terrainUpdateMagnitude;// WPP: assigned but not used
     
     public ToolType curActiveTool;  // ******** move to phase out this approach
-    
-    // *********************************************    NEW UI PASS *******************
-    //public GameObject panelClock;
-    //public Text textCurYear;
-    //public Button buttonClockOpenClose;
-    //public Button buttonOpenGlobalResourcesPanel;
-    //public Button buttonOpenMutationPanel;
-    //public Button buttonOpenWatcherPanel;
-    //public Button buttonOpenBrushesPanel;
-    //public Button buttonOpenKnowledgePanel;
-
-    // *******************************************
 
     public Color buttonActiveColor = new Color(1f, 1f, 1f, 1f);
     public Color buttonDisabledColor = new Color(0.7f, 0.7f, 0.7f, 1f);
@@ -104,8 +86,6 @@ public class UIManager : MonoBehaviour {
     public GameObject panelPendingClickPrompt;
     private bool announceAlgaeCollapsePossible = false;
     private bool announceAlgaeCollapseOccurred = false;
-    //private bool announceAgentCollapsePossible = false;
-    //private bool announceAgentCollapseOccurred = false;
     public int timerAnnouncementTextCounter = 0;// WPP: assigned but not used
     public bool isAnnouncementTextOn = false;   // WPP: assigned but not used
     public bool isUnlockCooldown = false;       // WPP: assigned but not used
@@ -114,11 +94,7 @@ public class UIManager : MonoBehaviour {
     TrophicSlot unlockedAnnouncementSlotRef;    // WPP: assigned but not used
   
     // ***** figure out where to put this
-    //public Sprite spriteSpiritBrushKnowledgeIcon;
-    //public Sprite spriteSpiritBrushMutationIcon;
     public Sprite spriteSpiritBrushStirIcon;
-    //public Sprite spriteSpiritBrushWatcherIcon;
-    //public Sprite spriteSpiritBrushWatcherOffIcon;
     public Sprite spriteSpiritBrushCreationIcon;
 
     public Sprite spriteSpiritWorldIcon;
@@ -165,63 +141,8 @@ public class UIManager : MonoBehaviour {
     public bool isBrushAddingAgents = false; // WPP: assigned but not used
     public int brushAddAgentCounter = 0;
     public int framesPerAgentSpawn = 3;
-
-    //public int bigBangFramesCounter = 0;
-
-
-    //public bool brainDisplayOn = false;
     
     #endregion
-
-    // WPP: Removed 3/18/21
-    // Moved to direct UnityEvent or mini panel scripts
-    /*public void ClickButtonOpenMinimap() {
-        panelMinimap.SetActive(true);
-    }
-    public void ClickButtonCloseMinimap() {
-        panelMinimap.SetActive(false);
-    }
-
-    public void ClickButtonOpenSpeciesTree() {
-        panelSpeciesTree.SetActive(true);
-        panelGraphs.SetActive(false);
-    }
-    
-    public void ClickButtonCloseSpeciesTree() {
-        panelSpeciesTree.SetActive(false);
-        panelGraphs.SetActive(false);
-    }
-    
-    public void ClickButtonOpenGraphPanel() {
-        panelGraphs.SetActive(true);
-        panelSpeciesTree.SetActive(false);
-    }
-    
-    public void ClickButtonToggleGraphPanel() {
-        panelGraphs.SetActive(!panelGraphs.activeSelf);
-        panelSpeciesTree.SetActive(!panelSpeciesTree.activeSelf);
-    }
-    
-    public void ClickButtonCloseGraphPanel() {
-        panelGraphs.SetActive(false);
-        panelSpeciesTree.SetActive(true);
-        //Debug.LogError("!@%$#%");
-    }
-
-    public void ClickButtonOpenGenome() {
-        panelGenomeViewer.SetActive(true);
-        //Debug.Log("ClickButtonOpenGenome");
-    }
-    public void ClickButtonCloseGenome() {
-        panelGenomeViewer.SetActive(false);
-    }
-
-    public void ClickButtonOpenSpeciesOverview() {
-        panelSpeciesOverview.SetActive(true);
-    }
-    public void ClickButtonCloseSpeciesOverview() {
-        panelSpeciesOverview.SetActive(false);
-    }*/
 
     public void SetFocusedCandidateGenome(CandidateAgentData candidate) {
         focusedCandidate = candidate;
@@ -245,18 +166,6 @@ public class UIManager : MonoBehaviour {
     }
 
     #region Initialization Functions:::
-    // Use this for initialization
-    void Start() {
-        //animatorInspectPanel.enabled = false;
-
-        //ClickToolButtonAdd();        
-    }
-    
-    // *** WPP: removed 3/15/21
-    // Never called?
-    //public void EnterObserverMode() {
-    //    isObserverMode = true;
-    //}
     
     public void TransitionToNewGameState(GameState gameState) {
         mainMenu.gameObject.SetActive(gameState == GameState.MainMenu);
@@ -277,11 +186,12 @@ public class UIManager : MonoBehaviour {
                 break;
         }
     }
-    
+        
     private void EnterLoadingUI() {
         panelLoading.SetActive(true);
         panelPlaying.SetActive(false);
     }
+    
     private void EnterPlayingUI() {   //// ******* this happens everytime quit to menu and resume.... *** needs to change!!! ***
         panelLoading.SetActive(false);
         panelPlaying.SetActive(true);
@@ -310,22 +220,6 @@ public class UIManager : MonoBehaviour {
     #region UPDATE UI PANELS FUNCTIONS!!! :::
     
     [SerializeField] MainMenuUI mainMenu;
-
-    // *** WPP: Removed 3/15/21
-    /*void Update() {
-        switch (gameManager.CurrentGameState) {
-            case GameState.MainMenu: break;
-            case GameState.Loading: break;
-            case GameState.Playing:
-                UpdateSimulationUI();
-                break;
-            default:
-                Debug.LogError("No Enum Type Found! (" + gameManager.CurrentGameState.ToString() + ")");
-                break;
-        }
-    }*/
-    
-    
     [SerializeField] int timeStepsToRebuildGenomeButtons = 111;
     SpeciesGenomePool pool;
     const string ANIM_FINISHED = "_AnimFinished";
@@ -349,47 +243,6 @@ public class UIManager : MonoBehaviour {
             animatorSpiritUnlock.SetBool(ANIM_FINISHED, false);
         }
     }
-    
-    // *** WPP: Removed 3/15/21
-    /*
-    private void UpdateBigBangPanel() {
-        if(gameManager.simulationManager._BigBangOn) {
-            panelBigBang.SetActive(true);
-            bigBangFramesCounter += 1;
-            if(bigBangFramesCounter == 1) {
-                InitialUnlocks();    
-            }   
-            
-            if(bigBangFramesCounter > 70) {
-                bigBangFramesCounter = 0;
-                gameManager.simulationManager._BigBangOn = false;
-                panelBigBang.SetActive(false);
-                curActiveTool = UIManager.ToolType.None;
-            }
-            else if(bigBangFramesCounter > 40) {
-                imageBigBangStrokes01.gameObject.SetActive(true);
-                imageBigBangStrokes02.gameObject.SetActive(false);
-                imageBigBangStrokes03.gameObject.SetActive(false);
-                worldSpiritHubUI.PlayBigBangSpawnAnim();
-
-                gameManager.simulationManager.vegetationManager.isBrushActive = true;
-                panelFocus = UIManager.PanelFocus.Watcher;
-            }
-            else if(bigBangFramesCounter > 20) {
-                imageBigBangStrokes01.gameObject.SetActive(true);
-                imageBigBangStrokes02.gameObject.SetActive(true);
-                imageBigBangStrokes03.gameObject.SetActive(false);
-                //gameManager.simulationManager.zooplanktonManager. = true;
-            }
-            else if(bigBangFramesCounter > 0) {
-                imageBigBangStrokes01.gameObject.SetActive(true);
-                imageBigBangStrokes02.gameObject.SetActive(true);
-                imageBigBangStrokes03.gameObject.SetActive(true);
-                curActiveTool = UIManager.ToolType.Stir;
-            }
-        }
-    }
-    */
     
     public void InitialUnlocks() {
         focusedCandidate = simulationManager.masterGenomePool.completeSpeciesPoolsList[0].candidateGenomesList[0];
@@ -456,8 +309,6 @@ public class UIManager : MonoBehaviour {
         //mutationUI.ClickToolButton();
         //worldSpiritHubUI.OpenWorldTreeSelect();
         theRenderKing.InitializeCreaturePortrait(simulationManager.masterGenomePool.completeSpeciesPoolsList[0].foundingCandidate.candidateGenome); //, gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][mutationUI.selectedToolbarMutationID].representativeGenome);
-                
-
 
         TrophicSlot mineralSlot = simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[0];
         mineralSlot.status = TrophicSlot.SlotStatus.On;
@@ -1066,23 +917,6 @@ public class UIManager : MonoBehaviour {
         }
     }        
     */
-    
-    /*
-    public void UpdateClockPanelUI() {
-        textCurYear.text = (gameManager.simulationManager.curSimYear + 1).ToString();
-        clockUI.UpdateClockUI(gameManager.simulationManager.simAgeTimeSteps);
-    }
-    */
-    
-    // *** WPP: Removed 3/15/21
-    /*public void UpdatePausedUI() {
-        if (isPaused) {
-            panelPausedSetActive(true);
-        }
-        else {
-            panelPaused.SetActive(false);
-        }
-    } */   
             
     public void CheckForAnnouncements() {
         //announceAlgaeCollapsePossible = false;
@@ -1395,29 +1229,6 @@ public class UIManager : MonoBehaviour {
         brushesUI.isUnlocked = true;
     }
     
-    // *** WPP: remove, replace with external utility
-    public void ClickButtonQuit() 
-    {
-        #if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-        #else
-        Application.Quit();
-        #endif   
-    }
-    
-    public void ClickButtonMainMenu() {
-        gameManager.EscapeToMainMenu();
-    }
-
-    // WPP: Removed 3/15/21
-    /*
-    public void ClickButtonPause() {
-        Time.timeScale = 0f;
-    }
-    public void ClickButtonPlayNormal() {
-        Time.timeScale = 1f;
-    }    
-    */
     #endregion
 }
 

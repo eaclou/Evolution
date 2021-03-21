@@ -842,6 +842,7 @@
             <e p="WorldSpiritHubUI.cs" t="Include" />
           </e>
           <e p="Utility" t="Include">
+            <e p="QuitGame.cs" t="Include" />
             <e p="UtilityMutationFunctions.cs" t="Include" />
             <e p="WallRandomizer.cs" t="Include" />
           </e>

@@ -241,7 +241,6 @@ public class WatcherUI : MonoBehaviour {
                         developmentStateID = 3;
                     }
                             
-
                     // curActivity
                     if(agent.isPregnantAndCarryingEggs) {
                         curActivityID = 6;
@@ -384,15 +383,12 @@ public class WatcherUI : MonoBehaviour {
                                                 agent.coreModule.energy * agent.currentBiomass,
                                                 agent.coreModule.stomachContentsNorm,
                                                 agent.currentBiomass,
-                                                agent.coreModule.stamina[0]);
-                       
-                        
+                                                agent.coreModule.stamina[0]);   
             }
             else {
                 followCreaturePanel.SetActive(false);
             }
             TextCommonStatsA.text = str;
-
             
             // string?
         }
@@ -413,8 +409,6 @@ public class WatcherUI : MonoBehaviour {
 
             //animatorWatcherUI.SetBool("_IsOpen", true);
             //animatorWatcherUI.SetBool("_IsDim", false);
-
-           
         }
         else {
             //animatorWatcherUI.SetBool("_IsDim", true);
@@ -554,12 +548,12 @@ public class WatcherUI : MonoBehaviour {
             }
         }        
     }
+    
     public void ClickWatcherCycleTargetNext() {
         TrophicSlot slotRef = uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot;  // ************* TEMP!!!!!!!!!
 
         if(slotRef.kingdomID == 1) {
             if(slotRef.tierID == 0) {
-
             }
             else {
                 VegetationManager veggieRef = uiManagerRef.gameManager.simulationManager.vegetationManager;
@@ -584,27 +578,23 @@ public class WatcherUI : MonoBehaviour {
             }
         } 
     }
-
     
     public void ClickPrevAgent() {
         Debug.Log("ClickPrevAgent");
-        
         int newIndex = (uiManagerRef.gameManager.simulationManager._NumAgents + uiManagerRef.cameraManager.targetAgentIndex - 1) % uiManagerRef.gameManager.simulationManager._NumAgents;
         uiManagerRef.cameraManager.SetTargetAgent(uiManagerRef.gameManager.simulationManager.agentsArray[newIndex], newIndex);          
                            
     }
     public void ClickNextAgent() {
         Debug.Log("ClickNextAgent");
-        
         int newIndex = (uiManagerRef.cameraManager.targetAgentIndex + 1) % uiManagerRef.gameManager.simulationManager._NumAgents;
         uiManagerRef.cameraManager.SetTargetAgent(uiManagerRef.gameManager.simulationManager.agentsArray[newIndex], newIndex);                
     }
-    
 
     public void StopFollowingAgent() {
         uiManagerRef.cameraManager.isFollowingAgent = false;
-        
     }
+    
     public void StartFollowingAgent() {
         uiManagerRef.cameraManager.isFollowingAgent = true;
 
@@ -619,13 +609,13 @@ public class WatcherUI : MonoBehaviour {
         uiManagerRef.cameraManager.isFollowingPlantParticle = true;
         uiManagerRef.cameraManager.isFollowingAnimalParticle = false; 
         watcherSelectedTrophicSlotRef = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[0];
-        //uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = 
-
-        
+        //uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef =   
     }
+    
     public void StopFollowingAnimalParticle() {
         uiManagerRef.cameraManager.isFollowingAnimalParticle = false;        
     }
+    
     public void StartFollowingAnimalParticle() {
         uiManagerRef.cameraManager.isFollowingAnimalParticle = true;  
         uiManagerRef.cameraManager.isFollowingPlantParticle = false;

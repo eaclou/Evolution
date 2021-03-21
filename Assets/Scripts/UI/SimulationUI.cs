@@ -25,7 +25,6 @@ public class SimulationUI : MonoBehaviour
         manager.InitialUnlocks();
     }
     
-    // * WPP: why are these centralized?
     void Update() {
         bigBangPanelUI.Tick();
         observerModeUI.Tick();  
