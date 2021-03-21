@@ -19,17 +19,18 @@
     </file-type-list>
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/17AD9609-AE06-4F2C-9315-931FF97ADCF1/e9/3e0ac117/ComputeBuffer.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/BigBangPanelUI.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/ObserverModeUI.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Playcraft/_NEW/DirectionInputToVector2.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/ClockPanelUI.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Utility/QuitGame.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Playcraft/_NEW/SetTimeScale.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/17AD9609-AE06-4F2C-9315-931FF97ADCF1/c3/85153ec3/ComputeShader.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/17AD9609-AE06-4F2C-9315-931FF97ADCF1/e9/3e0ac117/ComputeBuffer.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/ObserverModeUI.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/SimulationUI.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/LoadingPanelUI.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Playcraft/_NEW/SetTimeScale.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Playcraft/_NEW/ButtonInputToFloat.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Rendering/TheRenderKing.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/17AD9609-AE06-4F2C-9315-931FF97ADCF1/c3/85153ec3/ComputeShader.cs" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="IdeDocumentHistory">
     <changedPaths>
@@ -70,6 +71,7 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/SimulationUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/DebugPanelUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Camera/CameraManager.cs" />
+      <option value="$PROJECT_DIR$/Assets/Playcraft/_NEW/ButtonInputToFloat.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/ObserverModeUI.cs" />
     </changedPaths>
   </component>
@@ -120,7 +122,7 @@
       <workItem from="1615752093154" duration="3850000" />
       <workItem from="1615872028434" duration="9271000" />
       <workItem from="1616048791562" duration="5777000" />
-      <workItem from="1616297465275" duration="5638000" />
+      <workItem from="1616297465275" duration="7902000" />
     </task>
     <servers />
   </component>

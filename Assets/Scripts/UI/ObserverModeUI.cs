@@ -25,6 +25,11 @@ public class ObserverModeUI : MonoBehaviour
     VegetationManager vegetationManager => simulationManager.vegetationManager;
     ToolType curActiveTool => manager.curActiveTool;
     
+    // WPP: use constants to prevent spelling errors
+    const string VISIBLE = "_IsVisible";
+    const string STIRRING = "_IsStirring";
+    const string RADIUS = "_Radius";
+    
     public int timerAnnouncementTextCounter = 0;
     public bool isAnnouncementTextOn = false;
     public bool isBrushAddingAgents = false;
@@ -44,10 +49,13 @@ public class ObserverModeUI : MonoBehaviour
     public void StepCamera(Vector2 input)
     {    
         panelObserverMode.SetActive(enabled);
-        if (!enabled) return;
+        
+        if (!enabled || input == Vector2.zero) 
+            return;
 
-        isKeyboardInput = input != Vector2.zero;
-        input = input.normalized;
+        watcherUI.StopFollowingAgent();
+        watcherUI.StopFollowingPlantParticle();
+        watcherUI.StopFollowingAnimalParticle();
         
         // WPP: extracted input system
         /*
@@ -76,20 +84,22 @@ public class ObserverModeUI : MonoBehaviour
         }
         */
 
-        // WPP: Conditions are the same???
-        if (isKeyboardInput) {
-            //moveDir = moveDir.normalized;
-            watcherUI.StopFollowingAgent();
-            watcherUI.StopFollowingPlantParticle();
-            watcherUI.StopFollowingAnimalParticle();
-        }
-        if (input.sqrMagnitude > 0.001f) {
-            watcherUI.StopFollowingAgent();
-            watcherUI.StopFollowingPlantParticle();
-            watcherUI.StopFollowingAnimalParticle();
-        }
+        // WPP: condition replaced with early-exit
+        //isKeyboardInput = input != Vector2.zero;
+        //if (isKeyboardInput) {
+        //    watcherUI.StopFollowingAgent();
+        //    watcherUI.StopFollowingPlantParticle();
+        //    watcherUI.StopFollowingAnimalParticle();
+        //}
+        
+        // WPP: same condition and response -> removed
+        //if (input.sqrMagnitude > 0.001f) {
+        //    watcherUI.StopFollowingAgent();
+        //    watcherUI.StopFollowingPlantParticle();
+        //    watcherUI.StopFollowingAnimalParticle();
+        //}
 
-        cameraManager.MoveCamera(input);
+        cameraManager.MoveCamera(input.normalized);
         
         // WPP: commented out because only logging to console
         // and should be replaced with keyboard input calls when ready to implement
@@ -139,6 +149,7 @@ public class ObserverModeUI : MonoBehaviour
     }
 
     // WPP: break into separate functions, call from here
+    // (start by commenting blocks of code)
     public void Tick()
     {                    
         if (isAnnouncementTextOn) {
@@ -266,9 +277,9 @@ public class ObserverModeUI : MonoBehaviour
                     theCursorCzar.stirStickDepth = Mathf.Lerp(theCursorCzar.stirStickDepth, -4f, 0.2f);
                 }
                 theRenderKing.isStirring = theCursorCzar.isDraggingMouseLeft;
-                theRenderKing.gizmoStirToolMat.SetFloat("_IsStirring", isActing);
-                theRenderKing.gizmoStirStickAMat.SetFloat("_IsStirring", isActing);                    
-                theRenderKing.gizmoStirStickAMat.SetFloat("_Radius", 6.2f);
+                theRenderKing.gizmoStirToolMat.SetFloat(STIRRING, isActing);
+                theRenderKing.gizmoStirStickAMat.SetFloat(STIRRING, isActing);                    
+                theRenderKing.gizmoStirStickAMat.SetFloat(RADIUS, 6.2f);
             }
 
             theRenderKing.isBrushing = false;
@@ -306,20 +317,20 @@ public class ObserverModeUI : MonoBehaviour
         }
         
         if(theCursorCzar.stirGizmoVisible) {
-            theRenderKing.gizmoStirToolMat.SetFloat("_IsVisible", 1f);
-            theRenderKing.gizmoStirStickAMat.SetFloat("_IsVisible", 1f);
+            theRenderKing.gizmoStirToolMat.SetFloat(VISIBLE, 1f);
+            theRenderKing.gizmoStirStickAMat.SetFloat(VISIBLE, 1f);
             //Cursor.visible = false;
         }         
         else {
-            theRenderKing.gizmoStirToolMat.SetFloat("_IsVisible", 0f);
-            theRenderKing.gizmoStirStickAMat.SetFloat("_IsVisible", 0f);
+            theRenderKing.gizmoStirToolMat.SetFloat(VISIBLE, 0f);
+            theRenderKing.gizmoStirStickAMat.SetFloat(VISIBLE, 0f);
             //Cursor.visible = true;
         }
 
-        // WPP: call externally
-        if (Input.GetMouseButtonDown(1)) {
-            Debug.Log("RIGHT CLICKETY-CLICK!");
-        }
+        // WPP: Create when needed
+        //if (Input.GetMouseButtonDown(1)) {
+        //    Debug.Log("RIGHT CLICKETY-CLICK!");
+        //}
 
         // WPP: removed 3/20/21, extracted to GetMouseScroll
         /*
@@ -333,8 +344,8 @@ public class ObserverModeUI : MonoBehaviour
         }
         */
 
-        // WPP: extract to Joystick input system
-        float zoomSpeed = 0.2f; // * magic number, expose ("sensitivity")
+        // WPP: extracted to: KeyboardInput -> ButtonInputFloat -> CameraManager
+        /*float zoomSpeed = 0.2f; // * magic number, expose ("sensitivity")
         float zoomVal = 0f;
         if (Input.GetKey("joystick button 4")) //  Forwards
         {
@@ -346,7 +357,7 @@ public class ObserverModeUI : MonoBehaviour
             zoomVal -= 1f; 
             //Debug.Log("LeftShoulder");    
         }
-        cameraManager.ZoomCamera(zoomVal * zoomSpeed);  
+        cameraManager.ZoomCamera(zoomVal * zoomSpeed);  */
     }     
 }
 

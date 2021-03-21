@@ -180,11 +180,8 @@ public class CameraManager : Singleton<CameraManager> {
         //cameraManager.masterTargetTiltAngle -= cameraManager.masterTiltSpeed * tiltSpeedMult * Time.deltaTime;
     }
 
-    // WPP: added 3/20/21, receiver should modify values
-    // use values that are intuitive in context, expose inversion on source
-    // Called from PanelObserverMode -> GetMouseScroll
-    public void ZoomCameraFixed(float zoomValue)
-    {
+    // WPP: added 3/20/21
+    public void ZoomCameraFixed(float zoomValue) {
         if (zoomValue > 0f) zoomValue = 1f;
         else if (zoomValue < 0f) zoomValue = -1f;
         ZoomCamera(zoomValue);
