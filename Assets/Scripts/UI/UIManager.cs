@@ -36,12 +36,16 @@ public class UIManager : MonoBehaviour {
     public CameraManager cameraManager;
     public GameOptionsManager gameOptionsManager;
     
-    // * Make this private, use accessors to eliminate references to this script
-    public GameManager gameManager => GameManager.instance;
+    GameManager gameManager => GameManager.instance;
     SimulationManager simulationManager => SimulationManager.instance;
-    TheCursorCzar theCursorCzar => TheCursorCzar.instance;
     MasterGenomePool genomePool => simulationManager.masterGenomePool;
     TheRenderKing theRenderKing => TheRenderKing.instance;
+    
+    Lookup lookup => Lookup.instance;
+    public Color colorDecomposersLayer => lookup.colorDecomposersLayer;
+    public Color colorAlgaeLayer => lookup.colorAlgaeLayer;
+    public Color colorPlantsLayer => lookup.colorPlantsLayer;
+    public Color colorZooplanktonLayer => lookup.colorZooplanktonLayer;
     
     //public GameObject cursorParticlesGO;
 
@@ -53,33 +57,32 @@ public class UIManager : MonoBehaviour {
 
     public PanelFocus panelFocus = PanelFocus.WorldHub;
 
-    public GameObject panelGenomeViewer;
-    public GameObject panelMinimap;
-    public GameObject panelSpeciesTree;
-    public GameObject panelSpeciesOverview;
-    public GameObject panelGraphs;
+    //public GameObject panelGenomeViewer;
+    //public GameObject panelMinimap;
+    //public GameObject panelSpeciesTree;
+    //public GameObject panelSpeciesOverview;
+    //public GameObject panelGraphs;
      
     public bool updateTerrainAltitude;  // WPP: assigned but not used
     public float terrainUpdateMagnitude;// WPP: assigned but not used
     
     public ToolType curActiveTool;  // ******** move to phase out this approach
 
-    public Color buttonActiveColor = new Color(1f, 1f, 1f, 1f);
-    public Color buttonDisabledColor = new Color(0.7f, 0.7f, 0.7f, 1f);
-
-    public Color colorSpiritBrushLight;
-    public Color colorSpiritBrushDark;
-
-    public Color colorWorldLayer;
-    public Color colorTerrainLayer;
-    public Color colorMineralLayer;
-    public Color colorWaterLayer;
-    public Color colorAirLayer;
-    public Color colorDecomposersLayer;
-    public Color colorAlgaeLayer;
-    public Color colorPlantsLayer;
-    public Color colorZooplanktonLayer;
-    public Color colorVertebratesLayer;
+    // WPP: Removed 3/24/21, moved to Lookup SO
+    //public Color buttonActiveColor = new Color(1f, 1f, 1f, 1f);
+    //public Color buttonDisabledColor = new Color(0.7f, 0.7f, 0.7f, 1f);
+    //public Color colorSpiritBrushLight;
+    //public Color colorSpiritBrushDark;
+    //public Color colorWorldLayer;
+    //public Color colorTerrainLayer;
+    //public Color colorMineralLayer;
+    //public Color colorWaterLayer;
+    //public Color colorAirLayer;
+    //public Color colorDecomposersLayer;
+    //public Color colorAlgaeLayer;
+    //public Color colorPlantsLayer;
+    //public Color colorZooplanktonLayer;
+    //public Color colorVertebratesLayer;
         
     
     // announcements:
@@ -92,23 +95,22 @@ public class UIManager : MonoBehaviour {
     public int unlockCooldownCounter = 0;
     //private bool inspectToolUnlockedAnnounce = false;
     TrophicSlot unlockedAnnouncementSlotRef;    // WPP: assigned but not used
-  
-    // ***** figure out where to put this
-    public Sprite spriteSpiritBrushStirIcon;
-    public Sprite spriteSpiritBrushCreationIcon;
 
-    public Sprite spriteSpiritWorldIcon;
-    public Sprite spriteSpiritStoneIcon;
-    public Sprite spriteSpiritPebblesIcon;
-    public Sprite spriteSpiritSandIcon;
-    public Sprite spriteSpiritMineralsIcon;
-    public Sprite spriteSpiritWaterIcon;
-    public Sprite spriteSpiritAirIcon;
-    public Sprite spriteSpiritDecomposerIcon;
-    public Sprite spriteSpiritAlgaeIcon;
-    public Sprite spriteSpiritPlantIcon;
-    public Sprite spriteSpiritZooplanktonIcon;
-    public Sprite spriteSpiritVertebrateIcon;
+    // WPP: moved to Lookup SO
+    //public Sprite spriteSpiritBrushStirIcon;
+    //public Sprite spriteSpiritBrushCreationIcon;
+    //public Sprite spriteSpiritWorldIcon;
+    //public Sprite spriteSpiritStoneIcon;
+    //public Sprite spriteSpiritPebblesIcon;
+    //public Sprite spriteSpiritSandIcon;
+    //public Sprite spriteSpiritMineralsIcon;
+    //public Sprite spriteSpiritWaterIcon;
+    //public Sprite spriteSpiritAirIcon;
+    //public Sprite spriteSpiritDecomposerIcon;
+    //public Sprite spriteSpiritAlgaeIcon;
+    //public Sprite spriteSpiritPlantIcon;
+    //public Sprite spriteSpiritZooplanktonIcon;
+    //public Sprite spriteSpiritVertebrateIcon;
         
     //public GameObject panelObserverMode;
     //public GameObject panelPaused;

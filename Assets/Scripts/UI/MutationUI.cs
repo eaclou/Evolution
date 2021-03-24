@@ -523,7 +523,7 @@ public class MutationUI : MonoBehaviour {
         }
         else if(slotRef.kingdomID == 1) {  // Plants
             if (slotRef.tierID == 0) {
-                vegetationManager.algaeSlotGenomeCurrent = uiManagerRef.gameManager.simulationManager.vegetationManager.algaeSlotGenomeMutations[selectedToolbarMutationID];
+                vegetationManager.algaeSlotGenomeCurrent = simulationManager.vegetationManager.algaeSlotGenomeMutations[selectedToolbarMutationID];
                 vegetationManager.GenerateWorldLayerAlgaeGridGenomeMutationOptions();
             }
             else {

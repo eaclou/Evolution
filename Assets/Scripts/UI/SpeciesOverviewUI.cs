@@ -3,6 +3,8 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class SpeciesOverviewUI : MonoBehaviour {
+    SimulationManager simulationManager => SimulationManager.instance;
+
     public UIManager uiManagerRef;
 
     //private bool isFoundingGenomeSelected = false;
@@ -60,7 +62,7 @@ public class SpeciesOverviewUI : MonoBehaviour {
 
     public void RebuildGenomeButtons() { // **** CHANGE to properly pooled, only create as needed, etc. ****
         
-        SpeciesGenomePool pool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID];
+        SpeciesGenomePool pool = simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID];
 
         Vector3 hueA = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
         imageLineageA.color = new Color(hueA.x, hueA.y, hueA.z);
@@ -76,7 +78,7 @@ public class SpeciesOverviewUI : MonoBehaviour {
                 
             if (parentSpeciesID >= 0) {
                 //get parent pool:
-                SpeciesGenomePool parentPool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[parentSpeciesID];
+                SpeciesGenomePool parentPool = simulationManager.masterGenomePool.completeSpeciesPoolsList[parentSpeciesID];
                 lineageTxt += " <- " + parentPool.speciesID.ToString();
 
                 savedSpeciesID = parentPool.speciesID;
@@ -141,14 +143,14 @@ public class SpeciesOverviewUI : MonoBehaviour {
             // find Agent:
             int matchingAgentIndex = -1;
             Agent matchingAgent = null;
-            for(int a = 0; a < uiManagerRef.gameManager.simulationManager.agentsArray.Length; a++) {
+            for(int a = 0; a < simulationManager.agentsArray.Length; a++) {
 
-                Agent gent = uiManagerRef.gameManager.simulationManager.agentsArray[a];
+                Agent gent = simulationManager.agentsArray[a];
 
                 if(gent.candidateRef != null) {
                     if(iCand.candidateID == gent.candidateRef.candidateID) {
                         matchingAgentIndex = a;
-                        matchingAgent = uiManagerRef.gameManager.simulationManager.agentsArray[matchingAgentIndex];
+                        matchingAgent = simulationManager.agentsArray[matchingAgentIndex];
                         break;
                             
                             
@@ -251,7 +253,7 @@ public class SpeciesOverviewUI : MonoBehaviour {
         //isLeaderboardGenomesSelected = false;    
         //isCandidateGenomesSelected = false;    
 
-        SpeciesGenomePool spool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID];
+        SpeciesGenomePool spool = simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID];
 
 
         switch(group) {

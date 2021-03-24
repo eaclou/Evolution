@@ -2,6 +2,9 @@
 using UnityEngine.UI;
 
 public class DebugPanelUI : MonoBehaviour {
+    SimulationManager simulationManager => SimulationManager.instance;
+    TheRenderKing theRenderKing => TheRenderKing.instance;
+
     public UIManager uiManagerRef;
     public bool isOpen;
     public GameObject panelDebug;
@@ -47,7 +50,7 @@ public class DebugPanelUI : MonoBehaviour {
 	
     private void UpdateUI() {
         // DISABLED!!!! -- Need to establish good method for grabbing data from SimulationManager!
-        SimulationManager simManager = uiManagerRef.gameManager.simulationManager;
+        SimulationManager simManager = simulationManager;
 
         Agent agentRef = uiManagerRef.cameraManager.targetAgent;  
 
@@ -254,43 +257,43 @@ public class DebugPanelUI : MonoBehaviour {
 
     private void CreateDebugRenderViewerArray() {
         debugTextureViewerArray = new RenderTexture[13];
-        debugTextureViewerArray[0] = uiManagerRef.gameManager.theRenderKing.baronVonTerrain.terrainHeightDataRT;
+        debugTextureViewerArray[0] = theRenderKing.baronVonTerrain.terrainHeightDataRT;
         debugTextureViewerArray[0].name = "Terrain Height Data";
         //if (gameManager.theRenderKing.baronVonTerrain.terrainColorRT0 != null) {
-        debugTextureViewerArray[1] = uiManagerRef.gameManager.theRenderKing.baronVonTerrain.terrainColorRT0;
+        debugTextureViewerArray[1] = theRenderKing.baronVonTerrain.terrainColorRT0;
         debugTextureViewerArray[1].name = "Terrain Color";
 
-        debugTextureViewerArray[2] = uiManagerRef.gameManager.theRenderKing.baronVonWater.waterSurfaceDataRT0;
+        debugTextureViewerArray[2] = theRenderKing.baronVonWater.waterSurfaceDataRT0;
         debugTextureViewerArray[2].name = "Water Surface Data";
 
-        debugTextureViewerArray[3] = uiManagerRef.gameManager.theRenderKing.fluidManager._VelocityPressureDivergenceMain;
+        debugTextureViewerArray[3] = theRenderKing.fluidManager._VelocityPressureDivergenceMain;
         debugTextureViewerArray[3].name = "_VelocityPressureDivergenceMain";
 
-        debugTextureViewerArray[4] = uiManagerRef.gameManager.theRenderKing.fluidManager._VelocityPressureDivergenceMain;
+        debugTextureViewerArray[4] = theRenderKing.fluidManager._VelocityPressureDivergenceMain;
         debugTextureViewerArray[4].name = "_VelocityPressureDivergenceMain";
 
-        debugTextureViewerArray[5] = uiManagerRef.gameManager.theRenderKing.fluidManager._VelocityPressureDivergenceMain;
+        debugTextureViewerArray[5] = theRenderKing.fluidManager._VelocityPressureDivergenceMain;
         debugTextureViewerArray[5].name = "_VelocityPressureDivergenceMain";
 
-        debugTextureViewerArray[6] = uiManagerRef.gameManager.theRenderKing.fluidManager._VelocityPressureDivergenceMain;
+        debugTextureViewerArray[6] = theRenderKing.fluidManager._VelocityPressureDivergenceMain;
         debugTextureViewerArray[6].name = "_VelocityPressureDivergenceMain";
 
-        debugTextureViewerArray[7] = uiManagerRef.gameManager.theRenderKing.fluidManager._ObstaclesRT;
+        debugTextureViewerArray[7] = theRenderKing.fluidManager._ObstaclesRT;
         debugTextureViewerArray[7].name = "Solid Obstacles Render";
 
-        debugTextureViewerArray[8] = uiManagerRef.gameManager.simulationManager.vegetationManager.critterNearestPlants32;
+        debugTextureViewerArray[8] = simulationManager.vegetationManager.critterNearestPlants32;
         debugTextureViewerArray[8].name = "critterNearestPlants32";        
         
-        debugTextureViewerArray[9] = uiManagerRef.gameManager.simulationManager.zooplanktonManager.critterNearestZooplankton32;
+        debugTextureViewerArray[9] = simulationManager.zooplanktonManager.critterNearestZooplankton32;
         debugTextureViewerArray[9].name = "critterNearestZooplankton32";
 
-        debugTextureViewerArray[10] = uiManagerRef.gameManager.simulationManager.vegetationManager.resourceGridRT1;
+        debugTextureViewerArray[10] = simulationManager.vegetationManager.resourceGridRT1;
         debugTextureViewerArray[10].name = "Resources Grid";
 
         
         //}
         //if(gameManager.theRenderKing.spiritBrushRT != null) {
-        debugTextureViewerArray[11] = uiManagerRef.gameManager.theRenderKing.spiritBrushRT;
+        debugTextureViewerArray[11] = theRenderKing.spiritBrushRT;
         debugTextureViewerArray[11].name = "Spirit Brush";
         //}        
         //if(gameManager.simulationManager.environmentFluidManager._DensityA != null) {
@@ -298,7 +301,7 @@ public class DebugPanelUI : MonoBehaviour {
         //debugTextureViewerArray[3].name = "Water DensityA";
         //}        
         
-        debugTextureViewerArray[12] = uiManagerRef.gameManager.simulationManager.vegetationManager.resourceSimTransferRT;
+        debugTextureViewerArray[12] = simulationManager.vegetationManager.resourceSimTransferRT;
         debugTextureViewerArray[12].name = "Resource Sim Transfer";
     }
     public void ClickDebugTexturePrev() {

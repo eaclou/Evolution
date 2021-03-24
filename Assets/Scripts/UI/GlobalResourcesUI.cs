@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -322,7 +321,7 @@ public class GlobalResourcesUI : MonoBehaviour {
             
             statsSpeciesColorKey.SetPixel(i, 1, new Color(huePrimary.x, huePrimary.y, huePrimary.z));            
             //Debug.Log("(" + i.ToString() + ", " + gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList[i].ToString());
-            displaySpeciesIndicesArray[i] = uiManagerRef.gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList[i];
+            displaySpeciesIndicesArray[i] = masterGenomePool.currentlyActiveSpeciesIDList[i];
 
             TheRenderKing.TreeOfLifeSpeciesKeyData keyData = new TheRenderKing.TreeOfLifeSpeciesKeyData();
             keyData.timeCreated = pool.timeStepCreated;  // Use TimeSteps instead of Years???
@@ -334,13 +333,13 @@ public class GlobalResourcesUI : MonoBehaviour {
             keyData.isOn = 1f;
             //int selectedID = treeOfLifeManager.selectedID;
             
-            keyData.isSelected = (uiManagerRef.selectedSpeciesID == uiManagerRef.gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList[i]) ? 1f : 0f;
+            keyData.isSelected = (uiManagerRef.selectedSpeciesID == masterGenomePool.currentlyActiveSpeciesIDList[i]) ? 1f : 0f;
 
             speciesKeyDataArray[i] = keyData;
         }
         
         // Then fill with most recently extinct:
-        for(int i = (numTotalSpecies - 1); i > Mathf.Clamp((numTotalSpecies - maxDisplaySpecies), 0, numTotalSpecies); i--) {
+        for(int i = numTotalSpecies - 1; i > Mathf.Clamp((numTotalSpecies - maxDisplaySpecies), 0, numTotalSpecies); i--) {
             SpeciesGenomePool pool = masterGenomePool.completeSpeciesPoolsList[i];
 
             SpeciesGenomePool parentPool;
@@ -863,7 +862,7 @@ public class GlobalResourcesUI : MonoBehaviour {
                 obj.GetComponent<Image>().color = color;
 
                 string labelText = "";                
-                labelText += "[" + speciesID.ToString() + "] " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].foundingCandidate.candidateGenome.bodyGenome.coreGenome.name;
+                labelText += "[" + speciesID.ToString() + "] " + masterGenomePool.completeSpeciesPoolsList[speciesID].foundingCandidate.candidateGenome.bodyGenome.coreGenome.name;
 
                 int savedParentSpeciesID = parentSpeciesID;
                 string lineageTxt = "";
@@ -912,7 +911,7 @@ public class GlobalResourcesUI : MonoBehaviour {
         textMeterZooplankton.text = (resourcesRef.curGlobalAnimalParticles).ToString("F0");
         textMeterAnimals.text = (resourcesRef.curGlobalAgentBiomass).ToString("F2");
 
-        textSelectedSpeciesTitle.text = "SPECIES #" + uiManagerRef.selectedSpeciesID.ToString() + ":  " + uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID].foundingCandidate.candidateGenome.bodyGenome.coreGenome.name;
+        textSelectedSpeciesTitle.text = "SPECIES #" + uiManagerRef.selectedSpeciesID.ToString() + ":  " + masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID].foundingCandidate.candidateGenome.bodyGenome.coreGenome.name;
         
         Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
         imageSelectedSpeciesBG.color = new Color(hue.x, hue.y, hue.z);

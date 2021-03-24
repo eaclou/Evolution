@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class WatcherUI : MonoBehaviour {
+    SimulationManager simulationManager => SimulationManager.instance;
+
     public UIManager uiManagerRef;
     public bool isUnlocked;
     public bool isOpen;
@@ -164,10 +166,10 @@ public class WatcherUI : MonoBehaviour {
         }
         
         if(uiManagerRef.cameraManager.isFollowingPlantParticle) {
-            uiManagerRef.cameraManager.targetPlantWorldPos = uiManagerRef.gameManager.simulationManager.vegetationManager.selectedPlantParticleData.worldPos;
+            uiManagerRef.cameraManager.targetPlantWorldPos = simulationManager.vegetationManager.selectedPlantParticleData.worldPos;
         }
         if(uiManagerRef.cameraManager.isFollowingAnimalParticle) {
-            uiManagerRef.cameraManager.targetZooplanktonWorldPos = uiManagerRef.gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleData.worldPos;
+            uiManagerRef.cameraManager.targetZooplanktonWorldPos = simulationManager.zooplanktonManager.selectedAnimalParticleData.worldPos;
         }
 
         //panelWatcherSpiritVertebratesText.SetActive(false);
@@ -177,7 +179,7 @@ public class WatcherUI : MonoBehaviour {
             TextCommonStatsA.gameObject.SetActive(true);
 
             int critterIndex = uiManagerRef.cameraManager.targetAgentIndex;
-            Agent agent = uiManagerRef.gameManager.simulationManager.agentsArray[critterIndex];
+            Agent agent = simulationManager.agentsArray[critterIndex];
 
             imageDimmingSheet.gameObject.SetActive(agent.isDecaying);  // ** dimming sheet! to show not following???? just an experiment
             //button
@@ -271,7 +273,7 @@ public class WatcherUI : MonoBehaviour {
                 newInspectAgentWasteMat.SetFloat("_Value", Mathf.Clamp01(agent.wasteProducedLastFrame * 1000f));
                 newInspectAgentThrottleMat.SetFloat("_ThrottleX", Mathf.Clamp01(agent.smoothedThrottle.x));
                 newInspectAgentThrottleMat.SetFloat("_ThrottleY", Mathf.Clamp01(agent.smoothedThrottle.y));
-                newInspectAgentThrottleMat.SetTexture("_VelocityTex", uiManagerRef.gameManager.simulationManager.environmentFluidManager._VelocityPressureDivergenceMain);
+                newInspectAgentThrottleMat.SetTexture("_VelocityTex", simulationManager.environmentFluidManager._VelocityPressureDivergenceMain);
                 newInspectAgentThrottleMat.SetFloat("_AgentCoordX", agent.ownPos.x / SimulationManager._MapSize);
                 newInspectAgentThrottleMat.SetFloat("_AgentCoordY", agent.ownPos.y / SimulationManager._MapSize);
                 
@@ -526,7 +528,7 @@ public class WatcherUI : MonoBehaviour {
 
             }
             else {
-                VegetationManager veggieRef = uiManagerRef.gameManager.simulationManager.vegetationManager;
+                VegetationManager veggieRef = simulationManager.vegetationManager;
                 veggieRef.selectedPlantParticleIndex--;
                 if(veggieRef.selectedPlantParticleIndex < 0) {
                     veggieRef.selectedPlantParticleIndex = veggieRef.plantParticlesCBuffer.count - 1;
@@ -536,7 +538,7 @@ public class WatcherUI : MonoBehaviour {
         }
         else if(slotRef.kingdomID == 2) {
             if (slotRef.tierID == 0) {
-                ZooplanktonManager zoopRef = uiManagerRef.gameManager.simulationManager.zooplanktonManager;
+                ZooplanktonManager zoopRef = simulationManager.zooplanktonManager;
                 zoopRef.selectedAnimalParticleIndex--;
                 if (zoopRef.selectedAnimalParticleIndex < 0) {
                     zoopRef.selectedAnimalParticleIndex = zoopRef.animalParticlesCBuffer.count - 1;
@@ -556,7 +558,7 @@ public class WatcherUI : MonoBehaviour {
             if(slotRef.tierID == 0) {
             }
             else {
-                VegetationManager veggieRef = uiManagerRef.gameManager.simulationManager.vegetationManager;
+                VegetationManager veggieRef = simulationManager.vegetationManager;
                 veggieRef.selectedPlantParticleIndex++;
                 if(veggieRef.selectedPlantParticleIndex > veggieRef.plantParticlesCBuffer.count - 1) {
                     veggieRef.selectedPlantParticleIndex = 0;
@@ -566,7 +568,7 @@ public class WatcherUI : MonoBehaviour {
         }
         else if(slotRef.kingdomID == 2) {
             if (slotRef.tierID == 0) {
-                ZooplanktonManager zoopRef = uiManagerRef.gameManager.simulationManager.zooplanktonManager;
+                ZooplanktonManager zoopRef = simulationManager.zooplanktonManager;
                 zoopRef.selectedAnimalParticleIndex++;
                 if (zoopRef.selectedAnimalParticleIndex > zoopRef.animalParticlesCBuffer.count - 1) {
                     zoopRef.selectedAnimalParticleIndex = 0;
@@ -581,14 +583,14 @@ public class WatcherUI : MonoBehaviour {
     
     public void ClickPrevAgent() {
         Debug.Log("ClickPrevAgent");
-        int newIndex = (uiManagerRef.gameManager.simulationManager._NumAgents + uiManagerRef.cameraManager.targetAgentIndex - 1) % uiManagerRef.gameManager.simulationManager._NumAgents;
-        uiManagerRef.cameraManager.SetTargetAgent(uiManagerRef.gameManager.simulationManager.agentsArray[newIndex], newIndex);          
+        int newIndex = (simulationManager._NumAgents + uiManagerRef.cameraManager.targetAgentIndex - 1) % simulationManager._NumAgents;
+        uiManagerRef.cameraManager.SetTargetAgent(simulationManager.agentsArray[newIndex], newIndex);          
                            
     }
     public void ClickNextAgent() {
         Debug.Log("ClickNextAgent");
-        int newIndex = (uiManagerRef.cameraManager.targetAgentIndex + 1) % uiManagerRef.gameManager.simulationManager._NumAgents;
-        uiManagerRef.cameraManager.SetTargetAgent(uiManagerRef.gameManager.simulationManager.agentsArray[newIndex], newIndex);                
+        int newIndex = (uiManagerRef.cameraManager.targetAgentIndex + 1) % simulationManager._NumAgents;
+        uiManagerRef.cameraManager.SetTargetAgent(simulationManager.agentsArray[newIndex], newIndex);                
     }
 
     public void StopFollowingAgent() {
@@ -608,7 +610,7 @@ public class WatcherUI : MonoBehaviour {
     public void StartFollowingPlantParticle() {
         uiManagerRef.cameraManager.isFollowingPlantParticle = true;
         uiManagerRef.cameraManager.isFollowingAnimalParticle = false; 
-        watcherSelectedTrophicSlotRef = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[0];
+        watcherSelectedTrophicSlotRef = simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[0];
         //uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef =   
     }
     
@@ -619,7 +621,6 @@ public class WatcherUI : MonoBehaviour {
     public void StartFollowingAnimalParticle() {
         uiManagerRef.cameraManager.isFollowingAnimalParticle = true;  
         uiManagerRef.cameraManager.isFollowingPlantParticle = false;
-        watcherSelectedTrophicSlotRef = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0];
+        watcherSelectedTrophicSlotRef = simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0];
     }
- 
 }

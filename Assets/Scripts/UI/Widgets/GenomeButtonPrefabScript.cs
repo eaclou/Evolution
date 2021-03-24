@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class GenomeButtonPrefabScript : MonoBehaviour {
+    SimulationManager simulationManager => SimulationManager.instance;
 
     public int index = -1;
     private SpeciesOverviewUI.SelectionGroup group;
@@ -40,15 +41,15 @@ public class GenomeButtonPrefabScript : MonoBehaviour {
 
             bool isFound = false;
             int agentIndex = -1;
-            for(int i = 0; i < uiManagerRef.gameManager.simulationManager.agentsArray.Length; i++) {
-                if(uiManagerRef.gameManager.simulationManager.agentsArray[i].candidateRef.candidateID == uiManagerRef.focusedCandidate.candidateID) {
+            for(int i = 0; i < simulationManager.agentsArray.Length; i++) {
+                if(simulationManager.agentsArray[i].candidateRef.candidateID == uiManagerRef.focusedCandidate.candidateID) {
                     isFound = true;
                     agentIndex = i;
                     break;
                 }
             }
             if(isFound) {
-                uiManagerRef.cameraManager.SetTargetAgent(uiManagerRef.gameManager.simulationManager.agentsArray[agentIndex], agentIndex);
+                uiManagerRef.cameraManager.SetTargetAgent(simulationManager.agentsArray[agentIndex], agentIndex);
                 uiManagerRef.watcherUI.StartFollowingAgent();
             }
 

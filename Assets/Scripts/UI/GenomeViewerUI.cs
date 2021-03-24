@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class GenomeViewerUI : MonoBehaviour {
+    SimulationManager simulationManager => SimulationManager.instance;
+
     public UIManager uiManagerRef;
 
     public Text textFocusedCandidate;
@@ -171,10 +173,10 @@ public class GenomeViewerUI : MonoBehaviour {
 
             if(candidate.isBeingEvaluated) {
                 
-                lifespan = uiManagerRef.gameManager.simulationManager.agentsArray[uiManagerRef.cameraManager.targetAgentIndex].ageCounter;
+                lifespan = simulationManager.agentsArray[uiManagerRef.cameraManager.targetAgentIndex].ageCounter;
                 textGenomeOverviewA.text = "Age: " + (lifespan * 0.1f).ToString("F0") + ", Gen: " + candidate.candidateGenome.generationCount.ToString();
             }
-            if(uiManagerRef.gameManager.simulationManager.agentsArray[uiManagerRef.cameraManager.targetAgentIndex].curLifeStage == Agent.AgentLifeStage.Dead) {
+            if(simulationManager.agentsArray[uiManagerRef.cameraManager.targetAgentIndex].curLifeStage == Agent.AgentLifeStage.Dead) {
                 imageDeadDim.gameObject.SetActive(true);
             }
 
@@ -373,14 +375,14 @@ public class GenomeViewerUI : MonoBehaviour {
     public void ClickButtonNext() {
         int curSpeciesID = uiManagerRef.selectedSpeciesID;
 
-        if(curSpeciesID >= uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList.Count - 1) {
+        if(curSpeciesID >= simulationManager.masterGenomePool.completeSpeciesPoolsList.Count - 1) {
             curSpeciesID = 0;
         }
         else {
             curSpeciesID += 1;
         }
         uiManagerRef.globalResourcesUI.SetSelectedSpeciesUI(curSpeciesID);  // *** These should be combined??
-        uiManagerRef.SetFocusedCandidateGenome(uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[curSpeciesID].representativeCandidate);
+        uiManagerRef.SetFocusedCandidateGenome(simulationManager.masterGenomePool.completeSpeciesPoolsList[curSpeciesID].representativeCandidate);
     }
     public void ClickButtonPrev() {
         //uiManagerRef.speciesOverviewUI.CycleHallOfFame();
@@ -431,13 +433,8 @@ public class GenomeViewerUI : MonoBehaviour {
         isTooltipHover = false;
         
     }
-    // Use this for initialization
+    
 	void Start () {
 		isTooltipHover = false;
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
 	}
 }

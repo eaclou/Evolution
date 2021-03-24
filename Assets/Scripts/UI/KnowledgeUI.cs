@@ -4,6 +4,9 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class KnowledgeUI : MonoBehaviour {
+    SimulationManager simulationManager => SimulationManager.instance;
+    TheRenderKing theRenderKing => TheRenderKing.instance;
+
     public UIManager uiManagerRef;
     public bool isUnlocked;
     public bool isOpen;    
@@ -131,8 +134,8 @@ public class KnowledgeUI : MonoBehaviour {
             groupMinimap.gameObject.SetActive(true);
             textCurPage.text = "WORLD MAP";
             
-            uiKnowledgeMapViewerMat.SetTexture("_AltitudeTex", uiManagerRef.gameManager.theRenderKing.baronVonTerrain.terrainHeightDataRT);
-            uiKnowledgeMapViewerMat.SetTexture("_ResourceGridTex", uiManagerRef.gameManager.simulationManager.vegetationManager.resourceGridRT1);
+            uiKnowledgeMapViewerMat.SetTexture("_AltitudeTex", theRenderKing.baronVonTerrain.terrainHeightDataRT);
+            uiKnowledgeMapViewerMat.SetTexture("_ResourceGridTex", simulationManager.vegetationManager.resourceGridRT1);
             uiKnowledgeMapViewerMat.SetFloat("_WaterLevel", SimulationManager._GlobalWaterLevel);
 
             //string summaryText = GetSpeciesDescriptionString(uiManagerRef.gameManager.simulationManager);
@@ -181,7 +184,7 @@ public class KnowledgeUI : MonoBehaviour {
 
             if(curPage == Page.One) {                
                 imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
-                uiKnowledgeMapViewerMat.SetTexture("_MainTex", uiManagerRef.gameManager.simulationManager.vegetationManager.resourceGridRT1);
+                uiKnowledgeMapViewerMat.SetTexture("_MainTex", simulationManager.vegetationManager.resourceGridRT1);
                 uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
                 uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
                 uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
@@ -191,25 +194,18 @@ public class KnowledgeUI : MonoBehaviour {
             }
             else if(curPage == Page.Two) {              
 
-                float metabolicRate = uiManagerRef.gameManager.simulationManager.vegetationManager.decomposerSlotGenomeCurrent.metabolicRate;
-                float efficiencyDecomp = uiManagerRef.gameManager.simulationManager.vegetationManager.decomposerSlotGenomeCurrent.growthEfficiency;
+                float metabolicRate = simulationManager.vegetationManager.decomposerSlotGenomeCurrent.metabolicRate;
+                float efficiencyDecomp = simulationManager.vegetationManager.decomposerSlotGenomeCurrent.growthEfficiency;
                 string decompInfoString = "Metabolic Rate: " + metabolicRate.ToString();
                 decompInfoString += "\nGrowth Efficiency: " + efficiencyDecomp.ToString();
                 textDecomposersPage2.text = decompInfoString;
-            }
-            else {
-                
-            }
-            
-
-            
-            
+            }            
         }
         else if (slotRef.kingdomID == 1) {
             if (slotRef.tierID == 0) {  // ALGAE
                 
                 imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
-                uiKnowledgeMapViewerMat.SetTexture("_MainTex", uiManagerRef.gameManager.simulationManager.vegetationManager.resourceGridRT1);
+                uiKnowledgeMapViewerMat.SetTexture("_MainTex", simulationManager.vegetationManager.resourceGridRT1);
                 uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
                 uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
                 uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
@@ -219,8 +215,8 @@ public class KnowledgeUI : MonoBehaviour {
             
                 panelKnowledgeInfoAlgae.SetActive(true);
 
-                float metabolicRate = uiManagerRef.gameManager.simulationManager.vegetationManager.algaeSlotGenomeCurrent.metabolicRate;
-                float efficiencyDecomp = uiManagerRef.gameManager.simulationManager.vegetationManager.algaeSlotGenomeCurrent.growthEfficiency;
+                float metabolicRate = simulationManager.vegetationManager.algaeSlotGenomeCurrent.metabolicRate;
+                float efficiencyDecomp = simulationManager.vegetationManager.algaeSlotGenomeCurrent.growthEfficiency;
                 string decompInfoString = "Metabolic Rate: " + metabolicRate.ToString();
                 decompInfoString += "\nGrowth Efficiency: " + efficiencyDecomp.ToString();
                 textDecomposersPage2.text = decompInfoString;
@@ -230,7 +226,7 @@ public class KnowledgeUI : MonoBehaviour {
                 panelKnowledgeInfoPlants.SetActive(true);
 
                 imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
-                uiKnowledgeMapViewerMat.SetTexture("_MainTex", uiManagerRef.gameManager.simulationManager.environmentFluidManager._SourceColorRT);
+                uiKnowledgeMapViewerMat.SetTexture("_MainTex", simulationManager.environmentFluidManager._SourceColorRT);
                 uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
                 uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
                 uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
@@ -244,7 +240,7 @@ public class KnowledgeUI : MonoBehaviour {
                 panelKnowledgeInfoZooplankton.SetActive(true);
 
                 imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
-                uiKnowledgeMapViewerMat.SetTexture("_MainTex", uiManagerRef.gameManager.simulationManager.environmentFluidManager._SourceColorRT);
+                uiKnowledgeMapViewerMat.SetTexture("_MainTex", simulationManager.environmentFluidManager._SourceColorRT);
                 uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
                 uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
                 uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
@@ -261,7 +257,7 @@ public class KnowledgeUI : MonoBehaviour {
                 //textKnowledgeGraphGenome.text = genome.ToString("F1");  // avg Body size
 
                 imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
-                uiKnowledgeMapViewerMat.SetTexture("_MainTex", uiManagerRef.gameManager.simulationManager.environmentFluidManager._SourceColorRT);
+                uiKnowledgeMapViewerMat.SetTexture("_MainTex", simulationManager.environmentFluidManager._SourceColorRT);
                 uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
                 uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
                 uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
@@ -276,7 +272,7 @@ public class KnowledgeUI : MonoBehaviour {
             if (slotRef.slotID == 0) {
                 // WORLD 
                 imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
-                uiKnowledgeMapViewerMat.SetTexture("_MainTex", uiManagerRef.gameManager.theRenderKing.baronVonTerrain.terrainHeightDataRT);
+                uiKnowledgeMapViewerMat.SetTexture("_MainTex", theRenderKing.baronVonTerrain.terrainHeightDataRT);
                 uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
                 uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 0.7f);
                 uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
@@ -287,7 +283,7 @@ public class KnowledgeUI : MonoBehaviour {
             else if (slotRef.slotID == 1) {
                 // STONE
                 imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
-                uiKnowledgeMapViewerMat.SetTexture("_MainTex", uiManagerRef.gameManager.theRenderKing.baronVonTerrain.terrainHeightDataRT);
+                uiKnowledgeMapViewerMat.SetTexture("_MainTex", theRenderKing.baronVonTerrain.terrainHeightDataRT);
                 uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
                 uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
                 uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
@@ -298,7 +294,7 @@ public class KnowledgeUI : MonoBehaviour {
             else if (slotRef.slotID == 2) {
                 // PEBBLES
                 imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
-                uiKnowledgeMapViewerMat.SetTexture("_MainTex", uiManagerRef.gameManager.theRenderKing.baronVonTerrain.terrainHeightDataRT);
+                uiKnowledgeMapViewerMat.SetTexture("_MainTex", theRenderKing.baronVonTerrain.terrainHeightDataRT);
                 uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
                 uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
                 uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
@@ -309,7 +305,7 @@ public class KnowledgeUI : MonoBehaviour {
             else {
                 // SAND
                 imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
-                uiKnowledgeMapViewerMat.SetTexture("_MainTex", uiManagerRef.gameManager.theRenderKing.baronVonTerrain.terrainHeightDataRT);
+                uiKnowledgeMapViewerMat.SetTexture("_MainTex", theRenderKing.baronVonTerrain.terrainHeightDataRT);
                 uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
                 uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
                 uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
@@ -325,7 +321,7 @@ public class KnowledgeUI : MonoBehaviour {
                 // Minerals
                 panelKnowledgeInfoAlgae.SetActive(true);
                 imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
-                uiKnowledgeMapViewerMat.SetTexture("_MainTex", uiManagerRef.gameManager.simulationManager.vegetationManager.resourceGridRT1);
+                uiKnowledgeMapViewerMat.SetTexture("_MainTex", simulationManager.vegetationManager.resourceGridRT1);
                 uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
                 uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
                 uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
@@ -337,7 +333,7 @@ public class KnowledgeUI : MonoBehaviour {
                 // Water
                 //Debug.Log("sadfasdfadsfas");
                 imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
-                uiKnowledgeMapViewerMat.SetTexture("_MainTex", uiManagerRef.gameManager.theRenderKing.baronVonWater.waterSurfaceDataRT0);
+                uiKnowledgeMapViewerMat.SetTexture("_MainTex", theRenderKing.baronVonWater.waterSurfaceDataRT0);
                 uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
                 uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
                 uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
@@ -349,7 +345,7 @@ public class KnowledgeUI : MonoBehaviour {
             else if (slotRef.slotID == 2) {
                 // AIR
                 imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
-                uiKnowledgeMapViewerMat.SetTexture("_MainTex", uiManagerRef.gameManager.theRenderKing.baronVonWater.waterSurfaceDataRT0);
+                uiKnowledgeMapViewerMat.SetTexture("_MainTex", theRenderKing.baronVonWater.waterSurfaceDataRT0);
                 uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
                 uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 0.5f);
                 uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);

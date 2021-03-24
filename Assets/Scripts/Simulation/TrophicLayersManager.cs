@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class TrophicLayersManager {
 
@@ -33,6 +31,27 @@ public class TrophicLayersManager {
     public int timeStepDecomposersOn = 0;
     public int timeStepZooplanktonOn = 0;
     private int timeStepsLayerGrowthDuration = 1200;
+    
+    Lookup lookup => Lookup.instance;
+    Sprite spiritWorldIcon => lookup.spiritWorldIcon;
+    Sprite spiritStoneIcon => lookup.spiritStoneIcon;
+    Sprite spiritAlgaeIcon => lookup.spiritAlgaeIcon;
+    Sprite spiritPlantIcon => lookup.spiritPlantIcon;
+    Sprite spiritZooplanktonIcon => lookup.spiritZooplanktonIcon;
+    Sprite spiritVertebrateIcon => lookup.spiritVertebrateIcon;
+    Sprite spiritDecomposerIcon => lookup.spiritDecomposerIcon;
+    Sprite spiritPebblesIcon => lookup.spiritPebblesIcon;
+    Sprite spiritSandIcon => lookup.spiritSandIcon;
+    Sprite spiritMineralsIcon => lookup.spiritMineralsIcon;
+    Sprite spiritWaterIcon => lookup.spiritWaterIcon;
+    Sprite spiritAirIcon => lookup.spiritAirIcon;
+    Color colorVertebratesLayer => lookup.colorVertebratesLayer;
+    Color colorWorldLayer => lookup.colorWorldLayer;
+    Color colorTerrainLayer => lookup.colorTerrainLayer; 
+    Color colorMineralLayer => lookup.colorMineralLayer;
+    Color colorWaterLayer => lookup.colorWaterLayer;
+    Color colorAirLayer => lookup.colorAirLayer;
+
 
 	public TrophicLayersManager(UIManager uiManagerRef) {  // constructor
         decomposersOn = false;  // first pass -- temporary?
@@ -46,50 +65,50 @@ public class TrophicLayersManager {
         kingdomDecomposers = new TrophicKingdom();
         kingdomDecomposers.name = "Decomposers";
         TrophicTier decomposersTier0 = new TrophicTier();
-        decomposersTier0.trophicSlots[0].Initialize("Decomposers", TrophicSlot.SlotStatus.On, 0, 0, 0, uiManagerRef.spriteSpiritDecomposerIcon, uiManagerRef.colorDecomposersLayer);
+        decomposersTier0.trophicSlots[0].Initialize("Decomposers", TrophicSlot.SlotStatus.On, 0, 0, 0, spiritDecomposerIcon, uiManagerRef.colorDecomposersLayer);
         kingdomDecomposers.trophicTiersList.Add(decomposersTier0);
 
         // PLANTS::::
         kingdomPlants = new TrophicKingdom();
         kingdomPlants.name = "Plants";
         TrophicTier plantsTier0 = new TrophicTier();  // simple algae
-        plantsTier0.trophicSlots[0].Initialize("Algae", TrophicSlot.SlotStatus.On, 1, 0, 0, uiManagerRef.spriteSpiritAlgaeIcon, uiManagerRef.colorAlgaeLayer);        
+        plantsTier0.trophicSlots[0].Initialize("Algae", TrophicSlot.SlotStatus.On, 1, 0, 0, spiritAlgaeIcon, uiManagerRef.colorAlgaeLayer);        
         kingdomPlants.trophicTiersList.Add(plantsTier0);
         TrophicTier plantsTier1 = new TrophicTier();  // bigger plants
-        plantsTier1.trophicSlots[0].Initialize("Floating Plants", TrophicSlot.SlotStatus.Locked, 1, 1, 0, uiManagerRef.spriteSpiritPlantIcon, uiManagerRef.colorPlantsLayer);
-        plantsTier1.trophicSlots[1].Initialize("Submerged Plants", TrophicSlot.SlotStatus.Locked, 1, 1, 1, uiManagerRef.spriteSpiritPlantIcon, uiManagerRef.colorPlantsLayer);
+        plantsTier1.trophicSlots[0].Initialize("Floating Plants", TrophicSlot.SlotStatus.Locked, 1, 1, 0, spiritPlantIcon, uiManagerRef.colorPlantsLayer);
+        plantsTier1.trophicSlots[1].Initialize("Submerged Plants", TrophicSlot.SlotStatus.Locked, 1, 1, 1, spiritPlantIcon, uiManagerRef.colorPlantsLayer);
         kingdomPlants.trophicTiersList.Add(plantsTier1);
 
         // ANIMALS:::::
         kingdomAnimals = new TrophicKingdom();
         kingdomAnimals.name = "Animals";
         TrophicTier animalsTier0 = new TrophicTier();  // Zooplankton
-        animalsTier0.trophicSlots[0].Initialize("Zooplankton", TrophicSlot.SlotStatus.Locked, 2, 0, 0, uiManagerRef.spriteSpiritZooplanktonIcon, uiManagerRef.colorZooplanktonLayer);
+        animalsTier0.trophicSlots[0].Initialize("Zooplankton", TrophicSlot.SlotStatus.Locked, 2, 0, 0, spiritZooplanktonIcon, uiManagerRef.colorZooplanktonLayer);
         kingdomAnimals.trophicTiersList.Add(animalsTier0);
         TrophicTier animalsTier1 = new TrophicTier();  // full Agents
-        animalsTier1.trophicSlots[0].Initialize("Vertebrate", TrophicSlot.SlotStatus.Locked, 2, 1, 0, uiManagerRef.spriteSpiritVertebrateIcon, uiManagerRef.colorVertebratesLayer);
-        animalsTier1.trophicSlots[1].Initialize("Vertebrate", TrophicSlot.SlotStatus.Locked, 2, 1, 1, uiManagerRef.spriteSpiritVertebrateIcon, uiManagerRef.colorVertebratesLayer);
-        animalsTier1.trophicSlots[2].Initialize("Vertebrate", TrophicSlot.SlotStatus.Locked, 2, 1, 2, uiManagerRef.spriteSpiritVertebrateIcon, uiManagerRef.colorVertebratesLayer);
-        animalsTier1.trophicSlots[3].Initialize("Vertebrate", TrophicSlot.SlotStatus.Locked, 2, 1, 3, uiManagerRef.spriteSpiritVertebrateIcon, uiManagerRef.colorVertebratesLayer);
+        animalsTier1.trophicSlots[0].Initialize("Vertebrate", TrophicSlot.SlotStatus.Locked, 2, 1, 0, spiritVertebrateIcon, colorVertebratesLayer);
+        animalsTier1.trophicSlots[1].Initialize("Vertebrate", TrophicSlot.SlotStatus.Locked, 2, 1, 1, spiritVertebrateIcon, colorVertebratesLayer);
+        animalsTier1.trophicSlots[2].Initialize("Vertebrate", TrophicSlot.SlotStatus.Locked, 2, 1, 2, spiritVertebrateIcon, colorVertebratesLayer);
+        animalsTier1.trophicSlots[3].Initialize("Vertebrate", TrophicSlot.SlotStatus.Locked, 2, 1, 3, spiritVertebrateIcon, colorVertebratesLayer);
         kingdomAnimals.trophicTiersList.Add(animalsTier1);
 
         // TERRAIN !!!!::::::
         kingdomTerrain = new TrophicKingdom();
         kingdomTerrain.name = "Terrain";
         TrophicTier terrainTier0 = new TrophicTier();
-        terrainTier0.trophicSlots[0].Initialize("World", TrophicSlot.SlotStatus.On, 3, 0, 0, uiManagerRef.spriteSpiritWorldIcon, uiManagerRef.colorWorldLayer);
-        terrainTier0.trophicSlots[1].Initialize("*World*", TrophicSlot.SlotStatus.On, 3, 0, 1, uiManagerRef.spriteSpiritStoneIcon, uiManagerRef.colorTerrainLayer);
-        terrainTier0.trophicSlots[2].Initialize("Pebbles", TrophicSlot.SlotStatus.Locked, 3, 0, 2, uiManagerRef.spriteSpiritPebblesIcon, uiManagerRef.colorTerrainLayer);
-        terrainTier0.trophicSlots[3].Initialize("Sand", TrophicSlot.SlotStatus.Locked, 3, 0, 3, uiManagerRef.spriteSpiritSandIcon, uiManagerRef.colorTerrainLayer);
+        terrainTier0.trophicSlots[0].Initialize("World", TrophicSlot.SlotStatus.On, 3, 0, 0, spiritWorldIcon, colorWorldLayer);
+        terrainTier0.trophicSlots[1].Initialize("*World*", TrophicSlot.SlotStatus.On, 3, 0, 1, spiritStoneIcon, colorTerrainLayer);
+        terrainTier0.trophicSlots[2].Initialize("Pebbles", TrophicSlot.SlotStatus.Locked, 3, 0, 2, spiritPebblesIcon, colorTerrainLayer);
+        terrainTier0.trophicSlots[3].Initialize("Sand", TrophicSlot.SlotStatus.Locked, 3, 0, 3, spiritSandIcon, colorTerrainLayer);
         kingdomTerrain.trophicTiersList.Add(terrainTier0);
 
         // OTHER!!!!!%%%
         kingdomOther = new TrophicKingdom();
         kingdomOther.name = "Other";
         TrophicTier otherTier0 = new TrophicTier();
-        otherTier0.trophicSlots[0].Initialize("Minerals", TrophicSlot.SlotStatus.Locked, 4, 0, 0, uiManagerRef.spriteSpiritMineralsIcon, uiManagerRef.colorMineralLayer);
-        otherTier0.trophicSlots[1].Initialize("Water", TrophicSlot.SlotStatus.On, 4, 0, 1, uiManagerRef.spriteSpiritWaterIcon, uiManagerRef.colorWaterLayer);
-        otherTier0.trophicSlots[2].Initialize("Air", TrophicSlot.SlotStatus.Locked, 4, 0, 2, uiManagerRef.spriteSpiritAirIcon, uiManagerRef.colorAirLayer);
+        otherTier0.trophicSlots[0].Initialize("Minerals", TrophicSlot.SlotStatus.Locked, 4, 0, 0, spiritMineralsIcon, colorMineralLayer);
+        otherTier0.trophicSlots[1].Initialize("Water", TrophicSlot.SlotStatus.On, 4, 0, 1, spiritWaterIcon, colorWaterLayer);
+        otherTier0.trophicSlots[2].Initialize("Air", TrophicSlot.SlotStatus.Locked, 4, 0, 2, spiritAirIcon, colorAirLayer);
         kingdomOther.trophicTiersList.Add(otherTier0);
                 
         //selectedTrophicSlotRef = terrainTier0.trophicSlots[0];        

@@ -3,6 +3,8 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class TheCursorCzar : Singleton<TheCursorCzar> {
+    SimulationManager simulationManager => SimulationManager.instance;
+
     public UIManager uiManagerRef;
 
     public bool _IsHoverClickableSpirit;
@@ -107,7 +109,7 @@ public class TheCursorCzar : Singleton<TheCursorCzar> {
                         //uiManagerRef.globalResourcesUI.SetSelectedSpeciesUI(agentRef.speciesIndex);
                         uiManagerRef.SetFocusedCandidateGenome(agentRef.candidateRef);
                         //uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[agentRef.speciesIndex];
-                        uiManagerRef.watcherUI.watcherSelectedTrophicSlotRef = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0];
+                        uiManagerRef.watcherUI.watcherSelectedTrophicSlotRef = simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0];
                     }
                 }
                 else {
