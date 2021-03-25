@@ -78,9 +78,9 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/TrophicLayersManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/BrushesUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/WorldSpiritHubUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/PanelPendingClickPromptUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/MasterGenomePool.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/PanelPendingClickPromptUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" />
     </changedPaths>
   </component>
@@ -133,7 +133,7 @@
       <workItem from="1616048791562" duration="5777000" />
       <workItem from="1616297465275" duration="7998000" />
       <workItem from="1616624936908" duration="4833000" />
-      <workItem from="1616644045919" duration="5168000" />
+      <workItem from="1616644045919" duration="5478000" />
     </task>
     <servers />
   </component>

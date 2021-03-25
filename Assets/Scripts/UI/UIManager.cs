@@ -1160,6 +1160,7 @@ public class UIManager : MonoBehaviour {
     }
     
     // ***WPP: Convert to UnityEvents passing SOs...if these are called from UnityEvents?
+    // Currently nothing is calling these
     public void AnnounceUnlockWater() {
         panelPendingClickPrompt.Narrate("Water Spirit Found!", new Color(0.4f, 0.4f, 0.9f));  
     }

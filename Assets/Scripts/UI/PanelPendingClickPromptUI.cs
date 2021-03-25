@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
+// Rename?
 public class PanelPendingClickPromptUI : MonoBehaviour
 {
     [SerializeField] UIManager manager;
