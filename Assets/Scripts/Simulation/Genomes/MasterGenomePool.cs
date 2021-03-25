@@ -25,6 +25,7 @@ public class MasterGenomePool {
 
     public List<int> debugRecentlyDeletedCandidateIDsList;
 
+    PanelPendingClickPromptUI panelPendingClickPrompt => SimulationManager.instance.uiManager.panelPendingClickPrompt;
    
     public MasterGenomePool() {
         
@@ -249,8 +250,7 @@ public class MasterGenomePool {
                     speciesSimilarityDistanceThreshold += 70f;
 
                     Color colo = new Color(newGenome.bodyGenome.appearanceGenome.huePrimary.x, newGenome.bodyGenome.appearanceGenome.huePrimary.y, newGenome.bodyGenome.appearanceGenome.huePrimary.z);
-                    simManagerRef.uiManager.NarratorText("A new species has emerged! " + newGenome.bodyGenome.coreGenome.name, colo);
-                    
+                    panelPendingClickPrompt.Narrate("A new species has emerged! " + newGenome.bodyGenome.coreGenome.name, colo); 
                 }               
             }
             else {
@@ -258,11 +258,9 @@ public class MasterGenomePool {
             }
         }
         else {
-
             //Debug.Log("closestDistanceSpeciesID: " + closestSpeciesID.ToString() + ", score: " + closestDistance.ToString());
         }
 
-        
         if(!assignedToNewSpecies) {
             // *** maybe something fishy here??
             // **********************

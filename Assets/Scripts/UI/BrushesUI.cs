@@ -114,6 +114,11 @@ public class BrushesUI : MonoBehaviour {
     Color colorMineralLayer => lookup.colorMineralLayer;
     Color colorWaterLayer => lookup.colorWaterLayer;
     Color colorAirLayer => lookup.colorAirLayer;
+    Color colorDecomposersLayer => lookup.colorDecomposersLayer;
+    Color colorAlgaeLayer => lookup.colorAlgaeLayer;
+    Color colorPlantsLayer => lookup.colorPlantsLayer;
+    Color colorZooplanktonLayer => lookup.colorZooplanktonLayer;
+
 
     private string GetSpiritBrushSummary(TrophicLayersManager layerManager) {
         string str = "";
@@ -361,25 +366,25 @@ public class BrushesUI : MonoBehaviour {
         string str = "";
         //selected layer ui identifying color:
         if (selectedEssenceSlot.kingdomID == 0) {
-            curIconColor = uiManagerRef.colorDecomposersLayer;
+            curIconColor = colorDecomposersLayer;
             curIconSprite = spiritDecomposerIcon;
             str = "Creates Decomposers";
         }
         else if (selectedEssenceSlot.kingdomID == 1) {
             if (selectedEssenceSlot.tierID == 0) {
-                curIconColor = uiManagerRef.colorAlgaeLayer;
+                curIconColor = colorAlgaeLayer;
                 curIconSprite = spiritAlgaeIcon;
                 str = "Creates a bloom of Algae";
             }
             else {
-                curIconColor = uiManagerRef.colorPlantsLayer;
+                curIconColor = colorPlantsLayer;
                 curIconSprite = spiritPlantIcon;
                 str = "Creates floating plant seedlings";
             }
         }
         else if (selectedEssenceSlot.kingdomID == 2) {
             if (selectedEssenceSlot.tierID == 0) {
-                curIconColor = uiManagerRef.colorZooplanktonLayer;
+                curIconColor = colorZooplanktonLayer;
                 curIconSprite = spiritZooplanktonIcon;
                 str = "Creates simple tiny creatures";
             }
@@ -466,18 +471,18 @@ public class BrushesUI : MonoBehaviour {
         if (true) { //layerManager.isSelectedTrophicSlot) {
             if (selectedEssenceSlot.kingdomID == 0) {
                 isSelectedDecomposers = true;
-                iconColor = uiManagerRef.colorDecomposersLayer;
+                iconColor = colorDecomposersLayer;
                 //imageToolbarSpeciesPortraitRender.sprite = uiManagerRef.spriteSpiritDecomposerIcon;
             }
             else if (selectedEssenceSlot.kingdomID == 1) {
                 if (selectedEssenceSlot.tierID == 0) {
                     isSelectedAlgae = true;
-                    iconColor = uiManagerRef.colorAlgaeLayer;
+                    iconColor = colorAlgaeLayer;
                     //imageToolbarSpeciesPortraitRender.sprite = uiManagerRef.spriteSpiritAlgaeIcon;
                 }
                 else {
                     isSelectedPlants = true;
-                    iconColor = uiManagerRef.colorPlantsLayer;
+                    iconColor = colorPlantsLayer;
                     //imageToolbarSpeciesPortraitRender.sprite = uiManagerRef.spriteSpiritPlantIcon;
                 }
             }

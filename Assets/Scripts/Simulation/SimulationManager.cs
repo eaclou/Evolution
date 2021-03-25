@@ -10,6 +10,7 @@ using Playcraft;
 public class SimulationManager : Singleton<SimulationManager> 
 {
     public UIManager uiManager;
+
     public LoadingPanelUI loadingPanel;
     public EnvironmentFluidManager environmentFluidManager;
     public TheRenderKing theRenderKing;

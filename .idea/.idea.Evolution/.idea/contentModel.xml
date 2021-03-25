@@ -828,6 +828,7 @@
               <e p="TreeOfLifeSpeciesNodeData.cs" t="Include" />
               <e p="TreeOfLifeStemSegmentData.cs" t="Include" />
             </e>
+            <e p="PanelPendingClickPromptUI.cs" t="Include" />
             <e p="SimulationUI.cs" t="Include" />
             <e p="SpeciesOverviewUI.cs" t="Include" />
             <e p="SpeciesTreePanel.cs" t="Include" />

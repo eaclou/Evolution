@@ -39,10 +39,11 @@ public class UIManager : MonoBehaviour {
     TheRenderKing theRenderKing => TheRenderKing.instance;
     
     Lookup lookup => Lookup.instance;
-    public Color colorDecomposersLayer => lookup.colorDecomposersLayer;
-    public Color colorAlgaeLayer => lookup.colorAlgaeLayer;
-    public Color colorPlantsLayer => lookup.colorPlantsLayer;
-    public Color colorZooplanktonLayer => lookup.colorZooplanktonLayer;
+    Color colorDecomposersLayer => lookup.colorDecomposersLayer;
+    Color colorAlgaeLayer => lookup.colorAlgaeLayer;
+    Color colorPlantsLayer => lookup.colorPlantsLayer;
+    Color colorZooplanktonLayer => lookup.colorZooplanktonLayer;
+    Color colorVertebratesLayer => lookup.colorVertebratesLayer;
     
     //public GameObject cursorParticlesGO;
 
@@ -83,7 +84,7 @@ public class UIManager : MonoBehaviour {
         
     
     // announcements:
-    public GameObject panelPendingClickPrompt;
+    public PanelPendingClickPromptUI panelPendingClickPrompt;
     private bool announceAlgaeCollapsePossible = false;
     private bool announceAlgaeCollapseOccurred = false;
     public int timerAnnouncementTextCounter = 0;// WPP: assigned but not used
@@ -158,13 +159,20 @@ public class UIManager : MonoBehaviour {
         speciesOverviewUI.RebuildGenomeButtons();
     }
 
-    public void NarratorText(string message, Color col) {
+    // ***WPP: Delegate
+    /*public void NarratorText(string message, Color col) {
         panelPendingClickPrompt.GetComponentInChildren<Text>().text = message;
         panelPendingClickPrompt.GetComponentInChildren<Text>().color = col;
         panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
         
         isAnnouncementTextOn = true;
         timerAnnouncementTextCounter = 0;
+    }*/
+    
+    public void BeginAnnouncement()
+    {
+        isAnnouncementTextOn = true;
+        timerAnnouncementTextCounter = 0;        
     }
 
     #region Initialization Functions:::
@@ -208,7 +216,7 @@ public class UIManager : MonoBehaviour {
         newEventData.timeStepActivated = 0;
         simulationManager.simEventsManager.completeEventHistoryList.Add(newEventData);
 
-        NarratorText("... And Then There Was Not Nothing ...", new Color(0.75f, 0.75f, 0.75f));
+        panelPendingClickPrompt.Narrate("... And Then There Was Not Nothing ...", new Color(0.75f, 0.75f, 0.75f));
         //panelPendingClickPrompt.GetComponentInChildren<Text>().text = "... And Then There Was Not Nothing ...";// "Welcome! This Pond is devoid of life...\nIt's up to you to change that!";
         //panelPendingClickPrompt.GetComponentInChildren<Text>().color = new Color(0.75f, 0.75f, 0.75f);
         //panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
@@ -926,9 +934,10 @@ public class UIManager : MonoBehaviour {
                     announceAlgaeCollapsePossible = false;
                     announceAlgaeCollapseOccurred = true;
 
-                    panelPendingClickPrompt.GetComponentInChildren<Text>().text = "<color=#DDDDDDFF>Algae Died from lack of Nutrients!</color>\nAdd Decomposers to recycle waste";
-                    panelPendingClickPrompt.GetComponentInChildren<Text>().color = colorDecomposersLayer;
-                    panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
+                    //panelPendingClickPrompt.GetComponentInChildren<Text>().text = "<color=#DDDDDDFF>Algae Died from lack of Nutrients!</color>\nAdd Decomposers to recycle waste";
+                    //panelPendingClickPrompt.GetComponentInChildren<Text>().color = colorDecomposersLayer;
+                    //panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
+                    panelPendingClickPrompt.Narrate("<color=#DDDDDDFF>Algae Died from lack of Nutrients!</color>\nAdd Decomposers to recycle waste", colorDecomposersLayer);
                     isAnnouncementTextOn = true;
                 }
             }
@@ -1107,7 +1116,7 @@ public class UIManager : MonoBehaviour {
         simulationManager._BigBangOn = true;
     }
 
-    // WPP: Removed 3/24/21, replaced with direct UnityEvent
+    // WPP: Removed 3/24/21, replaced with direct UnityEvents
     /*
     public void ClickToolButtonBrushes() {
         brushesUI.ClickToolButton();
@@ -1124,10 +1133,11 @@ public class UIManager : MonoBehaviour {
     public void ClickToolButtonMutate() {
         mutationUI.ClickToolButton();        
     }
-    */
+    
     public void ClickToolButtonGlobalResources() {
         globalResourcesUI.ClickToolButton();        
     }
+    */
     
     public void UnlockBrushes() {
         brushesUI.Unlock();
@@ -1137,63 +1147,64 @@ public class UIManager : MonoBehaviour {
     }
 
     public void AnnounceBrushAppear() {
-        NarratorText("A Minor Creation Spirit Appeared!", new Color(1f, 1f, 1f));
+        panelPendingClickPrompt.Narrate("A Minor Creation Spirit Appeared!", new Color(1f, 1f, 1f));
         // map opens!
     }
 
     public void AnnounceUnlockBrushes() {
-        NarratorText("Creation Spirit Captured!", new Color(1f, 1f, 1f));  
+        panelPendingClickPrompt.Narrate("Creation Spirit Captured!", new Color(1f, 1f, 1f));  
         
         Feat feat = new Feat("Brush", Feat.FeatType.WorldExpand, Time.frameCount, Color.white, "blah blah blah blah!");
         simulationManager.LogFeat(feat);
         //featsUI.isOpen = true;
     }
     
+    // ***WPP: Convert to UnityEvents passing SOs...if these are called from UnityEvents?
     public void AnnounceUnlockWater() {
-        NarratorText("Water Spirit Found!", new Color(0.4f, 0.4f, 0.9f));  
+        panelPendingClickPrompt.Narrate("Water Spirit Found!", new Color(0.4f, 0.4f, 0.9f));  
     }
     
     public void AnnounceUnlockKnowledgeSpirit() {
-        NarratorText("Knowledge Spirit Captured!", new Color(0.9f, 0.77f, 0.76f)); 
+        panelPendingClickPrompt.Narrate("Knowledge Spirit Captured!", new Color(0.9f, 0.77f, 0.76f)); 
     }
     
     public void AnnounceUnlockWatcherSpirit() {
-        NarratorText("Watcher Spirit Captured!", new Color(0.6f, 0.71277f, 1f)); 
+        panelPendingClickPrompt.Narrate("Watcher Spirit Captured!", new Color(0.6f, 0.71277f, 1f)); 
         
         Feat feat = new Feat("Inspect Tool Unlocked!", Feat.FeatType.Watcher, Time.frameCount, Color.white, "Use this to see hidden information.");
         simulationManager.LogFeat(feat);
     }
     
     public void AnnounceUnlockMutationSpirit() {
-        NarratorText("Mutation Spirit Captured!", new Color(0.8f, 0.1277f, 0.1276f));  
+        panelPendingClickPrompt.Narrate("Mutation Spirit Captured!", new Color(0.8f, 0.1277f, 0.1276f));  
     }
     
     public void AnnounceUnlockMinerals() {
-        NarratorText("Minerals Essence Captured!", new Color(1f, 1f, 1f)); 
+        panelPendingClickPrompt.Narrate("Minerals Essence Captured!", new Color(1f, 1f, 1f)); 
     }
     
     public void AnnounceUnlockAir() {
-        NarratorText("Air Spirit Captured!", new Color(0.5f, 0.5f, 1f));        
+        panelPendingClickPrompt.Narrate("Air Spirit Captured!", new Color(0.5f, 0.5f, 1f));        
     }
     
     public void AnnounceUnlockPebbles() {
-        NarratorText("Pebble Spirit Captured!", new Color(1f, 1f, 1f));
+        panelPendingClickPrompt.Narrate("Pebble Spirit Captured!", new Color(1f, 1f, 1f));
     }
     
     public void AnnounceUnlockSand() {
-        NarratorText("Sand Spirit Captured!", new Color(1f, 1f, 1f));
+        panelPendingClickPrompt.Narrate("Sand Spirit Captured!", new Color(1f, 1f, 1f));
     }
     
     public void AnnounceUnlockAlgae() {
-        NarratorText("Algae Species Unlocked!", colorAlgaeLayer);
+        panelPendingClickPrompt.Narrate("Algae Species Unlocked!", colorAlgaeLayer);
     }
     
     public void AnnounceUnlockDecomposers() {
-        NarratorText("Decomposer Species Unlocked!", colorDecomposersLayer);
+        panelPendingClickPrompt.Narrate("Decomposer Species Unlocked!", colorDecomposersLayer);
     }
     
     public void AnnounceUnlockZooplankton() {
-        NarratorText("Zooplankton Species Unlocked!", colorZooplanktonLayer);
+        panelPendingClickPrompt.Narrate("Zooplankton Species Unlocked!", colorZooplanktonLayer);
 
         Feat feat = new Feat("Animal Spirit!", Feat.FeatType.Zooplankton, Time.frameCount, Color.white, "Tiny creatures that eat algae.");
         simulationManager.LogFeat(feat);
@@ -1201,13 +1212,13 @@ public class UIManager : MonoBehaviour {
     
     public void AnnounceUnlockVertebrates() {
         Debug.LogError("WTF?");
-        //NarratorText("Vertebrate Species Unlocked!", colorVertebratesLayer);
+        panelPendingClickPrompt.Narrate("Vertebrate Species Unlocked!", colorVertebratesLayer);
         Feat feat = new Feat("Animal Spirit!", Feat.FeatType.Plants, Time.frameCount, Color.white, "More complex, larger animals");
         simulationManager.LogFeat(feat);
     }
     
     public void AnnounceUnlockPlants() {
-        NarratorText("Plant Species Unlocked!", colorPlantsLayer);
+        panelPendingClickPrompt.Narrate("Plant Species Unlocked!", colorPlantsLayer);
         Feat feat = new Feat("Plant Spirit!", Feat.FeatType.Plants, Time.frameCount, Color.white, "Tiny simple plants.");
         simulationManager.LogFeat(feat);
     }

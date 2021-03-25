@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class WorldSpiritHubUI : MonoBehaviour {
     public UIManager uiManagerRef;
+    public PanelPendingClickPromptUI panelPendingClickPrompt;
+
     public bool isUnlocked;
     public bool isOpen;
     public bool isDim;
@@ -19,7 +21,6 @@ public class WorldSpiritHubUI : MonoBehaviour {
     public Animator animatorTest01;
     //private int animTestTriggerHash = Animator.StringToHash("PlayAnim");
     public Animator animatorWorldHubUI;
-
 
     public Button buttonMutationLink;
     public Button buttonBrushesLink;
@@ -106,6 +107,10 @@ public class WorldSpiritHubUI : MonoBehaviour {
     Color colorMineralLayer => lookup.colorMineralLayer;
     Color colorWaterLayer => lookup.colorWaterLayer;
     Color colorAirLayer => lookup.colorAirLayer;
+    Color colorAlgaeLayer => lookup.colorAlgaeLayer;
+    Color colorPlantsLayer => lookup.colorPlantsLayer;
+    Color colorZooplanktonLayer => lookup.colorZooplanktonLayer;
+    Color colorDecomposersLayer => lookup.colorDecomposersLayer;
 
 
 	// Use this for initialization
@@ -208,7 +213,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
         
         if (selectedWorldSpiritSlot.kingdomID == 0) {
             isSelectedDecomposers = true;
-            curIconColor = uiManagerRef.colorDecomposersLayer;
+            curIconColor = colorDecomposersLayer;
             curIconSprite = spiritDecomposerIcon;
             //essenceDescriptionStr = "Decomposers break down the old so that new life can grow.";
             textTotalMass.text = "Biomass: " + simulationManager.simResourceManager.curGlobalDecomposers.ToString("F1");
@@ -216,7 +221,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
         else if (selectedWorldSpiritSlot.kingdomID == 1) {
             if (selectedWorldSpiritSlot.tierID == 0) {
                 isSelectedAlgae = true;
-                curIconColor = uiManagerRef.colorAlgaeLayer;
+                curIconColor = colorAlgaeLayer;
                 curIconSprite = spiritAlgaeIcon;
                 //essenceDescriptionStr = "Algae needs light and nutrients to grow.";
                 textTotalMass.text = "Biomass: " + simulationManager.simResourceManager.curGlobalAlgaeReservoir.ToString("F1");
@@ -224,14 +229,14 @@ public class WorldSpiritHubUI : MonoBehaviour {
             else {
                 if(selectedWorldSpiritSlot.slotID == 0) {
                     isSelectedPlants0 = true;
-                    curIconColor = uiManagerRef.colorPlantsLayer;
+                    curIconColor = colorPlantsLayer;
                     curIconSprite = spiritPlantIcon;
                     //essenceDescriptionStr = "Floating Plants that are a foodsource for Vertebrates";
                     textTotalMass.text = "Biomass: " + simulationManager.simResourceManager.curGlobalPlantParticles.ToString("F1");
                 }
                 else {
                     isSelectedPlants1 = true;
-                    curIconColor = uiManagerRef.colorPlantsLayer;
+                    curIconColor = colorPlantsLayer;
                     curIconSprite = spiritPlantIcon;
                     //essenceDescriptionStr = "Big Plants?";
                     //textTotalMass.text = "Biomass: " + uiManagerRef.gameManager.simulationManager
@@ -242,7 +247,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
         else if (selectedWorldSpiritSlot.kingdomID == 2) {
             if (selectedWorldSpiritSlot.tierID == 0) {
                 isSelectedZooplankton = true;
-                curIconColor = uiManagerRef.colorZooplanktonLayer;
+                curIconColor = colorZooplanktonLayer;
                 curIconSprite = spiritZooplanktonIcon;
                 //essenceDescriptionStr = "Tiny Organisms that feed on Algae";
                 textTotalMass.text = "Biomass: " + simulationManager.simResourceManager.curGlobalAnimalParticles.ToString("F1");
@@ -526,17 +531,17 @@ public class WorldSpiritHubUI : MonoBehaviour {
         //isAnnouncementTextOn = true;
 
         if(slot.kingdomID == 0) {
-            uiManagerRef.NarratorText("A new species of D3composer added!", uiManagerRef.colorDecomposersLayer);
+            panelPendingClickPrompt.Narrate("A new species of D3composer added!", colorDecomposersLayer);
             //panelPendingClickPrompt.GetComponentInChildren<Text>().text = "A new species of DEcomposer added!";
             //uiManagerRef.panelPendingClickPrompt.GetComponentInChildren<Text>().color = uiManagerRef.colorDecomposersLayer;
             //panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
         }
         else if(slot.kingdomID == 1) {
             if(slot.tierID == 0) {
-                uiManagerRef.NarratorText("A new species of Algae added!", uiManagerRef.colorAlgaeLayer);                
+                panelPendingClickPrompt.Narrate("A new species of Algae added!", colorAlgaeLayer);                
             }
             else {   /// BIG PLANTS:
-                uiManagerRef.NarratorText("A new species of PLAN%T added!", uiManagerRef.colorPlantsLayer);               
+                panelPendingClickPrompt.Narrate("A new species of PLANT added!", colorPlantsLayer);               
             }
             
         }
@@ -557,8 +562,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
                 
             }
             else {
-
-                uiManagerRef.NarratorText("A new species of Zooplankton added!", colorVertebratesLayer);
+                panelPendingClickPrompt.Narrate("A new species of Zooplankton added!", colorVertebratesLayer);
             }
         }
 
@@ -570,6 +574,4 @@ public class WorldSpiritHubUI : MonoBehaviour {
         //recentlyCreatedSpeciesTimeStepCounter = 0;
         //UpdateSelectedSpeciesColorUI();
     }
-    
-
 }

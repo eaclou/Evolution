@@ -51,6 +51,10 @@ public class TrophicLayersManager {
     Color colorMineralLayer => lookup.colorMineralLayer;
     Color colorWaterLayer => lookup.colorWaterLayer;
     Color colorAirLayer => lookup.colorAirLayer;
+    Color colorPlantsLayer => lookup.colorPlantsLayer;
+    Color colorZooplanktonLayer => lookup.colorZooplanktonLayer;
+    Color colorAlgaeLayer => lookup.colorAlgaeLayer;
+    Color colorDecomposersLayer => lookup.colorDecomposersLayer;
 
 
 	public TrophicLayersManager(UIManager uiManagerRef) {  // constructor
@@ -65,25 +69,25 @@ public class TrophicLayersManager {
         kingdomDecomposers = new TrophicKingdom();
         kingdomDecomposers.name = "Decomposers";
         TrophicTier decomposersTier0 = new TrophicTier();
-        decomposersTier0.trophicSlots[0].Initialize("Decomposers", TrophicSlot.SlotStatus.On, 0, 0, 0, spiritDecomposerIcon, uiManagerRef.colorDecomposersLayer);
+        decomposersTier0.trophicSlots[0].Initialize("Decomposers", TrophicSlot.SlotStatus.On, 0, 0, 0, spiritDecomposerIcon, colorDecomposersLayer);
         kingdomDecomposers.trophicTiersList.Add(decomposersTier0);
 
         // PLANTS::::
         kingdomPlants = new TrophicKingdom();
         kingdomPlants.name = "Plants";
         TrophicTier plantsTier0 = new TrophicTier();  // simple algae
-        plantsTier0.trophicSlots[0].Initialize("Algae", TrophicSlot.SlotStatus.On, 1, 0, 0, spiritAlgaeIcon, uiManagerRef.colorAlgaeLayer);        
+        plantsTier0.trophicSlots[0].Initialize("Algae", TrophicSlot.SlotStatus.On, 1, 0, 0, spiritAlgaeIcon, colorAlgaeLayer);        
         kingdomPlants.trophicTiersList.Add(plantsTier0);
         TrophicTier plantsTier1 = new TrophicTier();  // bigger plants
-        plantsTier1.trophicSlots[0].Initialize("Floating Plants", TrophicSlot.SlotStatus.Locked, 1, 1, 0, spiritPlantIcon, uiManagerRef.colorPlantsLayer);
-        plantsTier1.trophicSlots[1].Initialize("Submerged Plants", TrophicSlot.SlotStatus.Locked, 1, 1, 1, spiritPlantIcon, uiManagerRef.colorPlantsLayer);
+        plantsTier1.trophicSlots[0].Initialize("Floating Plants", TrophicSlot.SlotStatus.Locked, 1, 1, 0, spiritPlantIcon, colorPlantsLayer);
+        plantsTier1.trophicSlots[1].Initialize("Submerged Plants", TrophicSlot.SlotStatus.Locked, 1, 1, 1, spiritPlantIcon, colorPlantsLayer);
         kingdomPlants.trophicTiersList.Add(plantsTier1);
 
         // ANIMALS:::::
         kingdomAnimals = new TrophicKingdom();
         kingdomAnimals.name = "Animals";
         TrophicTier animalsTier0 = new TrophicTier();  // Zooplankton
-        animalsTier0.trophicSlots[0].Initialize("Zooplankton", TrophicSlot.SlotStatus.Locked, 2, 0, 0, spiritZooplanktonIcon, uiManagerRef.colorZooplanktonLayer);
+        animalsTier0.trophicSlots[0].Initialize("Zooplankton", TrophicSlot.SlotStatus.Locked, 2, 0, 0, spiritZooplanktonIcon, colorZooplanktonLayer);
         kingdomAnimals.trophicTiersList.Add(animalsTier0);
         TrophicTier animalsTier1 = new TrophicTier();  // full Agents
         animalsTier1.trophicSlots[0].Initialize("Vertebrate", TrophicSlot.SlotStatus.Locked, 2, 1, 0, spiritVertebrateIcon, colorVertebratesLayer);
