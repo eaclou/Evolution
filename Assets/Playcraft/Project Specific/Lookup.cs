@@ -44,6 +44,9 @@ public class Lookup : ScriptableObject
     public Color colorPlantsLayer;
     public Color colorZooplanktonLayer;
     public Color colorVertebratesLayer;
+    
+    [Header("Prefabs")]
+    public GameObject genomeIcon;
 	#endregion
 
 

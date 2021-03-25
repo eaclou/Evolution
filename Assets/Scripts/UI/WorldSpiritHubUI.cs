@@ -85,6 +85,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
     
     SimulationManager simulationManager => SimulationManager.instance;
     TheRenderKing theRenderKing => TheRenderKing.instance;
+    CameraManager cameraManager => CameraManager.instance;
     
     Lookup lookup => Lookup.instance;
     Sprite spiritWorldIcon => lookup.spiritWorldIcon;
@@ -518,9 +519,9 @@ public class WorldSpiritHubUI : MonoBehaviour {
     
     public void ClickWorldCreateNewSpecies(TrophicSlot slot) {
         // questionable code, possibly un-needed:
-        simulationManager.trophicLayersManager.CreateTrophicSlotSpecies(simulationManager, slot, uiManagerRef.cameraManager.curCameraFocusPivotPos, simulationManager.simAgeTimeSteps);
+        simulationManager.trophicLayersManager.CreateTrophicSlotSpecies(simulationManager, slot, cameraManager.curCameraFocusPivotPos, simulationManager.simAgeTimeSteps);
                 
-        theRenderKing.baronVonWater.StartCursorClick(uiManagerRef.cameraManager.curCameraFocusPivotPos);
+        theRenderKing.baronVonWater.StartCursorClick(cameraManager.curCameraFocusPivotPos);
         
         //isAnnouncementTextOn = true;
 

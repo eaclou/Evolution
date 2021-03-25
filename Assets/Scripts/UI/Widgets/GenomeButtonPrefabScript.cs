@@ -1,10 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class GenomeButtonPrefabScript : MonoBehaviour {
     SimulationManager simulationManager => SimulationManager.instance;
+    CameraManager cameraManager => CameraManager.instance;
 
     public int index = -1;
     private SpeciesOverviewUI.SelectionGroup group;
@@ -49,12 +48,9 @@ public class GenomeButtonPrefabScript : MonoBehaviour {
                 }
             }
             if(isFound) {
-                uiManagerRef.cameraManager.SetTargetAgent(simulationManager.agentsArray[agentIndex], agentIndex);
+                cameraManager.SetTargetAgent(simulationManager.agentsArray[agentIndex], agentIndex);
                 uiManagerRef.watcherUI.StartFollowingAgent();
             }
-
-
-        }
-        
+        }     
     }
 }

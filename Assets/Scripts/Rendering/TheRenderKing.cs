@@ -8,6 +8,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     // Singleton references
     TheCursorCzar theCursorCzar => TheCursorCzar.instance;
     SimulationManager simManager => SimulationManager.instance;
+    CameraManager cameraManager => CameraManager.instance;
 
     // SET IN INSPECTOR!!!::::
     public EnvironmentFluidManager fluidManager;
@@ -3663,18 +3664,18 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                 }
                 critterDebugGenericStrokeMat.SetFloat("_HighlightOn", highlightOn); 
                 */
-                critterDebugGenericStrokeMat.SetInt("_HoverID", simManager.uiManager.cameraManager.mouseHoverAgentIndex);
-                critterDebugGenericStrokeMat.SetInt("_SelectedID", simManager.uiManager.cameraManager.targetAgentIndex);
+                critterDebugGenericStrokeMat.SetInt("_HoverID", cameraManager.mouseHoverAgentIndex);
+                critterDebugGenericStrokeMat.SetInt("_SelectedID", cameraManager.targetAgentIndex);
                 float isHighlightCritter = simManager.uiManager.panelFocus == PanelFocus.Watcher ? 1f : 0f;
-                float isHoverCritter = simManager.uiManager.cameraManager.isMouseHoverAgent ? 1f : 0f;
+                float isHoverCritter = cameraManager.isMouseHoverAgent ? 1f : 0f;
                 if (simManager.uiManager.panelFocus != PanelFocus.Watcher) {
                     isHighlightCritter = 0f;
                     isHoverCritter = 0f;
                 }
                 critterDebugGenericStrokeMat.SetFloat("_HighlightOn", isHighlightCritter);
                 critterDebugGenericStrokeMat.SetFloat("_IsHover", isHoverCritter);
-                critterDebugGenericStrokeMat.SetFloat("_IsSelected", simManager.uiManager.cameraManager.isFollowingAgent ? 1f : 0f);
-                //Debug.Log("SetTargetAgent: [ " + simManager.uiManager.cameraManager.targetAgentIndex.ToString());
+                critterDebugGenericStrokeMat.SetFloat("_IsSelected", cameraManager.isFollowingAgent ? 1f : 0f);
+                //Debug.Log("SetTargetAgent: [ " + cameraManager.targetAgentIndex.ToString());
                 critterDebugGenericStrokeMat.SetFloat("_MapSize", SimulationManager._MapSize);
                 critterDebugGenericStrokeMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
                 critterDebugGenericStrokeMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);

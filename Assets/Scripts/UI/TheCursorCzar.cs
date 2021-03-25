@@ -4,6 +4,7 @@ using UnityEngine.UI;
 
 public class TheCursorCzar : Singleton<TheCursorCzar> {
     SimulationManager simulationManager => SimulationManager.instance;
+    CameraManager cameraManager => CameraManager.instance;
 
     public UIManager uiManagerRef;
 
@@ -54,7 +55,7 @@ public class TheCursorCzar : Singleton<TheCursorCzar> {
 
         mouseRaycastWaterPlane.gameObject.transform.position = targetPosition;
         
-        Ray ray = uiManagerRef.cameraManager.gameObject.GetComponent<Camera>().ScreenPointToRay(screenPos);
+        Ray ray = cameraManager.gameObject.GetComponent<Camera>().ScreenPointToRay(screenPos);
         cursorRay = ray;
         //Ray ray = new Ray(uiManagerRef.cameraManager.gameObject.transform.position, midMidpoint - uiManagerRef.cameraManager.gameObject.transform.position);
         RaycastHit hit = new RaycastHit();
@@ -74,17 +75,17 @@ public class TheCursorCzar : Singleton<TheCursorCzar> {
     }    
     private void MouseRaycastCheckAgents(bool clicked) {
         
-        Vector3 camPos = uiManagerRef.cameraManager.gameObject.transform.position;
+        Vector3 camPos = cameraManager.gameObject.transform.position;
         
-        Ray ray = uiManagerRef.cameraManager.gameObject.GetComponent<Camera>().ScreenPointToRay(Input.mousePosition);
+        Ray ray = cameraManager.gameObject.GetComponent<Camera>().ScreenPointToRay(Input.mousePosition);
         RaycastHit hit = new RaycastHit();
         int layerMask = ~(1 << LayerMask.NameToLayer("UtilityRaycast"));  // *** THIS ISN'T WORKING!!! *** might be inverted?
 
         Physics.Raycast(ray, out hit, 1000f, layerMask);  // *** USE DEDICATED LAYER FOR THIS CHECK!!!! *********
 
-        uiManagerRef.cameraManager.isMouseHoverAgent = false;
-        uiManagerRef.cameraManager.mouseHoverAgentIndex = 0;
-        uiManagerRef.cameraManager.mouseHoverAgentRef = null;
+        cameraManager.isMouseHoverAgent = false;
+        cameraManager.mouseHoverAgentIndex = 0;
+        cameraManager.mouseHoverAgentRef = null;
 
         _IsHoverClickableSpirit = false;
 
@@ -98,8 +99,8 @@ public class TheCursorCzar : Singleton<TheCursorCzar> {
                     
                 if(clicked) {
                     if (uiManagerRef.panelFocus == PanelFocus.Watcher) {
-                        uiManagerRef.cameraManager.SetTargetAgent(agentRef, agentRef.index);
-                        uiManagerRef.cameraManager.isFollowingAgent = true;
+                        cameraManager.SetTargetAgent(agentRef, agentRef.index);
+                        cameraManager.isFollowingAgent = true;
 
                         //uiManagerRef.globalResourcesUI.selectedSpeciesIndex = agentRef.speciesIndex; // *************************************************
 
@@ -118,9 +119,9 @@ public class TheCursorCzar : Singleton<TheCursorCzar> {
                     //Debug.Log("HOVER AGENT: " + agentRef.index.ToString() + ", species: " + agentRef.speciesIndex.ToString());
                 }
 
-                uiManagerRef.cameraManager.isMouseHoverAgent = true;
-                uiManagerRef.cameraManager.mouseHoverAgentIndex = agentRef.index;
-                uiManagerRef.cameraManager.mouseHoverAgentRef = agentRef;                    
+                cameraManager.isMouseHoverAgent = true;
+                cameraManager.mouseHoverAgentIndex = agentRef.index;
+                cameraManager.mouseHoverAgentRef = agentRef;                    
             }
             else {
                 if(clicked) {
@@ -135,12 +136,8 @@ public class TheCursorCzar : Singleton<TheCursorCzar> {
             }
             //Debug.Log("CLICKED ON: [ " + hit.collider.gameObject.name + " ] Ray= " + ray.ToString() + ", hit= " + hit.point.ToString());
         }
-        else {
-            //Debug.Log("hit.collider == null");
-        }
     }
     
-	
 	public void UpdateCursorCzar () {
         
         //cursor sprite:

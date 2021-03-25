@@ -4,6 +4,7 @@ using UnityEngine.UI;
 public class DebugPanelUI : MonoBehaviour {
     SimulationManager simulationManager => SimulationManager.instance;
     TheRenderKing theRenderKing => TheRenderKing.instance;
+    CameraManager cameraManager => CameraManager.instance;
 
     public UIManager uiManagerRef;
     public bool isOpen;
@@ -52,7 +53,7 @@ public class DebugPanelUI : MonoBehaviour {
         // DISABLED!!!! -- Need to establish good method for grabbing data from SimulationManager!
         SimulationManager simManager = simulationManager;
 
-        Agent agentRef = uiManagerRef.cameraManager.targetAgent;  
+        Agent agentRef = cameraManager.targetAgent;  
 
         // WPP: exit early if no target agent
         if (!agentRef) return;

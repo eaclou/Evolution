@@ -4,6 +4,9 @@ using UnityEngine.UI;
 
 public class SpeciesOverviewUI : MonoBehaviour {
     SimulationManager simulationManager => SimulationManager.instance;
+    
+    Lookup lookup => Lookup.instance;
+    GameObject genomeIcon => lookup.genomeIcon;
 
     public UIManager uiManagerRef;
 
@@ -210,7 +213,7 @@ public class SpeciesOverviewUI : MonoBehaviour {
              GameObject.Destroy(child.gameObject);
         }
         for(int i = 0; i < Mathf.Min(pool.candidateGenomesList.Count, 24); i++) {
-            GameObject tempObj = Instantiate(uiManagerRef.prefabGenomeIcon, new Vector3(0, 0, 0), Quaternion.identity);
+            GameObject tempObj = Instantiate(genomeIcon, new Vector3(0, 0, 0), Quaternion.identity);
             tempObj.transform.SetParent(uiManagerRef.panelLeaderboardGenomes.transform, false);
             GenomeButtonPrefabScript buttonScript = tempObj.GetComponent<GenomeButtonPrefabScript>();
             buttonScript.UpdateButtonPrefab(uiManagerRef, SpeciesOverviewUI.SelectionGroup.Candidates, i);
@@ -226,7 +229,7 @@ public class SpeciesOverviewUI : MonoBehaviour {
              GameObject.Destroy(child.gameObject);
         }
         for(int i = 0; i < pool.hallOfFameGenomesList.Count; i++) {
-            GameObject tempObj = Instantiate(uiManagerRef.prefabGenomeIcon, new Vector3(0, 0, 0), Quaternion.identity);
+            GameObject tempObj = Instantiate(genomeIcon, new Vector3(0, 0, 0), Quaternion.identity);
             tempObj.transform.SetParent(uiManagerRef.panelHallOfFameGenomes.transform, false);
             GenomeButtonPrefabScript buttonScript = tempObj.GetComponent<GenomeButtonPrefabScript>();
             buttonScript.UpdateButtonPrefab(uiManagerRef, SpeciesOverviewUI.SelectionGroup.HallOfFame, i);

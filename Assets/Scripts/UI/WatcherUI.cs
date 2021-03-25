@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class WatcherUI : MonoBehaviour {
     SimulationManager simulationManager => SimulationManager.instance;
+    CameraManager cameraManager => CameraManager.instance;
 
     public UIManager uiManagerRef;
     public bool isUnlocked;
@@ -165,11 +166,11 @@ public class WatcherUI : MonoBehaviour {
             panelWatcherExpand.SetActive(true);
         }
         
-        if(uiManagerRef.cameraManager.isFollowingPlantParticle) {
-            uiManagerRef.cameraManager.targetPlantWorldPos = simulationManager.vegetationManager.selectedPlantParticleData.worldPos;
+        if(cameraManager.isFollowingPlantParticle) {
+            cameraManager.targetPlantWorldPos = simulationManager.vegetationManager.selectedPlantParticleData.worldPos;
         }
-        if(uiManagerRef.cameraManager.isFollowingAnimalParticle) {
-            uiManagerRef.cameraManager.targetZooplanktonWorldPos = simulationManager.zooplanktonManager.selectedAnimalParticleData.worldPos;
+        if(cameraManager.isFollowingAnimalParticle) {
+            cameraManager.targetZooplanktonWorldPos = simulationManager.zooplanktonManager.selectedAnimalParticleData.worldPos;
         }
 
         //panelWatcherSpiritVertebratesText.SetActive(false);
@@ -178,7 +179,7 @@ public class WatcherUI : MonoBehaviour {
         if(watcherSelectedTrophicSlotRef != null && uiManagerRef.panelFocus == PanelFocus.Watcher) {
             TextCommonStatsA.gameObject.SetActive(true);
 
-            int critterIndex = uiManagerRef.cameraManager.targetAgentIndex;
+            int critterIndex = cameraManager.targetAgentIndex;
             Agent agent = simulationManager.agentsArray[critterIndex];
 
             imageDimmingSheet.gameObject.SetActive(agent.isDecaying);  // ** dimming sheet! to show not following???? just an experiment
@@ -405,7 +406,7 @@ public class WatcherUI : MonoBehaviour {
 
         UpdateUI(layerManager);
 
-        if(uiManagerRef.cameraManager.isFollowingAgent) {  // only active when following a selected critter -- make sure it only contains:
+        if(cameraManager.isFollowingAgent) {  // only active when following a selected critter -- make sure it only contains:
             // FollowTitle, FollowStatus, FollowBrain
             // NOT HISTORY (shared with world event timeline?)
 
@@ -583,44 +584,43 @@ public class WatcherUI : MonoBehaviour {
     
     public void ClickPrevAgent() {
         Debug.Log("ClickPrevAgent");
-        int newIndex = (simulationManager._NumAgents + uiManagerRef.cameraManager.targetAgentIndex - 1) % simulationManager._NumAgents;
-        uiManagerRef.cameraManager.SetTargetAgent(simulationManager.agentsArray[newIndex], newIndex);          
-                           
+        int newIndex = (simulationManager._NumAgents + cameraManager.targetAgentIndex - 1) % simulationManager._NumAgents;
+        cameraManager.SetTargetAgent(simulationManager.agentsArray[newIndex], newIndex);                              
     }
+    
     public void ClickNextAgent() {
         Debug.Log("ClickNextAgent");
-        int newIndex = (uiManagerRef.cameraManager.targetAgentIndex + 1) % simulationManager._NumAgents;
-        uiManagerRef.cameraManager.SetTargetAgent(simulationManager.agentsArray[newIndex], newIndex);                
+        int newIndex = (cameraManager.targetAgentIndex + 1) % simulationManager._NumAgents;
+        cameraManager.SetTargetAgent(simulationManager.agentsArray[newIndex], newIndex);                
     }
 
     public void StopFollowingAgent() {
-        uiManagerRef.cameraManager.isFollowingAgent = false;
+        cameraManager.isFollowingAgent = false;
     }
     
     public void StartFollowingAgent() {
-        uiManagerRef.cameraManager.isFollowingAgent = true;
-
+        cameraManager.isFollowingAgent = true;
         //uiManagerRef.globalResourcesUI.CreateBrainGenomeTexture(uiManagerRef.cameraManager.targetAgent.candidateRef.candidateGenome);
     }
 
     public void StopFollowingPlantParticle() {
-        uiManagerRef.cameraManager.isFollowingPlantParticle = false;
+        cameraManager.isFollowingPlantParticle = false;
         
     }
     public void StartFollowingPlantParticle() {
-        uiManagerRef.cameraManager.isFollowingPlantParticle = true;
-        uiManagerRef.cameraManager.isFollowingAnimalParticle = false; 
+        cameraManager.isFollowingPlantParticle = true;
+        cameraManager.isFollowingAnimalParticle = false; 
         watcherSelectedTrophicSlotRef = simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[0];
         //uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef =   
     }
     
     public void StopFollowingAnimalParticle() {
-        uiManagerRef.cameraManager.isFollowingAnimalParticle = false;        
+        cameraManager.isFollowingAnimalParticle = false;        
     }
     
     public void StartFollowingAnimalParticle() {
-        uiManagerRef.cameraManager.isFollowingAnimalParticle = true;  
-        uiManagerRef.cameraManager.isFollowingPlantParticle = false;
+        cameraManager.isFollowingAnimalParticle = true;  
+        cameraManager.isFollowingPlantParticle = false;
         watcherSelectedTrophicSlotRef = simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0];
     }
 }

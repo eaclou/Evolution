@@ -80,7 +80,7 @@ public class GlobalResourcesUI : MonoBehaviour {
         Eaten,
         DigestSpec
     }
-	// Use this for initialization
+    
 	void Start () {
         brainGenomeTex = new Texture2D(16, 16, TextureFormat.RGBA32, false);
         brainGenomeTex.filterMode = FilterMode.Point;
@@ -88,7 +88,6 @@ public class GlobalResourcesUI : MonoBehaviour {
         brainGenomeMat.SetTexture("_MainTex", brainGenomeTex);
         //CreateBrainGenomeTexture(null);
 
-        
         speciesPoolGenomeTex = new Texture2D(16, 16, TextureFormat.RGBA32, false);
         speciesPoolGenomeTex.filterMode = FilterMode.Point;
         speciesPoolGenomeTex.wrapMode = TextureWrapMode.Clamp;
@@ -111,15 +110,22 @@ public class GlobalResourcesUI : MonoBehaviour {
             statsTreeOfLifeSpeciesTexArray[i] = statsTexture;
         }
                 
-        
         maxValuesStatArray = new float[16];
         minValuesStatArray = new float[16];
         for (int i = 0; i < maxValuesStatArray.Length; i++) {
             maxValuesStatArray[i] = 0.000001f;
             minValuesStatArray[i] = 1000000f;
-        }        
-        
+        }            
 	}
+	
+	public void SetFocusedGenome(int curSimYear, AgentGenome candidateGenome)
+	{
+        CreateSpeciesLeaderboardGenomeTexture();
+        UpdateSpeciesTreeDataTextures(curSimYear);
+        CreateBrainGenomeTexture(candidateGenome);
+        UpdateSpeciesListBars();
+	}
+	
     public void ClickButtonToggleExtinct() {
         isShowingExtinct = !isShowingExtinct;
         if(isShowingExtinct) { // was extinct, switch to current:
@@ -136,11 +142,10 @@ public class GlobalResourcesUI : MonoBehaviour {
         }
         else {
             int defaultSpeciesID = masterGenomePool.currentlyActiveSpeciesIDList[0];
-            SetSelectedSpeciesUI(defaultSpeciesID);
-            
-        }
-        
+            SetSelectedSpeciesUI(defaultSpeciesID);   
+        }  
     }
+    
     public void ClickButtonGraphType(int buttonID) {
         selectedGraphCategory = (GraphCategory)buttonID;
         
@@ -157,6 +162,7 @@ public class GlobalResourcesUI : MonoBehaviour {
         UpdateSpeciesTreeDataTextures(simulationManager.curSimYear);
         
     }
+    
     public void CreateSpeciesLeaderboardGenomeTexture() {
         int width = 32;
         int height = 96;
@@ -496,10 +502,8 @@ public class GlobalResourcesUI : MonoBehaviour {
             statsTreeOfLifeSpeciesTexArray[b].Apply();
         }
         //int selectedSpeciesID = treeOfLifeManager.selectedID;
-        
 
         RefreshGraphMaterial();
-
         
         //speciesGraphMat.SetTexture("_MainTex", statsTreeOfLifeSpeciesTexArray[selectedSpeciesStatsIndex]);
         //speciesGraphMat.SetTexture("_ColorKeyTex", statsSpeciesColorKey);
@@ -584,6 +588,7 @@ public class GlobalResourcesUI : MonoBehaviour {
         }        
     }
     */
+    
     private void RefreshGraphMaterial() {
         SpeciesGenomePool pool = masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID];
 
@@ -735,8 +740,6 @@ public class GlobalResourcesUI : MonoBehaviour {
                 break;
         }
 
-        
-
         //speciesGraphImage.material = speciesGraphMat;
         //speciesGraphImage.gameObject.SetActive(false);
         //speciesGraphImage.gameObject.SetActive(true);
@@ -746,15 +749,13 @@ public class GlobalResourcesUI : MonoBehaviour {
     }
     
     public void SetSelectedSpeciesUI(int id) {
-        
         SpeciesGenomePool pool = masterGenomePool.completeSpeciesPoolsList[id];
         uiManagerRef.selectedSpeciesID = id;
 
         uiManagerRef.SetFocusedCandidateGenome(pool.representativeCandidate);
 
-
         UpdateSpeciesListBars();
-     // attach to this parent object
+        // attach to this parent object
     }
 
     public void ClickToolButton() {
@@ -763,7 +764,6 @@ public class GlobalResourcesUI : MonoBehaviour {
     }
 
     public void UpdateSpeciesListBars() {
-
         // ****************************************************
         // ***** Add tab for Extinct species:
         if(isShowingExtinct) {
@@ -814,15 +814,14 @@ public class GlobalResourcesUI : MonoBehaviour {
                 obj.GetComponentInChildren<Text>().text = labelText;
                 SpeciesTreeBarUI buttonScript = obj.GetComponent<SpeciesTreeBarUI>();
                 
-                buttonScript.Initialize(uiManagerRef, s, speciesID);
+                buttonScript.Initialize(this, s, speciesID);
             }
-            
         }
         else {  // EXTANT!!! ***
             int numActiveSpecies = masterGenomePool.currentlyActiveSpeciesIDList.Count;
 
             foreach (Transform child in treeAnchorUI.transform) {
-                    GameObject.Destroy(child.gameObject);
+                Destroy(child.gameObject);
             }
             /*List<int> speciesTreeIDList = new List<int>();
             int topID = uiManagerRef.gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList[0];
@@ -886,19 +885,13 @@ public class GlobalResourcesUI : MonoBehaviour {
                 }
                 obj.GetComponentInChildren<Text>().text = labelText;
                 SpeciesTreeBarUI buttonScript = obj.GetComponent<SpeciesTreeBarUI>();
-                buttonScript.Initialize(uiManagerRef, s, speciesID);
-
-
+                buttonScript.Initialize(this, s, speciesID);
             }
         }
-
-        
     }
 
     private void UpdateUI() {
-
         SpeciesGenomePool pool = masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID];
-        
         
         textGlobalMass.text = "Global Biomass: " + simulationManager.simResourceManager.curTotalMass.ToString("F0");
         SimResourceManager resourcesRef = simulationManager.simResourceManager;
@@ -953,15 +946,11 @@ public class GlobalResourcesUI : MonoBehaviour {
         }
         */
 
-        
-
         if(simulationManager.simAgeTimeSteps % 177 == 275) {
             UpdateSpeciesListBars();
         }
         
-        
         //textSpeciationTree.text = speciesTreeString; // speciesDebugStr;
-
         //Debug.Break(); 
                 
         if(pool != null) {
@@ -1130,18 +1119,12 @@ public class GlobalResourcesUI : MonoBehaviour {
         */
         
         RefreshGraphMaterial();
-
-        
     }
 
     public void UpdateGlobalResourcesPanelUpdate() {
 
-        this.isOpen = true; // uiManagerRef.knowledgeUI.isOpen;
-        
-
+        isOpen = true;
         panelGlobalResourcesMain.SetActive(isOpen);
-        //if(isOpen) {
         UpdateUI();
-        //}
     }   
 }

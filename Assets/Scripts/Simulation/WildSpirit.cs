@@ -101,7 +101,7 @@ public class WildSpirit : MonoBehaviour {
         else {
             // random noise vel:
             if(framesSinceLastClickableSpirit % 735 == 0) {
-                velocity = Vector3.Lerp(velocity, UnityEngine.Random.insideUnitSphere * spiritSpeed * 0.14f, 0.15f);
+                velocity = Vector3.Lerp(velocity, Random.insideUnitSphere * spiritSpeed * 0.14f, 0.15f);
             }
 
             // guide back to center:

@@ -1,10 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class GenomeViewerUI : MonoBehaviour {
     SimulationManager simulationManager => SimulationManager.instance;
+    CameraManager cameraManager => CameraManager.instance;
 
     public UIManager uiManagerRef;
 
@@ -173,14 +172,13 @@ public class GenomeViewerUI : MonoBehaviour {
 
             if(candidate.isBeingEvaluated) {
                 
-                lifespan = simulationManager.agentsArray[uiManagerRef.cameraManager.targetAgentIndex].ageCounter;
+                lifespan = simulationManager.agentsArray[cameraManager.targetAgentIndex].ageCounter;
                 textGenomeOverviewA.text = "Age: " + (lifespan * 0.1f).ToString("F0") + ", Gen: " + candidate.candidateGenome.generationCount.ToString();
             }
-            if(simulationManager.agentsArray[uiManagerRef.cameraManager.targetAgentIndex].curLifeStage == Agent.AgentLifeStage.Dead) {
+            if(simulationManager.agentsArray[cameraManager.targetAgentIndex].curLifeStage == Agent.AgentLifeStage.Dead) {
                 imageDeadDim.gameObject.SetActive(true);
             }
 
-            
             textGenomeOverviewB.text = "Size: " + (100f * candidate.candidateGenome.bodyGenome.coreGenome.creatureBaseLength).ToString("F0") + ", Aspect 1:" + (1f / candidate.candidateGenome.bodyGenome.coreGenome.creatureAspectRatio).ToString("F0");
             textGenomeOverviewC.text = "Brain Size: " + candidate.candidateGenome.brainGenome.bodyNeuronList.Count.ToString() + "--" + candidate.candidateGenome.brainGenome.linkList.Count.ToString();
             
