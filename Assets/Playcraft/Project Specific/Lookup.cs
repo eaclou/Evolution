@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 // Globally-accessible point of access to prefabs and scriptable object resources
 //[CreateAssetMenu(menuName = "Playcraft/Resource Lookup")]
@@ -13,6 +14,7 @@ public class Lookup : ScriptableObject
 
 
 	#region Global Resource References
+	
     [Header("Spirit Icons")]
     public Sprite spiritWorldIcon;
     public Sprite spiritStoneIcon;
@@ -47,32 +49,44 @@ public class Lookup : ScriptableObject
     
     [Header("Prefabs")]
     public GameObject genomeIcon;
+    
 	#endregion
 
 
 	#region Resource Lookups
-	/*public ExampleLookup[] examples;
+	
+	/*
+	[SerializeField] ResolutionData[] resolutions;
 
-	public Example GetExample(ExampleType type)
+	public float GetResolution(ResolutionId id)
     {
-      	foreach (var item in examples)
-      	  	if (item.type == type)
+      	foreach (var item in resolutions)
+      	  	if (item.id == id)
       	  	  	return item.value;
 	
-      return null;
-    }*/
+	    Debug.LogError("Unable to find resolution " + id);
+        return resolutions[0].value;
+    }
+    */
+    
 	#endregion
 }
 
 #region Resource Lookup Containers
-/*[Serializable]
-public struct ExampleLookup
+
+/*
+[Serializable]
+public struct ResolutionData
 {
-	public ExampleType type;
-	public Example value;
-}*/
+	public ResolutionId id;
+	public float value;
+}
+*/
+
 #endregion
 
 #region Resource Identifier Enums
-// public enum ExampleType { ExampleA, ExampleB, ExampleC }
+
+//public enum ResolutionId { Low, Medium, High, Max }
+
 #endregion

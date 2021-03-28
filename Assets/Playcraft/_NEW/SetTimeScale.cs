@@ -1,7 +1,15 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class SetTimeScale : MonoBehaviour
 {
+    [SerializeField] [Range(0f,1f)] float timeScale = 1f;
+
+    void OnValidate()
+    {
+        Set(timeScale);   
+    }
+
     bool isPaused;
 
     public void TogglePause()

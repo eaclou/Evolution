@@ -19,6 +19,4 @@ public class SettingsZooplankton : ScriptableObject {
     public float _ShoreCollisionMag = 0.0065f;
     public float _ShoreCollisionDistOffset = 0.15f;
     public float _ShoreCollisionDistSlope = 3.5f;
-
-
 }

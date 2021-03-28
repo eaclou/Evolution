@@ -180,7 +180,6 @@ public class CameraManager : Singleton<CameraManager> {
         //cameraManager.masterTargetTiltAngle -= cameraManager.masterTiltSpeed * tiltSpeedMult * Time.deltaTime;
     }
 
-    // WPP: added 3/20/21
     public void ZoomCameraFixed(float zoomValue) {
         if (zoomValue > 0f) zoomValue = 1f;
         else if (zoomValue < 0f) zoomValue = -1f;

@@ -1,15 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
-using System.IO;
-using System;
 using Playcraft;
 
 // The meat of the Game, controls the primary simulation/core logic gameplay Loop
 public class SimulationManager : Singleton<SimulationManager> 
 {
     public UIManager uiManager;
+    public QualitySettingData qualitySettings;
 
     public LoadingPanelUI loadingPanel;
     public EnvironmentFluidManager environmentFluidManager;
@@ -360,8 +358,7 @@ public class SimulationManager : Singleton<SimulationManager>
     
     private void LoadingInitializePopulationGenomes() {
         masterGenomePool = new MasterGenomePool();
-        masterGenomePool.FirstTimeInitialize(24, settingsManager.mutationSettingsVertebrates, uiManager);
-        
+        masterGenomePool.FirstTimeInitialize(24, settingsManager.mutationSettingsVertebrates, uiManager);   
 
         // EGGSACKS:
         eggSackGenomePoolArray = new EggSackGenome[numEggSacks];
@@ -1935,6 +1932,18 @@ public class SimulationManager : Singleton<SimulationManager>
     }*/
 
     #endregion
+    
+    GameOptions gameOptions => uiManager.gameOptionsManager.gameOptions;
+    int simulationComplexity => gameOptions.simulationComplexity;
+    int fluidPhysicsQuality => gameOptions.fluidPhysicsQuality;
+    
+    // WPP: removed switch statement, values stored in QualitySettingData
+    public void ApplyQualitySettings() {
+        _NumAgents = qualitySettings.GetAgentCount(simulationComplexity);
+        _NumEggSacks = qualitySettings.GetEggSackCount(simulationComplexity);
+        numInitialHiddenNeurons = qualitySettings.GetHiddenNeuronCont(simulationComplexity);
+        environmentFluidManager.SetResolution(fluidPhysicsQuality);
+    }
     
     private void OnDisable() {
         if(simStateData != null) {

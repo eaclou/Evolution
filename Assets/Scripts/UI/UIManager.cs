@@ -65,23 +65,6 @@ public class UIManager : MonoBehaviour {
     public float terrainUpdateMagnitude;// WPP: assigned but not used
     
     public ToolType curActiveTool;  // ******** move to phase out this approach
-
-    // WPP: Removed 3/24/21, moved to Lookup SO
-    //public Color buttonActiveColor = new Color(1f, 1f, 1f, 1f);
-    //public Color buttonDisabledColor = new Color(0.7f, 0.7f, 0.7f, 1f);
-    //public Color colorSpiritBrushLight;
-    //public Color colorSpiritBrushDark;
-    //public Color colorWorldLayer;
-    //public Color colorTerrainLayer;
-    //public Color colorMineralLayer;
-    //public Color colorWaterLayer;
-    //public Color colorAirLayer;
-    //public Color colorDecomposersLayer;
-    //public Color colorAlgaeLayer;
-    //public Color colorPlantsLayer;
-    //public Color colorZooplanktonLayer;
-    //public Color colorVertebratesLayer;
-        
     
     // announcements:
     public PanelPendingClickPromptUI panelPendingClickPrompt;
@@ -93,31 +76,6 @@ public class UIManager : MonoBehaviour {
     public int unlockCooldownCounter = 0;
     //private bool inspectToolUnlockedAnnounce = false;
     TrophicSlot unlockedAnnouncementSlotRef;    // WPP: assigned but not used
-
-    // WPP: moved to Lookup SO
-    //public Sprite spriteSpiritBrushStirIcon;
-    //public Sprite spriteSpiritBrushCreationIcon;
-    //public Sprite spriteSpiritWorldIcon;
-    //public Sprite spriteSpiritStoneIcon;
-    //public Sprite spriteSpiritPebblesIcon;
-    //public Sprite spriteSpiritSandIcon;
-    //public Sprite spriteSpiritMineralsIcon;
-    //public Sprite spriteSpiritWaterIcon;
-    //public Sprite spriteSpiritAirIcon;
-    //public Sprite spriteSpiritDecomposerIcon;
-    //public Sprite spriteSpiritAlgaeIcon;
-    //public Sprite spriteSpiritPlantIcon;
-    //public Sprite spriteSpiritZooplanktonIcon;
-    //public Sprite spriteSpiritVertebrateIcon;
-        
-    //public GameObject panelObserverMode;
-    //public GameObject panelPaused;
-    
-    //public bool isActiveDebug = true;
-
-    //public bool isObserverMode = false;
-    
-    //public bool isPaused;
 
     public GameObject panelLoading;
     public GameObject panelPlaying;
@@ -148,27 +106,10 @@ public class UIManager : MonoBehaviour {
         focusedCandidate = candidate;
         selectedSpeciesID = focusedCandidate.speciesID;
         theRenderKing.InitializeCreaturePortrait(focusedCandidate.candidateGenome);
-        
-        // WPP: converted to method
         globalResourcesUI.SetFocusedGenome(simulationManager.curSimYear, focusedCandidate.candidateGenome);
-        //globalResourcesUI.CreateSpeciesLeaderboardGenomeTexture();
-        //globalResourcesUI.UpdateSpeciesTreeDataTextures(simulationManager.curSimYear);
-        //globalResourcesUI.CreateBrainGenomeTexture(focusedCandidate.candidateGenome);
-        //globalResourcesUI.UpdateSpeciesListBars();
-
         speciesOverviewUI.RebuildGenomeButtons();
     }
 
-    // ***WPP: Delegate
-    /*public void NarratorText(string message, Color col) {
-        panelPendingClickPrompt.GetComponentInChildren<Text>().text = message;
-        panelPendingClickPrompt.GetComponentInChildren<Text>().color = col;
-        panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
-        
-        isAnnouncementTextOn = true;
-        timerAnnouncementTextCounter = 0;
-    }*/
-    
     public void BeginAnnouncement()
     {
         isAnnouncementTextOn = true;
@@ -313,7 +254,6 @@ public class UIManager : MonoBehaviour {
         unlockedAnnouncementSlotRef = trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0];                
         worldSpiritHubUI.ClickWorldCreateNewSpecies(trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0]);
          
-                
         mutationUI.isUnlocked = true;
 
         //mutationUI.ClickToolButton();
@@ -612,322 +552,14 @@ public class UIManager : MonoBehaviour {
             brushesUI.ClickToolButtonAdd();
         }
     }
-    
-    /*
-    public void UpdateObserverModeUI() {
-        if (isObserverMode) {
-            panelObserverMode.SetActive(true);
-
-            Vector2 moveDir = Vector2.zero;
-            bool isKeyboardInput = false;
-            // CONTROLLER:
-            float controllerHorizontal = Input.GetAxis("Horizontal");
-            float controllerVertical = Input.GetAxis("Vertical");
-            moveDir.x = controllerHorizontal;
-            moveDir.y = controllerVertical;
-
-            if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W)) {  // UP !!!!
-                moveDir.y = 1f;
-                isKeyboardInput = true;
-            }
-            if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S)) {  // DOWN !!!!                
-                moveDir.y = -1f;
-                isKeyboardInput = true;
-            }
-            if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D)) {  // RIGHT !!!!
-                moveDir.x = 1f;
-                isKeyboardInput = true;
-            }
-            if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A)) {  // LEFT !!!!!                
-                moveDir.x = -1f;
-                isKeyboardInput = true;
-            }
-
-            if (isKeyboardInput) {
-                moveDir = moveDir.normalized;
-                watcherUI.StopFollowingAgent();
-                watcherUI.StopFollowingPlantParticle();
-                watcherUI.StopFollowingAnimalParticle();
-            }
-            if (moveDir.sqrMagnitude > 0.001f) {
-                watcherUI.StopFollowingAgent();
-                watcherUI.StopFollowingPlantParticle();
-                watcherUI.StopFollowingAnimalParticle();
-            }
-
-            cameraManager.MoveCamera(moveDir); // ********************
-
-            //if (Input.GetKey(KeyCode.R)) {
-            //    cameraManager.TiltCamera(-1f);
-            //}
-            //if (Input.GetKey(KeyCode.F)) {
-            //    cameraManager.TiltCamera(1f);
-            //}
-            if (Input.GetKeyDown(KeyCode.Escape)) {
-                Debug.Log("Pressed Escape!");
-                // Pause & Main Menu? :::
-                ClickButtonPause();
-                gameManager.EscapeToMainMenu();
-            }
-            if (Input.GetKeyDown(KeyCode.Tab)) {
-                Debug.Log("Pressed Tab!");
-                debugPanelUI.ClickButtonToggleDebug();
-            }
-            if (Input.GetKeyDown(KeyCode.Space)) {
-                Debug.Log("Pressed Spacebar!");
-                isPaused = !isPaused;
-                if (isPaused) {
-                    ClickButtonPause();
-                }
-                else {
-                    ClickButtonPlayNormal();
-                }
-            }
-
-            if (Input.GetKeyDown("joystick button 7")) {
-                Debug.Log("Pressed Start!");
-                //ClickButtonQuit();
-            }
-            if (Input.GetKeyDown("joystick button 0")) {
-                Debug.Log("Pressed ButtonA!");
-                //ClickStatsButton();
-            }
-            if (Input.GetKeyDown("joystick button 1")) {
-                Debug.Log("Pressed ButtonB!");
-                //ClickStatsButton();
-            }
-            if (Input.GetKeyDown("joystick button 2")) {
-                Debug.Log("Pressed ButtonX!");
-                //ClickStatsButton();
-            }
-            if (Input.GetKeyDown("joystick button 3")) {
-                Debug.Log("Pressed ButtonY!");
-                //ClickStatsButton();
-            }
-            if (Input.GetAxis("RightTrigger") > 0.01f) {
-                Debug.Log("Pressed RightTrigger: " + Input.GetAxis("RightTrigger").ToString());
-                //ClickStatsButton();
-            }
-                        
-            if (isAnnouncementTextOn) {
-                panelPendingClickPrompt.SetActive(true);
-                timerAnnouncementTextCounter++;
-
-                if (timerAnnouncementTextCounter > 640) {
-                    isAnnouncementTextOn = false;
-                    timerAnnouncementTextCounter = 0;
-
-                    //inspectToolUnlockedAnnounce = false;
-                }
-            }
-            else {
-                panelPendingClickPrompt.SetActive(false);
-            }
-                                    
-            if (EventSystem.current.IsPointerOverGameObject()) {  // if mouse is over ANY unity canvas UI object (with raycast enabled)
-                //Debug.Log("MouseOverUI!!!");
-                if(genomeViewerUI.isTooltipHover) {
-                    theCursorCzar.panelTooltip.SetActive(true);
-                    string tipString = genomeViewerUI.tooltipString;
-                        //if()
-                    theCursorCzar.textTooltip.text = tipString;
-                    theCursorCzar.textTooltip.color = Color.cyan;
-                }
-                else {
-                    theCursorCzar.panelTooltip.SetActive(false);
-                }   
-            }
-            else {
-                //int selectedPlantID = gameManager.simulationManager.vegetationManager.selectedPlantParticleIndex;
-                //int closestPlantID = gameManager.simulationManager.vegetationManager.closestPlantParticleData.index;
-                float plantDist = (gameManager.simulationManager.vegetationManager.closestPlantParticleData.worldPos - new Vector2(theCursorCzar.curMousePositionOnWaterPlane.x, theCursorCzar.curMousePositionOnWaterPlane.y)).magnitude;
-
-                //int selectedZoopID = gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex;
-                //int closestZoopID = gameManager.simulationManager.zooplanktonManager.closestAnimalParticleData.index;
-                float zoopDist = (new Vector2(gameManager.simulationManager.zooplanktonManager.closestAnimalParticleData.worldPos.x, gameManager.simulationManager.zooplanktonManager.closestAnimalParticleData.worldPos.y) - new Vector2(theCursorCzar.curMousePositionOnWaterPlane.x, theCursorCzar.curMousePositionOnWaterPlane.y)).magnitude;
-                
-                
-                //if(plantDist < zoopDist) {                       
-                //    if(panelFocus == PanelFocus.Watcher && !cameraManager.isMouseHoverAgent && theCursorCzar.leftClickThisFrame) { 
-                //        if(selectedPlantID != closestPlantID && plantDist < 3.3f) {
-                //            gameManager.simulationManager.vegetationManager.selectedPlantParticleIndex = closestPlantID;
-                //            gameManager.simulationManager.vegetationManager.isPlantParticleSelected = true;
-                //            Debug.Log("FOLLOWING PLANT " + gameManager.simulationManager.vegetationManager.selectedPlantParticleIndex.ToString());
-                            //isSpiritBrushSelected = true;
-                //            watcherUI.StartFollowingPlantParticle();
-                //        }
-                //    }
-                    
-                //}
-                //else {                   
-                //    if (panelFocus == PanelFocus.Watcher && !cameraManager.isMouseHoverAgent && theCursorCzar.leftClickThisFrame) {
-                //        if (selectedZoopID != closestZoopID && zoopDist < 3.3f) {
-                //            gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex = closestZoopID;
-                //            gameManager.simulationManager.zooplanktonManager.isAnimalParticleSelected = true;
-                //            Debug.Log("FOLLOWING ZOOP " + gameManager.simulationManager.zooplanktonManager.selectedAnimalParticleIndex.ToString());
-                            //isSpiritBrushSelected = true;
-                //            watcherUI.StartFollowingAnimalParticle();
-                //        }
-                //    }
-                //}
-                
-                watcherUI.isPlantParticleHighlight = 0f;
-                watcherUI.isZooplanktonHighlight = 0f;
-                watcherUI.isVertebrateHighlight = 0f;
-                float hitboxRadius = 1f;
-                if(cameraManager.isMouseHoverAgent) {  // move this to cursorCzar?
-                    watcherUI.isVertebrateHighlight = 1f;
-
-                    theCursorCzar.textTooltip.text = "Critter #" + gameManager.simulationManager.cameraManager.mouseHoverAgentRef.candidateRef.candidateID.ToString();
-                    theCursorCzar.textTooltip.color = Color.white;
-                }
-                else {
-                    if(plantDist < zoopDist && plantDist < hitboxRadius) {
-                        watcherUI.isPlantParticleHighlight = 1f;
-
-                        theCursorCzar.textTooltip.text = "Algae #" + gameManager.simulationManager.vegetationManager.closestPlantParticleData.index.ToString();
-                        theCursorCzar.textTooltip.color = Color.green;
-                    }
-                    if(plantDist > zoopDist && zoopDist < hitboxRadius) {
-                        watcherUI.isZooplanktonHighlight = 1f;
-
-                        theCursorCzar.textTooltip.text = "Microbe #" + gameManager.simulationManager.zooplanktonManager.closestAnimalParticleData.index.ToString();
-                        theCursorCzar.textTooltip.color = Color.yellow;
-                    }
-                }
-
-                if (watcherUI.isPlantParticleHighlight == 0f && (watcherUI.isZooplanktonHighlight == 0f) && watcherUI.isVertebrateHighlight == 0f) {
-                    theCursorCzar.panelTooltip.SetActive(false);
-                }
-                else {
-                    theCursorCzar.panelTooltip.SetActive(true);
-                }
-                
-                //Debug.Log("plantDist: " + plantDist.ToString() + ", zoopDist: " + zoopDist.ToString() + ",  agent: " + cameraManager.isMouseHoverAgent.ToString());
-                
-                if (curActiveTool == ToolType.Stir) {  
-                    theCursorCzar.stirGizmoVisible = true;
-                    
-                    float isActing = 0f;
-                    
-                    if (theCursorCzar.isDraggingMouseLeft) {
-                        
-                        isActing = 1f;
-                        
-                        float mag = theCursorCzar.smoothedMouseVel.magnitude;
-                        float radiusMult = Mathf.Lerp(0.075f, 1.33f, Mathf.Clamp01(theRenderKing.baronVonWater.camDistNormalized * 1.4f)); // 0.62379f; // (1f + theRenderKing.baronVonWater.camDistNormalized * 1.5f);
-
-                        if(mag > 0f) {
-                            gameManager.simulationManager.PlayerToolStirOn(theCursorCzar.curMousePositionOnWaterPlane, theCursorCzar.smoothedMouseVel * (0.25f + theRenderKing.baronVonWater.camDistNormalized * 1.2f), radiusMult);
-                            
-                        }
-                        else {
-                            gameManager.simulationManager.PlayerToolStirOff();
-                        }
-                    }
-                    else {
-                        gameManager.simulationManager.PlayerToolStirOff();                        
-                    }
-
-                    if(isActing > 0.5f) {
-                        theCursorCzar.stirStickDepth = Mathf.Lerp(theCursorCzar.stirStickDepth, 1f, 0.2f);
-                    }
-                    else {
-                        theCursorCzar.stirStickDepth = Mathf.Lerp(theCursorCzar.stirStickDepth, -4f, 0.2f);
-                    }
-                    gameManager.theRenderKing.isStirring = theCursorCzar.isDraggingMouseLeft;
-                    gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_IsStirring", isActing);
-                    gameManager.theRenderKing.gizmoStirStickAMat.SetFloat("_IsStirring", isActing);                    
-                    gameManager.theRenderKing.gizmoStirStickAMat.SetFloat("_Radius", 6.2f);
-                }
-
-                gameManager.theRenderKing.isBrushing = false;
-                gameManager.theRenderKing.isSpiritBrushOn = false;
-                gameManager.theRenderKing.nutrientToolOn = false;
-                isBrushAddingAgents = false;
-                gameManager.simulationManager.vegetationManager.isBrushActive = false;
-                
-                if (curActiveTool == ToolType.Add && panelFocus == PanelFocus.Brushes) {
-                    // What Palette Trophic Layer is selected?
-                    theCursorCzar.stirGizmoVisible = true;
-
-                    gameManager.simulationManager.PlayerToolStirOff();
-
-                    if (theCursorCzar.isDraggingMouseLeft || theCursorCzar.isDraggingMouseRight) {
-
-                        if(!brushesUI.isInfluencePointsCooldown) {
-                            if(brushesUI.toolbarInfluencePoints >= 0.05f) {
-                                brushesUI.ApplyCreationBrush();
-                            }
-                            else {
-                                Debug.Log("NOT ENOUGH MANA!");
-                                // Enter Cooldown!
-                                brushesUI.isInfluencePointsCooldown = true;
-                            } 
-                        }                                               
-                    }
-                }
-            }
-            
-            if (theCursorCzar.isDraggingMouseLeft || theCursorCzar.isDraggingMouseRight) {
-                gameManager.simulationManager.theRenderKing.ClickTestTerrainUpdateMaps(updateTerrainAltitude, terrainUpdateMagnitude);
-            }
-            else {
-                gameManager.simulationManager.theRenderKing.ClickTestTerrainUpdateMaps(updateTerrainAltitude, terrainUpdateMagnitude);                   
-            }
-            
-            if(theCursorCzar.stirGizmoVisible) {
-                gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_IsVisible", 1f);
-                gameManager.theRenderKing.gizmoStirStickAMat.SetFloat("_IsVisible", 1f);
-                //Cursor.visible = false;
-            }         
-            else {
-                gameManager.theRenderKing.gizmoStirToolMat.SetFloat("_IsVisible", 0f);
-                gameManager.theRenderKing.gizmoStirStickAMat.SetFloat("_IsVisible", 0f);
-                //Cursor.visible = true;
-            }
-
-            if (Input.GetMouseButtonDown(1)) {
-                Debug.Log("RIGHT CLICKETY-CLICK!");
-            }
-
-            if (Input.GetAxis("Mouse ScrollWheel") > 0f ) //  Forwards
-            {
-                cameraManager.ZoomCamera(-1f);
-                
-            }
-            else if (Input.GetAxis("Mouse ScrollWheel") < 0f ) //  Backwarfds
-            {  
-                cameraManager.ZoomCamera(1f);                 
-            }
-
-            float zoomSpeed = 0.2f;
-            float zoomVal = 0f;
-            if (Input.GetKey("joystick button 4")) //  Forwards
-            {
-                zoomVal += 1f;
-                //Debug.Log("RightShoulder");     
-            }
-            if (Input.GetKey("joystick button 5")) //  Backwards
-            {
-                zoomVal -= 1f; 
-                //Debug.Log("LeftShoulder");    
-            }
-            cameraManager.ZoomCamera(zoomVal * zoomSpeed);  
-        }
-        else {
-            panelObserverMode.SetActive(false);
-        }
-    }        
-    */
             
     public void CheckForAnnouncements() {
-        //announceAlgaeCollapsePossible = false;
+    //announceAlgaeCollapsePossible = false;
     //private bool announceAlgaeCollapseOccurred = false;
     //private bool announceAgentCollapsePossible = false; 
     //private bool announceAgentCollapseOccurred = false;
 
-        // 
+        // ***WPP: replace nested conditions with early exit 
         if(!announceAlgaeCollapseOccurred) {
             if(announceAlgaeCollapsePossible) {
                 if(simulationManager.simResourceManager.curGlobalPlantParticles < 10f) {
@@ -1115,29 +747,6 @@ public class UIManager : MonoBehaviour {
         Debug.Log("Let there be not nothing!");
         simulationManager._BigBangOn = true;
     }
-
-    // WPP: Removed 3/24/21, replaced with direct UnityEvents
-    /*
-    public void ClickToolButtonBrushes() {
-        brushesUI.ClickToolButton();
-    }
-    
-    public void ClickToolButtonWatcher() {
-        watcherUI.ClickToolButton();
-    }
-    
-    public void ClickToolButtonKnowledge() {
-        knowledgeUI.ClickToolButton();
-    }
-    
-    public void ClickToolButtonMutate() {
-        mutationUI.ClickToolButton();        
-    }
-    
-    public void ClickToolButtonGlobalResources() {
-        globalResourcesUI.ClickToolButton();        
-    }
-    */
     
     public void UnlockBrushes() {
         brushesUI.Unlock();
@@ -1160,7 +769,7 @@ public class UIManager : MonoBehaviour {
     }
     
     // ***WPP: Convert to UnityEvents passing SOs...if these are called from UnityEvents?
-    // Currently nothing is calling these
+    // [future use, preserve behavior]
     public void AnnounceUnlockWater() {
         panelPendingClickPrompt.Narrate("Water Spirit Found!", new Color(0.4f, 0.4f, 0.9f));  
     }

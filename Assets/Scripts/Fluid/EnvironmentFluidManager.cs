@@ -9,6 +9,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
     public Texture2D initialDensityTex;
     public Texture2D firstTimeRelaxedColorTex;
 
+    public QualitySettingData gameQuality;
     public int resolution = 512;
     public float deltaTime = 1f;
     public float invGridScale = 1f;
@@ -23,17 +24,8 @@ public class EnvironmentFluidManager : MonoBehaviour {
     public int curTierWaterCurrents = 2;
 
     private RenderTexture velocityPressureDivergenceMain;
-    public RenderTexture _VelocityPressureDivergenceMain
-    {
-        get
-        {
-            return velocityPressureDivergenceMain;
-        }
-        set
-        {
-
-        }
-    }
+    public RenderTexture _VelocityPressureDivergenceMain => velocityPressureDivergenceMain;
+    
     private RenderTexture velocityPressureDivergenceSwap;
     /*
     private RenderTexture pressureA;
@@ -76,29 +68,10 @@ public class EnvironmentFluidManager : MonoBehaviour {
     }
     */
     private RenderTexture obstaclesRT;
-    public RenderTexture _ObstaclesRT
-    {
-        get
-        {
-            return obstaclesRT;
-        }
-        set
-        {
+    public RenderTexture _ObstaclesRT => obstaclesRT;
 
-        }
-    }
     private RenderTexture sourceColorRT; // Rendered by renderKing.fluidColorRenderCamera;
-    public RenderTexture _SourceColorRT
-    {
-        get
-        {
-            return sourceColorRT;
-        }
-        set
-        {
-
-        }
-    }
+    public RenderTexture _SourceColorRT => sourceColorRT;
     
     //private Material displayMat; // shader for display Mesh
     //public Material debugMat;
@@ -146,6 +119,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
         computeShaderFluidSim.SetFloat("_ForceSize", 100f);
         computeShaderFluidSim.SetFloat("_ForceOn", 0f);
     }
+    
     public void StirWaterOn(Vector3 pos, Vector2 forceVector, float radiusMult) {
         /*computeShaderFluidSim.SetFloat("_ForcePosX", pos.x / 256f);
         computeShaderFluidSim.SetFloat("_ForcePosY", pos.y / 256f);
@@ -329,11 +303,11 @@ public class EnvironmentFluidManager : MonoBehaviour {
             ForcePoint agentPoint = new ForcePoint();
             
             float forceStrength = magnitude * 0.1f;
-            agentPoint.posX = UnityEngine.Random.Range(0f, 1f);
-            agentPoint.posY = UnityEngine.Random.Range(0f, 1f);
-            agentPoint.velX = UnityEngine.Random.Range(-1f, 1f) * forceStrength;
-            agentPoint.velY = UnityEngine.Random.Range(-1f, 1f) * forceStrength;
-            agentPoint.size = UnityEngine.Random.Range(minRadius, maxRadius);  // 60f, 300f originally
+            agentPoint.posX = Random.Range(0f, 1f);
+            agentPoint.posY = Random.Range(0f, 1f);
+            agentPoint.velX = Random.Range(-1f, 1f) * forceStrength;
+            agentPoint.velY = Random.Range(-1f, 1f) * forceStrength;
+            agentPoint.size = Random.Range(minRadius, maxRadius);  // 60f, 300f originally
             forcePointsArray[i] = agentPoint;
         }        
         forcePointsCBuffer.SetData(forcePointsArray);
@@ -519,6 +493,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
         computeShaderFluidSim.SetTexture(kernelPressureJacobi, "VelocityWrite", writeRT);
         computeShaderFluidSim.Dispatch(kernelPressureJacobi, resolution / 32, resolution / 32, 1);
     }
+    
     private void SubtractGradient(RenderTexture readRT, RenderTexture writeRT) {
         int kernelSubtractGradient = computeShaderFluidSim.FindKernel("SubtractGradient");
 
@@ -529,6 +504,11 @@ public class EnvironmentFluidManager : MonoBehaviour {
         computeShaderFluidSim.SetTexture(kernelSubtractGradient, "VelocityRead", readRT);
         computeShaderFluidSim.SetTexture(kernelSubtractGradient, "VelocityWrite", writeRT);
         computeShaderFluidSim.Dispatch(kernelSubtractGradient, resolution / 32, resolution / 32, 1);
+    }
+    
+    public void SetResolution(int quality)
+    {
+        resolution = gameQuality.GetResolution(quality);
     }
 
     private void OnDisable() {

@@ -780,6 +780,7 @@
             <e p="ReactionDiffusion.cs" t="Include" />
             <e p="Settings" t="Include">
               <e p="MutationSettings.cs" t="Include" />
+              <e p="QualitySettingData.cs" t="Include" />
               <e p="SettingsAgents.cs" t="Include" />
               <e p="SettingsAlgaeParticles.cs" t="Include" />
               <e p="SettingsEnvironment.cs" t="Include" />

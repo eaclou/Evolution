@@ -25,7 +25,6 @@ public class ObserverModeUI : MonoBehaviour
     VegetationManager vegetationManager => simulationManager.vegetationManager;
     ToolType curActiveTool => manager.curActiveTool;
     
-    // WPP: use constants to prevent spelling errors
     const string VISIBLE = "_IsVisible";
     const string STIRRING = "_IsStirring";
     const string RADIUS = "_Radius";
@@ -56,102 +55,14 @@ public class ObserverModeUI : MonoBehaviour
         watcherUI.StopFollowingAgent();
         watcherUI.StopFollowingPlantParticle();
         watcherUI.StopFollowingAnimalParticle();
-        
-        // WPP: extracted input system
-        /*
-        Vector2 moveDir = Vector2.zero;
-        bool isKeyboardInput = false;
-        float controllerHorizontal = Input.GetAxis("Horizontal");
-        float controllerVertical = Input.GetAxis("Vertical");
-        moveDir.x = controllerHorizontal;
-        moveDir.y = controllerVertical;
-
-        if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W)) {  // UP !!!!
-            moveDir.y = 1f;
-            isKeyboardInput = true;
-        }
-        if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S)) {  // DOWN !!!!                
-            moveDir.y = -1f;
-            isKeyboardInput = true;
-        }
-        if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D)) {  // RIGHT !!!!
-            moveDir.x = 1f;
-            isKeyboardInput = true;
-        }
-        if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A)) {  // LEFT !!!!!                
-            moveDir.x = -1f;
-            isKeyboardInput = true;
-        }
-        */
-
-        // WPP: condition replaced with early-exit
-        //isKeyboardInput = input != Vector2.zero;
-        //if (isKeyboardInput) {
-        //    watcherUI.StopFollowingAgent();
-        //    watcherUI.StopFollowingPlantParticle();
-        //    watcherUI.StopFollowingAnimalParticle();
-        //}
-        
-        // WPP: same condition and response -> removed
-        //if (input.sqrMagnitude > 0.001f) {
-        //    watcherUI.StopFollowingAgent();
-        //    watcherUI.StopFollowingPlantParticle();
-        //    watcherUI.StopFollowingAnimalParticle();
-        //}
 
         cameraManager.MoveCamera(input.normalized);
-        
-        // WPP: commented out because only logging to console
-        // and should be replaced with keyboard input calls when ready to implement
-        /*
-        //if (Input.GetKey(KeyCode.R)) {
-        //    cameraManager.TiltCamera(-1f);
-        //}
-        //if (Input.GetKey(KeyCode.F)) {
-        //    cameraManager.TiltCamera(1f);
-        //}
-        if (Input.GetKeyDown(KeyCode.Escape)) {
-            Debug.Log("Pressed Escape!");
-            // Pause & Main Menu? :::
-            ClickButtonPause();
-            gameManager.EscapeToMainMenu();
-        }
-        if (Input.GetKeyDown(KeyCode.Tab)) {
-            Debug.Log("Pressed Tab!");
-            debugPanelUI.ClickButtonToggleDebug();
-        }
-
-        if (Input.GetKeyDown("joystick button 7")) {
-            Debug.Log("Pressed Start!");
-            //ClickButtonQuit();
-        }
-        if (Input.GetKeyDown("joystick button 0")) {
-            Debug.Log("Pressed ButtonA!");
-            //ClickStatsButton();
-        }
-        if (Input.GetKeyDown("joystick button 1")) {
-            Debug.Log("Pressed ButtonB!");
-            //ClickStatsButton();
-        }
-        if (Input.GetKeyDown("joystick button 2")) {
-            Debug.Log("Pressed ButtonX!");
-            //ClickStatsButton();
-        }
-        if (Input.GetKeyDown("joystick button 3")) {
-            Debug.Log("Pressed ButtonY!");
-            //ClickStatsButton();
-        }
-        if (Input.GetAxis("RightTrigger") > 0.01f) {
-            Debug.Log("Pressed RightTrigger: " + Input.GetAxis("RightTrigger").ToString());
-            //ClickStatsButton();
-        }
-        */
     }
 
-    // WPP: break into separate functions, call from here
+    // ***WPP: break into separate functions, call from here
     // (start by commenting blocks of code)
     public void Tick()
-    {                    
+    {                 
         if (isAnnouncementTextOn) {
             panelPendingClickPrompt.SetActive(true);
             timerAnnouncementTextCounter++;
@@ -319,45 +230,11 @@ public class ObserverModeUI : MonoBehaviour
         if(theCursorCzar.stirGizmoVisible) {
             theRenderKing.gizmoStirToolMat.SetFloat(VISIBLE, 1f);
             theRenderKing.gizmoStirStickAMat.SetFloat(VISIBLE, 1f);
-            //Cursor.visible = false;
         }         
         else {
             theRenderKing.gizmoStirToolMat.SetFloat(VISIBLE, 0f);
             theRenderKing.gizmoStirStickAMat.SetFloat(VISIBLE, 0f);
-            //Cursor.visible = true;
         }
-
-        // WPP: Create when needed
-        //if (Input.GetMouseButtonDown(1)) {
-        //    Debug.Log("RIGHT CLICKETY-CLICK!");
-        //}
-
-        // WPP: removed 3/20/21, extracted to GetMouseScroll
-        /*
-        if (Input.GetAxis("Mouse ScrollWheel") > 0f ) //  Forwards
-        {
-            cameraManager.ZoomCamera(-1f);
-        }
-        else if (Input.GetAxis("Mouse ScrollWheel") < 0f ) //  Backwards
-        {  
-            cameraManager.ZoomCamera(1f);                 
-        }
-        */
-
-        // WPP: extracted to: KeyboardInput -> ButtonInputFloat -> CameraManager
-        /*float zoomSpeed = 0.2f; // * magic number, expose ("sensitivity")
-        float zoomVal = 0f;
-        if (Input.GetKey("joystick button 4")) //  Forwards
-        {
-            zoomVal += 1f;
-            //Debug.Log("RightShoulder");     
-        }
-        if (Input.GetKey("joystick button 5")) //  Backwards
-        {
-            zoomVal -= 1f; 
-            //Debug.Log("LeftShoulder");    
-        }
-        cameraManager.ZoomCamera(zoomVal * zoomSpeed);  */
     }     
 }
 

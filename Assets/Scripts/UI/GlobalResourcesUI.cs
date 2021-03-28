@@ -68,8 +68,7 @@ public class GlobalResourcesUI : MonoBehaviour {
     //private int agentSelectType = 2;
     //public int agentIndex;
 
-    GameManager gameManager => GameManager.instance;
-    SimulationManager simulationManager => gameManager.simulationManager;
+    SimulationManager simulationManager => SimulationManager.instance;
     MasterGenomePool masterGenomePool => simulationManager.masterGenomePool;
     
     public GraphCategory selectedGraphCategory;

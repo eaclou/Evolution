@@ -62,10 +62,10 @@ public class MutationUI : MonoBehaviour {
     public Text textTopCenter;
 
     GameManager gameManager => GameManager.instance;
-    SimulationManager simulationManager => gameManager.simulationManager;
+    SimulationManager simulationManager => SimulationManager.instance;
     VegetationManager vegetationManager => simulationManager.vegetationManager;
     ZooplanktonManager zooplanktonManager => simulationManager.zooplanktonManager;
-    TheRenderKing theRenderKing => gameManager.theRenderKing;
+    TheRenderKing theRenderKing => TheRenderKing.instance;
     BaronVonTerrain baronVonTerrain => theRenderKing.baronVonTerrain;
 
     public void PointerEnter() {
@@ -158,11 +158,11 @@ public class MutationUI : MonoBehaviour {
         uiColor = vegetationManager.decomposerSlotGenomeMutations[2].displayColorPri;
         uiColor.a = 1f;
         imageMutationPanelThumbnailC.color = uiColor;
-        uiColor = gameManager.simulationManager.vegetationManager.decomposerSlotGenomeMutations[3].displayColorPri;
+        uiColor = simulationManager.vegetationManager.decomposerSlotGenomeMutations[3].displayColorPri;
         uiColor.a = 1f;
         imageMutationPanelThumbnailD.color = uiColor;
 
-        uiColor = gameManager.simulationManager.vegetationManager.decomposerSlotGenomeMutations[selectedToolbarMutationID].displayColorPri;
+        uiColor = simulationManager.vegetationManager.decomposerSlotGenomeMutations[selectedToolbarMutationID].displayColorPri;
         uiColor.a = 1f;
         imageMutationPanelNewPortrait.color = uiColor;
         textMutationParameters.text = "Metabolic Rate:\nEfficiency:";

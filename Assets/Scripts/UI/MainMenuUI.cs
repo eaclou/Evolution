@@ -77,12 +77,11 @@ public class MainMenuUI : MonoBehaviour
     {
         if(firstTimeStartup) 
         {
-            gameManager.StartNewGameQuick();
+            gameManager.StartNewGame(true);
         }
         else 
         {
             gameManager.ResumePlaying();
-            gameManager.SetNormalTime();
         } 
     }
     
@@ -90,12 +89,11 @@ public class MainMenuUI : MonoBehaviour
     {
         if(firstTimeStartup) 
         {
-            gameManager.StartNewGameBlank();
+            gameManager.StartNewGame(false);
         }
         else 
         {
             gameManager.ResumePlaying();
-            gameManager.SetNormalTime();
         }        
     }
     
