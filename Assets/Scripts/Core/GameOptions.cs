@@ -7,8 +7,9 @@ public class GameOptions {
 
     public bool isFullscreen;
     public int vSync;
-    public int fluidPhysicsQuality;     // ***WPP replace with enum
-    public int simulationComplexity;    // ***WPP replace with enum
+    public QualitySettingId fluidPhysicsQuality;     // ***WPP replace with enum
+    public QualitySettingId simulationComplexity;
+    
     public int resolutionIndex;    
     public float masterVolume;
     public float musicVolume;

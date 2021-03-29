@@ -18,6 +18,8 @@ public class GameOptionsManager : MonoBehaviour {
     public Slider sliderAmbientVolume;
     public Resolution[] resolutionsArray;
     public GameOptions gameOptions;
+    
+    public QualitySettingData qualitySettings;
 
     private void OnEnable() {
 
@@ -34,12 +36,10 @@ public class GameOptionsManager : MonoBehaviour {
         dropdownVSync.value = gameOptions.vSync;
 
         // Set Defaults:  ** CHANGE LATER WHEN SUPPORTING PERSISTENT OPTIONS!! ***
-        gameOptions.fluidPhysicsQuality = 1;
-        dropdownFluidPhysicsQuality.value = gameOptions.fluidPhysicsQuality;
-        gameOptions.simulationComplexity = 1; 
-        dropdownSimulationComplexity.value = gameOptions.simulationComplexity;
-                
-                
+        gameOptions.fluidPhysicsQuality = QualitySettingId.Medium;
+        dropdownFluidPhysicsQuality.value = qualitySettings.GetBindingIndex(gameOptions.fluidPhysicsQuality);
+        gameOptions.simulationComplexity = QualitySettingId.Medium; 
+        dropdownSimulationComplexity.value = qualitySettings.GetBindingIndex(gameOptions.simulationComplexity);      
     }
 
     private void Start() {
@@ -116,14 +116,13 @@ public class GameOptionsManager : MonoBehaviour {
     }
 
     public void OnDropdownFluidPhysicsQuality() {
-        gameOptions.fluidPhysicsQuality = dropdownFluidPhysicsQuality.value;
+        gameOptions.fluidPhysicsQuality = qualitySettings.GetBindingId(dropdownFluidPhysicsQuality.value);
 
         // Actually change resolution in FluidManager!!! ******************************
     }
 
     public void OnDropdownSimulationComplexity() {
-        gameOptions.simulationComplexity = dropdownSimulationComplexity.value;
-
+        gameOptions.simulationComplexity = qualitySettings.GetBindingId(dropdownSimulationComplexity.value);
         // Actually change resolution in FluidManager!!! ******************************
     }
 

@@ -1,15 +1,13 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class EnvironmentFluidManager : MonoBehaviour {
+    public QualitySettingData qualitySettings;
 
     //public Camera mainCam;
     public ComputeShader computeShaderFluidSim;
     public Texture2D initialDensityTex;
     public Texture2D firstTimeRelaxedColorTex;
 
-    public QualitySettingData gameQuality;
     public int resolution = 512;
     public float deltaTime = 1f;
     public float invGridScale = 1f;
@@ -506,15 +504,15 @@ public class EnvironmentFluidManager : MonoBehaviour {
         computeShaderFluidSim.Dispatch(kernelSubtractGradient, resolution / 32, resolution / 32, 1);
     }
     
-    public void SetResolution(int quality)
+    public void SetResolution(QualitySettingId quality)
     {
-        resolution = gameQuality.GetResolution(quality);
+        resolution = qualitySettings.GetResolution(quality);
     }
 
     private void OnDisable() {
-        if(forcePointsCBuffer != null) {
-            forcePointsCBuffer.Release();
-        }
+        // WPP: use null propagation
+        forcePointsCBuffer?.Release();
+        
         /*if (floatyBitsCBuffer != null) {
             floatyBitsCBuffer.Release();
         }

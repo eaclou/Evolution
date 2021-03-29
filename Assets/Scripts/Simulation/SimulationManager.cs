@@ -1934,8 +1934,8 @@ public class SimulationManager : Singleton<SimulationManager>
     #endregion
     
     GameOptions gameOptions => uiManager.gameOptionsManager.gameOptions;
-    int simulationComplexity => gameOptions.simulationComplexity;
-    int fluidPhysicsQuality => gameOptions.fluidPhysicsQuality;
+    QualitySettingId simulationComplexity => gameOptions.simulationComplexity;
+    QualitySettingId fluidPhysicsQuality => gameOptions.fluidPhysicsQuality;
     
     // WPP: removed switch statement, values stored in QualitySettingData
     public void ApplyQualitySettings() {
@@ -1946,45 +1946,10 @@ public class SimulationManager : Singleton<SimulationManager>
     }
     
     private void OnDisable() {
-        if(simStateData != null) {
-            /*if (simStateData.agentSimDataCBuffer != null) {
-                simStateData.agentSimDataCBuffer.Release();
-            }*/
-            if (simStateData.critterInitDataCBuffer != null) {
-                simStateData.critterInitDataCBuffer.Release();
-            }
-            if (simStateData.critterSimDataCBuffer != null) {
-                simStateData.critterSimDataCBuffer.Release();
-            }
-            if (simStateData.debugBodyResourcesCBuffer != null) {
-                simStateData.debugBodyResourcesCBuffer.Release();
-            }
-            if (simStateData.agentMovementAnimDataCBuffer != null) {
-                simStateData.agentMovementAnimDataCBuffer.Release();
-            }            
-            if (simStateData.eggSackSimDataCBuffer != null) {
-                simStateData.eggSackSimDataCBuffer.Release();
-            }
-            /*if (simStateData.predatorSimDataCBuffer != null) {
-                simStateData.predatorSimDataCBuffer.Release();
-            }*/
-            if (simStateData.foodStemDataCBuffer != null) {
-                simStateData.foodStemDataCBuffer.Release();
-            }
-            if (simStateData.foodLeafDataCBuffer != null) {
-                simStateData.foodLeafDataCBuffer.Release();
-            }
-            if (simStateData.eggDataCBuffer != null) {
-                simStateData.eggDataCBuffer.Release();
-            }
-        }
-
-        if(vegetationManager != null) {
-            vegetationManager.ClearBuffers();
-        }
-        if(zooplanktonManager != null) {
-            zooplanktonManager.ClearBuffers();
-        }
+        // WPP: delegated to SimulationStateData, using null propagation
+        simStateData?.Release();
+        vegetationManager?.ClearBuffers();
+        zooplanktonManager?.ClearBuffers();
     }
 
     public void SaveTrainingData() {  // ********* BROKEN BY SPECIATION UPDATE!!!!!!!!!!!!! ****************

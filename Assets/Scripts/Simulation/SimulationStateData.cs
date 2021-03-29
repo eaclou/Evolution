@@ -484,4 +484,18 @@ public class SimulationStateData {
         debugBodyResourcesCBuffer.SetData(debugBodyResourcesArray); // send data to GPU for Rendering
         */
     }
+    
+    public void Release()
+    {
+        //agentSimDataCBuffer?.Release();
+        critterInitDataCBuffer?.Release();
+        critterSimDataCBuffer?.Release();
+        debugBodyResourcesCBuffer?.Release();
+        agentMovementAnimDataCBuffer?.Release();            
+        eggSackSimDataCBuffer?.Release();
+        //predatorSimDataCBuffer?.Release();
+        foodStemDataCBuffer?.Release();
+        foodLeafDataCBuffer?.Release();
+        eggDataCBuffer?.Release();
+    }
 }
