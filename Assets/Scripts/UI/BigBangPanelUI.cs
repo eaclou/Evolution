@@ -5,7 +5,7 @@ public class BigBangPanelUI : MonoBehaviour
 {
     public UIManager manager;
     public GameObject panelBigBang;
-    public WorldSpiritHubUI worldSpiritHubUI;
+    //public WorldSpiritHubUI worldSpiritHubUI;
     public Image imageBigBangStrokes01;
     public Image imageBigBangStrokes02;
     public Image imageBigBangStrokes03;
@@ -13,7 +13,7 @@ public class BigBangPanelUI : MonoBehaviour
     SimulationManager simulationManager => SimulationManager.instance;
     
     ToolType curActiveTool { set => manager.curActiveTool = value; }
-    PanelFocus panelFocus { set => manager.panelFocus = value; }
+    //PanelFocus panelFocus { set => manager.panelFocus = value; }  //*EC no longer used
     
     public int bigBangFramesCounter = 0;
 
@@ -36,10 +36,9 @@ public class BigBangPanelUI : MonoBehaviour
             imageBigBangStrokes01.gameObject.SetActive(true);
             imageBigBangStrokes02.gameObject.SetActive(false);
             imageBigBangStrokes03.gameObject.SetActive(false);
-            worldSpiritHubUI.PlayBigBangSpawnAnim();
-
+            //worldSpiritHubUI.PlayBigBangSpawnAnim();
             simulationManager.vegetationManager.isBrushActive = true;
-            panelFocus = PanelFocus.Watcher;
+            //panelFocus = PanelFocus.Watcher;
         }
         else if(bigBangFramesCounter > 20) {
             imageBigBangStrokes01.gameObject.SetActive(true);

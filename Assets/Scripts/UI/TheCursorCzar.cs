@@ -98,20 +98,20 @@ public class TheCursorCzar : Singleton<TheCursorCzar> {
                 //Debug.Log("AGENT: [ " + agentRef.gameObject.name + " ] #" + agentRef.index.ToString());
                     
                 if(clicked) {
-                    if (uiManagerRef.panelFocus == PanelFocus.Watcher) {
-                        cameraManager.SetTargetAgent(agentRef, agentRef.index);
-                        cameraManager.isFollowingAgent = true;
+                    
+                    cameraManager.SetTargetAgent(agentRef, agentRef.index);
+                    cameraManager.isFollowingAgent = true;
 
-                        //uiManagerRef.globalResourcesUI.selectedSpeciesIndex = agentRef.speciesIndex; // *************************************************
+                    //uiManagerRef.globalResourcesUI.selectedSpeciesIndex = agentRef.speciesIndex; // *************************************************
 
-                        uiManagerRef.watcherUI.StopFollowingPlantParticle();
-                        uiManagerRef.watcherUI.StopFollowingAnimalParticle();                        
-                        uiManagerRef.watcherUI.StartFollowingAgent();
-                        //uiManagerRef.globalResourcesUI.SetSelectedSpeciesUI(agentRef.speciesIndex);
-                        uiManagerRef.SetFocusedCandidateGenome(agentRef.candidateRef);
-                        //uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[agentRef.speciesIndex];
-                        uiManagerRef.watcherUI.watcherSelectedTrophicSlotRef = simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0];
-                    }
+                    uiManagerRef.watcherUI.StopFollowingPlantParticle();
+                    uiManagerRef.watcherUI.StopFollowingAnimalParticle();                        
+                    uiManagerRef.watcherUI.StartFollowingAgent();
+                    //uiManagerRef.globalResourcesUI.SetSelectedSpeciesUI(agentRef.speciesIndex);
+                    uiManagerRef.SetFocusedCandidateGenome(agentRef.candidateRef);
+                    //uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[agentRef.speciesIndex];
+                    uiManagerRef.watcherUI.watcherSelectedTrophicSlotRef = simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0];
+                    
                 }
                 else {
                     // HOVER:
@@ -125,8 +125,7 @@ public class TheCursorCzar : Singleton<TheCursorCzar> {
             }
             else {
                 if(clicked) {
-                    Debug.Log("CLICKED ON A SPIRIT!!!! ? " + uiManagerRef.wildSpirit.curClickableSpiritType.ToString());
-                    uiManagerRef.wildSpirit.CapturedClickableSpirit();
+                    
 
                 }
                 else {
@@ -139,8 +138,8 @@ public class TheCursorCzar : Singleton<TheCursorCzar> {
     }
     
 	public void UpdateCursorCzar () {
-        
-        //cursor sprite:
+        Cursor.SetCursor(cursorTexWatcher, Vector2.zero, CursorMode.Auto);
+        /*//cursor sprite:
         if(uiManagerRef.panelFocus == PanelFocus.Brushes) {
             Cursor.SetCursor(cursorTexBrush, Vector2.zero, CursorMode.Auto);
         }
@@ -149,7 +148,7 @@ public class TheCursorCzar : Singleton<TheCursorCzar> {
         }
         else {
             Cursor.SetCursor(cursorTexWorld, Vector2.zero, CursorMode.Auto);
-        }
+        }*/
         
 
         // &&&&&&&&&&&&&&&&& MOUSE: &&&&&&&&&&&&&&&

@@ -567,7 +567,7 @@ public class SimulationManager : Singleton<SimulationManager>
         agentRespawnCounter++;
         masterGenomePool.Tick(); // keep track of when species created so can't create multiple per frame?
 
-        trophicLayersManager.Tick(this);
+        //trophicLayersManager.Tick(this);
 
         /*private bool recentlyAddedSpeciesOn = false;// = true;
         private Vector2 recentlyAddedSpeciesWorldPos; // = new Vector2(spawnPos.x, spawnPos.y);

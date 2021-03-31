@@ -379,7 +379,7 @@ public class GenomeViewerUI : MonoBehaviour {
         else {
             curSpeciesID += 1;
         }
-        uiManagerRef.globalResourcesUI.SetSelectedSpeciesUI(curSpeciesID);  // *** These should be combined??
+        //uiManagerRef.globalResourcesUI.SetSelectedSpeciesUI(curSpeciesID);  // *** These should be combined??
         uiManagerRef.SetFocusedCandidateGenome(simulationManager.masterGenomePool.completeSpeciesPoolsList[curSpeciesID].representativeCandidate);
     }
     public void ClickButtonPrev() {

@@ -1914,9 +1914,9 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     public void SimSpiritBrushQuads() {
 
         bool isSpawn = false;
-        if (simManager.uiManager.panelFocus == PanelFocus.Brushes) {
-            isSpawn = true;
-        }
+        //if (simManager.uiManager.panelFocus == PanelFocus.Brushes) {
+        //    isSpawn = true;
+        //}
         float isBrushing = 0f;
         if (isSpiritBrushOn) {
             isBrushing = 1f;
@@ -2767,43 +2767,38 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             }
         }
         else { // Continuous/Drag type brush  
-            float isWildOn = 0f;
-            if (simManager.uiManager.wildSpirit.isClickableSpiritRoaming) {
-                isWildOn = 1f;
-            }
+            
 
             // *******************************************************
             isBrushing = true;
-            if (Time.realtimeSinceStartup % 1f > 0.5f) {
+            if (Time.realtimeSinceStartup % 1f > 0.5f) { // ***EC -- Change this when simulation spawn mechanics updated
                 isBrushing = false;
             }
-            if (isBrushing) {
-                if (simManager.uiManager.panelFocus == PanelFocus.Brushes) {
-                    spiritBrushRenderMat.SetPass(0);
-                    spiritBrushRenderMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer); // *** Needed? or just set it once in beginning....
-                    spiritBrushRenderMat.SetVector("_Position", new Vector4(theCursorCzar.curMousePositionOnWaterPlane.x, theCursorCzar.curMousePositionOnWaterPlane.y, simManager.uiManager.wildSpirit.curRoamingSpiritPosition.x, simManager.uiManager.wildSpirit.curRoamingSpiritPosition.y));
-                    spiritBrushRenderMat.SetFloat("_Scale", scale);
-                    spiritBrushRenderMat.SetFloat("_Strength", brushIntensity);
-                    spiritBrushRenderMat.SetFloat("_PatternColumn", brushData.patternColumn);
-                    spiritBrushRenderMat.SetFloat("_PatternRow", brushData.patternRow);
-                    spiritBrushRenderMat.SetFloat("_IsActive", 1f);
-                    spiritBrushRenderMat.SetFloat("_IsWildSpirit", isWildOn);
-                    spiritBrushRenderMat.SetFloat("_IsBrushing", 1f);
-                    //dir:
-                    Vector2 brushDir = new Vector2(0f, 1f);
-                    if (theCursorCzar.smoothedMouseVel.x != 0f || theCursorCzar.smoothedMouseVel.y != 0f) {
-                        brushDir = new Vector2(theCursorCzar.smoothedMouseVel.x, theCursorCzar.smoothedMouseVel.y).normalized;
-                    }
-                    spiritBrushRenderMat.SetFloat("_FacingDirX", brushDir.x);
-                    spiritBrushRenderMat.SetFloat("_FacingDirY", brushDir.y);
-                    cmdBufferSpiritBrush.DrawProcedural(Matrix4x4.identity, spiritBrushRenderMat, 0, MeshTopology.Triangles, 6, 2);
+            if (isBrushing) {                
+                spiritBrushRenderMat.SetPass(0);
+                spiritBrushRenderMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer); // *** Needed? or just set it once in beginning....
+                spiritBrushRenderMat.SetVector("_Position", new Vector4(theCursorCzar.curMousePositionOnWaterPlane.x, theCursorCzar.curMousePositionOnWaterPlane.y, 0f, 0f));
+                spiritBrushRenderMat.SetFloat("_Scale", scale);
+                spiritBrushRenderMat.SetFloat("_Strength", brushIntensity);
+                spiritBrushRenderMat.SetFloat("_PatternColumn", brushData.patternColumn);
+                spiritBrushRenderMat.SetFloat("_PatternRow", brushData.patternRow);
+                spiritBrushRenderMat.SetFloat("_IsActive", 1f);
+                spiritBrushRenderMat.SetFloat("_IsWildSpirit", 0f);
+                spiritBrushRenderMat.SetFloat("_IsBrushing", 1f);
+                //dir:
+                Vector2 brushDir = new Vector2(0f, 1f);
+                if (theCursorCzar.smoothedMouseVel.x != 0f || theCursorCzar.smoothedMouseVel.y != 0f) {
+                    brushDir = new Vector2(theCursorCzar.smoothedMouseVel.x, theCursorCzar.smoothedMouseVel.y).normalized;
                 }
+                spiritBrushRenderMat.SetFloat("_FacingDirX", brushDir.x);
+                spiritBrushRenderMat.SetFloat("_FacingDirY", brushDir.y);
+                cmdBufferSpiritBrush.DrawProcedural(Matrix4x4.identity, spiritBrushRenderMat, 0, MeshTopology.Triangles, 6, 2);                
             }
             else {
 
                 spiritBrushRenderMat.SetPass(0);
                 spiritBrushRenderMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer); // *** Needed? or just set it once in beginning....
-                spiritBrushRenderMat.SetVector("_Position", new Vector4(theCursorCzar.curMousePositionOnWaterPlane.x, theCursorCzar.curMousePositionOnWaterPlane.y, simManager.uiManager.wildSpirit.curRoamingSpiritPosition.x, simManager.uiManager.wildSpirit.curRoamingSpiritPosition.y));
+                spiritBrushRenderMat.SetVector("_Position", new Vector4(theCursorCzar.curMousePositionOnWaterPlane.x, theCursorCzar.curMousePositionOnWaterPlane.y, 0f, 0f));
                 spiritBrushRenderMat.SetFloat("_Scale", scale);
                 spiritBrushRenderMat.SetFloat("_Strength", brushIntensity * 1f);
                 spiritBrushRenderMat.SetFloat("_PatternColumn", brushData.patternColumn);
@@ -2811,7 +2806,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                 spiritBrushRenderMat.SetFloat("_IsActive", 0f);
                 spiritBrushRenderMat.SetFloat("_IsBrushing", 1f); // isBrushin);
 
-                spiritBrushRenderMat.SetFloat("_IsWildSpirit", isWildOn);
+                //spiritBrushRenderMat.SetFloat("_IsWildSpirit", isWildOn);
                 //dir:
                 Vector2 brushDir = new Vector2(0f, 1f);
                 if (theCursorCzar.smoothedMouseVel.x != 0f || theCursorCzar.smoothedMouseVel.y != 0f) {
@@ -3440,9 +3435,9 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         
             }*/
             float isHighlight = 0f;
-            float isSelectedZoop = 0f;
+            float isSelectedZoop = 0f; //***EC -- revisit
             float isSelectedPlant = 0f;
-            if (simManager.uiManager.watcherUI.watcherSelectedTrophicSlotRef != null && simManager.uiManager.panelFocus == PanelFocus.Watcher) {
+            if (simManager.uiManager.watcherUI.watcherSelectedTrophicSlotRef != null) { // && simManager.uiManager.panelFocus == PanelFocus.Watcher) {
 
                 isHighlight = 1f;
                 if (simManager.uiManager.watcherUI.watcherSelectedTrophicSlotRef.kingdomID == 2 && simManager.uiManager.watcherUI.watcherSelectedTrophicSlotRef.tierID == 0) {
@@ -3541,8 +3536,9 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             }
 
             // STIR STICK!!!!
+            /*
             if (simManager.uiManager.curActiveTool == ToolType.Stir) {
-                /*
+                
                 Quaternion rot = Quaternion.Euler(new Vector3(Mathf.Clamp(simManager.uiManager.theCursorCzar.smoothedMouseVel.y * 2.5f + 10f, -45f, 45f), Mathf.Clamp(simManager.uiManager.theCursorCzar.smoothedMouseVel.x * -1.5f, -45f, 45f), 0f));
                 float scale = Mathf.Lerp(0.35f, 1.75f, baronVonWater.camDistNormalized);
                 Matrix4x4 stirStickTransformMatrix = Matrix4x4.TRS(new Vector3(simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.x, simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.y, simManager.uiManager.theCursorCzar.stirStickDepth), rot, Vector3.one * scale);
@@ -3567,7 +3563,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                 gizmoStirStickAMat.SetFloat("_Turbidity", simManager.fogAmount);
                 gizmoStirStickAMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
                 cmdBufferMain.DrawMesh(stickMesh, stirStickTransformMatrix, gizmoStirStickAMat);
-                */
+                
             }
             else {
                 if (simManager.uiManager.wildSpirit.isClickableSpiritRoaming) {
@@ -3598,6 +3594,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                     cmdBufferMain.DrawMesh(stickMesh, stirStickTransformMatrix, gizmoProtoSpiritClickableMat);
                 }
             }
+            */
 
             if (simManager.trophicLayersManager.GetZooplanktonOnOff()) {
 
@@ -3657,21 +3654,13 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                 critterDebugGenericStrokeMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
                 critterDebugGenericStrokeMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
                 critterDebugGenericStrokeMat.SetTexture("_VelocityTex", fluidManager._VelocityPressureDivergenceMain);
-                critterDebugGenericStrokeMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
-                /*highlightOn = 0f;
-                if(simManager.uiManager.curActiveTool == UIManager.ToolType.Inspect) {
-                    highlightOn = 1f;
-                }
-                critterDebugGenericStrokeMat.SetFloat("_HighlightOn", highlightOn); 
-                */
+                critterDebugGenericStrokeMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);              
                 critterDebugGenericStrokeMat.SetInt("_HoverID", cameraManager.mouseHoverAgentIndex);
                 critterDebugGenericStrokeMat.SetInt("_SelectedID", cameraManager.targetAgentIndex);
-                float isHighlightCritter = simManager.uiManager.panelFocus == PanelFocus.Watcher ? 1f : 0f;
+                                
                 float isHoverCritter = cameraManager.isMouseHoverAgent ? 1f : 0f;
-                if (simManager.uiManager.panelFocus != PanelFocus.Watcher) {
-                    isHighlightCritter = 0f;
-                    isHoverCritter = 0f;
-                }
+                float isHighlightCritter = isHoverCritter; // simManager.uiManager.panelFocus == PanelFocus.Watcher ? 1f : 0f; // ***EC -- Come back to this later
+                
                 critterDebugGenericStrokeMat.SetFloat("_HighlightOn", isHighlightCritter);
                 critterDebugGenericStrokeMat.SetFloat("_IsHover", isHoverCritter);
                 critterDebugGenericStrokeMat.SetFloat("_IsSelected", cameraManager.isFollowingAgent ? 1f : 0f);
@@ -3719,8 +3708,9 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             //cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonWater.waterNutrientsBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterNutrientsBitsCBuffer.count);
 
-
+            /*
             if (simManager.uiManager.curActiveTool == ToolType.Add) {
+                
                 if (simManager.uiManager.panelFocus == PanelFocus.Brushes) {
 
                     gizmoStirToolMat.SetPass(0);
@@ -3735,6 +3725,8 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                     cmdBufferMain.DrawProcedural(Matrix4x4.identity, gizmoStirToolMat, 0, MeshTopology.Triangles, 6, 1);
                 }
             }
+            */
+
             /*
              // CURSOR PARTICLES!
             cursorParticlesDisplayMat.SetPass(0);

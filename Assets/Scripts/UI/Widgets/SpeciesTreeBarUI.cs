@@ -2,19 +2,18 @@
 
 public class SpeciesTreeBarUI : MonoBehaviour {
 
-    public GlobalResourcesUI globalResourcesUI;
+    //public AllSpeciesTreePanelUI allSpeciesTreePanelUI;
     public int index;
     public int speciesID;
 
 
-    public void Initialize(GlobalResourcesUI globalResourcesUI, int index, int speciesID) {
-        this.globalResourcesUI = globalResourcesUI;
+    public void Initialize(int index, int speciesID) {        
         this.index = index;
         this.speciesID = speciesID;
     }
 
     // Updates focusedCandidate in uiManager 
     public void ClickedThisButton() {
-        globalResourcesUI.SetSelectedSpeciesUI(speciesID);        
+        SimulationManager.instance.uiManager.SetSelectedSpeciesUI(speciesID);        
     }
 }

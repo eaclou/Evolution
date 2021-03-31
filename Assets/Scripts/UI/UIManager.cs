@@ -8,16 +8,13 @@ public enum ToolType {
     Stir
 }
 
-public enum PanelFocus {
-    None,
-    WorldHub,
-    Brushes,
-    Watcher
-}
-
 public class UIManager : MonoBehaviour {
 
     #region attributes
+    public SpeciesOverviewUI speciesOverviewUI;
+    public GenomeViewerUI genomeViewerUI;
+    public AllSpeciesTreePanelUI allSpeciesTreePanelUI;
+
     public WorldSpiritHubUI worldSpiritHubUI;
     //public DebugPanelUI debugPanelUI;
     public WatcherUI watcherUI;
@@ -26,10 +23,9 @@ public class UIManager : MonoBehaviour {
     public MutationUI mutationUI;
     public GlobalResourcesUI globalResourcesUI;
     //public ClockUI clockUI;
-    public WildSpirit wildSpirit;
+    //public WildSpirit wildSpirit;
     //public FeatsUI featsUI;
-    public SpeciesOverviewUI speciesOverviewUI;
-    public GenomeViewerUI genomeViewerUI;
+    
         
     public GameOptionsManager gameOptionsManager;
     
@@ -45,29 +41,14 @@ public class UIManager : MonoBehaviour {
     Color colorZooplanktonLayer => lookup.colorZooplanktonLayer;
     Color colorVertebratesLayer => lookup.colorVertebratesLayer;
     
-    //public GameObject cursorParticlesGO;
-
-    public Animator animatorSpiritUnlock;
-
-    //public Text textFXPH_loading_start;
-    //public Text textFXPH_loading_end;
-    //public Text textFXPH_playing_start;
-
-    public PanelFocus panelFocus = PanelFocus.WorldHub;
-
-    //public GameObject panelGenomeViewer;
-    //public GameObject panelMinimap;
-    //public GameObject panelSpeciesTree;
-    //public GameObject panelSpeciesOverview;
-    //public GameObject panelGraphs;
-     
+       
     public bool updateTerrainAltitude;  // WPP: assigned but not used
     public float terrainUpdateMagnitude;// WPP: assigned but not used
     
     public ToolType curActiveTool;  // ******** move to phase out this approach
     
     // announcements:
-    public PanelPendingClickPromptUI panelPendingClickPrompt;
+    public PanelNotificationsUI panelPendingClickPrompt;
     private bool announceAlgaeCollapsePossible = false;
     private bool announceAlgaeCollapseOccurred = false;
     public int timerAnnouncementTextCounter = 0;// WPP: assigned but not used
@@ -104,10 +85,19 @@ public class UIManager : MonoBehaviour {
 
     public void SetFocusedCandidateGenome(CandidateAgentData candidate) {
         focusedCandidate = candidate;
-        selectedSpeciesID = focusedCandidate.speciesID;
+        SetSelectedSpeciesUI(focusedCandidate.speciesID);
         theRenderKing.InitializeCreaturePortrait(focusedCandidate.candidateGenome);
-        globalResourcesUI.SetFocusedGenome(simulationManager.curSimYear, focusedCandidate.candidateGenome);
+        //globalResourcesUI.SetFocusedGenome(simulationManager.curSimYear, focusedCandidate.candidateGenome);
         speciesOverviewUI.RebuildGenomeButtons();
+    }
+    
+    public void SetSelectedSpeciesUI(int id) {
+        SpeciesGenomePool pool = simulationManager.masterGenomePool.completeSpeciesPoolsList[id];
+        selectedSpeciesID = id;
+        //SetFocusedCandidateGenome(pool.representativeCandidate);
+
+        allSpeciesTreePanelUI.UpdateSpeciesListBars();
+        // attach to this parent object
     }
 
     public void BeginAnnouncement()
@@ -166,8 +156,6 @@ public class UIManager : MonoBehaviour {
     }
     #endregion
 
-    // Update is called once per frame    
-    // =================================================================================================================================================
     #region UPDATE UI PANELS FUNCTIONS!!! :::
     
     [SerializeField] MainMenuUI mainMenu;
@@ -177,6 +165,8 @@ public class UIManager : MonoBehaviour {
     List<SpeciesGenomePool> speciesPools => genomePool.completeSpeciesPoolsList;
     bool isRebuildTimeStep => simulationManager.simAgeTimeSteps % timeStepsToRebuildGenomeButtons == 1;
     
+
+
     public void SetFocus()
     {
         pool = speciesPools[selectedSpeciesID];
@@ -189,10 +179,10 @@ public class UIManager : MonoBehaviour {
             }
         }
         
-        if(animatorSpiritUnlock.GetBool(ANIM_FINISHED)) {
-            SpiritUnlockComplete();
-            animatorSpiritUnlock.SetBool(ANIM_FINISHED, false);
-        }
+        //if(animatorSpiritUnlock.GetBool(ANIM_FINISHED)) {
+            //SpiritUnlockComplete();
+            //animatorSpiritUnlock.SetBool(ANIM_FINISHED, false);
+        //}
     }
     
     public void InitialUnlocks() {
@@ -238,7 +228,7 @@ public class UIManager : MonoBehaviour {
 
         watcherUI.isUnlocked = true;
         watcherUI.ClickToolButton();
-        panelFocus = PanelFocus.Watcher;
+        //panelFocus = PanelFocus.Watcher;
 
         //watcherUI.animatorWatcherUI.SetBool("_IsOpen", true);
                 
@@ -352,7 +342,7 @@ public class UIManager : MonoBehaviour {
     */
 
     // * REFACTOR: delegate to something else
-    public void SpiritUnlockComplete() {
+    /*public void SpiritUnlockComplete() {
         Debug.LogError("SPIRIT UNLOCK!!!  world size increase!");
         theRenderKing.baronVonTerrain.IncrementWorldRadius(0.7f);
 
@@ -551,7 +541,7 @@ public class UIManager : MonoBehaviour {
         if(panelFocus != PanelFocus.Brushes) {
             brushesUI.ClickToolButtonAdd();
         }
-    }
+    }*/
             
     public void CheckForAnnouncements() {
     //announceAlgaeCollapsePossible = false;
@@ -751,7 +741,7 @@ public class UIManager : MonoBehaviour {
     public void UnlockBrushes() {
         brushesUI.Unlock();
         brushesUI.SetTargetFromWorldTree();
-        wildSpirit.curClickableSpiritType = WildSpirit.ClickableSpiritType.Zooplankton;
+        //wildSpirit.curClickableSpiritType = WildSpirit.ClickableSpiritType.Zooplankton;
         AnnounceUnlockBrushes();
     }
 

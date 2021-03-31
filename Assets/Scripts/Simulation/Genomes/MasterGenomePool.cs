@@ -25,7 +25,7 @@ public class MasterGenomePool {
 
     public List<int> debugRecentlyDeletedCandidateIDsList;
 
-    PanelPendingClickPromptUI panelPendingClickPrompt => SimulationManager.instance.uiManager.panelPendingClickPrompt;
+    PanelNotificationsUI panelPendingClickPrompt => SimulationManager.instance.uiManager.panelPendingClickPrompt;
    
     public MasterGenomePool() {
         

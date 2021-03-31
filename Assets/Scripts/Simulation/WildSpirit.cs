@@ -55,7 +55,7 @@ public class WildSpirit : MonoBehaviour {
             protoSpiritClickColliderGO.SetActive(false);
         }
     }
-
+    /*
     public void SpawnWildSpirit(Color col) {
         uiManagerRef.wildSpirit.isClickableSpiritRoaming = true;
         uiManagerRef.wildSpirit.curRoamingSpiritPosition = uiManagerRef.wildSpirit.creationSpiritClickableStartPos;
@@ -64,7 +64,7 @@ public class WildSpirit : MonoBehaviour {
         fleeingFrameCounter = 0;
         //threatLevel = 0f;
     }
-    
+    */
     public void UpdateWildSpiritProto() {
         protoSpiritClickColliderGO.SetActive(true);
         //float orbitSpeed = 0.5f;
@@ -120,7 +120,7 @@ public class WildSpirit : MonoBehaviour {
     }
     
     public void CapturedClickableSpirit() {
-        uiManagerRef.animatorSpiritUnlock.SetTrigger("_TriggerClicked");
+        //uiManagerRef.animatorSpiritUnlock.SetTrigger("_TriggerClicked");
         isClickableSpiritRoaming = false;   
     }
 }

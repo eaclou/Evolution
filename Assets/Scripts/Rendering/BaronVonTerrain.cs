@@ -10,7 +10,7 @@ public class BaronVonTerrain : RenderBaron {
 
     public TheRenderKing renderKingRef;
 
-    public Material frameBufferStrokeDisplayMat;
+    //public Material frameBufferStrokeDisplayMat;
     public Material groundStrokesLrgDisplayMat;
     public Material groundStrokesMedDisplayMat;
     public Material groundStrokesSmlDisplayMat;
