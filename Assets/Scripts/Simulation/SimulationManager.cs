@@ -1,7 +1,9 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Playcraft;
+using Random = UnityEngine.Random;
 
 // The meat of the Game, controls the primary simulation/core logic gameplay Loop
 public class SimulationManager : Singleton<SimulationManager> 
@@ -370,9 +372,8 @@ public class SimulationManager : Singleton<SimulationManager>
 
             eggSackGenomePoolArray[i] = eggSackGenome;
         }
-
-        //yield return null;
     }
+    
     private void LoadingInitializeFluidSim() {
         environmentFluidManager.InitializeFluidSystem();
     }
@@ -381,9 +382,8 @@ public class SimulationManager : Singleton<SimulationManager>
         theRenderKing.InitializeRiseAndShine();
     }
     
+    // Instantiate AI Agents
     private void LoadingInstantiateAgents() {
-        
-        // Instantiate AI Agents
         agentsArray = new Agent[numAgents];
         for (int i = 0; i < agentsArray.Length; i++) {
             GameObject agentGO = new GameObject("Agent" + i.ToString());
@@ -393,20 +393,25 @@ public class SimulationManager : Singleton<SimulationManager>
             agentsArray[i] = newAgent; // Add to stored list of current Agents            
         }
     }
+    
     private void LoadingInitializeAlgaeGrid() {
         vegetationManager.InitializeAlgaeGrid();
     }
+    
     private void LoadingInitializePlantParticles() {
         vegetationManager.InitializePlantParticles(numAgents, computeShaderPlantParticles);
-    }    
+    }   
+     
     private void LoadingInitializeResourceGrid() {        
         vegetationManager.InitializeResourceGrid(numAgents, computeShaderResourceGrid); 
         vegetationManager.InitializeDecomposersGrid();
         
     }
+    
     private void LoadingInitializeAnimalParticles() {
         zooplanktonManager.InitializeAnimalParticles(numAgents, computeShaderAnimalParticles);
     }
+    
     private void LoadingInstantiateEggSacks() {
         // FOOODDDD!!!!
         eggSackArray = new EggSack[numEggSacks]; // create array
@@ -421,11 +426,14 @@ public class SimulationManager : Singleton<SimulationManager>
             eggSackArray[i] = newEggSack; // Add to stored list of current Food objects                     
         }
     }
+    
     private void LoadingInitializeEggSacksFirstTime() {  // Skip pregnancy, Instantiate EggSacks that begin as 'GrowingIndependent' ?
-        for (int i = 0; i < eggSackArray.Length; i++) {
-            eggSackArray[i].isDepleted = true;
-            eggSackArray[i].curLifeStage = EggSack.EggLifeStage.Null;
-            
+        //for (int i = 0; i < eggSackArray.Length; i++) {
+        // WPP: converted to foreach loop
+        foreach (var eggSack in eggSackArray)
+        {
+            eggSack.isDepleted = true;
+            eggSack.curLifeStage = EggSack.EggLifeStage.Null;
         }
     }
     
@@ -456,52 +464,56 @@ public class SimulationManager : Singleton<SimulationManager>
             }
         }
     }
+    
     private void LoadingFillGridCells() {
         PopulateGridCells();
     }
+    
     private void LoadingHookUpModules() {
         HookUpModules();
     }
+    
+    // WPP: condense with collection initializers
     private void LoadingSetUpFitnessStorage() {
         //rawFitnessScoresArray = new float[numAgents];
-        statsNutrientsEachGenerationList = new List<Vector4>();
-        statsNutrientsEachGenerationList.Add(Vector4.one * 0.0001f);
+        statsNutrientsEachGenerationList = new List<Vector4>{Vector4.one * 0.0001f};
+        //statsNutrientsEachGenerationList.Add(Vector4.one * 0.0001f);
 
-        statsHistoryBrainMutationFreqList = new List<float>();
-        statsHistoryBrainMutationFreqList.Add(0f);
-        statsHistoryBrainMutationAmpList = new List<float>();
-        statsHistoryBrainMutationAmpList.Add(0f);
-        statsHistoryBrainSizeBiasList = new List<float>();
-        statsHistoryBrainSizeBiasList.Add(0f);
-        statsHistoryBodyMutationFreqList = new List<float>();
-        statsHistoryBodyMutationFreqList.Add(0f);
-        statsHistoryBodyMutationAmpList = new List<float>();
-        statsHistoryBodyMutationAmpList.Add(0f);
-        statsHistoryBodySensorVarianceList = new List<float>();
-        statsHistoryBodySensorVarianceList.Add(0f);
-        statsHistoryWaterCurrentsList = new List<float>();
-        statsHistoryWaterCurrentsList.Add(0f);
+        statsHistoryBrainMutationFreqList = new List<float>{0f};
+        //statsHistoryBrainMutationFreqList.Add(0f);
+        statsHistoryBrainMutationAmpList = new List<float>{0f};
+        //statsHistoryBrainMutationAmpList.Add(0f);
+        statsHistoryBrainSizeBiasList = new List<float>{0f};
+        //statsHistoryBrainSizeBiasList.Add(0f);
+        statsHistoryBodyMutationFreqList = new List<float>{0f};
+        //statsHistoryBodyMutationFreqList.Add(0f);
+        statsHistoryBodyMutationAmpList = new List<float>{0f};
+        //statsHistoryBodyMutationAmpList.Add(0f);
+        statsHistoryBodySensorVarianceList = new List<float>{0f};
+        //statsHistoryBodySensorVarianceList.Add(0f);
+        statsHistoryWaterCurrentsList = new List<float>{0f};
+        //statsHistoryWaterCurrentsList.Add(0f);
 
-        statsHistoryOxygenList = new List<float>();
-        statsHistoryOxygenList.Add(0f);
-        statsHistoryNutrientsList = new List<float>();
-        statsHistoryNutrientsList.Add(0f);
-        statsHistoryDetritusList = new List<float>();
-        statsHistoryDetritusList.Add(0f);
-        statsHistoryDecomposersList = new List<float>();
-        statsHistoryDecomposersList.Add(0f);
-        statsHistoryAlgaeSingleList = new List<float>();
-        statsHistoryAlgaeSingleList.Add(0f);
-        statsHistoryAlgaeParticleList = new List<float>();
-        statsHistoryAlgaeParticleList.Add(0f);
-        statsHistoryZooplanktonList = new List<float>();
-        statsHistoryZooplanktonList.Add(0f);
-        statsHistoryLivingAgentsList = new List<float>();
-        statsHistoryLivingAgentsList.Add(0f);
-        statsHistoryDeadAgentsList = new List<float>();
-        statsHistoryDeadAgentsList.Add(0f);
-        statsHistoryEggSacksList = new List<float>();
-        statsHistoryEggSacksList.Add(0f);
+        statsHistoryOxygenList = new List<float>{0f};
+        //statsHistoryOxygenList.Add(0f);
+        statsHistoryNutrientsList = new List<float>{0f};
+        //statsHistoryNutrientsList.Add(0f);
+        statsHistoryDetritusList = new List<float>{0f};
+        //statsHistoryDetritusList.Add(0f);
+        statsHistoryDecomposersList = new List<float>{0f};
+        //statsHistoryDecomposersList.Add(0f);
+        statsHistoryAlgaeSingleList = new List<float>{0f};
+        //statsHistoryAlgaeSingleList.Add(0f);
+        statsHistoryAlgaeParticleList = new List<float>{0f};
+        //statsHistoryAlgaeParticleList.Add(0f);
+        statsHistoryZooplanktonList = new List<float>{0f};
+        //statsHistoryZooplanktonList.Add(0f);
+        statsHistoryLivingAgentsList = new List<float>{0f};
+        //statsHistoryLivingAgentsList.Add(0f);
+        statsHistoryDeadAgentsList = new List<float>{0f};
+        //statsHistoryDeadAgentsList.Add(0f);
+        statsHistoryEggSacksList = new List<float>{0f};
+        //statsHistoryEggSacksList.Add(0f);
         
         /*
         statsLifespanEachGenerationList = new List<Vector4>(); // 
@@ -518,6 +530,7 @@ public class SimulationManager : Singleton<SimulationManager>
         statsMutationEachGenerationList.Add(0.0001f);
         */
     }
+    
     /*private void LoadingLoadGenepoolFiles() {
         
         Debug.Log("LOAD LoadingLoadGenepoolFiles!");
@@ -542,6 +555,9 @@ public class SimulationManager : Singleton<SimulationManager>
 
     #region Every Frame  //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& EVERY FRAME &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
+    Agent targetAgent => cameraManager.targetAgent;
+
+    // ***WPP: break into sections -> comments (minimum) or functions (better)
     public void TickSimulation() {
         simAgeTimeSteps++;
         simAgeYearCounter++;
@@ -588,12 +604,9 @@ public class SimulationManager : Singleton<SimulationManager>
         
         vegetationManager.MeasureTotalPlantParticlesAmount();
 
-
         if(trophicLayersManager.GetZooplanktonOnOff()) {
-            
             zooplanktonManager.MeasureTotalAnimalParticlesAmount();
         }
-        
         
         // Actually measuring results of last frame's execution?
         float totalOxygenUsedByAgents = 0f;
@@ -601,15 +614,14 @@ public class SimulationManager : Singleton<SimulationManager>
         if(trophicLayersManager.GetAgentsOnOff()) {
             vegetationManager.FindClosestPlantParticleToCritters(simStateData);
             
-            for (int i = 0; i < agentsArray.Length; i++) {
-                totalOxygenUsedByAgents += agentsArray[i].oxygenUsedLastFrame;
-                totalWasteProducedByAgents += agentsArray[i].wasteProducedLastFrame;          
+            // WPP: use foreach
+            //for (int i = 0; i < agentsArray.Length; i++) {
+            foreach (var agent in agentsArray) {
+                totalOxygenUsedByAgents += agent.oxygenUsedLastFrame;
+                totalWasteProducedByAgents += agent.wasteProducedLastFrame;          
             }
-            for (int i = 0; i < eggSackArray.Length; i++) {
-            
-            }
-            zooplanktonManager.FindClosestAnimalParticleToCritters(simStateData);
-            
+
+            zooplanktonManager.FindClosestAnimalParticleToCritters(simStateData);            
         } 
         vegetationManager.FindClosestPlantParticleToCursor(theCursorCzar.curMousePositionOnWaterPlane.x, theCursorCzar.curMousePositionOnWaterPlane.y);
         zooplanktonManager.FindClosestAnimalParticleToCursor(theCursorCzar.curMousePositionOnWaterPlane.x, theCursorCzar.curMousePositionOnWaterPlane.y);
@@ -622,15 +634,18 @@ public class SimulationManager : Singleton<SimulationManager>
         // Try to make sure AlgaeReservoir and AlgaeParticles share same mechanics!!! *********************************************
         simResourceManager.Tick(settingsManager, trophicLayersManager, vegetationManager);  // Resource Flows Here
         
-
-        if(cameraManager.targetAgent != null) {  // *******
-            if(uiManager.focusedCandidate != null) {
-                if(cameraManager.targetAgent.candidateRef != null) {
-                    if(cameraManager.targetAgent.curLifeStage == Agent.AgentLifeStage.AwaitingRespawn && cameraManager.targetAgent.candidateRef.candidateID == uiManager.focusedCandidate.candidateID) {
-                        uiManager.watcherUI.StopFollowingAgent();
-                    }
-                }                
-            }            
+        // WPP: replaced nested conditional with AND
+        if(targetAgent && uiManager.focusedCandidate != null &&
+           targetAgent.candidateRef != null &&
+           targetAgent.curLifeStage == Agent.AgentLifeStage.AwaitingRespawn && 
+           targetAgent.candidateRef.candidateID == uiManager.focusedCandidate.candidateID) { 
+            //if(uiManager.focusedCandidate != null) {
+                //if(cameraManager.targetAgent.candidateRef != null) {
+                    //if(cameraManager.targetAgent.curLifeStage == Agent.AgentLifeStage.AwaitingRespawn && cameraManager.targetAgent.candidateRef.candidateID == uiManager.focusedCandidate.candidateID) {
+                uiManager.watcherUI.StopFollowingAgent();
+                    //}
+                //}                
+            //}            
         }
                 
         // CHECK FOR NULL Objects:        
@@ -662,12 +677,12 @@ public class SimulationManager : Singleton<SimulationManager>
         vegetationManager.SimResourceGrid(ref environmentFluidManager, ref theRenderKing.baronVonTerrain, ref theRenderKing);
         //}
         
-
         if(trophicLayersManager.GetPlantsOnOff()) {
             vegetationManager.EatSelectedFoodParticles(simStateData); // 
             // How much light/nutrients available?
             vegetationManager.SimulatePlantParticles(environmentFluidManager, theRenderKing, simStateData, simResourceManager);
         }
+        
         if(trophicLayersManager.GetZooplanktonOnOff()) {
             zooplanktonManager.EatSelectedAnimalParticles(simStateData);        
             // Send back information about how much growth/photosynthesis there was?
@@ -675,16 +690,18 @@ public class SimulationManager : Singleton<SimulationManager>
             // how much oxygen used? How much eaten? How much growth? How much waste/detritus?
         }
               
-        
         if(trophicLayersManager.GetAgentsOnOff()) {
             HookUpModules(); // Sets nearest-neighbors etc. feed current data into agent Brains
             // Load gameState into Agent Brain, process brain function, read out brainResults,
-            // Execute Agent Actions -- apply propulsive force to each Agent:        
-            for (int i = 0; i < agentsArray.Length; i++) {
-                agentsArray[i].Tick(this, settingsManager);            
+            // Execute Agent Actions -- apply propulsive force to each Agent:       
+            // WPP: convert to foreach 
+            //for (int i = 0; i < agentsArray.Length; i++) {
+            foreach (var agent in agentsArray) {
+                agent.Tick(this, settingsManager);            
             }
-            for (int i = 0; i < eggSackArray.Length; i++) {
-                eggSackArray[i].Tick();
+            //for (int i = 0; i < eggSackArray.Length; i++) {
+            foreach (var eggSack in eggSackArray) {
+                eggSack.Tick();
             }                
             // Apply External Forces to dynamic objects: (internal PhysX Updates):        
             ApplyFluidForcesToDynamicObjects();
@@ -693,7 +710,6 @@ public class SimulationManager : Singleton<SimulationManager>
         // TEMP AUDIO EFFECTS!!!!        
         float volume = agentsArray[0].smoothedThrottle.magnitude * 0.24f;
         audioManager.SetPlayerSwimLoopVolume(volume);      
-        
 
         // OLD ALGAE GRID:
         /*
@@ -723,6 +739,7 @@ public class SimulationManager : Singleton<SimulationManager>
         */
         
     }
+    
     private void TickSparseEvents() {
         if(simAgeYearCounter >= numStepsInSimYear) {
             curSimYear++;
@@ -735,35 +752,7 @@ public class SimulationManager : Singleton<SimulationManager>
             AddNewHistoricalDataEntry();
             AddNewSpeciesDataEntry(curSimYear);
             
-                        
-            if(curSimYear == 1) {
-                SimEventData newEventData = new SimEventData();
-                newEventData.name = "First Full Year";
-                newEventData.category = SimEventData.SimEventCategories.NPE;
-                newEventData.timeStepActivated = simAgeTimeSteps;
-                simEventsManager.completeEventHistoryList.Add(newEventData);
-            }
-            if(curSimYear == 10) {
-                SimEventData newEventData = new SimEventData();
-                newEventData.name = "Decade";
-                newEventData.category = SimEventData.SimEventCategories.NPE;
-                newEventData.timeStepActivated = simAgeTimeSteps;
-                simEventsManager.completeEventHistoryList.Add(newEventData);
-            }
-            if(curSimYear == 100) {
-                SimEventData newEventData = new SimEventData();
-                newEventData.name = "Century";
-                newEventData.category = SimEventData.SimEventCategories.NPE;
-                newEventData.timeStepActivated = simAgeTimeSteps;
-                simEventsManager.completeEventHistoryList.Add(newEventData);
-            }
-            if(curSimYear == 1000) {
-                SimEventData newEventData = new SimEventData();
-                newEventData.name = "Millenium";
-                newEventData.category = SimEventData.SimEventCategories.NPE;
-                newEventData.timeStepActivated = simAgeTimeSteps;
-                simEventsManager.completeEventHistoryList.Add(newEventData);
-            }
+            CheckForYearEvent();
         }
 
         //int numDoubles = Mathf.Min(graphDataGlobalNutrients.doublingCounter, 4);
@@ -832,6 +821,58 @@ public class SimulationManager : Singleton<SimulationManager>
             //theRenderKing.UpdateTreeOfLifeEventLineData(simEventsManager.completeEventHistoryList);
         }
     }
+    
+    [SerializeField] YearEventData[] yearEvents;
+    
+    // WPP extracted from TickSparseEvents
+    // Refactored with constructor initialization and exposed struct array
+    private void CheckForYearEvent() {
+        /*if(curSimYear == 1) {
+            SimEventData newEventData = new SimEventData();
+            newEventData.name = "First Full Year";
+            newEventData.category = SimEventData.SimEventCategories.NPE;
+            newEventData.timeStepActivated = simAgeTimeSteps;
+            simEventsManager.completeEventHistoryList.Add(newEventData);
+        }
+        if(curSimYear == 10) {
+            SimEventData newEventData = new SimEventData();
+            newEventData.name = "Decade";
+            newEventData.category = SimEventData.SimEventCategories.NPE;
+            newEventData.timeStepActivated = simAgeTimeSteps;
+            simEventsManager.completeEventHistoryList.Add(newEventData);
+        }
+        if(curSimYear == 100) {
+            SimEventData newEventData = new SimEventData();
+            newEventData.name = "Century";
+            newEventData.category = SimEventData.SimEventCategories.NPE;
+            newEventData.timeStepActivated = simAgeTimeSteps;
+            simEventsManager.completeEventHistoryList.Add(newEventData);
+        }
+        if(curSimYear == 1000) {
+            SimEventData newEventData = new SimEventData();
+            newEventData.name = "Millenium";
+            newEventData.category = SimEventData.SimEventCategories.NPE;
+            newEventData.timeStepActivated = simAgeTimeSteps;
+            simEventsManager.completeEventHistoryList.Add(newEventData);
+        }*/
+    
+        foreach (var yearEvent in yearEvents)
+        {
+            if (curSimYear == yearEvent.year)
+            {
+                SimEventData newEventData = new SimEventData(yearEvent.message, simAgeTimeSteps);
+                simEventsManager.completeEventHistoryList.Add(newEventData);                
+            }
+        }
+    }
+    
+    [Serializable]
+    public struct YearEventData
+    {
+        public int year;
+        public string message;
+    }
+    
     private void ApplyFluidForcesToDynamicObjects() {
         // ********** REVISIT CONVERSION btw fluid/scene coords and Force Amounts !!!! *************
         for (int i = 0; i < agentsArray.Length; i++) {
@@ -844,7 +885,6 @@ public class SimulationManager : Singleton<SimulationManager>
             else {
                 agentsArray[i].depthGradient = new Vector2(depthSample.y, depthSample.z).normalized;
             }
-            
             
             //float agentSize = (agentsArray[i].fullSizeBoundingBox.x + agentsArray[i].fullSizeBoundingBox.y) * agentsArray[i].sizePercentage * 0.25f + 0.025f;
             //float floorDepth = depthSample.x * 10f;
@@ -865,13 +905,14 @@ public class SimulationManager : Singleton<SimulationManager>
                 Vector2 grad = agentsArray[i].depthGradient; // new Vector2(depthSample.y, depthSample.z); //.normalized;
                 agentsArray[i].bodyRigidbody.AddForce(-grad * agentsArray[i].bodyRigidbody.mass * wallForce, ForceMode2D.Impulse);
 
-
                 float damage = wallForce * 0.015f;  
                 
                 if(depthSample.w < 0.51f) {
                     damage *= 0.33f;
                 }
+                
                 float defendBonus = 1f;
+                
                 if(agentsArray[i].coreModule != null && agentsArray[i].curLifeStage == Agent.AgentLifeStage.Mature) {
                     if(agentsArray[i].isDefending) {                        
                         defendBonus = 0f;
@@ -894,16 +935,12 @@ public class SimulationManager : Singleton<SimulationManager>
                     agentsArray[i].coreModule.contactForceY[0] = grad.y;
         
                     agentsArray[i].TakeDamage(damage);
-
                 }
             }
             
             agentsArray[i].bodyRigidbody.AddForce(simStateData.fluidVelocitiesAtAgentPositionsArray[i] * 64f * agentsArray[i].bodyRigidbody.mass, ForceMode2D.Impulse);
 
             agentsArray[i].avgFluidVel = Vector2.Lerp(agentsArray[i].avgFluidVel, simStateData.fluidVelocitiesAtAgentPositionsArray[i], 0.25f);
-
-            
-            
         }
         /*for (int i = 0; i < eggSackArray.Length; i++) { // *** cache rigidBody reference
             
@@ -998,12 +1035,12 @@ public class SimulationManager : Singleton<SimulationManager>
         }
         
     }
-    private void HookUpModules() {
-                
+    
+    // *** WPP: simplify conditionals
+    private void HookUpModules() {            
         // mapSize is global now, get with the times, jeez-louise!
         //float cellSize = mapSize / agentGridCellResolution;
         //Vector2 playerPos = new Vector2(playerAgent.transform.localPosition.x, playerAgent.transform.localPosition.y);
-
 
         // ***** Check for inactive/Null agents and cull them from consideration:
         // ******  REFACTOR!!! BROKEN BY SPECIATION UPDATE! ***
@@ -1328,12 +1365,12 @@ public class SimulationManager : Singleton<SimulationManager>
     public void RemoveSelectedAgentSpecies(int slotIndex) {
         //Debug.Log("pressedRemoveSpecies! " + trophicLayersManager.selectedTrophicSlotRef.slotID.ToString());
 
-        // need to connect UI slotID to speciesID
+        // Need to connect UI slotID to speciesID
         if(masterGenomePool.currentlyActiveSpeciesIDList.Count > 1) {
             masterGenomePool.ExtinctifySpecies(this, masterGenomePool.currentlyActiveSpeciesIDList[0]);
         }
-        
     }
+    
     /*public void CreateAgentSpecies(Vector3 spawnPos) {
         //eggSackArray[0].parentAgentIndex = 0;
         //eggSackArray[0].InitializeEggSackFromGenome(0, masterGenomePool.completeSpeciesPoolsList[0].representativeGenome, null, spawnPos);
@@ -1349,10 +1386,12 @@ public class SimulationManager : Singleton<SimulationManager>
 
         Debug.Log("CREATE CreateAgentSpecies pos: " + spawnPos.ToString());
     }*/
+    
     public void ExecuteSimEvent(SimEventData eventData) {
         Debug.LogError("ExecuteSimEvent(SimEventData eventData) DISABLED");
         //simEventsManager.ExecuteEvent(this, eventData);
     }
+    
     public void UpdateRecords(Agent agentRef) {
         SpeciesGenomePool speciesPool = masterGenomePool.completeSpeciesPoolsList[agentRef.speciesIndex];
         if(agentRef.ageCounter > speciesPool.recordLongestLife) {
@@ -1373,24 +1412,28 @@ public class SimulationManager : Singleton<SimulationManager>
                 speciesPool.hallOfFameGenomesList.Add(agentRef.candidateRef);
             }
         }
-        //if(speciesPool.)
     }
-    // *** confirm these are set up alright       
+    
+    // *** Confirm these are set up alright       
     public void ProcessNullAgent(Agent agentRef) {   // (Upon Agent Death:)
         numAgentsDied++;
-        // Now, this function should:
-        // -- look up the connected CandidateGenome & its speciesID
+        // Look up the connected CandidateGenome & its speciesID
         CandidateAgentData candidateData = agentRef.candidateRef;
+        
         int agentSpeciesIndex = agentRef.speciesIndex;
         if(candidateData == null) {
             Debug.LogError("candidateData NULL (" + agentRef.index.ToString() + ") species " + agentSpeciesIndex.ToString());
         }
+        
         int candidateSpeciesIndex = candidateData.speciesID;
         if(agentSpeciesIndex != candidateSpeciesIndex) {
             Debug.LogError("agentSpeciesIndex (" + agentSpeciesIndex.ToString() + " != candidateSpeciesIndex (" + candidateSpeciesIndex.ToString());
         }
+        
         //Debug.Log("masterGenomePool.completeSpeciesPoolsList: " + masterGenomePool.completeSpeciesPoolsList.Count.ToString());
         SpeciesGenomePool speciesPool = masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex];
+        var avgPerformanceData = speciesPool.avgPerformanceData;
+        var agentPerformanceData = agentRef.candidateRef.performanceData;
 
         UpdateRecords(agentRef);
 
@@ -1405,12 +1448,12 @@ public class SimulationManager : Singleton<SimulationManager>
             speciesPool.ProcessCompletedCandidate(candidateData, masterGenomePool);
             float lerpAmount = Mathf.Max(0.01f, 1f / (float)speciesPool.numAgentsEvaluated);
 
-            speciesPool.avgPerformanceData.totalTicksAlive = (int)Mathf.Lerp((float)speciesPool.avgPerformanceData.totalTicksAlive, (float)agentRef.ageCounter, lerpAmount);
-            speciesPool.avgPerformanceData.totalFoodEatenCorpse = Mathf.Lerp(speciesPool.avgPerformanceData.totalFoodEatenCorpse, agentRef.candidateRef.performanceData.totalFoodEatenCorpse, lerpAmount);
-            speciesPool.avgPerformanceData.totalFoodEatenPlant = Mathf.Lerp(speciesPool.avgPerformanceData.totalFoodEatenPlant, agentRef.candidateRef.performanceData.totalFoodEatenPlant, lerpAmount);
-            speciesPool.avgPerformanceData.totalFoodEatenZoop = Mathf.Lerp(speciesPool.avgPerformanceData.totalFoodEatenZoop, agentRef.candidateRef.performanceData.totalFoodEatenZoop, lerpAmount);
-            speciesPool.avgPerformanceData.totalFoodEatenEgg = Mathf.Lerp(speciesPool.avgPerformanceData.totalFoodEatenEgg, agentRef.candidateRef.performanceData.totalFoodEatenEgg, lerpAmount);
-            speciesPool.avgPerformanceData.totalFoodEatenCreature = Mathf.Lerp(speciesPool.avgPerformanceData.totalFoodEatenCreature, agentRef.candidateRef.performanceData.totalFoodEatenCreature, lerpAmount);
+            avgPerformanceData.totalTicksAlive = (int)Mathf.Lerp((float)avgPerformanceData.totalTicksAlive, (float)agentRef.ageCounter, lerpAmount);
+            avgPerformanceData.totalFoodEatenCorpse = Mathf.Lerp(avgPerformanceData.totalFoodEatenCorpse, agentPerformanceData.totalFoodEatenCorpse, lerpAmount);
+            avgPerformanceData.totalFoodEatenPlant = Mathf.Lerp(avgPerformanceData.totalFoodEatenPlant, agentPerformanceData.totalFoodEatenPlant, lerpAmount);
+            avgPerformanceData.totalFoodEatenZoop = Mathf.Lerp(avgPerformanceData.totalFoodEatenZoop, agentPerformanceData.totalFoodEatenZoop, lerpAmount);
+            avgPerformanceData.totalFoodEatenEgg = Mathf.Lerp(avgPerformanceData.totalFoodEatenEgg, agentPerformanceData.totalFoodEatenEgg, lerpAmount);
+            avgPerformanceData.totalFoodEatenCreature = Mathf.Lerp(avgPerformanceData.totalFoodEatenCreature, agentPerformanceData.totalFoodEatenCreature, lerpAmount);
             //speciesPool.avgPerformanceData.avgBodySize = Mathf.Lerp(speciesPool.avgPerformanceData.avgBodySize, agentRef.candidateRef.performanceData.fullSizeBodyVolume, lerpAmount);
             //speciesPool.avgPerformanceData.avgSpecAttack = Mathf.Lerp(speciesPool.avgPerformanceData.avgSpecAttack, (float)agentRef.candidateRef.performanceData.coreModule.talentSpecAttackNorm, lerpAmount);
             ////speciesPool.avgPerformanceData.avgSpecDefend = Mathf.Lerp(speciesPool.avgPerformanceData.avgSpecDefend, (float)agentRef.candidateRef.performanceData.coreModule.talentSpecDefenseNorm, lerpAmount);
@@ -1423,19 +1466,17 @@ public class SimulationManager : Singleton<SimulationManager>
             //speciesPool.avgPerformanceData.avgNumAxons = Mathf.Lerp(speciesPool.avgPerformanceData.avgNumAxons, (float)agentRef.candidateRef.performanceData.brain.axonList.Count, lerpAmount);
             //speciesPool.avgPerformanceData.avgExperience = Mathf.Lerp(speciesPool.avgPerformanceData.avgExperience, (float)agentRef.candidateRef.performanceData.totalExperience, lerpAmount);
             //speciesPool.avgPerformanceData.avgFitnessScore = Mathf.Lerp(speciesPool.avgPerformanceData.avgFitnessScore, (float)agentRef.candidateRef.performanceData.masterFitnessScore, lerpAmount);
-            speciesPool.avgPerformanceData.totalDamageDealt = Mathf.Lerp(speciesPool.avgPerformanceData.totalDamageDealt, agentRef.candidateRef.performanceData.totalDamageDealt, lerpAmount);
-            speciesPool.avgPerformanceData.totalDamageTaken = Mathf.Lerp(speciesPool.avgPerformanceData.totalDamageTaken, agentRef.candidateRef.performanceData.totalDamageTaken, lerpAmount);
+            avgPerformanceData.totalDamageDealt = Mathf.Lerp(avgPerformanceData.totalDamageDealt, agentPerformanceData.totalDamageDealt, lerpAmount);
+            avgPerformanceData.totalDamageTaken = Mathf.Lerp(avgPerformanceData.totalDamageTaken, agentPerformanceData.totalDamageTaken, lerpAmount);
 
-            speciesPool.avgPerformanceData.totalTicksRested = (int)Mathf.Lerp((float)speciesPool.avgPerformanceData.totalTicksRested, (float)agentRef.candidateRef.performanceData.totalTicksRested, lerpAmount);
-            speciesPool.avgPerformanceData.totalTimesAttacked = (int)Mathf.Lerp((float)speciesPool.avgPerformanceData.totalTimesAttacked, (float)agentRef.candidateRef.performanceData.totalTimesAttacked, lerpAmount);
-            speciesPool.avgPerformanceData.totalTimesDefended = (int)Mathf.Lerp((float)speciesPool.avgPerformanceData.totalTimesDefended, (float)agentRef.candidateRef.performanceData.totalTimesDefended, lerpAmount);
-            speciesPool.avgPerformanceData.totalTimesDashed = (int)Mathf.Lerp((float)speciesPool.avgPerformanceData.totalTimesDashed, (float)agentRef.candidateRef.performanceData.totalTimesDashed, lerpAmount);
-            speciesPool.avgPerformanceData.totalTimesPregnant = (int)Mathf.Lerp((float)speciesPool.avgPerformanceData.totalTimesPregnant, (float)agentRef.candidateRef.performanceData.totalTimesPregnant, lerpAmount);
+            avgPerformanceData.totalTicksRested = (int)Mathf.Lerp((float)avgPerformanceData.totalTicksRested, (float)agentPerformanceData.totalTicksRested, lerpAmount);
+            avgPerformanceData.totalTimesAttacked = (int)Mathf.Lerp((float)avgPerformanceData.totalTimesAttacked, (float)agentPerformanceData.totalTimesAttacked, lerpAmount);
+            avgPerformanceData.totalTimesDefended = (int)Mathf.Lerp((float)avgPerformanceData.totalTimesDefended, (float)agentPerformanceData.totalTimesDefended, lerpAmount);
+            avgPerformanceData.totalTimesDashed = (int)Mathf.Lerp((float)avgPerformanceData.totalTimesDashed, (float)agentPerformanceData.totalTimesDashed, lerpAmount);
+            avgPerformanceData.totalTimesPregnant = (int)Mathf.Lerp((float)avgPerformanceData.totalTimesPregnant, (float)agentPerformanceData.totalTimesPregnant, lerpAmount);
             
             // More??
             //masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].
-
-            
         }
         else {
             // -- Else:
@@ -1447,7 +1488,6 @@ public class SimulationManager : Singleton<SimulationManager>
         // Can be random selection (unbiased), or proportional to species avg Fitnesses?
         SpeciesGenomePool sourceSpeciesPool = masterGenomePool.SelectNewGenomeSourceSpecies(false, 0.33f); // select at random
                 
-        
         // -- Select a ParentGenome from the leaderboardList and create a mutated copy (childGenome):  
         AgentGenome newGenome = sourceSpeciesPool.GetGenomeFromFitnessLottery();
         newGenome = sourceSpeciesPool.Mutate(newGenome, true, true);
@@ -1464,8 +1504,8 @@ public class SimulationManager : Singleton<SimulationManager>
         agentRef.SetToAwaitingRespawn(); 
 
         ProcessAgentScores(agentRef);  // *** CLEAN THIS UP!!! ***
-        
     }
+    
     // ********** RE-IMPLEMENT THIS LATER!!!! ******************************************************************************
     private void SpawnAgentFromEggSack(CandidateAgentData sourceCandidate, int agentIndex, int speciesIndex, EggSack parentEggSack) {
         //Debug.Log("Spawn Creature #" + agentIndex.ToString() + " (" + numAgentsBorn.ToString() + ") FromEggSack " + parentEggSack.index.ToString() + "  " + parentEggSack._PrevPos.ToString());
@@ -1474,60 +1514,72 @@ public class SimulationManager : Singleton<SimulationManager>
         //currentOldestAgent = agentsArray[rankedIndicesList[0]].ageCounter;
         agentsArray[agentIndex].InitializeSpawnAgentFromEggSack(settingsManager, agentIndex, sourceCandidate, parentEggSack, _GlobalWaterLevel); // Spawn that genome in dead Agent's body and revive it!
         theRenderKing.UpdateCritterGenericStrokesData(agentsArray[agentIndex]); // agentIndex, sourceCandidate.candidateGenome);
-        
-        
     }
+    
     private void SpawnAgentImmaculate(CandidateAgentData sourceCandidate, int agentIndex, int speciesIndex, Vector2 spawnPos2D) {
-       
         //Debug.Log("SpawnAgentImmaculate!i= " + agentIndex.ToString() + ", spawnWorldPos: " + spawnPos2D.ToString());
             
         agentsArray[agentIndex].InitializeSpawnAgentImmaculate(settingsManager, agentIndex, sourceCandidate, new Vector3(spawnPos2D.x, spawnPos2D.y, 0f), _GlobalWaterLevel); // Spawn that genome in dead Agent's body and revive it!
         theRenderKing.UpdateCritterGenericStrokesData(agentsArray[agentIndex]); //agentIndex, sourceCandidate.candidateGenome);
         numAgentsBorn++;
-
     }
+    
     public void ProcessDeadEggSack(int eggSackIndex) {
         //Debug.Log("ProcessDeadEggSack(" + eggSackIndex.ToString() + ") eggSackRespawnCounter " + eggSackRespawnCounter.ToString());
 
         int numActiveSpecies = masterGenomePool.currentlyActiveSpeciesIDList.Count;
-        int randEggSpeciesIndex = masterGenomePool.currentlyActiveSpeciesIDList[UnityEngine.Random.Range(0, numActiveSpecies)];
+        int randEggSpeciesIndex = masterGenomePool.currentlyActiveSpeciesIDList[Random.Range(0, numActiveSpecies)];
         eggSackArray[eggSackIndex].speciesIndex = randEggSpeciesIndex;
 
         // Check for timer?
-        if(eggSackRespawnCounter > 3) {
+        // WPP: applied conditional inversion and early exit to reduce nesting
+        //if(eggSackRespawnCounter > 3) {
+        if (eggSackRespawnCounter <= 3)
+            return;
             
-            // How many active EggSacks are there in play?
-            int totalSuitableParentAgents = 0;
-            List<int> suitableParentAgentsList = new List<int>();
-            for(int i = 0; i < _NumAgents; i++) {
-                if(agentsArray[i].speciesIndex == eggSackArray[eggSackIndex].speciesIndex) {
-                    if(agentsArray[i].curLifeStage == Agent.AgentLifeStage.Mature) {
-                        if(agentsArray[i].isPregnantAndCarryingEggs) {
-                            // already carrying, not available
-                        }
-                        else {
-                            if(agentsArray[i].pregnancyRefactoryTimeStepCounter > agentsArray[i].pregnancyRefactoryDuration) {
-                                // Able to grow eggs
-                                // figure out if agent has enough biomass;
-                                float reqMass = settingsManager.agentSettings._BaseInitMass * settingsManager.agentSettings._MinPregnancyFactor;
-
-                                if(reqMass < agentsArray[i].currentBiomass * settingsManager.agentSettings._MaxPregnancyProportion) {
-                                    //Debug.Log("RequiredMass met! " + reqMass.ToString() + " biomass: " + agentsArray[i].currentBiomass.ToString() + ", _BaseInitMass: " + settingsManager.agentSettings._BaseInitMass.ToString());
-                                    totalSuitableParentAgents++;
-                                    suitableParentAgentsList.Add(i);
-                                }
-                            }
-                        }
-                    }
-                    else {
-
-                    }
-                }                
-            }
+        // How many active EggSacks are there in play?
+        int totalSuitableParentAgents = 0;
+        List<int> suitableParentAgentsList = new List<int>();
         
-            if(totalSuitableParentAgents > 0) {
+        for(int i = 0; i < _NumAgents; i++) 
+        {
+            // WPP: applied logical AND to reduce nesting
+            if(agentsArray[i].speciesIndex == eggSackArray[eggSackIndex].speciesIndex &&
+               agentsArray[i].curLifeStage == Agent.AgentLifeStage.Mature &&
+               !agentsArray[i].isPregnantAndCarryingEggs &&
+               agentsArray[i].pregnancyRefactoryTimeStepCounter > agentsArray[i].pregnancyRefactoryDuration) 
+            {
+                //if(agentsArray[i].curLifeStage == Agent.AgentLifeStage.Mature) 
+                //{
+                    //if(agentsArray[i].isPregnantAndCarryingEggs) 
+                    //{
+                        // already carrying, not available
+                    //}
+                    //else 
+                    //{
+                    //if(agentsArray[i].pregnancyRefactoryTimeStepCounter > agentsArray[i].pregnancyRefactoryDuration) 
+
+                    //{
+                    // Able to grow eggs
+                    // figure out if agent has enough biomass;
+                    float reqMass = settingsManager.agentSettings._BaseInitMass * settingsManager.agentSettings._MinPregnancyFactor;
+                    float agentMass = agentsArray[i].currentBiomass * settingsManager.agentSettings._MaxPregnancyProportion;
+                    
+                    if(reqMass < agentMass) 
+                    {
+                        //Debug.Log("RequiredMass met! " + reqMass.ToString() + " biomass: " + agentsArray[i].currentBiomass.ToString() + ", _BaseInitMass: " + settingsManager.agentSettings._BaseInitMass.ToString());
+                        totalSuitableParentAgents++;
+                        suitableParentAgentsList.Add(i);
+                    }
+                    //}
+                    //}
+                //}
+            }                
+        
+            if(totalSuitableParentAgents > 0) 
+            {
                 // At Least ONE fertile Agent available:
-                int randParentAgentIndex = suitableParentAgentsList[UnityEngine.Random.Range(0, totalSuitableParentAgents)];
+                int randParentAgentIndex = suitableParentAgentsList[Random.Range(0, totalSuitableParentAgents)];
 
                 // RespawnFood  // *** REFACTOR -- Need to sync egg and agent genomes to match each other
                 EggSackGenome newEggSackGenome = new EggSackGenome(eggSackIndex);
@@ -1535,7 +1587,8 @@ public class SimulationManager : Singleton<SimulationManager>
                 eggSackGenomePoolArray[eggSackIndex] = newEggSackGenome;
 
                 //Debug.Log("BeginPregnancy! Egg[" + eggSackIndex.ToString() + "]  Agent[" + randParentAgentIndex.ToString() + "]");
-                if(agentsArray[randParentAgentIndex].childEggSackRef != null && agentsArray[randParentAgentIndex].isPregnantAndCarryingEggs) {
+                if(agentsArray[randParentAgentIndex].childEggSackRef && agentsArray[randParentAgentIndex].isPregnantAndCarryingEggs) 
+                {
                     Debug.Log("DOUBLE PREGNANT!! egg[" + agentsArray[randParentAgentIndex].childEggSackRef.index.ToString() + "]  Agent[" + randParentAgentIndex.ToString() + "]");
                 }
 
@@ -1547,41 +1600,52 @@ public class SimulationManager : Singleton<SimulationManager>
 
                 eggSackRespawnCounter = 0;
             }
-            else {
+            else 
+            {
                 // Wait? SpawnImmaculate?
-                
                 int respawnCooldown = 1000;
                 
-                if(eggSackRespawnCounter > respawnCooldown) {  // try to encourage more pregnancies?
-                    //Debug.Log("eggSackRespawnCounter > respawnCooldown");
-                    List<int> eligibleAgentIndicesList = new List<int>();
-                    for(int a = 0; a < numAgents; a++) {
-                        if(agentsArray[a].isInert) {
-
-                        }
-                        else {
-                            eligibleAgentIndicesList.Add(a);
-                        }
+                //if(eggSackRespawnCounter > respawnCooldown) 
+                if (eggSackRespawnCounter <= respawnCooldown)
+                    continue;
+                //{  // try to encourage more pregnancies?
+                //Debug.Log("eggSackRespawnCounter > respawnCooldown");
+                List<int> eligibleAgentIndicesList = new List<int>();
+                
+                for(int a = 0; a < numAgents; a++) 
+                {
+                    if(!agentsArray[a].isInert) 
+                    {
+                        eligibleAgentIndicesList.Add(a);
                     }
-                    if(eligibleAgentIndicesList.Count > 0) {
-                        int randListIndex = UnityEngine.Random.Range(0, eligibleAgentIndicesList.Count);
-                        int agentIndex = eligibleAgentIndicesList[randListIndex];
-                    
-                        eggSackArray[eggSackIndex].parentAgentIndex = agentIndex;
-                        eggSackArray[eggSackIndex].InitializeEggSackFromGenome(eggSackIndex, agentsArray[agentIndex].candidateRef.candidateGenome, null, GetRandomFoodSpawnPosition().startPosition);
+                    //if(agentsArray[a].isInert)
+                    //{
 
-                        // TEMP::: TESTING!!!
-                        eggSackArray[eggSackIndex].currentBiomass = settingsManager.agentSettings._BaseInitMass; // *** TEMP!!! ***
-                        
-                        eggSackRespawnCounter = 0;       
-                    }         
-                }           
+                    //}
+                    //else 
+                    //{
+                    //eligibleAgentIndicesList.Add(a);
+                    //}
+                }
+                
+                //if(eligibleAgentIndicesList.Count > 0) 
+                if (eligibleAgentIndicesList.Count <= 0)
+                    continue;
+                //{
+                int randListIndex = Random.Range(0, eligibleAgentIndicesList.Count);
+                int agentIndex = eligibleAgentIndicesList[randListIndex];
+            
+                eggSackArray[eggSackIndex].parentAgentIndex = agentIndex;
+                eggSackArray[eggSackIndex].InitializeEggSackFromGenome(eggSackIndex, agentsArray[agentIndex].candidateRef.candidateGenome, null, GetRandomFoodSpawnPosition().startPosition);
+
+                // TEMP::: TESTING!!!
+                eggSackArray[eggSackIndex].currentBiomass = settingsManager.agentSettings._BaseInitMass; // *** TEMP!!! ***
+
+                eggSackRespawnCounter = 0;       
+                //}         
+                //}           
             }
-        }
-        else {
-
-        }
-        
+        }        
     }
         
     private void ProcessAgentScores(Agent agentRef) {
@@ -1602,14 +1666,11 @@ public class SimulationManager : Singleton<SimulationManager>
         }
         
         for(int i = 0; i < agentsArray.Length; i++) {
-            
             if(agentsArray[i].curLifeStage == Agent.AgentLifeStage.Dead) {
-                totalCarrionVolume += agentsArray[i].currentBiomass;
-                
+                totalCarrionVolume += agentsArray[i].currentBiomass;   
             }
             if(agentsArray[i].curLifeStage == Agent.AgentLifeStage.Egg || agentsArray[i].curLifeStage == Agent.AgentLifeStage.Mature) {
                 totalAgentBiomass += agentsArray[i].currentBiomass;
-
             }
         }
 
@@ -1618,11 +1679,9 @@ public class SimulationManager : Singleton<SimulationManager>
         simResourceManager.curGlobalCarrionVolume = Mathf.Lerp(simResourceManager.curGlobalCarrionVolume, totalCarrionVolume, weightedAvgLerpVal);
         simResourceManager.curGlobalAgentBiomass = Mathf.Lerp(simResourceManager.curGlobalAgentBiomass, totalAgentBiomass, weightedAvgLerpVal);
                 
-        
         float approxGen = (float)numAgentsBorn / (float)(numAgents - 1);
         if (approxGen > curApproxGen) {
             //statsNutrientsEachGenerationList.Add(new Vector4(foodManager.curGlobalNutrients, foodManager.curGlobalFoodParticles, 0f, 0f));
-            
             curApproxGen++;            
         }
         /*else {
@@ -1640,6 +1699,7 @@ public class SimulationManager : Singleton<SimulationManager>
         // Inject pre-trained critters
         environmentFluidManager.UpdateSimulationClimate();
     }
+    
     private void AddNewHistoricalDataEntry() {
         // add new entries to historical data lists: 
         //Debug.Log("eggVol: " + simResourceManager.curGlobalEggSackVolume.ToString() + ", carrion: " + simResourceManager.curGlobalCarrionVolume.ToString());
@@ -1664,9 +1724,11 @@ public class SimulationManager : Singleton<SimulationManager>
         statsHistoryDeadAgentsList.Add(simResourceManager.curGlobalCarrionVolume);
         statsHistoryEggSacksList.Add(simResourceManager.curGlobalEggSackVolume);
     }
+    
     private void AddNewSpeciesDataEntry(int year) {
         masterGenomePool.AddNewYearlySpeciesStats(year);
     }
+    
     private void RefreshLatestHistoricalDataEntry() {
         statsNutrientsEachGenerationList[statsNutrientsEachGenerationList.Count - 1] = new Vector4(simResourceManager.curGlobalAlgaeReservoir, simResourceManager.curGlobalPlantParticles, simResourceManager.curGlobalEggSackVolume, simResourceManager.curGlobalCarrionVolume);
         statsHistoryBrainMutationFreqList[statsHistoryBrainMutationFreqList.Count - 1] = settingsManager.curTierBrainMutationFrequency;
@@ -1688,8 +1750,8 @@ public class SimulationManager : Singleton<SimulationManager>
         statsHistoryDeadAgentsList[statsHistoryOxygenList.Count - 1] = simResourceManager.curGlobalCarrionVolume;
         statsHistoryEggSacksList[statsHistoryOxygenList.Count - 1] = simResourceManager.curGlobalEggSackVolume;
     }
-    private void RefreshLatestSpeciesDataEntry() {
-        
+    
+    private void RefreshLatestSpeciesDataEntry() {   
         for(int i = 0; i < masterGenomePool.completeSpeciesPoolsList.Count; i++) {
             if(masterGenomePool.completeSpeciesPoolsList[i].avgPerformanceDataYearList.Count > 0) {
                 masterGenomePool.completeSpeciesPoolsList[i].avgPerformanceDataYearList[masterGenomePool.completeSpeciesPoolsList[i].avgPerformanceDataYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgPerformanceData;
@@ -1725,10 +1787,8 @@ public class SimulationManager : Singleton<SimulationManager>
     }
     
     public void AddNewSpecies(AgentGenome newGenome, int parentSpeciesID) {  // ********** Move this to MasterGenomePool class?
-        
         int newSpeciesID = masterGenomePool.completeSpeciesPoolsList.Count;
                
-        
         SpeciesGenomePool newSpecies = new SpeciesGenomePool(newSpeciesID, parentSpeciesID, curSimYear, simAgeTimeSteps, settingsManager.mutationSettingsVertebrates);
 
         // Random Body?
@@ -1753,10 +1813,9 @@ public class SimulationManager : Singleton<SimulationManager>
         
         for(int i = 0; i < masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgPerformanceDataYearList.Count; i++) {
             newSpecies.avgPerformanceDataYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgPerformanceDataYearList[i]);
-            
-        }  // set
+        }  
+        // set
         newSpecies.avgPerformanceData = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgPerformanceDataYearList[lastIndex];
-        
         
         if(newSpecies.depthLevel > masterGenomePool.currentHighestDepth) {
             masterGenomePool.currentHighestDepth = newSpecies.depthLevel;
@@ -1830,45 +1889,41 @@ public class SimulationManager : Singleton<SimulationManager>
     private StartPositionGenome GetInitialAgentSpawnPosition(int speciesIndex)
     {
         int numSpawnZones = startPositionsPresets.spawnZonesList.Count;
-
-        int randZone = UnityEngine.Random.Range(0, numSpawnZones);
-        
+        int randZone = Random.Range(0, numSpawnZones);
         float randRadius = startPositionsPresets.spawnZonesList[randZone].radius;
-
-        Vector2 randOffset = UnityEngine.Random.insideUnitCircle * randRadius;
-
+        Vector2 randOffset = Random.insideUnitCircle * randRadius;
         Vector3 startPos = new Vector3(startPositionsPresets.spawnZonesList[randZone].transform.position.x + randOffset.x, 
                                startPositionsPresets.spawnZonesList[randZone].transform.position.y + randOffset.y, 
                                0f);
         StartPositionGenome startPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
         return startPosGenome;
-
     }
+    
     private StartPositionGenome GetRandomFoodSpawnPosition() {
-
         Vector3 startPos;
         StartPositionGenome startPosGenome;
 
         int numSpawnZones = startPositionsPresets.spawnZonesList.Count;
+        int randZone = Random.Range(0, numSpawnZones);
 
-        int randZone = UnityEngine.Random.Range(0, numSpawnZones);
-
+        // *** WPP: replace magic numbers with variables
         for(int i = 0; i < 10; i++) {
 
-            randZone = UnityEngine.Random.Range(0, numSpawnZones);
+            randZone = Random.Range(0, numSpawnZones);
 
             if(startPositionsPresets.spawnZonesList[randZone].active) {
                 break;  // use this one
             }
-            else {
-                if(startPositionsPresets.spawnZonesList[randZone].refactoryCounter > 100) {
-                    startPositionsPresets.spawnZonesList[randZone].refactoryCounter = 0;
-                    startPositionsPresets.spawnZonesList[randZone].active = true;
-                    break;
-                }
-                else {
+            // WPP: redundant else conditions removed
+            //else {
+            if(startPositionsPresets.spawnZonesList[randZone].refactoryCounter > 100) {
+                startPositionsPresets.spawnZonesList[randZone].refactoryCounter = 0;
+                startPositionsPresets.spawnZonesList[randZone].active = true;
+                break;
+            //    }
+                //else {
                     // do nothing, try again
-                }
+                //}
             }
 
             if(i == 9) {
@@ -1878,9 +1933,7 @@ public class SimulationManager : Singleton<SimulationManager>
         }
         //Debug.Log("Rand Zone: " + randZone.ToString());
         float randRadius = startPositionsPresets.spawnZonesList[randZone].radius;
-
-        Vector2 randOffset = UnityEngine.Random.insideUnitCircle * randRadius;
-
+        Vector2 randOffset = Random.insideUnitCircle * randRadius;
         startPos = new Vector3(startPositionsPresets.spawnZonesList[randZone].transform.position.x + randOffset.x, 
                                startPositionsPresets.spawnZonesList[randZone].transform.position.y + randOffset.y, 
                                0f);
@@ -1890,7 +1943,6 @@ public class SimulationManager : Singleton<SimulationManager>
     }
     
     private Vector3 GetRandomPredatorSpawnPosition() {
-
         Vector3 startPos;
         int numSpawnZones = startPositionsPresets.spawnZonesList.Count;
         int randZone = UnityEngine.Random.Range(0, numSpawnZones);
@@ -1904,11 +1956,11 @@ public class SimulationManager : Singleton<SimulationManager>
     }    
     #endregion
 
-    #region Utility Functions // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& UTILITY FUNCTIONS! &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+    #region Utility Functions (not used) // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& UTILITY FUNCTIONS! &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
     /*public int GetAgentIndexByLottery(float[] rankedFitnessList, int[] rankedIndicesList, int speciesIndex) {
         int selectedIndex = 0;
 
-        int popSize = (numAgents / numSpecies);
+        int popSize = numAgents / numSpecies;
         int startIndex = popSize * speciesIndex;
         int endIndex = popSize * (speciesIndex + 1);
         
@@ -1918,7 +1970,7 @@ public class SimulationManager : Singleton<SimulationManager>
             totalFitness += rankedFitnessList[i];
         }
         // generate random lottery value between 0f and totalFitness:
-        float lotteryValue = UnityEngine.Random.Range(0f, totalFitness);
+        float lotteryValue = Random.Range(0f, totalFitness);
         float currentValue = 0f;
         for (int i = startIndex; i < endIndex; i++) {
             if (lotteryValue >= currentValue && lotteryValue < (currentValue + rankedFitnessList[i])) {

@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
+﻿
 public class SimEventData {
 
     public string name = "Null Event";
@@ -98,9 +95,14 @@ public class SimEventData {
         SpecPlant,
         SpecMeat
     }
-    
 
 	public SimEventData() {
 
+    }
+    
+    public SimEventData(string name, int timeStepActivated, SimEventCategories category = SimEventCategories.NPE) {
+        this.name = name;
+        this.category = category;
+        this.timeStepActivated = timeStepActivated;
     }
 }

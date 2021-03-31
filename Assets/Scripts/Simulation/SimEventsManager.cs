@@ -387,11 +387,13 @@ public class SimEventsManager {
 
         newEventData.isPositive = true;
         newEventData.polarity = true;
-        float randPolarity = UnityEngine.Random.Range(0f, 1f);
+        float randPolarity = Random.Range(0f, 1f);
+        
         if(randPolarity < 0.5f) {
             newEventData.polarity = false;
         }
-        float randSign = UnityEngine.Random.Range(0f, 1f);
+        
+        float randSign = Random.Range(0f, 1f);
         if(randSign < 0.5f) {
             newEventData.isPositive = false;
         }
