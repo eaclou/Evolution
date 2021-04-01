@@ -46,6 +46,10 @@ public class SpeciesOverviewUI : MonoBehaviour {
     
     public bool isShowingLineage = false;
 
+    
+    private Texture2D speciesPoolGenomeTex; // speciesOverviewPanel
+    public Material speciesPoolGenomeMat;
+
     //private SelectionGroup selectionGroup = SelectionGroup.Founder;
     public enum SelectionGroup {
         Founder,
@@ -342,8 +346,75 @@ public class SpeciesOverviewUI : MonoBehaviour {
 
     }
     
+    
+    public void CreateSpeciesLeaderboardGenomeTexture() {
+        int width = 32;
+        int height = 96;
+        speciesPoolGenomeTex.Resize(width, height); // pool.leaderboardGenomesList.Count);
+        SpeciesGenomePool pool = simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID];
+        //for(int i = 0; i < pool.leaderboardGenomesList.Count; i++) {
+        for(int x = 0; x < width; x++) {
+                        
+            for(int y = 0; y < height; y++) {
+
+                int xIndex = x; 
+                int yIndex = y;            
+                              
+                Color testColor;
+
+                if(x < pool.leaderboardGenomesList.Count) {
+                    AgentGenome genome = pool.leaderboardGenomesList[x].candidateGenome;
+                    if (genome.brainGenome.linkList.Count > y) {
+
+                        float weightVal = genome.brainGenome.linkList[y].weight;
+                        testColor = new Color(weightVal * 0.5f + 0.5f, weightVal * 0.5f + 0.5f, weightVal * 0.5f + 0.5f);
+                        if(weightVal < -0.25f) {
+                            testColor = Color.Lerp(testColor, Color.black, 0.15f);
+                        }
+                        else if(weightVal > 0.25f) {
+                            testColor = Color.Lerp(testColor, Color.white, 0.15f);
+                        }
+                        else {
+                            testColor = Color.Lerp(testColor, Color.gray, 0.15f);
+                        }
+                    }
+                    else {
+                        testColor = Color.black; // CLEAR
+                    
+                        //break;
+                    }
+                }
+                else {
+                    testColor = Color.black; // CLEAR
+                }
+
+                
+                
+                speciesPoolGenomeTex.SetPixel(xIndex, yIndex, testColor);
+            }
+
+        }
+        
+       
+        //}
+          
+            
+        
+        // Body Genome
+        //int xI = curLinearIndex % speciesPoolGenomeTex.width;
+        //int yI = Mathf.FloorToInt(curLinearIndex / speciesPoolGenomeTex.width);
+        
+        speciesPoolGenomeTex.Apply();
+    }
+
 	// Use this for initialization
 	void Start () {
         selectedButton = buttonFoundingGenome; // default
+
+        
+        speciesPoolGenomeTex = new Texture2D(16, 16, TextureFormat.RGBA32, false);
+        speciesPoolGenomeTex.filterMode = FilterMode.Point;
+        speciesPoolGenomeTex.wrapMode = TextureWrapMode.Clamp;
+        speciesPoolGenomeMat.SetTexture("_MainTex", speciesPoolGenomeTex);
 	}
 }

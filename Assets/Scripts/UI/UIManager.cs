@@ -12,6 +12,7 @@ public class UIManager : MonoBehaviour {
 
     #region attributes
     public SpeciesOverviewUI speciesOverviewUI;
+    public SpeciesGraphPanelUI speciesGraphPanelUI;
     public GenomeViewerUI genomeViewerUI;
     public AllSpeciesTreePanelUI allSpeciesTreePanelUI;
 

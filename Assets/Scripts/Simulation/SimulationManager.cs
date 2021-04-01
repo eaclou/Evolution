@@ -757,7 +757,7 @@ public class SimulationManager : Singleton<SimulationManager>
 
         //int numDoubles = Mathf.Min(graphDataGlobalNutrients.doublingCounter, 4);
         if(simAgeTimeSteps % 80 == 10) {
-            uiManager.globalResourcesUI.UpdateSpeciesTreeDataTextures(curSimYear);
+            uiManager.speciesGraphPanelUI.UpdateSpeciesTreeDataTextures(curSimYear);
 
             graphDataGlobalNutrients.AddNewEntry(simResourceManager.curGlobalNutrients);
             graphDataGlobalWaste.AddNewEntry(simResourceManager.curGlobalDetritus);
