@@ -125,32 +125,32 @@ public class ObserverModeUI : MonoBehaviour
             //    }
             //}
             
-            watcherUI.isPlantParticleHighlight = 0f;
-            watcherUI.isZooplanktonHighlight = 0f;
-            watcherUI.isVertebrateHighlight = 0f;
+            manager.isPlantParticleHighlight = 0f;
+            manager.isZooplanktonHighlight = 0f;
+            manager.isVertebrateHighlight = 0f;
             float hitboxRadius = 1f;
             if(cameraManager.isMouseHoverAgent) {  // move this to cursorCzar?
-                watcherUI.isVertebrateHighlight = 1f;
+                manager.isVertebrateHighlight = 1f;
 
                 textTooltip.text = "Critter #" + cameraManager.mouseHoverAgentRef.candidateRef.candidateID.ToString();
                 textTooltip.color = Color.white;
             }
             else {
                 if(plantDist < zoopDist && plantDist < hitboxRadius) {
-                    watcherUI.isPlantParticleHighlight = 1f;
+                    manager.isPlantParticleHighlight = 1f;
 
                     textTooltip.text = "Algae #" + vegetationManager.closestPlantParticleData.index.ToString();
                     textTooltip.color = Color.green;
                 }
                 if(plantDist > zoopDist && zoopDist < hitboxRadius) {
-                    watcherUI.isZooplanktonHighlight = 1f;
+                    manager.isZooplanktonHighlight = 1f;
 
                     textTooltip.text = "Microbe #" + zooplanktonManager.closestAnimalParticleData.index.ToString();
                     textTooltip.color = Color.yellow;
                 }
             }
 
-            if (watcherUI.isPlantParticleHighlight == 0f && watcherUI.isZooplanktonHighlight == 0f && watcherUI.isVertebrateHighlight == 0f) {
+            if (manager.isPlantParticleHighlight == 0f && manager.isZooplanktonHighlight == 0f && manager.isVertebrateHighlight == 0f) {
                 panelTooltip.SetActive(false);
             }
             else {

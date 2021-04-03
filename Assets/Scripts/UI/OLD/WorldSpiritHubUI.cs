@@ -350,7 +350,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
         //isPaletteOpen = true;
     }
     public void SetTargetFromWatcherUI() {
-        selectedWorldSpiritSlot = uiManagerRef.watcherUI.watcherSelectedTrophicSlotRef;
+        //selectedWorldSpiritSlot = uiManagerRef.watcherUI.watcherSelectedTrophicSlotRef;
         //uiManagerRef.panelFocus = PanelFocus.WorldHub;
         this.isOpen = true;
         //animatorWorldHubUI.SetBool("_IsOpen", true);

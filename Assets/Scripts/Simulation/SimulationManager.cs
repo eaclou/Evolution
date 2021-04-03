@@ -638,11 +638,13 @@ public class SimulationManager : Singleton<SimulationManager>
         if(targetAgent && uiManager.focusedCandidate != null &&
            targetAgent.candidateRef != null &&
            targetAgent.curLifeStage == Agent.AgentLifeStage.AwaitingRespawn && 
-           targetAgent.candidateRef.candidateID == uiManager.focusedCandidate.candidateID) { 
+           targetAgent.candidateRef.candidateID == uiManager.focusedCandidate.candidateID) {
+
+           cameraManager.isFollowingAgent = false;
             //if(uiManager.focusedCandidate != null) {
                 //if(cameraManager.targetAgent.candidateRef != null) {
                     //if(cameraManager.targetAgent.curLifeStage == Agent.AgentLifeStage.AwaitingRespawn && cameraManager.targetAgent.candidateRef.candidateID == uiManager.focusedCandidate.candidateID) {
-                uiManager.watcherUI.StopFollowingAgent();
+                //uiManager.watcherUI.StopFollowingAgent();
                     //}
                 //}                
             //}            

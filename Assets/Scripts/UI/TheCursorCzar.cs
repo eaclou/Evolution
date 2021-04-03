@@ -101,17 +101,11 @@ public class TheCursorCzar : Singleton<TheCursorCzar> {
                     
                     cameraManager.SetTargetAgent(agentRef, agentRef.index);
                     cameraManager.isFollowingAgent = true;
-
-                    //uiManagerRef.globalResourcesUI.selectedSpeciesIndex = agentRef.speciesIndex; // *************************************************
-
-                    uiManagerRef.watcherUI.StopFollowingPlantParticle();
-                    uiManagerRef.watcherUI.StopFollowingAnimalParticle();                        
-                    uiManagerRef.watcherUI.StartFollowingAgent();
-                    //uiManagerRef.globalResourcesUI.SetSelectedSpeciesUI(agentRef.speciesIndex);
-                    uiManagerRef.SetFocusedCandidateGenome(agentRef.candidateRef);
-                    //uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = uiManagerRef.gameManager.simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[agentRef.speciesIndex];
-                    uiManagerRef.watcherUI.watcherSelectedTrophicSlotRef = simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0];
+                    cameraManager.isFollowingPlantParticle = false; //uiManagerRef.watcherUI.StopFollowingPlantParticle();
+                    cameraManager.isFollowingAnimalParticle = false;   //                    uiManagerRef.watcherUI.StopFollowingAnimalParticle();                        
                     
+                    uiManagerRef.SetFocusedCandidateGenome(agentRef.candidateRef);
+                   
                 }
                 else {
                     // HOVER:

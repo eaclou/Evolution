@@ -718,9 +718,9 @@ public class BrushesUI : MonoBehaviour {
         
         uiManagerRef.curActiveTool = ToolType.Stir;
               
-        uiManagerRef.watcherUI.StopFollowingAgent();
-        uiManagerRef.watcherUI.StopFollowingPlantParticle();
-        uiManagerRef.watcherUI.StopFollowingAnimalParticle();
+        //uiManagerRef.watcherUI.StopFollowingAgent();
+        //uiManagerRef.watcherUI.StopFollowingPlantParticle();
+        //uiManagerRef.watcherUI.StopFollowingAnimalParticle();
         buttonBrushStir.GetComponent<Image>().color = buttonActiveColor; 
  
         //uiManagerRef.isBrushModeON_snoopingOFF = true; // ***** Switching to brushingMode!!! ***
@@ -768,9 +768,9 @@ public class BrushesUI : MonoBehaviour {
     }
     private void EnterCreationBrushMode() {
         uiManagerRef.curActiveTool = ToolType.Add;
-        uiManagerRef.watcherUI.StopFollowingAgent();
-        uiManagerRef.watcherUI.StopFollowingPlantParticle();
-        uiManagerRef.watcherUI.StopFollowingAnimalParticle();      
+        //uiManagerRef.watcherUI.StopFollowingAgent();
+        //uiManagerRef.watcherUI.StopFollowingPlantParticle();
+        //uiManagerRef.watcherUI.StopFollowingAnimalParticle();      
         //uiManagerRef.panelFocus = PanelFocus.Brushes;
     }
     

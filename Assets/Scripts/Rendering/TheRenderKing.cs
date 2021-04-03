@@ -2297,7 +2297,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         simData.biteAnimCycle = 0f; // (Time.realtimeSinceStartup * 1f) % 1f;
         bool isDead = !simManager.uiManager.focusedCandidate.isBeingEvaluated;
         if (isDead) {
-            simData.worldPos = Vector3.one * 128f * simManager.uiManager.mutationUI.renderSpaceMult;
+            simData.worldPos = Vector3.one * 128f * 0.034f;
             float angle = Mathf.Cos(0f * 0.67f) * 2f;
             float angle2 = angle; // + (float)selectedSpeciesID; // + Time.realtimeSinceStartup * 0.1f; // + (Mathf.PI * 0.5f);
             Vector2 facingDir = new Vector2(Mathf.Cos(angle2 + (Mathf.PI * 0.75f)), Mathf.Sin(angle2 + (Mathf.PI * 0.75f)));
@@ -2305,7 +2305,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             simData.heading = facingDir.normalized; //new Vector2(0f, 1f); //     facingDir.normalized;        //new Vector2(0f, 1f); //     
             float embryo = 1f;
             simData.embryoPercentage = embryo;
-            simData.growthPercentage = 1.5f * simManager.uiManager.mutationUI.critterSizeMult;
+            simData.growthPercentage = 1.5f * 1.5f;
             float decay = 0f;
             if (simManager.uiManager.focusedCandidate.allEvaluationsComplete) {
                 decay = 0.25f;
@@ -2324,7 +2324,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             simData.velocity = Vector2.zero; // facingDir.normalized * (simData.accel + simData.smoothedThrottle);
         }
         else {
-            simData.worldPos = Vector3.one * 128f * simManager.uiManager.mutationUI.renderSpaceMult;
+            simData.worldPos = Vector3.one * 128f * 0.034f;
             float angle = Mathf.Cos(Time.realtimeSinceStartup * 0.67f) * 2f;
             float angle2 = angle; // + (float)selectedSpeciesID; // + Time.realtimeSinceStartup * 0.1f; // + (Mathf.PI * 0.5f);
             Vector2 facingDir = new Vector2(Mathf.Cos(angle2 + (Mathf.PI * 0.75f)), Mathf.Sin(angle2 + (Mathf.PI * 0.75f)));
@@ -2332,7 +2332,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             simData.heading = facingDir.normalized; //new Vector2(0f, 1f); //     facingDir.normalized;        //new Vector2(0f, 1f); //     
             float embryo = 1f;
             simData.embryoPercentage = embryo;
-            simData.growthPercentage = 1.5f * simManager.uiManager.mutationUI.critterSizeMult;
+            simData.growthPercentage = 1.5f * 1.5f;
             float decay = 0f;
             simData.decayPercentage = decay;
             simData.foodAmount = 0f; // Mathf.Lerp(simData.foodAmount, simManager.agentsArray[i].coreModule.stomachContents / simManager.agentsArray[i].coreModule.stomachCapacity, 0.16f);
@@ -2350,8 +2350,8 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         }
 
         toolbarPortraitCritterSimDataArray[0] = simData;
-        simData.worldPos = simManager.uiManager.mutationUI.posNewGO.transform.position * simManager.uiManager.mutationUI.renderSpaceMult;
-        simData.growthPercentage = simManager.uiManager.mutationUI.critterSizeMult;
+        simData.worldPos = Vector3.one * 0.034f; // simManager.uiManager.mutationUI.renderSpaceMult;
+        simData.growthPercentage = 1.5f; // simManager.uiManager.mutationUI.critterSizeMult;
         toolbarPortraitCritterSimDataArray[1] = simData;
 
         simData.growthPercentage = 2f; // ************************************************
@@ -3437,7 +3437,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             float isHighlight = 0f;
             float isSelectedZoop = 0f; //***EC -- revisit
             float isSelectedPlant = 0f;
-            if (simManager.uiManager.watcherUI.watcherSelectedTrophicSlotRef != null) { // && simManager.uiManager.panelFocus == PanelFocus.Watcher) {
+            /*if (simManager.uiManager.watcherUI.watcherSelectedTrophicSlotRef != null) { // && simManager.uiManager.panelFocus == PanelFocus.Watcher) {
 
                 isHighlight = 1f;
                 if (simManager.uiManager.watcherUI.watcherSelectedTrophicSlotRef.kingdomID == 2 && simManager.uiManager.watcherUI.watcherSelectedTrophicSlotRef.tierID == 0) {
@@ -3446,7 +3446,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                 if (simManager.uiManager.watcherUI.watcherSelectedTrophicSlotRef.kingdomID == 1 && simManager.uiManager.watcherUI.watcherSelectedTrophicSlotRef.tierID == 1) {
                     //isSelectedPlant = 1f;
                 }
-            }
+            }*/
 
             if (true) { //simManager.trophicLayersManager.GetAlgaeOnOff()) {
 
@@ -3523,7 +3523,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                 plantParticleDisplayMat.SetInt("_HoverParticleIndex", Mathf.RoundToInt(simManager.vegetationManager.closestPlantParticleData.index));
                 //Debug.Log("_SelectedParticleIndex: " + Mathf.RoundToInt(simManager.vegetationManager.selectedPlantParticleIndex).ToString() + ", _HoverParticleIndex: " + Mathf.RoundToInt(simManager.vegetationManager.closestPlantParticleData.index).ToString());
                 plantParticleDisplayMat.SetFloat("_IsSelected", isSelectedPlant); // isSelected);
-                plantParticleDisplayMat.SetFloat("_IsHover", simManager.uiManager.watcherUI.isPlantParticleHighlight * isHighlight); // isHighlight); // isHover);
+                plantParticleDisplayMat.SetFloat("_IsHover", simManager.uiManager.isPlantParticleHighlight * isHighlight); // isHighlight); // isHover);
                 plantParticleDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
                 plantParticleDisplayMat.SetVector("_FogColor", simManager.fogColor);
                 plantParticleDisplayMat.SetVector("_SunDir", sunDirection);
@@ -3619,8 +3619,8 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                 animalParticleDisplayMat.SetInt("_ClosestParticleID", Mathf.RoundToInt(simManager.zooplanktonManager.closestZooplanktonToCursorIndex));
 
                 animalParticleDisplayMat.SetFloat("_IsSelected", isSelectedZoop);// isSelectedA);
-                animalParticleDisplayMat.SetFloat("_IsHover", simManager.uiManager.watcherUI.isZooplanktonHighlight * isHighlight); // isHighlight); // isHoverA); // isHoverA);
-                animalParticleDisplayMat.SetFloat("_IsHighlight", simManager.uiManager.watcherUI.isZooplanktonHighlight * isHighlight); // isHighlight); // isHighlight);
+                animalParticleDisplayMat.SetFloat("_IsHover", simManager.uiManager.isZooplanktonHighlight * isHighlight); // isHighlight); // isHoverA); // isHoverA);
+                animalParticleDisplayMat.SetFloat("_IsHighlight", simManager.uiManager.isZooplanktonHighlight * isHighlight); // isHighlight); // isHighlight);
                 animalParticleDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
                 animalParticleDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
                 animalParticleDisplayMat.SetFloat("_CamDistNormalized", camDistHighlightDeleteLater); // baronVonWater.camDistNormalized);

@@ -97,12 +97,19 @@ public class GenomeViewerUI : MonoBehaviour {
     public string tooltipString;
 
     public bool isPerformancePanelON;
-    public bool isSpecializationPanelOn;
-    //public bool isHistoryPanelOn;
+    public bool isSpecializationPanelOn;    
     public bool isBrainPanelOn;
 
+    private Texture2D brainGenomeTex; //Barcode
+    public Material brainGenomeMat;
 
-
+    void Start () {
+		isTooltipHover = false;
+        brainGenomeTex = new Texture2D(16, 16, TextureFormat.RGBA32, false);
+        brainGenomeTex.filterMode = FilterMode.Point;
+        brainGenomeTex.wrapMode = TextureWrapMode.Clamp;
+        brainGenomeMat.SetTexture("_MainTex", brainGenomeTex);
+	}
     public void UpdateUI(SpeciesGenomePool pool, CandidateAgentData candidate) {
         if(candidate != null) {
 
@@ -201,6 +208,46 @@ public class GenomeViewerUI : MonoBehaviour {
             //}
         }        
     }
+    
+    public void CreateBrainGenomeTexture(AgentGenome genome) {
+
+        int width = 256;
+        brainGenomeTex.Resize(width, 1); // pool.leaderboardGenomesList.Count);
+
+        for(int x = 0; x < width; x++) {
+
+            int xIndex = x;// i % brainGenomeTex.width;
+            int yIndex = 0; // i; // Mathf.FloorToInt(i / brainGenomeTex.width);
+                              
+            Color testColor;
+
+            if (genome.brainGenome.linkList.Count > x) {
+
+                float weightVal = genome.brainGenome.linkList[x].weight;
+                testColor = new Color(weightVal * 0.5f + 0.5f, weightVal * 0.5f + 0.5f, weightVal * 0.5f + 0.5f);
+                if(weightVal < -0.25f) {
+                    testColor = Color.Lerp(testColor, Color.black, 0.15f);
+                }
+                else if(weightVal > 0.25f) {
+                    testColor = Color.Lerp(testColor, Color.white, 0.15f);
+                }
+                else {
+                    testColor = Color.Lerp(testColor, Color.gray, 0.15f);
+                }
+            }
+            else {
+                testColor = Color.black; // CLEAR
+                    
+                //break;
+            }
+                
+            brainGenomeTex.SetPixel(xIndex, yIndex, testColor);
+        }
+        
+        
+        brainGenomeTex.Apply();
+    }    
+    
     private void UpdateSensorsUI(SpeciesGenomePool pool, AgentGenome genome) {
         imageSensorComms.GetComponent<GenomeButtonTooltipSource>().isSensorEnabled = genome.bodyGenome.communicationGenome.useComms;
         imageSensorWater.GetComponent<GenomeButtonTooltipSource>().isSensorEnabled = genome.bodyGenome.environmentalGenome.useWaterStats;
@@ -432,7 +479,5 @@ public class GenomeViewerUI : MonoBehaviour {
         
     }
     
-	void Start () {
-		isTooltipHover = false;
-	}
+	
 }

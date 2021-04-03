@@ -16,11 +16,11 @@ public class WatcherUI : MonoBehaviour {
     public AudioSource audioSource01;
     public AudioSource audioSource02;
     public AudioSource audioSource03;
-    private int callTickCounter = 90;
+    
     //private int callTickCooldownCounter = 0;
 
-    public AgentBehaviorOneHot agentBehaviorOneHot;
-    public WidgetAgentStatus widgetAgentStatus;
+    
+    
 
     //public Image imageWatcherButtonMIP;  // superscript button over watcher toolbar Button
     //public Image imageWatcherCurTargetLayer; // in watcher panel
@@ -40,9 +40,7 @@ public class WatcherUI : MonoBehaviour {
     //public Image imageWatcherInactiveOverlay;
     //public Text textIsSnooping;
 
-    public float isPlantParticleHighlight;
-    public float isZooplanktonHighlight;
-    public float isVertebrateHighlight;
+    
 
     public GameObject followCreaturePanel;
     public GameObject panelFollowStatus;
@@ -71,72 +69,14 @@ public class WatcherUI : MonoBehaviour {
     //public GameObject panelWatcherSpiritVertebratesHUD; // 0
     public Text textWatcherVertebrateHUD;
     public Text textVertebrateGen;
-    public Text textVertebrateLifestage;
-    public Text textVertebrateStatus;
+    
     //public GameObject panelWatcherVertebrateWidgets01;
     public GameObject panelWatcherSpiritVertebratesText;  // 1
     public Text textWatcherVertebrateText;
-    //public GameObject panelWatcherSpiritVertebratesGenome; // 2
-    //public Text textWatcherVertebrateGenome;
-    //public GameObject panelWatcherSpiritVertebratesBrain; // 3
-   // public Text textWatcherVertebrateBrain;
 
-    /*public GameObject panelWatcherSpiritZooplankton;
-    public Text textZoopGen;
-    public Text textZoopLifestage;
-    public Text textZoopSize;
-    public Text textZoopHealth;
-    public Text textZoopStatus;
-    public Text textZoopLog;
-
-    public GameObject panelWatcherSpiritPlants;
-    public Text textPlantGen;
-    public Text textPlantLifestage;
-    public Text textPlantSize;
-    public Text textPlantHealth;
-    public Text textPlantStatus;
-    public Text textPlantLog;
-    */
-    //public GameObject panelWatcherSpiritAlgae;
-    //public GameObject panelWatcherSpiritDecomposers;
-    //public GameObject panelWatcherSpiritTerrain;
-    //public Text textWatcherVertebratePageNum;
     public Text textWatcherTargetIndex;
     
-    //Inspect!!!
-    //public bool isWatcherPanelOn = false;
     
-    //public Button buttonInspectCyclePrevSpecies;
-    //public Button buttonInspectCycleNextSpecies;
-    public Button buttonInspectCyclePrevAgent;
-    public Button buttonInspectCycleNextAgent;
-    public Text textStomachContents;
-    public Text textEnergy;
-    public Text textHealth;
-    public Text textWaste;
-    //public Text textDimensionsWidth;
-    //public Text textDimensionsLength;
-    //public Text textSpeciesID;
-    //public Text textAgentID;
-    //public Text textLifeCycle;
-    //public GameObject panelInspectHUD;
-    //public Animator animatorInspectPanel;
-    //public Text textInspectData;
-
-    //public GameObject panelNewInspect;
-    public Text textNewInspectAgentName;
-    public Material newInspectAgentEnergyMat;
-    public Material newInspectAgentStaminaMat;
-    public Material newInspectAgentStomachMat;
-    public Material newInspectAgentAgeMat;
-    public Material newInspectAgentHealthMat;
-    public Material newInspectAgentThrottleMat;
-    public Material newInspectAgentCommsMat;
-    public Material newInspectAgentStateMat;
-    public Material newInspectAgentCurActivityMat;
-    public Material newInspectAgentWasteMat;
-    public Material newInspectAgentBrainMat;
-    public Text textNewInspectLog;
 
 
 	// Use this for initialization
@@ -192,8 +132,8 @@ public class WatcherUI : MonoBehaviour {
             
             textTargetLayer.text = "Species " + agent.speciesIndex.ToString() + ":  " + agent.candidateRef.candidateGenome.bodyGenome.coreGenome.name;
 
-            textNewInspectAgentName.text = "Critter #" + agent.candidateRef.candidateID.ToString(); //.candidateGenome.bodyGenome.coreGenome.name;
-            textNewInspectAgentName.color = textColorSecondary; // uiManagerRef.colorVertebratesLayer;
+            //textNewInspectAgentName.text = "Critter #" + agent.candidateRef.candidateID.ToString(); //.candidateGenome.bodyGenome.coreGenome.name;
+            //textNewInspectAgentName.color = textColorSecondary; // uiManagerRef.colorVertebratesLayer;
 
             if(agent.coreModule != null) {
                 
@@ -204,107 +144,13 @@ public class WatcherUI : MonoBehaviour {
                 //panelFollowGenome.SetActive(isFollowGenomePanelOn);
                 panelFollowHistory.SetActive(isFollowHistoryPanelOn);
                 
-                textStomachContents.text = "STOMACH " + Mathf.Clamp01(agent.coreModule.stomachContentsNorm * 1f).ToString("F5");
-                textEnergy.text = "ENERGY " + (agent.coreModule.energy / agent.currentBiomass).ToString("F5");
-                textHealth.text = "HEALTH " + agent.coreModule.healthBody.ToString("F5");
-                textWaste.text = "WASTE " + agent.wasteProducedLastFrame.ToString("F5");
-
-                textNewInspectLog.text = agent.stringCauseOfDeath.ToString() + ", " + agent.cooldownFrameCounter.ToString() + " / " + agent.cooldownDuration.ToString(); // agent.lastEvent;
-                newInspectAgentEnergyMat.SetFloat("_Value", Mathf.Clamp01((agent.coreModule.energy * Mathf.Sqrt(agent.currentBiomass)) * 0.33f));
-                newInspectAgentStaminaMat.SetFloat("_Value", Mathf.Clamp01(agent.coreModule.stamina[0] * 1f));
-                newInspectAgentStomachMat.SetFloat("_Value", Mathf.Clamp01(agent.coreModule.stomachContentsNorm * 1f));
-
-                newInspectAgentHealthMat.SetFloat("_HealthHead", Mathf.Clamp01(agent.coreModule.healthHead));
-                newInspectAgentHealthMat.SetFloat("_HealthBody", Mathf.Clamp01(agent.coreModule.healthBody));
-                newInspectAgentHealthMat.SetFloat("_HealthExternal", Mathf.Clamp01(agent.coreModule.healthExternal));
-                newInspectAgentAgeMat.SetFloat("_Value", Mathf.Clamp01((float)agent.ageCounter * 0.0005f));
-                newInspectAgentAgeMat.SetFloat("_Age", Mathf.RoundToInt(agent.ageCounter * 0.1f));
-                int developmentStateID = 0;
-                int curActivityID = 0;
-                if(agent.curLifeStage == Agent.AgentLifeStage.Dead) {
-                    developmentStateID = 7;
-                    //curActivityID = 7;
-                }
-                if(agent.curLifeStage == Agent.AgentLifeStage.Mature) {
-
-                    // state
-                    if (agent.ageCounter < 1000) {
-                        developmentStateID = 1;
-                    }
-                    else {
-                        if (agent.ageCounter < 10000) {
-                            developmentStateID = 2;
-                        }
-                    }
-
-                    if (agent.sizePercentage > 0.5f) {
-                        developmentStateID = 3;
-                    }
-                            
-                    // curActivity
-                    if(agent.isPregnantAndCarryingEggs) {
-                        curActivityID = 6;
-                    }
-                    if(agent.isFeeding) {
-                        curActivityID = 1;
-                    }
-                    if(agent.isAttacking) {
-                        curActivityID = 2;
-                    }
-                    if(agent.isDashing) {
-                        curActivityID = 3;
-                    }
-                    if(agent.isDefending) {
-                        curActivityID = 4;
-                    }
-                    if(agent.isResting) {
-                        curActivityID = 5;
-                    }
-                            
-                    if(agent.isCooldown) {
-                        curActivityID = 7;
-                    }
-                }
-                newInspectAgentStateMat.SetInt("_StateID", developmentStateID);
-                newInspectAgentCurActivityMat.SetInt("_CurActivityID", curActivityID);
-                newInspectAgentBrainMat.SetFloat("_Value", Mathf.Clamp01((float)agent.brain.axonList.Count * 0.05f + (float)agent.brain.neuronList.Count * 0.05f));
-                newInspectAgentWasteMat.SetFloat("_Value", Mathf.Clamp01(agent.wasteProducedLastFrame * 1000f));
-                newInspectAgentThrottleMat.SetFloat("_ThrottleX", Mathf.Clamp01(agent.smoothedThrottle.x));
-                newInspectAgentThrottleMat.SetFloat("_ThrottleY", Mathf.Clamp01(agent.smoothedThrottle.y));
-                newInspectAgentThrottleMat.SetTexture("_VelocityTex", simulationManager.environmentFluidManager._VelocityPressureDivergenceMain);
-                newInspectAgentThrottleMat.SetFloat("_AgentCoordX", agent.ownPos.x / SimulationManager._MapSize);
-                newInspectAgentThrottleMat.SetFloat("_AgentCoordY", agent.ownPos.y / SimulationManager._MapSize);
-                
                 TextCommonStatsA.gameObject.SetActive(false);  // non-vertebrates just share one textbox for now
 
                 //textWatcherVertebratePageNum.text = "PAGE " + (curWatcherPanelVertebratePageNum + 1).ToString() + " of 4";
                 textWatcherTargetIndex.text = "#" + agent.index.ToString();
                                 
-                textNewInspectLog.text = "";
+                //textNewInspectLog.text = "";
                 textWatcherVertebrateHUD.text = "";
-
-                string statusStr = "Alive!";
-                Color statusColor = Color.white;
-                Color healthColor = Color.green;
-                            
-                if(agent.curLifeStage == Agent.AgentLifeStage.Dead) {
-                    statusStr = "Dead! (Decaying)";
-                    statusColor = Color.red;
-                    healthColor = Color.red;
-                }
-                if(agent.curLifeStage == Agent.AgentLifeStage.Egg) {
-                    statusStr = "Egg!";
-                    healthColor = Color.yellow;
-                }
-                if(agent.coreModule.healthBody <= 0f) {
-                    statusStr = "Died of Injury";
-                }                
-
-                //textVertebrateGen.text = "Gen #" + agent.candidateRef.candidateGenome.bodyGenome.coreGenome.generation.ToString();
-                textVertebrateLifestage.text = "Age: " + (0.1f * agent.ageCounter).ToString("F0");// + ", stateID: " + developmentStateID;
-                textVertebrateLifestage.color = healthColor;
-                textVertebrateStatus.text = statusStr; // "activity: " + curActivityID;
-                
                                    
                 int maxEventsToDisplay = 8;
                 //int numEvents = Mathf.Min(agent.agentEventDataList.Count, maxEventsToDisplay);
@@ -362,28 +208,7 @@ public class WatcherUI : MonoBehaviour {
                 //int progressPercent = Mathf.RoundToInt((float)curCount / (float)maxCount * 100f);
                 //string lifeStageProgressTxt = " " + agent.curLifeStage.ToString() + " " + curCount.ToString() + "/" + maxCount.ToString() + "  " + progressPercent.ToString() + "% ";
                 
-                agentBehaviorOneHot.UpdateBars( agent.coreModule.healEffector[0],
-                                                agent.coreModule.dashEffector[0],
-                                                agent.coreModule.defendEffector[0],
-                                                agent.coreModule.mouthFeedEffector[0],
-                                                agent.coreModule.mouthAttackEffector[0],
-                                                agent.communicationModule.outComm0[0], agent.isCooldown);
-
-                if(agent.communicationModule.outComm3[0] > 0.25f) {
-                    callTickCounter = Mathf.Min(200, callTickCounter++);
-                            
-                }
-                else {
-                    callTickCounter = Mathf.Max(0, callTickCounter--);
-                }
-               
-                agentBehaviorOneHot.UpdateExtras(agent);
-
-                widgetAgentStatus.UpdateBars((agent.coreModule.healthBody + agent.coreModule.healthHead + agent.coreModule.healthExternal) / 3f,
-                                                agent.coreModule.energy * agent.currentBiomass,
-                                                agent.coreModule.stomachContentsNorm,
-                                                agent.currentBiomass,
-                                                agent.coreModule.stamina[0]);   
+                
             }
             else {
                 followCreaturePanel.SetActive(false);

@@ -18,10 +18,10 @@ public class UIManager : MonoBehaviour {
 
     public WorldSpiritHubUI worldSpiritHubUI;
     //public DebugPanelUI debugPanelUI;
-    public WatcherUI watcherUI;
+    //public WatcherUI watcherUI;
     public BrushesUI brushesUI;
-    public KnowledgeUI knowledgeUI;
-    public MutationUI mutationUI;
+    //public KnowledgeUI knowledgeUI;
+    //public MutationUI mutationUI;
     public GlobalResourcesUI globalResourcesUI;
     //public ClockUI clockUI;
     //public WildSpirit wildSpirit;
@@ -42,6 +42,9 @@ public class UIManager : MonoBehaviour {
     Color colorZooplanktonLayer => lookup.colorZooplanktonLayer;
     Color colorVertebratesLayer => lookup.colorVertebratesLayer;
     
+    public float isPlantParticleHighlight;
+    public float isZooplanktonHighlight;
+    public float isVertebrateHighlight;
        
     public bool updateTerrainAltitude;  // WPP: assigned but not used
     public float terrainUpdateMagnitude;// WPP: assigned but not used
@@ -210,7 +213,7 @@ public class UIManager : MonoBehaviour {
         worldSpiritHubUI.ClickWorldCreateNewSpecies(trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0]);
 
                 
-        knowledgeUI.isUnlocked = true;
+        //knowledgeUI.isUnlocked = true;
         //AnnounceUnlockKnowledgeSpirit();
         //knowledgeUI.OpenKnowledgePanel();
         //worldSpiritHubUI.OpenWorldTreeSelect();                
@@ -227,8 +230,8 @@ public class UIManager : MonoBehaviour {
         worldSpiritHubUI.ClickWorldCreateNewSpecies(trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0]);
                   
 
-        watcherUI.isUnlocked = true;
-        watcherUI.ClickToolButton();
+        //watcherUI.isUnlocked = true;
+        //watcherUI.ClickToolButton();
         //panelFocus = PanelFocus.Watcher;
 
         //watcherUI.animatorWatcherUI.SetBool("_IsOpen", true);
@@ -245,7 +248,7 @@ public class UIManager : MonoBehaviour {
         unlockedAnnouncementSlotRef = trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0];                
         worldSpiritHubUI.ClickWorldCreateNewSpecies(trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0]);
          
-        mutationUI.isUnlocked = true;
+        //mutationUI.isUnlocked = true;
 
         //mutationUI.ClickToolButton();
         //worldSpiritHubUI.OpenWorldTreeSelect();
@@ -829,9 +832,9 @@ public class UIManager : MonoBehaviour {
 
         trophicLayersManager.CheatUnlockAll();
 
-        mutationUI.isUnlocked = true;
-        knowledgeUI.isUnlocked = true;
-        watcherUI.isUnlocked = true;
+        //mutationUI.isUnlocked = true;
+        //knowledgeUI.isUnlocked = true;
+        //watcherUI.isUnlocked = true;
         brushesUI.isUnlocked = true;
     }
     

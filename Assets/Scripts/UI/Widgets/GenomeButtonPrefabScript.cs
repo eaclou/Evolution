@@ -49,7 +49,8 @@ public class GenomeButtonPrefabScript : MonoBehaviour {
             }
             if(isFound) {
                 cameraManager.SetTargetAgent(simulationManager.agentsArray[agentIndex], agentIndex);
-                uiManagerRef.watcherUI.StartFollowingAgent();
+                uiManagerRef.SetFocusedCandidateGenome(uiManagerRef.focusedCandidate); //.StartFollowingAgent();
+                cameraManager.isFollowingAgent = true;
             }
         }     
     }
