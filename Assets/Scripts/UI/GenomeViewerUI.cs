@@ -111,7 +111,7 @@ public class GenomeViewerUI : MonoBehaviour {
         brainGenomeMat.SetTexture("_MainTex", brainGenomeTex);
 	}
     public void UpdateUI(SpeciesGenomePool pool, CandidateAgentData candidate) {
-        if(candidate != null) {
+        if(candidate != null && candidate.candidateGenome != null) {
 
             string titleString = "<size=18>Critter</size> " + candidate.candidateID.ToString() + "<size=18>";
             if(candidate.isBeingEvaluated) {
@@ -249,6 +249,9 @@ public class GenomeViewerUI : MonoBehaviour {
     }    
     
     private void UpdateSensorsUI(SpeciesGenomePool pool, AgentGenome genome) {
+        if (genome.bodyGenome.foodGenome == null) return;
+
+
         imageSensorComms.GetComponent<GenomeButtonTooltipSource>().isSensorEnabled = genome.bodyGenome.communicationGenome.useComms;
         imageSensorWater.GetComponent<GenomeButtonTooltipSource>().isSensorEnabled = genome.bodyGenome.environmentalGenome.useWaterStats;
         imageSensorWalls.GetComponent<GenomeButtonTooltipSource>().isSensorEnabled = (genome.bodyGenome.environmentalGenome.useCardinals || genome.bodyGenome.environmentalGenome.useDiagonals);

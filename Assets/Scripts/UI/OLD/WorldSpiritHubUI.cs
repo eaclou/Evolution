@@ -127,18 +127,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
 
     private void UpdateUI() {
         TrophicLayersManager layerManager = simulationManager.trophicLayersManager;
-
-        //textCurrencies.text = "Tier: " + tierA.ToString() + "\n(" + currencyB.ToString() + " of " + "16" + ") to next Tier"; // More # For Tier Up"; // "CurrencyA: " + currencyA.ToString() + "\nCurrencyB: " + currencyB.ToString();
-        //textCurrencies.text = "WORLD SIZE: " + uiManagerRef.gameManager.theRenderKing.baronVonTerrain._WorldRadius.ToString();
-
-        //buttonKnowledgeLink.interactable = true;
-        //buttonMutationLink.interactable = false;3
-        
-        
-        
-
-        //string essenceDescriptionStr = "";
-
+        /*
         bool isSelectedDecomposers = false;
         bool isSelectedAlgae = false;
         bool isSelectedPlants0 = false;
@@ -273,7 +262,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
                 textTotalMass.text = "Speed: " + simulationManager.environmentFluidManager.curTierWaterCurrents.ToString();
             }
         }
-
+        */
         isDim = false;
         //imageBitInfo.gameObject.SetActive(isDim);
         textSelectedEssenceName.gameObject.SetActive(!isDim);
@@ -281,7 +270,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
         //buttonBrushesLink.gameObject.SetActive(!isDim);
         //buttonKnowledgeLink.gameObject.SetActive(!isDim);
         //buttonMutationLink.gameObject.SetActive(!isDim);
-
+        /*
         uiManagerRef.SetToolbarButtonStateUI(isDim, ref buttonWorldSpiritDecomposers, layerManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status, isSelectedDecomposers);
 
         uiManagerRef.SetToolbarButtonStateUI(isDim, ref buttonWorldSpiritAlgae, layerManager.kingdomPlants.trophicTiersList[0].trophicSlots[0].status, isSelectedAlgae);
@@ -302,7 +291,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
         uiManagerRef.SetToolbarButtonStateUI(isDim, ref buttonWorldSpiritOther0, layerManager.kingdomOther.trophicTiersList[0].trophicSlots[0].status, isSelectedMinerals);
         uiManagerRef.SetToolbarButtonStateUI(isDim, ref buttonWorldSpiritOther1, layerManager.kingdomOther.trophicTiersList[0].trophicSlots[1].status, isSelectedWater);
         uiManagerRef.SetToolbarButtonStateUI(isDim, ref buttonWorldSpiritOther2, layerManager.kingdomOther.trophicTiersList[0].trophicSlots[2].status, isSelectedAir);
-
+        */
         //imageSelectedTargetLayer.sprite = curIconSprite;
         //imageSelectedTargetLayer.color = curIconColor;
 

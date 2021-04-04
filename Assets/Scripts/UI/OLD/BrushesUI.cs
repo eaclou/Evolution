@@ -443,7 +443,7 @@ public class BrushesUI : MonoBehaviour {
         TrophicLayersManager layerManager = simulationManager.trophicLayersManager;  
         
         Color iconColor = Color.white;
-
+        /*
         bool isSelectedDecomposers = false;
         bool isSelectedAlgae = false;
         bool isSelectedPlants = false;
@@ -539,9 +539,9 @@ public class BrushesUI : MonoBehaviour {
                 }
             }
         }
-
-        bool dimButtons = true;
-        
+        */
+        //bool dimButtons = true;
+        /*
         uiManagerRef.SetToolbarButtonStateUI(dimButtons, ref buttonBrushLinkedSpiritDecomposers, layerManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status, isSelectedDecomposers);
 
         uiManagerRef.SetToolbarButtonStateUI(dimButtons, ref buttonBrushLinkedSpiritAlgae, layerManager.kingdomPlants.trophicTiersList[0].trophicSlots[0].status, isSelectedAlgae);
@@ -562,7 +562,7 @@ public class BrushesUI : MonoBehaviour {
         uiManagerRef.SetToolbarButtonStateUI(dimButtons, ref buttonBrushLinkedSpiritOther0, layerManager.kingdomOther.trophicTiersList[0].trophicSlots[0].status, isSelectedMinerals);
         uiManagerRef.SetToolbarButtonStateUI(dimButtons, ref buttonBrushLinkedSpiritOther1, layerManager.kingdomOther.trophicTiersList[0].trophicSlots[1].status, isSelectedWater);
         uiManagerRef.SetToolbarButtonStateUI(dimButtons, ref buttonBrushLinkedSpiritOther2, layerManager.kingdomOther.trophicTiersList[0].trophicSlots[2].status, isSelectedAir);
-
+        */
     }
 	
     public void ApplyCreationBrush() {

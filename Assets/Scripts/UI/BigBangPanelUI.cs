@@ -18,7 +18,9 @@ public class BigBangPanelUI : MonoBehaviour
     public int bigBangFramesCounter = 0;
 
     public void Tick() {
-        if(!simulationManager._BigBangOn) return;
+        //Debug.Log("IS THIS RUNNING!?!?!? " + bigBangFramesCounter.ToString());
+
+        if (!simulationManager._BigBangOn) return;
 
         panelBigBang.SetActive(true);
         bigBangFramesCounter += 1;

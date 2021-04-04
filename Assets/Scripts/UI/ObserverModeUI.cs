@@ -62,7 +62,11 @@ public class ObserverModeUI : MonoBehaviour
     // ***WPP: break into separate functions, call from here
     // (start by commenting blocks of code)
     public void Tick()
-    {                 
+    {
+        if(vegetationManager == null) {
+            return;
+        }
+        //Debug.Log("ObserverMode ON");
         if (isAnnouncementTextOn) {
             panelPendingClickPrompt.SetActive(true);
             timerAnnouncementTextCounter++;
@@ -92,6 +96,10 @@ public class ObserverModeUI : MonoBehaviour
             }   
         }
         else {
+            //Debug.Log(vegetationManager.ToString());
+            //Debug.Log(vegetationManager.closestPlantParticleData.ToString());
+            //Debug.Log(theCursorCzar.curMousePositionOnWaterPlane.ToString());
+            
             //int selectedPlantID = vegetationManager.selectedPlantParticleIndex;
             //int closestPlantID = vegetationManager.closestPlantParticleData.index;
             float plantDist = (vegetationManager.closestPlantParticleData.worldPos - new Vector2(theCursorCzar.curMousePositionOnWaterPlane.x, theCursorCzar.curMousePositionOnWaterPlane.y)).magnitude;

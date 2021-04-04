@@ -11,29 +11,31 @@ public enum ToolType {
 public class UIManager : MonoBehaviour {
 
     #region attributes
-    public SpeciesOverviewUI speciesOverviewUI;
-    public SpeciesGraphPanelUI speciesGraphPanelUI;
-    public GenomeViewerUI genomeViewerUI;
-    public AllSpeciesTreePanelUI allSpeciesTreePanelUI;
-
-    public WorldSpiritHubUI worldSpiritHubUI;
-    //public DebugPanelUI debugPanelUI;
-    //public WatcherUI watcherUI;
-    public BrushesUI brushesUI;
-    //public KnowledgeUI knowledgeUI;
-    //public MutationUI mutationUI;
-    public GlobalResourcesUI globalResourcesUI;
-    //public ClockUI clockUI;
-    //public WildSpirit wildSpirit;
-    //public FeatsUI featsUI;
-    
-        
-    public GameOptionsManager gameOptionsManager;
-    
     SimulationManager simulationManager => SimulationManager.instance;
     MasterGenomePool genomePool => simulationManager.masterGenomePool;
     TrophicLayersManager trophicLayersManager => simulationManager.trophicLayersManager;
     TheRenderKing theRenderKing => TheRenderKing.instance;
+    TheCursorCzar theCursorCzar => TheCursorCzar.instance;
+
+    public SpeciesOverviewUI speciesOverviewUI;
+    public SpeciesGraphPanelUI speciesGraphPanelUI;
+    public GenomeViewerUI genomeViewerUI;
+    public AllSpeciesTreePanelUI allSpeciesTreePanelUI;
+    public BigBangPanelUI bigBangPanelUI;
+    public ClockPanelUI clockPanelUI;
+    public ObserverModeUI observerModeUI;
+    public DebugPanelUI debugPanelUI;
+    public WorldSpiritHubUI worldSpiritHubUI; // ***EC remove after cannibalizing this! (tied into initialization atm)
+    public BrushesUI brushesUI;
+    public GlobalResourcesUI globalResourcesUI;
+    //public WatcherUI watcherUI;    
+    //public KnowledgeUI knowledgeUI;
+    //public MutationUI mutationUI;    
+    //public ClockUI clockUI;
+    //public WildSpirit wildSpirit;
+    //public FeatsUI featsUI;    
+        
+    public GameOptionsManager gameOptionsManager;    
     
     Lookup lookup => Lookup.instance;
     Color colorDecomposersLayer => lookup.colorDecomposersLayer;
@@ -84,6 +86,14 @@ public class UIManager : MonoBehaviour {
     public bool isBrushAddingAgents = false; // WPP: assigned but not used
     public int brushAddAgentCounter = 0;
     public int framesPerAgentSpawn = 3;
+
+    [SerializeField] MainMenuUI mainMenu;
+    [SerializeField] int timeStepsToRebuildGenomeButtons = 111;
+    SpeciesGenomePool pool;
+    const string ANIM_FINISHED = "_AnimFinished";
+    List<SpeciesGenomePool> speciesPools => genomePool.completeSpeciesPoolsList;
+    bool isRebuildTimeStep => simulationManager.simAgeTimeSteps % timeStepsToRebuildGenomeButtons == 1;
+    
     
     #endregion
 
@@ -140,7 +150,8 @@ public class UIManager : MonoBehaviour {
     private void EnterPlayingUI() {   //// ******* this happens everytime quit to menu and resume.... *** needs to change!!! ***
         panelLoading.SetActive(false);
         panelPlaying.SetActive(true);
-        
+
+        Debug.Log("EnterPlayingUI() " + Time.timeScale.ToString());
         //Animation Big Bang here
         simulationManager._BigBangOn = true;
         //worldSpiritHubUI.OpenWorldTreeSelect();
@@ -161,21 +172,40 @@ public class UIManager : MonoBehaviour {
     #endregion
 
     #region UPDATE UI PANELS FUNCTIONS!!! :::
-    
-    [SerializeField] MainMenuUI mainMenu;
-    [SerializeField] int timeStepsToRebuildGenomeButtons = 111;
-    SpeciesGenomePool pool;
-    const string ANIM_FINISHED = "_AnimFinished";
-    List<SpeciesGenomePool> speciesPools => genomePool.completeSpeciesPoolsList;
-    bool isRebuildTimeStep => simulationManager.simAgeTimeSteps % timeStepsToRebuildGenomeButtons == 1;
-    
+    void Update() {                                        // ***EC CLEAN THIS CRAP UP
+        if(!simulationManager.loadingComplete) return;
+        bigBangPanelUI.Tick(); ////UpdateBigBangPanel();
+        if(simulationManager._BigBangOn) return;
+        
+        observerModeUI.Tick(); //UpdateObserverModeUI();  // <== this is the big one *******  
+        // ^^^  Need to Clean this up and replace with better approach ***********************        
+        theCursorCzar.UpdateCursorCzar();  // this will assume a larger role
+        brushesUI.UpdateBrushesUI();        
+        globalResourcesUI.UpdateGlobalResourcesPanelUpdate();
 
+
+        clockPanelUI.Tick(); // //UpdateClockPanelUI();
+
+        SpeciesGenomePool pool = simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesID]; // ***EC Move into genomeViewerUI.Tick()
+        if(focusedCandidate != null && focusedCandidate.candidateGenome != null) {
+            genomeViewerUI.UpdateUI(pool, focusedCandidate);
+
+            if(simulationManager.simAgeTimeSteps % 111 == 1) {
+                speciesOverviewUI.RebuildGenomeButtons();  
+            }
+        }
+
+        debugPanelUI.UpdateDebugUI();
+              
+        //UpdatePausedUI(); 
+
+    }
 
     public void SetFocus()
     {
         pool = speciesPools[selectedSpeciesID];
         
-        if(focusedCandidate != null) {
+        if(focusedCandidate != null && focusedCandidate.candidateGenome != null) {
             genomeViewerUI.UpdateUI(pool, focusedCandidate);
 
             if(isRebuildTimeStep) {
@@ -183,13 +213,11 @@ public class UIManager : MonoBehaviour {
             }
         }
         
-        //if(animatorSpiritUnlock.GetBool(ANIM_FINISHED)) {
-            //SpiritUnlockComplete();
-            //animatorSpiritUnlock.SetBool(ANIM_FINISHED, false);
-        //}
     }
     
     public void InitialUnlocks() {
+        Debug.Log("InitialUnlocks WATER UNLOCKED!!! " + unlockCooldownCounter.ToString()); // + ", " + BigBangPanelUI.bigBangFramesCounter.ToString());
+
         focusedCandidate = simulationManager.masterGenomePool.completeSpeciesPoolsList[0].candidateGenomesList[0];
         
         theRenderKing.baronVonTerrain.IncrementWorldRadius(5.7f);
@@ -202,7 +230,7 @@ public class UIManager : MonoBehaviour {
         brushesUI.selectedEssenceSlot = trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];
 
         trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[1].status = TrophicSlot.SlotStatus.On;
-        Debug.Log("WATER UNLOCKED!!! " + unlockCooldownCounter.ToString());
+        
                 
         unlockedAnnouncementSlotRef = trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[1];
                 
@@ -211,12 +239,6 @@ public class UIManager : MonoBehaviour {
         unlockedAnnouncementSlotRef = trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0];
                 
         worldSpiritHubUI.ClickWorldCreateNewSpecies(trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0]);
-
-                
-        //knowledgeUI.isUnlocked = true;
-        //AnnounceUnlockKnowledgeSpirit();
-        //knowledgeUI.OpenKnowledgePanel();
-        //worldSpiritHubUI.OpenWorldTreeSelect();                
 
         trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
                 
@@ -228,14 +250,7 @@ public class UIManager : MonoBehaviour {
                 
         unlockedAnnouncementSlotRef = trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0];
         worldSpiritHubUI.ClickWorldCreateNewSpecies(trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0]);
-                  
-
-        //watcherUI.isUnlocked = true;
-        //watcherUI.ClickToolButton();
-        //panelFocus = PanelFocus.Watcher;
-
-        //watcherUI.animatorWatcherUI.SetBool("_IsOpen", true);
-                
+                 
         trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
                 
         unlockedAnnouncementSlotRef = trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[0];                
@@ -548,11 +563,7 @@ public class UIManager : MonoBehaviour {
     }*/
             
     public void CheckForAnnouncements() {
-    //announceAlgaeCollapsePossible = false;
-    //private bool announceAlgaeCollapseOccurred = false;
-    //private bool announceAgentCollapsePossible = false; 
-    //private bool announceAgentCollapseOccurred = false;
-
+    
         // ***WPP: replace nested conditions with early exit 
         if(!announceAlgaeCollapseOccurred) {
             if(announceAlgaeCollapsePossible) {
@@ -560,43 +571,11 @@ public class UIManager : MonoBehaviour {
                     announceAlgaeCollapsePossible = false;
                     announceAlgaeCollapseOccurred = true;
 
-                    //panelPendingClickPrompt.GetComponentInChildren<Text>().text = "<color=#DDDDDDFF>Algae Died from lack of Nutrients!</color>\nAdd Decomposers to recycle waste";
-                    //panelPendingClickPrompt.GetComponentInChildren<Text>().color = colorDecomposersLayer;
-                    //panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
                     panelPendingClickPrompt.Narrate("<color=#DDDDDDFF>Algae Died from lack of Nutrients!</color>\nAdd Decomposers to recycle waste", colorDecomposersLayer);
                     isAnnouncementTextOn = true;
                 }
             }
         }
-        // Enable checking for this announcement happening -- algae collapse requires it to have reached full population at some point
-        /*if(trophicLayersManager.GetAlgaeOnOff()) {
-            if(gameManager.simulationManager.simResourceManager.curGlobalAlgaeParticles > 100f) {
-                announceAlgaeCollapsePossible = true;
-            }
-        }*/
-
-        // AGENTS:
-        /*if(!announceAgentCollapseOccurred) {
-            if(announceAgentCollapsePossible) {
-                if(gameManager.simulationManager.simResourceManager.curGlobalAgentParticles < 10f) {
-                    announceAgentCollapsePossible = false;
-                    announceAgentCollapseOccurred = true;
-
-                    panelPendingClickPrompt.GetComponentInChildren<Text>().text = "Vertebrate Population Collapsed! (Lack of Oxygen)";
-                    panelPendingClickPrompt.GetComponentInChildren<Text>().color = colorPlantsLight;
-                    isAnnouncementTextOn = true;
-                }
-            }
-            else {
-
-            }
-        }
-        // Enable checking for this announcement happening -- algae collapse requires it to have reached full population at some point
-        if(trophicLayersManager.GetAlgaeOnOff()) {
-            if(gameManager.simulationManager.simResourceManager.curGlobalAlgaeParticles > 100f) {
-                announceAlgaeCollapsePossible = true;
-            }
-        }*/
     }
 
     public Vector4 SampleTexture(RenderTexture tex, Vector2 uv) {
@@ -630,6 +609,7 @@ public class UIManager : MonoBehaviour {
     }
     */
     
+        /*
     public void SetToolbarButtonStateUI(bool isDim, ref Button button, TrophicSlot.SlotStatus slotStatus, bool isSelected) {
 
         button.gameObject.SetActive(true);
@@ -697,6 +677,7 @@ public class UIManager : MonoBehaviour {
             //button.gameObject.SetActive(true);
         }  
     }
+    */
     
     #endregion
 
