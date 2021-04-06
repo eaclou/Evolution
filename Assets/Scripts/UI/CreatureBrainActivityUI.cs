@@ -16,7 +16,7 @@ public class CreatureBrainActivityUI : MonoBehaviour
 
     private int callTickCounter = 90;
 
-    private void UpdateUI() {
+    public void Tick() {
 
         int critterIndex = cameraManager.targetAgentIndex;
         Agent agent = simulationManager.agentsArray[critterIndex];

@@ -6,11 +6,8 @@ using UnityEngine;
 public class CameraManager : Singleton<CameraManager> {
 
     public Vector3 curCameraFocusPivotPos;
-    //private Vector3 prevCameraFocusPivotPos;
     public Vector3 curCameraPos;
-    //private Vector3 prevCameraPos;
     public float curTiltAngleDegrees;
-    //private float prevTiltAngleDegrees;
 
     public Vector3 masterTargetCamPosition;
 
@@ -27,9 +24,7 @@ public class CameraManager : Singleton<CameraManager> {
     public Vector2 targetPlantWorldPos;
     public bool isFollowingAnimalParticle = false;
     public Vector2 targetZooplanktonWorldPos;
-    //public Agent targetAgent;
-    //public int targetAgentIndex = 0;
-
+    
     public float masterTargetDistance = 50f;
     public float masterTargetTiltAngle = 33f;
     public float masterLerpSpeed = 2.5f; 

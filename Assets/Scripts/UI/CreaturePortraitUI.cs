@@ -5,4 +5,7 @@ using UnityEngine;
 public class CreaturePortraitUI : MonoBehaviour
 {
     
+    public void Tick() {
+
+    }
 }

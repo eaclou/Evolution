@@ -748,16 +748,12 @@ public class SimulationManager : Singleton<SimulationManager>
             simEventsManager.curEventBucks += 5; // temporarily high!
             simAgeYearCounter = 0;
 
-            //energyDifficultyMultiplier = Mathf.Lerp(3f, 1f, (float)curSimYear / 100f);
-            //Debug.Log("energyDifficultyMultiplier: " + energyDifficultyMultiplier.ToString());
-            
             AddNewHistoricalDataEntry();
             AddNewSpeciesDataEntry(curSimYear);
             
             CheckForYearEvent();
         }
 
-        //int numDoubles = Mathf.Min(graphDataGlobalNutrients.doublingCounter, 4);
         if(simAgeTimeSteps % 80 == 10) {
             uiManager.speciesGraphPanelUI.UpdateSpeciesTreeDataTextures(curSimYear);
 

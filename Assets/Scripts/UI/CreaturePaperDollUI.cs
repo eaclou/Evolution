@@ -32,7 +32,7 @@ public class CreaturePaperDollUI : MonoBehaviour
     public Text textVertebrateLifestage;
     public Text textVertebrateStatus;
 
-    private void UpdateUI() {
+    public void Tick() {
 
         int critterIndex = cameraManager.targetAgentIndex;
         Agent agent = simulationManager.agentsArray[critterIndex];

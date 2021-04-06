@@ -28,6 +28,10 @@ public class UIManager : MonoBehaviour {
     public WorldSpiritHubUI worldSpiritHubUI; // ***EC remove after cannibalizing this! (tied into initialization atm)
     public BrushesUI brushesUI;
     public GlobalResourcesUI globalResourcesUI;
+    public CreatureBrainActivityUI creatureBrainActivityUI;
+    public CreaturePaperDollUI creaturePaperDollUI;
+    public CreaturePortraitUI creaturePortraitUI;
+    public CreatureLifeEventsLogUI creatureLifeEventsLogUI;
     //public WatcherUI watcherUI;    
     //public KnowledgeUI knowledgeUI;
     //public MutationUI mutationUI;    
@@ -183,6 +187,10 @@ public class UIManager : MonoBehaviour {
         brushesUI.UpdateBrushesUI();        
         globalResourcesUI.UpdateGlobalResourcesPanelUpdate();
 
+        creatureBrainActivityUI.Tick();
+        creaturePaperDollUI.Tick();
+        creaturePortraitUI.Tick();
+        creatureLifeEventsLogUI.Tick();
 
         clockPanelUI.Tick(); // //UpdateClockPanelUI();
 

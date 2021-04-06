@@ -15,12 +15,12 @@ public class SpeciesGraphPanelUI : MonoBehaviour
     public int selectedSpeciesStatsIndex;
         
     public Text textGraphCategory;
-    //public GameObject graphPanelGO;
     public Text textGraphStatsLeft;
     public Text textGraphStatsCenter;
     public Text textGraphStatsRight;
-    //public Image imageCreaturePortrait;
 
+    public GameObject graphPanelGO;
+    public Image speciesGraphImage;
     public Material speciesGraphMatLeft;
     public Material speciesGraphMatCenter;
     public Material speciesGraphMatRight;
@@ -287,6 +287,7 @@ public class SpeciesGraphPanelUI : MonoBehaviour
     }
 
     private void RefreshGraphMaterial() {
+        Debug.Log("RefreshGraphMaterial " + statsTreeOfLifeSpeciesTexArray[0].width.ToString() + ", " + maxValuesStatArray[0].ToString());
         SpeciesGenomePool pool = masterGenomePool.completeSpeciesPoolsList[simulationManager.uiManager.selectedSpeciesID];
 
         switch(selectedGraphCategory) {
@@ -437,11 +438,11 @@ public class SpeciesGraphPanelUI : MonoBehaviour
                 break;
         }
 
-        //speciesGraphImage.material = speciesGraphMat;
-        //speciesGraphImage.gameObject.SetActive(false);
-        //speciesGraphImage.gameObject.SetActive(true);
+        speciesGraphImage.material = speciesGraphMatLeft;
+        speciesGraphImage.gameObject.SetActive(false);
+        speciesGraphImage.gameObject.SetActive(true);
 
-        //graphPanelGO.gameObject.SetActive(false);
-        //graphPanelGO.gameObject.SetActive(true);
+        graphPanelGO.gameObject.SetActive(false);
+        graphPanelGO.gameObject.SetActive(true);
     }
 }
