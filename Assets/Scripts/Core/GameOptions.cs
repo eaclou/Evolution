@@ -7,7 +7,7 @@ public class GameOptions {
 
     public bool isFullscreen;
     public int vSync;
-    public QualitySettingId fluidPhysicsQuality;     // ***WPP replace with enum
+    public QualitySettingId fluidPhysicsQuality; 
     public QualitySettingId simulationComplexity;
     
     public int resolutionIndex;    

@@ -3,7 +3,8 @@ using UnityEngine;
 
 public enum QualitySettingId { Low, Medium, High, Max }
 
-// * Consider splitting into fluid physics and simulation complexity
+// * Consider splitting into fluid physics and simulation complexity <- if functions accumulate/diverge
+// * Consider upgrading Binding struct into an array of SOs <- if need to add open-ended # of variants
 [CreateAssetMenu(menuName = "ScriptableObjects/Quality Settings")]
 public class QualitySettingData : ScriptableObject
 {

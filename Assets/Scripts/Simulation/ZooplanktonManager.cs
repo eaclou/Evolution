@@ -491,6 +491,8 @@ public class ZooplanktonManager {
         
     }
 
+    // *** WPP: use null propagation
+    // For example: animalParticlesCBuffer?.Release();
     public void ClearBuffers() {
          /*       
         if(animalParticlesNearestCritters1 != null) {

@@ -280,8 +280,8 @@ public class SimulationManager : Singleton<SimulationManager>
         //uiManager.textLoadingTooltips.text = "LoadingInitializeGridCells()";
         LoadingInitializeGridCells();
         // Populates GridCells with their contents (agents/food/preds)
-        LoadingFillGridCells();
-        LoadingHookUpModules();
+        PopulateGridCells();
+        HookUpModules();
 
         loadingPanel.Refresh("", 3);
         
@@ -434,9 +434,8 @@ public class SimulationManager : Singleton<SimulationManager>
         }
     }
     
-    private void LoadingInitializeEggSacksFirstTime() {  // Skip pregnancy, Instantiate EggSacks that begin as 'GrowingIndependent' ?
-        //for (int i = 0; i < eggSackArray.Length; i++) {
-        // WPP: converted to foreach loop
+    // Skip pregnancy, Instantiate EggSacks that begin as 'GrowingIndependent' ?
+    private void LoadingInitializeEggSacksFirstTime() {  
         foreach (var eggSack in eggSackArray)
         {
             eggSack.isDepleted = true;
@@ -472,55 +471,26 @@ public class SimulationManager : Singleton<SimulationManager>
         }
     }
     
-    private void LoadingFillGridCells() {
-        PopulateGridCells();
-    }
-    
-    private void LoadingHookUpModules() {
-        HookUpModules();
-    }
-    
-    // WPP: condense with collection initializers
     private void LoadingSetUpFitnessStorage() {
-        //rawFitnessScoresArray = new float[numAgents];
         statsNutrientsEachGenerationList = new List<Vector4>{Vector4.one * 0.0001f};
-        //statsNutrientsEachGenerationList.Add(Vector4.one * 0.0001f);
-
         statsHistoryBrainMutationFreqList = new List<float>{0f};
-        //statsHistoryBrainMutationFreqList.Add(0f);
         statsHistoryBrainMutationAmpList = new List<float>{0f};
-        //statsHistoryBrainMutationAmpList.Add(0f);
         statsHistoryBrainSizeBiasList = new List<float>{0f};
-        //statsHistoryBrainSizeBiasList.Add(0f);
         statsHistoryBodyMutationFreqList = new List<float>{0f};
-        //statsHistoryBodyMutationFreqList.Add(0f);
         statsHistoryBodyMutationAmpList = new List<float>{0f};
-        //statsHistoryBodyMutationAmpList.Add(0f);
         statsHistoryBodySensorVarianceList = new List<float>{0f};
-        //statsHistoryBodySensorVarianceList.Add(0f);
         statsHistoryWaterCurrentsList = new List<float>{0f};
-        //statsHistoryWaterCurrentsList.Add(0f);
 
         statsHistoryOxygenList = new List<float>{0f};
-        //statsHistoryOxygenList.Add(0f);
         statsHistoryNutrientsList = new List<float>{0f};
-        //statsHistoryNutrientsList.Add(0f);
         statsHistoryDetritusList = new List<float>{0f};
-        //statsHistoryDetritusList.Add(0f);
         statsHistoryDecomposersList = new List<float>{0f};
-        //statsHistoryDecomposersList.Add(0f);
         statsHistoryAlgaeSingleList = new List<float>{0f};
-        //statsHistoryAlgaeSingleList.Add(0f);
         statsHistoryAlgaeParticleList = new List<float>{0f};
-        //statsHistoryAlgaeParticleList.Add(0f);
         statsHistoryZooplanktonList = new List<float>{0f};
-        //statsHistoryZooplanktonList.Add(0f);
         statsHistoryLivingAgentsList = new List<float>{0f};
-        //statsHistoryLivingAgentsList.Add(0f);
         statsHistoryDeadAgentsList = new List<float>{0f};
-        //statsHistoryDeadAgentsList.Add(0f);
         statsHistoryEggSacksList = new List<float>{0f};
-        //statsHistoryEggSacksList.Add(0f);
         
         /*
         statsLifespanEachGenerationList = new List<Vector4>(); // 
@@ -618,11 +588,10 @@ public class SimulationManager : Singleton<SimulationManager>
         // Actually measuring results of last frame's execution?
         float totalOxygenUsedByAgents = 0f;
         float totalWasteProducedByAgents = 0f;
+        
         if(trophicLayersManager.GetAgentsOnOff()) {
             vegetationManager.FindClosestPlantParticleToCritters(simStateData);
             
-            // WPP: use foreach
-            //for (int i = 0; i < agentsArray.Length; i++) {
             foreach (var agent in agentsArray) {
                 totalOxygenUsedByAgents += agent.oxygenUsedLastFrame;
                 totalWasteProducedByAgents += agent.wasteProducedLastFrame;          
@@ -630,6 +599,7 @@ public class SimulationManager : Singleton<SimulationManager>
 
             zooplanktonManager.FindClosestAnimalParticleToCritters(simStateData);            
         } 
+        
         vegetationManager.FindClosestPlantParticleToCursor(theCursorCzar.curMousePositionOnWaterPlane.x, theCursorCzar.curMousePositionOnWaterPlane.y);
         zooplanktonManager.FindClosestAnimalParticleToCursor(theCursorCzar.curMousePositionOnWaterPlane.x, theCursorCzar.curMousePositionOnWaterPlane.y);
         // Find best way to insert Agent Waste into ResourceGridTex.waste
@@ -641,20 +611,12 @@ public class SimulationManager : Singleton<SimulationManager>
         // Try to make sure AlgaeReservoir and AlgaeParticles share same mechanics!!! *********************************************
         simResourceManager.Tick(settingsManager, trophicLayersManager, vegetationManager);  // Resource Flows Here
         
-        // WPP: replaced nested conditional with AND
         if(targetAgent && uiManager.focusedCandidate != null &&
            targetAgent.candidateRef != null &&
            targetAgent.curLifeStage == Agent.AgentLifeStage.AwaitingRespawn && 
-           targetAgent.candidateRef.candidateID == uiManager.focusedCandidate.candidateID) {
-
-           cameraManager.isFollowingAgent = false;
-            //if(uiManager.focusedCandidate != null) {
-                //if(cameraManager.targetAgent.candidateRef != null) {
-                    //if(cameraManager.targetAgent.curLifeStage == Agent.AgentLifeStage.AwaitingRespawn && cameraManager.targetAgent.candidateRef.candidateID == uiManager.focusedCandidate.candidateID) {
-                //uiManager.watcherUI.StopFollowingAgent();
-                    //}
-                //}                
-            //}            
+           targetAgent.candidateRef.candidateID == uiManager.focusedCandidate.candidateID) 
+        {
+           cameraManager.isFollowingAgent = false;        
         }
                 
         // CHECK FOR NULL Objects:        
@@ -703,12 +665,9 @@ public class SimulationManager : Singleton<SimulationManager>
             HookUpModules(); // Sets nearest-neighbors etc. feed current data into agent Brains
             // Load gameState into Agent Brain, process brain function, read out brainResults,
             // Execute Agent Actions -- apply propulsive force to each Agent:       
-            // WPP: convert to foreach 
-            //for (int i = 0; i < agentsArray.Length; i++) {
             foreach (var agent in agentsArray) {
                 agent.Tick(this, settingsManager);            
             }
-            //for (int i = 0; i < eggSackArray.Length; i++) {
             foreach (var eggSack in eggSackArray) {
                 eggSack.Tick();
             }                
@@ -829,45 +788,14 @@ public class SimulationManager : Singleton<SimulationManager>
     
     [SerializeField] YearEventData[] yearEvents;
     
-    // WPP extracted from TickSparseEvents
-    // Refactored with constructor initialization and exposed struct array
     private void CheckForYearEvent() {
-        /*if(curSimYear == 1) {
-            SimEventData newEventData = new SimEventData();
-            newEventData.name = "First Full Year";
-            newEventData.category = SimEventData.SimEventCategories.NPE;
-            newEventData.timeStepActivated = simAgeTimeSteps;
-            simEventsManager.completeEventHistoryList.Add(newEventData);
-        }
-        if(curSimYear == 10) {
-            SimEventData newEventData = new SimEventData();
-            newEventData.name = "Decade";
-            newEventData.category = SimEventData.SimEventCategories.NPE;
-            newEventData.timeStepActivated = simAgeTimeSteps;
-            simEventsManager.completeEventHistoryList.Add(newEventData);
-        }
-        if(curSimYear == 100) {
-            SimEventData newEventData = new SimEventData();
-            newEventData.name = "Century";
-            newEventData.category = SimEventData.SimEventCategories.NPE;
-            newEventData.timeStepActivated = simAgeTimeSteps;
-            simEventsManager.completeEventHistoryList.Add(newEventData);
-        }
-        if(curSimYear == 1000) {
-            SimEventData newEventData = new SimEventData();
-            newEventData.name = "Millenium";
-            newEventData.category = SimEventData.SimEventCategories.NPE;
-            newEventData.timeStepActivated = simAgeTimeSteps;
-            simEventsManager.completeEventHistoryList.Add(newEventData);
-        }*/
-    
         foreach (var yearEvent in yearEvents)
         {
-            if (curSimYear == yearEvent.year)
-            {
-                SimEventData newEventData = new SimEventData(yearEvent.message, simAgeTimeSteps);
-                simEventsManager.completeEventHistoryList.Add(newEventData);                
-            }
+            if (curSimYear != yearEvent.year)
+                continue;
+
+            SimEventData newEventData = new SimEventData(yearEvent.message, simAgeTimeSteps);
+            simEventsManager.completeEventHistoryList.Add(newEventData);                
         }
     }
     
@@ -1041,8 +969,8 @@ public class SimulationManager : Singleton<SimulationManager>
         
     }
     
-    // *** WPP: simplify conditionals
-    private void HookUpModules() {            
+    private void HookUpModules() 
+    {            
         // mapSize is global now, get with the times, jeez-louise!
         //float cellSize = mapSize / agentGridCellResolution;
         //Vector2 playerPos = new Vector2(playerAgent.transform.localPosition.x, playerAgent.transform.localPosition.y);
@@ -1053,109 +981,106 @@ public class SimulationManager : Singleton<SimulationManager>
         // **** Add priority targeting here? save closest of each time for later determination? ***
 
         // Find NearestNeighbors:
-        for (int a = 0; a < agentsArray.Length; a++) {
-            if(agentsArray[a].curLifeStage == Agent.AgentLifeStage.Mature) { // *****
-                // Find which gridCell this Agent is in:    
-                Vector2 agentPos = new Vector2(agentsArray[a].bodyRigidbody.transform.position.x, agentsArray[a].bodyRigidbody.transform.position.y);
-                int xCoord = Mathf.FloorToInt(agentPos.x / mapSize * (float)agentGridCellResolution); // Mathf.FloorToInt((agentPos.x + mapSize) / (mapSize * 2f) * (float)agentGridCellResolution);
-                xCoord = Mathf.Clamp(xCoord, 0, agentGridCellResolution - 1);
-                int yCoord = Mathf.FloorToInt(agentPos.y / mapSize * (float)agentGridCellResolution);
-                yCoord = Mathf.Clamp(yCoord, 0, agentGridCellResolution - 1);
+        for (int a = 0; a < agentsArray.Length; a++) 
+        {
+            if (agentsArray[a].curLifeStage != Agent.AgentLifeStage.Mature)
+                continue;
+ 
+            Vector2 agentPos = new Vector2(agentsArray[a].bodyRigidbody.transform.position.x, agentsArray[a].bodyRigidbody.transform.position.y);
+            int xCoord = Mathf.FloorToInt(agentPos.x / mapSize * (float)agentGridCellResolution); // Mathf.FloorToInt((agentPos.x + mapSize) / (mapSize * 2f) * (float)agentGridCellResolution);
+            xCoord = Mathf.Clamp(xCoord, 0, agentGridCellResolution - 1);
+            int yCoord = Mathf.FloorToInt(agentPos.y / mapSize * (float)agentGridCellResolution);
+            yCoord = Mathf.Clamp(yCoord, 0, agentGridCellResolution - 1);
 
-                int closestFriendIndex = a;  // default to self
-                float nearestFriendSquaredDistance = float.PositiveInfinity;
-                int closestEnemyAgentIndex = 0;
-                float nearestEnemyAgentSqDistance = float.PositiveInfinity;
-                int closestEggSackIndex = -1; // default to -1??? ***            
-                float nearestFoodDistance = float.PositiveInfinity;
+            int closestFriendIndex = a;  // default to self
+            float nearestFriendSquaredDistance = float.PositiveInfinity;
+            int closestEnemyAgentIndex = 0;
+            float nearestEnemyAgentSqDistance = float.PositiveInfinity;
+            int closestEggSackIndex = -1; // default to -1??? ***            
+            float nearestFoodDistance = float.PositiveInfinity;
 
-                int ownSpeciesIndex = agentsArray[a].speciesIndex; // Mathf.FloorToInt((float)a / (float)numAgents * (float)numSpecies);
+            int ownSpeciesIndex = agentsArray[a].speciesIndex; // Mathf.FloorToInt((float)a / (float)numAgents * (float)numSpecies);
 
-                // **** Only checking its own grid cell!!! Will need to expand to adjacent cells as well!
-                /*int index = -1;
-                try {
-                    index = mapGridCellArray[xCoord][yCoord].friendIndicesList.Count;
-                }
-                catch (Exception e) {
-                    print("error! index = " + index.ToString() + ", xCoord: " + xCoord.ToString() + ", yCoord: " + yCoord.ToString() + ", xPos: " + agentPos.x.ToString() + ", yPos: " + agentPos.y.ToString());
-                } */
-                // **** Only checking its own grid cell!!! Will need to expand to adjacent cells as well!
-                for (int i = 0; i < mapGridCellArray[xCoord][yCoord].agentIndicesList.Count; i++) {
-                    int neighborIndex = mapGridCellArray[xCoord][yCoord].agentIndicesList[i];
-                    int neighborSpeciesIndex = agentsArray[neighborIndex].speciesIndex; 
+            // **** Only checking its own grid cell!!! Will need to expand to adjacent cells as well!
+            /*int index = -1;
+            try {
+                index = mapGridCellArray[xCoord][yCoord].friendIndicesList.Count;
+            }
+            catch (Exception e) {
+                print("error! index = " + index.ToString() + ", xCoord: " + xCoord.ToString() + ", yCoord: " + yCoord.ToString() + ", xPos: " + agentPos.x.ToString() + ", yPos: " + agentPos.y.ToString());
+            } */
+            // *** Only checking its own grid cell!!! Will need to expand to adjacent cells as well!
+            // *** WPP: Simplify: foreach, invert conditions with continue (or AND)
+            for (int i = 0; i < mapGridCellArray[xCoord][yCoord].agentIndicesList.Count; i++) {
+                int neighborIndex = mapGridCellArray[xCoord][yCoord].agentIndicesList[i];
+                int neighborSpeciesIndex = agentsArray[neighborIndex].speciesIndex; 
 
-                    if(agentsArray[neighborIndex].curLifeStage == Agent.AgentLifeStage.Mature) {
-                        // FRIEND:
-                        Vector2 neighborPos = new Vector2(agentsArray[neighborIndex].bodyRigidbody.transform.localPosition.x, agentsArray[neighborIndex].bodyRigidbody.transform.localPosition.y);
-                        float squaredDistNeighbor = (neighborPos - agentPos).sqrMagnitude;
-                                
-                        if (squaredDistNeighbor <= nearestFriendSquaredDistance) { // if now the closest so far, update index and dist:
-                            //int neighborSpeciesIndex = agentsArray[neighborIndex].speciesIndex; // Mathf.FloorToInt((float)neighborIndex / (float)numAgents * (float)numSpecies);
-                            if(ownSpeciesIndex == neighborSpeciesIndex) {  // if two agents are of same species - friends
-                                if(a != neighborIndex) {  // make sure it doesn't consider itself:
-                                    closestFriendIndex = neighborIndex;
-                                    nearestFriendSquaredDistance = squaredDistNeighbor;
-                                } 
-                            }                                       
-                        }
+                if(agentsArray[neighborIndex].curLifeStage == Agent.AgentLifeStage.Mature) {
+                    // FRIEND:
+                    Vector2 neighborPos = new Vector2(agentsArray[neighborIndex].bodyRigidbody.transform.localPosition.x, agentsArray[neighborIndex].bodyRigidbody.transform.localPosition.y);
+                    float squaredDistNeighbor = (neighborPos - agentPos).sqrMagnitude;
+                            
+                    if (squaredDistNeighbor <= nearestFriendSquaredDistance) { // if now the closest so far, update index and dist:
+                        //int neighborSpeciesIndex = agentsArray[neighborIndex].speciesIndex; // Mathf.FloorToInt((float)neighborIndex / (float)numAgents * (float)numSpecies);
+                        if(ownSpeciesIndex == neighborSpeciesIndex) {  // if two agents are of same species - friends
+                            if(a != neighborIndex) {  // make sure it doesn't consider itself:
+                                closestFriendIndex = neighborIndex;
+                                nearestFriendSquaredDistance = squaredDistNeighbor;
+                            } 
+                        }                                       
+                    }
 
-                        if (squaredDistNeighbor <= nearestEnemyAgentSqDistance) { // if now the closest so far, update index and dist:
-                            // Mathf.FloorToInt((float)neighborIndex / (float)numAgents * (float)numSpecies);
-                            if(ownSpeciesIndex != neighborSpeciesIndex) {  // if two agents are of different species - enemy
-                                if(a != neighborIndex) {  // make sure it doesn't consider itself:
-                                    closestEnemyAgentIndex = neighborIndex;
-                                    nearestEnemyAgentSqDistance = squaredDistNeighbor;
-                                }
-                            }                                        
-                        }
+                    if (squaredDistNeighbor <= nearestEnemyAgentSqDistance) { // if now the closest so far, update index and dist:
+                        // Mathf.FloorToInt((float)neighborIndex / (float)numAgents * (float)numSpecies);
+                        if(ownSpeciesIndex != neighborSpeciesIndex) {  // if two agents are of different species - enemy
+                            if(a != neighborIndex) {  // make sure it doesn't consider itself:
+                                closestEnemyAgentIndex = neighborIndex;
+                                nearestEnemyAgentSqDistance = squaredDistNeighbor;
+                            }
+                        }                                        
                     }
                 }
-            
-                for (int i = 0; i < mapGridCellArray[xCoord][yCoord].eggSackIndicesList.Count; i++) {
-                    // EggSacks:
-                    int eggSackIndex = mapGridCellArray[xCoord][yCoord].eggSackIndicesList[i];
-
-                    if(eggSackArray[eggSackIndex].curLifeStage != EggSack.EggLifeStage.Null) { // if enabled:
-                        if(!eggSackArray[eggSackIndex].isProtectedByParent) {
-                            //Debug.Log("Found valid Food!");
-                            Vector2 eggSackPos = new Vector2(eggSackArray[eggSackIndex].rigidbodyRef.transform.position.x, eggSackArray[eggSackIndex].rigidbodyRef.transform.position.y);
-                            float distEggSack = (eggSackPos - agentPos).magnitude - (eggSackArray[eggSackIndex].curSize.magnitude + 1f) * 0.5f;  // subtract food & agent radii
-
-                            if (distEggSack <= nearestFoodDistance) { // if now the closest so far, update index and dist:
-
-                                //int neighborSpeciesIndex = Mathf.FloorToInt((float)eggSackIndex / (float)numEggSacks * (float)numSpecies);
-
-                                //if (ownSpeciesIndex != neighborSpeciesIndex) {  // if eggSack and Agent diff species
-                                    //if (a != eggSackIndex) {  // make sure it doesn't consider itself:
-                                closestEggSackIndex = eggSackIndex;
-                                nearestFoodDistance = distEggSack;
-                                    //}
-                                //}                            
-                            }
-                        } 
-                    }                             
-                }
-            
-                // Set proper references between AgentBrains and Environment/Game Objects:::
-                // ***** DISABLED!!!! *** NEED TO RE_IMPLEMENT THIS LATER!!!! ********************************************
-                if(agentsArray[a].coreModule != null) {
-                    agentsArray[a].coreModule.nearestFriendAgent = agentsArray[closestFriendIndex];
-                    agentsArray[a].coreModule.nearestEnemyAgent = agentsArray[closestEnemyAgentIndex];
-                    if(closestEggSackIndex != -1) {
-                        agentsArray[a].coreModule.nearestEggSackModule = eggSackArray[closestEggSackIndex];                
-                    }  
-                }
-                else {
-                    Debug.LogError("agentsArray[" + a.ToString() + "].coreModule == null) " + agentsArray[a].curLifeStage.ToString());
-                    //agentsArray[a].coreModule.nearestFriendAgent = agentsArray[0];
-                    //agentsArray[a].coreModule.nearestEnemyAgent = agentsArray[0];                    
-                    //agentsArray[a].coreModule.nearestEggSackModule = eggSackArray[0];               
-                    
-                }
             }
-                      
-            //agentsArray[a].coreModule.nearestPredatorModule = predatorArray[closestPredIndex];            
+        
+            foreach (var eggSackIndex in mapGridCellArray[xCoord][yCoord].eggSackIndicesList)
+            {
+                if (eggSackArray[eggSackIndex].curLifeStage == EggSack.EggLifeStage.Null ||
+                    eggSackArray[eggSackIndex].isProtectedByParent)
+                    continue;
+
+                Vector2 eggSackPos = new Vector2(eggSackArray[eggSackIndex].rigidbodyRef.transform.position.x, eggSackArray[eggSackIndex].rigidbodyRef.transform.position.y);
+                float distEggSack = (eggSackPos - agentPos).magnitude - (eggSackArray[eggSackIndex].curSize.magnitude + 1f) * 0.5f;  // subtract food & agent radii
+
+                if (distEggSack > nearestFoodDistance) 
+                    continue;
+
+                closestEggSackIndex = eggSackIndex;
+                nearestFoodDistance = distEggSack;                           
+            }
+        
+            // Set proper references between AgentBrains and Environment/Game Objects:::
+            // ***** DISABLED!!!! *** NEED TO RE_IMPLEMENT THIS LATER!!!! ********************************************
+            SetNearestToCritter(agentsArray[a].coreModule, closestFriendIndex, closestEnemyAgentIndex, closestEggSackIndex, a);            
         }
+    }
+    
+    private void SetNearestToCritter(CritterModuleCore critter, int closestFriendIndex, 
+    int closestEnemyAgentIndex, int closestEggSackIndex, int agentIndex)
+    {
+        if (critter == null)
+        {
+            Debug.LogError("agentsArray[" + agentIndex.ToString() + "].coreModule == null) " + agentsArray[agentIndex].curLifeStage.ToString());                
+            return;
+        }
+    
+        critter.nearestFriendAgent = agentsArray[closestFriendIndex];
+        critter.nearestEnemyAgent = agentsArray[closestEnemyAgentIndex];
+            
+        // * If the result is that the module is set to null, set it explcitly with a ternary
+        if(closestEggSackIndex == -1) 
+            return;
+
+        critter.nearestEggSackModule = eggSackArray[closestEggSackIndex];                 
     }
     
     private void CheckForDevouredEggSacks() { // *** revisit
@@ -1543,8 +1468,6 @@ public class SimulationManager : Singleton<SimulationManager>
         eggSackArray[eggSackIndex].speciesIndex = randEggSpeciesIndex;
 
         // Check for timer?
-        // WPP: applied conditional inversion and early exit to reduce nesting
-        //if(eggSackRespawnCounter > 3) {
         if (eggSackRespawnCounter <= 3)
             return;
             
@@ -1554,37 +1477,24 @@ public class SimulationManager : Singleton<SimulationManager>
         
         for(int i = 0; i < _NumAgents; i++) 
         {
-            // WPP: applied logical AND to reduce nesting
             if(agentsArray[i].speciesIndex == eggSackArray[eggSackIndex].speciesIndex &&
                agentsArray[i].curLifeStage == Agent.AgentLifeStage.Mature &&
                !agentsArray[i].isPregnantAndCarryingEggs &&
                agentsArray[i].pregnancyRefactoryTimeStepCounter > agentsArray[i].pregnancyRefactoryDuration) 
             {
-                //if(agentsArray[i].curLifeStage == Agent.AgentLifeStage.Mature) 
-                //{
-                    //if(agentsArray[i].isPregnantAndCarryingEggs) 
-                    //{
-                        // already carrying, not available
-                    //}
-                    //else 
-                    //{
-                    //if(agentsArray[i].pregnancyRefactoryTimeStepCounter > agentsArray[i].pregnancyRefactoryDuration) 
+                //if(agentsArray[i].pregnancyRefactoryTimeStepCounter > agentsArray[i].pregnancyRefactoryDuration) 
 
-                    //{
-                    // Able to grow eggs
-                    // figure out if agent has enough biomass;
-                    float reqMass = settingsManager.agentSettings._BaseInitMass * settingsManager.agentSettings._MinPregnancyFactor;
-                    float agentMass = agentsArray[i].currentBiomass * settingsManager.agentSettings._MaxPregnancyProportion;
-                    
-                    if(reqMass < agentMass) 
-                    {
-                        //Debug.Log("RequiredMass met! " + reqMass.ToString() + " biomass: " + agentsArray[i].currentBiomass.ToString() + ", _BaseInitMass: " + settingsManager.agentSettings._BaseInitMass.ToString());
-                        totalSuitableParentAgents++;
-                        suitableParentAgentsList.Add(i);
-                    }
-                    //}
-                    //}
-                //}
+                // Able to grow eggs
+                // figure out if agent has enough biomass;
+                float reqMass = settingsManager.agentSettings._BaseInitMass * settingsManager.agentSettings._MinPregnancyFactor;
+                float agentMass = agentsArray[i].currentBiomass * settingsManager.agentSettings._MaxPregnancyProportion;
+                
+                if(reqMass < agentMass) 
+                {
+                    //Debug.Log("RequiredMass met! " + reqMass.ToString() + " biomass: " + agentsArray[i].currentBiomass.ToString() + ", _BaseInitMass: " + settingsManager.agentSettings._BaseInitMass.ToString());
+                    totalSuitableParentAgents++;
+                    suitableParentAgentsList.Add(i);
+                }
             }                
         
             if(totalSuitableParentAgents > 0) 
@@ -1825,16 +1735,10 @@ public class SimulationManager : Singleton<SimulationManager>
             if(startPositionsPresets.spawnZonesList[randZone].active) {
                 break;  // use this one
             }
-            // WPP: redundant else conditions removed
-            //else {
             if(startPositionsPresets.spawnZonesList[randZone].refactoryCounter > 100) {
                 startPositionsPresets.spawnZonesList[randZone].refactoryCounter = 0;
                 startPositionsPresets.spawnZonesList[randZone].active = true;
                 break;
-            //    }
-                //else {
-                    // do nothing, try again
-                //}
             }
 
             if(i == 9) {
@@ -1900,7 +1804,6 @@ public class SimulationManager : Singleton<SimulationManager>
     QualitySettingId simulationComplexity => gameOptions.simulationComplexity;
     QualitySettingId fluidPhysicsQuality => gameOptions.fluidPhysicsQuality;
     
-    // WPP: removed switch statement, values stored in QualitySettingData
     public void ApplyQualitySettings() {
         _NumAgents = qualitySettings.GetAgentCount(simulationComplexity);
         _NumEggSacks = qualitySettings.GetEggSackCount(simulationComplexity);
@@ -1909,7 +1812,6 @@ public class SimulationManager : Singleton<SimulationManager>
     }
     
     private void OnDisable() {
-        // WPP: delegated to SimulationStateData, using null propagation
         simStateData?.Release();
         vegetationManager?.ClearBuffers();
         zooplanktonManager?.ClearBuffers();

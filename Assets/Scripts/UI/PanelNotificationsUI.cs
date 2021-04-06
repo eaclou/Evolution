@@ -8,8 +8,6 @@ public class PanelNotificationsUI : MonoBehaviour
     [SerializeField] Text text;
     [SerializeField] Image image;
     
-    SimulationManager simulation => SimulationManager.instance;
-
     public void Narrate(NarrationSO value) { Narrate(value.message, value.color); }
     public void Narrate(string message, Color color)
     {
