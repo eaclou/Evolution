@@ -20,26 +20,22 @@
   </component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/BigBangPanelUI.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/FeatSO.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Playcraft/_NEW/DirectionInputToVector2.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/ClockPanelUI.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/PanelPendingClickPromptUI.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Utility/QuitGame.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/NarrationSO.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://C:/Program Files/Unity/Hub/Editor/2019.4.18f1/Editor/Data/Resources/PackageManager/BuiltInPackages/com.unity.ugui/Runtime/UI/Core/Dropdown.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Playcraft/_NEW/SetTimeScale.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/17AD9609-AE06-4F2C-9315-931FF97ADCF1/c3/85153ec3/ComputeShader.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/17AD9609-AE06-4F2C-9315-931FF97ADCF1/e9/3e0ac117/ComputeBuffer.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/ObserverModeUI.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/SimulationUI.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/LoadingPanelUI.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Playcraft/_NEW/ButtonInputToFloat.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Rendering/TheRenderKing.cs" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="IdeDocumentHistory">
     <changedPaths>
-      <option value="$PROJECT_DIR$/Assets/Playcraft/UI/Cursor/CursorInterface.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Audio/AudioManager.cs" />
-      <option value="$PROJECT_DIR$/Assets/Playcraft/_NEW/SetTimescale.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/ClockPanelUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/BigBangPanelUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/VegetationManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/ZooplanktonManager.cs" />
@@ -77,16 +73,20 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Settings/ResolutionSO.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Settings/ResolutionData.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/ObserverModeUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Core/GameOptions.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Settings/QualitySettingData.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Core/GameOptionsManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Fluid/EnvironmentFluidManager.cs" />
-      <option value="$PROJECT_DIR$/Assets/Playcraft/Project Specific/Lookup.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationStateData.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimEventsManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimEventData.cs" />
+      <option value="$PROJECT_DIR$/Assets/Playcraft/Project Specific/Lookup.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Feat.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/NarrationSO.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/PanelNotificationsUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/FeatSO.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" />
     </changedPaths>
   </component>
   <component name="ProjectId" id="1owaWgGpM80xkcfA3szn5iw9YkG" />
@@ -141,6 +141,7 @@
       <workItem from="1616644045919" duration="5478000" />
       <workItem from="1616967260881" duration="10610000" />
       <workItem from="1617153477797" duration="5882000" />
+      <workItem from="1617688528630" duration="1831000" />
     </task>
     <servers />
   </component>

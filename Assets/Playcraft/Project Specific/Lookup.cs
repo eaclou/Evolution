@@ -50,6 +50,22 @@ public class Lookup : ScriptableObject
     [Header("Prefabs")]
     public GameObject genomeIcon;
     
+    [Header("Narration")]
+    public NarrationSO unlockAlgae;
+    public NarrationSO unlockDecomposers;
+    public NarrationSO unlockZooplankton;
+    public NarrationSO unlockVertebrates;
+    public NarrationSO unlockPlant;
+    
+    void OnValidate()
+    {
+        unlockAlgae.color = colorAlgaeLayer;
+        unlockDecomposers.color = colorDecomposersLayer;
+        unlockZooplankton.color = colorZooplanktonLayer;
+        unlockVertebrates.color = colorVertebratesLayer;
+        unlockPlant.color = colorPlantsLayer;
+    }
+    
 	#endregion
 
 

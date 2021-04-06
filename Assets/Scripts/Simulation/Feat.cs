@@ -1,22 +1,24 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
+// WPP: de-nested for public access
+public enum FeatType {
+    Decomposer,
+    Algae,
+    Plants,
+    Zooplankton,
+    Vertebrate,
+    Water,
+    Stone,
+    Watcher,
+    Mutation,
+    WorldExpand
+}
+
+// *** WPP: possibly redundant with SO pattern
 public class Feat {
 
     public string name;
-    public enum FeatType {
-        Decomposer,
-        Algae,
-        Plants,
-        Zooplankton,
-        Vertebrate,
-        Water,
-        Stone,
-        Watcher,
-        Mutation,
-        WorldExpand
-    }
+    
     public FeatType featType;
     public int eventFrame;
     public Color color;
@@ -29,6 +31,4 @@ public class Feat {
         this.color = color;
         this.description = description;
     }
-
-
 }

@@ -746,75 +746,79 @@ public class UIManager : MonoBehaviour {
     public void AnnounceUnlockBrushes() {
         panelPendingClickPrompt.Narrate("Creation Spirit Captured!", new Color(1f, 1f, 1f));  
         
-        Feat feat = new Feat("Brush", Feat.FeatType.WorldExpand, Time.frameCount, Color.white, "blah blah blah blah!");
+        Feat feat = new Feat("Brush", FeatType.WorldExpand, Time.frameCount, Color.white, "blah blah blah blah!");
         simulationManager.LogFeat(feat);
         //featsUI.isOpen = true;
     }
     
-    // ***WPP: Convert to UnityEvents passing SOs...if these are called from UnityEvents?
-    // [future use, preserve behavior]
-    public void AnnounceUnlockWater() {
-        panelPendingClickPrompt.Narrate("Water Spirit Found!", new Color(0.4f, 0.4f, 0.9f));  
-    }
-    
-    public void AnnounceUnlockKnowledgeSpirit() {
-        panelPendingClickPrompt.Narrate("Knowledge Spirit Captured!", new Color(0.9f, 0.77f, 0.76f)); 
-    }
-    
-    public void AnnounceUnlockWatcherSpirit() {
-        panelPendingClickPrompt.Narrate("Watcher Spirit Captured!", new Color(0.6f, 0.71277f, 1f)); 
+    // WPP: Condensed with SO pattern
+    public void Narrate(NarrationSO value) 
+    { 
+        panelPendingClickPrompt.Narrate(value); 
         
-        Feat feat = new Feat("Inspect Tool Unlocked!", Feat.FeatType.Watcher, Time.frameCount, Color.white, "Use this to see hidden information.");
-        simulationManager.LogFeat(feat);
+        foreach (var feat in value.feats)
+            simulationManager.LogFeat(feat);
     }
     
-    public void AnnounceUnlockMutationSpirit() {
-        panelPendingClickPrompt.Narrate("Mutation Spirit Captured!", new Color(0.8f, 0.1277f, 0.1276f));  
-    }
+    //public void AnnounceUnlockWater() {
+    //    panelPendingClickPrompt.Narrate("Water Spirit Found!", new Color(0.4f, 0.4f, 0.9f));  
+    //}
     
-    public void AnnounceUnlockMinerals() {
-        panelPendingClickPrompt.Narrate("Minerals Essence Captured!", new Color(1f, 1f, 1f)); 
-    }
+    //public void AnnounceUnlockKnowledgeSpirit() {
+    //    panelPendingClickPrompt.Narrate("Knowledge Spirit Captured!", new Color(0.9f, 0.77f, 0.76f)); 
+    //}
     
-    public void AnnounceUnlockAir() {
-        panelPendingClickPrompt.Narrate("Air Spirit Captured!", new Color(0.5f, 0.5f, 1f));        
-    }
+    //public void AnnounceUnlockWatcherSpirit() {
+    //    panelPendingClickPrompt.Narrate("Watcher Spirit Captured!", new Color(0.6f, 0.71277f, 1f));   
+    //    Feat feat = new Feat("Inspect Tool Unlocked!", FeatType.Watcher, Time.frameCount, Color.white, "Use this to see hidden information.");
+    //    simulationManager.LogFeat(feat);
+    //}
     
-    public void AnnounceUnlockPebbles() {
-        panelPendingClickPrompt.Narrate("Pebble Spirit Captured!", new Color(1f, 1f, 1f));
-    }
+    //public void AnnounceUnlockMutationSpirit() {
+    //    panelPendingClickPrompt.Narrate("Mutation Spirit Captured!", new Color(0.8f, 0.1277f, 0.1276f));  
+    //}
     
-    public void AnnounceUnlockSand() {
-        panelPendingClickPrompt.Narrate("Sand Spirit Captured!", new Color(1f, 1f, 1f));
-    }
+    //public void AnnounceUnlockMinerals() {
+    //    panelPendingClickPrompt.Narrate("Minerals Essence Captured!", new Color(1f, 1f, 1f)); 
+    //}
     
-    public void AnnounceUnlockAlgae() {
-        panelPendingClickPrompt.Narrate("Algae Species Unlocked!", colorAlgaeLayer);
-    }
+    //public void AnnounceUnlockAir() {
+    //    panelPendingClickPrompt.Narrate("Air Spirit Captured!", new Color(0.5f, 0.5f, 1f));        
+    //}
     
-    public void AnnounceUnlockDecomposers() {
-        panelPendingClickPrompt.Narrate("Decomposer Species Unlocked!", colorDecomposersLayer);
-    }
+    //public void AnnounceUnlockPebbles() {
+    //    panelPendingClickPrompt.Narrate("Pebble Spirit Captured!", new Color(1f, 1f, 1f));
+    //}
     
-    public void AnnounceUnlockZooplankton() {
-        panelPendingClickPrompt.Narrate("Zooplankton Species Unlocked!", colorZooplanktonLayer);
-
-        Feat feat = new Feat("Animal Spirit!", Feat.FeatType.Zooplankton, Time.frameCount, Color.white, "Tiny creatures that eat algae.");
-        simulationManager.LogFeat(feat);
-    }
+    //public void AnnounceUnlockSand() {
+    //    panelPendingClickPrompt.Narrate("Sand Spirit Captured!", new Color(1f, 1f, 1f));
+    //}
     
-    public void AnnounceUnlockVertebrates() {
-        Debug.LogError("WTF?");
-        panelPendingClickPrompt.Narrate("Vertebrate Species Unlocked!", colorVertebratesLayer);
-        Feat feat = new Feat("Animal Spirit!", Feat.FeatType.Plants, Time.frameCount, Color.white, "More complex, larger animals");
-        simulationManager.LogFeat(feat);
-    }
+    //public void AnnounceUnlockAlgae() {
+    //    panelPendingClickPrompt.Narrate("Algae Species Unlocked!", colorAlgaeLayer);
+    //}
     
-    public void AnnounceUnlockPlants() {
-        panelPendingClickPrompt.Narrate("Plant Species Unlocked!", colorPlantsLayer);
-        Feat feat = new Feat("Plant Spirit!", Feat.FeatType.Plants, Time.frameCount, Color.white, "Tiny simple plants.");
-        simulationManager.LogFeat(feat);
-    }
+    //public void AnnounceUnlockDecomposers() {
+    //    panelPendingClickPrompt.Narrate("Decomposer Species Unlocked!", colorDecomposersLayer);
+    //}
+    
+    //public void AnnounceUnlockZooplankton() {
+    //    panelPendingClickPrompt.Narrate("Zooplankton Species Unlocked!", colorZooplanktonLayer);
+    //    Feat feat = new Feat("Animal Spirit!", FeatType.Zooplankton, Time.frameCount, Color.white, "Tiny creatures that eat algae.");
+    //    simulationManager.LogFeat(feat);
+    //}
+    
+    //public void AnnounceUnlockVertebrates() {
+    //    panelPendingClickPrompt.Narrate("Vertebrate Species Unlocked!", colorVertebratesLayer);
+    //    Feat feat = new Feat("Animal Spirit!", FeatType.Plants, Time.frameCount, Color.white, "More complex, larger animals");
+    //    simulationManager.LogFeat(feat);
+    //}
+    
+    //public void AnnounceUnlockPlants() {
+    //    panelPendingClickPrompt.Narrate("Plant Species Unlocked!", colorPlantsLayer);
+    //    Feat feat = new Feat("Plant Spirit!", FeatType.Plants, Time.frameCount, Color.white, "Tiny simple plants.");
+    //    simulationManager.LogFeat(feat);
+    //}
    
     public void CheatUnlockAll() {
         Debug.Log("Cheat!!! Unlocked all species!!!");

@@ -326,6 +326,13 @@ public class SimulationManager : Singleton<SimulationManager>
         graphDataVertebrateGenome3 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateGenomeMat3);
         */
     }
+    
+    public void LogFeat(FeatSO value)
+    {
+        var frame = value.useEventFrame ? Time.frameCount : 0;
+        var feat = new Feat(value.message, value.type, frame, value.color, value.description);
+        LogFeat(feat);
+    }
 
     public void LogFeat(Feat feat) {
         featsList.Insert(0, feat);
@@ -334,7 +341,7 @@ public class SimulationManager : Singleton<SimulationManager>
     private void LoadingInitializeCoreSimulationState() {
 
         featsList = new List<Feat>();
-        Feat feat = new Feat("Power of Creation", Feat.FeatType.WorldExpand, 0, Color.white, "A new world is created!");
+        Feat feat = new Feat("Power of Creation", FeatType.WorldExpand, 0, Color.white, "A new world is created!");
         LogFeat(feat);
 
         // allocate memory and initialize data structures, classes, arrays, etc.

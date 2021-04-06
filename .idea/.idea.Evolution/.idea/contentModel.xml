@@ -806,36 +806,44 @@
             <e p="TestControllerInput.cs" t="Include" />
           </e>
           <e p="UI" t="Include">
+            <e p="AllSpeciesTreePanelUI.cs" t="Include" />
             <e p="BigBangPanelUI.cs" t="Include" />
-            <e p="BrushesUI.cs" t="Include" />
             <e p="ClockPanelUI.cs" t="Include" />
-            <e p="ClockUI.cs" t="Include" />
-            <e p="CreationBrush.cs" t="Include" />
+            <e p="CreatureBrainActivityUI.cs" t="Include" />
+            <e p="CreatureLifeEventsLogUI.cs" t="Include" />
+            <e p="CreaturePaperDollUI.cs" t="Include" />
+            <e p="CreaturePortraitUI.cs" t="Include" />
             <e p="DebugPanelUI.cs" t="Include" />
-            <e p="FeatsUI.cs" t="Include" />
+            <e p="FeatSO.cs" t="Include" />
+            <e p="GenomeBrainWiringUI.cs" t="Include" />
+            <e p="GenomeSensorsEffectorsUI.cs" t="Include" />
+            <e p="GenomeSpecializationsUI.cs" t="Include" />
             <e p="GenomeViewerUI.cs" t="Include" />
             <e p="GlobalResourcesUI.cs" t="Include" />
             <e p="GraphData.cs" t="Include" />
-            <e p="GraphStatPanel.cs" t="Include" />
-            <e p="KnowledgeUI.cs" t="Include" />
             <e p="LoadingPanelUI.cs" t="Include" />
             <e p="MainMenuUI.cs" t="Include" />
-            <e p="MutationUI.cs" t="Include" />
+            <e p="NarrationSO.cs" t="Include" />
             <e p="ObserverModeUI.cs" t="Include" />
             <e p="OLD" t="Include">
+              <e p="BrushesUI.cs" t="Include" />
+              <e p="CreationBrush.cs" t="Include" />
+              <e p="FeatsUI.cs" t="Include" />
+              <e p="KnowledgeUI.cs" t="Include" />
+              <e p="MutationUI.cs" t="Include" />
               <e p="SimEventComponent.cs" t="Include" />
               <e p="TreeOfLifeManager.cs" t="Include" />
               <e p="TreeOfLifeNodeRaycastTarget.cs" t="Include" />
               <e p="TreeOfLifeSpeciesNodeData.cs" t="Include" />
               <e p="TreeOfLifeStemSegmentData.cs" t="Include" />
+              <e p="WatcherUI.cs" t="Include" />
+              <e p="WorldSpiritHubUI.cs" t="Include" />
             </e>
-            <e p="PanelPendingClickPromptUI.cs" t="Include" />
-            <e p="SimulationUI.cs" t="Include" />
+            <e p="PanelNotificationsUI.cs" t="Include" />
+            <e p="SpeciesGraphPanelUI.cs" t="Include" />
             <e p="SpeciesOverviewUI.cs" t="Include" />
-            <e p="SpeciesTreePanel.cs" t="Include" />
             <e p="TheCursorCzar.cs" t="Include" />
             <e p="UIManager.cs" t="Include" />
-            <e p="WatcherUI.cs" t="Include" />
             <e p="Widgets" t="Include">
               <e p="AgentBehaviorOneHot.cs" t="Include" />
               <e p="GenomeButtonPrefabScript.cs" t="Include" />
@@ -843,7 +851,6 @@
               <e p="SpeciesTreeBarUI.cs" t="Include" />
               <e p="WidgetAgentStatus.cs" t="Include" />
             </e>
-            <e p="WorldSpiritHubUI.cs" t="Include" />
           </e>
           <e p="Utility" t="Include">
             <e p="QuitGame.cs" t="Include" />
