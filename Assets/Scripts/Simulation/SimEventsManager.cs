@@ -340,7 +340,7 @@ public class SimEventsManager {
                 }
             }
             else if(data.speciesQualifier == SimEventData.SpeciesQualifier.Fitness) {
-                float val = (float)simManager.masterGenomePool.completeSpeciesPoolsList[simManager.masterGenomePool.currentlyActiveSpeciesIDList[i]].avgPerformanceData.totalTicksAlive;
+                float val = (float)simManager.masterGenomePool.completeSpeciesPoolsList[simManager.masterGenomePool.currentlyActiveSpeciesIDList[i]].avgCandidateData.performanceData.totalTicksAlive;
 
                 if(data.polarity) {
                     if (val > recordHigh) {

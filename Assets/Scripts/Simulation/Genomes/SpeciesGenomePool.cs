@@ -43,10 +43,11 @@ public class SpeciesGenomePool {
     public CandidateAgentData recordHolderBiggestBrain;
     public int recordDefender = 0;
     public CandidateAgentData recordHolderDefender;
+    public int recordDasher = 0;
+    public CandidateAgentData recordHolderDasher;
 
     // stats:
     public struct PerformanceData {
-        //public int totalLifespan = 0;
 	    public float totalFoodEatenPlant;
         public float totalFoodEatenZoop;
         public float totalFoodEatenEgg;
@@ -61,8 +62,8 @@ public class SpeciesGenomePool {
         public float totalTicksRested;
         public float totalTicksAlive;
     }
-    public List<PerformanceData> avgPerformanceDataYearList;
-    public PerformanceData avgPerformanceData;
+    //public List<PerformanceData> avgPerformanceDataYearList;
+    //public PerformanceData avgPerformanceData;
     public List<CandidateAgentData> avgCandidateDataYearList;
     public CandidateAgentData avgCandidateData;
 
@@ -86,75 +87,16 @@ public class SpeciesGenomePool {
     private void InitShared() {
         isFlaggedForExtinction = false;
         isExtinct = false;
-
-        avgPerformanceDataYearList = new List<PerformanceData>();
-        avgPerformanceData = new PerformanceData();
-        avgCandidateDataYearList = new List<CandidateAgentData>();
-
-        //avgCandidateData = new CandidateAgentData();
-        CreateNewAverageCandidate(); // *** ???? Redundant??? ***
-
+               
         candidateGenomesList = new List<CandidateAgentData>();
-        leaderboardGenomesList = new List<CandidateAgentData>();
-        
+        leaderboardGenomesList = new List<CandidateAgentData>();        
         hallOfFameGenomesList = new List<CandidateAgentData>();
 
+        avgCandidateDataYearList = new List<CandidateAgentData>(); 
+        CreateNewAverageCandidate(); // avgCandidateData = new CandidateAgentData();
         
     }
-
-    /*private void RecalculateAverageGenome() { // ** remove *** unneeded ***!!
-        AgentGenome avgGenome = new AgentGenome();
-        CandidateAgentData avgCandidate = new CandidateAgentData(avgGenome, speciesID);
-        for(int i = 0; i < leaderboardGenomesList.Count; i++) {
-
-        }
-    }*/
-    // **** Change this for special-case of First-Time startup?
-    // **** Create a bunch of random genomes and then organize them into Species first?
-    // **** THEN create species and place genomes in?
-    /*
-    public void FirstTimeInitializeROOT(int numGenomes, int depth) {
-        
-        InitShared();
-        depthLevel = depth;
-        int tempNumHiddenNeurons = 0;
-
-        int numInitialGenomes = 1;
-        AgentGenome[] seedGenomeArray = new AgentGenome[numInitialGenomes];
-        for(int i = 0; i < seedGenomeArray.Length; i++) {
-            AgentGenome seedGenome = new AgentGenome();
-            seedGenome.GenerateInitialRandomBodyGenome();
-            seedGenome.InitializeRandomBrainFromCurrentBody(1.0f, mutationSettingsRef.brainInitialConnectionChance, tempNumHiddenNeurons);
-
-            seedGenomeArray[i] = seedGenome;
-        }
-
-        foundingCandidate = new CandidateAgentData(seedGenomeArray[0], speciesID);
-        longestLivedCandidate = foundingCandidate;
-        mostEatenCandidate = foundingCandidate;
-
-        for (int i = 0; i < numGenomes; i++) {
-
-            int seedGenomeIndex = i % numInitialGenomes;
-            
-            mutationSettingsRef.bodyCoreSizeMutationChance = 0.5f;
-            mutationSettingsRef.bodyCoreMutationStepSize = 0.075f;
-                        
-            AgentGenome newGenome = Mutate(seedGenomeArray[seedGenomeIndex], true, true);
-
-            CandidateAgentData candidate = new CandidateAgentData(newGenome, speciesID);
-
-
-            if(i < maxLeaderboardGenomePoolSize) {
-                leaderboardGenomesList.Add(candidate);
-            }
-            candidateGenomesList.Add(candidate);
-
-            //yield return null;
-        }
-
-        representativeCandidate = candidateGenomesList[0];
-    }*/
+    
     public void FirstTimeInitialize(CandidateAgentData foundingGenome, int depth) {
         this.foundingCandidate = foundingGenome;        
         longestLivedCandidate = foundingGenome;
@@ -254,8 +196,11 @@ public class SpeciesGenomePool {
         int tempNumHiddenNeurons = 0;
         blankGenome.InitializeRandomBrainFromCurrentBody(1.0f, 0.1f, tempNumHiddenNeurons);   // unneeded?
         avgCandidateData = new CandidateAgentData(blankGenome, speciesID);
+
+        RecalculateAverageCandidate();
     }
     private void RecalculateAverageCandidate() {
+        
         //calculate avg candidate:
         avgCandidateData.candidateGenome.bodyGenome.appearanceGenome.huePrimary = Vector3.zero;
         avgCandidateData.candidateGenome.bodyGenome.appearanceGenome.hueSecondary = Vector3.zero;
@@ -270,7 +215,9 @@ public class SpeciesGenomePool {
         avgCandidateData.candidateGenome.bodyGenome.coreGenome.bodyLength = 0f;
         avgCandidateData.candidateGenome.bodyGenome.coreGenome.creatureAspectRatio = 0f;
 
-        avgCandidateData.performanceData = avgPerformanceData;
+        avgCandidateData.performanceData = new SpeciesGenomePool.PerformanceData();  // clear // ***EC better spot for this??
+        //Debug.Log("avgPerformanceData " + avgPerformanceData.totalTicksAlive.ToString());
+        //avgCandidateData.performanceData = avgPerformanceData;
         
                 
         for(int i = 0; i < leaderboardGenomesList.Count; i++) {
@@ -288,16 +235,8 @@ public class SpeciesGenomePool {
         
             avgCandidateData.candidateGenome.bodyGenome.coreGenome.bodyLength += leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome.bodyLength * norm;
             avgCandidateData.candidateGenome.bodyGenome.coreGenome.creatureAspectRatio += leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome.creatureAspectRatio * norm;
-        }
-    }
-    public void AddNewYearlyStats(int year) {
-        avgPerformanceDataYearList.Add(avgPerformanceData);
 
-        CreateNewAverageCandidate();
-        RecalculateAverageCandidate();
-       
-        for(int i = 0; i < leaderboardGenomesList.Count; i++) {
-            float norm = 1f / (float)(leaderboardGenomesList.Count - 1);
+            //Performance Data:
             avgCandidateData.performanceData.totalDamageDealt += leaderboardGenomesList[i].performanceData.totalDamageDealt * norm;
             avgCandidateData.performanceData.totalDamageTaken += leaderboardGenomesList[i].performanceData.totalDamageTaken * norm;
             avgCandidateData.performanceData.totalFoodEatenCorpse += leaderboardGenomesList[i].performanceData.totalFoodEatenCorpse * norm;
@@ -310,11 +249,16 @@ public class SpeciesGenomePool {
             avgCandidateData.performanceData.totalTimesAttacked += leaderboardGenomesList[i].performanceData.totalTimesAttacked * norm;
             avgCandidateData.performanceData.totalTimesDashed += leaderboardGenomesList[i].performanceData.totalTimesDashed * norm;
             avgCandidateData.performanceData.totalTimesDefended += leaderboardGenomesList[i].performanceData.totalTimesDefended * norm;
-            avgCandidateData.performanceData.totalTimesPregnant += leaderboardGenomesList[i].performanceData.totalTimesPregnant * norm;
-            
+            avgCandidateData.performanceData.totalTimesPregnant += leaderboardGenomesList[i].performanceData.totalTimesPregnant * norm;   
         }
+    }
+    public void AddNewYearlyStats(int year) {
+        
+        CreateNewAverageCandidate(); // ***EC figure this out???
+        
+        avgCandidateDataYearList.Add(avgCandidateData); // = new List<CandidateAgentData>(); // INCLUDES PerformanceData on CandidateData
 
-        avgCandidateDataYearList.Add(avgCandidateData); // = new List<CandidateAgentData>();
+        Debug.Log("AddNewYearlyStats " + avgCandidateData.performanceData.totalTicksAlive.ToString());
     }
     
 

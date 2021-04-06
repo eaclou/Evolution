@@ -75,7 +75,7 @@ public class MasterGenomePool {
             float worstFitness = 99999f;
             bool noCurrentlyExtinctFlaggedSpecies = true;
             for(int i = 0; i < currentlyActiveSpeciesIDList.Count; i++) {
-                float fitness = completeSpeciesPoolsList[currentlyActiveSpeciesIDList[i]].avgPerformanceData.totalTicksAlive;
+                float fitness = completeSpeciesPoolsList[currentlyActiveSpeciesIDList[i]].avgCandidateData.performanceData.totalTicksAlive;
                 if(fitness < worstFitness) {
                     worstFitness = fitness;
                     leastFitSpeciesID = currentlyActiveSpeciesIDList[i];

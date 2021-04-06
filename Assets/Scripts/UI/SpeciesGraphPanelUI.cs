@@ -186,8 +186,9 @@ public class SpeciesGraphPanelUI : MonoBehaviour
                     
                     for(int a = 0; a < statsTreeOfLifeSpeciesTexArray.Length; a++) {
                         float valStat = 0f;
-                        if(speciesPool.avgPerformanceDataYearList.Count > t) {
-                            valStat = (float)speciesPool.avgPerformanceDataYearList[t].totalTicksAlive; //0f;
+                        if(speciesPool.avgCandidateDataYearList.Count > t) {
+                            valStat = (float)speciesPool.avgCandidateDataYearList[t].performanceData.totalTicksAlive; //0f;
+                            //Debug.Log("valStat: " + valStat.ToString());
                         }
                         
                         //= speciesPool
@@ -287,7 +288,7 @@ public class SpeciesGraphPanelUI : MonoBehaviour
     }
 
     private void RefreshGraphMaterial() {
-        Debug.Log("RefreshGraphMaterial " + statsTreeOfLifeSpeciesTexArray[0].width.ToString() + ", " + maxValuesStatArray[0].ToString());
+        //Debug.Log("RefreshGraphMaterial " + statsTreeOfLifeSpeciesTexArray[0].width.ToString() + ", " + maxValuesStatArray[0].ToString());
         SpeciesGenomePool pool = masterGenomePool.completeSpeciesPoolsList[simulationManager.uiManager.selectedSpeciesID];
 
         switch(selectedGraphCategory) {
@@ -315,9 +316,9 @@ public class SpeciesGraphPanelUI : MonoBehaviour
 
                 //curSpeciesStatValue = pool.avgDamageDealt;
             //curSpeciesStatName = "Damage Dealt";
-                textGraphStatsLeft.text = "LIFESPAN\n" + pool.avgPerformanceData.totalTicksAlive.ToString(); // + ", M: " + maxValuesStatArray[selectedSpeciesStatsIndex].ToString() + ", m: " + minValuesStatArray[selectedSpeciesStatsIndex].ToString();
-                textGraphStatsCenter.text = "DMG DEALT\n" + pool.avgPerformanceData.totalDamageDealt.ToString();
-                textGraphStatsRight.text = "DMG TAKEN\n" + pool.avgPerformanceData.totalDamageTaken.ToString();
+                textGraphStatsLeft.text = "LIFESPAN\n" + pool.avgCandidateData.performanceData.totalTicksAlive.ToString(); // + ", M: " + maxValuesStatArray[selectedSpeciesStatsIndex].ToString() + ", m: " + minValuesStatArray[selectedSpeciesStatsIndex].ToString();
+                textGraphStatsCenter.text = "DMG DEALT\n" + pool.avgCandidateData.performanceData.totalDamageDealt.ToString();
+                textGraphStatsRight.text = "DMG TAKEN\n" + pool.avgCandidateData.performanceData.totalDamageTaken.ToString();
 
                 textGraphCategory.text = "HEALTH";
                 break;

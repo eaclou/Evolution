@@ -1437,8 +1437,8 @@ public class SimulationManager : Singleton<SimulationManager>
         
         //Debug.Log("masterGenomePool.completeSpeciesPoolsList: " + masterGenomePool.completeSpeciesPoolsList.Count.ToString());
         SpeciesGenomePool speciesPool = masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex];
-        var avgPerformanceData = speciesPool.avgPerformanceData;
-        var agentPerformanceData = agentRef.candidateRef.performanceData;
+        var avgPerformanceData = speciesPool.avgCandidateData.performanceData;
+        var agentPerformanceData = agentRef.candidateRef.performanceData;  //***EC  - something fishy!!!!!!*****  
 
         UpdateRecords(agentRef);
 
@@ -1451,7 +1451,9 @@ public class SimulationManager : Singleton<SimulationManager>
             // -- then push the candidate to Leaderboard List so it is eligible for reproduction
             // -- at the same time, remove it from the ToBeEvaluated pool
             speciesPool.ProcessCompletedCandidate(candidateData, masterGenomePool);
-            float lerpAmount = Mathf.Max(0.01f, 1f / (float)speciesPool.numAgentsEvaluated);
+
+            /*
+            float lerpAmount = Mathf.Max(0.01f, 1f / (float)speciesPool.numAgentsEvaluated);  //***EC isn't this handled elsewhere???
 
             avgPerformanceData.totalTicksAlive = (int)Mathf.Lerp((float)avgPerformanceData.totalTicksAlive, (float)agentRef.ageCounter, lerpAmount);
             avgPerformanceData.totalFoodEatenCorpse = Mathf.Lerp(avgPerformanceData.totalFoodEatenCorpse, agentPerformanceData.totalFoodEatenCorpse, lerpAmount);
@@ -1459,6 +1461,9 @@ public class SimulationManager : Singleton<SimulationManager>
             avgPerformanceData.totalFoodEatenZoop = Mathf.Lerp(avgPerformanceData.totalFoodEatenZoop, agentPerformanceData.totalFoodEatenZoop, lerpAmount);
             avgPerformanceData.totalFoodEatenEgg = Mathf.Lerp(avgPerformanceData.totalFoodEatenEgg, agentPerformanceData.totalFoodEatenEgg, lerpAmount);
             avgPerformanceData.totalFoodEatenCreature = Mathf.Lerp(avgPerformanceData.totalFoodEatenCreature, agentPerformanceData.totalFoodEatenCreature, lerpAmount);
+            */
+            //Debug.Log("WTF?? " + avgPerformanceData.totalTicksAlive.ToString());
+
             //speciesPool.avgPerformanceData.avgBodySize = Mathf.Lerp(speciesPool.avgPerformanceData.avgBodySize, agentRef.candidateRef.performanceData.fullSizeBodyVolume, lerpAmount);
             //speciesPool.avgPerformanceData.avgSpecAttack = Mathf.Lerp(speciesPool.avgPerformanceData.avgSpecAttack, (float)agentRef.candidateRef.performanceData.coreModule.talentSpecAttackNorm, lerpAmount);
             ////speciesPool.avgPerformanceData.avgSpecDefend = Mathf.Lerp(speciesPool.avgPerformanceData.avgSpecDefend, (float)agentRef.candidateRef.performanceData.coreModule.talentSpecDefenseNorm, lerpAmount);
@@ -1471,6 +1476,7 @@ public class SimulationManager : Singleton<SimulationManager>
             //speciesPool.avgPerformanceData.avgNumAxons = Mathf.Lerp(speciesPool.avgPerformanceData.avgNumAxons, (float)agentRef.candidateRef.performanceData.brain.axonList.Count, lerpAmount);
             //speciesPool.avgPerformanceData.avgExperience = Mathf.Lerp(speciesPool.avgPerformanceData.avgExperience, (float)agentRef.candidateRef.performanceData.totalExperience, lerpAmount);
             //speciesPool.avgPerformanceData.avgFitnessScore = Mathf.Lerp(speciesPool.avgPerformanceData.avgFitnessScore, (float)agentRef.candidateRef.performanceData.masterFitnessScore, lerpAmount);
+            /*
             avgPerformanceData.totalDamageDealt = Mathf.Lerp(avgPerformanceData.totalDamageDealt, agentPerformanceData.totalDamageDealt, lerpAmount);
             avgPerformanceData.totalDamageTaken = Mathf.Lerp(avgPerformanceData.totalDamageTaken, agentPerformanceData.totalDamageTaken, lerpAmount);
 
@@ -1479,7 +1485,7 @@ public class SimulationManager : Singleton<SimulationManager>
             avgPerformanceData.totalTimesDefended = (int)Mathf.Lerp((float)avgPerformanceData.totalTimesDefended, (float)agentPerformanceData.totalTimesDefended, lerpAmount);
             avgPerformanceData.totalTimesDashed = (int)Mathf.Lerp((float)avgPerformanceData.totalTimesDashed, (float)agentPerformanceData.totalTimesDashed, lerpAmount);
             avgPerformanceData.totalTimesPregnant = (int)Mathf.Lerp((float)avgPerformanceData.totalTimesPregnant, (float)agentPerformanceData.totalTimesPregnant, lerpAmount);
-            
+            */
             // More??
             //masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].
         }
@@ -1758,137 +1764,37 @@ public class SimulationManager : Singleton<SimulationManager>
     
     private void RefreshLatestSpeciesDataEntry() {   
         for(int i = 0; i < masterGenomePool.completeSpeciesPoolsList.Count; i++) {
-            if(masterGenomePool.completeSpeciesPoolsList[i].avgPerformanceDataYearList.Count > 0) {
-                masterGenomePool.completeSpeciesPoolsList[i].avgPerformanceDataYearList[masterGenomePool.completeSpeciesPoolsList[i].avgPerformanceDataYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgPerformanceData;
-            }
-            
-            // Combine these into a single stats class/struct?
-/*
-            masterGenomePool.completeSpeciesPoolsList[i].avgLifespanPerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgLifespanPerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgLifespan;
-            masterGenomePool.completeSpeciesPoolsList[i].avgFoodEatenCorpsePerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgFoodEatenCorpsePerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgFoodEatenCorpse;
-            masterGenomePool.completeSpeciesPoolsList[i].avgFoodEatenPlantPerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgFoodEatenPlantPerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgFoodEatenPlant;
-            masterGenomePool.completeSpeciesPoolsList[i].avgFoodEatenZoopPerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgFoodEatenZoopPerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgFoodEatenZoop;
-            masterGenomePool.completeSpeciesPoolsList[i].avgFoodEatenEggPerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgFoodEatenEggPerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgFoodEatenEgg;
-            masterGenomePool.completeSpeciesPoolsList[i].avgFoodEatenCreaturePerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgFoodEatenCreaturePerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgFoodEatenCreature;
-            masterGenomePool.completeSpeciesPoolsList[i].avgBodySizePerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgBodySizePerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgBodySize;
-            masterGenomePool.completeSpeciesPoolsList[i].avgSpecAttackPerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgSpecAttackPerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgSpecAttack;
-            masterGenomePool.completeSpeciesPoolsList[i].avgSpecDefendPerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgSpecDefendPerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgSpecDefend;
-            masterGenomePool.completeSpeciesPoolsList[i].avgSpecSpeedPerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgSpecSpeedPerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgSpecSpeed;
-            masterGenomePool.completeSpeciesPoolsList[i].avgSpecUtilityPerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgSpecUtilityPerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgSpecUtility;
-            masterGenomePool.completeSpeciesPoolsList[i].avgFoodSpecDecayPerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgFoodSpecDecayPerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgFoodSpecDecay;
-            masterGenomePool.completeSpeciesPoolsList[i].avgFoodSpecPlantPerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgFoodSpecPlantPerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgFoodSpecPlant;
-            masterGenomePool.completeSpeciesPoolsList[i].avgFoodSpecMeatPerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgFoodSpecMeatPerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgFoodSpecMeat;
-            masterGenomePool.completeSpeciesPoolsList[i].avgNumNeuronsPerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgNumNeuronsPerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgNumNeurons;
-            masterGenomePool.completeSpeciesPoolsList[i].avgNumAxonsPerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgNumAxonsPerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgNumAxons;
-            masterGenomePool.completeSpeciesPoolsList[i].avgExperiencePerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgExperiencePerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgExperience;
-            masterGenomePool.completeSpeciesPoolsList[i].avgFitnessScorePerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgFitnessScorePerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgFitnessScore;
-            masterGenomePool.completeSpeciesPoolsList[i].avgDamageDealtPerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgDamageDealtPerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgDamageDealt;
-            masterGenomePool.completeSpeciesPoolsList[i].avgDamageTakenPerYearList[masterGenomePool.completeSpeciesPoolsList[i].avgDamageTakenPerYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgDamageTaken;
-            */
-            
+            if(masterGenomePool.completeSpeciesPoolsList[i].avgCandidateDataYearList.Count > 0) {
+                masterGenomePool.completeSpeciesPoolsList[i].avgCandidateDataYearList[masterGenomePool.completeSpeciesPoolsList[i].avgCandidateDataYearList.Count - 1] = masterGenomePool.completeSpeciesPoolsList[i].avgCandidateData;
+            }            
         }
-        //avgLifespanPerYearList[avgLifespanPerYearList.Count - 1] = avgLifespan;
-        
     }
     
-    public void AddNewSpecies(AgentGenome newGenome, int parentSpeciesID) {  // ********** Move this to MasterGenomePool class?
+    public void AddNewSpecies(AgentGenome newGenome, int parentSpeciesID) {  // **********EC Move this to MasterGenomePool class?
         int newSpeciesID = masterGenomePool.completeSpeciesPoolsList.Count;
                
         SpeciesGenomePool newSpecies = new SpeciesGenomePool(newSpeciesID, parentSpeciesID, curSimYear, simAgeTimeSteps, settingsManager.mutationSettingsVertebrates);
 
-        // Random Body?
-        //newGenome.ProcessNewSpeciesExtraMutation();
-        //masterGenomePool.mutationSettingsRef.defaultBodyMutationChance = 1f;
-        //masterGenomePool.mutationSettingsRef.defaultBodyMutationStepSize = 1f;
-        //masterGenomePool.mutationSettingsRef.mutationStrengthSlot = 0.05f; // ****
-        //newGenome.GenerateInitialRandomBodyGenome(); // might break?
         AgentGenome foundingGenome = newGenome; // newSpecies.Mutate(newGenome, true, true); //
         
-        // **** I want to just change the APPEARANCE of body genome, but keep the brain? ... area to revisit later
-        // Maybe just do a fresh restart for now -- fully random init
-
         newSpecies.FirstTimeInitialize(new CandidateAgentData(foundingGenome, newSpeciesID), masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].depthLevel + 1);
         masterGenomePool.currentlyActiveSpeciesIDList.Add(newSpeciesID);
         masterGenomePool.completeSpeciesPoolsList.Add(newSpecies);
         masterGenomePool.speciesCreatedOrDestroyedThisFrame = true;
 
-        newSpecies.avgPerformanceDataYearList.Clear();
-        int lastIndex = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgPerformanceDataYearList.Count - 1;
+        //newSpecies.avgPerformanceDataYearList.Clear(); // handled inside FirstTimeInitialize()
+        int lastIndex = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgCandidateDataYearList.Count - 1;
         // Inherit Parent Data Stats:  // *** Vestigial but harmless ***
         
-        for(int i = 0; i < masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgPerformanceDataYearList.Count; i++) {
-            newSpecies.avgPerformanceDataYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgPerformanceDataYearList[i]);
+        for(int i = 0; i < masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgCandidateDataYearList.Count; i++) {
+            newSpecies.avgCandidateDataYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgCandidateDataYearList[i]);
         }  
         // set
-        newSpecies.avgPerformanceData = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgPerformanceDataYearList[lastIndex];
+        newSpecies.avgCandidateData = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgCandidateDataYearList[lastIndex];
         
         if(newSpecies.depthLevel > masterGenomePool.currentHighestDepth) {
             masterGenomePool.currentHighestDepth = newSpecies.depthLevel;
-        }
-        //Debug.Log("New Species Created!!! (" + newSpeciesID.ToString() + "] score: " + closestDistance.ToString());
-        /*newSpecies.avgLifespanPerYearList.Clear();
-        newSpecies.avgFoodEatenCorpsePerYearList.Clear();
-        newSpecies.avgFoodEatenPlantPerYearList.Clear();
-        newSpecies.avgFoodEatenZoopPerYearList.Clear();
-        newSpecies.avgFoodEatenEggPerYearList.Clear();
-        newSpecies.avgFoodEatenCreaturePerYearList.Clear();
-        newSpecies.avgBodySizePerYearList.Clear();
-        newSpecies.avgSpecAttackPerYearList.Clear();
-        newSpecies.avgSpecDefendPerYearList.Clear();
-        newSpecies.avgSpecSpeedPerYearList.Clear();
-        newSpecies.avgSpecUtilityPerYearList.Clear();
-        newSpecies.avgFoodSpecDecayPerYearList.Clear();
-        newSpecies.avgFoodSpecPlantPerYearList.Clear();
-        newSpecies.avgFoodSpecMeatPerYearList.Clear();
-        newSpecies.avgNumNeuronsPerYearList.Clear();
-        newSpecies.avgNumAxonsPerYearList.Clear();
-        newSpecies.avgExperiencePerYearList.Clear();
-        newSpecies.avgFitnessScorePerYearList.Clear();
-        newSpecies.avgDamageDealtPerYearList.Clear();
-        newSpecies.avgDamageTakenPerYearList.Clear();*/
-        
-        /*
-            newSpecies.avgLifespanPerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgLifespanPerYearList[i]);
-            newSpecies.avgFoodEatenCorpsePerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgFoodEatenCorpsePerYearList[i]);
-            newSpecies.avgFoodEatenPlantPerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgFoodEatenPlantPerYearList[i]);
-            newSpecies.avgFoodEatenZoopPerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgFoodEatenZoopPerYearList[i]);
-            newSpecies.avgFoodEatenEggPerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgFoodEatenEggPerYearList[i]);
-            newSpecies.avgFoodEatenCreaturePerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgFoodEatenCreaturePerYearList[i]);
-            newSpecies.avgBodySizePerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgBodySizePerYearList[i]);
-            newSpecies.avgSpecAttackPerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgSpecAttackPerYearList[i]);
-            newSpecies.avgSpecDefendPerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgSpecDefendPerYearList[i]);
-            newSpecies.avgSpecSpeedPerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgSpecSpeedPerYearList[i]);
-            newSpecies.avgSpecUtilityPerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgSpecUtilityPerYearList[i]);
-            newSpecies.avgFoodSpecDecayPerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgFoodSpecDecayPerYearList[i]);
-            newSpecies.avgFoodSpecPlantPerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgFoodSpecPlantPerYearList[i]);
-            newSpecies.avgFoodSpecMeatPerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgFoodSpecMeatPerYearList[i]);
-            newSpecies.avgNumNeuronsPerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgNumNeuronsPerYearList[i]);
-            newSpecies.avgNumAxonsPerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgNumAxonsPerYearList[i]);
-            newSpecies.avgExperiencePerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgExperiencePerYearList[i]);
-            newSpecies.avgFitnessScorePerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgFitnessScorePerYearList[i]);
-            newSpecies.avgDamageDealtPerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgDamageDealtPerYearList[i]);
-            newSpecies.avgDamageTakenPerYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgDamageTakenPerYearList[i]);*/
-
-        /*newSpecies.avgLifespan = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgLifespanPerYearList[lastIndex];
-        newSpecies.avgFoodEatenCorpse = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgFoodEatenCorpsePerYearList[lastIndex];
-        newSpecies.avgFoodEatenPlant = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgFoodEatenPlantPerYearList[lastIndex];
-        newSpecies.avgFoodEatenZoop = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgFoodEatenZoopPerYearList[lastIndex];
-        newSpecies.avgFoodEatenEgg = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgFoodEatenEggPerYearList[lastIndex];
-        newSpecies.avgFoodEatenCreature = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgFoodEatenCreaturePerYearList[lastIndex];
-        newSpecies.avgBodySize = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgBodySizePerYearList[lastIndex];
-        newSpecies.avgSpecAttack = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgSpecAttackPerYearList[lastIndex];
-        newSpecies.avgSpecDefend = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgSpecDefendPerYearList[lastIndex];
-        newSpecies.avgSpecSpeed = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgSpecSpeedPerYearList[lastIndex];
-        newSpecies.avgSpecUtility = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgSpecUtilityPerYearList[lastIndex];
-        newSpecies.avgFoodSpecDecay = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgFoodSpecDecayPerYearList[lastIndex];
-        newSpecies.avgFoodSpecPlant = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgFoodSpecPlantPerYearList[lastIndex];
-        newSpecies.avgFoodSpecMeat = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgFoodSpecMeatPerYearList[lastIndex];
-        newSpecies.avgNumNeurons = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgNumNeuronsPerYearList[lastIndex];
-        newSpecies.avgNumAxons = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgNumAxonsPerYearList[lastIndex];
-        newSpecies.avgExperience = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgExperiencePerYearList[lastIndex];
-        newSpecies.avgFitnessScore = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgFitnessScorePerYearList[lastIndex];
-        newSpecies.avgDamageDealt = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgDamageDealtPerYearList[lastIndex];
-        newSpecies.avgDamageTaken = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgDamageTakenPerYearList[lastIndex];*/
+        }        
     }
     
     private StartPositionGenome GetInitialAgentSpawnPosition(int speciesIndex)
