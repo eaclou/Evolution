@@ -64,7 +64,8 @@ public class Agent : MonoBehaviour {
         public float goodness;
     }
     public string stringCauseOfDeath = "";
-    public List<AgentEventData> agentEventDataList;
+    
+    public List<AgentEventData> agentEventDataList = new List<AgentEventData>();
     //public string lastEvent = "";
     //public int lastEventTime = 0;
     
@@ -88,17 +89,7 @@ public class Agent : MonoBehaviour {
         Decaying
     }
     private int gestationDurationTimeSteps = 120;
-    public int _GestationDurationTimeSteps
-    {
-        get
-        {
-            return gestationDurationTimeSteps;
-        }
-        set
-        {
-
-        }
-    }
+    public int _GestationDurationTimeSteps => gestationDurationTimeSteps;
     
     public int maxAgeTimeSteps = 100000;
     
@@ -155,17 +146,8 @@ public class Agent : MonoBehaviour {
     public float biomassAtDeath = 1f;
     
     private Vector3 prevPos;  // use these instead of sampling rigidbody?
-    public Vector3 _PrevPos
-    {
-        get
-        {
-            return prevPos;
-        }
-        set
-        {
+    public Vector3 _PrevPos => prevPos;
 
-        }
-    }
     public float prevVel;
     public float curVel;
     public float curAccel;
@@ -200,58 +182,73 @@ public class Agent : MonoBehaviour {
 
     //public float overflowFoodAmount = 0f;
         
-    // Use this for initialization
     private void Awake() {        
         // temp fix for delayed spawning of Agents (leading to nullReferenceExceptions)
         //agentWidthsArray = new float[widthsTexResolution];
         isInert = true;
-        agentEventDataList = new List<AgentEventData>();  // created once
+        
+        // WPP: initialized in declaration to eliminate possibility of race condition
+        //agentEventDataList = new List<AgentEventData>();  // created once
     }
+    
+    // WPP 4/9: cut verbosity with declarative style (optional if not repeated often)
+    bool isDead => curLifeStage == AgentLifeStage.Dead;
+    bool isEgg => curLifeStage == AgentLifeStage.Egg;
 
+    // WPP 4/9: simplified conditionals and added error condition
     public float GetDecayPercentage() {
-        float percentage = 0f;
-        if(curLifeStage == AgentLifeStage.Dead) {
-            if(this.biomassAtDeath == 0f) {
+        if (biomassAtDeath == 0f) {
+            Debug.LogError("Biomass at death zero for " + index);
+            return 0f;
+        }
+        if (!isDead) {
+            Debug.LogError("I'm not dead yet! " + index + " " + curLifeStage);
+            return 0f;
+        }
+    
+        float percentage = 1f - currentBiomass / biomassAtDeath;
+                
+        /*if (curLifeStage == AgentLifeStage.Dead) {
+            if(biomassAtDeath == 0f) {
                 Debug.LogError("AAAHH" + index.ToString());
             }
             else {
-                percentage = 1f - (this.currentBiomass / this.biomassAtDeath);
+                percentage = 1f - (currentBiomass / biomassAtDeath);
             }
-            
-        }
+        }*/
+        
         return Mathf.Clamp01(percentage);
     }
 
+    // WPP: early exit instead of if-else, added warning
     public void AttemptInitiateActiveFeedBite() {
         if (isFeeding) {
-            // this shouldn't happen?
+            Debug.LogWarning("Already feeding, no need to initiate feed bite");
+            return;
         }
-        else {
-            isFeeding = true;            
-            mouthRef.triggerCollider.enabled = true;
-            mouthRef.lastBiteFoodAmount = 0f;
-            feedingFrameCounter = 0;            
-        }
+        
+        isFeeding = true;            
+        mouthRef.triggerCollider.enabled = true;
+        mouthRef.lastBiteFoodAmount = 0f;
+        feedingFrameCounter = 0;            
     }
 
     public void AttemptInitiateActiveAttackBite() {
         //Debug.Log("ATTACK");
-
         if (isAttacking) {
-            // this shouldn't happen?
+            Debug.LogWarning("Already attacking, no need to initiate attack bite");
+            return;
         }
-        else {            
-            isAttacking = true;
-            mouthRef.triggerCollider.enabled = true;
-            attackingFrameCounter = 0;    
-            
-            candidateRef.performanceData.totalTimesAttacked++;
-        }
+               
+        isAttacking = true;
+        mouthRef.triggerCollider.enabled = true;
+        attackingFrameCounter = 0;    
+        
+        candidateRef.performanceData.totalTimesAttacked++;
     }
     
     public void SetToAwaitingRespawn() {
         curLifeStage = AgentLifeStage.AwaitingRespawn;
-
         isInert = true;
         isMarkedForDeathByUser = false;
     }
@@ -292,22 +289,20 @@ public class Agent : MonoBehaviour {
         swallowingPreyFrameCounter = 0;
         preyAgentRef = preyAgent;
 
-        float foodAmount = preyAgent.currentBiomass * 1000f * coreModule.foodEfficiencyMeat;  // *(*********************************************** experiment!
+        float foodAmount = preyAgent.currentBiomass * 1000f * coreModule.foodEfficiencyMeat;  // experiment!
         candidateRef.performanceData.totalFoodEatenCreature += foodAmount;
 
         EatFoodMeat(foodAmount);
-        RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Vertebrate! (" + foodAmount.ToString() + ") candID: " + preyAgent.candidateRef.candidateID.ToString(), 1f);
+        // WPP: .ToString() redundant on argument on concatenated string
+        RegisterAgentEvent(Time.frameCount, "Ate Vertebrate! (" + foodAmount + ") candID: " + preyAgent.candidateRef.candidateID, 1f);
         preyAgent.ProcessBeingEaten(preyAgent.currentBiomass);
         
         colliderBody.enabled = false;
         springJoint.enabled = false;
         springJoint.connectedBody = null;
-
-        
     }
 
     public void MapNeuronToModule(NID nid, Neuron neuron) {
-        
         // Hidden nodes!
         if (nid.moduleID == -1) {
             neuron.currentValue = new float[1];
@@ -345,7 +340,6 @@ public class Agent : MonoBehaviour {
         
         //UpdateInternalResources();  // update energy, stamina, food -- or do this during TickActions?
                
-
         coreModule.Tick();
         communicationModule.Tick(this);
         environmentModule.Tick(this);
@@ -359,28 +353,34 @@ public class Agent : MonoBehaviour {
         mouthRef.Tick();
     }
     
+    // STARVATION
+    // WPP: applied early-exit, replaced branching with ternaries
     private void CheckForDeathStarvation() {
-        // STARVATION::
-        if (coreModule.energy <= 0f) {
-            if(coreModule.stomachContentsNorm > 0.01f) {
-                stringCauseOfDeath = "Suffocated";
-                RegisterAgentEvent(UnityEngine.Time.frameCount, "Suffocated! stomachContentsNorm: " + coreModule.stomachContentsNorm.ToString(), 0f);
-            }
-            else {
-                stringCauseOfDeath = "Starved";
-                RegisterAgentEvent(UnityEngine.Time.frameCount, "Starved!", 0f);
-            }
+        if (coreModule.energy > 0f)
+            return;
             
-            lifeStageTransitionTimeStepCounter = 0;
-            
-            InitializeDeath();
+        bool starved = coreModule.stomachContentsNorm <= 0.01f;
+        stringCauseOfDeath = starved ? "Starved" : "Suffocated";
+        string eventMessage = starved ? "Starved!" : "Suffocated! stomachContentsNorm: " + coreModule.stomachContentsNorm;
+        RegisterAgentEvent(Time.frameCount, eventMessage, 0f);
+    
+        /*if(coreModule.stomachContentsNorm > 0.01f) {
+            stringCauseOfDeath = "Suffocated";
+            RegisterAgentEvent(Time.frameCount, "Suffocated! stomachContentsNorm: " + coreModule.stomachContentsNorm, 0f);
         }
+        else {
+            stringCauseOfDeath = "Starved";
+            RegisterAgentEvent(Time.frameCount, "Starved!", 0f);
+        }*/
+        
+        lifeStageTransitionTimeStepCounter = 0;
+        InitializeDeath();
     }
+    
     public void CheckForDeathHealth() {
         // HEALTH FAILURE:
         if (coreModule.healthBody <= 0f) {
-
-            curLifeStage = Agent.AgentLifeStage.Dead;
+            curLifeStage = AgentLifeStage.Dead;
             lifeStageTransitionTimeStepCounter = 0;
             
             coreModule.hitPoints[0] = 0f;
@@ -391,21 +391,23 @@ public class Agent : MonoBehaviour {
             //Debug.LogError("CheckForDeathHealth" + currentBiomass.ToString());
 
             stringCauseOfDeath = "Fatal Injuries";
-            RegisterAgentEvent(UnityEngine.Time.frameCount, "Died of Injuries!", 0f);
+            RegisterAgentEvent(Time.frameCount, "Died of Injuries!", 0f);
             InitializeDeath();
         }
     }
+    
     private void CheckForDeathOldAge() {
         if(ageCounter > maxAgeTimeSteps) {
-            curLifeStage = Agent.AgentLifeStage.Dead;
+            curLifeStage = AgentLifeStage.Dead;
             lifeStageTransitionTimeStepCounter = 0;
 
             //Debug.Log("Died of old age!");
             stringCauseOfDeath = "Old Age";
-            RegisterAgentEvent(UnityEngine.Time.frameCount, "Died of Old Age!", 0f);
+            RegisterAgentEvent(Time.frameCount, "Died of Old Age!", 0f);
             InitializeDeath();
         }
     }
+    
     private void CheckForDeathDivineJudgment() {
         if(isMarkedForDeathByUser) {
             curLifeStage = Agent.AgentLifeStage.Dead;
@@ -415,6 +417,7 @@ public class Agent : MonoBehaviour {
             InitializeDeath();
         }
     }
+    
     private void InitializeDeath()   // THIS CAN BE A LOT CLEANER!!!!! *****
     {  
         curLifeStage = AgentLifeStage.Dead;
@@ -1040,7 +1043,7 @@ public class Agent : MonoBehaviour {
             coreModule.energy = 0f;
         }
 
-        if(curLifeStage == AgentLifeStage.Dead || curLifeStage == AgentLifeStage.Egg) {
+        if(isDead || isEgg) {
             throttle = Vector2.zero;
             smoothedThrottle = Vector2.zero;
         }
