@@ -19,7 +19,10 @@ public class CritterModuleCore {
     public float healthBody = 1f;
     public float healthExternal = 1f;
 
-    public float stomachContentsNorm = 0f;  // 0-1 normalized
+    // *** WPP: mixed metaphor -> is this defined as the total contents / capacity
+    // or a number that can be incremented independently?
+    public float stomachContentsNorm = 0f;
+     
     public float stomachCapacity = 1f;  // absolute value in units of (area?)
     public float stomachContentsDecay = 0f;
     public float stomachContentsPlant = 0f;
@@ -69,6 +72,27 @@ public class CritterModuleCore {
     public float foodEfficiencyPlant;
     public float foodEfficiencyDecay;
     public float foodEfficiencyMeat;
+    
+    public float health => healthHead + healthBody + healthExternal;
+
+    public float stomachSpace => stomachCapacity - totalStomachContents;
+    public float totalStomachContents => stomachContentsPlant + stomachContentsMeat + stomachContentsDecay;
+    public float stomachContentsPercent => totalStomachContents / stomachCapacity;
+    public bool stomachEmpty => stomachContentsPercent <= .01f;
+    
+    // WPP: replaced Vector math with simpler percent calculation
+    //public Vector3 foodProportionsVector => foodVector / (totalStomachContents + 0.000001f);
+    //Vector3 foodVector => new Vector3(stomachContentsPlant, stomachContentsMeat, stomachContentsDecay);
+    public float plantEatenPercent => stomachContentsPlant / (totalStomachContents +0.000001f);
+    public float meatEatenPercent => stomachContentsMeat / (totalStomachContents +0.000001f);
+    public float decayEatenPercent => stomachContentsDecay / (totalStomachContents +0.000001f);
+    
+    public float GetEnergyTotal(float plantEfficiency, float meatEfficiency, float decayEfficiency)
+    {
+        return  dietSpecPlantNorm * plantEfficiency + 
+                dietSpecMeatNorm * meatEfficiency + 
+                dietSpecDecayNorm + decayEfficiency;
+    }
 
 	public CritterModuleCore() {
 
@@ -204,8 +228,26 @@ public class CritterModuleCore {
         hitPoints[0] = Mathf.Max(healthBody, 0f);
         //stamina[0] = stamina; // set in Agent.cs
         energyStored[0] = Mathf.Clamp01(energy * 0.001f);  // Mathf.Clamp01(energyRaw / maxEnergyStorage);
-        foodStored[0] = stomachContentsNorm; // / stomachCapacity;
+        foodStored[0] = stomachContentsPercent; // / stomachCapacity;
+    }
+    
+    public void DirectDamageToRandomBodyPart(float damage)
+    {
+        int rand = Random.Range(0, 3);
         
-        
+        switch (rand)
+        {
+            case 0: healthHead -= damage; break;
+            case 1: healthBody -= damage; break;
+            default: healthExternal -= damage; break;
+        }
+    }
+    
+    // WPP: future use? (pulled from Agent)
+    public void DistributeDamage(float damage)
+    {
+        //coreModule.healthHead -= damage * UnityEngine.Random.Range(0f, 1f);
+        //coreModule.healthBody -= damage * UnityEngine.Random.Range(0f, 1f);
+        //coreModule.healthExternal -= damage * UnityEngine.Random.Range(0f, 1f);
     }
 }

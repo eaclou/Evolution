@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class Agent : MonoBehaviour {
@@ -62,7 +61,15 @@ public class Agent : MonoBehaviour {
         public int eventFrame;
         public string eventText;
         public float goodness;
+        
+        public AgentEventData(int eventFrame, string eventText, float goodness)
+        {
+            this.eventFrame = eventFrame;
+            this.eventText = eventText;
+            this.goodness = goodness;
+        }
     }
+    
     public string stringCauseOfDeath = "";
     
     public List<AgentEventData> agentEventDataList = new List<AgentEventData>();
@@ -359,9 +366,9 @@ public class Agent : MonoBehaviour {
         if (coreModule.energy > 0f)
             return;
             
-        bool starved = coreModule.stomachContentsNorm <= 0.01f;
+        bool starved = coreModule.stomachEmpty;
         stringCauseOfDeath = starved ? "Starved" : "Suffocated";
-        string eventMessage = starved ? "Starved!" : "Suffocated! stomachContentsNorm: " + coreModule.stomachContentsNorm;
+        string eventMessage = starved ? "Starved!" : "Suffocated! stomachContentsNorm: " + coreModule.stomachContentsPercent;
         RegisterAgentEvent(Time.frameCount, eventMessage, 0f);
     
         /*if(coreModule.stomachContentsNorm > 0.01f) {
@@ -377,45 +384,48 @@ public class Agent : MonoBehaviour {
         InitializeDeath();
     }
     
+    // HEALTH FAILURE:
     public void CheckForDeathHealth() {
-        // HEALTH FAILURE:
-        if (coreModule.healthBody <= 0f) {
-            curLifeStage = AgentLifeStage.Dead;
-            lifeStageTransitionTimeStepCounter = 0;
+        if (coreModule.healthBody > 0f)
+            return;
             
-            coreModule.hitPoints[0] = 0f;
-            coreModule.healthHead = 0f;
-            coreModule.healthBody = 0f;
-            coreModule.healthExternal = 0f;
+        curLifeStage = AgentLifeStage.Dead;
+        lifeStageTransitionTimeStepCounter = 0;
+        
+        coreModule.hitPoints[0] = 0f;
+        coreModule.healthHead = 0f;
+        coreModule.healthBody = 0f;
+        coreModule.healthExternal = 0f;
 
-            //Debug.LogError("CheckForDeathHealth" + currentBiomass.ToString());
+        //Debug.LogError("CheckForDeathHealth" + currentBiomass.ToString());
 
-            stringCauseOfDeath = "Fatal Injuries";
-            RegisterAgentEvent(Time.frameCount, "Died of Injuries!", 0f);
-            InitializeDeath();
-        }
+        stringCauseOfDeath = "Fatal Injuries";
+        RegisterAgentEvent(Time.frameCount, "Died of Injuries!", 0f);
+        InitializeDeath();
     }
     
     private void CheckForDeathOldAge() {
-        if(ageCounter > maxAgeTimeSteps) {
-            curLifeStage = AgentLifeStage.Dead;
-            lifeStageTransitionTimeStepCounter = 0;
+        if(ageCounter <= maxAgeTimeSteps) 
+            return;
+        
+        curLifeStage = AgentLifeStage.Dead;
+        lifeStageTransitionTimeStepCounter = 0;
 
-            //Debug.Log("Died of old age!");
-            stringCauseOfDeath = "Old Age";
-            RegisterAgentEvent(Time.frameCount, "Died of Old Age!", 0f);
-            InitializeDeath();
-        }
+        //Debug.Log("Died of old age!");
+        stringCauseOfDeath = "Old Age";
+        RegisterAgentEvent(Time.frameCount, "Died of Old Age!", 0f);
+        InitializeDeath();
     }
     
     private void CheckForDeathDivineJudgment() {
-        if(isMarkedForDeathByUser) {
-            curLifeStage = Agent.AgentLifeStage.Dead;
-            lifeStageTransitionTimeStepCounter = 0;
-            stringCauseOfDeath = "Divine Judgment";
-            RegisterAgentEvent(UnityEngine.Time.frameCount, "Struck down by Divine Judgment!", 0f);
-            InitializeDeath();
-        }
+        if(!isMarkedForDeathByUser) 
+            return;
+            
+        curLifeStage = AgentLifeStage.Dead;
+        lifeStageTransitionTimeStepCounter = 0;
+        stringCauseOfDeath = "Divine Judgment";
+        RegisterAgentEvent(Time.frameCount, "Struck down by Divine Judgment!", 0f);
+        InitializeDeath();
     }
     
     private void InitializeDeath()   // THIS CAN BE A LOT CLEANER!!!!! *****
@@ -436,28 +446,24 @@ public class Agent : MonoBehaviour {
 
         masterFitnessScore = totalExperience; // update this???
         candidateRef.performanceData.totalTicksAlive = ageCounter;
-        
         biomassAtDeath = currentBiomass;
-
         mouthRef.Disable();
     }
+    
+    // ***WPP: replace with polymorphism
     private void CheckForLifeStageTransition() {
         switch(curLifeStage) {
             case AgentLifeStage.AwaitingRespawn:
-                //
                 break;
             case AgentLifeStage.Egg:
-                //
                 if(lifeStageTransitionTimeStepCounter >= gestationDurationTimeSteps) {
                     BeginHatching();
                 }
                 else {
                     CheckForDeathHealth();
                 }
-                
                 break;
             case AgentLifeStage.Mature:
-                
                 // Check for Death:
                 CheckForDeathStarvation();
                 CheckForDeathHealth();
@@ -473,7 +479,6 @@ public class Agent : MonoBehaviour {
                 break;
             case AgentLifeStage.Null:
                 isInert = true;
-
                 beingSwallowedFrameCounter = 0;
                 isBeingSwallowed = false;
                 isSwallowingPrey = false;
@@ -488,36 +493,45 @@ public class Agent : MonoBehaviour {
                 bodyRigidbody.velocity = Vector2.zero;
                 bodyRigidbody.angularVelocity = 0f;
 
-                biomassAtDeath = 1f; // ??
-                              
+                biomassAtDeath = 1f; // ??               
                 break;
             default:
-                Debug.LogError("NO SUCH ENUM ENTRY IMPLEMENTED, YOU FOOL!!! (" + curLifeStage.ToString() + ")");
+                Debug.LogError("NO SUCH ENUM ENTRY IMPLEMENTED, YOU FOOL!!! (" + curLifeStage + ")");
                 break;
         }
     }
     
-    public void RegisterAgentEvent(int frame, string textString, float goodness01) {
+    public void RegisterAgentEvent(int frame, string textString, float goodness) {
         //lastEvent = "Ate Plant! (" + amount.ToString() + ")";
         //lastEventTime = UnityEngine.Time.frameCount;
         //eventLogStringList
-        AgentEventData newEvent = new AgentEventData();
-        newEvent.eventFrame = frame;
-        newEvent.eventText = textString;
-        newEvent.goodness = goodness01;
+        
+        // WPP: use object initializer
+        AgentEventData newEvent = new AgentEventData(frame, textString, goodness);
+        //newEvent.eventFrame = frame;
+        //newEvent.eventText = textString;
+        //newEvent.goodness = goodness;
 
         agentEventDataList.Add(newEvent);
     }
-    public void EatFoodPlant(float amount) {
-         
-        float stomachSpace = coreModule.stomachCapacity - coreModule.stomachContentsPlant - coreModule.stomachContentsMeat - coreModule.stomachContentsDecay;  // Make food Discrete???
-        if(amount > stomachSpace) {
-            amount = stomachSpace; // ??
-        }
+    
+    public void EatFoodPlant(float amount) {   
+      
+        //float stomachSpace = coreModule.stomachCapacity - coreModule.stomachContentsPlant - coreModule.stomachContentsMeat - coreModule.stomachContentsDecay;  // Make food Discrete???
+        
+        //if(amount > stomachSpace) {
+        //    amount = stomachSpace; // ??
+        //}
+        
+        // WPP: simplified with delegation and Mathf.Min
+        amount = Mathf.Min(amount, coreModule.stomachSpace);
+        
         //amount *= coreModule.foodEfficiencyPlant;
         coreModule.stomachContentsNorm += (amount / coreModule.stomachCapacity);
         
-        if(coreModule.stomachContentsNorm > 1f) {
+        // WPP: needs comment
+        // unusual that a different variable would increment than the one being checked
+        if(coreModule.stomachContentsPercent > 1f) {
             //float overStuffAmount = coreModule.stomachContentsNorm - 1f;
             //ProcessDamageReceived(overStuffAmount);
             coreModule.stomachContentsNorm = 1f;            
@@ -525,17 +539,26 @@ public class Agent : MonoBehaviour {
         else {
             coreModule.stomachContentsPlant += amount;
         }
-        GainExperience((amount / coreModule.stomachCapacity) * coreModule.foodEfficiencyPlant * 1f); // Exp for appropriate food    
+        
+        // Exp for appropriate food
+        GainExperience((amount / coreModule.stomachCapacity) * coreModule.foodEfficiencyPlant * 1f);     
 
         //Debug.Log("EatFoodPlant " + amount.ToString());
-        RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Plant! (+" + (amount * 1000).ToString("F0") + " food)", 1f);
+        RegisterAgentEvent(Time.frameCount, "Ate Plant! (+" + (amount * 1000).ToString("F0") + " food)", 1f);
     }
+    
     public void EatFoodMeat(float amount) {
         //totalFoodEatenZoop += amount; 
-        float stomachSpace = coreModule.stomachCapacity - coreModule.stomachContentsPlant - coreModule.stomachContentsMeat - coreModule.stomachContentsDecay;
-        if(amount > stomachSpace) {
-            amount = stomachSpace; // ??
-        }
+        
+        // WPP: delegated calculation to coreModule
+        //float stomachSpace = coreModule.stomachCapacity - coreModule.stomachContentsPlant - coreModule.stomachContentsMeat - coreModule.stomachContentsDecay;
+        
+        // WPP: simplify with Mathf.Min        
+        //if(amount > coreModule.stomachSpace) {
+        //    amount = coreModule.stomachSpace; 
+        //}
+        amount = Mathf.Min(amount, coreModule.stomachSpace);
+                
         //amount *= coreModule.foodEfficiencyMeat;
         coreModule.stomachContentsNorm += (amount / coreModule.stomachCapacity);
         
@@ -554,10 +577,12 @@ public class Agent : MonoBehaviour {
     }
     public void EatFoodDecay(float amount) {
         
-        float stomachSpace = coreModule.stomachCapacity - coreModule.stomachContentsPlant - coreModule.stomachContentsMeat - coreModule.stomachContentsDecay;
-        if(amount > stomachSpace) {
-            amount = stomachSpace; // ??
-        }
+        // WPP: (repeat)
+        amount = Mathf.Min(amount, coreModule.stomachSpace);
+        //float stomachSpace = coreModule.stomachCapacity - coreModule.stomachContentsPlant - coreModule.stomachContentsMeat - coreModule.stomachContentsDecay;
+        //if(amount > stomachSpace) {
+        //    amount = stomachSpace; // ??
+        //}
         coreModule.stomachContentsNorm += (amount / coreModule.stomachCapacity);
         
         if(coreModule.stomachContentsNorm > 1f) {
@@ -570,10 +595,13 @@ public class Agent : MonoBehaviour {
         
         GainExperience((amount / coreModule.stomachCapacity) * coreModule.foodEfficiencyDecay * 1f); // Exp for appropriate food
 
-        RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Corpse! (" + amount.ToString() + ")", 1f);
+        RegisterAgentEvent(Time.frameCount, "Ate Corpse! (" + amount + ")", 1f);
     }
     public void TakeDamage(float damage) {
-        int rand = UnityEngine.Random.Range(0, 3);
+    
+        // WPP: delegated to coreModule
+        coreModule.DirectDamageToRandomBodyPart(damage);
+        /*int rand = Random.Range(0, 3);
         if(rand == 0) {
             coreModule.healthHead -= damage; // * UnityEngine.Random.Range(0f, 1f);
         }
@@ -582,47 +610,39 @@ public class Agent : MonoBehaviour {
         }
         else {
             coreModule.healthExternal -= damage;
-        }
-        //coreModule.healthHead -= damage * UnityEngine.Random.Range(0f, 1f);
-        //coreModule.healthBody -= damage * UnityEngine.Random.Range(0f, 1f);
-        //coreModule.healthExternal -= damage * UnityEngine.Random.Range(0f, 1f);
+        }*/
 
-        coreModule.hitPoints[0] = (coreModule.healthHead + coreModule.healthBody + coreModule.healthExternal) / 3f;
+        // WPP delegated to coreModule
+        coreModule.hitPoints[0] = coreModule.health / 3f;
+        //(coreModule.healthHead + coreModule.healthBody + coreModule.healthExternal) / 3f;
 
         candidateRef.performanceData.totalDamageTaken += damage;
 
-        RegisterAgentEvent(UnityEngine.Time.frameCount, "Took Damage! (" + damage.ToString() + ")", 0f);
+        RegisterAgentEvent(Time.frameCount, "Took Damage! (" + damage + ")", 0f);
 
         CheckForDeathHealth();
     }
+    
     public void ProcessBiteDamageReceived(float damage, Agent predatorAgentRef) {
-
-        damage = damage / coreModule.healthBonus;
+        damage /= coreModule.healthBonus;
 
         float defendBonus = 1f;
         if(isDefending && defendFrameCounter < defendDuration) {
-            
-            RegisterAgentEvent(UnityEngine.Time.frameCount, "Blocked Bite! from #" + predatorAgentRef.index.ToString(), 0.75f);
-           
+            RegisterAgentEvent(Time.frameCount, "Blocked Bite! from #" + predatorAgentRef.index, 0.75f);
         }
         else {
             damage *= defendBonus;
             predatorAgentRef.candidateRef.performanceData.totalDamageDealt += damage;
             TakeDamage(damage);
-            RegisterAgentEvent(UnityEngine.Time.frameCount, "Bitten! (" + damage.ToString("F2") + ") by #" + predatorAgentRef.index.ToString(), 0f);
+            RegisterAgentEvent(Time.frameCount, "Bitten! (" + damage.ToString("F2") + ") by #" + predatorAgentRef.index.ToString(), 0f);
         }
-
         
-
         //coreModule.energy *= 0.5f; // ******
-
-        
-     
     }
+    
+    // If this agent is dead, it acts as food.
     public void ProcessBeingEaten(float amount) {
-        // if this agent is dead, it acts as food.
         // it was just bitten by another creature and removed material -- 
-        
         currentBiomass -= amount;
 
         if (currentBiomass <= 0f)
@@ -648,12 +668,10 @@ public class Agent : MonoBehaviour {
             ScaleBody(sizePercentage, false);
         }
         
-        RegisterAgentEvent(UnityEngine.Time.frameCount, "Devoured!", 0f);
-        
+        RegisterAgentEvent(Time.frameCount, "Devoured!", 0f);  
     }
 
     public void Tick(SimulationManager simManager, SettingsManager settings) {
-        
         // Resources:
         wasteProducedLastFrame = 0f;
         oxygenUsedLastFrame = 0f;
@@ -692,29 +710,24 @@ public class Agent : MonoBehaviour {
         
         switch(curLifeStage) {
             case AgentLifeStage.AwaitingRespawn:
-                //
                 bodyRigidbody.simulated = false;
                 bodyRigidbody.isKinematic = false;
                 colliderBody.enabled = false;
                 break;
             case AgentLifeStage.Egg:
-                //
                 TickEgg();
                 break;            
             case AgentLifeStage.Mature:
-                //
                 TickMature(simManager);
                 break;
             case AgentLifeStage.Dead:
-                //
                 TickDead(settings);
                 break;
             case AgentLifeStage.Null:
-                //
                 //Debug.Log("agent is null - probably shouldn't have gotten to this point...;");
                 break;
             default:
-                Debug.LogError("NO SUCH ENUM ENTRY IMPLEMENTED, YOU FOOL!!! (" + curLifeStage.ToString() + ")");
+                Debug.LogError("NO SUCH ENUM ENTRY IMPLEMENTED, YOU FOOL!!! (" + curLifeStage + ")");
                 break;
         }
         
@@ -730,7 +743,6 @@ public class Agent : MonoBehaviour {
 
         prevPos = curPos;
         prevVel = curVel;
-          
     }
 
     // *** Condense these into ONE?
@@ -738,10 +750,7 @@ public class Agent : MonoBehaviour {
         lifeStageTransitionTimeStepCounter++;
 
         if(isBeingSwallowed) {
-            
             //Debug.Log("TickEgg() isBeingSwallowed! " + index.ToString() + " --> " + predatorAgentRef.index.ToString());
-            
-
         }
 
         sizePercentage = Mathf.Clamp01(((float)lifeStageTransitionTimeStepCounter / (float)gestationDurationTimeSteps) * spawnStartingScale);
@@ -749,38 +758,39 @@ public class Agent : MonoBehaviour {
         // Scaling Test:
         int frameNum = lifeStageTransitionTimeStepCounter % growthScalingSkipFrames;
         bool resizeCollider = false;
+        
         if(frameNum == 1) {
             resizeCollider = true;
-            this.bodyRigidbody.AddForce(UnityEngine.Random.insideUnitCircle * 250f * this.bodyRigidbody.mass * Time.deltaTime, ForceMode2D.Impulse);
+            // *** WPP: magic number -> what does 250 represent?
+            bodyRigidbody.AddForce(250f * bodyRigidbody.mass * Time.deltaTime * Random.insideUnitCircle, ForceMode2D.Impulse);
         }
         ScaleBody(sizePercentage, resizeCollider);  
-
-        if(isAttachedToParentEggSack) {
-            if(parentEggSackRef == null) {
+        
+        //if(isAttachedToParentEggSack) {
+        //    if(!parentEggSackRef) {
                 //  *** eventually look into aborting agents who are attached to EggSacks which don't reach birth ***
-            }
-            else {
-                float embryoPercentage = (float)lifeStageTransitionTimeStepCounter / (float)_GestationDurationTimeSteps;
-                float targetDist = Mathf.Lerp(0.01f, parentEggSackRef.fullSize.magnitude * 0.15f, embryoPercentage);
-                springJoint.distance = targetDist;
+       //     }
+        //    else {
+        
+        // WPP: early exit
+        if (!isAttachedToParentEggSack || !parentEggSackRef) 
+            return;
+            
+        float embryoPercentage = (float)lifeStageTransitionTimeStepCounter / (float)_GestationDurationTimeSteps;
+        float targetDist = Mathf.Lerp(0.01f, parentEggSackRef.fullSize.magnitude * 0.15f, embryoPercentage);
+        springJoint.distance = targetDist;
 
-                if(parentEggSackRef.curLifeStage == EggSack.EggLifeStage.Null) {                    
-                    isAttachedToParentEggSack = false;
-                    springJoint.connectedBody = null;
-                    springJoint.enabled = false;
-                    colliderBody.enabled = true;
-                    parentEggSackRef = null;  
-                }
-            }            
-        }
-        else {
-            //springJoint.enableCollision = false;
-        }
-        
-        
+        if(parentEggSackRef.curLifeStage != EggSack.EggLifeStage.Null) 
+            return;
+                               
+        isAttachedToParentEggSack = false;
+        springJoint.connectedBody = null;
+        springJoint.enabled = false;
+        colliderBody.enabled = true;
+        parentEggSackRef = null;                 
     }
+    
     private void BeginHatching() {
-
         springJoint.connectedBody = null;
         springJoint.enabled = false;
 
@@ -803,12 +813,12 @@ public class Agent : MonoBehaviour {
         isCooldown = false;
 
         agentEventDataList.Clear();
-        RegisterAgentEvent(UnityEngine.Time.frameCount, "Was Born!", 1f);        
+        RegisterAgentEvent(Time.frameCount, "Was Born!", 1f);        
     }
     
     private void TickMature(SimulationManager simManager) {
-        mouthRef.isFeeding = this.isFeeding;
-        mouthRef.isAttacking = this.isAttacking;
+        mouthRef.isFeeding = isFeeding;
+        mouthRef.isAttacking = isAttacking;
         //ProcessSwallowing();
 
         if(isSwallowingPrey) {
@@ -824,10 +834,12 @@ public class Agent : MonoBehaviour {
         // Scaling Test:
         int frameNum = ageCounter % growthScalingSkipFrames;
         bool resizeFrame = false;
+        
         if(frameNum == 1) {
             resizeFrame = true;
             GainExperience(0.025f); // Auto Exp for staying alive
         }
+        
         ScaleBody(sizePercentage, resizeFrame);  // change how growth works?
 
         TickModules(simManager); // update inputs for Brain        
@@ -839,12 +851,11 @@ public class Agent : MonoBehaviour {
                 
         if(!isPregnantAndCarryingEggs) {
             pregnancyRefactoryTimeStepCounter++;
-        }
-        
+        }    
     }
+    
     public void BeginPregnancy(EggSack developingEggSackRef) {
         //Debug.Log("BeginPregnancy! [" + developingEggSackRef.index.ToString() + "]");
-
         
         isPregnantAndCarryingEggs = true;
         childEggSackRef = developingEggSackRef;
@@ -858,15 +869,16 @@ public class Agent : MonoBehaviour {
             currentBiomass -= settingsRef.agentSettings._BaseInitMass;
             childEggSackRef.currentBiomass = starterMass;     // *************** TROUBLE!!!
 
-            RegisterAgentEvent(UnityEngine.Time.frameCount, "Pregnant! " + starterMass.ToString(), 0.5f);
+            RegisterAgentEvent(Time.frameCount, "Pregnant! " + starterMass.ToString(), 0.5f);
         }
         else {
             Debug.LogError("Something went wrong!! " + " curMass: " + currentBiomass.ToString() + ", reqMass: " + starterMass.ToString() + ", curProp: " + curProportion.ToString() );
         }
     }
+    
     public void AbortPregnancy() {
         //childEggSackRef
-        if(childEggSackRef != null) {
+        if(childEggSackRef) {
             childEggSackRef.ParentDiedWhilePregnant();
             childEggSackRef = null;
         }        
@@ -874,14 +886,16 @@ public class Agent : MonoBehaviour {
         isPregnantAndCarryingEggs = false;
         pregnancyRefactoryTimeStepCounter = 0;
     }
+    
     public void CompletedPregnancy() {
         childEggSackRef = null;
         candidateRef.performanceData.totalTimesPregnant++;
         isPregnantAndCarryingEggs = false;
         pregnancyRefactoryTimeStepCounter = 0;
 
-        RegisterAgentEvent(UnityEngine.Time.frameCount, "Pregnancy Complete!", 0.95f);
+        RegisterAgentEvent(Time.frameCount, "Pregnancy Complete!", 0.95f);
     }
+    
     private void TickDead(SettingsManager settings) {
         lifeStageTransitionTimeStepCounter++;
 
@@ -891,14 +905,18 @@ public class Agent : MonoBehaviour {
 
         // include reproductive stockpile energy???
 
-        currentBiomass -= decayAmount;
-        float wasteProducedMult = 1f;
-        wasteProducedLastFrame += decayAmount * wasteProducedMult;
+        // WPP: removed conditional with Mathf.Max
+        currentBiomass = Mathf.Max(currentBiomass - decayAmount, 0f);
+        //currentBiomass -= decayAmount;
+        
+        // WPP: redundant multiply by locally defined 1f
+        // (add multiplier later when ready to implement)
+        //float wasteProducedMult = 1f;
+        wasteProducedLastFrame += decayAmount;// * wasteProducedMult;
 
-        if(currentBiomass <= 0f) {
-            currentBiomass = 0f;
-
-        }
+        //if(currentBiomass <= 0f) {
+        //    currentBiomass = 0f;
+        //}
     }
 
     private void ScaleBody(float sizePercentage, bool resizeColliders) {
@@ -908,7 +926,7 @@ public class Agent : MonoBehaviour {
         currentBoundingBoxSize = fullSizeBoundingBox * scale;
         float currentBodyVolume = currentBoundingBoxSize.y * (currentBoundingBoxSize.x + currentBoundingBoxSize.z) * 0.5f; // coreModule.currentBodySize.x * coreModule.currentBodySize.y;
 
-        // REvisit this::::
+        // Revisit this::::
         //currentBiomass = currentBodyVolume;  // ??? **** DOESN'T LOOK CORRECT -- FIX!!
 
         coreModule.stomachCapacity = 1f; // currentBodyVolume;
@@ -921,7 +939,8 @@ public class Agent : MonoBehaviour {
             mouthRef.triggerCollider.radius = currentBoundingBoxSize.x * 0.5f;  // ***** REVISIT THIS!!! USE GENOME FOR MOUTH!!! *****
             mouthRef.triggerCollider.offset = new Vector2(0f, currentBoundingBoxSize.y * 0.5f);
         
-            // THIS IS HOT GARBAGE !!! RE-FACTOR!! *****
+            // THIS IS HOT GARBAGE !!! REFACTOR!! *****
+            // *** WPP Delegate to ColliderInterface component
             mouseClickCollider.radius = currentBoundingBoxSize.x * 0.5f + 2f;        
             mouseClickCollider.height = currentBoundingBoxSize.y + 2f;
             mouseClickCollider.center = new Vector3(0f, 0f, -SimulationManager._GlobalWaterLevel * SimulationManager._MaxAltitude);
@@ -931,7 +950,6 @@ public class Agent : MonoBehaviour {
     }
 
     public void TickActions(SimulationManager simManager) {
-       
         AgentActionState currentState = AgentActionState.Default;
         
         float horizontalMovementInput = movementModule.throttleX[0]; // Mathf.Lerp(horAI, horHuman, humanControlLerp);
@@ -946,42 +964,54 @@ public class Agent : MonoBehaviour {
         // Digestion:
         float maxDigestionRate = settingsRef.agentSettings._BaseDigestionRate * currentBiomass; // proportional to biomass?
         //float foodToEnergyBaseConversion = 1f; // what should this be?
-        float totalStomachContents = (coreModule.stomachContentsPlant + coreModule.stomachContentsMeat + coreModule.stomachContentsDecay);
-        Vector3 foodProportionsVec = new Vector3(coreModule.stomachContentsPlant, coreModule.stomachContentsMeat, coreModule.stomachContentsDecay) / (totalStomachContents + 0.000001f);
+        // WPP: delegated calculations to CoreModule
+        float totalStomachContents = coreModule.totalStomachContents;
+        //Vector3 foodProportionsVec = coreModule.foodProportionsVector;
+        //new Vector3(coreModule.stomachContentsPlant, coreModule.stomachContentsMeat, coreModule.stomachContentsDecay) / (totalStomachContents + 0.000001f);
 
         float digestedAmountTotal = Mathf.Min(totalStomachContents, maxDigestionRate);
-
-        float totalStomachContentsNorm = (coreModule.stomachContentsPlant + coreModule.stomachContentsMeat + coreModule.stomachContentsDecay) / coreModule.stomachCapacity;
+        
+        // WPP: previously used calculation to set Norm, now delegated to getter
+        // Setting this on each frame and also setting in other places seems error prone
+        float totalStomachContentsNorm = coreModule.stomachContentsPercent;
         coreModule.stomachContentsNorm = totalStomachContentsNorm; // ** we'll see.... ***
                                                                    //float digestedAmountTotal = Mathf.Min(totalStomachContentsNorm, maxDigestionRate);
                                                                    //float digestedProportionOfTotalContents = digestedAmountTotal / (totalStomachContentsNorm + 0.000001f);
 
         // *** Remember to Re-Implement dietary specialization!!! ****
-        float digestedPlantMass = digestedAmountTotal * foodProportionsVec.x;
+        // WPP: use percent calculations instead of vector math
+        float digestedPlantMass = digestedAmountTotal * coreModule.plantEatenPercent; // foodProportionsVec.x;
         float plantToEnergyAmount = digestedPlantMass; // * coreModule.foodEfficiencyPlant;
-        float digestedMeatMass = digestedAmountTotal * foodProportionsVec.y;
+        float digestedMeatMass = digestedAmountTotal * coreModule.meatEatenPercent; // foodProportionsVec.y;
         float meatToEnergyAmount = digestedMeatMass; // * coreModule.foodEfficiencyMeat;    
-        float digestedDecayMass = digestedAmountTotal * foodProportionsVec.z;
+        float digestedDecayMass = digestedAmountTotal * coreModule.decayEatenPercent; // foodProportionsVec.z;
         float decayToEnergyAmount = digestedDecayMass;
         
-        float createdEnergyTotal = (plantToEnergyAmount * coreModule.dietSpecPlantNorm + meatToEnergyAmount * coreModule.dietSpecMeatNorm + decayToEnergyAmount * coreModule.dietSpecDecayNorm) * settingsRef.agentSettings._DigestionEnergyEfficiency;
+        // WPP: added function to coreModule
+        float createdEnergyTotal = coreModule.GetEnergyTotal(plantToEnergyAmount, meatToEnergyAmount, decayToEnergyAmount) * settingsRef.agentSettings._DigestionEnergyEfficiency;
+        //(plantToEnergyAmount * coreModule.dietSpecPlantNorm + meatToEnergyAmount * coreModule.dietSpecMeatNorm + decayToEnergyAmount * coreModule.dietSpecDecayNorm)
         
         wasteProducedLastFrame += digestedAmountTotal * settingsRef.agentSettings._DigestionWasteEfficiency;
         oxygenUsedLastFrame = currentBiomass * settingsRef.agentSettings._BaseOxygenUsage;
         currentBiomass += digestedAmountTotal * settingsRef.agentSettings._GrowthEfficiency;  // **** <-- Reconsider
+        
         if(currentBiomass > fullsizeBiomass) {
             wasteProducedLastFrame += (currentBiomass - fullsizeBiomass);
             currentBiomass = fullsizeBiomass;
         }
                 
         coreModule.stomachContentsPlant -= digestedPlantMass;
+        
+        // *** WPP: use setter logic in coreModule
         if(coreModule.stomachContentsPlant < 0f) {
             coreModule.stomachContentsPlant = 0f;
         }
+        
         coreModule.stomachContentsMeat -= digestedMeatMass;
         if(coreModule.stomachContentsMeat < 0f) {
             coreModule.stomachContentsMeat = 0f;
         }
+        
         coreModule.stomachContentsDecay -= digestedDecayMass;
         if(coreModule.stomachContentsDecay < 0f) {
             coreModule.stomachContentsDecay = 0f;
