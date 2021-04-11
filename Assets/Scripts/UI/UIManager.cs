@@ -32,6 +32,7 @@ public class UIManager : MonoBehaviour {
     public CreaturePaperDollUI creaturePaperDollUI;
     public CreaturePortraitUI creaturePortraitUI;
     public CreatureLifeEventsLogUI creatureLifeEventsLogUI;
+    public MinimapUI minimapUI;
     //public WatcherUI watcherUI;    
     //public KnowledgeUI knowledgeUI;
     //public MutationUI mutationUI;    
@@ -202,6 +203,8 @@ public class UIManager : MonoBehaviour {
                 speciesOverviewUI.RebuildGenomeButtons();  
             }
         }
+        
+        minimapUI.Tick();
 
         debugPanelUI.UpdateDebugUI();
               

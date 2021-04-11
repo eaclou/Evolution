@@ -77,6 +77,8 @@ public class KnowledgeUI : MonoBehaviour {
     public GameObject panelKnowledgeInfoVertebrates;
     public Text textKnowledgeSpeciesSummary;
 
+    
+
 
     // Use this for initialization
     void Start() {
