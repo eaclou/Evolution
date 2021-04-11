@@ -118,7 +118,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     public Material toolbarSpeciesPortraitStrokesMat;
     public Material spiritBrushRenderMultiBurstMat;
     public Material spiritBrushRenderMat;
-    public Material mutationUIVertebratesRenderTexMat;
+    //public Material mutationUIVertebratesRenderTexMat;
 
     public ComputeBuffer gizmoCursorPosCBuffer;
     public ComputeBuffer gizmoFeedToolPosCBuffer;
@@ -2829,13 +2829,13 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         // Species PORTRAIT:
         cmdBufferSlotPortraitDisplay.Clear();
         cmdBufferSlotPortraitDisplay.SetRenderTarget(slotPortraitRenderCamera.targetTexture); // needed???
-        cmdBufferSlotPortraitDisplay.ClearRenderTarget(true, true, new Color(54f / 255f, 73f / 255f, 61f / 255f, 0f), 1.0f);  // clear -- needed???
+        cmdBufferSlotPortraitDisplay.ClearRenderTarget(true, true, new Color(54f / 255f, 73f / 255f, 61f / 255f, 1f), 1.0f);  // clear -- needed???
         cmdBufferSlotPortraitDisplay.SetViewProjectionMatrices(slotPortraitRenderCamera.worldToCameraMatrix, slotPortraitRenderCamera.projectionMatrix);
         /*
         // MEDIUM STROKES!!!!
         baronVonTerrain.groundStrokesMedDisplayMat.SetPass(0);
         baronVonTerrain.groundStrokesMedDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        baronVonTerrain.groundStrokesMedDisplayMat.SetBuffer("environmentStrokesCBuffer", baronVonTerrain.terrainStrokesCBuffer);
+        baronVonTerrain.groundStrokesMedDisplayMat.SetBuffer("environmentStrokesCBuffer", baronVonTerrain.terrainStoneStrokesCBuffer);
         baronVonTerrain.groundStrokesMedDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
         baronVonTerrain.groundStrokesMedDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
         baronVonTerrain.groundStrokesMedDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
@@ -2844,25 +2844,55 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         baronVonTerrain.groundStrokesMedDisplayMat.SetTexture("_SpiritBrushTex", spiritBrushRT); 
         baronVonTerrain.groundStrokesMedDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);       
         baronVonTerrain.groundStrokesMedDisplayMat.SetFloat("_MinFog", 0.4f);   
-        baronVonTerrain.groundStrokesMedDisplayMat.SetFloat("_GlobalWaterLevel", baronVonWater._GlobalWaterLevel);        
+        baronVonTerrain.groundStrokesMedDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);        
         baronVonTerrain.groundStrokesMedDisplayMat.SetVector("_FogColor", simManager.fogColor);
-        //cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
-        cmdBufferSlotPortraitDisplay.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundStrokesMedDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.terrainStrokesCBuffer.count);
-         */
+        baronVonTerrain.groundStrokesMedDisplayMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);           
+        baronVonTerrain.groundStrokesMedDisplayMat.SetVector("_SunDir", sunDirection);
+        baronVonTerrain.groundStrokesMedDisplayMat.SetVector("_WorldSpaceCameraPosition", new Vector4(mainRenderCam.transform.position.x, mainRenderCam.transform.position.y, mainRenderCam.transform.position.z, 0f));
+        baronVonTerrain.groundStrokesMedDisplayMat.SetVector("_Color0", baronVonTerrain.stoneSlotGenomeCurrent.color); // new Vector4(0.9f, 0.9f, 0.8f, 1f));
+        baronVonTerrain.groundStrokesMedDisplayMat.SetVector("_Color1", baronVonTerrain.pebblesSlotGenomeCurrent.color); // new Vector4(0.7f, 0.8f, 0.9f, 1f));
+        baronVonTerrain.groundStrokesMedDisplayMat.SetVector("_Color2", baronVonTerrain.sandSlotGenomeCurrent.color);                    
+        cmdBufferSlotPortraitDisplay.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundStrokesMedDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.terrainStoneStrokesCBuffer.count);
+       */
 
-        mutationUIVertebratesRenderTexMat.SetPass(0);
-        mutationUIVertebratesRenderTexMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        mutationUIVertebratesRenderTexMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-        mutationUIVertebratesRenderTexMat.SetFloat("_MapSize", SimulationManager._MapSize);
-        mutationUIVertebratesRenderTexMat.SetBuffer("critterInitDataCBuffer", toolbarPortraitCritterInitDataCBuffer);
-        mutationUIVertebratesRenderTexMat.SetBuffer("critterSimDataCBuffer", toolbarPortraitCritterSimDataCBuffer);
-        mutationUIVertebratesRenderTexMat.SetBuffer("critterGenericStrokesCBuffer", toolbarCritterPortraitStrokesCBuffer);
-        cmdBufferSlotPortraitDisplay.DrawProcedural(Matrix4x4.identity, mutationUIVertebratesRenderTexMat, 0, MeshTopology.Triangles, 6, toolbarCritterPortraitStrokesCBuffer.count); // toolbarCritterPortraitStrokesCBuffer.count);
+        toolbarSpeciesPortraitStrokesMat.SetPass(0);
+        toolbarSpeciesPortraitStrokesMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        toolbarSpeciesPortraitStrokesMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+        toolbarSpeciesPortraitStrokesMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        toolbarSpeciesPortraitStrokesMat.SetBuffer("critterInitDataCBuffer", toolbarPortraitCritterInitDataCBuffer);
+        toolbarSpeciesPortraitStrokesMat.SetBuffer("critterSimDataCBuffer", toolbarPortraitCritterSimDataCBuffer);
+        toolbarSpeciesPortraitStrokesMat.SetBuffer("critterGenericStrokesCBuffer", toolbarCritterPortraitStrokesCBuffer);
+        cmdBufferSlotPortraitDisplay.DrawProcedural(Matrix4x4.identity, toolbarSpeciesPortraitStrokesMat, 0, MeshTopology.Triangles, 6, toolbarCritterPortraitStrokesCBuffer.count); // toolbarCritterPortraitStrokesCBuffer.count);
 
+        /*
+        critterDebugGenericStrokeMat.SetPass(0);
+        critterDebugGenericStrokeMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        critterDebugGenericStrokeMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
+        critterDebugGenericStrokeMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
+        critterDebugGenericStrokeMat.SetBuffer("critterGenericStrokesCBuffer", critterGenericStrokesCBuffer);
+        critterDebugGenericStrokeMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+        critterDebugGenericStrokeMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
+        critterDebugGenericStrokeMat.SetTexture("_VelocityTex", fluidManager._VelocityPressureDivergenceMain);
+        critterDebugGenericStrokeMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);              
+        critterDebugGenericStrokeMat.SetInt("_HoverID", cameraManager.mouseHoverAgentIndex);
+        critterDebugGenericStrokeMat.SetInt("_SelectedID", cameraManager.targetAgentIndex);                                
+        float isHoverCritter = cameraManager.isMouseHoverAgent ? 1f : 0f;
+        float isHighlightCritter = isHoverCritter; // simManager.uiManager.panelFocus == PanelFocus.Watcher ? 1f : 0f; // ***EC -- Come back to this later                
+        critterDebugGenericStrokeMat.SetFloat("_HighlightOn", isHighlightCritter);
+        critterDebugGenericStrokeMat.SetFloat("_IsHover", isHoverCritter);
+        critterDebugGenericStrokeMat.SetFloat("_IsSelected", cameraManager.isFollowingAgent ? 1f : 0f);
+        //Debug.Log("SetTargetAgent: [ " + cameraManager.targetAgentIndex.ToString());
+        critterDebugGenericStrokeMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        critterDebugGenericStrokeMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
+        critterDebugGenericStrokeMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
+        critterDebugGenericStrokeMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
+        cmdBufferMain.DrawProcedural(Matrix4x4.identity, critterDebugGenericStrokeMat, 0, MeshTopology.Triangles, 6, critterGenericStrokesCBuffer.count);
+        */
+
+        
         Graphics.ExecuteCommandBuffer(cmdBufferSlotPortraitDisplay);
         slotPortraitRenderCamera.Render();
-
-
+        
 
         //===================   RESOURCE SIMULATION   ==========================================================
         cmdBufferResourceSim.Clear();

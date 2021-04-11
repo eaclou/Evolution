@@ -2,8 +2,8 @@
 {
 	Properties
 	{
-		_MainTex ("Texture", 2D) = "white" {}
-		_MaskTex ("Texture", 2D) = "white" {}
+		_MainTex ("_MainTex", 2D) = "white" {}
+		_MaskTex ("_MaskTex", 2D) = "white" {}
 		_TintPri ("_TintPri", Color) = (1,1,1,1)
 		_TintSec ("_TintSec", Color) = (1,1,1,1)
 	}
@@ -67,7 +67,7 @@
 				
 				float4 finalCol = texSample;
 				//finalCol.a = maskSample.a;
-
+				//return float4(1,1,1,1);
 				return finalCol;
 				
 				/*
