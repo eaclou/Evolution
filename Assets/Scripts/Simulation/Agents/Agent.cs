@@ -20,7 +20,7 @@ public class Agent : MonoBehaviour {
 
     public float spawnStartingScale = 0.1f; // *** REFACTOR!!! SYNC WITH EGGS!!!
 
-    public bool isInert = true;  // when inert, colliders disabled // is this still used?? ****
+    public bool isInert = true;  // when inert, colliders disabled // is this still used??
     // Refactor??
     public bool isActing = false;  // biting, defending, dashing, etc -- exclusive actions    
     public bool isDecaying = false;
@@ -54,7 +54,7 @@ public class Agent : MonoBehaviour {
     public bool isMarkedForDeathByUser = false;
 
     public int index;    
-    public int speciesIndex = -1;  // ********************** NEED to set these at birth!
+    public int speciesIndex = -1;  // Set these at birth!
     public CandidateAgentData candidateRef;
 
     public struct AgentEventData {
@@ -128,7 +128,7 @@ public class Agent : MonoBehaviour {
     public float fullSizeBodyVolume = 1f;
     //public float centerOfMass = 0f;
     
-        // *********  Combine thse stats into a serializable class for cleanliness?  *****
+    // * Combine thse stats into a serializable class for cleanliness?
     public int lifeStageTransitionTimeStepCounter = 0; // keeps track of how long agent has been in its current lifeStage
     public int ageCounter = 0;
     public float consumptionScore = 0f;
@@ -176,7 +176,7 @@ public class Agent : MonoBehaviour {
     public bool isSexuallyMature = false;
     public int beingSwallowedFrameCounter = 0;
     public int swallowingPreyFrameCounter = 0;
-    public int swallowDuration = 60; // **** how does this mix with mouseComponent???? ***
+    public int swallowDuration = 60; // * how does this mix with mouseComponent???? 
     public Agent predatorAgentRef;
     public Agent preyAgentRef;
 
@@ -450,7 +450,9 @@ public class Agent : MonoBehaviour {
         mouthRef.Disable();
     }
     
-    // ***WPP: replace with polymorphism
+    // *** WPP: trigger state changes & processes when conditions met
+    // rather than polling in the update loop -> efficiency and natural flow
+    // (would also eliminate conditional)
     private void CheckForLifeStageTransition() {
         switch(curLifeStage) {
             case AgentLifeStage.AwaitingRespawn:
@@ -637,7 +639,7 @@ public class Agent : MonoBehaviour {
             RegisterAgentEvent(Time.frameCount, "Bitten! (" + damage.ToString("F2") + ") by #" + predatorAgentRef.index.ToString(), 0f);
         }
         
-        //coreModule.energy *= 0.5f; // ******
+        //coreModule.energy *= 0.5f; 
     }
     
     // If this agent is dead, it acts as food.
@@ -733,8 +735,12 @@ public class Agent : MonoBehaviour {
         
         Vector3 curPos = bodyRigidbody.transform.position;
 
+        // *** WPP: ownVel and curVel express the same concept
+        // but are calculated in subtly different ways -> extremely error prone.
+        // (1) Pick one calculation and condense to one variable, or
+        // (2) create more distinct names and add a comment explaining unique purpose of each
         ownPos = new Vector2(bodyRigidbody.transform.localPosition.x, bodyRigidbody.transform.localPosition.y);
-        ownVel = new Vector2(bodyRigidbody.velocity.x, bodyRigidbody.velocity.y); // change this to ownPos - prevPos *****************
+        ownVel = new Vector2(bodyRigidbody.velocity.x, bodyRigidbody.velocity.y); // * change this to ownPos - prevPos
         
         curVel = (curPos - prevPos).magnitude;
         curAccel = Mathf.Lerp(curAccel, (curVel - prevVel), 0.2f);
@@ -867,12 +873,12 @@ public class Agent : MonoBehaviour {
         if(curProportion > starterMass) { // Good to go!
             //Debug.Log("Pregnancy! " + " curMass: " + currentBiomass.ToString() + ", reqMass: " + starterMass.ToString() + ", curProp: " + curProportion.ToString());
             currentBiomass -= settingsRef.agentSettings._BaseInitMass;
-            childEggSackRef.currentBiomass = starterMass;     // *************** TROUBLE!!!
+            childEggSackRef.currentBiomass = starterMass;     // * TROUBLE!!!
 
-            RegisterAgentEvent(Time.frameCount, "Pregnant! " + starterMass.ToString(), 0.5f);
+            RegisterAgentEvent(Time.frameCount, "Pregnant! " + starterMass, 0.5f);
         }
         else {
-            Debug.LogError("Something went wrong!! " + " curMass: " + currentBiomass.ToString() + ", reqMass: " + starterMass.ToString() + ", curProp: " + curProportion.ToString() );
+            Debug.LogError("Something went wrong!! " + " curMass: " + currentBiomass + ", reqMass: " + starterMass.ToString() + ", curProp: " + curProportion.ToString() );
         }
     }
     
@@ -931,23 +937,39 @@ public class Agent : MonoBehaviour {
 
         coreModule.stomachCapacity = 1f; // currentBodyVolume;
         
+        // WPP: extracted to new method
         if(resizeColliders) {
-            colliderBody.size = new Vector2(currentBoundingBoxSize.x, currentBoundingBoxSize.y); // coreModule.currentBodySize;
-            bodyRigidbody.mass = currentBodyVolume; 
-
-            // MOUTH:
-            mouthRef.triggerCollider.radius = currentBoundingBoxSize.x * 0.5f;  // ***** REVISIT THIS!!! USE GENOME FOR MOUTH!!! *****
-            mouthRef.triggerCollider.offset = new Vector2(0f, currentBoundingBoxSize.y * 0.5f);
-        
-            // THIS IS HOT GARBAGE !!! REFACTOR!! *****
-            // *** WPP Delegate to ColliderInterface component
-            mouseClickCollider.radius = currentBoundingBoxSize.x * 0.5f + 2f;        
-            mouseClickCollider.height = currentBoundingBoxSize.y + 2f;
-            mouseClickCollider.center = new Vector3(0f, 0f, -SimulationManager._GlobalWaterLevel * SimulationManager._MaxAltitude);
-            //mouseClickCollider.radius += 2f; // ** TEMP -- should be based on camera distance also
-            //mouseClickCollider.height += 2f;
+            ResizeColliders(currentBodyVolume);
         }               
     }
+    
+    // *** WPP: consider delegation to new component
+    private void ResizeColliders(float currentBodyVolume)
+    {
+        colliderBody.size = new Vector2(currentBoundingBoxSize.x, currentBoundingBoxSize.y); // coreModule.currentBodySize;
+        bodyRigidbody.mass = currentBodyVolume; 
+
+        // MOUTH:
+        mouthRef.triggerCollider.radius = currentBoundingBoxSize.x * 0.5f;  // ***** REVISIT THIS!!! USE GENOME FOR MOUTH!!! *****
+        mouthRef.triggerCollider.offset = new Vector2(0f, currentBoundingBoxSize.y * 0.5f);
+        
+        // THIS IS HOT GARBAGE !!! REFACTOR!! *****
+        mouseClickCollider.radius = currentBoundingBoxSize.x * 0.5f + 2f;        
+        mouseClickCollider.height = currentBoundingBoxSize.y + 2f;
+        mouseClickCollider.center = new Vector3(0f, 0f, -SimulationManager._GlobalWaterLevel * SimulationManager._MaxAltitude);
+        //mouseClickCollider.radius += 2f; // ** TEMP -- should be based on camera distance also
+        //mouseClickCollider.height += 2f;        
+    }
+    
+    // WPP: exposed variables (pulled from TickActions) -> less GC & more control
+    // (also removed conversionRate from names, implied by XtoY naming)
+    [SerializeField] float healRate = 0.0005f;
+    [SerializeField] float baseEnergyToHealth = 5f;
+    
+    float energyToHealth => baseEnergyToHealth * coreModule.healthBonus;
+    
+    [SerializeField] [Range(0,1)] float restingBonusWhenResting = 0.65f;
+    float restingBonus => isResting ? restingBonusWhenResting : 1f;
 
     public void TickActions(SimulationManager simManager) {
         AgentActionState currentState = AgentActionState.Default;
@@ -980,6 +1002,7 @@ public class Agent : MonoBehaviour {
 
         // *** Remember to Re-Implement dietary specialization!!! ****
         // WPP: use percent calculations instead of vector math
+        // + something seems off about this logic...
         float digestedPlantMass = digestedAmountTotal * coreModule.plantEatenPercent; // foodProportionsVec.x;
         float plantToEnergyAmount = digestedPlantMass; // * coreModule.foodEfficiencyPlant;
         float digestedMeatMass = digestedAmountTotal * coreModule.meatEatenPercent; // foodProportionsVec.y;
@@ -1002,31 +1025,29 @@ public class Agent : MonoBehaviour {
                 
         coreModule.stomachContentsPlant -= digestedPlantMass;
         
-        // *** WPP: use setter logic in coreModule
-        if(coreModule.stomachContentsPlant < 0f) {
-            coreModule.stomachContentsPlant = 0f;
-        }
+        // WPP: setter logic in coreModule automates value validation
+        //if(coreModule.stomachContentsPlant < 0f) {
+        //    coreModule.stomachContentsPlant = 0f;
+        //}
         
         coreModule.stomachContentsMeat -= digestedMeatMass;
-        if(coreModule.stomachContentsMeat < 0f) {
-            coreModule.stomachContentsMeat = 0f;
-        }
+        //if(coreModule.stomachContentsMeat < 0f) {
+        //    coreModule.stomachContentsMeat = 0f;
+        //}
         
         coreModule.stomachContentsDecay -= digestedDecayMass;
-        if(coreModule.stomachContentsDecay < 0f) {
-            coreModule.stomachContentsDecay = 0f;
-        }
-
-        // Heal:  // *** Re-Implement !!! ***************
-        float healRate = 0.0005f;
-        float energyToHealthConversionRate = 5f * coreModule.healthBonus;
-        if(coreModule.healthBody < 1f) {
+        //if(coreModule.stomachContentsDecay < 0f) {
+        //    coreModule.stomachContentsDecay = 0f;
+        //}
+        
+        // WPP: delegated to coreModule
+        coreModule.Regenerate(healRate, energyToHealth);
+        /*if(coreModule.healthBody < 1f) {
             coreModule.healthBody += healRate;
             coreModule.healthHead += healRate;
             coreModule.healthExternal += healRate;
-
-            coreModule.energy -= healRate / energyToHealthConversionRate;
-        }
+            coreModule.energy -= healRate / energyToHealth;
+        }*/
 
         float oxygenMask = Mathf.Clamp01(simManager.simResourceManager.curGlobalOxygen * settingsRef.agentSettings._OxygenEnergyMask);
         
@@ -1058,20 +1079,23 @@ public class Agent : MonoBehaviour {
         */
         //ENERGY:
         float energyCostMult = 0.1f; // Mathf.Lerp(settingsRef.agentSettings._BaseEnergyCost, settingsRef.agentSettings._BaseEnergyCost * 0.25f, sizePercentage);
-        float restingBonusMult = 1f;
-        if(isResting) {
-            restingBonusMult = 0.65f;
-        }
         
-        float energyCost = Mathf.Sqrt(currentBiomass) * energyCostMult * restingBonusMult; // * SimulationManager.energyDifficultyMultiplier; // / coreModule.energyBonus;
+        // WPP: extracted to exposed field + getter calculation
+        //float restingBonusMult = 1f;
+        //if(isResting) {
+        //    restingBonusMult = 0.65f;
+        //}
+        
+        float energyCost = Mathf.Sqrt(currentBiomass) * energyCostMult * restingBonus; // * SimulationManager.energyDifficultyMultiplier; // / coreModule.energyBonus;
         
         float throttleMag = smoothedThrottle.magnitude;
         
         // ENERGY DRAIN::::
         coreModule.energy -= energyCost;
-        if(coreModule.energy < 0f) {
-            coreModule.energy = 0f;
-        }
+        // WPP: automated by setter logic
+        //if(coreModule.energy < 0f) {
+        //    coreModule.energy = 0f;
+        //}
 
         if(isDead || isEgg) {
             throttle = Vector2.zero;
@@ -1124,24 +1148,24 @@ public class Agent : MonoBehaviour {
             mostActiveEffectorVal = Mathf.Max(mostActiveEffectorVal, coreModule.healEffector[0]);
 
             if(coreModule.mouthAttackEffector[0] >= mostActiveEffectorVal) {
-                if (IsFreeToAct()) {
+                if (isFreeToAct) {
                     AttemptInitiateActiveAttackBite();      
                 }
                           
             }
             if(coreModule.dashEffector[0] >= mostActiveEffectorVal) {
-                if (IsFreeToAct()) {
+                if (isFreeToAct) {
                     ActionDash();
                 }
             }
             if(coreModule.defendEffector[0] >= mostActiveEffectorVal) {
-                if(IsFreeToAct()) {
+                if(isFreeToAct) {
                     ActionDefend();
                 }
             }            
             
             if(coreModule.healEffector[0] >= mostActiveEffectorVal) {
-                if(IsFreeToAct()) {
+                if(isFreeToAct) {
                     isResting = true;
                     candidateRef.performanceData.totalTicksRested++;
                 }
@@ -1151,7 +1175,7 @@ public class Agent : MonoBehaviour {
             }                    
         }
         
-        ApplyPhysicsForces(smoothedThrottle);
+        MovementScalingTest(smoothedThrottle);
 
         float rotationInRadians = (bodyRigidbody.transform.localRotation.eulerAngles.z + 90f) * Mathf.Deg2Rad;
         facingDirection = new Vector2(Mathf.Cos(rotationInRadians), Mathf.Sin(rotationInRadians));
@@ -1205,8 +1229,7 @@ public class Agent : MonoBehaviour {
                 cooldownFrameCounter = 0;
                 isCooldown = false;
             }
-        }
-        
+        } 
     }
 
     private void EnterCooldown(int frames) {
@@ -1215,27 +1238,43 @@ public class Agent : MonoBehaviour {
         cooldownFrameCounter = 0;
     }
 
+    // WPP: early exit & abstracted conditions with getter logic
     private void ActionDash() {
-        if(IsFreeToAct()) {
-            if(coreModule.stamina[0] >= 0.1f) {
-                isDashing = true;
-                coreModule.stamina[0] -= 0.1f;
-                candidateRef.performanceData.totalTimesDashed++;
-            }            
-        } 
-    }
-    private void ActionDefend() {
-        if(IsFreeToAct()) {
-            if(coreModule.stamina[0] >= 0.1f) {
-                isDefending = true;
-                coreModule.stamina[0] -= 0.1f;
-                candidateRef.performanceData.totalTimesDefended++;
-            }            
-        } 
+        if (!isFreeToAct || outOfStamina)
+            return;
+            
+        //if(isFreeToAct) {
+        //    if(coreModule.stamina[0] >= 0.1f) {
+        isDashing = true;
+        coreModule.stamina[0] -= 0.1f;
+        candidateRef.performanceData.totalTimesDashed++;
+        //    }            
+        //} 
     }
     
+    private void ActionDefend() {
+        if (!isFreeToAct || outOfStamina)
+            return;
+            
+        //if(isFreeToAct) {
+        //    if(coreModule.stamina[0] >= 0.1f) {
+        isDefending = true;
+        coreModule.stamina[0] -= 0.1f;
+        candidateRef.performanceData.totalTimesDefended++;
+        //    }            
+        //} 
+    }
+    
+    bool isFreeToAct => !isCooldown && !isDashing && !isDefending && !isFeeding && !isAttacking &&
+                        curLifeStage == AgentLifeStage.Mature;
+                        
+    bool outOfStamina => coreModule.stamina[0] < 0.1f;
+    
+    // WPP: replaced with getter variable
+    /*
     private bool IsFreeToAct() {
-        bool isFree = true;
+        bool isFree = !isCooldown && !isDashing && !isDefending && !isFeeding && !isAttacking &&
+        curLifeStage == AgentLifeStage.Mature;
 
         if(isCooldown) {
             isFree = false;
@@ -1258,10 +1297,30 @@ public class Agent : MonoBehaviour {
 
         return isFree;
     }
+    */
 
-    private void ApplyPhysicsForces(Vector2 throttle) {
-        
-        MovementScalingTest(throttle);
+    // WPP: redundant pass-through method
+    //private void ApplyPhysicsForces(Vector2 throttle) {
+    //    MovementScalingTest(throttle);
+    //}
+    
+    [SerializeField] [Range(0,1)] float bitingPenaltyWhenFeeding = 0.5f;
+    float bitingPenalty => isFeeding ? bitingPenaltyWhenFeeding : 1f;
+    
+    [SerializeField] [Range(0,1)] float forcePenaltyWhenResting = 0.1f;
+    float forcePenalty => isResting ? forcePenaltyWhenResting : 1f;
+    
+    [SerializeField] float dashBonusInCooldown = 0.33f;
+    [SerializeField] float dashBonusWhenDashing = 4.3f;
+    float dashBonus
+    {
+        get
+        {
+            if (isCooldown)
+                return dashBonusInCooldown;
+                
+            return isDashing ?  dashBonusWhenDashing : 1f;
+        }
     }
     
     private void MovementScalingTest(Vector2 throttle) {
@@ -1270,71 +1329,68 @@ public class Agent : MonoBehaviour {
         //    jointAnglesArray[j] = hingeJointsArray[j].jointAngle;            
         //}
 
-        float bitingPenalty = 1f;
+        // WPP: removed
+        //float bitingPenalty = 1f;
+        //if(isFeeding)
+        //{
+        //    bitingPenalty = 0.5f;
+        //}
         
-        if(isFeeding)
-        {
-            bitingPenalty = 0.5f;
-        }
         /*if(coreModule.mouthFeedEffector[0] > 0f)  // Clean up code for State-machine-esque behaviors/abilities
         {
             bitingPenalty = 0.5f;
         }*/
 
-        float forcePenalty = 1f;
-        if(isResting) {
-            forcePenalty = 0.1f;
-        }
+        //float forcePenalty = 1f;
+        //if(isResting) {
+        //    forcePenalty = 0.1f;
+        //}
 
         float fatigueMultiplier = Mathf.Clamp01(coreModule.energy * 5f + 0.05f); // * Mathf.Clamp01(coreModule.stamina[0] * 4f + 0.05f);
         float lowHealthPenalty = Mathf.Clamp01(coreModule.healthBody * 5f) * 0.5f + 0.5f;
         fatigueMultiplier *= lowHealthPenalty;
         
-        turningAmount = Mathf.Lerp(turningAmount, this.bodyRigidbody.angularVelocity * Mathf.Deg2Rad * 0.03f, 0.28f);
+        turningAmount = Mathf.Lerp(turningAmount, bodyRigidbody.angularVelocity * Mathf.Deg2Rad * 0.03f, 0.28f);
 
         animationCycle += smoothedThrottle.magnitude * swimAnimationCycleSpeed * fatigueMultiplier * forcePenalty; // (Mathf.Lerp(fullSizeBoundingBox.y, 1f, 1f)
 
-        if (throttle.sqrMagnitude > 0.000001f) {  // Throttle is NOT == ZERO
+        if (throttle.sqrMagnitude <= 0.000001f)
+            return;
             
-            Vector2 headForwardDir = new Vector2(this.bodyRigidbody.transform.up.x, this.bodyRigidbody.transform.up.y).normalized;
-            Vector2 headRightDir =  new Vector2(this.bodyRigidbody.transform.right.x, this.bodyRigidbody.transform.right.y).normalized;
-            Vector2 throttleDir = throttle.normalized;
+        Vector2 headForwardDir = new Vector2(bodyRigidbody.transform.up.x, bodyRigidbody.transform.up.y).normalized;
+        Vector2 headRightDir =  new Vector2(bodyRigidbody.transform.right.x, bodyRigidbody.transform.right.y).normalized;
+        Vector2 throttleDir = throttle.normalized;
 
-            float turnSharpness = (-Vector2.Dot(throttleDir, headForwardDir) * 0.5f + 0.5f);
-            float headTurn = Vector2.Dot(throttleDir, headRightDir) * -1f * turnSharpness;
-            float headTurnSign = Mathf.Clamp(Vector2.Dot(throttleDir, headRightDir) * -10000f, -1f, 1f);
-              
-            // get size in 0-1 range from minSize to maxSize: // **** NOT ACCURATE!!!!
-            //float sizeValue = Mathf.Clamp01(coreModule.speedBonus * (candidateRef.candidateGenome.bodyGenome.coreGenome.creatureBaseLength - 0.2f) / 2f);  // Mathf.Clamp01((fullSizeBoundingBox.x - 0.1f) / 2.5f); // ** Hardcoded assuming size ranges from 0.1 --> 2.5 !!! ********
+        float turnSharpness = (-Vector2.Dot(throttleDir, headForwardDir) * 0.5f + 0.5f);
+        float headTurn = Vector2.Dot(throttleDir, headRightDir) * -1f * turnSharpness;
+        float headTurnSign = Mathf.Clamp(Vector2.Dot(throttleDir, headRightDir) * -10000f, -1f, 1f);
+          
+        // get size in 0-1 range from minSize to maxSize: // **** NOT ACCURATE!!!!
+        //float sizeValue = Mathf.Clamp01(coreModule.speedBonus * (candidateRef.candidateGenome.bodyGenome.coreGenome.creatureBaseLength - 0.2f) / 2f);  // Mathf.Clamp01((fullSizeBoundingBox.x - 0.1f) / 2.5f); // ** Hardcoded assuming size ranges from 0.1 --> 2.5 !!! ********
 
-            float swimSpeed = 48f * coreModule.speedBonus; // Mathf.Lerp(movementModule.smallestCreatureBaseSpeed, movementModule.largestCreatureBaseSpeed, 0.5f); // sizeValue);
-            float turnRate = 6f * coreModule.speedBonus; //10 // Mathf.Lerp(movementModule.smallestCreatureBaseTurnRate, movementModule.largestCreatureBaseTurnRate, 0.5f) * 0.1f; // sizeValue);
-            float dashBonus = 1f;
-            if(isDashing) {                
-                dashBonus = 4.3f;                
-            }
-            if(isCooldown) {
-                dashBonus = 0.33f;
-            }
-
-
-            speed = swimSpeed * dashBonus * forcePenalty; // * movementModule.speedBonus ; // * restingPenalty;
-            
-            Vector2 segmentForwardDir = new Vector2(this.bodyRigidbody.transform.up.x, this.bodyRigidbody.transform.up.y).normalized;
-
-            Vector2 forwardThrustDir = Vector2.Lerp(segmentForwardDir, throttleDir, 0.1f).normalized;
-
-            this.bodyRigidbody.AddForce(forwardThrustDir * (1f - turnSharpness * 0.25f) * speed * this.bodyRigidbody.mass * Time.deltaTime * fatigueMultiplier * bitingPenalty, ForceMode2D.Impulse);
-
-            // modify turning rate based on body proportions:
-            //float turnRatePenalty = Mathf.Lerp(0.25f, 1f, 1f - sizeValue);
-
-            // Head turn:
-            float torqueForce = Mathf.Lerp(headTurn, headTurnSign, 0.35f) * forcePenalty * turnRate * this.bodyRigidbody.mass * fatigueMultiplier * bitingPenalty * Time.deltaTime;
-            torqueForce = Mathf.Min(torqueForce, 50000.55f) * 3f;
-            this.bodyRigidbody.AddTorque(torqueForce, ForceMode2D.Impulse);
-            
+        float swimSpeed = 48f * coreModule.speedBonus; // Mathf.Lerp(movementModule.smallestCreatureBaseSpeed, movementModule.largestCreatureBaseSpeed, 0.5f); // sizeValue);
+        float turnRate = 6f * coreModule.speedBonus; //10 // Mathf.Lerp(movementModule.smallestCreatureBaseTurnRate, movementModule.largestCreatureBaseTurnRate, 0.5f) * 0.1f; // sizeValue);
+        
+        /*float dashBonus = 1f;
+        if(isDashing) {                
+            dashBonus = 4.3f;                
         }
+        if(isCooldown) {
+            dashBonus = 0.33f;
+        }*/
+
+        speed = swimSpeed * dashBonus * forcePenalty; // * movementModule.speedBonus ; // * restingPenalty;
+        Vector2 segmentForwardDir = new Vector2(bodyRigidbody.transform.up.x, bodyRigidbody.transform.up.y).normalized;
+        Vector2 forwardThrustDir = Vector2.Lerp(segmentForwardDir, throttleDir, 0.1f).normalized;
+        bodyRigidbody.AddForce(forwardThrustDir * (1f - turnSharpness * 0.25f) * speed * bodyRigidbody.mass * Time.deltaTime * fatigueMultiplier * bitingPenalty, ForceMode2D.Impulse);
+
+        // modify turning rate based on body proportions:
+        //float turnRatePenalty = Mathf.Lerp(0.25f, 1f, 1f - sizeValue);
+
+        // Head turn:
+        float torqueForce = Mathf.Lerp(headTurn, headTurnSign, 0.35f) * forcePenalty * turnRate * this.bodyRigidbody.mass * fatigueMultiplier * bitingPenalty * Time.deltaTime;
+        torqueForce = Mathf.Min(torqueForce, 50000.55f) * 3f;
+        bodyRigidbody.AddTorque(torqueForce, ForceMode2D.Impulse); 
     }
 
     public void GainExperience(float exp) {
@@ -1343,77 +1399,80 @@ public class Agent : MonoBehaviour {
             GainLevel();
         }
     }
+    
     public void GainLevel() {
         curLevel++;
-        experienceForNextLevel = experienceForNextLevel * 2f;
+        experienceForNextLevel *= 2f;
     }
 
     public void InitializeModules(AgentGenome genome) {
-
         communicationModule = new CritterModuleCommunication();
         communicationModule.Initialize(genome.bodyGenome.communicationGenome, this);
 
-        coreModule = new CritterModuleCore();
-        coreModule.Initialize(genome.bodyGenome.coreGenome, this);
+        // WPP: initialize from constructor
+        coreModule = new CritterModuleCore(genome.bodyGenome.coreGenome, this);
+        //coreModule.Initialize(genome.bodyGenome.coreGenome, this);
 
         mouthRef.Initialize(genome.bodyGenome.coreGenome, this);
 
-        environmentModule = new CritterModuleEnvironment();
-        environmentModule.Initialize(genome.bodyGenome.environmentalGenome, this);
+        environmentModule = new CritterModuleEnvironment(genome.bodyGenome.environmentalGenome, this);
+        //environmentModule.Initialize(genome.bodyGenome.environmentalGenome, this);
 
-        foodModule = new CritterModuleFood();
-        foodModule.Initialize(genome.bodyGenome.foodGenome, this);
+        foodModule = new CritterModuleFood(genome.bodyGenome.foodGenome, this);
+        //foodModule.Initialize(genome.bodyGenome.foodGenome, this);
 
-        friendModule = new CritterModuleFriends();
-        friendModule.Initialize(genome.bodyGenome.friendGenome, this);
+        friendModule = new CritterModuleFriends(genome.bodyGenome.friendGenome, this);
+        //friendModule.Initialize(genome.bodyGenome.friendGenome, this);
 
-        movementModule = new CritterModuleMovement();
-        movementModule.Initialize(genome, genome.bodyGenome.movementGenome);
+        movementModule = new CritterModuleMovement(genome, genome.bodyGenome.movementGenome);
+        //movementModule.Initialize(genome, genome.bodyGenome.movementGenome);
 
-        threatsModule = new CritterModuleThreats();
-        threatsModule.Initialize(genome.bodyGenome.threatGenome, this);
+        threatsModule = new CritterModuleThreats(genome.bodyGenome.threatGenome, this);
+        //threatsModule.Initialize(genome.bodyGenome.threatGenome, this);
     }
     
     public void FirstTimeInitialize(SettingsManager settings) {  //AgentGenome genome) {  // ** See if I can get away with init sans Genome
-        this.settingsRef = settings;
+        settingsRef = settings;
         curLifeStage = AgentLifeStage.AwaitingRespawn;
         //InitializeAgentWidths(genome);
         InitializeGameObjectsAndComponents();
         //InitializeModules(genome);  //  This breaks MapGridCell update, because coreModule doesn't exist?
     }
+    
     private void InitializeGameObjectsAndComponents() {
         // Create Physics GameObject:
-        if(bodyGO == null) {
-            GameObject bodySegmentGO = new GameObject("RootSegment" + index.ToString());
-            bodySegmentGO.transform.parent = this.gameObject.transform;            
-            bodySegmentGO.tag = "LiveAnimal";
-            bodyGO = bodySegmentGO;
-            //bodyCritterSegment = bodySegmentGO.AddComponent<CritterSegment>();
-            bodyRigidbody = bodySegmentGO.AddComponent<Rigidbody2D>();
-            colliderBody = bodyGO.AddComponent<CapsuleCollider2D>();            
-            //bodyCritterSegment.segmentCollider = colliderBody;
-            bodyRigidbody.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+        if (bodyGO)
+            return;
+        
+        GameObject bodySegmentGO = new GameObject("RootSegment" + index);
+        bodySegmentGO.transform.parent = gameObject.transform;            
+        bodySegmentGO.tag = "LiveAnimal";
+        bodyGO = bodySegmentGO;
+        //bodyCritterSegment = bodySegmentGO.AddComponent<CritterSegment>();
+        bodyRigidbody = bodySegmentGO.AddComponent<Rigidbody2D>();
+        colliderBody = bodyGO.AddComponent<CapsuleCollider2D>();            
+        //bodyCritterSegment.segmentCollider = colliderBody;
+        bodyRigidbody.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
 
-            springJoint = bodyGO.AddComponent<SpringJoint2D>();
-            springJoint.enabled = false;
-            springJoint.autoConfigureDistance = false;
-            springJoint.distance = 0f;
-            springJoint.dampingRatio = 0.1f;
-            springJoint.frequency = 15f;
+        springJoint = bodyGO.AddComponent<SpringJoint2D>();
+        springJoint.enabled = false;
+        springJoint.autoConfigureDistance = false;
+        springJoint.distance = 0f;
+        springJoint.dampingRatio = 0.1f;
+        springJoint.frequency = 15f;
 
-            GameObject testMouthGO = new GameObject("Mouth");
-            testMouthGO.transform.parent = bodyGO.transform;
-            testMouthGO.transform.localPosition = Vector3.zero;
-            mouthRef = testMouthGO.AddComponent<CritterMouthComponent>();
-            CircleCollider2D mouthTrigger = testMouthGO.AddComponent<CircleCollider2D>();
-            mouthRef.triggerCollider = mouthTrigger;
+        GameObject testMouthGO = new GameObject("Mouth");
+        testMouthGO.transform.parent = bodyGO.transform;
+        testMouthGO.transform.localPosition = Vector3.zero;
+        mouthRef = testMouthGO.AddComponent<CritterMouthComponent>();
+        CircleCollider2D mouthTrigger = testMouthGO.AddComponent<CircleCollider2D>();
+        mouthRef.triggerCollider = mouthTrigger;
 
-            GameObject mouseClickColliderGO = new GameObject("MouseClickCollider");
-            mouseClickColliderGO.transform.parent = bodyGO.transform;
-            mouseClickColliderGO.transform.localPosition = new Vector3(0f, 0f, 0f);
-            mouseClickCollider = mouseClickColliderGO.AddComponent<CapsuleCollider>();
-            mouseClickCollider.isTrigger = true;
-        }
+        GameObject mouseClickColliderGO = new GameObject("MouseClickCollider");
+        mouseClickColliderGO.transform.parent = bodyGO.transform;
+        mouseClickColliderGO.transform.localPosition = new Vector3(0f, 0f, 0f);
+        mouseClickCollider = mouseClickColliderGO.AddComponent<CapsuleCollider>();
+        mouseClickCollider.isTrigger = true;
     }
     
     // Colliders Footprint???  *************************************************************************************************************
@@ -1448,22 +1507,24 @@ public class Agent : MonoBehaviour {
         //springJoint.distance = 0.005f;
         //springJoint.enableCollision = false;        
         //springJoint.frequency = 15f;
+        
+        // WPP: removed from conditional
+        isAttachedToParentEggSack = !isImmaculate;
+        colliderBody.enabled = isImmaculate;
 
         if(isImmaculate) {            
             springJoint.connectedBody = null; // parentEggSack.rigidbodyRef;
             springJoint.enabled = false;
-            isAttachedToParentEggSack = false;
-
-            colliderBody.enabled = true;
+            //isAttachedToParentEggSack = false;
+            //colliderBody.enabled = true;
         }
-        else {
+        //else {
             //bodyGO.transform.localPosition = parentEggSack.gameObject.transform.position; // startPos.startPosition;        
             //springJoint.connectedBody = parentEggSack.rigidbodyRef;
             //springJoint.enabled = true;
-            isAttachedToParentEggSack = true;
-
-            colliderBody.enabled = false;
-        }                
+        //    isAttachedToParentEggSack = true;
+        //    colliderBody.enabled = false;
+        //}                
             
         bodyRigidbody.mass = 0.01f; // min mass
         bodyRigidbody.drag = 13.75f; // bodyDrag;
@@ -1483,16 +1544,13 @@ public class Agent : MonoBehaviour {
         isAttacking = false;
         attackingFrameCounter = 0;
         //mouthRef.isCooldown = false;
-        mouthRef.agentIndex = this.index;
+        mouthRef.agentIndex = index;
         mouthRef.agentRef = this;
         isResting = false;
         isDefending = false;
         isDashing = false;
 
-
-
         //mouthRef.Disable();
-
         //mouseclickcollider MCC
         mouseClickCollider.direction = 1; // Y-Axis ???
         mouseClickCollider.center = new Vector3(0f, 0f, (waterLevel * 2f - 1f) * -10f); //Vector3.zero; // new Vector3(0f, 0f, 1f);
@@ -1517,7 +1575,7 @@ public class Agent : MonoBehaviour {
         supportScore = 0f;
         masterFitnessScore = 0f;
         totalExperience = 0f;
-        experienceForNextLevel = 2f; // 2, 4, 8, 16, 32, 64, 128, 256?
+        experienceForNextLevel = 2f;
         curLevel = 0;
         
         turningAmount = 5f; // temporary for zygote animation
@@ -1543,16 +1601,15 @@ public class Agent : MonoBehaviour {
 
         // **** Separate out this code into shared function to avoid duplicate code::::
         ResetStartingValues();
-        
         InitializeModules(genome);      // Modules need to be created first so that Brain can map its neurons to existing modules  
         
         // Upgrade this to proper Pooling!!!!
         ReconstructAgentGameObjects(settings, genome, null, spawnWorldPos, true, globalWaterLevel);
 
         brain = new Brain(genome.brainGenome, this); 
-        
         isInert = false;
     }
+    
     public void InitializeSpawnAgentFromEggSack(SettingsManager settings, int agentIndex, CandidateAgentData candidateData, EggSack parentEggSack, float globalWaterLevel) {        
         index = agentIndex;
         speciesIndex = candidateData.speciesID;
@@ -1563,18 +1620,30 @@ public class Agent : MonoBehaviour {
         curLifeStage = AgentLifeStage.Egg;
         parentEggSackRef = parentEggSack;
         
-        ResetStartingValues();
-                
+        ResetStartingValues();       
         InitializeModules(genome);      // Modules need to be created first so that Brain can map its neurons to existing modules  
 
         // Upgrade this to proper Pooling!!!!
-        Vector3 spawnOffset = UnityEngine.Random.insideUnitSphere * parentEggSack.curSize.magnitude * 0.167f;
+        Vector3 spawnOffset = Random.insideUnitSphere * parentEggSack.curSize.magnitude * 0.167f;
         spawnOffset.z = 0f;
         ReconstructAgentGameObjects(settings, genome, parentEggSack, parentEggSack.gameObject.transform.position + spawnOffset, false, globalWaterLevel);
 
         brain = new Brain(genome.brainGenome, this);   
-        
         isInert = false;
     }
+    
+    // *** WPP: extract common logic from above 2 methods.
+    /*
+    void InitializeSpawnAgent()
+    {
+        ResetStartingValues();       
+        InitializeModules(genome);      // Modules need to be created first so that Brain can map its neurons to existing modules  
 
+        // Upgrade this to proper Pooling!!!!
+        ReconstructAgentGameObjects(settings, genome, parentEggSack, position, false, globalWaterLevel);
+
+        brain = new Brain(genome.brainGenome, this);   
+        isInert = false;
+    } 
+    */
 }

@@ -26,8 +26,8 @@ public class CritterModuleEnvironment {
     public float[] velBottomLeftX;
     public float[] velBottomRightY;
     
-    public CritterModuleEnvironment() {
-                
+    public CritterModuleEnvironment(CritterModuleEnvironmentSensorsGenome genome, Agent agent) {
+        Initialize(genome, agent);
     }
 
     public void Initialize(CritterModuleEnvironmentSensorsGenome genome, Agent agent) {

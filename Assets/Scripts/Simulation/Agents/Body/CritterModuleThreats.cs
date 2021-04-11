@@ -19,8 +19,8 @@ public class CritterModuleThreats {
     public float[] enemyGrowthStage;
     public float[] enemyThreatRating;
 
-    public CritterModuleThreats() {
-               
+    public CritterModuleThreats(CritterModuleThreatSensorsGenome genome, Agent agent) {
+        Initialize(genome, agent);
     }
 
     public void Initialize(CritterModuleThreatSensorsGenome genome, Agent agent) {

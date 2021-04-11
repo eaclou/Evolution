@@ -13,7 +13,13 @@ public class CritterModuleCore {
 
     public float foodConsumptionRate = 0.00125f;
     
-    public float energy = 1f;  // 0-1
+    float _energy = 1f;
+    public float energy
+    {
+        get => _energy;
+        set => Mathf.Clamp(_energy + value, 0f, 1f);
+    }
+    
     //public float stamina = 1f;
     public float healthHead = 1f;
     public float healthBody = 1f;
@@ -24,9 +30,27 @@ public class CritterModuleCore {
     public float stomachContentsNorm = 0f;
      
     public float stomachCapacity = 1f;  // absolute value in units of (area?)
-    public float stomachContentsDecay = 0f;
-    public float stomachContentsPlant = 0f;
-    public float stomachContentsMeat = 0f;
+    
+    float _stomachContentsDecay;
+    public float stomachContentsDecay
+    {
+        get => _stomachContentsDecay;
+        set => Mathf.Min(_stomachContentsDecay + value, 0f);
+    }
+    
+    float _stomachContentsPlant;
+    public float stomachContentsPlant
+    {
+        get => _stomachContentsPlant;
+        set => Mathf.Min(_stomachContentsPlant + value, 0f);
+    }
+    
+    float _stomachContentsMeat;
+    public float stomachContentsMeat
+    {
+        get => _stomachContentsMeat;
+        set => Mathf.Min(_stomachContentsMeat + value, 0f);
+    }
 
     public float debugFoodValue = 0f;
     
@@ -83,9 +107,9 @@ public class CritterModuleCore {
     // WPP: replaced Vector math with simpler percent calculation
     //public Vector3 foodProportionsVector => foodVector / (totalStomachContents + 0.000001f);
     //Vector3 foodVector => new Vector3(stomachContentsPlant, stomachContentsMeat, stomachContentsDecay);
-    public float plantEatenPercent => stomachContentsPlant / (totalStomachContents +0.000001f);
-    public float meatEatenPercent => stomachContentsMeat / (totalStomachContents +0.000001f);
-    public float decayEatenPercent => stomachContentsDecay / (totalStomachContents +0.000001f);
+    public float plantEatenPercent => stomachContentsPlant / (totalStomachContents + 0.000001f);
+    public float meatEatenPercent => stomachContentsMeat / (totalStomachContents + 0.000001f);
+    public float decayEatenPercent => stomachContentsDecay / (totalStomachContents + 0.000001f);
     
     public float GetEnergyTotal(float plantEfficiency, float meatEfficiency, float decayEfficiency)
     {
@@ -93,9 +117,20 @@ public class CritterModuleCore {
                 dietSpecMeatNorm * meatEfficiency + 
                 dietSpecDecayNorm + decayEfficiency;
     }
+    
+    public void Regenerate(float healRate, float energyToHealth)
+    {
+        if (healthBody >= 1f)
+            return;
+    
+        healthBody += healRate;
+        healthHead += healRate;
+        healthExternal += healRate;
+        energy -= healRate / energyToHealth;
+    }
 
-	public CritterModuleCore() {
-
+	public CritterModuleCore(CritterModuleCoreGenome genome, Agent agent) {
+        Initialize(genome, agent);
     }
 
     public void Initialize(CritterModuleCoreGenome genome, Agent agent) {

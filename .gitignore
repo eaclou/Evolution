@@ -85,3 +85,7 @@ $RECYCLE.BIN/
 *.aiff
 *.wav
 *.ogg
+.idea/.idea.Evolution/.idea/contentModel.xml
+.idea/.idea.Evolution/.idea/workspace.xml
+Assets/AudioAssets/test/28638__klangfabrik__tone-100-hz-44-1-16bit.wav.meta
+Packages/packages-lock.json

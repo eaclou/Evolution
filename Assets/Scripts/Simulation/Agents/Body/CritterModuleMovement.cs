@@ -30,8 +30,8 @@ public class CritterModuleMovement {
     public float speedBonus = 1f;
     public float turnBonus = 1f;
 	
-    public CritterModuleMovement() {
-        
+    public CritterModuleMovement(AgentGenome agentGenome, CritterModuleMovementGenome genome) {
+        Initialize(agentGenome, genome);
     }
 
     public void Initialize(AgentGenome agentGenome, CritterModuleMovementGenome genome) {

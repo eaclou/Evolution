@@ -56,8 +56,8 @@ public class CritterModuleFood {
 
     public CritterModuleFoodSensorsGenome genome;
 
-    public CritterModuleFood() {
-                
+    public CritterModuleFood(CritterModuleFoodSensorsGenome genome, Agent agent) {
+        Initialize(genome, agent);
     }
 
     public void Initialize(CritterModuleFoodSensorsGenome genome, Agent agent) {

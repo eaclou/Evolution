@@ -14,8 +14,8 @@ public class CritterModuleFriends {
     public float[] friendDirX;
     public float[] friendDirY;
 
-    public CritterModuleFriends() {
-               
+    public CritterModuleFriends(CritterModuleFriendSensorsGenome genome, Agent agent) {
+        Initialize(genome, agent);
     }
 
     public void Initialize(CritterModuleFriendSensorsGenome genome, Agent agent) {
@@ -26,8 +26,8 @@ public class CritterModuleFriends {
         friendDirX = new float[1]; // 12
         friendDirY = new float[1]; // 13
 
-        this.parentID = genome.parentID;
-        this.inno = genome.inno; 
+        parentID = genome.parentID;
+        inno = genome.inno; 
     }
 
     public void MapNeuron(NID nid, Neuron neuron) {
