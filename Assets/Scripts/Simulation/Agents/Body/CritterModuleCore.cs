@@ -156,13 +156,16 @@ public class CritterModuleCore {
         healEffector = new float[1];
                                                                           
         energy = 1f;
-        healthHead = 1f;
-        healthBody = 1f;
-        healthExternal = 1f;
+        
+        // WPP: extract method
+        //hitPoints[0] = 1f;
+        //healthHead = 1f;
+        //healthBody = 1f;
+        //healthExternal = 1f;
+        SetAllHealth(1f);
 
         bias[0] = 1f;
         
-        hitPoints[0] = 1f;
         stamina[0] = 1f;
         energyStored[0] = 1f;
         foodStored[0] = 0f;
@@ -254,7 +257,6 @@ public class CritterModuleCore {
     }
 
     public void Tick() {
-        
         //temperature[0] = 0f;
         //pressure[0] = 0f;
         isContact[0] = 0f;
@@ -284,5 +286,13 @@ public class CritterModuleCore {
         //coreModule.healthHead -= damage * UnityEngine.Random.Range(0f, 1f);
         //coreModule.healthBody -= damage * UnityEngine.Random.Range(0f, 1f);
         //coreModule.healthExternal -= damage * UnityEngine.Random.Range(0f, 1f);
+    }
+    
+    public void SetAllHealth(float value)
+    {
+        hitPoints[0] = value;
+        healthHead = value;
+        healthBody = value;
+        healthExternal = value;
     }
 }

@@ -51,7 +51,7 @@ public class CreaturePaperDollUI : MonoBehaviour
             textHealth.text = "HEALTH " + agent.coreModule.healthBody.ToString("F5");
             //textWaste.text = "WASTE " + agent.wasteProducedLastFrame.ToString("F5");
 
-            textNewInspectLog.text = agent.stringCauseOfDeath.ToString() + ", " + agent.cooldownFrameCounter.ToString() + " / " + agent.cooldownDuration.ToString(); // agent.lastEvent;
+            textNewInspectLog.text = agent.causeOfDeath + ", " + agent.cooldownFrameCounter + " / " + agent.cooldownDuration; // agent.lastEvent;
             newInspectAgentEnergyMat.SetFloat("_Value", Mathf.Clamp01((agent.coreModule.energy * Mathf.Sqrt(agent.currentBiomass)) * 0.33f));
             newInspectAgentStaminaMat.SetFloat("_Value", Mathf.Clamp01(agent.coreModule.stamina[0] * 1f));
             newInspectAgentStomachMat.SetFloat("_Value", Mathf.Clamp01(agent.coreModule.stomachContentsNorm * 1f));

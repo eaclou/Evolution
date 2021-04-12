@@ -70,7 +70,8 @@ public class Agent : MonoBehaviour {
         }
     }
     
-    public string stringCauseOfDeath = "";
+    // WPP: renamed -> string = implementation detail
+    public string causeOfDeath = "";
     
     public List<AgentEventData> agentEventDataList = new List<AgentEventData>();
     //public string lastEvent = "";
@@ -273,8 +274,7 @@ public class Agent : MonoBehaviour {
         predatorAgentRef = predatorAgent;
 
         //Debug.Log("Died of old age!");
-        stringCauseOfDeath = "Swallowed Whole";
-        InitializeDeath();
+        InitializeDeath("Swallowed Whole", "");
 
         /*
         springJoint.connectedBody = predatorAgentRef.bodyRigidbody;
@@ -366,10 +366,7 @@ public class Agent : MonoBehaviour {
         if (coreModule.energy > 0f)
             return;
             
-        bool starved = coreModule.stomachEmpty;
-        stringCauseOfDeath = starved ? "Starved" : "Suffocated";
-        string eventMessage = starved ? "Starved!" : "Suffocated! stomachContentsNorm: " + coreModule.stomachContentsPercent;
-        RegisterAgentEvent(Time.frameCount, eventMessage, 0f);
+        //RegisterAgentEvent(Time.frameCount, eventMessage, 0f);
     
         /*if(coreModule.stomachContentsNorm > 0.01f) {
             stringCauseOfDeath = "Suffocated";
@@ -380,57 +377,51 @@ public class Agent : MonoBehaviour {
             RegisterAgentEvent(Time.frameCount, "Starved!", 0f);
         }*/
         
-        lifeStageTransitionTimeStepCounter = 0;
-        InitializeDeath();
+        var starved = coreModule.stomachEmpty;
+        var cause = starved ? "Starved" : "Suffocated";
+        var eventMessage = starved ? "Starved!" : "Suffocated! stomachContentsNorm: " + coreModule.stomachContentsPercent;
+
+        InitializeDeath(cause, eventMessage);
     }
     
     // HEALTH FAILURE:
     public void CheckForDeathHealth() {
         if (coreModule.healthBody > 0f)
             return;
-            
-        curLifeStage = AgentLifeStage.Dead;
-        lifeStageTransitionTimeStepCounter = 0;
         
-        coreModule.hitPoints[0] = 0f;
-        coreModule.healthHead = 0f;
-        coreModule.healthBody = 0f;
-        coreModule.healthExternal = 0f;
+        // WPP: delegated to coreModule (also, shouldn't this be part of InitializeDeath?)
+        coreModule.SetAllHealth(0f);
+        
+        //coreModule.hitPoints[0] = 0f;
+        //coreModule.healthHead = 0f;
+        //coreModule.healthBody = 0f;
+        //coreModule.healthExternal = 0f;
 
         //Debug.LogError("CheckForDeathHealth" + currentBiomass.ToString());
 
-        stringCauseOfDeath = "Fatal Injuries";
-        RegisterAgentEvent(Time.frameCount, "Died of Injuries!", 0f);
-        InitializeDeath();
+        InitializeDeath("Fatal Injuries", "Died of Injuries!");
     }
     
     private void CheckForDeathOldAge() {
-        if(ageCounter <= maxAgeTimeSteps) 
-            return;
-        
-        curLifeStage = AgentLifeStage.Dead;
-        lifeStageTransitionTimeStepCounter = 0;
-
-        //Debug.Log("Died of old age!");
-        stringCauseOfDeath = "Old Age";
-        RegisterAgentEvent(Time.frameCount, "Died of Old Age!", 0f);
-        InitializeDeath();
+        if(ageCounter > maxAgeTimeSteps) ;
+            InitializeDeath("Old Age", "Died of Old Age!");
     }
     
     private void CheckForDeathDivineJudgment() {
-        if(!isMarkedForDeathByUser) 
-            return;
-            
-        curLifeStage = AgentLifeStage.Dead;
-        lifeStageTransitionTimeStepCounter = 0;
-        stringCauseOfDeath = "Divine Judgment";
-        RegisterAgentEvent(Time.frameCount, "Struck down by Divine Judgment!", 0f);
-        InitializeDeath();
+        if(isMarkedForDeathByUser)       
+            InitializeDeath("Divine Judgment", "Struck down by Divine Judgment!");
     }
     
-    private void InitializeDeath()   // THIS CAN BE A LOT CLEANER!!!!! *****
-    {  
+    private void InitializeDeath(string causeOfDeath, string deathEvent) 
+    {
+        // WPP: pulled functionality common to death from multiple calling sources  
         curLifeStage = AgentLifeStage.Dead;
+        lifeStageTransitionTimeStepCounter = 0;
+        this.causeOfDeath = causeOfDeath;
+        
+        // * Swallowed Whole did not call RegisterAgentEvent -> mistake?
+        if (deathEvent != "")
+            RegisterAgentEvent(Time.frameCount, deathEvent, 0f);
 
         if(isPregnantAndCarryingEggs) {
             AbortPregnancy();
@@ -1560,8 +1551,8 @@ public class Agent : MonoBehaviour {
     }
 
     private void ResetStartingValues() {
-        stringCauseOfDeath = "alive";
-
+        causeOfDeath = "alive";
+        
         animationCycle = 0f;
         lifeStageTransitionTimeStepCounter = 0;
         pregnancyRefactoryTimeStepCounter = 0;
@@ -1600,6 +1591,7 @@ public class Agent : MonoBehaviour {
         parentEggSackRef = null;
 
         // **** Separate out this code into shared function to avoid duplicate code::::
+        // WPP: incorrect refactor -> too many arguments
         ResetStartingValues();
         InitializeModules(genome);      // Modules need to be created first so that Brain can map its neurons to existing modules  
         
@@ -1615,35 +1607,20 @@ public class Agent : MonoBehaviour {
         speciesIndex = candidateData.speciesID;
         candidateRef = candidateData;
         AgentGenome genome = candidateRef.candidateGenome;
-        //genome.generationCount++;
                 
         curLifeStage = AgentLifeStage.Egg;
         parentEggSackRef = parentEggSack;
-        
+                
         ResetStartingValues();       
         InitializeModules(genome);      // Modules need to be created first so that Brain can map its neurons to existing modules  
 
         // Upgrade this to proper Pooling!!!!
         Vector3 spawnOffset = Random.insideUnitSphere * parentEggSack.curSize.magnitude * 0.167f;
         spawnOffset.z = 0f;
+        
         ReconstructAgentGameObjects(settings, genome, parentEggSack, parentEggSack.gameObject.transform.position + spawnOffset, false, globalWaterLevel);
 
         brain = new Brain(genome.brainGenome, this);   
         isInert = false;
     }
-    
-    // *** WPP: extract common logic from above 2 methods.
-    /*
-    void InitializeSpawnAgent()
-    {
-        ResetStartingValues();       
-        InitializeModules(genome);      // Modules need to be created first so that Brain can map its neurons to existing modules  
-
-        // Upgrade this to proper Pooling!!!!
-        ReconstructAgentGameObjects(settings, genome, parentEggSack, position, false, globalWaterLevel);
-
-        brain = new Brain(genome.brainGenome, this);   
-        isInert = false;
-    } 
-    */
 }
