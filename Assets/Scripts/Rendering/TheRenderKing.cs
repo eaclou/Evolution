@@ -2357,9 +2357,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         simData.growthPercentage = 2f; // ************************************************
         toolbarPortraitCritterSimDataArray[5] = simData;
 
-        if (toolbarPortraitCritterSimDataCBuffer != null) {
-            toolbarPortraitCritterSimDataCBuffer.Release();
-        }
+        
         toolbarPortraitCritterSimDataCBuffer = new ComputeBuffer(6, SimulationStateData.GetCritterSimDataSize());
         toolbarPortraitCritterSimDataCBuffer.SetData(toolbarPortraitCritterSimDataArray);
         // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -2516,11 +2514,13 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             debugFrameCounter = 0;
         }
 
-
+        
+        if (toolbarPortraitCritterSimDataCBuffer != null) {
+            toolbarPortraitCritterSimDataCBuffer.Release();
+        }
         // PORTRAIT
         if (isToolbarCritterPortraitEnabled) {
-
-
+            
             SetToolbarPortraitCritterSimData();
             SimUIToolbarCritterPortraitStrokes();
         }
@@ -3846,6 +3846,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         if (spiritBrushRenderCamera != null) {
             spiritBrushRenderCamera.RemoveAllCommandBuffers();
         }
+
         /*if(treeOfLifeSpeciesTreeRenderCamera != null) {
             treeOfLifeSpeciesTreeRenderCamera.RemoveAllCommandBuffers();
         }*/
@@ -3907,6 +3908,13 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             spiritBrushQuadDataCBuffer1.Release();
         }
 
+        if(cursorParticlesCBuffer0 != null) {
+            cursorParticlesCBuffer0.Release();
+        }
+        if(cursorParticlesCBuffer1 != null) {
+            cursorParticlesCBuffer1.Release();
+        }
+
         if (critterSkinStrokesCBuffer != null) {
             critterSkinStrokesCBuffer.Release();
         }
@@ -3920,6 +3928,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         if (gizmoFeedToolPosCBuffer != null) {
             gizmoFeedToolPosCBuffer.Release();
         }
+
         // TREE OF LIFE:
         if (testTreeOfLifePositionCBuffer != null) {
             testTreeOfLifePositionCBuffer.Release();

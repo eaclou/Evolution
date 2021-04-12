@@ -52,7 +52,7 @@
 			{
 				// sample the texture
 				fixed4 col = tex2D(_MainTex, i.uv);
-				col.rgb = lerp(_TintPri.rgb, _TintSec.rgb, i.uv.y);
+				//col.rgb = lerp(_TintPri.rgb, _TintSec.rgb, i.uv.y);
 				
 				return col;
 			}

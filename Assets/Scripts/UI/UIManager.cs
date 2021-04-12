@@ -109,6 +109,7 @@ public class UIManager : MonoBehaviour {
         Debug.Log("SetFocusedCandidateGenome --> theRenderKing.InitializeCreaturePortrait(focusedCandidate.candidateGenome);");
         //globalResourcesUI.SetFocusedGenome(simulationManager.curSimYear, focusedCandidate.candidateGenome);
         speciesOverviewUI.RebuildGenomeButtons();
+        genomeViewerUI.CreateBrainGenomeTexture(focusedCandidate.candidateGenome);
     }
     
     public void SetSelectedSpeciesUI(int id) {
