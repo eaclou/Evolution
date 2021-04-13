@@ -312,7 +312,7 @@ public class SpeciesOverviewUI : MonoBehaviour {
                 if(selectedCandidateGenomeIndex >= spool.candidateGenomesList.Count) {
                     selectedCandidateGenomeIndex = 0;
                 }
-
+                simulationManager.cameraManager.SetTargetAgent(simulationManager.agentsArray[simulationManager.cameraManager.targetAgentIndex], simulationManager.cameraManager.targetAgentIndex);
                 uiManagerRef.SetFocusedCandidateGenome(spool.candidateGenomesList[index]);
                 Debug.Log("ChangeSelectedGenome: " + group.ToString() + ", #" + index.ToString());
                 //selectedButton = candidateGenomeButtonsList[index].GetComponent<Button>();

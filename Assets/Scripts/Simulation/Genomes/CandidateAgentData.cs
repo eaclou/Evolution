@@ -13,17 +13,48 @@ public class CandidateAgentData {
     public bool allEvaluationsComplete = false;
     public bool isBeingEvaluated = false;
 
-    public SpeciesGenomePool.PerformanceData performanceData;
-    
-    // move stored performance stats here? *****
-    //
-    //
 
+
+    // stats:
+    public struct PerformanceData {
+	    public float totalFoodEatenPlant;
+        public float totalFoodEatenZoop;
+        public float totalFoodEatenEgg;
+        public float totalFoodEatenCorpse;
+        public float totalFoodEatenCreature;
+        public float totalDamageDealt;
+        public float totalDamageTaken;
+        public float totalTimesDashed;
+        public float totalTimesDefended;
+        public float totalTimesAttacked;
+        public float totalTimesPregnant;
+        public float totalTicksRested;
+        public float totalTicksAlive;
+    }
+    public PerformanceData performanceData;
+
+    public struct CandidateEventData {
+        public int eventFrame;
+        public string eventText;
+        public float goodness;
+        
+        public CandidateEventData(int eventFrame, string eventText, float goodness)
+        {
+            this.eventFrame = eventFrame;
+            this.eventText = eventText;
+            this.goodness = goodness;
+        }
+    }
+    
+    // WPP: renamed -> string = implementation detail
+    public string causeOfDeath = "";
+    public List<CandidateEventData> candidateEventDataList;
+    
     public CandidateAgentData(AgentGenome genome, int speciesID) {
         //Debug.Log("NewCandidateData: " + MasterGenomePool.nextCandidateIndex.ToString());
         int ID = MasterGenomePool.nextCandidateIndex;
         MasterGenomePool.nextCandidateIndex++;
-
+        causeOfDeath = "Alive!";
         this.candidateID = ID;
         this.speciesID = speciesID;
         candidateGenome = genome;
@@ -32,7 +63,8 @@ public class CandidateAgentData {
         allEvaluationsComplete = false;
         isBeingEvaluated = false;
 
-        performanceData = new SpeciesGenomePool.PerformanceData();
+        candidateEventDataList = new List<CandidateEventData>();
+        performanceData = new PerformanceData();
     }
 
     public void ProcessCompletedEvaluation(Agent agentRef) {
@@ -41,6 +73,12 @@ public class CandidateAgentData {
 
         numCompletedEvaluations++;
         isBeingEvaluated = false;
+    }
+
+    public void RegisterCandidateEvent(int frame, string textString, float goodness) {        
+        // WPP: use object initializer
+        CandidateEventData newEvent = new CandidateEventData(frame, textString, goodness);
+        candidateEventDataList.Add(newEvent);
     }
 
     

@@ -12,13 +12,13 @@ public class CritterModuleCore {
     public float[] bias;
 
     public float foodConsumptionRate = 0.00125f;
-    
-    float _energy = 1f;
-    public float energy
-    {
-        get => _energy;
-        set => Mathf.Clamp(_energy + value, 0f, 1f);
-    }
+
+    //float _energy = 1f;
+    public float energy = 1f;
+    //{
+    //    get => _energy;
+    //    set => Mathf.Clamp(_energy + value, 0f, 1000000f); // ***EC  REVISIT!!!!  use integers?
+    //}
     
     //public float stamina = 1f;
     public float healthHead = 1f;

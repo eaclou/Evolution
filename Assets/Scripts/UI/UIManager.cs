@@ -189,19 +189,18 @@ public class UIManager : MonoBehaviour {
         theCursorCzar.UpdateCursorCzar();  // this will assume a larger role
         brushesUI.UpdateBrushesUI();        
         globalResourcesUI.UpdateGlobalResourcesPanelUpdate();
-
-        creatureBrainActivityUI.Tick();
-        creaturePaperDollUI.Tick();
-        creaturePortraitUI.Tick();
-        creatureLifeEventsLogUI.Tick();
-
+ 
         clockPanelUI.Tick(); // //UpdateClockPanelUI();
 
         SpeciesGenomePool pool = simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesID]; // ***EC Move into genomeViewerUI.Tick()
         if(focusedCandidate != null && focusedCandidate.candidateGenome != null) {
             genomeViewerUI.UpdateUI(pool, focusedCandidate);
+            creatureBrainActivityUI.Tick();
+            creaturePaperDollUI.Tick();
+            creaturePortraitUI.Tick();
+            creatureLifeEventsLogUI.Tick(focusedCandidate);
 
-            if(simulationManager.simAgeTimeSteps % 111 == 1) {
+            if(simulationManager.simAgeTimeSteps % 67 == 1) {
                 speciesOverviewUI.RebuildGenomeButtons();  
             }
         }

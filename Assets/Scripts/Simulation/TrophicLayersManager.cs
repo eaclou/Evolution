@@ -58,11 +58,11 @@ public class TrophicLayersManager {
 
 
 	public TrophicLayersManager(UIManager uiManagerRef) {  // constructor
-        decomposersOn = false;  // first pass -- temporary?
-        algaeOn = false;
-        plantsOn = false;
-        zooplanktonOn = false;
-        agentsOn = false;
+        decomposersOn = true;  // first pass -- temporary?
+        algaeOn = true;
+        plantsOn = true;
+        zooplanktonOn = true;
+        agentsOn = true;
         //terrainOn = false;
 
         // DECOMPOSERS::::  // hacky manual initialization for now!!!!

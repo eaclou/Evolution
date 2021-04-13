@@ -57,25 +57,6 @@ public class Agent : MonoBehaviour {
     public int speciesIndex = -1;  // Set these at birth!
     public CandidateAgentData candidateRef;
 
-    public struct AgentEventData {
-        public int eventFrame;
-        public string eventText;
-        public float goodness;
-        
-        public AgentEventData(int eventFrame, string eventText, float goodness)
-        {
-            this.eventFrame = eventFrame;
-            this.eventText = eventText;
-            this.goodness = goodness;
-        }
-    }
-    
-    // WPP: renamed -> string = implementation detail
-    public string causeOfDeath = "";
-    
-    public List<AgentEventData> agentEventDataList = new List<AgentEventData>();
-    //public string lastEvent = "";
-    //public int lastEventTime = 0;
     
     public AgentLifeStage curLifeStage;
     public enum AgentLifeStage {
@@ -231,7 +212,7 @@ public class Agent : MonoBehaviour {
     // WPP: early exit instead of if-else, added warning
     public void AttemptInitiateActiveFeedBite() {
         if (isFeeding) {
-            Debug.LogWarning("Already feeding, no need to initiate feed bite");
+            //Debug.LogWarning("Already feeding, no need to initiate feed bite"); //***EC
             return;
         }
         
@@ -403,7 +384,7 @@ public class Agent : MonoBehaviour {
     }
     
     private void CheckForDeathOldAge() {
-        if(ageCounter > maxAgeTimeSteps) ;
+        if(ageCounter > maxAgeTimeSteps)
             InitializeDeath("Old Age", "Died of Old Age!");
     }
     
@@ -417,7 +398,7 @@ public class Agent : MonoBehaviour {
         // WPP: pulled functionality common to death from multiple calling sources  
         curLifeStage = AgentLifeStage.Dead;
         lifeStageTransitionTimeStepCounter = 0;
-        this.causeOfDeath = causeOfDeath;
+        candidateRef.causeOfDeath = causeOfDeath;
         
         // * Swallowed Whole did not call RegisterAgentEvent -> mistake?
         if (deathEvent != "")
@@ -495,17 +476,7 @@ public class Agent : MonoBehaviour {
     }
     
     public void RegisterAgentEvent(int frame, string textString, float goodness) {
-        //lastEvent = "Ate Plant! (" + amount.ToString() + ")";
-        //lastEventTime = UnityEngine.Time.frameCount;
-        //eventLogStringList
-        
-        // WPP: use object initializer
-        AgentEventData newEvent = new AgentEventData(frame, textString, goodness);
-        //newEvent.eventFrame = frame;
-        //newEvent.eventText = textString;
-        //newEvent.goodness = goodness;
-
-        agentEventDataList.Add(newEvent);
+        candidateRef.RegisterCandidateEvent(frame, textString, goodness);        
     }
     
     public void EatFoodPlant(float amount) {   
@@ -808,8 +779,6 @@ public class Agent : MonoBehaviour {
         
         mouthRef.Enable();
         isCooldown = false;
-
-        agentEventDataList.Clear();
         RegisterAgentEvent(Time.frameCount, "Was Born!", 1f);        
     }
     
@@ -1551,7 +1520,7 @@ public class Agent : MonoBehaviour {
     }
 
     private void ResetStartingValues() {
-        causeOfDeath = "alive";
+        //causeOfDeath = "alive"; --> moved to CandidateAgentData
         
         animationCycle = 0f;
         lifeStageTransitionTimeStepCounter = 0;

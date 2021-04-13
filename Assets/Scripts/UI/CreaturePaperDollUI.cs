@@ -16,7 +16,7 @@ public class CreaturePaperDollUI : MonoBehaviour
     public Text textWaste;
    
     //public GameObject panelNewInspect;
-    public Text textNewInspectAgentName;
+    //public Text textNewInspectAgentName;
     public Material newInspectAgentEnergyMat;
     public Material newInspectAgentStaminaMat;
     public Material newInspectAgentStomachMat;
@@ -28,30 +28,23 @@ public class CreaturePaperDollUI : MonoBehaviour
     public Material newInspectAgentWasteMat;
     public Material newInspectAgentBrainMat;
 
-    public Text textNewInspectLog;
+    //public Text textNewInspectLog;
     public Text textVertebrateLifestage;
     public Text textVertebrateStatus;
 
     public void Tick() {
 
-        int critterIndex = cameraManager.targetAgentIndex;
-        Agent agent = simulationManager.agentsArray[critterIndex];
+        //int critterIndex = cameraManager.targetAgentIndex;
+        Agent agent = simulationManager.agentsArray[cameraManager.targetAgentIndex]; // simulationManager.agentsArray[critterIndex];
 
         if (agent.coreModule != null) {
-
-            //followCreaturePanel.SetActive(true);
-
-            //panelFollowStatus.SetActive(isFollowStatusPanelOn);
-            //panelFollowBehavior.SetActive(isFollowBehaviorPanelOn);
-            //panelFollowGenome.SetActive(isFollowGenomePanelOn);
-            //panelFollowHistory.SetActive(isFollowHistoryPanelOn);
-
+            /*
             textStomachContents.text = "STOMACH " + Mathf.Clamp01(agent.coreModule.stomachContentsNorm * 1f).ToString("F5");
             textEnergy.text = "ENERGY " + (agent.coreModule.energy / agent.currentBiomass).ToString("F5");
             textHealth.text = "HEALTH " + agent.coreModule.healthBody.ToString("F5");
             //textWaste.text = "WASTE " + agent.wasteProducedLastFrame.ToString("F5");
 
-            textNewInspectLog.text = agent.causeOfDeath + ", " + agent.cooldownFrameCounter + " / " + agent.cooldownDuration; // agent.lastEvent;
+            //textNewInspectLog.text = agent.candidateRef.causeOfDeath + ", " + agent.cooldownFrameCounter + " / " + agent.cooldownDuration; // agent.lastEvent;
             newInspectAgentEnergyMat.SetFloat("_Value", Mathf.Clamp01((agent.coreModule.energy * Mathf.Sqrt(agent.currentBiomass)) * 0.33f));
             newInspectAgentStaminaMat.SetFloat("_Value", Mathf.Clamp01(agent.coreModule.stamina[0] * 1f));
             newInspectAgentStomachMat.SetFloat("_Value", Mathf.Clamp01(agent.coreModule.stomachContentsNorm * 1f));
@@ -84,10 +77,8 @@ public class CreaturePaperDollUI : MonoBehaviour
 
             }
             newInspectAgentStateMat.SetInt("_StateID", developmentStateID);
-            newInspectAgentBrainMat.SetFloat("_Value", Mathf.Clamp01((float)agent.brain.axonList.Count * 0.05f + (float)agent.brain.neuronList.Count * 0.05f));
-            newInspectAgentWasteMat.SetFloat("_Value", Mathf.Clamp01(agent.wasteProducedLastFrame * 1000f));
-            
-            textNewInspectLog.text = "";
+            //newInspectAgentBrainMat.SetFloat("_Value", Mathf.Clamp01((float)agent.brain.axonList.Count * 0.05f + (float)agent.brain.neuronList.Count * 0.05f));
+            //newInspectAgentWasteMat.SetFloat("_Value", Mathf.Clamp01(agent.wasteProducedLastFrame * 1000f));
             
 
             string statusStr = "Alive!";
@@ -103,18 +94,15 @@ public class CreaturePaperDollUI : MonoBehaviour
                 statusStr = "Egg!";
                 healthColor = Color.yellow;
             }
-            if (agent.coreModule.healthBody <= 0f) {
-                statusStr = "Died of Injury";
-            }
-
+            
             //textVertebrateGen.text = "Gen #" + agent.candidateRef.candidateGenome.bodyGenome.coreGenome.generation.ToString();
-            textVertebrateLifestage.text = "Age: " + (0.1f * agent.ageCounter).ToString("F0");// + ", stateID: " + developmentStateID;
-            textVertebrateLifestage.color = healthColor;
+            //textVertebrateLifestage.text = "Age: " + (0.1f * agent.ageCounter).ToString("F0");// + ", stateID: " + developmentStateID;
+            //textVertebrateLifestage.color = healthColor;
             textVertebrateStatus.text = statusStr; // "activity: " + curActivityID;
-                        
+               */         
 
             widgetAgentStatus.UpdateBars((agent.coreModule.healthBody + agent.coreModule.healthHead + agent.coreModule.healthExternal) / 3f,
-                                            agent.coreModule.energy * agent.currentBiomass,
+                                            agent.coreModule.energy,
                                             agent.coreModule.stomachContentsNorm,
                                             agent.currentBiomass,
                                             agent.coreModule.stamina[0]);   

@@ -45,23 +45,7 @@ public class SpeciesGenomePool {
     public CandidateAgentData recordHolderDefender;
     public int recordDasher = 0;
     public CandidateAgentData recordHolderDasher;
-
-    // stats:
-    public struct PerformanceData {
-	    public float totalFoodEatenPlant;
-        public float totalFoodEatenZoop;
-        public float totalFoodEatenEgg;
-        public float totalFoodEatenCorpse;
-        public float totalFoodEatenCreature;
-        public float totalDamageDealt;
-        public float totalDamageTaken;
-        public float totalTimesDashed;
-        public float totalTimesDefended;
-        public float totalTimesAttacked;
-        public float totalTimesPregnant;
-        public float totalTicksRested;
-        public float totalTicksAlive;
-    }
+        
     //public List<PerformanceData> avgPerformanceDataYearList;
     //public PerformanceData avgPerformanceData;
     public List<CandidateAgentData> avgCandidateDataYearList;
@@ -215,7 +199,7 @@ public class SpeciesGenomePool {
         avgCandidateData.candidateGenome.bodyGenome.coreGenome.bodyLength = 0f;
         avgCandidateData.candidateGenome.bodyGenome.coreGenome.creatureAspectRatio = 0f;
 
-        avgCandidateData.performanceData = new SpeciesGenomePool.PerformanceData();  // clear // ***EC better spot for this??
+        avgCandidateData.performanceData = new CandidateAgentData.PerformanceData();  // clear // ***EC better spot for this??
         //Debug.Log("avgPerformanceData " + avgPerformanceData.totalTicksAlive.ToString());
         //avgCandidateData.performanceData = avgPerformanceData;
         

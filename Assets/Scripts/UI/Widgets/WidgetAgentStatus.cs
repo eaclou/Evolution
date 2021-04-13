@@ -41,7 +41,7 @@ public class WidgetAgentStatus : MonoBehaviour {
         */
         float energyCapped = Mathf.Clamp01(energy * 0.167f);
         imageEnergy.gameObject.transform.localScale = new Vector3(1f, energyCapped, 1f);
-        textValEnergy.text = (energy * 100f).ToString("F0");
+        textValEnergy.text = energy.ToString("F0");
         /*if(energyCapped < 0.33f) {
             imageEnergy.color = Color.red;
         }
@@ -67,5 +67,7 @@ public class WidgetAgentStatus : MonoBehaviour {
         else {
             imageStamina.color = Color.yellow;
         }*/
+
+        //Debug.Log("EnergyCapped:" + energy.ToString());
     }
 }

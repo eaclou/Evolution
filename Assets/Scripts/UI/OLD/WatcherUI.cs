@@ -154,20 +154,20 @@ public class WatcherUI : MonoBehaviour {
                                    
                 int maxEventsToDisplay = 8;
                 //int numEvents = Mathf.Min(agent.agentEventDataList.Count, maxEventsToDisplay);
-                int startIndex = Mathf.Max(0, agent.agentEventDataList.Count - maxEventsToDisplay);                   
+                int startIndex = Mathf.Max(0, agent.candidateRef.candidateEventDataList.Count - maxEventsToDisplay);                   
                 string eventString = "";
-                for(int q = agent.agentEventDataList.Count - 1; q >= startIndex; q--) {
-                    eventString += "\n[" + agent.agentEventDataList[q].eventFrame.ToString() + "] " + agent.agentEventDataList[q].eventText;
+                for(int q = agent.candidateRef.candidateEventDataList.Count - 1; q >= startIndex; q--) {
+                    eventString += "\n[" + agent.candidateRef.candidateEventDataList[q].eventFrame.ToString() + "] " + agent.candidateRef.candidateEventDataList[q].eventText;
                 }                
 
                 string textStringLog = "Event Log! Agent[" + agent.index.ToString() + "]";                    
                 // Agent Event Log:
                 int maxEventsToDisplayLog = 12;
                 //int numEventsLog = Mathf.Min(agent.agentEventDataList.Count, maxEventsToDisplayLog);
-                int startIndexLog = Mathf.Max(0, agent.agentEventDataList.Count - maxEventsToDisplayLog);                   
+                int startIndexLog = Mathf.Max(0, agent.candidateRef.candidateEventDataList.Count - maxEventsToDisplayLog);                   
                 string eventLogString = "";
-                for(int q = agent.agentEventDataList.Count - 1; q >= startIndexLog; q--) {
-                    float dimAmount = Mathf.Clamp01((float)(agent.agentEventDataList.Count - q - 1) * 0.55f);
+                for(int q = agent.candidateRef.candidateEventDataList.Count - 1; q >= startIndexLog; q--) {
+                    float dimAmount = Mathf.Clamp01((float)(agent.candidateRef.candidateEventDataList.Count - q - 1) * 0.55f);
                     //Color displayColor = Color.Lerp(Color.red, Color.green, agent.agentEventDataList[q].goodness);
                     string goodColorStr = "#00FF00FF";
                     if(dimAmount > 0.5f) {
@@ -177,14 +177,14 @@ public class WatcherUI : MonoBehaviour {
                     if(dimAmount > 0.5f) {
                         badColorStr = "#770000FF";
                     }
-                    if(agent.agentEventDataList[q].goodness > 0.5f) {
+                    if(agent.candidateRef.candidateEventDataList[q].goodness > 0.5f) {
                         eventLogString += "<color=" + goodColorStr + ">";
                     }
                     else {
                         eventLogString += "<color=" + badColorStr + ">";
                     }
                             
-                    eventLogString += "\n[" + agent.agentEventDataList[q].eventFrame.ToString() + "] " + agent.agentEventDataList[q].eventText;
+                    eventLogString += "\n[" + agent.candidateRef.candidateEventDataList[q].eventFrame.ToString() + "] " + agent.candidateRef.candidateEventDataList[q].eventText;
                     eventLogString += "</color>";
                 }
                 textStringLog += eventLogString;
