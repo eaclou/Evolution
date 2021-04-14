@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-[CreateAssetMenu(menuName = "ScriptableObjects/Feat")]
+[CreateAssetMenu(menuName = "Pond Water/Narration/Feat")]
 public class FeatSO : ScriptableObject
 {
     public FeatType type;

@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Agent : MonoBehaviour {
+    Lookup lookup => Lookup.instance;
 
     SettingsManager settingsRef;
     //private PerformanceData performanceData;
@@ -254,8 +254,7 @@ public class Agent : MonoBehaviour {
         beingSwallowedFrameCounter = 0;
         predatorAgentRef = predatorAgent;
 
-        //Debug.Log("Died of old age!");
-        InitializeDeath("Swallowed Whole", "");
+        InitializeDeath(lookup.GetCauseOfDeath(CauseOfDeathId.SwallowedWhole));
 
         /*
         springJoint.connectedBody = predatorAgentRef.bodyRigidbody;
@@ -268,9 +267,9 @@ public class Agent : MonoBehaviour {
         springJoint.enabled = true;
         springJoint.frequency = 15f;
         */
-        //this.biomassAtDeath
-        
+        //this.biomassAtDeath   
     }
+    
     public void InitiateSwallowingPrey(Agent preyAgent)
     {
         isSwallowingPrey = true;
@@ -358,11 +357,10 @@ public class Agent : MonoBehaviour {
             RegisterAgentEvent(Time.frameCount, "Starved!", 0f);
         }*/
         
-        var starved = coreModule.stomachEmpty;
-        var cause = starved ? "Starved" : "Suffocated";
-        var eventMessage = starved ? "Starved!" : "Suffocated! stomachContentsNorm: " + coreModule.stomachContentsPercent;
-
-        InitializeDeath(cause, eventMessage);
+        if (coreModule.stomachEmpty)
+            InitializeDeath(lookup.GetCauseOfDeath(CauseOfDeathId.Starved));
+        else
+            InitializeDeath("Suffocated", "Suffocated! stomachContentsNorm: " + coreModule.stomachContentsPercent);
     }
     
     // HEALTH FAILURE:
@@ -380,17 +378,21 @@ public class Agent : MonoBehaviour {
 
         //Debug.LogError("CheckForDeathHealth" + currentBiomass.ToString());
 
-        InitializeDeath("Fatal Injuries", "Died of Injuries!");
+        InitializeDeath(lookup.GetCauseOfDeath(CauseOfDeathId.Injuries));    
     }
     
     private void CheckForDeathOldAge() {
         if(ageCounter > maxAgeTimeSteps)
-            InitializeDeath("Old Age", "Died of Old Age!");
+            InitializeDeath(lookup.GetCauseOfDeath(CauseOfDeathId.OldAge));    
     }
     
     private void CheckForDeathDivineJudgment() {
-        if(isMarkedForDeathByUser)       
-            InitializeDeath("Divine Judgment", "Struck down by Divine Judgment!");
+        if(isMarkedForDeathByUser)   
+            InitializeDeath(lookup.GetCauseOfDeath(CauseOfDeathId.DivineJudgment));    
+    }
+    
+    private void InitializeDeath(CauseOfDeathSO data) {
+        InitializeDeath(data.causeOfDeath, data.eventMessage);
     }
     
     private void InitializeDeath(string causeOfDeath, string deathEvent) 

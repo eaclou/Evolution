@@ -730,6 +730,7 @@
                 <e p="NID.cs" t="Include" />
                 <e p="TransferFunctions.cs" t="Include" />
               </e>
+              <e p="CauseOfDeathSO.cs" t="Include" />
               <e p="EggSack.cs" t="Include" />
             </e>
             <e p="AgentsManager.cs" t="Include" />
@@ -823,6 +824,7 @@
             <e p="GraphData.cs" t="Include" />
             <e p="LoadingPanelUI.cs" t="Include" />
             <e p="MainMenuUI.cs" t="Include" />
+            <e p="MinimapUI.cs" t="Include" />
             <e p="NarrationSO.cs" t="Include" />
             <e p="ObserverModeUI.cs" t="Include" />
             <e p="OLD" t="Include">

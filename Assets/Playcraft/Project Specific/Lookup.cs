@@ -71,33 +71,33 @@ public class Lookup : ScriptableObject
 
 	#region Resource Lookups
 	
-	/*
-	[SerializeField] ResolutionData[] resolutions;
+	
+	[SerializeField] CauseOfDeathData[] causesOfDeath;
 
-	public float GetResolution(ResolutionId id)
+	public CauseOfDeathSO GetCauseOfDeath(CauseOfDeathId id)
     {
-      	foreach (var item in resolutions)
+      	foreach (var item in causesOfDeath)
       	  	if (item.id == id)
       	  	  	return item.value;
 	
 	    Debug.LogError("Unable to find resolution " + id);
-        return resolutions[0].value;
+        return causesOfDeath[0].value;
     }
-    */
+    
     
 	#endregion
 }
 
 #region Resource Lookup Containers
 
-/*
+
 [Serializable]
-public struct ResolutionData
+public struct CauseOfDeathData
 {
-	public ResolutionId id;
-	public float value;
+	public CauseOfDeathId id;
+	public CauseOfDeathSO value;
 }
-*/
+
 
 #endregion
 

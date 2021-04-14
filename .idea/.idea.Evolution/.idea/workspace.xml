@@ -26,6 +26,7 @@
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Utility/QuitGame.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/NarrationSO.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://C:/Program Files/Unity/Hub/Editor/2019.4.18f1/Editor/Data/Resources/PackageManager/BuiltInPackages/com.unity.ugui/Runtime/UI/Core/Dropdown.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/CauseOfDeathSO.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Playcraft/_NEW/SetTimeScale.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/17AD9609-AE06-4F2C-9315-931FF97ADCF1/c3/85153ec3/ComputeShader.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/17AD9609-AE06-4F2C-9315-931FF97ADCF1/e9/3e0ac117/ComputeBuffer.cs" root0="SKIP_HIGHLIGHTING" />
@@ -36,8 +37,6 @@
   </component>
   <component name="IdeDocumentHistory">
     <changedPaths>
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/BigBangPanelUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/VegetationManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/LoadingPanelUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/SpeciesTreePanel.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/GraphStatPanel.cs" />
@@ -77,16 +76,18 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationStateData.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimEventsManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimEventData.cs" />
-      <option value="$PROJECT_DIR$/Assets/Playcraft/Project Specific/Lookup.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Feat.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/NarrationSO.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/FeatSO.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Settings/QualitySettingData.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/PanelNotificationsUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Core/GameOptions.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/ZooplanktonManager.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/NarrationSO.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/FeatSO.cs" />
+      <option value="$PROJECT_DIR$/Assets/Playcraft/Project Specific/Lookup.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/CauseOfDeathSO.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Agent.cs" />
     </changedPaths>
   </component>
   <component name="ProjectId" id="1owaWgGpM80xkcfA3szn5iw9YkG" />
@@ -143,6 +144,7 @@
       <workItem from="1617153477797" duration="5882000" />
       <workItem from="1617688528630" duration="1831000" />
       <workItem from="1617742264965" duration="6528000" />
+      <workItem from="1618349304869" duration="3704000" />
     </task>
     <servers />
   </component>

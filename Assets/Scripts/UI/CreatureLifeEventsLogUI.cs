@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class CreatureLifeEventsLogUI : MonoBehaviour
@@ -47,10 +45,9 @@ public class CreatureLifeEventsLogUI : MonoBehaviour
             eventLogString += "\n[" + agentData.candidateEventDataList[q].eventFrame.ToString() + "] " + agentData.candidateEventDataList[q].eventText;
             eventLogString += "</color>";
         }
-        eventsLog += eventLogString;
-        textEventsLog.text = eventsLog;
         
-       
+        eventsLog += eventLogString;
+        textEventsLog.text = eventsLog;       
     }
     
 }

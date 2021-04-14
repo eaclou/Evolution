@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-[CreateAssetMenu(menuName = "ScriptableObjects/Narration")]
+[CreateAssetMenu(menuName = "Pond Water/Narration/Unlock Event")]
 public class NarrationSO : ScriptableObject
 {
     public string message;
