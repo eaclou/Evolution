@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 
 public class Agent : MonoBehaviour {
     Lookup lookup => Lookup.instance;
@@ -177,8 +178,8 @@ public class Agent : MonoBehaviour {
         isInert = true;
     }
     
-    bool isDead => curLifeStage == AgentLifeStage.Dead;
-    bool isEgg => curLifeStage == AgentLifeStage.Egg;
+    public bool isDead => curLifeStage == AgentLifeStage.Dead;
+    public bool isEgg => curLifeStage == AgentLifeStage.Egg;
 
     public float GetDecayPercentage() {
         if (biomassAtDeath == 0f) {
@@ -196,8 +197,7 @@ public class Agent : MonoBehaviour {
     }
 
     public void AttemptInitiateActiveFeedBite() {
-        if (isFeeding) {
-            //Debug.LogWarning("Already feeding, no need to initiate feed bite"); //***EC
+        if (isFeeding || isAttacking || isDefending) {
             return;
         }
         
@@ -207,7 +207,8 @@ public class Agent : MonoBehaviour {
         feedingFrameCounter = 0;            
     }
 
-    public void AttemptInitiateActiveAttackBite() {
+    // WPP: moved to coroutine
+    /*public void AttemptInitiateActiveAttackBite() {
         //Debug.Log("ATTACK");
         if (isAttacking) {
             Debug.LogWarning("Already attacking, no need to initiate attack bite");
@@ -219,6 +220,27 @@ public class Agent : MonoBehaviour {
         attackingFrameCounter = 0;    
         
         candidateRef.performanceData.totalTimesAttacked++;
+    }*/
+    
+    public bool isAttackBiteFrame => attackingFrameCounter == attackAnimDuration / 2;
+    public float attackAnimCycle => Mathf.Clamp01((float)attackingFrameCounter / attackAnimDuration);
+    
+    IEnumerator AttackRoutine() {
+        if (isAttacking) yield break;
+            
+        isAttacking = true;
+        mouthRef.triggerCollider.enabled = true;
+        candidateRef.performanceData.totalTimesAttacked++;
+        attackingFrameCounter = 0;
+                
+        for (int i = 0; i < attackAnimDuration; i++) {
+            attackingFrameCounter++;            
+            yield return null;
+        }
+        
+        isAttacking = false;
+        attackingFrameCounter = 0;
+        EnterCooldown(attackAnimCooldown);
     }
     
     public void SetToAwaitingRespawn() {
@@ -950,78 +972,42 @@ public class Agent : MonoBehaviour {
             throttle = Vector2.zero;
             smoothedThrottle = Vector2.zero;
         }
-        else {
-            bool startBite = false;
+        else 
+        {
             // Food calc before energy/healing/etc? **************
             //float sizeValue = BodyGenome.GetBodySizeScore01(candidateRef.candidateGenome.bodyGenome);
             // FOOD PARTICLES: Either mouth type for now:
             float foodParticleEatAmount = simManager.vegetationManager.plantParticlesEatAmountsArray[index] * coreModule.foodEfficiencyPlant; // **************** PLANT BONUS!! HACKY
-            if(foodParticleEatAmount > 0f) {
+            float animalParticleEatAmount = simManager.zooplanktonManager.animalParticlesEatAmountsArray[index] * coreModule.foodEfficiencyMeat;
+            
+            bool isEatingPlant = foodParticleEatAmount > 0f;
+            bool isEatingAnimal = animalParticleEatAmount > 0f;
+            
+            if(isEatingPlant) {
                 //mouthRef.InitiatePassiveBite();
                 //float sizeEfficiencyPlant = Mathf.Lerp(settings.minSizeFeedingEfficiencyDecay, settings.maxSizeFeedingEfficiencyDecay, sizeValue);
-                startBite = true;
                 //Debug.Log("Agent[" + index.ToString() + "], Ate Plant: " + foodParticleEatAmount.ToString());
                 candidateRef.performanceData.totalFoodEatenPlant += foodParticleEatAmount; 
                 EatFoodPlant(foodParticleEatAmount);                
             }
 
-            float animalParticleEatAmount = simManager.zooplanktonManager.animalParticlesEatAmountsArray[index] * coreModule.foodEfficiencyMeat;
-            if(animalParticleEatAmount > 0f) {
+            if(isEatingAnimal) {
                 //float sizeEfficiencyPlant = Mathf.Lerp(settings.minSizeFeedingEfficiencyDecay, settings.maxSizeFeedingEfficiencyDecay, sizeValue);
                 candidateRef.performanceData.totalFoodEatenZoop += animalParticleEatAmount;
                 //animalParticleEatAmount *= 0.98f;
                 
                 //Debug.Log("Agent[" + index.ToString() + "], Ate Zooplankton: " + animalParticleEatAmount.ToString());
                 EatFoodMeat(animalParticleEatAmount); // * sizeEfficiencyPlant);    
-                RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Zooplankton! (+" + (animalParticleEatAmount * 1000).ToString("F0").ToString() + " food)", 1f);
-                startBite = true;
+                RegisterAgentEvent(Time.frameCount, "Ate Zooplankton! (+" + (animalParticleEatAmount * 1000).ToString("F0") + " food)", 1f);
             }
 
             mouthRef.lastBiteFoodAmount += foodParticleEatAmount + animalParticleEatAmount;
 
-            if(startBite) {
-                //if(IsFreeToAct()) {
-                if(!isAttacking && !isDefending) {
-                    //if (coreModule.mouthFeedEffector[0] >= 0f) {   //  needed?
-                    AttemptInitiateActiveFeedBite();
-                    //}
-                }                
+            if(isEatingPlant || isEatingAnimal) {
+                AttemptInitiateActiveFeedBite();                
             }
            
-            // *** REFACTOR THIS GARBAGE!!!!! ********
-            float mostActiveEffectorVal = 0f;
-            mostActiveEffectorVal = Mathf.Max(mostActiveEffectorVal, coreModule.mouthFeedEffector[0]);
-            mostActiveEffectorVal = Mathf.Max(mostActiveEffectorVal, coreModule.mouthAttackEffector[0]);
-            mostActiveEffectorVal = Mathf.Max(mostActiveEffectorVal, coreModule.defendEffector[0]);
-            mostActiveEffectorVal = Mathf.Max(mostActiveEffectorVal, coreModule.dashEffector[0]);
-            mostActiveEffectorVal = Mathf.Max(mostActiveEffectorVal, coreModule.healEffector[0]);
-
-            if(coreModule.mouthAttackEffector[0] >= mostActiveEffectorVal) {
-                if (isFreeToAct) {
-                    AttemptInitiateActiveAttackBite();      
-                }
-                          
-            }
-            if(coreModule.dashEffector[0] >= mostActiveEffectorVal) {
-                if (isFreeToAct) {
-                    ActionDash();
-                }
-            }
-            if(coreModule.defendEffector[0] >= mostActiveEffectorVal) {
-                if(isFreeToAct) {
-                    ActionDefend();
-                }
-            }            
-            
-            if(coreModule.healEffector[0] >= mostActiveEffectorVal) {
-                if(isFreeToAct) {
-                    isResting = true;
-                    candidateRef.performanceData.totalTicksRested++;
-                }
-                else {
-                    isResting = false;
-                }
-            }                    
+            SelectAction();                  
         }
         
         MovementScalingTest(smoothedThrottle);
@@ -1031,7 +1017,6 @@ public class Agent : MonoBehaviour {
                 
         curActionState = currentState;
 
-        
         if(isDashing) {
             dashFrameCounter++;
             if(dashFrameCounter >= dashDuration) {                
@@ -1063,14 +1048,16 @@ public class Agent : MonoBehaviour {
                 //}
             }
         }
-        if(isAttacking) {            
+        
+        // WPP: moved to coroutine
+        /*if(isAttacking) {            
             attackingFrameCounter++;
             if(attackingFrameCounter > attackAnimDuration) {
                 isAttacking = false;
                 EnterCooldown(attackAnimCooldown);
                 attackingFrameCounter = 0;
             }
-        }
+        }*/
 
         if(isCooldown) {
             cooldownFrameCounter++;
@@ -1079,6 +1066,45 @@ public class Agent : MonoBehaviour {
                 isCooldown = false;
             }
         } 
+    }
+    
+    // WPP: Extracted from TickActions,
+    // created static method to find highest value in array
+    // streamlined conditionals with early exit
+    private void SelectAction() {
+        //float mostActiveEffectorVal = 0f;
+        //mostActiveEffectorVal = Mathf.Max(mostActiveEffectorVal, coreModule.mouthFeedEffector[0]);
+        //mostActiveEffectorVal = Mathf.Max(mostActiveEffectorVal, coreModule.mouthAttackEffector[0]);
+        //mostActiveEffectorVal = Mathf.Max(mostActiveEffectorVal, coreModule.defendEffector[0]);
+        //mostActiveEffectorVal = Mathf.Max(mostActiveEffectorVal, coreModule.dashEffector[0]);
+        //mostActiveEffectorVal = Mathf.Max(mostActiveEffectorVal, coreModule.healEffector[0]);
+
+        float[] effectorValues = { 0f, coreModule.mouthFeedEffector[0], 
+            coreModule.mouthAttackEffector[0], coreModule.defendEffector[0],
+            coreModule.dashEffector[0], coreModule.healEffector[0] };
+            
+        float mostActiveEffectorValue = FloatMath.GetHighest(effectorValues);
+        
+        if(coreModule.healEffector[0] >= mostActiveEffectorValue) {
+            isResting = isFreeToAct;
+                
+            if(isFreeToAct) {
+                candidateRef.performanceData.totalTicksRested++;
+            }
+        }
+        
+        if (!isFreeToAct)
+            return;
+
+        if(coreModule.mouthAttackEffector[0] >= mostActiveEffectorValue) {
+            StartCoroutine(AttackRoutine());
+        }
+        if(coreModule.dashEffector[0] >= mostActiveEffectorValue) {
+            ActionDash();
+        }
+        if(coreModule.defendEffector[0] >= mostActiveEffectorValue) {
+            ActionDefend();
+        }    
     }
 
     private void EnterCooldown(int frames) {
@@ -1100,13 +1126,9 @@ public class Agent : MonoBehaviour {
         if (!isFreeToAct || outOfStamina)
             return;
             
-        //if(isFreeToAct) {
-        //    if(coreModule.stamina[0] >= 0.1f) {
         isDefending = true;
         coreModule.stamina[0] -= 0.1f;
         candidateRef.performanceData.totalTimesDefended++;
-        //    }            
-        //} 
     }
     
     bool isFreeToAct => !isCooldown && !isDashing && !isDefending && !isFeeding && !isAttacking &&
@@ -1324,7 +1346,7 @@ public class Agent : MonoBehaviour {
         isFeeding = false;
         feedingFrameCounter = 0;
         isAttacking = false;
-        attackingFrameCounter = 0;
+        //attackingFrameCounter = 0;
         //mouthRef.isCooldown = false;
         mouthRef.agentIndex = index;
         mouthRef.agentRef = this;

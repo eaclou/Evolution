@@ -355,7 +355,8 @@ public class SimulationStateData {
                     critterSimDataArray[i].biteAnimCycle = Mathf.Clamp01((float)simManager.agentsArray[i].feedingFrameCounter / (float)simManager.agentsArray[i].feedAnimDuration);
                 }
                 if(simManager.agentsArray[i].isAttacking) {
-                    critterSimDataArray[i].biteAnimCycle = Mathf.Clamp01((float)simManager.agentsArray[i].attackingFrameCounter / (float)simManager.agentsArray[i].attackAnimDuration);
+                    critterSimDataArray[i].biteAnimCycle = simManager.agentsArray[i].attackAnimCycle;
+                    //Mathf.Clamp01((float)simManager.agentsArray[i].attackingFrameCounter / (float)simManager.agentsArray[i].attackAnimDuration);
                 }
                 if (simManager.agentsArray[i].curLifeStage != Agent.AgentLifeStage.Mature)
                 {

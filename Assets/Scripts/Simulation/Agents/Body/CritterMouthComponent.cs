@@ -4,7 +4,6 @@ public class CritterMouthComponent : MonoBehaviour {
 
     public Agent agentRef;
     public int agentIndex = -1;
-    
 
     public Vector2 mouthTriggerSize;
     
@@ -35,21 +34,8 @@ public class CritterMouthComponent : MonoBehaviour {
      */  
     public CircleCollider2D triggerCollider;
 
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
-
     public void Tick() {
         agentRef.coreModule.isMouthTrigger[0] = 0f;
-
-        
-        
         /*else
         {
             bitingFrameCounter = 0; // needed?
@@ -201,9 +187,9 @@ public class CritterMouthComponent : MonoBehaviour {
         
         // Credit food:
         //float flow = preyAgent.sizePercentage * (preyAgent.fullSizeBoundingBox.x + preyAgent.fullSizeBoundingBox.z) * preyAgent.fullSizeBoundingBox.y * 0.5f; // + preyAgent.coreModule.stomachContents;
-        //agentRef.EatFoodMeat(flow); // assumes all foodAmounts are equal !! *****  
-        
+        //agentRef.EatFoodMeat(flow); // assumes all foodAmounts are equal !! *****    
     }
+    
     private void ProcessPredatorySwallowAttempt(Agent predatorAgent, Agent preyAgent)
     {
         // add boolean check here? possibly attempting to swallow multiple things?
@@ -215,7 +201,6 @@ public class CritterMouthComponent : MonoBehaviour {
         {
             preyAgent.InitiateBeingSwallowed(predatorAgent);            
             predatorAgent.InitiateSwallowingPrey(preyAgent);
-
         }
     }
     private void SwallowEggSackWhole(EggSack eggSack) {
@@ -226,7 +211,7 @@ public class CritterMouthComponent : MonoBehaviour {
 
         agentRef.candidateRef.performanceData.totalFoodEatenEgg += flow;
         agentRef.EatFoodDecay(flow);
-        agentRef.RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Egg! (" + flow.ToString() + ")", 1f);
+        agentRef.RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Egg! (" + flow + ")", 1f);
         eggSack.ConsumedByPredatorAgent();
     }
     private void BiteDamageAnimal(Agent preyAgent, float ownBiteArea, float targetArea) {
@@ -242,7 +227,7 @@ public class CritterMouthComponent : MonoBehaviour {
         agentRef.coreModule.energy += 5f;
 
         preyAgent.ProcessBiteDamageReceived(damage, agentRef);
-        agentRef.RegisterAgentEvent(UnityEngine.Time.frameCount, "Bit Vertebrate! (" + damage.ToString() + ") candID: " + preyAgent.candidateRef.candidateID.ToString(), 1f);
+        agentRef.RegisterAgentEvent(UnityEngine.Time.frameCount, "Bit Vertebrate! (" + damage + ") candID: " + preyAgent.candidateRef.candidateID.ToString(), 1f);
         //if(agentRef.coreModule.foodEfficiencyMeat > 0.5f) { // ** // damage bonus -- provided has the required specialization level:::::
         //    agentRef.GainExperience(damage * 0.5f);  
         //}
@@ -280,7 +265,7 @@ public class CritterMouthComponent : MonoBehaviour {
         agentRef.candidateRef.performanceData.totalFoodEatenEgg += flowR;
 
         agentRef.EatFoodMeat(flowR); // assumes all foodAmounts are equal !! *****
-        agentRef.RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Egg Bit! (" + flowR.ToString() + ")", 1f);
+        agentRef.RegisterAgentEvent(Time.frameCount, "Ate Egg Bit! (" + flowR + ")", 1f);
         //Debug.Log("BiteEggsack [" + agentRef.index.ToString() + "] ---> [" + eggSack.index.ToString() + "] " + agentRef.totalFoodEatenEgg.ToString());
     }
     public void BiteCorpseFood(Agent corpseAgent, float ownBiteArea)
@@ -291,7 +276,7 @@ public class CritterMouthComponent : MonoBehaviour {
 
         agentRef.candidateRef.performanceData.totalFoodEatenCorpse += flow;
         agentRef.EatFoodDecay(flowR); // assumes all foodAmounts are equal !! *****
-        agentRef.RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Carrion! (" + flowR.ToString() + ")", 1f);
+        agentRef.RegisterAgentEvent(Time.frameCount, "Ate Carrion! (" + flowR + ")", 1f);
         //if(agentRef.coreModule.foodEfficiencyMeat > 0.5f) { // ** // damage bonus -- provided has the required specialization level:::::
         //    agentRef.GainExperience((flowR / agentRef.coreModule.stomachCapacity) * 0.5f);  
         //}        
@@ -314,13 +299,12 @@ public class CritterMouthComponent : MonoBehaviour {
         } 
 
         if(isFeeding) {
-            //if(feedingFrameCounter == feedAnimDuration / 2) {  // is the current frame the Damage-Frame?
+            // is the current frame the Damage-Frame?
+            if(agentRef.feedingFrameCounter == agentRef.feedAnimDuration / 2 && !agentRef.isDead) {
+               //agentRef.curLifeStage != Agent.AgentLifeStage.Dead) {  
                 // if so, BITE!!
-                if(agentRef.curLifeStage != Agent.AgentLifeStage.Dead)
-                {
-                    ActiveFeedBiteCheck(collider);
-                }               
-            //}
+                ActiveFeedBiteCheck(collider);              
+            }
         }
         else {
             if(collider.gameObject.CompareTag("HazardCollider")) {
@@ -331,23 +315,20 @@ public class CritterMouthComponent : MonoBehaviour {
             }                
         }
 
-        if(isAttacking) {
-            if(agentRef.attackingFrameCounter == agentRef.attackAnimDuration / 2) {  // is the current frame the Damage-Frame?
-                // if so, BITE!!
-                if(agentRef.curLifeStage != Agent.AgentLifeStage.Dead)
-                {
-                    ActiveAttackBiteCheck(collider);
-                }               
-            }
+        // WPP: simplified conditionals with AND logic and getter in agentRef
+        if(isAttacking && agentRef.isAttackBiteFrame && !agentRef.isDead) {
+            ActiveAttackBiteCheck(collider);              
         }
-        else {
+        
+        // WPP: removed, no purpose
+        /*else {
             if(collider.gameObject.CompareTag("HazardCollider")) {
 
             }
             else {
                 //AttemptInitiateActiveAttackBite();
             }                
-        }
+        }*/
 
         /*if(isPassive) {
             PassiveBiteCheck(collider);
@@ -357,15 +338,14 @@ public class CritterMouthComponent : MonoBehaviour {
             
         }*/
     }
+    
     private void OnTriggerEnter2D(Collider2D collider) {
-        TriggerCheck(collider);
-        
+        TriggerCheck(collider);  
     }
+    
     private void OnTriggerStay2D(Collider2D collider) {
         TriggerCheck(collider); 
     }
-
-
 
     /*public void Bite() {
         // BITING:
@@ -460,7 +440,5 @@ public class CritterMouthComponent : MonoBehaviour {
         segment.agentRef.coreModule.healthExternal -= damage;
 
     }
-
     */
-
 }
