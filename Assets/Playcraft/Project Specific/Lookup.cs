@@ -80,7 +80,7 @@ public class Lookup : ScriptableObject
       	  	if (item.id == id)
       	  	  	return item.value;
 	
-	    Debug.LogError("Unable to find resolution " + id);
+	    Debug.LogError("Unable to find cause of death " + id);
         return causesOfDeath[0].value;
     }
     

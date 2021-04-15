@@ -4,6 +4,11 @@ using UnityEngine.UI;
 
 public class SpeciesGraphPanelUI : MonoBehaviour
 {
+    SimulationManager simulationManager => SimulationManager.instance;
+    MasterGenomePool masterGenomePool => simulationManager.masterGenomePool;
+
+    [SerializeField] GameObject graphPanelGO;
+
     public Texture2D statsSpeciesColorKey;
     private int maxDisplaySpecies = 32;  // **** WILL BECOME A PROBLEM!!!! ****
     public Texture2D[] statsTreeOfLifeSpeciesTexArray;
@@ -18,8 +23,7 @@ public class SpeciesGraphPanelUI : MonoBehaviour
     public Text textGraphStatsLeft;
     public Text textGraphStatsCenter;
     public Text textGraphStatsRight;
-
-    public GameObject graphPanelGO;
+    
     public Image speciesGraphImage;
     public Material speciesGraphMatLeft;
     public Material speciesGraphMatCenter;
@@ -34,8 +38,7 @@ public class SpeciesGraphPanelUI : MonoBehaviour
         DigestSpec
     }
 
-    SimulationManager simulationManager => SimulationManager.instance;
-    MasterGenomePool masterGenomePool => simulationManager.masterGenomePool;
+    
 
 
     void Start () {
@@ -443,7 +446,11 @@ public class SpeciesGraphPanelUI : MonoBehaviour
         speciesGraphImage.gameObject.SetActive(false);
         speciesGraphImage.gameObject.SetActive(true);
 
-        graphPanelGO.gameObject.SetActive(false);
-        graphPanelGO.gameObject.SetActive(true);
+        //graphPanelGO.gameObject.SetActive(false);
+        //graphPanelGO.gameObject.SetActive(true);
+    }
+
+    public void Set(bool value) {
+        graphPanelGO.SetActive(value);
     }
 }

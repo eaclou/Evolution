@@ -8,6 +8,8 @@ public class PredatorModule : MonoBehaviour {
     public MeshRenderer meshRendererBeauty;
     public MeshRenderer meshRendererFluidCollider;
 
+    //***EAC - this class is no longer used
+
     //private float speed = 250f;
 
     private float damage = 0.55f;
@@ -72,13 +74,14 @@ public class PredatorModule : MonoBehaviour {
         prevPos = curPos;
     }
 
-    private void AttackAgent(Agent agent) {        
-        agent.coreModule.hitPoints[0] -= damage;
+    private void AttackAgent(Agent agent) {
+        
+        agent.TakeDamage(damage);
 
         // currently no distinctionbetween regions:
-        agent.coreModule.healthHead -= damage;
-        agent.coreModule.healthBody -= damage;
-        agent.coreModule.healthExternal -= damage;
+        //agent.coreModule.healthHead -= damage;
+        //agent.coreModule.healthBody -= damage;
+        //agent.coreModule.healthExternal -= damage;
     }
     
     // *** Eventually look into explicitly ordering these Scripts Execution Order for OnCollision Monobehaviors (like Agents & Food) *****

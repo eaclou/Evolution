@@ -30,7 +30,7 @@ public class AllSpeciesTreePanelUI : MonoBehaviour
         imageSelectedSpeciesBG.color = new Color(hue.x, hue.y, hue.z);
         textSelectedSpeciesTitle.color = Color.white; // new Color(hue.x, hue.y, hue.z);
 
-        if(simulationManager.simAgeTimeSteps % 177 == 275) {
+        if(simulationManager.simAgeTimeSteps % 77 == 7) {
             UpdateSpeciesListBars();
         }
     }

@@ -29,28 +29,11 @@ public class WidgetAgentStatus : MonoBehaviour {
     public void UpdateBars(float health, float energy, float food, float mass, float stamina) {
         imageHealth.gameObject.transform.localScale = new Vector3(1f, health, 1f);
         textValHealth.text = (health * 100f).ToString("F0");
-        /*if(health < 0.33f) {
-            imageHealth.color = Color.red;
-        }
-        else if(health > 0.66f) {
-            imageHealth.color = Color.green;
-        }
-        else {
-            imageHealth.color = Color.yellow;
-        }
-        */
-        float energyCapped = Mathf.Clamp01(energy * 0.167f);
+        
+        float energyCapped = Mathf.Clamp01(energy * 0.1f); //***EC refactor how energy works
         imageEnergy.gameObject.transform.localScale = new Vector3(1f, energyCapped, 1f);
         textValEnergy.text = energy.ToString("F0");
-        /*if(energyCapped < 0.33f) {
-            imageEnergy.color = Color.red;
-        }
-        else if(energyCapped > 0.66f) {
-            imageEnergy.color = Color.green;
-        }
-        else {
-            imageEnergy.color = Color.yellow;
-        }*/
+        
         imageFood.gameObject.transform.localScale = new Vector3(1f, food, 1f);
         textValFood.text = (food * 100f).ToString("F0");
 

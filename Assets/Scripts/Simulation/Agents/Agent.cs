@@ -29,7 +29,7 @@ public class Agent : MonoBehaviour {
     public bool isFeeding = false;
     public bool isAttacking = false;    
 
-    public int feedAnimDuration = 30;
+    public int feedAnimDuration = 30;  //***EC eventually move these into creature genome, make variable
     public int feedAnimCooldown = 30;
     public int attackAnimDuration = 40;
     public int attackAnimCooldown = 75;
@@ -359,7 +359,7 @@ public class Agent : MonoBehaviour {
     
     // HEALTH FAILURE:
     public void CheckForDeathHealth() {
-        if (coreModule.healthBody > 0f)
+        if (coreModule.health > 0f)
             return;
         
         coreModule.SetAllHealth(0f);
@@ -535,13 +535,9 @@ public class Agent : MonoBehaviour {
     }
     
     public void TakeDamage(float damage) {
-        coreModule.DirectDamageToRandomBodyPart(damage);
-        coreModule.hitPoints[0] = coreModule.health / 3f;
-
+        coreModule.DirectDamage(damage);        
         candidateRef.performanceData.totalDamageTaken += damage;
-
         RegisterAgentEvent(Time.frameCount, "Took Damage! (" + damage + ")", 0f);
-
         CheckForDeathHealth();
     }
     
@@ -1167,7 +1163,7 @@ public class Agent : MonoBehaviour {
         }*/
 
         float fatigueMultiplier = Mathf.Clamp01(coreModule.energy * 5f + 0.05f); // * Mathf.Clamp01(coreModule.stamina[0] * 4f + 0.05f);
-        float lowHealthPenalty = Mathf.Clamp01(coreModule.healthBody * 5f) * 0.5f + 0.5f;
+        float lowHealthPenalty = Mathf.Clamp01(coreModule.health * 5f) * 0.5f + 0.5f;
         fatigueMultiplier *= lowHealthPenalty;
         
         turningAmount = Mathf.Lerp(turningAmount, bodyRigidbody.angularVelocity * Mathf.Deg2Rad * 0.03f, 0.28f);

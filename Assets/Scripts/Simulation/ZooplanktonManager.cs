@@ -93,8 +93,8 @@ public class ZooplanktonManager {
         animalParticlesCBufferSwap = new ComputeBuffer(numAnimalParticles, GetAnimalParticleDataSize());
         AnimalParticleData[] animalParticlesArray = new AnimalParticleData[numAnimalParticles];
 
-        float minParticleSize = 0.1f; // settingsRef.avgAnimalParticleRadius / settingsRef.animalParticleRadiusVariance;
-        float maxParticleSize = 0.2f; // settingsRef.avgAnimalParticleRadius * settingsRef.animalParticleRadiusVariance;
+        float minParticleSize = 1f; // settingsRef.avgAnimalParticleRadius / settingsRef.animalParticleRadiusVariance;
+        float maxParticleSize = 2f; // settingsRef.avgAnimalParticleRadius * settingsRef.animalParticleRadiusVariance;
 
         for(int i = 0; i < animalParticlesCBuffer.count; i++) {
             AnimalParticleData data = new AnimalParticleData();

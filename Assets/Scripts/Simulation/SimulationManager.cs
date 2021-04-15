@@ -855,11 +855,11 @@ public class SimulationManager : Singleton<SimulationManager>
                     }
                     damage *= defendBonus;
 
-                    agentsArray[i].coreModule.hitPoints[0] -= damage;
+                    //agentsArray[i].coreModule.hitPoints[0] -= damage;
                     // currently no distinctionbetween regions:
-                    agentsArray[i].coreModule.healthHead -= damage;
-                    agentsArray[i].coreModule.healthBody -= damage;
-                    agentsArray[i].coreModule.healthExternal -= damage;
+                    //agentsArray[i].coreModule.healthHead -= damage;  //***EAC Handled inside TakeDamage() func!!!
+                    //agentsArray[i].coreModule.healthBody -= damage;
+                    //agentsArray[i].coreModule.healthExternal -= damage;
 
                     agentsArray[i].candidateRef.performanceData.totalDamageTaken += damage;
 

@@ -19,11 +19,12 @@ public class CritterModuleCore {
     //    get => _energy;
     //    set => Mathf.Clamp(_energy + value, 0f, 1000000f); // ***EC  REVISIT!!!!  use integers?
     //}
-    
+
+    public float health = 1f;
     //public float stamina = 1f;
-    public float healthHead = 1f;
-    public float healthBody = 1f;
-    public float healthExternal = 1f;
+    //public float healthHead = 1f;
+    //public float healthBody = 1f;
+    //public float healthExternal = 1f;
 
     // *** WPP: mixed metaphor -> is this defined as the total contents / capacity
     // or a number that can be incremented independently?
@@ -100,7 +101,7 @@ public class CritterModuleCore {
     public float foodEfficiencyDecay;
     public float foodEfficiencyMeat;
     
-    public float health => healthHead + healthBody + healthExternal;
+    //public float health => healthHead + healthBody + healthExternal;
 
     public float stomachSpace => stomachCapacity - totalStomachContents;
     public float totalStomachContents => stomachContentsPlant + stomachContentsMeat + stomachContentsDecay;
@@ -125,13 +126,11 @@ public class CritterModuleCore {
     
     public void Regenerate(float healRate, float energyToHealth)
     {
-        if (healthBody >= 1f)
+        if (health >= 1f)
             return;
     
-        healthBody += healRate;
-        healthHead += healRate;
-        healthExternal += healRate;
-        energy -= healRate / energyToHealth;
+        health += healRate;
+        energy -= healRate / energyToHealth; //***EC note to self - is this correct functionality?
     }
 
 	public CritterModuleCore(CritterModuleCoreGenome genome, Agent agent) {
@@ -262,13 +261,13 @@ public class CritterModuleCore {
         isContact[0] = 0f;
         contactForceX[0] = 0f;
         contactForceY[0] = 0f;
-        hitPoints[0] = Mathf.Max(healthBody, 0f);
+        hitPoints[0] = Mathf.Max(health, 0f);
         //stamina[0] = stamina; // set in Agent.cs
         energyStored[0] = Mathf.Clamp01(energy * 0.001f);  // Mathf.Clamp01(energyRaw / maxEnergyStorage);
         foodStored[0] = stomachContentsPercent; // / stomachCapacity;
     }
     
-    public void DirectDamageToRandomBodyPart(float damage)
+    /*public void DirectDamageToRandomBodyPart(float damage)
     {
         int rand = Random.Range(0, 3);
         
@@ -278,20 +277,25 @@ public class CritterModuleCore {
             case 1: healthBody -= damage; break;
             default: healthExternal -= damage; break;
         }
+    }*/
+
+    public void DirectDamage(float damage) {
+        health -= damage;
     }
     
-    public void DistributeDamage(float damage)
+    /*public void DistributeDamage(float damage)
     {
-        //coreModule.healthHead -= damage * UnityEngine.Random.Range(0f, 1f);
-        //coreModule.healthBody -= damage * UnityEngine.Random.Range(0f, 1f);
-        //coreModule.healthExternal -= damage * UnityEngine.Random.Range(0f, 1f);
-    }
+        coreModule.healthHead -= damage * UnityEngine.Random.Range(0f, 1f);
+        coreModule.healthBody -= damage * UnityEngine.Random.Range(0f, 1f);
+        coreModule.healthExternal -= damage * UnityEngine.Random.Range(0f, 1f);
+    }*/
     
     public void SetAllHealth(float value)
     {
-        hitPoints[0] = value;
-        healthHead = value;
-        healthBody = value;
-        healthExternal = value;
+        health = value;
+        //hitPoints[0] = value;
+        //healthHead = value;
+        //healthBody = value;
+        //healthExternal = value;
     }
 }
