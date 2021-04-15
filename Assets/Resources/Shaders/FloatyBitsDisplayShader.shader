@@ -79,8 +79,8 @@
 				float randomValue = rand(float2(inst, randomAspect * 10));
 				float randomScale = lerp(0.75, 1.4, random2) * 0.6;
 				
-				float2 dir = normalize(velocity);
-				float2 scale = float2(0.095 * randomAspect, 0.15 * (1.0 / randomAspect)) * randomScale; //float2(randomAspect * randomScale, (1.0 / randomAspect) * randomScale * (length(velocity) * 25 + 1.61));
+				float2 dir = float2(0,1); // normalize(velocity);
+				float2 scale = 1.4 * float2(0.095 * randomAspect, 0.15 * (1.0 / randomAspect)) * randomScale; //float2(randomAspect * randomScale, (1.0 / randomAspect) * randomScale * (length(velocity) * 25 + 1.61));
 				//scale.y *= (1.0 + velMag * 10.0);
 				quadPoint *= float3(scale, 1.0); // * (_CamDistNormalized * 0.98 + 0.02); 
 
@@ -104,10 +104,10 @@
 				float waveHeight = waterSurfaceData.x * isUnderwaterMask;
 
 				
-				float seaFloorAltitude = -altitudeRaw * _MaxAltitude;
-				float waterAltitude = -(_GlobalWaterLevel + waveHeight * 0.152) * _MaxAltitude; 
-				worldPosition.z = min(seaFloorAltitude, waterAltitude);
-				
+				//float seaFloorAltitude = -altitudeRaw * _MaxAltitude;
+				//float waterAltitude = -(_GlobalWaterLevel + waveHeight * 0.152) * _MaxAltitude; 
+				//worldPosition.z = min(seaFloorAltitude, waterAltitude);
+				worldPosition.z = -max(_GlobalWaterLevel, altitudeRaw) * _MaxAltitude;
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(rotatedPoint, 0.0f));
 				float brightness = (random1);
 				dotLight *= brightness;
@@ -119,8 +119,8 @@
 
 			fixed4 frag(v2f i) : SV_Target
 			{
-				//return float4(0,0,0,1);
-				return float4(-0.21,-0.71,-0.91,0.1);
+				return float4(0.4,1,0.7,1);
+				//return float4(0.21,0.71,0.91,0.1);
 
 				float4 texColor = tex2D(_MainTex, i.uv);  // Read Brush Texture
 				//return texColor;

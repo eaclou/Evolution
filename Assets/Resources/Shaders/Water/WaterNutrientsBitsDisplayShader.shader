@@ -118,7 +118,7 @@
 				float bonusAmplitude = saturate(resourceGridSample.x * 1.5);//  cos((float)inst * 91204.119273 + _Time.y * 70.9128397) * 0.5 + 0.5;
 				bonusAmplitude = bonusAmplitude * bonusAmplitude;  // carve out
 
-				float sizeNorm = _CamDistNormalized * (0.5 + bonusAmplitude * 0.5) * 0.7 * alpha;
+				float sizeNorm = _CamDistNormalized * (0.5 + bonusAmplitude * 0.5) * 0.57 * alpha;
 				scale = float2(sizeNorm, sizeNorm);
 				quadPoint *= float3(scale, 1.0); // * (0.2 + _NutrientDensity * 0.175) * (_CamDistNormalized * 0.85 + 0.15);
 				
@@ -185,6 +185,8 @@
 
 			fixed4 frag(v2f i) : SV_Target
 			{
+				
+				return float4(1,1,0,1);
 				
 				float debugVal = i.color.y;
 				float4 finalColor = tex2D(_MainTex, i.quadUV);

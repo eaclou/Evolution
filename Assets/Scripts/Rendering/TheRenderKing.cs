@@ -457,7 +457,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     private void InitializeBuffers() {  // primary function -- calls sub-functions for initializing each buffer
 
         InitializeQuadMeshBuffer(); // Set up Quad Mesh billboard for brushStroke rendering            
-        //InitializeCurveRibbonMeshBuffer(); // Set up Curve Ribbon Mesh billboard for brushStroke rendering
+        InitializeCurveRibbonMeshBuffer(); // Set up Curve Ribbon Mesh billboard for brushStroke rendering
         //InitializeWaterSplineMeshBuffer(); // same for water splines
         InitializeFluidRenderMesh();
         //InitializeBodySwimAnimMeshBuffer(); // test movementAnimation
@@ -556,7 +556,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
         //spiritBrushQuadDataSpawnCBuffer.Release();
     }
-    /*
+    
     private void InitializeCurveRibbonMeshBuffer() {
         
         float rowSize = 1f / (float)numCurveRibbonQuads;
@@ -578,6 +578,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
         curveRibbonVerticesCBuffer.SetData(verticesArray);
     }
+    /*
     private void InitializeWaterSplineMeshBuffer() {
         
         float rowSize = 1f / (float)numWaterSplineMeshQuads;
@@ -598,8 +599,8 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         }
 
         waterSplineVerticesCBuffer.SetData(verticesArray);
-    }
-    */
+    }*/
+    
     private void InitializeQuadMeshBuffer() {
         quadVerticesCBuffer = new ComputeBuffer(6, sizeof(float) * 3);
         quadVerticesCBuffer.SetData(new[] {
@@ -3385,7 +3386,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
 
 
-            if (simManager.trophicLayersManager.GetAgentsOnOff()) {
+            //if (simManager.trophicLayersManager.GetAgentsOnOff()) {
                 /*critterUberStrokeShadowMat.SetPass(0);
                 critterUberStrokeShadowMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
                 critterUberStrokeShadowMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
@@ -3421,7 +3422,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                         //cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID);
                         cmdBufferMain.DrawProcedural(Matrix4x4.identity, eggSackShadowDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.eggDataCBuffer.count);
                 */
-            }
+            //}
 
             /*if(!simManager.uiManager.tolInspectOn) {
                 critterInspectHighlightMat.SetPass(0);
@@ -3478,28 +3479,6 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                 }
             }*/
 
-            if (true) { //simManager.trophicLayersManager.GetAlgaeOnOff()) {
-
-                //float isSelected = 0f;            
-                //float isHover = 0f;
-                /*if(simManager.trophicLayersManager.selectedTrophicSlotRef.kingdomID == 1) {
-                    if(simManager.trophicLayersManager.selectedTrophicSlotRef.tierID == 1) {
-                        if(simManager.uiManager.curActiveTool == UIManager.ToolType.None) {
-                            isHover = 1f;
-                            if(simManager.vegetationManager.isPlantParticleSelected) {                
-                                isSelected = 1f;                
-                            }
-                            else {
-                                simManager.vegetationManager.isPlantParticleSelected = false;
-                                simManager.uiManager.StopFollowingPlantParticle();
-                            }
-                        }
-                        else {
-                            simManager.vegetationManager.isPlantParticleSelected = false;
-                            simManager.uiManager.StopFollowingPlantParticle();
-                        }
-                    }
-                }*/
                 /*
                     // floating plants  shadows:
                     plantParticleShadowDisplayMat.SetPass(0);
@@ -3529,41 +3508,33 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                     cmdBufferMain.DrawProcedural(Matrix4x4.identity, plantParticleShadowDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, simManager.vegetationManager.plantParticlesCBuffer.count * 32);
             */
 
-                float camDistHighlightDeleteLater = baronVonWater.camDistNormalized;
-                if (simManager.uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.kingdomID == 1 && simManager.uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.tierID == 1) {
+            plantParticleDisplayMat.SetPass(0);
+            plantParticleDisplayMat.SetBuffer("plantParticleDataCBuffer", simManager.vegetationManager.plantParticlesCBuffer);
+            plantParticleDisplayMat.SetBuffer("quadVerticesCBuffer", curveRibbonVerticesCBuffer);
+            plantParticleDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
+            plantParticleDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+            plantParticleDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
+            plantParticleDisplayMat.SetTexture("_ResourceGridTex", simManager.vegetationManager.resourceGridRT1);
+            plantParticleDisplayMat.SetTexture("_SpiritBrushTex", spiritBrushRT);
+            plantParticleDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+            plantParticleDisplayMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
+            plantParticleDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);
+            plantParticleDisplayMat.SetFloat("_MinFog", minimumFogDensity);
+            plantParticleDisplayMat.SetInt("_SelectedParticleIndex", Mathf.RoundToInt(simManager.vegetationManager.selectedPlantParticleIndex));
+            plantParticleDisplayMat.SetInt("_HoverParticleIndex", Mathf.RoundToInt(simManager.vegetationManager.closestPlantParticleData.index));
+            //Debug.Log("_SelectedParticleIndex: " + Mathf.RoundToInt(simManager.vegetationManager.selectedPlantParticleIndex).ToString() + ", _HoverParticleIndex: " + Mathf.RoundToInt(simManager.vegetationManager.closestPlantParticleData.index).ToString());
+            plantParticleDisplayMat.SetFloat("_IsSelected", isSelectedPlant); // isSelected);
+            plantParticleDisplayMat.SetFloat("_IsHover", simManager.uiManager.isPlantParticleHighlight * isHighlight); // isHighlight); // isHover);
+            plantParticleDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
+            plantParticleDisplayMat.SetVector("_FogColor", simManager.fogColor);
+            plantParticleDisplayMat.SetVector("_SunDir", sunDirection);
+            plantParticleDisplayMat.SetVector("_WorldSpaceCameraPosition", new Vector4(mainRenderCam.transform.position.x, mainRenderCam.transform.position.y, mainRenderCam.transform.position.z, 0f));
 
-                }
-                else {
-                    camDistHighlightDeleteLater = Mathf.Clamp(camDistHighlightDeleteLater, 0f, 0.1f);
-                }
-                //if(simManager.trophicLayersManager.GetAlgaeOnOff()) {
-                plantParticleDisplayMat.SetPass(0);
-                plantParticleDisplayMat.SetBuffer("plantParticleDataCBuffer", simManager.vegetationManager.plantParticlesCBuffer);
-                plantParticleDisplayMat.SetBuffer("quadVerticesCBuffer", curveRibbonVerticesCBuffer);
-                plantParticleDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
-                plantParticleDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-                plantParticleDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
-                plantParticleDisplayMat.SetTexture("_ResourceGridTex", simManager.vegetationManager.resourceGridRT1);
-                plantParticleDisplayMat.SetTexture("_SpiritBrushTex", spiritBrushRT);
-                plantParticleDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
-                plantParticleDisplayMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
-                plantParticleDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);
-                plantParticleDisplayMat.SetFloat("_MinFog", minimumFogDensity);
-                plantParticleDisplayMat.SetInt("_SelectedParticleIndex", Mathf.RoundToInt(simManager.vegetationManager.selectedPlantParticleIndex));
-                plantParticleDisplayMat.SetInt("_HoverParticleIndex", Mathf.RoundToInt(simManager.vegetationManager.closestPlantParticleData.index));
-                //Debug.Log("_SelectedParticleIndex: " + Mathf.RoundToInt(simManager.vegetationManager.selectedPlantParticleIndex).ToString() + ", _HoverParticleIndex: " + Mathf.RoundToInt(simManager.vegetationManager.closestPlantParticleData.index).ToString());
-                plantParticleDisplayMat.SetFloat("_IsSelected", isSelectedPlant); // isSelected);
-                plantParticleDisplayMat.SetFloat("_IsHover", simManager.uiManager.isPlantParticleHighlight * isHighlight); // isHighlight); // isHover);
-                plantParticleDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
-                plantParticleDisplayMat.SetVector("_FogColor", simManager.fogColor);
-                plantParticleDisplayMat.SetVector("_SunDir", sunDirection);
-                plantParticleDisplayMat.SetVector("_WorldSpaceCameraPosition", new Vector4(mainRenderCam.transform.position.x, mainRenderCam.transform.position.y, mainRenderCam.transform.position.z, 0f));
-
-                plantParticleDisplayMat.SetFloat("_CamDistNormalized", camDistHighlightDeleteLater);
-                cmdBufferMain.DrawProcedural(Matrix4x4.identity, plantParticleDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, simManager.vegetationManager.plantParticlesCBuffer.count * 32);
+            plantParticleDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
+            cmdBufferMain.DrawProcedural(Matrix4x4.identity, plantParticleDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, simManager.vegetationManager.plantParticlesCBuffer.count * 32);
 
                 //}
-            }
+            
 
             // STIR STICK!!!!
             /*
@@ -3626,38 +3597,27 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             }
             */
 
-            if (simManager.trophicLayersManager.GetZooplanktonOnOff()) {
+            //if (simManager.trophicLayersManager.GetZooplanktonOnOff()) {
 
-                float camDistHighlightDeleteLater = baronVonWater.camDistNormalized;
-                if (simManager.uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.kingdomID == 2 && simManager.uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.tierID == 0) {
+            // add shadow pass eventually
+            animalParticleDisplayMat.SetPass(0);
+            animalParticleDisplayMat.SetBuffer("animalParticleDataCBuffer", simManager.zooplanktonManager.animalParticlesCBuffer);
+            animalParticleDisplayMat.SetBuffer("quadVerticesCBuffer", curveRibbonVerticesCBuffer);
+            animalParticleDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+            animalParticleDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
+            animalParticleDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
+            animalParticleDisplayMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
+            animalParticleDisplayMat.SetInt("_SelectedParticleIndex", Mathf.RoundToInt(simManager.zooplanktonManager.selectedAnimalParticleIndex));
+            animalParticleDisplayMat.SetInt("_ClosestParticleID", Mathf.RoundToInt(simManager.zooplanktonManager.closestZooplanktonToCursorIndex));
+            animalParticleDisplayMat.SetFloat("_IsSelected", isSelectedZoop);// isSelectedA);
+            animalParticleDisplayMat.SetFloat("_IsHover", simManager.uiManager.isZooplanktonHighlight * isHighlight); // isHighlight); // isHoverA); // isHoverA);
+            animalParticleDisplayMat.SetFloat("_IsHighlight", simManager.uiManager.isZooplanktonHighlight * isHighlight); // isHighlight); // isHighlight);
+            animalParticleDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+            animalParticleDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
+            animalParticleDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized); 
+            cmdBufferMain.DrawProcedural(Matrix4x4.identity, animalParticleDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, simManager.zooplanktonManager.animalParticlesCBuffer.count);
 
-                }
-                else {
-                    camDistHighlightDeleteLater = Mathf.Clamp(camDistHighlightDeleteLater, 0f, 0.1f);
-                }
-                // add shadow pass eventually
-                animalParticleDisplayMat.SetPass(0);
-                animalParticleDisplayMat.SetBuffer("animalParticleDataCBuffer", simManager.zooplanktonManager.animalParticlesCBuffer);
-                animalParticleDisplayMat.SetBuffer("quadVerticesCBuffer", curveRibbonVerticesCBuffer);
-                animalParticleDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-                animalParticleDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
-                animalParticleDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
-                //int selectedParticleIndex = (int)simManager.zooplanktonManager.closestAnimalParticlesDataArray[simManager.cameraManager.targetAgentIndex].index;
-                //animalParticleDisplayMat.SetInt("_SelectedParticleIndex", selectedParticleIndex); // Mathf.RoundToInt(simManager.zooplanktonManager.closestZooplanktonArray[0].x));  // Here goes nothing....
-                animalParticleDisplayMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
-                animalParticleDisplayMat.SetInt("_SelectedParticleIndex", Mathf.RoundToInt(simManager.zooplanktonManager.selectedAnimalParticleIndex));
-                animalParticleDisplayMat.SetInt("_ClosestParticleID", Mathf.RoundToInt(simManager.zooplanktonManager.closestZooplanktonToCursorIndex));
-
-                animalParticleDisplayMat.SetFloat("_IsSelected", isSelectedZoop);// isSelectedA);
-                animalParticleDisplayMat.SetFloat("_IsHover", simManager.uiManager.isZooplanktonHighlight * isHighlight); // isHighlight); // isHoverA); // isHoverA);
-                animalParticleDisplayMat.SetFloat("_IsHighlight", simManager.uiManager.isZooplanktonHighlight * isHighlight); // isHighlight); // isHighlight);
-                animalParticleDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
-                animalParticleDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
-                animalParticleDisplayMat.SetFloat("_CamDistNormalized", camDistHighlightDeleteLater); // baronVonWater.camDistNormalized);
-
-                cmdBufferMain.DrawProcedural(Matrix4x4.identity, animalParticleDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, simManager.zooplanktonManager.animalParticlesCBuffer.count);
-
-            }
+            //}
 
             if (simManager.trophicLayersManager.GetAgentsOnOff()) {
 
