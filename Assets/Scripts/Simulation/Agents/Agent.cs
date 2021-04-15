@@ -175,16 +175,11 @@ public class Agent : MonoBehaviour {
         // temp fix for delayed spawning of Agents (leading to nullReferenceExceptions)
         //agentWidthsArray = new float[widthsTexResolution];
         isInert = true;
-        
-        // WPP: initialized in declaration to eliminate possibility of race condition
-        //agentEventDataList = new List<AgentEventData>();  // created once
     }
     
-    // WPP 4/9: cut verbosity with declarative style (optional if not repeated often)
     bool isDead => curLifeStage == AgentLifeStage.Dead;
     bool isEgg => curLifeStage == AgentLifeStage.Egg;
 
-    // WPP 4/9: simplified conditionals and added error condition
     public float GetDecayPercentage() {
         if (biomassAtDeath == 0f) {
             Debug.LogError("Biomass at death zero for " + index);
@@ -196,20 +191,10 @@ public class Agent : MonoBehaviour {
         }
     
         float percentage = 1f - currentBiomass / biomassAtDeath;
-                
-        /*if (curLifeStage == AgentLifeStage.Dead) {
-            if(biomassAtDeath == 0f) {
-                Debug.LogError("AAAHH" + index.ToString());
-            }
-            else {
-                percentage = 1f - (currentBiomass / biomassAtDeath);
-            }
-        }*/
         
         return Mathf.Clamp01(percentage);
     }
 
-    // WPP: early exit instead of if-else, added warning
     public void AttemptInitiateActiveFeedBite() {
         if (isFeeding) {
             //Debug.LogWarning("Already feeding, no need to initiate feed bite"); //***EC
@@ -280,7 +265,6 @@ public class Agent : MonoBehaviour {
         candidateRef.performanceData.totalFoodEatenCreature += foodAmount;
 
         EatFoodMeat(foodAmount);
-        // WPP: .ToString() redundant on argument on concatenated string
         RegisterAgentEvent(Time.frameCount, "Ate Vertebrate! (" + foodAmount + ") candID: " + preyAgent.candidateRef.candidateID, 1f);
         preyAgent.ProcessBeingEaten(preyAgent.currentBiomass);
         
@@ -341,21 +325,9 @@ public class Agent : MonoBehaviour {
     }
     
     // STARVATION
-    // WPP: applied early-exit, replaced branching with ternaries
     private void CheckForDeathStarvation() {
         if (coreModule.energy > 0f)
             return;
-            
-        //RegisterAgentEvent(Time.frameCount, eventMessage, 0f);
-    
-        /*if(coreModule.stomachContentsNorm > 0.01f) {
-            stringCauseOfDeath = "Suffocated";
-            RegisterAgentEvent(Time.frameCount, "Suffocated! stomachContentsNorm: " + coreModule.stomachContentsNorm, 0f);
-        }
-        else {
-            stringCauseOfDeath = "Starved";
-            RegisterAgentEvent(Time.frameCount, "Starved!", 0f);
-        }*/
         
         if (coreModule.stomachEmpty)
             InitializeDeath(lookup.GetCauseOfDeath(CauseOfDeathId.Starved));
@@ -368,13 +340,7 @@ public class Agent : MonoBehaviour {
         if (coreModule.healthBody > 0f)
             return;
         
-        // WPP: delegated to coreModule (also, shouldn't this be part of InitializeDeath?)
         coreModule.SetAllHealth(0f);
-        
-        //coreModule.hitPoints[0] = 0f;
-        //coreModule.healthHead = 0f;
-        //coreModule.healthBody = 0f;
-        //coreModule.healthExternal = 0f;
 
         //Debug.LogError("CheckForDeathHealth" + currentBiomass.ToString());
 
@@ -397,7 +363,6 @@ public class Agent : MonoBehaviour {
     
     private void InitializeDeath(string causeOfDeath, string deathEvent) 
     {
-        // WPP: pulled functionality common to death from multiple calling sources  
         curLifeStage = AgentLifeStage.Dead;
         lifeStageTransitionTimeStepCounter = 0;
         candidateRef.causeOfDeath = causeOfDeath;
@@ -481,23 +446,17 @@ public class Agent : MonoBehaviour {
         candidateRef.RegisterCandidateEvent(frame, textString, goodness);        
     }
     
-    public void EatFoodPlant(float amount) {   
-      
-        //float stomachSpace = coreModule.stomachCapacity - coreModule.stomachContentsPlant - coreModule.stomachContentsMeat - coreModule.stomachContentsDecay;  // Make food Discrete???
-        
-        //if(amount > stomachSpace) {
-        //    amount = stomachSpace; // ??
-        //}
-        
-        // WPP: simplified with delegation and Mathf.Min
+    public void EatFoodPlant(float amount) {           
         amount = Mathf.Min(amount, coreModule.stomachSpace);
         
         //amount *= coreModule.foodEfficiencyPlant;
         coreModule.stomachContentsNorm += (amount / coreModule.stomachCapacity);
         
-        // WPP: needs comment
+        // *** delegate
+        // Put food in stomach
         // unusual that a different variable would increment than the one being checked
-        if(coreModule.stomachContentsPercent > 1f) {
+        // Consider clamping
+        if(coreModule.isFull) {
             //float overStuffAmount = coreModule.stomachContentsNorm - 1f;
             //ProcessDamageReceived(overStuffAmount);
             coreModule.stomachContentsNorm = 1f;            
@@ -516,13 +475,6 @@ public class Agent : MonoBehaviour {
     public void EatFoodMeat(float amount) {
         //totalFoodEatenZoop += amount; 
         
-        // WPP: delegated calculation to coreModule
-        //float stomachSpace = coreModule.stomachCapacity - coreModule.stomachContentsPlant - coreModule.stomachContentsMeat - coreModule.stomachContentsDecay;
-        
-        // WPP: simplify with Mathf.Min        
-        //if(amount > coreModule.stomachSpace) {
-        //    amount = coreModule.stomachSpace; 
-        //}
         amount = Mathf.Min(amount, coreModule.stomachSpace);
                 
         //amount *= coreModule.foodEfficiencyMeat;
@@ -543,12 +495,8 @@ public class Agent : MonoBehaviour {
     }
     public void EatFoodDecay(float amount) {
         
-        // WPP: (repeat)
         amount = Mathf.Min(amount, coreModule.stomachSpace);
-        //float stomachSpace = coreModule.stomachCapacity - coreModule.stomachContentsPlant - coreModule.stomachContentsMeat - coreModule.stomachContentsDecay;
-        //if(amount > stomachSpace) {
-        //    amount = stomachSpace; // ??
-        //}
+
         coreModule.stomachContentsNorm += (amount / coreModule.stomachCapacity);
         
         if(coreModule.stomachContentsNorm > 1f) {
@@ -563,24 +511,10 @@ public class Agent : MonoBehaviour {
 
         RegisterAgentEvent(Time.frameCount, "Ate Corpse! (" + amount + ")", 1f);
     }
-    public void TakeDamage(float damage) {
     
-        // WPP: delegated to coreModule
+    public void TakeDamage(float damage) {
         coreModule.DirectDamageToRandomBodyPart(damage);
-        /*int rand = Random.Range(0, 3);
-        if(rand == 0) {
-            coreModule.healthHead -= damage; // * UnityEngine.Random.Range(0f, 1f);
-        }
-        else if(rand == 1) {
-            coreModule.healthBody -= damage;
-        }
-        else {
-            coreModule.healthExternal -= damage;
-        }*/
-
-        // WPP delegated to coreModule
         coreModule.hitPoints[0] = coreModule.health / 3f;
-        //(coreModule.healthHead + coreModule.healthBody + coreModule.healthExternal) / 3f;
 
         candidateRef.performanceData.totalDamageTaken += damage;
 
@@ -736,13 +670,6 @@ public class Agent : MonoBehaviour {
         }
         ScaleBody(sizePercentage, resizeCollider);  
         
-        //if(isAttachedToParentEggSack) {
-        //    if(!parentEggSackRef) {
-                //  *** eventually look into aborting agents who are attached to EggSacks which don't reach birth ***
-       //     }
-        //    else {
-        
-        // WPP: early exit
         if (!isAttachedToParentEggSack || !parentEggSackRef) 
             return;
             
@@ -873,18 +800,10 @@ public class Agent : MonoBehaviour {
 
         // include reproductive stockpile energy???
 
-        // WPP: removed conditional with Mathf.Max
         currentBiomass = Mathf.Max(currentBiomass - decayAmount, 0f);
         //currentBiomass -= decayAmount;
         
-        // WPP: redundant multiply by locally defined 1f
-        // (add multiplier later when ready to implement)
-        //float wasteProducedMult = 1f;
         wasteProducedLastFrame += decayAmount;// * wasteProducedMult;
-
-        //if(currentBiomass <= 0f) {
-        //    currentBiomass = 0f;
-        //}
     }
 
     private void ScaleBody(float sizePercentage, bool resizeColliders) {
@@ -899,7 +818,6 @@ public class Agent : MonoBehaviour {
 
         coreModule.stomachCapacity = 1f; // currentBodyVolume;
         
-        // WPP: extracted to new method
         if(resizeColliders) {
             ResizeColliders(currentBodyVolume);
         }               
@@ -923,8 +841,6 @@ public class Agent : MonoBehaviour {
         //mouseClickCollider.height += 2f;        
     }
     
-    // WPP: exposed variables (pulled from TickActions) -> less GC & more control
-    // (also removed conversionRate from names, implied by XtoY naming)
     [SerializeField] float healRate = 0.0005f;
     [SerializeField] float baseEnergyToHealth = 5f;
     
@@ -948,31 +864,32 @@ public class Agent : MonoBehaviour {
         // Digestion:
         float maxDigestionRate = settingsRef.agentSettings._BaseDigestionRate * currentBiomass; // proportional to biomass?
         //float foodToEnergyBaseConversion = 1f; // what should this be?
-        // WPP: delegated calculations to CoreModule
         float totalStomachContents = coreModule.totalStomachContents;
         //Vector3 foodProportionsVec = coreModule.foodProportionsVector;
         //new Vector3(coreModule.stomachContentsPlant, coreModule.stomachContentsMeat, coreModule.stomachContentsDecay) / (totalStomachContents + 0.000001f);
 
         float digestedAmountTotal = Mathf.Min(totalStomachContents, maxDigestionRate);
         
-        // WPP: previously used calculation to set Norm, now delegated to getter
+        // *** WPP: previously used calculation to set Norm, now delegated to getter
         // Setting this on each frame and also setting in other places seems error prone
-        float totalStomachContentsNorm = coreModule.stomachContentsPercent;
-        coreModule.stomachContentsNorm = totalStomachContentsNorm; // ** we'll see.... ***
+        // comment left in place because possibly related to error...possibly delete for redundancy
+        //float totalStomachContentsNorm = coreModule.stomachContentsPercent;
+        //coreModule.stomachContentsNorm = totalStomachContentsNorm; // ** we'll see.... ***
                                                                    //float digestedAmountTotal = Mathf.Min(totalStomachContentsNorm, maxDigestionRate);
                                                                    //float digestedProportionOfTotalContents = digestedAmountTotal / (totalStomachContentsNorm + 0.000001f);
 
         // *** Remember to Re-Implement dietary specialization!!! ****
-        // WPP: use percent calculations instead of vector math
-        // + something seems off about this logic...
-        float digestedPlantMass = digestedAmountTotal * coreModule.plantEatenPercent; // foodProportionsVec.x;
-        float plantToEnergyAmount = digestedPlantMass; // * coreModule.foodEfficiencyPlant;
-        float digestedMeatMass = digestedAmountTotal * coreModule.meatEatenPercent; // foodProportionsVec.y;
-        float meatToEnergyAmount = digestedMeatMass; // * coreModule.foodEfficiencyMeat;    
-        float digestedDecayMass = digestedAmountTotal * coreModule.decayEatenPercent; // foodProportionsVec.z;
+        
+        // *** WPP: abstract to method
+        // How much of what was eaten is actually digested this frame (absolute value)
+        float digestedPlantMass = digestedAmountTotal * coreModule.plantEatenPercent;
+        // Amount of energy derived from the digested plant mass
+        float plantToEnergyAmount = digestedPlantMass;
+        float digestedMeatMass = digestedAmountTotal * coreModule.meatEatenPercent;
+        float meatToEnergyAmount = digestedMeatMass;  
+        float digestedDecayMass = digestedAmountTotal * coreModule.decayEatenPercent; 
         float decayToEnergyAmount = digestedDecayMass;
         
-        // WPP: added function to coreModule
         float createdEnergyTotal = coreModule.GetEnergyTotal(plantToEnergyAmount, meatToEnergyAmount, decayToEnergyAmount) * settingsRef.agentSettings._DigestionEnergyEfficiency;
         //(plantToEnergyAmount * coreModule.dietSpecPlantNorm + meatToEnergyAmount * coreModule.dietSpecMeatNorm + decayToEnergyAmount * coreModule.dietSpecDecayNorm)
         
@@ -985,31 +902,11 @@ public class Agent : MonoBehaviour {
             currentBiomass = fullsizeBiomass;
         }
                 
-        coreModule.stomachContentsPlant -= digestedPlantMass;
-        
-        // WPP: setter logic in coreModule automates value validation
-        //if(coreModule.stomachContentsPlant < 0f) {
-        //    coreModule.stomachContentsPlant = 0f;
-        //}
-        
-        coreModule.stomachContentsMeat -= digestedMeatMass;
-        //if(coreModule.stomachContentsMeat < 0f) {
-        //    coreModule.stomachContentsMeat = 0f;
-        //}
-        
+        coreModule.stomachContentsPlant -= digestedPlantMass;        
+        coreModule.stomachContentsMeat -= digestedMeatMass;        
         coreModule.stomachContentsDecay -= digestedDecayMass;
-        //if(coreModule.stomachContentsDecay < 0f) {
-        //    coreModule.stomachContentsDecay = 0f;
-        //}
-        
-        // WPP: delegated to coreModule
+   
         coreModule.Regenerate(healRate, energyToHealth);
-        /*if(coreModule.healthBody < 1f) {
-            coreModule.healthBody += healRate;
-            coreModule.healthHead += healRate;
-            coreModule.healthExternal += healRate;
-            coreModule.energy -= healRate / energyToHealth;
-        }*/
 
         float oxygenMask = Mathf.Clamp01(simManager.simResourceManager.curGlobalOxygen * settingsRef.agentSettings._OxygenEnergyMask);
         
@@ -1042,22 +939,12 @@ public class Agent : MonoBehaviour {
         //ENERGY:
         float energyCostMult = 0.1f; // Mathf.Lerp(settingsRef.agentSettings._BaseEnergyCost, settingsRef.agentSettings._BaseEnergyCost * 0.25f, sizePercentage);
         
-        // WPP: extracted to exposed field + getter calculation
-        //float restingBonusMult = 1f;
-        //if(isResting) {
-        //    restingBonusMult = 0.65f;
-        //}
-        
         float energyCost = Mathf.Sqrt(currentBiomass) * energyCostMult * restingBonus; // * SimulationManager.energyDifficultyMultiplier; // / coreModule.energyBonus;
         
         float throttleMag = smoothedThrottle.magnitude;
         
         // ENERGY DRAIN::::
         coreModule.energy -= energyCost;
-        // WPP: automated by setter logic
-        //if(coreModule.energy < 0f) {
-        //    coreModule.energy = 0f;
-        //}
 
         if(isDead || isEgg) {
             throttle = Vector2.zero;
@@ -1200,18 +1087,13 @@ public class Agent : MonoBehaviour {
         cooldownFrameCounter = 0;
     }
 
-    // WPP: early exit & abstracted conditions with getter logic
     private void ActionDash() {
         if (!isFreeToAct || outOfStamina)
             return;
-            
-        //if(isFreeToAct) {
-        //    if(coreModule.stamina[0] >= 0.1f) {
+
         isDashing = true;
         coreModule.stamina[0] -= 0.1f;
         candidateRef.performanceData.totalTimesDashed++;
-        //    }            
-        //} 
     }
     
     private void ActionDefend() {
@@ -1231,40 +1113,6 @@ public class Agent : MonoBehaviour {
                         curLifeStage == AgentLifeStage.Mature;
                         
     bool outOfStamina => coreModule.stamina[0] < 0.1f;
-    
-    // WPP: replaced with getter variable
-    /*
-    private bool IsFreeToAct() {
-        bool isFree = !isCooldown && !isDashing && !isDefending && !isFeeding && !isAttacking &&
-        curLifeStage == AgentLifeStage.Mature;
-
-        if(isCooldown) {
-            isFree = false;
-        }
-        if(isDashing) {
-            isFree = false;
-        }
-        if(isDefending) {
-            isFree = false;
-        }
-        if(isFeeding) {
-            isFree = false;
-        }
-        if(isAttacking) {
-            isFree = false;
-        }
-        if(curLifeStage != AgentLifeStage.Mature) {
-            isFree = false;
-        }
-
-        return isFree;
-    }
-    */
-
-    // WPP: redundant pass-through method
-    //private void ApplyPhysicsForces(Vector2 throttle) {
-    //    MovementScalingTest(throttle);
-    //}
     
     [SerializeField] [Range(0,1)] float bitingPenaltyWhenFeeding = 0.5f;
     float bitingPenalty => isFeeding ? bitingPenaltyWhenFeeding : 1f;
@@ -1290,23 +1138,11 @@ public class Agent : MonoBehaviour {
         //for(int j = 0; j < numSegments - 1; j++) {
         //    jointAnglesArray[j] = hingeJointsArray[j].jointAngle;            
         //}
-
-        // WPP: removed
-        //float bitingPenalty = 1f;
-        //if(isFeeding)
-        //{
-        //    bitingPenalty = 0.5f;
-        //}
         
         /*if(coreModule.mouthFeedEffector[0] > 0f)  // Clean up code for State-machine-esque behaviors/abilities
         {
             bitingPenalty = 0.5f;
         }*/
-
-        //float forcePenalty = 1f;
-        //if(isResting) {
-        //    forcePenalty = 0.1f;
-        //}
 
         float fatigueMultiplier = Mathf.Clamp01(coreModule.energy * 5f + 0.05f); // * Mathf.Clamp01(coreModule.stamina[0] * 4f + 0.05f);
         float lowHealthPenalty = Mathf.Clamp01(coreModule.healthBody * 5f) * 0.5f + 0.5f;
@@ -1371,26 +1207,15 @@ public class Agent : MonoBehaviour {
         communicationModule = new CritterModuleCommunication();
         communicationModule.Initialize(genome.bodyGenome.communicationGenome, this);
 
-        // WPP: initialize from constructor
         coreModule = new CritterModuleCore(genome.bodyGenome.coreGenome, this);
-        //coreModule.Initialize(genome.bodyGenome.coreGenome, this);
 
         mouthRef.Initialize(genome.bodyGenome.coreGenome, this);
 
         environmentModule = new CritterModuleEnvironment(genome.bodyGenome.environmentalGenome, this);
-        //environmentModule.Initialize(genome.bodyGenome.environmentalGenome, this);
-
         foodModule = new CritterModuleFood(genome.bodyGenome.foodGenome, this);
-        //foodModule.Initialize(genome.bodyGenome.foodGenome, this);
-
         friendModule = new CritterModuleFriends(genome.bodyGenome.friendGenome, this);
-        //friendModule.Initialize(genome.bodyGenome.friendGenome, this);
-
         movementModule = new CritterModuleMovement(genome, genome.bodyGenome.movementGenome);
-        //movementModule.Initialize(genome, genome.bodyGenome.movementGenome);
-
         threatsModule = new CritterModuleThreats(genome.bodyGenome.threatGenome, this);
-        //threatsModule.Initialize(genome.bodyGenome.threatGenome, this);
     }
     
     public void FirstTimeInitialize(SettingsManager settings) {  //AgentGenome genome) {  // ** See if I can get away with init sans Genome
@@ -1470,22 +1295,17 @@ public class Agent : MonoBehaviour {
         //springJoint.enableCollision = false;        
         //springJoint.frequency = 15f;
         
-        // WPP: removed from conditional
         isAttachedToParentEggSack = !isImmaculate;
         colliderBody.enabled = isImmaculate;
 
         if(isImmaculate) {            
             springJoint.connectedBody = null; // parentEggSack.rigidbodyRef;
             springJoint.enabled = false;
-            //isAttachedToParentEggSack = false;
-            //colliderBody.enabled = true;
         }
         //else {
             //bodyGO.transform.localPosition = parentEggSack.gameObject.transform.position; // startPos.startPosition;        
             //springJoint.connectedBody = parentEggSack.rigidbodyRef;
             //springJoint.enabled = true;
-        //    isAttachedToParentEggSack = true;
-        //    colliderBody.enabled = false;
         //}                
             
         bodyRigidbody.mass = 0.01f; // min mass
@@ -1562,7 +1382,6 @@ public class Agent : MonoBehaviour {
         parentEggSackRef = null;
 
         // **** Separate out this code into shared function to avoid duplicate code::::
-        // WPP: incorrect refactor -> too many arguments
         ResetStartingValues();
         InitializeModules(genome);      // Modules need to be created first so that Brain can map its neurons to existing modules  
         

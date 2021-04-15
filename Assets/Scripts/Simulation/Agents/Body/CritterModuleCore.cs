@@ -88,11 +88,14 @@ public class CritterModuleCore {
     public float talentSpecSpeedNorm;
     public float talentSpecUtilityNorm;
 
+    // Diet specialization: influences efficiency.  All 3 should add up to 1
+    // Derived from foodEfficiency
     public float dietSpecDecayNorm;
     public float dietSpecPlantNorm;
     public float dietSpecMeatNorm;
 
-    // Diet specialization:
+    // Diet specialization: 0-1
+    // Mutates occasionally
     public float foodEfficiencyPlant;
     public float foodEfficiencyDecay;
     public float foodEfficiencyMeat;
@@ -103,8 +106,10 @@ public class CritterModuleCore {
     public float totalStomachContents => stomachContentsPlant + stomachContentsMeat + stomachContentsDecay;
     public float stomachContentsPercent => totalStomachContents / stomachCapacity;
     public bool stomachEmpty => stomachContentsPercent <= .01f;
+    public bool isFull => stomachContentsPercent > 1f;
     
-    // WPP: replaced Vector math with simpler percent calculation
+    // *** WPP: replaced Vector math with simpler percent calculation
+    // (might be causing an error)
     //public Vector3 foodProportionsVector => foodVector / (totalStomachContents + 0.000001f);
     //Vector3 foodVector => new Vector3(stomachContentsPlant, stomachContentsMeat, stomachContentsDecay);
     public float plantEatenPercent => stomachContentsPlant / (totalStomachContents + 0.000001f);
@@ -157,11 +162,6 @@ public class CritterModuleCore {
                                                                           
         energy = 1f;
         
-        // WPP: extract method
-        //hitPoints[0] = 1f;
-        //healthHead = 1f;
-        //healthBody = 1f;
-        //healthExternal = 1f;
         SetAllHealth(1f);
 
         bias[0] = 1f;
@@ -280,7 +280,6 @@ public class CritterModuleCore {
         }
     }
     
-    // WPP: future use? (pulled from Agent)
     public void DistributeDamage(float damage)
     {
         //coreModule.healthHead -= damage * UnityEngine.Random.Range(0f, 1f);
