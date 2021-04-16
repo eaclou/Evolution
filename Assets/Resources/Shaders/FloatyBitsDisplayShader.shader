@@ -80,7 +80,7 @@
 				float randomScale = lerp(0.75, 1.4, random2) * 0.6;
 				
 				float2 dir = float2(0,1); // normalize(velocity);
-				float2 scale = 1.4 * float2(0.095 * randomAspect, 0.15 * (1.0 / randomAspect)) * randomScale; //float2(randomAspect * randomScale, (1.0 / randomAspect) * randomScale * (length(velocity) * 25 + 1.61));
+				float2 scale = 0.1 * float2(0.095 * randomAspect, 0.15 * (1.0 / randomAspect)) * randomScale; //float2(randomAspect * randomScale, (1.0 / randomAspect) * randomScale * (length(velocity) * 25 + 1.61));
 				//scale.y *= (1.0 + velMag * 10.0);
 				quadPoint *= float3(scale, 1.0); // * (_CamDistNormalized * 0.98 + 0.02); 
 
