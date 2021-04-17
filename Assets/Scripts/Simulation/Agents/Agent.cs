@@ -27,14 +27,14 @@ public class Agent : MonoBehaviour {
     public bool isDecaying = false;
 
     public bool isFeeding = false;
-    public bool isAttacking = false;    
+    public bool isAttacking => attack.inProcess;    
 
     public int feedAnimDuration = 30;  //***EC eventually move these into creature genome, make variable
     public int feedAnimCooldown = 30;
     public int attackAnimDuration = 40;
     public int attackAnimCooldown = 75;
     public int feedingFrameCounter = 0;
-    public int attackingFrameCounter = 0;
+    public int attackingFrameCounter => attack.frameCount;
     
     public bool isDashing = false;
     public int dashFrameCounter = 0;
@@ -58,7 +58,6 @@ public class Agent : MonoBehaviour {
     public int speciesIndex = -1;  // Set these at birth!
     public CandidateAgentData candidateRef;
 
-    
     public AgentLifeStage curLifeStage;
     public enum AgentLifeStage {
         AwaitingRespawn,  // can i merge this in with null?
@@ -78,6 +77,7 @@ public class Agent : MonoBehaviour {
         Cooldown,
         Decaying
     }
+    
     private int gestationDurationTimeSteps = 120;
     public int _GestationDurationTimeSteps => gestationDurationTimeSteps;
     
@@ -169,6 +169,9 @@ public class Agent : MonoBehaviour {
     public EggSack childEggSackRef;
     public bool isPregnantAndCarryingEggs = false;
     public int pregnancyRefactoryDuration = 2400;
+    
+    IAgentAbility activeAbility;
+    AttackOverTime attack;
 
     //public float overflowFoodAmount = 0f;
         
@@ -176,6 +179,11 @@ public class Agent : MonoBehaviour {
         // temp fix for delayed spawning of Agents (leading to nullReferenceExceptions)
         //agentWidthsArray = new float[widthsTexResolution];
         isInert = true;
+    }
+    
+    void Start()
+    {
+        attack = new AttackOverTime(this, attackAnimDuration, attackAnimCooldown, EnterCooldown);    
     }
     
     public bool isDead => curLifeStage == AgentLifeStage.Dead;
@@ -224,24 +232,6 @@ public class Agent : MonoBehaviour {
     
     public bool isAttackBiteFrame => attackingFrameCounter == attackAnimDuration / 2;
     public float attackAnimCycle => Mathf.Clamp01((float)attackingFrameCounter / attackAnimDuration);
-    
-    IEnumerator AttackRoutine() {
-        if (isAttacking) yield break;
-            
-        isAttacking = true;
-        mouthRef.triggerCollider.enabled = true;
-        candidateRef.performanceData.totalTimesAttacked++;
-        attackingFrameCounter = 0;
-                
-        for (int i = 0; i < attackAnimDuration; i++) {
-            attackingFrameCounter++;            
-            yield return null;
-        }
-        
-        isAttacking = false;
-        attackingFrameCounter = 0;
-        EnterCooldown(attackAnimCooldown);
-    }
     
     public void SetToAwaitingRespawn() {
         curLifeStage = AgentLifeStage.AwaitingRespawn;
@@ -1100,7 +1090,7 @@ public class Agent : MonoBehaviour {
             return;
 
         if(coreModule.mouthAttackEffector[0] >= mostActiveEffectorValue) {
-            StartCoroutine(AttackRoutine());
+            UseAbility(attack);
         }
         if(coreModule.dashEffector[0] >= mostActiveEffectorValue) {
             ActionDash();
@@ -1108,6 +1098,12 @@ public class Agent : MonoBehaviour {
         if(coreModule.defendEffector[0] >= mostActiveEffectorValue) {
             ActionDefend();
         }    
+    }
+    
+    private void UseAbility(IAgentAbility ability)
+    {
+        activeAbility = ability;
+        ability.Begin();
     }
 
     private void EnterCooldown(int frames) {
@@ -1348,7 +1344,7 @@ public class Agent : MonoBehaviour {
         mouthRef.triggerCollider.offset = new Vector2(0f, fullSizeBoundingBox.y / 2f * sizePercentage);
         isFeeding = false;
         feedingFrameCounter = 0;
-        isAttacking = false;
+        //isAttacking = false;
         //attackingFrameCounter = 0;
         //mouthRef.isCooldown = false;
         mouthRef.agentIndex = index;

@@ -22,7 +22,9 @@
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/BigBangPanelUI.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/FeatSO.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Playcraft/_NEW/DirectionInputToVector2.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Abilities/AttackOverTime.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/ClockPanelUI.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Abilities/IAgentAbility.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Utility/QuitGame.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/NarrationSO.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://C:/Program Files/Unity/Hub/Editor/2019.4.18f1/Editor/Data/Resources/PackageManager/BuiltInPackages/com.unity.ugui/Runtime/UI/Core/Dropdown.cs" root0="SKIP_HIGHLIGHTING" />
@@ -37,10 +39,6 @@
   </component>
   <component name="IdeDocumentHistory">
     <changedPaths>
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/LoadingPanelUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/SpeciesTreePanel.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/GraphStatPanel.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Utility/QuitGame.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Utility/WallRandomizer.cs" />
       <option value="$PROJECT_DIR$/Assets/Playcraft/_NEW/KeyboardInputToDirection.cs" />
       <option value="$PROJECT_DIR$/Assets/Playcraft/_NEW/DirectionInputToVector2.cs" />
@@ -87,7 +85,11 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/FeatSO.cs" />
       <option value="$PROJECT_DIR$/Assets/Playcraft/Project Specific/Lookup.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/CauseOfDeathSO.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/CandidateAgentData.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Abilities/IAgentAbility.cs" />
+      <option value="$PROJECT_DIR$/Assets/Playcraft/Quality of Life/Unity Extension/MonoSim.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Agent.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Abilities/AttackOverTime.cs" />
     </changedPaths>
   </component>
   <component name="ProjectId" id="1owaWgGpM80xkcfA3szn5iw9YkG" />
@@ -145,6 +147,7 @@
       <workItem from="1617688528630" duration="1831000" />
       <workItem from="1617742264965" duration="6528000" />
       <workItem from="1618349304869" duration="3704000" />
+      <workItem from="1618692271205" duration="4968000" />
     </task>
     <servers />
   </component>

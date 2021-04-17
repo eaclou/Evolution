@@ -14,6 +14,7 @@
           <e p="_NEW" t="Include">
             <e p="ButtonInputToFloat.cs" t="Include" />
             <e p="DirectionInputToVector2.cs" t="Include" />
+            <e p="FloatMath.cs" t="Include" />
             <e p="SetTimescale.cs" t="Include" />
           </e>
           <e p="Additive Scenes" t="Include">
@@ -710,6 +711,10 @@
           </e>
           <e p="Simulation" t="Include">
             <e p="Agents" t="Include">
+              <e p="Abilities" t="Include">
+                <e p="AttackOverTime.cs" t="Include" />
+                <e p="IAgentAbility.cs" t="Include" />
+              </e>
               <e p="Agent.cs" t="Include" />
               <e p="Body" t="Include">
                 <e p="CritterModuleCommunication.cs" t="Include" />
