@@ -31,29 +31,29 @@ public class CritterModuleCore {
     public float stomachContentsNorm = 0f;
      
     public float stomachCapacity = 1f;  // absolute value in units of (area?)
-    
-    float _stomachContentsDecay;
-    public float stomachContentsDecay
-    {
-        get => _stomachContentsDecay;
-        set => Mathf.Min(_stomachContentsDecay + value, 0f);
-    }
-    
-    float _stomachContentsPlant;
-    public float stomachContentsPlant
-    {
-        get => _stomachContentsPlant;
-        set => Mathf.Min(_stomachContentsPlant + value, 0f);
-    }
-    
-    float _stomachContentsMeat;
-    public float stomachContentsMeat
-    {
-        get => _stomachContentsMeat;
-        set => Mathf.Min(_stomachContentsMeat + value, 0f);
-    }
 
-    public float debugFoodValue = 0f;
+    //float _stomachContentsDecay;
+    public float stomachContentsDecay;
+    //{
+    //    get => _stomachContentsDecay;
+    //    set => Mathf.Min(_stomachContentsDecay + value, 0f);
+    //}
+
+    //float _stomachContentsPlant;
+    public float stomachContentsPlant;
+    //{
+    //    get => _stomachContentsPlant;
+    //    set => Mathf.Min(_stomachContentsPlant + value, 0f);
+    //}
+
+    //float _stomachContentsMeat;
+    public float stomachContentsMeat;
+    //{
+    //    get => _stomachContentsMeat;
+    //    set => Mathf.Min(_stomachContentsMeat + value, 0f);
+    //}
+
+    //public float debugFoodValue = 0f;
     
     public EggSack nearestEggSackModule;
     public PredatorModule nearestPredatorModule;
@@ -106,8 +106,8 @@ public class CritterModuleCore {
     public float stomachSpace => stomachCapacity - totalStomachContents;
     public float totalStomachContents => stomachContentsPlant + stomachContentsMeat + stomachContentsDecay;
     public float stomachContentsPercent => totalStomachContents / stomachCapacity;
-    public bool stomachEmpty => stomachContentsPercent <= .01f;
-    public bool isFull => stomachContentsPercent > 1f;
+    public bool stomachEmpty => stomachContentsPercent <= 0f;
+    public bool isFull => stomachContentsPercent >= 1f;
     
     // *** WPP: replaced Vector math with simpler percent calculation
     // (might be causing an error)
@@ -263,7 +263,7 @@ public class CritterModuleCore {
         contactForceY[0] = 0f;
         hitPoints[0] = Mathf.Max(health, 0f);
         //stamina[0] = stamina; // set in Agent.cs
-        energyStored[0] = Mathf.Clamp01(energy * 0.001f);  // Mathf.Clamp01(energyRaw / maxEnergyStorage);
+        energyStored[0] = Mathf.Clamp01(energy * 0.001f);  // Mathf.Clamp01(energyRaw / maxEnergyStorage); //***EAC will need to be changed once energy is adjusted
         foodStored[0] = stomachContentsPercent; // / stomachCapacity;
     }
     

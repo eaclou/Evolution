@@ -224,7 +224,7 @@ public class CritterMouthComponent : MonoBehaviour {
         float damage = baseDamage * sizeRatio * agentRef.coreModule.damageBonus;
         damage = Mathf.Clamp01(damage);
 
-        agentRef.coreModule.energy += 5f;
+        //agentRef.coreModule.energy += 5f;
 
         preyAgent.ProcessBiteDamageReceived(damage, agentRef);
         agentRef.RegisterAgentEvent(UnityEngine.Time.frameCount, "Bit Vertebrate! (" + damage + ") candID: " + preyAgent.candidateRef.candidateID.ToString(), 1f);

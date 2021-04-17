@@ -921,7 +921,8 @@ public class Agent : MonoBehaviour {
         }
                 
         coreModule.stomachContentsPlant -= digestedPlantMass;        
-        coreModule.stomachContentsMeat -= digestedMeatMass;        
+        coreModule.stomachContentsMeat -= digestedMeatMass;    
+        
         coreModule.stomachContentsDecay -= digestedDecayMass;
    
         coreModule.Regenerate(healRate, energyToHealth);
@@ -955,7 +956,7 @@ public class Agent : MonoBehaviour {
         }
         */
         //ENERGY:
-        float energyCostMult = 0.1f; // Mathf.Lerp(settingsRef.agentSettings._BaseEnergyCost, settingsRef.agentSettings._BaseEnergyCost * 0.25f, sizePercentage);
+        float energyCostMult = 0.25f; // Mathf.Lerp(settingsRef.agentSettings._BaseEnergyCost, settingsRef.agentSettings._BaseEnergyCost * 0.25f, sizePercentage);
         
         float energyCost = Mathf.Sqrt(currentBiomass) * energyCostMult * restingBonus; // * SimulationManager.energyDifficultyMultiplier; // / coreModule.energyBonus;
         
