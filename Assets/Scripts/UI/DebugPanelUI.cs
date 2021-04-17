@@ -87,7 +87,7 @@ public class DebugPanelUI : MonoBehaviour {
             debugTxtAgent += "Base Size: " + agentRef.candidateRef.candidateGenome.bodyGenome.coreGenome.creatureBaseLength.ToString("F2") + ",  Aspect: " + agentRef.candidateRef.candidateGenome.bodyGenome.coreGenome.creatureAspectRatio.ToString("F2") + "\n"; 
             debugTxtAgent += "Fullsize Dimensions: ( " + agentRef.fullSizeBoundingBox.x.ToString("F2") + ", " + agentRef.fullSizeBoundingBox.y.ToString("F2") + ", " + agentRef.fullSizeBoundingBox.z.ToString("F2") + " )\n";
             debugTxtAgent += "BONUS - Damage: " + agentRef.coreModule.damageBonus.ToString("F2") + ", Speed: " + agentRef.coreModule.speedBonus.ToString("F2") + ", Health: " + agentRef.coreModule.healthBonus.ToString("F2") + ", Energy: " + agentRef.coreModule.energyBonus.ToString("F2") + "\n";
-            debugTxtAgent += "DIET - Decay: " + agentRef.coreModule.foodEfficiencyDecay.ToString("F2") + ", Plant: " + agentRef.coreModule.foodEfficiencyPlant.ToString("F2") + ", Meat: " + agentRef.coreModule.foodEfficiencyMeat.ToString("F2") + "\n";
+            debugTxtAgent += "DIET - Decay: " + agentRef.coreModule.digestEfficiencyDecay.ToString("F2") + ", Plant: " + agentRef.coreModule.digestEfficiencyPlant.ToString("F2") + ", Meat: " + agentRef.coreModule.digestEfficiencyMeat.ToString("F2") + "\n";
             //string mouthType = "Active";
             //if (agentRef.mouthRef.isPassive) { mouthType = "Passive"; }
             //debugTxtAgent += "Mouth: [" + mouthType + "]\n";

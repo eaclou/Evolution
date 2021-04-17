@@ -206,7 +206,7 @@ public class CritterMouthComponent : MonoBehaviour {
     private void SwallowEggSackWhole(EggSack eggSack) {
         
         
-        float flow = eggSack.foodAmount * 10f * agentRef.coreModule.foodEfficiencyDecay;
+        float flow = eggSack.foodAmount * 10f * agentRef.coreModule.digestEfficiencyDecay;
         //Debug.Log("SwallowEggSackWhole " + flow.ToString());
 
         agentRef.candidateRef.performanceData.totalFoodEatenEgg += flow;
@@ -259,7 +259,7 @@ public class CritterMouthComponent : MonoBehaviour {
         float flowR = 0f;
         if(numEggsEaten > 0) {
             float flow = ownArea * 1f; // bonus for predators? // maximum bite intake
-            flowR = Mathf.Min(massConsumed, flow) * 10f * agentRef.coreModule.foodEfficiencyDecay;
+            flowR = Mathf.Min(massConsumed, flow) * 10f * agentRef.coreModule.digestEfficiencyDecay;
         }
 
         agentRef.candidateRef.performanceData.totalFoodEatenEgg += flowR;
@@ -271,7 +271,7 @@ public class CritterMouthComponent : MonoBehaviour {
     public void BiteCorpseFood(Agent corpseAgent, float ownBiteArea)
     {  
         //Debug.Log("BiteCorpseFood [" + agentRef.index.ToString() + "] ---> [" + corpseAgent.index.ToString() + "]");
-        float flow = ownBiteArea * 10f * agentRef.coreModule.foodEfficiencyDecay; // / colliderCount;        
+        float flow = ownBiteArea * 10f * agentRef.coreModule.digestEfficiencyDecay; // / colliderCount;        
         float flowR = Mathf.Min(corpseAgent.currentBiomass, flow) * 100f;
 
         agentRef.candidateRef.performanceData.totalFoodEatenCorpse += flow;

@@ -28,7 +28,7 @@ public class CritterModuleCore {
 
     // *** WPP: mixed metaphor -> is this defined as the total contents / capacity
     // or a number that can be incremented independently?
-    public float stomachContentsNorm = 0f;
+    //public float stomachContentsTotal01 = 0f;
      
     public float stomachCapacity = 1f;  // absolute value in units of (area?)
 
@@ -91,15 +91,15 @@ public class CritterModuleCore {
 
     // Diet specialization: influences efficiency.  All 3 should add up to 1
     // Derived from foodEfficiency
-    public float dietSpecDecayNorm;
-    public float dietSpecPlantNorm;
-    public float dietSpecMeatNorm;
+    //public float dietSpecDecayNorm;
+    //public float dietSpecPlantNorm;
+    //public float dietSpecMeatNorm;
 
     // Diet specialization: 0-1
     // Mutates occasionally
-    public float foodEfficiencyPlant;
-    public float foodEfficiencyDecay;
-    public float foodEfficiencyMeat;
+    public float digestEfficiencyPlant;
+    public float digestEfficiencyDecay;
+    public float digestEfficiencyMeat;
     
     //public float health => healthHead + healthBody + healthExternal;
 
@@ -113,24 +113,25 @@ public class CritterModuleCore {
     // (might be causing an error)
     //public Vector3 foodProportionsVector => foodVector / (totalStomachContents + 0.000001f);
     //Vector3 foodVector => new Vector3(stomachContentsPlant, stomachContentsMeat, stomachContentsDecay);
-    public float plantEatenPercent => stomachContentsPlant / (totalStomachContents + 0.000001f);
-    public float meatEatenPercent => stomachContentsMeat / (totalStomachContents + 0.000001f);
-    public float decayEatenPercent => stomachContentsDecay / (totalStomachContents + 0.000001f);
+    public float plantEatenPercent => Mathf.Clamp01(stomachContentsPlant / (totalStomachContents + 0.0000001f));
+    public float meatEatenPercent => Mathf.Clamp01(stomachContentsMeat / (totalStomachContents + 0.0000001f));
+    public float decayEatenPercent => Mathf.Clamp01(stomachContentsDecay / (totalStomachContents + 0.0000001f));
     
-    public float GetEnergyTotal(float plantEfficiency, float meatEfficiency, float decayEfficiency)
+    public float GetEnergyCreatedFromDigestion(float plantMassDigested, float meatMassDigested, float decayMassDigested)
     {
-        return  dietSpecPlantNorm * plantEfficiency + 
-                dietSpecMeatNorm * meatEfficiency + 
-                dietSpecDecayNorm + decayEfficiency;
+        //Debug.Log("GetEnergyCreatedFromDigestion: " + plantMassDigested + ", " + meatMassDigested + ", " + decayMassDigested);
+        return  (plantMassDigested * digestEfficiencyPlant + 
+                meatMassDigested * digestEfficiencyMeat + 
+                decayMassDigested * digestEfficiencyDecay);
     }
     
-    public void Regenerate(float healRate, float energyToHealth)
+    public void Regenerate(float healEnergyUsageRate, float energyToHealth)
     {
         if (health >= 1f)
             return;
     
-        health += healRate;
-        energy -= healRate / energyToHealth; //***EC note to self - is this correct functionality?
+        health += healEnergyUsageRate * energyToHealth;
+        energy -= healEnergyUsageRate;
     }
 
 	public CritterModuleCore(CritterModuleCoreGenome genome, Agent agent) {
@@ -183,13 +184,10 @@ public class CritterModuleCore {
         energyBonus = Mathf.Lerp(0.75f, 1.5f, talentSpecUtilityNorm);
         
         // Diet specialization:
-        float dietSpecTotal = genome.dietSpecializationDecay + genome.dietSpecializationPlant + genome.dietSpecializationMeat;        
-        dietSpecDecayNorm = genome.dietSpecializationDecay / dietSpecTotal;
-        foodEfficiencyDecay = Mathf.Lerp(0.33f, 2f, dietSpecDecayNorm);
-        dietSpecPlantNorm = genome.dietSpecializationPlant / dietSpecTotal;
-        foodEfficiencyPlant = Mathf.Lerp(0.33f, 2f, dietSpecPlantNorm);
-        dietSpecMeatNorm = genome.dietSpecializationMeat / dietSpecTotal;
-        foodEfficiencyMeat = Mathf.Lerp(0.33f, 2f, dietSpecMeatNorm);
+        float dietSpecTotal = genome.dietSpecializationDecay + genome.dietSpecializationPlant + genome.dietSpecializationMeat; 
+        digestEfficiencyDecay = genome.dietSpecializationDecay / dietSpecTotal;
+        digestEfficiencyPlant = genome.dietSpecializationPlant / dietSpecTotal;
+        digestEfficiencyMeat = genome.dietSpecializationMeat / dietSpecTotal;
     }
 
     public void MapNeuron(NID nid, Neuron neuron) {
@@ -256,6 +254,7 @@ public class CritterModuleCore {
     }
 
     public void Tick() {
+        
         //temperature[0] = 0f;
         //pressure[0] = 0f;
         isContact[0] = 0f;

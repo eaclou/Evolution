@@ -41,7 +41,7 @@ public class CreaturePaperDollUI : MonoBehaviour
             
             widgetAgentStatus.UpdateBars(agent.coreModule.health,
                                             agent.coreModule.energy,
-                                            agent.coreModule.stomachContentsNorm,
+                                            agent.coreModule.stomachContentsPercent,
                                             agent.currentBiomass,
                                             agent.coreModule.stamina[0]);   
         }        

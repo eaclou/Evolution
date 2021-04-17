@@ -283,7 +283,7 @@ public class Agent : MonoBehaviour {
         swallowingPreyFrameCounter = 0;
         preyAgentRef = preyAgent;
 
-        float foodAmount = preyAgent.currentBiomass * 1000f * coreModule.foodEfficiencyMeat;  // experiment!
+        float foodAmount = preyAgent.currentBiomass * 1000f * coreModule.digestEfficiencyMeat;  // experiment!
         candidateRef.performanceData.totalFoodEatenCreature += foodAmount;
 
         EatFoodMeat(foodAmount);
@@ -472,23 +472,24 @@ public class Agent : MonoBehaviour {
         amount = Mathf.Min(amount, coreModule.stomachSpace);
         
         //amount *= coreModule.foodEfficiencyPlant;
-        coreModule.stomachContentsNorm += (amount / coreModule.stomachCapacity);
+        //coreModule.stomachContentsTotal01 += (amount / coreModule.stomachCapacity);
         
         // *** delegate
         // Put food in stomach
         // unusual that a different variable would increment than the one being checked
         // Consider clamping
         if(coreModule.isFull) {
+            return;
             //float overStuffAmount = coreModule.stomachContentsNorm - 1f;
             //ProcessDamageReceived(overStuffAmount);
-            coreModule.stomachContentsNorm = 1f;            
+            //coreModule.stomachContentsPercent = 1f;            
         }
         else {
             coreModule.stomachContentsPlant += amount;
         }
         
         // Exp for appropriate food
-        GainExperience((amount / coreModule.stomachCapacity) * coreModule.foodEfficiencyPlant * 1f);     
+        GainExperience((amount / coreModule.stomachCapacity) * coreModule.digestEfficiencyPlant * 1f);     
 
         //Debug.Log("EatFoodPlant " + amount.ToString());
         RegisterAgentEvent(Time.frameCount, "Ate Plant! (+" + (amount * 1000).ToString("F0") + " food)", 1f);
@@ -500,18 +501,19 @@ public class Agent : MonoBehaviour {
         amount = Mathf.Min(amount, coreModule.stomachSpace);
                 
         //amount *= coreModule.foodEfficiencyMeat;
-        coreModule.stomachContentsNorm += (amount / coreModule.stomachCapacity);
+        //coreModule.stomachContentsTotal01 += (amount / coreModule.stomachCapacity);
         
-        if(coreModule.stomachContentsNorm > 1f) {
+        if(coreModule.stomachContentsPercent > 1f) {
+            return;
             //float overStuffAmount = coreModule.stomachContentsNorm - 1f;
             //ProcessDamageReceived(overStuffAmount);
-            coreModule.stomachContentsNorm = 1f;
+            //coreModule.stomachContentsPercent = 1f;
         }
         else {
             coreModule.stomachContentsMeat += amount;
         }
         
-        GainExperience((amount / coreModule.stomachCapacity) * coreModule.foodEfficiencyMeat * 1f); // Exp for appropriate food
+        GainExperience((amount / coreModule.stomachCapacity) * coreModule.digestEfficiencyMeat * 1f); // Exp for appropriate food
 
         //RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Zoop! (" + amount.ToString() + ")", 1f);
     }
@@ -519,17 +521,18 @@ public class Agent : MonoBehaviour {
         
         amount = Mathf.Min(amount, coreModule.stomachSpace);
 
-        coreModule.stomachContentsNorm += (amount / coreModule.stomachCapacity);
+        //coreModule.stomachContentsTotal01 += (amount / coreModule.stomachCapacity);
         
-        if(coreModule.stomachContentsNorm > 1f) {
+        if(coreModule.stomachContentsPercent > 1f) {
+            return;
             //float overStuffAmount = coreModule.stomachContentsNorm - 1f;            
-            coreModule.stomachContentsNorm = 1f;
+            //coreModule.stomachContentsPercent = 1f;
         }
         else {
             coreModule.stomachContentsDecay += amount;
         }
         
-        GainExperience((amount / coreModule.stomachCapacity) * coreModule.foodEfficiencyDecay * 1f); // Exp for appropriate food
+        GainExperience((amount / coreModule.stomachCapacity) * coreModule.digestEfficiencyDecay * 1f); // Exp for appropriate food
 
         RegisterAgentEvent(Time.frameCount, "Ate Corpse! (" + amount + ")", 1f);
     }
@@ -758,6 +761,7 @@ public class Agent : MonoBehaviour {
         TickModules(simManager); // update inputs for Brain        
         TickBrain(); // Tick Brain
         TickActions(simManager); // Execute Actions  -- Also Updates Resources!!! ***
+        TickMetabolism();
 
         lifeStageTransitionTimeStepCounter++;
         ageCounter++;
@@ -878,92 +882,6 @@ public class Agent : MonoBehaviour {
         smoothedThrottle = Vector2.Lerp(smoothedThrottle, throttle, smoothedThrottleLerp);
         Vector2 throttleForwardDir = throttle.normalized;
         
-        // ENERGY!!!!
-        // Digestion:
-        float maxDigestionRate = settingsRef.agentSettings._BaseDigestionRate * currentBiomass; // proportional to biomass?
-        //float foodToEnergyBaseConversion = 1f; // what should this be?
-        float totalStomachContents = coreModule.totalStomachContents;
-        //Vector3 foodProportionsVec = coreModule.foodProportionsVector;
-        //new Vector3(coreModule.stomachContentsPlant, coreModule.stomachContentsMeat, coreModule.stomachContentsDecay) / (totalStomachContents + 0.000001f);
-
-        float digestedAmountTotal = Mathf.Min(totalStomachContents, maxDigestionRate);
-        
-        // *** WPP: previously used calculation to set Norm, now delegated to getter
-        // Setting this on each frame and also setting in other places seems error prone
-        // comment left in place because possibly related to error...possibly delete for redundancy
-        //float totalStomachContentsNorm = coreModule.stomachContentsPercent;
-        //coreModule.stomachContentsNorm = totalStomachContentsNorm; // ** we'll see.... ***
-                                                                   //float digestedAmountTotal = Mathf.Min(totalStomachContentsNorm, maxDigestionRate);
-                                                                   //float digestedProportionOfTotalContents = digestedAmountTotal / (totalStomachContentsNorm + 0.000001f);
-
-        // *** Remember to Re-Implement dietary specialization!!! ****
-        
-        // *** WPP: abstract to method
-        // How much of what was eaten is actually digested this frame (absolute value)
-        float digestedPlantMass = digestedAmountTotal * coreModule.plantEatenPercent;
-        // Amount of energy derived from the digested plant mass
-        float plantToEnergyAmount = digestedPlantMass;
-        float digestedMeatMass = digestedAmountTotal * coreModule.meatEatenPercent;
-        float meatToEnergyAmount = digestedMeatMass;  
-        float digestedDecayMass = digestedAmountTotal * coreModule.decayEatenPercent; 
-        float decayToEnergyAmount = digestedDecayMass;
-        
-        float createdEnergyTotal = coreModule.GetEnergyTotal(plantToEnergyAmount, meatToEnergyAmount, decayToEnergyAmount) * settingsRef.agentSettings._DigestionEnergyEfficiency;
-        //(plantToEnergyAmount * coreModule.dietSpecPlantNorm + meatToEnergyAmount * coreModule.dietSpecMeatNorm + decayToEnergyAmount * coreModule.dietSpecDecayNorm)
-        
-        wasteProducedLastFrame += digestedAmountTotal * settingsRef.agentSettings._DigestionWasteEfficiency;
-        oxygenUsedLastFrame = currentBiomass * settingsRef.agentSettings._BaseOxygenUsage;
-        currentBiomass += digestedAmountTotal * settingsRef.agentSettings._GrowthEfficiency;  // **** <-- Reconsider
-        
-        if(currentBiomass > fullsizeBiomass) {
-            wasteProducedLastFrame += (currentBiomass - fullsizeBiomass);
-            currentBiomass = fullsizeBiomass;
-        }
-                
-        coreModule.stomachContentsPlant -= digestedPlantMass;        
-        coreModule.stomachContentsMeat -= digestedMeatMass;    
-        
-        coreModule.stomachContentsDecay -= digestedDecayMass;
-   
-        coreModule.Regenerate(healRate, energyToHealth);
-
-        float oxygenMask = Mathf.Clamp01(simManager.simResourceManager.curGlobalOxygen * settingsRef.agentSettings._OxygenEnergyMask);
-        
-        coreModule.energy += createdEnergyTotal * settingsRef.agentSettings._DigestionEnergyEfficiency * oxygenMask;
-        /*
-        // STAMINA:
-        float staminaRefillRate = 0.00025f;
-        float energyToStaminaConversionRate = 5f * coreModule.healthBonus;
-        coreModule.stamina[0] += staminaRefillRate * energyToStaminaConversionRate;
-        coreModule.energy -= staminaRefillRate; // / energyToStaminaConversionRate;
-
-        
-        if(coreModule.stamina[0] < 0.1f) {
-            staminaRefillRate *= 0.5f;
-        }
-        if(coreModule.stamina[0] > 0.75f) {
-            staminaRefillRate *= 1.5f;
-        }
-        if(isResting) {
-            staminaRefillRate *= 5f;
-        }
-        if(coreModule.stamina[0] < 1f) {
-            coreModule.stamina[0] += staminaRefillRate;
-            coreModule.energy -= staminaRefillRate / energyToStaminaConversionRate;
-        }
-        else {
-            coreModule.stamina[0] = 1f;
-        }
-        */
-        //ENERGY:
-        float energyCostMult = 0.25f; // Mathf.Lerp(settingsRef.agentSettings._BaseEnergyCost, settingsRef.agentSettings._BaseEnergyCost * 0.25f, sizePercentage);
-        
-        float energyCost = Mathf.Sqrt(currentBiomass) * energyCostMult * restingBonus; // * SimulationManager.energyDifficultyMultiplier; // / coreModule.energyBonus;
-        
-        float throttleMag = smoothedThrottle.magnitude;
-        
-        // ENERGY DRAIN::::
-        coreModule.energy -= energyCost;
 
         if(isDead || isEgg) {
             throttle = Vector2.zero;
@@ -974,8 +892,8 @@ public class Agent : MonoBehaviour {
             // Food calc before energy/healing/etc? **************
             //float sizeValue = BodyGenome.GetBodySizeScore01(candidateRef.candidateGenome.bodyGenome);
             // FOOD PARTICLES: Either mouth type for now:
-            float foodParticleEatAmount = simManager.vegetationManager.plantParticlesEatAmountsArray[index] * coreModule.foodEfficiencyPlant; // **************** PLANT BONUS!! HACKY
-            float animalParticleEatAmount = simManager.zooplanktonManager.animalParticlesEatAmountsArray[index] * coreModule.foodEfficiencyMeat;
+            float foodParticleEatAmount = simManager.vegetationManager.plantParticlesEatAmountsArray[index] * coreModule.digestEfficiencyPlant; // **************** PLANT BONUS!! HACKY
+            float animalParticleEatAmount = simManager.zooplanktonManager.animalParticlesEatAmountsArray[index] * coreModule.digestEfficiencyMeat;
             
             bool isEatingPlant = foodParticleEatAmount > 0f;
             bool isEatingAnimal = animalParticleEatAmount > 0f;
@@ -1065,6 +983,94 @@ public class Agent : MonoBehaviour {
         } 
     }
     
+    public void TickMetabolism() {
+        
+        // Digestion:
+        float maxDigestionRate = settingsRef.agentSettings._BaseDigestionRate * currentBiomass; // proportional to biomass?        
+        float totalStomachContents = coreModule.totalStomachContents;        
+        float digestedAmountTotal = Mathf.Min(totalStomachContents, maxDigestionRate);
+        
+        // *** Remember to Re-Implement dietary specialization!!! ****
+        
+        // *** WPP: abstract to method
+        // How much of what was eaten is actually digested this frame (absolute value)
+        float digestedPlantMass = digestedAmountTotal * coreModule.plantEatenPercent;
+        // Amount of energy derived from the digested plant mass
+        //float plantToEnergyAmount = digestedPlantMass;
+        float digestedMeatMass = digestedAmountTotal * coreModule.meatEatenPercent;
+        //float meatToEnergyAmount = digestedMeatMass;  
+        float digestedDecayMass = digestedAmountTotal * coreModule.decayEatenPercent; 
+        //float decayToEnergyAmount = digestedDecayMass;
+
+        wasteProducedLastFrame += digestedAmountTotal * settingsRef.agentSettings._DigestionWasteEfficiency;
+        oxygenUsedLastFrame = currentBiomass * settingsRef.agentSettings._BaseOxygenUsage;
+        currentBiomass += digestedAmountTotal * settingsRef.agentSettings._GrowthEfficiency;  // **** <-- Reconsider
+        
+        if(currentBiomass > fullsizeBiomass) {
+            wasteProducedLastFrame += (currentBiomass - fullsizeBiomass);
+            currentBiomass = fullsizeBiomass;
+        }
+        
+        float createdEnergyTotal = coreModule.GetEnergyCreatedFromDigestion(digestedPlantMass, digestedMeatMass, digestedDecayMass) * settingsRef.agentSettings._DigestionEnergyEfficiency;
+        coreModule.stomachContentsPlant -= digestedPlantMass;        
+        coreModule.stomachContentsMeat -= digestedMeatMass;
+        coreModule.stomachContentsDecay -= digestedDecayMass;
+
+        if(index == 1) {
+            //Debug.Log(createdEnergyTotal + "  GetEnergyCreatedFromDigestion: " + coreModule.stomachContentsPlant + ", " + coreModule.stomachContentsMeat + ", " + coreModule.stomachContentsDecay);
+
+        }
+        
+        //float spentEnergyTotal = 
+        
+        //(plantToEnergyAmount * coreModule.dietSpecPlantNorm + meatToEnergyAmount * coreModule.dietSpecMeatNorm + decayToEnergyAmount * coreModule.dietSpecDecayNorm)
+        
+        
+   
+        coreModule.Regenerate(healRate, energyToHealth);
+
+        //float oxygenMask = Mathf.Clamp01(simManager.simResourceManager.curGlobalOxygen * settingsRef.agentSettings._OxygenEnergyMask);
+        
+        
+
+        //ENERGY:
+        float energyCostMult = 0.2f; // Mathf.Lerp(settingsRef.agentSettings._BaseEnergyCost, settingsRef.agentSettings._BaseEnergyCost * 0.25f, sizePercentage);
+        
+        float restingEnergyCost = Mathf.Sqrt(currentBiomass) * energyCostMult * restingBonus; // * SimulationManager.energyDifficultyMultiplier; // / coreModule.energyBonus;
+        
+        float throttleMag = smoothedThrottle.magnitude;
+        
+
+        coreModule.energy += createdEnergyTotal;
+        // ENERGY DRAIN::::        
+        coreModule.energy -= restingEnergyCost;
+        /*
+        // STAMINA:
+        float staminaRefillRate = 0.00025f;
+        float energyToStaminaConversionRate = 5f * coreModule.healthBonus;
+        coreModule.stamina[0] += staminaRefillRate * energyToStaminaConversionRate;
+        coreModule.energy -= staminaRefillRate; // / energyToStaminaConversionRate;
+
+        
+        if(coreModule.stamina[0] < 0.1f) {
+            staminaRefillRate *= 0.5f;
+        }
+        if(coreModule.stamina[0] > 0.75f) {
+            staminaRefillRate *= 1.5f;
+        }
+        if(isResting) {
+            staminaRefillRate *= 5f;
+        }
+        if(coreModule.stamina[0] < 1f) {
+            coreModule.stamina[0] += staminaRefillRate;
+            coreModule.energy -= staminaRefillRate / energyToStaminaConversionRate;
+        }
+        else {
+            coreModule.stamina[0] = 1f;
+        }
+        */
+        
+    }
     // WPP: Extracted from TickActions,
     // created static method to find highest value in array
     // streamlined conditionals with early exit
