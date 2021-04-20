@@ -29,9 +29,8 @@ public class Agent : MonoBehaviour {
     public bool isFeeding => feed.inProcess;
     public bool isAttacking => attack.inProcess;    
 
-    // *** WPP: move anim and cooldown durations to SO or other system
-    // if it becomes useful to make them dynamic 
-    public int feedAnimDuration = 30;  //***EC eventually move these into creature genome, make variable
+    //***EC eventually move these into creature genome, make variable
+    public int feedAnimDuration = 30;  
     public int feedAnimCooldown = 30;
     public int attackAnimDuration = 40;
     public int attackAnimCooldown = 75;
@@ -173,10 +172,10 @@ public class Agent : MonoBehaviour {
     public int pregnancyRefactoryDuration = 2400;
     
     IAgentAbility activeAbility;
-    AttackOverTime attack;
-    Dash dash;
-    Defend defend;
-    Feed feed;
+    IAgentAbility attack;
+    IAgentAbility dash;
+    IAgentAbility defend;
+    IAgentAbility feed;
     Cooldown cooldown;
 
     //public float overflowFoodAmount = 0f;
@@ -219,32 +218,6 @@ public class Agent : MonoBehaviour {
         
         return Mathf.Clamp01(percentage);
     }
-
-    // WPP: delegated to Ability system
-    /* public void AttemptInitiateActiveFeedBite() {
-        if (isFeeding || isAttacking || isDefending) {
-            return;
-        }
-        
-        isFeeding = true;            
-        mouthRef.triggerCollider.enabled = true;
-        mouthRef.lastBiteFoodAmount = 0f;
-        feedingFrameCounter = 0;            
-    }
-
-    public void AttemptInitiateActiveAttackBite() {
-        //Debug.Log("ATTACK");
-        if (isAttacking) {
-            Debug.LogWarning("Already attacking, no need to initiate attack bite");
-            return;
-        }
-               
-        isAttacking = true;
-        mouthRef.triggerCollider.enabled = true;
-        attackingFrameCounter = 0;    
-        
-        candidateRef.performanceData.totalTimesAttacked++;
-    }*/
     
     public bool isAttackBiteFrame => attackingFrameCounter == attackAnimDuration / 2;
     public float attackAnimCycle => Mathf.Clamp01((float)attackingFrameCounter / attackAnimDuration);
@@ -851,7 +824,6 @@ public class Agent : MonoBehaviour {
         }               
     }
     
-    // *** WPP: consider delegation to new component
     private void ResizeColliders(float currentBodyVolume)
     {
         colliderBody.size = new Vector2(currentBoundingBoxSize.x, currentBoundingBoxSize.y); // coreModule.currentBodySize;
@@ -937,56 +909,6 @@ public class Agent : MonoBehaviour {
         facingDirection = new Vector2(Mathf.Cos(rotationInRadians), Mathf.Sin(rotationInRadians));
                 
         curActionState = currentState;
-
-        // WPP: delegated to Ability system
-        /* if(isDashing) {
-            dashFrameCounter++;
-            if(dashFrameCounter >= dashDuration) {                
-                isDashing = false;
-                EnterCooldown(dashCooldown);
-                dashFrameCounter = 0;
-            }
-        } 
-        
-        if(isDefending) {
-            defendFrameCounter++;
-            if (defendFrameCounter >= defendDuration) {                                
-                isDefending = false;
-                EnterCooldown(defendCooldown);
-                defendFrameCounter = 0;
-            }
-        }
-
-        if(isFeeding) {            
-            feedingFrameCounter++;
-            if(feedingFrameCounter > feedAnimDuration) {                
-                isFeeding = false;
-                EnterCooldown(feedAnimCooldown);
-                feedingFrameCounter = 0;
-
-                // EVENT HERE!!!!!
-                //if(mouthRef.lastBiteFoodAmount > 0f) {
-                    //RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Plant/Meat! (" + mouthRef.lastBiteFoodAmount.ToString("F3") + ")");
-                //}
-            }
-        }
-        
-        if(isAttacking) {            
-            attackingFrameCounter++;
-            if(attackingFrameCounter > attackAnimDuration) {
-                isAttacking = false;
-                EnterCooldown(attackAnimCooldown);
-                attackingFrameCounter = 0;
-            }
-        }
-
-        if(isCooldown) {
-            cooldownFrameCounter++;
-            if(cooldownFrameCounter >= cooldownDuration) {
-                cooldownFrameCounter = 0;
-                isCooldown = false;
-            }
-        } */
     }
     
     public void TickMetabolism() {
@@ -1002,11 +924,8 @@ public class Agent : MonoBehaviour {
         // How much of what was eaten is actually digested this frame (absolute value)
         float digestedPlantMass = digestedAmountTotal * coreModule.plantEatenPercent;
         // Amount of energy derived from the digested plant mass
-        //float plantToEnergyAmount = digestedPlantMass;
         float digestedMeatMass = digestedAmountTotal * coreModule.meatEatenPercent;
-        //float meatToEnergyAmount = digestedMeatMass;  
         float digestedDecayMass = digestedAmountTotal * coreModule.decayEatenPercent; 
-        //float decayToEnergyAmount = digestedDecayMass;
 
         wasteProducedLastFrame += digestedAmountTotal * settingsRef.agentSettings._DigestionWasteEfficiency;
         oxygenUsedLastFrame = currentBiomass * settingsRef.agentSettings._BaseOxygenUsage;
@@ -1077,17 +996,8 @@ public class Agent : MonoBehaviour {
         */
         
     }
-    // WPP: Extracted from TickActions,
-    // created static method to find highest value in array
-    // streamlined conditionals with early exit
-    private void SelectAction() {
-        //float mostActiveEffectorVal = 0f;
-        //mostActiveEffectorVal = Mathf.Max(mostActiveEffectorVal, coreModule.mouthFeedEffector[0]);
-        //mostActiveEffectorVal = Mathf.Max(mostActiveEffectorVal, coreModule.mouthAttackEffector[0]);
-        //mostActiveEffectorVal = Mathf.Max(mostActiveEffectorVal, coreModule.defendEffector[0]);
-        //mostActiveEffectorVal = Mathf.Max(mostActiveEffectorVal, coreModule.dashEffector[0]);
-        //mostActiveEffectorVal = Mathf.Max(mostActiveEffectorVal, coreModule.healEffector[0]);
 
+    private void SelectAction() {
         float[] effectorValues = { 0f, coreModule.mouthFeedEffector[0], 
             coreModule.mouthAttackEffector[0], coreModule.defendEffector[0],
             coreModule.dashEffector[0], coreModule.healEffector[0] };
@@ -1116,36 +1026,12 @@ public class Agent : MonoBehaviour {
         }    
     }
     
+    // TBD: handle null case if needed
     private void UseAbility(IAgentAbility ability)
     {
         activeAbility = ability;
-        ability.Begin();
+        ability.Begin();        
     }
-
-    // WPP: delegated to Ability system
-    /*private void EnterCooldown(int frames) {
-        isCooldown = true;
-        cooldownDuration = frames;
-        cooldownFrameCounter = 0;
-    }
-
-    private void ActionDash() {
-        if (!isFreeToAct || outOfStamina)
-            return;
-
-        isDashing = true;
-        coreModule.stamina[0] -= 0.1f;
-        candidateRef.performanceData.totalTimesDashed++;
-    }
-    
-    private void ActionDefend() {
-        if (!isFreeToAct || outOfStamina)
-            return;
-            
-        isDefending = true;
-        coreModule.stamina[0] -= 0.1f;
-        candidateRef.performanceData.totalTimesDefended++;
-    }*/
     
     bool isFreeToAct => !isCooldown && !isDashing && !isDefending && !isFeeding && !isAttacking &&
                         curLifeStage == AgentLifeStage.Mature;
@@ -1360,15 +1246,6 @@ public class Agent : MonoBehaviour {
         mouthRef.triggerCollider.radius = fullSizeBoundingBox.x / 2f * sizePercentage;
         mouthRef.triggerCollider.offset = new Vector2(0f, fullSizeBoundingBox.y / 2f * sizePercentage);
         
-        // WPP: delegated to Ability system
-        //isDefending = false;
-        //isDashing = false;
-        //isFeeding = false;
-        //feedingFrameCounter = 0;
-        //isAttacking = false;
-        //attackingFrameCounter = 0;
-        
-        //mouthRef.isCooldown = false;
         mouthRef.agentIndex = index;
         mouthRef.agentRef = this;
         isResting = false;

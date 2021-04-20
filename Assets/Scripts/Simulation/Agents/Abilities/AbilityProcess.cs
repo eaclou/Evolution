@@ -43,6 +43,6 @@ public class AbilityProcess
     {
         inProcess = false;
         frameCount = 0;
-        cooldown?.Invoke(cooldownDuration);          
+        cooldown?.Invoke(cooldownDuration);
     }
 }
