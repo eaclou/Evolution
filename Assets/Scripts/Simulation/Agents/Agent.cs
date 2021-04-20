@@ -26,30 +26,32 @@ public class Agent : MonoBehaviour {
     public bool isActing = false;  // biting, defending, dashing, etc -- exclusive actions    
     public bool isDecaying = false;
 
-    public bool isFeeding = false;
+    public bool isFeeding => feed.inProcess;
     public bool isAttacking => attack.inProcess;    
 
+    // *** WPP: move anim and cooldown durations to SO or other system
+    // if it becomes useful to make them dynamic 
     public int feedAnimDuration = 30;  //***EC eventually move these into creature genome, make variable
     public int feedAnimCooldown = 30;
     public int attackAnimDuration = 40;
     public int attackAnimCooldown = 75;
-    public int feedingFrameCounter = 0;
+    public int feedingFrameCounter => feed.frameCount;
     public int attackingFrameCounter => attack.frameCount;
     
-    public bool isDashing = false;
-    public int dashFrameCounter = 0;
+    public bool isDashing => dash.inProcess;
+    public int dashFrameCounter => dash.frameCount;
     public int dashDuration = 40;
     public int dashCooldown = 120;
 
-    public bool isDefending = false;
-    public int defendFrameCounter = 0;
+    public bool isDefending => defend.inProcess;
+    public int defendFrameCounter => defend.frameCount;
     public int defendDuration = 60;
     public int defendCooldown = 60;
 
     public bool isResting = false;
-    public bool isCooldown = false;
+    public bool isCooldown => cooldown.inProcess;
 
-    public int cooldownFrameCounter = 0;
+    public int cooldownFrameCounter => cooldown.frameCount;
     public int cooldownDuration = 60;  // arbitrary default
 
     public bool isMarkedForDeathByUser = false;
@@ -172,6 +174,10 @@ public class Agent : MonoBehaviour {
     
     IAgentAbility activeAbility;
     AttackOverTime attack;
+    Dash dash;
+    Defend defend;
+    Feed feed;
+    Cooldown cooldown;
 
     //public float overflowFoodAmount = 0f;
         
@@ -183,7 +189,17 @@ public class Agent : MonoBehaviour {
     
     void Start()
     {
-        attack = new AttackOverTime(this, attackAnimDuration, attackAnimCooldown, EnterCooldown);    
+        attack = new AttackOverTime(this, attackAnimDuration, attackAnimCooldown, EnterCooldown); 
+        dash = new Dash(this, dashDuration, dashCooldown, EnterCooldown);
+        defend = new Defend(this, defendDuration, defendCooldown, EnterCooldown);
+        feed = new Feed(this, feedAnimDuration, feedAnimCooldown, EnterCooldown);
+        cooldown = new Cooldown();
+    }
+    
+    void EnterCooldown(int duration) 
+    {
+        cooldown.duration = duration; 
+        UseAbility(cooldown);
     }
     
     public bool isDead => curLifeStage == AgentLifeStage.Dead;
@@ -204,7 +220,8 @@ public class Agent : MonoBehaviour {
         return Mathf.Clamp01(percentage);
     }
 
-    public void AttemptInitiateActiveFeedBite() {
+    // WPP: delegated to Ability system
+    /* public void AttemptInitiateActiveFeedBite() {
         if (isFeeding || isAttacking || isDefending) {
             return;
         }
@@ -215,8 +232,7 @@ public class Agent : MonoBehaviour {
         feedingFrameCounter = 0;            
     }
 
-    // WPP: moved to coroutine
-    /*public void AttemptInitiateActiveAttackBite() {
+    public void AttemptInitiateActiveAttackBite() {
         //Debug.Log("ATTACK");
         if (isAttacking) {
             Debug.LogWarning("Already attacking, no need to initiate attack bite");
@@ -718,7 +734,7 @@ public class Agent : MonoBehaviour {
         coreModule.energy = currentBiomass * 512f;  // should be proportional to body size??
         
         mouthRef.Enable();
-        isCooldown = false;
+        //isCooldown = false;
         RegisterAgentEvent(Time.frameCount, "Was Born!", 1f);        
     }
     
@@ -909,7 +925,7 @@ public class Agent : MonoBehaviour {
             mouthRef.lastBiteFoodAmount += foodParticleEatAmount + animalParticleEatAmount;
 
             if(isEatingPlant || isEatingAnimal) {
-                AttemptInitiateActiveFeedBite();                
+                UseAbility(feed);
             }
            
             SelectAction();                  
@@ -922,14 +938,15 @@ public class Agent : MonoBehaviour {
                 
         curActionState = currentState;
 
-        if(isDashing) {
+        // WPP: delegated to Ability system
+        /* if(isDashing) {
             dashFrameCounter++;
             if(dashFrameCounter >= dashDuration) {                
                 isDashing = false;
                 EnterCooldown(dashCooldown);
                 dashFrameCounter = 0;
             }
-        }
+        } 
         
         if(isDefending) {
             defendFrameCounter++;
@@ -954,15 +971,14 @@ public class Agent : MonoBehaviour {
             }
         }
         
-        // WPP: moved to coroutine
-        /*if(isAttacking) {            
+        if(isAttacking) {            
             attackingFrameCounter++;
             if(attackingFrameCounter > attackAnimDuration) {
                 isAttacking = false;
                 EnterCooldown(attackAnimCooldown);
                 attackingFrameCounter = 0;
             }
-        }*/
+        }
 
         if(isCooldown) {
             cooldownFrameCounter++;
@@ -970,7 +986,7 @@ public class Agent : MonoBehaviour {
                 cooldownFrameCounter = 0;
                 isCooldown = false;
             }
-        } 
+        } */
     }
     
     public void TickMetabolism() {
@@ -1093,10 +1109,10 @@ public class Agent : MonoBehaviour {
             UseAbility(attack);
         }
         if(coreModule.dashEffector[0] >= mostActiveEffectorValue) {
-            ActionDash();
+            UseAbility(dash);
         }
         if(coreModule.defendEffector[0] >= mostActiveEffectorValue) {
-            ActionDefend();
+            UseAbility(defend);
         }    
     }
     
@@ -1106,7 +1122,8 @@ public class Agent : MonoBehaviour {
         ability.Begin();
     }
 
-    private void EnterCooldown(int frames) {
+    // WPP: delegated to Ability system
+    /*private void EnterCooldown(int frames) {
         isCooldown = true;
         cooldownDuration = frames;
         cooldownFrameCounter = 0;
@@ -1128,7 +1145,7 @@ public class Agent : MonoBehaviour {
         isDefending = true;
         coreModule.stamina[0] -= 0.1f;
         candidateRef.performanceData.totalTimesDefended++;
-    }
+    }*/
     
     bool isFreeToAct => !isCooldown && !isDashing && !isDefending && !isFeeding && !isAttacking &&
                         curLifeStage == AgentLifeStage.Mature;
@@ -1342,16 +1359,19 @@ public class Agent : MonoBehaviour {
         mouthRef.triggerCollider.isTrigger = true;
         mouthRef.triggerCollider.radius = fullSizeBoundingBox.x / 2f * sizePercentage;
         mouthRef.triggerCollider.offset = new Vector2(0f, fullSizeBoundingBox.y / 2f * sizePercentage);
-        isFeeding = false;
-        feedingFrameCounter = 0;
+        
+        // WPP: delegated to Ability system
+        //isDefending = false;
+        //isDashing = false;
+        //isFeeding = false;
+        //feedingFrameCounter = 0;
         //isAttacking = false;
         //attackingFrameCounter = 0;
+        
         //mouthRef.isCooldown = false;
         mouthRef.agentIndex = index;
         mouthRef.agentRef = this;
         isResting = false;
-        isDefending = false;
-        isDashing = false;
 
         //mouthRef.Disable();
         //mouseclickcollider MCC

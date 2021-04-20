@@ -712,7 +712,12 @@
           <e p="Simulation" t="Include">
             <e p="Agents" t="Include">
               <e p="Abilities" t="Include">
+                <e p="AbilityProcess.cs" t="Include" />
                 <e p="AttackOverTime.cs" t="Include" />
+                <e p="Cooldown.cs" t="Include" />
+                <e p="Dash.cs" t="Include" />
+                <e p="Defend.cs" t="Include" />
+                <e p="Feed.cs" t="Include" />
                 <e p="IAgentAbility.cs" t="Include" />
               </e>
               <e p="Agent.cs" t="Include" />
