@@ -11,8 +11,8 @@ public class MasterGenomePool {
 
     public int maxNumActiveSpecies = 6;
     private int targetNumSpecies = 2;
-    public float speciesSimilarityDistanceThreshold = 18f;
-    private int minNumGuaranteedEvalsForNewSpecies = 512;
+    public float speciesSimilarityDistanceThreshold = 12f;
+    private int minNumGuaranteedEvalsForNewSpecies = 128;
 
     public int currentHighestDepth = 1;
     
@@ -44,9 +44,9 @@ public class MasterGenomePool {
         //currentlyActiveSpeciesIDList.Add(0);
         //completeSpeciesPoolsList.Add(rootSpecies);
 
-        int numInitSpecies = 5;
+        int numInitSpecies = 3;
         for(int i = 0; i < numInitSpecies; i++) {
-            float lerpV = Mathf.Clamp01(((float)i + 0.1f) / (float)(numInitSpecies + 1) + 0.06f); 
+            float lerpV = Mathf.Clamp01(((float)i + 0.1f) / (float)(numInitSpecies + 1) + 0.06f) * 0.8f + 0.1f; 
             SpeciesGenomePool newSpecies = new SpeciesGenomePool(i, -1, 0, 0, mutationSettingsRef);
             AgentGenome seedGenome = new AgentGenome();
             seedGenome.GenerateInitialRandomBodyGenome();
