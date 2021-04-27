@@ -21,6 +21,7 @@
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/BigBangPanelUI.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/FeatSO.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/GlobalGraphData.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Playcraft/_NEW/DirectionInputToVector2.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Abilities/AttackOverTime.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Abilities/AbilityProcess.cs" root0="FORCE_HIGHLIGHTING" />
@@ -35,6 +36,7 @@
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/17AD9609-AE06-4F2C-9315-931FF97ADCF1/e9/3e0ac117/ComputeBuffer.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/ObserverModeUI.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Abilities/Dash.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/Simulation/StatsHistory.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Abilities/Defend.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/LoadingPanelUI.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Playcraft/_NEW/ButtonInputToFloat.cs" root0="FORCE_HIGHLIGHTING" />
@@ -44,10 +46,6 @@
   </component>
   <component name="IdeDocumentHistory">
     <changedPaths>
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/KnowledgeUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/DebugPanelUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/WatcherUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Rendering/TheRenderKing.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/GenomeButtonPrefabScript.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/TheCursorCzar.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/GenomeViewerUI.cs" />
@@ -79,7 +77,6 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Settings/QualitySettingData.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/PanelNotificationsUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Core/GameOptions.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/ZooplanktonManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/NarrationSO.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/FeatSO.cs" />
@@ -92,9 +89,14 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Abilities/Defend.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Abilities/Dash.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Abilities/Cooldown.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Agent.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Abilities/Feed.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Abilities/AbilityProcess.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Agent.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimResourceManager.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/StatsHistory.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/GraphData.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/GlobalGraphData.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" />
     </changedPaths>
   </component>
   <component name="ProjectId" id="1owaWgGpM80xkcfA3szn5iw9YkG" />
@@ -154,7 +156,8 @@
       <workItem from="1618349304869" duration="3704000" />
       <workItem from="1618692271205" duration="5643000" />
       <workItem from="1618893289103" duration="5697000" />
-      <workItem from="1618956152983" duration="2738000" />
+      <workItem from="1618956152983" duration="3605000" />
+      <workItem from="1619553773804" duration="4029000" />
     </task>
     <servers />
   </component>

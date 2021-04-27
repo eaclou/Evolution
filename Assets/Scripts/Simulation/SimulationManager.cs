@@ -19,10 +19,10 @@ public class SimulationManager : Singleton<SimulationManager>
     public SimulationStateData simStateData;
     public AudioManager audioManager;
     public StartPositionsPresetLists startPositionsPresets;
-    public ComputeShader computeShaderResourceGrid; // algae grid
+    public ComputeShader computeShaderResourceGrid;    // algae grid
     public ComputeShader computeShaderPlantParticles;  // algae particles
-    public ComputeShader computeShaderAnimalParticles;  // animal particles
-    public MasterGenomePool masterGenomePool;  // agents
+    public ComputeShader computeShaderAnimalParticles; // animal particles
+    public MasterGenomePool masterGenomePool;           // agents
 
     public TrophicLayersManager trophicLayersManager;
     public VegetationManager vegetationManager;
@@ -73,7 +73,10 @@ public class SimulationManager : Singleton<SimulationManager>
     
     public int numAgentsBorn = 0;
     public int numAgentsDied = 0;
-    
+
+    public StatsHistory statsHistory;
+// WPP 4/27: delegated to StatsHistory    
+/*    
         // 0 == decay nutrients  .x
         // 1 == plant food  .y
         // 2 == eggs food  .z
@@ -85,6 +88,7 @@ public class SimulationManager : Singleton<SimulationManager>
         // 8 = body proportion amp
         // 9 = body sensor mutation rate
         // 10 = water current / storminess
+        
     public List<Vector4> statsNutrientsEachGenerationList;
     public List<float> statsHistoryBrainMutationFreqList;
     public List<float> statsHistoryBrainMutationAmpList;
@@ -104,6 +108,7 @@ public class SimulationManager : Singleton<SimulationManager>
     public List<float> statsHistoryLivingAgentsList;
     public List<float> statsHistoryDeadAgentsList;
     public List<float> statsHistoryEggSacksList;
+*/
 
     public int curApproxGen = 1;
 
@@ -126,7 +131,9 @@ public class SimulationManager : Singleton<SimulationManager>
     //private int recentlyAddedSpeciesID; // = masterGenomePool.completeSpeciesPoolsList.Count - 1;
     //private int recentlyAddedSpeciesTimeCounter = 0;
 
-
+    GlobalGraphData globalGraphData = new GlobalGraphData();
+    // WPP 4/27/21: delegated to GlobalGraphData
+    /*
     public GraphData graphDataGlobalNutrients;
     public GraphData graphDataGlobalWaste;
     public GraphData graphDataGlobalDecomposers;
@@ -154,6 +161,7 @@ public class SimulationManager : Singleton<SimulationManager>
     public GraphData graphDataVertebratePopulation3;
     public GraphData graphDataVertebrateFoodEaten3;
     public GraphData graphDataVertebrateGenome3;
+    */
         
     TheCursorCzar theCursorCzar => TheCursorCzar.instance;
 
@@ -185,7 +193,10 @@ public class SimulationManager : Singleton<SimulationManager>
                 
         // Fitness Stuffs:::
         startTime = Time.realtimeSinceStartup;
-        LoadingSetUpFitnessStorage();
+        
+        statsHistory = new StatsHistory(simResourceManager, settingsManager, environmentFluidManager);
+        statsHistory.Initialize();
+        
         Debug.Log("LoadingSetUpFitnessStorage: " + (Time.realtimeSinceStartup - startTime).ToString());
         yield return null;
         startTime = Time.realtimeSinceStartup;
@@ -296,6 +307,7 @@ public class SimulationManager : Singleton<SimulationManager>
         Debug.Log("LOADING COMPLETE - Starting WarmUp!");
     }
 
+    /*
     private void InitializeGraphData() {
         graphDataGlobalNutrients = new GraphData(uiManager.globalResourcesUI.knowledgeGraphNutrientsMat);  // testing!!!!
         graphDataGlobalWaste = new GraphData(uiManager.globalResourcesUI.knowledgeGraphDetritusMat);  // testing!!!!
@@ -304,28 +316,28 @@ public class SimulationManager : Singleton<SimulationManager>
         graphDataGlobalPlants = new GraphData(uiManager.globalResourcesUI.knowledgeGraphPlantsMat);  // testing!!!!
         graphDataGlobalZooplankton = new GraphData(uiManager.globalResourcesUI.knowledgeGraphZooplanktonMat);  // testing!!!!
         graphDataGlobalVertebrates = new GraphData(uiManager.globalResourcesUI.knowledgeGraphVertebratesMat);  // testing!!!!
-        /*
-        graphDataVertebrateLifespan0 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateLifespanMat0);
-        graphDataVertebratePopulation0 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebratePopulationMat0);
-        graphDataVertebrateFoodEaten0 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateFoodEatenMat0);
-        graphDataVertebrateGenome0 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateGenomeMat0);
+        
+        //graphDataVertebrateLifespan0 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateLifespanMat0);
+        //graphDataVertebratePopulation0 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebratePopulationMat0);
+        //graphDataVertebrateFoodEaten0 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateFoodEatenMat0);
+        //graphDataVertebrateGenome0 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateGenomeMat0);
 
-        graphDataVertebrateLifespan1 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateLifespanMat1);
-        graphDataVertebratePopulation1 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebratePopulationMat1);
-        graphDataVertebrateFoodEaten1 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateFoodEatenMat1);
-        graphDataVertebrateGenome1 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateGenomeMat1);
+        //graphDataVertebrateLifespan1 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateLifespanMat1);
+        //graphDataVertebratePopulation1 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebratePopulationMat1);
+        //graphDataVertebrateFoodEaten1 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateFoodEatenMat1);
+        //graphDataVertebrateGenome1 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateGenomeMat1);
 
-        graphDataVertebrateLifespan2 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateLifespanMat2);
-        graphDataVertebratePopulation2 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebratePopulationMat2);
-        graphDataVertebrateFoodEaten2 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateFoodEatenMat2);
-        graphDataVertebrateGenome2 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateGenomeMat2);
+        //graphDataVertebrateLifespan2 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateLifespanMat2);
+        //graphDataVertebratePopulation2 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebratePopulationMat2);
+        //graphDataVertebrateFoodEaten2 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateFoodEatenMat2);
+        //graphDataVertebrateGenome2 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateGenomeMat2);
 
-        graphDataVertebrateLifespan3 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateLifespanMat3);
-        graphDataVertebratePopulation3 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebratePopulationMat3);
-        graphDataVertebrateFoodEaten3 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateFoodEatenMat3);
-        graphDataVertebrateGenome3 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateGenomeMat3);
-        */
+        //graphDataVertebrateLifespan3 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateLifespanMat3);
+        //graphDataVertebratePopulation3 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebratePopulationMat3);
+        //graphDataVertebrateFoodEaten3 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateFoodEatenMat3);
+        //graphDataVertebrateGenome3 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateGenomeMat3);
     }
+    */
     
     public void LogFeat(FeatSO value)
     {
@@ -345,7 +357,7 @@ public class SimulationManager : Singleton<SimulationManager>
         LogFeat(feat);
 
         // allocate memory and initialize data structures, classes, arrays, etc.
-        InitializeGraphData();
+        globalGraphData.Initialize(uiManager.globalResourcesUI);
 
         settingsManager.Initialize();
         trophicLayersManager = new TrophicLayersManager(uiManager);
@@ -471,6 +483,8 @@ public class SimulationManager : Singleton<SimulationManager>
         }
     }
     
+    // WPP 4/27: delegated
+    /*
     private void LoadingSetUpFitnessStorage() {
         statsNutrientsEachGenerationList = new List<Vector4>{Vector4.one * 0.0001f};
         statsHistoryBrainMutationFreqList = new List<float>{0f};
@@ -506,7 +520,7 @@ public class SimulationManager : Singleton<SimulationManager>
         statsNutrientsEachGenerationList.Add(Vector4.one * 0.0001f);
         statsMutationEachGenerationList.Add(0.0001f);
         */
-    }
+    //}
     
     /*private void LoadingLoadGenepoolFiles() {
         
@@ -714,7 +728,7 @@ public class SimulationManager : Singleton<SimulationManager>
             simEventsManager.curEventBucks += 5; // temporarily high!
             simAgeYearCounter = 0;
 
-            AddNewHistoricalDataEntry();
+            statsHistory.AddNewHistoricalDataEntry();            
             AddNewSpeciesDataEntry(curSimYear);
             
             CheckForYearEvent();
@@ -723,12 +737,15 @@ public class SimulationManager : Singleton<SimulationManager>
         if(simAgeTimeSteps % 80 == 10) {
             uiManager.speciesGraphPanelUI.UpdateSpeciesTreeDataTextures(curSimYear);
 
+            // WPP 4/27: delegated
+            /*
             graphDataGlobalNutrients.AddNewEntry(simResourceManager.curGlobalNutrients);
             graphDataGlobalWaste.AddNewEntry(simResourceManager.curGlobalDetritus);
             graphDataGlobalDecomposers.AddNewEntry(simResourceManager.curGlobalDecomposers);
             graphDataGlobalAlgae.AddNewEntry(simResourceManager.curGlobalAlgaeReservoir);
             graphDataGlobalPlants.AddNewEntry(simResourceManager.curGlobalPlantParticles);
             graphDataGlobalZooplankton.AddNewEntry(simResourceManager.curGlobalAnimalParticles);
+            */
             
             int speciesID0 = trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0].linkedSpeciesID;
             int speciesID1 = trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1].linkedSpeciesID;
@@ -757,7 +774,9 @@ public class SimulationManager : Singleton<SimulationManager>
                     }
                 }                
             }
-            graphDataGlobalVertebrates.AddNewEntry(totalAgentBiomass); // simResourceManager.curGlobalAgentBiomass);
+            
+            globalGraphData.AddNewEntry(simResourceManager, totalAgentBiomass);
+            //graphDataGlobalVertebrates.AddNewEntry(totalAgentBiomass); // simResourceManager.curGlobalAgentBiomass);
                                                                        //uiManager.UpdateTolWorldStatsTexture(statsNutrientsEachGenerationList);
 
             /*
@@ -1127,18 +1146,23 @@ public class SimulationManager : Singleton<SimulationManager>
             }
         }                
     }
-    public void AttemptToKillAgent(int speciesID, Vector2 clickPos, float brushRadius) {
+    
+    public void AttemptToKillAgent(int speciesID, Vector2 clickPos, float brushRadius) 
+    {
         Debug.Log("AttemptToKillAgent loc: " + clickPos.ToString() + " ,,, species: " + speciesID.ToString() + ", brushRadius: " + brushRadius.ToString());  
 
-        for (int a = 0; a < agentsArray.Length; a++) {            
-            if (agentsArray[a].curLifeStage == Agent.AgentLifeStage.Mature) {
-                if(speciesID == agentsArray[a].speciesIndex) {
+        // * WPP: refactor with early exit (continue)
+        for (int a = 0; a < agentsArray.Length; a++) 
+        {            
+            if (agentsArray[a].curLifeStage == Agent.AgentLifeStage.Mature) 
+            {
+                if(speciesID == agentsArray[a].speciesIndex) 
+                {
                     float distToBrushCenter = (clickPos - agentsArray[a].ownPos).magnitude;
 
-                    if(distToBrushCenter < brushRadius) {
-                    
-                        Debug.Log("KILL AGENT " + a.ToString() + " ,,, species: " + speciesID.ToString() + ", distToBrushCenter: " + distToBrushCenter.ToString()); 
-                    
+                    if(distToBrushCenter < brushRadius) 
+                    {
+                        Debug.Log("KILL AGENT " + a + " ,,, species: " + speciesID + ", distToBrushCenter: " + distToBrushCenter); 
                         agentsArray[a].isMarkedForDeathByUser = true;
                     }
                 }
@@ -1621,6 +1645,8 @@ public class SimulationManager : Singleton<SimulationManager>
         environmentFluidManager.UpdateSimulationClimate();
     }
     
+    // WPP 4/27/21
+    /*
     private void AddNewHistoricalDataEntry() {
         // add new entries to historical data lists: 
         //Debug.Log("eggVol: " + simResourceManager.curGlobalEggSackVolume.ToString() + ", carrion: " + simResourceManager.curGlobalCarrionVolume.ToString());
@@ -1645,11 +1671,14 @@ public class SimulationManager : Singleton<SimulationManager>
         statsHistoryDeadAgentsList.Add(simResourceManager.curGlobalCarrionVolume);
         statsHistoryEggSacksList.Add(simResourceManager.curGlobalEggSackVolume);
     }
+    */
     
     private void AddNewSpeciesDataEntry(int year) {
         masterGenomePool.AddNewYearlySpeciesStats(year);
     }
     
+    // WPP 4/27: delegated, never called
+    /*
     private void RefreshLatestHistoricalDataEntry() {
         statsNutrientsEachGenerationList[statsNutrientsEachGenerationList.Count - 1] = new Vector4(simResourceManager.curGlobalAlgaeReservoir, simResourceManager.curGlobalPlantParticles, simResourceManager.curGlobalEggSackVolume, simResourceManager.curGlobalCarrionVolume);
         statsHistoryBrainMutationFreqList[statsHistoryBrainMutationFreqList.Count - 1] = settingsManager.curTierBrainMutationFrequency;
@@ -1671,6 +1700,7 @@ public class SimulationManager : Singleton<SimulationManager>
         statsHistoryDeadAgentsList[statsHistoryOxygenList.Count - 1] = simResourceManager.curGlobalCarrionVolume;
         statsHistoryEggSacksList[statsHistoryOxygenList.Count - 1] = simResourceManager.curGlobalEggSackVolume;
     }
+    */
     
     private void RefreshLatestSpeciesDataEntry() {   
         for(int i = 0; i < masterGenomePool.completeSpeciesPoolsList.Count; i++) {
@@ -1760,10 +1790,10 @@ public class SimulationManager : Singleton<SimulationManager>
     private Vector3 GetRandomPredatorSpawnPosition() {
         Vector3 startPos;
         int numSpawnZones = startPositionsPresets.spawnZonesList.Count;
-        int randZone = UnityEngine.Random.Range(0, numSpawnZones);
+        int randZone = Random.Range(0, numSpawnZones);
         float randRadius = 10f;
 
-        Vector2 randOffset = UnityEngine.Random.insideUnitCircle.normalized * randRadius;
+        Vector2 randOffset = Random.insideUnitCircle.normalized * randRadius;
         startPos = new Vector3(startPositionsPresets.spawnZonesList[randZone].transform.position.x + randOffset.x, 
                                startPositionsPresets.spawnZonesList[randZone].transform.position.y + randOffset.y, 
                                0f);

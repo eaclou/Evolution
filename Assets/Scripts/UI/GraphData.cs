@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class GraphData {
 
@@ -69,9 +67,6 @@ public class GraphData {
         targetDisplayMat.SetFloat("_MinValue", minValue);
         targetDisplayMat.SetFloat("_MaxValue", maxValue);
         targetDisplayMat.SetFloat("_SampleCoordMax", (float)nextWriteIndex / (float)historicalGraphsResolution);
-
-        
-        
     }
 
     private void RefreshDataUpperLowerBounds() {
@@ -90,7 +85,7 @@ public class GraphData {
                     maxValue = value;
                 }
             }            
-            allVals += i.ToString() + " value: " + value.ToString() + "\n";
+            allVals += i + " value: " + value + "\n";
         }
 
         /*if(dataArray.Length > 0) {
@@ -98,12 +93,11 @@ public class GraphData {
         }*/
     }
     
+    // Take full buffer, compress temporally by half. 
     private void RebuildDataArray() {
-        // take full buffer, compress temporally by half. 
         doublingCounter++;
         // Build new value array? --> build texture
         
-
         for(int i = 0; i < historicalGraphsResolution / 2; i++) {
             float avgValue = (dataArray[i * 2] + dataArray[i * 2 + 1]) / 2f;
             
@@ -120,7 +114,5 @@ public class GraphData {
         
         nextWriteIndex = historicalGraphsResolution / 2;
         //Debug.Log("RebuildDataArray() " + nextWriteIndex.ToString());
-
-        
     }
 }

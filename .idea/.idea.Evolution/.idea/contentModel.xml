@@ -803,6 +803,7 @@
             <e p="SimResourceManager.cs" t="Include" />
             <e p="SimulationManager.cs" t="Include" />
             <e p="SimulationStateData.cs" t="Include" />
+            <e p="StatsHistory.cs" t="Include" />
             <e p="TrophicKingdom.cs" t="Include" />
             <e p="TrophicLayersManager.cs" t="Include" />
             <e p="TrophicSlot.cs" t="Include" />
@@ -830,6 +831,7 @@
             <e p="GenomeSensorsEffectorsUI.cs" t="Include" />
             <e p="GenomeSpecializationsUI.cs" t="Include" />
             <e p="GenomeViewerUI.cs" t="Include" />
+            <e p="GlobalGraphData.cs" t="Include" />
             <e p="GlobalResourcesUI.cs" t="Include" />
             <e p="GraphData.cs" t="Include" />
             <e p="LoadingPanelUI.cs" t="Include" />
