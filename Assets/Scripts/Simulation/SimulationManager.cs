@@ -9,16 +9,15 @@ using Random = UnityEngine.Random;
 public class SimulationManager : Singleton<SimulationManager> 
 {
     UIManager uiManager => UIManager.instance;
+    TheRenderKing theRenderKing => TheRenderKing.instance;
+    CameraManager cameraManager => CameraManager.instance;
+    AudioManager audioManager => AudioManager.instance;
     
     public QualitySettingData qualitySettings;
-
     public LoadingPanelUI loadingPanel;
     public EnvironmentFluidManager environmentFluidManager;
-    public TheRenderKing theRenderKing;
-    public CameraManager cameraManager;
     public SettingsManager settingsManager;
     public SimulationStateData simStateData;
-    public AudioManager audioManager;
     public StartPositionsPresetLists startPositionsPresets;
     public ComputeShader computeShaderResourceGrid;    // algae grid
     public ComputeShader computeShaderPlantParticles;  // algae particles
@@ -648,7 +647,7 @@ public class SimulationManager : Singleton<SimulationManager>
         fogColor = Color.Lerp(new Color(0.15f, 0.25f, 0.52f), new Color(0.07f, 0.27f, 0.157f), Mathf.Clamp01(simResourceManager.curGlobalPlantParticles * 0.035f));
         fogAmount = Mathf.Lerp(0.3f, 0.55f, Mathf.Clamp01(simResourceManager.curGlobalPlantParticles * 0.0036f));
 
-        simStateData.PopulateSimDataArrays(this);  // reads from GameObject Transforms & RigidBodies!!! ++ from FluidSimulationData!!!
+        simStateData.PopulateSimDataArrays();  // reads from GameObject Transforms & RigidBodies!!! ++ from FluidSimulationData!!!
         theRenderKing.RenderSimulationCameras(); // will pass current info to FluidSim before it Ticks()
         // Reads from CameraRenders, GameObjects, and query GPU for fluidState
         // eventually, if agents get fluid sensors, will want to download FluidSim data from GPU into simStateData!*
@@ -661,7 +660,7 @@ public class SimulationManager : Singleton<SimulationManager>
         //vegetationManager.ApplyDiffusionOnResourceGrid(environmentFluidManager);
         //vegetationManager.AdvectResourceGrid(environmentFluidManager);
         //if(curSimYear < 4) {  // stop simulating after certain point !! TEMPORARY!!!
-        vegetationManager.SimResourceGrid(ref environmentFluidManager, ref theRenderKing.baronVonTerrain, ref theRenderKing);
+        vegetationManager.SimResourceGrid(ref environmentFluidManager, ref theRenderKing.baronVonTerrain);
         //}
         
         if(trophicLayersManager.GetPlantsOnOff()) {

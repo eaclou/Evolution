@@ -1,8 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class SimulationStateData {
+    SimulationManager simManager => SimulationManager.instance;
+    TheRenderKing theRenderKing => TheRenderKing.instance;
 
     // Stores data about the current simulation to be shared with RenderKing and FluidManager:
 
@@ -248,7 +248,7 @@ public class SimulationStateData {
         depthAtAgentPositionsArray = new Vector4[simManager._NumAgents];
     }
 
-    public void PopulateSimDataArrays(SimulationManager simManager) {
+    public void PopulateSimDataArrays() {
         
         // CRITTER INIT: // *** MOVE INTO OWN FUNCTION -- update more efficiently with compute shader?
         for(int i = 0; i < simManager._NumAgents; i++) {
@@ -435,7 +435,7 @@ public class SimulationStateData {
         fluidVelocitiesAtEggSackPositionsArray = simManager.environmentFluidManager.GetFluidVelocityAtObjectPositions(eggSackFluidPositionsArray);
         //fluidVelocitiesAtPredatorPositionsArray = simManager.environmentFluidManager.GetFluidVelocityAtObjectPositions(predatorFluidPositionsArray);
         //Debug.Log("agentFluidPositionsArray: " + agentFluidPositionsArray.Length.ToString());
-        depthAtAgentPositionsArray = simManager.theRenderKing.GetDepthAtObjectPositions(agentFluidPositionsArray);
+        depthAtAgentPositionsArray = theRenderKing.GetDepthAtObjectPositions(agentFluidPositionsArray);
 
 
         

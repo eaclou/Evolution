@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Playcraft;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -876,17 +875,17 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
             float zCoord = (1f - ((float)j / (float)(numStrokesPerCritterSkin - 1))) * 2f - 1f;
             float radiusAtZ = Mathf.Sqrt(1f - zCoord * zCoord); // pythagorean theorem
-            Vector2 xyCoords = UnityEngine.Random.insideUnitCircle.normalized * radiusAtZ; // possibility for (0,0) ??? ***** undefined/null divide by zero hazard!
+            Vector2 xyCoords = Random.insideUnitCircle.normalized * radiusAtZ; // possibility for (0,0) ??? ***** undefined/null divide by zero hazard!
             skinStroke.localPos = new Vector3(xyCoords.x, xyCoords.y, zCoord);
             //float width = 1f; // simManager.agentsArray[i].agentWidthsArray[Mathf.RoundToInt((skinStroke.localPos.y * 0.5f + 0.5f) * 15f)];
             skinStroke.localPos.x *= 0.5f;
             skinStroke.localPos.z *= 0.5f;
             skinStroke.localDir = new Vector3(0f, 1f, 0f); // start up? shouldn't matter
             skinStroke.localScale = new Vector2(0.25f, 0.420f) * 1.25f;
-            skinStroke.strength = UnityEngine.Random.Range(0f, 1f);
+            skinStroke.strength = Random.Range(0f, 1f);
             skinStroke.lifeStatus = 0f;
-            skinStroke.age = UnityEngine.Random.Range(1f, 2f);
-            skinStroke.randomSeed = UnityEngine.Random.Range(0f, 1f);
+            skinStroke.age = Random.Range(1f, 2f);
+            skinStroke.randomSeed = Random.Range(0f, 1f);
             skinStroke.followLerp = 1f;
 
             treeOfLifePortraitDataArray[j] = skinStroke;
@@ -1799,7 +1798,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         //float segmentsSummedCritterLength = gene.mouthLength + gene.headLength + gene.bodyLength + gene.tailLength;
 
         for (int i = 0; i < numStrokesPerCritterSkinDetail; i++) {
-            Vector2 randUV = new Vector2(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f));
+            Vector2 randUV = new Vector2(Random.Range(0f, 1f), Random.Range(0f, 1f));
 
             int brushIndex = arrayIndexStart + i;
             float angleRad = randUV.x * Mathf.PI * 2f; // verticalLerpPos * Mathf.PI;   
@@ -2532,14 +2531,14 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
 
         baronVonWater.altitudeMapRef = baronVonTerrain.terrainHeightDataRT;
-        float camDist = Mathf.Clamp01(-1f * simManager.cameraManager.gameObject.transform.position.z / (400f - 10f));
+        float camDist = Mathf.Clamp01(-1f * cameraManager.gameObject.transform.position.z / (400f - 10f));
         baronVonWater.camDistNormalized = camDist;
-        Vector2 boxSizeHalf = 0.8f * Vector2.Lerp(new Vector2(16f, 12f) * 2, new Vector2(256f, 204f), Mathf.Clamp01(-(simManager.cameraManager.gameObject.transform.position.z) / 150f));
+        Vector2 boxSizeHalf = 0.8f * Vector2.Lerp(new Vector2(16f, 12f) * 2, new Vector2(256f, 204f), Mathf.Clamp01(-(cameraManager.transform.position.z) / 150f));
 
-        baronVonWater.spawnBoundsCameraDetails = new Vector4(simManager.cameraManager.curCameraFocusPivotPos.x - boxSizeHalf.x,
-                                                            simManager.cameraManager.curCameraFocusPivotPos.y - boxSizeHalf.y,
-                                                            simManager.cameraManager.curCameraFocusPivotPos.x + boxSizeHalf.x,
-                                                            simManager.cameraManager.curCameraFocusPivotPos.y + boxSizeHalf.y);
+        baronVonWater.spawnBoundsCameraDetails = new Vector4(cameraManager.curCameraFocusPivotPos.x - boxSizeHalf.x,
+                                                            cameraManager.curCameraFocusPivotPos.y - boxSizeHalf.y,
+                                                            cameraManager.curCameraFocusPivotPos.x + boxSizeHalf.x,
+                                                            cameraManager.curCameraFocusPivotPos.y + boxSizeHalf.y);
 
         baronVonTerrain.spawnBoundsCameraDetails = baronVonWater.spawnBoundsCameraDetails;
 

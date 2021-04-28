@@ -7,6 +7,7 @@ public class SpeciesOverviewUI : MonoBehaviour {
     UIManager uiManagerRef => UIManager.instance;
     Lookup lookup => Lookup.instance;
     GameObject genomeIcon => lookup.genomeIcon;
+    CameraManager cameraManager => CameraManager.instance;
 
     //private bool isFoundingGenomeSelected = false;
     //private bool isRepresentativeGenomeSelected = false;
@@ -310,7 +311,7 @@ public class SpeciesOverviewUI : MonoBehaviour {
                 if(selectedCandidateGenomeIndex >= spool.candidateGenomesList.Count) {
                     selectedCandidateGenomeIndex = 0;
                 }
-                simulationManager.cameraManager.SetTargetAgent(simulationManager.agentsArray[simulationManager.cameraManager.targetAgentIndex], simulationManager.cameraManager.targetAgentIndex);
+                cameraManager.SetTargetAgent(simulationManager.agentsArray[cameraManager.targetAgentIndex], cameraManager.targetAgentIndex);
                 uiManagerRef.SetFocusedCandidateGenome(spool.candidateGenomesList[index]);
                 Debug.Log("ChangeSelectedGenome: " + group.ToString() + ", #" + index.ToString());
                 //selectedButton = candidateGenomeButtonsList[index].GetComponent<Button>();

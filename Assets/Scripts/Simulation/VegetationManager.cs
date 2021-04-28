@@ -3,6 +3,7 @@
 public class VegetationManager {
     SimulationManager simManager => SimulationManager.instance;
     UIManager uiManager => UIManager.instance;
+    TheRenderKing theRenderKing => TheRenderKing.instance;
 
     public SettingsManager settingsRef;
     public SimResourceManager resourceManagerRef;
@@ -960,7 +961,7 @@ public class VegetationManager {
     }*/
        
     
-    public void SimResourceGrid(ref EnvironmentFluidManager fluidManagerRef, ref BaronVonTerrain baronTerrainRef, ref TheRenderKing theRenderKingRef) {
+    public void SimResourceGrid(ref EnvironmentFluidManager fluidManagerRef, ref BaronVonTerrain baronTerrainRef) {
         int kernelCSSimRD = computeShaderResourceGrid.FindKernel("CSSimResourceGrid"); 
         computeShaderResourceGrid.SetTexture(kernelCSSimRD, "_AltitudeTex", baronTerrainRef.terrainHeightRT0);        
         computeShaderResourceGrid.SetFloat("_TextureResolution", (float)resourceGridTexResolution);
@@ -1007,7 +1008,7 @@ public class VegetationManager {
         computeShaderResourceGrid.SetFloat("_IsSpiritBrushDecomposersOn", brushDecomposersOn);
         computeShaderResourceGrid.SetFloat("_IsSpiritBrushAlgaeOn", brushAlgaeOn);
         computeShaderResourceGrid.SetFloat("_IsSpiritBrushMineralsOn", brushMineralsOn);
-        computeShaderResourceGrid.SetFloat("_SpiritBrushPosNeg", theRenderKingRef.spiritBrushPosNeg);
+        computeShaderResourceGrid.SetFloat("_SpiritBrushPosNeg", theRenderKing.spiritBrushPosNeg);
         //computeShaderResourceGrid.SetFloat("_RD_FeedRate", theRenderKingRef.simManager.vegetationManager.decomposerSlotGenomeCurrent.feedRate);
         //computeShaderResourceGrid.SetFloat("_RD_KillRate", theRenderKingRef.simManager.vegetationManager.decomposerSlotGenomeCurrent.killRate);            
         //computeShaderResourceGrid.SetFloat("_RD_Scale", theRenderKingRef.simManager.vegetationManager.decomposerSlotGenomeCurrent.scale);
@@ -1025,17 +1026,13 @@ public class VegetationManager {
         computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "VelocityRead", fluidManagerRef._VelocityPressureDivergenceMain);
         computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "_ResourceGridRead", resourceGridRT2);
         computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "_ResourceGridWrite", resourceGridRT1);
-        computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "_SpiritBrushTex", theRenderKingRef.spiritBrushRT);
+        computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "_SpiritBrushTex", theRenderKing.spiritBrushRT);
         computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "_ResourceSimTransferRead", resourceSimTransferRT);
         computeShaderResourceGrid.Dispatch(kernelCSAdvectRD, resourceGridTexResolution / 32, resourceGridTexResolution / 32, 1);
         //back into 1
     }
 
-    
-
-    
     public void ClearBuffers() {
-
         if (tempTex1 != null) {
             tempTex1.Release();
             tempTex2.Release();
@@ -1043,59 +1040,26 @@ public class VegetationManager {
             tempTex8.Release();
             tempTex32.Release();
         }
-        if(resourceGridAgentSamplesCBuffer != null) {
-            resourceGridAgentSamplesCBuffer.Release();
-        }
+        resourceGridAgentSamplesCBuffer?.Release();
         /*
         if (plantParticlesNearestCritters1 != null) {
             plantParticlesNearestCritters1.Release();
             plantParticlesNearestCritters32.Release();
             plantParticlesNearestCritters1024.Release();
         }*/        
-        if(plantParticlesCBuffer != null) {
-            plantParticlesCBuffer.Release();
-        }  
-        if(plantParticlesCBufferSwap != null) {
-            plantParticlesCBufferSwap.Release();
-        } 
-        if(closestPlantParticlesDataCBuffer != null) {
-            closestPlantParticlesDataCBuffer.Release();
-        }
-        /*if(closestParticlesToCursorDataCBuffer != null) {
-            closestParticlesToCursorDataCBuffer.Release();
-        }*/
-        if(cursorDistances1024 != null) {
-            cursorDistances1024.Release();
-        }
-        //if(cursorDistances32 != null) {
-        //    cursorDistances32.Release();
-        //} 
-        //if(cursorDistances1 != null) {
-        //    cursorDistances1.Release();
-        //}
-
-        if(critterNearestPlants32 != null) {
-            critterNearestPlants32.Release();
-        }
-        if(closestPlantIndexCBuffer != null) {
-            closestPlantIndexCBuffer.Release();
-        }
-        if(cursorClosestParticleDataCBuffer != null) {
-            cursorClosestParticleDataCBuffer.Release();
-        } 
-
-        if(plantParticlesEatAmountsCBuffer != null) {
-            plantParticlesEatAmountsCBuffer.Release();
-        }
-        if(plantParticlesMeasure32 != null) {
-            plantParticlesMeasure32.Release();
-        }
-        if(plantParticlesMeasure1 != null) {
-            plantParticlesMeasure1.Release();
-        }    
-        
-        if(plantParticlesRepresentativeGenomeCBuffer != null) {
-            plantParticlesRepresentativeGenomeCBuffer.Release();
-        }
+        plantParticlesCBuffer?.Release(); 
+        plantParticlesCBufferSwap?.Release();
+        closestPlantParticlesDataCBuffer?.Release();
+        // closestParticlesToCursorDataCBuffer?.Release();
+        cursorDistances1024?.Release();
+        // cursorDistances32?.Release(); 
+        // cursorDistances1?.Release();
+        critterNearestPlants32?.Release();
+        closestPlantIndexCBuffer?.Release();
+        cursorClosestParticleDataCBuffer?.Release();
+        plantParticlesEatAmountsCBuffer?.Release();
+        plantParticlesMeasure32?.Release();
+        plantParticlesMeasure1?.Release();   
+        plantParticlesRepresentativeGenomeCBuffer?.Release();
     }
 }

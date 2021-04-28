@@ -674,7 +674,7 @@ public class BrushesUI : MonoBehaviour {
         float radiusMult = Mathf.Lerp(0.075f, 1.33f, Mathf.Clamp01(theRenderKing.baronVonWater.camDistNormalized * 1.4f)); // 0.62379f; // (1f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.5f);
 
         if (mag > 0f) {
-            simulationManager.PlayerToolStirOn(theCursorCzar.curMousePositionOnWaterPlane, theCursorCzar.smoothedMouseVel * (0.25f + simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.2f) * 0.33f, radiusMult);
+            simulationManager.PlayerToolStirOn(theCursorCzar.curMousePositionOnWaterPlane, theCursorCzar.smoothedMouseVel * (0.25f + theRenderKing.baronVonWater.camDistNormalized * 1.2f) * 0.33f, radiusMult);
         }
         else {
             simulationManager.PlayerToolStirOff();
